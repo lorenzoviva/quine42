@@ -4,7 +4,9 @@ export type Action =
   | 'up' | 'down' | 'left' | 'right'
   | 'interact' | 'inscribe' | 'drop' | 'rollback'
   | 'prev' | 'next' | 'movePrev' | 'moveNext'
-  | 'help' | 'console' | 'escape';
+  | 'help' | 'console' | 'escape'
+  | 'inventory' | 'action' | 'feed'
+  | 'hot1' | 'hot2' | 'hot3' | 'hot4' | 'hot5' | 'hot6';
 
 const HOLD: Record<string, Action> = {
   KeyW: 'up', ArrowUp: 'up',
@@ -23,6 +25,10 @@ const PRESS: Record<string, Action> = {
   F1: 'help', KeyH: 'help',
   F2: 'console', Backquote: 'console', Backslash: 'console',
   Escape: 'escape',
+  KeyI: 'inventory', Tab: 'inventory',
+  KeyF: 'action',
+  KeyG: 'feed',
+  Digit1: 'hot1', Digit2: 'hot2', Digit3: 'hot3', Digit4: 'hot4', Digit5: 'hot5', Digit6: 'hot6',
 };
 
 export class Input {
@@ -30,12 +36,14 @@ export class Input {
   private queue: Action[] = [];
   /** When false (an overlay has focus), game actions are ignored. */
   enabled = true;
+  /** The inventory panel captures input but can be closed with its own key. */
+  inventoryOpen = false;
   onAny?: () => void;
 
   attach(target: Window): void {
     target.addEventListener('keydown', (e) => {
       this.onAny?.();
-      const always = e.code === 'F1' || e.code === 'F2' || e.code === 'Escape';
+      const always = e.code === 'F1' || e.code === 'F2' || e.code === 'Escape' || (this.inventoryOpen && (e.code === 'KeyI' || e.code === 'Tab'));
       if (!this.enabled && !always) return;
       const hold = HOLD[e.code];
       if (hold) {

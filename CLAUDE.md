@@ -8,5 +8,10 @@
   mai `Get-Content`/`Set-Content` di PowerShell 5.1 (corrompe UTF-8 senza BOM).
 - Identità git di questo repository: `lorenzoviva <lorenzo.vaccaro@hotmail.com>`, impostata in locale.
   La configurazione globale della macchina è un account di lavoro: non usarla e non modificarla.
-- Verifica visiva: `npm run build && npx vite preview`, poi apri `http://localhost:4173/?skip`
-  (`?dev&teleport=46,0` per vedere la corona). `window.rune` espone il kernel per ispezioni.
+- Verifica visiva: `npm run build && npx vite preview` (il proxy Gemini funziona anche lì), poi apri
+  `http://localhost:4173/` (`?skip` salta intro e Genesi, `?offline` forza i modelli locali,
+  `?dev&teleport=46,0` mostra la corona). `window.rune` espone il kernel; `window.rune.feed()` il registro
+  del Concilio, `window.rune.models.usage` i consumi.
+- Le prove con Gemini costano: una Genesi più qualche chunk ≈ 80 chiamate di testo e 20 immagini.
+  Usa un profilo browser persistente per non rigenerare il mondo a ogni prova, e i test offline per il resto.
+- Mai stampare o registrare il valore di `GEMINI_API_KEY`; verifica che non finisca in `dist/`.

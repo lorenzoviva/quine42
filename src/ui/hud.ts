@@ -1,12 +1,26 @@
-// In-world HUD: place, hand of runes, messages, dialogue, faults, tooltip, banners, help.
+// In-world HUD: place, rune hand, hotbar, messages, dialogue, faults, tooltip, banners.
 
 import type { Kernel, HoverInfo } from '../kernel/kernel';
 import type { Renderer } from '../render/renderer';
+import type { ImageCache } from '../render/imagetools';
+import { HOTBAR } from '../kernel/inventory';
 import { $, el } from './dom';
+
+/** An <img> for an item sprite, or its glyph while the sprite loads (or offline). */
+export function itemIcon(k: Kernel, images: ImageCache, item: string, size = 32): HTMLElement {
+  const info = k.itemInfo(item);
+  const box = el('span', { class: 'icon', style: `width:${size}px;height:${size}px;color:${info.color};font-size:${Math.round(size * 0.7)}px` }, info.glyph);
+  if (info.sprite)
+    void images.url(info.sprite).then((src) => {
+      if (src) box.replaceChildren(el('img', { src, alt: info.name, width: String(size), height: String(size) }));
+    });
+  return box;
+}
 
 export class Hud {
   private place = $('#place');
   private hand = $('#hand');
+  private hotbarEl = $('#hotbar');
   private msgs = $('#messages');
   private dialog = $('#dialog');
   private faults = $('#faults');
@@ -15,33 +29,36 @@ export class Hud {
   private zone = $('#zone');
   private lastPlace = '';
   private lastHand = '';
+  private lastHot = '';
   private lastFaults = '';
   private dialogTimer = 0;
 
   constructor(
     private kernel: Kernel,
     private renderer: Renderer,
+    private images: ImageCache,
   ) {
     kernel.bus.on('ui:message', ({ text, tone }) => this.message(text, tone));
     kernel.bus.on('ui:dialog', ({ speaker, text }) => this.showDialog(speaker, text));
     kernel.bus.on('zone', ({ zone, first }) => {
-      if (zone === 'corona' && first) this.showBanner('OLTRE IL BORDO', 'Il tappeto è fermo. Sotto i tuoi piedi scorre il codice sorgente dell\'universo.\nE su una runa per riscriverla.');
+      if (zone === 'corona' && first) this.showBanner('OLTRE IL BORDO', "Il tappeto è fermo. Sotto i tuoi piedi scorre il codice sorgente dell'universo.\nE su una runa per riscriverla.");
     });
-    kernel.bus.on('rollback', () => this.showBanner('ROLLBACK', 'Il mondo è tornato all\'ultimo stato valido.', 1800));
+    kernel.bus.on('rollback', () => this.showBanner('ROLLBACK', "Il mondo è tornato all'ultimo stato valido.", 1800));
+    kernel.bus.on('universe:reloaded', () => (this.lastHot = ''));
   }
 
   message(text: string, tone: string = 'info'): void {
     const m = el('div', { class: `msg ${tone}` }, text);
     this.msgs.append(m);
-    setTimeout(() => m.classList.add('fade'), 3500);
-    setTimeout(() => m.remove(), 4500);
+    setTimeout(() => m.classList.add('fade'), 4000);
+    setTimeout(() => m.remove(), 5000);
     while (this.msgs.children.length > 5) this.msgs.firstChild!.remove();
   }
 
   showDialog(speaker: string, text: string): void {
     this.dialog.replaceChildren(el('div', { class: 'speaker' }, speaker), el('div', { class: 'text' }, text));
     this.dialog.hidden = false;
-    this.dialogTimer = 7;
+    this.dialogTimer = 8;
   }
 
   hideDialog(): void {
@@ -66,7 +83,7 @@ export class Hud {
       this.lastPlace = placeKey;
       this.place.replaceChildren(
         el('div', { class: 'name' }, place?.name ?? (k.zone === 'corona' ? 'Corona' : '…')),
-        el('div', { class: 'descr' }, place?.description ?? (k.zone === 'corona' ? 'Il codice sorgente dell\'universo.' : '')),
+        el('div', { class: 'descr' }, place?.description ?? (k.zone === 'corona' ? "Il codice sorgente dell'universo." : 'Il Cartografo sta disegnando…')),
       );
       this.place.classList.remove('fresh');
       void this.place.offsetWidth;
@@ -84,10 +101,23 @@ export class Hud {
     const handKey = `${hand.tokens.join('\u0001')}|${hand.sel}`;
     if (handKey !== this.lastHand) {
       this.lastHand = handKey;
-      this.hand.replaceChildren(
-        ...(hand.tokens.length
-          ? hand.tokens.map((t, i) => el('span', { class: `slot${i === hand.sel ? ' sel' : ''}` }, t))
-          : [el('span', { class: 'empty' }, 'mano vuota — E per raccogliere una runa')]),
+      this.hand.replaceChildren(...hand.tokens.map((t, i) => el('span', { class: `slot${i === hand.sel ? ' sel' : ''}` }, t)));
+      this.hand.hidden = hand.tokens.length === 0;
+    }
+
+    const inv = k.inventory();
+    const hotKey = JSON.stringify([inv.slots.slice(0, HOTBAR), inv.equipped]);
+    if (hotKey !== this.lastHot) {
+      this.lastHot = hotKey;
+      this.hotbarEl.replaceChildren(
+        ...inv.slots.slice(0, HOTBAR).map((s, i) => {
+          const cell = el('div', { class: `hot${inv.equipped === i ? ' held' : ''}`, title: s ? k.itemInfo(s.item).name : '' }, el('span', { class: 'n' }, String(i + 1)));
+          if (s) {
+            cell.append(itemIcon(k, this.images, s.item, 30));
+            if (s.count > 1) cell.append(el('span', { class: 'count' }, String(s.count)));
+          }
+          return cell;
+        }),
       );
     }
 
@@ -142,7 +172,7 @@ export class Hud {
         return out;
       }
       case 'entity':
-        return [el('div', { class: 'h' }, info.name), el('div', { class: 'doc' }, info.description)];
+        return [el('div', { class: 'h' }, info.name), el('div', { class: 'doc' }, info.description), ...(info.extra ? [el('div', { class: 'src' }, info.extra)] : [])];
       case 'tile':
         return null;
       case 'code': {

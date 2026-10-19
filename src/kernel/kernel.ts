@@ -1,6 +1,6 @@
-// The kernel: the floor of the universe. Owns the ECS state, the chunks, the sandbox, versioning
-// and the AI gateway. Universe code (Lua) can break everything above this floor, never the floor:
-// a broken universe is always recoverable by rollback.
+// The kernel: the floor of the universe. Owns the ECS state, the chunks, the sandbox, versioning,
+// the assets and the Council of agents. Everything above this floor is generated (by the Council)
+// or written in Lua, and can break; the floor cannot: a broken universe is always recoverable.
 
 import { World, type Id } from './ecs';
 import { EventBus } from './events';
@@ -9,21 +9,39 @@ import { Sandbox, type Host } from './sandbox';
 import { Validator } from './validator';
 import { Repo, type KeyValueStore } from './repo';
 import { Corona, type CoronaCell } from './corona';
-import { AIGateway, type AIProvider } from './gateway/gateway';
 import { Input } from './input';
 import { discoverModules, readConfig } from './universe';
 import { cellIndex, extractLines, tokenize, type RuneComp, type RuneLine } from './runes';
-import { hash32, hashStr, Rng } from './rng';
-import type { ChunkContent, FileMap, ModuleEntry, Place, RuneFragment, TileDef, UniverseConfig } from './types';
+import { hash32, hashStr, hex, Rng } from './rng';
+import { BudgetError, type Models } from './ai/models';
+import { MemoryAssets, MemoryChunks, type AssetStore, type ChunkStore } from './assets';
+import { PAINT_MARGIN, TILE_PX, type ImageTools, type Neighbours } from './imaging';
+import { Council, readBible, type CatalogEntry, type FeedEntry } from './agents/council';
+import { paintPrompt, planChunk, surveyChunk, type ChunkPlan, type Edges } from './agents/cartography';
+import { forge, judgeCombination, repairLogic, spritePrompt, type ForgeOrigin } from './agents/forge';
+import { apiErrors } from './validator';
+import { narrate, npcReply, type NpcReply, type Turn } from './agents/minds';
+import { planGenesis } from './agents/genesis';
+import { addItem, CARRY_CAPACITY, countItem, equippedItem, moveSlot, newInventory, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
+import type { FileMap, ItemSpec, Manifest, ModuleEntry, Place, RuneFragment, TileDef, UniverseConfig } from './types';
+
+export type ChunkStage = 'draft' | 'planned' | 'painted';
 
 export interface Chunk {
   cx: number;
   cy: number;
   key: string;
+  /** size² tile codes: the collision grid. */
   tiles: string;
-  /** Bumped whenever tiles are regenerated (renderer cache key). */
+  /** Bumped whenever tiles or image change (renderer cache key). */
   version: number;
-  content?: ChunkContent;
+  stage: ChunkStage;
+  place?: Place;
+  plan?: ChunkPlan;
+  /** Asset id of the painted image. */
+  image?: string;
+  painting?: boolean;
+  developing?: boolean;
 }
 
 export interface LineState {
@@ -44,15 +62,34 @@ export interface LogEntry {
 
 export type HoverInfo =
   | { kind: 'rune'; token: string; doc?: string; symbol: string | null; line: LineState | undefined; source: 'gen' | 'player' }
-  | { kind: 'entity'; name: string; description: string }
+  | { kind: 'entity'; name: string; description: string; extra?: string }
   | { kind: 'tile'; name: string }
   | { kind: 'code'; cell: CoronaCell }
   | { kind: 'player' };
 
+export interface ItemInfo {
+  id: string;
+  name: string;
+  description: string;
+  glyph: string;
+  color: string;
+  sprite?: string;
+  spec: ItemSpec;
+}
+
+export interface Mind {
+  mode: 'vaga' | 'segui' | 'resta';
+  mood: string;
+  history: Turn[];
+}
+
 export interface KernelOptions {
   files: FileMap;
   store: KeyValueStore;
-  provider: AIProvider;
+  models: Models;
+  assets?: AssetStore;
+  chunks?: ChunkStore;
+  imageTools?: ImageTools;
   wasmUri?: string;
 }
 
@@ -60,7 +97,7 @@ export interface KernelOptions {
 export const SYMBOL_DOCS: Record<string, string> = {
   x: 'posizione X globale del giocatore (non quella del tappeto)',
   y: 'posizione Y globale del giocatore (non quella del tappeto)',
-  speed: 'velocità del giocatore, in celle al secondo',
+  speed: 'velocità del giocatore, in caselle al secondo',
   carpet: 'il tappeto che ti riporta al centro',
   time: 'secondi trascorsi dalla nascita del mondo',
   strength: 'campo del tappeto: quanto ti riporta indietro (1 = tutto)',
@@ -70,12 +107,11 @@ export const SYMBOL_DOCS: Record<string, string> = {
   oy: 'campo del tappeto: scorrimento verticale accumulato',
 };
 
-const VOID_TILE: TileDef = { name: 'vuoto', glyph: '?', color: '#ff3366', bg: '#16040a', solid: false };
+const VOID_TILE: TileDef = { name: 'vuoto', color: '#2a0612', solid: false };
+const DEFAULT_ITEM: ItemSpec = { stackable: false, maxStack: 1, weight: 1, equippable: false };
 const FALLBACK_PLAYER = {
-  player: { speed: 6, facing: 'down' },
+  player: { speed: 6, facing: 'down', load: 0 },
   hand: { tokens: [] as string[], sel: 0 },
-  glyph: { ch: '@', color: '#ffffff' },
-  body: { r: 0.3, solid: false },
 };
 
 const clone = <T>(v: T): T => (v === undefined ? v : JSON.parse(JSON.stringify(v)));
@@ -85,7 +121,11 @@ export class Kernel {
   readonly bus = new EventBus();
   readonly faults = new Faults();
   readonly input = new Input();
-  readonly gateway: AIGateway;
+  readonly models: Models;
+  readonly assets: AssetStore;
+  readonly chunkStore: ChunkStore;
+  readonly imageTools?: ImageTools;
+  council!: Council;
   sandbox!: Sandbox;
   validator!: Validator;
   repo!: Repo;
@@ -102,47 +142,67 @@ export class Kernel {
   readonly chunks = new Map<string, Chunk>();
   readonly lines = new Map<string, LineState>();
   runeCells = new Map<string, Id>();
+  /** Speech bubbles shown above entities. */
+  readonly bubbles = new Map<Id, { text: string; until: number }>();
   /** Entity cells blocked by solid bodies, rebuilt every tick. */
   private solidCells = new Set<string>();
   private runesDirty = true;
   private consumed = new Set<string>();
-  private contentCache = new Map<string, ChunkContent>();
-  private pending = new Set<string>();
   private loaded = new Map<string, string>();
   private singletons = new Map<string, Id>();
   private faultFlag: string | null = null;
+  private lastGood = { px: 0, py: 0, ox: 0, oy: 0 };
+  private painters = 0;
+  private paintingStopped = false;
+  private forgesUsed = 0;
+  private forging = new Set<string>();
+  private developers = 0;
+  private repaired = new Set<string>();
+  /** While true no chunk is planned or painted (e.g. during genesis): the Council works on one thing at a time. */
+  generationHeld = false;
   /** Terrain generation is Lua and costs a few ms: at most this many new chunks per tick. */
   static CHUNKS_PER_TICK = 1;
   private genBudget = 64;
   private tickCount = 0;
-  private lastGood = { px: 0, py: 0, ox: 0, oy: 0 };
 
   playerId: Id = 0;
   time = 0;
   zone: 'sim' | 'corona' = 'sim';
   exitedOnce = false;
   /** Size of the visible area in cells, set by the renderer. */
-  view = { w: 64, h: 40 };
+  view = { w: 32, h: 20 };
   readonly logs: LogEntry[] = [];
 
   private constructor(opts: KernelOptions) {
-    this.gateway = new AIGateway(opts.provider);
+    this.models = opts.models;
+    this.assets = opts.assets ?? new MemoryAssets();
+    this.chunkStore = opts.chunks ?? new MemoryChunks();
+    this.imageTools = opts.imageTools;
   }
 
   static async boot(opts: KernelOptions): Promise<Kernel> {
     const k = new Kernel(opts);
     k.sandbox = await Sandbox.create(k.makeHost(), opts.wasmUri);
     k.validator = new Validator(k.sandbox);
+    k.council = new Council(opts.models, () => ({ files: k.files, palette: k.palette, catalog: k.catalog() }));
+    k.council.onFeed = (e) => k.bus.emit('council', e);
     const name = readConfig(opts.files).config.name;
     const { repo, synced } = Repo.open(name, opts.files, opts.store);
     k.repo = repo;
     k.faults.onRaise = (f, isNew) => {
       if (isNew) k.log('fault', `${f.key}: ${f.message}`);
       k.bus.emit('fault', { fault: f, isNew });
+      if (isNew) void k.repairGenerated(f.key, f.message);
     };
     k.applyFiles(repo.working, { reset: true });
-    k.log('kernel', `universo «${name}» avviato su commit ${repo.head().id} (${repo.head().message})${synced ? ' — sincronizzato dal disco' : ''}`);
+    k.models.limits = { text: k.config.ai.maxText, images: k.models.canPaint ? k.config.ai.maxImages : 0 };
+    k.log('kernel', `universo «${name}» avviato su commit ${repo.head().id} (${repo.head().message}) — modelli: ${opts.models.name}${synced ? ' — sincronizzato dal disco' : ''}`);
     return k;
+  }
+
+  /** True when the universe was never generated by the Council (only the bundled example content). */
+  needsGenesis(): boolean {
+    return !this.repo.log().some((c) => c.message.startsWith('genesi:'));
   }
 
   // --- Host: the only surface Lua can touch ---------------------------------------------------
@@ -151,6 +211,13 @@ export class Kernel {
     return {
       query: (names) => this.ecs.query(...names.split(',').map((s) => s.trim()).filter(Boolean)).join(','),
       get: (id, name) => this.ecs.get(id, name) ?? undefined,
+      set: (id, name, data) => {
+        // The floor protects what keeps the universe navigable: position, the player, the carpet.
+        if (!this.ecs.alive.has(id) || ['pos', 'module', 'chunk', 'carpet'].includes(name) || (id === this.playerId && ['player', 'hand', 'inventory'].includes(name))) return false;
+        if (data === null || typeof data !== 'object') return false;
+        this.ecs.set(id, name, data);
+        return true;
+      },
       spawn: (c) => this.spawnFromLua(c),
       destroy: (id) => {
         if (id === this.playerId || [...this.singletons.values()].includes(id)) return;
@@ -162,6 +229,10 @@ export class Kernel {
       free: (x, y, r) => this.free(x, y, r),
       free_real: (x, y, r) => this.freeReal(x, y, r),
       tile: (x, y) => this.tileAt(Math.floor(x), Math.floor(y)) ?? '',
+      speed_at: (x, y) => {
+        const t = this.tileAt(Math.floor(x), Math.floor(y));
+        return (t && this.palette[t]?.speed) || 1;
+      },
       player_get: (key) => (key === 'x' || key === 'y' ? this.playerPos()[key] : (this.playerComp() as any)[key]),
       player_set: (key, v) => {
         if (typeof v !== 'number' || !Number.isFinite(v)) return `${key} deve essere un numero finito (ricevuto ${v === null ? 'nil' : typeof v})`;
@@ -177,6 +248,31 @@ export class Kernel {
       fault: (key, msg) => {
         this.faultFlag = key;
         this.faults.raise(key, msg);
+      },
+      spawn_module: (module, x, y) => {
+        const m = this.modules.get(module);
+        if (!m || !Number.isFinite(x) || !Number.isFinite(y) || (m.manifest.kind !== 'entity' && m.manifest.kind !== 'item')) return undefined;
+        return this.spawnModuleEntity(m, x, y);
+      },
+      player_id: () => this.playerId,
+      player_pos: () => this.playerCarpet(),
+      nearest: (x, y, r, tag) => this.nearest(x, y, r, tag ?? undefined) ?? undefined,
+      has_tag: (id, tag) => this.hasTag(id, tag),
+      break_entity: (id) => this.breakEntity(id),
+      say: (text) => this.message(String(text).slice(0, 300)),
+      speak: (id, text) => this.speak(id, String(text)),
+      inv_add: (id, item, n) => this.invAdd(id, item, n),
+      inv_remove: (id, item, n) => {
+        const inv: Inventory | undefined = this.ecs.get(id, 'inventory');
+        return inv && Number.isFinite(n) ? removeItem(inv, item, n) : 0;
+      },
+      inv_count: (id, item) => {
+        const inv: Inventory | undefined = this.ecs.get(id, 'inventory');
+        return inv ? countItem(inv, item) : 0;
+      },
+      inv_equipped: (id) => {
+        const inv: Inventory | undefined = this.ecs.get(id, 'inventory');
+        return (inv && equippedItem(inv)) ?? undefined;
       },
     };
   }
@@ -232,12 +328,17 @@ export class Kernel {
     return this.ecs.get(this.playerId, 'pos');
   }
 
-  playerComp(): { speed: number; facing: string } {
+  playerComp(): { speed: number; facing: string; load: number } {
     return this.ecs.get(this.playerId, 'player');
   }
 
+  /** The rune hand (ordered tokens to inscribe). */
   hand(): { tokens: string[]; sel: number } {
     return this.ecs.get(this.playerId, 'hand');
+  }
+
+  inventory(): Inventory {
+    return this.ecs.get(this.playerId, 'inventory');
   }
 
   /** Player position on the carpet (where the simulation thinks you are). */
@@ -245,6 +346,15 @@ export class Kernel {
     const p = this.playerPos();
     const { ox, oy } = this.offset();
     return { x: p.x + ox, y: p.y + oy };
+  }
+
+  /**
+   * The corona exists only for whoever escaped the carpet. While the carpet holds the player near the
+   * centre nothing of it is drawn, hovered or reachable: the simulation simply continues.
+   */
+  coronaRevealed(): boolean {
+    const p = this.playerPos();
+    return !!p && Math.hypot(p.x, p.y) > this.config.circleRadius * 0.45;
   }
 
   log(source: string, message: string): void {
@@ -257,6 +367,32 @@ export class Kernel {
   message(text: string, tone: 'info' | 'warn' | 'good' = 'info'): void {
     this.bus.emit('ui:message', { text, tone });
   }
+
+  speak(id: Id, text: string): void {
+    if (!this.ecs.alive.has(id)) return;
+    this.bubbles.set(id, { text: text.slice(0, 140), until: this.time + 4 + text.length / 25 });
+  }
+
+  catalog(): CatalogEntry[] {
+    return [...this.modules.values()]
+      .filter((m) => m.manifest.kind === 'entity' || m.manifest.kind === 'item')
+      .map((m) => ({ id: m.manifest.id, name: m.manifest.name, kind: m.manifest.kind === 'item' ? 'strumento' : m.manifest.persona ? 'npc' : 'oggetto', tiles: m.manifest.spawn?.tiles ?? [], context: m.manifest.context ?? m.manifest.description ?? '' }));
+  }
+
+  itemInfo(id: string): ItemInfo {
+    const m = this.modules.get(id)?.manifest;
+    return {
+      id,
+      name: m?.name ?? id,
+      description: m?.description ?? 'Qualcosa che non esiste più nel codice del mondo.',
+      glyph: m?.appearance?.glyph ?? '?',
+      color: m?.appearance?.color ?? '#888',
+      sprite: m?.appearance?.sprite,
+      spec: m?.item ?? DEFAULT_ITEM,
+    };
+  }
+
+  private itemSpec = (id: string): ItemSpec | undefined => this.modules.get(id)?.manifest.item;
 
   // --- Universe loading & hot reload ----------------------------------------------------------
 
@@ -311,6 +447,7 @@ export class Kernel {
       if (!opts.reset) this.log('kernel', `ricaricato a caldo: ${id}${err ? ' (con errori)' : ''}`);
     }
 
+    const oldPalette = JSON.stringify(this.palette);
     this.modules = new Map(modules.map((m) => [m.manifest.id, m]));
     this.systems = modules.filter((m) => m.manifest.kind === 'system').sort((a, b) => (a.manifest.order ?? 50) - (b.manifest.order ?? 50));
     this.terrain = modules.find((m) => m.manifest.kind === 'generator');
@@ -321,32 +458,37 @@ export class Kernel {
     for (const id of this.ecs.query('module', 'glyph')) {
       const modId = this.ecs.get(id, 'module').id;
       const app = this.modules.get(modId)?.manifest.appearance;
-      if (app && changed.has(modId)) this.ecs.set(id, 'glyph', { ch: app.glyph, color: app.color });
+      if (app && changed.has(modId)) this.ecs.set(id, 'glyph', this.glyphOf(app));
     }
 
-    const terrainChanged = !this.terrain || changed.has(this.terrain.manifest.id) || opts.reset || sizeChanged;
-    if (sizeChanged) this.clearChunks();
-    else if (terrainChanged) for (const ch of this.chunks.values()) this.regenerateTiles(ch);
+    const paletteChanged = oldPalette !== JSON.stringify(this.palette);
+    if (sizeChanged || paletteChanged) this.clearChunks();
+    else if (!this.terrain || changed.has(this.terrain.manifest.id) || opts.reset) for (const ch of this.chunks.values()) if (ch.stage === 'draft') this.regenerateTiles(ch);
 
     this.files = files;
     this.corona.build(files);
     this.bus.emit('universe:reloaded', { changed: [...changed] });
   }
 
+  private glyphOf(app: NonNullable<Manifest['appearance']>) {
+    return { ch: app.glyph, color: app.color, sprite: app.sprite, scale: app.scale ?? 1.1 };
+  }
+
   private ensureCoreEntities(reset: boolean): void {
     const playerMod = [...this.modules.values()].find((m) => m.manifest.kind === 'player');
-    const defaults: Record<string, any> = clone(playerMod?.manifest.components ?? { player: FALLBACK_PLAYER.player, hand: FALLBACK_PLAYER.hand });
+    const defaults: Record<string, any> = clone(playerMod?.manifest.components ?? FALLBACK_PLAYER);
     if (!defaults.player) defaults.player = clone(FALLBACK_PLAYER.player);
     if (!defaults.hand) defaults.hand = clone(FALLBACK_PLAYER.hand);
-    const app = playerMod?.manifest.appearance;
-    const glyph = app ? { ch: app.glyph, color: app.color } : clone(FALLBACK_PLAYER.glyph);
+    if (!defaults.inventory) defaults.inventory = newInventory();
+    const app = playerMod?.manifest.appearance ?? { glyph: '@', color: '#ffffff', scale: 1.3 };
+    const glyph = this.glyphOf(app);
     const body = { r: playerMod?.manifest.physics?.radius ?? 0.3, solid: false };
 
     if (!this.playerId || !this.ecs.alive.has(this.playerId)) {
       this.playerId = this.ecs.spawn({ ...defaults, pos: { x: 0, y: 0 }, glyph, body, module: { id: playerMod?.manifest.id ?? 'kernel.player' } });
     } else {
       this.ecs.set(this.playerId, 'glyph', glyph);
-      if (reset) this.resetComponents(this.playerId, defaults, playerMod?.manifest.persist ?? []);
+      if (reset) this.resetComponents(this.playerId, defaults, [...(playerMod?.manifest.persist ?? []), 'inventory.slots', 'inventory.equipped']);
     }
 
     for (const m of this.modules.values()) {
@@ -377,10 +519,16 @@ export class Kernel {
     }
   }
 
-  // --- Chunks -------------------------------------------------------------------------------
+  // --- Chunks: draft → plan (Cartographer) → paint (Artist) → survey (Physicist) ---------------
 
   private chunkKey(cx: number, cy: number): string {
     return `${cx},${cy}`;
+  }
+
+  /** Cache key: a new genesis (palette, bible) means a new world, so old chunks are not reused. */
+  private recordKey(ch: Chunk): string {
+    const world = hex(hashStr(JSON.stringify(this.palette) + (readBible(this.files)?.titolo ?? '')));
+    return `${this.config.name}:${this.config.seed}:${world}:${ch.key}`;
   }
 
   private genTiles(cx: number, cy: number): string {
@@ -390,7 +538,7 @@ export class Kernel {
       const id = this.terrain.manifest.id;
       const { value, failed } = this.runModule(id, 'generate_chunk', cx, cy, this.config.seed, S);
       if (!failed) {
-        if (typeof value === 'string' && value.length === n) return value;
+        if (typeof value === 'string' && value.length === n) return [...value].map((c) => (this.palette[c] ? c : '?')).join('');
         this.faults.raise(`module:${id}:generate_chunk`, `generate_chunk deve restituire una stringa di ${n} caratteri`);
       }
     }
@@ -402,19 +550,314 @@ export class Kernel {
     ch.version++;
   }
 
+  private rows(tiles: string): string[] {
+    const S = this.config.chunkSize;
+    return Array.from({ length: S }, (_, r) => tiles.slice(r * S, (r + 1) * S));
+  }
+
   private ensureChunk(cx: number, cy: number): Chunk | undefined {
     const key = this.chunkKey(cx, cy);
-    let ch = this.chunks.get(key);
-    if (ch) return ch;
+    const existing = this.chunks.get(key);
+    if (existing) return existing;
     if (this.genBudget <= 0) return undefined;
     this.genBudget--;
-    ch = { cx, cy, key, tiles: this.genTiles(cx, cy), version: 0 };
+    const ch: Chunk = { cx, cy, key, tiles: this.genTiles(cx, cy), version: 0, stage: 'draft' };
     this.chunks.set(key, ch);
-    this.spawnEntities(ch);
-    const cached = this.contentCache.get(key);
-    if (cached) this.applyContent(ch, cached);
-    else void this.requestContent(ch);
     return ch;
+  }
+
+  private alive(ch: Chunk): boolean {
+    return this.chunks.get(ch.key) === ch;
+  }
+
+  /** Plans the nearest drafts, a few at a time. */
+  private pumpDevelopment(): void {
+    if (this.generationHeld || this.developers >= 3) return;
+    const S = this.config.chunkSize;
+    const pc = this.playerCarpet();
+    const pcx = pc.x / S - 0.5;
+    const pcy = pc.y / S - 0.5;
+    const drafts = [...this.chunks.values()].filter((c) => c.stage === 'draft' && !c.developing);
+    drafts.sort((a, b) => Math.hypot(a.cx - pcx, a.cy - pcy) - Math.hypot(b.cx - pcx, b.cy - pcy));
+    for (const ch of drafts.slice(0, 3 - this.developers)) {
+      ch.developing = true;
+      this.developers++;
+      void this.develop(ch).finally(() => {
+        ch.developing = false;
+        this.developers--;
+      });
+    }
+  }
+
+  /** Brings a chunk from draft to planned (and queues painting), reusing the cache when possible. */
+  private async develop(ch: Chunk): Promise<void> {
+    const rec = await this.chunkStore.load(this.recordKey(ch));
+    if (!this.alive(ch)) return;
+    if (rec) {
+      this.applyPlan(ch, rec.plan, rec.grid);
+      if (rec.image) {
+        ch.image = rec.image;
+        ch.stage = 'painted';
+        ch.version++;
+      }
+      return;
+    }
+    const plan = await this.makePlan(ch);
+    await this.chunkStore.save(this.recordKey(ch), { plan, grid: plan.grid, painted: false });
+    if (this.alive(ch)) this.applyPlan(ch, plan, plan.grid);
+  }
+
+  private edges(ch: Chunk): Edges {
+    const S = this.config.chunkSize;
+    const get = (dx: number, dy: number) => this.chunks.get(this.chunkKey(ch.cx + dx, ch.cy + dy));
+    const col = (t: string, c: number) => Array.from({ length: S }, (_, r) => t[r * S + c]).join('');
+    const n = get(0, -1);
+    const s = get(0, 1);
+    const w = get(-1, 0);
+    const e = get(1, 0);
+    return {
+      n: n && n.stage !== 'draft' ? n.tiles.slice((S - 1) * S) : undefined,
+      s: s && s.stage !== 'draft' ? s.tiles.slice(0, S) : undefined,
+      w: w && w.stage !== 'draft' ? col(w.tiles, S - 1) : undefined,
+      e: e && e.stage !== 'draft' ? col(e.tiles, 0) : undefined,
+    };
+  }
+
+  private async makePlan(ch: Chunk): Promise<ChunkPlan> {
+    const S = this.config.chunkSize;
+    const draft = this.rows(ch.tiles);
+    const start = ch.cx === 0 && ch.cy === 0;
+    const placeable = new Map(this.catalog().map((c) => [c.id, c.tiles]));
+    const neighborPlaces = [[0, -1], [0, 1], [-1, 0], [1, 0]]
+      .map(([dx, dy]) => this.chunks.get(this.chunkKey(ch.cx + dx, ch.cy + dy))?.place?.name)
+      .filter((n): n is string => !!n);
+    let feedback = '';
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const raw = await planChunk(this.council, {
+          cx: ch.cx, cy: ch.cy, size: S, draft, edges: this.edges(ch), neighborPlaces, palette: this.palette,
+          catalog: this.catalog(), fragments: this.fragments.map((f) => f.line), start, attempt, feedback,
+        });
+        const repaired = this.repairGrid(raw.grid, draft);
+        if (repaired.fixes > 0 && repaired.fixes <= S * S * 0.15) {
+          raw.grid = repaired.grid;
+          this.log('validator', `chunk ${ch.key}: griglia riparata (${repaired.fixes} caselle)`);
+        }
+        const verdict = this.validator.validatePlan(raw, S, this.palette, placeable, start);
+        if (verdict.errors.length) {
+          feedback = verdict.errors.join('; ');
+          this.council.say('kernel', 'scarta', `chunk ${ch.key}: ${feedback} → rigenero`, 'cartografo', 'chunk.plan');
+          this.log('validator', `piano del chunk ${ch.key} scartato: ${feedback}`);
+          continue;
+        }
+        if (verdict.dropped.length) {
+          this.log('validator', `chunk ${ch.key}: scartati ${verdict.dropped.join('; ')}`);
+          this.council.say('kernel', 'scarta', `(${ch.key}) ${verdict.dropped[0]}${verdict.dropped.length > 1 ? ` (+${verdict.dropped.length - 1})` : ''}`, 'cartografo', 'chunk.plan');
+        }
+        const plan = verdict.plan;
+        if (start) this.ensureStarterRunes(plan);
+        this.council.say('cartografo', 'propone', `(${ch.key}) «${plan.place.name}»: ${plan.objects.length} oggetti, ${plan.runes.length} rune${plan.fresh.length ? `, chiede «${plan.fresh[0].concept}»` : ''}${verdict.moved ? `, ${verdict.moved} riposizionati dal kernel` : ''}${verdict.dropped.length ? `, ${verdict.dropped.length} scartati` : ''}`, undefined, 'chunk.plan');
+        return plan;
+      } catch (e) {
+        const msg = (e as Error).message;
+        this.council.say('cartografo', 'errore', `(${ch.key}) ${msg}`, undefined, 'chunk.plan');
+        if (e instanceof BudgetError) break;
+      }
+    }
+    return this.fallbackPlan(ch, draft, start);
+  }
+
+  /** Small mistakes (a row one character short, an unknown code) are mended from the draft; big ones are rejected. */
+  private repairGrid(grid: unknown, draft: string[]): { grid: string[]; fixes: number } {
+    const S = this.config.chunkSize;
+    const rows = Array.isArray(grid) ? grid.map(String) : [];
+    let fixes = Math.abs(rows.length - S) * S;
+    const out = draft.map((d, r) => {
+      const src = [...(rows[r] ?? '')];
+      fixes += Math.abs(src.length - S);
+      return d
+        .split('')
+        .map((dc, c) => {
+          const v = src[c];
+          if (v !== undefined && this.palette[v] && v !== '?') return v;
+          if (v !== undefined) fixes++;
+          return dc;
+        })
+        .join('');
+    });
+    return { grid: out, fixes };
+  }
+
+  /** The first square always offers a way in: a symbol to watch, an assignment, a carpet field. */
+  private ensureStarterRunes(plan: ChunkPlan): void {
+    const S = this.config.chunkSize;
+    const needed = ['x', 'speed = speed', 'carpet . active'].filter((l) => !plan.runes.some((r) => r.line === l));
+    const grid = plan.grid.map((r) => [...r]);
+    const used = new Set<string>();
+    for (const r of plan.runes) for (let i = -1; i <= tokenize(r.line).join('').length; i++) used.add(`${r.col + i},${r.row}`);
+    for (const o of plan.objects) used.add(`${o.col},${o.row}`);
+    for (const line of needed) {
+      const w = tokenize(line).join('').length;
+      search: for (let row = 4; row < S - 1; row++)
+        for (let col = 1; col + w < S - 1; col++) {
+          for (let i = -1; i <= w; i++) if (used.has(`${col + i},${row}`)) continue search;
+          for (let i = 0; i < w; i++) if (this.palette[grid[row][col + i]]?.solid !== false) continue search;
+          for (let i = 0; i < w; i++) used.add(`${col + i},${row}`);
+          plan.runes.push({ line, col, row });
+          break search;
+        }
+    }
+  }
+
+  private fallbackPlan(ch: Chunk, draft: string[], start: boolean): ChunkPlan {
+    const S = this.config.chunkSize;
+    const plan: ChunkPlan = { place: { name: 'Terra senza nome', description: 'Qui il mondo non ha ancora trovato le parole.' }, grid: draft, objects: [], fresh: [], runes: [] };
+    for (const m of this.modules.values()) {
+      const rule = m.manifest.spawn;
+      if ((m.manifest.kind !== 'entity' && m.manifest.kind !== 'item') || !rule) continue;
+      const rng = new Rng(hash32(this.config.seed, ch.cx, ch.cy, hashStr(m.manifest.id)));
+      for (let i = 0; i < rule.max; i++) {
+        if (!rng.chance(rule.chance)) continue;
+        const col = rng.int(S);
+        const row = rng.int(S);
+        const tile = draft[row][col];
+        if (!rule.tiles.includes(tile) || this.palette[tile]?.solid || (start && col < 3 && row < 3)) continue;
+        plan.objects.push({ module: m.manifest.id, col, row });
+      }
+    }
+    if (start) this.ensureStarterRunes(plan);
+    return plan;
+  }
+
+  private applyPlan(ch: Chunk, plan: ChunkPlan, grid: string[]): void {
+    const S = this.config.chunkSize;
+    ch.plan = plan;
+    ch.place = plan.place;
+    ch.tiles = grid.join('');
+    ch.stage = 'planned';
+    ch.version++;
+    // Entities of a previous application (hot reload) go away first.
+    for (const id of this.ecs.query('chunk')) if (this.ecs.get(id, 'chunk').key === ch.key) this.ecs.destroy(id);
+    plan.runes.forEach((r, i) => {
+      let col = ch.cx * S + r.col;
+      tokenize(r.line).forEach((token, j) => {
+        const origin = `${ch.key}#r${i}.${j}`;
+        if (!this.consumed.has(origin)) this.ecs.spawn({ rune: { token, col, row: ch.cy * S + r.row, source: 'gen', origin } satisfies RuneComp, chunk: { key: ch.key } });
+        col += token.length;
+      });
+    });
+    plan.objects.forEach((o, i) => {
+      const origin = `${ch.key}#o${i}`;
+      const m = this.modules.get(o.module);
+      if (m && !this.consumed.has(origin) && !this.uniqueTaken(m)) this.spawnModuleEntity(m, ch.cx * S + o.col + 0.5, ch.cy * S + o.row + 0.5, ch.key, origin);
+    });
+    for (const f of plan.fresh) void this.forgeForChunk(ch, f);
+    this.runesDirty = true;
+    this.bus.emit('chunk:planned', { key: ch.key });
+  }
+
+  /** The Cartographer asked for something that does not exist yet: the Forge makes it, then it appears. */
+  private async forgeForChunk(ch: Chunk, f: { concept: string; col: number; row: number }): Promise<void> {
+    const tag = `${ch.key}:${f.concept}`;
+    if (this.forging.has(tag) || this.forgesUsed >= this.config.ai.maxForges) return;
+    this.forging.add(tag);
+    this.forgesUsed++;
+    const r = await this.forgeModule(`${f.concept} (per il luogo «${ch.place?.name}»: ${ch.place?.description})`, 'cartografo');
+    this.forging.delete(tag);
+    if (!r.ok || !r.id || !ch.plan) return;
+    ch.plan.objects.push({ module: r.id, col: f.col, row: f.row });
+    ch.plan.fresh = ch.plan.fresh.filter((x) => x !== f);
+    await this.chunkStore.save(this.recordKey(ch), { plan: ch.plan, grid: this.rows(ch.tiles), image: ch.image, painted: ch.stage === 'painted' });
+    const m = this.modules.get(r.id);
+    const S = this.config.chunkSize;
+    if (m && this.alive(ch)) this.spawnModuleEntity(m, ch.cx * S + f.col + 0.5, ch.cy * S + f.row + 0.5, ch.key, `${ch.key}#o${ch.plan.objects.length - 1}`);
+  }
+
+  /** Paints the nearest planned chunks, a couple at a time. */
+  private pumpPainting(): void {
+    if (!this.models.canPaint || !this.imageTools || this.paintingStopped || this.painters >= 2) return;
+    const S = this.config.chunkSize;
+    const pc = this.playerCarpet();
+    const pcx = pc.x / S - 0.5;
+    const pcy = pc.y / S - 0.5;
+    const busy = [...this.chunks.values()].filter((c) => c.painting);
+    // Two neighbours painted at the same time cannot see each other: paint them one after the other.
+    const next = [...this.chunks.values()]
+      .filter((c) => c.stage === 'planned' && !c.painting && Math.hypot(c.cx - pcx, c.cy - pcy) < 2.6)
+      .filter((c) => !busy.some((b) => Math.abs(b.cx - c.cx) <= 1 && Math.abs(b.cy - c.cy) <= 1))
+      .sort((a, b) => Math.hypot(a.cx - pcx, a.cy - pcy) - Math.hypot(b.cx - pcx, b.cy - pcy))[0];
+    if (!next) return;
+    next.painting = true;
+    this.painters++;
+    void this.paint(next).finally(() => {
+      next.painting = false;
+      this.painters--;
+    });
+  }
+
+  private async neighbourImages(ch: Chunk): Promise<Neighbours> {
+    const dirs = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0], ne: [1, -1], nw: [-1, -1], se: [1, 1], sw: [-1, 1] } as const;
+    const out: Neighbours = {};
+    for (const [d, [dx, dy]] of Object.entries(dirs)) {
+      const n = this.chunks.get(this.chunkKey(ch.cx + dx, ch.cy + dy));
+      if (n?.image) {
+        const img = await this.assets.get(n.image);
+        if (img) out[d as keyof Neighbours] = img;
+      }
+    }
+    return out;
+  }
+
+  private async paint(ch: Chunk): Promise<void> {
+    const tools = this.imageTools!;
+    const S = this.config.chunkSize;
+    const plan = ch.plan!;
+    try {
+      const layout = await tools.composeLayout(plan.grid, this.palette, await this.neighbourImages(ch), PAINT_MARGIN);
+      this.council.say('artista', 'dipinge', `(${ch.key}) «${plan.place.name}»`, undefined, 'chunk.paint');
+      const raw = await this.council.paint('chunk.paint', paintPrompt(this.council, plan, this.palette, S, PAINT_MARGIN), [layout], { cx: ch.cx, cy: ch.cy });
+      if (!raw) return;
+      const inner = await tools.cropInner(raw, S, PAINT_MARGIN, S * TILE_PX);
+      // The Physicist realigns collisions with what was actually painted.
+      let grid = plan.grid;
+      try {
+        const survey = await surveyChunk(this.council, await tools.downscale(inner, 576), plan.grid, this.palette, { cx: ch.cx, cy: ch.cy });
+        if (!this.validator.validateGrid(survey.grid, S, this.palette).length) {
+          grid = this.keepOccupiedWalkable(survey.grid, plan);
+          const diff = grid.reduce((n, row, r) => n + [...row].filter((c, i) => c !== plan.grid[r][i]).length, 0);
+          this.council.say('fisico', diff ? 'corregge' : 'approva', diff ? `(${ch.key}) ${diff} caselle riallineate al dipinto${survey.notes ? `: ${survey.notes}` : ''}` : `(${ch.key}) dipinto e collisioni coincidono`, 'cartografo', 'chunk.survey');
+        } else this.council.say('kernel', 'scarta', `(${ch.key}) rilievo del Fisico non valido: tengo la griglia del Cartografo`, 'fisico');
+      } catch (e) {
+        this.council.say('fisico', 'errore', (e as Error).message);
+      }
+      const image = await this.assets.put(inner);
+      await this.chunkStore.save(this.recordKey(ch), { plan, grid, image, painted: true });
+      if (!this.alive(ch)) return;
+      ch.image = image;
+      ch.tiles = grid.join('');
+      ch.stage = 'painted';
+      ch.version++;
+      this.bus.emit('chunk:painted', { key: ch.key });
+    } catch (e) {
+      const msg = (e as Error).message;
+      this.council.say('artista', 'errore', `(${ch.key}) ${msg}`);
+      if (e instanceof BudgetError) {
+        this.paintingStopped = true;
+        this.message('Budget immagini esaurito: il mondo resta abbozzato.', 'warn');
+      }
+    }
+  }
+
+  /** Cells holding runes or objects stay walkable: things lie on the ground. */
+  private keepOccupiedWalkable(grid: string[], plan: ChunkPlan): string[] {
+    const g = grid.map((r) => [...r]);
+    const fix = (c: number, r: number) => {
+      if (this.palette[g[r]?.[c]]?.solid) g[r][c] = plan.grid[r][c];
+    };
+    for (const o of plan.objects) fix(o.col, o.row);
+    for (const r of plan.runes) for (let i = 0; i < tokenize(r.line).join('').length; i++) fix(r.col + i, r.row);
+    if (plan.objects.length || plan.runes.length) return g.map((r) => r.join(''));
+    return grid;
   }
 
   private unloadChunk(ch: Chunk): void {
@@ -428,21 +871,21 @@ export class Kernel {
 
   private clearChunks(): void {
     for (const ch of [...this.chunks.values()]) this.unloadChunk(ch);
-    this.contentCache.clear();
   }
 
-  /** Loads the chunks needed to draw the visible part of the circle; unloads the far ones. */
+  /** Loads the chunks needed to draw the visible area; unloads the far ones. */
   private updateChunks(): void {
     const S = this.config.chunkSize;
     const R = this.config.circleRadius;
     const p = this.playerPos();
     const { ox, oy } = this.offset();
-    const x0 = Math.max(p.x - this.view.w / 2, -R) + ox;
-    const x1 = Math.min(p.x + this.view.w / 2, R) + ox;
-    const y0 = Math.max(p.y - this.view.h / 2, -R) + oy;
-    const y1 = Math.min(p.y + this.view.h / 2, R) + oy;
+    // While the corona is hidden the simulation has no visible edge: the carpet fills the view.
+    const clamp = this.coronaRevealed() ? R : Infinity;
+    const x0 = Math.max(p.x - this.view.w / 2, -clamp) + ox;
+    const x1 = Math.min(p.x + this.view.w / 2, clamp) + ox;
+    const y0 = Math.max(p.y - this.view.h / 2, -clamp) + oy;
+    const y1 = Math.min(p.y + this.view.h / 2, clamp) + oy;
     const want = new Set<string>();
-    // The chunk under the player comes first (collisions); then the visible ones nearest to it.
     const pc = this.playerCarpet();
     const pcx = Math.floor(pc.x / S);
     const pcy = Math.floor(pc.y / S);
@@ -460,100 +903,75 @@ export class Kernel {
       }
     }
     this.genBudget = Kernel.CHUNKS_PER_TICK;
-    if (this.chunks.size > want.size + 24) {
+    if (this.chunks.size > want.size + 16) {
       for (const ch of [...this.chunks.values()]) if (!want.has(ch.key)) this.unloadChunk(ch);
     }
   }
 
-  private spawnEntities(ch: Chunk): void {
-    const S = this.config.chunkSize;
-    for (const m of this.modules.values()) {
-      const rule = m.manifest.spawn;
-      if (m.manifest.kind !== 'entity' || !rule) continue;
-      const rng = new Rng(hash32(this.config.seed, ch.cx, ch.cy, hashStr(m.manifest.id)));
-      for (let i = 0; i < rule.max; i++) {
-        if (!rng.chance(rule.chance)) continue;
-        const col = rng.int(S);
-        const row = rng.int(S);
-        const tile = ch.tiles[row * S + col];
-        if (!rule.tiles.includes(tile) || this.palette[tile]?.solid) continue;
-        const wx = ch.cx * S + col;
-        const wy = ch.cy * S + row;
-        if (Math.abs(wx) < 3 && Math.abs(wy) < 3) continue;
-        this.spawnModuleEntity(m, wx + 0.5, wy + 0.5, ch.key);
-      }
-    }
-  }
+  // --- Entities --------------------------------------------------------------------------------
 
-  spawnModuleEntity(m: ModuleEntry, x: number, y: number, chunkKey?: string): Id {
+  spawnModuleEntity(m: ModuleEntry, x: number, y: number, chunkKey?: string, origin?: string): Id {
     const man = m.manifest;
     const comps: Record<string, any> = {
       ...clone(man.components ?? {}),
       pos: { x, y },
       module: { id: man.id },
-      body: { r: man.physics?.radius ?? 0.35, solid: !!man.physics?.solid },
+      body: { r: man.physics?.radius ?? 0.35, solid: !!man.physics?.solid && !man.physics?.pushable, pushable: !!man.physics?.pushable, mass: man.physics?.mass ?? 1, friction: man.physics?.friction ?? 0.6 },
     };
-    if (man.appearance) comps.glyph = { ch: man.appearance.glyph, color: man.appearance.color };
-    if (man.interaction) comps.interact = { ...man.interaction, talks: 0 };
+    if (man.appearance) comps.glyph = this.glyphOf(man.appearance);
+    if (man.kind === 'item') comps.pickup = { item: man.id, count: 1 };
+    if (man.interaction) comps.interact = { type: man.interaction.type };
+    if (man.persona) comps.mind = { mode: 'vaga', mood: 'tranquillo', history: [], ...(comps.mind ?? {}) } satisfies Mind;
+    if (man.inventory?.length) {
+      const inv = newInventory(8);
+      for (const it of man.inventory) addItem(inv, it, 1, this.itemSpec(it));
+      comps.inventory = inv;
+    }
+    if (man.physics?.pushable && !comps.vel) comps.vel = { x: 0, y: 0 };
+    if (man.physics?.speed && comps.wander) comps.wander.speed = man.physics.speed;
     if (chunkKey) comps.chunk = { key: chunkKey };
+    if (origin) comps.origin = { key: origin };
     const id = this.ecs.spawn(comps);
     if (this.sandbox.has(man.id, 'on_spawn')) this.runModule(man.id, 'on_spawn', id);
     return id;
   }
 
-  /** Asks the AI for the chunk's place and runes; validates; discards and retries invalid answers. */
-  private async requestContent(ch: Chunk): Promise<void> {
-    if (this.pending.has(ch.key)) return;
-    this.pending.add(ch.key);
-    const S = this.config.chunkSize;
-    const neighbors = [this.chunkKey(ch.cx - 1, ch.cy), this.chunkKey(ch.cx + 1, ch.cy), this.chunkKey(ch.cx, ch.cy - 1), this.chunkKey(ch.cx, ch.cy + 1)]
-      .map((k) => this.contentCache.get(k)?.place.name)
-      .filter((n): n is string => !!n);
-    let content: ChunkContent | null = null;
-    try {
-      for (let attempt = 0; attempt < 3 && !content; attempt++) {
-        let answer: ChunkContent;
-        try {
-          answer = await this.gateway.chunk({
-            cx: ch.cx, cy: ch.cy, seed: this.config.seed, attempt, size: S, tiles: ch.tiles, palette: this.palette,
-            catalog: this.fragments, theme: this.files[this.config.theme] ?? '', prompt: this.files['prompts/chunk.md'] ?? '', neighbors,
-          });
-        } catch (e) {
-          this.gateway.record('chunk', `(${ch.key}) errore del provider: ${(e as Error).message}`, false);
-          continue;
-        }
-        const errors = this.validator.validateChunkContent(answer, ch.tiles, S, this.palette);
-        if (errors.length) {
-          this.gateway.record('chunk', `(${ch.key}) scartato: ${errors[0]} → rigenero`, false);
-          this.log('validator', `chunk ${ch.key} scartato: ${errors.join('; ')}`);
-          continue;
-        }
-        content = answer;
-        this.gateway.record('chunk', `(${ch.key}) «${answer.place.name}», ${answer.runes.length} rune`, true);
-      }
-    } finally {
-      this.pending.delete(ch.key);
+  private nearest(x: number, y: number, r: number, tag?: string, exclude: Id[] = []): Id | undefined {
+    let best: Id | undefined;
+    let bestD = r;
+    for (const id of this.ecs.query('module', 'pos')) {
+      if (id === this.playerId || exclude.includes(id)) continue;
+      if (tag && !this.hasTag(id, tag)) continue;
+      const p = this.ecs.get(id, 'pos');
+      const d = Math.hypot(p.x - x, p.y - y);
+      if (d < bestD) [best, bestD] = [id, d];
     }
-    content ??= { place: { name: 'Terra senza nome', description: 'Qui il mondo non ha ancora trovato le parole.' }, runes: [] };
-    this.contentCache.set(ch.key, content);
-    if (this.chunks.get(ch.key) === ch) this.applyContent(ch, content);
+    return best;
   }
 
-  private applyContent(ch: Chunk, content: ChunkContent): void {
-    ch.content = content;
-    const S = this.config.chunkSize;
-    content.runes.forEach((r, i) => {
-      let col = ch.cx * S + r.col;
-      tokenize(r.line).forEach((token, j) => {
-        const origin = `${ch.key}#${i}.${j}`;
-        if (!this.consumed.has(origin)) {
-          const rune: RuneComp = { token, col, row: ch.cy * S + r.row, source: 'gen', origin };
-          this.ecs.spawn({ rune, chunk: { key: ch.key } });
-        }
-        col += token.length;
-      });
-    });
-    this.runesDirty = true;
+  private hasTag(id: Id, tag: string): boolean {
+    const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
+    return !!m?.tags?.includes(tag);
+  }
+
+  /** Destroys an entity (never the player) and leaves its drops on the ground. */
+  private breakEntity(id: Id): void {
+    if (id === this.playerId || !this.ecs.alive.has(id) || this.ecs.has(id, 'carpet')) return;
+    const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
+    const p = this.ecs.get(id, 'pos');
+    const origin = this.ecs.get(id, 'origin')?.key;
+    if (origin) this.consumed.add(origin);
+    this.ecs.destroy(id);
+    for (const d of m?.drops ?? []) {
+      const dm = this.modules.get(d);
+      if (dm && p) this.spawnModuleEntity(dm, p.x, p.y);
+    }
+  }
+
+  private invAdd(id: Id, item: string, n: number): number {
+    const inv: Inventory | undefined = this.ecs.get(id, 'inventory');
+    if (!inv || !this.modules.has(item) || !Number.isFinite(n)) return 0;
+    return addItem(inv, item, n, this.itemSpec(item));
   }
 
   // --- Space & collisions ----------------------------------------------------------------------
@@ -565,6 +983,11 @@ export class Kernel {
     const cy = Math.floor(row / S);
     const ch = this.chunks.get(this.chunkKey(cx, cy));
     return ch?.tiles[(row - cy * S) * S + (col - cx * S)];
+  }
+
+  chunkAt(x: number, y: number): Chunk | undefined {
+    const S = this.config.chunkSize;
+    return this.chunks.get(this.chunkKey(Math.floor(x / S), Math.floor(y / S)));
   }
 
   private freeCell(col: number, row: number): boolean {
@@ -674,8 +1097,7 @@ export class Kernel {
     return Math.hypot(col + 0.5 - ox, row + 0.5 - oy) < this.config.circleRadius - 0.5;
   }
 
-  pickUp(): boolean {
-    if (this.zone !== 'sim') return false;
+  private pickUpRune(): boolean {
     const { col, row } = this.playerCell();
     const [dx, dy] = this.facingDelta();
     const id = this.runeCells.get(`${col},${row}`) ?? this.runeCells.get(`${col + dx},${row + dy}`);
@@ -695,11 +1117,11 @@ export class Kernel {
   /** Writes tokens on the carpet in front of the player, as one touching row. */
   inscribe(tokens: string[]): boolean {
     if (!tokens.length) {
-      this.message('La tua mano è vuota.', 'warn');
+      this.message('Non hai rune in mano.', 'warn');
       return false;
     }
     if (this.zone !== 'sim') {
-      this.message('Qui non c\'è tappeto su cui scrivere.', 'warn');
+      this.message("Qui non c'è tappeto su cui scrivere.", 'warn');
       return false;
     }
     const width = tokens.reduce((n, t) => n + t.length, 0);
@@ -709,14 +1131,13 @@ export class Kernel {
     for (let i = 0; i < width; i++) {
       const c = start.col + i;
       if (this.runeCells.has(`${c},${start.row}`) || !this.freeCell(c, start.row) || !this.inCircle(c, start.row)) {
-        this.message('Non c\'è spazio per scrivere qui.', 'warn');
+        this.message("Non c'è spazio per scrivere qui.", 'warn');
         return false;
       }
     }
     let c = start.col;
     for (const token of tokens) {
-      const rune: RuneComp = { token, col: c, row: start.row, source: 'player' };
-      this.ecs.spawn({ rune });
+      this.ecs.spawn({ rune: { token, col: c, row: start.row, source: 'player' } satisfies RuneComp });
       c += token.length;
     }
     this.runesDirty = true;
@@ -737,7 +1158,7 @@ export class Kernel {
     const hand = this.hand();
     const token = hand.tokens[hand.sel];
     if (token === undefined) {
-      this.message('La tua mano è vuota.', 'warn');
+      this.message('Non hai rune in mano.', 'warn');
       return;
     }
     if (this.inscribe([token])) {
@@ -755,9 +1176,157 @@ export class Kernel {
     hand.sel = to;
   }
 
+  /** Reorders the rune hand (drag and drop in the inventory). */
+  moveRune(from: number, to: number): void {
+    const t = this.hand().tokens;
+    if (from < 0 || from >= t.length || to < 0 || to >= t.length) return;
+    const [tok] = t.splice(from, 1);
+    t.splice(to, 0, tok);
+    this.hand().sel = to;
+  }
+
+  // --- Inventory -------------------------------------------------------------------------------
+
+  private pickUpItem(): boolean {
+    const pc = this.playerCarpet();
+    const [dx, dy] = this.facingDelta();
+    let best: Id | undefined;
+    let bestD = 1.3;
+    for (const id of this.ecs.query('pickup', 'pos')) {
+      const p = this.ecs.get(id, 'pos');
+      const d = Math.min(Math.hypot(p.x - pc.x, p.y - pc.y), Math.hypot(p.x - pc.x - dx * 0.6, p.y - pc.y - dy * 0.6));
+      if (d < bestD) [best, bestD] = [id, d];
+    }
+    if (best === undefined) return false;
+    const pk = this.ecs.get(best, 'pickup');
+    const info = this.itemInfo(pk.item);
+    const added = addItem(this.inventory(), pk.item, pk.count, info.spec);
+    if (!added) {
+      this.message("L'inventario è pieno.", 'warn');
+      return true;
+    }
+    pk.count -= added;
+    if (pk.count <= 0) {
+      const origin = this.ecs.get(best, 'origin')?.key;
+      if (origin) this.consumed.add(origin);
+      this.ecs.destroy(best);
+    }
+    this.bus.emit('item:picked', { item: pk.item });
+    this.message(`Raccolto: ${info.name}${added > 1 ? ` ×${added}` : ''}`);
+    return true;
+  }
+
+  useSlot(index: number): void {
+    const inv = this.inventory();
+    const slot = inv.slots[index];
+    if (!slot) return;
+    const info = this.itemInfo(slot.item);
+    if (!this.sandbox.has(slot.item, 'on_use')) {
+      if (info.spec.equippable) return this.equipSlot(index);
+      this.message(`${info.name}: non sai come usarlo.`, 'warn');
+      return;
+    }
+    const { value, failed } = this.runModule(slot.item, 'on_use', this.playerId, slot.item);
+    if (!failed && typeof value === 'string' && value) this.message(value);
+    this.bus.emit('item:used', { item: slot.item });
+  }
+
+  equipSlot(index: number): void {
+    const inv = this.inventory();
+    const slot = inv.slots[index];
+    if (!slot) {
+      inv.equipped = null;
+      return;
+    }
+    const info = this.itemInfo(slot.item);
+    if (!info.spec.equippable) {
+      this.message(`${info.name} non si può impugnare.`, 'warn');
+      return;
+    }
+    inv.equipped = inv.equipped === index ? null : index;
+    this.message(inv.equipped === null ? `Riponi ${info.name}.` : `Impugni ${info.name}. F per usarlo.`);
+  }
+
+  /** Hotbar keys 1–6: equip what can be held, use the rest. */
+  hotbar(index: number): void {
+    const slot = this.inventory().slots[index];
+    if (!slot) return;
+    if (this.itemInfo(slot.item).spec.equippable) this.equipSlot(index);
+    else this.useSlot(index);
+  }
+
+  /** F: the held item acts on what is in front of you. */
+  action(): void {
+    const inv = this.inventory();
+    const item = equippedItem(inv);
+    if (!item) {
+      this.message('Non impugni nulla (1–6 o inventario).', 'warn');
+      return;
+    }
+    const pc = this.playerCarpet();
+    const [dx, dy] = this.facingDelta();
+    const target = this.nearest(pc.x + dx * 0.9, pc.y + dy * 0.9, 1.1) ?? null;
+    if (!this.sandbox.has(item, 'on_action')) {
+      this.message(`${this.itemInfo(item).name} non fa nulla così.`, 'warn');
+      return;
+    }
+    const { value, failed } = this.runModule(item, 'on_action', this.playerId, target, item);
+    if (!failed && typeof value === 'string' && value) this.message(value);
+    this.bus.emit('item:action', { item, target });
+  }
+
+  dropSlot(index: number, count?: number): void {
+    if (this.zone !== 'sim') return;
+    const taken = takeFromSlot(this.inventory(), index, count);
+    if (!taken) return;
+    const pc = this.playerCarpet();
+    const [dx, dy] = this.facingDelta();
+    const m = this.modules.get(taken.item);
+    if (!m) return;
+    const id = this.spawnModuleEntity(m, pc.x + dx * 0.8, pc.y + dy * 0.8);
+    this.ecs.get(id, 'pickup').count = taken.count;
+    this.message(`Posi: ${m.manifest.name}${taken.count > 1 ? ` ×${taken.count}` : ''}`);
+  }
+
+  moveSlot(from: number, to: number): void {
+    moveSlot(this.inventory(), from, to, this.itemSpec);
+  }
+
+  /** Drag one item onto another: the Council decides if they combine, forging the result if needed. */
+  async combine(a: number, b: number): Promise<string> {
+    const inv = this.inventory();
+    const sa = inv.slots[a];
+    const sb = inv.slots[b];
+    if (!sa || !sb || a === b) return '';
+    const ia = this.itemInfo(sa.item);
+    const ib = this.itemInfo(sb.item);
+    const items = [...this.modules.values()].filter((m) => m.manifest.kind === 'item');
+    let verdict;
+    try {
+      verdict = await judgeCombination(this.council, ia, ib, items.map((m) => m.manifest.name));
+    } catch (e) {
+      return `Il Concilio non risponde: ${(e as Error).message}`;
+    }
+    if (!verdict.possible || !verdict.result) return verdict.reason;
+    let result = items.find((m) => m.manifest.name.toLowerCase() === verdict.result!.toLowerCase())?.manifest.id;
+    if (!result) {
+      if (this.forgesUsed >= this.config.ai.maxForges) return 'Il Concilio ha già forgiato abbastanza per oggi.';
+      this.forgesUsed++;
+      const r = await this.forgeModule(`${verdict.result}: ${verdict.description ?? ''} (ottenuto combinando ${ia.name} e ${ib.name})`, 'combinazione', 'strumento');
+      if (!r.ok || !r.id) return r.summary;
+      result = r.id;
+    }
+    removeItem(inv, sa.item, 1);
+    removeItem(inv, sb.item, 1);
+    addItem(inv, result, 1, this.itemSpec(result));
+    const name = this.itemInfo(result).name;
+    this.message(`${ia.name} + ${ib.name} → ${name}`, 'good');
+    return `${verdict.reason} Ottieni: ${name}.`;
+  }
+
   // --- Interaction ----------------------------------------------------------------------------
 
-  /** E: corona → edit code; carpet → pick a rune, else talk/read/use the nearest entity. */
+  /** E: corona → edit code; carpet → rune, item, then talk/read/use the nearest entity. */
   async interact(): Promise<void> {
     if (this.zone === 'corona') {
       const p = this.playerPos();
@@ -765,10 +1334,10 @@ export class Kernel {
       if (cell?.path) this.bus.emit('ui:edit', { path: cell.path, line: cell.line ?? 1 });
       return;
     }
-    if (this.pickUp()) return;
+    if (this.pickUpRune() || this.pickUpItem()) return;
     const pc = this.playerCarpet();
     let best: Id | null = null;
-    let bestD = 1.6;
+    let bestD = 1.7;
     for (const id of this.ecs.query('interact', 'pos')) {
       const p = this.ecs.get(id, 'pos');
       const d = Math.hypot(p.x - pc.x, p.y - pc.y);
@@ -777,28 +1346,69 @@ export class Kernel {
     if (best === null) return;
     const it = this.ecs.get(best, 'interact');
     const modId: string = this.ecs.get(best, 'module')?.id;
-    const m = this.modules.get(modId);
-    const speaker = m?.manifest.name ?? 'Qualcuno';
+    const m = this.modules.get(modId)?.manifest;
+    const speaker = m?.name ?? 'Qualcuno';
+    if (it.type === 'talk') {
+      this.bus.emit('ui:chat', { id: best, name: speaker });
+      return;
+    }
     if (it.type === 'lua') {
-      const { value, failed } = this.runModule(modId, 'on_interact', best);
+      const { value, failed } = this.runModule(modId, 'on_interact', best, this.playerId);
       if (!failed && typeof value === 'string') this.bus.emit('ui:dialog', { speaker, text: value });
       return;
     }
-    it.talks = (it.talks ?? 0) + 1;
-    const place = this.placeHere();
+    try {
+      const text = await narrate(this.council, { name: speaker, description: m?.description ?? '', lore: m?.lore }, this.worldFacts());
+      this.bus.emit('ui:dialog', { speaker, text });
+    } catch (e) {
+      this.bus.emit('ui:dialog', { speaker, text: `(le parole si confondono: ${(e as Error).message})` });
+    }
+  }
+
+  private worldFacts(): Record<string, unknown> {
     const p = this.playerPos();
-    const text = await this.gateway.text({
-      kind: it.type, speaker, persona: it.persona ?? '', theme: this.files[this.config.theme] ?? '',
-      prompt: m?.manifest.prompts?.dialogue ?? '', seed: this.config.seed + best,
-      context: { place: place?.name, talks: it.talks, distanceToEdge: this.config.circleRadius - Math.hypot(p.x, p.y) },
-    });
-    this.bus.emit('ui:dialog', { speaker, text });
+    const held = equippedItem(this.inventory());
+    return {
+      distanceToEdge: Math.round((this.config.circleRadius - Math.hypot(p.x, p.y)) * 10) / 10,
+      luogo: this.placeHere()?.name,
+      ora: Math.floor(this.time),
+      viandanteImpugna: held ? this.itemInfo(held).name : 'niente',
+    };
+  }
+
+  /** Talks to an NPC: the Narrator plays its persona; the chosen action is validated and applied. */
+  async talk(id: Id, text: string): Promise<NpcReply> {
+    const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
+    if (!m?.persona || !this.ecs.alive.has(id)) return { say: '…', action: 'nessuna', mood: '' };
+    let mind: Mind = this.ecs.get(id, 'mind');
+    if (!mind) mind = this.ecs.set(id, 'mind', { mode: 'vaga', mood: 'tranquillo', history: [] });
+    mind.history ??= [];
+    const inv: Inventory | undefined = this.ecs.get(id, 'inventory');
+    const carrying = inv ? inv.slots.filter(Boolean).map((s) => this.itemInfo(s!.item).name) : [];
+    let reply: NpcReply;
+    try {
+      reply = await npcReply(this.council, { name: m.name, persona: m.persona, mood: mind.mood, mode: mind.mode, carrying, place: this.placeHere()?.name ?? '', history: mind.history, facts: this.worldFacts() }, text);
+    } catch (e) {
+      return { say: `(${m.name} ti guarda in silenzio — ${(e as Error).message})`, action: 'nessuna', mood: mind.mood };
+    }
+    mind.history.push({ who: 'giocatore', text }, { who: 'npc', text: reply.say });
+    if (mind.history.length > 16) mind.history.splice(0, mind.history.length - 16);
+    mind.mood = reply.mood;
+    if (reply.action === 'segui' || reply.action === 'resta' || reply.action === 'vaga') mind.mode = reply.action;
+    if (reply.action === 'dai') {
+      const slot = inv?.slots.find((s) => s && this.itemInfo(s.item).name.toLowerCase() === (reply.item ?? '').toLowerCase()) ?? inv?.slots.find(Boolean);
+      if (slot && inv && addItem(this.inventory(), slot.item, 1, this.itemSpec(slot.item))) {
+        removeItem(inv, slot.item, 1);
+        this.message(`${m.name} ti dà: ${this.itemInfo(slot.item).name}`, 'good');
+      } else reply.action = 'nessuna';
+    }
+    this.speak(id, reply.say);
+    return reply;
   }
 
   placeHere(): Place | undefined {
     const pc = this.playerCarpet();
-    const S = this.config.chunkSize;
-    return this.chunks.get(this.chunkKey(Math.floor(pc.x / S), Math.floor(pc.y / S)))?.content?.place;
+    return this.chunkAt(pc.x, pc.y)?.place;
   }
 
   /** Tooltip contents for a real-space point. */
@@ -806,7 +1416,7 @@ export class Kernel {
     const p = this.playerPos();
     if (Math.hypot(rx - p.x, ry - p.y) < 0.5) return { kind: 'player' };
     const R = this.config.circleRadius;
-    if (Math.hypot(rx, ry) >= R) {
+    if (Math.hypot(rx, ry) >= R && this.coronaRevealed()) {
       const cell = this.corona.at(Math.floor(rx), Math.floor(ry));
       return cell && cell.kind !== 'empty' ? { kind: 'code', cell } : null;
     }
@@ -824,11 +1434,165 @@ export class Kernel {
       const ep = this.ecs.get(eid, 'pos');
       if (Math.hypot(ep.x - cx, ep.y - cy) < 0.6) {
         const m = this.modules.get(this.ecs.get(eid, 'module').id)?.manifest;
-        return { kind: 'entity', name: m?.name ?? '???', description: m?.description ?? '' };
+        const mind: Mind | undefined = this.ecs.get(eid, 'mind');
+        const pk = this.ecs.get(eid, 'pickup');
+        const extra = mind ? `umore: ${mind.mood}` : pk ? `E per raccogliere${pk.count > 1 ? ` (×${pk.count})` : ''}` : undefined;
+        return { kind: 'entity', name: m?.name ?? '???', description: m?.description ?? '', extra };
       }
     }
     const t = this.tileAt(Math.floor(cx), Math.floor(cy));
     return t ? { kind: 'tile', name: this.palette[t]?.name ?? t } : null;
+  }
+
+  // --- The Forge and Genesis ---------------------------------------------------------------------
+
+  /** Forges a module through the Council, then validates, stores its sprite, commits and hot loads it. */
+  async forgeModule(prompt: string, origin: ForgeOrigin, kind?: 'npc' | 'oggetto' | 'strumento'): Promise<{ ok: boolean; id?: string; summary: string }> {
+    const ids = [...this.modules.keys()];
+    try {
+      const r = await forge(
+        this.council,
+        { prompt, origin, kind, existingIds: ids, paletteCodes: Object.keys(this.palette).filter((c) => c !== '?' && !this.palette[c].solid) },
+        (m, logic) => this.validator.validateForged(m, logic, new Set(ids)),
+      );
+      if (r.sprite && this.imageTools) {
+        try {
+          r.manifest.appearance!.sprite = await this.assets.put(await this.imageTools.cutSprite(r.sprite, 160));
+        } catch (e) {
+          this.council.say('artista', 'errore', `sprite: ${(e as Error).message}`);
+        }
+      }
+      const dir = `modules/${r.id}/`;
+      this.repo.write(`${dir}manifest.json`, JSON.stringify(r.manifest, null, 2) + '\n');
+      this.repo.write(`${dir}logic.lua`, r.logic.endsWith('\n') ? r.logic : r.logic + '\n');
+      this.recordInBible(r.manifest);
+      this.applyFiles({ ...this.repo.working });
+      const c = this.repo.commit(`${origin}: ${r.summary}`, 'agent');
+      this.log('agent', `${r.summary} (commit ${c.id})`);
+      this.council.say('kernel', 'approva', `${r.summary} → validato, commit ${c.id}, caricato a caldo`);
+      this.bus.emit('forge:done', { id: r.id, summary: r.summary });
+      return { ok: true, id: r.id, summary: r.summary };
+    } catch (e) {
+      const msg = (e as Error).message;
+      this.council.say('kernel', 'errore', `Fucina: ${msg}`);
+      return { ok: false, summary: `Il Concilio non è riuscito a creare un modulo valido: ${msg}` };
+    }
+  }
+
+  /** The Narrator's memory: every new being or thing becomes part of the world bible. */
+  /** An individual already walks the loaded world. */
+  private uniqueTaken(m: ModuleEntry): boolean {
+    return !!m.manifest.unique && this.ecs.query('module').some((id) => this.ecs.get(id, 'module').id === m.manifest.id);
+  }
+
+  /**
+   * Generated code is never allowed to break the world: if a module the Council wrote fails at runtime,
+   * the Engineer receives the error and fixes it (once per module per session); the fix is validated,
+   * committed and hot loaded. Faults of hand-written modules and of the player's code are left alone.
+   */
+  async repairGenerated(faultKey: string, message: string): Promise<boolean> {
+    const m = /^module:([^:]+):(\w+)$/.exec(faultKey);
+    if (!m || m[2] === 'load') return false;
+    const entry = this.modules.get(m[1]);
+    const origin = entry?.manifest.origin;
+    if (!entry?.logicPath || !origin || origin === 'esempio' || this.repaired.has(m[1])) return false;
+    // If the player rewrote this module, breaking it was their right.
+    if (this.repo.lastAuthorOf(entry.logicPath) !== 'agent') return false;
+    this.repaired.add(m[1]);
+    this.council.say('kernel', 'obietta', `${m[1]}.${m[2]} fallisce durante il gioco: ${message}`, 'ingegnere', 'forge.fix');
+    let feedback = '';
+    for (let round = 0; round < 2; round++) {
+      try {
+        const logic = await repairLogic(this.council, entry.manifest, this.repo.working[entry.logicPath] ?? '', message, feedback);
+        const errors = [...this.validator.checkLua(entry.logicPath, logic), ...apiErrors(logic)];
+        if (errors.length) {
+          feedback = errors.join('; ');
+          this.council.say('kernel', 'scarta', feedback, 'ingegnere');
+          continue;
+        }
+        this.repo.write(entry.logicPath, logic.endsWith('\n') ? logic : logic + '\n');
+        this.applyFiles({ ...this.repo.working });
+        this.faults.clearPrefix(`module:${m[1]}:`);
+        const c = this.repo.commit(`riparazione: ${m[1]}`, 'agent');
+        this.council.say('ingegnere', 'corregge', `${m[1]} riparato → commit ${c.id}`);
+        return true;
+      } catch (e) {
+        this.council.say('ingegnere', 'errore', (e as Error).message);
+        return false;
+      }
+    }
+    return false;
+  }
+
+  private recordInBible(m: Manifest): void {
+    const bible = readBible(this.repo.working);
+    if (!bible) return;
+    const line = `${m.name} — ${m.description ?? ''}`.slice(0, 200);
+    if (m.persona) bible.personaggi = [...(bible.personaggi ?? []), line].slice(-30);
+    else bible.fatti = [...(bible.fatti ?? []), line].slice(-40);
+    this.repo.write('world/bible.json', JSON.stringify(bible, null, 2) + '\n');
+  }
+
+  /** Asks the in-world agent for a new module (console → Agente). */
+  async askAgent(prompt: string): Promise<{ ok: boolean; summary: string }> {
+    return this.forgeModule(prompt, 'agente');
+  }
+
+  /** The Council generates a whole new universe from a theme. Constants (carpet, movement, physics, runes) stay. */
+  async runGenesis(theme: string, onProgress?: (step: string) => void): Promise<boolean> {
+    this.generationHeld = true;
+    try {
+      onProgress?.('Il Concilio si riunisce');
+      const plan = await planGenesis(this.council, theme, this.repo.working);
+      for (const [p, src] of Object.entries(plan.files)) this.repo.write(p, src);
+      // Example content shipped on disk makes room for the generated world.
+      for (const m of this.modules.values()) {
+        if (m.manifest.origin !== 'esempio') continue;
+        for (const p of Object.keys(this.repo.working)) if (p.startsWith(m.dir)) this.repo.write(p, null);
+      }
+      this.applyFiles({ ...this.repo.working });
+      this.consumed.clear();
+      let done = 0;
+      const queue = [...plan.cast];
+      const worker = async () => {
+        for (let next = queue.shift(); next; next = queue.shift()) {
+          onProgress?.(`La Fucina crea: ${next.richiesta}`);
+          await this.forgeModule(next.richiesta, 'genesi', next.tipo);
+          done++;
+        }
+      };
+      await Promise.all([worker(), worker()]);
+      if (this.models.canPaint && this.imageTools) {
+        onProgress?.('L\'Artista ritrae il viandante');
+        this.council.say('artista', 'dipinge', `il viandante: ${plan.playerPrompt}`);
+        try {
+          const raw = await this.council.paint('genesis.player', spritePrompt(this.council, { nome: 'Viandante', aspetto: plan.playerPrompt, tipo: 'npc' }), []);
+          if (raw) {
+            const sprite = await this.assets.put(await this.imageTools.cutSprite(raw, 160));
+            const path = 'modules/core.player/manifest.json';
+            const man = JSON.parse(this.repo.working[path]);
+            man.appearance = { ...man.appearance, sprite, imagePrompt: plan.playerPrompt };
+            this.repo.write(path, JSON.stringify(man, null, 2) + '\n');
+          }
+        } catch (e) {
+          this.council.say('artista', 'errore', (e as Error).message);
+        }
+      }
+      this.applyFiles({ ...this.repo.working });
+      this.clearChunks();
+      const title = readBible(this.repo.working)?.titolo ?? 'nuovo universo';
+      const c = this.repo.commit(`genesi: ${title}`, 'agent');
+      this.council.say('kernel', 'approva', `Genesi completata: «${title}», ${done} moduli, commit ${c.id}`);
+      this.bus.emit('genesis:done', { title });
+      return true;
+    } catch (e) {
+      this.council.say('kernel', 'errore', `Genesi fallita: ${(e as Error).message}`);
+      this.repo.restore();
+      this.applyFiles({ ...this.repo.working });
+      return false;
+    } finally {
+      this.generationHeld = false;
+    }
   }
 
   // --- Versioning ------------------------------------------------------------------------------
@@ -868,26 +1632,6 @@ export class Kernel {
     return { errors, committed, written: true };
   }
 
-  /** Asks the in-world agent for a new module; validated, then committed and hot loaded. */
-  async askAgent(prompt: string): Promise<{ ok: boolean; summary: string }> {
-    const ids = [...this.modules.keys()];
-    for (let attempt = 0; attempt < 3; attempt++) {
-      const result = await this.gateway.module({ prompt, theme: this.files[this.config.theme] ?? '', existingIds: ids, instructions: this.files['prompts/module.md'] ?? '' });
-      const errors = this.validator.validateModule(result.files, new Set(ids));
-      if (errors.length) {
-        this.gateway.record('module', `scartato: ${errors[0]} → rigenero`, false);
-        continue;
-      }
-      for (const [p, src] of Object.entries(result.files)) this.repo.write(p, src);
-      this.applyFiles({ ...this.repo.working });
-      const c = this.repo.commit(`agente: ${result.summary}`, 'agent');
-      this.gateway.record('module', `${result.summary} → commit ${c.id}`, true);
-      this.log('agent', `${result.summary} (commit ${c.id})`);
-      return { ok: true, summary: result.summary };
-    }
-    return { ok: false, summary: 'L\'agente non è riuscito a produrre un modulo valido.' };
-  }
-
   /** Dev only: files on disk changed (Vite HMR). */
   syncFromDisk(files: FileMap): void {
     for (const p of Object.keys(this.repo.working)) if (!(p in files)) this.repo.write(p, null);
@@ -897,19 +1641,27 @@ export class Kernel {
     this.log('dev', `hot reload dal disco → commit ${c.id}`);
   }
 
+  feed(): FeedEntry[] {
+    return this.council.feed;
+  }
+
   // --- Tick ------------------------------------------------------------------------------------
 
   tick(dt: number): void {
     this.time += dt;
     this.tickCount++;
     this.updateChunks();
+    this.pumpDevelopment();
+    if (!this.generationHeld) this.pumpPainting();
     this.rebuildSolids();
+    this.playerComp().load = totalWeight(this.inventory(), this.itemSpec) / CARRY_CAPACITY;
     this.syncRunes();
     this.runRunes();
     for (const s of this.systems) this.runModule(s.manifest.id, 'update', dt);
     this.syncRunes();
     this.sanitize();
     this.updateZone();
+    for (const [id, b] of this.bubbles) if (b.until < this.time || !this.ecs.alive.has(id)) this.bubbles.delete(id);
   }
 
   private rebuildSolids(): void {

@@ -2,12 +2,15 @@
   "id": "npc.cat",
   "name": "Gatto",
   "kind": "entity",
-  "version": "0.1.0",
+  "version": "0.2.0",
+  "origin": "esempio",
   "description": "Un gatto. Probabilmente.",
+  "context": "prati fioriti",
   "logic": "logic.lua",
-  "appearance": { "glyph": "c", "color": "#f0a050", "imagePrompt": "orange cat, top-down" },
-  "physics": { "solid": false, "radius": 0.25 },
+  "appearance": { "glyph": "c", "color": "#f0a050", "scale": 0.9, "imagePrompt": "un gatto rosso tigrato visto dall'alto" },
+  "physics": { "solid": false, "radius": 0.25, "speed": 2.6 },
   "components": { "wander": { "dx": 0, "dy": 0, "t": 0, "speed": 2.6 } },
-  "interaction": { "type": "talk", "persona": "gatto" },
-  "spawn": { "tiles": ["g", "f"], "chance": 0.12, "max": 1 }
+  "interaction": { "type": "talk" },
+  "persona": "Sei un gatto. Rispondi solo con versi, fusa e azioni descritte tra parentesi. Sei vagamente consapevole che il mondo si ripete: a volte fissi il vuoto dove passa il bordo. Segui chi ti offre attenzione, ma solo se ne hai voglia.",
+  "spawn": { "tiles": ["g"], "chance": 0.12, "max": 1 }
 }

@@ -2,10 +2,13 @@
   "id": "object.sign",
   "name": "Cartello",
   "kind": "entity",
-  "version": "0.1.0",
-  "description": "Un cartello di legno. Indica il confine.",
-  "appearance": { "glyph": "†", "color": "#c89a5a", "imagePrompt": "wooden signpost, top-down" },
+  "version": "0.2.0",
+  "origin": "esempio",
+  "description": "Un cartello di legno che indica il confine del regno.",
+  "context": "incroci dei sentieri",
+  "lore": "I cartelli di Valmora dicono sempre la stessa distanza dal confine.",
+  "appearance": { "glyph": "†", "color": "#c89a5a", "imagePrompt": "un cartello di legno su un palo, visto dall'alto" },
   "physics": { "solid": true, "radius": 0.4 },
   "interaction": { "type": "read" },
-  "spawn": { "tiles": ["p", "g"], "chance": 0.15, "max": 1 }
+  "spawn": { "tiles": ["p"], "chance": 0.15, "max": 1 }
 }

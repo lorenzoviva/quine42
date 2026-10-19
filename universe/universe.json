@@ -3,5 +3,12 @@
   "seed": 1337,
   "theme": "prompts/theme.md",
   "circleRadius": 44,
-  "chunkSize": 20
+  "chunkSize": 18,
+  "ai": {
+    "textModel": "gemini-2.5-flash-lite",
+    "imageModel": "gemini-2.5-flash-image",
+    "maxText": 800,
+    "maxImages": 80,
+    "maxForges": 3
+  }
 }

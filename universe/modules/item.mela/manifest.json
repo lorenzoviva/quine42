@@ -1,0 +1,14 @@
+{
+  "id": "item.mela",
+  "name": "Mela",
+  "kind": "item",
+  "version": "0.1.0",
+  "origin": "esempio",
+  "description": "Una mela rossa e lucida. Si mangia.",
+  "context": "sotto i meli, nelle tasche degli abitanti",
+  "logic": "logic.lua",
+  "appearance": { "glyph": "ó", "color": "#e04040", "scale": 0.8, "imagePrompt": "una mela rossa" },
+  "physics": { "solid": false, "radius": 0.2 },
+  "item": { "stackable": true, "maxStack": 10, "weight": 0.3, "equippable": false, "controls": { "usa": "mangiala" } },
+  "spawn": { "tiles": ["g"], "chance": 0.08, "max": 1 }
+}

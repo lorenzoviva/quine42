@@ -1,0 +1,9 @@
+{
+  "id": "sys.physics",
+  "name": "Fisica",
+  "kind": "system",
+  "version": "0.1.0",
+  "description": "Le cose spingibili si spostano quando il viandante ci cammina contro, scivolano e si fermano secondo massa e attrito.",
+  "logic": "logic.lua",
+  "order": 25
+}

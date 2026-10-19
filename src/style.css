@@ -173,3 +173,93 @@ button[disabled] { opacity: 0.4; cursor: default; }
 @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
 @keyframes blink { 50% { opacity: 0.25; } }
 @keyframes flicker { 0%, 92%, 100% { opacity: 1; } 94% { opacity: 0.6; } 96% { opacity: 0.9; } }
+
+/* --- Iterazione 2: hotbar, inventario, chat, Concilio, genesi --- */
+#handbar { gap: 6px; }
+#hand { background: rgba(3, 6, 5, 0.6); padding: 4px 8px; }
+#hotbar { display: flex; gap: 4px; }
+#hotbar .hot, #inventory .cell {
+  position: relative; width: 46px; height: 46px; display: flex; align-items: center; justify-content: center;
+  background: rgba(8, 14, 11, 0.85); border: 1px solid #2b4a3a;
+}
+#hotbar .hot.held, #inventory .cell.held { border-color: var(--gold); box-shadow: 0 0 10px #ffcf5c66; }
+#hotbar .n, #inventory .n { position: absolute; top: 1px; left: 3px; font-size: 10px; color: var(--dim); }
+#hotbar .count, #inventory .count { position: absolute; bottom: 1px; right: 3px; font-size: 11px; color: #fff; text-shadow: 0 0 3px #000; }
+.icon { display: inline-flex; align-items: center; justify-content: center; line-height: 1; }
+.icon img { image-rendering: auto; display: block; }
+
+#inventory { position: fixed; inset: 0; z-index: 35; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.35); }
+#inventory .window { width: min(760px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow: auto; background: var(--panel); border: 1px solid var(--line); box-shadow: 0 0 40px #000; }
+#inventory .head { display: flex; gap: 16px; align-items: baseline; padding: 10px 14px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+#inventory .title { color: var(--gold); letter-spacing: 0.1em; }
+#inventory .weight { color: var(--dim); font-size: 12px; }
+#inventory .weight.over { color: var(--red); }
+#inventory .hint { margin-left: auto; color: #445; font-size: 11px; }
+#inventory .body { display: flex; gap: 14px; padding: 14px; flex-wrap: wrap; }
+#inventory .grid { display: grid; grid-template-columns: repeat(6, 52px); gap: 6px; }
+#inventory .cell { width: 52px; height: 52px; cursor: pointer; }
+#inventory .cell.hotbar { background: rgba(14, 22, 16, 0.95); }
+#inventory .cell.sel { outline: 1px solid var(--cyan); }
+#inventory .details { flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 6px; }
+#inventory .details .big { display: flex; justify-content: center; padding: 6px; background: rgba(255,255,255,0.03); }
+#inventory .details .name { color: var(--gold); font-size: 16px; }
+#inventory .details .descr { font-size: 13px; }
+#inventory .details .props { color: var(--dim); font-size: 12px; }
+#inventory .details .control b { color: var(--cyan); font-weight: normal; }
+#inventory .details .actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+#inventory .details .empty, #inventory .runebar .empty { color: var(--dim); font-size: 12px; }
+#inventory .busy { color: var(--gold); font-size: 12.5px; margin-top: 8px; }
+#inventory .combine { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; padding: 8px; border: 1px dashed var(--gold); }
+#inventory .runebar { border-top: 1px solid var(--line); padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
+#inventory .runebar .label { color: var(--dim); font-size: 12px; }
+#inventory .runes { display: flex; flex-wrap: wrap; gap: 4px; }
+#inventory .rune { background: #2e2306; border: 1px solid #d8a83a; color: #ffe7a3; padding: 3px 9px; cursor: grab; }
+#inventory .rune.sel { border-color: #fff; }
+
+#chat {
+  position: fixed; right: 16px; bottom: 120px; z-index: 32; width: min(420px, calc(100vw - 32px)); max-height: 50vh;
+  display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--gold);
+}
+#chat .head { display: flex; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+#chat .title { color: var(--gold); flex: 1; letter-spacing: 0.05em; }
+#chat .close { padding: 0 8px; }
+#chat .log { flex: 1; overflow: auto; padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; font-size: 13.5px; }
+#chat .line.giocatore b { color: var(--cyan); font-weight: normal; }
+#chat .line.npc b { color: var(--gold); font-weight: normal; }
+#chat .note { color: var(--dim); font-size: 12px; font-style: italic; }
+#chat .row { padding: 8px; border-top: 1px solid var(--line); }
+#chat input { width: 100%; background: #050a07; color: var(--fg); border: 1px solid var(--line); padding: 7px 9px; font: inherit; }
+
+#feed {
+  position: absolute; right: 16px; bottom: 120px; width: min(380px, 40vw); pointer-events: auto;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+}
+#faults:not([hidden]) ~ #feed { bottom: 120px; }
+#feed .toggle { font-size: 11px; padding: 2px 8px; opacity: 0.8; }
+#feed .list { display: flex; flex-direction: column; gap: 3px; width: 100%; }
+#feed.collapsed .list { display: none; }
+.feed-line { background: rgba(3, 6, 5, 0.82); border-left: 2px solid #2b4a3a; padding: 3px 8px; font-size: 11.5px; line-height: 1.35; transition: opacity 2s; }
+.feed-line.old { opacity: 0.45; }
+.feed-line .who { margin-right: 6px; }
+.feed-line .verb { color: var(--dim); margin-right: 6px; }
+.feed-line.k-obietta { border-left-color: var(--red); }
+.feed-line.k-approva { border-left-color: var(--code); }
+.feed-line.k-scarta, .feed-line.k-errore { border-left-color: #ff8a3d; }
+.feed-line.k-dipinge { border-left-color: #ff8ad8; }
+#chat:not([hidden]) ~ #feed { display: none; }
+
+#genesis { position: fixed; inset: 0; z-index: 45; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, #07110c 0%, #020303 75%); padding: 16px; }
+#genesis .window { width: min(760px, 100%); max-height: calc(100vh - 32px); overflow: auto; display: flex; flex-direction: column; gap: 10px; }
+#genesis .logo { color: var(--gold); letter-spacing: 0.4em; text-align: center; font-size: 28px; }
+#genesis h1 { margin: 0; text-align: center; color: var(--code); letter-spacing: 0.4em; font-weight: normal; }
+#genesis .note { color: var(--dim); font-size: 12.5px; }
+#genesis textarea { width: 100%; background: #050a07; color: var(--fg); border: 1px solid var(--line); padding: 10px; font: inherit; resize: vertical; }
+#genesis .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+#genesis .status { color: var(--gold); min-height: 1.4em; }
+#genesis .feed { display: flex; flex-direction: column; gap: 3px; max-height: 40vh; overflow: auto; }
+#genesis.running textarea { opacity: 0.5; }
+#intro .models { margin-top: 18px; color: var(--dim); font-size: 12px; }
+@media (max-width: 720px) {
+  #inventory .grid { grid-template-columns: repeat(4, 52px); }
+  #feed { display: none; }
+}

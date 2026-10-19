@@ -30,6 +30,11 @@ export function tokenize(line: string): string[] {
   return line.trim().split(/\s+/).filter(Boolean);
 }
 
+/** Splits Lua source into rune tokens even without spaces: "carpet.active=false" → carpet . active = false. */
+export function lex(line: string): string[] {
+  return line.match(/[A-Za-z_][A-Za-z0-9_]*|\d+(?:\.\d+)?|==|~=|<=|>=|\.\.|[-+*/%^#<>=(){}[\];:,.]|\S/g) ?? [];
+}
+
 export function joinTokens(tokens: string[]): string {
   return tokens.join(' ');
 }

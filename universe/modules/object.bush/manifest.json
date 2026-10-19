@@ -1,0 +1,14 @@
+{
+  "id": "object.bush",
+  "name": "Cespuglio di meli selvatici",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "esempio",
+  "description": "Un cespuglio fitto. Tra le foglie si intravede qualcosa di rosso.",
+  "context": "margini dei boschi e prati",
+  "appearance": { "glyph": "%", "color": "#3fae4a", "imagePrompt": "un cespuglio rotondo con piccole mele rosse, visto dall'alto" },
+  "physics": { "solid": true, "radius": 0.45 },
+  "tags": ["tagliabile"],
+  "drops": ["item.mela"],
+  "spawn": { "tiles": ["g"], "chance": 0.2, "max": 2 }
+}

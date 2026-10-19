@@ -9,7 +9,8 @@ export const DEFAULT_CONFIG: UniverseConfig = {
   seed: 1,
   theme: 'prompts/theme.md',
   circleRadius: 44,
-  chunkSize: 20,
+  chunkSize: 18,
+  ai: { textModel: 'gemini-2.5-flash-lite', imageModel: 'gemini-2.5-flash-image', maxText: 800, maxImages: 80, maxForges: 3 },
 };
 
 export function readConfig(files: FileMap): { config: UniverseConfig; error?: string } {
@@ -17,7 +18,7 @@ export function readConfig(files: FileMap): { config: UniverseConfig; error?: st
   if (!src) return { config: DEFAULT_CONFIG, error: 'universe.json mancante' };
   try {
     const parsed = JSON.parse(src);
-    return { config: { ...DEFAULT_CONFIG, ...parsed } };
+    return { config: { ...DEFAULT_CONFIG, ...parsed, ai: { ...DEFAULT_CONFIG.ai, ...(parsed.ai ?? {}) } } };
   } catch (e) {
     return { config: DEFAULT_CONFIG, error: `universe.json: ${(e as Error).message}` };
   }

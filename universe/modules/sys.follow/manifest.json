@@ -1,0 +1,9 @@
+{
+  "id": "sys.follow",
+  "name": "Seguire",
+  "kind": "system",
+  "version": "0.1.0",
+  "description": "Chi ha deciso di seguire il viandante lo segue, restando a un passo di distanza.",
+  "logic": "logic.lua",
+  "order": 31
+}

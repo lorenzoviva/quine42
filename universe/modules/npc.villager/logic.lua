@@ -1,5 +1,4 @@
--- Abitante: il dialogo arriva dal gateway IA (interaction "talk").
--- Qui solo ciò che succede alla nascita.
+-- Abitante: parla tramite il Narratore (persona nel manifest). Qui solo ciò che succede alla nascita.
 local M = {}
 
 function M.on_spawn(id)

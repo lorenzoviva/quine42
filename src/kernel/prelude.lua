@@ -97,6 +97,7 @@ local function make_api()
     end
   end
   function ecs.get(id, name) return host.get(id, name) end
+  function ecs.set(id, name, data) return host.set(id, tostring(name), data) end
   function ecs.spawn(components) return host.spawn(components) end
   function ecs.destroy(id) host.destroy(id) end
   function ecs.first(name) return host.first(name) end
@@ -106,6 +107,21 @@ local function make_api()
     free = function(x, y, r) return host.free(x, y, r or 0) end,
     free_real = function(x, y, r) return host.free_real(x, y, r or 0) end,
     tile = function(x, y) return host.tile(x, y) end,
+    speed_at = function(x, y) return host.speed_at(x, y) end,
+    spawn = function(module, x, y) return host.spawn_module(tostring(module), x, y) end,
+    player = function() return host.player_id() end,
+    player_pos = function() return host.player_pos() end,
+    nearest = function(x, y, r, tag) return host.nearest(x, y, r or 1, tag) end,
+    has_tag = function(id, tag) return host.has_tag(id, tostring(tag)) end,
+    break_entity = function(id) host.break_entity(id) end,
+    say = function(text) host.say(tostring(text)) end,
+    speak = function(id, text) host.speak(id, tostring(text)) end,
+  }
+  local inventory = {
+    add = function(id, item, n) return host.inv_add(id, tostring(item), n or 1) end,
+    remove = function(id, item, n) return host.inv_remove(id, tostring(item), n or 1) end,
+    count = function(id, item) return host.inv_count(id, tostring(item)) end,
+    equipped = function(id) return host.inv_equipped(id) end,
   }
   local bus = { emit = function(name, data) host.emit(tostring(name), data) end }
   local function log(...)
@@ -116,7 +132,7 @@ local function make_api()
     end
     host.log(concat(parts, " "))
   end
-  return ecs, input, world, bus, log
+  return ecs, input, world, bus, log, inventory
 end
 
 local function player_binding(key)
@@ -139,13 +155,13 @@ function K.reset()
     carpet = { get = function() return host.carpet() end },
     time = { get = function() return host.time() end },
   }
-  local ecs, input, world, bus, log = make_api()
+  local ecs, input, world, bus, log, inventory = make_api()
   local base = {
     math = copy(math), string = copy(string), table = copy(table), utf8 = copy(utf8),
     pairs = pairs, ipairs = ipairs, next = next, select = select, type = type,
     tostring = tostring, tonumber = tonumber, pcall = pcall, error = error, assert = assert,
     unpack = unpack, print = log, log = log, hash = hash,
-    ecs = ecs, input = input, world = world, bus = bus,
+    ecs = ecs, input = input, world = world, bus = bus, inventory = inventory,
   }
   base.string.dump = nil
   U = setmetatable(base, {

@@ -1,6 +1,7 @@
 -- Terreno di Valmora.
 -- generate_chunk restituisce size*size codici di tile, riga per riga.
--- Deterministico: stesso seme, stesse coordinate, stesso mondo.
+-- Deterministico: stesso seme, stesse coordinate, stesso mondo. È solo una BOZZA continua:
+-- il Cartografo la usa come punto di partenza e la trasforma. Usa solo i codici base g p t w r.
 local M = {}
 
 local function smooth(t) return t * t * (3 - 2 * t) end
@@ -42,8 +43,6 @@ local function tile_at(C, wx, wy, seed)
     if r < 0.55 then return "t" end
     return "g"
   end
-  if r < 0.04 then return "f" end
-  if r < 0.07 then return "t" end
   return "g"
 end
 

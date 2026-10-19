@@ -1,0 +1,18 @@
+{
+  "titolo": "Il Regno di Valmora",
+  "tono": "meraviglia e sospetto: un medioevo quieto con piccole crepe",
+  "sintesi": "Un regno di prati, boschi e laghi dove la gente vive tranquilla. Chi cammina a lungo torna sempre in piazza, e nel terreno brillano lettere che nessuno sa leggere.",
+  "storia": "Nessuno ricorda la fondazione di Valmora. Le cronache iniziano tutte con la stessa frase: «In principio era la piazza».",
+  "luoghi": ["Piazza di Valmora", "Bosco dei Sussurri", "Lago del Re Muto"],
+  "personaggi": ["Gli abitanti di Valmora, gentili e smemorati"],
+  "fatti": [
+    "Il bordo del regno è sempre a 44 passi, ovunque tu sia.",
+    "Le lettere luminose nel terreno reagiscono a come vengono disposte.",
+    "Chi parte verso l'orizzonte torna in piazza la sera stessa."
+  ],
+  "crepe": [
+    "Il vento muove tutte le foglie nello stesso istante.",
+    "Le onde del lago arrivano a intervalli troppo regolari.",
+    "Ogni tanto il cielo sfarfalla per un attimo."
+  ]
+}

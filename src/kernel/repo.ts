@@ -122,6 +122,16 @@ export class Repo {
     return [...this.data.commits].reverse();
   }
 
+  /** Who last changed a file (by walking the history back), or null if it never changed since genesis. */
+  lastAuthorOf(path: string): Author | null {
+    if (this.working[path] !== this.head().files[path]) return 'player';
+    const commits = this.data.commits;
+    for (let i = commits.length - 1; i > 0; i--) {
+      if (commits[i].files[path] !== commits[i - 1].files[path]) return commits[i].author;
+    }
+    return commits[0]?.files[path] !== undefined ? commits[0].author : null;
+  }
+
   isDirty(): boolean {
     return hashFiles(this.working) !== hashFiles(this.head().files);
   }

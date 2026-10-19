@@ -11,6 +11,8 @@ import prelude from './prelude.lua?raw';
 export interface Host {
   query(names: string): string;
   get(id: number, name: string): unknown;
+  /** Replaces a component (not on the player's core components). Returns success. */
+  set(id: number, name: string, data: unknown): boolean;
   spawn(components: unknown): number | undefined;
   destroy(id: number): void;
   first(name: string): number | undefined;
@@ -27,6 +29,19 @@ export interface Host {
   emit(name: string, data: unknown): void;
   describe(value: unknown): string;
   fault(key: string, message: string): void;
+  speed_at(x: number, y: number): number;
+  spawn_module(module: string, x: number, y: number): number | undefined;
+  player_id(): number;
+  player_pos(): { x: number; y: number };
+  nearest(x: number, y: number, r: number, tag?: string): number | undefined;
+  has_tag(id: number, tag: string): boolean;
+  break_entity(id: number): void;
+  say(text: string): void;
+  speak(id: number, text: string): void;
+  inv_add(id: number, item: string, n: number): number;
+  inv_remove(id: number, item: string, n: number): number;
+  inv_count(id: number, item: string): number;
+  inv_equipped(id: number): string | undefined;
 }
 
 interface KernelLua {

@@ -9,6 +9,7 @@ export function fakeHost() {
   const host: Host = {
     query: () => '',
     get: () => undefined,
+    set: () => false,
     spawn: () => undefined,
     destroy: () => {},
     first: () => undefined,
@@ -27,6 +28,19 @@ export function fakeHost() {
     log: (m) => logs.push(m),
     emit: () => {},
     describe: (v) => (v === carpet ? 'carpet{...}' : typeof v),
+    speed_at: () => 1,
+    spawn_module: () => undefined,
+    player_id: () => 1,
+    player_pos: () => ({ x: player.x, y: player.y }),
+    nearest: () => undefined,
+    has_tag: () => false,
+    break_entity: () => {},
+    say: (m) => logs.push(m),
+    speak: () => {},
+    inv_add: () => 0,
+    inv_remove: () => 0,
+    inv_count: () => 0,
+    inv_equipped: () => undefined,
     fault: (k, m) => {
       faults[k] = m;
     },

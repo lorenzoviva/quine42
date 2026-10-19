@@ -16,16 +16,17 @@
       <div id="messages"></div>
       <div id="dialog" hidden></div>
       <div id="handbar">
-        <div id="hand"></div>
+        <div id="hand" hidden></div>
+        <div id="hotbar"></div>
         <div class="keys">
           <span><kbd>WASD</kbd> muoviti</span>
-          <span><kbd>E</kbd> raccogli / parla</span>
-          <span><kbd>Q</kbd> incidi la mano</span>
-          <span><kbd>X</kbd> posa la runa scelta</span>
-          <span><kbd>Z</kbd><kbd>C</kbd> scegli · <kbd>⇧</kbd> sposta</span>
+          <span><kbd>E</kbd> raccogli · parla · usa</span>
+          <span><kbd>I</kbd> inventario</span>
+          <span><kbd>1</kbd>–<kbd>6</kbd> impugna/usa</span>
+          <span><kbd>F</kbd> azione</span>
+          <span><kbd>Q</kbd> incidi le rune</span>
           <span><kbd>R</kbd> rollback</span>
           <span><kbd>F1</kbd> aiuto</span>
-          <span><kbd>F2</kbd> kernel</span>
         </div>
       </div>
     </div>
@@ -36,20 +37,25 @@
     <div id="help" hidden>
       <h2>RUNE</h2>
       <p>Cammini e cammini, ma resti sempre al centro: un <b>tappeto</b> scorre sotto i tuoi passi e ti riporta indietro.
-        Tutto attorno, fermo e invisibile, c'è la <b>corona</b>: il codice sorgente dell'universo.</p>
+        Il mondo attorno a te è scritto, dipinto e abitato da un <b>Concilio</b> di intelligenze generative: il Narratore, il Cartografo,
+        l'Artista, il Fisico, l'Ingegnere e l'Arbitro, che controlla che tutto resti coerente.</p>
       <p>Le lettere luminose nel terreno sono <b>rune</b>: frammenti veri del codice. Ciò che è scritto sul tappeto <b>si esegue</b>, sempre.
         Rune che si toccano in orizzontale formano una riga di Lua. Passa il mouse su una runa per leggerne il valore.</p>
       <ul>
-        <li><kbd>E</kbd> raccoglie la runa sotto di te (o davanti), oppure parla con chi ti sta vicino.</li>
-        <li><kbd>Q</kbd> incide sul tappeto, davanti a te, tutte le rune che hai in mano, in ordine.</li>
-        <li><kbd>X</kbd> posa solo la runa selezionata. <kbd>Z</kbd>/<kbd>C</kbd> (o rotella) scelgono, con <kbd>⇧</kbd> la spostano.</li>
+        <li><kbd>E</kbd> raccoglie rune e oggetti, parla con le persone (scrivi liberamente), legge, usa.</li>
+        <li><kbd>I</kbd> apre l'inventario: trascina per riordinare, su un altro oggetto per scambiare o <b>combinare</b>, fuori dalla finestra per posare.</li>
+        <li><kbd>1</kbd>–<kbd>6</kbd> impugnano (o usano) gli oggetti della prima riga; <kbd>F</kbd> usa ciò che impugni su ciò che hai davanti.</li>
+        <li><kbd>Q</kbd> incide sul tappeto, davanti a te, tutte le rune che hai in mano, in ordine. <kbd>Z</kbd>/<kbd>C</kbd> le scelgono, con <kbd>⇧</kbd> le spostano.</li>
         <li>Una riga che non ha senso <b>spezza la simulazione</b>. Rimetti a posto le rune, o premi <kbd>R</kbd>: il mondo torna all'ultimo commit valido.</li>
         <li>Consiglio: per raccogliere da una riga senza romperla, togli prima le rune <i>nel mezzo</i>.</li>
       </ul>
       <p>Se riesci a fermare il tappeto, potrai camminare fino al bordo. E oltre.</p>
-      <p class="dim">F2 apre la console del kernel. Esc chiude.</p>
+      <p class="dim"><kbd>G</kbd> mostra/nasconde il Concilio. Esc chiude.</p>
     </div>
 
+    <div id="inventory" hidden></div>
+    <div id="chat" hidden></div>
+    <div id="genesis" hidden></div>
     <div id="editor" hidden></div>
     <div id="console" hidden></div>
 
@@ -58,6 +64,7 @@
       <div class="name">RUNE</div>
       <div class="tag">Il mondo è scritto. Tu sei al centro.</div>
       <div class="press">premi un tasto</div>
+      <div class="models" id="models"></div>
     </div>
     <div id="loading">avvio del kernel…</div>
 

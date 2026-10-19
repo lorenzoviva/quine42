@@ -1,6 +1,6 @@
 # ADR-0005 — Gateway IA e validazione
 
-Data: 2026-10-19 · Stato: accettato
+Data: 2026-10-19 · Stato: sostituito da [ADR-0008](0008-concilio-degli-agenti-e-gemini.md)
 
 ## Contesto
 I contenuti sono illimitati e generati da IA, ma l'IA non deve mai rompere il gioco. Le rune

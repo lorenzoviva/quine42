@@ -1,16 +1,18 @@
 {
   "id": "world.terrain",
-  "name": "Terreno di Valmora",
+  "name": "Terreni",
   "kind": "generator",
-  "version": "0.1.0",
-  "description": "Genera le celle del tappeto: prati, sentieri, boschi, acqua, roccia.",
+  "version": "0.2.0",
+  "description": "Bozza procedurale continua delle mappe e palette dei terreni. La Genesi riscrive la palette; il Cartografo trasforma la bozza.",
   "logic": "logic.lua",
   "tiles": {
-    "g": { "name": "prato", "glyph": ",", "color": "#3f7a3a", "bg": "#0f1a0e", "solid": false },
-    "f": { "name": "fiori", "glyph": "*", "color": "#d98ac0", "bg": "#0f1a0e", "solid": false },
-    "p": { "name": "sentiero", "glyph": ".", "color": "#a08a5c", "bg": "#1c1710", "solid": false },
-    "t": { "name": "albero", "glyph": "♣", "color": "#2f9c4a", "bg": "#0a140a", "solid": true },
-    "w": { "name": "acqua", "glyph": "≈", "color": "#4a8fd8", "bg": "#0a1426", "solid": true },
-    "r": { "name": "roccia", "glyph": "▲", "color": "#8a8f99", "bg": "#15161a", "solid": true }
+    "g": { "name": "prato", "description": "erba bassa e fiori sparsi", "color": "#4f9a45", "solid": false, "speed": 1 },
+    "p": { "name": "sentiero", "description": "terra battuta", "color": "#c8a868", "solid": false, "speed": 1.15 },
+    "t": { "name": "bosco", "description": "chiome di alberi fitti", "color": "#1f5a2a", "solid": true },
+    "w": { "name": "acqua", "description": "stagni e laghi", "color": "#3a78c8", "solid": true },
+    "r": { "name": "roccia", "description": "massi grigi", "color": "#8a8a92", "solid": true },
+    "h": { "name": "muro", "description": "muri di pietra e tetti di coppi", "color": "#8c4a32", "solid": true },
+    "d": { "name": "soglia", "description": "porte e soglie di legno", "color": "#e0c040", "solid": false, "speed": 1 },
+    "m": { "name": "fango", "description": "terra molle e pozzanghere", "color": "#6b5638", "solid": false, "speed": 0.6 }
   }
 }

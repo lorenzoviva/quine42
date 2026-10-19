@@ -3,6 +3,7 @@
 
 import type { Kernel } from '../kernel/kernel';
 import { $, el } from './dom';
+import { feedLine } from './feed';
 
 type Tab = 'log' | 'faults' | 'commits' | 'modules' | 'ai' | 'agent' | 'universe';
 
@@ -11,7 +12,7 @@ const TABS: Array<[Tab, string]> = [
   ['faults', 'Anomalie'],
   ['commits', 'Commit'],
   ['modules', 'Moduli'],
-  ['ai', 'Gateway IA'],
+  ['ai', 'Concilio'],
   ['agent', 'Agente'],
   ['universe', 'Universo'],
 ];
@@ -24,6 +25,7 @@ export class Console {
   private timer = 0;
   onEdit?: (path: string) => void;
   onClose?: () => void;
+  onGenesis?: () => void;
   dev = false;
 
   constructor(private kernel: Kernel) {
@@ -119,11 +121,13 @@ export class Console {
           }
           return row;
         });
-      case 'ai':
+      case 'ai': {
+        const u = k.models.usage;
         return [
-          el('div', { class: 'note' }, `Provider: ${k.gateway.provider.name}. Tutto ciò che genera passa dal validatore: se non è valido viene scartato e rigenerato.`),
-          ...k.gateway.log.slice(-120).reverse().map((e) => el('div', { class: `row${e.ok ? '' : ' fault'}` }, el('span', { class: 't' }, time(e.time)), el('span', { class: 's' }, e.kind), e.summary)),
+          el('div', { class: 'note' }, `Modelli: ${k.models.name} (${k.config.ai.textModel} · ${k.config.ai.imageModel}). Chiamate di testo ${u.text}/${k.models.limits.text}, immagini ${u.images}/${k.models.limits.images}, errori ${u.failures}, token ${u.inputTokens}→${u.outputTokens}. Ogni proposta passa dall'Arbitro e dal validatore.`),
+          ...k.feed().slice(-150).reverse().map((e) => feedLine(e)),
         ];
+      }
       case 'agent': {
         const input = el('textarea', { placeholder: 'Es: un fabbro che parla di spade incantate', rows: '3' });
         const out = el('div', { class: 'note' });
@@ -158,16 +162,28 @@ export class Console {
             alert((e as Error).message);
           }
         };
+        const genesis = el('button', { class: 'primary' }, 'Nuova genesi…');
+        genesis.onclick = () => {
+          this.close();
+          this.onGenesis?.();
+        };
+        const flush = el('button', {}, 'Dimentica i luoghi generati (cache)');
+        flush.onclick = async () => {
+          await k.chunkStore.clear();
+          flush.textContent = 'Cache svuotata: i luoghi nuovi verranno rigenerati';
+        };
         const reset = el('button', { class: 'danger' }, 'Cancella la storia e riparti dalla genesi');
         reset.onclick = () => {
           if (!confirm('Cancellare tutti i commit di questo universo?')) return;
           localStorage.removeItem(`rune:repo:${k.config.name}`);
-          location.reload();
+          void k.chunkStore.clear().then(() => location.reload());
         };
         return [
           el('div', { class: 'note' }, `Universo «${k.config.name}» — seme ${k.config.seed} — ${Object.keys(k.files).length} file — ${k.ecs.count()} entità — ${k.chunks.size} chunk`),
           el('div', { class: 'row' }, exp),
           el('div', { class: 'row' }, 'Importa: ', file),
+          el('div', { class: 'row' }, genesis),
+          el('div', { class: 'row' }, flush),
           el('div', { class: 'row' }, reset),
         ];
       }

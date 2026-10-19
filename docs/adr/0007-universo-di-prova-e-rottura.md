@@ -1,6 +1,6 @@
 # ADR-0007 — Universo di prova, resa grafica e stato "rotto"
 
-Data: 2026-10-19 · Stato: accettato
+Data: 2026-10-19 · Stato: accettato, la resa a glifi è sostituita da [ADR-0008](0008-concilio-degli-agenti-e-gemini.md)
 
 ## Contesto
 Il design doc lascia aperte: nome definitivo, tema dell'universo di prova, provider IA, cosa vede il
