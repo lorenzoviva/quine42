@@ -1,0 +1,11 @@
+{
+  "id": "object.sign",
+  "name": "Cartello",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "Un cartello di legno. Indica il confine.",
+  "appearance": { "glyph": "†", "color": "#c89a5a", "imagePrompt": "wooden signpost, top-down" },
+  "physics": { "solid": true, "radius": 0.4 },
+  "interaction": { "type": "read" },
+  "spawn": { "tiles": ["p", "g"], "chance": 0.15, "max": 1 }
+}

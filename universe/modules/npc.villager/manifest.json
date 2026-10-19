@@ -1,0 +1,16 @@
+{
+  "id": "npc.villager",
+  "name": "Abitante di Valmora",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "Gente del regno. Sa più di quanto dica.",
+  "logic": "logic.lua",
+  "appearance": { "glyph": "&", "color": "#e8c07a", "imagePrompt": "medieval villager, top-down, simple" },
+  "physics": { "solid": false, "radius": 0.35 },
+  "components": { "wander": { "dx": 0, "dy": 0, "t": 0, "speed": 1.2 } },
+  "interaction": { "type": "talk", "persona": "abitante" },
+  "spawn": { "tiles": ["g", "p", "f"], "chance": 0.3, "max": 2 },
+  "prompts": {
+    "dialogue": "Sei un abitante di Valmora. Parli in modo semplice. Lasci cadere indizi sul fatto che il mondo è scritto e che il tappeto riporta tutti al centro, senza mai dirlo apertamente."
+  }
+}

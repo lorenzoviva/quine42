@@ -1,0 +1,16 @@
+{
+  "id": "world.terrain",
+  "name": "Terreno di Valmora",
+  "kind": "generator",
+  "version": "0.1.0",
+  "description": "Genera le celle del tappeto: prati, sentieri, boschi, acqua, roccia.",
+  "logic": "logic.lua",
+  "tiles": {
+    "g": { "name": "prato", "glyph": ",", "color": "#3f7a3a", "bg": "#0f1a0e", "solid": false },
+    "f": { "name": "fiori", "glyph": "*", "color": "#d98ac0", "bg": "#0f1a0e", "solid": false },
+    "p": { "name": "sentiero", "glyph": ".", "color": "#a08a5c", "bg": "#1c1710", "solid": false },
+    "t": { "name": "albero", "glyph": "♣", "color": "#2f9c4a", "bg": "#0a140a", "solid": true },
+    "w": { "name": "acqua", "glyph": "≈", "color": "#4a8fd8", "bg": "#0a1426", "solid": true },
+    "r": { "name": "roccia", "glyph": "▲", "color": "#8a8f99", "bg": "#15161a", "solid": true }
+  }
+}

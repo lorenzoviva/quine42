@@ -1,0 +1,14 @@
+{
+  "id": "core.player",
+  "name": "Viandante",
+  "kind": "player",
+  "version": "0.1.0",
+  "description": "Tu.",
+  "appearance": { "glyph": "@", "color": "#ffffff", "imagePrompt": "a hooded wanderer, top-down" },
+  "physics": { "solid": false, "radius": 0.3 },
+  "components": {
+    "player": { "speed": 6, "facing": "down" },
+    "hand": { "tokens": [], "sel": 0 }
+  },
+  "persist": ["player.facing", "hand.tokens", "hand.sel"]
+}

@@ -1,0 +1,9 @@
+{
+  "id": "core.movement",
+  "name": "Movimento",
+  "kind": "system",
+  "version": "0.1.0",
+  "description": "Legge l'input e muove il giocatore, rispettando le celle solide.",
+  "logic": "logic.lua",
+  "order": 10
+}

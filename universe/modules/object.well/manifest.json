@@ -1,0 +1,12 @@
+{
+  "id": "object.well",
+  "name": "Pozzo",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "Un vecchio pozzo di pietra.",
+  "logic": "logic.lua",
+  "appearance": { "glyph": "Ö", "color": "#9aa6b8", "imagePrompt": "stone well, top-down" },
+  "physics": { "solid": true, "radius": 0.45 },
+  "interaction": { "type": "lua" },
+  "spawn": { "tiles": ["g"], "chance": 0.06, "max": 1 }
+}

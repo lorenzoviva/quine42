@@ -1,0 +1,9 @@
+{
+  "id": "sys.wander",
+  "name": "Vagabondaggio",
+  "kind": "system",
+  "version": "0.1.0",
+  "description": "Fa girovagare ogni entità con il componente wander.",
+  "logic": "logic.lua",
+  "order": 30
+}

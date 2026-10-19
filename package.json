@@ -1,0 +1,25 @@
+{
+  "name": "rune",
+  "version": "0.1.0",
+  "private": true,
+  "description": "RUNE — un mondo 2D top-down fatto del proprio codice sorgente.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "author": "lorenzoviva <lorenzo.vaccaro@hotmail.com>",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "wasmoon": "^1.16.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10",
+    "vitest": "^2.1.4"
+  }
+}

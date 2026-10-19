@@ -1,0 +1,7 @@
+{
+  "name": "valmora",
+  "seed": 1337,
+  "theme": "prompts/theme.md",
+  "circleRadius": 44,
+  "chunkSize": 20
+}

@@ -1,0 +1,13 @@
+{
+  "id": "npc.cat",
+  "name": "Gatto",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "Un gatto. Probabilmente.",
+  "logic": "logic.lua",
+  "appearance": { "glyph": "c", "color": "#f0a050", "imagePrompt": "orange cat, top-down" },
+  "physics": { "solid": false, "radius": 0.25 },
+  "components": { "wander": { "dx": 0, "dy": 0, "t": 0, "speed": 2.6 } },
+  "interaction": { "type": "talk", "persona": "gatto" },
+  "spawn": { "tiles": ["g", "f"], "chance": 0.12, "max": 1 }
+}

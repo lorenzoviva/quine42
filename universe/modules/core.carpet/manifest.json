@@ -1,0 +1,13 @@
+{
+  "id": "core.carpet",
+  "name": "Il Tappeto",
+  "kind": "system",
+  "version": "0.1.0",
+  "description": "Compensa ogni passo del giocatore riportandolo al centro del cerchio.",
+  "logic": "logic.lua",
+  "order": 20,
+  "singleton": {
+    "carpet": { "strength": 1, "rate": 6, "active": true, "ox": 0, "oy": 0 }
+  },
+  "persist": ["carpet.ox", "carpet.oy"]
+}
