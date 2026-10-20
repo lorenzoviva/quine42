@@ -874,6 +874,10 @@ export class Renderer {
     ctx.textBaseline = 'middle';
   }
 
+  /**
+   * The corona as an archive: each folder a room of the ring with its own floor and a sign; each file
+   * an object (book, crystal, scroll, tablet); the Council walking among them.
+   */
   private drawCorona(): void {
     const k = this.kernel;
     const corona = k.corona;
@@ -883,36 +887,199 @@ export class Renderer {
     const camD = Math.hypot(this.cam.x, this.cam.y);
     if (camD + Math.hypot(halfW, halfH) < corona.radius) return;
     const ctx = this.ctx;
-    ctx.font = `${Math.round(C * 0.6)}px ${FONT}`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
     const p = k.playerPos();
-    const here = corona.at(Math.floor(p.x), Math.floor(p.y));
+    const near = k.zone === 'corona' ? corona.nearestFile(p.x, p.y) : undefined;
     const x0 = Math.floor(this.cam.x - halfW);
     const y0 = Math.floor(this.cam.y - halfH);
+    const signs: Array<() => void> = [];
     for (let y = y0; y < this.cam.y + halfH; y++) {
       for (let x = x0; x < this.cam.x + halfW; x++) {
         const cell = corona.at(x, y);
-        if (!cell || cell.kind === 'empty') continue;
-        const sameFile = here?.path && cell.path === here.path;
-        let color: string;
-        let ch = cell.ch;
-        if (cell.kind === 'header') color = '#ffcf5c';
-        else if (cell.kind === 'eof') color = '#ff4d5e';
-        else if (ch === '\n') {
-          ch = '↵';
-          color = '#1c3a2a';
-        } else color = sameFile ? '#7dffb0' : '#2f7a52';
-        if (ch === ' ') continue;
-        if (sameFile && here?.line === cell.line && cell.kind === 'code') {
-          ctx.fillStyle = '#0f2e1f';
-          ctx.fillRect(this.sx(x), this.sy(y), C, C);
-          color = '#d6ffe6';
-        }
-        ctx.fillStyle = color;
-        ctx.fillText(ch, this.sx(x) + C / 2, this.sy(y) + C / 2 + 1);
+        if (!cell) continue;
+        const folder = corona.folder(cell.folder);
+        const col = folder?.color ?? '#9fb2a8';
+        const sx = this.sx(x);
+        const sy = this.sy(y);
+        // Floor: dark stone tinted with the room's colour, a faint grid of flagstones.
+        ctx.fillStyle = '#0a0d0c';
+        ctx.fillRect(sx, sy, C + 0.5, C + 0.5);
+        ctx.fillStyle = `${col}${(x + y) & 1 ? '14' : '0c'}`;
+        ctx.fillRect(sx, sy, C + 0.5, C + 0.5);
+        if (cell.kind === 'file') this.drawFile(cell.look ?? 'tavoletta', sx, sy, col, cell.path === near);
+        else if (cell.kind === 'folder' && folder) signs.push(() => this.drawSign(folder.name, sx, sy, col));
       }
     }
+    // Where one room ends and the next begins: a line along the radius.
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = 2;
+    for (const f of corona.folders) {
+      const a = f.from;
+      ctx.beginPath();
+      ctx.moveTo(this.sx(Math.sin(a) * corona.radius), this.sy(-Math.cos(a) * corona.radius));
+      ctx.lineTo(this.sx(Math.sin(a) * corona.outer), this.sy(-Math.cos(a) * corona.outer));
+      ctx.stroke();
+    }
+    for (const s of signs) s();
+    this.drawAvatars();
+  }
+
+  private drawFile(look: string, sx: number, sy: number, color: string, near: boolean): void {
+    const ctx = this.ctx;
+    const C = this.cell;
+    const cx = sx + C / 2;
+    const cy = sy + C / 2;
+    ctx.save();
+    ctx.shadowColor = color;
+    ctx.shadowBlur = near ? 16 : 6;
+    switch (look) {
+      case 'libro': {
+        ctx.fillStyle = '#3a2412';
+        ctx.fillRect(cx - C * 0.28, cy - C * 0.32, C * 0.56, C * 0.62);
+        ctx.fillStyle = color;
+        ctx.fillRect(cx - C * 0.28, cy - C * 0.32, C * 0.1, C * 0.62);
+        ctx.fillStyle = '#e9dcc0';
+        ctx.fillRect(cx - C * 0.14, cy - C * 0.24, C * 0.36, C * 0.46);
+        ctx.fillStyle = '#7a6a50';
+        for (let i = 0; i < 4; i++) ctx.fillRect(cx - C * 0.1, cy - C * 0.16 + i * C * 0.1, C * 0.26, 1.2);
+        break;
+      }
+      case 'cristallo': {
+        ctx.fillStyle = '#7dffd8';
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - C * 0.38);
+        ctx.lineTo(cx + C * 0.22, cy - C * 0.05);
+        ctx.lineTo(cx, cy + C * 0.34);
+        ctx.lineTo(cx - C * 0.22, cy - C * 0.05);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.55)';
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - C * 0.38);
+        ctx.lineTo(cx + C * 0.08, cy - C * 0.05);
+        ctx.lineTo(cx, cy + C * 0.34);
+        ctx.closePath();
+        ctx.fill();
+        break;
+      }
+      case 'pergamena': {
+        ctx.fillStyle = '#e8d8a8';
+        ctx.fillRect(cx - C * 0.22, cy - C * 0.26, C * 0.44, C * 0.52);
+        ctx.fillStyle = '#b89a5a';
+        ctx.beginPath();
+        ctx.ellipse(cx, cy - C * 0.27, C * 0.27, C * 0.07, 0, 0, Math.PI * 2);
+        ctx.ellipse(cx, cy + C * 0.27, C * 0.27, C * 0.07, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#6a5a3a';
+        for (let i = 0; i < 3; i++) ctx.fillRect(cx - C * 0.14, cy - C * 0.12 + i * C * 0.11, C * 0.28, 1.2);
+        break;
+      }
+      default: {
+        ctx.fillStyle = '#6b7470';
+        ctx.beginPath();
+        ctx.roundRect(cx - C * 0.25, cy - C * 0.3, C * 0.5, C * 0.6, C * 0.12);
+        ctx.fill();
+        ctx.fillStyle = color;
+        for (let i = 0; i < 3; i++) ctx.fillRect(cx - C * 0.14, cy - C * 0.15 + i * C * 0.12, C * 0.28, 1.5);
+      }
+    }
+    ctx.restore();
+    if (near) {
+      ctx.strokeStyle = '#ffcf5c';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(sx + 2, sy + 2, C - 4, C - 4);
+    }
+  }
+
+  private drawSign(name: string, sx: number, sy: number, color: string): void {
+    const ctx = this.ctx;
+    const C = this.cell;
+    const cx = sx + C / 2;
+    ctx.fillStyle = '#4a3420';
+    ctx.fillRect(cx - 1.5, sy + C * 0.1, 3, C * 0.8);
+    ctx.font = `bold ${Math.round(C * 0.32)}px ${FONT}`;
+    const w = ctx.measureText(name).width + 14;
+    ctx.fillStyle = 'rgba(10, 8, 4, 0.9)';
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.roundRect(cx - w / 2, sy - C * 0.15, w, C * 0.45, 4);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = color;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(name, cx, sy + C * 0.08);
+  }
+
+  /** The Council: robed figures with their sigil, and what they are saying. */
+  private drawAvatars(): void {
+    const ctx = this.ctx;
+    const C = this.cell;
+    for (const a of this.kernel.archive.avatars.values()) {
+      const x = this.sx(a.x);
+      const y = this.sy(a.y);
+      if (x < -C * 4 || y < -C * 4 || x > this.w + C * 4 || y > this.h + C * 4) continue;
+      const bob = Math.sin(this.t * 4 + a.x) * C * 0.03;
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.beginPath();
+      ctx.ellipse(x, y + C * 0.38, C * 0.28, C * 0.1, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Robe and hood.
+      ctx.fillStyle = a.color;
+      ctx.beginPath();
+      ctx.moveTo(x, y - C * 0.45 + bob);
+      ctx.lineTo(x + C * 0.3, y + C * 0.38);
+      ctx.lineTo(x - C * 0.3, y + C * 0.38);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#14100c';
+      ctx.beginPath();
+      ctx.arc(x, y - C * 0.28 + bob, C * 0.15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = `bold ${Math.round(C * 0.3)}px ${FONT}`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(a.sigil, x, y + C * 0.12 + bob);
+      ctx.font = `${Math.round(C * 0.26)}px ${FONT}`;
+      ctx.fillStyle = a.color;
+      ctx.fillText(a.name, x, y + C * 0.62);
+      if (a.say) this.bubble(x, y - C * 0.55, a.say);
+    }
+  }
+
+  /** A speech bubble anchored at (x, y). */
+  private bubble(x: number, y: number, text: string): void {
+    const ctx = this.ctx;
+    ctx.font = `12px ${FONT}`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    const words = text.split(/\s+/);
+    const lines: string[] = [];
+    let cur = '';
+    for (const w of words) {
+      if ((cur + ' ' + w).trim().length > 32) {
+        lines.push(cur.trim());
+        cur = w;
+      } else cur += ' ' + w;
+    }
+    if (cur.trim()) lines.push(cur.trim());
+    const shown = lines.slice(0, 3);
+    const bw = Math.max(...shown.map((l) => ctx.measureText(l).width)) + 14;
+    const bh = shown.length * 15 + 8;
+    const bx = Math.min(Math.max(8, x - bw / 2), this.w - bw - 8);
+    const by = y - bh;
+    ctx.fillStyle = 'rgba(16, 20, 18, 0.92)';
+    ctx.strokeStyle = 'rgba(160, 255, 200, 0.5)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(bx, by, bw, bh, 6);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#d6ffe6';
+    shown.forEach((l, i) => ctx.fillText(l, bx + 7, by + 4 + i * 15));
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
   }
 
   private drawHover(): void {

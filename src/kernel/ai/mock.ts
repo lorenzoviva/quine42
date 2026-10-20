@@ -173,6 +173,11 @@ export class MockModels implements Models {
           porta: [common.length ? rng.pick(common) : 'pane', common.length > 1 ? rng.pick(common) : 'moneta', 'Fischietto di canna'],
         };
       }
+      case 'agent.chat': {
+        const t = String(d.text ?? '');
+        const wants = /\b(crea|creare|aggiungi|fammi|voglio)\b/i.test(t);
+        return { risposta: wants ? `Si può fare. Lo passo alla Fucina: «${t}».` : `Sono il ${d.agent}. Qui ogni cosa del mondo è un file: tocca un libro o un cristallo e leggerai come è fatta.`, richiesta_fucina: wants ? t : '' };
+      }
       case 'action.judge':
         return this.judgeAction(d);
       case 'spell.name': {

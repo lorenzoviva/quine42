@@ -9,6 +9,7 @@ import { Sandbox, type Host } from './sandbox';
 import { apiErrors, validateEffects, Validator } from './validator';
 import { Repo, type KeyValueStore } from './repo';
 import { Corona, type CoronaCell } from './corona';
+import { Archive } from './archive';
 import { Input } from './input';
 import { discoverModules, readConfig } from './universe';
 import { CARPET_TOKENS, cellIndex, extractLines, tokenize, type RuneComp, type RuneLine } from './runes';
@@ -19,10 +20,10 @@ import type { ImageTools } from './imaging';
 import { Content, normName, specOf } from './content';
 import { layout, type Building } from './layout';
 import { ArtDirector } from './art';
-import { Council, readBible, type CatalogEntry, type FeedEntry } from './agents/council';
+import { AGENTS, Council, readBible, type AgentId, type CatalogEntry, type FeedEntry } from './agents/council';
 import { planChunk, type ChunkPlan, type Where } from './agents/cartography';
 import { forge, judgeCombination, repairLogic, type ForgeOrigin } from './agents/forge';
-import { examine, narrate, npcReply, type NpcReply, type Turn } from './agents/minds';
+import { agentReply, examine, narrate, npcReply, type NpcReply, type Turn } from './agents/minds';
 import { planGenesis } from './agents/genesis';
 import { judgeAction, nameSpell } from './agents/effects';
 import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Identity } from './agents/content';
@@ -66,7 +67,8 @@ export type HoverInfo =
   | { kind: 'rune'; token: string; doc?: string; symbol: string | null; line: LineState | undefined; source: 'gen' | 'player' }
   | { kind: 'entity'; name: string; description: string; extra?: string }
   | { kind: 'tile'; name: string }
-  | { kind: 'code'; cell: CoronaCell }
+  | { kind: 'code'; cell: CoronaCell; folder?: string }
+  | { kind: 'agent'; agent: AgentId; name: string; doing?: string }
   | { kind: 'player' };
 
 export interface ItemInfo {
@@ -161,6 +163,9 @@ export class Kernel {
   validator!: Validator;
   repo!: Repo;
   corona!: Corona;
+  /** The Council's figures walking the corona. */
+  readonly archive = new Archive(() => this.corona);
+  private agentTalks = new Map<AgentId, Turn[]>();
 
   config!: UniverseConfig;
   files: FileMap = {};
@@ -225,7 +230,10 @@ export class Kernel {
     k.sandbox = await Sandbox.create(k.makeHost(), opts.wasmUri);
     k.validator = new Validator(k.sandbox);
     k.council = new Council(opts.models, () => ({ files: k.files, palette: k.palette, catalog: k.catalog() }));
-    k.council.onFeed = (e) => k.bus.emit('council', e);
+    k.council.onFeed = (e) => {
+      k.archive.onFeed(e, (x) => k.pathForFeed(x));
+      k.bus.emit('council', e);
+    };
     const name = readConfig(opts.files).config.name;
     const { repo, synced } = Repo.open(name, opts.files, opts.store);
     k.repo = repo;
@@ -550,6 +558,7 @@ export class Kernel {
     else if (!this.terrain || changed.has(this.terrain.manifest.id) || opts.reset) for (const ch of this.chunks.values()) if (ch.stage === 'draft') this.regenerateDraft(ch);
 
     this.corona.build(files);
+    this.archive.reset();
     this.bus.emit('universe:reloaded', { changed: [...changed] });
   }
 
@@ -1483,8 +1492,11 @@ export class Kernel {
   async interact(): Promise<void> {
     if (this.zone === 'corona') {
       const p = this.playerPos();
-      const cell = this.corona.at(Math.floor(p.x), Math.floor(p.y));
-      if (cell?.path) this.bus.emit('ui:edit', { path: cell.path, line: cell.line ?? 1 });
+      const a = this.archive.nearest(p.x, p.y);
+      if (a) return void this.bus.emit('ui:agentchat', { agent: a.agent, name: a.name });
+      const path = this.corona.nearestFile(p.x, p.y);
+      if (path) this.bus.emit('ui:edit', { path, line: 1 });
+      else this.message("Qui non c'è niente da leggere: avvicinati a un libro, a un cristallo, a una pergamena.");
       return;
     }
     if (this.pickUpRune()) return;
@@ -1649,6 +1661,36 @@ export class Kernel {
     const oneOff = v.effects.some((e) => e.tipo === 'evoca' || e.tipo === 'crea_oggetto' || e.tipo === 'contenitore');
     if (j.possible && j.repeatable && lasting && !oneOff && entry && !m?.persona) this.learnAction(entry, { id: '', label: j.label || text, requires: need?.id, effects: v.effects });
     return j.story;
+  }
+
+  /** Which file a piece of the Council's work is about (the avatars walk there). */
+  pathForFeed(e: FeedEntry): string | undefined {
+    for (const id of this.modules.keys()) if (e.text.includes(id)) return this.modules.get(id)!.manifestPath;
+    const t = e.task ?? '';
+    if (t.startsWith('chunk.')) return 'modules/world.layouts/manifest.json';
+    if (t.startsWith('genesis.')) return t === 'genesis.terrain' || t === 'genesis.physics' ? 'modules/world.terrain/manifest.json' : 'world/bible.json';
+    if (t.startsWith('content.')) return 'modules/items.base/manifest.json';
+    if (t === 'action.judge') return 'modules/core.effects/logic.lua';
+    if (t === 'spell.name') return this.files['modules/magic.spells/manifest.json'] ? 'modules/magic.spells/manifest.json' : 'modules/magic.runes/manifest.json';
+    if (t.startsWith('art.') || e.kind === 'dipinge') return 'world/style.md';
+    return e.from === 'kernel' ? undefined : `prompts/agents/${e.from}.md`;
+  }
+
+  /** The player talks to an agent of the Council, in the corona. It may accept to make something. */
+  async talkToAgent(agent: AgentId, text: string): Promise<{ say: string; forged?: string }> {
+    const history = this.agentTalks.get(agent) ?? [];
+    this.agentTalks.set(agent, history);
+    let r;
+    try {
+      r = await agentReply(this.council, agent, history, text);
+    } catch (e) {
+      return { say: `(${AGENTS[agent].name} non risponde: ${(e as Error).message})` };
+    }
+    history.push({ who: 'giocatore', text }, { who: 'npc', text: r.say });
+    this.archive.go(agent, undefined, r.say);
+    if (!r.forge) return { say: r.say };
+    const f = await this.forgeModule(r.forge, 'agente');
+    return { say: r.say, forged: f.summary };
   }
 
   /** Magic runes in hand, in their order: the incantation T would cast. */
@@ -1937,8 +1979,10 @@ export class Kernel {
     if (Math.hypot(rx - p.x, ry - p.y) < 0.5) return { kind: 'player' };
     const R = this.config.circleRadius;
     if (Math.hypot(rx, ry) >= R && this.coronaRevealed()) {
+      const a = this.archive.nearest(rx, ry, 0.7);
+      if (a) return { kind: 'agent', agent: a.agent, name: a.name, doing: a.say ?? (a.path ? `lavora su ${a.path}` : undefined) };
       const cell = this.corona.at(Math.floor(rx), Math.floor(ry));
-      return cell && cell.kind !== 'empty' ? { kind: 'code', cell } : null;
+      return cell && (cell.kind === 'file' || cell.kind === 'folder') ? { kind: 'code', cell, folder: this.corona.folder(cell.folder)?.name } : null;
     }
     const { ox, oy } = this.offset();
     const cx = rx + ox;
@@ -2174,6 +2218,7 @@ export class Kernel {
   tick(dt: number): void {
     this.time += dt;
     this.tickCount++;
+    this.archive.tick(dt);
     this.updateChunks();
     this.pumpDevelopment();
     if (this.time - this.lastArtPump > 2) {

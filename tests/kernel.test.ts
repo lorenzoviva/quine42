@@ -108,7 +108,29 @@ describe('kernel', () => {
     k.playerPos().x = k.config.circleRadius + 0.5;
     run(k, DT * 2);
     expect(k.zone).toBe('corona');
-    expect(k.hoverAt(k.config.circleRadius + 1, 0)?.kind).toBe('code');
+    const slot = k.corona.slotOf('modules/sys.physics/logic.lua')!;
+    expect(k.hoverAt(slot.x + 0.5, slot.y + 0.5)?.kind).toMatch(/code|agent/);
+  });
+
+  it('the corona is an archive: folders are rooms, files are objects; the Council walks to its work', async () => {
+    const files = Object.keys(k.files);
+    for (const f of files) expect(k.corona.slotOf(f), f).toBeTruthy();
+    const rooms = k.corona.folders.map((f) => f.name);
+    expect(rooms).toEqual(expect.arrayContaining(['Concilio', 'Persone', 'Sistemi', 'Magia']));
+    const room = (p: string) => k.corona.at(k.corona.slotOf(p)!.x, k.corona.slotOf(p)!.y)!.folder;
+    expect(room('modules/npc.cat/manifest.json')).toBe(room('modules/npc.villager/manifest.json'));
+    expect(room('modules/npc.cat/manifest.json')).not.toBe(room('modules/sys.needs/logic.lua'));
+    // An agent working on a module walks to its book and says what it is doing.
+    k.council.say('ingegnere', 'propone', 'ritocco object.well: secchio più capiente');
+    const a = k.archive.avatars.get('ingegnere')!;
+    expect(a.say).toMatch(/object.well/);
+    for (let i = 0; i < 300; i++) k.archive.tick(1 / 30);
+    const s = k.corona.slotOf('modules/object.well/manifest.json')!;
+    expect(Math.hypot(a.x - (s.x + 0.5), a.y - (s.y + 0.5))).toBeLessThan(1.5);
+    expect(Math.hypot(a.x, a.y)).toBeGreaterThanOrEqual(k.config.circleRadius);
+    // Talking to an agent: it answers in its role and can send a request to the Forge.
+    const r = await k.talkToAgent('narratore', 'crea un mugnaio che parla del vento');
+    expect(r.forged).toMatch(/ugnaio|crea/i);
   });
 
   it('a broken phrase breaks the world; rollback repairs it and returns the runes', () => {

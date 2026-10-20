@@ -199,10 +199,12 @@ export class Hud {
         return null;
       case 'code': {
         const c = info.cell;
-        const ch = c.ch === '\n' ? '↵' : c.ch;
-        const where = c.kind === 'code' ? `${c.path}:${c.line}:${c.col}` : c.kind === 'eof' ? `${c.path} — EOF` : `file ${c.path}`;
-        return [el('div', { class: 'h code' }, `«${ch}»`), el('div', { class: 'doc' }, where)];
+        if (c.kind === 'folder') return [el('div', { class: 'h code' }, `cartella «${info.folder ?? c.folder}»`)];
+        const LOOK: Record<string, string> = { libro: 'un libro: il manifest di un modulo', cristallo: 'un cristallo: codice Lua', pergamena: 'una pergamena: testo', tavoletta: 'una tavoletta: dati' };
+        return [el('div', { class: 'h code' }, c.path ?? ''), el('div', { class: 'doc' }, `${LOOK[c.look ?? ''] ?? ''} — ${c.lines} righe, in «${info.folder ?? ''}»`), el('div', { class: 'src' }, 'E per aprirlo')];
       }
+      case 'agent':
+        return [el('div', { class: 'h' }, `${info.name} del Concilio`), ...(info.doing ? [el('div', { class: 'doc' }, info.doing)] : []), el('div', { class: 'src' }, 'E per parlarci')];
     }
   }
 }

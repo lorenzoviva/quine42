@@ -2,7 +2,7 @@
 // action from a closed set; the kernel validates it and Lua systems carry it out.
 
 import type { Schema } from '../ai/models';
-import type { Council } from './council';
+import type { AgentId, Council } from './council';
 
 export const NPC_ACTIONS = ['nessuna', 'segui', 'resta', 'vaga', 'dai'] as const;
 export type NpcAction = (typeof NPC_ACTIONS)[number];
@@ -89,4 +89,30 @@ export async function narrate(c: Council, what: { name: string; description: str
     { data: { what, facts }, temperature: 0.9 },
   );
   return String(r.testo ?? '');
+}
+
+const AGENT_CHAT_SCHEMA: Schema = {
+  type: 'OBJECT',
+  properties: {
+    risposta: { type: 'STRING' },
+    richiesta_fucina: { type: 'STRING', description: 'solo se il viandante chiede di creare qualcosa di nuovo nel mondo e tu accetti: la richiesta in una frase per la Fucina' },
+  },
+  required: ['risposta'],
+};
+
+/**
+ * In the corona the player meets the Council: an agent answers in its role, knowing that the player
+ * has seen the source. It may accept to make something new (the Forge then does it, with validation).
+ */
+export async function agentReply(c: Council, agent: AgentId, history: Turn[], text: string): Promise<{ say: string; forge?: string }> {
+  const past = history.slice(-8).map((t) => `${t.who === 'giocatore' ? 'Viandante' : 'Tu'}: ${t.text}`).join('\n');
+  const prompt = [
+    `Il viandante è uscito dal tappeto ed è entrato nell'archivio della corona, dove il Concilio lavora sul codice del mondo. Ti ha raggiunto e ti parla. Rispondi come te stesso (il tuo ruolo nel Concilio), in 1-3 frasi, in italiano: puoi spiegare cosa fai, cosa c'è nei file, come sono fatte le cose del mondo.`,
+    past ? `Conversazione finora:\n${past}` : '',
+    `Il viandante dice: «${text}»`,
+    `Se ti chiede di creare qualcosa (un personaggio, un oggetto, uno strumento) e ha senso per il mondo, accetta e scrivi la richiesta in "richiesta_fucina"; altrimenti lascialo vuoto.`,
+  ].filter(Boolean).join('\n\n');
+  const r = await c.ask<{ risposta: string; richiesta_fucina?: string }>(agent, 'agent.chat', prompt, AGENT_CHAT_SCHEMA, { data: { agent, text, history }, temperature: 0.8 });
+  const forge = r.richiesta_fucina?.trim();
+  return { say: String(r.risposta ?? '…'), forge: forge && forge.length > 3 ? forge : undefined };
 }
