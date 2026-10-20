@@ -129,6 +129,14 @@ export class Renderer {
     ctx.fillRect(0, 0, this.w, this.h);
     if (g > 0.2) ctx.translate((Math.random() - 0.5) * 4 * g, (Math.random() - 0.5) * 3 * g);
 
+    // Inside a building of the studio: only the room (bigger inside than outside).
+    if (k.zone === 'studio') {
+      this.drawStudio(p, g);
+      this.drawHover();
+      applyGlitch(ctx, this.canvas, g, this.dpr);
+      return;
+    }
+
     const revealed = k.coronaRevealed();
     if (revealed) this.drawCorona();
 
@@ -943,6 +951,10 @@ export class Renderer {
    * The corona as an archive: each folder a room of the ring with its own floor and a sign; each file
    * an object (book, crystal, scroll, tablet); the Council walking among them.
    */
+  /**
+   * The corona seen from outside: the campus of the studio on the ring — lawns and a walkway, one
+   * building per folder with its roof in the folder's colour, a sign and a door; the Referente.
+   */
   private drawCorona(): void {
     const k = this.kernel;
     const corona = k.corona;
@@ -952,40 +964,187 @@ export class Renderer {
     const camD = Math.hypot(this.cam.x, this.cam.y);
     if (camD + Math.hypot(halfW, halfH) < corona.radius) return;
     const ctx = this.ctx;
-    const p = k.playerPos();
-    const near = k.zone === 'corona' ? corona.nearestFile(p.x, p.y) : undefined;
     const x0 = Math.floor(this.cam.x - halfW);
     const y0 = Math.floor(this.cam.y - halfH);
-    const signs: Array<() => void> = [];
+    const R = corona.radius;
+    const p = k.playerPos();
+    const near = corona.doorNear(p.x, p.y);
     for (let y = y0; y < this.cam.y + halfH; y++) {
       for (let x = x0; x < this.cam.x + halfW; x++) {
         const cell = corona.at(x, y);
         if (!cell) continue;
-        const folder = corona.folder(cell.folder);
-        const col = folder?.color ?? '#9fb2a8';
+        const b = corona.building(cell.building);
         const sx = this.sx(x);
         const sy = this.sy(y);
-        // Floor: dark stone tinted with the room's colour, a faint grid of flagstones.
-        ctx.fillStyle = '#0a0d0c';
-        ctx.fillRect(sx, sy, C + 0.5, C + 0.5);
-        ctx.fillStyle = `${col}${(x + y) & 1 ? '14' : '0c'}`;
-        ctx.fillRect(sx, sy, C + 0.5, C + 0.5);
-        if (cell.kind === 'file') this.drawFile(cell.look ?? 'tavoletta', sx, sy, col, cell.path === near);
-        else if (cell.kind === 'folder' && folder) signs.push(() => this.drawSign(folder.name, sx, sy, col));
+        const d = Math.hypot(x + 0.5, y + 0.5);
+        if (cell.kind === 'floor') {
+          // A paved walkway along the circle, lawns further out.
+          const walk = d < R + 2.6;
+          ctx.fillStyle = walk ? ((x + y) & 1 ? '#3a3d42' : '#35383d') : (x * 7 + y * 3) % 5 ? '#24402a' : '#284730';
+          ctx.fillRect(sx, sy, C + 0.5, C + 0.5);
+        } else if (cell.kind === 'building' && b) {
+          // Roof tiles in the building's colour, darker towards the edges.
+          ctx.fillStyle = '#16120e';
+          ctx.fillRect(sx, sy, C + 0.5, C + 0.5);
+          ctx.fillStyle = b.color;
+          ctx.globalAlpha = 0.55 + 0.15 * (((x + y) & 1) as number);
+          ctx.fillRect(sx + 1, sy + 1, C - 1.5, C - 1.5);
+          ctx.globalAlpha = 1;
+          ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+          ctx.beginPath();
+          ctx.moveTo(sx, sy + C / 2);
+          ctx.lineTo(sx + C, sy + C / 2);
+          ctx.stroke();
+        } else if (cell.kind === 'door' && b) {
+          ctx.fillStyle = '#35383d';
+          ctx.fillRect(sx, sy, C + 0.5, C + 0.5);
+          ctx.fillStyle = '#5a3a1e';
+          ctx.fillRect(sx + C * 0.15, sy, C * 0.7, C * 0.8);
+          ctx.fillStyle = '#ffcf5c';
+          ctx.fillRect(sx + C * 0.62, sy + C * 0.4, 3, 3);
+          if (near === b) {
+            ctx.strokeStyle = '#ffcf5c';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(sx + 1, sy + 1, C - 2, C - 2);
+          }
+        }
       }
     }
-    // Where one room ends and the next begins: a line along the radius.
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-    ctx.lineWidth = 2;
-    for (const f of corona.folders) {
-      const a = f.from;
-      ctx.beginPath();
-      ctx.moveTo(this.sx(Math.sin(a) * corona.radius), this.sy(-Math.cos(a) * corona.radius));
-      ctx.lineTo(this.sx(Math.sin(a) * corona.outer), this.sy(-Math.cos(a) * corona.outer));
-      ctx.stroke();
+    // Signs over the doors.
+    for (const b of corona.buildings) {
+      const sx = this.sx(b.door.x);
+      const sy = this.sy(b.door.y);
+      if (sx < -C * 6 || sy < -C * 3 || sx > this.w + C * 6 || sy > this.h + C * 3) continue;
+      this.drawSign(b.floors.length > 1 ? `${b.name} (${b.floors.length} piani)` : b.name, sx, sy - C * 0.6, b.color);
     }
-    for (const s of signs) s();
     this.drawAvatars();
+  }
+
+  /**
+   * Inside a building: an office of the studio. Shelves with books, crystals and scrolls (the files),
+   * frames with sprites, swatches of terrain, desks where the team works, stairs, the notice board.
+   * What changed lately glows.
+   */
+  private drawStudio(p: { x: number; y: number }, g: number): void {
+    const k = this.kernel;
+    const ctx = this.ctx;
+    const C = this.cell;
+    const room = k.corona.roomAt(p.x, p.y);
+    if (!room) return;
+    const { floor, building } = room;
+    const recent = k.recentChanges();
+    const near = k.corona.itemNear(p.x, p.y);
+    // Floor and walls.
+    for (let y = 0; y < 15; y++)
+      for (let x = 0; x < 24; x++) {
+        const sx = this.sx(floor.ox + x);
+        const sy = this.sy(floor.oy + y);
+        const wall = x === 0 || y === 0 || x === 23 || y === 14;
+        ctx.fillStyle = wall ? '#2a2420' : (x + y) & 1 ? '#5b4630' : '#55412c';
+        ctx.fillRect(sx, sy, C + 0.5, C + 0.5);
+        if (wall) {
+          ctx.fillStyle = building.color;
+          ctx.globalAlpha = 0.25;
+          ctx.fillRect(sx, sy + C * 0.7, C + 0.5, C * 0.3);
+          ctx.globalAlpha = 1;
+        }
+      }
+    // Shelves under the rows of files.
+    const rows = new Set(floor.items.filter((i) => i.kind === 'file' || i.kind === 'sprite' || i.kind === 'tile').map((i) => i.y));
+    for (const y of rows) {
+      const xs = floor.items.filter((i) => i.y === y && (i.kind === 'file' || i.kind === 'sprite' || i.kind === 'tile')).map((i) => i.x);
+      const a = Math.min(...xs);
+      const b = Math.max(...xs);
+      ctx.fillStyle = '#3a2614';
+      ctx.fillRect(this.sx(a) - 2, this.sy(y) + C * 0.62, (b - a + 1) * C + 4, C * 0.3);
+    }
+    for (const it of floor.items) {
+      const sx = this.sx(it.x);
+      const sy = this.sy(it.y);
+      const isNear = it === near;
+      const changed = it.path ? recent.get(it.path) : undefined;
+      if (changed && (it.kind === 'file' || it.kind === 'sprite' || it.kind === 'tile')) {
+        // Recently changed by the Council (or by you): it glows, with a tag.
+        const pulse = 0.5 + 0.5 * Math.sin(this.t * 4);
+        ctx.fillStyle = `rgba(255, 220, 120, ${0.18 + 0.2 * pulse})`;
+        ctx.fillRect(sx - 2, sy - 2, C + 4, C + 4);
+      }
+      switch (it.kind) {
+        case 'file':
+          this.drawFile(it.look ?? 'tavoletta', sx, sy, building.color, isNear);
+          break;
+        case 'sprite':
+        case 'tile': {
+          const img = this.images.peek(it.asset);
+          ctx.fillStyle = '#c9a85a';
+          ctx.fillRect(sx + 1, sy + 1, C - 2, C - 2);
+          ctx.fillStyle = it.kind === 'tile' ? (it.color ?? '#888') : '#1c1a17';
+          ctx.fillRect(sx + 4, sy + 4, C - 8, C - 8);
+          if (img) ctx.drawImage(img, sx + 4, sy + 4, C - 8, C - 8);
+          else if (it.kind === 'sprite') {
+            ctx.fillStyle = it.color ?? '#aaa';
+            ctx.font = `${Math.round(C * 0.4)}px ${FONT}`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('?', sx + C / 2, sy + C / 2);
+          }
+          if (isNear) {
+            ctx.strokeStyle = '#ffcf5c';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(sx + 1, sy + 1, C - 2, C - 2);
+          }
+          break;
+        }
+        case 'desk':
+          ctx.fillStyle = '#6b4a2a';
+          ctx.fillRect(sx - C * 0.6, sy + C * 0.2, C * 2.2, C * 0.7);
+          ctx.fillStyle = '#1a2a3a';
+          ctx.fillRect(sx + C * 0.1, sy - C * 0.15, C * 0.8, C * 0.5);
+          ctx.fillStyle = `rgba(120, 220, 255, ${0.5 + 0.3 * Math.sin(this.t * 2 + it.x)})`;
+          ctx.fillRect(sx + C * 0.16, sy - C * 0.1, C * 0.68, C * 0.38);
+          break;
+        case 'board':
+          ctx.fillStyle = '#8a6a3a';
+          ctx.fillRect(sx, sy, C, C * 0.9);
+          ctx.fillStyle = '#efe6cc';
+          for (let i = 0; i < 3; i++) ctx.fillRect(sx + 4 + (i % 2) * C * 0.4, sy + 4 + i * C * 0.25, C * 0.35, C * 0.2);
+          break;
+        case 'up':
+        case 'down':
+          ctx.fillStyle = '#3a3027';
+          for (let i = 0; i < 4; i++) ctx.fillRect(sx + i * 3, sy + i * (C / 4), C - i * 3, C / 4 - 1);
+          ctx.fillStyle = '#ffcf5c';
+          ctx.font = `bold ${Math.round(C * 0.4)}px ${FONT}`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(it.kind === 'up' ? '↑' : '↓', sx + C / 2, sy + C / 2);
+          break;
+        case 'exit':
+          ctx.fillStyle = '#5a3a1e';
+          ctx.fillRect(sx + C * 0.1, sy, C * 0.8, C);
+          ctx.fillStyle = '#ffcf5c';
+          ctx.fillRect(sx + C * 0.65, sy + C * 0.45, 3, 3);
+          break;
+      }
+      if (isNear && it.kind !== 'file' && it.kind !== 'sprite' && it.kind !== 'tile') {
+        ctx.strokeStyle = '#ffcf5c';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(sx + 1, sy + 1, C - 2, C - 2);
+      }
+    }
+    // The room's name and floor.
+    ctx.font = `bold 14px ${FONT}`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = building.color;
+    ctx.fillText(`${building.name}${building.floors.length > 1 ? ` — piano ${floor.index + 1} di ${building.floors.length}` : ''}`, this.sx(floor.ox + 12), this.sy(floor.oy) - 22);
+    if (near && near.kind !== 'desk') {
+      ctx.font = `12px ${FONT}`;
+      ctx.fillStyle = '#d6ffe6';
+      ctx.fillText(`E: ${near.kind === 'file' ? `apri ${near.label}` : near.kind === 'sprite' || near.kind === 'tile' ? `guarda «${near.label}»` : near.label}`, this.w / 2, this.h - 70);
+    }
+    this.drawAvatars();
+    this.drawPlayer(k.ecs.get(k.playerId, 'glyph') ?? { ch: '@', color: '#fff', scale: 1.3 }, p, g);
   }
 
   private drawFile(look: string, sx: number, sy: number, color: string, near: boolean): void {

@@ -203,6 +203,18 @@ export class Repo {
     this.store.save(Repo.key(this.data.name), JSON.stringify(this.data));
   }
 
+  /** Files changed by the latest commits of this session (newest wins), for the studio to show. */
+  recentChanges(n: number): Map<string, { author: string; message: string; time: number }> {
+    const out = new Map<string, { author: string; message: string; time: number }>();
+    const cs = this.data.commits;
+    for (let i = cs.length - 1; i > 0 && i >= cs.length - n; i--) {
+      const a = cs[i].files;
+      const b = cs[i - 1].files;
+      for (const p of new Set([...Object.keys(a), ...Object.keys(b)])) if (a[p] !== b[p] && !out.has(p)) out.set(p, { author: cs[i].author, message: cs[i].message, time: cs[i].time });
+    }
+    return out;
+  }
+
   /** Writes commits to a universe repository from now on (the files are already there). */
   attach(backend: UniverseBackend, past: PastCommit[]): void {
     this.backend = backend;

@@ -19,6 +19,7 @@ import { Chat } from './ui/chat';
 import { FeedPanel } from './ui/feed';
 import { GenesisScreen } from './ui/genesis';
 import { ActionMenu } from './ui/actions';
+import { StudioPanel } from './ui/studio';
 import { Sfx } from './audio';
 import { $ } from './ui/dom';
 import './style.css';
@@ -84,12 +85,13 @@ async function main() {
   const feed = new FeedPanel($('#hud'), kernel);
   const genesis = new GenesisScreen(kernel);
   const actions = new ActionMenu(kernel);
+  const studio = new StudioPanel(kernel, images);
   const sfx = new Sfx();
   konsole.dev = dev;
   (window as any).rune = kernel;
 
   const syncFocus = () => {
-    kernel.input.enabled = !editor.isOpen && !konsole.isOpen && !inventory.isOpen && !chat.isOpen && !genesis.isOpen && !actions.isOpen;
+    kernel.input.enabled = !editor.isOpen && !konsole.isOpen && !inventory.isOpen && !chat.isOpen && !genesis.isOpen && !actions.isOpen && !studio.isOpen;
     if (!kernel.input.enabled) kernel.input.releaseAll();
   };
   editor.onClose = syncFocus;
@@ -97,8 +99,13 @@ async function main() {
   inventory.onClose = syncFocus;
   chat.onClose = syncFocus;
   actions.onClose = syncFocus;
+  studio.onClose = syncFocus;
   konsole.onEdit = (path) => {
     konsole.close();
+    editor.open(path);
+    syncFocus();
+  };
+  studio.onEdit = (path) => {
     editor.open(path);
     syncFocus();
   };

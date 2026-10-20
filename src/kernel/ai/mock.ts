@@ -202,6 +202,16 @@ export class MockModels implements Models {
       }
       case 'action.judge':
         return this.judgeAction(d);
+      case 'referente.coordinate': {
+        const t = String(d.text ?? '');
+        if (/distrugg.*universo|cancella tutto/i.test(t)) return { risposta: 'Questo no.', incarico: 'nessuno', rifiuto: "distruggerebbe l'universo" };
+        if (/ridiping/i.test(t)) return { risposta: "Lo dico all'Artista.", incarico: 'ridipingi', bersaglio: t.replace(/.*ridipingi\s+(il |la |lo |l')?/i, '').split(' ')[0], richiesta: t };
+        if (/regola/i.test(t)) return { risposta: 'Sarà una regola del mondo.', incarico: 'regola', richiesta: t.replace(/.*regola:?\s*/i, '') };
+        if (/bosco|luogo|regione|castello|deserto/i.test(t)) return { risposta: 'Il Cartografo ci pensa.', incarico: 'ambiente', richiesta: t };
+        if (/personaggio|abitante|persona/i.test(t)) return { risposta: 'La Fucina lo farà nascere.', incarico: 'personaggio', richiesta: t };
+        if (/spada|oggetto|strumento|crea/i.test(t)) return { risposta: 'Alla Fucina.', incarico: 'oggetto', richiesta: t };
+        return { risposta: 'Benvenuto nello studio. Chiedi pure: qui si fa il mondo.', incarico: 'nessuno' };
+      }
       case 'npc.dialogue':
         return {
           battute: [

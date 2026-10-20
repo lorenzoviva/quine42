@@ -69,6 +69,17 @@ export function upgradeFromSeed(files: FileMap, seed: FileMap): { files: FileMap
       updated.push(p);
     }
   }
+  // Manifests the universe rewrote still receive what the kernel added to them: new terrains, new
+  // environments, new runes and incantations — never replacing what the universe has.
+  for (const [p, content] of Object.entries(seed)) {
+    const mine = out[p];
+    if (!mine || mine === content || !p.endsWith('manifest.json')) continue;
+    const merged = mergeKeyed(mine, content);
+    if (merged && merged !== mine) {
+      out[p] = changes[p] = merged;
+      if (!updated.includes(p)) updated.push(p);
+    }
+  }
   const cfg = upgradeModels(out['universe.json'], seed['universe.json']);
   if (cfg && cfg !== out['universe.json']) {
     out['universe.json'] = changes['universe.json'] = cfg;
@@ -77,6 +88,28 @@ export function upgradeFromSeed(files: FileMap, seed: FileMap): { files: FileMap
   const hashes = JSON.stringify(seedHashes(seed), null, 1) + '\n';
   if (out[SEED_FILE] !== hashes) out[SEED_FILE] = changes[SEED_FILE] = hashes;
   return { files: out, changes, updated };
+}
+
+const KEYED = ['tiles', 'layouts', 'runes', 'spells'] as const;
+
+function mergeKeyed(mine: string, seed: string): string | undefined {
+  try {
+    const m = JSON.parse(mine);
+    const s = JSON.parse(seed);
+    let changed = false;
+    for (const k of KEYED) {
+      if (!s[k] || typeof s[k] !== 'object') continue;
+      m[k] ??= {};
+      for (const [id, v] of Object.entries(s[k])) {
+        if (id in m[k]) continue;
+        m[k][id] = v;
+        changed = true;
+      }
+    }
+    return changed ? JSON.stringify(m, null, 2) + '\n' : mine;
+  } catch {
+    return undefined;
+  }
 }
 
 function upgradeModels(mine: string | undefined, seed: string | undefined): string | undefined {

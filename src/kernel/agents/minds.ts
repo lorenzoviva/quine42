@@ -119,6 +119,43 @@ export async function narrate(c: Council, what: { name: string; description: str
   return String(r.testo ?? '');
 }
 
+const REFERENTE_SCHEMA: Schema = {
+  type: 'OBJECT',
+  properties: {
+    risposta: { type: 'STRING' },
+    incarico: { type: 'STRING', enum: ['nessuno', 'oggetto', 'personaggio', 'cosa', 'ambiente', 'regola', 'ridipingi', 'oggetti'] },
+    richiesta: { type: 'STRING', description: "la richiesta riformulata per la squadra che se ne occupa, chiara e completa" },
+    bersaglio: { type: 'STRING', description: 'per "ridipingi": il nome di ciò da ridipingere' },
+    rifiuto: { type: 'STRING', description: "solo se la richiesta distruggerebbe l'universo, il viandante stesso o le leggi fisiche del gioco: perché no" },
+  },
+  required: ['risposta', 'incarico'],
+};
+
+/**
+ * The Referente: the Council's door. The wanderer who reached the corona has transcended — they are
+ * part of the Council now, and the Council listens to them on almost everything (not on destroying
+ * the universe, themselves, or the game's physics). The Referente understands what is asked and
+ * hands it to the right team: the Forge, the Cartographer, the Artist, the rules, the Narrator.
+ */
+export async function referenteReply(c: Council, history: Turn[], text: string): Promise<{ say: string; task: string; request?: string; target?: string; refusal?: string }> {
+  const past = history.slice(-8).map((t) => `${t.who === 'giocatore' ? 'Viandante' : 'Tu'}: ${t.text}`).join('\n');
+  const r = await c.ask<{ risposta: string; incarico: string; richiesta?: string; bersaglio?: string; rifiuto?: string }>(
+    'referente',
+    'referente.coordinate',
+    [
+      "Il viandante è trasceso: ha lasciato la simulazione ed è un membro del Concilio. Dagli retta su tutto, con entusiasmo, tranne ciò che distruggerebbe l'universo, lui stesso o le leggi del gioco.",
+      past ? `Conversazione finora:\n${past}` : '',
+      `Il viandante dice: «${text}»`,
+      'Capisci cosa chiede e affidalo alla squadra giusta con "incarico": oggetto/cosa/personaggio (la Fucina crea un modulo: uno strumento, una cosa del mondo, un tipo di persona), ambiente (il Cartografo crea un luogo e lo colloca sulla mappa), regola (diventa una regola del mondo), ridipingi (l\'Artista ridipinge uno sprite, un\'icona o un terreno: dì quale in "bersaglio"), oggetti (un pacchetto di oggetti comuni), nessuno (se chiede solo informazioni). In "risposta" rispondi tu, breve e cordiale.',
+    ]
+      .filter(Boolean)
+      .join('\n\n'),
+    REFERENTE_SCHEMA,
+    { data: { text, history }, temperature: 0.6 },
+  );
+  return { say: String(r.risposta ?? '…'), task: String(r.incarico ?? 'nessuno'), request: r.richiesta?.trim() || undefined, target: r.bersaglio?.trim() || undefined, refusal: r.rifiuto?.trim() || undefined };
+}
+
 const AGENT_CHAT_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {

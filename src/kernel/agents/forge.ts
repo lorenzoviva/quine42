@@ -24,6 +24,8 @@ export interface ForgeRequest {
   kind?: 'npc' | 'oggetto' | 'strumento';
   /** False when the kernel's ArtDirector will paint the sprite later (few-shot, with walk cycle). */
   paint?: boolean;
+  /** Asked by the wanderer who transcended (in the corona): the Council goes along with it. */
+  permissive?: boolean;
 }
 
 export interface Concept {
@@ -256,6 +258,7 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
       'forge.concept',
       [
         `Richiesta (${req.origin}): ${req.prompt}`,
+        req.permissive ? 'Il viandante è trasceso: è un membro del Concilio. Accogli la sua richiesta come vuole lui; rifiuta solo ciò che distruggerebbe l’universo, lui stesso o le leggi del gioco. Resta fedele alla sua richiesta, anche se insolita.' : '',
         req.kind ? `Deve essere di tipo "${req.kind}".` : 'Scegli il tipo: npc (persona simulata), oggetto (sta nel mondo, inerte o interattivo), strumento (si raccoglie e va nell\'inventario).',
         `Terreni validi per "contesto.terreni": ${codes}. "rarita" tra 0.02 e 0.5.`,
         'Per un npc scrivi in "persona" la scheda del tipo di personaggio (ogni individuo avrà poi nome e storia propri): come parla, cosa vuole, cosa sa del mondo (e delle sue crepe); in "porta" 3-6 oggetti comuni del suo mestiere.',
@@ -320,7 +323,7 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
   const review = await c.ask<{ approvato: boolean; problemi: Array<{ agente: AgentId; problema: string }> }>(
     'arbitro',
     'forge.review',
-    `Verifica la coerenza tra narrativa, aspetto, fisica e codice di questo modulo. Segnala solo incoerenze concrete, indicando l'agente responsabile.\nConcetto:\n${JSON.stringify(concept, null, 1)}\nFisica:\n${JSON.stringify(physics)}\nlogic.lua:\n${code.logic}`,
+    `${req.permissive ? 'Il viandante è trasceso: è un membro del Concilio. Accogli la sua richiesta come vuole lui; rifiuta solo ciò che distruggerebbe l’universo, lui stesso o le leggi del gioco. Non obiettare sull\'idea in sé: solo su incoerenze tecniche che romperebbero il gioco.\n' : ''}Verifica la coerenza tra narrativa, aspetto, fisica e codice di questo modulo. Segnala solo incoerenze concrete, indicando l'agente responsabile.\nConcetto:\n${JSON.stringify(concept, null, 1)}\nFisica:\n${JSON.stringify(physics)}\nlogic.lua:\n${code.logic}`,
     REVIEW_SCHEMA,
     { data: { ...data, concept, physics, code }, temperature: 0.2 },
   );

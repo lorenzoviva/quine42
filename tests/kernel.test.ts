@@ -120,29 +120,60 @@ describe('kernel', () => {
     k.playerPos().x = k.config.circleRadius + 0.5;
     run(k, DT * 2);
     expect(k.zone).toBe('corona');
+    // Outside: the studio's campus. A door leads into a building, bigger inside than outside.
+    const b = k.corona.buildingOf('modules/sys.physics/logic.lua')!;
+    Object.assign(k.playerPos(), { x: b.door.x + 0.5, y: b.door.y + 0.5 });
+    run(k, DT);
+    void k.interact();
+    run(k, DT);
+    expect(k.zone).toBe('studio');
     const slot = k.corona.slotOf('modules/sys.physics/logic.lua')!;
-    expect(k.hoverAt(slot.x + 0.5, slot.y + 0.5)?.kind).toMatch(/code|agent/);
+    expect(k.hoverAt(slot.x + 0.5, slot.y + 0.5)?.kind).toMatch(/studio|agent/);
   });
 
-  it('the corona is an archive: folders are rooms, files are objects; the Council walks to its work', async () => {
-    const files = Object.keys(k.files);
-    for (const f of files) expect(k.corona.slotOf(f), f).toBeTruthy();
-    const rooms = k.corona.folders.map((f) => f.name);
-    expect(rooms).toEqual(expect.arrayContaining(['Concilio', 'Persone', 'Sistemi', 'Magia']));
-    const room = (p: string) => k.corona.at(k.corona.slotOf(p)!.x, k.corona.slotOf(p)!.y)!.folder;
-    expect(room('modules/npc.cat/manifest.json')).toBe(room('modules/npc.villager/manifest.json'));
-    expect(room('modules/npc.cat/manifest.json')).not.toBe(room('modules/sys.needs/logic.lua'));
-    // An agent working on a module walks to its book and says what it is doing.
+  it('the corona is a studio: a building per folder, rooms on floors, galleries; teams go to the files they change', async () => {
+    for (const f of Object.keys(k.files)) expect(k.corona.slotOf(f), f).toBeTruthy();
+    const names = k.corona.buildings.map((b) => b.name);
+    expect(names).toEqual(expect.arrayContaining(['Sala del Concilio', 'Studio dei Personaggi', 'Sala Sistemi', 'Torre della Magia', "Galleria dell'Artista", 'Studio del Cartografo']));
+    const bOf = (p: string) => k.corona.buildingOf(p)!.id;
+    expect(bOf('modules/npc.cat/manifest.json')).toBe(bOf('modules/npc.villager/manifest.json'));
+    expect(bOf('modules/npc.cat/manifest.json')).not.toBe(bOf('modules/sys.needs/logic.lua'));
+    // The gallery shows every sprite and icon; the map room every terrain.
+    const gallery = k.corona.building('galleria')!.floors.flatMap((f) => f.items.filter((i) => i.kind === 'sprite'));
+    expect(gallery.some((i) => i.label === 'Mela rossa' || i.target?.startsWith('item:'))).toBe(true);
+    const tiles = k.corona.building('cartografia')!.floors.flatMap((f) => f.items.filter((i) => i.kind === 'tile'));
+    expect(tiles.length).toBeGreaterThanOrEqual(Object.keys(k.palette).length - 1);
+    // Big buildings have several floors joined by stairs.
+    const big = k.corona.buildings.find((b) => b.floors.length > 1);
+    if (big) expect(big.floors[0].items.some((i) => i.kind === 'up')).toBe(true);
+    // A member of the Engineers' team goes to the book of the module it changes.
     k.council.say('ingegnere', 'propone', 'ritocco object.well: secchio più capiente');
-    const a = k.archive.avatars.get('ingegnere')!;
-    expect(a.say).toMatch(/object.well/);
+    const s0 = k.corona.slotOf('modules/object.well/manifest.json')!;
+    const member = [...k.archive.avatars.values()].find((a) => a.agent === 'ingegnere' && a.path === 'modules/object.well/manifest.json')!;
+    expect(member.say).toMatch(/object.well/);
     for (let i = 0; i < 300; i++) k.archive.tick(1 / 30);
-    const s = k.corona.slotOf('modules/object.well/manifest.json')!;
-    expect(Math.hypot(a.x - (s.x + 0.5), a.y - (s.y + 0.5))).toBeLessThan(1.5);
-    expect(Math.hypot(a.x, a.y)).toBeGreaterThanOrEqual(k.config.circleRadius);
+    expect(Math.hypot(member.x - (s0.x + 0.5), member.y - (s0.y + 0.5))).toBeLessThan(1.6);
+    // Only who is actually talking is seen together: the one called in appears beside the caller.
+    k.council.say('arbitro', 'obietta', 'object.well: la corda è troppo corta', 'narratore');
+    const called = [...k.archive.avatars.values()].find((a) => a.agent === 'narratore' && a.building === bOf('modules/object.well/manifest.json'))!;
+    const caller = [...k.archive.avatars.values()].find((a) => a.agent === 'arbitro' && a.building === bOf('modules/object.well/manifest.json'))!;
+    expect(Math.hypot(called.x - caller.tx, called.y - caller.ty)).toBeLessThan(1.5);
+    // Changed files glow: the latest commits are known file by file.
+    k.saveFile('modules/object.well/manifest.json', k.files['modules/object.well/manifest.json'].replace('"name"', '"name"'), true);
     // Talking to an agent: it answers in its role and can send a request to the Forge.
     const r = await k.talkToAgent('narratore', 'crea un mugnaio che parla del vento');
     expect(r.forged).toMatch(/ugnaio|crea/i);
+    expect(k.recentChanges().size).toBeGreaterThan(0);
+  });
+
+  it('the Referente takes the transcended wanderer\'s requests to the right team', async () => {
+    const env = await k.talkToAgent('referente', 'vorrei un bosco degli elfi a nord');
+    expect(env.forged).toMatch(/Bosco degli Elfi/);
+    const rule = await k.talkToAgent('referente', 'stabilisci una regola: di notte i lupi cantano');
+    expect(rule.forged).toMatch(/regola/i);
+    expect(k.rules().some((r) => /lupi/.test(r.testo))).toBe(true);
+    const art = await k.talkToAgent('referente', 'ridipingi il gatto più arancione');
+    expect(art.forged).toMatch(/ridipinge|non trova/i);
   });
 
   it('a broken phrase breaks the world; rollback repairs it and returns the runes', () => {
@@ -179,13 +210,9 @@ describe('kernel', () => {
     expect(k.saveFile(path, k.files[path].replace('carpet.strength *', '0.5 * carpet.strength *')).committed).toBe(true);
   });
 
-  it('the corona maps every universe file', () => {
+  it('the studio holds every universe file, each on a shelf of a room', () => {
     const seen = new Set<string>();
-    for (let y = -k.corona.outer; y < k.corona.outer; y++)
-      for (let x = -k.corona.outer; x < k.corona.outer; x++) {
-        const c = k.corona.at(x, y);
-        if (c?.path) seen.add(c.path);
-      }
+    for (const b of k.corona.buildings) for (const f of b.floors) for (const i of f.items) if (i.kind === 'file' && i.path) seen.add(i.path);
     expect([...seen].sort()).toEqual(Object.keys(k.files).sort());
   });
 });

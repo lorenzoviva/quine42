@@ -1,81 +1,77 @@
-// The Council in the flesh: in the corona the agents are figures that walk the archive. When one of
-// them works on something (the feed), it goes to the file it is touching, says what it does, and
-// whoever it addressed comes to listen. When idle they talk among themselves about recent work.
-// Real space, kernel-driven, no Lua and no model calls: cheap and always coherent with the feed.
+// The Council in the flesh. Every agent is a team (the Engineer is a team of engineers, and so on):
+// a member works in each building where its kind of work is done, at a desk, and goes to the shelf
+// of the file it is changing; members appear (teleport) where they are needed instead of walking
+// round the ring. Only those actually talking to each other in the Council's feed are seen talking.
+// The Referente waits for the wanderer on the ring and takes requests to the right team.
+// Real space, kernel-driven, no Lua and no model calls.
 
 import { AGENTS, type AgentId, type FeedEntry } from './agents/council';
-import type { Corona } from './corona';
+import type { Building, Corona } from './corona';
 
 export interface Avatar {
+  /** Agent kind (or 'referente'). */
   agent: AgentId;
   name: string;
   color: string;
   sigil: string;
+  /** Building where this member works ('' = on the ring). */
+  building: string;
   x: number;
   y: number;
-  /** Where it is going (real-space point) and the file it goes to. */
   tx: number;
   ty: number;
   path?: string;
   say?: string;
   sayUntil: number;
-  /** Not before this time it starts a new idle errand. */
+  /** Back to the desk after this time. */
   idleUntil: number;
-  /** Cells per second of the current errand (far errands are run: the Council is never late). */
   speed: number;
 }
 
 const SPEED = 3.2;
 
 export class Archive {
-  readonly avatars = new Map<AgentId, Avatar>();
-  /** Recent work per agent, for idle conversations. */
-  private recent: FeedEntry[] = [];
+  /** Team members by "agent@building". */
+  readonly avatars = new Map<string, Avatar>();
   private time = 0;
 
   constructor(private corona: () => Corona) {}
 
-  /** Places every agent next to its own prompt (its desk in the Council's room). */
+  /** One member of the right team at a desk of every building; the Referente on the ring. */
   reset(): void {
-    const ids = Object.keys(AGENTS) as AgentId[];
-    ids.forEach((agent, i) => {
-      const home = this.home(agent, i);
-      const a = this.avatars.get(agent);
-      if (a) return;
-      const def = AGENTS[agent];
-      this.avatars.set(agent, { agent, name: def.name, color: def.color, sigil: def.sigil, x: home.x, y: home.y, tx: home.x, ty: home.y, sayUntil: 0, idleUntil: 4 + i * 3, speed: SPEED });
-    });
-  }
-
-  private home(agent: AgentId, i = 0): { x: number; y: number } {
     const c = this.corona();
-    const s = c.slotOf(`prompts/agents/${agent}.md`);
-    if (s) return this.beside(s);
-    const t = (i / 6) * Math.PI * 2;
-    const r = c.radius + 1.5;
-    return { x: Math.sin(t) * r, y: -Math.cos(t) * r };
+    const keep = new Set<string>();
+    for (const b of c.buildings) {
+      const key = `${b.team}@${b.id}`;
+      keep.add(key);
+      if (!this.avatars.has(key) || this.avatars.get(key)!.building !== b.id) this.avatars.set(key, this.member(b.team as AgentId, b));
+    }
+    keep.add('referente@');
+    if (!this.avatars.has('referente@')) {
+      const p = { x: 0.5, y: -(c.radius + 1.5) };
+      this.avatars.set('referente@', { agent: 'referente', name: AGENTS.referente.name, color: AGENTS.referente.color, sigil: AGENTS.referente.sigil, building: '', ...p, tx: p.x, ty: p.y, sayUntil: 0, idleUntil: 0, speed: SPEED });
+    }
+    for (const k of [...this.avatars.keys()]) if (!keep.has(k) && !k.includes('#')) this.avatars.delete(k);
   }
 
-  /** A walkable point next to a file cell (towards the inner walkway). */
-  private beside(s: { x: number; y: number }): { x: number; y: number } {
-    const cx = s.x + 0.5;
-    const cy = s.y + 0.5;
-    const d = Math.hypot(cx, cy) || 1;
-    return { x: cx - (cx / d) * 0.9, y: cy - (cy / d) * 0.9 };
+  private desk(b: Building, n = 0): { x: number; y: number } {
+    const desks = b.floors[0].items.filter((i) => i.kind === 'desk');
+    const d = desks[n % Math.max(1, desks.length)];
+    return d ? { x: d.x + 0.5, y: d.y - 0.6 } : { x: b.floors[0].ox + 3.5, y: b.floors[0].oy + 3.5 };
   }
 
-  /** An agent goes to a file and says what it does there. */
-  go(agent: AgentId, path: string | undefined, say?: string): void {
-    const a = this.avatars.get(agent);
-    if (!a) return;
-    const slot = path ? this.corona().slotOf(path) : undefined;
-    const p = slot ? this.beside(slot) : this.home(agent);
-    a.tx = p.x;
-    a.ty = p.y;
-    a.speed = Math.max(SPEED, Math.hypot(a.tx - a.x, a.ty - a.y) / 3);
-    a.path = slot ? path : undefined;
-    if (say) this.speak(a, say);
-    a.idleUntil = this.time + 20;
+  private member(agent: AgentId, b: Building, n = 0): Avatar {
+    const p = this.desk(b, n);
+    const def = AGENTS[agent];
+    return { agent, name: def.name, color: def.color, sigil: def.sigil, building: b.id, x: p.x, y: p.y, tx: p.x, ty: p.y, sayUntil: 0, idleUntil: 0, speed: SPEED };
+  }
+
+  /** The member of a team working in a building (created the first time: teams are many). */
+  private memberIn(agent: AgentId, b: Building, n = 0): Avatar {
+    const key = n ? `${agent}@${b.id}#${n}` : `${agent}@${b.id}`;
+    let a = this.avatars.get(key);
+    if (!a) this.avatars.set(key, (a = this.member(agent, b, n)));
+    return a;
   }
 
   private speak(a: Avatar, text: string): void {
@@ -83,59 +79,93 @@ export class Archive {
     a.sayUntil = this.time + 4 + Math.min(6, text.length / 18);
   }
 
-  /** What the Council does, the avatars act out. */
+  /** A member goes to the shelf of a file (in the building that holds it) and says what it does. */
+  go(agent: AgentId, path: string | undefined, say?: string): Avatar | undefined {
+    const c = this.corona();
+    const b = path ? c.buildingOf(path) : undefined;
+    if (!b) {
+      // No file: the member of its own building speaks from the desk.
+      const home = c.buildings.find((x) => x.team === agent) ?? c.buildings[0];
+      if (!home) return undefined;
+      const m = this.memberIn(agent, home);
+      if (say) this.speak(m, say);
+      return m;
+    }
+    const m = this.memberIn(agent, b);
+    const s = c.slotOf(path!)!;
+    m.tx = s.x + 0.5;
+    m.ty = s.y + 1.4;
+    m.path = path;
+    m.speed = Math.max(SPEED, Math.hypot(m.tx - m.x, m.ty - m.y) / 3);
+    m.idleUntil = this.time + 20;
+    if (say) this.speak(m, say);
+    return m;
+  }
+
+  /**
+   * What the Council does, the teams act out: who works goes to the file; who is called in appears
+   * next to them, and only these two are seen talking.
+   */
   onFeed(e: FeedEntry, pathOf: (e: FeedEntry) => string | undefined): void {
     if (e.from === 'kernel' && !e.to) return;
-    this.recent.push(e);
-    if (this.recent.length > 40) this.recent.shift();
     const path = pathOf(e);
-    if (e.from !== 'kernel') this.go(e.from, path, e.text);
+    const from = e.from !== 'kernel' ? this.go(e.from, path, e.text) : undefined;
     if (e.to) {
-      this.go(e.to, path);
-      const to = this.avatars.get(e.to);
-      if (to && e.from !== 'kernel') to.say = undefined;
-      else if (to) this.speak(to, `(il kernel mi rimanda: ${e.text})`);
+      const c = this.corona();
+      const b = (path ? c.buildingOf(path) : undefined) ?? c.building(from?.building) ?? c.buildings.find((x) => x.team === e.to);
+      if (!b) return;
+      const to = this.memberIn(e.to, b, e.to === from?.agent ? 1 : 0);
+      // Called in: appears beside whoever called (the studio is big, the Council is quick).
+      const near = from ?? to;
+      to.x = to.tx = near.tx + 0.9;
+      to.y = to.ty = near.ty;
+      to.idleUntil = this.time + 20;
+      this.speak(to, e.from === 'kernel' ? `(il kernel mi rimanda: ${e.text})` : `${from?.name ?? ''}, ci penso io.`);
+    }
+  }
+
+  /** The Referente comes to meet the wanderer on the ring. */
+  meet(px: number, py: number): void {
+    const r = this.avatars.get('referente@');
+    if (!r) return;
+    const d = Math.hypot(r.x - px, r.y - py);
+    if (d > 2.2) {
+      r.tx = px + 1.2;
+      r.ty = py;
+      r.speed = Math.max(SPEED, d / 2);
     }
   }
 
   tick(dt: number): void {
     this.time += dt;
     const c = this.corona();
-    const R = c.radius;
-    const list = [...this.avatars.values()];
-    for (const a of list) {
+    for (const a of this.avatars.values()) {
       if (a.say && this.time > a.sayUntil) a.say = undefined;
-      // Walk along the ring (polar), never into the simulation circle.
-      const [r0, t0] = polar(a.x, a.y);
-      const [r1, t1] = polar(a.tx, a.ty);
-      let dtheta = t1 - t0;
-      if (dtheta > Math.PI) dtheta -= Math.PI * 2;
-      if (dtheta < -Math.PI) dtheta += Math.PI * 2;
-      const arc = dtheta * r0;
-      const dr = r1 - r0;
-      const dist = Math.hypot(arc, dr);
+      if (a.building && this.time > a.idleUntil && a.path) {
+        // Done: back to the desk.
+        const b = c.building(a.building);
+        if (b) {
+          const n = Number(/#(\d+)$/.exec([...this.avatars.entries()].find(([, v]) => v === a)?.[0] ?? '')?.[1] ?? 0);
+          const d = this.desk(b, n);
+          a.tx = d.x;
+          a.ty = d.y;
+        }
+        a.path = undefined;
+      }
+      const dx = a.tx - a.x;
+      const dy = a.ty - a.y;
+      const dist = Math.hypot(dx, dy);
       if (dist < 0.05) continue;
       const step = Math.min(dist, a.speed * dt);
-      const r = Math.max(R + 0.8, Math.min(c.outer - 0.8, r0 + (dr / dist) * step));
-      const t = t0 + ((arc / dist) * step) / r0;
-      a.x = Math.sin(t) * r;
-      a.y = -Math.cos(t) * r;
-    }
-    // Idle: two agents meet and talk about recent work (lines from the feed).
-    const idle = list.filter((a) => this.time > a.idleUntil);
-    if (idle.length >= 2) {
-      const [a, b] = [idle[Math.floor(this.time * 7) % idle.length], idle[Math.floor(this.time * 13 + 1) % idle.length]];
-      if (a !== b) {
-        a.tx = b.x + (b.x === 0 ? 0.8 : Math.sign(b.x) * 0.8);
-        a.ty = b.y;
-        a.speed = Math.max(SPEED, Math.hypot(a.tx - a.x, a.ty - a.y) / 4);
-        a.idleUntil = this.time + 18 + (this.time % 9);
-        b.idleUntil = this.time + 18;
-        const mine = [...this.recent].reverse().find((e) => e.from === a.agent);
-        const theirs = [...this.recent].reverse().find((e) => e.from === b.agent);
-        this.speak(a, mine ? `${b.name}, ho appena fatto questo: ${mine.text}` : `${b.name}, com'è il mondo dalla tua parte?`);
-        if (theirs) this.speak(b, `Io invece: ${theirs.text}`);
-        else this.speak(b, 'Tutto tranquillo, per ora.');
+      a.x += (dx / dist) * step;
+      a.y += (dy / dist) * step;
+      // On the ring, never into the simulation circle.
+      if (!a.building) {
+        const r = Math.hypot(a.x, a.y);
+        if (r < c.radius + 0.8) {
+          a.x *= (c.radius + 0.8) / r;
+          a.y *= (c.radius + 0.8) / r;
+        }
       }
     }
   }
@@ -149,10 +179,4 @@ export class Archive {
     }
     return best;
   }
-}
-
-function polar(x: number, y: number): [number, number] {
-  let t = Math.atan2(y, x) + Math.PI / 2;
-  if (t < 0) t += Math.PI * 2;
-  return [Math.hypot(x, y), t];
 }

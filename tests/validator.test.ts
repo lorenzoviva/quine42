@@ -197,3 +197,19 @@ describe('effects', () => {
     expect(v.dropped.join(' ')).toMatch(/Drago.*teletrasporto/);
   });
 });
+
+describe('kernel seed updates', () => {
+  it('a universe gets new kernel files and the new terrains of a manifest it rewrote, keeping its own', async () => {
+    const { upgradeFromSeed, seedHashes } = await import('../src/kernel/universes');
+    const oldSeed = { 'modules/t/manifest.json': JSON.stringify({ id: 't', tiles: { g: { name: 'prato' } } }), 'a.md': 'vecchio' };
+    const mine = { ...oldSeed, 'modules/t/manifest.json': JSON.stringify({ id: 't', tiles: { g: { name: 'pascolo' }, x: { name: 'mio' } } }), 'seed.json': JSON.stringify(seedHashes(oldSeed)) };
+    const newSeed = { 'modules/t/manifest.json': JSON.stringify({ id: 't', tiles: { g: { name: 'prato' }, s: { name: 'sabbia' } } }), 'a.md': 'nuovo', 'b.md': 'aggiunto' };
+    const up = upgradeFromSeed(mine, newSeed);
+    expect(up.files['a.md']).toBe('nuovo');
+    expect(up.files['b.md']).toBe('aggiunto');
+    const tiles = JSON.parse(up.files['modules/t/manifest.json']).tiles;
+    expect(tiles.g.name).toBe('pascolo');
+    expect(tiles.x.name).toBe('mio');
+    expect(tiles.s.name).toBe('sabbia');
+  });
+});

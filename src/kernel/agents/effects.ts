@@ -21,6 +21,8 @@ export interface ActionContext {
   summonable: string[];
   loot: string[];
   place: string;
+  /** The wanderer transcended: the Council goes along with almost anything. */
+  transcended?: boolean;
 }
 
 export interface ActionJudgement {
@@ -91,7 +93,9 @@ export async function judgeAction(c: Council, ctx: ActionContext): Promise<Actio
   const prompt = [
     `Il viandante, davanti a «${t.name}» (${t.kind}: ${t.description}${t.tags.length ? `; tag ${t.tags.join(', ')}` : ''}${t.container ? '; è un contenitore' : ''}), scrive: «${ctx.text}».`,
     `Porta: ${ctx.carrying.join(', ') || 'niente'}. Impugna: ${ctx.holding}. Sotto la cosa: ${ctx.tile}. Luogo: ${ctx.place || 'sconosciuto'}.`,
-    `Giudica come il Concilio: è possibile, nel mondo e per la fisica? Se no, "possibile" falso e racconta perché non riesce (effetti vuoti o solo messaggio).`,
+    ctx.transcended
+      ? `Il viandante è trasceso: è un membro del Concilio e ha visto il codice del mondo. Asseconda ciò che vuole fare (purché non distrugga l'universo, se stesso o le leggi del gioco), scegliendo gli effetti che lo realizzano meglio.`
+      : `Giudica come il Concilio: è possibile, nel mondo e per la fisica? Se no, "possibile" falso e racconta perché non riesce (effetti vuoti o solo messaggio).`,
     `Se sì, scegli gli effetti (al massimo 4) SOLO da questo elenco:\n${EFFECTS_GUIDE}`,
     `Terreni esistenti: ${ctx.terrains.join(', ')}. Cose evocabili: ${ctx.summonable.slice(0, 30).join(', ') || 'nessuna'}. Tabelle di bottino: ${ctx.loot.join(', ')}.`,
     `Sii fedele alla fisica: niente miracoli senza strumenti o rune; serve il giusto attrezzo per scassinare, tagliare, scavare. Se serve un oggetto che il viandante porta, mettilo in "serve".`,

@@ -208,14 +208,25 @@ export class Hud {
         return [el('div', { class: 'h' }, info.name), el('div', { class: 'doc' }, info.description), ...(info.extra ? [el('div', { class: 'src' }, info.extra)] : [])];
       case 'tile':
         return null;
-      case 'code': {
-        const c = info.cell;
-        if (c.kind === 'folder') return [el('div', { class: 'h code' }, `cartella «${info.folder ?? c.folder}»`)];
+      case 'code':
+        return [el('div', { class: 'h code' }, info.cell.path ?? info.folder ?? '')];
+      case 'studio': {
+        const it = info.item;
         const LOOK: Record<string, string> = { libro: 'un libro: il manifest di un modulo', cristallo: 'un cristallo: codice Lua', pergamena: 'una pergamena: testo', tavoletta: 'una tavoletta: dati' };
-        return [el('div', { class: 'h code' }, c.path ?? ''), el('div', { class: 'doc' }, `${LOOK[c.look ?? ''] ?? ''} — ${c.lines} righe, in «${info.folder ?? ''}»`), el('div', { class: 'src' }, 'E per aprirlo')];
+        const what =
+          it.kind === 'file' ? `${LOOK[it.look ?? ''] ?? ''} — ${it.lines} righe` : it.kind === 'sprite' ? `un quadro: ${it.asset ? 'dipinto dall\'Artista' : 'ancora da dipingere'}` : it.kind === 'tile' ? `un campione di terreno${it.asset ? '' : ' (non ancora dipinto)'}` : it.label;
+        return [
+          el('div', { class: 'h code' }, it.kind === 'file' ? (it.path ?? '') : it.label),
+          el('div', { class: 'doc' }, `${what}, in «${info.building}»`),
+          ...(info.recent ? [el('div', { class: 'val' }, `✦ modificato di recente — ${info.recent}`)] : []),
+          el('div', { class: 'src' }, it.kind === 'file' ? 'E per aprirlo' : it.kind === 'sprite' || it.kind === 'tile' ? 'E per guardarlo (e farlo ridipingere)' : 'E'),
+        ];
       }
+      case 'door':
+        return [el('div', { class: 'h' }, info.building), el('div', { class: 'doc' }, `ci lavora la squadra del ${info.team}`), el('div', { class: 'src' }, 'E alla porta per entrare')];
       case 'agent':
-        return [el('div', { class: 'h' }, `${info.name} del Concilio`), ...(info.doing ? [el('div', { class: 'doc' }, info.doing)] : []), el('div', { class: 'src' }, 'E per parlarci')];
+        return [el('div', { class: 'h' }, info.agent === 'referente' ? 'Il Referente del Concilio' : `${info.name} del Concilio`), ...(info.doing ? [el('div', { class: 'doc' }, info.doing)] : []), el('div', { class: 'src' }, 'E per parlarci')];
     }
+    return null;
   }
 }

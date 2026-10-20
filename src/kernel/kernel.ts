@@ -8,7 +8,7 @@ import { Faults } from './faults';
 import { Sandbox, type Host } from './sandbox';
 import { apiErrors, validateEffects, Validator } from './validator';
 import { Repo, type KeyValueStore } from './repo';
-import { Corona, type CoronaCell } from './corona';
+import { Corona, type CoronaCell, type Exhibit, type StudioItem } from './corona';
 import { Archive } from './archive';
 import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, placeRegion, readAtlas, regionAt, writeAtlas, type Region } from './atlas';
 import { STAMP_SHAPES } from './stamps';
@@ -29,7 +29,7 @@ import { ArtDirector } from './art';
 import { AGENTS, Council, readBible, type AgentId, type CatalogEntry, type FeedEntry } from './agents/council';
 import { designEnvironment, drawAtlas, planChunk, type ChunkPlan, type Where } from './agents/cartography';
 import { forge, judgeCombination, repairLogic, slug, type ForgeOrigin } from './agents/forge';
-import { agentReply, examine, narrate, npcDialogue, npcReply, weavePlot, type NpcReply, type Turn } from './agents/minds';
+import { agentReply, examine, narrate, npcDialogue, npcReply, referenteReply, weavePlot, type NpcReply, type Turn } from './agents/minds';
 import { planGenesis } from './agents/genesis';
 import { councilSession, judgeAction, judgeCraft, nameSpell } from './agents/effects';
 import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Identity } from './agents/content';
@@ -74,6 +74,8 @@ export type HoverInfo =
   | { kind: 'entity'; name: string; description: string; extra?: string }
   | { kind: 'tile'; name: string }
   | { kind: 'code'; cell: CoronaCell; folder?: string }
+  | { kind: 'studio'; item: StudioItem; building: string; recent?: string }
+  | { kind: 'door'; building: string; team: string }
   | { kind: 'agent'; agent: AgentId; name: string; doing?: string }
   | { kind: 'player' };
 
@@ -154,6 +156,9 @@ export const SYMBOL_DOCS: Record<string, string> = {
   oy: 'campo del tappeto: scorrimento verticale accumulato',
 };
 
+/** Draft codes of the biomes and the base terrain each falls back to, if a world lacks them. */
+const DRAFT_FALLBACK: Record<string, string> = { s: 'g', n: 'g', j: 't', o: 'w', k: 'r' };
+
 const VOID_TILE: TileDef = { name: 'vuoto', color: '#2a0612', solid: false, layer: 'ground' };
 const DEFAULT_ITEM: ItemSpec = { stackable: false, maxStack: 1, weight: 1, equippable: false };
 const FALLBACK_PLAYER = {
@@ -231,7 +236,7 @@ export class Kernel {
 
   playerId: Id = 0;
   time = 0;
-  zone: 'sim' | 'corona' = 'sim';
+  zone: 'sim' | 'corona' | 'studio' = 'sim';
   exitedOnce = false;
   /** Size of the visible area in cells, set by the renderer. */
   view = { w: 32, h: 20 };
@@ -583,7 +588,7 @@ export class Kernel {
     if (sizeChanged || (before && before !== this.worldSignature())) this.clearChunks();
     else if (!this.terrain || changed.has(this.terrain.manifest.id) || opts.reset) for (const ch of this.chunks.values()) if (ch.stage === 'draft') this.regenerateDraft(ch);
 
-    this.corona.build(files);
+    this.corona.build(files, this.exhibits(files), this.terrainExhibits());
     this.archive.reset();
     this.bus.emit('universe:reloaded', { changed: [...changed] });
   }
@@ -655,7 +660,8 @@ export class Kernel {
       const id = this.terrain.manifest.id;
       const { value, failed } = this.runModule(id, 'generate_chunk', cx, cy, this.config.seed, S);
       if (!failed) {
-        if (typeof value === 'string' && value.length === n) return [...value].map((c) => (this.palette[c] ? c : '?')).join('');
+        // A code the palette lacks becomes the nearest base terrain (sand → grass, sea → water…), never the void.
+        if (typeof value === 'string' && value.length === n) return [...value].map((c) => (this.palette[c] ? c : this.palette[DRAFT_FALLBACK[c]] ? DRAFT_FALLBACK[c] : '?')).join('');
         this.faults.raise(`module:${id}:generate_chunk`, `generate_chunk deve restituire una stringa di ${n} caratteri`);
       }
     }
@@ -1089,6 +1095,7 @@ export class Kernel {
 
   /** Loads the chunks needed to draw the visible area; unloads the far ones. */
   private updateChunks(): void {
+    if (this.zone === 'studio') return;
     const S = this.config.chunkSize;
     const R = this.config.circleRadius;
     const p = this.playerPos();
@@ -1292,12 +1299,17 @@ export class Kernel {
     if (![x, y, r].every(Number.isFinite)) return false;
     const R = this.config.circleRadius;
     const { ox, oy } = this.offset();
+    // Inside the studio's buildings: rooms with walls, shelves and desks.
+    if (this.corona.isInterior(x)) return [[-r, -r], [r, -r], [-r, r], [r, r]].every(([dx, dy]) => this.corona.free(x + dx, y + dy));
     for (const [dx, dy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
       const px = x + dx;
       const py = y + dy;
       const d = Math.hypot(px, py);
       if (d >= this.corona.outer) return false;
-      if (d >= R) continue;
+      if (d >= R) {
+        if (!this.corona.free(px, py)) return false;
+        continue;
+      }
       if (!this.freeCell(Math.floor(px + ox), Math.floor(py + oy))) return false;
     }
     return true;
@@ -1857,15 +1869,7 @@ export class Kernel {
 
   /** E: corona → edit code; rune → pick; otherwise the menu of the nearest thing (or a pickup directly). */
   async interact(): Promise<void> {
-    if (this.zone === 'corona') {
-      const p = this.playerPos();
-      const a = this.archive.nearest(p.x, p.y);
-      if (a) return void this.bus.emit('ui:agentchat', { agent: a.agent, name: a.name });
-      const path = this.corona.nearestFile(p.x, p.y);
-      if (path) this.bus.emit('ui:edit', { path, line: 1 });
-      else this.message("Qui non c'è niente da leggere: avvicinati a un libro, a un cristallo, a una pergamena.");
-      return;
-    }
+    if (this.zone === 'corona' || this.zone === 'studio') return this.interactStudio();
     if (this.pickUpRune()) return;
     const target = this.targetInFront();
     if (target === undefined) return;
@@ -2121,6 +2125,7 @@ export class Kernel {
         summonable: summonable.map((e) => e.manifest.name),
         loot: Object.keys(this.content.loot),
         place: this.placeHere()?.name ?? '',
+        transcended: this.exitedOnce,
       });
     } catch (e) {
       const msg = `(il Concilio tace: ${(e as Error).message})`;
@@ -2194,6 +2199,133 @@ export class Kernel {
     }
   }
 
+  /** What the gallery shows: every sprite, icon and painted thing of this universe. */
+  private exhibits(files: FileMap): Exhibit[] {
+    const out: Exhibit[] = [];
+    for (const path of Object.keys(files)) {
+      if (!/^modules\/[^/]+\/manifest\.json$/.test(path)) continue;
+      let man: Manifest;
+      try {
+        man = JSON.parse(files[path]);
+      } catch {
+        continue;
+      }
+      if (man.appearance) out.push({ label: man.name, asset: man.appearance.sprite, color: man.appearance.color, path, target: `module:${man.id}` });
+      for (const it of man.items ?? []) out.push({ label: it.name, asset: it.icon, color: it.color, path, target: `item:${it.id}` });
+    }
+    return out;
+  }
+
+  /** What the map room shows: every kind of terrain, painted or not, and the obstacles drawn on it. */
+  private terrainExhibits(): Exhibit[] {
+    const path = this.terrain?.manifestPath ?? 'modules/world.terrain/manifest.json';
+    const out: Exhibit[] = [];
+    for (const [code, t] of Object.entries(this.palette)) {
+      if (code === '?') continue;
+      out.push({ label: `${t.name} («${code}»)`, asset: t.texture, color: t.color, path, target: `tile:${code}` });
+      (t.sprites ?? []).forEach((sp, i) => out.push({ label: `${t.name}: ostacolo ${i + 1}`, asset: sp, color: t.color, path, target: `tile:${code}` }));
+    }
+    return out;
+  }
+
+  /** Files changed by the latest commits of this session: the studio shows them glowing. */
+  recentChanges(): Map<string, { author: string; message: string; time: number }> {
+    return this.repo.recentChanges(24);
+  }
+
+  /** E in the corona and in the studio: doors, stairs, shelves, frames, the notice board, people. */
+  private interactStudio(): void {
+    const p = this.playerPos();
+    const a = this.archive.nearest(p.x, p.y);
+    if (a) return void this.bus.emit('ui:agentchat', { agent: a.agent, name: a.name });
+    if (this.zone === 'corona') {
+      const b = this.corona.doorNear(p.x, p.y);
+      if (b) {
+        Object.assign(p, this.corona.entrance(b));
+        this.message(`${b.name}${b.floors.length > 1 ? ` — ${b.floors.length} piani` : ''}`);
+        this.updateZone();
+        return;
+      }
+      this.message('Avvicinati alla porta di un edificio, o a qualcuno del Concilio.');
+      return;
+    }
+    const it = this.corona.itemNear(p.x, p.y);
+    const room = this.corona.roomAt(p.x, p.y);
+    if (!it || !room) return this.message('Avvicinati a uno scaffale, a un quadro, alla bacheca o alle scale.');
+    switch (it.kind) {
+      case 'file':
+        this.bus.emit('ui:edit', { path: it.path, line: 1 });
+        return;
+      case 'sprite':
+      case 'tile':
+        this.bus.emit('ui:exhibit', { item: it, building: room.building.name });
+        return;
+      case 'board':
+        this.bus.emit('ui:board', { building: room.building.id, name: room.building.name });
+        return;
+      case 'up':
+      case 'down': {
+        const next = room.floor.index + (it.kind === 'up' ? 1 : -1);
+        Object.assign(p, this.corona.entrance(room.building, next, it.kind === 'up' ? 'up' : 'down'));
+        this.message(`${room.building.name}, piano ${next + 1}`);
+        return;
+      }
+      case 'exit':
+        Object.assign(p, this.corona.exitPoint(room.building));
+        this.updateZone();
+        return;
+    }
+  }
+
+  /** The latest changes to the files of a building (for its notice board). */
+  boardOf(buildingId: string): Array<{ path: string; author: string; message: string; time: number }> {
+    const b = this.corona.building(buildingId);
+    const paths = new Set(b?.floors.flatMap((f) => f.items.map((i) => i.path).filter(Boolean)) as string[]);
+    return [...this.recentChanges().entries()].filter(([p]) => paths.has(p)).map(([path, c]) => ({ path, ...c })).sort((x, y) => y.time - x.time);
+  }
+
+  /**
+   * "Ridipingilo": the Artist paints a sprite, an icon or a terrain again. The old image is removed
+   * from the manifest (committed) and the ArtDirector, finding it missing, paints it anew.
+   */
+  requestRepaint(target: string, why = ''): boolean {
+    const [kind, id] = [target.slice(0, target.indexOf(':')), target.slice(target.indexOf(':') + 1)];
+    let path: string | undefined;
+    let man: any;
+    const load = (p: string | undefined) => {
+      if (!p) return false;
+      try {
+        man = JSON.parse(this.repo.working[p]);
+        path = p;
+        return true;
+      } catch {
+        return false;
+      }
+    };
+    if (kind === 'module' && load(this.modules.get(id)?.manifestPath)) {
+      if (!man.appearance) return false;
+      delete man.appearance.sprite;
+      delete man.appearance.frames;
+      if (why) man.appearance.imagePrompt = `${man.appearance.imagePrompt ?? man.name}; ${why}`;
+    } else if (kind === 'item' && load(this.modules.get(this.content.itemSource.get(id) ?? '')?.manifestPath)) {
+      const it = (man.items ?? []).find((x: ItemDef) => x.id === id);
+      if (it) {
+        delete it.icon;
+        if (why) it.iconPrompt = `${it.iconPrompt ?? it.name}; ${why}`;
+      } else if (man.appearance) delete man.appearance.sprite;
+    } else if (kind === 'tile' && load(this.terrain?.manifestPath)) {
+      if (!man.tiles?.[id]) return false;
+      delete man.tiles[id].texture;
+      delete man.tiles[id].sprites;
+    } else return false;
+    this.repo.write(path!, JSON.stringify(man, null, 2) + '\n');
+    this.applyFiles({ ...this.repo.working });
+    this.repo.commit(`artista: da ridipingere ${target}`, 'agent');
+    this.council.say('artista', 'propone', `ridipingerò ${target}${why ? ` (${why})` : ''}`, undefined, 'art.repaint');
+    this.art.pump();
+    return true;
+  }
+
   /** Which file a piece of the Council's work is about (the avatars walk there). */
   pathForFeed(e: FeedEntry): string | undefined {
     for (const id of this.modules.keys()) if (e.text.includes(id)) return this.modules.get(id)!.manifestPath;
@@ -2211,6 +2343,7 @@ export class Kernel {
   async talkToAgent(agent: AgentId, text: string): Promise<{ say: string; forged?: string }> {
     const history = this.agentTalks.get(agent) ?? [];
     this.agentTalks.set(agent, history);
+    if (agent === 'referente') return this.askReferente(text, history);
     let r;
     try {
       r = await agentReply(this.council, agent, history, text);
@@ -2224,8 +2357,55 @@ export class Kernel {
       const env = await this.createEnvironment(r.forge);
       return { say: r.say, forged: env.summary };
     }
-    const f = await this.forgeModule(r.forge, 'agente');
+    const f = await this.forgeModule(r.forge, 'agente', undefined, true);
     return { say: r.say, forged: f.summary };
+  }
+
+  /**
+   * The Referente takes the transcended wanderer's request to the right team: the Forge, the
+   * Cartographer, the Artist, the rules, the Narrator's packs. The Council says yes to almost anything.
+   */
+  private async askReferente(text: string, history: Turn[]): Promise<{ say: string; forged?: string }> {
+    let r;
+    try {
+      r = await referenteReply(this.council, history, text);
+    } catch (e) {
+      return { say: `(il Referente non risponde: ${(e as Error).message})` };
+    }
+    history.push({ who: 'giocatore', text }, { who: 'npc', text: r.say });
+    this.archive.go('referente', undefined, r.say);
+    if (r.refusal) return { say: r.say, forged: `Il Concilio rifiuta: ${r.refusal}` };
+    const req = r.request ?? text;
+    this.council.say('referente', 'info', `il viandante chiede: «${text}» → ${r.task}`, r.task === 'ambiente' ? 'cartografo' : r.task === 'ridipingi' ? 'artista' : r.task === 'regola' ? 'arbitro' : r.task === 'nessuno' ? undefined : 'narratore', 'referente.coordinate');
+    switch (r.task) {
+      case 'oggetto':
+        return { say: r.say, forged: (await this.forgeModule(req, 'agente', 'strumento', true)).summary };
+      case 'cosa':
+        return { say: r.say, forged: (await this.forgeModule(req, 'agente', 'oggetto', true)).summary };
+      case 'personaggio':
+        return { say: r.say, forged: (await this.forgeModule(req, 'agente', 'npc', true)).summary };
+      case 'ambiente':
+        return { say: r.say, forged: (await this.createEnvironment(req)).summary };
+      case 'oggetti':
+        return { say: r.say, forged: (await this.growContent(`richiesta del viandante: ${req}`, 12, true)) ? 'Il Narratore ha scritto un pacchetto di oggetti nuovi.' : 'Il pacchetto non è venuto.' };
+      case 'regola': {
+        this.recordRule({ chiave: `regola|${normName(req).slice(0, 60)}`, testo: req, possibile: true, racconto: 'stabilito dal viandante trasceso, accolto dal Concilio', effetti: ['regola'] });
+        return { say: r.say, forged: `Nuova regola del mondo: ${req}` };
+      }
+      case 'ridipingi': {
+        const target = this.findPaintable(r.target ?? req);
+        if (!target) return { say: r.say, forged: `L'Artista non trova «${r.target ?? req}».` };
+        return { say: r.say, forged: this.requestRepaint(target.target, req) ? `L'Artista ridipinge «${target.label}».` : 'L\'Artista non può ridipingerlo.' };
+      }
+    }
+    return { say: r.say };
+  }
+
+  /** Something the Artist can paint, by name (a module, an item, a terrain). */
+  findPaintable(name: string): Exhibit | undefined {
+    const n = normName(name);
+    const all = [...this.exhibits(this.files), ...this.terrainExhibits()];
+    return all.find((e) => normName(e.label) === n) ?? all.find((e) => n.includes(normName(e.label).split(' ')[0]) && normName(e.label).length >= 3) ?? all.find((e) => normName(e.label).includes(n));
   }
 
   /** Magic runes in the phrase, in their order: the incantation T would cast. */
@@ -3022,11 +3202,19 @@ export class Kernel {
     const p = this.playerPos();
     if (Math.hypot(rx - p.x, ry - p.y) < 0.5) return { kind: 'player' };
     const R = this.config.circleRadius;
-    if (Math.hypot(rx, ry) >= R && this.coronaRevealed()) {
+    if (this.corona.isInterior(rx) || (Math.hypot(rx, ry) >= R && this.coronaRevealed())) {
       const a = this.archive.nearest(rx, ry, 0.7);
       if (a) return { kind: 'agent', agent: a.agent, name: a.name, doing: a.say ?? (a.path ? `lavora su ${a.path}` : undefined) };
       const cell = this.corona.at(Math.floor(rx), Math.floor(ry));
-      return cell && (cell.kind === 'file' || cell.kind === 'folder') ? { kind: 'code', cell, folder: this.corona.folder(cell.folder)?.name } : null;
+      if (cell?.kind === 'item' && cell.item && cell.item.kind !== 'desk') {
+        const recent = cell.item.path ? this.recentChanges().get(cell.item.path) : undefined;
+        return { kind: 'studio', item: cell.item, building: this.corona.building(cell.building)?.name ?? '', recent: recent ? `${recent.author}: ${recent.message}` : undefined };
+      }
+      if (cell?.kind === 'door' || cell?.kind === 'building') {
+        const b = this.corona.building(cell.building);
+        return b ? { kind: 'door', building: b.name, team: AGENTS[b.team as AgentId]?.name ?? b.team } : null;
+      }
+      return null;
     }
     const { ox, oy } = this.offset();
     const cx = rx + ox;
@@ -3063,12 +3251,12 @@ export class Kernel {
   // --- The Forge and Genesis ---------------------------------------------------------------------
 
   /** Forges a module through the Council, then validates, commits and hot loads it; the Atelier paints it later. */
-  async forgeModule(prompt: string, origin: ForgeOrigin, kind?: 'npc' | 'oggetto' | 'strumento'): Promise<{ ok: boolean; id?: string; summary: string }> {
+  async forgeModule(prompt: string, origin: ForgeOrigin, kind?: 'npc' | 'oggetto' | 'strumento', permissive = false): Promise<{ ok: boolean; id?: string; summary: string }> {
     const ids = [...this.modules.keys()];
     try {
       const r = await forge(
         this.council,
-        { prompt, origin, kind, existingIds: ids, paletteCodes: Object.keys(this.palette).filter((c) => c !== '?' && !this.palette[c].solid), paint: false },
+        { prompt, origin, kind, existingIds: ids, paletteCodes: Object.keys(this.palette).filter((c) => c !== '?' && !this.palette[c].solid), paint: false, permissive },
         (m, logic) => this.validator.validateForged(m, logic, new Set(ids)),
       );
       // What a character carries: existing items by name, new ones defined by the Narrator.
@@ -3343,6 +3531,7 @@ export class Kernel {
     this.time += dt;
     this.tickCount++;
     this.archive.tick(dt);
+    if (this.zone === 'corona') this.archive.meet(this.playerPos().x, this.playerPos().y);
     this.societyTick();
     if (this.repo.backend && this.tickCount % (60 * 120) === 0) this.saveState();
     if (this.tickCount % 10 === 0) {
@@ -3387,7 +3576,7 @@ export class Kernel {
     if (okPos && okCarpet) {
       const d = Math.hypot(p.x, p.y);
       const max = this.corona.outer - 0.5;
-      if (d > max) {
+      if (d > max && !this.corona.isInterior(p.x)) {
         p.x *= max / d;
         p.y *= max / d;
       }
@@ -3403,7 +3592,7 @@ export class Kernel {
 
   private updateZone(): void {
     const p = this.playerPos();
-    const zone = Math.hypot(p.x, p.y) >= this.config.circleRadius ? 'corona' : 'sim';
+    const zone = this.corona.isInterior(p.x) ? 'studio' : Math.hypot(p.x, p.y) >= this.config.circleRadius ? 'corona' : 'sim';
     if (zone === this.zone) return;
     this.zone = zone;
     this.bus.emit('zone', { zone, first: zone === 'corona' && !this.exitedOnce });

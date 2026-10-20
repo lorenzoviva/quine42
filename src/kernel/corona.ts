@@ -1,54 +1,103 @@
-// The corona: a still ring around the simulation circle holding the universe's entire source, laid
-// out as an archive. Every folder is a sector of the ring (a room with its own floor and a sign at the
-// threshold); every file is an object on the floor of its sector: a book (manifest), a crystal (Lua
-// code), a scroll (text), a tablet (other data). E next to a file opens it in the editor.
-// Deterministic: same files → same archive.
+// The corona as the studio of a game company: a campus on the ring around the simulation, one
+// building per folder of the universe (and a gallery, a map room), with a door on the walkway.
+// Inside, buildings are bigger than outside (ADR-0022): rooms on several floors joined by stairs,
+// shelves with every file (book = manifest, crystal = Lua, scroll = text, tablet = data), framed
+// sprites and painted terrains, desks where the Council's teams work, a notice board with the latest
+// changes. Interiors live in their own region of real space, far from the ring; doors teleport.
+// Deterministic: same files → same studio.
 
 import type { FileMap } from './types';
 
-export type CoronaCellKind = 'file' | 'folder' | 'floor' | 'empty';
 export type FileLook = 'libro' | 'cristallo' | 'pergamena' | 'tavoletta';
+export type ItemKind = 'file' | 'sprite' | 'tile' | 'board' | 'up' | 'down' | 'exit' | 'desk';
 
-export interface CoronaCell {
-  kind: CoronaCellKind;
-  /** Sector (folder) this cell belongs to. */
-  folder?: string;
-  /** For files. */
+export interface StudioItem {
+  kind: ItemKind;
+  x: number;
+  y: number;
+  label: string;
   path?: string;
   look?: FileLook;
-  /** Lines of the file (files only). */
   lines?: number;
-  /** For compatibility with the editor (opens at the first line). */
-  line?: number;
+  /** Image asset (sprites, icons, textures) and its fallback colour. */
+  asset?: string;
+  color?: string;
+  /** What to repaint when asked (module id, item id, tile code). */
+  target?: string;
 }
 
-export interface Folder {
+export interface Floor {
+  index: number;
+  /** Top-left of the room in real space. */
+  ox: number;
+  oy: number;
+  items: StudioItem[];
+}
+
+export interface Building {
+  index: number;
   id: string;
   name: string;
   color: string;
-  /** Angles (radians, clockwise from the top) the sector spans. */
+  /** Council agent whose team works here. */
+  team: string;
+  /** Angles (radians, clockwise from the top) of its sector of the ring. */
   from: number;
   to: number;
-  files: string[];
-  /** Where its sign stands (real-space cell). */
-  sign: { x: number; y: number };
+  /** Exterior: the door (real-space cell) and the cells of its walls/roof. */
+  door: { x: number; y: number };
+  cells: Set<string>;
+  floors: Floor[];
 }
 
-const FOLDERS: Record<string, { name: string; color: string }> = {
-  universo: { name: 'Universo', color: '#ffcf5c' },
-  mondo: { name: 'Mondo', color: '#7dd87d' },
-  concilio: { name: 'Concilio', color: '#ff8ad8' },
-  nucleo: { name: 'Nucleo', color: '#6fc3ff' },
-  sistemi: { name: 'Sistemi', color: '#b9a6ff' },
-  luoghi: { name: 'Luoghi', color: '#9ad27a' },
-  oggetti: { name: 'Oggetti', color: '#e0b070' },
-  cose: { name: 'Cose', color: '#d89a6a' },
-  persone: { name: 'Persone', color: '#ffb38a' },
-  magia: { name: 'Magia', color: '#c48aff' },
-  altro: { name: 'Altro', color: '#9fb2a8' },
+export interface CoronaCell {
+  kind: 'floor' | 'building' | 'door' | 'room' | 'wall' | 'item';
+  building?: string;
+  item?: StudioItem;
+  /** Compatibility with the hover/editor: the file under the cell. */
+  path?: string;
+  look?: FileLook;
+  lines?: number;
+  line?: number;
+  folder?: string;
+}
+
+/** Something to show in the gallery or the map room. */
+export interface Exhibit {
+  label: string;
+  asset?: string;
+  color?: string;
+  path: string;
+  target: string;
+}
+
+export const ROOM_W = 24;
+export const ROOM_H = 15;
+/** Interiors start here (real space); each building has its column, each floor its row. */
+export const INTERIOR_X = 30000;
+const BUILDING_STRIDE = 80;
+const FLOOR_STRIDE = 40;
+const SHELF_ROWS = [3, 6, 9];
+const SHELF_X0 = 3;
+const SHELF_X1 = ROOM_W - 4;
+
+const ROOMS: Record<string, { name: string; color: string; team: string }> = {
+  universo: { name: 'Direzione', color: '#ffcf5c', team: 'arbitro' },
+  mondo: { name: 'Biblioteca del Mondo', color: '#7dd87d', team: 'narratore' },
+  concilio: { name: 'Sala del Concilio', color: '#ff8ad8', team: 'arbitro' },
+  nucleo: { name: 'Il Nucleo', color: '#6fc3ff', team: 'ingegnere' },
+  sistemi: { name: 'Sala Sistemi', color: '#b9a6ff', team: 'ingegnere' },
+  luoghi: { name: 'Ufficio dei Luoghi', color: '#9ad27a', team: 'cartografo' },
+  oggetti: { name: 'Magazzino degli Oggetti', color: '#e0b070', team: 'fisico' },
+  cose: { name: 'Laboratorio delle Cose', color: '#d89a6a', team: 'fisico' },
+  persone: { name: 'Studio dei Personaggi', color: '#ffb38a', team: 'narratore' },
+  magia: { name: 'Torre della Magia', color: '#c48aff', team: 'narratore' },
+  altro: { name: 'Archivio', color: '#9fb2a8', team: 'ingegnere' },
+  galleria: { name: "Galleria dell'Artista", color: '#ff8ad8', team: 'artista' },
+  cartografia: { name: 'Studio del Cartografo', color: '#7dd87d', team: 'cartografo' },
 };
 
-/** Which room of the archive a file lives in. */
+/** Which building a file lives in. */
 export function folderOf(path: string): string {
   const m = /^modules\/([a-z]+)\./.exec(path);
   if (m) {
@@ -74,124 +123,203 @@ export function lookOf(path: string): FileLook {
   return 'tavoletta';
 }
 
-const ORDER = Object.keys(FOLDERS);
-/** Rings of the archive: a walkway, then shelves of files every other ring. */
-const SHELF_RINGS = [2, 4, 6];
-const SLOT_SPACING = 2;
+const ORDER = Object.keys(ROOMS);
+
+/** Real-space cell at radius r and angle t (clockwise from the top). */
+export function polarCell(r: number, t: number): { x: number; y: number } {
+  return { x: Math.floor(Math.sin(t) * r), y: Math.floor(-Math.cos(t) * r) };
+}
+
+function angleOf(x: number, y: number): number {
+  let t = Math.atan2(y + 0.5, x + 0.5) + Math.PI / 2;
+  if (t < 0) t += Math.PI * 2;
+  return t;
+}
+
+/** Shelf positions of a floor, in reading order. */
+function shelfSlots(): Array<{ x: number; y: number }> {
+  const out: Array<{ x: number; y: number }> = [];
+  for (const y of SHELF_ROWS) for (let x = SHELF_X0; x <= SHELF_X1; x++) out.push({ x, y });
+  return out;
+}
+const SLOTS = shelfSlots();
 
 export class Corona {
   outer: number;
-  folders: Folder[] = [];
-  private cells = new Map<string, CoronaCell>();
+  buildings: Building[] = [];
   private slots = new Map<string, { x: number; y: number }>();
+  private exterior = new Map<string, CoronaCell>();
   private files: FileMap = {};
 
   constructor(readonly radius: number) {
-    this.outer = radius + 8;
+    this.outer = radius + 9;
   }
 
-  build(files: FileMap): void {
+  /** Compatibility: the folders are the buildings. */
+  get folders(): Array<{ id: string; name: string; color: string; from: number; to: number; files: string[] }> {
+    return this.buildings.map((b) => ({ id: b.id, name: b.name, color: b.color, from: b.from, to: b.to, files: b.floors.flatMap((f) => f.items.filter((i) => i.kind === 'file').map((i) => i.path!)) }));
+  }
+
+  build(files: FileMap, gallery: Exhibit[] = [], terrains: Exhibit[] = []): void {
     this.files = files;
-    this.cells.clear();
     this.slots.clear();
+    this.exterior.clear();
     const R = this.radius;
-    const groups = new Map<string, string[]>();
-    for (const path of Object.keys(files).sort()) {
-      const f = folderOf(path);
-      if (!groups.has(f)) groups.set(f, []);
-      groups.get(f)!.push(path);
-    }
-    const ids = [...groups.keys()].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
-    // Enough rings for every file: slots per ring ≈ circumference / spacing.
-    let rings = [...SHELF_RINGS];
-    const capacity = (rs: number[]) => rs.reduce((n, r) => n + Math.floor((2 * Math.PI * (R + r)) / SLOT_SPACING), 0) - ids.length * rs.length;
-    while (capacity(rings) < Object.keys(files).length) rings.push(rings[rings.length - 1] + 2);
-    this.outer = R + rings[rings.length - 1] + 2;
-
-    // Sectors proportional to the number of files (with a minimum, so small folders are rooms too).
-    const total = ids.reduce((n, id) => n + groups.get(id)!.length + 2, 0);
-    let a = 0;
-    this.folders = ids.map((id) => {
-      const span = ((groups.get(id)!.length + 2) / total) * Math.PI * 2;
-      const def = FOLDERS[id] ?? FOLDERS.altro;
-      const from = a;
-      a += span;
-      const mid = from + 0.6 / (R + 1);
-      return { id, name: def.name, color: def.color, from, to: a, files: groups.get(id)!, sign: polarCell(R + 1.5, mid) };
-    });
-
-    const angleOf = (x: number, y: number) => {
-      let t = Math.atan2(y + 0.5, x + 0.5) + Math.PI / 2;
-      if (t < 0) t += Math.PI * 2;
-      return t;
+    this.outer = R + 9;
+    const groups = new Map<string, Array<Omit<StudioItem, 'x' | 'y'>>>();
+    const add = (room: string, item: Omit<StudioItem, 'x' | 'y'>) => {
+      if (!groups.has(room)) groups.set(room, []);
+      groups.get(room)!.push(item);
     };
+    for (const path of Object.keys(files).sort()) add(folderOf(path), { kind: 'file', path, label: path, look: lookOf(path), lines: files[path].split('\n').length });
+    for (const g of gallery) add('galleria', { kind: 'sprite', label: g.label, asset: g.asset, color: g.color, path: g.path, target: g.target });
+    for (const t of terrains) add('cartografia', { kind: 'tile', label: t.label, asset: t.asset, color: t.color, path: t.path, target: t.target });
+    const ids = [...groups.keys()].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
+    const total = ids.length;
+    this.buildings = ids.map((id, index) => {
+      const def = ROOMS[id] ?? ROOMS.altro;
+      const from = (index / total) * Math.PI * 2;
+      const to = ((index + 1) / total) * Math.PI * 2;
+      const mid = (from + to) / 2;
+      const items = groups.get(id)!;
+      const perFloor = SLOTS.length;
+      const floors: Floor[] = [];
+      const nFloors = Math.max(1, Math.ceil(items.length / perFloor));
+      for (let f = 0; f < nFloors; f++) {
+        const ox = INTERIOR_X + index * BUILDING_STRIDE;
+        const oy = f * FLOOR_STRIDE;
+        const placed: StudioItem[] = items.slice(f * perFloor, (f + 1) * perFloor).map((it, i) => ({ ...it, x: ox + SLOTS[i].x, y: oy + SLOTS[i].y }));
+        // Furniture of an office: desks for the team, the notice board, stairs, the way out.
+        for (let d = 0; d < 3; d++) placed.push({ kind: 'desk', label: 'scrivania', x: ox + 4 + d * 6, y: oy + ROOM_H - 3 });
+        if (f === 0) {
+          placed.push({ kind: 'exit', label: 'uscita', x: ox + Math.floor(ROOM_W / 2), y: oy + ROOM_H - 1 });
+          placed.push({ kind: 'board', label: 'bacheca: le ultime modifiche', x: ox + 1, y: oy + ROOM_H - 2 });
+        }
+        if (f < nFloors - 1) placed.push({ kind: 'up', label: `scala al piano ${f + 2}`, x: ox + ROOM_W - 2, y: oy + 1 });
+        if (f > 0) placed.push({ kind: 'down', label: `scala al piano ${f}`, x: ox + 1, y: oy + 1 });
+        for (const it of placed) if (it.kind === 'file' && it.path) this.slots.set(it.path, { x: it.x, y: it.y });
+        floors.push({ index: f, ox, oy, items: placed });
+      }
+      // Outside: a block on the outer part of the sector, the door towards the walkway.
+      const span = (to - from) * 0.36;
+      const cells = new Set<string>();
+      for (let r = R + 3.5; r < R + 7.5; r += 0.5)
+        for (let a = mid - span; a <= mid + span; a += 0.35 / r) {
+          const c = polarCell(r, a);
+          cells.add(`${c.x},${c.y}`);
+        }
+      const door = polarCell(R + 3.2, mid);
+      cells.delete(`${door.x},${door.y}`);
+      return { index, id, name: def.name, color: def.color, team: def.team, from, to, door, cells, floors };
+    });
+    // The walkway and the lawns of the campus.
     const max = Math.ceil(this.outer) + 1;
     for (let y = -max; y < max; y++)
       for (let x = -max; x < max; x++) {
         const d = Math.hypot(x + 0.5, y + 0.5);
         if (d < R || d >= this.outer) continue;
         const t = angleOf(x, y);
-        const folder = this.folders.find((f) => t >= f.from && t < f.to) ?? this.folders[this.folders.length - 1];
-        this.cells.set(`${x},${y}`, { kind: 'floor', folder: folder?.id });
+        const b = this.buildings.find((bb) => t >= bb.from && t < bb.to) ?? this.buildings[this.buildings.length - 1];
+        const key = `${x},${y}`;
+        if (b?.cells.has(key)) this.exterior.set(key, { kind: 'building', building: b.id });
+        else if (b && b.door.x === x && b.door.y === y) this.exterior.set(key, { kind: 'door', building: b.id });
+        else this.exterior.set(key, { kind: 'floor', building: b?.id, folder: b?.id });
       }
-
-    for (const f of this.folders) {
-      this.cells.set(`${f.sign.x},${f.sign.y}`, { kind: 'folder', folder: f.id });
-      // Files stand in columns across the shelves (a module's files side by side), centred in the room.
-      const queue = [...f.files];
-      const mid = R + rings[Math.floor(rings.length / 2)] + 0.5;
-      const step = SLOT_SPACING / mid;
-      const pad = 1.4 / mid;
-      const columns = Math.ceil(queue.length / rings.length);
-      const centre = (f.from + f.to) / 2;
-      let t = Math.max(f.from + pad, centre - ((columns - 1) * step) / 2);
-      for (; t < f.to - pad && queue.length; t += step)
-        for (const r of rings) {
-          if (!queue.length) break;
-          const c = polarCell(R + r + 0.5, t);
-          const key = `${c.x},${c.y}`;
-          if (this.cells.get(key)?.kind !== 'floor') continue;
-          const path = queue.shift()!;
-          this.cells.set(key, { kind: 'file', folder: f.id, path, look: lookOf(path), lines: files[path].split('\n').length, line: 1 });
-          this.slots.set(path, c);
-        }
-      // A sector too narrow for its files: the rest go wherever there is floor in it.
-      for (const [key, cell] of this.cells) {
-        if (!queue.length) break;
-        if (cell.kind !== 'floor' || cell.folder !== f.id) continue;
-        const [x, y] = key.split(',').map(Number);
-        const d = Math.hypot(x + 0.5, y + 0.5) - R;
-        if (d < 1.5 || (x + y) % 2) continue;
-        const path = queue.shift()!;
-        this.cells.set(key, { kind: 'file', folder: f.id, path, look: lookOf(path), lines: files[path].split('\n').length, line: 1 });
-        this.slots.set(path, { x, y });
-      }
-    }
   }
 
-  /** Cell at integer real-space coordinates, or null outside the ring. */
+  /** The room (building and floor) containing a real-space point, if it is inside. */
+  roomAt(x: number, y: number): { building: Building; floor: Floor } | undefined {
+    if (x < INTERIOR_X - 10) return undefined;
+    const b = this.buildings[Math.floor((x - INTERIOR_X + 10) / BUILDING_STRIDE)];
+    if (!b) return undefined;
+    const f = b.floors[Math.floor((y + 10) / FLOOR_STRIDE)];
+    if (!f) return undefined;
+    return { building: b, floor: f };
+  }
+
+  isInterior(x: number): boolean {
+    return x >= INTERIOR_X - 10;
+  }
+
+  /** Cell at integer real-space coordinates, or null outside the ring and the rooms. */
   at(cx: number, cy: number): CoronaCell | null {
-    return this.cells.get(`${cx},${cy}`) ?? null;
+    const room = this.roomAt(cx, cy);
+    if (room) {
+      const lx = cx - room.floor.ox;
+      const ly = cy - room.floor.oy;
+      if (lx < 0 || ly < 0 || lx >= ROOM_W || ly >= ROOM_H) return null;
+      const item = room.floor.items.find((i) => i.x === cx && i.y === cy);
+      if (item) return { kind: 'item', building: room.building.id, item, path: item.path, look: item.look, lines: item.lines, line: 1, folder: room.building.id };
+      if (lx === 0 || ly === 0 || lx === ROOM_W - 1 || ly === ROOM_H - 1) return { kind: 'wall', building: room.building.id };
+      return { kind: 'room', building: room.building.id };
+    }
+    return this.exterior.get(`${cx},${cy}`) ?? null;
   }
 
-  /** Where a file lies (real-space cell), if it is in the archive. */
+  /** Can one stand there? Walls, shelves, desks and the buildings' outside walls block. */
+  free(x: number, y: number): boolean {
+    const c = this.at(Math.floor(x), Math.floor(y));
+    if (!c) return false;
+    if (c.kind === 'floor' || c.kind === 'door' || c.kind === 'room') return true;
+    if (c.kind === 'item') return c.item!.kind === 'exit' || c.item!.kind === 'up' || c.item!.kind === 'down' || c.item!.kind === 'board';
+    return false;
+  }
+
+  /** Where a file stands (real-space cell), if it is in the studio. */
   slotOf(path: string): { x: number; y: number } | undefined {
     return this.slots.get(path);
   }
 
-  /** The nearest file within r cells of a real-space point. */
-  nearestFile(x: number, y: number, r = 1.6): string | undefined {
-    let best: string | undefined;
+  /** The nearest thing within r cells of a point (in the room you are in). */
+  itemNear(x: number, y: number, r = 1.6, kinds?: ItemKind[]): StudioItem | undefined {
+    const room = this.roomAt(x, y);
+    if (!room) return undefined;
+    let best: StudioItem | undefined;
     let bd = r;
-    for (const [path, s] of this.slots) {
-      const d = Math.hypot(s.x + 0.5 - x, s.y + 0.5 - y);
-      if (d < bd) [best, bd] = [path, d];
+    for (const it of room.floor.items) {
+      if (it.kind === 'desk' || (kinds && !kinds.includes(it.kind))) continue;
+      const d = Math.hypot(it.x + 0.5 - x, it.y + 0.5 - y);
+      if (d < bd) [best, bd] = [it, d];
     }
     return best;
   }
 
-  folder(id: string | undefined): Folder | undefined {
-    return this.folders.find((f) => f.id === id);
+  nearestFile(x: number, y: number, r = 1.6): string | undefined {
+    return this.itemNear(x, y, r, ['file'])?.path;
+  }
+
+  /** The building whose door is near a point outside. */
+  doorNear(x: number, y: number, r = 1.6): Building | undefined {
+    return this.buildings.find((b) => Math.hypot(b.door.x + 0.5 - x, b.door.y + 0.5 - y) < r);
+  }
+
+  /** Where you appear entering a building (floor 0, just inside the door) or a floor by the stairs. */
+  entrance(b: Building, floor = 0, from: 'door' | 'up' | 'down' = 'door'): { x: number; y: number } {
+    const f = b.floors[Math.max(0, Math.min(b.floors.length - 1, floor))];
+    if (from === 'up') return { x: f.ox + 2.5, y: f.oy + 2.5 };
+    if (from === 'down') return { x: f.ox + ROOM_W - 2.5, y: f.oy + 2.5 };
+    return { x: f.ox + ROOM_W / 2 + 0.5, y: f.oy + ROOM_H - 2.5 };
+  }
+
+  /** Where you come out of a building: on the walkway, in front of its door. */
+  exitPoint(b: Building): { x: number; y: number } {
+    const mid = (b.from + b.to) / 2;
+    return { x: Math.sin(mid) * (this.radius + 2) + 0.5, y: -Math.cos(mid) * (this.radius + 2) + 0.5 };
+  }
+
+  building(id: string | undefined): Building | undefined {
+    return this.buildings.find((b) => b.id === id);
+  }
+
+  /** Compatibility with the old archive: a folder is a building. */
+  folder(id: string | undefined): Building | undefined {
+    return this.building(id);
+  }
+
+  /** The building that holds a file. */
+  buildingOf(path: string): Building | undefined {
+    const s = this.slots.get(path);
+    return s ? this.roomAt(s.x, s.y)?.building : undefined;
   }
 
   inRing(x: number, y: number): boolean {
@@ -202,9 +330,4 @@ export class Corona {
   fileCount(): number {
     return Object.keys(this.files).length;
   }
-}
-
-/** Real-space cell at radius r and angle t (clockwise from the top). */
-export function polarCell(r: number, t: number): { x: number; y: number } {
-  return { x: Math.floor(Math.sin(t) * r), y: Math.floor(-Math.cos(t) * r) };
 }

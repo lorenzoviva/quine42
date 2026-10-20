@@ -6,7 +6,7 @@
 import { parseJson, type Models, type Schema } from '../ai/models';
 import type { FileMap, TileDef } from '../types';
 
-export type AgentId = 'narratore' | 'cartografo' | 'artista' | 'fisico' | 'ingegnere' | 'arbitro';
+export type AgentId = 'narratore' | 'cartografo' | 'artista' | 'fisico' | 'ingegnere' | 'arbitro' | 'referente';
 
 export const AGENTS: Record<AgentId, { name: string; color: string; sigil: string }> = {
   narratore: { name: 'Narratore', color: '#ffcf5c', sigil: '✒' },
@@ -15,6 +15,7 @@ export const AGENTS: Record<AgentId, { name: string; color: string; sigil: strin
   fisico: { name: 'Fisico', color: '#6fc3ff', sigil: '⚖' },
   ingegnere: { name: 'Ingegnere', color: '#b9a6ff', sigil: '⚙' },
   arbitro: { name: 'Arbitro', color: '#ff6b6b', sigil: '⚑' },
+  referente: { name: 'Referente', color: '#f2f2f2', sigil: '✉' },
 };
 
 export type FeedKind = 'propone' | 'obietta' | 'approva' | 'corregge' | 'dipinge' | 'scarta' | 'info' | 'errore';
@@ -162,6 +163,10 @@ export class Council {
         break;
       case 'arbitro':
         parts.push(`## Bibbia del mondo\n${bibleSummary(bible)}`, `## Guida di stile\n${style}`, `## Terreni\n${paletteSummary(v.palette)}`);
+        if (rules) parts.push(rules);
+        break;
+      case 'referente':
+        parts.push(`## Bibbia del mondo\n${bibleSummary(bible)}`, `## Moduli esistenti\n${catalogSummary(v.catalog)}`);
         if (rules) parts.push(rules);
         break;
     }
