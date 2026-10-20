@@ -412,7 +412,7 @@ export function spritePrompt(c: Council, concept: Pick<Concept, 'nome' | 'aspett
   return [
     `ART DIRECTION:\n${style}`,
     `Game sprite of "${concept.nome}": ${concept.aspetto}.`,
-    concept.tipo === 'npc' ? 'A single character seen from a high top-down angle, full body, facing down.' : 'A single object seen strictly from above (top-down), as it lies on the ground.',
+    concept.tipo === 'npc' ? 'A single character in three-quarter view (3/4, from about 45° above), full body, facing the viewer.' : 'A single object in three-quarter view (its front and a bit of its top), standing on its base.',
     'Centered, filling about 70% of the frame, crisp edges, no shadow on the ground, no text, no frame.',
     'Background: one flat uniform pure magenta (#FF00FF) colour, nothing else, so it can be cut out.',
   ].join('\n');

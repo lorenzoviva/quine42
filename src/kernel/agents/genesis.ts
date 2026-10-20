@@ -196,7 +196,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     c.ask<RawStyle>(
       'artista',
       'genesis.style',
-      `Scrivi la guida di stile visiva per tutte le immagini di questo universo (tile ripetibili, sprite di personaggi e oggetti, icone; gioco 2D rigorosamente dall'alto, grafica semplice e leggibile).\nTitolo: ${bible.titolo}\nTono: ${bible.tono}\nSintesi: ${bible.sintesi}${feedback ? `\nL'Arbitro ha obiettato: ${feedback}` : ''}`,
+      `Scrivi la guida di stile visiva per tutte le immagini di questo universo (tile ripetibili, sprite di personaggi e oggetti, icone; gioco 2D in prospettiva di 3/4 come i JRPG a 16 bit — si vedono il davanti e un po' del sopra di persone, oggetti ed edifici; il terreno è piatto —, grafica semplice e leggibile).\nTitolo: ${bible.titolo}\nTono: ${bible.tono}\nSintesi: ${bible.sintesi}${feedback ? `\nL'Arbitro ha obiettato: ${feedback}` : ''}`,
       STYLE_SCHEMA,
       { data: { ...data, bible } },
     );

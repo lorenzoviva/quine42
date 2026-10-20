@@ -18,8 +18,18 @@ export const DIRECTIONS = ['down', 'left', 'right', 'up'] as const;
 export type Direction = (typeof DIRECTIONS)[number];
 const DIR_WORDS: Record<Direction, string> = { down: 'walking towards the viewer (facing down)', left: 'walking to the left', right: 'walking to the right', up: 'walking away from the viewer (facing up)' };
 
-const style = (c: Council) => `ART DIRECTION:\n${c.files['world/style.md'] ?? ''}`;
-const KEY = 'Background: one flat uniform pure magenta (#FF00FF) colour everywhere around the subject, nothing else, so it can be cut out.';
+/**
+ * The camera of the game (kernel: whatever an older style guide says). Three-quarter view, as in
+ * classic 16-bit JRPGs: everything is seen from about 45° above, so people and objects show their
+ * front and their top, buildings their front walls under the roof; the ground is flat.
+ */
+export const PERSPECTIVE = 'CAMERA: three-quarter top-down view (3/4, like classic 16-bit JRPGs such as Chrono Trigger or Stardew Valley): seen from about 45 degrees above and from the south, so characters and objects show their front side and a bit of their top; buildings show their front wall under the roof. Never a pure top-down (bird\'s eye) view, never a side view.';
+const style = (c: Council) => `ART DIRECTION:\n${c.files['world/style.md'] ?? ''}\n${PERSPECTIVE}`;
+/**
+ * Image models paint no real transparency (no alpha channel): the subject goes on a flat key colour
+ * that the kernel removes (render/imagetools.ts → keyAndFit).
+ */
+const KEY = 'Background: one flat uniform pure magenta (#FF00FF) colour everywhere around the subject, nothing else, so it can be cut out. Never use magenta or pink on the subject itself. Keep each subject well inside its cell, never touching the edges.';
 
 export class Atelier {
   constructor(private c: Council) {}
@@ -31,8 +41,8 @@ export class Atelier {
       'art.textures',
       [
         style(this.c),
-        'Paint a 2x2 grid of square, seamless, tileable top-down ground textures for a 2D game (each quadrant is one texture, edge to edge, no borders, no gaps, no labels).',
-        ...terrains.slice(0, 4).map((t, i) => `${cells[i]}: ${t.name} — ${t.description}. Strictly top-down, uniform density, no single focal object, no shadows from outside, it must tile seamlessly when repeated.`),
+        'Paint a 2x2 grid of square, seamless, tileable ground textures for a 2D game (each quadrant is one texture, edge to edge, no borders, no gaps, no labels). The ground is flat, as the three-quarter camera sees a floor: no walls, no standing objects.',
+        ...terrains.slice(0, 4).map((t, i) => `${cells[i]}: ${t.name} — ${t.description}. Flat surface, uniform density, no single focal object, no shadows from outside, it must tile seamlessly when repeated.`),
         terrains.length < 4 ? `${cells.slice(terrains.length).join(', ')}: plain neutral grey.` : '',
       ].join('\n'),
       [],
@@ -47,7 +57,7 @@ export class Atelier {
       'art.obstacles',
       [
         style(this.c),
-        'Paint a 2x2 grid of separate game sprites, each centred in its quadrant and filling about 75% of it, seen from a high top-down angle, crisp edges, no ground, no cast shadow, no text.',
+        'Paint a 2x2 grid of separate game sprites (trees, rocks, standing things), each centred in its quadrant and filling about 70% of it, in three-quarter view (front and a bit of top visible, base at the bottom), crisp edges, no ground, no cast shadow, no text.',
         ...things.slice(0, 4).map((t, i) => `${cells[i]}: ${t.name} — ${t.description}.`),
         KEY,
       ].join('\n'),
@@ -66,7 +76,7 @@ export class Atelier {
         shots.length ? `The ${shots.length} input image(s) are sprites already in the game. ${shots.map((s, i) => `Image ${i + 1}: ${s.description}.`).join(' ')}` : '',
         shots.length ? 'Paint a NEW sprite in exactly the same style, scale, line weight, palette and viewing angle as the examples.' : 'Paint a game sprite.',
         `New sprite: ${description}.`,
-        kind === 'npc' ? 'A single character, full body, seen from a high top-down angle, facing down, standing.' : 'A single object seen from above, as it lies or stands on the ground.',
+        kind === 'npc' ? 'A single character, full body, in three-quarter view, facing the viewer (south), standing, feet at the bottom.' : 'A single object in three-quarter view (its front and a bit of its top), standing on its base at the bottom.',
         'Centred, filling about 70% of the frame, no ground, no cast shadow, no text, no frame.',
         KEY,
       ]
@@ -87,7 +97,7 @@ export class Atelier {
         'Paint its walking animation as a sprite sheet: a grid of 4 rows and 3 columns of equal cells.',
         'Row 1: walking towards the viewer (down). Row 2: walking left. Row 3: walking right. Row 4: walking away (up).',
         'Columns: three successive frames of the walk cycle (left foot forward, passing, right foot forward).',
-        'Same character, same size and position in every cell, same style as the input, no text, no grid lines.',
+        'Same character, same three-quarter view, same size and position in every cell (centred, never touching the cell edges), same style as the input, no text, no grid lines.',
         KEY,
       ].join('\n'),
       [base],

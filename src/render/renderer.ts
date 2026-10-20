@@ -339,19 +339,36 @@ export class Renderer {
         const x = col * T;
         const y = row * T;
         if (t.layer === 'wall') {
+          // Three-quarter view: the top of the wall above, its front face below where nothing hides it.
           const below = tile(code(col, row + 1)).layer === 'wall';
           if (!below) {
-            c.fillStyle = 'rgba(0,0,0,0.38)';
-            c.fillRect(x, y + T * 0.55, T, T * 0.45);
-            c.fillStyle = 'rgba(255,255,255,0.12)';
-            c.fillRect(x, y + T * 0.55, T, 2);
+            const top = y + T * 0.35;
+            c.fillStyle = shade(t.color, 0.72);
+            c.fillRect(x, top, T, T - (top - y));
+            // Courses of stone or brick on the face.
+            c.strokeStyle = 'rgba(0,0,0,0.28)';
+            c.lineWidth = 1;
+            for (let k = 0; k < 3; k++) {
+              const yy = top + ((T - (top - y)) / 3) * k;
+              c.beginPath();
+              c.moveTo(x, yy);
+              c.lineTo(x + T, yy);
+              c.stroke();
+              const off = k % 2 ? T / 2 : T / 4;
+              c.beginPath();
+              c.moveTo(x + off, yy);
+              c.lineTo(x + off, yy + (T - (top - y)) / 3);
+              c.stroke();
+            }
+            c.fillStyle = 'rgba(255,255,255,0.18)';
+            c.fillRect(x, top, T, 2);
+          } else {
+            c.fillStyle = 'rgba(255,255,255,0.06)';
+            c.fillRect(x, y, T, T);
           }
           c.strokeStyle = 'rgba(0,0,0,0.35)';
           c.lineWidth = 1;
           c.strokeRect(x + 0.5, y + 0.5, T - 1, T - 1);
-          if (tile(code(col, row + 1)).layer !== 'wall') {
-            // Cast shadow on the cell below is drawn by the cell below (next pass).
-          }
         } else if (t.layer === 'door') {
           c.fillStyle = shade(t.color, 0.7);
           c.fillRect(x + T * 0.15, y + T * 0.1, T * 0.7, T * 0.8);
@@ -752,6 +769,12 @@ export class Renderer {
   }
 
   /** Roofs cover buildings, except the one you are in. */
+  /**
+   * Roofs in three-quarter view: the roof rises above the building (shifted up), its front slope (the
+   * one facing the camera) larger and lit, the back slope narrow and darker, eaves along the front;
+   * under the eaves the front wall of the building stays visible (doors included). Hidden when you
+   * are inside.
+   */
   private drawRoofs(ox: number, oy: number): void {
     const k = this.kernel;
     const ctx = this.ctx;
@@ -762,33 +785,41 @@ export class Renderer {
     const roof = k.terrain?.manifest.roof ?? { color: '#9a4632' };
     const roofImg = this.images.peek(roof.texture);
     const pat = roofImg ? ctx.createPattern(roofImg, 'repeat') : null;
+    const lift = C * 0.7;
     for (const ch of k.chunks.values()) {
       for (const b of ch.buildings) {
         if (b === inside) continue;
         const x = this.sx(ch.cx * S + b.x0 - ox);
         const y = this.sy(ch.cy * S + b.y0 - oy);
         const w = (b.x1 - b.x0 + 1) * C;
-        const h = (b.y1 - b.y0 + 1) * C;
-        if (x > this.w || y > this.h || x + w < 0 || y + h < 0) continue;
+        // The front row of the building (its facade, with the doors) stays visible under the eaves.
+        const h = (b.y1 - b.y0) * C + C * 0.35;
+        if (x > this.w || y > this.h || x + w < 0 || y + h < -lift) continue;
+        const top = y - lift;
         ctx.fillStyle = 'rgba(0,0,0,0.3)';
-        ctx.fillRect(x + C * 0.15, y + C * 0.2, w, h);
+        ctx.fillRect(x + C * 0.12, top + C * 0.25, w, h + lift * 0.6);
         if (pat) {
-          pat.setTransform(new DOMMatrix().translate(x, y).scale(C / (roofImg!.width / 2)));
+          pat.setTransform(new DOMMatrix().translate(x, top).scale(C / (roofImg!.width / 2)));
           ctx.fillStyle = pat;
         } else ctx.fillStyle = roof.color;
-        ctx.fillRect(x, y - C * 0.25, w, h);
-        // Ridge and eaves: a top-down pitched roof.
-        const horizontal = w >= h;
-        const grd = horizontal ? ctx.createLinearGradient(0, y - C * 0.25, 0, y - C * 0.25 + h) : ctx.createLinearGradient(x, 0, x + w, 0);
-        grd.addColorStop(0, 'rgba(255,255,255,0.12)');
-        grd.addColorStop(0.49, 'rgba(255,255,255,0.02)');
-        grd.addColorStop(0.51, 'rgba(0,0,0,0.18)');
-        grd.addColorStop(1, 'rgba(0,0,0,0.32)');
+        ctx.fillRect(x, top, w, h);
+        // Back slope (narrow, darker) and front slope (wide, lit), split by the ridge.
+        const ridge = top + h * 0.33;
+        ctx.fillStyle = 'rgba(0,0,0,0.25)';
+        ctx.fillRect(x, top, w, ridge - top);
+        const grd = ctx.createLinearGradient(0, ridge, 0, top + h);
+        grd.addColorStop(0, 'rgba(255,255,255,0.16)');
+        grd.addColorStop(1, 'rgba(0,0,0,0.12)');
         ctx.fillStyle = grd;
-        ctx.fillRect(x, y - C * 0.25, w, h);
-        ctx.strokeStyle = 'rgba(0,0,0,0.45)';
+        ctx.fillRect(x, ridge, w, top + h - ridge);
+        ctx.fillStyle = 'rgba(255,255,255,0.25)';
+        ctx.fillRect(x, ridge - 1, w, 2);
+        // Eaves: a dark band along the front edge of the roof.
+        ctx.fillStyle = 'rgba(0,0,0,0.4)';
+        ctx.fillRect(x - 2, top + h - C * 0.14, w + 4, C * 0.14);
+        ctx.strokeStyle = 'rgba(0,0,0,0.5)';
         ctx.lineWidth = 2;
-        ctx.strokeRect(x + 1, y - C * 0.25 + 1, w - 2, h - 2);
+        ctx.strokeRect(x + 1, top + 1, w - 2, h - 2);
       }
     }
   }
