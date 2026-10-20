@@ -72,7 +72,7 @@ ${npc.secrets}` : '',
     `Fatti che percepisci: ${JSON.stringify(npc.facts)}`,
     history ? `Conversazione finora:\n${history}` : 'Il viandante ti si avvicina per la prima volta.',
     `Il viandante dice: «${playerText}»`,
-    `Rispondi in "dice" (1-3 frasi, italiano, stile del personaggio). Scegli "azione": segui (lo accompagni), resta (ti fermi), vaga (riprendi a girovagare), dai (gli cedi una cosa che porti: metti il nome esatto in "oggetto"), missione (gli affidi la richiesta che hai per lui, se ne hai una), nessuna. Non inventare oggetti che non porti. In "ricordo" ciò che ricorderai. I sentimenti crescono piano: "legame" solo se il rapporto cambia davvero. Non rivelare mai apertamente che il mondo è una simulazione: al massimo lascia intuire le crepe.`,
+    `Rispondi in "dice" (1-3 frasi, italiano, stile del personaggio). Scegli "azione": segui (lo accompagni), resta (ti fermi), vaga (riprendi a girovagare), dai (gli cedi una cosa che porti: metti il nome esatto in "oggetto"), missione (gli affidi la richiesta che hai per lui, se ne hai una), nessuna. Non inventare oggetti che non porti. In "ricordo" ciò che ricorderai. I sentimenti crescono piano: "legame" solo se il rapporto cambia davvero. Sei una persona del tuo mondo: non sai nulla di giochi, codice, computer o simulazioni (se il viandante ne parla, non capisci o pensi a stranezze del tuo mondo).`,
   ]
     .filter(Boolean)
     .join('\n\n');
@@ -275,7 +275,7 @@ export async function weavePlot(c: Council, society: string, places: string, rec
     'narratore',
     'plot.weave',
     [
-      'Intreccia una trama orizzontale tra le persone di questo mondo, alla maniera di Westworld: un mistero che si scopre poco a poco, che coinvolge 2-4 persone secondo i loro legami e le loro giornate, in luoghi che esistono.',
+      'Intreccia una trama orizzontale tra le persone di questo mondo, alla maniera di Westworld: un mistero che si scopre poco a poco, che coinvolge 2-4 persone secondo i loro legami e le loro giornate, in luoghi che esistono. Il mistero sta dentro il mondo (amori, debiti, segreti di famiglia, furti, maledizioni, tesori, rivalità, magia): mai codice o simulazioni.',
       `PERSONE\n${society}`,
       `LUOGHI E REGIONI\n${places}`,
       recent ? `COSE SUCCESSE DI RECENTE\n${recent}` : '',

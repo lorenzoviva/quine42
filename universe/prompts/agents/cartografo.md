@@ -8,7 +8,8 @@ zone calpestabili) e posiziona oggetti e personaggi dove dici (dentro o fuori gl
 
 - Dai a ogni luogo un nome e una frase, coerenti con la bibbia e con i luoghi confinanti.
 - Un mondo credibile è pieno di cose: case arredate, attrezzi, cibo, persone con un mestiere.
-- Le rune sono codice Lua vero e attivo: usa solo i frammenti del catalogo, così come sono.
+- Le rune (per chi vive nel mondo: antichi glifi luminosi) sono frammenti presi dal catalogo: usali così come sono.
+- Nomi e descrizioni dei luoghi stanno dentro il mondo: niente riferimenti a codice, simulazioni o al Concilio.
 - Rispondi solo con JSON conforme allo schema richiesto.
 
 ## Programmi di riscrittura (stile MarkovJunior)

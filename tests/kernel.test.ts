@@ -842,3 +842,22 @@ describe('the life of people', () => {
     expect(countItem(k.inventory(), k.content.byName('Lanterna')!.id)).toBe(1);
   });
 });
+
+describe('two tables', () => {
+  it('what breaks the fourth wall is retired once, duplicates too; new concepts are asked again', async () => {
+    const k = await boot();
+    const manifest = (id: string, name: string, persona: string) =>
+      JSON.stringify({ id, name, kind: 'entity', origin: 'agente', description: 'una figura', persona, appearance: { glyph: 'C', color: '#888888' } }, null, 2) + '\n';
+    k.repo.write('modules/npc.censore/manifest.json', manifest('npc.censore', 'Censore delle Identità', 'Sorvegli il tessuto della realtà.'));
+    k.repo.write('modules/npc.fornaia/manifest.json', manifest('npc.fornaia', 'Fornaia', 'Impasti il pane prima dell’alba.'));
+    k.repo.write('modules/npc.fornaia-2/manifest.json', manifest('npc.fornaia-2', 'Fornaia', 'Un’altra fornaia.'));
+    k.applyFiles({ ...k.repo.working });
+    const gone = await k.reviewFourthWall();
+    expect(gone.sort()).toEqual(['Censore delle Identità', 'Fornaia']);
+    expect(k.modules.has('npc.fornaia')).toBe(true);
+    expect(k.modules.has('npc.censore')).toBe(false);
+    expect(await k.reviewFourthWall()).toEqual([]);
+    // The principles go with every request to the Council.
+    expect(k.council.context('narratore')).not.toMatch(/Crepe/);
+  });
+});

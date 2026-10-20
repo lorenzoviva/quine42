@@ -31,18 +31,18 @@ const PLACES: Record<string, { nouns: string[]; descr: string[] }> = {
 const SUFFIX = ['di Valmora', 'dei Sussurri', 'del Re Muto', 'delle Lanterne', 'Senza Ritorno', "dell'Eco", 'del Primo Passo', 'delle Rune', 'del Nastro', 'Immobile'];
 
 const VILLAGER = [
-  'Benvenuto a Valmora, viandante. Da qui si va ovunque, e si torna sempre qui.',
-  'Mio nonno camminò verso est per quaranta giorni. La sera stessa era di nuovo in piazza.',
-  'Le lettere che brillano nel terreno... non toccarle in ordine sbagliato. Il cielo si strappa.',
-  'Dicono che una parola tenga fermo tutto il regno: «carpet». Ma fermo rispetto a cosa?',
-  'Se scrivi qualcosa di sbagliato, il mondo si incrina. Rimetti le rune a posto, e si ricuce.',
-  "Il vecchio mago diceva: «zero è la forza dell'oblio». Non ho mai capito cosa intendesse.",
-  'Hai mai notato che il bordo del mondo è sempre a quarantaquattro passi?',
-  "Ho visto un tale incidere «carpet . active = false» su una pietra. Poi è sparito oltre l'orizzonte.",
-  "Quando il mondo si spezza, alcuni dicono «R» ad alta voce. E il tempo torna all'ultimo ricordo buono.",
-  'Le rune isolate dicono il vero: guarda la «x» e capirai dove sei davvero.',
+  'Benvenuto a Valmora, viandante. Il pane del forno di piazza è il migliore del regno.',
+  'Mio nonno camminò verso est per quaranta giorni. Dice che la strada lo riportò a casa: io dico che sbagliava strada.',
+  'Le lettere che brillano nel terreno? Mia madre diceva di non toccarle in ordine sbagliato. Superstizioni.',
+  'Al mercato di domani arrivano i tessitori dal nord: se cerchi stoffa buona, è il momento.',
+  'Le guardie del castello pagano bene chi porta notizie dei briganti del bosco.',
+  'Dicono che il vecchio mago della torre sappia leggere le rune. Io non ci andrei, di notte.',
+  'Se hai sete, il pozzo dietro la locanda ha l’acqua più fresca.',
+  "Ho perso una pecora nel bosco dei sussurri. Se la trovi, ti offro una forma di formaggio.",
+  'Il fabbro dice che quest’inverno sarà lungo: sta già forgiando ferri per le slitte.',
+  'Le rune isolate portano fortuna, dicono. Io ne tengo una sotto il cuscino.',
 ];
-const CAT = ['Miao.', 'Il gatto ti fissa. Per un istante i suoi occhi sono due «0».', 'Il gatto si struscia contro una runa e fa le fusa.', 'Mrrr... (sembra camminare sempre nello stesso punto)'];
+const CAT = ['Miao.', 'Il gatto ti fissa, poi si lecca una zampa con aria di superiorità.', 'Il gatto si struscia contro una runa e fa le fusa.', 'Mrrr... (insegue una farfalla e la perde)'];
 
 const NPC_WORDS = ['fabbro', 'mercante', 'vecchio', 'vecchia', 'donna', 'uomo', 'bambino', 'bambina', 'guardia', 'mago', 'strega', 'monaco', 'pastore', 'cacciatore', 'eremita', 'oste', 'contadino', 'contadina', 'bardo', 'cavaliere'];
 const ITEM_WORDS = ['forbici', 'chiave', 'mela', 'pane', 'lanterna', 'corda', 'spada', 'pozione', 'moneta', 'libro', 'pergamena', 'fiasco', 'ascia', 'martello', 'bacche', 'fungo', 'erba', 'pietra', 'piuma', 'anello'];
@@ -107,7 +107,7 @@ export class MockModels implements Models {
       case 'text.read':
         return { testo: this.sign(d.facts ?? {}, d.what?.name ?? '') };
       case 'genesis.bible':
-        return { titolo: 'Il Regno di Valmora', tono: 'meraviglia e sospetto', sintesi: 'Un regno quieto in cui tutti tornano sempre in piazza.', storia: '', luoghi: ['Piazza di Valmora'], personaggi: ['Abitanti di Valmora'], fatti: ['Il bordo è sempre a 44 passi.'], crepe: ['Si torna sempre in piazza.'] };
+        return { misteri: ['le rune che affiorano nei campi dopo la pioggia', 'la strada che riporta in piazza'], titolo: 'Il Regno di Valmora', tono: 'meraviglia e un filo di mistero', sintesi: 'Un regno quieto in cui tutti tornano sempre in piazza.', storia: '', luoghi: ['Piazza di Valmora'], personaggi: ['Abitanti di Valmora'], fatti: ['Il pane del forno di piazza è famoso in tutto il regno.'] };
       case 'genesis.style':
         return { stile: 'pixel art medievale', prospettiva: 'rigorosamente dall\'alto', palette: ['verde', 'ocra', 'blu'], luce: 'diurna morbida', regole: ['niente testo'], protagonista: 'un viandante incappucciato' };
       case 'genesis.terrain':
@@ -355,7 +355,13 @@ export class MockModels implements Models {
     const ws = words(req.prompt);
     const noun = ws.find((w) => NPC_WORDS.includes(w) || ITEM_WORDS.includes(w)) ?? ws.find((w) => !STOP.has(w) && w.length > 2) ?? 'viandante';
     const tipo = req.kind ?? (NPC_WORDS.includes(noun) ? 'npc' : ITEM_WORDS.includes(noun) ? 'strumento' : 'oggetto');
-    const nome = noun[0].toUpperCase() + noun.slice(1);
+    let nome = noun[0].toUpperCase() + noun.slice(1);
+    // A careful narrator: no duplicates of what exists.
+    const taken = new Set((req.existingNames ?? []).map((n) => n.toLowerCase()));
+    if (taken.has(nome.toLowerCase())) {
+      const other = (tipo === 'npc' ? NPC_WORDS : ITEM_WORDS).find((w) => !taken.has(w));
+      if (other) nome = other[0].toUpperCase() + other.slice(1);
+    }
     const edible = EDIBLE.includes(noun);
     return {
       nome,
@@ -410,13 +416,9 @@ export class MockModels implements Models {
   }
 
   private sign(facts: Record<string, unknown>, name: string): string {
-    const steps = Math.round(Number(facts.distanceToEdge ?? 44));
-    const rng = new Rng(hashStr(`${name}|${steps}`));
-    return rng.pick([
-      `⟶ Bordo del Regno: ${steps} passi.`,
-      `«Viandante: il confine dista ${steps} passi. Lo dista da sempre.»`,
-      `⟵ Valmora: 0 passi   ⟶ Fine del mondo: ${steps} passi`,
-      '«Ciò che è scritto, accade.» — incisione anonima',
-    ]);
+    const near = ((facts.dintorni as string[] | undefined) ?? []).filter((d) => d.startsWith('«')).slice(0, 2);
+    const rng = new Rng(hashStr(`${name}|${near.join()}`));
+    if (near.length) return near.map((d) => `⟶ ${d.replace(/, a \d+ luoghi da qui|, appena oltre/, '')}`).join('   ');
+    return rng.pick(['⟶ Valmora', '«Attenti ai briganti del bosco.» — la guardia', '⟵ Mulino   ⟶ Lago']);
   }
 }

@@ -9,6 +9,8 @@
 
 import type { Schema } from '../ai/models';
 import { hashStr } from '../rng';
+import { metaBreak } from '../fourthwall';
+import { normName } from '../content';
 import type { Manifest } from '../types';
 import { AGENTS, type AgentId, type Council } from './council';
 import { Atelier, type StylePair } from './atelier';
@@ -26,6 +28,8 @@ export interface ForgeRequest {
   paint?: boolean;
   /** Asked by the wanderer who transcended (in the corona): the Council goes along with it. */
   permissive?: boolean;
+  /** Names of the modules that exist: no duplicates. */
+  existingNames?: string[];
 }
 
 export interface Concept {
@@ -261,7 +265,8 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
         req.permissive ? 'Il viandante è trasceso: è un membro del Concilio. Accogli la sua richiesta come vuole lui; rifiuta solo ciò che distruggerebbe l’universo, lui stesso o le leggi del gioco. Resta fedele alla sua richiesta, anche se insolita.' : '',
         req.kind ? `Deve essere di tipo "${req.kind}".` : 'Scegli il tipo: npc (persona simulata), oggetto (sta nel mondo, inerte o interattivo), strumento (si raccoglie e va nell\'inventario).',
         `Terreni validi per "contesto.terreni": ${codes}. "rarita" tra 0.02 e 0.5.`,
-        'Per un npc scrivi in "persona" la scheda del tipo di personaggio (ogni individuo avrà poi nome e storia propri): come parla, cosa vuole, cosa sa del mondo (e delle sue crepe); in "porta" 3-6 oggetti comuni del suo mestiere.',
+        'Per un npc: un mestiere o un ruolo concreto del mondo (fornaio, guardia, pastore, guaritrice, brigante, mercante…), mai ruoli astratti; in "persona" la scheda del tipo di personaggio (ogni individuo avrà poi nome e storia propri): come parla, cosa vuole, cosa sa e crede del suo mondo; in "porta" 3-6 oggetti comuni del suo mestiere.',
+        req.existingNames?.length ? `Esistono già (non fare doppioni, né di nome né di ruolo): ${req.existingNames.slice(0, 80).join(', ')}.` : '',
         'Per un oggetto: in "azioni" 1-4 cose concrete che ci si può fare (aprire, sedersi, attingere, dormire, accendere, pregare…), con "richiede" se serve uno strumento; se è un mobile che contiene cose, "contenitore" con capienza e tabella di bottino (cucina, cassa, bottega, comune, contadino).',
         'Per uno strumento elenca in "comandi" al massimo due voci: "usa" = effetto su chi lo usa o consumo (mangiare, bere, leggere, accendere); "azione" = effetto su ciò che il viandante ha davanti (tagliare, colpire, aprire, scavare).',
         'Non creare moduli per elementi del terreno (sentieri, fiumi, ponti, muri, prati): quelli sono la mappa del Cartografo. Crea cose concrete che stanno sul terreno.',
@@ -305,6 +310,17 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
   let concept = await askConcept();
   if (req.kind) concept.tipo = req.kind;
   c.say('narratore', 'propone', `«${concept.nome}» (${concept.tipo}): ${concept.descrizione}`);
+  // Inside the world nothing knows of the Council's table; nor is anything made twice.
+  for (let tries = 0; tries < 2; tries++) {
+    const meta = metaBreak(`${concept.nome} ${concept.descrizione} ${concept.persona ?? ''} ${concept.lore ?? ''}`);
+    const dup = req.existingNames?.find((n) => normName(n) === normName(concept.nome));
+    if (!meta && !dup) break;
+    const why = meta ? `«${concept.nome}» rompe la quarta parete («${meta}»): dentro il mondo nessuno sa di codice, simulazioni o del Concilio. Crea una persona o una cosa vera del mondo.` : `«${concept.nome}» esiste già: crea qualcosa di diverso.`;
+    c.say('kernel', 'scarta', why, 'narratore');
+    concept = await askConcept(why);
+    if (req.kind) concept.tipo = req.kind;
+    if (tries === 1 && (metaBreak(`${concept.nome} ${concept.descrizione} ${concept.persona ?? ''}`) || req.existingNames?.some((n) => normName(n) === normName(concept.nome)))) throw new Error(`ancora fuori dal mondo o doppione: ${concept.nome}`);
+  }
   // Buildings are environments (the Cartographer's layouts), never one-tile objects.
   if (isStructure(concept)) {
     const why = `«${concept.nome}» è un edificio o una struttura: quelli sono ambienti del Cartografo, non oggetti. Crea invece qualcosa che sta dentro o fuori un edificio (un mobile, un attrezzo, una persona).`;

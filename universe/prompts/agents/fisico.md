@@ -16,3 +16,7 @@ Rispondi solo con JSON conforme allo schema richiesto.
 
 Coerenza tipica: strutture e costruzioni (chioschi, altari, statue, pozzi, alberi, macigni) sono solide;
 cose piccole posate a terra (fiori, monete, attrezzi) si attraversano; casse, barili e sassi si possono spingere.
+
+## Meccaniche nuove
+Un cavallo rende più veloci, una slitta scivola sulla neve, uno zaino porta più peso: quantifica le
+nuove meccaniche (moltiplicatori di velocità, peso trasportabile, durata) in modo credibile.

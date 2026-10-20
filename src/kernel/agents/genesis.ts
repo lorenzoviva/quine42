@@ -48,9 +48,9 @@ const BIBLE_SCHEMA: Schema = {
     luoghi: { type: 'ARRAY', items: { type: 'STRING' } },
     personaggi: { type: 'ARRAY', items: { type: 'STRING' } },
     fatti: { type: 'ARRAY', items: { type: 'STRING' } },
-    crepe: { type: 'ARRAY', items: { type: 'STRING' } },
+    misteri: { type: 'ARRAY', items: { type: 'STRING' }, description: 'leggende e misteri raccontati dalla gente del mondo' },
   },
-  required: ['titolo', 'tono', 'sintesi', 'storia', 'luoghi', 'personaggi', 'fatti', 'crepe'],
+  required: ['titolo', 'tono', 'sintesi', 'storia', 'luoghi', 'personaggi', 'fatti', 'misteri'],
 };
 
 const STYLE_SCHEMA: Schema = {
@@ -188,7 +188,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     c.ask<Bible>(
       'narratore',
       'genesis.bible',
-      `Crea la bibbia di un nuovo universo a partire da questo tema:\n${theme}\n\nÈ un mondo simulato: un tappeto riporta sempre il viandante al centro, e il mondo è scritto in codice (rune). Gli abitanti non lo sanno, o fingono di non saperlo. Elenca 6-10 luoghi, 4-6 personaggi, 6-10 fatti, 4-6 crepe (indizi sottili della simulazione).${feedback ? `\nL'Arbitro ha obiettato: ${feedback}` : ''}`,
+      `Crea la bibbia di un nuovo universo a partire da questo tema:\n${theme}\n\nPer chi ci vive il mondo è reale (niente riferimenti a codice o simulazioni: vedi i principi). Nel terreno affiorano a volte antichi glifi luminosi (le rune) e chi cammina troppo a lungo si ritrova in piazza: dentro il mondo hanno spiegazioni del mondo (magia, leggende). Elenca 6-10 luoghi, 4-6 personaggi con mestieri concreti, 6-10 fatti, 4-6 misteri o leggende raccontati dalla gente.${feedback ? `\nL'Arbitro ha obiettato: ${feedback}` : ''}`,
       BIBLE_SCHEMA,
       { data },
     );

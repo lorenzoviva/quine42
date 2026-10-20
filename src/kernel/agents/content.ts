@@ -283,7 +283,7 @@ export async function individuate(c: Council, archetype: { name: string; descrip
       'Inseriscilo nella società: dagli una famiglia (1-3 legami) e, quando ha senso, legalo a persone già conosciute usando ESATTAMENTE i loro nomi (figlia del mugnaio, fratello del fabbro, rivale della locandiera); può anche nominare parenti che non sono ancora stati incontrati. Se tra le persone nominate e mai incontrate ce n\'è una adatta a questo tipo, puoi essere proprio lei (usa il suo nome).',
       'Descrivi la sua giornata in "routine": mattina, giorno, sera, notte — cosa fa e dove (casa, lavoro, piazza, in giro).',
       `Preferisci oggetti comuni già esistenti quando hanno senso: ${ctx.common.slice(0, 60).join(', ')}.`,
-      'In "persona" scrivi la scheda in seconda persona ("Sei …"): come parli, cosa vuoi, chi sono i tuoi cari, cosa sai del mondo e delle sue crepe.',
+      'In "persona" scrivi la scheda in seconda persona ("Sei …"): come parli, cosa vuoi, chi sono i tuoi cari, cosa sai e cosa credi del tuo mondo (le sue leggende, a modo tuo). Sei una persona del mondo: non sai nulla di giochi, codice o simulazioni.',
     ]
       .filter(Boolean)
       .join('\n'),

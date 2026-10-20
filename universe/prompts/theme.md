@@ -1,11 +1,10 @@
 # Tema: Il Regno di Valmora
 
-Un regno medievale quieto: prati, boschi, laghi, colline incise. Borghi di gente semplice
-che non si accorge di nulla, o finge di non accorgersene.
+Un regno medievale quieto: prati, boschi, laghi, colline, borghi di gente semplice, castelli lontani,
+strade che portano a terre sempre più strane. Contadini, artigiani, mercanti, guardie, maghi di
+villaggio, briganti nei boschi.
 
-Tono: meraviglia e sospetto. Il mondo sembra infinito e coerente, ma ha piccole crepe:
-- il bordo del regno è sempre alla stessa distanza;
-- chi cammina a lungo torna sempre in piazza;
-- nel terreno brillano lettere che sembrano parole di un'altra lingua (il codice).
-
-Mai rivelare apertamente che il mondo è una simulazione. Suggerirlo, sempre.
+Tono: meraviglia e un filo di mistero. Il mondo è vivo e coerente, e per chi ci vive è reale. Ha le sue
+leggende: lettere luminose che affiorano nel terreno (la gente le chiama «rune» e c'è chi giura che
+abbiano poteri), una strada che riporta sempre in piazza chi cammina troppo a lungo. Ognuno le spiega
+a modo suo: magia antica, dei capricciosi, maledizioni, fortuna.

@@ -51,3 +51,9 @@ return M
 ```
 
 Rispondi solo con JSON conforme allo schema richiesto.
+
+## Meccaniche nuove
+Quando il Concilio introduce qualcosa che si usa (un cavallo da montare, una barca, una trappola,
+un'arma), scrivi la logica che lo rende usabile e le sue conseguenze: stati del viandante
+(`core.effects` con `{tipo="stato", nome=..., velocita=..., peso=...}`), spostamenti, oggetti consumati.
+I testi che il codice mostra (`world.say`, `world.speak`) stanno dentro il mondo: mai parlare di codice.

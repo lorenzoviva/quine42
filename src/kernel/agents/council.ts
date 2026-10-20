@@ -4,6 +4,7 @@
 // narrative, graphics, engine and physics disagree.
 
 import { parseJson, type Models, type Schema } from '../ai/models';
+import { COUNCIL_PRINCIPLES } from '../fourthwall';
 import type { FileMap, TileDef } from '../types';
 
 export type AgentId = 'narratore' | 'cartografo' | 'artista' | 'fisico' | 'ingegnere' | 'arbitro' | 'referente';
@@ -52,7 +53,10 @@ export interface Bible {
   luoghi: string[];
   personaggi: string[];
   fatti: string[];
-  crepe: string[];
+  /** Legends and mysteries of the world, told from inside it. */
+  misteri?: string[];
+  /** Old bibles: hints that the world was a simulation. No longer used (no meta-game, ADR-0025). */
+  crepe?: string[];
 }
 
 export function readBible(files: FileMap): Bible | null {
@@ -74,7 +78,7 @@ export function bibleSummary(b: Bible | null, full = false): string {
     `Luoghi noti:\n${list(b.luoghi, full ? 30 : 12)}`,
     `Personaggi noti:\n${list(b.personaggi, full ? 20 : 8)}`,
     `Fatti stabiliti:\n${list(b.fatti, full ? 30 : 12)}`,
-    `Crepe della simulazione (da suggerire, mai dichiarare):\n${list(b.crepe, 8)}`,
+    b.misteri?.length ? `Misteri e leggende del mondo:\n${list(b.misteri, 8)}` : '',
   ]
     .filter(Boolean)
     .join('\n');
@@ -178,7 +182,7 @@ export class Council {
     const text = await this.models.text({
       agent,
       task,
-      system: `${role}\n\n${this.context(agent)}`,
+      system: `${role}\n\n${COUNCIL_PRINCIPLES}\n\n${this.context(agent)}`,
       prompt,
       schema,
       images: opts.images,

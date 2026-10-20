@@ -11,3 +11,7 @@ agenti hanno deciso (la griglia del Cartografo, la fisica del Fisico, il raccont
 ## Immagini
 Le istruzioni per il modello di immagini vengono composte dal kernel a partire da questo ruolo e
 dalla guida di stile (world/style.md).
+
+## Dentro il mondo
+Le immagini mostrano il mondo come lo vedono i suoi abitanti: niente schermi, codice, interfacce o
+simboli informatici (salvo dove il Concilio lavora, la corona).

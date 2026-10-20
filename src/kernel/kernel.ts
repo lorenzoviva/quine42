@@ -10,6 +10,7 @@ import { apiErrors, validateEffects, Validator } from './validator';
 import { Repo, type KeyValueStore } from './repo';
 import { Corona, type CoronaCell, type Exhibit, type StudioItem } from './corona';
 import { Archive } from './archive';
+import { metaBreak } from './fourthwall';
 import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, placeRegion, readAtlas, regionAt, writeAtlas, type Region } from './atlas';
 import { STAMP_SHAPES } from './stamps';
 import { repairProgram } from './mj';
@@ -271,6 +272,7 @@ export class Kernel {
     k.applyFiles(repo.working, { reset: true });
     k.loadState();
     k.ensureAtlas();
+    void k.reviewFourthWall();
     k.models.limits = { text: k.config.ai.maxText, images: k.models.canPaint ? k.config.ai.maxImages : 0 };
     k.log('kernel', `universo «${name}» avviato su commit ${repo.head().id} (${repo.head().message}) — modelli: ${opts.models.name}${synced ? ' — sincronizzato dal disco' : ''}`);
     return k;
@@ -2588,11 +2590,9 @@ export class Kernel {
   }
 
   private worldFacts(): Record<string, unknown> {
-    const p = this.playerPos();
     const held = equippedItem(this.inventory());
     const n = this.needs();
     return {
-      distanceToEdge: Math.round((this.config.circleRadius - Math.hypot(p.x, p.y)) * 10) / 10,
       luogo: this.placeHere()?.name,
       ora: Math.floor(this.time),
       momento: this.daylight() > 0.6 ? 'giorno' : this.daylight() > 0.15 ? 'crepuscolo' : 'notte',
@@ -2636,7 +2636,10 @@ export class Kernel {
       identity = { name: known.nome, persona: known.persona ?? m.persona, look: known.aspetto ?? '', carrying: known.porta ?? [], job: known.mestiere, age: known.eta, family: known.famiglia, routine: known.routine, story: known.storia };
     } else {
       try {
-        identity = await individuate(this.council, { name: m.name, description: m.description ?? '', persona: m.persona }, { place: this.placeHere()?.name ?? '', common: [...this.content.items.values()].map((d) => d.name), society: societySummary(readPeople(this.files)) });
+        const ask = () => individuate(this.council, { name: m.name, description: m.description ?? '', persona: m.persona! }, { place: this.placeHere()?.name ?? '', common: [...this.content.items.values()].map((d) => d.name), society: societySummary(readPeople(this.files)) });
+        identity = await ask();
+        // A person of the world, not of the Council's table: once more if the fourth wall breaks.
+        if (metaBreak(`${identity.persona} ${identity.story ?? ''} ${identity.job ?? ''}`)) identity = await ask();
       } catch {
         identity = { name: m.name, persona: m.persona, look: '', carrying: [], routine: defaultRoutine('') };
       }
@@ -3263,7 +3266,7 @@ export class Kernel {
     try {
       const r = await forge(
         this.council,
-        { prompt, origin, kind, existingIds: ids, paletteCodes: Object.keys(this.palette).filter((c) => c !== '?' && !this.palette[c].solid), paint: false, permissive },
+        { prompt, origin, kind, existingIds: ids, paletteCodes: Object.keys(this.palette).filter((c) => c !== '?' && !this.palette[c].solid), paint: false, permissive, existingNames: [...this.modules.values()].filter((m) => m.manifest.kind === 'entity' || m.manifest.kind === 'item').map((m) => m.manifest.name) },
         (m, logic) => this.validator.validateForged(m, logic, new Set(ids)),
       );
       // What a character carries: existing items by name, new ones defined by the Narrator.
@@ -3337,6 +3340,65 @@ export class Kernel {
     if (m.persona) bible.personaggi = [...(bible.personaggi ?? []), line].slice(-30);
     else bible.fatti = [...(bible.fatti ?? []), line].slice(-40);
     this.repo.write('world/bible.json', JSON.stringify(bible, null, 2) + '\n');
+  }
+
+  /**
+   * Once per universe, the Arbiter reviews what the Council created before the two tables were kept
+   * apart (ADR-0025): characters or things that break the fourth wall, and duplicates, are retired
+   * (their files removed, the bible cleaned). The universe's history keeps them, recoverable.
+   */
+  async reviewFourthWall(): Promise<string[]> {
+    const marker = 'revisione|quarta-parete';
+    if (this.rules().some((r) => r.chiave === marker)) return [];
+    const generated = [...this.modules.values()].filter((m) => m.manifest.origin && m.manifest.origin !== 'esempio' && (m.manifest.kind === 'entity' || m.manifest.kind === 'item'));
+    // Nothing created yet (a universe just born from the seed): nothing to review.
+    if (!generated.length) return [];
+    const retire = new Set<string>();
+    const seen = new Map<string, string>();
+    // The first of a kind (the shortest id: "-2", "-3" came later) is the one that stays.
+    generated.sort((x, y) => x.manifest.id.length - y.manifest.id.length || x.manifest.id.localeCompare(y.manifest.id));
+    for (const m of generated) {
+      const man = m.manifest;
+      if (metaBreak(`${man.name} ${man.description ?? ''} ${man.persona ?? ''} ${man.lore ?? ''}`)) retire.add(man.id);
+      const key = normName(man.name);
+      if (seen.has(key)) retire.add(man.id);
+      else seen.set(key, man.id);
+    }
+    // The Arbiter sees subtler breaks the words miss (offline models answer nothing).
+    if (generated.length && this.models.name !== 'offline') {
+      try {
+        const r = await this.council.ask<{ ritira?: string[]; motivo?: string }>(
+          'arbitro',
+          'review.fourthwall',
+          `Rivedi questi moduli creati dal Concilio. Ritira quelli che rompono la quarta parete (riferimenti a codice, simulazione, realtà instabile o finta, mondi che si ripetono, ruoli astratti come custodi della realtà, censori, archivisti del mondo, misuratori di anomalie) e i doppioni. Tieni tutto ciò che è una persona o una cosa vera del mondo.\n${generated.map((m) => `- ${m.manifest.id} «${m.manifest.name}»: ${(m.manifest.description ?? '').slice(0, 140)} ${(m.manifest.persona ?? '').slice(0, 160)}`).join('\n')}`,
+          { type: 'OBJECT', properties: { ritira: { type: 'ARRAY', items: { type: 'STRING' } }, motivo: { type: 'STRING' } }, required: ['ritira'] },
+          { data: { ids: generated.map((m) => m.manifest.id) }, temperature: 0.2 },
+        );
+        for (const id of r.ritira ?? []) if (this.modules.get(id)?.manifest.origin && this.modules.get(id)?.manifest.origin !== 'esempio') retire.add(id);
+      } catch {
+        /* the words are enough */
+      }
+    }
+    const names: string[] = [];
+    for (const id of retire) {
+      const m = this.modules.get(id);
+      if (!m) continue;
+      names.push(m.manifest.name);
+      for (const p of Object.keys(this.repo.working)) if (p.startsWith(m.dir)) this.repo.write(p, null);
+    }
+    const bible = readBible(this.repo.working);
+    if (bible) {
+      const gone = new Set(names.map(normName));
+      bible.personaggi = (bible.personaggi ?? []).filter((l) => !gone.has(normName(l.split(' — ')[0])) && !metaBreak(l));
+      bible.fatti = (bible.fatti ?? []).filter((l) => !metaBreak(l) && !gone.has(normName(l.split(' — ')[0])));
+      delete bible.crepe;
+      this.repo.write('world/bible.json', JSON.stringify(bible, null, 2) + '\n');
+    }
+    this.recordRule({ chiave: marker, testo: 'revisione della quarta parete', possibile: true, racconto: names.length ? `ritirati: ${names.join(', ')}` : 'niente da ritirare' }, false);
+    this.applyFiles({ ...this.repo.working });
+    this.repo.commit(names.length ? `l'Arbitro ritira ${names.length} moduli fuori dal mondo: ${[...new Set(names)].join(', ')}` : 'revisione della quarta parete', 'agent');
+    if (names.length) this.council.say('arbitro', 'approva', `quarta parete: ritirati ${names.length} moduli (${[...new Set(names)].join(', ')})`, undefined, 'review.fourthwall');
+    return names;
   }
 
   /** Asks the in-world agent for a new module (console → Agente). */
