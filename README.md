@@ -40,17 +40,19 @@ con un modello locale.
 |---|---|
 | `WASD` / frecce | muoviti |
 | `E` / spazio | raccogli; davanti a cose e persone apre il menu: parla (chat libera), apri, esamina, dormi, attingi… e **Altro…**: scrivi cosa fai, il Concilio giudica, l'oggetto impara |
-| `I` / `Tab` | inventario: trascina per riordinare, su un altro oggetto per **combinare**, fuori per posare; scheda **Crea** per le ricette |
+| `I` / `Tab` | inventario: trascina per riordinare, su un altro oggetto per **combinare**, fuori per posare; borse e sacche si aprono; **Altro…** su ogni oggetto; scheda **Crea** con le ricette e **Altro…** per inventarne |
 | `1`–`6` | impugna o usa gli oggetti della prima riga |
 | `F` | usa ciò che impugni su ciò che hai davanti |
 | `Q` / `X` | incidi tutte le rune in mano / solo quella scelta (`Z` `C` per scegliere, `Shift` per spostare) |
-| `T` | pronuncia le rune magiche in mano, in ordine: un incantesimo (le sequenze nuove le nomina il Concilio) |
+| `T` | pronuncia le rune magiche della frase, in ordine, consumandole: un incantesimo (le sequenze nuove le nomina il Concilio; costa mana, da 3 rune serve un cristallo) |
 | `R` | rollback all'ultimo commit valido |
 | `V` | mostra in rosso ciò che non si può attraversare |
 | `G` | mostra/nasconde il Concilio · `F1` aiuto · `Esc` chiudi |
 
 Fame, sete ed energia calano: mangia, bevi, dormi. Passa il mouse su una runa per vederne il valore vivo.
-Rune che si toccano formano una riga di codice; ogni runa è una casella. Il giorno dura dieci minuti: di notte
+Rune che si toccano formano una riga di codice; ogni runa è una casella, e una volta raccolta è un oggetto nella
+borsa delle rune: dalla borsa componi la frase da incidere (`Q`) o pronunciare (`T`). Gli NPC hanno un mestiere, una
+famiglia e una giornata loro; ciò che il Concilio decide sulle tue azioni diventa una regola del mondo. Il giorno dura dieci minuti: di notte
 servono luci. Oltre il bordo, la corona è un archivio: ogni cartella una stanza, ogni file un oggetto da
 aprire, e gli agenti del Concilio che ci lavorano (con `E` ci parli).
 

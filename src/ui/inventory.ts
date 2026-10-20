@@ -148,8 +148,16 @@ export class InventoryPanel {
       const accepts = k.content.get(inv.slots[bs]!.item)?.container?.accepts;
       side.append(
         el('div', { class: 'name' }, k.itemInfo(inv.slots[bs]!.item).name),
-        el('div', { class: 'descr' }, `${bag.slots.some(Boolean) ? 'Clic su ciò che c\'è dentro per prenderlo; clic sui tuoi oggetti per metterli dentro.' : 'Vuota. Clic sui tuoi oggetti per metterli dentro.'}${accepts ? ` Ci vanno solo cose «${accepts}».` : ''}`),
-        this.grid(bag.slots, { onClick: (i) => (k.takeFromBag(bs, i), this.render()) }),
+        el('div', { class: 'descr' }, `${bag.slots.some(Boolean) ? 'Clic su ciò che c\'è dentro per prenderlo; clic sui tuoi oggetti per metterli dentro.' : 'Vuota. Clic sui tuoi oggetti per metterli dentro.'}${accepts ? ` Ci vanno solo cose «${accepts}».` : ''}${accepts === 'runa' ? ' Clic su una runa: la aggiungi alla frase.' : ''}`),
+        this.grid(bag.slots, {
+          onClick: (i) => {
+            // Runes are composed straight from the pouch; anything else is taken out.
+            const it = bag.slots[i]?.item;
+            if (it?.startsWith('rune:')) k.composeRune(it.slice(5));
+            else k.takeFromBag(bs, i);
+            this.render();
+          },
+        }),
         close,
       );
     } else if (box) {

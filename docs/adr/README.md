@@ -22,5 +22,8 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0015](0015-rune-magia-giorno-notte.md) | Una runa per casella, magia, incantesimi, giorno e notte | accettato |
 | [0016](0016-corona-archivio-e-concilio.md) | La corona come archivio, il Concilio in carne e ossa | accettato |
 | [0017](0017-varieta-delle-persone.md) | Varietà delle persone | accettato |
+| [0018](0018-rune-oggetto-mana-borse.md) | Rune come oggetti, frase, mana e cristalli, borse nell'inventario | accettato |
+| [0019](0019-decisioni-regole.md) | Le decisioni del Concilio diventano regole | accettato |
+| [0020](0020-societa-degli-npc.md) | La società degli NPC | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

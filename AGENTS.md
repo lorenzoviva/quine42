@@ -14,7 +14,8 @@ un archivio di stanze (cartelle) e oggetti (file) dove si vedono lavorare gli ag
 Un **Concilio di agenti** su Google Gemini scrive storia, ambienti, oggetti, persone e il loro codice,
 e dipinge a lotti tile e sprite. Nel terreno brillano **rune**: token Lua veri, una per casella. Ciò che è
 scritto sul tappeto **si esegue**: componendo frasi il giocatore può rompere la simulazione, o uscirne e
-riscriverla. Alcune rune sono anche **magia**: pronunciate (T) diventano incantesimi.
+riscriverla. Le rune raccolte sono oggetti (nella borsa delle rune); alcune sono anche **magia**:
+pronunciate (T) diventano incantesimi e si consumano. Ciò che il Concilio decide diventa **regola** del mondo.
 
 Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/`](docs/adr/README.md).
 
@@ -74,6 +75,7 @@ src/
     kernel.ts           orchestratore: tick, luoghi, oggetti, contenitori, azioni (anche libere), effetti, magia, chat, Fucina, Genesi, rollback
     corona.ts           la corona come archivio: cartelle = stanze dell'anello, file = oggetti
     archive.ts          gli agenti del Concilio come figure nella corona
+    society.ts          la società: registro delle persone, legami, routine, saluti
     mj.ts               motore di riscrittura stile MarkovJunior
     layout.ts           bozza → varchi → programma → sentieri garantiti → edifici
     content.ts          registro di oggetti, ricette, bottino, ambienti
@@ -86,7 +88,8 @@ src/
   ui/                   hud.ts, inventory.ts (contenitori, ricette), actions.ts, chat.ts, feed.ts, genesis.ts, editor.ts, console.ts
 universe/
   universe.json         nome, seme, raggio, chunk (18), modelli e budget
-  world/                bible.json (memoria del Narratore), style.md, atelier.json (coppie few-shot)
+  world/                bible.json (memoria del Narratore), style.md, atelier.json (coppie few-shot),
+                        rules.json (regole nate dal gioco), people.json (la società)
   prompts/              theme.md, agents/<agente>.md
   modules/<id>/         manifest.json (+ logic.lua): sistemi, terreni, ambienti, pacchetti di oggetti, mobili, persone,
                         effetti (core.effects), fuoco (sys.fire), rune magiche e incantesimi (magic.runes, magic.spells)
@@ -97,12 +100,12 @@ tests/  docs/
 
 | Agente | Fa |
 |---|---|
-| Narratore | bibbia; concetti dei moduli; individui dietro ogni NPC; chat nel personaggio; pacchetti di oggetti, ricette, bottino; oggetti citati; "Esamina"; combinazioni; giudica le azioni libere; dà nome agli incantesimi nuovi |
+| Narratore | bibbia; concetti dei moduli; individui dietro ogni NPC (mestiere, famiglia, routine); chat nel personaggio; pacchetti di oggetti, ricette, bottino; oggetti citati; "Esamina"; combinazioni; giudica azioni libere e fabbricazioni libere; dà nome agli incantesimi nuovi |
 | Cartografo | terreni (con strati) e ambienti (programmi di riscrittura) alla Genesi; per ogni luogo: ambiente, nome, cosa c'è dentro e fuori, rune |
 | Artista | guida di stile; texture seamless (4/immagine), ostacoli, sprite few-shot, camminate, icone (16/immagine) |
 | Fisico | fisica di moduli, terreni e oggetti (pesi, pile, effetti) |
 | Ingegnere | logic.lua (`on_act`, `on_use`, `on_action`…); ripara il codice che fallisce |
-| Arbitro | coerenza tra narrativa, aspetto, fisica e codice; rimanda all'agente responsabile |
+| Arbitro | coerenza tra narrativa, aspetto, fisica e codice; rimanda all'agente responsabile; tiene le sessioni del Concilio |
 
 Registro: `kernel.feed()`, pannello Concilio (`G`) e console. Nella corona gli agenti sono figure che vanno
 al file su cui lavorano, parlano tra loro, e con `E` ci si parla (possono passare richieste alla Fucina).
@@ -122,8 +125,16 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 - **Spazi, tappeto, corona** (ADR-0004, 0009): cerchio fermo in (0,0), tappeto con offset; `coronaRevealed()`.
 - **Rune** (ADR-0002, 0015): un token per runa, una casella per runa (glifo), righe orizzontali eseguite ogni
   tick; binding `x y speed carpet time`. Rare; quelle del tappeto solo a ≥ 3 chunk dall'origine.
-- **Magia** (ADR-0015): rune magiche `luce fuoco acqua terra vita scudo vento`; `T` pronuncia quelle in mano
-  in ordine; incantesimi noti in `spells`, nuovi nominati una volta dal Narratore; costano energia.
+- **Magia** (ADR-0015, 0018): rune magiche `luce fuoco acqua terra vita scudo vento`; ogni runa è un oggetto
+  `rune:<token>`; la **frase** (`hand.tokens`) è la selezione ordinata; `T` pronuncia le magiche della frase e
+  le consuma; incantesimi noti in `spells`, nuovi nominati una volta dal Narratore; costano **mana**
+  (`needs.mana`); da 3 rune consumano un **cristallo magico** (tabella di bottino `magia`).
+- **Borse** (ADR-0018): `ItemDef.container {size, accepts}`; lo slot ha `inv`; la borsa delle rune accetta `runa`.
+- **Regole** (ADR-0019): ogni giudizio in `world/rules.json`, mostrato al Concilio; le azioni possibili si
+  imparano (modulo o `ItemDef.actions`); «Altro…» anche nell'inventario e nel crafting (ricette in
+  `items.scoperte`); sessioni del Concilio ogni 12 luoghi.
+- **Società** (ADR-0020): `world/people.json`; individui con mestiere, famiglia (legami simmetrici), routine
+  (mattina/giorno/sera/notte → casa/lavoro/piazza/in giro, componente `meta` seguito da `sys.wander`).
 - **Effetti** (ADR-0014): insieme chiuso (`messaggio bisogni crea_oggetto consuma distruggi apri contenitore
   terreno fuoco luce scudo spingi evoca`), validati dal kernel, applicati da `core.effects`. Usati da
   azioni libere («Altro…»), azioni imparate (`actions[].effects`) e incantesimi. Terreno cambiato persistente.
@@ -132,7 +143,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 - **Mappa** (ADR-0011): tile con texture, strati `ground floor wall door liquid vegetation rock`, tetti.
 - **Contenuti** (ADR-0012): `ItemDef` in pacchetti; bottino per tag; contenitori; ricette; bisogni
   (`needs` sul giocatore, `sys.needs`); uso generico in `core.items`; menu azioni (`E`).
-- **Personaggi** (ADR-0010, 0013, 0017): tipo + individuo (`identity`), `mind` (memoria, umore, modo), azioni
+- **Personaggi** (ADR-0010, 0013, 0017, 0020): tipo + individuo (`identity`: anche `job family routine story`), `mind` (memoria, umore, modo), azioni
   `segui resta vaga dai nessuna`, oggetti citati → `wanted`. Al massimo 2 dello stesso tipo nel mondo
   caricato; nuovi tipi forgiati esplorando (`ai.maxCast`); abiti e statura variano per individuo.
 
@@ -143,7 +154,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 `interaction` (`talk | read | lua`), `actions` (`id`, `label`, `requires`, `effects`), `container` (`size`, `loot`),
 `spawn`, `persona`, `unique`, `inventory` (id di oggetti), `item`, `context`, `lore`, `tags`, `drops`,
 `origin`; generatori: `tiles` (`name`, `color`, `solid`, `layer`, `indoor`, `speed`, `texture`, `sprites`),
-`roof`; dati: `items`, `recipes`, `loot`, `layouts`, `fragments`, `runes`, `spells`.
+`roof`; dati: `items` (anche `container`, `actions`, effetti `mana`), `recipes`, `loot`, `layouts`, `fragments`, `runes`, `spells`.
 
 ### API Lua — l'unica disponibile, il validatore rifiuta il resto
 `ecs.each/get/set/spawn/destroy/first`; `world.free/free_real/tile/speed_at/spawn/player/player_pos/
@@ -152,7 +163,7 @@ nearest/has_tag/break_entity/say/speak/set_tile/open/make_container`; `inventory
 Hook: `update(dt)` (sistemi), `generate_chunk`, `on_spawn(id)`, `on_interact(id, user)`,
 `on_act(id, user, action)`, `on_use(user, item)`, `on_action(user, target, item)`; `core.items.use(user, item)`;
 `core.effects.apply(target, user, effect, x, y)`. Componenti noti: `luce {raggio, accesa, colore}`, `fuoco {raggio}`,
-`effimero {fino}` (sparisce a tempo), `scudo {fino}`.
+`effimero {fino}` (sparisce a tempo), `scudo {fino}`, `meta {x, y}` (dove va un NPC).
 
 ## Convenzioni
 
@@ -181,7 +192,9 @@ con il Concilio che vi lavora, versionamento, Concilio su Gemini, mappe a tile s
 regole e connettività garantita, interni con tetti, contenuti come dati (pacchetti, bottino, contenitori,
 ricette, bisogni), menu delle azioni con azioni libere giudicate dal Concilio e imparate dagli oggetti,
 effetti, magia e incantesimi, fuoco, giorno e notte, individui con abiti propri, varietà di persone,
-oggetti citati, Atelier few-shot con camminate, icone a fogli, riparazione automatica, test.
+oggetti citati, Atelier few-shot con camminate, icone a fogli, riparazione automatica, rune come oggetti
+con borsa e frase, mana e cristalli, borse nell'inventario, regole nate dal gioco, fabbricazione libera,
+società degli NPC con famiglie e routine, sessioni del Concilio, test.
 
 Prossimi passi suggeriti:
 1. Persistenza dello stato del mondo (inventario, contenitori aperti, individui incontrati).
