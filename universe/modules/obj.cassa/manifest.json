@@ -1,0 +1,13 @@
+{
+  "id": "obj.cassa",
+  "name": "Cassapanca",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "esempio",
+  "description": "Una cassapanca di legno con borchie di ferro.",
+  "context": "dentro le case, nei capanni, nelle rovine",
+  "appearance": { "glyph": "▣", "color": "#a0703c", "scale": 1, "imagePrompt": "una cassapanca di legno con borchie di ferro, vista dall'alto" },
+  "physics": { "solid": true, "radius": 0.42 },
+  "container": { "size": 10, "loot": "cassa" },
+  "spawn": { "tiles": ["f", "g"], "chance": 0.3, "max": 1 }
+}

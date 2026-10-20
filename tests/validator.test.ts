@@ -1,93 +1,117 @@
 import { describe, expect, it } from 'vitest';
 import { Sandbox } from '../src/kernel/sandbox';
-import { Validator } from '../src/kernel/validator';
+import { Validator, apiErrors } from '../src/kernel/validator';
 import { extractLines } from '../src/kernel/runes';
 import { Repo, memoryStore } from '../src/kernel/repo';
 import { addItem, moveSlot, newInventory, removeItem, totalWeight } from '../src/kernel/inventory';
+import { Content } from '../src/kernel/content';
+import { Rng } from '../src/kernel/rng';
+import { assemblePack, toItemDef } from '../src/kernel/agents/content';
 import { fakeHost } from './helpers';
 import type { ChunkPlan } from '../src/kernel/agents/cartography';
-import type { ItemSpec, TileDef } from '../src/kernel/types';
+import type { ItemSpec, LayoutDef, TileDef } from '../src/kernel/types';
 
-const S = 18;
 const palette: Record<string, TileDef> = {
-  g: { name: 'prato', color: '#4f9a45', solid: false },
-  w: { name: 'acqua', color: '#3a78c8', solid: true },
+  g: { name: 'prato', color: '#4f9a45', solid: false, layer: 'ground' },
+  p: { name: 'sentiero', color: '#c8a868', solid: false, layer: 'ground' },
+  t: { name: 'bosco', color: '#1f5a2a', solid: true, layer: 'vegetation' },
+  h: { name: 'muro', color: '#8c4a32', solid: true, layer: 'wall' },
+  f: { name: 'pavimento', color: '#a07850', solid: false, layer: 'floor', indoor: true },
+  d: { name: 'porta', color: '#e0c040', solid: false, layer: 'door' },
 };
-const grid = Array.from({ length: S }, (_, r) => (r === 9 ? 'w'.repeat(S) : 'g'.repeat(S)));
-const plan = (p: Partial<ChunkPlan>): ChunkPlan => ({ place: { name: 'Radura', description: 'Una radura.' }, grid, objects: [], fresh: [], runes: [], ...p });
-const placeable = new Map([['npc.a', ['g']]]);
+const plan = (p: Partial<ChunkPlan>): ChunkPlan => ({ place: { name: 'Radura', description: 'Una radura.' }, layout: 'bosco', objects: [], ground: [], fresh: [], runes: [], ...p });
+const layouts = new Set(['bosco', 'borgo']);
+const placeable = new Set(['npc.a', 'obj.cassa']);
+const S = 18;
+const drafts = [Array.from({ length: S }, () => 'g'.repeat(S)), Array.from({ length: S }, (_, r) => (r % 3 ? 'g' : 't').repeat(S))];
 
 describe('validator', async () => {
   const v = new Validator(await Sandbox.create(fakeHost().host));
 
-  it('accepts a good plan', () => {
-    const r = v.validatePlan(plan({ runes: [{ line: 'carpet . active', col: 2, row: 2 }, { line: 'speed = speed', col: 2, row: 4 }], objects: [{ module: 'npc.a', col: 5, row: 5 }] }), S, palette, placeable, false);
+  it('accepts a good plan and normalizes runes written without spaces', () => {
+    const r = v.validatePlan(plan({ runes: ['carpet.active', 'speed=speed'], objects: [{ module: 'npc.a', where: 'fuori' }, { module: 'obj.cassa', where: 'dentro' }] }), layouts, placeable);
     expect(r.errors).toEqual([]);
     expect(r.dropped).toEqual([]);
-    expect(r.plan.runes.length).toBe(2);
+    expect(r.plan.runes).toEqual(['carpet . active', 'speed = speed']);
   });
 
-  it('rejects malformed grids and blocked starting squares (fatal)', () => {
-    expect(v.validatePlan(plan({ grid: ['ggg'] }), S, palette, placeable, false).errors[0]).toMatch(/righe/);
-    expect(v.validatePlan(plan({ grid: grid.map((r, i) => (i === 3 ? 'gx' + r.slice(2) : r)) }), S, palette, placeable, false).errors[0]).toMatch(/sconosciuto/);
-    const blocked = grid.map((r, i) => (i === 0 ? 'w' + r.slice(1) : r));
-    expect(v.validatePlan(plan({ grid: blocked }), S, palette, placeable, true).errors[0]).toMatch(/partenza/);
+  it('rejects unknown environments and missing places (fatal)', () => {
+    expect(v.validatePlan(plan({ layout: 'luna' }), layouts, placeable).errors[0]).toMatch(/ambiente sconosciuto/);
+    expect(v.validatePlan(plan({ place: { name: '', description: '' } }), layouts, placeable).errors[0]).toMatch(/nome/);
   });
 
-  it('drops invalid code, snaps misplaced runes and objects to the nearest valid cell', () => {
-    const r = v.validatePlan(
-      plan({
-        runes: [
-          { line: 'carpet . strength =', col: 2, row: 2 },
-          { line: 'carpet . active = false', col: 2, row: 3 },
-          { line: 'print ( x )', col: 2, row: 4 },
-          { line: 'x', col: 2, row: 9 },
-          { line: 'y', col: 0, row: 5 },
-          { line: 'time', col: 4, row: 5 },
-        ],
-        objects: [{ module: 'npc.nope', col: 1, row: 1 }, { module: 'npc.a', col: 1, row: 9 }, { module: 'npc.a', col: 1, row: 1 }],
-      }),
-      S,
-      palette,
-      placeable,
-      false,
-    );
+  it('drops invalid code and unknown modules one by one, keeping the rest', () => {
+    const r = v.validatePlan(plan({ runes: ['carpet . strength =', 'carpet . active = false', 'print ( x )', 'x', 'time'], objects: [{ module: 'npc.nope', where: 'fuori' }, { module: 'npc.a', where: 'ovunque' }] }), layouts, placeable);
     expect(r.errors).toEqual([]);
     const dropped = r.dropped.join(' | ');
     expect(dropped).toMatch(/non compila/);
     expect(dropped).toMatch(/effetti/);
     expect(dropped).toMatch(/funzione/);
     expect(dropped).toMatch(/inesistente/);
-    expect(r.plan.runes.map((x) => x.line)).toEqual(['x', 'y', 'time']);
-    // x was on water (row 9), y on the border, time touching y: all moved to valid cells.
-    expect(r.moved).toBeGreaterThanOrEqual(3);
-    for (const x of r.plan.runes) {
-      expect(x.row).not.toBe(9);
-      expect(x.col).toBeGreaterThanOrEqual(1);
-    }
-    expect(r.plan.objects.length).toBe(2);
-    expect(r.plan.objects.every((o) => o.row !== 9)).toBe(true);
+    expect(r.plan.runes).toEqual(['x', 'time']);
+    expect(r.plan.objects).toEqual([{ module: 'npc.a', where: 'ovunque' }]);
   });
 
-  it('normalizes generated runes written without spaces', () => {
-    const r = v.validatePlan(plan({ runes: [{ line: 'carpet.active', col: 2, row: 2 }, { line: 'speed=speed', col: 2, row: 4 }] }), S, palette, placeable, false);
-    expect(r.dropped).toEqual([]);
-    expect(r.plan.runes.map((x) => x.line)).toEqual(['carpet . active', 'speed = speed']);
+  it('test-runs layout programs on real drafts before accepting them', () => {
+    const good: LayoutDef = { name: 'Borgo', description: 'case', environment: 'misto', program: { type: 'one', rules: [{ in: 'gggg/gggg/gggg/gggg', out: 'hhhh/hffh/hffh/hdhh' }], steps: 2 } };
+    expect(v.validateLayout('borgo', good, palette, drafts)).toEqual([]);
+    const unknownCode: LayoutDef = { ...good, program: { type: 'all', rules: [{ in: 'g', out: 'Z' }] } };
+    expect(v.validateLayout('x', unknownCode, palette, drafts).join()).toMatch(/codici inesistenti Z/);
+    const walls: LayoutDef = { ...good, program: { type: 'all', rules: [{ in: 'g', out: 'h' }] } };
+    expect(v.validateLayout('x', walls, palette, drafts).join()).toMatch(/troppo poco spazio/);
+    const broken = { ...good, program: { type: 'one', rules: [{ in: 'gg', out: 'g' }] } } as LayoutDef;
+    expect(v.validateLayout('x', broken, palette, drafts).join()).toMatch(/stessa forma/);
   });
 
-  it('validates manifests, including items and characters', () => {
+  it('validates manifests, items and characters', () => {
     expect(v.parseManifest('m', '{"id":"npc.a","name":"A","kind":"entity","appearance":{"glyph":"a","color":"#fff"}}').errors).toEqual([]);
     expect(v.parseManifest('m', '{"id":"npc.a","name":"A","kind":"entity","appearance":{"glyph":"a","color":"#fff"},"interaction":{"type":"talk"}}').errors.join()).toMatch(/persona/);
-    expect(v.parseManifest('m', '{"id":"item.a","name":"A","kind":"item","appearance":{"glyph":"a","color":"#fff"}}').errors.join()).toMatch(/item/);
-    expect(v.parseManifest('m', '{"id":"A","kind":"nope"}').errors.length).toBeGreaterThan(1);
+    expect(v.validateItems([{ id: 'item.a', name: 'A', category: 'cibo', weight: 1, stack: 5, tags: [] }])).toEqual([]);
+    expect(v.validateItems([{ id: 'bad', name: '', category: 'boh', weight: 99, stack: 0, tags: [] }]).length).toBeGreaterThan(3);
   });
 
-  it('dry-loads forged code without touching the universe', () => {
+  it('dry-loads forged code and rejects calls to functions that do not exist', () => {
     const m = { id: 'obj.prova', name: 'Prova', kind: 'entity' as const, appearance: { glyph: 'p', color: '#fff' } };
     expect(v.validateForged(m, 'return {}', new Set())).toEqual([]);
     expect(v.validateForged(m, 'error("boom") return {}', new Set()).join()).toMatch(/boom/);
-    expect(v.validateForged(m, 'return 42', new Set()).join()).toMatch(/tabella/);
-    expect(v.validateForged(m, 'return {}', new Set(['obj.prova'])).join()).toMatch(/già esistente/);
+    expect(v.validateForged(m, 'local M = {} function M.on_act() world.teleport(1) end return M', new Set()).join()).toMatch(/world\.teleport non esiste/);
+    expect(apiErrors('-- world.nope nei commenti non conta\nlocal s = "ecs.niente"\nreturn items.find("x")')).toEqual([]);
+    expect(apiErrors('os.exit()').join()).toMatch(/os/);
+  });
+});
+
+describe('content', () => {
+  it('turns model output into items, recipes and loot, resolving names', () => {
+    const taken = new Set<string>();
+    const pack = assemblePack(
+      {
+        items: [
+          { nome: 'Corda', descrizione: 'fune', categoria: 'materiale', peso: 1, pila: 5, tag: ['Bottega'], aspetto: 'corda' },
+          { nome: 'Rete da pesca', descrizione: 'rete', categoria: 'attrezzo', peso: 2, pila: 1, tag: [], aspetto: 'rete' },
+        ],
+        recipes: [{ nome: 'Rete', ingredienti: [{ oggetto: 'corda', quantita: 3 }], risultato: { oggetto: 'Rete da pesca', quantita: 1 } }, { nome: 'Impossibile', ingredienti: [{ oggetto: 'unobtainium', quantita: 1 }], risultato: { oggetto: 'Corda', quantita: 1 } }],
+        loot: [{ tabella: 'Bottega', voci: [{ tag: 'materiale', peso: 2 }, { oggetto: 'Corda', peso: 1 }] }],
+      },
+      new Map(),
+      taken,
+    );
+    expect(pack.items.map((d) => d.id)).toEqual(['item.corda', 'item.rete-da-pesca']);
+    expect(pack.items[0].tags).toEqual(['bottega']);
+    expect(pack.recipes).toHaveLength(1);
+    expect(pack.recipes[0].inputs[0]).toEqual({ item: 'item.corda', count: 3 });
+    expect(pack.loot.bottega.entries).toHaveLength(2);
+  });
+
+  it('finds items by loose names and rolls loot by tag, favouring what was talked about', () => {
+    const c = new Content();
+    const taken = new Set<string>();
+    const items = ['Pane di segale', 'Formaggio', 'Coltello'].map((n, i) => toItemDef({ nome: n, descrizione: '', categoria: i < 2 ? 'cibo' : 'attrezzo', peso: 1, pila: 3, tag: ['cucina'], aspetto: n }, taken)!);
+    c.rebuild([{ manifest: { id: 'items.t', name: 't', kind: 'data', items, loot: { cucina: { rolls: [3, 3], entries: [{ tag: 'cibo', weight: 1 }] } } }, dir: '', manifestPath: '' }]);
+    expect(c.byName('il pane di segale')?.id).toBe('item.pane-di-segale');
+    expect(c.byName('un formaggio')?.id).toBe('item.formaggio');
+    const rolled = c.roll('cucina', new Rng(1), ['item.formaggio']);
+    expect(rolled).toHaveLength(3);
+    expect(rolled.every((r) => r.item !== 'item.coltello')).toBe(true);
   });
 });
 

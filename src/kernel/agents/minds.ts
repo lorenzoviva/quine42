@@ -30,6 +30,8 @@ export interface NpcReply {
   action: NpcAction;
   item?: string;
   mood: string;
+  /** Concrete things mentioned in the exchange: the world may make them real. */
+  mentioned?: string[];
 }
 
 const REPLY_SCHEMA: Schema = {
@@ -39,6 +41,7 @@ const REPLY_SCHEMA: Schema = {
     azione: { type: 'STRING', enum: [...NPC_ACTIONS] },
     oggetto: { type: 'STRING', description: 'solo per "dai": il nome esatto di ciò che porti e cedi' },
     umore: { type: 'STRING' },
+    oggetti_citati: { type: 'ARRAY', items: { type: 'STRING' }, description: 'oggetti concreti di cui si è parlato in questo scambio (da te o dal viandante)' },
   },
   required: ['dice', 'azione', 'umore'],
 };
@@ -54,12 +57,24 @@ export async function npcReply(c: Council, npc: NpcContext, playerText: string):
     `Il viandante dice: «${playerText}»`,
     `Rispondi in "dice" (1-3 frasi, italiano, stile del personaggio). Scegli "azione": segui (lo accompagni), resta (ti fermi), vaga (riprendi a girovagare), dai (gli cedi una cosa che porti: metti il nome esatto in "oggetto"), nessuna. Non inventare oggetti che non porti. Non rivelare mai apertamente che il mondo è una simulazione: al massimo lascia intuire le crepe.`,
   ].join('\n\n');
-  const r = await c.ask<{ dice: string; azione: string; oggetto?: string; umore?: string }>('narratore', 'npc.reply', prompt, REPLY_SCHEMA, {
+  const r = await c.ask<{ dice: string; azione: string; oggetto?: string; umore?: string; oggetti_citati?: string[] }>('narratore', 'npc.reply', prompt, REPLY_SCHEMA, {
     data: { npc, playerText },
     temperature: 0.9,
   });
   const action = (NPC_ACTIONS as readonly string[]).includes(r.azione) ? (r.azione as NpcAction) : 'nessuna';
-  return { say: String(r.dice ?? '…'), action, item: r.oggetto, mood: String(r.umore ?? npc.mood) };
+  return { say: String(r.dice ?? '…'), action, item: r.oggetto, mood: String(r.umore ?? npc.mood), mentioned: (r.oggetti_citati ?? []).map(String).slice(0, 5) };
+}
+
+/** "Esamina": the Narrator describes what the player looks at (cached by the kernel). */
+export async function examine(c: Council, what: { name: string; description: string; lore?: string }, facts: Record<string, unknown>): Promise<string> {
+  const r = await c.ask<{ testo: string }>(
+    'narratore',
+    'text.examine',
+    `Il viandante osserva da vicino «${what.name}» (${what.description}${what.lore ? `; ${what.lore}` : ''}). Descrivi in 2-3 frasi cosa nota: dettagli concreti, materiali, odori, un piccolo indizio narrativo. Contesto: ${JSON.stringify(facts)}.`,
+    READ_SCHEMA,
+    { data: { what, facts }, temperature: 0.9 },
+  );
+  return String(r.testo ?? '');
 }
 
 const READ_SCHEMA: Schema = { type: 'OBJECT', properties: { testo: { type: 'STRING' } }, required: ['testo'] };

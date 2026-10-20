@@ -2,13 +2,42 @@
   "id": "core.player",
   "name": "Viandante",
   "kind": "player",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Tu.",
-  "appearance": { "glyph": "@", "color": "#ffffff", "scale": 1.3, "imagePrompt": "un viandante con mantello e cappuccio" },
-  "physics": { "solid": false, "radius": 0.3 },
-  "components": {
-    "player": { "speed": 6, "facing": "down", "load": 0 },
-    "hand": { "tokens": [], "sel": 0 }
+  "appearance": {
+    "glyph": "@",
+    "color": "#ffffff",
+    "scale": 1.3,
+    "imagePrompt": "un viandante con mantello e cappuccio"
   },
-  "persist": ["player.facing", "hand.tokens", "hand.sel"]
+  "physics": {
+    "solid": false,
+    "radius": 0.3
+  },
+  "components": {
+    "player": {
+      "speed": 6,
+      "facing": "down",
+      "load": 0
+    },
+    "hand": {
+      "tokens": [],
+      "sel": 0
+    },
+    "needs": {
+      "hunger": 85,
+      "thirst": 85,
+      "energy": 90,
+      "health": 100
+    }
+  },
+  "persist": [
+    "player.facing",
+    "hand.tokens",
+    "hand.sel",
+    "needs.hunger",
+    "needs.thirst",
+    "needs.energy",
+    "needs.health"
+  ]
 }

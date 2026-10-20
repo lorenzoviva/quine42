@@ -41,6 +41,8 @@ export function fakeHost() {
     inv_remove: () => 0,
     inv_count: () => 0,
     inv_equipped: () => undefined,
+    item_find: () => undefined,
+    item_def: () => undefined,
     fault: (k, m) => {
       faults[k] = m;
     },

@@ -2,17 +2,19 @@
   "id": "world.terrain",
   "name": "Terreni",
   "kind": "generator",
-  "version": "0.2.0",
-  "description": "Bozza procedurale continua delle mappe e palette dei terreni. La Genesi riscrive la palette; il Cartografo trasforma la bozza.",
+  "version": "0.3.0",
+  "description": "Bozza procedurale continua delle mappe e palette dei terreni (con strati: terreno, pavimento, muro, porta, acqua, vegetazione, roccia). La Genesi riscrive la palette; gli ambienti trasformano la bozza.",
   "logic": "logic.lua",
   "tiles": {
-    "g": { "name": "prato", "description": "erba bassa e fiori sparsi", "color": "#4f9a45", "solid": false, "speed": 1 },
-    "p": { "name": "sentiero", "description": "terra battuta", "color": "#c8a868", "solid": false, "speed": 1.15 },
-    "t": { "name": "bosco", "description": "chiome di alberi fitti", "color": "#1f5a2a", "solid": true },
-    "w": { "name": "acqua", "description": "stagni e laghi", "color": "#3a78c8", "solid": true },
-    "r": { "name": "roccia", "description": "massi grigi", "color": "#8a8a92", "solid": true },
-    "h": { "name": "muro", "description": "muri di pietra e tetti di coppi", "color": "#8c4a32", "solid": true },
-    "d": { "name": "soglia", "description": "porte e soglie di legno", "color": "#e0c040", "solid": false, "speed": 1 },
-    "m": { "name": "fango", "description": "terra molle e pozzanghere", "color": "#6b5638", "solid": false, "speed": 0.6 }
-  }
+    "g": { "name": "prato", "description": "erba bassa con trifoglio e piccoli fiori", "color": "#5a9e48", "solid": false, "layer": "ground", "speed": 1 },
+    "p": { "name": "sentiero", "description": "terra battuta con sassolini", "color": "#c7a76a", "solid": false, "layer": "ground", "speed": 1.15 },
+    "t": { "name": "bosco", "description": "alberi fitti dalle chiome tonde", "color": "#2c6a34", "solid": true, "layer": "vegetation" },
+    "w": { "name": "acqua", "description": "acqua di stagno, increspata", "color": "#3c7cc8", "solid": true, "layer": "liquid" },
+    "r": { "name": "roccia", "description": "massi grigi e lastre di pietra", "color": "#8c8d95", "solid": true, "layer": "rock" },
+    "h": { "name": "muro", "description": "muri di pietra squadrata", "color": "#8a6a52", "solid": true, "layer": "wall" },
+    "f": { "name": "pavimento di legno", "description": "assi di legno chiaro", "color": "#b48a5a", "solid": false, "layer": "floor", "indoor": true },
+    "d": { "name": "porta", "description": "soglia e porta di legno", "color": "#d8b048", "solid": false, "layer": "door" },
+    "m": { "name": "campo arato", "description": "solchi di terra scura coltivata", "color": "#6e5434", "solid": false, "layer": "ground", "speed": 0.8 }
+  },
+  "roof": { "color": "#9a4632" }
 }

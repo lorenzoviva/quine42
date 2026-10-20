@@ -1,0 +1,74 @@
+{
+  "id": "world.layouts",
+  "name": "Ambienti",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "Gli ambienti del mondo come programmi di riscrittura (stile MarkovJunior) applicati alla bozza del terreno. Li scrive il Cartografo; il kernel li prova prima di accettarli.",
+  "layouts": {
+    "borgo": {
+      "name": "Borgo",
+      "description": "case di pietra con porte sulla strada, orti e cortili",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          { "type": "prl", "rules": [{ "in": "t", "out": "g", "p": 0.85 }, { "in": "w", "out": "g", "p": 0.6 }] },
+          { "type": "one", "rules": [{ "in": "[gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm]", "out": "hhhhhh/hffffh/hffffh/hffffh/hhdhhh" }], "steps": 2 },
+          { "type": "one", "rules": [{ "in": "ggg/ggg", "out": "mmm/mmm" }], "steps": 2 },
+          { "type": "path", "from": "d", "to": "p", "on": "gm", "color": "p", "steps": 3 }
+        ]
+      }
+    },
+    "bosco": {
+      "name": "Bosco",
+      "description": "alberi fitti con radure e sentieri di animali",
+      "environment": "esterno",
+      "program": {
+        "type": "sequence",
+        "children": [
+          { "type": "prl", "rules": [{ "in": "g", "out": "t", "p": 0.35 }] },
+          { "type": "one", "rules": [{ "in": "ttt/ttt/ttt", "out": "ggg/ggg/ggg" }], "steps": 3 }
+        ]
+      }
+    },
+    "campi": {
+      "name": "Campi",
+      "description": "appezzamenti coltivati divisi da viottoli, un capanno",
+      "environment": "esterno",
+      "program": {
+        "type": "sequence",
+        "children": [
+          { "type": "prl", "rules": [{ "in": "t", "out": "g", "p": 0.9 }] },
+          { "type": "one", "rules": [{ "in": "gggg/gggg/gggg", "out": "mmmm/mmmm/pppp" }], "steps": 5 },
+          { "type": "one", "rules": [{ "in": "gggg/gggg/gggg/gggg", "out": "hhhh/hffh/hffh/hhdh" }], "steps": 1 }
+        ]
+      }
+    },
+    "rovine": {
+      "name": "Rovine",
+      "description": "colonne spezzate e muri crollati di un edificio dimenticato",
+      "environment": "esterno",
+      "program": {
+        "type": "sequence",
+        "children": [
+          { "type": "one", "rules": [{ "in": "ggg/ggg/ggg", "out": "r*r/***/r*r" }], "steps": 3 },
+          { "type": "one", "rules": [{ "in": "gggg", "out": "hh*h" }], "steps": 4 },
+          { "type": "prl", "rules": [{ "in": "g", "out": "p", "p": 0.08 }] }
+        ]
+      }
+    },
+    "locanda": {
+      "name": "Locanda",
+      "description": "un grande edificio con sala comune e stanze, cortile intorno",
+      "environment": "interno",
+      "program": {
+        "type": "sequence",
+        "children": [
+          { "type": "prl", "rules": [{ "in": "[tw]", "out": "g", "p": 1 }] },
+          { "type": "one", "rules": [{ "in": "[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]", "out": "hhhhhhhhh/hfffhfffh/hfffdfffh/hfffhhdhh/hfffffffh/hfffffffh/hhhhdhhhh" }], "steps": 1, "symmetry": "none" },
+          { "type": "path", "from": "d", "to": "p", "on": "gm", "color": "p", "steps": 1 }
+        ]
+      }
+    }
+  }
+}

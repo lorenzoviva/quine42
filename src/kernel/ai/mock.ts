@@ -49,6 +49,17 @@ const ITEM_WORDS = ['forbici', 'chiave', 'mela', 'pane', 'lanterna', 'corda', 's
 const EDIBLE = ['mela', 'pane', 'pozione', 'bacche', 'fungo', 'erba', 'fiasco'];
 const STOP = new Set(['un', 'una', 'uno', 'il', 'lo', 'la', 'i', 'gli', 'le', 'che', 'di', 'del', 'della', 'con', 'e', 'a', 'in', 'per', 'crea', 'aggiungi', 'voglio', 'fammi', 'genera', 'nuovo', 'nuova', 'personaggio', 'npc', 'oggetto', 'strumento', 'risultato', 'combinazione']);
 
+const NAMES = ['Berta', 'Gualtiero', 'Ilde', 'Ottone', 'Mirella', 'Tancredi', 'Gemma', 'Ugolino', 'Fiora', 'Corrado', 'Agnese', 'Bastiano'];
+const STOCK: Array<[string, string, string, number, number, string[], Record<string, number>?]> = [
+  ['Fiasco di vino', 'bevanda', 'un fiasco impagliato', 1.2, 4, ['locanda', 'cucina'], { thirst: 20, energy: -5 }],
+  ['Castagne secche', 'cibo', 'un sacchetto di castagne', 0.3, 10, ['bosco', 'cucina'], { hunger: 15 }],
+  ['Ago e filo', 'attrezzo', 'per rammendare', 0.05, 5, ['stoffa', 'casa']],
+  ['Falcetto', 'attrezzo', "una piccola falce per l'erba", 0.8, 1, ['contadino', 'taglio', 'metallo']],
+  ['Fune di canapa', 'materiale', 'corda robusta', 0.8, 5, ['bottega']],
+  ['Lucerna', 'luce', 'una lampada a olio di terracotta', 0.5, 1, ['luce', 'casa']],
+  ['Ricotta', 'cibo', 'ricotta fresca in un canestro', 0.5, 3, ['cucina', 'contadino'], { hunger: 20 }],
+  ['Erba medica', 'medicina', 'un mazzetto di erbe che curano', 0.05, 10, ['erbe'], { health: 15 }],
+];
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const words = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').match(/[a-z]+/g) ?? [];
 
@@ -102,74 +113,126 @@ export class MockModels implements Models {
       case 'genesis.terrain':
         return {
           terreni: [
-            { codice: 'g', nome: 'prato', descrizione: 'erba bassa', colore: '#4f9a45', solido: false, velocita: 1 },
-            { codice: 'p', nome: 'sentiero', descrizione: 'terra battuta', colore: '#c8a868', solido: false, velocita: 1.1 },
-            { codice: 't', nome: 'bosco', descrizione: 'alberi fitti', colore: '#1f5a2a', solido: true, velocita: 1 },
-            { codice: 'w', nome: 'acqua', descrizione: 'stagni e laghi', colore: '#3a78c8', solido: true, velocita: 1 },
-            { codice: 'r', nome: 'roccia', descrizione: 'massi grigi', colore: '#8a8a92', solido: true, velocita: 1 },
+            { codice: 'g', nome: 'pascolo', descrizione: 'erba rasa da pecore', colore: '#6aa84f', strato: 'ground', solido: false, velocita: 1 },
+            { codice: 'p', nome: 'tratturo', descrizione: 'terra battuta dalle greggi', colore: '#c8a868', strato: 'ground', solido: false, velocita: 1.1 },
+            { codice: 't', nome: 'macchia', descrizione: 'cespugli e querce basse', colore: '#2f6a2a', strato: 'vegetation', solido: true, velocita: 1 },
+            { codice: 'w', nome: 'torrente', descrizione: 'acqua fredda tra i sassi', colore: '#3a78c8', strato: 'liquid', solido: true, velocita: 1 },
+            { codice: 'r', nome: 'pietraia', descrizione: 'massi calcarei', colore: '#9a9a92', strato: 'rock', solido: true, velocita: 1 },
+            { codice: 'h', nome: 'muro a secco', descrizione: 'pietre sovrapposte', colore: '#8a7a62', strato: 'wall', solido: true, velocita: 1 },
+            { codice: 'f', nome: 'pavimento di cotto', descrizione: 'mattonelle rosse', colore: '#b06a4a', strato: 'floor', solido: false, velocita: 1 },
+            { codice: 'd', nome: 'uscio', descrizione: 'porta di castagno', colore: '#d8a040', strato: 'door', solido: false, velocita: 1 },
+            { codice: 'm', nome: 'orto', descrizione: 'solchi di terra coltivata', colore: '#6e5434', strato: 'ground', solido: false, velocita: 0.8 },
           ],
+          tetto: '#8a3a2a',
         };
       case 'genesis.physics':
         return { terreni: [] };
+      case 'genesis.layouts':
+        return {
+          ambienti: [
+            {
+              id: 'stazzo',
+              nome: 'Stazzo',
+              descrizione: 'casupole di pietra e recinti per le greggi',
+              tipo: 'misto',
+              programma_json: JSON.stringify({ type: 'sequence', children: [{ type: 'prl', rules: [{ in: 't', out: 'g', p: 0.8 }] }, { type: 'one', rules: [{ in: 'gggg/gggg/gggg/gggg', out: 'hhhh/hffh/hffh/hdhh' }], steps: 2 }, { type: 'path', from: 'd', to: 'p', on: 'gm', color: 'p', steps: 2 }] }),
+            },
+            { id: 'macchia', nome: 'Macchia', descrizione: 'boscaglia fitta con radure', tipo: 'esterno', programma_json: JSON.stringify({ type: 'prl', rules: [{ in: 'g', out: 't', p: 0.3 }] }) },
+            { id: 'rotto', nome: 'Programma rotto', descrizione: 'non compila', tipo: 'esterno', programma_json: '{"type":"teletrasporta","dove":"altrove"}' },
+          ],
+        };
       case 'genesis.cast':
-        return { moduli: [{ tipo: 'npc', richiesta: 'un vecchio pastore che conta le pecore e perde il conto' }, { tipo: 'strumento', richiesta: 'una mela rossa' }] };
+        return {
+          moduli: [
+            { tipo: 'npc', richiesta: 'un vecchio pastore che conta le pecore e perde il conto' },
+            { tipo: 'oggetto', richiesta: 'una madia di legno per il pane' },
+            { tipo: 'strumento', richiesta: 'un bastone da pastore' },
+          ],
+        };
+      case 'content.items':
+        return { oggetti: this.items(d.count ?? 6, d.existing ?? [], d.hints ?? []) };
+      case 'content.define':
+        return { oggetti: (d.names ?? []).map((n: string) => this.item(n)) };
+      case 'content.physics':
+        return { correzioni: [] };
+      case 'content.review':
+        return { approvato: true, problemi: [] };
+      case 'content.recipes': {
+        const names: string[] = d.names ?? [];
+        const ricette = names.length >= 3 ? [{ nome: `${names[names.length - 1]} grezzo`, ingredienti: [{ oggetto: names[names.length - 2], quantita: 1 }], attrezzi: [], risultato: { oggetto: names[names.length - 1], quantita: 1 } }] : [];
+        return { ricette, bottino: [{ tabella: 'comune', voci: [{ tag: 'cibo', peso: 3 }, { tag: 'materiale', peso: 2 }] }] };
+      }
+      case 'npc.individuate': {
+        const rng = new Rng(hashStr(`${d.archetype?.name}|${d.ctx?.place}|${Math.random()}`));
+        const nome = rng.pick(NAMES);
+        const common: string[] = d.ctx?.common ?? [];
+        return {
+          nome,
+          persona: `Sei ${nome}, ${d.archetype?.description ?? ''}. ${d.archetype?.persona ?? ''}`,
+          aspetto: rng.pick(['ha le mani screpolate dal lavoro', 'porta un fazzoletto rosso al collo', 'zoppica leggermente', 'ha un sorriso sdentato e gentile']),
+          porta: [common.length ? rng.pick(common) : 'pane', common.length > 1 ? rng.pick(common) : 'moneta', 'Fischietto di canna'],
+        };
+      }
+      case 'text.examine':
+        return { testo: `Osservi ${d.what?.name ?? 'la cosa'} da vicino. ${d.what?.description ?? ''} Per un istante ti sembra di averla già vista, identica, altrove.` };
       default:
         return {};
     }
   }
 
+  private item(name: string): unknown {
+    const ws = words(name);
+    const food = ws.some((w) => EDIBLE.includes(w));
+    return { nome: name.trim().replace(/^./, (c) => c.toUpperCase()), descrizione: `${name}, come lo si trova nel regno`, categoria: food ? 'cibo' : 'varie', peso: 0.5, pila: food ? 5 : 1, tag: [food ? 'cucina' : 'casa'], effetti: food ? { fame: 15 } : undefined, impugnabile: false, aspetto: name };
+  }
+
+  private items(count: number, existing: string[], hints: string[]): unknown[] {
+    const out: unknown[] = hints.slice(0, 2).map((h) => this.item(h));
+    for (const [nome, categoria, descrizione, peso, pila, tag, e] of STOCK) {
+      if (out.length >= count) break;
+      if (existing.includes(nome)) continue;
+      out.push({ nome, categoria, descrizione, peso, pila, tag, effetti: e ? { fame: e.hunger, sete: e.thirst, energia: e.energy, salute: e.health } : undefined, impugnabile: categoria === 'attrezzo', aspetto: descrizione });
+    }
+    return out;
+  }
+
   private plan(ctx: PlanContext): unknown {
     const rng = new Rng(hashStr(`plan|${ctx.cx}|${ctx.cy}|${ctx.attempt}`));
-    const tiles = ctx.draft.join('');
-    const count = (c: string) => [...tiles].filter((t) => t === c).length;
-    const biome = count('t') > tiles.length * 0.27 ? 'forest' : count('w') > tiles.length * 0.2 ? 'water' : count('r') > tiles.length * 0.16 ? 'rock' : 'plain';
+    const forest = /bosco (\d+)%/.exec(ctx.terrain);
+    const water = /acqua (\d+)%/.exec(ctx.terrain);
+    const biome = forest && +forest[1] > 30 ? 'forest' : water && +water[1] > 20 ? 'water' : 'plain';
     const lex = PLACES[biome];
-    const size = ctx.size;
-    const walk = (col: number, row: number) => ctx.palette[ctx.draft[row]?.[col]]?.solid === false;
-
-    const used = new Set<string>();
-    const rune: Array<{ codice: string; col: number; riga: number }> = [];
-    const widthOf = (line: string) => tokenize(line).reduce((w, t) => w + t.length, 0);
-    const pool = ctx.fragments.filter((f) => widthOf(f) <= size - 2);
-    const forced = ctx.start ? ['x', 'speed = speed', 'carpet . active'] : [];
-    const n = ctx.start ? forced.length : rng.chance(0.35) ? 0 : 1 + rng.int(3);
-    for (let i = 0; i < n && pool.length; i++) {
-      const line = forced[i] ?? rng.pick(pool);
-      const width = widthOf(line);
-      for (let tries = 0; tries < 30; tries++) {
-        const col = 1 + rng.int(size - 1 - width);
-        const row = 1 + rng.int(size - 2);
-        let ok = true;
-        for (let k = -1; k <= width && ok; k++) if (used.has(`${col + k},${row}`)) ok = false;
-        for (let k = 0; k < width && ok; k++) if (!walk(col + k, row)) ok = false;
-        if (!ok) continue;
-        for (let k = 0; k < width; k++) used.add(`${col + k},${row}`);
-        rune.push({ codice: line, col, riga: row });
-        break;
-      }
-    }
-
-    const oggetti: Array<{ modulo: string; col: number; riga: number }> = [];
+    const ids = ctx.layouts.map((l) => l.id);
+    const neighbour = ctx.neighbors.find((n) => ids.includes(n.layout))?.layout;
+    const ambiente = ctx.start
+      ? (ids.find((i) => i === 'borgo') ?? ids[0])
+      : neighbour && rng.chance(0.4)
+        ? neighbour
+        : biome === 'forest' && ids.includes('bosco')
+          ? 'bosco'
+          : rng.pick(ids);
+    const oggetti: Array<{ modulo: string; dove: string }> = [];
     for (const m of ctx.catalog) {
-      if (oggetti.length >= 3 || !rng.chance(m.kind === 'item' ? 0.25 : 0.3)) continue;
-      for (let tries = 0; tries < 12; tries++) {
-        const col = rng.int(size);
-        const row = rng.int(size);
-        const tile = ctx.draft[row]?.[col];
-        if (!walk(col, row) || (m.tiles.length && !m.tiles.includes(tile)) || used.has(`${col},${row}`)) continue;
-        if (ctx.start && col < 3 && row < 3) continue;
-        used.add(`${col},${row}`);
-        oggetti.push({ modulo: m.id, col, riga: row });
-        break;
-      }
+      if (oggetti.length >= 6) break;
+      const p = m.kind === 'mobile' ? 0.45 : m.kind === 'npc' ? 0.35 : 0.25;
+      if (rng.chance(p)) oggetti.push({ modulo: m.id, dove: m.kind === 'mobile' ? 'dentro' : 'fuori' });
     }
-
-    // A careless cartographer: a rune line that does not compile.
+    const rune: string[] = [];
+    const n = rng.chance(0.4) ? 0 : 1 + rng.int(2);
+    for (let i = 0; i < n && ctx.fragments.length; i++) rune.push(rng.pick(ctx.fragments));
+    // A careless cartographer: a rune line that does not compile (the validator drops it).
     if (!ctx.start && ctx.attempt === 0 && rune.length && rng.chance(this.corruptRate)) {
-      const t = tokenize(rune[0].codice);
-      rune[0].codice = t.length > 1 ? t.slice(0, -1).join(' ') : `${rune[0].codice} =`;
+      const t = tokenize(rune[0]);
+      rune[0] = t.length > 1 ? t.slice(0, -1).join(' ') : `${rune[0]} =`;
     }
-    return { luogo: { nome: `${rng.pick(lex.nouns)} ${rng.pick(SUFFIX)}`, descrizione: rng.pick(lex.descr) }, griglia: ctx.draft, oggetti, nuovi: [], rune };
+    return {
+      luogo: { nome: `${rng.pick(lex.nouns)} ${rng.pick(SUFFIX)}`, descrizione: rng.pick(lex.descr) },
+      ambiente,
+      oggetti,
+      a_terra: ctx.wanted.length && rng.chance(0.5) ? [rng.pick(ctx.wanted)] : [],
+      nuovi: [],
+      rune,
+    };
   }
 
   private concept(req: ForgeRequest): Concept {
@@ -190,6 +253,9 @@ export class MockModels implements Models {
       unico: tipo === 'npc' && !/gatto|cane|pecora|uccello|corvo/.test(req.prompt.toLowerCase()),
       persona: tipo === 'npc' ? `Sei ${nome}, ${req.prompt}. Parli poco, con frasi semplici. Sai che chi cammina torna sempre in piazza, ma non ne parli volentieri.` : undefined,
       tags: tipo === 'oggetto' ? ['tagliabile'] : [],
+      azioni: tipo === 'oggetto' ? [{ id: 'tocca', etichetta: `Tocca ${nome.toLowerCase()}` }] : [],
+      contenitore: tipo === 'oggetto' && /madia|cassa|credenza|armadio|baule|cesta|scaffale/.test(req.prompt) ? { capienza: 6, bottino: 'cucina' } : undefined,
+      porta: tipo === 'npc' ? ['Pagnotta', 'Fune di canapa'] : undefined,
     };
   }
 
@@ -206,7 +272,7 @@ export class MockModels implements Models {
         return `-- ${name}: generato offline.\nlocal M = {}\n\nfunction M.on_use(user, item)\n  inventory.remove(user, item, 1)\n  return "Hai consumato: ${name}."\nend\n\nreturn M\n`;
       return `-- ${name}: generato offline.\nlocal M = {}\n\nfunction M.on_action(user, target, item)\n  if not target then return "Non c'è niente davanti a te." end\n  if world.has_tag(target, "tagliabile") then\n    world.break_entity(target)\n    return "Fatto."\n  end\n  return "Non funziona su questo."\nend\n\nreturn M\n`;
     }
-    if (c.tipo === 'oggetto') return `-- ${name}: generato offline.\nlocal M = {}\n\nfunction M.on_interact(id)\n  return "${name}. ${c.lore.replace(/"/g, '')}"\nend\n\nreturn M\n`;
+    if (c.tipo === 'oggetto') return `-- ${name}: generato offline.\nlocal M = {}\n\nfunction M.on_act(id, user, action)\n  return "${name}. ${c.lore.replace(/"/g, '')}"\nend\n\nfunction M.on_interact(id)\n  return "${name}."\nend\n\nreturn M\n`;
     return `-- ${name}: generato offline. Il dialogo è simulato dal Narratore (persona).\nlocal M = {}\n\nfunction M.on_spawn(id)\nend\n\nreturn M\n`;
   }
 
@@ -218,7 +284,8 @@ export class MockModels implements Models {
     if (/ferm|aspett|resta/.test(t)) return { dice: 'Resto qui. Il mondo verrà da me.', azione: 'resta', umore: 'calmo' };
     if (/vai|lascia|addio/.test(t)) return { dice: 'Torno ai miei giri.', azione: 'vaga', umore: 'tranquillo' };
     if (/dammi|hai qualcosa|regal|scambi/.test(t) && npc.carrying.length) return { dice: `Tieni, prendi questo: ${npc.carrying[0]}.`, azione: 'dai', oggetto: npc.carrying[0], umore: 'generoso' };
-    return { dice: VILLAGER[(npc.history.length + rng.int(3)) % VILLAGER.length], azione: 'nessuna', umore: npc.mood };
+    const mention = /\b(?:un|una|uno|del|della|dello)\s+([a-zàèéìòù]{4,})/i.exec(text);
+    return { dice: VILLAGER[(npc.history.length + rng.int(3)) % VILLAGER.length], azione: 'nessuna', umore: npc.mood, oggetti_citati: mention ? [mention[1]] : [] };
   }
 
   private sign(facts: Record<string, unknown>, name: string): string {

@@ -2,19 +2,21 @@
 
 *Il mondo è scritto. Tu sei al centro.*
 
-Un gioco 2D top-down generato da IA in ogni suo aspetto tranne il kernel. Un **Concilio di agenti** su
-Google Gemini (Narratore, Cartografo, Artista, Fisico, Ingegnere, Arbitro) scrive la storia, disegna e
-dipinge le mappe, inventa oggetti e personaggi, ne scrive il codice e controlla che tutto resti coerente.
+Un gioco 2D top-down a grafica semplice e contenuti ricchissimi, generato da IA in ogni suo aspetto
+tranne il kernel. Un **Concilio di agenti** su Google Gemini (Narratore, Cartografo, Artista, Fisico,
+Ingegnere, Arbitro) scrive la storia, inventa gli ambienti come programmi di regole in stile
+[MarkovJunior](https://github.com/mxgmn/MarkovJunior), riempie il mondo di oggetti, ricette e persone
+(ognuna con un nome e le sue tasche), ne scrive il codice e dipinge a lotti tile, sprite animati e icone.
 Cammini in un regno che sembra infinito, ma un **tappeto** ti riporta sempre al centro. Nel terreno
 brillano **rune**: token Lua veri. Ciò che è scritto sul tappeto si esegue. Componi la frase giusta e il
 tappeto si ferma: puoi camminare fino al bordo ed entrare nella **corona**, il codice sorgente
 dell'universo, e riscriverlo.
 
-![Il regno, dipinto dal Concilio, e un personaggio simulato](docs/img/world.png)
+![Il regno: tile dipinte dall'Artista, ambienti a regole, oggetti e persone](docs/img/world.png)
 
-| Genesi: il Concilio al lavoro | Inventario | Oltre il bordo: la corona |
+| Elara, un individuo simulato | Inventario e contenitori | Oltre il bordo: la corona |
 |---|---|---|
-| ![genesi](docs/img/genesis.png) | ![inventario](docs/img/inventory.png) | ![corona](docs/img/corona.png) |
+| ![chat](docs/img/chat.png) | ![inventario](docs/img/inventory.png) | ![corona](docs/img/corona.png) |
 
 ## Avvio
 
@@ -26,8 +28,9 @@ npm test
 ```
 
 Al primo avvio con Gemini parte la **Genesi**: descrivi il mondo che vuoi e il Concilio lo crea in circa
-un minuto (~40 chiamate a `gemini-2.5-flash-lite`, ~7 immagini con `gemini-2.5-flash-image`); poi i luoghi
-vengono dipinti mentre esplori e restano in cache. La chiave resta sul server di sviluppo: il browser
+un minuto (~60 chiamate a `gemini-2.5-flash-lite`); poi l'Artista dipinge a lotti texture, sprite e
+icone (~15-25 immagini con `gemini-2.5-flash-image` per tutto il mondo, riusate ovunque). Il testo costa
+poco: il mondo continua a crescere di oggetti e ricette mentre esplori. La chiave resta sul server di sviluppo: il browser
 parla con un proxy locale. Senza chiave (o con `?offline`) i luoghi sono abbozzati e gli agenti rispondono
 con un modello locale.
 
@@ -36,15 +39,17 @@ con un modello locale.
 | Tasto | Azione |
 |---|---|
 | `WASD` / frecce | muoviti |
-| `E` / spazio | raccogli rune e oggetti · parla (chat libera) · leggi · usa |
-| `I` / `Tab` | inventario: trascina per riordinare, su un altro oggetto per scambiare o **combinare**, fuori per posare |
+| `E` / spazio | raccogli; davanti a cose e persone apre il menu: parla (chat libera), apri, esamina, dormi, attingi… |
+| `I` / `Tab` | inventario: trascina per riordinare, su un altro oggetto per **combinare**, fuori per posare; scheda **Crea** per le ricette |
 | `1`–`6` | impugna o usa gli oggetti della prima riga |
 | `F` | usa ciò che impugni su ciò che hai davanti |
 | `Q` / `X` | incidi tutte le rune in mano / solo quella scelta (`Z` `C` per scegliere, `Shift` per spostare) |
 | `R` | rollback all'ultimo commit valido |
+| `V` | mostra in rosso ciò che non si può attraversare |
 | `G` | mostra/nasconde il Concilio · `F1` aiuto · `Esc` chiudi |
 
-Passa il mouse su una runa per vederne il valore vivo. Rune che si toccano formano una riga di codice.
+Fame, sete ed energia calano: mangia, bevi, dormi. Passa il mouse su una runa per vederne il valore vivo.
+Rune che si toccano formano una riga di codice.
 
 <details>
 <summary>Spoiler: come si esce</summary>

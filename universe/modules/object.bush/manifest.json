@@ -1,14 +1,16 @@
 {
   "id": "object.bush",
-  "name": "Cespuglio di meli selvatici",
+  "name": "Rovo di more",
   "kind": "entity",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "origin": "esempio",
-  "description": "Un cespuglio fitto. Tra le foglie si intravede qualcosa di rosso.",
+  "description": "Un cespuglio spinoso carico di more.",
   "context": "margini dei boschi e prati",
-  "appearance": { "glyph": "%", "color": "#3fae4a", "imagePrompt": "un cespuglio rotondo con piccole mele rosse, visto dall'alto" },
+  "logic": "logic.lua",
+  "appearance": { "glyph": "%", "color": "#3fae4a", "imagePrompt": "un cespuglio di rovo spinoso con more nere, visto dall'alto" },
   "physics": { "solid": true, "radius": 0.45 },
   "tags": ["tagliabile"],
-  "drops": ["item.mela"],
+  "drops": ["item.ciocco"],
+  "actions": [{ "id": "raccogli", "label": "Raccogli le more" }],
   "spawn": { "tiles": ["g"], "chance": 0.2, "max": 2 }
 }

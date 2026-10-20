@@ -3,11 +3,15 @@
 // validated against: the player is allowed to break the game.
 
 import type { Sandbox } from './sandbox';
-import type { FileMap, GeneratedRune, Manifest, ModuleKind, TileDef } from './types';
-import type { ChunkPlan, FreshObject, PlacedObject } from './agents/cartography';
+import type { FileMap, ItemDef, LayoutDef, Manifest, ModuleKind, TileDef } from './types';
+import { ITEM_CATEGORIES } from './types';
+import type { ChunkPlan } from './agents/cartography';
 import { lex, TOKEN_RE, tokenize } from './runes';
+import { compile, writtenCodes, MjError } from './mj';
+import { layout } from './layout';
 
 const KINDS: ModuleKind[] = ['system', 'entity', 'item', 'player', 'generator', 'data'];
+const LAYERS = ['ground', 'floor', 'wall', 'door', 'liquid', 'vegetation', 'rock'];
 const ID_RE = /^[a-z][a-z0-9-]*(\.[a-z0-9-]+)+$/;
 const HEX_RE = /^#[0-9a-f]{6}$/i;
 
@@ -18,13 +22,14 @@ export const LUA_API: Record<string, string[]> = {
   inventory: ['add', 'remove', 'count', 'equipped'],
   input: ['held'],
   bus: ['emit'],
+  items: ['find', 'def'],
 };
 
 /** Calls to functions that do not exist, or to what the sandbox forbids: caught before anything runs. */
 export function apiErrors(logic: string): string[] {
   const code = logic.replace(/--\[\[[\s\S]*?\]\]|--[^\n]*/g, '').replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g, '""');
   const errors = new Set<string>();
-  for (const m of code.matchAll(/\b(ecs|world|inventory|input|bus)\s*[.:]\s*([A-Za-z_]\w*)/g)) {
+  for (const m of code.matchAll(/\b(ecs|world|inventory|input|bus|items)\s*[.:]\s*([A-Za-z_]\w*)/g)) {
     if (!LUA_API[m[1]].includes(m[2])) errors.add(`${m[1]}.${m[2]} non esiste nell'API (disponibili: ${LUA_API[m[1]].join(', ')})`);
   }
   for (const m of code.matchAll(/\b(os|io|debug|package)\s*\.|\b(require|load|loadstring|dofile|setfenv|getmetatable)\s*\(/g)) errors.add(`${m[1] ?? m[2]} non è disponibile nella sandbox`);
@@ -37,12 +42,10 @@ export const IDENTITY_SAFE = new Set(['x', 'y', 'speed', 'carpet . strength', 'c
 export interface PlanVerdict {
   /** Fatal problems: the plan is discarded and requested again. */
   errors: string[];
-  /** The plan with invalid runes/objects removed (when there are no fatal errors). */
+  /** The plan with invalid parts removed (when there are no fatal errors). */
   plan: ChunkPlan;
   /** What was filtered out, for the log. */
   dropped: string[];
-  /** Placements snapped to the nearest valid cell. */
-  moved: number;
 }
 
 export class Validator {
@@ -92,13 +95,35 @@ export class Validator {
     }
     if (m.tiles) {
       for (const [code, t] of Object.entries<any>(m.tiles)) {
-        if (code.length !== 1) err(`codice tile "${code}" deve essere un carattere`);
+        if (code.length !== 1 || code === '?' || code === '*' || code === '/' || code === '[' || code === ']') err(`codice tile "${code}" non valido`);
         if (typeof t.name !== 'string' || typeof t.solid !== 'boolean' || typeof t.color !== 'string' || !HEX_RE.test(t.color)) err(`tile "${code}" incompleta (name, color #rrggbb, solid)`);
         if (t.speed !== undefined && (typeof t.speed !== 'number' || t.speed < 0.2 || t.speed > 2)) err(`tile "${code}": speed fuori intervallo`);
+        if (t.layer !== undefined && !LAYERS.includes(t.layer)) err(`tile "${code}": layer deve essere uno tra ${LAYERS.join(', ')}`);
       }
     }
+    if (m.container && (!Number.isInteger(m.container.size) || m.container.size < 1 || m.container.size > 24 || typeof m.container.loot !== 'string')) err('container: size 1..24 e loot');
+    if (m.actions && (!Array.isArray(m.actions) || m.actions.some((a: any) => typeof a?.id !== 'string' || typeof a?.label !== 'string'))) err('actions: lista di {id, label}');
+    if (m.items) errors.push(...this.validateItems(m.items).map((e) => `${path}: ${e}`));
     if (m.fragments && !Array.isArray(m.fragments)) err('fragments deve essere una lista');
     return errors.length ? { errors } : { manifest: m as Manifest, errors };
+  }
+
+  validateItems(items: unknown): string[] {
+    if (!Array.isArray(items)) return ['items deve essere una lista'];
+    const errors: string[] = [];
+    const seen = new Set<string>();
+    for (const it of items as ItemDef[]) {
+      const w = `oggetto ${it?.id}`;
+      if (typeof it?.id !== 'string' || !/^item\.[a-z0-9-]+$/.test(it.id)) errors.push(`${w}: id non valido`);
+      else if (seen.has(it.id)) errors.push(`${w}: id duplicato`);
+      seen.add(it?.id);
+      if (typeof it?.name !== 'string' || !it.name) errors.push(`${w}: name mancante`);
+      if (!(ITEM_CATEGORIES as readonly string[]).includes(it?.category)) errors.push(`${w}: categoria sconosciuta`);
+      if (typeof it?.weight !== 'number' || it.weight < 0 || it.weight > 50) errors.push(`${w}: weight 0..50`);
+      if (!Number.isInteger(it?.stack) || it.stack < 1 || it.stack > 99) errors.push(`${w}: stack 1..99`);
+      if (!Array.isArray(it?.tags)) errors.push(`${w}: tags`);
+    }
+    return errors.slice(0, 6);
   }
 
   checkLua(path: string, src: string): string[] {
@@ -120,7 +145,7 @@ export class Validator {
     return [];
   }
 
-  /** A forged module: manifest shape, Lua that compiles and loads, only world kinds. */
+  /** A forged module: manifest shape, Lua that compiles, uses only the API and loads. */
   validateForged(manifest: Manifest, logic: string, existingIds: Set<string>): string[] {
     const path = `modules/${manifest.id}/manifest.json`;
     const errors = [...this.parseManifest(path, JSON.stringify(manifest)).errors];
@@ -138,7 +163,6 @@ export class Validator {
     return errors;
   }
 
-  /** Validates a module given as files (import, legacy agent output). */
   validateModuleFiles(files: FileMap, existingIds: Set<string>): string[] {
     const manifests = Object.keys(files).filter((p) => p.endsWith('/manifest.json'));
     if (manifests.length !== 1) return ['un modulo deve contenere esattamente un manifest.json'];
@@ -146,19 +170,6 @@ export class Validator {
     if (!manifest) return errors;
     const logicPath = manifests[0].replace(/manifest\.json$/, manifest.logic ?? 'logic.lua');
     return this.validateForged(manifest, files[logicPath] ?? 'return {}', existingIds);
-  }
-
-  validateGrid(grid: unknown, size: number, palette: Record<string, TileDef>): string[] {
-    if (!Array.isArray(grid) || grid.length !== size) return [`la griglia deve avere ${size} righe (ne ha ${Array.isArray(grid) ? grid.length : 0})`];
-    const errors: string[] = [];
-    grid.forEach((row, i) => {
-      if (typeof row !== 'string' || [...row].length !== size) errors.push(`la riga ${i} deve avere ${size} caratteri`);
-      else {
-        const bad = [...row].find((c) => !palette[c] || c === '?');
-        if (bad) errors.push(`codice sconosciuto "${bad}" alla riga ${i}`);
-      }
-    });
-    return errors.slice(0, 4);
   }
 
   /** A rune line is valid generated code: it compiles, has no calls, statements only `a = a` on safe symbols. */
@@ -179,91 +190,64 @@ export class Validator {
   }
 
   /**
-   * The Cartographer's plan. Grid and place are essential (fatal errors); runes, objects and new things
-   * that break a rule are dropped one by one, so nothing invalid ever enters the world.
+   * A layout program must compile, write only known terrain, terminate, and leave a playable chunk on
+   * real drafts (enough walkable ground once the kernel has carved its paths).
    */
-  validatePlan(plan: ChunkPlan, size: number, palette: Record<string, TileDef>, placeable: Map<string, string[]>, start: boolean): PlanVerdict {
+  validateLayout(id: string, def: LayoutDef, palette: Record<string, TileDef>, drafts: string[][]): string[] {
+    const errors: string[] = [];
+    if (!def || typeof def.name !== 'string' || typeof def.description !== 'string') return [`${id}: name e description obbligatori`];
+    try {
+      compile(def.program);
+    } catch (e) {
+      return [`${id}: ${(e as Error).message}`];
+    }
+    const unknown = [...writtenCodes(def.program)].filter((c) => !palette[c] || c === '?');
+    if (unknown.length) errors.push(`${id}: scrive codici inesistenti ${unknown.join(', ')}`);
+    if (errors.length) return errors;
+    drafts.forEach((draft, i) => {
+      try {
+        const r = layout(draft, palette, { cx: 100 + i, cy: -100, seed: 1, program: def.program, pathCode: 'p' });
+        const open = (rows: string[]) => rows.join('').split('').filter((c) => palette[c]?.solid === false).length;
+        // Judged against what the draft offered: a forest draft is allowed to stay mostly forest.
+        const cells = draft.length * draft.length;
+        const needed = Math.min(cells * 0.25, open(draft) * 0.5);
+        if (open(r.grid) < needed) errors.push(`${id}: lascia troppo poco spazio calpestabile`);
+        if (r.steps >= 4000) errors.push(`${id}: non termina (troppi passi): usa "steps"`);
+      } catch (e) {
+        errors.push(`${id}: ${e instanceof MjError ? e.message : (e as Error).message}`);
+      }
+    });
+    return [...new Set(errors)];
+  }
+
+  /**
+   * The Cartographer's plan: place and environment are essential (fatal); objects, runes and new
+   * things that break a rule are dropped one by one, so nothing invalid ever enters the world.
+   */
+  validatePlan(plan: ChunkPlan, layouts: Set<string>, placeable: Set<string>): PlanVerdict {
     const errors: string[] = [];
     const dropped: string[] = [];
-    if (!plan.place?.name?.trim() || plan.place.name.length > 60) errors.push('luogo.nome mancante o troppo lungo');
+    if (!plan.place?.name || plan.place.name.length > 60) errors.push('luogo.nome mancante o troppo lungo');
     if (typeof plan.place?.description !== 'string' || plan.place.description.length > 300) errors.push('luogo.descrizione non valida');
-    errors.push(...this.validateGrid(plan.grid, size, palette));
-    if (errors.length) return { errors, plan, dropped, moved: 0 };
-    const grid = plan.grid.map((r) => [...r]);
-    const walk = (c: number, r: number) => c >= 0 && r >= 0 && c < size && r < size && palette[grid[r][c]]?.solid === false;
-    if (start) for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) if (!walk(c, r)) errors.push(`la piazza di partenza (${c},${r}) deve restare calpestabile`);
-    if (errors.length) return { errors: errors.slice(0, 3), plan, dropped, moved: 0 };
-
-    // Models are poor at counting cells: placements express intent, the kernel snaps them to the
-    // nearest valid cell. Only what cannot be made valid (bad code, unknown modules) is dropped.
-    const occupied = new Set<string>();
-    let moved = 0;
-    const nearest = (c0: number, r0: number, fits: (c: number, r: number) => boolean, radius = 6): [number, number] | null => {
-      const c = Number.isInteger(c0) ? c0 : Math.floor(size / 2);
-      const r = Number.isInteger(r0) ? r0 : Math.floor(size / 2);
-      for (let d = 0; d <= radius; d++)
-        for (let dy = -d; dy <= d; dy++)
-          for (let dx = -d; dx <= d; dx++) {
-            if (Math.max(Math.abs(dx), Math.abs(dy)) !== d) continue;
-            if (fits(c + dx, r + dy)) return [c + dx, r + dy];
-          }
-      return null;
-    };
-    const runes: GeneratedRune[] = [];
-    for (const r of plan.runes ?? []) {
-      const where = `runa «${r?.line}»`;
-      if (typeof r?.line !== 'string') {
-        dropped.push(`${where}: forma non valida`);
-        continue;
-      }
-      const line = lex(r.line).join(' ');
-      const problems = this.runeErrors(line);
-      if (problems.length) {
-        dropped.push(`${where}: ${problems.join(', ')}`);
-        continue;
-      }
-      const width = tokenize(line).reduce((n, t) => n + t.length, 0);
-      const fits = (col: number, row: number) => {
-        if (row < 1 || row > size - 2 || col < 1 || col + width > size - 1) return false;
-        for (let i = -1; i <= width; i++) if (occupied.has(`${col + i},${row}`)) return false;
-        for (let i = 0; i < width; i++) if (!walk(col + i, row)) return false;
-        return true;
-      };
-      const at = nearest(r.col, r.row, fits, size); // runes are rare and precious: anywhere in the chunk
-      if (!at) {
-        dropped.push(`${where}: nessuna posizione valida vicina`);
-        continue;
-      }
-      if (at[0] !== r.col || at[1] !== r.row) moved++;
-      for (let i = 0; i < width; i++) occupied.add(`${at[0] + i},${at[1]}`);
-      runes.push({ line, col: at[0], row: at[1] });
-    }
-
-    const objects: PlacedObject[] = [];
-    const fitsCell = (c: number, r: number) => walk(c, r) && !occupied.has(`${c},${r}`);
-    for (const o of (plan.objects ?? []).slice(0, 6)) {
-      if (!placeable.has(o.module)) {
-        dropped.push(`oggetto ${o.module}: modulo inesistente o non posizionabile`);
-        continue;
-      }
-      const at = nearest(o.col, o.row, fitsCell);
-      if (!at) {
-        dropped.push(`oggetto ${o.module}: nessuna casella libera vicina`);
-        continue;
-      }
-      if (at[0] !== o.col || at[1] !== o.row) moved++;
-      occupied.add(`${at[0]},${at[1]}`);
-      objects.push({ module: o.module, col: at[0], row: at[1] });
-    }
-    const fresh: FreshObject[] = [];
-    for (const f of (plan.fresh ?? []).slice(0, 1)) {
-      const at = typeof f.concept === 'string' && f.concept.length >= 3 && f.concept.length <= 200 ? nearest(f.col, f.row, fitsCell) : null;
-      if (!at) dropped.push(`nuovo «${f.concept}»: non valido`);
-      else {
-        occupied.add(`${at[0]},${at[1]}`);
-        fresh.push({ concept: f.concept, col: at[0], row: at[1] });
-      }
-    }
-    return { errors: [], dropped, moved, plan: { ...plan, place: { name: plan.place.name.trim(), description: plan.place.description.trim() }, runes, objects, fresh } };
+    if (!layouts.has(plan.layout)) errors.push(`ambiente sconosciuto "${plan.layout}" (scegli tra: ${[...layouts].join(', ')})`);
+    if (errors.length) return { errors, plan, dropped };
+    const objects = plan.objects.filter((o) => {
+      if (placeable.has(o.module)) return true;
+      dropped.push(`oggetto ${o.module}: modulo inesistente o non posizionabile`);
+      return false;
+    });
+    const runes = plan.runes
+      .map((r) => lex(r).join(' '))
+      .filter((line) => {
+        const e = this.runeErrors(line);
+        if (e.length) dropped.push(`runa «${line}»: ${e.join(', ')}`);
+        return !e.length;
+      });
+    const fresh = plan.fresh.filter((f) => {
+      const ok = f.concept.length >= 3 && f.concept.length <= 200;
+      if (!ok) dropped.push(`nuovo «${f.concept}»: non valido`);
+      return ok;
+    });
+    return { errors, dropped, plan: { ...plan, objects, runes, fresh, ground: plan.ground.filter((g) => g.trim().length >= 2 && g.length <= 60) } };
   }
 }

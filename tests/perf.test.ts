@@ -18,6 +18,6 @@ it('perf', async () => {
   };
   time('tick', () => k.tick(1 / 60));
   for (const s of k.systems) time(`sys ${s.manifest.id}`, () => k.runModule(s.manifest.id, 'update', 1 / 60));
-  time('genTiles', () => (k as any).genTiles(99, 99), 20);
+  time('genTiles', () => (k as any).genDraft(99, 99), 20);
   console.log('entities', k.ecs.count(), 'lines', k.lines.size, 'chunks', k.chunks.size);
 });

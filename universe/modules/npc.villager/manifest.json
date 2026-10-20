@@ -1,17 +1,45 @@
 {
   "id": "npc.villager",
-  "name": "Abitante di Valmora",
+  "name": "Abitante",
   "kind": "entity",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "origin": "esempio",
-  "description": "Gente del regno. Sa più di quanto dica.",
+  "description": "Gente del regno: ognuno con un nome, un mestiere e le tasche piene di cose.",
   "context": "prati e sentieri vicino ai borghi",
   "logic": "logic.lua",
-  "appearance": { "glyph": "&", "color": "#e8c07a", "scale": 1.25, "imagePrompt": "un contadino medievale con tunica ocra e cappello di paglia" },
-  "physics": { "solid": false, "radius": 0.35, "speed": 1.2 },
-  "components": { "wander": { "dx": 0, "dy": 0, "t": 0, "speed": 1.2 } },
-  "interaction": { "type": "talk" },
-  "persona": "Sei un abitante di Valmora: gentile, un po' smemorato, parli in modo semplice e cordiale. Ami il tuo borgo. Sai che chi parte verso l'orizzonte torna in piazza la sera stessa e che il bordo del regno è sempre a 44 passi, ma ne parli a mezza voce, come di una superstizione. Hai sentito dire che le lettere luminose nel terreno «obbediscono a chi le mette in fila» e che una parola, «carpet», tiene fermo tutto. Porti con te una mela e la cedi volentieri a chi è gentile.",
-  "inventory": ["item.mela"],
-  "spawn": { "tiles": ["g", "p"], "chance": 0.3, "max": 2 }
+  "appearance": {
+    "glyph": "&",
+    "color": "#e8c07a",
+    "scale": 1.25,
+    "imagePrompt": "un contadino medievale con tunica ocra e cappello di paglia"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.35,
+    "speed": 1.2
+  },
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 1.2
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Sei una persona comune del regno di Valmora: hai un mestiere, una famiglia, piccole preoccupazioni quotidiane. Sei gentile ma un po' smemorato. Sai che chi parte verso l'orizzonte torna in piazza la sera stessa e che il bordo è sempre a 44 passi, ma ne parli a mezza voce, come di una superstizione. Hai sentito dire che le lettere luminose nel terreno «obbediscono a chi le mette in fila» e che una parola, «carpet», tiene fermo tutto. Scambi volentieri ciò che porti con chi è gentile.",
+  "inventory": [
+    "item.pane",
+    "item.moneta"
+  ],
+  "spawn": {
+    "tiles": [
+      "g",
+      "p"
+    ],
+    "chance": 0.3,
+    "max": 2
+  }
 }

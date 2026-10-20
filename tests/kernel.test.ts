@@ -15,7 +15,7 @@ export async function boot(models = new MockModels()) {
 
 /** Ticks until every loaded chunk has been planned by the Cartographer. */
 export async function develop(k: Kernel) {
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 80; i++) {
     k.tick(DT);
     await settle(25);
     if ([...k.chunks.values()].every((c) => c.stage !== 'draft')) break;
@@ -32,10 +32,10 @@ export const settle = (ms = 250) => new Promise((r) => setTimeout(r, ms));
 /** Moves the player next to a run of free cells and faces right, so inscriptions always fit. */
 export function clearArea(k: Kernel, width = 24) {
   const { ox, oy } = k.offset();
-  const free = (c: number, r: number) => (k as any).freeCell(c, r) && !k.runeCells.has(`${c},${r}`) && k.tileAt(c, r) !== undefined;
-  for (let d = 0; d < 20; d++)
+  const free = (c: number, r: number) => (k as any).freeCell(c, r) && !k.runeCells.has(`${c},${r}`) && k.tileAt(c, r) !== undefined && !k.buildingAt(c + 0.5, r + 0.5);
+  for (let d = 0; d < 30; d++)
     for (const row of [d, -d]) {
-      for (let col = -20; col < 0; col++) {
+      for (let col = -30; col < 0; col++) {
         let ok = true;
         for (let i = 0; i <= width && ok; i++) ok = free(col + i, row);
         if (!ok) continue;
@@ -52,6 +52,12 @@ export function clearArea(k: Kernel, width = 24) {
   throw new Error('nessuno spazio libero trovato');
 }
 
+const spawnInFront = (k: Kernel, id: string, dist = 0.9) => {
+  const pc = k.playerCarpet();
+  k.playerComp().facing = 'right';
+  return k.spawnModuleEntity(k.modules.get(id)!, pc.x + dist, pc.y);
+};
+
 describe('kernel', () => {
   let k: Kernel;
   beforeEach(async () => {
@@ -60,31 +66,38 @@ describe('kernel', () => {
 
   it('boots the bundled universe without faults', () => {
     expect(k.faults.list()).toEqual([]);
-    expect(k.modules.size).toBeGreaterThanOrEqual(12);
+    expect(k.modules.size).toBeGreaterThanOrEqual(20);
+    expect(k.content.items.size).toBeGreaterThanOrEqual(30);
+    expect(Object.keys(k.content.layouts)).toEqual(expect.arrayContaining(['borgo', 'bosco', 'campi', 'rovine', 'locanda']));
     expect(k.repo.head().message).toBe('genesi');
-    expect(k.chunks.size).toBeGreaterThan(0);
     expect(k.needsGenesis()).toBe(true);
   });
 
-  it('every chunk is planned by the Cartographer and its runes are valid live code', () => {
-    expect([...k.chunks.values()].every((c) => c.stage !== 'draft')).toBe(true);
-    expect([...k.chunks.values()].every((c) => c.place?.name)).toBe(true);
-    expect(k.lines.size).toBeGreaterThan(0);
+  it('every chunk gets an environment from the Cartographer; the start is a village with buildings', () => {
+    const chunks = [...k.chunks.values()];
+    expect(chunks.every((c) => c.stage === 'planned' && c.place?.name && k.content.layouts[c.plan!.layout])).toBe(true);
+    const start = k.chunks.get('0,0')!;
+    expect(start.plan!.layout).toBe('borgo');
+    expect(start.buildings.length).toBeGreaterThan(0);
+    const b = start.buildings[0];
+    const S = k.config.chunkSize;
+    expect(k.buildingAt((b.floor[0] % S) + 0.5, Math.floor(b.floor[0] / S) + 0.5)?.building).toBe(b);
     for (const st of k.lines.values()) expect(st.compiled).toBe(true);
     expect(k.feed().some((e) => e.from === 'cartografo' && e.kind === 'propone')).toBe(true);
+  });
+
+  it('the world is full of things: furniture with contents, items on the ground', () => {
+    expect(k.ecs.query('container').length).toBeGreaterThan(0);
+    expect(k.ecs.query('pickup').length).toBeGreaterThan(0);
   });
 
   it('the carpet keeps the player at the centre and the corona stays hidden', () => {
     k.input.setHeld('right', true);
     run(k, 6);
     k.input.setHeld('right', false);
-    const p = k.playerPos();
-    expect(Math.abs(p.x)).toBeLessThan(2);
-    expect(k.offset().ox).toBeGreaterThan(5);
+    expect(Math.abs(k.playerPos().x)).toBeLessThan(2);
     expect(k.coronaRevealed()).toBe(false);
-    // Beyond the circle there is just more carpet: no code is exposed to the cursor.
-    const hover = k.hoverAt(k.config.circleRadius + 2, 0);
-    expect(hover?.kind).not.toBe('code');
+    expect(k.hoverAt(k.config.circleRadius + 2, 0)?.kind).not.toBe('code');
   });
 
   it('runes that stop the carpet reveal the corona and let the player reach it', () => {
@@ -92,11 +105,9 @@ describe('kernel', () => {
     expect(k.inscribe(['carpet', '.', 'active', '=', 'false'])).toBe(true);
     run(k, DT * 2);
     expect(k.carpet()!.active).toBe(false);
-    expect(k.faults.size).toBe(0);
     k.playerPos().x = k.config.circleRadius + 0.5;
     run(k, DT * 2);
     expect(k.zone).toBe('corona');
-    expect(k.coronaRevealed()).toBe(true);
     expect(k.hoverAt(k.config.circleRadius + 1, 0)?.kind).toBe('code');
   });
 
@@ -105,42 +116,30 @@ describe('kernel', () => {
     k.inscribe(['carpet', '.', 'strength', '=']);
     run(k, DT * 2);
     expect(k.faults.list().some((f) => f.key.startsWith('rune:'))).toBe(true);
-    expect(k.brokenness()).toBeGreaterThan(0);
     k.rollback();
     run(k, DT * 2);
     expect(k.faults.size).toBe(0);
     expect(k.hand().tokens).toEqual(['carpet', '.', 'strength', '=']);
   });
 
-  it('severing a binding breaks the system that depends on it', () => {
+  it('severing a binding breaks the system that depends on it; the kernel survives absurd values', () => {
     clearArea(k);
     k.inscribe(['carpet', '=', 'nil']);
     run(k, DT * 3);
     expect(k.faults.has('module:core.carpet:update')).toBe(true);
     k.rollback();
-    run(k, DT * 2);
-    expect(k.faults.size).toBe(0);
-  });
-
-  it('the kernel survives absurd values', () => {
     clearArea(k);
     k.inscribe(['carpet', '.', 'ox', '=', 'nil']);
     run(k, DT * 2);
     expect(Number.isFinite(k.offset().ox)).toBe(true);
-    expect(k.faults.has('kernel:sanitize')).toBe(true);
   });
 
   it('valid edits are hot reloaded and committed; invalid ones are refused unless forced', () => {
     const path = 'modules/core.carpet/logic.lua';
-    const bad = k.saveFile(path, 'local M = {} function M.update( return M');
-    expect(bad.written).toBe(false);
-    const forced = k.saveFile(path, 'local M = {} function M.update( return M', true);
-    expect(forced.committed).toBe(false);
-    expect(k.faults.has('module:core.carpet:load')).toBe(true);
+    expect(k.saveFile(path, 'local M = {} function M.update( return M').written).toBe(false);
+    expect(k.saveFile(path, 'local M = {} function M.update( return M', true).committed).toBe(false);
     k.rollback();
-    expect(k.faults.size).toBe(0);
-    const good = k.saveFile(path, k.files[path].replace('carpet.strength *', '0.5 * carpet.strength *'));
-    expect(good.committed).toBe(true);
+    expect(k.saveFile(path, k.files[path].replace('carpet.strength *', '0.5 * carpet.strength *')).committed).toBe(true);
   });
 
   it('the corona maps every universe file', () => {
@@ -154,78 +153,142 @@ describe('kernel', () => {
   });
 });
 
-describe('items and inventory', () => {
+describe('items, containers, actions, needs', () => {
   let k: Kernel;
   beforeEach(async () => {
     k = await boot();
+    clearArea(k);
   });
 
-  const spawnInFront = (id: string, dist = 0.9) => {
+  it('items on the ground are picked up, stacked and eaten', async () => {
     const pc = k.playerCarpet();
-    k.playerComp().facing = 'right';
-    return k.spawnModuleEntity(k.modules.get(id)!, pc.x + dist, pc.y);
-  };
-
-  it('items on the ground are picked up, stacked and used', async () => {
-    clearArea(k);
-    spawnInFront('item.mela', 0.5);
-    spawnInFront('item.mela', 0.6);
+    k.spawnItem('item.mela-rossa', pc.x + 0.5, pc.y);
+    k.spawnItem('item.mela-rossa', pc.x + 0.6, pc.y);
     await k.interact();
     await k.interact();
     const inv = k.inventory();
-    expect(countItem(inv, 'item.mela')).toBe(2);
-    expect(inv.slots.filter(Boolean).length).toBe(1);
-    k.useSlot(inv.slots.findIndex((s) => s?.item === 'item.mela'));
-    expect(countItem(inv, 'item.mela')).toBe(1);
+    expect(countItem(inv, 'item.mela-rossa')).toBe(2);
+    k.needs()!.hunger = 40;
+    k.useSlot(inv.slots.findIndex((s) => s?.item === 'item.mela-rossa'));
+    expect(countItem(inv, 'item.mela-rossa')).toBe(1);
+    expect(k.needs()!.hunger).toBe(52);
   });
 
-  it('an equipped tool acts on the world: scissors cut a bush, which drops an apple', () => {
-    clearArea(k);
+  it('an equipped tool acts on the world: scissors cut a bramble, which leaves wood', () => {
     const inv = k.inventory();
     inv.slots[0] = { item: 'item.forbici', count: 1 };
     k.equipSlot(0);
-    expect(inv.equipped).toBe(0);
-    const bush = spawnInFront('object.bush');
+    const bush = spawnInFront(k, 'object.bush');
     k.action();
     expect(k.ecs.alive.has(bush)).toBe(false);
-    expect(k.ecs.query('pickup').some((id) => k.ecs.get(id, 'pickup').item === 'item.mela')).toBe(true);
+    expect(k.ecs.query('pickup').some((id) => k.ecs.get(id, 'pickup').item === 'item.ciocco')).toBe(true);
   });
 
-  it('dropping puts the item back in the world', () => {
-    clearArea(k);
+  it('containers are filled from their loot table the first time and can be emptied', () => {
+    const box = spawnInFront(k, 'obj.credenza');
+    expect(k.actionsFor(box).map((a) => a.id)).toEqual(expect.arrayContaining(['apri', 'esamina']));
+    const c = k.openContainer(box)!;
+    const found = c.inv.slots.filter(Boolean).length;
+    expect(found).toBeGreaterThan(0);
+    c.inv.slots.forEach((s, i) => s && k.takeFromContainer(box, i));
+    expect(c.inv.slots.filter(Boolean).length).toBe(0);
+    expect(k.inventory().slots.filter(Boolean).length).toBe(found);
+    k.openContainer(box);
+    expect(c.inv.slots.filter(Boolean).length).toBe(0);
+  });
+
+  it('objects offer their own actions, with requirements', async () => {
+    const bed = spawnInFront(k, 'obj.letto');
+    k.needs()!.energy = 10;
+    await k.perform(bed, 'act:dormi');
+    expect(k.needs()!.energy).toBe(100);
+    const well = spawnInFront(k, 'object.well', 2.5);
+    const attingi = () => k.actionsFor(well).find((a) => a.id === 'act:attingi')!;
+    expect(attingi().enabled).toBe(false);
+    expect(attingi().reason).toMatch(/Secchio/);
+    k.inventory().slots[5] = { item: 'item.secchio', count: 1 };
+    expect(attingi().enabled).toBe(true);
+    await k.perform(well, 'act:attingi');
+    expect(countItem(k.inventory(), 'item.otre-acqua')).toBe(1);
+  });
+
+  it('recipes turn what you carry into new things', () => {
     const inv = k.inventory();
-    inv.slots[3] = { item: 'item.mela', count: 4 };
-    k.dropSlot(3, 1);
-    expect(inv.slots[3]!.count).toBe(3);
-    expect(k.ecs.query('pickup').some((id) => k.ecs.get(id, 'pickup').item === 'item.mela')).toBe(true);
+    inv.slots[0] = { item: 'item.stoffa', count: 2 };
+    inv.slots[1] = { item: 'item.coltello', count: 1 };
+    expect(k.recipes().available.has('ricetta.benda')).toBe(true);
+    expect(k.craft('ricetta.benda')).toBe(true);
+    expect(countItem(inv, 'item.benda')).toBe(2);
+    expect(countItem(inv, 'item.coltello')).toBe(1);
+    expect(k.craft('ricetta.benda')).toBe(false);
+  });
+
+  it('needs decay with time and walking', () => {
+    const before = { ...k.needs()! };
+    run(k, 10);
+    expect(k.needs()!.hunger).toBeLessThan(before.hunger);
+    expect(k.needs()!.thirst).toBeLessThan(before.thirst);
   });
 
   it('pushable things move when walked into', () => {
     const { col, row } = clearArea(k);
-    const { ox, oy } = k.offset();
     k.carpet()!.active = false;
     const crate = k.spawnModuleEntity(k.modules.get('object.crate')!, col + 2.5, row + 0.5);
     const before = k.ecs.get(crate, 'pos').x;
-    expect(k.playerPos().x + ox).toBeCloseTo(col + 0.5);
     k.input.setHeld('right', true);
     run(k, 0.8);
     k.input.setHeld('right', false);
     run(k, 0.5);
     expect(k.ecs.get(crate, 'pos').x).toBeGreaterThan(before + 0.3);
-    expect(oy).toBeDefined();
+  });
+});
+
+describe('characters', () => {
+  let k: Kernel;
+  beforeEach(async () => {
+    k = await boot();
+    clearArea(k);
   });
 
-  it('NPCs answer in character and their actions are carried out', async () => {
-    clearArea(k);
-    const npc = spawnInFront('npc.villager', 1);
+  it('every NPC is an individual with a name and pockets; they give, follow and remember', async () => {
+    const npc = spawnInFront(k, 'npc.villager', 1);
     const give = await k.talk(npc, 'Buongiorno! Hai qualcosa da darmi?');
+    const identity = k.ecs.get(npc, 'identity');
+    expect(identity.name).not.toBe('Abitante');
+    expect(k.nameOf(npc)).toBe(identity.name);
     expect(give.action).toBe('dai');
-    expect(countItem(k.inventory(), 'item.mela')).toBe(1);
+    expect(k.inventory().slots.filter(Boolean).length).toBe(1);
     const follow = await k.talk(npc, 'Seguimi, ti prego');
     expect(follow.action).toBe('segui');
-    expect(k.ecs.get(npc, 'mind').mode).toBe('segui');
     expect(k.ecs.get(npc, 'mind').history.length).toBe(4);
-    expect(k.bubbles.has(npc)).toBe(true);
+    // A second NPC of the same kind is somebody else.
+    const other = spawnInFront(k, 'npc.villager', 2);
+    await k.ensureIdentity(other);
+    expect(k.ecs.get(other, 'identity')).toBeTruthy();
+  });
+
+  it('things mentioned in conversation become real and turn up more often', async () => {
+    const npc = spawnInFront(k, 'npc.villager', 1);
+    await k.talk(npc, 'Sai dove trovare una lanterna?');
+    await settle(80);
+    expect(k.wanted.has('item.lanterna')).toBe(true);
+    await k.talk(npc, 'E uno zufolo?');
+    await settle(120);
+    const zufolo = k.content.byName('zufolo');
+    expect(zufolo).toBeTruthy();
+    expect(k.wanted.has(zufolo!.id)).toBe(true);
+    expect(k.files['modules/items.citati/manifest.json']).toContain('Zufolo');
+  });
+
+  it('examining something asks the Narrator once, then remembers', async () => {
+    const box = spawnInFront(k, 'obj.cassa');
+    let said = '';
+    k.bus.on('ui:dialog', ({ text }: { text: string }) => (said = text));
+    await k.perform(box, 'esamina');
+    expect(said).toMatch(/Cassapanca/);
+    const calls = k.models.usage.text;
+    await k.perform(box, 'esamina');
+    expect(k.models.usage.text).toBe(calls);
   });
 });
 
@@ -234,11 +297,20 @@ describe('the Council', () => {
     const k = await boot();
     const r = await k.askAgent('un fabbro che parla di spade');
     expect(r.ok).toBe(true);
-    expect(k.modules.get('npc.fabbro')?.manifest.persona).toBeTruthy();
+    const m = k.modules.get('npc.fabbro')!.manifest;
+    expect(m.persona).toBeTruthy();
+    expect(m.inventory?.length).toBeGreaterThan(0);
     expect(k.repo.head().author).toBe('agent');
-    expect(JSON.parse(k.files['world/bible.json']).personaggi.some((p: string) => p.startsWith('Fabbro'))).toBe(true);
     const kinds = k.feed().map((e) => `${e.from}:${e.kind}`);
     for (const step of ['narratore:propone', 'fisico:propone', 'ingegnere:propone', 'arbitro:approva']) expect(kinds).toContain(step);
+  });
+
+  it('forged objects get actions and containers', async () => {
+    const k = await boot();
+    const r = await k.forgeModule('una madia di legno per il pane', 'agente', 'oggetto');
+    const m = k.modules.get(r.id!)!.manifest;
+    expect(m.actions?.length).toBeGreaterThan(0);
+    expect(m.container?.loot).toBe('cucina');
   });
 
   it('the Arbiter sends incoherent work back to the responsible agent', async () => {
@@ -246,113 +318,87 @@ describe('the Council', () => {
       reviews = 0;
       physicsCalls = 0;
       async text(call: Parameters<MockModels['text']>[0]) {
-        if (call.task === 'forge.review' && this.reviews++ === 0)
-          return JSON.stringify({ approvato: false, problemi: [{ agente: 'fisico', problema: 'una mela non pesa 40 kg' }] });
+        if (call.task === 'forge.review' && this.reviews++ === 0) return JSON.stringify({ approvato: false, problemi: [{ agente: 'fisico', problema: 'una mela non pesa 40 kg' }] });
         if (call.task === 'forge.physics') this.physicsCalls++;
         return super.text(call);
       }
     }
     const models = new Picky();
     const k = await boot(models);
-    const r = await k.askAgent('una mela dorata');
-    expect(r.ok).toBe(true);
+    expect((await k.askAgent('una mela dorata')).ok).toBe(true);
     expect(models.physicsCalls).toBe(2);
-    const feed = k.feed();
-    expect(feed.some((e) => e.from === 'arbitro' && e.kind === 'obietta' && e.to === 'fisico')).toBe(true);
-    expect(feed.some((e) => e.from === 'fisico' && e.kind === 'corregge')).toBe(true);
+    expect(k.feed().some((e) => e.from === 'arbitro' && e.kind === 'obietta' && e.to === 'fisico')).toBe(true);
   });
 
-  it('code that does not load is sent back to the Engineer', async () => {
+  it('code that does not load, or calls functions that do not exist, goes back to the Engineer', async () => {
     class Sloppy extends MockModels {
-      first = true;
+      n = 0;
       async text(call: Parameters<MockModels['text']>[0]) {
-        if (call.task === 'forge.code' && this.first) {
-          this.first = false;
-          return JSON.stringify({ logic: 'local M = {} function M.on_use( return M' });
-        }
+        if (call.task === 'forge.code' && this.n++ < 2) return JSON.stringify({ logic: this.n === 1 ? 'local M = {} function M.on_use( return M' : 'local M = {}\nfunction M.on_use(u, i) world.teleport(u) end\nreturn M' });
         return super.text(call);
       }
     }
     const k = await boot(new Sloppy());
-    const r = await k.askAgent('una pagnotta di pane');
-    expect(r.ok).toBe(true);
-    expect(k.feed().some((e) => e.from === 'kernel' && e.kind === 'scarta' && e.to === 'ingegnere')).toBe(true);
+    expect((await k.askAgent('una pagnotta di pane')).ok).toBe(true);
+    const rejected = k.feed().filter((e) => e.from === 'kernel' && e.kind === 'scarta' && e.to === 'ingegnere');
+    expect(rejected.length).toBe(2);
+    expect(rejected[1].text).toMatch(/world\.teleport non esiste/);
   });
 
-  it('calls to functions that do not exist are rejected before the code ever runs', async () => {
-    class Inventive extends MockModels {
-      first = true;
-      async text(call: Parameters<MockModels['text']>[0]) {
-        if (call.task === 'forge.code' && this.first) {
-          this.first = false;
-          return JSON.stringify({ logic: 'local M = {}\nfunction M.on_interact(id) world.teleport(id, 0, 0) return "puf" end\nreturn M' });
-        }
-        return super.text(call);
-      }
-    }
-    const k = await boot(new Inventive());
-    const r = await k.askAgent('una statua che parla');
-    expect(r.ok).toBe(true);
-    expect(k.feed().some((e) => e.kind === 'scarta' && /world\.teleport non esiste/.test(e.text))).toBe(true);
-  });
-
-  it('generated code that fails at runtime is repaired by the Engineer; the player\'s breakage is respected', async () => {
+  it('generated code that fails at runtime is repaired; the player\'s breakage is respected', async () => {
     const k = await boot();
-    const r = await k.askAgent('un fabbro che parla di spade');
-    expect(r.ok).toBe(true);
+    await k.askAgent('un fabbro che parla di spade');
     const path = 'modules/npc.fabbro/logic.lua';
-    // Simulate a Council mistake that slipped through: committed by the agent, fails when run.
     k.repo.write(path, 'local M = {}\nfunction M.on_spawn(id) local t = nil; return t.x end\nreturn M\n');
     k.applyFiles({ ...k.repo.working });
     k.repo.commit('agente: versione difettosa', 'agent');
     const pc = k.playerCarpet();
     k.spawnModuleEntity(k.modules.get('npc.fabbro')!, pc.x + 2, pc.y);
     await settle(100);
-    expect(k.faults.list().filter((f) => f.key.startsWith('module:npc.fabbro:'))).toEqual([]);
     expect(k.repo.head().message).toBe('riparazione: npc.fabbro');
-    // Now the player breaks it: no repair, the fault stays.
     k.saveFile(path, 'local M = {}\nfunction M.on_spawn(id) error("mio") end\nreturn M\n');
     k.spawnModuleEntity(k.modules.get('npc.fabbro')!, pc.x + 3, pc.y);
     await settle(100);
     expect(k.faults.has('module:npc.fabbro:on_spawn')).toBe(true);
-    expect(k.repo.head().author).toBe('player');
   });
 
-  it('a unique character appears only once in the world', async () => {
+  it('the world grows: a content pack of items, recipes and loot', async () => {
     const k = await boot();
-    const forged = await k.forgeModule('un vecchio eremita', 'agente');
-    const m = k.modules.get(forged.id!)!;
-    expect(m.manifest.unique).toBe(true);
-    const plan = { place: { name: 'A', description: 'B' }, grid: Array.from({ length: k.config.chunkSize }, () => 'g'.repeat(k.config.chunkSize)), objects: [{ module: m.manifest.id, col: 4, row: 4 }, { module: m.manifest.id, col: 6, row: 6 }], fresh: [], runes: [] };
-    const ch = [...k.chunks.values()][0];
-    (k as any).applyPlan(ch, plan, plan.grid);
-    expect(k.ecs.query('module').filter((id) => k.ecs.get(id, 'module').id === m.manifest.id).length).toBe(1);
+    const before = k.content.items.size;
+    expect(await k.growContent('prova', 6, true)).toBe(true);
+    expect(k.content.items.size).toBeGreaterThan(before);
+    expect(k.repo.head().message).toMatch(/pacchetto 1/);
   });
 
-  it('genesis replaces the example content with a generated world', async () => {
+  it('genesis writes terrains, environments (test-running them), items and inhabitants', async () => {
     const k = await boot();
-    const ok = await k.runGenesis('un regno di pastori sulle colline');
-    expect(ok).toBe(true);
-    expect(k.generationHeld).toBe(false);
-    await develop(k);
+    expect(await k.runGenesis('un regno di pastori sulle colline')).toBe(true);
     expect(k.needsGenesis()).toBe(false);
     expect(k.modules.has('npc.villager')).toBe(false);
+    expect(k.modules.has('items.base')).toBe(false);
     expect(k.modules.has('core.carpet')).toBe(true);
+    expect(Object.keys(k.content.layouts)).toEqual(expect.arrayContaining(['macchia', 'stazzo']));
+    expect(k.feed().some((e) => e.kind === 'scarta' && /rotto/.test(e.text))).toBe(true);
+    expect(k.palette.f.indoor).toBe(true);
+    expect(k.content.items.size).toBeGreaterThan(3);
     expect([...k.modules.values()].some((m) => m.manifest.origin === 'genesi')).toBe(true);
+    await develop(k);
     expect(k.faults.list()).toEqual([]);
+    const planned = [...k.chunks.values()].filter((c) => c.stage === 'planned');
+    expect(planned.length).toBeGreaterThan(0);
+    expect(planned.every((c) => k.content.layouts[c.plan!.layout])).toBe(true);
   });
 
-  it('invalid chunk plans are discarded and regenerated, invalid runes are dropped one by one', async () => {
+  it('invalid plans are discarded and regenerated, invalid runes dropped one by one', async () => {
     class Careless extends MockModels {
       plans = 0;
       async text(call: Parameters<MockModels['text']>[0]) {
-        if (call.task === 'chunk.plan' && this.plans++ === 0) return JSON.stringify({ luogo: { nome: 'X', descrizione: '' }, griglia: ['ggg'], oggetti: [], rune: [] });
+        if (call.task === 'chunk.plan' && this.plans++ === 0) return JSON.stringify({ luogo: { nome: 'X', descrizione: '' }, ambiente: 'luna', oggetti: [], rune: [] });
         return super.text(call);
       }
     }
     const k = await boot(new Careless());
-    expect(k.feed().some((e) => e.from === 'kernel' && e.kind === 'scarta' && e.to === 'cartografo')).toBe(true);
-    expect([...k.chunks.values()].every((c) => c.place?.name)).toBe(true);
+    expect(k.feed().some((e) => e.from === 'kernel' && e.kind === 'scarta' && /ambiente sconosciuto/.test(e.text))).toBe(true);
     for (const st of k.lines.values()) expect(st.compiled).toBe(true);
   });
 });

@@ -16,6 +16,7 @@ import { InventoryPanel } from './ui/inventory';
 import { Chat } from './ui/chat';
 import { FeedPanel } from './ui/feed';
 import { GenesisScreen } from './ui/genesis';
+import { ActionMenu } from './ui/actions';
 import { Sfx } from './audio';
 import { $ } from './ui/dom';
 import './style.css';
@@ -41,18 +42,20 @@ async function main() {
   const chat = new Chat(kernel);
   const feed = new FeedPanel($('#hud'), kernel);
   const genesis = new GenesisScreen(kernel);
+  const actions = new ActionMenu(kernel);
   const sfx = new Sfx();
   konsole.dev = dev;
   (window as any).rune = kernel;
 
   const syncFocus = () => {
-    kernel.input.enabled = !editor.isOpen && !konsole.isOpen && !inventory.isOpen && !chat.isOpen && !genesis.isOpen;
+    kernel.input.enabled = !editor.isOpen && !konsole.isOpen && !inventory.isOpen && !chat.isOpen && !genesis.isOpen && !actions.isOpen;
     if (!kernel.input.enabled) kernel.input.releaseAll();
   };
   editor.onClose = syncFocus;
   konsole.onClose = syncFocus;
   inventory.onClose = syncFocus;
   chat.onClose = syncFocus;
+  actions.onClose = syncFocus;
   konsole.onEdit = (path) => {
     konsole.close();
     editor.open(path);
@@ -99,6 +102,7 @@ async function main() {
 
   kernel.bus.on('rune:picked', () => sfx.blip(660, 0.07));
   kernel.bus.on('item:picked', () => sfx.blip(520, 0.09, 'triangle'));
+  kernel.bus.on('item:crafted', () => sfx.chord([523, 659], 0.2));
   kernel.bus.on('rune:inscribed', () => sfx.chord([440, 554, 659], 0.25));
   kernel.bus.on('fault', ({ isNew }) => isNew && sfx.noise(0.3));
   kernel.bus.on('rollback', () => sfx.chord([660, 440, 330], 0.3));
@@ -141,6 +145,10 @@ async function main() {
         break;
       case 'feed':
         feed.toggle();
+        break;
+      case 'walk':
+        renderer.showWalk = !renderer.showWalk;
+        hud.message(renderer.showWalk ? 'Caselle invalicabili in rosso (V per nascondere).' : 'Vista normale.');
         break;
       case 'help':
         help.hidden = !help.hidden;

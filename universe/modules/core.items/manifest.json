@@ -1,0 +1,8 @@
+{
+  "id": "core.items",
+  "name": "Uso degli oggetti",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "Cosa succede quando usi un oggetto che non ha una logica propria: si mangia, si beve, si applica, si accende, secondo la sua categoria e i suoi effetti.",
+  "logic": "logic.lua"
+}

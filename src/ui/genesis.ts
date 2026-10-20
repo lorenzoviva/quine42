@@ -26,7 +26,7 @@ export class GenesisScreen {
         'div',
         { class: 'note' },
         canGenerate
-          ? `Il Concilio (${this.k.config.ai.textModel} + ${this.k.config.ai.imageModel}) scriverà bibbia, stile, terreni e i primi abitanti, poi dipingerà i luoghi mentre esplori. Circa 40 chiamate di testo e 7 immagini per la genesi.`
+          ? `Il Concilio (${this.k.config.ai.textModel} + ${this.k.config.ai.imageModel}) scriverà bibbia, stile, terreni, ambienti, decine di oggetti e i primi abitanti (circa 60 chiamate di testo, economiche). Poi l'Artista dipingerà a lotti le texture, gli sprite con le camminate e le icone (circa 15-25 immagini in tutto, riusate ovunque).`
           : 'Manca GEMINI_API_KEY nel file .env, oppure il server non è quello di Vite. Puoi giocare offline: i luoghi saranno abbozzati e gli agenti risponderanno con un modello locale.',
       );
       const feed = el('div', { class: 'feed' });

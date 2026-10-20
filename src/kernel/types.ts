@@ -15,6 +15,8 @@ export interface Appearance {
   sprite?: string;
   /** Sprite size in cells (default 1.1). */
   scale?: number;
+  /** Walk cycle: asset ids per direction (down, left, right, up), painted by the Atelier. */
+  frames?: Record<string, string[]>;
 }
 
 export interface Physics {
@@ -53,14 +55,88 @@ export interface ItemSpec {
   controls?: Record<string, string>;
 }
 
+export type TileLayer = 'ground' | 'floor' | 'wall' | 'door' | 'liquid' | 'vegetation' | 'rock';
+
 export interface TileDef {
   name: string;
-  /** Colour of the tile in layout sketches (and in the offline rendering). */
+  /** Base colour: procedural texture offline, legend for the Artist. */
   color: string;
   solid: boolean;
   /** Walking speed multiplier on this tile (mud 0.6, road 1.1…). Default 1. */
   speed?: number;
   description?: string;
+  /** How it is drawn and how paths are carved through it. Default ground (walkable) / rock (solid). */
+  layer?: TileLayer;
+  /** Indoor floor: buildings are indoor floor enclosed by walls; their roof hides them from outside. */
+  indoor?: boolean;
+  /** Asset id of the seamless texture painted by the Artist. */
+  texture?: string;
+  /** Asset ids of obstacle sprites standing on this tile (trees, boulders…), chosen per cell. */
+  sprites?: string[];
+}
+
+export const ITEM_CATEGORIES = ['cibo', 'bevanda', 'medicina', 'attrezzo', 'arma', 'materiale', 'luce', 'vestiario', 'contenitore', 'varie'] as const;
+export type ItemCategory = (typeof ITEM_CATEGORIES)[number];
+
+/** A thing that can be carried. Mostly data (cheap text), generated in packs; custom logic is optional. */
+export interface ItemDef {
+  id: string;
+  name: string;
+  description: string;
+  category: ItemCategory;
+  weight: number;
+  /** Max stack size (1 = not stackable). */
+  stack: number;
+  tags: string[];
+  glyph: string;
+  color: string;
+  /** Asset id of the icon (painted in sheets of 16). */
+  icon?: string;
+  iconPrompt?: string;
+  equippable?: boolean;
+  /** Applied by core.items when the item is used (eaten, drunk, applied). */
+  effects?: { hunger?: number; thirst?: number; energy?: number; health?: number };
+  /** Module with custom logic (on_use / on_action), if any. */
+  module?: string;
+}
+
+export interface Recipe {
+  id: string;
+  name: string;
+  inputs: Array<{ item: string; count: number }>;
+  /** Items needed but not consumed. */
+  tools?: string[];
+  output: { item: string; count: number };
+}
+
+export interface LootEntry {
+  item?: string;
+  /** Any item with this tag (categories count as tags). */
+  tag?: string;
+  weight: number;
+  min?: number;
+  max?: number;
+}
+
+export interface LootTable {
+  rolls: [number, number];
+  entries: LootEntry[];
+}
+
+/** An environment: a MarkovJunior program that shapes a chunk (written by the Cartographer). */
+export interface LayoutDef {
+  name: string;
+  description: string;
+  environment: 'esterno' | 'interno' | 'misto';
+  program: import('./mj').MjNode;
+}
+
+/** Something you can do to an object (E opens the menu). Handled by the module's on_act(id, user, action). */
+export interface ActionDef {
+  id: string;
+  label: string;
+  /** Item id or tag the player must carry. */
+  requires?: string;
 }
 
 export interface RuneFragment {
@@ -103,7 +179,17 @@ export interface Manifest {
   origin?: string;
   prompts?: Record<string, string>;
   tiles?: Record<string, TileDef>;
+  /** Roof of buildings (generator modules). */
+  roof?: { color: string; texture?: string };
   fragments?: RuneFragment[];
+  /** Content packs (data modules). */
+  items?: ItemDef[];
+  recipes?: Recipe[];
+  loot?: Record<string, LootTable>;
+  layouts?: Record<string, LayoutDef>;
+  /** Furniture and chests: a container filled from a loot table the first time it is opened. */
+  container?: { size: number; loot: string };
+  actions?: ActionDef[];
 }
 
 export interface ModuleEntry {
@@ -121,6 +207,10 @@ export interface AiConfig {
   maxImages: number;
   /** New modules the world may forge by itself per session (cartographer, combinations). */
   maxForges: number;
+  /** How characters get their walk cycle: one sheet per character, frame by frame, or none. */
+  animation?: 'sheet' | 'frames' | 'none';
+  /** New item packs the world writes by itself per session, as it is explored. */
+  maxPacks?: number;
 }
 
 export interface UniverseConfig {

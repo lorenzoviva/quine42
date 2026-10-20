@@ -1,12 +1,12 @@
 // The kernel: the floor of the universe. Owns the ECS state, the chunks, the sandbox, versioning,
-// the assets and the Council of agents. Everything above this floor is generated (by the Council)
-// or written in Lua, and can break; the floor cannot: a broken universe is always recoverable.
+// the assets, the content registry and the Council of agents. Everything above this floor is
+// generated (by the Council) or written in Lua, and can break; the floor cannot.
 
 import { World, type Id } from './ecs';
 import { EventBus } from './events';
 import { Faults } from './faults';
 import { Sandbox, type Host } from './sandbox';
-import { Validator } from './validator';
+import { apiErrors, Validator } from './validator';
 import { Repo, type KeyValueStore } from './repo';
 import { Corona, type CoronaCell } from './corona';
 import { Input } from './input';
@@ -15,32 +15,33 @@ import { cellIndex, extractLines, tokenize, type RuneComp, type RuneLine } from 
 import { hash32, hashStr, hex, Rng } from './rng';
 import { BudgetError, type Models } from './ai/models';
 import { MemoryAssets, MemoryChunks, type AssetStore, type ChunkStore } from './assets';
-import { PAINT_MARGIN, TILE_PX, type ImageTools, type Neighbours } from './imaging';
+import type { ImageTools } from './imaging';
+import { Content, normName, specOf } from './content';
+import { layout, type Building } from './layout';
+import { ArtDirector } from './art';
 import { Council, readBible, type CatalogEntry, type FeedEntry } from './agents/council';
-import { paintPrompt, planChunk, surveyChunk, type ChunkPlan, type Edges } from './agents/cartography';
-import { forge, judgeCombination, repairLogic, spritePrompt, type ForgeOrigin } from './agents/forge';
-import { apiErrors } from './validator';
-import { narrate, npcReply, type NpcReply, type Turn } from './agents/minds';
+import { planChunk, type ChunkPlan, type Where } from './agents/cartography';
+import { forge, judgeCombination, repairLogic, type ForgeOrigin } from './agents/forge';
+import { examine, narrate, npcReply, type NpcReply, type Turn } from './agents/minds';
 import { planGenesis } from './agents/genesis';
+import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Identity } from './agents/content';
 import { addItem, CARRY_CAPACITY, countItem, equippedItem, moveSlot, newInventory, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
-import type { FileMap, ItemSpec, Manifest, ModuleEntry, Place, RuneFragment, TileDef, UniverseConfig } from './types';
-
-export type ChunkStage = 'draft' | 'planned' | 'painted';
+import type { FileMap, ItemDef, ItemSpec, Manifest, ModuleEntry, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
 
 export interface Chunk {
   cx: number;
   cy: number;
   key: string;
-  /** size² tile codes: the collision grid. */
+  /** The continuous procedural draft (kept to rebuild the layout). */
+  draft: string;
+  /** size² tile codes: what is drawn and what blocks, the same grid. */
   tiles: string;
-  /** Bumped whenever tiles or image change (renderer cache key). */
+  /** Bumped whenever tiles change (renderer cache key). */
   version: number;
-  stage: ChunkStage;
+  stage: 'draft' | 'planned';
   place?: Place;
   plan?: ChunkPlan;
-  /** Asset id of the painted image. */
-  image?: string;
-  painting?: boolean;
+  buildings: Building[];
   developing?: boolean;
 }
 
@@ -74,13 +75,36 @@ export interface ItemInfo {
   glyph: string;
   color: string;
   sprite?: string;
+  category: string;
   spec: ItemSpec;
+  effects?: ItemDef['effects'];
+  tags: string[];
 }
 
 export interface Mind {
   mode: 'vaga' | 'segui' | 'resta';
   mood: string;
   history: Turn[];
+}
+
+export interface Container {
+  inv: Inventory;
+  loot: string;
+  filled: boolean;
+}
+
+export interface ActionOption {
+  id: string;
+  label: string;
+  enabled: boolean;
+  reason?: string;
+}
+
+export interface Needs {
+  hunger: number;
+  thirst: number;
+  energy: number;
+  health: number;
 }
 
 export interface KernelOptions {
@@ -107,12 +131,14 @@ export const SYMBOL_DOCS: Record<string, string> = {
   oy: 'campo del tappeto: scorrimento verticale accumulato',
 };
 
-const VOID_TILE: TileDef = { name: 'vuoto', color: '#2a0612', solid: false };
+const VOID_TILE: TileDef = { name: 'vuoto', color: '#2a0612', solid: false, layer: 'ground' };
 const DEFAULT_ITEM: ItemSpec = { stackable: false, maxStack: 1, weight: 1, equippable: false };
 const FALLBACK_PLAYER = {
   player: { speed: 6, facing: 'down', load: 0 },
   hand: { tokens: [] as string[], sel: 0 },
+  needs: { hunger: 85, thirst: 85, energy: 90, health: 100 },
 };
+const STARTER_RUNES = ['x', 'speed = speed', 'carpet . active'];
 
 const clone = <T>(v: T): T => (v === undefined ? v : JSON.parse(JSON.stringify(v)));
 
@@ -121,10 +147,12 @@ export class Kernel {
   readonly bus = new EventBus();
   readonly faults = new Faults();
   readonly input = new Input();
+  readonly content = new Content();
   readonly models: Models;
   readonly assets: AssetStore;
   readonly chunkStore: ChunkStore;
   readonly imageTools?: ImageTools;
+  readonly art: ArtDirector;
   council!: Council;
   sandbox!: Sandbox;
   validator!: Validator;
@@ -144,6 +172,8 @@ export class Kernel {
   runeCells = new Map<string, Id>();
   /** Speech bubbles shown above entities. */
   readonly bubbles = new Map<Id, { text: string; until: number }>();
+  /** Items people talked about: they turn up more often, where coherent. */
+  readonly wanted = new Set<string>();
   /** Entity cells blocked by solid bodies, rebuilt every tick. */
   private solidCells = new Set<string>();
   private runesDirty = true;
@@ -152,13 +182,16 @@ export class Kernel {
   private singletons = new Map<string, Id>();
   private faultFlag: string | null = null;
   private lastGood = { px: 0, py: 0, ox: 0, oy: 0 };
-  private painters = 0;
-  private paintingStopped = false;
   private forgesUsed = 0;
+  private packsUsed = 0;
+  private plannedCount = 0;
+  private growing = false;
   private forging = new Set<string>();
   private developers = 0;
   private repaired = new Set<string>();
-  /** While true no chunk is planned or painted (e.g. during genesis): the Council works on one thing at a time. */
+  private examined = new Map<string, string>();
+  private lastArtPump = 0;
+  /** While true no chunk is planned and nothing is painted (e.g. during genesis). */
   generationHeld = false;
   /** Terrain generation is Lua and costs a few ms: at most this many new chunks per tick. */
   static CHUNKS_PER_TICK = 1;
@@ -178,6 +211,7 @@ export class Kernel {
     this.assets = opts.assets ?? new MemoryAssets();
     this.chunkStore = opts.chunks ?? new MemoryChunks();
     this.imageTools = opts.imageTools;
+    this.art = new ArtDirector(this);
   }
 
   static async boot(opts: KernelOptions): Promise<Kernel> {
@@ -208,12 +242,13 @@ export class Kernel {
   // --- Host: the only surface Lua can touch ---------------------------------------------------
 
   private makeHost(): Host {
+    const inv = (id: number): Inventory | undefined => this.ecs.get(id, 'inventory');
     return {
       query: (names) => this.ecs.query(...names.split(',').map((s) => s.trim()).filter(Boolean)).join(','),
       get: (id, name) => this.ecs.get(id, name) ?? undefined,
       set: (id, name, data) => {
         // The floor protects what keeps the universe navigable: position, the player, the carpet.
-        if (!this.ecs.alive.has(id) || ['pos', 'module', 'chunk', 'carpet'].includes(name) || (id === this.playerId && ['player', 'hand', 'inventory'].includes(name))) return false;
+        if (!this.ecs.alive.has(id) || ['pos', 'module', 'chunk', 'carpet', 'container'].includes(name) || (id === this.playerId && ['player', 'hand', 'inventory', 'needs'].includes(name))) return false;
         if (data === null || typeof data !== 'object') return false;
         this.ecs.set(id, name, data);
         return true;
@@ -250,8 +285,10 @@ export class Kernel {
         this.faults.raise(key, msg);
       },
       spawn_module: (module, x, y) => {
+        if (!Number.isFinite(x) || !Number.isFinite(y)) return undefined;
+        if (this.content.get(module) && !this.modules.has(module)) return this.spawnItem(module, x, y, 1);
         const m = this.modules.get(module);
-        if (!m || !Number.isFinite(x) || !Number.isFinite(y) || (m.manifest.kind !== 'entity' && m.manifest.kind !== 'item')) return undefined;
+        if (!m || (m.manifest.kind !== 'entity' && m.manifest.kind !== 'item')) return undefined;
         return this.spawnModuleEntity(m, x, y);
       },
       player_id: () => this.playerId,
@@ -263,16 +300,21 @@ export class Kernel {
       speak: (id, text) => this.speak(id, String(text)),
       inv_add: (id, item, n) => this.invAdd(id, item, n),
       inv_remove: (id, item, n) => {
-        const inv: Inventory | undefined = this.ecs.get(id, 'inventory');
-        return inv && Number.isFinite(n) ? removeItem(inv, item, n) : 0;
+        const i = inv(id);
+        return i && Number.isFinite(n) ? removeItem(i, item, n) : 0;
       },
       inv_count: (id, item) => {
-        const inv: Inventory | undefined = this.ecs.get(id, 'inventory');
-        return inv ? countItem(inv, item) : 0;
+        const i = inv(id);
+        return i ? countItem(i, item) : 0;
       },
       inv_equipped: (id) => {
-        const inv: Inventory | undefined = this.ecs.get(id, 'inventory');
-        return (inv && equippedItem(inv)) ?? undefined;
+        const i = inv(id);
+        return (i && equippedItem(i)) ?? undefined;
+      },
+      item_find: (name) => this.content.byName(name)?.id,
+      item_def: (id) => {
+        const d = this.content.get(id);
+        return d ? { id: d.id, name: d.name, category: d.category, weight: d.weight, tags: d.tags.join(','), effects: { ...(d.effects ?? {}) } } : undefined;
       },
     };
   }
@@ -341,6 +383,10 @@ export class Kernel {
     return this.ecs.get(this.playerId, 'inventory');
   }
 
+  needs(): Needs | undefined {
+    return this.ecs.get(this.playerId, 'needs');
+  }
+
   /** Player position on the carpet (where the simulation thinks you are). */
   playerCarpet(): { x: number; y: number } {
     const p = this.playerPos();
@@ -373,28 +419,47 @@ export class Kernel {
     this.bubbles.set(id, { text: text.slice(0, 140), until: this.time + 4 + text.length / 25 });
   }
 
+  /** Placeable world modules (people, animals, furniture, things), for the Cartographer. */
   catalog(): CatalogEntry[] {
     return [...this.modules.values()]
-      .filter((m) => m.manifest.kind === 'entity' || m.manifest.kind === 'item')
-      .map((m) => ({ id: m.manifest.id, name: m.manifest.name, kind: m.manifest.kind === 'item' ? 'strumento' : m.manifest.persona ? 'npc' : 'oggetto', tiles: m.manifest.spawn?.tiles ?? [], context: m.manifest.context ?? m.manifest.description ?? '' }));
+      .filter((m) => m.manifest.kind === 'entity')
+      .map((m) => ({ id: m.manifest.id, name: m.manifest.name, kind: m.manifest.persona ? 'npc' : m.manifest.container ? 'mobile' : 'oggetto', tiles: m.manifest.spawn?.tiles ?? [], context: m.manifest.context ?? m.manifest.description ?? '' }));
   }
 
   itemInfo(id: string): ItemInfo {
-    const m = this.modules.get(id)?.manifest;
+    const d = this.content.get(id);
     return {
       id,
-      name: m?.name ?? id,
-      description: m?.description ?? 'Qualcosa che non esiste più nel codice del mondo.',
-      glyph: m?.appearance?.glyph ?? '?',
-      color: m?.appearance?.color ?? '#888',
-      sprite: m?.appearance?.sprite,
-      spec: m?.item ?? DEFAULT_ITEM,
+      name: d?.name ?? id,
+      description: d?.description ?? 'Qualcosa che non esiste più nel codice del mondo.',
+      glyph: d?.glyph ?? '?',
+      color: d?.color ?? '#888',
+      sprite: d?.icon,
+      category: d?.category ?? 'varie',
+      spec: specOf(d) ?? DEFAULT_ITEM,
+      effects: d?.effects,
+      tags: d?.tags ?? [],
     };
   }
 
-  private itemSpec = (id: string): ItemSpec | undefined => this.modules.get(id)?.manifest.item;
+  private itemSpec = (id: string): ItemSpec | undefined => specOf(this.content.get(id));
+
+  /** Name of an entity as the player knows it: an individual's name, or its kind. */
+  nameOf(id: Id): string {
+    const identity: Identity | undefined = this.ecs.get(id, 'identity');
+    if (identity) return identity.name;
+    const pk = this.ecs.get(id, 'pickup');
+    if (pk) return this.itemInfo(pk.item).name;
+    return this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest.name ?? 'qualcosa';
+  }
 
   // --- Universe loading & hot reload ----------------------------------------------------------
+
+  /** What makes chunks different: codes, solidity, layers, layouts (not textures or sprites). */
+  private worldSignature(): string {
+    const pal = Object.entries(this.palette).map(([c, t]) => `${c}${t.solid ? 1 : 0}${t.layer ?? ''}${t.indoor ? 'i' : ''}`);
+    return hex(hashStr(pal.join('|') + JSON.stringify(this.content.layouts) + (readBible(this.files)?.titolo ?? '')));
+  }
 
   /**
    * Loads a set of universe files. Without reset this is a hot reload: only changed modules are
@@ -447,12 +512,14 @@ export class Kernel {
       if (!opts.reset) this.log('kernel', `ricaricato a caldo: ${id}${err ? ' (con errori)' : ''}`);
     }
 
-    const oldPalette = JSON.stringify(this.palette);
+    const before = this.palette && this.files ? this.worldSignature() : '';
+    this.files = files;
     this.modules = new Map(modules.map((m) => [m.manifest.id, m]));
     this.systems = modules.filter((m) => m.manifest.kind === 'system').sort((a, b) => (a.manifest.order ?? 50) - (b.manifest.order ?? 50));
     this.terrain = modules.find((m) => m.manifest.kind === 'generator');
     this.palette = { '?': VOID_TILE, ...(this.terrain?.manifest.tiles ?? {}) };
     this.fragments = modules.flatMap((m) => m.manifest.fragments ?? []);
+    this.content.rebuild(modules);
 
     this.ensureCoreEntities(opts.reset ?? false);
     for (const id of this.ecs.query('module', 'glyph')) {
@@ -460,25 +527,27 @@ export class Kernel {
       const app = this.modules.get(modId)?.manifest.appearance;
       if (app && changed.has(modId)) this.ecs.set(id, 'glyph', this.glyphOf(app));
     }
+    // Item icons arrive later than the items themselves.
+    for (const id of this.ecs.query('pickup', 'glyph')) {
+      const d = this.content.get(this.ecs.get(id, 'pickup').item);
+      if (d?.icon) this.ecs.get(id, 'glyph').sprite = d.icon;
+    }
 
-    const paletteChanged = oldPalette !== JSON.stringify(this.palette);
-    if (sizeChanged || paletteChanged) this.clearChunks();
-    else if (!this.terrain || changed.has(this.terrain.manifest.id) || opts.reset) for (const ch of this.chunks.values()) if (ch.stage === 'draft') this.regenerateTiles(ch);
+    if (sizeChanged || (before && before !== this.worldSignature())) this.clearChunks();
+    else if (!this.terrain || changed.has(this.terrain.manifest.id) || opts.reset) for (const ch of this.chunks.values()) if (ch.stage === 'draft') this.regenerateDraft(ch);
 
-    this.files = files;
     this.corona.build(files);
     this.bus.emit('universe:reloaded', { changed: [...changed] });
   }
 
   private glyphOf(app: NonNullable<Manifest['appearance']>) {
-    return { ch: app.glyph, color: app.color, sprite: app.sprite, scale: app.scale ?? 1.1 };
+    return { ch: app.glyph, color: app.color, sprite: app.sprite, scale: app.scale ?? 1.1, frames: app.frames };
   }
 
   private ensureCoreEntities(reset: boolean): void {
     const playerMod = [...this.modules.values()].find((m) => m.manifest.kind === 'player');
     const defaults: Record<string, any> = clone(playerMod?.manifest.components ?? FALLBACK_PLAYER);
-    if (!defaults.player) defaults.player = clone(FALLBACK_PLAYER.player);
-    if (!defaults.hand) defaults.hand = clone(FALLBACK_PLAYER.hand);
+    for (const [k, v] of Object.entries(FALLBACK_PLAYER)) if (!defaults[k]) defaults[k] = clone(v);
     if (!defaults.inventory) defaults.inventory = newInventory();
     const app = playerMod?.manifest.appearance ?? { glyph: '@', color: '#ffffff', scale: 1.3 };
     const glyph = this.glyphOf(app);
@@ -519,19 +588,17 @@ export class Kernel {
     }
   }
 
-  // --- Chunks: draft → plan (Cartographer) → paint (Artist) → survey (Physicist) ---------------
+  // --- Chunks: draft → plan (Cartographer) → layout (rules + guaranteed paths) → things ----------
 
   private chunkKey(cx: number, cy: number): string {
     return `${cx},${cy}`;
   }
 
-  /** Cache key: a new genesis (palette, bible) means a new world, so old chunks are not reused. */
   private recordKey(ch: Chunk): string {
-    const world = hex(hashStr(JSON.stringify(this.palette) + (readBible(this.files)?.titolo ?? '')));
-    return `${this.config.name}:${this.config.seed}:${world}:${ch.key}`;
+    return `${this.config.name}:${this.config.seed}:${this.worldSignature()}:${ch.key}`;
   }
 
-  private genTiles(cx: number, cy: number): string {
+  private genDraft(cx: number, cy: number): string {
     const S = this.config.chunkSize;
     const n = S * S;
     if (this.terrain) {
@@ -545,8 +612,8 @@ export class Kernel {
     return '?'.repeat(n);
   }
 
-  private regenerateTiles(ch: Chunk): void {
-    ch.tiles = this.genTiles(ch.cx, ch.cy);
+  private regenerateDraft(ch: Chunk): void {
+    ch.draft = ch.tiles = this.genDraft(ch.cx, ch.cy);
     ch.version++;
   }
 
@@ -561,7 +628,8 @@ export class Kernel {
     if (existing) return existing;
     if (this.genBudget <= 0) return undefined;
     this.genBudget--;
-    const ch: Chunk = { cx, cy, key, tiles: this.genTiles(cx, cy), version: 0, stage: 'draft' };
+    const draft = this.genDraft(cx, cy);
+    const ch: Chunk = { cx, cy, key, draft, tiles: draft, version: 0, stage: 'draft', buildings: [] };
     this.chunks.set(key, ch);
     return ch;
   }
@@ -589,175 +657,172 @@ export class Kernel {
     }
   }
 
-  /** Brings a chunk from draft to planned (and queues painting), reusing the cache when possible. */
+  /** Brings a chunk from draft to planned, reusing the cached plan when possible. */
   private async develop(ch: Chunk): Promise<void> {
     const rec = await this.chunkStore.load(this.recordKey(ch));
     if (!this.alive(ch)) return;
-    if (rec) {
-      this.applyPlan(ch, rec.plan, rec.grid);
-      if (rec.image) {
-        ch.image = rec.image;
-        ch.stage = 'painted';
-        ch.version++;
-      }
-      return;
-    }
+    if (rec) return this.applyPlan(ch, rec.plan);
     const plan = await this.makePlan(ch);
-    await this.chunkStore.save(this.recordKey(ch), { plan, grid: plan.grid, painted: false });
-    if (this.alive(ch)) this.applyPlan(ch, plan, plan.grid);
+    await this.chunkStore.save(this.recordKey(ch), { plan, grid: [], painted: false });
+    if (this.alive(ch)) this.applyPlan(ch, plan);
   }
 
-  private edges(ch: Chunk): Edges {
-    const S = this.config.chunkSize;
-    const get = (dx: number, dy: number) => this.chunks.get(this.chunkKey(ch.cx + dx, ch.cy + dy));
-    const col = (t: string, c: number) => Array.from({ length: S }, (_, r) => t[r * S + c]).join('');
-    const n = get(0, -1);
-    const s = get(0, 1);
-    const w = get(-1, 0);
-    const e = get(1, 0);
-    return {
-      n: n && n.stage !== 'draft' ? n.tiles.slice((S - 1) * S) : undefined,
-      s: s && s.stage !== 'draft' ? s.tiles.slice(0, S) : undefined,
-      w: w && w.stage !== 'draft' ? col(w.tiles, S - 1) : undefined,
-      e: e && e.stage !== 'draft' ? col(e.tiles, 0) : undefined,
-    };
+  private terrainSummary(draft: string): string {
+    const counts: Record<string, number> = {};
+    for (const c of draft) counts[c] = (counts[c] ?? 0) + 1;
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([c, n]) => `${this.palette[c]?.name ?? c} ${Math.round((n / draft.length) * 100)}%`)
+      .join(', ');
   }
 
   private async makePlan(ch: Chunk): Promise<ChunkPlan> {
-    const S = this.config.chunkSize;
-    const draft = this.rows(ch.tiles);
     const start = ch.cx === 0 && ch.cy === 0;
-    const placeable = new Map(this.catalog().map((c) => [c.id, c.tiles]));
-    const neighborPlaces = [[0, -1], [0, 1], [-1, 0], [1, 0]]
-      .map(([dx, dy]) => this.chunks.get(this.chunkKey(ch.cx + dx, ch.cy + dy))?.place?.name)
-      .filter((n): n is string => !!n);
+    const layouts = Object.entries(this.content.layouts).map(([id, l]) => ({ id, name: l.name, description: l.description, environment: l.environment }));
+    const neighbors = [[0, -1], [0, 1], [-1, 0], [1, 0]]
+      .map(([dx, dy]) => this.chunks.get(this.chunkKey(ch.cx + dx, ch.cy + dy)))
+      .filter((n): n is Chunk => !!n?.place)
+      .map((n) => ({ place: n.place!.name, layout: n.plan?.layout ?? '' }));
+    const placeable = new Set(this.catalog().map((c) => c.id));
     let feedback = '';
-    for (let attempt = 0; attempt < 3; attempt++) {
+    for (let attempt = 0; attempt < 3 && layouts.length; attempt++) {
       try {
         const raw = await planChunk(this.council, {
-          cx: ch.cx, cy: ch.cy, size: S, draft, edges: this.edges(ch), neighborPlaces, palette: this.palette,
-          catalog: this.catalog(), fragments: this.fragments.map((f) => f.line), start, attempt, feedback,
+          cx: ch.cx, cy: ch.cy, terrain: this.terrainSummary(ch.draft), neighbors, layouts, catalog: this.catalog(),
+          fragments: this.fragments.map((f) => f.line), wanted: [...this.wanted].map((id) => this.itemInfo(id).name).slice(0, 8), start, attempt, feedback,
         });
-        const repaired = this.repairGrid(raw.grid, draft);
-        if (repaired.fixes > 0 && repaired.fixes <= S * S * 0.15) {
-          raw.grid = repaired.grid;
-          this.log('validator', `chunk ${ch.key}: griglia riparata (${repaired.fixes} caselle)`);
-        }
-        const verdict = this.validator.validatePlan(raw, S, this.palette, placeable, start);
+        const verdict = this.validator.validatePlan(raw, new Set(layouts.map((l) => l.id)), placeable);
         if (verdict.errors.length) {
           feedback = verdict.errors.join('; ');
-          this.council.say('kernel', 'scarta', `chunk ${ch.key}: ${feedback} → rigenero`, 'cartografo', 'chunk.plan');
-          this.log('validator', `piano del chunk ${ch.key} scartato: ${feedback}`);
+          this.council.say('kernel', 'scarta', `luogo ${ch.key}: ${feedback} → rigenero`, 'cartografo', 'chunk.plan');
           continue;
         }
-        if (verdict.dropped.length) {
-          this.log('validator', `chunk ${ch.key}: scartati ${verdict.dropped.join('; ')}`);
-          this.council.say('kernel', 'scarta', `(${ch.key}) ${verdict.dropped[0]}${verdict.dropped.length > 1 ? ` (+${verdict.dropped.length - 1})` : ''}`, 'cartografo', 'chunk.plan');
-        }
+        if (verdict.dropped.length) this.council.say('kernel', 'scarta', `(${ch.key}) ${verdict.dropped[0]}${verdict.dropped.length > 1 ? ` (+${verdict.dropped.length - 1})` : ''}`, 'cartografo', 'chunk.plan');
         const plan = verdict.plan;
-        if (start) this.ensureStarterRunes(plan);
-        this.council.say('cartografo', 'propone', `(${ch.key}) «${plan.place.name}»: ${plan.objects.length} oggetti, ${plan.runes.length} rune${plan.fresh.length ? `, chiede «${plan.fresh[0].concept}»` : ''}${verdict.moved ? `, ${verdict.moved} riposizionati dal kernel` : ''}${verdict.dropped.length ? `, ${verdict.dropped.length} scartati` : ''}`, undefined, 'chunk.plan');
+        this.council.say('cartografo', 'propone', `(${ch.key}) «${plan.place.name}» — ${this.content.layouts[plan.layout]?.name}: ${plan.objects.length} cose, ${plan.ground.length} a terra, ${plan.runes.length} rune${plan.fresh.length ? `, chiede «${plan.fresh[0].concept}»` : ''}`, undefined, 'chunk.plan');
         return plan;
       } catch (e) {
-        const msg = (e as Error).message;
-        this.council.say('cartografo', 'errore', `(${ch.key}) ${msg}`, undefined, 'chunk.plan');
+        this.council.say('cartografo', 'errore', `(${ch.key}) ${(e as Error).message}`, undefined, 'chunk.plan');
         if (e instanceof BudgetError) break;
       }
     }
-    return this.fallbackPlan(ch, draft, start);
+    return this.fallbackPlan(ch, layouts.map((l) => l.id), start);
   }
 
-  /** Small mistakes (a row one character short, an unknown code) are mended from the draft; big ones are rejected. */
-  private repairGrid(grid: unknown, draft: string[]): { grid: string[]; fixes: number } {
-    const S = this.config.chunkSize;
-    const rows = Array.isArray(grid) ? grid.map(String) : [];
-    let fixes = Math.abs(rows.length - S) * S;
-    const out = draft.map((d, r) => {
-      const src = [...(rows[r] ?? '')];
-      fixes += Math.abs(src.length - S);
-      return d
-        .split('')
-        .map((dc, c) => {
-          const v = src[c];
-          if (v !== undefined && this.palette[v] && v !== '?') return v;
-          if (v !== undefined) fixes++;
-          return dc;
-        })
-        .join('');
-    });
-    return { grid: out, fixes };
-  }
-
-  /** The first square always offers a way in: a symbol to watch, an assignment, a carpet field. */
-  private ensureStarterRunes(plan: ChunkPlan): void {
-    const S = this.config.chunkSize;
-    const needed = ['x', 'speed = speed', 'carpet . active'].filter((l) => !plan.runes.some((r) => r.line === l));
-    const grid = plan.grid.map((r) => [...r]);
-    const used = new Set<string>();
-    for (const r of plan.runes) for (let i = -1; i <= tokenize(r.line).join('').length; i++) used.add(`${r.col + i},${r.row}`);
-    for (const o of plan.objects) used.add(`${o.col},${o.row}`);
-    for (const line of needed) {
-      const w = tokenize(line).join('').length;
-      search: for (let row = 4; row < S - 1; row++)
-        for (let col = 1; col + w < S - 1; col++) {
-          for (let i = -1; i <= w; i++) if (used.has(`${col + i},${row}`)) continue search;
-          for (let i = 0; i < w; i++) if (this.palette[grid[row][col + i]]?.solid !== false) continue search;
-          for (let i = 0; i < w; i++) used.add(`${col + i},${row}`);
-          plan.runes.push({ line, col, row });
-          break search;
-        }
-    }
-  }
-
-  private fallbackPlan(ch: Chunk, draft: string[], start: boolean): ChunkPlan {
-    const S = this.config.chunkSize;
-    const plan: ChunkPlan = { place: { name: 'Terra senza nome', description: 'Qui il mondo non ha ancora trovato le parole.' }, grid: draft, objects: [], fresh: [], runes: [] };
+  private fallbackPlan(ch: Chunk, layouts: string[], start: boolean): ChunkPlan {
+    const rng = new Rng(hash32(this.config.seed, ch.cx, ch.cy, 404));
+    const trees = [...ch.draft].filter((c) => c === 't').length / ch.draft.length;
+    const layoutId = start ? (layouts.find((l) => /borgo|villag|paese/.test(l)) ?? layouts[0]) : trees > 0.3 && layouts.includes('bosco') ? 'bosco' : layouts[rng.int(Math.max(1, layouts.length))];
+    const plan: ChunkPlan = { place: { name: 'Terra senza nome', description: 'Qui il mondo non ha ancora trovato le parole.' }, layout: layoutId ?? '', objects: [], ground: [], fresh: [], runes: [] };
     for (const m of this.modules.values()) {
       const rule = m.manifest.spawn;
-      if ((m.manifest.kind !== 'entity' && m.manifest.kind !== 'item') || !rule) continue;
-      const rng = new Rng(hash32(this.config.seed, ch.cx, ch.cy, hashStr(m.manifest.id)));
-      for (let i = 0; i < rule.max; i++) {
-        if (!rng.chance(rule.chance)) continue;
-        const col = rng.int(S);
-        const row = rng.int(S);
-        const tile = draft[row][col];
-        if (!rule.tiles.includes(tile) || this.palette[tile]?.solid || (start && col < 3 && row < 3)) continue;
-        plan.objects.push({ module: m.manifest.id, col, row });
-      }
+      if (m.manifest.kind !== 'entity' || !rule) continue;
+      for (let i = 0; i < rule.max; i++) if (rng.chance(rule.chance)) plan.objects.push({ module: m.manifest.id, where: rule.tiles.some((t) => this.palette[t]?.indoor) ? 'dentro' : 'fuori' });
     }
-    if (start) this.ensureStarterRunes(plan);
     return plan;
   }
 
-  private applyPlan(ch: Chunk, plan: ChunkPlan, grid: string[]): void {
+  /** Runs the layout and puts things in the world: deterministic, so a cached plan rebuilds the same place. */
+  private applyPlan(ch: Chunk, plan: ChunkPlan): void {
     const S = this.config.chunkSize;
+    const pathCode = this.palette.p ? 'p' : (Object.keys(this.palette).find((c) => c !== '?' && !this.palette[c].solid) ?? 'g');
+    let result;
+    try {
+      result = layout(this.rows(ch.draft), this.palette, { cx: ch.cx, cy: ch.cy, seed: this.config.seed, program: this.content.layouts[plan.layout]?.program, pathCode });
+    } catch (e) {
+      this.council.say('kernel', 'errore', `ambiente ${plan.layout} non eseguibile: ${(e as Error).message}`);
+      result = layout(this.rows(ch.draft), this.palette, { cx: ch.cx, cy: ch.cy, seed: this.config.seed, pathCode });
+    }
     ch.plan = plan;
     ch.place = plan.place;
-    ch.tiles = grid.join('');
+    ch.tiles = result.grid.join('');
+    ch.buildings = result.buildings;
     ch.stage = 'planned';
     ch.version++;
-    // Entities of a previous application (hot reload) go away first.
+    this.plannedCount++;
     for (const id of this.ecs.query('chunk')) if (this.ecs.get(id, 'chunk').key === ch.key) this.ecs.destroy(id);
-    plan.runes.forEach((r, i) => {
-      let col = ch.cx * S + r.col;
-      tokenize(r.line).forEach((token, j) => {
-        const origin = `${ch.key}#r${i}.${j}`;
-        if (!this.consumed.has(origin)) this.ecs.spawn({ rune: { token, col, row: ch.cy * S + r.row, source: 'gen', origin } satisfies RuneComp, chunk: { key: ch.key } });
-        col += token.length;
+
+    // Where things can go: reachable cells, inside or outside buildings, never on gates or doors.
+    const rng = new Rng(hash32(this.config.seed, ch.cx, ch.cy, 991));
+    const occupied = new Set<number>(result.gates);
+    for (const b of result.buildings) for (const d of b.doors) occupied.add(d);
+    const indoorSet = new Set(result.buildings.flatMap((b) => b.floor));
+    const reach = [...result.reachable];
+    const indoor = reach.filter((i) => indoorSet.has(i));
+    const outdoor = reach.filter((i) => !indoorSet.has(i) && this.palette[result.grid[Math.floor(i / S)][i % S]]?.layer !== 'door');
+    const pick = (where: Where): number | undefined => {
+      const pool = (where === 'dentro' && indoor.length ? indoor : where === 'fuori' && outdoor.length ? outdoor : reach).filter((i) => !occupied.has(i));
+      if (!pool.length) return undefined;
+      const cell = pool[rng.int(pool.length)];
+      occupied.add(cell);
+      return cell;
+    };
+    const at = (cell: number) => ({ x: ch.cx * S + (cell % S) + 0.5, y: ch.cy * S + Math.floor(cell / S) + 0.5 });
+
+    // Runes: rare and precious, on a free reachable stretch of a row, anywhere in the chunk.
+    const lines = [...plan.runes];
+    if (ch.cx === 0 && ch.cy === 0) for (const l of STARTER_RUNES) if (!lines.includes(l)) lines.push(l);
+    const reachSet = result.reachable;
+    lines.forEach((line, i) => {
+      const toks = tokenize(line);
+      const w = toks.reduce((n, t) => n + t.length, 0);
+      for (let tries = 0; tries < 200; tries++) {
+        const row = 1 + rng.int(S - 2);
+        const col = 1 + rng.int(Math.max(1, S - 1 - w));
+        let ok = col + w <= S - 1;
+        for (let k = -1; k <= w && ok; k++) if (occupied.has(row * S + col + k)) ok = false;
+        for (let k = 0; k < w && ok; k++) if (!reachSet.has(row * S + col + k) || indoorSet.has(row * S + col + k)) ok = false;
+        if (!ok) continue;
+        for (let k = 0; k < w; k++) occupied.add(row * S + col + k);
+        let c = ch.cx * S + col;
+        toks.forEach((token, j) => {
+          const origin = `${ch.key}#r${i}.${j}`;
+          if (!this.consumed.has(origin)) this.ecs.spawn({ rune: { token, col: c, row: ch.cy * S + row, source: 'gen', origin } satisfies RuneComp, chunk: { key: ch.key } });
+          c += token.length;
+        });
+        break;
+      }
+    });
+
+    plan.objects.forEach((o, i) => {
+      const m = this.modules.get(o.module);
+      const origin = `${ch.key}#o${i}`;
+      if (!m || this.consumed.has(origin) || this.uniqueTaken(m)) return;
+      const cell = pick(o.where);
+      if (cell === undefined) return;
+      const p = at(cell);
+      this.spawnModuleEntity(m, p.x, p.y, ch.key, origin);
+    });
+
+    // Things lying around: named by the Cartographer, plus what the ground loot table yields.
+    const unknown: string[] = [];
+    plan.ground.forEach((name, i) => {
+      const d = this.content.byName(name);
+      if (!d) return void unknown.push(name);
+      const origin = `${ch.key}#g${i}`;
+      const cell = pick('fuori');
+      if (cell !== undefined && !this.consumed.has(origin)) this.spawnItem(d.id, at(cell).x, at(cell).y, 1, ch.key, origin);
+    });
+    this.content.roll('terreno', rng, [...this.wanted]).forEach((l, i) => {
+      const origin = `${ch.key}#l${i}`;
+      const cell = pick('ovunque');
+      if (cell !== undefined && !this.consumed.has(origin)) this.spawnItem(l.item, at(cell).x, at(cell).y, l.count, ch.key, origin);
+    });
+    if (unknown.length) void this.introduceItems(unknown, `trovati a terra in «${plan.place.name}»`).then((defs) => {
+      if (!this.alive(ch)) return;
+      defs.forEach((d, i) => {
+        const cell = pick('fuori');
+        if (cell !== undefined) this.spawnItem(d.id, at(cell).x, at(cell).y, 1, ch.key, `${ch.key}#n${i}`);
       });
     });
-    plan.objects.forEach((o, i) => {
-      const origin = `${ch.key}#o${i}`;
-      const m = this.modules.get(o.module);
-      if (m && !this.consumed.has(origin) && !this.uniqueTaken(m)) this.spawnModuleEntity(m, ch.cx * S + o.col + 0.5, ch.cy * S + o.row + 0.5, ch.key, origin);
-    });
-    for (const f of plan.fresh) void this.forgeForChunk(ch, f);
+    for (const f of plan.fresh) void this.forgeForChunk(ch, f, pick, at);
     this.runesDirty = true;
     this.bus.emit('chunk:planned', { key: ch.key });
+    if (this.plannedCount % 10 === 0) void this.growContent('esplorazione');
   }
 
   /** The Cartographer asked for something that does not exist yet: the Forge makes it, then it appears. */
-  private async forgeForChunk(ch: Chunk, f: { concept: string; col: number; row: number }): Promise<void> {
+  private async forgeForChunk(ch: Chunk, f: { concept: string; where: Where }, pick: (w: Where) => number | undefined, at: (c: number) => { x: number; y: number }): Promise<void> {
     const tag = `${ch.key}:${f.concept}`;
     if (this.forging.has(tag) || this.forgesUsed >= this.config.ai.maxForges) return;
     this.forging.add(tag);
@@ -765,99 +830,12 @@ export class Kernel {
     const r = await this.forgeModule(`${f.concept} (per il luogo «${ch.place?.name}»: ${ch.place?.description})`, 'cartografo');
     this.forging.delete(tag);
     if (!r.ok || !r.id || !ch.plan) return;
-    ch.plan.objects.push({ module: r.id, col: f.col, row: f.row });
+    ch.plan.objects.push({ module: r.id, where: f.where });
     ch.plan.fresh = ch.plan.fresh.filter((x) => x !== f);
-    await this.chunkStore.save(this.recordKey(ch), { plan: ch.plan, grid: this.rows(ch.tiles), image: ch.image, painted: ch.stage === 'painted' });
+    await this.chunkStore.save(this.recordKey(ch), { plan: ch.plan, grid: [], painted: false });
     const m = this.modules.get(r.id);
-    const S = this.config.chunkSize;
-    if (m && this.alive(ch)) this.spawnModuleEntity(m, ch.cx * S + f.col + 0.5, ch.cy * S + f.row + 0.5, ch.key, `${ch.key}#o${ch.plan.objects.length - 1}`);
-  }
-
-  /** Paints the nearest planned chunks, a couple at a time. */
-  private pumpPainting(): void {
-    if (!this.models.canPaint || !this.imageTools || this.paintingStopped || this.painters >= 2) return;
-    const S = this.config.chunkSize;
-    const pc = this.playerCarpet();
-    const pcx = pc.x / S - 0.5;
-    const pcy = pc.y / S - 0.5;
-    const busy = [...this.chunks.values()].filter((c) => c.painting);
-    // Two neighbours painted at the same time cannot see each other: paint them one after the other.
-    const next = [...this.chunks.values()]
-      .filter((c) => c.stage === 'planned' && !c.painting && Math.hypot(c.cx - pcx, c.cy - pcy) < 2.6)
-      .filter((c) => !busy.some((b) => Math.abs(b.cx - c.cx) <= 1 && Math.abs(b.cy - c.cy) <= 1))
-      .sort((a, b) => Math.hypot(a.cx - pcx, a.cy - pcy) - Math.hypot(b.cx - pcx, b.cy - pcy))[0];
-    if (!next) return;
-    next.painting = true;
-    this.painters++;
-    void this.paint(next).finally(() => {
-      next.painting = false;
-      this.painters--;
-    });
-  }
-
-  private async neighbourImages(ch: Chunk): Promise<Neighbours> {
-    const dirs = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0], ne: [1, -1], nw: [-1, -1], se: [1, 1], sw: [-1, 1] } as const;
-    const out: Neighbours = {};
-    for (const [d, [dx, dy]] of Object.entries(dirs)) {
-      const n = this.chunks.get(this.chunkKey(ch.cx + dx, ch.cy + dy));
-      if (n?.image) {
-        const img = await this.assets.get(n.image);
-        if (img) out[d as keyof Neighbours] = img;
-      }
-    }
-    return out;
-  }
-
-  private async paint(ch: Chunk): Promise<void> {
-    const tools = this.imageTools!;
-    const S = this.config.chunkSize;
-    const plan = ch.plan!;
-    try {
-      const layout = await tools.composeLayout(plan.grid, this.palette, await this.neighbourImages(ch), PAINT_MARGIN);
-      this.council.say('artista', 'dipinge', `(${ch.key}) «${plan.place.name}»`, undefined, 'chunk.paint');
-      const raw = await this.council.paint('chunk.paint', paintPrompt(this.council, plan, this.palette, S, PAINT_MARGIN), [layout], { cx: ch.cx, cy: ch.cy });
-      if (!raw) return;
-      const inner = await tools.cropInner(raw, S, PAINT_MARGIN, S * TILE_PX);
-      // The Physicist realigns collisions with what was actually painted.
-      let grid = plan.grid;
-      try {
-        const survey = await surveyChunk(this.council, await tools.downscale(inner, 576), plan.grid, this.palette, { cx: ch.cx, cy: ch.cy });
-        if (!this.validator.validateGrid(survey.grid, S, this.palette).length) {
-          grid = this.keepOccupiedWalkable(survey.grid, plan);
-          const diff = grid.reduce((n, row, r) => n + [...row].filter((c, i) => c !== plan.grid[r][i]).length, 0);
-          this.council.say('fisico', diff ? 'corregge' : 'approva', diff ? `(${ch.key}) ${diff} caselle riallineate al dipinto${survey.notes ? `: ${survey.notes}` : ''}` : `(${ch.key}) dipinto e collisioni coincidono`, 'cartografo', 'chunk.survey');
-        } else this.council.say('kernel', 'scarta', `(${ch.key}) rilievo del Fisico non valido: tengo la griglia del Cartografo`, 'fisico');
-      } catch (e) {
-        this.council.say('fisico', 'errore', (e as Error).message);
-      }
-      const image = await this.assets.put(inner);
-      await this.chunkStore.save(this.recordKey(ch), { plan, grid, image, painted: true });
-      if (!this.alive(ch)) return;
-      ch.image = image;
-      ch.tiles = grid.join('');
-      ch.stage = 'painted';
-      ch.version++;
-      this.bus.emit('chunk:painted', { key: ch.key });
-    } catch (e) {
-      const msg = (e as Error).message;
-      this.council.say('artista', 'errore', `(${ch.key}) ${msg}`);
-      if (e instanceof BudgetError) {
-        this.paintingStopped = true;
-        this.message('Budget immagini esaurito: il mondo resta abbozzato.', 'warn');
-      }
-    }
-  }
-
-  /** Cells holding runes or objects stay walkable: things lie on the ground. */
-  private keepOccupiedWalkable(grid: string[], plan: ChunkPlan): string[] {
-    const g = grid.map((r) => [...r]);
-    const fix = (c: number, r: number) => {
-      if (this.palette[g[r]?.[c]]?.solid) g[r][c] = plan.grid[r][c];
-    };
-    for (const o of plan.objects) fix(o.col, o.row);
-    for (const r of plan.runes) for (let i = 0; i < tokenize(r.line).join('').length; i++) fix(r.col + i, r.row);
-    if (plan.objects.length || plan.runes.length) return g.map((r) => r.join(''));
-    return grid;
+    const cell = pick(f.where);
+    if (m && this.alive(ch) && cell !== undefined) this.spawnModuleEntity(m, at(cell).x, at(cell).y, ch.key, `${ch.key}#o${ch.plan.objects.length - 1}`);
   }
 
   private unloadChunk(ch: Chunk): void {
@@ -912,6 +890,7 @@ export class Kernel {
 
   spawnModuleEntity(m: ModuleEntry, x: number, y: number, chunkKey?: string, origin?: string): Id {
     const man = m.manifest;
+    if (man.kind === 'item') return this.spawnItem(man.id, x, y, 1, chunkKey, origin);
     const comps: Record<string, any> = {
       ...clone(man.components ?? {}),
       pos: { x, y },
@@ -919,12 +898,12 @@ export class Kernel {
       body: { r: man.physics?.radius ?? 0.35, solid: !!man.physics?.solid && !man.physics?.pushable, pushable: !!man.physics?.pushable, mass: man.physics?.mass ?? 1, friction: man.physics?.friction ?? 0.6 },
     };
     if (man.appearance) comps.glyph = this.glyphOf(man.appearance);
-    if (man.kind === 'item') comps.pickup = { item: man.id, count: 1 };
     if (man.interaction) comps.interact = { type: man.interaction.type };
     if (man.persona) comps.mind = { mode: 'vaga', mood: 'tranquillo', history: [], ...(comps.mind ?? {}) } satisfies Mind;
+    if (man.container) comps.container = { inv: newInventory(man.container.size), loot: man.container.loot, filled: false } satisfies Container;
     if (man.inventory?.length) {
       const inv = newInventory(8);
-      for (const it of man.inventory) addItem(inv, it, 1, this.itemSpec(it));
+      for (const it of man.inventory) if (this.content.get(it)) addItem(inv, it, 1, this.itemSpec(it));
       comps.inventory = inv;
     }
     if (man.physics?.pushable && !comps.vel) comps.vel = { x: 0, y: 0 };
@@ -936,11 +915,25 @@ export class Kernel {
     return id;
   }
 
+  /** An item lying on the ground. */
+  spawnItem(item: string, x: number, y: number, count = 1, chunkKey?: string, origin?: string): Id {
+    const d = this.content.get(item);
+    const comps: Record<string, any> = {
+      pos: { x, y },
+      pickup: { item, count },
+      glyph: { ch: d?.glyph ?? '?', color: d?.color ?? '#aaa', sprite: d?.icon, scale: 0.75 },
+      body: { r: 0.2, solid: false },
+    };
+    if (chunkKey) comps.chunk = { key: chunkKey };
+    if (origin) comps.origin = { key: origin };
+    return this.ecs.spawn(comps);
+  }
+
   private nearest(x: number, y: number, r: number, tag?: string, exclude: Id[] = []): Id | undefined {
     let best: Id | undefined;
     let bestD = r;
-    for (const id of this.ecs.query('module', 'pos')) {
-      if (id === this.playerId || exclude.includes(id)) continue;
+    for (const id of this.ecs.query('pos')) {
+      if (id === this.playerId || exclude.includes(id) || (!this.ecs.has(id, 'module') && !this.ecs.has(id, 'pickup'))) continue;
       if (tag && !this.hasTag(id, tag)) continue;
       const p = this.ecs.get(id, 'pos');
       const d = Math.hypot(p.x - x, p.y - y);
@@ -950,28 +943,38 @@ export class Kernel {
   }
 
   private hasTag(id: Id, tag: string): boolean {
+    const pk = this.ecs.get(id, 'pickup');
+    if (pk) return this.itemInfo(pk.item).tags.includes(tag);
     const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
     return !!m?.tags?.includes(tag);
   }
 
-  /** Destroys an entity (never the player) and leaves its drops on the ground. */
+  /** Destroys an entity (never the player) and leaves its drops (and its container's contents) on the ground. */
   private breakEntity(id: Id): void {
     if (id === this.playerId || !this.ecs.alive.has(id) || this.ecs.has(id, 'carpet')) return;
     const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
     const p = this.ecs.get(id, 'pos');
     const origin = this.ecs.get(id, 'origin')?.key;
+    const box: Container | undefined = this.ecs.get(id, 'container');
     if (origin) this.consumed.add(origin);
     this.ecs.destroy(id);
+    if (!p) return;
     for (const d of m?.drops ?? []) {
-      const dm = this.modules.get(d);
-      if (dm && p) this.spawnModuleEntity(dm, p.x, p.y);
+      if (this.content.get(d)) this.spawnItem(d, p.x, p.y);
+      else if (this.modules.get(d)) this.spawnModuleEntity(this.modules.get(d)!, p.x, p.y);
     }
+    for (const s of box?.inv.slots ?? []) if (s) this.spawnItem(s.item, p.x + (Math.random() - 0.5) * 0.6, p.y + (Math.random() - 0.5) * 0.6, s.count);
   }
 
   private invAdd(id: Id, item: string, n: number): number {
     const inv: Inventory | undefined = this.ecs.get(id, 'inventory');
-    if (!inv || !this.modules.has(item) || !Number.isFinite(n)) return 0;
+    if (!inv || !this.content.get(item) || !Number.isFinite(n)) return 0;
     return addItem(inv, item, n, this.itemSpec(item));
+  }
+
+  /** An individual already walks the loaded world. */
+  private uniqueTaken(m: ModuleEntry): boolean {
+    return !!m.manifest.unique && this.ecs.query('module').some((id) => this.ecs.get(id, 'module').id === m.manifest.id);
   }
 
   // --- Space & collisions ----------------------------------------------------------------------
@@ -988,6 +991,16 @@ export class Kernel {
   chunkAt(x: number, y: number): Chunk | undefined {
     const S = this.config.chunkSize;
     return this.chunks.get(this.chunkKey(Math.floor(x / S), Math.floor(y / S)));
+  }
+
+  /** The building whose floor contains this carpet point (for roofs and interiors). */
+  buildingAt(x: number, y: number): { chunk: Chunk; building: Building } | undefined {
+    const S = this.config.chunkSize;
+    const ch = this.chunkAt(x, y);
+    if (!ch) return undefined;
+    const cell = (Math.floor(y) - ch.cy * S) * S + (Math.floor(x) - ch.cx * S);
+    const building = ch.buildings.find((b) => b.floor.includes(cell) || b.doors.includes(cell));
+    return building ? { chunk: ch, building } : undefined;
   }
 
   private freeCell(col: number, row: number): boolean {
@@ -1185,20 +1198,11 @@ export class Kernel {
     this.hand().sel = to;
   }
 
-  // --- Inventory -------------------------------------------------------------------------------
+  // --- Inventory, containers, crafting ---------------------------------------------------------
 
-  private pickUpItem(): boolean {
-    const pc = this.playerCarpet();
-    const [dx, dy] = this.facingDelta();
-    let best: Id | undefined;
-    let bestD = 1.3;
-    for (const id of this.ecs.query('pickup', 'pos')) {
-      const p = this.ecs.get(id, 'pos');
-      const d = Math.min(Math.hypot(p.x - pc.x, p.y - pc.y), Math.hypot(p.x - pc.x - dx * 0.6, p.y - pc.y - dy * 0.6));
-      if (d < bestD) [best, bestD] = [id, d];
-    }
-    if (best === undefined) return false;
-    const pk = this.ecs.get(best, 'pickup');
+  private pickUpEntity(id: Id): boolean {
+    const pk = this.ecs.get(id, 'pickup');
+    if (!pk) return false;
     const info = this.itemInfo(pk.item);
     const added = addItem(this.inventory(), pk.item, pk.count, info.spec);
     if (!added) {
@@ -1207,9 +1211,9 @@ export class Kernel {
     }
     pk.count -= added;
     if (pk.count <= 0) {
-      const origin = this.ecs.get(best, 'origin')?.key;
+      const origin = this.ecs.get(id, 'origin')?.key;
       if (origin) this.consumed.add(origin);
-      this.ecs.destroy(best);
+      this.ecs.destroy(id);
     }
     this.bus.emit('item:picked', { item: pk.item });
     this.message(`Raccolto: ${info.name}${added > 1 ? ` ×${added}` : ''}`);
@@ -1217,16 +1221,12 @@ export class Kernel {
   }
 
   useSlot(index: number): void {
-    const inv = this.inventory();
-    const slot = inv.slots[index];
+    const slot = this.inventory().slots[index];
     if (!slot) return;
-    const info = this.itemInfo(slot.item);
-    if (!this.sandbox.has(slot.item, 'on_use')) {
-      if (info.spec.equippable) return this.equipSlot(index);
-      this.message(`${info.name}: non sai come usarlo.`, 'warn');
-      return;
-    }
-    const { value, failed } = this.runModule(slot.item, 'on_use', this.playerId, slot.item);
+    const def = this.content.get(slot.item);
+    const custom = def?.module && this.sandbox.has(def.module, 'on_use') ? def.module : null;
+    if (!custom && def?.equippable && !def.effects && !['luce', 'vestiario'].includes(def.category)) return this.equipSlot(index);
+    const { value, failed } = this.runModule(custom ?? 'core.items', custom ? 'on_use' : 'use', this.playerId, slot.item);
     if (!failed && typeof value === 'string' && value) this.message(value);
     this.bus.emit('item:used', { item: slot.item });
   }
@@ -1244,7 +1244,7 @@ export class Kernel {
       return;
     }
     inv.equipped = inv.equipped === index ? null : index;
-    this.message(inv.equipped === null ? `Riponi ${info.name}.` : `Impugni ${info.name}. F per usarlo.`);
+    this.message(inv.equipped === null ? `Riponi ${info.name}.` : `Impugni ${info.name}. F per usarlo su ciò che hai davanti.`);
   }
 
   /** Hotbar keys 1–6: equip what can be held, use the rest. */
@@ -1256,23 +1256,24 @@ export class Kernel {
   }
 
   /** F: the held item acts on what is in front of you. */
-  action(): void {
-    const inv = this.inventory();
-    const item = equippedItem(inv);
+  action(target?: Id): void {
+    const item = equippedItem(this.inventory());
     if (!item) {
       this.message('Non impugni nulla (1–6 o inventario).', 'warn');
       return;
     }
     const pc = this.playerCarpet();
     const [dx, dy] = this.facingDelta();
-    const target = this.nearest(pc.x + dx * 0.9, pc.y + dy * 0.9, 1.1) ?? null;
-    if (!this.sandbox.has(item, 'on_action')) {
-      this.message(`${this.itemInfo(item).name} non fa nulla così.`, 'warn');
-      return;
-    }
-    const { value, failed } = this.runModule(item, 'on_action', this.playerId, target, item);
-    if (!failed && typeof value === 'string' && value) this.message(value);
-    this.bus.emit('item:action', { item, target });
+    const t = target ?? this.nearest(pc.x + dx * 0.9, pc.y + dy * 0.9, 1.1) ?? null;
+    const def = this.content.get(item);
+    if (def?.module && this.sandbox.has(def.module, 'on_action')) {
+      const { value, failed } = this.runModule(def.module, 'on_action', this.playerId, t, item);
+      if (!failed && typeof value === 'string' && value) this.message(value);
+    } else if (t !== null && def?.tags.includes('taglio') && this.hasTag(t, 'tagliabile')) {
+      this.breakEntity(t);
+      this.message(`Con ${def.name} abbatti ciò che hai davanti.`);
+    } else this.message(`${this.itemInfo(item).name} non fa nulla così.`, 'warn');
+    this.bus.emit('item:action', { item, target: t });
   }
 
   dropSlot(index: number, count?: number): void {
@@ -1281,15 +1282,73 @@ export class Kernel {
     if (!taken) return;
     const pc = this.playerCarpet();
     const [dx, dy] = this.facingDelta();
-    const m = this.modules.get(taken.item);
-    if (!m) return;
-    const id = this.spawnModuleEntity(m, pc.x + dx * 0.8, pc.y + dy * 0.8);
-    this.ecs.get(id, 'pickup').count = taken.count;
-    this.message(`Posi: ${m.manifest.name}${taken.count > 1 ? ` ×${taken.count}` : ''}`);
+    this.spawnItem(taken.item, pc.x + dx * 0.8, pc.y + dy * 0.8, taken.count);
+    this.message(`Posi: ${this.itemInfo(taken.item).name}${taken.count > 1 ? ` ×${taken.count}` : ''}`);
   }
 
   moveSlot(from: number, to: number): void {
     moveSlot(this.inventory(), from, to, this.itemSpec);
+  }
+
+  container(id: Id): Container | undefined {
+    return this.ecs.get(id, 'container');
+  }
+
+  /** First opening fills the container from its loot table (things people talked about turn up more). */
+  openContainer(id: Id): Container | undefined {
+    const box = this.container(id);
+    if (!box) return undefined;
+    if (!box.filled) {
+      box.filled = true;
+      const origin = this.ecs.get(id, 'origin')?.key ?? `e${id}`;
+      const rng = new Rng(hash32(this.config.seed, hashStr(origin), 7));
+      for (const l of this.content.roll(box.loot, rng, [...this.wanted])) addItem(box.inv, l.item, l.count, this.itemSpec(l.item));
+    }
+    this.bus.emit('ui:container', { id, name: this.nameOf(id) });
+    return box;
+  }
+
+  takeFromContainer(id: Id, slot: number): void {
+    const box = this.container(id);
+    const s = box?.inv.slots[slot];
+    if (!box || !s) return;
+    const moved = addItem(this.inventory(), s.item, s.count, this.itemSpec(s.item));
+    if (!moved) return this.message("L'inventario è pieno.", 'warn');
+    takeFromSlot(box.inv, slot, moved);
+    this.message(`Prendi: ${this.itemInfo(s.item).name}${moved > 1 ? ` ×${moved}` : ''}`);
+  }
+
+  putIntoContainer(id: Id, slot: number): void {
+    const box = this.container(id);
+    const s = this.inventory().slots[slot];
+    if (!box || !s) return;
+    const moved = addItem(box.inv, s.item, s.count, this.itemSpec(s.item));
+    if (moved) takeFromSlot(this.inventory(), slot, moved);
+  }
+
+  /** Recipes the player can make now, and all known ones. */
+  recipes(): { available: Set<string>; all: Recipe[] } {
+    const inv = this.inventory();
+    const ok = this.content.craftable((item) => countItem(inv, item));
+    return { available: new Set(ok.map((r) => r.id)), all: this.content.recipes };
+  }
+
+  craft(recipeId: string): boolean {
+    const r = this.content.recipes.find((x) => x.id === recipeId);
+    const inv = this.inventory();
+    if (!r || !this.content.craftable((item) => countItem(inv, item)).includes(r)) {
+      this.message('Ti manca qualcosa per farlo.', 'warn');
+      return false;
+    }
+    for (const i of r.inputs) removeItem(inv, i.item, i.count);
+    const added = addItem(inv, r.output.item, r.output.count, this.itemSpec(r.output.item));
+    if (added < r.output.count) {
+      const pc = this.playerCarpet();
+      this.spawnItem(r.output.item, pc.x, pc.y, r.output.count - added);
+    }
+    this.message(`Hai fatto: ${this.itemInfo(r.output.item).name}${r.output.count > 1 ? ` ×${r.output.count}` : ''}`, 'good');
+    this.bus.emit('item:crafted', { recipe: r.id });
+    return true;
   }
 
   /** Drag one item onto another: the Council decides if they combine, forging the result if needed. */
@@ -1300,21 +1359,19 @@ export class Kernel {
     if (!sa || !sb || a === b) return '';
     const ia = this.itemInfo(sa.item);
     const ib = this.itemInfo(sb.item);
-    const items = [...this.modules.values()].filter((m) => m.manifest.kind === 'item');
+    const known = [...this.content.items.values()];
     let verdict;
     try {
-      verdict = await judgeCombination(this.council, ia, ib, items.map((m) => m.manifest.name));
+      verdict = await judgeCombination(this.council, ia, ib, known.map((d) => d.name).slice(-150));
     } catch (e) {
       return `Il Concilio non risponde: ${(e as Error).message}`;
     }
     if (!verdict.possible || !verdict.result) return verdict.reason;
-    let result = items.find((m) => m.manifest.name.toLowerCase() === verdict.result!.toLowerCase())?.manifest.id;
+    let result = this.content.byName(verdict.result)?.id;
     if (!result) {
-      if (this.forgesUsed >= this.config.ai.maxForges) return 'Il Concilio ha già forgiato abbastanza per oggi.';
-      this.forgesUsed++;
-      const r = await this.forgeModule(`${verdict.result}: ${verdict.description ?? ''} (ottenuto combinando ${ia.name} e ${ib.name})`, 'combinazione', 'strumento');
-      if (!r.ok || !r.id) return r.summary;
-      result = r.id;
+      const defs = await this.introduceItems([verdict.result], `ottenuto combinando ${ia.name} e ${ib.name}: ${verdict.description ?? ''}`);
+      result = defs[0]?.id;
+      if (!result) return 'Il Concilio non riesce a dare forma al risultato.';
     }
     removeItem(inv, sa.item, 1);
     removeItem(inv, sb.item, 1);
@@ -1326,7 +1383,29 @@ export class Kernel {
 
   // --- Interaction ----------------------------------------------------------------------------
 
-  /** E: corona → edit code; carpet → rune, item, then talk/read/use the nearest entity. */
+  /** What can be done to an entity: generic actions, its own actions, the held tool. */
+  actionsFor(id: Id): ActionOption[] {
+    const out: ActionOption[] = [];
+    const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
+    const inv = this.inventory();
+    const has = (req: string) => countItem(inv, req) > 0 || inv.slots.some((s) => s && this.itemInfo(s.item).tags.includes(req));
+    if (this.ecs.has(id, 'pickup')) out.push({ id: 'raccogli', label: 'Raccogli', enabled: true });
+    const it = this.ecs.get(id, 'interact');
+    if (it?.type === 'talk') out.push({ id: 'parla', label: 'Parla', enabled: true });
+    if (it?.type === 'read') out.push({ id: 'leggi', label: 'Leggi', enabled: true });
+    if (it?.type === 'lua') out.push({ id: 'usa', label: 'Usa', enabled: true });
+    if (this.ecs.has(id, 'container')) out.push({ id: 'apri', label: 'Apri', enabled: true });
+    for (const a of m?.actions ?? []) {
+      const ok = !a.requires || has(a.requires);
+      out.push({ id: `act:${a.id}`, label: a.label, enabled: ok, reason: ok ? undefined : `serve: ${this.content.get(a.requires!)?.name ?? a.requires}` });
+    }
+    const held = equippedItem(inv);
+    if (held) out.push({ id: 'strumento', label: `Usa ${this.itemInfo(held).name}`, enabled: true });
+    out.push({ id: 'esamina', label: 'Esamina', enabled: true });
+    return out;
+  }
+
+  /** E: corona → edit code; rune → pick; otherwise the menu of the nearest thing (or a pickup directly). */
   async interact(): Promise<void> {
     if (this.zone === 'corona') {
       const p = this.playerPos();
@@ -1334,76 +1413,224 @@ export class Kernel {
       if (cell?.path) this.bus.emit('ui:edit', { path: cell.path, line: cell.line ?? 1 });
       return;
     }
-    if (this.pickUpRune() || this.pickUpItem()) return;
+    if (this.pickUpRune()) return;
+    const target = this.targetInFront();
+    if (target === undefined) return;
+    if (this.ecs.has(target, 'pickup')) {
+      this.pickUpEntity(target);
+      return;
+    }
+    const options = this.actionsFor(target);
+    const main = options.filter((o) => o.id !== 'esamina' && o.id !== 'strumento');
+    if (main.length === 1 && main[0].enabled && options.length <= 2) return this.perform(target, main[0].id);
+    this.bus.emit('ui:actions', { id: target, name: this.nameOf(target), options });
+  }
+
+  /** The thing you are facing (or standing next to). */
+  targetInFront(): Id | undefined {
     const pc = this.playerCarpet();
-    let best: Id | null = null;
-    let bestD = 1.7;
-    for (const id of this.ecs.query('interact', 'pos')) {
-      const p = this.ecs.get(id, 'pos');
-      const d = Math.hypot(p.x - pc.x, p.y - pc.y);
-      if (d < bestD) [best, bestD] = [id, d];
-    }
-    if (best === null) return;
-    const it = this.ecs.get(best, 'interact');
-    const modId: string = this.ecs.get(best, 'module')?.id;
-    const m = this.modules.get(modId)?.manifest;
-    const speaker = m?.name ?? 'Qualcuno';
-    if (it.type === 'talk') {
-      this.bus.emit('ui:chat', { id: best, name: speaker });
-      return;
-    }
-    if (it.type === 'lua') {
-      const { value, failed } = this.runModule(modId, 'on_interact', best, this.playerId);
-      if (!failed && typeof value === 'string') this.bus.emit('ui:dialog', { speaker, text: value });
-      return;
-    }
-    try {
-      const text = await narrate(this.council, { name: speaker, description: m?.description ?? '', lore: m?.lore }, this.worldFacts());
-      this.bus.emit('ui:dialog', { speaker, text });
-    } catch (e) {
-      this.bus.emit('ui:dialog', { speaker, text: `(le parole si confondono: ${(e as Error).message})` });
+    const [dx, dy] = this.facingDelta();
+    return this.nearest(pc.x + dx * 0.6, pc.y + dy * 0.6, 1.4) ?? this.nearest(pc.x, pc.y, 1.2);
+  }
+
+  async perform(id: Id, action: string): Promise<void> {
+    if (!this.ecs.alive.has(id)) return;
+    const modId: string | undefined = this.ecs.get(id, 'module')?.id;
+    const m = modId ? this.modules.get(modId)?.manifest : undefined;
+    const speaker = this.nameOf(id);
+    const say = (text: string) => this.bus.emit('ui:dialog', { speaker, text });
+    switch (action) {
+      case 'raccogli':
+        this.pickUpEntity(id);
+        return;
+      case 'parla':
+        await this.ensureIdentity(id);
+        this.bus.emit('ui:chat', { id, name: this.nameOf(id) });
+        return;
+      case 'apri':
+        this.openContainer(id);
+        return;
+      case 'strumento':
+        this.action(id);
+        return;
+      case 'usa': {
+        const { value, failed } = this.runModule(modId!, 'on_interact', id, this.playerId);
+        if (!failed && typeof value === 'string') say(value);
+        return;
+      }
+      case 'leggi':
+        try {
+          say(await narrate(this.council, { name: speaker, description: m?.description ?? '', lore: m?.lore }, this.worldFacts()));
+        } catch (e) {
+          say(`(le parole si confondono: ${(e as Error).message})`);
+        }
+        return;
+      case 'esamina': {
+        const identity: Identity | undefined = this.ecs.get(id, 'identity');
+        const key = `${modId ?? this.ecs.get(id, 'pickup')?.item}|${identity?.name ?? ''}`;
+        let text = this.examined.get(key);
+        if (!text) {
+          const pk = this.ecs.get(id, 'pickup');
+          const what = pk ? this.itemInfo(pk.item) : { name: speaker, description: `${m?.description ?? ''}${identity ? ` ${identity.look}` : ''}`, lore: m?.lore };
+          try {
+            text = await examine(this.council, { name: what.name, description: what.description, lore: (what as { lore?: string }).lore }, this.worldFacts());
+            this.examined.set(key, text);
+          } catch (e) {
+            text = `${what.description} (${(e as Error).message})`;
+          }
+        }
+        say(text);
+        return;
+      }
+      default:
+        if (action.startsWith('act:') && modId) {
+          const a = m?.actions?.find((x) => `act:${x.id}` === action);
+          const opt = this.actionsFor(id).find((o) => o.id === action);
+          if (!a || !opt?.enabled) return say(opt?.reason ?? 'Non puoi farlo.');
+          const { value, failed } = this.runModule(modId, 'on_act', id, this.playerId, a.id);
+          if (!failed) say(typeof value === 'string' && value ? value : `${a.label}: fatto.`);
+        }
     }
   }
 
   private worldFacts(): Record<string, unknown> {
     const p = this.playerPos();
     const held = equippedItem(this.inventory());
+    const n = this.needs();
     return {
       distanceToEdge: Math.round((this.config.circleRadius - Math.hypot(p.x, p.y)) * 10) / 10,
       luogo: this.placeHere()?.name,
       ora: Math.floor(this.time),
       viandanteImpugna: held ? this.itemInfo(held).name : 'niente',
+      viandante: n ? { fame: Math.round(100 - n.hunger), sete: Math.round(100 - n.thirst), stanchezza: Math.round(100 - n.energy) } : undefined,
     };
   }
 
-  /** Talks to an NPC: the Narrator plays its persona; the chosen action is validated and applied. */
+  /** Behind every character there is an individual: name, story, own pockets (written once, cheap text). */
+  async ensureIdentity(id: Id): Promise<Identity | undefined> {
+    const existing: Identity | undefined = this.ecs.get(id, 'identity');
+    if (existing) return existing;
+    const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
+    if (!m?.persona) return undefined;
+    let identity: Identity;
+    try {
+      identity = await individuate(this.council, { name: m.name, description: m.description ?? '', persona: m.persona }, { place: this.placeHere()?.name ?? '', common: [...this.content.items.values()].map((d) => d.name) });
+    } catch {
+      identity = { name: m.name, persona: m.persona, look: '', carrying: [] };
+    }
+    this.ecs.set(id, 'identity', identity);
+    const resolved = identity.carrying.map((n) => this.content.byName(n));
+    const unknown = identity.carrying.filter((_, i) => !resolved[i]);
+    const defs = [...resolved.filter((d): d is ItemDef => !!d), ...(unknown.length ? await this.introduceItems(unknown, `portati da ${identity.name}`) : [])];
+    let inv: Inventory | undefined = this.ecs.get(id, 'inventory');
+    if (!inv) inv = this.ecs.set(id, 'inventory', newInventory(10));
+    for (const d of defs) addItem(inv, d.id, 1, this.itemSpec(d.id));
+    this.council.say('narratore', 'propone', `${m.name} → ${identity.name}: ${identity.look} (porta ${defs.map((d) => d.name).join(', ') || 'niente'})`);
+    return identity;
+  }
+
+  /** Talks to an NPC: the Narrator plays the individual; the chosen action is validated and applied. */
   async talk(id: Id, text: string): Promise<NpcReply> {
     const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
     if (!m?.persona || !this.ecs.alive.has(id)) return { say: '…', action: 'nessuna', mood: '' };
+    const identity = await this.ensureIdentity(id);
     let mind: Mind = this.ecs.get(id, 'mind');
     if (!mind) mind = this.ecs.set(id, 'mind', { mode: 'vaga', mood: 'tranquillo', history: [] });
     mind.history ??= [];
     const inv: Inventory | undefined = this.ecs.get(id, 'inventory');
     const carrying = inv ? inv.slots.filter(Boolean).map((s) => this.itemInfo(s!.item).name) : [];
+    const name = identity?.name ?? m.name;
     let reply: NpcReply;
     try {
-      reply = await npcReply(this.council, { name: m.name, persona: m.persona, mood: mind.mood, mode: mind.mode, carrying, place: this.placeHere()?.name ?? '', history: mind.history, facts: this.worldFacts() }, text);
+      reply = await npcReply(this.council, { name, persona: identity?.persona ?? m.persona, mood: mind.mood, mode: mind.mode, carrying, place: this.placeHere()?.name ?? '', history: mind.history, facts: this.worldFacts() }, text);
     } catch (e) {
-      return { say: `(${m.name} ti guarda in silenzio — ${(e as Error).message})`, action: 'nessuna', mood: mind.mood };
+      return { say: `(${name} ti guarda in silenzio — ${(e as Error).message})`, action: 'nessuna', mood: mind.mood };
     }
     mind.history.push({ who: 'giocatore', text }, { who: 'npc', text: reply.say });
     if (mind.history.length > 16) mind.history.splice(0, mind.history.length - 16);
     mind.mood = reply.mood;
     if (reply.action === 'segui' || reply.action === 'resta' || reply.action === 'vaga') mind.mode = reply.action;
     if (reply.action === 'dai') {
-      const slot = inv?.slots.find((s) => s && this.itemInfo(s.item).name.toLowerCase() === (reply.item ?? '').toLowerCase()) ?? inv?.slots.find(Boolean);
+      const wantedName = normName(reply.item ?? '');
+      const slot = inv?.slots.find((s) => s && normName(this.itemInfo(s.item).name) === wantedName) ?? inv?.slots.find((s) => s && wantedName && normName(this.itemInfo(s.item).name).includes(wantedName));
       if (slot && inv && addItem(this.inventory(), slot.item, 1, this.itemSpec(slot.item))) {
         removeItem(inv, slot.item, 1);
-        this.message(`${m.name} ti dà: ${this.itemInfo(slot.item).name}`, 'good');
+        this.message(`${name} ti dà: ${this.itemInfo(slot.item).name}`, 'good');
       } else reply.action = 'nessuna';
     }
+    if (reply.mentioned?.length) void this.noteMentions(reply.mentioned, `di cui si parla con ${name}`);
     this.speak(id, reply.say);
     return reply;
+  }
+
+  /** Things mentioned in conversation become part of the world: defined if new, then found more often. */
+  async noteMentions(names: string[], context: string): Promise<void> {
+    const unknown: string[] = [];
+    for (const n of names) {
+      const d = this.content.byName(n);
+      if (d) this.wanted.add(d.id);
+      else unknown.push(n);
+    }
+    if (unknown.length) for (const d of await this.introduceItems(unknown, context)) this.wanted.add(d.id);
+    while (this.wanted.size > 24) this.wanted.delete(this.wanted.values().next().value!);
+  }
+
+  /** New items, defined by the Narrator, written into the "citati" pack, committed. */
+  async introduceItems(names: string[], context: string): Promise<ItemDef[]> {
+    const fresh = [...new Set(names.map((n) => n.trim()).filter((n) => n.length >= 2 && !this.content.byName(n)))].slice(0, 6);
+    if (!fresh.length) return names.map((n) => this.content.byName(n)).filter((d): d is ItemDef => !!d);
+    let raw;
+    try {
+      raw = await defineItems(this.council, fresh, context);
+    } catch (e) {
+      this.council.say('narratore', 'errore', (e as Error).message);
+      return [];
+    }
+    const taken = new Set(this.content.items.keys());
+    const defs = raw.map((r) => toItemDef(r, taken)).filter((d): d is ItemDef => !!d);
+    if (!defs.length) return [];
+    this.writePack('modules/items.citati/manifest.json', { id: 'items.citati', name: 'Oggetti di cui si è parlato', description: 'Oggetti entrati nel mondo perché qualcuno ne ha parlato.' }, { items: defs, recipes: [], loot: {} });
+    this.applyFiles({ ...this.repo.working });
+    this.repo.commit(`contenuti: ${defs.map((d) => d.name).join(', ')}`, 'agent');
+    return defs;
+  }
+
+  private writePack(path: string, head: { id: string; name: string; description: string }, pack: { items: ItemDef[]; recipes: any[]; loot: Record<string, any> }): void {
+    const existing = this.repo.working[path] ? JSON.parse(this.repo.working[path]) : { ...head, kind: 'data', version: '0.1.0', items: [], recipes: [], loot: {} };
+    existing.items = [...(existing.items ?? []), ...pack.items];
+    existing.recipes = [...(existing.recipes ?? []), ...pack.recipes];
+    existing.loot = { ...(existing.loot ?? {}), ...pack.loot };
+    this.repo.write(path, JSON.stringify(existing, null, 2) + '\n');
+  }
+
+  /** The world grows as it is explored: a new pack of items, recipes and loot (text only, cheap). */
+  async growContent(reason: string, count = 16, force = false): Promise<boolean> {
+    if (this.growing || (!force && (this.packsUsed >= (this.config.ai.maxPacks ?? 4) || this.models.name === 'offline'))) return false;
+    this.growing = true;
+    this.packsUsed++;
+    try {
+      const tags = [...new Set([...this.content.items.values()].flatMap((d) => d.tags))].slice(0, 30);
+      const raw = await itemPack(this.council, { count, existing: [...this.content.items.values()].map((d) => d.name), hints: [...this.wanted].map((id) => this.itemInfo(id).name), tags });
+      const known = new Map([...this.content.items.values()].map((d) => [normName(d.name), d.id]));
+      const pack = assemblePack(raw, known, new Set(this.content.items.keys()));
+      const errors = this.validator.validateItems(pack.items);
+      if (errors.length || !pack.items.length) {
+        this.council.say('kernel', 'scarta', `pacchetto: ${errors.join('; ') || 'vuoto'}`, 'narratore');
+        return false;
+      }
+      let n = 1;
+      while (this.repo.working[`modules/items.pacco-${n}/manifest.json`]) n++;
+      this.writePack(`modules/items.pacco-${n}/manifest.json`, { id: `items.pacco-${n}`, name: `Pacchetto ${n}`, description: `Oggetti scritti dal Concilio (${reason}).` }, pack);
+      this.applyFiles({ ...this.repo.working });
+      const c = this.repo.commit(`contenuti: pacchetto ${n} (${pack.items.length} oggetti, ${pack.recipes.length} ricette)`, 'agent');
+      this.council.say('kernel', 'approva', `pacchetto ${n}: ${pack.items.length} oggetti, ${pack.recipes.length} ricette, ${Object.keys(pack.loot).length} tabelle → commit ${c.id}`);
+      return true;
+    } catch (e) {
+      this.council.say('narratore', 'errore', `pacchetto: ${(e as Error).message}`);
+      return false;
+    } finally {
+      this.growing = false;
+    }
   }
 
   placeHere(): Place | undefined {
@@ -1429,38 +1656,42 @@ export class Kernel {
       const symbol = /^[A-Za-z_]\w*$/.test(rune.token) && !['true', 'false', 'nil', 'not', 'and', 'or'].includes(rune.token) ? this.sandbox.eval(rune.token) : null;
       return { kind: 'rune', token: rune.token, doc: SYMBOL_DOCS[rune.token], symbol, line: this.lineOfRune(id), source: rune.source };
     }
-    for (const eid of this.ecs.query('module', 'pos', 'glyph')) {
+    for (const eid of this.ecs.query('pos', 'glyph')) {
       if (eid === this.playerId) continue;
       const ep = this.ecs.get(eid, 'pos');
-      if (Math.hypot(ep.x - cx, ep.y - cy) < 0.6) {
-        const m = this.modules.get(this.ecs.get(eid, 'module').id)?.manifest;
-        const mind: Mind | undefined = this.ecs.get(eid, 'mind');
-        const pk = this.ecs.get(eid, 'pickup');
-        const extra = mind ? `umore: ${mind.mood}` : pk ? `E per raccogliere${pk.count > 1 ? ` (×${pk.count})` : ''}` : undefined;
-        return { kind: 'entity', name: m?.name ?? '???', description: m?.description ?? '', extra };
+      if (Math.hypot(ep.x - cx, ep.y - cy) >= 0.6) continue;
+      const pk = this.ecs.get(eid, 'pickup');
+      if (pk) {
+        const info = this.itemInfo(pk.item);
+        return { kind: 'entity', name: info.name, description: info.description, extra: `E per raccogliere${pk.count > 1 ? ` (×${pk.count})` : ''}` };
       }
+      const m = this.modules.get(this.ecs.get(eid, 'module')?.id)?.manifest;
+      const mind: Mind | undefined = this.ecs.get(eid, 'mind');
+      const identity: Identity | undefined = this.ecs.get(eid, 'identity');
+      const extra = mind ? `umore: ${mind.mood}` : this.ecs.has(eid, 'container') ? 'E per aprire' : m?.actions?.length ? `E: ${m.actions.map((a) => a.label).join(', ')}` : undefined;
+      return { kind: 'entity', name: identity?.name ?? m?.name ?? '???', description: identity ? `${m?.name}. ${identity.look}` : (m?.description ?? ''), extra };
     }
     const t = this.tileAt(Math.floor(cx), Math.floor(cy));
-    return t ? { kind: 'tile', name: this.palette[t]?.name ?? t } : null;
+    return t ? { kind: 'tile', name: `${this.palette[t]?.name ?? t}${this.palette[t]?.solid ? ' (invalicabile)' : ''}` } : null;
   }
 
   // --- The Forge and Genesis ---------------------------------------------------------------------
 
-  /** Forges a module through the Council, then validates, stores its sprite, commits and hot loads it. */
+  /** Forges a module through the Council, then validates, commits and hot loads it; the Atelier paints it later. */
   async forgeModule(prompt: string, origin: ForgeOrigin, kind?: 'npc' | 'oggetto' | 'strumento'): Promise<{ ok: boolean; id?: string; summary: string }> {
     const ids = [...this.modules.keys()];
     try {
       const r = await forge(
         this.council,
-        { prompt, origin, kind, existingIds: ids, paletteCodes: Object.keys(this.palette).filter((c) => c !== '?' && !this.palette[c].solid) },
+        { prompt, origin, kind, existingIds: ids, paletteCodes: Object.keys(this.palette).filter((c) => c !== '?' && !this.palette[c].solid), paint: false },
         (m, logic) => this.validator.validateForged(m, logic, new Set(ids)),
       );
-      if (r.sprite && this.imageTools) {
-        try {
-          r.manifest.appearance!.sprite = await this.assets.put(await this.imageTools.cutSprite(r.sprite, 160));
-        } catch (e) {
-          this.council.say('artista', 'errore', `sprite: ${(e as Error).message}`);
-        }
+      // What a character carries: existing items by name, new ones defined by the Narrator.
+      if (r.concept.porta?.length) {
+        const known = r.concept.porta.map((n) => this.content.byName(n)).filter((d): d is ItemDef => !!d);
+        const fresh = r.concept.porta.filter((n) => !this.content.byName(n));
+        const defs = [...known, ...(fresh.length ? await this.introduceItems(fresh, `portati da ${r.concept.nome}`) : [])];
+        if (defs.length) r.manifest.inventory = defs.map((d) => d.id);
       }
       const dir = `modules/${r.id}/`;
       this.repo.write(`${dir}manifest.json`, JSON.stringify(r.manifest, null, 2) + '\n');
@@ -1477,12 +1708,6 @@ export class Kernel {
       this.council.say('kernel', 'errore', `Fucina: ${msg}`);
       return { ok: false, summary: `Il Concilio non è riuscito a creare un modulo valido: ${msg}` };
     }
-  }
-
-  /** The Narrator's memory: every new being or thing becomes part of the world bible. */
-  /** An individual already walks the loaded world. */
-  private uniqueTaken(m: ModuleEntry): boolean {
-    return !!m.manifest.unique && this.ecs.query('module').some((id) => this.ecs.get(id, 'module').id === m.manifest.id);
   }
 
   /**
@@ -1524,6 +1749,7 @@ export class Kernel {
     return false;
   }
 
+  /** The Narrator's memory: every new being or thing becomes part of the world bible. */
   private recordInBible(m: Manifest): void {
     const bible = readBible(this.repo.working);
     if (!bible) return;
@@ -1534,24 +1760,39 @@ export class Kernel {
   }
 
   /** Asks the in-world agent for a new module (console → Agente). */
-  async askAgent(prompt: string): Promise<{ ok: boolean; summary: string }> {
+  async askAgent(prompt: string): Promise<{ ok: boolean; id?: string; summary: string }> {
     return this.forgeModule(prompt, 'agente');
   }
 
-  /** The Council generates a whole new universe from a theme. Constants (carpet, movement, physics, runes) stay. */
+  /** Real drafts to test layout programs on (forest-ish, open, watery). */
+  sampleDrafts(): string[][] {
+    return [[3, -7], [-11, 4], [20, 13]].map(([cx, cy]) => this.rows(this.genDraft(cx, cy)));
+  }
+
+  /** The Council generates a whole new universe from a theme. Constants (carpet, movement, physics, needs, runes) stay. */
   async runGenesis(theme: string, onProgress?: (step: string) => void): Promise<boolean> {
     this.generationHeld = true;
+    const backup = { ...this.repo.working };
     try {
       onProgress?.('Il Concilio si riunisce');
-      const plan = await planGenesis(this.council, theme, this.repo.working);
+      const plan = await planGenesis(this.council, theme, this.repo.working, (id, def, palette) => this.validator.validateLayout(id, def, palette, this.sampleDrafts()));
       for (const [p, src] of Object.entries(plan.files)) this.repo.write(p, src);
       // Example content shipped on disk makes room for the generated world.
       for (const m of this.modules.values()) {
         if (m.manifest.origin !== 'esempio') continue;
         for (const p of Object.keys(this.repo.working)) if (p.startsWith(m.dir)) this.repo.write(p, null);
       }
+      this.repo.write('world/atelier.json', JSON.stringify({ pairs: [] }, null, 2) + '\n');
       this.applyFiles({ ...this.repo.working });
       this.consumed.clear();
+      this.wanted.clear();
+      onProgress?.('Il Narratore scrive gli oggetti comuni del mondo');
+      if (!(await this.growContent('genesi', 30, true))) {
+        // Without a pack the world would be empty: keep the example one.
+        for (const [p, src] of Object.entries(backup)) if (p.startsWith('modules/items.base/')) this.repo.write(p, src);
+        this.applyFiles({ ...this.repo.working });
+      }
+      this.packsUsed = 0;
       let done = 0;
       const queue = [...plan.cast];
       const worker = async () => {
@@ -1562,27 +1803,15 @@ export class Kernel {
         }
       };
       await Promise.all([worker(), worker()]);
-      if (this.models.canPaint && this.imageTools) {
-        onProgress?.('L\'Artista ritrae il viandante');
-        this.council.say('artista', 'dipinge', `il viandante: ${plan.playerPrompt}`);
-        try {
-          const raw = await this.council.paint('genesis.player', spritePrompt(this.council, { nome: 'Viandante', aspetto: plan.playerPrompt, tipo: 'npc' }), []);
-          if (raw) {
-            const sprite = await this.assets.put(await this.imageTools.cutSprite(raw, 160));
-            const path = 'modules/core.player/manifest.json';
-            const man = JSON.parse(this.repo.working[path]);
-            man.appearance = { ...man.appearance, sprite, imagePrompt: plan.playerPrompt };
-            this.repo.write(path, JSON.stringify(man, null, 2) + '\n');
-          }
-        } catch (e) {
-          this.council.say('artista', 'errore', (e as Error).message);
-        }
-      }
+      const path = 'modules/core.player/manifest.json';
+      const man = JSON.parse(this.repo.working[path]);
+      man.appearance = { glyph: '@', color: '#ffffff', scale: 1.3, imagePrompt: plan.playerPrompt };
+      this.repo.write(path, JSON.stringify(man, null, 2) + '\n');
       this.applyFiles({ ...this.repo.working });
       this.clearChunks();
       const title = readBible(this.repo.working)?.titolo ?? 'nuovo universo';
       const c = this.repo.commit(`genesi: ${title}`, 'agent');
-      this.council.say('kernel', 'approva', `Genesi completata: «${title}», ${done} moduli, commit ${c.id}`);
+      this.council.say('kernel', 'approva', `Genesi completata: «${title}», ${done} moduli, ${this.content.items.size} oggetti, ${Object.keys(this.content.layouts).length} ambienti, commit ${c.id}. L'Artista ora dipinge tile e sprite.`);
       this.bus.emit('genesis:done', { title });
       return true;
     } catch (e) {
@@ -1652,7 +1881,10 @@ export class Kernel {
     this.tickCount++;
     this.updateChunks();
     this.pumpDevelopment();
-    if (!this.generationHeld) this.pumpPainting();
+    if (this.time - this.lastArtPump > 2) {
+      this.lastArtPump = this.time;
+      this.art.pump();
+    }
     this.rebuildSolids();
     this.playerComp().load = totalWeight(this.inventory(), this.itemSpec) / CARRY_CAPACITY;
     this.syncRunes();

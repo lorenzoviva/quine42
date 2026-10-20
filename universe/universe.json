@@ -8,7 +8,9 @@
     "textModel": "gemini-2.5-flash-lite",
     "imageModel": "gemini-2.5-flash-image",
     "maxText": 800,
-    "maxImages": 80,
-    "maxForges": 3
+    "maxImages": 60,
+    "maxForges": 3,
+    "animation": "sheet",
+    "maxPacks": 4
   }
 }

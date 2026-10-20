@@ -1,0 +1,121 @@
+// The content registry: items, recipes, loot tables and layouts, gathered from every module.
+// Content is mostly data (text is cheap): items arrive in packs of dozens, each with category,
+// weight, effects and tags; loot tables pick by tag, so every new pack enriches every chest.
+
+import { Rng } from './rng';
+import type { ItemDef, ItemSpec, LayoutDef, LootTable, ModuleEntry, Recipe } from './types';
+
+export const CATEGORY_GLYPHS: Record<string, string> = {
+  cibo: 'ò', bevanda: 'Ů', medicina: '+', attrezzo: '⚒', arma: '†', materiale: '▪', luce: '☼', vestiario: 'Ʌ', contenitore: '◘', varie: '•',
+};
+
+export function normName(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/\b(il|lo|la|i|gli|le|un|uno|una|di|del|della|dei|delle|da)\b/g, ' ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+export function specOf(d: ItemDef | undefined): ItemSpec | undefined {
+  if (!d) return undefined;
+  return { stackable: d.stack > 1, maxStack: Math.max(1, d.stack), weight: d.weight, equippable: !!d.equippable };
+}
+
+export class Content {
+  readonly items = new Map<string, ItemDef>();
+  recipes: Recipe[] = [];
+  loot: Record<string, LootTable> = {};
+  layouts: Record<string, LayoutDef> = {};
+  /** Which module defines each item / layout (for writing updates back). */
+  readonly itemSource = new Map<string, string>();
+
+  rebuild(modules: ModuleEntry[]): void {
+    this.items.clear();
+    this.itemSource.clear();
+    this.recipes = [];
+    this.loot = {};
+    this.layouts = {};
+    for (const m of modules) {
+      const man = m.manifest;
+      if (man.kind === 'item') {
+        const app = man.appearance;
+        this.items.set(man.id, {
+          id: man.id,
+          name: man.name,
+          description: man.description ?? '',
+          category: (man.tags?.find((t) => t in CATEGORY_GLYPHS) as ItemDef['category']) ?? 'varie',
+          weight: man.item?.weight ?? 1,
+          stack: man.item?.stackable ? man.item.maxStack : 1,
+          tags: man.tags ?? [],
+          glyph: app?.glyph ?? '?',
+          color: app?.color ?? '#aaa',
+          icon: app?.sprite,
+          equippable: man.item?.equippable,
+          module: man.id,
+        });
+        this.itemSource.set(man.id, man.id);
+      }
+      for (const it of man.items ?? []) {
+        this.items.set(it.id, { ...it, tags: [...new Set([...(it.tags ?? []), it.category])] });
+        this.itemSource.set(it.id, man.id);
+      }
+      this.recipes.push(...(man.recipes ?? []));
+      Object.assign(this.loot, man.loot ?? {});
+      Object.assign(this.layouts, man.layouts ?? {});
+    }
+  }
+
+  get(id: string): ItemDef | undefined {
+    return this.items.get(id);
+  }
+
+  /** Finds an item by a name a model or the player used ("una corda" → item.corda). */
+  byName(name: string): ItemDef | undefined {
+    const n = normName(name);
+    if (!n) return undefined;
+    let best: ItemDef | undefined;
+    for (const d of this.items.values()) {
+      const dn = normName(d.name);
+      if (dn === n) return d;
+      if (!best && (dn.includes(n) || n.includes(dn)) && Math.min(dn.length, n.length) >= 4) best = d;
+    }
+    return best;
+  }
+
+  withTag(tag: string): ItemDef[] {
+    return [...this.items.values()].filter((d) => d.tags.includes(tag) || d.category === tag);
+  }
+
+  /** Rolls a loot table: items found in a chest, a drawer, on the ground. */
+  roll(tableId: string, rng: Rng, favour: string[] = []): Array<{ item: string; count: number }> {
+    const table = this.loot[tableId] ?? this.loot.comune;
+    if (!table) return [];
+    const [lo, hi] = table.rolls;
+    const rolls = lo + rng.int(Math.max(1, hi - lo + 1));
+    const out: Array<{ item: string; count: number }> = [];
+    const entries = table.entries.filter((e) => (e.item ? this.items.has(e.item) : this.withTag(e.tag ?? '').length));
+    const total = entries.reduce((s, e) => s + e.weight, 0);
+    for (let i = 0; i < rolls && total > 0; i++) {
+      let r = rng.next() * total;
+      const e = entries.find((x) => (r -= x.weight) < 0) ?? entries[0];
+      let item = e.item;
+      if (!item) {
+        const pool = this.withTag(e.tag!);
+        // Things people talked about turn up more often, if they fit.
+        const wanted = pool.filter((d) => favour.includes(d.id));
+        item = (wanted.length && rng.chance(0.5) ? rng.pick(wanted) : rng.pick(pool)).id;
+      }
+      const min = e.min ?? 1;
+      const max = Math.max(min, e.max ?? 1);
+      out.push({ item, count: min + rng.int(max - min + 1) });
+    }
+    return out;
+  }
+
+  craftable(has: (item: string) => number): Recipe[] {
+    return this.recipes.filter((r) => r.inputs.every((i) => has(i.item) >= i.count) && (r.tools ?? []).every((t) => has(t) > 0));
+  }
+}

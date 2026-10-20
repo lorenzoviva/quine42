@@ -1,6 +1,6 @@
 // The inventory: 24 slots (the first 6 are the hotbar), weight, the held item, item details and
-// actions, and the rune hand. Drag a slot onto another to swap or combine (the Council decides),
-// drag it out of the panel to drop it in the world, drag runes to reorder the phrase.
+// actions, an open container next to it, recipes to craft, and the rune hand.
+// Drag a slot onto another to swap or combine (the Council decides), out of the window to drop it.
 
 import type { Kernel } from '../kernel/kernel';
 import type { ImageCache } from '../render/imagetools';
@@ -12,6 +12,8 @@ export class InventoryPanel {
   private root = $('#inventory');
   private sel = 0;
   private busy = '';
+  private tab: 'oggetti' | 'crea' = 'oggetti';
+  private box: number | null = null;
   onClose?: () => void;
 
   constructor(
@@ -20,11 +22,10 @@ export class InventoryPanel {
   ) {
     this.root.addEventListener('dragover', (e) => e.preventDefault());
     this.root.addEventListener('drop', (e) => {
-      // Dropped on the backdrop (outside the window): put it in the world.
       if (e.target !== this.root) return;
-      const from = Number(e.dataTransfer?.getData('slot'));
-      if (Number.isInteger(from) && e.dataTransfer?.getData('slot') !== '') {
-        this.k.dropSlot(from);
+      const raw = e.dataTransfer?.getData('slot');
+      if (raw) {
+        this.k.dropSlot(Number(raw));
         this.render();
       }
     });
@@ -32,6 +33,11 @@ export class InventoryPanel {
       if (e.target === this.root) this.close();
     });
     k.bus.on('item:picked', () => this.isOpen && this.render());
+    k.bus.on('ui:container', ({ id }: { id: number }) => {
+      this.box = id;
+      this.tab = 'oggetti';
+      this.open();
+    });
   }
 
   get isOpen(): boolean {
@@ -47,85 +53,140 @@ export class InventoryPanel {
     this.root.hidden = false;
     this.k.input.inventoryOpen = true;
     this.render();
+    this.onClose?.();
   }
 
   close(): void {
     this.root.hidden = true;
+    this.box = null;
     this.k.input.inventoryOpen = false;
     this.onClose?.();
   }
 
-  private slotAction(i: number): void {
-    this.sel = i;
-    this.render();
+  private grid(slots: Array<{ item: string; count: number } | null>, opts: { hotbar?: boolean; held?: number | null; sel?: number; onClick: (i: number) => void; onDbl?: (i: number) => void; drag?: string; onDrop?: (from: number, to: number) => void }): HTMLElement {
+    const grid = el('div', { class: 'grid' });
+    slots.forEach((s, i) => {
+      const cell = el('div', { class: `cell${i === opts.sel ? ' sel' : ''}${opts.held === i ? ' held' : ''}${opts.hotbar && i < HOTBAR ? ' hotbar' : ''}`, draggable: s && opts.drag ? 'true' : 'false' });
+      if (opts.hotbar && i < HOTBAR) cell.append(el('span', { class: 'n' }, String(i + 1)));
+      if (s) {
+        cell.append(itemIcon(this.k, this.images, s.item, 38));
+        if (s.count > 1) cell.append(el('span', { class: 'count' }, String(s.count)));
+        cell.title = this.k.itemInfo(s.item).name;
+      }
+      cell.onclick = () => opts.onClick(i);
+      if (opts.onDbl) cell.ondblclick = () => opts.onDbl!(i);
+      if (opts.drag) {
+        cell.ondragstart = (e) => e.dataTransfer?.setData(opts.drag!, String(i));
+        cell.ondragover = (e) => e.preventDefault();
+        cell.ondrop = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const raw = e.dataTransfer?.getData(opts.drag!);
+          if (raw && opts.onDrop) opts.onDrop(Number(raw), i);
+        };
+      }
+      grid.append(cell);
+    });
+    return grid;
   }
 
   render(): void {
     const k = this.k;
     const inv = k.inventory();
-    const lookup = (id: string) => k.itemInfo(id).spec;
-    const weight = totalWeight(inv, lookup);
+    const weight = totalWeight(inv, (id) => k.itemInfo(id).spec);
+    const box = this.box !== null ? k.container(this.box) : undefined;
 
-    const grid = el('div', { class: 'grid' });
-    inv.slots.forEach((s, i) => {
-      const cell = el('div', { class: `cell${i === this.sel ? ' sel' : ''}${inv.equipped === i ? ' held' : ''}${i < HOTBAR ? ' hotbar' : ''}`, draggable: s ? 'true' : 'false' });
-      if (i < HOTBAR) cell.append(el('span', { class: 'n' }, String(i + 1)));
-      if (s) {
-        cell.append(itemIcon(k, this.images, s.item, 40));
-        if (s.count > 1) cell.append(el('span', { class: 'count' }, String(s.count)));
-        cell.title = k.itemInfo(s.item).name;
-      }
-      cell.onclick = () => this.slotAction(i);
-      cell.ondblclick = () => {
-        if (s) k.useSlot(i);
+    const mine = this.grid(inv.slots, {
+      hotbar: true,
+      held: inv.equipped,
+      sel: this.sel,
+      drag: 'slot',
+      onClick: (i) => {
+        if (box && inv.slots[i]) k.putIntoContainer(this.box!, i);
+        else this.sel = i;
         this.render();
-      };
-      cell.ondragstart = (e) => e.dataTransfer?.setData('slot', String(i));
-      cell.ondragover = (e) => e.preventDefault();
-      cell.ondrop = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const from = Number(e.dataTransfer?.getData('slot'));
-        if (!Number.isInteger(from) || from === i) return;
+      },
+      onDbl: (i) => {
+        if (!box && inv.slots[i]) k.useSlot(i);
+        this.render();
+      },
+      onDrop: (from, to) => {
         const a = inv.slots[from];
-        const b = inv.slots[i];
-        if (a && b && a.item !== b.item) this.askCombine(from, i);
+        const b = inv.slots[to];
+        if (a && b && a.item !== b.item) this.askCombine(from, to);
         else {
-          k.moveSlot(from, i);
-          this.sel = i;
+          k.moveSlot(from, to);
+          this.sel = to;
           this.render();
         }
-      };
-      grid.append(cell);
+      },
     });
 
-    const s = inv.slots[this.sel];
-    const details = el('div', { class: 'details' });
-    if (s) {
-      const info = k.itemInfo(s.item);
-      const actions = el('div', { class: 'actions' });
-      const btn = (label: string, fn: () => void, cls = '') => {
-        const b = el('button', { class: cls }, label);
-        b.onclick = () => {
-          fn();
-          this.render();
-        };
-        actions.append(b);
+    const side = el('div', { class: 'details' });
+    if (box) {
+      const take = el('button', { class: 'primary' }, 'Prendi tutto');
+      take.onclick = () => {
+        box.inv.slots.forEach((s, i) => s && k.takeFromContainer(this.box!, i));
+        this.render();
       };
-      if (k.sandbox.has(s.item, 'on_use')) btn('Usa', () => k.useSlot(this.sel), 'primary');
-      if (info.spec.equippable) btn(inv.equipped === this.sel ? 'Riponi' : 'Impugna', () => k.equipSlot(this.sel), 'primary');
-      btn('Getta', () => k.dropSlot(this.sel));
-      if (s.count > 1) btn('Getta 1', () => k.dropSlot(this.sel, 1));
-      details.append(
-        el('div', { class: 'big' }, itemIcon(k, this.images, s.item, 96)),
-        el('div', { class: 'name' }, `${info.name}${s.count > 1 ? ` ×${s.count}` : ''}`),
-        el('div', { class: 'descr' }, info.description),
-        el('div', { class: 'props' }, `peso ${info.spec.weight}${info.spec.stackable ? ` · pila fino a ${info.spec.maxStack}` : ''}${info.spec.equippable ? ' · si impugna (F)' : ''}`),
-        ...Object.entries(info.spec.controls ?? {}).map(([a, d]) => el('div', { class: 'control' }, el('b', {}, a), ' ', d)),
-        actions,
+      side.append(
+        el('div', { class: 'name' }, k.nameOf(this.box!)),
+        el('div', { class: 'descr' }, box.inv.slots.some(Boolean) ? 'Clic su un oggetto per prenderlo; clic sui tuoi per riporli qui.' : 'Vuoto.'),
+        this.grid(box.inv.slots, { onClick: (i) => (k.takeFromContainer(this.box!, i), this.render()) }),
+        take,
       );
-    } else details.append(el('div', { class: 'empty' }, 'Slot vuoto. Trascina un oggetto su un altro per scambiarli o combinarli; fuori dalla finestra per posarlo.'));
-    if (this.busy) details.append(el('div', { class: 'busy' }, this.busy));
+    } else if (this.tab === 'crea') {
+      const { available, all } = k.recipes();
+      const sorted = [...all].sort((a, b) => Number(available.has(b.id)) - Number(available.has(a.id)));
+      side.append(
+        el('div', { class: 'name' }, 'Ricette'),
+        ...(sorted.length
+          ? sorted.map((r) => {
+              const ok = available.has(r.id);
+              const btn = el('button', { class: ok ? 'primary' : '' }, 'Crea');
+              if (!ok) btn.setAttribute('disabled', '');
+              btn.onclick = () => {
+                k.craft(r.id);
+                this.render();
+              };
+              const parts = r.inputs.map((i) => `${k.itemInfo(i.item).name} ×${i.count}`).join(' + ');
+              const tools = r.tools?.length ? ` (con ${r.tools.map((t) => k.itemInfo(t).name).join(', ')})` : '';
+              return el('div', { class: `recipe${ok ? ' ok' : ''}` }, el('div', {}, el('b', {}, k.itemInfo(r.output.item).name), r.output.count > 1 ? ` ×${r.output.count}` : ''), el('div', { class: 'parts' }, parts + tools), btn);
+            })
+          : [el('div', { class: 'empty' }, 'Nessuna ricetta conosciuta.')]),
+      );
+    } else {
+      const s = inv.slots[this.sel];
+      if (s) {
+        const info = k.itemInfo(s.item);
+        const actions = el('div', { class: 'actions' });
+        const btn = (label: string, fn: () => void, cls = '') => {
+          const b = el('button', { class: cls }, label);
+          b.onclick = () => {
+            fn();
+            this.render();
+          };
+          actions.append(b);
+        };
+        const usable = !!info.effects || ['cibo', 'bevanda', 'medicina', 'luce', 'vestiario'].includes(info.category) || k.sandbox.has(k.content.get(s.item)?.module ?? '', 'on_use');
+        if (usable) btn(info.category === 'cibo' ? 'Mangia' : info.category === 'bevanda' ? 'Bevi' : 'Usa', () => k.useSlot(this.sel), 'primary');
+        if (info.spec.equippable) btn(inv.equipped === this.sel ? 'Riponi' : 'Impugna', () => k.equipSlot(this.sel), 'primary');
+        btn('Getta', () => k.dropSlot(this.sel));
+        if (s.count > 1) btn('Getta 1', () => k.dropSlot(this.sel, 1));
+        const e = info.effects ?? {};
+        const effects = [e.hunger && `fame ${e.hunger > 0 ? '+' : ''}${e.hunger}`, e.thirst && `sete ${e.thirst > 0 ? '+' : ''}${e.thirst}`, e.energy && `energia ${e.energy > 0 ? '+' : ''}${e.energy}`, e.health && `salute ${e.health > 0 ? '+' : ''}${e.health}`].filter(Boolean).join(' · ');
+        side.append(
+          el('div', { class: 'big' }, itemIcon(k, this.images, s.item, 96)),
+          el('div', { class: 'name' }, `${info.name}${s.count > 1 ? ` ×${s.count}` : ''}`),
+          el('div', { class: 'descr' }, info.description),
+          el('div', { class: 'props' }, `${info.category} · peso ${info.spec.weight}${info.spec.stackable ? ` · pila fino a ${info.spec.maxStack}` : ''}${info.spec.equippable ? ' · si impugna (F)' : ''}`),
+          effects ? el('div', { class: 'control' }, effects) : '',
+          info.tags.length ? el('div', { class: 'props' }, info.tags.join(', ')) : '',
+          actions,
+        );
+      } else side.append(el('div', { class: 'empty' }, 'Slot vuoto. Trascina un oggetto su un altro per scambiarli o combinarli; fuori dalla finestra per posarlo. Doppio clic per usare.'));
+    }
+    if (this.busy) side.append(el('div', { class: 'busy' }, this.busy));
 
     const hand = k.hand();
     const runes = el('div', { class: 'runes' });
@@ -136,8 +197,8 @@ export class InventoryPanel {
       r.ondrop = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        const from = Number(e.dataTransfer?.getData('rune'));
-        if (Number.isInteger(from)) k.moveRune(from, i);
+        const raw = e.dataTransfer?.getData('rune');
+        if (raw) k.moveRune(Number(raw), i);
         this.render();
       };
       r.onclick = () => {
@@ -152,13 +213,23 @@ export class InventoryPanel {
       this.render();
     };
 
+    const tabs = el('div', { class: 'tabs' });
+    for (const [id, label] of [['oggetti', 'Oggetti'], ['crea', `Crea (${k.recipes().available.size})`]] as const) {
+      const b = el('button', { class: this.tab === id && !box ? 'on' : '' }, label);
+      b.onclick = () => {
+        this.tab = id;
+        this.box = null;
+        this.render();
+      };
+      tabs.append(b);
+    }
     const over = weight > CARRY_CAPACITY;
     this.root.replaceChildren(
       el(
         'div',
         { class: 'window' },
-        el('div', { class: 'head' }, el('span', { class: 'title' }, 'Inventario'), el('span', { class: `weight${over ? ' over' : ''}` }, `peso ${Math.round(weight * 10) / 10} / ${CARRY_CAPACITY}${over ? ' — sei appesantito' : ''}`), el('span', { class: 'hint' }, 'I / Tab per chiudere')),
-        el('div', { class: 'body' }, grid, details),
+        el('div', { class: 'head' }, el('span', { class: 'title' }, 'Inventario'), tabs, el('span', { class: `weight${over ? ' over' : ''}` }, `peso ${Math.round(weight * 10) / 10} / ${CARRY_CAPACITY}${over ? ' — appesantito' : ''}`), el('span', { class: 'hint' }, 'I / Tab per chiudere')),
+        el('div', { class: 'body' }, mine, side),
         el('div', { class: 'runebar' }, el('div', { class: 'label' }, 'Rune in mano — trascinale per comporre la frase'), hand.tokens.length ? runes : el('div', { class: 'empty' }, 'nessuna runa'), hand.tokens.length ? inscribe : ''),
       ),
     );
@@ -178,8 +249,7 @@ export class InventoryPanel {
     combine.onclick = async () => {
       this.busy = 'Il Concilio valuta la combinazione…';
       this.render();
-      const out = await this.k.combine(a, b);
-      this.busy = out;
+      this.busy = await this.k.combine(a, b);
       this.render();
       setTimeout(() => {
         this.busy = '';

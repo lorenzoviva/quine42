@@ -12,6 +12,7 @@
     <div id="hud">
       <div id="place"></div>
       <div id="zone" hidden></div>
+      <div id="needs"></div>
       <div id="faults" hidden></div>
       <div id="messages"></div>
       <div id="dialog" hidden></div>
@@ -23,7 +24,8 @@
           <span><kbd>E</kbd> raccogli · parla · usa</span>
           <span><kbd>I</kbd> inventario</span>
           <span><kbd>1</kbd>–<kbd>6</kbd> impugna/usa</span>
-          <span><kbd>F</kbd> azione</span>
+          <span><kbd>F</kbd> usa ciò che impugni</span>
+          <span><kbd>V</kbd> calpestabile</span>
           <span><kbd>Q</kbd> incidi le rune</span>
           <span><kbd>R</kbd> rollback</span>
           <span><kbd>F1</kbd> aiuto</span>
@@ -42,8 +44,9 @@
       <p>Le lettere luminose nel terreno sono <b>rune</b>: frammenti veri del codice. Ciò che è scritto sul tappeto <b>si esegue</b>, sempre.
         Rune che si toccano in orizzontale formano una riga di Lua. Passa il mouse su una runa per leggerne il valore.</p>
       <ul>
-        <li><kbd>E</kbd> raccoglie rune e oggetti, parla con le persone (scrivi liberamente), legge, usa.</li>
-        <li><kbd>I</kbd> apre l'inventario: trascina per riordinare, su un altro oggetto per scambiare o <b>combinare</b>, fuori dalla finestra per posare.</li>
+        <li><kbd>E</kbd> raccoglie rune e oggetti; davanti a cose e persone apre il menu: parlare (scrivi liberamente), aprire mobili e casse, esaminare, fare ciò che quell'oggetto permette.</li>
+        <li>Fame, sete ed energia calano: mangia, bevi, dormi. <kbd>V</kbd> mostra in rosso ciò che non si può attraversare.</li>
+        <li><kbd>I</kbd> apre l'inventario: trascina per riordinare, su un altro oggetto per scambiare o <b>combinare</b>, fuori dalla finestra per posare. La scheda <b>Crea</b> mostra le ricette.</li>
         <li><kbd>1</kbd>–<kbd>6</kbd> impugnano (o usano) gli oggetti della prima riga; <kbd>F</kbd> usa ciò che impugni su ciò che hai davanti.</li>
         <li><kbd>Q</kbd> incide sul tappeto, davanti a te, tutte le rune che hai in mano, in ordine. <kbd>Z</kbd>/<kbd>C</kbd> le scelgono, con <kbd>⇧</kbd> le spostano.</li>
         <li>Una riga che non ha senso <b>spezza la simulazione</b>. Rimetti a posto le rune, o premi <kbd>R</kbd>: il mondo torna all'ultimo commit valido.</li>
@@ -53,6 +56,7 @@
       <p class="dim"><kbd>G</kbd> mostra/nasconde il Concilio. Esc chiude.</p>
     </div>
 
+    <div id="actions" hidden></div>
     <div id="inventory" hidden></div>
     <div id="chat" hidden></div>
     <div id="genesis" hidden></div>

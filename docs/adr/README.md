@@ -12,8 +12,11 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0005](0005-gateway-ia-e-validazione.md) | Gateway IA e validazione | sostituito da 0008 |
 | [0006](0006-versionamento.md) | Versionamento dell'universo | accettato |
 | [0007](0007-universo-di-prova-e-rottura.md) | Universo di prova, resa grafica e stato "rotto" | in parte sostituito da 0008 (resa a glifi) |
-| [0008](0008-concilio-degli-agenti-e-gemini.md) | Il Concilio degli agenti e Google Gemini | accettato |
+| [0008](0008-concilio-degli-agenti-e-gemini.md) | Il Concilio degli agenti e Google Gemini | accettato; la pittura per chunk è sostituita da 0011 |
 | [0009](0009-corona-nascosta.md) | La corona è davvero nascosta finché il tappeto ti tiene | accettato |
 | [0010](0010-oggetti-inventario-personaggi.md) | Oggetti, inventario e personaggi simulati | accettato |
+| [0011](0011-tile-e-layout-markovjunior.md) | Mappe a tile e layout con regole stile MarkovJunior | accettato |
+| [0012](0012-contenuti-guidati-dai-dati.md) | Contenuti guidati dai dati: oggetti, bottino, ricette, bisogni, azioni | accettato |
+| [0013](0013-atelier-e-individui.md) | L'Atelier (immagini in contesto) e gli NPC come individui | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

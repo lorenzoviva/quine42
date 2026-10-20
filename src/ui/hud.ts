@@ -27,6 +27,8 @@ export class Hud {
   private tip = $('#tooltip');
   private banner = $('#banner');
   private zone = $('#zone');
+  private needsEl = $('#needs');
+  private lastNeeds = '';
   private lastPlace = '';
   private lastHand = '';
   private lastHot = '';
@@ -119,6 +121,16 @@ export class Hud {
           return cell;
         }),
       );
+    }
+
+    const n = k.needs();
+    if (n) {
+      const bars: Array<[string, number, string]> = [['fame', n.hunger, '#e0a040'], ['sete', n.thirst, '#4aa8e8'], ['energia', n.energy, '#c0d860'], ['salute', n.health, '#e85060']];
+      const key = bars.map((b) => Math.round(b[1])).join(',');
+      if (key !== this.lastNeeds) {
+        this.lastNeeds = key;
+        this.needsEl.replaceChildren(...bars.map(([label, v, color]) => el('div', { class: `need${v < 25 ? ' low' : ''}`, title: `${label} ${Math.round(v)}` }, el('span', { class: 'l' }, label), el('span', { class: 'bar' }, el('span', { class: 'fill', style: `width:${Math.max(0, Math.min(100, v))}%;background:${color}` })))));
+      }
     }
 
     const faults = k.faults.list();

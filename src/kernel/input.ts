@@ -5,7 +5,7 @@ export type Action =
   | 'interact' | 'inscribe' | 'drop' | 'rollback'
   | 'prev' | 'next' | 'movePrev' | 'moveNext'
   | 'help' | 'console' | 'escape'
-  | 'inventory' | 'action' | 'feed'
+  | 'inventory' | 'action' | 'feed' | 'walk'
   | 'hot1' | 'hot2' | 'hot3' | 'hot4' | 'hot5' | 'hot6';
 
 const HOLD: Record<string, Action> = {
@@ -28,6 +28,7 @@ const PRESS: Record<string, Action> = {
   KeyI: 'inventory', Tab: 'inventory',
   KeyF: 'action',
   KeyG: 'feed',
+  KeyV: 'walk',
   Digit1: 'hot1', Digit2: 'hot2', Digit3: 'hot3', Digit4: 'hot4', Digit5: 'hot5', Digit6: 'hot6',
 };
 

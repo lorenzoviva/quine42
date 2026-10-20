@@ -10,7 +10,8 @@ componenti (`ecs.get(id, "nome")` restituisce una tabella modificabile).
 
 Funzioni che il kernel chiama, se presenti:
 - `M.on_spawn(id)` quando l'entità nasce.
-- `M.on_interact(id, user)` quando il viandante interagisce (E) con l'oggetto: restituisci il testo da mostrare.
+- `M.on_act(id, user, action)` quando il viandante sceglie una delle "azioni" dell'oggetto dal menu (E): `action` è l'id dell'azione. Restituisci il testo da mostrare. Esempio: dormire → `local n = ecs.get(user, "needs"); n.energy = 100`.
+- `M.on_interact(id, user)` per oggetti con un'unica interazione: restituisci il testo da mostrare.
 - `M.on_use(user, item)` quando il viandante usa lo strumento dall'inventario: restituisci il testo. Per consumarlo: `inventory.remove(user, item, 1)`.
 - `M.on_action(user, target, item)` quando lo strumento è impugnato e il viandante preme F; `target` è l'entità davanti a lui o `nil`. Restituisci il testo.
 - `M.update(dt)` solo per i sistemi.
@@ -24,7 +25,9 @@ Funzioni che il kernel chiama, se presenti:
 - `world.has_tag(id, tag)`, `world.break_entity(id)` (la distrugge e lascia cadere i suoi "drops")
 - `world.tile(x, y)` codice del terreno; `world.speed_at(x, y)`; `world.free(x, y, r)`
 - `world.say(testo)` messaggio al viandante; `world.speak(id, testo)` fumetto sopra un'entità
-- `inventory.add(id, modulo, n)`, `inventory.remove(id, modulo, n)`, `inventory.count(id, modulo)`, `inventory.equipped(id)`
+- `inventory.add(id, oggetto, n)`, `inventory.remove(id, oggetto, n)`, `inventory.count(id, oggetto)`, `inventory.equipped(id)` (gli oggetti sono id come "item.corda")
+- `items.find(nome)` id dell'oggetto con quel nome (o `nil`); `items.def(id)` → `{name=, category=, weight=, tags=}`
+- Bisogni del viandante: `ecs.get(user, "needs")` → `{hunger=, thirst=, energy=, health=}` da 0 a 100 (modificabili)
 - `input.held(azione)`, `bus.emit(nome, dati)`, `log(...)`, `hash(a, b, c, d)` (deterministico, 0..1), `time`
 - `math`, `string`, `table`, `utf8`, `pairs`, `ipairs`, `tostring`, `tonumber`, `type`, `pcall`
 

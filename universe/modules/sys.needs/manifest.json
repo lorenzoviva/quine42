@@ -1,0 +1,9 @@
+{
+  "id": "sys.needs",
+  "name": "Bisogni",
+  "kind": "system",
+  "version": "0.1.0",
+  "description": "Fame, sete ed energia calano col tempo; se fame o sete arrivano a zero cala la salute. A zero salute il viandante sviene e la simulazione lo rimette in piedi.",
+  "logic": "logic.lua",
+  "order": 40
+}

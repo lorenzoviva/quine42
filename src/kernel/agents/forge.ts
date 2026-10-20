@@ -11,6 +11,7 @@ import type { Schema } from '../ai/models';
 import { hashStr } from '../rng';
 import type { Manifest } from '../types';
 import { AGENTS, type AgentId, type Council } from './council';
+import { Atelier, type StylePair } from './atelier';
 
 export type ForgeOrigin = 'genesi' | 'agente' | 'cartografo' | 'combinazione';
 
@@ -21,6 +22,8 @@ export interface ForgeRequest {
   paletteCodes: string[];
   /** Restrict the kind (e.g. combinations always produce items). */
   kind?: 'npc' | 'oggetto' | 'strumento';
+  /** False when the kernel's ArtDirector will paint the sprite later (few-shot, with walk cycle). */
+  paint?: boolean;
 }
 
 export interface Concept {
@@ -34,6 +37,9 @@ export interface Concept {
   comandi: Array<{ azione: string; descrizione: string }>;
   persona?: string;
   unico?: boolean;
+  azioni?: Array<{ id: string; etichetta: string; richiede?: string }>;
+  contenitore?: { capienza: number; bottino: string };
+  porta?: string[];
   tags: string[];
 }
 
@@ -86,6 +92,18 @@ const CONCEPT_SCHEMA: Schema = {
     comandi: { type: 'ARRAY', items: { type: 'OBJECT', properties: { azione: { type: 'STRING', enum: ['usa', 'azione'] }, descrizione: { type: 'STRING' } }, required: ['azione', 'descrizione'] } },
     persona: { type: 'STRING' },
     unico: { type: 'BOOLEAN', description: 'true per un individuo con un nome (esiste una sola volta nel mondo), false per animali, oggetti comuni, cose che si ripetono' },
+    azioni: {
+      type: 'ARRAY',
+      description: 'per un oggetto: cosa ci si può fare (voci del menu), es. {id:"attingi", etichetta:"Attingi acqua", richiede:"secchio"}',
+      items: { type: 'OBJECT', properties: { id: { type: 'STRING' }, etichetta: { type: 'STRING' }, richiede: { type: 'STRING' } }, required: ['id', 'etichetta'] },
+    },
+    contenitore: {
+      type: 'OBJECT',
+      description: 'per mobili e casse: quanti posti e quale tabella di bottino (cucina, cassa, bottega, comune…)',
+      properties: { capienza: { type: 'INTEGER' }, bottino: { type: 'STRING' } },
+      required: ['capienza', 'bottino'],
+    },
+    porta: { type: 'ARRAY', items: { type: 'STRING' }, description: 'per un npc: oggetti che porta con sé' },
     tags: { type: 'ARRAY', items: { type: 'STRING' } },
   },
   required: ['nome', 'tipo', 'descrizione', 'lore', 'aspetto', 'contesto', 'interazione', 'comandi', 'tags'],
@@ -151,7 +169,8 @@ export function moduleId(concept: Concept, existing: string[]): string {
 /** Hooks a module must define, given what the concept promises. */
 export function requiredHooks(concept: Concept): string[] {
   const hooks = new Set<string>();
-  if (concept.tipo === 'oggetto' && concept.interazione === 'usa') hooks.add('on_interact');
+  if (concept.tipo === 'oggetto' && concept.azioni?.length) hooks.add('on_act');
+  else if (concept.tipo === 'oggetto' && concept.interazione === 'usa') hooks.add('on_interact');
   if (concept.tipo === 'strumento') {
     for (const c of concept.comandi) hooks.add(c.azione === 'usa' ? 'on_use' : 'on_action');
   }
@@ -210,12 +229,15 @@ export function assembleManifest(id: string, concept: Concept, physics: PhysicsS
       controls: Object.fromEntries((concept.comandi ?? []).map((c) => [c.azione, c.descrizione])),
     };
   } else if (concept.interazione === 'leggi') m.interaction = { type: 'read' };
-  else if (concept.interazione === 'usa') m.interaction = { type: 'lua' };
+  else if (concept.interazione === 'usa' && !concept.azioni?.length) m.interaction = { type: 'lua' };
+  if (concept.tipo === 'oggetto' && concept.azioni?.length)
+    m.actions = concept.azioni.slice(0, 6).map((a) => ({ id: slug(a.id || a.etichetta), label: String(a.etichetta).slice(0, 40), ...(a.richiede ? { requires: String(a.richiede) } : {}) }));
+  if (concept.tipo === 'oggetto' && concept.contenitore) m.container = { size: Math.round(clamp(concept.contenitore.capienza, 2, 16, 6)), loot: slug(concept.contenitore.bottino || 'comune') };
   if (m.physics!.pushable) m.components!.vel = { x: 0, y: 0 };
   return m;
 }
 
-export async function forge(c: Council, req: ForgeRequest, validate: ModuleValidator): Promise<ForgeResult> {
+export async function forge(c: Council, req: ForgeRequest, validate: ModuleValidator, art?: { examples: StylePair[] }): Promise<ForgeResult> {
   const data = { request: req };
   const codes = req.paletteCodes.join(', ');
 
@@ -227,7 +249,8 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
         `Richiesta (${req.origin}): ${req.prompt}`,
         req.kind ? `Deve essere di tipo "${req.kind}".` : 'Scegli il tipo: npc (persona simulata), oggetto (sta nel mondo, inerte o interattivo), strumento (si raccoglie e va nell\'inventario).',
         `Terreni validi per "contesto.terreni": ${codes}. "rarita" tra 0.02 e 0.5.`,
-        'Per un npc scrivi in "persona" la scheda del personaggio: chi è, come parla, cosa vuole, cosa sa del mondo (e delle sue crepe), cosa porta con sé.',
+        'Per un npc scrivi in "persona" la scheda del tipo di personaggio (ogni individuo avrà poi nome e storia propri): come parla, cosa vuole, cosa sa del mondo (e delle sue crepe); in "porta" 3-6 oggetti comuni del suo mestiere.',
+        'Per un oggetto: in "azioni" 1-4 cose concrete che ci si può fare (aprire, sedersi, attingere, dormire, accendere, pregare…), con "richiede" se serve uno strumento; se è un mobile che contiene cose, "contenitore" con capienza e tabella di bottino (cucina, cassa, bottega, comune, contadino).',
         'Per uno strumento elenca in "comandi" al massimo due voci: "usa" = effetto su chi lo usa o consumo (mangiare, bere, leggere, accendere); "azione" = effetto su ciò che il viandante ha davanti (tagliare, colpire, aprire, scavare).',
         'Non creare moduli per elementi del terreno (sentieri, fiumi, ponti, muri, prati): quelli sono la mappa del Cartografo. Crea cose concrete che stanno sul terreno.',
         feedback && `L'Arbitro ha obiettato: ${feedback}`,
@@ -317,9 +340,9 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
   }
 
   let sprite: string | null = null;
-  if (c.models.canPaint) {
-    c.say('artista', 'dipinge', `«${concept.nome}»: ${concept.aspetto}`);
-    sprite = await c.paint('forge.sprite', spritePrompt(c, concept), [], { concept }).catch((e: Error) => {
+  if (c.models.canPaint && req.paint !== false) {
+    c.say('artista', 'dipinge', `«${concept.nome}»: ${concept.aspetto}${art?.examples.length ? ` (sullo stile di ${art.examples.length} esempi)` : ''}`);
+    sprite = await new Atelier(c).sprite(`${concept.nome}: ${concept.aspetto}`, concept.tipo, art?.examples ?? []).catch((e: Error) => {
       c.say('artista', 'errore', e.message);
       return null;
     });

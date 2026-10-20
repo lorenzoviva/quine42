@@ -42,6 +42,9 @@ export interface Host {
   inv_remove(id: number, item: string, n: number): number;
   inv_count(id: number, item: string): number;
   inv_equipped(id: number): string | undefined;
+  item_find(name: string): string | undefined;
+  /** A copy of an item definition (name, category, weight, tags, effects). */
+  item_def(id: string): unknown;
 }
 
 interface KernelLua {
