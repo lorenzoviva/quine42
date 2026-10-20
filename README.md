@@ -28,8 +28,8 @@ npm test
 ```
 
 Al primo avvio con Gemini parte la **Genesi**: descrivi il mondo che vuoi e il Concilio lo crea in circa
-un minuto (~60 chiamate a `gemini-2.5-flash-lite`); poi l'Artista dipinge a lotti texture, sprite e
-icone (~15-25 immagini con `gemini-2.5-flash-image` per tutto il mondo, riusate ovunque). Il testo costa
+un minuto (~60 chiamate a `gemini-3.1-flash-lite`); poi l'Artista dipinge a lotti texture, sprite e
+icone (~15-25 immagini con `gemini-3.1-flash-lite-image` per tutto il mondo, riusate ovunque). Il testo costa
 poco: il mondo continua a crescere di oggetti e ricette mentre esplori. La chiave resta sul server di sviluppo: il browser
 parla con un proxy locale. Senza chiave (o con `?offline`) i luoghi sono abbozzati e gli agenti rispondono
 con un modello locale.

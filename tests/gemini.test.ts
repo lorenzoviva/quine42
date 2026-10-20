@@ -20,10 +20,10 @@ const textOk = (text: string) => ({ status: 200, body: { candidates: [{ content:
 describe('GeminiModels', () => {
   it('sends system prompt, images and JSON schema through the proxy, and counts usage', async () => {
     const { calls, impl } = fakeFetch([textOk('{"a":1}')]);
-    const g = new GeminiModels({ textModel: 'gemini-2.5-flash-lite', imageModel: 'gemini-2.5-flash-image', limits: { text: 5, images: 5 }, fetchImpl: impl });
+    const g = new GeminiModels({ textModel: 'gemini-3.1-flash-lite', imageModel: 'gemini-3.1-flash-lite-image', limits: { text: 5, images: 5 }, fetchImpl: impl });
     const out = await g.text({ agent: 'fisico', task: 't', system: 'sei il fisico', prompt: 'ciao', schema: { type: 'OBJECT', properties: { a: { type: 'NUMBER' } } }, images: ['data:image/png;base64,QUJD'] });
     expect(out).toBe('{"a":1}');
-    expect(calls[0].url).toBe('/api/gemini/models/gemini-2.5-flash-lite:generateContent');
+    expect(calls[0].url).toBe('/api/gemini/models/gemini-3.1-flash-lite:generateContent');
     expect(calls[0].body.systemInstruction.parts[0].text).toBe('sei il fisico');
     expect(calls[0].body.contents[0].parts[1].inlineData).toEqual({ mimeType: 'image/png', data: 'QUJD' });
     expect(calls[0].body.generationConfig.responseMimeType).toBe('application/json');
@@ -35,7 +35,7 @@ describe('GeminiModels', () => {
       { status: 429, body: { error: { message: 'slow down' } } },
       { status: 200, body: { candidates: [{ content: { parts: [{ inlineData: { mimeType: 'image/png', data: 'AAA' } }] } }] } },
     ]);
-    const g = new GeminiModels({ textModel: 't', imageModel: 'gemini-2.5-flash-image', limits: { text: 5, images: 5 }, fetchImpl: impl });
+    const g = new GeminiModels({ textModel: 't', imageModel: 'gemini-3.1-flash-lite-image', limits: { text: 5, images: 5 }, fetchImpl: impl });
     expect(await g.image({ agent: 'artista', task: 'p', prompt: 'x' })).toBe('data:image/png;base64,AAA');
     expect(calls.length).toBe(2);
     expect(calls[1].body.generationConfig.responseModalities).toEqual(['IMAGE']);

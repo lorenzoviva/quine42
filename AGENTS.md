@@ -46,7 +46,7 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
 
 - **Vite 5 + TypeScript 5** (strict), Canvas 2D per il mondo, DOM per HUD/pannelli.
 - **Lua 5.4 via wasmoon** (WebAssembly), sandbox gestita dal kernel.
-- **Google Gemini**: `gemini-2.5-flash-lite` (testo) e `gemini-2.5-flash-image` (immagini), in
+- **Google Gemini**: `gemini-3.1-flash-lite` (testo) e `gemini-3.1-flash-lite-image` (immagini), in
   `universe/universe.json → ai` con i budget (`maxText`, `maxImages`, `maxForges`, `maxPacks`, `animation`).
 - **Vitest** in Node con modelli offline (`MockModels`): kernel, Concilio e layout testabili headless.
 - Persistenza: `localStorage` (repository), IndexedDB (immagini e piani dei luoghi).
