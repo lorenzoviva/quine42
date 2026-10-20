@@ -169,6 +169,10 @@ export class InventoryPanel {
       const sorted = [...all].sort((a, b) => Number(available.has(b.id)) - Number(available.has(a.id)));
       side.append(
         el('div', { class: 'name' }, 'Ricette'),
+        this.freeLine('Altro… cosa vuoi fabbricare con ciò che porti?', 'Il Concilio valuta…', async (text) => {
+          const r = await k.freeCraft(text);
+          return r.story;
+        }),
         ...(sorted.length
           ? sorted.map((r) => {
               const ok = available.has(r.id);
@@ -204,6 +208,7 @@ export class InventoryPanel {
         if (isRune) btn('Aggiungi alla frase', () => k.composeRune(s.item.slice(5)), 'primary');
         if (usable) btn(info.category === 'cibo' ? 'Mangia' : info.category === 'bevanda' ? 'Bevi' : info.category === 'magia' ? 'Assorbi' : 'Usa', () => k.useSlot(this.sel), 'primary');
         if (info.spec.equippable) btn(inv.equipped === this.sel ? 'Riponi' : 'Impugna', () => k.equipSlot(this.sel), 'primary');
+        for (const a of def?.actions ?? []) if (a.effects?.length) btn(a.label, () => k.itemAct(this.sel, a.id), 'primary');
         btn('Getta', () => k.dropSlot(this.sel));
         if (s.count > 1) btn('Getta 1', () => k.dropSlot(this.sel, 1));
         const e = info.effects ?? {};
@@ -216,6 +221,7 @@ export class InventoryPanel {
           effects ? el('div', { class: 'control' }, effects) : '',
           info.tags.length ? el('div', { class: 'props' }, info.tags.join(', ')) : '',
           actions,
+          this.freeLine(`Altro… cosa fai con ${info.name.toLowerCase()}?`, 'Il Concilio valuta…', (text) => k.freeItemAction(this.sel, text)),
         );
       } else side.append(el('div', { class: 'empty' }, 'Slot vuoto. Trascina un oggetto su un altro per scambiarli o combinarli; fuori dalla finestra per posarlo. Doppio clic per usare.'));
     }
@@ -283,6 +289,28 @@ export class InventoryPanel {
         ),
       ),
     );
+  }
+
+  /** A line where the player writes something for the Council to judge; the answer stays below it. */
+  private freeLine(placeholder: string, waiting: string, run: (text: string) => Promise<string>): HTMLElement {
+    const input = el('input', { type: 'text', placeholder, maxlength: '160', class: 'free' }) as HTMLInputElement;
+    const out = el('div', { class: 'reason' });
+    input.addEventListener('keydown', (e) => {
+      e.stopPropagation();
+      if (e.key !== 'Enter' || !input.value.trim()) return;
+      const text = input.value;
+      input.disabled = true;
+      out.textContent = waiting;
+      void run(text).then((story) => {
+        this.busy = story;
+        this.render();
+        setTimeout(() => {
+          this.busy = '';
+          if (this.isOpen) this.render();
+        }, 8000);
+      });
+    });
+    return el('div', { class: 'freeline' }, input, out);
   }
 
   private askCombine(a: number, b: number): void {

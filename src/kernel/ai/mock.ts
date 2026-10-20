@@ -180,6 +180,13 @@ export class MockModels implements Models {
       }
       case 'action.judge':
         return this.judgeAction(d);
+      case 'craft.free': {
+        // An honest craftsman: one thing you carry becomes what you ask for, unless it is a marvel.
+        const carrying: string[] = (d.carrying ?? []).map((c: string) => c.replace(/ ×\d+$/, '')).filter((c: string) => !/^Runa|Borsa/.test(c));
+        const t = String(d.text ?? '');
+        if (!carrying.length || /drago|oro|stella|magia/i.test(t)) return { possibile: false, racconto: `Con quello che hai non puoi fare ${t}.` };
+        return { possibile: true, racconto: `Lavori ${carrying[0]} con pazienza.`, risultato: t.replace(/^(un|una|uno|il|la)\s+/i, '').replace(/^./, (c) => c.toUpperCase()), descrizione: `${t}, fatto a mano`, quantita: 1, ingredienti: [{ oggetto: carrying[0], quantita: 1 }], attrezzi: [] };
+      }
       case 'spell.name': {
         // Combines what the single runes already do, a little stronger.
         const runes: Array<{ token: string; name: string; element: string }> = d.runes ?? [];
@@ -205,6 +212,7 @@ export class MockModels implements Models {
     if (has('bruc', 'incend', 'appicc')) return { possibile: true, racconto: `Le fiamme attecchiscono a ${name}.`, effetti: [{ tipo: 'fuoco', raggio: 1, durata: 8 }], ripetibile: true, etichetta: label };
     if (has('scav')) return { possibile: true, racconto: 'Scavi attorno, la terra si smuove.', effetti: [{ tipo: 'terreno', a: (d.terrains ?? []).find((t: string) => /sentier|terra|strada/.test(t)) ?? d.terrains?.[0], raggio: 1 }], ripetibile: true, etichetta: label };
     if (has('spin', 'calc')) return { possibile: true, racconto: `Dai una spinta a ${name}.`, effetti: [{ tipo: 'spingi', forza: 2 }], ripetibile: true, etichetta: label };
+    if (has('bev', 'sorsegg')) return { possibile: true, racconto: `Bevi da ${name}: l'acqua è fresca.`, effetti: [{ tipo: 'bisogni', sete: 15 }], ripetibile: true, etichetta: label };
     if (has('bussa', 'accarezz', 'ascolt')) return { possibile: true, racconto: `${name} non risponde, ma per un attimo ti sembra di sentire un'eco.`, effetti: [{ tipo: 'messaggio', testo: 'Nulla cambia.' }], ripetibile: false, etichetta: label };
     return { possibile: false, racconto: `Provi, ma ${name} non si lascia ${d.text}.`, effetti: [], ripetibile: false, etichetta: label };
   }

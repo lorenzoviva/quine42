@@ -155,3 +155,54 @@ export async function nameSpell(
     effects: Array.isArray(r.effetti) ? r.effetti : [],
   };
 }
+
+const CRAFT_SCHEMA: Schema = {
+  type: 'OBJECT',
+  properties: {
+    possibile: { type: 'BOOLEAN' },
+    racconto: { type: 'STRING', description: 'come lo fai, o perché non si può: 1-2 frasi, seconda persona' },
+    risultato: { type: 'STRING', description: "nome dell'oggetto che ottieni" },
+    descrizione: { type: 'STRING', description: "com'è l'oggetto ottenuto, se è nuovo" },
+    quantita: { type: 'INTEGER' },
+    ingredienti: { type: 'ARRAY', items: { type: 'OBJECT', properties: { oggetto: { type: 'STRING' }, quantita: { type: 'INTEGER' } }, required: ['oggetto', 'quantita'] }, description: 'cose che porti e che si consumano' },
+    attrezzi: { type: 'ARRAY', items: { type: 'STRING' }, description: 'cose che porti, servono ma non si consumano' },
+  },
+  required: ['possibile', 'racconto'],
+};
+
+export interface CraftJudgement {
+  possible: boolean;
+  story: string;
+  result?: string;
+  description?: string;
+  count: number;
+  inputs: Array<{ item: string; count: number }>;
+  tools: string[];
+}
+
+/**
+ * Free crafting: the player says what they want to make from what they carry. The Narrator (with the
+ * Physicist's sense) decides whether it can be made and from what; the kernel checks that every
+ * ingredient is really carried, and a possible recipe becomes a rule of the world (a known recipe).
+ */
+export async function judgeCraft(c: Council, text: string, carrying: string[], known: string[]): Promise<CraftJudgement> {
+  const prompt = [
+    `Il viandante vuole fabbricare: «${text}».`,
+    `Porta con sé: ${carrying.join(', ') || 'niente'}.`,
+    `Oggetti che esistono già nel mondo (usa questi nomi se il risultato è uno di loro): ${known.slice(0, 80).join(', ')}.`,
+    `Si può fare con ciò che porta, a mano, in modo credibile? Se sì: "risultato" (nome), "quantita", "ingredienti" consumati e "attrezzi" usati, SOLO tra le cose che porta e con nomi esatti; se il risultato non esiste ancora, descrivilo. Se no, "possibile" falso e spiega cosa manca. Sii severo come un artigiano vero.`,
+  ].join('\n\n');
+  const r = await c.ask<{ possibile: boolean; racconto: string; risultato?: string; descrizione?: string; quantita?: number; ingredienti?: Array<{ oggetto: string; quantita: number }>; attrezzi?: string[] }>('narratore', 'craft.free', prompt, CRAFT_SCHEMA, {
+    data: { text, carrying, known },
+    temperature: 0.4,
+  });
+  return {
+    possible: !!r.possibile && !!r.risultato,
+    story: String(r.racconto ?? ''),
+    result: r.risultato ? String(r.risultato).slice(0, 40) : undefined,
+    description: r.descrizione ? String(r.descrizione).slice(0, 200) : undefined,
+    count: Math.max(1, Math.min(10, Math.round(Number(r.quantita) || 1))),
+    inputs: (r.ingredienti ?? []).slice(0, 5).map((i) => ({ item: String(i.oggetto ?? ''), count: Math.max(1, Math.min(20, Math.round(Number(i.quantita) || 1))) })),
+    tools: (r.attrezzi ?? []).slice(0, 3).map(String),
+  };
+}

@@ -22,10 +22,10 @@ import { layout, type Building } from './layout';
 import { ArtDirector } from './art';
 import { AGENTS, Council, readBible, type AgentId, type CatalogEntry, type FeedEntry } from './agents/council';
 import { planChunk, type ChunkPlan, type Where } from './agents/cartography';
-import { forge, judgeCombination, repairLogic, type ForgeOrigin } from './agents/forge';
+import { forge, judgeCombination, repairLogic, slug, type ForgeOrigin } from './agents/forge';
 import { agentReply, examine, narrate, npcReply, type NpcReply, type Turn } from './agents/minds';
 import { planGenesis } from './agents/genesis';
-import { judgeAction, nameSpell } from './agents/effects';
+import { judgeAction, judgeCraft, nameSpell } from './agents/effects';
 import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Identity } from './agents/content';
 import { addItem, CARRY_CAPACITY, countItem, equippedItem, moveSlot, newInventory, putSlot, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
 import type { ActionDef, Effect, FileMap, Spell, ItemDef, ItemSpec, Manifest, ModuleEntry, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
@@ -101,6 +101,15 @@ export interface ActionOption {
   label: string;
   enabled: boolean;
   reason?: string;
+}
+
+/** A decision of the Council, kept as a rule of the world. */
+export interface Rule {
+  chiave: string;
+  testo: string;
+  possibile: boolean;
+  racconto: string;
+  effetti?: string[];
 }
 
 export interface Needs {
@@ -1551,6 +1560,69 @@ export class Kernel {
     return true;
   }
 
+  /** A carried item whose name matches what a model said (exact first, then partial). */
+  private carriedByName(name: string): string | undefined {
+    const n = normName(name);
+    const ids = new Set<string>();
+    const walk = (inv: Inventory) => inv.slots.forEach((s) => s && (ids.add(s.item), s.inv && walk(s.inv)));
+    walk(this.inventory());
+    const list = [...ids];
+    return list.find((id) => normName(this.itemInfo(id).name) === n) ?? list.find((id) => {
+      const m = normName(this.itemInfo(id).name);
+      return Math.min(m.length, n.length) >= 4 && (m.includes(n) || n.includes(m));
+    });
+  }
+
+  /**
+   * "Altro…" in crafting: the player says what to make. The Council decides from what (only things
+   * carried); the kernel checks it; a possible recipe becomes a known recipe of the world, then is made.
+   */
+  async freeCraft(rawText: string): Promise<{ ok: boolean; story: string }> {
+    const text = rawText.trim().slice(0, 120);
+    if (!text) return { ok: false, story: '' };
+    const key = `craft|${normName(text)}`;
+    const ruled = this.rules().find((r) => r.chiave === key && !r.possibile);
+    if (ruled) return { ok: false, story: ruled.racconto };
+    let j;
+    try {
+      j = await judgeCraft(this.council, text, this.carriedNames(), [...this.content.items.values()].map((d) => d.name));
+    } catch (e) {
+      return { ok: false, story: `(il Concilio tace: ${(e as Error).message})` };
+    }
+    const refuse = (why: string) => {
+      this.council.say('narratore', 'obietta', `fabbricare «${text}»: ${why}`, undefined, 'craft.free');
+      this.recordRule({ chiave: key, testo: `fabbricare «${text}»`, possibile: false, racconto: why });
+      return { ok: false, story: why };
+    };
+    if (!j.possible) return refuse(j.story || 'Non si può fare.');
+    const inputs: Array<{ item: string; count: number }> = [];
+    for (const i of j.inputs) {
+      const id = this.carriedByName(i.item);
+      if (!id) return { ok: false, story: `${j.story} Ma non hai «${i.item}».` };
+      if (countItem(this.inventory(), id) < i.count) return { ok: false, story: `${j.story} Ma ti servono ${i.count} «${this.itemInfo(id).name}».` };
+      inputs.push({ item: id, count: i.count });
+    }
+    if (!inputs.length) return refuse('Dal nulla non si fabbrica niente.');
+    const tools: string[] = [];
+    for (const t of j.tools) {
+      const id = this.carriedByName(t);
+      if (!id) return { ok: false, story: `${j.story} Ma non hai «${t}».` };
+      if (!inputs.some((i) => i.item === id)) tools.push(id);
+    }
+    const result = this.content.byName(j.result!) ?? (await this.introduceItems([j.result!], `fabbricato dal viandante: ${j.description ?? text}`))[0];
+    if (!result) return { ok: false, story: `${j.story} (ma il Concilio non riesce a dire cosa ne esca)` };
+    let id = `ricetta.${slug(result.name)}`;
+    while (this.content.recipes.some((r) => r.id === id)) id += '-2';
+    const recipe: Recipe = { id, name: result.name, inputs, ...(tools.length ? { tools } : {}), output: { item: result.id, count: j.count } };
+    this.recordRule({ chiave: key, testo: `fabbricare «${result.name}»`, possibile: true, racconto: j.story, effetti: [`ricetta: ${inputs.map((i) => `${this.itemInfo(i.item).name} ×${i.count}`).join(' + ')}`] }, false);
+    this.writePack('modules/items.scoperte/manifest.json', { id: 'items.scoperte', name: 'Ricette scoperte', description: 'Ricette che il viandante ha inventato e che il Concilio ha giudicato possibili: ora sono regole del mondo.' }, { items: [], recipes: [recipe], loot: {} });
+    this.applyFiles({ ...this.repo.working });
+    const c = this.repo.commit(`ricetta scoperta: ${result.name}`, 'agent');
+    this.council.say('narratore', 'approva', `nuova ricetta «${result.name}»: ${inputs.map((i) => `${this.itemInfo(i.item).name} ×${i.count}`).join(' + ')}${tools.length ? ` con ${tools.map((t) => this.itemInfo(t).name).join(', ')}` : ''} (commit ${c.id})`, undefined, 'craft.free');
+    this.craft(id);
+    return { ok: true, story: j.story };
+  }
+
   /** Drag one item onto another: the Council decides if they combine, forging the result if needed. */
   async combine(a: number, b: number): Promise<string> {
     const inv = this.inventory();
@@ -1595,7 +1667,8 @@ export class Kernel {
     if (it?.type === 'read') out.push({ id: 'leggi', label: 'Leggi', enabled: true });
     if (it?.type === 'lua') out.push({ id: 'usa', label: 'Usa', enabled: true });
     if (this.ecs.has(id, 'container')) out.push({ id: 'apri', label: 'Apri', enabled: true });
-    for (const a of m?.actions ?? []) {
+    const pickupItem = this.ecs.get(id, 'pickup')?.item;
+    for (const a of [...(m?.actions ?? []), ...(pickupItem ? (this.content.get(pickupItem)?.actions ?? []) : [])]) {
       const ok = !a.requires || has(a.requires);
       out.push({ id: `act:${a.id}`, label: a.label, enabled: ok, reason: ok ? undefined : `serve: ${this.content.get(a.requires!)?.name ?? a.requires}` });
     }
@@ -1690,14 +1763,16 @@ export class Kernel {
         return;
       }
       default:
-        if (action.startsWith('act:') && modId) {
-          const a = m?.actions?.find((x) => `act:${x.id}` === action);
+        if (action.startsWith('act:')) {
+          const pickupItem = this.ecs.get(id, 'pickup')?.item;
+          const a = [...(m?.actions ?? []), ...(pickupItem ? (this.content.get(pickupItem)?.actions ?? []) : [])].find((x) => `act:${x.id}` === action);
           const opt = this.actionsFor(id).find((o) => o.id === action);
           if (!a || !opt?.enabled) return say(opt?.reason ?? 'Non puoi farlo.');
           if (a.effects?.length) {
             const out = this.applyEffects(a.effects, id);
             return say(out.join(' ') || `${a.label}: fatto.`);
           }
+          if (!modId) return;
           const { value, failed } = this.runModule(modId, 'on_act', id, this.playerId, a.id);
           if (!failed) say(typeof value === 'string' && value ? value : `${a.label}: fatto.`);
         }
@@ -1705,43 +1780,112 @@ export class Kernel {
   }
 
   /**
-   * "Altro…": the player writes what they do. Actions the object already learned run directly; otherwise
-   * the Narrator judges, the validator keeps only known effects, core.effects applies them, and a
-   * sensible repeatable action is learned by the object's module (committed, so it stays).
+   * "Altro…": the player writes what they do to a thing in the world. Actions the thing already learned
+   * run directly, judgements already given are remembered (rules); otherwise the Narrator judges, the
+   * validator keeps only known effects, core.effects applies them, and the thing learns the action.
    */
   async freeAction(id: Id, text: string): Promise<string> {
-    text = text.trim().slice(0, 200);
-    if (!text || !this.ecs.alive.has(id)) return '';
+    if (!this.ecs.alive.has(id)) return '';
     const modId: string | undefined = this.ecs.get(id, 'module')?.id;
     const entry = modId ? this.modules.get(modId) : undefined;
     const m = entry?.manifest;
-    const learned = m?.actions?.find((a) => a.effects?.length && normName(a.label) === normName(text));
-    if (learned) {
-      await this.perform(id, `act:${learned.id}`);
-      return learned.label;
-    }
     const pk = this.ecs.get(id, 'pickup');
     const info = pk ? this.itemInfo(pk.item) : undefined;
     const identity: Identity | undefined = this.ecs.get(id, 'identity');
-    const p = this.ecs.get(id, 'pos');
+    return this.judgeFree(
+      {
+        entity: id,
+        key: pk ? pk.item : (modId ?? this.nameOf(id)),
+        name: this.nameOf(id),
+        description: info?.description ?? `${m?.description ?? ''}${identity ? ` ${identity.look}` : ''}`,
+        tags: info?.tags ?? m?.tags ?? [],
+        container: this.ecs.has(id, 'container'),
+        kind: pk ? 'oggetto a terra' : m?.persona ? 'persona' : this.ecs.has(id, 'container') ? 'mobile' : 'cosa',
+        learnModule: !pk && !m?.persona ? entry : undefined,
+        learnItem: pk?.item,
+      },
+      text,
+    );
+  }
+
+  /** "Altro…" on something the player carries: a fanciful use, judged like any other action. */
+  async freeItemAction(slot: number, text: string): Promise<string> {
+    const s = this.inventory().slots[slot];
+    if (!s) return '';
+    const info = this.itemInfo(s.item);
+    return this.judgeFree(
+      { slot, key: s.item, name: info.name, description: info.description, tags: info.tags, container: !!this.content.get(s.item)?.container, kind: 'oggetto che porti con te', learnItem: s.item },
+      text,
+    );
+  }
+
+  /** Actions a thing has learned (its module's, or its item definition's). */
+  learnedActions(sub: { learnModule?: ModuleEntry; learnItem?: string }): ActionDef[] {
+    return [...(sub.learnModule?.manifest.actions ?? []), ...(sub.learnItem ? (this.content.get(sub.learnItem)?.actions ?? []) : [])].filter((a) => a.effects?.length);
+  }
+
+  /** Runs a learned action of something carried (inventory buttons). */
+  itemAct(slot: number, actionId: string): void {
+    const s = this.inventory().slots[slot];
+    const a = s ? this.content.get(s.item)?.actions?.find((x) => x.id === actionId) : undefined;
+    if (!s || !a?.effects) return;
+    if (a.requires && countItem(this.inventory(), a.requires) <= 0) return this.message(`Ti serve ${this.itemInfo(a.requires).name}.`, 'warn');
+    const out = this.applyOn({ slot, key: s.item }, a.effects);
+    this.message(out.join(' ') || `${a.label}: fatto.`);
+  }
+
+  /** Applies effects to the subject of an action: a thing in the world, or something carried. */
+  private applyOn(sub: { entity?: Id; slot?: number; key: string }, effects: Effect[]): string[] {
+    if (sub.entity !== undefined) return this.applyEffects(effects, sub.entity);
+    const out: string[] = [];
+    const rest: Effect[] = [];
+    for (const e of effects) {
+      if (e.tipo === 'distruggi' && sub.slot !== undefined) removeItem(this.inventory(), sub.key, 1);
+      else if (e.tipo === 'apri' && sub.slot !== undefined && this.content.get(sub.key)?.container) this.bus.emit('ui:bag', { slot: sub.slot });
+      else if (e.tipo !== 'contenitore' && e.tipo !== 'spingi') rest.push(e);
+    }
+    const pc = this.playerCarpet();
+    const [dx, dy] = this.facingDelta();
+    out.push(...this.applyEffects(rest, undefined, { x: pc.x + dx, y: pc.y + dy }));
+    this.syncHand();
+    return out;
+  }
+
+  private async judgeFree(
+    sub: { entity?: Id; slot?: number; key: string; name: string; description: string; tags: string[]; container: boolean; kind: string; learnModule?: ModuleEntry; learnItem?: string },
+    rawText: string,
+  ): Promise<string> {
+    const text = rawText.trim().slice(0, 200);
+    if (!text) return '';
+    const say = (t: string) => this.bus.emit('ui:dialog', { speaker: sub.name, text: t });
+    const learned = this.learnedActions(sub).find((a) => normName(a.label) === normName(text));
+    if (learned) {
+      if (learned.requires && countItem(this.inventory(), learned.requires) <= 0) {
+        say(`Ti serve ${this.itemInfo(learned.requires).name}.`);
+        return learned.label;
+      }
+      say(this.applyOn(sub, learned.effects!).join(' ') || `${learned.label}: fatto.`);
+      return learned.label;
+    }
+    // What the Council already ruled impossible stays impossible: no need to ask again.
+    const ruleKey = `${sub.key}|${normName(text)}`;
+    const ruled = this.rules().find((r) => r.chiave === ruleKey && !r.possibile);
+    if (ruled) {
+      say(ruled.racconto);
+      return ruled.racconto;
+    }
+    const p = sub.entity !== undefined ? this.ecs.get(sub.entity, 'pos') : this.playerCarpet();
     const tile = p ? (this.palette[this.tileAt(Math.floor(p.x), Math.floor(p.y)) ?? '']?.name ?? '?') : '?';
     const inv = this.inventory();
     const held = equippedItem(inv);
     const summonable = [...this.modules.values()].filter((e) => e.manifest.kind === 'entity' && !e.manifest.unique);
-    const say = (t: string) => this.bus.emit('ui:dialog', { speaker: this.nameOf(id), text: t });
-    this.council.say('kernel', 'info', `il viandante prova: «${text}» su ${this.nameOf(id)}`, 'narratore', 'action.judge');
+    this.council.say('kernel', 'info', `il viandante prova: «${text}» su ${sub.name}`, 'narratore', 'action.judge');
     let j;
     try {
       j = await judgeAction(this.council, {
         text,
-        target: {
-          name: this.nameOf(id),
-          description: info?.description ?? `${m?.description ?? ''}${identity ? ` ${identity.look}` : ''}`,
-          tags: info?.tags ?? m?.tags ?? [],
-          container: this.ecs.has(id, 'container'),
-          kind: pk ? 'oggetto a terra' : m?.persona ? 'persona' : this.ecs.has(id, 'container') ? 'mobile' : 'cosa',
-        },
-        carrying: inv.slots.filter((s): s is NonNullable<typeof s> => !!s).map((s) => this.itemInfo(s.item).name),
+        target: { name: sub.name, description: sub.description, tags: sub.tags, container: sub.container, kind: sub.kind },
+        carrying: this.carriedNames(),
         holding: held ? this.itemInfo(held).name : 'niente',
         tile,
         terrains: Object.entries(this.palette).filter(([c]) => c !== '?').map(([, t]) => t.name),
@@ -1768,17 +1912,56 @@ export class Kernel {
     };
     let v = validateEffects(j.possible ? j.effects : [], ectx);
     if (v.unknownItems.length) {
-      await this.introduceItems(v.unknownItems, `nati dall'azione «${text}» su ${this.nameOf(id)}`);
+      await this.introduceItems(v.unknownItems, `nati dall'azione «${text}» su ${sub.name}`);
       v = validateEffects(j.possible ? j.effects : [], ectx);
     }
     if (v.dropped.length) this.council.say('kernel', 'scarta', `azione «${text}»: ${v.dropped.join('; ')}`, 'narratore', 'action.judge');
-    this.council.say('narratore', j.possible ? 'approva' : 'obietta', `«${text}» su ${this.nameOf(id)}: ${j.story}${v.effects.length ? ` [${v.effects.map((e) => e.tipo).join(', ')}]` : ''}`, undefined, 'action.judge');
-    const out = j.possible ? this.applyEffects(v.effects, id) : [];
+    this.council.say('narratore', j.possible ? 'approva' : 'obietta', `«${text}» su ${sub.name}: ${j.story}${v.effects.length ? ` [${v.effects.map((e) => e.tipo).join(', ')}]` : ''}`, undefined, 'action.judge');
+    const out = j.possible ? this.applyOn(sub, v.effects) : [];
     say([j.story, ...out].filter(Boolean).join(' ') || 'Non succede niente.');
+    // The decision becomes a rule of the world; a possible action stays in the thing's menu.
     const lasting = v.effects.some((e) => e.tipo !== 'messaggio');
-    const oneOff = v.effects.some((e) => e.tipo === 'evoca' || e.tipo === 'crea_oggetto' || e.tipo === 'contenitore');
-    if (j.possible && j.repeatable && lasting && !oneOff && entry && !m?.persona) this.learnAction(entry, { id: '', label: j.label || text, requires: need?.id, effects: v.effects });
+    const creates = v.effects.some((e) => e.tipo === 'crea_oggetto' || e.tipo === 'evoca');
+    const pays = v.effects.some((e) => e.tipo === 'consuma') || !!need;
+    const learn = j.possible && lasting && (!creates || pays);
+    this.recordRule({ chiave: ruleKey, testo: `«${text}» su ${sub.name}`, possibile: j.possible && v.effects.length > 0, racconto: j.story, effetti: v.effects.map((e) => e.tipo) }, !learn);
+    if (learn) this.learnAction(sub, { id: '', label: j.label || text, requires: need?.id, effects: v.effects });
     return j.story;
+  }
+
+  /** Names of what the player carries, bags included. */
+  carriedNames(): string[] {
+    const out: string[] = [];
+    const walk = (inv: Inventory) => {
+      for (const s of inv.slots) {
+        if (!s) continue;
+        out.push(`${this.itemInfo(s.item).name}${s.count > 1 ? ` ×${s.count}` : ''}`);
+        if (s.inv) walk(s.inv);
+      }
+    };
+    walk(this.inventory());
+    return out;
+  }
+
+  /** The rules the Council established while the world was played (world/rules.json). */
+  rules(): Rule[] {
+    try {
+      return (JSON.parse(this.files['world/rules.json'] ?? '{}').regole ?? []) as Rule[];
+    } catch {
+      return [];
+    }
+  }
+
+  /** A judgement becomes a rule: written in the universe, shown to the Council in every later judgement. */
+  recordRule(r: Rule, commit = true): void {
+    const all = this.rules().filter((x) => x.chiave !== r.chiave);
+    all.push(r);
+    this.repo.write('world/rules.json', JSON.stringify({ regole: all.slice(-300) }, null, 2) + '\n');
+    this.files = { ...this.files, 'world/rules.json': this.repo.working['world/rules.json']! };
+    if (commit) {
+      this.applyFiles({ ...this.repo.working });
+      this.repo.commit(`regola: ${r.testo} → ${r.possibile ? 'si può' : 'non si può'}`, 'agent');
+    }
   }
 
   /** Which file a piece of the Council's work is about (the avatars walk there). */
@@ -1946,16 +2129,38 @@ export class Kernel {
     return out;
   }
 
-  /** An object learns an action: it enters the module's menu, with its effects, for every copy of it. */
-  private learnAction(entry: ModuleEntry, def: ActionDef): void {
-    const path = entry.manifestPath;
+  /**
+   * A thing learns an action: it enters the menu of every copy of it — the module's actions for things
+   * in the world, the item definition's for things you carry or find on the ground.
+   */
+  private learnAction(sub: { learnModule?: ModuleEntry; learnItem?: string }, def: ActionDef): void {
+    let path: string | undefined;
     let man: Manifest;
+    let actions: ActionDef[];
+    let owner: string;
     try {
-      man = JSON.parse(this.repo.working[path] ?? '');
+      if (sub.learnModule) {
+        path = sub.learnModule.manifestPath;
+        man = JSON.parse(this.repo.working[path] ?? '');
+        actions = man.actions ??= [];
+        owner = man.name;
+      } else if (sub.learnItem && !sub.learnItem.startsWith('rune:')) {
+        const src = this.content.itemSource.get(sub.learnItem);
+        path = src ? this.modules.get(src)?.manifestPath : undefined;
+        if (!path) return;
+        man = JSON.parse(this.repo.working[path] ?? '');
+        if (man.kind === 'item') {
+          actions = man.actions ??= [];
+        } else {
+          const it = man.items?.find((x) => x.id === sub.learnItem);
+          if (!it) return;
+          actions = it.actions ??= [];
+        }
+        owner = this.itemInfo(sub.learnItem).name;
+      } else return;
     } catch {
       return;
     }
-    const actions = (man.actions ??= []);
     if (actions.length >= 8 || actions.some((a) => normName(a.label) === normName(def.label))) return;
     let id = normName(def.label).replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 24) || 'azione';
     while (actions.some((a) => a.id === id)) id += '_';
@@ -1964,8 +2169,8 @@ export class Kernel {
     actions.push(learned);
     this.repo.write(path, JSON.stringify(man, null, 2) + '\n');
     this.applyFiles({ ...this.repo.working });
-    const c = this.repo.commit(`azione imparata: ${man.name} → ${def.label}`, 'agent');
-    this.council.say('kernel', 'approva', `${man.name} impara «${def.label}» (commit ${c.id})`);
+    const c = this.repo.commit(`azione imparata: ${owner} → ${def.label}`, 'agent');
+    this.council.say('kernel', 'approva', `${owner} impara «${def.label}» (commit ${c.id})`);
   }
 
   private worldFacts(): Record<string, unknown> {

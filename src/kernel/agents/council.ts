@@ -86,6 +86,19 @@ export function paletteSummary(palette: Record<string, TileDef>): string {
     .join('\n');
 }
 
+/** Rules established while the world was played (world/rules.json): later judgements must respect them. */
+export function rulesSummary(files: FileMap, n = 30): string {
+  let list: Array<{ testo: string; possibile: boolean; racconto: string; effetti?: string[] }> = [];
+  try {
+    list = JSON.parse(files['world/rules.json'] ?? '{}').regole ?? [];
+  } catch {
+    return '';
+  }
+  if (!list.length) return '';
+  const lines = list.slice(-n).map((r) => `- ${r.testo}: ${r.possibile ? `si può${r.effetti?.length ? ` (${r.effetti.join(', ')})` : ''}` : 'non si può'} — ${r.racconto}`);
+  return `## Regole già stabilite dal Concilio (rispettale, sii coerente)\n${lines.join('\n')}`;
+}
+
 export function catalogSummary(catalog: CatalogEntry[]): string {
   return catalog.map((m) => `- ${m.id} «${m.name}» [${m.kind}] terreni ${m.tiles.join('') || '-'}: ${m.context}`).join('\n');
 }
@@ -120,9 +133,11 @@ export class Council {
     const bible = readBible(v.files);
     const style = v.files['world/style.md'] ?? '';
     const parts: string[] = [];
+    const rules = rulesSummary(v.files);
     switch (agent) {
       case 'narratore':
         parts.push(`## Bibbia del mondo\n${bibleSummary(bible, true)}`, `## Moduli esistenti\n${catalogSummary(v.catalog)}`);
+        if (rules) parts.push(rules);
         break;
       case 'cartografo':
         parts.push(`## Bibbia del mondo\n${bibleSummary(bible)}`, `## Terreni\n${paletteSummary(v.palette)}`, `## Moduli posizionabili\n${catalogSummary(v.catalog)}`);
@@ -132,12 +147,14 @@ export class Council {
         break;
       case 'fisico':
         parts.push(`## Terreni\n${paletteSummary(v.palette)}`, `## Tono\n${bible?.tono ?? ''}`);
+        if (rules) parts.push(rules);
         break;
       case 'ingegnere':
         parts.push(`## Bibbia (sintesi)\n${bible?.sintesi ?? ''}`, `## Terreni\n${paletteSummary(v.palette)}`);
         break;
       case 'arbitro':
         parts.push(`## Bibbia del mondo\n${bibleSummary(bible)}`, `## Guida di stile\n${style}`, `## Terreni\n${paletteSummary(v.palette)}`);
+        if (rules) parts.push(rules);
         break;
     }
     return parts.join('\n\n');

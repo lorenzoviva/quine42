@@ -365,6 +365,49 @@ describe('free actions and effects', () => {
     expect(opened).toBe(true);
   });
 
+  it('decisions become rules: things carried or on the ground learn actions; impossible ones are not asked twice', async () => {
+    const inv = k.inventory();
+    inv.slots[8] = { item: 'item.secchio', count: 1 };
+    k.needs()!.thirst = 20;
+    await k.freeItemAction(8, 'bevo dal secchio');
+    expect(k.needs()!.thirst).toBe(35);
+    const learned = k.content.get('item.secchio')!.actions!.find((a) => a.effects?.length)!;
+    expect(learned.label).toMatch(/Bevo dal secchio/);
+    expect(k.rules().some((r) => r.possibile && /bevo dal secchio/.test(r.testo))).toBe(true);
+    const calls = k.models.usage.text;
+    k.itemAct(8, learned.id);
+    expect(k.needs()!.thirst).toBe(50);
+    // On the ground, the same item offers the learned action in its menu.
+    const pc = k.playerCarpet();
+    const dropped = k.spawnItem('item.secchio', pc.x + 0.9, pc.y);
+    expect(k.actionsFor(dropped).some((a) => a.label === learned.label)).toBe(true);
+    // What is impossible stays impossible, without asking again.
+    await k.freeItemAction(8, 'lo faccio volare sulla luna');
+    const after = k.models.usage.text;
+    await k.freeItemAction(8, 'lo faccio volare sulla luna');
+    expect(k.models.usage.text).toBe(after);
+    expect(after).toBe(calls + 1);
+    // The Council sees the rules in every later judgement.
+    expect(k.council.context('narratore')).toMatch(/Regole già stabilite[\s\S]*bevo dal secchio/);
+  });
+
+  it('free crafting: the Council decides from what you carry; a possible recipe becomes a known recipe', async () => {
+    const inv = k.inventory();
+    inv.slots[8] = { item: 'item.stoffa', count: 2 };
+    const r = await k.freeCraft('una fascia da polso');
+    expect(r.ok).toBe(true);
+    const made = k.content.byName('Fascia da polso')!;
+    expect(countItem(inv, made.id)).toBe(1);
+    expect(countItem(inv, 'item.stoffa')).toBe(1);
+    expect(k.content.recipes.some((x) => x.output.item === made.id && x.inputs[0].item === 'item.stoffa')).toBe(true);
+    expect(k.repo.head().message).toMatch(/ricetta scoperta/);
+    const no = await k.freeCraft("un drago d'oro");
+    expect(no.ok).toBe(false);
+    const calls = k.models.usage.text;
+    await k.freeCraft("un drago d'oro");
+    expect(k.models.usage.text).toBe(calls);
+  });
+
   it('fire burns what is flammable and goes out; digging changes the terrain, and the change persists', async () => {
     const bush = spawnInFront(k, 'object.bush', 1.2);
     const crate = spawnInFront(k, 'object.crate', 2.2);

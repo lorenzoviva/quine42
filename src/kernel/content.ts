@@ -61,6 +61,7 @@ export class Content {
           icon: app?.sprite,
           equippable: man.item?.equippable,
           module: man.id,
+          ...(man.actions?.length ? { actions: man.actions } : {}),
         });
         this.itemSource.set(man.id, man.id);
       }
