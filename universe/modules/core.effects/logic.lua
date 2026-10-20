@@ -126,8 +126,9 @@ function F.stato(_, user, e)
 end
 
 function F.togli_stato(_, user, e)
+  -- Lo stato si spegne (false); il kernel poi lo toglie dalla tabella.
   local st = ecs.get(user, "stati")
-  if st then st[e.nome] = nil end
+  if st then st[e.nome] = false end
   return nil
 end
 

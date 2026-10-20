@@ -941,3 +941,22 @@ describe('the neon studio', () => {
     expect(view.regions.length).toBeGreaterThan(5);
   });
 });
+
+describe('regression: walking with states', () => {
+  it('the wanderer walks with no state, an empty state table, or on horseback (and faster then)', async () => {
+    const moved: number[] = [];
+    for (const st of [undefined, {}, { 'a cavallo': { velocita: 1.8, peso: 0, luce: 0, fino: 0 } }]) {
+      const k = await boot();
+      clearArea(k);
+      if (st) k.ecs.set(k.playerId, 'stati', JSON.parse(JSON.stringify(st)));
+      k.carpet()!.active = false;
+      (k.input as any).held.add('right');
+      const x = k.playerPos().x;
+      run(k, 0.3);
+      expect(k.faults.size).toBe(0);
+      moved.push(k.playerPos().x - x);
+    }
+    expect(moved[1]).toBeGreaterThan(1);
+    expect(moved[2]).toBeGreaterThan(moved[1] * 1.5);
+  });
+});

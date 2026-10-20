@@ -3623,7 +3623,7 @@ export class Kernel {
     if (v.inventory?.slots) this.ecs.set(this.playerId, 'inventory', v.inventory);
     if (v.needs) Object.assign(this.needs() ?? {}, v.needs);
     if (v.hand?.tokens) Object.assign(this.hand(), v.hand);
-    if (v.stati) this.ecs.set(this.playerId, 'stati', v.stati);
+    if (v.stati) this.ecs.set(this.playerId, 'stati', Object.fromEntries(Object.entries(v.stati).filter(([, x]) => x && typeof x === 'object')));
     if (v.trasceso) this.exitedOnce = true;
     for (const k of st.consumati ?? []) this.consumed.add(String(k));
     for (const [k, c] of Object.entries(st.contenitori ?? {})) this.savedContainers.set(k, c as { inv: Inventory; filled: boolean });
@@ -3708,6 +3708,17 @@ export class Kernel {
     // Dead: the world waits for the choice (continue or start again).
     if (this.dead) return;
     this.time += dt;
+    // The floor: states switched off by Lua are removed, and the pace they give is a plain number on the
+    // player (Lua must not iterate tables that live on the JS side: wasmoon cannot).
+    const stati = this.ecs.get(this.playerId, 'stati');
+    let passo = 1;
+    if (stati)
+      for (const k of Object.keys(stati)) {
+        if (!stati[k] || typeof stati[k] !== 'object') delete stati[k];
+        else passo *= Number(stati[k].velocita) || 1;
+      }
+    const pl = this.ecs.get(this.playerId, 'player');
+    if (pl) pl.passo = Math.max(0.2, Math.min(4, passo));
     this.tickCount++;
     this.archive.tick(dt);
     if (!this.corona.isInterior(this.playerPos().x)) this.lastWorld = { ...this.playerCarpet() };
