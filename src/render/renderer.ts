@@ -544,17 +544,27 @@ export class Renderer {
     } else m.moving = Math.max(0, m.moving - dt);
     m.x = p.x;
     m.y = p.y;
+    const base = this.images.peek(gl.sprite);
+    // A frame much emptier or shorter than the standing sprite was cut badly: the standing one is better.
+    const whole = (fid: string | undefined) => {
+      const f = this.images.inkOf(fid);
+      const b = this.images.inkOf(gl.sprite);
+      return !!f && (!b || (f.ink >= b.ink * 0.5 && f.h >= b.h * 0.7));
+    };
     const frames = gl.frames?.[m.dir];
     if (frames?.length && m.moving > 0) {
-      const img = this.images.peek(frames[Math.floor(m.phase) % frames.length]);
-      if (img) return img;
+      const fid = frames[Math.floor(m.phase) % frames.length];
+      const img = this.images.peek(fid);
+      if (img && whole(fid)) return img;
     }
     if (frames?.length && m.dir !== 'down') {
-      const img = this.images.peek(frames[1 % frames.length]);
-      if (img) return img;
+      const fid = frames[1 % frames.length];
+      const img = this.images.peek(fid);
+      if (img && whole(fid)) return img;
     }
-    return this.images.peek(gl.sprite);
+    return base;
   }
+
 
   /**
    * Every individual looks a little different from the others of their kind (same sprite): clothes

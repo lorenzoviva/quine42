@@ -149,6 +149,10 @@ export class BrowserImageTools implements ImageTools {
     return base.toDataURL('image/png');
   }
 
+  async measure(dataUrl: string): Promise<{ ink: number; h: number }> {
+    return inkOf(await loadImage(dataUrl));
+  }
+
   async cutSprite(dataUrl: string, px: number): Promise<string> {
     const img = await loadImage(dataUrl);
     return keyAndFit(img, img.width, img.height, px);
@@ -182,9 +186,41 @@ function stained(img: HTMLImageElement): boolean {
   return bad > band * 0.5;
 }
 
+/** How much of an image is drawn: opaque fraction and height of the figure (0..1), on a 32×32 sample. */
+export function inkOf(img: CanvasImageSource): { ink: number; h: number } {
+  const N = 32;
+  const [, ctx] = canvas(N);
+  ctx.drawImage(img, 0, 0, N, N);
+  const d = ctx.getImageData(0, 0, N, N).data;
+  let ink = 0;
+  let top = N;
+  let bottom = -1;
+  for (let i = 0; i < N * N; i++) {
+    if (d[i * 4 + 3] < 80) continue;
+    ink++;
+    const y = Math.floor(i / N);
+    if (y < top) top = y;
+    if (y > bottom) bottom = y;
+  }
+  return { ink: ink / (N * N), h: bottom < 0 ? 0 : (bottom - top + 1) / N };
+}
+
 /** Decoded images by asset id, for the renderer and the UI. */
 export class ImageCache {
   private images = new Map<string, HTMLImageElement | null>();
+  private inks = new Map<string, { ink: number; h: number }>();
+
+  /** How much of a loaded image is drawn (to tell a whole walking frame from a cut or empty one). */
+  inkOf(id: string | undefined): { ink: number; h: number } | undefined {
+    if (!id) return undefined;
+    let v = this.inks.get(id);
+    if (!v) {
+      const img = this.images.get(id);
+      if (!img) return undefined;
+      this.inks.set(id, (v = inkOf(img)));
+    }
+    return v;
+  }
   constructor(private get: (id: string) => Promise<string | undefined>) {}
 
   /** The image if ready; starts loading it otherwise. */

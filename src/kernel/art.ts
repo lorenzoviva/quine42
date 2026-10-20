@@ -169,6 +169,15 @@ export class ArtDirector {
           const sheet = await atelier.walkSheet(base, description);
           if (sheet) {
             const cells = await tools.cutGrid(sheet, 3, 4, SPRITE_PX, { key: true });
+            // A frame much emptier or shorter than the standing sprite is a cut figure: its row goes.
+            if (tools.measure) {
+              const b = await tools.measure(base);
+              for (let i = 0; i < cells.length; i++) {
+                if (!cells[i]) continue;
+                const f = await tools.measure(cells[i]);
+                if (f.ink < b.ink * 0.5 || f.h < b.h * 0.7) cells[i] = '';
+              }
+            }
             // A direction with a dirty frame is dropped; without any clean direction the sprite stays still.
             const rows = await Promise.all(DIRECTIONS.map(async (d, r) => [d, cells.slice(r * 3, r * 3 + 3).every(Boolean) ? await Promise.all(cells.slice(r * 3, r * 3 + 3).map((c) => k.assets.put(c))) : null] as const));
             const clean = rows.filter(([, ids]) => ids);

@@ -86,12 +86,48 @@ async function main() {
   const genesis = new GenesisScreen(kernel);
   const actions = new ActionMenu(kernel);
   const studio = new StudioPanel(kernel, images);
+  // Death: the session ends; continue in the same universe or start again from the seed.
+  const deathEl = $('#death');
+  kernel.bus.on('ui:death', ({ cause }: { cause: string }) => {
+    const again = document.createElement('button');
+    again.className = 'primary';
+    again.textContent = 'Continua in questo universo';
+    again.onclick = () => {
+      deathEl.hidden = true;
+      kernel.continueAfterDeath();
+      syncFocus();
+    };
+    const restart = document.createElement('button');
+    restart.className = 'danger';
+    restart.textContent = 'Ricomincia da capo (nuovo universo)';
+    restart.onclick = async () => {
+      await kernel.repo.backend?.reset().catch(() => undefined);
+      try {
+        localStorage.removeItem(`rune:repo:${kernel.config.name}`);
+      } catch {
+        /* nothing to remove */
+      }
+      location.reload();
+    };
+    const t = document.createElement('div');
+    t.className = 'title';
+    t.textContent = 'SEI MORTO';
+    const why = document.createElement('div');
+    why.className = 'why';
+    why.textContent = cause === 'sete' ? 'La sete ti ha vinto. La strada era lunga e i pozzi lontani.' : cause === 'fame' ? 'La fame ti ha vinto. Le dispense erano vuote, i campi lontani.' : 'Le ferite ti hanno vinto.';
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.append(again, restart);
+    deathEl.replaceChildren(t, why, row);
+    deathEl.hidden = false;
+    syncFocus();
+  });
   const sfx = new Sfx();
   konsole.dev = dev;
   (window as any).rune = kernel;
 
   const syncFocus = () => {
-    kernel.input.enabled = !editor.isOpen && !konsole.isOpen && !inventory.isOpen && !chat.isOpen && !genesis.isOpen && !actions.isOpen && !studio.isOpen;
+    kernel.input.enabled = !editor.isOpen && !konsole.isOpen && !inventory.isOpen && !chat.isOpen && !genesis.isOpen && !actions.isOpen && !studio.isOpen && !kernel.dead;
     if (!kernel.input.enabled) kernel.input.releaseAll();
   };
   editor.onClose = syncFocus;

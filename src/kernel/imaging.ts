@@ -12,6 +12,8 @@ export interface ImageTools {
   /** Removes the flat background colour, trims, fits into px×px with transparency ('' if it cannot). */
   cutSprite(dataUrl: string, px: number): Promise<string>;
   downscale(dataUrl: string, px: number): Promise<string>;
+  /** How much of an image is drawn (opaque fraction, figure height, 0..1). */
+  measure?(dataUrl: string): Promise<{ ink: number; h: number }>;
 }
 
 /** Size of stored textures and sprites. */

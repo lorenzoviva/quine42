@@ -17,9 +17,11 @@ function M.update(dt)
     end
     -- Il mana torna piano, da solo; i cristalli magici lo ridanno di colpo.
     n.mana = math.min(100, (n.mana or 0) + 0.12 * dt)
-    if n.health <= 0 then
-      n.health, n.hunger, n.thirst, n.energy = 35, 35, 35, 50
-      world.say("Svieni. Quando riapri gli occhi sei di nuovo al centro di tutto, con la bocca secca.")
+    if n.health <= 0 and not n.morto then
+      -- La fine del viaggio: il kernel chiude la sessione (si può continuare nello stesso mondo).
+      n.health = 0
+      n.morto = true
+      bus.emit("morte", { fame = n.hunger <= 0, sete = n.thirst <= 0 })
     end
   end)
 end

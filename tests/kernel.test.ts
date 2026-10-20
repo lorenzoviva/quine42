@@ -877,3 +877,32 @@ describe('new mechanics', () => {
     expect(k.states()['a cavallo']).toBeUndefined();
   });
 });
+
+describe('death and transcendence', () => {
+  it('dying of thirst ends the session; one can continue in the same universe; after the corona nothing is lost', async () => {
+    const k = await boot();
+    clearArea(k);
+    let died = '';
+    k.bus.on('ui:death', ({ cause }: { cause: string }) => (died = cause));
+    const n = k.needs()!;
+    Object.assign(n, { thirst: 0, health: 0.5 });
+    k.give('item.coltello', 1);
+    run(k, 2);
+    expect(died).toBe('sete');
+    expect(k.dead).toBe(true);
+    const t = k.time;
+    run(k, 1);
+    expect(k.time).toBe(t);
+    k.continueAfterDeath();
+    expect(k.dead).toBe(false);
+    expect(k.needs()!.health).toBeGreaterThan(50);
+    expect(countItem(k.inventory(), 'item.coltello')).toBe(0);
+    expect(k.inventory().slots.some((s) => s?.item === 'item.borsa-rune')).toBe(true);
+    // Transcended: needs stay full, no death.
+    k.exitedOnce = true;
+    Object.assign(k.needs()!, { thirst: 0, hunger: 0, health: 1 });
+    run(k, 2);
+    expect(k.dead).toBe(false);
+    expect(k.needs()!.thirst).toBeGreaterThan(99.9);
+  });
+});

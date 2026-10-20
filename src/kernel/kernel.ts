@@ -239,6 +239,8 @@ export class Kernel {
   time = 0;
   zone: 'sim' | 'corona' | 'studio' = 'sim';
   exitedOnce = false;
+  /** The wanderer died: the session is over until they continue or start again. */
+  dead = false;
   /** Size of the visible area in cells, set by the renderer. */
   view = { w: 32, h: 20 };
   readonly logs: LogEntry[] = [];
@@ -264,6 +266,7 @@ export class Kernel {
     const { repo, synced } = Repo.open(name, opts.files, opts.store);
     k.repo = repo;
     if (opts.backend) repo.attach(opts.backend, opts.past ?? []);
+    k.bus.on('lua:morte', (d: { fame?: boolean; sete?: boolean }) => k.die(d?.sete ? 'sete' : d?.fame ? 'fame' : 'ferite'));
     k.faults.onRaise = (f, isNew) => {
       if (isNew) k.log('fault', `${f.key}: ${f.message}`);
       k.bus.emit('fault', { fault: f, isNew });
@@ -2410,6 +2413,41 @@ export class Kernel {
     return all.find((e) => normName(e.label) === n) ?? all.find((e) => n.includes(normName(e.label).split(' ')[0]) && normName(e.label).length >= 3) ?? all.find((e) => normName(e.label).includes(n));
   }
 
+  /**
+   * Death: of thirst, of hunger, of wounds. The session ends; the wanderer may continue in the same
+   * universe (a new life at the starting square, the world as it is) or start again from the seed.
+   * Who reached the corona cannot die any more.
+   */
+  die(cause: string): void {
+    if (this.dead || this.exitedOnce) return;
+    this.dead = true;
+    this.log('kernel', `il viandante è morto (${cause})`);
+    this.council.say('narratore', 'info', `il viandante è morto di ${cause}`, undefined, 'player.death');
+    this.bus.emit('ui:death', { cause });
+  }
+
+  /** A new life in the same universe: the starting square, fresh needs, the pouch; the world remembers. */
+  continueAfterDeath(): void {
+    const playerMod = [...this.modules.values()].find((m) => m.manifest.kind === 'player');
+    const defaults: Record<string, any> = clone(playerMod?.manifest.components ?? FALLBACK_PLAYER);
+    Object.assign(this.needs() ?? {}, { ...FALLBACK_PLAYER.needs, ...(defaults.needs ?? {}), morto: false });
+    this.ecs.set(this.playerId, 'inventory', newInventory());
+    this.ecs.set(this.playerId, 'stati', {});
+    Object.assign(this.hand(), { tokens: [], sel: 0 });
+    for (const it of playerMod?.manifest.inventory ?? []) if (this.content.get(it)) this.give(it, 1);
+    Object.assign(this.playerPos(), { x: 0, y: 0 });
+    const c = this.carpet();
+    if (c) Object.assign(c, { ox: 0, oy: 0 });
+    this.dead = false;
+    this.rememberDeath();
+    this.saveState();
+    this.message('Riapri gli occhi nella piazza. È un nuovo giorno, e una nuova vita.', 'good');
+  }
+
+  private rememberDeath(): void {
+    this.recordRule({ chiave: `morte|${Date.now()}`, testo: 'un viandante è morto', possibile: true, racconto: 'la gente ne parla ancora, in piazza' }, false);
+  }
+
   /** States of the wanderer (on horseback, with a backpack…): what they change, until when. */
   states(): Record<string, { velocita: number; peso: number; luce: number; fino: number }> {
     // Lua removes a state by setting it to nil (null on the JS side): those are gone.
@@ -3516,7 +3554,7 @@ export class Kernel {
     }
     const n = this.needs();
     const state = {
-      viandante: { inventory: this.inventory(), needs: n, hand: this.hand() },
+      viandante: { inventory: this.inventory(), needs: n, hand: this.hand(), stati: this.states(), trasceso: this.exitedOnce },
       consumati: [...this.consumed].slice(-5000),
       contenitori: containers,
       ora: Math.round(this.time),
@@ -3543,6 +3581,8 @@ export class Kernel {
     if (v.inventory?.slots) this.ecs.set(this.playerId, 'inventory', v.inventory);
     if (v.needs) Object.assign(this.needs() ?? {}, v.needs);
     if (v.hand?.tokens) Object.assign(this.hand(), v.hand);
+    if (v.stati) this.ecs.set(this.playerId, 'stati', v.stati);
+    if (v.trasceso) this.exitedOnce = true;
     for (const k of st.consumati ?? []) this.consumed.add(String(k));
     for (const [k, c] of Object.entries(st.contenitori ?? {})) this.savedContainers.set(k, c as { inv: Inventory; filled: boolean });
     if (Number.isFinite(st.ora)) this.time = st.ora;
@@ -3623,12 +3663,19 @@ export class Kernel {
   // --- Tick ------------------------------------------------------------------------------------
 
   tick(dt: number): void {
+    // Dead: the world waits for the choice (continue or start again).
+    if (this.dead) return;
     this.time += dt;
     this.tickCount++;
     this.archive.tick(dt);
     if (this.zone === 'corona') this.archive.meet(this.playerPos().x, this.playerPos().y);
     this.societyTick();
     if (this.repo.backend && this.tickCount % (60 * 120) === 0) this.saveState();
+    // Transcended: nothing is lost any more (needs stay full, no death).
+    if (this.exitedOnce) {
+      const n = this.needs();
+      if (n) Object.assign(n, { hunger: 100, thirst: 100, energy: 100, health: 100 });
+    }
     if (this.tickCount % 10 === 0) {
       this.syncHand();
       this.statesTick();

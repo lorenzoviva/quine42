@@ -310,3 +310,8 @@ button[disabled] { opacity: 0.4; cursor: default; }
 #studio .row input { flex: 1; font: inherit; font-size: 12.5px; padding: 6px 8px; background: #050a07; color: var(--fg); border: 1px solid var(--line); }
 #studio .item { font-size: 12px; padding: 2px 0; }
 #studio .item .path { color: var(--gold); font-family: monospace; }
+
+#death { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: radial-gradient(circle, rgba(40,0,10,0.85), rgba(0,0,0,0.96)); color: #f2d6d6; text-align: center; }
+#death .title { font-size: 42px; letter-spacing: 0.3em; color: #ff4d5e; text-shadow: 0 0 18px #ff2a6d; }
+#death .why { font-size: 15px; color: #d8b8b8; max-width: 520px; }
+#death .row { display: flex; gap: 12px; margin-top: 8px; }
