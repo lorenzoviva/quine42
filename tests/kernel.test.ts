@@ -353,6 +353,56 @@ describe('free actions and effects', () => {
   });
 });
 
+describe('runes and magic', () => {
+  it('one rune per cell; the start has magic, carpet runes only far away', async () => {
+    const k = await boot();
+    const runes = k.ecs.query('rune').map((id) => k.ecs.get(id, 'rune'));
+    expect(runes.some((r) => r.token === 'luce')).toBe(true);
+    const S = k.config.chunkSize;
+    for (const r of runes) {
+      const near = Math.max(Math.abs(Math.floor(r.col / S)), Math.abs(Math.floor(r.row / S))) < 3;
+      if (near) expect(['carpet', 'active', 'strength', 'rate']).not.toContain(r.token);
+    }
+    // Inscribed runes take one cell each.
+    clearArea(k);
+    k.inscribe(['speed', '=', 'speed']);
+    const mine = k.ecs.query('rune').map((id) => k.ecs.get(id, 'rune')).filter((r) => r.source === 'player');
+    expect(mine.map((r) => r.col - mine[0].col)).toEqual([0, 1, 2]);
+  });
+
+  it('magic runes in hand are an incantation: known ones cast, new ones are named once by the Council', async () => {
+    const k = await boot();
+    clearArea(k);
+    const n = k.needs()!;
+    n.energy = 100;
+    k.hand().tokens = ['x', 'luce'];
+    expect(await k.castSpell()).toBe(true);
+    expect(k.ecs.query('luce', 'effimero').length).toBe(1);
+    expect(n.energy).toBe(96);
+
+    k.hand().tokens = ['vita', 'scudo'];
+    const calls = k.models.usage.text;
+    expect(await k.castSpell()).toBe(true);
+    expect(k.models.usage.text).toBe(calls + 1);
+    expect(k.content.spells['vita scudo']).toBeTruthy();
+    expect(k.repo.head().message).toMatch(/incantesimo: vita scudo/);
+    expect(k.ecs.get(k.playerId, 'scudo')?.fino).toBeGreaterThan(k.time);
+    await k.castSpell();
+    expect(k.models.usage.text).toBe(calls + 1);
+
+    n.energy = 1;
+    expect(await k.castSpell()).toBe(false);
+  });
+
+  it('the day turns into night', () => {
+    const k0 = { time: 0 } as unknown as Kernel;
+    const light = (t: number) => Kernel.prototype.daylight.call({ ...k0, time: t });
+    expect(light(0)).toBeGreaterThan(0.6);
+    const night = Array.from({ length: 60 }, (_, i) => light((i / 60) * Kernel.DAY_SECONDS));
+    expect(Math.min(...night)).toBe(0);
+  });
+});
+
 describe('the Council', () => {
   it('forges a module: validated, committed, hot loaded and recorded in the bible', async () => {
     const k = await boot();

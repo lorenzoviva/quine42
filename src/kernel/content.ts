@@ -3,7 +3,7 @@
 // weight, effects and tags; loot tables pick by tag, so every new pack enriches every chest.
 
 import { Rng } from './rng';
-import type { ItemDef, ItemSpec, LayoutDef, LootTable, ModuleEntry, Recipe } from './types';
+import type { ItemDef, ItemSpec, LayoutDef, LootTable, MagicRune, ModuleEntry, Recipe, Spell } from './types';
 
 export const CATEGORY_GLYPHS: Record<string, string> = {
   cibo: 'ò', bevanda: 'Ů', medicina: '+', attrezzo: '⚒', arma: '†', materiale: '▪', luce: '☼', vestiario: 'Ʌ', contenitore: '◘', varie: '•',
@@ -29,6 +29,9 @@ export class Content {
   recipes: Recipe[] = [];
   loot: Record<string, LootTable> = {};
   layouts: Record<string, LayoutDef> = {};
+  /** Magic runes by token, incantations by sequence of tokens ("fuoco luce"). */
+  runes: Record<string, MagicRune> = {};
+  spells: Record<string, Spell> = {};
   /** Which module defines each item / layout (for writing updates back). */
   readonly itemSource = new Map<string, string>();
 
@@ -38,6 +41,8 @@ export class Content {
     this.recipes = [];
     this.loot = {};
     this.layouts = {};
+    this.runes = {};
+    this.spells = {};
     for (const m of modules) {
       const man = m.manifest;
       if (man.kind === 'item') {
@@ -65,6 +70,8 @@ export class Content {
       this.recipes.push(...(man.recipes ?? []));
       Object.assign(this.loot, man.loot ?? {});
       Object.assign(this.layouts, man.layouts ?? {});
+      Object.assign(this.runes, man.runes ?? {});
+      Object.assign(this.spells, man.spells ?? {});
     }
   }
 

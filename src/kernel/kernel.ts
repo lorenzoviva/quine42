@@ -11,7 +11,7 @@ import { Repo, type KeyValueStore } from './repo';
 import { Corona, type CoronaCell } from './corona';
 import { Input } from './input';
 import { discoverModules, readConfig } from './universe';
-import { cellIndex, extractLines, tokenize, type RuneComp, type RuneLine } from './runes';
+import { CARPET_TOKENS, cellIndex, extractLines, tokenize, type RuneComp, type RuneLine } from './runes';
 import { hash32, hashStr, hex, Rng } from './rng';
 import { BudgetError, type Models } from './ai/models';
 import { MemoryAssets, MemoryChunks, type AssetStore, type ChunkStore } from './assets';
@@ -24,10 +24,10 @@ import { planChunk, type ChunkPlan, type Where } from './agents/cartography';
 import { forge, judgeCombination, repairLogic, type ForgeOrigin } from './agents/forge';
 import { examine, narrate, npcReply, type NpcReply, type Turn } from './agents/minds';
 import { planGenesis } from './agents/genesis';
-import { judgeAction } from './agents/effects';
+import { judgeAction, nameSpell } from './agents/effects';
 import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Identity } from './agents/content';
 import { addItem, CARRY_CAPACITY, countItem, equippedItem, moveSlot, newInventory, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
-import type { ActionDef, Effect, FileMap, ItemDef, ItemSpec, Manifest, ModuleEntry, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
+import type { ActionDef, Effect, FileMap, Spell, ItemDef, ItemSpec, Manifest, ModuleEntry, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
 
 export interface Chunk {
   cx: number;
@@ -139,7 +139,9 @@ const FALLBACK_PLAYER = {
   hand: { tokens: [] as string[], sel: 0 },
   needs: { hunger: 85, thirst: 85, energy: 90, health: 100 },
 };
-const STARTER_RUNES = ['x', 'speed = speed', 'carpet . active'];
+const STARTER_RUNES = ['x', 'speed = speed', 'luce'];
+/** Chunks from the origin (in carpet space) before runes that touch the carpet can appear. */
+const CARPET_RUNE_DISTANCE = 3;
 
 const clone = <T>(v: T): T => (v === undefined ? v : JSON.parse(JSON.stringify(v)));
 
@@ -771,13 +773,17 @@ export class Kernel {
     };
     const at = (cell: number) => ({ x: ch.cx * S + (cell % S) + 0.5, y: ch.cy * S + Math.floor(cell / S) + 0.5 });
 
-    // Runes: rare and precious, on a free reachable stretch of a row, anywhere in the chunk.
-    const lines = [...plan.runes];
-    if (ch.cx === 0 && ch.cy === 0) for (const l of STARTER_RUNES) if (!lines.includes(l)) lines.push(l);
+    // Runes: rare and precious, on a free reachable stretch of a row, anywhere in the chunk. Those that
+    // touch the carpet only far from the start (you learn the logic before you can leave); sometimes a magic rune.
+    const far = Math.max(Math.abs(ch.cx), Math.abs(ch.cy)) >= CARPET_RUNE_DISTANCE;
+    const start = ch.cx === 0 && ch.cy === 0;
+    const lines = start ? [...STARTER_RUNES] : plan.runes.filter((l) => !tokenize(l).some((t) => CARPET_TOKENS.has(t)) || (far && rng.chance(0.5))).slice(0, far ? 2 : 1);
+    const magic = Object.keys(this.content.runes);
+    if (!start && magic.length && rng.chance(0.3)) lines.push(magic[rng.int(magic.length)]);
     const reachSet = result.reachable;
     lines.forEach((line, i) => {
       const toks = tokenize(line);
-      const w = toks.reduce((n, t) => n + t.length, 0);
+      const w = toks.length;
       for (let tries = 0; tries < 200; tries++) {
         const row = 1 + rng.int(S - 2);
         const col = 1 + rng.int(Math.max(1, S - 1 - w));
@@ -790,7 +796,7 @@ export class Kernel {
         toks.forEach((token, j) => {
           const origin = `${ch.key}#r${i}.${j}`;
           if (!this.consumed.has(origin)) this.ecs.spawn({ rune: { token, col: c, row: ch.cy * S + row, source: 'gen', origin } satisfies RuneComp, chunk: { key: ch.key } });
-          c += token.length;
+          c += 1;
         });
         break;
       }
@@ -1181,7 +1187,7 @@ export class Kernel {
       this.message("Qui non c'è tappeto su cui scrivere.", 'warn');
       return false;
     }
-    const width = tokens.reduce((n, t) => n + t.length, 0);
+    const width = tokens.length;
     const { col, row } = this.playerCell();
     const facing = this.playerComp()?.facing;
     const start = facing === 'left' ? { col: col - width, row } : facing === 'right' ? { col: col + 1, row } : { col, row: row + (facing === 'up' ? -1 : 1) };
@@ -1195,7 +1201,7 @@ export class Kernel {
     let c = start.col;
     for (const token of tokens) {
       this.ecs.spawn({ rune: { token, col: c, row: start.row, source: 'player' } satisfies RuneComp });
-      c += token.length;
+      c += 1;
     }
     this.runesDirty = true;
     this.bus.emit('rune:inscribed', { tokens });
@@ -1622,6 +1628,104 @@ export class Kernel {
     return j.story;
   }
 
+  /** Magic runes in hand, in their order: the incantation T would cast. */
+  incantation(): string[] {
+    return this.hand().tokens.filter((t) => this.content.runes[t]);
+  }
+
+  private castingNow = false;
+
+  /**
+   * T: the magic runes in hand, in order, are an incantation. Known ones are cast at once; a sequence
+   * never spoken before is named once by the Narrator (and kept, committed, in magic.spells). Costs energy.
+   */
+  async castSpell(): Promise<boolean> {
+    if (this.castingNow) return false;
+    const seq = this.incantation();
+    if (!seq.length) {
+      this.message(this.hand().tokens.length ? 'Nessuna delle rune che hai in mano è magica.' : 'Non hai rune in mano.', 'warn');
+      return false;
+    }
+    if (this.zone !== 'sim') {
+      this.message('Qui la magia non ha niente su cui agire.', 'warn');
+      return false;
+    }
+    const key = seq.join(' ');
+    this.castingNow = true;
+    try {
+      let spell: Spell | undefined = this.content.spells[key];
+      if (!spell) {
+        this.message(`Pronunci ${seq.map((t) => this.content.runes[t].name).join(' · ')}… il mondo esita.`);
+        spell = await this.inventSpell(seq);
+        if (!spell) {
+          this.message("Le rune si spengono: questa sequenza non vuol dire niente, per ora.", 'warn');
+          return false;
+        }
+      }
+      const n = this.needs();
+      if (n && n.energy < spell.cost) {
+        this.message(`«${spell.name}» chiede più forze di quante te ne restino (${spell.cost}).`, 'warn');
+        return false;
+      }
+      const ctx = {
+        palette: this.palette,
+        item: (x: string) => this.content.byName(x)?.id ?? (this.content.get(x) ? x : undefined),
+        module: (x: string) => (this.modules.get(x)?.manifest.kind === 'entity' ? x : undefined),
+        loot: new Set(Object.keys(this.content.loot)),
+      };
+      const effects = validateEffects(spell.effects, ctx).effects;
+      if (n) n.energy = Math.max(0, n.energy - spell.cost);
+      const pc = this.playerCarpet();
+      const [dx, dy] = this.facingDelta();
+      const at = { x: pc.x + dx * 1.5, y: pc.y + dy * 1.5 };
+      const target = this.nearest(at.x, at.y, 1.2);
+      const out = this.applyEffects(effects, target, at);
+      this.bus.emit('spell:cast', { name: spell.name, at, color: this.content.runes[seq[0]].color });
+      this.message(`«${spell.name}»: ${[spell.description, ...out].filter(Boolean).join(' ')}`, 'good');
+      return true;
+    } finally {
+      this.castingNow = false;
+    }
+  }
+
+  private async inventSpell(seq: string[]): Promise<Spell | undefined> {
+    const runes = seq.map((t) => ({ token: t, ...this.content.runes[t] }));
+    const known = Object.entries(this.content.spells).map(([sequence, sp]) => ({ sequence, name: sp.name, description: sp.description }));
+    let draft;
+    try {
+      draft = await nameSpell(this.council, runes, known, Object.entries(this.palette).filter(([c]) => c !== '?').map(([, t]) => t.name));
+    } catch (e) {
+      this.council.say('narratore', 'errore', `incantesimo ${seq.join(' ')}: ${(e as Error).message}`, undefined, 'spell.name');
+      return undefined;
+    }
+    const v = validateEffects(draft.effects, { palette: this.palette, item: (x) => this.content.byName(x)?.id, module: () => undefined, loot: new Set(Object.keys(this.content.loot)) });
+    if (v.dropped.length) this.council.say('kernel', 'scarta', `incantesimo «${draft.name}»: ${v.dropped.join('; ')}`, 'narratore', 'spell.name');
+    if (!v.effects.length) return undefined;
+    const spell: Spell = { name: draft.name, description: draft.description, cost: draft.cost, effects: v.effects };
+    const path = 'modules/magic.spells/manifest.json';
+    let man: Manifest;
+    try {
+      man = JSON.parse(this.repo.working[path] ?? 'null') ?? { id: 'magic.spells', name: 'Incantesimi scoperti', kind: 'data', version: '0.1.0', description: 'Sequenze di rune pronunciate dal viandante, a cui il Concilio ha dato un nome e un effetto.', spells: {} };
+    } catch {
+      return spell;
+    }
+    man.spells = { ...(man.spells ?? {}), [seq.join(' ')]: spell };
+    this.repo.write(path, JSON.stringify(man, null, 2) + '\n');
+    this.applyFiles({ ...this.repo.working });
+    const c = this.repo.commit(`incantesimo: ${seq.join(' ')} → ${spell.name}`, 'agent');
+    this.council.say('narratore', 'propone', `${seq.join(' ')} → «${spell.name}»: ${spell.description} [${spell.effects.map((e) => e.tipo).join(', ')}] (commit ${c.id})`, undefined, 'spell.name');
+    return spell;
+  }
+
+  /** Day and night: 0 = deep night, 1 = full day. A day lasts DAY_SECONDS; the world is born in the morning. */
+  daylight(): number {
+    const phase = (this.time / Kernel.DAY_SECONDS + 0.12) % 1;
+    const sun = Math.sin(phase * Math.PI * 2);
+    return Math.max(0, Math.min(1, 0.5 + sun * 1.4));
+  }
+
+  static DAY_SECONDS = 600;
+
   /** Applies validated effects through core.effects (Lua): the world's own code decides how they happen. */
   applyEffects(effects: Effect[], target?: Id, at?: { x: number; y: number }): string[] {
     const out: string[] = [];
@@ -1666,6 +1770,7 @@ export class Kernel {
       distanceToEdge: Math.round((this.config.circleRadius - Math.hypot(p.x, p.y)) * 10) / 10,
       luogo: this.placeHere()?.name,
       ora: Math.floor(this.time),
+      momento: this.daylight() > 0.6 ? 'giorno' : this.daylight() > 0.15 ? 'crepuscolo' : 'notte',
       viandanteImpugna: held ? this.itemInfo(held).name : 'niente',
       viandante: n ? { fame: Math.round(100 - n.hunger), sete: Math.round(100 - n.thirst), stanchezza: Math.round(100 - n.energy) } : undefined,
     };
@@ -1819,7 +1924,9 @@ export class Kernel {
     if (id !== undefined && this.ecs.alive.has(id)) {
       const rune: RuneComp = this.ecs.get(id, 'rune');
       const symbol = /^[A-Za-z_]\w*$/.test(rune.token) && !['true', 'false', 'nil', 'not', 'and', 'or'].includes(rune.token) ? this.sandbox.eval(rune.token) : null;
-      return { kind: 'rune', token: rune.token, doc: SYMBOL_DOCS[rune.token], symbol, line: this.lineOfRune(id), source: rune.source };
+      const mr = this.content.runes[rune.token];
+      const doc = mr ? `${mr.glyph} ${mr.name} — runa magica (${mr.element}): ${mr.description}. Tienila in mano e premi T.` : SYMBOL_DOCS[rune.token];
+      return { kind: 'rune', token: rune.token, doc, symbol, line: this.lineOfRune(id), source: rune.source };
     }
     for (const eid of this.ecs.query('pos', 'glyph')) {
       if (eid === this.playerId) continue;

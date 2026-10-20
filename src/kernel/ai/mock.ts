@@ -175,6 +175,13 @@ export class MockModels implements Models {
       }
       case 'action.judge':
         return this.judgeAction(d);
+      case 'spell.name': {
+        // Combines what the single runes already do, a little stronger.
+        const runes: Array<{ token: string; name: string; element: string }> = d.runes ?? [];
+        const BASE: Record<string, unknown> = { luce: { tipo: 'luce', raggio: 7, durata: 120 }, fuoco: { tipo: 'fuoco', raggio: 2, durata: 10 }, vita: { tipo: 'bisogni', salute: 30 }, scudo: { tipo: 'scudo', durata: 45 }, vento: { tipo: 'spingi', forza: 7 }, terra: { tipo: 'terreno', a: 'sentiero', raggio: 2 }, acqua: { tipo: 'terreno', a: 'acqua', raggio: 1 } };
+        const effetti = [...new Set(runes.map((r) => r.token))].map((t) => BASE[t]).filter(Boolean).slice(0, 3);
+        return { nome: runes.map((r) => r.name.slice(0, 3)).join('').replace(/^./, (c) => c.toUpperCase()), descrizione: `Le rune ${runes.map((r) => r.element).join(' e ')} insieme.`, costo: 8 * runes.length, effetti };
+      }
       case 'text.examine':
         return { testo: `Osservi ${d.what?.name ?? 'la cosa'} da vicino. ${d.what?.description ?? ''} Per un istante ti sembra di averla già vista, identica, altrove.` };
       default:

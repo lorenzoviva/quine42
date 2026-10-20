@@ -5,7 +5,7 @@ export type Action =
   | 'interact' | 'inscribe' | 'drop' | 'rollback'
   | 'prev' | 'next' | 'movePrev' | 'moveNext'
   | 'help' | 'console' | 'escape'
-  | 'inventory' | 'action' | 'feed' | 'walk'
+  | 'inventory' | 'action' | 'feed' | 'walk' | 'cast'
   | 'hot1' | 'hot2' | 'hot3' | 'hot4' | 'hot5' | 'hot6';
 
 const HOLD: Record<string, Action> = {
@@ -18,6 +18,7 @@ const HOLD: Record<string, Action> = {
 const PRESS: Record<string, Action> = {
   KeyE: 'interact', Space: 'interact',
   KeyQ: 'inscribe',
+  KeyT: 'cast',
   KeyX: 'drop',
   KeyR: 'rollback',
   KeyZ: 'prev',

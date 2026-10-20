@@ -5,6 +5,7 @@ import type { Renderer } from '../render/renderer';
 import type { ImageCache } from '../render/imagetools';
 import { HOTBAR } from '../kernel/inventory';
 import { $, el } from './dom';
+import { runeGlyph } from '../kernel/runes';
 
 /** An <img> for an item sprite, or its glyph while the sprite loads (or offline). */
 export function itemIcon(k: Kernel, images: ImageCache, item: string, size = 32): HTMLElement {
@@ -103,7 +104,16 @@ export class Hud {
     const handKey = `${hand.tokens.join('\u0001')}|${hand.sel}`;
     if (handKey !== this.lastHand) {
       this.lastHand = handKey;
-      this.hand.replaceChildren(...hand.tokens.map((t, i) => el('span', { class: `slot${i === hand.sel ? ' sel' : ''}` }, t)));
+      this.hand.replaceChildren(
+        ...hand.tokens.map((t, i) => {
+          const look = runeGlyph(t, k.content.runes[t]);
+          const span = el('span', { class: `slot${i === hand.sel ? ' sel' : ''}${look.color ? ' magic' : ''}` }, el('b', {}, look.glyph), look.label ? el('small', {}, look.label) : '');
+          if (look.color) span.style.color = look.color;
+          return span;
+        }),
+      );
+      const spell = k.incantation();
+      if (spell.length) this.hand.append(el('span', { class: 'cast' }, el('kbd', {}, 'T'), ` ${k.content.spells[spell.join(' ')]?.name ?? 'incantesimo ignoto'}`));
       this.hand.hidden = hand.tokens.length === 0;
     }
 

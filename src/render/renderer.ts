@@ -5,7 +5,7 @@
 // drawn only once the carpet stops holding you.
 
 import type { Chunk, Kernel } from '../kernel/kernel';
-import type { RuneComp } from '../kernel/runes';
+import { runeGlyph, type RuneComp } from '../kernel/runes';
 import type { TileDef } from '../kernel/types';
 import { hash32 } from '../kernel/rng';
 import { applyGlitch, randomGlyph } from './glitch';
@@ -54,6 +54,9 @@ export class Renderer {
   private glitch = 0;
   private crack = 0;
   private t = 0;
+  /** Darkness layer (night) and the bursts of light of spells. */
+  private dark?: HTMLCanvasElement;
+  private flashes: Array<{ x: number; y: number; until: number }> = [];
   mouse: { x: number; y: number } | null = null;
 
   constructor(
@@ -74,6 +77,7 @@ export class Renderer {
       const [cx, cy] = key.split(',').map(Number);
       for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) this.chunkCache.delete(`${cx + dx},${cy + dy}`);
     });
+    kernel.bus.on('spell:cast', ({ at }: { at: { x: number; y: number } }) => this.flashes.push({ x: at.x, y: at.y, until: this.t + 0.6 }));
     canvas.addEventListener('mousemove', (e) => (this.mouse = { x: e.offsetX, y: e.offsetY }));
     canvas.addEventListener('mouseleave', () => (this.mouse = null));
   }
@@ -151,6 +155,7 @@ export class Renderer {
     this.drawStanding(ox, oy, g);
     this.drawRoofs(ox, oy);
     if (this.showWalk) this.drawWalkability(ox, oy);
+    if (k.zone === 'sim') this.drawLighting(ox, oy);
     ctx.restore();
 
     if (revealed) {
@@ -661,32 +666,115 @@ export class Renderer {
     const ctx = this.ctx;
     const C = this.cell;
     const pulse = 0.7 + 0.3 * Math.sin(this.t * 3);
-    ctx.font = `bold ${Math.round(C * 0.6)}px ${FONT}`;
     for (const id of k.ecs.query('rune')) {
       const r: RuneComp = k.ecs.get(id, 'rune');
       const x0 = this.sx(r.col - ox);
       const y0 = this.sy(r.row - oy);
-      if (x0 > this.w || y0 > this.h || x0 + r.token.length * C < 0 || y0 + C < 0) continue;
+      if (x0 > this.w || y0 > this.h || x0 + C < 0 || y0 + C < 0) continue;
       const line = k.lineOfRune(id);
+      const magic = k.content.runes[r.token];
+      const look = runeGlyph(r.token, magic);
       const style = line?.error ? RUNE_STYLE.broken : RUNE_STYLE[r.source];
+      const edge = !line?.error && look.color ? look.color : style.edge;
       const jitter = line?.error ? (Math.random() - 0.5) * 2 : 0;
-      const pad = C * 0.12;
+      const pad = C * 0.1;
+      const cx = x0 + C / 2 + jitter;
+      // A carved stone: rounded, glowing in the rune's colour.
       ctx.fillStyle = style.bg;
-      ctx.fillRect(x0 + pad / 2, y0 + pad, r.token.length * C - pad, C - pad * 2);
+      ctx.beginPath();
+      ctx.roundRect(x0 + pad, y0 + pad, C - pad * 2, C - pad * 2, C * 0.18);
+      ctx.fill();
       ctx.globalAlpha = pulse;
-      ctx.shadowColor = style.edge;
-      ctx.shadowBlur = 8;
-      ctx.strokeStyle = style.edge;
+      ctx.shadowColor = edge;
+      ctx.shadowBlur = magic ? 14 : 8;
+      ctx.strokeStyle = edge;
       ctx.lineWidth = 1.5;
-      ctx.strokeRect(x0 + pad / 2, y0 + pad, r.token.length * C - pad, C - pad * 2);
+      ctx.stroke();
       ctx.shadowBlur = 0;
       ctx.globalAlpha = 1;
-      ctx.fillStyle = style.fg;
-      for (let i = 0; i < r.token.length; i++) {
-        const ch = g > 0.3 && Math.random() < g * 0.05 ? randomGlyph() : r.token[i];
-        ctx.fillText(ch, x0 + i * C + C / 2 + jitter, y0 + C / 2 + 1);
+      ctx.fillStyle = look.color && !line?.error ? look.color : style.fg;
+      const glyph = g > 0.3 && Math.random() < g * 0.05 ? randomGlyph() : look.glyph;
+      const big = look.glyph.length > 1 ? 0.42 : 0.56;
+      ctx.font = `bold ${Math.round(C * big)}px ${FONT}`;
+      ctx.fillText(glyph, cx, y0 + C * (look.label ? 0.42 : 0.52));
+      if (look.label) {
+        const size = Math.max(7, Math.min(C * 0.24, (C * 1.5) / look.label.length));
+        ctx.font = `${Math.round(size)}px ${FONT}`;
+        ctx.fillStyle = style.fg;
+        ctx.globalAlpha = 0.85;
+        ctx.fillText(look.label, cx, y0 + C * 0.78);
+        ctx.globalAlpha = 1;
       }
     }
+  }
+
+  /**
+   * Night: the world darkens with the hour; lights (lanterns, fires, spells, a lamp you carry) open
+   * holes in the dark. Drawn on its own canvas, then over the world.
+   */
+  private drawLighting(ox: number, oy: number): void {
+    const k = this.kernel;
+    const dark = (1 - k.daylight()) * 0.82;
+    this.flashes = this.flashes.filter((f) => f.until > this.t);
+    if (dark < 0.02 && !this.flashes.length) return;
+    const C = this.cell;
+    if (!this.dark) this.dark = document.createElement('canvas');
+    const c = this.dark;
+    if (c.width !== this.canvas.width || c.height !== this.canvas.height) [c.width, c.height] = [this.canvas.width, this.canvas.height];
+    const d = c.getContext('2d')!;
+    d.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    d.globalCompositeOperation = 'source-over';
+    d.clearRect(0, 0, this.w, this.h);
+    d.fillStyle = `rgba(6, 10, 32, ${dark})`;
+    d.fillRect(0, 0, this.w, this.h);
+    d.globalCompositeOperation = 'destination-out';
+    const hole = (x: number, y: number, r: number, strength = 1) => {
+      const gr = d.createRadialGradient(x, y, 0, x, y, r);
+      gr.addColorStop(0, `rgba(0,0,0,${strength})`);
+      gr.addColorStop(0.55, `rgba(0,0,0,${strength * 0.75})`);
+      gr.addColorStop(1, 'rgba(0,0,0,0)');
+      d.fillStyle = gr;
+      d.fillRect(x - r, y - r, r * 2, r * 2);
+    };
+    const pp = k.playerPos();
+    const px = this.sx(pp.x);
+    const py = this.sy(pp.y);
+    // You always see a little around yourself.
+    hole(px, py, C * 2.2, 0.55);
+    const glow: Array<[number, number, number, string]> = [];
+    for (const id of k.ecs.query('luce')) {
+      const l = k.ecs.get(id, 'luce');
+      if (!l?.accesa) continue;
+      const r = (Number(l.raggio) || 4) * C;
+      if (id === k.playerId) {
+        hole(px, py, r);
+        continue;
+      }
+      const p = k.ecs.get(id, 'pos');
+      if (!p) continue;
+      const x = this.sx(p.x - ox);
+      const y = this.sy(p.y - oy);
+      if (x < -r || y < -r || x > this.w + r || y > this.h + r) continue;
+      hole(x, y, r * (0.94 + 0.06 * Math.sin(this.t * 9 + id)));
+      if (l.colore) glow.push([x, y, r, l.colore]);
+    }
+    for (const f of this.flashes) hole(this.sx(f.x - ox), this.sy(f.y - oy), C * 3 * ((f.until - this.t) / 0.6), 1);
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.drawImage(c, 0, 0);
+    ctx.restore();
+    // Warm light where fires and spells shine.
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for (const [x, y, r, col] of glow) {
+      const gr = ctx.createRadialGradient(x, y, 0, x, y, r * 0.6);
+      gr.addColorStop(0, `${col}33`);
+      gr.addColorStop(1, `${col}00`);
+      ctx.fillStyle = gr;
+      ctx.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+    ctx.restore();
   }
 
   private drawBubbles(ox: number, oy: number): void {

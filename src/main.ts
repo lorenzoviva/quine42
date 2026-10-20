@@ -104,6 +104,7 @@ async function main() {
   kernel.bus.on('item:picked', () => sfx.blip(520, 0.09, 'triangle'));
   kernel.bus.on('item:crafted', () => sfx.chord([523, 659], 0.2));
   kernel.bus.on('rune:inscribed', () => sfx.chord([440, 554, 659], 0.25));
+  kernel.bus.on('spell:cast', () => sfx.chord([330, 494, 740, 988], 0.5));
   kernel.bus.on('fault', ({ isNew }) => isNew && sfx.noise(0.3));
   kernel.bus.on('rollback', () => sfx.chord([660, 440, 330], 0.3));
   kernel.bus.on('forge:done', () => sfx.chord([392, 494, 587], 0.4));
@@ -117,6 +118,9 @@ async function main() {
         break;
       case 'inscribe':
         kernel.inscribeHand();
+        break;
+      case 'cast':
+        void kernel.castSpell();
         break;
       case 'drop':
         kernel.dropSelected();

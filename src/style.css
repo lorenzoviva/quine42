@@ -68,6 +68,11 @@ html, body {
 #hand { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; min-height: 30px; }
 #hand .slot { background: #062a33; border: 1px solid #1f6c7a; color: #b8f6ff; padding: 3px 9px; font-size: 15px; }
 #hand .slot.sel { border-color: var(--cyan); box-shadow: 0 0 10px #3fd6f077; color: #fff; }
+#hand .slot { display: inline-flex; flex-direction: column; align-items: center; line-height: 1.05; min-width: 30px; }
+#hand .slot b { font-size: 18px; }
+#hand .slot small { font-size: 9.5px; opacity: 0.8; }
+#hand .slot.magic { border-color: currentColor; background: #160f2a; }
+#hand .cast { align-self: center; color: var(--gold); font-size: 12px; padding-left: 8px; }
 #hand .empty { color: var(--dim); font-size: 12px; padding-top: 6px; }
 .keys { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; color: var(--dim); font-size: 11.5px; background: rgba(3, 6, 5, 0.75); padding: 4px 12px; }
 #hand .empty { background: rgba(3, 6, 5, 0.75); padding: 3px 10px; }

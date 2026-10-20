@@ -116,9 +116,9 @@ describe('content', () => {
 });
 
 describe('runes', () => {
-  it('groups touching runes into lines in reading order', () => {
+  it('groups touching runes (one cell each) into lines in reading order', () => {
     const r = (id: number, token: string, col: number, row: number) => ({ id, rune: { token, col, row, source: 'gen' as const } });
-    const lines = extractLines([r(1, 'carpet', 0, 0), r(2, '.', 6, 0), r(3, 'active', 7, 0), r(4, 'x', 20, 0), r(5, 'y', 0, 1)]);
+    const lines = extractLines([r(1, 'carpet', 0, 0), r(2, '.', 1, 0), r(3, 'active', 2, 0), r(4, 'x', 4, 0), r(5, 'y', 0, 1)]);
     expect(lines.map((l) => l.src)).toEqual(['carpet . active', 'x', 'y']);
   });
 });

@@ -1,4 +1,4 @@
-// Runes on the carpet. A rune is one lexical token occupying `token.length` cells on a row.
+// Runes on the carpet. A rune is one lexical token occupying one cell, drawn as a glyph.
 // Runes touching horizontally form a line; every line is Lua code that runs every tick.
 
 import type { Id } from './ecs';
@@ -57,9 +57,9 @@ export function extractLines(runes: Array<{ id: Id; rune: RuneComp }>): RuneLine
       if (cur && rune.col <= cur.col + cur.width) {
         cur.ids.push(id);
         cur.tokens.push(rune.token);
-        cur.width = Math.max(cur.width, rune.col + rune.token.length - cur.col);
+        cur.width = Math.max(cur.width, rune.col + 1 - cur.col);
       } else {
-        cur = { key: lineKey(row, rune.col), row, col: rune.col, width: rune.token.length, ids: [id], tokens: [rune.token], src: '' };
+        cur = { key: lineKey(row, rune.col), row, col: rune.col, width: 1, ids: [id], tokens: [rune.token], src: '' };
         lines.push(cur);
       }
     }
@@ -71,6 +71,23 @@ export function extractLines(runes: Array<{ id: Id; rune: RuneComp }>): RuneLine
 /** Map "col,row" → rune id for every cell covered by a rune. */
 export function cellIndex(runes: Array<{ id: Id; rune: RuneComp }>): Map<string, Id> {
   const m = new Map<string, Id>();
-  for (const { id, rune } of runes) for (let i = 0; i < rune.token.length; i++) m.set(`${rune.col + i},${rune.row}`, id);
+  for (const { id, rune } of runes) m.set(`${rune.col},${rune.row}`, id);
   return m;
 }
+
+const FUTHARK = [...'ᚠᚢᚦᚩᚱᚷᚹᚺᚾᛁᛃᛇᛈᛏᛖᛗᛜᛞᚳᚸᛣᛤᛥᛯᛰᛱᛲᛳᛴᛵ'];
+
+/**
+ * How a rune looks: magic runes have their own glyph; short tokens (operators, digits, `x`) are their
+ * own sign; longer words get a stable runic letter, with the word written small beneath.
+ */
+export function runeGlyph(token: string, magic?: { glyph: string; color: string }): { glyph: string; label?: string; color?: string } {
+  if (magic) return { glyph: magic.glyph, label: token, color: magic.color };
+  if (token.length <= 2) return { glyph: token };
+  let h = 0;
+  for (const ch of token) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return { glyph: FUTHARK[h % FUTHARK.length], label: token };
+}
+
+/** Tokens that touch the carpet: rare, and never close to where the world begins. */
+export const CARPET_TOKENS = new Set(['carpet', 'active', 'strength', 'rate', 'ox', 'oy']);

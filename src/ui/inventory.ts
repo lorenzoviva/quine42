@@ -7,6 +7,7 @@ import type { ImageCache } from '../render/imagetools';
 import { CARRY_CAPACITY, HOTBAR, totalWeight } from '../kernel/inventory';
 import { itemIcon } from './hud';
 import { $, el } from './dom';
+import { runeGlyph } from '../kernel/runes';
 
 export class InventoryPanel {
   private root = $('#inventory');
@@ -191,7 +192,9 @@ export class InventoryPanel {
     const hand = k.hand();
     const runes = el('div', { class: 'runes' });
     hand.tokens.forEach((t, i) => {
-      const r = el('span', { class: `rune${i === hand.sel ? ' sel' : ''}`, draggable: 'true' }, t);
+      const look = runeGlyph(t, k.content.runes[t]);
+      const r = el('span', { class: `rune${i === hand.sel ? ' sel' : ''}`, draggable: 'true', title: k.content.runes[t]?.description ?? t }, `${look.glyph !== t ? `${look.glyph} ` : ''}${t}`);
+      if (look.color) r.style.color = look.color;
       r.ondragstart = (e) => e.dataTransfer?.setData('rune', String(i));
       r.ondragover = (e) => e.preventDefault();
       r.ondrop = (e) => {

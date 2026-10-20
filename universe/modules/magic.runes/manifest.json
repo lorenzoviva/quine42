@@ -1,0 +1,26 @@
+{
+  "id": "magic.runes",
+  "name": "Rune magiche",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "Le rune della magia: ognuna è anche una parola del codice (una variabile che non vale niente, finché qualcuno non le dà un valore), ma tenute in mano e pronunciate (T) diventano incantesimi. Più rune in fila fanno un incantesimo nuovo: il Concilio gli dà un nome la prima volta.",
+  "runes": {
+    "luce": { "name": "Sowilo", "glyph": "ᛊ", "color": "#ffe27a", "element": "luce", "description": "il sole: illumina, rivela" },
+    "fuoco": { "name": "Kenaz", "glyph": "ᚲ", "color": "#ff7a3a", "element": "fuoco", "description": "la fiaccola: brucia, scalda" },
+    "acqua": { "name": "Laguz", "glyph": "ᛚ", "color": "#5ab8ff", "element": "acqua", "description": "il lago: scorre, spegne, allaga" },
+    "terra": { "name": "Othala", "glyph": "ᛟ", "color": "#c49a5a", "element": "terra", "description": "il suolo: apre sentieri, smuove" },
+    "vita": { "name": "Berkano", "glyph": "ᛒ", "color": "#7ee08a", "element": "vita", "description": "la betulla: cura, fa crescere" },
+    "scudo": { "name": "Algiz", "glyph": "ᛉ", "color": "#b9a6ff", "element": "protezione", "description": "il corno d'alce: protegge" },
+    "vento": { "name": "Ansuz", "glyph": "ᚨ", "color": "#d8f4ff", "element": "aria", "description": "il soffio: spinge, porta voci" }
+  },
+  "spells": {
+    "luce": { "name": "Lume", "description": "Una piccola luce resta sospesa davanti a te.", "cost": 4, "effects": [{ "tipo": "luce", "raggio": 5, "durata": 90 }] },
+    "fuoco": { "name": "Favilla", "description": "Una fiammata davanti a te: brucia ciò che è secco.", "cost": 10, "effects": [{ "tipo": "fuoco", "raggio": 1, "durata": 8 }] },
+    "acqua": { "name": "Polla", "description": "Dal suolo davanti a te sgorga acqua.", "cost": 10, "effects": [{ "tipo": "terreno", "a": "w", "raggio": 0 }] },
+    "terra": { "name": "Varco", "description": "Il terreno davanti a te si spiana in un sentiero, anche attraverso rovi e muri.", "cost": 14, "effects": [{ "tipo": "terreno", "a": "p", "raggio": 1 }] },
+    "vita": { "name": "Linfa", "description": "Un tepore ti scorre nelle vene.", "cost": 12, "effects": [{ "tipo": "bisogni", "salute": 25 }] },
+    "scudo": { "name": "Corno", "description": "Un guscio d'aria ti avvolge.", "cost": 8, "effects": [{ "tipo": "scudo", "durata": 30 }] },
+    "vento": { "name": "Soffio", "description": "Una folata spinge via ciò che hai davanti.", "cost": 6, "effects": [{ "tipo": "spingi", "forza": 5 }] },
+    "acqua fuoco": { "name": "Vapore", "description": "Acqua e fuoco si annullano: il fuoco davanti a te si spegne in una nube bianca.", "cost": 6, "effects": [{ "tipo": "messaggio", "testo": "Una nube di vapore sale e si dissolve." }] }
+  }
+}

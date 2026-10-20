@@ -108,3 +108,50 @@ export async function judgeAction(c: Council, ctx: ActionContext): Promise<Actio
     requires: r.serve ? String(r.serve) : undefined,
   };
 }
+
+const SPELL_SCHEMA: Schema = {
+  type: 'OBJECT',
+  properties: {
+    nome: { type: 'STRING', description: "nome dell'incantesimo, 1-2 parole" },
+    descrizione: { type: 'STRING', description: 'cosa fa, una frase' },
+    costo: { type: 'INTEGER', description: 'energia del viandante che consuma, da 3 a 40' },
+    effetti: { type: 'ARRAY', items: EFFECT_SCHEMA },
+  },
+  required: ['nome', 'descrizione', 'costo', 'effetti'],
+};
+
+export interface SpellDraft {
+  name: string;
+  description: string;
+  cost: number;
+  effects: unknown[];
+}
+
+/**
+ * An incantation never spoken before: the Narrator decides, once, what this sequence of runes does.
+ * Coherent with the runes' elements and with the incantations already known; stronger costs more.
+ */
+export async function nameSpell(
+  c: Council,
+  runes: Array<{ token: string; name: string; element: string; description: string }>,
+  known: Array<{ sequence: string; name: string; description: string }>,
+  terrains: string[],
+): Promise<SpellDraft> {
+  const seq = runes.map((r) => r.token).join(' ');
+  const prompt = [
+    `Il viandante pronuncia, in quest'ordine, le rune: ${runes.map((r) => `«${r.token}» (${r.name}, ${r.element}: ${r.description})`).join(', ')}.`,
+    `Incantesimi già noti:\n${known.map((k) => `- ${k.sequence} → ${k.name}: ${k.description}`).join('\n') || '(nessuno)'}`,
+    `Decidi cosa fa questa sequenza (${seq}). L'ordine conta. Deve derivare dagli elementi delle rune, essere coerente con gli incantesimi noti e con il mondo; più rune = più forte e più costoso. Effetti (al massimo 4) SOLO da questo elenco:\n${EFFECTS_GUIDE}`,
+    `Terreni esistenti: ${terrains.join(', ')}. Gli effetti agiscono su ciò che il viandante ha davanti (o sul viandante stesso per bisogni e scudo).`,
+  ].join('\n\n');
+  const r = await c.ask<{ nome: string; descrizione: string; costo: number; effetti?: unknown[] }>('narratore', 'spell.name', prompt, SPELL_SCHEMA, {
+    data: { runes, known, terrains },
+    temperature: 0.7,
+  });
+  return {
+    name: String(r.nome ?? seq).slice(0, 40),
+    description: String(r.descrizione ?? '').slice(0, 200),
+    cost: Math.max(3, Math.min(40, Math.round(Number(r.costo) || 10))),
+    effects: Array.isArray(r.effetti) ? r.effetti : [],
+  };
+}
