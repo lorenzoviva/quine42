@@ -18,8 +18,9 @@ const ITEM_SCHEMA: Schema = {
     peso: { type: 'NUMBER' },
     pila: { type: 'INTEGER' },
     tag: { type: 'ARRAY', items: { type: 'STRING' } },
-    effetti: { type: 'OBJECT', properties: { fame: { type: 'NUMBER' }, sete: { type: 'NUMBER' }, energia: { type: 'NUMBER' }, salute: { type: 'NUMBER' } } },
+    effetti: { type: 'OBJECT', properties: { fame: { type: 'NUMBER' }, sete: { type: 'NUMBER' }, energia: { type: 'NUMBER' }, salute: { type: 'NUMBER' }, mana: { type: 'NUMBER' } } },
     impugnabile: { type: 'BOOLEAN' },
+    contenitore: { type: 'INTEGER', description: 'solo per borse, sacche, cesti, bisacce che si portano addosso: quante cose ci stanno dentro (2-12)' },
     aspetto: { type: 'STRING' },
   },
   required: ['nome', 'descrizione', 'categoria', 'peso', 'pila', 'tag', 'aspetto'],
@@ -32,8 +33,9 @@ interface RawItem {
   peso: number;
   pila: number;
   tag: string[];
-  effetti?: { fame?: number; sete?: number; energia?: number; salute?: number };
+  effetti?: { fame?: number; sete?: number; energia?: number; salute?: number; mana?: number };
   impugnabile?: boolean;
+  contenitore?: number;
   aspetto: string;
 }
 
@@ -52,7 +54,8 @@ export function toItemDef(r: RawItem, taken: Set<string>): ItemDef | null {
   taken.add(id);
   const category = (ITEM_CATEGORIES as readonly string[]).includes(r.categoria) ? (r.categoria as ItemDef['category']) : 'varie';
   const e = r.effetti ?? {};
-  const effects = { hunger: clamp(e.fame, -50, 60, 0), thirst: clamp(e.sete, -50, 60, 0), energy: clamp(e.energia, -50, 60, 0), health: clamp(e.salute, -50, 60, 0) };
+  const effects = { hunger: clamp(e.fame, -50, 60, 0), thirst: clamp(e.sete, -50, 60, 0), energy: clamp(e.energia, -50, 60, 0), health: clamp(e.salute, -50, 60, 0), mana: clamp(e.mana, -50, 60, 0) };
+  const bag = category === 'contenitore' && Number(r.contenitore) >= 2 ? { size: Math.round(clamp(r.contenitore, 2, 12, 4)) } : undefined;
   const hasEffects = Object.values(effects).some((v) => v !== 0);
   return {
     id,
@@ -60,13 +63,14 @@ export function toItemDef(r: RawItem, taken: Set<string>): ItemDef | null {
     description: String(r.descrizione ?? '').slice(0, 240),
     category,
     weight: clamp(r.peso, 0, 30, 1),
-    stack: Math.round(clamp(r.pila, 1, 50, 1)),
+    stack: bag ? 1 : Math.round(clamp(r.pila, 1, 50, 1)),
     tags: [...new Set((r.tag ?? []).map((t) => String(t).toLowerCase().trim()).filter(Boolean).slice(0, 8))],
     glyph: CATEGORY_GLYPHS[category] ?? '•',
     color: `hsl(${hashStr(id) % 360} 60% 66%)`,
     iconPrompt: String(r.aspetto ?? r.nome).slice(0, 200),
     equippable: !!r.impugnabile,
     ...(hasEffects ? { effects } : {}),
+    ...(bag ? { container: bag } : {}),
   };
 }
 

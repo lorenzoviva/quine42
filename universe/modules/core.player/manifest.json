@@ -2,7 +2,7 @@
   "id": "core.player",
   "name": "Viandante",
   "kind": "player",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Tu.",
   "appearance": {
     "glyph": "@",
@@ -28,7 +28,8 @@
       "hunger": 85,
       "thirst": 85,
       "energy": 90,
-      "health": 100
+      "health": 100,
+      "mana": 60
     }
   },
   "persist": [
@@ -38,6 +39,10 @@
     "needs.hunger",
     "needs.thirst",
     "needs.energy",
-    "needs.health"
+    "needs.health",
+    "needs.mana"
+  ],
+  "inventory": [
+    "item.borsa-rune"
   ]
 }

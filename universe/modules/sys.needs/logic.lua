@@ -15,6 +15,8 @@ function M.update(dt)
     elseif n.hunger > 50 and n.thirst > 50 then
       n.health = math.min(100, n.health + 0.08 * dt)
     end
+    -- Il mana torna piano, da solo; i cristalli magici lo ridanno di colpo.
+    n.mana = math.min(100, (n.mana or 0) + 0.12 * dt)
     if n.health <= 0 then
       n.health, n.hunger, n.thirst, n.energy = 35, 35, 35, 50
       world.say("Svieni. Quando riapri gli occhi sei di nuovo al centro di tutto, con la bocca secca.")

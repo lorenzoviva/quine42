@@ -75,7 +75,7 @@ export interface TileDef {
   sprites?: string[];
 }
 
-export const ITEM_CATEGORIES = ['cibo', 'bevanda', 'medicina', 'attrezzo', 'arma', 'materiale', 'luce', 'vestiario', 'contenitore', 'varie'] as const;
+export const ITEM_CATEGORIES = ['cibo', 'bevanda', 'medicina', 'attrezzo', 'arma', 'materiale', 'luce', 'vestiario', 'contenitore', 'magia', 'varie'] as const;
 export type ItemCategory = (typeof ITEM_CATEGORIES)[number];
 
 /** A thing that can be carried. Mostly data (cheap text), generated in packs; custom logic is optional. */
@@ -94,8 +94,12 @@ export interface ItemDef {
   icon?: string;
   iconPrompt?: string;
   equippable?: boolean;
-  /** Applied by core.items when the item is used (eaten, drunk, applied). */
-  effects?: { hunger?: number; thirst?: number; energy?: number; health?: number };
+  /** Applied by core.items when the item is used (eaten, drunk, applied, absorbed). */
+  effects?: { hunger?: number; thirst?: number; energy?: number; health?: number; mana?: number };
+  /** Bags, pouches, baskets: an inventory inside the item (only things with tag `accepts`, if set). */
+  container?: { size: number; accepts?: string };
+  /** Learned uses ("Altro…" in the inventory): effects applied without asking the Council again. */
+  actions?: ActionDef[];
   /** Module with custom logic (on_use / on_action), if any. */
   module?: string;
 }

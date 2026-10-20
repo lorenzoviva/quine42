@@ -135,7 +135,7 @@ export class Hud {
 
     const n = k.needs();
     if (n) {
-      const bars: Array<[string, number, string]> = [['fame', n.hunger, '#e0a040'], ['sete', n.thirst, '#4aa8e8'], ['energia', n.energy, '#c0d860'], ['salute', n.health, '#e85060']];
+      const bars: Array<[string, number, string]> = [['fame', n.hunger, '#e0a040'], ['sete', n.thirst, '#4aa8e8'], ['energia', n.energy, '#c0d860'], ['salute', n.health, '#e85060'], ['mana', n.mana ?? 0, '#a070ff']];
       const key = bars.map((b) => Math.round(b[1])).join(',');
       if (key !== this.lastNeeds) {
         this.lastNeeds = key;

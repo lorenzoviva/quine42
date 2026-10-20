@@ -3,10 +3,11 @@
 // weight, effects and tags; loot tables pick by tag, so every new pack enriches every chest.
 
 import { Rng } from './rng';
+import { runeGlyph } from './runes';
 import type { ItemDef, ItemSpec, LayoutDef, LootTable, MagicRune, ModuleEntry, Recipe, Spell } from './types';
 
 export const CATEGORY_GLYPHS: Record<string, string> = {
-  cibo: 'ò', bevanda: 'Ů', medicina: '+', attrezzo: '⚒', arma: '†', materiale: '▪', luce: '☼', vestiario: 'Ʌ', contenitore: '◘', varie: '•',
+  cibo: 'ò', bevanda: 'Ů', medicina: '+', attrezzo: '⚒', arma: '†', materiale: '▪', luce: '☼', vestiario: 'Ʌ', contenitore: '◘', magia: '✦', varie: '•',
 };
 
 export function normName(s: string): string {
@@ -75,8 +76,28 @@ export class Content {
     }
   }
 
+  /**
+   * Runes are items too (`rune:<token>`): small, light, stackable, kept in pockets or in a rune pouch.
+   * They are not written in any pack: every token is a rune.
+   */
   get(id: string): ItemDef | undefined {
-    return this.items.get(id);
+    const d = this.items.get(id);
+    if (d || !id.startsWith('rune:')) return d;
+    const token = id.slice(5);
+    if (!token || token.length > 24) return undefined;
+    const magic = this.runes[token];
+    const look = runeGlyph(token, magic);
+    return {
+      id,
+      name: magic ? `Runa ${magic.name} («${token}»)` : `Runa «${token}»`,
+      description: magic ? `Runa magica (${magic.element}): ${magic.description}. Come codice è la parola «${token}».` : `Un frammento del codice del mondo: la parola «${token}». Incisa sul tappeto, si esegue.`,
+      category: magic ? 'magia' : 'varie',
+      weight: 0.02,
+      stack: 50,
+      tags: magic ? ['runa', 'magica'] : ['runa'],
+      glyph: look.glyph,
+      color: magic?.color ?? '#ffcf5c',
+    };
   }
 
   /** Finds an item by a name a model or the player used ("una corda" → item.corda). */
@@ -103,7 +124,7 @@ export class Content {
     const [lo, hi] = table.rolls;
     const rolls = lo + rng.int(Math.max(1, hi - lo + 1));
     const out: Array<{ item: string; count: number }> = [];
-    const entries = table.entries.filter((e) => (e.item ? this.items.has(e.item) : this.withTag(e.tag ?? '').length));
+    const entries = table.entries.filter((e) => (e.item ? !!this.get(e.item) : this.withTag(e.tag ?? '').length));
     const total = entries.reduce((s, e) => s + e.weight, 0);
     for (let i = 0; i < rolls && total > 0; i++) {
       let r = rng.next() * total;
@@ -119,6 +140,8 @@ export class Content {
       const max = Math.max(min, e.max ?? 1);
       out.push({ item, count: min + rng.int(max - min + 1) });
     }
+    // Magic hides inside things: any chest or drawer may hold something from the "magia" table.
+    if (tableId !== 'magia' && tableId !== 'terreno' && this.loot.magia && rng.chance(0.18)) out.push(...this.roll('magia', rng));
     return out;
   }
 

@@ -1,7 +1,7 @@
 -- Uso generico degli oggetti, secondo categoria ed effetti (scritti dal Concilio nei pacchetti).
 local M = {}
 
-local VERBI = { cibo = "Mangi", bevanda = "Bevi", medicina = "Usi" }
+local VERBI = { cibo = "Mangi", bevanda = "Bevi", medicina = "Usi", magia = "Assorbi" }
 
 local function clamp(v) return math.max(0, math.min(100, v)) end
 
@@ -17,6 +17,7 @@ function M.use(user, item)
       n.thirst = clamp(n.thirst + (e.thirst or 0))
       n.energy = clamp(n.energy + (e.energy or 0))
       n.health = clamp(n.health + (e.health or 0))
+      n.mana = clamp((n.mana or 0) + (e.mana or 0))
     end
     inventory.remove(user, item, 1)
     return verbo .. ": " .. d.name .. "."

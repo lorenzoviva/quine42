@@ -27,7 +27,7 @@ import { agentReply, examine, narrate, npcReply, type NpcReply, type Turn } from
 import { planGenesis } from './agents/genesis';
 import { judgeAction, nameSpell } from './agents/effects';
 import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Identity } from './agents/content';
-import { addItem, CARRY_CAPACITY, countItem, equippedItem, moveSlot, newInventory, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
+import { addItem, CARRY_CAPACITY, countItem, equippedItem, moveSlot, newInventory, putSlot, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
 import type { ActionDef, Effect, FileMap, Spell, ItemDef, ItemSpec, Manifest, ModuleEntry, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
 
 export interface Chunk {
@@ -108,6 +108,8 @@ export interface Needs {
   thirst: number;
   energy: number;
   health: number;
+  /** Magic strength: spells cost it, it slowly comes back, magic crystals restore it. */
+  mana: number;
 }
 
 export interface KernelOptions {
@@ -139,7 +141,7 @@ const DEFAULT_ITEM: ItemSpec = { stackable: false, maxStack: 1, weight: 1, equip
 const FALLBACK_PLAYER = {
   player: { speed: 6, facing: 'down', load: 0 },
   hand: { tokens: [] as string[], sel: 0 },
-  needs: { hunger: 85, thirst: 85, energy: 90, health: 100 },
+  needs: { hunger: 85, thirst: 85, energy: 90, health: 100, mana: 60 },
 };
 const STARTER_RUNES = ['x', 'speed = speed', 'luce'];
 /** Chunks from the origin (in carpet space) before runes that touch the carpet can appear. */
@@ -577,6 +579,8 @@ export class Kernel {
 
     if (!this.playerId || !this.ecs.alive.has(this.playerId)) {
       this.playerId = this.ecs.spawn({ ...defaults, pos: { x: 0, y: 0 }, glyph, body, module: { id: playerMod?.manifest.id ?? 'kernel.player' } });
+      // What the wanderer starts with (e.g. a rune pouch).
+      for (const it of playerMod?.manifest.inventory ?? []) if (this.content.get(it)) this.give(it, 1);
     } else {
       this.ecs.set(this.playerId, 'glyph', glyph);
       if (reset) this.resetComponents(this.playerId, defaults, [...(playerMod?.manifest.persist ?? []), 'inventory.slots', 'inventory.equipped']);
@@ -1198,6 +1202,11 @@ export class Kernel {
     const id = this.runeCells.get(`${col},${row}`) ?? this.runeCells.get(`${col + dx},${row + dy}`);
     if (id === undefined) return false;
     const rune: RuneComp = this.ecs.get(id, 'rune');
+    // A rune is a thing: it goes into the rune pouch (or the pockets), and onto the phrase being composed.
+    if (!this.give(`rune:${rune.token}`, 1)) {
+      this.message("Non hai più posto per altre rune.", 'warn');
+      return true;
+    }
     if (rune.origin) this.consumed.add(rune.origin);
     this.ecs.destroy(id);
     const hand = this.hand();
@@ -1219,6 +1228,11 @@ export class Kernel {
       this.message("Qui non c'è tappeto su cui scrivere.", 'warn');
       return false;
     }
+    const missing = this.missingRunes(tokens);
+    if (missing) {
+      this.message(`Non hai la runa «${missing}».`, 'warn');
+      return false;
+    }
     const width = tokens.length;
     const { col, row } = this.playerCell();
     const facing = this.playerComp()?.facing;
@@ -1232,6 +1246,7 @@ export class Kernel {
     }
     let c = start.col;
     for (const token of tokens) {
+      removeItem(this.inventory(), `rune:${token}`, 1);
       this.ecs.spawn({ rune: { token, col: c, row: start.row, source: 'player' } satisfies RuneComp });
       c += 1;
     }
@@ -1239,6 +1254,53 @@ export class Kernel {
     this.bus.emit('rune:inscribed', { tokens });
     this.message(`Hai inciso: ${tokens.join(' ')}`);
     return true;
+  }
+
+  /** The first token of a phrase the player does not carry enough runes for, if any. */
+  missingRunes(tokens: string[]): string | undefined {
+    const need = new Map<string, number>();
+    for (const t of tokens) need.set(t, (need.get(t) ?? 0) + 1);
+    for (const [t, n] of need) if (countItem(this.inventory(), `rune:${t}`) < n) return t;
+    return undefined;
+  }
+
+  /** Adds a carried rune to the phrase being composed (if there is one left that is not already in it). */
+  composeRune(token: string): boolean {
+    const hand = this.hand();
+    if (this.missingRunes([...hand.tokens, token])) {
+      this.message(`Non hai altre rune «${token}».`, 'warn');
+      return false;
+    }
+    hand.tokens.push(token);
+    hand.sel = hand.tokens.length - 1;
+    return true;
+  }
+
+  /** Takes a rune out of the phrase (it stays in the pouch). */
+  uncompose(index: number): void {
+    const hand = this.hand();
+    if (index < 0 || index >= hand.tokens.length) return;
+    hand.tokens.splice(index, 1);
+    hand.sel = Math.max(0, Math.min(hand.sel, hand.tokens.length - 1));
+  }
+
+  /** The phrase never uses runes the player no longer has (dropped, stored away, spent). */
+  syncHand(): void {
+    const hand = this.hand();
+    if (!hand?.tokens?.length) return;
+    const left = new Map<string, number>();
+    const keep: string[] = [];
+    for (const t of hand.tokens) {
+      if (!left.has(t)) left.set(t, countItem(this.inventory(), `rune:${t}`));
+      if (left.get(t)! > 0) {
+        keep.push(t);
+        left.set(t, left.get(t)! - 1);
+      }
+    }
+    if (keep.length !== hand.tokens.length) {
+      hand.tokens = keep;
+      hand.sel = Math.max(0, Math.min(hand.sel, keep.length - 1));
+    }
   }
 
   inscribeHand(): void {
@@ -1286,7 +1348,7 @@ export class Kernel {
     const pk = this.ecs.get(id, 'pickup');
     if (!pk) return false;
     const info = this.itemInfo(pk.item);
-    const added = addItem(this.inventory(), pk.item, pk.count, info.spec);
+    const added = pk.inv ? putSlot(this.inventory(), { item: pk.item, count: 1, inv: pk.inv }, info.spec) : this.give(pk.item, pk.count);
     if (!added) {
       this.message("L'inventario è pieno.", 'warn');
       return true;
@@ -1306,6 +1368,8 @@ export class Kernel {
     const slot = this.inventory().slots[index];
     if (!slot) return;
     const def = this.content.get(slot.item);
+    if (def?.container) return void this.bus.emit('ui:bag', { slot: index });
+    if (slot.item.startsWith('rune:')) return void this.composeRune(slot.item.slice(5));
     const custom = def?.module && this.sandbox.has(def.module, 'on_use') ? def.module : null;
     if (!custom && def?.equippable && !def.effects && !['luce', 'vestiario'].includes(def.category)) return this.equipSlot(index);
     const { value, failed } = this.runModule(custom ?? 'core.items', custom ? 'on_use' : 'use', this.playerId, slot.item);
@@ -1364,7 +1428,9 @@ export class Kernel {
     if (!taken) return;
     const pc = this.playerCarpet();
     const [dx, dy] = this.facingDelta();
-    this.spawnItem(taken.item, pc.x + dx * 0.8, pc.y + dy * 0.8, taken.count);
+    const id = this.spawnItem(taken.item, pc.x + dx * 0.8, pc.y + dy * 0.8, taken.count);
+    if (taken.inv && this.ecs.alive.has(id)) this.ecs.get(id, 'pickup').inv = taken.inv;
+    this.syncHand();
     this.message(`Posi: ${this.itemInfo(taken.item).name}${taken.count > 1 ? ` ×${taken.count}` : ''}`);
   }
 
@@ -1394,7 +1460,7 @@ export class Kernel {
     const box = this.container(id);
     const s = box?.inv.slots[slot];
     if (!box || !s) return;
-    const moved = addItem(this.inventory(), s.item, s.count, this.itemSpec(s.item));
+    const moved = s.inv ? putSlot(this.inventory(), s, this.itemSpec(s.item)) : this.give(s.item, s.count);
     if (!moved) return this.message("L'inventario è pieno.", 'warn');
     takeFromSlot(box.inv, slot, moved);
     this.message(`Prendi: ${this.itemInfo(s.item).name}${moved > 1 ? ` ×${moved}` : ''}`);
@@ -1404,8 +1470,60 @@ export class Kernel {
     const box = this.container(id);
     const s = this.inventory().slots[slot];
     if (!box || !s) return;
-    const moved = addItem(box.inv, s.item, s.count, this.itemSpec(s.item));
+    const moved = putSlot(box.inv, s, this.itemSpec(s.item));
     if (moved) takeFromSlot(this.inventory(), slot, moved);
+    this.syncHand();
+  }
+
+  /** The inventory inside a bag the player carries (created the first time it is opened). */
+  bag(slot: number): Inventory | undefined {
+    const s = this.inventory().slots[slot];
+    const def = s ? this.content.get(s.item) : undefined;
+    if (!s || !def?.container) return undefined;
+    s.inv ??= newInventory(Math.max(1, Math.min(24, def.container.size)));
+    return s.inv;
+  }
+
+  /** Can this item go into that bag? (A rune pouch takes only runes; no bag inside a bag.) */
+  bagAccepts(slot: number, item: string): boolean {
+    const s = this.inventory().slots[slot];
+    const def = s ? this.content.get(s.item) : undefined;
+    const it = this.content.get(item);
+    if (!def?.container || !it || it.container) return false;
+    return !def.container.accepts || it.tags.includes(def.container.accepts) || it.category === def.container.accepts;
+  }
+
+  takeFromBag(bagSlot: number, i: number): void {
+    const b = this.bag(bagSlot);
+    const s = b?.slots[i];
+    if (!b || !s) return;
+    const moved = addItem(this.inventory(), s.item, s.count, this.itemSpec(s.item));
+    if (!moved) return this.message("L'inventario è pieno.", 'warn');
+    takeFromSlot(b, i, moved);
+  }
+
+  putIntoBag(bagSlot: number, i: number): void {
+    const s = this.inventory().slots[i];
+    const b = this.bag(bagSlot);
+    if (!b || !s || i === bagSlot) return;
+    if (!this.bagAccepts(bagSlot, s.item)) return this.message(`${this.itemInfo(s.item).name} non ci va, in ${this.itemInfo(this.inventory().slots[bagSlot]!.item).name}.`, 'warn');
+    const moved = addItem(b, s.item, s.count, this.itemSpec(s.item));
+    if (moved) takeFromSlot(this.inventory(), i, moved);
+  }
+
+  /**
+   * Gives the player something: first into a bag made for it (runes into the rune pouch), then the
+   * pockets, then any bag with room. Returns how many fit.
+   */
+  give(item: string, n: number): number {
+    const inv = this.inventory();
+    const spec = this.itemSpec(item);
+    let left = Math.max(0, Math.floor(n));
+    const bags = inv.slots.map((s, i) => ({ s, i })).filter(({ s }) => s && this.content.get(s.item)?.container);
+    for (const { i } of bags) if (left && this.content.get(inv.slots[i]!.item)!.container!.accepts && this.bagAccepts(i, item)) left -= addItem(this.bag(i)!, item, left, spec);
+    if (left) left -= addItem(inv, item, left, spec);
+    for (const { i } of bags) if (left && !this.content.get(inv.slots[i]!.item)!.container!.accepts && this.bagAccepts(i, item)) left -= addItem(this.bag(i)!, item, left, spec);
+    return Math.floor(n) - left;
   }
 
   /** Recipes the player can make now, and all known ones. */
@@ -1423,7 +1541,7 @@ export class Kernel {
       return false;
     }
     for (const i of r.inputs) removeItem(inv, i.item, i.count);
-    const added = addItem(inv, r.output.item, r.output.count, this.itemSpec(r.output.item));
+    const added = this.give(r.output.item, r.output.count);
     if (added < r.output.count) {
       const pc = this.playerCarpet();
       this.spawnItem(r.output.item, pc.x, pc.y, r.output.count - added);
@@ -1457,7 +1575,7 @@ export class Kernel {
     }
     removeItem(inv, sa.item, 1);
     removeItem(inv, sb.item, 1);
-    addItem(inv, result, 1, this.itemSpec(result));
+    this.give(result, 1);
     const name = this.itemInfo(result).name;
     this.message(`${ia.name} + ${ib.name} → ${name}`, 'good');
     return `${verdict.reason} Ottieni: ${name}.`;
@@ -1693,9 +1811,16 @@ export class Kernel {
     return { say: r.say, forged: f.summary };
   }
 
-  /** Magic runes in hand, in their order: the incantation T would cast. */
+  /** Magic runes in the phrase, in their order: the incantation T would cast. */
   incantation(): string[] {
     return this.hand().tokens.filter((t) => this.content.runes[t]);
+  }
+
+  /** Incantations of this many runes or more also burn a magic crystal. */
+  static CRYSTAL_RUNES = 3;
+
+  private crystalId(): string | undefined {
+    return [...this.content.items.values()].find((d) => d.tags.includes('cristallo') && d.category === 'magia')?.id;
   }
 
   private castingNow = false;
@@ -1728,8 +1853,18 @@ export class Kernel {
         }
       }
       const n = this.needs();
-      if (n && n.energy < spell.cost) {
-        this.message(`«${spell.name}» chiede più forze di quante te ne restino (${spell.cost}).`, 'warn');
+      if (n && (n.mana ?? 0) < spell.cost) {
+        this.message(`«${spell.name}» chiede più mana di quanto te ne resti (${spell.cost}). Un cristallo magico aiuterebbe.`, 'warn');
+        return false;
+      }
+      const crystal = seq.length >= Kernel.CRYSTAL_RUNES ? this.crystalId() : undefined;
+      if (seq.length >= Kernel.CRYSTAL_RUNES && (!crystal || countItem(this.inventory(), crystal) < 1)) {
+        this.message(`Un incantesimo di ${seq.length} rune ha bisogno di un cristallo magico da consumare.`, 'warn');
+        return false;
+      }
+      const missing = this.missingRunes(seq);
+      if (missing) {
+        this.message(`Non hai la runa «${missing}».`, 'warn');
         return false;
       }
       const ctx = {
@@ -1739,7 +1874,13 @@ export class Kernel {
         loot: new Set(Object.keys(this.content.loot)),
       };
       const effects = validateEffects(spell.effects, ctx).effects;
-      if (n) n.energy = Math.max(0, n.energy - spell.cost);
+      if (n) n.mana = Math.max(0, (n.mana ?? 0) - spell.cost);
+      // Spoken runes are spent: worth collecting and keeping.
+      for (const t of seq) removeItem(this.inventory(), `rune:${t}`, 1);
+      if (crystal) removeItem(this.inventory(), crystal, 1);
+      const hand = this.hand();
+      hand.tokens = hand.tokens.filter((t) => !this.content.runes[t]);
+      hand.sel = Math.max(0, Math.min(hand.sel, hand.tokens.length - 1));
       const pc = this.playerCarpet();
       const [dx, dy] = this.facingDelta();
       const at = { x: pc.x + dx * 1.5, y: pc.y + dy * 1.5 };
@@ -1888,7 +2029,7 @@ export class Kernel {
     if (reply.action === 'dai') {
       const wantedName = normName(reply.item ?? '');
       const slot = inv?.slots.find((s) => s && normName(this.itemInfo(s.item).name) === wantedName) ?? inv?.slots.find((s) => s && wantedName && normName(this.itemInfo(s.item).name).includes(wantedName));
-      if (slot && inv && addItem(this.inventory(), slot.item, 1, this.itemSpec(slot.item))) {
+      if (slot && inv && this.give(slot.item, 1)) {
         removeItem(inv, slot.item, 1);
         this.message(`${name} ti dà: ${this.itemInfo(slot.item).name}`, 'good');
       } else reply.action = 'nessuna';
@@ -2170,7 +2311,7 @@ export class Kernel {
     const hand = this.hand();
     for (const { id, rune } of this.runeList()) {
       if (rune.source !== 'player') continue;
-      hand.tokens.push(rune.token);
+      if (this.give(`rune:${rune.token}`, 1)) hand.tokens.push(rune.token);
       this.ecs.destroy(id);
     }
     const files = commitId ? this.repo.checkout(commitId) : this.repo.restore();
@@ -2219,6 +2360,11 @@ export class Kernel {
     this.time += dt;
     this.tickCount++;
     this.archive.tick(dt);
+    if (this.tickCount % 10 === 0) {
+      this.syncHand();
+      const n = this.needs();
+      if (n && !Number.isFinite(n.mana)) n.mana = 60;
+    }
     this.updateChunks();
     this.pumpDevelopment();
     if (this.time - this.lastArtPump > 2) {

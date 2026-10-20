@@ -15,6 +15,8 @@ export class InventoryPanel {
   private busy = '';
   private tab: 'oggetti' | 'crea' = 'oggetti';
   private box: number | null = null;
+  /** A bag the player carries, opened (slot index). */
+  private bagSlot: number | null = null;
   onClose?: () => void;
 
   constructor(
@@ -36,8 +38,16 @@ export class InventoryPanel {
     k.bus.on('item:picked', () => this.isOpen && this.render());
     k.bus.on('ui:container', ({ id }: { id: number }) => {
       this.box = id;
+      this.bagSlot = null;
       this.tab = 'oggetti';
       this.open();
+    });
+    k.bus.on('ui:bag', ({ slot }: { slot: number }) => {
+      this.bagSlot = slot;
+      this.box = null;
+      this.tab = 'oggetti';
+      if (this.isOpen) this.render();
+      else this.open();
     });
   }
 
@@ -60,6 +70,7 @@ export class InventoryPanel {
   close(): void {
     this.root.hidden = true;
     this.box = null;
+    this.bagSlot = null;
     this.k.input.inventoryOpen = false;
     this.onClose?.();
   }
@@ -96,6 +107,8 @@ export class InventoryPanel {
     const inv = k.inventory();
     const weight = totalWeight(inv, (id) => k.itemInfo(id).spec);
     const box = this.box !== null ? k.container(this.box) : undefined;
+    const bag = this.bagSlot !== null && !box ? k.bag(this.bagSlot) : undefined;
+    if (this.bagSlot !== null && !bag) this.bagSlot = null;
 
     const mine = this.grid(inv.slots, {
       hotbar: true,
@@ -104,6 +117,7 @@ export class InventoryPanel {
       drag: 'slot',
       onClick: (i) => {
         if (box && inv.slots[i]) k.putIntoContainer(this.box!, i);
+        else if (bag && inv.slots[i] && i !== this.bagSlot) k.putIntoBag(this.bagSlot!, i);
         else this.sel = i;
         this.render();
       },
@@ -124,7 +138,21 @@ export class InventoryPanel {
     });
 
     const side = el('div', { class: 'details' });
-    if (box) {
+    if (bag) {
+      const bs = this.bagSlot!;
+      const close = el('button', {}, 'Chiudi');
+      close.onclick = () => {
+        this.bagSlot = null;
+        this.render();
+      };
+      const accepts = k.content.get(inv.slots[bs]!.item)?.container?.accepts;
+      side.append(
+        el('div', { class: 'name' }, k.itemInfo(inv.slots[bs]!.item).name),
+        el('div', { class: 'descr' }, `${bag.slots.some(Boolean) ? 'Clic su ciò che c\'è dentro per prenderlo; clic sui tuoi oggetti per metterli dentro.' : 'Vuota. Clic sui tuoi oggetti per metterli dentro.'}${accepts ? ` Ci vanno solo cose «${accepts}».` : ''}`),
+        this.grid(bag.slots, { onClick: (i) => (k.takeFromBag(bs, i), this.render()) }),
+        close,
+      );
+    } else if (box) {
       const take = el('button', { class: 'primary' }, 'Prendi tutto');
       take.onclick = () => {
         box.inv.slots.forEach((s, i) => s && k.takeFromContainer(this.box!, i));
@@ -169,8 +197,12 @@ export class InventoryPanel {
           };
           actions.append(b);
         };
-        const usable = !!info.effects || ['cibo', 'bevanda', 'medicina', 'luce', 'vestiario'].includes(info.category) || k.sandbox.has(k.content.get(s.item)?.module ?? '', 'on_use');
-        if (usable) btn(info.category === 'cibo' ? 'Mangia' : info.category === 'bevanda' ? 'Bevi' : 'Usa', () => k.useSlot(this.sel), 'primary');
+        const def = k.content.get(s.item);
+        const isRune = s.item.startsWith('rune:');
+        const usable = !isRune && !def?.container && (!!info.effects || ['cibo', 'bevanda', 'medicina', 'luce', 'vestiario'].includes(info.category) || k.sandbox.has(def?.module ?? '', 'on_use'));
+        if (def?.container) btn(`Apri (${(s.inv?.slots.filter(Boolean).length ?? 0)}/${def.container.size})`, () => k.useSlot(this.sel), 'primary');
+        if (isRune) btn('Aggiungi alla frase', () => k.composeRune(s.item.slice(5)), 'primary');
+        if (usable) btn(info.category === 'cibo' ? 'Mangia' : info.category === 'bevanda' ? 'Bevi' : info.category === 'magia' ? 'Assorbi' : 'Usa', () => k.useSlot(this.sel), 'primary');
         if (info.spec.equippable) btn(inv.equipped === this.sel ? 'Riponi' : 'Impugna', () => k.equipSlot(this.sel), 'primary');
         btn('Getta', () => k.dropSlot(this.sel));
         if (s.count > 1) btn('Getta 1', () => k.dropSlot(this.sel, 1));
@@ -204,8 +236,9 @@ export class InventoryPanel {
         if (raw) k.moveRune(Number(raw), i);
         this.render();
       };
+      r.title = 'clic: togli dalla frase (resta nella borsa)';
       r.onclick = () => {
-        hand.sel = i;
+        k.uncompose(i);
         this.render();
       };
       runes.append(r);
@@ -215,6 +248,12 @@ export class InventoryPanel {
       k.inscribeHand();
       this.render();
     };
+    const spell = k.incantation();
+    const cast = el('button', { class: 'primary' }, `Pronuncia (T): ${k.content.spells[spell.join(' ')]?.name ?? 'incantesimo ignoto'}`);
+    cast.onclick = async () => {
+      this.close();
+      await k.castSpell();
+    };
 
     const tabs = el('div', { class: 'tabs' });
     for (const [id, label] of [['oggetti', 'Oggetti'], ['crea', `Crea (${k.recipes().available.size})`]] as const) {
@@ -222,6 +261,7 @@ export class InventoryPanel {
       b.onclick = () => {
         this.tab = id;
         this.box = null;
+        this.bagSlot = null;
         this.render();
       };
       tabs.append(b);
@@ -233,7 +273,14 @@ export class InventoryPanel {
         { class: 'window' },
         el('div', { class: 'head' }, el('span', { class: 'title' }, 'Inventario'), tabs, el('span', { class: `weight${over ? ' over' : ''}` }, `peso ${Math.round(weight * 10) / 10} / ${CARRY_CAPACITY}${over ? ' — appesantito' : ''}`), el('span', { class: 'hint' }, 'I / Tab per chiudere')),
         el('div', { class: 'body' }, mine, side),
-        el('div', { class: 'runebar' }, el('div', { class: 'label' }, 'Rune in mano — trascinale per comporre la frase'), hand.tokens.length ? runes : el('div', { class: 'empty' }, 'nessuna runa'), hand.tokens.length ? inscribe : ''),
+        el(
+          'div',
+          { class: 'runebar' },
+          el('div', { class: 'label' }, 'Frase — le rune che userai: trascinale per riordinarle, clic per toglierle; dalla borsa «Aggiungi alla frase»'),
+          hand.tokens.length ? runes : el('div', { class: 'empty' }, 'nessuna runa nella frase'),
+          hand.tokens.length ? inscribe : '',
+          spell.length ? cast : '',
+        ),
       ),
     );
   }

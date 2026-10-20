@@ -52,6 +52,13 @@ export function clearArea(k: Kernel, width = 24) {
   throw new Error('nessuno spazio libero trovato');
 }
 
+/** Runes are things the player carries: tests put them in the pouch first. */
+export const giveRunes = (k: Kernel, tokens: string[]) => tokens.forEach((t) => k.give(`rune:${t}`, 1));
+
+/** Stacks carried, in the pockets and inside bags (bags themselves not counted). */
+const carried = (k: Kernel) =>
+  k.inventory().slots.reduce((n, s) => n + (!s ? 0 : k.content.get(s.item)?.container ? (s.inv?.slots.filter(Boolean).length ?? 0) : 1), 0);
+
 const spawnInFront = (k: Kernel, id: string, dist = 0.9) => {
   const pc = k.playerCarpet();
   k.playerComp().facing = 'right';
@@ -102,7 +109,10 @@ describe('kernel', () => {
 
   it('runes that stop the carpet reveal the corona and let the player reach it', () => {
     clearArea(k);
+    expect(k.inscribe(['carpet', '.', 'active', '=', 'false'])).toBe(false);
+    giveRunes(k, ['carpet', '.', 'active', '=', 'false']);
     expect(k.inscribe(['carpet', '.', 'active', '=', 'false'])).toBe(true);
+    expect(countItem(k.inventory(), 'rune:carpet')).toBe(0);
     run(k, DT * 2);
     expect(k.carpet()!.active).toBe(false);
     k.playerPos().x = k.config.circleRadius + 0.5;
@@ -135,6 +145,7 @@ describe('kernel', () => {
 
   it('a broken phrase breaks the world; rollback repairs it and returns the runes', () => {
     clearArea(k);
+    giveRunes(k, ['carpet', '.', 'strength', '=']);
     k.inscribe(['carpet', '.', 'strength', '=']);
     run(k, DT * 2);
     expect(k.faults.list().some((f) => f.key.startsWith('rune:'))).toBe(true);
@@ -146,11 +157,13 @@ describe('kernel', () => {
 
   it('severing a binding breaks the system that depends on it; the kernel survives absurd values', () => {
     clearArea(k);
+    giveRunes(k, ['carpet', '=', 'nil']);
     k.inscribe(['carpet', '=', 'nil']);
     run(k, DT * 3);
     expect(k.faults.has('module:core.carpet:update')).toBe(true);
     k.rollback();
     clearArea(k);
+    giveRunes(k, ['carpet', '.', 'ox', '=', 'nil']);
     k.inscribe(['carpet', '.', 'ox', '=', 'nil']);
     run(k, DT * 2);
     expect(Number.isFinite(k.offset().ox)).toBe(true);
@@ -214,7 +227,7 @@ describe('items, containers, actions, needs', () => {
     expect(found).toBeGreaterThan(0);
     c.inv.slots.forEach((s, i) => s && k.takeFromContainer(box, i));
     expect(c.inv.slots.filter(Boolean).length).toBe(0);
-    expect(k.inventory().slots.filter(Boolean).length).toBe(found);
+    expect(carried(k)).toBe(found);
     k.openContainer(box);
     expect(c.inv.slots.filter(Boolean).length).toBe(0);
   });
@@ -279,7 +292,7 @@ describe('characters', () => {
     expect(identity.name).not.toBe('Abitante');
     expect(k.nameOf(npc)).toBe(identity.name);
     expect(give.action).toBe('dai');
-    expect(k.inventory().slots.filter(Boolean).length).toBe(1);
+    expect(carried(k)).toBe(1);
     const follow = await k.talk(npc, 'Seguimi, ti prego');
     expect(follow.action).toBe('segui');
     expect(k.ecs.get(npc, 'mind').history.length).toBe(4);
@@ -402,21 +415,33 @@ describe('runes and magic', () => {
     }
     // Inscribed runes take one cell each.
     clearArea(k);
+    giveRunes(k, ['speed', '=', 'speed']);
     k.inscribe(['speed', '=', 'speed']);
     const mine = k.ecs.query('rune').map((id) => k.ecs.get(id, 'rune')).filter((r) => r.source === 'player');
     expect(mine.map((r) => r.col - mine[0].col)).toEqual([0, 1, 2]);
   });
 
-  it('magic runes in hand are an incantation: known ones cast, new ones are named once by the Council', async () => {
+  it('runes are things: picked into the pouch, composed into a phrase, spent when spoken', async () => {
     const k = await boot();
     clearArea(k);
     const n = k.needs()!;
-    n.energy = 100;
-    k.hand().tokens = ['x', 'luce'];
+    n.mana = 100;
+    const pouch = k.inventory().slots.findIndex((s) => s?.item === 'item.borsa-rune');
+    expect(pouch).toBeGreaterThanOrEqual(0);
+    giveRunes(k, ['luce', 'luce', 'x']);
+    // Runes go into the rune pouch, not the pockets.
+    expect(countItem(k.bag(pouch)!, 'rune:luce')).toBe(2);
+    expect(k.composeRune('luce')).toBe(true);
+    expect(k.composeRune('x')).toBe(true);
+    expect(k.incantation()).toEqual(['luce']);
     expect(await k.castSpell()).toBe(true);
     expect(k.ecs.query('luce', 'effimero').length).toBe(1);
-    expect(n.energy).toBe(96);
+    expect(n.mana).toBe(96);
+    expect(countItem(k.inventory(), 'rune:luce')).toBe(1);
+    expect(k.hand().tokens).toEqual(['x']);
 
+    // A new sequence: named once by the Council, then known.
+    giveRunes(k, ['vita', 'scudo', 'vita', 'scudo']);
     k.hand().tokens = ['vita', 'scudo'];
     const calls = k.models.usage.text;
     expect(await k.castSpell()).toBe(true);
@@ -424,11 +449,49 @@ describe('runes and magic', () => {
     expect(k.content.spells['vita scudo']).toBeTruthy();
     expect(k.repo.head().message).toMatch(/incantesimo: vita scudo/);
     expect(k.ecs.get(k.playerId, 'scudo')?.fino).toBeGreaterThan(k.time);
+    k.hand().tokens = ['vita', 'scudo'];
     await k.castSpell();
     expect(k.models.usage.text).toBe(calls + 1);
-
-    n.energy = 1;
+    // Spent: no runes left, nothing to cast.
+    k.hand().tokens = ['vita', 'scudo'];
     expect(await k.castSpell()).toBe(false);
+
+    // Long incantations burn a magic crystal; without mana nothing happens.
+    giveRunes(k, ['fuoco', 'fuoco', 'vento']);
+    k.hand().tokens = ['fuoco', 'fuoco', 'vento'];
+    expect(await k.castSpell()).toBe(false);
+    k.give('item.cristallo-magico', 1);
+    expect(await k.castSpell()).toBe(true);
+    expect(countItem(k.inventory(), 'item.cristallo-magico')).toBe(0);
+    n.mana = 1;
+    giveRunes(k, ['luce']);
+    k.hand().tokens = ['luce'];
+    expect(await k.castSpell()).toBe(false);
+  });
+
+  it('bags are containers you carry: open them, put things in, take them out; dropped, they keep their contents', async () => {
+    const k = await boot();
+    clearArea(k);
+    const inv = k.inventory();
+    k.give('item.sacca', 1);
+    const sacca = inv.slots.findIndex((s) => s?.item === 'item.sacca');
+    const pouch = inv.slots.findIndex((s) => s?.item === 'item.borsa-rune');
+    inv.slots[10] = { item: 'item.coltello', count: 1 };
+    // The rune pouch takes only runes.
+    k.putIntoBag(pouch, 10);
+    expect(inv.slots[10]?.item).toBe('item.coltello');
+    k.putIntoBag(sacca, 10);
+    expect(inv.slots[10]).toBeNull();
+    expect(countItem(inv, 'item.coltello')).toBe(1);
+    // Dropped and picked up again, the bag still holds the knife.
+    k.dropSlot(sacca);
+    expect(countItem(inv, 'item.coltello')).toBe(0);
+    const dropped = k.ecs.query('pickup').find((id) => k.ecs.get(id, 'pickup').item === 'item.sacca')!;
+    expect((k as any).pickUpEntity(dropped)).toBe(true);
+    expect(countItem(inv, 'item.coltello')).toBe(1);
+    const again = inv.slots.findIndex((s) => s?.item === 'item.sacca');
+    k.takeFromBag(again, k.bag(again)!.slots.findIndex(Boolean));
+    expect(inv.slots.some((s) => s?.item === 'item.coltello' && !s.inv)).toBe(true);
   });
 
   it('the day turns into night', () => {
