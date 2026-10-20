@@ -27,6 +27,7 @@ export interface UniverseSnapshot {
 /** Where commits go: the universe repository on disk. Tests and static hosting have none. */
 export interface UniverseBackend {
   readonly name: string;
+  listMaps?(): Promise<Array<{ file: string; name: string; layout: string }>>;
   commit(changes: Record<string, string | null>, message: string, author: Author): Promise<string | null>;
   checkout(id: string): Promise<FileMap | null>;
   reset(): Promise<void>;
@@ -203,6 +204,12 @@ export class UniverseClient implements UniverseBackend {
 
   async putAsset(id: string, dataUrl: string): Promise<void> {
     await fetch(this.url(`asset/${encodeURIComponent(id)}`), { method: 'PUT', body: dataUrl }).catch(() => undefined);
+  }
+
+  /** Every place ever planned in this universe (file name, place name, environment). */
+  async listMaps(): Promise<Array<{ file: string; name: string; layout: string }>> {
+    const r = await fetch(this.url('maps')).catch(() => null);
+    return r?.ok ? r.json() : [];
   }
 
   async getMap(key: string): Promise<unknown | undefined> {

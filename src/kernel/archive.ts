@@ -42,6 +42,19 @@ export class Archive {
     const c = this.corona();
     const keep = new Set<string>();
     for (const b of c.buildings) {
+      if (b.id === 'concilio') {
+        // The whole Council sits at the round table, each at its place.
+        for (const seat of b.floors[0].items.filter((i) => i.kind === 'desk' && i.target)) {
+          const key = `${seat.target}@concilio`;
+          keep.add(key);
+          if (!this.avatars.has(key)) {
+            const def = AGENTS[seat.target as AgentId];
+            const p = { x: seat.x + 0.5, y: seat.y + 0.4 };
+            this.avatars.set(key, { agent: seat.target as AgentId, name: def.name, color: def.color, sigil: def.sigil, building: b.id, ...p, tx: p.x, ty: p.y, sayUntil: 0, idleUntil: 0, speed: SPEED });
+          }
+        }
+        continue;
+      }
       const key = `${b.team}@${b.id}`;
       keep.add(key);
       if (!this.avatars.has(key) || this.avatars.get(key)!.building !== b.id) this.avatars.set(key, this.member(b.team as AgentId, b));
@@ -55,7 +68,7 @@ export class Archive {
   }
 
   private desk(b: Building, n = 0): { x: number; y: number } {
-    const desks = b.floors[0].items.filter((i) => i.kind === 'desk');
+    const desks = b.floors[0].items.filter((i) => i.kind === 'desk' && (b.id !== 'concilio' || !i.target));
     const d = desks[n % Math.max(1, desks.length)];
     return d ? { x: d.x + 0.5, y: d.y - 0.6 } : { x: b.floors[0].ox + 3.5, y: b.floors[0].oy + 3.5 };
   }
@@ -142,9 +155,13 @@ export class Archive {
     for (const a of this.avatars.values()) {
       if (a.say && this.time > a.sayUntil) a.say = undefined;
       if (a.building && this.time > a.idleUntil && a.path) {
-        // Done: back to the desk.
+        // Done: back to the desk (at the round table, back to its seat).
         const b = c.building(a.building);
-        if (b) {
+        const seat = b?.id === 'concilio' ? b.floors[0].items.find((i) => i.kind === 'desk' && i.target === a.agent) : undefined;
+        if (seat) {
+          a.tx = seat.x + 0.5;
+          a.ty = seat.y + 0.4;
+        } else if (b) {
           const n = Number(/#(\d+)$/.exec([...this.avatars.entries()].find(([, v]) => v === a)?.[0] ?? '')?.[1] ?? 0);
           const d = this.desk(b, n);
           a.tx = d.x;

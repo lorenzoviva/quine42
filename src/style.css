@@ -315,3 +315,17 @@ button[disabled] { opacity: 0.4; cursor: default; }
 #death .title { font-size: 42px; letter-spacing: 0.3em; color: #ff4d5e; text-shadow: 0 0 18px #ff2a6d; }
 #death .why { font-size: 15px; color: #d8b8b8; max-width: 520px; }
 #death .row { display: flex; gap: 12px; margin-top: 8px; }
+
+#atlas { position: fixed; inset: 0; z-index: 41; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); }
+#atlas .window { position: relative; background: #07080e; border: 1px solid #05d9e8; box-shadow: 0 0 24px #05d9e855; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+#atlas .title { color: #05d9e8; letter-spacing: 0.2em; text-transform: uppercase; text-shadow: 0 0 10px #05d9e8; }
+#atlas .close { position: absolute; top: 6px; right: 8px; }
+#atlas canvas { cursor: grab; border: 1px solid #1a2a33; max-width: 92vw; }
+#atlas .note { color: var(--dim); font-size: 12px; }
+#atlas .legend { display: flex; gap: 12px; font-size: 11px; color: var(--dim); }
+#atlas .legend .k::before { content: ''; display: inline-block; width: 10px; height: 10px; margin-right: 4px; vertical-align: -1px; }
+#atlas .legend .planned::before { background: hsl(140 55% 42%); }
+#atlas .legend .draft::before { background: rgba(120, 130, 150, 0.6); }
+#atlas .legend .fog::before { background: #06070c; border: 1px solid #333; }
+#atlas .legend .region::before { border: 1px dashed #f5d300; }
+#atlas .legend .you::before { border: 2px solid #ff2a6d; }

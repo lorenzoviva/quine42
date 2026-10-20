@@ -908,3 +908,36 @@ describe('death and transcendence', () => {
     expect(k.needs()!.thirst).toBeGreaterThan(99.9);
   });
 });
+
+describe('the neon studio', () => {
+  it('the Council sits at the round table; behind each seat a teleport to its room; every room leads back', async () => {
+    const k = await boot();
+    const hall = k.corona.building('concilio')!;
+    const f0 = hall.floors[0].items;
+    expect(f0.some((i) => i.kind === 'table')).toBe(true);
+    const seats = f0.filter((i) => i.kind === 'desk' && i.target);
+    expect(seats.map((s) => s.target).sort()).toEqual(['arbitro', 'artista', 'cartografo', 'fisico', 'ingegnere', 'narratore', 'referente']);
+    for (const s of seats) expect([...k.archive.avatars.values()].some((a) => a.agent === s.target && a.building === 'concilio')).toBe(true);
+    const portals = f0.filter((i) => i.kind === 'portal');
+    expect(portals.length).toBe(7);
+    for (const b of k.corona.buildings) if (b.id !== 'concilio') expect(b.floors[0].items.some((i) => i.kind === 'portal' && i.target === 'concilio'), b.id).toBe(true);
+    for (const b of k.corona.buildings) if (b.id !== 'concilio') expect(b.floors[0].items.some((i) => i.kind === 'screen'), b.id).toBe(true);
+    // Through the cartographer's teleport, into its room, where the atlas is.
+    k.exitedOnce = true;
+    k.carpet()!.active = false;
+    const pad = portals.find((p) => p.target === 'cartografia')!;
+    Object.assign(k.playerPos(), { x: pad.x + 0.5, y: pad.y + 0.5 });
+    run(k, DT);
+    await k.interact();
+    expect(k.corona.roomAt(k.playerPos().x, k.playerPos().y)?.building.id).toBe('cartografia');
+    const atlasItem = k.corona.building('cartografia')!.floors[0].items.find((i) => i.kind === 'atlas')!;
+    let opened = false;
+    k.bus.on('ui:atlas', () => (opened = true));
+    Object.assign(k.playerPos(), { x: atlasItem.x + 1.5, y: atlasItem.y - 0.6 });
+    await k.interact();
+    expect(opened).toBe(true);
+    const view = await k.atlasView();
+    expect(view.planned.length).toBeGreaterThan(0);
+    expect(view.regions.length).toBeGreaterThan(5);
+  });
+});

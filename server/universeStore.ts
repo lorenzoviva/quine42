@@ -11,6 +11,7 @@
 //   POST /api/universe/<name>/reset                                             → { trashed }
 //   GET|PUT /api/universe/<name>/asset/<id>   data URL as text
 //   GET|PUT /api/universe/<name>/map/<key>    JSON
+//   GET  /api/universe/<name>/maps            → [{ file, name, layout }] every place ever planned
 
 import type { Connect, Plugin } from 'vite';
 import type { IncomingMessage, ServerResponse } from 'node:http';
@@ -137,7 +138,7 @@ export function universeStore(baseDir: string): Plugin {
   const handler: Connect.NextHandleFunction = (req, res, next) => {
     if (!req.url?.startsWith('/api/universe')) return next();
     const url = req.url.split('?')[0];
-    const m = /^\/api\/universe\/([^/]+)(?:\/(create|commit|checkout|reset|asset|map)(?:\/([^/]+))?)?$/.exec(url);
+    const m = /^\/api\/universe\/([^/]+)(?:\/(create|commit|checkout|reset|asset|map|maps)(?:\/([^/]+))?)?$/.exec(url);
     if (url === '/api/universe' || url === '/api/universe/') {
       void fs
         .readdir(baseDir, { withFileTypes: true })
@@ -157,6 +158,25 @@ export function universeStore(baseDir: string): Plugin {
         if (!(await exists(path.join(root, '.git')))) return { exists: false };
         return { exists: true, head: await head(root), log: await log(root), files: await readTree(root) };
       }).then((r) => send(res, 200, r), fail);
+      return;
+    }
+    if (op === 'maps' && req.method === 'GET') {
+      // The atlas of what has been explored: names and environments of every planned place.
+      void (async () => {
+        const dir = path.join(root, 'maps');
+        const files = await fs.readdir(dir).catch(() => [] as string[]);
+        const out: Array<{ file: string; name: string; layout: string }> = [];
+        for (const f of files) {
+          if (!f.endsWith('.json')) continue;
+          try {
+            const rec = JSON.parse(await fs.readFile(path.join(dir, f), 'utf8'));
+            out.push({ file: f.slice(0, -5), name: String(rec?.plan?.place?.name ?? ''), layout: String(rec?.plan?.layout ?? '') });
+          } catch {
+            /* a broken map is skipped */
+          }
+        }
+        send(res, 200, out);
+      })();
       return;
     }
     if ((op === 'asset' || op === 'map') && arg) {

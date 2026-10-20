@@ -9,7 +9,19 @@
 import type { FileMap } from './types';
 
 export type FileLook = 'libro' | 'cristallo' | 'pergamena' | 'tavoletta';
-export type ItemKind = 'file' | 'sprite' | 'tile' | 'board' | 'up' | 'down' | 'exit' | 'desk';
+export type ItemKind = 'file' | 'sprite' | 'tile' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas';
+
+/** The Council at its round table: who sits where, and the room behind each seat's teleport. */
+export const SEATS: Array<{ agent: string; room: string }> = [
+  { agent: 'narratore', room: 'persone' },
+  { agent: 'cartografo', room: 'cartografia' },
+  { agent: 'artista', room: 'galleria' },
+  { agent: 'fisico', room: 'oggetti' },
+  { agent: 'ingegnere', room: 'sistemi' },
+  { agent: 'arbitro', room: 'universo' },
+  { agent: 'referente', room: '' },
+];
+const TABLE = { cx: 12, cy: 8.5, rx: 3.4, ry: 2.3 };
 
 export interface StudioItem {
   kind: ItemKind;
@@ -22,8 +34,10 @@ export interface StudioItem {
   /** Image asset (sprites, icons, textures) and its fallback colour. */
   asset?: string;
   color?: string;
-  /** What to repaint when asked (module id, item id, tile code). */
+  /** What to repaint when asked (module id, item id, tile code); for seats the agent, for portals the room. */
   target?: string;
+  /** Width in cells (screens are wide). */
+  w?: number;
 }
 
 export interface Floor {
@@ -188,13 +202,25 @@ export class Corona {
       for (let f = 0; f < nFloors; f++) {
         const ox = INTERIOR_X + index * BUILDING_STRIDE;
         const oy = f * FLOOR_STRIDE;
-        const placed: StudioItem[] = items.slice(f * perFloor, (f + 1) * perFloor).map((it, i) => ({ ...it, x: ox + SLOTS[i].x, y: oy + SLOTS[i].y }));
-        // Furniture of an office: desks for the team, the notice board, stairs, the way out.
-        for (let d = 0; d < 3; d++) placed.push({ kind: 'desk', label: 'scrivania', x: ox + 4 + d * 6, y: oy + ROOM_H - 3 });
-        if (f === 0) {
-          placed.push({ kind: 'exit', label: 'uscita', x: ox + Math.floor(ROOM_W / 2), y: oy + ROOM_H - 1 });
-          placed.push({ kind: 'board', label: 'bacheca: le ultime modifiche', x: ox + 1, y: oy + ROOM_H - 2 });
+        const council = id === 'concilio';
+        // The Council's hall: its files on one shelf along the wall, the round table in the middle.
+        const slots = council ? Array.from({ length: perFloor }, (_, i) => ({ x: SHELF_X0 + (i % (SHELF_X1 - SHELF_X0 + 1)), y: 2 + Math.floor(i / (SHELF_X1 - SHELF_X0 + 1)) })) : SLOTS;
+        const placed: StudioItem[] = items.slice(f * perFloor, (f + 1) * perFloor).map((it, i) => ({ ...it, x: ox + slots[i].x, y: oy + slots[i].y }));
+        if (council && f === 0) {
+          placed.push({ kind: 'table', label: "il tavolo del Concilio: al centro, l'universo", x: ox + Math.floor(TABLE.cx), y: oy + Math.floor(TABLE.cy) });
+          SEATS.forEach((s, i) => {
+            const a = -Math.PI / 2 + (i / SEATS.length) * Math.PI * 2;
+            placed.push({ kind: 'desk', label: `il posto del ${s.agent}`, target: s.agent, x: ox + Math.round(TABLE.cx + Math.cos(a) * 5), y: oy + Math.round(TABLE.cy + Math.sin(a) * 3.4) });
+            placed.push({ kind: 'portal', label: s.room ? `teletrasporto: ${ROOMS[s.room]?.name ?? s.room}` : 'teletrasporto: fuori, sul viale', target: s.room, x: ox + Math.round(TABLE.cx + Math.cos(a) * 7.6), y: oy + Math.max(1, Math.min(ROOM_H - 2, Math.round(TABLE.cy + Math.sin(a) * 4.9))) });
+          });
+        } else if (f === 0) {
+          // A wall of screens with the room's history; the team works in front of it.
+          placed.push({ kind: 'screen', label: 'schermo: la storia di questa sala', x: ox + 3, y: oy + ROOM_H - 3, w: 6 });
+          for (let d = 0; d < 3; d++) placed.push({ kind: 'desk', label: 'postazione', x: ox + 4 + d * 2, y: oy + ROOM_H - 4 });
+          placed.push({ kind: 'portal', label: 'teletrasporto: Sala del Concilio', target: 'concilio', x: ox + ROOM_W - 3, y: oy + ROOM_H - 3 });
+          if (id === 'cartografia') placed.push({ kind: 'atlas', label: "l'atlante del mondo", x: ox + ROOM_W - 7, y: oy + ROOM_H - 3, w: 3 });
         }
+        if (f === 0) placed.push({ kind: 'exit', label: 'uscita', x: ox + Math.floor(ROOM_W / 2), y: oy + ROOM_H - 1 });
         if (f < nFloors - 1) placed.push({ kind: 'up', label: `scala al piano ${f + 2}`, x: ox + ROOM_W - 2, y: oy + 1 });
         if (f > 0) placed.push({ kind: 'down', label: `scala al piano ${f}`, x: ox + 1, y: oy + 1 });
         for (const it of placed) if (it.kind === 'file' && it.path) this.slots.set(it.path, { x: it.x, y: it.y });
@@ -248,7 +274,12 @@ export class Corona {
       const lx = cx - room.floor.ox;
       const ly = cy - room.floor.oy;
       if (lx < 0 || ly < 0 || lx >= ROOM_W || ly >= ROOM_H) return null;
-      const item = room.floor.items.find((i) => i.x === cx && i.y === cy);
+      const item = room.floor.items.find((i) => i.y === cy && cx >= i.x && cx < i.x + (i.w ?? 1));
+      // The round table fills an ellipse in the middle of the Council's hall.
+      if (!item && room.building.id === 'concilio' && room.floor.index === 0 && ((lx + 0.5 - TABLE.cx) / TABLE.rx) ** 2 + ((ly + 0.5 - TABLE.cy) / TABLE.ry) ** 2 <= 1) {
+        const table = room.floor.items.find((i) => i.kind === 'table');
+        if (table) return { kind: 'item', building: room.building.id, item: table, folder: room.building.id };
+      }
       if (item) return { kind: 'item', building: room.building.id, item, path: item.path, look: item.look, lines: item.lines, line: 1, folder: room.building.id };
       if (lx === 0 || ly === 0 || lx === ROOM_W - 1 || ly === ROOM_H - 1) return { kind: 'wall', building: room.building.id };
       return { kind: 'room', building: room.building.id };
@@ -261,7 +292,7 @@ export class Corona {
     const c = this.at(Math.floor(x), Math.floor(y));
     if (!c) return false;
     if (c.kind === 'floor' || c.kind === 'door' || c.kind === 'room') return true;
-    if (c.kind === 'item') return c.item!.kind === 'exit' || c.item!.kind === 'up' || c.item!.kind === 'down' || c.item!.kind === 'board';
+    if (c.kind === 'item') return ['exit', 'up', 'down', 'portal'].includes(c.item!.kind);
     return false;
   }
 
@@ -278,7 +309,9 @@ export class Corona {
     let bd = r;
     for (const it of room.floor.items) {
       if (it.kind === 'desk' || (kinds && !kinds.includes(it.kind))) continue;
-      const d = Math.hypot(it.x + 0.5 - x, it.y + 0.5 - y);
+      // Wide things (screens, the atlas) are near from any of their cells; the table from its rim.
+      const cx = Math.max(it.x, Math.min(it.x + (it.w ?? 1) - 1, Math.floor(x)));
+      const d = it.kind === 'table' ? Math.hypot((x - TABLE.cx - this.roomAt(x, y)!.floor.ox) / TABLE.rx, (y - TABLE.cy - this.roomAt(x, y)!.floor.oy) / TABLE.ry) * 1.2 - 0.2 : Math.hypot(cx + 0.5 - x, it.y + 0.5 - y);
       if (d < bd) [best, bd] = [it, d];
     }
     return best;

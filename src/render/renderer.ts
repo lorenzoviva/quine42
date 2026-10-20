@@ -988,30 +988,46 @@ export class Renderer {
         const sy = this.sy(y);
         const d = Math.hypot(x + 0.5, y + 0.5);
         if (cell.kind === 'floor') {
-          // A paved walkway along the circle, lawns further out.
+          // Neon-punk campus: a dark walkway with a glowing line along the circle, dark ground beyond.
           const walk = d < R + 2.6;
-          ctx.fillStyle = walk ? ((x + y) & 1 ? '#3a3d42' : '#35383d') : (x * 7 + y * 3) % 5 ? '#24402a' : '#284730';
+          ctx.fillStyle = walk ? ((x + y) & 1 ? '#11121b' : '#0e0f17') : (x * 7 + y * 3) % 5 ? '#0a0d12' : '#0c1016';
           ctx.fillRect(sx, sy, C + 0.5, C + 0.5);
+          if (walk && Math.abs(d - (R + 1.3)) < 0.5) {
+            ctx.fillStyle = `rgba(5, 217, 232, ${0.25 + 0.15 * Math.sin(this.t * 2 + x * 0.3 + y * 0.3)})`;
+            ctx.fillRect(sx, sy + C * 0.45, C + 0.5, 2);
+          }
         } else if (cell.kind === 'building' && b) {
-          // Roof tiles in the building's colour, darker towards the edges.
-          ctx.fillStyle = '#16120e';
+          // Dark towers with neon edges in the building's colour.
+          ctx.fillStyle = (x + y) & 1 ? '#15151f' : '#121219';
           ctx.fillRect(sx, sy, C + 0.5, C + 0.5);
-          ctx.fillStyle = b.color;
-          ctx.globalAlpha = 0.55 + 0.15 * (((x + y) & 1) as number);
-          ctx.fillRect(sx + 1, sy + 1, C - 1.5, C - 1.5);
-          ctx.globalAlpha = 1;
-          ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+          const edge = (dx: number, dy: number) => corona.at(x + dx, y + dy)?.kind !== 'building';
+          ctx.save();
+          ctx.shadowColor = b.color;
+          ctx.shadowBlur = 10;
+          ctx.strokeStyle = b.color;
+          ctx.lineWidth = 2;
           ctx.beginPath();
-          ctx.moveTo(sx, sy + C / 2);
-          ctx.lineTo(sx + C, sy + C / 2);
+          if (edge(0, -1)) (ctx.moveTo(sx, sy), ctx.lineTo(sx + C, sy));
+          if (edge(0, 1)) (ctx.moveTo(sx, sy + C), ctx.lineTo(sx + C, sy + C));
+          if (edge(-1, 0)) (ctx.moveTo(sx, sy), ctx.lineTo(sx, sy + C));
+          if (edge(1, 0)) (ctx.moveTo(sx + C, sy), ctx.lineTo(sx + C, sy + C));
           ctx.stroke();
+          ctx.restore();
+          if ((x * 13 + y * 7) % 9 === 0) {
+            ctx.fillStyle = `${b.color}${Math.sin(this.t * 3 + x) > 0 ? '88' : '33'}`;
+            ctx.fillRect(sx + C * 0.35, sy + C * 0.35, C * 0.3, C * 0.3);
+          }
         } else if (cell.kind === 'door' && b) {
-          ctx.fillStyle = '#35383d';
+          ctx.fillStyle = '#0e0f17';
           ctx.fillRect(sx, sy, C + 0.5, C + 0.5);
-          ctx.fillStyle = '#5a3a1e';
+          ctx.save();
+          ctx.shadowColor = '#ff2a6d';
+          ctx.shadowBlur = 14;
+          ctx.fillStyle = '#1a0a14';
           ctx.fillRect(sx + C * 0.15, sy, C * 0.7, C * 0.8);
-          ctx.fillStyle = '#ffcf5c';
-          ctx.fillRect(sx + C * 0.62, sy + C * 0.4, 3, 3);
+          ctx.strokeStyle = '#ff2a6d';
+          ctx.strokeRect(sx + C * 0.15, sy, C * 0.7, C * 0.8);
+          ctx.restore();
           if (near === b) {
             ctx.strokeStyle = '#ffcf5c';
             ctx.lineWidth = 2;
@@ -1031,9 +1047,10 @@ export class Renderer {
   }
 
   /**
-   * Inside a building: an office of the studio. Shelves with books, crystals and scrolls (the files),
-   * frames with sprites, swatches of terrain, desks where the team works, stairs, the notice board.
-   * What changed lately glows.
+   * Inside a building of the studio, neon-punk: a dark floor with a glowing grid, neon strips on the
+   * walls in the room's colour, holographic racks of files, frames and swatches, a wall of screens
+   * with the room's history, teleport pads; in the Council's hall the round table with the universe
+   * turning on its circular screen. Each room has its own motif. What changed lately glows.
    */
   private drawStudio(p: { x: number; y: number }, g: number): void {
     const k = this.kernel;
@@ -1042,31 +1059,71 @@ export class Renderer {
     const room = k.corona.roomAt(p.x, p.y);
     if (!room) return;
     const { floor, building } = room;
+    const col = building.color;
     const recent = k.recentChanges();
     const near = k.corona.itemNear(p.x, p.y);
-    // Floor and walls.
-    for (let y = 0; y < 15; y++)
-      for (let x = 0; x < 24; x++) {
-        const sx = this.sx(floor.ox + x);
-        const sy = this.sy(floor.oy + y);
-        const wall = x === 0 || y === 0 || x === 23 || y === 14;
-        ctx.fillStyle = wall ? '#2a2420' : (x + y) & 1 ? '#5b4630' : '#55412c';
-        ctx.fillRect(sx, sy, C + 0.5, C + 0.5);
-        if (wall) {
-          ctx.fillStyle = building.color;
-          ctx.globalAlpha = 0.25;
-          ctx.fillRect(sx, sy + C * 0.7, C + 0.5, C * 0.3);
-          ctx.globalAlpha = 1;
-        }
-      }
-    // Shelves under the rows of files.
-    const rows = new Set(floor.items.filter((i) => i.kind === 'file' || i.kind === 'sprite' || i.kind === 'tile').map((i) => i.y));
-    for (const y of rows) {
-      const xs = floor.items.filter((i) => i.y === y && (i.kind === 'file' || i.kind === 'sprite' || i.kind === 'tile')).map((i) => i.x);
-      const a = Math.min(...xs);
-      const b = Math.max(...xs);
-      ctx.fillStyle = '#3a2614';
-      ctx.fillRect(this.sx(a) - 2, this.sy(y) + C * 0.62, (b - a + 1) * C + 4, C * 0.3);
+    const X = (x: number) => this.sx(floor.ox + x);
+    const Y = (y: number) => this.sy(floor.oy + y);
+    // Floor: near-black, a neon grid, a slow light sweeping across.
+    ctx.fillStyle = '#07070f';
+    ctx.fillRect(X(0), Y(0), C * 24, C * 15);
+    ctx.save();
+    ctx.globalAlpha = 0.16;
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 1;
+    for (let x = 1; x < 24; x++) {
+      ctx.beginPath();
+      ctx.moveTo(X(x), Y(1));
+      ctx.lineTo(X(x), Y(14));
+      ctx.stroke();
+    }
+    for (let y = 1; y < 15; y++) {
+      ctx.beginPath();
+      ctx.moveTo(X(1), Y(y));
+      ctx.lineTo(X(23), Y(y));
+      ctx.stroke();
+    }
+    const sweep = ((this.t * 0.15) % 1) * 24;
+    const gr = ctx.createLinearGradient(X(sweep - 3), 0, X(sweep + 3), 0);
+    gr.addColorStop(0, 'rgba(255,255,255,0)');
+    gr.addColorStop(0.5, `${col}33`);
+    gr.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = gr;
+    ctx.fillRect(X(1), Y(1), C * 22, C * 13);
+    ctx.restore();
+    this.drawMotif(building.id, X(0), Y(0), C, col);
+    // Walls: dark metal with a neon strip.
+    ctx.fillStyle = '#12121c';
+    ctx.fillRect(X(0), Y(0), C * 24, C);
+    ctx.fillRect(X(0), Y(14), C * 24, C);
+    ctx.fillRect(X(0), Y(0), C, C * 15);
+    ctx.fillRect(X(23), Y(0), C, C * 15);
+    ctx.save();
+    ctx.shadowColor = col;
+    ctx.shadowBlur = 14;
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(X(1) - 1, Y(1) - 1, C * 22 + 2, C * 13 + 2);
+    ctx.strokeStyle = '#ff2a6d';
+    ctx.globalAlpha = 0.5;
+    ctx.strokeRect(X(0) + 3, Y(0) + 3, C * 24 - 6, C * 15 - 6);
+    ctx.restore();
+    // Holographic racks under the rows of files, frames and swatches.
+    const shelfItems = floor.items.filter((i) => i.kind === 'file' || i.kind === 'sprite' || i.kind === 'tile');
+    for (const y of new Set(shelfItems.map((i) => i.y))) {
+      const xs = shelfItems.filter((i) => i.y === y).map((i) => i.x);
+      const a0 = Math.min(...xs);
+      const a1 = Math.max(...xs);
+      ctx.save();
+      ctx.fillStyle = 'rgba(20, 24, 40, 0.9)';
+      ctx.fillRect(this.sx(a0) - 3, this.sy(y) + C * 0.68, (a1 - a0 + 1) * C + 6, C * 0.18);
+      ctx.shadowColor = col;
+      ctx.shadowBlur = 10;
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(this.sx(a0) - 3, this.sy(y) + C * 0.68, (a1 - a0 + 1) * C + 6, C * 0.18);
+      ctx.restore();
     }
     for (const it of floor.items) {
       const sx = this.sx(it.x);
@@ -1074,87 +1131,279 @@ export class Renderer {
       const isNear = it === near;
       const changed = it.path ? recent.get(it.path) : undefined;
       if (changed && (it.kind === 'file' || it.kind === 'sprite' || it.kind === 'tile')) {
-        // Recently changed by the Council (or by you): it glows, with a tag.
         const pulse = 0.5 + 0.5 * Math.sin(this.t * 4);
-        ctx.fillStyle = `rgba(255, 220, 120, ${0.18 + 0.2 * pulse})`;
-        ctx.fillRect(sx - 2, sy - 2, C + 4, C + 4);
+        ctx.fillStyle = `rgba(255, 220, 120, ${0.2 + 0.25 * pulse})`;
+        ctx.fillRect(sx - 3, sy - 3, C + 6, C + 6);
       }
       switch (it.kind) {
         case 'file':
-          this.drawFile(it.look ?? 'tavoletta', sx, sy, building.color, isNear);
+          this.drawFile(it.look ?? 'tavoletta', sx, sy, col, isNear);
           break;
         case 'sprite':
         case 'tile': {
           const img = this.images.peek(it.asset);
-          ctx.fillStyle = '#c9a85a';
-          ctx.fillRect(sx + 1, sy + 1, C - 2, C - 2);
-          ctx.fillStyle = it.kind === 'tile' ? (it.color ?? '#888') : '#1c1a17';
+          ctx.save();
+          ctx.shadowColor = col;
+          ctx.shadowBlur = isNear ? 16 : 6;
+          ctx.strokeStyle = col;
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(sx + 2, sy + 2, C - 4, C - 4);
+          ctx.restore();
+          ctx.fillStyle = it.kind === 'tile' ? (it.color ?? '#888') : '#0c0c16';
           ctx.fillRect(sx + 4, sy + 4, C - 8, C - 8);
           if (img) ctx.drawImage(img, sx + 4, sy + 4, C - 8, C - 8);
           else if (it.kind === 'sprite') {
-            ctx.fillStyle = it.color ?? '#aaa';
+            ctx.fillStyle = col;
             ctx.font = `${Math.round(C * 0.4)}px ${FONT}`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText('?', sx + C / 2, sy + C / 2);
           }
-          if (isNear) {
-            ctx.strokeStyle = '#ffcf5c';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(sx + 1, sy + 1, C - 2, C - 2);
-          }
           break;
         }
-        case 'desk':
-          ctx.fillStyle = '#6b4a2a';
-          ctx.fillRect(sx - C * 0.6, sy + C * 0.2, C * 2.2, C * 0.7);
-          ctx.fillStyle = '#1a2a3a';
-          ctx.fillRect(sx + C * 0.1, sy - C * 0.15, C * 0.8, C * 0.5);
-          ctx.fillStyle = `rgba(120, 220, 255, ${0.5 + 0.3 * Math.sin(this.t * 2 + it.x)})`;
-          ctx.fillRect(sx + C * 0.16, sy - C * 0.1, C * 0.68, C * 0.38);
+        case 'screen':
+          this.drawHistoryScreen(sx, sy, (it.w ?? 1) * C, C, col, building.id);
           break;
-        case 'board':
-          ctx.fillStyle = '#8a6a3a';
-          ctx.fillRect(sx, sy, C, C * 0.9);
-          ctx.fillStyle = '#efe6cc';
-          for (let i = 0; i < 3; i++) ctx.fillRect(sx + 4 + (i % 2) * C * 0.4, sy + 4 + i * C * 0.25, C * 0.35, C * 0.2);
+        case 'atlas':
+          this.drawAtlasTable(sx, sy, (it.w ?? 1) * C, C, col);
+          break;
+        case 'portal':
+          this.drawPortal(sx, sy, it.target ? (k.corona.building(it.target)?.color ?? col) : '#ffffff', isNear);
+          break;
+        case 'table':
+          this.drawCouncilTable(X(12), Y(8.5), C);
+          break;
+        case 'desk':
+          // A glowing pad on the floor where someone of the team works.
+          ctx.save();
+          ctx.globalAlpha = 0.6;
+          ctx.strokeStyle = col;
+          ctx.beginPath();
+          ctx.ellipse(sx + C / 2, sy + C * 0.75, C * 0.4, C * 0.14, 0, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
           break;
         case 'up':
         case 'down':
-          ctx.fillStyle = '#3a3027';
-          for (let i = 0; i < 4; i++) ctx.fillRect(sx + i * 3, sy + i * (C / 4), C - i * 3, C / 4 - 1);
-          ctx.fillStyle = '#ffcf5c';
+          ctx.save();
+          ctx.shadowColor = '#05d9e8';
+          ctx.shadowBlur = 10;
+          ctx.strokeStyle = '#05d9e8';
+          for (let i = 0; i < 4; i++) ctx.strokeRect(sx + 2 + i * 2, sy + 2 + i * (C / 4.5), C - 4 - i * 4, C / 5);
+          ctx.restore();
+          ctx.fillStyle = '#05d9e8';
           ctx.font = `bold ${Math.round(C * 0.4)}px ${FONT}`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           ctx.fillText(it.kind === 'up' ? '↑' : '↓', sx + C / 2, sy + C / 2);
           break;
         case 'exit':
-          ctx.fillStyle = '#5a3a1e';
+          ctx.save();
+          ctx.shadowColor = '#ff2a6d';
+          ctx.shadowBlur = 12;
+          ctx.fillStyle = '#1a0a14';
           ctx.fillRect(sx + C * 0.1, sy, C * 0.8, C);
-          ctx.fillStyle = '#ffcf5c';
-          ctx.fillRect(sx + C * 0.65, sy + C * 0.45, 3, 3);
+          ctx.strokeStyle = '#ff2a6d';
+          ctx.strokeRect(sx + C * 0.1, sy, C * 0.8, C);
+          ctx.restore();
           break;
       }
-      if (isNear && it.kind !== 'file' && it.kind !== 'sprite' && it.kind !== 'tile') {
+      if (isNear && !['file', 'sprite', 'tile', 'table'].includes(it.kind)) {
         ctx.strokeStyle = '#ffcf5c';
         ctx.lineWidth = 2;
-        ctx.strokeRect(sx + 1, sy + 1, C - 2, C - 2);
+        ctx.strokeRect(sx + 1, sy + 1, (it.w ?? 1) * C - 2, C - 2);
       }
     }
-    // The room's name and floor.
-    ctx.font = `bold 14px ${FONT}`;
+    ctx.save();
+    ctx.font = `bold 15px ${FONT}`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    ctx.fillStyle = building.color;
-    ctx.fillText(`${building.name}${building.floors.length > 1 ? ` — piano ${floor.index + 1} di ${building.floors.length}` : ''}`, this.sx(floor.ox + 12), this.sy(floor.oy) - 22);
+    ctx.shadowColor = col;
+    ctx.shadowBlur = 12;
+    ctx.fillStyle = col;
+    ctx.fillText(`${building.name.toUpperCase()}${building.floors.length > 1 ? `  ·  PIANO ${floor.index + 1}/${building.floors.length}` : ''}`, X(12), Y(0) - 24);
+    ctx.restore();
     if (near && near.kind !== 'desk') {
       ctx.font = `12px ${FONT}`;
       ctx.fillStyle = '#d6ffe6';
+      ctx.textAlign = 'center';
       ctx.fillText(`E: ${near.kind === 'file' ? `apri ${near.label}` : near.kind === 'sprite' || near.kind === 'tile' ? `guarda «${near.label}»` : near.label}`, this.w / 2, this.h - 70);
     }
     this.drawAvatars();
     this.drawPlayer(k.ecs.get(k.playerId, 'glyph') ?? { ch: '@', color: '#fff', scale: 1.3 }, p, g);
+  }
+
+  /** Each room's personality, faint on the floor: code rain, a compass grid, splashes, orbits… */
+  private drawMotif(id: string, x0: number, y0: number, C: number, col: string): void {
+    const ctx = this.ctx;
+    const t = this.t;
+    ctx.save();
+    ctx.globalAlpha = 0.12;
+    ctx.fillStyle = col;
+    ctx.strokeStyle = col;
+    ctx.font = `${Math.round(C * 0.35)}px monospace`;
+    const W = C * 24;
+    const H = C * 15;
+    if (id === 'sistemi' || id === 'nucleo' || id === 'altro') {
+      for (let i = 0; i < 18; i++) {
+        const x = x0 + ((i * 97) % 22 + 1) * C;
+        const y = y0 + C + (((t * 40 + i * 53) % (H - 2 * C)) as number);
+        ctx.fillText(String.fromCharCode(0x30a0 + ((i * 7 + Math.floor(t * 6)) % 90)), x, y);
+      }
+    } else if (id === 'cartografia' || id === 'luoghi') {
+      for (let r = 1; r < 6; r++) {
+        ctx.beginPath();
+        ctx.arc(x0 + W / 2, y0 + H / 2, r * C * 1.4, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.beginPath();
+      ctx.moveTo(x0 + W / 2, y0 + C);
+      ctx.lineTo(x0 + W / 2, y0 + H - C);
+      ctx.moveTo(x0 + C, y0 + H / 2);
+      ctx.lineTo(x0 + W - C, y0 + H / 2);
+      ctx.stroke();
+    } else if (id === 'galleria') {
+      for (let i = 0; i < 9; i++) {
+        ctx.fillStyle = ['#ff2a6d', '#05d9e8', '#f5d300', '#b026ff'][i % 4];
+        ctx.beginPath();
+        ctx.arc(x0 + ((i * 131) % 20 + 2) * C, y0 + ((i * 71) % 11 + 2) * C, C * (0.8 + (i % 3) * 0.5), 0, Math.PI * 2);
+        ctx.fill();
+      }
+    } else if (id === 'oggetti' || id === 'cose') {
+      for (let i = 0; i < 6; i++) {
+        const a = t * 0.6 + i;
+        ctx.beginPath();
+        ctx.ellipse(x0 + W / 2, y0 + H / 2, C * (3 + i), C * (1.5 + i * 0.5), a * 0.2, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    } else if (id === 'persone' || id === 'mondo' || id === 'magia') {
+      for (let y = y0 + C; y < y0 + H - C; y += 4) {
+        ctx.globalAlpha = 0.05 + 0.04 * Math.sin(y * 0.1 + t * 3);
+        ctx.fillRect(x0 + C, y, W - 2 * C, 1);
+      }
+    } else if (id === 'universo') {
+      ctx.globalAlpha = 0.1;
+      for (let i = 0; i < 12; i++) {
+        ctx.beginPath();
+        ctx.moveTo(x0 + W / 2, y0 + H / 2);
+        const a = (i / 12) * Math.PI * 2 + t * 0.1;
+        ctx.lineTo(x0 + W / 2 + Math.cos(a) * W, y0 + H / 2 + Math.sin(a) * W);
+        ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
+
+  /** The wall of screens: the latest changes of this room, scrolling. */
+  private drawHistoryScreen(x: number, y: number, w: number, h: number, col: string, buildingId: string): void {
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.fillStyle = '#05060c';
+    ctx.fillRect(x, y - h * 0.3, w, h * 1.2);
+    ctx.shadowColor = col;
+    ctx.shadowBlur = 16;
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x, y - h * 0.3, w, h * 1.2);
+    ctx.shadowBlur = 0;
+    ctx.beginPath();
+    ctx.rect(x + 3, y - h * 0.3 + 3, w - 6, h * 1.2 - 6);
+    ctx.clip();
+    const lines = this.kernel.boardOf(buildingId).map((l) => `${l.author}: ${l.message}`);
+    const all = lines.length ? lines : this.kernel.repo.log().slice(0, 8).map((c) => `${c.id} ${c.message}`);
+    ctx.font = `10px monospace`;
+    ctx.fillStyle = col;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    const scroll = (this.t * 10) % (all.length * 12 + 20);
+    all.forEach((l, i) => ctx.fillText(l.slice(0, Math.floor(w / 6)), x + 6, y - h * 0.3 + 6 + i * 12 - scroll + h));
+    ctx.restore();
+  }
+
+  /** A holographic table with the atlas. */
+  private drawAtlasTable(x: number, y: number, w: number, h: number, col: string): void {
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.fillStyle = '#081210';
+    ctx.fillRect(x, y, w, h);
+    ctx.shadowColor = col;
+    ctx.shadowBlur = 14;
+    ctx.strokeStyle = col;
+    ctx.strokeRect(x, y, w, h);
+    ctx.globalAlpha = 0.7;
+    for (let i = 0; i < 14; i++) {
+      ctx.fillStyle = i % 3 ? col : '#f5d300';
+      ctx.fillRect(x + 4 + ((i * 37) % (w - 10)), y + 4 + ((i * 17) % (h - 10)), 3, 3);
+    }
+    ctx.restore();
+  }
+
+  /** A teleport pad: rings of light turning. */
+  private drawPortal(x: number, y: number, col: string, near: boolean): void {
+    const ctx = this.ctx;
+    const C = this.cell;
+    ctx.save();
+    ctx.shadowColor = col;
+    ctx.shadowBlur = near ? 22 : 12;
+    ctx.strokeStyle = col;
+    for (let i = 0; i < 3; i++) {
+      const r = C * (0.18 + 0.12 * i) * (1 + 0.08 * Math.sin(this.t * 4 + i));
+      ctx.globalAlpha = 0.9 - i * 0.25;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.ellipse(x + C / 2, y + C / 2, r * 1.3, r * 0.7, this.t * (i % 2 ? 1 : -1), 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  /**
+   * The Council's round table: glossy black with a neon rim; in the middle a circular screen with a
+   * universe turning (a galaxy of light, drawn — not the real one).
+   */
+  private drawCouncilTable(cx: number, cy: number, C: number): void {
+    const ctx = this.ctx;
+    const t = this.t;
+    ctx.save();
+    ctx.fillStyle = '#0b0b12';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, C * 3.4, C * 2.3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowColor = '#b026ff';
+    ctx.shadowBlur = 20;
+    ctx.strokeStyle = '#b026ff';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.shadowColor = '#05d9e8';
+    ctx.strokeStyle = '#05d9e8';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, C * 3.1, C * 2.05, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    // The circular screen.
+    const R = C * 1.5;
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#020208';
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.clip();
+    for (let i = 0; i < 260; i++) {
+      const arm = i % 3;
+      const d = (i / 260) * R * 0.95;
+      const a = d * 0.09 + (arm * Math.PI * 2) / 3 + t * 0.5 + ((i * 7919) % 100) / 400;
+      const px = cx + Math.cos(a) * d;
+      const py = cy + Math.sin(a) * d * 0.9;
+      const tw = 0.5 + 0.5 * Math.sin(t * 3 + i);
+      ctx.fillStyle = i % 5 === 0 ? `rgba(255, 80, 180, ${0.5 + 0.5 * tw})` : i % 2 ? `rgba(120, 220, 255, ${0.4 + 0.5 * tw})` : `rgba(255, 245, 210, ${0.5 + 0.4 * tw})`;
+      ctx.fillRect(px, py, 1.6, 1.6);
+    }
+    const core = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 0.35);
+    core.addColorStop(0, 'rgba(255, 240, 220, 0.9)');
+    core.addColorStop(1, 'rgba(255, 120, 200, 0)');
+    ctx.fillStyle = core;
+    ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
+    ctx.restore();
   }
 
   private drawFile(look: string, sx: number, sy: number, color: string, near: boolean): void {

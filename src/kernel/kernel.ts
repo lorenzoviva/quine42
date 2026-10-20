@@ -701,6 +701,7 @@ export class Kernel {
 
   /** Plans the nearest drafts, a few at a time. */
   private pumpDevelopment(): void {
+    if (this.corona.isInterior(this.playerPos().x)) return;
     if (this.generationHeld || this.developers >= 3) return;
     const S = this.config.chunkSize;
     const pc = this.playerCarpet();
@@ -889,6 +890,26 @@ export class Kernel {
       return { ok: true, summary };
     }
     return { ok: false, summary: `Il Cartografo non è riuscito a scrivere un ambiente valido: ${feedback}` };
+  }
+
+  /**
+   * What the Cartographer's atlas shows, without generating anything: places planned (ever, from the
+   * universe's maps, and now), places only sketched (drafts loaded, not yet planned), the regions, you.
+   */
+  async atlasView(): Promise<{ planned: Array<{ cx: number; cy: number; name: string; layout: string }>; drafts: Array<{ cx: number; cy: number }>; regions: Region[]; here: { cx: number; cy: number } }> {
+    const S = this.config.chunkSize;
+    const planned = new Map<string, { cx: number; cy: number; name: string; layout: string }>();
+    const prefix = this.recordKey({ cx: 0, cy: 0, key: '' } as Chunk).replace(/[:,]/g, '_');
+    for (const m of (await this.repo.backend?.listMaps?.().catch(() => [])) ?? []) {
+      if (!m.file.startsWith(prefix)) continue;
+      const parts = m.file.slice(prefix.length).split('_').map(Number);
+      if (parts.length >= 2 && parts.every(Number.isFinite)) planned.set(`${parts[0]},${parts[1]}`, { cx: parts[0], cy: parts[1], name: m.name, layout: m.layout });
+    }
+    for (const ch of this.chunks.values()) if (ch.stage === 'planned' && ch.place) planned.set(ch.key, { cx: ch.cx, cy: ch.cy, name: ch.place.name, layout: ch.plan?.layout ?? '' });
+    const drafts = [...this.chunks.values()].filter((c) => c.stage === 'draft' && !planned.has(c.key)).map((c) => ({ cx: c.cx, cy: c.cy }));
+    // Seen from the studio, "here" is where the wanderer last stood in the world.
+    const pc = this.corona.isInterior(this.playerPos().x) ? this.lastWorld : this.playerCarpet();
+    return { planned: [...planned.values()], drafts, regions: readAtlas(this.files).regioni, here: { cx: Math.floor(pc.x / S), cy: Math.floor(pc.y / S) } };
   }
 
   /** Where things are, seen from a carpet point: places nearby and regions of the atlas. */
@@ -1100,7 +1121,8 @@ export class Kernel {
 
   /** Loads the chunks needed to draw the visible area; unloads the far ones. */
   private updateChunks(): void {
-    if (this.zone === 'studio') return;
+    // Inside the studio there is no world to load (interiors are far away in real space on purpose).
+    if (this.zone === 'studio' || this.corona.isInterior(this.playerPos().x)) return;
     const S = this.config.chunkSize;
     const R = this.config.circleRadius;
     const p = this.playerPos();
@@ -2265,9 +2287,27 @@ export class Kernel {
       case 'tile':
         this.bus.emit('ui:exhibit', { item: it, building: room.building.name });
         return;
-      case 'board':
+      case 'screen':
         this.bus.emit('ui:board', { building: room.building.id, name: room.building.name });
         return;
+      case 'atlas':
+        this.bus.emit('ui:atlas', {});
+        return;
+      case 'table':
+        this.message("Al centro del tavolo, sullo schermo rotondo, l'universo gira. Ognuno del Concilio ha alle spalle il teletrasporto per la sua sala.");
+        return;
+      case 'portal': {
+        const to = this.corona.building(it.target);
+        if (to) {
+          Object.assign(p, this.corona.entrance(to));
+          this.message(to.name);
+        } else {
+          Object.assign(p, this.corona.exitPoint(room.building));
+          this.updateZone();
+        }
+        this.bus.emit('studio:teleport', {});
+        return;
+      }
       case 'up':
       case 'down': {
         const next = room.floor.index + (it.kind === 'up' ? 1 : -1);
@@ -2756,6 +2796,8 @@ export class Kernel {
   private talking = false;
   private lastTalk = -1e9;
   private worldPhase = '';
+  /** Where the wanderer last stood in the world (carpet space), for views opened from the studio. */
+  private lastWorld = { x: 0, y: 0 };
   private plotsWoven = 0;
 
   /** The day of the world (0 = the first) and a label for memories. */
@@ -3668,6 +3710,7 @@ export class Kernel {
     this.time += dt;
     this.tickCount++;
     this.archive.tick(dt);
+    if (!this.corona.isInterior(this.playerPos().x)) this.lastWorld = { ...this.playerCarpet() };
     if (this.zone === 'corona') this.archive.meet(this.playerPos().x, this.playerPos().y);
     this.societyTick();
     if (this.repo.backend && this.tickCount % (60 * 120) === 0) this.saveState();

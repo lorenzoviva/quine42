@@ -20,6 +20,7 @@ import { FeedPanel } from './ui/feed';
 import { GenesisScreen } from './ui/genesis';
 import { ActionMenu } from './ui/actions';
 import { StudioPanel } from './ui/studio';
+import { AtlasPanel } from './ui/atlas';
 import { Sfx } from './audio';
 import { $ } from './ui/dom';
 import './style.css';
@@ -86,6 +87,7 @@ async function main() {
   const genesis = new GenesisScreen(kernel);
   const actions = new ActionMenu(kernel);
   const studio = new StudioPanel(kernel, images);
+  const atlas = new AtlasPanel(kernel);
   // Death: the session ends; continue in the same universe or start again from the seed.
   const deathEl = $('#death');
   kernel.bus.on('ui:death', ({ cause }: { cause: string }) => {
@@ -127,7 +129,7 @@ async function main() {
   (window as any).rune = kernel;
 
   const syncFocus = () => {
-    kernel.input.enabled = !editor.isOpen && !konsole.isOpen && !inventory.isOpen && !chat.isOpen && !genesis.isOpen && !actions.isOpen && !studio.isOpen && !kernel.dead;
+    kernel.input.enabled = !editor.isOpen && !konsole.isOpen && !inventory.isOpen && !chat.isOpen && !genesis.isOpen && !actions.isOpen && !studio.isOpen && !atlas.isOpen && !kernel.dead;
     if (!kernel.input.enabled) kernel.input.releaseAll();
   };
   editor.onClose = syncFocus;
@@ -136,6 +138,7 @@ async function main() {
   chat.onClose = syncFocus;
   actions.onClose = syncFocus;
   studio.onClose = syncFocus;
+  atlas.onClose = syncFocus;
   konsole.onEdit = (path) => {
     konsole.close();
     editor.open(path);
