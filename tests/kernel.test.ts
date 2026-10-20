@@ -861,3 +861,19 @@ describe('two tables', () => {
     expect(k.council.context('narratore')).not.toMatch(/Crepe/);
   });
 });
+
+describe('new mechanics', () => {
+  it('a saddled horse can be ridden: a state that makes you faster and carry more, learned as an action', async () => {
+    const k = await boot();
+    clearArea(k);
+    const pc = k.playerCarpet();
+    const horse = k.spawnModuleEntity(k.modules.get('object.crate')!, pc.x + 0.9, pc.y);
+    const cap = k.carryCapacity();
+    await k.freeAction(horse, 'monto in sella al cavallo');
+    expect(k.states()['a cavallo'].velocita).toBeCloseTo(1.8);
+    expect(k.carryCapacity()).toBe(cap + 30);
+    expect(k.actionsFor(horse).some((a) => a.label === 'Monta in sella')).toBe(true);
+    await k.freeAction(horse, 'scendo dal cavallo');
+    expect(k.states()['a cavallo']).toBeUndefined();
+  });
+});

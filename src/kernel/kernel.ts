@@ -2410,6 +2410,32 @@ export class Kernel {
     return all.find((e) => normName(e.label) === n) ?? all.find((e) => n.includes(normName(e.label).split(' ')[0]) && normName(e.label).length >= 3) ?? all.find((e) => normName(e.label).includes(n));
   }
 
+  /** States of the wanderer (on horseback, with a backpack…): what they change, until when. */
+  states(): Record<string, { velocita: number; peso: number; luce: number; fino: number }> {
+    // Lua removes a state by setting it to nil (null on the JS side): those are gone.
+    const st = this.ecs.get(this.playerId, 'stati') ?? {};
+    for (const k of Object.keys(st)) if (!st[k]) delete st[k];
+    return st;
+  }
+
+  /** How much the wanderer carries without slowing down (a backpack, a horse carry more). */
+  carryCapacity(): number {
+    return CARRY_CAPACITY + Object.values(this.states()).reduce((n, s) => n + (Number(s.peso) || 0), 0);
+  }
+
+  /** States run out; a state with light lights the wanderer's way. */
+  private statesTick(): void {
+    const st = this.states();
+    let light = 0;
+    for (const [k, s] of Object.entries(st)) {
+      if (s.fino && s.fino < this.time) delete st[k];
+      else light = Math.max(light, Number(s.luce) || 0);
+    }
+    const l = this.ecs.get(this.playerId, 'luce');
+    if (light > 0) this.ecs.set(this.playerId, 'luce', { ...(l ?? {}), accesa: true, raggio: light, daStato: true });
+    else if (l?.daStato) this.ecs.set(this.playerId, 'luce', { accesa: false });
+  }
+
   /** Magic runes in the phrase, in their order: the incantation T would cast. */
   incantation(): string[] {
     return this.hand().tokens.filter((t) => this.content.runes[t]);
@@ -3605,6 +3631,7 @@ export class Kernel {
     if (this.repo.backend && this.tickCount % (60 * 120) === 0) this.saveState();
     if (this.tickCount % 10 === 0) {
       this.syncHand();
+      this.statesTick();
       const n = this.needs();
       if (n && !Number.isFinite(n.mana)) n.mana = 60;
     }
@@ -3615,7 +3642,7 @@ export class Kernel {
       this.art.pump();
     }
     this.rebuildSolids();
-    this.playerComp().load = totalWeight(this.inventory(), this.itemSpec) / CARRY_CAPACITY;
+    this.playerComp().load = totalWeight(this.inventory(), this.itemSpec) / this.carryCapacity();
     this.syncRunes();
     this.runRunes();
     for (const s of this.systems) this.runModule(s.manifest.id, 'update', dt);

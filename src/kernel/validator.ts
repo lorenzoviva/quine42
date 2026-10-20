@@ -355,6 +355,22 @@ export function validateEffects(raw: unknown, ctx: EffectContext): EffectVerdict
       case 'ricordo':
         if (typeof e.testo === 'string' && e.testo.trim()) out.effects.push({ tipo, testo: e.testo.trim().slice(0, 200), peso: Math.round(num(e.peso, 1, 3, 2)) });
         break;
+      case 'stato': {
+        const nome = typeof e.nome === 'string' ? e.nome.trim().toLowerCase().slice(0, 30) : '';
+        if (!nome) {
+          out.dropped.push('stato senza nome');
+          break;
+        }
+        const st: Effect & { tipo: 'stato' } = { tipo, nome, durata: Math.round(num(e.durata, 0, 3600, 0)) };
+        if (e.velocita !== undefined) st.velocita = num(e.velocita, 0.3, 3, 1);
+        if (e.peso !== undefined) st.peso = num(e.peso, -20, 60, 0);
+        if (e.luce !== undefined) st.luce = num(e.luce, 0, 8, 0);
+        out.effects.push(st);
+        break;
+      }
+      case 'togli_stato':
+        if (typeof e.nome === 'string' && e.nome.trim()) out.effects.push({ tipo, nome: e.nome.trim().toLowerCase().slice(0, 30) });
+        break;
       case 'nascita':
         out.effects.push({ tipo, ...(typeof e.nome === 'string' && e.nome.trim() ? { nome: e.nome.trim().slice(0, 30) } : {}) });
         break;

@@ -41,6 +41,11 @@ const EFFECT_SCHEMA: Schema = {
     tipo: { type: 'STRING', enum: [...EFFECT_TYPES] },
     testo: { type: 'STRING' },
     oggetto: { type: 'STRING', description: 'nome di un oggetto (crea_oggetto, consuma)' },
+    nome: { type: 'STRING', description: 'stato/togli_stato: il nome della condizione (es. «a cavallo»)' },
+    velocita: { type: 'NUMBER' },
+    peso: { type: 'NUMBER' },
+    luce: { type: 'NUMBER' },
+    legame: { type: 'STRING' },
     quantita: { type: 'INTEGER' },
     a: { type: 'STRING', description: 'terreno: nome del terreno risultante' },
     da: { type: 'STRING', description: 'terreno: solo le caselle di questo terreno (facoltativo)' },
@@ -85,6 +90,8 @@ export const EFFECTS_GUIDE = [
   'scudo {durata}: il viandante è protetto',
   'spingi {forza}: la cosa viene spinta via',
   'evoca {modulo}: compare qualcosa o qualcuno che esiste già nel mondo',
+  'stato {nome, velocita, peso, luce, durata}: una condizione del viandante che rende possibile una meccanica nuova (a cavallo: velocita 1.8; con lo zaino: peso 15; con la torcia: luce 5; durata in secondi, 0 = finché non lo togli)',
+  'togli_stato {nome}: finisce una condizione (scendere da cavallo, posare lo zaino)',
   'SOLO SU UNA PERSONA — legame {legame}: cosa diventa per il viandante (amico, innamorata, moglie, marito, nemico…); ricordo {testo, peso 1-3}: cosa ricorderà; nascita {nome}: nasce un figlio (solo tra sposi, e solo se la persona lo vuole)',
 ].join('\n');
 
@@ -99,6 +106,7 @@ export async function judgeAction(c: Council, ctx: ActionContext): Promise<Actio
     `Se sì, scegli gli effetti (al massimo 4) SOLO da questo elenco:\n${EFFECTS_GUIDE}`,
     `Terreni esistenti: ${ctx.terrains.join(', ')}. Cose evocabili: ${ctx.summonable.slice(0, 30).join(', ') || 'nessuna'}. Tabelle di bottino: ${ctx.loot.join(', ')}.`,
     `Sii fedele alla fisica: niente miracoli senza strumenti o rune; serve il giusto attrezzo per scassinare, tagliare, scavare. Se serve un oggetto che il viandante porta, mettilo in "serve".`,
+    `Fai evolvere il gioco: se l'azione apre una meccanica nuova sensata (montare il cavallo sellato, remare sulla barca, indossare lo zaino), rendila possibile con uno "stato", e diventerà un'azione ripetibile della cosa.`,
   ].join('\n\n');
   const r = await c.ask<{ possibile: boolean; racconto: string; effetti?: unknown[]; ripetibile?: boolean; etichetta?: string; serve?: string }>('narratore', 'action.judge', prompt, JUDGE_SCHEMA, {
     data: ctx,

@@ -147,10 +147,11 @@ export class Hud {
     const n = k.needs();
     if (n) {
       const bars: Array<[string, number, string]> = [['fame', n.hunger, '#e0a040'], ['sete', n.thirst, '#4aa8e8'], ['energia', n.energy, '#c0d860'], ['salute', n.health, '#e85060'], ['mana', n.mana ?? 0, '#a070ff']];
-      const key = bars.map((b) => Math.round(b[1])).join(',');
+      const key = bars.map((b) => Math.round(b[1])).join(',') + Object.keys(k.states()).join('|');
       if (key !== this.lastNeeds) {
         this.lastNeeds = key;
-        this.needsEl.replaceChildren(...bars.map(([label, v, color]) => el('div', { class: `need${v < 25 ? ' low' : ''}`, title: `${label} ${Math.round(v)}` }, el('span', { class: 'l' }, label), el('span', { class: 'bar' }, el('span', { class: 'fill', style: `width:${Math.max(0, Math.min(100, v))}%;background:${color}` })))));
+        const stati = Object.keys(k.states());
+      this.needsEl.replaceChildren(...(stati.length ? [el('div', { class: 'need' }, el('span', { class: 'l' }, stati.join(' · ')))] : []), ...bars.map(([label, v, color]) => el('div', { class: `need${v < 25 ? ' low' : ''}`, title: `${label} ${Math.round(v)}` }, el('span', { class: 'l' }, label), el('span', { class: 'bar' }, el('span', { class: 'fill', style: `width:${Math.max(0, Math.min(100, v))}%;background:${color}` })))));
       }
     }
 

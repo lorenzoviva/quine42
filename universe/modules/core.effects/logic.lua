@@ -117,6 +117,20 @@ function F.spingi(target, user, e)
   return nil
 end
 
+-- Uno stato del viandante: a cavallo, in barca, con lo zaino. Cambia velocità, peso, luce.
+function F.stato(_, user, e)
+  local st = ecs.get(user, "stati") or {}
+  st[e.nome] = { velocita = e.velocita or 1, peso = e.peso or 0, luce = e.luce or 0, fino = (e.durata or 0) > 0 and (time + e.durata) or 0 }
+  ecs.set(user, "stati", st)
+  return nil
+end
+
+function F.togli_stato(_, user, e)
+  local st = ecs.get(user, "stati")
+  if st then st[e.nome] = nil end
+  return nil
+end
+
 function F.evoca(target, _, e, x, y)
   local px, py = dove(target, x, y)
   world.spawn(e.modulo, px + 0.8, py + 0.3)

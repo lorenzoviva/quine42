@@ -4,7 +4,7 @@
 
 import type { Kernel } from '../kernel/kernel';
 import type { ImageCache } from '../render/imagetools';
-import { CARRY_CAPACITY, HOTBAR, totalWeight } from '../kernel/inventory';
+import { HOTBAR, totalWeight } from '../kernel/inventory';
 import { itemIcon } from './hud';
 import { $, el } from './dom';
 import { runeGlyph } from '../kernel/runes';
@@ -280,12 +280,13 @@ export class InventoryPanel {
       };
       tabs.append(b);
     }
-    const over = weight > CARRY_CAPACITY;
+    const cap = k.carryCapacity();
+    const over = weight > cap;
     this.root.replaceChildren(
       el(
         'div',
         { class: 'window' },
-        el('div', { class: 'head' }, el('span', { class: 'title' }, 'Inventario'), tabs, el('span', { class: `weight${over ? ' over' : ''}` }, `peso ${Math.round(weight * 10) / 10} / ${CARRY_CAPACITY}${over ? ' — appesantito' : ''}`), el('span', { class: 'hint' }, 'I / Tab per chiudere')),
+        el('div', { class: 'head' }, el('span', { class: 'title' }, 'Inventario'), tabs, el('span', { class: `weight${over ? ' over' : ''}` }, `peso ${Math.round(weight * 10) / 10} / ${Math.round(cap)}${over ? ' — appesantito' : ''}`), el('span', { class: 'hint' }, 'I / Tab per chiudere')),
         el('div', { class: 'body' }, mine, side),
         el(
           'div',

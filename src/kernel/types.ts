@@ -156,9 +156,13 @@ export type Effect =
   // Between people (only on someone): what they become to the wanderer, what they will remember, a birth.
   | { tipo: 'legame'; legame: string }
   | { tipo: 'ricordo'; testo: string; peso?: number }
-  | { tipo: 'nascita'; nome?: string };
+  | { tipo: 'nascita'; nome?: string }
+  // New mechanics: a state of the wanderer (on horseback, rowing, wearing a backpack…) that changes how
+  // fast they go, how much they carry, how far they see; durata 0 = until taken off.
+  | { tipo: 'stato'; nome: string; velocita?: number; peso?: number; luce?: number; durata?: number }
+  | { tipo: 'togli_stato'; nome: string };
 
-export const EFFECT_TYPES = ['messaggio', 'bisogni', 'crea_oggetto', 'consuma', 'distruggi', 'apri', 'contenitore', 'terreno', 'fuoco', 'luce', 'scudo', 'spingi', 'evoca', 'legame', 'ricordo', 'nascita'] as const;
+export const EFFECT_TYPES = ['messaggio', 'bisogni', 'crea_oggetto', 'consuma', 'distruggi', 'apri', 'contenitore', 'terreno', 'fuoco', 'luce', 'scudo', 'spingi', 'evoca', 'legame', 'ricordo', 'nascita', 'stato', 'togli_stato'] as const;
 
 /**
  * Something you can do to an object (E opens the menu). Either handled by the module's

@@ -26,7 +26,11 @@ function M.update(dt)
     local here = world.player_pos()
     local terrain = world.speed_at(here.x, here.y)
     local burden = math.max(0.4, 1 - 0.5 * math.max(0, (pl.load or 0) - 1))
-    local v = speed * terrain * burden * dt
+    -- Gli stati (a cavallo, in barca…) cambiano il passo.
+    local stati = ecs.get(id, "stati")
+    local mult = 1
+    if stati then for _, s in pairs(stati) do mult = mult * (s.velocita or 1) end end
+    local v = speed * terrain * burden * mult * dt
     step(p, b, dx * v, dy * v)
   end)
 end
