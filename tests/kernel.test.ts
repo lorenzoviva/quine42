@@ -478,9 +478,11 @@ describe('a society', () => {
     const ib = (await k.ensureIdentity(b))!;
     // The second is related to someone already known, and that person knows it too.
     const people = JSON.parse(k.files['world/people.json']);
-    const relative = people.persone.find((p: { nome: string }) => p.nome === ib.family?.[0].nome);
-    expect(relative).toBeTruthy();
-    expect(relative.famiglia.some((f: { nome: string }) => f.nome === ib.name)).toBe(true);
+    const relName = ib.family?.[0].nome;
+    const relative = people.persone.find((p: { nome: string }) => p.nome === relName);
+    // Either someone already met (who now knows it too) or a relative not met yet (awaited).
+    if (relative) expect(relative.famiglia.some((f: { nome: string }) => f.nome === ib.name)).toBe(true);
+    else expect(people.attesi.some((x: { nome: string }) => x.nome === relName)).toBe(true);
     expect(people.persone.map((p: { nome: string }) => p.nome)).toEqual(expect.arrayContaining([ia.name, ib.name]));
     expect(k.council.context('narratore')).toBeTruthy();
     // Met again (same origin), no new call: the same person.
