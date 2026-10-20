@@ -1,7 +1,9 @@
 import wasmUri from 'wasmoon/dist/glue.wasm?url';
 import { Kernel } from './kernel/kernel';
 import { bundledFiles } from './kernel/bundle';
-import { localStore } from './kernel/repo';
+import { localStore, memoryStore } from './kernel/repo';
+import { SEED_FILE, seedHashes, UniverseAssets, UniverseChunks, UniverseClient, upgradeFromSeed, type PastCommit } from './kernel/universes';
+import type { FileMap } from './kernel/types';
 import { readConfig } from './kernel/universe';
 import { IdbAssets, IdbChunks } from './kernel/assets';
 import { GeminiModels } from './kernel/ai/gemini';
@@ -31,8 +33,47 @@ async function main() {
   const ai = readConfig(bundledFiles).config.ai;
   const online = !params.has('offline') && (await GeminiModels.available());
   const models: Models = online ? new GeminiModels({ textModel: ai.textModel, imageModel: ai.imageModel, limits: { text: ai.maxText, images: ai.maxImages } }) : new MockModels();
-  const assets = new IdbAssets();
-  const kernel = await Kernel.boot({ files: bundledFiles, store: localStore, models, assets, chunks: new IdbChunks(), imageTools: new BrowserImageTools(), wasmUri });
+  // Two repositories (ADR-0021): the kernel's seed (bundled) and the universe's, on disk.
+  const name = readConfig(bundledFiles).config.name;
+  const client = await UniverseClient.connect(name);
+  let files: FileMap = bundledFiles;
+  let past: PastCommit[] = [];
+  if (client) {
+    loading.textContent = `apertura dell'universo «${name}»…`;
+    let snap = await client.load();
+    if (!snap.exists) {
+      // A world played before this version lived in the browser: it becomes the universe's first commit.
+      const legacy = (() => {
+        try {
+          const d = JSON.parse(localStore.load(`rune:repo:${name}`) ?? 'null');
+          const head = d?.commits?.find((c: { id: string }) => c.id === d.head);
+          return head ? { files: head.files as FileMap, genesis: d.commits.some((c: { message: string }) => c.message.startsWith('genesi:')) } : null;
+        } catch {
+          return null;
+        }
+      })();
+      const start = { ...(legacy?.files ?? bundledFiles), [SEED_FILE]: JSON.stringify(seedHashes(bundledFiles), null, 1) + '\n' };
+      await client.create(start, legacy ? `genesi: mondo portato dal browser${legacy.genesis ? '' : ' (senza genesi)'}` : 'nasce dal seme del kernel');
+      if (legacy) {
+        try {
+          localStorage.removeItem(`rune:repo:${name}`);
+        } catch {
+          /* nothing to free */
+        }
+      }
+      snap = await client.load();
+    }
+    const up = upgradeFromSeed(snap.files ?? {}, bundledFiles);
+    if (Object.keys(up.changes).length) await client.commit(up.changes, `aggiornamento dal kernel: ${up.updated.slice(0, 6).join(', ') || 'seme'}${up.updated.length > 6 ? '…' : ''}`, 'kernel');
+    files = up.files;
+    past = snap.log ?? [];
+  }
+  const legacyAssets = new IdbAssets();
+  const assets = client ? new UniverseAssets(client, legacyAssets) : legacyAssets;
+  const chunks = client ? new UniverseChunks(client, new IdbChunks()) : new IdbChunks();
+  const kernel = await Kernel.boot({ files, store: client ? memoryStore() : localStore, models, assets, chunks, imageTools: new BrowserImageTools(), wasmUri, backend: client ?? undefined, past });
+  // Leaving: the state of play goes into the universe (if it is valid).
+  window.addEventListener('pagehide', () => kernel.saveState());
   const images = new ImageCache((id) => assets.get(id));
   const renderer = new Renderer($<HTMLCanvasElement>('#world'), kernel, images);
   const hud = new Hud(kernel, renderer, images);

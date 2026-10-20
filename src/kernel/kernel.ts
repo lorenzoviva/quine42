@@ -10,6 +10,7 @@ import { apiErrors, validateEffects, Validator } from './validator';
 import { Repo, type KeyValueStore } from './repo';
 import { Corona, type CoronaCell } from './corona';
 import { Archive } from './archive';
+import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './universes';
 import { addPerson, dayPhase, defaultRoutine, greeting, readPeople, societySummary, type DayPhase, type Person } from './society';
 import { Input } from './input';
 import { discoverModules, readConfig } from './universe';
@@ -130,6 +131,9 @@ export interface KernelOptions {
   chunks?: ChunkStore;
   imageTools?: ImageTools;
   wasmUri?: string;
+  /** The universe repository on disk (ADR-0021), and its history from earlier sessions. */
+  backend?: UniverseBackend;
+  past?: PastCommit[];
 }
 
 /** Documentation of the live symbols runes can bind to. */
@@ -249,12 +253,14 @@ export class Kernel {
     const name = readConfig(opts.files).config.name;
     const { repo, synced } = Repo.open(name, opts.files, opts.store);
     k.repo = repo;
+    if (opts.backend) repo.attach(opts.backend, opts.past ?? []);
     k.faults.onRaise = (f, isNew) => {
       if (isNew) k.log('fault', `${f.key}: ${f.message}`);
       k.bus.emit('fault', { fault: f, isNew });
       if (isNew) void k.repairGenerated(f.key, f.message);
     };
     k.applyFiles(repo.working, { reset: true });
+    k.loadState();
     k.models.limits = { text: k.config.ai.maxText, images: k.models.canPaint ? k.config.ai.maxImages : 0 };
     k.log('kernel', `universo «${name}» avviato su commit ${repo.head().id} (${repo.head().message}) — modelli: ${opts.models.name}${synced ? ' — sincronizzato dal disco' : ''}`);
     return k;
@@ -992,7 +998,10 @@ export class Kernel {
     if (man.appearance) comps.glyph = this.glyphOf(man.appearance);
     if (man.interaction) comps.interact = { type: man.interaction.type };
     if (man.persona) comps.mind = { mode: 'vaga', mood: 'tranquillo', history: [], ...(comps.mind ?? {}) } satisfies Mind;
-    if (man.container) comps.container = { inv: newInventory(man.container.size), loot: man.container.loot, filled: false } satisfies Container;
+    if (man.container) {
+      const saved = origin ? this.savedContainers.get(origin) : undefined;
+      comps.container = saved ? { inv: clone(saved.inv), loot: man.container.loot, filled: saved.filled } : ({ inv: newInventory(man.container.size), loot: man.container.loot, filled: false } satisfies Container);
+    }
     if (man.inventory?.length) {
       const inv = newInventory(8);
       for (const it of man.inventory) if (this.content.get(it)) addItem(inv, it, 1, this.itemSpec(it));
@@ -2650,6 +2659,8 @@ export class Kernel {
       this.repo.write('world/atelier.json', JSON.stringify({ pairs: [] }, null, 2) + '\n');
       this.applyFiles({ ...this.repo.working });
       this.consumed.clear();
+      this.savedContainers.clear();
+      this.repo.write('world/stato.json', null);
       this.wanted.clear();
       onProgress?.('Il Narratore scrive gli oggetti comuni del mondo');
       if (!(await this.growContent('genesi', 30, true))) {
@@ -2692,7 +2703,77 @@ export class Kernel {
   // --- Versioning ------------------------------------------------------------------------------
 
   /** Returns the player's inscribed runes to the hand and restores the last valid commit. */
+  /** Containers opened in earlier sessions, by stable origin: they keep what was left in them. */
+  private savedContainers = new Map<string, { inv: Inventory; filled: boolean }>();
+  private lastState = '';
+
+  /**
+   * The state of play is part of the universe too (`world/stato.json`): what the wanderer carries,
+   * what was taken from the world, what is left in chests. Saved only while the universe is valid.
+   */
+  saveState(): boolean {
+    if (this.faults.size || this.generationHeld) return false;
+    const containers: Record<string, { inv: Inventory; filled: boolean }> = Object.fromEntries(this.savedContainers);
+    for (const id of this.ecs.query('container', 'origin')) {
+      const c: Container = this.ecs.get(id, 'container');
+      if (c.filled) containers[this.ecs.get(id, 'origin').key] = { inv: c.inv, filled: true };
+    }
+    const n = this.needs();
+    const state = {
+      viandante: { inventory: this.inventory(), needs: n, hand: this.hand() },
+      consumati: [...this.consumed].slice(-5000),
+      contenitori: containers,
+      ora: Math.round(this.time),
+    };
+    const json = JSON.stringify(state);
+    if (json === this.lastState) return false;
+    this.lastState = json;
+    this.repo.write('world/stato.json', JSON.stringify(state, null, 1) + '\n');
+    this.files = { ...this.files, 'world/stato.json': this.repo.working['world/stato.json']! };
+    this.repo.commit('salvataggio della partita', 'player');
+    return true;
+  }
+
+  /** Restores what was saved: the same wanderer, the same world, after a restart. */
+  loadState(): void {
+    let st: any;
+    try {
+      st = JSON.parse(this.files['world/stato.json'] ?? 'null');
+    } catch {
+      st = null;
+    }
+    if (!st) return;
+    const v = st.viandante ?? {};
+    if (v.inventory?.slots) this.ecs.set(this.playerId, 'inventory', v.inventory);
+    if (v.needs) Object.assign(this.needs() ?? {}, v.needs);
+    if (v.hand?.tokens) Object.assign(this.hand(), v.hand);
+    for (const k of st.consumati ?? []) this.consumed.add(String(k));
+    for (const [k, c] of Object.entries(st.contenitori ?? {})) this.savedContainers.set(k, c as { inv: Inventory; filled: boolean });
+    if (Number.isFinite(st.ora)) this.time = st.ora;
+    this.lastState = JSON.stringify(st);
+  }
+
+  /** Back to a commit of an earlier session: only the universe repository on disk has its files. */
+  async rollbackPast(commitId: string): Promise<boolean> {
+    const files = await this.repo.backend?.checkout(commitId).catch(() => null);
+    if (!files) return false;
+    for (const [p, v] of Object.entries(files)) this.repo.write(p, v);
+    for (const p of Object.keys(this.repo.working)) if (!(p in files)) this.repo.write(p, null);
+    this.applyFiles({ ...this.repo.working }, { reset: true });
+    // The disk already has the commit ("ritorno a …"): here only the session snapshot.
+    const backend = this.repo.backend;
+    this.repo.backend = undefined;
+    this.repo.commit(`ritorno a ${commitId}`, 'kernel');
+    this.repo.backend = backend;
+    this.message(`Il mondo torna a ${commitId}`, 'good');
+    return true;
+  }
+
   rollback(commitId?: string): void {
+    if (commitId && !this.repo.find(commitId)) {
+      void this.rollbackPast(commitId);
+      return;
+    }
     const hand = this.hand();
     for (const { id, rune } of this.runeList()) {
       if (rune.source !== 'player') continue;
@@ -2726,13 +2807,17 @@ export class Kernel {
     return { errors, committed, written: true };
   }
 
-  /** Dev only: files on disk changed (Vite HMR). */
-  syncFromDisk(files: FileMap): void {
-    for (const p of Object.keys(this.repo.working)) if (!(p in files)) this.repo.write(p, null);
-    for (const [p, src] of Object.entries(files)) this.repo.write(p, src);
+  /**
+   * Dev only: the kernel's seed changed on disk (Vite HMR). The universe takes the new versions of the
+   * files it never changed itself (same merge as at boot); its own creations stay.
+   */
+  syncFromDisk(seed: FileMap): void {
+    const up = upgradeFromSeed({ ...this.repo.working }, seed);
+    if (!up.updated.length) return;
+    for (const [p, v] of Object.entries(up.changes)) this.repo.write(p, v);
     this.applyFiles({ ...this.repo.working });
-    const c = this.repo.commit('dev: modifica dal disco', 'dev');
-    this.log('dev', `hot reload dal disco → commit ${c.id}`);
+    const c = this.repo.commit(`aggiornamento dal kernel: ${up.updated.join(', ')}`, 'dev');
+    this.log('dev', `seme aggiornato (${up.updated.length} file) → commit ${c.id}`);
   }
 
   feed(): FeedEntry[] {
@@ -2746,6 +2831,7 @@ export class Kernel {
     this.tickCount++;
     this.archive.tick(dt);
     this.societyTick();
+    if (this.repo.backend && this.tickCount % (60 * 120) === 0) this.saveState();
     if (this.tickCount % 10 === 0) {
       this.syncHand();
       const n = this.needs();

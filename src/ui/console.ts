@@ -172,14 +172,20 @@ export class Console {
           await k.chunkStore.clear();
           flush.textContent = 'Cache svuotata: i luoghi nuovi verranno rigenerati';
         };
-        const reset = el('button', { class: 'danger' }, 'Cancella la storia e riparti dalla genesi');
-        reset.onclick = () => {
-          if (!confirm('Cancellare tutti i commit di questo universo?')) return;
-          localStorage.removeItem(`rune:repo:${k.config.name}`);
+        const reset = el('button', { class: 'danger' }, 'Riparti dal seme del kernel (nuovo universo)');
+        reset.onclick = async () => {
+          if (!confirm(`L'universo «${k.config.name}» verrà messo da parte (universes/.cestino) e ne nascerà uno nuovo dal seme del kernel. Procedere?`)) return;
+          await k.repo.backend?.reset().catch(() => undefined);
+          try {
+            localStorage.removeItem(`rune:repo:${k.config.name}`);
+          } catch {
+            /* nothing to remove */
+          }
           void k.chunkStore.clear().then(() => location.reload());
         };
         return [
           el('div', { class: 'note' }, `Universo «${k.config.name}» — seme ${k.config.seed} — ${Object.keys(k.files).length} file — ${k.ecs.count()} entità — ${k.chunks.size} chunk`),
+          el('div', { class: 'note' }, k.repo.backend ? `Due repository: il kernel (il seme, immutabile) e questo universo, un repository git su disco in universes/${k.config.name}/ — ogni commit valido vi viene scritto; la partita si salva da sola.` : 'Nessun repository su disco (hosting statico): l\'universo vive nel browser.'),
           el('div', { class: 'row' }, exp),
           el('div', { class: 'row' }, 'Importa: ', file),
           el('div', { class: 'row' }, genesis),

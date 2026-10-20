@@ -1,8 +1,11 @@
-// Local versioning of a universe: full snapshots of the universe files, one commit per valid state.
-// Every universe is its own repository; rollback always returns to the last valid commit.
+// Versioning of a universe: snapshots of the universe files, one commit per valid state; rollback
+// always returns to the last valid commit. In the browser the snapshots of this session live in
+// memory and every commit is also written to the universe's git repository on disk (a backend,
+// ADR-0021); without a backend (tests, static hosting) the repo persists in a key-value store.
 
 import type { FileMap } from './types';
 import { hashStr, hex } from './rng';
+import type { PastCommit, UniverseBackend } from './universes';
 
 export type Author = 'genesis' | 'player' | 'agent' | 'dev' | 'kernel';
 
@@ -61,6 +64,10 @@ export class Repo {
   /** Files currently loaded in the universe; may differ from HEAD (uncommitted / broken edits). */
   working: FileMap;
   private data: RepoData;
+  /** The universe repository on disk, if any: commits are written there too. */
+  backend?: UniverseBackend;
+  /** Commits of earlier sessions (from the backend): history only, no snapshots. */
+  past: PastCommit[] = [];
 
   private constructor(
     data: RepoData,
@@ -118,8 +125,11 @@ export class Repo {
     return this.data.commits.find((c) => c.id === id);
   }
 
+  /** This session's commits, newest first, then earlier sessions' (without snapshots). */
   log(): Commit[] {
-    return [...this.data.commits].reverse();
+    const known = new Set(this.data.commits.map((c) => c.id));
+    const older = this.past.filter((p) => !known.has(p.id)).map((p) => ({ id: p.id, parent: null, message: p.message, author: (p.author === 'Concilio' ? 'agent' : p.author === 'Viandante' ? 'player' : 'kernel') as Author, time: p.time, files: {} as FileMap, past: true }));
+    return [...[...this.data.commits].reverse(), ...older];
   }
 
   /** Who last changed a file (by walking the history back), or null if it never changed since genesis. */
@@ -142,7 +152,14 @@ export class Repo {
   }
 
   commit(message: string, author: Author): Commit {
+    const prev = this.head().files;
     const c = Repo.makeCommit(this.data.head, message, author, this.working);
+    if (this.backend) {
+      const changes: Record<string, string | null> = {};
+      for (const [p, v] of Object.entries(this.working)) if (prev[p] !== v) changes[p] = v;
+      for (const p of Object.keys(prev)) if (!(p in this.working)) changes[p] = null;
+      if (Object.keys(changes).length) void this.backend.commit(changes, message, author);
+    }
     this.data.commits.push(c);
     if (this.data.commits.length > MAX_COMMITS) this.data.commits.splice(1, this.data.commits.length - MAX_COMMITS);
     this.data.head = c.id;
@@ -181,6 +198,14 @@ export class Repo {
   }
 
   private persist(): void {
+    // With a universe repository on disk, nothing goes to the (small) browser store.
+    if (this.backend) return;
     this.store.save(Repo.key(this.data.name), JSON.stringify(this.data));
+  }
+
+  /** Writes commits to a universe repository from now on (the files are already there). */
+  attach(backend: UniverseBackend, past: PastCommit[]): void {
+    this.backend = backend;
+    this.past = past;
   }
 }
