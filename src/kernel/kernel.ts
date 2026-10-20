@@ -10,6 +10,7 @@ import { apiErrors, validateEffects, Validator } from './validator';
 import { Repo, type KeyValueStore } from './repo';
 import { Corona, type CoronaCell } from './corona';
 import { Archive } from './archive';
+import { addPerson, dayPhase, defaultRoutine, greeting, readPeople, societySummary, type DayPhase, type Person } from './society';
 import { Input } from './input';
 import { discoverModules, readConfig } from './universe';
 import { CARPET_TOKENS, cellIndex, extractLines, tokenize, type RuneComp, type RuneLine } from './runes';
@@ -25,7 +26,7 @@ import { planChunk, type ChunkPlan, type Where } from './agents/cartography';
 import { forge, judgeCombination, repairLogic, slug, type ForgeOrigin } from './agents/forge';
 import { agentReply, examine, narrate, npcReply, type NpcReply, type Turn } from './agents/minds';
 import { planGenesis } from './agents/genesis';
-import { judgeAction, judgeCraft, nameSpell } from './agents/effects';
+import { councilSession, judgeAction, judgeCraft, nameSpell } from './agents/effects';
 import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Identity } from './agents/content';
 import { addItem, CARRY_CAPACITY, countItem, equippedItem, moveSlot, newInventory, putSlot, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
 import type { ActionDef, Effect, FileMap, Spell, ItemDef, ItemSpec, Manifest, ModuleEntry, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
@@ -866,12 +867,40 @@ export class Kernel {
     this.bus.emit('chunk:planned', { key: ch.key });
     if (this.plannedCount % 10 === 0) void this.growContent('esplorazione');
     if (this.plannedCount % 7 === 0) void this.growCast(plan.place);
+    if (this.plannedCount % 12 === 0) void this.holdSession();
   }
 
   /**
    * The world needs new faces: as it is explored, the Forge creates a new kind of inhabitant, different
    * from those already known and fitting where the player is (it then turns up in the next places).
    */
+  private sessions = 0;
+
+  /**
+   * The Council meets: it reads the rules born from play, the people met, the places seen, and may
+   * intervene (items, a new inhabitant, a new thing). The base logic is theirs; so are its changes.
+   */
+  async holdSession(force = false): Promise<string> {
+    if (!force && (this.sessions >= 4 || this.generationHeld || this.models.name === 'offline')) return 'nessuno';
+    this.sessions++;
+    const rules = this.rules().slice(-12).map((r) => `- ${r.testo}: ${r.possibile ? 'si può' : 'non si può'}`).join('\n');
+    const people = readPeople(this.files).persone.slice(-10).map((p) => `- ${p.nome}, ${p.mestiere}`).join('\n');
+    const places = [...this.chunks.values()].filter((c) => c.place).slice(-8).map((c) => `- ${c.place!.name}`).join('\n');
+    const summary = `Regole nate dal gioco:\n${rules || '(nessuna)'}\nPersone incontrate:\n${people || '(nessuna)'}\nLuoghi visti:\n${places || '(nessuno)'}\nOggetti esistenti: ${this.content.items.size}; tipi di abitanti: ${[...this.modules.values()].filter((m) => m.manifest.persona).length}.`;
+    let s;
+    try {
+      s = await councilSession(this.council, summary);
+    } catch (e) {
+      this.council.say('arbitro', 'errore', `sessione del Concilio: ${(e as Error).message}`);
+      return 'nessuno';
+    }
+    this.council.say('arbitro', 'info', `Sessione del Concilio: ${s.assessment}${s.action !== 'nessuno' ? ` → interviene: ${s.action}${s.request ? ` («${s.request}»)` : ''}` : ''}`, undefined, 'council.session');
+    if (s.action === 'oggetti') await this.growContent(`sessione del Concilio: ${s.request ?? ''}`, 12, true);
+    else if (s.action === 'abitante') await this.forgeModule(s.request ?? 'un nuovo abitante del mondo', 'agente', 'npc');
+    else if (s.action === 'cosa' && s.request) await this.forgeModule(s.request, 'agente', 'oggetto');
+    return s.action;
+  }
+
   async growCast(place?: Place, force = false): Promise<boolean> {
     const max = this.config.ai.maxCast ?? 3;
     if (!force && (this.castUsed >= max || this.generationHeld || this.models.name === 'offline')) return false;
@@ -2187,27 +2216,169 @@ export class Kernel {
     };
   }
 
-  /** Behind every character there is an individual: name, story, own pockets (written once, cheap text). */
+  /**
+   * Behind every character there is an individual: name, story, own pockets, a job, a family among the
+   * people already known, a daily routine (written once, cheap text, kept in world/people.json: met
+   * again, they are the same person).
+   */
   async ensureIdentity(id: Id): Promise<Identity | undefined> {
     const existing: Identity | undefined = this.ecs.get(id, 'identity');
     if (existing) return existing;
-    const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
-    if (!m?.persona) return undefined;
-    let identity: Identity;
+    const pending = this.individuating.get(id);
+    if (pending) return pending;
+    const job = this.individuate(id);
+    this.individuating.set(id, job);
     try {
-      identity = await individuate(this.council, { name: m.name, description: m.description ?? '', persona: m.persona }, { place: this.placeHere()?.name ?? '', common: [...this.content.items.values()].map((d) => d.name) });
-    } catch {
-      identity = { name: m.name, persona: m.persona, look: '', carrying: [] };
+      return await job;
+    } finally {
+      this.individuating.delete(id);
     }
+  }
+
+  private individuating = new Map<Id, Promise<Identity | undefined>>();
+
+  private async individuate(id: Id): Promise<Identity | undefined> {
+    const modId: string | undefined = this.ecs.get(id, 'module')?.id;
+    const m = (modId ? this.modules.get(modId)?.manifest : undefined);
+    if (!m?.persona) return undefined;
+    const origin: string | undefined = this.ecs.get(id, 'origin')?.key;
+    const people = readPeople(this.files);
+    const known = origin ? people.persone.find((p) => p.origine === origin && p.tipo === modId) : undefined;
+    let identity: Identity;
+    if (known) {
+      identity = { name: known.nome, persona: known.persona ?? m.persona, look: known.aspetto ?? '', carrying: known.porta ?? [], job: known.mestiere, age: known.eta, family: known.famiglia, routine: known.routine, story: known.storia };
+    } else {
+      try {
+        identity = await individuate(this.council, { name: m.name, description: m.description ?? '', persona: m.persona }, { place: this.placeHere()?.name ?? '', common: [...this.content.items.values()].map((d) => d.name), society: societySummary(readPeople(this.files)) });
+      } catch {
+        identity = { name: m.name, persona: m.persona, look: '', carrying: [], routine: defaultRoutine('') };
+      }
+    }
+    if (!this.ecs.alive.has(id)) return identity;
     this.ecs.set(id, 'identity', identity);
     const resolved = identity.carrying.map((n) => this.content.byName(n));
     const unknown = identity.carrying.filter((_, i) => !resolved[i]);
     const defs = [...resolved.filter((d): d is ItemDef => !!d), ...(unknown.length ? await this.introduceItems(unknown, `portati da ${identity.name}`) : [])];
     let inv: Inventory | undefined = this.ecs.get(id, 'inventory');
     if (!inv) inv = this.ecs.set(id, 'inventory', newInventory(10));
-    for (const d of defs) addItem(inv, d.id, 1, this.itemSpec(d.id));
-    this.council.say('narratore', 'propone', `${m.name} → ${identity.name}: ${identity.look} (porta ${defs.map((d) => d.name).join(', ') || 'niente'})`);
+    if (!inv.slots.some(Boolean)) for (const d of defs) addItem(inv, d.id, 1, this.itemSpec(d.id));
+    if (!known && identity.name !== m.name) {
+      const person: Person = {
+        nome: identity.name, tipo: modId!, mestiere: identity.job || m.name, eta: identity.age, famiglia: identity.family ?? [], routine: identity.routine ?? defaultRoutine(identity.job ?? ''),
+        storia: identity.story, luogo: this.chunkAt(this.ecs.get(id, 'pos')?.x ?? 0, this.ecs.get(id, 'pos')?.y ?? 0)?.place?.name, origine: origin, persona: identity.persona, aspetto: identity.look, porta: identity.carrying,
+      };
+      const next = addPerson(readPeople(this.files), person);
+      this.repo.write('world/people.json', JSON.stringify(next, null, 2) + '\n');
+      this.applyFiles({ ...this.repo.working });
+      this.repo.commit(`persone: ${identity.name}, ${person.mestiere}`, 'agent');
+      // Relatives already met learn about the newcomer too.
+      for (const other of this.ecs.query('identity')) {
+        const oi: Identity = this.ecs.get(other, 'identity');
+        const back = next.persone.find((p) => p.nome === oi.name);
+        if (back && other !== id) oi.family = back.famiglia;
+      }
+      const fam = (identity.family ?? []).map((f) => `${f.legame} di ${f.nome}`).join(', ');
+      this.council.say('narratore', 'propone', `${m.name} → ${identity.name}, ${person.mestiere}${fam ? `; ${fam}` : ''}: ${identity.look} (porta ${defs.map((d) => d.name).join(', ') || 'niente'})`, undefined, 'npc.individuate');
+    }
     return identity;
+  }
+
+  /** What the routine says this person does now. */
+  routineNow(identity: Identity | undefined): { quando: DayPhase; fa: string; dove: string } | undefined {
+    if (!identity?.routine?.length) return undefined;
+    const q = dayPhase(this.time, Kernel.DAY_SECONDS);
+    return identity.routine.find((r) => r.quando === q);
+  }
+
+  private greeted = new Map<string, number>();
+  private lastPhase = new Map<Id, string>();
+  private queuedSpeech: Array<{ id: Id; text: string; at: number }> = [];
+
+  /**
+   * Society, once a second: people met nearby get an identity; everyone with a routine is given a
+   * place to go (sys.wander walks there); related people who meet greet each other.
+   */
+  private societyTick(): void {
+    for (const q of this.queuedSpeech.filter((x) => x.at <= this.time)) this.speak(q.id, q.text);
+    this.queuedSpeech = this.queuedSpeech.filter((x) => x.at > this.time);
+    if (this.tickCount % 60 !== 0) return;
+    const pc = this.playerCarpet();
+    const people = this.ecs.query('mind', 'pos');
+    let started = 0;
+    for (const id of people) {
+      const p = this.ecs.get(id, 'pos');
+      const identity: Identity | undefined = this.ecs.get(id, 'identity');
+      if (!identity) {
+        if (!this.generationHeld && started < 2 && this.individuating.size < 2 && Math.hypot(p.x - pc.x, p.y - pc.y) < 9) {
+          started++;
+          void this.ensureIdentity(id);
+        }
+        continue;
+      }
+      const mind: Mind = this.ecs.get(id, 'mind');
+      const now = this.routineNow(identity);
+      if (!now) continue;
+      const phaseKey = `${now.quando}`;
+      if (this.lastPhase.get(id) !== phaseKey) {
+        this.lastPhase.set(id, phaseKey);
+        if (mind.mode === 'vaga') this.ecs.set(id, 'meta', this.placeFor(id, identity, now.dove) ?? { none: true });
+        if (Math.hypot(p.x - pc.x, p.y - pc.y) < 10 && this.lastPhase.size > 0) this.speak(id, `(${now.fa})`);
+      }
+    }
+    // Related people meeting.
+    const ids = people.filter((id) => this.ecs.has(id, 'identity'));
+    for (let i = 0; i < ids.length; i++)
+      for (let j = i + 1; j < ids.length; j++) {
+        const a = ids[i];
+        const b = ids[j];
+        const pa = this.ecs.get(a, 'pos');
+        const pb = this.ecs.get(b, 'pos');
+        if (Math.hypot(pa.x - pb.x, pa.y - pb.y) > 2.2) continue;
+        const ia: Identity = this.ecs.get(a, 'identity');
+        const ib: Identity = this.ecs.get(b, 'identity');
+        const rel = ia.family?.find((f) => f.nome === ib.name);
+        if (!rel) continue;
+        const key = [ia.name, ib.name].sort().join('|');
+        if ((this.greeted.get(key) ?? -1e9) > this.time - 90) continue;
+        this.greeted.set(key, this.time);
+        const [la, lb] = greeting({ nome: ia.name, mestiere: ia.job ?? '' }, { nome: ib.name }, rel.legame, this.routineNow(ia)?.fa ?? '');
+        this.speak(a, la);
+        this.queuedSpeech.push({ id: b, text: lb, at: this.time + 2.2 });
+      }
+  }
+
+  /** Where a routine step happens: home (a building of the place where they live), work, the square. */
+  private placeFor(id: Id, identity: Identity, where: string): { x: number; y: number } | undefined {
+    if (where === 'in giro') return undefined;
+    const S = this.config.chunkSize;
+    const key: string | undefined = this.ecs.get(id, 'chunk')?.key;
+    const p = this.ecs.get(id, 'pos');
+    const ch = (key ? this.chunks.get(key) : undefined) ?? this.chunkAt(p.x, p.y);
+    if (!ch || ch.stage !== 'planned') return undefined;
+    const h = hashStr(identity.name);
+    const cell = (i: number) => ({ x: ch.cx * S + (i % S) + 0.5, y: ch.cy * S + Math.floor(i / S) + 0.5 });
+    const free = (i: number) => !this.palette[ch.tiles[i]]?.solid;
+    if (where === 'casa' || (where === 'lavoro' && /fabbr|forn|oste|locand|bottega|mercant|sart|panett|cuoc|tessit|speziale|scriv|mago|monac/i.test(identity.job ?? ''))) {
+      const bs = ch.buildings.filter((b) => b.floor.some(free));
+      if (bs.length) {
+        const b = bs[(h + (where === 'lavoro' ? 1 : 0)) % bs.length];
+        const floor = b.floor.filter(free);
+        return cell(floor[h % floor.length]);
+      }
+    }
+    if (where === 'piazza') {
+      const pathCode = this.palette.p ? 'p' : undefined;
+      const centre = (S * S) / 2 + S / 2;
+      let best = -1;
+      for (let i = 0; i < S * S; i++) if ((pathCode ? ch.tiles[i] === pathCode : free(i)) && (best < 0 || Math.abs(i - centre) < Math.abs(best - centre))) best = i;
+      if (best >= 0) return cell(best);
+    }
+    // Work outdoors (fields, woods, flock): a free spot of their place, always the same.
+    for (let k = 0; k < 40; k++) {
+      const i = (h + k * 7919) % (S * S);
+      if (free(i)) return cell(i);
+    }
+    return undefined;
   }
 
   /** Talks to an NPC: the Narrator plays the individual; the chosen action is validated and applied. */
@@ -2223,7 +2394,11 @@ export class Kernel {
     const name = identity?.name ?? m.name;
     let reply: NpcReply;
     try {
-      reply = await npcReply(this.council, { name, persona: identity?.persona ?? m.persona, mood: mind.mood, mode: mind.mode, carrying, place: this.placeHere()?.name ?? '', history: mind.history, facts: this.worldFacts() }, text);
+      const now = this.routineNow(identity);
+      const social = identity
+        ? `\nIl tuo mestiere: ${identity.job ?? '—'}. La tua famiglia: ${(identity.family ?? []).map((f) => `${f.legame} ${f.nome}`).join(', ') || 'nessuno'}.${identity.story ? ` La tua storia: ${identity.story}` : ''}${now ? ` Adesso (${now.quando}) stai: ${now.fa}.` : ''}`
+        : '';
+      reply = await npcReply(this.council, { name, persona: (identity?.persona ?? m.persona) + social, mood: mind.mood, mode: mind.mode, carrying, place: this.placeHere()?.name ?? '', history: mind.history, facts: this.worldFacts() }, text);
     } catch (e) {
       return { say: `(${name} ti guarda in silenzio — ${(e as Error).message})`, action: 'nessuna', mood: mind.mood };
     }
@@ -2353,8 +2528,10 @@ export class Kernel {
       const m = this.modules.get(this.ecs.get(eid, 'module')?.id)?.manifest;
       const mind: Mind | undefined = this.ecs.get(eid, 'mind');
       const identity: Identity | undefined = this.ecs.get(eid, 'identity');
-      const extra = mind ? `umore: ${mind.mood}` : this.ecs.has(eid, 'container') ? 'E per aprire' : m?.actions?.length ? `E: ${m.actions.map((a) => a.label).join(', ')}` : undefined;
-      return { kind: 'entity', name: identity?.name ?? m?.name ?? '???', description: identity ? `${m?.name}. ${identity.look}` : (m?.description ?? ''), extra };
+      const doing = this.routineNow(identity)?.fa;
+      const extra = mind ? `${doing ? `${doing} · ` : ''}umore: ${mind.mood}` : this.ecs.has(eid, 'container') ? 'E per aprire' : m?.actions?.length ? `E: ${m.actions.map((a) => a.label).join(', ')}` : undefined;
+      const fam = identity?.family?.length ? ` ${identity.family.map((f) => `${f.legame[0].toUpperCase()}${f.legame.slice(1)} di ${f.nome}`).join(', ')}.` : '';
+      return { kind: 'entity', name: identity?.name ?? m?.name ?? '???', description: identity ? `${identity.job ? identity.job[0].toUpperCase() + identity.job.slice(1) : m?.name}.${fam} ${identity.look}` : (m?.description ?? ''), extra };
     }
     const t = this.tileAt(Math.floor(cx), Math.floor(cy));
     return t ? { kind: 'tile', name: `${this.palette[t]?.name ?? t}${this.palette[t]?.solid ? ' (invalicabile)' : ''}` } : null;
@@ -2565,6 +2742,7 @@ export class Kernel {
     this.time += dt;
     this.tickCount++;
     this.archive.tick(dt);
+    this.societyTick();
     if (this.tickCount % 10 === 0) {
       this.syncHand();
       const n = this.needs();

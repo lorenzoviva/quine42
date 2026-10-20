@@ -171,6 +171,20 @@ export class MockModels implements Models {
           persona: `Sei ${nome}, ${d.archetype?.description ?? ''}. ${d.archetype?.persona ?? ''}`,
           aspetto: rng.pick(['ha le mani screpolate dal lavoro', 'porta un fazzoletto rosso al collo', 'zoppica leggermente', 'ha un sorriso sdentato e gentile']),
           porta: [common.length ? rng.pick(common) : 'pane', common.length > 1 ? rng.pick(common) : 'moneta', 'Fischietto di canna'],
+          mestiere: rng.pick(['contadina', 'fornaio', 'pastore', 'tessitrice', 'boscaiolo', 'locandiera']),
+          eta: rng.pick(['giovane', 'adulto', 'anziana']),
+          storia: `È nata qui e da qui non è mai riuscita ad andarsene, anche se ci ha provato.`,
+          // Someone already known becomes family; otherwise a relative not met yet.
+          famiglia: (() => {
+            const known = [...String(d.ctx?.society ?? '').split('Nominate')[0].matchAll(/^- ([^,]+),/gm)].pop()?.[1];
+            return known && known !== nome ? [{ nome: known, legame: rng.pick(['fratello', 'sorella', 'figlio', 'amico', 'rivale']) }] : [{ nome: rng.pick(NAMES.filter((n) => n !== nome)), legame: 'madre' }];
+          })(),
+          routine: [
+            { quando: 'mattina', fa: 'apre le imposte', dove: 'casa' },
+            { quando: 'giorno', fa: 'lavora', dove: 'lavoro' },
+            { quando: 'sera', fa: 'chiacchiera in piazza', dove: 'piazza' },
+            { quando: 'notte', fa: 'dorme', dove: 'casa' },
+          ],
         };
       }
       case 'agent.chat': {
@@ -180,6 +194,8 @@ export class MockModels implements Models {
       }
       case 'action.judge':
         return this.judgeAction(d);
+      case 'council.session':
+        return { valutazione: 'Il mondo cresce, ma la piazza è vuota di mestieri.', intervento: 'abitante', richiesta: 'una guaritrice che conosce le erbe del bosco' };
       case 'craft.free': {
         // An honest craftsman: one thing you carry becomes what you ask for, unless it is a marvel.
         const carrying: string[] = (d.carrying ?? []).map((c: string) => c.replace(/ ×\d+$/, '')).filter((c: string) => !/^Runa|Borsa/.test(c));

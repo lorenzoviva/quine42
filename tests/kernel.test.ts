@@ -431,6 +431,47 @@ describe('free actions and effects', () => {
   });
 });
 
+describe('a society', () => {
+  it('people have jobs, families among those already known, routines; met again they are the same', async () => {
+    const k = await boot();
+    clearArea(k);
+    const pc = k.playerCarpet();
+    const a = k.spawnModuleEntity(k.modules.get('npc.villager')!, pc.x + 1, pc.y, undefined, 'test#a');
+    const ia = (await k.ensureIdentity(a))!;
+    expect(ia.job).toBeTruthy();
+    expect(ia.routine?.map((r) => r.quando)).toEqual(['mattina', 'giorno', 'sera', 'notte']);
+    const b = k.spawnModuleEntity(k.modules.get('npc.villager')!, pc.x + 1.5, pc.y, undefined, 'test#b');
+    const ib = (await k.ensureIdentity(b))!;
+    // The second is related to the first, and the first knows it too.
+    expect(ib.family?.[0].nome).toBe(ia.name);
+    expect(k.ecs.get(a, 'identity').family.some((f: { nome: string }) => f.nome === ib.name)).toBe(true);
+    const people = JSON.parse(k.files['world/people.json']);
+    expect(people.persone.map((p: { nome: string }) => p.nome)).toEqual(expect.arrayContaining([ia.name, ib.name]));
+    expect(k.council.context('narratore')).toBeTruthy();
+    // Met again (same origin), no new call: the same person.
+    k.ecs.destroy(a);
+    const calls = k.models.usage.text;
+    const again = k.spawnModuleEntity(k.modules.get('npc.villager')!, pc.x + 1, pc.y, undefined, 'test#a');
+    expect((await k.ensureIdentity(again))!.name).toBe(ia.name);
+    expect(k.models.usage.text).toBe(calls);
+    // Routines give them somewhere to go; relatives who meet greet each other.
+    for (let i = 0; i < 70; i++) k.tick(1 / 60);
+    expect(k.ecs.get(again, 'meta') ?? k.ecs.get(b, 'meta')).toBeTruthy();
+    expect(k.bubbles.has(again) || k.bubbles.has(b)).toBe(true);
+  });
+});
+
+describe('the Council keeps governing', () => {
+  it('a session of the Council reads what happened and may add to the world', async () => {
+    const k = await boot();
+    const before = k.modules.size;
+    expect(await k.holdSession(true)).toBe('abitante');
+    expect(k.modules.size).toBeGreaterThan(before);
+    expect([...k.modules.values()].some((m) => m.manifest.persona && /guaritrice/i.test(m.manifest.description ?? m.manifest.name))).toBe(true);
+    expect(k.feed().some((e) => /Sessione del Concilio/.test(e.text))).toBe(true);
+  });
+});
+
 describe('variety of people', () => {
   it('never more than a couple of the same kind in the loaded world; the world forges new kinds', async () => {
     const k = await boot();

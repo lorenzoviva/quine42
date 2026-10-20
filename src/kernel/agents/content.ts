@@ -8,6 +8,7 @@ import { CATEGORY_GLYPHS, normName } from '../content';
 import { ITEM_CATEGORIES, type ItemDef, type LootTable, type Recipe } from '../types';
 import { slug } from './forge';
 import type { AgentId, Council } from './council';
+import { DAY_PHASES, defaultRoutine, WHERES, type DayPhase, type Relation, type RoutineStep, type Where } from '../society';
 
 const ITEM_SCHEMA: Schema = {
   type: 'OBJECT',
@@ -237,23 +238,71 @@ export interface Identity {
   persona: string;
   look: string;
   carrying: string[];
+  /** Their place in society (ADR-0018). */
+  job?: string;
+  age?: string;
+  family?: Relation[];
+  routine?: RoutineStep[];
+  story?: string;
 }
 
-/** Behind every archetype there are individuals: a name, a past, their own pockets. */
-export async function individuate(c: Council, archetype: { name: string; description: string; persona: string }, ctx: { place: string; common: string[] }): Promise<Identity> {
-  const r = await c.ask<{ nome: string; persona: string; aspetto: string; porta: string[] }>(
+const INDIVIDUAL_SCHEMA: Schema = {
+  type: 'OBJECT',
+  properties: {
+    nome: { type: 'STRING' },
+    persona: { type: 'STRING' },
+    aspetto: { type: 'STRING' },
+    porta: { type: 'ARRAY', items: { type: 'STRING' } },
+    mestiere: { type: 'STRING' },
+    eta: { type: 'STRING', description: 'giovane, adulto, anziano…' },
+    storia: { type: 'STRING', description: 'due frasi: da dove viene, cosa le è successo' },
+    famiglia: { type: 'ARRAY', items: { type: 'OBJECT', properties: { nome: { type: 'STRING' }, legame: { type: 'STRING', description: 'madre, padre, figlio, figlia, fratello, sorella, moglie, marito, nonno, amico, rivale, maestro, apprendista…' } }, required: ['nome', 'legame'] } },
+    routine: {
+      type: 'ARRAY',
+      description: 'la sua giornata: 4 voci, una per momento',
+      items: { type: 'OBJECT', properties: { quando: { type: 'STRING', enum: [...DAY_PHASES] }, fa: { type: 'STRING', description: 'cosa fa, breve (es. "impasta il pane")' }, dove: { type: 'STRING', enum: [...WHERES] } }, required: ['quando', 'fa', 'dove'] },
+    },
+  },
+  required: ['nome', 'persona', 'aspetto', 'porta', 'mestiere', 'famiglia', 'routine'],
+};
+
+/**
+ * Behind every archetype there are individuals: a name, a past, their own pockets — and a place in
+ * society: a job, a family related to the people already known, a daily routine.
+ */
+export async function individuate(c: Council, archetype: { name: string; description: string; persona: string }, ctx: { place: string; common: string[]; society?: string }): Promise<Identity> {
+  const r = await c.ask<{ nome: string; persona: string; aspetto: string; porta: string[]; mestiere?: string; eta?: string; storia?: string; famiglia?: Relation[]; routine?: Array<{ quando: string; fa: string; dove: string }> }>(
     'narratore',
     'npc.individuate',
     [
       `Crea un individuo di questo tipo di personaggio: «${archetype.name}» (${archetype.description}).`,
       `Scheda del tipo:\n${archetype.persona}`,
       `Luogo in cui si trova: ${ctx.place || 'sconosciuto'}.`,
-      'Dagli un nome proprio, un carattere e una storia brevi e suoi (non generici), un dettaglio d\'aspetto, e 3-6 cose che porta con sé coerenti con la sua vita (attrezzi del mestiere, cibo, ricordi, piccoli oggetti).',
+      ctx.society ? `LA SOCIETÀ DEL MONDO\n${ctx.society}` : '',
+      'Dagli un nome proprio, un carattere e una storia brevi e suoi (non generici), un mestiere, un dettaglio d\'aspetto, e 3-6 cose che porta con sé coerenti con la sua vita (attrezzi del mestiere, cibo, ricordi, piccoli oggetti).',
+      'Inseriscilo nella società: dagli una famiglia (1-3 legami) e, quando ha senso, legalo a persone già conosciute usando ESATTAMENTE i loro nomi (figlia del mugnaio, fratello del fabbro, rivale della locandiera); può anche nominare parenti che non sono ancora stati incontrati. Se tra le persone nominate e mai incontrate ce n\'è una adatta a questo tipo, puoi essere proprio lei (usa il suo nome).',
+      'Descrivi la sua giornata in "routine": mattina, giorno, sera, notte — cosa fa e dove (casa, lavoro, piazza, in giro).',
       `Preferisci oggetti comuni già esistenti quando hanno senso: ${ctx.common.slice(0, 60).join(', ')}.`,
-      'In "persona" scrivi la scheda in seconda persona ("Sei …"): come parli, cosa vuoi, cosa sai del mondo e delle sue crepe.',
-    ].join('\n'),
-    { type: 'OBJECT', properties: { nome: { type: 'STRING' }, persona: { type: 'STRING' }, aspetto: { type: 'STRING' }, porta: { type: 'ARRAY', items: { type: 'STRING' } } }, required: ['nome', 'persona', 'aspetto', 'porta'] },
+      'In "persona" scrivi la scheda in seconda persona ("Sei …"): come parli, cosa vuoi, chi sono i tuoi cari, cosa sai del mondo e delle sue crepe.',
+    ]
+      .filter(Boolean)
+      .join('\n'),
+    INDIVIDUAL_SCHEMA,
     { data: { archetype, ctx }, temperature: 1 },
   );
-  return { name: String(r.nome ?? archetype.name).slice(0, 40), persona: String(r.persona ?? archetype.persona), look: String(r.aspetto ?? ''), carrying: (r.porta ?? []).map(String).slice(0, 8) };
+  const job = String(r.mestiere ?? '').slice(0, 40);
+  const routine = (r.routine ?? [])
+    .filter((s) => (DAY_PHASES as string[]).includes(s?.quando) && s?.fa)
+    .map((s) => ({ quando: s.quando as DayPhase, fa: String(s.fa).slice(0, 60), dove: ((WHERES as string[]).includes(s.dove) ? s.dove : 'in giro') as Where }));
+  return {
+    name: String(r.nome ?? archetype.name).slice(0, 40),
+    persona: String(r.persona ?? archetype.persona),
+    look: String(r.aspetto ?? ''),
+    carrying: (r.porta ?? []).map(String).slice(0, 8),
+    job,
+    age: r.eta ? String(r.eta).slice(0, 20) : undefined,
+    story: r.storia ? String(r.storia).slice(0, 300) : undefined,
+    family: (r.famiglia ?? []).filter((f) => f?.nome && f?.legame).slice(0, 4).map((f) => ({ nome: String(f.nome).slice(0, 40), legame: String(f.legame).toLowerCase().slice(0, 20) })),
+    routine: DAY_PHASES.map((q) => routine.find((s) => s.quando === q) ?? defaultRoutine(job).find((s) => s.quando === q)!),
+  };
 }

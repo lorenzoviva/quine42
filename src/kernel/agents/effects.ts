@@ -206,3 +206,30 @@ export async function judgeCraft(c: Council, text: string, carrying: string[], k
     tools: (r.attrezzi ?? []).slice(0, 3).map(String),
   };
 }
+
+const SESSION_SCHEMA: Schema = {
+  type: 'OBJECT',
+  properties: {
+    valutazione: { type: 'STRING', description: 'in una frase: come sta andando il mondo' },
+    intervento: { type: 'STRING', enum: ['nessuno', 'oggetti', 'abitante', 'cosa'] },
+    richiesta: { type: 'STRING', description: 'per abitante o cosa: la richiesta alla Fucina in una frase; per oggetti: che genere di oggetti mancano' },
+  },
+  required: ['valutazione', 'intervento'],
+};
+
+/**
+ * A session of the Council: from time to time it looks at how the world is being played (rules made,
+ * people met, places seen) and decides whether to intervene — new items, a new kind of inhabitant, a
+ * new thing — so the world keeps evolving coherently with what happened.
+ */
+export async function councilSession(c: Council, summary: string): Promise<{ assessment: string; action: 'nessuno' | 'oggetti' | 'abitante' | 'cosa'; request?: string }> {
+  const r = await c.ask<{ valutazione: string; intervento: string; richiesta?: string }>(
+    'arbitro',
+    'council.session',
+    `Sessione del Concilio. Ecco come il viandante sta vivendo il mondo:\n${summary}\n\nIl mondo deve evolvere restando coerente. Serve un intervento? Al massimo uno: "oggetti" (un pacchetto di oggetti che manca, dì quali), "abitante" (un nuovo tipo di persona che renda più viva la società), "cosa" (un oggetto o mobile del mondo che le azioni del viandante fanno pensare), oppure "nessuno". Interveni solo se serve davvero.`,
+    SESSION_SCHEMA,
+    { data: { summary }, temperature: 0.6 },
+  );
+  const action = (['nessuno', 'oggetti', 'abitante', 'cosa'] as const).find((a) => a === r.intervento) ?? 'nessuno';
+  return { assessment: String(r.valutazione ?? ''), action, request: r.richiesta ? String(r.richiesta).slice(0, 200) : undefined };
+}
