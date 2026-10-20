@@ -22,10 +22,15 @@ function canvas(w: number, h = w): [HTMLCanvasElement, CanvasRenderingContext2D]
 const magentaish = (r: number, g: number, b: number) => r > 140 && b > 120 && g < 120 && r - g > 70 && b - g > 50 && Math.abs(r - b) < 110;
 
 /**
- * Keys out the flat background, trims and fits into px×px. The background is the dominant colour along
- * all four borders (a corner can fall on a grid line or a neighbouring frame); it is removed by flood
- * fill from the borders, plus any magenta-ish pixel left anywhere. Returns '' if the result is still
- * dirty (mostly opaque, or with visible key colour): callers discard it rather than show a square.
+ * Keys out the flat background, trims and fits into px×px.
+ * - The background is the magenta key when the borders show it (that is what the models are asked to
+ *   paint); only otherwise the dominant colour of the borders. A figure touching the borders of a tight
+ *   cell must never be taken for the background.
+ * - It is removed by flood fill from the borders; magenta holes inside the figure go too.
+ * - Soft edges only where the figure meets the removed background, never inside the figure.
+ * - Only the figure stays: pieces of neighbouring cells (a painted grid is never exact) are dropped —
+ *   the largest connected shape and whatever is at least a sixth of it.
+ * Returns '' if the result is still dirty (callers discard it rather than show a square).
  */
 function keyAndFit(src: CanvasImageSource, sw: number, sh: number, px: number): string {
   const W = 256;
@@ -33,68 +38,102 @@ function keyAndFit(src: CanvasImageSource, sw: number, sh: number, px: number): 
   ctx.drawImage(src, 0, 0, sw, sh, 0, 0, W, W);
   const data = ctx.getImageData(0, 0, W, W);
   const d = data.data;
+  const N = W * W;
   const border: number[] = [];
   for (let i = 0; i < W; i++) border.push(i, (W - 1) * W + i, i * W, i * W + W - 1);
-  const buckets = new Map<number, number[]>();
-  for (const i of border) {
-    const key = ((d[i * 4] >> 5) << 6) | ((d[i * 4 + 1] >> 5) << 3) | (d[i * 4 + 2] >> 5);
-    let b = buckets.get(key);
-    if (!b) buckets.set(key, (b = []));
-    b.push(i);
+  const isKey = (i: number) => magentaish(d[i * 4], d[i * 4 + 1], d[i * 4 + 2]);
+  const keyed = border.filter(isKey);
+  let sample: number[];
+  if (keyed.length >= border.length * 0.1) sample = keyed;
+  else {
+    const buckets = new Map<number, number[]>();
+    for (const i of border) {
+      const key = ((d[i * 4] >> 5) << 6) | ((d[i * 4 + 1] >> 5) << 3) | (d[i * 4 + 2] >> 5);
+      let bk = buckets.get(key);
+      if (!bk) buckets.set(key, (bk = []));
+      bk.push(i);
+    }
+    sample = [...buckets.values()].sort((x, y) => y.length - x.length)[0];
   }
-  const dominant = [...buckets.values()].sort((a, b) => b.length - a.length)[0];
-  const bg = [0, 1, 2].map((ch) => dominant.reduce((s, i) => s + d[i * 4 + ch], 0) / dominant.length);
+  const bg = [0, 1, 2].map((ch) => sample.reduce((s, i) => s + d[i * 4 + ch], 0) / sample.length);
   const dist = (i: number) => Math.hypot(d[i * 4] - bg[0], d[i * 4 + 1] - bg[1], d[i * 4 + 2] - bg[2]);
-  const isBg = (i: number) => dist(i) < 80 || magentaish(d[i * 4], d[i * 4 + 1], d[i * 4 + 2]);
+  const isBg = (i: number) => dist(i) < 80 || isKey(i);
   // Flood fill the background from the borders.
-  const seen = new Uint8Array(W * W);
+  const gone = new Uint8Array(N);
   const stack = border.filter(isBg);
-  for (const i of stack) seen[i] = 1;
+  for (const i of stack) gone[i] = 1;
   while (stack.length) {
     const i = stack.pop()!;
-    d[i * 4 + 3] = 0;
     const x = i % W;
     const y = (i - x) / W;
     for (const n of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, y > 0 ? i - W : -1, y < W - 1 ? i + W : -1]) {
-      if (n < 0 || seen[n] || !isBg(n)) continue;
-      seen[n] = 1;
+      if (n < 0 || gone[n] || !isBg(n)) continue;
+      gone[n] = 1;
       stack.push(n);
     }
   }
+  // Magenta holes inside the figure (between arms and legs).
+  for (let i = 0; i < N; i++) if (!gone[i] && isKey(i) && dist(i) < 90) gone[i] = 1;
+  for (let i = 0; i < N; i++) if (gone[i]) d[i * 4 + 3] = 0;
+  // Soft edges: only pixels touching the removed background, faded by how close they are to it.
+  for (let i = 0; i < N; i++) {
+    if (gone[i]) continue;
+    const x = i % W;
+    const y = (i - x) / W;
+    const edge = (x > 0 && gone[i - 1]) || (x < W - 1 && gone[i + 1]) || (y > 0 && gone[i - W]) || (y < W - 1 && gone[i + W]);
+    if (!edge) continue;
+    const dd = dist(i);
+    if (dd < 110) d[i * 4 + 3] = Math.round(Math.max(0.25, (dd - 60) / 50) * 255);
+  }
+  // Keep the figure: connected shapes of opaque pixels, the largest and those at least a sixth of it.
+  const label = new Int32Array(N).fill(-1);
+  const sizes: number[] = [];
+  for (let i = 0; i < N; i++) {
+    if (label[i] >= 0 || d[i * 4 + 3] <= 40) continue;
+    const id = sizes.length;
+    let size = 0;
+    const st = [i];
+    label[i] = id;
+    while (st.length) {
+      const j = st.pop()!;
+      size++;
+      const x = j % W;
+      const y = (j - x) / W;
+      for (const n of [x > 0 ? j - 1 : -1, x < W - 1 ? j + 1 : -1, y > 0 ? j - W : -1, y < W - 1 ? j + W : -1]) {
+        if (n < 0 || label[n] >= 0 || d[n * 4 + 3] <= 40) continue;
+        label[n] = id;
+        st.push(n);
+      }
+    }
+    sizes.push(size);
+  }
+  const biggest = Math.max(0, ...sizes);
   let minX = W, minY = W, maxX = -1, maxY = -1;
   let opaque = 0;
   let band = 0;
   let bandOpaque = 0;
   const B = Math.round(W * 0.03);
-  for (let i = 0; i < W * W; i++) {
-    const px = i % W;
-    const py = (i - px) / W;
-    const inBand = px < B || py < B || px >= W - B || py >= W - B;
+  for (let i = 0; i < N; i++) {
+    const x = i % W;
+    const y = (i - x) / W;
+    const inBand = x < B || y < B || x >= W - B || y >= W - B;
     if (inBand) band++;
-    if (d[i * 4 + 3] === 0) continue;
-    // Holes of key colour inside the figure (between arms and legs) — only the key itself, not pink or
-    // purple clothes — and soft edges.
-    const dd = dist(i);
-    if (dd < 60 && magentaish(d[i * 4], d[i * 4 + 1], d[i * 4 + 2])) {
+    if (label[i] >= 0 && sizes[label[i]] < biggest / 6) {
       d[i * 4 + 3] = 0;
       continue;
     }
-    if (dd < 110) d[i * 4 + 3] = Math.round(Math.max(0, (dd - 70) / 40) * 255);
-    if (d[i * 4 + 3] > 40) {
-      opaque++;
-      if (inBand) bandOpaque++;
-      const x = i % W;
-      const y = Math.floor(i / W);
-      if (x < minX) minX = x;
-      if (y < minY) minY = y;
-      if (x > maxX) maxX = x;
-      if (y > maxY) maxY = y;
-    }
+    if (d[i * 4 + 3] <= 40) continue;
+    opaque++;
+    if (inBand) bandOpaque++;
+    if (x < minX) minX = x;
+    if (y < minY) minY = y;
+    if (x > maxX) maxX = x;
+    if (y > maxY) maxY = y;
   }
   ctx.putImageData(data, 0, 0);
   const [out, octx] = canvas(px);
   // Dirty means the background did not go: the frame of the image is still mostly opaque.
-  if (maxX < 0 || opaque > W * W * 0.9 || bandOpaque > band * 0.5) return '';
+  if (maxX < 0 || opaque > N * 0.9 || bandOpaque > band * 0.5) return '';
   const bw = maxX - minX + 1;
   const bh = maxY - minY + 1;
   const scale = (px * 0.92) / Math.max(bw, bh);
