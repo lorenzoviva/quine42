@@ -32,5 +32,8 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0025](0025-due-tavoli.md) | Due tavoli: il Concilio è il Dungeon Master, dentro il mondo niente meta-gioco | accettato; supera le «crepe» |
 | [0026](0026-meccaniche-morte-trascendenza.md) | Meccaniche nuove (stati), morte, trascendenza, camminate valide | accettato |
 | [0027](0027-studi-neon-e-atlante.md) | Studi neon-punk, sala del Concilio, atlante navigabile | accettato |
+| [0028](0028-meccaniche-con-interfacce.md) | Meccaniche con interfacce: il Concilio aggiunge pannelli (slot, barre, pulsanti) | accettato |
+| [0029](0029-menu-delle-caselle.md) | Menu contestuale delle caselle, azioni imparate dal terreno | accettato |
+| [0030](0030-prospettiva-tre-quarti-e-scontorno.md) | Prospettiva 3/4 e scontorno delle immagini (perché il magenta) | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

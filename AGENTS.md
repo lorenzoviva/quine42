@@ -99,7 +99,7 @@ src/
     content.ts          registro di oggetti, ricette, bottino, ambienti
     art.ts              ArtDirector: coda di lavori grafici entro il budget
     ai/                 models.ts, gemini.ts, mock.ts
-    agents/             council.ts, cartography.ts, forge.ts, genesis.ts, minds.ts, content.ts, atelier.ts, effects.ts
+    agents/             council.ts, cartography.ts, forge.ts, genesis.ts, minds.ts, content.ts, atelier.ts, effects.ts, mechanics.ts
     ecs.ts, sandbox.ts, prelude.lua, validator.ts, runes.ts, repo.ts, universe.ts,
     inventory.ts, assets.ts, imaging.ts, bundle.ts, faults.ts, events.ts, input.ts, rng.ts, types.ts
   render/               renderer.ts (tile, transizioni, ostacoli, tetti, animazioni), imagetools.ts, glitch.ts
@@ -123,7 +123,7 @@ tests/  docs/
 | Cartografo | terreni (con strati) e ambienti (programmi di riscrittura) alla Genesi; per ogni luogo: ambiente, nome, cosa c'è dentro e fuori, rune |
 | Artista | guida di stile; texture seamless (4/immagine), ostacoli, sprite few-shot, camminate, icone (16/immagine) |
 | Fisico | fisica di moduli, terreni e oggetti (pesi, pile, effetti) |
-| Ingegnere | logic.lua (`on_act`, `on_use`, `on_action`…); ripara il codice che fallisce |
+| Ingegnere | logic.lua (`on_act`, `on_use`, `on_action`…); meccaniche con pannelli (`mechanic.design`); ripara il codice che fallisce |
 | Arbitro | coerenza tra narrativa, aspetto, fisica e codice; rimanda all'agente responsabile; tiene le sessioni del Concilio |
 | Referente | nella corona accoglie il viandante trasceso e porta le sue richieste alla squadra giusta (Fucina, Cartografo, Artista, regole, pacchetti) |
 
@@ -175,6 +175,14 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 - **Vita degli NPC** (ADR-0024): attività visibili (`attivita {tipo, ferma}`), dialoghi tra persone,
   ricordi pesati, legami col viandante e figli (effetti `legame ricordo nascita`), trame e missioni
   (`world/plots.json`, diario nell'HUD).
+- **Meccaniche con interfacce** (ADR-0028): un modulo di sistema può avere un pannello (`manifest.ui`:
+  `slot barra testo pulsante`) che il kernel disegna come scheda dell'inventario; hook `on_slot`/`on_ui`,
+  componente `slots` del viandante; oggetti con `slot` (posto) e `bonus`. Le crea la Fucina delle meccaniche
+  (`forgeMechanic`), su richiesta delle sessioni del Concilio o del Referente: il kernel dà gli strumenti, non i contenuti.
+- **Menu delle caselle** (ADR-0029): `E`/clic destro su una casella → azioni dell'entità, della casella, «Altro…»;
+  le azioni libere ripetibili si imparano per tipo di terreno (`TileDef.actions`).
+- **Prospettiva 3/4 e scontorno** (ADR-0030): `PERSPECTIVE` nella guida di stile, muri con faccia frontale, tetti
+  in 3/4; il magenta serve perché i modelli di immagine non danno alfa; `keyAndFit` trova lo sfondo e tiene il soggetto.
 - **Mappa** (ADR-0011): tile con texture, strati `ground floor wall door liquid vegetation rock`, tetti.
 - **Contenuti** (ADR-0012): `ItemDef` in pacchetti; bottino per tag; contenitori; ricette; bisogni
   (`needs` sul giocatore, `sys.needs`); uso generico in `core.items`; menu azioni (`E`).
@@ -187,16 +195,16 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 `appearance` (`glyph`, `color`, `imagePrompt`, `sprite`, `scale`, `frames` per direzione), `physics`
 (`solid`, `radius`, `pushable`, `mass`, `friction`, `speed`), `components`, `singleton`, `persist`,
 `interaction` (`talk | read | lua`), `actions` (`id`, `label`, `requires`, `effects`), `container` (`size`, `loot`),
-`spawn`, `persona`, `unique`, `inventory` (id di oggetti), `item`, `context`, `lore`, `tags`, `drops`,
+`ui` (pannello: `titolo`, `elementi`), `spawn`, `persona`, `unique`, `inventory` (id di oggetti), `item`, `context`, `lore`, `tags`, `drops`,
 `origin`; generatori: `tiles` (`name`, `color`, `solid`, `layer`, `indoor`, `speed`, `texture`, `sprites`),
-`roof`; dati: `items` (anche `container`, `actions`, effetti `mana`), `recipes`, `loot`, `layouts`, `fragments`, `runes`, `spells`.
+`roof`; dati: `items` (anche `container`, `actions`, `slot`, `bonus`, effetti `mana`), `recipes`, `loot`, `layouts`, `fragments`, `runes`, `spells`.
 
 ### API Lua — l'unica disponibile, il validatore rifiuta il resto
 `ecs.each/get/set/spawn/destroy/first`; `world.free/free_real/tile/speed_at/spawn/player/player_pos/
-nearest/has_tag/break_entity/say/speak/set_tile/open/make_container`; `inventory.add/remove/count/equipped`; `items.find/def`;
+nearest/has_tag/break_entity/say/speak/set_tile/open/make_container`; `inventory.add/remove/count/equipped`; `items.find/def/bonus`; `ui.slot`;
 `input.held`; `bus.emit`; `log`; `hash`; `math string table utf8 pairs pcall…`.
 Hook: `update(dt)` (sistemi), `generate_chunk`, `on_spawn(id)`, `on_interact(id, user)`,
-`on_act(id, user, action)`, `on_use(user, item)`, `on_action(user, target, item)`; `core.items.use(user, item)`;
+`on_act(id, user, action)`, `on_use(user, item)`, `on_action(user, target, item)`, `on_slot(user, slot, item, panel)`, `on_ui(user, azione)`; `core.items.use(user, item)`;
 `core.effects.apply(target, user, effect, x, y)`. Componenti noti: `luce {raggio, accesa, colore}`, `fuoco {raggio}`,
 `effimero {fino}` (sparisce a tempo), `scudo {fino}`, `meta {x, y}` (dove va un NPC), `stati` (del viandante).
 `bus.emit("morte", …)` da `sys.needs` chiude la sessione.
@@ -233,6 +241,7 @@ con borsa e frase, mana e cristalli, borse nell'inventario, regole nate dal gioc
 società degli NPC con famiglie e routine, sessioni del Concilio, test.
 
 Fatto anche: due repository (seme del kernel + universo git su disco), stato della partita salvato,
+menu delle caselle, prospettiva 3/4, meccaniche con pannelli generate dal Concilio (equipaggiamento),
 studio della corona con squadre e Referente, atlante e timbri, biomi, vita degli NPC con trame e missioni.
 
 Prossimi passi suggeriti:
@@ -240,4 +249,4 @@ Prossimi passi suggeriti:
 2. Notte con conseguenze (NPC che dormono, creature notturne); luce delle lanterne impugnate.
 3. Personaggi con iniziativa (orari, mestieri, scambi tra loro) e quest generate.
 4. Port più ampio di MarkovJunior (campi, WFC) per interni complessi; interni come zone separate.
-5. Multiplayer come visita dei repository altrui; poi fork/merge.
+5. Multiplayer con un master: piano e punti aperti in [`docs/plans/multiplayer.md`](docs/plans/multiplayer.md).
