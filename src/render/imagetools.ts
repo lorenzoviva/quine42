@@ -18,22 +18,64 @@ function canvas(w: number, h = w): [HTMLCanvasElement, CanvasRenderingContext2D]
   return [c, c.getContext('2d', { willReadFrequently: true })!];
 }
 
-/** Keys out the flat background (sampled at the corners), trims and fits into px×px. */
+/** The key colour family: magenta-ish pixels (models never paint the exact #FF00FF). */
+const magentaish = (r: number, g: number, b: number) => r > 140 && b > 120 && g < 120 && r - g > 70 && b - g > 50 && Math.abs(r - b) < 110;
+
+/**
+ * Keys out the flat background, trims and fits into px×px. The background is the dominant colour along
+ * all four borders (a corner can fall on a grid line or a neighbouring frame); it is removed by flood
+ * fill from the borders, plus any magenta-ish pixel left anywhere. Returns '' if the result is still
+ * dirty (mostly opaque, or with visible key colour): callers discard it rather than show a square.
+ */
 function keyAndFit(src: CanvasImageSource, sw: number, sh: number, px: number): string {
   const W = 256;
   const [c, ctx] = canvas(W);
   ctx.drawImage(src, 0, 0, sw, sh, 0, 0, W, W);
   const data = ctx.getImageData(0, 0, W, W);
   const d = data.data;
-  // Background colour: average of the four corners (models rarely hit the exact key colour).
-  const corners = [0, W - 1, (W - 1) * W, W * W - 1];
-  const bg = [0, 1, 2].map((ch) => corners.reduce((s, i) => s + d[i * 4 + ch], 0) / 4);
+  const border: number[] = [];
+  for (let i = 0; i < W; i++) border.push(i, (W - 1) * W + i, i * W, i * W + W - 1);
+  const buckets = new Map<number, number[]>();
+  for (const i of border) {
+    const key = ((d[i * 4] >> 5) << 6) | ((d[i * 4 + 1] >> 5) << 3) | (d[i * 4 + 2] >> 5);
+    let b = buckets.get(key);
+    if (!b) buckets.set(key, (b = []));
+    b.push(i);
+  }
+  const dominant = [...buckets.values()].sort((a, b) => b.length - a.length)[0];
+  const bg = [0, 1, 2].map((ch) => dominant.reduce((s, i) => s + d[i * 4 + ch], 0) / dominant.length);
+  const dist = (i: number) => Math.hypot(d[i * 4] - bg[0], d[i * 4 + 1] - bg[1], d[i * 4 + 2] - bg[2]);
+  const isBg = (i: number) => dist(i) < 80 || magentaish(d[i * 4], d[i * 4 + 1], d[i * 4 + 2]);
+  // Flood fill the background from the borders.
+  const seen = new Uint8Array(W * W);
+  const stack = border.filter(isBg);
+  for (const i of stack) seen[i] = 1;
+  while (stack.length) {
+    const i = stack.pop()!;
+    d[i * 4 + 3] = 0;
+    const x = i % W;
+    const y = (i - x) / W;
+    for (const n of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, y > 0 ? i - W : -1, y < W - 1 ? i + W : -1]) {
+      if (n < 0 || seen[n] || !isBg(n)) continue;
+      seen[n] = 1;
+      stack.push(n);
+    }
+  }
   let minX = W, minY = W, maxX = -1, maxY = -1;
+  let opaque = 0;
+  let stain = 0;
   for (let i = 0; i < W * W; i++) {
-    const dist = Math.hypot(d[i * 4] - bg[0], d[i * 4 + 1] - bg[1], d[i * 4 + 2] - bg[2]);
-    const a = dist < 70 ? 0 : dist < 120 ? Math.round(((dist - 70) / 50) * 255) : 255;
-    d[i * 4 + 3] = a;
-    if (a > 40) {
+    if (d[i * 4 + 3] === 0) continue;
+    // Holes of key colour inside the figure (between arms and legs), and soft edges.
+    if (magentaish(d[i * 4], d[i * 4 + 1], d[i * 4 + 2])) {
+      d[i * 4 + 3] = 0;
+      continue;
+    }
+    const dd = dist(i);
+    if (dd < 120) d[i * 4 + 3] = Math.round(((dd - 80) / 40) * 255);
+    if (d[i * 4 + 3] > 40) {
+      opaque++;
+      if (dd < 140) stain++;
       const x = i % W;
       const y = Math.floor(i / W);
       if (x < minX) minX = x;
@@ -44,7 +86,7 @@ function keyAndFit(src: CanvasImageSource, sw: number, sh: number, px: number): 
   }
   ctx.putImageData(data, 0, 0);
   const [out, octx] = canvas(px);
-  if (maxX < 0) return out.toDataURL('image/png');
+  if (maxX < 0 || opaque > W * W * 0.88 || stain > opaque * 0.2) return '';
   const bw = maxX - minX + 1;
   const bh = maxY - minY + 1;
   const scale = (px * 0.92) / Math.max(bw, bh);
@@ -113,6 +155,17 @@ export class BrowserImageTools implements ImageTools {
   }
 }
 
+/** An image (stored before the robust key) that still shows a block of key colour: better not drawn. */
+function stained(img: HTMLImageElement): boolean {
+  const N = 32;
+  const [, ctx] = canvas(N);
+  ctx.drawImage(img, 0, 0, N, N);
+  const d = ctx.getImageData(0, 0, N, N).data;
+  let bad = 0;
+  for (let i = 0; i < N * N; i++) if (d[i * 4 + 3] > 200 && magentaish(d[i * 4], d[i * 4 + 1], d[i * 4 + 2])) bad++;
+  return bad > N * N * 0.12;
+}
+
 /** Decoded images by asset id, for the renderer and the UI. */
 export class ImageCache {
   private images = new Map<string, HTMLImageElement | null>();
@@ -128,7 +181,7 @@ export class ImageCache {
       void this.get(id)
         .then((src) => (src ? loadImage(src) : null))
         .then((im) => {
-          if (im) this.images.set(id, im);
+          if (im && !stained(im)) this.images.set(id, im);
         })
         .catch(() => undefined);
     }

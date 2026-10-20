@@ -1,0 +1,1 @@
+Creiamo un nuovo progetto. Crea una cartella dentro projects. Ho stilato un documento di design, voglio che prendi un pò di iniziativa e mi consegni un prodotto semi finito, prendi tu le decisioni. Di seguito il documento: [Pasted text #2 +146 lines]

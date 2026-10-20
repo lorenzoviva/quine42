@@ -23,6 +23,7 @@ export class ArtDirector {
   private stopped = false;
   private failures = 0;
   private skip = new Set<string>();
+  private retries = new Map<string, number>();
 
   constructor(private k: Kernel) {}
 
@@ -114,8 +115,8 @@ export class ArtDirector {
     const raw = await new Atelier(k.council).obstacles(things);
     if (!raw) return;
     const cells = await tools.cutGrid(raw, 2, 2, SPRITE_PX, { key: true });
-    const ids = await Promise.all(cells.slice(0, things.length).map((c) => k.assets.put(c)));
-    this.writeJson(TERRAIN_PATH, (m) => codes.forEach((c, i) => m.tiles?.[c] && (m.tiles[c].sprites = ids.slice(i * 2, i * 2 + 2))));
+    const ids = await Promise.all(cells.slice(0, things.length).map((c) => (c ? k.assets.put(c) : Promise.resolve(''))));
+    this.writeJson(TERRAIN_PATH, (m) => codes.forEach((c, i) => m.tiles?.[c] && (m.tiles[c].sprites = ids.slice(i * 2, i * 2 + 2).filter(Boolean))));
     this.commit(`ostacoli: ${codes.map((c) => k.palette[c].name).join(', ')}`);
   }
 
@@ -145,7 +146,16 @@ export class ArtDirector {
     const atelier = new Atelier(k.council);
     const raw = await atelier.sprite(description, character ? 'npc' : 'oggetto', examples);
     if (!raw) return;
-    const sprite = await k.assets.put(await tools.cutSprite(raw, SPRITE_PX));
+    const cut = await tools.cutSprite(raw, SPRITE_PX);
+    if (!cut) {
+      // The background could not be removed cleanly: try once more, never show a magenta square.
+      const n = (this.retries.get(moduleId) ?? 0) + 1;
+      this.retries.set(moduleId, n);
+      if (n < 2) this.skip.delete(`spr:${moduleId}`);
+      k.council.say('kernel', 'scarta', `sprite di ${man.name}: sfondo non rimovibile${n < 2 ? ', si ridipinge' : ''}`, 'artista');
+      return;
+    }
+    const sprite = await k.assets.put(cut);
     let frames: Record<string, string[]> | undefined;
     const mode = k.config.ai.animation ?? 'sheet';
     if (character && mode !== 'none') {
@@ -153,14 +163,17 @@ export class ArtDirector {
         const base = (await k.assets.get(sprite))!;
         if (mode === 'frames') {
           const down = await atelier.walkFrames(base, description, 'down', 3, (r) => tools.cutSprite(r, SPRITE_PX));
-          const ids = await Promise.all(down.map((f) => k.assets.put(f)));
+          const ids = down.every(Boolean) ? await Promise.all(down.map((f) => k.assets.put(f))) : [];
           if (ids.length) frames = { down: ids, left: ids, right: ids, up: ids };
         } else {
           const sheet = await atelier.walkSheet(base, description);
           if (sheet) {
             const cells = await tools.cutGrid(sheet, 3, 4, SPRITE_PX, { key: true });
-            const ids = await Promise.all(cells.map((c) => k.assets.put(c)));
-            frames = Object.fromEntries(DIRECTIONS.map((d, r) => [d, ids.slice(r * 3, r * 3 + 3)]));
+            // A direction with a dirty frame is dropped; without any clean direction the sprite stays still.
+            const rows = await Promise.all(DIRECTIONS.map(async (d, r) => [d, cells.slice(r * 3, r * 3 + 3).every(Boolean) ? await Promise.all(cells.slice(r * 3, r * 3 + 3).map((c) => k.assets.put(c))) : null] as const));
+            const clean = rows.filter(([, ids]) => ids);
+            if (clean.length) frames = Object.fromEntries(clean.map(([d, ids]) => [d, ids!]));
+            if (clean.length < 4) k.council.say('kernel', 'scarta', `camminata di ${man.name}: ${4 - clean.length} direzioni con lo sfondo sporco scartate`, 'artista');
           }
         }
         if (frames) k.council.say('artista', 'dipinge', `${man.name}: camminata (${mode === 'frames' ? 'fotogramma per fotogramma' : 'foglio 4×3'})`);
@@ -189,9 +202,10 @@ export class ArtDirector {
     const raw = await new Atelier(k.council).icons(defs.map((d) => ({ name: d.name, description: d.iconPrompt ?? d.description })), ref);
     if (!raw) return;
     const cells = await tools.cutGrid(raw, 4, 4, ICON_PX, { key: true });
-    const icons = await Promise.all(cells.slice(0, defs.length).map((c) => k.assets.put(c)));
+    const icons = await Promise.all(cells.slice(0, defs.length).map((c) => (c ? k.assets.put(c) : Promise.resolve(''))));
     const sheet = await k.assets.put(await tools.downscale(raw, 512));
     defs.forEach((d, i) => {
+      if (!icons[i]) return;
       const src = k.content.itemSource.get(d.id);
       const entry = src ? k.modules.get(src) : undefined;
       if (!entry) return;

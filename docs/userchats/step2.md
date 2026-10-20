@@ -1,0 +1,3 @@
+Come modello di ia generativa voglio usare Google Gemini, per la fase di prototipazione rimaniamo con modelli cheap: gemini-2.5-flash-lite per il testo (narrativa, chat NPC, descrizioni e codice dei moduli), gemini-2.5-flash-image per le immagini.   
+  Mi piacerebbe un "inventario" più complesso. Includi una forte componente di interazione tra gli agents, affinché la narrativa, la grafica, l'engine e la fisica rimangano coerenti e allineate. Trovi il token per gemini nella variabile d'ambiente     
+  GEMINI_API_KEY dichiarata nell'.env nella root del progetto

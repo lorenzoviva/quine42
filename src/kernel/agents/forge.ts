@@ -166,6 +166,13 @@ export function moduleId(concept: Concept, existing: string[]): string {
   return id;
 }
 
+const STRUCTURES = /^(?:(?:la|il|lo|l'|una|un|uno|le|i|gli|vecchi[oa]|antic[oa]|piccol[oa]|grande|modesta?)\s+)*(casa|case|casetta|capanna|casupola|baracca|edificio|torre|mulino|fienile|stalla|chiesa|cappella|tempio|castello|taverna|locanda|osteria|bottega|negozio|ponte|muro|mura|recinto|palizzata|villaggio|borgo|piazza|strada|sentiero|fattoria)\b/i;
+const FURNITURE = /cass|baule|forziere|scrigno|credenz|armadi|cesta|cesto|madia|cassett|dispens|scaffal|librer|comò|como\b|banco/i;
+
+export function isStructure(concept: Pick<Concept, 'nome' | 'tipo'>): boolean {
+  return concept.tipo !== 'npc' && STRUCTURES.test(concept.nome.trim());
+}
+
 /** Hooks a module must define, given what the concept promises. */
 export function requiredHooks(concept: Concept): string[] {
   const hooks = new Set<string>();
@@ -233,6 +240,8 @@ export function assembleManifest(id: string, concept: Concept, physics: PhysicsS
   if (concept.tipo === 'oggetto' && concept.azioni?.length)
     m.actions = concept.azioni.slice(0, 6).map((a) => ({ id: slug(a.id || a.etichetta), label: String(a.etichetta).slice(0, 40), ...(a.richiede ? { requires: String(a.richiede) } : {}) }));
   if (concept.tipo === 'oggetto' && concept.contenitore) m.container = { size: Math.round(clamp(concept.contenitore.capienza, 2, 16, 6)), loot: slug(concept.contenitore.bottino || 'comune') };
+  // A chest that cannot be opened is incoherent: furniture that holds things always does.
+  else if (concept.tipo === 'oggetto' && FURNITURE.test(concept.nome)) m.container = { size: 8, loot: /credenz|madia|dispens|cucin/i.test(concept.nome) ? 'cucina' : /banco|bottega|attrezz/i.test(concept.nome) ? 'bottega' : 'cassa' };
   if (m.physics!.pushable) m.components!.vel = { x: 0, y: 0 };
   return m;
 }
@@ -293,6 +302,15 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
   let concept = await askConcept();
   if (req.kind) concept.tipo = req.kind;
   c.say('narratore', 'propone', `«${concept.nome}» (${concept.tipo}): ${concept.descrizione}`);
+  // Buildings are environments (the Cartographer's layouts), never one-tile objects.
+  if (isStructure(concept)) {
+    const why = `«${concept.nome}» è un edificio o una struttura: quelli sono ambienti del Cartografo, non oggetti. Crea invece qualcosa che sta dentro o fuori un edificio (un mobile, un attrezzo, una persona).`;
+    c.say('kernel', 'scarta', why, 'narratore');
+    concept = await askConcept(why);
+    if (req.kind) concept.tipo = req.kind;
+    if (isStructure(concept)) throw new Error(`ancora una struttura: ${concept.nome}`);
+    c.say('narratore', 'corregge', `«${concept.nome}» (${concept.tipo}): ${concept.descrizione}`);
+  }
   let physics = await askPhysics(concept);
   c.say('fisico', 'propone', `${physics.solido ? 'solido' : 'attraversabile'}${physics.spingibile ? ', spingibile' : ''}, ${physics.massa} kg, peso ${physics.peso}${physics.note ? ` — ${physics.note}` : ''}`);
   let code = await askCode(concept, physics);

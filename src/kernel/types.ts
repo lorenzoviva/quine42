@@ -131,12 +131,56 @@ export interface LayoutDef {
   program: import('./mj').MjNode;
 }
 
-/** Something you can do to an object (E opens the menu). Handled by the module's on_act(id, user, action). */
+/**
+ * What can happen in the world, from a closed set: the Council chooses, the kernel validates,
+ * core.effects (Lua) applies. Used by free actions ("Altro…"), learned actions and spells.
+ */
+export type Effect =
+  | { tipo: 'messaggio'; testo: string }
+  | { tipo: 'bisogni'; fame?: number; sete?: number; energia?: number; salute?: number }
+  | { tipo: 'crea_oggetto'; oggetto: string; quantita?: number }
+  | { tipo: 'consuma'; oggetto: string; quantita?: number }
+  | { tipo: 'distruggi' }
+  | { tipo: 'apri' }
+  | { tipo: 'contenitore'; capienza?: number; bottino?: string }
+  | { tipo: 'terreno'; a: string; da?: string; raggio?: number }
+  | { tipo: 'fuoco'; raggio?: number; durata?: number }
+  | { tipo: 'luce'; raggio?: number; durata?: number }
+  | { tipo: 'scudo'; durata?: number }
+  | { tipo: 'spingi'; forza?: number }
+  | { tipo: 'evoca'; modulo: string };
+
+export const EFFECT_TYPES = ['messaggio', 'bisogni', 'crea_oggetto', 'consuma', 'distruggi', 'apri', 'contenitore', 'terreno', 'fuoco', 'luce', 'scudo', 'spingi', 'evoca'] as const;
+
+/**
+ * Something you can do to an object (E opens the menu). Either handled by the module's
+ * on_act(id, user, action), or, for learned actions, by its `effects`.
+ */
 export interface ActionDef {
   id: string;
   label: string;
   /** Item id or tag the player must carry. */
   requires?: string;
+  /** Learned through "Altro…": what the action does, applied without asking the Council again. */
+  effects?: Effect[];
+}
+
+/** A magic rune: its token is what it means as code; as magic it has an element and a glyph. */
+export interface MagicRune {
+  name: string;
+  glyph: string;
+  color: string;
+  element: string;
+  description: string;
+}
+
+/** An incantation: an ordered sequence of runes the Council has named and given effects to. */
+export interface Spell {
+  name: string;
+  description: string;
+  /** Energy it costs to cast. */
+  cost: number;
+  effects: Effect[];
 }
 
 export interface RuneFragment {
@@ -187,6 +231,9 @@ export interface Manifest {
   recipes?: Recipe[];
   loot?: Record<string, LootTable>;
   layouts?: Record<string, LayoutDef>;
+  /** Magic (data modules): runes by token, incantations by sequence of tokens. */
+  runes?: Record<string, MagicRune>;
+  spells?: Record<string, Spell>;
   /** Furniture and chests: a container filled from a loot table the first time it is opened. */
   container?: { size: number; loot: string };
   actions?: ActionDef[];
