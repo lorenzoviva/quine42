@@ -960,3 +960,33 @@ describe('regression: walking with states', () => {
     expect(moved[2]).toBeGreaterThan(moved[1] * 1.5);
   });
 });
+
+describe('tile context menus', () => {
+  it('every tile has a menu with "Altro…"; what stands on it adds its actions; a terrain learns', async () => {
+    const k = await boot();
+    clearArea(k);
+    const pc = k.playerCarpet();
+    const col = Math.floor(pc.x) + 1;
+    const row = Math.floor(pc.y);
+    const plain = k.tileMenu(col, row);
+    expect(plain.options.map((o) => o.id)).toEqual(['t:altro']);
+    const box = k.spawnModuleEntity(k.modules.get('obj.credenza')!, col + 0.5, row + 0.5);
+    const withBox = k.tileMenu(col, row);
+    expect(withBox.entity).toBe(box);
+    expect(withBox.options.some((o) => o.id === 'e:apri')).toBe(true);
+    expect(withBox.options.at(-1)!.id).toBe('t:altro');
+    // "Altro…" on the tile: judged, applied there, learned by the terrain.
+    const code = k.tileAt(col + 1, row)!;
+    await k.freeTileAction(col + 1, row, 'scavo qui una buca');
+    const learned = k.palette[code].actions?.find((a) => a.effects?.length);
+    expect(learned).toBeTruthy();
+    const calls = k.models.usage.text;
+    const again = k.tileMenu(col + 2, row);
+    const opt = again.options.find((o) => o.id === `t:${learned!.id}`);
+    if (k.tileAt(col + 2, row) === code) {
+      expect(opt).toBeTruthy();
+      await k.performMenu(opt!.id, -1, col + 2, row);
+      expect(k.models.usage.text).toBe(calls);
+    }
+  });
+});

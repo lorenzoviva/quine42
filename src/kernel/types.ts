@@ -73,6 +73,8 @@ export interface TileDef {
   texture?: string;
   /** Asset ids of obstacle sprites standing on this tile (trees, boulders…), chosen per cell. */
   sprites?: string[];
+  /** Actions learned on this kind of terrain ("Altro…" on a tile): effects at that place. */
+  actions?: ActionDef[];
 }
 
 export const ITEM_CATEGORIES = ['cibo', 'bevanda', 'medicina', 'attrezzo', 'arma', 'materiale', 'luce', 'vestiario', 'contenitore', 'magia', 'varie'] as const;

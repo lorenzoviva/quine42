@@ -7,13 +7,15 @@ import { $, el } from './dom';
 export class ActionMenu {
   private root = $('#actions');
   private target: number | null = null;
+  /** The tile the menu is about. */
+  private tile: { col: number; row: number } | null = null;
   private options: ActionOption[] = [];
   private typing = false;
   onClose?: () => void;
 
   constructor(private k: Kernel) {
-    k.bus.on('ui:actions', ({ id, name, options }: { id: number; name: string; options: ActionOption[] }) => this.open(id, name, options));
-    k.bus.on('ui:freeaction', ({ id, name }: { id: number; name: string }) => this.write(id, name));
+    k.bus.on('ui:actions', ({ id, name, options, col, row }: { id: number; name: string; options: ActionOption[]; col?: number; row?: number }) => this.open(id, name, options, col !== undefined && row !== undefined ? { col, row } : null));
+    k.bus.on('ui:freeaction', ({ id, name, col, row }: { id: number; name: string; col?: number; row?: number }) => this.write(id, name, col !== undefined && row !== undefined ? { col, row } : null));
     window.addEventListener('keydown', (e) => {
       if (!this.isOpen || this.typing) return;
       const n = Number(e.key);
@@ -33,8 +35,9 @@ export class ActionMenu {
     return !this.root.hidden;
   }
 
-  open(id: number, name: string, options: ActionOption[]): void {
+  open(id: number, name: string, options: ActionOption[], tile: { col: number; row: number } | null = null): void {
     this.target = id;
+    this.tile = tile;
     this.options = options;
     this.typing = false;
     this.root.replaceChildren(
@@ -50,8 +53,9 @@ export class ActionMenu {
   }
 
   /** Free action: the player writes what they do. */
-  write(id: number, name: string): void {
+  write(id: number, name: string, tile: { col: number; row: number } | null = null): void {
     this.target = id;
+    this.tile = tile;
     this.typing = true;
     const input = el('input', { type: 'text', placeholder: 'Cosa fai? (es. «forzo la serratura col coltello»)', maxlength: '200' }) as HTMLInputElement;
     const note = el('div', { class: 'reason' }, 'Il Concilio giudicherà se è possibile. Invio per provare, Esc per lasciar stare.');
@@ -62,7 +66,8 @@ export class ActionMenu {
       const text = input.value;
       input.disabled = true;
       note.textContent = 'Il Concilio valuta…';
-      void this.k.freeAction(id, text).finally(() => this.close());
+      const done = tile && id < 0 ? this.k.freeTileAction(tile.col, tile.row, text) : this.k.freeAction(id, text);
+      void done.finally(() => this.close());
     });
     this.root.replaceChildren(el('div', { class: 'title' }, name), input, note);
     this.root.hidden = false;
@@ -73,8 +78,9 @@ export class ActionMenu {
   private choose(o: ActionOption): void {
     if (this.target === null) return;
     const id = this.target;
+    const tile = this.tile;
     this.close();
-    if (o.enabled) void this.k.perform(id, o.id);
+    if (o.enabled) void (tile ? this.k.performMenu(o.id, id, tile.col, tile.row) : this.k.perform(id, o.id));
     else this.k.message(o.reason ?? 'Non puoi farlo.', 'warn');
   }
 

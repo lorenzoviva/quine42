@@ -1899,15 +1899,77 @@ export class Kernel {
     if (this.zone === 'corona' || this.zone === 'studio') return this.interactStudio();
     if (this.pickUpRune()) return;
     const target = this.targetInFront();
-    if (target === undefined) return;
-    if (this.ecs.has(target, 'pickup')) {
+    if (target !== undefined && this.ecs.has(target, 'pickup')) {
       this.pickUpEntity(target);
       return;
     }
-    const options = this.actionsFor(target);
-    const main = options.filter((o) => o.id !== 'esamina' && o.id !== 'strumento' && o.id !== 'altro');
-    if (main.length === 1 && main[0].enabled && options.length <= 3) return this.perform(target, main[0].id);
-    this.bus.emit('ui:actions', { id: target, name: this.nameOf(target), options });
+    // The menu of the tile in front, with what stands on it.
+    const pc = this.playerCarpet();
+    const [dx, dy] = this.facingDelta();
+    const col = target !== undefined ? Math.floor(this.ecs.get(target, 'pos').x) : Math.floor(pc.x + dx);
+    const row = target !== undefined ? Math.floor(this.ecs.get(target, 'pos').y) : Math.floor(pc.y + dy);
+    this.openTileMenu(col, row, target);
+  }
+
+  /**
+   * Every tile has a context menu: what stands on it (an object, a person) with its actions, then the
+   * actions learned on this kind of terrain, then "Altro…" for the tile itself.
+   */
+  tileMenu(col: number, row: number, entity?: Id): { title: string; options: ActionOption[]; entity?: Id } {
+    const code = this.tileAt(col, row);
+    const t = code ? this.palette[code] : undefined;
+    const on = entity ?? this.nearest(col + 0.5, row + 0.5, 0.75);
+    const options: ActionOption[] = [];
+    if (on !== undefined) for (const o of this.actionsFor(on)) options.push({ ...o, id: `e:${o.id}`, label: o.id === 'altro' ? `Altro… (${this.nameOf(on)})` : o.label });
+    if (t) {
+      for (const a of t.actions ?? []) if (a.effects?.length) options.push({ id: `t:${a.id}`, label: `${a.label} (${t.name})`, enabled: !a.requires || countItem(this.inventory(), a.requires) > 0, reason: a.requires && countItem(this.inventory(), a.requires) <= 0 ? `serve: ${this.itemInfo(a.requires).name}` : undefined });
+      options.push({ id: 't:altro', label: `Altro… (${t.name})`, enabled: true });
+    }
+    const title = [on !== undefined ? this.nameOf(on) : '', t?.name ?? ''].filter(Boolean).join(' — ');
+    return { title, options, entity: on };
+  }
+
+  openTileMenu(col: number, row: number, entity?: Id): void {
+    const m = this.tileMenu(col, row, entity);
+    if (!m.options.length) return;
+    this.bus.emit('ui:actions', { id: m.entity ?? -1, col, row, name: m.title, options: m.options });
+  }
+
+  /** Right click: the menu of a tile near the wanderer (real-space point → carpet tile). */
+  contextAt(rx: number, ry: number): boolean {
+    if (this.zone !== 'sim') return false;
+    const { ox, oy } = this.offset();
+    const col = Math.floor(rx + ox);
+    const row = Math.floor(ry + oy);
+    const pc = this.playerCarpet();
+    if (Math.hypot(col + 0.5 - pc.x, row + 0.5 - pc.y) > 2.6) {
+      this.message('Troppo lontano: avvicinati.');
+      return false;
+    }
+    this.openTileMenu(col, row);
+    return true;
+  }
+
+  /** A choice of a tile menu: the entity's action, a learned terrain action, or "Altro…" on the tile. */
+  async performMenu(option: string, entity: Id, col: number, row: number): Promise<void> {
+    if (option.startsWith('e:') && entity >= 0) return this.perform(entity, option.slice(2));
+    if (option === 't:altro') return void this.bus.emit('ui:freeaction', { id: -1, col, row, name: this.palette[this.tileAt(col, row) ?? '']?.name ?? 'qui' });
+    if (option.startsWith('t:')) {
+      const code = this.tileAt(col, row);
+      const a = code ? this.palette[code]?.actions?.find((x) => x.id === option.slice(2)) : undefined;
+      if (!a?.effects) return;
+      if (a.requires && countItem(this.inventory(), a.requires) <= 0) return this.message(`Ti serve ${this.itemInfo(a.requires).name}.`, 'warn');
+      const out = this.applyOn({ tile: { col, row }, key: `tile:${code}` }, a.effects);
+      this.bus.emit('ui:dialog', { speaker: this.palette[code!].name, text: out.join(' ') || `${a.label}: fatto.` });
+    }
+  }
+
+  /** "Altro…" on a tile: what the wanderer does there (dig, draw water, cut the tree…). */
+  async freeTileAction(col: number, row: number, text: string): Promise<string> {
+    const code = this.tileAt(col, row);
+    const t = code ? this.palette[code] : undefined;
+    if (!t || !code) return '';
+    return this.judgeFree({ tile: { col, row }, key: `tile:${code}`, name: t.name, description: t.description ?? t.name, tags: [t.layer ?? 'ground'], container: false, kind: 'terreno (una casella del mondo)', learnTile: code }, text);
   }
 
   /** The thing you are facing (or standing next to). */
@@ -2027,8 +2089,8 @@ export class Kernel {
   }
 
   /** Actions a thing has learned (its module's, or its item definition's). */
-  learnedActions(sub: { learnModule?: ModuleEntry; learnItem?: string }): ActionDef[] {
-    return [...(sub.learnModule?.manifest.actions ?? []), ...(sub.learnItem ? (this.content.get(sub.learnItem)?.actions ?? []) : [])].filter((a) => a.effects?.length);
+  learnedActions(sub: { learnModule?: ModuleEntry; learnItem?: string; learnTile?: string }): ActionDef[] {
+    return [...(sub.learnModule?.manifest.actions ?? []), ...(sub.learnItem ? (this.content.get(sub.learnItem)?.actions ?? []) : []), ...(sub.learnTile ? (this.palette[sub.learnTile]?.actions ?? []) : [])].filter((a) => a.effects?.length);
   }
 
   /**
@@ -2082,7 +2144,7 @@ export class Kernel {
   }
 
   /** Applies effects to the subject of an action: a thing in the world, or something carried. */
-  private applyOn(sub: { entity?: Id; slot?: number; key: string }, all: Effect[]): string[] {
+  private applyOn(sub: { entity?: Id; slot?: number; tile?: { col: number; row: number }; key: string }, all: Effect[]): string[] {
     // Acting on something never spends it by accident: only "distruggi" breaks or uses it up.
     let effects = all.filter((e) => !(e.tipo === 'consuma' && e.oggetto === sub.key));
     // Between people: bonds, memories, births are the society's, not the Lua effects'.
@@ -2097,6 +2159,8 @@ export class Kernel {
       }
     }
     if (sub.entity !== undefined) return this.applyEffects(effects, sub.entity);
+    // On a tile: everything happens there (destroying a tile turns it into the ground around).
+    if (sub.tile) return this.applyEffects(effects.filter((e) => e.tipo !== 'distruggi' && e.tipo !== 'apri' && e.tipo !== 'contenitore'), undefined, { x: sub.tile.col + 0.5, y: sub.tile.row + 0.5 });
     const out: string[] = [];
     const rest: Effect[] = [];
     for (const e of effects) {
@@ -2112,7 +2176,7 @@ export class Kernel {
   }
 
   private async judgeFree(
-    sub: { entity?: Id; slot?: number; key: string; name: string; description: string; tags: string[]; container: boolean; kind: string; learnModule?: ModuleEntry; learnItem?: string },
+    sub: { entity?: Id; slot?: number; tile?: { col: number; row: number }; key: string; name: string; description: string; tags: string[]; container: boolean; kind: string; learnModule?: ModuleEntry; learnItem?: string; learnTile?: string },
     rawText: string,
   ): Promise<string> {
     const text = rawText.trim().slice(0, 200);
@@ -2134,7 +2198,7 @@ export class Kernel {
       say(ruled.racconto);
       return ruled.racconto;
     }
-    const p = sub.entity !== undefined ? this.ecs.get(sub.entity, 'pos') : this.playerCarpet();
+    const p = sub.entity !== undefined ? this.ecs.get(sub.entity, 'pos') : sub.tile ? { x: sub.tile.col + 0.5, y: sub.tile.row + 0.5 } : this.playerCarpet();
     const tile = p ? (this.palette[this.tileAt(Math.floor(p.x), Math.floor(p.y)) ?? '']?.name ?? '?') : '?';
     const inv = this.inventory();
     const held = equippedItem(inv);
@@ -2653,13 +2717,21 @@ export class Kernel {
    * A thing learns an action: it enters the menu of every copy of it — the module's actions for things
    * in the world, the item definition's for things you carry or find on the ground.
    */
-  private learnAction(sub: { learnModule?: ModuleEntry; learnItem?: string }, def: ActionDef): void {
+  private learnAction(sub: { learnModule?: ModuleEntry; learnItem?: string; learnTile?: string }, def: ActionDef): void {
     let path: string | undefined;
     let man: Manifest;
     let actions: ActionDef[];
     let owner: string;
     try {
-      if (sub.learnModule) {
+      if (sub.learnTile && this.terrain) {
+        // A terrain learns: every tile of this kind offers the action from now on.
+        path = this.terrain.manifestPath;
+        man = JSON.parse(this.repo.working[path] ?? '');
+        const tile = man.tiles?.[sub.learnTile];
+        if (!tile) return;
+        actions = tile.actions ??= [];
+        owner = tile.name;
+      } else if (sub.learnModule) {
         path = sub.learnModule.manifestPath;
         man = JSON.parse(this.repo.working[path] ?? '');
         actions = man.actions ??= [];

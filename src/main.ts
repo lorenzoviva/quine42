@@ -87,6 +87,12 @@ async function main() {
   const genesis = new GenesisScreen(kernel);
   const actions = new ActionMenu(kernel);
   const studio = new StudioPanel(kernel, images);
+  // Right click on a tile near you: its context menu (with what stands on it, and "Altro…").
+  $<HTMLCanvasElement>('#world').addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    const r = renderer.toReal(e.offsetX, e.offsetY);
+    kernel.contextAt(r.x, r.y);
+  });
   const atlas = new AtlasPanel(kernel);
   // Death: the session ends; continue in the same universe or start again from the seed.
   const deathEl = $('#death');
