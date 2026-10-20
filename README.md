@@ -71,3 +71,14 @@ Nella piazza iniziale ci sono `x`, `speed = speed` e la runa magica `luce`. Le r
 Leggi **[AGENTS.md](AGENTS.md)**: architettura, Concilio, regole inviolabili, convenzioni (vale per
 persone, Claude Code e Gemini CLI). Design originale in [docs/design.md](docs/design.md), decisioni in
 [docs/adr/](docs/adr/README.md).
+
+## Riferimenti e ispirazioni
+
+- Dan Harmon
+    - Community: Digital Estate Planning
+    - Rick and Morty: M. Night Shaym-Aliens!
+- South Park: Grounded Vindaloop
+- Matrix
+- Westworld
+- Project Zomboid
+- Cyberpunk 2077

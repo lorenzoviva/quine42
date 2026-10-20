@@ -29,5 +29,8 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0022](0022-corona-studio-e-referente.md) | La corona come studio, il Referente, il viandante trasceso | accettato; sostituisce la disposizione di 0016 |
 | [0023](0023-geografia-atlante-timbri.md) | Geografia: biomi, atlante, timbri di strutture | accettato |
 | [0024](0024-vita-degli-npc.md) | La vita degli NPC: attività, dialoghi, ricordi, trame, famiglia | accettato |
+| [0025](0025-due-tavoli.md) | Due tavoli: il Concilio è il Dungeon Master, dentro il mondo niente meta-gioco | accettato; supera le «crepe» |
+| [0026](0026-meccaniche-morte-trascendenza.md) | Meccaniche nuove (stati), morte, trascendenza, camminate valide | accettato |
+| [0027](0027-studi-neon-e-atlante.md) | Studi neon-punk, sala del Concilio, atlante navigabile | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

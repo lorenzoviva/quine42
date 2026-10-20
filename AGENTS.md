@@ -18,9 +18,16 @@ scritto sul tappeto **si esegue**: componendo frasi il giocatore può rompere la
 riscriverla. Le rune raccolte sono oggetti (nella borsa delle rune); alcune sono anche **magia**:
 pronunciate (T) diventano incantesimi e si consumano. Ciò che il Concilio decide diventa **regola** del mondo.
 
+**Due tavoli** (ADR-0025), come in Dungeons & Dragons: il Concilio (o il giocatore che fa il Dungeon
+Master, nella corona) crea e fa evolvere il mondo; dentro il mondo il viandante e le persone vivono un
+mondo reale. Nei contenuti mai meta-gioco: niente codice, simulazione, Concilio, «crepe», bordi misurati.
+
 Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/`](docs/adr/README.md).
 
 ## Regole inviolabili
+
+0. **Niente meta-gioco dentro il mondo** (ADR-0025): i principi del Concilio (`src/kernel/fourthwall.ts`)
+   vanno con ogni richiesta; ciò che rompe la quarta parete viene richiesto di nuovo o ritirato.
 
 1. **Il kernel non è mai modificabile da Lua.** Il kernel è TypeScript in `src/kernel/`. Il codice
    dell'universo gira in ambienti Lua che non vedono `_G`, `debug`, `load`, `os`, `io`, `package`.
@@ -86,6 +93,7 @@ src/
     atlas.ts            l'atlante: regioni geolocalizzate, direzioni
     stamps.ts           timbri di strutture (castelli, torri, templi, piramidi, sotterranei…)
     universes.ts        client del repository dell'universo, aggiornamenti dal seme
+    fourthwall.ts       principi del Concilio (due tavoli) e filtro della quarta parete
     mj.ts               motore di riscrittura stile MarkovJunior
     layout.ts           bozza → varchi → programma → sentieri garantiti → edifici
     content.ts          registro di oggetti, ricette, bottino, ambienti
@@ -95,7 +103,7 @@ src/
     ecs.ts, sandbox.ts, prelude.lua, validator.ts, runes.ts, repo.ts, universe.ts,
     inventory.ts, assets.ts, imaging.ts, bundle.ts, faults.ts, events.ts, input.ts, rng.ts, types.ts
   render/               renderer.ts (tile, transizioni, ostacoli, tetti, animazioni), imagetools.ts, glitch.ts
-  ui/                   hud.ts (anche il diario delle missioni), inventory.ts, actions.ts, chat.ts, feed.ts, genesis.ts, editor.ts, console.ts, studio.ts
+  ui/                   hud.ts (anche il diario delle missioni), inventory.ts, actions.ts, chat.ts, feed.ts, genesis.ts, editor.ts, console.ts, studio.ts, atlas.ts
 universe/
   universe.json         nome, seme, raggio, chunk (18), modelli e budget
   world/                bible.json (memoria del Narratore), style.md, atelier.json (coppie few-shot),
@@ -158,6 +166,12 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   icone, «ridipingi»), Studio del Cartografo (terreni), bacheche con le modifiche recenti (che brillano).
 - **Geografia** (ADR-0023): biomi nel generatore (`s j o k n`), 20 ambienti nel seme, nodo `stamp` di
   MarkovJunior, atlante di regioni (`world/atlas.json`), direzioni note a NPC e Cartografo.
+- **Stati e meccaniche** (ADR-0026): effetti `stato`/`togli_stato` (velocità, peso, luce, durata) per ciò che
+  si usa (cavallo, barca, zaino); componente `stati` del viandante.
+- **Morte e trascendenza** (ADR-0026): a salute zero la sessione finisce (continua nello stesso universo o
+  ricomincia dal seme); dopo la corona non si muore e non si perde nulla.
+- **Sala del Concilio e studi** (ADR-0027): tavolo rotondo con l'universo che gira, i sette membri seduti,
+  teletrasporti verso le sale e ritorno, schermi della storia, stile neon punk; atlante navigabile.
 - **Vita degli NPC** (ADR-0024): attività visibili (`attivita {tipo, ferma}`), dialoghi tra persone,
   ricordi pesati, legami col viandante e figli (effetti `legame ricordo nascita`), trame e missioni
   (`world/plots.json`, diario nell'HUD).
@@ -184,7 +198,8 @@ nearest/has_tag/break_entity/say/speak/set_tile/open/make_container`; `inventory
 Hook: `update(dt)` (sistemi), `generate_chunk`, `on_spawn(id)`, `on_interact(id, user)`,
 `on_act(id, user, action)`, `on_use(user, item)`, `on_action(user, target, item)`; `core.items.use(user, item)`;
 `core.effects.apply(target, user, effect, x, y)`. Componenti noti: `luce {raggio, accesa, colore}`, `fuoco {raggio}`,
-`effimero {fino}` (sparisce a tempo), `scudo {fino}`, `meta {x, y}` (dove va un NPC).
+`effimero {fino}` (sparisce a tempo), `scudo {fino}`, `meta {x, y}` (dove va un NPC), `stati` (del viandante).
+`bus.emit("morte", …)` da `sys.needs` chiude la sessione.
 
 ## Convenzioni
 
