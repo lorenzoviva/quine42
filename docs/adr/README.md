@@ -25,5 +25,9 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0018](0018-rune-oggetto-mana-borse.md) | Rune come oggetti, frase, mana e cristalli, borse nell'inventario | accettato |
 | [0019](0019-decisioni-regole.md) | Le decisioni del Concilio diventano regole | accettato |
 | [0020](0020-societa-degli-npc.md) | La società degli NPC | accettato |
+| [0021](0021-due-repository.md) | Due repository: il kernel (seme) e l'universo (su disco) | accettato |
+| [0022](0022-corona-studio-e-referente.md) | La corona come studio, il Referente, il viandante trasceso | accettato; sostituisce la disposizione di 0016 |
+| [0023](0023-geografia-atlante-timbri.md) | Geografia: biomi, atlante, timbri di strutture | accettato |
+| [0024](0024-vita-degli-npc.md) | La vita degli NPC: attività, dialoghi, ricordi, trame, famiglia | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

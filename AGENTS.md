@@ -10,7 +10,8 @@ RUNE è un gioco 2D top-down, a grafica semplice e contenuti ricchissimi, in cui
 da IA in ogni aspetto tranne il kernel, ed è fatto del proprio codice sorgente. Il giocatore vive in
 un cerchio di simulazione; un **tappeto** compensa ogni suo passo e lo riporta al centro. Attorno,
 ferma e **invisibile finché il tappeto lo tiene**, c'è la **corona**: il codice sorgente dell'universo,
-un archivio di stanze (cartelle) e oggetti (file) dove si vedono lavorare gli agenti.
+lo studio di una software house di giochi (un edificio per cartella, interni su più piani, gallerie di
+sprite e terreni) dove si vedono lavorare le squadre del Concilio. Chi ci arriva è trasceso: ne fa parte.
 Un **Concilio di agenti** su Google Gemini scrive storia, ambienti, oggetti, persone e il loro codice,
 e dipinge a lotti tile e sprite. Nel terreno brillano **rune**: token Lua veri, una per casella. Ciò che è
 scritto sul tappeto **si esegue**: componendo frasi il giocatore può rompere la simulazione, o uscirne e
@@ -33,7 +34,9 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
 4. **Stato nei componenti, logica stateless.** Hot reload = sostituzione delle funzioni.
 5. **Ogni contenuto è un modulo autosufficiente** con `manifest.json`; il manifest dei moduli
    generati lo assembla il kernel (forma garantita). Gli oggetti stanno in pacchetti di dati.
-6. **Ogni universo è un repository.** Si committano solo stati validi; `R` torna all'ultimo valido.
+6. **Due repository** (ADR-0021): il kernel (questo progetto; `universe/` è il seme, immutabile) e
+   l'universo (repository git su disco, `universes/<nome>/`). Si committano solo stati validi; `R` torna
+   all'ultimo valido; ripartire dal seme mette l'universo in `universes/.cestino/`.
 7. **Il kernel è il pavimento**: sopravvive a NaN, nil, cicli infiniti, binding recisi. Le API del
    `Host` validano gli input e restituiscono `undefined` (mai `null`).
 8. **La corona è nascosta finché il tappeto funziona** (ADR-0009).
@@ -49,7 +52,9 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
 - **Google Gemini**: `gemini-3.1-flash-lite` (testo) e `gemini-3.1-flash-lite-image` (immagini), in
   `universe/universe.json → ai` con i budget (`maxText`, `maxImages`, `maxForges`, `maxPacks`, `animation`).
 - **Vitest** in Node con modelli offline (`MockModels`): kernel, Concilio e layout testabili headless.
-- Persistenza: `localStorage` (repository), IndexedDB (immagini e piani dei luoghi).
+- Persistenza: repository git dell'universo su disco tramite il server di Vite (`server/universeStore.ts`):
+  testi, `maps/` (piani dei luoghi), `assets/` (immagini), `world/stato.json` (la partita). Senza server:
+  `localStorage` + IndexedDB.
 
 ## Comandi
 
@@ -69,13 +74,18 @@ In console del browser: `window.rune` è il kernel (`.feed()`, `.models.usage`, 
 
 ```
 server/geminiProxy.ts   proxy /api/gemini → Google, chiave da .env
+server/universeStore.ts /api/universe: ogni universo è un repository git in universes/<nome>/
 src/
   main.ts               bootstrap: modelli, kernel, renderer, UI, loop a 60 Hz
   kernel/               IL PAVIMENTO — mai scrivibile da Lua
     kernel.ts           orchestratore: tick, luoghi, oggetti, contenitori, azioni (anche libere), effetti, magia, chat, Fucina, Genesi, rollback
-    corona.ts           la corona come archivio: cartelle = stanze dell'anello, file = oggetti
-    archive.ts          gli agenti del Concilio come figure nella corona
-    society.ts          la società: registro delle persone, legami, routine, saluti
+    corona.ts           la corona come studio: edifici, interni su più piani, scaffali, gallerie
+    archive.ts          le squadre del Concilio e il Referente nello studio
+    society.ts          la società: persone, legami, routine, attività, ricordi
+    plots.ts            trame orizzontali e missioni
+    atlas.ts            l'atlante: regioni geolocalizzate, direzioni
+    stamps.ts           timbri di strutture (castelli, torri, templi, piramidi, sotterranei…)
+    universes.ts        client del repository dell'universo, aggiornamenti dal seme
     mj.ts               motore di riscrittura stile MarkovJunior
     layout.ts           bozza → varchi → programma → sentieri garantiti → edifici
     content.ts          registro di oggetti, ricette, bottino, ambienti
@@ -85,11 +95,12 @@ src/
     ecs.ts, sandbox.ts, prelude.lua, validator.ts, runes.ts, repo.ts, universe.ts,
     inventory.ts, assets.ts, imaging.ts, bundle.ts, faults.ts, events.ts, input.ts, rng.ts, types.ts
   render/               renderer.ts (tile, transizioni, ostacoli, tetti, animazioni), imagetools.ts, glitch.ts
-  ui/                   hud.ts, inventory.ts (contenitori, ricette), actions.ts, chat.ts, feed.ts, genesis.ts, editor.ts, console.ts
+  ui/                   hud.ts (anche il diario delle missioni), inventory.ts, actions.ts, chat.ts, feed.ts, genesis.ts, editor.ts, console.ts, studio.ts
 universe/
   universe.json         nome, seme, raggio, chunk (18), modelli e budget
   world/                bible.json (memoria del Narratore), style.md, atelier.json (coppie few-shot),
-                        rules.json (regole nate dal gioco), people.json (la società)
+                        rules.json (regole), people.json (la società, con i ricordi), plots.json (trame),
+                        atlas.json (geografia), stato.json (la partita)
   prompts/              theme.md, agents/<agente>.md
   modules/<id>/         manifest.json (+ logic.lua): sistemi, terreni, ambienti, pacchetti di oggetti, mobili, persone,
                         effetti (core.effects), fuoco (sys.fire), rune magiche e incantesimi (magic.runes, magic.spells)
@@ -106,9 +117,12 @@ tests/  docs/
 | Fisico | fisica di moduli, terreni e oggetti (pesi, pile, effetti) |
 | Ingegnere | logic.lua (`on_act`, `on_use`, `on_action`…); ripara il codice che fallisce |
 | Arbitro | coerenza tra narrativa, aspetto, fisica e codice; rimanda all'agente responsabile; tiene le sessioni del Concilio |
+| Referente | nella corona accoglie il viandante trasceso e porta le sue richieste alla squadra giusta (Fucina, Cartografo, Artista, regole, pacchetti) |
 
-Registro: `kernel.feed()`, pannello Concilio (`G`) e console. Nella corona gli agenti sono figure che vanno
-al file su cui lavorano, parlano tra loro, e con `E` ci si parla (possono passare richieste alla Fucina).
+Registro: `kernel.feed()`, pannello Concilio (`G`) e console. Nella corona ogni agente è una squadra: un
+membro per edificio, che va allo scaffale del file che cambia; si vedono parlare solo quelli che
+interagiscono nel registro; con `E` ci si parla. Il Cartografo crea ambienti e li colloca sull'atlante.
+Il Narratore intreccia trame tra le persone e scrive i loro dialoghi.
 
 **Luogo** (18×18): bozza Lua continua (`g p t w r`) → piano del Cartografo (ambiente, cose `dentro`/
 `fuori`/`ovunque`, oggetti `a_terra`, rune) → layout (varchi deterministici, programma con bordo
@@ -139,7 +153,14 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   terreno fuoco luce scudo spingi evoca`), validati dal kernel, applicati da `core.effects`. Usati da
   azioni libere («Altro…»), azioni imparate (`actions[].effects`) e incantesimi. Terreno cambiato persistente.
 - **Giorno e notte** (ADR-0015): `daylight()`, giornata di 10 minuti; luce dai componenti `luce`.
-- **Corona** (ADR-0009, 0016): archivio; stanze per cartella, file come libri/cristalli/pergamene/tavolette.
+- **Corona** (ADR-0009, 0016, 0022): studio; edifici per cartella con porte che teletrasportano in interni
+  più grandi (stanze 24×15 su più piani, zona `studio`), scaffali di file, Galleria dell'Artista (sprite e
+  icone, «ridipingi»), Studio del Cartografo (terreni), bacheche con le modifiche recenti (che brillano).
+- **Geografia** (ADR-0023): biomi nel generatore (`s j o k n`), 20 ambienti nel seme, nodo `stamp` di
+  MarkovJunior, atlante di regioni (`world/atlas.json`), direzioni note a NPC e Cartografo.
+- **Vita degli NPC** (ADR-0024): attività visibili (`attivita {tipo, ferma}`), dialoghi tra persone,
+  ricordi pesati, legami col viandante e figli (effetti `legame ricordo nascita`), trame e missioni
+  (`world/plots.json`, diario nell'HUD).
 - **Mappa** (ADR-0011): tile con texture, strati `ground floor wall door liquid vegetation rock`, tetti.
 - **Contenuti** (ADR-0012): `ItemDef` in pacchetti; bottino per tag; contenitori; ricette; bisogni
   (`needs` sul giocatore, `sys.needs`); uso generico in `core.items`; menu azioni (`E`).
@@ -196,8 +217,11 @@ oggetti citati, Atelier few-shot con camminate, icone a fogli, riparazione autom
 con borsa e frase, mana e cristalli, borse nell'inventario, regole nate dal gioco, fabbricazione libera,
 società degli NPC con famiglie e routine, sessioni del Concilio, test.
 
+Fatto anche: due repository (seme del kernel + universo git su disco), stato della partita salvato,
+studio della corona con squadre e Referente, atlante e timbri, biomi, vita degli NPC con trame e missioni.
+
 Prossimi passi suggeriti:
-1. Persistenza dello stato del mondo (inventario, contenitori aperti, individui incontrati).
+1. Interni del mondo come zone separate (case più grandi dentro), come già nello studio.
 2. Notte con conseguenze (NPC che dormono, creature notturne); luce delle lanterne impugnate.
 3. Personaggi con iniziativa (orari, mestieri, scambi tra loro) e quest generate.
 4. Port più ampio di MarkovJunior (campi, WFC) per interni complessi; interni come zone separate.

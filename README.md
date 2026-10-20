@@ -48,6 +48,7 @@ con un modello locale.
 | `R` | rollback all'ultimo commit valido |
 | `V` | mostra in rosso ciò che non si può attraversare |
 | `G` | mostra/nasconde il Concilio · `F1` aiuto · `Esc` chiudi |
+| nella corona | `E` alla porta di un edificio per entrare; dentro: scaffali (file), quadri (sprite, «ridipingi»), bacheca, scale; il Referente accoglie le tue richieste |
 
 Fame, sete ed energia calano: mangia, bevi, dormi. Passa il mouse su una runa per vederne il valore vivo.
 Rune che si toccano formano una riga di codice; ogni runa è una casella, e una volta raccolta è un oggetto nella

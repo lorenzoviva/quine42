@@ -879,7 +879,7 @@ export class Kernel {
       const dist = Math.max(Math.abs(centro[0] - here[0]), Math.abs(centro[1] - here[1]));
       const where = `${direction(centro[0] - here[0], centro[1] - here[1])}, a ${dist} luoghi da qui`;
       const c = this.repo.commit(`cartografo: ${region.nome} (${where})`, 'agent');
-      const summary = `«${region.nome}» — ${region.descrizione}. Si trova a ${where}.${Object.keys(added).length ? ` Terreni nuovi: ${Object.values(added).map((t) => t.name).join(', ')}.` : ''}`;
+      const summary = `«${region.nome}» — ${region.descrizione.replace(/\.$/, '')}. Si trova a ${where}.${Object.keys(added).length ? ` Terreni nuovi: ${Object.values(added).map((t) => t.name).join(', ')}.` : ''}`;
       this.council.say('cartografo', 'approva', `${summary} (commit ${c.id})`, undefined, 'cartographer.environment');
       return { ok: true, summary };
     }
@@ -3108,14 +3108,21 @@ export class Kernel {
     if (reply.bond && reply.bond !== this.personOf(name)?.legameViandante) this.setBond(name, reply.bond);
     if (reply.action === 'missione') {
       let given = '';
+      let carry: string | undefined;
       this.updatePlots((plots) => {
         const p = plots.find((x) => x.stato === 'attiva' && x.missione?.da === name && x.missione.stato === 'offerta');
         if (!p?.missione) return false;
         p.missione.stato = 'accettata';
         given = p.missione.testo;
+        if (p.missione.obiettivo.tipo === 'porta') carry = p.missione.obiettivo.oggetto;
         return true;
       });
       if (given) this.message(`Nuova missione da ${name}: ${given}`, 'good');
+      // "Take this to…": whoever asks hands over what is to be carried.
+      if (carry && !this.carriedByName(carry)) {
+        const d = this.content.byName(carry) ?? (await this.introduceItems([carry], `affidato da ${name} al viandante`))[0];
+        if (d && this.give(d.id, 1)) this.message(`${name} ti affida: ${d.name}`, 'good');
+      }
     }
     this.questsOnTalk(name);
     this.speak(id, reply.say);
