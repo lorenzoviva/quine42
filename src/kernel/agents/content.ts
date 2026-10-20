@@ -8,7 +8,7 @@ import { CATEGORY_GLYPHS, normName } from '../content';
 import { ITEM_CATEGORIES, type ItemDef, type LootTable, type Recipe } from '../types';
 import { slug } from './forge';
 import type { AgentId, Council } from './council';
-import { DAY_PHASES, defaultRoutine, WHERES, type DayPhase, type Relation, type RoutineStep, type Where } from '../society';
+import { ACTIVITIES, DAY_PHASES, defaultRoutine, inferActivity, WHERES, type Activity, type DayPhase, type Relation, type RoutineStep, type Where } from '../society';
 
 const ITEM_SCHEMA: Schema = {
   type: 'OBJECT',
@@ -260,7 +260,7 @@ const INDIVIDUAL_SCHEMA: Schema = {
     routine: {
       type: 'ARRAY',
       description: 'la sua giornata: 4 voci, una per momento',
-      items: { type: 'OBJECT', properties: { quando: { type: 'STRING', enum: [...DAY_PHASES] }, fa: { type: 'STRING', description: 'cosa fa, breve (es. "impasta il pane")' }, dove: { type: 'STRING', enum: [...WHERES] } }, required: ['quando', 'fa', 'dove'] },
+      items: { type: 'OBJECT', properties: { quando: { type: 'STRING', enum: [...DAY_PHASES] }, fa: { type: 'STRING', description: 'cosa fa, breve (es. "impasta il pane")' }, dove: { type: 'STRING', enum: [...WHERES] }, azione: { type: 'STRING', enum: [...ACTIVITIES], description: 'il gesto che si vede fare' } }, required: ['quando', 'fa', 'dove', 'azione'] },
     },
   },
   required: ['nome', 'persona', 'aspetto', 'porta', 'mestiere', 'famiglia', 'routine'],
@@ -271,7 +271,7 @@ const INDIVIDUAL_SCHEMA: Schema = {
  * society: a job, a family related to the people already known, a daily routine.
  */
 export async function individuate(c: Council, archetype: { name: string; description: string; persona: string }, ctx: { place: string; common: string[]; society?: string }): Promise<Identity> {
-  const r = await c.ask<{ nome: string; persona: string; aspetto: string; porta: string[]; mestiere?: string; eta?: string; storia?: string; famiglia?: Relation[]; routine?: Array<{ quando: string; fa: string; dove: string }> }>(
+  const r = await c.ask<{ nome: string; persona: string; aspetto: string; porta: string[]; mestiere?: string; eta?: string; storia?: string; famiglia?: Relation[]; routine?: Array<{ quando: string; fa: string; dove: string; azione?: string }> }>(
     'narratore',
     'npc.individuate',
     [
@@ -293,7 +293,11 @@ export async function individuate(c: Council, archetype: { name: string; descrip
   const job = String(r.mestiere ?? '').slice(0, 40);
   const routine = (r.routine ?? [])
     .filter((s) => (DAY_PHASES as string[]).includes(s?.quando) && s?.fa)
-    .map((s) => ({ quando: s.quando as DayPhase, fa: String(s.fa).slice(0, 60), dove: ((WHERES as string[]).includes(s.dove) ? s.dove : 'in giro') as Where }));
+    .map((s) => {
+      const dove = ((WHERES as string[]).includes(s.dove) ? s.dove : 'in giro') as Where;
+      const fa = String(s.fa).slice(0, 60);
+      return { quando: s.quando as DayPhase, fa, dove, azione: (ACTIVITIES as readonly string[]).includes(s.azione ?? '') ? (s.azione as Activity) : inferActivity(fa, dove) };
+    });
   return {
     name: String(r.nome ?? archetype.name).slice(0, 40),
     persona: String(r.persona ?? archetype.persona),

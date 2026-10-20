@@ -11,10 +11,40 @@ export const DAY_PHASES: DayPhase[] = ['mattina', 'giorno', 'sera', 'notte'];
 export type Where = 'casa' | 'lavoro' | 'piazza' | 'in giro';
 export const WHERES: Where[] = ['casa', 'lavoro', 'piazza', 'in giro'];
 
+/** What a person is physically doing: the renderer shows it (lying in bed, hoeing, fishing…). */
+export const ACTIVITIES = ['dorme', 'zappa', 'lavora', 'cucina', 'mangia', 'prega', 'commercia', 'pattuglia', 'chiacchiera', 'legge', 'pesca', 'taglia_legna', 'pascola', 'passeggia'] as const;
+export type Activity = (typeof ACTIVITIES)[number];
+
+/** A sign over the head while doing it. */
+export const ACTIVITY_ICON: Record<Activity, string> = {
+  dorme: 'z', zappa: '⚒', lavora: '⚒', cucina: '♨', mangia: 'ò', prega: '✦', commercia: '⚖', pattuglia: '⚔', chiacchiera: '…', legge: '▤', pesca: '≈', taglia_legna: '⚒', pascola: '♣', passeggia: '',
+};
+
+/** The activity a routine step describes, when the Narrator did not say. */
+export function inferActivity(fa: string, dove: string): Activity {
+  const t = fa.toLowerCase();
+  const rules: Array<[RegExp, Activity]> = [
+    [/dorm|riposa|letto|sonn/, 'dorme'], [/zapp|semin|ar[ao]|campo|orto|raccol|mietere|mieti/, 'zappa'], [/cucin|impast|forno|pane|zuppa/, 'cucina'], [/mangi|cena|pranz|colazion/, 'mangia'],
+    [/preg|tempio|altare|medita/, 'prega'], [/vend|commerc|merc|banco|baratt/, 'commercia'], [/guard|pattugl|ronda|sorveglia/, 'pattuglia'], [/legg|studi|scriv|libr/, 'legge'],
+    [/pesc/, 'pesca'], [/legna|ascia|taglia|tronc/, 'taglia_legna'], [/pecor|greg|pascol|capre|mucche/, 'pascola'], [/chiacchier|parla|racconta|piazza/, 'chiacchiera'],
+    [/lavor|forgia|martell|cuc[ie]|tess|ripara|intaglia|bottega/, 'lavora'],
+  ];
+  return rules.find(([re]) => re.test(t))?.[1] ?? (dove === 'casa' ? 'mangia' : dove === 'piazza' ? 'chiacchiera' : 'passeggia');
+}
+
 export interface RoutineStep {
   quando: DayPhase;
   fa: string;
   dove: Where;
+  azione?: Activity;
+}
+
+/** Something a person remembers: what happened, with whom, how much it mattered (1-3). */
+export interface Memory {
+  quando: string;
+  testo: string;
+  con?: string;
+  peso: number;
 }
 
 export interface Relation {
@@ -37,6 +67,26 @@ export interface Person {
   persona?: string;
   aspetto?: string;
   porta?: string[];
+  ricordi?: Memory[];
+  /** What they are to the wanderer (amico, fidanzata, moglie, figlio…), if anything. */
+  legameViandante?: string;
+}
+
+/** Keeps memories that matter: the heavy ones and the recent ones (at most 30). */
+export function remember(list: Memory[] | undefined, m: Memory): Memory[] {
+  const all = [...(list ?? []), m];
+  if (all.length <= 30) return all;
+  // Forget the lightest of the oldest.
+  const old = all.slice(0, all.length - 10);
+  const drop = old.reduce((best, x, i) => (x.peso < old[best].peso ? i : best), 0);
+  return all.filter((_, i) => i !== drop);
+}
+
+export function memorySummary(list: Memory[] | undefined, n = 12): string {
+  return (list ?? [])
+    .slice(-n)
+    .map((m) => `- (${m.quando}${m.con ? `, con ${m.con}` : ''}${m.peso >= 3 ? ', importante' : ''}) ${m.testo}`)
+    .join('\n');
 }
 
 export interface People {
@@ -112,10 +162,10 @@ export function dayPhase(time: number, daySeconds: number): DayPhase {
 /** A sensible routine when the Narrator gave none. */
 export function defaultRoutine(job: string): RoutineStep[] {
   return [
-    { quando: 'mattina', fa: 'si prepara per la giornata', dove: 'casa' },
-    { quando: 'giorno', fa: job ? `lavora come ${job}` : 'lavora', dove: 'lavoro' },
-    { quando: 'sera', fa: 'chiacchiera in piazza', dove: 'piazza' },
-    { quando: 'notte', fa: 'dorme', dove: 'casa' },
+    { quando: 'mattina', fa: 'si prepara per la giornata', dove: 'casa', azione: 'mangia' },
+    { quando: 'giorno', fa: job ? `lavora come ${job}` : 'lavora', dove: 'lavoro', azione: inferActivity(job || 'lavora', 'lavoro') },
+    { quando: 'sera', fa: 'chiacchiera in piazza', dove: 'piazza', azione: 'chiacchiera' },
+    { quando: 'notte', fa: 'dorme', dove: 'casa', azione: 'dorme' },
   ];
 }
 

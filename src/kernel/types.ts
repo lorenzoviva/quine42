@@ -152,9 +152,13 @@ export type Effect =
   | { tipo: 'luce'; raggio?: number; durata?: number }
   | { tipo: 'scudo'; durata?: number }
   | { tipo: 'spingi'; forza?: number }
-  | { tipo: 'evoca'; modulo: string };
+  | { tipo: 'evoca'; modulo: string }
+  // Between people (only on someone): what they become to the wanderer, what they will remember, a birth.
+  | { tipo: 'legame'; legame: string }
+  | { tipo: 'ricordo'; testo: string; peso?: number }
+  | { tipo: 'nascita'; nome?: string };
 
-export const EFFECT_TYPES = ['messaggio', 'bisogni', 'crea_oggetto', 'consuma', 'distruggi', 'apri', 'contenitore', 'terreno', 'fuoco', 'luce', 'scudo', 'spingi', 'evoca'] as const;
+export const EFFECT_TYPES = ['messaggio', 'bisogni', 'crea_oggetto', 'consuma', 'distruggi', 'apri', 'contenitore', 'terreno', 'fuoco', 'luce', 'scudo', 'spingi', 'evoca', 'legame', 'ricordo', 'nascita'] as const;
 
 /**
  * Something you can do to an object (E opens the menu). Either handled by the module's

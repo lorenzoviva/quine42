@@ -348,6 +348,16 @@ export function validateEffects(raw: unknown, ctx: EffectContext): EffectVerdict
         else out.dropped.push(`evoca: «${String(e.modulo ?? '')}» non esiste`);
         break;
       }
+      case 'legame':
+        if (typeof e.legame === 'string' && e.legame.trim()) out.effects.push({ tipo, legame: e.legame.trim().toLowerCase().slice(0, 30) });
+        else out.dropped.push('legame senza legame');
+        break;
+      case 'ricordo':
+        if (typeof e.testo === 'string' && e.testo.trim()) out.effects.push({ tipo, testo: e.testo.trim().slice(0, 200), peso: Math.round(num(e.peso, 1, 3, 2)) });
+        break;
+      case 'nascita':
+        out.effects.push({ tipo, ...(typeof e.nome === 'string' && e.nome.trim() ? { nome: e.nome.trim().slice(0, 30) } : {}) });
+        break;
       default:
         out.dropped.push(`effetto sconosciuto «${tipo}»`);
     }

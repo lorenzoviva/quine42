@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
+import { readPeople } from '../src/kernel/society';
+import { readPlots } from '../src/kernel/plots';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockModels } from '../src/kernel/ai/mock';
@@ -447,10 +449,11 @@ describe('a society', () => {
     expect(ia.routine?.map((r) => r.quando)).toEqual(['mattina', 'giorno', 'sera', 'notte']);
     const b = k.spawnModuleEntity(k.modules.get('npc.villager')!, pc.x + 1.5, pc.y, undefined, 'test#b');
     const ib = (await k.ensureIdentity(b))!;
-    // The second is related to the first, and the first knows it too.
-    expect(ib.family?.[0].nome).toBe(ia.name);
-    expect(k.ecs.get(a, 'identity').family.some((f: { nome: string }) => f.nome === ib.name)).toBe(true);
+    // The second is related to someone already known, and that person knows it too.
     const people = JSON.parse(k.files['world/people.json']);
+    const relative = people.persone.find((p: { nome: string }) => p.nome === ib.family?.[0].nome);
+    expect(relative).toBeTruthy();
+    expect(relative.famiglia.some((f: { nome: string }) => f.nome === ib.name)).toBe(true);
     expect(people.persone.map((p: { nome: string }) => p.nome)).toEqual(expect.arrayContaining([ia.name, ib.name]));
     expect(k.council.context('narratore')).toBeTruthy();
     // Met again (same origin), no new call: the same person.
@@ -729,5 +732,86 @@ describe('the atlas', () => {
     // The cartographer in the corona routes requests to environments, not objects.
     const chat = await k.talkToAgent('cartografo', 'crea un bosco incantato degli elfi');
     expect(chat.forged).toMatch(/Bosco degli Elfi/);
+  });
+});
+
+describe('the life of people', () => {
+  const person = async (k: Kernel, origin: string, dx: number) => {
+    const pc = k.playerCarpet();
+    const id = k.spawnModuleEntity(k.modules.get('npc.villager')!, pc.x + dx, pc.y, undefined, origin);
+    const identity = (await k.ensureIdentity(id))!;
+    return { id, name: identity.name };
+  };
+
+  it('they remember what you promised and what you are to them; a spouse can give you a child', async () => {
+    const k = await boot();
+    clearArea(k);
+    const a = await person(k, 'vita#a', 1);
+    await k.talk(a.id, 'Ti prometto che tornerò con una lanterna');
+    expect(k.personOf(a.name)!.ricordi!.some((m) => m.peso === 3 && /promesso/.test(m.testo))).toBe(true);
+    const r = await k.talk(a.id, 'Ti ricordi cosa ti ho detto?');
+    expect(r.say).toMatch(/lanterna/);
+    await k.talk(a.id, 'Ti amo. Sposami!');
+    expect(k.personOf(a.name)!.legameViandante).toBe('moglie');
+    expect(k.rules().some((x) => x.chiave === `legame|${a.name}`)).toBe(true);
+    // "Altro…" on a person: judged by the Council, with social effects.
+    await k.freeAction(a.id, 'vorrei avere un figlio con te');
+    const child = readPeople(k.files).persone.find((p) => p.legameViandante === 'figlio')!;
+    expect(child.famiglia.map((f) => f.nome)).toEqual(expect.arrayContaining([a.name, 'Viandante']));
+    expect(k.ecs.query('identity').some((id) => k.ecs.get(id, 'identity').name === child.nome)).toBe(true);
+  });
+
+  it('they live their routine visibly: at night they go to bed and sleep there', async () => {
+    const k = await boot();
+    clearArea(k);
+    const a = await person(k, 'vita#b', 1);
+    const pc = k.playerCarpet();
+    k.spawnModuleEntity(k.modules.get('obj.letto')!, pc.x + 2.5, pc.y);
+    // Deep night.
+    k.time = Kernel.DAY_SECONDS * 0.7;
+    for (let i = 0; i < 60 * 8; i++) k.tick(1 / 60);
+    const att = k.ecs.get(a.id, 'attivita');
+    expect(att.tipo).toBe('dorme');
+    expect(att.ferma).toBe(true);
+  });
+
+  it('people who meet talk to each other and remember it', async () => {
+    const k = await boot();
+    clearArea(k);
+    const a = await person(k, 'vita#c', 1);
+    const b = await person(k, 'vita#d', 1.6);
+    for (const id of [a.id, b.id]) k.ecs.get(id, 'mind').mode = 'resta';
+    for (let i = 0; i < 70; i++) k.tick(1 / 60);
+    await settle(100);
+    for (let i = 0; i < 60 * 6; i++) k.tick(1 / 60);
+    expect(k.feed().some((e) => e.task === 'npc.dialogue')).toBe(true);
+    expect(k.personOf(a.name)!.ricordi?.length).toBeGreaterThan(0);
+  });
+
+  it('the Narrator weaves a plot among them; beats happen; a quest is given, done and rewarded', async () => {
+    const k = await boot();
+    clearArea(k);
+    const x = await person(k, 'trama#x', 1);
+    const y = await person(k, 'trama#y', 2);
+    const z = await person(k, 'trama#z', 3);
+    void y;
+    const plot = (await k.weaveStory(true))!;
+    expect(plot.coinvolti.length).toBeGreaterThan(1);
+    expect(plot.missione?.stato).toBe('offerta');
+    const giver = plot.missione!.da;
+    const giverId = [x, y, z].find((p) => p.name === giver)!.id;
+    await k.talk(giverId, 'Posso aiutarti in qualche modo?');
+    expect(k.quests().length).toBe(1);
+    // The night comes: the first beat happens, and its person remembers it.
+    k.time = Kernel.DAY_SECONDS * (k.day() + 0.7);
+    for (let i = 0; i < 61; i++) k.tick(1 / 60);
+    const first = readPlots(k.files)[0].tappe[0];
+    expect(first.fatto).toBe(true);
+    // Talking to whom the quest names completes it, with a reward.
+    const target = plot.missione!.obiettivo.a!;
+    await k.talk([x, y, z].find((p) => p.name === target)!.id, 'Ciao, mi manda qualcuno.');
+    await settle(100);
+    expect(k.quests().length).toBe(0);
+    expect(countItem(k.inventory(), k.content.byName('Lanterna')!.id)).toBe(1);
   });
 });

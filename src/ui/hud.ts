@@ -29,6 +29,8 @@ export class Hud {
   private banner = $('#banner');
   private zone = $('#zone');
   private needsEl = $('#needs');
+  private questsEl = $('#quests');
+  private lastQuests = '';
   private lastNeeds = '';
   private lastPlace = '';
   private lastHand = '';
@@ -131,6 +133,15 @@ export class Hud {
           return cell;
         }),
       );
+    }
+
+    // The wanderer's diary: requests accepted, what they ask.
+    const qs = k.quests();
+    const qk = JSON.stringify(qs);
+    if (qk !== this.lastQuests) {
+      this.lastQuests = qk;
+      this.questsEl.hidden = !qs.length;
+      this.questsEl.replaceChildren(el('div', { class: 'h' }, 'Missioni'), ...qs.map((q) => el('div', { class: 'q' }, el('b', {}, `${q.da}: `), q.obiettivo, el('span', {}, `«${q.testo}» — ${q.titolo}`))));
     }
 
     const n = k.needs();

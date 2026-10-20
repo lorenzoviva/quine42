@@ -83,6 +83,7 @@ export const EFFECTS_GUIDE = [
   'scudo {durata}: il viandante è protetto',
   'spingi {forza}: la cosa viene spinta via',
   'evoca {modulo}: compare qualcosa o qualcuno che esiste già nel mondo',
+  'SOLO SU UNA PERSONA — legame {legame}: cosa diventa per il viandante (amico, innamorata, moglie, marito, nemico…); ricordo {testo, peso 1-3}: cosa ricorderà; nascita {nome}: nasce un figlio (solo tra sposi, e solo se la persona lo vuole)',
 ].join('\n');
 
 export async function judgeAction(c: Council, ctx: ActionContext): Promise<ActionJudgement> {

@@ -27,6 +27,9 @@ function M.update(dt)
   ecs.each("wander, pos, body", function(id, w, p, b)
     local mind = ecs.get(id, "mind")
     if mind and mind.mode ~= "vaga" then return end
+    -- Arrivato, fa quello che deve: dorme nel letto, zappa il campo, pesca sulla riva. Fermo.
+    local att = ecs.get(id, "attivita")
+    if att and att.ferma then return end
     local meta = ecs.get(id, "meta")
     if meta and meta.x then
       if (w.scansa or 0) > 0 then

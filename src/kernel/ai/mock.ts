@@ -202,6 +202,30 @@ export class MockModels implements Models {
       }
       case 'action.judge':
         return this.judgeAction(d);
+      case 'npc.dialogue':
+        return {
+          battute: [
+            { chi: 'a', dice: `${d.b?.nome ?? 'Ehi'}, hai sentito anche tu quel rumore stanotte?` },
+            { chi: 'b', dice: d.b?.segreti ? 'Non qui. Ne parliamo dopo.' : 'Sarà stato il vento. Come sempre.' },
+          ],
+          ricordo_a: `ha chiesto a ${d.b?.nome} del rumore di notte`,
+          ricordo_b: `${d.a?.nome} ha fatto domande sul rumore di notte`,
+        };
+      case 'plot.weave': {
+        const names = [...String(d.society ?? '').split('Nominate')[0].matchAll(/^- ([^,]+),/gm)].map((m) => m[1]);
+        const [x, y, z] = [names[0], names[1] ?? names[0], names[2] ?? names[0]];
+        return {
+          titolo: 'Il rumore sotto la piazza',
+          mistero: `${x} scava di notte sotto la piazza: cerca una runa che fermi il tempo. ${y} lo sa e lo copre.`,
+          coinvolti: [x, y, z],
+          tappe: [
+            { giorno: 0, momento: 'notte', chi: x, dove: 'piazza', cosa: 'scava in silenzio vicino al pozzo', battuta: 'Ancora un poco…', indizio: 'terra smossa vicino al pozzo' },
+            { giorno: 1, momento: 'mattina', chi: y, dove: 'piazza', cosa: 'ricopre la terra smossa', battuta: 'Nessuno deve vedere.' },
+            { giorno: 1, momento: 'sera', chi: z, dove: 'casa', cosa: 'scrive una lettera e la nasconde' },
+          ],
+          missione: { da: z, testo: `Porta questa mela a ${x}, e guarda bene cosa ha nelle mani.`, tipo: 'parla', a: x, ricompensa: 'Lanterna' },
+        };
+      }
       case 'genesis.atlas': {
         const special = (d.layouts ?? []).filter((l: { id: string }) => !/^(borgo|bosco|campi|rovine|locanda)$/.test(l.id));
         const dirs = ['nord', 'nord-est', 'est', 'sud-est', 'sud', 'sud-ovest', 'ovest', 'nord-ovest'];
@@ -256,6 +280,8 @@ export class MockModels implements Models {
     if (has('spin', 'calc')) return { possibile: true, racconto: `Dai una spinta a ${name}.`, effetti: [{ tipo: 'spingi', forza: 2 }], ripetibile: true, etichetta: label };
     if (has('riemp')) return { possibile: true, racconto: `Riempi ${name} e bevi; poi è di nuovo vuoto.`, effetti: [{ tipo: 'consuma', oggetto: name }, { tipo: 'bisogni', sete: 10 }], ripetibile: true, etichetta: label };
     if (has('bev', 'sorsegg')) return { possibile: true, racconto: `Bevi da ${name}: l'acqua è fresca.`, effetti: [{ tipo: 'bisogni', sete: 15 }], ripetibile: true, etichetta: label };
+    if (d.target?.kind === 'persona' && has('figli', 'bambin')) return { possibile: true, racconto: `${name} ti stringe la mano: tra qualche tempo, una nuova vita.`, effetti: [{ tipo: 'nascita' }, { tipo: 'ricordo', testo: 'abbiamo deciso di avere un figlio', peso: 3 }], ripetibile: false, etichetta: label };
+    if (d.target?.kind === 'persona' && has('abbracc', 'regal')) return { possibile: true, racconto: `${name} sorride, sorpreso.`, effetti: [{ tipo: 'ricordo', testo: 'il viandante è stato gentile', peso: 2 }, { tipo: 'legame', legame: 'amico' }], ripetibile: false, etichetta: label };
     if (has('bussa', 'accarezz', 'ascolt')) return { possibile: true, racconto: `${name} non risponde, ma per un attimo ti sembra di sentire un'eco.`, effetti: [{ tipo: 'messaggio', testo: 'Nulla cambia.' }], ripetibile: false, etichetta: label };
     return { possibile: false, racconto: `Provi, ma ${name} non si lascia ${d.text}.`, effetti: [], ripetibile: false, etichetta: label };
   }
@@ -364,6 +390,11 @@ export class MockModels implements Models {
     if (/ferm|aspett|resta/.test(t)) return { dice: 'Resto qui. Il mondo verrà da me.', azione: 'resta', umore: 'calmo' };
     if (/vai|lascia|addio/.test(t)) return { dice: 'Torno ai miei giri.', azione: 'vaga', umore: 'tranquillo' };
     if (/dammi|hai qualcosa|regal|scambi/.test(t) && npc.carrying.length) return { dice: `Tieni, prendi questo: ${npc.carrying[0]}.`, azione: 'dai', oggetto: npc.carrying[0], umore: 'generoso' };
+    // Feelings, promises, requests: what a person will remember.
+    if (/sposami|ti amo|vuoi essere mia|vuoi essere mio/.test(t)) return { dice: 'Sì… sì, lo voglio.', azione: 'resta', umore: 'felice', ricordo: 'il viandante mi ha chiesto di sposarlo, e ho detto sì', importanza: 3, legame: 'moglie' };
+    if (/prometto|giuro/.test(t)) return { dice: 'Lo terrò a mente. Non deludermi.', azione: 'nessuna', umore: 'speranzoso', ricordo: `il viandante ha promesso: ${text.slice(0, 80)}`, importanza: 3 };
+    if (/aiut|posso fare|serve qualcosa|richiesta/.test(t) && npc.secrets?.includes('richiesta per il viandante')) return { dice: 'Sì. Ho bisogno di te. Ti spiego tutto.', azione: 'missione', umore: 'sollevato', ricordo: 'ho affidato una richiesta al viandante', importanza: 2 };
+    if (npc.memories && /ricord|ti ricordi/.test(t)) return { dice: `Mi ricordo, eccome: ${npc.memories.split('\n').pop()?.replace(/^- \([^)]*\) /, '') ?? ''}`, azione: 'nessuna', umore: npc.mood };
     const mention = /\b(?:un|una|uno|del|della|dello)\s+([a-zàèéìòù]{4,})/i.exec(text);
     return { dice: VILLAGER[(npc.history.length + rng.int(3)) % VILLAGER.length], azione: 'nessuna', umore: npc.mood, oggetti_citati: mention ? [mention[1]] : [] };
   }

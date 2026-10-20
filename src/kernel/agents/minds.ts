@@ -4,7 +4,7 @@
 import type { Schema } from '../ai/models';
 import type { AgentId, Council } from './council';
 
-export const NPC_ACTIONS = ['nessuna', 'segui', 'resta', 'vaga', 'dai'] as const;
+export const NPC_ACTIONS = ['nessuna', 'segui', 'resta', 'vaga', 'dai', 'missione'] as const;
 export type NpcAction = (typeof NPC_ACTIONS)[number];
 
 export interface Turn {
@@ -23,6 +23,10 @@ export interface NpcContext {
   history: Turn[];
   /** Facts the world exposes to characters (distance to the edge, held item…). */
   facts: Record<string, unknown>;
+  /** What they remember (of the wanderer and of others), what they are to the wanderer, their secrets. */
+  memories?: string;
+  bond?: string;
+  secrets?: string;
 }
 
 export interface NpcReply {
@@ -32,6 +36,11 @@ export interface NpcReply {
   mood: string;
   /** Concrete things mentioned in the exchange: the world may make them real. */
   mentioned?: string[];
+  /** What they will remember of this exchange, and how much it matters (1-3). */
+  memory?: string;
+  weight?: number;
+  /** What they have become to the wanderer, if it changed (amico, innamorata, moglie…). */
+  bond?: string;
 }
 
 const REPLY_SCHEMA: Schema = {
@@ -42,6 +51,9 @@ const REPLY_SCHEMA: Schema = {
     oggetto: { type: 'STRING', description: 'solo per "dai": il nome esatto di ciò che porti e cedi' },
     umore: { type: 'STRING' },
     oggetti_citati: { type: 'ARRAY', items: { type: 'STRING' }, description: 'oggetti concreti di cui si è parlato in questo scambio (da te o dal viandante)' },
+    ricordo: { type: 'STRING', description: 'cosa ricorderai di questo scambio, in terza persona e breve (promesse, favori, offese, segreti, sentimenti); vuoto se nulla di notevole' },
+    importanza: { type: 'INTEGER', description: '1 = banale, 2 = notevole, 3 = non lo dimenticherai mai (promesse, tradimenti, amore)' },
+    legame: { type: 'STRING', description: 'solo se il vostro rapporto è cambiato davvero: cosa sei ora per il viandante (amico, rivale, innamorata, fidanzato, moglie, marito, nemico…)' },
   },
   required: ['dice', 'azione', 'umore'],
 };
@@ -52,17 +64,33 @@ export async function npcReply(c: Council, npc: NpcContext, playerText: string):
     `Interpreta questo personaggio, in prima persona, restando sempre nel personaggio.`,
     `SCHEDA DEL PERSONAGGIO\n${npc.persona}`,
     `Stato: umore ${npc.mood}; ora stai ${npc.mode === 'segui' ? 'seguendo il viandante' : npc.mode === 'resta' ? 'fermo' : 'girovagando'}; luogo: ${npc.place || 'sconosciuto'}; porti con te: ${npc.carrying.join(', ') || 'niente'}.`,
+    npc.bond ? `Per il viandante sei: ${npc.bond}.` : '',
+    npc.memories ? `I TUOI RICORDI (usali: chi ricorda le promesse, i torti, l'affetto è credibile):
+${npc.memories}` : '',
+    npc.secrets ? `Cose che sai e che non dici apertamente (lascia indizi, se il viandante se li merita):
+${npc.secrets}` : '',
     `Fatti che percepisci: ${JSON.stringify(npc.facts)}`,
     history ? `Conversazione finora:\n${history}` : 'Il viandante ti si avvicina per la prima volta.',
     `Il viandante dice: «${playerText}»`,
-    `Rispondi in "dice" (1-3 frasi, italiano, stile del personaggio). Scegli "azione": segui (lo accompagni), resta (ti fermi), vaga (riprendi a girovagare), dai (gli cedi una cosa che porti: metti il nome esatto in "oggetto"), nessuna. Non inventare oggetti che non porti. Non rivelare mai apertamente che il mondo è una simulazione: al massimo lascia intuire le crepe.`,
-  ].join('\n\n');
-  const r = await c.ask<{ dice: string; azione: string; oggetto?: string; umore?: string; oggetti_citati?: string[] }>('narratore', 'npc.reply', prompt, REPLY_SCHEMA, {
+    `Rispondi in "dice" (1-3 frasi, italiano, stile del personaggio). Scegli "azione": segui (lo accompagni), resta (ti fermi), vaga (riprendi a girovagare), dai (gli cedi una cosa che porti: metti il nome esatto in "oggetto"), missione (gli affidi la richiesta che hai per lui, se ne hai una), nessuna. Non inventare oggetti che non porti. In "ricordo" ciò che ricorderai. I sentimenti crescono piano: "legame" solo se il rapporto cambia davvero. Non rivelare mai apertamente che il mondo è una simulazione: al massimo lascia intuire le crepe.`,
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+  const r = await c.ask<{ dice: string; azione: string; oggetto?: string; umore?: string; oggetti_citati?: string[]; ricordo?: string; importanza?: number; legame?: string }>('narratore', 'npc.reply', prompt, REPLY_SCHEMA, {
     data: { npc, playerText },
     temperature: 0.9,
   });
   const action = (NPC_ACTIONS as readonly string[]).includes(r.azione) ? (r.azione as NpcAction) : 'nessuna';
-  return { say: String(r.dice ?? '…'), action, item: r.oggetto, mood: String(r.umore ?? npc.mood), mentioned: (r.oggetti_citati ?? []).map(String).slice(0, 5) };
+  return {
+    say: String(r.dice ?? '…'),
+    action,
+    item: r.oggetto,
+    mood: String(r.umore ?? npc.mood),
+    mentioned: (r.oggetti_citati ?? []).map(String).slice(0, 5),
+    memory: r.ricordo?.trim() ? String(r.ricordo).slice(0, 200) : undefined,
+    weight: Math.max(1, Math.min(3, Math.round(Number(r.importanza) || 1))),
+    bond: r.legame?.trim() ? String(r.legame).toLowerCase().slice(0, 30) : undefined,
+  };
 }
 
 /** "Esamina": the Narrator describes what the player looks at (cached by the kernel). */
@@ -115,4 +143,110 @@ export async function agentReply(c: Council, agent: AgentId, history: Turn[], te
   const r = await c.ask<{ risposta: string; richiesta_fucina?: string }>(agent, 'agent.chat', prompt, AGENT_CHAT_SCHEMA, { data: { agent, text, history }, temperature: 0.8 });
   const forge = r.richiesta_fucina?.trim();
   return { say: String(r.risposta ?? '…'), forge: forge && forge.length > 3 ? forge : undefined };
+}
+
+const DIALOGUE_SCHEMA: Schema = {
+  type: 'OBJECT',
+  properties: {
+    battute: { type: 'ARRAY', items: { type: 'OBJECT', properties: { chi: { type: 'STRING', enum: ['a', 'b'] }, dice: { type: 'STRING' } }, required: ['chi', 'dice'] } },
+    ricordo_a: { type: 'STRING', description: 'cosa ricorderà A di questo scambio (breve), vuoto se nulla' },
+    ricordo_b: { type: 'STRING', description: 'cosa ricorderà B, vuoto se nulla' },
+  },
+  required: ['battute'],
+};
+
+export interface DialoguePerson {
+  nome: string;
+  mestiere: string;
+  /** What B is to A (from A's side). */
+  legame?: string;
+  fa: string;
+  ricordi: string;
+  segreti: string;
+}
+
+/**
+ * Two people meet and talk, as they are: their relation, what they remember, what they are doing,
+ * the plots they are in (they may let a clue slip if the wanderer is near). 2-4 short lines.
+ */
+export async function npcDialogue(c: Council, a: DialoguePerson, b: DialoguePerson, place: string): Promise<{ lines: Array<{ who: 'a' | 'b'; say: string }>; memoryA?: string; memoryB?: string }> {
+  const who = (p: DialoguePerson) => `${p.nome}, ${p.mestiere}; ora: ${p.fa}${p.ricordi ? `\nricordi:\n${p.ricordi}` : ''}${p.segreti ? `\nsegreti:\n${p.segreti}` : ''}`;
+  const r = await c.ask<{ battute: Array<{ chi: string; dice: string }>; ricordo_a?: string; ricordo_b?: string }>(
+    'narratore',
+    'npc.dialogue',
+    [
+      `A e B si incontrano a «${place}». ${a.legame ? `${b.nome} è ${a.legame} di ${a.nome}.` : 'Si conoscono appena.'}`,
+      `A: ${who(a)}`,
+      `B: ${who(b)}`,
+      'Scrivi 2-4 battute brevi e vive, nel loro modo di parlare, coerenti con il loro legame e con ciò che ricordano; se c\'è una trama, lasciate intuire qualcosa senza spiegarla. Il viandante li sta ascoltando.',
+    ].join('\n\n'),
+    DIALOGUE_SCHEMA,
+    { data: { a, b, place }, temperature: 0.95 },
+  );
+  return {
+    lines: (r.battute ?? []).filter((l) => l?.dice).slice(0, 4).map((l) => ({ who: l.chi === 'b' ? 'b' : 'a', say: String(l.dice).slice(0, 140) })),
+    memoryA: r.ricordo_a?.trim() || undefined,
+    memoryB: r.ricordo_b?.trim() || undefined,
+  };
+}
+
+const PLOT_SCHEMA: Schema = {
+  type: 'OBJECT',
+  properties: {
+    titolo: { type: 'STRING' },
+    mistero: { type: 'STRING', description: 'la verità nascosta, in due frasi (il viandante non la conosce)' },
+    coinvolti: { type: 'ARRAY', items: { type: 'STRING' } },
+    tappe: {
+      type: 'ARRAY',
+      items: {
+        type: 'OBJECT',
+        properties: {
+          giorno: { type: 'INTEGER', description: '0 = oggi, 1 = domani… (0-3)' },
+          momento: { type: 'STRING', enum: ['mattina', 'giorno', 'sera', 'notte'] },
+          chi: { type: 'STRING' },
+          dove: { type: 'STRING', description: 'casa, lavoro, piazza, oppure il nome di un luogo o di una regione' },
+          cosa: { type: 'STRING', description: 'cosa fa, visibile a chi guarda' },
+          battuta: { type: 'STRING', description: 'cosa dice, a mezza voce' },
+          indizio: { type: 'STRING' },
+        },
+        required: ['giorno', 'momento', 'chi', 'dove', 'cosa'],
+      },
+    },
+    missione: {
+      type: 'OBJECT',
+      properties: {
+        da: { type: 'STRING' },
+        testo: { type: 'STRING', description: 'cosa chiede al viandante, in prima persona' },
+        tipo: { type: 'STRING', enum: ['porta', 'vai', 'parla'] },
+        oggetto: { type: 'STRING', description: 'per "porta": cosa portare' },
+        a: { type: 'STRING', description: 'per "parla" o "porta": a chi' },
+        luogo: { type: 'STRING', description: 'per "vai": dove andare' },
+        ricompensa: { type: 'STRING', description: 'un oggetto' },
+      },
+      required: ['da', 'testo', 'tipo'],
+    },
+  },
+  required: ['titolo', 'mistero', 'coinvolti', 'tappe'],
+};
+
+/**
+ * The Narrator weaves a horizontal plot among people who exist, in places that exist: a mystery,
+ * beats tied to their routines and relations over a few days, clues, maybe a request for the wanderer.
+ */
+export async function weavePlot(c: Council, society: string, places: string, recent: string): Promise<any> {
+  return c.ask<any>(
+    'narratore',
+    'plot.weave',
+    [
+      'Intreccia una trama orizzontale tra le persone di questo mondo, alla maniera di Westworld: un mistero che si scopre poco a poco, che coinvolge 2-4 persone secondo i loro legami e le loro giornate, in luoghi che esistono.',
+      `PERSONE\n${society}`,
+      `LUOGHI E REGIONI\n${places}`,
+      recent ? `COSE SUCCESSE DI RECENTE\n${recent}` : '',
+      'Dai 3-6 tappe nei prossimi giorni (chi fa cosa, dove, quando, cosa si lascia sfuggire, quale indizio lascia). Se ha senso, una persona chiede aiuto al viandante (una missione semplice: portare un oggetto, andare in un luogo, parlare con qualcuno). Usa solo nomi esistenti.',
+    ]
+      .filter(Boolean)
+      .join('\n\n'),
+    PLOT_SCHEMA,
+    { data: { society, places, recent }, temperature: 0.9 },
+  );
 }

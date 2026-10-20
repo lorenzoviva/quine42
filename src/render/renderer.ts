@@ -6,6 +6,7 @@
 
 import type { Chunk, Kernel } from '../kernel/kernel';
 import { runeGlyph, type RuneComp } from '../kernel/runes';
+import { ACTIVITY_ICON, type Activity } from '../kernel/society';
 import type { TileDef } from '../kernel/types';
 import { hash32 } from '../kernel/rng';
 import { applyGlitch, randomGlyph } from './glitch';
@@ -596,6 +597,63 @@ export class Renderer {
     return c;
   }
 
+  /** A person doing their routine: a pose and a sign, cheap (no new images). */
+  private drawActivity(img: CanvasImageSource, tipo: Activity, x: number, y: number, size: number, id: number): void {
+    const ctx = this.ctx;
+    const t = this.t + id * 0.37;
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.beginPath();
+    ctx.ellipse(x, y + size * 0.36, size * 0.34, size * 0.12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.save();
+    if (tipo === 'dorme') {
+      // Lying down, breathing.
+      ctx.translate(x, y + size * 0.1);
+      ctx.rotate(-Math.PI / 2);
+      ctx.scale(1, 1 + Math.sin(t * 1.5) * 0.02);
+      ctx.drawImage(img, -size / 2, -size * 0.5, size, size);
+    } else if (tipo === 'zappa' || tipo === 'taglia_legna' || tipo === 'lavora') {
+      // Bending over the work, rhythmically.
+      const bend = Math.max(0, Math.sin(t * 5)) * 0.12;
+      ctx.translate(x, y + size * 0.38);
+      ctx.rotate(bend);
+      ctx.drawImage(img, -size / 2, -size, size, size);
+    } else if (tipo === 'pesca' || tipo === 'legge' || tipo === 'mangia') {
+      // Sitting: a little lower and still.
+      ctx.drawImage(img, x - size / 2, y - size * 0.5, size, size * 0.9);
+    } else {
+      const bob = Math.sin(t * 2) * size * 0.02;
+      ctx.drawImage(img, x - size / 2, y - size * 0.62 + bob, size, size);
+    }
+    ctx.restore();
+    const icon = ACTIVITY_ICON[tipo];
+    if (icon) {
+      const C = this.cell;
+      const rise = tipo === 'dorme' ? ((t * 0.6) % 1) : 0;
+      ctx.globalAlpha = tipo === 'dorme' ? 1 - rise : 0.9;
+      ctx.font = `bold ${Math.round(C * 0.32)}px ${FONT}`;
+      ctx.fillStyle = tipo === 'dorme' ? '#cfe3ff' : '#ffe7a3';
+      ctx.textAlign = 'center';
+      ctx.fillText(icon, x + size * 0.32, y - size * 0.55 - rise * C * 0.6);
+      if (tipo === 'zappa' || tipo === 'taglia_legna') {
+        // Earth or chips flying at each stroke.
+        const s = Math.sin(t * 5);
+        if (s > 0.85) {
+          ctx.fillStyle = tipo === 'zappa' ? '#6e5434' : '#c8a060';
+          for (let k = 0; k < 3; k++) ctx.fillRect(x + (k - 1) * 4 + s * 3, y + size * 0.3 - k * 3, 2, 2);
+        }
+      }
+      if (tipo === 'pesca') {
+        ctx.strokeStyle = 'rgba(230,230,230,0.7)';
+        ctx.beginPath();
+        ctx.moveTo(x + size * 0.2, y - size * 0.3);
+        ctx.quadraticCurveTo(x + size * 0.8, y - size * 0.6, x + size * 0.9, y + size * 0.2 + Math.sin(t * 3) * 2);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
+  }
+
   private drawSprite(id: number, gl: any, x: number, y: number, p: { x: number; y: number }, pickup: boolean, g: number): void {
     const ctx = this.ctx;
     const C = this.cell;
@@ -603,6 +661,9 @@ export class Renderer {
     const size = C * (gl.scale ?? 1.1) * (v?.scale ?? 1);
     const raw = pickup ? this.images.peek(gl.sprite) : this.frameOf(id, gl, p);
     const img = raw && v ? this.tintedSprite(raw, v.tint) : raw;
+    // What they are doing, seen: lying in bed, bending over the hoe, sitting on the bank.
+    const att: { tipo?: Activity; ferma?: boolean } | undefined = pickup ? undefined : this.kernel.ecs.get(id, 'attivita');
+    if (img && att?.ferma && att.tipo && !(g > 0.4 && Math.random() < 0.08)) return this.drawActivity(img, att.tipo, x, y, size, id);
     const bob = pickup ? Math.sin(this.t * 3 + id) * C * 0.04 : 0;
     ctx.fillStyle = 'rgba(0,0,0,0.25)';
     ctx.beginPath();
