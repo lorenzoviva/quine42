@@ -117,7 +117,9 @@ export class Renderer {
 
     const target = k.brokenness();
     this.glitch += (target - this.glitch) * Math.min(1, dt * 4);
-    if (target === 0 && Math.random() < dt / 30) this.crack = 0.12;
+    // A faint crack only right at the edge of the world, as a hint (never in the middle of play).
+    const edge = k.config.circleRadius - Math.hypot(k.playerPos().x, k.playerPos().y);
+    if (target === 0 && edge < 3 && edge > 0 && Math.random() < dt / 8) this.crack = 0.08;
     this.crack = Math.max(0, this.crack - dt);
     const g = Math.max(this.glitch, this.crack > 0 ? 0.22 : 0);
 
@@ -172,6 +174,7 @@ export class Renderer {
       }
     }
 
+    if (k.zone === 'corona') this.drawPlayer(k.ecs.get(k.playerId, 'glyph') ?? { ch: '@', color: '#fff', scale: 1.3 }, p, g);
     this.drawBubbles(ox, oy);
     this.drawHover();
     if (g > 0.05) this.drawCorruption(g);
@@ -498,7 +501,8 @@ export class Renderer {
     // The player.
     const pp = k.playerPos();
     const pgl = k.ecs.get(k.playerId, 'glyph') ?? { ch: '@', color: '#fff', scale: 1.3 };
-    list.push({ y: pc.y, draw: () => this.drawPlayer(pgl, pp, g) });
+    // Beyond the circle the world is clipped away: there the player is drawn on top, after the corona.
+    if (k.zone === 'sim') list.push({ y: pc.y, draw: () => this.drawPlayer(pgl, pp, g) });
 
     list.sort((a, b) => a.y - b.y);
     for (const it of list) it.draw();

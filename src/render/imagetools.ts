@@ -63,19 +63,26 @@ function keyAndFit(src: CanvasImageSource, sw: number, sh: number, px: number): 
   }
   let minX = W, minY = W, maxX = -1, maxY = -1;
   let opaque = 0;
-  let stain = 0;
+  let band = 0;
+  let bandOpaque = 0;
+  const B = Math.round(W * 0.03);
   for (let i = 0; i < W * W; i++) {
+    const px = i % W;
+    const py = (i - px) / W;
+    const inBand = px < B || py < B || px >= W - B || py >= W - B;
+    if (inBand) band++;
     if (d[i * 4 + 3] === 0) continue;
-    // Holes of key colour inside the figure (between arms and legs), and soft edges.
-    if (magentaish(d[i * 4], d[i * 4 + 1], d[i * 4 + 2])) {
+    // Holes of key colour inside the figure (between arms and legs) — only the key itself, not pink or
+    // purple clothes — and soft edges.
+    const dd = dist(i);
+    if (dd < 60 && magentaish(d[i * 4], d[i * 4 + 1], d[i * 4 + 2])) {
       d[i * 4 + 3] = 0;
       continue;
     }
-    const dd = dist(i);
-    if (dd < 120) d[i * 4 + 3] = Math.round(((dd - 80) / 40) * 255);
+    if (dd < 110) d[i * 4 + 3] = Math.round(Math.max(0, (dd - 70) / 40) * 255);
     if (d[i * 4 + 3] > 40) {
       opaque++;
-      if (dd < 140) stain++;
+      if (inBand) bandOpaque++;
       const x = i % W;
       const y = Math.floor(i / W);
       if (x < minX) minX = x;
@@ -86,7 +93,8 @@ function keyAndFit(src: CanvasImageSource, sw: number, sh: number, px: number): 
   }
   ctx.putImageData(data, 0, 0);
   const [out, octx] = canvas(px);
-  if (maxX < 0 || opaque > W * W * 0.88 || stain > opaque * 0.2) return '';
+  // Dirty means the background did not go: the frame of the image is still mostly opaque.
+  if (maxX < 0 || opaque > W * W * 0.9 || bandOpaque > band * 0.5) return '';
   const bw = maxX - minX + 1;
   const bh = maxY - minY + 1;
   const scale = (px * 0.92) / Math.max(bw, bh);
@@ -161,9 +169,17 @@ function stained(img: HTMLImageElement): boolean {
   const [, ctx] = canvas(N);
   ctx.drawImage(img, 0, 0, N, N);
   const d = ctx.getImageData(0, 0, N, N).data;
+  // Only the frame counts: a figure may well wear pink or purple.
   let bad = 0;
-  for (let i = 0; i < N * N; i++) if (d[i * 4 + 3] > 200 && magentaish(d[i * 4], d[i * 4 + 1], d[i * 4 + 2])) bad++;
-  return bad > N * N * 0.12;
+  let band = 0;
+  for (let i = 0; i < N * N; i++) {
+    const x = i % N;
+    const y = (i - x) / N;
+    if (x > 1 && y > 1 && x < N - 2 && y < N - 2) continue;
+    band++;
+    if (d[i * 4 + 3] > 200 && magentaish(d[i * 4], d[i * 4 + 1], d[i * 4 + 2])) bad++;
+  }
+  return bad > band * 0.5;
 }
 
 /** Decoded images by asset id, for the renderer and the UI. */
