@@ -543,11 +543,62 @@ export class Renderer {
     return this.images.peek(gl.sprite);
   }
 
+  /**
+   * Every individual looks a little different from the others of their kind (same sprite): clothes
+   * recoloured, a slightly different height. Stable per individual, cached per sprite and variant.
+   */
+  private variantOf(id: number): { tint: number; scale: number } | undefined {
+    const k = this.kernel;
+    if (!k.ecs.has(id, 'mind') && !k.ecs.has(id, 'identity')) return undefined;
+    const who: string = k.ecs.get(id, 'identity')?.name ?? k.ecs.get(id, 'origin')?.key ?? String(id);
+    let h = 2166136261;
+    for (const ch of who) h = Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0;
+    return { tint: h % 7, scale: 0.93 + ((h >>> 8) % 13) / 100 };
+  }
+
+  private tinted = new WeakMap<CanvasImageSource, Map<number, HTMLCanvasElement>>();
+
+  /** Variant 0 is the original; the others rotate the hue of saturated pixels that are not skin. */
+  private tintedSprite(img: HTMLImageElement | HTMLCanvasElement, variant: number): CanvasImageSource {
+    if (!variant) return img;
+    let byVariant = this.tinted.get(img);
+    if (!byVariant) this.tinted.set(img, (byVariant = new Map()));
+    const hit = byVariant.get(variant);
+    if (hit) return hit;
+    const c = document.createElement('canvas');
+    c.width = img instanceof HTMLImageElement ? img.naturalWidth : img.width;
+    c.height = img instanceof HTMLImageElement ? img.naturalHeight : img.height;
+    const x = c.getContext('2d', { willReadFrequently: true })!;
+    x.drawImage(img, 0, 0);
+    try {
+      const data = x.getImageData(0, 0, c.width, c.height);
+      const d = data.data;
+      const shift = (variant * 51) % 360;
+      for (let i = 0; i < d.length; i += 4) {
+        if (d[i + 3] < 30) continue;
+        const [hh, ss, ll] = rgbToHsl(d[i], d[i + 1], d[i + 2]);
+        const skin = hh >= 8 && hh <= 48 && ss < 0.75 && ll > 0.3;
+        if (ss < 0.25 || skin) continue;
+        const [r, g, b] = hslToRgb((hh + shift) % 360, ss, ll);
+        d[i] = r;
+        d[i + 1] = g;
+        d[i + 2] = b;
+      }
+      x.putImageData(data, 0, 0);
+    } catch {
+      return img;
+    }
+    byVariant.set(variant, c);
+    return c;
+  }
+
   private drawSprite(id: number, gl: any, x: number, y: number, p: { x: number; y: number }, pickup: boolean, g: number): void {
     const ctx = this.ctx;
     const C = this.cell;
-    const size = C * (gl.scale ?? 1.1);
-    const img = pickup ? this.images.peek(gl.sprite) : this.frameOf(id, gl, p);
+    const v = pickup ? undefined : this.variantOf(id);
+    const size = C * (gl.scale ?? 1.1) * (v?.scale ?? 1);
+    const raw = pickup ? this.images.peek(gl.sprite) : this.frameOf(id, gl, p);
+    const img = raw && v ? this.tintedSprite(raw, v.tint) : raw;
     const bob = pickup ? Math.sin(this.t * 3 + id) * C * 0.04 : 0;
     ctx.fillStyle = 'rgba(0,0,0,0.25)';
     ctx.beginPath();
@@ -892,4 +943,27 @@ export class Renderer {
       ctx.fillText(randomGlyph(), x + C / 2, y + C / 2 + 1);
     }
   }
+}
+
+function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
+  r /= 255;
+  g /= 255;
+  b /= 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  if (max === min) return [0, 0, l];
+  const d = max - min;
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  let h = max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  h *= 60;
+  return [h, s, l];
+}
+
+function hslToRgb(h: number, s: number, l: number): [number, number, number] {
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = l - c / 2;
+  const [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+  return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)];
 }

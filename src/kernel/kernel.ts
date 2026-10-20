@@ -187,6 +187,9 @@ export class Kernel {
   private lastGood = { px: 0, py: 0, ox: 0, oy: 0 };
   private forgesUsed = 0;
   private packsUsed = 0;
+  private castUsed = 0;
+  /** At most this many of the same kind of character in the loaded world (individuals: one). */
+  static NPC_CAP = 2;
   private plannedCount = 0;
   private growing = false;
   private forging = new Set<string>();
@@ -802,10 +805,13 @@ export class Kernel {
       }
     });
 
+    const loadedOf = (id: string) => this.ecs.query('module').filter((e) => this.ecs.get(e, 'module').id === id).length;
     plan.objects.forEach((o, i) => {
       const m = this.modules.get(o.module);
       const origin = `${ch.key}#o${i}`;
       if (!m || this.consumed.has(origin) || this.uniqueTaken(m)) return;
+      // Variety: not the same kind of person in every place.
+      if (m.manifest.persona && loadedOf(m.manifest.id) >= Kernel.NPC_CAP) return;
       const cell = pick(o.where);
       if (cell === undefined) return;
       const p = at(cell);
@@ -837,6 +843,23 @@ export class Kernel {
     this.runesDirty = true;
     this.bus.emit('chunk:planned', { key: ch.key });
     if (this.plannedCount % 10 === 0) void this.growContent('esplorazione');
+    if (this.plannedCount % 7 === 0) void this.growCast(plan.place);
+  }
+
+  /**
+   * The world needs new faces: as it is explored, the Forge creates a new kind of inhabitant, different
+   * from those already known and fitting where the player is (it then turns up in the next places).
+   */
+  async growCast(place?: Place, force = false): Promise<boolean> {
+    const max = this.config.ai.maxCast ?? 3;
+    if (!force && (this.castUsed >= max || this.generationHeld || this.models.name === 'offline')) return false;
+    const people = [...this.modules.values()].filter((m) => m.manifest.persona);
+    if (people.length >= 14) return false;
+    this.castUsed++;
+    const known = people.map((m) => m.manifest.name).join(', ') || 'nessuno';
+    this.council.say('narratore', 'propone', `il mondo ha bisogno di volti nuovi (finora: ${known})`, undefined, 'forge.concept');
+    const r = await this.forgeModule(`un nuovo abitante del mondo${place ? ` che si incontra in posti come «${place.name}» (${place.description})` : ''}: un mestiere, un'età e un carattere diversi da tutti quelli già noti (${known})`, 'cartografo', 'npc');
+    return r.ok;
   }
 
   /** The Cartographer asked for something that does not exist yet: the Forge makes it, then it appears. */

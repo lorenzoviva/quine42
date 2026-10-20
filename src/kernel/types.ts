@@ -258,6 +258,8 @@ export interface AiConfig {
   animation?: 'sheet' | 'frames' | 'none';
   /** New item packs the world writes by itself per session, as it is explored. */
   maxPacks?: number;
+  /** New kinds of inhabitants the world forges by itself per session, so the same face is not everywhere. */
+  maxCast?: number;
 }
 
 export interface UniverseConfig {

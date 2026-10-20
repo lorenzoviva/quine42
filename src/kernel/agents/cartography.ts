@@ -67,7 +67,7 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
     ctx.neighbors.length ? `Luoghi confinanti: ${ctx.neighbors.map((n) => `${n.place} (${n.layout})`).join('; ')}. Mantieni continuità: un borgo non finisce di colpo, un bosco sfuma.` : '',
     `Ambienti disponibili ("ambiente" = uno di questi id):\n${ctx.layouts.map((l) => `- ${l.id}: ${l.name} [${l.environment}] — ${l.description}`).join('\n')}`,
     ctx.start ? 'È la piazza di partenza: scegli un ambiente abitato e accogliente.' : '',
-    `Oggetti e personaggi: 2-6 voci, "modulo" = ESATTAMENTE uno degli id qui sotto; "dove": dentro (negli edifici), fuori, ovunque. Arreda gli interni (letti, tavoli, credenze, casse) e popola: circa un luogo su due ha almeno un personaggio.\n${ctx.catalog.map((m) => `- ${m.id} «${m.name}» [${m.kind}]: ${m.context}`).join('\n')}`,
+    `Oggetti e personaggi: 2-6 voci, "modulo" = ESATTAMENTE uno degli id qui sotto; "dove": dentro (negli edifici), fuori, ovunque. Arreda gli interni (letti, tavoli, credenze, casse) e popola: circa un luogo su due ha almeno un personaggio; varia i personaggi (non mettere sempre lo stesso tipo, e mai lo stesso dei luoghi vicini).\n${ctx.catalog.map((m) => `- ${m.id} «${m.name}» [${m.kind}]: ${m.context}`).join('\n')}`,
     `"a_terra": 0-4 nomi di oggetti comuni che si trovano per terra qui (anche nuovi, se coerenti).${ctx.wanted.length ? ` Se ha senso, includi qualcosa di cui si è parlato: ${ctx.wanted.join(', ')}.` : ''}`,
     '"nuovi": quasi sempre vuoto; solo un oggetto concreto o un personaggio che il luogo richiede e che non esiste tra i moduli.',
     `"rune": 0-2 frammenti presi esattamente da questo elenco: ${ctx.fragments.map((f) => `«${f}»`).join(', ')}.`,

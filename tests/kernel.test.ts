@@ -353,6 +353,21 @@ describe('free actions and effects', () => {
   });
 });
 
+describe('variety of people', () => {
+  it('never more than a couple of the same kind in the loaded world; the world forges new kinds', async () => {
+    const k = await boot();
+    const counts = new Map<string, number>();
+    for (const id of k.ecs.query('mind')) {
+      const m = k.ecs.get(id, 'module').id;
+      counts.set(m, (counts.get(m) ?? 0) + 1);
+    }
+    for (const n of counts.values()) expect(n).toBeLessThanOrEqual(Kernel.NPC_CAP);
+    const before = [...k.modules.values()].filter((m) => m.manifest.persona).length;
+    expect(await k.growCast({ name: 'Piazza', description: 'una piazza' }, true)).toBe(true);
+    expect([...k.modules.values()].filter((m) => m.manifest.persona).length).toBe(before + 1);
+  });
+});
+
 describe('runes and magic', () => {
   it('one rune per cell; the start has magic, carpet runes only far away', async () => {
     const k = await boot();

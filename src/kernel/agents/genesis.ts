@@ -288,7 +288,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
   const { moduli } = await c.ask<{ moduli: CastEntry[] }>(
     'narratore',
     'genesis.cast',
-    `Scegli i primi abitanti e le prime cose di «${bible.titolo}»: 3 npc (tipi di persone o animali, ognuno con un mestiere o un ruolo), 5 oggetti che stanno nel mondo (almeno 3 mobili o contenitori: letto, credenza, cassa, banco da lavoro…, e 1-2 cose all'aperto con cui fare qualcosa: pozzo, altare, falò…), 2 strumenti speciali. Per ognuno una richiesta di una frase per la Fucina, coerente con la bibbia.`,
+    `Scegli i primi abitanti e le prime cose di «${bible.titolo}»: 5 npc molto diversi tra loro (almeno 3 persone di mestieri, età e generi diversi, e 1 animale; nessuno uguale a un altro), 5 oggetti che stanno nel mondo (almeno 3 mobili o contenitori: letto, credenza, cassa, banco da lavoro…, e 1-2 cose all'aperto con cui fare qualcosa: pozzo, altare, falò…), 2 strumenti speciali. Per ognuno una richiesta di una frase per la Fucina, coerente con la bibbia.`,
     CAST_SCHEMA,
     { data: { bible } },
   );
@@ -312,5 +312,5 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     lm.layouts = { ...layouts, ...Object.fromEntries(keep) };
     files[lp] = JSON.stringify(lm, null, 2) + '\n';
   }
-  return { files, cast: moduli.slice(0, 12), playerPrompt: style.protagonista, palette };
+  return { files, cast: moduli.slice(0, 14), playerPrompt: style.protagonista, palette };
 }

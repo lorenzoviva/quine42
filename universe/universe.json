@@ -11,6 +11,7 @@
     "maxImages": 60,
     "maxForges": 3,
     "animation": "sheet",
-    "maxPacks": 4
+    "maxPacks": 4,
+    "maxCast": 3
   }
 }
