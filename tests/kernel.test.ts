@@ -377,6 +377,10 @@ describe('free actions and effects', () => {
     const calls = k.models.usage.text;
     k.itemAct(8, learned.id);
     expect(k.needs()!.thirst).toBe(50);
+    // A careless judgement that "spends" the thing you act on does not take it from you.
+    await k.freeItemAction(8, 'riempio il secchio e bevo');
+    expect(countItem(inv, 'item.secchio')).toBe(1);
+    expect(k.needs()!.thirst).toBe(60);
     // On the ground, the same item offers the learned action in its menu.
     const pc = k.playerCarpet();
     const dropped = k.spawnItem('item.secchio', pc.x + 0.9, pc.y);
@@ -386,7 +390,7 @@ describe('free actions and effects', () => {
     const after = k.models.usage.text;
     await k.freeItemAction(8, 'lo faccio volare sulla luna');
     expect(k.models.usage.text).toBe(after);
-    expect(after).toBe(calls + 1);
+    expect(after).toBe(calls + 2);
     // The Council sees the rules in every later judgement.
     expect(k.council.context('narratore')).toMatch(/Regole già stabilite[\s\S]*bevo dal secchio/);
   });

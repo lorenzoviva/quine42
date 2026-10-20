@@ -228,6 +228,7 @@ export class MockModels implements Models {
     if (has('bruc', 'incend', 'appicc')) return { possibile: true, racconto: `Le fiamme attecchiscono a ${name}.`, effetti: [{ tipo: 'fuoco', raggio: 1, durata: 8 }], ripetibile: true, etichetta: label };
     if (has('scav')) return { possibile: true, racconto: 'Scavi attorno, la terra si smuove.', effetti: [{ tipo: 'terreno', a: (d.terrains ?? []).find((t: string) => /sentier|terra|strada/.test(t)) ?? d.terrains?.[0], raggio: 1 }], ripetibile: true, etichetta: label };
     if (has('spin', 'calc')) return { possibile: true, racconto: `Dai una spinta a ${name}.`, effetti: [{ tipo: 'spingi', forza: 2 }], ripetibile: true, etichetta: label };
+    if (has('riemp')) return { possibile: true, racconto: `Riempi ${name} e bevi; poi è di nuovo vuoto.`, effetti: [{ tipo: 'consuma', oggetto: name }, { tipo: 'bisogni', sete: 10 }], ripetibile: true, etichetta: label };
     if (has('bev', 'sorsegg')) return { possibile: true, racconto: `Bevi da ${name}: l'acqua è fresca.`, effetti: [{ tipo: 'bisogni', sete: 15 }], ripetibile: true, etichetta: label };
     if (has('bussa', 'accarezz', 'ascolt')) return { possibile: true, racconto: `${name} non risponde, ma per un attimo ti sembra di sentire un'eco.`, effetti: [{ tipo: 'messaggio', testo: 'Nulla cambia.' }], ripetibile: false, etichetta: label };
     return { possibile: false, racconto: `Provi, ma ${name} non si lascia ${d.text}.`, effetti: [], ripetibile: false, etichetta: label };

@@ -1864,7 +1864,9 @@ export class Kernel {
   }
 
   /** Applies effects to the subject of an action: a thing in the world, or something carried. */
-  private applyOn(sub: { entity?: Id; slot?: number; key: string }, effects: Effect[]): string[] {
+  private applyOn(sub: { entity?: Id; slot?: number; key: string }, all: Effect[]): string[] {
+    // Acting on something never spends it by accident: only "distruggi" breaks or uses it up.
+    const effects = all.filter((e) => !(e.tipo === 'consuma' && e.oggetto === sub.key));
     if (sub.entity !== undefined) return this.applyEffects(effects, sub.entity);
     const out: string[] = [];
     const rest: Effect[] = [];
@@ -1944,6 +1946,7 @@ export class Kernel {
       await this.introduceItems(v.unknownItems, `nati dall'azione «${text}» su ${sub.name}`);
       v = validateEffects(j.possible ? j.effects : [], ectx);
     }
+    v.effects = v.effects.filter((e) => !(e.tipo === 'consuma' && e.oggetto === sub.key));
     if (v.dropped.length) this.council.say('kernel', 'scarta', `azione «${text}»: ${v.dropped.join('; ')}`, 'narratore', 'action.judge');
     this.council.say('narratore', j.possible ? 'approva' : 'obietta', `«${text}» su ${sub.name}: ${j.story}${v.effects.length ? ` [${v.effects.map((e) => e.tipo).join(', ')}]` : ''}`, undefined, 'action.judge');
     const out = j.possible ? this.applyOn(sub, v.effects) : [];
