@@ -116,6 +116,9 @@ local function make_api()
     break_entity = function(id) host.break_entity(id) end,
     say = function(text) host.say(tostring(text)) end,
     speak = function(id, text) host.speak(id, tostring(text)) end,
+    set_tile = function(x, y, code) return host.set_tile(x, y, tostring(code)) end,
+    open = function(id) return host.open(id) end,
+    make_container = function(id, size, loot) return host.make_container(id, size or 6, tostring(loot or "cassa")) end,
   }
   local inventory = {
     add = function(id, item, n) return host.inv_add(id, tostring(item), n or 1) end,

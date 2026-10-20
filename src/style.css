@@ -277,6 +277,7 @@ button[disabled] { opacity: 0.4; cursor: default; }
 #actions button { text-align: left; font-size: 13px; padding: 6px 10px; }
 #actions button.disabled { opacity: 0.5; }
 #actions .reason { color: var(--dim); font-size: 11px; }
+#actions input { font: inherit; font-size: 13px; padding: 6px 8px; background: #050b08; color: var(--fg, #e6f2ea); border: 1px solid #2a4a38; min-width: 340px; }
 #inventory .tabs { display: flex; gap: 4px; }
 #inventory .recipe { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid #0c1a12; font-size: 12.5px; opacity: 0.6; }
 #inventory .recipe.ok { opacity: 1; }

@@ -1,0 +1,9 @@
+{
+  "id": "sys.fire",
+  "name": "Fuoco e cose che passano",
+  "kind": "system",
+  "version": "0.1.0",
+  "description": "Il fuoco brucia ciò che è infiammabile e scotta chi non è protetto; le cose effimere (fiamme, luci evocate) svaniscono a tempo; gli scudi si spengono.",
+  "logic": "logic.lua",
+  "order": 45
+}

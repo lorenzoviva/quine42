@@ -43,6 +43,9 @@ export function fakeHost() {
     inv_equipped: () => undefined,
     item_find: () => undefined,
     item_def: () => undefined,
+    set_tile: () => false,
+    open: () => false,
+    make_container: () => false,
     fault: (k, m) => {
       faults[k] = m;
     },

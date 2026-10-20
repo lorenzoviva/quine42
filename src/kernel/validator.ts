@@ -3,7 +3,7 @@
 // validated against: the player is allowed to break the game.
 
 import type { Sandbox } from './sandbox';
-import type { FileMap, ItemDef, LayoutDef, Manifest, ModuleKind, TileDef } from './types';
+import type { Effect, FileMap, ItemDef, LayoutDef, Manifest, ModuleKind, TileDef } from './types';
 import { ITEM_CATEGORIES } from './types';
 import type { ChunkPlan } from './agents/cartography';
 import { lex, TOKEN_RE, tokenize } from './runes';
@@ -18,7 +18,7 @@ const HEX_RE = /^#[0-9a-f]{6}$/i;
 /** The Lua API (prelude.lua): generated code may only call these. */
 export const LUA_API: Record<string, string[]> = {
   ecs: ['each', 'get', 'set', 'spawn', 'destroy', 'first'],
-  world: ['free', 'free_real', 'tile', 'speed_at', 'spawn', 'player', 'player_pos', 'nearest', 'has_tag', 'break_entity', 'say', 'speak'],
+  world: ['free', 'free_real', 'tile', 'speed_at', 'spawn', 'player', 'player_pos', 'nearest', 'has_tag', 'break_entity', 'say', 'speak', 'set_tile', 'open', 'make_container'],
   inventory: ['add', 'remove', 'count', 'equipped'],
   input: ['held'],
   bus: ['emit'],
@@ -250,4 +250,107 @@ export class Validator {
     });
     return { errors, dropped, plan: { ...plan, objects, runes, fresh, ground: plan.ground.filter((g) => g.trim().length >= 2 && g.length <= 60) } };
   }
+}
+
+export interface EffectContext {
+  palette: Record<string, TileDef>;
+  /** Item id by (fuzzy) name. */
+  item: (name: string) => string | undefined;
+  /** Summonable entity module id by id or name. */
+  module: (name: string) => string | undefined;
+  loot: Set<string>;
+}
+
+export interface EffectVerdict {
+  effects: Effect[];
+  dropped: string[];
+  /** Items named by crea_oggetto that do not exist yet (the Narrator can define them, then validate again). */
+  unknownItems: string[];
+}
+
+const num = (v: unknown, lo: number, hi: number, def: number) => {
+  const n = typeof v === 'number' ? v : Number(v);
+  return Number.isFinite(n) ? Math.max(lo, Math.min(hi, n)) : def;
+};
+
+/**
+ * Effects chosen by the Council, from the closed set: unknown types are dropped, numbers clamped,
+ * names resolved to ids (items, modules, terrains). What remains is safe to apply.
+ */
+export function validateEffects(raw: unknown, ctx: EffectContext): EffectVerdict {
+  const out: EffectVerdict = { effects: [], dropped: [], unknownItems: [] };
+  const list = Array.isArray(raw) ? raw.slice(0, 8) : [];
+  const tileCode = (v: unknown): string | undefined => {
+    const s = String(v ?? '').trim();
+    if (!s) return undefined;
+    if (ctx.palette[s] && s !== '?') return s;
+    const n = s.toLowerCase();
+    return Object.keys(ctx.palette).find((c) => c !== '?' && ctx.palette[c].name.toLowerCase() === n) ?? Object.keys(ctx.palette).find((c) => c !== '?' && (ctx.palette[c].name.toLowerCase().includes(n) || n.includes(ctx.palette[c].name.toLowerCase())));
+  };
+  for (const r of list) {
+    if (!r || typeof r !== 'object') continue;
+    const e = r as Record<string, unknown>;
+    const tipo = String(e.tipo ?? '');
+    switch (tipo) {
+      case 'messaggio':
+        if (typeof e.testo === 'string' && e.testo.trim()) out.effects.push({ tipo, testo: e.testo.trim().slice(0, 300) });
+        break;
+      case 'bisogni': {
+        const b: Effect & { tipo: 'bisogni' } = { tipo };
+        for (const k of ['fame', 'sete', 'energia', 'salute'] as const) if (e[k] !== undefined && e[k] !== null) b[k] = Math.round(num(e[k], -40, 40, 0));
+        if (Object.keys(b).length > 1) out.effects.push(b);
+        else out.dropped.push('bisogni senza variazioni');
+        break;
+      }
+      case 'crea_oggetto':
+      case 'consuma': {
+        const name = String(e.oggetto ?? '').trim();
+        const id = name ? ctx.item(name) : undefined;
+        const quantita = Math.round(num(e.quantita, 1, tipo === 'crea_oggetto' ? 5 : 10, 1));
+        if (id) out.effects.push({ tipo, oggetto: id, quantita });
+        else if (tipo === 'crea_oggetto' && name.length >= 2) out.unknownItems.push(name);
+        else out.dropped.push(`${tipo}: «${name}» non esiste`);
+        break;
+      }
+      case 'distruggi':
+      case 'apri':
+        out.effects.push({ tipo });
+        break;
+      case 'contenitore': {
+        const bottino = typeof e.bottino === 'string' && ctx.loot.has(e.bottino) ? e.bottino : ctx.loot.has('cassa') ? 'cassa' : [...ctx.loot][0];
+        if (bottino) out.effects.push({ tipo, capienza: Math.round(num(e.capienza, 2, 12, 6)), bottino });
+        else out.dropped.push('contenitore: nessuna tabella di bottino');
+        break;
+      }
+      case 'terreno': {
+        const a = tileCode(e.a);
+        if (!a) {
+          out.dropped.push(`terreno: «${String(e.a ?? '')}» non è un terreno`);
+          break;
+        }
+        const da = e.da !== undefined && e.da !== null && e.da !== '' ? tileCode(e.da) : undefined;
+        out.effects.push({ tipo, a, ...(da ? { da } : {}), raggio: Math.round(num(e.raggio, 0, 3, 1)) });
+        break;
+      }
+      case 'fuoco':
+      case 'luce':
+        out.effects.push({ tipo, raggio: num(e.raggio, 0.5, tipo === 'fuoco' ? 3 : 8, tipo === 'fuoco' ? 1 : 4), durata: num(e.durata, 2, tipo === 'fuoco' ? 30 : 300, tipo === 'fuoco' ? 10 : 60) });
+        break;
+      case 'scudo':
+        out.effects.push({ tipo, durata: num(e.durata, 2, 120, 20) });
+        break;
+      case 'spingi':
+        out.effects.push({ tipo, forza: num(e.forza, 0.5, 10, 3) });
+        break;
+      case 'evoca': {
+        const id = ctx.module(String(e.modulo ?? ''));
+        if (id) out.effects.push({ tipo, modulo: id });
+        else out.dropped.push(`evoca: «${String(e.modulo ?? '')}» non esiste`);
+        break;
+      }
+      default:
+        out.dropped.push(`effetto sconosciuto «${tipo}»`);
+    }
+  }
+  return out;
 }

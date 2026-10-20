@@ -23,6 +23,8 @@ Funzioni che il kernel chiama, se presenti:
 - `world.player()` id del viandante; `world.player_pos()` → `{x=, y=}`
 - `world.nearest(x, y, raggio, tag)` id dell'entità più vicina (tag opzionale) o `nil`
 - `world.has_tag(id, tag)`, `world.break_entity(id)` (la distrugge e lascia cadere i suoi "drops")
+- `world.set_tile(x, y, codice)` (cambia il terreno di una casella, resta cambiato), `world.open(id)` (apre un contenitore al viandante), `world.make_container(id, capienza, bottino)`
+- Effetti pronti: il modulo `core.effects` applica `{ tipo = "fuoco" | "luce" | "scudo" | "terreno" | ... }`; componenti `fuoco`, `luce {raggio, accesa}`, `effimero {fino}` (sparisce a tempo), `scudo {fino}`
 - `world.tile(x, y)` codice del terreno; `world.speed_at(x, y)`; `world.free(x, y, r)`
 - `world.say(testo)` messaggio al viandante; `world.speak(id, testo)` fumetto sopra un'entità
 - `inventory.add(id, oggetto, n)`, `inventory.remove(id, oggetto, n)`, `inventory.count(id, oggetto)`, `inventory.equipped(id)` (gli oggetti sono id come "item.corda")

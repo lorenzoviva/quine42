@@ -6,7 +6,7 @@ import { World, type Id } from './ecs';
 import { EventBus } from './events';
 import { Faults } from './faults';
 import { Sandbox, type Host } from './sandbox';
-import { apiErrors, Validator } from './validator';
+import { apiErrors, validateEffects, Validator } from './validator';
 import { Repo, type KeyValueStore } from './repo';
 import { Corona, type CoronaCell } from './corona';
 import { Input } from './input';
@@ -24,9 +24,10 @@ import { planChunk, type ChunkPlan, type Where } from './agents/cartography';
 import { forge, judgeCombination, repairLogic, type ForgeOrigin } from './agents/forge';
 import { examine, narrate, npcReply, type NpcReply, type Turn } from './agents/minds';
 import { planGenesis } from './agents/genesis';
+import { judgeAction } from './agents/effects';
 import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Identity } from './agents/content';
 import { addItem, CARRY_CAPACITY, countItem, equippedItem, moveSlot, newInventory, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
-import type { FileMap, ItemDef, ItemSpec, Manifest, ModuleEntry, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
+import type { ActionDef, Effect, FileMap, ItemDef, ItemSpec, Manifest, ModuleEntry, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
 
 export interface Chunk {
   cx: number;
@@ -315,6 +316,13 @@ export class Kernel {
       item_def: (id) => {
         const d = this.content.get(id);
         return d ? { id: d.id, name: d.name, category: d.category, weight: d.weight, tags: d.tags.join(','), effects: { ...(d.effects ?? {}) } } : undefined;
+      },
+      set_tile: (x, y, code) => this.setTile(Math.floor(x), Math.floor(y), code),
+      open: (id) => !!this.openContainer(id),
+      make_container: (id, size, loot) => {
+        if (!this.ecs.alive.has(id) || id === this.playerId || this.ecs.has(id, 'container') || this.ecs.has(id, 'pickup') || !this.content.loot[loot]) return false;
+        this.ecs.set(id, 'container', { inv: newInventory(Math.max(1, Math.min(16, Math.floor(size) || 6))), loot, filled: false } satisfies Container);
+        return true;
       },
     };
   }
@@ -736,6 +744,10 @@ export class Kernel {
     ch.plan = plan;
     ch.place = plan.place;
     ch.tiles = result.grid.join('');
+    for (const [cell, code] of Object.entries(plan.edits ?? {})) {
+      const i = Number(cell);
+      if (Number.isInteger(i) && i >= 0 && i < S * S && this.palette[code]) ch.tiles = ch.tiles.slice(0, i) + code + ch.tiles.slice(i + 1);
+    }
     ch.buildings = result.buildings;
     ch.stage = 'planned';
     ch.version++;
@@ -986,6 +998,38 @@ export class Kernel {
     const cy = Math.floor(row / S);
     const ch = this.chunks.get(this.chunkKey(cx, cy));
     return ch?.tiles[(row - cy * S) * S + (col - cx * S)];
+  }
+
+  /**
+   * Changes one tile of a planned chunk (effects, spells, Lua). Persisted with the place's plan, so
+   * a changed world stays changed. The floor refuses a solid tile under the player.
+   */
+  setTile(col: number, row: number, code: string): boolean {
+    const S = this.config.chunkSize;
+    const ch = this.chunkAt(col, row);
+    const def = this.palette[code];
+    if (!ch || ch.stage !== 'planned' || !ch.plan || !def || code === '?') return false;
+    if (def.solid) {
+      const pc = this.playerCarpet();
+      if (Math.abs(pc.x - (col + 0.5)) < 1 && Math.abs(pc.y - (row + 0.5)) < 1) return false;
+    }
+    const cell = (row - ch.cy * S) * S + (col - ch.cx * S);
+    if (ch.tiles[cell] === code) return true;
+    ch.tiles = ch.tiles.slice(0, cell) + code + ch.tiles.slice(cell + 1);
+    ch.version++;
+    (ch.plan.edits ??= {})[String(cell)] = code;
+    this.saveChunkSoon(ch);
+    return true;
+  }
+
+  private saving = new Set<string>();
+  private saveChunkSoon(ch: Chunk): void {
+    if (this.saving.has(ch.key)) return;
+    this.saving.add(ch.key);
+    setTimeout(() => {
+      this.saving.delete(ch.key);
+      if (ch.plan) void this.chunkStore.save(this.recordKey(ch), { plan: ch.plan, grid: [], painted: false });
+    }, 500);
   }
 
   chunkAt(x: number, y: number): Chunk | undefined {
@@ -1402,6 +1446,7 @@ export class Kernel {
     const held = equippedItem(inv);
     if (held) out.push({ id: 'strumento', label: `Usa ${this.itemInfo(held).name}`, enabled: true });
     out.push({ id: 'esamina', label: 'Esamina', enabled: true });
+    out.push({ id: 'altro', label: 'Altro…', enabled: true });
     return out;
   }
 
@@ -1421,8 +1466,8 @@ export class Kernel {
       return;
     }
     const options = this.actionsFor(target);
-    const main = options.filter((o) => o.id !== 'esamina' && o.id !== 'strumento');
-    if (main.length === 1 && main[0].enabled && options.length <= 2) return this.perform(target, main[0].id);
+    const main = options.filter((o) => o.id !== 'esamina' && o.id !== 'strumento' && o.id !== 'altro');
+    if (main.length === 1 && main[0].enabled && options.length <= 3) return this.perform(target, main[0].id);
     this.bus.emit('ui:actions', { id: target, name: this.nameOf(target), options });
   }
 
@@ -1452,6 +1497,9 @@ export class Kernel {
         return;
       case 'strumento':
         this.action(id);
+        return;
+      case 'altro':
+        this.bus.emit('ui:freeaction', { id, name: speaker });
         return;
       case 'usa': {
         const { value, failed } = this.runModule(modId!, 'on_interact', id, this.playerId);
@@ -1487,10 +1535,127 @@ export class Kernel {
           const a = m?.actions?.find((x) => `act:${x.id}` === action);
           const opt = this.actionsFor(id).find((o) => o.id === action);
           if (!a || !opt?.enabled) return say(opt?.reason ?? 'Non puoi farlo.');
+          if (a.effects?.length) {
+            const out = this.applyEffects(a.effects, id);
+            return say(out.join(' ') || `${a.label}: fatto.`);
+          }
           const { value, failed } = this.runModule(modId, 'on_act', id, this.playerId, a.id);
           if (!failed) say(typeof value === 'string' && value ? value : `${a.label}: fatto.`);
         }
     }
+  }
+
+  /**
+   * "Altro…": the player writes what they do. Actions the object already learned run directly; otherwise
+   * the Narrator judges, the validator keeps only known effects, core.effects applies them, and a
+   * sensible repeatable action is learned by the object's module (committed, so it stays).
+   */
+  async freeAction(id: Id, text: string): Promise<string> {
+    text = text.trim().slice(0, 200);
+    if (!text || !this.ecs.alive.has(id)) return '';
+    const modId: string | undefined = this.ecs.get(id, 'module')?.id;
+    const entry = modId ? this.modules.get(modId) : undefined;
+    const m = entry?.manifest;
+    const learned = m?.actions?.find((a) => a.effects?.length && normName(a.label) === normName(text));
+    if (learned) {
+      await this.perform(id, `act:${learned.id}`);
+      return learned.label;
+    }
+    const pk = this.ecs.get(id, 'pickup');
+    const info = pk ? this.itemInfo(pk.item) : undefined;
+    const identity: Identity | undefined = this.ecs.get(id, 'identity');
+    const p = this.ecs.get(id, 'pos');
+    const tile = p ? (this.palette[this.tileAt(Math.floor(p.x), Math.floor(p.y)) ?? '']?.name ?? '?') : '?';
+    const inv = this.inventory();
+    const held = equippedItem(inv);
+    const summonable = [...this.modules.values()].filter((e) => e.manifest.kind === 'entity' && !e.manifest.unique);
+    const say = (t: string) => this.bus.emit('ui:dialog', { speaker: this.nameOf(id), text: t });
+    this.council.say('kernel', 'info', `il viandante prova: «${text}» su ${this.nameOf(id)}`, 'narratore', 'action.judge');
+    let j;
+    try {
+      j = await judgeAction(this.council, {
+        text,
+        target: {
+          name: this.nameOf(id),
+          description: info?.description ?? `${m?.description ?? ''}${identity ? ` ${identity.look}` : ''}`,
+          tags: info?.tags ?? m?.tags ?? [],
+          container: this.ecs.has(id, 'container'),
+          kind: pk ? 'oggetto a terra' : m?.persona ? 'persona' : this.ecs.has(id, 'container') ? 'mobile' : 'cosa',
+        },
+        carrying: inv.slots.filter((s): s is NonNullable<typeof s> => !!s).map((s) => this.itemInfo(s.item).name),
+        holding: held ? this.itemInfo(held).name : 'niente',
+        tile,
+        terrains: Object.entries(this.palette).filter(([c]) => c !== '?').map(([, t]) => t.name),
+        summonable: summonable.map((e) => e.manifest.name),
+        loot: Object.keys(this.content.loot),
+        place: this.placeHere()?.name ?? '',
+      });
+    } catch (e) {
+      const msg = `(il Concilio tace: ${(e as Error).message})`;
+      say(msg);
+      return msg;
+    }
+    // What it needs must really be in the pockets.
+    const need = j.requires ? this.content.byName(j.requires) : undefined;
+    if (j.possible && need && countItem(inv, need.id) <= 0) {
+      say(`${j.story} Ma ti serve ${need.name}.`.trim());
+      return j.story;
+    }
+    const ectx = {
+      palette: this.palette,
+      item: (n: string) => this.content.byName(n)?.id,
+      module: (n: string) => summonable.find((e) => e.manifest.id === n || normName(e.manifest.name) === normName(n))?.manifest.id,
+      loot: new Set(Object.keys(this.content.loot)),
+    };
+    let v = validateEffects(j.possible ? j.effects : [], ectx);
+    if (v.unknownItems.length) {
+      await this.introduceItems(v.unknownItems, `nati dall'azione «${text}» su ${this.nameOf(id)}`);
+      v = validateEffects(j.possible ? j.effects : [], ectx);
+    }
+    if (v.dropped.length) this.council.say('kernel', 'scarta', `azione «${text}»: ${v.dropped.join('; ')}`, 'narratore', 'action.judge');
+    this.council.say('narratore', j.possible ? 'approva' : 'obietta', `«${text}» su ${this.nameOf(id)}: ${j.story}${v.effects.length ? ` [${v.effects.map((e) => e.tipo).join(', ')}]` : ''}`, undefined, 'action.judge');
+    const out = j.possible ? this.applyEffects(v.effects, id) : [];
+    say([j.story, ...out].filter(Boolean).join(' ') || 'Non succede niente.');
+    const lasting = v.effects.some((e) => e.tipo !== 'messaggio');
+    const oneOff = v.effects.some((e) => e.tipo === 'evoca' || e.tipo === 'crea_oggetto' || e.tipo === 'contenitore');
+    if (j.possible && j.repeatable && lasting && !oneOff && entry && !m?.persona) this.learnAction(entry, { id: '', label: j.label || text, requires: need?.id, effects: v.effects });
+    return j.story;
+  }
+
+  /** Applies validated effects through core.effects (Lua): the world's own code decides how they happen. */
+  applyEffects(effects: Effect[], target?: Id, at?: { x: number; y: number }): string[] {
+    const out: string[] = [];
+    if (!this.modules.has('core.effects')) return out;
+    for (const e of effects) {
+      if (target !== undefined && !this.ecs.alive.has(target)) target = undefined;
+      const { value, failed } = this.runModule('core.effects', 'apply', target, this.playerId, clone(e), at?.x, at?.y);
+      if (failed) break;
+      if (typeof value === 'string' && value) out.push(value);
+    }
+    this.runesDirty = true;
+    return out;
+  }
+
+  /** An object learns an action: it enters the module's menu, with its effects, for every copy of it. */
+  private learnAction(entry: ModuleEntry, def: ActionDef): void {
+    const path = entry.manifestPath;
+    let man: Manifest;
+    try {
+      man = JSON.parse(this.repo.working[path] ?? '');
+    } catch {
+      return;
+    }
+    const actions = (man.actions ??= []);
+    if (actions.length >= 8 || actions.some((a) => normName(a.label) === normName(def.label))) return;
+    let id = normName(def.label).replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 24) || 'azione';
+    while (actions.some((a) => a.id === id)) id += '_';
+    const learned: ActionDef = { id, label: def.label, effects: def.effects };
+    if (def.requires) learned.requires = def.requires;
+    actions.push(learned);
+    this.repo.write(path, JSON.stringify(man, null, 2) + '\n');
+    this.applyFiles({ ...this.repo.working });
+    const c = this.repo.commit(`azione imparata: ${man.name} → ${def.label}`, 'agent');
+    this.council.say('kernel', 'approva', `${man.name} impara «${def.label}» (commit ${c.id})`);
   }
 
   private worldFacts(): Record<string, unknown> {

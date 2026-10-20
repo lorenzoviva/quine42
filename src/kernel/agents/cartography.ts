@@ -26,6 +26,8 @@ export interface ChunkPlan {
   fresh: Array<{ concept: string; where: Where }>;
   /** Rune fragments (lines from the catalogue) to scatter. */
   runes: string[];
+  /** Tiles changed after the layout (by effects, spells, Lua): cell index → tile code. */
+  edits?: Record<string, string>;
 }
 
 export interface PlanContext {

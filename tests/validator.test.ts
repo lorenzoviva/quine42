@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Sandbox } from '../src/kernel/sandbox';
-import { Validator, apiErrors } from '../src/kernel/validator';
+import { Validator, apiErrors, validateEffects } from '../src/kernel/validator';
 import { extractLines } from '../src/kernel/runes';
 import { Repo, memoryStore } from '../src/kernel/repo';
 import { addItem, moveSlot, newInventory, removeItem, totalWeight } from '../src/kernel/inventory';
@@ -166,5 +166,34 @@ describe('repo', () => {
     const changed = Repo.open('t', { 'a.lua': '3' }, store);
     expect(changed.synced).toBe(true);
     expect(changed.repo.working['a.lua']).toBe('3');
+  });
+});
+
+describe('effects', () => {
+  const palette = { g: { name: 'erba', color: '#3a6', solid: false }, p: { name: 'sentiero', color: '#a86', solid: false }, w: { name: 'acqua', color: '#36a', solid: true } };
+  const ctx = { palette, item: (n: string) => (/mela/i.test(n) ? 'item.mela' : undefined), module: (n: string) => (n === 'Gatto' ? 'npc.cat' : undefined), loot: new Set(['cassa']) };
+
+  it('keeps only the closed set, clamps numbers and resolves names', () => {
+    const v = validateEffects(
+      [
+        { tipo: 'bisogni', fame: 500, salute: -3 },
+        { tipo: 'terreno', a: 'Sentiero', raggio: 99 },
+        { tipo: 'crea_oggetto', oggetto: 'una mela rossa', quantita: 40 },
+        { tipo: 'fuoco', durata: 1e9 },
+        { tipo: 'crea_oggetto', oggetto: 'Spada di vetro' },
+        { tipo: 'evoca', modulo: 'Drago' },
+        { tipo: 'teletrasporto' },
+        'rubbish',
+      ],
+      ctx,
+    );
+    expect(v.effects).toEqual([
+      { tipo: 'bisogni', fame: 40, salute: -3 },
+      { tipo: 'terreno', a: 'p', raggio: 3 },
+      { tipo: 'crea_oggetto', oggetto: 'item.mela', quantita: 5 },
+      { tipo: 'fuoco', raggio: 1, durata: 30 },
+    ]);
+    expect(v.unknownItems).toEqual(['Spada di vetro']);
+    expect(v.dropped.join(' ')).toMatch(/Drago.*teletrasporto/);
   });
 });

@@ -292,6 +292,67 @@ describe('characters', () => {
   });
 });
 
+describe('free actions and effects', () => {
+  let k: Kernel;
+  let said = '';
+  beforeEach(async () => {
+    k = await boot();
+    clearArea(k);
+    k.bus.on('ui:dialog', ({ text }: { text: string }) => (said = text));
+  });
+
+  it('every menu offers "Altro…"; a judged action happens and, if repeatable, the object learns it', async () => {
+    const bush = spawnInFront(k, 'object.bush');
+    expect(k.actionsFor(bush).at(-1)?.id).toBe('altro');
+    await k.freeAction(bush, 'rompo il rovo a calci');
+    expect(k.ecs.alive.has(bush)).toBe(false);
+    expect(said).toMatch(/pezzi/);
+    const learned = k.modules.get('object.bush')!.manifest.actions!.find((a) => a.effects?.length);
+    expect(learned?.label).toMatch(/Rompo il rovo/);
+    expect(k.repo.head().message).toMatch(/azione imparata/);
+    // The learned action is in the menu of every bramble, and runs without asking the Council again.
+    const other = spawnInFront(k, 'object.bush');
+    expect(k.actionsFor(other).some((a) => a.id === `act:${learned!.id}`)).toBe(true);
+    const calls = k.models.usage.text;
+    await k.perform(other, `act:${learned!.id}`);
+    expect(k.ecs.alive.has(other)).toBe(false);
+    expect(k.models.usage.text).toBe(calls);
+  });
+
+  it('what is not possible does not happen; a closed thing can be forced open', async () => {
+    const crate = spawnInFront(k, 'object.crate');
+    await k.freeAction(crate, 'lo faccio volare sulla luna');
+    expect(k.ecs.alive.has(crate)).toBe(true);
+    let opened = false;
+    k.bus.on('ui:container', () => (opened = true));
+    await k.freeAction(crate, 'forzo il coperchio');
+    expect(k.container(crate)).toBeTruthy();
+    expect(opened).toBe(true);
+  });
+
+  it('fire burns what is flammable and goes out; digging changes the terrain, and the change persists', async () => {
+    const bush = spawnInFront(k, 'object.bush', 1.2);
+    const crate = spawnInFront(k, 'object.crate', 2.2);
+    await k.freeAction(crate, 'brucio la cassa');
+    const fires = () => k.ecs.query('fuoco');
+    expect(fires().length).toBe(1);
+    run(k, 0.5);
+    expect(k.ecs.alive.has(bush)).toBe(false);
+    run(k, 9);
+    expect(fires().length).toBe(0);
+
+    const pc = k.playerCarpet();
+    const col = Math.floor(pc.x);
+    const row = Math.floor(pc.y);
+    const target = spawnInFront(k, 'object.crate', 1);
+    const before = k.tileAt(col + 1, row);
+    await k.freeAction(target, 'scavo qui attorno');
+    const code = Object.keys(k.palette).find((c) => /sentier|terra|strada/.test(k.palette[c].name))!;
+    expect(k.tileAt(col + 1, row)).toBe(code);
+    expect(before === code || Object.keys(k.chunkAt(col + 1, row)!.plan!.edits ?? {}).length > 0).toBe(true);
+  });
+});
+
 describe('the Council', () => {
   it('forges a module: validated, committed, hot loaded and recorded in the bible', async () => {
     const k = await boot();

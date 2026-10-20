@@ -45,6 +45,12 @@ export interface Host {
   item_find(name: string): string | undefined;
   /** A copy of an item definition (name, category, weight, tags, effects). */
   item_def(id: string): unknown;
+  /** Changes the tile at a carpet cell (persisted with the place). Returns success. */
+  set_tile(x: number, y: number, code: string): boolean;
+  /** Opens a container for the player (the container panel). */
+  open(id: number): boolean;
+  /** Gives an entity an empty container filled from a loot table on first opening. */
+  make_container(id: number, size: number, loot: string): boolean;
 }
 
 interface KernelLua {

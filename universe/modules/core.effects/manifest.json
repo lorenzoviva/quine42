@@ -1,0 +1,8 @@
+{
+  "id": "core.effects",
+  "name": "Effetti",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "Come accadono le cose: gli effetti scelti dal Concilio per le azioni libere, le azioni imparate e gli incantesimi (bisogni, oggetti, terreno, fuoco, luce, scudo, spinte, evocazioni).",
+  "logic": "logic.lua"
+}
