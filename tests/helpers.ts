@@ -46,6 +46,8 @@ export function fakeHost() {
     set_tile: () => false,
     open: () => false,
     make_container: () => false,
+    item_bonus: () => 0,
+    slot_get: () => undefined,
     fault: (k, m) => {
       faults[k] = m;
     },

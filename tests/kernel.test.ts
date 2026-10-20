@@ -990,3 +990,34 @@ describe('tile context menus', () => {
     }
   });
 });
+
+describe('mechanics with interfaces', () => {
+  it('the Council adds equipment slots as a module with a panel; wearing a helmet gives defence', async () => {
+    const k = await boot();
+    clearArea(k);
+    expect(k.uiPanels().length).toBe(0);
+    const r = await k.forgeMechanic('equipaggiamento: slot per indossare e impugnare');
+    expect(r.ok).toBe(true);
+    const p = k.uiPanels()[0];
+    expect(p.panel.elementi.filter((e) => e.tipo === 'slot').map((e) => e.id)).toEqual(['testa', 'corpo', 'piedi', 'arma']);
+    // A helmet from a pack of the Narrator (with its place and bonus).
+    const items = JSON.parse(k.files['modules/items.base/manifest.json']);
+    items.items.push({ id: 'item.elmo', name: 'Elmo di ferro', description: 'un elmo', category: 'vestiario', weight: 2, stack: 1, tags: ['metallo'], glyph: 'Ʌ', color: '#999999', slot: 'testa', bonus: { difesa: 3, velocita: 0.95 } });
+    k.saveFile('modules/items.base/manifest.json', JSON.stringify(items, null, 2) + '\n');
+    k.give('item.elmo', 1);
+    const at = k.inventory().slots.findIndex((s) => s?.item === 'item.elmo');
+    expect(k.equip(p.panel.id, 'piedi', at)).toBe(false);
+    expect(k.equip(p.panel.id, 'testa', at)).toBe(true);
+    expect(k.uiValue('difesa.valore')).toBe(3);
+    expect(k.states().equipaggiamento.velocita).toBeCloseTo(0.95);
+    expect(countItem(k.inventory(), 'item.elmo')).toBe(0);
+    // The game is saved and resumed: the helmet is still on, the defence rebuilt.
+    expect(k.saveState()).toBe(true);
+    const k2 = await Kernel.boot({ files: { ...bundledFiles, ...k.files }, store: memoryStore(), models: new MockModels() });
+    expect(k2.slots()[p.panel.id].testa?.item).toBe('item.elmo');
+    expect(k2.uiValue('difesa.valore')).toBe(3);
+    expect(k.unequip(p.panel.id, 'testa')).toBe(true);
+    expect(countItem(k.inventory(), 'item.elmo')).toBe(1);
+    expect(k.uiValue('difesa.valore')).toBe(0);
+  });
+});

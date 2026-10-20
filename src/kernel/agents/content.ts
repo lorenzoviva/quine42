@@ -22,6 +22,8 @@ const ITEM_SCHEMA: Schema = {
     effetti: { type: 'OBJECT', properties: { fame: { type: 'NUMBER' }, sete: { type: 'NUMBER' }, energia: { type: 'NUMBER' }, salute: { type: 'NUMBER' }, mana: { type: 'NUMBER' } } },
     impugnabile: { type: 'BOOLEAN' },
     contenitore: { type: 'INTEGER', description: 'solo per borse, sacche, cesti, bisacce che si portano addosso: quante cose ci stanno dentro (2-12)' },
+    posto: { type: 'STRING', description: 'solo per ciò che si indossa o si impugna: testa, corpo, gambe, piedi, mani, arma, scudo, anello, collo, schiena' },
+    bonus: { type: 'OBJECT', description: 'solo per ciò che si indossa o si impugna: cosa dà', properties: { difesa: { type: 'NUMBER' }, attacco: { type: 'NUMBER' }, velocita: { type: 'NUMBER', description: 'moltiplicatore, es. 0.95 per un\'armatura pesante, 1.1 per stivali leggeri' }, peso: { type: 'NUMBER', description: 'peso trasportabile in più (zaini)' }, luce: { type: 'NUMBER' }, calore: { type: 'NUMBER' } } },
     aspetto: { type: 'STRING' },
   },
   required: ['nome', 'descrizione', 'categoria', 'peso', 'pila', 'tag', 'aspetto'],
@@ -38,6 +40,8 @@ interface RawItem {
   impugnabile?: boolean;
   contenitore?: number;
   aspetto: string;
+  posto?: string;
+  bonus?: Record<string, number>;
 }
 
 export interface Pack {
@@ -72,6 +76,8 @@ export function toItemDef(r: RawItem, taken: Set<string>): ItemDef | null {
     equippable: !!r.impugnabile,
     ...(hasEffects ? { effects } : {}),
     ...(bag ? { container: bag } : {}),
+    ...(r.posto && /^[a-z]{3,12}$/.test(String(r.posto).toLowerCase().trim()) ? { slot: String(r.posto).toLowerCase().trim() } : {}),
+    ...(r.bonus && typeof r.bonus === 'object' ? { bonus: Object.fromEntries(Object.entries(r.bonus).filter(([, v]) => typeof v === 'number' && Number.isFinite(v)).map(([k, v]) => [k, Math.max(-50, Math.min(50, v as number))])) } : {}),
   };
 }
 

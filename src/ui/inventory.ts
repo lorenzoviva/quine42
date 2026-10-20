@@ -13,7 +13,8 @@ export class InventoryPanel {
   private root = $('#inventory');
   private sel = 0;
   private busy = '';
-  private tab: 'oggetti' | 'crea' = 'oggetti';
+  /** 'oggetti', 'crea', or `ui:<panel>` for a panel a module brought into the game. */
+  private tab: string = 'oggetti';
   private box: number | null = null;
   /** A bag the player carries, opened (slot index). */
   private bagSlot: number | null = null;
@@ -172,6 +173,8 @@ export class InventoryPanel {
         this.grid(box.inv.slots, { onClick: (i) => (k.takeFromContainer(this.box!, i), this.render()) }),
         take,
       );
+    } else if (this.tab.startsWith('ui:')) {
+      this.renderPanel(side, this.tab.slice(3));
     } else if (this.tab === 'crea') {
       const { available, all } = k.recipes();
       const sorted = [...all].sort((a, b) => Number(available.has(b.id)) - Number(available.has(a.id)));
@@ -270,7 +273,7 @@ export class InventoryPanel {
     };
 
     const tabs = el('div', { class: 'tabs' });
-    for (const [id, label] of [['oggetti', 'Oggetti'], ['crea', `Crea (${k.recipes().available.size})`]] as const) {
+    for (const [id, label] of [['oggetti', 'Oggetti'], ['crea', `Crea (${k.recipes().available.size})`], ...k.uiPanels().map((p) => [`ui:${p.panel.id}`, p.panel.titolo])] as Array<[string, string]>) {
       const b = el('button', { class: this.tab === id && !box ? 'on' : '' }, label);
       b.onclick = () => {
         this.tab = id;
@@ -298,6 +301,59 @@ export class InventoryPanel {
         ),
       ),
     );
+  }
+
+  /**
+   * A panel a module brought into the game (ADR-0028): slots (click with an item selected, or drag an
+   * item onto it; click a full slot to take it back), bars and texts bound to the wanderer, buttons.
+   */
+  private renderPanel(side: HTMLElement, panelId: string): void {
+    const k = this.k;
+    const p = k.uiPanels().find((x) => x.panel.id === panelId);
+    if (!p) {
+      this.tab = 'oggetti';
+      return;
+    }
+    const slots = k.slots()[panelId] ?? {};
+    const inv = k.inventory();
+    const body = el('div', { class: 'panel-ui' });
+    for (const e of p.panel.elementi) {
+      if (e.tipo === 'slot') {
+        const cur = slots[e.id!];
+        const cell = el('div', { class: `uislot${cur ? ' full' : ''}`, title: e.accetta?.length ? `ci va: ${e.accetta.join(', ')}` : '' });
+        cell.append(cur ? itemIcon(k, this.images, cur.item, 38) : el('span', { class: 'hint' }, '+'));
+        cell.onclick = () => {
+          if (cur) k.unequip(panelId, e.id!);
+          else if (inv.slots[this.sel]) k.equip(panelId, e.id!, this.sel);
+          else k.message("Seleziona un oggetto dell'inventario, poi clicca lo slot (o trascinalo qui).");
+          this.render();
+        };
+        cell.ondragover = (ev) => ev.preventDefault();
+        cell.ondrop = (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          const raw = ev.dataTransfer?.getData('slot');
+          if (raw) k.equip(panelId, e.id!, Number(raw));
+          this.render();
+        };
+        body.append(el('div', { class: 'uirow' }, el('span', { class: 'l' }, e.etichetta ?? e.id ?? ''), cell, el('span', { class: 'v' }, cur ? k.itemInfo(cur.item).name : '—')));
+      } else if (e.tipo === 'barra') {
+        const v = Number(k.uiValue(e.campo)) || 0;
+        const max = e.max ?? 100;
+        body.append(el('div', { class: 'uirow' }, el('span', { class: 'l' }, e.etichetta ?? ''), el('span', { class: 'bar' }, el('span', { class: 'fill', style: `width:${Math.max(0, Math.min(100, (v / max) * 100))}%` })), el('span', { class: 'v' }, `${Math.round(v)}/${max}`)));
+      } else if (e.tipo === 'testo') {
+        const v = k.uiValue(e.campo);
+        body.append(el('div', { class: 'uirow' }, el('span', { class: 'l' }, e.etichetta ?? ''), el('span', { class: 'v' }, v === undefined ? '' : String(typeof v === 'number' ? Math.round(v * 100) / 100 : v))));
+      } else if (e.tipo === 'pulsante') {
+        const b = el('button', { class: 'primary' }, e.etichetta ?? e.id ?? '');
+        b.onclick = () => {
+          k.uiAction(panelId, e.id!);
+          this.render();
+        };
+        body.append(b);
+      }
+    }
+    side.append(el('div', { class: 'name' }, p.panel.titolo), p.panel.descrizione ? el('div', { class: 'descr' }, p.panel.descrizione) : '', body);
   }
 
   /** A line where the player writes something for the Council to judge; the answer stays below it. */

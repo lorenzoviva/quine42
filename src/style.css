@@ -329,3 +329,12 @@ button[disabled] { opacity: 0.4; cursor: default; }
 #atlas .legend .fog::before { background: #06070c; border: 1px solid #333; }
 #atlas .legend .region::before { border: 1px dashed #f5d300; }
 #atlas .legend .you::before { border: 2px solid #ff2a6d; }
+
+#inventory .panel-ui { display: flex; flex-direction: column; gap: 6px; }
+#inventory .uirow { display: grid; grid-template-columns: 90px 46px 1fr; align-items: center; gap: 8px; font-size: 12.5px; }
+#inventory .uirow .l { color: var(--dim); }
+#inventory .uirow .bar { grid-column: span 1; height: 8px; background: #0c1a12; border: 1px solid var(--line); position: relative; width: 46px; }
+#inventory .uirow .bar .fill { position: absolute; inset: 0 auto 0 0; background: var(--gold); }
+#inventory .uislot { width: 44px; height: 44px; border: 1px dashed var(--line); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+#inventory .uislot.full { border-style: solid; border-color: var(--gold); }
+#inventory .uislot .hint { color: var(--dim); }

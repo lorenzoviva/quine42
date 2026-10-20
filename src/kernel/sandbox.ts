@@ -45,6 +45,10 @@ export interface Host {
   item_find(name: string): string | undefined;
   /** A copy of an item definition (name, category, weight, tags, effects). */
   item_def(id: string): unknown;
+  /** A number of an item's bonus (difesa, velocita…), 0 if none. */
+  item_bonus(id: string, name: string): number;
+  /** The item in a slot of a module's panel, or undefined. */
+  slot_get(panel: string, slot: string): string | undefined;
   /** Changes the tile at a carpet cell (persisted with the place). Returns success. */
   set_tile(x: number, y: number, code: string): boolean;
   /** Opens a container for the player (the container panel). */

@@ -224,7 +224,7 @@ const SESSION_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
     valutazione: { type: 'STRING', description: 'in una frase: come sta andando il mondo' },
-    intervento: { type: 'STRING', enum: ['nessuno', 'oggetti', 'abitante', 'cosa'] },
+    intervento: { type: 'STRING', enum: ['nessuno', 'oggetti', 'abitante', 'cosa', 'meccanica'] },
     richiesta: { type: 'STRING', description: 'per abitante o cosa: la richiesta alla Fucina in una frase; per oggetti: che genere di oggetti mancano' },
   },
   required: ['valutazione', 'intervento'],
@@ -235,14 +235,14 @@ const SESSION_SCHEMA: Schema = {
  * people met, places seen) and decides whether to intervene — new items, a new kind of inhabitant, a
  * new thing — so the world keeps evolving coherently with what happened.
  */
-export async function councilSession(c: Council, summary: string): Promise<{ assessment: string; action: 'nessuno' | 'oggetti' | 'abitante' | 'cosa'; request?: string }> {
+export async function councilSession(c: Council, summary: string): Promise<{ assessment: string; action: 'nessuno' | 'oggetti' | 'abitante' | 'cosa' | 'meccanica'; request?: string }> {
   const r = await c.ask<{ valutazione: string; intervento: string; richiesta?: string }>(
     'arbitro',
     'council.session',
-    `Sessione del Concilio. Ecco come il viandante sta vivendo il mondo:\n${summary}\n\nIl mondo deve evolvere restando coerente. Serve un intervento? Al massimo uno: "oggetti" (un pacchetto di oggetti che manca, dì quali), "abitante" (un nuovo tipo di persona che renda più viva la società), "cosa" (un oggetto o mobile del mondo che le azioni del viandante fanno pensare), oppure "nessuno". Interveni solo se serve davvero.`,
+    `Sessione del Concilio. Ecco come il viandante sta vivendo il mondo:\n${summary}\n\nIl mondo deve evolvere restando coerente. Serve un intervento? Al massimo uno: "oggetti" (un pacchetto di oggetti che manca, dì quali), "abitante" (un nuovo tipo di persona che renda più viva la società), "cosa" (un oggetto o mobile del mondo che le azioni del viandante fanno pensare), "meccanica" (una meccanica con la sua interfaccia: slot per l'equipaggiamento, una faretra, una scheda di reputazione… — soprattutto se il riepilogo dice MANCA), oppure "nessuno". Interveni solo se serve davvero.`,
     SESSION_SCHEMA,
     { data: { summary }, temperature: 0.6 },
   );
-  const action = (['nessuno', 'oggetti', 'abitante', 'cosa'] as const).find((a) => a === r.intervento) ?? 'nessuno';
+  const action = (['nessuno', 'oggetti', 'abitante', 'cosa', 'meccanica'] as const).find((a) => a === r.intervento) ?? 'nessuno';
   return { assessment: String(r.valutazione ?? ''), action, request: r.richiesta ? String(r.richiesta).slice(0, 200) : undefined };
 }

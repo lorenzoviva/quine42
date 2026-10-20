@@ -81,4 +81,5 @@ persone, Claude Code e Gemini CLI). Design originale in [docs/design.md](docs/de
 - Matrix
 - Westworld
 - Project Zomboid
-- Cyberpunk 2077
+- Cyberpunk 
+- Dungeons & Dragons

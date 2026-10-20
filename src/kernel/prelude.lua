@@ -129,7 +129,10 @@ local function make_api()
   local items = {
     find = function(name) return host.item_find(tostring(name)) end,
     def = function(id) return host.item_def(tostring(id)) end,
+    bonus = function(id, name) return host.item_bonus(tostring(id), tostring(name)) end,
   }
+  -- Interfaces of modules: what sits in a slot of a panel.
+  local ui = { slot = function(panel, slot) return host.slot_get(tostring(panel), tostring(slot)) end }
   local bus = { emit = function(name, data) host.emit(tostring(name), data) end }
   local function log(...)
     local parts = {}
@@ -139,7 +142,7 @@ local function make_api()
     end
     host.log(concat(parts, " "))
   end
-  return ecs, input, world, bus, log, inventory, items
+  return ecs, input, world, bus, log, inventory, items, ui
 end
 
 local function player_binding(key)
@@ -162,13 +165,13 @@ function K.reset()
     carpet = { get = function() return host.carpet() end },
     time = { get = function() return host.time() end },
   }
-  local ecs, input, world, bus, log, inventory, items = make_api()
+  local ecs, input, world, bus, log, inventory, items, ui = make_api()
   local base = {
     math = copy(math), string = copy(string), table = copy(table), utf8 = copy(utf8),
     pairs = pairs, ipairs = ipairs, next = next, select = select, type = type,
     tostring = tostring, tonumber = tonumber, pcall = pcall, error = error, assert = assert,
     unpack = unpack, print = log, log = log, hash = hash,
-    ecs = ecs, input = input, world = world, bus = bus, inventory = inventory, items = items,
+    ecs = ecs, input = input, world = world, bus = bus, inventory = inventory, items = items, ui = ui,
   }
   base.string.dump = nil
   U = setmetatable(base, {

@@ -202,6 +202,47 @@ export class MockModels implements Models {
       }
       case 'action.judge':
         return this.judgeAction(d);
+      case 'mechanic.design':
+        // A careful engineer: equipment slots whose bonuses become a state of the wanderer.
+        return {
+          nome: 'Equipaggiamento',
+          descrizione: 'Slot per indossare e impugnare: armature e vestiti danno difesa e cambiano il passo.',
+          pannello: {
+            titolo: 'Equipaggiamento',
+            elementi: [
+              { tipo: 'slot', id: 'testa', etichetta: 'Testa', accetta: ['testa'] },
+              { tipo: 'slot', id: 'corpo', etichetta: 'Corpo', accetta: ['corpo', 'vestiario'] },
+              { tipo: 'slot', id: 'piedi', etichetta: 'Piedi', accetta: ['piedi'] },
+              { tipo: 'slot', id: 'arma', etichetta: 'Arma', accetta: ['arma'] },
+              { tipo: 'testo', etichetta: 'Difesa', campo: 'difesa.valore' },
+              { tipo: 'barra', etichetta: 'Salute', campo: 'needs.health', max: 100 },
+            ],
+          },
+          componenti_json: '{"difesa":{"valore":0}}',
+          logica: [
+            '-- Equipaggiamento: ciò che indossi dà difesa e cambia il passo.',
+            'local M = {}',
+            'local POSTI = { "testa", "corpo", "piedi", "arma" }',
+            'function M.on_slot(user, slot, item, panel)',
+            '  local difesa, passo = 0, 1',
+            '  for _, p in ipairs(POSTI) do',
+            '    local it = ui.slot(panel, p)',
+            '    if it then',
+            '      difesa = difesa + items.bonus(it, "difesa")',
+            '      local v = items.bonus(it, "velocita")',
+            '      if v > 0 then passo = passo * v end',
+            '    end',
+            '  end',
+            '  ecs.set(user, "difesa", { valore = difesa })',
+            '  local st = ecs.get(user, "stati") or {}',
+            '  st["equipaggiamento"] = { velocita = passo, peso = 0, luce = 0, fino = 0 }',
+            '  ecs.set(user, "stati", st)',
+            '  if item then return "Ti senti più protetto." end',
+            '  return nil',
+            'end',
+            'return M',
+          ].join('\n'),
+        };
       case 'referente.coordinate': {
         const t = String(d.text ?? '');
         if (/distrugg.*universo|cancella tutto/i.test(t)) return { risposta: 'Questo no.', incarico: 'nessuno', rifiuto: "distruggerebbe l'universo" };

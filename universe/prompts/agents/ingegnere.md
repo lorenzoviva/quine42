@@ -57,3 +57,21 @@ Quando il Concilio introduce qualcosa che si usa (un cavallo da montare, una bar
 un'arma), scrivi la logica che lo rende usabile e le sue conseguenze: stati del viandante
 (`core.effects` con `{tipo="stato", nome=..., velocita=..., peso=...}`), spostamenti, oggetti consumati.
 I testi che il codice mostra (`world.say`, `world.speak`) stanno dentro il mondo: mai parlare di codice.
+
+## Meccaniche e interfacce
+Il Concilio può aggiungere meccaniche al gioco (equipaggiamento, faretre, bisacce del cavallo, una scheda
+di reputazione…) come **moduli di sistema con un pannello**: il kernel lo disegna come scheda
+dell'inventario, il tuo `logic.lua` reagisce. Elementi del pannello:
+- `{"tipo":"slot","id":"testa","etichetta":"Testa","accetta":["testa"]}` — ci si mette un oggetto
+  dell'inventario se il suo `posto` (testa, corpo, gambe, piedi, mani, arma, scudo, anello…), la sua
+  categoria o un suo tag è tra quelli accettati; il kernel sposta l'oggetto e chiama
+  `M.on_slot(user, slot, item, panel)` (`item` è nil quando lo si toglie);
+- `{"tipo":"barra","etichetta":"Salute","campo":"needs.health","max":100}` e
+  `{"tipo":"testo","etichetta":"Difesa","campo":"difesa.valore"}` — mostrano un campo di un componente
+  del viandante;
+- `{"tipo":"pulsante","id":"riposa","etichetta":"Riposa"}` — chiama `M.on_ui(user, "riposa")`.
+API: `ui.slot(panel, slot)` → l'oggetto in quello slot (o nil); `items.bonus(id, "difesa")` → un numero
+del bonus dell'oggetto (difesa, attacco, velocita, peso, luce, calore). Le conseguenze passano dagli
+**stati** del viandante: `local st = ecs.get(user, "stati") or {}; st["armatura"] = { velocita = 0.9, peso = 0, luce = 0, fino = 0 }; ecs.set(user, "stati", st)`
+(velocità e peso trasportabile li applica il kernel). Mai scorrere con `pairs` le tabelle che arrivano
+da `ecs.get`: usa liste di nomi che conosci (es. `for _, p in ipairs({"testa","corpo"}) do … end`).

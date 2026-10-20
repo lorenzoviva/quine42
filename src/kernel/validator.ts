@@ -22,14 +22,15 @@ export const LUA_API: Record<string, string[]> = {
   inventory: ['add', 'remove', 'count', 'equipped'],
   input: ['held'],
   bus: ['emit'],
-  items: ['find', 'def'],
+  items: ['find', 'def', 'bonus'],
+  ui: ['slot'],
 };
 
 /** Calls to functions that do not exist, or to what the sandbox forbids: caught before anything runs. */
 export function apiErrors(logic: string): string[] {
   const code = logic.replace(/--\[\[[\s\S]*?\]\]|--[^\n]*/g, '').replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g, '""');
   const errors = new Set<string>();
-  for (const m of code.matchAll(/\b(ecs|world|inventory|input|bus|items)\s*[.:]\s*([A-Za-z_]\w*)/g)) {
+  for (const m of code.matchAll(/\b(ecs|world|inventory|input|bus|items|ui)\s*[.:]\s*([A-Za-z_]\w*)/g)) {
     if (!LUA_API[m[1]].includes(m[2])) errors.add(`${m[1]}.${m[2]} non esiste nell'API (disponibili: ${LUA_API[m[1]].join(', ')})`);
   }
   for (const m of code.matchAll(/\b(os|io|debug|package)\s*\.|\b(require|load|loadstring|dofile|setfenv|getmetatable)\s*\(/g)) errors.add(`${m[1] ?? m[2]} non è disponibile nella sandbox`);
@@ -146,11 +147,12 @@ export class Validator {
   }
 
   /** A forged module: manifest shape, Lua that compiles, uses only the API and loads. */
-  validateForged(manifest: Manifest, logic: string, existingIds: Set<string>): string[] {
+  validateForged(manifest: Manifest, logic: string, existingIds: Set<string>, opts: { system?: boolean } = {}): string[] {
     const path = `modules/${manifest.id}/manifest.json`;
     const errors = [...this.parseManifest(path, JSON.stringify(manifest)).errors];
     if (existingIds.has(manifest.id)) errors.push(`id già esistente: ${manifest.id}`);
-    if (manifest.kind !== 'entity' && manifest.kind !== 'item') errors.push(`la Fucina non può creare moduli di tipo ${manifest.kind}`);
+    // Systems only from the Forge of mechanics, and only with a panel (ADR-0028).
+    if (manifest.kind !== 'entity' && manifest.kind !== 'item' && !(opts.system && manifest.kind === 'system' && manifest.ui)) errors.push(`la Fucina non può creare moduli di tipo ${manifest.kind}`);
     errors.push(...this.checkLua(`modules/${manifest.id}/logic.lua`, logic));
     errors.push(...apiErrors(logic));
     if (!errors.length) {

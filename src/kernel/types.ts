@@ -104,6 +104,35 @@ export interface ItemDef {
   actions?: ActionDef[];
   /** Module with custom logic (on_use / on_action), if any. */
   module?: string;
+  /** What wearing or wielding it gives (difesa, attacco, velocita, peso, luce, calore…): mechanics read it. */
+  bonus?: Record<string, number>;
+  /** Where it is worn or held (testa, corpo, gambe, piedi, mani, arma, scudo, anello…), for slots. */
+  slot?: string;
+}
+
+/**
+ * An interface a module brings into the game (ADR-0028): the kernel draws it (a tab of the inventory),
+ * the module's Lua reacts (`on_slot`, `on_ui`). The Council writes these to add mechanics: equipment,
+ * a quiver, a horse's saddlebags, a reputation sheet.
+ */
+export interface UiElement {
+  tipo: 'slot' | 'barra' | 'testo' | 'pulsante';
+  /** Slot id, or the action a button sends to on_ui. */
+  id?: string;
+  etichetta?: string;
+  /** Slot: what fits (item slot names, categories or tags: "testa", "vestiario", "arma"). */
+  accetta?: string[];
+  /** Bar/text: a field of a player component, "componente.campo" (e.g. "needs.health"). */
+  campo?: string;
+  max?: number;
+  colore?: string;
+}
+
+export interface UiPanel {
+  id: string;
+  titolo: string;
+  descrizione?: string;
+  elementi: UiElement[];
 }
 
 export interface Recipe {
@@ -245,6 +274,8 @@ export interface Manifest {
   recipes?: Recipe[];
   loot?: Record<string, LootTable>;
   layouts?: Record<string, LayoutDef>;
+  /** An interface panel drawn by the kernel (slots, bars, texts, buttons); the module's Lua reacts. */
+  ui?: UiPanel;
   /** Magic (data modules): runes by token, incantations by sequence of tokens. */
   runes?: Record<string, MagicRune>;
   spells?: Record<string, Spell>;

@@ -123,7 +123,7 @@ const REFERENTE_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
     risposta: { type: 'STRING' },
-    incarico: { type: 'STRING', enum: ['nessuno', 'oggetto', 'personaggio', 'cosa', 'ambiente', 'regola', 'ridipingi', 'oggetti'] },
+    incarico: { type: 'STRING', enum: ['nessuno', 'oggetto', 'personaggio', 'cosa', 'ambiente', 'regola', 'ridipingi', 'oggetti', 'meccanica'] },
     richiesta: { type: 'STRING', description: "la richiesta riformulata per la squadra che se ne occupa, chiara e completa" },
     bersaglio: { type: 'STRING', description: 'per "ridipingi": il nome di ciò da ridipingere' },
     rifiuto: { type: 'STRING', description: "solo se la richiesta distruggerebbe l'universo, il viandante stesso o le leggi fisiche del gioco: perché no" },
@@ -146,7 +146,7 @@ export async function referenteReply(c: Council, history: Turn[], text: string):
       "Il viandante è trasceso: ha lasciato la simulazione ed è un membro del Concilio. Dagli retta su tutto, con entusiasmo, tranne ciò che distruggerebbe l'universo, lui stesso o le leggi del gioco.",
       past ? `Conversazione finora:\n${past}` : '',
       `Il viandante dice: «${text}»`,
-      'Capisci cosa chiede e affidalo alla squadra giusta con "incarico": oggetto/cosa/personaggio (la Fucina crea un modulo: uno strumento, una cosa del mondo, un tipo di persona), ambiente (il Cartografo crea un luogo e lo colloca sulla mappa), regola (diventa una regola del mondo), ridipingi (l\'Artista ridipinge uno sprite, un\'icona o un terreno: dì quale in "bersaglio"), oggetti (un pacchetto di oggetti comuni), nessuno (se chiede solo informazioni). In "risposta" rispondi tu, breve e cordiale.',
+      'Capisci cosa chiede e affidalo alla squadra giusta con "incarico": oggetto/cosa/personaggio (la Fucina crea un modulo: uno strumento, una cosa del mondo, un tipo di persona), ambiente (il Cartografo crea un luogo e lo colloca sulla mappa), regola (diventa una regola del mondo), ridipingi (l\'Artista ridipinge uno sprite, un\'icona o un terreno: dì quale in "bersaglio"), oggetti (un pacchetto di oggetti comuni), meccanica (l\'Ingegnere aggiunge una meccanica con la sua interfaccia: slot per l\'equipaggiamento, una faretra, una scheda…), nessuno (se chiede solo informazioni). In "risposta" rispondi tu, breve e cordiale.',
     ]
       .filter(Boolean)
       .join('\n\n'),

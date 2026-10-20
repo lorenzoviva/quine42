@@ -33,9 +33,10 @@ import { forge, judgeCombination, repairLogic, slug, type ForgeOrigin } from './
 import { agentReply, examine, narrate, npcDialogue, npcReply, referenteReply, weavePlot, type NpcReply, type Turn } from './agents/minds';
 import { planGenesis } from './agents/genesis';
 import { councilSession, judgeAction, judgeCraft, nameSpell } from './agents/effects';
+import { cleanPanel, designMechanic } from './agents/mechanics';
 import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Identity } from './agents/content';
 import { addItem, CARRY_CAPACITY, countItem, equippedItem, moveSlot, newInventory, putSlot, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
-import type { ActionDef, Effect, FileMap, Spell, ItemDef, ItemSpec, Manifest, ModuleEntry, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
+import type { ActionDef, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
 
 export interface Chunk {
   cx: number;
@@ -295,7 +296,7 @@ export class Kernel {
       get: (id, name) => this.ecs.get(id, name) ?? undefined,
       set: (id, name, data) => {
         // The floor protects what keeps the universe navigable: position, the player, the carpet.
-        if (!this.ecs.alive.has(id) || ['pos', 'module', 'chunk', 'carpet', 'container'].includes(name) || (id === this.playerId && ['player', 'hand', 'inventory', 'needs'].includes(name))) return false;
+        if (!this.ecs.alive.has(id) || ['pos', 'module', 'chunk', 'carpet', 'container'].includes(name) || (id === this.playerId && ['player', 'hand', 'inventory', 'needs', 'slots'].includes(name))) return false;
         if (data === null || typeof data !== 'object') return false;
         this.ecs.set(id, name, data);
         return true;
@@ -361,8 +362,13 @@ export class Kernel {
       item_find: (name) => this.content.byName(name)?.id,
       item_def: (id) => {
         const d = this.content.get(id);
-        return d ? { id: d.id, name: d.name, category: d.category, weight: d.weight, tags: d.tags.join(','), effects: { ...(d.effects ?? {}) } } : undefined;
+        return d ? { id: d.id, name: d.name, category: d.category, weight: d.weight, tags: d.tags.join(','), slot: d.slot ?? '', effects: { ...(d.effects ?? {}) } } : undefined;
       },
+      item_bonus: (id, name) => {
+        const v = this.content.get(id)?.bonus?.[name];
+        return typeof v === 'number' && Number.isFinite(v) ? v : 0;
+      },
+      slot_get: (panel, slot) => this.slots()[panel]?.[slot]?.item ?? undefined,
       set_tile: (x, y, code) => this.setTile(Math.floor(x), Math.floor(y), code),
       open: (id) => !!this.openContainer(id),
       make_container: (id, size, loot) => {
@@ -1043,7 +1049,7 @@ export class Kernel {
     this.bus.emit('chunk:planned', { key: ch.key });
     if (this.plannedCount % 10 === 0) void this.growContent('esplorazione');
     if (this.plannedCount % 7 === 0) void this.growCast(plan.place);
-    if (this.plannedCount % 12 === 0) void this.holdSession();
+    if (this.plannedCount === 3 || this.plannedCount % 12 === 0) void this.holdSession();
   }
 
   /**
@@ -1062,7 +1068,10 @@ export class Kernel {
     const rules = this.rules().slice(-12).map((r) => `- ${r.testo}: ${r.possibile ? 'si può' : 'non si può'}`).join('\n');
     const people = readPeople(this.files).persone.slice(-10).map((p) => `- ${p.nome}, ${p.mestiere}`).join('\n');
     const places = [...this.chunks.values()].filter((c) => c.place).slice(-8).map((c) => `- ${c.place!.name}`).join('\n');
-    const summary = `Regole nate dal gioco:\n${rules || '(nessuna)'}\nPersone incontrate:\n${people || '(nessuna)'}\nLuoghi visti:\n${places || '(nessuno)'}\nOggetti esistenti: ${this.content.items.size}; tipi di abitanti: ${[...this.modules.values()].filter((m) => m.manifest.persona).length}.`;
+    const wearable = [...this.content.items.values()].filter((d) => d.equippable || d.slot || ['arma', 'vestiario'].includes(d.category)).length;
+    const panels = this.uiPanels().map((p) => p.panel.titolo);
+    const mech = `Meccaniche con interfaccia: ${panels.join(', ') || 'nessuna'}.${wearable && !this.uiPanels().some((p) => p.panel.elementi.some((e) => e.tipo === 'slot')) ? ` MANCA: ci sono ${wearable} oggetti da indossare o impugnare ma nessuno slot per farlo.` : ''}`;
+    const summary = `${mech}\nRegole nate dal gioco:\n${rules || '(nessuna)'}\nPersone incontrate:\n${people || '(nessuna)'}\nLuoghi visti:\n${places || '(nessuno)'}\nOggetti esistenti: ${this.content.items.size}; tipi di abitanti: ${[...this.modules.values()].filter((m) => m.manifest.persona).length}.`;
     let s;
     try {
       s = await councilSession(this.council, summary);
@@ -1074,6 +1083,7 @@ export class Kernel {
     if (s.action === 'oggetti') await this.growContent(`sessione del Concilio: ${s.request ?? ''}`, 12, true);
     else if (s.action === 'abitante') await this.forgeModule(s.request ?? 'un nuovo abitante del mondo', 'agente', 'npc');
     else if (s.action === 'cosa' && s.request) await this.forgeModule(s.request, 'agente', 'oggetto');
+    else if (s.action === 'meccanica') await this.forgeMechanic(s.request ?? 'equipaggiamento: slot per indossare e impugnare');
     return s.action;
   }
 
@@ -2497,6 +2507,8 @@ export class Kernel {
         return { say: r.say, forged: (await this.createEnvironment(req)).summary };
       case 'oggetti':
         return { say: r.say, forged: (await this.growContent(`richiesta del viandante: ${req}`, 12, true)) ? 'Il Narratore ha scritto un pacchetto di oggetti nuovi.' : 'Il pacchetto non è venuto.' };
+      case 'meccanica':
+        return { say: r.say, forged: (await this.forgeMechanic(req)).summary };
       case 'regola': {
         this.recordRule({ chiave: `regola|${normName(req).slice(0, 60)}`, testo: req, possibile: true, racconto: 'stabilito dal viandante trasceso, accolto dal Concilio', effetti: ['regola'] });
         return { say: r.say, forged: `Nuova regola del mondo: ${req}` };
@@ -2550,6 +2562,121 @@ export class Kernel {
 
   private rememberDeath(): void {
     this.recordRule({ chiave: `morte|${Date.now()}`, testo: 'un viandante è morto', possibile: true, racconto: 'la gente ne parla ancora, in piazza' }, false);
+  }
+
+  // --- Interfaces of modules (ADR-0028) -------------------------------------------------------
+
+  /** Panels modules bring into the game (drawn by the kernel as tabs of the inventory). */
+  uiPanels(): Array<{ module: string; panel: UiPanel }> {
+    return [...this.modules.values()].filter((m) => m.manifest.ui?.elementi?.length).map((m) => ({ module: m.manifest.id, panel: m.manifest.ui! }));
+  }
+
+  /** What sits in the slots of every panel: player component `slots` (kernel-owned). */
+  slots(): Record<string, Record<string, { item: string; count: number } | null>> {
+    let s = this.ecs.get(this.playerId, 'slots');
+    if (!s) s = this.ecs.set(this.playerId, 'slots', {});
+    return s;
+  }
+
+  /** Whether an item fits a slot: by its place (slot), category or tags. */
+  fits(item: string, accetta: string[] | undefined): boolean {
+    const d = this.content.get(item);
+    if (!d) return false;
+    if (!accetta?.length) return true;
+    return accetta.some((a) => a === d.slot || a === d.category || d.tags.includes(a));
+  }
+
+  /** Puts something from the inventory into a slot of a panel; the module reacts (on_slot). */
+  equip(panelId: string, slotId: string, invSlot: number): boolean {
+    const p = this.uiPanels().find((x) => x.panel.id === panelId);
+    const el = p?.panel.elementi.find((e) => e.tipo === 'slot' && e.id === slotId);
+    const s = this.inventory().slots[invSlot];
+    if (!p || !el || !s) return false;
+    if (!this.fits(s.item, el.accetta)) {
+      this.message(`${this.itemInfo(s.item).name} non va lì (${el.etichetta}).`, 'warn');
+      return false;
+    }
+    const slots = this.slots();
+    slots[panelId] ??= {};
+    const old = slots[panelId][slotId];
+    takeFromSlot(this.inventory(), invSlot, 1);
+    slots[panelId][slotId] = { item: s.item, count: 1 };
+    if (old) this.give(old.item, old.count);
+    this.slotChanged(p.module, panelId, slotId, s.item);
+    return true;
+  }
+
+  unequip(panelId: string, slotId: string): boolean {
+    const p = this.uiPanels().find((x) => x.panel.id === panelId);
+    const cur = this.slots()[panelId]?.[slotId];
+    if (!p || !cur) return false;
+    if (!this.give(cur.item, cur.count)) {
+      this.message("L'inventario è pieno.", 'warn');
+      return false;
+    }
+    this.slots()[panelId][slotId] = null;
+    this.slotChanged(p.module, panelId, slotId, undefined);
+    return true;
+  }
+
+  private slotChanged(module: string, panel: string, slot: string, item: string | undefined): void {
+    if (!this.sandbox.has(module, 'on_slot')) return;
+    const { value, failed } = this.runModule(module, 'on_slot', this.playerId, slot, item, panel);
+    if (!failed && typeof value === 'string' && value) this.message(value);
+  }
+
+  /** A button of a panel: the module's on_ui(user, action). */
+  uiAction(panelId: string, action: string): void {
+    const p = this.uiPanels().find((x) => x.panel.id === panelId);
+    if (!p || !this.sandbox.has(p.module, 'on_ui')) return;
+    const { value, failed } = this.runModule(p.module, 'on_ui', this.playerId, action);
+    if (!failed && typeof value === 'string' && value) this.message(value);
+  }
+
+  /** A field of a player component for bars and texts ("needs.health"). */
+  uiValue(campo: string | undefined): unknown {
+    if (!campo) return undefined;
+    const [c, f] = campo.split('.');
+    return this.ecs.get(this.playerId, c)?.[f];
+  }
+
+  /**
+   * The Forge of mechanics: the Council adds a mechanic (equipment, a quiver, a reputation…) as a
+   * system module with a panel and Lua logic; validated (panel cleaned, code compiled, dry-loaded).
+   */
+  async forgeMechanic(request: string): Promise<{ ok: boolean; id?: string; summary: string }> {
+    const items = [...this.content.items.values()].filter((d) => d.equippable || d.slot || ['arma', 'vestiario'].includes(d.category)).map((d) => `${d.name}${d.slot ? ` [${d.slot}]` : ` (${d.category})`}${d.bonus ? ` ${JSON.stringify(d.bonus)}` : ''}`);
+    const mechanics = this.uiPanels().map((p) => p.panel.titolo);
+    let feedback = '';
+    for (let attempt = 0; attempt < 2; attempt++) {
+      let d;
+      try {
+        d = await designMechanic(this.council, request, { items, mechanics, feedback });
+      } catch (e) {
+        return { ok: false, summary: `L'Ingegnere non riesce: ${(e as Error).message}` };
+      }
+      let id = `mech.${slug(d.name)}`;
+      while (this.modules.has(id)) id += '-2';
+      const { panel, errors } = cleanPanel(d.panel, slug(d.name));
+      const logic = d.logic.endsWith('\n') ? d.logic : `${d.logic}\n`;
+      const manifest: Manifest = { id, name: d.name, kind: 'system', version: '0.1.0', origin: 'agente', description: d.description, logic: 'logic.lua', order: 60, ...(panel ? { ui: panel } : {}) };
+      const errs = [...errors, ...(panel ? [] : ['nessun pannello']), ...this.validator.validateForged(manifest, logic, new Set(this.modules.keys()), { system: true })];
+      if (errs.length) {
+        feedback = errs.join('; ');
+        this.council.say('kernel', 'scarta', `meccanica «${d.name}»: ${feedback}`, 'ingegnere', 'mechanic.design');
+        continue;
+      }
+      const dir = `modules/${id}/`;
+      this.repo.write(`${dir}manifest.json`, JSON.stringify(manifest, null, 2) + '\n');
+      this.repo.write(`${dir}logic.lua`, logic);
+      // Starting components for the wanderer (e.g. a reputation at 0).
+      for (const [name, data] of Object.entries(d.components ?? {})) if (data && typeof data === 'object' && !this.ecs.has(this.playerId, name) && !['player', 'hand', 'inventory', 'needs', 'pos', 'slots'].includes(name)) this.ecs.set(this.playerId, name, clone(data));
+      this.applyFiles({ ...this.repo.working });
+      const c = this.repo.commit(`meccanica: ${d.name}`, 'agent');
+      this.council.say('ingegnere', 'approva', `nuova meccanica «${d.name}»: ${d.description} (pannello «${panel!.titolo}», commit ${c.id})`, undefined, 'mechanic.design');
+      return { ok: true, id, summary: `Nuova meccanica: ${d.name} — ${d.description} (la trovi nell'inventario, scheda «${panel!.titolo}»).` };
+    }
+    return { ok: false, summary: `L'Ingegnere non è riuscito a scrivere una meccanica valida: ${feedback}` };
   }
 
   /** States of the wanderer (on horseback, with a backpack…): what they change, until when. */
@@ -3668,7 +3795,7 @@ export class Kernel {
     }
     const n = this.needs();
     const state = {
-      viandante: { inventory: this.inventory(), needs: n, hand: this.hand(), stati: this.states(), trasceso: this.exitedOnce },
+      viandante: { inventory: this.inventory(), needs: n, hand: this.hand(), stati: this.states(), slots: this.slots(), trasceso: this.exitedOnce },
       consumati: [...this.consumed].slice(-5000),
       contenitori: containers,
       ora: Math.round(this.time),
@@ -3697,6 +3824,12 @@ export class Kernel {
     if (v.hand?.tokens) Object.assign(this.hand(), v.hand);
     if (v.stati) this.ecs.set(this.playerId, 'stati', Object.fromEntries(Object.entries(v.stati).filter(([, x]) => x && typeof x === 'object')));
     if (v.trasceso) this.exitedOnce = true;
+    if (v.slots && typeof v.slots === 'object') this.ecs.set(this.playerId, 'slots', v.slots);
+    // What the mechanics derive from the slots (defence, states) is rebuilt by their own on_slot.
+    for (const p of this.uiPanels()) {
+      const filled = Object.entries(this.slots()[p.panel.id] ?? {}).find(([, x]) => x);
+      if (filled) this.slotChanged(p.module, p.panel.id, filled[0], filled[1]!.item);
+    }
     for (const k of st.consumati ?? []) this.consumed.add(String(k));
     for (const [k, c] of Object.entries(st.contenitori ?? {})) this.savedContainers.set(k, c as { inv: Inventory; filled: boolean });
     if (Number.isFinite(st.ora)) this.time = st.ora;
