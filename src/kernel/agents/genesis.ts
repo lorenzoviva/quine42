@@ -18,6 +18,12 @@ export const BASE_CODES: Record<string, { meaning: string; layer: TileLayer; sol
   h: { meaning: 'muro degli edifici', layer: 'wall', solid: true },
   f: { meaning: 'pavimento interno degli edifici', layer: 'floor', solid: false, indoor: true },
   d: { meaning: 'porta o soglia', layer: 'door', solid: false },
+  // Biomes of the procedural draft (world.terrain): they must exist in every world.
+  s: { meaning: 'terreno arido calpestabile (sabbia, deserto, spiaggia)', layer: 'ground', solid: false },
+  j: { meaning: 'vegetazione fittissima e invalicabile dei climi caldi (giungla)', layer: 'vegetation', solid: true },
+  o: { meaning: 'acqua profonda del mare o dell’oceano', layer: 'liquid', solid: true },
+  k: { meaning: 'montagna, pareti invalicabili', layer: 'rock', solid: true },
+  n: { meaning: 'terreno freddo calpestabile e lento (neve, gelo)', layer: 'ground', solid: false },
 };
 
 export interface CastEntry {
@@ -158,7 +164,7 @@ export function terrainErrors(terrains: RawTerrain[]): string[] {
     if (!/^#[0-9a-f]{6}$/i.test(t.colore)) errors.push(`colore non valido per ${t.codice}: ${t.colore}`);
   }
   if (new Set(codes).size !== codes.length) errors.push('codici duplicati');
-  if (terrains.length > 12) errors.push('al massimo 12 terreni');
+  if (terrains.length > 24) errors.push('al massimo 24 terreni');
   return errors;
 }
 
@@ -198,7 +204,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     c.ask<{ terreni: RawTerrain[]; tetto: string }>(
       'cartografo',
       'genesis.terrain',
-      `Definisci 8-11 tipi di terreno per le mappe di questo universo, esterni e interni.\nTono: ${bible.tono}\nLuoghi: ${bible.luoghi.join('; ')}\nStile: ${style.stile}; palette ${style.palette.join(', ')}\nCodici obbligatori (un carattere ciascuno), adattati al tema:\n${Object.entries(BASE_CODES).map(([k, v]) => `- ${k}: ${v.meaning} [strato ${v.layer}]`).join('\n')}\nAggiungine altri (un carattere: es. campi coltivati, fango, sabbia, pavimento di pietra, tappeto, ponte di legno). Colori ben distinti tra loro.${feedback ? `\nDa correggere: ${feedback}` : ''}`,
+      `Definisci 14-20 tipi di terreno per le mappe di questo universo, esterni e interni.\nTono: ${bible.tono}\nLuoghi: ${bible.luoghi.join('; ')}\nStile: ${style.stile}; palette ${style.palette.join(', ')}\nCodici obbligatori (un carattere ciascuno), adattati al tema:\n${Object.entries(BASE_CODES).map(([k, v]) => `- ${k}: ${v.meaning} [strato ${v.layer}]`).join('\n')}\nAggiungine altri (un carattere: es. campi coltivati, fango, pavimento di pietra, muro di pietra, mattoni, paglia delle capanne, staccionata, ponte levatoio, lava, tappeto). Colori ben distinti tra loro.${feedback ? `\nDa correggere: ${feedback}` : ''}`,
       TERRAIN_SCHEMA,
       { data: { ...data, bible } },
     );
