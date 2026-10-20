@@ -2,19 +2,166 @@
   "id": "world.terrain",
   "name": "Terreni",
   "kind": "generator",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Bozza procedurale continua delle mappe e palette dei terreni (con strati: terreno, pavimento, muro, porta, acqua, vegetazione, roccia). La Genesi riscrive la palette; gli ambienti trasformano la bozza.",
   "logic": "logic.lua",
   "tiles": {
-    "g": { "name": "prato", "description": "erba bassa con trifoglio e piccoli fiori", "color": "#5a9e48", "solid": false, "layer": "ground", "speed": 1 },
-    "p": { "name": "sentiero", "description": "terra battuta con sassolini", "color": "#c7a76a", "solid": false, "layer": "ground", "speed": 1.15 },
-    "t": { "name": "bosco", "description": "alberi fitti dalle chiome tonde", "color": "#2c6a34", "solid": true, "layer": "vegetation" },
-    "w": { "name": "acqua", "description": "acqua di stagno, increspata", "color": "#3c7cc8", "solid": true, "layer": "liquid" },
-    "r": { "name": "roccia", "description": "massi grigi e lastre di pietra", "color": "#8c8d95", "solid": true, "layer": "rock" },
-    "h": { "name": "muro", "description": "muri di pietra squadrata", "color": "#8a6a52", "solid": true, "layer": "wall" },
-    "f": { "name": "pavimento di legno", "description": "assi di legno chiaro", "color": "#b48a5a", "solid": false, "layer": "floor", "indoor": true },
-    "d": { "name": "porta", "description": "soglia e porta di legno", "color": "#d8b048", "solid": false, "layer": "door" },
-    "m": { "name": "campo arato", "description": "solchi di terra scura coltivata", "color": "#6e5434", "solid": false, "layer": "ground", "speed": 0.8 }
+    "g": {
+      "name": "prato",
+      "description": "erba bassa con trifoglio e piccoli fiori",
+      "color": "#5a9e48",
+      "solid": false,
+      "layer": "ground",
+      "speed": 1
+    },
+    "p": {
+      "name": "sentiero",
+      "description": "terra battuta con sassolini",
+      "color": "#c7a76a",
+      "solid": false,
+      "layer": "ground",
+      "speed": 1.15
+    },
+    "t": {
+      "name": "bosco",
+      "description": "alberi fitti dalle chiome tonde",
+      "color": "#2c6a34",
+      "solid": true,
+      "layer": "vegetation"
+    },
+    "w": {
+      "name": "acqua",
+      "description": "acqua di stagno, increspata",
+      "color": "#3c7cc8",
+      "solid": true,
+      "layer": "liquid"
+    },
+    "r": {
+      "name": "roccia",
+      "description": "massi grigi e lastre di pietra",
+      "color": "#8c8d95",
+      "solid": true,
+      "layer": "rock"
+    },
+    "h": {
+      "name": "muro",
+      "description": "muri di pietra squadrata",
+      "color": "#8a6a52",
+      "solid": true,
+      "layer": "wall"
+    },
+    "f": {
+      "name": "pavimento di legno",
+      "description": "assi di legno chiaro",
+      "color": "#b48a5a",
+      "solid": false,
+      "layer": "floor",
+      "indoor": true
+    },
+    "d": {
+      "name": "porta",
+      "description": "soglia e porta di legno",
+      "color": "#d8b048",
+      "solid": false,
+      "layer": "door"
+    },
+    "m": {
+      "name": "campo arato",
+      "description": "solchi di terra scura coltivata",
+      "color": "#6e5434",
+      "solid": false,
+      "layer": "ground",
+      "speed": 0.8
+    },
+    "s": {
+      "name": "sabbia",
+      "color": "#d8c27a",
+      "solid": false,
+      "speed": 0.85,
+      "layer": "ground",
+      "description": "sabbia fine e calda, di deserto o di spiaggia"
+    },
+    "j": {
+      "name": "giungla",
+      "color": "#1f6b34",
+      "solid": true,
+      "layer": "vegetation",
+      "description": "vegetazione tropicale fittissima, liane e foglie enormi"
+    },
+    "o": {
+      "name": "mare",
+      "color": "#1d4f8a",
+      "solid": true,
+      "layer": "liquid",
+      "description": "acqua profonda del mare aperto"
+    },
+    "k": {
+      "name": "montagna",
+      "color": "#6e6a66",
+      "solid": true,
+      "layer": "rock",
+      "description": "pareti di montagna, invalicabili"
+    },
+    "n": {
+      "name": "neve",
+      "color": "#e8eef2",
+      "solid": false,
+      "speed": 0.7,
+      "layer": "ground",
+      "description": "neve alta che rallenta il passo"
+    },
+    "b": {
+      "name": "muro di pietra",
+      "color": "#8a8580",
+      "solid": true,
+      "layer": "wall",
+      "description": "muri di grosse pietre squadrate: castelli, torri, templi"
+    },
+    "q": {
+      "name": "muro di mattoni",
+      "color": "#9a4a32",
+      "solid": true,
+      "layer": "wall",
+      "description": "mattoni rossi cotti al forno"
+    },
+    "a": {
+      "name": "parete di paglia",
+      "color": "#c9a85a",
+      "solid": true,
+      "layer": "wall",
+      "description": "pareti di canne e paglia delle capanne"
+    },
+    "c": {
+      "name": "staccionata",
+      "color": "#7a5a34",
+      "solid": true,
+      "layer": "wall",
+      "description": "recinto di pali di legno per cavalli e pecore"
+    },
+    "z": {
+      "name": "ponte levatoio",
+      "color": "#8b6a42",
+      "solid": false,
+      "layer": "floor",
+      "description": "assi di legno robuste sopra il fossato"
+    },
+    "l": {
+      "name": "pavimento di pietra",
+      "color": "#9c958c",
+      "solid": false,
+      "layer": "floor",
+      "indoor": true,
+      "description": "lastre di pietra consumate dai passi"
+    },
+    "v": {
+      "name": "lava",
+      "color": "#e2581e",
+      "solid": true,
+      "layer": "liquid",
+      "description": "roccia fusa che ribolle: nessuno la attraversa"
+    }
   },
-  "roof": { "color": "#9a4632" }
+  "roof": {
+    "color": "#9a4632"
+  }
 }

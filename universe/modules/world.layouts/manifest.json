@@ -12,10 +12,49 @@
       "program": {
         "type": "sequence",
         "children": [
-          { "type": "prl", "rules": [{ "in": "t", "out": "g", "p": 0.85 }, { "in": "w", "out": "g", "p": 0.6 }] },
-          { "type": "one", "rules": [{ "in": "[gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm]", "out": "hhhhhh/hffffh/hffffh/hffffh/hhdhhh" }], "steps": 2 },
-          { "type": "one", "rules": [{ "in": "ggg/ggg", "out": "mmm/mmm" }], "steps": 2 },
-          { "type": "path", "from": "d", "to": "p", "on": "gm", "color": "p", "steps": 3 }
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "g",
+                "p": 0.85
+              },
+              {
+                "in": "w",
+                "out": "g",
+                "p": 0.6
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm]",
+                "out": "hhhhhh/hffffh/hffffh/hffffh/hhdhhh"
+              }
+            ],
+            "steps": 2
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "ggg/ggg",
+                "out": "mmm/mmm"
+              }
+            ],
+            "steps": 2
+          },
+          {
+            "type": "path",
+            "from": "d",
+            "to": "p",
+            "on": "gm",
+            "color": "p",
+            "steps": 3
+          }
         ]
       }
     },
@@ -26,8 +65,26 @@
       "program": {
         "type": "sequence",
         "children": [
-          { "type": "prl", "rules": [{ "in": "g", "out": "t", "p": 0.35 }] },
-          { "type": "one", "rules": [{ "in": "ttt/ttt/ttt", "out": "ggg/ggg/ggg" }], "steps": 3 }
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "t",
+                "p": 0.35
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "ttt/ttt/ttt",
+                "out": "ggg/ggg/ggg"
+              }
+            ],
+            "steps": 3
+          }
         ]
       }
     },
@@ -38,9 +95,36 @@
       "program": {
         "type": "sequence",
         "children": [
-          { "type": "prl", "rules": [{ "in": "t", "out": "g", "p": 0.9 }] },
-          { "type": "one", "rules": [{ "in": "gggg/gggg/gggg", "out": "mmmm/mmmm/pppp" }], "steps": 5 },
-          { "type": "one", "rules": [{ "in": "gggg/gggg/gggg/gggg", "out": "hhhh/hffh/hffh/hhdh" }], "steps": 1 }
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "g",
+                "p": 0.9
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "gggg/gggg/gggg",
+                "out": "mmmm/mmmm/pppp"
+              }
+            ],
+            "steps": 5
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "gggg/gggg/gggg/gggg",
+                "out": "hhhh/hffh/hffh/hhdh"
+              }
+            ],
+            "steps": 1
+          }
         ]
       }
     },
@@ -51,9 +135,36 @@
       "program": {
         "type": "sequence",
         "children": [
-          { "type": "one", "rules": [{ "in": "ggg/ggg/ggg", "out": "r*r/***/r*r" }], "steps": 3 },
-          { "type": "one", "rules": [{ "in": "gggg", "out": "hh*h" }], "steps": 4 },
-          { "type": "prl", "rules": [{ "in": "g", "out": "p", "p": 0.08 }] }
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "ggg/ggg/ggg",
+                "out": "r*r/***/r*r"
+              }
+            ],
+            "steps": 3
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "gggg",
+                "out": "hh*h"
+              }
+            ],
+            "steps": 4
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "p",
+                "p": 0.08
+              }
+            ]
+          }
         ]
       }
     },
@@ -64,9 +175,496 @@
       "program": {
         "type": "sequence",
         "children": [
-          { "type": "prl", "rules": [{ "in": "[tw]", "out": "g", "p": 1 }] },
-          { "type": "one", "rules": [{ "in": "[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]", "out": "hhhhhhhhh/hfffhfffh/hfffdfffh/hfffhhdhh/hfffffffh/hfffffffh/hhhhdhhhh" }], "steps": 1, "symmetry": "none" },
-          { "type": "path", "from": "d", "to": "p", "on": "gm", "color": "p", "steps": 1 }
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[tw]",
+                "out": "g",
+                "p": 1
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]",
+                "out": "hhhhhhhhh/hfffhfffh/hfffdfffh/hfffhhdhh/hfffffffh/hfffffffh/hhhhdhhhh"
+              }
+            ],
+            "steps": 1,
+            "symmetry": "none"
+          },
+          {
+            "type": "path",
+            "from": "d",
+            "to": "p",
+            "on": "gm",
+            "color": "p",
+            "steps": 1
+          }
+        ]
+      }
+    },
+    "castello": {
+      "name": "Castello",
+      "description": "un castello di pietra con fossato, ponte levatoio, mura e torri; un mastio nel cortile",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[tw]",
+                "out": "g",
+                "p": 1
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "castello",
+            "codes": {
+              "muro": "b",
+              "pavimento": "l",
+              "ponte": "z"
+            }
+          }
+        ]
+      }
+    },
+    "fortezza": {
+      "name": "Fortezza",
+      "description": "una fortezza a doppia cinta di mura, con caserma interna",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[tw]",
+                "out": "g",
+                "p": 1
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "fortezza",
+            "codes": {
+              "muro": "b",
+              "pavimento": "l"
+            }
+          }
+        ]
+      }
+    },
+    "capanne": {
+      "name": "Villaggio di capanne",
+      "description": "capanne di paglia sparse attorno a un pozzo",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "g",
+                "p": 0.8
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "pozzo"
+          },
+          {
+            "type": "stamp",
+            "shape": "capanne",
+            "codes": {
+              "muro": "a",
+              "pavimento": "f"
+            },
+            "count": 5
+          }
+        ]
+      }
+    },
+    "maneggio": {
+      "name": "Maneggio",
+      "description": "recinti di staccionata per cavalli, una stalla",
+      "environment": "esterno",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[tw]",
+                "out": "g",
+                "p": 1
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "recinto",
+            "codes": {
+              "recinto": "c"
+            },
+            "count": 2
+          }
+        ]
+      }
+    },
+    "caserma": {
+      "name": "Caserma",
+      "description": "la caserma delle guardie, lunga e bassa, con il cortile per le esercitazioni",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[tw]",
+                "out": "g",
+                "p": 1
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "caserma",
+            "codes": {
+              "muro": "b",
+              "pavimento": "l"
+            }
+          },
+          {
+            "type": "stamp",
+            "shape": "recinto",
+            "codes": {
+              "recinto": "c"
+            }
+          }
+        ]
+      }
+    },
+    "dungeon": {
+      "name": "Sotterraneo",
+      "description": "cunicoli e stanze scavati nella roccia, umidi e bui",
+      "environment": "interno",
+      "program": {
+        "type": "stamp",
+        "shape": "dungeon",
+        "codes": {
+          "roccia": "k",
+          "pavimento": "l"
+        }
+      }
+    },
+    "torre_mago": {
+      "name": "Torre del mago",
+      "description": "una torre rotonda di pietra in una radura silenziosa",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "g",
+                "p": 0.5
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "torre",
+            "codes": {
+              "muro": "b",
+              "pavimento": "l"
+            }
+          }
+        ]
+      }
+    },
+    "tana_drago": {
+      "name": "Tana del drago",
+      "description": "una caverna nella montagna, con pozze di lava e ossa sparse",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[gt]",
+                "out": "k",
+                "p": 0.35
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "tana",
+            "codes": {
+              "roccia": "k",
+              "terreno": "s"
+            }
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "k",
+                "out": "v",
+                "p": 0.04
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "tempio": {
+      "name": "Tempio",
+      "description": "un tempio di pietra con colonne, in cima a una scalinata",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "g",
+                "p": 0.9
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "tempio",
+            "codes": {
+              "muro": "b",
+              "pavimento": "l"
+            }
+          }
+        ]
+      }
+    },
+    "piramide": {
+      "name": "Piramide",
+      "description": "una piramide di pietra nel deserto, con una camera segreta",
+      "environment": "esterno",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[gtw]",
+                "out": "s",
+                "p": 1
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "piramide",
+            "codes": {
+              "muro": "b",
+              "pavimento": "l"
+            }
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "s",
+                "out": "r",
+                "p": 0.02
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "deserto": {
+      "name": "Deserto",
+      "description": "dune di sabbia, rocce bruciate dal sole, rare oasi",
+      "environment": "esterno",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[gt]",
+                "out": "s",
+                "p": 1
+              }
+            ]
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "s",
+                "out": "r",
+                "p": 0.04
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "giungla": {
+      "name": "Giungla",
+      "description": "una giungla fitta, umida, con radure e sentieri di animali",
+      "environment": "esterno",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[gt]",
+                "out": "j",
+                "p": 0.62
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "jjj/jjj",
+                "out": "ggg/ggg"
+              }
+            ],
+            "steps": 4
+          }
+        ]
+      }
+    },
+    "montagne": {
+      "name": "Montagne",
+      "description": "pareti di roccia, passi stretti e neve sulle cime",
+      "environment": "esterno",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "r",
+                "p": 0.25
+              }
+            ]
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "r",
+                "out": "k",
+                "p": 0.5
+              }
+            ]
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "n",
+                "p": 0.2
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "lago": {
+      "name": "Lago",
+      "description": "un lago tranquillo tra i canneti",
+      "environment": "esterno",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "gggg/gggg/gggg",
+                "out": "wwww/wwww/wwww"
+              }
+            ],
+            "steps": 3
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "w",
+                "out": "g",
+                "p": 0.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "borgo_mattoni": {
+      "name": "Borgo di mattoni",
+      "description": "case di mattoni rossi strette attorno a una piazza",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "g",
+                "p": 0.9
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "casa",
+            "codes": {
+              "muro": "q",
+              "pavimento": "f"
+            },
+            "count": 4
+          },
+          {
+            "type": "stamp",
+            "shape": "pozzo"
+          }
         ]
       }
     }

@@ -120,3 +120,25 @@ describe('program repair', () => {
     expect(repairProgram({ type: 'boh' })).toBeNull();
   });
 });
+
+describe('structure stamps', () => {
+  it('a castle has its moat, walls, a drawbridge at the gate and a keep, in the world codes', () => {
+    const rows = Array.from({ length: 18 }, () => 'g'.repeat(18));
+    const pal = { ...palette, b: { name: 'muro di pietra', color: '#888888', solid: true, layer: 'wall' as const }, z: { name: 'ponte levatoio', color: '#8b6a42', solid: false, layer: 'floor' as const }, l: { name: 'pavimento di pietra', color: '#999999', solid: false, layer: 'floor' as const, indoor: true } };
+    const r = layout(rows, pal, { cx: 3, cy: 2, seed: 9, pathCode: 'p', program: { type: 'stamp', shape: 'castello', codes: { muro: 'b', pavimento: 'l', ponte: 'z' } } as MjNode });
+    const all = r.grid.join('');
+    expect(all).toMatch(/w/);
+    expect(all).toMatch(/z/);
+    expect((all.match(/b/g) ?? []).length).toBeGreaterThan(30);
+    expect(r.buildings.length).toBeGreaterThan(0);
+    // The keep's door is reachable: the gate crosses the moat on the drawbridge.
+    expect(r.buildings.every((b) => b.doors.some((d) => r.reachable.has(d)))).toBe(true);
+  });
+
+  it('every stamp fits an 18×18 place', () => {
+    for (const shape of ['casa', 'castello', 'fortezza', 'torre', 'tempio', 'piramide', 'capanne', 'recinto', 'caserma', 'dungeon', 'tana', 'pozzo']) {
+      const g = { w: 18, h: 18, cells: Array(18 * 18).fill('g') };
+      expect(run({ type: 'stamp', shape } as MjNode, g, 4), shape).toBeGreaterThan(0);
+    }
+  });
+});

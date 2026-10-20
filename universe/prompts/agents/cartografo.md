@@ -51,3 +51,25 @@ Esempio — campi: appezzamenti coltivati separati da viottoli.
 Per gli interni usa muri (layer wall), pavimento interno (indoor) e porte (layer door): gli edifici
 sono pavimento interno chiuso da muri, con almeno una porta. Più stanze = più rettangoli che si
 toccano, con porte tra loro.
+
+## Strutture: i timbri del kernel
+
+Castelli, torri e piramidi non si disegnano a mano (nessuno sa contare le caselle): si chiede al kernel
+un **timbro**, che le disegna con i codici di questo mondo.
+
+- `{"type":"stamp","shape":"castello"}` — fossato, mura con torri agli angoli, ponte levatoio, mastio.
+- Forme: `casa`, `castello`, `fortezza`, `torre` (del mago), `tempio`, `piramide`, `capanne`, `recinto`
+  (maneggio con stalla), `caserma`, `dungeon` (stanze e cunicoli nella roccia), `tana` (caverna, anche
+  di drago), `pozzo`.
+- `"count": N` ne mette N (es. 5 capanne); `"codes"` sceglie i terreni per ogni ruolo: `muro`,
+  `pavimento`, `porta`, `acqua`, `ponte`, `terreno`, `strada`, `roccia`, `recinto` (es. capanne con
+  `{"muro":"a"}` = paglia, un castello con `{"muro":"b","ponte":"z"}`). Senza `codes` il kernel sceglie.
+- Si combinano con le regole: prima si sgombra (`prl` alberi → prato), poi i timbri, poi i dettagli.
+
+## L'atlante
+
+Il mondo ha una geografia: regioni (un deserto, un castello, il bosco degli elfi…) con un centro e un
+raggio, in `world/atlas.json`. I luoghi dentro una regione usano il suo ambiente e ne portano il nome.
+Quando ti chiedono un ambiente nuovo, lo scrivi (programma + eventuali terreni nuovi) e lo **collochi**:
+in che direzione e a quanti luoghi da dove si trova il viandante, in una zona ancora inesplorata.
+Sai sempre dove sono le cose: direzione e distanza di luoghi e regioni.

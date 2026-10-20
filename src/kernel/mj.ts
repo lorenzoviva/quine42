@@ -11,10 +11,13 @@
 //   sequence — run children in order, each until it can do nothing more
 //   markov   — every step, run the first child that can do something
 //   path     — draw a shortest path of `color` from a `from` cell to the nearest `to` cell over `on` cells
+//   stamp    — a whole structure drawn by the kernel (castello, torre, tempio…, see stamps.ts), with the
+//              world's codes for each role (muro, pavimento, porta, acqua, ponte…); `count` copies
 // `steps` limits how many times a node may apply; `symmetry` ("all" by default) also tries rotations
 // and mirrors of each rule.
 
 import { Rng } from './rng';
+import { stamp, STAMP_ROLES, STAMP_SHAPES, type StampCodes, type StampShape } from './stamps';
 
 export interface MjRule {
   in: string;
@@ -26,7 +29,8 @@ export interface MjRule {
 export type MjNode =
   | { type: 'one' | 'all' | 'prl'; rules: MjRule[]; steps?: number; symmetry?: 'all' | 'none' }
   | { type: 'sequence' | 'markov'; children: MjNode[] }
-  | { type: 'path'; from: string; to: string; on: string; color: string; steps?: number };
+  | { type: 'path'; from: string; to: string; on: string; color: string; steps?: number }
+  | { type: 'stamp'; shape: StampShape; codes?: Partial<StampCodes>; on?: string; count?: number };
 
 export interface MjGrid {
   w: number;
@@ -290,6 +294,20 @@ class SequenceRunner extends Runner {
   }
 }
 
+class StampRunner extends Runner {
+  constructor(private node: { shape: StampShape; codes?: Partial<StampCodes>; on?: string; count?: number }) {
+    super(Math.max(1, Math.min(6, node.count ?? 1)));
+    if (!(STAMP_SHAPES as readonly string[]).includes(node.shape)) throw new MjError(`stamp: forma sconosciuta "${node.shape}" (note: ${STAMP_SHAPES.join(', ')})`);
+  }
+  go(g: MjGrid, rng: Rng): boolean {
+    if (this.count >= (this.limit ?? 1)) return false;
+    this.count++;
+    // Codes are resolved by the layout from the palette; a lone stamp falls back to the base codes.
+    const codes = { muro: 'h', pavimento: 'f', porta: 'd', acqua: 'w', ponte: 'p', terreno: 'g', strada: 'p', roccia: 'r', recinto: 'h', ...(this.node.codes ?? {}) } as StampCodes;
+    return stamp(g.cells, g.w, g.h, g.fixed, this.node.shape, codes, rng, this.node.on);
+  }
+}
+
 class MarkovRunner extends Runner {
   constructor(private children: Runner[]) {
     super();
@@ -315,6 +333,8 @@ export function compile(node: MjNode, depth = 0): Runner {
       return new RuleRunner(node.type, node.rules, node.steps ?? (node.type === 'prl' ? 1 : undefined), node.symmetry ?? 'all');
     case 'path':
       return new PathRunner(node, node.steps);
+    case 'stamp':
+      return new StampRunner(node);
     case 'sequence':
     case 'markov': {
       if (!Array.isArray(node.children) || !node.children.length) throw new MjError(`nodo ${node.type} senza figli`);
@@ -336,6 +356,13 @@ export function run(node: MjNode, g: MjGrid, seed: number, maxSteps = 4000): num
   return steps;
 }
 
+/** Fills in the codes stamps draw with, from the world's palette (roles the program did not set). */
+export function resolveStamps(node: MjNode, codes: StampCodes): MjNode {
+  if (node.type === 'sequence' || node.type === 'markov') return { ...node, children: node.children.map((c) => resolveStamps(c, codes)) };
+  if (node.type === 'stamp') return { ...node, codes: { ...codes, ...(node.codes ?? {}) } };
+  return node;
+}
+
 const cellsOf = (row: string) => row.match(/\[[^\]]*\]|./g) ?? [];
 
 /**
@@ -349,6 +376,11 @@ export function repairProgram(node: unknown, notes: string[] = [], depth = 0): M
   if (n.type === 'sequence' || n.type === 'markov') {
     const children = (Array.isArray(n.children) ? n.children : []).map((c: unknown) => repairProgram(c, notes, depth + 1)).filter(Boolean);
     return children.length ? { type: n.type, children } : null;
+  }
+  if (n.type === 'stamp') {
+    if (!(STAMP_SHAPES as readonly string[]).includes(n.shape)) return notes.push(`forma sconosciuta "${n.shape}" rimossa`), null;
+    const codes = Object.fromEntries(Object.entries(n.codes ?? {}).filter(([k, v]) => (STAMP_ROLES as string[]).includes(k) && typeof v === 'string' && v.length === 1));
+    return { type: 'stamp', shape: n.shape, ...(Object.keys(codes).length ? { codes } : {}), ...(typeof n.on === 'string' ? { on: n.on } : {}), ...(Number.isInteger(n.count) ? { count: Math.max(1, Math.min(6, n.count)) } : {}) };
   }
   if (n.type === 'path') return typeof n.from === 'string' && typeof n.to === 'string' && typeof n.on === 'string' && typeof n.color === 'string' && n.color.length === 1 ? { ...n } : (notes.push('path incompleto rimosso'), null);
   if (n.type === 'one' || n.type === 'all' || n.type === 'prl') {
@@ -381,7 +413,9 @@ export function writtenCodes(node: MjNode): Set<string> {
   const walk = (n: MjNode) => {
     if (n.type === 'sequence' || n.type === 'markov') n.children.forEach(walk);
     else if (n.type === 'path') out.add(n.color);
-    else if ("rules" in n) for (const r of n.rules) for (const ch of r.out.replace(/[/*]/g, "")) out.add(ch);
+    else if (n.type === 'stamp') {
+      for (const c of Object.values(n.codes ?? {})) if (c) out.add(c);
+    } else if ("rules" in n) for (const r of n.rules) for (const ch of r.out.replace(/[/*]/g, "")) out.add(ch);
   };
   walk(node);
   return out;

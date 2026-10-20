@@ -194,6 +194,24 @@ export class MockModels implements Models {
       }
       case 'action.judge':
         return this.judgeAction(d);
+      case 'genesis.atlas': {
+        const special = (d.layouts ?? []).filter((l: { id: string }) => !/^(borgo|bosco|campi|rovine|locanda)$/.test(l.id));
+        const dirs = ['nord', 'nord-est', 'est', 'sud-est', 'sud', 'sud-ovest', 'ovest', 'nord-ovest'];
+        return { regioni: special.map((l: { id: string; name: string; description: string }, i: number) => ({ nome: `${l.name} ${SUFFIX[i % SUFFIX.length]}`, descrizione: l.description, ambiente: l.id, direzione: dirs[(i * 3) % 8], distanza: 3 + (i % 5), raggio: 1 })) };
+      }
+      case 'cartographer.environment': {
+        const t = String(d.request ?? '');
+        const elves = /elf|fat|incant/i.test(t);
+        return {
+          id: elves ? 'bosco_elfi' : 'luogo_nuovo',
+          nome: elves ? 'Bosco degli Elfi' : t.slice(0, 30),
+          descrizione: elves ? 'alberi altissimi e argentei, case sugli alberi, sentieri di luce' : t,
+          tipo: 'esterno',
+          programma_json: JSON.stringify({ type: 'sequence', children: [{ type: 'prl', rules: [{ in: 'g', out: 'E', p: 0.3 }] }, { type: 'stamp', shape: 'torre', codes: { muro: 'E' } }] }),
+          nuovi_terreni: [{ codice: 'E', nome: elves ? 'albero argenteo' : 'pietra strana', colore: '#c8d8e8', strato: 'vegetation', solido: true, descrizione: 'alberi dalla corteccia d\'argento' }],
+          regione: { nome: elves ? 'Bosco degli Elfi' : t.slice(0, 30), descrizione: 'dove la luce cade a fili', direzione: 'nord-est', distanza: 4, raggio: 1 },
+        };
+      }
       case 'council.session':
         return { valutazione: 'Il mondo cresce, ma la piazza è vuota di mestieri.', intervento: 'abitante', richiesta: 'una guaritrice che conosce le erbe del bosco' };
       case 'craft.free': {

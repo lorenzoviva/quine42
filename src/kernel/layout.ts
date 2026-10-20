@@ -8,7 +8,8 @@
 //   5. buildings (indoor floor enclosed by walls) are recognised for roofs and interiors.
 
 import { hash32 } from './rng';
-import { run, type MjNode } from './mj';
+import { resolveStamps, run, type MjNode } from './mj';
+import { defaultCodes } from './stamps';
 import type { TileDef } from './types';
 
 export interface Building {
@@ -188,7 +189,7 @@ export function layout(draft: string[], palette: Record<string, TileDef>, opts: 
   let steps = 0;
   if (opts.program) {
     const grid = { w: size, h: size, cells: cells.flat(), fixed: border };
-    steps = run(opts.program, grid, hash32(opts.seed, opts.cx, opts.cy, 77));
+    steps = run(resolveStamps(opts.program, defaultCodes(palette, opts.pathCode)), grid, hash32(opts.seed, opts.cx, opts.cy, 77));
     for (let i = 0; i < size * size; i++) cells[Math.floor(i / size)][i % size] = palette[grid.cells[i]] ? grid.cells[i] : draft[Math.floor(i / size)][i % size];
   }
 

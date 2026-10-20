@@ -10,6 +10,9 @@ import { apiErrors, validateEffects, Validator } from './validator';
 import { Repo, type KeyValueStore } from './repo';
 import { Corona, type CoronaCell } from './corona';
 import { Archive } from './archive';
+import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, placeRegion, readAtlas, regionAt, writeAtlas, type Region } from './atlas';
+import { STAMP_SHAPES } from './stamps';
+import { repairProgram } from './mj';
 import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './universes';
 import { addPerson, dayPhase, defaultRoutine, greeting, readPeople, societySummary, type DayPhase, type Person } from './society';
 import { Input } from './input';
@@ -23,7 +26,7 @@ import { Content, normName, specOf } from './content';
 import { layout, type Building } from './layout';
 import { ArtDirector } from './art';
 import { AGENTS, Council, readBible, type AgentId, type CatalogEntry, type FeedEntry } from './agents/council';
-import { planChunk, type ChunkPlan, type Where } from './agents/cartography';
+import { designEnvironment, drawAtlas, planChunk, type ChunkPlan, type Where } from './agents/cartography';
 import { forge, judgeCombination, repairLogic, slug, type ForgeOrigin } from './agents/forge';
 import { agentReply, examine, narrate, npcReply, type NpcReply, type Turn } from './agents/minds';
 import { planGenesis } from './agents/genesis';
@@ -261,6 +264,7 @@ export class Kernel {
     };
     k.applyFiles(repo.working, { reset: true });
     k.loadState();
+    k.ensureAtlas();
     k.models.limits = { text: k.config.ai.maxText, images: k.models.canPaint ? k.config.ai.maxImages : 0 };
     k.log('kernel', `universo «${name}» avviato su commit ${repo.head().id} (${repo.head().message}) — modelli: ${opts.models.name}${synced ? ' — sincronizzato dal disco' : ''}`);
     return k;
@@ -495,9 +499,12 @@ export class Kernel {
   // --- Universe loading & hot reload ----------------------------------------------------------
 
   /** What makes chunks different: codes, solidity, layers, layouts (not textures or sprites). */
+  /**
+   * Which world a cached place belongs to. Only a new genesis (a new bible) makes places obsolete:
+   * new environments, tiles or regions must not regenerate what was already explored.
+   */
   private worldSignature(): string {
-    const pal = Object.entries(this.palette).map(([c, t]) => `${c}${t.solid ? 1 : 0}${t.layer ?? ''}${t.indoor ? 'i' : ''}`);
-    return hex(hashStr(pal.join('|') + JSON.stringify(this.content.layouts) + (readBible(this.files)?.titolo ?? '')));
+    return hex(hashStr(readBible(this.files)?.titolo ?? ''));
   }
 
   /**
@@ -718,9 +725,20 @@ export class Kernel {
       .join(', ');
   }
 
+  /** Environments that belong to a region of the atlas are used only there; the rest anywhere. */
+  private layoutsFor(ch: Chunk): { layouts: Array<{ id: string; name: string; description: string; environment: string }>; region?: Region } {
+    const all = Object.entries(this.content.layouts).map(([id, l]) => ({ id, name: l.name, description: l.description, environment: l.environment }));
+    const atlas = readAtlas(this.files);
+    const region = ch.cx === 0 && ch.cy === 0 ? undefined : regionAt(atlas, ch.cx, ch.cy);
+    if (region && this.content.layouts[region.ambiente]) return { layouts: all.filter((l) => l.id === region.ambiente), region };
+    const regional = new Set(atlas.regioni.map((r) => r.ambiente));
+    const free = all.filter((l) => !regional.has(l.id));
+    return { layouts: free.length ? free : all };
+  }
+
   private async makePlan(ch: Chunk): Promise<ChunkPlan> {
     const start = ch.cx === 0 && ch.cy === 0;
-    const layouts = Object.entries(this.content.layouts).map(([id, l]) => ({ id, name: l.name, description: l.description, environment: l.environment }));
+    const { layouts, region } = this.layoutsFor(ch);
     const neighbors = [[0, -1], [0, 1], [-1, 0], [1, 0]]
       .map(([dx, dy]) => this.chunks.get(this.chunkKey(ch.cx + dx, ch.cy + dy)))
       .filter((n): n is Chunk => !!n?.place)
@@ -732,6 +750,7 @@ export class Kernel {
         const raw = await planChunk(this.council, {
           cx: ch.cx, cy: ch.cy, terrain: this.terrainSummary(ch.draft), neighbors, layouts, catalog: this.catalog(),
           fragments: this.fragments.map((f) => f.line), wanted: [...this.wanted].map((id) => this.itemInfo(id).name).slice(0, 8), start, attempt, feedback,
+          region: region ? { nome: region.nome, descrizione: region.descrizione } : undefined,
         });
         const verdict = this.validator.validatePlan(raw, new Set(layouts.map((l) => l.id)), placeable);
         if (verdict.errors.length) {
@@ -748,7 +767,125 @@ export class Kernel {
         if (e instanceof BudgetError) break;
       }
     }
-    return this.fallbackPlan(ch, layouts.map((l) => l.id), start);
+    const plan = this.fallbackPlan(ch, layouts.map((l) => l.id), start);
+    if (region) plan.place = { name: region.nome, description: region.descrizione };
+    return plan;
+  }
+
+  /** A universe without a geography gets one (the Cartographer may redraw it); explored places stay. */
+  ensureAtlas(): void {
+    if (this.files[ATLAS_FILE] || !Object.keys(this.content.layouts).length) return;
+    const explored = new Set([...this.chunks.values()].filter((c) => c.stage === 'planned').map((c) => c.key));
+    const atlas = defaultAtlas(this.content.layouts, explored, this.config.seed);
+    this.repo.write(ATLAS_FILE, writeAtlas(atlas));
+    this.applyFiles({ ...this.repo.working });
+    this.repo.commit(`atlante: ${atlas.regioni.length} regioni`, 'agent');
+    this.council.say('cartografo', 'propone', `atlante del mondo: ${atlas.regioni.map((r) => `${r.nome} (${r.centro.join(',')})`).join(', ')}`, undefined, 'atlas');
+  }
+
+  private explored(): Set<string> {
+    return new Set([...this.chunks.values()].filter((c) => c.stage === 'planned').map((c) => c.key));
+  }
+
+  /** Genesis: the Cartographer draws the geography of the new world. */
+  async drawGenesisAtlas(): Promise<void> {
+    const layouts = Object.entries(this.content.layouts).map(([id, l]) => ({ id, name: l.name, description: l.description }));
+    let drafts: Awaited<ReturnType<typeof drawAtlas>>;
+    try {
+      drafts = await drawAtlas(this.council, layouts);
+    } catch (e) {
+      this.council.say('cartografo', 'errore', `atlante: ${(e as Error).message}`, undefined, 'genesis.atlas');
+      drafts = [];
+    }
+    const atlas = { regioni: [] as Region[] };
+    for (const d of drafts) {
+      const raggio = Math.max(1, Math.min(3, Math.round(d.raggio) || 1));
+      const centro = placeRegion(atlas, [0, 0], d.direzione, Math.max(2, Math.min(14, Math.round(d.distanza) || 4)), raggio, new Set());
+      atlas.regioni.push({ id: `${d.ambiente}-${atlas.regioni.length}`, nome: String(d.nome).slice(0, 40), descrizione: String(d.descrizione).slice(0, 200), ambiente: d.ambiente, centro, raggio });
+    }
+    const final = atlas.regioni.length >= 3 ? atlas : defaultAtlas(this.content.layouts, new Set(), this.config.seed);
+    this.repo.write(ATLAS_FILE, writeAtlas(final));
+    this.applyFiles({ ...this.repo.working });
+    this.council.say('cartografo', 'propone', `geografia: ${final.regioni.map((r) => `${r.nome} (${direction(r.centro[0], r.centro[1])})`).join(', ')}`, undefined, 'genesis.atlas');
+  }
+
+  /**
+   * "Un bosco degli elfi": the Cartographer writes the environment (rules, stamps, new terrains if
+   * needed), the validator test-runs it, and it is placed on the atlas in an unexplored direction.
+   */
+  async createEnvironment(request: string): Promise<{ ok: boolean; summary: string }> {
+    const pc = this.playerCarpet();
+    const S = this.config.chunkSize;
+    const here: [number, number] = [Math.floor(pc.x / S), Math.floor(pc.y / S)];
+    const layouts = Object.entries(this.content.layouts).map(([id, l]) => ({ id, name: l.name, description: l.description }));
+    let feedback = '';
+    for (let attempt = 0; attempt < 2; attempt++) {
+      let d;
+      try {
+        d = await designEnvironment(this.council, request, { palette: this.palette, layouts, here: this.placeHere()?.name ?? 'qui', stamps: STAMP_SHAPES, feedback });
+      } catch (e) {
+        return { ok: false, summary: `Il Cartografo non riesce: ${(e as Error).message}` };
+      }
+      // New terrains: one free character each, a known layer.
+      const palette = { ...this.palette };
+      const added: Record<string, TileDef> = {};
+      const free = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'].filter((c) => !palette[c]);
+      for (const t of d.tiles) {
+        if (!['ground', 'floor', 'wall', 'door', 'liquid', 'vegetation', 'rock'].includes(t.tile.layer ?? '')) continue;
+        const code = t.code && !palette[t.code] && t.code !== '?' && /\S/.test(t.code) ? t.code : free.shift();
+        if (!code) break;
+        palette[code] = added[code] = t.tile;
+        // A model's own code for the terrain may appear in its program: map it to the one assigned.
+        if (t.code && t.code !== code && d.program) d.program = JSON.parse(JSON.stringify(d.program).split(`"${t.code}"`).join(`"${code}"`));
+      }
+      let layoutId = d.reuse;
+      if (!layoutId) {
+        const notes: string[] = [];
+        const program = repairProgram(d.program, notes);
+        let id = d.id;
+        while (this.content.layouts[id]) id += '_';
+        const def = program ? { name: d.name, description: d.description, environment: d.environment, program } : undefined;
+        const errs = def ? this.validator.validateLayout(id, def, palette, this.sampleDrafts()) : ['programma mancante o incomprensibile'];
+        if (errs.length) {
+          feedback = errs.join('; ');
+          this.council.say('kernel', 'scarta', `ambiente «${d.name}»: ${feedback}`, 'cartografo', 'cartographer.environment');
+          continue;
+        }
+        layoutId = id;
+        const tp = this.terrain?.manifestPath;
+        if (tp && Object.keys(added).length) {
+          const tm = JSON.parse(this.repo.working[tp]);
+          tm.tiles = { ...tm.tiles, ...added };
+          this.repo.write(tp, JSON.stringify(tm, null, 2) + '\n');
+        }
+        const lp = [...this.modules.values()].find((m) => m.manifest.layouts)?.manifestPath ?? 'modules/world.layouts/manifest.json';
+        const lm = JSON.parse(this.repo.working[lp] ?? '{"id":"world.layouts","name":"Ambienti","kind":"data","layouts":{}}');
+        lm.layouts = { ...(lm.layouts ?? {}), [id]: def };
+        this.repo.write(lp, JSON.stringify(lm, null, 2) + '\n');
+      }
+      const atlas = readAtlas(this.repo.working);
+      const centro = placeRegion(atlas, here, d.region.direzione, d.region.distanza, d.region.raggio, this.explored());
+      const region: Region = { id: `${layoutId}-${atlas.regioni.length}`, nome: d.region.nome, descrizione: d.region.descrizione || d.description, ambiente: layoutId, centro, raggio: d.region.raggio };
+      atlas.regioni.push(region);
+      this.repo.write(ATLAS_FILE, writeAtlas(atlas));
+      this.applyFiles({ ...this.repo.working });
+      const dist = Math.max(Math.abs(centro[0] - here[0]), Math.abs(centro[1] - here[1]));
+      const where = `${direction(centro[0] - here[0], centro[1] - here[1])}, a ${dist} luoghi da qui`;
+      const c = this.repo.commit(`cartografo: ${region.nome} (${where})`, 'agent');
+      const summary = `«${region.nome}» — ${region.descrizione}. Si trova a ${where}.${Object.keys(added).length ? ` Terreni nuovi: ${Object.values(added).map((t) => t.name).join(', ')}.` : ''}`;
+      this.council.say('cartografo', 'approva', `${summary} (commit ${c.id})`, undefined, 'cartographer.environment');
+      return { ok: true, summary };
+    }
+    return { ok: false, summary: `Il Cartografo non è riuscito a scrivere un ambiente valido: ${feedback}` };
+  }
+
+  /** Where things are, seen from a carpet point: places nearby and regions of the atlas. */
+  directionsAt(x: number, y: number): string[] {
+    const S = this.config.chunkSize;
+    const cx = Math.floor(x / S);
+    const cy = Math.floor(y / S);
+    const places = [...this.chunks.values()].filter((c) => c.place).map((c) => ({ name: c.place!.name, cx: c.cx, cy: c.cy }));
+    return directionsFrom(readAtlas(this.files), places, cx, cy);
   }
 
   private fallbackPlan(ch: Chunk, layouts: string[], start: boolean): ChunkPlan {
@@ -2031,6 +2168,10 @@ export class Kernel {
     history.push({ who: 'giocatore', text }, { who: 'npc', text: r.say });
     this.archive.go(agent, undefined, r.say);
     if (!r.forge) return { say: r.say };
+    if (agent === 'cartografo') {
+      const env = await this.createEnvironment(r.forge);
+      return { say: r.say, forged: env.summary };
+    }
     const f = await this.forgeModule(r.forge, 'agente');
     return { say: r.say, forged: f.summary };
   }
@@ -2223,6 +2364,8 @@ export class Kernel {
       luogo: this.placeHere()?.name,
       ora: Math.floor(this.time),
       momento: this.daylight() > 0.6 ? 'giorno' : this.daylight() > 0.15 ? 'crepuscolo' : 'notte',
+      // Locals know their surroundings: which places and regions are where.
+      dintorni: this.directionsAt(this.playerCarpet().x, this.playerCarpet().y),
       viandanteImpugna: held ? this.itemInfo(held).name : 'niente',
       viandante: n ? { fame: Math.round(100 - n.hunger), sete: Math.round(100 - n.thirst), stanchezza: Math.round(100 - n.energy) } : undefined,
     };
@@ -2669,6 +2812,8 @@ export class Kernel {
         this.applyFiles({ ...this.repo.working });
       }
       this.packsUsed = 0;
+      onProgress?.('Il Cartografo disegna la geografia del mondo');
+      await this.drawGenesisAtlas();
       let done = 0;
       const queue = [...plan.cast];
       const worker = async () => {

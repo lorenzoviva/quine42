@@ -223,11 +223,12 @@ describe('items, containers, actions, needs', () => {
     const box = spawnInFront(k, 'obj.credenza');
     expect(k.actionsFor(box).map((a) => a.id)).toEqual(expect.arrayContaining(['apri', 'esamina']));
     const c = k.openContainer(box)!;
-    const found = c.inv.slots.filter(Boolean).length;
-    expect(found).toBeGreaterThan(0);
+    const found = new Map<string, number>();
+    for (const s of c.inv.slots) if (s) found.set(s.item, (found.get(s.item) ?? 0) + s.count);
+    expect(found.size).toBeGreaterThan(0);
     c.inv.slots.forEach((s, i) => s && k.takeFromContainer(box, i));
     expect(c.inv.slots.filter(Boolean).length).toBe(0);
-    expect(carried(k)).toBe(found);
+    for (const [item, n] of found) expect(countItem(k.inventory(), item)).toBe(n);
     k.openContainer(box);
     expect(c.inv.slots.filter(Boolean).length).toBe(0);
   });
@@ -699,5 +700,34 @@ describe('the Council', () => {
     const k = await boot(new Careless());
     expect(k.feed().some((e) => e.from === 'kernel' && e.kind === 'scarta' && /ambiente sconosciuto/.test(e.text))).toBe(true);
     for (const st of k.lines.values()) expect(st.compiled).toBe(true);
+  });
+});
+
+describe('the atlas', () => {
+  it('every environment of the seed passes the validator; regions shape the places inside them', async () => {
+    const k = await boot();
+    for (const [id, def] of Object.entries(k.content.layouts)) expect(k.validator.validateLayout(id, def, k.palette, k.sampleDrafts()), id).toEqual([]);
+    const atlas = JSON.parse(k.files['world/atlas.json']);
+    expect(atlas.regioni.length).toBeGreaterThan(8);
+    const r = atlas.regioni.find((x: { ambiente: string }) => x.ambiente === 'castello');
+    expect((k as any).layoutsFor({ cx: r.centro[0], cy: r.centro[1] }).layouts.map((l: { id: string }) => l.id)).toEqual(['castello']);
+    // Elsewhere, regional environments are not used at random.
+    expect((k as any).layoutsFor({ cx: 0, cy: 1 }).layouts.some((l: { id: string }) => l.id === 'castello')).toBe(false);
+  });
+
+  it('asked for an elves wood, the Cartographer writes it, adds its terrain and places it on the map; locals know the way', async () => {
+    const k = await boot();
+    const r = await k.createEnvironment('un bosco degli elfi');
+    expect(r.ok).toBe(true);
+    expect(r.summary).toMatch(/Bosco degli Elfi[\s\S]*nord-est/);
+    expect(k.content.layouts.bosco_elfi).toBeTruthy();
+    expect(Object.values(k.palette).some((t) => t.name === 'albero argenteo')).toBe(true);
+    const region = JSON.parse(k.files['world/atlas.json']).regioni.find((x: { nome: string }) => x.nome === 'Bosco degli Elfi');
+    expect(region.ambiente).toBe('bosco_elfi');
+    const pc = k.playerCarpet();
+    expect(k.directionsAt(pc.x, pc.y).join(' ')).toMatch(/Bosco degli Elfi.*nord-est/);
+    // The cartographer in the corona routes requests to environments, not objects.
+    const chat = await k.talkToAgent('cartografo', 'crea un bosco incantato degli elfi');
+    expect(chat.forged).toMatch(/Bosco degli Elfi/);
   });
 });

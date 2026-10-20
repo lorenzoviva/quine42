@@ -139,9 +139,17 @@ export class Council {
         parts.push(`## Bibbia del mondo\n${bibleSummary(bible, true)}`, `## Moduli esistenti\n${catalogSummary(v.catalog)}`);
         if (rules) parts.push(rules);
         break;
-      case 'cartografo':
+      case 'cartografo': {
         parts.push(`## Bibbia del mondo\n${bibleSummary(bible)}`, `## Terreni\n${paletteSummary(v.palette)}`, `## Moduli posizionabili\n${catalogSummary(v.catalog)}`);
+        let regions: Array<{ nome: string; ambiente: string; centro: [number, number]; raggio: number }> = [];
+        try {
+          regions = JSON.parse(v.files['world/atlas.json'] ?? '{}').regioni ?? [];
+        } catch {
+          regions = [];
+        }
+        if (regions.length) parts.push(`## Atlante (centro in luoghi; nord = y negativa)\n${regions.map((r) => `- ${r.nome} [${r.ambiente}] centro ${r.centro.join(',')} raggio ${r.raggio}`).join('\n')}`);
         break;
+      }
       case 'artista':
         parts.push(`## Guida di stile\n${style}`, `## Tono\n${bible?.tono ?? ''}`);
         break;
