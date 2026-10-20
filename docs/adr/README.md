@@ -18,5 +18,9 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0011](0011-tile-e-layout-markovjunior.md) | Mappe a tile e layout con regole stile MarkovJunior | accettato |
 | [0012](0012-contenuti-guidati-dai-dati.md) | Contenuti guidati dai dati: oggetti, bottino, ricette, bisogni, azioni | accettato |
 | [0013](0013-atelier-e-individui.md) | L'Atelier (immagini in contesto) e gli NPC come individui | accettato |
+| [0014](0014-azioni-libere-ed-effetti.md) | Azioni libere («Altro…») e il motore degli effetti | accettato |
+| [0015](0015-rune-magia-giorno-notte.md) | Una runa per casella, magia, incantesimi, giorno e notte | accettato |
+| [0016](0016-corona-archivio-e-concilio.md) | La corona come archivio, il Concilio in carne e ossa | accettato |
+| [0017](0017-varieta-delle-persone.md) | Varietà delle persone | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.
