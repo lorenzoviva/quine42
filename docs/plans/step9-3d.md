@@ -327,3 +327,16 @@ Piano scritto; branch `3d`.
   Cartografo stava accanto al suo teletrasporto e `E` apriva la chat; ora chi sta su un teletrasporto, una scala o
   l'uscita li usa.
 - ADR-0042; AGENTS.md (Concilio, Fucina).
+
+### F6 — prova con Gemini (R7)
+`npx vite-node lab/scripts/sculpt-game.ts -- --root H:/projects/rune`: lo Scultore e l'Artista del gioco, con il
+registro dei consumi del kernel, su due richieste.
+
+| richiesta | scultore | chiamate | voto | esito |
+|---|---|---|---|---|
+| `forma-bottiglia` (oggetto, forma comune) | gemini-3.1-flash-lite, 2 programmi | 2 + 2 giudizi | 9/10 | bottiglia con il tappo; il corpo è la lettera C (si ricolora) |
+| `npc-mugnaio` (persona) | gemini-3.8-flash | 1 + 1 giudizio | 8/10 | riconoscibile (grembiule, maniche, sacco), il berretto copre il volto: l'Artista lo nota ma dà 8 |
+
+**Spesa: 6 chiamate, $0,0205** (3.1 Flash-Lite $0,0046; 3.8 Flash $0,0088; Artista 3.5 Flash $0,0071, prezzo
+stimato). Il ragionamento `low` costa ancora con 3.1 (1.304 token su 437 di risposta) e quasi nulla con 3.8. Il
+giudizio è generoso (un difetto visto non abbassa il voto sotto 7): da tenere d'occhio, non da cambiare ora.
