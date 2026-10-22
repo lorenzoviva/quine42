@@ -78,7 +78,7 @@ Senza numero («esegui il prossimo task del backlog») vale il primo `da fare` c
   dai permessi della sessione: cancellarli a mano (`rm -rf` delle tre cartelle) o autorizzarla; (2) il repository
   non ha nessun remote (`git remote -v` vuoto): a quale remote fare il push di `3d`, o si salta?
 
-### T06 · Chiusura dello step 9 — `fatto` (commit in fondo al task)
+### T06 · Chiusura dello step 9 — `fatto` (`4e19d6a`)
 - AGENTS.md riscritto dove descrive ancora il 2D (Visione, Regole, Corona, Personaggi, Fatto/Prossimi passi);
   `GEMINI.md` («gioco 2D top-down»); `README.md`; ADR-0037 → «attuato»; diario del piano chiuso; riassunto finale
   dello step 9 (cosa è cambiato, cosa manca, quanto è costato) in `docs/reports/step9.md`.
