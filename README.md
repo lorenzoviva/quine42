@@ -80,6 +80,7 @@ persone, Claude Code e Gemini CLI). Design originale in [docs/design.md](docs/de
 - South Park: Grounded Vindaloop
 - Matrix
 - Westworld
+- The Trueman Show
 - Project Zomboid
 - Cyberpunk 
 - Dungeons & Dragons

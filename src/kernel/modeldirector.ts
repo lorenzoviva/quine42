@@ -23,8 +23,6 @@ export class ModelDirector {
   private used = 0;
   private skip = new Set<string>();
   private stopped = false;
-  /** Structures sculpted by the best model this session (it is the dearest). */
-  private important = 0;
 
   constructor(private k: Kernel) {}
 
@@ -49,12 +47,13 @@ export class ModelDirector {
       const forma = d.model!.startsWith('forma-') ? d.model!.slice('forma-'.length) : undefined;
       out.push(forma ? { id: d.model!, nome: `${forma} (forma comune degli oggetti)`, aspetto: `un ${forma} semplice e riconoscibile, come tanti oggetti del mondo (per esempio: ${d.name})`, classe: 'oggetto', tinta: true } : { id: d.model!, nome: d.name, aspetto: d.aspetto ?? d.description, classe: 'oggetto' });
     }
-    // Structures the Cartographer asked for (ADR-0043): the important ones by the best model, a few per session.
+    // Structures the Cartographer asked for (ADR-0043): the important ones (one per zone of the world, the
+    // kernel sees to it) by the best model.
     for (const id of k.ecs.query('struttura')) {
       const s = k.ecs.get(id, 'struttura') as { model?: string; concetto: string; classe: string; importante?: boolean };
       if (!lacks(s.model)) continue;
       const place = k.chunkAt(k.ecs.get(id, 'pos').x, k.ecs.get(id, 'pos').y)?.place;
-      out.push({ id: s.model!, nome: s.concetto, aspetto: `${s.concetto}: un edificio in cui si entra, con la porta sul davanti${place ? `, a «${place.name}» (${place.description})` : ''}`, classe: s.classe, importante: !!s.importante && this.important < 3, contesto: place?.name });
+      out.push({ id: s.model!, nome: s.concetto, aspetto: `${s.concetto}: un edificio in cui si entra, con la porta sul davanti${place ? `, a «${place.name}» (${place.description})` : ''}`, classe: s.classe, importante: !!s.importante, contesto: place?.name });
     }
     for (const [code, t] of Object.entries(k.palette)) {
       if (code === '?' || !lacks(t.model)) continue;
@@ -75,7 +74,6 @@ export class ModelDirector {
     this.busy = true;
     this.used++;
     try {
-      if (req.importante) this.important++;
       const r = await sculpt(this.k.council, req, this.k.sculptors());
       if (!r) {
         this.skip.add(req.id);

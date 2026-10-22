@@ -175,6 +175,13 @@ const FALLBACK_PLAYER = {
 const STARTER_RUNES = ['x', 'speed = speed', 'luce'];
 /** Chunks from the origin (in carpet space) before runes that touch the carpet can appear. */
 const CARPET_RUNE_DISTANCE = 3;
+/**
+ * Side, in chunks, of a zone of the world that has at most one important structure (ADR-0043): 56 chunks
+ * of 18 tiles, about 1000 × 1000 tiles (a million). Walking straight (6 tiles/s) one crosses a zone in
+ * about three minutes; exploring, much more. Zones are centred on the start.
+ */
+export const IMPORTANT_ZONE = 56;
+export const zoneOf = (cx: number, cy: number) => `${Math.floor((cx + IMPORTANT_ZONE / 2) / IMPORTANT_ZONE)},${Math.floor((cy + IMPORTANT_ZONE / 2) / IMPORTANT_ZONE)}`;
 
 const clone = <T>(v: T): T => (v === undefined ? v : JSON.parse(JSON.stringify(v)));
 
@@ -226,6 +233,8 @@ export class Kernel {
   private instanceFeet = new Map<Id, { key: string; foot: Uint8Array }>();
   /** What was done to models of things, by stable origin (saved with the game). */
   private savedForms = new Map<string, string[]>();
+  /** Zones of the world that already have their important structure: zone → the chunk that has it (saved with the game). */
+  private importanti = new Map<string, string>();
   private runesDirty = true;
   private consumed = new Set<string>();
   private loaded = new Map<string, string>();
@@ -863,6 +872,7 @@ export class Kernel {
           cx: ch.cx, cy: ch.cy, terrain: this.terrainSummary(ch.draft), neighbors, layouts, catalog: this.catalog(),
           fragments: this.fragments.map((f) => f.line), wanted: [...this.wanted].map((id) => this.itemInfo(id).name).slice(0, 8), start, attempt, feedback,
           region: region ? { nome: region.nome, descrizione: region.descrizione } : undefined,
+          importante: this.importantAllowed(ch),
         });
         const verdict = this.validator.validatePlan(raw, new Set(layouts.map((l) => l.id)), placeable);
         if (verdict.errors.length) {
@@ -1056,6 +1066,7 @@ export class Kernel {
     ch.version++;
     this.plannedCount++;
     for (const id of this.ecs.query('chunk')) if (this.ecs.get(id, 'chunk').key === ch.key) this.ecs.destroy(id);
+    this.claimImportant(ch, plan);
     const structures = this.settleLots(ch, plan, pathCode);
 
     // Where things can go: reachable cells, inside or outside buildings, never on gates or doors.
@@ -1132,7 +1143,11 @@ export class Kernel {
     this.content.roll('terreno', rng, [...this.wanted]).forEach((l, i) => {
       const origin = `${ch.key}#l${i}`;
       const cell = pick('ovunque');
-      if (cell !== undefined && !this.consumed.has(origin)) this.spawnItem(l.item, at(cell).x, at(cell).y, l.count, ch.key, origin);
+      if (cell === undefined || this.consumed.has(origin)) return;
+      // On a lot: on the floor of its structure, not inside its walls.
+      const lot = ch.buildings.findIndex((b) => b.floor.includes(cell));
+      if (lot >= 0 && structures[lot] !== undefined) return void this.placeInside(ch, structures[lot], at(cell), (x, y) => this.spawnItem(l.item, x, y, l.count, ch.key, origin));
+      this.spawnItem(l.item, at(cell).x, at(cell).y, l.count, ch.key, origin);
     });
     if (unknown.length) void this.introduceItems(unknown, `trovati a terra in «${plan.place.name}»`).then((defs) => {
       if (!this.alive(ch)) return;
@@ -1147,6 +1162,28 @@ export class Kernel {
     if (this.plannedCount % 10 === 0) void this.growContent('esplorazione');
     if (this.plannedCount % 7 === 0) void this.growCast(plan.place);
     if (this.plannedCount === 3 || this.plannedCount % 12 === 0) void this.holdSession();
+  }
+
+  /** Whether a place may still have an important structure: its zone has none, or this place is the one that has it. */
+  importantAllowed(ch: { cx: number; cy: number; key: string }): boolean {
+    const owner = this.importanti.get(zoneOf(ch.cx, ch.cy));
+    return !owner || owner === ch.key;
+  }
+
+  /**
+   * One important structure per zone (ADR-0043): the first place of a zone that has one keeps it, the
+   * others' become ordinary (the plan is changed, so it is saved as it is applied).
+   */
+  private claimImportant(ch: Chunk, plan: ChunkPlan): void {
+    let kept = false;
+    for (const s of plan.strutture ?? []) {
+      if (!s.importante) continue;
+      // One per place, too.
+      if (!kept && this.importantAllowed(ch)) {
+        this.importanti.set(zoneOf(ch.cx, ch.cy), ch.key);
+        kept = true;
+      } else delete s.importante;
+    }
   }
 
   /**
@@ -3991,6 +4028,7 @@ export class Kernel {
       this.applyFiles({ ...this.repo.working });
       this.consumed.clear();
       this.savedContainers.clear();
+      this.importanti.clear();
       this.repo.write('world/stato.json', null);
       this.wanted.clear();
       onProgress?.('Il Narratore scrive gli oggetti comuni del mondo');
@@ -4057,6 +4095,7 @@ export class Kernel {
       consumati: [...this.consumed].slice(-5000),
       contenitori: containers,
       forme: this.formsToSave(),
+      importanti: Object.fromEntries(this.importanti),
       ora: Math.round(this.time),
     };
     const json = JSON.stringify(state);
@@ -4113,6 +4152,7 @@ export class Kernel {
     for (const k of st.consumati ?? []) this.consumed.add(String(k));
     for (const [k, c] of Object.entries(st.contenitori ?? {})) this.savedContainers.set(k, c as { inv: Inventory; filled: boolean });
     for (const [k, d] of Object.entries(st.forme ?? {})) if (Array.isArray(d)) this.savedForms.set(k, d.map(String));
+    for (const [z, c] of Object.entries(st.importanti ?? {})) if (typeof c === 'string') this.importanti.set(z, c);
     if (Number.isFinite(st.ora)) this.time = st.ora;
     this.lastState = JSON.stringify(st);
   }

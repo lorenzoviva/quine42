@@ -52,6 +52,11 @@ export interface PlanContext {
   feedback?: string;
   /** The region of the atlas this place belongs to, if any. */
   region?: { nome: string; descrizione: string };
+  /**
+   * Whether a structure here may be important (ADR-0043): one per zone of the world (about a million
+   * tiles); the kernel enforces it anyway.
+   */
+  importante?: boolean;
 }
 
 const WHERE: Where[] = ['dentro', 'fuori', 'ovunque'];
@@ -81,7 +86,10 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
     `"a_terra": 0-4 nomi di oggetti comuni che si trovano per terra qui (anche nuovi, se coerenti).${ctx.wanted.length ? ` Se ha senso, includi qualcosa di cui si è parlato: ${ctx.wanted.join(', ')}.` : ''}`,
     '"nuovi": quasi sempre vuoto; solo un oggetto concreto o un personaggio che il luogo richiede e che non esiste tra i moduli.',
     `"rune": 0-2 frammenti presi esattamente da questo elenco: ${ctx.fragments.map((f) => `«${f}»`).join(', ')}.`,
-    '"strutture": 0-2 edifici o costruzioni di questo luogo, se l\'ambiente ne ha (es. «il mulino sul fiume», «la casa del fabbro con la forgia»): ognuno diventa un modello intero in cui si entra, sui lotti dell\'ambiente (gli altri lotti hanno case comuni). "importante" solo per un luogo notevole del mondo (un castello, un tempio, la torre del mago), raramente.',
+    '"strutture": 0-2 edifici o costruzioni di questo luogo, se l\'ambiente ne ha (es. «il mulino sul fiume», «la casa del fabbro con la forgia»): ognuno diventa un modello intero in cui si entra, sui lotti dell\'ambiente (gli altri lotti hanno case comuni).',
+    ctx.importante
+      ? '"importante" (al più una struttura): solo per un luogo notevole del mondo (un castello, un tempio, la torre del mago). In questa parte del mondo non ce n\'è ancora uno: mettilo solo se il luogo lo merita davvero.'
+      : 'Nessuna struttura "importante" qui: questa parte del mondo ha già il suo luogo notevole.',
     ctx.feedback ? `IL TENTATIVO PRECEDENTE È STATO SCARTATO: ${ctx.feedback}. Correggi.` : '',
   ]
     .filter(Boolean)
