@@ -97,7 +97,7 @@ impossibili, trame che non rispettano le persone, allusioni alla quarta parete, 
 diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
 [`docs/userchats/to-do-2026-10-22.md`](../userchats/to-do-2026-10-22.md) (sezione «Incoerenze personaggi e trame»).
 
-### T07 · Decisione: Graphify e il grafo del mondo — `fatto` (vedi il commit «Step 9 (T07)»)
+### T07 · Decisione: Graphify e il grafo del mondo — `fatto` (`faa0bc7`)
 - **Risposta dell'autore** (22/10/2026): approvato il grafo nativo del kernel («in casa») per l'uso (b); resta da
   provare Graphify per (a) e scrivere l'ADR.
 - Due usi distinti, da non confondere: (a) **sviluppo**: Graphify (CLI open source che fa del repository un
