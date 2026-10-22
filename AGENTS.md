@@ -115,7 +115,7 @@ src/
   ui/                   hud.ts (anche il diario delle missioni), inventory.ts, actions.ts, chat.ts, feed.ts, genesis.ts, editor.ts, console.ts, studio.ts, atlas.ts, dom.ts
 universe/
   universe.json         nome, seme, raggio, chunk (18), modelli e budget
-  world/                bible.json (memoria del Narratore), style.md (guida di stile dei modelli), consumi.json,
+  world/                bible.json (memoria del Narratore), style.md (guida di stile dei modelli), canone.md (le rune), consumi.json,
                         rules.json (regole), people.json (la società, con i ricordi), plots.json (trame),
                         atlas.json (geografia), stato.json (la partita)
   prompts/              theme.md, agents/<agente>.md
@@ -163,7 +163,10 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 
 - **Spazi, tappeto, corona** (ADR-0004, 0009): cerchio fermo in (0,0), tappeto con offset; `coronaRevealed()`.
 - **Rune** (ADR-0002, 0015): un token per runa, una casella per runa (una lastra luminosa a terra), righe orizzontali eseguite ogni
-  tick; binding `x y speed carpet time`. Rare; quelle del tappeto solo a ≥ 3 chunk dall'origine.
+  tick; binding `x y speed carpet time`. Rare; quelle del tappeto solo a ≥ 3 chunk dall'origine. Il **canone delle rune**
+  (`world/canone.md`: aspetto, dove stanno, restano finché qualcuno non le raccoglie, magia, ciò che nessuno sa), con le rune
+  magiche e gli incantesimi dell'universo, va con ogni compito del Narratore e dell'Arbitro (`canonSummary`): nessuna storia
+  dà alle rune comportamenti che lì non ci sono.
 - **Magia** (ADR-0015, 0018): rune magiche `luce fuoco acqua terra vita scudo vento`; ogni runa è un oggetto
   `rune:<token>`; la **frase** (`hand.tokens`) è la selezione ordinata; `T` pronuncia le magiche della frase e
   le consuma; incantesimi noti in `spells`, nuovi nominati una volta dal Narratore; costano **mana**

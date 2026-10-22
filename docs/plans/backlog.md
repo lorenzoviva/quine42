@@ -116,11 +116,17 @@ diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
   Misura su `valmora`: 57 persone, 215 legami, 39 legami gatto–umano di parentela o mestiere, 4 non simmetrici,
   1 verso nessuno, molti nomi quasi uguali: i casi di prova di T10-T12.
 
-### T08 · Il canone delle rune — `da fare`
+### T08 · Il canone delle rune — `fatto` (COMMIT)
 - Un documento dell'universo (`world/canone.md`) che dice cosa sono le rune per chi vive nel mondo: aspetto, dove
   si trovano, che restano dove sono finché qualcuno non le raccoglie, cosa fanno le magiche, cosa nessuno sa. Lo
   ricevono il Narratore e l'Arbitro in ogni compito narrativo; regola: nessuna trama inventa comportamenti nuovi
   delle rune. Test sul contesto degli agenti.
+- Esito: `universe/world/canone.md` nel seme (arriva agli universi esistenti con `upgradeFromSeed`); `canonSummary` in
+  `agents/council.ts` aggiunge al canone le rune magiche e gli incantesimi letti dai manifest dell'universo (anche quelli
+  aggiunti dopo) e lo mette nel contesto di Narratore e Arbitro, con la regola in testa; `tests/canon.test.ts` (3).
+  Diverso dal previsto: nessun ADR (è contesto degli agenti, non architettura; descritto in AGENTS.md → Rune);
+  `prompts/theme.md` parla ancora di «lettere che affiorano» e della strada che riporta in piazza: lo toglie T09.
+  Nessuna verifica nel browser (nessuna UI cambiata).
 
 ### T09 · Prompt narrativi più semplici e senza quarta parete — `da fare`
 - Genesi: togliere l'invito al mistero e la leggenda attorno alla piazza («chi cammina troppo si ritrova in

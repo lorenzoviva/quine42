@@ -5,7 +5,7 @@
 
 import { parseJson, type Models, type Schema, type Thinking } from '../ai/models';
 import { COUNCIL_PRINCIPLES } from '../fourthwall';
-import type { FileMap, TileDef } from '../types';
+import type { FileMap, MagicRune, Spell, TileDef } from '../types';
 
 export type AgentId = 'narratore' | 'cartografo' | 'artista' | 'scultore' | 'fisico' | 'ingegnere' | 'arbitro' | 'referente';
 
@@ -114,6 +114,37 @@ export function rulesSummary(files: FileMap, n = 30): string {
   return `## Regole già stabilite dal Concilio (rispettale, sii coerente)\n${lines.join('\n')}`;
 }
 
+/**
+ * The rune canon (world/canone.md): what the people of the world know about runes, plus the magic runes
+ * and incantations the universe actually has. Every narrative task gets it, so no story invents new rune
+ * behaviours.
+ */
+export function canonSummary(files: FileMap): string {
+  const canon = (files['world/canone.md'] ?? '').replace(/^# .*\n+/, '').trim();
+  if (!canon) return '';
+  const runes: string[] = [];
+  const spells: string[] = [];
+  for (const [path, text] of Object.entries(files)) {
+    if (!path.endsWith('manifest.json') || !text.includes('"runes"')) continue;
+    let m: { runes?: Record<string, MagicRune>; spells?: Record<string, Spell> };
+    try {
+      m = JSON.parse(text);
+    } catch {
+      continue;
+    }
+    for (const [token, r] of Object.entries(m.runes ?? {})) runes.push(`- ${r.glyph} ${r.name} («${token}», ${r.element}): ${r.description}`);
+    for (const [seq, sp] of Object.entries(m.spells ?? {})) spells.push(`- ${seq.split(' ').join(' + ')} → ${sp.name}: ${sp.description}`);
+  }
+  return [
+    '## Canone delle rune (vale sempre: nessuna trama, fatto, mistero o dialogo dà alle rune comportamenti che qui non ci sono)',
+    canon,
+    runes.length ? `### Le rune magiche di questo mondo\n${runes.join('\n')}` : '',
+    spells.length ? `### Gli incantesimi conosciuti\n${spells.join('\n')}` : '',
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+}
+
 export function catalogSummary(catalog: CatalogEntry[]): string {
   return catalog.map((m) => `- ${m.id} «${m.name}» [${m.kind}] terreni ${m.tiles.join('') || '-'}: ${m.context}`).join('\n');
 }
@@ -149,9 +180,12 @@ export class Council {
     const style = v.files['world/style.md'] ?? '';
     const parts: string[] = [];
     const rules = rulesSummary(v.files);
+    // The rune canon goes with every narrative task (the Narrator's and the Arbiter's).
+    const canon = agent === 'narratore' || agent === 'arbitro' ? canonSummary(v.files) : '';
     switch (agent) {
       case 'narratore':
         parts.push(`## Bibbia del mondo\n${bibleSummary(bible, true)}`, `## Moduli esistenti\n${catalogSummary(v.catalog)}`);
+        if (canon) parts.push(canon);
         if (rules) parts.push(rules);
         break;
       case 'cartografo': {
@@ -180,6 +214,7 @@ export class Council {
         break;
       case 'arbitro':
         parts.push(`## Bibbia del mondo\n${bibleSummary(bible)}`, `## Guida di stile\n${style}`, `## Terreni\n${paletteSummary(v.palette)}`);
+        if (canon) parts.push(canon);
         if (rules) parts.push(rules);
         break;
       case 'referente':
