@@ -181,7 +181,9 @@ export class MockModels implements Models {
       }
       case 'npc.individuate': {
         const rng = new Rng(hashStr(`${d.archetype?.name}|${d.ctx?.place}|${Math.random()}`));
-        const nome = rng.pick(NAMES);
+        // A careful narrator: a name not taken (the kernel says which ones are).
+        const avoid: string[] = d.ctx?.avoid ?? [];
+        const nome = rng.pick(NAMES.filter((n) => !avoid.includes(n)).length ? NAMES.filter((n) => !avoid.includes(n)) : NAMES);
         const common: string[] = d.ctx?.common ?? [];
         return {
           nome,
@@ -189,6 +191,7 @@ export class MockModels implements Models {
           aspetto: rng.pick(['ha le mani screpolate dal lavoro', 'porta un fazzoletto rosso al collo', 'zoppica leggermente', 'ha un sorriso sdentato e gentile']),
           porta: [common.length ? rng.pick(common) : 'pane', common.length > 1 ? rng.pick(common) : 'moneta', 'Fischietto di canna'],
           mestiere: rng.pick(['contadina', 'fornaio', 'pastore', 'tessitrice', 'boscaiolo', 'locandiera']),
+          genere: /a$|e$/.test(nome) && !/one$/.test(nome) ? 'femmina' : 'maschio',
           eta: rng.pick(['giovane', 'adulto', 'anziana']),
           storia: `È nata qui e da qui non è mai riuscita ad andarsene, anche se ci ha provato.`,
           // Someone already known becomes family; otherwise a relative not met yet.

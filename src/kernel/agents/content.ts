@@ -9,7 +9,7 @@ import { ITEM_CATEGORIES, type ItemDef, type LootTable, type Recipe } from '../t
 import { slug } from './forge';
 import type { AgentId, Council } from './council';
 import { FORME, formaModel } from '../modeldirector';
-import { ACTIVITIES, DAY_PHASES, defaultRoutine, inferActivity, WHERES, type Activity, type DayPhase, type Relation, type RoutineStep, type Where } from '../society';
+import { ACTIVITIES, DAY_PHASES, defaultRoutine, inferActivity, RELATION_WORDS, WHERES, type Activity, type DayPhase, type Gender, type Relation, type RoutineStep, type Species, type Where } from '../society';
 
 const ITEM_SCHEMA: Schema = {
   type: 'OBJECT',
@@ -250,6 +250,7 @@ export interface Identity {
   carrying: string[];
   /** Their place in society (ADR-0018). */
   job?: string;
+  gender?: Gender;
   age?: string;
   family?: Relation[];
   routine?: RoutineStep[];
@@ -264,33 +265,48 @@ const INDIVIDUAL_SCHEMA: Schema = {
     aspetto: { type: 'STRING' },
     porta: { type: 'ARRAY', items: { type: 'STRING' } },
     mestiere: { type: 'STRING' },
+    genere: { type: 'STRING', enum: ['maschio', 'femmina'] },
     eta: { type: 'STRING', description: 'giovane, adulto, anziano…' },
     storia: { type: 'STRING', description: 'due frasi: da dove viene, cosa le è successo' },
-    famiglia: { type: 'ARRAY', items: { type: 'OBJECT', properties: { nome: { type: 'STRING' }, legame: { type: 'STRING', description: 'madre, padre, figlio, figlia, fratello, sorella, moglie, marito, nonno, amico, rivale, maestro, apprendista…' } }, required: ['nome', 'legame'] } },
+    famiglia: { type: 'ARRAY', items: { type: 'OBJECT', properties: { nome: { type: 'STRING' }, legame: { type: 'STRING', description: 'ciò che QUESTO individuo è per quella persona, al suo genere: madre, padre, figlia, figlio, sorella, fratello, moglie, marito, amica, amico, rivale, maestra, apprendista, padrone (di un animale), animale (di un padrone)…' } }, required: ['nome', 'legame'] } },
     routine: {
       type: 'ARRAY',
       description: 'la sua giornata: 4 voci, una per momento',
       items: { type: 'OBJECT', properties: { quando: { type: 'STRING', enum: [...DAY_PHASES] }, fa: { type: 'STRING', description: 'cosa fa, breve (es. "impasta il pane")' }, dove: { type: 'STRING', enum: [...WHERES] }, azione: { type: 'STRING', enum: [...ACTIVITIES], description: 'il gesto che si vede fare' } }, required: ['quando', 'fa', 'dove', 'azione'] },
     },
   },
-  required: ['nome', 'persona', 'aspetto', 'porta', 'mestiere', 'famiglia', 'routine'],
+  required: ['nome', 'persona', 'aspetto', 'porta', 'mestiere', 'genere', 'famiglia', 'routine'],
 };
+
+/** What the Narrator must know of relations for this species (the kernel repairs the rest). */
+function relationRules(specie: Species): string {
+  return [
+    `In "famiglia" ogni legame dice cosa sei TU per quella persona, nella forma del tuo genere: {"nome": "Tazio", "legame": "figlia"} vuol dire che sei la figlia di Tazio. Parole possibili: ${RELATION_WORDS.join(', ')}.`,
+    specie === 'animale'
+      ? 'È un ANIMALE: niente mestieri da persona (il "mestiere" è ciò che fa: caccia topi, fa la guardia), niente parenti, maestri o apprendisti umani. Con una persona può essere solo "animale" (di un padrone: uno solo), "amico" o "rivale"; madre, padre, figlio, fratello solo con altri animali della sua specie.'
+      : 'È una PERSONA: un animale non è suo parente né suo apprendista; di un animale può essere "padrone" (l\'animale ne ha uno solo). Al massimo un padre, una madre e un coniuge.',
+    'Il nome deve essere nuovo: diverso, anche nella prima parola, da quelli delle persone già conosciute (niente "Elias il Giovane" accanto a "Elias il Vecchio", niente "Ombroso" accanto a "Ombra").',
+  ].join('\n');
+}
 
 /**
  * Behind every archetype there are individuals: a name, a past, their own pockets — and a place in
  * society: a job, a family related to the people already known, a daily routine.
  */
-export async function individuate(c: Council, archetype: { name: string; description: string; persona: string }, ctx: { place: string; common: string[]; society?: string }): Promise<Identity> {
-  const r = await c.ask<{ nome: string; persona: string; aspetto: string; porta: string[]; mestiere?: string; eta?: string; storia?: string; famiglia?: Relation[]; routine?: Array<{ quando: string; fa: string; dove: string; azione?: string }> }>(
+export async function individuate(c: Council, archetype: { name: string; description: string; persona: string; specie?: Species }, ctx: { place: string; common: string[]; society?: string; avoid?: string[] }): Promise<Identity> {
+  const specie = archetype.specie ?? 'persona';
+  const r = await c.ask<{ nome: string; persona: string; aspetto: string; porta: string[]; mestiere?: string; genere?: string; eta?: string; storia?: string; famiglia?: Relation[]; routine?: Array<{ quando: string; fa: string; dove: string; azione?: string }> }>(
     'narratore',
     'npc.individuate',
     [
-      `Crea un individuo di questo tipo di personaggio: «${archetype.name}» (${archetype.description}).`,
+      `Crea un individuo di questo tipo di personaggio: «${archetype.name}» (${archetype.description}), ${specie === 'animale' ? 'un animale' : 'una persona'}.`,
       `Scheda del tipo:\n${archetype.persona}`,
       `Luogo in cui si trova: ${ctx.place || 'sconosciuto'}.`,
       ctx.society ? `LA SOCIETÀ DEL MONDO\n${ctx.society}` : '',
-      'Dagli un nome proprio, un carattere e una storia brevi e suoi (non generici), un mestiere, un dettaglio d\'aspetto, e 3-6 cose che porta con sé coerenti con la sua vita (attrezzi del mestiere, cibo, ricordi, piccoli oggetti).',
+      'Dagli un nome proprio, un carattere e una storia brevi e suoi (non generici), un genere (maschio o femmina), un mestiere, un dettaglio d\'aspetto, e 3-6 cose che porta con sé coerenti con la sua vita (attrezzi del mestiere, cibo, ricordi, piccoli oggetti).',
       'Inseriscilo nella società: dagli una famiglia (1-3 legami) e, quando ha senso, legalo a persone già conosciute usando ESATTAMENTE i loro nomi (figlia del mugnaio, fratello del fabbro, rivale della locandiera); può anche nominare parenti che non sono ancora stati incontrati. Se tra le persone nominate e mai incontrate ce n\'è una adatta a questo tipo, puoi essere proprio lei (usa il suo nome).',
+      relationRules(specie),
+      ctx.avoid?.length ? `Nomi già presi o troppo simili, da NON usare: ${ctx.avoid.join(', ')}.` : '',
       'Descrivi la sua giornata in "routine": mattina, giorno, sera, notte — cosa fa e dove (casa, lavoro, piazza, in giro).',
       `Preferisci oggetti comuni già esistenti quando hanno senso: ${ctx.common.slice(0, 60).join(', ')}.`,
       'In "persona" scrivi la scheda in seconda persona ("Sei …"): come parli, cosa vuoi, chi sono i tuoi cari, cosa sai e cosa credi del tuo mondo (le sue leggende, a modo tuo). Sei una persona del mondo: non sai nulla di giochi, codice o simulazioni.',
@@ -314,6 +330,7 @@ export async function individuate(c: Council, archetype: { name: string; descrip
     look: String(r.aspetto ?? ''),
     carrying: (r.porta ?? []).map(String).slice(0, 8),
     job,
+    gender: r.genere === 'maschio' || r.genere === 'femmina' ? r.genere : undefined,
     age: r.eta ? String(r.eta).slice(0, 20) : undefined,
     story: r.storia ? String(r.storia).slice(0, 300) : undefined,
     family: (r.famiglia ?? []).filter((f) => f?.nome && f?.legame).slice(0, 4).map((f) => ({ nome: String(f.nome).slice(0, 40), legame: String(f.legame).toLowerCase().slice(0, 20) })),

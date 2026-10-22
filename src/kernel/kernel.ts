@@ -15,7 +15,7 @@ import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, placeRegion, readA
 import { STAMP_SHAPES } from './stamps';
 import { repairProgram } from './mj';
 import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './universes';
-import { addPerson, dayPhase, defaultRoutine, greeting, inferActivity, memorySummary, readPeople, remember, societySummary, type Activity, type DayPhase, type Person } from './society';
+import { addPerson, applyRenames, dayPhase, defaultRoutine, freshName, greeting, guessGender, inferActivity, memorySummary, readPeople, remember, repairSociety, similarNames, societySummary, type Activity, type DayPhase, type Person, type Species } from './society';
 import { activeQuests, plotText, PLOTS_FILE, readPlots, secretsOf, writePlots, type Plot } from './plots';
 import { Input } from './input';
 import { discoverModules, readConfig } from './universe';
@@ -302,6 +302,7 @@ export class Kernel {
     k.applyFiles(repo.working, { reset: true });
     k.loadState();
     k.ensureAtlas();
+    k.reviewSociety();
     void k.reviewFourthWall();
     k.models.limits = { text: k.config.ai.maxText };
     k.log('kernel', `universo «${name}» avviato su commit ${repo.head().id} (${repo.head().message}) — modelli: ${opts.models.name}${synced ? ' — sincronizzato dal disco' : ''}`);
@@ -2420,15 +2421,20 @@ export class Kernel {
     if (!parent || !entry || !p) return undefined;
     const origin = `${this.ecs.get(parentId, 'origin')?.key ?? parent.name}#figlio${Date.now().toString(36)}`;
     const child = this.spawnModuleEntity(entry, p.x + 0.7, p.y + 0.4, this.ecs.get(parentId, 'chunk')?.key, origin);
-    const nome = name || `${['Piccolo', 'Piccola'][hashStr(origin) % 2]} ${parent.name}`;
+    const gender = name ? guessGender({ nome: name, mestiere: '', famiglia: [] }) : hashStr(origin) % 2 ? 'femmina' : 'maschio';
+    // A name of their own, unlike anyone else's (not "Piccola Berta" beside Berta).
+    const taken = readPeople(this.files).persone.map((x) => x.nome);
+    const nome = name && !taken.some((t) => similarNames(t, name)) ? name : freshName(this.speciesOf(entry.manifest.id) ?? 'persona', gender, taken, origin);
+    const child_ = gender === 'femmina' ? 'figlia' : 'figlio';
     const identity: Identity = {
       name: nome,
-      persona: `Sei ${nome}, un bambino appena nato, figlio di ${parent.name} e del viandante. Parli a monosillabi, guardi tutto con meraviglia.`,
+      persona: `Sei ${nome}, ${gender === 'femmina' ? 'una bambina appena nata' : 'un bambino appena nato'}, ${child_} di ${parent.name} e del viandante. Parli a monosillabi, guardi tutto con meraviglia.`,
       look: 'piccolissimo, in fasce',
       carrying: [],
       job: 'bambino',
       age: 'neonato',
-      family: [{ nome: parent.name, legame: 'figlio' }, { nome: 'Viandante', legame: 'figlio' }],
+      gender,
+      family: [{ nome: parent.name, legame: child_ }, { nome: 'Viandante', legame: child_ }],
       routine: [
         { quando: 'mattina', fa: 'gioca vicino a casa', dove: 'casa', azione: 'passeggia' },
         { quando: 'giorno', fa: 'segue il genitore al lavoro', dove: 'lavoro', azione: 'passeggia' },
@@ -2439,13 +2445,13 @@ export class Kernel {
     this.ecs.set(child, 'identity', identity);
     const glyph = this.ecs.get(child, 'glyph');
     if (glyph) glyph.scale = (glyph.scale ?? 1.1) * 0.6;
-    const next = addPerson(readPeople(this.files), { nome, tipo: entry.manifest.id, mestiere: 'bambino', eta: 'neonato', famiglia: identity.family!, routine: identity.routine!, origine: origin, persona: identity.persona, aspetto: identity.look, legameViandante: 'figlio' });
+    const next = addPerson(readPeople(this.files), { nome, tipo: entry.manifest.id, specie: this.speciesOf(entry.manifest.id) ?? 'persona', genere: gender, mestiere: 'bambino', eta: 'neonato', famiglia: identity.family!, routine: identity.routine!, origine: origin, persona: identity.persona, aspetto: identity.look, legameViandante: child_ }, (t) => this.speciesOf(t));
     this.repo.write('world/people.json', JSON.stringify(next, null, 2) + '\n');
     this.applyFiles({ ...this.repo.working });
-    this.repo.commit(`nascita: ${nome}, figlio di ${parent.name} e del viandante`, 'agent');
-    this.rememberAbout(parent.name, `è nato nostro figlio, ${nome}`, 'Viandante', 3);
-    this.message(`È nato ${nome}!`, 'good');
-    this.council.say('narratore', 'approva', `nasce ${nome}, figlio di ${parent.name} e del viandante`, undefined, 'npc.birth');
+    this.repo.commit(`nascita: ${nome}, ${child_} di ${parent.name} e del viandante`, 'agent');
+    this.rememberAbout(parent.name, `è ${gender === 'femmina' ? 'nata nostra figlia' : 'nato nostro figlio'}, ${nome}`, 'Viandante', 3);
+    this.message(`È ${gender === 'femmina' ? 'nata' : 'nato'} ${nome}!`, 'good');
+    this.council.say('narratore', 'approva', `nasce ${nome}, ${child_} di ${parent.name} e del viandante`, undefined, 'npc.birth');
     return child;
   }
 
@@ -3289,24 +3295,36 @@ export class Kernel {
     const known = origin ? people.persone.find((p) => p.origine === origin && p.tipo === modId) : undefined;
     let identity: Identity;
     if (known) {
-      identity = { name: known.nome, persona: known.persona ?? m.persona, look: known.aspetto ?? '', carrying: known.porta ?? [], job: known.mestiere, age: known.eta, family: known.famiglia, routine: known.routine, story: known.storia };
+      identity = { name: known.nome, persona: known.persona ?? m.persona, look: known.aspetto ?? '', carrying: known.porta ?? [], job: known.mestiere, gender: known.genere, age: known.eta, family: known.famiglia, routine: known.routine, story: known.storia };
     } else {
+      const specie = this.speciesOf(modId!) ?? 'persona';
+      // Names already taken (people met, people around): a newcomer's name is unlike all of them,
+      // unless they are someone named and awaited.
+      const taken = () => [...readPeople(this.files).persone.map((p) => p.nome), ...this.ecs.query('identity').map((e) => this.ecs.get(e, 'identity').name as string)];
+      const awaited = (n: string) => readPeople(this.files).attesi.some((a) => a.nome.toLowerCase() === n.toLowerCase());
+      const alike = (n: string) => (awaited(n) && !taken().includes(n) ? [] : taken().filter((t) => similarNames(t, n)));
       try {
-        const ask = () => individuate(this.council, { name: m.name, description: m.description ?? '', persona: m.persona! }, { place: this.placeHere()?.name ?? '', common: [...this.content.items.values()].map((d) => d.name), society: societySummary(readPeople(this.files)) });
+        const ask = (avoid?: string[]) => individuate(this.council, { name: m.name, description: m.description ?? '', persona: m.persona!, specie }, { place: this.placeHere()?.name ?? '', common: [...this.content.items.values()].map((d) => d.name), society: societySummary(readPeople(this.files)), avoid });
         identity = await ask();
-        // A person of the world, not of the Council's table: once more if the fourth wall breaks.
+        // A person of the world, not of the Council's table: once more if the fourth wall breaks,
+        // or if the name is like someone else's.
         if (metaBreak(`${identity.persona} ${identity.story ?? ''} ${identity.job ?? ''}`)) identity = await ask();
+        else if (alike(identity.name).length) {
+          this.council.say('kernel', 'scarta', `il nome «${identity.name}» è troppo simile a ${alike(identity.name).join(', ')}`, 'narratore', 'npc.individuate');
+          identity = await ask([...alike(identity.name), identity.name]);
+        }
       } catch {
         identity = { name: m.name, persona: m.persona, look: '', carrying: [], routine: defaultRoutine('') };
       }
+      identity.gender ??= guessGender({ nome: identity.name, mestiere: identity.job ?? '', famiglia: identity.family ?? [] });
+      // Still alike: a name the kernel picks (and the persona says it).
+      if (identity.name !== m.name && alike(identity.name).length) {
+        const old = identity.name;
+        identity.name = freshName(specie, identity.gender, taken(), origin ?? old);
+        identity.persona = applyRenames(identity.persona, [[old, identity.name]]);
+      }
     }
     if (!this.ecs.alive.has(id)) return identity;
-    // Two people never share a name: a namesake gets an epithet, as in any village.
-    if (!known) {
-      const taken = new Set([...readPeople(this.files).persone.map((p) => p.nome), ...this.ecs.query('identity').map((e) => this.ecs.get(e, 'identity').name)]);
-      const epithets = ['il Giovane', 'del Pozzo', 'di Sotto', 'la Rossa', 'dalla Collina', 'il Vecchio', 'del Mulino', 'di Sopra'];
-      for (let i = 0; taken.has(identity.name) && i < epithets.length; i++) identity.name = `${identity.name.split(' ')[0]} ${epithets[(hashStr(origin ?? identity.name) + i) % epithets.length]}`;
-    }
     this.ecs.set(id, 'identity', identity);
     const resolved = identity.carrying.map((n) => this.content.byName(n));
     const unknown = identity.carrying.filter((_, i) => !resolved[i]);
@@ -3316,18 +3334,19 @@ export class Kernel {
     if (!inv.slots.some(Boolean)) for (const d of defs) addItem(inv, d.id, 1, this.itemSpec(d.id));
     if (!known && identity.name !== m.name) {
       const person: Person = {
-        nome: identity.name, tipo: modId!, mestiere: identity.job || m.name, eta: identity.age, famiglia: identity.family ?? [], routine: identity.routine ?? defaultRoutine(identity.job ?? ''),
+        nome: identity.name, tipo: modId!, specie: this.speciesOf(modId!) ?? 'persona', genere: identity.gender, mestiere: identity.job || m.name, eta: identity.age, famiglia: identity.family ?? [], routine: identity.routine ?? defaultRoutine(identity.job ?? ''),
         storia: identity.story, luogo: this.chunkAt(this.ecs.get(id, 'pos')?.x ?? 0, this.ecs.get(id, 'pos')?.y ?? 0)?.place?.name, origine: origin, persona: identity.persona, aspetto: identity.look, porta: identity.carrying,
       };
-      const next = addPerson(readPeople(this.files), person);
+      // The kernel makes the society coherent: the other side of each relation, what this species can be.
+      const next = addPerson(readPeople(this.files), person, (t) => this.speciesOf(t));
       this.repo.write('world/people.json', JSON.stringify(next, null, 2) + '\n');
       this.applyFiles({ ...this.repo.working });
       this.repo.commit(`persone: ${identity.name}, ${person.mestiere}`, 'agent');
-      // Relatives already met learn about the newcomer too.
+      // Relatives already met learn about the newcomer too (and the newcomer's relations may be corrected).
       for (const other of this.ecs.query('identity')) {
         const oi: Identity = this.ecs.get(other, 'identity');
         const back = next.persone.find((p) => p.nome === oi.name);
-        if (back && other !== id) oi.family = back.famiglia;
+        if (back) oi.family = back.famiglia;
       }
       const fam = (identity.family ?? []).map((f) => `${f.legame} di ${f.nome}`).join(', ');
       this.council.say('narratore', 'propone', `${m.name} → ${identity.name}, ${person.mestiere}${fam ? `; ${fam}` : ''}: ${identity.look} (porta ${defs.map((d) => d.name).join(', ') || 'niente'})`, undefined, 'npc.individuate');
@@ -3359,6 +3378,33 @@ export class Kernel {
 
   private when(): string {
     return `giorno ${this.day() + 1}, ${dayPhase(this.time, Kernel.DAY_SECONDS)}`;
+  }
+
+  /** A person or an animal, from the archetype's class (a cat, a dog, a horse are animals). */
+  speciesOf(tipo: string): Species | undefined {
+    const man = this.modules.get(tipo)?.manifest;
+    if (!man) return undefined;
+    const app = man.appearance;
+    const classe = app?.classe ?? (app?.model === 'animale' || app?.model === 'bestia' ? app.model : guessClass(`${man.name} ${man.description ?? ''} ${app?.aspetto ?? ''}`, man.persona ? 'figura' : undefined).id);
+    return classe === 'animale' || classe === 'bestia' ? 'animale' : 'persona';
+  }
+
+  /**
+   * The society is kept coherent (src/kernel/society.ts): at boot the registry is checked and, if
+   * something is wrong (relations impossible for the species or the gender, one side only, names
+   * alike), repaired and committed; renamed people are renamed in the plots too. No model calls.
+   */
+  reviewSociety(): string[] {
+    const people = readPeople(this.repo.working);
+    if (!people.persone.length) return [];
+    const { people: fixed, fixes, renames } = repairSociety(people, (t) => this.speciesOf(t));
+    if (!fixes.length) return [];
+    this.repo.write('world/people.json', JSON.stringify(fixed, null, 2) + '\n');
+    if (renames.length && this.repo.working[PLOTS_FILE]) this.repo.write(PLOTS_FILE, writePlots(applyRenames(readPlots(this.repo.working), renames)));
+    this.applyFiles({ ...this.repo.working });
+    this.repo.commit(`società: ${fixes.length} correzioni${renames.length ? ` (${renames.length} nomi nuovi)` : ''}`, 'agent');
+    this.council.say('arbitro', 'approva', `società: ${fixes.length} correzioni — ${fixes.slice(0, 6).join('; ')}${fixes.length > 6 ? '…' : ''}`, undefined, 'review.society');
+    return fixes;
   }
 
   /** The registry entry of a person, by name. */

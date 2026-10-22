@@ -786,7 +786,7 @@ describe('the life of people', () => {
     expect(k.rules().some((x) => x.chiave === `legame|${a.name}`)).toBe(true);
     // "Altro…" on a person: judged by the Council, with social effects.
     await k.freeAction(a.id, 'vorrei avere un figlio con te');
-    const child = readPeople(k.files).persone.find((p) => p.legameViandante === 'figlio')!;
+    const child = readPeople(k.files).persone.find((p) => /^figli[oa]$/.test(p.legameViandante ?? ''))!;
     expect(child.famiglia.map((f) => f.nome)).toEqual(expect.arrayContaining([a.name, 'Viandante']));
     expect(k.ecs.query('identity').some((id) => k.ecs.get(id, 'identity').name === child.nome)).toBe(true);
   });

@@ -177,8 +177,11 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 - **Regole** (ADR-0019): ogni giudizio in `world/rules.json`, mostrato al Concilio; le azioni possibili si
   imparano (modulo o `ItemDef.actions`); «Altro…» anche nell'inventario e nel crafting (ricette in
   `items.scoperte`); sessioni del Concilio ogni 12 luoghi.
-- **Società** (ADR-0020): `world/people.json`; individui con mestiere, famiglia (legami simmetrici), routine
-  (mattina/giorno/sera/notte → casa/lavoro/piazza/in giro, componente `meta` seguito da `sys.wander`).
+- **Società** (ADR-0020): `world/people.json`; individui con specie (`persona | animale`, dal tipo) e genere,
+  mestiere, famiglia, routine (mattina/giorno/sera/notte → casa/lavoro/piazza/in giro, componente `meta` seguito
+  da `sys.wander`). Un legame dice cosa è la persona per l'altro, nel suo genere; il validatore della società
+  (`repairSociety` in `society.ts`) lo rende possibile per le due specie e simmetrico, un padrone per animale,
+  nomi non simili (rinomina anche nelle trame); ripara a ogni aggiunta e all'avvio (`reviewSociety`).
 - **Effetti** (ADR-0014): insieme chiuso (`messaggio bisogni crea_oggetto consuma distruggi apri contenitore
   terreno fuoco luce scudo spingi evoca`), validati dal kernel, applicati da `core.effects`. Usati da
   azioni libere («Altro…»), azioni imparate (`actions[].effects`) e incantesimi. Terreno cambiato persistente.
