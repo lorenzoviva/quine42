@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => {
     server: { port: 5173, watch: { ignored: ['**/universes/**'] } },
     optimizeDeps: { exclude: ['wasmoon'] },
     // The voxel lab (lab/, experimental) is a second page on the same server: /lab/.
-    build: { rollupOptions: { input: { main: path.resolve('index.html'), lab: path.resolve('lab/index.html') } } },
+    build: { rollupOptions: { input: { main: path.resolve('index.html'), lab: path.resolve('lab/index.html'), lab3d: path.resolve('lab/3d/index.html') } } },
     test: { environment: 'node', include: ['tests/**/*.test.ts', 'lab/**/*.test.ts'] },
   };
 });

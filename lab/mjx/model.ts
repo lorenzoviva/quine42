@@ -157,11 +157,16 @@ class Compiler {
     for (const c of el.children) this.collect(c);
   }
 
+  /** Animations and actions wait for the end: they run on the finished model, in its last grid's letters. */
+  pending: XmlElement[] = [];
+  /** The grid the program ends in (the root's, or the last map's). */
+  final?: Ctx;
+
   /** The nodes among an element's children (unions, colours, animations and actions are not nodes). */
   children(el: XmlElement, ctx: Ctx): Node3[] {
     return el.children.flatMap((c) => {
       if (c.name === 'animation' || c.name === 'action') {
-        this.clip(c, ctx);
+        this.pending.push(c);
         return [];
       }
       const n = this.node(c, ctx);
@@ -188,6 +193,9 @@ class Compiler {
       const rs = own ? sym : this.symmetry(r, { ...ctx, sym });
       const p = this.num(r, r.attrs.p, 'p');
       const rule: Rule3 = { in: this.pattern(r, r.attrs.in, ctx, 'in'), out: this.pattern(r, r.attrs.out, ctx, 'out'), ...(p !== undefined ? { p } : {}) };
+      const shape = (s: string) => s.split(' ').map((layer) => layer.split('/').map((row) => (row.match(/\[[^\]]*\]|./g) ?? []).length).join('×')).join(' | ');
+      if (shape(rule.in) !== shape(rule.out))
+        this.fail(r, `in e out devono avere la stessa forma (strati separati da spazi, righe da "/"): in ${shape(rule.in)}, out ${shape(rule.out)}`);
       if (rs !== sym) rule.symmetry = rs;
       out.push(rule);
     };
@@ -278,6 +286,7 @@ class Compiler {
         return { in: this.pattern(r, r.attrs.in, ctx, 'in'), out: this.pattern(r, r.attrs.out, inner, 'out'), ...(p !== undefined ? { p } : {}) };
       });
     const step: Node3 = { type: 'map', scale: scale.map(Number) as Vec3, rules, symmetry: sym, clear: true };
+    this.final = inner;
     const rest = this.children({ ...el, children: el.children.filter((c) => c.name !== 'rule') }, inner);
     return rest.length ? { type: 'sequence', children: [step, ...rest] } : step;
   }
@@ -320,7 +329,8 @@ export function compileMjx(src: string, opts: { size?: Vec3 } = {}): MjxModel {
   let program: Node3 | null;
   if (RULE_NODES.has(root.name) || root.name === 'sequence' || root.name === 'markov' || root.name === 'map' || root.name === 'convolution' || root.name === 'path') program = c.node(root, ctx);
   else throw new Mj3Error(`riga ${root.line}: <${root.name}> non può essere la radice`);
-  for (const r of roots) if (CLIP_TAGS.has(r.name)) c.clip(r, ctx);
+  const last = { ...(c.final ?? ctx), sym: rootSym };
+  for (const r of [...c.pending, ...roots.filter((r) => CLIP_TAGS.has(r.name))]) c.clip(r, last);
 
   const size = opts.size ?? (root.attrs.size ? c.vec(root, root.attrs.size, 'size') : undefined);
   if (!size) throw new Mj3Error('manca la scatola: size="X Y Z" sulla radice');
