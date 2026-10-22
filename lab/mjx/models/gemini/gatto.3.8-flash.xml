@@ -1,0 +1,58 @@
+<!-- Gatto: scolpito da gemini-3.8-flash nello step 8.2A (lab/out/mjx-38-flash-2), voti dell'Artista 4 → 4/10 -->
+<sequence values="BISCTUNERKJLPQAZW" size="15 20 15" symmetry="(xy)" name="Gatto soriano">
+  <color symbol="I" value="cf7832" name="pelo fulvo"/>
+  <color symbol="S" value="783b18" name="striatura scura"/>
+  <color symbol="C" value="f2dbbe" name="petto chiaro"/>
+  <color symbol="T" value="cf7832" name="testa fulva" part="testa"/>
+  <color symbol="U" value="f2dbbe" name="musetto chiaro" part="testa"/>
+  <color symbol="N" value="d96868" name="naso" part="testa"/>
+  <color symbol="E" value="4e8c34" name="occhi verdi" part="testa"/>
+  <color symbol="R" value="e09088" name="interno orecchie" part="testa"/>
+  <color symbol="K" value="783b18" name="striatura testa" part="testa"/>
+  <color symbol="J" value="cf7832" name="zampa ant sx" part="gamba"/>
+  <color symbol="L" value="cf7832" name="zampa ant dx" part="gamba"/>
+  <color symbol="P" value="cf7832" name="zampa post sx" part="gamba"/>
+  <color symbol="Q" value="cf7832" name="zampa post dx" part="gamba"/>
+  <color symbol="W" value="f2dbbe" name="punta zampe"/>
+  <color symbol="A" value="cf7832" name="coda fulva" part="coda"/>
+  <color symbol="Z" value="783b18" name="striatura coda" part="coda"/>
+  <box at="4 14 0" size="2 2 1" color="W"/>
+  <box at="10 14 0" size="2 2 1" color="W"/>
+  <box at="4 14 1" size="2 2 5" color="J"/>
+  <box at="10 14 1" size="2 2 5" color="L"/>
+  <box at="4 5 0" size="2 2 1" color="W"/>
+  <box at="10 5 0" size="2 2 1" color="W"/>
+  <box at="4 5 1" size="2 3 5" color="P"/>
+  <box at="10 5 1" size="2 3 5" color="Q"/>
+  <ellipsoid at="4 6 5" size="3 4 3" color="P"/>
+  <ellipsoid at="10 6 5" size="3 4 3" color="Q"/>
+  <ellipsoid at="7 9 5" size="8 12 6" color="I"/>
+  <box at="7 9 4" size="6 10 5" color="I" on="B"/>
+  <ellipsoid at="7 13 5" size="6 5 4" color="C"/>
+  <box at="7 10 3" size="4 8 2" color="C"/>
+  <ellipsoid at="7 15 8" size="7 6 6" color="T"/>
+  <box at="7 17 7" size="4 2 2" color="U"/>
+  <box at="7 18 8" size="2 1 1" color="N"/>
+  <box at="5 17 9" size="1 1 1" color="E"/>
+  <box at="9 17 9" size="1 1 1" color="E"/>
+  <box at="4 14 11" size="2 2 2" color="T"/>
+  <box at="10 14 11" size="2 2 2" color="T"/>
+  <box at="4 14 13" size="1 1 1" color="T"/>
+  <box at="10 14 13" size="1 1 1" color="T"/>
+  <box at="4 15 11" size="1 1 2" color="R"/>
+  <box at="10 15 11" size="1 1 2" color="R"/>
+  <line at="7 4 7" to="7 2 10" r="1" color="A"/>
+  <line at="7 2 10" to="7 3 13" r="1" color="A"/>
+  <line at="7 3 13" to="7 5 14" r="0" color="A"/>
+  <box at="7 2 9" size="2 1 1" color="Z" on="A"/>
+  <box at="7 2 11" size="2 1 1" color="Z" on="A"/>
+  <box at="7 3 13" size="2 1 1" color="Z" on="A"/>
+  <box at="7 6 8" size="7 1 1" color="S" on="I"/>
+  <box at="7 8 8" size="7 1 1" color="S" on="I"/>
+  <box at="7 10 8" size="7 1 1" color="S" on="I"/>
+  <box at="7 12 7" size="7 1 1" color="S" on="I"/>
+  <box at="7 14 10" size="3 1 1" color="K" on="T"/>
+  <box at="7 15 10" size="1 2 1" color="K" on="T"/>
+  <box at="5 16 10" size="1 1 1" color="K" on="T"/>
+  <box at="9 16 10" size="1 1 1" color="K" on="T"/>
+</sequence>

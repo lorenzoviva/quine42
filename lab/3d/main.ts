@@ -440,7 +440,7 @@ async function buildWorld(seed: number) {
   player = showcase = undefined;
   status.textContent = 'il fiume (models/River.xml di MarkovJunior)…';
   land = makeLand(44, 44, seed);
-  const ids = (role: string) => CATALOG.filter((e) => e.role === role).map((e) => e.id);
+  const ids = (role: string) => CATALOG.filter((e) => e.role === role && !e.trial && !e.id.startsWith('sandbox:')).map((e) => e.id);
   const p = plan(land, seed, {
     trees: ids('tree'),
     plants: ids('plant'),
@@ -698,11 +698,11 @@ let current: { e: Entry; seed: number; xml: string } | undefined;
 function listModels() {
   const box = $('models');
   box.innerHTML = '';
-  for (const [title, roles] of GROUPS) {
+  for (const [title, keep] of GROUPS) {
     const h = document.createElement('h3');
     h.textContent = title;
     box.append(h);
-    for (const e of CATALOG.filter((x) => roles.includes(x.role))) {
+    for (const e of CATALOG.filter(keep)) {
       const b = document.createElement('button');
       b.textContent = e.name;
       b.title = e.source;

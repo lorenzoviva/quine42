@@ -1,0 +1,57 @@
+<!-- Pino: scolpito da gemini-3.8-flash nello step 8.2A (lab/out/mjx-38-flash-2), voti dell'Artista 9/10 -->
+<sequence values="BTtFfLN" size="40 40 60" symmetry="(xy)" name="Pino">
+  <color symbol="T" value="5a3825" name="legno_tronco"/>
+  <color symbol="t" value="382216" name="legno_ombra"/>
+  <color symbol="F" value="2d5e37" name="aghi_base"/>
+  <color symbol="f" value="3e7c4b" name="aghi_medio"/>
+  <color symbol="L" value="65a854" name="aghi_luce"/>
+  <color symbol="N" value="1a3a22" name="aghi_ombra"/>
+
+  <!-- Radici alla base -->
+  <cylinder at="20 20 0" size="7 7 3" color="t"/>
+  <!-- Tronco slanciato e affusolato -->
+  <cylinder at="20 20 0" size="5 5 20" color="T"/>
+  <cylinder at="20 20 18" size="4 4 25" color="T"/>
+  <cylinder at="20 20 40" size="3 3 16" color="T"/>
+
+  <!-- Palchi di chioma conica degradanti verso l'alto -->
+  <!-- Palco 1 (inferiore, ampio) -->
+  <cone at="20 20 10" size="30 30 14" color="F" on="B"/>
+  <!-- Palco 2 -->
+  <cone at="20 20 20" size="26 26 13" color="F" on="B"/>
+  <!-- Palco 3 -->
+  <cone at="20 20 29" size="22 22 12" color="F" on="B"/>
+  <!-- Palco 4 -->
+  <cone at="20 20 37" size="17 17 11" color="F" on="B"/>
+  <!-- Palco 5 -->
+  <cone at="20 20 45" size="12 12 10" color="F" on="B"/>
+  <!-- Cima / Punta -->
+  <cone at="20 20 52" size="6 6 7" color="F" on="B"/>
+
+  <!-- Frangiatura e clustering stile pixel art RPG -->
+  <convolution neighborhood="Moore" steps="2">
+    <rule in="F" out="B" values="B" sum="14..26" p="0.5"/>
+    <rule in="B" out="F" values="F" sum="13..26" p="0.15"/>
+  </convolution>
+
+  <!-- Ombreggiatura sotto i palchi (aghi_ombra N) -->
+  <prl steps="1">
+    <rule in="F B" out="N B" p="0.85"/>
+  </prl>
+
+  <!-- Illuminazione calda dall'alto e nord (aghi_luce L, aghi_medio f) -->
+  <prl steps="1">
+    <rule in="B F" out="B L" p="0.9"/>
+  </prl>
+  <prl steps="1">
+    <rule in="L F" out="* f" p="0.6"/>
+    <rule in="B/F" out="B/L" p="0.4" symmetry="(x)"/>
+  </prl>
+
+  <!-- Dettagli e ombre sul tronco -->
+  <prl steps="1" symmetry="()">
+    <!-- Ombra verso sud ed est -->
+    <rule in="T/B" out="t/B" p="0.6"/>
+    <rule in="TB" out="tB" p="0.6"/>
+  </prl>
+</sequence>

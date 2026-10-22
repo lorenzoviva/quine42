@@ -1,0 +1,43 @@
+<!-- Lupo: scolpito da gemini-3.1-flash-lite nello step 8.2A (lab/out/mjx-31-flash-lite-2), voti dell'Artista 2/10 -->
+<sequence values="BGDLKW" size="25 40 30" symmetry="(xy)" name="Lupo">
+  <color symbol="G" value="847e87" name="pelliccia base" part="busto"/>
+  <color symbol="D" value="5f574f" name="zampe e ombre" part="gamba"/>
+  <color symbol="L" value="c2c3c7" name="pelliccia chiara"/>
+  <color symbol="K" value="291814" name="tartufo e occhi" part="testa"/>
+  <color symbol="W" value="fff1e8" name="sottopelo"/>
+
+  <!-- Zampe: Solidali al suolo (z=0), altezze 0-10 -->
+  <box at="7 25 0" size="4 4 10" color="D"/>
+  <box at="17 25 0" size="4 4 10" color="D"/>
+  <box at="7 10 0" size="4 4 10" color="D"/>
+  <box at="17 10 0" size="4 4 10" color="D"/>
+
+  <!-- Corpo: Un unico blocco centrale che poggia sulle zampe (z=10-20) -->
+  <box at="12 18 10" size="14 20 10" color="G"/>
+  
+  <!-- Sottopelo/Volume aggiuntivo -->
+  <ellipsoid at="12 18 14" size="12 18 8" color="W"/>
+
+  <!-- Testa: Collegata al corpo principale (z=18+) -->
+  <ellipsoid at="12 32 18" size="8 8 8" color="G"/>
+  <box at="12 36 18" size="4 4 4" color="G"/>
+
+  <!-- Coda: Collegata al corpo posteriore (z=10+) -->
+  <ellipsoid at="12 2 12" size="6 8 6" color="G"/>
+
+  <!-- Dettagli del volto -->
+  <box at="10 34 20" size="1 1 1" color="K"/>
+  <box at="14 34 20" size="1 1 1" color="K"/>
+  <box at="12 38 19" size="2 2 2" color="K"/>
+
+  <!-- Smoothing: Collega le geometrie riempiendo i vuoti di connessione -->
+  <convolution neighborhood="Moore" steps="2">
+    <rule in="B" out="G" values="G" sum="2..26"/>
+  </convolution>
+  
+  <!-- Aggiunta di luci/ombre di dettaglio -->
+  <prl steps="1">
+    <rule in="B G" out="B L" p="0.3"/>
+    <rule in="B D" out="B G" p="0.2"/>
+  </prl>
+</sequence>

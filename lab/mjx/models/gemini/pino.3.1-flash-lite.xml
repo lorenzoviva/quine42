@@ -1,0 +1,31 @@
+<!-- Pino: scolpito da gemini-3.1-flash-lite nello step 8.2A (lab/out/mjx-31-flash-lite-2), voti dell'Artista 5 → 9/10 -->
+<sequence values="BTFLD" size="40 40 60" symmetry="(xy)" name="Pino">
+  <color symbol="T" value="6b4a2e" name="tronco"/>
+  <color symbol="F" value="2f6b3a" name="aghi"/>
+  <color symbol="L" value="4b8f4a" name="aghi_luce"/>
+  <color symbol="D" value="1f4a2c" name="aghi_ombra"/>
+  <color symbol="S" value="453020" name="ombra_tronco"/>
+
+  <!-- Tronco visibile alla base -->
+  <cylinder at="20 20 0" size="4 4 20" color="T"/>
+
+  <!-- Chioma a palchi distinti (più larghi alla base, più stretti in cima) -->
+  <cone at="20 20 18" size="36 36 14" color="F" on="B"/>
+  <cone at="20 20 28" size="28 28 12" color="F" on="B"/>
+  <cone at="20 20 37" size="20 20 10" color="F" on="B"/>
+  <cone at="20 20 45" size="12 12 8" color="F" on="B"/>
+
+  <!-- Texture per rendere i bordi più spigolosi e naturali -->
+  <convolution neighborhood="Moore" steps="2">
+    <rule in="F" out="D" values="F" sum="10..18" p="0.5"/>
+  </convolution>
+
+  <!-- Dettagli: luci e ombre sugli aghi per profondità -->
+  <prl steps="1">
+    <rule in="B F" out="B L" p="0.3"/>
+    <rule in="F B" out="D B" p="0.6"/>
+  </prl>
+
+  <!-- Ombra di contatto alla base del tronco -->
+  <all in="T B" out="S B" steps="2"/>
+</sequence>

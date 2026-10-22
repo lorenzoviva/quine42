@@ -1,0 +1,37 @@
+<!-- Barile: scolpito da gemini-3.1-flash-lite nello step 8.2A (lab/out/mjx-31-flash-lite-2), voti dell'Artista 5 → 7/10 -->
+<sequence values="BWLIDT" size="20 20 20" symmetry="(xy)" name="Barile Bombato">
+  <color symbol="W" value="8c532b" name="legno doghe"/>
+  <color symbol="L" value="ad6f3d" name="legno chiaro"/>
+  <color symbol="D" value="4e2c14" name="fessura doghe"/>
+  <color symbol="I" value="424754" name="cerchio ferro"/>
+  <color symbol="T" value="6a3b1a" name="tappo"/>
+
+  <!-- Struttura bombata: cilindri sovrapposti per creare la curva, poggia a z=0 -->
+  <cylinder at="10 10 0" size="14 14 2" color="W"/>
+  <cylinder at="10 10 2" size="16 16 2" color="W"/>
+  <cylinder at="10 10 4" size="18 18 10" color="W"/>
+  <cylinder at="10 10 14" size="16 16 2" color="W"/>
+  <cylinder at="10 10 16" size="14 14 2" color="W"/>
+
+  <!-- Cerchi di ferro (posizionati dove il barile si restringe, sopra la struttura) -->
+  <cylinder at="10 10 3" size="18 18 2" color="I"/>
+  <cylinder at="10 10 13" size="18 18 2" color="I"/>
+
+  <!-- Tappi superiore e inferiore -->
+  <cylinder at="10 10 0" size="12 12 1" color="T"/>
+  <cylinder at="10 10 17" size="12 12 1" color="T"/>
+
+  <!-- Definisci le doghe verticali: rimuovi pixel centrali per fare linee -->
+  <all steps="1">
+    <rule in="W W W" out="W D W"/>
+  </all>
+
+  <!-- Texture del legno (leggera) -->
+  <prl steps="1">
+    <rule in="W" out="L" p="0.2"/>
+  </prl>
+
+  <!-- Pulizia: Assicurati che il ferro sia solido e non bucato dalle fessure -->
+  <cylinder at="10 10 3" size="18 18 2" color="I"/>
+  <cylinder at="10 10 13" size="18 18 2" color="I"/>
+</sequence>

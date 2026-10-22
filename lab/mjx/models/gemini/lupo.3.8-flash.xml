@@ -1,0 +1,52 @@
+<!-- Lupo: scolpito da gemini-3.8-flash nello step 8.2A (lab/out/mjx-38-flash-2), voti dell'Artista 3 → 3/10 -->
+<sequence values="BAIUVFDWHCKE" size="25 40 30" symmetry="()" name="Lupo">
+  <color symbol="A" value="545967" name="zampa anteriore sx" part="gamba"/>
+  <color symbol="I" value="545967" name="zampa anteriore dx" part="gamba"/>
+  <color symbol="U" value="454955" name="zampa posteriore sx" part="gamba"/>
+  <color symbol="V" value="454955" name="zampa posteriore dx" part="gamba"/>
+  <color symbol="F" value="686e7f" name="pelliccia grigia"/>
+  <color symbol="D" value="333742" name="dorso scuro"/>
+  <color symbol="W" value="d6d9e6" name="pelo chiaro"/>
+  <color symbol="H" value="8a91a3" name="luce pelliccia"/>
+  <color symbol="C" value="545967" name="coda folta" part="coda"/>
+  <color symbol="K" value="1a1c22" name="tartufo e dettagli"/>
+  <color symbol="E" value="ffaa22" name="occhi dorati"/>
+  <!-- Zampe anteriori solide e connesse al tronco -->
+  <box at="7 23 0" size="4 5 13" color="A"/>
+  <box at="14 23 0" size="4 5 13" color="I"/>
+  <!-- Zampe posteriori robuste con coscia integrata -->
+  <box at="7 10 0" size="4 5 11" color="U"/>
+  <box at="14 10 0" size="4 5 11" color="V"/>
+  <box at="7 10 8" size="4 6 6" color="U"/>
+  <box at="14 10 8" size="4 6 6" color="V"/>
+  <!-- Tronco principale continuo e compatto -->
+  <box at="7 8 10" size="11 20 8" color="F"/>
+  <box at="8 7 11" size="9 21 7" color="F"/>
+  <!-- Torace e collo robusti rivolti verso il davanti (+y) -->
+  <box at="8 21 12" size="9 9 9" color="F"/>
+  <!-- Testa ben posizionata e fusa al collo -->
+  <box at="8 27 15" size="9 8 8" color="F"/>
+  <!-- Muso allungato e definito -->
+  <box at="9 33 15" size="7 6 5" color="F"/>
+  <box at="10 34 14" size="5 5 2" color="W"/>
+  <box at="11 38 17" size="3 2 2" color="K"/>
+  <!-- Occhi dorati incassati sui lati del muso/fronte -->
+  <box at="8 32 18" size="2 2 2" color="E"/>
+  <box at="15 32 18" size="2 2 2" color="E"/>
+  <box at="9 33 19" size="1 1 1" color="K"/>
+  <box at="15 33 19" size="1 1 1" color="K"/>
+  <!-- Orecchie a punta ben ancorate in cima alla testa -->
+  <box at="8 28 22" size="3 3 5" color="D"/>
+  <box at="14 28 22" size="3 3 5" color="D"/>
+  <box at="9 29 23" size="1 1 3" color="K"/>
+  <box at="15 29 23" size="1 1 3" color="K"/>
+  <!-- Coda folta solidamente attaccata al retro del tronco -->
+  <box at="10 6 12" size="5 5 6" color="C"/>
+  <box at="10 4 8" size="5 5 6" color="C"/>
+  <box at="10 2 4" size="5 4 6" color="C"/>
+  <box at="11 2 4" size="3 3 3" color="W"/>
+  <!-- Dettagli di mantello e pelo chiaro sul petto -->
+  <box at="8 9 17" size="9 18 2" color="D"/>
+  <box at="9 23 11" size="7 6 7" color="W"/>
+  <box at="10 10 18" size="5 15 1" color="H"/>
+</sequence>

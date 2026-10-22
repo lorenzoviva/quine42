@@ -1,0 +1,38 @@
+<!-- Betulla: scolpito da gemini-3.1-flash-lite nello step 8.2A (lab/out/mjx-31-flash-lite-2), voti dell'Artista 5 → 4/10 -->
+<sequence values="BWbgG" size="40 40 60" symmetry="(xy)" name="Betulla">
+  <color symbol="W" value="fcfcfc" name="tronco_base"/>
+  <color symbol="b" value="291814" name="macchie_corteccia"/>
+  <color symbol="G" value="a8e72e" name="foglie_luce"/>
+  <color symbol="g" value="00b543" name="foglie_ombra"/>
+  <color symbol="B" value="000000" hidden="True"/>
+
+  <!-- 1. Tronco Bianco sottile -->
+  <cylinder at="20 20 0" size="3 3 50" color="W"/>
+  
+  <!-- Texture corteccia: macchie scure orizzontali (tipico della betulla) -->
+  <prl steps="60">
+    <rule in="W" out="b" p="0.15" symmetry="(x)"/>
+  </prl>
+
+  <!-- 2. Chioma irregolare (non più ellissoidi perfetti) -->
+  <!-- Creiamo grappoli casuali anziché una forma unica -->
+  <box at="20 20 40" size="28 28 20" color="G" on="B"/>
+  <box at="20 20 50" size="18 18 18" color="G" on="B"/>
+  
+  <!-- Erosione e frastagliatura per rendere naturale -->
+  <convolution neighborhood="NoCorners" steps="3">
+    <rule in="G" out="B" values="B" sum="0..4" p="0.8"/>
+    <rule in="B" out="G" values="G" sum="3..6" p="0.3"/>
+  </convolution>
+
+  <!-- Aggiunta dettagli fogliame: ombre e profondità -->
+  <prl steps="1">
+    <!-- Ombre interne (dove le foglie sono dense) -->
+    <rule in="G B" out="g B" p="0.5" symmetry="()"/>
+    <!-- Piccoli ciuffi sparsi ai bordi per un look "arioso" -->
+    <rule in="B G" out="G B" p="0.2" symmetry="(xyz)"/>
+  </prl>
+  
+  <!-- Pulizia finale: assicura che il tronco sia libero sotto la chioma -->
+  <all in="G W" out="G W" steps="1"/>
+</sequence>

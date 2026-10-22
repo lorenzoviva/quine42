@@ -1,0 +1,44 @@
+<!-- Quercia: scolpito da gemini-3.1-flash-lite nello step 8.2A (lab/out/mjx-31-flash-lite-2), voti dell'Artista 4 → 1/10 -->
+<sequence values="BTtLGN" size="40 40 60" symmetry="(xy)" name="Quercia">
+  <color symbol="T" value="6b4a2e" name="tronco"/>
+  <color symbol="t" value="4a3424" name="tronco ombra"/>
+  <color symbol="L" value="4b8f4a" name="chioma luce"/>
+  <color symbol="G" value="2f6b3a" name="chioma media"/>
+  <color symbol="N" value="1f4a2c" name="chioma ombra"/>
+
+  <!-- Struttura del tronco: più robusta e alta -->
+  <cylinder at="20 20 0" size="12 12 20" color="T"/>
+  <cylinder at="20 20 20" size="9 9 20" color="T"/>
+  <cylinder at="20 20 40" size="6 6 10" color="T"/>
+
+  <!-- Rami principali: si estendono verso l'esterno per sostenere la chioma -->
+  <line at="20 20 40" to="8 8 48" r="2" color="T"/>
+  <line at="20 20 40" to="32 32 48" r="2" color="T"/>
+  <line at="20 20 40" to="8 32 48" r="2" color="T"/>
+  <line at="20 20 40" to="32 8 48" r="2" color="T"/>
+
+  <!-- Chioma irregolare: multiple masse per evitare l'effetto palloncino -->
+  <ellipsoid at="20 20 48" size="26 26 16" color="G" on="T"/>
+  <ellipsoid at="12 12 50" size="18 18 14" color="G" on="T"/>
+  <ellipsoid at="28 28 50" size="18 18 14" color="G" on="T"/>
+  <ellipsoid at="12 28 50" size="18 18 14" color="G" on="T"/>
+  <ellipsoid at="28 12 50" size="18 18 14" color="G" on="T"/>
+
+  <!-- Solidificazione: riempie i vuoti nella chioma -->
+  <convolution neighborhood="Moore" steps="2">
+    <rule in="B" out="G" values="G" sum="6..26"/>
+  </convolution>
+
+  <!-- Clustering di colore: definisce luce (sopra) e ombra (sotto) senza dithering -->
+  <prl steps="2" symmetry="()">
+    <!-- Luce: picchi superiori -->
+    <rule in="B G" out="L B" p="0.8"/>
+    <!-- Ombra: rientranze e parte inferiore -->
+    <rule in="G G" out="N G" p="0.5"/>
+  </prl>
+
+  <!-- Dettaglio tronco: venature verticali -->
+  <prl steps="2" symmetry="()">
+    <rule in="T T" out="t T" p="0.3"/>
+  </prl>
+</sequence>

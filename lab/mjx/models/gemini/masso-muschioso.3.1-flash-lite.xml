@@ -1,0 +1,36 @@
+<!-- Masso muschioso: scolpito da gemini-3.1-flash-lite nello step 8.2A (lab/out/mjx-31-flash-lite-2), voti dell'Artista 5 → 4/10 -->
+<sequence values="BRS Gg M" size="20 20 16" symmetry="(xyz)" origin="bottom" name="Masso muschioso">
+  <color symbol="R" value="5f574f" name="roccia scura"/>
+  <color symbol="S" value="83769c" name="roccia chiara"/>
+  <color symbol="G" value="00e436" name="muschio vivo"/>
+  <color symbol="g" value="00b543" name="muschio ombra"/>
+  <color symbol="M" value="5a8a3c" name="muschio base"/>
+
+  <!-- Creazione volume base solido -->
+  <box at="10 10 2" size="6 6 5" color="R"/>
+  <one steps="500" symmetry="(xyz)" in="RB" out="RR"/>
+  
+  <!-- Levigazione per forma naturale -->
+  <convolution neighborhood="Moore" steps="4">
+    <rule in="B" out="R" values="R" sum="12..26"/>
+    <rule in="R" out="B" values="R" sum="1..8"/>
+  </convolution>
+
+  <!-- Dettagli texture roccia: variazioni di grigio -->
+  <prl steps="60" in="R" out="S" p="0.2"/>
+  <prl steps="30" in="S R" out="R S" p="0.1"/>
+
+  <!-- Muschio: cresce prioritariamente sulle zone esposte (vuoto sopra) -->
+  <prl steps="1" in="B R" out="M R" p="0.6"/>
+  <prl steps="1" in="B S" out="M S" p="0.4"/>
+  
+  <!-- Clustering del muschio -->
+  <one steps="150" in="B M" out="M M" symmetry="(xyz)"/>
+  
+  <!-- Sfumature muschio: verde vivo e verde ombra -->
+  <prl steps="1" in="M" out="G" p="0.3"/>
+  <prl steps="1" in="M" out="g" p="0.3"/>
+
+  <!-- Piccoli dettagli di crepa/usura finale -->
+  <prl steps="20" in="R" out="B" p="0.05"/>
+</sequence>

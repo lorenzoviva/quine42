@@ -21,6 +21,8 @@ export interface Entry {
   grows?: boolean;
   /** A step limit (models.xml's, for MarkovJunior's own models). */
   steps?: number;
+  /** Written by Gemini in the step 8.2A trial (kept out of the world, shown in the panel). */
+  trial?: boolean;
 }
 
 const files = import.meta.glob('../mjx/models/*.xml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
@@ -68,10 +70,21 @@ export const CATALOG: Entry[] = [
     .map((o) => ({ id: `mj:${o.name}`, name: o.name, role: 'official' as const, xml: o.xml, vpt: 20, size: o.size, source: 'MarkovJunior (github.com/mxgmn/MarkovJunior, models/' + o.name + '.xml), invariato', grows: true, ...(o.steps ? { steps: o.steps } : {}) })),
 ];
 
+// The step 8.2A trial: what each Gemini model wrote for the same targets (<target>.<model>.xml).
+const trial = import.meta.glob('../mjx/models/gemini/*.xml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+const TRIAL_ROLE: Record<string, Role> = { pino: 'tree', quercia: 'tree', betulla: 'tree', 'masso-muschioso': 'rock', 'cespuglio-con-bacche': 'plant', barile: 'prop', pozzo: 'structure', casetta: 'structure', viandante: 'npc', contadina: 'npc', gatto: 'animal', lupo: 'animal' };
+for (const [file, xml] of Object.entries(trial)) {
+  const base = file.replace(/^.*\//, '').replace(/\.xml$/, '');
+  const target = base.split('.')[0];
+  const model = base.slice(target.length + 1) || '?';
+  CATALOG.push({ id: `g:${target}.${model}`, name: `${target} · ${model}`, role: TRIAL_ROLE[target] ?? 'prop', xml, vpt: 20, source: sourceOf(xml) || `scolpito da ${model} nello step 8.2A`, trial: true });
+}
+
 export const byId = (id: string) => CATALOG.find((e) => e.id === id);
-export const GROUPS: Array<[string, Role[]]> = [
-  ['Persone e animali', ['player', 'npc', 'animal']],
-  ['Piante e rocce', ['tree', 'plant', 'rock']],
-  ['Oggetti e strutture', ['prop', 'structure']],
-  ['MarkovJunior (originali)', ['official']],
+export const GROUPS: Array<[string, (e: Entry) => boolean]> = [
+  ['Persone e animali', (e) => !e.trial && ['player', 'npc', 'animal'].includes(e.role)],
+  ['Piante e rocce', (e) => !e.trial && ['tree', 'plant', 'rock'].includes(e.role)],
+  ['Oggetti e strutture', (e) => !e.trial && ['prop', 'structure'].includes(e.role)],
+  ['MarkovJunior (originali)', (e) => e.role === 'official'],
+  ['Gemini, step 8.2A (stessi bersagli)', (e) => !!e.trial],
 ];

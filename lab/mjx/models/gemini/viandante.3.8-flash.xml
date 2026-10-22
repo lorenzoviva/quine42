@@ -1,0 +1,45 @@
+<!-- Viandante: scolpito da gemini-3.8-flash nello step 8.2A (lab/out/mjx-38-flash-2), voti dell'Artista 5 → 8/10 -->
+<sequence values="BGMNOCSEAQHPWLK" size="20 15 30" symmetry="(xy)" name="Viandante">
+  <color symbol="G" value="38261b" name="stivali robusti" part="gamba"/>
+  <color symbol="M" value="2c4d59" name="mantello petrolio"/>
+  <color symbol="N" value="3e6a7a" name="mantello luce"/>
+  <color symbol="O" value="1c323a" name="mantello ombra"/>
+  <color symbol="C" value="355d6b" name="cappuccio petrolio"/>
+  <color symbol="S" value="e6b894" name="viso"/>
+  <color symbol="E" value="1b181f" name="occhi"/>
+  <color symbol="A" value="2c4d59" name="braccio sinistro" part="braccio"/>
+  <color symbol="Q" value="e6b894" name="mano sinistra" part="braccio"/>
+  <color symbol="H" value="2c4d59" name="braccio bastone" part="braccio"/>
+  <color symbol="P" value="e6b894" name="mano bastone" part="braccio"/>
+  <color symbol="W" value="634125" name="bastone da viaggio"/>
+  <color symbol="L" value="422917" name="cintura cuoio"/>
+  <color symbol="K" value="d69e2e" name="fibbia ottone"/>
+  <!-- Gambe e stivali alla base -->
+  <box at="8 7 0" size="3 4 6" color="G"/>
+  <box at="12 7 0" size="3 4 6" color="G"/>
+  <!-- Corpo e mantello allargati e ben bilanciati -->
+  <cone at="10 7 5" size="15 11 15" color="M" on="B"/>
+  <cylinder at="10 7 6" size="13 10 13" color="M" on="B"/>
+  <box at="10 7 15" size="14 10 4" color="M" on="B"/>
+  <!-- Braccia integrate sulle spalle più ampie -->
+  <cylinder at="3 7 9" size="3 4 8" color="A" on="B"/>
+  <box at="3 7 8" size="2 2 2" color="Q" on="B"/>
+  <cylinder at="17 8 10" size="3 4 7" color="H" on="B"/>
+  <box at="17 9 9" size="2 2 2" color="P" on="B"/>
+  <!-- Cappuccio compatto, arrotondato e proporzionato -->
+  <ellipsoid at="10 7 18" size="11 10 9" color="C" on="B"/>
+  <!-- Volto che sporge dal cappuccio -->
+  <ellipsoid at="10 8 18" size="8 7 7" color="S" on="C"/>
+  <box at="10 12 18" size="7 3 5" color="B" on="C"/>
+  <!-- Occhi scuri espressivi -->
+  <box at="8 10 19" size="1 2 2" color="E" on="S"/>
+  <box at="12 10 19" size="1 2 2" color="E" on="S"/>
+  <!-- Cintura e fibbia in vita -->
+  <cylinder at="10 7 11" size="13 10 1" color="L" on="M"/>
+  <box at="10 12 11" size="3 1 1" color="K" on="L"/>
+  <!-- Bastone da viaggio saldo a terra -->
+  <line at="17 11 0" to="17 11 25" r="0" color="W" on="B"/>
+  <!-- Ombreggiatura pulita del bordo inferiore senza scaglie rumorose sul cappuccio -->
+  <prl steps="1" symmetry="()" in="M/B" out="O/B" p="0.25"/>
+  <prl steps="1" in="B M" out="B N" p="0.6"/>
+</sequence>

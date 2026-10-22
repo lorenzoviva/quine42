@@ -365,8 +365,64 @@ giro di miglioramento con l'immagine. Ultima tornata, voti dell'Artista:
 Il limite ora è la qualità dei blocchi dello Scultore (quasi solo scatole) e la tendenza dell'Architetto a
 copiare gli schemi degli esempi o a far crescere una zona fino a riempire tutto.
 
+## Step 8.2A: MarkovJunior alla lettera, tutto in 3D
+
+Richiesta in [`docs/userchats/step8.2A.md`](../docs/userchats/step8.2A.md). Decisione:
+[ADR-0036](../docs/adr/0036-markovjunior-alla-lettera-in-3d.md). Un modello intero per ogni cosa, scritto
+nell'XML di MarkovJunior; niente blocchi, niente architetto, niente JSON.
+
+- **Sandbox 3D**: `npm run dev` → <http://localhost:5173/lab/3d/>. WASD (Shift corre), Q/R ruota la
+  camera, rotella zoom, tasto destro trascina per orbitare, E agisce (la porta della casa si apre e ci si
+  entra: il tetto si taglia), clic su un modello per ispezionarlo. Il pannello: seme del mondo, ora del
+  giorno, vento; l'elenco dei modelli (XML modificabile, «Nuovo seme», «Cresci», «Mettilo davanti a me»);
+  «Scolpisci con Gemini» (serve la chiave in `.env`). In console `window.sandbox`.
+- **Pezzi nuovi**:
+
+| File | Cosa fa |
+|---|---|
+| `mjx/xml.ts`, `mjx/model.ts` | legge l'XML di MarkovJunior (strati dall'alto, palette, simmetrie, `map`, `convolution`, `union`…) e ripara le forme sbagliate |
+| `mjx/palette.ts` | la palette ufficiale (52 lettere) |
+| `mjx/run.ts` | esecuzione su griglie grandi (fino a 512 per lato, 24 M celle), fotogrammi delle animazioni, azioni |
+| `mjx/convert.ts` | i programmi JSON degli step 8A-8E in XML, stessi voxel |
+| `mjx/official/` | 16 modelli 3D del repository di MarkovJunior, invariati (licenza MIT) |
+| `mjx/models/` | casa, falò, girasole (a mano), i modelli delle sessioni prima convertiti, `gemini/` (la prova 8.2A) |
+| `mjx/sculptor.ts`, `prompts/scultore-mj.md` | lo Scultore che scrive XML |
+| `3d/` | la sandbox: `world.ts` (terreno dal modello `River`, disposizione), `mesh.ts` (voxel → triangoli, occlusione, impronte e pavimenti), `worker.ts`, `main.ts` |
+
+- **Script**: `mjx-official.ts` (i modelli ufficiali), `mjx-render.ts -- casa --frames --act apri`
+  (foto, fotogrammi, azioni), `mjx-slice.ts -- casa 1 3` (sezioni in lettere), `mjx-stats.ts` (tempi e
+  triangoli), `mjx-port.ts` (porta i modelli da `lab/out`), `mjx-sculpt.ts -- --model …` (la prova con
+  Gemini, Artista fisso), `mjx-keep.ts` (tiene i risultati per la sandbox).
+
+### Cosa ho imparato scrivendo la casa
+Gli errori che ho fatto io sono quelli che faranno gli agenti, e ora sono nelle «trappole» del prompt:
+- gli strati si scrivono dall'alto: `in="D W"` è D sopra W (ho messo la soglia e il fumo sottosopra);
+- in `out` va scritto solo ciò che cambia (`out="*X"`): `all` blocca le corrispondenze che si
+  sovrappongono nelle celle scritte; con `out="XX"` una linea larga uno cresce da un lato solo;
+- `prl` decide per ogni corrispondenza: allungare a caso un lato intero lo fa frastagliato;
+- una regola che crea ciò che cerca (una trave sotto una trave) va con `steps="1"`;
+- «muro con il vuoto davanti» vale anche dall'interno: la porta va ancorata al terreno fuori;
+- le proporzioni si decidono su una griglia grossa e poi `map`, come fanno ModernHouse e CarmaTower: i
+  pattern restano corti (la porta alta quanto il viandante sarebbe un pattern di 36 strati).
+
+### La prova con Gemini (12 bersagli, Artista fisso `gemini-3.5-flash`)
+
+| scultore | tornata | validi | approvati | voto medio | chiamate |
+|---|---|---|---|---|---|
+| gemini-3.1-flash-lite | 1 | 8/12 | 5 | 6,1 → 6,8 | 28 |
+| gemini-3.1-flash-lite | 2 (con le riparazioni) | 9/12 | 2 | 4,1 → 4,3 | 40 |
+| gemini-3.8-flash | 1 | 11/12 | 8 | 6,5 → 7,3 | 23 |
+| gemini-3.8-flash | 2 (con le riparazioni) | 12/12 | 9 | 5,9 → 7,2 | 25 |
+
+3.1-flash-lite va bene per alberi, rocce, cespugli e oggetti, non per persone, animali ed edifici, e varia
+molto da una tornata all'altra; 3.8-flash è costante. Dettagli e token nell'ADR-0036. Mosaici in
+`lab/out/mjx-*/montage.png`.
+
 ## Prossimi passi proposti
 
+- Step 8.2A: provare i modelli di mezzo (3.5-flash, 3.6-flash) sulle figure e sugli edifici; un esempio di
+  quadrupede scritto bene (il lupo è debole con tutti); un livello di dettaglio per le distanze (mesh greedy,
+  meno triangoli per gli alberi lontani); strutture grandi (la rocca dello step 8D) come un solo programma.
 - Provare l'Architetto su Gemini con i nuovi prompt (rocca e cripta come esempi) e misurare se impara crescita,
   contorno e `detail`.
 - Dettaglio a riquadri con un bordo in comune, nei worker, per le strutture oltre 24 milioni di voxel.
@@ -378,5 +434,5 @@ copiare gli schemi degli esempi o a far crescere una zona fino a riempire tutto.
 - Integrazione: l'ArtDirector sceglie voxel o immagine per tipo di asset; le viste diventano `frames`
   (`down`, `right`, `up`, `left`); pannello nello studio dell'Artista per approvare.
 
-Per tornare indietro basta cancellare `lab/` e le tre righe che lo nominano (`vite.config.ts`,
+Per tornare indietro basta cancellare `lab/`, le dipendenze `three` e `@types/three` e le righe che lo nominano (`vite.config.ts`,
 `tsconfig.json`, `.gitignore`).

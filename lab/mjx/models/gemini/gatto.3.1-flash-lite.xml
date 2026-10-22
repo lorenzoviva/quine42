@@ -1,0 +1,59 @@
+<!-- Gatto: scolpito da gemini-3.1-flash-lite nello step 8.2A (lab/out/mjx-31-flash-lite-2), voti dell'Artista 3/10 -->
+<sequence values="BISCTUNERKJLPQAZ" size="15 20 15" symmetry="(xy)" name="Gatto Soriano">
+  <!-- Palette -->
+  <color symbol="I" value="cf7832" name="pelo fulvo"/>
+  <color symbol="S" value="783b18" name="striatura scura"/>
+  <color symbol="C" value="f2dbbe" name="petto chiaro"/>
+  <color symbol="T" value="cf7832" name="testa fulva" part="testa"/>
+  <color symbol="U" value="f2dbbe" name="musetto chiaro" part="testa"/>
+  <color symbol="N" value="d96868" name="naso" part="testa"/>
+  <color symbol="E" value="4e8c34" name="occhi verdi" part="testa"/>
+  <color symbol="R" value="e09088" name="interno orecchie" part="testa"/>
+  <color symbol="K" value="783b18" name="striatura testa" part="testa"/>
+  <color symbol="J" value="f2dbbe" name="zampa ant sx" part="gamba"/>
+  <color symbol="L" value="f2dbbe" name="zampa ant dx" part="gamba"/>
+  <color symbol="P" value="cf7832" name="zampa post sx" part="gamba"/>
+  <color symbol="Q" value="cf7832" name="zampa post dx" part="gamba"/>
+  <color symbol="A" value="cf7832" name="coda fulva" part="coda"/>
+  <color symbol="Z" value="783b18" name="striatura coda" part="coda"/>
+
+  <!-- Struttura base -->
+  <box at="4 13 0" size="2 2 4" color="J"/>
+  <box at="10 13 0" size="2 2 4" color="L"/>
+  <box at="4 4 0" size="2 3 4" color="P"/>
+  <box at="10 4 0" size="2 3 4" color="Q"/>
+  
+  <!-- Corpo -->
+  <ellipsoid at="7 8 4" size="8 11 6" color="I"/>
+  <box at="7 8 4" size="7 9 5" color="I" on="B"/>
+  <box at="7 12 4" size="6 3 4" color="C"/>
+  <box at="7 9 2" size="4 6 2" color="C"/>
+  
+  <!-- Testa -->
+  <ellipsoid at="7 14 7" size="9 7 7" color="T"/>
+  <box at="7 17 6" size="6 2 3" color="U"/>
+  <box at="7 18 7" size="1 1 1" color="N"/>
+  <box at="5 17 8" size="1 1 2" color="E"/>
+  <box at="9 17 8" size="1 1 2" color="E"/>
+  
+  <!-- Orecchie -->
+  <cone at="4 14 11" size="3 2 3" color="T"/>
+  <cone at="10 14 11" size="3 2 3" color="T"/>
+  <box at="4 14 11" size="1 1 2" color="R"/>
+  <box at="10 14 11" size="1 1 2" color="R"/>
+
+  <!-- Coda alzata -->
+  <line at="7 3 5" to="7 2 9" r="0" color="A"/>
+  <line at="7 2 9" to="7 3 12" r="0" color="A"/>
+  <line at="7 3 12" to="7 4 13" r="0" color="A"/>
+  <box at="7 2 8" size="1 1 1" color="Z" on="A"/>
+  <box at="7 2 10" size="1 1 1" color="Z" on="A"/>
+  <box at="7 3 12" size="1 1 1" color="Z" on="A"/>
+  
+  <!-- Dettagli striature -->
+  <box at="7 5 7" size="7 1 1" color="S" on="I"/>
+  <box at="7 7 7" size="7 1 1" color="S" on="I"/>
+  <box at="7 9 7" size="7 1 1" color="S" on="I"/>
+  <box at="7 14 11" size="3 1 1" color="K" on="T"/>
+  <box at="7 15 10" size="1 2 1" color="K" on="T"/>
+</sequence>

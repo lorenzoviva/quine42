@@ -1,0 +1,36 @@
+<!-- Barile: scolpito da gemini-3.8-flash nello step 8.2A (lab/out/mjx-38-flash-2), voti dell'Artista 8/10 -->
+<sequence values="BWLDFISb" size="20 20 20" symmetry="(xy)" name="Barile">
+  <color symbol="W" value="8c532b" name="legno caldo"/>
+  <color symbol="L" value="ba7544" name="luce legno"/>
+  <color symbol="D" value="4e2a14" name="ombra legno"/>
+  <color symbol="F" value="434a59" name="ferro cerchi"/>
+  <color symbol="I" value="6e788e" name="luce ferro"/>
+  <color symbol="S" value="262b35" name="ombra ferro"/>
+  <color symbol="b" value="381e0e" name="tappo"/>
+  <!-- Corpo a botte leggermente panciuto, posato a terra a z=0 -->
+  <cylinder at="10 10 0" size="14 14 18" color="W"/>
+  <cylinder at="10 10 2" size="16 16 14" color="W"/>
+  <cylinder at="10 10 5" size="18 18 8" color="W"/>
+  <!-- Coperchio incassato e spina/tappo -->
+  <cylinder at="10 10 17" size="12 12 1" color="D"/>
+  <box at="10 10 17" size="2 2 1" color="b"/>
+  <!-- Cerchi di ferro inferiore e superiore -->
+  <cylinder at="10 10 3" size="18 18 2" color="F" on="B"/>
+  <cylinder at="10 10 13" size="18 18 2" color="F" on="B"/>
+  <!-- Fessure verticali per le doghe di legno -->
+  <prl steps="1" in="B W" out="B D" p="0.06"/>
+  <all steps="8">
+    <rule in="D W" out="D D"/>
+    <rule in="W D" out="D D"/>
+  </all>
+  <!-- Rifinitura pixel art: ombre sotto i cerchi e lumeggiature superiori -->
+  <all steps="1">
+    <rule in="B W" out="L *"/>
+    <rule in="B F" out="I *"/>
+    <rule in="F W" out="* D"/>
+  </all>
+  <prl steps="1">
+    <rule in="F B" out="S *" p="0.75"/>
+    <rule in="W B" out="D *" p="0.75"/>
+  </prl>
+</sequence>

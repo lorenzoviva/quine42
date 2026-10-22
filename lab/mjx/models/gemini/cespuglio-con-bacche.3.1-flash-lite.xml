@@ -1,0 +1,30 @@
+<!-- Cespuglio con bacche: scolpito da gemini-3.1-flash-lite nello step 8.2A (lab/out/mjx-31-flash-lite-2), voti dell'Artista 4 → 4/10 -->
+<sequence values="BLHDi" size="20 20 16" symmetry="(xy)" origin="bottom" name="Cespuglio con bacche">
+  <color symbol="B" value="000000" hidden="true"/>
+  <color symbol="L" value="3d7a35" name="foglie base"/>
+  <color symbol="H" value="62a447" name="foglie luce"/>
+  <color symbol="D" value="28552a" name="foglie ombra"/>
+  <color symbol="i" value="c8323c" name="bacche"/>
+
+  <!-- Struttura principale: un volume solido arrotondato -->
+  <ellipsoid at="10 10 0" size="18 18 14" color="L"/>
+  
+  <!-- Levigatura della forma -->
+  <convolution neighborhood="Moore" steps="2">
+    <rule in="B" out="L" values="L" sum="12..26"/>
+    <rule in="L" out="B" values="L" sum="0..4"/>
+  </convolution>
+
+  <!-- Dettaglio foglie: ombreggiature e luci per definire i volumi -->
+  <prl steps="2" in="L" out="D" p="0.4"/>
+  <prl steps="2" in="B L" out="B H" p="0.3"/>
+
+  <!-- Bacche: inserite in piccoli cluster isolati -->
+  <all in="L" out="i" p="0.02" steps="1"/>
+  <all in="L i" out="i i" steps="3"/>
+  
+  <!-- Pulizia finale: rimuove bacche isolate che sembrano rumore -->
+  <convolution neighborhood="NoCorners" steps="1">
+    <rule in="i" out="L" values="i" sum="0..1"/>
+  </convolution>
+</sequence>

@@ -40,5 +40,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0033](0033-protocollo-blocchi-wfc.md) | Laboratorio voxel: protocollo tra i due scultori (catalogo, varianti, zone), WFC a bit, foto per blocchi | sperimentale |
 | [0034](0034-strutture-alla-markovjunior.md) | Laboratorio voxel: strutture scritte come gli esempi di MarkovJunior (crescita, contorno, dettaglio sulla struttura intera) | sperimentale |
 | [0035](0035-commissione-dei-blocchi.md) | Laboratorio voxel: l'Architetto commissiona i blocchi (pianta prima, configurazioni, vuoti di tipo diverso) | sperimentale |
+| [0036](0036-markovjunior-alla-lettera-in-3d.md) | Laboratorio voxel: MarkovJunior alla lettera (XML), modelli interi, sandbox 3D; Gemini 3.1 contro 3.8 | sperimentale |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

@@ -113,7 +113,8 @@ universe/
   modules/<id>/         manifest.json (+ logic.lua): sistemi, terreni, ambienti, pacchetti di oggetti, mobili, persone,
                         effetti (core.effects), fuoco (sys.fire), rune magiche e incantesimi (magic.runes, magic.spells)
 tests/  docs/
-lab/                    laboratorio voxel sperimentale (ADR-0031…0035): MarkovJunior 3D → sprite in 3/4, strutture a blocchi, pagina /lab/
+lab/                    laboratorio voxel sperimentale (ADR-0031…0036): MarkovJunior 3D → sprite in 3/4, strutture a blocchi, pagina /lab/;
+                        MarkovJunior in XML alla lettera (lab/mjx) e sandbox 3D con modelli interi, pagina /lab/3d/
 ```
 
 ## Il Concilio (ADR-0008, 0011, 0012, 0013, 0014, 0016)
@@ -194,6 +195,12 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   `inertia`/`longest`; esempi `rocca` e `cripta`. ADR-0035: l'Architetto scrive prima la pianta, il kernel ne ricava la
   commissione (configurazioni per zona, diagonali comprese), lo Scultore fa i blocchi su ordinazione (`serves`); vuoti di
   tipo diverso (`open`: il cortile non è il fuori), `paint.under`, diagnosi per configurazione prima del collasso.
+  ADR-0036 (step 8.2A): tutto in 3D, un modello intero per cosa (niente blocchi né architetto). I programmi sono
+  l'XML di MarkovJunior letto alla lettera (`lab/mjx`: palette ufficiale, strati dall'alto, simmetrie, `map`,
+  `convolution` come nel repository; 16 modelli 3D ufficiali girano invariati), più `<color part hidden>`,
+  forme di base, `<animation>` e `<action>` (regole sul modello finito: la porta si apre). Il front-end ripara
+  le forme sbagliate dagli agenti. Sandbox 3D `lab/3d/` (three.js): terreno dal modello `River`, collisioni sui
+  voxel, case in cui si entra, camminata dagli arti e vento dal kernel, crescita dall'esecuzione stessa.
   Non importarlo da `src/`. Vedi `lab/README.md`.
 - **Mappa** (ADR-0011): tile con texture, strati `ground floor wall door liquid vegetation rock`, tetti.
 - **Contenuti** (ADR-0012): `ItemDef` in pacchetti; bottino per tag; contenitori; ricette; bisogni
