@@ -13,6 +13,8 @@ export default defineConfig(({ mode }) => {
     // Writing a universe must not reload the page (dev server watches the project folder).
     server: { port: 5173, watch: { ignored: ['**/universes/**'] } },
     optimizeDeps: { exclude: ['wasmoon'] },
-    test: { environment: 'node', include: ['tests/**/*.test.ts'] },
+    // The voxel lab (lab/, experimental) is a second page on the same server: /lab/.
+    build: { rollupOptions: { input: { main: path.resolve('index.html'), lab: path.resolve('lab/index.html') } } },
+    test: { environment: 'node', include: ['tests/**/*.test.ts', 'lab/**/*.test.ts'] },
   };
 });

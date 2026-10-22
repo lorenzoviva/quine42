@@ -35,5 +35,10 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0028](0028-meccaniche-con-interfacce.md) | Meccaniche con interfacce: il Concilio aggiunge pannelli (slot, barre, pulsanti) | accettato |
 | [0029](0029-menu-delle-caselle.md) | Menu contestuale delle caselle, azioni imparate dal terreno | accettato |
 | [0030](0030-prospettiva-tre-quarti-e-scontorno.md) | Prospettiva 3/4 e scontorno delle immagini (perché il magenta) | accettato |
+| [0031](0031-laboratorio-voxel.md) | Laboratorio voxel: MarkovJunior 3D fotografato in 3/4 (fuori dal gioco) | sperimentale |
+| [0032](0032-scala-fotogrammi-strutture.md) | Laboratorio voxel: scala unica, fotogrammi dal modello, strutture a blocchi | sperimentale |
+| [0033](0033-protocollo-blocchi-wfc.md) | Laboratorio voxel: protocollo tra i due scultori (catalogo, varianti, zone), WFC a bit, foto per blocchi | sperimentale |
+| [0034](0034-strutture-alla-markovjunior.md) | Laboratorio voxel: strutture scritte come gli esempi di MarkovJunior (crescita, contorno, dettaglio sulla struttura intera) | sperimentale |
+| [0035](0035-commissione-dei-blocchi.md) | Laboratorio voxel: l'Architetto commissiona i blocchi (pianta prima, configurazioni, vuoti di tipo diverso) | sperimentale |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

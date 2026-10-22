@@ -6,3 +6,4 @@ dist/
 .shots/
 .env
 universes/
+lab/out/

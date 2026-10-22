@@ -1,0 +1,1 @@
+ottimi risultati, forse si, conviene commissionare i blocchi mancanti alla fine invece di cambiare piano, dimmi tu. Procedi e poi fai la prova con gemini, creiamo altri contenuti, vediamo come se la cava. Non usare modelli troppo cari, max Gemini 3.6 Flash

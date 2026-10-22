@@ -1,0 +1,3 @@
+In questo contesto, il gioco Rune, abbiamo provato a sostituite la generazione delle immagini direttamente attraverso l'IA con una generazione che passa per uno stato intermedii: codice MarkovJunior. Il tutto è stato implementato come sperimentazione standalone in "lab".
+Tuttavia mi sembra che, per quanto riguarda la generazione di strutture complesse ancora non ci siamo. Ho chiesto in un'altra sessione di utilizzare due "livelli" di generazione. Puoi leggere tutte le indicazioni nei files step8A step8B e step8C.
+Mi sembra che il meccanismo di generazione non stia sfruttando appieno la potenza di MJ. Guarda gli esempi, sono molto più belli, e non dovrebbe volerci molto sforzo per produrre MJ di buona qualità grafica
