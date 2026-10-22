@@ -1,0 +1,154 @@
+<!--
+Fattoria, scritta a mano da Claude Code (step 8.2B): una struttura grande (5 × 5 × 4 caselle, 100 × 100 × 80
+voxel) generata direttamente a piena risoluzione, senza `map`. A questa scala non si stampano pattern
+enormi: porta e finestre crescono da un seme (`all` con steps), come le stanze di MarkovJunior.
+Il cortile cresce dal seme e ha una palizzata; la casa sta nella sua metà di fondo, con muri spessi due
+voxel, graticcio, tetto a capanna con i timpani intonacati, comignolo; davanti un sentiero di ghiaia fino
+al cancello e due aiuole di ortaggi; dentro un tavolo. La porta si apre (azione); il comignolo fuma.
+-->
+<sequence values="BXYFfEPpQRrIWwNnDdOoUKhjSGgTta" size="100 100 80" origin="True" symmetry="(xy)">
+  <color symbol="a" hidden="True" name="muro già diviso"/>
+  <color symbol="Y" hidden="True" name="cortile"/>
+  <color symbol="X" hidden="True" name="volume della casa"/>
+  <color symbol="E" hidden="True" name="cancello"/>
+  <color symbol="Q" hidden="True" name="volume del tetto"/>
+  <color symbol="I" hidden="True" name="interno"/>
+  <color symbol="h" hidden="True" name="porta aperta"/>
+  <color symbol="j" hidden="True" name="porta aperta"/>
+  <color symbol="T" hidden="True" name="seme di un palo"/>
+  <color symbol="F" value="7a5634" name="pali"/>
+  <color symbol="f" value="5e4026" name="pali scuri"/>
+  <color symbol="P" value="a89c86" name="ghiaia"/>
+  <color symbol="p" value="8a8070" name="pietra della soglia"/>
+  <color symbol="R" value="a5482e" name="coppi"/>
+  <color symbol="r" value="7e3424" name="coppi in ombra"/>
+  <color symbol="W" value="e8dcc0" name="intonaco"/>
+  <color symbol="w" value="d4c6a4" name="intonaco scrostato"/>
+  <color symbol="N" value="6b4a2e" name="travi"/>
+  <color symbol="n" value="8e6a44" name="assito"/>
+  <color symbol="D" value="7d766c" name="pietra"/>
+  <color symbol="d" value="5e5850" name="pietra scura"/>
+  <color symbol="O" value="7a4a26" name="porta"/>
+  <color symbol="o" value="5e3a1e" name="asse scura"/>
+  <color symbol="U" value="86b8c8" name="vetro"/>
+  <color symbol="K" value="8e8578" name="comignolo"/>
+  <color symbol="S" value="d8d8d8" name="fumo"/>
+  <color symbol="G" value="5a4030" name="terra dell'orto"/>
+  <color symbol="g" value="4e8a3a" name="ortaggi"/>
+  <color symbol="t" value="9a7048" name="tavolo"/>
+  <union symbol="~" values="Ff"/>
+  <union symbol="#" values="WN"/>
+  <union symbol="@" values="XY"/>
+
+  <!-- Il seme della casa cade sul fondo; il cortile cresce intorno: 89 × 81 voxel (4,5 × 4 caselle). -->
+  <one in="X B" out="B X"/>
+  <all in="@B" out="*Y" steps="44" symmetry="(x)"/>
+  <all in="@/B" out="*/Y" steps="40" symmetry="(y)"/>
+
+  <!-- La casa: il seme torna indietro di 14, poi la pianta (45-53 × 29 voxel) nel fondo del cortile. -->
+  <one in="Y/X" out="X/Y" steps="14" symmetry="()"/>
+  <all in="XY" out="*X" steps="22" symmetry="(x)"/>
+  <prl in="XY" out="*X" p="0.5" steps="4" symmetry="(x)"/>
+  <all in="X/Y" out="*/X" steps="14" symmetry="(y)"/>
+
+  <!-- Volume: muri alti 39 voxel (quasi due caselle), base del tetto con la gronda, prisma, tetto a capanna. -->
+  <all in="B X" out="X *" steps="38"/>
+  <all in="B X" out="R *"/>
+  <all in="RB XB" out="*R **"/>
+  <all in="B R" out="Q *"/>
+  <all in="B Q" out="Q *" steps="20"/>
+  <all in="*/Q B/*" out="*/B */*" symmetry="(y)"/>
+  <prl in="Q" out="R" steps="1"/>
+
+  <!-- Scavo: muri spessi due voxel; pavimento in fondo, soffitto sotto il tetto, il resto è aria. -->
+  <prl in="XXXXX/XXXXX/XXXXX/XXXXX/XXXXX" out="*****/*****/**I**/*****/*****" steps="1"/>
+  <prl in="R I" out="* n" steps="1"/>
+  <prl in="I *" out="B *" steps="1"/>
+  <prl in="I" out="n" steps="1"/>
+  <prl in="X *" out="W *" steps="1"/>
+  <prl in="X" out="D" steps="1"/>
+
+  <!-- Timpani: dove il tetto finisce di lato, intonaco. -->
+  <prl in="RB" out="W*" symmetry="(x)" steps="1"/>
+  <prl in="B W" out="* R" steps="1"/>
+
+  <!-- Graticcio: pali agli spigoli (larghi), travi doppie in cima e sopra lo zoccolo, pali ogni tanto. -->
+  <all in="BB/BW" out="**/*N"/>
+  <all in="NW" out="*N" steps="1"/>
+  <all in="R W" out="* N"/>
+  <all in="N W" out="* N" steps="1"/>
+  <all in="W D" out="N *"/>
+  <!-- (la regola scrive tutte e undici le celle: così due pali non possono stare a meno di undici voxel) -->
+  <all in="WWWWWWWWWWW/BBBBBBBBBBB NNNNNNNNNNN/BBBBBBBBBBB" out="aaaaaTaaaaa/*********** ***********/***********"/>
+  <prl in="a" out="W" steps="1"/>
+  <all in="W T" out="T *"/>
+  <prl in="T" out="N" steps="1"/>
+
+  <!-- La porta: un seme nello zoccolo della facciata davanti (symmetry "()": verso y grande), lontano dagli
+       spigoli; sale per 32 voxel, si allarga a 13, attraversa il muro; poi la cornice. -->
+  <one steps="1" symmetry="()" in="NNNNNNNNN/BBBBBBBBB DDDDDDDDD/YYYYYYYYY" out="****O****/********* *********/*********"/>
+  <all in="# O" out="O *" steps="31"/>
+  <all in="O#" out="*O" steps="6" symmetry="(x)"/>
+  <all in="#/O" out="O/*" symmetry="()"/>
+  <all in="O#" out="*N" steps="1"/>
+  <all in="# O" out="N *" steps="1"/>
+  <all in="OOO" out="*o*" symmetry="()"/>
+
+  <!-- Finestre: un seme 9 voxel sotto la trave alta, sul lato di fuori; crescono in basso e di lato,
+       attraversano il muro; cornice e croce. -->
+  <one steps="7" in="N/B W/B W/B W/B W/B W/B W/B W/B W/B W/B" out="*/* */* */* */* */* */* */* */* */* U/*"/>
+  <all in="U W" out="* U" steps="10"/>
+  <all in="UW" out="*U" steps="4"/>
+  <all in="UW" out="*N" steps="1"/>
+  <all in="W U" out="N *" steps="1"/>
+  <all in="U U" out="N *" steps="1" optional="True"/>
+  <all in="UUUUUUUUU" out="****N****" optional="True"/>
+
+  <!-- Dentro: un tavolo su quattro gambe. -->
+  <one steps="1" in="BBBBBBB/BBBBBBB/BBBBBBB BBBBBBB/BBBBBBB/BBBBBBB BBBBBBB/BBBBBBB/BBBBBBB BBBBBBB/BBBBBBB/BBBBBBB nnnnnnn/nnnnnnn/nnnnnnn"
+       out="*******/*******/******* ttttttt/ttttttt/ttttttt t*****t/*******/t*****t t*****t/*******/t*****t *******/*******/*******"/>
+
+  <!-- Fuori: la soglia, il sentiero di ghiaia dritto fino alla palizzata, il cancello. -->
+  <all in="O/B */Y" out="*/* */p" symmetry="()"/>
+  <all in="Y/B" out="E/*" symmetry="()"/>
+  <all in="YB" out="F*"/>
+  <path from="p" to="E" on="Y" color="P" inertia="True"/>
+  <all in="PY" out="*P" symmetry="(x)" steps="2"/>
+  <all in="P/E" out="*/P" symmetry="()"/>
+  <all in="PE" out="*P" steps="1" symmetry="(x)"/>
+  <prl in="E" out="F" steps="1"/>
+
+  <!-- Due aiuole: terra a solchi, ortaggi che spuntano. -->
+  <one steps="2" in="YYYYYYYYYYY/YYYYYYYYYYY/YYYYYYYYYYY/YYYYYYYYYYY/YYYYYYYYYYY/YYYYYYYYYYY/YYYYYYYYYYY"
+       out="GGGGGGGGGGG/GGGGGGGGGGG/GGGGGGGGGGG/GGGGGGGGGGG/GGGGGGGGGGG/GGGGGGGGGGG/GGGGGGGGGGG"/>
+  <prl in="B G" out="g *" p="0.35" steps="1"/>
+  <one in="B g" out="g *" steps="200"/>
+
+  <!-- La palizzata: pali chiari e scuri, alti 13-15 voxel. -->
+  <prl in="F" out="f" p="0.45" steps="1"/>
+  <all in="B F" out="F *" steps="12"/>
+  <all in="B f" out="f *" steps="12"/>
+  <prl in="B ~" out="F *" p="0.4" steps="2"/>
+
+  <!-- Il cortile non si vede (sotto c'è il prato del mondo). -->
+  <prl in="Y" out="B" steps="1"/>
+
+  <!-- Tetto, muri, pietra: i dettagli. -->
+  <prl in="RB" out="r*" p="0.6" steps="1"/>
+  <prl in="B R" out="* r" p="0.1" steps="1"/>
+  <prl in="W" out="w" p="0.01" steps="1"/>
+  <one in="Ww" out="w*" steps="600"/>
+  <prl in="D" out="d" p="0.3" steps="1"/>
+  <one in="B B R" out="* K *" steps="1"/>
+  <all in="KB" out="*K" steps="1"/>
+  <all in="B K" out="K *" steps="7"/>
+
+  <action name="apri" label="Apri la porta"><all><rule in="O" out="h"/><rule in="o" out="j"/></all></action>
+  <action name="chiudi" label="Chiudi la porta"><all><rule in="h" out="O"/><rule in="j" out="o"/></all></action>
+</sequence>
+<animation name="fumo" frames="8">
+  <prl in="B S" out="S B" steps="1"/>
+  <prl in="B K" out="S *" p="0.4" steps="1"/>
+  <prl in="BS" out="S*" p="0.15" steps="1"/>
+  <prl in="S" out="B" p="0.12" steps="1"/>
+</animation>

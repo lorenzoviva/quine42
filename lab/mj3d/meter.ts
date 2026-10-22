@@ -3,6 +3,8 @@
 // had cached. This fetch reads all of them from every answer, gives up on requests that hang, and can
 // ask for less reasoning.
 
+import { costOf, usd } from './prices';
+
 export interface Meter {
   calls: number;
   prompt: number;
@@ -59,4 +61,16 @@ export function meteredFetch(meter: Meter, opts: MeterOptions = {}, base: typeof
   };
 }
 
-export const meterLine = (m: Meter) => `${m.calls} chiamate · input ${m.prompt} token (di cui in cache ${m.cached}) · risposta ${m.output} · ragionamento ${m.thoughts}`;
+/** USD spent, from prices.ts (undefined if a model has no published price). */
+export function meterCost(m: Meter): number | undefined {
+  let sum = 0;
+  for (const [model, t] of Object.entries(m.models)) {
+    const c = costOf(model, t);
+    if (c === undefined) return undefined;
+    sum += c;
+  }
+  return sum;
+}
+
+export const meterLine = (m: Meter) =>
+  `${m.calls} chiamate · input ${m.prompt} token (di cui in cache ${m.cached}) · risposta ${m.output} · ragionamento ${m.thoughts} · costo ${usd(meterCost(m))}`;

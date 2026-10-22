@@ -85,10 +85,10 @@ export function plan(land: Land, seed: number, kinds: Record<'trees' | 'plants' 
   put('falo', 'prop', fire[0], fire[1]);
   const barrel = spot(land, house[0] - 3.2, house[1] + 2, 1, 1, taken, true);
   if (barrel) put('barile', 'prop', barrel[0], barrel[1], rng.next() * 6.28);
-  for (const [id, dx, dz] of [['pozzo', -6, 4], ['casetta', 7, -2], ['fontana', -2, 8], ['torre-di-guardia', 10, 6]] as const) {
-    const w = id === 'casetta' ? 4 : 3;
+  for (const [id, dx, dz] of [['fattoria', -9, -3], ['pozzo', -6, 4], ['casetta', 7, -2], ['fontana', -2, 8], ['torre-di-guardia', 10, 6]] as const) {
+    const w = id === 'fattoria' ? 6 : id === 'casetta' ? 4 : 3;
     const s = spot(land, house[0] + dx, house[1] + dz, w, w, taken, true);
-    if (s) put(id, 'structure', s[0], s[1], id === 'casetta' ? 0 : Math.floor(rng.next() * 4) * (Math.PI / 2));
+    if (s) put(id, 'structure', s[0], s[1], id === 'casetta' || id === 'fattoria' ? 0 : Math.floor(rng.next() * 4) * (Math.PI / 2));
   }
   // A row of slots for MarkovJunior's own models, south of the village (the page fills in the ids).
   const gallery = spot(land, house[0] - 1, house[1] + 13, 18, 3, taken, true);

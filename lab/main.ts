@@ -9,7 +9,8 @@ import { buildStructure, compose, DEFAULT_STRUCT, STRUCTURE_PRESETS, STRUCTURE_T
 import { analyse, type Analysis } from './mj3d/check';
 import { Mj3Error, run, type Grid3, type Program3, type RunResult, type Vec3 } from './mj3d/engine';
 import { EXAMPLES } from './mj3d/examples';
-import { meteredFetch, newMeter } from './mj3d/meter';
+import { meterCost, meteredFetch, newMeter } from './mj3d/meter';
+import { usd } from './mj3d/prices';
 import { LabMockModels } from './mj3d/mock';
 import { DAY, DEFAULT_RENDER, region, render, sheet, shrink, VIEWS, type Picture, type RenderOptions } from './mj3d/render';
 import { boxOf, CLASSES, TILE } from './mj3d/scale';
@@ -205,7 +206,7 @@ function log(text: string, kind: '' | 'ok' | 'err' = '') {
 
 function showUsage() {
   const u = models.usage;
-  $('#usage').textContent = `chiamate ${u.text} · input ${meter.prompt} (in cache ${meter.cached}) · risposta ${meter.output} · ragionamento ${meter.thoughts}${u.failures ? ` · errori ${u.failures}` : ''}`;
+  $('#usage').textContent = `chiamate ${u.text} · input ${meter.prompt} (in cache ${meter.cached}) · risposta ${meter.output} · ragionamento ${meter.thoughts} · costo ${usd(meterCost(meter))}${u.failures ? ` · errori ${u.failures}` : ''}`;
 }
 
 function sprite(ref?: string): Promise<string | undefined> {

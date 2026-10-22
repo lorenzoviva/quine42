@@ -52,6 +52,7 @@ const MODELS: Array<[string, string, Role, number?]> = [
   ['barile', 'Barile', 'prop'],
   ['falo', 'Falò', 'prop'],
   ['casa', 'Casa a graticcio', 'structure'],
+  ['fattoria', 'Fattoria (5 × 5 caselle)', 'structure'],
   ['casetta', 'Casetta', 'structure', 8],
   ['pozzo', 'Pozzo', 'structure', 8],
   ['fontana', 'Fontana', 'structure', 8],

@@ -33,7 +33,8 @@ export const CLASSES: AssetClass[] = [
   { id: 'animale', name: 'animale piccolo', tiles: [0.75, 1, 0.75], minHeight: 0.6, animation: 'camminata', hint: 'gatto, cane, volpe, gallina; il muso verso il davanti' },
   { id: 'bestia', name: 'animale grande o mostro', tiles: [1.25, 2, 1.5], minHeight: 0.6, animation: 'camminata', hint: 'lupo, cavallo, orso, troll' },
   { id: 'monumento', name: 'colonna, statua, portale', tiles: [1, 1, 3], minHeight: 0.6, hint: 'una casella di base, alto' },
-  { id: 'edificio', name: 'edificio piccolo', tiles: [2.5, 2.5, 2.5], minHeight: 0.6, hint: 'pozzo, fontana, capanna (più grande: una struttura a blocchi)' },
+  { id: 'edificio', name: 'edificio piccolo', tiles: [2.5, 2.5, 2.5], minHeight: 0.6, hint: 'pozzo, fontana, capanna' },
+  { id: 'grande', name: 'struttura grande', tiles: [5, 5, 4], minHeight: 0.5, hint: 'casa con cortile, mulino, torre, tempio: un solo modello su più caselle, in cui si entra' },
 ];
 
 export const classOf = (id: string | undefined) => CLASSES.find((c) => c.id === id);

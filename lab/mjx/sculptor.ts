@@ -28,6 +28,7 @@ const EXAMPLES_FOR: Record<string, string[]> = {
   mobile: ['barile', 'falo'],
   monumento: ['casa', 'falo'],
   edificio: ['casa', 'falo'],
+  grande: ['fattoria', 'falo'],
 };
 
 const classLine = (c: AssetClass) => {
