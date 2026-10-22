@@ -128,7 +128,7 @@ diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
   `prompts/theme.md` parla ancora di «lettere che affiorano» e della strada che riporta in piazza: lo toglie T09.
   Nessuna verifica nel browser (nessuna UI cambiata).
 
-### T09 · Prompt narrativi più semplici e senza quarta parete — `fatto` (COMMIT)
+### T09 · Prompt narrativi più semplici e senza quarta parete — `fatto` (`23d04a1`)
 - Genesi: togliere l'invito al mistero e la leggenda attorno alla piazza («chi cammina troppo si ritrova in
   piazza»). Principi della quarta parete (`src/kernel/fourthwall.ts`) con gli esempi dell'analisi (tornare in
   piazza, essere osservati, confini invalicabili, simboli luminosi nel terreno) e il divieto di duplicare elementi
