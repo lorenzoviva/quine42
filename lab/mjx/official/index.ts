@@ -17,7 +17,7 @@ export interface OfficialModel {
 
 const cube = (n: number): Vec3 => [n, n, n];
 
-export const OFFICIAL: OfficialModel[] = [
+export const OFFICIAL: OfficialModel[] = ([
   { name: 'Growth', size: cube(29), steps: 3000 },
   { name: 'ParallelGrowth', size: cube(29), steps: 24 },
   { name: 'MazeGrowth', size: cube(27) },
@@ -34,4 +34,4 @@ export const OFFICIAL: OfficialModel[] = [
   { name: 'Noise', size: cube(24) },
   { name: 'Counting', size: cube(8) },
   { name: 'OddScale3D', size: cube(8) },
-].map((m) => ({ ...m, xml: xml(m.name) }));
+] as Array<Omit<OfficialModel, 'xml'>>).map((m) => ({ ...m, xml: xml(m.name) }));
