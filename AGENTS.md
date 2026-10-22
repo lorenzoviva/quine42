@@ -6,16 +6,16 @@
 
 ## Visione in breve
 
-RUNE è un gioco 2D top-down, a grafica semplice e contenuti ricchissimi, in cui il mondo è generato
-da IA in ogni aspetto tranne il kernel, ed è fatto del proprio codice sorgente. Il giocatore vive in
-un cerchio di simulazione; un **tappeto** compensa ogni suo passo e lo riporta al centro. Attorno,
+RUNE è un gioco 3D visto dall'alto in 3/4, fatto di voxel semplici e di contenuti ricchissimi, in cui il
+mondo è generato da IA in ogni aspetto tranne il kernel, ed è fatto del proprio codice sorgente. Il giocatore
+vive in un cerchio di simulazione; un **tappeto** compensa ogni suo passo e lo riporta al centro. Attorno,
 ferma e **invisibile finché il tappeto lo tiene**, c'è la **corona**: il codice sorgente dell'universo,
 lo studio di una software house di giochi (un edificio per cartella, interni su più piani, gallerie di
-sprite e terreni) dove si vedono lavorare le squadre del Concilio. Chi ci arriva è trasceso: ne fa parte.
+modelli e terreni) dove si vedono lavorare le squadre del Concilio. Chi ci arriva è trasceso: ne fa parte.
 Un **Concilio di agenti** su Google Gemini scrive storia, ambienti, oggetti, persone e il loro codice,
-e dipinge a lotti tile e sprite. Nel terreno brillano **rune**: token Lua veri, una per casella. Ciò che è
-scritto sul tappeto **si esegue**: componendo frasi il giocatore può rompere la simulazione, o uscirne e
-riscriverla. Le rune raccolte sono oggetti (nella borsa delle rune); alcune sono anche **magia**:
+e scolpisce l'aspetto di ogni cosa come programma MarkovJunior. Nel terreno brillano **rune**: token Lua
+veri, una per casella. Ciò che è scritto sul tappeto **si esegue**: componendo frasi il giocatore può rompere
+la simulazione, o uscirne e riscriverla. Le rune raccolte sono oggetti (nella borsa delle rune); alcune sono anche **magia**:
 pronunciate (T) diventano incantesimi e si consumano. Ciò che il Concilio decide diventa **regola** del mondo.
 
 **Due tavoli** (ADR-0025), come in Dungeons & Dragons: il Concilio (o il giocatore che fa il Dungeon
@@ -48,8 +48,8 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
    `Host` validano gli input e restituiscono `undefined` (mai `null`).
 8. **La corona è nascosta finché il tappeto funziona** (ADR-0009).
 9. **La chiave API non arriva mai al browser**: passa dal proxy di Vite (`server/geminiProxy.ts`).
-10. **Collisione e grafica sono la stessa griglia**: ciò che sembra invalicabile lo è; ogni luogo è
-    connesso (varchi + sentieri scavati dal kernel).
+10. **Ciò che sembra invalicabile lo è**: il terreno blocca a caselle, i modelli con i loro voxel (ADR-0041);
+    ogni luogo è connesso (varchi + sentieri scavati dal kernel, porte delle strutture sul sentiero).
 11. **Solo testo, niente immagini generate** (ADR-0037): contenuti come dati e ogni aspetto come programma
     MarkovJunior; un programma per tipo, le istanze sono semi diversi.
 
@@ -99,16 +99,18 @@ src/
     mj.ts               motore di riscrittura stile MarkovJunior
     layout.ts           bozza → varchi → programma → sentieri garantiti → edifici
     content.ts          registro di oggetti, ricette, bottino, ambienti
-    art.ts              ArtDirector: coda di lavori grafici entro il budget
-    ai/                 models.ts, gemini.ts, mock.ts
-    agents/             council.ts, cartography.ts, forge.ts, genesis.ts, minds.ts, content.ts, atelier.ts, effects.ts, mechanics.ts
+    forms.ts            libreria dei modelli, forme (programma + seme → griglia, impronta, pavimenti, azioni)
+    modeldirector.ts    i modelli che mancano, uno alla volta, entro `ai.maxModels`
+    chunks.ts           archivio dei piani dei luoghi
+    ai/                 models.ts, gemini.ts, mock.ts, prices.ts (prezzi, con la data), usage.ts (registro dei consumi)
+    agents/             council.ts, cartography.ts, forge.ts, genesis.ts, minds.ts, content.ts, sculptor.ts, effects.ts, mechanics.ts
     ecs.ts, sandbox.ts, prelude.lua, validator.ts, runes.ts, repo.ts, universe.ts,
-    inventory.ts, assets.ts, imaging.ts, bundle.ts, faults.ts, events.ts, input.ts, rng.ts, types.ts
+    inventory.ts, bundle.ts, faults.ts, events.ts, input.ts, rng.ts, types.ts
   render/               renderer.ts (three.js: camera 3/4, luce, spazi), terrain.ts (chunk, muri, tetti), things.ts (entità, viandante,
                         rune, luci), models.ts (geometrie dei modelli), forms.ts + worker.ts (i programmi nei worker),
                         thumbs.ts (icone: foto dei modelli), corona3d.ts (corona, studio, avatar), overlay.ts (testi, E, mouse),
                         materials.ts, glitch.ts
-  ui/                   hud.ts (anche il diario delle missioni), inventory.ts, actions.ts, chat.ts, feed.ts, genesis.ts, editor.ts, console.ts, studio.ts, atlas.ts
+  ui/                   hud.ts (anche il diario delle missioni), inventory.ts, actions.ts, chat.ts, feed.ts, genesis.ts, editor.ts, console.ts, studio.ts, atlas.ts, dom.ts
 universe/
   universe.json         nome, seme, raggio, chunk (18), modelli e budget
   world/                bible.json (memoria del Narratore), style.md (guida di stile dei modelli), consumi.json,
@@ -158,7 +160,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 ## Architettura del gioco
 
 - **Spazi, tappeto, corona** (ADR-0004, 0009): cerchio fermo in (0,0), tappeto con offset; `coronaRevealed()`.
-- **Rune** (ADR-0002, 0015): un token per runa, una casella per runa (glifo), righe orizzontali eseguite ogni
+- **Rune** (ADR-0002, 0015): un token per runa, una casella per runa (una lastra luminosa a terra), righe orizzontali eseguite ogni
   tick; binding `x y speed carpet time`. Rare; quelle del tappeto solo a ≥ 3 chunk dall'origine.
 - **Magia** (ADR-0015, 0018): rune magiche `luce fuoco acqua terra vita scudo vento`; ogni runa è un oggetto
   `rune:<token>`; la **frase** (`hand.tokens`) è la selezione ordinata; `T` pronuncia le magiche della frase e
@@ -186,7 +188,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   si usa (cavallo, barca, zaino); componente `stati` del viandante.
 - **Morte e trascendenza** (ADR-0026): a salute zero la sessione finisce (continua nello stesso universo o
   ricomincia dal seme); dopo la corona non si muore e non si perde nulla.
-- **Sala del Concilio e studi** (ADR-0027): tavolo rotondo con l'universo che gira, i sette membri seduti,
+- **Sala del Concilio e studi** (ADR-0027): tavolo rotondo con l'universo che gira, gli otto membri seduti (con lo Scultore),
   teletrasporti verso le sale e ritorno, schermi della storia, stile neon punk; atlante navigabile.
 - **Vita degli NPC** (ADR-0024): attività visibili (`attivita {tipo, ferma}`), dialoghi tra persone,
   ricordi pesati, legami col viandante e figli (effetti `legame ricordo nascita`), trame e missioni
@@ -226,7 +228,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   (`needs` sul giocatore, `sys.needs`); uso generico in `core.items`; menu azioni (`E`).
 - **Personaggi** (ADR-0010, 0013, 0017, 0020): tipo + individuo (`identity`: anche `job family routine story`), `mind` (memoria, umore, modo), azioni
   `segui resta vaga dai nessuna`, oggetti citati → `wanted`. Al massimo 2 dello stesso tipo nel mondo
-  caricato; nuovi tipi forgiati esplorando (`ai.maxCast`); abiti e statura variano per individuo.
+  caricato; nuovi tipi forgiati esplorando (`ai.maxCast`); ogni individuo è un seme del programma del suo tipo (pochi semi per classe).
 
 ### Manifest (`src/kernel/types.ts`)
 `id`, `name`, `kind` (`system | entity | item | player | generator | data`), `logic`, `order`,
@@ -288,31 +290,36 @@ lavoro vive nei file, non nella chat.
 
 ## Stato e prossimi passi
 
-> **Decisione (ADR-0037, step 8.2C): si passa al 3D.** Il rendering 2D (tile con texture, sprite, Atelier e
-> ArtDirector che dipingono, scontorno) si toglie su un branch nuovo nello step 9; gli asset diventano programmi
-> MarkovJunior (ADR-0036); lo spazio è una scala di griglie (regione → piano → modello → corpi,
-> [`docs/plans/universo-continuo.md`](docs/plans/universo-continuo.md)); i costi seguono
-> [`docs/reports/costi-step8.2B.md`](docs/reports/costi-step8.2B.md). Il prompt dello step 9 è in
-> [`docs/userchats/step9-3d.md`](docs/userchats/step9-3d.md); il piano, con il diario delle fasi, in
-> [`docs/plans/step9-3d.md`](docs/plans/step9-3d.md) (branch `3d`). Finché lo step 9 non è fatto, quanto sotto
-> descrive ancora il gioco 2D.
+> **Step 9 fatto (ADR-0037 attuato): il gioco è 3D.** Niente immagini generate; ogni aspetto è un programma
+> MarkovJunior scritto dallo Scultore e giudicato dall'Artista; lo spazio è una scala di griglie (atlante → piano a
+> caselle → lotti e strutture → modelli a voxel → corpi). Riassunto, costi e ciò che manca:
+> [`docs/reports/step9.md`](docs/reports/step9.md); piano e diario delle fasi: [`docs/plans/step9-3d.md`](docs/plans/step9-3d.md).
+> Il lavoro va avanti un task per sessione dal [backlog](docs/plans/backlog.md). Il gioco 2D è su `main` e negli
+> universi `valmora` (backup in `H:/projects/rune-backup/universi-2d/`); il seme del 3D si chiama `aurora`.
 
-Fatto: kernel, sandbox, rune (una per casella, rare), tappeto, corona nascosta e organizzata come archivio
-con il Concilio che vi lavora, versionamento, Concilio su Gemini, mappe a tile senza cuciture con layout a
-regole e connettività garantita, interni con tetti, contenuti come dati (pacchetti, bottino, contenitori,
-ricette, bisogni), menu delle azioni con azioni libere giudicate dal Concilio e imparate dagli oggetti,
-effetti, magia e incantesimi, fuoco, giorno e notte, individui con abiti propri, varietà di persone,
-oggetti citati, Atelier few-shot con camminate, icone a fogli, riparazione automatica, rune come oggetti
+Fatto: kernel, sandbox, rune (una per casella, rare), tappeto, corona nascosta e organizzata come studio
+con il Concilio che vi lavora, versionamento, Concilio su Gemini, piani dei luoghi a caselle senza cuciture con
+layout a regole e connettività garantita, contenuti come dati (pacchetti, bottino, contenitori, ricette, bisogni),
+menu delle azioni con azioni libere giudicate dal Concilio e imparate dagli oggetti, effetti, magia e
+incantesimi, fuoco, giorno e notte, varietà di persone, oggetti citati, riparazione automatica, rune come oggetti
 con borsa e frase, mana e cristalli, borse nell'inventario, regole nate dal gioco, fabbricazione libera,
 società degli NPC con famiglie e routine, sessioni del Concilio, test.
 
 Fatto anche: due repository (seme del kernel + universo git su disco), stato della partita salvato,
-menu delle caselle, prospettiva 3/4, meccaniche con pannelli generate dal Concilio (equipaggiamento),
-studio della corona con squadre e Referente, atlante e timbri, biomi, vita degli NPC con trame e missioni.
+menu delle caselle, meccaniche con pannelli generate dal Concilio (equipaggiamento), studio della corona con
+squadre e Referente, atlante e timbri, biomi, vita degli NPC con trame e missioni.
 
-Prossimi passi suggeriti:
-1. Interni del mondo come zone separate (case più grandi dentro), come già nello studio.
-2. Notte con conseguenze (NPC che dormono, creature notturne); luce delle lanterne impugnate.
-3. Personaggi con iniziativa (orari, mestieri, scambi tra loro) e quest generate.
-4. Port più ampio di MarkovJunior (campi, WFC) per interni complessi; interni come zone separate.
+Fatto nello step 9 (3D): MarkovJunior del gioco in `src/mj/` e laboratorio di MarkovJunior; registro dei consumi
+in dollari; kernel senza immagini; renderer three.js (camera 3/4, giorno e notte, corona e studio dalle celle,
+taglio al cerchio anche per istanze e ombre); libreria dei modelli con forme, semi, collisione e pavimenti dai
+voxel, arti, vento, animazioni, `<action>` nel menu; icone come foto dei modelli; Scultore per classe e Artista
+giudice; lotti come strutture girate verso la porta, una struttura importante per zona; azioni come regole
+(«Altro…» che cambia la forma scrive un'`<action>`); aiuto senza meta-gioco.
+
+Prossimi passi (il dettaglio è nel backlog):
+1. Coerenza del mondo: canone delle rune, prompt narrativi più semplici, società e trame coerenti, il grafo del
+   mondo come contesto degli agenti (T07-T13).
+2. Grafica e controlli 3D: voxel luminosi, telecamera che ruota, terreno con le altezze (Hills), lotti in piano.
+3. La corona più grande, con gli esterni e gli interni come modelli.
+4. Ancore del piano («vicino a…»), forme degli oggetti portati e dei terreni che cambiano con «Altro…».
 5. Multiplayer con un master: piano e punti aperti in [`docs/plans/multiplayer.md`](docs/plans/multiplayer.md).

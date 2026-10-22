@@ -379,3 +379,13 @@ Dal 22/10/2026 il lavoro va avanti in sessioni brevi, un task per sessione: ciò
 [`backlog.md`](backlog.md) (T01 lotti: test e documenti; T02 azioni come regole; T03-T04 correzioni; T05 backup
 e push; T06 chiusura). Un'altra sessione ha aggiunto a F7 una struttura importante per zona (circa 1000 × 1000
 caselle) al posto del tetto di tre per sessione, e il bottino sui lotti sul pavimento delle strutture (`447c10e`).
+
+### F9 — fatto (T03-T06 del backlog): lo step 9 è chiuso
+- T03 (`b1fa100`): alberi, massi e ombre tagliati oltre il cerchio. T04 (`de71498`): aiuto senza meta-gioco, con i
+  comandi del 3D. T05 (in attesa): universi 2D copiati e verificati in `H:/projects/rune-backup/universi-2d/`; la
+  cancellazione degli originali aspetta l'autore; niente push (il repository non ha ancora un remote).
+- T06: AGENTS.md riscritto dove descriveva il 2D (Visione, regola 10, Struttura, Rune, Sala del Concilio,
+  Personaggi, Stato e prossimi passi); README (descrizione, costi, comandi del 3D; le immagini del 2D non sono più
+  mostrate); GEMINI.md; ADR-0037 «attuato», con ciò che è andato diversamente; indice degli ADR (0001, 0008, 0017
+  in parte sostituiti); riassunto finale in [`docs/reports/step9.md`](../reports/step9.md).
+- Test: 13 file, 141 verdi; typecheck pulito. Le righe doppie dell'indice degli ADR (F9 del piano) non c'erano più.

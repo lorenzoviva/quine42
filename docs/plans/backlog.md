@@ -73,14 +73,19 @@ Senza numero («esegui il prossimo task del backlog») vale il primo `da fare` c
   dimensione). Push del branch `3d` (mai su `main`).
 - Fatto (22/10/2026): copia in `H:\projects\rune-backup\universi-2d\` verificata (`valmora` 6466 file / 98 586 709
   byte, `valmora copy 2` 2586 / 48 304 796, `valmora new` 4087 / 67 278 328; `diff -rq` senza differenze).
+- Push: l'autore ha detto di saltarlo finché non c'è un repository remoto (22/10/2026).
 - **Domande all'autore**: (1) la cancellazione degli originali in `H:\projects\rune\universes\` è stata bloccata
   dai permessi della sessione: cancellarli a mano (`rm -rf` delle tre cartelle) o autorizzarla; (2) il repository
   non ha nessun remote (`git remote -v` vuoto): a quale remote fare il push di `3d`, o si salta?
 
-### T06 · Chiusura dello step 9 — `da fare` (dipende da T01-T05)
+### T06 · Chiusura dello step 9 — `fatto` (commit in fondo al task)
 - AGENTS.md riscritto dove descrive ancora il 2D (Visione, Regole, Corona, Personaggi, Fatto/Prossimi passi);
   `GEMINI.md` («gioco 2D top-down»); `README.md`; ADR-0037 → «attuato»; diario del piano chiuso; riassunto finale
   dello step 9 (cosa è cambiato, cosa manca, quanto è costato) in `docs/reports/step9.md`.
+- Esito: AGENTS.md (Visione, regola 10, Struttura, Rune, Sala del Concilio, Personaggi, Stato e prossimi passi),
+  README (descrizione, costi, comandi del 3D), GEMINI.md, ADR-0037 attuato (con le differenze), indice degli ADR,
+  diario F9, `docs/reports/step9.md`. Diverso dal previsto: fatto con T05 ancora `in attesa` (l'autore ha detto di
+  saltare il push: non c'è un remote); le immagini del README sono ancora del 2D (non mostrate più): task T30.
 
 ## Coerenza del mondo (prioritario)
 
@@ -215,3 +220,11 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   god mode e senza tappeto, punizione della morte configurabile, budget e modelli nella lobby, PvP e «Altro…» tra
   giocatori; togliere i riferimenti al 2D e alle immagini. Poi spezzare l'implementazione in task di questo
   backlog.
+
+## Varie
+
+### T30 · Immagini del 3D nel README — `da fare`
+- Il README mostrava le immagini del 2D (`docs/img/`): ora non le mostra più. Fare quattro schermate del 3D (il borgo
+  di giorno, una persona con la chat, l'inventario con le icone dei modelli, la corona con `?dev&teleport=46,0`) con
+  `vite preview` offline, salvarle in `docs/img/3d/` e rimetterle nel README.
+- Fatto quando: README con le immagini nuove, commit.

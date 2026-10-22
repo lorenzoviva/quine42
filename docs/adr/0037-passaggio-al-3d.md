@@ -1,7 +1,8 @@
 # ADR-0037 — Si passa al 3D
 
-Data: 2026-10-22 · Stato: accettato (decisione dell'autore, step 8.2C); attuazione nello step 9.
-Sostituisce, quando lo step 9 sarà fatto: ADR-0011 (mappe a tile con texture), ADR-0017 per la parte
+Data: 2026-10-22 · Stato: **attuato** (decisione dell'autore, step 8.2C; attuata nello step 9, branch `3d`,
+riassunto in [`docs/reports/step9.md`](../reports/step9.md)).
+Sostituisce: ADR-0011 (mappe a tile con texture), ADR-0017 per la parte
 grafica (Atelier, sprite, camminate dipinte), ADR-0030 (prospettiva 3/4 e scontorno), ADR-0031…0035
 (laboratorio voxel: sprite fotografati e strutture a blocchi).
 
@@ -39,3 +40,12 @@ e del report dei costi.
 - Molti ADR passano a «sostituito»; AGENTS.md va riscritto nelle parti di rendering, contenuti e Cartografo.
 - Il Concilio cambia lavoro: niente immagini; lo Scultore entra nel Concilio; il Cartografo produce lotti e
   ancore; l'Artista giudica i modelli invece di dipingerli.
+
+## Attuazione (step 9, 22/10/2026)
+Fatta in nove fasi (F0-F8 del [piano](../plans/step9-3d.md), poi i task T01-T06 del [backlog](../plans/backlog.md)),
+con gli ADR 0038 (MarkovJunior nel gioco, laboratorio), 0039 (registro dei consumi), 0040 (renderer three.js),
+0041 (asset come programmi), 0042 (Scultore e Artista), 0043 (lotti e strutture), 0044 (azioni come regole).
+Diverso da qui: le **ancore** del piano non sono fatte (i lotti sì); il piano dei luoghi resta il MarkovJunior a
+caselle in JSON (l'XML 2D o «Hills» è un passo successivo); invece di «al massimo 3 strutture importanti per
+mondo», una per zona di 56 × 56 luoghi (risposta dell'autore: il mondo cresce esplorando). Gli universi 2D sono
+copiati in `H:/projects/rune-backup/universi-2d/` (la cancellazione degli originali aspetta l'autore).
