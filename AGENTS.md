@@ -77,6 +77,8 @@ npm run build        # typecheck + build (npx vite preview la serve, proxy inclu
 
 `.env`: `GEMINI_API_KEY=...` (ignorato da git). Senza chiave o con `?offline`: modelli locali, texture e
 ostacoli procedurali. URL: `?skip` salta intro e Genesi; `?dev&teleport=46,0` porta oltre il tappeto.
+Graphify (facoltativo, ADR-0045): `pip install graphifyy` in un ambiente a parte, poi `GRAPHIFY_BACKEND=none graphify update .`
+(solo codice, offline, ~12 s; `graphify-out/` è ignorato da git; niente skill, MCP né hook).
 In console del browser: `window.rune` è il kernel (`.feed()`, `.models.usage`, `.content`).
 
 ## Struttura
@@ -224,6 +226,10 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   al centro del lotto, girato verso la porta; le caselle del lotto tornano terreno. Dentro = sul pavimento del modello
   (`placeInside`, `floorAt`, `structureAt`); il renderer taglia la struttura in cui si è. Una struttura `importante`
   (Argon) per zona di 56 × 56 luoghi (`zoneOf`, `stato.json → importanti`).
+- **Grafo del mondo** (ADR-0045, da attuare in T12-T13): `src/kernel/graph.ts` costruisce dai file dell'universo un grafo di
+  nodi tipizzati (persone, tipi, luoghi, regioni, trame, oggetti, rune, regole, fatti) e archi (legami, routine, tappe,
+  contenuti), in `world/grafo.json` con ogni commit, nel formato di Graphify; il Concilio ne riceve il vicinato e il
+  kernel ne trova le incoerenze (`check()`). Graphify sul codice è facoltativo e fuori dal progetto (vedi Comandi).
 - **Contenuti** (ADR-0012): `ItemDef` in pacchetti; bottino per tag; contenitori; ricette; bisogni
   (`needs` sul giocatore, `sys.needs`); uso generico in `core.items`; menu azioni (`E`).
 - **Personaggi** (ADR-0010, 0013, 0017, 0020): tipo + individuo (`identity`: anche `job family routine story`), `mind` (memoria, umore, modo), azioni

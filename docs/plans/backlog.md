@@ -67,7 +67,7 @@ Senza numero («esegui il prossimo task del backlog») vale il primo `da fare` c
   Da notare: il pannello del Concilio (`G`, pulsante in basso a destra) resta visibile a tutti; con
   `NODE_ENV=development` nella shell `npm run build` fa una build di sviluppo (`DEV` sempre vero).
 
-### T05 · Backup degli universi 2D e push del branch — `in attesa`
+### T05 · Backup degli universi 2D e push del branch — `fatto` (chiuso dall'autore)
 - D2 del piano: spostare `H:\projects\rune\universes\valmora`, `valmora copy 2`, `valmora new` in
   `H:\projects\rune-backup\universi-2d\` (spostati, non copiati; prima verificare la copia: numero di file e
   dimensione). Push del branch `3d` (mai su `main`).
@@ -77,6 +77,9 @@ Senza numero («esegui il prossimo task del backlog») vale il primo `da fare` c
 - **Domande all'autore**: (1) la cancellazione degli originali in `H:\projects\rune\universes\` è stata bloccata
   dai permessi della sessione: cancellarli a mano (`rm -rf` delle tre cartelle) o autorizzarla; (2) il repository
   non ha nessun remote (`git remote -v` vuoto): a quale remote fare il push di `3d`, o si salta?
+- Chiuso (22/10/2026) su richiesta dell'autore, senza push. Copia riverificata (stesso numero di file, `diff -rq`
+  senza differenze); la cancellazione degli originali è ancora bloccata dai permessi della sessione: resta all'autore
+  (`rm -rf "H:/projects/rune/universes/valmora" "H:/projects/rune/universes/valmora copy 2" "H:/projects/rune/universes/valmora new"`).
 
 ### T06 · Chiusura dello step 9 — `fatto` (`4e19d6a`)
 - AGENTS.md riscritto dove descrive ancora il 2D (Visione, Regole, Corona, Personaggi, Fatto/Prossimi passi);
@@ -94,7 +97,7 @@ impossibili, trame che non rispettano le persone, allusioni alla quarta parete, 
 diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
 [`docs/userchats/to-do-2026-10-22.md`](../userchats/to-do-2026-10-22.md) (sezione «Incoerenze personaggi e trame»).
 
-### T07 · Decisione: Graphify e il grafo del mondo — `da fare` (dipende da T06)
+### T07 · Decisione: Graphify e il grafo del mondo — `fatto` (vedi il commit «Step 9 (T07)»)
 - **Risposta dell'autore** (22/10/2026): approvato il grafo nativo del kernel («in casa») per l'uso (b); resta da
   provare Graphify per (a) e scrivere l'ADR.
 - Due usi distinti, da non confondere: (a) **sviluppo**: Graphify (CLI open source che fa del repository un
@@ -104,6 +107,14 @@ diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
 - Fare: provare Graphify sul repository (costo, tempi, utilità) e proporre per (b) un grafo nativo del kernel
   (`world/grafo.json`, nodi e archi tipizzati, ricostruito a ogni commit, esportabile nel formato di Graphify per
   vederlo con i suoi strumenti) contro le alternative. **Domanda all'autore** prima di implementare. ADR.
+- Esito: [ADR-0045](../adr/0045-grafo-del-mondo.md). Graphify provato su una copia di `HEAD` (offline, 12 s, 0 token,
+  3158 nodi, 7099 archi): utile per chi chiama chi, ma non legge gli XML, dei JSON vede solo le chiavi e i documenti
+  senza modello sono titoli; resta facoltativo, fuori dal progetto (`graphify-out/` ignorato, comando in AGENTS.md).
+  Per il gioco: grafo nativo `src/kernel/graph.ts` → `world/grafo.json` nel formato di Graphify. Diverso dal
+  previsto: la domanda all'autore non serviva più (aveva già approvato il grafo «in casa»); le interrogazioni di
+  Graphify (`explain`, `path`, `query`) non le ho potute lanciare (permessi), le ho rifatte leggendo `graph.json`.
+  Misura su `valmora`: 57 persone, 215 legami, 39 legami gatto–umano di parentela o mestiere, 4 non simmetrici,
+  1 verso nessuno, molti nomi quasi uguali: i casi di prova di T10-T12.
 
 ### T08 · Il canone delle rune — `da fare`
 - Un documento dell'universo (`world/canone.md`) che dice cosa sono le rune per chi vive nel mondo: aspetto, dove
@@ -127,8 +138,10 @@ diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
   delle rune; ciò che non torna va al Narratore con il motivo. Test.
 
 ### T12 · Il grafo del mondo — `da fare` (dipende da T07)
-- Implementare la decisione di T07: costruzione del grafo dai file dell'universo, aggiornamento a ogni commit,
-  interrogazione per entità e vicinato. Test.
+- Attuare l'[ADR-0045](../adr/0045-grafo-del-mondo.md): `src/kernel/graph.ts` costruisce il grafo dai file dell'universo
+  (nodi e archi tipizzati, id `<tipo>:<slug>`), lo ricostruisce dopo ogni scrittura di quei file e lo scrive in
+  `world/grafo.json` con il commit (formato node-link di Graphify); `find`, `node`, `neighbors`, `context`, `check`.
+  Test su un universo offline e su una copia dei file di `valmora` (i conteggi dell'esito di T07).
 
 ### T13 · Il contesto degli agenti dal grafo — `da fare` (dipende da T12)
 - Ogni compito narrativo riceve i nodi rilevanti (le persone coinvolte e i loro legami, il luogo, le trame

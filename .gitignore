@@ -7,3 +7,4 @@ dist/
 .env
 universes/
 lab/out/
+graphify-out/
