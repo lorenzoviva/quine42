@@ -2,6 +2,9 @@
 
 ## Note specifiche per Claude Code
 
+- Segui il «Protocollo delle sessioni» di `AGENTS.md`: all'inizio pianifica nel backlog
+  (`docs/plans/backlog.md`) ciò che è rimasto in `docs/userchats/to-do.md` e toglilo da lì; fai un solo task;
+  alla fine dai il prompt per la sessione successiva.
 - `AGENTS.md` (importato sopra) è la fonte di verità: se prendi una decisione architetturale,
   aggiorna `AGENTS.md` e aggiungi un ADR in `docs/adr/` nello stesso cambio.
 - Ambiente dell'autore: Windows. Per modifiche testuali in-place usa Edit, Bash (`sed`) o `node`,

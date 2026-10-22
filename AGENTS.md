@@ -238,6 +238,24 @@ Hook: `update(dt)` (sistemi), `generate_chunk`, `on_spawn(id)`, `on_interact(id,
 `effimero {fino}` (sparisce a tempo), `scudo {fino}`, `meta {x, y}` (dove va un NPC), `stati` (del viandante).
 `bus.emit("morte", …)` da `sys.needs` chiude la sessione.
 
+## Protocollo delle sessioni
+
+Il progetto si porta avanti in **sessioni brevi**, una per task: ogni sessione riparte da zero e lo stato del
+lavoro vive nei file, non nella chat.
+
+1. **All'inizio**: leggi questo file. Poi apri [`docs/userchats/to-do.md`](docs/userchats/to-do.md): se nella
+   sezione «Modifiche da fare» ci sono richieste dell'autore non ancora pianificate, trasformale in task atomici
+   in [`docs/plans/backlog.md`](docs/plans/backlog.md) (contesto, cosa fare, quando è fatto, dipendenze,
+   domande per l'autore) e **toglile dal to-do** (il testo originale va in `docs/userchats/to-do-<data>.md` se i
+   task lo citano). Questo conta già come lavoro della sessione: committalo.
+2. **Il task**: esegui un solo task del backlog, quello indicato nel prompt (o il primo `da fare` con le
+   dipendenze fatte). Segnalo `in corso`. Se scopri che è troppo grande, spezzalo nel backlog e fai il primo
+   pezzo. Se serve una decisione dell'autore, segnalo `in attesa` con la domanda scritta nel task e chiedila.
+3. **Alla fine**: `npm test` e `npm run typecheck` verdi (e la verifica nel browser se tocca il gioco); ADR e
+   questo file aggiornati se la decisione è architetturale; il task segnato `fatto` con il commit e una riga su
+   cosa è cambiato rispetto al previsto; commit (mai su `main`). Poi **dai all'autore il prompt per la sessione
+   successiva** (quello in testa al backlog, con il numero del prossimo task) e di' in una riga cosa farà.
+
 ## Convenzioni
 
 - Documentazione, UI, prompt degli agenti e testi di gioco in **italiano**; identificatori e commenti

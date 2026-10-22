@@ -11,4 +11,8 @@ dall'IA deve passare dal validatore e non può mai rompere il gioco, mentre il g
 universo è un repository indipendente. Quando prendi una decisione architetturale, aggiornala in
 `AGENTS.md` e in un ADR in `docs/adr/`.
 
+Segui il «Protocollo delle sessioni» di `AGENTS.md`: all'inizio pianifica nel backlog (`docs/plans/backlog.md`)
+ciò che è rimasto in `docs/userchats/to-do.md` e toglilo da lì; fai un solo task; alla fine dai il prompt per la
+sessione successiva.
+
 Se il tuo client non risolve l'import `@./AGENTS.md`, apri e leggi `AGENTS.md` manualmente.

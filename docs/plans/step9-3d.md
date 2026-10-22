@@ -352,3 +352,9 @@ giudizio è generoso (un difetto visto non abbassa il voto sotto 7): da tenere d
 - Verificato nel browser: case a graticcio sui lotti, «Apri la porta» dal menu, dentro con il tetto tagliato.
 - Manca: test dedicati ai lotti, ADR-0043, AGENTS.md; poi F8 (azioni come regole da «Altro…») e F9 (backup
   degli universi 2D, AGENTS.md riscritto, riassunto finale).
+
+### Da qui: il backlog
+Dal 22/10/2026 il lavoro va avanti in sessioni brevi, un task per sessione: ciò che resta dello step 9 è in
+[`backlog.md`](backlog.md) (T01 lotti: test e documenti; T02 azioni come regole; T03-T04 correzioni; T05 backup
+e push; T06 chiusura). Un'altra sessione ha aggiunto a F7 una struttura importante per zona (circa 1000 × 1000
+caselle) al posto del tetto di tre per sessione, e il bottino sui lotti sul pavimento delle strutture (`447c10e`).

@@ -1,0 +1,192 @@
+# Backlog — i task di RUNE, uno per sessione
+
+Questo file è lo **stato del lavoro**: un elenco ordinato di task piccoli e atomici, ciascuno fatto per stare in
+una sessione nuova di Claude Code (o Gemini CLI) e finire con test e typecheck verdi e un commit. Il protocollo
+delle sessioni è in [`AGENTS.md`](../../AGENTS.md) (sezione «Protocollo delle sessioni»).
+
+Le idee nuove dell'autore arrivano in [`docs/userchats/to-do.md`](../userchats/to-do.md) (testo libero): la
+sessione che le trova le trasforma in task qui e le toglie da lì.
+
+Stato: `da fare` · `in corso` · `in attesa` (serve una decisione dell'autore: la domanda è nel task) · `fatto`
+(con il commit). Branch: `3d` (worktree `H:\projects\rune\.claude\worktrees\step8.2A-lab3d`).
+
+**Il prompt per ogni sessione** è lo stesso, cambia solo il numero:
+
+> Lavora nel worktree `H:\projects\rune\.claude\worktrees\step8.2A-lab3d` (branch `3d`). Leggi `AGENTS.md`,
+> poi esegui il task **T01** di `docs/plans/backlog.md` seguendo il protocollo delle sessioni.
+
+Senza numero («esegui il prossimo task del backlog») vale il primo `da fare` con le dipendenze fatte.
+
+---
+
+## Step 9 — chiusura
+
+### T01 · Lotti e strutture: test, ADR, documenti — `da fare`
+- Contesto: F7 di [`step9-3d.md`](step9-3d.md) (codice fatto: `settleLots`, `placeInside`, `floorAt`,
+  `structureAt`, una struttura importante per zona, `form.wanted`).
+- Fare: test in `tests/` (gli edifici del borgo diventano strutture girate verso la porta; le caselle del lotto
+  sono terreno; le cose `dentro` stanno sul pavimento del modello e non nei muri; una sola struttura importante
+  per zona, salvata; una cosa indossa il suo modello appena lo Scultore lo scrive). ADR-0043 «Lo spazio a scale:
+  piano, lotti, strutture» (indice degli ADR); AGENTS.md (Il Concilio → Luogo; Architettura); diario di F7.
+- Fatto quando: test verdi, ADR e AGENTS.md scritti, commit.
+
+### T02 · Azioni come regole: «Altro…» scrive un'`<action>` — `da fare` (dipende da T01)
+- Contesto: F8 del piano. Oggi «Altro…» su un'entità produce effetti (ADR-0014).
+- Fare: se ciò che il viandante vuole fare cambia la **forma** della cosa (aprire, rompere, accendere, spegnere),
+  l'Ingegnere (o lo Scultore) scrive una regola `<action>` sul programma del tipo; il kernel la prova sul modello
+  (deve cambiare qualcosa, non svuotarlo, finire) e la aggiunge al programma nella libreria (commit): l'azione è
+  imparata da tutto il tipo. Gli effetti restano per ciò che non è forma. Mock offline, test, ADR-0044, AGENTS.md
+  (Effetti, Menu).
+
+### T03 · Bug: alberi e massi dei terreni visibili oltre il cerchio — `da fare`
+- Dal to-do: «gli oggetti bloccanti (roccia, montagna) vengono spawnati anche sulla corona».
+- Causa probabile: in `src/render/materials.ts` il taglio usa `modelMatrix * transformed` senza `instanceMatrix`,
+  quindi le istanze (`InstancedMesh` dei modelli dei terreni) non vengono tagliate.
+- Fare: correggere (con `USE_INSTANCING`), verificare nel browser con `?dev&teleport=46,0`.
+
+### T04 · Aiuto (H/F1) senza meta-gioco, con i comandi del 3D — `da fare`
+- Dal to-do: «rimuovere i riferimenti meta del menu di aiuto». Il testo in `index.html` parla di codice, Concilio,
+  simulazione, «spezza la simulazione», caselle, sprite. Riscriverlo dentro il mondo (ADR-0025) e con i comandi
+  attuali; ciò che è da giocatore trasceso solo dopo la corona.
+
+### T05 · Backup degli universi 2D e push del branch — `da fare`
+- D2 del piano: spostare `H:\projects\rune\universes\valmora`, `valmora copy 2`, `valmora new` in
+  `H:\projects\rune-backup\universi-2d\` (spostati, non copiati; prima verificare la copia: numero di file e
+  dimensione). Push del branch `3d` (mai su `main`).
+
+### T06 · Chiusura dello step 9 — `da fare` (dipende da T01-T05)
+- AGENTS.md riscritto dove descrive ancora il 2D (Visione, Regole, Corona, Personaggi, Fatto/Prossimi passi);
+  `GEMINI.md` («gioco 2D top-down»); `README.md`; ADR-0037 → «attuato»; diario del piano chiuso; riassunto finale
+  dello step 9 (cosa è cambiato, cosa manca, quanto è costato) in `docs/reports/step9.md`.
+
+## Coerenza del mondo (prioritario)
+
+Dal to-do: personaggi, trame e bibbia incoerenti (gatti trattati come umani, nomi quasi uguali, legami
+impossibili, trame che non rispettano le persone, allusioni alla quarta parete, rune che si comportano in modo
+diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
+[`docs/userchats/to-do-2026-10-22.md`](../userchats/to-do-2026-10-22.md) (sezione «Incoerenze personaggi e trame»).
+
+### T07 · Decisione: Graphify e il grafo del mondo — `in attesa` di T06
+- Due usi distinti, da non confondere: (a) **sviluppo**: Graphify (CLI open source che fa del repository un
+  grafo interrogabile, con `graph.html` e un server MCP) per gli agenti che scrivono il codice; (b) **gioco**: un
+  grafo dei contenuti dell'universo (persone, legami, luoghi, trame, oggetti, rune, regole, fatti) che il Concilio
+  interroga per non inventare. Graphify è Python e lavora sul codice: nel browser non gira.
+- Fare: provare Graphify sul repository (costo, tempi, utilità) e proporre per (b) un grafo nativo del kernel
+  (`world/grafo.json`, nodi e archi tipizzati, ricostruito a ogni commit, esportabile nel formato di Graphify per
+  vederlo con i suoi strumenti) contro le alternative. **Domanda all'autore** prima di implementare. ADR.
+
+### T08 · Il canone delle rune — `da fare`
+- Un documento dell'universo (`world/canone.md`) che dice cosa sono le rune per chi vive nel mondo: aspetto, dove
+  si trovano, che restano dove sono finché qualcuno non le raccoglie, cosa fanno le magiche, cosa nessuno sa. Lo
+  ricevono il Narratore e l'Arbitro in ogni compito narrativo; regola: nessuna trama inventa comportamenti nuovi
+  delle rune. Test sul contesto degli agenti.
+
+### T09 · Prompt narrativi più semplici e senza quarta parete — `da fare`
+- Genesi: togliere l'invito al mistero e la leggenda attorno alla piazza («chi cammina troppo si ritrova in
+  piazza»). Principi della quarta parete (`src/kernel/fourthwall.ts`) con gli esempi dell'analisi (tornare in
+  piazza, essere osservati, confini invalicabili, simboli luminosi nel terreno) e il divieto di duplicare elementi
+  di gioco. Aggiornare il filtro (`reviewFourthWall`) e i test.
+
+### T10 · Società coerente — `da fare`
+- Ogni individuo ha una specie (persona, animale) e un genere; i legami possibili dipendono da entrambi (un gatto
+  non ha fratelli umani né apprendisti; una donna non è padre); niente nomi quasi uguali. Validatore della
+  società e riparazione di `people.json` esistenti; prompt del Narratore; test.
+
+### T11 · Trame coerenti con le persone — `da fare` (dipende da T08, T10)
+- Le trame (`plots.json`) validate contro `people.json` (personaggi esistenti, specie, legami) e contro il canone
+  delle rune; ciò che non torna va al Narratore con il motivo. Test.
+
+### T12 · Il grafo del mondo — `da fare` (dipende da T07)
+- Implementare la decisione di T07: costruzione del grafo dai file dell'universo, aggiornamento a ogni commit,
+  interrogazione per entità e vicinato. Test.
+
+### T13 · Il contesto degli agenti dal grafo — `da fare` (dipende da T12)
+- Ogni compito narrativo riceve i nodi rilevanti (le persone coinvolte e i loro legami, il luogo, le trame
+  aperte, il canone) invece dei riassunti generici di oggi: meno token, meno invenzioni. Misurare i token prima e
+  dopo con il registro dei consumi.
+
+## Grafica e controlli 3D
+
+### T14 · Voxel luminosi — `da fare`
+- `<color symbol="F" value="ffcc66" glow="True"/>`: lettere che emettono luce (fiamme, finestre, rune, neon).
+  Emissivo nelle mesh (attributo per vertice), un bloom leggero, nella palette dello Scultore e nelle istruzioni.
+  Serve per la corona neon (T19, T20).
+
+### T15 · Telecamera che ruota — `da fare`
+- Dal to-do: «non mi è chiaro come si giri la telecamera»: oggi è fissa (il movimento del kernel è relativo allo
+  schermo, Q e R sono tasti del gioco). Proposta: rotazione a scatti di 90° (tasti da scegliere tra quelli liberi)
+  e trascinamento con il tasto centrale; WASD relativo alla telecamera (l'input del kernel ruota di conseguenza);
+  nell'aiuto. ADR breve.
+
+### T16 · Terreno con le altezze (Hills) — `da fare`
+- Dal to-do: il terreno con variazioni di altezza, partendo dal modello 3D `Hills` di MarkovJunior. ADR: campo di
+  altezza a scala di casella, continuo fra i chunk (deterministico per seme e coordinate); il renderer lo disegna,
+  il kernel lo usa per i pavimenti dei corpi. Da decidere nel task: altezze solo estetiche o anche ostacoli
+  (pendenze invalicabili).
+
+### T17 · Lotti in piano — `da fare` (dipende da T16)
+- Le strutture su più caselle hanno bisogno di spazi piani: il piano spiana i lotti (e i sentieri) prima di
+  posare i modelli. Test.
+
+## La corona
+
+Dal to-do (testo completo, con le specifiche di ogni edificio, in
+[`docs/userchats/to-do-2026-10-22.md`](../userchats/to-do-2026-10-22.md)): la corona più grande, ogni edificio con un esterno e un interno neon-punk propri; dentro e fuori
+restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano ridondanti.
+
+### T18 · Corona quattro volte più grande — `da fare`
+- Raggio del campus ×4 (il cerchio della simulazione no), edifici ridisposti sull'anello, viale, insegne. Test
+  dello studio aggiornati.
+
+### T19 · Prompt per Gemini (abbonamento): le strutture della corona — `da fare` (dipende da T14)
+- Un prompt per Gemini CLI (agente con file e browser, **senza** la `GEMINI_API_KEY`: genera lui stesso l'XML e
+  lo collauda nella sandbox `/lab/3d/` e con gli script del laboratorio), una struttura alla volta, con le
+  specifiche dell'autore: Torre della Magia (cilindrica, alta, incisa di rune, scritta in rune), Studio dei
+  personaggi (studio-fabbrica), Laboratorio delle cose (cupola di metallo nero e vetro), Magazzino degli oggetti
+  (piramide nera e vetro), Ufficio dei luoghi (edificio mobile con strumenti di terraformazione), Sala sistemi
+  (rampa verso una base sotterranea), Il Nucleo (sfera di voxel neri sotto un edificio ad anello), Sala del
+  Concilio (esagonale). In `docs/prompts/gemini-strutture-corona.md`.
+
+### T20 · Gli esterni della corona come modelli — `da fare` (dipende da T18, T19)
+- Ogni edificio della corona usa il suo programma (`models/corona-<id>.xml`) con insegna neon; collisione dai
+  voxel; porta dove il modello la mette.
+
+### T21 · La vetrina con selettore — `da fare`
+- Un meccanismo comune agli interni: un oggetto (schermo, silos, stampante) con «<» «>» ai lati che sceglie
+  cosa mostrare; un clic apre un pannello con le informazioni (il modello, il modulo). Base per T22-T24.
+
+### T22 · La Torre della Magia, dentro — `da fare` (dipende da T21)
+- Lo schermo mostra una runa o una combinazione di rune (magiche e incantesimi noti), «<» «>» per cambiarla; il
+  clic mostra nel pannello l'effetto.
+
+### T23 · Lo Studio dei personaggi, dentro — `da fare` (dipende da T21)
+- Un silos al centro con il personaggio scelto che fluttua in un liquido viscoso; «<» «>»; il clic mostra il
+  modulo e l'individuo.
+
+### T24 · Laboratorio delle cose e Magazzino degli oggetti, dentro — `da fare` (dipende da T21)
+- Una stampante 3D di 3 × 3 caselle con l'oggetto scelto sulla casella centrale (le strutture ridotte alla scala
+  di una casella); «<» «>»; il clic mostra le informazioni.
+
+### T25 · La Sala del Concilio: il tavolo unito — `da fare`
+- Il tavolo è fatto di cubi separati: farne un ellissoide unico (un modello o una mesh sola).
+
+### T26 · L'Ufficio dei luoghi, dentro — `in attesa`
+- Da progettare in funzione di come lavora il Cartografo (piani, lotti, atlante). **Proposta all'autore** prima
+  di costruire.
+
+### T27 · La Sala sistemi, dentro — `in attesa`
+- L'autore chiede un aiuto: far apprezzare la complessità del codice con esempi (cosa fa un sistema, casi d'uso).
+  **Proposta all'autore** (es. ogni sistema come un «caso» animato: prima, regola, dopo).
+
+### T28 · Il Nucleo, dentro — `da fare` (dipende da T12)
+- Il grafo del mondo navigabile in UI.
+
+## Multiplayer
+
+### T29 · Aggiornare il piano del multiplayer — `da fare`
+- Riscrivere [`docs/plans/multiplayer.md`](multiplayer.md) con le decisioni dell'autore del to-do (sezione «Multiplayer» di
+  [`docs/userchats/to-do-2026-10-22.md`](../userchats/to-do-2026-10-22.md)): server unica fonte di
+  verità, modalità singola e multigiocatore, crediti e proxy, contenuti come carte del giocatore (P#2), master in
+  god mode e senza tappeto, punizione della morte configurabile, budget e modelli nella lobby, PvP e «Altro…» tra
+  giocatori; togliere i riferimenti al 2D e alle immagini. Poi spezzare l'implementazione in task di questo
+  backlog.

@@ -1,0 +1,6 @@
+Ti sei interrotto in questo punto, ho fatto procedere un'altro agent Claude Opus 5.5 (da un altro provider) su questo plan ma non ha girato a lungo e non ha concluso il task. Riprendi da dove avevi lasciato, potresti trovare qualcosa di già completato nei primi passi.
+
+Ho introdotto un file con una lista molto discorsiva sui task rimanenti del progetto da pianificare (docs\userchats\to-do.md). Iniziamo ad essere più lungimiranti e pianificare a lungo termine. Vorrei che aggiungessi ai vari CLAUDE.md, AGENTS.md, GEMINI.md un istruzione di controllare se rimangono task non pianificati nel file "to-do.md" pianificarli e cancellarli dal file.
+Se hai un idea di un protocollo migliore di comunicazione avvisami.
+In ogni caso ho necessità, arrivati a questo punto di estensione del progetto, di ricominciare spesso le sessioni di chat di Claude Code mantenendo i task piccoli e atomici.
+Voglio che ogni volta che concludi un piccolo task, mi fornisci il prompt con cui lanciare la successiva iterazione su una nuova chat per il task successivo.
