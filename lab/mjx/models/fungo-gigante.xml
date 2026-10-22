@@ -1,0 +1,24 @@
+<!-- Fungo gigante: step 8A (8 voxel per casella), gemini-3.8-flash (s1-flash38/fungo-gigante.json, voto dell'Artista 6/10). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
+<sequence values="BSKGRHDW" size="15 15 16" symmetry="(xy)" name="Fungo gigante">
+  <color symbol="S" value="f1e8d4" name="gambo avorio"/>
+  <color symbol="K" value="baa888" name="ombra gambo"/>
+  <color symbol="G" value="7a6245" name="lamelle"/>
+  <color symbol="R" value="c82b2b" name="cappello rosso"/>
+  <color symbol="H" value="e34c4c" name="cappello luce"/>
+  <color symbol="D" value="821616" name="cappello ombra"/>
+  <color symbol="W" value="fffef5" name="pois bianco"/>
+  <cylinder at="7 7 0" size="6 6 3" color="S"/>
+  <cylinder at="7 7 2" size="4 4 7" color="S"/>
+  <cylinder at="7 7 6" size="6 6 2" color="S"/>
+  <cylinder at="7 7 7" size="10 10 2" color="G"/>
+  <ellipsoid at="7 7 7" size="13 13 9" color="R" on="B"/>
+  <convolution neighborhood="Moore" steps="1">
+    <rule in="R" out="B" values="B" sum="17..26"/>
+  </convolution>
+  <prl steps="1" in="B R" out="B W" p="0.055"/>
+  <one steps="16" in="BB WR" out="BB WW"/>
+  <prl steps="1" in="B R" out="B H" p="0.65"/>
+  <prl steps="1" in="R B" out="D B" p="0.7"/>
+  <all in="[GD] S" out="* K"/>
+  <prl steps="1" in="SB" out="KB" p="0.3"/>
+</sequence>

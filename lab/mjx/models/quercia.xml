@@ -1,0 +1,32 @@
+<!-- Quercia: scritto a mano da Claude Code, step 8B (lab/mj3d/examples.ts). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
+<sequence values="BTKLHS" size="40 40 60" symmetry="(xy)" name="Quercia">
+  <color symbol="T" value="6e4b2f" name="corteccia"/>
+  <color symbol="K" value="4e3420" name="corteccia scura"/>
+  <color symbol="L" value="3f7f3a" name="foglie"/>
+  <color symbol="H" value="68a84a" name="foglie al sole"/>
+  <color symbol="S" hidden="True" name="seme di ramo"/>
+  <cylinder at="20 20 0" size="6 6 3" color="T"/>
+  <cylinder at="20 20 0" size="4 4 26" color="T"/>
+  <box at="9 21 32" size="1 1 1" color="S"/>
+  <box at="31 18 34" size="1 1 1" color="S"/>
+  <box at="21 9 37" size="1 1 1" color="S"/>
+  <box at="22 31 30" size="1 1 1" color="S"/>
+  <box at="19 20 44" size="1 1 1" color="S"/>
+  <path from="S" to="T" on="B" color="T" steps="5"/>
+  <ellipsoid at="20 20 22" size="28 28 26" color="L" on="B"/>
+  <ellipsoid at="10 21 24" size="16 16 14" color="L" on="BS"/>
+  <ellipsoid at="30 18 26" size="16 16 14" color="L" on="BS"/>
+  <ellipsoid at="21 10 28" size="16 14 14" color="L" on="BS"/>
+  <ellipsoid at="22 30 22" size="16 14 14" color="L" on="BS"/>
+  <ellipsoid at="19 20 36" size="16 16 14" color="L" on="BS"/>
+  <convolution neighborhood="Moore" steps="3">
+    <rule in="L" out="B" values="B" sum="11..26" p="0.55"/>
+  </convolution>
+  <convolution neighborhood="Moore" steps="1">
+    <rule in="B" out="L" values="L" sum="16..26"/>
+  </convolution>
+  <prl steps="1">
+    <rule in="B L" out="B H" p="0.75"/>
+    <rule in="T" out="K" p="0.3"/>
+  </prl>
+</sequence>

@@ -1,0 +1,34 @@
+<!-- Cespuglio con bacche: step 8B, gemini-3.8-flash, rivisto (b-semplici-flash38/cespuglio-con-bacche.v2.json, voto dell'Artista 6/10). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
+<sequence values="BLHDIKO" size="20 20 16" symmetry="(xy)" name="Cespuglio con bacche">
+  <color symbol="L" value="3b7d34" name="foglie"/>
+  <color symbol="H" value="6eb53e" name="foglie al sole"/>
+  <color symbol="D" value="204622" name="foglie in ombra"/>
+  <color symbol="I" value="d62b33" name="bacche"/>
+  <color symbol="K" value="7e141c" name="bacche in ombra"/>
+  <color symbol="O" value="ff5c65" name="luce su bacca"/>
+  <cylinder at="10 10 0" size="15 15 3" color="L"/>
+  <ellipsoid at="10 10 1" size="17 17 9" color="L"/>
+  <ellipsoid at="6 10 0" size="8 8 7" color="L"/>
+  <ellipsoid at="14 10 0" size="8 8 7" color="L"/>
+  <ellipsoid at="10 6 0" size="8 8 7" color="L"/>
+  <ellipsoid at="10 14 0" size="8 8 7" color="L"/>
+  <ellipsoid at="10 10 4" size="12 12 6" color="L"/>
+  <convolution neighborhood="Moore" steps="2">
+    <rule in="L" out="B" values="B" sum="15..26" p="0.5"/>
+    <rule in="B" out="L" values="L" sum="16..26" p="0.8"/>
+  </convolution>
+  <prl steps="1">
+    <rule in="B L" out="B H" p="0.75"/>
+    <rule in="L B" out="D B" p="0.6"/>
+    <rule in="L" out="D" p="0.15"/>
+  </prl>
+  <prl steps="1">
+    <rule in="HB" out="IB" p="0.07"/>
+    <rule in="LB" out="IB" p="0.05"/>
+    <rule in="DB" out="KB" p="0.05"/>
+  </prl>
+  <prl steps="1" symmetry="()">
+    <rule in="I B" out="K B" p="0.75"/>
+    <rule in="B I" out="B O" p="0.35"/>
+  </prl>
+</sequence>

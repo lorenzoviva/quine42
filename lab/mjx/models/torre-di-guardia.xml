@@ -1,0 +1,56 @@
+<!-- Torre di guardia: step 8A (8 voxel per casella), gemini-3.8-flash, rivisto (s2-flash38/torre-di-guardia.v2.json, voto dell'Artista 7/10). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
+<sequence values="BSLDIWKRYMH" size="18 18 38" symmetry="(xy)" name="Torre di guardia">
+  <color symbol="S" value="9aa0ad" name="pietra arenaria"/>
+  <color symbol="L" value="c6ccd6" name="pietra chiara"/>
+  <color symbol="D" value="636975" name="pietra scura"/>
+  <color symbol="I" value="b06e4a" name="mattone caldo"/>
+  <color symbol="W" value="7a4622" name="legno"/>
+  <color symbol="K" value="221f26" name="ombra feritoia"/>
+  <color symbol="R" value="cf3232" name="stendardo rosso"/>
+  <color symbol="Y" value="f0b533" name="oro"/>
+  <color symbol="M" value="4d8e35" name="muschio"/>
+  <color symbol="H" value="7cb83e" name="muschio chiaro"/>
+  <cylinder at="9 9 0" size="14 14 3" color="S"/>
+  <cylinder at="9 9 3" size="13 13 2" color="S"/>
+  <cylinder at="9 9 5" size="12 12 18" color="S"/>
+  <cylinder at="9 9 23" size="13 13 1" color="S"/>
+  <box at="9 3 23" size="2 1 1" color="D"/>
+  <box at="9 15 23" size="2 1 1" color="D"/>
+  <box at="3 9 23" size="1 2 1" color="D"/>
+  <box at="15 9 23" size="1 2 1" color="D"/>
+  <cylinder at="9 9 24" size="15 15 6" color="S"/>
+  <cylinder at="9 9 24" size="11 11 1" color="D"/>
+  <cylinder at="9 9 25" size="11 11 6" color="B"/>
+  <box at="9 2 26" size="3 4 5" color="B"/>
+  <box at="9 16 26" size="3 4 5" color="B"/>
+  <box at="2 9 26" size="4 3 5" color="B"/>
+  <box at="16 9 26" size="4 3 5" color="B"/>
+  <box at="4 4 26" size="3 3 5" color="B"/>
+  <box at="14 4 26" size="3 3 5" color="B"/>
+  <box at="4 14 26" size="3 3 5" color="B"/>
+  <box at="14 14 26" size="3 3 5" color="B"/>
+  <box at="9 15 0" size="4 3 6" color="K" on="S"/>
+  <box at="9 14 0" size="2 2 5" color="W"/>
+  <box at="9 15 5" size="4 1 1" color="L" on="SK"/>
+  <box at="9 15 13" size="1 2 4" color="K" on="S"/>
+  <box at="9 3 14" size="1 2 4" color="K" on="S"/>
+  <box at="15 9 11" size="2 1 4" color="K" on="S"/>
+  <box at="3 9 16" size="2 1 4" color="K" on="S"/>
+  <box at="9 9 24" size="1 1 13" color="W"/>
+  <box at="9 9 36" size="1 1 1" color="Y"/>
+  <box at="9 7 32" size="1 3 3" color="R"/>
+  <box at="9 6 32" size="1 1 1" color="Y"/>
+  <box at="13 12 0" size="3 2 3" color="M" on="S"/>
+  <box at="5 13 0" size="2 2 2" color="M" on="S"/>
+  <box at="4 6 0" size="2 3 2" color="M" on="S"/>
+  <prl steps="1">
+    <rule in="S" out="I" p="0.06"/>
+    <rule in="S" out="D" p="0.09"/>
+    <rule in="S" out="L" p="0.09"/>
+  </prl>
+  <prl steps="1">
+    <rule in="B S" out="B L" p="0.8"/>
+    <rule in="B D" out="B S" p="0.7"/>
+    <rule in="B M" out="B H" p="0.6"/>
+  </prl>
+</sequence>

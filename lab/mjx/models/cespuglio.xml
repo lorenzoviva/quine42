@@ -1,0 +1,18 @@
+<!-- Cespuglio con bacche: scritto a mano da Claude Code, step 8B (lab/mj3d/examples.ts). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
+<sequence values="BLHDI" size="20 20 16" symmetry="(xy)" origin="bottom" name="Cespuglio con bacche">
+  <color symbol="L" value="3d7a35" name="foglie"/>
+  <color symbol="H" value="62a447" name="foglie chiare"/>
+  <color symbol="D" value="28552a" name="foglie scure"/>
+  <color symbol="I" value="c8323c" name="bacche"/>
+  <one steps="650" symmetry="(xyz)" in="LB" out="LL"/>
+  <one steps="350" in="LB" out="LL"/>
+  <convolution neighborhood="Moore" steps="2">
+    <rule in="B" out="L" values="L" sum="14..26"/>
+    <rule in="L" out="B" values="L" sum="1..6"/>
+  </convolution>
+  <prl steps="1">
+    <rule in="B L" out="B H" p="0.6"/>
+    <rule in="L" out="D" p="0.2"/>
+  </prl>
+  <prl steps="1" in="[LH]B" out="IB" p="0.05"/>
+</sequence>

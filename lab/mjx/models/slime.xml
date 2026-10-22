@@ -1,0 +1,26 @@
+<!-- Slime: step 8B, gemini-3.8-flash, rivisto (b-figure-flash38/slime.v2.json, voto dell'Artista 5/10). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
+<sequence values="BGDLHIW" size="15 20 15" symmetry="(xy)" name="Slime">
+  <color symbol="G" value="42b232" name="gelatina"/>
+  <color symbol="D" value="236c1e" name="ombra gelatina"/>
+  <color symbol="L" value="78db46" name="gelatina lucida"/>
+  <color symbol="H" value="d2ff72" name="riflesso"/>
+  <color symbol="I" value="161a22" name="occhi"/>
+  <color symbol="W" value="ffffff" name="luce occhi"/>
+  <ellipsoid at="7 10 0" size="13 14 5" color="G"/>
+  <ellipsoid at="7 10 2" size="11 12 6" color="G"/>
+  <ellipsoid at="7 9 5" size="8 9 5" color="G"/>
+  <ellipsoid at="7 9 8" size="5 5 4" color="G"/>
+  <cone at="7 9 10" size="3 3 2" color="G"/>
+  <convolution neighborhood="Moore" steps="1">
+    <rule in="B" out="G" values="G" sum="16..26"/>
+  </convolution>
+  <box at="7 10 0" size="13 14 2" color="D" on="G"/>
+  <ellipsoid at="6 9 5" size="8 8 6" color="L" on="G"/>
+  <ellipsoid at="5 11 7" size="3 3 2" color="H" on="GL"/>
+  <box at="5 12 6" size="2 1 1" color="H" on="GL"/>
+  <box at="5 15 3" size="2 2 3" color="I" on="GDL"/>
+  <box at="9 15 3" size="2 2 3" color="I" on="GDL"/>
+  <box at="5 16 4" size="1 1 1" color="W" on="I"/>
+  <box at="9 16 4" size="1 1 1" color="W" on="I"/>
+  <box at="7 15 2" size="2 1 1" color="I" on="GDL"/>
+</sequence>

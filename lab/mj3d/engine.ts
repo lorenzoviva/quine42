@@ -20,17 +20,27 @@
 //                      after works at the new resolution (MarkovJunior "map": coarse plan → fine detail)
 //   shape            — box, ellipsoid, cylinder, cone resting on `at` (centre of the base), or a line
 //                      from `at` to `to` with radius `r`; `on` limits which codes it may overwrite
+//
+// Programs written in MarkovJunior's own XML (lab/mjx) compile to these nodes with MarkovJunior's
+// semantics: map with `clear` (a new empty grid, rules wrapping round), conv with `sums`, unlimited steps.
 
 import { Rng } from '../../src/kernel/rng';
 
 export type Vec3 = [number, number, number];
-export type Sym = 'xy' | 'none' | 'x' | 'all';
+/**
+ * Symmetry groups, as MarkovJunior names them in 3D: xy = "(xy)" (turns and mirrors in the horizontal
+ * plane: gravity stays), none = "()", x = "(x)", y = "(y)", z = "(z)" (upside down), rot = "(xyz+)" (the 24
+ * turns of the cube, no mirror), all = "(xyz)" (the whole cube group, 48).
+ */
+export type Sym = 'xy' | 'none' | 'x' | 'y' | 'z' | 'rot' | 'all';
 
 export interface Rule3 {
   in: string;
   out: string;
   /** Weight (one) or probability (prl). */
   p?: number;
+  /** Its own symmetry (MarkovJunior lets a rule narrow its node's). */
+  symmetry?: Sym;
 }
 
 export interface ConvRule {
@@ -39,6 +49,8 @@ export interface ConvRule {
   neighbors: string;
   min?: number;
   max?: number;
+  /** The neighbour counts that fire the rule (MarkovJunior "sum"); when given, min and max are ignored. */
+  sums?: number[];
   p?: number;
 }
 
@@ -48,9 +60,9 @@ export const SHAPES: readonly ShapeKind[] = ['box', 'ellipsoid', 'cylinder', 'co
 export type Node3 =
   | { type: 'one' | 'all' | 'prl'; rules: Rule3[]; steps?: number; symmetry?: Sym; optional?: boolean }
   | { type: 'sequence' | 'markov'; children: Node3[] }
-  | { type: 'conv'; rules: ConvRule[]; neighborhood?: 'moore' | 'vonneumann'; steps?: number }
+  | { type: 'conv'; rules: ConvRule[]; neighborhood?: 'moore' | 'vonneumann' | 'nocorners'; steps?: number; periodic?: boolean }
   | { type: 'path'; from: string; to: string; on: string; color: string; steps?: number; inertia?: boolean; longest?: boolean }
-  | { type: 'map'; scale: Vec3; rules?: Rule3[]; symmetry?: Sym }
+  | { type: 'map'; scale: Vec3; rules?: Rule3[]; symmetry?: Sym; clear?: boolean }
   | { type: 'shape'; shape: ShapeKind; at: Vec3; size?: Vec3; to?: Vec3; r?: number; color: string; on?: string };
 
 /** Body parts the kernel can move to animate a figure (legs and arms swing, the head nods, tails wag). */
@@ -68,8 +80,10 @@ export interface Program3 {
   name?: string;
   size: Vec3;
   palette: Record<string, PaletteEntry>;
-  /** A cell of this code at the bottom centre before the program starts (MarkovJunior "origin"). */
+  /** A cell of this code before the program starts (MarkovJunior "origin"), where `originAt` says. */
   origin?: string;
+  /** The bottom centre (default) or the centre of the box, as MarkovJunior does. */
+  originAt?: 'bottom' | 'centre';
   /** Fills the layer z = 0 with this code (a floor to grow on; hide it if it should not show). */
   ground?: string;
   /** Symbol → codes it stands for in rule inputs (MarkovJunior "union"). */
@@ -191,17 +205,26 @@ function parsePattern(rule: Rule3, alpha: Alphabet): Pattern {
 }
 
 const PERMS: Vec3[] = [[0, 1, 2], [1, 0, 2], [0, 2, 1], [2, 1, 0], [1, 2, 0], [2, 0, 1]];
+const PERM_ODD = [0, 1, 1, 1, 0, 0];
 
 /** The symmetries a rule is also tried in: xy keeps z (gravity), all is the whole cube group. */
 function symmetries(sym: Sym): Array<{ perm: Vec3; flip: Vec3 }> {
   const flips = (fx: number[], fy: number[], fz: number[]) => fx.flatMap((a) => fy.flatMap((b) => fz.map((c) => [a, b, c] as Vec3)));
+  const cube = () => PERMS.flatMap((perm) => flips([0, 1], [0, 1], [0, 1]).map((flip) => ({ perm, flip })));
   switch (sym) {
     case 'none':
       return [{ perm: [0, 1, 2], flip: [0, 0, 0] }];
     case 'x':
       return flips([0, 1], [0], [0]).map((flip) => ({ perm: [0, 1, 2], flip }));
+    case 'y':
+      return flips([0], [0, 1], [0]).map((flip) => ({ perm: [0, 1, 2], flip }));
+    case 'z':
+      return flips([0], [0], [0, 1]).map((flip) => ({ perm: [0, 1, 2], flip }));
     case 'all':
-      return PERMS.flatMap((perm) => flips([0, 1], [0, 1], [0, 1]).map((flip) => ({ perm, flip })));
+      return cube();
+    case 'rot':
+      // Proper turns only: an odd permutation needs an odd number of mirrors to stay a turn.
+      return cube().filter(({ perm, flip }) => (PERM_ODD[PERMS.findIndex((p) => p.join() === perm.join())] + flip[0] + flip[1] + flip[2]) % 2 === 0);
     default:
       return PERMS.slice(0, 2).flatMap((perm) => flips([0, 1], [0, 1], [0]).map((flip) => ({ perm, flip })));
   }
@@ -301,7 +324,7 @@ class RuleRunner extends Runner {
   ) {
     super(limit);
     if (!Array.isArray(rules) || !rules.length) throw new Mj3Error(`nodo ${kind} senza regole`);
-    this.patterns = rules.map((r) => parsePattern(r, alpha)).flatMap((p) => variants(p, sym));
+    this.patterns = rules.flatMap((r) => variants(parsePattern(r, alpha), r.symmetry ?? sym));
     this.wanted = [...new Set(rules.flatMap((r) => (r.in.match(/\[[^\]]*\]|[^*/ ]/g) ?? []).map((c) => (c.startsWith('[') ? c.slice(1, -1) : c))))];
     this.alpha = alpha;
     this.sets = alpha.sets;
@@ -444,46 +467,62 @@ class RuleRunner extends Runner {
 const MOORE: Vec3[] = [];
 for (let z = -1; z <= 1; z++) for (let y = -1; y <= 1; y++) for (let x = -1; x <= 1; x++) if (x || y || z) MOORE.push([x, y, z]);
 const VON_NEUMANN: Vec3[] = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
+/** MarkovJunior's 3D "NoCorners": the 18 neighbours that share a face or an edge. */
+const NO_CORNERS: Vec3[] = MOORE.filter(([x, y, z]) => Math.abs(x) + Math.abs(y) + Math.abs(z) < 3);
+/** Unlimited steps (MarkovJunior: until nothing changes) still stop here, so a flickering automaton ends. */
+const CONV_UNLIMITED = 200;
 
 class ConvRunner extends Runner {
-  private rules: Array<{ input: number; output: number; neighbors: number; min: number; max: number; p: number }>;
+  private rules: Array<{ input: number; output: number; neighbors: number; sums: Uint8Array; p: number }>;
   private offsets: Vec3[];
   private sets: Uint8Array[];
-  constructor(node: { rules: ConvRule[]; neighborhood?: string; steps?: number }, alpha: Alphabet) {
-    super(Math.max(1, Math.min(30, node.steps ?? 1)));
+  private periodic: boolean;
+  constructor(node: { rules: ConvRule[]; neighborhood?: string; steps?: number; periodic?: boolean }, alpha: Alphabet) {
+    super(node.steps === Infinity ? CONV_UNLIMITED : Math.max(1, Math.min(30, node.steps ?? 1)));
     if (!Array.isArray(node.rules) || !node.rules.length) throw new Mj3Error('nodo conv senza regole');
-    this.offsets = node.neighborhood === 'vonneumann' ? VON_NEUMANN : MOORE;
+    this.offsets = node.neighborhood === 'vonneumann' ? VON_NEUMANN : node.neighborhood === 'nocorners' ? NO_CORNERS : MOORE;
+    this.periodic = node.periodic === true;
     this.sets = alpha.sets;
     this.rules = node.rules.map((r) => {
       if (typeof r?.in !== 'string' || typeof r?.out !== 'string' || typeof r?.neighbors !== 'string') throw new Mj3Error('conv: ogni regola vuole in, out e neighbors');
       if (r.out.length !== 1) throw new Mj3Error(`conv: "out" è un solo codice (${r.out})`);
-      return {
-        input: alpha.mask(r.in),
-        output: alpha.index(r.out),
-        neighbors: alpha.mask(r.neighbors),
-        min: Number.isFinite(r.min) ? r.min! : 1,
-        max: Number.isFinite(r.max) ? r.max! : 26,
-        p: typeof r.p === 'number' ? r.p : 1,
-      };
+      const sums = new Uint8Array(27);
+      if (Array.isArray(r.sums)) {
+        for (const n of r.sums) if (Number.isInteger(n) && n >= 0 && n <= 26) sums[n] = 1;
+      } else {
+        const min = Number.isFinite(r.min) ? r.min! : 1;
+        const max = Number.isFinite(r.max) ? r.max! : 26;
+        for (let n = Math.max(0, min); n <= Math.min(26, max); n++) sums[n] = 1;
+      }
+      return { input: alpha.mask(r.in), output: alpha.index(r.out), neighbors: alpha.mask(r.neighbors), sums, p: typeof r.p === 'number' ? r.p : 1 };
     });
   }
   go(g: Grid3, rng: Rng): boolean {
     if (this.count >= this.limit!) return false;
     const changes: number[] = [];
+    const wrap = (v: number, n: number) => (v < 0 ? v + n : v >= n ? v - n : v);
     for (let z = 0; z < g.Z; z++)
       for (let y = 0; y < g.Y; y++)
         for (let x = 0; x < g.X; x++) {
           const idx = x + y * g.X + z * g.X * g.Y;
           const c = g.cells[idx];
-          const rule = this.rules.find((r) => this.sets[r.input][c]);
-          if (!rule || rule.output === c) continue;
-          let n = 0;
-          for (const [ox, oy, oz] of this.offsets) {
-            const nx = x + ox, ny = y + oy, nz = z + oz;
-            if (nx < 0 || ny < 0 || nz < 0 || nx >= g.X || ny >= g.Y || nz >= g.Z) continue;
-            if (this.sets[rule.neighbors][g.cells[nx + ny * g.X + nz * g.X * g.Y]]) n++;
+          // As in MarkovJunior: the first rule whose input, chance and neighbour count all agree.
+          for (const rule of this.rules) {
+            if (!this.sets[rule.input][c] || rule.output === c || (rule.p < 1 && rng.next() >= rule.p)) continue;
+            let n = 0;
+            for (const [ox, oy, oz] of this.offsets) {
+              let nx = x + ox, ny = y + oy, nz = z + oz;
+              if (this.periodic) {
+                nx = wrap(nx, g.X);
+                ny = wrap(ny, g.Y);
+                nz = wrap(nz, g.Z);
+              } else if (nx < 0 || ny < 0 || nz < 0 || nx >= g.X || ny >= g.Y || nz >= g.Z) continue;
+              if (this.sets[rule.neighbors][g.cells[nx + ny * g.X + nz * g.X * g.Y]]) n++;
+            }
+            if (!rule.sums[n]) continue;
+            changes.push(idx, rule.output);
+            break;
           }
-          if (n >= rule.min && n <= rule.max && rng.next() < rule.p) changes.push(idx, rule.output);
         }
     if (!changes.length) return false;
     for (let i = 0; i < changes.length; i += 2) write(g, changes[i], changes[i + 1]);
@@ -594,21 +633,24 @@ class PathRunner extends Runner {
 /** Scales the grid (see the header): the program goes on at the new resolution. */
 class MapRunner extends Runner {
   private scale: Vec3;
-  private rules: Array<{ d: Vec3; input: Int32Array; output: Int16Array }>;
+  private rules: Array<{ d: Vec3; D: Vec3; input: Int32Array; output: Int16Array }>;
   private sets: Uint8Array[];
-  constructor(node: { scale: Vec3; rules?: Rule3[]; symmetry?: Sym }, alpha: Alphabet, private limits: GridLimits) {
+  /** MarkovJunior's map: the new grid starts empty and only the rules write it (wrapping round the edges). */
+  private clear: boolean;
+  constructor(node: { scale: Vec3; rules?: Rule3[]; symmetry?: Sym; clear?: boolean }, alpha: Alphabet, private limits: GridLimits) {
     super(1);
     if (!isVec(node.scale) || node.scale.some((v) => !Number.isInteger(v) || v < 1 || v > 32)) throw new Mj3Error('map: "scale" vuole tre interi tra 1 e 32');
     this.scale = node.scale;
     this.sets = alpha.sets;
+    this.clear = node.clear === true;
     this.rules = (node.rules ?? []).flatMap((r) => {
       const li = layersOf(String(r?.in ?? ''));
       const lo = layersOf(String(r?.out ?? ''));
       const d: Vec3 = [li[0]?.[0]?.length ?? 0, li[0]?.length ?? 0, li.length];
-      const D: Vec3 = [d[0] * this.scale[0], d[1] * this.scale[1], d[2] * this.scale[2]];
+      const D: Vec3 = this.clear ? [lo[0]?.[0]?.length ?? 0, lo[0]?.length ?? 0, lo.length] : [d[0] * this.scale[0], d[1] * this.scale[1], d[2] * this.scale[2]];
       const shaped = (ls: string[][][], s: Vec3) => ls.length === s[2] && ls.every((l) => l.length === s[1] && l.every((row) => row.length === s[0]));
       if (!d[0] || !shaped(li, d)) throw new Mj3Error(`map: ingresso irregolare "${r?.in}"`);
-      if (!shaped(lo, D)) throw new Mj3Error(`map: l'uscita di "${r.in}" deve essere grande ${D.join('×')} (l'ingresso per la scala)`);
+      if (!D[0] || !shaped(lo, D)) throw new Mj3Error(this.clear ? `map: uscita irregolare "${r?.out}"` : `map: l'uscita di "${r.in}" deve essere grande ${D.join('×')} (l'ingresso per la scala)`);
       if (D[0] * D[1] * D[2] > 4096) throw new Mj3Error(`map: uscita troppo grande (max 4096 celle): ${r.in}`);
       const input = Int32Array.from(li.flat(2), (a) => (a === '*' ? -1 : alpha.mask(a.startsWith('[') ? a.slice(1, -1) : a)));
       const output = Int16Array.from(lo.flat(2), (b) => {
@@ -619,11 +661,11 @@ class MapRunner extends Runner {
       const seen = new Set<string>();
       return symmetries(node.symmetry ?? 'xy').flatMap(({ perm, flip }) => {
         const [ti, nd] = turnCells(input, d, perm, flip);
-        const [to] = turnCells(output, D, perm, flip);
-        const key = `${nd.join(',')}|${ti.join(',')}|${to.join(',')}`;
+        const [to, nD] = turnCells(output, D, perm, flip);
+        const key = `${nd.join(',')}|${nD.join(',')}|${ti.join(',')}|${to.join(',')}`;
         if (seen.has(key)) return [];
         seen.add(key);
-        return [{ d: nd, input: ti, output: to }];
+        return [{ d: nd, D: nD, input: ti, output: to }];
       });
     });
   }
@@ -636,28 +678,33 @@ class MapRunner extends Runner {
     if (Math.max(X, Y, Z) > this.limits.side || X * Y * Z > this.limits.cells) throw new Mj3Error(`map: la griglia scalata (${X}×${Y}×${Z}) supera i limiti`);
     const old = g.cells;
     const cells = new Uint8Array(X * Y * Z);
-    for (let z = 0; z < Z; z++)
-      for (let y = 0; y < Y; y++)
-        for (let x = 0; x < X; x++) cells[x + y * X + z * X * Y] = old[Math.floor(x / sx) + Math.floor(y / sy) * g.X + Math.floor(z / sz) * g.X * g.Y];
+    if (!this.clear)
+      for (let z = 0; z < Z; z++)
+        for (let y = 0; y < Y; y++)
+          for (let x = 0; x < X; x++) cells[x + y * X + z * X * Y] = old[Math.floor(x / sx) + Math.floor(y / sy) * g.X + Math.floor(z / sz) * g.X * g.Y];
+    // Without `clear` rules stay inside the grid; with it they wrap round, as MarkovJunior's map does.
+    const wrap = this.clear;
     for (const r of this.rules) {
       const [dx, dy, dz] = r.d;
-      const DX = dx * sx, DY = dy * sy;
-      for (let oz = 0; oz + dz <= g.Z; oz++)
-        for (let oy = 0; oy + dy <= g.Y; oy++)
-          for (let ox = 0; ox + dx <= g.X; ox++) {
+      const [DX, DY] = r.D;
+      for (let oz = 0; oz + (wrap ? 1 : dz) <= g.Z; oz++)
+        for (let oy = 0; oy + (wrap ? 1 : dy) <= g.Y; oy++)
+          for (let ox = 0; ox + (wrap ? 1 : dx) <= g.X; ox++) {
             let ok = true;
             for (let n = 0; n < r.input.length && ok; n++) {
               const want = r.input[n];
               if (want === -1) continue;
               const i = n % dx, j = Math.floor(n / dx) % dy, k = Math.floor(n / (dx * dy));
-              ok = this.sets[want][old[ox + i + (oy + j) * g.X + (oz + k) * g.X * g.Y]] === 1;
+              ok = this.sets[want][old[((ox + i) % g.X) + ((oy + j) % g.Y) * g.X + ((oz + k) % g.Z) * g.X * g.Y]] === 1;
             }
             if (!ok) continue;
             for (let n = 0; n < r.output.length; n++) {
               const put = r.output[n];
               if (put === -1) continue;
               const i = n % DX, j = Math.floor(n / DX) % DY, k = Math.floor(n / (DX * DY));
-              cells[ox * sx + i + (oy * sy + j) * X + (oz * sz + k) * X * Y] = put;
+              const x = ox * sx + i, y = oy * sy + j, z = oz * sz + k;
+              if (!wrap && (x >= X || y >= Y || z >= Z)) continue;
+              cells[(x % X) + (y % Y) * X + (z % Z) * X * Y] = put;
             }
           }
     }
@@ -863,16 +910,60 @@ function alphabetOf(p: Pick<Program3, 'palette' | 'unions'>, codes: string[] = [
   return alpha;
 }
 
-function exec(root: Runner, g: Grid3, seed: number, maxSteps: number, t0: number, trace: Trace = []): RunResult {
+export interface RunOptions {
+  /** Milliseconds after which the run stops (it then counts as not finished). */
+  deadline?: number;
+  /** Keep about this many states along the run, evenly spaced: the model growing, frame by frame. */
+  snapshots?: number;
+}
+
+export interface Snapshot {
+  X: number;
+  Y: number;
+  Z: number;
+  cells: Uint8Array;
+  step: number;
+}
+
+function exec(root: Runner, g: Grid3, seed: number, maxSteps: number, t0: number, trace: Trace = [], opts: RunOptions = {}): RunResult & { snapshots?: Snapshot[] } {
   root.reset();
   const rng = new Rng(seed);
   let steps = 0;
-  while (steps < maxSteps && root.go(g, rng)) steps++;
-  return { grid: g, steps, finished: steps < maxSteps, ms: Date.now() - t0, unused: trace.filter((t) => t.runner.total === 0).map((t) => (t.runner.why ? `${t.what} — ${t.runner.why}` : t.what)) };
+  let late = false;
+  const keep = opts.snapshots ?? 0;
+  const shots: Snapshot[] = [];
+  let every = 1;
+  const shoot = () => shots.push({ X: g.X, Y: g.Y, Z: g.Z, cells: new Uint8Array(g.cells), step: steps });
+  if (keep) shoot();
+  while (steps < maxSteps && root.go(g, rng)) {
+    steps++;
+    if (keep && steps % every === 0) {
+      shoot();
+      // Too many: keep one in two and take them half as often.
+      if (shots.length > 2 * keep) {
+        for (let i = 0; i < shots.length / 2; i++) shots[i] = shots[i * 2];
+        shots.length = Math.ceil(shots.length / 2);
+        every *= 2;
+      }
+    }
+    if (opts.deadline && (steps & 255) === 0 && Date.now() - t0 > opts.deadline) {
+      late = true;
+      break;
+    }
+  }
+  if (keep && shots[shots.length - 1]?.step !== steps) shoot();
+  return {
+    grid: g,
+    steps,
+    finished: steps < maxSteps && !late,
+    ms: Date.now() - t0,
+    unused: trace.filter((t) => t.runner.total === 0).map((t) => (t.runner.why ? `${t.what} — ${t.runner.why}` : t.what)),
+    ...(keep ? { snapshots: shots } : {}),
+  };
 }
 
 /** Runs a program from an empty box. Throws Mj3Error if the program does not compile. */
-export function run(p: Program3, seed: number, maxSteps = 20000, limits: GridLimits = MODEL_LIMITS): RunResult {
+export function run(p: Program3, seed: number, maxSteps = 20000, limits: GridLimits = MODEL_LIMITS, opts: RunOptions = {}): RunResult & { snapshots?: Snapshot[] } {
   const t0 = Date.now();
   const [X, Y, Z] = checkSize(p?.size, limits);
   const alpha = alphabetOf(p);
@@ -883,15 +974,15 @@ export function run(p: Program3, seed: number, maxSteps = 20000, limits: GridLim
     const v = alpha.index(p.ground);
     for (let i = 0; i < X * Y; i++) g.cells[i] = v;
   }
-  if (typeof p.origin === 'string' && p.origin.length === 1) g.cells[(X >> 1) + (Y >> 1) * X] = alpha.index(p.origin);
-  return exec(root, g, seed, maxSteps, t0, trace);
+  if (typeof p.origin === 'string' && p.origin.length === 1) g.cells[(X >> 1) + (Y >> 1) * X + (p.originAt === 'centre' ? (Z >> 1) * X * Y : 0)] = alpha.index(p.origin);
+  return exec(root, g, seed, maxSteps, t0, trace, opts);
 }
 
 /**
  * Runs more rules on a grid that already exists (a composed structure, say): its codes keep their
  * meaning, the palette may add new ones. The grid is changed in place and returned.
  */
-export function runOn(grid: Grid3, p: Pick<Program3, 'palette' | 'unions' | 'program'>, seed: number, maxSteps = 20000, limits: GridLimits = { side: 4096, cells: 64_000_000 }): RunResult {
+export function runOn(grid: Grid3, p: Pick<Program3, 'palette' | 'unions' | 'program'>, seed: number, maxSteps = 20000, limits: GridLimits = { side: 4096, cells: 64_000_000 }, opts: RunOptions = {}): RunResult {
   const t0 = Date.now();
   const alpha = alphabetOf(p, grid.alphabet);
   const trace: Trace = [];
@@ -899,7 +990,7 @@ export function runOn(grid: Grid3, p: Pick<Program3, 'palette' | 'unions' | 'pro
   grid.alphabet = alpha.codes;
   grid.log = [];
   grid.epoch++;
-  return exec(root, grid, seed, maxSteps, t0, trace);
+  return exec(root, grid, seed, maxSteps, t0, trace, opts);
 }
 
 export const at = (g: Grid3, x: number, y: number, z: number) => g.alphabet[g.cells[x + y * g.X + z * g.X * g.Y]];

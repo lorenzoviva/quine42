@@ -1,0 +1,32 @@
+<!-- Masso muschioso: step 8B, gemini-3.8-flash, rivisto (b-semplici-flash38/masso-muschioso.v2.json, voto dell'Artista 7/10). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
+<sequence values="BRSDMKV" size="20 20 16" symmetry="(xy)" name="Masso muschioso">
+  <color symbol="R" value="6e7480" name="granito"/>
+  <color symbol="S" value="8f97a5" name="granito chiaro"/>
+  <color symbol="D" value="494d58" name="granito scuro"/>
+  <color symbol="M" value="4a8528" name="muschio"/>
+  <color symbol="K" value="7bb538" name="muschio chiaro"/>
+  <color symbol="V" value="2f571b" name="muschio d'ombra"/>
+  <ellipsoid at="9 10 0" size="14 13 10" color="R"/>
+  <ellipsoid at="14 9 0" size="9 10 8" color="R"/>
+  <ellipsoid at="8 6 0" size="10 8 9" color="R"/>
+  <convolution neighborhood="Moore" steps="2">
+    <rule in="B" out="R" values="R" sum="15..26"/>
+    <rule in="R" out="B" values="R" sum="1..7"/>
+  </convolution>
+  <one steps="120" in="RB" out="RR"/>
+  <ellipsoid at="9 10 8" size="9 9 4" color="M" on="RB"/>
+  <ellipsoid at="14 10 6" size="6 5 3" color="M" on="RB"/>
+  <ellipsoid at="6 12 4" size="5 4 3" color="M" on="RB"/>
+  <convolution neighborhood="Moore" steps="1">
+    <rule in="M" out="B" values="B" sum="16..26"/>
+  </convolution>
+  <prl steps="1">
+    <rule in="B R" out="B S" p="0.65"/>
+    <rule in="R" out="D" p="0.08"/>
+  </prl>
+  <prl steps="1">
+    <rule in="B M" out="B K" p="0.75"/>
+    <rule in="M B" out="V B" p="0.7"/>
+    <rule in="R M" out="R V" p="0.5"/>
+  </prl>
+</sequence>

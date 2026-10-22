@@ -1,0 +1,44 @@
+<!-- Quercia maestosa: step 8B, gemini-3.8-flash, rivisto (b-semplici-flash38/quercia.v2.json, voto dell'Artista 7/10). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
+<sequence values="BTKWLHDS" size="40 40 60" symmetry="(xy)" name="Quercia maestosa">
+  <color symbol="T" value="684427" name="legno di quercia"/>
+  <color symbol="K" value="442a17" name="corteccia scura"/>
+  <color symbol="W" value="855b35" name="corteccia al sole"/>
+  <color symbol="L" value="3e7e32" name="foglie"/>
+  <color symbol="H" value="74b344" name="foglie al sole"/>
+  <color symbol="D" value="224d20" name="foglie in ombra"/>
+  <color symbol="S" hidden="True" name="seme di ramo"/>
+  <cone at="20 20 0" size="14 14 7" color="T"/>
+  <cylinder at="20 20 0" size="8 8 22" color="T"/>
+  <box at="9 22 26" size="1 1 1" color="S"/>
+  <box at="31 17 27" size="1 1 1" color="S"/>
+  <box at="16 9 26" size="1 1 1" color="S"/>
+  <box at="24 31 25" size="1 1 1" color="S"/>
+  <box at="19 20 36" size="1 1 1" color="S"/>
+  <path from="S" to="T" on="B" color="T" steps="5"/>
+  <ellipsoid at="20 20 18" size="34 32 22" color="L" on="B"/>
+  <ellipsoid at="9 22 19" size="19 18 18" color="L" on="BS"/>
+  <ellipsoid at="30 17 20" size="20 19 17" color="L" on="BS"/>
+  <ellipsoid at="22 29 18" size="19 17 16" color="L" on="BS"/>
+  <ellipsoid at="16 10 20" size="20 18 17" color="L" on="BS"/>
+  <ellipsoid at="14 21 29" size="21 20 17" color="L" on="BS"/>
+  <ellipsoid at="26 20 29" size="23 21 17" color="L" on="BS"/>
+  <ellipsoid at="19 18 37" size="22 20 15" color="L" on="BS"/>
+  <convolution neighborhood="Moore" steps="2">
+    <rule in="L" out="B" values="B" sum="14..26" p="0.45"/>
+  </convolution>
+  <convolution neighborhood="Moore" steps="1">
+    <rule in="B" out="L" values="L" sum="17..26"/>
+  </convolution>
+  <prl steps="1">
+    <rule in="L" out="H" p="0.08"/>
+    <rule in="L" out="D" p="0.08"/>
+  </prl>
+  <prl steps="1">
+    <rule in="B L" out="B H" p="0.8"/>
+    <rule in="L B" out="D B" p="0.75"/>
+  </prl>
+  <prl steps="1">
+    <rule in="T" out="K" p="0.25"/>
+    <rule in="B T" out="B W" p="0.35"/>
+  </prl>
+</sequence>

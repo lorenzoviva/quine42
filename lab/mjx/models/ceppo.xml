@@ -1,0 +1,28 @@
+<!-- Ceppo: step 8A (8 voxel per casella), gemini-3.8-flash (s1-flash38/ceppo.json, voto dell'Artista 7/10). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
+<sequence values="BIKDWCML" size="13 13 7" symmetry="(xy)" name="Ceppo">
+  <color symbol="I" value="563826" name="corteccia"/>
+  <color symbol="K" value="764d35" name="corteccia chiara"/>
+  <color symbol="D" value="9c6838" name="anello scuro"/>
+  <color symbol="W" value="d4a366" name="legno chiaro"/>
+  <color symbol="C" value="422919" name="cuore del legno"/>
+  <color symbol="M" value="4d7f28" name="muschio"/>
+  <color symbol="L" value="73a838" name="muschio chiaro"/>
+  <cylinder at="6 6 0" size="8 8 5" color="I"/>
+  <line at="6 6 1" to="1 2 0" r="1" color="I"/>
+  <line at="6 6 1" to="11 2 0" r="1" color="I"/>
+  <line at="6 6 1" to="2 11 0" r="1" color="I"/>
+  <line at="6 6 1" to="11 10 0" r="1" color="I"/>
+  <line at="6 6 0" to="6 1 0" r="1" color="I"/>
+  <line at="6 6 0" to="6 11 0" r="1" color="I"/>
+  <cylinder at="6 6 4" size="7 7 1" color="D"/>
+  <cylinder at="6 6 4" size="5 5 1" color="W"/>
+  <cylinder at="6 6 4" size="3 3 1" color="D"/>
+  <box at="6 6 4" size="1 1 1" color="C"/>
+  <box at="7 6 4" size="2 1 1" color="C"/>
+  <ellipsoid at="3 3 0" size="4 4 2" color="M" on="I"/>
+  <ellipsoid at="9 3 0" size="3 3 2" color="M" on="I"/>
+  <ellipsoid at="4 10 0" size="4 4 2" color="M" on="I"/>
+  <one steps="10" in="BB MI" out="BB MM"/>
+  <prl steps="1" in="B I" out="B K" p="0.35"/>
+  <prl steps="1" in="B M" out="B L" p="0.5"/>
+</sequence>

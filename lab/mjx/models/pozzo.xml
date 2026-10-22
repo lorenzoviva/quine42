@@ -1,0 +1,45 @@
+<!-- Pozzo medievale: step 8A (8 voxel per casella), gemini-3.8-flash, rivisto (s2-flash38/pozzo.v2.json, voto dell'Artista 7/10). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
+<sequence values="BSCDGWTRLKI" size="16 16 18" symmetry="(xy)" name="Pozzo medievale">
+  <color symbol="S" value="787b82" name="pietra"/>
+  <color symbol="C" value="9ba0ab" name="pietra chiara"/>
+  <color symbol="D" value="4b4e54" name="pietra scura"/>
+  <color symbol="G" value="4e7c36" name="muschio"/>
+  <color symbol="W" value="2a5c80" name="acqua"/>
+  <color symbol="T" value="5c361e" name="legno travi"/>
+  <color symbol="R" value="9b4f2c" name="tegole tetto"/>
+  <color symbol="L" value="be6c3b" name="tetto al sole"/>
+  <color symbol="K" value="c4a268" name="corda"/>
+  <color symbol="I" value="3a3942" name="ferro"/>
+  <cylinder at="8 8 0" size="14 14 4" color="S"/>
+  <cylinder at="8 8 1" size="8 8 4" color="B"/>
+  <cylinder at="8 8 0" size="8 8 2" color="W"/>
+  <box at="3 8 4" size="2 2 8" color="T"/>
+  <box at="13 8 4" size="2 2 8" color="T"/>
+  <box at="8 8 11" size="12 2 2" color="T"/>
+  <box at="8 8 11" size="4 2 2" color="K"/>
+  <box at="8 8 8" size="1 1 3" color="K"/>
+  <box at="8 8 7" size="2 1 1" color="I"/>
+  <box at="8 8 5" size="3 3 2" color="T"/>
+  <box at="8 8 6" size="1 1 1" color="W"/>
+  <box at="14 8 11" size="2 1 1" color="I"/>
+  <box at="15 9 10" size="1 2 2" color="I"/>
+  <box at="8 8 12" size="14 14 1" color="R"/>
+  <box at="8 8 13" size="14 11 1" color="R"/>
+  <box at="8 8 14" size="14 8 1" color="R"/>
+  <box at="8 8 15" size="14 5 1" color="R"/>
+  <box at="8 8 16" size="14 2 1" color="R"/>
+  <box at="8 8 12" size="12 10 1" color="B"/>
+  <box at="8 8 13" size="12 7 1" color="B"/>
+  <box at="8 8 14" size="12 4 1" color="B"/>
+  <box at="8 8 15" size="12 1 1" color="B"/>
+  <prl steps="1">
+    <rule in="S" out="C" p="0.15"/>
+    <rule in="S" out="D" p="0.12"/>
+  </prl>
+  <prl steps="1">
+    <rule in="B S" out="B G" p="0.08"/>
+    <rule in="S" out="G" p="0.05"/>
+  </prl>
+  <one steps="14" in="BB G[SCD]" out="BB GG"/>
+  <prl steps="1" in="B R" out="B L" p="0.8"/>
+</sequence>

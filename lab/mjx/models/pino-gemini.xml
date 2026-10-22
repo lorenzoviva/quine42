@@ -1,0 +1,25 @@
+<!-- Pino a palchi: step 8B, gemini-3.8-flash (b-semplici-flash38/pino.json, voto dell'Artista 7/10). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
+<sequence values="BTKFLDP" size="40 40 60" symmetry="(xy)" name="Pino a palchi">
+  <color symbol="T" value="694324" name="tronco"/>
+  <color symbol="K" value="472b15" name="corteccia scura"/>
+  <color symbol="F" value="2c683b" name="aghi"/>
+  <color symbol="L" value="5ca146" name="aghi al sole"/>
+  <color symbol="D" value="184226" name="aghi in ombra"/>
+  <color symbol="P" value="8b562b" name="pigna"/>
+  <cylinder at="20 20 0" size="5 5 4" color="T"/>
+  <cylinder at="20 20 0" size="3 3 53" color="T"/>
+  <cone at="20 20 10" size="28 28 14" color="F" on="B"/>
+  <cone at="20 20 21" size="24 24 13" color="F" on="B"/>
+  <cone at="20 20 31" size="19 19 12" color="F" on="B"/>
+  <cone at="20 20 40" size="14 14 11" color="F" on="B"/>
+  <cone at="20 20 48" size="8 8 9" color="F" on="B"/>
+  <convolution neighborhood="Moore" steps="2">
+    <rule in="F" out="B" values="B" sum="15..26" p="0.45"/>
+  </convolution>
+  <prl steps="1" in="T" out="K" p="0.3"/>
+  <prl steps="1">
+    <rule in="B F" out="B L" p="0.75"/>
+    <rule in="F B" out="D B" p="0.75"/>
+  </prl>
+  <prl steps="1" in="*/B F/B" out="*/B P/B" p="0.03"/>
+</sequence>
