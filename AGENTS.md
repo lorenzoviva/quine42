@@ -250,6 +250,14 @@ Hook: `update(dt)` (sistemi), `generate_chunk`, `on_spawn(id)`, `on_interact(id,
 
 ## Stato e prossimi passi
 
+> **Decisione (ADR-0037, step 8.2C): si passa al 3D.** Il rendering 2D (tile con texture, sprite, Atelier e
+> ArtDirector che dipingono, scontorno) si toglie su un branch nuovo nello step 9; gli asset diventano programmi
+> MarkovJunior (ADR-0036); lo spazio è una scala di griglie (regione → piano → modello → corpi,
+> [`docs/plans/universo-continuo.md`](docs/plans/universo-continuo.md)); i costi seguono
+> [`docs/reports/costi-step8.2B.md`](docs/reports/costi-step8.2B.md). Il prompt dello step 9 è in
+> [`docs/userchats/step9-3d.md`](docs/userchats/step9-3d.md). Finché lo step 9 non è fatto, quanto sotto
+> descrive ancora il gioco 2D.
+
 Fatto: kernel, sandbox, rune (una per casella, rare), tappeto, corona nascosta e organizzata come archivio
 con il Concilio che vi lavora, versionamento, Concilio su Gemini, mappe a tile senza cuciture con layout a
 regole e connettività garantita, interni con tetti, contenuti come dati (pacchetti, bottino, contenitori,

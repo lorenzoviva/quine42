@@ -41,5 +41,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0034](0034-strutture-alla-markovjunior.md) | Laboratorio voxel: strutture scritte come gli esempi di MarkovJunior (crescita, contorno, dettaglio sulla struttura intera) | sperimentale |
 | [0035](0035-commissione-dei-blocchi.md) | Laboratorio voxel: l'Architetto commissiona i blocchi (pianta prima, configurazioni, vuoti di tipo diverso) | sperimentale |
 | [0036](0036-markovjunior-alla-lettera-in-3d.md) | Laboratorio voxel: MarkovJunior alla lettera (XML), modelli interi, sandbox 3D; Gemini 3.1 contro 3.8 | sperimentale |
+| [0037](0037-passaggio-al-3d.md) | Si passa al 3D: modelli MarkovJunior come asset, spazio a scale, via il 2D (attuazione nello step 9) | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.
