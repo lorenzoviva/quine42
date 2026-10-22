@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { footprint, meshVoxels, type VoxelGrid } from '../3d/mesh';
+import { footprint, meshVoxels, type VoxelGrid } from '../../src/mj/mesh';
 
 const palette = { A: { color: '#808080' }, H: { color: '#ffffff', hidden: true } };
 const grid = (X: number, Y: number, Z: number, fill: (x: number, y: number, z: number) => number): VoxelGrid => {

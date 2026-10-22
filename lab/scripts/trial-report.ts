@@ -5,9 +5,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { priceOf } from '../mj3d/prices';
-import { DEFAULT_RENDER, render, sheet, type Picture } from '../mj3d/render';
-import { compileMjx } from '../mjx/model';
-import { runMjx } from '../mjx/run';
+import { DEFAULT_RENDER, render, sheet, type Picture } from '../../src/mj/photo';
+import { compileMjx } from '../../src/mj/model';
+import { runMjx } from '../../src/mj/run';
 import { png } from './png';
 
 const out = path.resolve('lab/out');

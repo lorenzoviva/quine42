@@ -4,10 +4,10 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { compileMjx } from '../mjx/model';
-import { runMjx } from '../mjx/run';
+import { compileMjx } from '../../src/mj/model';
+import { runMjx } from '../../src/mj/run';
 import { OFFICIAL } from '../mjx/official';
-import { DEFAULT_RENDER, render, sheet } from '../mj3d/render';
+import { DEFAULT_RENDER, render, sheet } from '../../src/mj/photo';
 import { png } from './png';
 
 const only = process.argv.slice(2).filter((a) => a !== '--');

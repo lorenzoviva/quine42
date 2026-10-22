@@ -20,7 +20,7 @@
 // Not supported (they need files, search or tiles): wfc, convchain, observe and field (inference),
 // rule files (fin, fout, file).
 
-import { Mj3Error, PARTS, SHAPES, type ConvRule, type Node3, type PaletteEntry, type Part, type Program3, type Rule3, type ShapeKind, type Sym, type Vec3 } from '../mj3d/engine';
+import { Mj3Error, PARTS, SHAPES, type ConvRule, type Node3, type PaletteEntry, type Part, type Program3, type Rule3, type ShapeKind, type Sym, type Vec3 } from './engine';
 import { MJ_PALETTE } from './palette';
 import { parseXml, XmlError, type XmlElement } from './xml';
 

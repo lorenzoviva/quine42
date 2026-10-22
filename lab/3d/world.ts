@@ -2,9 +2,9 @@
 // river, its meadows and the woods; then a plan says where things go. Pure functions, no three.js.
 
 import { Rng } from '../../src/kernel/rng';
-import { compileMjx } from '../mjx/model';
+import { compileMjx } from '../../src/mj/model';
 import { OFFICIAL } from '../mjx/official';
-import { runMjx } from '../mjx/run';
+import { runMjx } from '../../src/mj/run';
 import type { Role } from './catalog';
 
 export type Ground = 'water' | 'meadow' | 'wood';

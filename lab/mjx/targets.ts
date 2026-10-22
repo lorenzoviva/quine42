@@ -1,9 +1,7 @@
-// What the lab tries to sculpt: presets for each step of the experiment, and the assets of a universe
-// (obstacle tiles, objects, people, the player) read from its files, with their current sprite and
-// every frame of their walk for comparison.
+// What the lab sculpts in its trials: presets for figures, plants, things and structures, and the style
+// lines of a universe's style guide.
 
-import { guessClass } from './scale';
-import type { Category, Target } from './sculptor';
+import type { Category, Target } from './target';
 
 const preset = (category: Category, name: string, description: string, kind: string): Target => ({
   id: `preset:${name.toLowerCase().replace(/\s+/g, '-')}`,
@@ -33,7 +31,7 @@ export const PRESETS: Target[] = [
   preset('semplice', 'Cassa di legno', 'Una cassa di assi di legno con rinforzi di ferro agli spigoli', 'mobile'),
   preset('semplice', 'Barile', 'Un barile di legno a doghe con due cerchi di ferro', 'mobile'),
   preset('semplice', 'Vaso di terracotta', 'Un vaso panciuto di terracotta con il collo stretto', 'oggetto'),
-  // 2. Strutture (un solo modello; per quelle a più caselle c'è la scheda «blocchi»)
+  // 2. Strutture
   preset('struttura', 'Colonna di pietra', 'Una colonna classica con base, fusto scanalato e capitello', 'monumento'),
   preset('struttura', 'Colonna in rovina', "Il moncone spezzato di una colonna antica, con frammenti caduti a terra e edera", 'monumento'),
   preset('struttura', 'Porta ad arco', 'Un portale di pietra ad arco con un battente di legno chiuso e borchie di ferro', 'monumento'),
@@ -49,67 +47,7 @@ export const PRESETS: Target[] = [
   preset('figura', 'Slime', 'Una creatura gelatinosa verde e traslucida, a goccia, con due occhi', 'animale'),
 ];
 
-interface TileDef {
-  name?: string;
-  description?: string;
-  layer?: string;
-  sprites?: string[];
-  texture?: string;
-}
 
-const STRUCTURE_WORDS = /pozzo|fontana|statua|colonna|porta|portale|torre|altare|ponte|muro|cancello|edicola|mulino|forno/i;
-
-/** Targets from the files of a universe (as GET /api/universe/<name> returns them). */
-export function universeTargets(files: Record<string, string>): Target[] {
-  const out: Target[] = [];
-  const terrain = safe(files['modules/world.terrain/manifest.json']);
-  for (const [code, t] of Object.entries((terrain?.tiles ?? {}) as Record<string, TileDef>)) {
-    const layer = t.layer ?? '';
-    if (!['rock', 'vegetation', 'wall', 'door'].includes(layer)) continue;
-    const category: Category = layer === 'wall' || layer === 'door' ? 'struttura' : 'semplice';
-    out.push({
-      id: `tile:${code}`,
-      name: t.name ?? code,
-      category,
-      kind: layer === 'rock' ? 'roccia' : layer === 'vegetation' ? 'albero' : 'monumento',
-      description: [t.description, layer === 'vegetation' ? 'un ostacolo singolo (un albero o una pianta) che sta su una casella del terreno' : layer === 'rock' ? 'un ostacolo singolo (una roccia) che sta su una casella del terreno' : 'un tratto di muro o porta lungo una casella'].filter(Boolean).join('. '),
-      sprite: t.sprites?.[0] ?? t.texture,
-      ...(t.sprites && t.sprites.length > 1 ? { variants: t.sprites } : {}),
-      source: `terreno "${code}" (${layer})`,
-    });
-  }
-  for (const [file, text] of Object.entries(files)) {
-    const m = /^modules\/([^/]+)\/manifest\.json$/.exec(file);
-    if (!m) continue;
-    const man = safe(text);
-    if (!man || (man.kind !== 'entity' && man.kind !== 'player') || !man.appearance) continue;
-    const figure = man.kind === 'player' || man.id?.startsWith('npc.') || !!man.persona;
-    const name = man.kind === 'player' ? 'Viandante (il giocatore)' : String(man.name ?? man.id);
-    const category: Category = figure ? 'figura' : STRUCTURE_WORDS.test(`${name} ${man.description ?? ''}`) ? 'struttura' : 'semplice';
-    const description = man.kind === 'player' ? man.appearance.imagePrompt : man.description;
-    out.push({
-      id: `module:${man.id}`,
-      name,
-      category,
-      kind: guessClass(`${name} ${description ?? ''} ${man.appearance.imagePrompt ?? ''}`, category).id,
-      description,
-      look: man.kind === 'player' ? undefined : man.appearance.imagePrompt,
-      context: man.context,
-      sprite: man.appearance.sprite,
-      ...(man.appearance.frames ? { frames: man.appearance.frames } : {}),
-      source: man.id,
-    });
-  }
-  return out;
-}
-
-function safe(text: string | undefined): any {
-  try {
-    return text ? JSON.parse(text) : undefined;
-  } catch {
-    return undefined;
-  }
-}
 
 /** The first lines of the style guide: style, perspective, light, palette. */
 export function styleOf(files: Record<string, string>): string | undefined {

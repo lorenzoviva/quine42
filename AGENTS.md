@@ -113,8 +113,11 @@ universe/
   modules/<id>/         manifest.json (+ logic.lua): sistemi, terreni, ambienti, pacchetti di oggetti, mobili, persone,
                         effetti (core.effects), fuoco (sys.fire), rune magiche e incantesimi (magic.runes, magic.spells)
 tests/  docs/
-lab/                    laboratorio voxel sperimentale (ADR-0031…0036): MarkovJunior 3D → sprite in 3/4, strutture a blocchi, pagina /lab/;
-                        MarkovJunior in XML alla lettera (lab/mjx) e sandbox 3D con modelli interi, pagina /lab/3d/
+src/mj/                 MarkovJunior del gioco (ADR-0036, 0038): engine.ts (motore 3D), xml.ts e model.ts (XML alla lettera), palette.ts,
+                        run.ts (esecuzione, animazioni, azioni), rig.ts (arti), mesh.ts (voxel → triangoli, impronte, pavimenti),
+                        classes.ts (classi e scatole), photo.ts (foto in 3/4 per l'Artista), check.ts (misure di un modello)
+lab/                    laboratorio di MarkovJunior (ADR-0038): sandbox 3D /lab/3d/, modelli ufficiali e conformità, script per
+                        affettare, fotografare, misurare e provare i programmi con Gemini; non importarlo da src/
 ```
 
 ## Il Concilio (ADR-0008, 0011, 0012, 0013, 0014, 0016)
@@ -185,23 +188,11 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   le azioni libere ripetibili si imparano per tipo di terreno (`TileDef.actions`).
 - **Prospettiva 3/4 e scontorno** (ADR-0030): `PERSPECTIVE` nella guida di stile, muri con faccia frontale, tetti
   in 3/4; il magenta serve perché i modelli di immagine non danno alfa; `keyAndFit` trova lo sfondo e tiene il soggetto.
-- **Laboratorio voxel** (ADR-0031, sperimentale, fuori dal gioco): `lab/`, pagina `/lab/`; MarkovJunior 3D
-  (`lab/mj3d`), foto in 3/4 da quattro lati, Scultore e Artista di prova. ADR-0032: 20 voxel per casella e una
-  scatola per classe, camminata/vento/ombre dal modello, strutture a blocchi (Scultore dei blocchi + Architetto, prese, WFC).
-  ADR-0033: catalogo e facce dichiarati prima dei programmi, varianti e compatibilità calcolate dal kernel, l'Architetto
-  dipinge zone e il WFC (a bit, con riparazioni locali) sceglie blocco e rotazione; foto per blocchi; fino a 255 codici.
-  ADR-0034: piante generative come negli esempi di MJ (crescita da un seme, contorno, `path`, ciclo che collega), `paint`
-  e `detail` (regole sui voxel della struttura composta, oltre i bordi dei blocchi), nodi `map`, `unions`, `path` con
-  `inertia`/`longest`; esempi `rocca` e `cripta`. ADR-0035: l'Architetto scrive prima la pianta, il kernel ne ricava la
-  commissione (configurazioni per zona, diagonali comprese), lo Scultore fa i blocchi su ordinazione (`serves`); vuoti di
-  tipo diverso (`open`: il cortile non è il fuori), `paint.under`, diagnosi per configurazione prima del collasso.
-  ADR-0036 (step 8.2A): tutto in 3D, un modello intero per cosa (niente blocchi né architetto). I programmi sono
-  l'XML di MarkovJunior letto alla lettera (`lab/mjx`: palette ufficiale, strati dall'alto, simmetrie, `map`,
-  `convolution` come nel repository; 16 modelli 3D ufficiali girano invariati), più `<color part hidden>`,
-  forme di base, `<animation>` e `<action>` (regole sul modello finito: la porta si apre). Il front-end ripara
-  le forme sbagliate dagli agenti. Sandbox 3D `lab/3d/` (three.js): terreno dal modello `River`, collisioni sui
-  voxel, case in cui si entra, camminata dagli arti e vento dal kernel, crescita dall'esecuzione stessa.
-  Non importarlo da `src/`. Vedi `lab/README.md`.
+- **MarkovJunior** (ADR-0036, 0038): l'XML di MarkovJunior letto alla lettera (palette ufficiale, strati dall'alto,
+  simmetrie, `map`, `convolution`; 16 modelli 3D ufficiali girano invariati), più `<color part hidden>`, forme di
+  base, `<animation>` e `<action>` (regole sul modello finito: la porta si apre); il front-end ripara le forme
+  sbagliate dagli agenti. Il codice è in `src/mj/`; il laboratorio (`lab/`, `lab/README.md`) serve ad analizzare e
+  correggere i programmi che il Concilio non riesce a scrivere (sandbox 3D `/lab/3d/`, sezioni, foto, prove con Gemini).
 - **Mappa** (ADR-0011): tile con texture, strati `ground floor wall door liquid vegetation rock`, tetti.
 - **Contenuti** (ADR-0012): `ItemDef` in pacchetti; bottino per tag; contenitori; ricette; bisogni
   (`needs` sul giocatore, `sys.needs`); uso generico in `core.items`; menu azioni (`E`).

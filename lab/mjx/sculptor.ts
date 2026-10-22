@@ -3,13 +3,13 @@
 // program, measures it and sends it back with the reason while it does not work.
 
 import type { Models } from '../../src/kernel/ai/models';
-import { analyse, type Analysis } from '../mj3d/check';
-import { Mj3Error, type RunResult } from '../mj3d/engine';
-import { classFor, describe, type Critique, type Target } from '../mj3d/sculptor';
-import { boxOf, CLASSES, TILE, type AssetClass } from '../mj3d/scale';
-import { compileMjx, type MjxModel } from './model';
-import { MJ_PALETTE } from './palette';
-import { runMjx } from './run';
+import { analyse, type Analysis } from '../../src/mj/check';
+import { Mj3Error, type RunResult } from '../../src/mj/engine';
+import { classFor, describe, type Critique, type Target } from './target';
+import { boxOf, CLASSES, TILE, type AssetClass } from '../../src/mj/classes';
+import { compileMjx, type MjxModel } from '../../src/mj/model';
+import { MJ_PALETTE } from '../../src/mj/palette';
+import { runMjx } from '../../src/mj/run';
 import SCULPTOR from '../prompts/scultore-mj.md?raw';
 
 const examples = import.meta.glob('./models/*.xml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;

@@ -1,11 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { run, type Grid3, type Program3 } from '../mj3d/engine';
-import { EXAMPLES } from '../mj3d/examples';
-import { viandante } from '../programs/viandante';
-import { toMjx } from '../mjx/convert';
-import { compileMjx } from '../mjx/model';
+import type { Grid3 } from '../../src/mj/engine';
+import { compileMjx } from '../../src/mj/model';
 import { OFFICIAL } from '../mjx/official';
-import { act, clipFrames, runMjx } from '../mjx/run';
+import { act, clipFrames, runMjx } from '../../src/mj/run';
 import { extractXml, mjxSystem } from '../mjx/sculptor';
 
 const EXAMPLE_XML = Object.fromEntries(
@@ -61,17 +58,6 @@ describe('MarkovJunior XML (lab/mjx)', () => {
       if (!o.steps) expect(r.finished, o.name).toBe(true);
     }
   }, 120_000);
-
-  it('rewrites the JSON programs of steps 8A-8E without changing a voxel', () => {
-    const programs: Program3[] = [...EXAMPLES.map((e) => e.program), viandante(28, [20, 15, 30])];
-    for (const p of programs) {
-      const xml = toMjx(p);
-      const m = compileMjx(xml);
-      // Letters may be renamed (B is the empty cell): compare what each voxel looks like.
-      const look = (g: Grid3, pal: Program3['palette']) => Array.from(g.cells, (c) => (c ? (pal[g.alphabet[c]]?.hidden ? 'h' : pal[g.alphabet[c]]?.color ?? 'h') : '.')).join();
-      for (const seed of [1, 2]) expect(look(runMjx(m, seed, { maxSteps: 20000 }).grid, m.program.palette), p.name).toBe(look(run(p, seed).grid, p.palette));
-    }
-  });
 
   it('animates and acts with MarkovJunior rules on the finished model', () => {
     const m = compileMjx(`

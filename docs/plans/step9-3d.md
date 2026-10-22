@@ -227,3 +227,21 @@ ADR: nessuno. AGENTS.md: rimando a questo piano in «Stato e prossimi passi».
 ## Diario
 
 (aggiornato a ogni fase)
+
+### F0 — fatto (`a3cc228`)
+Piano scritto; branch `3d`.
+
+### F1 — fatto
+- `src/mj/` con `engine xml model palette run rig mesh classes photo check` (spostati con `git mv`, la storia li segue).
+  `rig.ts` ha solo lo scheletro (via camminate e vento a fotogrammi, servivano agli sprite); `check.ts` solo le
+  misure (via le riparazioni del JSON).
+- Laboratorio: via la pagina `/lab/`, blocchi, WFC, architetto, commissione, Scultore JSON, esempi e programmi
+  JSON, conversione, 16 script e 5 file di test. Le parti del vecchio Scultore che le prove XML usano ancora
+  (bersaglio, descrizione, Artista, foglio delle quattro viste) sono in `lab/mjx/target.ts`; i bersagli
+  preimpostati in `lab/mjx/targets.ts`.
+- Test: `lab/tests/mjx.test.ts` (conformità ai modelli ufficiali) invariato salvo gli import; tolto solo il caso
+  della conversione JSON → XML (il convertitore non c'è più). I test del motore sono ora in `tests/mj.test.ts`
+  (13 casi, su XML o programmi minimi). Totale: 9 file, 120 test (prima 155: i 47 dei blocchi e del JSON sono andati).
+- ADR-0038; indice degli ADR (0031-0035 sostituiti, 0036 accettato); AGENTS.md (Struttura, MarkovJunior);
+  `lab/README.md` riscritto.
+- Diverso dal previsto: nulla di sostanziale; `prices.ts` e `meter.ts` restano in `lab/mj3d/` fino a F2.

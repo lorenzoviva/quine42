@@ -13,10 +13,10 @@ import path from 'node:path';
 import type { Models, TextCall } from '../../src/kernel/ai/models';
 import { emptyUsage } from '../../src/kernel/ai/models';
 import { costOf, usd } from '../mj3d/prices';
-import { DEFAULT_RENDER, render, sheet, type Picture } from '../mj3d/render';
-import { contactSheet, review, type Critique, type Target } from '../mj3d/sculptor';
+import { DEFAULT_RENDER, render, sheet, type Picture } from '../../src/mj/photo';
+import { contactSheet, review, type Critique, type Target } from '../mjx/target';
 import { sculptMjx, type MjxSculpture } from '../mjx/sculptor';
-import { runMjx } from '../mjx/run';
+import { runMjx } from '../../src/mj/run';
 import { png } from './png';
 
 const argv = process.argv.slice(2);

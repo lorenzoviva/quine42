@@ -13,11 +13,11 @@ import path from 'node:path';
 import { GeminiModels } from '../../src/kernel/ai/gemini';
 import type { Models } from '../../src/kernel/ai/models';
 import { meteredFetch, meterLine, newMeter, type Meter } from '../mj3d/meter';
-import { DEFAULT_RENDER, render, sheet, type Picture } from '../mj3d/render';
-import { contactSheet, review, type Critique, type Target } from '../mj3d/sculptor';
-import { PRESETS, styleOf } from '../mj3d/targets';
+import { DEFAULT_RENDER, render, sheet, type Picture } from '../../src/mj/photo';
+import { contactSheet, review, type Critique, type Target } from '../mjx/target';
+import { PRESETS, styleOf } from '../mjx/targets';
 import { sculptMjx, type MjxSculpture } from '../mjx/sculptor';
-import { runMjx } from '../mjx/run';
+import { runMjx } from '../../src/mj/run';
 import { png } from './png';
 
 const argv = process.argv.slice(2);

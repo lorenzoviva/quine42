@@ -4,15 +4,15 @@
 
 import * as THREE from 'three';
 import { GeminiModels } from '../../src/kernel/ai/gemini';
-import type { Grid3 } from '../mj3d/engine';
+import type { Grid3 } from '../../src/mj/engine';
 import { meteredFetch, meterLine, newMeter } from '../mj3d/meter';
-import { CLASSES } from '../mj3d/scale';
-import { classFor, type Target } from '../mj3d/sculptor';
+import { CLASSES } from '../../src/mj/classes';
+import { classFor, type Target } from '../mjx/target';
 import { sculptMjx } from '../mjx/sculptor';
-import { compileMjx, type MjxModel } from '../mjx/model';
-import { act, clipFrames } from '../mjx/run';
+import { compileMjx, type MjxModel } from '../../src/mj/model';
+import { act, clipFrames } from '../../src/mj/run';
 import { byId, CATALOG, GROUPS, type Entry } from './catalog';
-import { floors, footprint, meshVoxels, type MeshData } from './mesh';
+import { floors, footprint, meshVoxels, type MeshData } from '../../src/mj/mesh';
 import type { BuildRequest, BuildResponse, Built } from './worker';
 import { makeLand, plan, type Land } from './world';
 

@@ -3,9 +3,9 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { meshVoxels } from '../3d/mesh';
-import { compileMjx } from '../mjx/model';
-import { runMjx } from '../mjx/run';
+import { meshVoxels } from '../../src/mj/mesh';
+import { compileMjx } from '../../src/mj/model';
+import { runMjx } from '../../src/mj/run';
 
 const dir = path.resolve('lab/mjx/models');
 for (const f of fs.readdirSync(dir).filter((f) => f.endsWith('.xml'))) {

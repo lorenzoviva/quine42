@@ -1,6 +1,5 @@
-// Frames from one model, at no cost: the kernel moves the parts of a figure (legs and arms swing round
-// their joints) for the walk, bends vegetation in the wind. The sun for moving shadows is a render
-// option (render.ts → DAY).
+// The skeleton of a figure: the kernel moves its parts (legs and arms swing round their joints) to walk,
+// turns the head, wags the tail; the renderer does it on the meshes of each limb.
 //
 // Parts come from the palette (`part`: gamba, braccio, testa, coda). Each connected piece of a part is
 // a limb; its joint is where it meets the body (top for legs and arms, bottom for the head, the end
@@ -114,77 +113,3 @@ export function rig(g: Grid3, palette: Record<string, PaletteEntry>): Rig {
   }
   return { limbs, guessed };
 }
-
-function copy(g: Grid3, cells = new Uint8Array(g.cells)): Grid3 {
-  return { ...g, cells, log: [], epoch: 0 };
-}
-
-/** Rotates each limb round its joint: about x (swing back and forth) or z (a tail wagging). */
-export function pose(g: Grid3, r: Rig, angle: (l: Limb) => { ax: number; az: number }): Grid3 {
-  const out = new Uint8Array(g.cells);
-  const moving = new Set<number>();
-  for (const l of r.limbs) for (const c of l.cells) moving.add(c);
-  for (const c of moving) out[c] = 0;
-  const XY = g.X * g.Y;
-  for (const l of r.limbs) {
-    const { ax, az } = angle(l);
-    const [jx, jy, jz] = l.joint;
-    const ca = Math.cos(ax), sa = Math.sin(ax), cz = Math.cos(az), sz = Math.sin(az);
-    for (const c of l.cells) {
-      const [x, y, z] = coords(g, c);
-      const v = g.cells[c];
-      // Several samples per voxel, so that a turned limb has no holes.
-      for (const ox of [-0.25, 0.25])
-        for (const oy of [-0.25, 0.25])
-          for (const oz of [-0.25, 0.25]) {
-            let dx = x + ox - jx, dy = y + oy - jy, dz = z + oz - jz;
-            [dy, dz] = [dy * ca - dz * sa, dy * sa + dz * ca];
-            [dx, dy] = [dx * cz - dy * sz, dx * sz + dy * cz];
-            const nx = Math.round(jx + dx), ny = Math.round(jy + dy), nz = Math.round(jz + dz);
-            if (nx < 0 || ny < 0 || nz < 0 || nx >= g.X || ny >= g.Y || nz >= g.Z) continue;
-            const n = nx + ny * g.X + nz * XY;
-            if (out[n] === 0 || moving.has(n)) out[n] = v;
-          }
-    }
-  }
-  return copy(g, out);
-}
-
-/**
- * The walk cycle as the game wants it, per direction: left foot forward, passing, right foot forward.
- * Legs swing more than arms; heads and tails follow.
- */
-export function walk(g: Grid3, palette: Record<string, PaletteEntry>, swing = 0.5): { frames: Grid3[]; rig: Rig } {
-  const r = rig(g, palette);
-  const at = (t: number) =>
-    pose(g, r, (l) => {
-      if (l.part === 'gamba') return { ax: t * l.phase * swing, az: 0 };
-      if (l.part === 'braccio') return { ax: t * l.phase * swing * 0.7, az: 0 };
-      if (l.part === 'coda') return { ax: 0, az: t * 0.35 };
-      return { ax: t * 0.06, az: 0 };
-    });
-  return { frames: [at(1), copy(g), at(-1)], rig: r };
-}
-
-/** Wind: the upper part leans one way and back, the trunk stays (frames: still, half, full, half). */
-export function sway(g: Grid3, amount = 2): Grid3[] {
-  const z0 = Math.floor(g.Z * 0.25);
-  const lean = (k: number) => {
-    const out = new Uint8Array(g.cells.length);
-    const XY = g.X * g.Y;
-    for (let z = 0; z < g.Z; z++) {
-      const t = z <= z0 ? 0 : (z - z0) / Math.max(1, g.Z - 1 - z0);
-      const shift = Math.round(k * t ** 1.5);
-      for (let y = 0; y < g.Y; y++)
-        for (let x = 0; x < g.X; x++) {
-          const sx = x - shift;
-          if (sx >= 0 && sx < g.X) out[x + y * g.X + z * XY] = g.cells[sx + y * g.X + z * XY];
-        }
-    }
-    return copy(g, out);
-  };
-  return [copy(g), lean(amount / 2), lean(amount), lean(amount / 2)];
-}
-
-/** Game directions → lab views (render.ts VIEWS). */
-export const DIRECTION_VIEW: Record<'down' | 'left' | 'right' | 'up', number> = { down: 0, left: 3, right: 1, up: 2 };

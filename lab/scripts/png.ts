@@ -1,7 +1,7 @@
 // Minimal PNG writer for Node (RGBA, no filters), so lab scripts can save what they render.
 
 import { deflateSync } from 'node:zlib';
-import type { Picture } from '../mj3d/render';
+import type { Picture } from '../../src/mj/photo';
 
 const CRC = new Uint32Array(256).map((_, n) => {
   let c = n;

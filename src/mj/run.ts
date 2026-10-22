@@ -1,7 +1,7 @@
 // Running MarkovJunior models in the lab: whole models (not tiles), so the grids are larger than the
 // sculptor's boxes of steps 8A-8E, and a run is bounded by time rather than by a small step budget.
 
-import { run, runOn, type Grid3, type GridLimits, type RunResult, type Snapshot } from '../mj3d/engine';
+import { run, runOn, type Grid3, type GridLimits, type RunResult, type Snapshot } from './engine';
 import type { MjxClip, MjxModel } from './model';
 
 /** A house of 3×3 tiles at 20 voxels a tile is 60×60×50; a castle a few hundred a side. */

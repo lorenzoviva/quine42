@@ -1,11 +1,11 @@
 // Runs a MarkovJunior model and turns it into meshes, off the page's thread: the finished model (for a
 // figure, the body and each limb around its joint), the frames of its animations and of its growth.
 
-import { rig } from '../mj3d/animate';
-import { Mj3Error, type Grid3, type PaletteEntry, type Part, type Vec3 } from '../mj3d/engine';
-import { compileMjx } from '../mjx/model';
-import { clipFrames, runMjx } from '../mjx/run';
-import { meshVoxels, type MeshData } from './mesh';
+import { rig } from '../../src/mj/rig';
+import { Mj3Error, type Grid3, type PaletteEntry, type Part, type Vec3 } from '../../src/mj/engine';
+import { compileMjx } from '../../src/mj/model';
+import { clipFrames, runMjx } from '../../src/mj/run';
+import { meshVoxels, type MeshData } from '../../src/mj/mesh';
 
 export interface BuildRequest {
   id: number;

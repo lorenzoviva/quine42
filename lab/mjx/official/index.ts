@@ -2,7 +2,7 @@
 // © 2022 Maxim Gumin), copied unchanged, with the size and steps that models.xml gives them. Only those
 // that need no rule files, tiles (wfc) or inference: the lab's front-end must run them as they are.
 
-import type { Vec3 } from '../../mj3d/engine';
+import type { Vec3 } from '../../../src/mj/engine';
 
 const files = import.meta.glob('./*.xml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
 const xml = (name: string) => files[`./${name}.xml`];

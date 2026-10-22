@@ -5,7 +5,7 @@
 // Axes: the engine's x (left → right), y (back → front) and z (up) become three.js x, z and y. One tile
 // is one unit, so a voxel is 1 / voxels-per-tile. The mesh's origin is the centre of the model's floor.
 
-import type { PaletteEntry } from '../mj3d/engine';
+import type { PaletteEntry } from './engine';
 
 export interface MeshData {
   positions: Float32Array;

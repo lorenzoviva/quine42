@@ -35,12 +35,13 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0028](0028-meccaniche-con-interfacce.md) | Meccaniche con interfacce: il Concilio aggiunge pannelli (slot, barre, pulsanti) | accettato |
 | [0029](0029-menu-delle-caselle.md) | Menu contestuale delle caselle, azioni imparate dal terreno | accettato |
 | [0030](0030-prospettiva-tre-quarti-e-scontorno.md) | Prospettiva 3/4 e scontorno delle immagini (perché il magenta) | accettato |
-| [0031](0031-laboratorio-voxel.md) | Laboratorio voxel: MarkovJunior 3D fotografato in 3/4 (fuori dal gioco) | sperimentale |
-| [0032](0032-scala-fotogrammi-strutture.md) | Laboratorio voxel: scala unica, fotogrammi dal modello, strutture a blocchi | sperimentale |
-| [0033](0033-protocollo-blocchi-wfc.md) | Laboratorio voxel: protocollo tra i due scultori (catalogo, varianti, zone), WFC a bit, foto per blocchi | sperimentale |
-| [0034](0034-strutture-alla-markovjunior.md) | Laboratorio voxel: strutture scritte come gli esempi di MarkovJunior (crescita, contorno, dettaglio sulla struttura intera) | sperimentale |
-| [0035](0035-commissione-dei-blocchi.md) | Laboratorio voxel: l'Architetto commissiona i blocchi (pianta prima, configurazioni, vuoti di tipo diverso) | sperimentale |
-| [0036](0036-markovjunior-alla-lettera-in-3d.md) | Laboratorio voxel: MarkovJunior alla lettera (XML), modelli interi, sandbox 3D; Gemini 3.1 contro 3.8 | sperimentale |
+| [0031](0031-laboratorio-voxel.md) | Laboratorio voxel: MarkovJunior 3D fotografato in 3/4 (fuori dal gioco) | sostituito da 0038 (il laboratorio è di MarkovJunior) |
+| [0032](0032-scala-fotogrammi-strutture.md) | Laboratorio voxel: scala unica, fotogrammi dal modello, strutture a blocchi | sostituito da 0038 (il laboratorio è di MarkovJunior) |
+| [0033](0033-protocollo-blocchi-wfc.md) | Laboratorio voxel: protocollo tra i due scultori (catalogo, varianti, zone), WFC a bit, foto per blocchi | sostituito da 0038 (il laboratorio è di MarkovJunior) |
+| [0034](0034-strutture-alla-markovjunior.md) | Laboratorio voxel: strutture scritte come gli esempi di MarkovJunior (crescita, contorno, dettaglio sulla struttura intera) | sostituito da 0038 (il laboratorio è di MarkovJunior) |
+| [0035](0035-commissione-dei-blocchi.md) | Laboratorio voxel: l'Architetto commissiona i blocchi (pianta prima, configurazioni, vuoti di tipo diverso) | sostituito da 0038 (il laboratorio è di MarkovJunior) |
+| [0036](0036-markovjunior-alla-lettera-in-3d.md) | Laboratorio voxel: MarkovJunior alla lettera (XML), modelli interi, sandbox 3D; Gemini 3.1 contro 3.8 | accettato; il formato è quello del gioco (0038) |
 | [0037](0037-passaggio-al-3d.md) | Si passa al 3D: modelli MarkovJunior come asset, spazio a scale, via il 2D (attuazione nello step 9) | accettato |
+| [0038](0038-laboratorio-di-markovjunior.md) | MarkovJunior nel gioco (src/mj), il laboratorio diventa il laboratorio di MarkovJunior | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

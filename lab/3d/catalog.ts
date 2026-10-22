@@ -1,7 +1,7 @@
 // What the 3D sandbox knows: the MarkovJunior models of lab/mjx/models (hand-written and ported from
 // the earlier sessions) and a few of MarkovJunior's own 3D models, with the part each plays in the world.
 
-import type { Vec3 } from '../mj3d/engine';
+import type { Vec3 } from '../../src/mj/engine';
 import { OFFICIAL } from '../mjx/official';
 
 export type Role = 'player' | 'npc' | 'animal' | 'tree' | 'plant' | 'rock' | 'prop' | 'structure' | 'official';

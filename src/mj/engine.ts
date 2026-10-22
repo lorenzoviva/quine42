@@ -24,7 +24,7 @@
 // Programs written in MarkovJunior's own XML (lab/mjx) compile to these nodes with MarkovJunior's
 // semantics: map with `clear` (a new empty grid, rules wrapping round), conv with `sums`, unlimited steps.
 
-import { Rng } from '../../src/kernel/rng';
+import { Rng } from '../kernel/rng';
 
 export type Vec3 = [number, number, number];
 /**

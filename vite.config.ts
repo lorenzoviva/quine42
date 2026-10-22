@@ -13,8 +13,8 @@ export default defineConfig(({ mode }) => {
     // Writing a universe must not reload the page (dev server watches the project folder).
     server: { port: 5173, watch: { ignored: ['**/universes/**'] } },
     optimizeDeps: { exclude: ['wasmoon'] },
-    // The voxel lab (lab/, experimental) is a second page on the same server: /lab/.
-    build: { rollupOptions: { input: { main: path.resolve('index.html'), lab: path.resolve('lab/index.html'), lab3d: path.resolve('lab/3d/index.html') } } },
+    // The MarkovJunior lab's sandbox (lab/3d) is a second page on the same server: /lab/3d/.
+    build: { rollupOptions: { input: { main: path.resolve('index.html'), lab3d: path.resolve('lab/3d/index.html') } } },
     test: { environment: 'node', include: ['tests/**/*.test.ts', 'lab/**/*.test.ts'] },
   };
 });
