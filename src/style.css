@@ -244,6 +244,8 @@ button[disabled] { opacity: 0.4; cursor: default; }
 }
 #faults:not([hidden]) ~ #feed { bottom: 120px; }
 #feed .toggle { font-size: 11px; padding: 2px 8px; opacity: 0.8; }
+#feed .cost { font-size: 11px; color: #ffcf5c; opacity: 0.85; font-variant-numeric: tabular-nums; }
+#feed.collapsed .cost { display: none; }
 #feed .list { display: flex; flex-direction: column; gap: 3px; width: 100%; }
 #feed.collapsed .list { display: none; }
 .feed-line { background: rgba(3, 6, 5, 0.82); border-left: 2px solid #2b4a3a; padding: 3px 8px; font-size: 11.5px; line-height: 1.35; transition: opacity 2s; }

@@ -22,6 +22,7 @@ import { discoverModules, readConfig } from './universe';
 import { CARPET_TOKENS, cellIndex, extractLines, tokenize, type RuneComp, type RuneLine } from './runes';
 import { hash32, hashStr, hex, Rng } from './rng';
 import { BudgetError, type Models } from './ai/models';
+import { USAGE_FILE, UsageLedger } from './ai/usage';
 import { MemoryAssets, MemoryChunks, type AssetStore, type ChunkStore } from './assets';
 import type { ImageTools } from './imaging';
 import { Content, normName, specOf } from './content';
@@ -181,6 +182,9 @@ export class Kernel {
   readonly input = new Input();
   readonly content = new Content();
   readonly models: Models;
+  /** What the models cost, per day, model and task (world/consumi.json). */
+  readonly usage = new UsageLedger();
+  private usageWritten = -1;
   readonly assets: AssetStore;
   readonly chunkStore: ChunkStore;
   readonly imageTools?: ImageTools;
@@ -273,6 +277,11 @@ export class Kernel {
       k.bus.emit('fault', { fault: f, isNew });
       if (isNew) void k.repairGenerated(f.key, f.message);
     };
+    // The usage ledger: every call is counted; the file is written before every commit (it survives rollbacks).
+    k.usage.load(repo.working[USAGE_FILE]);
+    k.models.onCall = (r) => k.usage.record(r);
+    k.usage.onChange = () => k.bus.emit('usage', k.usage);
+    repo.beforeCommit = () => k.writeUsage();
     k.applyFiles(repo.working, { reset: true });
     k.loadState();
     k.ensureAtlas();
@@ -3806,6 +3815,22 @@ export class Kernel {
     this.repo.write('world/stato.json', JSON.stringify(state, null, 1) + '\n');
     this.files = { ...this.files, 'world/stato.json': this.repo.working['world/stato.json']! };
     this.repo.commit('salvataggio della partita', 'player');
+    return true;
+  }
+
+  /** Puts the usage ledger in the working files when it changed (the next commit carries it). */
+  private writeUsage(): void {
+    if (this.usage.version === this.usageWritten || !this.repo) return;
+    this.usageWritten = this.usage.version;
+    this.repo.write(USAGE_FILE, this.usage.toJson());
+    this.files = { ...this.files, [USAGE_FILE]: this.repo.working[USAGE_FILE]! };
+  }
+
+  /** On leaving: the spending of this session goes into the universe even if nothing else changed. */
+  saveUsage(): boolean {
+    // Only valid states are committed: with a fault the ledger waits for the next valid commit.
+    if (this.usage.version === this.usageWritten || this.faults.size) return false;
+    this.repo.commit('consumi dei modelli', 'kernel');
     return true;
   }
 

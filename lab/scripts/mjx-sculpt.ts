@@ -10,9 +10,8 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { GeminiModels } from '../../src/kernel/ai/gemini';
-import type { Models } from '../../src/kernel/ai/models';
-import { meteredFetch, meterLine, newMeter, type Meter } from '../mj3d/meter';
+import { tallyLine, UsageLedger } from '../../src/kernel/ai/usage';
+import { direct, readKey } from './gemini';
 import { DEFAULT_RENDER, render, sheet, type Picture } from '../../src/mj/photo';
 import { contactSheet, review, type Critique, type Target } from '../mjx/target';
 import { PRESETS, styleOf } from '../mjx/targets';
@@ -26,29 +25,15 @@ const opt = (name: string) => {
   return i >= 0 ? argv[i + 1] : undefined;
 };
 const root = path.resolve(opt('root') ?? (fs.existsSync('.env') ? '.' : '../../..'));
-const key = (() => {
-  try {
-    return /^GEMINI_API_KEY\s*=\s*"?([^"\r\n]+)"?/m.exec(fs.readFileSync(path.join(root, '.env'), 'utf8'))?.[1]?.trim();
-  } catch {
-    return undefined;
-  }
-})();
-if (!key) throw new Error(`nessuna GEMINI_API_KEY in ${path.join(root, '.env')}`);
+const key = readKey(root);
 
 const thinking = (opt('thinking') ?? 'low') as 'low' | 'medium' | 'high';
-const gemini = (model: string, meter: Meter): Models =>
-  new GeminiModels({
-    endpoint: 'https://generativelanguage.googleapis.com/v1beta',
-    textModel: model,
-    imageModel: 'none',
-    limits: { text: Number(opt('max') ?? 200), images: 0 },
-    fetchImpl: meteredFetch(meter, { timeout: 240_000, thinking, headers: { 'x-goog-api-key': key } }),
-  });
+const gemini = (model: string, ledger: UsageLedger) => direct(model, key, ledger, { thinking, max: Number(opt('max') ?? 200) });
 
 const model = opt('model') ?? 'gemini-3.1-flash-lite';
 const judgeModel = opt('judge') ?? 'gemini-3.5-flash';
-const sculptMeter = newMeter();
-const judgeMeter = newMeter();
+const sculptMeter = new UsageLedger();
+const judgeMeter = new UsageLedger();
 const sculptor = gemini(model, sculptMeter);
 const judge = gemini(judgeModel, judgeMeter);
 
@@ -155,11 +140,11 @@ const summary = {
   approved: rows.filter((r) => r.final?.verdetto === 'approvato').length,
   meanFirstVote: mean(valid.map((r) => r.votes[0])),
   meanFinalVote: mean(valid.map((r) => r.votes.at(-1)!)),
-  sculptor: sculptMeter,
-  judgeUsage: judgeMeter,
+  sculptor: sculptMeter.session,
+  judgeUsage: judgeMeter.session,
   rows,
 };
 fs.writeFileSync(path.join(outDir, 'summary.json'), JSON.stringify(summary, null, 2));
 console.log(`validi ${summary.valid}/${summary.total} · al primo colpo ${summary.firstTry} · approvati ${summary.approved} · voto medio ${summary.meanFirstVote.toFixed(1)} → ${summary.meanFinalVote.toFixed(1)}`);
-console.log(`scultore: ${meterLine(sculptMeter)}`);
-console.log(`Artista:  ${meterLine(judgeMeter)}`);
+console.log(`scultore: ${tallyLine(sculptMeter.session)}`);
+console.log(`Artista:  ${tallyLine(judgeMeter.session)}`);

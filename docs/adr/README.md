@@ -43,5 +43,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0036](0036-markovjunior-alla-lettera-in-3d.md) | Laboratorio voxel: MarkovJunior alla lettera (XML), modelli interi, sandbox 3D; Gemini 3.1 contro 3.8 | accettato; il formato è quello del gioco (0038) |
 | [0037](0037-passaggio-al-3d.md) | Si passa al 3D: modelli MarkovJunior come asset, spazio a scale, via il 2D (attuazione nello step 9) | accettato |
 | [0038](0038-laboratorio-di-markovjunior.md) | MarkovJunior nel gioco (src/mj), il laboratorio diventa il laboratorio di MarkovJunior | accettato |
+| [0039](0039-registro-dei-consumi.md) | Registro dei consumi, prezzi in un file, ragionamento low, niente ripetizioni dopo un tempo scaduto | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

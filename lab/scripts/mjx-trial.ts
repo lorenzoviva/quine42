@@ -12,7 +12,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type { Models, TextCall } from '../../src/kernel/ai/models';
 import { emptyUsage } from '../../src/kernel/ai/models';
-import { costOf, usd } from '../mj3d/prices';
+import { costOf, usd } from '../../src/kernel/ai/prices';
 import { DEFAULT_RENDER, render, sheet, type Picture } from '../../src/mj/photo';
 import { contactSheet, review, type Critique, type Target } from '../mjx/target';
 import { sculptMjx, type MjxSculpture } from '../mjx/sculptor';

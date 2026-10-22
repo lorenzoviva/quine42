@@ -9,7 +9,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { costOf, priceOf } from '../mj3d/prices';
+import { costOf, priceOf } from '../../src/kernel/ai/prices';
 
 interface Run {
   run: string;

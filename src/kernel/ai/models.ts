@@ -1,6 +1,8 @@
 // The model layer: the only place that talks to generative models. Agents (src/kernel/agents)
 // build prompts on top of it; the kernel validates whatever comes back.
 
+import type { CallRecord } from './usage';
+
 /** Gemini-style response schema (OpenAPI subset, uppercase types). Mock models ignore it. */
 export type Schema = {
   type: 'OBJECT' | 'ARRAY' | 'STRING' | 'NUMBER' | 'INTEGER' | 'BOOLEAN';
@@ -24,7 +26,14 @@ export interface TextCall {
   temperature?: number;
   /** Structured context, used by offline models instead of parsing the prompt. */
   data?: unknown;
+  /** A model other than the configured text model (the Sculptor and the Artist have their own). */
+  model?: string;
+  /** Reasoning effort; default the configuration's (`low`). */
+  thinking?: Thinking;
 }
+
+/** Gemini 3 `thinkingLevel`; `off` sends nothing (the model's default). */
+export type Thinking = 'low' | 'medium' | 'high' | 'off';
 
 export interface ImageCall {
   agent: string;
@@ -40,6 +49,14 @@ export interface Usage {
   failures: number;
   inputTokens: number;
   outputTokens: number;
+  /** Of the input, served from the cache. */
+  cachedTokens: number;
+  /** Reasoning, billed as output. */
+  thoughtTokens: number;
+  /** Calls that never got an answer (timeout, network): not repeated, they may have been billed. */
+  timeouts: number;
+  /** Tries repeated after 429 or a server error. */
+  retries: number;
 }
 
 export interface Limits {
@@ -53,6 +70,8 @@ export interface Models {
   readonly canPaint: boolean;
   readonly usage: Usage;
   limits: Limits;
+  /** Every call, with its tokens (the kernel's usage ledger listens). */
+  onCall?: (r: CallRecord) => void;
   text(call: TextCall): Promise<string>;
   image(call: ImageCall): Promise<string | null>;
 }
@@ -63,7 +82,7 @@ export class BudgetError extends Error {
   }
 }
 
-export const emptyUsage = (): Usage => ({ text: 0, images: 0, failures: 0, inputTokens: 0, outputTokens: 0 });
+export const emptyUsage = (): Usage => ({ text: 0, images: 0, failures: 0, inputTokens: 0, outputTokens: 0, cachedTokens: 0, thoughtTokens: 0, timeouts: 0, retries: 0 });
 
 /** Parses a model's JSON answer, tolerating code fences and leading prose. */
 export function parseJson<T>(text: string): T {

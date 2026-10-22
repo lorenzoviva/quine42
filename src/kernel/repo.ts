@@ -68,6 +68,8 @@ export class Repo {
   backend?: UniverseBackend;
   /** Commits of earlier sessions (from the backend): history only, no snapshots. */
   past: PastCommit[] = [];
+  /** Runs before every commit: the kernel writes files it keeps in memory (the usage ledger). */
+  beforeCommit?: () => void;
 
   private constructor(
     data: RepoData,
@@ -152,6 +154,7 @@ export class Repo {
   }
 
   commit(message: string, author: Author): Commit {
+    this.beforeCommit?.();
     const prev = this.head().files;
     const c = Repo.makeCommit(this.data.head, message, author, this.working);
     if (this.backend) {

@@ -12,6 +12,8 @@
     "maxForges": 3,
     "animation": "sheet",
     "maxPacks": 4,
-    "maxCast": 3
+    "maxCast": 3,
+    "thinking": "low",
+    "timeout": 120
   }
 }

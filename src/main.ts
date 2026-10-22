@@ -34,7 +34,7 @@ async function main() {
   loading.textContent = 'avvio del kernel…';
   const ai = readConfig(bundledFiles).config.ai;
   const online = !params.has('offline') && (await GeminiModels.available());
-  const models: Models = online ? new GeminiModels({ textModel: ai.textModel, imageModel: ai.imageModel, limits: { text: ai.maxText, images: ai.maxImages } }) : new MockModels();
+  const models: Models = online ? new GeminiModels({ textModel: ai.textModel, imageModel: ai.imageModel, limits: { text: ai.maxText, images: ai.maxImages }, thinking: ai.thinking, timeout: (ai.timeout ?? 120) * 1000 }) : new MockModels();
   // Two repositories (ADR-0021): the kernel's seed (bundled) and the universe's, on disk.
   const name = readConfig(bundledFiles).config.name;
   const client = await UniverseClient.connect(name);
@@ -75,7 +75,10 @@ async function main() {
   const chunks = client ? new UniverseChunks(client, new IdbChunks()) : new IdbChunks();
   const kernel = await Kernel.boot({ files, store: client ? memoryStore() : localStore, models, assets, chunks, imageTools: new BrowserImageTools(), wasmUri, backend: client ?? undefined, past });
   // Leaving: the state of play goes into the universe (if it is valid).
-  window.addEventListener('pagehide', () => kernel.saveState());
+  window.addEventListener('pagehide', () => {
+    kernel.saveState();
+    kernel.saveUsage();
+  });
   const images = new ImageCache((id) => assets.get(id));
   const renderer = new Renderer($<HTMLCanvasElement>('#world'), kernel, images);
   const hud = new Hud(kernel, renderer, images);

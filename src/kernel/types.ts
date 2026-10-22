@@ -305,6 +305,10 @@ export interface AiConfig {
   maxPacks?: number;
   /** New kinds of inhabitants the world forges by itself per session, so the same face is not everywhere. */
   maxCast?: number;
+  /** Reasoning effort of every call (default `low`: see docs/reports/costi-step8.2B.md). */
+  thinking?: 'low' | 'medium' | 'high' | 'off';
+  /** Seconds before a request is given up (and not repeated). */
+  timeout?: number;
 }
 
 export interface UniverseConfig {

@@ -1,6 +1,7 @@
-// What a Gemini call costs, from https://aistudio.google.com/docs/pricing (read on 22 October 2026: paid
-// tier, Standard, USD per million tokens). Prices change: keep the date, and the report in
-// docs/reports/ that shows every calculation. Thinking tokens are billed as output.
+// The only list of prices in the project (the kernel's usage ledger, the Council panel and the lab use it).
+// Read from https://aistudio.google.com/docs/pricing on PRICES_READ_ON (paid tier, Standard, USD per million
+// tokens). Prices change: keep the date, and the report in docs/reports/ that shows every calculation.
+// Thinking tokens are billed as output; prompt tokens served from the cache at the cache price.
 
 export interface Price {
   /** USD per million prompt tokens (text and images). */
@@ -27,14 +28,19 @@ export const PRICES: Record<string, Price> = {
   'gemini-3-flash-preview': { input: 0.5, output: 3.0, cached: 0.05, note: 'modello «legacy»' },
 };
 
-/** Not on the pricing page: the report treats these as assumptions. */
-export const UNPRICED = ['gemini-3.5-flash', 'gemini-3.7-flash'];
-
-/** Images: gemini-3.1-flash-lite-image, $30 per million image tokens = $0.0336 per 1K image. */
-export const IMAGE_PRICE = { model: 'gemini-3.1-flash-lite-image', perImage: 0.0336, input: 0.25, textOutput: 1.5 };
+/**
+ * Not on the pricing page. The report of step 8.2B priced them between the Flash-Lite and the 3.8 Flash
+ * prices; the ledger uses the higher estimate (its note says so), so a cost is never shown as lower than it is.
+ */
+export const ESTIMATED: Record<string, Price> = {
+  'gemini-3.5-flash': { input: 0.75, output: 3.75, cached: 0.075, note: 'stima (report 8.2B)' },
+  'gemini-3.7-flash': { input: 0.75, output: 3.75, cached: 0.075, note: 'stima (report 8.2B)' },
+};
+export const UNPRICED = Object.keys(ESTIMATED);
 
 export function priceOf(model: string, date = new Date().toISOString().slice(0, 10)): Price | undefined {
-  const p = PRICES[model.replace(/^models\//, '')];
+  const id = model.replace(/^models\//, '');
+  const p = PRICES[id] ?? ESTIMATED[id];
   if (!p) return undefined;
   return p.until && p.next && date >= p.until ? { ...p.next } : p;
 }

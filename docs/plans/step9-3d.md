@@ -222,6 +222,14 @@ ADR: nessuno. AGENTS.md: rimando a questo piano in «Stato e prossimi passi».
 3. Il piano a caselle resta in JSON nello step 9 (D4): l'XML 2D per il Cartografo lo propongo come passo dopo.
 4. La cartella del backup: `H:/projects/rune-backup/universi-2d/` (D2).
 
+### Risposte dell'utente (scritte a posteriori aggiornando il documento)
+
+1. Si va bene, credo che più avanti modificheremo anche il nome del gioco, per ora non mi preoccuperei tanto dei nomi.
+2. Non va bene, il gioco è generato proceduralmente e deve continuare ad espandersi a mano a mano che il giocatore esplora zone inesplorate della mappa. Pertanto limiterei in frequenza le strutture importanti, ad esempio 1 struttura per bioma, e il bioma potrebbe essere un'area di 1'000'000 "tiles" quadrate (se esiste ancora il concetto di tile). Fai tu le proporzioni in funzione del tempo che impiegherebbe il giocatore per arrivare a generare una struttura "importante" in più.
+3. Ok, ma stavo pensando, potremmo utilizzare il codice MJ di esempio "Hills"? magari nel prossimo passo.
+4. OK.
+
+
 ---
 
 ## Diario
@@ -245,3 +253,18 @@ Piano scritto; branch `3d`.
 - ADR-0038; indice degli ADR (0031-0035 sostituiti, 0036 accettato); AGENTS.md (Struttura, MarkovJunior);
   `lab/README.md` riscritto.
 - Diverso dal previsto: nulla di sostanziale; `prices.ts` e `meter.ts` restano in `lab/mj3d/` fino a F2.
+
+### F2 — fatto
+- `src/kernel/ai/prices.ts` (spostato dal laboratorio; stime per 3.5 e 3.7 Flash al prezzo più alto del report,
+  così il costo non è mai mostrato più basso), `src/kernel/ai/usage.ts` (registro), `GeminiModels` riscritto
+  (ragionamento `low`, modello per chiamata, tempo massimo 120 s, mai ripetere dopo un tempo scaduto o un errore
+  di rete, ripetere solo 429/5xx, contare cache e ragionamento, `onCall`).
+- `world/consumi.json` scritto prima di ogni commit (`Repo.beforeCommit`): sopravvive al rollback; commit
+  «consumi dei modelli» alla chiusura se è cambiato e non ci sono guasti.
+- Pannello del Concilio: «sessione · oggi · in tutto» in dollari, dettaglio per modello al passaggio del mouse.
+- Laboratorio: `meter.ts` tolto; `lab/scripts/gemini.ts` dà agli script `GeminiModels` diretto a Google con il registro.
+- Test: 4 nuovi (ragionamento, modello per chiamata e conteggi, nessuna ripetizione dopo un tempo scaduto,
+  registro in dollari, file nell'universo e rollback). 124 test verdi.
+- ADR-0039; AGENTS.md (Stack, Costi).
+- Diverso dal previsto: la configurazione dei modelli per lo Scultore e l'Artista (`ai.models`) la aggiungo in
+  F6, dove serve; qui c'è il meccanismo (`TextCall.model`).

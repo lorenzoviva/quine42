@@ -2,6 +2,7 @@
 
 import { AGENTS, type FeedEntry } from '../kernel/agents/council';
 import type { Kernel } from '../kernel/kernel';
+import { tallyLine, usd } from '../kernel/ai/usage';
 import { el } from './dom';
 
 const VERBS: Record<string, string> = {
@@ -31,13 +32,22 @@ export function feedLine(e: FeedEntry): HTMLElement {
 export class FeedPanel {
   private root: HTMLElement;
   private list = el('div', { class: 'list' });
+  /** What the models cost: this session and today, right after every call. */
+  private cost = el('div', { class: 'cost' });
   private collapsed = false;
 
   constructor(host: HTMLElement, k: Kernel) {
     const toggle = el('button', { class: 'toggle' }, 'Concilio');
     toggle.onclick = () => this.toggle();
-    this.root = el('div', { id: 'feed' }, toggle, this.list);
+    this.root = el('div', { id: 'feed' }, toggle, this.cost, this.list);
     host.append(this.root);
+    const showCost = () => {
+      const day = k.usage.day();
+      this.cost.textContent = `sessione ${usd(k.usage.session.usd)} · oggi ${usd(day.total.usd)} · in tutto ${usd(k.usage.total().usd)}`;
+      this.cost.title = [`Sessione: ${tallyLine(k.usage.session)}`, ...Object.entries(day.byModel).map(([m, t]) => `${m} (oggi): ${tallyLine(t)}`)].join('\n');
+    };
+    k.bus.on('usage', showCost);
+    showCost();
     k.bus.on('council', (e: FeedEntry) => this.push(e));
     for (const e of k.feed().slice(-6)) this.push(e);
   }

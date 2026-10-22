@@ -2,6 +2,7 @@
 // the AI gateway, the agent, import/export.
 
 import type { Kernel } from '../kernel/kernel';
+import { tallyLine } from '../kernel/ai/usage';
 import { $, el } from './dom';
 import { feedLine } from './feed';
 
@@ -124,7 +125,7 @@ export class Console {
       case 'ai': {
         const u = k.models.usage;
         return [
-          el('div', { class: 'note' }, `Modelli: ${k.models.name} (${k.config.ai.textModel} · ${k.config.ai.imageModel}). Chiamate di testo ${u.text}/${k.models.limits.text}, immagini ${u.images}/${k.models.limits.images}, errori ${u.failures}, token ${u.inputTokens}→${u.outputTokens}. Ogni proposta passa dall'Arbitro e dal validatore.`),
+          el('div', { class: 'note' }, `Modelli: ${k.models.name} (${k.config.ai.textModel} · ${k.config.ai.imageModel}). Chiamate di testo ${u.text}/${k.models.limits.text}, immagini ${u.images}/${k.models.limits.images}, errori ${u.failures} (scadute ${u.timeouts}), token ${u.inputTokens} (cache ${u.cachedTokens}) → ${u.outputTokens} + ragionamento ${u.thoughtTokens}. Costo: ${tallyLine(k.usage.session)}. Ogni proposta passa dall'Arbitro e dal validatore.`),
           ...k.feed().slice(-150).reverse().map((e) => feedLine(e)),
         ];
       }

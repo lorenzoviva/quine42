@@ -10,7 +10,7 @@ export const DEFAULT_CONFIG: UniverseConfig = {
   theme: 'prompts/theme.md',
   circleRadius: 44,
   chunkSize: 18,
-  ai: { textModel: 'gemini-3.1-flash-lite', imageModel: 'gemini-3.1-flash-lite-image', maxText: 800, maxImages: 60, maxForges: 3, animation: 'sheet', maxPacks: 4, maxCast: 3 },
+  ai: { textModel: 'gemini-3.1-flash-lite', imageModel: 'gemini-3.1-flash-lite-image', maxText: 800, maxImages: 60, maxForges: 3, animation: 'sheet', maxPacks: 4, maxCast: 3, thinking: 'low', timeout: 120 },
 };
 
 export function readConfig(files: FileMap): { config: UniverseConfig; error?: string } {

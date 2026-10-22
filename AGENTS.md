@@ -57,7 +57,8 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
 - **Vite 5 + TypeScript 5** (strict), Canvas 2D per il mondo, DOM per HUD/pannelli.
 - **Lua 5.4 via wasmoon** (WebAssembly), sandbox gestita dal kernel.
 - **Google Gemini**: `gemini-3.1-flash-lite` (testo) e `gemini-3.1-flash-lite-image` (immagini), in
-  `universe/universe.json → ai` con i budget (`maxText`, `maxImages`, `maxForges`, `maxPacks`, `animation`).
+  `universe/universe.json → ai` con i budget (`maxText`, `maxImages`, `maxForges`, `maxPacks`, `animation`),
+  il ragionamento (`thinking`, `low`) e il tempo massimo (`timeout`). Prezzi in `src/kernel/ai/prices.ts` (con la data).
 - **Vitest** in Node con modelli offline (`MockModels`): kernel, Concilio e layout testabili headless.
 - Persistenza: repository git dell'universo su disco tramite il server di Vite (`server/universeStore.ts`):
   testi, `maps/` (piani dei luoghi), `assets/` (immagini), `world/stato.json` (la partita). Senza server:
@@ -229,6 +230,10 @@ Hook: `update(dt)` (sistemi), `generate_chunk`, `on_spawn(id)`, `on_interact(id,
 - Prima di consegnare: `npm test` e `npm run typecheck` verdi.
 
 ## Costi e prestazioni
+
+- **Registro dei consumi** (ADR-0039): ogni chiamata passa da `kernel.usage` (per giorno, modello e compito, in token e
+  dollari, cache e ragionamento compresi) e va in `world/consumi.json` con ogni commit; il costo è nel pannello del
+  Concilio (`G`). `GeminiModels` non ripete mai una richiesta scaduta (può essere stata pagata); ripete solo 429/5xx.
 
 - Testo per mondo: Genesi ~60 chiamate; poi 1 per luogo, 1-2 per individuo, ~4 per pacchetto di oggetti.
 - Immagini per mondo: ~3 texture, 1-2 ostacoli, 1-2 per tipo di personaggio o oggetto (sprite +

@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import { GeminiModels } from '../../src/kernel/ai/gemini';
 import type { Grid3 } from '../../src/mj/engine';
-import { meteredFetch, meterLine, newMeter } from '../mj3d/meter';
+import { tallyLine, UsageLedger } from '../../src/kernel/ai/usage';
 import { CLASSES } from '../../src/mj/classes';
 import { classFor, type Target } from '../mjx/target';
 import { sculptMjx } from '../mjx/sculptor';
@@ -793,7 +793,7 @@ $<HTMLInputElement>('wind').oninput = (e) => (uWind.value = Number((e.target as 
 const roleOfClass: Record<string, Entry['role']> = { persona: 'npc', animale: 'animal', bestia: 'animal', albero: 'tree', cespuglio: 'plant', roccia: 'rock', sasso: 'rock', edificio: 'structure', monumento: 'structure' };
 for (const c of CLASSES) $('g-class').append(new Option(`${c.name} (${c.tiles.join('×')})`, c.id));
 $<HTMLSelectElement>('g-class').value = 'edificio';
-const gMeter = newMeter();
+const gMeter = new UsageLedger();
 $('g-go').onclick = async () => {
   const out = $('g-out');
   if (!(await GeminiModels.available())) {
@@ -809,7 +809,8 @@ $('g-go').onclick = async () => {
     kind,
     category: ['persona', 'animale', 'bestia'].includes(kind) ? 'figura' : ['edificio', 'monumento'].includes(kind) ? 'struttura' : 'semplice',
   };
-  const models = new GeminiModels({ textModel: $<HTMLSelectElement>('g-model').value, imageModel: 'none', limits: { text: 50, images: 0 }, fetchImpl: meteredFetch(gMeter, { timeout: 240_000, thinking: 'low' }) });
+  const models = new GeminiModels({ textModel: $<HTMLSelectElement>('g-model').value, imageModel: 'none', limits: { text: 50, images: 0 }, thinking: 'low', timeout: 240_000 });
+  models.onCall = (r) => gMeter.record(r);
   $<HTMLButtonElement>('g-go').disabled = true;
   out.textContent = 'lo Scultore scrive…';
   try {
@@ -824,7 +825,7 @@ $('g-go').onclick = async () => {
     listModels();
     inspect(e, 1);
     await show(false);
-    out.textContent = `fatto in ${s.attempts.length} tentativi · ${meterLine(gMeter)}`;
+    out.textContent = `fatto in ${s.attempts.length} tentativi · ${tallyLine(gMeter.session)}`;
   } catch (x) {
     out.textContent = `errore: ${(x as Error).message}`;
   } finally {

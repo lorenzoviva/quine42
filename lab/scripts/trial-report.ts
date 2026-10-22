@@ -4,7 +4,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { priceOf } from '../mj3d/prices';
+import { priceOf } from '../../src/kernel/ai/prices';
 import { DEFAULT_RENDER, render, sheet, type Picture } from '../../src/mj/photo';
 import { compileMjx } from '../../src/mj/model';
 import { runMjx } from '../../src/mj/run';
