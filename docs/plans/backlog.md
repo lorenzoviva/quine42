@@ -46,7 +46,7 @@ Senza numero («esegui il prossimo task del backlog») vale il primo `da fare` c
   nuova nell'azione è accettata (colore dalla palette di MarkovJunior); non fatto per oggetti portati e terreni.
   Non verificato nel browser con Gemini (nessuna UI nuova: la voce `modello:` del menu c'era già).
 
-### T03 · Bug: alberi e massi dei terreni visibili oltre il cerchio — `in corso`
+### T03 · Bug: alberi e massi dei terreni visibili oltre il cerchio — `fatto` (`b1fa100`)
 - Dal to-do: «gli oggetti bloccanti (roccia, montagna) vengono spawnati anche sulla corona».
 - Causa probabile: in `src/render/materials.ts` il taglio usa `modelMatrix * transformed` senza `instanceMatrix`,
   quindi le istanze (`InstancedMesh` dei modelli dei terreni) non vengono tagliate.
