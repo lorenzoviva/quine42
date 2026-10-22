@@ -1,0 +1,27 @@
+<!--
+Girasole, scritto a mano da Claude Code (step 8.2A). Lo stelo è una punta che sale (a volte di sbieco),
+le foglie spuntano ai lati, in cima il fiore si apre. La crescita è l'esecuzione stessa del programma:
+il laboratorio ne conserva i passi e li mostra come animazione («cresce»).
+-->
+<sequence values="BXGgLYKN" size="16 16 30" origin="True" symmetry="(xy)">
+  <color symbol="X" hidden="True" name="punta che cresce"/>
+  <color symbol="G" value="4e8a3a" name="stelo"/>
+  <color symbol="g" value="3a6a2c" name="stelo in ombra"/>
+  <color symbol="L" value="6aa84a" name="foglia"/>
+  <color symbol="Y" value="f2c230" name="petalo"/>
+  <color symbol="K" value="d8962a" name="petalo scuro"/>
+  <color symbol="N" value="5a3a1e" name="cuore"/>
+
+  <one in="X B" out="B X"/>
+  <!-- Lo stelo: la punta sale lasciando lo stelo dietro di sé, ogni tanto piega di lato. -->
+  <one steps="20">
+    <rule in="B X" out="X G" p="5"/>
+    <rule in="*B X*" out="*X G*" p="1"/>
+  </one>
+  <!-- Foglie: dallo stelo, verso l'esterno e un poco in alto. -->
+  <one in="*BB GBB" out="*LL *L*" steps="3"/>
+  <prl in="GB" out="gB" p="0.3" steps="1" symmetry="()"/>
+  <!-- Il fiore: un disco di petali attorno al cuore, le punte dei petali alzate. -->
+  <one steps="1" in="BBBBB/BBBBB/BBBBB/BBBBB/BBBBB BBBBB/BBBBB/BBXBB/BBBBB/BBBBB" out="*****/*****/*****/*****/***** *YYY*/YKKKY/YKNKY/YKKKY/*YYY*"/>
+  <prl in="B* YB" out="Y* **" p="0.7" steps="1"/>
+</sequence>

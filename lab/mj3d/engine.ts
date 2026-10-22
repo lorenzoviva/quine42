@@ -408,17 +408,20 @@ class RuleRunner extends Runner {
     const p = this.patterns[Math.floor(key / N)];
     const o = key % N;
     const XY = g.X * g.Y;
+    // As MarkovJunior's all: a match is skipped only if a cell it writes was already written in this
+    // step; the cells it merely reads ('*' in the output) may be shared.
     if (written) {
-      for (let k = 0; k < p.dz; k++)
+      for (let k = 0, n = 0; k < p.dz; k++)
         for (let j = 0; j < p.dy; j++)
-          for (let i = 0; i < p.dx; i++) if (written[o + i + j * g.X + k * XY]) return false;
+          for (let i = 0; i < p.dx; i++, n++) if (p.output[n] !== -1 && written[o + i + j * g.X + k * XY]) return false;
     }
     for (let k = 0, n = 0; k < p.dz; k++)
       for (let j = 0; j < p.dy; j++)
         for (let i = 0; i < p.dx; i++, n++) {
+          if (p.output[n] === -1) continue;
           const idx = o + i + j * g.X + k * XY;
           if (written) written[idx] = 1;
-          if (p.output[n] !== -1) write(g, idx, p.output[n]);
+          write(g, idx, p.output[n]);
         }
     return true;
   }

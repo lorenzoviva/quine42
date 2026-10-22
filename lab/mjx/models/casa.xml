@@ -1,0 +1,80 @@
+<!--
+Casa a graticcio, scritta a mano da Claude Code (step 8.2A): una struttura intera in un solo programma
+MarkovJunior, senza blocchi né architetto. Il blocco pieno della casa si scava; il tetto a padiglione
+nasce da un prisma eroso strato per strato; travi, finestre e porta li trovano i pattern sulla facciata.
+La porta si apre e si chiude con due azioni; il comignolo fuma (animazione).
+Scala del gioco: 20 voxel per casella; la casa occupa circa 3 × 2,5 caselle.
+-->
+<sequence values="BXQIWNnDOURrKhS" size="64 64 44" origin="True" symmetry="(xy)">
+  <color symbol="X" hidden="True" name="volume della casa"/>
+  <color symbol="Q" hidden="True" name="volume del tetto"/>
+  <color symbol="I" hidden="True" name="interno"/>
+  <color symbol="h" hidden="True" name="porta aperta"/>
+  <color symbol="W" value="e6d8b8" name="intonaco"/>
+  <color symbol="N" value="6b4a2e" name="travi"/>
+  <color symbol="n" value="8a6440" name="assito"/>
+  <color symbol="D" value="7d766c" name="pietra"/>
+  <color symbol="O" value="7a4a26" name="porta"/>
+  <color symbol="U" value="86b8c8" name="vetro"/>
+  <color symbol="R" value="a54a32" name="coppi"/>
+  <color symbol="r" value="80372a" name="coppi in ombra"/>
+  <color symbol="K" value="8e8578" name="comignolo"/>
+  <color symbol="S" value="d8d8d8" name="fumo"/>
+
+  <!-- Il seme cade sul fondo e diventa una pianta rettangolare: una linea lungo x (le due punte si
+       allungano a caso: prl decide per ogni corrispondenza), poi la linea intera avanza lungo y. -->
+  <one in="X B" out="B X"/>
+  <all in="XB" out="*X" steps="8" symmetry="(x)"/>
+  <prl in="XB" out="*X" p="0.5" steps="4" symmetry="(x)"/>
+  <all in="X/B" out="*/X" steps="7" symmetry="(y)"/>
+
+  <!-- Il volume: la casa alta 15, sopra il prisma del tetto, che sporge di un voxel alla base (gronda). -->
+  <all in="B X" out="X *" steps="14"/>
+  <all in="B X" out="R X"/>
+  <all in="RB XB" out="RR XB"/>
+  <all in="B R" out="Q R"/>
+  <all in="B Q" out="Q *" steps="16"/>
+  <!-- Tetto a padiglione: ogni strato del prisma perde il bordo che non ha nulla sotto in diagonale
+       (la base R, che poggia sulla casa e fa la gronda, resta intera). -->
+  <all in="*Q B*" out="*B **"/>
+
+  <!-- Scavo: l'interno diventa vuoto; restano i muri, il pavimento sul fondo e il soffitto sotto il tetto. -->
+  <prl in="XXX/XXX/XXX" out="***/*I*/***" steps="1"/>
+  <prl in="R I" out="R n" steps="1"/>
+  <prl in="I *" out="B *" steps="1"/>
+  <prl in="I" out="n" steps="1"/>
+  <prl in="X *" out="W *" steps="1"/>
+  <prl in="X" out="D" steps="1"/>
+
+  <!-- Graticcio: pali agli spigoli, trave in cima ai muri e una a metà altezza. -->
+  <all in="BB/BW" out="**/*N"/>
+  <all in="R W" out="R N"/>
+  <all in="N W W W W W W" out="* * * * * * N" steps="1"/>
+  <all in="W D" out="N D"/>
+
+  <!-- La porta sul davanti (verso y grande, symmetry "()"), poi le finestre sotto le travi. -->
+  <one steps="1" symmetry="()"
+       in="WWWWWW/BBBBBB WWWWWW/BBBBBB WWWWWW/BBBBBB WWWWWW/BBBBBB WWWWWW/BBBBBB WWWWWW/BBBBBB NNNNNN/BBBBBB DDDDDD/BBBBBB"
+       out="*NNNN*/****** *NOON*/****** *NOON*/****** *NOON*/****** *NOON*/****** *NOON*/****** *NOON*/****** ******/******"/>
+  <one steps="7"
+       in="NNNNNN/BBBBBB WWWWWW/BBBBBB WWWWWW/BBBBBB WWWWWW/BBBBBB WWWWWW/BBBBBB"
+       out="******/****** *NUUN*/****** *NUUN*/****** *NUUN*/****** *NNNN*/******"/>
+  <!-- Qualche pietra a vista nell'intonaco, un gradino davanti alla porta. -->
+  <prl in="W" out="D" p="0.03" steps="1"/>
+  <all in="O/B D/B" out="O/B D/D" symmetry="()"/>
+
+  <!-- Tetto: coppi, file in ombra, comignolo. -->
+  <prl in="Q" out="R" steps="1"/>
+  <prl in="R/B" out="r/B" p="0.5" steps="1" symmetry="()"/>
+  <prl in="B R" out="B r" p="0.15" steps="1"/>
+  <one in="B B R" out="B K R" steps="1"/>
+  <all in="B K" out="K *" steps="4"/>
+
+  <action name="apri" label="Apri la porta"><all in="O" out="h"/></action>
+  <action name="chiudi" label="Chiudi la porta"><all in="h" out="O"/></action>
+</sequence>
+<animation name="fumo" frames="8">
+  <prl in="B S" out="S B" steps="1"/>
+  <prl in="B K" out="S K" p="0.5" steps="1"/>
+  <prl in="S" out="B" p="0.1" steps="1"/>
+</animation>
