@@ -255,7 +255,8 @@ Hook: `update(dt)` (sistemi), `generate_chunk`, `on_spawn(id)`, `on_interact(id,
 > MarkovJunior (ADR-0036); lo spazio è una scala di griglie (regione → piano → modello → corpi,
 > [`docs/plans/universo-continuo.md`](docs/plans/universo-continuo.md)); i costi seguono
 > [`docs/reports/costi-step8.2B.md`](docs/reports/costi-step8.2B.md). Il prompt dello step 9 è in
-> [`docs/userchats/step9-3d.md`](docs/userchats/step9-3d.md). Finché lo step 9 non è fatto, quanto sotto
+> [`docs/userchats/step9-3d.md`](docs/userchats/step9-3d.md); il piano, con il diario delle fasi, in
+> [`docs/plans/step9-3d.md`](docs/plans/step9-3d.md) (branch `3d`). Finché lo step 9 non è fatto, quanto sotto
 > descrive ancora il gioco 2D.
 
 Fatto: kernel, sandbox, rune (una per casella, rare), tappeto, corona nascosta e organizzata come archivio
