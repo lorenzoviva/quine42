@@ -198,6 +198,23 @@ export function reverseRelation(legame: string, gender?: Gender, a: Species = 'p
   return wordOf(backOf(fitKind(kindOf(legame), a, b), a, b), gender);
 }
 
+/** What is wrong with a relation between these two (species, the word's gender), or undefined when it can be. */
+export function relationProblem(legame: string, a: { specie?: Species; genere?: Gender }, b: { specie?: Species }): string | undefined {
+  const k = kindOf(legame);
+  const sa = a.specie ?? 'persona';
+  if (!allowed(k, sa, b.specie)) return `«${legame}» non si dà tra ${sa === 'animale' ? 'un animale' : 'una persona'} e ${b.specie === 'animale' ? 'un animale' : 'una persona'}`;
+  const word = legame.toLowerCase().split(/[^\p{L}]+/u).find((w) => k.words.test(w));
+  if (word && k.m !== k.f && a.genere && word === (a.genere === 'femmina' ? k.m : k.f)) return `«${legame}» non si dice di ${a.genere === 'femmina' ? 'una femmina' : 'un maschio'}`;
+  return undefined;
+}
+
+/** True when two relations can be the two sides of one bond (Ada madre di Berta, Berta figlia di Ada). */
+export function relationsAgree(ab: string, ba: string): boolean {
+  const x = kindOf(ab);
+  const y = kindOf(ba);
+  return x.back.includes(y.id) || y.back.includes(x.id);
+}
+
 /** Relations anyone may claim loosely (a friend, a rival, a neighbour): the others bind and are checked. */
 const LOOSE = new Set(['amico', 'rivale', 'vicino', 'collega', 'conoscente']);
 

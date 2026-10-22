@@ -1,6 +1,6 @@
 # ADR-0045 — Il grafo del mondo (nel kernel) e Graphify (per lo sviluppo)
 
-Data: 2026-10-22 · Stato: accettato (task T07 del backlog; si attua in T12 e T13) · Segue ADR-0020 (società),
+Data: 2026-10-22 · Stato: accettato (task T07 del backlog); attuato in T12 (23/10/2026), il contesto degli agenti in T13 · Segue ADR-0020 (società),
 ADR-0021 (due repository), ADR-0023 (atlante), ADR-0024 (trame), ADR-0025 (due tavoli).
 
 ## Contesto
@@ -72,3 +72,31 @@ gira: per (b) non serve così com'è.
   kernel.
 - Provare Graphify nelle sessioni di Claude Code richiede il permesso di eseguire codice esterno (in modalità
   automatica è bloccato): va concesso dall'autore.
+
+## Attuazione (T12, 23/10/2026)
+`src/kernel/graph.ts`: `buildGraph(files, places, speciesOf)` → `WorldGraph` con `node`, `find`, `edges`,
+`neighbors`, `describe`, `context`, `check`, `counts`, `toJson`. Ciò che è cambiato rispetto alla decisione:
+- **I luoghi** (i piani dei chunk) non sono nel testo dell'universo (`maps/` sta fuori dallo snapshot): il kernel
+  ricorda i luoghi pianificati in questa sessione (`applyPlan`), all'avvio aggiunge quelli delle mappe su disco
+  (`listMaps`: nome e ambiente) e ogni ricostruzione tiene i luoghi del `grafo.json` precedente (con le cose che
+  contengono). Id `luogo:<cx>_<cy>`; i luoghi nominati dalla bibbia senza chunk sono `luogo:<nome>` (`dalla_bibbia`).
+- **Il viandante** è un nodo (`persona:viandante`) con gli archi `porta` verso ciò che ha in tasca e nelle borse (da
+  `stato.json`, solo l'inventario: la posizione cambia a ogni salvataggio e non tocca il grafo); i legami verso
+  «Viandante» (il «verso nessuno» di `valmora`) puntano a lui.
+- **Le persone attese** (nominate, mai incontrate) sono nodi `atteso`, della specie di chi le nomina.
+- Archi in più: `produce` (ricetta → oggetto), `usa` (incantesimo → runa), `ambiente` (luogo, regione → ambiente),
+  `porta`. I moduli `item` sono `oggetto`, gli altri moduli non di dati `tipo`.
+- **Quando si riscrive**: prima di ogni commit (`Repo.beforeCommit`, come il registro dei consumi), solo se cambia
+  l'hash di ciò di cui è fatto (persone, trame, atlante, regole, bibbia, manifest, luoghi, inventario, versione del
+  costruttore `GRAPH_BUILD`). Una riga per nodo e per arco, per diff leggibili. `kernel.graph()` lo tiene in cache.
+- `check()` dà: `riferimento` (legami, tipi, ricette, cose dei luoghi, regole e incantesimi verso nulla, raggruppati per
+  ricetta e per luogo), `simmetria` (legami da un lato solo o che non si corrispondono), `impossibile` (specie,
+  genere della parola), `nomi` (quasi uguali), `trama` (persone o tappe in luoghi che non ci sono, solo trame aperte).
+  Il validatore della società e quello delle trame restano dove sono (T10, T11); il grafo li completa con i luoghi e
+  i riferimenti tra file, e lo userà T13.
+
+Misure: `valmora` (con i moduli del seme sotto) → 2 164 nodi (58 persone, 285 luoghi, 1 403 oggetti, 243 ricette…),
+3 205 archi (215 legami), 54 ms per costruirlo, 11 ms per `check`, 930 KB; 74 riferimenti verso nulla (ricette con
+oggetti inventati, `npc.custode` mai forgiato), 25 legami non simmetrici, 14 impossibili per specie (la specie dal tipo:
+il registro di `valmora` non è ancora riparato), 50 coppie di nomi, 1 tappa in un luogo ignoto («Prato dell'Eco»).
+`aurora`: 196 luoghi, 103 KB, nessuna incoerenza.

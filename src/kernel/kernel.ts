@@ -16,6 +16,7 @@ import { STAMP_SHAPES } from './stamps';
 import { repairProgram } from './mj';
 import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './universes';
 import { addPerson, applyRenames, dayPhase, defaultRoutine, freshName, greeting, guessGender, inferActivity, memorySummary, readPeople, remember, repairSociety, similarNames, societySummary, type Activity, type DayPhase, type Person, type Species } from './society';
+import { buildGraph, GRAPH_FILE, graphHash, mergePlaces, placesOf, readGraph, type GraphPlace, type WorldGraph } from './graph';
 import { activeQuests, plotFromRaw, plotText, PLOTS_FILE, readPlots, reviewPlot, secretsOf, writePlots, type Plot } from './plots';
 import { Input } from './input';
 import { discoverModules, readConfig } from './universe';
@@ -195,6 +196,10 @@ export class Kernel {
   /** What the models cost, per day, model and task (world/consumi.json). */
   readonly usage = new UsageLedger();
   private usageWritten = -1;
+  /** The places the graph of the world knows (ADR-0045): planned chunks, by key. */
+  private graphPlaces = new Map<string, GraphPlace>();
+  private graphCache?: { files: FileMap; places: number; graph: WorldGraph };
+  private graphPlacesVersion = 0;
   readonly chunkStore: ChunkStore;
   /** The models of things (ADR-0041): the library of programs and the forms they make. */
   readonly forms: Forms;
@@ -298,12 +303,16 @@ export class Kernel {
     k.usage.load(repo.working[USAGE_FILE]);
     k.models.onCall = (r) => k.usage.record(r);
     k.usage.onChange = () => k.bus.emit('usage', k.usage);
-    repo.beforeCommit = () => k.writeUsage();
+    repo.beforeCommit = () => {
+      k.writeUsage();
+      k.writeGraph();
+    };
     k.applyFiles(repo.working, { reset: true });
     k.loadState();
     k.ensureAtlas();
     k.reviewSociety();
     k.reviewPlots();
+    void k.seedGraphPlaces();
     void k.reviewFourthWall();
     k.models.limits = { text: k.config.ai.maxText };
     k.log('kernel', `universo «${name}» avviato su commit ${repo.head().id} (${repo.head().message}) — modelli: ${opts.models.name}${synced ? ' — sincronizzato dal disco' : ''}`);
@@ -1104,6 +1113,8 @@ export class Kernel {
     }
     ch.plan = plan;
     ch.place = plan.place;
+    this.graphPlaces.set(ch.key, { cx: ch.cx, cy: ch.cy, nome: plan.place.name, descrizione: plan.place.description, ambiente: plan.layout, cose: plan.objects.map((o) => o.module), a_terra: plan.ground, strutture: plan.strutture?.map((x) => x.concetto) });
+    this.graphPlacesVersion++;
     ch.tiles = result.grid.join('');
     for (const [cell, code] of Object.entries(plan.edits ?? {})) {
       const i = Number(cell);
@@ -4245,6 +4256,43 @@ export class Kernel {
     this.files = { ...this.files, 'world/stato.json': this.repo.working['world/stato.json']! };
     this.repo.commit('salvataggio della partita', 'player');
     return true;
+  }
+
+  // --- The graph of the world (ADR-0045) -------------------------------------------------------
+
+  /** The graph of the universe as it is now: built from the files and the places known, rebuilt when they change. */
+  graph(): WorldGraph {
+    const c = this.graphCache;
+    if (c && c.files === this.files && c.places === this.graphPlacesVersion) return c.graph;
+    const graph = buildGraph(this.files, [...this.graphPlaces.values()], (t) => this.speciesOf(t));
+    this.graphCache = { files: this.files, places: this.graphPlacesVersion, graph };
+    return graph;
+  }
+
+  /** Puts the graph in the working files when what it is made of changed (the commit carries it). */
+  private writeGraph(): void {
+    if (!this.repo) return;
+    const files = this.repo.working;
+    const places = [...this.graphPlaces.values()];
+    if (readGraph(files)?.graph.hash === graphHash(files, mergePlaces(files, places))) return;
+    this.repo.write(GRAPH_FILE, buildGraph(files, places, (t) => this.speciesOf(t)).toJson());
+    this.files = { ...this.files, [GRAPH_FILE]: this.repo.working[GRAPH_FILE]! };
+  }
+
+  /** The places planned in earlier sessions that the graph does not have yet (from the universe's maps). */
+  private async seedGraphPlaces(): Promise<void> {
+    const maps = (await this.repo.backend?.listMaps?.().catch(() => [])) ?? [];
+    if (!maps.length) return;
+    const prefix = this.recordKey({ cx: 0, cy: 0, key: '' } as Chunk).replace(/[:,]/g, '_');
+    const known = new Set(placesOf(readGraph(this.files)).map((p) => `${p.cx},${p.cy}`));
+    for (const m of maps) {
+      if (!m.file.startsWith(prefix)) continue;
+      const [cx, cy] = m.file.slice(prefix.length).split('_').map(Number);
+      const key = `${cx},${cy}`;
+      if (!Number.isFinite(cx) || !Number.isFinite(cy) || known.has(key) || this.graphPlaces.has(key)) continue;
+      this.graphPlaces.set(key, { cx, cy, nome: m.name, ambiente: m.layout || undefined });
+      this.graphPlacesVersion++;
+    }
   }
 
   /** Puts the usage ledger in the working files when it changed (the next commit carries it). */

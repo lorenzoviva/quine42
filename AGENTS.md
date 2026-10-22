@@ -96,6 +96,7 @@ src/
     archive.ts          le squadre del Concilio e il Referente nello studio
     society.ts          la società: persone, legami, routine, attività, ricordi
     plots.ts            trame orizzontali e missioni
+    graph.ts            il grafo del mondo: nodi e archi dai file dell'universo, interrogazioni, controlli
     atlas.ts            l'atlante: regioni geolocalizzate, direzioni
     stamps.ts           timbri di strutture (castelli, torri, templi, piramidi, sotterranei…)
     universes.ts        client del repository dell'universo, aggiornamenti dal seme
@@ -119,7 +120,7 @@ universe/
   universe.json         nome, seme, raggio, chunk (18), modelli e budget
   world/                bible.json (memoria del Narratore), style.md (guida di stile dei modelli), canone.md (le rune), consumi.json,
                         rules.json (regole), people.json (la società, con i ricordi), plots.json (trame),
-                        atlas.json (geografia), stato.json (la partita)
+                        atlas.json (geografia), stato.json (la partita), grafo.json (il grafo del mondo, derivato)
   prompts/              theme.md, agents/<agente>.md
   models/               index.json + <id>.xml: i programmi MarkovJunior di ogni cosa (ADR-0041), uno per tipo
   modules/<id>/         manifest.json (+ logic.lua): sistemi, terreni, ambienti, pacchetti di oggetti, mobili, persone,
@@ -236,10 +237,13 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   al centro del lotto, girato verso la porta; le caselle del lotto tornano terreno. Dentro = sul pavimento del modello
   (`placeInside`, `floorAt`, `structureAt`); il renderer taglia la struttura in cui si è. Una struttura `importante`
   (Argon) per zona di 56 × 56 luoghi (`zoneOf`, `stato.json → importanti`).
-- **Grafo del mondo** (ADR-0045, da attuare in T12-T13): `src/kernel/graph.ts` costruisce dai file dell'universo un grafo di
-  nodi tipizzati (persone, tipi, luoghi, regioni, trame, oggetti, rune, regole, fatti) e archi (legami, routine, tappe,
-  contenuti), in `world/grafo.json` con ogni commit, nel formato di Graphify; il Concilio ne riceve il vicinato e il
-  kernel ne trova le incoerenze (`check()`). Graphify sul codice è facoltativo e fuori dal progetto (vedi Comandi).
+- **Grafo del mondo** (ADR-0045): `src/kernel/graph.ts` costruisce dai file dell'universo e dai luoghi pianificati un grafo
+  di nodi tipizzati (`<tipo>:<slug>`: persone col viandante e gli attesi, tipi, luoghi `luogo:<cx>_<cy>`, regioni, ambienti,
+  strutture, trame, oggetti, ricette, rune, incantesimi, regole, fatti) e archi (legami, routine, tappe, contenuti, ingredienti,
+  ciò che il viandante porta); `kernel.graph()` (in cache) con `find`, `neighbors`, `context`, `check()` (riferimenti verso
+  nulla, legami da un lato solo o impossibili, nomi simili, trame senza persone o luoghi). Va in `world/grafo.json` prima di
+  ogni commit se è cambiato ciò di cui è fatto (formato di Graphify, una riga per nodo e arco; tiene i luoghi del file
+  precedente; `GRAPH_BUILD` da alzare quando si costruisce in modo diverso). Il Concilio ne riceverà il vicinato (T13). Graphify sul codice è facoltativo e fuori dal progetto (vedi Comandi).
 - **Contenuti** (ADR-0012): `ItemDef` in pacchetti; bottino per tag; contenitori; ricette; bisogni
   (`needs` sul giocatore, `sys.needs`); uso generico in `core.items`; menu azioni (`E`).
 - **Personaggi** (ADR-0010, 0013, 0017, 0020): tipo + individuo (`identity`: anche `job family routine story`), `mind` (memoria, umore, modo), azioni
