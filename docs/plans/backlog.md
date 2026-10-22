@@ -33,7 +33,7 @@ Senza numero («esegui il prossimo task del backlog») vale il primo `da fare` c
   sono), AGENTS.md. Diverso dal previsto: i test hanno trovato un difetto di `placeInside` (la struttura contava
   come occupante del proprio pavimento, quindi le cose `dentro` finivano sempre sulla casella del lotto), corretto.
 
-### T02 · Azioni come regole: «Altro…» scrive un'`<action>` — `fatto` (@@HASH@@)
+### T02 · Azioni come regole: «Altro…» scrive un'`<action>` — `fatto` (`fd85a30`)
 - Contesto: F8 del piano. Oggi «Altro…» su un'entità produce effetti (ADR-0014).
 - Fare: se ciò che il viandante vuole fare cambia la **forma** della cosa (aprire, rompere, accendere, spegnere),
   l'Ingegnere (o lo Scultore) scrive una regola `<action>` sul programma del tipo; il kernel la prova sul modello
