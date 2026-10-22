@@ -141,10 +141,21 @@ diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
   Arbitro e mock offline ripuliti; `tests/fourthwall.test.ts` (6). Diverso dal previsto: nessun ADR nuovo, un
   aggiornamento dell'ADR-0025; la revisione ora tocca anche `plots.json`. Nessuna verifica nel browser (nessuna UI).
 
-### T10 · Società coerente — `da fare`
+### T10 · Società coerente — `fatto` (`5f7db1c`)
 - Ogni individuo ha una specie (persona, animale) e un genere; i legami possibili dipendono da entrambi (un gatto
   non ha fratelli umani né apprendisti; una donna non è padre); niente nomi quasi uguali. Validatore della
   società e riparazione di `people.json` esistenti; prompt del Narratore; test.
+- Esito: `specie`/`genere` in `Person`; in `society.ts` i tipi di legame (chi può esserlo per chi, il rovescio, la
+  forma per genere), `repairSociety`/`checkSociety` (legami possibili e simmetrici, un padrone per animale, un padre,
+  una madre e un coniuge, coniugi senza genitori in comune, mestiere da animale, nomi simili rinominati anche nelle
+  trame, attesi ricavati dai legami), `similarNames`, `freshName`; `addPerson` ripara a ogni aggiunta,
+  `Kernel.reviewSociety` all'avvio (commit `società: …`), `Kernel.speciesOf`; Narratore con specie, parole e regole
+  dei legami e nomi da evitare (una richiesta in più, poi il nome lo sceglie il kernel); niente più epiteti; i nati
+  hanno un nome e un genere loro. `tests/society.test.ts` (7), aggiornamento dell'ADR-0020, AGENTS.md.
+  Su una copia di `valmora` (57 persone): 227 correzioni, 24 nomi nuovi, due passate danno lo stesso risultato.
+  Diverso dal previsto: la convenzione dei legami («cosa sei TU per l'altro») ora è scritta e la segue anche il
+  riassunto della società; la stima del genere dei registri vecchi è euristica (nome, mestiere): qualche errore
+  resta (es. «Isolde» maschio). Nessuna verifica nel browser (nessuna UI; `aurora` non ha ancora persone).
 
 ### T11 · Trame coerenti con le persone — `da fare` (dipende da T08, T10)
 - Le trame (`plots.json`) validate contro `people.json` (personaggi esistenti, specie, legami) e contro il canone
