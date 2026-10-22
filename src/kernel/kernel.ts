@@ -16,7 +16,7 @@ import { STAMP_SHAPES } from './stamps';
 import { repairProgram } from './mj';
 import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './universes';
 import { addPerson, applyRenames, dayPhase, defaultRoutine, freshName, greeting, guessGender, inferActivity, memorySummary, readPeople, remember, repairSociety, similarNames, societySummary, type Activity, type DayPhase, type Person, type Species } from './society';
-import { activeQuests, plotText, PLOTS_FILE, readPlots, secretsOf, writePlots, type Plot } from './plots';
+import { activeQuests, plotFromRaw, plotText, PLOTS_FILE, readPlots, reviewPlot, secretsOf, writePlots, type Plot } from './plots';
 import { Input } from './input';
 import { discoverModules, readConfig } from './universe';
 import { CARPET_TOKENS, cellIndex, extractLines, tokenize, type RuneComp, type RuneLine } from './runes';
@@ -303,6 +303,7 @@ export class Kernel {
     k.loadState();
     k.ensureAtlas();
     k.reviewSociety();
+    k.reviewPlots();
     void k.reviewFourthWall();
     k.models.limits = { text: k.config.ai.maxText };
     k.log('kernel', `universo «${name}» avviato su commit ${repo.head().id} (${repo.head().message}) — modelli: ${opts.models.name}${synced ? ' — sincronizzato dal disco' : ''}`);
@@ -3407,6 +3408,35 @@ export class Kernel {
     return fixes;
   }
 
+  /**
+   * The open plots are kept coherent with the society and the rune canon (reviewPlot): at boot what
+   * can be repaired is (beats of people who do not exist, animals that talk, impossible quests), what
+   * contradicts the registry or the canon is dropped (the history keeps it). No model calls.
+   */
+  reviewPlots(): string[] {
+    const plots = readPlots(this.repo.working);
+    if (!plots.length) return [];
+    const people = readPeople(this.repo.working);
+    const fixes: string[] = [];
+    const kept: Plot[] = [];
+    for (const p of plots) {
+      if (p.stato !== 'attiva') {
+        kept.push(p);
+        continue;
+      }
+      const r = reviewPlot(p, people);
+      if (!r.problems.length) kept.push(p);
+      else if (r.plot) kept.push(r.plot), fixes.push(`«${p.titolo}»: ${r.problems.join('; ')}`);
+      else fixes.push(`«${p.titolo}» ritirata: ${r.problems.join('; ')}`);
+    }
+    if (!fixes.length) return [];
+    this.repo.write(PLOTS_FILE, writePlots(kept));
+    this.applyFiles({ ...this.repo.working });
+    this.repo.commit(`trame: ${fixes.length} corrette o ritirate`, 'agent');
+    this.council.say('arbitro', 'corregge', `trame: ${fixes.join(' — ')}`.slice(0, 600), 'narratore', 'review.plots');
+    return fixes;
+  }
+
   /** The registry entry of a person, by name. */
   personOf(name: string): Person | undefined {
     return readPeople(this.files).persone.find((p) => p.nome === name);
@@ -3606,42 +3636,28 @@ export class Kernel {
     const pc = this.playerCarpet();
     const places = this.directionsAt(pc.x, pc.y).join('\n');
     const recent = society.persone.flatMap((p) => (p.ricordi ?? []).filter((m) => m.peso >= 2).slice(-2).map((m) => `${p.nome}: ${m.testo}`)).slice(-10).join('\n');
-    let raw;
+    // The plot is checked against the people and the canon; what does not hold goes back to the
+    // Narrator once, with the reasons; the second answer is repaired, or dropped if it cannot be.
+    const attempt = async (feedback?: string) => {
+      const raw = plotFromRaw(await weavePlot(this.council, societySummary(society, 20), places, recent, feedback), this.day(), `trama-${Date.now().toString(36)}`);
+      return { titolo: raw.titolo, ...reviewPlot(raw, society) };
+    };
+    let plot: Plot | undefined;
     try {
-      raw = await weavePlot(this.council, societySummary(society, 20), places, recent);
-      const meta = metaBreak(plotText({ titolo: String(raw?.titolo ?? ''), mistero: String(raw?.mistero ?? ''), tappe: Array.isArray(raw?.tappe) ? raw.tappe : [], missione: raw?.missione }));
-      if (meta) {
-        const why = `la trama «${raw?.titolo ?? ''}» rompe la quarta parete o duplica le rune («${meta}»): dentro il mondo nessuno sa di essere in un gioco, e le rune sono solo quelle del canone.`;
+      let a = await attempt();
+      if (a.problems.length) {
+        const why = `la trama «${a.titolo}» non torna: ${a.problems.join('; ')}.`;
         this.council.say('kernel', 'scarta', why, 'narratore', 'plot.weave');
-        raw = await weavePlot(this.council, societySummary(society, 20), places, recent, why);
-        const again = metaBreak(plotText({ titolo: String(raw?.titolo ?? ''), mistero: String(raw?.mistero ?? ''), tappe: Array.isArray(raw?.tappe) ? raw.tappe : [], missione: raw?.missione }));
-        if (again) throw new Error(`ancora fuori dal mondo («${again}»)`);
+        a = await attempt(why);
+        if (!a.plot) throw new Error(`ancora incoerente: ${a.problems.join('; ')}`);
+        if (a.problems.length) this.council.say('arbitro', 'corregge', `trama «${a.titolo}»: ${a.problems.join('; ')}`, 'narratore', 'plot.weave');
       }
+      plot = a.plot;
     } catch (e) {
       this.council.say('narratore', 'errore', `trama: ${(e as Error).message}`, undefined, 'plot.weave');
       return undefined;
     }
-    const names = new Set(society.persone.map((p) => p.nome));
-    const tappe = (raw.tappe ?? []).filter((b: any) => names.has(b?.chi)).slice(0, 8).map((b: any) => ({
-      giorno: Math.max(0, Math.min(4, Math.round(Number(b.giorno) || 0))),
-      momento: ['mattina', 'giorno', 'sera', 'notte'].includes(b.momento) ? b.momento : 'giorno',
-      chi: String(b.chi), dove: String(b.dove ?? 'piazza').slice(0, 40), cosa: String(b.cosa ?? '').slice(0, 120),
-      ...(b.battuta ? { battuta: String(b.battuta).slice(0, 140) } : {}), ...(b.indizio ? { indizio: String(b.indizio).slice(0, 120) } : {}),
-    }));
-    if (tappe.length < 2) return undefined;
-    const m = raw.missione;
-    const plot: Plot = {
-      id: `trama-${Date.now().toString(36)}`,
-      titolo: String(raw.titolo ?? 'Una storia').slice(0, 60),
-      mistero: String(raw.mistero ?? '').slice(0, 300),
-      coinvolti: [...new Set(tappe.map((b: { chi: string }) => b.chi))] as string[],
-      tappe,
-      inizio: this.day(),
-      stato: 'attiva',
-      ...(m && names.has(m.da) && ['porta', 'vai', 'parla'].includes(m.tipo)
-        ? { missione: { da: String(m.da), testo: String(m.testo ?? '').slice(0, 200), obiettivo: { tipo: m.tipo, ...(m.oggetto ? { oggetto: String(m.oggetto) } : {}), ...(m.a ? { a: String(m.a) } : {}), ...(m.luogo ? { luogo: String(m.luogo) } : {}) }, ...(m.ricompensa ? { ricompensa: String(m.ricompensa) } : {}), stato: 'offerta' as const } }
-        : {}),
-    };
+    if (!plot || plot.tappe.length < 2) return undefined;
     const plots = [...readPlots(this.files), plot];
     this.repo.write(PLOTS_FILE, writePlots(plots));
     this.applyFiles({ ...this.repo.working });

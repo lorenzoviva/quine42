@@ -32,3 +32,16 @@ un «Altro…» anche verso le persone.
 
 ## Conseguenze
 - Costo: ~1 chiamata per conversazione tra NPC ascoltata, 1 per trama, 1-2 per persona incontrata.
+
+## Aggiornamento (2026-10-23, T11): trame coerenti con le persone
+- Ogni trama passa da un validatore (`reviewPlot` in `src/kernel/plots.ts`) contro `people.json` e il canone delle
+  rune: le persone esistono; un animale fa cose da animale (non parla, non scrive, non tesse, non chiede missioni);
+  i legami che la trama nomina («mio fratello X», «suo padre X», «X, sorella di Y») sono quelli del registro, per
+  tipo (sorella e fratello sono un tipo; amici, rivali, vicini e colleghi si dicono liberamente); le rune non fanno
+  ciò che il canone non dice (`canonBreak`: si spostano, parlano, appaiono, cambiano segno…; la negazione è il
+  canone stesso); niente quarta parete (`metaBreak`).
+- Ciò che si ripara si ripara (via le tappe di chi non esiste, le battute degli animali, la missione impossibile);
+  ciò che contraddice registro, canone o quarta parete no.
+- `weaveStory`: se qualcosa non torna, la trama torna una volta al Narratore con i motivi; la seconda risposta si
+  ripara o si scarta. All'avvio `reviewPlots` (dopo `reviewSociety`, che rinomina anche nelle trame) ripara o
+  ritira le trame aperte (commit `trame: …`), senza chiamate ai modelli.

@@ -281,6 +281,7 @@ export async function weavePlot(c: Council, society: string, places: string, rec
       recent ? `COSE SUCCESSE DI RECENTE\n${recent}` : '',
       feedback ? `DA CORREGGERE\n${feedback}` : '',
       'Dai 3-6 tappe nei prossimi giorni (chi fa cosa, dove, quando, cosa si lascia sfuggire, quale indizio lascia). Se ha senso, una persona chiede aiuto al viandante (una missione semplice: portare un oggetto, andare in un luogo, parlare con qualcuno). Usa solo nomi esistenti.',
+      'COERENZA (il kernel la verifica e ti rimanda ciò che non torna): ognuno è ciò che l\'elenco dice. Chiama i parenti per il legame che hanno davvero («mio fratello X» solo se X è suo fratello; chi non è parente non lo diventa nella trama). Gli animali fanno cose da animali: non parlano (niente battuta), non scrivono, non tessono, non commerciano, non chiedono missioni. Le rune fanno solo ciò che dice il canone: restano ferme e mute dove sono finché qualcuno non le raccoglie.',
     ]
       .filter(Boolean)
       .join('\n\n'),

@@ -198,6 +198,17 @@ export function reverseRelation(legame: string, gender?: Gender, a: Species = 'p
   return wordOf(backOf(fitKind(kindOf(legame), a, b), a, b), gender);
 }
 
+/** Relations anyone may claim loosely (a friend, a rival, a neighbour): the others bind and are checked. */
+const LOOSE = new Set(['amico', 'rivale', 'vicino', 'collega', 'conoscente']);
+
+/** The words of the binding relations (family, master and apprentice, owner and animal), as a regex alternation. */
+export const BINDING_WORDS = KINDS.filter((k) => !LOOSE.has(k.id)).map((k) => k.words.source.slice(1, -1)).join('|');
+
+/** The kind of a relation: "sorella" and "fratello" are one kind, to compare what is said with the registry. */
+export function relationKind(legame: string): string {
+  return kindOf(legame).id;
+}
+
 // Names: two names are alike when their given names are close ("Elias il Giovane" and "Elias la
 // Rossa", "Vecchia Elara" and "Elara del Pozzo", "Ombra" and "Ombroso", "Elia" and "Elias"); a
 // shared family or place name ("Isolde del Riflesso", "Lyra del Riflesso") is fine.

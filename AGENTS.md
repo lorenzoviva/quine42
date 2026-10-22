@@ -202,7 +202,9 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   teletrasporti verso le sale e ritorno, schermi della storia, stile neon punk; atlante navigabile.
 - **Vita degli NPC** (ADR-0024): attività visibili (`attivita {tipo, ferma}`), dialoghi tra persone,
   ricordi pesati, legami col viandante e figli (effetti `legame ricordo nascita`), trame e missioni
-  (`world/plots.json`, diario nell'HUD).
+  (`world/plots.json`, diario nell'HUD). Ogni trama passa dal validatore (`reviewPlot` in `plots.ts`): persone che
+  esistono, animali da animali, legami del registro, rune del canone, niente quarta parete; ciò che non torna va al
+  Narratore con il motivo, all'avvio `reviewPlots` ripara o ritira le trame aperte.
 - **Meccaniche con interfacce** (ADR-0028): un modulo di sistema può avere un pannello (`manifest.ui`:
   `slot barra testo pulsante`) che il kernel disegna come scheda dell'inventario; hook `on_slot`/`on_ui`,
   componente `slots` del viandante; oggetti con `slot` (posto) e `bonus`. Le crea la Fucina delle meccaniche
