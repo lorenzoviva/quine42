@@ -157,9 +157,18 @@ diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
   riassunto della società; la stima del genere dei registri vecchi è euristica (nome, mestiere): qualche errore
   resta (es. «Isolde» maschio). Nessuna verifica nel browser (nessuna UI; `aurora` non ha ancora persone).
 
-### T11 · Trame coerenti con le persone — `da fare` (dipende da T08, T10)
+### T11 · Trame coerenti con le persone — `fatto` (`311c466`) (dipende da T08, T10)
 - Le trame (`plots.json`) validate contro `people.json` (personaggi esistenti, specie, legami) e contro il canone
   delle rune; ciò che non torna va al Narratore con il motivo. Test.
+- Esito: `reviewPlot` in `plots.ts` (persone esistenti; animali che non parlano, non scrivono, non chiedono missioni;
+  legami nominati nei testi — «mio fratello X», «suo padre X», «X, sorella di Y» — confrontati per tipo con il registro;
+  `canonBreak` per le rune che si spostano, parlano, appaiono…; `metaBreak`); ripara ciò che si ripara, il resto si
+  scarta. `weaveStory` rimanda la trama al Narratore una volta con i motivi (prompt con le regole di coerenza);
+  `reviewPlots` all'avvio ripara o ritira le trame aperte; `plotFromRaw`; `relationKind`, `BINDING_WORDS` in
+  `society.ts`. `tests/plots.test.ts` (7), aggiornamento dell'ADR-0024, AGENTS.md. Sulle tre trame di `valmora`: due
+  riparabili (gatti che parlano e chiedono missioni, persone che non esistono), una ritirata («mio fratello» falso).
+  Diverso dal previsto: anche la quarta parete è nel validatore (le trame vecchie erano controllate una volta sola);
+  i luoghi delle tappe (`dove`) non sono verificati: lo farà il grafo (T12-T13). Nessuna verifica nel browser (nessuna UI).
 
 ### T12 · Il grafo del mondo — `da fare` (dipende da T07)
 - Attuare l'[ADR-0045](../adr/0045-grafo-del-mondo.md): `src/kernel/graph.ts` costruisce il grafo dai file dell'universo
