@@ -105,14 +105,17 @@ src/
     ecs.ts, sandbox.ts, prelude.lua, validator.ts, runes.ts, repo.ts, universe.ts,
     inventory.ts, assets.ts, imaging.ts, bundle.ts, faults.ts, events.ts, input.ts, rng.ts, types.ts
   render/               renderer.ts (three.js: camera 3/4, luce, spazi), terrain.ts (chunk, muri, tetti), things.ts (entità, viandante,
-                        rune, luci), corona3d.ts (corona, studio, avatar), overlay.ts (testi, E, passaggio del mouse), materials.ts, glitch.ts
+                        rune, luci), models.ts (geometrie dei modelli), forms.ts + worker.ts (i programmi nei worker),
+                        thumbs.ts (icone: foto dei modelli), corona3d.ts (corona, studio, avatar), overlay.ts (testi, E, mouse),
+                        materials.ts, glitch.ts
   ui/                   hud.ts (anche il diario delle missioni), inventory.ts, actions.ts, chat.ts, feed.ts, genesis.ts, editor.ts, console.ts, studio.ts, atlas.ts
 universe/
   universe.json         nome, seme, raggio, chunk (18), modelli e budget
-  world/                bible.json (memoria del Narratore), style.md, atelier.json (coppie few-shot),
+  world/                bible.json (memoria del Narratore), style.md (guida di stile dei modelli), consumi.json,
                         rules.json (regole), people.json (la società, con i ricordi), plots.json (trame),
                         atlas.json (geografia), stato.json (la partita)
   prompts/              theme.md, agents/<agente>.md
+  models/               index.json + <id>.xml: i programmi MarkovJunior di ogni cosa (ADR-0041), uno per tipo
   modules/<id>/         manifest.json (+ logic.lua): sistemi, terreni, ambienti, pacchetti di oggetti, mobili, persone,
                         effetti (core.effects), fuoco (sys.fire), rune magiche e incantesimi (magic.runes, magic.spells)
 tests/  docs/
@@ -200,7 +203,14 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   correggere i programmi che il Concilio non riesce a scrivere (sandbox 3D `/lab/3d/`, sezioni, foto, prove con Gemini).
 - **Mappa** (ADR-0011, 0040): caselle colorate per terreno, strati `ground floor wall door liquid vegetation rock`: l'acqua è
   più bassa con le sponde, i muri sono estrusi, le porte un varco sotto l'architrave, i tetti a padiglione spariscono quando
-  si entra; ciò che sta sulle caselle di bosco e roccia è per ora un segnaposto (diventa un modello in F5).
+  si entra; sulle caselle con `TileDef.model` (bosco, roccia) stanno istanze di quel modello, ruotate e spostate.
+- **Modelli** (ADR-0041): ogni cosa ha un programma della libreria `models/` (`appearance.model`, `ItemDef.model`,
+  `TileDef.model`; senza, il generico della sua classe; gli oggetti senza modello il generico `oggetto` nel loro
+  colore); un'istanza è un seme (pochi per tipo). `src/kernel/forms.ts`: programma + seme → griglia, impronta,
+  pavimenti, azioni (in Node le esegue il kernel, nel browser i worker, che fanno anche le mesh). Componente `form`
+  `{model, seed, yaw, tint, done}`. Le cose solide bloccano con l'impronta dei loro voxel; le `<action>` del modello
+  sono nel menu dell'entità e restano fatte (`stato.json → forme`). Persone e animali camminano con gli arti, la
+  vegetazione al vento, le `<animation>` girano; le icone sono foto dei modelli.
 - **Contenuti** (ADR-0012): `ItemDef` in pacchetti; bottino per tag; contenitori; ricette; bisogni
   (`needs` sul giocatore, `sys.needs`); uso generico in `core.items`; menu azioni (`E`).
 - **Personaggi** (ADR-0010, 0013, 0017, 0020): tipo + individuo (`identity`: anche `job family routine story`), `mind` (memoria, umore, modo), azioni
@@ -209,12 +219,12 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 
 ### Manifest (`src/kernel/types.ts`)
 `id`, `name`, `kind` (`system | entity | item | player | generator | data`), `logic`, `order`,
-`appearance` (`glyph`, `color`, `aspetto`), `physics`
+`appearance` (`glyph`, `color`, `aspetto`, `model`, `classe`), `physics`
 (`solid`, `radius`, `pushable`, `mass`, `friction`, `speed`), `components`, `singleton`, `persist`,
 `interaction` (`talk | read | lua`), `actions` (`id`, `label`, `requires`, `effects`), `container` (`size`, `loot`),
 `ui` (pannello: `titolo`, `elementi`), `spawn`, `persona`, `unique`, `inventory` (id di oggetti), `item`, `context`, `lore`, `tags`, `drops`,
-`origin`; generatori: `tiles` (`name`, `color`, `solid`, `layer`, `indoor`, `speed`, `actions`),
-`roof`; dati: `items` (anche `container`, `actions`, `slot`, `bonus`, effetti `mana`), `recipes`, `loot`, `layouts`, `fragments`, `runes`, `spells`.
+`origin`; generatori: `tiles` (`name`, `color`, `solid`, `layer`, `indoor`, `speed`, `model`, `actions`),
+`roof`; dati: `items` (anche `model`, `aspetto`, `container`, `actions`, `slot`, `bonus`, effetti `mana`), `recipes`, `loot`, `layouts`, `fragments`, `runes`, `spells`.
 
 ### API Lua — l'unica disponibile, il validatore rifiuta il resto
 `ecs.each/get/set/spawn/destroy/first`; `world.free/free_real/tile/speed_at/spawn/player/player_pos/

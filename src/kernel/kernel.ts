@@ -24,6 +24,8 @@ import { hash32, hashStr, hex, Rng } from './rng';
 import { BudgetError, type Models } from './ai/models';
 import { USAGE_FILE, UsageLedger } from './ai/usage';
 import { MemoryChunks, type ChunkStore } from './chunks';
+import { bodyFoot, footBlocks, Forms, InlineRunner, instanceGrid, toLocal, type Form, type FormComp, type FormRunner } from './forms';
+import { guessClass } from '../mj/classes';
 import { Content, normName, specOf } from './content';
 import { layout, type Building } from './layout';
 import { AGENTS, Council, readBible, type AgentId, type CatalogEntry, type FeedEntry } from './agents/council';
@@ -135,6 +137,8 @@ export interface KernelOptions {
   store: KeyValueStore;
   models: Models;
   chunks?: ChunkStore;
+  /** Who runs the MarkovJunior programs of the models (default: this thread; the browser uses workers). */
+  forms?: FormRunner;
   wasmUri?: string;
   /** The universe repository on disk (ADR-0021), and its history from earlier sessions. */
   backend?: UniverseBackend;
@@ -182,6 +186,8 @@ export class Kernel {
   readonly usage = new UsageLedger();
   private usageWritten = -1;
   readonly chunkStore: ChunkStore;
+  /** The models of things (ADR-0041): the library of programs and the forms they make. */
+  readonly forms: Forms;
   council!: Council;
   sandbox!: Sandbox;
   validator!: Validator;
@@ -208,6 +214,12 @@ export class Kernel {
   readonly wanted = new Set<string>();
   /** Entity cells blocked by solid bodies, rebuilt every tick. */
   private solidCells = new Set<string>();
+  /** Solid things with a model, by the cells their footprint reaches (they block by their voxels). */
+  private solidForms = new Map<string, Array<{ id: Id; x: number; y: number; yaw: number; form: Form; foot: Uint8Array }>>();
+  /** Footprints of instances whose model was changed by an action (the door is open). */
+  private instanceFeet = new Map<Id, { key: string; foot: Uint8Array }>();
+  /** What was done to models of things, by stable origin (saved with the game). */
+  private savedForms = new Map<string, string[]>();
   private runesDirty = true;
   private consumed = new Set<string>();
   private loaded = new Map<string, string>();
@@ -245,6 +257,7 @@ export class Kernel {
   private constructor(opts: KernelOptions) {
     this.models = opts.models;
     this.chunkStore = opts.chunks ?? new MemoryChunks();
+    this.forms = new Forms(opts.forms ?? new InlineRunner());
   }
 
   static async boot(opts: KernelOptions): Promise<Kernel> {
@@ -532,6 +545,7 @@ export class Kernel {
     const radiusChanged = !this.config || this.config.circleRadius !== config.circleRadius;
     const sizeChanged = !this.config || this.config.chunkSize !== config.chunkSize || this.config.seed !== config.seed;
     this.config = config;
+    this.forms.load(files);
     if (radiusChanged) this.corona = new Corona(config.circleRadius);
 
     if (opts.reset) {
@@ -596,6 +610,76 @@ export class Kernel {
     this.bus.emit('universe:reloaded', { changed: [...changed] });
   }
 
+  /**
+   * The look of a module's instance: its program (or the generic one of its class), a seed for who it is
+   * (instances of a kind differ, a few seeds per kind), the way it faces.
+   */
+  private formFor(man: Manifest | undefined, who: string): FormComp {
+    const app = man?.appearance;
+    const classe = app?.classe ?? (man?.kind === 'player' ? 'persona' : man ? guessClass(`${man.name} ${man.description ?? ''} ${app?.aspetto ?? ''}`, man.persona ? 'figura' : undefined).id : 'oggetto');
+    const model = this.forms.resolve(app?.model, classe);
+    return { model, seed: this.forms.seedFor(model, who), yaw: man?.persona || man?.kind === 'player' ? 0 : (hashStr(who) % 628) / 100 };
+  }
+
+  /** The look of an item: its own model, or the generic thing in its colour. */
+  itemLook(item: string): FormComp {
+    const d = this.content.get(item);
+    return { model: this.forms.resolve(d?.model, 'oggetto'), seed: 1, yaw: 0, tint: d?.color };
+  }
+
+  /** The actions of a thing's model that would change it now (open when closed, close when open). */
+  modelActions(id: Id): Array<{ name: string; label: string }> {
+    const fc: FormComp | undefined = this.ecs.get(id, 'form');
+    const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint);
+    if (!fc || !f?.result?.actions.length) return [];
+    const m = this.forms.compiled(fc.model);
+    const now = instanceGrid(this.forms, f, fc.done ?? []);
+    const out: Array<{ name: string; label: string }> = [];
+    for (const a of f.result.actions) {
+      const after = instanceGrid(this.forms, f, [...(fc.done ?? []), a.name]);
+      if (m && after.cells.some((c, i) => c !== now.cells[i])) out.push({ name: a.name, label: a.label ?? a.name });
+    }
+    return out;
+  }
+
+  /** Does an action of a thing's model: the rule runs on its voxels (the door opens), and it is remembered. */
+  doModelAction(id: Id, name: string): boolean {
+    const fc: FormComp | undefined = this.ecs.get(id, 'form');
+    if (!fc || !this.modelActions(id).some((a) => a.name === name)) return false;
+    const f = this.forms.ready(fc.model, fc.seed, fc.tint)!;
+    const done = [...(fc.done ?? []), name];
+    // Back to how it was made: nothing to remember. A long history keeps its last steps.
+    const base = f.result!.grid.cells;
+    const g = instanceGrid(this.forms, f, done);
+    fc.done = g.cells.every((c, i) => c === base[i]) ? [] : done.slice(-32);
+    const origin = this.ecs.get(id, 'origin')?.key;
+    if (origin) this.savedForms.set(origin, [...fc.done]);
+    this.instanceFeet.delete(id);
+    this.bus.emit('form:changed', { id });
+    return true;
+  }
+
+  /** Where a solid thing blocks: its model's footprint, or the changed one of this instance. */
+  private footOf(id: Id, fc: FormComp, f: Form): Uint8Array {
+    if (!fc.done?.length) return f.foot!;
+    const key = `${f.key}|${fc.done.join(',')}`;
+    const c = this.instanceFeet.get(id);
+    if (c?.key === key) return c.foot;
+    const r = f.result!;
+    const foot = bodyFoot(instanceGrid(this.forms, f, fc.done), r.palette);
+    this.instanceFeet.set(id, { key, foot });
+    return foot;
+  }
+
+  /** Carpet-space point blocked by the voxels of a solid thing. */
+  private formBlocks(x: number, y: number): boolean {
+    for (const s of this.solidForms.get(`${Math.floor(x)},${Math.floor(y)}`) ?? []) {
+      const [lx, lz] = toLocal(x - s.x, y - s.y, s.yaw);
+      if (footBlocks(s.form, s.foot, lx, lz)) return true;
+    }
+    return false;
+  }
+
   private glyphOf(app: NonNullable<Manifest['appearance']>) {
     return { ch: app.glyph, color: app.color };
   }
@@ -605,16 +689,17 @@ export class Kernel {
     const defaults: Record<string, any> = clone(playerMod?.manifest.components ?? FALLBACK_PLAYER);
     for (const [k, v] of Object.entries(FALLBACK_PLAYER)) if (!defaults[k]) defaults[k] = clone(v);
     if (!defaults.inventory) defaults.inventory = newInventory();
-    const app = playerMod?.manifest.appearance ?? { glyph: '@', color: '#ffffff', scale: 1.3 };
+    const app = playerMod?.manifest.appearance ?? { glyph: '@', color: '#ffffff' };
     const glyph = this.glyphOf(app);
     const body = { r: playerMod?.manifest.physics?.radius ?? 0.3, solid: false };
 
     if (!this.playerId || !this.ecs.alive.has(this.playerId)) {
-      this.playerId = this.ecs.spawn({ ...defaults, pos: { x: 0, y: 0 }, glyph, body, module: { id: playerMod?.manifest.id ?? 'kernel.player' } });
+      this.playerId = this.ecs.spawn({ ...defaults, pos: { x: 0, y: 0 }, glyph, body, form: this.formFor(playerMod?.manifest, 'viandante'), module: { id: playerMod?.manifest.id ?? 'kernel.player' } });
       // What the wanderer starts with (e.g. a rune pouch).
       for (const it of playerMod?.manifest.inventory ?? []) if (this.content.get(it)) this.give(it, 1);
     } else {
       this.ecs.set(this.playerId, 'glyph', glyph);
+      this.ecs.set(this.playerId, 'form', this.formFor(playerMod?.manifest, 'viandante'));
       if (reset) this.resetComponents(this.playerId, defaults, [...(playerMod?.manifest.persist ?? []), 'inventory.slots', 'inventory.equipped']);
     }
 
@@ -1170,6 +1255,9 @@ export class Kernel {
       body: { r: man.physics?.radius ?? 0.35, solid: !!man.physics?.solid && !man.physics?.pushable, pushable: !!man.physics?.pushable, mass: man.physics?.mass ?? 1, friction: man.physics?.friction ?? 0.6 },
     };
     if (man.appearance) comps.glyph = this.glyphOf(man.appearance);
+    comps.form = this.formFor(man, origin ?? `${man.id}@${x.toFixed(2)},${y.toFixed(2)}`);
+    const done = origin ? this.savedForms.get(origin) : undefined;
+    if (done?.length) comps.form.done = [...done];
     if (man.interaction) comps.interact = { type: man.interaction.type };
     if (man.persona) comps.mind = { mode: 'vaga', mood: 'tranquillo', history: [], ...(comps.mind ?? {}) } satisfies Mind;
     if (man.container) {
@@ -1198,6 +1286,7 @@ export class Kernel {
       pickup: { item, count },
       glyph: { ch: d?.glyph ?? '?', color: d?.color ?? '#aaa' },
       body: { r: 0.2, solid: false },
+      form: { ...this.itemLook(item), yaw: (hash32(Math.round(x * 100), Math.round(y * 100)) % 628) / 100 } satisfies FormComp,
     };
     if (chunkKey) comps.chunk = { key: chunkKey };
     if (origin) comps.origin = { key: origin };
@@ -1319,7 +1408,7 @@ export class Kernel {
   /** Carpet-space collision test of a box of half-size r. */
   free(x: number, y: number, r: number): boolean {
     if (![x, y, r].every(Number.isFinite)) return false;
-    for (const [dx, dy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) if (!this.freeCell(Math.floor(x + dx), Math.floor(y + dy))) return false;
+    for (const [dx, dy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) if (!this.freeCell(Math.floor(x + dx), Math.floor(y + dy)) || this.formBlocks(x + dx, y + dy)) return false;
     return true;
   }
 
@@ -1339,7 +1428,7 @@ export class Kernel {
         if (!this.corona.free(px, py)) return false;
         continue;
       }
-      if (!this.freeCell(Math.floor(px + ox), Math.floor(py + oy))) return false;
+      if (!this.freeCell(Math.floor(px + ox), Math.floor(py + oy)) || this.formBlocks(px + ox, py + oy)) return false;
     }
     return true;
   }
@@ -1884,6 +1973,8 @@ export class Kernel {
     if (it?.type === 'read') out.push({ id: 'leggi', label: 'Leggi', enabled: true });
     if (it?.type === 'lua') out.push({ id: 'usa', label: 'Usa', enabled: true });
     if (this.ecs.has(id, 'container')) out.push({ id: 'apri', label: 'Apri', enabled: true });
+    // What its model can do: rules on its voxels (a door that opens, a lid that lifts).
+    for (const a of this.modelActions(id)) out.push({ id: `modello:${a.name}`, label: a.label, enabled: true });
     const pickupItem = this.ecs.get(id, 'pickup')?.item;
     for (const a of [...(m?.actions ?? []), ...(pickupItem ? (this.content.get(pickupItem)?.actions ?? []) : [])]) {
       const ok = !a.requires || has(a.requires);
@@ -2034,6 +2125,11 @@ export class Kernel {
         return;
       }
       default:
+        if (action.startsWith('modello:')) {
+          const a = this.modelActions(id).find((x) => `modello:${x.name}` === action);
+          if (a && this.doModelAction(id, a.name)) this.message(`${a.label}.`);
+          return;
+        }
         if (action.startsWith('act:')) {
           const pickupItem = this.ecs.get(id, 'pickup')?.item;
           const a = [...(m?.actions ?? []), ...(pickupItem ? (this.content.get(pickupItem)?.actions ?? []) : [])].find((x) => `act:${x.id}` === action);
@@ -3783,6 +3879,7 @@ export class Kernel {
       viandante: { inventory: this.inventory(), needs: n, hand: this.hand(), stati: this.states(), slots: this.slots(), trasceso: this.exitedOnce },
       consumati: [...this.consumed].slice(-5000),
       contenitori: containers,
+      forme: this.formsToSave(),
       ora: Math.round(this.time),
     };
     const json = JSON.stringify(state);
@@ -3810,6 +3907,11 @@ export class Kernel {
     return true;
   }
 
+  /** What was done to the models of things in the world, by origin. */
+  private formsToSave(): Record<string, string[]> {
+    return Object.fromEntries([...this.savedForms].filter(([, d]) => d.length));
+  }
+
   /** Restores what was saved: the same wanderer, the same world, after a restart. */
   loadState(): void {
     let st: any;
@@ -3833,6 +3935,7 @@ export class Kernel {
     }
     for (const k of st.consumati ?? []) this.consumed.add(String(k));
     for (const [k, c] of Object.entries(st.contenitori ?? {})) this.savedContainers.set(k, c as { inv: Inventory; filled: boolean });
+    for (const [k, d] of Object.entries(st.forme ?? {})) if (Array.isArray(d)) this.savedForms.set(k, d.map(String));
     if (Number.isFinite(st.ora)) this.time = st.ora;
     this.lastState = JSON.stringify(st);
   }
@@ -3957,12 +4060,25 @@ export class Kernel {
 
   private rebuildSolids(): void {
     this.solidCells.clear();
+    this.solidForms.clear();
     for (const id of this.ecs.query('body', 'pos')) {
       if (id === this.playerId) continue;
       const b = this.ecs.get(id, 'body');
       if (!b.solid) continue;
       const p = this.ecs.get(id, 'pos');
-      this.solidCells.add(`${Math.floor(p.x)},${Math.floor(p.y)}`);
+      const fc: FormComp | undefined = this.ecs.get(id, 'form');
+      const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint);
+      if (!fc || !f?.foot) {
+        this.solidCells.add(`${Math.floor(p.x)},${Math.floor(p.y)}`);
+        continue;
+      }
+      // A thing with a model blocks with its voxels: it is listed in every cell its footprint may reach.
+      const s = { id, x: p.x, y: p.y, yaw: fc.yaw, form: f, foot: this.footOf(id, fc, f) };
+      for (let cy = Math.floor(p.y - f.reach); cy <= Math.floor(p.y + f.reach); cy++)
+        for (let cx = Math.floor(p.x - f.reach); cx <= Math.floor(p.x + f.reach); cx++) {
+          const key = `${cx},${cy}`;
+          (this.solidForms.get(key) ?? this.solidForms.set(key, []).get(key)!).push(s);
+        }
     }
   }
 

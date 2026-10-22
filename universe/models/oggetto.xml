@@ -1,0 +1,8 @@
+<!-- Cosa (l'oggetto generico): scritta a mano da Claude Code (step 9). Un fagotto legato in cima; la lettera C prende il colore della cosa (index.json: "tinta"), così un programma solo vale per tutti gli oggetti che non hanno un modello loro. -->
+<sequence values="BCN" size="12 12 12" symmetry="(xy)" name="Cosa">
+  <color symbol="C" value="b08a5a" name="colore della cosa"/>
+  <color symbol="N" value="5a4028" name="laccio"/>
+  <ellipsoid at="6 6 0" size="10 10 8" color="C"/>
+  <cylinder at="6 6 7" size="4 4 3" color="C"/>
+  <cylinder at="6 6 8" size="5 5 1" color="N"/>
+</sequence>

@@ -1,0 +1,19 @@
+<!-- Banco da lavoro: scritto a mano da Claude Code (step 9). Quattro gambe, il piano, un ripiano basso, attrezzi sparsi. -->
+<sequence values="BNnTIG" size="20 20 20" symmetry="(xy)" name="Banco da lavoro">
+  <color symbol="N" value="7a5534" name="legno"/>
+  <color symbol="n" value="553a22" name="legno scuro"/>
+  <color symbol="T" value="9a7048" name="piano"/>
+  <color symbol="I" value="6d7687" name="ferro"/>
+  <color symbol="G" value="b08040" name="manico"/>
+  <box at="3 5 0" size="2 2 10" color="N"/>
+  <box at="17 5 0" size="2 2 10" color="N"/>
+  <box at="3 15 0" size="2 2 10" color="N"/>
+  <box at="17 15 0" size="2 2 10" color="N"/>
+  <box at="10 10 3" size="16 12 1" color="n"/>
+  <box at="10 10 10" size="20 14 2" color="T"/>
+  <box at="6 9 12" size="5 1 1" color="I"/>
+  <box at="13 11 12" size="1 4 1" color="G"/>
+  <box at="13 9 12" size="2 1 1" color="I"/>
+  <box at="15 6 12" size="2 2 2" color="n"/>
+  <prl in="T" out="n" p="0.04" steps="1"/>
+</sequence>

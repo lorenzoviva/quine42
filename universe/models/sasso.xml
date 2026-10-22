@@ -1,0 +1,18 @@
+<!-- Sasso levigato: step 8B, gemini-3.8-flash (b-semplici-flash38/sasso.json, voto dell'Artista 5/10). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
+<sequence values="BHLGDS" size="10 10 8" symmetry="(xy)" name="Sasso levigato">
+  <color symbol="H" value="c4c9d4" name="pietra lucida"/>
+  <color symbol="L" value="9ba0aa" name="pietra chiara"/>
+  <color symbol="G" value="6e737d" name="pietra grigia"/>
+  <color symbol="D" value="4b5059" name="pietra d'ombra"/>
+  <color symbol="S" value="32353b" name="ombra profonda"/>
+  <ellipsoid at="5 5 0" size="7 6 4" color="G"/>
+  <convolution neighborhood="Moore" steps="1">
+    <rule in="B" out="G" values="G" sum="14..26"/>
+    <rule in="G" out="B" values="G" sum="1..7"/>
+  </convolution>
+  <all in="B G" out="B L"/>
+  <all in="G G" out="G D"/>
+  <all in="DB" out="GB"/>
+  <prl steps="1" in="B L" out="B H" p="0.25"/>
+  <prl steps="1" in="D" out="S" p="0.35"/>
+</sequence>

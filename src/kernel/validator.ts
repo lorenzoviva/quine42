@@ -9,10 +9,33 @@ import type { ChunkPlan } from './agents/cartography';
 import { lex, TOKEN_RE, tokenize } from './runes';
 import { compile, writtenCodes, MjError } from './mj';
 import { layout } from './layout';
+import { analyse } from '../mj/check';
+import { boxOf, classOf, CLASSES } from '../mj/classes';
+import { Mj3Error } from '../mj/engine';
+import { compileMjx } from '../mj/model';
+import { runMjx } from '../mj/run';
 
 const KINDS: ModuleKind[] = ['system', 'entity', 'item', 'player', 'generator', 'data'];
 const LAYERS = ['ground', 'floor', 'wall', 'door', 'liquid', 'vegetation', 'rock'];
 const ID_RE = /^[a-z][a-z0-9-]*(\.[a-z0-9-]+)+$/;
+/** Ids of the models of the library (`models/<id>.xml`). */
+export const MODEL_RE = /^[a-z0-9][a-z0-9-]{0,40}$/;
+
+/**
+ * A model of the library must compile, finish and build something that stands: what the front-end can
+ * mend it mends (ADR-0036), the rest goes back with the line of the error.
+ */
+export function modelErrors(path: string, xml: string): string[] {
+  try {
+    const size = /<(?!!)[a-z]+\b[^>]*\ssize="/i.test(xml) ? undefined : boxOf(classOf('oggetto')!);
+    const m = compileMjx(xml, size ? { size } : {});
+    const r = runMjx(m, 1, { deadline: 8_000 });
+    if (!r.finished) return [`${path}: il programma non finisce in 8 secondi (ogni crescita deve avere steps)`];
+    return analyse(r, m.program.palette, { grounded: true }).errors.map((e) => `${path}: ${e}`);
+  } catch (e) {
+    return [`${path}: ${e instanceof Mj3Error ? e.message : (e as Error).message}`];
+  }
+}
 const HEX_RE = /^#[0-9a-f]{6}$/i;
 
 /** The Lua API (prelude.lua): generated code may only call these. */
@@ -69,6 +92,8 @@ export class Validator {
     if (m.appearance) {
       if (typeof m.appearance.glyph !== 'string' || [...m.appearance.glyph].length !== 1) err('appearance.glyph deve essere un singolo carattere');
       if (typeof m.appearance.color !== 'string') err('appearance.color mancante');
+      if (m.appearance.model !== undefined && (typeof m.appearance.model !== 'string' || !MODEL_RE.test(m.appearance.model))) err(`appearance.model deve essere l'id di un modello di models/ (es. "pino"): "${m.appearance.model}"`);
+      if (m.appearance.classe !== undefined && !classOf(m.appearance.classe)) err(`appearance.classe sconosciuta "${m.appearance.classe}" (note: ${CLASSES.map((c) => c.id).join(', ')})`);
     }
     if (['entity', 'item', 'player'].includes(m.kind) && !m.appearance) err(`un modulo ${m.kind} richiede appearance`);
     if (m.physics) {
@@ -133,6 +158,7 @@ export class Validator {
 
   validateFile(path: string, content: string): string[] {
     if (path.endsWith('.lua')) return this.checkLua(path, content);
+    if (/^models\/[^/]+\.xml$/.test(path)) return modelErrors(path, content);
     if (path.endsWith('manifest.json')) return this.parseManifest(path, content).errors;
     if (path.endsWith('.json')) {
       try {

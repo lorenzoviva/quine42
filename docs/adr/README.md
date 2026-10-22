@@ -45,5 +45,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0038](0038-laboratorio-di-markovjunior.md) | MarkovJunior nel gioco (src/mj), il laboratorio diventa il laboratorio di MarkovJunior | accettato |
 | [0039](0039-registro-dei-consumi.md) | Registro dei consumi, prezzi in un file, ragionamento low, niente ripetizioni dopo un tempo scaduto | accettato |
 | [0040](0040-il-gioco-in-3d.md) | Il gioco è 3D: renderer three.js, niente immagini | accettato |
+| [0041](0041-asset-come-programmi.md) | Gli asset sono programmi MarkovJunior (libreria models/, forme, semi); collisione dai voxel; azioni come regole | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

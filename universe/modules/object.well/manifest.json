@@ -7,7 +7,7 @@
   "description": "Un vecchio pozzo di pietra.",
   "context": "piazze, cortili e radure",
   "logic": "logic.lua",
-  "appearance": { "glyph": "Ö", "color": "#9aa6b8", "aspetto": "un pozzo di pietra rotondo visto dall'alto, acqua scura" },
+  "appearance": { "model": "pozzo", "glyph": "Ö", "color": "#9aa6b8", "aspetto": "un pozzo di pietra rotondo, acqua scura" },
   "physics": { "solid": true, "radius": 0.45 },
   "actions": [
     { "id": "attingi", "label": "Attingi acqua", "requires": "item.secchio" },

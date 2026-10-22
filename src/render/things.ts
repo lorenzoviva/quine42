@@ -1,6 +1,6 @@
 // What moves and lies on the ground: people, animals, things, items to pick up, the wanderer, and the
 // runes carved in the ground. Each entity has a view (an Object3D) kept in step with the ECS. Until a
-// thing has its MarkovJunior model (step 9, F5) its view is a stand-in by kind: a figure with legs and
+// thing's model is ready (src/render/models.ts) its view is a stand-in by kind: a figure with legs and
 // arms that swing, a block, a floating gem.
 
 import * as THREE from 'three';
@@ -10,6 +10,8 @@ import { runeGlyph, type RuneComp } from '../kernel/runes';
 import { hash32, hashStr } from '../kernel/rng';
 import { Builder } from './terrain';
 import { clipped, MAT, rgbOf, solid } from './materials';
+import { modelObject, showFrame } from './models';
+import type { FormComp } from '../kernel/forms';
 
 export interface Limb {
   pivot: THREE.Object3D;
@@ -21,7 +23,11 @@ export interface ThingView {
   root: THREE.Group;
   body: THREE.Object3D;
   limbs: Limb[];
+  /** Frames of its animation (fire, smoke), shown in turn. */
+  frames: THREE.Mesh[];
   kind: 'figure' | 'item' | 'thing';
+  /** A stand-in owns its geometry; a model shares it with the other instances. */
+  owned: boolean;
   /** Where it was last frame (carpet space), to know where it goes and how fast. */
   last: { x: number; y: number };
   yaw: number;
@@ -111,25 +117,38 @@ export class Things {
     private world: THREE.Group,
   ) {}
 
-  /** Individuals differ a little: size, and the colour of what they wear. */
+  /** Individuals differ a little: size, and (while they have no model) the colour of what they wear. */
   private variant(id: Id): { scale: number; color?: string } {
     const k = this.k;
     if (!k.ecs.has(id, 'mind') && !k.ecs.has(id, 'identity')) return { scale: 1 };
     const who: string = k.ecs.get(id, 'identity')?.name ?? k.ecs.get(id, 'origin')?.key ?? String(id);
     const h = hashStr(who);
-    return { scale: 0.92 + (h % 13) / 100, color: `hsl(${h % 360}, 45%, 52%)` };
+    return { scale: 0.94 + (h % 11) / 100, color: `hsl(${h % 360}, 45%, 52%)` };
   }
 
-  private build(id: Id): ThingView {
+  /** What a view is made of now: rebuilt when it changes (its model got ready, an action changed it). */
+  private sigOf(id: Id): string {
+    const k = this.k;
+    const fc: FormComp | undefined = k.ecs.get(id, 'form');
+    const f = fc && k.forms.ready(fc.model, fc.seed, fc.tint);
+    return `${k.ecs.get(id, 'glyph')?.color}|${f?.result?.meshes ? f.key : 'stand-in'}|${fc?.done?.join(',') ?? ''}`;
+  }
+
+  private build(id: Id, sig: string): ThingView {
     const k = this.k;
     const gl = k.ecs.get(id, 'glyph') ?? { color: '#aaa' };
     const p = k.ecs.get(id, 'pos');
     const figure = k.ecs.has(id, 'mind') || k.ecs.has(id, 'wander') || k.ecs.has(id, 'identity');
     const item = k.ecs.has(id, 'pickup');
-    const sig = `${gl.color}|${figure}|${item}`;
-    let root: THREE.Group, body: THREE.Object3D, limbs: Limb[] = [];
-    if (figure) {
-      const v = this.variant(id);
+    const fc: FormComp | undefined = k.ecs.get(id, 'form');
+    const f = fc && k.forms.ready(fc.model, fc.seed, fc.tint);
+    const v = this.variant(id);
+    const model = f && modelObject(k, f, fc);
+    let root: THREE.Group, body: THREE.Object3D, limbs: Limb[] = [], frames: THREE.Mesh[] = [];
+    if (model) {
+      ({ root, body, limbs, frames } = model);
+      if (figure) root.scale.setScalar(v.scale);
+    } else if (figure) {
       const persona = k.ecs.has(id, 'mind') || k.ecs.has(id, 'identity');
       ({ root, body, limbs } = figureStandIn(v.color ?? gl.color, (persona ? 1.1 : 0.55) * v.scale));
     } else {
@@ -137,10 +156,11 @@ export class Things {
       body = item ? itemStandIn(gl.color) : thingStandIn(gl.color, k.ecs.get(id, 'body')?.r ?? 0.35);
       root.add(body);
     }
-    root.userData.entity = id;
     root.traverse((o) => (o.userData.entity = id));
     this.world.add(root);
-    return { root, body, limbs, kind: figure ? 'figure' : item ? 'item' : 'thing', last: { x: p.x, y: p.y }, yaw: hash32(id) % 6, phase: 0, sig };
+    const yaw = figure ? hash32(id) % 6 : (fc?.yaw ?? 0);
+    root.rotation.y = yaw;
+    return { root, body, limbs, frames, kind: figure ? 'figure' : item ? 'item' : 'thing', last: { x: p.x, y: p.y }, yaw, phase: 0, sig, owned: !model };
   }
 
   update(dt: number, t: number): void {
@@ -150,24 +170,26 @@ export class Things {
       if (id === k.playerId) continue;
       seen.add(id);
       let v = this.views.get(id);
-      const gl = k.ecs.get(id, 'glyph');
-      if (v && v.sig.split('|')[0] !== gl?.color) {
+      const sig = this.sigOf(id);
+      if (v && v.sig !== sig) {
         this.remove(id);
         v = undefined;
       }
-      if (!v) this.views.set(id, (v = this.build(id)));
+      if (!v) this.views.set(id, (v = this.build(id, sig)));
       const p = k.ecs.get(id, 'pos');
       const dx = p.x - v.last.x, dy = p.y - v.last.y;
       const moved = Math.hypot(dx, dy);
       v.last = { x: p.x, y: p.y };
+      showFrame(v.frames, t, id * 0.37);
       if (v.kind === 'item') {
-        v.root.position.set(p.x, 0.25 + Math.sin(t * 2.5 + id) * 0.05, p.y);
-        v.body.rotation.y = t * 1.2 + id;
+        // Things to pick up hover a little and turn, so they are seen among the grass.
+        v.root.position.set(p.x, v.owned ? 0.25 + Math.sin(t * 2.5 + id) * 0.05 : 0.04 + Math.abs(Math.sin(t * 2 + id)) * 0.04, p.y);
+        v.root.rotation.y = t * 0.8 + id;
         continue;
       }
       v.root.position.set(p.x, 0, p.y);
       if (v.kind !== 'figure') continue;
-      // What they are doing, seen: lying down to sleep, still at work.
+      // What they are doing, seen: lying down to sleep.
       const att = k.ecs.get(id, 'attivita');
       v.root.rotation.z = att?.tipo === 'dorme' && att.ferma ? Math.PI / 2.2 : 0;
       if (moved > 0.0005 && moved < 2) {
@@ -183,9 +205,11 @@ export class Things {
     const v = this.views.get(id);
     if (!v) return;
     this.world.remove(v.root);
-    v.root.traverse((o) => {
-      if (o instanceof THREE.Mesh) o.geometry.dispose();
-    });
+    // Models share their geometry among instances (models.ts keeps it); stand-ins own theirs.
+    if (v.owned)
+      v.root.traverse((o) => {
+        if (o instanceof THREE.Mesh) o.geometry.dispose();
+      });
     this.views.delete(id);
   }
 
@@ -194,26 +218,41 @@ export class Things {
   }
 }
 
-/** The wanderer: a stand-in figure (its model comes in F5), in real space, facing where it walks. */
+/** The wanderer, in real space, facing where it walks: its model, or a stand-in until the model is ready. */
 export class Wanderer {
   view: { root: THREE.Group; body: THREE.Object3D; limbs: Limb[]; yaw: number; phase: number };
   private last = { x: 0, y: 0 };
-  constructor(scene: THREE.Object3D) {
+  private sig = '';
+  constructor(private scene: THREE.Object3D) {
+    this.view = this.make();
+  }
+
+  private make(k?: Kernel): Wanderer['view'] {
+    const fc: FormComp | undefined = k?.ecs.get(k.playerId, 'form');
+    const f = k && fc && k.forms.ready(fc.model, fc.seed, fc.tint);
     // The wanderer is never clipped: beyond the circle is where it goes when it leaves the simulation.
-    const f = figureStandIn('#4a6680', 1.15, '#e8c39a', MAT.corona);
-    this.view = { ...f, yaw: 0, phase: 0 };
-    f.root.traverse((o) => (o.userData.player = true));
-    scene.add(f.root);
+    const m = (f && modelObject(k, f, fc, MAT.corona)) ?? figureStandIn('#4a6680', 1.15, '#e8c39a', MAT.corona);
+    m.root.traverse((o) => (o.userData.player = true));
+    this.scene.add(m.root);
+    return { root: m.root, body: m.body, limbs: m.limbs, yaw: this.view?.yaw ?? 0, phase: 0 };
   }
 
   update(k: Kernel, dt: number, t: number): void {
+    const fc: FormComp | undefined = k.ecs.get(k.playerId, 'form');
+    const f = fc && k.forms.ready(fc.model, fc.seed, fc.tint);
+    const sig = f?.result?.meshes ? f.key : 'stand-in';
+    if (sig !== this.sig) {
+      this.sig = sig;
+      this.scene.remove(this.view.root);
+      this.view = this.make(k);
+    }
     const p = k.playerPos();
     const dx = p.x - this.last.x, dy = p.y - this.last.y;
     const moved = Math.hypot(dx, dy);
     this.last = { x: p.x, y: p.y };
     this.view.root.position.set(p.x, 0, p.y);
-    const f = k.playerComp()?.facing;
-    const goal = f === 'left' ? -Math.PI / 2 : f === 'right' ? Math.PI / 2 : f === 'up' ? Math.PI : 0;
+    const facing = k.playerComp()?.facing;
+    const goal = facing === 'left' ? -Math.PI / 2 : facing === 'right' ? Math.PI / 2 : facing === 'up' ? Math.PI : 0;
     // The carpet pulls the wanderer back: what counts for the legs is the walking, not the real motion.
     const pc = k.playerCarpet();
     const walking = moved > 0.0005 || Math.hypot(pc.x - (this.view.root.userData.cx ?? pc.x), pc.y - (this.view.root.userData.cy ?? pc.y)) > 0.0005;

@@ -296,3 +296,22 @@ Piano scritto; branch `3d`.
   gioco); le sale dello studio si costruiscono la prima volta che ci si entra.
 - ADR-0040 (sostituisce 0030; la resa di 0011 e l'Atelier di 0013); AGENTS.md (Stack, Struttura, Il mondo in 3D, Mappa).
   `three` passa fra le dipendenze del gioco.
+
+### F5 — fatto
+- `src/kernel/forms.ts` (libreria, forme, semi, impronte, azioni), `src/render/{worker,forms,models,thumbs}.ts`;
+  componente `form` su ogni entità; collisione delle cose solide dalla loro impronta (la casella finché la forma
+  non è pronta); `<action>` del modello nel menu dell'entità, con lo stato salvato in `stato.json → forme`;
+  validatore dei modelli; terreni con `model` (alberi, palme, massi) come istanze; icone come foto dei modelli.
+- Libreria del seme: 28 programmi (`universe/models/`): i generici di ogni classe, quelli del laboratorio scritti a
+  mano e quelli di Gemini 3.8 approvati nello step 8.2A (contadina, quercia, betulla, cespuglio con bacche, masso
+  muschioso, pozzo, casetta), e 8 scritti a mano ora (letto, banco, credenza, cassa, cartello, forbici, colonna, la
+  cosa generica tingibile). Il seme si chiama `aurora`.
+- Verificato nel browser: il borgo con pini, palme e massi a voxel, il pozzo di Gemini con il tetto, i cespugli con
+  le bacche, le persone e il viandante con i loro modelli, le icone dell'inventario (le forbici, i fagotti nei
+  colori degli oggetti).
+- Diverso dal previsto: i modelli usano la loro `size` (le strutture decidono su una griglia grossa e fanno `map`),
+  la scatola della classe solo se il programma non ne dice una; i modelli a 8 voxel per casella degli step 8A non
+  sono entrati nel seme (scala diversa). Gli edifici restano muri a caselle fino a F7.
+- Test: `tests/forms.test.ts` (libreria valida, modelli alle entità, collisione colonna per colonna, azioni che
+  si fanno, si ricordano, si salvano). 128 test verdi.
+- ADR-0041; AGENTS.md (Struttura, Mappa, Modelli, Manifest).

@@ -124,6 +124,8 @@ export function folderOf(path: string): string {
     return 'altro';
   }
   if (path.startsWith('prompts/')) return 'concilio';
+  // The programs of the models: in the Artist's gallery, with the models on show.
+  if (path.startsWith('models/')) return 'galleria';
   if (path.startsWith('world/')) return 'mondo';
   return 'universo';
 }

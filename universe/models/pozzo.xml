@@ -1,0 +1,90 @@
+<!-- Pozzo: scolpito da gemini-3.8-flash nello step 8.2A (lab/out/mjx-38-flash-2), voti dell'Artista 8/10 -->
+<sequence values="BXPpdWgNnCcRoU" size="50 50 50" origin="True" symmetry="(xy)">
+  <!-- Palette e ruoli materiali -->
+  <color symbol="X" hidden="True" name="seme/guida"/>
+  <color symbol="P" value="7d766c" name="pietra base"/>
+  <color symbol="p" value="a29c92" name="pietra chiara rilievo"/>
+  <color symbol="d" value="544e47" name="pietra scura fessure"/>
+  <color symbol="W" value="23769c" name="acqua pozzo profonda"/>
+  <color symbol="g" value="448a3c" name="muschio umido"/>
+  <color symbol="N" value="5c381e" name="legno scuro travi"/>
+  <color symbol="n" value="8f582f" name="legno caldo doghe"/>
+  <color symbol="C" value="7a7872" name="corda e ferro"/>
+  <color symbol="c" value="9e9d96" name="ferro chiaro secchio"/>
+  <color symbol="R" value="a93b29" name="tegole tetto rossicce"/>
+  <color symbol="o" value="c85834" name="tegole cresta calda"/>
+  <color symbol="U" value="45b5cc" name="riflesso acqua brillante"/>
+
+  <!-- Fase 1: Struttura base del pozzo (cilindro cavo in pietra) -->
+  <!-- Basamento circolare in pietra sul terreno z=0..12 -->
+  <cylinder at="25 25 0" size="26 26 13" color="P"/>
+  <!-- Scavo interno del pozzo (cilindro d'aria profondo) -->
+  <cylinder at="25 25 1" size="18 18 13" color="B"/>
+  <!-- Specchio d'acqua in fondo al pozzo -->
+  <cylinder at="25 25 1" size="18 18 4" color="W"/>
+
+  <!-- Bordo superiore sagomato/cordolo del pozzo a z=12..14 -->
+  <cylinder at="25 25 12" size="28 28 2" color="p" on="B"/>
+  <cylinder at="25 25 12" size="16 16 2" color="B"/>
+
+  <!-- Fase 2: Montanti e travi in legno del tettuccio -->
+  <!-- Due montanti laterali massicci (est e ovest) da z=12 a z=35 -->
+  <box at="13 25 12" size="4 4 24" color="N"/>
+  <box at="37 25 12" size="4 4 24" color="N"/>
+
+  <!-- Trave orizzontale maestra che collega i due montanti in cima a z=34 -->
+  <box at="25 25 34" size="28 4 3" color="N"/>
+  <!-- Arganello cilindrico di legno per arrotolare la corda a z=31 -->
+  <cylinder at="25 25 31" size="4 4 14" color="n"/>
+
+  <!-- Fase 3: Corda e secchio sospeso -->
+  <!-- Corda verticale che scende dal rullo verso il secchio -->
+  <line at="25 25 31" to="25 25 20" r="1" color="C"/>
+  <!-- Manico in ferro del secchio -->
+  <line at="23 25 19" to="25 25 21" r="1" color="C"/>
+  <line at="27 25 19" to="25 25 21" r="1" color="C"/>
+  <!-- Corpo cilindrico del secchio di legno/ferro -->
+  <cylinder at="25 25 14" size="6 6 5" color="n"/>
+  <cylinder at="25 25 15" size="4 4 4" color="c"/>
+  <cylinder at="25 25 16" size="4 4 2" color="W"/>
+
+  <!-- Fase 4: Tettuccio spiovente a due falde stile RPG/chibi (z=34..44) -->
+  <!-- Falde in assi di legno e spioventi in coppi rossi sagomati a piramide/prisma -->
+  <box at="25 25 35" size="32 26 2" color="n"/>
+  <box at="25 25 36" size="34 24 2" color="R"/>
+  <box at="25 25 38" size="32 20 2" color="R"/>
+  <box at="25 25 40" size="30 16 2" color="R"/>
+  <box at="25 25 42" size="28 12 2" color="R"/>
+  <box at="25 25 44" size="26 8 2" color="R"/>
+  <box at="25 25 46" size="24 4 2" color="o"/>
+
+  <!-- Timpani triangolari di chiusura sotto le falde (est/ovest) -->
+  <box at="13 25 37" size="2 18 2" color="N"/>
+  <box at="13 25 39" size="2 14 2" color="N"/>
+  <box at="13 25 41" size="2 10 2" color="N"/>
+  <box at="37 25 37" size="2 18 2" color="N"/>
+  <box at="37 25 39" size="2 14 2" color="N"/>
+  <box at="37 25 41" size="2 10 2" color="N"/>
+
+  <!-- Manovella in ferro per il sollevamento (a lato del palo destro) -->
+  <line at="39 25 31" to="42 25 31" r="1" color="C"/>
+  <line at="42 25 31" to="42 28 31" r="1" color="C"/>
+  <line at="42 28 31" to="42 28 28" r="1" color="C"/>
+
+  <!-- Fase 5: Dettagli voxel, texture medievale, usura e pixel art -->
+  <!-- Fessure e ombre tra le pietre del pozzo -->
+  <prl in="PP" out="Pd" p="0.25" steps="1"/>
+  <prl in="P/P" out="P/d" p="0.2" steps="1"/>
+  <!-- Pietre sporgenti in luce sul cordolo e sul parapetto -->
+  <prl in="B P" out="* p" p="0.3" steps="1"/>
+  <!-- Macchie di muschio sulle pietre inferiori umide vicino alla terra -->
+  <prl in="P" out="g" p="0.08" steps="1"/>
+  <one in="Pg" out="gg" steps="120"/>
+
+  <!-- Coppi scanalati ed evidenziazione del colmo del tetto -->
+  <prl in="R R" out="* o" p="0.2" steps="1"/>
+  <!-- Riflessi vibranti azzurri sull'acqua del pozzo -->
+  <prl in="W" out="U" p="0.15" steps="1"/>
+  <!-- Cerchiature metalliche sul secchio di legno -->
+  <all in="n n n" out="c * c" steps="1" symmetry="()"/>
+</sequence>

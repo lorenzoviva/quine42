@@ -1,0 +1,52 @@
+<!-- Fabbro robusto: step 8B, gemini-3.8-flash, rivisto (b-figure-flash38/fabbro.v2.json, voto dell'Artista 6/10). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
+<sequence values="BNPCDAULFMSVHEWIJ" size="20 15 30" symmetry="(xy)" name="Fabbro robusto">
+  <color symbol="N" value="382315" name="stivali di cuoio" part="gamba"/>
+  <color symbol="P" value="4a3c32" name="brache robuste" part="gamba"/>
+  <color symbol="C" value="8c382b" name="camicia pesante"/>
+  <color symbol="D" value="63241b" name="camicia in ombra"/>
+  <color symbol="A" value="9e5c2b" name="grembiule di cuoio"/>
+  <color symbol="U" value="2c1c14" name="cuoio bruciacchiato"/>
+  <color symbol="L" value="23150d" name="cinturone"/>
+  <color symbol="F" value="b0b2ba" name="fibbia di ferro"/>
+  <color symbol="M" value="8c382b" name="manica arrotolata" part="braccio"/>
+  <color symbol="S" value="dfa57e" name="braccio possente" part="braccio"/>
+  <color symbol="V" value="dfa57e" name="pelle viso"/>
+  <color symbol="H" value="3e2415" name="capelli e barba"/>
+  <color symbol="E" value="1c140e" name="occhi"/>
+  <color symbol="W" value="7a502e" name="manico del martello"/>
+  <color symbol="I" value="7d848f" name="testa del martello"/>
+  <color symbol="J" value="4b5059" name="ferro scuro"/>
+  <box at="7 7 0" size="4 6 4" color="N"/>
+  <box at="13 7 0" size="4 6 4" color="N"/>
+  <box at="7 7 4" size="4 5 4" color="P"/>
+  <box at="13 7 4" size="4 5 4" color="P"/>
+  <cylinder at="10 7 8" size="11 10 10" color="C"/>
+  <box at="10 9 5" size="9 5 12" color="A"/>
+  <cylinder at="10 7 9" size="12 11 2" color="L"/>
+  <box at="10 12 9" size="3 2 2" color="F"/>
+  <cylinder at="4 7 13" size="4 5 4" color="M" on="B"/>
+  <cylinder at="4 7 7" size="3 4 7" color="S" on="B"/>
+  <cylinder at="16 7 13" size="4 5 4" color="M" on="B"/>
+  <cylinder at="16 7 7" size="3 4 7" color="S" on="B"/>
+  <box at="15 6 4" size="1 2 8" color="W"/>
+  <box at="15 6 11" size="3 4 3" color="I"/>
+  <ellipsoid at="10 7 18" size="11 11 10" color="V" on="B"/>
+  <ellipsoid at="10 6 21" size="12 11 8" color="H"/>
+  <box at="10 5 18" size="10 5 7" color="H"/>
+  <box at="10 9 17" size="9 5 4" color="H"/>
+  <box at="10 9 21" size="8 5 4" color="V"/>
+  <box at="10 11 19" size="7 3 2" color="H"/>
+  <box at="8 11 21" size="2 2 2" color="E"/>
+  <box at="12 11 21" size="2 2 2" color="E"/>
+  <box at="8 11 23" size="2 2 1" color="H"/>
+  <box at="12 11 23" size="2 2 1" color="H"/>
+  <prl steps="1" symmetry="()">
+    <rule in="B/* */* A/B" out="B/* */* U/B" p="0.22"/>
+    <rule in="B A" out="B U" p="0.12"/>
+  </prl>
+  <one steps="25" symmetry="()" in="U A" out="U U"/>
+  <prl steps="1">
+    <rule in="C" out="D" p="0.25"/>
+    <rule in="I" out="J" p="0.35"/>
+  </prl>
+</sequence>

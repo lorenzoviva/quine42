@@ -1,0 +1,48 @@
+<!--
+Falò, scritto a mano da Claude Code (step 8.2A): un anello di pietre attorno alla brace, tre ciocchi e
+le fiamme. L'animazione è MarkovJunior anche lei: a ogni fotogramma le punte delle fiamme si spengono o
+salgono a caso, e la brace pulsa.
+-->
+<sequence values="BXDdENnYORe" size="20 20 18" origin="True" symmetry="(xy)">
+  <color symbol="X" hidden="True" name="seme"/>
+  <color symbol="D" value="8a8478" name="pietra"/>
+  <color symbol="d" value="5e5a52" name="pietra scura"/>
+  <color symbol="E" value="3a2a22" name="cenere"/>
+  <color symbol="N" value="6b4528" name="ciocco"/>
+  <color symbol="n" value="4a2e1a" name="corteccia"/>
+  <color symbol="Y" value="ffe27a" name="cuore della fiamma"/>
+  <color symbol="O" value="ff9a2e" name="fiamma"/>
+  <color symbol="R" value="e2482a" name="punta"/>
+  <color symbol="e" value="c8501e" name="brace accesa"/>
+
+  <one in="X B" out="B X"/>
+  <!-- Un disco ottagonale: crescita a rombo, poi in diagonale. -->
+  <all in="XB" out="*X" steps="4"/>
+  <all in="X*/*B" out="**/*X" steps="2"/>
+  <!-- Il bordo diventa pietre (alcune doppie), il resto cenere. -->
+  <all in="XB" out="D*"/>
+  <prl in="X" out="E" steps="1"/>
+  <prl in="B D" out="D *" p="0.5" steps="1"/>
+  <prl in="D" out="d" p="0.3" steps="1"/>
+
+  <!-- Tre ciocchi sulla cenere, il secondo e il terzo appoggiati sopra quando non c'è posto. -->
+  <one in="BBBBBBB EEEEEEE" out="NNNNNNN *******" steps="2"/>
+  <one in="BBBBB NNNNN" out="NNNNN *****" steps="1"/>
+  
+
+  <!-- Le fiamme: semi sopra i ciocchi, lingue che salgono a caso, poi i colori dalla base alla punta. -->
+  <prl in="B N" out="Y *" p="0.6" steps="1"/>
+  <one in="B Y" out="Y *" steps="16"/>
+  <one in="YB YY" out="*Y **" steps="40"/>
+  <all in="B Y" out="* R"/>
+  <all in="R Y" out="* O"/>
+  <all in="O Y Y" out="* O *" steps="1"/>
+  <prl in="N" out="n" p="0.3" steps="1"/>
+</sequence>
+<animation name="fiamme" frames="8">
+  <prl in="R" out="B" p="0.5" steps="1"/>
+  <prl in="B O" out="R *" p="0.6" steps="1"/>
+  <prl in="B R" out="R *" p="0.3" steps="1"/>
+  <prl in="e" out="E" p="0.5" steps="1"/>
+  <prl in="E" out="e" p="0.08" steps="1"/>
+</animation>

@@ -1,0 +1,151 @@
+{
+ "viandante": {
+  "classe": "persona",
+  "nome": "Viandante",
+  "autore": "a mano (Claude Code)"
+ },
+ "contadina": {
+  "classe": "persona",
+  "nome": "Contadina",
+  "autore": "gemini-3.8-flash (step 8.2A)",
+  "voto": 8
+ },
+ "persona": {
+  "classe": "persona",
+  "nome": "Fabbro",
+  "autore": "a mano, step 8B (Claude Code)"
+ },
+ "animale": {
+  "classe": "animale",
+  "nome": "Gatto",
+  "autore": "a mano, step 8B (Claude Code)"
+ },
+ "bestia": {
+  "classe": "bestia",
+  "nome": "Lupo",
+  "autore": "a mano, step 8B (Claude Code)"
+ },
+ "albero": {
+  "classe": "albero",
+  "nome": "Pino",
+  "autore": "a mano, step 8B (Claude Code)"
+ },
+ "quercia": {
+  "classe": "albero",
+  "nome": "Quercia",
+  "autore": "gemini-3.8-flash (step 8.2A)",
+  "voto": 5
+ },
+ "betulla": {
+  "classe": "albero",
+  "nome": "Betulla",
+  "autore": "gemini-3.8-flash (step 8.2A)",
+  "voto": 8
+ },
+ "palma": {
+  "classe": "albero",
+  "nome": "Palma",
+  "autore": "a mano, step 8B (Claude Code)"
+ },
+ "cespuglio": {
+  "classe": "cespuglio",
+  "nome": "Cespuglio",
+  "autore": "a mano (Claude Code)"
+ },
+ "cespuglio-con-bacche": {
+  "classe": "cespuglio",
+  "nome": "Cespuglio con bacche",
+  "autore": "gemini-3.8-flash (step 8.2A)",
+  "voto": 8
+ },
+ "roccia": {
+  "classe": "roccia",
+  "nome": "Masso",
+  "autore": "a mano (Claude Code)"
+ },
+ "masso-muschioso": {
+  "classe": "roccia",
+  "nome": "Masso muschioso",
+  "autore": "gemini-3.8-flash (step 8.2A)",
+  "voto": 8
+ },
+ "sasso": {
+  "classe": "sasso",
+  "nome": "Sasso",
+  "autore": "a mano, step 8B (Claude Code)"
+ },
+ "barile": {
+  "classe": "mobile",
+  "nome": "Barile",
+  "autore": "gemini-3.8-flash (step 8B)",
+  "voto": 7
+ },
+ "falo": {
+  "classe": "mobile",
+  "nome": "Falò",
+  "autore": "a mano (Claude Code)"
+ },
+ "mobile": {
+  "classe": "mobile",
+  "nome": "Cassa",
+  "autore": "a mano (Claude Code)"
+ },
+ "letto": {
+  "classe": "mobile",
+  "nome": "Letto",
+  "autore": "a mano (Claude Code)"
+ },
+ "banco": {
+  "classe": "mobile",
+  "nome": "Banco da lavoro",
+  "autore": "a mano (Claude Code)"
+ },
+ "credenza": {
+  "classe": "mobile",
+  "nome": "Credenza",
+  "autore": "a mano (Claude Code)"
+ },
+ "cartello": {
+  "classe": "mobile",
+  "nome": "Cartello",
+  "autore": "a mano (Claude Code)"
+ },
+ "oggetto": {
+  "classe": "oggetto",
+  "nome": "Cosa",
+  "autore": "a mano (Claude Code)",
+  "tinta": "C"
+ },
+ "forbici": {
+  "classe": "oggetto",
+  "nome": "Forbici",
+  "autore": "a mano (Claude Code)"
+ },
+ "pozzo": {
+  "classe": "edificio",
+  "nome": "Pozzo",
+  "autore": "gemini-3.8-flash (step 8.2A)",
+  "voto": 8
+ },
+ "edificio": {
+  "classe": "edificio",
+  "nome": "Casetta",
+  "autore": "gemini-3.8-flash (step 8.2A)",
+  "voto": 9
+ },
+ "monumento": {
+  "classe": "monumento",
+  "nome": "Colonna",
+  "autore": "a mano (Claude Code)"
+ },
+ "grande": {
+  "classe": "grande",
+  "nome": "Casa a graticcio",
+  "autore": "a mano (Claude Code)"
+ },
+ "fattoria": {
+  "classe": "grande",
+  "nome": "Fattoria",
+  "autore": "a mano (Claude Code)"
+ }
+}

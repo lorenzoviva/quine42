@@ -6,7 +6,7 @@
   "origin": "esempio",
   "description": "Una credenza di legno scuro con due ante che cigolano.",
   "context": "dentro le case, nelle cucine e nelle locande",
-  "appearance": { "glyph": "▤", "color": "#8a5a34", "aspetto": "una credenza di legno scuro con due ante, vista dall'alto" },
+  "appearance": { "model": "credenza", "glyph": "▤", "color": "#8a5a34", "aspetto": "una credenza di legno scuro con due ante" },
   "physics": { "solid": true, "radius": 0.45 },
   "container": { "size": 8, "loot": "cucina" },
   "spawn": { "tiles": ["f"], "chance": 0.4, "max": 1 }

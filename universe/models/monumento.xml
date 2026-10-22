@@ -1,0 +1,14 @@
+<!-- Colonna (il monumento generico): scritta a mano da Claude Code (step 9). Base, fusto scanalato, capitello; qualche pietra consumata. -->
+<sequence values="BDdWw" size="20 20 60" symmetry="(xy)" name="Colonna">
+  <color symbol="D" value="b8b0a0" name="pietra"/>
+  <color symbol="d" value="8e8678" name="pietra consumata"/>
+  <color symbol="W" value="d8d0c0" name="marmo"/>
+  <color symbol="w" value="a8a090" name="scanalatura"/>
+  <box at="10 10 0" size="16 16 4" color="D"/>
+  <box at="10 10 4" size="13 13 2" color="D"/>
+  <cylinder at="10 10 6" size="10 10 46" color="W"/>
+  <box at="10 10 52" size="13 13 2" color="D"/>
+  <box at="10 10 54" size="16 16 4" color="D"/>
+  <prl in="W/B" out="w/*" p="0.5" steps="1" symmetry="()"/>
+  <prl in="D" out="d" p="0.1" steps="1"/>
+</sequence>

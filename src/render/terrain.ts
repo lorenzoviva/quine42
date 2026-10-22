@@ -1,14 +1,17 @@
 // The ground of the simulation, chunk by chunk, in carpet coordinates (x → three x, y → three z, one
 // tile = one unit). The plan's tiles are still the ground: colour per terrain, water lower than the
 // land with earthen banks, walls extruded, doors as an opening under a lintel. What stands on a tile
-// (trees on woods, boulders on rock) is a stand-in until the tile has a model (step 9, F5). Roofs are
-// separate meshes, hidden when the wanderer is inside.
+// (trees on woods, boulders on rock) is the terrain's model (`TileDef.model`), a few seeds of it as
+// instances, turned and shifted; a stand-in until the model is ready. Roofs are separate meshes, hidden
+// when the wanderer is inside.
 
 import * as THREE from 'three';
 import type { Chunk, Kernel } from '../kernel/kernel';
 import { hash32 } from '../kernel/rng';
 import type { TileDef } from '../kernel/types';
 import { MAT, rgbOf } from './materials';
+import { geoOf, type ModelGeo } from './models';
+import type { Form } from '../kernel/forms';
 
 export const WALL_H = 1.6;
 const WATER_Y = -0.18;
@@ -78,19 +81,56 @@ export interface ChunkView {
   roofs: Array<{ mesh: THREE.Mesh; building: Chunk['buildings'][number] }>;
 }
 
-/** What a chunk's meshes depend on: its tiles and its neighbours' (banks and walls look across the edge). */
-export function chunkSig(k: Kernel, ch: Chunk): string {
-  const v = (dx: number, dy: number) => k.chunks.get(`${ch.cx + dx},${ch.cy + dy}`)?.version ?? -1;
-  return `${ch.version}|${v(1, 0)}|${v(-1, 0)}|${v(0, 1)}|${v(0, -1)}`;
+/** How many seeds of a terrain's model stand on its tiles. */
+const TILE_SEEDS = 3;
+
+/** The ready forms (with meshes) of what stands on a terrain, or undefined while they are not all ready. */
+export function tileForms(k: Kernel, code: string): Array<{ form: Form; geo: ModelGeo }> | undefined {
+  const t = k.palette[code];
+  if (!t?.model || !k.forms.info(t.model)) return undefined;
+  const out: Array<{ form: Form; geo: ModelGeo }> = [];
+  for (let s = 1; s <= TILE_SEEDS; s++) {
+    const f = k.forms.ready(t.model, s);
+    const geo = f && geoOf(f);
+    if (!f || !geo) return undefined;
+    out.push({ form: f, geo });
+  }
+  return out;
 }
 
-export function buildChunk(k: Kernel, ch: Chunk): ChunkView {
+/** What a chunk's meshes depend on: its tiles, its neighbours' (banks and walls look across the edge), the terrains' models. */
+export function chunkSig(k: Kernel, ch: Chunk, models = ''): string {
+  const v = (dx: number, dy: number) => k.chunks.get(`${ch.cx + dx},${ch.cy + dy}`)?.version ?? -1;
+  return `${ch.version}|${v(1, 0)}|${v(-1, 0)}|${v(0, 1)}|${v(0, -1)}|${models}`;
+}
+
+export function buildChunk(k: Kernel, ch: Chunk, models = ''): ChunkView {
   const S = k.config.chunkSize;
   const pal = k.palette;
   const ground = new Builder();
   const solid = new Builder();
   const X0 = ch.cx * S, Z0 = ch.cy * S;
   const tile = (col: number, row: number) => pal[k.tileAt(col, row) ?? ''];
+  // Instances of the terrains' models, by form: where, how turned, how big.
+  const instances = new Map<string, { geo: ModelGeo; mats: THREE.Matrix4[] }>();
+  const formsOf = new Map<string, ReturnType<typeof tileForms>>();
+  const place = (code: string, x: number, z: number, h: number, every: number): boolean => {
+    if (!formsOf.has(code)) formsOf.set(code, tileForms(k, code));
+    const fs = formsOf.get(code);
+    if (!fs) return false;
+    // Trees are two tiles wide: one every other tile is a wood; rocks one a tile.
+    if (every > 1 && (x + z) % every !== 0) return true;
+    const { form, geo } = fs[h % fs.length];
+    const jitter = every > 1 ? 0.35 : 0.12;
+    const m = new THREE.Matrix4().compose(
+      new THREE.Vector3(x + 0.5 + (((h >> 4) % 100) / 100 - 0.5) * jitter, 0, z + 0.5 + (((h >> 11) % 100) / 100 - 0.5) * jitter),
+      new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), ((h >> 7) % 628) / 100),
+      new THREE.Vector3().setScalar(0.85 + ((h >> 13) % 25) / 100),
+    );
+    const slot = instances.get(form.key) ?? instances.set(form.key, { geo, mats: [] }).get(form.key)!;
+    slot.mats.push(m);
+    return true;
+  };
   for (let r = 0; r < S; r++)
     for (let c = 0; c < S; c++) {
       const code = ch.tiles[r * S + c];
@@ -121,10 +161,10 @@ export function buildChunk(k: Kernel, ch: Chunk): ChunkView {
           solid.box(x, WALL_H - 0.35, z, x + 1, WALL_H, z + 1, rgbOf(t.color, 0.8));
           break;
         case 'vegetation':
-          standInTree(solid, x, z, h, rgbOf(t.color));
+          if (!place(code, x, z, h, 2)) standInTree(solid, x, z, h, rgbOf(t.color));
           break;
         case 'rock':
-          standInRock(solid, x, z, h, rgbOf(t.color));
+          if (!place(code, x, z, h, 1)) standInRock(solid, x, z, h, rgbOf(t.color));
           break;
       }
     }
@@ -136,6 +176,14 @@ export function buildChunk(k: Kernel, ch: Chunk): ChunkView {
     const s = new THREE.Mesh(solid.geometry(), MAT.world);
     s.castShadow = s.receiveShadow = true;
     group.add(s);
+  }
+  for (const { geo, mats } of instances.values()) {
+    const im = new THREE.InstancedMesh(geo.body, geo.sway ? MAT.sway : MAT.world, mats.length);
+    mats.forEach((m, i) => im.setMatrixAt(i, m));
+    im.castShadow = im.receiveShadow = true;
+    im.computeBoundingSphere();
+    im.userData.shared = true;
+    group.add(im);
   }
   // Roofs: a hip roof of shrinking layers over each building, in the terrain's roof colour.
   const roofColor = rgbOf(k.terrain?.manifest.roof?.color ?? '#9a4632');
@@ -153,11 +201,12 @@ export function buildChunk(k: Kernel, ch: Chunk): ChunkView {
     group.add(mesh);
     return { mesh, building: b };
   });
-  return { key: ch.key, sig: chunkSig(k, ch), group, roofs };
+  return { key: ch.key, sig: chunkSig(k, ch, models), group, roofs };
 }
 
 export function disposeChunk(v: ChunkView): void {
   v.group.traverse((o) => {
-    if (o instanceof THREE.Mesh) o.geometry.dispose();
+    // Instanced models share their geometry with every chunk (models.ts keeps it).
+    if (o instanceof THREE.Mesh && !o.userData.shared) o.geometry.dispose();
   });
 }

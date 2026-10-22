@@ -5,6 +5,7 @@
   "version": "0.4.0",
   "description": "Tu.",
   "appearance": {
+    "model": "viandante",
     "glyph": "@",
     "color": "#ffffff",
     "aspetto": "un viandante con mantello e cappuccio"

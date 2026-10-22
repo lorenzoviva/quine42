@@ -6,10 +6,17 @@ import { HOTBAR } from '../kernel/inventory';
 import { $, el } from './dom';
 import { runeGlyph } from '../kernel/runes';
 
-/** An item's sign in its colour. */
+/** Where icons come from: photographs of the items' models (src/render/thumbs.ts), set by main. */
+export const icons: { get?: (item: string) => Promise<string | undefined> } = {};
+
+/** An item's icon: the photograph of its model, its sign in its colour until the photograph is there. */
 export function itemIcon(k: Kernel, item: string, size = 32): HTMLElement {
   const info = k.itemInfo(item);
-  return el('span', { class: 'icon', style: `width:${size}px;height:${size}px;color:${info.color};font-size:${Math.round(size * 0.7)}px` }, info.glyph);
+  const box = el('span', { class: 'icon', style: `width:${size}px;height:${size}px;color:${info.color};font-size:${Math.round(size * 0.7)}px` }, info.glyph);
+  void icons.get?.(item).then((src) => {
+    if (src) box.replaceChildren(el('img', { src, alt: info.name, width: String(size), height: String(size) }));
+  });
+  return box;
 }
 
 export class Hud {

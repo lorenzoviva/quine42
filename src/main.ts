@@ -10,7 +10,9 @@ import { GeminiModels } from './kernel/ai/gemini';
 import { MockModels } from './kernel/ai/mock';
 import type { Models } from './kernel/ai/models';
 import { Renderer } from './render/renderer';
-import { Hud } from './ui/hud';
+import { WorkerRunner } from './render/forms';
+import { Thumbs } from './render/thumbs';
+import { Hud, icons } from './ui/hud';
 import { Editor } from './ui/editor';
 import { Console } from './ui/console';
 import { InventoryPanel } from './ui/inventory';
@@ -70,13 +72,15 @@ async function main() {
     past = snap.log ?? [];
   }
   const chunks = client ? new UniverseChunks(client, new IdbChunks()) : new IdbChunks();
-  const kernel = await Kernel.boot({ files, store: client ? memoryStore() : localStore, models, chunks, wasmUri, backend: client ?? undefined, past });
+  const kernel = await Kernel.boot({ files, store: client ? memoryStore() : localStore, models, chunks, forms: new WorkerRunner(), wasmUri, backend: client ?? undefined, past });
   // Leaving: the state of play goes into the universe (if it is valid).
   window.addEventListener('pagehide', () => {
     kernel.saveState();
     kernel.saveUsage();
   });
   const renderer = new Renderer($<HTMLCanvasElement>('#world'), $<HTMLCanvasElement>('#overlay'), kernel);
+  const thumbs = new Thumbs(kernel);
+  icons.get = (item) => thumbs.icon(item);
   const hud = new Hud(kernel, renderer);
   const editor = new Editor(kernel);
   const konsole = new Console(kernel);
@@ -132,6 +136,8 @@ async function main() {
   const sfx = new Sfx();
   konsole.dev = dev;
   (window as any).rune = kernel;
+  // The 3D view, for the console (camera distance, scene).
+  (window as any).view = renderer;
 
   const syncFocus = () => {
     kernel.input.enabled = !editor.isOpen && !konsole.isOpen && !inventory.isOpen && !chat.isOpen && !genesis.isOpen && !actions.isOpen && !studio.isOpen && !atlas.isOpen && !kernel.dead;

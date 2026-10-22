@@ -11,6 +11,10 @@ export interface Appearance {
   color: string;
   /** How it looks, in words: what the Sculptor sculpts. */
   aspetto?: string;
+  /** Its look: a program of the library (`models/<id>.xml`); without one, the generic model of its class. */
+  model?: string;
+  /** Asset class (src/mj/classes.ts): persona, animale, albero, mobile, edificio… */
+  classe?: string;
 }
 
 export interface Physics {
@@ -63,6 +67,8 @@ export interface TileDef {
   layer?: TileLayer;
   /** Indoor floor: buildings are indoor floor enclosed by walls; their roof hides them from outside. */
   indoor?: boolean;
+  /** What stands on tiles of this terrain (trees on woods, boulders on rock): a program of `models/`. */
+  model?: string;
   /** Actions learned on this kind of terrain ("Altro…" on a tile): effects at that place. */
   actions?: ActionDef[];
 }
@@ -84,6 +90,8 @@ export interface ItemDef {
   color: string;
   /** How it looks, in words: what the Sculptor sculpts. */
   aspetto?: string;
+  /** Its look (a program of `models/`); items of a kind can share one, tinted with `color`. */
+  model?: string;
   equippable?: boolean;
   /** Applied by core.items when the item is used (eaten, drunk, applied, absorbed). */
   effects?: { hunger?: number; thirst?: number; energy?: number; health?: number; mana?: number };

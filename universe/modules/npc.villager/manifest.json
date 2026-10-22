@@ -8,6 +8,7 @@
   "context": "prati e sentieri vicino ai borghi",
   "logic": "logic.lua",
   "appearance": {
+    "model": "contadina",
     "glyph": "&",
     "color": "#e8c07a",
     "aspetto": "un contadino medievale con tunica ocra e cappello di paglia"

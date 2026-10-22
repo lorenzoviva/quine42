@@ -6,7 +6,7 @@
   "origin": "esempio",
   "description": "Una cassa abbandonata. Si può spingere.",
   "context": "sentieri e borghi",
-  "appearance": { "glyph": "▣", "color": "#b07a3c", "aspetto": "una cassa di legno con rinforzi di ferro, vista dall'alto" },
+  "appearance": { "model": "mobile", "glyph": "▣", "color": "#b07a3c", "aspetto": "una cassa di legno con rinforzi di ferro" },
   "physics": { "solid": false, "pushable": true, "radius": 0.42, "mass": 20, "friction": 0.8 },
   "spawn": { "tiles": ["p", "g"], "chance": 0.12, "max": 1 }
 }

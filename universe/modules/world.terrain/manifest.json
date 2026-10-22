@@ -23,6 +23,7 @@
       "speed": 1.15
     },
     "t": {
+      "model": "albero",
       "name": "bosco",
       "description": "alberi fitti dalle chiome tonde",
       "color": "#2c6a34",
@@ -37,6 +38,7 @@
       "layer": "liquid"
     },
     "r": {
+      "model": "roccia",
       "name": "roccia",
       "description": "massi grigi e lastre di pietra",
       "color": "#8c8d95",
@@ -82,6 +84,7 @@
       "description": "sabbia fine e calda, di deserto o di spiaggia"
     },
     "j": {
+      "model": "palma",
       "name": "giungla",
       "color": "#1f6b34",
       "solid": true,
@@ -96,6 +99,7 @@
       "description": "acqua profonda del mare aperto"
     },
     "k": {
+      "model": "masso-muschioso",
       "name": "montagna",
       "color": "#6e6a66",
       "solid": true,

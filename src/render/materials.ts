@@ -23,6 +23,9 @@ export function clipped<M extends THREE.Material>(m: M, key: string, sway = fals
         sway
           ? `#include <begin_vertex>
     vec3 swp = (modelMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+    #ifdef USE_INSTANCING
+    swp += (modelMatrix * vec4(instanceMatrix[3].xyz, 0.0)).xyz;
+    #endif
     float ph = uTime * 1.7 + swp.x * 0.37 + swp.z * 0.61;
     transformed.x += sway * uWind * (sin(ph) + 0.35 * sin(ph * 2.3 + 1.0));
     transformed.z += sway * uWind * 0.45 * cos(ph * 0.8);`

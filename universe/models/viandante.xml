@@ -1,0 +1,36 @@
+<!-- Viandante (28 voxel): scritto a mano da Claude Code, step 8B (lab/programs/viandante.ts). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
+<sequence values="BGMNOCSEAQHPWLK" size="20 15 30" symmetry="(xy)" name="Viandante (28 voxel)">
+  <color symbol="G" value="4a3424" name="stivali" part="gamba"/>
+  <color symbol="M" value="3f6470" name="mantello"/>
+  <color symbol="N" value="5a8592" name="mantello al sole"/>
+  <color symbol="O" value="2c4952" name="piega del mantello"/>
+  <color symbol="C" value="46707d" name="cappuccio"/>
+  <color symbol="S" value="e0b48c" name="viso"/>
+  <color symbol="E" value="1e1a22" name="occhi"/>
+  <color symbol="A" value="3f6470" name="braccio libero" part="braccio"/>
+  <color symbol="Q" value="e0b48c" name="mano libera" part="braccio"/>
+  <color symbol="H" value="3f6470" name="braccio col bastone"/>
+  <color symbol="P" value="e0b48c" name="mano"/>
+  <color symbol="W" value="7a5532" name="bastone"/>
+  <color symbol="L" value="6b4626" name="cintura"/>
+  <color symbol="K" value="d8b048" name="fibbia"/>
+  <box at="8 7 0" size="3 3 9" color="G"/>
+  <box at="12 7 0" size="3 3 9" color="G"/>
+  <cone at="10 7 7" size="12 9 16" color="M" on="B"/>
+  <cylinder at="10 7 7" size="10 8 10" color="M" on="B"/>
+  <cylinder at="4 7 10" size="3 3 7" color="A" on="B"/>
+  <box at="4 7 9" size="2 2 2" color="Q" on="B"/>
+  <cylinder at="16 8 10" size="3 3 7" color="H" on="B"/>
+  <box at="16 9 9" size="2 2 2" color="P" on="B"/>
+  <ellipsoid at="10 6 16" size="12 10 12" color="C" on="B"/>
+  <ellipsoid at="10 7 16" size="10 8 10" color="S" on="C"/>
+  <box at="10 12 17" size="8 3 5" color="B" on="C"/>
+  <box at="8 11 19" size="1 5 2" color="E" on="S"/>
+  <box at="12 11 19" size="1 5 2" color="E" on="S"/>
+  <cylinder at="10 7 11" size="11 9 1" color="L" on="M"/>
+  <box at="10 11 11" size="2 2 1" color="K" on="L"/>
+  <line at="16 10 0" to="16 10 25" r="0" color="W" on="B"/>
+  <prl steps="1" symmetry="()" in="M/B" out="O/B" p="0.12"/>
+  <one steps="30" symmetry="()" in="O M" out="O O"/>
+  <prl steps="1" in="B M" out="B N" p="0.8"/>
+</sequence>

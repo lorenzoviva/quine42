@@ -1,0 +1,16 @@
+<!-- Letto: scritto a mano da Claude Code (step 9). Telaio di legno, pagliericcio, coperta di lana, il cuscino e la testiera verso il fondo. -->
+<sequence values="BNnWCRP" size="20 20 20" symmetry="(xy)" name="Letto">
+  <color symbol="N" value="6b4a2e" name="legno"/>
+  <color symbol="n" value="4e3420" name="legno in ombra"/>
+  <color symbol="W" value="d8c89a" name="pagliericcio"/>
+  <color symbol="C" value="a8432f" name="coperta"/>
+  <color symbol="R" value="7e2e22" name="coperta in ombra"/>
+  <color symbol="P" value="f1ead8" name="cuscino"/>
+  <box at="10 10 0" size="14 20 4" color="N"/>
+  <box at="10 10 4" size="12 18 3" color="W"/>
+  <box at="10 13 7" size="13 12 1" color="C"/>
+  <box at="10 4 7" size="8 4 2" color="P"/>
+  <box at="10 1 4" size="14 2 8" color="N"/>
+  <prl in="C" out="R" p="0.15" steps="1"/>
+  <prl in="N/B" out="n/*" p="0.5" steps="1" symmetry="()"/>
+</sequence>

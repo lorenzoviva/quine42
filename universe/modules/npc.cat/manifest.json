@@ -7,7 +7,7 @@
   "description": "Un gatto. Probabilmente.",
   "context": "prati fioriti",
   "logic": "logic.lua",
-  "appearance": { "glyph": "c", "color": "#f0a050", "aspetto": "un gatto rosso tigrato visto dall'alto" },
+  "appearance": { "model": "animale", "glyph": "c", "color": "#f0a050", "aspetto": "un gatto rosso tigrato" },
   "physics": { "solid": false, "radius": 0.25, "speed": 2.6 },
   "components": { "wander": { "dx": 0, "dy": 0, "t": 0, "speed": 2.6 } },
   "interaction": { "type": "talk" },

@@ -11,7 +11,7 @@ import type { Kernel } from '../kernel/kernel';
 import { Avatars, buildCoronaRing, buildRoom } from './corona3d';
 import { U } from './materials';
 import { Overlay } from './overlay';
-import { buildChunk, chunkSig, disposeChunk, type ChunkView } from './terrain';
+import { buildChunk, chunkSig, disposeChunk, tileForms, type ChunkView } from './terrain';
 import { Lights, Runes, Things, Wanderer } from './things';
 
 const SKY = { day: new THREE.Color('#9cc8e8'), dusk: new THREE.Color('#e8a070'), night: new THREE.Color('#0e1424'), studio: new THREE.Color('#07070f'), corona: new THREE.Color('#05060a') };
@@ -201,15 +201,17 @@ export class Renderer {
   private syncChunks(): void {
     const k = this.kernel;
     let budget = 3;
+    // Which terrains' models are ready: chunks are built again when theirs arrive.
+    const models = Object.entries(k.palette).filter(([, t]) => t.model).map(([code]) => `${code}${tileForms(k, code) ? 1 : 0}`).join('');
     for (const ch of k.chunks.values()) {
       const v = this.chunks.get(ch.key);
-      if (v && v.sig === chunkSig(k, ch)) continue;
+      if (v && v.sig === chunkSig(k, ch, models)) continue;
       if (budget-- <= 0) continue;
       if (v) {
         this.world.remove(v.group);
         disposeChunk(v);
       }
-      const nv = buildChunk(k, ch);
+      const nv = buildChunk(k, ch, models);
       this.world.add(nv.group);
       this.chunks.set(ch.key, nv);
     }

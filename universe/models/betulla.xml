@@ -1,0 +1,60 @@
+<!-- Betulla: scolpito da gemini-3.8-flash nello step 8.2A (lab/out/mjx-38-flash-2), voti dell'Artista 8/10 -->
+<sequence values="BWKDFlLS" size="40 40 60" symmetry="(xy)" name="Betulla">
+  <!-- Tronco bianco di betulla con lenticelle scure -->
+  <color symbol="W" value="f3f1e8" name="corteccia bianca"/>
+  <color symbol="K" value="322c2b" name="macchia scura"/>
+  <color symbol="D" value="9e958d" name="corteccia ombra"/>
+  
+  <!-- Fogliame leggero e arioso -->
+  <color symbol="F" value="7ec850" name="foglie verde chiaro"/>
+  <color symbol="l" value="b2e868" name="foglie sole"/>
+  <color symbol="L" value="4e9b38" name="foglie ombra"/>
+  <color symbol="S" value="386828" name="foglie profonde"/>
+
+  <!-- Radici e base del tronco leggermente allargata -->
+  <cylinder at="20 20 0" size="5 5 4" color="W"/>
+  <!-- Tronco slanciato e sottile tipico della betulla, alto 52 voxel -->
+  <cylinder at="20 20 2" size="3 3 50" color="W"/>
+
+  <!-- Rami principali che salgono verso l'esterno -->
+  <line at="20 20 24" to="27 18 36" r="1" color="W"/>
+  <line at="20 20 26" to="13 23 37" r="1" color="W"/>
+  <line at="20 20 32" to="22 28 42" r="1" color="W"/>
+  <line at="20 20 34" to="17 12 43" r="1" color="W"/>
+  <line at="20 20 42" to="25 24 50" r="1" color="W"/>
+  <line at="20 20 44" to="15 16 51" r="1" color="W"/>
+
+  <!-- Macchie nere/brune orizzontali sulla corteccia bianca -->
+  <prl steps="1">
+    <rule in="W" out="K" p="0.12"/>
+    <rule in="W" out="D" p="0.10"/>
+  </prl>
+  <all in="KW" out="KK" steps="1"/>
+
+  <!-- Masse di chioma aerea, disposte a nuvole asimmetriche -->
+  <ellipsoid at="20 20 50" size="18 18 14" color="F" on="B"/>
+  <ellipsoid at="27 18 38" size="14 14 11" color="F" on="B"/>
+  <ellipsoid at="13 23 39" size="15 15 11" color="F" on="B"/>
+  <ellipsoid at="22 29 44" size="13 13 10" color="F" on="B"/>
+  <ellipsoid at="16 12 45" size="14 14 10" color="F" on="B"/>
+  <ellipsoid at="20 20 54" size="11 11 9" color="F" on="B"/>
+
+  <!-- Frastagliatura e leggerezza della chioma per simulare foglioline sparse -->
+  <convolution neighborhood="Moore" steps="2">
+    <rule in="F" out="B" values="B" sum="15..26" p="0.5"/>
+  </convolution>
+  <prl in="FB" out="*F" p="0.18" steps="1"/>
+
+  <!-- Ombreggiatura stilizzata RPG: luce da nord-ovest in alto, ombra verso sud-est in basso -->
+  <prl steps="1">
+    <!-- Cime e bordi superiori esposti alla luce del sole -->
+    <rule in="B F" out="B l" p="0.85"/>
+    <!-- Bordi inferiori e cavità della chioma in ombra -->
+    <rule in="F B" out="L B" p="0.75"/>
+  </prl>
+
+  <!-- Nuclei interni profondi per dare volume -->
+  <convolution neighborhood="NoCorners" steps="1">
+    <rule in="F" out="S" values="F l L S" sum="16..18"/>
+  </convolution>
+</sequence>

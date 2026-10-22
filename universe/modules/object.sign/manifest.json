@@ -7,7 +7,7 @@
   "description": "Un cartello di legno a un incrocio, con le frecce verso i luoghi vicini.",
   "context": "incroci dei sentieri",
   "lore": "I cartelli li pianta la gilda dei carrettieri; qualcuno ci incide sopra avvertimenti e scherzi.",
-  "appearance": { "glyph": "†", "color": "#c89a5a", "aspetto": "un cartello di legno su un palo, visto dall'alto" },
+  "appearance": { "model": "cartello", "glyph": "†", "color": "#c89a5a", "aspetto": "un cartello di legno su un palo" },
   "physics": { "solid": true, "radius": 0.4 },
   "interaction": { "type": "read" },
   "spawn": { "tiles": ["p"], "chance": 0.15, "max": 1 }
