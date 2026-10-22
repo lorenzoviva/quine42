@@ -24,6 +24,19 @@
         <div id="stats" class="small"></div>
       </section>
       <section>
+        <h2>Scolpisci con Gemini</h2>
+        <label>nome <input id="g-name" value="Mulino a vento" /></label>
+        <label>descrizione <input id="g-desc" value="Un piccolo mulino di pietra con le pale di legno" /></label>
+        <label>classe <select id="g-class"></select></label>
+        <label>modello <select id="g-model">
+          <option>gemini-3.1-flash-lite</option>
+          <option>gemini-3.5-flash</option>
+          <option>gemini-3.8-flash</option>
+        </select></label>
+        <button id="g-go">Scolpisci</button>
+        <div id="g-out" class="small"></div>
+      </section>
+      <section>
         <h2>Modelli</h2>
         <div id="models"></div>
       </section>

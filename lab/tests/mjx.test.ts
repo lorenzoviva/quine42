@@ -6,6 +6,11 @@ import { toMjx } from '../mjx/convert';
 import { compileMjx } from '../mjx/model';
 import { OFFICIAL } from '../mjx/official';
 import { act, clipFrames, runMjx } from '../mjx/run';
+import { extractXml, mjxSystem } from '../mjx/sculptor';
+
+const EXAMPLE_XML = Object.fromEntries(
+  Object.entries(import.meta.glob('../mjx/models/*.xml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>).map(([k, v]) => [k.replace(/^.*\/|\.xml$/g, ''), v]),
+);
 
 const letters = (g: Grid3) => Array.from(g.cells, (c) => g.alphabet[c]).join('');
 const count = (g: Grid3) => {
@@ -30,7 +35,12 @@ describe('MarkovJunior XML (lab/mjx)', () => {
   });
 
   it('says where the program is wrong', () => {
-    expect(() => compileMjx('<sequence values="BW" size="4 4 4">\n  <one in="BX" out="WW"/>\n</sequence>')).toThrow(/riga 2.*"X"/);
+    expect(() => compileMjx('<sequence values="BW" size="4 4 4">\n  <one in="BX" out="WW"/>\n</sequence>', { strict: true })).toThrow(/riga 2.*"X"/);
+    // Without strict, what the sculptors get wrong in form is mended, with a warning.
+    const m = compileMjx('<sequence values="B W W" size="4 4 4">\n  <color symbol="X" value="ff0000" part="busto"/>\n  <one in="BX" out="WW"/>\n</sequence>');
+    expect(m.warnings.join(' ')).toMatch(/spazi.*ripetuta|ripetuta.*spazi/);
+    expect(m.warnings.join(' ')).toMatch(/"X".*aggiunta/);
+    expect(m.warnings.join(' ')).toMatch(/busto/);
     expect(() => compileMjx('<sequence values="BW" size="4 4 4">\n  <one in="B" out="W">\n</sequence>')).toThrow(/riga 3/);
     expect(() => compileMjx('<sequence values="BW" size="4 4 4"><wfc/></sequence>')).toThrow(/WFC/);
     expect(() => compileMjx('<one values="BW" size="4 4 4" in="B" out="W" symmetry="(ab)"/>')).toThrow(/simmetria/);
@@ -78,6 +88,22 @@ describe('MarkovJunior XML (lab/mjx)', () => {
     expect(count(frames[3]).O ?? 0).toBeGreaterThan(count(frames[1]).O ?? 0);
     act(g, m.actions[0], 1);
     expect(count(g)['.']).toBe(27);
+  });
+
+  it('gives the sculptor the palette, the boxes and two examples of the class, and reads its answer', () => {
+    const s = mjxSystem('persona');
+    expect(s).toContain('IL PRIMO STRATO È QUELLO IN ALTO');
+    expect(s).toContain('N ab5236');
+    expect(s).toContain('persona (persona): 20×15×30');
+    expect(s).not.toMatch(/@@/);
+    expect(s).toContain('Fabbro robusto');
+    expect(extractXml('Ecco:\n```xml\n<one values="BW" in="B" out="W"/>\n```\nfine')).toBe('<one values="BW" in="B" out="W"/>');
+    expect(extractXml('<one values="BW" in="B" out="W"/>')).toBe('<one values="BW" in="B" out="W"/>');
+    // Every model the examples come from compiles and finishes.
+    for (const id of ['viandante', 'fabbro', 'gatto', 'lupo', 'pino', 'fiore', 'cespuglio', 'masso', 'falo', 'barile', 'casa']) {
+      const m = compileMjx(EXAMPLE_XML[id]);
+      expect(runMjx(m, 1).finished, id).toBe(true);
+    }
   });
 
   it('keeps the model growing, frame by frame', () => {

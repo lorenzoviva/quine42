@@ -67,21 +67,41 @@ class Compiler {
   warnings: string[] = [];
   animations: MjxClip[] = [];
   actions: MjxClip[] = [];
+  /**
+   * Strict: MarkovJunior's own checks. Otherwise the shapes models get wrong and whose meaning is clear
+   * are mended, with a warning (spaces or repeats in values, a letter used but not declared, an unknown
+   * part): models do not count characters.
+   */
+  constructor(private strict: boolean) {}
 
   fail(el: XmlElement, msg: string): never {
     throw new Mj3Error(`riga ${el.line}, <${el.name}>: ${msg}`);
   }
 
+  mend(el: XmlElement, msg: string): void {
+    if (this.strict) this.fail(el, msg);
+    this.warnings.push(`riga ${el.line}: ${msg} (riparato)`);
+  }
+
   values(el: XmlElement, s: string | undefined): string {
     if (!s) this.fail(el, 'manca "values" (le lettere della griglia; la prima è la cella vuota)');
     const seen = new Set<string>();
+    let out = '';
     for (const ch of s) {
-      if (seen.has(ch)) this.fail(el, `la lettera "${ch}" è ripetuta in values`);
-      if (!/^[A-Za-z0-9]$/.test(ch)) this.fail(el, `"${ch}" non può essere un valore (solo lettere e cifre)`);
+      if (seen.has(ch)) {
+        this.mend(el, `la lettera "${ch}" è ripetuta in values`);
+        continue;
+      }
+      if (!/^[A-Za-z0-9]$/.test(ch)) {
+        if (/\s|,/.test(ch)) this.mend(el, 'values è una parola di lettere, senza spazi né virgole');
+        else this.fail(el, `"${ch}" non può essere un valore (solo lettere e cifre)`);
+        continue;
+      }
       seen.add(ch);
       this.declared.add(ch);
+      out += ch;
     }
-    return s;
+    return out;
   }
 
   symmetry(el: XmlElement, ctx: Ctx): Sym {
@@ -99,7 +119,12 @@ class Compiler {
       if (ch === ctx.bg) out += '.';
       else if ('*/ []'.includes(ch) || ch === '.') out += ch;
       else if (ctx.values.has(ch) || ch in this.unions) out += ch;
-      else this.fail(el, `${what}: la lettera "${ch}" non è tra i values della griglia ("${[...ctx.values].join('')}")`);
+      else if (!this.strict && /^[A-Za-z0-9]$/.test(ch)) {
+        this.mend(el, `${what}: la lettera "${ch}" non era tra i values della griglia, aggiunta`);
+        ctx.values.add(ch);
+        this.declared.add(ch);
+        out += ch;
+      } else this.fail(el, `${what}: la lettera "${ch}" non è tra i values della griglia ("${[...ctx.values].join('')}")`);
     }
     return out;
   }
@@ -145,8 +170,11 @@ class Compiler {
       if (!sym || sym.length !== 1) this.fail(el, '"symbol" è una sola lettera');
       const value = el.attrs.value?.replace(/^#/, '');
       if (value !== undefined && !/^[0-9a-fA-F]{6}$/.test(value)) this.fail(el, `"value" è un colore esadecimale (rrggbb), non "${el.attrs.value}"`);
-      const part = el.attrs.part;
-      if (part !== undefined && !(PARTS as readonly string[]).includes(part)) this.fail(el, `part "${part}" sconosciuta (${PARTS.join(', ')})`);
+      let part: string | undefined = el.attrs.part;
+      if (part !== undefined && !(PARTS as readonly string[]).includes(part)) {
+        this.mend(el, `part "${part}" sconosciuta (${PARTS.join(', ')}): tolta`);
+        part = undefined;
+      }
       this.colors[sym] = {
         ...(value ? { color: `#${value.toLowerCase()}` } : {}),
         ...(el.attrs.name || el.attrs.comment ? { name: el.attrs.name ?? el.attrs.comment } : {}),
@@ -194,6 +222,14 @@ class Compiler {
       const p = this.num(r, r.attrs.p, 'p');
       const rule: Rule3 = { in: this.pattern(r, r.attrs.in, ctx, 'in'), out: this.pattern(r, r.attrs.out, ctx, 'out'), ...(p !== undefined ? { p } : {}) };
       const shape = (s: string) => s.split(' ').map((layer) => layer.split('/').map((row) => (row.match(/\[[^\]]*\]|./g) ?? []).length).join('×')).join(' | ');
+      if (!this.strict && shape(rule.in) !== shape(rule.out) || !regular(rule.in) || !regular(rule.out)) {
+        const [a, b] = pad(rule.in, rule.out);
+        if (!this.strict && (a !== rule.in || b !== rule.out)) {
+          this.mend(r, `pattern irregolari completati con "*": in "${r.attrs.in}", out "${r.attrs.out}"`);
+          rule.in = a;
+          rule.out = b;
+        }
+      }
       if (shape(rule.in) !== shape(rule.out))
         this.fail(r, `in e out devono avere la stessa forma (strati separati da spazi, righe da "/"): in ${shape(rule.in)}, out ${shape(rule.out)}`);
       if (rs !== sym) rule.symmetry = rs;
@@ -306,8 +342,32 @@ class Compiler {
 
 const CLIP_TAGS = new Set(['animation', 'action']);
 
+const cellsOf = (row: string) => row.match(/\[[^\]]*\]|./g) ?? [];
+const grid = (s: string) => s.split(' ').map((layer) => layer.split('/').map(cellsOf));
+/** Every layer with the same rows, every row with the same cells. */
+const regular = (s: string) => {
+  const g = grid(s);
+  return g.every((l) => l.length === g[0].length && l.every((r) => r.length === g[0][0].length));
+};
+/**
+ * Two patterns (engine order, bottom layer first) brought to one box, missing cells written "*": the
+ * bottom layers, back rows and left cells are kept where they are (models drop what they think obvious).
+ */
+function pad(a: string, b: string): [string, string] {
+  const ga = grid(a), gb = grid(b);
+  const dz = Math.max(ga.length, gb.length);
+  const dy = Math.max(...[...ga, ...gb].map((l) => l.length));
+  const dx = Math.max(...[...ga, ...gb].flatMap((l) => l.map((r) => r.length)));
+  const fit = (g: string[][][], out: boolean) =>
+    Array.from({ length: dz }, (_, k) => Array.from({ length: dy }, (_, j) => Array.from({ length: dx }, (_, i) => {
+      const c = g[k]?.[j]?.[i] ?? '*';
+      return out && c.startsWith('[') ? '*' : c;
+    }).join('')).join('/')).join(' ');
+  return [fit(ga, false), fit(gb, true)];
+}
+
 /** Compiles a program; `size` (the class's box) wins over the program's own. Throws Mj3Error with the line. */
-export function compileMjx(src: string, opts: { size?: Vec3 } = {}): MjxModel {
+export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean } = {}): MjxModel {
   let roots: XmlElement[];
   try {
     roots = parseXml(src);
@@ -319,7 +379,7 @@ export function compileMjx(src: string, opts: { size?: Vec3 } = {}): MjxModel {
   if (!mains.length) throw new Mj3Error('nessun programma: il primo elemento è il nodo radice (sequence, markov, one…) con values');
   if (mains.length > 1) throw new Mj3Error(`un solo nodo radice (trovati: ${mains.map((m) => `<${m.name}>`).join(', ')}); animazioni e azioni possono stare accanto`);
   const root = mains[0];
-  const c = new Compiler();
+  const c = new Compiler(opts.strict === true);
   for (const r of roots) c.collect(r);
   const values = c.values(root, root.attrs.values);
   const ctx: Ctx = { bg: values[0], sym: 'all', values: new Set(values) };
