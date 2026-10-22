@@ -21,7 +21,7 @@ Senza numero («esegui il prossimo task del backlog») vale il primo `da fare` c
 
 ## Step 9 — chiusura
 
-### T01 · Lotti e strutture: test, ADR, documenti — `da fare`
+### T01 · Lotti e strutture: test, ADR, documenti — `fatto`
 - Contesto: F7 di [`step9-3d.md`](step9-3d.md) (codice fatto: `settleLots`, `placeInside`, `floorAt`,
   `structureAt`, una struttura importante per zona, `form.wanted`).
 - Fare: test in `tests/` (gli edifici del borgo diventano strutture girate verso la porta; le caselle del lotto
@@ -29,6 +29,9 @@ Senza numero («esegui il prossimo task del backlog») vale il primo `da fare` c
   per zona, salvata; una cosa indossa il suo modello appena lo Scultore lo scrive). ADR-0043 «Lo spazio a scale:
   piano, lotti, strutture» (indice degli ADR); AGENTS.md (Il Concilio → Luogo; Architettura); diario di F7.
 - Fatto quando: test verdi, ADR e AGENTS.md scritti, commit.
+- Esito: `tests/lots.test.ts` (4 test), ADR-0043 (titolo «piano, lotti, strutture»: le ancore del piano F7 non ci
+  sono), AGENTS.md. Diverso dal previsto: i test hanno trovato un difetto di `placeInside` (la struttura contava
+  come occupante del proprio pavimento, quindi le cose `dentro` finivano sempre sulla casella del lotto), corretto.
 
 ### T02 · Azioni come regole: «Altro…» scrive un'`<action>` — `da fare` (dipende da T01)
 - Contesto: F8 del piano. Oggi «Altro…» su un'entità produce effetti (ADR-0014).

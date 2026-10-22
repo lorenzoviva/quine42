@@ -1267,9 +1267,13 @@ export class Kernel {
     if (fc) await this.forms.wait(fc.model, fc.seed, fc.tint);
     if (!this.alive(ch) || !this.ecs.alive.has(sid)) return;
     this.rebuildSolids();
-    const taken = this.ecs.query('pos').map((id) => this.ecs.get(id, 'pos'));
-    const free = this.interiorPoints(sid).filter((q) => taken.every((t) => Math.hypot(t.x - q.x, t.y - q.y) > 0.9));
-    const p = free.length ? free[hash32(sid, free.length, this.ecs.query('pos').length) % free.length] : fallback;
+    // Away from what already stands there (not the structure itself: its position is the middle of its floor);
+    // a crowded floor is still better than the lot, which may be inside the walls.
+    const taken = this.ecs.query('pos').filter((id) => id !== sid).map((id) => this.ecs.get(id, 'pos'));
+    const inside = this.interiorPoints(sid);
+    const free = inside.filter((q) => taken.every((t) => Math.hypot(t.x - q.x, t.y - q.y) > 0.9));
+    const pool = free.length ? free : inside;
+    const p = pool.length ? pool[hash32(sid, pool.length, this.ecs.query('pos').length) % pool.length] : fallback;
     spawn(p.x, p.y);
   }
 

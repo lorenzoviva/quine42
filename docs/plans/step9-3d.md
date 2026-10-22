@@ -187,7 +187,7 @@ ADR: nessuno. AGENTS.md: rimando a questo piano in «Stato e prossimi passi».
   `ancore` (cosa, dove, vicino a cosa); il kernel posa le strutture nei lotti (scatola dal lotto, rotazione verso
   l'ingresso, posizione libera nel lotto), libera le caselle del lotto, collega l'ingresso del modello (le
   lettere della porta) al sentiero del piano; le cose `dentro` vanno sul pavimento del modello.
-- ADR-0043 «Lo spazio a scale: piano, lotti, ancore». AGENTS.md: Il Concilio (Luogo), Architettura.
+- ADR-0043 «Lo spazio a scale: piano, lotti, strutture» (le ancore restano da fare). AGENTS.md: Il Concilio (Luogo), Architettura.
 
 ### F8 — Azioni come regole
 - «Altro…» su un modello può produrre una regola nuova (`<action>`): l'Ingegnere/Scultore la scrive, il kernel
@@ -352,6 +352,16 @@ giudizio è generoso (un difetto visto non abbassa il voto sotto 7): da tenere d
 - Verificato nel browser: case a graticcio sui lotti, «Apri la porta» dal menu, dentro con il tetto tagliato.
 - Manca: test dedicati ai lotti, ADR-0043, AGENTS.md; poi F8 (azioni come regole da «Altro…») e F9 (backup
   degli universi 2D, AGENTS.md riscritto, riassunto finale).
+
+### F7 — fatto (T01 del backlog)
+- `tests/lots.test.ts` (4): gli edifici del borgo diventano strutture girate verso la porta, le caselle del lotto
+  sono terreno, la struttura del Cartografo va sul lotto più grande e aspetta il suo modello; le cose dentro stanno
+  sul pavimento del modello, dove si può stare; una struttura importante per zona, salvata e riletta; una struttura
+  indossa il suo modello appena lo Scultore lo scrive.
+- Corretto un difetto trovato dai test: `placeInside` contava la struttura stessa (il suo centro è in mezzo al
+  pavimento) tra le cose già presenti, quindi nessun punto era libero e tutto finiva sulla casella del lotto, anche
+  nei muri; ora la struttura non conta e un pavimento affollato è meglio del lotto.
+- ADR-0043; AGENTS.md (Luogo, Mappa, Modelli, Lotti e strutture). Le ancore («vicino a…») non sono fatte.
 
 ### Da qui: il backlog
 Dal 22/10/2026 il lavoro va avanti in sessioni brevi, un task per sessione: ciò che resta dello step 9 è in

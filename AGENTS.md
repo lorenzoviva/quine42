@@ -145,9 +145,10 @@ interagiscono nel registro; con `E` ci si parla. Il Cartografo crea ambienti e l
 Il Narratore intreccia trame tra le persone e scrive i loro dialoghi.
 
 **Luogo** (18×18): bozza Lua continua (`g p t w r`) → piano del Cartografo (ambiente, cose `dentro`/
-`fuori`/`ovunque`, oggetti `a_terra`, rune) → layout (varchi deterministici, programma con bordo
-congelato, sentieri garantiti, edifici) → cose su celle raggiungibili, bottino `terreno`, rune su tratti
-liberi. Il chunk (0,0) ha sempre `x`, `speed = speed` e la runa magica `luce`.
+`fuori`/`ovunque`, oggetti `a_terra`, rune, `strutture`) → layout (varchi deterministici, programma con bordo
+congelato, sentieri garantiti, edifici) → lotti: ogni edificio diventa una struttura, un modello intero girato
+verso la porta (ADR-0043) → cose su celle raggiungibili (quelle `dentro` sul pavimento del modello), bottino
+`terreno`, rune su tratti liberi. Il chunk (0,0) ha sempre `x`, `speed = speed` e la runa magica `luce`.
 
 **Fucina**: concetto (tipo, contesto, aspetto, comandi, azioni, contenitore, cose portate, persona,
 unicità) → fisica → codice → Arbitro → validatore → commit → bibbia; il modello (`appearance.model` suo, con la `classe`) lo scrive poi lo Scultore; gli oggetti dei pacchetti
@@ -204,15 +205,19 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   sbagliate dagli agenti. Il codice è in `src/mj/`; il laboratorio (`lab/`, `lab/README.md`) serve ad analizzare e
   correggere i programmi che il Concilio non riesce a scrivere (sandbox 3D `/lab/3d/`, sezioni, foto, prove con Gemini).
 - **Mappa** (ADR-0011, 0040): caselle colorate per terreno, strati `ground floor wall door liquid vegetation rock`: l'acqua è
-  più bassa con le sponde, i muri sono estrusi, le porte un varco sotto l'architrave, i tetti a padiglione spariscono quando
-  si entra; sulle caselle con `TileDef.model` (bosco, roccia) stanno istanze di quel modello, ruotate e spostate.
+  più bassa con le sponde, i muri sono estrusi, le porte un varco sotto l'architrave; gli edifici dei luoghi non sono più caselle ma strutture; sulle caselle con `TileDef.model` (bosco, roccia) stanno istanze di quel modello, ruotate e spostate.
 - **Modelli** (ADR-0041): ogni cosa ha un programma della libreria `models/` (`appearance.model`, `ItemDef.model`,
   `TileDef.model`; senza, il generico della sua classe; gli oggetti senza modello il generico `oggetto` nel loro
   colore); un'istanza è un seme (pochi per tipo). `src/kernel/forms.ts`: programma + seme → griglia, impronta,
   pavimenti, azioni (in Node le esegue il kernel, nel browser i worker, che fanno anche le mesh). Componente `form`
-  `{model, seed, yaw, tint, done}`. Le cose solide bloccano con l'impronta dei loro voxel; le `<action>` del modello
+  `{model, seed, yaw, tint, done, wanted}` (`wanted`: il modello suo, indossato appena lo Scultore lo scrive). Le cose solide bloccano con l'impronta dei loro voxel; le `<action>` del modello
   sono nel menu dell'entità e restano fatte (`stato.json → forme`). Persone e animali camminano con gli arti, la
   vegetazione al vento, le `<animation>` girano; le icone sono foto dei modelli.
+- **Lotti e strutture** (ADR-0043): ogni edificio del piano è un lotto con una struttura (entità `struttura`, origine
+  `<chunk>#s<i>`): il modello `edificio`/`grande` o `struttura-<concetto>` chiesto dal Cartografo sui lotti più grandi,
+  al centro del lotto, girato verso la porta; le caselle del lotto tornano terreno. Dentro = sul pavimento del modello
+  (`placeInside`, `floorAt`, `structureAt`); il renderer taglia la struttura in cui si è. Una struttura `importante`
+  (Argon) per zona di 56 × 56 luoghi (`zoneOf`, `stato.json → importanti`).
 - **Contenuti** (ADR-0012): `ItemDef` in pacchetti; bottino per tag; contenitori; ricette; bisogni
   (`needs` sul giocatore, `sys.needs`); uso generico in `core.items`; menu azioni (`E`).
 - **Personaggi** (ADR-0010, 0013, 0017, 0020): tipo + individuo (`identity`: anche `job family routine story`), `mind` (memoria, umore, modo), azioni
