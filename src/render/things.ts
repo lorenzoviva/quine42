@@ -9,7 +9,7 @@ import type { Kernel } from '../kernel/kernel';
 import { runeGlyph, type RuneComp } from '../kernel/runes';
 import { hash32, hashStr } from '../kernel/rng';
 import { Builder } from './terrain';
-import { clipped, MAT, rgbOf, solid } from './materials';
+import { casts, clipped, MAT, rgbOf, solid } from './materials';
 import { modelObject, showFrame } from './models';
 import type { FormComp } from '../kernel/forms';
 
@@ -53,9 +53,7 @@ export function figureStandIn(color: string, scale = 1, skin = '#e8b88a', materi
   const dark = c.map((v) => v * 0.6);
   const s = scale;
   const mesh = (g: THREE.BufferGeometry) => {
-    const m = new THREE.Mesh(g, material);
-    m.castShadow = true;
-    return m;
+    return casts(new THREE.Mesh(g, material));
   };
   body.add(mesh(box(0.42 * s, 0.5 * s, 0.26 * s, c, 0.48 * s)));
   const head = new THREE.Group();
@@ -80,15 +78,11 @@ export function figureStandIn(color: string, scale = 1, skin = '#e8b88a', materi
 }
 
 function thingStandIn(color: string, r: number): THREE.Mesh {
-  const m = new THREE.Mesh(box(r * 1.8, Math.max(0.3, r * 2), r * 1.8, rgbOf(color)), MAT.world);
-  m.castShadow = m.receiveShadow = true;
-  return m;
+  return casts(new THREE.Mesh(box(r * 1.8, Math.max(0.3, r * 2), r * 1.8, rgbOf(color)), MAT.world), true);
 }
 
 function itemStandIn(color: string): THREE.Mesh {
-  const m = new THREE.Mesh(new THREE.OctahedronGeometry(0.16), solid(color, { emissive: 0.35 }));
-  m.castShadow = true;
-  return m;
+  return casts(new THREE.Mesh(new THREE.OctahedronGeometry(0.16), solid(color, { emissive: 0.35 })));
 }
 
 /** Legs swing while it walks, arms against them, the head nods a little. */

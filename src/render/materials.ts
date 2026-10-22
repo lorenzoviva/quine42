@@ -31,10 +31,34 @@ export function clipped<M extends THREE.Material>(m: M, key: string, sway = fals
     transformed.z += sway * uWind * 0.45 * cos(ph * 0.8);`
           : '#include <begin_vertex>',
       )
-      .replace('#include <project_vertex>', '#include <project_vertex>\n  vClipXZ = (modelMatrix * vec4(transformed, 1.0)).xz;');
+      // The clip follows project_vertex: instances (terrain models) are cut where they stand, not at the mesh origin.
+      .replace(
+        '#include <project_vertex>',
+        `#include <project_vertex>
+  vec4 clipP = vec4(transformed, 1.0);
+  #ifdef USE_BATCHING
+  clipP = batchingMatrix * clipP;
+  #endif
+  #ifdef USE_INSTANCING
+  clipP = instanceMatrix * clipP;
+  #endif
+  vClipXZ = (modelMatrix * clipP).xz;`,
+      );
     sh.fragmentShader = `uniform float uClipR;\nvarying vec2 vClipXZ;\n${sh.fragmentShader}`.replace('void main() {', 'void main() {\n  if (length(vClipXZ) > uClipR) discard;');
   };
   m.customProgramCacheKey = () => key;
+  m.userData.clipped = true;
+  return m;
+}
+
+/** The shadow pass draws with its own depth material: clipped too, or what is cut still casts its shadow. */
+const CLIPPED_DEPTH = clipped(new THREE.MeshDepthMaterial(), 'depth');
+
+/** A mesh that casts shadows: if its material is clipped, so is its shadow. */
+export function casts<T extends THREE.Mesh>(m: T, receive = false): T {
+  m.castShadow = true;
+  if (receive) m.receiveShadow = true;
+  if ((m.material as THREE.Material).userData?.clipped) m.customDepthMaterial = CLIPPED_DEPTH;
   return m;
 }
 

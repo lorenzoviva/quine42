@@ -9,7 +9,7 @@ import * as THREE from 'three';
 import type { Chunk, Kernel } from '../kernel/kernel';
 import { hash32 } from '../kernel/rng';
 import type { TileDef } from '../kernel/types';
-import { MAT, rgbOf } from './materials';
+import { casts, MAT, rgbOf } from './materials';
 import { geoOf, type ModelGeo } from './models';
 import type { Form } from '../kernel/forms';
 
@@ -172,14 +172,12 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): ChunkView {
   g.receiveShadow = true;
   group.add(g);
   if (!solid.empty) {
-    const s = new THREE.Mesh(solid.geometry(), MAT.world);
-    s.castShadow = s.receiveShadow = true;
-    group.add(s);
+    group.add(casts(new THREE.Mesh(solid.geometry(), MAT.world), true));
   }
   for (const { geo, mats } of instances.values()) {
     const im = new THREE.InstancedMesh(geo.body, geo.sway ? MAT.sway : MAT.world, mats.length);
     mats.forEach((m, i) => im.setMatrixAt(i, m));
-    im.castShadow = im.receiveShadow = true;
+    casts(im, true);
     im.computeBoundingSphere();
     im.userData.shared = true;
     group.add(im);

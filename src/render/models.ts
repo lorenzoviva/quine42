@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import type { Kernel } from '../kernel/kernel';
 import { instanceGrid, VPT, type Form, type FormComp } from '../kernel/forms';
 import { meshVoxels, type MeshData } from '../mj/mesh';
-import { MAT } from './materials';
+import { casts, MAT } from './materials';
 import type { Limb } from './things';
 import type { FormMeshes } from './worker';
 
@@ -66,9 +66,7 @@ export function modelObject(k: Kernel, f: Form, fc: FormComp | undefined, materi
   if (!g) return undefined;
   const mat = material ?? (g.sway ? MAT.sway : MAT.world);
   const mesh = (geo: THREE.BufferGeometry) => {
-    const m = new THREE.Mesh(geo, mat);
-    m.castShadow = m.receiveShadow = true;
-    return m;
+    return casts(new THREE.Mesh(geo, mat), true);
   };
   const root = new THREE.Group();
   const bodyMesh = mesh(fc?.done?.length ? changedBody(k, f, fc.done) : g.body);

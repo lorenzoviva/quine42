@@ -46,11 +46,15 @@ Senza numero («esegui il prossimo task del backlog») vale il primo `da fare` c
   nuova nell'azione è accettata (colore dalla palette di MarkovJunior); non fatto per oggetti portati e terreni.
   Non verificato nel browser con Gemini (nessuna UI nuova: la voce `modello:` del menu c'era già).
 
-### T03 · Bug: alberi e massi dei terreni visibili oltre il cerchio — `da fare`
+### T03 · Bug: alberi e massi dei terreni visibili oltre il cerchio — `in corso`
 - Dal to-do: «gli oggetti bloccanti (roccia, montagna) vengono spawnati anche sulla corona».
 - Causa probabile: in `src/render/materials.ts` il taglio usa `modelMatrix * transformed` senza `instanceMatrix`,
   quindi le istanze (`InstancedMesh` dei modelli dei terreni) non vengono tagliate.
 - Fare: correggere (con `USE_INSTANCING`), verificare nel browser con `?dev&teleport=46,0`.
+- Esito: in `materials.ts` il taglio segue `project_vertex` (`instanceMatrix`, `batchingMatrix`). Diverso dal previsto:
+  anche le **ombre** delle cose tagliate restavano sul pavimento della corona (il passaggio delle ombre usa un suo
+  materiale, senza taglio): ora ogni mesh della simulazione che fa ombra ha un materiale di profondità tagliato
+  (`casts`). Verificato nel browser (offline): corona senza alberi né ombre, dentro il cerchio tutto come prima.
 
 ### T04 · Aiuto (H/F1) senza meta-gioco, con i comandi del 3D — `da fare`
 - Dal to-do: «rimuovere i riferimenti meta del menu di aiuto». Il testo in `index.html` parla di codice, Concilio,
