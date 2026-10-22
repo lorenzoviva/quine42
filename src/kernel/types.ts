@@ -256,7 +256,7 @@ export interface Manifest {
   prompts?: Record<string, string>;
   tiles?: Record<string, TileDef>;
   /** Roof of buildings (generator modules). */
-  roof?: { color: string; texture?: string };
+  roof?: { color: string };
   fragments?: RuneFragment[];
   /** Content packs (data modules). */
   items?: ItemDef[];

@@ -2,13 +2,12 @@
 
 import type { Kernel, HoverInfo } from '../kernel/kernel';
 import type { Renderer } from '../render/renderer';
-import type { ImageCache } from '../render/imagetools';
 import { HOTBAR } from '../kernel/inventory';
 import { $, el } from './dom';
 import { runeGlyph } from '../kernel/runes';
 
 /** An item's sign in its colour. */
-export function itemIcon(k: Kernel, _images: ImageCache, item: string, size = 32): HTMLElement {
+export function itemIcon(k: Kernel, item: string, size = 32): HTMLElement {
   const info = k.itemInfo(item);
   return el('span', { class: 'icon', style: `width:${size}px;height:${size}px;color:${info.color};font-size:${Math.round(size * 0.7)}px` }, info.glyph);
 }
@@ -36,7 +35,6 @@ export class Hud {
   constructor(
     private kernel: Kernel,
     private renderer: Renderer,
-    private images: ImageCache,
   ) {
     kernel.bus.on('ui:message', ({ text, tone }) => this.message(text, tone));
     kernel.bus.on('ui:dialog', ({ speaker, text }) => this.showDialog(speaker, text));
@@ -122,7 +120,7 @@ export class Hud {
         ...inv.slots.slice(0, HOTBAR).map((s, i) => {
           const cell = el('div', { class: `hot${inv.equipped === i ? ' held' : ''}`, title: s ? k.itemInfo(s.item).name : '' }, el('span', { class: 'n' }, String(i + 1)));
           if (s) {
-            cell.append(itemIcon(k, this.images, s.item, 30));
+            cell.append(itemIcon(k, s.item, 30));
             if (s.count > 1) cell.append(el('span', { class: 'count' }, String(s.count)));
           }
           return cell;

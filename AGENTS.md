@@ -55,7 +55,7 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
 
 ## Stack
 
-- **Vite 5 + TypeScript 5** (strict), Canvas 2D per il mondo, DOM per HUD/pannelli.
+- **Vite 5 + TypeScript 5** (strict), **three.js** per il mondo (ADR-0040), DOM per HUD/pannelli, uno strato 2D sopra per i testi.
 - **Lua 5.4 via wasmoon** (WebAssembly), sandbox gestita dal kernel.
 - **Google Gemini**: `gemini-3.1-flash-lite` (testo), in
   `universe/universe.json → ai` con i budget (`maxText`, `maxForges`, `maxPacks`, `maxCast`),
@@ -104,7 +104,8 @@ src/
     agents/             council.ts, cartography.ts, forge.ts, genesis.ts, minds.ts, content.ts, atelier.ts, effects.ts, mechanics.ts
     ecs.ts, sandbox.ts, prelude.lua, validator.ts, runes.ts, repo.ts, universe.ts,
     inventory.ts, assets.ts, imaging.ts, bundle.ts, faults.ts, events.ts, input.ts, rng.ts, types.ts
-  render/               renderer.ts (tile, transizioni, ostacoli, tetti, animazioni), imagetools.ts, glitch.ts
+  render/               renderer.ts (three.js: camera 3/4, luce, spazi), terrain.ts (chunk, muri, tetti), things.ts (entità, viandante,
+                        rune, luci), corona3d.ts (corona, studio, avatar), overlay.ts (testi, E, passaggio del mouse), materials.ts, glitch.ts
   ui/                   hud.ts (anche il diario delle missioni), inventory.ts, actions.ts, chat.ts, feed.ts, genesis.ts, editor.ts, console.ts, studio.ts, atlas.ts
 universe/
   universe.json         nome, seme, raggio, chunk (18), modelli e budget
@@ -187,14 +188,19 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   (`forgeMechanic`), su richiesta delle sessioni del Concilio o del Referente: il kernel dà gli strumenti, non i contenuti.
 - **Menu delle caselle** (ADR-0029): `E`/clic destro su una casella → azioni dell'entità, della casella, «Altro…»;
   le azioni libere ripetibili si imparano per tipo di terreno (`TileDef.actions`).
-- **Prospettiva 3/4 e scontorno** (ADR-0030): `PERSPECTIVE` nella guida di stile, muri con faccia frontale, tetti
-  in 3/4; il magenta serve perché i modelli di immagine non danno alfa; `keyAndFit` trova lo sfondo e tiene il soggetto.
+- **Il mondo in 3D** (ADR-0040): three.js, camera fissa in 3/4 da sud (il nord è in alto, come vuole il movimento del
+  kernel), un'unità = una casella, kernel (x, y) = three.js (x, z). La simulazione (chunk, cose, rune) è in coordinate del
+  tappeto e si disegna spostata del suo scorrimento; viandante, corona e studio in coordinate reali; quando la corona si
+  vede, nulla della simulazione si disegna oltre il cerchio (un taglio nello shader). Testi, fumetti, «E», passaggio del
+  mouse e glitch su uno strato 2D sopra. Il tasto destro sceglie la casella con un raggio sul terreno.
 - **MarkovJunior** (ADR-0036, 0038): l'XML di MarkovJunior letto alla lettera (palette ufficiale, strati dall'alto,
   simmetrie, `map`, `convolution`; 16 modelli 3D ufficiali girano invariati), più `<color part hidden>`, forme di
   base, `<animation>` e `<action>` (regole sul modello finito: la porta si apre); il front-end ripara le forme
   sbagliate dagli agenti. Il codice è in `src/mj/`; il laboratorio (`lab/`, `lab/README.md`) serve ad analizzare e
   correggere i programmi che il Concilio non riesce a scrivere (sandbox 3D `/lab/3d/`, sezioni, foto, prove con Gemini).
-- **Mappa** (ADR-0011): tile con texture, strati `ground floor wall door liquid vegetation rock`, tetti.
+- **Mappa** (ADR-0011, 0040): caselle colorate per terreno, strati `ground floor wall door liquid vegetation rock`: l'acqua è
+  più bassa con le sponde, i muri sono estrusi, le porte un varco sotto l'architrave, i tetti a padiglione spariscono quando
+  si entra; ciò che sta sulle caselle di bosco e roccia è per ora un segnaposto (diventa un modello in F5).
 - **Contenuti** (ADR-0012): `ItemDef` in pacchetti; bottino per tag; contenitori; ricette; bisogni
   (`needs` sul giocatore, `sys.needs`); uso generico in `core.items`; menu azioni (`E`).
 - **Personaggi** (ADR-0010, 0013, 0017, 0020): tipo + individuo (`identity`: anche `job family routine story`), `mind` (memoria, umore, modo), azioni

@@ -3,7 +3,6 @@
 // Drag a slot onto another to swap or combine (the Council decides), out of the window to drop it.
 
 import type { Kernel } from '../kernel/kernel';
-import type { ImageCache } from '../render/imagetools';
 import { HOTBAR, totalWeight } from '../kernel/inventory';
 import { itemIcon } from './hud';
 import { $, el } from './dom';
@@ -22,7 +21,6 @@ export class InventoryPanel {
 
   constructor(
     private k: Kernel,
-    private images: ImageCache,
   ) {
     this.root.addEventListener('dragover', (e) => e.preventDefault());
     this.root.addEventListener('drop', (e) => {
@@ -82,7 +80,7 @@ export class InventoryPanel {
       const cell = el('div', { class: `cell${i === opts.sel ? ' sel' : ''}${opts.held === i ? ' held' : ''}${opts.hotbar && i < HOTBAR ? ' hotbar' : ''}`, draggable: s && opts.drag ? 'true' : 'false' });
       if (opts.hotbar && i < HOTBAR) cell.append(el('span', { class: 'n' }, String(i + 1)));
       if (s) {
-        cell.append(itemIcon(this.k, this.images, s.item, 38));
+        cell.append(itemIcon(this.k, s.item, 38));
         if (s.count > 1) cell.append(el('span', { class: 'count' }, String(s.count)));
         cell.title = this.k.itemInfo(s.item).name;
       }
@@ -225,7 +223,7 @@ export class InventoryPanel {
         const e = info.effects ?? {};
         const effects = [e.hunger && `fame ${e.hunger > 0 ? '+' : ''}${e.hunger}`, e.thirst && `sete ${e.thirst > 0 ? '+' : ''}${e.thirst}`, e.energy && `energia ${e.energy > 0 ? '+' : ''}${e.energy}`, e.health && `salute ${e.health > 0 ? '+' : ''}${e.health}`].filter(Boolean).join(' · ');
         side.append(
-          el('div', { class: 'big' }, itemIcon(k, this.images, s.item, 96)),
+          el('div', { class: 'big' }, itemIcon(k, s.item, 96)),
           el('div', { class: 'name' }, `${info.name}${s.count > 1 ? ` ×${s.count}` : ''}`),
           el('div', { class: 'descr' }, info.description),
           el('div', { class: 'props' }, `${info.category} · peso ${info.spec.weight}${info.spec.stackable ? ` · pila fino a ${info.spec.maxStack}` : ''}${info.spec.equippable ? ' · si impugna (F)' : ''}`),
@@ -321,7 +319,7 @@ export class InventoryPanel {
       if (e.tipo === 'slot') {
         const cur = slots[e.id!];
         const cell = el('div', { class: `uislot${cur ? ' full' : ''}`, title: e.accetta?.length ? `ci va: ${e.accetta.join(', ')}` : '' });
-        cell.append(cur ? itemIcon(k, this.images, cur.item, 38) : el('span', { class: 'hint' }, '+'));
+        cell.append(cur ? itemIcon(k, cur.item, 38) : el('span', { class: 'hint' }, '+'));
         cell.onclick = () => {
           if (cur) k.unequip(panelId, e.id!);
           else if (inv.slots[this.sel]) k.equip(panelId, e.id!, this.sel);

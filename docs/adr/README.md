@@ -15,9 +15,9 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0008](0008-concilio-degli-agenti-e-gemini.md) | Il Concilio degli agenti e Google Gemini | accettato; la pittura per chunk è sostituita da 0011 |
 | [0009](0009-corona-nascosta.md) | La corona è davvero nascosta finché il tappeto ti tiene | accettato |
 | [0010](0010-oggetti-inventario-personaggi.md) | Oggetti, inventario e personaggi simulati | accettato |
-| [0011](0011-tile-e-layout-markovjunior.md) | Mappe a tile e layout con regole stile MarkovJunior | accettato |
+| [0011](0011-tile-e-layout-markovjunior.md) | Mappe a tile e layout con regole stile MarkovJunior | accettato; la resa è sostituita da 0040 |
 | [0012](0012-contenuti-guidati-dai-dati.md) | Contenuti guidati dai dati: oggetti, bottino, ricette, bisogni, azioni | accettato |
-| [0013](0013-atelier-e-individui.md) | L'Atelier (immagini in contesto) e gli NPC come individui | accettato |
+| [0013](0013-atelier-e-individui.md) | L'Atelier (immagini in contesto) e gli NPC come individui | accettato; l'Atelier è sostituito da 0040 |
 | [0014](0014-azioni-libere-ed-effetti.md) | Azioni libere («Altro…») e il motore degli effetti | accettato |
 | [0015](0015-rune-magia-giorno-notte.md) | Una runa per casella, magia, incantesimi, giorno e notte | accettato |
 | [0016](0016-corona-archivio-e-concilio.md) | La corona come archivio, il Concilio in carne e ossa | accettato |
@@ -34,7 +34,7 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0027](0027-studi-neon-e-atlante.md) | Studi neon-punk, sala del Concilio, atlante navigabile | accettato |
 | [0028](0028-meccaniche-con-interfacce.md) | Meccaniche con interfacce: il Concilio aggiunge pannelli (slot, barre, pulsanti) | accettato |
 | [0029](0029-menu-delle-caselle.md) | Menu contestuale delle caselle, azioni imparate dal terreno | accettato |
-| [0030](0030-prospettiva-tre-quarti-e-scontorno.md) | Prospettiva 3/4 e scontorno delle immagini (perché il magenta) | accettato |
+| [0030](0030-prospettiva-tre-quarti-e-scontorno.md) | Prospettiva 3/4 e scontorno delle immagini (perché il magenta) | sostituito da 0040 |
 | [0031](0031-laboratorio-voxel.md) | Laboratorio voxel: MarkovJunior 3D fotografato in 3/4 (fuori dal gioco) | sostituito da 0038 (il laboratorio è di MarkovJunior) |
 | [0032](0032-scala-fotogrammi-strutture.md) | Laboratorio voxel: scala unica, fotogrammi dal modello, strutture a blocchi | sostituito da 0038 (il laboratorio è di MarkovJunior) |
 | [0033](0033-protocollo-blocchi-wfc.md) | Laboratorio voxel: protocollo tra i due scultori (catalogo, varianti, zone), WFC a bit, foto per blocchi | sostituito da 0038 (il laboratorio è di MarkovJunior) |
@@ -44,5 +44,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0037](0037-passaggio-al-3d.md) | Si passa al 3D: modelli MarkovJunior come asset, spazio a scale, via il 2D (attuazione nello step 9) | accettato |
 | [0038](0038-laboratorio-di-markovjunior.md) | MarkovJunior nel gioco (src/mj), il laboratorio diventa il laboratorio di MarkovJunior | accettato |
 | [0039](0039-registro-dei-consumi.md) | Registro dei consumi, prezzi in un file, ragionamento low, niente ripetizioni dopo un tempo scaduto | accettato |
+| [0040](0040-il-gioco-in-3d.md) | Il gioco è 3D: renderer three.js, niente immagini | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

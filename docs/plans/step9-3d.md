@@ -283,3 +283,16 @@ Piano scritto; branch `3d`.
   cache che non trova nulla (sparisce in F4).
 - Test: 123 verdi (il caso del Referente ora chiede «riscolpisci»).
 - AGENTS.md: regola 11, Stack, Concilio (Artista, Referente), Fucina e Genesi, Manifest, Costi.
+
+### F4 — fatto
+- Nuovo `src/render/`: `renderer.ts` (three.js, stessa interfaccia del 2D), `terrain.ts`, `things.ts`, `corona3d.ts`,
+  `overlay.ts`, `materials.ts`; tolti il renderer 2D e `imagetools.ts`; `index.html` ha uno strato `#overlay` sopra.
+- Verificato nel browser (`vite preview`, `?skip&offline`): il borgo di giorno e di notte, tetti, rune, segnaposto di
+  alberi e persone (una contadina che dorme, con il fumetto), il viandante che si gira; la corona (`?dev&teleport=46,0`)
+  con la simulazione tagliata al cerchio; la Sala del Concilio con il tavolo, l'universo che gira, i sette seduti.
+- Corretti durante la prova: le rune oltre il cerchio (ora anche loro tagliate), il viandante che spariva oltre il
+  cerchio (usava il materiale della simulazione), la corona buia di notte (ora ha la sua luce, come lo studio).
+- Diverso dal previsto: la camera non ruota (il movimento del kernel è relativo allo schermo e Q, R sono tasti del
+  gioco); le sale dello studio si costruiscono la prima volta che ci si entra.
+- ADR-0040 (sostituisce 0030; la resa di 0011 e l'Atelier di 0013); AGENTS.md (Stack, Struttura, Il mondo in 3D, Mappa).
+  `three` passa fra le dipendenze del gioco.

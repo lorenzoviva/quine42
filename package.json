@@ -2,7 +2,7 @@
   "name": "rune",
   "version": "0.1.0",
   "private": true,
-  "description": "RUNE — un mondo 2D top-down fatto del proprio codice sorgente.",
+  "description": "RUNE — un mondo in 3D fatto del proprio codice sorgente.",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -15,12 +15,12 @@
   "author": "lorenzoviva <lorenzo.vaccaro@hotmail.com>",
   "license": "UNLICENSED",
   "dependencies": {
+    "three": "^0.186.1",
     "wasmoon": "^1.16.0"
   },
   "devDependencies": {
     "@types/node": "^22.9.0",
     "@types/three": "^0.186.0",
-    "three": "^0.186.1",
     "typescript": "^5.6.3",
     "vite": "^5.4.10",
     "vitest": "^2.1.4"
