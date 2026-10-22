@@ -67,10 +67,15 @@ Senza numero («esegui il prossimo task del backlog») vale il primo `da fare` c
   Da notare: il pannello del Concilio (`G`, pulsante in basso a destra) resta visibile a tutti; con
   `NODE_ENV=development` nella shell `npm run build` fa una build di sviluppo (`DEV` sempre vero).
 
-### T05 · Backup degli universi 2D e push del branch — `da fare`
+### T05 · Backup degli universi 2D e push del branch — `in attesa`
 - D2 del piano: spostare `H:\projects\rune\universes\valmora`, `valmora copy 2`, `valmora new` in
   `H:\projects\rune-backup\universi-2d\` (spostati, non copiati; prima verificare la copia: numero di file e
   dimensione). Push del branch `3d` (mai su `main`).
+- Fatto (22/10/2026): copia in `H:\projects\rune-backup\universi-2d\` verificata (`valmora` 6466 file / 98 586 709
+  byte, `valmora copy 2` 2586 / 48 304 796, `valmora new` 4087 / 67 278 328; `diff -rq` senza differenze).
+- **Domande all'autore**: (1) la cancellazione degli originali in `H:\projects\rune\universes\` è stata bloccata
+  dai permessi della sessione: cancellarli a mano (`rm -rf` delle tre cartelle) o autorizzarla; (2) il repository
+  non ha nessun remote (`git remote -v` vuoto): a quale remote fare il push di `3d`, o si salta?
 
 ### T06 · Chiusura dello step 9 — `da fare` (dipende da T01-T05)
 - AGENTS.md riscritto dove descrive ancora il 2D (Visione, Regole, Corona, Personaggi, Fatto/Prossimi passi);
