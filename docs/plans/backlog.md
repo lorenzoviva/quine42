@@ -56,10 +56,16 @@ Senza numero («esegui il prossimo task del backlog») vale il primo `da fare` c
   materiale, senza taglio): ora ogni mesh della simulazione che fa ombra ha un materiale di profondità tagliato
   (`casts`). Verificato nel browser (offline): corona senza alberi né ombre, dentro il cerchio tutto come prima.
 
-### T04 · Aiuto (H/F1) senza meta-gioco, con i comandi del 3D — `da fare`
+### T04 · Aiuto (H/F1) senza meta-gioco, con i comandi del 3D — `fatto` (`de71498`)
 - Dal to-do: «rimuovere i riferimenti meta del menu di aiuto». Il testo in `index.html` parla di codice, Concilio,
   simulazione, «spezza la simulazione», caselle, sprite. Riscriverlo dentro il mondo (ADR-0025) e con i comandi
   attuali; ciò che è da giocatore trasceso solo dopo la corona.
+- Esito: aiuto riscritto in `index.html` (viandante, persone, rune, frase, magia, menu, «Altro…», inventario,
+  comandi del 3D: mouse, tasto destro, rotella, `X`, `V`); la sezione «Oltre il bordo» (`#help-beyond`: tappeto,
+  corona, Concilio, rune come Lua, `G`, console) si vede solo con `kernel.exitedOnce` o `?dev`. Anche la barra dei
+  tasti (`R` torna com'era, `H` aiuto) e il messaggio di `V`. Verificato nel browser (offline), nei due casi.
+  Da notare: il pannello del Concilio (`G`, pulsante in basso a destra) resta visibile a tutti; con
+  `NODE_ENV=development` nella shell `npm run build` fa una build di sviluppo (`DEV` sempre vero).
 
 ### T05 · Backup degli universi 2D e push del branch — `da fare`
 - D2 del piano: spostare `H:\projects\rune\universes\valmora`, `valmora copy 2`, `valmora new` in
@@ -78,7 +84,9 @@ impossibili, trame che non rispettano le persone, allusioni alla quarta parete, 
 diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
 [`docs/userchats/to-do-2026-10-22.md`](../userchats/to-do-2026-10-22.md) (sezione «Incoerenze personaggi e trame»).
 
-### T07 · Decisione: Graphify e il grafo del mondo — `in attesa` di T06
+### T07 · Decisione: Graphify e il grafo del mondo — `da fare` (dipende da T06)
+- **Risposta dell'autore** (22/10/2026): approvato il grafo nativo del kernel («in casa») per l'uso (b); resta da
+  provare Graphify per (a) e scrivere l'ADR.
 - Due usi distinti, da non confondere: (a) **sviluppo**: Graphify (CLI open source che fa del repository un
   grafo interrogabile, con `graph.html` e un server MCP) per gli agenti che scrivono il codice; (b) **gioco**: un
   grafo dei contenuti dell'universo (persone, legami, luoghi, trame, oggetti, rune, regole, fatti) che il Concilio
