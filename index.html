@@ -30,8 +30,8 @@
           <span><kbd>V</kbd> calpestabile</span>
           <span><kbd>Q</kbd> incidi le rune</span>
           <span><kbd>T</kbd> pronuncia (magia)</span>
-          <span><kbd>R</kbd> rollback</span>
-          <span><kbd>F1</kbd> aiuto</span>
+          <span><kbd>R</kbd> torna com'era</span>
+          <span><kbd>H</kbd> aiuto</span>
         </div>
       </div>
     </div>
@@ -41,33 +41,45 @@
 
     <div id="help" hidden>
       <h2>RUNE</h2>
-      <p>Cammini e cammini, ma resti sempre al centro: un <b>tappeto</b> scorre sotto i tuoi passi e ti riporta indietro.
-        Il mondo attorno a te è scritto, dipinto e abitato da un <b>Concilio</b> di intelligenze generative: il Narratore, il Cartografo,
-        l'Artista, il Fisico, l'Ingegnere e l'Arbitro, che controlla che tutto resti coerente.</p>
-      <p>I segni luminosi nel terreno sono <b>rune</b>: ognuna è una parola vera del codice. Ciò che è scritto sul tappeto <b>si esegue</b>, sempre.
-        Rune che si toccano in orizzontale formano una riga di Lua. Passa il mouse su una runa per leggerne il valore.</p>
-      <p>Le rune sono <b>oggetti</b>: raccolte, finiscono nella <b>borsa delle rune</b>. Dalla borsa (<kbd>I</kbd>) componi la <b>frase</b>: le rune che userai, nell'ordine.
-        Alcune rune sono anche <b>magia</b> (luce, fuoco, acqua, terra, vita, scudo, vento): <kbd>T</kbd> pronuncia quelle della frase e le <b>consuma</b>.
-        Più rune insieme sono un incantesimo nuovo: la prima volta il Concilio decide cosa fa. Costa <b>mana</b>; da tre rune in su serve anche un
-        <b>cristallo magico</b> (si trovano nelle case e nelle casse, e assorbiti ridanno mana).</p>
+      <p>Sei un viandante. Il paese, le strade, i boschi attorno sono abitati: le persone hanno una famiglia, un mestiere e una giornata,
+        le vedrai lavorare, dormire, parlarsi. Ricordano ciò che fai e dici, e tra loro succedono cose. Alcune ti affideranno una
+        <b>missione</b> (in alto a destra il diario).</p>
+      <p>Nel terreno, qua e là, brillano le <b>rune</b>. Raccolte finiscono nella <b>borsa delle rune</b>; dalla borsa (<kbd>I</kbd>) componi la
+        <b>frase</b>: le rune che userai, nell'ordine. Alcune sono <b>magia</b> (luce, fuoco, acqua, terra, vita, scudo, vento): <kbd>T</kbd>
+        pronuncia quelle della frase e le <b>consuma</b>. Più rune insieme sono un incantesimo nuovo: cosa fa lo scoprirai la prima volta.
+        Costa <b>mana</b>; da tre rune in su serve anche un <b>cristallo magico</b> (si trovano nelle case e nelle casse, e assorbiti ridanno mana).
+        <kbd>Q</kbd> incide la frase nel terreno davanti a te: ciò che è scritto in fila accade.</p>
       <ul>
-        <li><kbd>E</kbd> raccoglie rune e oggetti; davanti a cose e persone apre il menu: parlare (scrivi liberamente), aprire mobili e casse, esaminare, fare ciò che quell'oggetto permette.
-          <b>Altro…</b> ti fa scrivere cosa vuoi fare: il Concilio giudica se è possibile, e se lo è l'oggetto lo impara.
-          Ogni casella ha il suo menu (<kbd>E</kbd> su quella davanti, <b>tasto destro</b> su una vicina): ciò che c'è sopra, e «Altro…» per la casella stessa (scavare, attingere, tagliare…).</li>
-        <li>Fame, sete ed energia calano: mangia, bevi, dormi. <kbd>V</kbd> mostra in rosso ciò che non si può attraversare.</li>
-        <li><kbd>I</kbd> apre l'inventario: trascina per riordinare, su un altro oggetto per scambiare o <b>combinare</b>, fuori dalla finestra per posare. Sacche e borse si <b>aprono</b>.
-          Ogni oggetto ha <b>Altro…</b> per usarlo come vuoi; la scheda <b>Crea</b> mostra le ricette e ha <b>Altro…</b> per inventarne una. Ciò che il Concilio decide diventa una <b>regola</b> del mondo.</li>
-        <li><kbd>1</kbd>–<kbd>6</kbd> impugnano (o usano) gli oggetti della prima riga; <kbd>F</kbd> usa ciò che impugni su ciò che hai davanti.</li>
-        <li><kbd>Q</kbd> incide sul tappeto, davanti a te, tutte le rune che hai in mano, in ordine. <kbd>Z</kbd>/<kbd>C</kbd> le scelgono, con <kbd>⇧</kbd> le spostano.</li>
-        <li>Una riga che non ha senso <b>spezza la simulazione</b>. Rimetti a posto le rune, o premi <kbd>R</kbd>: il mondo torna all'ultimo commit valido.</li>
-        <li>Consiglio: per raccogliere da una riga senza romperla, togli prima le rune <i>nel mezzo</i>.</li>
+        <li><kbd>WASD</kbd> o le frecce per camminare. Passa il mouse su cose, persone e rune per sapere cosa sono.</li>
+        <li><kbd>E</kbd> (o <kbd>Spazio</kbd>) raccoglie rune e oggetti; davanti a cose e persone apre il menu: parlare (scrivi liberamente),
+          aprire mobili e casse, esaminare, fare ciò che quella cosa permette. Anche il terreno ha il suo menu: <kbd>E</kbd> su quello davanti
+          a te, <b>tasto destro</b> su un punto vicino (scavare, attingere, tagliare…).</li>
+        <li><b>Altro…</b>, in ogni menu, ti fa scrivere cosa vuoi fare: se è possibile accade, e da allora si può fare sempre. Ciò che si scopre
+          così diventa una <b>regola</b> del mondo.</li>
+        <li><kbd>I</kbd> (o <kbd>Tab</kbd>) apre l'inventario: trascina per riordinare, su un altro oggetto per scambiare o <b>combinare</b>, fuori
+          dalla finestra per posare. Sacche e borse si <b>aprono</b>. La scheda <b>Crea</b> mostra le ricette e ha <b>Altro…</b> per inventarne una.</li>
+        <li><kbd>1</kbd>–<kbd>6</kbd> impugnano (o usano) gli oggetti della prima riga; <kbd>F</kbd> usa ciò che impugni su ciò che hai davanti;
+          <kbd>X</kbd> posa.</li>
+        <li><kbd>Z</kbd>/<kbd>C</kbd> o la rotella scelgono una runa della frase, con <kbd>⇧</kbd> la spostano.</li>
+        <li><kbd>V</kbd> mostra in rosso dove non si passa.</li>
+        <li>Se qualcosa si guasta, rimetti a posto le rune o premi <kbd>R</kbd>: il mondo torna com'era prima.</li>
+        <li>Consiglio: per raccogliere da una fila di rune senza romperla, togli prima quelle <i>nel mezzo</i>.</li>
       </ul>
-      <p>Le persone hanno una famiglia, un mestiere e una giornata: le vedrai lavorare, dormire, parlarsi; ricordano ciò che fai
-        e dici, e tra loro succedono cose. Alcune ti affideranno una missione (in alto a destra il diario).</p>
-      <p>Attento a fame e sete: se muori, il viaggio finisce (puoi ricominciare nello stesso mondo).</p>
-      <p>Se riesci a fermare il tappeto, potrai camminare fino al bordo. E oltre: lo studio dove il Concilio fa il mondo, e dove
-        nessuno muore. Nella Sala del Concilio, ognuno ha alle spalle un teletrasporto per la sua sala.</p>
-      <p class="dim"><kbd>G</kbd> mostra/nasconde il Concilio. Esc chiude.</p>
+      <p>Fame, sete ed energia calano: mangia, bevi, dormi. Se muori, il viaggio finisce (puoi ricominciare nello stesso mondo).</p>
+      <div id="help-beyond" hidden>
+        <h3>Oltre il bordo</h3>
+        <p>Hai fermato il <b>tappeto</b> che ti riportava sempre al centro, e hai visto la <b>corona</b>: lo studio dove il <b>Concilio</b> fa il mondo.
+          Il Narratore, il Cartografo, l'Artista, lo Scultore, il Fisico, l'Ingegnere e l'Arbitro scrivono storia, luoghi, persone,
+          forme e codice; il Referente porta loro le tue richieste. Qui nessuno muore e non si perde nulla.</p>
+        <p>Ogni runa è una parola vera del codice: rune che si toccano in orizzontale sul tappeto formano una riga di Lua, che si esegue
+          a ogni istante. Una riga che non ha senso <b>spezza la simulazione</b>; <kbd>R</kbd> torna all'ultimo stato valido.</p>
+        <ul>
+          <li>Ogni edificio è una cartella: <kbd>E</kbd> alla porta per entrare, <kbd>E</kbd> su un membro del Concilio per parlarci.
+            Nella Sala del Concilio, ognuno ha alle spalle un teletrasporto per la sua sala.</li>
+          <li><kbd>G</kbd> mostra o nasconde il registro del Concilio; <kbd>F2</kbd> (o <kbd>\</kbd>) apre la console.</li>
+        </ul>
+      </div>
+      <p class="dim"><kbd>H</kbd> o <kbd>F1</kbd> apre e chiude questo aiuto. Esc chiude.</p>
     </div>
 
     <div id="actions" hidden></div>

@@ -180,6 +180,7 @@ async function main() {
   kernel.input.onAny = () => sfx.unlock();
   const intro = $('#intro');
   const help = $('#help');
+  const helpBeyond = $('#help-beyond');
   const startGame = () => {
     if (intro.hidden) return;
     intro.classList.add('out');
@@ -251,9 +252,11 @@ async function main() {
         break;
       case 'walk':
         renderer.showWalk = !renderer.showWalk;
-        hud.message(renderer.showWalk ? 'Caselle invalicabili in rosso (V per nascondere).' : 'Vista normale.');
+        hud.message(renderer.showWalk ? 'In rosso, dove non si passa (V per nascondere).' : 'Vista normale.');
         break;
       case 'help':
+        // What lies beyond the edge (the Council, the code) is told only to those who have been there.
+        helpBeyond.hidden = !dev && !kernel.exitedOnce;
         help.hidden = !help.hidden;
         break;
       case 'console':

@@ -109,6 +109,7 @@ kbd { display: inline-block; border: 1px solid #2b4a3a; border-bottom-width: 2px
 #help h2 { margin: 0 0 8px; color: var(--code); letter-spacing: 0.3em; }
 #help b { color: var(--gold); font-weight: normal; }
 #help li { margin: 4px 0; }
+#help h3 { margin: 14px 0 4px; color: var(--code); letter-spacing: 0.15em; font-weight: normal; }
 #help .dim { color: var(--dim); }
 
 /* Editor & console */
