@@ -27,3 +27,16 @@ vivono il mondo — e non vanno mischiati.
 
 ## Conseguenze
 - Dentro il mondo tutto è reale per chi ci vive; il codice, il Concilio e lo studio restano nella corona.
+
+## Aggiornamento (23/10/2026, T09): allusioni e doppioni
+L'analisi dell'autore (`docs/userchats/to-do-2026-10-22.md`) ha trovato rotture più sottili, travestite da
+leggenda: chi torna sempre in piazza (il tappeto), il re sotto il lago che osserva ogni viandante (il giocatore),
+il confine del bosco che nessuno supera (il mondo finito), un «simbolo luminoso» nel terreno che fa le veci delle
+rune (un doppione che inventa comportamenti).
+- La Genesi non invita più al mistero né racconta la leggenda della piazza: tema e bibbia del seme semplici, le rune
+  come dice il canone (T08), 2-4 leggende della gente «mai sul mondo stesso».
+- I principi del Concilio nominano questi esempi e vietano i doppioni degli elementi del gioco; il filtro
+  (`metaBreak`) li riconosce, e `bibleBreaks`/`cleanBible` lo applicano alla bibbia (la Genesi la chiede di nuovo,
+  poi la ripulisce); le trame nuove si chiedono di nuovo una volta, poi si scartano.
+- La revisione ha un marcatore con versione (`revisione|quarta-parete-2`): gli universi già rivisti vengono rivisti
+  di nuovo, con la bibbia intera (anche `misteri`) e le trame (quelle che rompono la parete si tolgono).

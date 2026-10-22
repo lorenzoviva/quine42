@@ -16,15 +16,15 @@ const PLACES: Record<string, { nouns: string[]; descr: string[] }> = {
   },
   water: {
     nouns: ['Lago', 'Guado', 'Stagno', 'Palude'],
-    descr: ["L'acqua riflette un cielo che non è quello sopra di te.", 'Le onde arrivano a riva a intervalli regolari. Troppo regolari.', 'Sul fondo, lettere luminose si muovono piano.'],
+    descr: ["L'acqua è fredda e limpida.", 'Le onde arrivano a riva lente, portando foglie.', 'Sul fondo si vedono sassi lisci e qualche pesce.'],
   },
   rock: {
     nouns: ['Colle', 'Rupe', 'Altura', 'Cava'],
-    descr: ['Le pietre sono incise con segni che sembrano parole.', "Da quassù l'orizzonte sembra sempre alla stessa distanza.", "L'eco ripete i tuoi passi, ma in ritardo."],
+    descr: ['Le pietre sono coperte di muschio.', 'Da quassù si vedono i tetti del borgo.', "L'eco ripete i tuoi passi."],
   },
   plain: {
     nouns: ['Piana', 'Radura', 'Prato', 'Campagna', 'Borgo'],
-    descr: ["L'erba si piega verso il centro del mondo.", 'Hai la sensazione di essere già stato qui.', 'Cammini da ore, eppure il paesaggio ti segue.', 'Qualcuno ha lasciato segni luminosi nel terreno.'],
+    descr: ["L'erba si piega al vento.", 'Un sentiero di pecore attraversa il prato.', 'In lontananza suona una campana.', 'Qualcuno ha lasciato un cesto vuoto sul sasso.'],
   },
 };
 const SUFFIX = ['di Valmora', 'dei Sussurri', 'del Re Muto', 'delle Lanterne', 'Senza Ritorno', "dell'Eco", 'del Primo Passo', 'delle Rune', 'del Nastro', 'Immobile'];
@@ -103,7 +103,7 @@ export class MockModels implements Models {
       case 'text.read':
         return { testo: this.sign(d.facts ?? {}, d.what?.name ?? '') };
       case 'genesis.bible':
-        return { misteri: ['le rune che affiorano nei campi dopo la pioggia', 'la strada che riporta in piazza'], titolo: 'Il Regno di Valmora', tono: 'meraviglia e un filo di mistero', sintesi: 'Un regno quieto in cui tutti tornano sempre in piazza.', storia: '', luoghi: ['Piazza di Valmora'], personaggi: ['Abitanti di Valmora'], fatti: ['Il pane del forno di piazza è famoso in tutto il regno.'] };
+        return { misteri: ['i vecchi non calpestano le rune: dicono che porti sfortuna'], titolo: 'Il Regno di Valmora', tono: 'concreto e caldo', sintesi: 'Un regno quieto di prati, boschi e borghi.', storia: '', luoghi: ['Piazza di Valmora'], personaggi: ['Abitanti di Valmora'], fatti: ['Il pane del forno di piazza è famoso in tutto il regno.'] };
       case 'genesis.style':
         return { stile: 'voxel medievale, semplice e caldo', forme: 'persone tozze dalla testa grande, case basse', palette: ['verde', 'ocra', 'blu'], luce: 'diurna morbida', regole: ['niente testo'], protagonista: 'un viandante incappucciato' };
       case 'model.sculpt':
@@ -276,7 +276,7 @@ export class MockModels implements Models {
         const [x, y, z] = [names[0], names[1] ?? names[0], names[2] ?? names[0]];
         return {
           titolo: 'Il rumore sotto la piazza',
-          mistero: `${x} scava di notte sotto la piazza: cerca una runa che fermi il tempo. ${y} lo sa e lo copre.`,
+          mistero: `${x} scava di notte sotto la piazza: cerca una runa che suo nonno avrebbe sepolto lì. ${y} lo sa e lo copre.`,
           coinvolti: [x, y, z],
           tappe: [
             { giorno: 0, momento: 'notte', chi: x, dove: 'piazza', cosa: 'scava in silenzio vicino al pozzo', battuta: 'Ancora un poco…', indizio: 'terra smossa vicino al pozzo' },
@@ -430,7 +430,7 @@ export class MockModels implements Models {
       interazione: tipo === 'npc' ? 'parla' : tipo === 'oggetto' ? 'usa' : 'nessuna',
       comandi: tipo === 'strumento' ? [edible ? { azione: 'usa', descrizione: 'mangialo' } : { azione: 'azione', descrizione: 'usalo su ciò che hai davanti' }] : [],
       unico: tipo === 'npc' && !/gatto|cane|pecora|uccello|corvo/.test(req.prompt.toLowerCase()),
-      persona: tipo === 'npc' ? `Sei ${nome}, ${req.prompt}. Parli poco, con frasi semplici. Sai che chi cammina torna sempre in piazza, ma non ne parli volentieri.` : undefined,
+      persona: tipo === 'npc' ? `Sei ${nome}, ${req.prompt}. Parli poco, con frasi semplici. Conosci bene i sentieri attorno al borgo.` : undefined,
       tags: tipo === 'oggetto' ? ['tagliabile'] : [],
       azioni: tipo === 'oggetto' ? [{ id: 'tocca', etichetta: `Tocca ${nome.toLowerCase()}` }] : [],
       contenitore: tipo === 'oggetto' && /madia|cassa|credenza|armadio|baule|cesta|scaffale/.test(req.prompt) ? { capienza: 6, bottino: 'cucina' } : undefined,

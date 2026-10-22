@@ -270,15 +270,16 @@ const PLOT_SCHEMA: Schema = {
  * The Narrator weaves a horizontal plot among people who exist, in places that exist: a mystery,
  * beats tied to their routines and relations over a few days, clues, maybe a request for the wanderer.
  */
-export async function weavePlot(c: Council, society: string, places: string, recent: string): Promise<any> {
+export async function weavePlot(c: Council, society: string, places: string, recent: string, feedback = ''): Promise<any> {
   return c.ask<any>(
     'narratore',
     'plot.weave',
     [
-      'Intreccia una trama orizzontale tra le persone di questo mondo, alla maniera di Westworld: un mistero che si scopre poco a poco, che coinvolge 2-4 persone secondo i loro legami e le loro giornate, in luoghi che esistono. Il mistero sta dentro il mondo (amori, debiti, segreti di famiglia, furti, maledizioni, tesori, rivalità, magia): mai codice o simulazioni.',
+      'Intreccia una trama orizzontale tra le persone di questo mondo, alla maniera di Westworld: una storia semplice che si scopre poco a poco, che coinvolge 2-4 persone secondo i loro legami e le loro giornate, in luoghi che esistono. Sta dentro il mondo (amori, debiti, segreti di famiglia, furti, feste, tesori, rivalità, magia delle rune come la dice il canone): mai allusioni al gioco (chi torna sempre in piazza, chi osserva ogni viandante, confini che nessuno supera) né altri simboli luminosi nel terreno.',
       `PERSONE\n${society}`,
       `LUOGHI E REGIONI\n${places}`,
       recent ? `COSE SUCCESSE DI RECENTE\n${recent}` : '',
+      feedback ? `DA CORREGGERE\n${feedback}` : '',
       'Dai 3-6 tappe nei prossimi giorni (chi fa cosa, dove, quando, cosa si lascia sfuggire, quale indizio lascia). Se ha senso, una persona chiede aiuto al viandante (una missione semplice: portare un oggetto, andare in un luogo, parlare con qualcuno). Usa solo nomi esistenti.',
     ]
       .filter(Boolean)

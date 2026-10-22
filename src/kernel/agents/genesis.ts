@@ -7,6 +7,7 @@ import type { FileMap, LayoutDef, TileDef, TileLayer } from '../types';
 import type { AgentId, Bible, Council } from './council';
 import { designLayouts } from './cartography';
 import { repairProgram } from '../mj';
+import { bibleBreaks, cleanBible } from '../fourthwall';
 
 /** Codes the procedural draft and the kernel rely on: every palette must define them. */
 export const BASE_CODES: Record<string, { meaning: string; layer: TileLayer; solid: boolean; indoor?: boolean }> = {
@@ -48,7 +49,7 @@ const BIBLE_SCHEMA: Schema = {
     luoghi: { type: 'ARRAY', items: { type: 'STRING' } },
     personaggi: { type: 'ARRAY', items: { type: 'STRING' } },
     fatti: { type: 'ARRAY', items: { type: 'STRING' } },
-    misteri: { type: 'ARRAY', items: { type: 'STRING' }, description: 'leggende e misteri raccontati dalla gente del mondo' },
+    misteri: { type: 'ARRAY', items: { type: 'STRING' }, description: 'leggende raccontate dalla gente del mondo (persone, bestie, dei, re del passato)' },
   },
   required: ['titolo', 'tono', 'sintesi', 'storia', 'luoghi', 'personaggi', 'fatti', 'misteri'],
 };
@@ -190,7 +191,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     c.ask<Bible>(
       'narratore',
       'genesis.bible',
-      `Crea la bibbia di un nuovo universo a partire da questo tema:\n${theme}\n\nPer chi ci vive il mondo è reale (niente riferimenti a codice o simulazioni: vedi i principi). Nel terreno affiorano a volte antichi glifi luminosi (le rune) e chi cammina troppo a lungo si ritrova in piazza: dentro il mondo hanno spiegazioni del mondo (magia, leggende). Elenca 6-10 luoghi, 4-6 personaggi con mestieri concreti, 6-10 fatti, 4-6 misteri o leggende raccontati dalla gente.${feedback ? `\nL'Arbitro ha obiettato: ${feedback}` : ''}`,
+      `Crea la bibbia di un nuovo universo a partire da questo tema:\n${theme}\n\nPer chi ci vive il mondo è reale (vedi i principi). Scrivi un mondo semplice e concreto, fatto di persone e mestieri. Le rune sono come le dice il canone: non aggiungere nulla. Elenca 6-10 luoghi, 4-6 personaggi con mestieri concreti, 6-10 fatti, 2-4 leggende raccontate dalla gente (storie di persone, bestie, dei, re del passato: mai sul mondo stesso, né sulle rune oltre il canone).${feedback ? `\nL'Arbitro ha obiettato: ${feedback}` : ''}`,
       BIBLE_SCHEMA,
       { data },
     );
@@ -211,7 +212,18 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
       { data: { ...data, bible } },
     );
 
-  let bible = await askBible();
+  // A bible of the world, not of the Council's table: asked once more if it breaks the fourth wall, then cleaned.
+  const worldBible = async (feedback = '') => {
+    let b = await askBible(feedback);
+    const breaks = bibleBreaks(b);
+    if (breaks.length) {
+      const why = `rompe la quarta parete o duplica le rune: ${breaks.slice(0, 4).join('; ')}. Dentro il mondo nessuno sa di essere in un gioco.`;
+      c.say('kernel', 'scarta', why, 'narratore');
+      b = await askBible([feedback, why].filter(Boolean).join('; '));
+    }
+    return cleanBible(b);
+  };
+  let bible = await worldBible();
   c.say('narratore', 'propone', `«${bible.titolo}» — ${bible.sintesi}`);
   let style = await askStyle(bible);
   c.say('artista', 'propone', `${style.stile}; ${style.forme}; luce ${style.luce}`);
@@ -256,7 +268,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     for (const p of review.problemi.slice(0, 4)) c.say('arbitro', 'obietta', p.problema, p.agente);
     const issues = (a: AgentId) => review.problemi.filter((p) => p.agente === a).map((p) => p.problema).join('; ');
     if (issues('narratore')) {
-      bible = await askBible(issues('narratore'));
+      bible = await worldBible(issues('narratore'));
       c.say('narratore', 'corregge', bible.sintesi);
     }
     if (issues('artista')) {

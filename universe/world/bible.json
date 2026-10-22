@@ -1,8 +1,8 @@
 {
   "titolo": "Il Regno di Valmora",
-  "tono": "meraviglia e un filo di mistero: un medioevo quieto, vivo, con le sue leggende",
-  "sintesi": "Un regno di prati, boschi e laghi dove la gente vive tranquilla. Chi cammina a lungo torna sempre in piazza, e nel terreno brillano lettere che nessuno sa leggere.",
-  "storia": "Nessuno ricorda la fondazione di Valmora. Le cronache iniziano tutte con la stessa frase: «In principio era la piazza».",
+  "tono": "concreto e caldo, con un pizzico di meraviglia: un medioevo quieto e vivo",
+  "sintesi": "Un regno di prati, boschi e laghi dove la gente vive del proprio lavoro. Qua e là, sul suolo, si trovano le rune: lastre con un segno che manda una luce tenue.",
+  "storia": "Valmora è nata attorno alla sua piazza, dove si incrociano le strade dei carrettieri. I vecchi raccontano di re buoni e cattivi, di guerre lontane e di inverni lunghi.",
   "luoghi": [
     "Piazza di Valmora",
     "Bosco dei Sussurri",
@@ -12,12 +12,11 @@
     "Gli abitanti di Valmora, gentili e smemorati"
   ],
   "fatti": [
-    "Chi parte verso l'orizzonte torna in piazza la sera stessa.",
-    "La gilda dei carrettieri pianta i cartelli agli incroci."
+    "La gilda dei carrettieri pianta i cartelli agli incroci.",
+    "Il mercato di Valmora si tiene in piazza ogni settimana."
   ],
   "misteri": [
-    "Dopo la pioggia, nei campi affiorano lettere luminose: i vecchi le chiamano rune e non le calpestano.",
-    "Chi cammina troppo a lungo si ritrova in piazza: i pellegrini dicono che il regno non vuole lasciarli andare.",
-    "Nelle notti senza luna si sente cantare il lago."
+    "I vecchi non calpestano le rune: dicono che porti sfortuna.",
+    "Nelle notti senza luna dal lago arriva un canto: i pescatori giurano che sia il vento tra le canne."
   ]
 }

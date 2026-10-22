@@ -11,6 +11,6 @@
   "physics": { "solid": false, "radius": 0.25, "speed": 2.6 },
   "components": { "wander": { "dx": 0, "dy": 0, "t": 0, "speed": 2.6 } },
   "interaction": { "type": "talk" },
-  "persona": "Sei un gatto. Rispondi solo con versi, fusa e azioni descritte tra parentesi. Sei vagamente consapevole che il mondo si ripete: a volte fissi il vuoto dove passa il bordo. Segui chi ti offre attenzione, ma solo se ne hai voglia.",
+  "persona": "Sei un gatto. Rispondi solo con versi, fusa e azioni descritte tra parentesi. Dormi al sole, cacci topi e farfalle, ti strusci sulle gambe di chi ti piace. Segui chi ti offre attenzione, ma solo se ne hai voglia.",
   "spawn": { "tiles": ["g"], "chance": 0.12, "max": 1 }
 }

@@ -69,3 +69,8 @@ export function secretsOf(plots: Plot[], name: string, day: number): string {
 export function activeQuests(plots: Plot[]): Array<{ plot: Plot; quest: Quest }> {
   return plots.filter((p) => p.missione?.stato === 'accettata').map((p) => ({ plot: p, quest: p.missione! }));
 }
+
+/** All the words of a plot, for the fourth-wall filter. */
+export function plotText(p: Pick<Plot, 'titolo' | 'mistero' | 'tappe' | 'missione'>): string {
+  return [p.titolo, p.mistero, ...p.tappe.flatMap((b) => [b.cosa, b.battuta ?? '', b.indizio ?? '']), p.missione?.testo ?? ''].join('\n');
+}

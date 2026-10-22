@@ -10,13 +10,13 @@ import { apiErrors, validateEffects, Validator } from './validator';
 import { Repo, type KeyValueStore } from './repo';
 import { Corona, type CoronaCell, type Exhibit, type StudioItem } from './corona';
 import { Archive } from './archive';
-import { metaBreak } from './fourthwall';
+import { bibleBreaks, cleanBible, metaBreak } from './fourthwall';
 import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, placeRegion, readAtlas, regionAt, writeAtlas, type Region } from './atlas';
 import { STAMP_SHAPES } from './stamps';
 import { repairProgram } from './mj';
 import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './universes';
 import { addPerson, dayPhase, defaultRoutine, greeting, inferActivity, memorySummary, readPeople, remember, societySummary, type Activity, type DayPhase, type Person } from './society';
-import { activeQuests, PLOTS_FILE, readPlots, secretsOf, writePlots, type Plot } from './plots';
+import { activeQuests, plotText, PLOTS_FILE, readPlots, secretsOf, writePlots, type Plot } from './plots';
 import { Input } from './input';
 import { discoverModules, readConfig } from './universe';
 import { CARPET_TOKENS, cellIndex, extractLines, tokenize, type RuneComp, type RuneLine } from './runes';
@@ -3563,6 +3563,14 @@ export class Kernel {
     let raw;
     try {
       raw = await weavePlot(this.council, societySummary(society, 20), places, recent);
+      const meta = metaBreak(plotText({ titolo: String(raw?.titolo ?? ''), mistero: String(raw?.mistero ?? ''), tappe: Array.isArray(raw?.tappe) ? raw.tappe : [], missione: raw?.missione }));
+      if (meta) {
+        const why = `la trama «${raw?.titolo ?? ''}» rompe la quarta parete o duplica le rune («${meta}»): dentro il mondo nessuno sa di essere in un gioco, e le rune sono solo quelle del canone.`;
+        this.council.say('kernel', 'scarta', why, 'narratore', 'plot.weave');
+        raw = await weavePlot(this.council, societySummary(society, 20), places, recent, why);
+        const again = metaBreak(plotText({ titolo: String(raw?.titolo ?? ''), mistero: String(raw?.mistero ?? ''), tappe: Array.isArray(raw?.tappe) ? raw.tappe : [], missione: raw?.missione }));
+        if (again) throw new Error(`ancora fuori dal mondo («${again}»)`);
+      }
     } catch (e) {
       this.council.say('narratore', 'errore', `trama: ${(e as Error).message}`, undefined, 'plot.weave');
       return undefined;
@@ -4007,14 +4015,19 @@ export class Kernel {
   /**
    * Once per universe, the Arbiter reviews what the Council created before the two tables were kept
    * apart (ADR-0025): characters or things that break the fourth wall, and duplicates, are retired
-   * (their files removed, the bible cleaned). The universe's history keeps them, recoverable.
+   * (their files removed, the bible cleaned, plots dropped). The universe's history keeps them, recoverable.
+   * The marker has a version: when the principles grow (legends that hint at the game, doubles of the
+   * runes), universes already reviewed are reviewed again.
    */
   async reviewFourthWall(): Promise<string[]> {
-    const marker = 'revisione|quarta-parete';
+    const marker = 'revisione|quarta-parete-2';
     if (this.rules().some((r) => r.chiave === marker)) return [];
     const generated = [...this.modules.values()].filter((m) => m.manifest.origin && m.manifest.origin !== 'esempio' && (m.manifest.kind === 'entity' || m.manifest.kind === 'item'));
+    const oldBible = readBible(this.repo.working);
+    const plots = readPlots(this.repo.working);
+    const brokenPlots = plots.filter((p) => metaBreak(plotText(p)));
     // Nothing created yet (a universe just born from the seed): nothing to review.
-    if (!generated.length) return [];
+    if (!generated.length && !brokenPlots.length && !(oldBible && bibleBreaks(oldBible).length)) return [];
     const retire = new Set<string>();
     const seen = new Map<string, string>();
     // The first of a kind (the shortest id: "-2", "-3" came later) is the one that stays.
@@ -4032,7 +4045,7 @@ export class Kernel {
         const r = await this.council.ask<{ ritira?: string[]; motivo?: string }>(
           'arbitro',
           'review.fourthwall',
-          `Rivedi questi moduli creati dal Concilio. Ritira quelli che rompono la quarta parete (riferimenti a codice, simulazione, realtà instabile o finta, mondi che si ripetono, ruoli astratti come custodi della realtà, censori, archivisti del mondo, misuratori di anomalie) e i doppioni. Tieni tutto ciò che è una persona o una cosa vera del mondo.\n${generated.map((m) => `- ${m.manifest.id} «${m.manifest.name}»: ${(m.manifest.description ?? '').slice(0, 140)} ${(m.manifest.persona ?? '').slice(0, 160)}`).join('\n')}`,
+          `Rivedi questi moduli creati dal Concilio. Ritira quelli che rompono la quarta parete (riferimenti a codice, simulazione, realtà instabile o finta, mondi che si ripetono, ruoli astratti come custodi della realtà, censori, archivisti del mondo, misuratori di anomalie; anche travestiti da leggenda: chi torna sempre in piazza, chi osserva ogni viandante, confini che nessuno supera), quelli che duplicano le rune (altri simboli luminosi nel terreno) e i doppioni. Tieni tutto ciò che è una persona o una cosa vera del mondo.\n${generated.map((m) => `- ${m.manifest.id} «${m.manifest.name}»: ${(m.manifest.description ?? '').slice(0, 140)} ${(m.manifest.persona ?? '').slice(0, 160)}`).join('\n')}`,
           { type: 'OBJECT', properties: { ritira: { type: 'ARRAY', items: { type: 'STRING' } }, motivo: { type: 'STRING' } }, required: ['ritira'] },
           { data: { ids: generated.map((m) => m.manifest.id) }, temperature: 0.2 },
         );
@@ -4048,13 +4061,17 @@ export class Kernel {
       names.push(m.manifest.name);
       for (const p of Object.keys(this.repo.working)) if (p.startsWith(m.dir)) this.repo.write(p, null);
     }
-    const bible = readBible(this.repo.working);
-    if (bible) {
+    if (oldBible) {
       const gone = new Set(names.map(normName));
-      bible.personaggi = (bible.personaggi ?? []).filter((l) => !gone.has(normName(l.split(' — ')[0])) && !metaBreak(l));
-      bible.fatti = (bible.fatti ?? []).filter((l) => !metaBreak(l) && !gone.has(normName(l.split(' — ')[0])));
-      delete bible.crepe;
+      const bible = cleanBible(oldBible);
+      bible.personaggi = bible.personaggi.filter((l) => !gone.has(normName(l.split(' — ')[0])));
+      bible.fatti = bible.fatti.filter((l) => !gone.has(normName(l.split(' — ')[0])));
       this.repo.write('world/bible.json', JSON.stringify(bible, null, 2) + '\n');
+    }
+    // Plots that hint at the game, or give the runes a life of their own, are dropped.
+    if (brokenPlots.length) {
+      this.repo.write(PLOTS_FILE, writePlots(plots.filter((p) => !brokenPlots.includes(p))));
+      names.push(...brokenPlots.map((p) => `trama «${p.titolo}»`));
     }
     this.recordRule({ chiave: marker, testo: 'revisione della quarta parete', possibile: true, racconto: names.length ? `ritirati: ${names.join(', ')}` : 'niente da ritirare' }, false);
     this.applyFiles({ ...this.repo.working });
