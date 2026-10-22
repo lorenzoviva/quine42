@@ -16,6 +16,7 @@ export const SEATS: Array<{ agent: string; room: string }> = [
   { agent: 'narratore', room: 'persone' },
   { agent: 'cartografo', room: 'cartografia' },
   { agent: 'artista', room: 'galleria' },
+  { agent: 'scultore', room: 'galleria' },
   { agent: 'fisico', room: 'oggetti' },
   { agent: 'ingegnere', room: 'sistemi' },
   { agent: 'arbitro', room: 'universo' },
@@ -32,6 +33,9 @@ export interface StudioItem {
   look?: FileLook;
   lines?: number;
   /** Colour of a terrain or a thing on display. */
+  /** A thing on display: its model (and tint). */
+  model?: string;
+  tint?: string;
   color?: string;
   /** What to re-sculpt when asked (module id, item id, tile code); for seats the agent, for portals the room. */
   target?: string;
@@ -81,6 +85,9 @@ export interface Exhibit {
   color?: string;
   path: string;
   target: string;
+  /** The model on show, and the colour it is tinted with. */
+  model?: string;
+  tint?: string;
 }
 
 export const ROOM_W = 24;
@@ -186,7 +193,7 @@ export class Corona {
       groups.get(room)!.push(item);
     };
     for (const path of Object.keys(files).sort()) add(folderOf(path), { kind: 'file', path, label: path, look: lookOf(path), lines: files[path].split('\n').length });
-    for (const g of gallery) add('galleria', { kind: 'sprite', label: g.label, color: g.color, path: g.path, target: g.target });
+    for (const g of gallery) add('galleria', { kind: 'sprite', label: g.label, color: g.color, path: g.path, target: g.target, model: g.model, tint: g.tint });
     for (const t of terrains) add('cartografia', { kind: 'tile', label: t.label, color: t.color, path: t.path, target: t.target });
     const ids = [...groups.keys()].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
     const total = ids.length;

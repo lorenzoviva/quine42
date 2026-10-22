@@ -298,6 +298,10 @@ export interface AiConfig {
   maxPacks?: number;
   /** New kinds of inhabitants the world forges by itself per session, so the same face is not everywhere. */
   maxCast?: number;
+  /** The Sculptor's model per class and the Artist's (agents/sculptor.ts → DEFAULT_SCULPTORS). */
+  scultori?: Partial<import('./agents/sculptor').SculptorModels>;
+  /** New models the Sculptor writes by itself per session. */
+  maxModels?: number;
   /** Reasoning effort of every call (default `low`: see docs/reports/costi-step8.2B.md). */
   thinking?: 'low' | 'medium' | 'high' | 'off';
   /** Seconds before a request is given up (and not repeated). */

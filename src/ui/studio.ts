@@ -1,9 +1,10 @@
-// Panels of the studio (the corona): a frame seen up close — the sprite, icon or terrain as the Artist
-// painted it, with "ridipingi" — and a building's notice board, with the latest changes to its files.
+// Panels of the studio (the corona): a thing on show seen up close — its model, or the terrain as the Artist
+// shows it, with «Riscolpisci» — and a building's notice board, with the latest changes to its files.
 
 import type { Kernel } from '../kernel/kernel';
 import type { StudioItem } from '../kernel/corona';
 import { $, el } from './dom';
+import { icons } from './hud';
 
 export class StudioPanel {
   private root = $('#studio');
@@ -48,6 +49,10 @@ export class StudioPanel {
 
   exhibit(item: StudioItem, building: string): void {
     const frame = el('div', { class: 'frame' }, el('div', { class: 'swatch', style: `background:${item.color ?? '#333'}` }));
+    if (item.model)
+      void icons.model?.(item.model, item.tint).then((src) => {
+        if (src) frame.replaceChildren(el('img', { src, alt: item.label }));
+      });
     const why = el('input', { type: 'text', placeholder: "Come lo vuoi? (es. «più scuro, con un mantello rosso»)", maxlength: '160' }) as HTMLInputElement;
     const out = el('div', { class: 'note' });
     const repaint = el('button', { class: 'primary' }, 'Chiedi allo Scultore di riscolpirlo');

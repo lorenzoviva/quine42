@@ -11,6 +11,7 @@
     "maxPacks": 4,
     "maxCast": 3,
     "thinking": "low",
-    "timeout": 120
+    "timeout": 120,
+    "maxModels": 40
   }
 }

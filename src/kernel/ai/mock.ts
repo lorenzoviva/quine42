@@ -73,7 +73,9 @@ export class MockModels implements Models {
   async text(call: TextCall): Promise<string> {
     this.usage.text++;
     await delay(this.latency);
-    return JSON.stringify(this.answer(call));
+    const a = this.answer(call);
+    // Programs (the Sculptor's) are text, not JSON.
+    return typeof a === 'string' ? a : JSON.stringify(a);
   }
 
   private answer(call: TextCall): unknown {
@@ -104,6 +106,11 @@ export class MockModels implements Models {
         return { misteri: ['le rune che affiorano nei campi dopo la pioggia', 'la strada che riporta in piazza'], titolo: 'Il Regno di Valmora', tono: 'meraviglia e un filo di mistero', sintesi: 'Un regno quieto in cui tutti tornano sempre in piazza.', storia: '', luoghi: ['Piazza di Valmora'], personaggi: ['Abitanti di Valmora'], fatti: ['Il pane del forno di piazza è famoso in tutto il regno.'] };
       case 'genesis.style':
         return { stile: 'voxel medievale, semplice e caldo', forme: 'persone tozze dalla testa grande, case basse', palette: ['verde', 'ocra', 'blu'], luce: 'diurna morbida', regole: ['niente testo'], protagonista: 'un viandante incappucciato' };
+      case 'model.sculpt':
+        // Offline the Sculptor answers with the library's hand-written program of the class.
+        return d.example ?? '<sequence values="BC" size="12 12 12"><box at="6 6 0" size="8 8 8" color="C"/></sequence>';
+      case 'model.judge':
+        return { voto: 7, riconoscibile: true, problemi: [], consigli: [] };
       case 'genesis.terrain':
         return {
           terreni: [
@@ -336,7 +343,7 @@ export class MockModels implements Models {
   private item(name: string): unknown {
     const ws = words(name);
     const food = ws.some((w) => EDIBLE.includes(w));
-    return { nome: name.trim().replace(/^./, (c) => c.toUpperCase()), descrizione: `${name}, come lo si trova nel regno`, categoria: food ? 'cibo' : 'varie', peso: 0.5, pila: food ? 5 : 1, tag: [food ? 'cucina' : 'casa'], effetti: food ? { fame: 15 } : undefined, impugnabile: false, aspetto: name };
+    return { nome: name.trim().replace(/^./, (c) => c.toUpperCase()), descrizione: `${name}, come lo si trova nel regno`, categoria: food ? 'cibo' : 'varie', peso: 0.5, pila: food ? 5 : 1, tag: [food ? 'cucina' : 'casa'], effetti: food ? { fame: 15 } : undefined, impugnabile: false, aspetto: name, forma: food ? 'pane' : 'sacco' };
   }
 
   private items(count: number, existing: string[], hints: string[]): unknown[] {
@@ -344,7 +351,7 @@ export class MockModels implements Models {
     for (const [nome, categoria, descrizione, peso, pila, tag, e] of STOCK) {
       if (out.length >= count) break;
       if (existing.includes(nome)) continue;
-      out.push({ nome, categoria, descrizione, peso, pila, tag, effetti: e ? { fame: e.hunger, sete: e.thirst, energia: e.energy, salute: e.health } : undefined, impugnabile: categoria === 'attrezzo', aspetto: descrizione });
+      out.push({ nome, categoria, descrizione, peso, pila, tag, effetti: e ? { fame: e.hunger, sete: e.thirst, energia: e.energy, salute: e.health } : undefined, impugnabile: categoria === 'attrezzo', aspetto: descrizione, forma: categoria === 'cibo' ? 'frutto' : categoria === 'bevanda' ? 'bottiglia' : categoria === 'attrezzo' ? 'attrezzo' : 'sacco' });
     }
     return out;
   }
@@ -405,7 +412,8 @@ export class MockModels implements Models {
       tipo,
       descrizione: req.prompt,
       lore: `Nessuno ricorda da quando ${tipo === 'npc' ? 'vive' : 'si trova'} qui.`,
-      aspetto: `${req.prompt}, visto dall'alto`,
+      aspetto: req.prompt,
+      classe: tipo === 'npc' ? (/gatto|cane|pecora|uccello|corvo|volpe/.test(req.prompt.toLowerCase()) ? 'animale' : 'persona') : tipo === 'strumento' ? 'oggetto' : 'mobile',
       contesto: { terreni: req.paletteCodes.filter((c) => c === 'g' || c === 'p'), luoghi: 'prati e sentieri', rarita: 0.2 },
       interazione: tipo === 'npc' ? 'parla' : tipo === 'oggetto' ? 'usa' : 'nessuna',
       comandi: tipo === 'strumento' ? [edible ? { azione: 'usa', descrizione: 'mangialo' } : { azione: 'azione', descrizione: 'usalo su ciò che hai davanti' }] : [],

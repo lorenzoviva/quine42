@@ -315,3 +315,15 @@ Piano scritto; branch `3d`.
 - Test: `tests/forms.test.ts` (libreria valida, modelli alle entità, collisione colonna per colonna, azioni che
   si fanno, si ricordano, si salvano). 128 test verdi.
 - ADR-0041; AGENTS.md (Struttura, Mappa, Modelli, Manifest).
+
+### F6 — fatto (codice)
+- `agents/sculptor.ts` (Scultore per classe, controlli del kernel, Artista sulle foto), `modeldirector.ts` (i modelli
+  che mancano, uno alla volta, entro `ai.maxModels`), `src/mj/png.ts` (PNG senza dipendenze per le foto),
+  `prompts/agents/scultore.md` (le istruzioni nell'universo); `Council.write` (risposte non JSON, modello per
+  chiamata); lo Scultore siede al tavolo (otto membri). La Fucina nomina un modello per ogni cosa nuova, il
+  Narratore una forma comune per ogni oggetto, la Genesi un modello per i terreni con cose sopra; «riscolpisci»
+  ora scolpisce. Galleria: i modelli sui piedistalli, la foto nel pannello.
+- Test: `tests/sculptor.test.ts` (6). 134 test verdi. Corretto un effetto collaterale: con otto posti l'avatar del
+  Cartografo stava accanto al suo teletrasporto e `E` apriva la chat; ora chi sta su un teletrasporto, una scala o
+  l'uscita li usa.
+- ADR-0042; AGENTS.md (Concilio, Fucina).

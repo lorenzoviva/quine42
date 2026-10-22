@@ -917,10 +917,10 @@ describe('the neon studio', () => {
     const f0 = hall.floors[0].items;
     expect(f0.some((i) => i.kind === 'table')).toBe(true);
     const seats = f0.filter((i) => i.kind === 'desk' && i.target);
-    expect(seats.map((s) => s.target).sort()).toEqual(['arbitro', 'artista', 'cartografo', 'fisico', 'ingegnere', 'narratore', 'referente']);
+    expect(seats.map((s) => s.target).sort()).toEqual(['arbitro', 'artista', 'cartografo', 'fisico', 'ingegnere', 'narratore', 'referente', 'scultore']);
     for (const s of seats) expect([...k.archive.avatars.values()].some((a) => a.agent === s.target && a.building === 'concilio')).toBe(true);
     const portals = f0.filter((i) => i.kind === 'portal');
-    expect(portals.length).toBe(7);
+    expect(portals.length).toBe(8);
     for (const b of k.corona.buildings) if (b.id !== 'concilio') expect(b.floors[0].items.some((i) => i.kind === 'portal' && i.target === 'concilio'), b.id).toBe(true);
     for (const b of k.corona.buildings) if (b.id !== 'concilio') expect(b.floors[0].items.some((i) => i.kind === 'screen'), b.id).toBe(true);
     // Through the cartographer's teleport, into its room, where the atlas is.

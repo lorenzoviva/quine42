@@ -12,6 +12,8 @@ import { hashStr } from '../rng';
 import { metaBreak } from '../fourthwall';
 import { normName } from '../content';
 import type { Manifest } from '../types';
+import { classOf, CLASSES, guessClass } from '../../mj/classes';
+import { ownModelId } from '../modeldirector';
 import { AGENTS, type AgentId, type Council } from './council';
 
 export type ForgeOrigin = 'genesi' | 'agente' | 'cartografo' | 'combinazione';
@@ -35,6 +37,7 @@ export interface Concept {
   descrizione: string;
   lore: string;
   aspetto: string;
+  classe?: string;
   contesto: { terreni: string[]; luoghi: string; rarita: number };
   interazione: 'parla' | 'leggi' | 'usa' | 'nessuna';
   comandi: Array<{ azione: string; descrizione: string }>;
@@ -84,6 +87,7 @@ const CONCEPT_SCHEMA: Schema = {
     descrizione: { type: 'STRING' },
     lore: { type: 'STRING' },
     aspetto: { type: 'STRING', description: "com'è fatto: forma, proporzioni, materiali, colori (lo Scultore ne fa un modello 3D)" },
+    classe: { type: 'STRING', enum: CLASSES.map((c) => c.id), description: 'la sua classe di grandezza (persona, animale, mobile, oggetto, edificio…)' },
     contesto: {
       type: 'OBJECT',
       properties: { terreni: { type: 'ARRAY', items: { type: 'STRING' } }, luoghi: { type: 'STRING' }, rarita: { type: 'NUMBER' } },
@@ -210,7 +214,7 @@ export function assembleManifest(id: string, concept: Concept, physics: PhysicsS
     tags: concept.tags ?? [],
     origin,
     logic: 'logic.lua',
-    appearance: { glyph, color: `hsl(${hue} 65% 68%)`, aspetto: concept.aspetto },
+    appearance: { glyph, color: `hsl(${hue} 65% 68%)`, aspetto: concept.aspetto, model: ownModelId(id), classe: classOf(concept.classe)?.id ?? guessClass(`${concept.nome} ${concept.aspetto}`, npc ? 'figura' : undefined).id },
     physics: {
       solid: item ? false : !!physics.solido,
       radius: clamp(physics.raggio, 0.2, 0.5, 0.35),

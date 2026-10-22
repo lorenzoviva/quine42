@@ -9,6 +9,7 @@ import type { Kernel } from '../kernel/kernel';
 import { ROOM_H, ROOM_W, type Building, type Floor, type StudioItem } from '../kernel/corona';
 import { Builder } from './terrain';
 import { MAT, rgbOf } from './materials';
+import { geoOf } from './models';
 
 const TOWER_H = 3.2;
 const LOOK_COLOR: Record<string, string> = { libro: '#a0683a', cristallo: '#5fe0ff', pergamena: '#e8dcb0', tavoletta: '#9aa3ad' };
@@ -95,6 +96,22 @@ export function buildRoom(k: Kernel, building: Building, floor: Floor): { group:
   const m = new THREE.Mesh(lit.geometry(), MAT.corona);
   m.receiveShadow = m.castShadow = true;
   group.add(m, new THREE.Mesh(glow.geometry(), MAT.glow));
+  // The gallery's things on their plinths: the models themselves, made to fit.
+  for (const it of floor.items) {
+    if (it.kind !== 'sprite' || !it.model) continue;
+    const f = k.forms.ready(it.model, 1, it.tint);
+    const geo = f && geoOf(f);
+    if (!geo) continue;
+    geo.body.computeBoundingBox();
+    const size = new THREE.Vector3();
+    geo.body.boundingBox!.getSize(size);
+    const s = Math.min(0.7 / Math.max(size.x, size.z, 0.01), 0.9 / Math.max(size.y, 0.01), 1);
+    const m = new THREE.Mesh(geo.body, MAT.corona);
+    m.scale.setScalar(s);
+    m.position.set(it.x + 0.5, 0.46, it.y + 0.52);
+    m.castShadow = true;
+    group.add(m);
+  }
   // The universe turning above the Council's table.
   const table = floor.items.find((i) => i.kind === 'table');
   if (table) {
@@ -116,9 +133,9 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
     }
     case 'sprite':
     case 'tile':
-      // A model on show (its own model comes with F5) or a sample of terrain, on a plinth.
+      // A plinth: the model stands on it (added in buildRoom when it is ready); a terrain is a sample slab.
       lit.box(x + 0.15, 0.38, z + 0.3, x + 0.85, 0.46, z + 0.75, rgbOf('#22263a'));
-      lit.box(x + 0.25, 0.46, z + 0.38, x + 0.75, it.kind === 'tile' ? 0.52 : 0.9, z + 0.68, rgbOf(it.color ?? col));
+      if (it.kind === 'tile') lit.box(x + 0.25, 0.46, z + 0.38, x + 0.75, 0.52, z + 0.68, rgbOf(it.color ?? col));
       break;
     case 'screen': {
       const w = it.w ?? 1;

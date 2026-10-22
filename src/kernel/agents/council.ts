@@ -3,23 +3,33 @@
 // shared world knowledge it needs. They see each other's work and the Arbiter sends it back when
 // narrative, graphics, engine and physics disagree.
 
-import { parseJson, type Models, type Schema } from '../ai/models';
+import { parseJson, type Models, type Schema, type Thinking } from '../ai/models';
 import { COUNCIL_PRINCIPLES } from '../fourthwall';
 import type { FileMap, TileDef } from '../types';
 
-export type AgentId = 'narratore' | 'cartografo' | 'artista' | 'fisico' | 'ingegnere' | 'arbitro' | 'referente';
+export type AgentId = 'narratore' | 'cartografo' | 'artista' | 'scultore' | 'fisico' | 'ingegnere' | 'arbitro' | 'referente';
 
 export const AGENTS: Record<AgentId, { name: string; color: string; sigil: string }> = {
   narratore: { name: 'Narratore', color: '#ffcf5c', sigil: '✒' },
   cartografo: { name: 'Cartografo', color: '#7dd87d', sigil: '⌖' },
   artista: { name: 'Artista', color: '#ff8ad8', sigil: '✎' },
+  scultore: { name: 'Scultore', color: '#ffa65c', sigil: '◈' },
   fisico: { name: 'Fisico', color: '#6fc3ff', sigil: '⚖' },
   ingegnere: { name: 'Ingegnere', color: '#b9a6ff', sigil: '⚙' },
   arbitro: { name: 'Arbitro', color: '#ff6b6b', sigil: '⚑' },
   referente: { name: 'Referente', color: '#f2f2f2', sigil: '✉' },
 };
 
-export type FeedKind = 'propone' | 'obietta' | 'approva' | 'corregge' | 'dipinge' | 'scarta' | 'info' | 'errore';
+export type FeedKind = 'propone' | 'obietta' | 'approva' | 'corregge' | 'scolpisce' | 'scarta' | 'info' | 'errore';
+
+export interface CallOptions {
+  data?: unknown;
+  images?: string[];
+  temperature?: number;
+  /** A model other than the text model (the Sculptor's per class, the Artist's). */
+  model?: string;
+  thinking?: Thinking;
+}
 
 export interface FeedEntry {
   time: number;
@@ -155,6 +165,9 @@ export class Council {
         if (regions.length) parts.push(`## Atlante (centro in luoghi; nord = y negativa)\n${regions.map((r) => `- ${r.nome} [${r.ambiente}] centro ${r.centro.join(',')} raggio ${r.raggio}`).join('\n')}`);
         break;
       }
+      case 'scultore':
+        parts.push(`## Guida di stile\n${style}`);
+        break;
       case 'artista':
         parts.push(`## Guida di stile\n${style}`, `## Tono\n${bible?.tono ?? ''}`);
         break;
@@ -177,18 +190,27 @@ export class Council {
     return parts.join('\n\n');
   }
 
-  async ask<T>(agent: AgentId, task: string, prompt: string, schema: Schema, opts: { data?: unknown; images?: string[]; temperature?: number } = {}): Promise<T> {
-    const role = this.files[`prompts/agents/${agent}.md`] ?? `Sei il ${AGENTS[agent].name} del gioco.`;
-    const text = await this.models.text({
+  async ask<T>(agent: AgentId, task: string, prompt: string, schema: Schema, opts: CallOptions = {}): Promise<T> {
+    return parseJson<T>(await this.write(agent, task, prompt, { ...opts, schema }));
+  }
+
+  /**
+   * A call whose answer is not JSON (the Sculptor's programs). The stable part first — role, principles,
+   * the agent's context, then `system` (instructions that change rarely) — so the cache serves it.
+   */
+  async write(agent: AgentId, task: string, prompt: string, opts: CallOptions & { schema?: Schema; system?: string; role?: string } = {}): Promise<string> {
+    const role = opts.role ?? this.files[`prompts/agents/${agent}.md`] ?? `Sei il ${AGENTS[agent].name} del gioco.`;
+    return this.models.text({
       agent,
       task,
-      system: `${role}\n\n${COUNCIL_PRINCIPLES}\n\n${this.context(agent)}`,
+      system: [role, COUNCIL_PRINCIPLES, this.context(agent), opts.system].filter(Boolean).join('\n\n'),
       prompt,
-      schema,
+      schema: opts.schema,
       images: opts.images,
       temperature: opts.temperature,
       data: opts.data,
+      model: opts.model,
+      thinking: opts.thinking,
     });
-    return parseJson<T>(text);
   }
 }

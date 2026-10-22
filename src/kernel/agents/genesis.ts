@@ -175,7 +175,9 @@ export function toPalette(terrains: RawTerrain[]): Record<string, TileDef> {
       const base = BASE_CODES[t.codice];
       const layer = base?.layer ?? t.strato ?? (t.solido ? 'rock' : 'ground');
       const solid = base ? base.solid : layer === 'wall' || layer === 'liquid' || layer === 'vegetation' || layer === 'rock' ? true : layer === 'floor' || layer === 'door' ? false : !!t.solido;
-      return [t.codice, { name: t.nome, description: t.descrizione, color: t.colore.toLowerCase(), solid, layer, ...(base?.indoor || layer === 'floor' ? { indoor: true } : {}), speed: Math.min(1.5, Math.max(0.3, Number(t.velocita) || 1)) }];
+      // What stands on woods and rocks is a model of its own, which the Sculptor writes from the description.
+      const model = layer === 'vegetation' || layer === 'rock' ? { model: `terreno-${t.nome.toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30) || t.codice.charCodeAt(0)}` } : {};
+      return [t.codice, { name: t.nome, description: t.descrizione, color: t.colore.toLowerCase(), solid, layer, ...model, ...(base?.indoor || layer === 'floor' ? { indoor: true } : {}), speed: Math.min(1.5, Math.max(0.3, Number(t.velocita) || 1)) }];
     }),
   );
 }

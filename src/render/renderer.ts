@@ -37,7 +37,7 @@ export class Renderer {
   private lights: Lights;
   private avatars: Avatars;
   private ring?: THREE.Group;
-  private rooms = new Map<string, { group: THREE.Group; globe?: THREE.Object3D }>();
+  private rooms = new Map<string, { group: THREE.Group; globe?: THREE.Object3D; version: number }>();
   private overlay: Overlay;
   private flash = new THREE.PointLight(0xfff2c0, 0, 8, 1.4);
   private flashUntil = 0;
@@ -156,8 +156,13 @@ export class Renderer {
     if (studio) {
       const key = `${studio.building.id}#${studio.floor.index}`;
       let r = this.rooms.get(key);
+      // A room with things on show is built again when their models are ready.
+      if (r && r.version !== k.forms.version && studio.floor.items.some((i) => i.kind === 'sprite')) {
+        this.scene.remove(r.group);
+        r = undefined;
+      }
       if (!r) {
-        this.rooms.set(key, (r = buildRoom(k, studio.building, studio.floor)));
+        this.rooms.set(key, (r = { ...buildRoom(k, studio.building, studio.floor), version: k.forms.version }));
         this.scene.add(r.group);
       }
       r.group.visible = true;

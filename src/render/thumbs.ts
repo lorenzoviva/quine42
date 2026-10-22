@@ -33,6 +33,12 @@ export class Thumbs {
   /** A data URL of the item's model, or undefined if it has none yet (the glyph stays). */
   icon(item: string): Promise<string | undefined> {
     const look = this.k.itemLook(item);
+    return this.model(look.model, look.tint, look.seed);
+  }
+
+  /** A data URL of a model of the library (the gallery's frames). */
+  model(model: string, tint?: string, seed = 1): Promise<string | undefined> {
+    const look = { model, tint, seed };
     const key = `${look.model}#${look.seed}#${look.tint ?? ''}`;
     let p = this.cache.get(key);
     if (!p) {

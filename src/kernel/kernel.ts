@@ -26,6 +26,9 @@ import { USAGE_FILE, UsageLedger } from './ai/usage';
 import { MemoryChunks, type ChunkStore } from './chunks';
 import { bodyFoot, footBlocks, Forms, InlineRunner, instanceGrid, toLocal, type Form, type FormComp, type FormRunner } from './forms';
 import { guessClass } from '../mj/classes';
+import { ModelDirector, ownModelId } from './modeldirector';
+import { DEFAULT_SCULPTORS, type SculptorModels } from './agents/sculptor';
+import { MODELS_INDEX, type ModelInfo } from './forms';
 import { Content, normName, specOf } from './content';
 import { layout, type Building } from './layout';
 import { AGENTS, Council, readBible, type AgentId, type CatalogEntry, type FeedEntry } from './agents/council';
@@ -188,6 +191,9 @@ export class Kernel {
   readonly chunkStore: ChunkStore;
   /** The models of things (ADR-0041): the library of programs and the forms they make. */
   readonly forms: Forms;
+  /** The Sculptor at work on the models the world lacks. */
+  readonly sculpting = new ModelDirector(this);
+  private lastSculptPump = 0;
   council!: Council;
   sandbox!: Sandbox;
   validator!: Validator;
@@ -2399,8 +2405,8 @@ export class Kernel {
       } catch {
         continue;
       }
-      if (man.appearance) out.push({ label: man.name, color: man.appearance.color, path, target: `module:${man.id}` });
-      for (const it of man.items ?? []) out.push({ label: it.name, color: it.color, path, target: `item:${it.id}` });
+      if (man.appearance) out.push({ label: man.name, color: man.appearance.color, path, target: `module:${man.id}`, model: this.formFor(man, man.id).model });
+      for (const it of man.items ?? []) out.push({ label: it.name, color: it.color, path, target: `item:${it.id}`, model: this.forms.resolve(it.model, 'oggetto'), tint: it.color });
     }
     return out;
   }
@@ -2424,7 +2430,10 @@ export class Kernel {
   /** E in the corona and in the studio: doors, stairs, shelves, frames, the notice board, people. */
   private interactStudio(): void {
     const p = this.playerPos();
-    const a = this.archive.nearest(p.x, p.y);
+    // Standing on a teleport, the stairs or the exit: that, before whoever stands near.
+    const under = this.zone === 'studio' ? this.corona.itemNear(p.x, p.y) : undefined;
+    const onPad = under && ['portal', 'up', 'down', 'exit'].includes(under.kind) && Math.hypot(under.x + 0.5 - p.x, under.y + 0.5 - p.y) < 0.75;
+    const a = onPad ? undefined : this.archive.nearest(p.x, p.y);
     if (a) return void this.bus.emit('ui:agentchat', { agent: a.agent, name: a.name });
     if (this.zone === 'corona') {
       const b = this.corona.doorNear(p.x, p.y);
@@ -2508,22 +2517,61 @@ export class Kernel {
         return false;
       }
     };
-    // The wish is added to how it looks: { aspetto } of a module's appearance or of an item.
-    const wish = (o: { aspetto?: string }, name: string) => {
+    // The wish is added to how it looks ({ aspetto } of a module's appearance or of an item), and the thing
+    // gets a model of its own if it showed a generic one.
+    const own = (o: { aspetto?: string; model?: string }, name: string, fallback: string) => {
       if (why) o.aspetto = `${o.aspetto ?? name}; ${why}`;
+      const current = o.model && this.forms.info(o.model) ? o.model : undefined;
+      if (!current || this.sculpting.isGeneric(current)) o.model = ownModelId(fallback);
+      return { id: o.model!, previous: current };
     };
+    let req: { id: string; previous?: string; nome: string; aspetto: string; classe: string } | undefined;
     if (kind === 'module' && load(this.modules.get(id)?.manifestPath)) {
       if (!man.appearance) return false;
-      wish(man.appearance, man.name);
+      const r = own(man.appearance, man.name, man.id);
+      req = { ...r, nome: man.name, aspetto: man.appearance.aspetto ?? man.description ?? man.name, classe: man.appearance.classe ?? this.forms.classOf(this.forms.resolve(r.previous ?? r.id, undefined)).id };
     } else if (kind === 'item' && load(this.modules.get(this.content.itemSource.get(id) ?? '')?.manifestPath)) {
       const it = (man.items ?? []).find((x: ItemDef) => x.id === id);
-      if (it) wish(it, it.name);
-      else if (man.appearance) wish(man.appearance, man.name);
+      const o = it ?? man.appearance;
+      if (!o) return false;
+      const r = own(o, it?.name ?? man.name, id);
+      req = { ...r, nome: it?.name ?? man.name, aspetto: o.aspetto ?? it?.description ?? man.name, classe: 'oggetto' };
     } else return false;
     this.repo.write(path!, JSON.stringify(man, null, 2) + '\n');
     this.applyFiles({ ...this.repo.working });
     this.repo.commit(`scultore: da riscolpire ${target}`, 'agent');
-    this.council.say('artista', 'propone', `da riscolpire: ${target}${why ? ` (${why})` : ''}`, undefined, 'model.resculpt');
+    this.council.say('artista', 'propone', `da riscolpire: ${target}${why ? ` (${why})` : ''}`, 'scultore', 'model.resculpt');
+    const previous = req.previous ? this.repo.working[`models/${req.previous}.xml`] : undefined;
+    void this.sculpting.make({ id: req.id, nome: req.nome, aspetto: req.aspetto, classe: req.classe, ...(previous ? { previous } : {}), ...(why ? { desiderio: why } : {}) });
+    return true;
+  }
+
+  /** The Sculptor's models per class (universe.json → ai.scultori over the defaults). */
+  sculptors(): SculptorModels {
+    return { ...DEFAULT_SCULPTORS, ...(this.config.ai.scultori ?? {}) };
+  }
+
+  /** A program enters the library (or replaces one): validated, written with its index entry, committed. */
+  addModel(id: string, xml: string, info: ModelInfo, message: string): boolean {
+    const path = `models/${id}.xml`;
+    const errors = this.validator.validateFile(path, xml);
+    if (errors.length) {
+      this.council.say('kernel', 'scarta', errors.join('; '), 'scultore', 'model.sculpt');
+      return false;
+    }
+    let index: Record<string, ModelInfo> = {};
+    try {
+      index = JSON.parse(this.repo.working[MODELS_INDEX] ?? '{}');
+    } catch {
+      index = {};
+    }
+    index[id] = info;
+    this.repo.write(path, xml);
+    this.repo.write(MODELS_INDEX, JSON.stringify(index, null, 1) + '\n');
+    this.applyFiles({ ...this.repo.working });
+    const c = this.repo.commit(message, 'agent');
+    this.council.say('kernel', 'approva', `modello «${info.nome ?? id}» (${id}) → validato, commit ${c.id}`, undefined, 'model.sculpt');
+    this.bus.emit('model:added', { id });
     return true;
   }
 
@@ -4047,6 +4095,10 @@ export class Kernel {
     }
     this.updateChunks();
     this.pumpDevelopment();
+    if (this.time - this.lastSculptPump > 2) {
+      this.lastSculptPump = this.time;
+      this.sculpting.pump();
+    }
     this.rebuildSolids();
     this.playerComp().load = totalWeight(this.inventory(), this.itemSpec) / this.carryCapacity();
     this.syncRunes();

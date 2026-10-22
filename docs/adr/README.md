@@ -46,5 +46,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0039](0039-registro-dei-consumi.md) | Registro dei consumi, prezzi in un file, ragionamento low, niente ripetizioni dopo un tempo scaduto | accettato |
 | [0040](0040-il-gioco-in-3d.md) | Il gioco è 3D: renderer three.js, niente immagini | accettato |
 | [0041](0041-asset-come-programmi.md) | Gli asset sono programmi MarkovJunior (libreria models/, forme, semi); collisione dai voxel; azioni come regole | accettato |
+| [0042](0042-scultore-e-artista.md) | Lo Scultore nel Concilio (per classe, programmi indipendenti, revisione), l'Artista giudica le foto | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

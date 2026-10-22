@@ -126,13 +126,14 @@ lab/                    laboratorio di MarkovJunior (ADR-0038): sandbox 3D /lab/
                         affettare, fotografare, misurare e provare i programmi con Gemini; non importarlo da src/
 ```
 
-## Il Concilio (ADR-0008, 0011, 0012, 0013, 0014, 0016)
+## Il Concilio (ADR-0008, 0011, 0012, 0013, 0014, 0016, 0042)
 
 | Agente | Fa |
 |---|---|
 | Narratore | bibbia; concetti dei moduli; individui dietro ogni NPC (mestiere, famiglia, routine); chat nel personaggio; pacchetti di oggetti, ricette, bottino; oggetti citati; "Esamina"; combinazioni; giudica azioni libere e fabbricazioni libere; dà nome agli incantesimi nuovi |
 | Cartografo | terreni (con strati) e ambienti (programmi di riscrittura) alla Genesi; per ogni luogo: ambiente, nome, cosa c'è dentro e fuori, rune |
 | Artista | guida di stile (palette, forme, luce); guarda le foto dei modelli da quattro lati e li giudica (voto, problemi, consigli) |
+| Scultore | scrive i programmi MarkovJunior dei modelli (ADR-0042): per classe (3.1 Flash-Lite per le cose semplici, due programmi; 3.8 Flash per figure e strutture, con una revisione; Argon per le strutture importanti); i modelli che mancano li trova il `ModelDirector` |
 | Fisico | fisica di moduli, terreni e oggetti (pesi, pile, effetti) |
 | Ingegnere | logic.lua (`on_act`, `on_use`, `on_action`…); meccaniche con pannelli (`mechanic.design`); ripara il codice che fallisce |
 | Arbitro | coerenza tra narrativa, aspetto, fisica e codice; rimanda all'agente responsabile; tiene le sessioni del Concilio |
@@ -149,7 +150,8 @@ congelato, sentieri garantiti, edifici) → cose su celle raggiungibili, bottino
 liberi. Il chunk (0,0) ha sempre `x`, `speed = speed` e la runa magica `luce`.
 
 **Fucina**: concetto (tipo, contesto, aspetto, comandi, azioni, contenitore, cose portate, persona,
-unicità) → fisica → codice → Arbitro → validatore → commit → bibbia; il modello lo fa lo Scultore. **Genesi**: bibbia → stile → terreni (Fisico) → Arbitro → ambienti (provati) →
+unicità) → fisica → codice → Arbitro → validatore → commit → bibbia; il modello (`appearance.model` suo, con la `classe`) lo scrive poi lo Scultore; gli oggetti dei pacchetti
+hanno una forma comune (`forma-…`, un programma per forma, ricolorato), i terreni con cose sopra un modello loro. **Genesi**: bibbia → stile → terreni (Fisico) → Arbitro → ambienti (provati) →
 pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) → commit.
 
 ## Architettura del gioco

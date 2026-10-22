@@ -10,7 +10,7 @@ const VERBS: Record<string, string> = {
   obietta: 'obietta',
   approva: 'approva',
   corregge: 'corregge',
-  dipinge: 'dipinge',
+  scolpisce: 'scolpisce',
   scarta: 'scarta',
   info: '',
   errore: 'errore',
