@@ -58,7 +58,7 @@ export class Content {
           tags: man.tags ?? [],
           glyph: app?.glyph ?? '?',
           color: app?.color ?? '#aaa',
-          icon: app?.sprite,
+          ...(app?.aspetto ? { aspetto: app.aspetto } : {}),
           equippable: man.item?.equippable,
           module: man.id,
           ...(man.actions?.length ? { actions: man.actions } : {}),

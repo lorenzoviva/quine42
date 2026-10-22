@@ -2,13 +2,13 @@
 // 1. the KERNEL repository — this project; its `universe/` folder is the seed every universe starts
 //    from. It never changes while playing.
 // 2. the UNIVERSE repository — a real git repository on disk (`universes/<name>/`, served by
-//    server/universeStore.ts): modules, rules, people, maps, images. It grows session after session.
+//    server/universeStore.ts): modules, rules, people, models, maps. It grows session after session.
 // Here: the browser client of the universe repository, and the merge of kernel updates into it.
 
 import type { FileMap } from './types';
 import type { Author } from './repo';
 import { hashStr, hex } from './rng';
-import { assetId, type AssetStore, type ChunkRecord, type ChunkStore } from './assets';
+import type { ChunkRecord, ChunkStore } from './chunks';
 
 export interface PastCommit {
   id: string;
@@ -196,16 +196,7 @@ export class UniverseClient implements UniverseBackend {
     await this.post('reset', {});
   }
 
-  // Images and maps: files of the universe too, outside the text snapshot.
-  async getAsset(id: string): Promise<string | undefined> {
-    const r = await fetch(this.url(`asset/${encodeURIComponent(id)}`)).catch(() => null);
-    return r?.ok ? r.text() : undefined;
-  }
-
-  async putAsset(id: string, dataUrl: string): Promise<void> {
-    await fetch(this.url(`asset/${encodeURIComponent(id)}`), { method: 'PUT', body: dataUrl }).catch(() => undefined);
-  }
-
+  // Maps: files of the universe too, outside the text snapshot.
   /** Every place ever planned in this universe (file name, place name, environment). */
   async listMaps(): Promise<Array<{ file: string; name: string; layout: string }>> {
     const r = await fetch(this.url('maps')).catch(() => null);
@@ -219,39 +210,6 @@ export class UniverseClient implements UniverseBackend {
 
   async putMap(key: string, data: unknown): Promise<void> {
     await fetch(this.url(`map/${encodeURIComponent(key)}`), { method: 'PUT', body: JSON.stringify(data) }).catch(() => undefined);
-  }
-}
-
-/**
- * Images of the universe live in its repository (`assets/`). Images painted before (in the browser's
- * IndexedDB) are moved there the first time they are needed.
- */
-export class UniverseAssets implements AssetStore {
-  private m = new Map<string, string>();
-  constructor(
-    private client: UniverseClient,
-    private legacy?: AssetStore,
-  ) {}
-  async put(dataUrl: string): Promise<string> {
-    const id = assetId(dataUrl);
-    if (!this.m.has(id)) {
-      this.m.set(id, dataUrl);
-      await this.client.putAsset(id, dataUrl);
-    }
-    return id;
-  }
-  async get(id: string): Promise<string | undefined> {
-    if (this.m.has(id)) return this.m.get(id);
-    let v = await this.client.getAsset(id);
-    if (!v && this.legacy) {
-      v = await this.legacy.get(id);
-      if (v) void this.client.putAsset(id, v);
-    }
-    if (v) this.m.set(id, v);
-    return v;
-  }
-  peek(id: string): string | undefined {
-    return this.m.get(id);
   }
 }
 

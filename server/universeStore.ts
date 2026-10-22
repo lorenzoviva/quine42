@@ -1,15 +1,14 @@
 // Dev/preview server middleware: every universe is a real git repository on disk, under
 // `universes/<name>/` (ignored by the kernel's own repository). The kernel repository — this
 // project, with the seed universe in `universe/` — never changes at runtime; a universe starts as a
-// copy of the seed and grows session after session: modules, rules, people, maps (`maps/`), images
-// (`assets/`). Resetting means moving the universe aside and starting again from the seed.
+// copy of the seed and grows session after session: modules, models, rules, people, maps (`maps/`).
+// Resetting means moving the universe aside and starting again from the seed.
 //
-//   GET  /api/universe/<name>                 → { exists, head, log, files }   (text files, no maps/assets)
+//   GET  /api/universe/<name>                 → { exists, head, log, files }   (text files, no maps)
 //   POST /api/universe/<name>/create          { files, message }               → { head }
 //   POST /api/universe/<name>/commit          { changes, message, author }     → { head }
 //   POST /api/universe/<name>/checkout        { id }                            → { head, files }
 //   POST /api/universe/<name>/reset                                             → { trashed }
-//   GET|PUT /api/universe/<name>/asset/<id>   data URL as text
 //   GET|PUT /api/universe/<name>/map/<key>    JSON
 //   GET  /api/universe/<name>/maps            → [{ file, name, layout }] every place ever planned
 
@@ -138,7 +137,7 @@ export function universeStore(baseDir: string): Plugin {
   const handler: Connect.NextHandleFunction = (req, res, next) => {
     if (!req.url?.startsWith('/api/universe')) return next();
     const url = req.url.split('?')[0];
-    const m = /^\/api\/universe\/([^/]+)(?:\/(create|commit|checkout|reset|asset|map|maps)(?:\/([^/]+))?)?$/.exec(url);
+    const m = /^\/api\/universe\/([^/]+)(?:\/(create|commit|checkout|reset|map|maps)(?:\/([^/]+))?)?$/.exec(url);
     if (url === '/api/universe' || url === '/api/universe/') {
       void fs
         .readdir(baseDir, { withFileTypes: true })
@@ -179,14 +178,14 @@ export function universeStore(baseDir: string): Plugin {
       })();
       return;
     }
-    if ((op === 'asset' || op === 'map') && arg) {
+    if (op === 'map' && arg) {
       if (!/^[\w:.,-]+$/.test(arg)) return send(res, 400, { error: 'nome non valido' });
-      const file = op === 'asset' ? path.join(root, 'assets', `${arg.replace(/:/g, '_')}.txt`) : path.join(root, 'maps', `${arg.replace(/[:,]/g, '_')}.json`);
+      const file = path.join(root, 'maps', `${arg.replace(/[:,]/g, '_')}.json`);
       if (req.method === 'GET') {
         void fs.readFile(file, 'utf8').then(
           (t) => {
             res.statusCode = 200;
-            res.setHeader('Content-Type', op === 'map' ? 'application/json' : 'text/plain');
+            res.setHeader('Content-Type', 'application/json');
             res.end(t);
           },
           () => send(res, 404, { error: 'non trovato' }),
@@ -214,7 +213,7 @@ export function universeStore(baseDir: string): Plugin {
               await fs.mkdir(root, { recursive: true });
               await git(root, ['init', '-q']);
               await writeFiles(root, body.files ?? {});
-              await fs.writeFile(path.join(root, '.gitattributes'), '* text=auto eol=lf\nassets/** -text\n', 'utf8');
+              await fs.writeFile(path.join(root, '.gitattributes'), '* text=auto eol=lf\n', 'utf8');
               return { head: await commitAll(root, body.message ?? 'nasce dal seme del kernel', 'genesis') };
             }
             case 'commit':

@@ -51,9 +51,8 @@ interface Call {
 /** One request per call; the usage of each answer goes into `log`. */
 class Direct implements Models {
   readonly name = 'gemini';
-  readonly canPaint = false;
   readonly usage = emptyUsage();
-  limits = { text: 1e9, images: 0 };
+  limits = { text: 1e9 };
   constructor(private model: string, private role: Call['role'], private log: Call[], private thinking?: string) {}
   async text(call: TextCall): Promise<string> {
     const t0 = Date.now();
@@ -90,9 +89,6 @@ class Direct implements Models {
     const text = (j.candidates?.[0]?.content?.parts ?? []).filter((p: { thought?: boolean }) => !p.thought).map((p: { text?: string }) => p.text ?? '').join('');
     if (!text) throw new Error(`risposta vuota (${entry.finish})`);
     return text;
-  }
-  async image(): Promise<string | null> {
-    throw new Error('niente immagini');
   }
 }
 

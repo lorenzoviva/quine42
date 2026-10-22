@@ -23,11 +23,9 @@ import { CARPET_TOKENS, cellIndex, extractLines, tokenize, type RuneComp, type R
 import { hash32, hashStr, hex, Rng } from './rng';
 import { BudgetError, type Models } from './ai/models';
 import { USAGE_FILE, UsageLedger } from './ai/usage';
-import { MemoryAssets, MemoryChunks, type AssetStore, type ChunkStore } from './assets';
-import type { ImageTools } from './imaging';
+import { MemoryChunks, type ChunkStore } from './chunks';
 import { Content, normName, specOf } from './content';
 import { layout, type Building } from './layout';
-import { ArtDirector } from './art';
 import { AGENTS, Council, readBible, type AgentId, type CatalogEntry, type FeedEntry } from './agents/council';
 import { designEnvironment, drawAtlas, planChunk, type ChunkPlan, type Where } from './agents/cartography';
 import { forge, judgeCombination, repairLogic, slug, type ForgeOrigin } from './agents/forge';
@@ -136,9 +134,7 @@ export interface KernelOptions {
   files: FileMap;
   store: KeyValueStore;
   models: Models;
-  assets?: AssetStore;
   chunks?: ChunkStore;
-  imageTools?: ImageTools;
   wasmUri?: string;
   /** The universe repository on disk (ADR-0021), and its history from earlier sessions. */
   backend?: UniverseBackend;
@@ -185,10 +181,7 @@ export class Kernel {
   /** What the models cost, per day, model and task (world/consumi.json). */
   readonly usage = new UsageLedger();
   private usageWritten = -1;
-  readonly assets: AssetStore;
   readonly chunkStore: ChunkStore;
-  readonly imageTools?: ImageTools;
-  readonly art: ArtDirector;
   council!: Council;
   sandbox!: Sandbox;
   validator!: Validator;
@@ -232,7 +225,6 @@ export class Kernel {
   private developers = 0;
   private repaired = new Set<string>();
   private examined = new Map<string, string>();
-  private lastArtPump = 0;
   /** While true no chunk is planned and nothing is painted (e.g. during genesis). */
   generationHeld = false;
   /** Terrain generation is Lua and costs a few ms: at most this many new chunks per tick. */
@@ -252,10 +244,7 @@ export class Kernel {
 
   private constructor(opts: KernelOptions) {
     this.models = opts.models;
-    this.assets = opts.assets ?? new MemoryAssets();
     this.chunkStore = opts.chunks ?? new MemoryChunks();
-    this.imageTools = opts.imageTools;
-    this.art = new ArtDirector(this);
   }
 
   static async boot(opts: KernelOptions): Promise<Kernel> {
@@ -286,7 +275,7 @@ export class Kernel {
     k.loadState();
     k.ensureAtlas();
     void k.reviewFourthWall();
-    k.models.limits = { text: k.config.ai.maxText, images: k.models.canPaint ? k.config.ai.maxImages : 0 };
+    k.models.limits = { text: k.config.ai.maxText };
     k.log('kernel', `universo «${name}» avviato su commit ${repo.head().id} (${repo.head().message}) — modelli: ${opts.models.name}${synced ? ' — sincronizzato dal disco' : ''}`);
     return k;
   }
@@ -503,7 +492,6 @@ export class Kernel {
       description: d?.description ?? 'Qualcosa che non esiste più nel codice del mondo.',
       glyph: d?.glyph ?? '?',
       color: d?.color ?? '#888',
-      sprite: d?.icon,
       category: d?.category ?? 'varie',
       spec: specOf(d) ?? DEFAULT_ITEM,
       effects: d?.effects,
@@ -599,11 +587,6 @@ export class Kernel {
       const app = this.modules.get(modId)?.manifest.appearance;
       if (app && changed.has(modId)) this.ecs.set(id, 'glyph', this.glyphOf(app));
     }
-    // Item icons arrive later than the items themselves.
-    for (const id of this.ecs.query('pickup', 'glyph')) {
-      const d = this.content.get(this.ecs.get(id, 'pickup').item);
-      if (d?.icon) this.ecs.get(id, 'glyph').sprite = d.icon;
-    }
 
     if (sizeChanged || (before && before !== this.worldSignature())) this.clearChunks();
     else if (!this.terrain || changed.has(this.terrain.manifest.id) || opts.reset) for (const ch of this.chunks.values()) if (ch.stage === 'draft') this.regenerateDraft(ch);
@@ -614,7 +597,7 @@ export class Kernel {
   }
 
   private glyphOf(app: NonNullable<Manifest['appearance']>) {
-    return { ch: app.glyph, color: app.color, sprite: app.sprite, scale: app.scale ?? 1.1, frames: app.frames };
+    return { ch: app.glyph, color: app.color };
   }
 
   private ensureCoreEntities(reset: boolean): void {
@@ -740,7 +723,7 @@ export class Kernel {
     if (!this.alive(ch)) return;
     if (rec) return this.applyPlan(ch, rec.plan);
     const plan = await this.makePlan(ch);
-    await this.chunkStore.save(this.recordKey(ch), { plan, grid: [], painted: false });
+    await this.chunkStore.save(this.recordKey(ch), { plan });
     if (this.alive(ch)) this.applyPlan(ch, plan);
   }
 
@@ -1119,7 +1102,7 @@ export class Kernel {
     if (!r.ok || !r.id || !ch.plan) return;
     ch.plan.objects.push({ module: r.id, where: f.where });
     ch.plan.fresh = ch.plan.fresh.filter((x) => x !== f);
-    await this.chunkStore.save(this.recordKey(ch), { plan: ch.plan, grid: [], painted: false });
+    await this.chunkStore.save(this.recordKey(ch), { plan: ch.plan });
     const m = this.modules.get(r.id);
     const cell = pick(f.where);
     if (m && this.alive(ch) && cell !== undefined) this.spawnModuleEntity(m, at(cell).x, at(cell).y, ch.key, `${ch.key}#o${ch.plan.objects.length - 1}`);
@@ -1213,7 +1196,7 @@ export class Kernel {
     const comps: Record<string, any> = {
       pos: { x, y },
       pickup: { item, count },
-      glyph: { ch: d?.glyph ?? '?', color: d?.color ?? '#aaa', sprite: d?.icon, scale: 0.75 },
+      glyph: { ch: d?.glyph ?? '?', color: d?.color ?? '#aaa' },
       body: { r: 0.2, solid: false },
     };
     if (chunkKey) comps.chunk = { key: chunkKey };
@@ -1308,7 +1291,7 @@ export class Kernel {
     this.saving.add(ch.key);
     setTimeout(() => {
       this.saving.delete(ch.key);
-      if (ch.plan) void this.chunkStore.save(this.recordKey(ch), { plan: ch.plan, grid: [], painted: false });
+      if (ch.plan) void this.chunkStore.save(this.recordKey(ch), { plan: ch.plan });
     }, 500);
   }
 
@@ -2309,7 +2292,7 @@ export class Kernel {
     }
   }
 
-  /** What the gallery shows: every sprite, icon and painted thing of this universe. */
+  /** What the gallery shows: every thing of this universe that has (or will have) a model. */
   private exhibits(files: FileMap): Exhibit[] {
     const out: Exhibit[] = [];
     for (const path of Object.keys(files)) {
@@ -2320,20 +2303,19 @@ export class Kernel {
       } catch {
         continue;
       }
-      if (man.appearance) out.push({ label: man.name, asset: man.appearance.sprite, color: man.appearance.color, path, target: `module:${man.id}` });
-      for (const it of man.items ?? []) out.push({ label: it.name, asset: it.icon, color: it.color, path, target: `item:${it.id}` });
+      if (man.appearance) out.push({ label: man.name, color: man.appearance.color, path, target: `module:${man.id}` });
+      for (const it of man.items ?? []) out.push({ label: it.name, color: it.color, path, target: `item:${it.id}` });
     }
     return out;
   }
 
-  /** What the map room shows: every kind of terrain, painted or not, and the obstacles drawn on it. */
+  /** What the map room shows: every kind of terrain. */
   private terrainExhibits(): Exhibit[] {
     const path = this.terrain?.manifestPath ?? 'modules/world.terrain/manifest.json';
     const out: Exhibit[] = [];
     for (const [code, t] of Object.entries(this.palette)) {
       if (code === '?') continue;
-      out.push({ label: `${t.name} («${code}»)`, asset: t.texture, color: t.color, path, target: `tile:${code}` });
-      (t.sprites ?? []).forEach((sp, i) => out.push({ label: `${t.name}: ostacolo ${i + 1}`, asset: sp, color: t.color, path, target: `tile:${code}` }));
+      out.push({ label: `${t.name} («${code}»)`, color: t.color, path, target: `tile:${code}` });
     }
     return out;
   }
@@ -2413,10 +2395,10 @@ export class Kernel {
   }
 
   /**
-   * "Ridipingilo": the Artist paints a sprite, an icon or a terrain again. The old image is removed
-   * from the manifest (committed) and the ArtDirector, finding it missing, paints it anew.
+   * "Riscolpiscilo": the wish goes into how the thing looks (its `aspetto`, committed); the Sculptor
+   * writes a new program for it from there.
    */
-  requestRepaint(target: string, why = ''): boolean {
+  requestResculpt(target: string, why = ''): boolean {
     const [kind, id] = [target.slice(0, target.indexOf(':')), target.slice(target.indexOf(':') + 1)];
     let path: string | undefined;
     let man: any;
@@ -2430,27 +2412,22 @@ export class Kernel {
         return false;
       }
     };
+    // The wish is added to how it looks: { aspetto } of a module's appearance or of an item.
+    const wish = (o: { aspetto?: string }, name: string) => {
+      if (why) o.aspetto = `${o.aspetto ?? name}; ${why}`;
+    };
     if (kind === 'module' && load(this.modules.get(id)?.manifestPath)) {
       if (!man.appearance) return false;
-      delete man.appearance.sprite;
-      delete man.appearance.frames;
-      if (why) man.appearance.imagePrompt = `${man.appearance.imagePrompt ?? man.name}; ${why}`;
+      wish(man.appearance, man.name);
     } else if (kind === 'item' && load(this.modules.get(this.content.itemSource.get(id) ?? '')?.manifestPath)) {
       const it = (man.items ?? []).find((x: ItemDef) => x.id === id);
-      if (it) {
-        delete it.icon;
-        if (why) it.iconPrompt = `${it.iconPrompt ?? it.name}; ${why}`;
-      } else if (man.appearance) delete man.appearance.sprite;
-    } else if (kind === 'tile' && load(this.terrain?.manifestPath)) {
-      if (!man.tiles?.[id]) return false;
-      delete man.tiles[id].texture;
-      delete man.tiles[id].sprites;
+      if (it) wish(it, it.name);
+      else if (man.appearance) wish(man.appearance, man.name);
     } else return false;
     this.repo.write(path!, JSON.stringify(man, null, 2) + '\n');
     this.applyFiles({ ...this.repo.working });
-    this.repo.commit(`artista: da ridipingere ${target}`, 'agent');
-    this.council.say('artista', 'propone', `ridipingerò ${target}${why ? ` (${why})` : ''}`, undefined, 'art.repaint');
-    this.art.pump();
+    this.repo.commit(`scultore: da riscolpire ${target}`, 'agent');
+    this.council.say('artista', 'propone', `da riscolpire: ${target}${why ? ` (${why})` : ''}`, undefined, 'model.resculpt');
     return true;
   }
 
@@ -2463,7 +2440,7 @@ export class Kernel {
     if (t.startsWith('content.')) return 'modules/items.base/manifest.json';
     if (t === 'action.judge') return 'modules/core.effects/logic.lua';
     if (t === 'spell.name') return this.files['modules/magic.spells/manifest.json'] ? 'modules/magic.spells/manifest.json' : 'modules/magic.runes/manifest.json';
-    if (t.startsWith('art.') || e.kind === 'dipinge') return 'world/style.md';
+    if (t.startsWith('model.')) return 'world/style.md';
     return e.from === 'kernel' ? undefined : `prompts/agents/${e.from}.md`;
   }
 
@@ -2504,7 +2481,7 @@ export class Kernel {
     this.archive.go('referente', undefined, r.say);
     if (r.refusal) return { say: r.say, forged: `Il Concilio rifiuta: ${r.refusal}` };
     const req = r.request ?? text;
-    this.council.say('referente', 'info', `il viandante chiede: «${text}» → ${r.task}`, r.task === 'ambiente' ? 'cartografo' : r.task === 'ridipingi' ? 'artista' : r.task === 'regola' ? 'arbitro' : r.task === 'nessuno' ? undefined : 'narratore', 'referente.coordinate');
+    this.council.say('referente', 'info', `il viandante chiede: «${text}» → ${r.task}`, r.task === 'ambiente' ? 'cartografo' : r.task === 'riscolpisci' ? 'artista' : r.task === 'regola' ? 'arbitro' : r.task === 'nessuno' ? undefined : 'narratore', 'referente.coordinate');
     switch (r.task) {
       case 'oggetto':
         return { say: r.say, forged: (await this.forgeModule(req, 'agente', 'strumento', true)).summary };
@@ -2522,17 +2499,17 @@ export class Kernel {
         this.recordRule({ chiave: `regola|${normName(req).slice(0, 60)}`, testo: req, possibile: true, racconto: 'stabilito dal viandante trasceso, accolto dal Concilio', effetti: ['regola'] });
         return { say: r.say, forged: `Nuova regola del mondo: ${req}` };
       }
-      case 'ridipingi': {
-        const target = this.findPaintable(r.target ?? req);
-        if (!target) return { say: r.say, forged: `L'Artista non trova «${r.target ?? req}».` };
-        return { say: r.say, forged: this.requestRepaint(target.target, req) ? `L'Artista ridipinge «${target.label}».` : 'L\'Artista non può ridipingerlo.' };
+      case 'riscolpisci': {
+        const target = this.findExhibit(r.target ?? req);
+        if (!target) return { say: r.say, forged: `Lo Scultore non trova «${r.target ?? req}».` };
+        return { say: r.say, forged: this.requestResculpt(target.target, req) ? `Lo Scultore riscolpirà «${target.label}».` : 'Lo Scultore non può riscolpirlo.' };
       }
     }
     return { say: r.say };
   }
 
-  /** Something the Artist can paint, by name (a module, an item, a terrain). */
-  findPaintable(name: string): Exhibit | undefined {
+  /** Something with a model, by name (a module, an item, a terrain). */
+  findExhibit(name: string): Exhibit | undefined {
     const n = normName(name);
     const all = [...this.exhibits(this.files), ...this.terrainExhibits()];
     return all.find((e) => normName(e.label) === n) ?? all.find((e) => n.includes(normName(e.label).split(' ')[0]) && normName(e.label).length >= 3) ?? all.find((e) => normName(e.label).includes(n));
@@ -3574,13 +3551,13 @@ export class Kernel {
 
   // --- The Forge and Genesis ---------------------------------------------------------------------
 
-  /** Forges a module through the Council, then validates, commits and hot loads it; the Atelier paints it later. */
+  /** Forges a module through the Council, then validates, commits and hot loads it; the Sculptor gives it a model. */
   async forgeModule(prompt: string, origin: ForgeOrigin, kind?: 'npc' | 'oggetto' | 'strumento', permissive = false): Promise<{ ok: boolean; id?: string; summary: string }> {
     const ids = [...this.modules.keys()];
     try {
       const r = await forge(
         this.council,
-        { prompt, origin, kind, existingIds: ids, paletteCodes: Object.keys(this.palette).filter((c) => c !== '?' && !this.palette[c].solid), paint: false, permissive, existingNames: [...this.modules.values()].filter((m) => m.manifest.kind === 'entity' || m.manifest.kind === 'item').map((m) => m.manifest.name) },
+        { prompt, origin, kind, existingIds: ids, paletteCodes: Object.keys(this.palette).filter((c) => c !== '?' && !this.palette[c].solid), permissive, existingNames: [...this.modules.values()].filter((m) => m.manifest.kind === 'entity' || m.manifest.kind === 'item').map((m) => m.manifest.name) },
         (m, logic) => this.validator.validateForged(m, logic, new Set(ids)),
       );
       // What a character carries: existing items by name, new ones defined by the Narrator.
@@ -3738,7 +3715,6 @@ export class Kernel {
         if (m.manifest.origin !== 'esempio') continue;
         for (const p of Object.keys(this.repo.working)) if (p.startsWith(m.dir)) this.repo.write(p, null);
       }
-      this.repo.write('world/atelier.json', JSON.stringify({ pairs: [] }, null, 2) + '\n');
       this.applyFiles({ ...this.repo.working });
       this.consumed.clear();
       this.savedContainers.clear();
@@ -3765,13 +3741,13 @@ export class Kernel {
       await Promise.all([worker(), worker()]);
       const path = 'modules/core.player/manifest.json';
       const man = JSON.parse(this.repo.working[path]);
-      man.appearance = { glyph: '@', color: '#ffffff', scale: 1.3, imagePrompt: plan.playerPrompt };
+      man.appearance = { glyph: '@', color: '#ffffff', aspetto: plan.playerPrompt };
       this.repo.write(path, JSON.stringify(man, null, 2) + '\n');
       this.applyFiles({ ...this.repo.working });
       this.clearChunks();
       const title = readBible(this.repo.working)?.titolo ?? 'nuovo universo';
       const c = this.repo.commit(`genesi: ${title}`, 'agent');
-      this.council.say('kernel', 'approva', `Genesi completata: «${title}», ${done} moduli, ${this.content.items.size} oggetti, ${Object.keys(this.content.layouts).length} ambienti, commit ${c.id}. L'Artista ora dipinge tile e sprite.`);
+      this.council.say('kernel', 'approva', `Genesi completata: «${title}», ${done} moduli, ${this.content.items.size} oggetti, ${Object.keys(this.content.layouts).length} ambienti, commit ${c.id}.`);
       this.bus.emit('genesis:done', { title });
       return true;
     } catch (e) {
@@ -3968,10 +3944,6 @@ export class Kernel {
     }
     this.updateChunks();
     this.pumpDevelopment();
-    if (this.time - this.lastArtPump > 2) {
-      this.lastArtPump = this.time;
-      this.art.pump();
-    }
     this.rebuildSolids();
     this.playerComp().load = totalWeight(this.inventory(), this.itemSpec) / this.carryCapacity();
     this.syncRunes();

@@ -10,8 +10,7 @@
   "appearance": {
     "glyph": "&",
     "color": "#e8c07a",
-    "scale": 1.25,
-    "imagePrompt": "un contadino medievale con tunica ocra e cappello di paglia"
+    "aspetto": "un contadino medievale con tunica ocra e cappello di paglia"
   },
   "physics": {
     "solid": false,

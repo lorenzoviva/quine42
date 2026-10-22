@@ -268,3 +268,18 @@ Piano scritto; branch `3d`.
 - ADR-0039; AGENTS.md (Stack, Costi).
 - Diverso dal previsto: la configurazione dei modelli per lo Scultore e l'Artista (`ai.models`) la aggiungo in
   F6, dove serve; qui c'è il meccanismo (`TextCall.model`).
+
+### F3 — fatto
+- Via `art.ts` (ArtDirector), `agents/atelier.ts`, `imaging.ts`, l'archivio delle immagini (`assets.ts` → `chunks.ts`,
+  solo i piani dei luoghi; `UniverseAssets` e l'endpoint `asset/` del server), `Models.image()`, `canPaint`,
+  `imageModel`, `maxImages`, `animation`, i campi `sprite frames scale texture sprites icon`; `imagePrompt` e
+  `iconPrompt` diventano `aspetto` (anche nei manifest del seme, con modifiche testuali che non toccano la forma
+  dei file). `world/atelier.json` tolto.
+- La Genesi scrive la guida di stile per i modelli a voxel (`forme` invece di `prospettiva`); il prompt
+  dell'Artista ora dice che guarda e giudica; il Referente manda le richieste di «riscolpisci» allo Scultore:
+  per ora il desiderio si aggiunge all'`aspetto` del modulo o dell'oggetto e si committa (`requestResculpt`);
+  lo Scultore lo esegue in F6. La Galleria espone le cose con il loro colore; «Riscolpisci» al posto di «Ridipingi».
+- Il renderer 2D resta per questa fase, con texture e ostacoli procedurali; `imagetools.ts` è ridotto a una
+  cache che non trova nulla (sparisce in F4).
+- Test: 123 verdi (il caso del Referente ora chiede «riscolpisci»).
+- AGENTS.md: regola 11, Stack, Concilio (Artista, Referente), Fucina e Genesi, Manifest, Costi.

@@ -191,32 +191,4 @@ export class Council {
     });
     return parseJson<T>(text);
   }
-
-  async paint(task: string, prompt: string, images: string[], data?: unknown): Promise<string | null> {
-    if (!this.models.canPaint) return null;
-    return this.models.image({ agent: 'artista', task, prompt, images, data });
-  }
-}
-
-/** Rough colour name for a hex colour, to make sketch legends readable to image models. */
-export function colorName(hex: string): string {
-  const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex.trim());
-  if (!m) return hex;
-  const [r, g, b] = [1, 2, 3].map((i) => parseInt(m[i], 16) / 255);
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  const l = (max + min) / 2;
-  const s = max === min ? 0 : (max - min) / (1 - Math.abs(2 * l - 1));
-  let h = 0;
-  if (max !== min) {
-    if (max === r) h = ((g - b) / (max - min)) % 6;
-    else if (max === g) h = (b - r) / (max - min) + 2;
-    else h = (r - g) / (max - min) + 4;
-    h = (h * 60 + 360) % 360;
-  }
-  const tone = l < 0.25 ? 'dark ' : l > 0.72 ? 'light ' : '';
-  if (s < 0.15) return l < 0.2 ? 'black' : l > 0.85 ? 'white' : `${tone}gray`;
-  const names: Array<[number, string]> = [[15, 'red'], [40, 'orange'], [65, 'yellow'], [160, 'green'], [195, 'cyan'], [255, 'blue'], [290, 'purple'], [335, 'magenta'], [360, 'red']];
-  const name = names.find(([lim]) => h < lim)![1];
-  return `${tone}${name}`;
 }

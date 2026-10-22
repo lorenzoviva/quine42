@@ -57,13 +57,13 @@ const STYLE_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
     stile: { type: 'STRING' },
-    prospettiva: { type: 'STRING' },
+    forme: { type: 'STRING', description: 'proporzioni e forme dei modelli (teste grandi o realistiche, edifici tozzi o slanciati…)' },
     palette: { type: 'ARRAY', items: { type: 'STRING' } },
     luce: { type: 'STRING' },
     regole: { type: 'ARRAY', items: { type: 'STRING' } },
     protagonista: { type: 'STRING', description: 'aspetto del viandante (il giocatore)' },
   },
-  required: ['stile', 'prospettiva', 'palette', 'luce', 'regole', 'protagonista'],
+  required: ['stile', 'forme', 'palette', 'luce', 'regole', 'protagonista'],
 };
 
 const TERRAIN_SCHEMA: Schema = {
@@ -76,7 +76,7 @@ const TERRAIN_SCHEMA: Schema = {
         properties: {
           codice: { type: 'STRING' },
           nome: { type: 'STRING' },
-          descrizione: { type: 'STRING', description: 'come appare dall\'alto: materiale, colore, dettagli (serve all\'Artista per la texture)' },
+          descrizione: { type: 'STRING', description: "com'è: materiale, colore, dettagli" },
           colore: { type: 'STRING', description: 'esadecimale #rrggbb, ben distinto dagli altri' },
           strato: { type: 'STRING', enum: ['ground', 'floor', 'wall', 'door', 'liquid', 'vegetation', 'rock'] },
           solido: { type: 'BOOLEAN' },
@@ -126,7 +126,7 @@ const CAST_SCHEMA: Schema = {
 
 interface RawStyle {
   stile: string;
-  prospettiva: string;
+  forme: string;
   palette: string[];
   luce: string;
   regole: string[];
@@ -147,7 +147,7 @@ export function styleMarkdown(s: RawStyle): string {
   return [
     `# Guida di stile`,
     `Stile: ${s.stile}`,
-    `Prospettiva: ${s.prospettiva}`,
+    `Forme: ${s.forme}`,
     `Luce: ${s.luce}`,
     `Palette: ${(s.palette ?? []).join(', ')}`,
     `Regole:\n${(s.regole ?? []).map((r) => `- ${r}`).join('\n')}`,
@@ -196,7 +196,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     c.ask<RawStyle>(
       'artista',
       'genesis.style',
-      `Scrivi la guida di stile visiva per tutte le immagini di questo universo (tile ripetibili, sprite di personaggi e oggetti, icone; gioco 2D in prospettiva di 3/4 come i JRPG a 16 bit — si vedono il davanti e un po' del sopra di persone, oggetti ed edifici; il terreno è piatto —, grafica semplice e leggibile).\nTitolo: ${bible.titolo}\nTono: ${bible.tono}\nSintesi: ${bible.sintesi}${feedback ? `\nL'Arbitro ha obiettato: ${feedback}` : ''}`,
+      `Scrivi la guida di stile per tutti i modelli di questo universo: è un gioco 3D in cui ogni cosa (persone, animali, alberi, rocce, oggetti, edifici) è un modello a voxel (20 voxel per casella) costruito da un programma di regole, visto dall'alto in 3/4. Dì lo stile (semplice e leggibile da lontano), le forme e le proporzioni, la palette (pochi colori ben distinti), la luce, 3-6 regole e l'aspetto del protagonista.\nTitolo: ${bible.titolo}\nTono: ${bible.tono}\nSintesi: ${bible.sintesi}${feedback ? `\nL'Arbitro ha obiettato: ${feedback}` : ''}`,
       STYLE_SCHEMA,
       { data: { ...data, bible } },
     );
@@ -212,7 +212,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
   let bible = await askBible();
   c.say('narratore', 'propone', `«${bible.titolo}» — ${bible.sintesi}`);
   let style = await askStyle(bible);
-  c.say('artista', 'propone', `${style.stile}; ${style.prospettiva}; luce ${style.luce}`);
+  c.say('artista', 'propone', `${style.stile}; ${style.forme}; luce ${style.luce}`);
   let terrain = await askTerrain(bible, style);
   let errs = terrainErrors(terrain.terreni);
   if (errs.length) {

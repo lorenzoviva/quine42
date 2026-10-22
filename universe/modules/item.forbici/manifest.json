@@ -7,7 +7,7 @@
   "description": "Forbici robuste. Impugnale e premi F davanti a ciò che vuoi tagliare.",
   "context": "vicino ai cespugli, nei borghi",
   "logic": "logic.lua",
-  "appearance": { "glyph": "✂", "color": "#c0c8d0", "scale": 0.9, "imagePrompt": "un paio di forbici da giardiniere con manici di legno" },
+  "appearance": { "glyph": "✂", "color": "#c0c8d0", "aspetto": "un paio di forbici da giardiniere con manici di legno" },
   "physics": { "solid": false, "radius": 0.2 },
   "item": { "stackable": false, "maxStack": 1, "weight": 1, "equippable": true, "controls": { "azione": "taglia ciò che hai davanti (cespugli, corde…)" } },
   "spawn": { "tiles": ["p", "g"], "chance": 0.05, "max": 1 }

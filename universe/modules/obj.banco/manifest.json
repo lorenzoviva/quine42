@@ -6,7 +6,7 @@
   "origin": "esempio",
   "description": "Un banco robusto pieno di segni di attrezzi. Sopra c'è sempre qualcosa.",
   "context": "botteghe, capanni, cortili",
-  "appearance": { "glyph": "╤", "color": "#9a7a52", "scale": 1.15, "imagePrompt": "un banco da lavoro di legno con attrezzi sparsi sopra, visto dall'alto" },
+  "appearance": { "glyph": "╤", "color": "#9a7a52", "aspetto": "un banco da lavoro di legno con attrezzi sparsi sopra, visto dall'alto" },
   "physics": { "solid": true, "radius": 0.45 },
   "container": { "size": 6, "loot": "bottega" },
   "spawn": { "tiles": ["f", "g", "p"], "chance": 0.2, "max": 1 }

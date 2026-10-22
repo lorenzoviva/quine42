@@ -1,9 +1,8 @@
 // Offline models: deterministic, themed (medieval), no network. They answer every agent task from
-// its structured `data`, so the whole Council works in tests and without an API key. They cannot
-// paint (the renderer then draws layout sketches) and sometimes answer badly on purpose, so the
-// discard-and-regenerate path is always exercised.
+// its structured `data`, so the whole Council works in tests and without an API key. They sometimes
+// answer badly on purpose, so the discard-and-regenerate path is always exercised.
 
-import { emptyUsage, type ImageCall, type Limits, type Models, type TextCall } from './models';
+import { emptyUsage, type Limits, type Models, type TextCall } from './models';
 import { hashStr, Rng } from '../rng';
 import { tokenize } from '../runes';
 import type { PlanContext } from '../agents/cartography';
@@ -65,9 +64,8 @@ const words = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g
 
 export class MockModels implements Models {
   readonly name = 'offline';
-  readonly canPaint = false;
   readonly usage = emptyUsage();
-  limits: Limits = { text: Infinity, images: 0 };
+  limits: Limits = { text: Infinity };
   /** Probability that a first chunk plan is broken on purpose. */
   corruptRate = 0.15;
   latency = 15;
@@ -76,10 +74,6 @@ export class MockModels implements Models {
     this.usage.text++;
     await delay(this.latency);
     return JSON.stringify(this.answer(call));
-  }
-
-  async image(_call: ImageCall): Promise<string | null> {
-    return null;
   }
 
   private answer(call: TextCall): unknown {
@@ -109,7 +103,7 @@ export class MockModels implements Models {
       case 'genesis.bible':
         return { misteri: ['le rune che affiorano nei campi dopo la pioggia', 'la strada che riporta in piazza'], titolo: 'Il Regno di Valmora', tono: 'meraviglia e un filo di mistero', sintesi: 'Un regno quieto in cui tutti tornano sempre in piazza.', storia: '', luoghi: ['Piazza di Valmora'], personaggi: ['Abitanti di Valmora'], fatti: ['Il pane del forno di piazza è famoso in tutto il regno.'] };
       case 'genesis.style':
-        return { stile: 'pixel art medievale', prospettiva: 'rigorosamente dall\'alto', palette: ['verde', 'ocra', 'blu'], luce: 'diurna morbida', regole: ['niente testo'], protagonista: 'un viandante incappucciato' };
+        return { stile: 'voxel medievale, semplice e caldo', forme: 'persone tozze dalla testa grande, case basse', palette: ['verde', 'ocra', 'blu'], luce: 'diurna morbida', regole: ['niente testo'], protagonista: 'un viandante incappucciato' };
       case 'genesis.terrain':
         return {
           terreni: [
@@ -246,7 +240,7 @@ export class MockModels implements Models {
       case 'referente.coordinate': {
         const t = String(d.text ?? '');
         if (/distrugg.*universo|cancella tutto/i.test(t)) return { risposta: 'Questo no.', incarico: 'nessuno', rifiuto: "distruggerebbe l'universo" };
-        if (/ridiping/i.test(t)) return { risposta: "Lo dico all'Artista.", incarico: 'ridipingi', bersaglio: t.replace(/.*ridipingi\s+(il |la |lo |l')?/i, '').split(' ')[0], richiesta: t };
+        if (/riscolp/i.test(t)) return { risposta: 'Lo dico allo Scultore.', incarico: 'riscolpisci', bersaglio: t.replace(/.*riscolpisci\s+(il |la |lo |l')?/i, '').split(' ')[0], richiesta: t };
         if (/regola/i.test(t)) return { risposta: 'Sarà una regola del mondo.', incarico: 'regola', richiesta: t.replace(/.*regola:?\s*/i, '') };
         if (/bosco|luogo|regione|castello|deserto/i.test(t)) return { risposta: 'Il Cartografo ci pensa.', incarico: 'ambiente', richiesta: t };
         if (/personaggio|abitante|persona/i.test(t)) return { risposta: 'La Fucina lo farà nascere.', incarico: 'personaggio', richiesta: t };

@@ -172,8 +172,9 @@ describe('kernel', () => {
     const rule = await k.talkToAgent('referente', 'stabilisci una regola: di notte i lupi cantano');
     expect(rule.forged).toMatch(/regola/i);
     expect(k.rules().some((r) => /lupi/.test(r.testo))).toBe(true);
-    const art = await k.talkToAgent('referente', 'ridipingi il gatto più arancione');
-    expect(art.forged).toMatch(/ridipinge|non trova/i);
+    const art = await k.talkToAgent('referente', 'riscolpisci il gatto più arancione');
+    expect(art.forged).toMatch(/riscolpirà/i);
+    expect(JSON.parse(k.repo.head().files['modules/npc.cat/manifest.json']!).appearance.aspetto).toMatch(/arancione/);
   });
 
   it('a broken phrase breaks the world; rollback repairs it and returns the runes', () => {

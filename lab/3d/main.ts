@@ -809,7 +809,7 @@ $('g-go').onclick = async () => {
     kind,
     category: ['persona', 'animale', 'bestia'].includes(kind) ? 'figura' : ['edificio', 'monumento'].includes(kind) ? 'struttura' : 'semplice',
   };
-  const models = new GeminiModels({ textModel: $<HTMLSelectElement>('g-model').value, imageModel: 'none', limits: { text: 50, images: 0 }, thinking: 'low', timeout: 240_000 });
+  const models = new GeminiModels({ textModel: $<HTMLSelectElement>('g-model').value, limits: { text: 50 }, thinking: 'low', timeout: 240_000 });
   models.onCall = (r) => gMeter.record(r);
   $<HTMLButtonElement>('g-go').disabled = true;
   out.textContent = 'lo Scultore scrive…';

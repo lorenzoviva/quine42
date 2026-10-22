@@ -5,13 +5,12 @@
 // A request that times out, or whose connection fails, is NOT repeated: Gemini may have generated (and
 // billed) it anyway. Only an answer that says "try again" (429, 5xx) is repeated, a few times.
 
-import { BudgetError, emptyUsage, Semaphore, type ImageCall, type Limits, type Models, type TextCall, type Thinking } from './models';
+import { BudgetError, emptyUsage, Semaphore, type Limits, type Models, type TextCall, type Thinking } from './models';
 import type { CallRecord } from './usage';
 
 export interface GeminiOptions {
   endpoint?: string;
   textModel: string;
-  imageModel: string;
   limits: Limits;
   fetchImpl?: typeof fetch;
   /** Default reasoning effort (`low`). */
@@ -36,12 +35,10 @@ const RETRIES = 3;
 
 export class GeminiModels implements Models {
   readonly name = 'gemini';
-  readonly canPaint = true;
   readonly usage = emptyUsage();
   limits: Limits;
   onCall?: (r: CallRecord) => void;
   private textGate = new Semaphore(4);
-  private imageGate = new Semaphore(2);
   private endpoint: string;
   private fetchImpl: typeof fetch;
 
@@ -80,21 +77,6 @@ export class GeminiModels implements Models {
       const text = (j.candidates?.[0]?.content?.parts ?? []).map((p: GeminiPart) => p.text ?? '').join('');
       if (!text) throw new Error(`risposta vuota (${j.candidates?.[0]?.finishReason ?? 'sconosciuto'})`);
       return text;
-    });
-  }
-
-  async image(call: ImageCall): Promise<string | null> {
-    if (this.usage.images >= this.limits.images) throw new BudgetError('le immagini');
-    this.usage.images++;
-    return this.imageGate.run(async () => {
-      const body = {
-        contents: [{ role: 'user', parts: [{ text: call.prompt }, ...(call.images ?? []).map(inline)] }],
-        generationConfig: { responseModalities: ['IMAGE'], imageConfig: { aspectRatio: '1:1' } },
-      };
-      const j = await this.post(this.opts.imageModel, body, call);
-      const part = (j.candidates?.[0]?.content?.parts ?? []).find((p: GeminiPart) => p.inlineData);
-      if (!part?.inlineData) throw new Error(`nessuna immagine (${j.candidates?.[0]?.finishReason ?? 'sconosciuto'})`);
-      return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
     });
   }
 

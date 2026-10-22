@@ -4,7 +4,7 @@
 //   Engineer  → Lua logic and extra components
 //   Arbiter   → reviews the whole bundle; sends issues back to the responsible agent (1 round)
 //   Kernel    → validator + dry load in the sandbox; errors go back to the Engineer (2 rounds)
-//   Artist    → sprite
+//   (the Sculptor then gives it a model)
 // Nothing reaches the universe unless it passes the validator.
 
 import type { Schema } from '../ai/models';
@@ -13,7 +13,6 @@ import { metaBreak } from '../fourthwall';
 import { normName } from '../content';
 import type { Manifest } from '../types';
 import { AGENTS, type AgentId, type Council } from './council';
-import { Atelier, type StylePair } from './atelier';
 
 export type ForgeOrigin = 'genesi' | 'agente' | 'cartografo' | 'combinazione';
 
@@ -24,8 +23,6 @@ export interface ForgeRequest {
   paletteCodes: string[];
   /** Restrict the kind (e.g. combinations always produce items). */
   kind?: 'npc' | 'oggetto' | 'strumento';
-  /** False when the kernel's ArtDirector will paint the sprite later (few-shot, with walk cycle). */
-  paint?: boolean;
   /** Asked by the wanderer who transcended (in the corona): the Council goes along with it. */
   permissive?: boolean;
   /** Names of the modules that exist: no duplicates. */
@@ -73,8 +70,6 @@ export interface ForgeResult {
   id: string;
   manifest: Manifest;
   logic: string;
-  /** Raw sprite (data URL) from the image model, before chroma keying; null offline. */
-  sprite: string | null;
   summary: string;
   concept: Concept;
 }
@@ -88,7 +83,7 @@ const CONCEPT_SCHEMA: Schema = {
     tipo: { type: 'STRING', enum: ['npc', 'oggetto', 'strumento'] },
     descrizione: { type: 'STRING' },
     lore: { type: 'STRING' },
-    aspetto: { type: 'STRING', description: 'descrizione visiva per lo sprite, vista dall\'alto' },
+    aspetto: { type: 'STRING', description: "com'è fatto: forma, proporzioni, materiali, colori (lo Scultore ne fa un modello 3D)" },
     contesto: {
       type: 'OBJECT',
       properties: { terreni: { type: 'ARRAY', items: { type: 'STRING' } }, luoghi: { type: 'STRING' }, rarita: { type: 'NUMBER' } },
@@ -215,7 +210,7 @@ export function assembleManifest(id: string, concept: Concept, physics: PhysicsS
     tags: concept.tags ?? [],
     origin,
     logic: 'logic.lua',
-    appearance: { glyph, color: `hsl(${hue} 65% 68%)`, imagePrompt: concept.aspetto, scale: npc ? 1.25 : 1.1 },
+    appearance: { glyph, color: `hsl(${hue} 65% 68%)`, aspetto: concept.aspetto },
     physics: {
       solid: item ? false : !!physics.solido,
       radius: clamp(physics.raggio, 0.2, 0.5, 0.35),
@@ -252,7 +247,7 @@ export function assembleManifest(id: string, concept: Concept, physics: PhysicsS
   return m;
 }
 
-export async function forge(c: Council, req: ForgeRequest, validate: ModuleValidator, art?: { examples: StylePair[] }): Promise<ForgeResult> {
+export async function forge(c: Council, req: ForgeRequest, validate: ModuleValidator): Promise<ForgeResult> {
   const data = { request: req };
   const codes = req.paletteCodes.join(', ');
 
@@ -376,15 +371,7 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
     manifest = assembleManifest(id, concept, physics, code, req.paletteCodes, req.origin);
   }
 
-  let sprite: string | null = null;
-  if (c.models.canPaint && req.paint !== false) {
-    c.say('artista', 'dipinge', `«${concept.nome}»: ${concept.aspetto}${art?.examples.length ? ` (sullo stile di ${art.examples.length} esempi)` : ''}`);
-    sprite = await new Atelier(c).sprite(`${concept.nome}: ${concept.aspetto}`, concept.tipo, art?.examples ?? []).catch((e: Error) => {
-      c.say('artista', 'errore', e.message);
-      return null;
-    });
-  }
-  return { id, manifest, logic: code.logic, sprite, concept, summary: `${concept.tipo === 'npc' ? 'Nuovo abitante' : concept.tipo === 'strumento' ? 'Nuovo strumento' : 'Nuovo oggetto'} «${concept.nome}» (${id})` };
+  return { id, manifest, logic: code.logic, concept, summary: `${concept.tipo === 'npc' ? 'Nuovo abitante' : concept.tipo === 'strumento' ? 'Nuovo strumento' : 'Nuovo oggetto'} «${concept.nome}» (${id})` };
 }
 
 /** A generated module failed at runtime: the Engineer gets the code and the error, and fixes it. */
@@ -407,16 +394,6 @@ export async function repairLogic(c: Council, manifest: Manifest, logic: string,
   return code.logic;
 }
 
-export function spritePrompt(c: Council, concept: Pick<Concept, 'nome' | 'aspetto' | 'tipo'>): string {
-  const style = c.files['world/style.md'] ?? '';
-  return [
-    `ART DIRECTION:\n${style}`,
-    `Game sprite of "${concept.nome}": ${concept.aspetto}.`,
-    concept.tipo === 'npc' ? 'A single character in three-quarter view (3/4, from about 45° above), full body, facing the viewer.' : 'A single object in three-quarter view (its front and a bit of its top), standing on its base.',
-    'Centered, filling about 70% of the frame, crisp edges, no shadow on the ground, no text, no frame.',
-    'Background: one flat uniform pure magenta (#FF00FF) colour, nothing else, so it can be cut out.',
-  ].join('\n');
-}
 
 const JUDGE_SCHEMA: Schema = {
   type: 'OBJECT',

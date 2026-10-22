@@ -2,15 +2,15 @@ import wasmUri from 'wasmoon/dist/glue.wasm?url';
 import { Kernel } from './kernel/kernel';
 import { bundledFiles } from './kernel/bundle';
 import { localStore, memoryStore } from './kernel/repo';
-import { SEED_FILE, seedHashes, UniverseAssets, UniverseChunks, UniverseClient, upgradeFromSeed, type PastCommit } from './kernel/universes';
+import { SEED_FILE, seedHashes, UniverseChunks, UniverseClient, upgradeFromSeed, type PastCommit } from './kernel/universes';
 import type { FileMap } from './kernel/types';
 import { readConfig } from './kernel/universe';
-import { IdbAssets, IdbChunks } from './kernel/assets';
+import { IdbChunks } from './kernel/chunks';
 import { GeminiModels } from './kernel/ai/gemini';
 import { MockModels } from './kernel/ai/mock';
 import type { Models } from './kernel/ai/models';
 import { Renderer } from './render/renderer';
-import { BrowserImageTools, ImageCache } from './render/imagetools';
+import { ImageCache } from './render/imagetools';
 import { Hud } from './ui/hud';
 import { Editor } from './ui/editor';
 import { Console } from './ui/console';
@@ -34,7 +34,7 @@ async function main() {
   loading.textContent = 'avvio del kernel…';
   const ai = readConfig(bundledFiles).config.ai;
   const online = !params.has('offline') && (await GeminiModels.available());
-  const models: Models = online ? new GeminiModels({ textModel: ai.textModel, imageModel: ai.imageModel, limits: { text: ai.maxText, images: ai.maxImages }, thinking: ai.thinking, timeout: (ai.timeout ?? 120) * 1000 }) : new MockModels();
+  const models: Models = online ? new GeminiModels({ textModel: ai.textModel, limits: { text: ai.maxText }, thinking: ai.thinking, timeout: (ai.timeout ?? 120) * 1000 }) : new MockModels();
   // Two repositories (ADR-0021): the kernel's seed (bundled) and the universe's, on disk.
   const name = readConfig(bundledFiles).config.name;
   const client = await UniverseClient.connect(name);
@@ -70,16 +70,14 @@ async function main() {
     files = up.files;
     past = snap.log ?? [];
   }
-  const legacyAssets = new IdbAssets();
-  const assets = client ? new UniverseAssets(client, legacyAssets) : legacyAssets;
   const chunks = client ? new UniverseChunks(client, new IdbChunks()) : new IdbChunks();
-  const kernel = await Kernel.boot({ files, store: client ? memoryStore() : localStore, models, assets, chunks, imageTools: new BrowserImageTools(), wasmUri, backend: client ?? undefined, past });
+  const kernel = await Kernel.boot({ files, store: client ? memoryStore() : localStore, models, chunks, wasmUri, backend: client ?? undefined, past });
   // Leaving: the state of play goes into the universe (if it is valid).
   window.addEventListener('pagehide', () => {
     kernel.saveState();
     kernel.saveUsage();
   });
-  const images = new ImageCache((id) => assets.get(id));
+  const images = new ImageCache();
   const renderer = new Renderer($<HTMLCanvasElement>('#world'), kernel, images);
   const hud = new Hud(kernel, renderer, images);
   const editor = new Editor(kernel);
@@ -89,7 +87,7 @@ async function main() {
   const feed = new FeedPanel($('#hud'), kernel);
   const genesis = new GenesisScreen(kernel);
   const actions = new ActionMenu(kernel);
-  const studio = new StudioPanel(kernel, images);
+  const studio = new StudioPanel(kernel);
   // Right click on a tile near you: its context menu (with what stands on it, and "Altro…").
   $<HTMLCanvasElement>('#world').addEventListener('contextmenu', (e) => {
     e.preventDefault();
@@ -187,7 +185,7 @@ async function main() {
   };
   window.addEventListener('keydown', startGame);
   intro.addEventListener('click', startGame);
-  $('#models').textContent = online ? `Gemini · ${ai.textModel} · ${ai.imageModel}` : 'offline: luoghi abbozzati, agenti locali';
+  $('#models').textContent = online ? `Gemini · ${ai.textModel}` : 'offline: luoghi abbozzati, agenti locali';
   if (params.has('skip')) intro.hidden = true;
   // Dev: ?dev&teleport=46,0 stops the carpet and drops you at real coordinates (e.g. in the corona).
   const tp = dev && params.get('teleport')?.split(',').map(Number);

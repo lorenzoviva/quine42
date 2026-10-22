@@ -52,5 +52,5 @@ export const PRESETS: Target[] = [
 /** The first lines of the style guide: style, perspective, light, palette. */
 export function styleOf(files: Record<string, string>): string | undefined {
   const s = files['world/style.md'];
-  return s ? s.split('\n').filter((l) => /^(Stile|Prospettiva|Luce|Palette):/.test(l)).join('\n') || s.slice(0, 600) : undefined;
+  return s ? s.split('\n').filter((l) => /^(Stile|Forme|Prospettiva|Luce|Palette):/.test(l)).join('\n') || s.slice(0, 600) : undefined;
 }

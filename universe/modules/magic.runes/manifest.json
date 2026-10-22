@@ -163,7 +163,7 @@
       ],
       "glyph": "✦",
       "color": "#9fe8ff",
-      "iconPrompt": "a small glowing blue magic crystal shard",
+      "aspetto": "a small glowing blue magic crystal shard",
       "effects": {
         "mana": 40
       }
@@ -181,7 +181,7 @@
       ],
       "glyph": "◘",
       "color": "#c49a5a",
-      "iconPrompt": "a small leather pouch with runic stitching",
+      "aspetto": "a small leather pouch with runic stitching",
       "container": {
         "size": 12,
         "accepts": "runa"
@@ -200,7 +200,7 @@
       ],
       "glyph": "◘",
       "color": "#b8a888",
-      "iconPrompt": "a canvas shoulder bag",
+      "aspetto": "a canvas shoulder bag",
       "container": {
         "size": 6
       }

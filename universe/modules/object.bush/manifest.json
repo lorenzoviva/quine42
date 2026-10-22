@@ -7,7 +7,7 @@
   "description": "Un cespuglio spinoso carico di more.",
   "context": "margini dei boschi e prati",
   "logic": "logic.lua",
-  "appearance": { "glyph": "%", "color": "#3fae4a", "imagePrompt": "un cespuglio di rovo spinoso con more nere, visto dall'alto" },
+  "appearance": { "glyph": "%", "color": "#3fae4a", "aspetto": "un cespuglio di rovo spinoso con more nere, visto dall'alto" },
   "physics": { "solid": true, "radius": 0.45 },
   "tags": ["tagliabile"],
   "drops": ["item.ciocco"],

@@ -3,7 +3,6 @@
 
 import type { Kernel } from '../kernel/kernel';
 import type { StudioItem } from '../kernel/corona';
-import type { ImageCache } from '../render/imagetools';
 import { $, el } from './dom';
 
 export class StudioPanel {
@@ -13,7 +12,6 @@ export class StudioPanel {
 
   constructor(
     private k: Kernel,
-    private images: ImageCache,
   ) {
     k.bus.on('ui:exhibit', ({ item, building }: { item: StudioItem; building: string }) => this.exhibit(item, building));
     k.bus.on('ui:board', ({ building, name }: { building: string; name: string }) => this.board(building, name));
@@ -50,16 +48,12 @@ export class StudioPanel {
 
   exhibit(item: StudioItem, building: string): void {
     const frame = el('div', { class: 'frame' }, el('div', { class: 'swatch', style: `background:${item.color ?? '#333'}` }));
-    if (item.asset)
-      void this.images.url(item.asset).then((src) => {
-        if (src) frame.replaceChildren(el('img', { src, alt: item.label }));
-      });
     const why = el('input', { type: 'text', placeholder: "Come lo vuoi? (es. «più scuro, con un mantello rosso»)", maxlength: '160' }) as HTMLInputElement;
     const out = el('div', { class: 'note' });
-    const repaint = el('button', { class: 'primary' }, "Chiedi all'Artista di ridipingerlo");
+    const repaint = el('button', { class: 'primary' }, 'Chiedi allo Scultore di riscolpirlo');
     repaint.onclick = () => {
-      const ok = item.target ? this.k.requestRepaint(item.target, why.value.trim()) : false;
-      out.textContent = ok ? "L'Artista lo rimette in coda: lo vedrai cambiare qui e nel mondo." : 'Questo non si può ridipingere.';
+      const ok = item.target ? this.k.requestResculpt(item.target, why.value.trim()) : false;
+      out.textContent = ok ? 'Lo Scultore lo riscolpirà: lo vedrai cambiare qui e nel mondo.' : 'Questo non si può riscolpire.';
     };
     why.addEventListener('keydown', (e) => {
       e.stopPropagation();
@@ -72,7 +66,7 @@ export class StudioPanel {
     };
     this.show(
       el('div', { class: 'title' }, item.label),
-      el('div', { class: 'note' }, `${item.kind === 'tile' ? 'Terreno' : 'Quadro'} della ${building} — ${item.asset ? `immagine ${item.asset}` : "non ancora dipinto: l'Artista ci arriverà"} — ${item.path ?? ''}`),
+      el('div', { class: 'note' }, `${item.kind === 'tile' ? 'Terreno' : 'Modello'} della ${building} — ${item.path ?? ''}`),
       frame,
       el('div', { class: 'row' }, why, repaint),
       out,

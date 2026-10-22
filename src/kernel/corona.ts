@@ -31,10 +31,9 @@ export interface StudioItem {
   path?: string;
   look?: FileLook;
   lines?: number;
-  /** Image asset (sprites, icons, textures) and its fallback colour. */
-  asset?: string;
+  /** Colour of a terrain or a thing on display. */
   color?: string;
-  /** What to repaint when asked (module id, item id, tile code); for seats the agent, for portals the room. */
+  /** What to re-sculpt when asked (module id, item id, tile code); for seats the agent, for portals the room. */
   target?: string;
   /** Width in cells (screens are wide). */
   w?: number;
@@ -79,7 +78,6 @@ export interface CoronaCell {
 /** Something to show in the gallery or the map room. */
 export interface Exhibit {
   label: string;
-  asset?: string;
   color?: string;
   path: string;
   target: string;
@@ -186,8 +184,8 @@ export class Corona {
       groups.get(room)!.push(item);
     };
     for (const path of Object.keys(files).sort()) add(folderOf(path), { kind: 'file', path, label: path, look: lookOf(path), lines: files[path].split('\n').length });
-    for (const g of gallery) add('galleria', { kind: 'sprite', label: g.label, asset: g.asset, color: g.color, path: g.path, target: g.target });
-    for (const t of terrains) add('cartografia', { kind: 'tile', label: t.label, asset: t.asset, color: t.color, path: t.path, target: t.target });
+    for (const g of gallery) add('galleria', { kind: 'sprite', label: g.label, color: g.color, path: g.path, target: g.target });
+    for (const t of terrains) add('cartografia', { kind: 'tile', label: t.label, color: t.color, path: t.path, target: t.target });
     const ids = [...groups.keys()].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
     const total = ids.length;
     this.buildings = ids.map((id, index) => {

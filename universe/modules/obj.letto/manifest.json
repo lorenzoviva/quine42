@@ -7,7 +7,7 @@
   "description": "Un pagliericcio con una coperta di lana.",
   "context": "dentro le case e le locande",
   "logic": "logic.lua",
-  "appearance": { "glyph": "▭", "color": "#c8a870", "scale": 1.2, "imagePrompt": "un letto di legno con pagliericcio e coperta di lana, visto dall'alto" },
+  "appearance": { "glyph": "▭", "color": "#c8a870", "aspetto": "un letto di legno con pagliericcio e coperta di lana, visto dall'alto" },
   "physics": { "solid": true, "radius": 0.45 },
   "actions": [{ "id": "dormi", "label": "Dormi" }, { "id": "fruga", "label": "Fruga sotto il letto" }],
   "spawn": { "tiles": ["f"], "chance": 0.4, "max": 1 }

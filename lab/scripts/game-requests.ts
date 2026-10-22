@@ -1,7 +1,7 @@
 // How big the game's requests to Gemini are. The kernel never kept its usage, so this measures what it
 // sends: a Genesis and the first places, offline (MockModels, as in the tests), every request recorded,
 // then a sample of each kind counted with Gemini's countTokens (free, no generation). Images in a
-// request are counted too. Output is not measured here (the report uses the lab's measured answers).
+// request (the Artist's photos) are counted too. Output is not measured here (the report uses the lab's measured answers).
 // npx vite-node lab/scripts/game-requests.ts -- [--root H:/projects/rune] [--per-task 3]
 
 import fs from 'node:fs';
@@ -10,7 +10,7 @@ import { Kernel } from '../../src/kernel/kernel';
 import { bundledFiles } from '../../src/kernel/bundle';
 import { memoryStore } from '../../src/kernel/repo';
 import { MockModels } from '../../src/kernel/ai/mock';
-import type { ImageCall, TextCall } from '../../src/kernel/ai/models';
+import type { TextCall } from '../../src/kernel/ai/models';
 
 const argv = process.argv.slice(2);
 const opt = (n: string) => (argv.includes(`--${n}`) ? argv[argv.indexOf(`--${n}`) + 1] : undefined);
@@ -19,7 +19,7 @@ const key = /^GEMINI_API_KEY\s*=\s*"?([^"\r\n]+)"?/m.exec(fs.readFileSync(path.j
 if (!key) throw new Error('nessuna chiave');
 const perTask = Number(opt('per-task') ?? 3);
 
-const recorded: Array<{ kind: 'text' | 'image'; task: string; body: unknown }> = [];
+const recorded: Array<{ kind: 'text'; task: string; body: unknown }> = [];
 const inline = (u: string) => {
   const m = /^data:([^;]+);base64,(.*)$/.exec(u);
   return m ? { inlineData: { mimeType: m[1], data: m[2] } } : { text: u };
@@ -37,10 +37,6 @@ class Recording extends MockModels {
       },
     });
     return super.text(call);
-  }
-  async image(call: ImageCall): Promise<string | null> {
-    recorded.push({ kind: 'image', task: call.task, body: { contents: [{ role: 'user', parts: [{ text: call.prompt }, ...(call.images ?? []).map(inline)] }] } });
-    return super.image(call);
   }
 }
 

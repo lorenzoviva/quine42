@@ -35,17 +35,8 @@ export interface TextCall {
 /** Gemini 3 `thinkingLevel`; `off` sends nothing (the model's default). */
 export type Thinking = 'low' | 'medium' | 'high' | 'off';
 
-export interface ImageCall {
-  agent: string;
-  task: string;
-  prompt: string;
-  images?: string[];
-  data?: unknown;
-}
-
 export interface Usage {
   text: number;
-  images: number;
   failures: number;
   inputTokens: number;
   outputTokens: number;
@@ -61,19 +52,15 @@ export interface Usage {
 
 export interface Limits {
   text: number;
-  images: number;
 }
 
 export interface Models {
   readonly name: string;
-  /** Whether image() can return pictures (offline models cannot). */
-  readonly canPaint: boolean;
   readonly usage: Usage;
   limits: Limits;
   /** Every call, with its tokens (the kernel's usage ledger listens). */
   onCall?: (r: CallRecord) => void;
   text(call: TextCall): Promise<string>;
-  image(call: ImageCall): Promise<string | null>;
 }
 
 export class BudgetError extends Error {
@@ -82,7 +69,7 @@ export class BudgetError extends Error {
   }
 }
 
-export const emptyUsage = (): Usage => ({ text: 0, images: 0, failures: 0, inputTokens: 0, outputTokens: 0, cachedTokens: 0, thoughtTokens: 0, timeouts: 0, retries: 0 });
+export const emptyUsage = (): Usage => ({ text: 0, failures: 0, inputTokens: 0, outputTokens: 0, cachedTokens: 0, thoughtTokens: 0, timeouts: 0, retries: 0 });
 
 /** Parses a model's JSON answer, tolerating code fences and leading prose. */
 export function parseJson<T>(text: string): T {

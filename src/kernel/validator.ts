@@ -69,7 +69,6 @@ export class Validator {
     if (m.appearance) {
       if (typeof m.appearance.glyph !== 'string' || [...m.appearance.glyph].length !== 1) err('appearance.glyph deve essere un singolo carattere');
       if (typeof m.appearance.color !== 'string') err('appearance.color mancante');
-      if (m.appearance.sprite !== undefined && !/^img:[0-9a-f]+$/.test(m.appearance.sprite)) err('appearance.sprite deve essere un id di asset "img:…"');
     }
     if (['entity', 'item', 'player'].includes(m.kind) && !m.appearance) err(`un modulo ${m.kind} richiede appearance`);
     if (m.physics) {

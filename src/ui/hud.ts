@@ -7,15 +7,10 @@ import { HOTBAR } from '../kernel/inventory';
 import { $, el } from './dom';
 import { runeGlyph } from '../kernel/runes';
 
-/** An <img> for an item sprite, or its glyph while the sprite loads (or offline). */
-export function itemIcon(k: Kernel, images: ImageCache, item: string, size = 32): HTMLElement {
+/** An item's sign in its colour. */
+export function itemIcon(k: Kernel, _images: ImageCache, item: string, size = 32): HTMLElement {
   const info = k.itemInfo(item);
-  const box = el('span', { class: 'icon', style: `width:${size}px;height:${size}px;color:${info.color};font-size:${Math.round(size * 0.7)}px` }, info.glyph);
-  if (info.sprite)
-    void images.url(info.sprite).then((src) => {
-      if (src) box.replaceChildren(el('img', { src, alt: info.name, width: String(size), height: String(size) }));
-    });
-  return box;
+  return el('span', { class: 'icon', style: `width:${size}px;height:${size}px;color:${info.color};font-size:${Math.round(size * 0.7)}px` }, info.glyph);
 }
 
 export class Hud {
@@ -215,7 +210,7 @@ export class Hud {
         const it = info.item;
         const LOOK: Record<string, string> = { libro: 'un libro: il manifest di un modulo', cristallo: 'un cristallo: codice Lua', pergamena: 'una pergamena: testo', tavoletta: 'una tavoletta: dati' };
         const what =
-          it.kind === 'file' ? `${LOOK[it.look ?? ''] ?? ''} — ${it.lines} righe` : it.kind === 'sprite' ? `un quadro: ${it.asset ? 'dipinto dall\'Artista' : 'ancora da dipingere'}` : it.kind === 'tile' ? `un campione di terreno${it.asset ? '' : ' (non ancora dipinto)'}` : it.label;
+          it.kind === 'file' ? `${LOOK[it.look ?? ''] ?? ''} — ${it.lines} righe` : it.kind === 'sprite' ? 'un modello in mostra' : it.kind === 'tile' ? 'un campione di terreno' : it.label;
         return [
           el('div', { class: 'h code' }, it.kind === 'file' ? (it.path ?? '') : it.label),
           el('div', { class: 'doc' }, `${what}, in «${info.building}»`),

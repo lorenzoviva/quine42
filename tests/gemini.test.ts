@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { GeminiModels } from '../src/kernel/ai/gemini';
 import { BudgetError, parseJson } from '../src/kernel/ai/models';
-import { colorName } from '../src/kernel/agents/council';
 import { costOf, priceOf } from '../src/kernel/ai/prices';
 import { UsageLedger, type CallRecord } from '../src/kernel/ai/usage';
 import { Kernel } from '../src/kernel/kernel';
@@ -26,7 +25,7 @@ const textOk = (text: string) => ({ status: 200, body: { candidates: [{ content:
 describe('GeminiModels', () => {
   it('sends system prompt, images and JSON schema through the proxy, and counts usage', async () => {
     const { calls, impl } = fakeFetch([textOk('{"a":1}')]);
-    const g = new GeminiModels({ textModel: 'gemini-3.1-flash-lite', imageModel: 'gemini-3.1-flash-lite-image', limits: { text: 5, images: 5 }, fetchImpl: impl });
+    const g = new GeminiModels({ textModel: 'gemini-3.1-flash-lite', limits: { text: 5 }, fetchImpl: impl });
     const out = await g.text({ agent: 'fisico', task: 't', system: 'sei il fisico', prompt: 'ciao', schema: { type: 'OBJECT', properties: { a: { type: 'NUMBER' } } }, images: ['data:image/png;base64,QUJD'] });
     expect(out).toBe('{"a":1}');
     expect(calls[0].url).toBe('/api/gemini/models/gemini-3.1-flash-lite:generateContent');
@@ -40,7 +39,7 @@ describe('GeminiModels', () => {
 
   it('uses the model a call asks for, counts reasoning and cache, and reports every call', async () => {
     const { calls, impl } = fakeFetch([{ status: 200, body: { candidates: [{ content: { parts: [{ text: 'ok' }] } }], usageMetadata: { promptTokenCount: 1000, cachedContentTokenCount: 600, candidatesTokenCount: 200, thoughtsTokenCount: 300 } } }]);
-    const g = new GeminiModels({ textModel: 'gemini-3.1-flash-lite', imageModel: 'i', limits: { text: 5, images: 0 }, fetchImpl: impl, thinking: 'medium' });
+    const g = new GeminiModels({ textModel: 'gemini-3.1-flash-lite', limits: { text: 5 }, fetchImpl: impl, thinking: 'medium' });
     const seen: CallRecord[] = [];
     g.onCall = (r) => seen.push(r);
     await g.text({ agent: 'scultore', task: 'sculpt', system: 's', prompt: 'p', model: 'gemini-3.8-flash', thinking: 'off' });
@@ -56,7 +55,7 @@ describe('GeminiModels', () => {
       n++;
       throw Object.assign(new Error('The operation was aborted due to timeout'), { name: 'TimeoutError' });
     }) as unknown as typeof fetch;
-    const g = new GeminiModels({ textModel: 'gemini-3.1-flash-lite', imageModel: 'i', limits: { text: 5, images: 0 }, fetchImpl: impl });
+    const g = new GeminiModels({ textModel: 'gemini-3.1-flash-lite', limits: { text: 5 }, fetchImpl: impl });
     const seen: CallRecord[] = [];
     g.onCall = (r) => seen.push(r);
     await expect(g.text({ agent: 'a', task: 't', system: '', prompt: '' })).rejects.toThrow(/tempo scaduto/);
@@ -65,23 +64,22 @@ describe('GeminiModels', () => {
     expect(seen[0].failed).toBe('timeout');
   });
 
-  it('retries on 429 and returns images as data URLs', async () => {
-    const { calls, impl } = fakeFetch([
-      { status: 429, body: { error: { message: 'slow down' } } },
-      { status: 200, body: { candidates: [{ content: { parts: [{ inlineData: { mimeType: 'image/png', data: 'AAA' } }] } }] } },
-    ]);
-    const g = new GeminiModels({ textModel: 't', imageModel: 'gemini-3.1-flash-lite-image', limits: { text: 5, images: 5 }, fetchImpl: impl });
-    expect(await g.image({ agent: 'artista', task: 'p', prompt: 'x' })).toBe('data:image/png;base64,AAA');
+  it('retries on 429 and counts the retries', async () => {
+    const { calls, impl } = fakeFetch([{ status: 429, body: { error: { message: 'slow down' } } }, textOk('ok')]);
+    const g = new GeminiModels({ textModel: 't', limits: { text: 5 }, fetchImpl: impl });
+    const seen: CallRecord[] = [];
+    g.onCall = (r) => seen.push(r);
+    expect(await g.text({ agent: 'a', task: 'p', system: '', prompt: 'x' })).toBe('ok');
     expect(calls.length).toBe(2);
-    expect(calls[1].body.generationConfig.responseModalities).toEqual(['IMAGE']);
+    expect(seen[0].retries).toBe(1);
+    expect(g.usage.retries).toBe(1);
   }, 10000);
 
   it('enforces the session budget', async () => {
     const { impl } = fakeFetch([textOk('{}')]);
-    const g = new GeminiModels({ textModel: 't', imageModel: 'i', limits: { text: 1, images: 0 }, fetchImpl: impl });
+    const g = new GeminiModels({ textModel: 't', limits: { text: 1 }, fetchImpl: impl });
     await g.text({ agent: 'a', task: 't', system: '', prompt: '' });
     await expect(g.text({ agent: 'a', task: 't', system: '', prompt: '' })).rejects.toBeInstanceOf(BudgetError);
-    await expect(g.image({ agent: 'a', task: 't', prompt: '' })).rejects.toBeInstanceOf(BudgetError);
   });
 });
 
@@ -125,9 +123,4 @@ describe('helpers', () => {
     expect(parseJson('Ecco: {"b":2}')).toEqual({ b: 2 });
   });
 
-  it('names colours for image legends', () => {
-    expect(colorName('#3a78c8')).toBe('blue');
-    expect(colorName('#1f5a2a')).toBe('dark green');
-    expect(colorName('#8a8a92')).toBe('gray');
-  });
 });

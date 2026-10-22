@@ -50,18 +50,19 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
 9. **La chiave API non arriva mai al browser**: passa dal proxy di Vite (`server/geminiProxy.ts`).
 10. **Collisione e grafica sono la stessa griglia**: ciò che sembra invalicabile lo è; ogni luogo è
     connesso (varchi + sentieri scavati dal kernel).
-11. **Testo abbondante, immagini poche e riusate**: contenuti come dati (economici); immagini a lotti.
+11. **Solo testo, niente immagini generate** (ADR-0037): contenuti come dati e ogni aspetto come programma
+    MarkovJunior; un programma per tipo, le istanze sono semi diversi.
 
 ## Stack
 
 - **Vite 5 + TypeScript 5** (strict), Canvas 2D per il mondo, DOM per HUD/pannelli.
 - **Lua 5.4 via wasmoon** (WebAssembly), sandbox gestita dal kernel.
-- **Google Gemini**: `gemini-3.1-flash-lite` (testo) e `gemini-3.1-flash-lite-image` (immagini), in
-  `universe/universe.json → ai` con i budget (`maxText`, `maxImages`, `maxForges`, `maxPacks`, `animation`),
+- **Google Gemini**: `gemini-3.1-flash-lite` (testo), in
+  `universe/universe.json → ai` con i budget (`maxText`, `maxForges`, `maxPacks`, `maxCast`),
   il ragionamento (`thinking`, `low`) e il tempo massimo (`timeout`). Prezzi in `src/kernel/ai/prices.ts` (con la data).
 - **Vitest** in Node con modelli offline (`MockModels`): kernel, Concilio e layout testabili headless.
 - Persistenza: repository git dell'universo su disco tramite il server di Vite (`server/universeStore.ts`):
-  testi, `maps/` (piani dei luoghi), `assets/` (immagini), `world/stato.json` (la partita). Senza server:
+  testi, `maps/` (piani dei luoghi), `world/stato.json` (la partita), `world/consumi.json` (i consumi). Senza server:
   `localStorage` + IndexedDB.
 
 ## Comandi
@@ -127,11 +128,11 @@ lab/                    laboratorio di MarkovJunior (ADR-0038): sandbox 3D /lab/
 |---|---|
 | Narratore | bibbia; concetti dei moduli; individui dietro ogni NPC (mestiere, famiglia, routine); chat nel personaggio; pacchetti di oggetti, ricette, bottino; oggetti citati; "Esamina"; combinazioni; giudica azioni libere e fabbricazioni libere; dà nome agli incantesimi nuovi |
 | Cartografo | terreni (con strati) e ambienti (programmi di riscrittura) alla Genesi; per ogni luogo: ambiente, nome, cosa c'è dentro e fuori, rune |
-| Artista | guida di stile; texture seamless (4/immagine), ostacoli, sprite few-shot, camminate, icone (16/immagine) |
+| Artista | guida di stile (palette, forme, luce); guarda le foto dei modelli da quattro lati e li giudica (voto, problemi, consigli) |
 | Fisico | fisica di moduli, terreni e oggetti (pesi, pile, effetti) |
 | Ingegnere | logic.lua (`on_act`, `on_use`, `on_action`…); meccaniche con pannelli (`mechanic.design`); ripara il codice che fallisce |
 | Arbitro | coerenza tra narrativa, aspetto, fisica e codice; rimanda all'agente responsabile; tiene le sessioni del Concilio |
-| Referente | nella corona accoglie il viandante trasceso e porta le sue richieste alla squadra giusta (Fucina, Cartografo, Artista, regole, pacchetti) |
+| Referente | nella corona accoglie il viandante trasceso e porta le sue richieste alla squadra giusta (Fucina, Cartografo, Scultore, regole, pacchetti) |
 
 Registro: `kernel.feed()`, pannello Concilio (`G`) e console. Nella corona ogni agente è una squadra: un
 membro per edificio, che va allo scaffale del file che cambia; si vedono parlare solo quelli che
@@ -144,9 +145,8 @@ congelato, sentieri garantiti, edifici) → cose su celle raggiungibili, bottino
 liberi. Il chunk (0,0) ha sempre `x`, `speed = speed` e la runa magica `luce`.
 
 **Fucina**: concetto (tipo, contesto, aspetto, comandi, azioni, contenitore, cose portate, persona,
-unicità) → fisica → codice → Arbitro → validatore → commit → bibbia; lo sprite (few-shot) e la camminata
-li fa poi l'ArtDirector. **Genesi**: bibbia → stile → terreni (Fisico) → Arbitro → ambienti (provati) →
-pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) → commit; poi l'Artista dipinge.
+unicità) → fisica → codice → Arbitro → validatore → commit → bibbia; il modello lo fa lo Scultore. **Genesi**: bibbia → stile → terreni (Fisico) → Arbitro → ambienti (provati) →
+pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) → commit.
 
 ## Architettura del gioco
 
@@ -168,8 +168,8 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   azioni libere («Altro…»), azioni imparate (`actions[].effects`) e incantesimi. Terreno cambiato persistente.
 - **Giorno e notte** (ADR-0015): `daylight()`, giornata di 10 minuti; luce dai componenti `luce`.
 - **Corona** (ADR-0009, 0016, 0022): studio; edifici per cartella con porte che teletrasportano in interni
-  più grandi (stanze 24×15 su più piani, zona `studio`), scaffali di file, Galleria dell'Artista (sprite e
-  icone, «ridipingi»), Studio del Cartografo (terreni), bacheche con le modifiche recenti (che brillano).
+  più grandi (stanze 24×15 su più piani, zona `studio`), scaffali di file, Galleria dell'Artista (i modelli,
+  «riscolpisci»), Studio del Cartografo (terreni), bacheche con le modifiche recenti (che brillano).
 - **Geografia** (ADR-0023): biomi nel generatore (`s j o k n`), 20 ambienti nel seme, nodo `stamp` di
   MarkovJunior, atlante di regioni (`world/atlas.json`), direzioni note a NPC e Cartografo.
 - **Stati e meccaniche** (ADR-0026): effetti `stato`/`togli_stato` (velocità, peso, luce, durata) per ciò che
@@ -203,11 +203,11 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 
 ### Manifest (`src/kernel/types.ts`)
 `id`, `name`, `kind` (`system | entity | item | player | generator | data`), `logic`, `order`,
-`appearance` (`glyph`, `color`, `imagePrompt`, `sprite`, `scale`, `frames` per direzione), `physics`
+`appearance` (`glyph`, `color`, `aspetto`), `physics`
 (`solid`, `radius`, `pushable`, `mass`, `friction`, `speed`), `components`, `singleton`, `persist`,
 `interaction` (`talk | read | lua`), `actions` (`id`, `label`, `requires`, `effects`), `container` (`size`, `loot`),
 `ui` (pannello: `titolo`, `elementi`), `spawn`, `persona`, `unique`, `inventory` (id di oggetti), `item`, `context`, `lore`, `tags`, `drops`,
-`origin`; generatori: `tiles` (`name`, `color`, `solid`, `layer`, `indoor`, `speed`, `texture`, `sprites`),
+`origin`; generatori: `tiles` (`name`, `color`, `solid`, `layer`, `indoor`, `speed`, `actions`),
 `roof`; dati: `items` (anche `container`, `actions`, `slot`, `bonus`, effetti `mana`), `recipes`, `loot`, `layouts`, `fragments`, `runes`, `spells`.
 
 ### API Lua — l'unica disponibile, il validatore rifiuta il resto
@@ -223,7 +223,7 @@ Hook: `update(dt)` (sistemi), `generate_chunk`, `on_spawn(id)`, `on_interact(id,
 ## Convenzioni
 
 - Documentazione, UI, prompt degli agenti e testi di gioco in **italiano**; identificatori e commenti
-  TypeScript in **inglese**; commenti Lua dell'universo in **italiano**. Prompt di immagine in inglese.
+  TypeScript in **inglese**; commenti Lua dell'universo in **italiano**.
 - File in LF (`.gitattributes`). Su Windows niente `Get-Content`/`Set-Content` di PowerShell 5.1 sui sorgenti.
 - Nuova API per Lua: `Host` + `prelude.lua` + `LUA_API` nel validatore + prompt dell'Ingegnere + questo file.
 - Nuovo compito per un agente: schema Gemini + risposta in `MockModels` + voce nel registro.
@@ -236,10 +236,7 @@ Hook: `update(dt)` (sistemi), `generate_chunk`, `on_spawn(id)`, `on_interact(id,
   Concilio (`G`). `GeminiModels` non ripete mai una richiesta scaduta (può essere stata pagata); ripete solo 429/5xx.
 
 - Testo per mondo: Genesi ~60 chiamate; poi 1 per luogo, 1-2 per individuo, ~4 per pacchetto di oggetti.
-- Immagini per mondo: ~3 texture, 1-2 ostacoli, 1-2 per tipo di personaggio o oggetto (sprite +
-  camminata), 1 ogni 16 icone. Nessuna immagine per luogo.
-- Misurato (Genesi + ~20 luoghi + l'Artista che dipinge tutto + una chat): 127 chiamate di testo, 25 immagini
-  (12 texture in 3 immagini, 9 sprite con 4 camminate, 87 icone in 6 fogli), ~5 minuti.
+- Niente immagini (step 9): il costo dell'aspetto è testo, un programma per tipo (vedi il report 8.2B, sezione 4).
 - Tick ≈ 5 ms in Node con ~100 entità (`sys.wander` il più costoso); budget di istruzioni Lua ~1.5×.
 - Lezione ricorrente: i modelli non contano caratteri né caselle. Il kernel ripara le forme (griglie,
   regole dei programmi, nomi nelle ricette) e posiziona le cose; si scarta solo ciò che non si capisce.

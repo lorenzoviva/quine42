@@ -72,7 +72,7 @@ export function toItemDef(r: RawItem, taken: Set<string>): ItemDef | null {
     tags: [...new Set((r.tag ?? []).map((t) => String(t).toLowerCase().trim()).filter(Boolean).slice(0, 8))],
     glyph: CATEGORY_GLYPHS[category] ?? '•',
     color: `hsl(${hashStr(id) % 360} 60% 66%)`,
-    iconPrompt: String(r.aspetto ?? r.nome).slice(0, 200),
+    aspetto: String(r.aspetto ?? r.nome).slice(0, 200),
     equippable: !!r.impugnabile,
     ...(hasEffects ? { effects } : {}),
     ...(bag ? { container: bag } : {}),

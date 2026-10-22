@@ -239,8 +239,7 @@ export class Renderer {
 
   private texture(code: string): { src: Sprite; size: number } {
     const t = this.kernel.palette[code] ?? this.kernel.palette['?'];
-    const img = this.images.peek(t.texture);
-    return img ? { src: img, size: img.width } : { src: this.proceduralTexture(code, t), size: 64 };
+    return { src: this.proceduralTexture(code, t), size: 64 };
   }
 
   private pattern(ctx: CanvasRenderingContext2D, code: string, ox: number, oy: number): CanvasPattern | null {
@@ -257,8 +256,7 @@ export class Renderer {
     const k = this.kernel;
     const S = k.config.chunkSize;
     const edge = (dx: number, dy: number) => k.chunks.get(`${ch.cx + dx},${ch.cy + dy}`)?.version ?? -1;
-    const tex = Object.values(k.palette).map((t) => (this.images.peek(t.texture) ? 1 : 0)).join('');
-    return `${ch.version}|${edge(1, 0)}|${edge(-1, 0)}|${edge(0, 1)}|${edge(0, -1)}|${tex}|${S}`;
+    return `${ch.version}|${edge(1, 0)}|${edge(-1, 0)}|${edge(0, 1)}|${edge(0, -1)}|${S}`;
   }
 
   private chunkCanvas(ch: Chunk): HTMLCanvasElement {
@@ -461,8 +459,6 @@ export class Renderer {
     const t = this.kernel.palette[code];
     if (!t || (t.layer !== 'vegetation' && t.layer !== 'rock')) return null;
     const h = hash32(wx, wy, 31);
-    const painted = (t.sprites ?? []).map((id) => this.images.peek(id)).filter((x): x is HTMLImageElement => !!x);
-    if (painted.length) return painted[h % painted.length];
     const proc = this.proceduralObstacles(code, t);
     return proc[h % proc.length];
   }
@@ -1172,7 +1168,7 @@ export class Renderer {
           break;
         case 'sprite':
         case 'tile': {
-          const img = this.images.peek(it.asset);
+          const img = this.images.peek(undefined);
           ctx.save();
           ctx.shadowColor = col;
           ctx.shadowBlur = isNear ? 16 : 6;

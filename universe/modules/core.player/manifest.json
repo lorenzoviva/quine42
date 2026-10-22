@@ -7,8 +7,7 @@
   "appearance": {
     "glyph": "@",
     "color": "#ffffff",
-    "scale": 1.3,
-    "imagePrompt": "un viandante con mantello e cappuccio"
+    "aspetto": "un viandante con mantello e cappuccio"
   },
   "physics": {
     "solid": false,

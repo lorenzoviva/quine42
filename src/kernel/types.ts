@@ -6,17 +6,11 @@ export type FileMap = Record<string, string>;
 export type ModuleKind = 'system' | 'entity' | 'item' | 'player' | 'generator' | 'data';
 
 export interface Appearance {
-  /** Fallback glyph when no sprite is available (offline, or still painting). */
+  /** A sign for lists and the atlas, and the colour of its stand-in while it has no model. */
   glyph: string;
   color: string;
-  /** What the Artist paints. */
-  imagePrompt?: string;
-  /** Asset id ("img:…") of the generated sprite. */
-  sprite?: string;
-  /** Sprite size in cells (default 1.1). */
-  scale?: number;
-  /** Walk cycle: asset ids per direction (down, left, right, up), painted by the Atelier. */
-  frames?: Record<string, string[]>;
+  /** How it looks, in words: what the Sculptor sculpts. */
+  aspetto?: string;
 }
 
 export interface Physics {
@@ -59,7 +53,7 @@ export type TileLayer = 'ground' | 'floor' | 'wall' | 'door' | 'liquid' | 'veget
 
 export interface TileDef {
   name: string;
-  /** Base colour: procedural texture offline, legend for the Artist. */
+  /** Colour of the ground. */
   color: string;
   solid: boolean;
   /** Walking speed multiplier on this tile (mud 0.6, road 1.1…). Default 1. */
@@ -69,10 +63,6 @@ export interface TileDef {
   layer?: TileLayer;
   /** Indoor floor: buildings are indoor floor enclosed by walls; their roof hides them from outside. */
   indoor?: boolean;
-  /** Asset id of the seamless texture painted by the Artist. */
-  texture?: string;
-  /** Asset ids of obstacle sprites standing on this tile (trees, boulders…), chosen per cell. */
-  sprites?: string[];
   /** Actions learned on this kind of terrain ("Altro…" on a tile): effects at that place. */
   actions?: ActionDef[];
 }
@@ -92,9 +82,8 @@ export interface ItemDef {
   tags: string[];
   glyph: string;
   color: string;
-  /** Asset id of the icon (painted in sheets of 16). */
-  icon?: string;
-  iconPrompt?: string;
+  /** How it looks, in words: what the Sculptor sculpts. */
+  aspetto?: string;
   equippable?: boolean;
   /** Applied by core.items when the item is used (eaten, drunk, applied, absorbed). */
   effects?: { hunger?: number; thirst?: number; energy?: number; health?: number; mana?: number };
@@ -293,14 +282,10 @@ export interface ModuleEntry {
 
 export interface AiConfig {
   textModel: string;
-  imageModel: string;
-  /** Per-session call budgets. */
+  /** Per-session call budget. */
   maxText: number;
-  maxImages: number;
   /** New modules the world may forge by itself per session (cartographer, combinations). */
   maxForges: number;
-  /** How characters get their walk cycle: one sheet per character, frame by frame, or none. */
-  animation?: 'sheet' | 'frames' | 'none';
   /** New item packs the world writes by itself per session, as it is explored. */
   maxPacks?: number;
   /** New kinds of inhabitants the world forges by itself per session, so the same face is not everywhere. */

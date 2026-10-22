@@ -10,7 +10,6 @@ Regole del motore (non cambiano):
   si spostano quando il viandante ci cammina contro, frenate dall'attrito (0 = scivolano, 1 = si fermano subito).
 - Il viandante cammina a 6 caselle/s e porta 20 unità di peso senza rallentare.
 - I terreni hanno un moltiplicatore di velocità (0.3–1.5) e possono essere invalicabili.
-- Quando confronti un dipinto con una griglia, fidati di ciò che è dipinto: il giocatore vede quello.
 
 Rispondi solo con JSON conforme allo schema richiesto.
 
