@@ -21,7 +21,7 @@ Senza numero («esegui il prossimo task del backlog») vale il primo `da fare` c
 
 ## Step 9 — chiusura
 
-### T01 · Lotti e strutture: test, ADR, documenti — `fatto`
+### T01 · Lotti e strutture: test, ADR, documenti — `fatto` (`34adee7`)
 - Contesto: F7 di [`step9-3d.md`](step9-3d.md) (codice fatto: `settleLots`, `placeInside`, `floorAt`,
   `structureAt`, una struttura importante per zona, `form.wanted`).
 - Fare: test in `tests/` (gli edifici del borgo diventano strutture girate verso la porta; le caselle del lotto
