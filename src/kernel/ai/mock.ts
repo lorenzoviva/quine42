@@ -392,6 +392,8 @@ export class MockModels implements Models {
       a_terra: ctx.wanted.length && rng.chance(0.5) ? [rng.pick(ctx.wanted)] : [],
       nuovi: [],
       rune,
+      // The start has its bakery: a structure of its own, which the Sculptor writes.
+      strutture: ctx.start ? [{ concetto: 'il forno del borgo' }] : [],
     };
   }
 

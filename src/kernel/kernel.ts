@@ -612,6 +612,15 @@ export class Kernel {
     else if (!this.terrain || changed.has(this.terrain.manifest.id) || opts.reset) for (const ch of this.chunks.values()) if (ch.stage === 'draft') this.regenerateDraft(ch);
 
     this.corona.build(files, this.exhibits(files), this.terrainExhibits());
+    // Things that wait for a model of their own wear it as soon as the library has it.
+    for (const id of this.ecs.query('form')) {
+      const fc: FormComp = this.ecs.get(id, 'form');
+      if (!fc.wanted || !this.forms.info(fc.wanted)) continue;
+      fc.model = fc.wanted;
+      fc.seed = this.forms.seedFor(fc.wanted, this.ecs.get(id, 'origin')?.key ?? String(id));
+      delete fc.wanted;
+      this.instanceFeet.delete(id);
+    }
     this.archive.reset();
     this.bus.emit('universe:reloaded', { changed: [...changed] });
   }
@@ -624,13 +633,14 @@ export class Kernel {
     const app = man?.appearance;
     const classe = app?.classe ?? (man?.kind === 'player' ? 'persona' : man ? guessClass(`${man.name} ${man.description ?? ''} ${app?.aspetto ?? ''}`, man.persona ? 'figura' : undefined).id : 'oggetto');
     const model = this.forms.resolve(app?.model, classe);
-    return { model, seed: this.forms.seedFor(model, who), yaw: man?.persona || man?.kind === 'player' ? 0 : (hashStr(who) % 628) / 100 };
+    return { model, seed: this.forms.seedFor(model, who), yaw: man?.persona || man?.kind === 'player' ? 0 : (hashStr(who) % 628) / 100, ...(app?.model && app.model !== model ? { wanted: app.model, classe } : {}) };
   }
 
   /** The look of an item: its own model, or the generic thing in its colour. */
   itemLook(item: string): FormComp {
     const d = this.content.get(item);
-    return { model: this.forms.resolve(d?.model, 'oggetto'), seed: 1, yaw: 0, tint: d?.color };
+    const model = this.forms.resolve(d?.model, 'oggetto');
+    return { model, seed: 1, yaw: 0, tint: d?.color, ...(d?.model && d.model !== model ? { wanted: d.model, classe: 'oggetto' } : {}) };
   }
 
   /** The actions of a thing's model that would change it now (open when closed, close when open). */
@@ -1046,6 +1056,7 @@ export class Kernel {
     ch.version++;
     this.plannedCount++;
     for (const id of this.ecs.query('chunk')) if (this.ecs.get(id, 'chunk').key === ch.key) this.ecs.destroy(id);
+    const structures = this.settleLots(ch, plan, pathCode);
 
     // Where things can go: reachable cells, inside or outside buildings, never on gates or doors.
     const rng = new Rng(hash32(this.config.seed, ch.cx, ch.cy, 991));
@@ -1103,6 +1114,9 @@ export class Kernel {
       const cell = pick(o.where);
       if (cell === undefined) return;
       const p = at(cell);
+      // Inside a structure: on the floor of its model, once its form is ready.
+      const lot = ch.buildings.findIndex((b) => b.floor.includes(cell));
+      if (lot >= 0 && structures[lot] !== undefined) return void this.placeInside(ch, structures[lot], p, (x, y) => this.spawnModuleEntity(m, x, y, ch.key, origin));
       this.spawnModuleEntity(m, p.x, p.y, ch.key, origin);
     });
 
@@ -1133,6 +1147,117 @@ export class Kernel {
     if (this.plannedCount % 10 === 0) void this.growContent('esplorazione');
     if (this.plannedCount % 7 === 0) void this.growCast(plan.place);
     if (this.plannedCount === 3 || this.plannedCount % 12 === 0) void this.holdSession();
+  }
+
+  /**
+   * Lots (ADR-0043): every building of the plan becomes a structure — a whole model one enters, set on its
+   * lot and turned towards its door. The Cartographer's structures go to the largest lots (the Sculptor
+   * writes the ones that do not exist yet); the others are common houses. The lot's tiles become ground,
+   * the path goes on from its door towards the house. Returns the structures, by building index.
+   */
+  private settleLots(ch: Chunk, plan: ChunkPlan, pathCode: string): Id[] {
+    const S = this.config.chunkSize;
+    const tiles = [...ch.tiles];
+    const wanted = [...(plan.strutture ?? [])];
+    const out: Id[] = [];
+    const order = ch.buildings.map((b, i) => ({ b, i, area: (b.x1 - b.x0 + 1) * (b.y1 - b.y0 + 1) })).sort((a, b) => b.area - a.area || a.i - b.i);
+    for (const { b, i } of order) {
+      const w = b.x1 - b.x0 + 1, h = b.y1 - b.y0 + 1;
+      const classe = Math.max(w, h) >= 5 ? 'grande' : 'edificio';
+      const req = wanted.shift();
+      const own = req ? `struttura-${ownModelId(req.concetto).slice(0, 30)}` : undefined;
+      for (const c of [...b.walls, ...b.floor, ...b.doors]) {
+        const d = this.palette[ch.draft[c]];
+        tiles[c] = d && !d.solid && (d.layer ?? 'ground') === 'ground' ? ch.draft[c] : pathCode;
+      }
+      // The front of the model looks towards the door; the path goes on from the door into the lot.
+      const door = b.doors[0];
+      let yaw = 0;
+      if (door !== undefined) {
+        const dc = door % S, dr = Math.floor(door / S);
+        const [dx, dy] = dr === b.y1 ? [0, -1] : dr === b.y0 ? [0, 1] : dc === b.x0 ? [1, 0] : [-1, 0];
+        yaw = dr === b.y1 ? 0 : dr === b.y0 ? Math.PI : dc === b.x0 ? -Math.PI / 2 : Math.PI / 2;
+        for (let s = 0, c = dc, r = dr; s < 2 && c > b.x0 - 1 && c < b.x1 + 1 && r > b.y0 - 1 && r < b.y1 + 1; s++, c += dx, r += dy) tiles[r * S + c] = pathCode;
+      }
+      const origin = `${ch.key}#s${i}`;
+      const model = this.forms.resolve(own, classe);
+      const form: FormComp = { model, seed: this.forms.seedFor(model, origin), yaw, ...(own && own !== model ? { wanted: own, classe } : {}) };
+      const done = this.savedForms.get(origin);
+      if (done?.length) form.done = [...done];
+      out[i] = this.ecs.spawn({
+        pos: { x: ch.cx * S + (b.x0 + b.x1 + 1) / 2, y: ch.cy * S + (b.y0 + b.y1 + 1) / 2 },
+        glyph: { ch: '⌂', color: this.terrain?.manifest.roof?.color ?? '#9a4632' },
+        body: { r: 0.5, solid: true },
+        form,
+        struttura: { concetto: req?.concetto ?? (classe === 'grande' ? 'una casa' : 'una casetta'), classe, importante: !!req?.importante, ...(own ? { model: own } : {}) },
+        chunk: { key: ch.key },
+        origin: { key: origin },
+      });
+    }
+    ch.tiles = tiles.join('');
+    return out;
+  }
+
+  /** Points of a structure's floor, inside its walls (world, carpet space), for what goes indoors. */
+  private interiorPoints(sid: Id): Array<{ x: number; y: number }> {
+    const fc: FormComp | undefined = this.ecs.get(sid, 'form');
+    const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint);
+    const p = this.ecs.get(sid, 'pos');
+    if (!fc || !f?.floor || !p) return [];
+    const g = f.result!.grid;
+    const foot = this.footOf(sid, fc, f);
+    const clear = (vx: number, vy: number) => {
+      for (let dy = -6; dy <= 6; dy += 2) for (let dx = -6; dx <= 6; dx += 2) {
+        const x = vx + dx, y = vy + dy;
+        if (x < 0 || y < 0 || x >= g.X || y >= g.Y || foot[x + y * g.X] || !f.floor![x + y * g.X]) return false;
+      }
+      return true;
+    };
+    const out: Array<{ x: number; y: number }> = [];
+    const c = Math.cos(fc.yaw), s = Math.sin(fc.yaw);
+    for (let vy = 6; vy < g.Y - 6; vy += 4)
+      for (let vx = 6; vx < g.X - 6; vx += 4) {
+        if (!clear(vx, vy)) continue;
+        const lx = (vx + 0.5 - g.X / 2) / 20, lz = (vy + 0.5 - g.Y / 2) / 20;
+        out.push({ x: p.x + lx * c + lz * s, y: p.y - lx * s + lz * c });
+      }
+    return out;
+  }
+
+  /** Puts something inside a structure, on its floor, when its form is ready (or where the plan said, if it never is). */
+  private async placeInside(ch: Chunk, sid: Id, fallback: { x: number; y: number }, spawn: (x: number, y: number) => void): Promise<void> {
+    const fc: FormComp | undefined = this.ecs.get(sid, 'form');
+    if (fc) await this.forms.wait(fc.model, fc.seed, fc.tint);
+    if (!this.alive(ch) || !this.ecs.alive.has(sid)) return;
+    this.rebuildSolids();
+    const taken = this.ecs.query('pos').map((id) => this.ecs.get(id, 'pos'));
+    const free = this.interiorPoints(sid).filter((q) => taken.every((t) => Math.hypot(t.x - q.x, t.y - q.y) > 0.9));
+    const p = free.length ? free[hash32(sid, free.length, this.ecs.query('pos').length) % free.length] : fallback;
+    spawn(p.x, p.y);
+  }
+
+  /** The height (tiles) of what one stands on at a point of the simulation (a structure's floor, a step). */
+  floorAt(x: number, y: number): number {
+    let h = 0;
+    for (const s of this.solidForms.get(`${Math.floor(x)},${Math.floor(y)}`) ?? []) {
+      const [lx, lz] = toLocal(x - s.x, y - s.y, s.yaw);
+      const g = s.form.result!.grid;
+      const vx = Math.floor(lx * 20 + g.X / 2), vy = Math.floor(lz * 20 + g.Y / 2);
+      if (vx >= 0 && vy >= 0 && vx < g.X && vy < g.Y) h = Math.max(h, (s.form.floor?.[vx + vy * g.X] ?? 0) / 20);
+    }
+    return h;
+  }
+
+  /** The structure whose floor is under a point of the simulation (the wanderer is inside it), if any. */
+  structureAt(x: number, y: number): Id | undefined {
+    for (const s of this.solidForms.get(`${Math.floor(x)},${Math.floor(y)}`) ?? []) {
+      if (!this.ecs.has(s.id, 'struttura')) continue;
+      const [lx, lz] = toLocal(x - s.x, y - s.y, s.yaw);
+      const g = s.form.result!.grid;
+      const vx = Math.floor(lx * 20 + g.X / 2), vy = Math.floor(lz * 20 + g.Y / 2);
+      if (vx >= 0 && vy >= 0 && vx < g.X && vy < g.Y && s.form.floor?.[vx + vy * g.X]) return s.id;
+    }
+    return undefined;
   }
 
   /**
@@ -3483,6 +3608,10 @@ export class Kernel {
       const bs = ch.buildings.filter((b) => b.floor.some(free));
       if (bs.length) {
         const b = bs[(h + (where === 'lavoro' ? 1 : 0)) % bs.length];
+        // Home is the floor of the house's model, inside its walls (its lot, until the model is ready).
+        const sid = this.ecs.query('struttura', 'origin').find((e) => this.ecs.get(e, 'origin').key === `${ch.key}#s${ch.buildings.indexOf(b)}`);
+        const inside = sid !== undefined ? this.interiorPoints(sid) : [];
+        if (inside.length) return inside[h % inside.length];
         const floor = b.floor.filter(free);
         return cell(floor[h % floor.length]);
       }

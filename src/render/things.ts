@@ -28,6 +28,8 @@ export interface ThingView {
   kind: 'figure' | 'item' | 'thing';
   /** A stand-in owns its geometry; a model shares it with the other instances. */
   owned: boolean;
+  /** Cut above the head (the wanderer is inside). */
+  cut?: boolean;
   /** Where it was last frame (carpet space), to know where it goes and how fast. */
   last: { x: number; y: number };
   yaw: number;
@@ -163,7 +165,8 @@ export class Things {
     return { root, body, limbs, frames, kind: figure ? 'figure' : item ? 'item' : 'thing', last: { x: p.x, y: p.y }, yaw, phase: 0, sig, owned: !model };
   }
 
-  update(dt: number, t: number): void {
+  /** `inside`: the structure the wanderer is in (cut above the head). */
+  update(dt: number, t: number, inside?: Id): void {
     const k = this.k;
     const seen = new Set<Id>();
     for (const id of k.ecs.query('glyph', 'pos')) {
@@ -187,8 +190,21 @@ export class Things {
         v.root.rotation.y = t * 0.8 + id;
         continue;
       }
-      v.root.position.set(p.x, 0, p.y);
-      if (v.kind !== 'figure') continue;
+      if (v.kind !== 'figure') {
+        v.root.position.set(p.x, 0, p.y);
+        const cut = id === inside;
+        if (v.cut !== cut) {
+          v.cut = cut;
+          v.root.traverse((o) => {
+            if (!(o instanceof THREE.Mesh)) return;
+            o.userData.mat ??= o.material;
+            o.material = cut ? MAT.cut : o.userData.mat;
+          });
+        }
+        continue;
+      }
+      // People stand on what is under them: a house's floor, a step.
+      v.root.position.set(p.x, k.floorAt(p.x, p.y), p.y);
       // What they are doing, seen: lying down to sleep.
       const att = k.ecs.get(id, 'attivita');
       v.root.rotation.z = att?.tipo === 'dorme' && att.ferma ? Math.PI / 2.2 : 0;
@@ -250,7 +266,8 @@ export class Wanderer {
     const dx = p.x - this.last.x, dy = p.y - this.last.y;
     const moved = Math.hypot(dx, dy);
     this.last = { x: p.x, y: p.y };
-    this.view.root.position.set(p.x, 0, p.y);
+    const pcf = k.playerCarpet();
+    this.view.root.position.set(p.x, k.zone === 'sim' ? k.floorAt(pcf.x, pcf.y) : 0, p.y);
     const facing = k.playerComp()?.facing;
     const goal = facing === 'left' ? -Math.PI / 2 : facing === 'right' ? Math.PI / 2 : facing === 'up' ? Math.PI : 0;
     // The carpet pulls the wanderer back: what counts for the legs is the walking, not the real motion.

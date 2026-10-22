@@ -340,3 +340,15 @@ registro dei consumi del kernel, su due richieste.
 **Spesa: 6 chiamate, $0,0205** (3.1 Flash-Lite $0,0046; 3.8 Flash $0,0088; Artista 3.5 Flash $0,0071, prezzo
 stimato). Il ragionamento `low` costa ancora con 3.1 (1.304 token su 437 di risposta) e quasi nulla con 3.8. Il
 giudizio è generoso (un difetto visto non abbassa il voto sotto 7): da tenere d'occhio, non da cambiare ora.
+
+### F7 — in corso (codice fatto, documenti da scrivere)
+- Lotti: ogni edificio del piano diventa una struttura (entità con `form`, modello `grande`/`edificio` o
+  `struttura-<concetto>` chiesto dal Cartografo in `strutture`, girato verso la porta); le caselle del lotto
+  tornano terreno, il sentiero entra dalla porta; le cose `dentro` vanno sul pavimento del modello; le persone
+  tornano a casa sul pavimento del modello; `floorAt`/`structureAt`; nel renderer niente tetti a caselle, le
+  figure stanno sui pavimenti, la struttura in cui si è si taglia sopra la testa. `form.wanted`: una cosa
+  indossa il suo modello appena lo Scultore lo scrive. Il raggio del viandante passa da 0,3 a 0,22 (le porte
+  della casa sono larghe 0,6 caselle).
+- Verificato nel browser: case a graticcio sui lotti, «Apri la porta» dal menu, dentro con il tetto tagliato.
+- Manca: test dedicati ai lotti, ADR-0043, AGENTS.md; poi F8 (azioni come regole da «Altro…») e F9 (backup
+  degli universi 2D, AGENTS.md riscritto, riassunto finale).

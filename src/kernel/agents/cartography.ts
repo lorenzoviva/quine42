@@ -27,6 +27,11 @@ export interface ChunkPlan {
   fresh: Array<{ concept: string; where: Where }>;
   /** Rune fragments (lines from the catalogue) to scatter. */
   runes: string[];
+  /**
+   * Structures the place has (ADR-0043): each becomes a whole model one enters, set on a lot of the
+   * environment (the largest first); the Sculptor writes the ones that do not exist yet.
+   */
+  strutture?: Array<{ concetto: string; importante?: boolean }>;
   /** Tiles changed after the layout (by effects, spells, Lua): cell index → tile code. */
   edits?: Record<string, string>;
 }
@@ -60,6 +65,7 @@ const PLAN_SCHEMA: Schema = {
     a_terra: { type: 'ARRAY', items: { type: 'STRING' } },
     nuovi: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concetto: { type: 'STRING' }, dove: { type: 'STRING', enum: WHERE } }, required: ['concetto', 'dove'] } },
     rune: { type: 'ARRAY', items: { type: 'STRING' } },
+    strutture: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concetto: { type: 'STRING' }, importante: { type: 'BOOLEAN' } }, required: ['concetto'] } },
   },
   required: ['luogo', 'ambiente', 'oggetti', 'rune'],
 };
@@ -75,6 +81,7 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
     `"a_terra": 0-4 nomi di oggetti comuni che si trovano per terra qui (anche nuovi, se coerenti).${ctx.wanted.length ? ` Se ha senso, includi qualcosa di cui si è parlato: ${ctx.wanted.join(', ')}.` : ''}`,
     '"nuovi": quasi sempre vuoto; solo un oggetto concreto o un personaggio che il luogo richiede e che non esiste tra i moduli.',
     `"rune": 0-2 frammenti presi esattamente da questo elenco: ${ctx.fragments.map((f) => `«${f}»`).join(', ')}.`,
+    '"strutture": 0-2 edifici o costruzioni di questo luogo, se l\'ambiente ne ha (es. «il mulino sul fiume», «la casa del fabbro con la forgia»): ognuno diventa un modello intero in cui si entra, sui lotti dell\'ambiente (gli altri lotti hanno case comuni). "importante" solo per un luogo notevole del mondo (un castello, un tempio, la torre del mago), raramente.',
     ctx.feedback ? `IL TENTATIVO PRECEDENTE È STATO SCARTATO: ${ctx.feedback}. Correggi.` : '',
   ]
     .filter(Boolean)
@@ -90,6 +97,7 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
     ground: (raw?.a_terra ?? []).slice(0, 4).map(String),
     fresh: (raw?.nuovi ?? []).slice(0, 1).map((o: any) => ({ concept: String(o?.concetto ?? ''), where: where(o?.dove) })),
     runes: (raw?.rune ?? []).slice(0, 3).map(String),
+    strutture: (raw?.strutture ?? []).slice(0, 3).map((s: any) => ({ concetto: String(s?.concetto ?? '').trim(), ...(s?.importante === true ? { importante: true } : {}) })),
   };
 }
 

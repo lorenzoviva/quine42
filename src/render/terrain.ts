@@ -2,8 +2,8 @@
 // tile = one unit). The plan's tiles are still the ground: colour per terrain, water lower than the
 // land with earthen banks, walls extruded, doors as an opening under a lintel. What stands on a tile
 // (trees on woods, boulders on rock) is the terrain's model (`TileDef.model`), a few seeds of it as
-// instances, turned and shifted; a stand-in until the model is ready. Roofs are separate meshes, hidden
-// when the wanderer is inside.
+// instances, turned and shifted; a stand-in until the model is ready. Buildings are no longer tiles: each
+// is a structure, a model on its lot (ADR-0043), drawn with the things.
 
 import * as THREE from 'three';
 import type { Chunk, Kernel } from '../kernel/kernel';
@@ -78,7 +78,6 @@ export interface ChunkView {
   key: string;
   sig: string;
   group: THREE.Group;
-  roofs: Array<{ mesh: THREE.Mesh; building: Chunk['buildings'][number] }>;
 }
 
 /** How many seeds of a terrain's model stand on its tiles. */
@@ -185,23 +184,7 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): ChunkView {
     im.userData.shared = true;
     group.add(im);
   }
-  // Roofs: a hip roof of shrinking layers over each building, in the terrain's roof colour.
-  const roofColor = rgbOf(k.terrain?.manifest.roof?.color ?? '#9a4632');
-  const roofs = ch.buildings.map((b) => {
-    const rb = new Builder();
-    const x0 = X0 + b.x0 - 0.1, x1 = X0 + b.x1 + 1.1, z0 = Z0 + b.y0 - 0.1, z1 = Z0 + b.y1 + 1.1;
-    const layers = Math.max(2, Math.ceil(Math.min(x1 - x0, z1 - z0) / 2 / 0.35));
-    for (let i = 0; i < layers; i++) {
-      const inset = i * 0.35;
-      if (x1 - x0 - 2 * inset < 0.3 || z1 - z0 - 2 * inset < 0.3) break;
-      rb.box(x0 + inset, WALL_H + i * 0.22, z0 + inset, x1 - inset, WALL_H + (i + 1) * 0.22, z1 - inset, roofColor.map((v) => v * (1 - i * 0.03)), i === 0);
-    }
-    const mesh = new THREE.Mesh(rb.geometry(), MAT.world);
-    mesh.castShadow = true;
-    group.add(mesh);
-    return { mesh, building: b };
-  });
-  return { key: ch.key, sig: chunkSig(k, ch, models), group, roofs };
+  return { key: ch.key, sig: chunkSig(k, ch, models), group };
 }
 
 export function disposeChunk(v: ChunkView): void {

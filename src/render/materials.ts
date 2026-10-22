@@ -38,7 +38,12 @@ export function clipped<M extends THREE.Material>(m: M, key: string, sway = fals
   return m;
 }
 
+/** Inside a structure everything above the head is cut away (the renderer sets where). */
+export const CUT = new THREE.Plane(new THREE.Vector3(0, -1, 0), 1e9);
+
 export const MAT = {
+  /** The structure the wanderer is in: cut above the head. */
+  cut: clipped(new THREE.MeshLambertMaterial({ vertexColors: true, clippingPlanes: [CUT] }), 'cut'),
   /** The simulation: ground, things, people. */
   world: clipped(new THREE.MeshLambertMaterial({ vertexColors: true }), 'world'),
   /** Vegetation: the wind moves the top (the `sway` attribute). */

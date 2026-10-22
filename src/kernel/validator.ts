@@ -275,7 +275,12 @@ export class Validator {
       if (!ok) dropped.push(`nuovo «${f.concept}»: non valido`);
       return ok;
     });
-    return { errors, dropped, plan: { ...plan, objects, runes, fresh, ground: plan.ground.filter((g) => g.trim().length >= 2 && g.length <= 60) } };
+    const strutture = (plan.strutture ?? []).filter((s) => {
+      const ok = s.concetto.length >= 3 && s.concetto.length <= 120;
+      if (!ok) dropped.push(`struttura «${s.concetto}»: non valida`);
+      return ok;
+    });
+    return { errors, dropped, plan: { ...plan, objects, runes, fresh, strutture, ground: plan.ground.filter((g) => g.trim().length >= 2 && g.length <= 60) } };
   }
 }
 

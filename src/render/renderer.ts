@@ -9,7 +9,7 @@
 import * as THREE from 'three';
 import type { Kernel } from '../kernel/kernel';
 import { Avatars, buildCoronaRing, buildRoom } from './corona3d';
-import { U } from './materials';
+import { CUT, U } from './materials';
 import { Overlay } from './overlay';
 import { buildChunk, chunkSig, disposeChunk, tileForms, type ChunkView } from './terrain';
 import { Lights, Runes, Things, Wanderer } from './things';
@@ -57,6 +57,7 @@ export class Renderer {
   ) {
     this.gl = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.gl.shadowMap.enabled = true;
+    this.gl.localClippingEnabled = true;
     this.gl.shadowMap.type = THREE.PCFSoftShadowMap;
     this.sun.castShadow = true;
     this.sun.shadow.mapSize.set(2048, 2048);
@@ -141,10 +142,11 @@ export class Renderer {
     U.clipR.value = revealed ? k.config.circleRadius : 1e9;
     if (!interior) {
       this.syncChunks();
+      // Inside a structure its upper part is cut away, so the wanderer is seen.
       const pc = k.playerCarpet();
-      const inside = k.buildingAt(pc.x, pc.y)?.building;
-      for (const v of this.chunks.values()) for (const r of v.roofs) r.mesh.visible = r.building !== inside;
-      this.things.update(dt, this.t);
+      const inside = k.structureAt(pc.x, pc.y);
+      CUT.constant = inside !== undefined ? 1.15 + k.floorAt(pc.x, pc.y) : 1e9;
+      this.things.update(dt, this.t, inside);
       this.runes.update(this.t);
     }
     this.wanderer.update(k, dt, this.t);

@@ -42,6 +42,12 @@ export interface FormComp {
   tint?: string;
   /** Actions done on this instance, in order (the door opened, then closed): replayed on the form. */
   done?: string[];
+  /**
+   * The model it should wear when the library has it (its own, or a structure's), and its class: until
+   * then `model` is the generic one of the class; the kernel switches when the program arrives.
+   */
+  wanted?: string;
+  classe?: string;
 }
 
 export interface FormRequest {
