@@ -1,0 +1,125 @@
+<!-- Mulino a vento: scolpito da gemini-3.7-flash nello step 8.2B (lab/out/trial-3.7-flash-1, giro-1), voto del giudice gemini-3.8-flash 6/10 -->
+<sequence values="BXDCcdNnOoWwFfPpUu" size="100 100 80" origin="True" symmetry="()">
+  <color symbol="X" hidden="True" name="seme"/>
+  <color symbol="D" value="7e776b" name="pietra base"/>
+  <color symbol="d" value="544e46" name="pietra scura ombre"/>
+  <color symbol="C" value="9e978a" name="pietra chiara blocchi"/>
+  <color symbol="c" value="686259" name="malta e giunti"/>
+  <color symbol="N" value="5a381e" name="legno scuro travi"/>
+  <color symbol="n" value="7d4e2a" name="legno medio struttura"/>
+  <color symbol="O" value="a26a3a" name="assi tetto e pedana"/>
+  <color symbol="o" value="c4884f" name="legno chiaro ringhiera"/>
+  <color symbol="W" value="eee6d3" name="tela pale"/>
+  <color symbol="w" value="c2b89f" name="tela ombra"/>
+  <color symbol="F" value="d9cca8" name="sacco farina"/>
+  <color symbol="f" value="ab9d7b" name="sacco pieghe"/>
+  <color symbol="P" value="8f8677" name="lastricato soglia"/>
+  <color symbol="p" value="6e675b" name="gradino scuro"/>
+  <color symbol="U" value="64c0d6" name="vetro finestre"/>
+  <color symbol="u" value="382e2b" name="telaio finestra"/>
+
+  <!-- Il seme cade sul fondo z=0 garantendo contatto e origine -->
+  <one in="X B" out="B X"/>
+
+  <!-- Pavimento di fondazione solido a z=0 per radicamento completo al suolo -->
+  <cylinder at="50 50 0" r="19" h="2" color="D"/>
+
+  <!-- Fusto della torre circolare in muratura rastremata (da z=1 a z=45) -->
+  <cylinder at="50 50 1" r="18" h="16" color="D"/>
+  <cylinder at="50 50 17" r="17" h="14" color="D"/>
+  <cylinder at="50 50 31" r="16" h="15" color="D"/>
+
+  <!-- Svuotamento interno mantenendo solido lo strato z=0 e pareti spesse 4-5 voxel -->
+  <cylinder at="50 50 1" r="11" h="44" color="B"/>
+  <cylinder at="50 50 0" r="13" h="1" color="d"/>
+
+  <!-- Tetto conico aggettante: comincia sopra i muri (z=45), sporge con r=18 e sale slanciato -->
+  <cylinder at="50 50 45" r="18" h="2" color="N"/>
+  <cone at="50 50 47" r="18" h="28" color="O"/>
+  <cylinder at="50 50 74" r="2" h="4" color="n"/>
+
+  <!-- Texture muraria a grandi blocchi di pietra raggruppati -->
+  <one steps="35" in="DD/DD" out="CC/CC"/>
+  <one steps="28" in="DD/DD" out="dd/dd"/>
+  <one steps="20" in="DD/DD" out="cc/cc"/>
+  <prl in="CD" out="CC" p="0.35" steps="1"/>
+  <prl in="dD" out="dd" p="0.35" steps="1"/>
+
+  <!-- Trama ad assi verticali sul tetto conico -->
+  <prl in="B O" out="* n" p="0.25" steps="1"/>
+  <prl in="OB" out="N*" p="0.3" steps="1"/>
+
+  <!-- Ballatoio ligneo a quota intermedia z=22..26 perfettamente saldato alla muratura -->
+  <!-- Travi e mensole portanti -->
+  <cylinder at="50 50 21" r="20" h="1" color="N" on="B"/>
+  <!-- Pedana praticabile -->
+  <cylinder at="50 50 22" r="20" h="2" color="O" on="B"/>
+  <!-- Ringhiera con montanti e corrimano continuo -->
+  <cylinder at="50 50 24" r="20" h="3" color="o" on="B"/>
+  <cylinder at="50 50 24" r="19" h="3" color="B"/>
+  <cylinder at="50 50 26" r="20" h="1" color="N" on="B"/>
+
+  <!-- Porta ad arco sul davanti (y grande) con stipiti e soglia collegati -->
+  <box at="50 67 1" size="8 10 13" color="B"/>
+  <cylinder at="50 67 13" r="4" h="10" color="B"/>
+  <!-- Stipiti e architrave in conci chiari -->
+  <box at="45 67 1" size="2 4 13" color="C"/>
+  <box at="55 67 1" size="2 4 13" color="C"/>
+  <box at="50 67 14" size="10 4 2" color="n"/>
+  <!-- Battente in legno all'interno -->
+  <box at="50 63 1" size="6 1 12" color="N"/>
+
+  <!-- Lastricato e gradino della soglia a filo suolo z=0 -->
+  <box at="50 71 0" size="14 6 1" color="P"/>
+  <box at="50 75 0" size="10 4 1" color="p"/>
+
+  <!-- Finestrelle visibili con telaio e vetro incassati nelle pareti -->
+  <!-- Finestra inferiore (davanti-sinistra, sopra la soglia) -->
+  <box at="38 58 13" size="6 6 8" color="u"/>
+  <box at="38 59 14" size="4 4 6" color="U"/>
+  <!-- Finestra superiore (destra, sopra il ballatoio) -->
+  <box at="62 48 32" size="6 6 8" color="u"/>
+  <box at="62 48 33" size="4 4 6" color="U"/>
+
+  <!-- Mozzo delle pale: esce solidamente dal colmo del tetto verso sud (y grande, z=60) -->
+  <box at="50 54 60" size="8 18 8" color="N"/>
+  <cylinder at="50 64 60" r="5" h="6" color="n"/>
+
+  <!-- Quattro grandi pale a croce (attaccate saldamente al mozzo a y=67, z=60) -->
+  <!-- Asta verticale lunga 51 voxel (z da 35 a 85, centrata a z=60) -->
+  <box at="50 67 60" size="3 2 51" color="N"/>
+  <!-- Asta orizzontale lunga 51 voxel (x da 25 a 75, centrata a x=50) -->
+  <box at="50 67 60" size="51 2 3" color="N"/>
+
+  <!-- Vele di tela ampie fissate lungo ciascun braccio -->
+  <!-- Pala alta (+z) -->
+  <box at="54 67 72" size="7 1 21" color="W"/>
+  <!-- Pala bassa (-z) -->
+  <box at="46 67 48" size="7 1 21" color="W"/>
+  <!-- Pala destra (+x) -->
+  <box at="62 67 56" size="21 1 7" color="W"/>
+  <!-- Pala sinistra (-x) -->
+  <box at="38 67 64" size="21 1 7" color="W"/>
+
+  <!-- Travetti di rinforzo sulla griglia delle pale -->
+  <box at="54 68 72" size="7 1 1" color="n"/>
+  <box at="54 68 80" size="7 1 1" color="n"/>
+  <box at="46 68 48" size="7 1 1" color="n"/>
+  <box at="46 68 40" size="7 1 1" color="n"/>
+  <box at="62 68 56" size="1 1 7" color="n"/>
+  <box at="70 68 56" size="1 1 7" color="n"/>
+  <box at="38 68 64" size="1 1 7" color="n"/>
+  <box at="30 68 64" size="1 1 7" color="n"/>
+
+  <!-- Ombreggiatura sfumata sulla tela delle vele -->
+  <prl in="W" out="w" p="0.2" steps="1"/>
+
+  <!-- Gruppo di sacchi di farina addossati alla parete e sul lastricato a z=0..8 -->
+  <box at="59 67 0" size="5 5 5" color="F"/>
+  <box at="59 67 5" size="3 3 2" color="f"/>
+  <box at="64 64 0" size="5 4 4" color="F"/>
+  <box at="64 64 4" size="3 3 2" color="f"/>
+  <box at="61 63 0" size="4 4 6" color="F"/>
+  <box at="61 63 6" size="2 2 2" color="f"/>
+  <prl in="F B" out="* f" p="0.25" steps="1"/>
+</sequence>

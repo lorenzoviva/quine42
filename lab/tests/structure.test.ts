@@ -21,7 +21,9 @@ describe('scale', () => {
     expect(guessClass('Una quercia frondosa').id).toBe('albero');
     expect(guessClass('Il fabbro', 'figura').id).toBe('persona');
     expect(guessClass('un lupo grigio', 'figura').id).toBe('bestia');
-    for (const c of CLASSES) for (const v of boxOf(c)) expect(v).toBeLessThanOrEqual(64);
+    // The JSON programs of steps 8A-8E stay within 64 voxels a side; large structures are for the XML sculptor.
+    for (const c of CLASSES.filter((c) => c.id !== 'grande')) for (const v of boxOf(c)) expect(v).toBeLessThanOrEqual(64);
+    expect(boxOf(classOf('grande')!)).toEqual([5 * TILE, 5 * TILE, 4 * TILE]);
   });
 
   it('forces the class box on the program and refuses a tree too short', async () => {

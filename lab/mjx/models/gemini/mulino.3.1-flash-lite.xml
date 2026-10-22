@@ -1,0 +1,68 @@
+<!-- Mulino a vento: scolpito da gemini-3.1-flash-lite nello step 8.2B (lab/out/trial-31-flash-lite, giro-1), voto del giudice gemini-3.8-flash 6/10 -->
+<sequence values="BXDdNWnOQYUiSjR" size="100 100 80" origin="True" symmetry="(xy)">
+  <color symbol="X" hidden="True" name="Seme"/>
+  <color symbol="D" value="7d766c" name="Pietra"/>
+  <color symbol="d" value="5e5850" name="Ombra Pietra"/>
+  <color symbol="N" value="6b4a2e" name="Legno"/>
+  <color symbol="n" value="4a3424" name="Legno Scuro"/>
+  <color symbol="W" value="f3ef7d" name="Sacco Farina"/>
+  <color symbol="O" value="a5482e" name="Tetto"/>
+  <color symbol="Q" value="7e3424" name="Tetto Ombra"/>
+  <color symbol="Y" value="847e87" name="Balcone"/>
+  <color symbol="R" value="5a4a3a" name="Ringhiera"/>
+  <color symbol="U" value="29adff" name="Finestra"/>
+  <color symbol="i" value="111d35" name="Interno"/>
+  <color symbol="S" value="fff1e8" name="Tela"/>
+  <color symbol="j" value="5e3a1e" name="Arco Porta"/>
+
+  <!-- Struttura Principale: Torre conica rastremata -->
+  <cylinder at="50 50 0" radius="20" height="30" color="D"/>
+  <cylinder at="50 50 30" radius="16" height="20" color="D"/>
+  <cylinder at="50 50 50" radius="12" height="15" color="D"/>
+  <cone at="50 50 65" radius="14" height="15" color="O"/>
+  
+  <!-- Balcone a metà torre (altezza 30-32) -->
+  <cylinder at="50 50 30" radius="22" height="2" color="Y"/>
+  <cylinder at="50 50 32" radius="22" height="1" color="R"/>
+  
+  <!-- Porta ad arco (y grande = davanti) -->
+  <box at="50 70 0" size="8 2 12" color="j"/>
+  <box at="50 70 0" size="6 2 10" color="i"/>
+  
+  <!-- Sacchi di farina alla base -->
+  <box at="38 70 0" size="6 6 6" color="W"/>
+  <box at="62 70 0" size="6 6 6" color="W"/>
+
+  <!-- Finestre (due livelli) -->
+  <box at="38 50 40" size="4 2 4" color="U"/>
+  <box at="62 50 40" size="4 2 4" color="U"/>
+  <box at="50 35 55" size="4 2 4" color="U"/>
+
+  <!-- Mozzo delle pale (in alto, sotto la gronda) -->
+  <box at="50 65 60" size="4 2 4" color="N"/>
+  
+  <!-- Pale (croce centrata sul mozzo) -->
+  <line at="50 65 60" to="50 65 95" r="1" color="N"/>
+  <line at="50 65 60" to="50 65 25" r="1" color="N"/>
+  <line at="50 65 60" to="15 65 60" r="1" color="N"/>
+  <line at="50 65 60" to="85 65 60" r="1" color="N"/>
+  
+  <!-- Tessuto delle pale (aggiunge volume alle pale) -->
+  <all in="N B" out="S *" steps="30"/>
+
+  <!-- Scavo interno per entrata -->
+  <cylinder at="50 50 1" radius="10" height="60" color="i"/>
+
+  <!-- Dettagli e Texture -->
+  <prl in="D" out="d" p="0.1" steps="1"/>
+  <prl in="O" out="Q" p="0.15" steps="1"/>
+  <prl in="N" out="n" p="0.1" steps="1"/>
+  
+  <!-- Rifinitura base: assicura solidità -->
+  <all in="B D" out="D D" steps="2"/>
+
+  <action name="entra" label="Entra nel mulino"><all><rule in="i" out="B"/></all></action>
+</sequence>
+<animation name="pale" frames="4">
+  <prl in="S" out="S" steps="1"/>
+</animation>

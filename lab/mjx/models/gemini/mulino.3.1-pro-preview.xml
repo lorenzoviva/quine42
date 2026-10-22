@@ -1,0 +1,111 @@
+<!-- Mulino a vento: scolpito da gemini-3.1-pro-preview nello step 8.2B (lab/out/trial-3.1-pro-preview-1, giro-1), voto del giudice gemini-3.8-flash 3/10 -->
+<sequence values="BXYDdWwNnOoUuPpFfRrKkSsAaM" size="100 100 80" origin="True" symmetry="(xy)">
+  <color symbol="X" hidden="True" name="seme"/>
+  <color symbol="Y" hidden="True" name="base"/>
+  <color symbol="D" value="7d766c" name="pietra"/>
+  <color symbol="d" value="5e5850" name="pietra scura"/>
+  <color symbol="W" value="6b4a2e" name="legno"/>
+  <color symbol="w" value="8e6a44" name="legno chiaro"/>
+  <color symbol="N" value="e8dcc0" name="tela"/>
+  <color symbol="n" value="d4c6a4" name="tela scura"/>
+  <color symbol="O" value="7a4a26" name="porta"/>
+  <color symbol="o" value="5e3a1e" name="asse scura"/>
+  <color symbol="U" value="86b8c8" name="vetro"/>
+  <color symbol="u" value="4b692f" name="vetro scuro"/>
+  <color symbol="P" value="a89c86" name="soglia"/>
+  <color symbol="p" value="8a8070" name="soglia scura"/>
+  <color symbol="F" value="d8d8d8" name="sacco"/>
+  <color symbol="f" value="a28879" name="sacco scuro"/>
+  <color symbol="R" value="a5482e" name="tetto"/>
+  <color symbol="r" value="7e3424" name="tetto scuro"/>
+  <color symbol="K" value="3a2a22" name="interno"/>
+  <color symbol="k" value="1a1a1a" name="interno scuro"/>
+  <color symbol="S" value="8a6f30" name="paglia"/>
+  <color symbol="A" value="fff1e8" name="farina"/>
+  <color symbol="M" hidden="True" name="mozzo"/>
+
+  <!-- Il seme cade -->
+  <one in="X B" out="B X" steps="80"/>
+  
+  <!-- Base tonda più larga -->
+  <all in="X" out="Y" steps="1"/>
+  <all in="YB" out="*Y" steps="20" symmetry="(xy)"/>
+  <convolution neighborhood="NoCorners" steps="2">
+    <rule in="Y" out="B" values="Y" sum="0..3"/>
+    <rule in="B" out="Y" values="Y" sum="5..8"/>
+  </convolution>
+  <all in="Y" out="D" steps="1"/>
+  
+  <!-- Torre che si restringe -->
+  <all in="B D" out="D *" steps="12"/>
+  <all in="D/B" out="B/*" steps="1"/>
+  <all in="DB" out="B*" steps="1"/>
+  <all in="B D" out="D *" steps="12"/>
+  <all in="D/B" out="B/*" steps="1"/>
+  <all in="DB" out="B*" steps="1"/>
+  <all in="B D" out="D *" steps="12"/>
+  <all in="D/B" out="B/*" steps="1"/>
+  <all in="DB" out="B*" steps="1"/>
+  <all in="B D" out="D *" steps="12"/>
+  
+  <!-- Interno -->
+  <prl in="DDDDD/DDDDD/DDDDD/DDDDD/DDDDD" out="*****/**K**/*****/**K**/*****" steps="1"/>
+  <prl in="K D" out="K *" steps="1"/>
+  <prl in="D K" out="D *" steps="1"/>
+  <prl in="K" out="k" steps="1"/>
+  
+  <!-- Tetto conico di assi -->
+  <all in="B D" out="R *" steps="1"/>
+  <all in="B R" out="R *" steps="2"/>
+  <all in="R/B" out="B/*" steps="1"/>
+  <all in="RB" out="B*" steps="1"/>
+  <all in="B R" out="R *" steps="2"/>
+  <all in="R/B" out="B/*" steps="1"/>
+  <all in="RB" out="B*" steps="1"/>
+  <all in="B R" out="R *" steps="2"/>
+  <all in="R/B" out="B/*" steps="1"/>
+  <all in="RB" out="B*" steps="1"/>
+  <all in="B R" out="R *" steps="4"/>
+  <all in="R/B" out="B/*" steps="1"/>
+  <all in="RB" out="B*" steps="1"/>
+  <all in="B R" out="R *" steps="4"/>
+  
+  <!-- Mozzo e pale -->
+  <one in="R/B D/B D/B" out="*/* */M */*" steps="1" symmetry="()"/>
+  <all in="M/B" out="M/*" steps="4" symmetry="()"/>
+  <all in="M" out="W" steps="1"/>
+  
+  <all in="W/B B/B" out="*/* W/*" steps="20" symmetry="(x)"/>
+  <all in="B W" out="W *" steps="20"/>
+  <all in="W B" out="* W" steps="20"/>
+  
+  <all in="W/B B/B" out="*/* N/*" steps="1" symmetry="(x)"/>
+  <all in="N/B B/B" out="*/* N/*" steps="4" symmetry="(x)"/>
+  <all in="B N" out="N *" steps="20"/>
+  <all in="N B" out="* N" steps="20"/>
+  
+  <!-- Porta -->
+  <one in="DDDDD/BBBBB DDDDD/BBBBB" out="OOOOO/***** OOOOO/*****" steps="1" symmetry="()"/>
+  <all in="O/B" out="O/*" steps="1"/>
+  <all in="B O" out="O *" steps="10"/>
+  <all in="O O" out="o *" steps="1"/>
+  
+  <!-- Finestre -->
+  <one in="D/B B/B B/B" out="*/* U/* U/*" steps="2" symmetry="()"/>
+  <all in="U/B" out="U/*" steps="1"/>
+  <all in="B U" out="U *" steps="2"/>
+  
+  <!-- Ballatoio -->
+  <one in="D/B B/B" out="*/* W/*" steps="1" symmetry="()"/>
+  <all in="WB" out="*W" steps="18" symmetry="(xy)"/>
+  <convolution neighborhood="NoCorners" steps="2">
+    <rule in="W" out="B" values="W" sum="0..2"/>
+  </convolution>
+  <all in="B W" out="W *" steps="1"/>
+  
+  <!-- Dettagli -->
+  <prl in="D" out="d" p="0.3" steps="1"/>
+  <prl in="R" out="r" p="0.4" steps="1"/>
+  <prl in="W" out="w" p="0.2" steps="1"/>
+  <prl in="N" out="n" p="0.3" steps="1"/>
+</sequence>

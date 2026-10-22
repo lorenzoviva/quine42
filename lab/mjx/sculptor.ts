@@ -80,7 +80,10 @@ function attempt(raw: string, t: Target): { a: MjxAttempt; model?: MjxModel; res
     const result = runMjx(model, 1, { deadline: 20_000 });
     if (!result.finished) return { a: { xml, error: 'il programma non finisce in 20 secondi: ogni crescita deve avere steps' }, model };
     const analysis = analyse(result, model.program.palette, { grounded: true, minHeight });
-    const notes = analysis.errors;
+    const notes = [...analysis.errors];
+    // A model that fills (nearly) the whole box is a block, not a shape: something grew without limit.
+    const cells = result.grid.X * result.grid.Y * result.grid.Z;
+    if (analysis.voxels > cells * 0.85) notes.push(`riempie il ${Math.round((analysis.voxels / cells) * 100)}% della scatola: qualcosa cresce senza limite (manca steps?) o la prima lettera di values non è la cella vuota`);
     return { a: { xml, analysis, ...(notes.length ? { error: notes.join('; ') } : {}) }, model, result };
   } catch (e) {
     return { a: { xml, error: e instanceof Mj3Error ? e.message : `errore: ${(e as Error).message}` } };

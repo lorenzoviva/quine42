@@ -1,0 +1,85 @@
+<!-- Mulino a vento: scolpito da gemini-3.5-flash nello step 8.2B (lab/out/trial-3.5-flash-2, giro-1), voto del giudice gemini-3.8-flash 6/10 -->
+<sequence values="BWRDNnOoSUtFGfPprdw" size="100 100 80" origin="True" symmetry="(xy)">
+  <color symbol="W" value="d8d0c0" name="intonaco/pietra chiara"/>
+  <color symbol="w" value="b0a898" name="pietra scura"/>
+  <color symbol="D" value="7d766c" name="pietra base"/>
+  <color symbol="d" value="5e5850" name="pietra scura base"/>
+  <color symbol="R" value="a5482e" name="tetto assi"/>
+  <color symbol="r" value="7e3424" name="tetto ombra"/>
+  <color symbol="N" value="6b4a2e" name="legno travi"/>
+  <color symbol="n" value="4a301c" name="legno scuro"/>
+  <color symbol="O" value="5e3a1e" name="porta"/>
+  <color symbol="o" value="3d2411" name="porta scura"/>
+  <color symbol="U" value="86b8c8" name="finestra vetro"/>
+  <color symbol="F" value="f0e6d2" name="tela pale"/>
+  <color symbol="G" value="3a2e24" name="mozzo pale"/>
+  <color symbol="S" value="a89c86" name="soglia"/>
+  <color symbol="s" value="7d7260" name="soglia scura"/>
+  <color symbol="t" value="8a6a48" name="ringhiera"/>
+  <color symbol="P" value="d0c8b8" name="sacco farina"/>
+  <color symbol="f" value="a8a090" name="sacco farina scuro"/>
+
+  <!-- Struttura della torre tronco-conica a strati decrescenti -->
+  <cylinder at="50 42 0" r="20" h="12" color="D"/>
+  <cylinder at="50 42 12" r="18" h="14" color="W"/>
+  <cylinder at="50 42 26" r="16" h="16" color="W"/>
+  <cylinder at="50 42 42" r="14" h="10" color="W"/>
+
+  <!-- Scavo interno cavo della torre -->
+  <cylinder at="50 42 0" r="15" h="12" color="B" on="D"/>
+  <cylinder at="50 42 12" r="13" h="14" color="B" on="W"/>
+  <cylinder at="50 42 26" r="11" h="16" color="B" on="W"/>
+  <cylinder at="50 42 42" r="9" h="10" color="B" on="W"/>
+
+  <!-- Tetto conico di assi spiovente -->
+  <cone at="50 42 50" r="16" h="22" color="R"/>
+
+  <!-- Ballatoio di legno con deck e ringhiera a meta torre (z=26) -->
+  <cylinder at="50 42 25" r="22" h="2" color="N" on="B"/>
+  <cylinder at="50 42 25" r="16" h="2" color="B" on="N"/>
+  <!-- Supporti del ballatoio sotto la piattaforma -->
+  <box at="49 18 20" size="2 26 5" color="n" on="B"/>
+  <box at="35 41 20" size="30 2 5" color="n" on="B"/>
+  <!-- Ringhiera del ballatoio -->
+  <cylinder at="50 42 27" r="22" h="5" color="t" on="B"/>
+  <cylinder at="50 42 27" r="21" h="5" color="B" on="t"/>
+
+  <!-- Porta ad arco sul davanti con passaggio all'interno -->
+  <box at="46 58 0" size="8 8 13" color="O" on="WD"/>
+  <box at="47 57 0" size="6 8 11" color="B" on="O"/>
+  <box at="44 62 0" size="12 4 1" color="S"/>
+
+  <!-- Finestrelle con vetro e cornice -->
+  <box at="62 40 32" size="4 4 6" color="U" on="W"/>
+  <box at="34 40 32" size="4 4 6" color="U" on="W"/>
+
+  <!-- Mozzo centrale delle pale sporgente sul davanti -->
+  <box at="47 56 53" size="6 6 6" color="G"/>
+
+  <!-- Quattro pale di legno e tela perfettamente simmetriche -->
+  <box at="49 61 30" size="2 2 52" color="N"/>
+  <box at="24 61 55" size="52 2 2" color="N"/>
+  <!-- Vele di tela distribuite sulle 4 pale (rotazione simmetrica attorno al mozzo) -->
+  <box at="51 62 57" size="10 1 22" color="F"/>
+  <box at="52 62 45" size="22 1 10" color="F"/>
+  <box at="39 62 31" size="10 1 22" color="F"/>
+  <box at="26 62 57" size="22 1 10" color="F"/>
+
+  <!-- Sacchi di farina accanto alla porta -->
+  <box at="38 58 0" size="5 5 6" color="P"/>
+  <box at="37 61 0" size="4 4 5" color="f"/>
+  <box at="57 58 0" size="5 5 6" color="P"/>
+  <box at="58 61 0" size="4 4 5" color="f"/>
+
+  <!-- Dettagli di texture, sfumature ed erosione -->
+  <prl in="W" out="w" p="0.22" steps="1"/>
+  <prl in="D" out="d" p="0.25" steps="1"/>
+  <prl in="R" out="r" p="0.2" steps="1"/>
+  <prl in="S" out="s" p="0.3" steps="1"/>
+  <prl in="O" out="o" p="0.2" steps="1"/>
+  <prl in="N" out="n" p="0.15" steps="1"/>
+</sequence>
+<animation name="pale_rotazione" frames="4">
+  <prl in="F" out="N" p="0.1" steps="1"/>
+  <prl in="N" out="F" p="0.1" steps="1"/>
+</animation>

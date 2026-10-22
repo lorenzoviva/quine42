@@ -73,12 +73,13 @@ export const CATALOG: Entry[] = [
 
 // The step 8.2A trial: what each Gemini model wrote for the same targets (<target>.<model>.xml).
 const trial = import.meta.glob('../mjx/models/gemini/*.xml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
-const TRIAL_ROLE: Record<string, Role> = { pino: 'tree', quercia: 'tree', betulla: 'tree', 'masso-muschioso': 'rock', 'cespuglio-con-bacche': 'plant', barile: 'prop', pozzo: 'structure', casetta: 'structure', viandante: 'npc', contadina: 'npc', gatto: 'animal', lupo: 'animal' };
+const TRIAL_ROLE: Record<string, Role> = { mulino: 'structure', pino: 'tree', quercia: 'tree', betulla: 'tree', 'masso-muschioso': 'rock', 'cespuglio-con-bacche': 'plant', barile: 'prop', pozzo: 'structure', casetta: 'structure', viandante: 'npc', contadina: 'npc', gatto: 'animal', lupo: 'animal' };
 for (const [file, xml] of Object.entries(trial)) {
   const base = file.replace(/^.*\//, '').replace(/\.xml$/, '');
   const target = base.split('.')[0];
   const model = base.slice(target.length + 1) || '?';
-  CATALOG.push({ id: `g:${target}.${model}`, name: `${target} · ${model}`, role: TRIAL_ROLE[target] ?? 'prop', xml, vpt: 20, source: sourceOf(xml) || `scolpito da ${model} nello step 8.2A`, trial: true });
+  // The windmill of step 8.2B is a large structure: its box is the class's (5 × 5 × 4 tiles).
+  CATALOG.push({ id: `g:${target}.${model}`, name: `${target} · ${model}`, role: TRIAL_ROLE[target] ?? 'prop', xml, vpt: 20, source: sourceOf(xml) || `scolpito da ${model} nello step 8.2A`, trial: true, ...(target === 'mulino' ? { size: [100, 100, 80] as Vec3 } : {}) });
 }
 
 export const byId = (id: string) => CATALOG.find((e) => e.id === id);
@@ -87,5 +88,5 @@ export const GROUPS: Array<[string, (e: Entry) => boolean]> = [
   ['Piante e rocce', (e) => !e.trial && ['tree', 'plant', 'rock'].includes(e.role)],
   ['Oggetti e strutture', (e) => !e.trial && ['prop', 'structure'].includes(e.role)],
   ['MarkovJunior (originali)', (e) => e.role === 'official'],
-  ['Gemini, step 8.2A (stessi bersagli)', (e) => !!e.trial],
+  ['Gemini: prove degli step 8.2A e 8.2B', (e) => !!e.trial],
 ];

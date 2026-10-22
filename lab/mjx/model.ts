@@ -294,14 +294,22 @@ class Compiler {
       const input = this.one(r, r.attrs.in, ctx, 'in');
       const output = this.one(r, r.attrs.out, ctx, 'out');
       const p = this.num(r, r.attrs.p, 'p');
-      if ((r.attrs.values === undefined) !== (r.attrs.sum === undefined)) this.fail(r, 'values e sum vanno insieme');
+      // A rule may take values or sum from its node (models put them there), spaces between letters go.
+      let values = r.attrs.values;
+      let sum = r.attrs.sum;
+      if (!this.strict && r !== el) {
+        if (values === undefined && el.attrs.values !== undefined) (values = el.attrs.values), this.mend(r, 'values preso dal nodo convolution');
+        if (sum === undefined && el.attrs.sum !== undefined) (sum = el.attrs.sum), this.mend(r, 'sum preso dal nodo convolution');
+      }
+      if (values !== undefined && /\s/.test(values) && !this.strict) values = values.replace(/\s+/g, '');
+      if ((values === undefined) !== (sum === undefined)) this.fail(r, 'values e sum vanno insieme');
       let sums: number[];
       let neighbors = input;
-      if (r.attrs.sum !== undefined) {
-        neighbors = this.letters(r, r.attrs.values!, ctx, 'values');
-        sums = r.attrs.sum.split(',').flatMap((part) => {
+      if (sum !== undefined) {
+        neighbors = this.letters(r, values!, ctx, 'values');
+        sums = sum.split(',').flatMap((part) => {
           const [a, b] = part.split('..').map((v) => Number(v.trim()));
-          if (!Number.isInteger(a) || (b !== undefined && !Number.isInteger(b))) this.fail(r, `sum "${r.attrs.sum}" non valido (es. "5..8" o "1,3")`);
+          if (!Number.isInteger(a) || (b !== undefined && !Number.isInteger(b))) this.fail(r, `sum "${sum}" non valido (es. "5..8" o "1,3")`);
           return Array.from({ length: (b ?? a) - a + 1 }, (_, k) => a + k);
         });
       } else sums = Array.from({ length: 27 }, (_, k) => k);
@@ -336,7 +344,30 @@ class Compiler {
       const r = this.num(el, el.attrs.r, 'r');
       return { type: 'shape', shape, at, to: this.vec(el, el.attrs.to, 'to'), color, ...(r !== undefined ? { r } : {}), ...(on ? { on } : {}) };
     }
-    return { type: 'shape', shape, at, size: this.vec(el, el.attrs.size, 'size'), color, ...(on ? { on } : {}) };
+    return { type: 'shape', shape, at, size: this.shapeSize(el), color, ...(on ? { on } : {}) };
+  }
+
+  /** `size`, or what models write instead when the meaning is clear: radii (rx ry rz, r) and a height (h). */
+  shapeSize(el: XmlElement): Vec3 {
+    const a = el.attrs;
+    if (a.size !== undefined && !this.strict) {
+      const v = a.size.trim().split(/[\s,]+/).map(Number);
+      if (v.length === 1 && Number.isFinite(v[0])) {
+        this.mend(el, `size con un solo numero: un cubo di ${v[0]}`);
+        return [v[0], v[0], v[0]];
+      }
+    }
+    if (a.size !== undefined || this.strict) return this.vec(el, a.size, 'size');
+    const n = (k: string) => (a[k] !== undefined ? this.num(el, a[k], k) : undefined);
+    const rx = n('rx') ?? n('r') ?? n('radius'), ry = n('ry') ?? n('r') ?? n('radius'), rz = n('rz');
+    const h = n('h') ?? n('height');
+    const w = n('w') ?? n('width'), d = n('d') ?? n('depth');
+    const x = w ?? (rx !== undefined ? 2 * rx : undefined);
+    const y = d ?? (ry !== undefined ? 2 * ry : x);
+    const z = h ?? (rz !== undefined ? 2 * rz : undefined);
+    if (x === undefined || y === undefined || z === undefined) this.fail(el, '"size" vuole tre numeri separati da spazi: larghezza, profondità, altezza');
+    this.mend(el, `size ricavata dagli altri attributi: ${x} ${y} ${z}`);
+    return [x, y, z];
   }
 }
 
