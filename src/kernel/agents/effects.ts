@@ -23,6 +23,8 @@ export interface ActionContext {
   place: string;
   /** The wanderer transcended: the Council goes along with almost anything. */
   transcended?: boolean;
+  /** The thing has a model of its own: what changes its look can become a rule of the model (ADR-0044). */
+  shape?: boolean;
 }
 
 export interface ActionJudgement {
@@ -33,6 +35,8 @@ export interface ActionJudgement {
   label: string;
   /** Item (name) the action needs, if any. */
   requires?: string;
+  /** How the thing's look changes, if it does: the Sculptor writes it as an action of its model. */
+  shape?: string;
 }
 
 const EFFECT_SCHEMA: Schema = {
@@ -72,6 +76,7 @@ const JUDGE_SCHEMA: Schema = {
     ripetibile: { type: 'BOOLEAN', description: "vero se è un'azione sensata che si può rifare sempre allo stesso modo su cose come questa" },
     etichetta: { type: 'STRING', description: "l'azione come voce di menu, 1-3 parole (es. «Forza la serratura»)" },
     serve: { type: 'STRING', description: "oggetto che il viandante deve avere per farlo (facoltativo, tra quelli che porta)" },
+    forma: { type: 'STRING', description: "se cambia l'aspetto della cosa stessa, che resta lì: come cambia, in poche parole (facoltativo)" },
   },
   required: ['possibile', 'racconto', 'effetti', 'ripetibile', 'etichetta'],
 };
@@ -107,8 +112,12 @@ export async function judgeAction(c: Council, ctx: ActionContext): Promise<Actio
     `Terreni esistenti: ${ctx.terrains.join(', ')}. Cose evocabili: ${ctx.summonable.slice(0, 30).join(', ') || 'nessuna'}. Tabelle di bottino: ${ctx.loot.join(', ')}.`,
     `Sii fedele alla fisica: niente miracoli senza strumenti o rune; serve il giusto attrezzo per scassinare, tagliare, scavare. Se serve un oggetto che il viandante porta, mettilo in "serve".`,
     `Fai evolvere il gioco: se l'azione apre una meccanica nuova sensata (montare il cavallo sellato, remare sulla barca, indossare lo zaino), rendila possibile con uno "stato", e diventerà un'azione ripetibile della cosa.`,
-  ].join('\n\n');
-  const r = await c.ask<{ possibile: boolean; racconto: string; effetti?: unknown[]; ripetibile?: boolean; etichetta?: string; serve?: string }>('narratore', 'action.judge', prompt, JUDGE_SCHEMA, {
+    ctx.shape &&
+      `Se ciò che il viandante fa cambia l'aspetto della cosa, che resta lì (si apre, si scheggia, si accende, si spegne, si piega, si macchia), scrivi in "forma" come cambia, in poche parole: diventerà una regola della sua forma, per tutte le cose di questo tipo. In quel caso niente "distruggi"; gli effetti servono per ciò che non è aspetto (luce, fuoco, bisogni, oggetti).`,
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+  const r = await c.ask<{ possibile: boolean; racconto: string; effetti?: unknown[]; ripetibile?: boolean; etichetta?: string; serve?: string; forma?: string }>('narratore', 'action.judge', prompt, JUDGE_SCHEMA, {
     data: ctx,
     temperature: 0.5,
   });
@@ -119,6 +128,7 @@ export async function judgeAction(c: Council, ctx: ActionContext): Promise<Actio
     repeatable: !!r.ripetibile,
     label: String(r.etichetta ?? ctx.text).slice(0, 40),
     requires: r.serve ? String(r.serve) : undefined,
+    shape: ctx.shape && r.forma?.trim() ? String(r.forma).trim().slice(0, 200) : undefined,
   };
 }
 

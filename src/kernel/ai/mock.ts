@@ -109,6 +109,14 @@ export class MockModels implements Models {
       case 'model.sculpt':
         // Offline the Sculptor answers with the library's hand-written program of the class.
         return d.example ?? '<sequence values="BC" size="12 12 12"><box at="6 6 0" size="8 8 8" color="C"/></sequence>';
+      case 'model.action': {
+        // Offline the Sculptor recolours part of the most used letter (or chips it away, if it cracks).
+        const ls: Array<{ lettera: string }> = d.letters ?? [];
+        const r = d.request ?? {};
+        const chip = /scheggi|ammacc|incid|crep|romp/.test(`${r.testo} ${r.cambia}`);
+        const to = chip || ls.length < 2 ? d.background : ls[1].lettera;
+        return `<action name="${r.azione}" label="${r.etichetta}"><prl in="${ls[0]?.lettera ?? 'C'}" out="${to}" p="0.3" steps="1"/></action>`;
+      }
       case 'model.judge':
         return { voto: 7, riconoscibile: true, problemi: [], consigli: [] };
       case 'genesis.terrain':
@@ -325,6 +333,8 @@ export class MockModels implements Models {
     const has = (...xs: string[]) => ws.some((w) => xs.some((x) => w.startsWith(x)));
     const name = d.target?.name ?? 'la cosa';
     const label = String(d.text ?? '').trim().replace(/^./, (c: string) => c.toUpperCase()).slice(0, 30);
+    // A thing with a shape of its own changes it: the Sculptor will write the rule.
+    if (d.shape && has('scheggi', 'ammacc', 'incid', 'accend', 'spegn', 'dipin')) return { possibile: true, racconto: `${name} cambia sotto le tue mani.`, effetti: [{ tipo: 'bisogni', energia: -2 }], ripetibile: true, etichetta: label, forma: `${name} ${ws.find((w) => /scheggi|ammacc|incid/.test(w)) ? 'si scheggia in parte' : 'cambia colore in parte'}` };
     if (has('apr', 'forz', 'scassin')) return { possibile: true, racconto: `Fai leva su ${name} finché cede.`, effetti: [d.target?.container ? { tipo: 'apri' } : { tipo: 'contenitore', capienza: 4, bottino: 'cassa' }, { tipo: 'apri' }], ripetibile: true, etichetta: label };
     if (has('romp', 'sfond', 'spacc', 'distrugg')) return { possibile: true, racconto: `Colpisci ${name} con tutta la forza: va in pezzi.`, effetti: [{ tipo: 'distruggi' }, { tipo: 'bisogni', energia: -5 }], ripetibile: true, etichetta: label };
     if (has('bruc', 'incend', 'appicc')) return { possibile: true, racconto: `Le fiamme attecchiscono a ${name}.`, effetti: [{ tipo: 'fuoco', raggio: 1, durata: 8 }], ripetibile: true, etichetta: label };

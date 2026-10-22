@@ -363,6 +363,17 @@ giudizio è generoso (un difetto visto non abbassa il voto sotto 7): da tenere d
   nei muri; ora la struttura non conta e un pavimento affollato è meglio del lotto.
 - ADR-0043; AGENTS.md (Luogo, Mappa, Modelli, Lotti e strutture). Le ancore («vicino a…») non sono fatte.
 
+### F8 — fatto (T02 del backlog)
+- «Altro…» su una cosa con una forma sua (un programma della libreria che non sia il generico di una classe, e non
+  una figura): il Narratore dice in `forma` come cambia l'aspetto; lo Scultore scrive un'`<action>` (`sculptAction`,
+  compito `model.action`); il kernel la prova sul modello finito (`checkAction`: finisce, cambia qualcosa, lascia
+  almeno metà di ciò che è disegnato, nome nuovo) e la aggiunge al programma con `addModel` (commit «azione
+  imparata»); la cosa la fa subito, il tipo la ha nel menu e «Altro…» con lo stesso testo la fa senza chiamate.
+  Gli effetti restano per il resto (senza `distruggi`), senza un'`ActionDef` in più.
+- `tests/actions.test.ts` (3); ADR-0044; AGENTS.md (Scultore, Effetti, Menu). Diverso dal previsto: la scrive lo
+  Scultore, non l'Ingegnere (sa già il formato e le lettere); una lettera nuova nell'azione è accettata (prende il
+  colore dalla palette di MarkovJunior). Non fatto: forme degli oggetti portati e dei terreni.
+
 ### Da qui: il backlog
 Dal 22/10/2026 il lavoro va avanti in sessioni brevi, un task per sessione: ciò che resta dello step 9 è in
 [`backlog.md`](backlog.md) (T01 lotti: test e documenti; T02 azioni come regole; T03-T04 correzioni; T05 backup

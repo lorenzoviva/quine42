@@ -26,8 +26,8 @@ import { USAGE_FILE, UsageLedger } from './ai/usage';
 import { MemoryChunks, type ChunkStore } from './chunks';
 import { bodyFoot, footBlocks, Forms, InlineRunner, instanceGrid, toLocal, type Form, type FormComp, type FormRunner } from './forms';
 import { guessClass } from '../mj/classes';
-import { ModelDirector, ownModelId } from './modeldirector';
-import { DEFAULT_SCULPTORS, type SculptorModels } from './agents/sculptor';
+import { GENERIC, ModelDirector, ownModelId } from './modeldirector';
+import { categoryOf, DEFAULT_SCULPTORS, sculptAction, type SculptorModels } from './agents/sculptor';
 import { MODELS_INDEX, type ModelInfo } from './forms';
 import { Content, normName, specOf } from './content';
 import { layout, type Building } from './layout';
@@ -682,6 +682,52 @@ export class Kernel {
     this.instanceFeet.delete(id);
     this.bus.emit('form:changed', { id });
     return true;
+  }
+
+  /**
+   * The model whose shape an action may change: a thing's own program in the library (not the generic one
+   * of a class, which many kinds share), and not a figure (people and animals change by other means).
+   */
+  shapeModel(id: Id): string | undefined {
+    const fc: FormComp | undefined = this.ecs.get(id, 'form');
+    if (!fc || GENERIC.has(fc.model) || !this.forms.info(fc.model) || this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest.persona) return undefined;
+    return categoryOf(this.forms.classOf(fc.model)) === 'figura' ? undefined : fc.model;
+  }
+
+  /**
+   * An action that changes a thing's shape becomes a rule of its model (ADR-0044): the Sculptor writes an
+   * `<action>`, the kernel tries it on the model (it finishes, changes something, does not empty it), the
+   * program enters the library with it (commit) and every thing of the kind has it in its menu. This one
+   * does it now. Returns the action's name, or undefined (then only the effects happen).
+   */
+  async learnShape(id: Id, label: string, text: string, change: string): Promise<string | undefined> {
+    const model = this.shapeModel(id);
+    const xml = model && this.files[`models/${model}.xml`];
+    if (!model || !xml) return undefined;
+    const cls = this.forms.classOf(model);
+    const taken = new Set(this.forms.compiled(model)?.actions.map((a) => a.name) ?? []);
+    let name = slug(label);
+    for (let i = 2; taken.has(name); i++) name = `${slug(label)}-${i}`;
+    const nome = this.forms.info(model)?.nome ?? this.nameOf(id);
+    this.council.say('narratore', 'propone', `«${text}» cambia ${nome}: ${change}`, 'scultore', 'model.action');
+    let r;
+    try {
+      r = await sculptAction(this.council, { nome, xml, classe: cls.id, azione: name, etichetta: label, testo: text, cambia: change }, this.sculptors()[categoryOf(cls)]);
+    } catch (e) {
+      this.council.say('scultore', 'errore', `azione «${label}»: ${(e as Error).message}`, undefined, 'model.action');
+      return undefined;
+    }
+    if (!r || !this.addModel(model, r.xml, this.forms.info(model) ?? { classe: cls.id }, `azione imparata: ${label} (${model})`)) return undefined;
+    // The program changed (a new form is on its way): this instance remembers what was done to it.
+    const fc: FormComp | undefined = this.ecs.get(id, 'form');
+    if (fc) {
+      fc.done = [...(fc.done ?? []), name].slice(-32);
+      const origin = this.ecs.get(id, 'origin')?.key;
+      if (origin) this.savedForms.set(origin, [...fc.done]);
+      this.instanceFeet.delete(id);
+      this.bus.emit('form:changed', { id });
+    }
+    return name;
   }
 
   /** Where a solid thing blocks: its model's footprint, or the changed one of this instance. */
@@ -2452,6 +2498,12 @@ export class Kernel {
     const text = rawText.trim().slice(0, 200);
     if (!text) return '';
     const say = (t: string) => this.bus.emit('ui:dialog', { speaker: sub.name, text: t });
+    // What its model already knows how to do (an action of the program) happens without asking.
+    const own = sub.entity !== undefined ? this.modelActions(sub.entity).find((a) => normName(a.label) === normName(text) || normName(a.name) === normName(text)) : undefined;
+    if (own && this.doModelAction(sub.entity!, own.name)) {
+      say(`${own.label}.`);
+      return own.label;
+    }
     const learned = this.learnedActions(sub).find((a) => normName(a.label) === normName(text));
     if (learned) {
       if (learned.requires && countItem(this.inventory(), learned.requires) <= 0) {
@@ -2487,6 +2539,7 @@ export class Kernel {
         loot: Object.keys(this.content.loot),
         place: this.placeHere()?.name ?? '',
         transcended: this.exitedOnce,
+        shape: sub.entity !== undefined && !!this.shapeModel(sub.entity),
       });
     } catch (e) {
       const msg = `(il Concilio tace: ${(e as Error).message})`;
@@ -2511,6 +2564,9 @@ export class Kernel {
       v = validateEffects(j.possible ? j.effects : [], ectx);
     }
     v.effects = v.effects.filter((e) => !(e.tipo === 'consuma' && e.oggetto === sub.key));
+    // What changes the thing's look becomes a rule of its model (ADR-0044): the thing stays, changed.
+    const shaped = j.possible && j.shape && sub.entity !== undefined ? await this.learnShape(sub.entity, j.label || text, text, j.shape) : undefined;
+    if (shaped) v.effects = v.effects.filter((e) => e.tipo !== 'distruggi');
     if (v.dropped.length) this.council.say('kernel', 'scarta', `azione «${text}»: ${v.dropped.join('; ')}`, 'narratore', 'action.judge');
     this.council.say('narratore', j.possible ? 'approva' : 'obietta', `«${text}» su ${sub.name}: ${j.story}${v.effects.length ? ` [${v.effects.map((e) => e.tipo).join(', ')}]` : ''}`, undefined, 'action.judge');
     const out = j.possible ? this.applyOn(sub, v.effects) : [];
@@ -2519,8 +2575,9 @@ export class Kernel {
     const lasting = v.effects.some((e) => e.tipo !== 'messaggio');
     const creates = v.effects.some((e) => e.tipo === 'crea_oggetto' || e.tipo === 'evoca');
     const pays = v.effects.some((e) => e.tipo === 'consuma') || !!need;
-    const learn = j.possible && lasting && (!creates || pays);
-    this.recordRule({ chiave: ruleKey, testo: `«${text}» su ${sub.name}`, possibile: j.possible && v.effects.length > 0, racconto: j.story, effetti: v.effects.map((e) => e.tipo) }, !learn);
+    // A rule of the model is already in every menu of the kind: the rest happened this once.
+    const learn = j.possible && !shaped && lasting && (!creates || pays);
+    this.recordRule({ chiave: ruleKey, testo: `«${text}» su ${sub.name}`, possibile: j.possible && (v.effects.length > 0 || !!shaped), racconto: j.story, effetti: [...(shaped ? ['forma'] : []), ...v.effects.map((e) => e.tipo)] }, !learn);
     if (learn) this.learnAction(sub, { id: '', label: j.label || text, requires: need?.id, effects: v.effects });
     return j.story;
   }

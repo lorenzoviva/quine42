@@ -33,13 +33,18 @@ Senza numero («esegui il prossimo task del backlog») vale il primo `da fare` c
   sono), AGENTS.md. Diverso dal previsto: i test hanno trovato un difetto di `placeInside` (la struttura contava
   come occupante del proprio pavimento, quindi le cose `dentro` finivano sempre sulla casella del lotto), corretto.
 
-### T02 · Azioni come regole: «Altro…» scrive un'`<action>` — `da fare` (dipende da T01)
+### T02 · Azioni come regole: «Altro…» scrive un'`<action>` — `fatto` (@@HASH@@)
 - Contesto: F8 del piano. Oggi «Altro…» su un'entità produce effetti (ADR-0014).
 - Fare: se ciò che il viandante vuole fare cambia la **forma** della cosa (aprire, rompere, accendere, spegnere),
   l'Ingegnere (o lo Scultore) scrive una regola `<action>` sul programma del tipo; il kernel la prova sul modello
   (deve cambiare qualcosa, non svuotarlo, finire) e la aggiunge al programma nella libreria (commit): l'azione è
   imparata da tutto il tipo. Gli effetti restano per ciò che non è forma. Mock offline, test, ADR-0044, AGENTS.md
   (Effetti, Menu).
+- Esito: campo `forma` nel giudizio del Narratore (solo per cose con un modello proprio, non generico e non figura),
+  `sculptAction`/`checkAction` in `agents/sculptor.ts`, `Kernel.shapeModel`/`learnShape`; `tests/actions.test.ts`
+  (3), ADR-0044, AGENTS.md, diario F8. Diverso dal previsto: la scrive lo Scultore (non l'Ingegnere); una lettera
+  nuova nell'azione è accettata (colore dalla palette di MarkovJunior); non fatto per oggetti portati e terreni.
+  Non verificato nel browser con Gemini (nessuna UI nuova: la voce `modello:` del menu c'era già).
 
 ### T03 · Bug: alberi e massi dei terreni visibili oltre il cerchio — `da fare`
 - Dal to-do: «gli oggetti bloccanti (roccia, montagna) vengono spawnati anche sulla corona».

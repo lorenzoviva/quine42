@@ -13,7 +13,8 @@ export const FORME = ['sacco', 'bottiglia', 'vaso', 'cesto', 'frutto', 'pane', '
 export type Forma = (typeof FORME)[number];
 export const formaModel = (f: string) => `forma-${f}`;
 
-const GENERIC = new Set(['persona', 'animale', 'bestia', 'albero', 'cespuglio', 'roccia', 'sasso', 'oggetto', 'mobile', 'edificio', 'monumento', 'grande']);
+/** The generic programs of the classes: shared by every kind of thing without a model of its own. */
+export const GENERIC = new Set(['persona', 'animale', 'bestia', 'albero', 'cespuglio', 'roccia', 'sasso', 'oggetto', 'mobile', 'edificio', 'monumento', 'grande']);
 
 /** A model id for a module or an item of its own ("npc.mugnaio" → "npc-mugnaio"). */
 export const ownModelId = (id: string) => id.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'cosa';

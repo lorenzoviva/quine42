@@ -15,7 +15,7 @@ import { compileMjx, type MjxModel } from '../../mj/model';
 import { MJ_PALETTE } from '../../mj/palette';
 import { DEFAULT_RENDER, render, sheet } from '../../mj/photo';
 import { pngDataUrl } from '../../mj/png';
-import { runMjx } from '../../mj/run';
+import { act, runMjx } from '../../mj/run';
 import type { FileMap } from '../types';
 import type { Council } from './council';
 
@@ -266,4 +266,118 @@ export async function sculpt(c: Council, req: SculptRequest, m: SculptorModels =
   if (best.critique) c.say('artista', voto !== undefined && voto >= 7 ? 'approva' : 'obietta', `«${req.nome}»: ${voto}/10${best.critique.problemi.length ? ` — ${best.critique.problemi[0]}` : ''}`, 'scultore', 'model.judge');
   const xml = `<!-- ${req.nome}: scolpito da ${model} (step 9)${voto !== undefined ? `, voto dell'Artista ${voto}/10` : ''} -->\n${withSize(best.checked.xml.replace(/^\s*<!--[\s\S]*?-->\s*/, ''), boxOf(cls))}\n`;
   return { xml, model, voto, calls };
+}
+
+// Actions as rules (ADR-0044): what the wanderer does to a thing that changes its shape (it opens, cracks,
+// lights up) becomes an `<action>` of the thing's program, written by the Sculptor and tried by the kernel
+// on the finished model; the whole kind learns it.
+
+export interface ActionRequest {
+  /** The thing and its program (`models/<id>.xml`). */
+  nome: string;
+  xml: string;
+  classe: string;
+  /** Name of the action in the program, and its menu label. */
+  azione: string;
+  etichetta: string;
+  /** What the wanderer wrote, and how the Narrator says the look changes. */
+  testo: string;
+  cambia: string;
+}
+
+export interface ActionLetter {
+  lettera: string;
+  nome?: string;
+  colore?: string;
+  voxel: number;
+}
+
+/** The program's own box, or its class's (as the library runs it). */
+const boxFor = (xml: string, cls: AssetClass): { size?: Vec3 } => (/<(?!!)[a-z]+\b[^>]*\ssize="/i.test(xml) ? {} : { size: boxOf(cls) });
+
+/** The letters of the finished model, the drawn ones with how many voxels they colour: what an action rewrites. */
+export function actionLetters(xml: string, cls: AssetClass): { background: string; letters: ActionLetter[] } {
+  const model = compileMjx(xml, boxFor(xml, cls));
+  const g = runMjx(model, 1, { deadline: 8_000 }).grid;
+  const counts = new Map<number, number>();
+  for (const c of g.cells) counts.set(c, (counts.get(c) ?? 0) + 1);
+  const pal = model.program.palette;
+  const letters = g.alphabet
+    .map((ch, code) => ({ lettera: ch, nome: pal[ch]?.name, colore: pal[ch]?.color, hidden: pal[ch]?.hidden, voxel: counts.get(code) ?? 0 }))
+    .filter((l) => l.lettera !== '.' && l.colore && !l.hidden && l.voxel > 0)
+    .sort((a, b) => b.voxel - a.voxel)
+    .map(({ hidden: _, ...l }) => l);
+  return { background: model.background, letters };
+}
+
+/** The `<action>` in an answer, named as the kernel wants it. */
+export function extractAction(raw: string, name: string, label: string): string | undefined {
+  const m = /<action\b[^>]*>[\s\S]*?<\/action>/.exec(extractXml(raw));
+  if (!m) return undefined;
+  const attr = (v: string) => v.replace(/[<>&"]/g, '');
+  return m[0].replace(/^<action\b[^>]*>/, `<action name="${attr(name)}" label="${attr(label)}">`);
+}
+
+/**
+ * The kernel's checks on a new action: the program with it compiles; on the finished model the action
+ * finishes, changes something, and does not empty it (at least half of what is drawn stays drawn).
+ * Returns the program with the action beside the root, or the reason.
+ */
+export function checkAction(xml: string, clip: string, name: string, cls: AssetClass): { xml?: string; error?: string } {
+  if ([...xml.matchAll(/<action\s[^>]*name="([^"]*)"/g)].some((m) => m[1] === name)) return { error: `il modello ha già un'azione "${name}"` };
+  const full = `${xml.trimEnd()}\n${clip.trim()}\n`;
+  try {
+    const model = compileMjx(full, boxFor(full, cls));
+    const a = model.actions.find((x) => x.name === name);
+    if (!a) return { error: `manca <action name="${name}">` };
+    const r = runMjx(model, 1, { deadline: 8_000 });
+    if (!r.finished) return { error: 'il modello non finisce più in 8 secondi' };
+    const g = r.grid;
+    const pal = model.program.palette;
+    const drawn = (cells: Uint8Array, alphabet: string[]) => cells.reduce((n, c) => n + (alphabet[c] !== '.' && pal[alphabet[c]]?.color && !pal[alphabet[c]]?.hidden ? 1 : 0), 0);
+    const before = new Uint8Array(g.cells);
+    const beforeDrawn = drawn(before, g.alphabet);
+    const res = act(g, a, 1);
+    if (!res.finished) return { error: "l'azione non finisce: ogni regola che si ripete deve avere steps, o cambiare lettere che poi non trova più" };
+    let changed = 0;
+    for (let i = 0; i < before.length; i++) if (before[i] !== g.cells[i]) changed++;
+    if (!changed) return { error: "l'azione non cambia niente: le lettere in \"in\" devono esserci nel modello finito (sono quelle dell'elenco)" };
+    const afterDrawn = drawn(g.cells, g.alphabet);
+    if (afterDrawn < beforeDrawn * 0.5) return { error: `l'azione svuota il modello (restano ${afterDrawn} voxel su ${beforeDrawn}): deve cambiarne una parte, non cancellarlo` };
+    return { xml: full };
+  } catch (e) {
+    return { error: e instanceof Mj3Error ? e.message : `errore: ${(e as Error).message}` };
+  }
+}
+
+/** The Sculptor writes an action for a model; undefined if none passes the kernel's checks. */
+export async function sculptAction(c: Council, req: ActionRequest, model: string, retries = 2): Promise<{ xml: string; calls: number } | undefined> {
+  const cls = classOf(req.classe) ?? classOf('oggetto')!;
+  let info: ReturnType<typeof actionLetters>;
+  try {
+    info = actionLetters(req.xml, cls);
+  } catch {
+    return undefined;
+  }
+  const letters = info.letters.map((l) => `${l.lettera} (${l.nome ?? 'senza nome'}, #${l.colore?.replace('#', '')}, ${l.voxel} voxel)`).join(', ');
+  const prompt = [
+    `Il viandante, davanti a «${req.nome}», fa: «${req.testo}». Il Concilio ha deciso che il suo aspetto cambia così: ${req.cambia}.`,
+    `Scrivi UNA regola <action name="${req.azione}" label="${req.etichetta}">nodi</action> per il programma qui sotto: i nodi girano una volta sul modello finito e lo cambiano (come la porta che si apre: <action name="apri" label="Apri la porta"><all><rule in="O" out="h"/></all></action>).`,
+    `Usa SOLO le lettere del modello finito (la cella vuota è ${info.background}): ${letters}. Cambia una parte del modello, non svuotarlo; metti steps sulle regole che potrebbero ripetersi all'infinito. Varrà per tutte le cose di questo tipo.`,
+    `Il programma:\n${req.xml.slice(0, 8000)}`,
+    'Rispondi con la sola <action>.',
+  ].join('\n\n');
+  let last: { clip?: string; error?: string } = {};
+  let calls = 0;
+  for (let i = 0; i <= retries; i++) {
+    const p = i === 0 ? prompt : `${prompt}\n\nHai scritto:\n${last.clip ?? '(niente)'}\nNon va: ${last.error}\nCorreggila e rispondi con la sola <action>.`;
+    calls++;
+    const raw = await c.write('scultore', 'model.action', p, { role: sculptorRole(c.files), model, temperature: 0.4, data: { request: req, background: info.background, letters: info.letters } });
+    const clip = extractAction(raw, req.azione, req.etichetta);
+    const checked = clip ? checkAction(req.xml, clip, req.azione, cls) : { error: 'manca <action>…</action>' };
+    if (checked.xml) return { xml: checked.xml, calls };
+    last = { clip: clip ?? raw.slice(0, 400), error: checked.error };
+    c.say('kernel', 'scarta', `azione «${req.etichetta}» di «${req.nome}»: ${checked.error?.slice(0, 160)}`, 'scultore', 'model.action');
+  }
+  return undefined;
 }

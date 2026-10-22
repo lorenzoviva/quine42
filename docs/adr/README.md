@@ -48,5 +48,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0041](0041-asset-come-programmi.md) | Gli asset sono programmi MarkovJunior (libreria models/, forme, semi); collisione dai voxel; azioni come regole | accettato |
 | [0042](0042-scultore-e-artista.md) | Lo Scultore nel Concilio (per classe, programmi indipendenti, revisione), l'Artista giudica le foto | accettato |
 | [0043](0043-spazio-a-scale-lotti-strutture.md) | Lo spazio a scale: i lotti del piano diventano strutture (modelli girati verso la porta), dentro è sul pavimento del modello, una struttura importante per zona | accettato |
+| [0044](0044-azioni-come-regole-sul-modello.md) | Le azioni sono regole sul modello: «Altro…» che cambia l'aspetto fa scrivere allo Scultore un'`<action>`, provata dal kernel e imparata dal tipo; gli effetti per il resto | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.
