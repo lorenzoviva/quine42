@@ -116,7 +116,7 @@ diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
   Misura su `valmora`: 57 persone, 215 legami, 39 legami gatto–umano di parentela o mestiere, 4 non simmetrici,
   1 verso nessuno, molti nomi quasi uguali: i casi di prova di T10-T12.
 
-### T08 · Il canone delle rune — `fatto` (COMMIT)
+### T08 · Il canone delle rune — `fatto` (`dc311a7`)
 - Un documento dell'universo (`world/canone.md`) che dice cosa sono le rune per chi vive nel mondo: aspetto, dove
   si trovano, che restano dove sono finché qualcuno non le raccoglie, cosa fanno le magiche, cosa nessuno sa. Lo
   ricevono il Narratore e l'Arbitro in ogni compito narrativo; regola: nessuna trama inventa comportamenti nuovi
