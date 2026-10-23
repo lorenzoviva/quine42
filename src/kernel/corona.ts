@@ -6,6 +6,7 @@
 // changes. Interiors live in their own region of real space, far from the ring; doors teleport.
 // Deterministic: same files → same studio.
 
+import { footBlocks, toLocal, type Form } from './forms';
 import type { FileMap } from './types';
 
 export type FileLook = 'libro' | 'cristallo' | 'pergamena' | 'tavoletta';
@@ -85,7 +86,23 @@ export interface Building {
   door: { x: number; y: number };
   cells: Set<string>;
   floors: Floor[];
+  /**
+   * The building as a model (T20, ADR-0049): `models/corona-<id>.xml`, its middle (real space) and how it is
+   * turned (its front towards the avenue). Without one, `cells` is a plain block.
+   */
+  structure?: CampusStructure;
 }
+
+export interface CampusStructure {
+  model: string;
+  x: number;
+  y: number;
+  yaw: number;
+  form: Form;
+}
+
+/** The model of a building of the campus, if the library has one. */
+export const campusModel = (id: string) => `corona-${id}`;
 
 export interface CoronaCell {
   kind: 'floor' | 'building' | 'door' | 'room' | 'wall' | 'item';
@@ -343,9 +360,69 @@ export class Corona {
   free(x: number, y: number): boolean {
     const c = this.at(Math.floor(x), Math.floor(y));
     if (!c) return false;
+    // Outside, a building that is a model blocks with its voxels (and only with them).
+    if (c.kind === 'floor' || c.kind === 'building' || c.kind === 'door') {
+      const s = c.building ? this.building(c.building)?.structure : undefined;
+      if (s) return !this.structureBlocks(s, x, y);
+    }
     if (c.kind === 'floor' || c.kind === 'door' || c.kind === 'room') return true;
     if (c.kind === 'item') return ['exit', 'up', 'down', 'portal'].includes(c.item!.kind);
     return false;
+  }
+
+  private structureBlocks(s: CampusStructure, x: number, y: number): boolean {
+    const [lx, lz] = toLocal(x - s.x, y - s.y, s.yaw);
+    return Math.abs(lx) < s.form.reach + 1 && Math.abs(lz) < s.form.reach + 1 && footBlocks(s.form, s.form.foot!, lx, lz);
+  }
+
+  /**
+   * A building of the campus becomes its model (T20): its front (y large in MarkovJunior) towards the circle, the
+   * door (the letter named `porta`, or the middle of the front) on the avenue where the block's door was; its
+   * cells are the ones its voxels cover, the rest of the block is lawn again.
+   */
+  placeStructure(id: string, model: string, form: Form): CampusStructure | undefined {
+    const b = this.building(id);
+    const r = form.result;
+    if (!b || !r || !form.foot) return undefined;
+    const g = r.grid, XY = g.X * g.Y;
+    const door = new Set(g.alphabet.map((sym, i) => (r.palette[sym]?.name === 'porta' ? i : -1)).filter((i) => i >= 0));
+    let sx = 0, sy = 0, n = 0, front = 0;
+    for (let i = 0; i < g.cells.length; i++) {
+      if (!door.has(g.cells[i])) continue;
+      sx += i % g.X;
+      sy += Math.floor((i % XY) / g.X);
+      n++;
+    }
+    for (let i = 0; i < XY; i++) if (form.foot[i]) front = Math.max(front, Math.floor(i / g.X));
+    // The door's voxels, or the middle of the front; one step outside it is where one stands to go in.
+    const [dx, dy] = n ? [sx / n, sy / n] : [g.X / 2, front];
+    const lx = (dx + 0.5 - g.X / 2) / form.vpt, lz = (Math.max(dy, front) + 1 - g.Y / 2) / form.vpt + 0.5;
+    const mid = (b.from + b.to) / 2;
+    const yaw = -mid;
+    const c = Math.cos(yaw), sn = Math.sin(yaw);
+    const R = this.radius + CAMPUS.door;
+    const px = Math.sin(mid) * R + 0.5, py = -Math.cos(mid) * R + 0.5;
+    const s: CampusStructure = { model, x: px - (lx * c + lz * sn), y: py - (-lx * sn + lz * c), yaw, form };
+    b.structure = s;
+    b.door = { x: Math.floor(px), y: Math.floor(py) };
+    // Its cells: those it blocks; what was block and is not covered goes back to the ground of the campus.
+    const total = this.buildings.length;
+    for (const key of b.cells) {
+      const [x, y] = key.split(',').map(Number);
+      this.exterior.set(key, { kind: 'floor', ground: groundAt(Math.hypot(x + 0.5, y + 0.5), this.radius, angleOf(x, y), total), building: b.id, folder: b.id });
+    }
+    b.cells = new Set();
+    const reach = Math.ceil(form.reach) + 1;
+    for (let y = Math.floor(s.y) - reach; y <= Math.floor(s.y) + reach; y++)
+      for (let x = Math.floor(s.x) - reach; x <= Math.floor(s.x) + reach; x++) {
+        const key = `${x},${y}`;
+        const cell = this.exterior.get(key);
+        if (!cell || cell.kind !== 'floor' || cell.building !== b.id || !this.structureBlocks(s, x + 0.5, y + 0.5)) continue;
+        b.cells.add(key);
+        this.exterior.set(key, { kind: 'building', building: b.id });
+      }
+    this.exterior.set(`${b.door.x},${b.door.y}`, { kind: 'door', building: b.id });
+    return s;
   }
 
   /** Where a file stands (real-space cell), if it is in the studio. */

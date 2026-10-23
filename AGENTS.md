@@ -196,7 +196,9 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   «riscolpisci»), Studio del Cartografo (terreni), bacheche con le modifiche recenti (che brillano).
   Fuori, il campus è un anello profondo 36 caselle oltre il cerchio (`CAMPUS` in `corona.ts`): il viale con la linea al
   neon, le porte, un blocco di 16 × ~20 caselle per edificio (lo spazio di un modello), vicoli tra i settori, prati,
-  il bordo luminoso; sopra ogni porta un'insegna al neon con il nome. Dentro, le **vetrine** (T21, `SHOWCASES` in
+  il bordo luminoso; sopra ogni porta un'insegna al neon con il nome. Un edificio con un programma suo (`models/corona-<id>.xml`,
+  8 voxel per casella, ADR-0049) è quel modello: davanti al viale, la porta sulla lettera `porta`, collisione dai voxel
+  (`placeStructure`, `kernel.placeCampus`); senza, il blocco. Dentro, le **vetrine** (T21, `SHOWCASES` in
   `corona.ts`): uno schermo (Torre della Magia: ogni runa magica e ogni combinazione nota, nei loro colori; il pannello dice l'effetto in parole, `describeEffect` in `validator.ts`), un silos (Studio dei personaggi: ogni tipo e dopo di lui i suoi individui, ciascuno col seme che ha nel mondo, che fluttuano in un liquido viscoso; il pannello dice l'individuo e il modulo), una stampante
   (Laboratorio delle cose, Magazzino degli oggetti) con «<» «>» ai lati; E o un clic (`kernel.clickStudio`) cambiano ciò
   che mostrano (`showcaseOf`, `stepShowcase`) o aprono il pannello (`ui:showcase`: modello, modulo, individui).
@@ -245,7 +247,8 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   bagliore nell'alfa e un bloom leggero prende solo ciò che brilla (`src/render/bloom.ts`); nelle foto non prende ombra.
 - **Modelli** (ADR-0041): ogni cosa ha un programma della libreria `models/` (`appearance.model`, `ItemDef.model`,
   `TileDef.model`; senza, il generico della sua classe; gli oggetti senza modello il generico `oggetto` nel loro
-  colore); un'istanza è un seme (pochi per tipo). `src/kernel/forms.ts`: programma + seme → griglia, impronta,
+  colore); un'istanza è un seme (pochi per tipo). Densità: 20 voxel per casella, o la `vpt` della voce in `models/index.json`
+  (ADR-0049; la forma la porta in `Form.vpt`). `src/kernel/forms.ts`: programma + seme → griglia, impronta,
   pavimenti, azioni (in Node le esegue il kernel, nel browser i worker, che fanno anche le mesh). Componente `form`
   `{model, seed, yaw, tint, done, wanted}` (`wanted`: il modello suo, indossato appena lo Scultore lo scrive). Le cose solide bloccano con l'impronta dei loro voxel; le `<action>` del modello
   sono nel menu dell'entità e restano fatte (`stato.json → forme`). Persone e animali camminano con gli arti, la
@@ -362,6 +365,6 @@ Prossimi passi (il dettaglio è nel backlog):
 1. Coerenza del mondo: canone delle rune, prompt narrativi più semplici, società e trame coerenti, il grafo del
    mondo come contesto degli agenti (T07-T13, fatti).
 2. Grafica e controlli 3D: voxel luminosi (T14, fatto), telecamera che ruota (T15, fatto), terreno con le altezze (T16, fatto), lotti in piano (T17, fatto).
-3. La corona più grande, con gli esterni e gli interni come modelli.
+3. La corona più grande (T18, fatto), con gli esterni come modelli (motore: T20, fatto; i programmi: T31) e gli interni.
 4. Ancore del piano («vicino a…»), forme degli oggetti portati e dei terreni che cambiano con «Altro…».
 5. Multiplayer con un master: piano e punti aperti in [`docs/plans/multiplayer.md`](docs/plans/multiplayer.md).

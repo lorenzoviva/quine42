@@ -287,12 +287,21 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   casella** (la sandbox lo regge già: un cilindro 112 × 112 × 160 gira in ~250 ms); la porta è la lettera `name="porta"`.
   Nessun ADR: la decisione la attua (e la registra) T20.
 
-### T20 · Gli esterni della corona come modelli — `da fare` (dipende da T18, T19)
+### T20 · Gli esterni della corona come modelli — `fatto` (COMMIT)
 - Ogni edificio della corona usa il suo programma (`models/corona-<id>.xml`) con insegna neon; collisione dai
   voxel; porta dove il modello la mette.
 - Dai programmi di T19 (in `lab/mjx/models/corona-*.xml`): la libreria deve avere una densità per modello (quelli della
   corona sono a 8 voxel per casella, `VPT = 20` è fisso in `src/kernel/forms.ts`), con un ADR; la porta del campus va
   sulla lettera `name="porta"`, il davanti del modello (y grande) verso il viale.
+- Esito: ADR-0049. `models/index.json` → `vpt` per modello (4-40, senza 20): `Form.vpt`, e impronta, pavimenti, portata,
+  collisione, `floorAt`, `structureAt`, punti interni e mesh la usano. `corona.ts`: `Building.structure`, `campusModel`
+  (`corona-<id>`), `placeStructure` (girato di `-mid`, la porta sul baricentro della lettera `porta` e mezza casella davanti
+  dove era la porta del blocco, caselle coperte `building`, il resto prato), `free` con i voxel. `kernel.placeCampus`
+  (dopo `corona.build` e a ogni `forms.version`). `corona3d.ts`: la mesh del modello al posto del blocco e dell'insegna,
+  una soglia luminosa; il renderer rifà l'anello quando cambia ciò che il campus indossa (`campusKey`). `tests/campus.test.ts`
+  (3). Nel browser (offline, un modello di prova solo in memoria): posato con la porta verso il viale, il centro blocca,
+  E sulla porta entra nella Torre della Magia. Diverso dal previsto: **i programmi di T19 non esistono ancora** (il prompt
+  va eseguito dall'autore in Gemini CLI); qui c'è il motore, e portarli nel gioco è T31.
 
 ### T21 · La vetrina con selettore — `fatto` (`0021163`)
 - Un meccanismo comune agli interni: un oggetto (schermo, silos, stampante) con «<» «>» ai lati che sceglie
@@ -355,6 +364,18 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 
 ### T28 · Il Nucleo, dentro — `da fare` (dipende da T12)
 - Il grafo del mondo navigabile in UI.
+
+### T31 · Gli otto edifici della corona nella libreria — `in attesa` (dipende da T20 e dai programmi di T19)
+- Contesto: T20 ha fatto il motore (ADR-0049); mancano i programmi. **Per l'autore**: esegui il prompt di
+  [`docs/prompts/gemini-strutture-corona.md`](../prompts/gemini-strutture-corona.md) in Gemini CLI, una struttura per
+  sessione (`magia`, `persone`, `cose`, `oggetti`, `luoghi`, `sistemi`, `nucleo`, `concilio`), poi rimetti questo task
+  `da fare` (bastano anche alcune).
+- Fare: copiare `lab/mjx/models/corona-<id>.xml` in `universe/models/` con la voce in `models/index.json`
+  (`classe: edificio`, `nome`, `autore`, `voto`, `vpt: 8`); controllare che girino in Node sotto il limite di tempo, che la
+  porta sia raggiungibile dal viale (un test per edificio presente) e che il modello stia nel suo settore; escludere i
+  `corona-*` dal `ModelDirector` e dal «riscolpisci» della Galleria se lo Scultore non deve toccarli (o deciderlo con
+  l'autore); verifica nel browser da quattro lati, di giorno e di notte.
+- Fatto quando: gli edifici scritti stanno nel campus, test verdi, commit.
 
 ## Multiplayer
 

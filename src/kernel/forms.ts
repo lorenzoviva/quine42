@@ -17,8 +17,14 @@ import type { FileMap } from './types';
 
 export const MODELS_DIR = 'models/';
 export const MODELS_INDEX = 'models/index.json';
-/** Voxels per tile (ADR-0032): a person is 30 voxels tall, a tile 20. */
+/** Voxels per tile (ADR-0032): a person is 30 voxels tall, a tile 20. A model may say its own (ADR-0049). */
 export const VPT = 20;
+
+/** The density a model's index entry asks for, if it is a sane one (the corona's buildings: 8). */
+export function vptOf(info: ModelInfo | undefined): number {
+  const v = info?.vpt;
+  return typeof v === 'number' && Number.isInteger(v) && v >= 4 && v <= 40 ? v : VPT;
+}
 
 export interface ModelInfo {
   /** Asset class (src/mj/classes.ts): its box and how it moves. */
@@ -30,6 +36,8 @@ export interface ModelInfo {
   voto?: number;
   /** A letter of the program that takes the colour of the thing (generic models: one program, many colours). */
   tinta?: string;
+  /** Voxels per tile, if not the usual 20 (ADR-0049): big models are written coarser. */
+  vpt?: number;
 }
 
 /** What a thing's look is: which program, which seed, which way it faces, what has been done to it. */
@@ -89,13 +97,15 @@ export interface Form {
   cls: AssetClass;
   /** Half the diagonal of the footprint, in tiles: the reach of its collision. */
   reach: number;
+  /** Voxels per tile of this model (ADR-0049). */
+  vpt: number;
 }
 
 /** How many different seeds a kind of thing has in the world (instances share them: fewer meshes). */
 const SEEDS: Record<string, number> = { albero: 3, cespuglio: 3, roccia: 3, sasso: 3, persona: 8, animale: 4, bestia: 4, edificio: 1, grande: 1, monumento: 2 };
 
-/** A step one walks up without noticing (a doorstep, a floor): 0.2 tiles. */
-const STEP = Math.round(0.2 * VPT);
+/** A step one walks up without noticing (a doorstep, a floor): 0.2 tiles, in voxels of a density. */
+const stepOf = (vpt: number) => Math.round(0.2 * vpt);
 
 /**
  * The box a program runs in: its own `size` if it says one (structures decide on a coarse grid and `map`
@@ -107,7 +117,7 @@ function sizeFor(xml: string, cls: AssetClass): Vec3 | undefined {
 }
 
 /** Where a body cannot go: voxel columns solid between a step and a head. */
-export const bodyFoot = (g: VoxelGrid, palette: Record<string, PaletteEntry>) => footprint(g, palette, STEP + 1, Math.ceil(0.7 * VPT));
+export const bodyFoot = (g: VoxelGrid, palette: Record<string, PaletteEntry>, vpt = VPT) => footprint(g, palette, stepOf(vpt) + 1, Math.ceil(0.7 * vpt));
 
 /** Runs programs in this thread (Node, tests): no meshes. */
 export class InlineRunner implements FormRunner {
@@ -201,16 +211,17 @@ export class Forms {
     if (f) return f;
     const cls = this.classOf(model);
     const size = sizeFor(xml, cls);
-    f = { key, model, seed, status: 'pending', cls, reach: 0 };
+    const vpt = vptOf(info);
+    f = { key, model, seed, status: 'pending', cls, reach: 0, vpt };
     this.forms.set(key, f);
     const form = f;
     void this.runner
-      .run({ xml, seed, size, tint: tinta, rig: cls.animation === 'camminata', sway: cls.animation === 'vento', vpt: VPT })
+      .run({ xml, seed, size, tint: tinta, rig: cls.animation === 'camminata', sway: cls.animation === 'vento', vpt })
       .then((result) => {
         form.result = result;
-        form.foot = bodyFoot(result.grid, result.palette);
-        form.floor = floors(result.grid, result.palette, STEP);
-        form.reach = Math.hypot(result.grid.X, result.grid.Y) / 2 / VPT;
+        form.foot = bodyFoot(result.grid, result.palette, vpt);
+        form.floor = floors(result.grid, result.palette, stepOf(vpt));
+        form.reach = Math.hypot(result.grid.X, result.grid.Y) / 2 / vpt;
         form.status = 'ready';
         this.version++;
         this.onReady?.(form);
@@ -263,7 +274,7 @@ export function instanceGrid(forms: Forms, f: Form, done: string[]): VoxelGrid &
 /** Whether a point (tile units, relative to the instance's centre, already turned into its frame) is blocked. */
 export function footBlocks(f: Form, foot: Uint8Array, lx: number, lz: number): boolean {
   const g = f.result!.grid;
-  const vx = Math.floor(lx * VPT + g.X / 2), vy = Math.floor(lz * VPT + g.Y / 2);
+  const vx = Math.floor(lx * f.vpt + g.X / 2), vy = Math.floor(lz * f.vpt + g.Y / 2);
   return vx >= 0 && vy >= 0 && vx < g.X && vy < g.Y && !!foot[vx + vy * g.X];
 }
 

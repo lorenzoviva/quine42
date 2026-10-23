@@ -4,7 +4,7 @@
 
 import * as THREE from 'three';
 import type { Kernel } from '../kernel/kernel';
-import { instanceGrid, VPT, type Form, type FormComp } from '../kernel/forms';
+import { instanceGrid, type Form, type FormComp } from '../kernel/forms';
 import { meshVoxels, type MeshData } from '../mj/mesh';
 import { casts, MAT } from './materials';
 import type { Limb } from './things';
@@ -49,7 +49,7 @@ export function changedBody(k: Kernel, f: Form, done: string[]): THREE.BufferGeo
   let g = changed.get(key);
   if (!g) {
     const grid = instanceGrid(k.forms, f, done);
-    changed.set(key, (g = geometry(meshVoxels(grid, f.result!.palette, { vpt: VPT }))));
+    changed.set(key, (g = geometry(meshVoxels(grid, f.result!.palette, { vpt: f.vpt }))));
   }
   return g;
 }

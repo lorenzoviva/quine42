@@ -39,7 +39,8 @@ export function buildCoronaRing(k: Kernel): THREE.Group {
       if (!cell) continue;
       const d = Math.hypot(x + 0.5, y + 0.5);
       const b = cell.building ? c.building(cell.building) : undefined;
-      if (cell.kind === 'floor') {
+      // A building that is a model (T20): its cells are ground, the model stands on them.
+      if (cell.kind === 'floor' || (b?.structure && cell.kind !== 'door')) {
         const [a, b2] = GROUND[cell.ground ?? 'prato'];
         lit.quad([x, 0, y], [x, 0, y + 1], [x + 1, 0, y + 1], [x + 1, 0, y], [0, 1, 0], rgbOf((x + y) & 1 ? a : b2));
         if (cell.ground === 'viale' && Math.abs(d - (R + CAMPUS.line)) < 0.5) glow.box(x, 0.005, y + 0.45, x + 1, 0.02, y + 0.55, rgbOf('#05d9e8', 0.7));
@@ -52,6 +53,10 @@ export function buildCoronaRing(k: Kernel): THREE.Group {
         edgeStrip(glow, x, y, TOWER_H, open, rgbOf(b.color));
         edgeStrip(glow, x, y, 0.06, open, rgbOf(b.color, 0.6));
         if ((x * 13 + y * 7) % 9 === 0 && (open.s || open.n || open.w || open.e)) glow.box(x + 0.35, 1.2 + (x % 3) * 0.5, y + 0.35, x + 0.65, 1.5 + (x % 3) * 0.5, y + 0.65, rgbOf(b.color, 0.8));
+      } else if (cell.kind === 'door' && b?.structure) {
+        // Where one goes in: a glowing threshold in front of the model's door.
+        lit.quad([x, 0, y], [x, 0, y + 1], [x + 1, 0, y + 1], [x + 1, 0, y], [0, 1, 0], rgbOf('#1a0a14'));
+        glow.box(x + 0.15, 0.005, y + 0.15, x + 0.85, 0.02, y + 0.85, rgbOf(b.color, 0.5));
       } else if (cell.kind === 'door' && b) {
         lit.quad([x, 0, y], [x, 0, y + 1], [x + 1, 0, y + 1], [x + 1, 0, y], [0, 1, 0], rgbOf('#1a0a14'));
         glow.box(x + 0.1, 0, y + 0.45, x + 0.18, 1.5, y + 0.55, rgbOf('#ff2a6d'));
@@ -63,9 +68,25 @@ export function buildCoronaRing(k: Kernel): THREE.Group {
   const m = new THREE.Mesh(lit.geometry(), MAT.corona);
   m.receiveShadow = m.castShadow = true;
   g.add(m, new THREE.Mesh(glow.geometry(), MAT.glow));
-  for (const b of c.buildings) g.add(neonSign(b, R));
+  for (const b of c.buildings) {
+    const s = b.structure;
+    // A model has its own sign (the letter named `insegna`); a plain block gets one in neon over its door.
+    const geo = s && geoOf(s.form);
+    if (!s || !geo) {
+      g.add(neonSign(b, R));
+      continue;
+    }
+    const mesh = new THREE.Mesh(geo.body, MAT.corona);
+    mesh.castShadow = mesh.receiveShadow = true;
+    mesh.position.set(s.x, 0, s.y);
+    mesh.rotation.y = s.yaw;
+    g.add(mesh);
+  }
   return g;
 }
+
+/** What the campus wears (T20): the ring is built again when a building becomes its model. */
+export const campusKey = (k: Kernel) => k.corona.buildings.map((b) => (b.structure && geoOf(b.structure.form) ? b.structure.form.key : '')).join('|');
 
 /** The building's name in neon above its door, facing the avenue (and, on its back, the lawns). */
 function neonSign(b: Building, R: number): THREE.Group {

@@ -8,7 +8,7 @@ import { Faults } from './faults';
 import { Sandbox, type Host } from './sandbox';
 import { apiErrors, describeEffect, validateEffects, Validator } from './validator';
 import { Repo, type KeyValueStore } from './repo';
-import { Corona, folderOf, type CoronaCell, type Exhibit, type ShowcaseSource, type StudioItem } from './corona';
+import { Corona, campusModel, folderOf, type CoronaCell, type Exhibit, type ShowcaseSource, type StudioItem } from './corona';
 import { Archive } from './archive';
 import { bibleBreaks, cleanBible, metaBreak } from './fourthwall';
 import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, placeRegion, readAtlas, regionAt, writeAtlas, type Region } from './atlas';
@@ -289,6 +289,8 @@ export class Kernel {
   zone: 'sim' | 'corona' | 'studio' = 'sim';
   /** What each showcase of the studio shows: building → index in its entries (not saved). */
   private showcaseIndex = new Map<string, number>();
+  /** The library's version when the campus last looked for its buildings' models (T20). */
+  private campusVersion = -1;
   private showcaseCache = new Map<ShowcaseSource, { files: FileMap; entries: ShowcaseEntry[] }>();
   exitedOnce = false;
   /** The wanderer died: the session is over until they continue or start again. */
@@ -655,6 +657,7 @@ export class Kernel {
     else if (!this.terrain || changed.has(this.terrain.manifest.id) || opts.reset) for (const ch of this.chunks.values()) if (ch.stage === 'draft') this.regenerateDraft(ch);
 
     this.corona.build(files, this.exhibits(files), this.terrainExhibits());
+    this.placeCampus();
     // Things that wait for a model of their own wear it as soon as the library has it.
     for (const id of this.ecs.query('form')) {
       const fc: FormComp = this.ecs.get(id, 'form');
@@ -771,7 +774,7 @@ export class Kernel {
     const c = this.instanceFeet.get(id);
     if (c?.key === key) return c.foot;
     const r = f.result!;
-    const foot = bodyFoot(instanceGrid(this.forms, f, fc.done), r.palette);
+    const foot = bodyFoot(instanceGrid(this.forms, f, fc.done), r.palette, f.vpt);
     this.instanceFeet.set(id, { key, foot });
     return foot;
   }
@@ -1337,7 +1340,7 @@ export class Kernel {
     for (let vy = 6; vy < g.Y - 6; vy += 4)
       for (let vx = 6; vx < g.X - 6; vx += 4) {
         if (!clear(vx, vy)) continue;
-        const lx = (vx + 0.5 - g.X / 2) / 20, lz = (vy + 0.5 - g.Y / 2) / 20;
+        const lx = (vx + 0.5 - g.X / 2) / f.vpt, lz = (vy + 0.5 - g.Y / 2) / f.vpt;
         out.push({ x: p.x + lx * c + lz * s, y: p.y - lx * s + lz * c });
       }
     return out;
@@ -1400,10 +1403,10 @@ export class Kernel {
     for (const s of this.solidForms.get(`${Math.floor(x)},${Math.floor(y)}`) ?? []) {
       const [lx, lz] = toLocal(x - s.x, y - s.y, s.yaw);
       const g = s.form.result!.grid;
-      const vx = Math.floor(lx * 20 + g.X / 2), vy = Math.floor(lz * 20 + g.Y / 2);
+      const vx = Math.floor(lx * s.form.vpt + g.X / 2), vy = Math.floor(lz * s.form.vpt + g.Y / 2);
       const f = vx >= 0 && vy >= 0 && vx < g.X && vy < g.Y ? (s.form.floor?.[vx + vy * g.X] ?? 0) : 0;
       // A model stands on the ground under its middle.
-      if (f) h = Math.max(h, this.groundAt(s.x, s.y) + f / 20);
+      if (f) h = Math.max(h, this.groundAt(s.x, s.y) + f / s.form.vpt);
     }
     return h;
   }
@@ -1414,7 +1417,7 @@ export class Kernel {
       if (!this.ecs.has(s.id, 'struttura')) continue;
       const [lx, lz] = toLocal(x - s.x, y - s.y, s.yaw);
       const g = s.form.result!.grid;
-      const vx = Math.floor(lx * 20 + g.X / 2), vy = Math.floor(lz * 20 + g.Y / 2);
+      const vx = Math.floor(lx * s.form.vpt + g.X / 2), vy = Math.floor(lz * s.form.vpt + g.Y / 2);
       if (vx >= 0 && vy >= 0 && vx < g.X && vy < g.Y && s.form.floor?.[vx + vy * g.X]) return s.id;
     }
     return undefined;
@@ -2818,6 +2821,20 @@ export class Kernel {
     if (it.kind === 'showcase') this.openShowcase(it.target!);
     else this.stepShowcase(it.target!, it.kind === 'prev' ? -1 : 1);
     return true;
+  }
+
+  /**
+   * The buildings of the campus that have a model in the library (`models/corona-<id>.xml`) wear it as soon as it
+   * has run (T20, ADR-0049): its voxels block, its door is where one goes in; the others stay plain blocks.
+   */
+  placeCampus(): void {
+    this.campusVersion = this.forms.version;
+    for (const b of this.corona.buildings) {
+      const model = campusModel(b.id);
+      if (b.structure || !this.forms.info(model)) continue;
+      const f = this.forms.ready(model, 1);
+      if (f) this.corona.placeStructure(b.id, model, f);
+    }
   }
 
   /** What a source of showcases has to show, in a stable order. */
@@ -4645,6 +4662,7 @@ export class Kernel {
     const pl = this.ecs.get(this.playerId, 'player');
     if (pl) pl.passo = Math.max(0.2, Math.min(4, passo));
     this.tickCount++;
+    if (this.campusVersion !== this.forms.version) this.placeCampus();
     this.archive.tick(dt);
     if (!this.corona.isInterior(this.playerPos().x)) this.lastWorld = { ...this.playerCarpet() };
     if (this.zone === 'corona') this.archive.meet(this.playerPos().x, this.playerPos().y);

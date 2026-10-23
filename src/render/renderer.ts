@@ -9,7 +9,7 @@
 import * as THREE from 'three';
 import type { Kernel } from '../kernel/kernel';
 import { Bloom } from './bloom';
-import { Avatars, buildCoronaRing, buildRoom, buildShowcase } from './corona3d';
+import { Avatars, buildCoronaRing, buildRoom, buildShowcase, campusKey } from './corona3d';
 import { CUT, U } from './materials';
 import { Overlay } from './overlay';
 import { buildChunk, chunkSig, disposeChunk, tileForms, type ChunkView } from './terrain';
@@ -43,6 +43,8 @@ export class Renderer {
   private lights: Lights;
   private avatars: Avatars;
   private ring?: THREE.Group;
+  /** What the campus wore when the ring was built (its buildings' models). */
+  private ringKey = '';
   private rooms = new Map<string, { group: THREE.Group; globe?: THREE.Object3D; version: number }>();
   /** What the showcases of the studio show (T21), by building: rebuilt when the choice or the models change. */
   private shows = new Map<string, { key: string; group: THREE.Group; spin?: THREE.Object3D; bubbles?: THREE.Object3D[]; silo: boolean }>();
@@ -201,7 +203,15 @@ export class Renderer {
     this.wanderer.update(k, dt, this.t);
 
     // The corona and the studio.
-    if (revealed && !this.ring) this.scene.add((this.ring = buildCoronaRing(k)));
+    const campus = revealed ? campusKey(k) : this.ringKey;
+    if (this.ring && campus !== this.ringKey) {
+      this.scene.remove(this.ring);
+      this.ring = undefined;
+    }
+    if (revealed && !this.ring) {
+      this.scene.add((this.ring = buildCoronaRing(k)));
+      this.ringKey = campus;
+    }
     if (this.ring) this.ring.visible = revealed && !interior;
     for (const [key, r] of this.rooms) r.group.visible = !!studio && key === `${studio.building.id}#${studio.floor.index}`;
     if (studio) {
