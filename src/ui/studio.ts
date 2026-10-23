@@ -1,13 +1,19 @@
 // Panels of the studio (the corona): a thing on show seen up close — its model, or the terrain as the Artist
-// shows it, with «Riscolpisci» — and a building's notice board, with the latest changes to its files.
+// shows it, with «Riscolpisci» — a building's notice board, with the latest changes to its files, and what a
+// showcase shows (T21), with its arrows.
 
-import type { Kernel } from '../kernel/kernel';
+import type { Kernel, ShowcaseEntry } from '../kernel/kernel';
 import type { StudioItem } from '../kernel/corona';
 import { $, el } from './dom';
 import { icons } from './hud';
 
+/** A showcase and what it shows (the kernel's `ui:showcase` and `studio:showcase`). */
+type Shown = { building: string; name: string; entry: ShowcaseEntry; index: number; count: number };
+
 export class StudioPanel {
   private root = $('#studio');
+  /** The building whose showcase the panel shows, while it is open. */
+  private shown?: string;
   onClose?: () => void;
   onEdit?: (path: string) => void;
 
@@ -16,6 +22,11 @@ export class StudioPanel {
   ) {
     k.bus.on('ui:exhibit', ({ item, building }: { item: StudioItem; building: string }) => this.exhibit(item, building));
     k.bus.on('ui:board', ({ building, name }: { building: string; name: string }) => this.board(building, name));
+    k.bus.on('ui:showcase', (e: Shown) => this.showcase(e));
+    // The arrows pressed with the panel open: it follows.
+    k.bus.on('studio:showcase', (e: Shown) => {
+      if (this.isOpen && this.shown === e.building) this.showcase({ ...e, name: this.k.corona.building(e.building)?.name ?? e.building });
+    });
     window.addEventListener(
       'keydown',
       (e) => {
@@ -37,6 +48,7 @@ export class StudioPanel {
   private show(...children: Array<Node | string>): void {
     const close = el('button', { class: 'close' }, '×');
     close.onclick = () => this.close();
+    this.shown = undefined;
     this.root.replaceChildren(el('div', { class: 'window' }, close, ...children));
     this.root.hidden = false;
     this.onClose?.();
@@ -44,7 +56,38 @@ export class StudioPanel {
 
   close(): void {
     this.root.hidden = true;
+    this.shown = undefined;
     this.onClose?.();
+  }
+
+  /** What a showcase shows: its model (or its runes), what is known of it, «<» «>» to change it. */
+  showcase(e: Shown): void {
+    const { entry } = e;
+    const frame = el('div', { class: 'frame' }, el('div', { class: 'swatch', style: `background:${entry.color ?? '#333'}` }));
+    if (entry.runes?.length)
+      frame.replaceChildren(el('div', { class: 'runes', style: `color:${entry.color ?? '#c48aff'}` }, entry.runes.map((t) => this.k.content.get(`rune:${t}`)?.glyph ?? t).join(' ')));
+    else if (entry.model)
+      void icons.model?.(entry.model, entry.tint).then((src) => {
+        if (src && this.shown === e.building) frame.replaceChildren(el('img', { src, alt: entry.label }));
+      });
+    const step = (d: number, text: string) => {
+      const b = el('button', {}, text);
+      b.onclick = () => this.k.stepShowcase(e.building, d);
+      return b;
+    };
+    const open = el('button', {}, 'Apri il file');
+    open.onclick = () => {
+      this.close();
+      if (entry.path) this.onEdit?.(entry.path);
+    };
+    this.show(
+      el('div', { class: 'title' }, entry.label),
+      el('div', { class: 'note' }, `${e.name} — ${e.index + 1} di ${e.count}`),
+      el('div', { class: 'row showcase' }, step(-1, '<'), frame, step(1, '>')),
+      ...entry.facts.map(([what, text]) => el('div', { class: 'item' }, el('span', { class: 'path' }, what), ` ${text}`)),
+      ...(entry.path ? [el('div', { class: 'row' }, open)] : []),
+    );
+    this.shown = e.building;
   }
 
   exhibit(item: StudioItem, building: string): void {

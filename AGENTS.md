@@ -196,7 +196,10 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   «riscolpisci»), Studio del Cartografo (terreni), bacheche con le modifiche recenti (che brillano).
   Fuori, il campus è un anello profondo 36 caselle oltre il cerchio (`CAMPUS` in `corona.ts`): il viale con la linea al
   neon, le porte, un blocco di 16 × ~20 caselle per edificio (lo spazio di un modello), vicoli tra i settori, prati,
-  il bordo luminoso; sopra ogni porta un'insegna al neon con il nome.
+  il bordo luminoso; sopra ogni porta un'insegna al neon con il nome. Dentro, le **vetrine** (T21, `SHOWCASES` in
+  `corona.ts`): uno schermo (Torre della Magia: rune e incantesimi), un silos (Studio dei personaggi), una stampante
+  (Laboratorio delle cose, Magazzino degli oggetti) con «<» «>» ai lati; E o un clic (`kernel.clickStudio`) cambiano ciò
+  che mostrano (`showcaseOf`, `stepShowcase`) o aprono il pannello (`ui:showcase`: modello, modulo, individui).
 - **Geografia** (ADR-0023): biomi nel generatore (`s j o k n`), 20 ambienti nel seme, nodo `stamp` di
   MarkovJunior, atlante di regioni (`world/atlas.json`), direzioni note a NPC e Cartografo.
 - **Stati e meccaniche** (ADR-0026): effetti `stato`/`togli_stato` (velocità, peso, luce, durata) per ciò che

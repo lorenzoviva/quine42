@@ -3,10 +3,11 @@
 // under a neon sign with the building's name, a glowing edge), and inside each tower its rooms
 // (24 × 15 cells, several floors): neon grid on the floor, walls with a strip of light, racks of files,
 // the gallery's models on show, screens, teleports, stairs, the Council's round table with the universe
-// turning above it. Built from the kernel's cells (src/kernel/corona.ts): logic stays in the kernel.
+// turning above it, the showcases with their arrows (T21). Built from the kernel's cells
+// (src/kernel/corona.ts): logic stays in the kernel.
 
 import * as THREE from 'three';
-import type { Kernel } from '../kernel/kernel';
+import type { Kernel, ShowcaseEntry } from '../kernel/kernel';
 import { CAMPUS, ROOM_H, ROOM_W, type Building, type Floor, type StudioItem } from '../kernel/corona';
 import { Builder } from './terrain';
 import { MAT, rgbOf } from './materials';
@@ -246,6 +247,15 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
     case 'table':
       roundTable(lit, glow, x, z + 0.5, col);
       break;
+    case 'showcase':
+      showcaseBody(lit, glow, it, col);
+      break;
+    case 'prev':
+    case 'next':
+      // A pillar with a glowing button on top (its arrow is drawn with what the showcase shows).
+      lit.box(x + 0.25, 0, z + 0.3, x + 0.75, 0.9, z + 0.7, rgbOf('#141420'));
+      glow.box(x + 0.22, 0.9, z + 0.27, x + 0.78, 0.96, z + 0.73, rgbOf(col, 0.8));
+      break;
     case 'desk':
       glow.box(x + 0.1, 0.004, z + 0.45, x + 0.9, 0.012, z + 0.55, rgbOf(col, 0.6));
       break;
@@ -260,6 +270,110 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
       glow.box(x + 0.1, 1.12, z + 0.45, x + 0.9, 1.2, z + 0.55, rgbOf('#ff2a6d'));
       break;
   }
+}
+
+/** The device of a showcase: a screen, a silo (its glass is drawn with what it shows), a 3D printer. */
+function showcaseBody(lit: Builder, glow: Builder, it: StudioItem, col: string): void {
+  const x = it.x, z = it.y, w = it.w ?? 1;
+  const dark = rgbOf('#10101a');
+  const c = rgbOf(col);
+  if (it.device === 'schermo') {
+    lit.box(x + 0.1, 0, z + 0.35, x + w - 0.1, 2.3, z + 0.7, dark);
+    glow.box(x + 0.1, 2.3, z + 0.35, x + w - 0.1, 2.36, z + 0.7, c);
+    glow.box(x + 0.1, 0.2, z + 0.7, x + w - 0.1, 0.25, z + 0.72, c);
+    return;
+  }
+  if (it.device === 'silos') {
+    const cx = x + w / 2, cz = z + 0.5;
+    lit.box(cx - 1.1, 0, cz - 0.5, cx + 1.1, 0.3, cz + 0.5, dark);
+    lit.box(cx - 1.1, 2.6, cz - 0.5, cx + 1.1, 2.85, cz + 0.5, dark);
+    glow.box(cx - 1.1, 0.3, cz + 0.45, cx + 1.1, 0.34, cz + 0.5, c);
+    glow.box(cx - 1.1, 2.56, cz + 0.45, cx + 1.1, 2.6, cz + 0.5, c);
+    return;
+  }
+  // The printer: four posts, a beam with the head, a glowing bed.
+  for (const px of [x + 0.05, x + w - 0.2]) for (const pz of [z + 0.05, z + 0.8]) lit.box(px, 0, pz, px + 0.15, 2.2, pz + 0.15, dark);
+  lit.box(x + 0.05, 2.2, z + 0.05, x + w - 0.05, 2.35, z + 0.95, dark);
+  glow.box(x + w / 2 - 0.12, 1.95, z + 0.38, x + w / 2 + 0.12, 2.2, z + 0.62, c);
+  lit.box(x + 0.2, 0, z + 0.15, x + w - 0.2, 0.2, z + 0.85, rgbOf('#1a1e2e'));
+  glow.box(x + 0.25, 0.2, z + 0.2, x + w - 0.25, 0.22, z + 0.8, rgbOf(col, 0.35));
+}
+
+/** Text on a glowing plane (canvas), w wide in cells. */
+function textPlane(lines: string[], color: string, w: number, h: number, big = false): THREE.Mesh {
+  const W = 512, H = Math.round((512 * h) / w);
+  const cv = document.createElement('canvas');
+  cv.width = W;
+  cv.height = H;
+  const ctx = cv.getContext('2d')!;
+  ctx.fillStyle = 'rgba(6,6,12,0.9)';
+  ctx.fillRect(0, 0, W, H);
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 14;
+  ctx.fillStyle = '#ffffff';
+  lines.forEach((t, i) => {
+    const size = big && i === 0 ? Math.min(H * 0.5, (W * 1.6) / Math.max(1, t.length)) : Math.min(H * (big ? 0.16 : 0.62), (W * 1.7) / Math.max(1, t.length));
+    ctx.font = `bold ${Math.floor(size)}px system-ui, sans-serif`;
+    ctx.fillText(t, W / 2, big && i === 0 ? H * 0.42 : H * (big ? 0.82 : 0.5) + (i - (big ? 1 : 0)) * size * 1.1);
+  });
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tex, toneMapped: false, transparent: true }));
+}
+
+/** An arrow button's sign, floating above its pillar. */
+function arrowSign(x: number, z: number, text: string, color: string): THREE.Mesh {
+  const m = textPlane([text], color, 0.5, 0.5, true);
+  m.position.set(x + 0.5, 1.3, z + 0.72);
+  return m;
+}
+
+/**
+ * What a showcase shows now: the model, made to fit and turning (in the silo, floating in its liquid), or
+ * the runes on the screen; its name under it and the arrows at its sides. `spin` is what turns.
+ */
+export function buildShowcase(k: Kernel, it: StudioItem, entry: ShowcaseEntry, color: string): { group: THREE.Group; spin?: THREE.Object3D } {
+  const g = new THREE.Group();
+  const w = it.w ?? 1;
+  const cx = it.x + w / 2, cz = it.y + 0.5;
+  g.add(arrowSign(it.x - 1, it.y, '<', color), arrowSign(it.x + w, it.y, '>', color));
+  const name = textPlane([entry.label], color, w - 0.2, 0.32);
+  name.position.set(cx, it.device === 'schermo' ? 0.45 : 0.17, cz + (it.device === 'schermo' ? 0.73 : 0.52));
+  g.add(name);
+  if (it.device === 'silos') {
+    const glass = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.95, 2.26, 28, 1, true), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.18, side: THREE.DoubleSide, depthWrite: false, toneMapped: false }));
+    glass.position.set(cx, 0.3 + 1.13, cz);
+    g.add(glass);
+  }
+  if (entry.runes?.length) {
+    const glyphs = entry.runes.map((t) => k.content.get(`rune:${t}`)?.glyph ?? t).join(' ');
+    const screen = textPlane([glyphs, entry.runes.join(' · ')], entry.color ?? color, w - 0.4, 1.6, true);
+    screen.position.set(cx, 1.35, cz + 0.22);
+    g.add(screen);
+    return { group: g };
+  }
+  const f = entry.model ? k.forms.ready(entry.model, 1, entry.tint) : undefined;
+  const geo = f && geoOf(f);
+  if (!geo) return { group: g };
+  geo.body.computeBoundingBox();
+  const size = new THREE.Vector3();
+  const box = geo.body.boundingBox!;
+  box.getSize(size);
+  // Things too big (structures) are brought down to the device: at most its width and 1.8 high.
+  const room = it.device === 'schermo' ? [w - 0.6, 1.6] : it.device === 'silos' ? [1.4, 1.8] : [w - 0.7, 1.6];
+  const s = Math.min(room[0] / Math.max(size.x, size.z, 0.01), room[1] / Math.max(size.y, 0.01), 1.5);
+  const m = new THREE.Mesh(geo.body, MAT.corona);
+  m.castShadow = true;
+  m.scale.setScalar(s);
+  const centre = box.getCenter(new THREE.Vector3());
+  m.position.set(-centre.x * s, -box.min.y * s, -centre.z * s);
+  const spin = new THREE.Group();
+  spin.add(m);
+  spin.position.set(cx, it.device === 'silos' ? 0.5 : it.device === 'stampante' ? 0.22 : 0.6, cz);
+  g.add(spin);
+  return { group: g, spin };
 }
 
 /** The Council's people in the corona and in the studio: robed figures in their colour. */

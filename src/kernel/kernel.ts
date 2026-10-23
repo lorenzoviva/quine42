@@ -8,7 +8,7 @@ import { Faults } from './faults';
 import { Sandbox, type Host } from './sandbox';
 import { apiErrors, validateEffects, Validator } from './validator';
 import { Repo, type KeyValueStore } from './repo';
-import { Corona, type CoronaCell, type Exhibit, type StudioItem } from './corona';
+import { Corona, folderOf, type CoronaCell, type Exhibit, type ShowcaseSource, type StudioItem } from './corona';
 import { Archive } from './archive';
 import { bibleBreaks, cleanBible, metaBreak } from './fourthwall';
 import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, placeRegion, readAtlas, regionAt, writeAtlas, type Region } from './atlas';
@@ -120,6 +120,20 @@ export interface ActionOption {
 }
 
 /** A decision of the Council, kept as a rule of the world. */
+/** One thing a showcase of the studio can show (T21): its model, its file, what is known of it. */
+export interface ShowcaseEntry {
+  id: string;
+  label: string;
+  model?: string;
+  tint?: string;
+  color?: string;
+  /** Runes on show (a magic rune, or the sequence of a spell). */
+  runes?: string[];
+  path?: string;
+  /** What the panel says of it, in order: [what, value]. */
+  facts: Array<[string, string]>;
+}
+
 export interface Rule {
   chiave: string;
   testo: string;
@@ -271,6 +285,9 @@ export class Kernel {
   playerId: Id = 0;
   time = 0;
   zone: 'sim' | 'corona' | 'studio' = 'sim';
+  /** What each showcase of the studio shows: building → index in its entries (not saved). */
+  private showcaseIndex = new Map<string, number>();
+  private showcaseCache = new Map<ShowcaseSource, { files: FileMap; entries: ShowcaseEntry[] }>();
   exitedOnce = false;
   /** The wanderer died: the session is over until they continue or start again. */
   dead = false;
@@ -2745,6 +2762,13 @@ export class Kernel {
       case 'atlas':
         this.bus.emit('ui:atlas', {});
         return;
+      case 'showcase':
+        this.openShowcase(it.target!);
+        return;
+      case 'prev':
+      case 'next':
+        this.stepShowcase(it.target!, it.kind === 'prev' ? -1 : 1);
+        return;
       case 'table':
         this.message("Al centro del tavolo, sullo schermo rotondo, l'universo gira. Ognuno del Concilio ha alle spalle il teletrasporto per la sua sala.");
         return;
@@ -2772,6 +2796,103 @@ export class Kernel {
         this.updateZone();
         return;
     }
+  }
+
+  /**
+   * A left click in the studio (T21): on a showcase or its arrows, within reach, the same as E there.
+   * The click falls on the ground, often behind something tall: the nearest of them to that point counts.
+   * Returns whether it did something.
+   */
+  clickStudio(rx: number, ry: number): boolean {
+    if (this.zone !== 'studio') return false;
+    const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next']);
+    if (!it) return false;
+    const p = this.playerPos();
+    const cx = Math.max(it.x, Math.min(it.x + (it.w ?? 1) - 1, Math.floor(p.x)));
+    if (Math.hypot(cx + 0.5 - p.x, it.y + 0.5 - p.y) > 4) {
+      this.message('Troppo lontano: avvicinati.');
+      return false;
+    }
+    if (it.kind === 'showcase') this.openShowcase(it.target!);
+    else this.stepShowcase(it.target!, it.kind === 'prev' ? -1 : 1);
+    return true;
+  }
+
+  /** What a source of showcases has to show, in a stable order. */
+  showcaseEntries(source: ShowcaseSource): ShowcaseEntry[] {
+    const hit = this.showcaseCache.get(source);
+    if (hit?.files === this.files) return hit.entries;
+    const entries = this.listShowcase(source);
+    this.showcaseCache.set(source, { files: this.files, entries });
+    return entries;
+  }
+
+  private listShowcase(source: ShowcaseSource): ShowcaseEntry[] {
+    const out: ShowcaseEntry[] = [];
+    if (source === 'rune') {
+      for (const [token, r] of Object.entries(this.content.runes))
+        out.push({ id: `rune:${token}`, label: `Runa ${r.name} («${token}»)`, color: r.color, runes: [token], path: 'modules/magic.runes/manifest.json', facts: [['Elemento', r.element], ['Effetto', r.description]] });
+      for (const [seq, sp] of Object.entries(this.content.spells))
+        out.push({ id: `spell:${seq}`, label: sp.name, runes: seq.split(' '), path: this.files['modules/magic.spells/manifest.json'] ? 'modules/magic.spells/manifest.json' : 'modules/magic.runes/manifest.json', facts: [['Rune', seq], ['Effetto', sp.description], ['Mana', String(sp.cost)]] });
+      return out;
+    }
+    if (source === 'oggetti') {
+      for (const d of [...this.content.items.values()].sort((a, b) => a.id.localeCompare(b.id))) {
+        const path = `modules/${this.content.itemSource.get(d.id) ?? d.module ?? ''}/manifest.json`;
+        out.push({ id: `item:${d.id}`, label: d.name, model: this.forms.resolve(d.model, 'oggetto'), tint: d.color, color: d.color, path: this.files[path] ? path : undefined, facts: [['Oggetto', d.id], ['Categoria', d.category], ['Descrizione', d.description], ...(d.aspetto ? [['Aspetto', d.aspetto] as [string, string]] : []), ['Peso', String(d.weight)]] });
+      }
+      return out;
+    }
+    // People and things: the modules of their building that have a look.
+    const people = readPeople(this.files).persone;
+    for (const path of Object.keys(this.files).sort()) {
+      if (!/^modules\/[^/]+\/manifest\.json$/.test(path) || folderOf(path) !== source) continue;
+      let man: Manifest;
+      try {
+        man = JSON.parse(this.files[path]);
+      } catch {
+        continue;
+      }
+      if (!man.appearance) continue;
+      const facts: Array<[string, string]> = [['Modulo', man.id]];
+      if (man.description) facts.push(['Descrizione', man.description]);
+      if (man.appearance.aspetto) facts.push(['Aspetto', man.appearance.aspetto]);
+      if (man.context) facts.push(['Contesto', man.context]);
+      if (man.lore) facts.push(['Storia', man.lore]);
+      if (man.persona) facts.push(['Carattere', man.persona]);
+      if (source === 'persone') {
+        const who = people.filter((x) => x.tipo === man.id).map((x) => `${x.nome} (${x.mestiere})`);
+        if (who.length) facts.push(['Individui', who.join(', ')]);
+      }
+      out.push({ id: `module:${man.id}`, label: man.name, model: this.formFor(man, man.id).model, color: man.appearance.color, path, facts });
+    }
+    return out;
+  }
+
+  /** What a showcase (by building) shows now, with its place in the list. */
+  showcaseOf(building: string): { entry: ShowcaseEntry; index: number; count: number } | undefined {
+    const source = this.corona.building(building)?.floors[0]?.items.find((i) => i.kind === 'showcase')?.source;
+    const all = source ? this.showcaseEntries(source) : [];
+    if (!all.length) return undefined;
+    const index = (((this.showcaseIndex.get(building) ?? 0) % all.length) + all.length) % all.length;
+    return { entry: all[index], index, count: all.length };
+  }
+
+  /** «<» «>»: the showcase shows the previous or the next thing. */
+  stepShowcase(building: string, d: number): void {
+    const n = this.showcaseOf(building)?.count ?? 0;
+    if (!n) return this.message('La vetrina è vuota.');
+    this.showcaseIndex.set(building, ((((this.showcaseIndex.get(building) ?? 0) + d) % n) + n) % n);
+    const now = this.showcaseOf(building)!;
+    this.message(`${now.entry.label} (${now.index + 1}/${now.count})`);
+    this.bus.emit('studio:showcase', { building, ...now });
+  }
+
+  /** The showcase seen up close: a panel with what it shows. */
+  openShowcase(building: string): void {
+    const now = this.showcaseOf(building);
+    if (!now) return this.message('La vetrina è vuota.');
+    this.bus.emit('ui:showcase', { building, name: this.corona.building(building)?.name ?? building, ...now });
   }
 
   /** The latest changes to the files of a building (for its notice board). */

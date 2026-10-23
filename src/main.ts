@@ -100,6 +100,12 @@ async function main() {
   // The camera turns by quarter turns (, and .) or with the middle button dragged (ADR-0047).
   kernel.input.onTurn = () => renderer.fitView();
   $<HTMLCanvasElement>('#world').addEventListener('mousedown', (e) => {
+    // A left click in the studio: a showcase or its arrows (T21).
+    if (e.button === 0) {
+      const r = renderer.toReal(e.offsetX, e.offsetY);
+      kernel.clickStudio(r.x, r.y);
+      return;
+    }
     if (e.button !== 1) return;
     e.preventDefault();
     renderer.dragStart(e.clientX);

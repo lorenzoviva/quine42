@@ -9,7 +9,7 @@
 import * as THREE from 'three';
 import type { Kernel } from '../kernel/kernel';
 import { Bloom } from './bloom';
-import { Avatars, buildCoronaRing, buildRoom } from './corona3d';
+import { Avatars, buildCoronaRing, buildRoom, buildShowcase } from './corona3d';
 import { CUT, U } from './materials';
 import { Overlay } from './overlay';
 import { buildChunk, chunkSig, disposeChunk, tileForms, type ChunkView } from './terrain';
@@ -44,6 +44,8 @@ export class Renderer {
   private avatars: Avatars;
   private ring?: THREE.Group;
   private rooms = new Map<string, { group: THREE.Group; globe?: THREE.Object3D; version: number }>();
+  /** What the showcases of the studio show (T21), by building: rebuilt when the choice or the models change. */
+  private shows = new Map<string, { key: string; group: THREE.Group; spin?: THREE.Object3D; silo: boolean }>();
   private overlay: Overlay;
   private flash = new THREE.PointLight(0xfff2c0, 0, 8, 1.4);
   private flashUntil = 0;
@@ -101,6 +103,8 @@ export class Renderer {
     this.ring = undefined;
     for (const r of this.rooms.values()) this.scene.remove(r.group);
     this.rooms.clear();
+    for (const v of this.shows.values()) this.scene.remove(v.group);
+    this.shows.clear();
     this.things.clear();
   }
 
@@ -215,6 +219,26 @@ export class Renderer {
       r.group.visible = true;
       if (r.globe) r.globe.rotation.y = this.t * 0.4;
     }
+    for (const [id, v] of this.shows) v.group.visible = studio?.building.id === id && studio.floor.index === 0;
+    const show = studio?.floor.items.find((i) => i.kind === 'showcase');
+    if (studio && show) {
+      const now = k.showcaseOf(studio.building.id);
+      const key = now ? `${now.entry.id}|${k.forms.version}` : '';
+      let v = this.shows.get(studio.building.id);
+      if (v?.key !== key) {
+        if (v) this.scene.remove(v.group);
+        v = undefined;
+        if (now) {
+          v = { key, ...buildShowcase(k, show, now.entry, studio.building.color), silo: show.device === 'silos' };
+          this.shows.set(studio.building.id, v);
+          this.scene.add(v.group);
+        } else this.shows.delete(studio.building.id);
+      }
+      if (v?.spin) {
+        v.spin.rotation.y = this.t * 0.6;
+        if (v.silo) v.spin.position.y = 0.55 + Math.sin(this.t * 1.3) * 0.12;
+      }
+    }
     this.avatars.update(k, this.t);
 
     // Light: the day outside, a dim neon light in the studio.
@@ -318,7 +342,9 @@ export class Renderer {
       if (near) o.cell(near.x, near.y, '#ffcf5c', undefined, 0.42);
       const fl = studio.floor;
       o.title(`${studio.building.name.toUpperCase()}${studio.building.floors.length > 1 ? `  ·  PIANO ${fl.index + 1}/${studio.building.floors.length}` : ''}`, studio.building.color);
-      if (near && near.kind !== 'desk') o.caption(`E: ${near.kind === 'file' ? `apri ${near.label}` : near.kind === 'sprite' || near.kind === 'tile' ? `guarda «${near.label}»` : near.label}`);
+      const shown = near?.kind === 'showcase' ? k.showcaseOf(near.target!) : undefined;
+      if (shown) o.caption(`E: guarda «${shown.entry.label}» (${shown.index + 1}/${shown.count})`);
+      else if (near && near.kind !== 'desk') o.caption(`E: ${near.kind === 'file' ? `apri ${near.label}` : near.kind === 'sprite' || near.kind === 'tile' ? `guarda «${near.label}»` : near.label}`);
     }
     if (this.mouse) {
       const r = this.toReal(this.mouse.x, this.mouse.y);

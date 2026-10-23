@@ -9,7 +9,24 @@
 import type { FileMap } from './types';
 
 export type FileLook = 'libro' | 'cristallo' | 'pergamena' | 'tavoletta';
-export type ItemKind = 'file' | 'sprite' | 'tile' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas';
+export type ItemKind = 'file' | 'sprite' | 'tile' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next';
+/** What a showcase shows (T21): the runes and spells, the people, the things, the objects of the packs. */
+export type ShowcaseSource = 'rune' | 'persone' | 'cose' | 'oggetti';
+/** How a showcase looks: a screen, a silo of liquid, a 3D printer. */
+export type ShowcaseDevice = 'schermo' | 'silos' | 'stampante';
+
+/**
+ * The showcases of the interiors (T21): a device with «<» «>» at its sides that picks what it shows; E or a
+ * click on it opens a panel with what it is. One per building, on the ground floor.
+ */
+export const SHOWCASES: Record<string, { source: ShowcaseSource; device: ShowcaseDevice; label: string }> = {
+  magia: { source: 'rune', device: 'schermo', label: 'lo schermo delle rune' },
+  persone: { source: 'persone', device: 'silos', label: 'il silos dei personaggi' },
+  cose: { source: 'cose', device: 'stampante', label: 'la stampante delle cose' },
+  oggetti: { source: 'oggetti', device: 'stampante', label: 'la stampante degli oggetti' },
+};
+/** Where a showcase stands in its room (left cell, row) and how wide it is; the arrows are at its sides. */
+export const SHOWCASE_AT = { x: 15, y: 11, w: 3 };
 
 /** The Council at its round table: who sits where, and the room behind each seat's teleport. */
 export const SEATS: Array<{ agent: string; room: string }> = [
@@ -41,6 +58,9 @@ export interface StudioItem {
   target?: string;
   /** Width in cells (screens are wide). */
   w?: number;
+  /** A showcase: what it shows and how it looks; its arrows point to it with `target` (the building). */
+  source?: ShowcaseSource;
+  device?: ShowcaseDevice;
 }
 
 export interface Floor {
@@ -244,6 +264,13 @@ export class Corona {
           for (let d = 0; d < 3; d++) placed.push({ kind: 'desk', label: 'postazione', x: ox + 4 + d * 2, y: oy + ROOM_H - 4 });
           placed.push({ kind: 'portal', label: 'teletrasporto: Sala del Concilio', target: 'concilio', x: ox + ROOM_W - 3, y: oy + ROOM_H - 3 });
           if (id === 'cartografia') placed.push({ kind: 'atlas', label: "l'atlante del mondo", x: ox + ROOM_W - 7, y: oy + ROOM_H - 3, w: 3 });
+          const show = SHOWCASES[id];
+          if (show) {
+            const { x, y, w } = SHOWCASE_AT;
+            placed.push({ kind: 'showcase', label: show.label, source: show.source, device: show.device, target: id, x: ox + x, y: oy + y, w });
+            placed.push({ kind: 'prev', label: '«<» il precedente', target: id, x: ox + x - 1, y: oy + y });
+            placed.push({ kind: 'next', label: '«>» il successivo', target: id, x: ox + x + w, y: oy + y });
+          }
         }
         if (f === 0) placed.push({ kind: 'exit', label: 'uscita', x: ox + Math.floor(ROOM_W / 2), y: oy + ROOM_H - 1 });
         if (f < nFloors - 1) placed.push({ kind: 'up', label: `scala al piano ${f + 2}`, x: ox + ROOM_W - 2, y: oy + 1 });
