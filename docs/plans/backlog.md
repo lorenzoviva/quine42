@@ -466,7 +466,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   meccaniche altrove ci finisce solo un prefisso sconosciuto). Diverso dal previsto: la proposta numerava gli interni
   T32-T34, ma T33-T45 sono del multiplayer, quindi T46-T48.
 
-### T46 · La Direzione, dentro: la sala operativa — `in corso` (T46a fatto; il prossimo è T46b)
+### T46 · La Direzione, dentro: la sala operativa — `in corso` (T46a e T46b fatti; il prossimo è T46c)
 - Contesto: [`corona-proposte.md`](corona-proposte.md) §3.1 (approvata il 23/10). Oggi dentro la Direzione (`universo`,
   squadra dell'Arbitro, oro `ffcf5c`) ci sono solo gli scaffali di `universe.json` e le scrivanie. Gli apparecchi seguono
   le vetrine di T21-T28 (`SHOWCASES`/`GRAPH_AT` in `corona.ts`, `showcaseOf`/`stepShowcase`/`clickStudio` in
@@ -485,12 +485,22 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   (entità, poi `origine`, poi `luogo`), la missione «vai a» sul luogo o la regione nominati. Nessun ADR (deciso in T32). Verifica:
   build + preview, `aurora` offline, pannello aperto con E, nessun errore in console. Nel seme offline le regioni sono tante e
   vicine: i loro nomi sulla mappa del pannello si sovrappongono (da rivedere con T46b se disturba).
-- **T46b · la parete di schermi**: sul davanti, larga quanto la sala, tre campi: a sinistra la **linea del tempo** dei
+- **T46b · la parete di schermi — `fatto`** (commit «Corona (T46b)»): sul davanti, larga quanto la sala, tre campi: a sinistra la **linea del tempo** dei
   commit (`repo.log()`, una pellicola; «<» «>» la scorrono, il clic dice cosa è cambiato e chi l'ha voluto; non torna
   indietro: `R` resta l'unico modo); al centro il **registro dal vivo** (`kernel.feed()`: chi lavora, a cosa, con quale
   modello); a destra il **quadro dei costi** (`kernel.usage` per agente e compito, in dollari, i budget di
   `universe.json → ai` come fondo scala). Le scritte sullo strato 2D o in texture (decidere misurando i fotogrammi).
   Test: la pellicola si sposta e si ferma ai bordi; il quadro somma come il pannello del Concilio.
+  Esito: `src/kernel/screens.ts` (funzioni pure: `timeline`, `whoWanted`, `changedFiles`, `liveFeed`, `costBoard`), `kernel.screens()`,
+  `stepTimeline`, `openScreen`; voci `parete` (`WALL_AT` in `corona.ts`: 7 + 6 + 7 caselle contro la parete di fondo, frecce sotto la
+  pellicola); `UsageLedger.sessionByAgent` e `lastCall` (il registro dei consumi teneva solo modelli e compiti: gli agenti solo per la
+  sessione, il file non cambia); `ModelDirector.count`; disegno in `src/render/screens.ts`, pannello `ui:screens` in `studio.ts`. Test
+  in `tests/screens.test.ts`. Diverso dal previsto: «sul davanti» letto come la parete che si ha davanti entrando (quella di fondo,
+  rivolta alla camera: sulla parete della porta si vedrebbe il retro). Scritte in texture, deciso misurando: in piedi gli schermi erano
+  un terzo della loro altezza (la camera guarda da 54°), inclinati di 0,6 rad all'indietro quasi interi; i fotogrammi restano a
+  33,4 ms come nel Nucleo e nello Studio dei personaggi, `screens()` costa 0,04 ms. Lo schermo si misura dal piede (il bordo
+  anteriore della sua cella): a pari distanza vinceva lo scaffale dietro. Budget come numeri di chiamate/forge (quelli di
+  `universe.json` non sono dollari). Verifica: build + preview, `aurora` offline, i tre pannelli, «<» «>», nessun errore in console.
 - **T46c · allerta e postazioni**: una fascia luminosa sotto il soffitto verde/ambra/rossa (guasti aperti, rifiuti del
   validatore nell'ultima ora, budget oltre l'80 %), il motivo nel pannello; le scrivanie della squadra dell'Arbitro in file
   davanti agli schermi, chi lavora nel registro si vede alla sua console. Test: i tre livelli dai tre casi.

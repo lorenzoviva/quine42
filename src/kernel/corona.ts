@@ -8,9 +8,10 @@
 
 import { footBlocks, toLocal, type Form } from './forms';
 import type { FileMap } from './types';
+import { SCREEN_NAME, type ScreenField } from './screens';
 
 export type FileLook = 'libro' | 'cristallo' | 'pergamena' | 'tavoletta';
-export type ItemKind = 'file' | 'sprite' | 'tile' | 'layout' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'less' | 'more' | 'grafo' | 'situazione';
+export type ItemKind = 'file' | 'sprite' | 'tile' | 'layout' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'less' | 'more' | 'grafo' | 'situazione' | 'parete';
 /** What a showcase shows (T21): the runes and spells, the people, the things, the objects of the packs, the places planned (T26). */
 export type ShowcaseSource = 'rune' | 'persone' | 'cose' | 'oggetti' | 'luoghi';
 /** How a showcase looks: a screen, a silo of liquid, a 3D printer, a holographic table with a place in miniature. */
@@ -45,6 +46,16 @@ export const GRAPH_AT = { x: 15, y: 10, w: 3, h: 3 };
  * the operations under way on the world seen from above (`Kernel.situation`), E or a click opens them in a panel.
  */
 export const SITUATION_AT = { x: 14, y: 10, w: 5, h: 3 };
+/**
+ * The Direction's wall of screens (T46b): against the back wall, the one in front of whoever comes in, as wide as the room,
+ * in three fields (`ScreenField`, src/kernel/screens.ts); «<» «>» stand under the ends of the timeline.
+ */
+export const WALL_AT: Array<{ field: ScreenField; x: number; w: number }> = [
+  { field: 'tempo', x: 2, w: 7 },
+  { field: 'registro', x: 9, w: 6 },
+  { field: 'costi', x: 15, w: 7 },
+];
+export const WALL_Y = 1;
 /**
  * The Office of places is also the Cartographer's studio (T26c, ADR-0051): the atlas on a table against its back wall,
  * the terrains in the sample room, which starts on its own floor after the files; after them, from a shelf of their own, a
@@ -320,7 +331,13 @@ export class Corona {
           placed.push({ kind: 'portal', label: 'teletrasporto: Sala del Concilio', target: 'concilio', x: ox + ROOM_W - 3, y: oy + ROOM_H - 3 });
           if (id === SAMPLES) placed.push({ kind: 'atlas', label: "l'atlante del mondo", ...ATLAS_AT, x: ox + ATLAS_AT.x, y: oy + ATLAS_AT.y });
           if (id === 'nucleo') placed.push({ kind: 'grafo', label: 'il grafo del mondo', ...GRAPH_AT, x: ox + GRAPH_AT.x, y: oy + GRAPH_AT.y });
-          if (id === 'universo') placed.push({ kind: 'situazione', label: 'il tavolo della situazione', ...SITUATION_AT, x: ox + SITUATION_AT.x, y: oy + SITUATION_AT.y });
+          if (id === 'universo') {
+            placed.push({ kind: 'situazione', label: 'il tavolo della situazione', ...SITUATION_AT, x: ox + SITUATION_AT.x, y: oy + SITUATION_AT.y });
+            for (const f of WALL_AT) placed.push({ kind: 'parete', label: `la parete di schermi: ${SCREEN_NAME[f.field]}`, target: f.field, x: ox + f.x, y: oy + WALL_Y, w: f.w });
+            const film = WALL_AT[0];
+            placed.push({ kind: 'prev', label: '«<» indietro nel tempo', target: film.field, x: ox + film.x, y: oy + WALL_Y + 1 });
+            placed.push({ kind: 'next', label: '«>» avanti nel tempo', target: film.field, x: ox + film.x + film.w - 1, y: oy + WALL_Y + 1 });
+          }
           const show = SHOWCASES[id];
           if (show) {
             const { x, y, w } = SHOWCASE_AT;
@@ -483,9 +500,10 @@ export class Corona {
     let bd = r;
     for (const it of room.floor.items) {
       if (it.kind === 'desk' || (kinds && !kinds.includes(it.kind))) continue;
-      // Wide or deep things (screens, the atlas, the printer) are near from any of their cells; the table from its rim.
+      // Wide or deep things (screens, the atlas, the printer) are near from any of their cells; the table from its rim; the
+      // Direction's wall of screens (T46b) from the foot of its screens, at the front of their cells.
       const c = cellNear(it, x, y);
-      const d = it.kind === 'table' ? Math.hypot((x - TABLE.cx - this.roomAt(x, y)!.floor.ox) / TABLE.rx, (y - TABLE.cy - this.roomAt(x, y)!.floor.oy) / TABLE.ry) * 1.2 - 0.2 : Math.hypot(c.x + 0.5 - x, c.y + 0.5 - y);
+      const d = it.kind === 'table' ? Math.hypot((x - TABLE.cx - this.roomAt(x, y)!.floor.ox) / TABLE.rx, (y - TABLE.cy - this.roomAt(x, y)!.floor.oy) / TABLE.ry) * 1.2 - 0.2 : Math.hypot(c.x + 0.5 - x, c.y + (it.kind === 'parete' ? 1 : 0.5) - y);
       if (d < bd) [best, bd] = [it, d];
     }
     return best;

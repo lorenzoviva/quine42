@@ -11,6 +11,7 @@ import type { Kernel } from '../kernel/kernel';
 import { Bloom } from './bloom';
 import { cellNear } from '../kernel/corona';
 import { animateRing, Avatars, buildCoronaRing, buildRoom, buildShowcase, buildSituation, campusKey } from './corona3d';
+import { ScreenWall } from './screens';
 import { CUT, U } from './materials';
 import { Overlay } from './overlay';
 import { buildChunk, chunkSig, disposeChunk, tileForms, type ChunkView } from './terrain';
@@ -50,6 +51,8 @@ export class Renderer {
   /** What the showcases of the studio show (T21), by building: rebuilt when the choice or the models change. */
   /** The marks on the Direction's situation table (T46a): what they show, when it was last read, what pulses. */
   private sit?: { key: string; at: number; group: THREE.Group; pulse: THREE.Object3D[] };
+  /** The Direction's wall of screens (T46b), for the room it stands in. */
+  private wall?: { room: string; view: ScreenWall };
   private shows = new Map<string, { key: string; group: THREE.Group; spin?: THREE.Object3D; bubbles?: THREE.Object3D[]; silo: boolean }>();
   private overlay: Overlay;
   private flash = new THREE.PointLight(0xfff2c0, 0, 8, 1.4);
@@ -278,6 +281,24 @@ export class Renderer {
         } else this.sit.at = this.t;
       }
       for (const [i, m] of this.sit.pulse.entries()) m.scale.y = 1 + 2.5 * (0.5 + 0.5 * Math.sin(this.t * 4 + i));
+    }
+    const wall = studio?.floor.items.filter((i) => i.kind === 'parete') ?? [];
+    const here = studio ? `${studio.building.id}#${studio.floor.index}` : '';
+    if (this.wall && (this.wall.room !== here || !wall.length)) {
+      this.scene.remove(this.wall.view.group);
+      this.wall.view.dispose();
+      this.wall = undefined;
+    }
+    if (studio && wall.length) {
+      if (!this.wall) {
+        this.wall = { room: here, view: new ScreenWall(wall, studio.building.color) };
+        this.scene.add(this.wall.view.group);
+      }
+      // Read twice a second (the arrows answer at once enough); a field is drawn again only when it changed.
+      if (this.t - this.wall.view.at > 0.5) {
+        this.wall.view.at = this.t;
+        this.wall.view.draw(k.screens());
+      }
     }
     this.avatars.update(k, this.t);
 

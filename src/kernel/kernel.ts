@@ -18,6 +18,7 @@ import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './univer
 import { addPerson, applyRenames, dayPhase, defaultRoutine, freshName, greeting, guessGender, inferActivity, memorySummary, readPeople, remember, repairSociety, similarNames, societySummary, type Activity, type DayPhase, type Person, type Species } from './society';
 import { buildGraph, GRAPH_FILE, graphHash, mergePlaces, placesOf, readGraph, slug as nodeSlug, type GraphPlace, type WorldGraph } from './graph';
 import { situation as buildSituation, type Situation } from './situation';
+import { clampFrame, costBoard, liveFeed, SCREEN_NAME, timeline, type Budget, type ScreenField, type Screens } from './screens';
 import { activeQuests, plotFromRaw, plotText, PLOTS_FILE, readPlots, reviewPlot, secretsOf, writePlots, type Plot } from './plots';
 import { Input } from './input';
 import { discoverModules, readConfig } from './universe';
@@ -362,6 +363,8 @@ export class Kernel {
   private showcaseIndex = new Map<string, number>();
   /** The phase each model of places shows (T26, an index of `PLACE_PHASES`): the finished place until it is moved. */
   private showcasePhase = new Map<string, number>();
+  /** The commit the Direction's timeline shows (T46b); none: the newest. */
+  private filmAt?: string;
   /** The library's version when the campus last looked for its buildings' models (T20). */
   private campusVersion = -1;
   private showcaseCache = new Map<ShowcaseSource, { files: FileMap; stamp: string; entries: ShowcaseEntry[] }>();
@@ -3044,12 +3047,16 @@ export class Kernel {
       case 'situazione':
         this.bus.emit('ui:situation', { situation: this.situation() });
         return;
+      case 'parete':
+        this.openScreen(it.target as ScreenField);
+        return;
       case 'showcase':
         this.openShowcase(it.target!);
         return;
       case 'prev':
       case 'next':
-        this.stepShowcase(it.target!, it.kind === 'prev' ? -1 : 1);
+        if (it.target === 'tempo') this.stepTimeline(it.kind === 'prev' ? 1 : -1);
+        else this.stepShowcase(it.target!, it.kind === 'prev' ? -1 : 1);
         return;
       case 'less':
       case 'more':
@@ -3097,7 +3104,7 @@ export class Kernel {
 
   clickStudio(rx: number, ry: number): boolean {
     if (this.zone !== 'studio') return false;
-    const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'situazione', 'layout']);
+    const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'situazione', 'parete', 'layout']);
     if (!it) return false;
     const p = this.playerPos();
     const c = cellNear(it, p.x, p.y);
@@ -3107,6 +3114,8 @@ export class Kernel {
     }
     if (it.kind === 'grafo') this.bus.emit('ui:graph', {});
     else if (it.kind === 'situazione') this.bus.emit('ui:situation', { situation: this.situation() });
+    else if (it.kind === 'parete') this.openScreen(it.target as ScreenField);
+    else if (it.target === 'tempo') this.stepTimeline(it.kind === 'prev' ? 1 : -1);
     else if (it.kind === 'layout') this.openLayout(it, this.corona.roomAt(it.x, it.y)?.building.name ?? '');
     else if (it.kind === 'showcase') this.openShowcase(it.target!);
     else if (it.kind === 'less' || it.kind === 'more') this.stepPhase(it.target!, it.kind === 'less' ? -1 : 1);
@@ -4317,6 +4326,51 @@ export class Kernel {
       locate,
       chunkSize: S,
     });
+  }
+
+  /**
+   * The Direction's wall of screens (T46b): the timeline of the commits around the one chosen, the live log of the
+   * Council, the board of the costs with the budgets of `universe.json → ai`; from what there is, changing nothing.
+   */
+  screens(now = Date.now()): Screens {
+    const log = this.repo.log();
+    const i = this.filmAt ? log.findIndex((c) => c.id === this.filmAt) : 0;
+    const ai = this.config.ai;
+    const budgets: Budget[] = [
+      { nome: 'testo', usati: this.models.usage.text, max: ai.maxText },
+      { nome: 'Fucina', usati: this.forgesUsed, max: ai.maxForges },
+      { nome: 'pacchetti', usati: this.packsUsed, max: ai.maxPacks ?? 4 },
+      { nome: 'tipi nuovi', usati: this.castUsed, max: ai.maxCast ?? 3 },
+      { nome: 'modelli', usati: this.sculpting.count, max: ai.maxModels ?? 40 },
+    ];
+    return {
+      tempo: timeline(log, Math.max(0, i), (c) => (c.parent ? this.repo.find(c.parent) : undefined)),
+      registro: liveFeed(this.feed(), this.usage.lastCall, now, this.models.name === 'offline' ? 'offline' : ai.textModel),
+      costi: costBoard(this.usage, budgets),
+    };
+  }
+
+  /**
+   * «<» «>» of the timeline: an older (d > 0) or a newer commit, stopping at the first and the last. Only the film
+   * moves: looking never goes back (R is the only way).
+   */
+  stepTimeline(d: number): void {
+    const log = this.repo.log();
+    if (!log.length) return this.message('La pellicola è vuota.');
+    const from = Math.max(0, this.filmAt ? log.findIndex((c) => c.id === this.filmAt) : 0);
+    const to = clampFrame(from + d, log.length);
+    if (to === from) return this.message(to === 0 ? 'La pellicola finisce qui: è il presente.' : "La pellicola finisce qui: è l'inizio dell'universo.");
+    // The newest is not held: new commits keep it at the present.
+    this.filmAt = to === 0 ? undefined : log[to].id;
+    const t = this.screens().tempo;
+    this.message(`${t.chosen?.message ?? ''} — ${t.chosen?.who ?? ''} (${t.count - t.index}/${t.count})`);
+    this.bus.emit('studio:screens', { screens: this.screens() });
+  }
+
+  /** A field of the wall seen up close. */
+  openScreen(field: ScreenField): void {
+    if (!SCREEN_NAME[field]) return;
+    this.bus.emit('ui:screens', { field, screens: this.screens() });
   }
 
   /** "Vai" quests are done by arriving: the place or the region you stand in. */

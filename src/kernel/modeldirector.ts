@@ -27,6 +27,11 @@ export class ModelDirector {
 
   constructor(private k: Kernel) {}
 
+  /** The models sculpted this session (out of `ai.maxModels`). */
+  get count(): number {
+    return this.used;
+  }
+
   get active(): boolean {
     return this.k.models.name !== 'offline' && !this.stopped;
   }

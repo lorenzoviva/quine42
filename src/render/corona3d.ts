@@ -349,6 +349,15 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
       glow.box(x + w - 0.05, 0.7, z, x + w, 0.72, z + d, rgbOf(col, 0.8));
       break;
     }
+    case 'parete': {
+      // A field of the Direction's wall of screens (T46b): a dark plinth with a golden edge and a support against the
+      // back wall; the screen leans on them, tilted towards the camera (src/render/screens.ts).
+      const w = it.w ?? 1;
+      lit.box(x + 0.02, 0, z, x + w - 0.02, 1.95, z + 0.12, rgbOf('#0c0c16'));
+      lit.box(x + 0.02, 0, z + 0.12, x + w - 0.02, 0.4, z + 1.15, rgbOf('#10101a'));
+      glow.box(x + 0.02, 0.4, z + 1.13, x + w - 0.02, 0.43, z + 1.17, rgbOf(col, 0.7));
+      break;
+    }
     case 'atlas':
       lit.box(x, 0, z + 0.1, x + (it.w ?? 1), 0.7, z + 0.9, rgbOf('#1a2a33'));
       glow.box(x + 0.1, 0.7, z + 0.2, x + (it.w ?? 1) - 0.1, 0.72, z + 0.8, rgbOf('#7dd87d', 0.6));
@@ -637,7 +646,7 @@ export function buildSituation(it: StudioItem, s: Situation, color: string): { g
 }
 
 /** An arrow button's sign, floating above its pillar. */
-function arrowSign(x: number, z: number, text: string, color: string): THREE.Mesh {
+export function arrowSign(x: number, z: number, text: string, color: string): THREE.Mesh {
   const m = textPlane([text], color, 0.5, 0.5, true);
   m.position.set(x + 0.5, 1.3, z + 0.72);
   return m;

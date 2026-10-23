@@ -5,6 +5,8 @@
 import { PLACE_PHASES, type Kernel, type LayoutSample, type PlaceMiniature, type ShowcaseEntry } from '../kernel/kernel';
 import type { StudioItem } from '../kernel/corona';
 import { OPERATION_COLOR, OPERATION_NAME, type Operation, type OperationKind, type Situation } from '../kernel/situation';
+import { LIVE_LINES, SCREEN_NAME, fill, type Screens, type ScreenField } from '../kernel/screens';
+import { tallyLine, usd } from '../kernel/ai/usage';
 import { $, el } from './dom';
 import { icons } from './hud';
 
@@ -15,6 +17,8 @@ export class StudioPanel {
   private root = $('#studio');
   /** The building whose showcase the panel shows, while it is open. */
   private shown?: string;
+  /** The field of the Direction's wall the panel shows, while it is open (T46b). */
+  private screen?: ScreenField;
   onClose?: () => void;
   onEdit?: (path: string) => void;
 
@@ -25,6 +29,11 @@ export class StudioPanel {
     k.bus.on('ui:board', ({ building, name }: { building: string; name: string }) => this.board(building, name));
     k.bus.on('ui:showcase', (e: Shown) => this.showcase(e));
     k.bus.on('ui:situation', ({ situation }: { situation: Situation }) => this.situation(situation));
+    k.bus.on('ui:screens', ({ field, screens }: { field: ScreenField; screens: Screens }) => this.screens(field, screens));
+    // The film moved with the panel open: it follows.
+    k.bus.on('studio:screens', ({ screens }: { screens: Screens }) => {
+      if (this.isOpen && this.screen === 'tempo') this.screens('tempo', screens);
+    });
     k.bus.on('ui:layout', ({ sample, building }: { sample: LayoutSample; building: string }) => this.layout(sample, building));
     // The arrows pressed with the panel open: it follows.
     k.bus.on('studio:showcase', (e: Shown) => {
@@ -52,6 +61,7 @@ export class StudioPanel {
     const close = el('button', { class: 'close' }, '×');
     close.onclick = () => this.close();
     this.shown = undefined;
+    this.screen = undefined;
     this.root.replaceChildren(el('div', { class: 'window' }, close, ...children));
     this.root.hidden = false;
     this.onClose?.();
@@ -60,6 +70,7 @@ export class StudioPanel {
   close(): void {
     this.root.hidden = true;
     this.shown = undefined;
+    this.screen = undefined;
     this.onClose?.();
   }
 
@@ -267,6 +278,80 @@ export class StudioPanel {
       }
     g.globalAlpha = 1;
     return c;
+  }
+
+  /**
+   * A field of the Direction's wall of screens (T46b): the commit chosen on the film (what changed, who wanted it) with
+   * «<» «>»; the consoles of the Council and the last lines of the log; the costs by agent and by task with the budgets.
+   */
+  screens(field: ScreenField, s: Screens): void {
+    const head = (text: string) => el('div', { class: 'title' }, `${text[0].toUpperCase()}${text.slice(1)} — Direzione`);
+    const item = (what: string, text: string, color?: string) => el('div', { class: 'item' }, el('span', { class: 'path', ...(color ? { style: `color:${color}` } : {}) }, what), ` ${text}`);
+    const time = (t: number) => new Date(t).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    if (field === 'tempo') {
+      const t = s.tempo, c = t.chosen;
+      const step = (d: number, text: string) => {
+        const b = el('button', {}, text);
+        b.onclick = () => this.k.stepTimeline(d);
+        return b;
+      };
+      const changed = c?.changed;
+      const files = changed === undefined
+        ? [el('div', { class: 'note' }, 'Un commit di una sessione precedente: che cosa ha cambiato è nella storia del repository su disco.')]
+        : changed.length
+          ? changed.slice(0, 30).map((path) => {
+              const b = el('button', {}, 'apri');
+              b.onclick = () => {
+                this.close();
+                this.onEdit?.(path);
+              };
+              return el('div', { class: 'item' }, el('span', { class: 'path' }, path), ' ', b);
+            })
+          : [el('div', { class: 'note' }, 'Nessun file cambiato.')];
+      this.show(
+        head(SCREEN_NAME.tempo),
+        el('div', { class: 'note' }, "Guardare non torna indietro: per tornare all'ultimo stato valido c'è solo R."),
+        el('div', { class: 'row' }, step(1, '<'), el('span', { class: 'note' }, t.count ? `${t.count - t.index} di ${t.count}` : 'nessun commit'), step(-1, '>')),
+        ...(c
+          ? [
+              item(c.id, c.message),
+              item("chi l'ha voluto", c.who),
+              item('quando', time(c.time)),
+              el('div', { class: 'section' }, `Che cosa è cambiato${changed?.length ? ` (${changed.length} file)` : ''}`),
+              ...files,
+              ...(changed && changed.length > 30 ? [el('div', { class: 'note' }, `… e altri ${changed.length - 30}.`)] : []),
+            ]
+          : []),
+        el('div', { class: 'section' }, 'La pellicola'),
+        ...t.frames.map((f, i) => el('div', { class: 'item' }, el('span', { class: 'path', ...(i === t.at ? { style: 'color:#ffcf5c' } : {}) }, `${i === t.at ? '▶ ' : ''}${f.id}`), ` ${f.who}: ${f.message}`)),
+      );
+    } else if (field === 'registro') {
+      const f = s.registro;
+      const ago = (n?: number) => (n === undefined ? 'mai' : n < 60 ? `${n} s fa` : n < 3600 ? `${Math.round(n / 60)} min fa` : `${Math.round(n / 3600)} h fa`);
+      this.show(
+        head(SCREEN_NAME.registro),
+        el('div', { class: 'note' }, "Chi lavora adesso (nell'ultimo minuto e mezzo), a che cosa, con quale modello. Il registro intero è nel pannello del Concilio (G)."),
+        el('div', { class: 'section' }, 'Le console del Concilio'),
+        ...f.desks.map((d) => el('div', { class: 'item' }, el('span', { style: `color:${d.working ? '#5cff8a' : '#555'}` }, '● '), el('span', { class: 'path', style: `color:${d.color}` }, `${d.sigil} ${d.name}`), ` ${d.task ? [d.task, d.model].filter(Boolean).join(' · ') : 'non ha ancora lavorato'} `, el('span', { class: 'note' }, `(${ago(d.ago)})${d.text ? ` — ${d.text.slice(0, 140)}` : ''}`))),
+        el('div', { class: 'section' }, `Le ultime ${LIVE_LINES} righe`),
+        ...(f.lines.length ? f.lines.map((l) => item(l.from, `${l.kind}: ${l.text.slice(0, 200)}`, l.color)) : [el('div', { class: 'note' }, 'Il registro è vuoto.')]),
+      );
+    } else {
+      const c = s.costi;
+      this.show(
+        head(SCREEN_NAME.costi),
+        el('div', { class: 'note' }, `sessione ${usd(c.session.usd)} · oggi ${usd(c.today.usd)} · in tutto ${usd(c.total.usd)}`),
+        item('sessione', tallyLine(c.session)),
+        item('oggi', tallyLine(c.today)),
+        el('div', { class: 'section' }, 'Per agente (questa sessione)'),
+        ...(c.byAgent.length ? c.byAgent.map((a) => item(a.name, tallyLine(a.tally), a.color)) : [el('div', { class: 'note' }, 'Nessuna chiamata in questa sessione.')]),
+        el('div', { class: 'section' }, 'Per compito (oggi)'),
+        ...(c.byTask.length ? c.byTask.map((t) => item(t.task, `${t.model} — ${tallyLine(t.tally)}`)) : [el('div', { class: 'note' }, 'Nessuna chiamata oggi.')]),
+        el('div', { class: 'section' }, 'I budget della sessione (universe.json → ai)'),
+        ...c.budgets.map((b) => item(b.nome, `${b.usati} di ${b.max} (${Math.round(fill(b) * 100)} %)`, fill(b) >= 1 ? '#ff3b3b' : fill(b) > 0.8 ? '#ffb000' : '#5cff8a')),
+      );
+    }
+    this.screen = field;
   }
 
   board(building: string, name: string): void {

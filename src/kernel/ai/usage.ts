@@ -75,6 +75,9 @@ export class UsageLedger {
   /** This session only (since the page opened). */
   readonly session = emptyTally();
   readonly sessionByModel: Record<string, Tally> = {};
+  /** This session by agent (the file keeps models and tasks only), and each agent's last call (the Direction's screens, T46b). */
+  readonly sessionByAgent: Record<string, Tally> = {};
+  readonly lastCall: Record<string, { model: string; task: string; time: number }> = {};
   /** Bumped at every call: the kernel writes the file when it changed. */
   version = 0;
   onChange?: () => void;
@@ -101,6 +104,8 @@ export class UsageLedger {
     add(((this.file.giorni[day] ??= {})[r.model] ??= {})[r.task] ??= emptyTally(), r, usd);
     add(this.session, r, usd);
     add((this.sessionByModel[r.model] ??= emptyTally()), r, usd);
+    add((this.sessionByAgent[r.agent] ??= emptyTally()), r, usd);
+    this.lastCall[r.agent] = { model: r.model, task: r.task, time: Date.now() };
     this.version++;
     this.onChange?.();
   }
