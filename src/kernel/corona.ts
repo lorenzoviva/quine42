@@ -33,19 +33,23 @@ export const SHOWCASES: Record<string, { source: ShowcaseSource; device: Showcas
  * The printer (T24) is square: `PRINTER` rows deep, centred on the arrows' row, the thing on its middle cell; the model of
  * places (T26) is as big, the place on all of it, with the pads «−» «+» of its phases on the floor in front (under its
  * outer columns: one walks on them, and the front of the table stays free).
+ * Every device stands in the middle of its room, its block (arrows and pads included) centred on the exit's column, with
+ * `DEVICE_MARGIN` free cells on every side (T49b): the ground floor's shelves are at the sides (`DEVICE_SLOTS`).
  */
-export const SHOWCASE_AT = { x: 15, y: 11, w: 3 };
+export const SHOWCASE_AT = { x: 11, y: 6, w: 3 };
 export const PRINTER = 3;
 /**
  * The Nucleus's graph of the world (T28): a pedestal with the graph turning above it, where the other buildings have
  * their showcase; E or a click opens it, navigable (src/ui/graph.ts).
  */
-export const GRAPH_AT = { x: 15, y: 10, w: 3, h: 3 };
+export const GRAPH_AT = { x: 11, y: 5, w: 3, h: 3 };
 /**
  * The Direction's situation table (T46a): 5 × 3 cells in the middle of its war room, where the others have their showcase;
  * the operations under way on the world seen from above (`Kernel.situation`), E or a click opens them in a panel.
  */
-export const SITUATION_AT = { x: 14, y: 10, w: 5, h: 3 };
+export const SITUATION_AT = { x: 10, y: 6, w: 5, h: 3 };
+/** The free cells around a room's device, on every side (T49b). */
+export const DEVICE_MARGIN = 3;
 /**
  * The Direction's wall of screens (T46b): against the back wall, the one in front of whoever comes in, as wide as the room,
  * in three fields (`ScreenField`, src/kernel/screens.ts); «<» «>» stand under the ends of the timeline.
@@ -188,6 +192,8 @@ const SHELF_ROWS = [3, 6, 9];
 const SHELF_X0 = 3;
 const SHELF_X1 = ROOM_W - 4;
 const SHELF_W = SHELF_X1 - SHELF_X0 + 1;
+/** The ground floor of a room with a device: short shelves left and right of it (T49b), mirrored about the exit's column. */
+const SIDE_W = 4;
 
 const ROOMS: Record<string, { name: string; color: string; team: string }> = {
   universo: { name: 'Direzione', color: '#ffcf5c', team: 'arbitro' },
@@ -256,12 +262,16 @@ function groundAt(d: number, R: number, t: number, n: number): CoronaCell['groun
 }
 
 /** Shelf positions of a floor, in reading order. */
-function shelfSlots(): Array<{ x: number; y: number }> {
+function shelfSlots(sides = false): Array<{ x: number; y: number }> {
   const out: Array<{ x: number; y: number }> = [];
-  for (const y of SHELF_ROWS) for (let x = SHELF_X0; x <= SHELF_X1; x++) out.push({ x, y });
+  const xs = sides ? Array.from({ length: SIDE_W * 2 }, (_, i) => (i < SIDE_W ? SHELF_X0 + i : ROOM_W - SHELF_X0 - (SIDE_W * 2 - 1 - i))) : Array.from({ length: SHELF_W }, (_, i) => SHELF_X0 + i);
+  for (const y of SHELF_ROWS) for (const x of xs) out.push({ x, y });
   return out;
 }
 const SLOTS = shelfSlots();
+const DEVICE_SLOTS = shelfSlots(true);
+/** The buildings with a device in the middle of their ground floor. */
+const DEVICES = new Set([...Object.keys(SHOWCASES), 'nucleo', 'universo']);
 
 export class Corona {
   outer: number;
@@ -305,8 +315,12 @@ export class Corona {
       const mid = (from + to) / 2;
       const perFloor = SLOTS.length;
       const chunk = <T,>(list: T[]) => Array.from({ length: Math.ceil(list.length / perFloor) }, (_, i) => list.slice(i * perFloor, (i + 1) * perFloor));
+      // With a device, the ground floor holds fewer files (at the sides): the rest go upstairs.
+      const ground = DEVICES.has(id) ? DEVICE_SLOTS.length : perFloor;
+      const files = groups.get(id)!;
+      const filePages = files.length ? [files.slice(0, ground), ...chunk(files.slice(ground))] : [];
       // The files floor by floor; the terrains of the sample room after them, from a floor of their own.
-      const pages = [...chunk(groups.get(id)!), ...(id === SAMPLES ? chunk(samples) : [])];
+      const pages = [...filePages, ...(id === SAMPLES ? chunk(samples) : [])];
       const firstSample = id === SAMPLES && samples.length ? pages.length - Math.ceil(samples.length / perFloor) : -1;
       const floors: Floor[] = [];
       const nFloors = Math.max(1, pages.length);
@@ -315,7 +329,7 @@ export class Corona {
         const oy = f * FLOOR_STRIDE;
         const council = id === 'concilio';
         // The Council's hall: its files on one shelf along the wall, the round table in the middle.
-        const slots = council ? Array.from({ length: perFloor }, (_, i) => ({ x: SHELF_X0 + (i % (SHELF_X1 - SHELF_X0 + 1)), y: 2 + Math.floor(i / (SHELF_X1 - SHELF_X0 + 1)) })) : SLOTS;
+        const slots = council ? Array.from({ length: perFloor }, (_, i) => ({ x: SHELF_X0 + (i % (SHELF_X1 - SHELF_X0 + 1)), y: 2 + Math.floor(i / (SHELF_X1 - SHELF_X0 + 1)) })) : f === 0 && DEVICES.has(id) ? DEVICE_SLOTS : SLOTS;
         const placed: StudioItem[] = (pages[f] ?? []).flatMap((it, i) => (it ? [{ ...it, x: ox + slots[i].x, y: oy + slots[i].y }] : []));
         if (council && f === 0) {
           placed.push({ kind: 'table', label: "il tavolo del Concilio: al centro, l'universo", x: ox + Math.floor(TABLE.cx), y: oy + Math.floor(TABLE.cy) });

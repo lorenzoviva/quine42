@@ -177,10 +177,14 @@ export function buildRoom(k: Kernel, building: Building, floor: Floor): { group:
   // Racks under the rows of files and exhibits, a neon rim all round their top.
   const shelf = floor.items.filter((i) => i.kind === 'file' || i.kind === 'sprite' || i.kind === 'tile' || i.kind === 'layout');
   for (const y of new Set(shelf.map((i) => i.y))) {
-    const xs = shelf.filter((i) => i.y === y).map((i) => i.x);
-    const a0 = Math.min(...xs) - 0.05, a1 = Math.max(...xs) + 1.05;
-    lit.box(a0, 0, y + 0.3, a1, 0.35, y + 0.75, rgbOf('#1a1e2e'));
-    rim(glow, a0, y + 0.3, a1, y + 0.75, 0.35, rgbOf(col));
+    const xs = shelf.filter((i) => i.y === y).map((i) => i.x).sort((a, b) => a - b);
+    // One rack per run of neighbouring slots: around a room's device the shelves stop at its sides (T49b).
+    for (let i = 0, j = 0; i < xs.length; i = j) {
+      for (j = i + 1; j < xs.length && xs[j] - xs[j - 1] === 1; j++);
+      const a0 = xs[i] - 0.05, a1 = xs[j - 1] + 1.05;
+      lit.box(a0, 0, y + 0.3, a1, 0.35, y + 0.75, rgbOf('#1a1e2e'));
+      rim(glow, a0, y + 0.3, a1, y + 0.75, 0.35, rgbOf(col));
+    }
   }
   let globe: THREE.Object3D | undefined;
   for (const it of floor.items) itemMesh(lit, glow, it, col, k);

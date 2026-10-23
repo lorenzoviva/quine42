@@ -466,7 +466,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   meccaniche altrove ci finisce solo un prefisso sconosciuto). Diverso dal previsto: la proposta numerava gli interni
   T32-T34, ma T33-T45 sono del multiplayer, quindi T46-T48.
 
-### T49 · Gli interni della corona: aria, simmetria, luci più tenui — `in corso` (T49a fatto; il prossimo è T49b)
+### T49 · Gli interni della corona: aria, simmetria, luci più tenui — `fatto` (T49a, T49b)
 - Contesto: richiesta del 24/10 ([`to-do-2026-10-24.md`](../userchats/to-do-2026-10-24.md), «Interni edifici della corona»,
   con `docs/userchats/direzione.png`). Vale per tutte le stanze (`buildRoom`/`itemMesh` in `corona3d.ts`, le posizioni in
   `corona.ts`). Oggi: tre postazioni (`desk`, `x 4/6/8, y ROOM_H-4`) davanti allo schermo della storia sono celle bloccate
@@ -492,6 +492,15 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   ai piani sopra, se non ci stanno: decidere misurando la stanza più piena); la parete di schermi della Direzione (T46b)
   resta contro la parete di fondo. Test: per ogni stanza con un dispositivo, il rettangolo che lo circonda (+3) è libero e
   raggiungibile dalla porta; i test di T21-T28 e T46 ancora verdi (aggiornare le posizioni).
+  - Esito: `fatto` (commit «Corona (T49b)»). Ogni dispositivo sta sulla colonna dell'uscita (x 12), con il suo blocco
+    (frecce, pedane) a x 10..14: vetrine con le frecce alla riga 6 (il plastico e le stampanti 5..7, le pedane a 8), il grafo
+    5..7, il tavolo della situazione 6..8 (il margine non tocca le frecce della pellicola alla riga 2 né lo schermo della
+    storia alla 12). Misura: la stanza più piena è lo Studio dei personaggi di `valmora` (128 file); con gli scaffali laterali
+    (x 3..6 e 18..21, specchiati sull'uscita: 24 posti) più 54 per piano sopra restano 3 piani, come prima: quindi scaffali
+    corti ai lati e il resto sopra. Le stanze senza dispositivo (Galleria, Biblioteca, Sala sistemi, Archivio) non cambiano.
+    Diverso dal previsto: la rastrelliera di una riga si spezza in tratti contigui (`corona3d.ts`), se no attraverserebbe
+    il dispositivo. Test in `tests/corona.test.ts` (rettangolo +3 libero e raggiungibile, centrato; 129 file → 24 a terra,
+    3 piani). Foto prima/dopo di Direzione e Ufficio dei luoghi, e dello Studio dei personaggi, nella build offline.
 - Fatto quando (per pezzo): test verdi, typecheck, verifica nel browser con le foto prima/dopo, commit.
 - Dipendenze: nessuna. T46c, T47, T48 dopo T49b (mettono apparecchi nelle stanze).
 - Domande per l'autore: nessuna (se il piano terra non tiene dispositivo e scaffali, la scelta è scritta nel task).

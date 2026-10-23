@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CAMPUS, Corona } from '../src/kernel/corona';
+import { CAMPUS, Corona, DEVICE_MARGIN, ROOM_H, ROOM_W } from '../src/kernel/corona';
 
 // T18: the campus on the ring is four times the 2D one (the circle stays): avenue, doors, buildings
 // big enough for a model, alleys, lawns, a glowing edge; every door reachable from the avenue.
@@ -69,5 +69,64 @@ describe('the corona campus', () => {
     const mid = (back.from + back.to) / 2;
     const behind = { x: Math.floor(Math.sin(mid) * (R + CAMPUS.back + 4)), y: Math.floor(-Math.cos(mid) * (R + CAMPUS.back + 4)) };
     expect(seen.has(`${behind.x},${behind.y}`)).toBe(true);
+  });
+});
+
+// T49b: every room's device stands in the middle, with DEVICE_MARGIN free cells on every side, reachable from the door;
+// the ground floor's shelves are at its sides, the files that do not fit there go upstairs.
+const DEVICE_KINDS = ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'situazione'];
+
+describe('the devices of the rooms', () => {
+  it('stand in the middle, the cells around them free and reachable from the door', () => {
+    const c = campus();
+    const rooms = c.buildings.filter((b) => b.floors[0].items.some((i) => ['showcase', 'grafo', 'situazione'].includes(i.kind)));
+    expect(rooms.map((b) => b.id).sort()).toEqual(['cose', 'luoghi', 'magia', 'nucleo', 'oggetti', 'persone', 'universo']);
+    for (const b of rooms) {
+      const f = b.floors[0];
+      const device = f.items.filter((i) => DEVICE_KINDS.includes(i.kind) && (i.kind !== 'prev' && i.kind !== 'next' || i.target !== 'tempo'));
+      const x0 = Math.min(...device.map((i) => i.x)) - f.ox, x1 = Math.max(...device.map((i) => i.x + (i.w ?? 1) - 1)) - f.ox;
+      const y0 = Math.min(...device.map((i) => i.y)) - f.oy, y1 = Math.max(...device.map((i) => i.y + (i.h ?? 1) - 1)) - f.oy;
+      // Centred on the exit's column, the margin inside the room.
+      expect((x0 + x1) / 2, b.id).toBe(ROOM_W / 2);
+      expect(x0 - DEVICE_MARGIN, b.id).toBeGreaterThanOrEqual(1);
+      expect(y0 - DEVICE_MARGIN, b.id).toBeGreaterThanOrEqual(1);
+      expect(x1 + DEVICE_MARGIN, b.id).toBeLessThanOrEqual(ROOM_W - 2);
+      expect(y1 + DEVICE_MARGIN, b.id).toBeLessThanOrEqual(ROOM_H - 2);
+      // Everything that can be walked is reached from the door.
+      const start = c.entrance(b);
+      const seen = new Set<string>([`${Math.floor(start.x)},${Math.floor(start.y)}`]);
+      const queue = [[Math.floor(start.x), Math.floor(start.y)]];
+      while (queue.length) {
+        const [x, y] = queue.shift()!;
+        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          const key = `${x + dx},${y + dy}`;
+          if (!seen.has(key) && c.free(x + dx + 0.5, y + dy + 0.5)) seen.add(key), queue.push([x + dx, y + dy]);
+        }
+      }
+      for (let y = y0 - DEVICE_MARGIN; y <= y1 + DEVICE_MARGIN; y++)
+        for (let x = x0 - DEVICE_MARGIN; x <= x1 + DEVICE_MARGIN; x++) {
+          const here = f.items.filter((i) => f.oy + y >= i.y && f.oy + y < i.y + (i.h ?? 1) && f.ox + x >= i.x && f.ox + x < i.x + (i.w ?? 1));
+          if (here.length && here.every((i) => device.includes(i))) continue;
+          expect(here.map((i) => i.kind), `${b.id} ${x},${y}`).toEqual([]);
+          expect(seen.has(`${f.ox + x},${f.oy + y}`), `${b.id} ${x},${y}`).toBe(true);
+        }
+    }
+  });
+
+  it('keep the ground floor\'s shelves at their sides, the other files upstairs', () => {
+    const many: Record<string, string> = { ...files };
+    for (let i = 0; i < 128; i++) many[`modules/npc.p${String(i).padStart(3, '0')}/manifest.json`] = '{}';
+    const c = new Corona(R);
+    c.build(many);
+    const b = c.building('persone')!;
+    const ground = b.floors[0].items.filter((i) => i.kind === 'file');
+    const show = b.floors[0].items.find((i) => i.kind === 'showcase')!;
+    expect(ground.length).toBe(24);
+    expect(ground.every((i) => i.x < show.x - 1 - DEVICE_MARGIN || i.x > show.x + show.w! + DEVICE_MARGIN)).toBe(true);
+    // Upstairs the whole floor holds files; none is lost.
+    expect(b.floors.length).toBe(3);
+    expect(b.floors.flatMap((f) => f.items.filter((i) => i.kind === 'file')).length).toBe(129);
+    // The rooms without a device keep their full shelves on the ground floor.
+    expect(c.building('galleria')!.floors[0].items.filter((i) => i.kind === 'file').length).toBe(1);
   });
 });
