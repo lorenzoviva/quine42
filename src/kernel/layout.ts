@@ -32,6 +32,8 @@ export interface LayoutResult {
   reachable: Set<number>;
   carved: number;
   steps: number;
+  /** With `stages` (the phases of the model of places, T26): the grid with its gates, and after the program. */
+  stages?: { gated: string[]; programmed: string[] };
 }
 
 export interface LayoutOptions {
@@ -41,6 +43,8 @@ export interface LayoutOptions {
   program?: MjNode;
   /** Code used for carved paths and gates. */
   pathCode: string;
+  /** Keep the intermediate grids (`LayoutResult.stages`). */
+  stages?: boolean;
 }
 
 const DIRS: Array<[number, number]> = [[1, 0], [-1, 0], [0, 1], [0, -1]];
@@ -184,6 +188,7 @@ export function layout(draft: string[], palette: Record<string, TileDef>, opts: 
   const gateCells = gates(opts.cx, opts.cy, size, opts.seed);
   const walkable = (i: number) => palette[cells[Math.floor(i / size)][i % size]]?.solid === false;
   for (const g of gateCells) if (!walkable(g)) cells[Math.floor(g / size)][g % size] = opts.pathCode;
+  const gated = opts.stages ? cells.map((r) => r.join('')) : undefined;
 
   // The layout program shapes the interior; the border ring stays exactly as the draft.
   let steps = 0;
@@ -196,6 +201,7 @@ export function layout(draft: string[], palette: Record<string, TileDef>, opts: 
   // Connectivity: everything that matters must be reachable from the first gate.
   let carved = 0;
   const rows = () => cells.map((r) => r.join(''));
+  const stages = gated && { gated, programmed: rows() };
   const doorCells: number[] = [];
   for (let i = 0; i < size * size; i++) if (palette[cells[Math.floor(i / size)][i % size]]?.layer === 'door') doorCells.push(i);
   const mustReach = [...gateCells.slice(1), ...doorCells];
@@ -225,5 +231,5 @@ export function layout(draft: string[], palette: Record<string, TileDef>, opts: 
   }
 
   const grid = rows();
-  return { grid, buildings: findBuildings(grid, size, palette), gates: gateCells, reachable: reach, carved, steps };
+  return { grid, buildings: findBuildings(grid, size, palette), gates: gateCells, reachable: reach, carved, steps, ...(stages ? { stages } : {}) };
 }

@@ -169,7 +169,22 @@ export interface PlaceMiniature {
   things: Array<{ x: number; y: number; model: string; seed: number; yaw: number; tint?: string; color?: string }>;
   /** Each rune with the line (of the plan) it belongs to. */
   runes: Array<{ x: number; y: number; token: string; line: number; color?: string }>;
+  /**
+   * The Cartographer's work in phases (`PLACE_PHASES`), each the place as it is then: its tiles, their levels, the cells
+   * that phase adds (`lit`). The last is the place as above; structures from the fifth on, things and runes in the sixth.
+   */
+  phases: Array<{ tiles: string; levels: number[]; lit: number[] }>;
 }
+
+/** The phases of a place's making (T26), as the model of places shows them: a name and what happens, in one line. */
+export const PLACE_PHASES: ReadonlyArray<{ name: string; what: string }> = [
+  { name: 'bozza', what: 'Il terreno prima di tutto: una bozza continua, che non si ferma ai bordi del luogo.' },
+  { name: 'varchi', what: 'Un varco per lato, lo stesso per i due luoghi che lo condividono: da lì si entra e si esce.' },
+  { name: 'ambiente', what: "Il programma dell'ambiente riscrive l'interno con le sue regole; il bordo resta com'era." },
+  { name: 'sentieri', what: 'Ciò che resterebbe isolato viene collegato dal sentiero più breve: ogni angolo si raggiunge.' },
+  { name: 'lotti e strutture', what: 'Ogni edificio diventa un lotto in piano con la sua struttura, girata verso la porta.' },
+  { name: 'cose e rune', what: 'Le persone, le cose e le rune, ciascuna su una casella che si raggiunge.' },
+];
 
 export interface Rule {
   chiave: string;
@@ -324,6 +339,8 @@ export class Kernel {
   zone: 'sim' | 'corona' | 'studio' = 'sim';
   /** What each showcase of the studio shows: building → index in its entries (not saved). */
   private showcaseIndex = new Map<string, number>();
+  /** The phase each model of places shows (T26, an index of `PLACE_PHASES`): the finished place until it is moved. */
+  private showcasePhase = new Map<string, number>();
   /** The library's version when the campus last looked for its buildings' models (T20). */
   private campusVersion = -1;
   private showcaseCache = new Map<ShowcaseSource, { files: FileMap; stamp: string; entries: ShowcaseEntry[] }>();
@@ -1177,11 +1194,13 @@ export class Kernel {
   private layoutOf(ch: Pick<Chunk, 'cx' | 'cy' | 'draft'>, plan: ChunkPlan, pathCode: string, quiet = false): { result: LayoutResult; tiles: string } {
     const S = this.config.chunkSize;
     let result: LayoutResult;
+    // Quiet is the model of places: it shows the phases too.
+    const opts = { cx: ch.cx, cy: ch.cy, seed: this.config.seed, pathCode, stages: quiet };
     try {
-      result = layout(this.rows(ch.draft), this.palette, { cx: ch.cx, cy: ch.cy, seed: this.config.seed, program: this.content.layouts[plan.layout]?.program, pathCode });
+      result = layout(this.rows(ch.draft), this.palette, { ...opts, program: this.content.layouts[plan.layout]?.program });
     } catch (e) {
       if (!quiet) this.council.say('kernel', 'errore', `ambiente ${plan.layout} non eseguibile: ${(e as Error).message}`);
-      result = layout(this.rows(ch.draft), this.palette, { cx: ch.cx, cy: ch.cy, seed: this.config.seed, pathCode });
+      result = layout(this.rows(ch.draft), this.palette, opts);
     }
     let tiles = result.grid.join('');
     for (const [cell, code] of Object.entries(plan.edits ?? {})) {
@@ -1432,7 +1451,9 @@ export class Kernel {
     const { tiles, lots } = this.lotsOf({ ...ch, tiles: laid, buildings: result.buildings }, plan, pathCode);
     const place = this.placementsOf(ch, plan, result);
     const relief = this.relief;
-    const levels = chunkLevels(tiles, S, (code) => this.palette[code]?.layer === 'liquid', (c, r) => relief.level(ch.cx * S + c, ch.cy * S + r), result.buildings);
+    const liquid = (code: string) => this.palette[code]?.layer === 'liquid';
+    const height = (c: number, r: number) => relief.level(ch.cx * S + c, ch.cy * S + r);
+    const levels = chunkLevels(tiles, S, liquid, height, result.buildings);
     const local = (cell: number) => ({ x: (cell % S) + 0.5, y: Math.floor(cell / S) + 0.5 });
     const things: PlaceMiniature['things'] = [];
     for (const { index, cell } of place.objects) {
@@ -1448,6 +1469,20 @@ export class Kernel {
       const f = this.itemLook(it.item);
       things.push({ ...local(it.cell), model: f.model, seed: f.seed, tint: f.tint, yaw: 0, color: f.tint });
     }
+    const runes = place.runes.filter((r) => !this.consumed.has(r.origin)).map((r) => ({ x: r.col - ch.cx * S + 0.5, y: r.row - ch.cy * S + 0.5, token: r.token, line: r.line, color: this.content.runes[r.token]?.color }));
+    // The phases (T26): what changes from one to the next is lit; before the lots, the ground is not levelled for them.
+    const changed = (a: string, b: string) => [...b].flatMap((c, i) => (c !== a[i] ? [i] : []));
+    const phase = (t: string, lit: number[], lv?: Int16Array) => ({ tiles: t, levels: [...(lv ?? chunkLevels(t, S, liquid, height, []))], lit: [...new Set(lit)].sort((a, b) => a - b) });
+    const gated = result.stages!.gated.join(''), programmed = result.stages!.programmed.join('');
+    const cellOf = (p: { x: number; y: number }) => Math.floor(p.y) * S + Math.floor(p.x);
+    const phases = [
+      phase(ch.draft, []),
+      phase(gated, result.gates),
+      phase(programmed, changed(gated, programmed)),
+      phase(laid, changed(programmed, laid)),
+      phase(tiles, [...result.buildings.flatMap((b) => [...b.walls, ...b.floor, ...b.doors]), ...changed(laid, tiles)], levels),
+      phase(tiles, [...things, ...runes].map(cellOf), levels),
+    ];
     return {
       cx: ch.cx,
       cy: ch.cy,
@@ -1456,7 +1491,8 @@ export class Kernel {
       levels: [...levels],
       structures: lots.map((l) => ({ x: l.x - ch.cx * S, y: l.y - ch.cy * S, w: result.buildings[l.index].x1 - result.buildings[l.index].x0 + 1, h: result.buildings[l.index].y1 - result.buildings[l.index].y0 + 1, model: l.form.model, seed: l.form.seed, yaw: l.form.yaw, done: l.form.done })),
       things,
-      runes: place.runes.filter((r) => !this.consumed.has(r.origin)).map((r) => ({ x: r.col - ch.cx * S + 0.5, y: r.row - ch.cy * S + 0.5, token: r.token, line: r.line, color: this.content.runes[r.token]?.color })),
+      runes,
+      phases,
     };
   }
 
@@ -2876,7 +2912,7 @@ export class Kernel {
     const p = this.playerPos();
     // Standing on a teleport, the stairs or the exit: that, before whoever stands near.
     const under = this.zone === 'studio' ? this.corona.itemNear(p.x, p.y) : undefined;
-    const onPad = under && ['portal', 'up', 'down', 'exit'].includes(under.kind) && Math.hypot(under.x + 0.5 - p.x, under.y + 0.5 - p.y) < 0.75;
+    const onPad = under && ['portal', 'up', 'down', 'exit', 'less', 'more'].includes(under.kind) && Math.hypot(under.x + 0.5 - p.x, under.y + 0.5 - p.y) < 0.75;
     const a = onPad ? undefined : this.archive.nearest(p.x, p.y);
     if (a) return void this.bus.emit('ui:agentchat', { agent: a.agent, name: a.name });
     if (this.zone === 'corona') {
@@ -2917,6 +2953,10 @@ export class Kernel {
       case 'next':
         this.stepShowcase(it.target!, it.kind === 'prev' ? -1 : 1);
         return;
+      case 'less':
+      case 'more':
+        this.stepPhase(it.target!, it.kind === 'less' ? -1 : 1);
+        return;
       case 'table':
         this.message("Al centro del tavolo, sullo schermo rotondo, l'universo gira. Ognuno del Concilio ha alle spalle il teletrasporto per la sua sala.");
         return;
@@ -2947,13 +2987,13 @@ export class Kernel {
   }
 
   /**
-   * A left click in the studio (T21): on a showcase or its arrows, or on the Nucleus's graph (T28), within reach, the same as E there.
+   * A left click in the studio (T21): on a showcase or its arrows (or the phases of the model of places, T26), or on the Nucleus's graph (T28), within reach, the same as E there.
    * The click falls on the ground, often behind something tall: the nearest of them to that point counts.
    * Returns whether it did something.
    */
   clickStudio(rx: number, ry: number): boolean {
     if (this.zone !== 'studio') return false;
-    const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next', 'grafo']);
+    const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next', 'less', 'more', 'grafo']);
     if (!it) return false;
     const p = this.playerPos();
     const c = cellNear(it, p.x, p.y);
@@ -2963,6 +3003,7 @@ export class Kernel {
     }
     if (it.kind === 'grafo') this.bus.emit('ui:graph', {});
     else if (it.kind === 'showcase') this.openShowcase(it.target!);
+    else if (it.kind === 'less' || it.kind === 'more') this.stepPhase(it.target!, it.kind === 'less' ? -1 : 1);
     else this.stepShowcase(it.target!, it.kind === 'prev' ? -1 : 1);
     return true;
   }
@@ -3118,13 +3159,24 @@ export class Kernel {
     });
   }
 
-  /** What a showcase (by building) shows now, with its place in the list. */
-  showcaseOf(building: string): { entry: ShowcaseEntry; index: number; count: number } | undefined {
+  /** What a showcase (by building) shows now, with its place in the list; a model of places also its phase (T26). */
+  showcaseOf(building: string): { entry: ShowcaseEntry; index: number; count: number; phase?: number } | undefined {
     const source = this.corona.building(building)?.floors[0]?.items.find((i) => i.kind === 'showcase')?.source;
     const all = source ? this.showcaseEntries(source) : [];
     if (!all.length) return undefined;
     const index = (((this.showcaseIndex.get(building) ?? 0) % all.length) + all.length) % all.length;
-    return { entry: all[index], index, count: all.length };
+    return { entry: all[index], index, count: all.length, ...(source === 'luoghi' ? { phase: this.showcasePhase.get(building) ?? PLACE_PHASES.length - 1 } : {}) };
+  }
+
+  /** «−» «+» of the model of places (T26): the phase before or after, the same for every place, up to the first or the last. */
+  stepPhase(building: string, d: number): void {
+    const now = this.showcaseOf(building);
+    if (now?.phase === undefined) return this.message('La vetrina è vuota.');
+    const phase = Math.max(0, Math.min(PLACE_PHASES.length - 1, now.phase + d));
+    this.showcasePhase.set(building, phase);
+    const p = PLACE_PHASES[phase];
+    this.message(`Fase ${phase + 1} di ${PLACE_PHASES.length}, ${p.name}: ${p.what}`);
+    this.bus.emit('studio:showcase', { building, ...now, phase });
   }
 
   /** «<» «>»: the showcase shows the previous or the next thing. */

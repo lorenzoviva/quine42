@@ -7,7 +7,7 @@
 // (src/kernel/corona.ts): logic stays in the kernel.
 
 import * as THREE from 'three';
-import type { Kernel, PlaceMiniature, ShowcaseEntry } from '../kernel/kernel';
+import { PLACE_PHASES, type Kernel, type PlaceMiniature, type ShowcaseEntry } from '../kernel/kernel';
 import { CAMPUS, ROOM_H, ROOM_W, type Building, type Floor, type StudioItem } from '../kernel/corona';
 import { Builder } from './terrain';
 import { MAT, rgbOf } from './materials';
@@ -338,6 +338,12 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
     case 'showcase':
       showcaseBody(lit, glow, it, col);
       break;
+    case 'less':
+    case 'more':
+      // A pad on the floor (T26), walked on (its sign is drawn with what the showcase shows).
+      lit.box(x + 0.12, 0, z + 0.12, x + 0.88, 0.04, z + 0.88, rgbOf('#141420'));
+      glow.box(x + 0.18, 0.04, z + 0.18, x + 0.82, 0.06, z + 0.82, rgbOf(col, 0.7));
+      break;
     case 'prev':
     case 'next':
       // A pillar with a glowing button on top (its arrow is drawn with what the showcase shows).
@@ -416,23 +422,38 @@ function showcaseBody(lit: Builder, glow: Builder, it: StudioItem, col: string):
 /** The height of the model of places' table, where the place in miniature stands. */
 const PLATE = 0.7;
 
+/** What a phase of the model of places adds (T26) glows in this green. */
+const PHASE_LIT = '#39ff88';
+
 /**
  * A planned place in miniature on the model of places (T26), `side` wide: each tile a column in its colour up to its
  * level (water a little lower, walls and rocks higher), the structures and things as their models made small, the runes
  * as glowing tiles. What is not ready yet (a model still running) is simply missing: the key changes when it is.
+ * `phase` (of `PLACE_PHASES`): the place as it is then, what that phase adds glowing green on its columns; the
+ * structures come in the fifth, things and runes in the sixth.
  */
-function buildMiniature(k: Kernel, mini: PlaceMiniature, side: number): THREE.Group {
+function buildMiniature(k: Kernel, mini: PlaceMiniature, side: number, phase = PLACE_PHASES.length - 1): THREE.Group {
   const g = new THREE.Group();
   const S = mini.size, t = side / S;
   const lit = new Builder();
   const glow = new Builder();
-  const top = (i: number) => (mini.levels[i] ?? 0) * LEVEL * t;
+  const now = mini.phases[phase] ?? { tiles: mini.tiles, levels: mini.levels, lit: [] };
+  const top = (i: number) => (now.levels[i] ?? 0) * LEVEL * t;
+  const lights = new Set(now.lit);
   for (let i = 0; i < S * S; i++) {
-    const def = k.palette[mini.tiles[i]];
+    const def = k.palette[now.tiles[i]];
     const c = i % S, r = (i - c) / S;
     const layer = def?.layer ?? 'ground';
-    const h = top(i) + (layer === 'liquid' ? -0.2 : layer === 'wall' || layer === 'rock' || def?.solid ? 0.8 : layer === 'vegetation' ? 0.15 : 0) * t;
-    lit.box(c * t, 0, r * t, (c + 1) * t, Math.max(0.01, h + 0.03), (r + 1) * t, rgbOf(def?.color ?? '#333'));
+    const h = Math.max(0.01, top(i) + (layer === 'liquid' ? -0.2 : layer === 'wall' || layer === 'rock' || def?.solid ? 0.8 : layer === 'vegetation' ? 0.15 : 0) * t + 0.03);
+    lit.box(c * t, 0, r * t, (c + 1) * t, h, (r + 1) * t, rgbOf(def?.color ?? '#333'));
+    // An outline, not a plate: under the bloom a plate would hide the tile's colour.
+    if (lights.has(i)) {
+      const e = 0.12 * t, x0 = c * t + e / 2, z0 = r * t + e / 2, x1 = (c + 1) * t - e / 2, z1 = (r + 1) * t - e / 2, on = rgbOf(PHASE_LIT, 0.55);
+      glow.box(x0, h, z0, x1, h + 0.01, z0 + e, on);
+      glow.box(x0, h, z1 - e, x1, h + 0.01, z1, on);
+      glow.box(x0, h, z0 + e, x0 + e, h + 0.01, z1 - e, on);
+      glow.box(x1 - e, h, z0 + e, x1, h + 0.01, z1 - e, on);
+    }
   }
   // The rim of the projection.
   const rim = rgbOf('#05d9e8', 0.5);
@@ -440,7 +461,8 @@ function buildMiniature(k: Kernel, mini: PlaceMiniature, side: number): THREE.Gr
   glow.box(-0.02, 0, side, side + 0.02, 0.015, side + 0.02, rim);
   glow.box(-0.02, 0, 0, 0, 0.015, side, rim);
   glow.box(side, 0, 0, side + 0.02, 0.015, side, rim);
-  for (const r of mini.runes) {
+  const finished = phase >= PLACE_PHASES.length - 1;
+  for (const r of finished ? mini.runes : []) {
     const i = Math.floor(r.y) * S + Math.floor(r.x);
     glow.box((r.x - 0.4) * t, top(i) + 0.03, (r.y - 0.4) * t, (r.x + 0.4) * t, top(i) + 0.03 + 0.12 * t, (r.y + 0.4) * t, rgbOf(r.color ?? '#ffcf5c'));
   }
@@ -449,14 +471,16 @@ function buildMiniature(k: Kernel, mini: PlaceMiniature, side: number): THREE.Gr
     const f = k.forms.ready(o.model, o.seed, o.tint);
     const m = f && modelObject(k, f, { model: o.model, seed: o.seed, yaw: o.yaw, tint: o.tint, done: o.done }, MAT.corona);
     if (!m) return;
+    // Still: an animated model shows its body, not its frames (which hide it).
     for (const fr of m.frames) fr.visible = false;
+    for (const c of m.body.children) c.visible = true;
     m.root.scale.setScalar(t);
     m.root.rotation.y = o.yaw;
     m.root.position.set(o.x * t, top(Math.floor(o.y) * S + Math.floor(o.x)) + 0.03, o.y * t);
     g.add(m.root);
   };
-  for (const s of mini.structures) place(s);
-  for (const th of mini.things) place(th);
+  if (phase >= 4) for (const s of mini.structures) place(s);
+  if (finished) for (const th of mini.things) place(th);
   return g;
 }
 
@@ -514,6 +538,13 @@ function runeScreen(runes: Array<{ glyph: string; color: string; name: string }>
   return new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tex, toneMapped: false, transparent: true }));
 }
 
+/** The sign of a pad on the floor («−» «+» of the model of places, T26), floating low above it. */
+function padSign(x: number, z: number, text: string, color: string): THREE.Mesh {
+  const m = textPlane([text], color, 0.4, 0.4, true);
+  m.position.set(x + 0.5, 0.35, z + 0.5);
+  return m;
+}
+
 /** An arrow button's sign, floating above its pillar. */
 function arrowSign(x: number, z: number, text: string, color: string): THREE.Mesh {
   const m = textPlane([text], color, 0.5, 0.5, true);
@@ -524,9 +555,9 @@ function arrowSign(x: number, z: number, text: string, color: string): THREE.Mes
 /**
  * What a showcase shows now: the model, made to fit and turning (in the silo, floating in its liquid), or
  * the runes on the screen; its name under it and the arrows at its sides. `spin` is what turns, `bubbles`
- * rise in the silo's liquid (their place, speed and phase in `userData`).
+ * rise in the silo's liquid (their place, speed and phase in `userData`). The model of places shows its place in `phase`.
  */
-export function buildShowcase(k: Kernel, it: StudioItem, entry: ShowcaseEntry, color: string): { group: THREE.Group; spin?: THREE.Object3D; bubbles?: THREE.Object3D[] } {
+export function buildShowcase(k: Kernel, it: StudioItem, entry: ShowcaseEntry, color: string, phase?: number): { group: THREE.Group; spin?: THREE.Object3D; bubbles?: THREE.Object3D[] } {
   const g = new THREE.Group();
   const w = it.w ?? 1, d = it.h ?? 1;
   // The arrows are on the middle row; a deep printer shows its thing on the middle cell (T24).
@@ -543,10 +574,21 @@ export function buildShowcase(k: Kernel, it: StudioItem, entry: ShowcaseEntry, c
     const mini = k.miniature(entry.place.cx, entry.place.cy);
     if (mini) {
       const side = Math.min(w, d) - 0.3;
-      const m = buildMiniature(k, mini, side);
+      const m = buildMiniature(k, mini, side, phase);
       m.position.set(it.x + (w - side) / 2, PLATE, it.y + (d - side) / 2);
       g.add(m);
     }
+    // The phases: «−» «+» on their pads, the phase written under the name and six lamps along the front, the current one lit.
+    const now = phase ?? PLACE_PHASES.length - 1;
+    g.add(padSign(it.x, it.y + d, '−', color), padSign(it.x + w - 1, it.y + d, '+', color));
+    const line = textPlane([`fase ${now + 1}/${PLACE_PHASES.length} · ${PLACE_PHASES[now].name}`], PHASE_LIT, w - 0.6, 0.14);
+    line.position.set(cx, 0.15, it.y + d - 0.04);
+    const lamps = new Builder();
+    PLACE_PHASES.forEach((_, i) => {
+      const lx = cx + (i - (PLACE_PHASES.length - 1) / 2) * 0.22;
+      lamps.box(lx - 0.07, 0.56, it.y + d - 0.06, lx + 0.07, 0.62, it.y + d - 0.03, rgbOf(i === now ? PHASE_LIT : color, i === now ? 1 : 0.25));
+    });
+    g.add(line, new THREE.Mesh(lamps.geometry(), MAT.glow));
     return { group: g };
   }
   let bubbles: THREE.Object3D[] | undefined;

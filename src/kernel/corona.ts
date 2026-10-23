@@ -10,7 +10,7 @@ import { footBlocks, toLocal, type Form } from './forms';
 import type { FileMap } from './types';
 
 export type FileLook = 'libro' | 'cristallo' | 'pergamena' | 'tavoletta';
-export type ItemKind = 'file' | 'sprite' | 'tile' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'grafo';
+export type ItemKind = 'file' | 'sprite' | 'tile' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'less' | 'more' | 'grafo';
 /** What a showcase shows (T21): the runes and spells, the people, the things, the objects of the packs, the places planned (T26). */
 export type ShowcaseSource = 'rune' | 'persone' | 'cose' | 'oggetti' | 'luoghi';
 /** How a showcase looks: a screen, a silo of liquid, a 3D printer, a holographic table with a place in miniature. */
@@ -30,7 +30,8 @@ export const SHOWCASES: Record<string, { source: ShowcaseSource; device: Showcas
 /**
  * Where a showcase stands in its room (left cell, row of its arrows) and how wide it is; the arrows are at its sides.
  * The printer (T24) is square: `PRINTER` rows deep, centred on the arrows' row, the thing on its middle cell; the model of
- * places (T26) is as big, the place on all of it.
+ * places (T26) is as big, the place on all of it, with the pads «−» «+» of its phases on the floor in front (under its
+ * outer columns: one walks on them, and the front of the table stays free).
  */
 export const SHOWCASE_AT = { x: 15, y: 11, w: 3 };
 export const PRINTER = 3;
@@ -307,6 +308,10 @@ export class Corona {
             placed.push({ kind: 'showcase', label: show.label, source: show.source, device: show.device, target: id, x: ox + x, y: oy + y - Math.floor(h / 2), w, h });
             placed.push({ kind: 'prev', label: '«<» il precedente', target: id, x: ox + x - 1, y: oy + y });
             placed.push({ kind: 'next', label: '«>» il successivo', target: id, x: ox + x + w, y: oy + y });
+            if (show.device === 'plastico') {
+              placed.push({ kind: 'less', label: '«−» la fase prima', target: id, x: ox + x, y: oy + y + 2 });
+              placed.push({ kind: 'more', label: '«+» la fase dopo', target: id, x: ox + x + w - 1, y: oy + y + 2 });
+            }
           }
         }
         if (f === 0) placed.push({ kind: 'exit', label: 'uscita', x: ox + Math.floor(ROOM_W / 2), y: oy + ROOM_H - 1 });
@@ -386,7 +391,7 @@ export class Corona {
       if (s) return !this.structureBlocks(s, x, y);
     }
     if (c.kind === 'floor' || c.kind === 'door' || c.kind === 'room') return true;
-    if (c.kind === 'item') return ['exit', 'up', 'down', 'portal'].includes(c.item!.kind);
+    if (c.kind === 'item') return ['exit', 'up', 'down', 'portal', 'less', 'more'].includes(c.item!.kind);
     return false;
   }
 

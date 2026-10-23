@@ -1,15 +1,17 @@
 // T26: the model of places in the Office of places. A holographic table, 3 × 3 cells, shows a place already planned in
 // miniature (its tiles with their levels, the structures on its lots, its things and runes), built by the same code that
 // builds the world; «<» «>» pick the place, the one where the wanderer last stood first; looking does not generate anything.
+// T26b: «−» «+» go through the six phases of the Cartographer's work on the same place, what each adds lit.
 
 import { describe, expect, it } from 'vitest';
-import { Kernel } from '../src/kernel/kernel';
+import { Kernel, PLACE_PHASES } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockModels } from '../src/kernel/ai/mock';
 import { MemoryChunks } from '../src/kernel/chunks';
 import { LEVEL } from '../src/kernel/relief';
 import type { FormComp } from '../src/kernel/forms';
+import { gates } from '../src/kernel/layout';
 
 /** A kernel whose loaded chunks have all been planned by the Cartographer. */
 async function boot(chunks = new MemoryChunks()) {
@@ -110,5 +112,75 @@ describe('the model of places (T26)', () => {
     await new Promise((r) => setTimeout(r, 30));
     expect(k2.miniature(40, 40)).toBeUndefined();
     expect(k2.chunks.size).toBe(0);
+  }, 30_000);
+
+  it('shows the six phases of the place, from the draft to things and runes, what each adds lit', async () => {
+    const { k } = await boot();
+    const ch = k.chunks.get('0,0')!;
+    const S = k.config.chunkSize;
+    const mini = k.miniature(0, 0)!;
+    expect(mini.phases.length).toBe(PLACE_PHASES.length);
+    const [draft, gated, env, paths, lots, last] = mini.phases;
+    // The draft as the generator made it, nothing lit; the last is the place itself.
+    expect(draft.tiles).toBe(ch.draft);
+    expect(draft.lit).toEqual([]);
+    expect([last.tiles, last.levels]).toEqual([mini.tiles, mini.levels]);
+    // The gates: one per side, walkable from then on.
+    const g = gates(0, 0, S, k.config.seed);
+    expect(gated.lit).toEqual([...g].sort((a, b) => a - b));
+    for (const c of g) expect(k.palette[gated.tiles[c]]?.solid).toBe(false);
+    // The environment and the paths light what they changed; the border stays the draft's (save the gates).
+    for (const [before, now] of [[gated, env], [env, paths]]) for (const c of now.lit) expect(now.tiles[c]).not.toBe(before.tiles[c]);
+    for (let i = 0; i < S; i++) for (const c of [i, i * S, i * S + S - 1, (S - 1) * S + i]) if (!g.includes(c)) expect(env.tiles[c]).toBe(draft.tiles[c]);
+    // The lots: the cells of each building, its structure in the middle of them.
+    expect(lots.tiles).toBe(mini.tiles);
+    for (const s of mini.structures) expect(lots.lit).toContain(Math.floor(s.y) * S + Math.floor(s.x));
+    expect(mini.structures.length ? lots.lit.length : 1).toBeGreaterThan(0);
+    // Things and runes, each on its cell.
+    for (const p of [...mini.things, ...mini.runes]) expect(last.lit).toContain(Math.floor(p.y) * S + Math.floor(p.x));
+    expect(last.lit.length).toBeGreaterThan(0);
+    // Each phase's levels are a place's: as many as the tiles, all numbers.
+    for (const p of mini.phases) expect(p.levels.length === S * S && p.levels.every(Number.isFinite)).toBe(true);
+  }, 30_000);
+
+  it('goes through the phases with the pads «−» «+» in front of the table, walked on, with E or a click', async () => {
+    const { k } = await boot();
+    const f = k.corona.building('luoghi')!.floors[0];
+    const at = (kind: string) => f.items.find((i) => i.kind === kind)!;
+    const show = at('showcase');
+    const less = at('less'), more = at('more');
+    // Under the outer columns of the table, on the floor: one walks on them, and the front of the table stays free.
+    expect([less.x, less.y, more.x, more.y]).toEqual([show.x, show.y + 3, show.x + 2, show.y + 3]);
+    for (const p of [less, more]) expect(k.corona.free(p.x + 0.5, p.y + 0.5)).toBe(true);
+    expect(k.corona.free(show.x + 1.5, show.y + 3.5)).toBe(true);
+    // The finished place, until it is moved; the other showcases have no phases.
+    expect(k.showcaseOf('luoghi')!.phase).toBe(PLACE_PHASES.length - 1);
+    expect(k.showcaseOf('persone')!.phase).toBeUndefined();
+    const seen: any[] = [];
+    const said: string[] = [];
+    k.bus.on('studio:showcase', (e: any) => seen.push(e));
+    k.bus.on('ui:message', (e: any) => said.push(e.text));
+    // E standing on «−», twice; then a click on «+».
+    Object.assign(k.playerPos(), { x: less.x + 0.5, y: less.y + 0.5 });
+    k.zone = 'studio';
+    await k.interact();
+    await k.interact();
+    expect(k.showcaseOf('luoghi')!.phase).toBe(PLACE_PHASES.length - 3);
+    expect(said.at(-1)).toContain(`Fase ${PLACE_PHASES.length - 2} di ${PLACE_PHASES.length}, ${PLACE_PHASES[PLACE_PHASES.length - 3].name}`);
+    expect(k.clickStudio(more.x + 0.5, more.y + 0.5)).toBe(true);
+    expect(seen.map((e) => e.phase)).toEqual([4, 3, 4]);
+    // Down to the draft and no further; changing place keeps the phase.
+    for (let i = 0; i < 9; i++) k.stepPhase('luoghi', -1);
+    expect(k.showcaseOf('luoghi')!.phase).toBe(0);
+    k.stepShowcase('luoghi', 1);
+    expect(k.showcaseOf('luoghi')!.phase).toBe(0);
+    for (let i = 0; i < 9; i++) k.stepPhase('luoghi', 1);
+    expect(k.showcaseOf('luoghi')!.phase).toBe(PLACE_PHASES.length - 1);
+    // Standing in front of the table, E opens the panel, with the phase.
+    const panels: any[] = [];
+    k.bus.on('ui:showcase', (e: any) => panels.push(e));
+    Object.assign(k.playerPos(), { x: show.x + 1.5, y: show.y + 3.5 });
+    await k.interact();
+    expect(panels.at(-1)?.phase).toBe(PLACE_PHASES.length - 1);
   }, 30_000);
 });

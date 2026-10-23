@@ -363,7 +363,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   un bordo al neon e un anello azzurro sotto l'universo; tutto nella mesh della stanza. Nel browser (offline): un pezzo
   solo, senza buchi. Diverso dal previsto: nessun modello MarkovJunior (bastano le quad del `Builder`), nessun ADR.
 
-### T26 · L'Ufficio dei luoghi, dentro — `in corso` (T26a fatto; il prossimo è T26b)
+### T26 · L'Ufficio dei luoghi, dentro — `in corso` (T26a e T26b fatti; il prossimo è T26c)
 - Da progettare in funzione di come lavora il Cartografo (piani, lotti, atlante). **Proposta all'autore** prima
   di costruire.
 - Proposta scritta il 23/10/2026: [`corona-proposte.md`](corona-proposte.md) §1 — **il plastico**: un tavolo olografico
@@ -387,6 +387,18 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   sua cella (prima la lasciava alle altre): le celle non dipendono più dallo stato, quindi le cose dei luoghi già visitati possono
   spostarsi una volta (il test «at night they go to bed» ora toglie gli altri letti: quello di un luogo vicino lo
   attirava a volte); gli alberi dei terreni con un modello (bosco) nel plastico sono solo colonne verdi; nessun ADR.
+- **T26b · le fasi — `fatto`** (commit «Corona (T26b)»). `layout.ts`: l'opzione `stages` tiene la griglia con i varchi e quella dopo il
+  programma. `kernel.ts`: `PLACE_PHASES` (bozza, varchi, ambiente, sentieri, lotti e strutture, cose e rune: nome e una riga) e
+  `PlaceMiniature.phases` (per fase caselle, livelli, celle accese: i varchi, ciò che il programma o i sentieri cambiano, i lotti, le celle
+  di cose e rune; prima dei lotti il terreno non è spianato per loro); `showcaseOf` dà la fase del plastico (la sesta finché non si
+  sposta, la stessa cambiando luogo), `stepPhase` la sposta fino alla prima o all'ultima con un messaggio. `corona.ts`: le pedane `less`
+  `more` a terra sotto le colonne esterne del tavolo (si calpestano: E standoci sopra, o un clic), il davanti del tavolo resta libero.
+  `corona3d.ts`: la miniatura nella fase scelta, con ciò che aggiunge contornato di verde, le strutture dalla quinta, cose e rune nella sesta;
+  sul davanti la fase scritta e sei spie. `studio.ts`: «−» «+» nel pannello, la fase spiegata (con «Qui non è servito nulla.» se non ha
+  cambiato niente) e la pianta nella fase. `tests/places.test.ts` (+2). Nel browser (offline): «Campagna del Primo Passo» fase per fase,
+  pedane, pannello che segue, nessun errore. Diverso dal previsto: niente leva, due pedane; i sentieri spesso non servono (l'ambiente
+  lascia il luogo connesso), quindi la fase 4 lo dice; prima riempivo le celle accese, ma col bagliore coprivano il terreno: ora sono
+  contorni. Corretto un difetto di T26a: i modelli animati (`grande`) nel plastico erano invisibili (fotogrammi e corpo nascosti); nessun ADR.
 
 ### T27 · La Sala sistemi, dentro — `da fare` (si comincia da T27a)
 - L'autore chiede un aiuto: far apprezzare la complessità del codice con esempi (cosa fa un sistema, casi d'uso).

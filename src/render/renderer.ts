@@ -238,13 +238,13 @@ export class Renderer {
     if (studio && show) {
       const now = k.showcaseOf(studio.building.id);
       // A place in miniature (T26) read from its saved plan arrives later.
-      const key = now ? `${now.entry.id}|${k.forms.version}|${now.entry.place ? k.miniatureVersion : 0}` : '';
+      const key = now ? `${now.entry.id}|${k.forms.version}|${now.entry.place ? `${k.miniatureVersion}|${now.phase}` : 0}` : '';
       let v = this.shows.get(studio.building.id);
       if (v?.key !== key) {
         if (v) this.scene.remove(v.group);
         v = undefined;
         if (now) {
-          v = { key, ...buildShowcase(k, show, now.entry, studio.building.color), silo: show.device === 'silos' };
+          v = { key, ...buildShowcase(k, show, now.entry, studio.building.color, now.phase), silo: show.device === 'silos' };
           this.shows.set(studio.building.id, v);
           this.scene.add(v.group);
         } else this.shows.delete(studio.building.id);

@@ -2,13 +2,13 @@
 // shows it, with «Riscolpisci» — a building's notice board, with the latest changes to its files, and what a
 // showcase shows (T21), with its arrows.
 
-import type { Kernel, ShowcaseEntry } from '../kernel/kernel';
+import { PLACE_PHASES, type Kernel, type ShowcaseEntry } from '../kernel/kernel';
 import type { StudioItem } from '../kernel/corona';
 import { $, el } from './dom';
 import { icons } from './hud';
 
 /** A showcase and what it shows (the kernel's `ui:showcase` and `studio:showcase`). */
-type Shown = { building: string; name: string; entry: ShowcaseEntry; index: number; count: number };
+type Shown = { building: string; name: string; entry: ShowcaseEntry; index: number; count: number; phase?: number };
 
 export class StudioPanel {
   private root = $('#studio');
@@ -72,7 +72,7 @@ export class StudioPanel {
         })),
       );
     else if (entry.place) {
-      const plan = this.planOf(entry.place.cx, entry.place.cy);
+      const plan = this.planOf(entry.place.cx, entry.place.cy, e.phase);
       if (plan) frame.replaceChildren(plan);
     } else if (entry.model)
       void icons.model?.(entry.model, entry.tint, entry.seed).then((src) => {
@@ -83,6 +83,19 @@ export class StudioPanel {
       b.onclick = () => this.k.stepShowcase(e.building, d);
       return b;
     };
+    // The model of places (T26): its phases, the one shown explained in a line.
+    const phases: Node[] = [];
+    if (e.phase !== undefined) {
+      const p = PLACE_PHASES[e.phase];
+      // A phase that changed nothing here (often the paths: the environment left no corner cut off).
+      const idle = e.phase > 0 && !this.k.miniature(entry.place!.cx, entry.place!.cy)?.phases[e.phase]?.lit.length;
+      const move = (d: number, text: string) => {
+        const b = el('button', {}, text);
+        b.onclick = () => this.k.stepPhase(e.building, d);
+        return b;
+      };
+      phases.push(el('div', { class: 'row' }, move(-1, '−'), el('span', { class: 'note' }, `Fase ${e.phase + 1} di ${PLACE_PHASES.length}, ${p.name}: ${p.what}${idle ? ' Qui non è servito nulla.' : ''}`), move(1, '+')));
+    }
     const open = el('button', {}, 'Apri il file');
     open.onclick = () => {
       this.close();
@@ -92,27 +105,37 @@ export class StudioPanel {
       el('div', { class: 'title' }, entry.label),
       el('div', { class: 'note' }, `${e.name} — ${e.index + 1} di ${e.count}`),
       el('div', { class: 'row showcase' }, step(-1, '<'), frame, step(1, '>')),
+      ...phases,
       ...entry.facts.map(([what, text]) => el('div', { class: 'item' }, el('span', { class: 'path' }, what), ` ${text}`)),
       ...(entry.path ? [el('div', { class: 'row' }, open)] : []),
     );
     this.shown = e.building;
   }
 
-  /** The plan of a place seen from above (T26): its tiles in their colours, the structures, the things and the runes. */
-  private planOf(cx: number, cy: number): HTMLCanvasElement | undefined {
+  /**
+   * The plan of a place seen from above (T26): its tiles in their colours, the structures, the things and the runes; in a
+   * phase (`PLACE_PHASES`), the place as it is then, what the phase adds outlined in green.
+   */
+  private planOf(cx: number, cy: number, phase = PLACE_PHASES.length - 1): HTMLCanvasElement | undefined {
     const mini = this.k.miniature(cx, cy);
     if (!mini) return undefined;
+    const now = mini.phases[phase] ?? { tiles: mini.tiles, lit: [] };
+    const finished = phase >= PLACE_PHASES.length - 1;
     const S = mini.size, px = 8;
     const cv = el('canvas', { width: String(S * px), height: String(S * px), class: 'plan' }) as HTMLCanvasElement;
     const ctx = cv.getContext('2d');
     if (!ctx) return cv;
     for (let i = 0; i < S * S; i++) {
-      ctx.fillStyle = this.k.palette[mini.tiles[i]]?.color ?? '#333';
+      ctx.fillStyle = this.k.palette[now.tiles[i]]?.color ?? '#333';
       ctx.fillRect((i % S) * px, Math.floor(i / S) * px, px, px);
     }
+    ctx.strokeStyle = '#39ff88';
+    ctx.lineWidth = 1.5;
+    for (const i of now.lit) ctx.strokeRect((i % S) * px + 1, Math.floor(i / S) * px + 1, px - 2, px - 2);
     ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 2;
-    for (const s of mini.structures) ctx.strokeRect((s.x - s.w / 2) * px + 1, (s.y - s.h / 2) * px + 1, s.w * px - 2, s.h * px - 2);
+    for (const s of phase >= 4 ? mini.structures : []) ctx.strokeRect((s.x - s.w / 2) * px + 1, (s.y - s.h / 2) * px + 1, s.w * px - 2, s.h * px - 2);
+    if (!finished) return cv;
     for (const t of mini.things) {
       ctx.fillStyle = t.color ?? '#ffffff';
       ctx.beginPath();
