@@ -293,7 +293,7 @@ function relationRules(specie: Species): string {
  * Behind every archetype there are individuals: a name, a past, their own pockets — and a place in
  * society: a job, a family related to the people already known, a daily routine.
  */
-export async function individuate(c: Council, archetype: { name: string; description: string; persona: string; specie?: Species }, ctx: { place: string; common: string[]; society?: string; avoid?: string[] }): Promise<Identity> {
+export async function individuate(c: Council, archetype: { name: string; description: string; persona: string; specie?: Species }, ctx: { place: string; common: string[]; society?: string; avoid?: string[]; focus?: string[] }): Promise<Identity> {
   const specie = archetype.specie ?? 'persona';
   const r = await c.ask<{ nome: string; persona: string; aspetto: string; porta: string[]; mestiere?: string; genere?: string; eta?: string; storia?: string; famiglia?: Relation[]; routine?: Array<{ quando: string; fa: string; dove: string; azione?: string }> }>(
     'narratore',
@@ -314,7 +314,7 @@ export async function individuate(c: Council, archetype: { name: string; descrip
       .filter(Boolean)
       .join('\n'),
     INDIVIDUAL_SCHEMA,
-    { data: { archetype, ctx }, temperature: 1 },
+    { data: { archetype, ctx }, temperature: 1, focus: ctx.focus },
   );
   const job = String(r.mestiere ?? '').slice(0, 40);
   const routine = (r.routine ?? [])

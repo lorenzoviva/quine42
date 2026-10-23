@@ -218,6 +218,23 @@ export class WorldGraph {
     return [...exact, ...near, ...within];
   }
 
+  /** Node ids for some references: ids as they are, names by their exact label (people first); the unknown are left out. */
+  resolve(refs: string[]): string[] {
+    const out = new Set<string>();
+    for (const r of refs) {
+      if (!r) continue;
+      if (this.nodes.has(r)) {
+        out.add(r);
+        continue;
+      }
+      const k = normName(r);
+      const same = (this.byLabel.get(k) ?? []).map((id) => this.nodes.get(id)!);
+      const n = same.find((x) => x.tipo === 'persona') ?? same[0];
+      if (n) out.add(n.id);
+    }
+    return [...out];
+  }
+
   /** The edges from and to a node. */
   edges(id: string): GraphLink[] {
     return [...(this.out.get(id) ?? []), ...(this.in.get(id) ?? [])];
@@ -254,7 +271,7 @@ export class WorldGraph {
     for (const l of this.out.get(id) ?? []) {
       const t = name(l.target);
       switch (l.relation) {
-        case 'legame': parts.push(`${l.legame} di ${t}`); break;
+        case 'legame': parts.push(`${l.legame} ${l.target === 'persona:viandante' ? 'del viandante' : `di ${t}`}`); break;
         case 'e_un': break;
         case 'abita': parts.push(`abita a ${t}`); break;
         case 'lavora': parts.push(`lavora a ${t}`); break;
@@ -283,19 +300,25 @@ export class WorldGraph {
 
   /**
    * The compact text of some nodes and their neighbourhood for a task of the Council: the nodes
-   * asked first, then their neighbours (nearest first), until the budget in characters is spent.
+   * asked first, then their neighbours, then the neighbours of those (not through hubs: a kind, a
+   * region, an environment, the wanderer lead to everything), until the budget in characters is
+   * spent. Leaves (items, kinds, environments…) are named in the lines of who has them, and get a
+   * line of their own only when asked.
    */
   context(ids: string[], budget = 2000): string {
     const order: string[] = [];
     const seen = new Set<string>();
     const push = (id: string) => {
-      if (!seen.has(id) && this.nodes.has(id)) {
+      const n = this.nodes.get(id);
+      if (n && !seen.has(id)) {
         seen.add(id);
-        order.push(id);
+        if (ids.includes(id) || !LEAVES.has(n.tipo)) order.push(id);
       }
     };
     for (const id of ids) push(id);
-    for (const depth of [1, 2]) for (const id of ids) for (const n of this.neighbors(id, depth)) if (n.tipo !== 'fatto' || depth === 1) push(n.id);
+    const first = ids.flatMap((id) => this.neighbors(id, 1));
+    for (const n of first) push(n.id);
+    for (const n of first) if (!HUBS.has(n.tipo) && !n.viandante) for (const m of this.neighbors(n.id, 1)) if (m.tipo !== 'fatto') push(m.id);
     const lines: string[] = [];
     let used = 0;
     for (const id of order) {
@@ -367,8 +390,13 @@ export class WorldGraph {
   }
 }
 
+/** Nodes the context does not walk through: everything is near them. */
+const HUBS = new Set<NodeType>(['tipo', 'regione', 'ambiente', 'oggetto', 'runa']);
+/** Nodes whose name, in the lines of who has them, says all the context needs. */
+const LEAVES = new Set<NodeType>(['oggetto', 'tipo', 'ambiente', 'struttura', 'runa', 'ricetta']);
+
 const DESCRIBE: Partial<Record<NodeType, (n: GraphNode) => string>> = {
-  persona: (n) => (n.viandante ? 'il viandante' : `${n.label}${n.atteso ? ' (nominata, mai incontrata)' : ''}${n.specie === 'animale' ? `, animale${n.genere ? ` ${n.genere}` : ''}` : n.genere === 'femmina' ? ', donna' : n.genere === 'maschio' ? ', uomo' : ''}${n.mestiere ? `, ${n.mestiere}` : ''}`),
+  persona: (n) => (n.viandante ? 'il viandante' : `${n.label}${n.atteso ? ' (se ne parla, ma nessuno l’ha incontrata)' : ''}${n.specie === 'animale' ? `, animale${n.genere ? ` ${n.genere}` : ''}` : n.genere === 'femmina' ? ', donna' : n.genere === 'maschio' ? ', uomo' : ''}${n.mestiere ? `, ${n.mestiere}` : ''}`),
   luogo: (n) => `${n.label} (luogo${typeof n.cx === 'number' ? ` ${n.cx},${n.cy}` : ''})`,
   regione: (n) => `${n.label} (regione)${n.descrizione ? `: ${n.descrizione}` : ''}`,
   trama: (n) => `trama «${n.label}»${n.stato === 'chiusa' ? ' (chiusa)' : ''}: ${n.mistero ?? ''}`,

@@ -100,7 +100,7 @@ export const EFFECTS_GUIDE = [
   'SOLO SU UNA PERSONA — legame {legame}: cosa diventa per il viandante (amico, innamorata, moglie, marito, nemico…); ricordo {testo, peso 1-3}: cosa ricorderà; nascita {nome}: nasce un figlio (solo tra sposi, e solo se la persona lo vuole)',
 ].join('\n');
 
-export async function judgeAction(c: Council, ctx: ActionContext): Promise<ActionJudgement> {
+export async function judgeAction(c: Council, ctx: ActionContext, focus?: string[]): Promise<ActionJudgement> {
   const t = ctx.target;
   const prompt = [
     `Il viandante, davanti a «${t.name}» (${t.kind}: ${t.description}${t.tags.length ? `; tag ${t.tags.join(', ')}` : ''}${t.container ? '; è un contenitore' : ''}), scrive: «${ctx.text}».`,
@@ -120,6 +120,7 @@ export async function judgeAction(c: Council, ctx: ActionContext): Promise<Actio
   const r = await c.ask<{ possibile: boolean; racconto: string; effetti?: unknown[]; ripetibile?: boolean; etichetta?: string; serve?: string; forma?: string }>('narratore', 'action.judge', prompt, JUDGE_SCHEMA, {
     data: ctx,
     temperature: 0.5,
+    focus,
   });
   return {
     possible: !!r.possibile,
@@ -159,6 +160,7 @@ export async function nameSpell(
   runes: Array<{ token: string; name: string; element: string; description: string }>,
   known: Array<{ sequence: string; name: string; description: string }>,
   terrains: string[],
+  focus?: string[],
 ): Promise<SpellDraft> {
   const seq = runes.map((r) => r.token).join(' ');
   const prompt = [
@@ -170,6 +172,7 @@ export async function nameSpell(
   const r = await c.ask<{ nome: string; descrizione: string; costo: number; effetti?: unknown[] }>('narratore', 'spell.name', prompt, SPELL_SCHEMA, {
     data: { runes, known, terrains },
     temperature: 0.7,
+    focus,
   });
   return {
     name: String(r.nome ?? seq).slice(0, 40),
@@ -208,7 +211,7 @@ export interface CraftJudgement {
  * Physicist's sense) decides whether it can be made and from what; the kernel checks that every
  * ingredient is really carried, and a possible recipe becomes a rule of the world (a known recipe).
  */
-export async function judgeCraft(c: Council, text: string, carrying: string[], known: string[]): Promise<CraftJudgement> {
+export async function judgeCraft(c: Council, text: string, carrying: string[], known: string[], focus?: string[]): Promise<CraftJudgement> {
   const prompt = [
     `Il viandante vuole fabbricare: «${text}».`,
     `Porta con sé: ${carrying.join(', ') || 'niente'}.`,
@@ -218,6 +221,7 @@ export async function judgeCraft(c: Council, text: string, carrying: string[], k
   const r = await c.ask<{ possibile: boolean; racconto: string; risultato?: string; descrizione?: string; quantita?: number; ingredienti?: Array<{ oggetto: string; quantita: number }>; attrezzi?: string[] }>('narratore', 'craft.free', prompt, CRAFT_SCHEMA, {
     data: { text, carrying, known },
     temperature: 0.4,
+    focus,
   });
   return {
     possible: !!r.possibile && !!r.risultato,

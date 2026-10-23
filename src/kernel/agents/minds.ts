@@ -58,7 +58,7 @@ const REPLY_SCHEMA: Schema = {
   required: ['dice', 'azione', 'umore'],
 };
 
-export async function npcReply(c: Council, npc: NpcContext, playerText: string): Promise<NpcReply> {
+export async function npcReply(c: Council, npc: NpcContext, playerText: string, focus?: string[]): Promise<NpcReply> {
   const history = npc.history.slice(-10).map((t) => `${t.who === 'giocatore' ? 'Viandante' : npc.name}: ${t.text}`).join('\n');
   const prompt = [
     `Interpreta questo personaggio, in prima persona, restando sempre nel personaggio.`,
@@ -79,6 +79,7 @@ ${npc.secrets}` : '',
   const r = await c.ask<{ dice: string; azione: string; oggetto?: string; umore?: string; oggetti_citati?: string[]; ricordo?: string; importanza?: number; legame?: string }>('narratore', 'npc.reply', prompt, REPLY_SCHEMA, {
     data: { npc, playerText },
     temperature: 0.9,
+    focus,
   });
   const action = (NPC_ACTIONS as readonly string[]).includes(r.azione) ? (r.azione as NpcAction) : 'nessuna';
   return {
@@ -94,13 +95,13 @@ ${npc.secrets}` : '',
 }
 
 /** "Esamina": the Narrator describes what the player looks at (cached by the kernel). */
-export async function examine(c: Council, what: { name: string; description: string; lore?: string }, facts: Record<string, unknown>): Promise<string> {
+export async function examine(c: Council, what: { name: string; description: string; lore?: string }, facts: Record<string, unknown>, focus?: string[]): Promise<string> {
   const r = await c.ask<{ testo: string }>(
     'narratore',
     'text.examine',
     `Il viandante osserva da vicino «${what.name}» (${what.description}${what.lore ? `; ${what.lore}` : ''}). Descrivi in 2-3 frasi cosa nota: dettagli concreti, materiali, odori, un piccolo indizio narrativo. Contesto: ${JSON.stringify(facts)}.`,
     READ_SCHEMA,
-    { data: { what, facts }, temperature: 0.9 },
+    { data: { what, facts }, temperature: 0.9, focus },
   );
   return String(r.testo ?? '');
 }
@@ -108,13 +109,13 @@ export async function examine(c: Council, what: { name: string; description: str
 const READ_SCHEMA: Schema = { type: 'OBJECT', properties: { testo: { type: 'STRING' } }, required: ['testo'] };
 
 /** Text written on things (signs, inscriptions): the Narrator writes it, with the world's measurements. */
-export async function narrate(c: Council, what: { name: string; description: string; lore?: string }, facts: Record<string, unknown>): Promise<string> {
+export async function narrate(c: Council, what: { name: string; description: string; lore?: string }, facts: Record<string, unknown>, focus?: string[]): Promise<string> {
   const r = await c.ask<{ testo: string }>(
     'narratore',
     'text.read',
     `Il viandante legge «${what.name}» (${what.description}${what.lore ? `; ${what.lore}` : ''}). Scrivi ciò che c'è scritto, breve (max 2 righe), nel tono del mondo. Fatti misurabili del mondo da usare se pertinenti: ${JSON.stringify(facts)}.`,
     READ_SCHEMA,
-    { data: { what, facts }, temperature: 0.9 },
+    { data: { what, facts }, temperature: 0.9, focus },
   );
   return String(r.testo ?? '');
 }
@@ -206,7 +207,7 @@ export interface DialoguePerson {
  * Two people meet and talk, as they are: their relation, what they remember, what they are doing,
  * the plots they are in (they may let a clue slip if the wanderer is near). 2-4 short lines.
  */
-export async function npcDialogue(c: Council, a: DialoguePerson, b: DialoguePerson, place: string): Promise<{ lines: Array<{ who: 'a' | 'b'; say: string }>; memoryA?: string; memoryB?: string }> {
+export async function npcDialogue(c: Council, a: DialoguePerson, b: DialoguePerson, place: string, focus?: string[]): Promise<{ lines: Array<{ who: 'a' | 'b'; say: string }>; memoryA?: string; memoryB?: string }> {
   const who = (p: DialoguePerson) => `${p.nome}, ${p.mestiere}; ora: ${p.fa}${p.ricordi ? `\nricordi:\n${p.ricordi}` : ''}${p.segreti ? `\nsegreti:\n${p.segreti}` : ''}`;
   const r = await c.ask<{ battute: Array<{ chi: string; dice: string }>; ricordo_a?: string; ricordo_b?: string }>(
     'narratore',
@@ -218,7 +219,7 @@ export async function npcDialogue(c: Council, a: DialoguePerson, b: DialoguePers
       'Scrivi 2-4 battute brevi e vive, nel loro modo di parlare, coerenti con il loro legame e con ciò che ricordano; se c\'è una trama, lasciate intuire qualcosa senza spiegarla. Il viandante li sta ascoltando.',
     ].join('\n\n'),
     DIALOGUE_SCHEMA,
-    { data: { a, b, place }, temperature: 0.95 },
+    { data: { a, b, place }, temperature: 0.95, focus },
   );
   return {
     lines: (r.battute ?? []).filter((l) => l?.dice).slice(0, 4).map((l) => ({ who: l.chi === 'b' ? 'b' : 'a', say: String(l.dice).slice(0, 140) })),
@@ -270,7 +271,7 @@ const PLOT_SCHEMA: Schema = {
  * The Narrator weaves a horizontal plot among people who exist, in places that exist: a mystery,
  * beats tied to their routines and relations over a few days, clues, maybe a request for the wanderer.
  */
-export async function weavePlot(c: Council, society: string, places: string, recent: string, feedback = ''): Promise<any> {
+export async function weavePlot(c: Council, society: string, places: string, recent: string, feedback = '', focus?: string[]): Promise<any> {
   return c.ask<any>(
     'narratore',
     'plot.weave',
@@ -286,6 +287,6 @@ export async function weavePlot(c: Council, society: string, places: string, rec
       .filter(Boolean)
       .join('\n\n'),
     PLOT_SCHEMA,
-    { data: { society, places, recent }, temperature: 0.9 },
+    { data: { society, places, recent }, temperature: 0.9, focus },
   );
 }

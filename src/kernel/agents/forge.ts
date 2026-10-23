@@ -416,13 +416,14 @@ export async function judgeCombination(
   a: { name: string; description: string },
   b: { name: string; description: string },
   knownItems: string[],
+  focus?: string[],
 ): Promise<{ possible: boolean; result?: string; description?: string; reason: string }> {
   const r = await c.ask<{ possibile: boolean; risultato?: string; descrizione?: string; spiegazione: string }>(
     'narratore',
     'craft.judge',
     `Il giocatore prova a combinare «${a.name}» (${a.description}) con «${b.name}» (${b.description}). Ha senso nel mondo e fisicamente? Se sì, cosa ne esce (uno strumento)? Strumenti già esistenti: ${knownItems.join(', ') || 'nessuno'}. Sii severo: la maggior parte delle combinazioni non produce nulla.`,
     JUDGE_SCHEMA,
-    { data: { a, b, knownItems }, temperature: 0.4 },
+    { data: { a, b, knownItems }, temperature: 0.4, focus },
   );
   c.say('narratore', r.possibile ? 'propone' : 'obietta', r.possibile ? `«${a.name}» + «${b.name}» → «${r.risultato}». ${r.spiegazione}` : r.spiegazione);
   return { possible: !!r.possibile && !!r.risultato, result: r.risultato, description: r.descrizione, reason: r.spiegazione };

@@ -6,6 +6,7 @@
 import { parseJson, type Models, type Schema, type Thinking } from '../ai/models';
 import { COUNCIL_PRINCIPLES } from '../fourthwall';
 import type { FileMap, MagicRune, Spell, TileDef } from '../types';
+import type { WorldGraph } from '../graph';
 
 export type AgentId = 'narratore' | 'cartografo' | 'artista' | 'scultore' | 'fisico' | 'ingegnere' | 'arbitro' | 'referente';
 
@@ -29,6 +30,11 @@ export interface CallOptions {
   /** A model other than the text model (the Sculptor's per class, the Artist's). */
   model?: string;
   thinking?: Thinking;
+  /**
+   * What the task is about, as nodes of the graph of the world (ids, or names of people, places,
+   * things): the agent gets their neighbourhood instead of the whole bible and catalog (T13).
+   */
+  focus?: string[];
 }
 
 export interface FeedEntry {
@@ -53,6 +59,8 @@ export interface WorldView {
   files: FileMap;
   palette: Record<string, TileDef>;
   catalog: CatalogEntry[];
+  /** The graph of the world (ADR-0045), for the tasks with a focus. */
+  graph?: () => WorldGraph;
 }
 
 export interface Bible {
@@ -93,6 +101,16 @@ export function bibleSummary(b: Bible | null, full = false): string {
     .filter(Boolean)
     .join('\n');
 }
+
+/** The head of the bible, for the tasks that bring their own context from the graph. */
+export function bibleHead(b: Bible | null): string {
+  if (!b) return '(nessuna bibbia del mondo)';
+  return [`Titolo: ${b.titolo}`, `Tono: ${b.tono}`, `Sintesi: ${b.sintesi}`].join('\n');
+}
+
+/** Characters of graph context a focused task gets (about 700 tokens), and how many recent rules. */
+export const FOCUS_BUDGET = 2800;
+const FOCUSED_RULES = 12;
 
 export function paletteSummary(palette: Record<string, TileDef>): string {
   return Object.entries(palette)
@@ -173,8 +191,11 @@ export class Council {
     this.onFeed?.(e);
   }
 
-  /** The slice of shared knowledge each agent works with. */
-  context(agent: AgentId): string {
+  /**
+   * The slice of shared knowledge each agent works with. `focused`: the task brings its own context
+   * from the graph, so the Narrator gets only the head of the bible (no list of everything, no catalog).
+   */
+  context(agent: AgentId, focused = false): string {
     const v = this.view();
     const bible = readBible(v.files);
     const style = v.files['world/style.md'] ?? '';
@@ -184,9 +205,10 @@ export class Council {
     const canon = agent === 'narratore' || agent === 'arbitro' ? canonSummary(v.files) : '';
     switch (agent) {
       case 'narratore':
-        parts.push(`## Bibbia del mondo\n${bibleSummary(bible, true)}`, `## Moduli esistenti\n${catalogSummary(v.catalog)}`);
+        if (focused) parts.push(`## Il mondo\n${bibleHead(bible)}`);
+        else parts.push(`## Bibbia del mondo\n${bibleSummary(bible, true)}`, `## Moduli esistenti\n${catalogSummary(v.catalog)}`);
         if (canon) parts.push(canon);
-        if (rules) parts.push(rules);
+        if (rules) parts.push(focused ? rulesSummary(v.files, FOCUSED_RULES) : rules);
         break;
       case 'cartografo': {
         parts.push(`## Bibbia del mondo\n${bibleSummary(bible)}`, `## Terreni\n${paletteSummary(v.palette)}`, `## Moduli posizionabili\n${catalogSummary(v.catalog)}`);
@@ -225,6 +247,23 @@ export class Council {
     return parts.join('\n\n');
   }
 
+  /**
+   * The neighbourhood in the graph of what a task is about (people with their bonds, the place, the
+   * plots, the facts that name them), or '' when the graph knows none of it.
+   */
+  focusContext(focus: string[] | undefined): string {
+    if (!focus?.length) return '';
+    let graph: WorldGraph | undefined;
+    try {
+      graph = this.view().graph?.();
+    } catch {
+      return '';
+    }
+    const ids = graph?.resolve(focus) ?? [];
+    if (!graph || !ids.length) return '';
+    return `## Ciò che il mondo sa di questo compito (usa questi nomi e questi legami, non inventarne altri)\n${graph.context(ids, FOCUS_BUDGET)}`;
+  }
+
   async ask<T>(agent: AgentId, task: string, prompt: string, schema: Schema, opts: CallOptions = {}): Promise<T> {
     return parseJson<T>(await this.write(agent, task, prompt, { ...opts, schema }));
   }
@@ -235,10 +274,12 @@ export class Council {
    */
   async write(agent: AgentId, task: string, prompt: string, opts: CallOptions & { schema?: Schema; system?: string; role?: string } = {}): Promise<string> {
     const role = opts.role ?? this.files[`prompts/agents/${agent}.md`] ?? `Sei il ${AGENTS[agent].name} del gioco.`;
+    // The focus goes last: what comes before it is the same for every focused task of the agent (the cache).
+    const focus = this.focusContext(opts.focus);
     return this.models.text({
       agent,
       task,
-      system: [role, COUNCIL_PRINCIPLES, this.context(agent), opts.system].filter(Boolean).join('\n\n'),
+      system: [role, COUNCIL_PRINCIPLES, this.context(agent, !!focus), opts.system, focus].filter(Boolean).join('\n\n'),
       prompt,
       schema: opts.schema,
       images: opts.images,

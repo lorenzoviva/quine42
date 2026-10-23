@@ -16,7 +16,7 @@ import { STAMP_SHAPES } from './stamps';
 import { repairProgram } from './mj';
 import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './universes';
 import { addPerson, applyRenames, dayPhase, defaultRoutine, freshName, greeting, guessGender, inferActivity, memorySummary, readPeople, remember, repairSociety, similarNames, societySummary, type Activity, type DayPhase, type Person, type Species } from './society';
-import { buildGraph, GRAPH_FILE, graphHash, mergePlaces, placesOf, readGraph, type GraphPlace, type WorldGraph } from './graph';
+import { buildGraph, GRAPH_FILE, graphHash, mergePlaces, placesOf, readGraph, slug as nodeSlug, type GraphPlace, type WorldGraph } from './graph';
 import { activeQuests, plotFromRaw, plotText, PLOTS_FILE, readPlots, reviewPlot, secretsOf, writePlots, type Plot } from './plots';
 import { Input } from './input';
 import { discoverModules, readConfig } from './universe';
@@ -284,7 +284,7 @@ export class Kernel {
     const k = new Kernel(opts);
     k.sandbox = await Sandbox.create(k.makeHost(), opts.wasmUri);
     k.validator = new Validator(k.sandbox);
-    k.council = new Council(opts.models, () => ({ files: k.files, palette: k.palette, catalog: k.catalog() }));
+    k.council = new Council(opts.models, () => ({ files: k.files, palette: k.palette, catalog: k.catalog(), graph: () => k.graph() }));
     k.council.onFeed = (e) => {
       k.archive.onFeed(e, (x) => k.pathForFeed(x));
       k.bus.emit('council', e);
@@ -2122,7 +2122,7 @@ export class Kernel {
     if (ruled) return { ok: false, story: ruled.racconto };
     let j;
     try {
-      j = await judgeCraft(this.council, text, this.carriedNames(), [...this.content.items.values()].map((d) => d.name));
+      j = await judgeCraft(this.council, text, this.carriedNames(), [...this.content.items.values()].map((d) => d.name), this.focusOn([]));
     } catch (e) {
       return { ok: false, story: `(il Concilio tace: ${(e as Error).message})` };
     }
@@ -2171,7 +2171,7 @@ export class Kernel {
     const known = [...this.content.items.values()];
     let verdict;
     try {
-      verdict = await judgeCombination(this.council, ia, ib, known.map((d) => d.name).slice(-150));
+      verdict = await judgeCombination(this.council, ia, ib, known.map((d) => d.name).slice(-150), this.focusOn([ia.name, ib.name]));
     } catch (e) {
       return `Il Concilio non risponde: ${(e as Error).message}`;
     }
@@ -2333,7 +2333,7 @@ export class Kernel {
       }
       case 'leggi':
         try {
-          say(await narrate(this.council, { name: speaker, description: m?.description ?? '', lore: m?.lore }, this.worldFacts()));
+          say(await narrate(this.council, { name: speaker, description: m?.description ?? '', lore: m?.lore }, this.worldFacts(), this.focusOn([speaker, modId && `tipo:${nodeSlug(modId)}`], this.ecs.get(id, 'pos'))));
         } catch (e) {
           say(`(le parole si confondono: ${(e as Error).message})`);
         }
@@ -2346,7 +2346,7 @@ export class Kernel {
           const pk = this.ecs.get(id, 'pickup');
           const what = pk ? this.itemInfo(pk.item) : { name: speaker, description: `${m?.description ?? ''}${identity ? ` ${identity.look}` : ''}`, lore: m?.lore };
           try {
-            text = await examine(this.council, { name: what.name, description: what.description, lore: (what as { lore?: string }).lore }, this.worldFacts());
+            text = await examine(this.council, { name: what.name, description: what.description, lore: (what as { lore?: string }).lore }, this.worldFacts(), this.focusOn([what.name, modId && `tipo:${nodeSlug(modId)}`], this.ecs.get(id, 'pos')));
             this.examined.set(key, text);
           } catch (e) {
             text = `${what.description} (${(e as Error).message})`;
@@ -2558,7 +2558,7 @@ export class Kernel {
         place: this.placeHere()?.name ?? '',
         transcended: this.exitedOnce,
         shape: sub.entity !== undefined && !!this.shapeModel(sub.entity),
-      });
+      }, this.focusOn([sub.name, sub.learnModule && `tipo:${nodeSlug(sub.learnModule.manifest.id)}`, sub.learnItem && `oggetto:${nodeSlug(sub.learnItem)}`], p));
     } catch (e) {
       const msg = `(il Concilio tace: ${(e as Error).message})`;
       say(msg);
@@ -3164,7 +3164,7 @@ export class Kernel {
     const known = Object.entries(this.content.spells).map(([sequence, sp]) => ({ sequence, name: sp.name, description: sp.description }));
     let draft;
     try {
-      draft = await nameSpell(this.council, runes, known, Object.entries(this.palette).filter(([c]) => c !== '?').map(([, t]) => t.name));
+      draft = await nameSpell(this.council, runes, known, Object.entries(this.palette).filter(([c]) => c !== '?').map(([, t]) => t.name), this.focusOn(seq.map((t) => `runa:${nodeSlug(t)}`)));
     } catch (e) {
       this.council.say('narratore', 'errore', `incantesimo ${seq.join(' ')}: ${(e as Error).message}`, undefined, 'spell.name');
       return undefined;
@@ -3316,7 +3316,7 @@ export class Kernel {
       const awaited = (n: string) => readPeople(this.files).attesi.some((a) => a.nome.toLowerCase() === n.toLowerCase());
       const alike = (n: string) => (awaited(n) && !taken().includes(n) ? [] : taken().filter((t) => similarNames(t, n)));
       try {
-        const ask = (avoid?: string[]) => individuate(this.council, { name: m.name, description: m.description ?? '', persona: m.persona!, specie }, { place: this.placeHere()?.name ?? '', common: [...this.content.items.values()].map((d) => d.name), society: societySummary(readPeople(this.files)), avoid });
+        const ask = (avoid?: string[]) => individuate(this.council, { name: m.name, description: m.description ?? '', persona: m.persona!, specie }, { place: this.placeHere()?.name ?? '', common: [...this.content.items.values()].map((d) => d.name), society: societySummary(readPeople(this.files)), avoid, focus: this.focusOn([`tipo:${nodeSlug(modId!)}`], this.ecs.get(id, 'pos')) });
         identity = await ask();
         // A person of the world, not of the Council's table: once more if the fourth wall breaks,
         // or if the name is like someone else's.
@@ -3573,7 +3573,7 @@ export class Kernel {
       segreti: secretsOf(plots, who.name, day),
     });
     try {
-      const r = await npcDialogue(this.council, as(ia, ib, legame), as(ib, ia), this.chunkAt(this.ecs.get(a, 'pos')?.x ?? 0, this.ecs.get(a, 'pos')?.y ?? 0)?.place?.name ?? 'qui');
+      const r = await npcDialogue(this.council, as(ia, ib, legame), as(ib, ia), this.chunkAt(this.ecs.get(a, 'pos')?.x ?? 0, this.ecs.get(a, 'pos')?.y ?? 0)?.place?.name ?? 'qui', this.focusOn([ia.name, ib.name], this.ecs.get(a, 'pos')));
       r.lines.forEach((l, i) => this.queuedSpeech.push({ id: l.who === 'a' ? a : b, text: l.say, at: this.time + i * 2.6 }));
       if (r.memoryA) this.rememberAbout(ia.name, r.memoryA, ib.name, 1);
       if (r.memoryB) this.rememberAbout(ib.name, r.memoryB, ia.name, 1);
@@ -3650,7 +3650,7 @@ export class Kernel {
     // The plot is checked against the people and the canon; what does not hold goes back to the
     // Narrator once, with the reasons; the second answer is repaired, or dropped if it cannot be.
     const attempt = async (feedback?: string) => {
-      const raw = plotFromRaw(await weavePlot(this.council, societySummary(society, 20), places, recent, feedback), this.day(), `trama-${Date.now().toString(36)}`);
+      const raw = plotFromRaw(await weavePlot(this.council, societySummary(society, 20), places, recent, feedback, this.focusOn(society.persone.slice(-20).map((p) => p.nome))), this.day(), `trama-${Date.now().toString(36)}`);
       return { titolo: raw.titolo, ...reviewPlot(raw, society) };
     };
     let plot: Plot | undefined;
@@ -3833,7 +3833,7 @@ export class Kernel {
         memories: memorySummary(person?.ricordi, 12),
         bond: person?.legameViandante,
         secrets: secretsOf(readPlots(this.files), name, this.day()),
-        persona: (identity?.persona ?? m.persona) + social, mood: mind.mood, mode: mind.mode, carrying, place: this.placeHere()?.name ?? '', history: mind.history, facts: this.worldFacts() }, text);
+        persona: (identity?.persona ?? m.persona) + social, mood: mind.mood, mode: mind.mode, carrying, place: this.placeHere()?.name ?? '', history: mind.history, facts: this.worldFacts() }, text, this.focusOn([name], this.ecs.get(id, 'pos')));
     } catch (e) {
       return { say: `(${name} ti guarda in silenzio — ${(e as Error).message})`, action: 'nessuna', mood: mind.mood };
     }
@@ -3943,6 +3943,17 @@ export class Kernel {
     } finally {
       this.growing = false;
     }
+  }
+
+  /**
+   * What a task of the Narrator is about, as nodes of the graph of the world (T13): the things named,
+   * and the place where it happens (the wanderer's, or the given carpet point's). Not the wanderer: what
+   * they carry is in the prompts, and who is bound to them says it in their own line.
+   */
+  focusOn(refs: Array<string | false | undefined>, at?: { x: number; y: number }): string[] {
+    const p = at ?? this.playerCarpet();
+    const ch = this.chunkAt(p.x, p.y);
+    return [...refs.filter((r): r is string => !!r), ...(ch ? [`luogo:${nodeSlug(`${ch.cx}_${ch.cy}`)}`] : [])];
   }
 
   placeHere(): Place | undefined {

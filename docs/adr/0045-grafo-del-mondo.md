@@ -1,6 +1,6 @@
 # ADR-0045 — Il grafo del mondo (nel kernel) e Graphify (per lo sviluppo)
 
-Data: 2026-10-22 · Stato: accettato (task T07 del backlog); attuato in T12 (23/10/2026), il contesto degli agenti in T13 · Segue ADR-0020 (società),
+Data: 2026-10-22 · Stato: accettato (task T07 del backlog); attuato in T12 (23/10/2026), il contesto degli agenti in T13 (23/10/2026) · Segue ADR-0020 (società),
 ADR-0021 (due repository), ADR-0023 (atlante), ADR-0024 (trame), ADR-0025 (due tavoli).
 
 ## Contesto
@@ -100,3 +100,21 @@ Misure: `valmora` (con i moduli del seme sotto) → 2 164 nodi (58 persone, 285 
 oggetti inventati, `npc.custode` mai forgiato), 25 legami non simmetrici, 14 impossibili per specie (la specie dal tipo:
 il registro di `valmora` non è ancora riparato), 50 coppie di nomi, 1 tappa in un luogo ignoto («Prato dell'Eco»).
 `aurora`: 196 luoghi, 103 KB, nessuna incoerenza.
+
+## Attuazione del contesto (T13, 23/10/2026)
+- `CallOptions.focus` (id di nodi o nomi esatti, risolti da `WorldGraph.resolve`) e `WorldView.graph`. Con un focus che il
+  grafo conosce, il Narratore riceve la testa della bibbia (titolo, tono, sintesi), il canone delle rune, le ultime 12 regole
+  e il vicinato dei nodi (`context`, 2 800 caratteri) **in fondo** al system: ciò che viene prima è uguale per ogni compito
+  con focus, e la cache lo serve. Senza focus, o se nessun nodo è noto, i riassunti di prima (Genesi, Fucina, pacchetti).
+- `kernel.focusOn(cose, punto)`: le cose nominate e il luogo del punto (`luogo:<cx>_<cy>`). Il viandante no: la sua riga
+  è l'elenco della borsa, già nei prompt che servono; chi gli è legato lo dice nella propria riga («rivale del viandante»).
+- `context` non passa più per gli snodi (tipi, regioni, ambienti, oggetti, rune: portano a tutto) e non dà una riga alle
+  foglie (oggetti, tipi, ambienti, strutture, rune, ricette), che sono nominate nelle righe di chi le ha.
+- Compiti con focus: `npc.reply`, `npc.dialogue`, `npc.individuate`, `text.examine`, `text.read`, `action.judge`,
+  `craft.free`, `craft.judge`, `spell.name`, `plot.weave`. L'Arbitro, il Cartografo e la Fucina restano come prima.
+
+Misure (`tests/focus.test.ts`, su `valmora`, token stimati a 4 caratteri, passati dal registro dei consumi al prezzo di
+`gemini-3.1-flash-lite`): `npc.reply` 5 818 → 3 310 token (−43 %), `plot.weave` 6 112 → 3 629 (−41 %); tolti bibbia
+(1 290) e catalogo (1 969), aggiunti 70 + ~710 di grafo. Il resto (ruolo, principi, canone ≈ 2 300) è fisso e va in cache.
+Nel browser (`aurora`, offline) il contesto del Narratore passa da 5 567 a 4 147 caratteri prima del focus. Non misurato
+con chiamate vere a Gemini (costano): il registro dei consumi lo mostrerà nelle prossime partite.
