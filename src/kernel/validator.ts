@@ -130,6 +130,7 @@ export class Validator {
     if (m.actions && (!Array.isArray(m.actions) || m.actions.some((a: any) => typeof a?.id !== 'string' || typeof a?.label !== 'string'))) err('actions: lista di {id, label}');
     if (m.items) errors.push(...this.validateItems(m.items).map((e) => `${path}: ${e}`));
     if (m.fragments && !Array.isArray(m.fragments)) err('fragments deve essere una lista');
+    if (m.casi && (!Array.isArray(m.casi) || m.casi.some((c: any) => typeof c?.titolo !== 'string' || !Array.isArray(c?.guarda)))) err('casi: lista di {titolo, guarda, …}');
     return errors.length ? { errors } : { manifest: m as Manifest, errors };
   }
 

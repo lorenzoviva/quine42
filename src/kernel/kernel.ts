@@ -39,10 +39,11 @@ import { agentReply, examine, narrate, npcDialogue, npcReply, referenteReply, we
 import { planGenesis } from './agents/genesis';
 import { councilSession, judgeAction, judgeCraft, nameSpell } from './agents/effects';
 import { cleanPanel, designMechanic } from './agents/mechanics';
+import { BENCH, cleanCases, runCase, type BenchRun } from './bench';
 import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Identity } from './agents/content';
 import { addItem, CARRY_CAPACITY, countItem, equippedItem, moveSlot, newInventory, putSlot, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
 import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH } from './relief';
-import type { ActionDef, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
+import type { ActionDef, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
 
 export interface Chunk {
   cx: number;
@@ -231,6 +232,8 @@ export interface KernelOptions {
   /** The universe repository on disk (ADR-0021), and its history from earlier sessions. */
   backend?: UniverseBackend;
   past?: PastCommit[];
+  /** A kernel in miniature for the bench of the Sala sistemi (T27): a fixed scene, nothing generated, nothing saved. */
+  bench?: { terreno?: string[] };
 }
 
 /** Documentation of the live symbols runes can bind to. */
@@ -376,8 +379,14 @@ export class Kernel {
   view = { w: 32, h: 20 };
   readonly logs: LogEntry[] = [];
 
+  /** The scene of a kernel in miniature (T27), if this is one. */
+  readonly bench?: { terreno?: string[] };
+  private wasmUri?: string;
+
   private constructor(opts: KernelOptions) {
     this.models = opts.models;
+    this.bench = opts.bench;
+    this.wasmUri = opts.wasmUri;
     this.chunkStore = opts.chunks ?? new MemoryChunks();
     this.forms = new Forms(opts.forms ?? new InlineRunner());
   }
@@ -399,7 +408,7 @@ export class Kernel {
     k.faults.onRaise = (f, isNew) => {
       if (isNew) k.log('fault', `${f.key}: ${f.message}`);
       k.bus.emit('fault', { fault: f, isNew });
-      if (isNew) void k.repairGenerated(f.key, f.message);
+      if (isNew && !k.bench) void k.repairGenerated(f.key, f.message);
     };
     // The usage ledger: every call is counted; the file is written before every commit (it survives rollbacks).
     k.usage.load(repo.working[USAGE_FILE]);
@@ -410,6 +419,10 @@ export class Kernel {
       k.writeGraph();
     };
     k.applyFiles(repo.working, { reset: true });
+    if (k.bench) {
+      k.generationHeld = true;
+      return k;
+    }
     k.loadState();
     k.ensureAtlas();
     k.reviewSociety();
@@ -929,6 +942,7 @@ export class Kernel {
   private genDraft(cx: number, cy: number): string {
     const S = this.config.chunkSize;
     const n = S * S;
+    if (this.bench) return this.benchDraft(cx, cy);
     if (this.terrain) {
       const id = this.terrain.manifest.id;
       const { value, failed } = this.runModule(id, 'generate_chunk', cx, cy, this.config.seed, S);
@@ -939,6 +953,21 @@ export class Kernel {
       }
     }
     return '?'.repeat(n);
+  }
+
+  /** The scene of the bench (5 × 5 around the cell of the wanderer, (0, 0)); the first walkable terrain around it. */
+  private benchDraft(cx: number, cy: number): string {
+    const S = this.config.chunkSize;
+    const base = Object.keys(this.palette).find((c) => c !== '?' && !this.palette[c].solid && !this.palette[c].layer?.match(/liquid|wall|door/)) ?? '?';
+    const scene = this.bench?.terreno;
+    const h = Math.floor(BENCH / 2);
+    let out = '';
+    for (let r = 0; r < S; r++)
+      for (let c = 0; c < S; c++) {
+        const code = [...(scene?.[cy * S + r + h] ?? '')][cx * S + c + h];
+        out += code && this.palette[code] ? code : base;
+      }
+    return out;
   }
 
   private regenerateDraft(ch: Chunk): void {
@@ -3570,6 +3599,22 @@ export class Kernel {
         this.council.say('kernel', 'scarta', `meccanica «${d.name}»: ${feedback}`, 'ingegnere', 'mechanic.design');
         continue;
       }
+      // Its cases run with the real code in a kernel in miniature (T27): only those that show it working stay.
+      const { cases, errors: caseErrors } = cleanCases(d.cases, panel, logic.split('\n').length);
+      const failed = [...caseErrors];
+      const kept: BenchCase[] = [];
+      for (const c of cases) {
+        const run = await this.runBenchCase(manifest, logic, c);
+        if (run.errori.length) failed.push(`«${c.titolo}»: ${run.errori.join('; ')}`);
+        else kept.push(c);
+      }
+      if (!cases.length) failed.push('nessun caso d’uso da mettere in scena');
+      if (failed.length) this.council.say('kernel', 'scarta', `casi di «${d.name}»: ${failed.join('; ')}`, 'ingegnere', 'mechanic.design');
+      if (!kept.length && attempt === 0) {
+        feedback = `i casi d'uso non mostrano la meccanica: ${failed.join('; ')}`;
+        continue;
+      }
+      if (kept.length) manifest.casi = kept;
       const dir = `modules/${id}/`;
       this.repo.write(`${dir}manifest.json`, JSON.stringify(manifest, null, 2) + '\n');
       this.repo.write(`${dir}logic.lua`, logic);
@@ -3581,6 +3626,15 @@ export class Kernel {
       return { ok: true, id, summary: `Nuova meccanica: ${d.name} — ${d.description} (la trovi nell'inventario, scheda «${panel!.titolo}»).` };
     }
     return { ok: false, summary: `L'Ingegnere non è riuscito a scrivere una meccanica valida: ${feedback}` };
+  }
+
+  /**
+   * Runs a case of a system in a kernel in miniature (T27): only `core.*`, the content and that system, on the
+   * case's scene; objects the universe lacks become trial objects. Nothing of this universe changes.
+   */
+  runBenchCase(manifest: Manifest, logic: string, c: BenchCase): Promise<BenchRun> {
+    const known = (name: string) => this.content.byName(name)?.id ?? (this.content.get(name) ? name : undefined);
+    return runCase(this.files, manifest, logic, c, { wasmUri: this.wasmUri, boot: (o) => Kernel.boot(o), known });
   }
 
   /** States of the wanderer (on horseback, with a backpack…): what they change, until when. */

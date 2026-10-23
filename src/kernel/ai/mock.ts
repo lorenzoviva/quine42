@@ -254,6 +254,17 @@ export class MockModels implements Models {
             'end',
             'return M',
           ].join('\n'),
+          casi: [
+            {
+              titolo: "Si indossa l'elmo",
+              racconto: "Il viandante mette l'elmo in testa: la difesa sale a 3 e il passo rallenta un poco.",
+              oggetti: [{ nome: 'Elmo di prova', posto: 'testa', bonus_json: '{"difesa":3,"velocita":0.95}' }],
+              passi: [{ tipo: 'slot', slot: 'testa', oggetto: 'Elmo di prova' }],
+              durata: 1,
+              guarda: ['difesa.valore', 'stati.equipaggiamento'],
+              righe: [4, 9, 14, 17],
+            },
+          ],
         };
       case 'referente.coordinate': {
         const t = String(d.text ?? '');

@@ -19,6 +19,34 @@ const ELEMENT: Schema = {
   required: ['tipo', 'etichetta'],
 };
 
+/** A case of the bench (T27): a small scene that shows the mechanic working, run with the real code. */
+const CASE: Schema = {
+  type: 'OBJECT',
+  properties: {
+    titolo: { type: 'STRING', description: 'il caso in poche parole (es. «Si indossa l’elmo»)' },
+    racconto: { type: 'STRING', description: 'cosa si vede succedere, prima e dopo' },
+    viandante_json: { type: 'STRING', description: 'componenti del viandante prima del caso, come JSON (es. {"needs":{"health":40}}), facoltativo' },
+    oggetti: {
+      type: 'ARRAY',
+      description: 'ciò che il viandante porta: un oggetto che esiste (per nome) o uno di prova, con il suo posto e i bonus',
+      items: { type: 'OBJECT', properties: { nome: { type: 'STRING' }, posto: { type: 'STRING' }, categoria: { type: 'STRING' }, bonus_json: { type: 'STRING', description: 'es. {"difesa":3}' } }, required: ['nome'] },
+    },
+    passi: {
+      type: 'ARRAY',
+      description: 'cosa succede, in ordine: un oggetto in uno slot del pannello, toglierlo, un pulsante, un po’ di tempo',
+      items: {
+        type: 'OBJECT',
+        properties: { tipo: { type: 'STRING', enum: ['slot', 'togli', 'pulsante', 'attendi'] }, slot: { type: 'STRING' }, oggetto: { type: 'STRING' }, azione: { type: 'STRING' }, secondi: { type: 'NUMBER' } },
+        required: ['tipo'],
+      },
+    },
+    durata: { type: 'NUMBER', description: 'secondi dopo i passi (al massimo 30)' },
+    guarda: { type: 'ARRAY', items: { type: 'STRING' }, description: 'i campi "componente.campo" del viandante che il caso cambia (es. difesa.valore)' },
+    righe: { type: 'ARRAY', items: { type: 'INTEGER' }, description: 'le righe di logica (da 1) che fanno il caso' },
+  },
+  required: ['titolo', 'racconto', 'durata', 'guarda'],
+};
+
 const MECHANIC_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
@@ -27,8 +55,9 @@ const MECHANIC_SCHEMA: Schema = {
     pannello: { type: 'OBJECT', properties: { titolo: { type: 'STRING' }, elementi: { type: 'ARRAY', items: ELEMENT } }, required: ['titolo', 'elementi'] },
     componenti_json: { type: 'STRING', description: 'componenti iniziali del viandante, come JSON (es. {"reputazione":{"valore":0}}), facoltativo' },
     logica: { type: 'STRING', description: 'logic.lua del modulo (return M), con on_slot(user, slot, item, panel), on_ui(user, azione) e/o update(dt)' },
+    casi: { type: 'ARRAY', items: CASE, description: '1-3 casi d’uso che il banco della Sala sistemi mette in scena con il codice vero' },
   },
-  required: ['nome', 'descrizione', 'pannello', 'logica'],
+  required: ['nome', 'descrizione', 'pannello', 'logica', 'casi'],
 };
 
 export interface MechanicDraft {
@@ -37,10 +66,12 @@ export interface MechanicDraft {
   panel: Omit<UiPanel, 'id'>;
   components?: Record<string, unknown>;
   logic: string;
+  /** The cases as the Engineer wrote them (the kernel cleans and runs them, T27). */
+  cases: unknown[];
 }
 
 export async function designMechanic(c: Council, request: string, ctx: { items: string[]; mechanics: string[]; feedback?: string }): Promise<MechanicDraft> {
-  const r = await c.ask<{ nome: string; descrizione: string; pannello: { titolo: string; elementi: UiElement[] }; componenti_json?: string; logica: string }>(
+  const r = await c.ask<{ nome: string; descrizione: string; pannello: { titolo: string; elementi: UiElement[] }; componenti_json?: string; logica: string; casi?: unknown[] }>(
     'ingegnere',
     'mechanic.design',
     [
@@ -48,6 +79,7 @@ export async function designMechanic(c: Council, request: string, ctx: { items: 
       `Oggetti esistenti (con il posto dove si indossano, se c'è): ${ctx.items.slice(0, 60).join(', ') || 'nessuno'}.`,
       `Meccaniche già presenti: ${ctx.mechanics.join(', ') || 'nessuna'}.`,
       'Scrivi un modulo di sistema con un pannello (il kernel lo disegna come scheda dell\'inventario) e la sua logica Lua. Vedi il tuo ruolo, sezione «Meccaniche e interfacce», per gli elementi del pannello e l\'API (ui.slot, items.bonus, stati del viandante). La meccanica deve avere conseguenze vere nel gioco (es. le armature danno difesa e pesano, le armi si impugnano, uno zaino dà peso).',
+      'In "casi" 1-3 casi d’uso, come esempi per chi visita la Sala sistemi: il kernel li esegue con il tuo codice in un mondo in miniatura (il viandante, ciò che porta, i passi) e controlla che i campi di "guarda" cambino davvero.',
       ctx.feedback ? `IL TENTATIVO PRECEDENTE NON ANDAVA: ${ctx.feedback}` : '',
     ]
       .filter(Boolean)
@@ -67,6 +99,7 @@ export async function designMechanic(c: Council, request: string, ctx: { items: 
     panel: { titolo: String(r.pannello?.titolo ?? r.nome ?? 'Meccanica').slice(0, 30), elementi: Array.isArray(r.pannello?.elementi) ? r.pannello.elementi : [] },
     components,
     logic: String(r.logica ?? ''),
+    cases: Array.isArray(r.casi) ? r.casi : [],
   };
 }
 

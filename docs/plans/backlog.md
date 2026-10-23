@@ -416,7 +416,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   `sampleDrafts` ora sceglie in modo deterministico una bozza boscosa, una aperta e una con acqua (le tre vecchie per prime, poi
   attorno all'origine), in cache; tutti gli ambienti del seme restano validi. Nessun ADR.
 
-### T27 · La Sala sistemi, dentro — `da fare` (si comincia da T27a)
+### T27 · La Sala sistemi, dentro — `da fare` (T27c fatto; si continua da T27a)
 - L'autore chiede un aiuto: far apprezzare la complessità del codice con esempi (cosa fa un sistema, casi d'uso).
   **Proposta all'autore** (es. ogni sistema come un «caso» animato: prima, regola, dopo).
 - Proposta scritta il 23/10/2026: [`corona-proposte.md`](corona-proposte.md) §2 — **la catena** (ogni sistema una
@@ -427,6 +427,19 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   meccaniche (`mech.*`, oggi nell'Archivio) vanno nella Sala sistemi?
 - Deciso (23/10): il caso con il **codice vero** (kernel in miniatura nella teca); le meccaniche `mech.*` vanno nella
   **Sala sistemi** (l'Archivio resta riserva).
+- **T27c · i casi dei sistemi forgiati — `fatto`** (commit «Corona (T27c)»). Fatto prima di T27b, quindi qui sono nati il
+  formato e l'esecuzione dei casi (ADR-0052): `Manifest.casi` (`BenchCase` in `types.ts`); `src/kernel/bench.ts` con
+  `cleanCases`, `benchFiles` e `runCase` (un `Kernel` con `KernelOptions.bench`: `core.*`, i moduli che non sono sistemi e il
+  sistema del caso, terreno della scena 5 × 5, generazione ferma, niente stato, società, grafo né riparazioni; oggetti di prova
+  in `bench.prova`; 20 tick/s, un fotogramma ogni mezzo secondo e dopo ogni passo, messaggi, guasti); `kernel.runBenchCase`.
+  `mechanic.design` chiede 1-3 `casi` (schema, prompt dell'Ingegnere, `MockModels`: «Si indossa l'elmo»); `forgeMechanic` li
+  esegue e tiene quelli in cui ciò che guardano cambia (se nessuno regge, un secondo tentativo; poi entra senza casi). Test in
+  `tests/bench.test.ts` (7: un caso di `sys.needs` e uno di `sys.fire` col codice del seme, errori, file del banco, pulizia,
+  la meccanica con il suo caso e il codice riscritto che cambia il caso, il ritorno all'Ingegnere). Diverso dal previsto: niente
+  nel browser (nessun disegno: la teca è T27b); un caso costa ~60-300 ms in Node.
+- **T27b, dopo T27c**: i casi del seme vanno scritti come `casi` nei manifest di `sys.*` (il formato e `runCase` ci sono, provati
+  con fuoco e bisogni); restano la teca, lo schermo con le `righe` e il pannello, che disegnano `BenchRun.frames`. Per i casi
+  di `sys.wander`, `sys.follow` e `sys.physics` può servire un passo nuovo in `BenchStep` (es. l'ora del giorno, «segui»).
 - **T27d · le meccaniche nella Sala sistemi** (da T32): `folderOf` in `corona.ts` manda `mech.*` a `sistemi` (oggi
   finiscono in `altro`, l'Archivio); nella catena di T27a una meccanica è una stazione col suo pannello (`manifest.ui`).
   Test: un universo con una meccanica forgiata non ha l'Archivio nello studio.

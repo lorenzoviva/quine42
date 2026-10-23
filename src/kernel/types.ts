@@ -279,7 +279,43 @@ export interface Manifest {
   /** Furniture and chests: a container filled from a loot table the first time it is opened. */
   container?: { size: number; loot: string };
   actions?: ActionDef[];
+  /** Cases of a system (T27): small scenes the bench of the Sala sistemi runs with the real code. */
+  casi?: BenchCase[];
 }
+
+/**
+ * A case of a system (T27): a scene of 5 × 5 tiles around the wanderer, what happens in it, and what to watch.
+ * The bench runs it in a kernel in miniature (only `core.*`, the content and this system): before, the rule, after.
+ */
+export interface BenchCase {
+  titolo: string;
+  /** The case in words: what the visitor sees happen. */
+  racconto: string;
+  /** Five rows of five terrain codes, the wanderer in the middle (default: the first walkable terrain). */
+  terreno?: string[];
+  /** The wanderer: components set before the case (e.g. {"needs": {"health": 50}}), what they carry. */
+  viandante?: { componenti?: Record<string, Record<string, unknown>>; oggetti?: BenchItem[] };
+  /** Things of the scene, by module, in tiles from the wanderer. */
+  cose?: Array<{ modulo: string; x: number; y: number; componenti?: Record<string, Record<string, unknown>> }>;
+  /** What happens, in order: an object into a slot of the panel, out of it, a button, some time. */
+  passi?: BenchStep[];
+  /** Seconds the case lasts after its steps (at most 30). */
+  durata: number;
+  /** What changes: "component.field" of the wanderer, or "<n>:component.field" of the n-th thing (from 0). */
+  guarda: string[];
+  /** The lines of logic.lua that matter (from 1), lit on the screen above the bench. */
+  righe?: number[];
+}
+
+/** An object of a case: one of the universe (by name or id) or a trial one, only for the bench. */
+export interface BenchItem {
+  nome: string;
+  posto?: string;
+  categoria?: string;
+  bonus?: Record<string, number>;
+}
+
+export type BenchStep = { tipo: 'slot'; slot: string; oggetto: string } | { tipo: 'togli'; slot: string } | { tipo: 'pulsante'; azione: string } | { tipo: 'attendi'; secondi: number };
 
 export interface ModuleEntry {
   manifest: Manifest;
