@@ -8,6 +8,7 @@
 
 import * as THREE from 'three';
 import type { Kernel } from '../kernel/kernel';
+import { Bloom } from './bloom';
 import { Avatars, buildCoronaRing, buildRoom } from './corona3d';
 import { CUT, U } from './materials';
 import { Overlay } from './overlay';
@@ -24,6 +25,7 @@ export class Renderer {
   distance = 15;
 
   private gl: THREE.WebGLRenderer;
+  private bloom: Bloom;
   private scene = new THREE.Scene();
   readonly camera = new THREE.PerspectiveCamera(38, 1, 0.1, 400);
   private hemi = new THREE.HemisphereLight(0xdcecff, 0x5a4a3a, 1.1);
@@ -59,6 +61,7 @@ export class Renderer {
     this.gl.shadowMap.enabled = true;
     this.gl.localClippingEnabled = true;
     this.gl.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.bloom = new Bloom(this.gl, this.scene, this.camera);
     this.sun.castShadow = true;
     this.sun.shadow.mapSize.set(2048, 2048);
     Object.assign(this.sun.shadow.camera, { left: -22, right: 22, top: 22, bottom: -22, near: 1, far: 90 });
@@ -103,6 +106,7 @@ export class Renderer {
     this.h = this.canvas.clientHeight || window.innerHeight;
     this.gl.setPixelRatio(dpr);
     this.gl.setSize(this.w, this.h, false);
+    this.bloom.setSize(this.w, this.h, dpr);
     this.camera.aspect = this.w / this.h;
     this.camera.updateProjectionMatrix();
     this.overlay.resize(this.w, this.h, dpr);
@@ -200,7 +204,7 @@ export class Renderer {
     this.camera.lookAt(this.target);
     this.sun.position.copy(this.target).add(new THREE.Vector3(-14, 24, 10));
     this.sun.target.position.copy(this.target);
-    this.gl.render(this.scene, this.camera);
+    this.bloom.render(dt);
     this.drawOverlay(studio, revealed, interior, g);
   }
 

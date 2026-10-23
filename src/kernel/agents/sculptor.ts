@@ -289,6 +289,8 @@ export interface ActionLetter {
   lettera: string;
   nome?: string;
   colore?: string;
+  /** The letter gives light (`glow`): an action that lights or puts out swaps it with another. */
+  luce?: boolean;
   voxel: number;
 }
 
@@ -303,7 +305,7 @@ export function actionLetters(xml: string, cls: AssetClass): { background: strin
   for (const c of g.cells) counts.set(c, (counts.get(c) ?? 0) + 1);
   const pal = model.program.palette;
   const letters = g.alphabet
-    .map((ch, code) => ({ lettera: ch, nome: pal[ch]?.name, colore: pal[ch]?.color, hidden: pal[ch]?.hidden, voxel: counts.get(code) ?? 0 }))
+    .map((ch, code) => ({ lettera: ch, nome: pal[ch]?.name, colore: pal[ch]?.color, hidden: pal[ch]?.hidden, ...(pal[ch]?.glow ? { luce: true } : {}), voxel: counts.get(code) ?? 0 }))
     .filter((l) => l.lettera !== '.' && l.colore && !l.hidden && l.voxel > 0)
     .sort((a, b) => b.voxel - a.voxel)
     .map(({ hidden: _, ...l }) => l);
@@ -359,7 +361,7 @@ export async function sculptAction(c: Council, req: ActionRequest, model: string
   } catch {
     return undefined;
   }
-  const letters = info.letters.map((l) => `${l.lettera} (${l.nome ?? 'senza nome'}, #${l.colore?.replace('#', '')}, ${l.voxel} voxel)`).join(', ');
+  const letters = info.letters.map((l) => `${l.lettera} (${l.nome ?? 'senza nome'}, #${l.colore?.replace('#', '')}, ${l.voxel} voxel${l.luce ? ", luminosa" : ""})`).join(', ');
   const prompt = [
     `Il viandante, davanti a «${req.nome}», fa: «${req.testo}». Il Concilio ha deciso che il suo aspetto cambia così: ${req.cambia}.`,
     `Scrivi UNA regola <action name="${req.azione}" label="${req.etichetta}">nodi</action> per il programma qui sotto: i nodi girano una volta sul modello finito e lo cambiano (come la porta che si apre: <action name="apri" label="Apri la porta"><all><rule in="O" out="h"/></all></action>).`,

@@ -24,7 +24,7 @@ export interface FormMeshes {
 
 export type WorkerAnswer = { id: number; ok: true; result: FormResult } | { id: number; ok: false; error: string };
 
-const buffers = (m: MeshData) => [m.positions.buffer, m.normals.buffer, m.colors.buffer, m.indices.buffer, ...(m.sway ? [m.sway.buffer] : [])];
+const buffers = (m: MeshData) => [m.positions.buffer, m.normals.buffer, m.colors.buffer, m.indices.buffer, ...(m.sway ? [m.sway.buffer] : []), ...(m.glow ? [m.glow.buffer] : [])];
 
 self.onmessage = (ev: MessageEvent<{ id: number; req: FormRequest }>) => {
   const { id, req } = ev.data;

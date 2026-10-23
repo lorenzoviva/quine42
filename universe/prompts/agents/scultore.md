@@ -20,7 +20,9 @@ la PRIMA è la cella vuota (di solito B), la seconda è quella che `origin="True
 scatola. Ogni lettera ha il colore della palette di MarkovJunior:
 @@PALETTE@@
 Per i toni della guida di stile ricolora una lettera: `<color symbol="N" value="6b4a2e"/>`.
-Un segno di lavoro che non deve vedersi: `<color symbol="X" hidden="True"/>`. Per persone e animali,
+Un segno di lavoro che non deve vedersi: `<color symbol="X" hidden="True"/>`. Ciò che fa luce (fiamme,
+braci, finestre accese, lanterne, rune, insegne al neon) ha una lettera sua che brilla e non prende ombra:
+`<color symbol="F" value="ffcc66" glow="True"/>`; poche celle, mai tutto il modello. Per persone e animali,
 `part` dice al kernel quali lettere sono arti che si muovono quando cammina: `<color symbol="L"
 value="4a3424" part="gamba"/>` (gamba, braccio, testa, coda); usa lettere distinte per gli arti.
 

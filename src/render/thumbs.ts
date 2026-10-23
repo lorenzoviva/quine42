@@ -3,6 +3,7 @@
 
 import * as THREE from 'three';
 import type { Kernel } from '../kernel/kernel';
+import { glowing } from './materials';
 import { geoOf } from './models';
 
 const PX = 96;
@@ -12,7 +13,7 @@ export class Thumbs {
   private scene = new THREE.Scene();
   private camera = new THREE.PerspectiveCamera(30, 1, 0.01, 50);
   private cache = new Map<string, Promise<string | undefined>>();
-  private material = new THREE.MeshLambertMaterial({ vertexColors: true });
+  private material = glowing(new THREE.MeshLambertMaterial({ vertexColors: true }), 'thumb');
 
   constructor(private k: Kernel) {
     this.scene.add(new THREE.HemisphereLight(0xffffff, 0x6a5a4a, 1.6));

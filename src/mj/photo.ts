@@ -165,7 +165,10 @@ export function paint(g: Grid3, palette: Record<string, PaletteEntry>, view: num
         const n = y + z;
         let k = 1;
         let shadeFront = 0.8;
-        if (o.light) {
+        // What glows is not shaded: it is its own light.
+        const glow = !!palette[g.alphabet[t.cells[x + y * t.X + z * XY]]]?.glow;
+        if (glow) shadeFront = 1;
+        else if (o.light) {
           // In the shade of something else: tops darken a lot, fronts (always half in shade) a little.
           if (!lit(x, y, z)) {
             k *= 0.72;
@@ -177,7 +180,7 @@ export function paint(g: Grid3, palette: Record<string, PaletteEntry>, view: num
         }
         if (topOpen) {
           const sy = oy + y * o.top - (z + 1) * o.front;
-          rect(left, sy, o.px, o.top, shade(c, k * (o.light && !solid(x, y - 1, z) && !solid(x, y - 1, z + 1) ? 1.06 : 1)), n);
+          rect(left, sy, o.px, o.top, shade(c, k * (o.light && !glow && !solid(x, y - 1, z) && !solid(x, y - 1, z + 1) ? 1.06 : 1)), n);
         }
         if (frontOpen) {
           const sy = oy + (y + 1) * o.top - (z + 1) * o.front;

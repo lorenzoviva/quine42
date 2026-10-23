@@ -9,9 +9,10 @@
 //                                           sculptor's box comes from the class and overrides it
 //   origin="True" | "bottom"                MarkovJunior's centre of the box, or the centre of the floor
 //   ground="G"                              fills the floor layer before the program starts
-//   <color symbol="N" value="8b5a2b" part="gamba" hidden="True"/>  recolours a letter (MarkovJunior's
-//                                           palette.xml syntax); `part` names a limb that moves when the
-//                                           figure walks; `hidden` keeps a marker out of the picture
+//   <color symbol="N" value="8b5a2b" part="gamba" hidden="True" glow="True"/>  recolours a letter
+//                                           (MarkovJunior's palette.xml syntax); `part` names a limb that
+//                                           moves when the figure walks; `hidden` keeps a marker out of the
+//                                           picture; `glow` makes it give light (flames, windows, neon)
 //   <box|ellipsoid|cylinder|cone at="x y z" size="w d h" color="A" on="B"/>, <line at to r color/>
 //                                           solid shapes, `at` the centre of the base, z from the floor up
 //   <animation name="fiamma" frames="6">…</animation>  nodes run once per frame on the finished model,
@@ -180,6 +181,7 @@ class Compiler {
         ...(el.attrs.name || el.attrs.comment ? { name: el.attrs.name ?? el.attrs.comment } : {}),
         ...(part ? { part: part as Part } : {}),
         ...(/^true$/i.test(el.attrs.hidden ?? '') ? { hidden: true } : {}),
+        ...(/^true$/i.test(el.attrs.glow ?? '') ? { glow: true } : {}),
       };
     }
     for (const c of el.children) this.collect(c);
@@ -432,7 +434,7 @@ export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean } 
     const base = MJ_PALETTE[ch];
     const own = c.colors[ch];
     if (!base && !own?.color && !own?.hidden) throw new Mj3Error(`la lettera "${ch}" non ha colore nella palette di MarkovJunior: dagliene uno con <color symbol="${ch}" value="rrggbb"/>`);
-    palette[ch] = { name: own?.name ?? base?.name, ...(own?.color ?? base?.color ? { color: own?.color ?? base!.color } : {}), ...(own?.part ? { part: own.part } : {}), ...(own?.hidden ? { hidden: true } : {}) };
+    palette[ch] = { name: own?.name ?? base?.name, ...(own?.color ?? base?.color ? { color: own?.color ?? base!.color } : {}), ...(own?.part ? { part: own.part } : {}), ...(own?.hidden ? { hidden: true } : {}), ...(own?.glow ? { glow: true } : {}) };
   }
   for (const ch of Object.keys(c.colors)) if (!c.declared.has(ch)) c.warnings.push(`<color symbol="${ch}">: la lettera non è in nessun values`);
   const unions: Record<string, string> = {};

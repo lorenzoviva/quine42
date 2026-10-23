@@ -1,6 +1,7 @@
 // Materials of the 3D world. Everything is vertex-coloured Lambert (like the voxel models), and the
 // simulation's materials share a clip: once the corona is revealed, nothing of the simulation is drawn
-// beyond the circle (the corona is the world beyond it).
+// beyond the circle (the corona is the world beyond it). Glowing voxels (`<color glow="True">`, ADR-0046) emit
+// their colour; while the renderer blooms they also mark themselves in the frame's alpha, which the bloom reads.
 
 import * as THREE from 'three';
 
@@ -9,7 +10,47 @@ export const U = {
   time: { value: 0 },
   wind: { value: 0.05 },
   clipR: { value: 1e9 },
+  /** How much a glowing voxel emits, over its lit colour. */
+  glow: { value: 1.4 },
+  /** 1 while the renderer draws into its bloom target (alpha = 1 - glow there); 0 for icons and the lab. */
+  glowMask: { value: 0 },
 };
+
+/**
+ * Glowing voxels in a shader: the `glow` attribute (0 where a geometry has none) adds the vertex colour to
+ * the emitted light and marks the pixel for the bloom. `always`: the whole material glows (neon edges).
+ */
+function addGlow(sh: THREE.WebGLProgramParametersWithUniforms, always = false): void {
+  sh.uniforms.uGlow = U.glow;
+  sh.uniforms.uGlowMask = U.glowMask;
+  const g = always ? '1.0' : 'vGlow';
+  if (!always) {
+    sh.vertexShader = `attribute float glow;\nvarying float vGlow;\n${sh.vertexShader}`.replace('#include <begin_vertex>', '#include <begin_vertex>\n  vGlow = glow;');
+    sh.fragmentShader = `varying float vGlow;\n${sh.fragmentShader}`;
+  }
+  sh.fragmentShader = `uniform float uGlow;\nuniform float uGlowMask;\n${sh.fragmentShader}`
+    .replace(
+      '#include <emissivemap_fragment>',
+      `#include <emissivemap_fragment>
+  #ifdef USE_COLOR
+  totalEmissiveRadiance += vColor.rgb * ${g} * uGlow;
+  #endif`,
+    )
+    .replace('#include <opaque_fragment>', `#include <opaque_fragment>\n  gl_FragColor.a *= 1.0 - uGlowMask * ${g};`);
+}
+
+/** Geometries without the attribute read 0 (otherwise WebGL keeps whatever value it was given last). */
+function noGlow(m: THREE.Material): void {
+  (m as unknown as { defaultAttributeValues: Record<string, number[]> }).defaultAttributeValues = { glow: [0] };
+}
+
+/** A material that shows glowing voxels without the clip (the corona, the icons). `always`: all of it glows. */
+export function glowing<M extends THREE.Material>(m: M, key: string, always = false): M {
+  m.onBeforeCompile = (sh) => addGlow(sh, always);
+  m.customProgramCacheKey = () => `glow-${key}`;
+  noGlow(m);
+  return m;
+}
 
 /** Adds the circle clip (in world xz) to a material. */
 export function clipped<M extends THREE.Material>(m: M, key: string, sway = false): M {
@@ -45,8 +86,10 @@ export function clipped<M extends THREE.Material>(m: M, key: string, sway = fals
   vClipXZ = (modelMatrix * clipP).xz;`,
       );
     sh.fragmentShader = `uniform float uClipR;\nvarying vec2 vClipXZ;\n${sh.fragmentShader}`.replace('void main() {', 'void main() {\n  if (length(vClipXZ) > uClipR) discard;');
+    addGlow(sh);
   };
   m.customProgramCacheKey = () => key;
+  noGlow(m);
   m.userData.clipped = true;
   return m;
 }
@@ -73,9 +116,9 @@ export const MAT = {
   /** Vegetation: the wind moves the top (the `sway` attribute). */
   sway: clipped(new THREE.MeshLambertMaterial({ vertexColors: true }), 'sway', true),
   /** The corona and the studio: never clipped. */
-  corona: new THREE.MeshLambertMaterial({ vertexColors: true }),
-  /** Neon edges and glowing things (unlit). */
-  glow: new THREE.MeshBasicMaterial({ vertexColors: true }),
+  corona: glowing(new THREE.MeshLambertMaterial({ vertexColors: true }), 'corona'),
+  /** Neon edges and glowing things (unlit, they bloom). */
+  glow: glowing(new THREE.MeshBasicMaterial({ vertexColors: true }), 'neon', true),
 };
 
 /** Solid-coloured clipped material (stand-ins). Cached by colour. */

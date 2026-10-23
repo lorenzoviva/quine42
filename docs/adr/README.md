@@ -50,5 +50,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0043](0043-spazio-a-scale-lotti-strutture.md) | Lo spazio a scale: i lotti del piano diventano strutture (modelli girati verso la porta), dentro è sul pavimento del modello, una struttura importante per zona | accettato |
 | [0044](0044-azioni-come-regole-sul-modello.md) | Le azioni sono regole sul modello: «Altro…» che cambia l'aspetto fa scrivere allo Scultore un'`<action>`, provata dal kernel e imparata dal tipo; gli effetti per il resto | accettato |
 | [0045](0045-grafo-del-mondo.md) | Il grafo del mondo nel kernel (`world/grafo.json`, nodi e archi tipizzati, interrogazioni e controlli, formato di Graphify); Graphify facoltativo per lo sviluppo | accettato |
+| [0046](0046-voxel-luminosi.md) | Voxel luminosi: `<color glow="True">`, attributo `glow` nelle mesh, emissione nei materiali e bloom selettivo dalla maschera nell'alfa | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

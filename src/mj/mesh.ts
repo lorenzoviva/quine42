@@ -1,6 +1,7 @@
 // Voxels → triangles for the 3D sandbox, without three.js (it runs in the worker too): one quad per
 // voxel face that touches the empty, coloured from the palette, darkened at the vertices by ambient
-// occlusion, with a faint per-voxel grain so large surfaces are not flat.
+// occlusion, with a faint per-voxel grain so large surfaces are not flat. Glowing letters are not
+// occluded and carry a `glow` weight per vertex (the renderer makes them emit and bloom).
 //
 // Axes: the engine's x (left → right), y (back → front) and z (up) become three.js x, z and y. One tile
 // is one unit, so a voxel is 1 / voxels-per-tile. The mesh's origin is the centre of the model's floor.
@@ -14,6 +15,8 @@ export interface MeshData {
   indices: Uint32Array;
   /** Per vertex, how much the wind moves it (0 at the foot, 1 at the top): vegetation only. */
   sway?: Float32Array;
+  /** Per vertex, 1 where the voxel gives light (`<color glow="True">`): only if the mesh has some. */
+  glow?: Float32Array;
 }
 
 export interface VoxelGrid {
@@ -66,6 +69,7 @@ export function meshVoxels(g: VoxelGrid, palette: Record<string, PaletteEntry>, 
   const { X, Y, Z, cells } = g;
   const XY = X * Y;
   const colors = colorTable(g.alphabet, palette);
+  const glows = g.alphabet.map((ch) => !!palette[ch]?.glow);
   const solid = (x: number, y: number, z: number) => {
     if (x < 0 || y < 0 || z < 0 || x >= X || y >= Y || z >= Z) return false;
     const i = x + y * X + z * XY;
@@ -83,6 +87,8 @@ export function meshVoxels(g: VoxelGrid, palette: Record<string, PaletteEntry>, 
   const nor: number[] = [];
   const col: number[] = [];
   const sw: number[] = [];
+  const gl: number[] = [];
+  let glowing = false;
   const idx: number[] = [];
   for (let z = 0; z < Z; z++)
     for (let y = 0; y < Y; y++)
@@ -91,6 +97,8 @@ export function meshVoxels(g: VoxelGrid, palette: Record<string, PaletteEntry>, 
         const c = colors[cells[i]];
         if (!c || (o.only && !o.only(i))) continue;
         const grain = 0.93 + 0.1 * hash(x, y, z);
+        const glow = glows[cells[i]];
+        if (glow) glowing = true;
         for (const f of FACES) {
           const [nx, ny, nz] = f.n;
           if (solid(x + nx, y + ny, z + nz)) continue;
@@ -107,10 +115,11 @@ export function meshVoxels(g: VoxelGrid, palette: Record<string, PaletteEntry>, 
             const s2 = solid(ox + a2[0], oy + a2[1], oz + a2[2]);
             const sc = solid(ox + a1[0] + a2[0], oy + a1[1] + a2[1], oz + a1[2] + a2[2]);
             const occ = s1 && s2 ? 3 : (s1 ? 1 : 0) + (s2 ? 1 : 0) + (sc ? 1 : 0);
-            const light = (1 - occ * 0.17) * grain;
+            const light = glow ? grain : (1 - occ * 0.17) * grain;
             const vx = x + cx, vy = y + cy, vz = z + cz;
             pos.push((vx - px) * s, (vz - pz) * s, (vy - py) * s);
             nor.push(nx, nz, ny);
+            gl.push(glow ? 1 : 0);
             col.push(c[0] * light, c[1] * light, c[2] * light);
             if (o.sway) {
               const h = Math.max(0, vz / top - 0.25) / 0.75;
@@ -133,6 +142,7 @@ export function meshVoxels(g: VoxelGrid, palette: Record<string, PaletteEntry>, 
     colors: new Float32Array(col),
     indices: new Uint32Array(idx),
     ...(o.sway ? { sway: new Float32Array(sw) } : {}),
+    ...(glowing ? { glow: new Float32Array(gl) } : {}),
   };
 }
 

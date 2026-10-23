@@ -15,6 +15,8 @@ import { byId, CATALOG, GROUPS, type Entry } from './catalog';
 import { floors, footprint, meshVoxels, type MeshData } from '../../src/mj/mesh';
 import type { BuildRequest, BuildResponse, Built } from './worker';
 import { makeLand, plan, type Land } from './world';
+import { Bloom } from '../../src/render/bloom';
+import { glowing } from '../../src/render/materials';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -81,7 +83,7 @@ scene.add(sun, sun.target);
 
 const uTime = { value: 0 };
 const uWind = { value: 0.05 };
-const matStatic = new THREE.MeshLambertMaterial({ vertexColors: true });
+const matStatic = glowing(new THREE.MeshLambertMaterial({ vertexColors: true }), 'lab');
 /** Vegetation: the vertices move with the wind, more at the top (the `sway` attribute). */
 const matSway = new THREE.MeshLambertMaterial({ vertexColors: true });
 matSway.onBeforeCompile = (sh) => {
@@ -99,7 +101,9 @@ matSway.onBeforeCompile = (sh) => {
 matSway.customProgramCacheKey = () => 'sway';
 /** Structures: cut away above the head when the wanderer is inside. */
 const cut = new THREE.Plane(new THREE.Vector3(0, -1, 0), 1000);
-const matCut = new THREE.MeshLambertMaterial({ vertexColors: true, clippingPlanes: [cut] });
+const matCut = glowing(new THREE.MeshLambertMaterial({ vertexColors: true, clippingPlanes: [cut] }), 'lab-cut');
+/** Glowing voxels (`<color glow="True">`) bloom as in the game. */
+const bloom = new Bloom(renderer, scene, camera);
 
 function geometry(m: MeshData): THREE.BufferGeometry {
   const g = new THREE.BufferGeometry();
@@ -107,6 +111,7 @@ function geometry(m: MeshData): THREE.BufferGeometry {
   g.setAttribute('normal', new THREE.BufferAttribute(m.normals, 3));
   g.setAttribute('color', new THREE.BufferAttribute(m.colors, 3));
   if (m.sway) g.setAttribute('sway', new THREE.BufferAttribute(m.sway, 1));
+  if (m.glow) g.setAttribute('glow', new THREE.BufferAttribute(m.glow, 1));
   g.setIndex(new THREE.BufferAttribute(m.indices, 1));
   g.computeBoundingSphere();
   return g;
@@ -556,6 +561,7 @@ function pick(e: PointerEvent) {
 function resize() {
   const w = innerWidth, h = innerHeight;
   renderer.setSize(w, h, false);
+  bloom.setSize(w, h, renderer.getPixelRatio());
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
 }
@@ -670,7 +676,7 @@ function tick(now: number) {
   camera.position.copy(cam.target).add(off);
   camera.lookAt(cam.target);
   light();
-  renderer.render(scene, camera);
+  bloom.render(dt);
   $('stats').textContent = `${Math.round(fps)} fps · ${renderer.info.render.triangles.toLocaleString('it')} triangoli disegnati · ${renderer.info.render.calls} chiamate · lavori in coda ${pool.busy}`;
   requestAnimationFrame(tick);
 }

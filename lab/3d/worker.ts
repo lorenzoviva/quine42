@@ -45,7 +45,7 @@ export interface Built {
 
 export type BuildResponse = Built | { id: number; ok: false; error: string };
 
-const buffers = (m: MeshData) => [m.positions.buffer, m.normals.buffer, m.colors.buffer, m.indices.buffer, ...(m.sway ? [m.sway.buffer] : [])];
+const buffers = (m: MeshData) => [m.positions.buffer, m.normals.buffer, m.colors.buffer, m.indices.buffer, ...(m.sway ? [m.sway.buffer] : []), ...(m.glow ? [m.glow.buffer] : [])];
 
 self.onmessage = (ev: MessageEvent<BuildRequest>) => {
   const q = ev.data;

@@ -74,6 +74,8 @@ export interface PaletteEntry {
   color?: string;
   hidden?: boolean;
   part?: Part;
+  /** The letter gives light: drawn unshaded and bright, it blooms (flames, windows, neon). */
+  glow?: boolean;
 }
 
 export interface Program3 {
