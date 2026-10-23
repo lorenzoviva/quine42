@@ -4,42 +4,79 @@ Scritto da Gemini CLI (Gemini 3.8 Flash, abbonamento) il 23/10/2026, task T19.
 Scatola: 10 × 10 × 24 caselle, 80 × 80 × 192 voxel, 8 voxel per casella.
 Lettere chiave:
   O = porta (vano di ingresso a z=0 con atrio interno vuoto per oltre 6 voxel)
-  F = insegna ("LA TORRE DELLA MAGIA", neon viola c48aff glow fisso)
+  F = insegna ("LA TORRE DELLA MAGIA", neon viola c084f8 glow fisso)
   P = targa scura opaca per contrasto perfetto dell'insegna
-  w = neon apice bianco-viola (eeddff glow, picco energetico)
-  T = neon violetto elettrico (c48aff glow, alta energia)
-  t = neon porpora medio (8b42cf glow, media energia)
-  u = neon viola profondo (5a228c glow, minima energia)
-  x = buffer temporaneo di transizione per l'animazione ciclica (hidden)
   M, m = metallo nero cybernetico primario e secondario
   C = cemento grafite della base
   S = dettagli e ghiere in metallo chiaro
   V = condotti in vetro scuro (supporto architettonico)
-Animazione "energia" (8 frame): macro-pulsazione ondulatoria a blocchi interi (all)
-tra w -> T -> t -> u -> w, con Cuore Arcano sommitale completamente visibile a cielo aperto sopra la guglia.
+  x, y = buffer temporanei per l'animazione ciclica (hidden)
+Glifi a parete (fasi 0..I):
+  0..6 = glifo spento/dormiente (16161e, nessun glow, indistinguibile dal metallo M)
+  7..I = glifo acceso in lenta pulsazione (sfumature da 6d32a0 a c68ef8 con glow)
+Condotti e anelli (fasi a..w):
+  a..w = gradiente continuo di 16 fasi (da 7436a8 a c68ef8) con oscillazione analogica morbida
+Cuore Arcano:
+  Sommitale a cielo aperto a z=184..190 sopra la guglia centrale (fase k, apice morbido)
+Animazione "energia" (16 frame, 2.4s):
+  Onda cosmica distesa con glifi che appaiono e scompaiono all'unisono col respiro della torre.
 -->
-<sequence values="BMmCSVPFxTtuwO" size="80 80 192" symmetry="(xy)" name="Torre della Magia">
+<sequence values="BMmCSVPFOxy0123456789ADEGHIabdeghijklnqrtuw" size="80 80 192" symmetry="(xy)" name="Torre della Magia">
+  <!-- Materiali architettonici -->
   <color symbol="M" value="16161e" name="metallo primario"/>
   <color symbol="m" value="242632" name="metallo secondario"/>
   <color symbol="C" value="363842" name="cemento grafite"/>
   <color symbol="S" value="8a8f9c" name="metallo chiaro"/>
   <color symbol="V" value="1c2a3a" name="vetro scuro"/>
   <color symbol="P" value="0b0b10" name="targa insegna"/>
-  <color symbol="F" value="c48aff" glow="True" name="insegna fissa"/>
-  <color symbol="x" hidden="True" name="buffer transizione"/>
-  <color symbol="w" value="eeddff" glow="True" name="neon apice bianco-viola"/>
-  <color symbol="T" value="c48aff" glow="True" name="neon viola brillante"/>
-  <color symbol="t" value="8b42cf" glow="True" name="neon porpora"/>
-  <color symbol="u" value="5a228c" glow="True" name="neon viola profondo"/>
+  <color symbol="F" value="c084f8" glow="True" name="insegna fissa"/>
   <color symbol="O" value="2a1836" name="porta"/>
+  <color symbol="x" hidden="True" name="buffer glifi"/>
+  <color symbol="y" hidden="True" name="buffer condotti"/>
+
+  <!-- 16 Fasi dei Glifi a parete (0..6 spenti nel metallo M, 7..I accesi con glow tenue) -->
+  <color symbol="0" value="16161e" name="glifo spento 0"/>
+  <color symbol="1" value="16161e" name="glifo spento 1"/>
+  <color symbol="2" value="16161e" name="glifo spento 2"/>
+  <color symbol="3" value="16161e" name="glifo spento 3"/>
+  <color symbol="4" value="16161e" name="glifo spento 4"/>
+  <color symbol="5" value="16161e" name="glifo spento 5"/>
+  <color symbol="6" value="16161e" name="glifo spento 6"/>
+  <color symbol="7" value="6d32a0" glow="True" name="glifo scintilla"/>
+  <color symbol="8" value="8444bc" glow="True" name="glifo risveglio"/>
+  <color symbol="9" value="9c5cd8" glow="True" name="glifo medio"/>
+  <color symbol="A" value="b272f0" glow="True" name="glifo radioso"/>
+  <color symbol="D" value="c68ef8" glow="True" name="glifo apice"/>
+  <color symbol="E" value="b272f0" glow="True" name="glifo calante 1"/>
+  <color symbol="G" value="9c5cd8" glow="True" name="glifo calante 2"/>
+  <color symbol="H" value="8444bc" glow="True" name="glifo calante 3"/>
+  <color symbol="I" value="6d32a0" glow="True" name="glifo brace"/>
+
+  <!-- 16 Fasi dei Condotti e Anelli (onda continua morbida senza scatti né sfarfallio) -->
+  <color symbol="a" value="7436a8" glow="True" name="condotto min"/>
+  <color symbol="b" value="7c3cb6" glow="True" name="condotto 1"/>
+  <color symbol="d" value="8644c4" glow="True" name="condotto 2"/>
+  <color symbol="e" value="904cd0" glow="True" name="condotto 3"/>
+  <color symbol="g" value="9c58dc" glow="True" name="condotto 4"/>
+  <color symbol="h" value="a866e6" glow="True" name="condotto 5"/>
+  <color symbol="i" value="b474f0" glow="True" name="condotto 6"/>
+  <color symbol="j" value="c084f8" glow="True" name="condotto 7"/>
+  <color symbol="k" value="c68ef8" glow="True" name="condotto apice"/>
+  <color symbol="l" value="c084f8" glow="True" name="condotto 9"/>
+  <color symbol="n" value="b474f0" glow="True" name="condotto 10"/>
+  <color symbol="q" value="a866e6" glow="True" name="condotto 11"/>
+  <color symbol="r" value="9c58dc" glow="True" name="condotto 12"/>
+  <color symbol="t" value="904cd0" glow="True" name="condotto 13"/>
+  <color symbol="u" value="8644c4" glow="True" name="condotto 14"/>
+  <color symbol="w" value="7c3cb6" glow="True" name="condotto 15"/>
 
   <!-- ================================================================= -->
-  <!-- 1. BASAMENTO E ZOCCOLO (z = 0..16) - FASE INIZIALE T (viola)      -->
+  <!-- 1. BASAMENTO E ZOCCOLO (z = 0..16)                                -->
   <!-- ================================================================= -->
-  <!-- Zoccolo a gradoni in cemento grafite e anello neon di terra -->
+  <!-- Zoccolo a gradoni in cemento grafite e anello neon di terra (fase a) -->
   <cylinder at="40 40 0" size="72 72 4" color="C"/>
   <cylinder at="40 40 4" size="68 68 4" color="C"/>
-  <cylinder at="40 40 4" size="69 69 1" color="T" on="B"/>
+  <cylinder at="40 40 4" size="69 69 1" color="a" on="B"/>
   <cylinder at="40 40 8" size="64 64 6" color="m"/>
   <cylinder at="40 40 14" size="62 62 2" color="S"/>
 
@@ -53,35 +90,35 @@ tra w -> T -> t -> u -> w, con Cuore Arcano sommitale completamente visibile a c
   <box at="17 63 0" size="8 8 14" color="C"/>
   <box at="63 63 0" size="8 8 14" color="C"/>
 
-  <!-- Linee neon sui contrafforti (in fase T) -->
-  <box at="8 40 2" size="1 4 14" color="T"/>
-  <box at="72 40 2" size="1 4 14" color="T"/>
-  <box at="40 8 2" size="4 1 14" color="T"/>
-  <box at="17 17 2" size="2 2 12" color="T"/>
-  <box at="63 17 2" size="2 2 12" color="T"/>
-  <box at="17 63 2" size="2 2 12" color="T"/>
-  <box at="63 63 2" size="2 2 12" color="T"/>
+  <!-- Linee neon sui contrafforti (fase b) -->
+  <box at="8 40 2" size="1 4 14" color="b"/>
+  <box at="72 40 2" size="1 4 14" color="b"/>
+  <box at="40 8 2" size="4 1 14" color="b"/>
+  <box at="17 17 2" size="2 2 12" color="b"/>
+  <box at="63 17 2" size="2 2 12" color="b"/>
+  <box at="17 63 2" size="2 2 12" color="b"/>
+  <box at="63 63 2" size="2 2 12" color="b"/>
 
   <!-- ================================================================= -->
-  <!-- 2. ORDINE INFERIORE DEL FUSTO (z = 16..64) - FASE INIZIALE t     -->
+  <!-- 2. ORDINE INFERIORE DEL FUSTO (z = 16..64)                        -->
   <!-- ================================================================= -->
   <!-- Corpo cilindrico principale -->
   <cylinder at="40 40 16" size="56 56 48" color="M"/>
   <cylinder at="40 40 16" size="50 50 48" color="m"/>
 
-  <!-- Fasce metalliche orizzontali e anelli luminosi (fase t) -->
+  <!-- Fasce metalliche orizzontali e anelli luminosi (fase d ed e) -->
   <cylinder at="40 40 32" size="58 58 2" color="m"/>
-  <cylinder at="40 40 33" size="59 59 1" color="t" on="B"/>
+  <cylinder at="40 40 33" size="59 59 1" color="d" on="B"/>
   <cylinder at="40 40 48" size="58 58 2" color="m"/>
-  <cylinder at="40 40 49" size="59 59 1" color="t" on="B"/>
+  <cylinder at="40 40 49" size="59 59 1" color="e" on="B"/>
 
-  <!-- Condotti verticali a nastro in vetro con linea neon centrale brillante -->
+  <!-- Condotti verticali a nastro in vetro con linea neon centrale (fase d ed e) -->
   <box at="40 12 18" size="4 2 44" color="V"/>
-  <box at="40 11 18" size="2 1 44" color="t"/>
+  <box at="40 11 18" size="2 1 44" color="d"/>
   <box at="12 40 18" size="2 4 44" color="V"/>
-  <box at="11 40 18" size="1 2 44" color="t"/>
+  <box at="11 40 18" size="1 2 44" color="e"/>
   <box at="68 40 18" size="2 4 44" color="V"/>
-  <box at="69 40 18" size="1 2 44" color="t"/>
+  <box at="69 40 18" size="1 2 44" color="e"/>
 
   <!-- Profilo laterale dei condotti in metallo chiaro -->
   <box at="37 12 18" size="1 2 44" color="S"/>
@@ -91,165 +128,759 @@ tra w -> T -> t -> u -> w, con Cuore Arcano sommitale completamente visibile a c
   <box at="68 37 18" size="2 1 44" color="S"/>
   <box at="68 43 18" size="2 1 44" color="S"/>
 
-  <!-- Fascia runica inferiore 1 (z = 36..44) solchi incisi con rune luminose in t -->
-  <box at="40 11 37" size="1 1 6" color="t"/>
-  <box at="38 11 39" size="1 1 2" color="t"/>
-  <box at="42 11 41" size="1 1 2" color="t"/>
-  <box at="46 13 37" size="1 1 6" color="t"/>
-  <box at="47 13 39" size="1 1 2" color="t"/>
-  <box at="34 13 37" size="1 1 6" color="t"/>
-  <box at="33 13 41" size="1 1 2" color="t"/>
-  <box at="52 17 37" size="1 1 6" color="t"/>
-  <box at="53 17 40" size="1 1 2" color="t"/>
-  <box at="28 17 37" size="1 1 6" color="t"/>
-  <box at="27 17 38" size="1 1 2" color="t"/>
-
-  <box at="67 34 37" size="1 1 6" color="t"/>
-  <box at="67 33 39" size="1 1 2" color="t"/>
-  <box at="67 46 37" size="1 1 6" color="t"/>
-  <box at="67 47 41" size="1 1 2" color="t"/>
-  <box at="13 34 37" size="1 1 6" color="t"/>
-  <box at="13 33 39" size="1 1 2" color="t"/>
-  <box at="13 46 37" size="1 1 6" color="t"/>
-  <box at="13 47 41" size="1 1 2" color="t"/>
+  <!-- TAPPEZZERIA DI GLIFI INCISI SUL TIER 1 -->
+    <!-- Glifo 0 a theta=25 z=26 fase=11 (D) -->
+    <box at="64 51 28" size="1 1 1" color="D"/>
+    <box at="65 51 27" size="1 1 1" color="D"/>
+    <box at="64 52 27" size="1 1 1" color="D"/>
+    <box at="65 50 26" size="1 1 1" color="D"/>
+    <box at="64 53 26" size="1 1 1" color="D"/>
+    <box at="65 51 25" size="1 1 1" color="D"/>
+    <box at="64 52 25" size="1 1 1" color="D"/>
+    <box at="64 51 24" size="1 1 1" color="D"/>
+    <!-- Glifo 0 a theta=155 z=26 fase=5 (5) -->
+    <box at="16 51 28" size="1 1 1" color="5"/>
+    <box at="16 52 27" size="1 1 1" color="5"/>
+    <box at="15 51 27" size="1 1 1" color="5"/>
+    <box at="16 53 26" size="1 1 1" color="5"/>
+    <box at="15 50 26" size="1 1 1" color="5"/>
+    <box at="16 52 25" size="1 1 1" color="5"/>
+    <box at="15 51 25" size="1 1 1" color="5"/>
+    <box at="16 51 24" size="1 1 1" color="5"/>
+    <!-- Glifo 8 a theta=205 z=26 fase=11 (D) -->
+    <box at="15 29 28" size="1 1 1" color="D"/>
+    <box at="16 29 28" size="1 1 1" color="D"/>
+    <box at="15 29 27" size="1 1 1" color="D"/>
+    <box at="15 29 26" size="1 1 1" color="D"/>
+    <box at="15 29 25" size="1 1 1" color="D"/>
+    <box at="15 29 24" size="1 1 1" color="D"/>
+    <box at="16 29 24" size="1 1 1" color="D"/>
+    <!-- Glifo 4 a theta=225 z=26 fase=12 (E) -->
+    <box at="20 22 28" size="1 1 1" color="E"/>
+    <box at="22 20 28" size="1 1 1" color="E"/>
+    <box at="20 22 27" size="1 1 1" color="E"/>
+    <box at="22 20 27" size="1 1 1" color="E"/>
+    <box at="21 21 26" size="1 1 1" color="E"/>
+    <box at="21 21 25" size="1 1 1" color="E"/>
+    <!-- Glifo 0 a theta=245 z=26 fase=11 (D) -->
+    <box at="29 16 28" size="1 1 1" color="D"/>
+    <box at="28 16 27" size="1 1 1" color="D"/>
+    <box at="29 15 27" size="1 1 1" color="D"/>
+    <box at="27 16 26" size="1 1 1" color="D"/>
+    <box at="30 15 26" size="1 1 1" color="D"/>
+    <box at="28 16 25" size="1 1 1" color="D"/>
+    <box at="29 15 25" size="1 1 1" color="D"/>
+    <box at="29 16 24" size="1 1 1" color="D"/>
+    <!-- Glifo 8 a theta=295 z=26 fase=1 (1) -->
+    <box at="51 15 28" size="1 1 1" color="1"/>
+    <box at="51 16 28" size="1 1 1" color="1"/>
+    <box at="51 15 27" size="1 1 1" color="1"/>
+    <box at="51 15 26" size="1 1 1" color="1"/>
+    <box at="51 15 25" size="1 1 1" color="1"/>
+    <box at="51 15 24" size="1 1 1" color="1"/>
+    <box at="51 16 24" size="1 1 1" color="1"/>
+    <!-- Glifo 4 a theta=315 z=26 fase=2 (2) -->
+    <box at="58 20 28" size="1 1 1" color="2"/>
+    <box at="60 22 28" size="1 1 1" color="2"/>
+    <box at="58 20 27" size="1 1 1" color="2"/>
+    <box at="60 22 27" size="1 1 1" color="2"/>
+    <box at="59 21 26" size="1 1 1" color="2"/>
+    <box at="59 21 25" size="1 1 1" color="2"/>
+    <!-- Glifo 0 a theta=335 z=26 fase=3 (3) -->
+    <box at="64 29 28" size="1 1 1" color="3"/>
+    <box at="64 28 27" size="1 1 1" color="3"/>
+    <box at="65 29 27" size="1 1 1" color="3"/>
+    <box at="64 27 26" size="1 1 1" color="3"/>
+    <box at="65 30 26" size="1 1 1" color="3"/>
+    <box at="64 28 25" size="1 1 1" color="3"/>
+    <box at="65 29 25" size="1 1 1" color="3"/>
+    <box at="64 29 24" size="1 1 1" color="3"/>
+    <!-- Glifo 11 a theta=25 z=40 fase=3 (3) -->
+    <box at="64 51 42" size="1 1 1" color="3"/>
+    <box at="65 51 41" size="1 1 1" color="3"/>
+    <box at="64 51 40" size="1 1 1" color="3"/>
+    <box at="64 52 39" size="1 1 1" color="3"/>
+    <box at="64 51 38" size="1 1 1" color="3"/>
+    <!-- Glifo 11 a theta=155 z=40 fase=13 (G) -->
+    <box at="16 51 42" size="1 1 1" color="G"/>
+    <box at="16 52 41" size="1 1 1" color="G"/>
+    <box at="16 51 40" size="1 1 1" color="G"/>
+    <box at="15 51 39" size="1 1 1" color="G"/>
+    <box at="16 51 38" size="1 1 1" color="G"/>
+    <!-- Glifo 7 a theta=205 z=40 fase=0 (0) -->
+    <box at="15 29 42" size="1 1 1" color="0"/>
+    <box at="16 28 42" size="1 1 1" color="0"/>
+    <box at="15 29 41" size="1 1 1" color="0"/>
+    <box at="16 28 41" size="1 1 1" color="0"/>
+    <box at="16 29 40" size="1 1 1" color="0"/>
+    <box at="16 29 39" size="1 1 1" color="0"/>
+    <box at="16 29 38" size="1 1 1" color="0"/>
+    <!-- Glifo 3 a theta=225 z=40 fase=1 (1) -->
+    <box at="21 21 42" size="1 1 1" color="1"/>
+    <box at="20 22 41" size="1 1 1" color="1"/>
+    <box at="22 20 41" size="1 1 1" color="1"/>
+    <box at="20 22 40" size="1 1 1" color="1"/>
+    <box at="22 20 40" size="1 1 1" color="1"/>
+    <box at="20 22 39" size="1 1 1" color="1"/>
+    <box at="22 20 39" size="1 1 1" color="1"/>
+    <!-- Glifo 11 a theta=245 z=40 fase=3 (3) -->
+    <box at="29 16 42" size="1 1 1" color="3"/>
+    <box at="28 16 41" size="1 1 1" color="3"/>
+    <box at="29 16 40" size="1 1 1" color="3"/>
+    <box at="29 15 39" size="1 1 1" color="3"/>
+    <box at="29 16 38" size="1 1 1" color="3"/>
+    <!-- Glifo 7 a theta=295 z=40 fase=6 (6) -->
+    <box at="51 15 42" size="1 1 1" color="6"/>
+    <box at="52 16 42" size="1 1 1" color="6"/>
+    <box at="51 15 41" size="1 1 1" color="6"/>
+    <box at="52 16 41" size="1 1 1" color="6"/>
+    <box at="51 16 40" size="1 1 1" color="6"/>
+    <box at="51 16 39" size="1 1 1" color="6"/>
+    <box at="51 16 38" size="1 1 1" color="6"/>
+    <!-- Glifo 3 a theta=315 z=40 fase=7 (7) -->
+    <box at="59 21 42" size="1 1 1" color="7"/>
+    <box at="58 20 41" size="1 1 1" color="7"/>
+    <box at="60 22 41" size="1 1 1" color="7"/>
+    <box at="58 20 40" size="1 1 1" color="7"/>
+    <box at="60 22 40" size="1 1 1" color="7"/>
+    <box at="58 20 39" size="1 1 1" color="7"/>
+    <box at="60 22 39" size="1 1 1" color="7"/>
+    <!-- Glifo 11 a theta=335 z=40 fase=11 (D) -->
+    <box at="64 29 42" size="1 1 1" color="D"/>
+    <box at="64 28 41" size="1 1 1" color="D"/>
+    <box at="64 29 40" size="1 1 1" color="D"/>
+    <box at="65 29 39" size="1 1 1" color="D"/>
+    <box at="64 29 38" size="1 1 1" color="D"/>
+    <!-- Glifo 10 a theta=25 z=54 fase=8 (8) -->
+    <box at="65 51 55" size="1 1 1" color="8"/>
+    <box at="64 52 55" size="1 1 1" color="8"/>
+    <box at="64 51 53" size="1 1 1" color="8"/>
+    <!-- Glifo 6 a theta=45 z=54 fase=7 (7) -->
+    <box at="60 58 56" size="1 1 1" color="7"/>
+    <box at="59 59 56" size="1 1 1" color="7"/>
+    <box at="58 60 56" size="1 1 1" color="7"/>
+    <box at="59 59 55" size="1 1 1" color="7"/>
+    <box at="59 59 54" size="1 1 1" color="7"/>
+    <box at="60 58 53" size="1 1 1" color="7"/>
+    <box at="59 59 53" size="1 1 1" color="7"/>
+    <box at="58 60 53" size="1 1 1" color="7"/>
+    <!-- Glifo 2 a theta=65 z=54 fase=11 (D) -->
+    <box at="52 64 56" size="1 1 1" color="D"/>
+    <box at="51 65 56" size="1 1 1" color="D"/>
+    <box at="51 64 55" size="1 1 1" color="D"/>
+    <box at="51 64 54" size="1 1 1" color="D"/>
+    <box at="52 64 53" size="1 1 1" color="D"/>
+    <box at="51 65 53" size="1 1 1" color="D"/>
+    <box at="53 64 52" size="1 1 1" color="D"/>
+    <box at="50 65 52" size="1 1 1" color="D"/>
+    <!-- Glifo 10 a theta=115 z=54 fase=14 (H) -->
+    <box at="29 65 55" size="1 1 1" color="H"/>
+    <box at="28 64 55" size="1 1 1" color="H"/>
+    <box at="29 64 53" size="1 1 1" color="H"/>
+    <!-- Glifo 6 a theta=135 z=54 fase=15 (I) -->
+    <box at="22 60 56" size="1 1 1" color="I"/>
+    <box at="21 59 56" size="1 1 1" color="I"/>
+    <box at="20 58 56" size="1 1 1" color="I"/>
+    <box at="21 59 55" size="1 1 1" color="I"/>
+    <box at="21 59 54" size="1 1 1" color="I"/>
+    <box at="22 60 53" size="1 1 1" color="I"/>
+    <box at="21 59 53" size="1 1 1" color="I"/>
+    <box at="20 58 53" size="1 1 1" color="I"/>
+    <!-- Glifo 2 a theta=155 z=54 fase=3 (3) -->
+    <box at="16 52 56" size="1 1 1" color="3"/>
+    <box at="15 51 56" size="1 1 1" color="3"/>
+    <box at="16 51 55" size="1 1 1" color="3"/>
+    <box at="16 51 54" size="1 1 1" color="3"/>
+    <box at="16 52 53" size="1 1 1" color="3"/>
+    <box at="15 51 53" size="1 1 1" color="3"/>
+    <box at="16 53 52" size="1 1 1" color="3"/>
+    <box at="15 50 52" size="1 1 1" color="3"/>
+    <!-- Glifo 10 a theta=205 z=54 fase=6 (6) -->
+    <box at="15 29 55" size="1 1 1" color="6"/>
+    <box at="16 28 55" size="1 1 1" color="6"/>
+    <box at="16 29 53" size="1 1 1" color="6"/>
+    <!-- Glifo 6 a theta=225 z=54 fase=7 (7) -->
+    <box at="20 22 56" size="1 1 1" color="7"/>
+    <box at="21 21 56" size="1 1 1" color="7"/>
+    <box at="22 20 56" size="1 1 1" color="7"/>
+    <box at="21 21 55" size="1 1 1" color="7"/>
+    <box at="21 21 54" size="1 1 1" color="7"/>
+    <box at="20 22 53" size="1 1 1" color="7"/>
+    <box at="21 21 53" size="1 1 1" color="7"/>
+    <box at="22 20 53" size="1 1 1" color="7"/>
+    <!-- Glifo 2 a theta=245 z=54 fase=9 (9) -->
+    <box at="28 16 56" size="1 1 1" color="9"/>
+    <box at="29 15 56" size="1 1 1" color="9"/>
+    <box at="29 16 55" size="1 1 1" color="9"/>
+    <box at="29 16 54" size="1 1 1" color="9"/>
+    <box at="28 16 53" size="1 1 1" color="9"/>
+    <box at="29 15 53" size="1 1 1" color="9"/>
+    <box at="27 16 52" size="1 1 1" color="9"/>
+    <box at="30 15 52" size="1 1 1" color="9"/>
+    <!-- Glifo 10 a theta=295 z=54 fase=12 (E) -->
+    <box at="51 15 55" size="1 1 1" color="E"/>
+    <box at="52 16 55" size="1 1 1" color="E"/>
+    <box at="51 16 53" size="1 1 1" color="E"/>
+    <!-- Glifo 6 a theta=315 z=54 fase=13 (G) -->
+    <box at="58 20 56" size="1 1 1" color="G"/>
+    <box at="59 21 56" size="1 1 1" color="G"/>
+    <box at="60 22 56" size="1 1 1" color="G"/>
+    <box at="59 21 55" size="1 1 1" color="G"/>
+    <box at="59 21 54" size="1 1 1" color="G"/>
+    <box at="58 20 53" size="1 1 1" color="G"/>
+    <box at="59 21 53" size="1 1 1" color="G"/>
+    <box at="60 22 53" size="1 1 1" color="G"/>
+    <!-- Glifo 2 a theta=335 z=54 fase=1 (1) -->
+    <box at="64 28 56" size="1 1 1" color="1"/>
+    <box at="65 29 56" size="1 1 1" color="1"/>
+    <box at="64 29 55" size="1 1 1" color="1"/>
+    <box at="64 29 54" size="1 1 1" color="1"/>
+    <box at="64 28 53" size="1 1 1" color="1"/>
+    <box at="65 29 53" size="1 1 1" color="1"/>
+    <box at="64 27 52" size="1 1 1" color="1"/>
+    <box at="65 30 52" size="1 1 1" color="1"/>
 
   <!-- ================================================================= -->
-  <!-- 3. BALCONATA DI TRANSIZIONE MEDIANA (z = 64..68) - FASE u         -->
+  <!-- 3. BALCONATA DI TRANSIZIONE MEDIANA (z = 64..68)                  -->
   <!-- ================================================================= -->
   <cylinder at="40 40 64" size="62 62 2" color="C"/>
   <cylinder at="40 40 66" size="60 60 2" color="S"/>
-  <cylinder at="40 40 66" size="61 61 1" color="u" on="B"/>
+  <cylinder at="40 40 66" size="61 61 1" color="g" on="B"/>
 
   <!-- ================================================================= -->
-  <!-- 4. ORDINE MEDIANO DEL FUSTO (z = 68..120) - FASE INIZIALE u       -->
+  <!-- 4. ORDINE MEDIANO DEL FUSTO (z = 68..120)                         -->
   <!-- ================================================================= -->
   <cylinder at="40 40 68" size="48 48 52" color="M"/>
   <cylinder at="40 40 68" size="42 42 52" color="m"/>
 
-  <!-- Cornici intermedie (in fase u) -->
+  <!-- Cornici intermedie (fase h e i) -->
   <cylinder at="40 40 84" size="50 50 2" color="S"/>
-  <cylinder at="40 40 85" size="51 51 1" color="u" on="B"/>
+  <cylinder at="40 40 85" size="51 51 1" color="h" on="B"/>
   <cylinder at="40 40 102" size="50 50 2" color="S"/>
-  <cylinder at="40 40 103" size="51 51 1" color="u" on="B"/>
+  <cylinder at="40 40 103" size="51 51 1" color="i" on="B"/>
 
-  <!-- Condotti verticali mediani con linee neon in fase u -->
+  <!-- Condotti verticali mediani (fase h e i) -->
   <box at="40 16 70" size="3 2 48" color="V"/>
-  <box at="40 15 70" size="1 1 48" color="u"/>
+  <box at="40 15 70" size="1 1 48" color="h"/>
   <box at="40 64 70" size="3 2 48" color="V"/>
-  <box at="40 65 70" size="1 1 48" color="u"/>
+  <box at="40 65 70" size="1 1 48" color="i"/>
   <box at="16 40 70" size="2 3 48" color="V"/>
-  <box at="15 40 70" size="1 1 48" color="u"/>
+  <box at="15 40 70" size="1 1 48" color="h"/>
   <box at="64 40 70" size="2 3 48" color="V"/>
-  <box at="65 40 70" size="1 1 48" color="u"/>
+  <box at="65 40 70" size="1 1 48" color="i"/>
 
-  <!-- Fascia runica mediana 2 (z = 88..98) incisa con rune in u -->
-  <box at="40 15 90" size="1 1 6" color="u"/>
-  <box at="38 15 92" size="1 1 2" color="u"/>
-  <box at="45 17 90" size="1 1 6" color="u"/>
-  <box at="46 17 93" size="1 1 2" color="u"/>
-  <box at="35 17 90" size="1 1 6" color="u"/>
-  <box at="34 17 91" size="1 1 2" color="u"/>
-  <box at="64 33 90" size="1 1 6" color="u"/>
-  <box at="64 32 92" size="1 1 2" color="u"/>
-  <box at="64 47 90" size="1 1 6" color="u"/>
-  <box at="64 48 94" size="1 1 2" color="u"/>
-  <box at="16 33 90" size="1 1 6" color="u"/>
-  <box at="16 32 92" size="1 1 2" color="u"/>
-  <box at="16 47 90" size="1 1 6" color="u"/>
-  <box at="16 48 94" size="1 1 2" color="u"/>
-
-  <!-- Fascia runica mediana 3 (z = 106..116) incisa con rune in u -->
-  <box at="40 15 108" size="1 1 6" color="u"/>
-  <box at="42 15 111" size="1 1 2" color="u"/>
-  <box at="45 17 108" size="1 1 6" color="u"/>
-  <box at="44 17 110" size="1 1 2" color="u"/>
-  <box at="35 17 108" size="1 1 6" color="u"/>
-  <box at="36 17 112" size="1 1 2" color="u"/>
-  <box at="64 35 108" size="1 1 6" color="u"/>
-  <box at="64 36 110" size="1 1 2" color="u"/>
-  <box at="64 45 108" size="1 1 6" color="u"/>
-  <box at="64 44 112" size="1 1 2" color="u"/>
-  <box at="16 35 108" size="1 1 6" color="u"/>
-  <box at="16 36 110" size="1 1 2" color="u"/>
-  <box at="16 45 108" size="1 1 6" color="u"/>
-  <box at="16 44 112" size="1 1 2" color="u"/>
+  <!-- TAPPEZZERIA DI GLIFI INCISI SUL TIER 2 -->
+    <!-- Glifo 0 a theta=25 z=76 fase=0 (0) -->
+    <box at="61 50 78" size="1 1 1" color="0"/>
+    <box at="61 49 77" size="1 1 1" color="0"/>
+    <box at="60 51 77" size="1 1 1" color="0"/>
+    <box at="62 48 76" size="1 1 1" color="0"/>
+    <box at="60 51 76" size="1 1 1" color="0"/>
+    <box at="61 49 75" size="1 1 1" color="0"/>
+    <box at="60 51 75" size="1 1 1" color="0"/>
+    <box at="61 50 74" size="1 1 1" color="0"/>
+    <!-- Glifo 8 a theta=45 z=76 fase=2 (2) -->
+    <box at="57 56 78" size="1 1 1" color="2"/>
+    <box at="56 56 78" size="1 1 1" color="2"/>
+    <box at="57 56 77" size="1 1 1" color="2"/>
+    <box at="57 56 76" size="1 1 1" color="2"/>
+    <box at="57 56 75" size="1 1 1" color="2"/>
+    <box at="57 56 74" size="1 1 1" color="2"/>
+    <box at="56 56 74" size="1 1 1" color="2"/>
+    <!-- Glifo 4 a theta=65 z=76 fase=3 (3) -->
+    <box at="51 60 78" size="1 1 1" color="3"/>
+    <box at="49 61 78" size="1 1 1" color="3"/>
+    <box at="51 60 77" size="1 1 1" color="3"/>
+    <box at="49 61 77" size="1 1 1" color="3"/>
+    <box at="50 61 76" size="1 1 1" color="3"/>
+    <box at="50 61 75" size="1 1 1" color="3"/>
+    <!-- Glifo 0 a theta=115 z=76 fase=6 (6) -->
+    <box at="30 61 78" size="1 1 1" color="6"/>
+    <box at="31 61 77" size="1 1 1" color="6"/>
+    <box at="29 60 77" size="1 1 1" color="6"/>
+    <box at="32 62 76" size="1 1 1" color="6"/>
+    <box at="29 60 76" size="1 1 1" color="6"/>
+    <box at="31 61 75" size="1 1 1" color="6"/>
+    <box at="29 60 75" size="1 1 1" color="6"/>
+    <box at="30 61 74" size="1 1 1" color="6"/>
+    <!-- Glifo 8 a theta=135 z=76 fase=10 (A) -->
+    <box at="24 57 78" size="1 1 1" color="A"/>
+    <box at="24 56 78" size="1 1 1" color="A"/>
+    <box at="24 57 77" size="1 1 1" color="A"/>
+    <box at="24 57 76" size="1 1 1" color="A"/>
+    <box at="24 57 75" size="1 1 1" color="A"/>
+    <box at="24 57 74" size="1 1 1" color="A"/>
+    <box at="24 56 74" size="1 1 1" color="A"/>
+    <!-- Glifo 4 a theta=155 z=76 fase=11 (D) -->
+    <box at="20 51 78" size="1 1 1" color="D"/>
+    <box at="19 49 78" size="1 1 1" color="D"/>
+    <box at="20 51 77" size="1 1 1" color="D"/>
+    <box at="19 49 77" size="1 1 1" color="D"/>
+    <box at="19 50 76" size="1 1 1" color="D"/>
+    <box at="19 50 75" size="1 1 1" color="D"/>
+    <!-- Glifo 0 a theta=205 z=76 fase=14 (H) -->
+    <box at="19 30 78" size="1 1 1" color="H"/>
+    <box at="19 31 77" size="1 1 1" color="H"/>
+    <box at="20 29 77" size="1 1 1" color="H"/>
+    <box at="18 32 76" size="1 1 1" color="H"/>
+    <box at="20 29 76" size="1 1 1" color="H"/>
+    <box at="19 31 75" size="1 1 1" color="H"/>
+    <box at="20 29 75" size="1 1 1" color="H"/>
+    <box at="19 30 74" size="1 1 1" color="H"/>
+    <!-- Glifo 8 a theta=225 z=76 fase=2 (2) -->
+    <box at="23 24 78" size="1 1 1" color="2"/>
+    <box at="24 24 78" size="1 1 1" color="2"/>
+    <box at="23 24 77" size="1 1 1" color="2"/>
+    <box at="23 24 76" size="1 1 1" color="2"/>
+    <box at="23 24 75" size="1 1 1" color="2"/>
+    <box at="23 24 74" size="1 1 1" color="2"/>
+    <box at="24 24 74" size="1 1 1" color="2"/>
+    <!-- Glifo 4 a theta=245 z=76 fase=1 (1) -->
+    <box at="29 20 78" size="1 1 1" color="1"/>
+    <box at="31 19 78" size="1 1 1" color="1"/>
+    <box at="29 20 77" size="1 1 1" color="1"/>
+    <box at="31 19 77" size="1 1 1" color="1"/>
+    <box at="30 19 76" size="1 1 1" color="1"/>
+    <box at="30 19 75" size="1 1 1" color="1"/>
+    <!-- Glifo 0 a theta=295 z=76 fase=4 (4) -->
+    <box at="50 19 78" size="1 1 1" color="4"/>
+    <box at="49 19 77" size="1 1 1" color="4"/>
+    <box at="51 20 77" size="1 1 1" color="4"/>
+    <box at="48 18 76" size="1 1 1" color="4"/>
+    <box at="51 20 76" size="1 1 1" color="4"/>
+    <box at="49 19 75" size="1 1 1" color="4"/>
+    <box at="51 20 75" size="1 1 1" color="4"/>
+    <box at="50 19 74" size="1 1 1" color="4"/>
+    <!-- Glifo 8 a theta=315 z=76 fase=8 (8) -->
+    <box at="56 23 78" size="1 1 1" color="8"/>
+    <box at="56 24 78" size="1 1 1" color="8"/>
+    <box at="56 23 77" size="1 1 1" color="8"/>
+    <box at="56 23 76" size="1 1 1" color="8"/>
+    <box at="56 23 75" size="1 1 1" color="8"/>
+    <box at="56 23 74" size="1 1 1" color="8"/>
+    <box at="56 24 74" size="1 1 1" color="8"/>
+    <!-- Glifo 4 a theta=335 z=76 fase=9 (9) -->
+    <box at="60 29 78" size="1 1 1" color="9"/>
+    <box at="61 31 78" size="1 1 1" color="9"/>
+    <box at="60 29 77" size="1 1 1" color="9"/>
+    <box at="61 31 77" size="1 1 1" color="9"/>
+    <box at="61 30 76" size="1 1 1" color="9"/>
+    <box at="61 30 75" size="1 1 1" color="9"/>
+    <!-- Glifo 3 a theta=25 z=94 fase=9 (9) -->
+    <box at="61 50 96" size="1 1 1" color="9"/>
+    <box at="61 49 95" size="1 1 1" color="9"/>
+    <box at="60 51 95" size="1 1 1" color="9"/>
+    <box at="61 49 94" size="1 1 1" color="9"/>
+    <box at="60 51 94" size="1 1 1" color="9"/>
+    <box at="62 48 93" size="1 1 1" color="9"/>
+    <box at="60 51 93" size="1 1 1" color="9"/>
+    <!-- Glifo 11 a theta=45 z=94 fase=11 (D) -->
+    <box at="56 56 96" size="1 1 1" color="D"/>
+    <box at="57 56 95" size="1 1 1" color="D"/>
+    <box at="56 56 94" size="1 1 1" color="D"/>
+    <box at="56 57 93" size="1 1 1" color="D"/>
+    <box at="56 56 92" size="1 1 1" color="D"/>
+    <!-- Glifo 7 a theta=65 z=94 fase=12 (E) -->
+    <box at="51 60 96" size="1 1 1" color="E"/>
+    <box at="49 61 96" size="1 1 1" color="E"/>
+    <box at="51 60 95" size="1 1 1" color="E"/>
+    <box at="49 61 95" size="1 1 1" color="E"/>
+    <box at="50 61 94" size="1 1 1" color="E"/>
+    <box at="50 61 93" size="1 1 1" color="E"/>
+    <box at="50 61 92" size="1 1 1" color="E"/>
+    <!-- Glifo 3 a theta=115 z=94 fase=15 (I) -->
+    <box at="30 61 96" size="1 1 1" color="I"/>
+    <box at="31 61 95" size="1 1 1" color="I"/>
+    <box at="29 60 95" size="1 1 1" color="I"/>
+    <box at="31 61 94" size="1 1 1" color="I"/>
+    <box at="29 60 94" size="1 1 1" color="I"/>
+    <box at="32 62 93" size="1 1 1" color="I"/>
+    <box at="29 60 93" size="1 1 1" color="I"/>
+    <!-- Glifo 11 a theta=135 z=94 fase=3 (3) -->
+    <box at="24 56 96" size="1 1 1" color="3"/>
+    <box at="24 57 95" size="1 1 1" color="3"/>
+    <box at="24 56 94" size="1 1 1" color="3"/>
+    <box at="23 56 93" size="1 1 1" color="3"/>
+    <box at="24 56 92" size="1 1 1" color="3"/>
+    <!-- Glifo 7 a theta=155 z=94 fase=4 (4) -->
+    <box at="20 51 96" size="1 1 1" color="4"/>
+    <box at="19 49 96" size="1 1 1" color="4"/>
+    <box at="20 51 95" size="1 1 1" color="4"/>
+    <box at="19 49 95" size="1 1 1" color="4"/>
+    <box at="19 50 94" size="1 1 1" color="4"/>
+    <box at="19 50 93" size="1 1 1" color="4"/>
+    <box at="19 50 92" size="1 1 1" color="4"/>
+    <!-- Glifo 3 a theta=205 z=94 fase=7 (7) -->
+    <box at="19 30 96" size="1 1 1" color="7"/>
+    <box at="19 31 95" size="1 1 1" color="7"/>
+    <box at="20 29 95" size="1 1 1" color="7"/>
+    <box at="19 31 94" size="1 1 1" color="7"/>
+    <box at="20 29 94" size="1 1 1" color="7"/>
+    <box at="18 32 93" size="1 1 1" color="7"/>
+    <box at="20 29 93" size="1 1 1" color="7"/>
+    <!-- Glifo 11 a theta=225 z=94 fase=11 (D) -->
+    <box at="24 24 96" size="1 1 1" color="D"/>
+    <box at="23 24 95" size="1 1 1" color="D"/>
+    <box at="24 24 94" size="1 1 1" color="D"/>
+    <box at="24 23 93" size="1 1 1" color="D"/>
+    <box at="24 24 92" size="1 1 1" color="D"/>
+    <!-- Glifo 7 a theta=245 z=94 fase=10 (A) -->
+    <box at="29 20 96" size="1 1 1" color="A"/>
+    <box at="31 19 96" size="1 1 1" color="A"/>
+    <box at="29 20 95" size="1 1 1" color="A"/>
+    <box at="31 19 95" size="1 1 1" color="A"/>
+    <box at="30 19 94" size="1 1 1" color="A"/>
+    <box at="30 19 93" size="1 1 1" color="A"/>
+    <box at="30 19 92" size="1 1 1" color="A"/>
+    <!-- Glifo 3 a theta=295 z=94 fase=13 (G) -->
+    <box at="50 19 96" size="1 1 1" color="G"/>
+    <box at="49 19 95" size="1 1 1" color="G"/>
+    <box at="51 20 95" size="1 1 1" color="G"/>
+    <box at="49 19 94" size="1 1 1" color="G"/>
+    <box at="51 20 94" size="1 1 1" color="G"/>
+    <box at="48 18 93" size="1 1 1" color="G"/>
+    <box at="51 20 93" size="1 1 1" color="G"/>
+    <!-- Glifo 11 a theta=315 z=94 fase=1 (1) -->
+    <box at="56 24 96" size="1 1 1" color="1"/>
+    <box at="56 23 95" size="1 1 1" color="1"/>
+    <box at="56 24 94" size="1 1 1" color="1"/>
+    <box at="57 24 93" size="1 1 1" color="1"/>
+    <box at="56 24 92" size="1 1 1" color="1"/>
+    <!-- Glifo 7 a theta=335 z=94 fase=2 (2) -->
+    <box at="60 29 96" size="1 1 1" color="2"/>
+    <box at="61 31 96" size="1 1 1" color="2"/>
+    <box at="60 29 95" size="1 1 1" color="2"/>
+    <box at="61 31 95" size="1 1 1" color="2"/>
+    <box at="61 30 94" size="1 1 1" color="2"/>
+    <box at="61 30 93" size="1 1 1" color="2"/>
+    <box at="61 30 92" size="1 1 1" color="2"/>
+    <!-- Glifo 6 a theta=25 z=110 fase=15 (I) -->
+    <box at="61 49 112" size="1 1 1" color="I"/>
+    <box at="61 50 112" size="1 1 1" color="I"/>
+    <box at="60 51 112" size="1 1 1" color="I"/>
+    <box at="61 50 111" size="1 1 1" color="I"/>
+    <box at="61 50 110" size="1 1 1" color="I"/>
+    <box at="61 49 109" size="1 1 1" color="I"/>
+    <box at="61 50 109" size="1 1 1" color="I"/>
+    <box at="60 51 109" size="1 1 1" color="I"/>
+    <!-- Glifo 2 a theta=45 z=110 fase=1 (1) -->
+    <box at="57 56 112" size="1 1 1" color="1"/>
+    <box at="56 57 112" size="1 1 1" color="1"/>
+    <box at="56 56 111" size="1 1 1" color="1"/>
+    <box at="56 56 110" size="1 1 1" color="1"/>
+    <box at="57 56 109" size="1 1 1" color="1"/>
+    <box at="56 57 109" size="1 1 1" color="1"/>
+    <box at="58 55 108" size="1 1 1" color="1"/>
+    <box at="55 58 108" size="1 1 1" color="1"/>
+    <!-- Glifo 10 a theta=65 z=110 fase=2 (2) -->
+    <box at="51 60 111" size="1 1 1" color="2"/>
+    <box at="49 61 111" size="1 1 1" color="2"/>
+    <box at="50 61 109" size="1 1 1" color="2"/>
+    <!-- Glifo 6 a theta=115 z=110 fase=5 (5) -->
+    <box at="31 61 112" size="1 1 1" color="5"/>
+    <box at="30 61 112" size="1 1 1" color="5"/>
+    <box at="29 60 112" size="1 1 1" color="5"/>
+    <box at="30 61 111" size="1 1 1" color="5"/>
+    <box at="30 61 110" size="1 1 1" color="5"/>
+    <box at="31 61 109" size="1 1 1" color="5"/>
+    <box at="30 61 109" size="1 1 1" color="5"/>
+    <box at="29 60 109" size="1 1 1" color="5"/>
+    <!-- Glifo 2 a theta=135 z=110 fase=9 (9) -->
+    <box at="24 57 112" size="1 1 1" color="9"/>
+    <box at="23 56 112" size="1 1 1" color="9"/>
+    <box at="24 56 111" size="1 1 1" color="9"/>
+    <box at="24 56 110" size="1 1 1" color="9"/>
+    <box at="24 57 109" size="1 1 1" color="9"/>
+    <box at="23 56 109" size="1 1 1" color="9"/>
+    <box at="25 58 108" size="1 1 1" color="9"/>
+    <box at="22 55 108" size="1 1 1" color="9"/>
+    <!-- Glifo 10 a theta=155 z=110 fase=10 (A) -->
+    <box at="20 51 111" size="1 1 1" color="A"/>
+    <box at="19 49 111" size="1 1 1" color="A"/>
+    <box at="19 50 109" size="1 1 1" color="A"/>
+    <!-- Glifo 6 a theta=205 z=110 fase=13 (G) -->
+    <box at="19 31 112" size="1 1 1" color="G"/>
+    <box at="19 30 112" size="1 1 1" color="G"/>
+    <box at="20 29 112" size="1 1 1" color="G"/>
+    <box at="19 30 111" size="1 1 1" color="G"/>
+    <box at="19 30 110" size="1 1 1" color="G"/>
+    <box at="19 31 109" size="1 1 1" color="G"/>
+    <box at="19 30 109" size="1 1 1" color="G"/>
+    <box at="20 29 109" size="1 1 1" color="G"/>
+    <!-- Glifo 2 a theta=225 z=110 fase=1 (1) -->
+    <box at="23 24 112" size="1 1 1" color="1"/>
+    <box at="24 23 112" size="1 1 1" color="1"/>
+    <box at="24 24 111" size="1 1 1" color="1"/>
+    <box at="24 24 110" size="1 1 1" color="1"/>
+    <box at="23 24 109" size="1 1 1" color="1"/>
+    <box at="24 23 109" size="1 1 1" color="1"/>
+    <box at="22 25 108" size="1 1 1" color="1"/>
+    <box at="25 22 108" size="1 1 1" color="1"/>
+    <!-- Glifo 10 a theta=245 z=110 fase=0 (0) -->
+    <box at="29 20 111" size="1 1 1" color="0"/>
+    <box at="31 19 111" size="1 1 1" color="0"/>
+    <box at="30 19 109" size="1 1 1" color="0"/>
+    <!-- Glifo 6 a theta=295 z=110 fase=3 (3) -->
+    <box at="49 19 112" size="1 1 1" color="3"/>
+    <box at="50 19 112" size="1 1 1" color="3"/>
+    <box at="51 20 112" size="1 1 1" color="3"/>
+    <box at="50 19 111" size="1 1 1" color="3"/>
+    <box at="50 19 110" size="1 1 1" color="3"/>
+    <box at="49 19 109" size="1 1 1" color="3"/>
+    <box at="50 19 109" size="1 1 1" color="3"/>
+    <box at="51 20 109" size="1 1 1" color="3"/>
+    <!-- Glifo 2 a theta=315 z=110 fase=7 (7) -->
+    <box at="56 23 112" size="1 1 1" color="7"/>
+    <box at="57 24 112" size="1 1 1" color="7"/>
+    <box at="56 24 111" size="1 1 1" color="7"/>
+    <box at="56 24 110" size="1 1 1" color="7"/>
+    <box at="56 23 109" size="1 1 1" color="7"/>
+    <box at="57 24 109" size="1 1 1" color="7"/>
+    <box at="55 22 108" size="1 1 1" color="7"/>
+    <box at="58 25 108" size="1 1 1" color="7"/>
+    <!-- Glifo 10 a theta=335 z=110 fase=8 (8) -->
+    <box at="60 29 111" size="1 1 1" color="8"/>
+    <box at="61 31 111" size="1 1 1" color="8"/>
+    <box at="61 30 109" size="1 1 1" color="8"/>
 
   <!-- ================================================================= -->
-  <!-- 5. COLLARE E ORDINE SUPERIORE (z = 120..166) - FASE INIZIALE w     -->
+  <!-- 5. COLLARE E ORDINE SUPERIORE (z = 120..166)                      -->
   <!-- ================================================================= -->
-  <cylinder at="40 40 120" size="52 52 2" color="C"/>
-  <cylinder at="40 40 122" size="50 50 2" color="S"/>
-  <cylinder at="40 40 122" size="51 51 1" color="w" on="B"/>
+  <!-- Balconata superiore di stacco (fase j) -->
+  <cylinder at="40 40 120" size="50 50 2" color="C"/>
+  <cylinder at="40 40 122" size="46 46 2" color="S"/>
+  <cylinder at="40 40 122" size="47 47 1" color="j" on="B"/>
 
   <!-- Fusto superiore rastremato -->
   <cylinder at="40 40 124" size="38 38 42" color="M"/>
   <cylinder at="40 40 124" size="32 32 42" color="m"/>
 
-  <!-- 4 pinne radiatrici verticali con costolatura neon bianco-viola w -->
+  <!-- 4 pinne radiatrici verticali con costolatura neon (fase l e n) -->
   <box at="40 21 126" size="2 2 36" color="S"/>
-  <box at="40 20 126" size="1 1 36" color="w"/>
+  <box at="40 20 126" size="1 1 36" color="l"/>
   <box at="40 59 126" size="2 2 36" color="S"/>
-  <box at="40 60 126" size="1 1 36" color="w"/>
+  <box at="40 60 126" size="1 1 36" color="n"/>
   <box at="21 40 126" size="2 2 36" color="S"/>
-  <box at="20 40 126" size="1 1 36" color="w"/>
+  <box at="20 40 126" size="1 1 36" color="l"/>
   <box at="59 40 126" size="2 2 36" color="S"/>
-  <box at="60 40 126" size="1 1 36" color="w"/>
+  <box at="60 40 126" size="1 1 36" color="n"/>
 
-  <!-- Ghiera di mezza altezza (fase w) -->
+  <!-- Ghiera di mezza altezza (fase q) -->
   <cylinder at="40 40 144" size="40 40 2" color="S"/>
-  <cylinder at="40 40 145" size="41 41 1" color="w" on="B"/>
+  <cylinder at="40 40 145" size="41 41 1" color="q" on="B"/>
 
-  <!-- Fascia runica superiore 4 (z = 148..158) incisa con rune in w -->
-  <box at="40 21 150" size="1 1 6" color="w" on="Mm"/>
-  <box at="39 21 152" size="1 1 2" color="w" on="Mm"/>
-  <box at="40 59 150" size="1 1 6" color="w" on="Mm"/>
-  <box at="41 59 153" size="1 1 2" color="w" on="Mm"/>
-  <box at="21 40 150" size="1 1 6" color="w" on="Mm"/>
-  <box at="21 39 152" size="1 1 2" color="w" on="Mm"/>
-  <box at="59 40 150" size="1 1 6" color="w" on="Mm"/>
-  <box at="59 41 153" size="1 1 2" color="w" on="Mm"/>
+  <!-- TAPPEZZERIA DI GLIFI INCISI SUL TIER 3 -->
+    <!-- Glifo 0 a theta=25 z=134 fase=11 (D) -->
+    <box at="56 48 136" size="1 1 1" color="D"/>
+    <box at="57 47 135" size="1 1 1" color="D"/>
+    <box at="56 48 135" size="1 1 1" color="D"/>
+    <box at="57 46 134" size="1 1 1" color="D"/>
+    <box at="55 49 134" size="1 1 1" color="D"/>
+    <box at="57 47 133" size="1 1 1" color="D"/>
+    <box at="56 48 133" size="1 1 1" color="D"/>
+    <box at="56 48 132" size="1 1 1" color="D"/>
+    <!-- Glifo 8 a theta=45 z=134 fase=13 (G) -->
+    <box at="53 52 136" size="1 1 1" color="G"/>
+    <box at="53 53 136" size="1 1 1" color="G"/>
+    <box at="53 52 135" size="1 1 1" color="G"/>
+    <box at="53 52 134" size="1 1 1" color="G"/>
+    <box at="53 52 133" size="1 1 1" color="G"/>
+    <box at="53 52 132" size="1 1 1" color="G"/>
+    <box at="53 53 132" size="1 1 1" color="G"/>
+    <!-- Glifo 4 a theta=65 z=134 fase=14 (H) -->
+    <box at="48 56 136" size="1 1 1" color="H"/>
+    <box at="47 57 136" size="1 1 1" color="H"/>
+    <box at="48 56 135" size="1 1 1" color="H"/>
+    <box at="47 57 135" size="1 1 1" color="H"/>
+    <box at="48 56 134" size="1 1 1" color="H"/>
+    <box at="48 56 133" size="1 1 1" color="H"/>
+    <!-- Glifo 0 a theta=115 z=134 fase=1 (1) -->
+    <box at="32 56 136" size="1 1 1" color="1"/>
+    <box at="33 57 135" size="1 1 1" color="1"/>
+    <box at="32 56 135" size="1 1 1" color="1"/>
+    <box at="34 57 134" size="1 1 1" color="1"/>
+    <box at="31 55 134" size="1 1 1" color="1"/>
+    <box at="33 57 133" size="1 1 1" color="1"/>
+    <box at="32 56 133" size="1 1 1" color="1"/>
+    <box at="32 56 132" size="1 1 1" color="1"/>
+    <!-- Glifo 8 a theta=135 z=134 fase=5 (5) -->
+    <box at="28 53 136" size="1 1 1" color="5"/>
+    <box at="27 53 136" size="1 1 1" color="5"/>
+    <box at="28 53 135" size="1 1 1" color="5"/>
+    <box at="28 53 134" size="1 1 1" color="5"/>
+    <box at="28 53 133" size="1 1 1" color="5"/>
+    <box at="28 53 132" size="1 1 1" color="5"/>
+    <box at="27 53 132" size="1 1 1" color="5"/>
+    <!-- Glifo 4 a theta=155 z=134 fase=6 (6) -->
+    <box at="24 48 136" size="1 1 1" color="6"/>
+    <box at="23 47 136" size="1 1 1" color="6"/>
+    <box at="24 48 135" size="1 1 1" color="6"/>
+    <box at="23 47 135" size="1 1 1" color="6"/>
+    <box at="24 48 134" size="1 1 1" color="6"/>
+    <box at="24 48 133" size="1 1 1" color="6"/>
+    <!-- Glifo 0 a theta=205 z=134 fase=9 (9) -->
+    <box at="24 32 136" size="1 1 1" color="9"/>
+    <box at="23 33 135" size="1 1 1" color="9"/>
+    <box at="24 32 135" size="1 1 1" color="9"/>
+    <box at="23 34 134" size="1 1 1" color="9"/>
+    <box at="25 31 134" size="1 1 1" color="9"/>
+    <box at="23 33 133" size="1 1 1" color="9"/>
+    <box at="24 32 133" size="1 1 1" color="9"/>
+    <box at="24 32 132" size="1 1 1" color="9"/>
+    <!-- Glifo 8 a theta=225 z=134 fase=13 (G) -->
+    <box at="27 28 136" size="1 1 1" color="G"/>
+    <box at="27 27 136" size="1 1 1" color="G"/>
+    <box at="27 28 135" size="1 1 1" color="G"/>
+    <box at="27 28 134" size="1 1 1" color="G"/>
+    <box at="27 28 133" size="1 1 1" color="G"/>
+    <box at="27 28 132" size="1 1 1" color="G"/>
+    <box at="27 27 132" size="1 1 1" color="G"/>
+    <!-- Glifo 4 a theta=245 z=134 fase=12 (E) -->
+    <box at="32 24 136" size="1 1 1" color="E"/>
+    <box at="33 23 136" size="1 1 1" color="E"/>
+    <box at="32 24 135" size="1 1 1" color="E"/>
+    <box at="33 23 135" size="1 1 1" color="E"/>
+    <box at="32 24 134" size="1 1 1" color="E"/>
+    <box at="32 24 133" size="1 1 1" color="E"/>
+    <!-- Glifo 0 a theta=295 z=134 fase=15 (I) -->
+    <box at="48 24 136" size="1 1 1" color="I"/>
+    <box at="47 23 135" size="1 1 1" color="I"/>
+    <box at="48 24 135" size="1 1 1" color="I"/>
+    <box at="46 23 134" size="1 1 1" color="I"/>
+    <box at="49 25 134" size="1 1 1" color="I"/>
+    <box at="47 23 133" size="1 1 1" color="I"/>
+    <box at="48 24 133" size="1 1 1" color="I"/>
+    <box at="48 24 132" size="1 1 1" color="I"/>
+    <!-- Glifo 8 a theta=315 z=134 fase=3 (3) -->
+    <box at="52 27 136" size="1 1 1" color="3"/>
+    <box at="53 27 136" size="1 1 1" color="3"/>
+    <box at="52 27 135" size="1 1 1" color="3"/>
+    <box at="52 27 134" size="1 1 1" color="3"/>
+    <box at="52 27 133" size="1 1 1" color="3"/>
+    <box at="52 27 132" size="1 1 1" color="3"/>
+    <box at="53 27 132" size="1 1 1" color="3"/>
+    <!-- Glifo 4 a theta=335 z=134 fase=4 (4) -->
+    <box at="56 32 136" size="1 1 1" color="4"/>
+    <box at="57 33 136" size="1 1 1" color="4"/>
+    <box at="56 32 135" size="1 1 1" color="4"/>
+    <box at="57 33 135" size="1 1 1" color="4"/>
+    <box at="56 32 134" size="1 1 1" color="4"/>
+    <box at="56 32 133" size="1 1 1" color="4"/>
+    <!-- Glifo 3 a theta=25 z=152 fase=1 (1) -->
+    <box at="56 48 154" size="1 1 1" color="1"/>
+    <box at="57 47 153" size="1 1 1" color="1"/>
+    <box at="56 48 153" size="1 1 1" color="1"/>
+    <box at="57 47 152" size="1 1 1" color="1"/>
+    <box at="56 48 152" size="1 1 1" color="1"/>
+    <box at="57 46 151" size="1 1 1" color="1"/>
+    <box at="55 49 151" size="1 1 1" color="1"/>
+    <!-- Glifo 11 a theta=45 z=152 fase=3 (3) -->
+    <box at="53 53 154" size="1 1 1" color="3"/>
+    <box at="53 52 153" size="1 1 1" color="3"/>
+    <box at="53 53 152" size="1 1 1" color="3"/>
+    <box at="52 53 151" size="1 1 1" color="3"/>
+    <box at="53 53 150" size="1 1 1" color="3"/>
+    <!-- Glifo 7 a theta=65 z=152 fase=4 (4) -->
+    <box at="48 56 154" size="1 1 1" color="4"/>
+    <box at="47 57 154" size="1 1 1" color="4"/>
+    <box at="48 56 153" size="1 1 1" color="4"/>
+    <box at="47 57 153" size="1 1 1" color="4"/>
+    <box at="48 56 152" size="1 1 1" color="4"/>
+    <box at="48 56 151" size="1 1 1" color="4"/>
+    <box at="48 56 150" size="1 1 1" color="4"/>
+    <!-- Glifo 3 a theta=115 z=152 fase=7 (7) -->
+    <box at="32 56 154" size="1 1 1" color="7"/>
+    <box at="33 57 153" size="1 1 1" color="7"/>
+    <box at="32 56 153" size="1 1 1" color="7"/>
+    <box at="33 57 152" size="1 1 1" color="7"/>
+    <box at="32 56 152" size="1 1 1" color="7"/>
+    <box at="34 57 151" size="1 1 1" color="7"/>
+    <box at="31 55 151" size="1 1 1" color="7"/>
+    <!-- Glifo 11 a theta=135 z=152 fase=11 (D) -->
+    <box at="27 53 154" size="1 1 1" color="D"/>
+    <box at="28 53 153" size="1 1 1" color="D"/>
+    <box at="27 53 152" size="1 1 1" color="D"/>
+    <box at="27 52 151" size="1 1 1" color="D"/>
+    <box at="27 53 150" size="1 1 1" color="D"/>
+    <!-- Glifo 7 a theta=155 z=152 fase=12 (E) -->
+    <box at="24 48 154" size="1 1 1" color="E"/>
+    <box at="23 47 154" size="1 1 1" color="E"/>
+    <box at="24 48 153" size="1 1 1" color="E"/>
+    <box at="23 47 153" size="1 1 1" color="E"/>
+    <box at="24 48 152" size="1 1 1" color="E"/>
+    <box at="24 48 151" size="1 1 1" color="E"/>
+    <box at="24 48 150" size="1 1 1" color="E"/>
+    <!-- Glifo 3 a theta=205 z=152 fase=15 (I) -->
+    <box at="24 32 154" size="1 1 1" color="I"/>
+    <box at="23 33 153" size="1 1 1" color="I"/>
+    <box at="24 32 153" size="1 1 1" color="I"/>
+    <box at="23 33 152" size="1 1 1" color="I"/>
+    <box at="24 32 152" size="1 1 1" color="I"/>
+    <box at="23 34 151" size="1 1 1" color="I"/>
+    <box at="25 31 151" size="1 1 1" color="I"/>
+    <!-- Glifo 11 a theta=225 z=152 fase=3 (3) -->
+    <box at="27 27 154" size="1 1 1" color="3"/>
+    <box at="27 28 153" size="1 1 1" color="3"/>
+    <box at="27 27 152" size="1 1 1" color="3"/>
+    <box at="28 27 151" size="1 1 1" color="3"/>
+    <box at="27 27 150" size="1 1 1" color="3"/>
+    <!-- Glifo 7 a theta=245 z=152 fase=2 (2) -->
+    <box at="32 24 154" size="1 1 1" color="2"/>
+    <box at="33 23 154" size="1 1 1" color="2"/>
+    <box at="32 24 153" size="1 1 1" color="2"/>
+    <box at="33 23 153" size="1 1 1" color="2"/>
+    <box at="32 24 152" size="1 1 1" color="2"/>
+    <box at="32 24 151" size="1 1 1" color="2"/>
+    <box at="32 24 150" size="1 1 1" color="2"/>
+    <!-- Glifo 3 a theta=295 z=152 fase=5 (5) -->
+    <box at="48 24 154" size="1 1 1" color="5"/>
+    <box at="47 23 153" size="1 1 1" color="5"/>
+    <box at="48 24 153" size="1 1 1" color="5"/>
+    <box at="47 23 152" size="1 1 1" color="5"/>
+    <box at="48 24 152" size="1 1 1" color="5"/>
+    <box at="46 23 151" size="1 1 1" color="5"/>
+    <box at="49 25 151" size="1 1 1" color="5"/>
+    <!-- Glifo 11 a theta=315 z=152 fase=9 (9) -->
+    <box at="53 27 154" size="1 1 1" color="9"/>
+    <box at="52 27 153" size="1 1 1" color="9"/>
+    <box at="53 27 152" size="1 1 1" color="9"/>
+    <box at="53 28 151" size="1 1 1" color="9"/>
+    <box at="53 27 150" size="1 1 1" color="9"/>
+    <!-- Glifo 7 a theta=335 z=152 fase=10 (A) -->
+    <box at="56 32 154" size="1 1 1" color="A"/>
+    <box at="57 33 154" size="1 1 1" color="A"/>
+    <box at="56 32 153" size="1 1 1" color="A"/>
+    <box at="57 33 153" size="1 1 1" color="A"/>
+    <box at="56 32 152" size="1 1 1" color="A"/>
+    <box at="56 32 151" size="1 1 1" color="A"/>
+    <box at="56 32 150" size="1 1 1" color="A"/>
 
   <!-- ================================================================= -->
-  <!-- 6. CORONA SOMMITALE E HALO ARCANO (z = 166..184) - FASE T         -->
+  <!-- 6. CORONA SOMMITALE E HALO ARCANO (z = 166..184)                  -->
   <!-- ================================================================= -->
-  <!-- Galleria panoramica / tamburo svasato -->
+  <!-- Galleria panoramica / tamburo svasato (fase r) -->
   <cylinder at="40 40 166" size="44 44 3" color="C"/>
-  <cylinder at="40 40 169" size="46 46 2" color="m"/>
-  <cylinder at="40 40 171" size="48 48 1" color="S"/>
-  <cylinder at="40 40 171" size="49 49 1" color="T" on="B"/>
+  <cylinder at="40 40 169" size="42 42 2" color="m"/>
+  <cylinder at="40 40 170" size="43 43 1" color="r" on="B"/>
 
-  <!-- Svuotamento interno della galleria (atrio cielo) -->
-  <cylinder at="40 40 172" size="38 38 4" color="B"/>
-
-  <!-- 4 piloni a cavalletto che reggono l'anello arcano -->
-  <box at="40 23 172" size="4 3 12" color="m"/>
-  <box at="40 23 172" size="2 1 12" color="S"/>
-  <box at="40 57 172" size="4 3 12" color="m"/>
-  <box at="40 57 172" size="2 1 12" color="S"/>
-  <box at="23 40 172" size="3 4 12" color="m"/>
-  <box at="23 40 172" size="1 2 12" color="S"/>
-  <box at="57 40 172" size="3 4 12" color="m"/>
-  <box at="57 40 172" size="1 2 12" color="S"/>
-
-  <!-- Halo arcano sospeso (z = 178..182) -->
-  <cylinder at="40 40 178" size="44 44 4" color="m"/>
-  <cylinder at="40 40 179" size="46 46 2" color="T"/>
-  <cylinder at="40 40 177" size="43 43 1" color="S"/>
-  <cylinder at="40 40 182" size="43 43 1" color="S"/>
+  <!-- Halo toroidale luminoso ad anello galleggiante (fase t ed u) -->
+  <cylinder at="40 40 176" size="46 46 8" color="t"/>
+  <cylinder at="40 40 177" size="48 48 6" color="u"/>
   <!-- Svuotamento toroidale: lascia un'apertura centrale di diametro 34 attraverso tutta la halo -->
   <cylinder at="40 40 176" size="34 34 8" color="B"/>
 
-  <!-- Guglia emettitrice centrale che sale fino alla base del Cuore Arcano -->
+  <!-- Guglia emettitrice centrale che sale fino alla base del Cuore Arcano (fase w) -->
   <cylinder at="40 40 172" size="10 10 7" color="S"/>
   <cylinder at="40 40 176" size="6 6 8" color="m"/>
   <cylinder at="40 40 182" size="4 4 3" color="S"/>
+  <box at="40 40 183" size="2 2 1" color="w"/>
 
   <!-- ================================================================= -->
   <!-- IL CUORE ARCANO SOMMITALE (z = 184..190) - TOTALMENTE A CIELO APERTO -->
   <!-- ================================================================= -->
-  <!-- Sfera/nucleo di plasma magico posizionato sopra la guglia e l'halo -->
-  <ellipsoid at="40 40 184" size="8 8 6" color="w"/>
-  <ellipsoid at="40 40 185" size="4 4 4" color="T"/>
+  <!-- Sfera/nucleo di plasma magico posizionato sopra la guglia e l'halo (fase k, apice morbido) -->
+  <ellipsoid at="40 40 184" size="8 8 6" color="k"/>
+  <ellipsoid at="40 40 185" size="4 4 4" color="j"/>
   <!-- 4 griffi/stabilizzatori in acciaio alla base dell'orbe -->
   <box at="36 40 184" size="1 1 3" color="S"/>
   <box at="44 40 184" size="1 1 3" color="S"/>
@@ -259,46 +890,42 @@ tra w -> T -> t -> u -> w, con Cuore Arcano sommitale completamente visibile a c
   <!-- ================================================================= -->
   <!-- 7. PORTALE MONUMENTALE D'INGRESSO E ATRIO (y >= 40, davanti)     -->
   <!-- ================================================================= -->
-  <!-- Basamento avanzato del portale -->
-  <box at="40 66 0" size="38 16 4" color="C"/>
-  <box at="40 75 0" size="24 4 1" color="C"/>
-  <box at="40 73 0" size="22 4 2" color="C"/>
+  <!-- Pavimentazione dell'atrio a terra (z=0, interno) -->
+  <box at="40 60 0" size="28 28 1" color="C"/>
 
   <!-- Corpo massiccio del portale cybernetico -->
   <box at="40 64 4" size="36 18 50" color="M"/>
 
-  <!-- Piloni laterali di guardia al portale (fase T) -->
+  <!-- Piloni laterali di guardia al portale (fase b) -->
   <box at="25 71 0" size="6 6 56" color="m"/>
   <box at="55 71 0" size="6 6 56" color="m"/>
-  <box at="23 72 6" size="1 1 48" color="T"/>
-  <box at="57 72 6" size="1 1 48" color="T"/>
+  <box at="23 72 6" size="1 1 48" color="b"/>
+  <box at="57 72 6" size="1 1 48" color="b"/>
+  <box at="25 74 12" size="4 1 40" color="b"/>
+  <box at="55 74 12" size="4 1 40" color="b"/>
 
-  <!-- Svuotamento dell'apertura del portale e atrio interno vuoto (y=60..73) -->
-  <box at="40 67 0" size="18 14 24" color="B"/>
-  <box at="40 61 0" size="18 10 24" color="B"/>
+  <!-- Cornice neon viola del vano porta sulla facciata esterna (fase b) -->
+  <box at="31 73 0" size="1 1 25" color="b"/>
+  <box at="48 73 0" size="1 1 25" color="b"/>
+  <box at="40 73 24" size="18 1 1" color="b"/>
 
-  <!-- Pavimento dell'atrio a terra -->
-  <box at="40 66 0" size="18 16 1" color="C"/>
+  <!-- I VOXEL DELLA PORTA O (z=0..23, vano libero verso l'interno) -->
+  <box at="40 73 0" size="16 1 24" color="O"/>
+  <!-- Atrio interno completamente vuoto per 8 voxel verso il retro (y=65..72) -->
+  <box at="40 68 0" size="16 8 24" color="B"/>
 
-  <!-- LA PORTA (lettera O, nome "porta", al centro x=40, z=0..23, y=67) -->
-  <box at="40 67 0" size="16 1 24" color="O"/>
-  <box at="32 67 0" size="1 1 24" color="m"/>
-  <box at="47 67 0" size="1 1 24" color="m"/>
+  <!-- Travatura superiore del portale -->
+  <box at="40 72 50" size="38 4 6" color="m"/>
+  <box at="40 73 53" size="34 2 2" color="S"/>
 
-  <!-- Cornice neon viola del vano porta sulla facciata esterna (fase T) -->
-  <box at="31 73 0" size="1 1 25" color="T"/>
-  <box at="48 73 0" size="1 1 25" color="T"/>
-  <box at="40 73 24" size="18 1 1" color="T"/>
-  <box at="40 72 25" size="22 2 2" color="S"/>
-
-  <!-- ================================================================= -->
-  <!-- 8. LASTRA SCURA DELL'INSEGNA (y = 73, z = 26..52)                 -->
-  <!-- ================================================================= -->
-  <box at="40 73 27" size="36 1 25" color="P"/>
-  <box at="40 73 52" size="38 1 1" color="S"/>
-  <box at="40 73 26" size="38 1 1" color="S"/>
+  <!-- Parapetti e lesene verticali sulla facciata -->
   <box at="21 73 27" size="1 1 25" color="S"/>
   <box at="59 73 27" size="1 1 25" color="S"/>
+
+  <!-- ================================================================= -->
+  <!-- 8. TARGA SCURA OPACA DELL'INSEGNA (y = 73, z = 28..49)            -->
+  <!-- ================================================================= -->
+  <box at="40 73 38" size="26 1 18" color="P"/>
 
   <!-- ================================================================= -->
   <!-- 9. L'INSEGNA NEON "LA TORRE DELLA MAGIA" (y = 74, glow=True, FISSA) -->
@@ -417,22 +1044,48 @@ tra w -> T -> t -> u -> w, con Cuore Arcano sommitale completamente visibile a c
 </sequence>
 
 <!-- ================================================================= -->
-<!-- ANIMAZIONE CICLICA "ENERGIA" (8 frame, onda macroscopica deterministica) -->
-<!-- Ogni anello e sezione luminosa pulsa all'unisono senza casualità:   -->
-<!--   w (apice bianco-viola) -> T (viola brillante) ->                -->
-<!--   t (porpora medio) -> u (viola profondo) -> w                     -->
+<!-- ANIMAZIONE CICLICA "ENERGIA" (16 frame, respiro cosmico di 2.4s)  -->
+<!-- 1. I glifi si risvegliano, brillano e ritornano al metallo spento   -->
+<!-- 2. I condotti e gli anelli oscillano in un'onda continua morbida  -->
 <!-- ================================================================= -->
-<animation name="energia" frames="8">
+<animation name="energia" frames="16">
   <sequence>
-    <!-- Passo 1: salva lo stato T nel buffer x -->
-    <all in="T" out="x"/>
-    <!-- Passo 2: w (apice) decade a T (alta energia) -->
-    <all in="w" out="T"/>
-    <!-- Passo 3: u (minimo) si carica ed esplode a w (apice bianco-viola) -->
-    <all in="u" out="w"/>
-    <!-- Passo 4: t (media energia) sfuma a u (minimo) -->
-    <all in="t" out="u"/>
-    <!-- Passo 5: il vecchio T salvato in x passa a t (media energia) -->
-    <all in="x" out="t"/>
+    <!-- 1. Ciclo dei glifi a parete (0..6 spenti, 7..I accesi) -->
+    <all in="0" out="x"/>
+    <all in="1" out="0"/>
+    <all in="2" out="1"/>
+    <all in="3" out="2"/>
+    <all in="4" out="3"/>
+    <all in="5" out="4"/>
+    <all in="6" out="5"/>
+    <all in="7" out="6"/>
+    <all in="8" out="7"/>
+    <all in="9" out="8"/>
+    <all in="A" out="9"/>
+    <all in="D" out="A"/>
+    <all in="E" out="D"/>
+    <all in="G" out="E"/>
+    <all in="H" out="G"/>
+    <all in="I" out="H"/>
+    <all in="x" out="I"/>
+
+    <!-- 2. Ciclo dei condotti, anelli e cuore sommitale -->
+    <all in="a" out="y"/>
+    <all in="b" out="a"/>
+    <all in="d" out="b"/>
+    <all in="e" out="d"/>
+    <all in="g" out="e"/>
+    <all in="h" out="g"/>
+    <all in="i" out="h"/>
+    <all in="j" out="i"/>
+    <all in="k" out="j"/>
+    <all in="l" out="k"/>
+    <all in="n" out="l"/>
+    <all in="q" out="n"/>
+    <all in="r" out="q"/>
+    <all in="t" out="r"/>
+    <all in="u" out="t"/>
+    <all in="w" out="u"/>
+    <all in="y" out="w"/>
   </sequence>
 </animation>
