@@ -796,6 +796,8 @@ describe('the life of people', () => {
     clearArea(k);
     const a = await person(k, 'vita#b', 1);
     const pc = k.playerCarpet();
+    // Only the bed next to them: the places' own beds may be anywhere around.
+    for (const id of k.ecs.query('module')) if (k.ecs.get(id, 'module').id === 'obj.letto') k.ecs.destroy(id);
     k.spawnModuleEntity(k.modules.get('obj.letto')!, pc.x + 2.5, pc.y);
     // Deep night.
     k.time = Kernel.DAY_SECONDS * 0.7;

@@ -7,12 +7,13 @@
 // (src/kernel/corona.ts): logic stays in the kernel.
 
 import * as THREE from 'three';
-import type { Kernel, ShowcaseEntry } from '../kernel/kernel';
+import type { Kernel, PlaceMiniature, ShowcaseEntry } from '../kernel/kernel';
 import { CAMPUS, ROOM_H, ROOM_W, type Building, type Floor, type StudioItem } from '../kernel/corona';
 import { Builder } from './terrain';
 import { MAT, rgbOf } from './materials';
 import { NODE_COLOR } from '../kernel/graph';
-import { geoOf, showFrame } from './models';
+import { geoOf, modelObject, showFrame } from './models';
+import { LEVEL } from '../kernel/relief';
 
 const TOWER_H = 4.5;
 const GROUND: Record<string, [string, string]> = { viale: ['#161824', '#12131d'], vicolo: ['#14141c', '#111119'], prato: ['#0b0f15', '#0b0f15'], bordo: ['#0d0d16', '#0d0d16'] };
@@ -359,7 +360,7 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
   }
 }
 
-/** The device of a showcase: a screen, a silo (its glass is drawn with what it shows), a 3D printer. */
+/** The device of a showcase: a screen, a silo (its glass is drawn with what it shows), a 3D printer, a holographic table. */
 function showcaseBody(lit: Builder, glow: Builder, it: StudioItem, col: string): void {
   const x = it.x, z = it.y, w = it.w ?? 1;
   const dark = rgbOf('#10101a');
@@ -376,6 +377,18 @@ function showcaseBody(lit: Builder, glow: Builder, it: StudioItem, col: string):
     lit.box(cx - 1.1, 2.6, cz - 0.5, cx + 1.1, 2.85, cz + 0.5, dark);
     glow.box(cx - 1.1, 0.3, cz + 0.45, cx + 1.1, 0.34, cz + 0.5, c);
     glow.box(cx - 1.1, 2.56, cz + 0.45, cx + 1.1, 2.6, cz + 0.5, c);
+    return;
+  }
+  if (it.device === 'plastico') {
+    // The model of places (T26): a dark table over w × h cells, glowing edges, a projector plate under the place.
+    const d = it.h ?? 1;
+    lit.box(x + 0.05, 0, z + 0.05, x + w - 0.05, PLATE - 0.04, z + d - 0.05, dark);
+    lit.box(x + 0.1, PLATE - 0.04, z + 0.1, x + w - 0.1, PLATE, z + d - 0.1, rgbOf('#0b1624'));
+    glow.box(x + 0.05, PLATE - 0.04, z + 0.05, x + w - 0.05, PLATE - 0.01, z + 0.1, c);
+    glow.box(x + 0.05, PLATE - 0.04, z + d - 0.1, x + w - 0.05, PLATE - 0.01, z + d - 0.05, c);
+    glow.box(x + 0.05, PLATE - 0.04, z + 0.1, x + 0.1, PLATE - 0.01, z + d - 0.1, c);
+    glow.box(x + w - 0.1, PLATE - 0.04, z + 0.1, x + w - 0.05, PLATE - 0.01, z + d - 0.1, c);
+    glow.box(x + 0.3, 0.12, z + d - 0.06, x + w - 0.3, 0.16, z + d - 0.04, c);
     return;
   }
   // The printer (T24): w × h cells, four posts and a frame, a gantry with the head over the middle cell, a bed of
@@ -398,6 +411,53 @@ function showcaseBody(lit: Builder, glow: Builder, it: StudioItem, col: string):
   glow.box(mx + 0.04, 0.3, mz + 0.9, mx + 0.96, 0.32, mz + 0.96, c);
   glow.box(mx + 0.04, 0.3, mz + 0.1, mx + 0.1, 0.32, mz + 0.9, c);
   glow.box(mx + 0.9, 0.3, mz + 0.1, mx + 0.96, 0.32, mz + 0.9, c);
+}
+
+/** The height of the model of places' table, where the place in miniature stands. */
+const PLATE = 0.7;
+
+/**
+ * A planned place in miniature on the model of places (T26), `side` wide: each tile a column in its colour up to its
+ * level (water a little lower, walls and rocks higher), the structures and things as their models made small, the runes
+ * as glowing tiles. What is not ready yet (a model still running) is simply missing: the key changes when it is.
+ */
+function buildMiniature(k: Kernel, mini: PlaceMiniature, side: number): THREE.Group {
+  const g = new THREE.Group();
+  const S = mini.size, t = side / S;
+  const lit = new Builder();
+  const glow = new Builder();
+  const top = (i: number) => (mini.levels[i] ?? 0) * LEVEL * t;
+  for (let i = 0; i < S * S; i++) {
+    const def = k.palette[mini.tiles[i]];
+    const c = i % S, r = (i - c) / S;
+    const layer = def?.layer ?? 'ground';
+    const h = top(i) + (layer === 'liquid' ? -0.2 : layer === 'wall' || layer === 'rock' || def?.solid ? 0.8 : layer === 'vegetation' ? 0.15 : 0) * t;
+    lit.box(c * t, 0, r * t, (c + 1) * t, Math.max(0.01, h + 0.03), (r + 1) * t, rgbOf(def?.color ?? '#333'));
+  }
+  // The rim of the projection.
+  const rim = rgbOf('#05d9e8', 0.5);
+  glow.box(-0.02, 0, -0.02, side + 0.02, 0.015, 0, rim);
+  glow.box(-0.02, 0, side, side + 0.02, 0.015, side + 0.02, rim);
+  glow.box(-0.02, 0, 0, 0, 0.015, side, rim);
+  glow.box(side, 0, 0, side + 0.02, 0.015, side, rim);
+  for (const r of mini.runes) {
+    const i = Math.floor(r.y) * S + Math.floor(r.x);
+    glow.box((r.x - 0.4) * t, top(i) + 0.03, (r.y - 0.4) * t, (r.x + 0.4) * t, top(i) + 0.03 + 0.12 * t, (r.y + 0.4) * t, rgbOf(r.color ?? '#ffcf5c'));
+  }
+  g.add(new THREE.Mesh(lit.geometry(), MAT.corona), new THREE.Mesh(glow.geometry(), MAT.glow));
+  const place = (o: { x: number; y: number; model: string; seed: number; yaw: number; tint?: string; done?: string[] }) => {
+    const f = k.forms.ready(o.model, o.seed, o.tint);
+    const m = f && modelObject(k, f, { model: o.model, seed: o.seed, yaw: o.yaw, tint: o.tint, done: o.done }, MAT.corona);
+    if (!m) return;
+    for (const fr of m.frames) fr.visible = false;
+    m.root.scale.setScalar(t);
+    m.root.rotation.y = o.yaw;
+    m.root.position.set(o.x * t, top(Math.floor(o.y) * S + Math.floor(o.x)) + 0.03, o.y * t);
+    g.add(m.root);
+  };
+  for (const s of mini.structures) place(s);
+  for (const th of mini.things) place(th);
+  return g;
 }
 
 /** Text on a glowing plane (canvas), w wide in cells. */
@@ -474,9 +534,21 @@ export function buildShowcase(k: Kernel, it: StudioItem, entry: ShowcaseEntry, c
   const cx = it.x + w / 2, cz = row + 0.5;
   g.add(arrowSign(it.x - 1, row, '<', color), arrowSign(it.x + w, row, '>', color));
   const printer = it.device === 'stampante';
-  const name = textPlane([entry.label], color, w - 0.2, printer ? 0.24 : 0.32);
-  name.position.set(cx, it.device === 'schermo' ? 0.45 : printer ? 0.14 : 0.17, it.device === 'schermo' ? cz + 0.73 : printer ? it.y + d - 0.09 : cz + 0.52);
+  const table = it.device === 'plastico';
+  const name = textPlane([entry.label], color, w - 0.2, printer || table ? 0.24 : 0.32);
+  name.position.set(cx, it.device === 'schermo' ? 0.45 : table ? 0.38 : printer ? 0.14 : 0.17, it.device === 'schermo' ? cz + 0.73 : table ? it.y + d - 0.04 : printer ? it.y + d - 0.09 : cz + 0.52);
   g.add(name);
+  if (entry.place) {
+    // The model of places (T26): the place in miniature over the table, still; until it is read, the table is empty.
+    const mini = k.miniature(entry.place.cx, entry.place.cy);
+    if (mini) {
+      const side = Math.min(w, d) - 0.3;
+      const m = buildMiniature(k, mini, side);
+      m.position.set(it.x + (w - side) / 2, PLATE, it.y + (d - side) / 2);
+      g.add(m);
+    }
+    return { group: g };
+  }
   let bubbles: THREE.Object3D[] | undefined;
   if (it.device === 'silos') {
     const glass = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.95, 2.26, 28, 1, true), new THREE.MeshBasicMaterial({ color: '#cfe8ff', transparent: true, opacity: 0.1, side: THREE.DoubleSide, depthWrite: false, toneMapped: false }));

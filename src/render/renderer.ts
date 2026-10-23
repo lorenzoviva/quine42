@@ -237,7 +237,8 @@ export class Renderer {
     const show = studio?.floor.items.find((i) => i.kind === 'showcase');
     if (studio && show) {
       const now = k.showcaseOf(studio.building.id);
-      const key = now ? `${now.entry.id}|${k.forms.version}` : '';
+      // A place in miniature (T26) read from its saved plan arrives later.
+      const key = now ? `${now.entry.id}|${k.forms.version}|${now.entry.place ? k.miniatureVersion : 0}` : '';
       let v = this.shows.get(studio.building.id);
       if (v?.key !== key) {
         if (v) this.scene.remove(v.group);

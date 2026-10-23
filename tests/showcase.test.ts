@@ -20,16 +20,16 @@ describe('the showcases of the studio', () => {
   it('stand on the ground floor of their buildings, with an arrow on each side and room in front', async () => {
     const k = await boot();
     const ids = k.corona.buildings.map((b) => b.id).filter((id) => SHOWCASES[id]);
-    expect(ids.sort()).toEqual(['cose', 'magia', 'oggetti', 'persone']);
+    expect(ids.sort()).toEqual(['cose', 'luoghi', 'magia', 'oggetti', 'persone']);
     for (const id of ids) {
       const f = k.corona.building(id)!.floors[0];
       const show = f.items.find((i) => i.kind === 'showcase')!;
       const prev = f.items.find((i) => i.kind === 'prev')!;
       const next = f.items.find((i) => i.kind === 'next')!;
       expect(show.source, id).toBe(SHOWCASES[id].source);
-      // The arrows on its middle row (the printer is PRINTER rows deep, T24).
+      // The arrows on its middle row (the printer and the model of places are PRINTER rows deep, T24, T26).
       const h = show.h ?? 1;
-      expect(h, id).toBe(SHOWCASES[id].device === 'stampante' ? PRINTER : 1);
+      expect(h, id).toBe(SHOWCASES[id].device === 'stampante' || SHOWCASES[id].device === 'plastico' ? PRINTER : 1);
       const row = show.y + Math.floor(h / 2);
       expect([prev.x, prev.y, next.x, next.y]).toEqual([show.x - 1, row, show.x + show.w!, row]);
       // Nothing else on its cells; they block, the row in front is free, and the entrance is not in the way.

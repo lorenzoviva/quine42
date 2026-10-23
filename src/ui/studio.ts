@@ -71,7 +71,10 @@ export class StudioPanel {
           return el('span', { class: 'rune', style: `color:${r?.color ?? entry.color ?? '#c48aff'}` }, r?.glyph ?? t, el('small', {}, r?.name ?? t));
         })),
       );
-    else if (entry.model)
+    else if (entry.place) {
+      const plan = this.planOf(entry.place.cx, entry.place.cy);
+      if (plan) frame.replaceChildren(plan);
+    } else if (entry.model)
       void icons.model?.(entry.model, entry.tint, entry.seed).then((src) => {
         if (src && this.shown === e.building) frame.replaceChildren(el('img', { src, alt: entry.label }));
       });
@@ -93,6 +96,34 @@ export class StudioPanel {
       ...(entry.path ? [el('div', { class: 'row' }, open)] : []),
     );
     this.shown = e.building;
+  }
+
+  /** The plan of a place seen from above (T26): its tiles in their colours, the structures, the things and the runes. */
+  private planOf(cx: number, cy: number): HTMLCanvasElement | undefined {
+    const mini = this.k.miniature(cx, cy);
+    if (!mini) return undefined;
+    const S = mini.size, px = 8;
+    const cv = el('canvas', { width: String(S * px), height: String(S * px), class: 'plan' }) as HTMLCanvasElement;
+    const ctx = cv.getContext('2d');
+    if (!ctx) return cv;
+    for (let i = 0; i < S * S; i++) {
+      ctx.fillStyle = this.k.palette[mini.tiles[i]]?.color ?? '#333';
+      ctx.fillRect((i % S) * px, Math.floor(i / S) * px, px, px);
+    }
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    for (const s of mini.structures) ctx.strokeRect((s.x - s.w / 2) * px + 1, (s.y - s.h / 2) * px + 1, s.w * px - 2, s.h * px - 2);
+    for (const t of mini.things) {
+      ctx.fillStyle = t.color ?? '#ffffff';
+      ctx.beginPath();
+      ctx.arc(t.x * px, t.y * px, px * 0.35, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    for (const r of mini.runes) {
+      ctx.fillStyle = r.color ?? '#ffcf5c';
+      ctx.fillRect((r.x - 0.4) * px, (r.y - 0.4) * px, px * 0.8, px * 0.8);
+    }
+    return cv;
   }
 
   exhibit(item: StudioItem, building: string): void {

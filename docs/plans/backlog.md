@@ -363,7 +363,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   un bordo al neon e un anello azzurro sotto l'universo; tutto nella mesh della stanza. Nel browser (offline): un pezzo
   solo, senza buchi. Diverso dal previsto: nessun modello MarkovJunior (bastano le quad del `Builder`), nessun ADR.
 
-### T26 · L'Ufficio dei luoghi, dentro — `da fare` (si comincia da T26a)
+### T26 · L'Ufficio dei luoghi, dentro — `in corso` (T26a fatto; il prossimo è T26b)
 - Da progettare in funzione di come lavora il Cartografo (piani, lotti, atlante). **Proposta all'autore** prima
   di costruire.
 - Proposta scritta il 23/10/2026: [`corona-proposte.md`](corona-proposte.md) §1 — **il plastico**: un tavolo olografico
@@ -372,6 +372,21 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   Studio del Cartografo qui. Pezzi: T26a plastico, T26b fasi, T26c unione con lo Studio del Cartografo.
 - **Domande per l'autore**: unire lo Studio del Cartografo all'Ufficio dei luoghi? Le sei fasi, o basta il plastico finito?
 - Deciso (23/10): **unire** lo Studio del Cartografo all'Ufficio dei luoghi (T26c); plastico **e** sei fasi approvati.
+- **T26a · il plastico — `fatto`** (commit «Corona (T26a)»). `corona.ts`: sorgente `luoghi`, dispositivo `plastico` (3 × 3 come la
+  stampante). `kernel.ts`: `applyPlan` diviso in parti pure — `layoutOf` (programma, sentieri, ritocchi), `lotsOf` (i lotti e le
+  strutture, prima dentro `settleLots`), `placementsOf` (le celle di rune, cose, oggetti a terra, bottino) — e gli spawn;
+  `miniature(cx, cy)` le riusa: dal chunk caricato o, se non lo è, dal piano salvato (`chunkStore`, asincrono, `miniatureVersion`),
+  senza chiamare il Concilio né caricare il luogo; un luogo mai pianificato non ha miniatura. `showcaseEntries('luoghi')`: i luoghi
+  noti (`mergePlaces`), quello dove il viandante è stato per ultimo per primo, poi per distanza; fatti: dove, regione, descrizione,
+  ambiente («Apri il file» apre il suo modulo), dentro/fuori, a terra, strutture, rune posate (quelle iniziali nel luogo di partenza),
+  il file del piano in `maps/`. `corona3d.ts`: il tavolo scuro con i bordi al neon e `buildMiniature` (una colonna per casella nel
+  colore del terreno fino al suo livello, acqua più bassa, muri e rocce più alti; strutture e cose come i loro modelli ridotti; rune
+  luminose). `studio.ts`: nel pannello la pianta del luogo dall'alto (caselle, lotti, cose, rune). `tests/places.test.ts` (3) e la
+  vetrina nuova in `showcase.test.ts`. Nel browser (`aurora`, offline): 285 luoghi, «Palude di Valmora» con due case, una persona e
+  la runa, pannello e «>», nessun errore. Diverso dal previsto: per avere la miniatura uguale al mondo una cosa già raccolta tiene la
+  sua cella (prima la lasciava alle altre): le celle non dipendono più dallo stato, quindi le cose dei luoghi già visitati possono
+  spostarsi una volta (il test «at night they go to bed» ora toglie gli altri letti: quello di un luogo vicino lo
+  attirava a volte); gli alberi dei terreni con un modello (bosco) nel plastico sono solo colonne verdi; nessun ADR.
 
 ### T27 · La Sala sistemi, dentro — `da fare` (si comincia da T27a)
 - L'autore chiede un aiuto: far apprezzare la complessità del codice con esempi (cosa fa un sistema, casi d'uso).

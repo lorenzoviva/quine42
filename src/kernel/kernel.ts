@@ -31,7 +31,7 @@ import { GENERIC, ModelDirector, ownModelId } from './modeldirector';
 import { categoryOf, DEFAULT_SCULPTORS, sculptAction, type SculptorModels } from './agents/sculptor';
 import { MODELS_INDEX, type ModelInfo } from './forms';
 import { Content, normName, specOf } from './content';
-import { layout, type Building } from './layout';
+import { layout, type Building, type LayoutResult } from './layout';
 import { AGENTS, Council, readBible, type AgentId, type CatalogEntry, type FeedEntry } from './agents/council';
 import { designEnvironment, drawAtlas, planChunk, type ChunkPlan, type Where } from './agents/cartography';
 import { forge, judgeCombination, repairLogic, slug, type ForgeOrigin } from './agents/forge';
@@ -132,8 +132,43 @@ export interface ShowcaseEntry {
   /** Runes on show (a magic rune, or the sequence of a spell). */
   runes?: string[];
   path?: string;
+  /** A planned place (T26): the model of places shows it in miniature (`Kernel.miniature`). */
+  place?: { cx: number; cy: number };
   /** What the panel says of it, in order: [what, value]. */
   facts: Array<[string, string]>;
+}
+
+/** Where a plan puts its runes and things (cells of the chunk; runes in world columns and rows). */
+interface Placements {
+  runes: Array<{ token: string; line: number; col: number; row: number; origin: string }>;
+  objects: Array<{ index: number; cell?: number }>;
+  ground: Array<{ index: number; item?: string; cell?: number }>;
+  loot: Array<{ index: number; item: string; count: number; cell?: number }>;
+  pick: (where: Where) => number | undefined;
+}
+
+/** A lot of a planned place and the structure that stands on it (ADR-0043). */
+interface PlaceLot {
+  index: number;
+  origin: string;
+  x: number;
+  y: number;
+  form: FormComp;
+  struttura: { concetto: string; classe: string; importante: boolean; model?: string };
+}
+
+/** A planned place in miniature (T26): positions in tiles from the place's top-left corner, levels in `LEVEL`s. */
+export interface PlaceMiniature {
+  cx: number;
+  cy: number;
+  size: number;
+  tiles: string;
+  levels: number[];
+  /** The structures in the middle of their lots (w × h tiles). */
+  structures: Array<{ x: number; y: number; w: number; h: number; model: string; seed: number; yaw: number; done?: string[] }>;
+  things: Array<{ x: number; y: number; model: string; seed: number; yaw: number; tint?: string; color?: string }>;
+  /** Each rune with the line (of the plan) it belongs to. */
+  runes: Array<{ x: number; y: number; token: string; line: number; color?: string }>;
 }
 
 export interface Rule {
@@ -291,7 +326,11 @@ export class Kernel {
   private showcaseIndex = new Map<string, number>();
   /** The library's version when the campus last looked for its buildings' models (T20). */
   private campusVersion = -1;
-  private showcaseCache = new Map<ShowcaseSource, { files: FileMap; entries: ShowcaseEntry[] }>();
+  private showcaseCache = new Map<ShowcaseSource, { files: FileMap; stamp: string; entries: ShowcaseEntry[] }>();
+  /** The places in miniature (T26), by chunk key, made once per state of the files. */
+  private miniatures = new Map<string, { files: FileMap; mini?: PlaceMiniature }>();
+  /** Grows when a miniature read from a saved plan is ready (the renderer's cache key). */
+  miniatureVersion = 0;
   exitedOnce = false;
   /** The wanderer died: the session is over until they continue or start again. */
   dead = false;
@@ -1126,35 +1165,39 @@ export class Kernel {
     return plan;
   }
 
-  /** Runs the layout and puts things in the world: deterministic, so a cached plan rebuilds the same place. */
-  private applyPlan(ch: Chunk, plan: ChunkPlan): void {
+  /** The tile the kernel digs paths with (and lays on lots). */
+  private pathCode(): string {
+    return this.palette.p ? 'p' : (Object.keys(this.palette).find((c) => c !== '?' && !this.palette[c].solid) ?? 'g');
+  }
+
+  /**
+   * A plan laid out on its draft (deterministic): the environment's program, the guaranteed paths, the buildings,
+   * the Cartographer's edits. `quiet` for the model of places (T26): a program that fails there is not news.
+   */
+  private layoutOf(ch: Pick<Chunk, 'cx' | 'cy' | 'draft'>, plan: ChunkPlan, pathCode: string, quiet = false): { result: LayoutResult; tiles: string } {
     const S = this.config.chunkSize;
-    const pathCode = this.palette.p ? 'p' : (Object.keys(this.palette).find((c) => c !== '?' && !this.palette[c].solid) ?? 'g');
-    let result;
+    let result: LayoutResult;
     try {
       result = layout(this.rows(ch.draft), this.palette, { cx: ch.cx, cy: ch.cy, seed: this.config.seed, program: this.content.layouts[plan.layout]?.program, pathCode });
     } catch (e) {
-      this.council.say('kernel', 'errore', `ambiente ${plan.layout} non eseguibile: ${(e as Error).message}`);
+      if (!quiet) this.council.say('kernel', 'errore', `ambiente ${plan.layout} non eseguibile: ${(e as Error).message}`);
       result = layout(this.rows(ch.draft), this.palette, { cx: ch.cx, cy: ch.cy, seed: this.config.seed, pathCode });
     }
-    ch.plan = plan;
-    ch.place = plan.place;
-    this.graphPlaces.set(ch.key, { cx: ch.cx, cy: ch.cy, nome: plan.place.name, descrizione: plan.place.description, ambiente: plan.layout, cose: plan.objects.map((o) => o.module), a_terra: plan.ground, strutture: plan.strutture?.map((x) => x.concetto) });
-    this.graphPlacesVersion++;
-    ch.tiles = result.grid.join('');
+    let tiles = result.grid.join('');
     for (const [cell, code] of Object.entries(plan.edits ?? {})) {
       const i = Number(cell);
-      if (Number.isInteger(i) && i >= 0 && i < S * S && this.palette[code]) ch.tiles = ch.tiles.slice(0, i) + code + ch.tiles.slice(i + 1);
+      if (Number.isInteger(i) && i >= 0 && i < S * S && this.palette[code]) tiles = tiles.slice(0, i) + code + tiles.slice(i + 1);
     }
-    ch.buildings = result.buildings;
-    ch.stage = 'planned';
-    ch.version++;
-    this.plannedCount++;
-    for (const id of this.ecs.query('chunk')) if (this.ecs.get(id, 'chunk').key === ch.key) this.ecs.destroy(id);
-    this.claimImportant(ch, plan);
-    const structures = this.settleLots(ch, plan, pathCode);
+    return { result, tiles };
+  }
 
-    // Where things can go: reachable cells, inside or outside buildings, never on gates or doors.
+  /**
+   * Where a plan puts its runes and things: reachable cells, inside or outside buildings, never on gates or doors.
+   * Deterministic, the same for the world and for the model of places (T26): what was already taken keeps its cell,
+   * so the rest does not move. `pick` goes on for what comes later (things forged for the place, items introduced).
+   */
+  private placementsOf(ch: Pick<Chunk, 'cx' | 'cy' | 'key'>, plan: ChunkPlan, result: LayoutResult): Placements {
+    const S = this.config.chunkSize;
     const rng = new Rng(hash32(this.config.seed, ch.cx, ch.cy, 991));
     const occupied = new Set<number>(result.gates);
     for (const b of result.buildings) for (const d of b.doors) occupied.add(d);
@@ -1169,7 +1212,6 @@ export class Kernel {
       occupied.add(cell);
       return cell;
     };
-    const at = (cell: number) => ({ x: ch.cx * S + (cell % S) + 0.5, y: ch.cy * S + Math.floor(cell / S) + 0.5 });
 
     // Runes: rare and precious, on a free reachable stretch of a row, anywhere in the chunk. Those that
     // touch the carpet only far from the start (you learn the logic before you can leave); sometimes a magic rune.
@@ -1178,7 +1220,7 @@ export class Kernel {
     const lines = start ? [...STARTER_RUNES] : plan.runes.filter((l) => !tokenize(l).some((t) => CARPET_TOKENS.has(t)) || (far && rng.chance(0.5))).slice(0, far ? 2 : 1);
     const magic = Object.keys(this.content.runes);
     if (!start && magic.length && rng.chance(0.3)) lines.push(magic[rng.int(magic.length)]);
-    const reachSet = result.reachable;
+    const runes: Placements['runes'] = [];
     lines.forEach((line, i) => {
       const toks = tokenize(line);
       const w = toks.length;
@@ -1187,61 +1229,83 @@ export class Kernel {
         const col = 1 + rng.int(Math.max(1, S - 1 - w));
         let ok = col + w <= S - 1;
         for (let k = -1; k <= w && ok; k++) if (occupied.has(row * S + col + k)) ok = false;
-        for (let k = 0; k < w && ok; k++) if (!reachSet.has(row * S + col + k) || indoorSet.has(row * S + col + k)) ok = false;
+        for (let k = 0; k < w && ok; k++) if (!result.reachable.has(row * S + col + k) || indoorSet.has(row * S + col + k)) ok = false;
         if (!ok) continue;
         for (let k = 0; k < w; k++) occupied.add(row * S + col + k);
-        let c = ch.cx * S + col;
-        toks.forEach((token, j) => {
-          const origin = `${ch.key}#r${i}.${j}`;
-          if (!this.consumed.has(origin)) this.ecs.spawn({ rune: { token, col: c, row: ch.cy * S + row, source: 'gen', origin } satisfies RuneComp, chunk: { key: ch.key } });
-          c += 1;
-        });
+        toks.forEach((token, j) => runes.push({ token, line: i, col: ch.cx * S + col + j, row: ch.cy * S + row, origin: `${ch.key}#r${i}.${j}` }));
         break;
       }
     });
+    const objects = plan.objects.map((o, index) => ({ index, cell: this.modules.has(o.module) ? pick(o.where) : undefined }));
+    // Things lying around: named by the Cartographer (those not known yet are introduced later), plus what the ground loot table yields.
+    const ground = plan.ground.map((name, index) => {
+      const item = this.content.byName(name)?.id;
+      return { index, item, cell: item ? pick('fuori') : undefined };
+    });
+    const loot = this.content.roll('terreno', rng, [...this.wanted]).map((l, index) => ({ index, item: l.item, count: l.count, cell: pick('ovunque') }));
+    return { runes, objects, ground, loot, pick };
+  }
+
+  /** Runs the layout and puts things in the world: deterministic, so a cached plan rebuilds the same place. */
+  private applyPlan(ch: Chunk, plan: ChunkPlan): void {
+    const S = this.config.chunkSize;
+    const pathCode = this.pathCode();
+    const { result, tiles } = this.layoutOf(ch, plan, pathCode);
+    ch.plan = plan;
+    ch.place = plan.place;
+    this.graphPlaces.set(ch.key, { cx: ch.cx, cy: ch.cy, nome: plan.place.name, descrizione: plan.place.description, ambiente: plan.layout, cose: plan.objects.map((o) => o.module), a_terra: plan.ground, strutture: plan.strutture?.map((x) => x.concetto) });
+    this.graphPlacesVersion++;
+    ch.tiles = tiles;
+    ch.buildings = result.buildings;
+    ch.stage = 'planned';
+    ch.version++;
+    this.plannedCount++;
+    for (const id of this.ecs.query('chunk')) if (this.ecs.get(id, 'chunk').key === ch.key) this.ecs.destroy(id);
+    this.claimImportant(ch, plan);
+    const structures = this.settleLots(ch, plan, pathCode);
+    const place = this.placementsOf(ch, plan, result);
+    const at = (cell: number) => ({ x: ch.cx * S + (cell % S) + 0.5, y: ch.cy * S + Math.floor(cell / S) + 0.5 });
+    // On a lot: on the floor of its structure (once its form is ready), not inside its walls.
+    const inLot = (cell: number) => {
+      const lot = ch.buildings.findIndex((b) => b.floor.includes(cell));
+      return lot >= 0 ? structures[lot] : undefined;
+    };
+
+    for (const r of place.runes) if (!this.consumed.has(r.origin)) this.ecs.spawn({ rune: { token: r.token, col: r.col, row: r.row, source: 'gen', origin: r.origin } satisfies RuneComp, chunk: { key: ch.key } });
 
     const loadedOf = (id: string) => this.ecs.query('module').filter((e) => this.ecs.get(e, 'module').id === id).length;
-    plan.objects.forEach((o, i) => {
-      const m = this.modules.get(o.module);
-      const origin = `${ch.key}#o${i}`;
-      if (!m || this.consumed.has(origin) || this.uniqueTaken(m)) return;
+    for (const { index, cell } of place.objects) {
+      const m = this.modules.get(plan.objects[index].module);
+      const origin = `${ch.key}#o${index}`;
+      if (!m || cell === undefined || this.consumed.has(origin) || this.uniqueTaken(m)) continue;
       // Variety: not the same kind of person in every place.
-      if (m.manifest.persona && loadedOf(m.manifest.id) >= Kernel.NPC_CAP) return;
-      const cell = pick(o.where);
-      if (cell === undefined) return;
+      if (m.manifest.persona && loadedOf(m.manifest.id) >= Kernel.NPC_CAP) continue;
       const p = at(cell);
-      // Inside a structure: on the floor of its model, once its form is ready.
-      const lot = ch.buildings.findIndex((b) => b.floor.includes(cell));
-      if (lot >= 0 && structures[lot] !== undefined) return void this.placeInside(ch, structures[lot], p, (x, y) => this.spawnModuleEntity(m, x, y, ch.key, origin));
-      this.spawnModuleEntity(m, p.x, p.y, ch.key, origin);
-    });
+      const sid = inLot(cell);
+      if (sid !== undefined) void this.placeInside(ch, sid, p, (x, y) => this.spawnModuleEntity(m, x, y, ch.key, origin));
+      else this.spawnModuleEntity(m, p.x, p.y, ch.key, origin);
+    }
 
-    // Things lying around: named by the Cartographer, plus what the ground loot table yields.
-    const unknown: string[] = [];
-    plan.ground.forEach((name, i) => {
-      const d = this.content.byName(name);
-      if (!d) return void unknown.push(name);
-      const origin = `${ch.key}#g${i}`;
-      const cell = pick('fuori');
-      if (cell !== undefined && !this.consumed.has(origin)) this.spawnItem(d.id, at(cell).x, at(cell).y, 1, ch.key, origin);
-    });
-    this.content.roll('terreno', rng, [...this.wanted]).forEach((l, i) => {
-      const origin = `${ch.key}#l${i}`;
-      const cell = pick('ovunque');
-      if (cell === undefined || this.consumed.has(origin)) return;
-      // On a lot: on the floor of its structure, not inside its walls.
-      const lot = ch.buildings.findIndex((b) => b.floor.includes(cell));
-      if (lot >= 0 && structures[lot] !== undefined) return void this.placeInside(ch, structures[lot], at(cell), (x, y) => this.spawnItem(l.item, x, y, l.count, ch.key, origin));
-      this.spawnItem(l.item, at(cell).x, at(cell).y, l.count, ch.key, origin);
-    });
+    for (const g of place.ground) {
+      const origin = `${ch.key}#g${g.index}`;
+      if (g.item && g.cell !== undefined && !this.consumed.has(origin)) this.spawnItem(g.item, at(g.cell).x, at(g.cell).y, 1, ch.key, origin);
+    }
+    for (const l of place.loot) {
+      const origin = `${ch.key}#l${l.index}`;
+      if (l.cell === undefined || this.consumed.has(origin)) continue;
+      const sid = inLot(l.cell);
+      if (sid !== undefined) void this.placeInside(ch, sid, at(l.cell), (x, y) => this.spawnItem(l.item, x, y, l.count, ch.key, origin));
+      else this.spawnItem(l.item, at(l.cell).x, at(l.cell).y, l.count, ch.key, origin);
+    }
+    const unknown = place.ground.filter((g) => !g.item).map((g) => plan.ground[g.index]);
     if (unknown.length) void this.introduceItems(unknown, `trovati a terra in «${plan.place.name}»`).then((defs) => {
       if (!this.alive(ch)) return;
       defs.forEach((d, i) => {
-        const cell = pick('fuori');
+        const cell = place.pick('fuori');
         if (cell !== undefined) this.spawnItem(d.id, at(cell).x, at(cell).y, 1, ch.key, `${ch.key}#n${i}`);
       });
     });
-    for (const f of plan.fresh) void this.forgeForChunk(ch, f, pick, at);
+    for (const f of plan.fresh) void this.forgeForChunk(ch, f, place.pick, at);
     this.runesDirty = true;
     this.bus.emit('chunk:planned', { key: ch.key });
     if (this.plannedCount % 10 === 0) void this.growContent('esplorazione');
@@ -1275,13 +1339,13 @@ export class Kernel {
    * Lots (ADR-0043): every building of the plan becomes a structure — a whole model one enters, set on its
    * lot and turned towards its door. The Cartographer's structures go to the largest lots (the Sculptor
    * writes the ones that do not exist yet); the others are common houses. The lot's tiles become ground,
-   * the path goes on from its door towards the house. Returns the structures, by building index.
+   * the path goes on from its door towards the house. Pure: the world and the model of places (T26) build the same.
    */
-  private settleLots(ch: Chunk, plan: ChunkPlan, pathCode: string): Id[] {
+  private lotsOf(ch: Pick<Chunk, 'cx' | 'cy' | 'key' | 'draft' | 'tiles' | 'buildings'>, plan: ChunkPlan, pathCode: string): { tiles: string; lots: PlaceLot[] } {
     const S = this.config.chunkSize;
     const tiles = [...ch.tiles];
     const wanted = [...(plan.strutture ?? [])];
-    const out: Id[] = [];
+    const lots: PlaceLot[] = [];
     const order = ch.buildings.map((b, i) => ({ b, i, area: (b.x1 - b.x0 + 1) * (b.y1 - b.y0 + 1) })).sort((a, b) => b.area - a.area || a.i - b.i);
     for (const { b, i } of order) {
       const w = b.x1 - b.x0 + 1, h = b.y1 - b.y0 + 1;
@@ -1306,18 +1370,94 @@ export class Kernel {
       const form: FormComp = { model, seed: this.forms.seedFor(model, origin), yaw, ...(own && own !== model ? { wanted: own, classe } : {}) };
       const done = this.savedForms.get(origin);
       if (done?.length) form.done = [...done];
-      out[i] = this.ecs.spawn({
-        pos: { x: ch.cx * S + (b.x0 + b.x1 + 1) / 2, y: ch.cy * S + (b.y0 + b.y1 + 1) / 2 },
-        glyph: { ch: '⌂', color: this.terrain?.manifest.roof?.color ?? '#9a4632' },
-        body: { r: 0.5, solid: true },
+      lots.push({
+        index: i,
+        origin,
+        x: ch.cx * S + (b.x0 + b.x1 + 1) / 2,
+        y: ch.cy * S + (b.y0 + b.y1 + 1) / 2,
         form,
         struttura: { concetto: req?.concetto ?? (classe === 'grande' ? 'una casa' : 'una casetta'), classe, importante: !!req?.importante, ...(own ? { model: own } : {}) },
-        chunk: { key: ch.key },
-        origin: { key: origin },
       });
     }
-    ch.tiles = tiles.join('');
+    return { tiles: tiles.join(''), lots };
+  }
+
+  /** The lots of a planned chunk become structures in the world. Returns them, by building index. */
+  private settleLots(ch: Chunk, plan: ChunkPlan, pathCode: string): Id[] {
+    const { tiles, lots } = this.lotsOf(ch, plan, pathCode);
+    const out: Id[] = [];
+    for (const l of lots)
+      out[l.index] = this.ecs.spawn({
+        pos: { x: l.x, y: l.y },
+        glyph: { ch: '⌂', color: this.terrain?.manifest.roof?.color ?? '#9a4632' },
+        body: { r: 0.5, solid: true },
+        form: l.form,
+        struttura: l.struttura,
+        chunk: { key: ch.key },
+        origin: { key: l.origin },
+      });
+    ch.tiles = tiles;
     return out;
+  }
+
+  /**
+   * A planned place in miniature (T26), for the model of places in the Office of places: its tiles with their levels,
+   * the structures on its lots, its things and runes where the plan puts them (what was taken is not there). From the
+   * chunk if it is loaded, else from its saved plan: then `undefined` the first time, and `miniatureVersion` grows when
+   * it is ready. Looking does not generate anything: a place never planned has no miniature.
+   */
+  miniature(cx: number, cy: number): PlaceMiniature | undefined {
+    const key = this.chunkKey(cx, cy);
+    const hit = this.miniatures.get(key);
+    if (hit?.files === this.files) return hit.mini;
+    const entry: { files: FileMap; mini?: PlaceMiniature } = { files: this.files };
+    this.miniatures.set(key, entry);
+    const ch = this.chunks.get(key);
+    if (ch?.stage === 'planned' && ch.plan) return (entry.mini = this.miniatureOf(ch, ch.plan));
+    void this.chunkStore
+      .load(this.recordKey({ cx, cy, key } as Chunk))
+      .then((rec) => {
+        if (!rec?.plan || this.miniatures.get(key) !== entry) return;
+        entry.mini = this.miniatureOf({ cx, cy, key, draft: this.genDraft(cx, cy) }, rec.plan);
+        this.miniatureVersion++;
+      })
+      .catch(() => undefined);
+    return undefined;
+  }
+
+  private miniatureOf(ch: Pick<Chunk, 'cx' | 'cy' | 'key' | 'draft'>, plan: ChunkPlan): PlaceMiniature {
+    const S = this.config.chunkSize;
+    const pathCode = this.pathCode();
+    const { result, tiles: laid } = this.layoutOf(ch, plan, pathCode, true);
+    const { tiles, lots } = this.lotsOf({ ...ch, tiles: laid, buildings: result.buildings }, plan, pathCode);
+    const place = this.placementsOf(ch, plan, result);
+    const relief = this.relief;
+    const levels = chunkLevels(tiles, S, (code) => this.palette[code]?.layer === 'liquid', (c, r) => relief.level(ch.cx * S + c, ch.cy * S + r), result.buildings);
+    const local = (cell: number) => ({ x: (cell % S) + 0.5, y: Math.floor(cell / S) + 0.5 });
+    const things: PlaceMiniature['things'] = [];
+    for (const { index, cell } of place.objects) {
+      const m = this.modules.get(plan.objects[index].module);
+      const origin = `${ch.key}#o${index}`;
+      if (!m || cell === undefined || this.consumed.has(origin)) continue;
+      const f = this.formFor(m.manifest, origin);
+      things.push({ ...local(cell), model: f.model, seed: f.seed, yaw: f.yaw, color: m.manifest.appearance?.color });
+    }
+    const items = [...place.ground.map((g) => ({ ...g, origin: `${ch.key}#g${g.index}` })), ...place.loot.map((l) => ({ ...l, origin: `${ch.key}#l${l.index}` }))];
+    for (const it of items) {
+      if (!it.item || it.cell === undefined || this.consumed.has(it.origin)) continue;
+      const f = this.itemLook(it.item);
+      things.push({ ...local(it.cell), model: f.model, seed: f.seed, tint: f.tint, yaw: 0, color: f.tint });
+    }
+    return {
+      cx: ch.cx,
+      cy: ch.cy,
+      size: S,
+      tiles,
+      levels: [...levels],
+      structures: lots.map((l) => ({ x: l.x - ch.cx * S, y: l.y - ch.cy * S, w: result.buildings[l.index].x1 - result.buildings[l.index].x0 + 1, h: result.buildings[l.index].y1 - result.buildings[l.index].y0 + 1, model: l.form.model, seed: l.form.seed, yaw: l.form.yaw, done: l.form.done })),
+      things,
+      runes: place.runes.filter((r) => !this.consumed.has(r.origin)).map((r) => ({ x: r.col - ch.cx * S + 0.5, y: r.row - ch.cy * S + 0.5, token: r.token, line: r.line, color: this.content.runes[r.token]?.color })),
+    };
   }
 
   /** Points of a structure's floor, inside its walls (world, carpet space), for what goes indoors. */
@@ -2843,11 +2983,21 @@ export class Kernel {
 
   /** What a source of showcases has to show, in a stable order. */
   showcaseEntries(source: ShowcaseSource): ShowcaseEntry[] {
+    // The places change as they are planned, loaded (what is known of them) and visited (their order).
+    const here = this.lastPlace();
+    const stamp = source === 'luoghi' ? `${this.graphPlacesVersion}|${this.plannedCount}|${this.chunks.size}|${here.cx},${here.cy}` : '';
     const hit = this.showcaseCache.get(source);
-    if (hit?.files === this.files) return hit.entries;
+    if (hit?.files === this.files && hit.stamp === stamp) return hit.entries;
     const entries = this.listShowcase(source);
-    this.showcaseCache.set(source, { files: this.files, entries });
+    this.showcaseCache.set(source, { files: this.files, stamp, entries });
     return entries;
+  }
+
+  /** The place where the wanderer stands, or (from the studio) last stood in the world. */
+  private lastPlace(): { cx: number; cy: number } {
+    const S = this.config.chunkSize;
+    const p = this.corona.isInterior(this.playerPos().x) ? this.lastWorld : this.playerCarpet();
+    return { cx: Math.floor(p.x / S), cy: Math.floor(p.y / S) };
   }
 
   private listShowcase(source: ShowcaseSource): ShowcaseEntry[] {
@@ -2893,6 +3043,7 @@ export class Kernel {
       }
       return out;
     }
+    if (source === 'luoghi') return this.listPlaces();
     if (source === 'oggetti') {
       for (const d of [...this.content.items.values()].sort((a, b) => a.id.localeCompare(b.id))) {
         const path = `modules/${this.content.itemSource.get(d.id) ?? d.module ?? ''}/manifest.json`;
@@ -2926,6 +3077,45 @@ export class Kernel {
         out.push({ id: `person:${p.nome}`, label: `${p.nome} · ${p.mestiere}`, model, seed: this.forms.seedFor(model, p.origine ?? p.nome), color: man.appearance.color, path, facts: [...personFacts(p, man.name), ...facts.filter(([w]) => w !== 'Individui').map(([w, t]): [string, string] => [w === 'Aspetto' || w === 'Carattere' ? `${w} del tipo` : w, t])] });
     }
     return out;
+  }
+
+  /**
+   * The places planned in this universe (T26), the one where the wanderer last stood first, then the others by distance;
+   * what is known of each: where, the region, the environment (its module: «Apri il file»), what is inside and outside,
+   * the structures, the runes, the file of its plan.
+   */
+  private listPlaces(): ShowcaseEntry[] {
+    const here = this.lastPlace();
+    const far = (p: { cx: number; cy: number }) => Math.hypot(p.cx - here.cx, p.cy - here.cy);
+    const places = mergePlaces(this.files, [...this.graphPlaces.values()]).sort((a, b) => far(a) - far(b) || a.cx - b.cx || a.cy - b.cy);
+    const atlas = readAtlas(this.files);
+    const nameOf = (id: string) => this.modules.get(id)?.manifest.name ?? id;
+    const list = (xs: string[]) => [...new Set(xs)].join(', ');
+    return places.map((p): ShowcaseEntry => {
+      const key = this.chunkKey(p.cx, p.cy);
+      const plan = this.chunks.get(key)?.plan;
+      const region = p.cx === 0 && p.cy === 0 ? undefined : regionAt(atlas, p.cx, p.cy);
+      const env = p.ambiente ? this.content.layouts[p.ambiente] : undefined;
+      const envModule = p.ambiente ? [...this.modules.values()].find((m) => m.manifest.layouts?.[p.ambiente!]) : undefined;
+      const path = envModule ? `modules/${envModule.manifest.id}/manifest.json` : undefined;
+      const facts: Array<[string, string]> = [['Dove', `luogo ${p.cx}, ${p.cy}${p.cx === here.cx && p.cy === here.cy ? ' (qui sei stato per ultimo)' : ''}`]];
+      if (region) facts.push(['Regione', `${region.nome}: ${region.descrizione}`]);
+      if (p.descrizione) facts.push(['Descrizione', p.descrizione]);
+      if (p.ambiente) facts.push(['Ambiente', env ? `${env.name} (${p.ambiente}): ${env.description}` : p.ambiente]);
+      if (plan) {
+        const by = (w: Where) => list(plan.objects.filter((o) => o.where === w).map((o) => nameOf(o.module)));
+        if (by('dentro')) facts.push(['Dentro', by('dentro')]);
+        if (by('fuori')) facts.push(['Fuori', by('fuori')]);
+        if (by('ovunque')) facts.push(['Ovunque', by('ovunque')]);
+      } else if (p.cose?.length) facts.push(['Cose', list(p.cose.map(nameOf))]);
+      if (p.a_terra?.length) facts.push(['A terra', list(p.a_terra)]);
+      if (p.strutture?.length) facts.push(['Strutture', list(p.strutture)]);
+      // The runes as they lie there (the starting place has its own), when the place is loaded.
+      const runes = plan ? this.miniature(p.cx, p.cy)?.runes : undefined;
+      if (runes?.length) facts.push(['Rune', [...new Set(runes.map((r) => r.line))].map((l) => `«${runes.filter((r) => r.line === l).map((r) => r.token).join(' ')}»`).join(' · ')]);
+      facts.push(['Piano', `maps/${this.recordKey({ cx: p.cx, cy: p.cy, key } as Chunk).replace(/[:,]/g, '_')}.json`]);
+      return { id: `luogo:${p.cx}_${p.cy}`, label: p.nome, place: { cx: p.cx, cy: p.cy }, path, facts };
+    });
   }
 
   /** What a showcase (by building) shows now, with its place in the list. */

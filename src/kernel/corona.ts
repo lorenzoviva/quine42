@@ -11,10 +11,10 @@ import type { FileMap } from './types';
 
 export type FileLook = 'libro' | 'cristallo' | 'pergamena' | 'tavoletta';
 export type ItemKind = 'file' | 'sprite' | 'tile' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'grafo';
-/** What a showcase shows (T21): the runes and spells, the people, the things, the objects of the packs. */
-export type ShowcaseSource = 'rune' | 'persone' | 'cose' | 'oggetti';
-/** How a showcase looks: a screen, a silo of liquid, a 3D printer. */
-export type ShowcaseDevice = 'schermo' | 'silos' | 'stampante';
+/** What a showcase shows (T21): the runes and spells, the people, the things, the objects of the packs, the places planned (T26). */
+export type ShowcaseSource = 'rune' | 'persone' | 'cose' | 'oggetti' | 'luoghi';
+/** How a showcase looks: a screen, a silo of liquid, a 3D printer, a holographic table with a place in miniature. */
+export type ShowcaseDevice = 'schermo' | 'silos' | 'stampante' | 'plastico';
 
 /**
  * The showcases of the interiors (T21): a device with «<» «>» at its sides that picks what it shows; E or a
@@ -25,10 +25,12 @@ export const SHOWCASES: Record<string, { source: ShowcaseSource; device: Showcas
   persone: { source: 'persone', device: 'silos', label: 'il silos dei personaggi' },
   cose: { source: 'cose', device: 'stampante', label: 'la stampante delle cose' },
   oggetti: { source: 'oggetti', device: 'stampante', label: 'la stampante degli oggetti' },
+  luoghi: { source: 'luoghi', device: 'plastico', label: 'il plastico dei luoghi' },
 };
 /**
  * Where a showcase stands in its room (left cell, row of its arrows) and how wide it is; the arrows are at its sides.
- * The printer (T24) is square: `PRINTER` rows deep, centred on the arrows' row, the thing on its middle cell.
+ * The printer (T24) is square: `PRINTER` rows deep, centred on the arrows' row, the thing on its middle cell; the model of
+ * places (T26) is as big, the place on all of it.
  */
 export const SHOWCASE_AT = { x: 15, y: 11, w: 3 };
 export const PRINTER = 3;
@@ -301,7 +303,7 @@ export class Corona {
           const show = SHOWCASES[id];
           if (show) {
             const { x, y, w } = SHOWCASE_AT;
-            const h = show.device === 'stampante' ? PRINTER : 1;
+            const h = show.device === 'stampante' || show.device === 'plastico' ? PRINTER : 1;
             placed.push({ kind: 'showcase', label: show.label, source: show.source, device: show.device, target: id, x: ox + x, y: oy + y - Math.floor(h / 2), w, h });
             placed.push({ kind: 'prev', label: '«<» il precedente', target: id, x: ox + x - 1, y: oy + y });
             placed.push({ kind: 'next', label: '«>» il successivo', target: id, x: ox + x + w, y: oy + y });
