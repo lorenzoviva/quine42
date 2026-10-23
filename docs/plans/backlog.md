@@ -251,7 +251,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   (3: misure, porte raggiungibili, prati raggiunti dai vicoli). Nel browser (offline): viale, blocchi e insegne leggibili.
   Diverso dal previsto: nessun ADR (è una misura, non una decisione); i test dello studio non dipendevano dal raggio.
 
-### T19 · Prompt per Gemini (abbonamento): le strutture della corona — `da fare` (dipende da T14)
+### T19 · Prompt per Gemini (abbonamento): le strutture della corona — `fatto` (`74bf122`)
 - Un prompt per Gemini CLI (agente con file e browser, **senza** la `GEMINI_API_KEY`: genera lui stesso l'XML e
   lo collauda nella sandbox `/lab/3d/` e con gli script del laboratorio), una struttura alla volta, con le
   specifiche dell'autore: Torre della Magia (cilindrica, alta, incisa di rune, scritta in rune), Studio dei
@@ -259,10 +259,20 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   (piramide nera e vetro), Ufficio dei luoghi (edificio mobile con strumenti di terraformazione), Sala sistemi
   (rampa verso una base sotterranea), Il Nucleo (sfera di voxel neri sotto un edificio ad anello), Sala del
   Concilio (esagonale). In `docs/prompts/gemini-strutture-corona.md`.
+- Esito: [`docs/prompts/gemini-strutture-corona.md`](../prompts/gemini-strutture-corona.md): un prompt comune (niente
+  chiave né script a pagamento; scrive solo `lab/mjx/models/corona-<id>.xml` e una riga di `lab/3d/catalog.ts`; collaudo
+  con `mjx-render`, `mjx-slice`, la sandbox e il giudizio da Artista; un commit per struttura) e una scheda per ciascuna
+  delle otto strutture, con le parole dell'autore, la scatola e il neon della sala. Diverso dal previsto: la scala. A 20
+  voxel per casella un edificio di 14 caselle avrebbe 280 voxel di lato, quindi questi modelli si scrivono a **8 voxel per
+  casella** (la sandbox lo regge già: un cilindro 112 × 112 × 160 gira in ~250 ms); la porta è la lettera `name="porta"`.
+  Nessun ADR: la decisione la attua (e la registra) T20.
 
 ### T20 · Gli esterni della corona come modelli — `da fare` (dipende da T18, T19)
 - Ogni edificio della corona usa il suo programma (`models/corona-<id>.xml`) con insegna neon; collisione dai
   voxel; porta dove il modello la mette.
+- Dai programmi di T19 (in `lab/mjx/models/corona-*.xml`): la libreria deve avere una densità per modello (quelli della
+  corona sono a 8 voxel per casella, `VPT = 20` è fisso in `src/kernel/forms.ts`), con un ADR; la porta del campus va
+  sulla lettera `name="porta"`, il davanti del modello (y grande) verso il viale.
 
 ### T21 · La vetrina con selettore — `da fare`
 - Un meccanismo comune agli interni: un oggetto (schermo, silos, stampante) con «<» «>» ai lati che sceglie
