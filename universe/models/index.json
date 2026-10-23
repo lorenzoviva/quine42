@@ -147,5 +147,11 @@
   "classe": "grande",
   "nome": "Fattoria",
   "autore": "a mano (Claude Code)"
+ },
+ "corona-magia": {
+  "classe": "edificio",
+  "nome": "Torre della Magia",
+  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+  "vpt": 8
  }
 }

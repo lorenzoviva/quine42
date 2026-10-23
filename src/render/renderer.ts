@@ -10,7 +10,7 @@ import * as THREE from 'three';
 import type { Kernel } from '../kernel/kernel';
 import { Bloom } from './bloom';
 import { cellNear } from '../kernel/corona';
-import { Avatars, buildCoronaRing, buildRoom, buildShowcase, campusKey } from './corona3d';
+import { animateRing, Avatars, buildCoronaRing, buildRoom, buildShowcase, campusKey } from './corona3d';
 import { CUT, U } from './materials';
 import { Overlay } from './overlay';
 import { buildChunk, chunkSig, disposeChunk, tileForms, type ChunkView } from './terrain';
@@ -213,7 +213,10 @@ export class Renderer {
       this.scene.add((this.ring = buildCoronaRing(k)));
       this.ringKey = campus;
     }
-    if (this.ring) this.ring.visible = revealed && !interior;
+    if (this.ring) {
+      this.ring.visible = revealed && !interior;
+      if (this.ring.visible) animateRing(this.ring, this.t);
+    }
     for (const [key, r] of this.rooms) r.group.visible = !!studio && key === `${studio.building.id}#${studio.floor.index}`;
     if (studio) {
       const key = `${studio.building.id}#${studio.floor.index}`;

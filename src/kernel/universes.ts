@@ -81,6 +81,15 @@ export function upgradeFromSeed(files: FileMap, seed: FileMap): { files: FileMap
       if (!updated.includes(p)) updated.push(p);
     }
   }
+  // The library's index the Sculptor rewrote still receives the kernel's new models (the corona's buildings).
+  const index = 'models/index.json';
+  if (out[index] && seed[index] && out[index] !== seed[index]) {
+    const merged = mergeEntries(out[index], seed[index]);
+    if (merged && merged !== out[index]) {
+      out[index] = changes[index] = merged;
+      if (!updated.includes(index)) updated.push(index);
+    }
+  }
   const cfg = upgradeModels(out['universe.json'], seed['universe.json']);
   if (cfg && cfg !== out['universe.json']) {
     out['universe.json'] = changes['universe.json'] = cfg;
@@ -92,6 +101,20 @@ export function upgradeFromSeed(files: FileMap, seed: FileMap): { files: FileMap
 }
 
 const KEYED = ['tiles', 'layouts', 'runes', 'spells'] as const;
+
+/** The seed's top-level entries the universe lacks, added; the universe's own never replaced. */
+function mergeEntries(mine: string, seed: string): string | undefined {
+  try {
+    const m = JSON.parse(mine);
+    const s = JSON.parse(seed);
+    const add = Object.keys(s).filter((id) => !(id in m));
+    if (!add.length) return mine;
+    for (const id of add) m[id] = s[id];
+    return JSON.stringify(m, null, 1) + '\n';
+  } catch {
+    return undefined;
+  }
+}
 
 function mergeKeyed(mine: string, seed: string): string | undefined {
   try {

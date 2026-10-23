@@ -398,6 +398,14 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   `corona-*` dal `ModelDirector` e dal «riscolpisci» della Galleria se lo Scultore non deve toccarli (o deciderlo con
   l'autore); verifica nel browser da quattro lati, di giorno e di notte.
 - Fatto quando: gli edifici scritti stanno nel campus, test verdi, commit.
+- Avanzamento: **magia** fatta (la Torre della Magia di Gemini 3.8 Flash, con l'animazione `energia`: anelli di neon che
+  pulsano w → T → t → u). Nel gioco: `universe/models/corona-magia.xml` e la voce nell'indice; il campus mostra i
+  fotogrammi delle animazioni degli edifici (`animateRing` in `corona3d.ts`); l'aggiornamento dal seme aggiunge le voci
+  nuove di `models/index.json` anche agli universi che l'hanno riscritto (senza, la torre avrebbe 20 voxel per casella);
+  `tests/campus.test.ts`: per ogni edificio del seme tempo, settore, porta dal viale, animazione. Nel lab la vetrina ora
+  anima i modelli («mostra» li nascondeva: corpo spento, nessun fotogramma acceso). ModelDirector e «riscolpisci» non
+  toccano già i `corona-*` (il primo fa solo i modelli che mancano, il secondo solo moduli e oggetti). Mancano `persone`,
+  `cose`, `oggetti`, `luoghi`, `sistemi`, `nucleo`, `concilio`; per ognuno aggiungere l'id alla lista del test.
 
 ## Multiplayer
 

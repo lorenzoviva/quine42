@@ -626,7 +626,7 @@ function tick(now: number) {
 
   // MarkovJunior animations: one frame every 0.15 s.
   const k = Math.floor(frameClock / 0.15);
-  for (const t of things) if (t.frames.length && !t.growing) t.frames.forEach((f, i) => (f.visible = i === k % t.frames.length));
+  for (const t of [...things, ...(showcase ? [showcase] : [])]) if (t.frames.length && !t.growing) t.frames.forEach((f, i) => (f.visible = i === k % t.frames.length));
   // Growth: the run of the program, replayed when the wanderer walks by (or on request).
   for (const t of [...things, ...(showcase ? [showcase] : [])]) {
     if (player && t.entry.grows && !t.grown && !t.growing && Math.hypot(t.x - player.x, t.z - player.z) < 3.2) startGrowth(t);

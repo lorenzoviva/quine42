@@ -12,7 +12,7 @@ import { CAMPUS, ROOM_H, ROOM_W, type Building, type Floor, type StudioItem } fr
 import { Builder } from './terrain';
 import { MAT, rgbOf } from './materials';
 import { NODE_COLOR } from '../kernel/graph';
-import { geoOf } from './models';
+import { geoOf, showFrame } from './models';
 
 const TOWER_H = 4.5;
 const GROUND: Record<string, [string, string]> = { viale: ['#161824', '#12131d'], vicolo: ['#14141c', '#111119'], prato: ['#0b0f15', '#0b0f15'], bordo: ['#0d0d16', '#0d0d16'] };
@@ -69,6 +69,7 @@ export function buildCoronaRing(k: Kernel): THREE.Group {
   const m = new THREE.Mesh(lit.geometry(), MAT.corona);
   m.receiveShadow = m.castShadow = true;
   g.add(m, new THREE.Mesh(glow.geometry(), MAT.glow));
+  const frames: THREE.Mesh[][] = [];
   for (const b of c.buildings) {
     const s = b.structure;
     // A model has its own sign (the letter named `insegna`); a plain block gets one in neon over its door.
@@ -77,13 +78,25 @@ export function buildCoronaRing(k: Kernel): THREE.Group {
       g.add(neonSign(b, R));
       continue;
     }
-    const mesh = new THREE.Mesh(geo.body, MAT.corona);
-    mesh.castShadow = mesh.receiveShadow = true;
-    mesh.position.set(s.x, 0, s.y);
-    mesh.rotation.y = s.yaw;
-    g.add(mesh);
+    // An animated model shows one frame at a time instead of its body (the tower's energy pulses).
+    const place = (geo: THREE.BufferGeometry) => {
+      const mesh = new THREE.Mesh(geo, MAT.corona);
+      mesh.castShadow = mesh.receiveShadow = true;
+      mesh.position.set(s.x, 0, s.y);
+      mesh.rotation.y = s.yaw;
+      g.add(mesh);
+      return mesh;
+    };
+    if (!geo.frames.length) place(geo.body);
+    else frames.push(geo.frames.map(place));
   }
+  g.userData.frames = frames;
   return g;
+}
+
+/** The frames of the campus's animated buildings, each building with its own beat. */
+export function animateRing(ring: THREE.Group, t: number): void {
+  (ring.userData.frames as THREE.Mesh[][] | undefined)?.forEach((f, i) => showFrame(f, t, i * 0.37));
 }
 
 /** What the campus wears (T20): the ring is built again when a building becomes its model. */

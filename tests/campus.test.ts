@@ -8,6 +8,9 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockModels } from '../src/kernel/ai/mock';
 import { footBlocks } from '../src/kernel/forms';
+import { compileMjx } from '../src/mj/model';
+import { clipFrames } from '../src/mj/run';
+import type { Grid3 } from '../src/mj/engine';
 
 /** A small building at 8 voxels per tile: 6 × 5 × 4 tiles, a body 5.5 × 4.25, a door in the middle of its front. */
 const BUILDING = `<sequence values="BMO" size="48 40 32" name="Prova">
@@ -84,5 +87,64 @@ describe('the buildings of the campus as models', () => {
     expect(k.corona.building('magia')!.structure).toBeUndefined();
     k.placeCampus();
     expect(k.corona.building('magia')!.structure?.model).toBe('corona-magia');
+  });
+});
+
+// T31: the buildings Gemini wrote for the campus (lab/mjx/models/corona-<id>.xml, then in the seed).
+describe('the buildings of the seed', () => {
+  const written = Object.keys(bundledFiles).map((p) => /^models\/corona-([a-z]+)\.xml$/.exec(p)?.[1]).filter((id): id is string => !!id);
+
+  it('are in the library at 8 voxels per tile', () => {
+    expect(written).toContain('magia');
+    const index = JSON.parse(bundledFiles['models/index.json']);
+    for (const id of written) expect(index[`corona-${id}`]).toMatchObject({ classe: 'edificio', vpt: 8 });
+  });
+
+  for (const id of ['magia']) {
+    it(`${id}: runs in time, stands in its sector, its door reached from the avenue, its animation a loop`, async () => {
+      const k = await boot(bundledFiles);
+      const t = Date.now();
+      const f = (await k.forms.wait(`corona-${id}`, 1))!;
+      expect(f.status).toBe('ready');
+      expect(Date.now() - t).toBeLessThan(5_000);
+      k.placeCampus();
+      const b = k.corona.building(id)!;
+      const s = b.structure!;
+      expect(s.model).toBe(`corona-${id}`);
+      // Within its sector: every corner of the model's box is between the sector's edges.
+      const half = Math.max(f.result!.grid.X, f.result!.grid.Y) / 2 / f.vpt;
+      const ang = (x: number, y: number) => { const a = Math.atan2(x, -y); return a < 0 ? a + Math.PI * 2 : a; };
+      for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+        const a = ang(s.x + dx * half, s.y + dy * half);
+        expect(a).toBeGreaterThan(b.from);
+        expect(a).toBeLessThan(b.to);
+      }
+      // From the avenue to the door nothing is in the way.
+      const door = { x: b.door.x + 0.5, y: b.door.y + 0.5 };
+      const out = k.corona.exitPoint(b);
+      for (let i = 0; i <= 20; i++) expect(k.corona.free(out.x + ((door.x - out.x) * i) / 20, out.y + ((door.y - out.y) * i) / 20)).toBe(true);
+      expect(k.corona.doorNear(door.x, door.y)?.id).toBe(id);
+      // The animation changes the model and comes back to it (the renderer shows its frames in a ring).
+      const m = compileMjx(bundledFiles[`models/corona-${id}.xml`]);
+      for (const clip of m.animations) {
+        const frames = clipFrames(f.result!.grid as Grid3, clip, 1);
+        expect(frames.some((g) => g.cells.some((c, i) => c !== frames[0].cells[i]))).toBe(true);
+      }
+    }, 30_000);
+  }
+
+  it('reach a universe whose library index the Sculptor rewrote', async () => {
+    const { upgradeFromSeed, seedHashes } = await import('../src/kernel/universes');
+    const index = JSON.parse(bundledFiles['models/index.json']);
+    const old = Object.fromEntries(Object.entries(index).filter(([id]) => !id.startsWith('corona-')));
+    const oldSeed: Record<string, string> = { ...bundledFiles, 'models/index.json': JSON.stringify(old) };
+    for (const p of Object.keys(oldSeed)) if (/^models\/corona-/.test(p)) delete oldSeed[p];
+    const mine = { ...old, mulino: { classe: 'edificio', nome: 'Mulino', autore: 'scultore' } };
+    const files = { ...oldSeed, 'models/index.json': JSON.stringify(mine), 'seed.json': JSON.stringify(seedHashes(oldSeed)) };
+    const up = upgradeFromSeed(files, bundledFiles).files;
+    const now = JSON.parse(up['models/index.json']);
+    expect(now.mulino.autore).toBe('scultore');
+    expect(now['corona-magia']).toMatchObject({ vpt: 8 });
+    expect(up['models/corona-magia.xml']).toBe(bundledFiles['models/corona-magia.xml']);
   });
 });
