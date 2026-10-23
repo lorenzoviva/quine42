@@ -10,7 +10,7 @@ struttura per sessione; T20 li porta poi nel gioco.
 1. Apri Gemini CLI nel worktree `H:\projects\rune\.claude\worktrees\step8.2A-lab3d` (branch `3d`), con il modello
    più forte disponibile in ragionamento alto (oggi `gemini-3.8-flash`, effort *high*).
 2. Incolla il **prompt comune** qui sotto, sostituendo `<ID>` con l'id della struttura (in ordine: `magia`,
-   `persone`, `cose`, `oggetti`, `luoghi`, `sistemi`, `nucleo`, `concilio`, poi `universo` e `galleria`, aggiunte il 23/10). La scheda della struttura è più sotto
+   `persone`, `cose`, `oggetti`, `luoghi`, `sistemi`, `nucleo`, `concilio`, poi `universo`, `galleria` e `mondo`, aggiunte il 23/10). La scheda della struttura è più sotto
    in questo stesso file: Gemini la legge da qui.
 3. A fine sessione guarda le foto in `lab/out/mjx/corona-<ID>.png` e il modello nella sandbox; se va bene, il
    commit l'ha già fatto lui; altrimenti scrivigli cosa cambiare nella stessa sessione.
@@ -236,6 +236,21 @@ neon è quello della sala nel gioco (`ROOMS` in `corona.ts`), così fuori e dent
   (`name="plinto"`), perché il gioco ci poserà sopra un modello della libreria che cambia a ogni visita (lascia libero lo
   spazio sopra, almeno 3 caselle). Il plinto non sta davanti alla porta: spostalo di lato al percorso. Insegna «GALLERIA
   DELL'ARTISTA» sopra la cornice, su due righe se serve.
+
+### `mondo` — La Biblioteca del Mondo
+- **Scatola**: 14 × 14 × 7 caselle → `size="112 112 56"`. Neon `7dd87d` (verde).
+- **Esterno** (proposta A, scelta dall'autore il 23/10, [`corona-proposte.md`](../plans/corona-proposte.md) §3.2):
+  **il chiostro**. La memoria del Narratore come un luogo dove si cammina piano; elegante, niente libri da vedere.
+- Indicazioni: un edificio basso e quadrato (~12 × 12 caselle, alto ~3), con il tetto piano e sottile come una lama
+  (una lastra di 1-2 voxel che sporge un poco oltre i muri). Tutto attorno, sotto il tetto, un **portico** di pilastri neri
+  sottilissimi e fitti (1 × 1 voxel, uno ogni 4-6 voxel), ciascuno con un filo di neon verde alla base; dietro il portico,
+  pareti di vetro scuro. Al centro una **corte aperta** (~6 × 6 caselle, senza tetto) con uno **specchio d'acqua** scura
+  (`10202a`, a filo del pavimento o un voxel sotto, mai sotto z = 0): sul fondo dell'acqua, a filo, le rune del canone
+  accese in verde (segni angolari brevi, come quelli della Torre della Magia, in un anello o in righe ordinate, non a
+  caso). Nella corte, in un angolo dello specchio, **una sola lanterna** alta e sottile (fino a z ~ 6 caselle: l'unica cosa
+  che sale), con la luce in cima. La porta al centro del lato davanti, a z = 0, larga, con un varco nel portico. Insegna
+  «BIBLIOTECA DEL MONDO» sul bordo del tetto sopra la porta, in lettere sottili (su due righe se serve). È l'unico edificio
+  orizzontale del campus: niente torri, cupole o antenne.
 
 ## Dopo (T20)
 

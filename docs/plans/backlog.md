@@ -385,7 +385,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 - Deciso (23/10): il caso con il **codice vero** (kernel in miniatura nella teca); le meccaniche `mech.*` vanno nella
   **Sala sistemi** (l'Archivio resta riserva).
 
-### T32 · Gli edifici dimenticati: Direzione, Biblioteca, Galleria, Archivio — `in attesa`
+### T32 · Gli edifici dimenticati: Direzione, Biblioteca, Galleria, Archivio — `da fare`
 - Contesto: nel seme il campus ha 12 edifici (13 con l'Archivio, dove oggi finiscono le meccaniche `mech.*`); le
   specifiche del 22/10 e il prompt di T19 ne coprono 8. Proposte in [`corona-proposte.md`](corona-proposte.md) §3:
   Direzione come regia (maxischermo, torre di trasmissione; dentro la linea del tempo dei commit e il quadro dei costi),
@@ -398,7 +398,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   con le operazioni in corso, parete di schermi con linea del tempo, registro dal vivo e costi, livello di allerta;
   `corona-proposte.md` §3.1); **Galleria** approvata; le schede `universo` e `galleria` sono nel prompt di T19.
   L'Archivio resta riserva (le meccaniche vanno nella Sala sistemi). **Biblioteca**: la pila di libri è scartata;
-  **in attesa** della scelta fra chiostro (proposta), stele e nastro (§3.2).
+  scelto **il chiostro** (§3.2), scheda `mondo` nel prompt di T19.
 
 ### T28 · Il Nucleo, dentro — `fatto` (`673eeba`) (dipende da T12)
 - Il grafo del mondo navigabile in UI.
@@ -434,7 +434,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   `tests/campus.test.ts`: per ogni edificio del seme tempo, settore, porta dal viale, animazione. Nel lab la vetrina ora
   anima i modelli («mostra» li nascondeva: corpo spento, nessun fotogramma acceso). ModelDirector e «riscolpisci» non
   toccano già i `corona-*` (il primo fa solo i modelli che mancano, il secondo solo moduli e oggetti). Mancano `persone` (scritta da Gemini in `bdd198e`, nel lab: da portare nel gioco),
-  `cose`, `oggetti`, `luoghi`, `sistemi`, `nucleo`, `concilio`, `universo`, `galleria` (schede del 23/10; `mondo` quando la Biblioteca è decisa); per ognuno aggiungere l'id alla lista del test.
+  `cose`, `oggetti`, `luoghi`, `sistemi`, `nucleo`, `concilio`, `universo`, `galleria`, `mondo` (schede del 23/10); per ognuno aggiungere l'id alla lista del test.
 
 ## Multiplayer
 

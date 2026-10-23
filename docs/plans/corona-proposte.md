@@ -154,7 +154,8 @@ che cosa sta succedendo all'universo, che cosa costa, che cosa si è rotto e qua
 
 ### 3.2 La Biblioteca del Mondo (`mondo`, Narratore, `7dd87d` verde)
 È la memoria del Narratore: la bibbia, il canone, lo stile, le regole, le persone, le trame. La pila di libri è stata
-scartata (didascalica). Tre alternative più eleganti, in cui il libro non si vede ma si sente:
+scartata (didascalica). Tre alternative più eleganti, in cui il libro non si vede ma si sente. *(Scelta A, il chiostro, il
+23/10: scheda `mondo` nel prompt di T19.)*
 - **A · Il chiostro** *(proposta)*: un edificio basso e quadrato, un portico di pilastri neri sottilissimi e fitti (un
   filo di neon verde alla base di ognuno) attorno a una **corte aperta** con uno specchio d'acqua scura; sul fondo
   dell'acqua le rune del canone, accese. In mezzo, una sola lanterna alta e sottile. Orizzontale e quieto: è l'unico
