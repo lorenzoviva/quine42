@@ -7,7 +7,7 @@ import { $, el } from './dom';
 import { runeGlyph } from '../kernel/runes';
 
 /** Where icons come from: photographs of the items' models (src/render/thumbs.ts), set by main. */
-export const icons: { get?: (item: string) => Promise<string | undefined>; model?: (model: string, tint?: string) => Promise<string | undefined> } = {};
+export const icons: { get?: (item: string) => Promise<string | undefined>; model?: (model: string, tint?: string, seed?: number) => Promise<string | undefined> } = {};
 
 /** An item's icon: the photograph of its model, its sign in its colour until the photograph is there. */
 export function itemIcon(k: Kernel, item: string, size = 32): HTMLElement {

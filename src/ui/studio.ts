@@ -72,7 +72,7 @@ export class StudioPanel {
         })),
       );
     else if (entry.model)
-      void icons.model?.(entry.model, entry.tint).then((src) => {
+      void icons.model?.(entry.model, entry.tint, entry.seed).then((src) => {
         if (src && this.shown === e.building) frame.replaceChildren(el('img', { src, alt: entry.label }));
       });
     const step = (d: number, text: string) => {

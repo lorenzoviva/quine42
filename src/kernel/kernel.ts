@@ -125,6 +125,8 @@ export interface ShowcaseEntry {
   id: string;
   label: string;
   model?: string;
+  /** The instance of the model (T23: an individual is a seed of its type's program). */
+  seed?: number;
   tint?: string;
   color?: string;
   /** Runes on show (a magic rune, or the sequence of a spell). */
@@ -2894,11 +2896,13 @@ export class Kernel {
       if (man.context) facts.push(['Contesto', man.context]);
       if (man.lore) facts.push(['Storia', man.lore]);
       if (man.persona) facts.push(['Carattere', man.persona]);
-      if (source === 'persone') {
-        const who = people.filter((x) => x.tipo === man.id).map((x) => `${x.nome} (${x.mestiere})`);
-        if (who.length) facts.push(['Individui', who.join(', ')]);
-      }
-      out.push({ id: `module:${man.id}`, label: man.name, model: this.formFor(man, man.id).model, color: man.appearance.color, path, facts });
+      const model = this.formFor(man, man.id).model;
+      const who = source === 'persone' ? people.filter((x) => x.tipo === man.id) : [];
+      if (who.length) facts.push(['Individui', who.map((x) => `${x.nome} (${x.mestiere})`).join(', ')]);
+      out.push({ id: `module:${man.id}`, label: man.name, model, color: man.appearance.color, path, facts });
+      // T23: after its type, each individual, with the look it has in the world (its seed) and the module under it.
+      for (const p of who)
+        out.push({ id: `person:${p.nome}`, label: `${p.nome} · ${p.mestiere}`, model, seed: this.forms.seedFor(model, p.origine ?? p.nome), color: man.appearance.color, path, facts: [...personFacts(p, man.name), ...facts.filter(([w]) => w !== 'Individui').map(([w, t]): [string, string] => [w === 'Aspetto' || w === 'Carattere' ? `${w} del tipo` : w, t])] });
     }
     return out;
   }
@@ -4735,4 +4739,21 @@ export class Kernel {
     const n = this.faults.size;
     return n === 0 ? 0 : Math.min(1, 0.3 + 0.15 * (n - 1));
   }
+}
+
+/** What the Studio of characters says of an individual (T23), in the order a visitor reads it. */
+function personFacts(p: Person, type: string): Array<[string, string]> {
+  const out: Array<[string, string]> = [['Individuo', p.nome]];
+  const who = [p.specie === 'animale' ? 'animale' : 'persona', p.genere, p.eta].filter(Boolean).join(', ');
+  out.push(['Chi è', `${type} (${who})`], ['Mestiere', p.mestiere]);
+  if (p.aspetto) out.push(['Aspetto', p.aspetto]);
+  if (p.persona) out.push(['Carattere', p.persona]);
+  if (p.storia) out.push(['Storia', p.storia]);
+  if (p.famiglia?.length) out.push(['Famiglia', p.famiglia.map((r) => `${r.legame} di ${r.nome}`).join(', ')]);
+  if (p.legameViandante) out.push(['Per il viandante', p.legameViandante]);
+  if (p.routine?.length) out.push(['Giornata', p.routine.map((r) => `${r.quando}: ${r.fa}`).join('; ')]);
+  if (p.luogo) out.push(['Incontrato a', p.luogo]);
+  if (p.porta?.length) out.push(['Porta con sé', p.porta.join(', ')]);
+  if (p.ricordi?.length) out.push(['Ricorda', p.ricordi.slice(-3).map((m) => m.testo).join(' · ')]);
+  return out;
 }

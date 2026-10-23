@@ -121,4 +121,32 @@ describe('the screen of the Tower of Magic (T22)', () => {
     expect(fact(comet.id, 'Cristallo')).toBe('ne consuma uno');
     expect(all.every((e) => e.path === 'modules/magic.runes/manifest.json' && e.facts.some(([w]) => w === 'Effetto'))).toBe(true);
   });
+
+  it('shows each individual after its type, with the look it has in the world, the individual and the module (T23)', async () => {
+    const routine = [{ quando: 'mattina', fa: 'impasta il pane', dove: 'lavoro' }];
+    const persone = [
+      { nome: 'Mara', specie: 'persona', genere: 'femmina', tipo: 'npc.villager', mestiere: 'fornaia', famiglia: [{ nome: 'Teo', legame: 'madre' }], routine, storia: 'Ha aperto il forno del borgo.', origine: '0,0#3', aspetto: 'grembiule infarinato' },
+      { nome: 'Teo', specie: 'persona', genere: 'maschio', tipo: 'npc.villager', mestiere: 'garzone', famiglia: [{ nome: 'Mara', legame: 'figlio' }], routine },
+    ];
+    const k = await Kernel.boot({ files: { ...bundledFiles, 'world/people.json': JSON.stringify({ persone, attesi: [] }) }, store: memoryStore(), models: new MockModels() });
+    const all = k.showcaseEntries('persone');
+    const at = all.findIndex((e) => e.id === 'module:npc.villager');
+    expect(all.slice(at + 1, at + 3).map((e) => e.id)).toEqual(['person:Mara', 'person:Teo']);
+    const type = all[at], mara = all[at + 1], teo = all[at + 2];
+    expect(type.facts.find(([w]) => w === 'Individui')?.[1]).toBe('Mara (fornaia), Teo (garzone)');
+    // The seed of the entity met in the world (its origin), or of the name if it has none.
+    expect(mara.model).toBe(type.model);
+    expect(mara.seed).toBe(k.forms.seedFor(type.model!, '0,0#3'));
+    expect(teo.seed).toBe(k.forms.seedFor(type.model!, 'Teo'));
+    expect(mara.label).toBe('Mara · fornaia');
+    const fact = (what: string) => mara.facts.find(([w]) => w === what)?.[1];
+    expect(fact('Individuo')).toBe('Mara');
+    expect(fact('Famiglia')).toBe('madre di Teo');
+    expect(fact('Giornata')).toBe('mattina: impasta il pane');
+    expect(fact('Aspetto')).toBe('grembiule infarinato');
+    // Then the module: the same facts as its type, without the list of individuals.
+    expect(fact('Modulo')).toBe('npc.villager');
+    expect(fact('Individui')).toBeUndefined();
+    expect(mara.path).toBe(type.path);
+  });
 });

@@ -322,9 +322,16 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   `tests/showcase.test.ts` (+1). Nel browser (offline): «Vapore» con Laguz e Kenaz sullo schermo e nel pannello.
   Diverso dal previsto: niente; nessun ADR. Le rune singole e i loro incantesimi sono una voce sola (prima erano due).
 
-### T23 · Lo Studio dei personaggi, dentro — `da fare` (dipende da T21)
+### T23 · Lo Studio dei personaggi, dentro — `fatto` (COMMIT)
 - Un silos al centro con il personaggio scelto che fluttua in un liquido viscoso; «<» «>»; il clic mostra il
   modulo e l'individuo.
+- Esito:  mette dopo ogni tipo i suoi individui (, «nome · mestiere»), ciascuno
+  con il  che ha nel mondo (, campo nuovo di , usato dal silos e dalla
+  foto del pannello); i fatti dicono l'individuo (chi è, mestiere, aspetto, carattere, storia, famiglia, legame col viandante,
+  giornata, dove l'ha incontrato, cosa porta, gli ultimi ricordi: ) e poi il modulo («Aspetto del tipo»,
+  «Carattere del tipo»). : il silos è pieno di un liquido viscoso del colore dell'edificio, con un anello
+  luminoso in superficie e sedici bolle che salgono; il renderer fa girare e fluttuare la figura piano.   (+1). Nel browser (offline): 13 voci (2 tipi, 11 individui), Ottone che fluttua nel liquido, pannello con foto, individuo e
+  modulo. Diverso dal previsto: il tipo resta una voce a sé, prima dei suoi individui; nessun ADR.
 
 ### T24 · Laboratorio delle cose e Magazzino degli oggetti, dentro — `da fare` (dipende da T21)
 - Una stampante 3D di 3 × 3 caselle con l'oggetto scelto sulla casella centrale (le strutture ridotte alla scala

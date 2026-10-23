@@ -45,7 +45,7 @@ export class Renderer {
   private ring?: THREE.Group;
   private rooms = new Map<string, { group: THREE.Group; globe?: THREE.Object3D; version: number }>();
   /** What the showcases of the studio show (T21), by building: rebuilt when the choice or the models change. */
-  private shows = new Map<string, { key: string; group: THREE.Group; spin?: THREE.Object3D; silo: boolean }>();
+  private shows = new Map<string, { key: string; group: THREE.Group; spin?: THREE.Object3D; bubbles?: THREE.Object3D[]; silo: boolean }>();
   private overlay: Overlay;
   private flash = new THREE.PointLight(0xfff2c0, 0, 8, 1.4);
   private flashUntil = 0;
@@ -235,8 +235,16 @@ export class Renderer {
         } else this.shows.delete(studio.building.id);
       }
       if (v?.spin) {
-        v.spin.rotation.y = this.t * 0.6;
-        if (v.silo) v.spin.position.y = 0.55 + Math.sin(this.t * 1.3) * 0.12;
+        // In the silo's thick liquid (T23) it turns and floats slowly, swaying a little.
+        v.spin.rotation.y = this.t * (v.silo ? 0.25 : 0.6);
+        if (v.silo) {
+          v.spin.position.y = 0.55 + Math.sin(this.t * 0.7) * 0.12;
+          v.spin.rotation.z = Math.sin(this.t * 0.45) * 0.05;
+        }
+      }
+      for (const b of v?.bubbles ?? []) {
+        const { x, z, speed, phase } = b.userData as { x: number; z: number; speed: number; phase: number };
+        b.position.set(x + Math.sin(this.t * 0.8 + phase * 9) * 0.05, 0.35 + ((phase + this.t * speed * 0.5) % 1) * 1.9, z);
       }
     }
     this.avatars.update(k, this.t);

@@ -362,9 +362,10 @@ function arrowSign(x: number, z: number, text: string, color: string): THREE.Mes
 
 /**
  * What a showcase shows now: the model, made to fit and turning (in the silo, floating in its liquid), or
- * the runes on the screen; its name under it and the arrows at its sides. `spin` is what turns.
+ * the runes on the screen; its name under it and the arrows at its sides. `spin` is what turns, `bubbles`
+ * rise in the silo's liquid (their place, speed and phase in `userData`).
  */
-export function buildShowcase(k: Kernel, it: StudioItem, entry: ShowcaseEntry, color: string): { group: THREE.Group; spin?: THREE.Object3D } {
+export function buildShowcase(k: Kernel, it: StudioItem, entry: ShowcaseEntry, color: string): { group: THREE.Group; spin?: THREE.Object3D; bubbles?: THREE.Object3D[] } {
   const g = new THREE.Group();
   const w = it.w ?? 1;
   const cx = it.x + w / 2, cz = it.y + 0.5;
@@ -372,10 +373,32 @@ export function buildShowcase(k: Kernel, it: StudioItem, entry: ShowcaseEntry, c
   const name = textPlane([entry.label], color, w - 0.2, 0.32);
   name.position.set(cx, it.device === 'schermo' ? 0.45 : 0.17, cz + (it.device === 'schermo' ? 0.73 : 0.52));
   g.add(name);
+  let bubbles: THREE.Object3D[] | undefined;
   if (it.device === 'silos') {
-    const glass = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.95, 2.26, 28, 1, true), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.18, side: THREE.DoubleSide, depthWrite: false, toneMapped: false }));
+    const glass = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.95, 2.26, 28, 1, true), new THREE.MeshBasicMaterial({ color: '#cfe8ff', transparent: true, opacity: 0.1, side: THREE.DoubleSide, depthWrite: false, toneMapped: false }));
     glass.position.set(cx, 0.3 + 1.13, cz);
-    g.add(glass);
+    // T23: a viscous liquid in the building's colour fills it up to a glowing surface; slow bubbles rise in it.
+    const liquid = new THREE.Mesh(new THREE.CylinderGeometry(0.92, 0.92, 2.0, 28), new THREE.MeshBasicMaterial({ color: new THREE.Color(color).lerp(new THREE.Color('#04140f'), 0.7), transparent: true, opacity: 0.3, depthWrite: false, toneMapped: false }));
+    liquid.position.set(cx, 0.3 + 1.0, cz);
+    liquid.renderOrder = 1;
+    // The surface: a glowing rim where it meets the glass, clear inside so what floats is seen from above.
+    const surface = new THREE.Mesh(new THREE.RingGeometry(0.78, 0.92, 28), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.5, depthWrite: false, toneMapped: false }));
+    surface.rotation.x = -Math.PI / 2;
+    surface.position.set(cx, 2.3, cz);
+    surface.renderOrder = 2;
+    const ball = new THREE.SphereGeometry(1, 8, 6);
+    const foam = new THREE.MeshBasicMaterial({ color: '#e8fff8', transparent: true, opacity: 0.55, depthWrite: false, toneMapped: false });
+    bubbles = [];
+    for (let i = 0; i < 16; i++) {
+      const b = new THREE.Mesh(ball, foam);
+      const a = (i * 2.399) % (Math.PI * 2), r = 0.25 + ((i * 0.37) % 0.6);
+      b.scale.setScalar(0.025 + ((i * 7) % 5) * 0.008);
+      b.renderOrder = 3;
+      b.userData = { x: cx + Math.cos(a) * r, z: cz + Math.sin(a) * r, speed: 0.12 + ((i * 3) % 7) * 0.03, phase: (i * 0.61) % 1 };
+      b.position.set(b.userData.x, 0.35, b.userData.z);
+      bubbles.push(b);
+    }
+    g.add(glass, liquid, surface, ...bubbles);
   }
   if (entry.runes?.length) {
     const screen = runeScreen(entry.runes.map((t) => ({ glyph: k.content.runes[t]?.glyph ?? t, color: k.content.runes[t]?.color ?? color, name: k.content.runes[t]?.name ?? t })), w - 0.4, 1.6);
@@ -383,7 +406,7 @@ export function buildShowcase(k: Kernel, it: StudioItem, entry: ShowcaseEntry, c
     g.add(screen);
     return { group: g };
   }
-  const f = entry.model ? k.forms.ready(entry.model, 1, entry.tint) : undefined;
+  const f = entry.model ? k.forms.ready(entry.model, entry.seed ?? 1, entry.tint) : undefined;
   const geo = f && geoOf(f);
   if (!geo) return { group: g };
   geo.body.computeBoundingBox();
@@ -402,7 +425,7 @@ export function buildShowcase(k: Kernel, it: StudioItem, entry: ShowcaseEntry, c
   spin.add(m);
   spin.position.set(cx, it.device === 'silos' ? 0.5 : it.device === 'stampante' ? 0.22 : 0.6, cz);
   g.add(spin);
-  return { group: g, spin };
+  return { group: g, spin, bubbles };
 }
 
 /** The Council's people in the corona and in the studio: robed figures in their colour. */

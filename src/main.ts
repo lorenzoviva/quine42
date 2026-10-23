@@ -81,7 +81,7 @@ async function main() {
   const renderer = new Renderer($<HTMLCanvasElement>('#world'), $<HTMLCanvasElement>('#overlay'), kernel);
   const thumbs = new Thumbs(kernel);
   icons.get = (item) => thumbs.icon(item);
-  icons.model = (model, tint) => thumbs.model(model, tint);
+  icons.model = (model, tint, seed) => thumbs.model(model, tint, seed);
   const hud = new Hud(kernel, renderer);
   const editor = new Editor(kernel);
   const konsole = new Console(kernel);
