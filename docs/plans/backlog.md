@@ -366,10 +366,31 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 ### T26 · L'Ufficio dei luoghi, dentro — `in attesa`
 - Da progettare in funzione di come lavora il Cartografo (piani, lotti, atlante). **Proposta all'autore** prima
   di costruire.
+- Proposta scritta il 23/10/2026: [`corona-proposte.md`](corona-proposte.md) §1 — **il plastico**: un tavolo olografico
+  3 × 3 con un luogo già pianificato in miniatura («<» «>» per il luogo), una leva che scorre le sei fasi del Cartografo
+  (bozza, varchi, ambiente, sentieri, lotti e strutture, cose e rune), pannello con il piano; l'atlante e i terreni dello
+  Studio del Cartografo qui. Pezzi: T26a plastico, T26b fasi, T26c unione con lo Studio del Cartografo.
+- **Domande per l'autore**: unire lo Studio del Cartografo all'Ufficio dei luoghi? Le sei fasi, o basta il plastico finito?
 
 ### T27 · La Sala sistemi, dentro — `in attesa`
 - L'autore chiede un aiuto: far apprezzare la complessità del codice con esempi (cosa fa un sistema, casi d'uso).
   **Proposta all'autore** (es. ogni sistema come un «caso» animato: prima, regola, dopo).
+- Proposta scritta il 23/10/2026: [`corona-proposte.md`](corona-proposte.md) §2 — **la catena** (ogni sistema una
+  stazione nell'ordine del tick, con entità toccate, ms e guasti dal vivo) e **il banco di prova** (una teca 3 × 3 con un
+  caso d'uso a ciclo: prima, la regola, dopo). Pezzi: T27a catena, T27b banco con i casi del seme, T27c casi dei sistemi
+  forgiati.
+- **Domande per l'autore**: il caso con il codice vero (un kernel in miniatura nella teca: proposta) o raccontato? Le
+  meccaniche (`mech.*`, oggi nell'Archivio) vanno nella Sala sistemi?
+
+### T32 · Gli edifici dimenticati: Direzione, Biblioteca, Galleria, Archivio — `in attesa`
+- Contesto: nel seme il campus ha 12 edifici (13 con l'Archivio, dove oggi finiscono le meccaniche `mech.*`); le
+  specifiche del 22/10 e il prompt di T19 ne coprono 8. Proposte in [`corona-proposte.md`](corona-proposte.md) §3:
+  Direzione come regia (maxischermo, torre di trasmissione; dentro la linea del tempo dei commit e il quadro dei costi),
+  Biblioteca del Mondo come pila di libri (dentro il leggio della bibbia e le tavole delle regole), Galleria dell'Artista
+  come museo-cubo con una scultura nel piazzale (dentro il tornio dello Scultore), Archivio come pila di container o
+  Officina delle meccaniche.
+- Fare, dopo le risposte: le schede nel prompt di T19, gli id nuovi in T31, un task di interno per edificio.
+- **Domande per l'autore**: le tre proposte vanno bene come base? L'Archivio: riserva o Officina delle meccaniche?
 
 ### T28 · Il Nucleo, dentro — `fatto` (`673eeba`) (dipende da T12)
 - Il grafo del mondo navigabile in UI.
