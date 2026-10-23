@@ -466,7 +466,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   meccaniche altrove ci finisce solo un prefisso sconosciuto). Diverso dal previsto: la proposta numerava gli interni
   T32-T34, ma T33-T45 sono del multiplayer, quindi T46-T48.
 
-### T49 · Gli interni della corona: aria, simmetria, luci più tenui — `da fare` (si comincia da T49a)
+### T49 · Gli interni della corona: aria, simmetria, luci più tenui — `in corso` (T49a fatto; il prossimo è T49b)
 - Contesto: richiesta del 24/10 ([`to-do-2026-10-24.md`](../userchats/to-do-2026-10-24.md), «Interni edifici della corona»,
   con `docs/userchats/direzione.png`). Vale per tutte le stanze (`buildRoom`/`itemMesh` in `corona3d.ts`, le posizioni in
   `corona.ts`). Oggi: tre postazioni (`desk`, `x 4/6/8, y ROOM_H-4`) davanti allo schermo della storia sono celle bloccate
@@ -481,6 +481,12 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   situazione; linee del pavimento molto più tenui (misurare il bloom con e senza: nessun alone sopra la griglia); strisce dei
   muri simmetriche. Test: nessuna voce `desk` fuori dalla Sala del Concilio; le celle davanti allo schermo sono libere.
   Verifica nel browser: la Direzione inquadrata come in `direzione.png`, prima e dopo, e un'altra stanza per edificio.
+  - Esito: `fatto` (commit «Corona (T49a)»). Le postazioni non ci sono più; i membri delle squadre, quando non sono a uno
+    scaffale, stanno davanti allo schermo della storia (`Archive.post`, sulle celle ora libere). La griglia non si attenua
+    soltanto: passa a un materiale suo (`MAT.line`, senza luce e fuori dal bloom, `GRID = 0.12` del colore), quindi non fa
+    alone per costruzione invece che per misura. Il bordo intero (`rim` in `corona3d.ts`) vale anche per i piedistalli degli
+    ambienti. Il muro basso della porta ha la sua striscia in cima, aperta sull'uscita. Foto prima/dopo della Direzione e
+    dell'Ufficio dei luoghi, nella build offline.
 - **T49b · il dispositivo al centro**: il dispositivo di ogni stanza al centro, lontano dai muri (almeno tre caselle libere
   su ogni lato, pulsanti e pedane compresi), gli scaffali del piano terra spostati di conseguenza (o i file del piano terra
   ai piani sopra, se non ci stanno: decidere misurando la stanza più piena); la parete di schermi della Direzione (T46b)

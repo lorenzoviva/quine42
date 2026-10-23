@@ -20,6 +20,9 @@ const TOWER_H = 4.5;
 const GROUND: Record<string, [string, string]> = { viale: ['#161824', '#12131d'], vicolo: ['#14141c', '#111119'], prato: ['#0b0f15', '#0b0f15'], bordo: ['#0d0d16', '#0d0d16'] };
 const LOOK_COLOR: Record<string, string> = { libro: '#a0683a', cristallo: '#5fe0ff', pergamena: '#e8dcb0', tavoletta: '#9aa3ad' };
 
+/** How bright the studio's floor grid is, over the building's colour (T49a: faint, and it does not bloom). */
+const GRID = 0.12;
+
 /** A thin glowing frame along the top edges of a cell block where it meets the outside. */
 function edgeStrip(b: Builder, x: number, z: number, y: number, open: { n: boolean; s: boolean; w: boolean; e: boolean }, rgb: number[]): void {
   const t = 0.05;
@@ -152,35 +155,39 @@ export function buildRoom(k: Kernel, building: Building, floor: Floor): { group:
   const lit = new Builder();
   const glow = new Builder();
   const X = floor.ox, Z = floor.oy;
-  // Floor and its neon grid.
+  // Floor and its grid: faint lines that do not bloom (T49a: a glowing grid was a haze over the whole floor).
   lit.quad([X, 0, Z], [X, 0, Z + ROOM_H], [X + ROOM_W, 0, Z + ROOM_H], [X + ROOM_W, 0, Z], [0, 1, 0], rgbOf('#08080f'));
-  const grid = rgbOf(col, 0.25);
-  for (let x = 1; x < ROOM_W; x++) glow.box(X + x - 0.01, 0.003, Z + 1, X + x + 0.01, 0.006, Z + ROOM_H - 1, grid);
-  for (let y = 1; y < ROOM_H; y++) glow.box(X + 1, 0.003, Z + y - 0.01, X + ROOM_W - 1, 0.006, Z + y + 0.01, grid);
-  // Walls: dark metal with a strip of light.
+  const lines = new Builder();
+  const grid = rgbOf(col, GRID);
+  for (let x = 1; x < ROOM_W; x++) lines.box(X + x - 0.01, 0.003, Z + 1, X + x + 0.01, 0.006, Z + ROOM_H - 1, grid);
+  for (let y = 1; y < ROOM_H; y++) lines.box(X + 1, 0.003, Z + y - 0.01, X + ROOM_W - 1, 0.006, Z + y + 0.01, grid);
+  // Walls: dark metal with a strip of light on all four, the low front wall's at its top, open at the exit.
   const wall = rgbOf('#13131d');
-  const H = 1.4;
+  const H = 1.4, low = H * 0.35;
   lit.box(X, 0, Z, X + ROOM_W, H, Z + 1, wall);
-  lit.box(X, 0, Z + ROOM_H - 1, X + ROOM_W, H * 0.35, Z + ROOM_H, wall);
+  lit.box(X, 0, Z + ROOM_H - 1, X + ROOM_W, low, Z + ROOM_H, wall);
   lit.box(X, 0, Z, X + 1, H, Z + ROOM_H, wall);
   lit.box(X + ROOM_W - 1, 0, Z, X + ROOM_W, H, Z + ROOM_H, wall);
   glow.box(X + 1, H * 0.7, Z + 0.98, X + ROOM_W - 1, H * 0.75, Z + 1.02, rgbOf(col));
   glow.box(X + 0.98, H * 0.7, Z + 1, X + 1.02, H * 0.75, Z + ROOM_H - 1, rgbOf(col));
   glow.box(X + ROOM_W - 1.02, H * 0.7, Z + 1, X + ROOM_W - 0.98, H * 0.75, Z + ROOM_H - 1, rgbOf(col));
-  // Racks under the rows of files and exhibits.
+  const exit = floor.items.find((i) => i.kind === 'exit');
+  const gaps = exit ? [[X + 1, exit.x], [exit.x + 1, X + ROOM_W - 1]] : [[X + 1, X + ROOM_W - 1]];
+  for (const [a, b] of gaps) if (b > a) glow.box(a, low - 0.05, Z + ROOM_H - 1.02, b, low, Z + ROOM_H - 0.98, rgbOf(col));
+  // Racks under the rows of files and exhibits, a neon rim all round their top.
   const shelf = floor.items.filter((i) => i.kind === 'file' || i.kind === 'sprite' || i.kind === 'tile' || i.kind === 'layout');
   for (const y of new Set(shelf.map((i) => i.y))) {
     const xs = shelf.filter((i) => i.y === y).map((i) => i.x);
-    const a0 = Math.min(...xs), a1 = Math.max(...xs) + 1;
-    lit.box(a0 - 0.05, 0, y + 0.3, a1 + 0.05, 0.35, y + 0.75, rgbOf('#1a1e2e'));
-    glow.box(a0 - 0.05, 0.35, y + 0.73, a1 + 0.05, 0.38, y + 0.77, rgbOf(col));
+    const a0 = Math.min(...xs) - 0.05, a1 = Math.max(...xs) + 1.05;
+    lit.box(a0, 0, y + 0.3, a1, 0.35, y + 0.75, rgbOf('#1a1e2e'));
+    rim(glow, a0, y + 0.3, a1, y + 0.75, 0.35, rgbOf(col));
   }
   let globe: THREE.Object3D | undefined;
   for (const it of floor.items) itemMesh(lit, glow, it, col, k);
   const group = new THREE.Group();
   const m = new THREE.Mesh(lit.geometry(), MAT.corona);
   m.receiveShadow = m.castShadow = true;
-  group.add(m, new THREE.Mesh(glow.geometry(), MAT.glow));
+  group.add(m, new THREE.Mesh(glow.geometry(), MAT.glow), new THREE.Mesh(lines.geometry(), MAT.line));
   // The gallery's things on their plinths: the models themselves, made to fit.
   for (const it of floor.items) {
     if (it.kind !== 'sprite' || !it.model) continue;
@@ -318,7 +325,7 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
     case 'layout':
       // A square plinth with a neon rim: the environment in miniature stands on it (buildRoom).
       lit.box(x + 0.12, 0.38, z + 0.15, x + 0.88, 0.46, z + 0.9, rgbOf('#22263a'));
-      glow.box(x + 0.12, 0.46, z + 0.88, x + 0.88, 0.47, z + 0.9, rgbOf(col, 0.6));
+      rim(glow, x + 0.12, z + 0.15, x + 0.88, z + 0.9, 0.46, rgbOf(col, 0.6), 0.02, 0.01);
       break;
     case 'screen': {
       const w = it.w ?? 1;
@@ -400,6 +407,14 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
       glow.box(x + 0.1, 1.12, z + 0.45, x + 0.9, 1.2, z + 0.55, rgbOf('#ff2a6d'));
       break;
   }
+}
+
+/** A neon rim all round the top (at height y) of a box from (x0, z0) to (x1, z1), e wide and t thick, inside its edge. */
+function rim(glow: Builder, x0: number, z0: number, x1: number, z1: number, y: number, c: number[], e = 0.04, t = 0.03): void {
+  glow.box(x0, y, z0, x1, y + t, z0 + e, c);
+  glow.box(x0, y, z1 - e, x1, y + t, z1, c);
+  glow.box(x0, y, z0 + e, x0 + e, y + t, z1 - e, c);
+  glow.box(x1 - e, y, z0 + e, x1, y + t, z1 - e, c);
 }
 
 /** The device of a showcase: a screen, a silo (its glass is drawn with what it shows), a 3D printer, a holographic table. */

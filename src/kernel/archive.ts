@@ -1,12 +1,12 @@
 // The Council in the flesh. Every agent is a team (the Engineer is a team of engineers, and so on):
-// a member works in each building where its kind of work is done, at a desk, and goes to the shelf
+// a member works in each building where its kind of work is done, by the history screen, and goes to the shelf
 // of the file it is changing; members appear (teleport) where they are needed instead of walking
 // round the ring. Only those actually talking to each other in the Council's feed are seen talking.
 // The Referente waits for the wanderer on the ring and takes requests to the right team.
 // Real space, kernel-driven, no Lua and no model calls.
 
 import { AGENTS, type AgentId, type FeedEntry } from './agents/council';
-import type { Building, Corona } from './corona';
+import { ROOM_H, type Building, type Corona } from './corona';
 
 export interface Avatar {
   /** Agent kind (or 'referente'). */
@@ -23,7 +23,7 @@ export interface Avatar {
   path?: string;
   say?: string;
   sayUntil: number;
-  /** Back to the desk after this time. */
+  /** Back to its post after this time. */
   idleUntil: number;
   speed: number;
 }
@@ -37,7 +37,7 @@ export class Archive {
 
   constructor(private corona: () => Corona) {}
 
-  /** One member of the right team at a desk of every building; the Referente on the ring. */
+  /** One member of the right team by the screen of every building; the Referente on the ring. */
   reset(): void {
     const c = this.corona();
     const keep = new Set<string>();
@@ -67,14 +67,16 @@ export class Archive {
     for (const k of [...this.avatars.keys()]) if (!keep.has(k) && !k.includes('#')) this.avatars.delete(k);
   }
 
-  private desk(b: Building, n = 0): { x: number; y: number } {
-    const desks = b.floors[0].items.filter((i) => i.kind === 'desk' && (b.id !== 'concilio' || !i.target));
-    const d = desks[n % Math.max(1, desks.length)];
-    return d ? { x: d.x + 0.5, y: d.y - 0.6 } : { x: b.floors[0].ox + 3.5, y: b.floors[0].oy + 3.5 };
+  /** Where a member stands when idle: in front of the room's history screen, the n-th a little further along. */
+  private post(b: Building, n = 0): { x: number; y: number } {
+    const f = b.floors[0];
+    const screen = f.items.find((i) => i.kind === 'screen');
+    if (!screen) return { x: f.ox + 3.5, y: f.oy + ROOM_H - 3.5 };
+    return { x: screen.x + 1.5 + (n % 3) * 1.5, y: screen.y - 0.5 };
   }
 
   private member(agent: AgentId, b: Building, n = 0): Avatar {
-    const p = this.desk(b, n);
+    const p = this.post(b, n);
     const def = AGENTS[agent];
     return { agent, name: def.name, color: def.color, sigil: def.sigil, building: b.id, x: p.x, y: p.y, tx: p.x, ty: p.y, sayUntil: 0, idleUntil: 0, speed: SPEED };
   }
@@ -97,7 +99,7 @@ export class Archive {
     const c = this.corona();
     const b = path ? c.buildingOf(path) : undefined;
     if (!b) {
-      // No file: the member of its own building speaks from the desk.
+      // No file: the member of its own building speaks from its post.
       const home = c.buildings.find((x) => x.team === agent) ?? c.buildings[0];
       if (!home) return undefined;
       const m = this.memberIn(agent, home);
@@ -155,7 +157,7 @@ export class Archive {
     for (const a of this.avatars.values()) {
       if (a.say && this.time > a.sayUntil) a.say = undefined;
       if (a.building && this.time > a.idleUntil && a.path) {
-        // Done: back to the desk (at the round table, back to its seat).
+        // Done: back to its post (at the round table, back to its seat).
         const b = c.building(a.building);
         const seat = b?.id === 'concilio' ? b.floors[0].items.find((i) => i.kind === 'desk' && i.target === a.agent) : undefined;
         if (seat) {
@@ -163,7 +165,7 @@ export class Archive {
           a.ty = seat.y + 0.4;
         } else if (b) {
           const n = Number(/#(\d+)$/.exec([...this.avatars.entries()].find(([, v]) => v === a)?.[0] ?? '')?.[1] ?? 0);
-          const d = this.desk(b, n);
+          const d = this.post(b, n);
           a.tx = d.x;
           a.ty = d.y;
         }

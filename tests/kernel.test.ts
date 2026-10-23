@@ -921,6 +921,22 @@ describe('death and transcendence', () => {
 });
 
 describe('the neon studio', () => {
+  it('no desks outside the Council hall (T49a): the cells before the history screen are free, the team stands there', async () => {
+    const k = await boot();
+    // Whoever went to a shelf during the Genesis is back at its post.
+    k.archive.tick(30);
+    k.archive.tick(30);
+    for (const b of k.corona.buildings) {
+      for (const f of b.floors) if (b.id !== 'concilio') expect(f.items.filter((i) => i.kind === 'desk'), b.id).toEqual([]);
+      if (b.id === 'concilio') continue;
+      const screen = b.floors[0].items.find((i) => i.kind === 'screen')!;
+      for (let x = screen.x; x < screen.x + (screen.w ?? 1); x++) expect(k.corona.free(x + 0.5, screen.y - 0.5), `${b.id} ${x}`).toBe(true);
+      const m = k.archive.avatars.get(`${b.team}@${b.id}`)!;
+      expect([m.x, m.y], b.id).toEqual([screen.x + 1.5, screen.y - 0.5]);
+      expect(k.corona.free(m.x, m.y), b.id).toBe(true);
+    }
+  });
+
   it('the Council sits at the round table; behind each seat a teleport to its room; every room leads back', async () => {
     const k = await boot();
     const hall = k.corona.building('concilio')!;

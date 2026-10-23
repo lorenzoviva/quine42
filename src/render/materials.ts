@@ -119,6 +119,8 @@ export const MAT = {
   corona: glowing(new THREE.MeshLambertMaterial({ vertexColors: true }), 'corona'),
   /** Neon edges and glowing things (unlit, they bloom). */
   glow: glowing(new THREE.MeshBasicMaterial({ vertexColors: true }), 'neon', true),
+  /** Faint lines (the studio's floor grid): unlit, but outside the bloom, so they cast no halo (T49a). */
+  line: new THREE.MeshBasicMaterial({ vertexColors: true }),
 };
 
 /** Solid-coloured clipped material (stand-ins). Cached by colour. */

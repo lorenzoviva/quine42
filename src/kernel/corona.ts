@@ -2,7 +2,7 @@
 // building per folder of the universe (and a gallery; the terrains and the atlas in the Office of places), with a door on the walkway.
 // Inside, buildings are bigger than outside (ADR-0022): rooms on several floors joined by stairs,
 // shelves with every file (book = manifest, crystal = Lua, scroll = text, tablet = data), framed
-// sprites and painted terrains, desks where the Council's teams work, a notice board with the latest
+// sprites and painted terrains, the history screen the Council's teams stand at, a notice board with the latest
 // changes. Interiors live in their own region of real space, far from the ring; doors teleport.
 // Deterministic: same files → same studio.
 
@@ -325,9 +325,8 @@ export class Corona {
             placed.push({ kind: 'portal', label: s.room ? `teletrasporto: ${ROOMS[s.room]?.name ?? s.room}` : 'teletrasporto: fuori, sul viale', target: s.room, x: ox + Math.round(TABLE.cx + Math.cos(a) * 7.6), y: oy + Math.max(1, Math.min(ROOM_H - 2, Math.round(TABLE.cy + Math.sin(a) * 4.9))) });
           });
         } else if (f === 0) {
-          // A wall of screens with the room's history; the team works in front of it.
+          // A wall of screens with the room's history; the team stands in front of it (no desks: T49a).
           placed.push({ kind: 'screen', label: 'schermo: la storia di questa sala', x: ox + 3, y: oy + ROOM_H - 3, w: 6 });
-          for (let d = 0; d < 3; d++) placed.push({ kind: 'desk', label: 'postazione', x: ox + 4 + d * 2, y: oy + ROOM_H - 4 });
           placed.push({ kind: 'portal', label: 'teletrasporto: Sala del Concilio', target: 'concilio', x: ox + ROOM_W - 3, y: oy + ROOM_H - 3 });
           if (id === SAMPLES) placed.push({ kind: 'atlas', label: "l'atlante del mondo", ...ATLAS_AT, x: ox + ATLAS_AT.x, y: oy + ATLAS_AT.y });
           if (id === 'nucleo') placed.push({ kind: 'grafo', label: 'il grafo del mondo', ...GRAPH_AT, x: ox + GRAPH_AT.x, y: oy + GRAPH_AT.y });
@@ -418,7 +417,7 @@ export class Corona {
     return this.exterior.get(`${cx},${cy}`) ?? null;
   }
 
-  /** Can one stand there? Walls, shelves, desks and the buildings' outside walls block. */
+  /** Can one stand there? Walls, shelves, the Council's seats and the buildings' outside walls block. */
   free(x: number, y: number): boolean {
     const c = this.at(Math.floor(x), Math.floor(y));
     if (!c) return false;
