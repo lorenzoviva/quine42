@@ -371,7 +371,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 - L'autore chiede un aiuto: far apprezzare la complessità del codice con esempi (cosa fa un sistema, casi d'uso).
   **Proposta all'autore** (es. ogni sistema come un «caso» animato: prima, regola, dopo).
 
-### T28 · Il Nucleo, dentro — `fatto` (COMMIT) (dipende da T12)
+### T28 · Il Nucleo, dentro — `fatto` (`673eeba`) (dipende da T12)
 - Il grafo del mondo navigabile in UI.
 - Esito: `corona.ts`: voce `grafo` (3 × 3, `GRAPH_AT`, dove gli altri edifici hanno la vetrina) al piano terra del Nucleo;
   `kernel.ts`: E o un clic (`clickStudio`) → `ui:graph`. `src/ui/graphlayout.ts`: `ForceLayout` senza DOM (molle sugli archi,
