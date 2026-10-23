@@ -466,6 +466,30 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   meccaniche altrove ci finisce solo un prefisso sconosciuto). Diverso dal previsto: la proposta numerava gli interni
   T32-T34, ma T33-T45 sono del multiplayer, quindi T46-T48.
 
+### T49 · Gli interni della corona: aria, simmetria, luci più tenui — `da fare` (si comincia da T49a)
+- Contesto: richiesta del 24/10 ([`to-do-2026-10-24.md`](../userchats/to-do-2026-10-24.md), «Interni edifici della corona»,
+  con `docs/userchats/direzione.png`). Vale per tutte le stanze (`buildRoom`/`itemMesh` in `corona3d.ts`, le posizioni in
+  `corona.ts`). Oggi: tre postazioni (`desk`, `x 4/6/8, y ROOM_H-4`) davanti allo schermo della storia sono celle bloccate
+  (`Corona.free` le esclude) che a vista sono solo tre trattini; il dispositivo centrale (tavolo della situazione, plastico,
+  stampante, grafo, vetrina, `SHOWCASE_AT`/`SITUATION_AT`/`GRAPH_AT` a y 10-12) sta a due caselle dal muro della porta, con
+  pulsanti e pedane attorno (nell'Ufficio dei luoghi è claustrofobico); gli scaffali hanno il bordo luminoso solo davanti;
+  le linee del pavimento (`grid`, `rgbOf(col, 0.25)` sul bloom) fanno nebbia; le strisce dei muri sono su tre lati (il muro
+  basso della porta non ne ha).
+- **T49a · togliere e attenuare**: via le tre postazioni davanti allo schermo della storia in ogni stanza (le squadre
+  lavorano altrove: le loro scrivanie tornano con T46c, solo nella Direzione, e senza celle bloccate inutili); il bordo
+  luminoso degli scaffali (teche dei file, dei modelli, dei campioni) gira su tutto il bordo superiore, come il tavolo della
+  situazione; linee del pavimento molto più tenui (misurare il bloom con e senza: nessun alone sopra la griglia); strisce dei
+  muri simmetriche. Test: nessuna voce `desk` fuori dalla Sala del Concilio; le celle davanti allo schermo sono libere.
+  Verifica nel browser: la Direzione inquadrata come in `direzione.png`, prima e dopo, e un'altra stanza per edificio.
+- **T49b · il dispositivo al centro**: il dispositivo di ogni stanza al centro, lontano dai muri (almeno tre caselle libere
+  su ogni lato, pulsanti e pedane compresi), gli scaffali del piano terra spostati di conseguenza (o i file del piano terra
+  ai piani sopra, se non ci stanno: decidere misurando la stanza più piena); la parete di schermi della Direzione (T46b)
+  resta contro la parete di fondo. Test: per ogni stanza con un dispositivo, il rettangolo che lo circonda (+3) è libero e
+  raggiungibile dalla porta; i test di T21-T28 e T46 ancora verdi (aggiornare le posizioni).
+- Fatto quando (per pezzo): test verdi, typecheck, verifica nel browser con le foto prima/dopo, commit.
+- Dipendenze: nessuna. T46c, T47, T48 dopo T49b (mettono apparecchi nelle stanze).
+- Domande per l'autore: nessuna (se il piano terra non tiene dispositivo e scaffali, la scelta è scritta nel task).
+
 ### T46 · La Direzione, dentro: la sala operativa — `in corso` (T46a e T46b fatti; il prossimo è T46c)
 - Contesto: [`corona-proposte.md`](corona-proposte.md) §3.1 (approvata il 23/10). Oggi dentro la Direzione (`universo`,
   squadra dell'Arbitro, oro `ffcf5c`) ci sono solo gli scaffali di `universe.json` e le scrivanie. Gli apparecchi seguono
@@ -501,7 +525,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   33,4 ms come nel Nucleo e nello Studio dei personaggi, `screens()` costa 0,04 ms. Lo schermo si misura dal piede (il bordo
   anteriore della sua cella): a pari distanza vinceva lo scaffale dietro. Budget come numeri di chiamate/forge (quelli di
   `universe.json` non sono dollari). Verifica: build + preview, `aurora` offline, i tre pannelli, «<» «>», nessun errore in console.
-- **T46c · allerta e postazioni**: una fascia luminosa sotto il soffitto verde/ambra/rossa (guasti aperti, rifiuti del
+- **T46c · allerta e postazioni** (dopo T49b): una fascia luminosa sotto il soffitto verde/ambra/rossa (guasti aperti, rifiuti del
   validatore nell'ultima ora, budget oltre l'80 %), il motivo nel pannello; le scrivanie della squadra dell'Arbitro in file
   davanti agli schermi, chi lavora nel registro si vede alla sua console. Test: i tre livelli dai tre casi.
 - Fatto quando (per pezzo): test verdi, typecheck, verifica nel browser (`aurora`, offline) con pannello e nessun errore.
@@ -568,6 +592,142 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   anima i modelli («mostra» li nascondeva: corpo spento, nessun fotogramma acceso). ModelDirector e «riscolpisci» non
   toccano già i `corona-*` (il primo fa solo i modelli che mancano, il secondo solo moduli e oggetti). Mancano `persone` (scritta da Gemini in `bdd198e`, nel lab: da portare nel gioco),
   `cose`, `oggetti`, `luoghi`, `sistemi`, `nucleo`, `concilio`, `universo`, `galleria`, `mondo` (schede del 23/10); per ognuno aggiungere l'id alla lista del test.
+
+### T50 · La corona personalizzata: il viale e gli esterni — `in attesa` (dipende da T31)
+- Contesto: richiesta del 24/10 («La corona»): le strutture sono rifatte (T19, T31 in corso), ma viale, vicoli e prati
+  (`groundAt`, `buildCoronaRing`) restano spogli e anonimi. L'autore vuole personalizzarli dopo che le strutture nuove sono
+  nel campus.
+- Fare (da precisare con l'autore): arredo del campus come modelli della libreria (`corona-*`, 8 voxel per casella come gli
+  edifici): lampioni al neon lungo il viale, panchine e cartelli nei vicoli, alberi o giardini di luce sui prati, insegne e
+  schermi pubblicitari dello studio; i membri del Concilio che camminano tra gli edifici quando lavorano.
+- Fatto quando: gli elementi scelti nel campus, collisione dai voxel, verifica di giorno e di notte, commit.
+- **Domande per l'autore**: che cosa vuoi vedere fuori (gli esempi sopra, altro)? Li scrive Gemini come le strutture (un
+  prompt come `gemini-strutture-corona.md`) o lo Scultore? Uno stile per settore (il colore dell'edificio) o uno solo?
+
+## Terreno, strutture e taglie
+
+Richieste del 24/10 ([`to-do-2026-10-24.md`](../userchats/to-do-2026-10-24.md), «Generazione della heightmap» e «taglia»).
+
+### T51 · Il livello del mare e un motore dell'acqua — `da fare` (si comincia da T51a; T51b in attesa della domanda)
+- Contesto: ADR-0048. Oggi ogni specchio d'acqua è piano **dentro il suo chunk** (`waterLevels` in `relief.ts`: al livello
+  più basso delle sue caselle, contando solo il chunk); lo stesso lago o fiume su due chunk ha due livelli, e laghi vicini
+  livelli diversi: a vista l'acqua ha dei dislivelli (si vede anche in `Blocchi.png`).
+- **T51a · il livello del mare**: un livello dell'acqua per il mondo (`universe.json → rilievo.mare`, o derivato dal rilievo
+  alla Genesi): il mare e ciò che lo tocca stanno lì, il terreno sotto viene scavato fino a lui con le sponde (si sale sempre,
+  come ora); laghi e fiumi interni hanno un livello per specchio **intero** (attraverso i chunk: lo specchio si segue fino
+  al bordo del mondo caricato, deterministico, cache per regione). Test: lo stesso specchio su due chunk ha un livello; due
+  chunk caricati in ordine diverso danno gli stessi livelli; nessuna casella d'acqua sopra la terra che la circonda.
+- **T51b · il motore dell'acqua** (ADR): l'acqua che scorre quando il terreno cambia (incantesimi che alzano o abbassano
+  il terreno, T57; «Altro…» che scava). Proposta: MarkovJunior resta per **generare** (rilievo, fiumi alla Genesi); per la
+  fisica un automa cellulare del kernel sui chunk caricati (quantità d'acqua per casella, scorre verso i vicini più bassi,
+  pochi passi al secondo, solo dove qualcosa è cambiato, si ferma quando è in equilibrio e salva il risultato nel piano
+  del luogo). Un programma MarkovJunior per tick su tutto il mondo caricato costerebbe troppo (ogni passo cerca le regole su
+  tutta la griglia e l'acqua non si ferma mai del tutto) ed è difficile da ottimizzare: possibile solo come regola locale
+  attorno al punto cambiato. Test: una conca scavata accanto a un lago si riempie e il lago si abbassa del giusto.
+- Fatto quando (per pezzo): test verdi, verifica nel browser su un lago tra due chunk, ADR-0048 aggiornato (T51a) o ADR
+  nuovo (T51b), commit.
+- **Domanda per l'autore**: va bene l'automa cellulare del kernel per la fisica dell'acqua (MarkovJunior solo per generare)?
+
+### T52 · I sotterranei — `in attesa` (decisione di progetto prima del codice)
+- Contesto: oggi niente sta sotto il livello del terreno (il rilievo è una colonna piena, i modelli stanno sul suolo,
+  `floorAt`). L'autore vuole i sotterranei (anche un edificio seminterrato nella corona, come la Sala sistemi).
+- **T52a · il progetto** (ADR, nessun codice): come esiste uno spazio sotto il terreno (un piano sotto il luogo come zona a
+  parte, tipo gli interni della corona, con scale/rampe che ci portano; oppure strutture che scendono sotto il suolo con il
+  terreno tagliato dal renderer come le strutture oggi); chi lo genera (il Cartografo: «sotterraneo» nel piano; lo Scultore:
+  un modello che scende sotto lo zero); come si vede (taglio sopra il viandante, luce); collisione e connettività (regola 10).
+  Poi spezzare in task di codice.
+- Dipendenze: T53a (le scale come rampe sono il modo di scendere).
+- **Domanda per l'autore**: sotterranei come luoghi a parte sotto il mondo (dungeon) o come parti sotterranee delle
+  strutture (cantine, cripte), o entrambi?
+
+### T53 · Le scale come rampe e le strutture su più piani — `da fare` (si comincia da T53a)
+- Contesto: richiesta del 24/10: le strutture devono essere navigabili appena generate; l'autore sceglie la seconda via
+  (la scala è una lastra inclinata, il viandante ci sale camminando), non «E → Sali». Oggi `floors()` in `src/mj/mesh.ts`
+  dà un'altezza per colonna di voxel e **solo** fino a un gradino (`h <= step`, oltre vale 0 e l'impronta blocca): una scala
+  più alta di un gradino è un muro, e un piano sopra un altro non esiste.
+- **T53a · la rampa**: si sale su una colonna se è più alta di quella su cui si sta **al più di un gradino** (non più
+  rispetto al suolo): una scala di gradini piccoli è una rampa e porta in alto; il viandante e le persone posano i piedi
+  sull'altezza (interpolata tra le colonne, come il rilievo); l'impronta blocca solo ciò che è più alto di un gradino
+  rispetto a dove si è. Test: una scala di prova (un programma con dieci gradini) si sale fino in cima e si scende; un muro
+  resta un muro; i modelli del seme (`grande`, `edificio`) restano attraversabili come prima.
+- **T53b · i piani**: più pavimenti per colonna (il piano terra sotto il soffitto, il primo piano sopra): `floors` dà una
+  lista di altezze, si sta su quella raggiunta salendo; il renderer taglia sopra il piano in cui si è (oggi taglia la
+  struttura a `1.15 + floorAt`). Test: una torre di prova a due piani con la scala si percorre fino al tetto.
+- Fatto quando (per pezzo): test verdi, verifica nel browser su una struttura generata con le scale, commit (ADR-0043
+  aggiornato).
+- Dipendenze: nessuna. Utile prima di T52 e di T56.
+
+### T54 · Le taglie di D&D per strutture e creature — `in attesa` (domande sotto)
+- Contesto: richiesta del 24/10. Oggi le classi (`CLASSES` in `src/mj/classes.ts`: `persona`, `animale`, `bestia`,
+  `edificio`, `grande`…) danno la scatola in caselle, e una struttura «importante» (Argon) per zona di 56 × 56 luoghi.
+  L'autore vuole riferirsi alla taglia di D&D: Minuscola, Piccola, Media, Grande, Enorme, Gargantuesca, più una ancora più
+  grande e più rara; il castello più grande di oggi è «Enorme».
+- Fare: un campo `taglia` per creature e strutture (manifest, piano del Cartografo, richieste allo Scultore), con la scatola
+  in caselle di ogni taglia (per le creature lo spazio di D&D: Media 1 casella, Grande 2 × 2, Enorme 3 × 3, Gargantuesca
+  4 × 4 o più; per le strutture una scala loro); la classe resta per la forma (persona, animale, edificio), la taglia dà le
+  misure; «importante» diventa la rarità delle taglie più grandi (Enorme per zona, Gargantuesca per regione, la settima per
+  mondo, da decidere); prompt di Cartografo, Narratore e Scultore; validatore. Test: una richiesta «Enorme» dà la scatola
+  giusta; la rarità per zona regge.
+- Fatto quando: test verdi, AGENTS.md e un ADR (sostituisce in parte ADR-0043 sulle importanti), commit.
+- **Domande per l'autore**: il nome della settima taglia (es. «Colossale», «Titanica»)? Le taglie delle strutture seguono
+  quelle delle creature (Media = una casa, Enorme = il castello) o una scala a parte? Quanto rare sono le ultime tre?
+
+## Controlli
+
+### T55 · La camera libera (orbita) nel gioco — `da fare`
+- Contesto: richiesta del 24/10: nel laboratorio (`/lab/3d/`) il tasto destro trascinato fa orbitare la camera e all'autore
+  piace; nel gioco la camera gira a quarti di giro (ADR-0047: `,` `.`, tasto centrale trascinato, `Input.turn`) e il tasto
+  destro apre il menu della casella (ADR-0029).
+- Fare: rotazione libera attorno al viandante (angolo continuo; anche l'inclinazione entro due limiti, se regge la
+  leggibilità) con il tasto centrale trascinato (il destro resta il menu); `,` `.` restano a quarti; l'input traduce le
+  direzioni dello schermo in quelle del mondo con l'angolo continuo (W va sempre in alto sullo schermo, il movimento del
+  kernel resta in coordinate del mondo); le cose che oggi presumono quarti di giro (taglio delle strutture, overlay 2D,
+  raggio del tasto destro, schermi inclinati della Direzione) controllate. Test: la traduzione delle direzioni per angoli
+  qualsiasi; la camera torna a un quarto con `,` `.`.
+- Fatto quando: test verdi, verifica nel browser (mondo, corona, studio), ADR-0047 aggiornato, commit.
+
+### T56 · Il salto, e le cose che chiudono i sentieri — `da fare` (si comincia da T56a)
+- Contesto: richiesta del 24/10 con `docs/userchats/Blocchi.png`: un sentiero largo una casella su un lago, con un banco,
+  una cassa e un letto messi sopra; i dislivelli piccoli si salgono già senza saltare (ADR-0048) e devono restare così.
+- **T56a · niente cose sui passaggi obbligati**: il piazzamento delle cose (`placeThings`/`placeInside`) non mette nulla di
+  solido su una casella la cui chiusura separerebbe il luogo (punto di articolazione del grafo delle caselle libere, varchi e
+  sentieri garantiti compresi); regola 10. Test: un luogo con un unico sentiero largo uno non ha cose solide sul sentiero.
+- **T56b · il salto**: un tasto (Spazio) fa saltare il viandante: supera un ostacolo alto fino a ~1 casella (le cose dei
+  mobili, una cassa, un gradino alto) se oltre c'è dove posare i piedi; arco visibile, ombra, niente salto nell'acqua
+  profonda né oltre i muri dei modelli più alti; nella corona nulla cambia. Test: il viandante salta una cassa su un
+  sentiero e non salta un muro; un dislivello di un livello si sale ancora camminando.
+- Fatto quando (per pezzo): test verdi, verifica nel browser (la scena di `Blocchi.png`), aiuto (`H`) e barra dei tasti
+  aggiornati per T56b, commit.
+- Dipendenze: T56b dopo T53a (l'altezza su cui si atterra è quella delle rampe).
+
+## Le rune
+
+### T57 · Le rune come codice: sequenze ordinate, effetti, rune nuove — `da fare` (si comincia da T57a)
+- Contesto: richiesta del 24/10 («Le rune»). L'esempio del seme `acqua fuoco` → «Vapore» (si annullano, un messaggio, in
+  `universe/modules/magic.runes/manifest.json`) non è l'idea: le rune sono come codice, una **sequenza ordinata** produce
+  un effetto specifico, e l'ordine conta (`aria terra` ≠ `terra aria`). Effetti come incantesimi di D&D (`terra fuoco` →
+  palla di fuoco 1, `terra fuoco fuoco` → palla di fuoco 2, `fuoco terra fuoco` → dardi infuocati 1, `acqua` → crea acqua)
+  o di terraformazione (`terra aria terra` → innalza il terreno, `aria terra aria` → abbassa il terreno). Gli effetti
+  **non** vanno nel kernel: Narratore, Fisico e Concilio devono sapere come generarli (gli esempi li guidano) e sapere di
+  poter inventare rune nuove (es. «sangue»).
+- **T57a · il Concilio sa comporre**: canone delle rune (`world/canone.md`, `canonSummary`) e prompt di Narratore, Fisico
+  e Arbitro: una sequenza è un programma, l'ordine conta, ripetere una runa rafforza, gli esempi sopra come guida (non come
+  lista); gli incantesimi nuovi nascono con effetti che agiscono sulla mappa e sulle persone (fuoco, spinte, terreno,
+  stati), validati come oggi; il seme perde «Vapore» per un esempio vero. La chiave delle combinazioni rispetta già l'ordine
+  (`seq.join(' ')` in `castSpell`, senza ordinare): resta così. Test offline: `terra aria` e `aria terra`
+  danno incantesimi diversi; il MockModels risponde con effetti diversi per ordini diversi.
+- **T57b · rune nuove dal Concilio**: una via per inventare una runa magica (nome, glifo, colore, cosa significa nel
+  canone) in una sessione del Concilio o quando una combinazione la chiede: modulo `magic.runes` riscritto, validatore
+  (glifo unico, nome non simile alle altre, niente meta-gioco), canone aggiornato; la runa compare nel mondo come le altre
+  (rare). Test: una runa nuova entra, è valida, si può raccogliere e combinare.
+- **T57c · il terreno che sale e scende**: per la terraformazione serve un effetto del kernel che cambi il **livello** delle
+  caselle (oggi `terreno` cambia il tipo di casella, non l'altezza): `rilievo {delta, raggio}` nell'insieme chiuso degli
+  effetti (ADR-0014), persistente come il terreno cambiato, con l'acqua che scorre se T51b c'è. È uno strumento, non un
+  incantesimo: quali sequenze lo usano lo decide il Concilio.
+- Fatto quando (per pezzo): test verdi, AGENTS.md (Magia) aggiornato, commit; ADR per T57b e T57c.
+- Dipendenze: T57c dopo T51a (livelli dell'acqua coerenti).
+- **Domanda per l'autore** (per T57c): va bene un effetto `rilievo` nel kernel come strumento generico (gli incantesimi
+  che lo usano restano del Concilio)?
 
 ## Multiplayer
 
