@@ -363,7 +363,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   un bordo al neon e un anello azzurro sotto l'universo; tutto nella mesh della stanza. Nel browser (offline): un pezzo
   solo, senza buchi. Diverso dal previsto: nessun modello MarkovJunior (bastano le quad del `Builder`), nessun ADR.
 
-### T26 · L'Ufficio dei luoghi, dentro — `in attesa`
+### T26 · L'Ufficio dei luoghi, dentro — `da fare` (si comincia da T26a)
 - Da progettare in funzione di come lavora il Cartografo (piani, lotti, atlante). **Proposta all'autore** prima
   di costruire.
 - Proposta scritta il 23/10/2026: [`corona-proposte.md`](corona-proposte.md) §1 — **il plastico**: un tavolo olografico
@@ -371,9 +371,9 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   (bozza, varchi, ambiente, sentieri, lotti e strutture, cose e rune), pannello con il piano; l'atlante e i terreni dello
   Studio del Cartografo qui. Pezzi: T26a plastico, T26b fasi, T26c unione con lo Studio del Cartografo.
 - **Domande per l'autore**: unire lo Studio del Cartografo all'Ufficio dei luoghi? Le sei fasi, o basta il plastico finito?
-- Deciso (23/10): **unire** lo Studio del Cartografo all'Ufficio dei luoghi (T26c).
+- Deciso (23/10): **unire** lo Studio del Cartografo all'Ufficio dei luoghi (T26c); plastico **e** sei fasi approvati.
 
-### T27 · La Sala sistemi, dentro — `in attesa`
+### T27 · La Sala sistemi, dentro — `da fare` (si comincia da T27a)
 - L'autore chiede un aiuto: far apprezzare la complessità del codice con esempi (cosa fa un sistema, casi d'uso).
   **Proposta all'autore** (es. ogni sistema come un «caso» animato: prima, regola, dopo).
 - Proposta scritta il 23/10/2026: [`corona-proposte.md`](corona-proposte.md) §2 — **la catena** (ogni sistema una
