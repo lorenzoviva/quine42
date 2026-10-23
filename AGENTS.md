@@ -213,8 +213,9 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 - **Menu delle caselle** (ADR-0029): `E`/clic destro su una casella → azioni dell'entità, della casella, «Altro…»;
   le azioni libere ripetibili si imparano per tipo di terreno (`TileDef.actions`). Le `<action>` del modello di una
   cosa sono voci del suo menu (`modello:<nome>`), anche quelle nate da «Altro…» (ADR-0044).
-- **Il mondo in 3D** (ADR-0040): three.js, camera fissa in 3/4 da sud (il nord è in alto, come vuole il movimento del
-  kernel), un'unità = una casella, kernel (x, y) = three.js (x, z). La simulazione (chunk, cose, rune) è in coordinate del
+- **Il mondo in 3D** (ADR-0040, 0047): three.js, camera in 3/4 da sud che gira a quarti di giro (`,` `.`, o
+  trascinando col tasto centrale: `Input.turn`); l'input traduce le direzioni dello schermo in quelle del mondo, così il
+  movimento del kernel resta in coordinate del mondo e `W` va sempre in alto; un'unità = una casella, kernel (x, y) = three.js (x, z). La simulazione (chunk, cose, rune) è in coordinate del
   tappeto e si disegna spostata del suo scorrimento; viandante, corona e studio in coordinate reali; quando la corona si
   vede, nulla della simulazione si disegna oltre il cerchio (un taglio nello shader). Testi, fumetti, «E», passaggio del
   mouse e glitch su uno strato 2D sopra. Il tasto destro sceglie la casella con un raggio sul terreno.
@@ -346,7 +347,7 @@ giudice; lotti come strutture girate verso la porta, una struttura importante pe
 Prossimi passi (il dettaglio è nel backlog):
 1. Coerenza del mondo: canone delle rune, prompt narrativi più semplici, società e trame coerenti, il grafo del
    mondo come contesto degli agenti (T07-T13, fatti).
-2. Grafica e controlli 3D: voxel luminosi (T14, fatto), telecamera che ruota, terreno con le altezze (Hills), lotti in piano.
+2. Grafica e controlli 3D: voxel luminosi (T14, fatto), telecamera che ruota (T15, fatto), terreno con le altezze (Hills), lotti in piano.
 3. La corona più grande, con gli esterni e gli interni come modelli.
 4. Ancore del piano («vicino a…»), forme degli oggetti portati e dei terreni che cambiano con «Altro…».
 5. Multiplayer con un master: piano e punti aperti in [`docs/plans/multiplayer.md`](docs/plans/multiplayer.md).

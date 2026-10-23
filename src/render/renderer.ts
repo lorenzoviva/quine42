@@ -1,5 +1,5 @@
-// The 3D renderer (step 9, ADR-0040): three.js, a fixed camera in 3/4 from the south (north is up on
-// screen, as the kernel's movement expects), HUD and panels above it in the DOM, text on a 2D overlay.
+// The 3D renderer (step 9, ADR-0040): three.js, a camera in 3/4 from the south that turns by quarter turns
+// (ADR-0047: the input turns the keys with it), HUD and panels above it in the DOM, text on a 2D overlay.
 //
 // Spaces (ADR-0004): the simulation — chunks, things, runes — lives in carpet coordinates and is drawn
 // shifted by the carpet's offset; the wanderer, the corona and the studio are in real space. Kernel
@@ -23,6 +23,10 @@ export class Renderer {
   mouse: { x: number; y: number } | null = null;
   /** Distance of the camera from the wanderer, in tiles. */
   distance = 15;
+  /** The camera's angle around the wanderer (0 = from the south; it follows `input.turn`). */
+  yaw = 0;
+  /** While the middle button drags: the angle under the mouse. */
+  private drag?: { x: number; yaw: number };
 
   private gl: THREE.WebGLRenderer;
   private bloom: Bloom;
@@ -110,8 +114,30 @@ export class Renderer {
     this.camera.aspect = this.w / this.h;
     this.camera.updateProjectionMatrix();
     this.overlay.resize(this.w, this.h, dpr);
-    // What the kernel loads around the wanderer: what the camera sees, with the far side of the 3/4 view.
-    this.kernel.view = { w: Math.ceil(this.distance * 2.4 * Math.max(1, this.camera.aspect)), h: Math.ceil(this.distance * 2.2) };
+    this.fitView();
+  }
+
+  /** What the kernel loads around the wanderer: what the camera sees, with the far side of the 3/4 view; turned with the camera. */
+  fitView(): void {
+    const across = Math.ceil(this.distance * 2.4 * Math.max(1, this.camera.aspect));
+    const deep = Math.ceil(this.distance * 2.2);
+    const side = this.kernel.input.turn % 2 === 1;
+    this.kernel.view = { w: side ? deep : across, h: side ? across : deep };
+  }
+
+  /** Middle-button drag: the camera follows the mouse, the keys follow the nearest quarter turn, and on release it settles there. */
+  dragStart(x: number): void {
+    this.drag = { x, yaw: this.yaw };
+  }
+
+  dragMove(x: number): void {
+    if (!this.drag) return;
+    this.yaw = this.drag.yaw - ((x - this.drag.x) / Math.max(1, this.w)) * Math.PI * 1.5;
+    this.kernel.input.setTurn(Math.round(this.yaw / (Math.PI / 2)));
+  }
+
+  dragEnd(): void {
+    this.drag = undefined;
   }
 
   /** Screen → real-space point on the ground. */
@@ -196,10 +222,16 @@ export class Renderer {
     this.lights.update(k, studio ? 0 : night, { ox, oy }, this.t);
     this.flash.intensity = this.flashUntil > this.t ? 6 * ((this.flashUntil - this.t) / 0.6) : 0;
 
-    // The camera follows the wanderer, from the south, above.
+    // The camera follows the wanderer, from above, turned by the quarter turns of the input (the shortest way round).
     this.target.lerp(new THREE.Vector3(p.x, 0.6, p.y), Math.min(1, dt * 8));
     if (this.target.distanceTo(new THREE.Vector3(p.x, 0.6, p.y)) > 30) this.target.set(p.x, 0.6, p.y);
-    this.camera.position.set(this.target.x, this.target.y + Math.sin(PITCH) * this.distance, this.target.z + Math.cos(PITCH) * this.distance);
+    if (!this.drag) {
+      const goal = (k.input.turn * Math.PI) / 2;
+      const off = Math.atan2(Math.sin(goal - this.yaw), Math.cos(goal - this.yaw));
+      this.yaw = Math.abs(off) < 0.001 ? goal : this.yaw + off * Math.min(1, dt * 9);
+    }
+    const flat = Math.cos(PITCH) * this.distance;
+    this.camera.position.set(this.target.x + Math.sin(this.yaw) * flat, this.target.y + Math.sin(PITCH) * this.distance, this.target.z + Math.cos(this.yaw) * flat);
     if (g > 0.2) this.camera.position.x += (Math.random() - 0.5) * 0.15 * g;
     this.camera.lookAt(this.target);
     this.sun.position.copy(this.target).add(new THREE.Vector3(-14, 24, 10));

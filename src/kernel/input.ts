@@ -33,8 +33,14 @@ const PRESS: Record<string, Action> = {
   Digit1: 'hot1', Digit2: 'hot2', Digit3: 'hot3', Digit4: 'hot4', Digit5: 'hot5', Digit6: 'hot6',
 };
 
+/** Directions in clockwise order: screen directions and world directions share it (ADR-0047). */
+const DIRS = ['up', 'right', 'down', 'left'] as const;
+
 export class Input {
   private held = new Set<Action>();
+  /** Quarter turns of the camera (0 = from the south, 1 = from the east, …): the keys are relative to the screen. */
+  turn = 0;
+  onTurn?: (turn: number) => void;
   private queue: Action[] = [];
   /** When false (an overlay has focus), game actions are ignored. */
   enabled = true;
@@ -47,6 +53,11 @@ export class Input {
       this.onAny?.();
       const always = e.code === 'F1' || e.code === 'F2' || e.code === 'Escape' || (this.inventoryOpen && (e.code === 'KeyI' || e.code === 'Tab'));
       if (!this.enabled && !always) return;
+      if ((e.code === 'Comma' || e.code === 'Period') && !e.repeat) {
+        this.rotate(e.code === 'Comma' ? 1 : -1);
+        e.preventDefault();
+        return;
+      }
       const hold = HOLD[e.code];
       if (hold) {
         this.held.add(hold);
@@ -68,8 +79,24 @@ export class Input {
     target.addEventListener('blur', () => this.held.clear());
   }
 
+  /** Whether an action is held; a world direction is held when the screen direction that points to it is. */
   isHeld(action: string): boolean {
-    return this.enabled && this.held.has(action as Action);
+    if (!this.enabled) return false;
+    const d = DIRS.indexOf(action as (typeof DIRS)[number]);
+    if (d < 0) return this.held.has(action as Action);
+    return this.held.has(DIRS[(d + this.turn) % 4]);
+  }
+
+  /** Turns the camera by quarter turns (positive: it goes round counterclockwise, seen from above). */
+  rotate(by: number): void {
+    this.setTurn(this.turn + by);
+  }
+
+  setTurn(turn: number): void {
+    const t = (((Math.round(turn) % 4) + 4) % 4) || 0;
+    if (t === this.turn) return;
+    this.turn = t;
+    this.onTurn?.(t);
   }
 
   /** Programmatic hold (tests, touch controls). */

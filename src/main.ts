@@ -97,6 +97,15 @@ async function main() {
     const r = renderer.toReal(e.offsetX, e.offsetY);
     kernel.contextAt(r.x, r.y);
   });
+  // The camera turns by quarter turns (, and .) or with the middle button dragged (ADR-0047).
+  kernel.input.onTurn = () => renderer.fitView();
+  $<HTMLCanvasElement>('#world').addEventListener('mousedown', (e) => {
+    if (e.button !== 1) return;
+    e.preventDefault();
+    renderer.dragStart(e.clientX);
+  });
+  window.addEventListener('mousemove', (e) => renderer.dragMove(e.clientX));
+  window.addEventListener('mouseup', (e) => e.button === 1 && renderer.dragEnd());
   const atlas = new AtlasPanel(kernel);
   // Death: the session ends; continue in the same universe or start again from the seed.
   const deathEl = $('#death');
