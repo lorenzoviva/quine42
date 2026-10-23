@@ -287,7 +287,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   casella** (la sandbox lo regge già: un cilindro 112 × 112 × 160 gira in ~250 ms); la porta è la lettera `name="porta"`.
   Nessun ADR: la decisione la attua (e la registra) T20.
 
-### T20 · Gli esterni della corona come modelli — `fatto` (COMMIT)
+### T20 · Gli esterni della corona come modelli — `fatto` (`40435ef`)
 - Ogni edificio della corona usa il suo programma (`models/corona-<id>.xml`) con insegna neon; collisione dai
   voxel; porta dove il modello la mette.
 - Dai programmi di T19 (in `lab/mjx/models/corona-*.xml`): la libreria deve avere una densità per modello (quelli della
