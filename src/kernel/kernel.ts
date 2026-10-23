@@ -2767,6 +2767,9 @@ export class Kernel {
       case 'atlas':
         this.bus.emit('ui:atlas', {});
         return;
+      case 'grafo':
+        this.bus.emit('ui:graph', {});
+        return;
       case 'showcase':
         this.openShowcase(it.target!);
         return;
@@ -2804,13 +2807,13 @@ export class Kernel {
   }
 
   /**
-   * A left click in the studio (T21): on a showcase or its arrows, within reach, the same as E there.
+   * A left click in the studio (T21): on a showcase or its arrows, or on the Nucleus's graph (T28), within reach, the same as E there.
    * The click falls on the ground, often behind something tall: the nearest of them to that point counts.
    * Returns whether it did something.
    */
   clickStudio(rx: number, ry: number): boolean {
     if (this.zone !== 'studio') return false;
-    const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next']);
+    const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next', 'grafo']);
     if (!it) return false;
     const p = this.playerPos();
     const c = cellNear(it, p.x, p.y);
@@ -2818,7 +2821,8 @@ export class Kernel {
       this.message('Troppo lontano: avvicinati.');
       return false;
     }
-    if (it.kind === 'showcase') this.openShowcase(it.target!);
+    if (it.kind === 'grafo') this.bus.emit('ui:graph', {});
+    else if (it.kind === 'showcase') this.openShowcase(it.target!);
     else this.stepShowcase(it.target!, it.kind === 'prev' ? -1 : 1);
     return true;
   }

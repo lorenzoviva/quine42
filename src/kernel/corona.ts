@@ -10,7 +10,7 @@ import { footBlocks, toLocal, type Form } from './forms';
 import type { FileMap } from './types';
 
 export type FileLook = 'libro' | 'cristallo' | 'pergamena' | 'tavoletta';
-export type ItemKind = 'file' | 'sprite' | 'tile' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next';
+export type ItemKind = 'file' | 'sprite' | 'tile' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'grafo';
 /** What a showcase shows (T21): the runes and spells, the people, the things, the objects of the packs. */
 export type ShowcaseSource = 'rune' | 'persone' | 'cose' | 'oggetti';
 /** How a showcase looks: a screen, a silo of liquid, a 3D printer. */
@@ -32,6 +32,11 @@ export const SHOWCASES: Record<string, { source: ShowcaseSource; device: Showcas
  */
 export const SHOWCASE_AT = { x: 15, y: 11, w: 3 };
 export const PRINTER = 3;
+/**
+ * The Nucleus's graph of the world (T28): a pedestal with the graph turning above it, where the other buildings have
+ * their showcase; E or a click opens it, navigable (src/ui/graph.ts).
+ */
+export const GRAPH_AT = { x: 15, y: 10, w: 3, h: 3 };
 
 /** The cell of a (wide or deep) studio item nearest to a point: distances are measured from it. */
 export function cellNear(it: StudioItem, x: number, y: number): { x: number; y: number } {
@@ -292,6 +297,7 @@ export class Corona {
           for (let d = 0; d < 3; d++) placed.push({ kind: 'desk', label: 'postazione', x: ox + 4 + d * 2, y: oy + ROOM_H - 4 });
           placed.push({ kind: 'portal', label: 'teletrasporto: Sala del Concilio', target: 'concilio', x: ox + ROOM_W - 3, y: oy + ROOM_H - 3 });
           if (id === 'cartografia') placed.push({ kind: 'atlas', label: "l'atlante del mondo", x: ox + ROOM_W - 7, y: oy + ROOM_H - 3, w: 3 });
+          if (id === 'nucleo') placed.push({ kind: 'grafo', label: 'il grafo del mondo', ...GRAPH_AT, x: ox + GRAPH_AT.x, y: oy + GRAPH_AT.y });
           const show = SHOWCASES[id];
           if (show) {
             const { x, y, w } = SHOWCASE_AT;

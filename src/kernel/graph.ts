@@ -37,6 +37,55 @@ export type EdgeType =
   | 'riguarda' // regola → tipo, oggetto
   | 'cita'; // fatto → persona, luogo, regione
 
+/** How the Nucleus shows the graph (T28): a colour for each kind of node, a name for each kind of edge. */
+export const NODE_COLOR: Record<NodeType, string> = {
+  persona: '#ffb38a',
+  tipo: '#d89a6a',
+  luogo: '#7dd87d',
+  regione: '#3fa35f',
+  ambiente: '#9ad27a',
+  struttura: '#c8b27a',
+  trama: '#ff8ad8',
+  oggetto: '#e0b070',
+  ricetta: '#f0d890',
+  runa: '#c48aff',
+  incantesimo: '#9a6aff',
+  regola: '#ffcf5c',
+  fatto: '#6fc3ff',
+};
+export const NODE_NAME: Record<NodeType, string> = {
+  persona: 'persone',
+  tipo: 'tipi',
+  luogo: 'luoghi',
+  regione: 'regioni',
+  ambiente: 'ambienti',
+  struttura: 'strutture',
+  trama: 'trame',
+  oggetto: 'oggetti',
+  ricetta: 'ricette',
+  runa: 'rune',
+  incantesimo: 'incantesimi',
+  regola: 'regole',
+  fatto: 'fatti',
+};
+export const EDGE_NAME: Record<EdgeType, string> = {
+  legame: 'legame',
+  e_un: 'è un',
+  abita: 'abita a',
+  lavora: 'lavora a',
+  porta: 'porta',
+  coinvolge: 'coinvolge',
+  tappa: 'tappa a',
+  in_regione: 'nella regione',
+  ambiente: 'ambiente',
+  contiene: 'contiene',
+  ingrediente: 'ingrediente',
+  produce: 'produce',
+  usa: 'usa la runa',
+  riguarda: 'riguarda',
+  cita: 'cita',
+};
+
 export interface GraphNode {
   id: string;
   label: string;

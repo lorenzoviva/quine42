@@ -371,8 +371,21 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 - L'autore chiede un aiuto: far apprezzare la complessità del codice con esempi (cosa fa un sistema, casi d'uso).
   **Proposta all'autore** (es. ogni sistema come un «caso» animato: prima, regola, dopo).
 
-### T28 · Il Nucleo, dentro — `da fare` (dipende da T12)
+### T28 · Il Nucleo, dentro — `fatto` (COMMIT) (dipende da T12)
 - Il grafo del mondo navigabile in UI.
+- Esito: `corona.ts`: voce `grafo` (3 × 3, `GRAPH_AT`, dove gli altri edifici hanno la vetrina) al piano terra del Nucleo;
+  `kernel.ts`: E o un clic (`clickStudio`) → `ui:graph`. `src/ui/graphlayout.ts`: `ForceLayout` senza DOM (molle sugli archi,
+  repulsione entro 2.5 spaziature con una griglia, gravità debole; parte da una spirale con i nodi più connessi al centro;
+  deterministico). `src/ui/graph.ts` (`GraphPanel`): tutto il grafo sul canvas, colorato per tipo (`NODE_COLOR`, `NODE_NAME`,
+  `EDGE_NAME` in `graph.ts`), ciò che `check()` trova cerchiato di rosso e in elenco quando nulla è scelto; trascina/frecce,
+  rotella/+/- verso il mouse; ricerca per nome (`find`, Invio sceglie il primo); legenda che nasconde i tipi; il nodo scelto
+  con `describe`, attributi, file («Apri il file») e archi cliccabili; doppio clic o «Vicinato»: solo i nodi a due passi,
+  disposti di nuovo, e il vicinato segue il nodo scelto. `corona3d.ts`: piedistallo e ologramma che gira (i 120 nodi più
+  connessi su una sfera, voxel luminosi nel colore del tipo, archi come linee). `tests/nucleus.test.ts` (5). Nel browser
+  (`aurora`, offline): 362 nodi, 597 archi; ricerca «Agnese», vicinato, Berta, il file, Esc; nessun errore. Misure: 1838 nodi di
+  `valmora` in ~0.6 s in Node (nel browser a 6 passi per fotogramma, chiude con l'inquadratura). Diverso dal previsto: è il
+  grafo **del mondo** (ADR-0045), non quello di Graphify sul codice (che non gira nel browser); con la luce piena l'ologramma
+  era una palla abbagliante, quindi voxel piccoli a metà intensità; nessun ADR (interno della corona, come T21-T24).
 
 ### T31 · Gli otto edifici della corona nella libreria — `in attesa` (dipende da T20 e dai programmi di T19)
 - Contesto: T20 ha fatto il motore (ADR-0049); mancano i programmi. **Per l'autore**: esegui il prompt di

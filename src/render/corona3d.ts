@@ -11,6 +11,7 @@ import type { Kernel, ShowcaseEntry } from '../kernel/kernel';
 import { CAMPUS, ROOM_H, ROOM_W, type Building, type Floor, type StudioItem } from '../kernel/corona';
 import { Builder } from './terrain';
 import { MAT, rgbOf } from './materials';
+import { NODE_COLOR } from '../kernel/graph';
 import { geoOf } from './models';
 
 const TOWER_H = 4.5;
@@ -181,6 +182,13 @@ export function buildRoom(k: Kernel, building: Building, floor: Floor): { group:
     m.castShadow = true;
     group.add(m);
   }
+  // The Nucleus's graph of the world (T28), turning above its pedestal.
+  const graph = floor.items.find((i) => i.kind === 'grafo');
+  if (graph) {
+    globe = graphHologram(k);
+    globe.position.set(graph.x + (graph.w ?? 1) / 2, 1.9, graph.y + (graph.h ?? 1) / 2);
+    group.add(globe);
+  }
   // The universe turning above the Council's table.
   const table = floor.items.find((i) => i.kind === 'table');
   if (table) {
@@ -189,6 +197,41 @@ export function buildRoom(k: Kernel, building: Building, floor: Floor): { group:
     group.add(globe);
   }
   return { group, globe };
+}
+
+/**
+ * The graph of the world as a hologram (T28): its most connected nodes on a sphere, each a glowing voxel in the colour
+ * of its kind (the hubs bigger), the edges among them as faint lines.
+ */
+function graphHologram(k: Kernel): THREE.Group {
+  const g = k.graph();
+  const degree = new Map<string, number>();
+  for (const l of g.links) for (const id of [l.source, l.target]) degree.set(id, (degree.get(id) ?? 0) + 1);
+  const nodes = [...g.nodes.values()].sort((a, b) => (degree.get(b.id) ?? 0) - (degree.get(a.id) ?? 0)).slice(0, 120);
+  const at = new Map<string, number[]>();
+  const golden = Math.PI * (3 - Math.sqrt(5));
+  const R = 1.15;
+  const glow = new Builder();
+  nodes.forEach((n, i) => {
+    const y = 1 - ((i + 0.5) / nodes.length) * 2, r = Math.sqrt(1 - y * y), t = i * golden;
+    const p = [Math.cos(t) * r * R, y * R, Math.sin(t) * r * R];
+    at.set(n.id, p);
+    const h = 0.022 + Math.min(0.035, Math.sqrt(degree.get(n.id) ?? 0) * 0.007);
+    glow.box(p[0] - h, p[1] - h, p[2] - h, p[0] + h, p[1] + h, p[2] + h, rgbOf(NODE_COLOR[n.tipo], 0.45));
+  });
+  const lines: number[] = [];
+  for (const l of g.links) {
+    const a = at.get(l.source), b = at.get(l.target);
+    if (a && b) lines.push(...a, ...b);
+  }
+  const group = new THREE.Group();
+  group.add(new THREE.Mesh(glow.geometry(), MAT.glow));
+  if (lines.length) {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(lines, 3));
+    group.add(new THREE.LineSegments(geo, new THREE.LineBasicMaterial({ color: '#6fc3ff', transparent: true, opacity: 0.25 })));
+  }
+  return group;
 }
 
 /** A quad wound so that its front faces along n (the builders draw one side). */
@@ -253,6 +296,16 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
       const w = it.w ?? 1;
       lit.box(x, 0, z + 0.4, x + w, 1.25, z + 0.6, rgbOf('#0c0c16'));
       glow.box(x + 0.05, 0.2, z + 0.38, x + w - 0.05, 1.15, z + 0.4, rgbOf(col, 0.45));
+      break;
+    }
+    case 'grafo': {
+      // A pedestal of dark metal under the hologram, with rings of light.
+      const w = it.w ?? 1, d = it.h ?? 1, cx = x + w / 2, cz = z + d / 2;
+      lit.box(cx - 1.2, 0, cz - 1.2, cx + 1.2, 0.18, cz + 1.2, rgbOf('#10101a'));
+      lit.box(cx - 0.8, 0.18, cz - 0.8, cx + 0.8, 0.42, cz + 0.8, rgbOf('#161a28'));
+      glow.box(cx - 0.8, 0.4, cz - 0.82, cx + 0.8, 0.44, cz - 0.78, rgbOf(col, 0.5));
+      glow.box(cx - 0.8, 0.4, cz + 0.78, cx + 0.8, 0.44, cz + 0.82, rgbOf(col, 0.5));
+      glow.box(cx - 1.22, 0.14, cz + 1.18, cx + 1.22, 0.18, cz + 1.22, rgbOf(col, 0.4));
       break;
     }
     case 'atlas':
