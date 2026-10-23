@@ -343,7 +343,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   (+1). Nel browser (offline): 13 voci (2 tipi, 11 individui), Ottone che fluttua nel liquido, pannello con foto, individuo e
   modulo. Diverso dal previsto: il tipo resta una voce a sé, prima dei suoi individui; nessun ADR.
 
-### T24 · Laboratorio delle cose e Magazzino degli oggetti, dentro — `fatto` (`5a5a3c8`) (dipende da T21)
+### T24 · Laboratorio delle cose e Magazzino degli oggetti, dentro — `fatto` (`5a5a3c8`)
 - Una stampante 3D di 3 × 3 caselle con l'oggetto scelto sulla casella centrale (le strutture ridotte alla scala
   di una casella); «<» «>»; il clic mostra le informazioni.
 - Esito: `corona.ts`: `StudioItem.h` (profondità in caselle), `PRINTER = 3`; la vetrina `stampante` è 3 × 3 (righe 10-12),
