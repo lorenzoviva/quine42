@@ -343,9 +343,18 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   (+1). Nel browser (offline): 13 voci (2 tipi, 11 individui), Ottone che fluttua nel liquido, pannello con foto, individuo e
   modulo. Diverso dal previsto: il tipo resta una voce a sé, prima dei suoi individui; nessun ADR.
 
-### T24 · Laboratorio delle cose e Magazzino degli oggetti, dentro — `da fare` (dipende da T21)
+### T24 · Laboratorio delle cose e Magazzino degli oggetti, dentro — `fatto` (`5a5a3c8`) (dipende da T21)
 - Una stampante 3D di 3 × 3 caselle con l'oggetto scelto sulla casella centrale (le strutture ridotte alla scala
   di una casella); «<» «>»; il clic mostra le informazioni.
+- Esito: `corona.ts`: `StudioItem.h` (profondità in caselle), `PRINTER = 3`; la vetrina `stampante` è 3 × 3 (righe 10-12),
+  le frecce sulla riga di mezzo (11, come prima), la riga 13 resta libera; `at` conta le righe, `cellNear` (la casella
+  più vicina di una cosa larga o profonda) per `itemNear`, `clickStudio` e il riquadro dell'overlay. `corona3d.ts`: la
+  stampante con quattro montanti, telaio, ponte con la testina sopra la casella centrale, un letto di nove piastrelle scure
+  e la centrale contornata di luce; la cosa sta sulla casella centrale, adattata a una casella (0.9 × 1.8: il pozzo e le
+  strutture si riducono, le cose piccole crescono al più di 1.5). `tests/showcase.test.ts` (+1, e il primo test conta le
+  righe). Nel browser (offline): banco e pozzo sulla casella centrale, clic sulla casella centrale → pannello
+  «Acciarino» (1 di 36), nessun errore. Diverso dal previsto: il letto tutto luminoso nascondeva la cosa sotto il bagliore,
+  quindi solo la casella centrale brilla (il contorno); nessun ADR.
 
 ### T25 · La Sala del Concilio: il tavolo unito — `fatto` (`aa4d322`)
 - Il tavolo è fatto di cubi separati: farne un ellissoide unico (un modello o una mesh sola).
