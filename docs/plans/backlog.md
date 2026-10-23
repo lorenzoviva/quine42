@@ -371,6 +371,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   (bozza, varchi, ambiente, sentieri, lotti e strutture, cose e rune), pannello con il piano; l'atlante e i terreni dello
   Studio del Cartografo qui. Pezzi: T26a plastico, T26b fasi, T26c unione con lo Studio del Cartografo.
 - **Domande per l'autore**: unire lo Studio del Cartografo all'Ufficio dei luoghi? Le sei fasi, o basta il plastico finito?
+- Deciso (23/10): **unire** lo Studio del Cartografo all'Ufficio dei luoghi (T26c).
 
 ### T27 · La Sala sistemi, dentro — `in attesa`
 - L'autore chiede un aiuto: far apprezzare la complessità del codice con esempi (cosa fa un sistema, casi d'uso).
@@ -381,6 +382,8 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   forgiati.
 - **Domande per l'autore**: il caso con il codice vero (un kernel in miniatura nella teca: proposta) o raccontato? Le
   meccaniche (`mech.*`, oggi nell'Archivio) vanno nella Sala sistemi?
+- Deciso (23/10): il caso con il **codice vero** (kernel in miniatura nella teca); le meccaniche `mech.*` vanno nella
+  **Sala sistemi** (l'Archivio resta riserva).
 
 ### T32 · Gli edifici dimenticati: Direzione, Biblioteca, Galleria, Archivio — `in attesa`
 - Contesto: nel seme il campus ha 12 edifici (13 con l'Archivio, dove oggi finiscono le meccaniche `mech.*`); le
