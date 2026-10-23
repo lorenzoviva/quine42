@@ -241,7 +241,7 @@ Dal to-do (testo completo, con le specifiche di ogni edificio, in
 [`docs/userchats/to-do-2026-10-22.md`](../userchats/to-do-2026-10-22.md)): la corona più grande, ogni edificio con un esterno e un interno neon-punk propri; dentro e fuori
 restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano ridondanti.
 
-### T18 · Corona quattro volte più grande — `fatto`
+### T18 · Corona quattro volte più grande — `fatto` (`151549f`)
 - Raggio del campus ×4 (il cerchio della simulazione no), edifici ridisposti sull'anello, viale, insegne. Test
   dello studio aggiornati.
 - Esito: `CAMPUS` in `src/kernel/corona.ts`: l'anello va da 9 a 36 caselle oltre il cerchio (`outer` = R + 36 = 80); viale
