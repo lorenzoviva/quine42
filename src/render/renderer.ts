@@ -83,7 +83,7 @@ export class Renderer {
     kernel.bus.on('universe:reloaded', () => this.reset());
     kernel.bus.on('spell:cast', ({ at }: { at: { x: number; y: number } }) => {
       const { ox, oy } = kernel.offset();
-      this.flash.position.set(at.x - ox, 1, at.y - oy);
+      this.flash.position.set(at.x - ox, kernel.groundAt(at.x, at.y) + 1, at.y - oy);
       this.flashUntil = this.t + 0.6;
     });
     canvas.addEventListener('mousemove', (e) => (this.mouse = { x: e.offsetX, y: e.offsetY }));
@@ -140,11 +140,26 @@ export class Renderer {
     this.drag = undefined;
   }
 
-  /** Screen → real-space point on the ground. */
+  /** The height of the ground at a real-space point: the relief in the simulation, flat in the corona. */
+  groundReal(x: number, y: number): number {
+    const k = this.kernel;
+    if (k.corona.isInterior(x) || (k.coronaRevealed() && Math.hypot(x, y) >= k.config.circleRadius)) return 0;
+    const { ox, oy } = k.offset();
+    return k.groundAt(x + ox, y + oy);
+  }
+
+  /** Screen → real-space point on the ground: the ray meets the plane of the ground where it lands, a few times over (the relief). */
   toReal(sx: number, sy: number): { x: number; y: number } {
     this.ray.setFromCamera(new THREE.Vector2((sx / this.w) * 2 - 1, -(sy / this.h) * 2 + 1), this.camera);
     const hit = new THREE.Vector3();
-    if (!this.ray.ray.intersectPlane(this.ground, hit)) return { ...this.kernel.playerPos() };
+    const p = this.kernel.playerPos();
+    this.ground.constant = -this.groundReal(p.x, p.y);
+    for (let i = 0; i < 4; i++) {
+      if (!this.ray.ray.intersectPlane(this.ground, hit)) return { ...p };
+      const h = this.groundReal(hit.x, hit.z);
+      if (Math.abs(h + this.ground.constant) < 1e-6) break;
+      this.ground.constant = -h;
+    }
     return { x: hit.x, y: hit.z };
   }
 
@@ -223,8 +238,10 @@ export class Renderer {
     this.flash.intensity = this.flashUntil > this.t ? 6 * ((this.flashUntil - this.t) / 0.6) : 0;
 
     // The camera follows the wanderer, from above, turned by the quarter turns of the input (the shortest way round).
-    this.target.lerp(new THREE.Vector3(p.x, 0.6, p.y), Math.min(1, dt * 8));
-    if (this.target.distanceTo(new THREE.Vector3(p.x, 0.6, p.y)) > 30) this.target.set(p.x, 0.6, p.y);
+    // It looks at the wanderer's middle, up and down the hills with it.
+    const aim = new THREE.Vector3(p.x, this.wanderer.view.root.position.y + 0.6, p.y);
+    this.target.lerp(aim, Math.min(1, dt * 8));
+    if (this.target.distanceTo(aim) > 30) this.target.copy(aim);
     if (!this.drag) {
       const goal = (k.input.turn * Math.PI) / 2;
       const off = Math.atan2(Math.sin(goal - this.yaw), Math.cos(goal - this.yaw));
@@ -274,17 +291,17 @@ export class Renderer {
       if (this.showWalk) o.walkability(k);
       for (const [id, b] of k.bubbles) {
         const p = k.ecs.get(id, 'pos');
-        if (p) o.bubble(p.x - ox, 1.9, p.y - oy, b.text);
+        if (p) o.bubble(p.x - ox, k.floorAt(p.x, p.y) + 1.9, p.y - oy, b.text);
       }
       for (const id of k.ecs.query('attivita', 'pos')) {
         const a = k.ecs.get(id, 'attivita');
         const p = k.ecs.get(id, 'pos');
-        if (a?.tipo && a.ferma) o.activity(p.x - ox, 1.6, p.y - oy, a.tipo, this.t);
+        if (a?.tipo && a.ferma) o.activity(p.x - ox, k.floorAt(p.x, p.y) + 1.6, p.y - oy, a.tipo, this.t);
       }
       const target = k.targetInFront();
       if (target !== undefined) {
         const p = k.ecs.get(target, 'pos');
-        if (p) o.hint(p.x - ox, 1.5, p.y - oy);
+        if (p) o.hint(p.x - ox, k.floorAt(p.x, p.y) + 1.5, p.y - oy);
       }
     }
     if (revealed && !interior) for (const b of k.corona.buildings) o.label(b.door.x + 0.5, 2.1, b.door.y + 0.5, b.floors.length > 1 ? `${b.name} (${b.floors.length} piani)` : b.name, b.color, 12, true);
@@ -308,7 +325,7 @@ export class Renderer {
       const inCorona = interior || (revealed && Math.hypot(r.x, r.y) >= k.config.circleRadius);
       const x = inCorona ? Math.floor(r.x) : Math.floor(r.x + ox) - ox;
       const y = inCorona ? Math.floor(r.y) : Math.floor(r.y + oy) - oy;
-      o.cell(x, y, 'rgba(255,255,255,0.45)');
+      o.cell(x, y, 'rgba(255,255,255,0.45)', undefined, this.groundReal(x + 0.5, y + 0.5) + 0.02);
     }
     o.glitch(this.canvas, g);
   }

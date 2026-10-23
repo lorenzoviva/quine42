@@ -38,6 +38,14 @@ export interface ThingView {
   sig: string;
 }
 
+/** Bodies go up and down the steps of the relief (and of a house) in a moment, not at once; far jumps are at once. */
+export function climb(o: THREE.Object3D, y: number, dt: number): number {
+  const was = o.userData.climbed as number | undefined;
+  const now = was === undefined || Math.abs(y - was) > 2 ? y : was + (y - was) * Math.min(1, dt * 14);
+  o.userData.climbed = now;
+  return now;
+}
+
 const box = (w: number, h: number, d: number, color: number[], y0 = 0): THREE.BufferGeometry => {
   const b = new Builder();
   b.box(-w / 2, y0, -d / 2, w / 2, y0 + h, d / 2, color);
@@ -180,12 +188,13 @@ export class Things {
       showFrame(v.frames, t, id * 0.37);
       if (v.kind === 'item') {
         // Things to pick up hover a little and turn, so they are seen among the grass.
-        v.root.position.set(p.x, v.owned ? 0.25 + Math.sin(t * 2.5 + id) * 0.05 : 0.04 + Math.abs(Math.sin(t * 2 + id)) * 0.04, p.y);
+        v.root.position.set(p.x, k.groundAt(p.x, p.y) + (v.owned ? 0.25 + Math.sin(t * 2.5 + id) * 0.05 : 0.04 + Math.abs(Math.sin(t * 2 + id)) * 0.04), p.y);
         v.root.rotation.y = t * 0.8 + id;
         continue;
       }
       if (v.kind !== 'figure') {
-        v.root.position.set(p.x, 0, p.y);
+        // A thing (a structure too) stands on the ground under its middle.
+        v.root.position.set(p.x, k.groundAt(p.x, p.y), p.y);
         const cut = id === inside;
         if (v.cut !== cut) {
           v.cut = cut;
@@ -197,8 +206,8 @@ export class Things {
         }
         continue;
       }
-      // People stand on what is under them: a house's floor, a step.
-      v.root.position.set(p.x, k.floorAt(p.x, p.y), p.y);
+      // People stand on what is under them: the ground, a house's floor, a step.
+      v.root.position.set(p.x, climb(v.root, k.floorAt(p.x, p.y), dt), p.y);
       // What they are doing, seen: lying down to sleep.
       const att = k.ecs.get(id, 'attivita');
       v.root.rotation.z = att?.tipo === 'dorme' && att.ferma ? Math.PI / 2.2 : 0;
@@ -261,7 +270,7 @@ export class Wanderer {
     const moved = Math.hypot(dx, dy);
     this.last = { x: p.x, y: p.y };
     const pcf = k.playerCarpet();
-    this.view.root.position.set(p.x, k.zone === 'sim' ? k.floorAt(pcf.x, pcf.y) : 0, p.y);
+    this.view.root.position.set(p.x, climb(this.view.root, k.zone === 'sim' ? k.floorAt(pcf.x, pcf.y) : 0, dt), p.y);
     const facing = k.playerComp()?.facing;
     const goal = facing === 'left' ? -Math.PI / 2 : facing === 'right' ? Math.PI / 2 : facing === 'up' ? Math.PI : 0;
     // The carpet pulls the wanderer back: what counts for the legs is the walking, not the real motion.
@@ -354,7 +363,7 @@ export class Runes {
         this.slabs.set(id, (s = { mesh, key }));
       }
       const jitter = line?.error ? (Math.random() - 0.5) * 0.06 : 0;
-      s.mesh.position.set(r.col + 0.5 + jitter, 0.03, r.row + 0.5);
+      s.mesh.position.set(r.col + 0.5 + jitter, k.groundAt(r.col, r.row) + 0.03, r.row + 0.5);
       (s.mesh.material as THREE.MeshBasicMaterial).opacity = pulse;
     }
     for (const [id, s] of [...this.slabs]) if (!seen.has(id)) {
@@ -390,7 +399,7 @@ export class Lights {
     this.pool.forEach((light, i) => {
       const f = found[i];
       if (!f) return void (light.intensity = 0);
-      light.position.set(f.x, 0.9, f.z);
+      light.position.set(f.x, (k.zone === 'sim' ? k.groundAt(f.x + offset.ox, f.z + offset.oy) : 0) + 0.9, f.z);
       light.distance = f.r * 1.6;
       light.color.set(f.color.startsWith('#') ? f.color : '#ffb060');
       light.intensity = (0.6 + 3 * night) * (0.92 + 0.08 * Math.sin(t * 9 + f.id));

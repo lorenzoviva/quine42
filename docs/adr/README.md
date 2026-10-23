@@ -52,5 +52,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0045](0045-grafo-del-mondo.md) | Il grafo del mondo nel kernel (`world/grafo.json`, nodi e archi tipizzati, interrogazioni e controlli, formato di Graphify); Graphify facoltativo per lo sviluppo | accettato |
 | [0046](0046-voxel-luminosi.md) | Voxel luminosi: `<color glow="True">`, attributo `glow` nelle mesh, emissione nei materiali e bloom selettivo dalla maschera nell'alfa | accettato |
 | [0047](0047-telecamera-che-ruota.md) | La telecamera ruota a quarti di giro (`,` `.`, trascinando col tasto centrale); l'input traduce le direzioni dello schermo in quelle del mondo | accettato |
+| [0048](0048-terreno-con-le-altezze.md) | Il terreno con le altezze: `Hills` di MarkovJunior su due piastrelle che si ripetono, livelli di un quarto di casella, gradini sempre salibili, acqua piana; `groundAt` nel kernel | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

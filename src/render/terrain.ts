@@ -1,6 +1,7 @@
 // The ground of the simulation, chunk by chunk, in carpet coordinates (x → three x, y → three z, one
-// tile = one unit). The plan's tiles are still the ground: colour per terrain, water lower than the
-// land with earthen banks, walls extruded, doors as an opening under a lintel. What stands on a tile
+// tile = one unit). The plan's tiles are still the ground: colour per terrain, each tile a column as high
+// as the relief (ADR-0048) with its sides where a neighbour is lower, water lower than the land with
+// earthen banks, walls extruded, doors as an opening under a lintel. What stands on a tile
 // (trees on woods, boulders on rock) is the terrain's model (`TileDef.model`), a few seeds of it as
 // instances, turned and shifted; a stand-in until the model is ready. Buildings are no longer tiles: each
 // is a structure, a model on its lot (ADR-0043), drawn with the things.
@@ -58,20 +59,20 @@ export class Builder {
 
 const groundY = (t: TileDef | undefined) => (t?.layer === 'liquid' ? WATER_Y : t?.layer === 'floor' ? 0.02 : 0);
 
-/** A tree in voxel style: trunk and three shrinking layers of foliage, size and colour varied per tile. */
-function standInTree(b: Builder, x: number, z: number, h: number, rgb: number[]): void {
+/** A tree in voxel style on ground at height y: trunk and three shrinking layers of foliage, size and colour varied per tile. */
+function standInTree(b: Builder, x: number, y: number, z: number, h: number, rgb: number[]): void {
   const s = 0.75 + (h % 7) / 20;
   const cx = x + 0.5 + ((h >> 3) % 5) / 25 - 0.08, cz = z + 0.5 + ((h >> 6) % 5) / 25 - 0.08;
-  b.box(cx - 0.08, 0, cz - 0.08, cx + 0.08, 0.6 * s, cz + 0.08, rgbOf('#6b4a2e'));
+  b.box(cx - 0.08, y, cz - 0.08, cx + 0.08, y + 0.6 * s, cz + 0.08, rgbOf('#6b4a2e'));
   const leaf = rgb.map((v, i) => v * (0.9 + ((h >> (9 + i)) % 3) * 0.08));
-  [[0.45, 0.4, 0.75], [0.35, 0.95, 0.6], [0.22, 1.4, 0.5]].forEach(([r, y0, hh]) => b.box(cx - r * s, y0 * s, cz - r * s, cx + r * s, (y0 + hh) * s, cz + r * s, leaf));
+  [[0.45, 0.4, 0.75], [0.35, 0.95, 0.6], [0.22, 1.4, 0.5]].forEach(([r, y0, hh]) => b.box(cx - r * s, y + y0 * s, cz - r * s, cx + r * s, y + (y0 + hh) * s, cz + r * s, leaf));
 }
 
-function standInRock(b: Builder, x: number, z: number, h: number, rgb: number[]): void {
+function standInRock(b: Builder, x: number, y: number, z: number, h: number, rgb: number[]): void {
   const hh = 0.35 + (h % 5) / 10;
   const w = 0.36 + ((h >> 4) % 3) / 20;
-  b.box(x + 0.5 - w, 0, z + 0.5 - w, x + 0.5 + w, hh, z + 0.5 + w * 0.9, rgb);
-  b.box(x + 0.5 - w * 0.6, hh, z + 0.5 - w * 0.5, x + 0.5 + w * 0.5, hh + 0.15, z + 0.5 + w * 0.4, rgb.map((v) => v * 1.06));
+  b.box(x + 0.5 - w, y, z + 0.5 - w, x + 0.5 + w, y + hh, z + 0.5 + w * 0.9, rgb);
+  b.box(x + 0.5 - w * 0.6, y + hh, z + 0.5 - w * 0.5, x + 0.5 + w * 0.5, y + hh + 0.15, z + 0.5 + w * 0.4, rgb.map((v) => v * 1.06));
 }
 
 export interface ChunkView {
@@ -113,7 +114,8 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): ChunkView {
   // Instances of the terrains' models, by form: where, how turned, how big.
   const instances = new Map<string, { geo: ModelGeo; mats: THREE.Matrix4[] }>();
   const formsOf = new Map<string, ReturnType<typeof tileForms>>();
-  const place = (code: string, x: number, z: number, h: number, every: number): boolean => {
+  const top = (x: number, z: number) => k.groundAt(x, z) + groundY(tile(x, z));
+  const place = (code: string, x: number, y: number, z: number, h: number, every: number): boolean => {
     if (!formsOf.has(code)) formsOf.set(code, tileForms(k, code));
     const fs = formsOf.get(code);
     if (!fs) return false;
@@ -122,7 +124,7 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): ChunkView {
     const { form, geo } = fs[h % fs.length];
     const jitter = every > 1 ? 0.35 : 0.12;
     const m = new THREE.Matrix4().compose(
-      new THREE.Vector3(x + 0.5 + (((h >> 4) % 100) / 100 - 0.5) * jitter, 0, z + 0.5 + (((h >> 11) % 100) / 100 - 0.5) * jitter),
+      new THREE.Vector3(x + 0.5 + (((h >> 4) % 100) / 100 - 0.5) * jitter, y, z + 0.5 + (((h >> 11) % 100) / 100 - 0.5) * jitter),
       new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), ((h >> 7) % 628) / 100),
       new THREE.Vector3().setScalar(0.85 + ((h >> 13) % 25) / 100),
     );
@@ -136,34 +138,37 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): ChunkView {
       const t = pal[code] ?? pal['?'];
       const x = X0 + c, z = Z0 + r;
       const h = hash32(x, z, 77);
-      const y = groundY(t);
+      const g0 = k.groundAt(x, z);
+      const y = g0 + groundY(t);
       const k0 = 0.92 + (h % 13) / 100;
       const base = rgbOf(t?.color, k0);
       ground.quad([x, y, z], [x, y, z + 1], [x + 1, y, z + 1], [x + 1, y, z], [0, 1, 0], base);
-      // Banks: earth where this tile is higher than its neighbour.
+      // Sides where this tile is higher than its neighbour: the slope of a hill in its own colour, darker,
+      // banks of earth down to the water.
       for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
         const n = tile(x + dx, z + dz);
-        const ny = groundY(n);
-        if (!n || ny >= y) continue;
-        const earth = rgbOf('#735638');
-        if (dx === 1) ground.quad([x + 1, y, z], [x + 1, ny, z], [x + 1, ny, z + 1], [x + 1, y, z + 1], [1, 0, 0], earth);
-        if (dx === -1) ground.quad([x, y, z + 1], [x, ny, z + 1], [x, ny, z], [x, y, z], [-1, 0, 0], earth);
-        if (dz === 1) ground.quad([x + 1, y, z + 1], [x + 1, ny, z + 1], [x, ny, z + 1], [x, y, z + 1], [0, 0, 1], earth);
-        if (dz === -1) ground.quad([x, y, z], [x, ny, z], [x + 1, ny, z], [x + 1, y, z], [0, 0, -1], earth);
+        const ny = top(x + dx, z + dz);
+        if (ny >= y) continue;
+        const earth = n?.layer === 'liquid' && t?.layer !== 'liquid' ? rgbOf('#735638') : base.map((v) => v * 0.72);
+        // Wound counter-clockwise seen from outside, like the boxes.
+        if (dx === 1) ground.quad([x + 1, y, z + 1], [x + 1, ny, z + 1], [x + 1, ny, z], [x + 1, y, z], [1, 0, 0], earth);
+        if (dx === -1) ground.quad([x, y, z], [x, ny, z], [x, ny, z + 1], [x, y, z + 1], [-1, 0, 0], earth);
+        if (dz === 1) ground.quad([x, y, z + 1], [x, ny, z + 1], [x + 1, ny, z + 1], [x + 1, y, z + 1], [0, 0, 1], earth);
+        if (dz === -1) ground.quad([x + 1, y, z], [x + 1, ny, z], [x, ny, z], [x, y, z], [0, 0, -1], earth);
       }
       switch (t?.layer) {
         case 'wall':
-          solid.box(x, 0, z, x + 1, WALL_H, z + 1, rgbOf(t.color, 0.95 + (h % 7) / 100));
+          solid.box(x, g0, z, x + 1, g0 + WALL_H, z + 1, rgbOf(t.color, 0.95 + (h % 7) / 100));
           break;
         case 'door':
           // An opening: posts at the sides where walls continue, a lintel above.
-          solid.box(x, WALL_H - 0.35, z, x + 1, WALL_H, z + 1, rgbOf(t.color, 0.8));
+          solid.box(x, g0 + WALL_H - 0.35, z, x + 1, g0 + WALL_H, z + 1, rgbOf(t.color, 0.8));
           break;
         case 'vegetation':
-          if (!place(code, x, z, h, 2)) standInTree(solid, x, z, h, rgbOf(t.color));
+          if (!place(code, x, y, z, h, 2)) standInTree(solid, x, y, z, h, rgbOf(t.color));
           break;
         case 'rock':
-          if (!place(code, x, z, h, 1)) standInRock(solid, x, z, h, rgbOf(t.color));
+          if (!place(code, x, y, z, h, 1)) standInRock(solid, x, y, z, h, rgbOf(t.color));
           break;
       }
     }

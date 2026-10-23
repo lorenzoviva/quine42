@@ -205,7 +205,7 @@ export class Overlay {
     for (let row = Math.floor(pc.y) - r; row <= pc.y + r; row++)
       for (let col = Math.floor(pc.x) - r; col <= pc.x + r; col++) {
         const t = k.palette[k.tileAt(col, row) ?? ''];
-        if (t) this.cell(col - ox, row - oy, t.solid ? 'rgba(255,40,60,0.5)' : 'rgba(80,255,160,0.15)', t.solid ? 'rgba(255,40,60,0.3)' : undefined);
+        if (t) this.cell(col - ox, row - oy, t.solid ? 'rgba(255,40,60,0.5)' : 'rgba(80,255,160,0.15)', t.solid ? 'rgba(255,40,60,0.3)' : undefined, k.groundAt(col, row) + 0.02);
       }
   }
 }

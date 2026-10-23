@@ -87,13 +87,13 @@ describe('lots and structures', () => {
       expect(p).not.toEqual(fallback);
       // On its floor, inside it, where one can stand.
       expect(k.structureAt(p.x, p.y)).toBe(sid);
-      expect(k.floorAt(p.x, p.y)).toBeGreaterThan(0);
+      expect(k.floorAt(p.x, p.y)).toBeGreaterThan(k.groundAt(p.x, p.y));
       expect(k.free(p.x, p.y, 0.15), `${p.x},${p.y}`).toBe(true);
     }
-    // Outside the structure there is no floor to stand on.
+    // Outside the structure one stands on the ground.
     const far = k.ecs.get(sid, 'pos');
     expect(k.structureAt(far.x + 40, far.y + 40)).toBeUndefined();
-    expect(k.floorAt(far.x + 40, far.y + 40)).toBe(0);
+    expect(k.floorAt(far.x + 40, far.y + 40)).toBe(k.groundAt(far.x + 40, far.y + 40));
   }, 30_000);
 
   it('keeps one important structure per zone of the world, and remembers which', async () => {

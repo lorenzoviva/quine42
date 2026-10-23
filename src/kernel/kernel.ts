@@ -41,6 +41,7 @@ import { councilSession, judgeAction, judgeCraft, nameSpell } from './agents/eff
 import { cleanPanel, designMechanic } from './agents/mechanics';
 import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Identity } from './agents/content';
 import { addItem, CARRY_CAPACITY, countItem, equippedItem, moveSlot, newInventory, putSlot, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
+import { HILLS, LEVEL, Relief, RELIEF_PATH, waterLevels } from './relief';
 import type { ActionDef, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
 
 export interface Chunk {
@@ -233,6 +234,9 @@ export class Kernel {
   /** Entity cells blocked by solid bodies, rebuilt every tick. */
   private solidCells = new Set<string>();
   /** Solid things with a model, by the cells their footprint reaches (they block by their voxels). */
+  private reliefCache?: { key: string; relief: Relief };
+  /** The level of each body of water, per chunk, while its tiles stay the same. */
+  private waterCache = new WeakMap<Chunk, { tiles: string; levels: Int16Array }>();
   private solidForms = new Map<string, Array<{ id: Id; x: number; y: number; yaw: number; form: Form; foot: Uint8Array }>>();
   /** Footprints of instances whose model was changed by an action (the door is open). */
   private instanceFeet = new Map<Id, { key: string; foot: Uint8Array }>();
@@ -1336,14 +1340,53 @@ export class Kernel {
     spawn(p.x, p.y);
   }
 
-  /** The height (tiles) of what one stands on at a point of the simulation (a structure's floor, a step). */
+  /** The relief of the simulation (ADR-0048), made the first time it is asked for, again if the seed or the program change. */
+  get relief(): Relief {
+    const xml = this.files[RELIEF_PATH] ?? HILLS;
+    const key = `${this.config.seed}|${xml}`;
+    if (this.reliefCache?.key !== key) {
+      let relief: Relief;
+      try {
+        relief = new Relief(this.config.seed, xml);
+        this.faults.clear('universe:relief');
+      } catch (e) {
+        this.faults.raise('universe:relief', `${RELIEF_PATH}: ${(e as Error).message}`);
+        relief = new Relief(this.config.seed);
+      }
+      this.reliefCache = { key, relief };
+    }
+    return this.reliefCache.relief;
+  }
+
+  /** The height (tiles) of the ground at a point of the simulation: the relief of its tile; water lies flat. */
+  groundAt(x: number, y: number): number {
+    const col = Math.floor(x), row = Math.floor(y);
+    const S = this.config.chunkSize;
+    const cx = Math.floor(col / S), cy = Math.floor(row / S);
+    const ch = this.chunks.get(this.chunkKey(cx, cy));
+    const i = (row - cy * S) * S + (col - cx * S);
+    if (ch && this.palette[ch.tiles[i]]?.layer === 'liquid') {
+      let w = this.waterCache.get(ch);
+      if (w?.tiles !== ch.tiles) {
+        const relief = this.relief;
+        w = { tiles: ch.tiles, levels: waterLevels(ch.tiles, S, (code) => this.palette[code]?.layer === 'liquid', (c, r) => relief.level(cx * S + c, cy * S + r)) };
+        this.waterCache.set(ch, w);
+      }
+      return w.levels[i] * LEVEL;
+    }
+    return this.relief.height(col, row);
+  }
+
+  /** The height (tiles) of what one stands on at a point of the simulation (the ground, a structure's floor, a step). */
   floorAt(x: number, y: number): number {
-    let h = 0;
+    let h = this.groundAt(x, y);
     for (const s of this.solidForms.get(`${Math.floor(x)},${Math.floor(y)}`) ?? []) {
       const [lx, lz] = toLocal(x - s.x, y - s.y, s.yaw);
       const g = s.form.result!.grid;
       const vx = Math.floor(lx * 20 + g.X / 2), vy = Math.floor(lz * 20 + g.Y / 2);
-      if (vx >= 0 && vy >= 0 && vx < g.X && vy < g.Y) h = Math.max(h, (s.form.floor?.[vx + vy * g.X] ?? 0) / 20);
+      const f = vx >= 0 && vy >= 0 && vx < g.X && vy < g.Y ? (s.form.floor?.[vx + vy * g.X] ?? 0) : 0;
+      // A model stands on the ground under its middle.
+      if (f) h = Math.max(h, this.groundAt(s.x, s.y) + f / 20);
     }
     return h;
   }
