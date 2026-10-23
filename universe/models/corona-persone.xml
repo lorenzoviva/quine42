@@ -1,0 +1,523 @@
+<!--
+Lo Studio dei personaggi (corona): studi di posa cinematografici e officina delle persone della corona.
+Scritto da Gemini CLI (Gemini 3.8 Flash, abbonamento) il 23/10/2026, task T19.
+Scatola: 14 × 12 × 7 caselle, 112 × 96 × 56 voxel, 8 voxel per casella.
+Lettere chiave:
+  O = porta (vano pedonale d'ingresso a z=0..19, centrato a x=56, con atrio interno vuoto e sgombro)
+  F = insegna ("LO STUDIO DEI PERSONAGGI", neon pesca ffb38a glow fisso)
+  P = targa scura opaca per contrasto dell'insegna
+  M, m = metallo nero cyber-industriale primario e secondario (pannelli e profilati)
+  C = cemento grafite della base e banchina di carico
+  S, s = acciaio chiaro e tubazioni industriali zincate
+  V, G = vetro scuro riflettente e riflesso delle vetrate a shed
+  p, q, r, t = fasi neon pesca animato per display, lampade di segnalazione e condotti
+  u, w = indicatore studio "ON AIR" a luce pulsante
+  x, y = buffer temporanei per l'animazione (hidden)
+Architettura:
+  - Facciata unificata a coronamento monumentale (y = 80..86, z = 3..38) che ospita l'insegna neon pesca,
+    il portone scenografie a scorrimento sulla sinistra, il portale pedonale al centro (x = 56) e le vetrate
+    degli uffici di produzione a destra.
+  - Teatro di posa principale (Soundstage 01): volume imponente cieco a pannelli acustici scuri (x = 14..66, y = 14..80),
+    sormontato da doppia ciminiera industriale di ventilazione (z = 37..50) e impianto HVAC con condotte.
+  - Ala officina a tetto a shed (x = 66..100, y = 14..78): 4 campate a dente di sega con vetrate a nord.
+  - Fascio di tubazioni tecnologiche industriali lungo la parete ovest con staffe e risers.
+  - Animazione "studio" (8 frame): respiro del neon pesca e lampeggio del segnale "ON AIR".
+-->
+<sequence values="BMmCSsVGPFOpqrtuwxy" size="112 96 56" symmetry="()" name="Studio dei personaggi">
+  <!-- Materiali architettonici -->
+  <color symbol="M" value="181a22" name="metallo primario"/>
+  <color symbol="m" value="262934" name="metallo secondario"/>
+  <color symbol="C" value="343640" name="cemento grafite"/>
+  <color symbol="S" value="8a8f9c" name="acciaio chiaro"/>
+  <color symbol="s" value="545866" name="acciaio medio"/>
+  <color symbol="V" value="1c2a3a" name="vetro scuro"/>
+  <color symbol="G" value="3d5a78" name="riflesso vetro"/>
+  <color symbol="P" value="0c0e14" name="targa insegna"/>
+  <color symbol="F" value="ffb38a" glow="True" name="insegna fissa"/>
+  <color symbol="O" value="3c261e" name="porta"/>
+  <color symbol="x" hidden="True" name="buffer neon"/>
+  <color symbol="y" hidden="True" name="buffer on air"/>
+
+  <!-- Fasi neon pesca animato (respiro continuo dei terminali e indicatori) -->
+  <color symbol="p" value="ffb38a" glow="True" name="neon pesca apice"/>
+  <color symbol="q" value="e09872" glow="True" name="neon pesca 2"/>
+  <color symbol="r" value="c4805e" glow="True" name="neon pesca 3"/>
+  <color symbol="t" value="9e6044" glow="True" name="neon pesca profondo"/>
+
+  <!-- Segnale studio ON AIR (fase attiva e standby) -->
+  <color symbol="u" value="ff3b30" glow="True" name="on air attivo"/>
+  <color symbol="w" value="601515" name="on air spento"/>
+
+  <!-- ================================================================= -->
+  <!-- 1. BASAMENTO, FASCIA DI TERRA E BANCHINA DI CARICO (z = 0..3)     -->
+  <!-- ================================================================= -->
+  <!-- Platea generale di fondazione in cemento grafite -->
+  <box at="56 48 0" size="94 78 3" color="C"/>
+  <box at="56 48 0" size="96 80 1" color="C"/>
+
+  <!-- Banchina di carico scenografie davanti al portone di posa (x = 18..46, y = 85..89) -->
+  <box at="32 87 0" size="28 6 3" color="C"/>
+  <box at="32 90 0" size="30 2 1" color="s"/>
+  <!-- Cordolo paracolpi della banchina -->
+  <box at="17 88 0" size="2 4 4" color="m"/>
+  <box at="46 88 0" size="2 4 4" color="m"/>
+
+  <!-- Sagoma di raccordo pedonale d'ingresso (x = 48..64, y = 87..91, z = 0..1) -->
+  <box at="56 89 0" size="18 6 1" color="C"/>
+  <box at="56 88 1" size="18 4 1" color="C"/>
+
+  <!-- ================================================================= -->
+  <!-- 2. TEATRO DI POSA PRINCIPALE / SOUNDSTAGE 01 (x = 14..66, y = 14..80) -->
+  <!-- ================================================================= -->
+  <!-- Volume principale del teatro a pannelli acustici scuri (z = 3..37) -->
+  <box at="40 47 3" size="52 66 34" color="M"/>
+
+  <!-- Basamento lavorato in metallo secondario -->
+  <box at="40 47 3" size="54 68 3" color="m"/>
+
+  <!-- Copertura / soletta del tetto a z = 37 -->
+  <box at="40 47 37" size="52 66 1" color="m"/>
+
+  <!-- Parapetti perimetrali della copertura del teatro (z = 37..40) -->
+  <box at="40 14 37" size="52 2 3" color="m"/>
+  <box at="14 47 37" size="2 66 3" color="m"/>
+  <box at="66 47 37" size="2 66 3" color="m"/>
+
+  <!-- Copertine in acciaio chiaro sui parapetti del teatro -->
+  <box at="40 14 40" size="52 2 1" color="S"/>
+  <box at="14 47 40" size="2 66 1" color="S"/>
+  <box at="66 47 40" size="2 66 1" color="S"/>
+
+  <!-- Contrafforti e lesene verticali su parete ovest (x = 14) -->
+  <box at="14 20 3" size="2 2 34" color="m"/>
+  <box at="14 32 3" size="2 2 34" color="m"/>
+  <box at="14 44 3" size="2 2 34" color="m"/>
+  <box at="14 56 3" size="2 2 34" color="m"/>
+  <box at="14 68 3" size="2 2 34" color="m"/>
+
+  <!-- Parete nord/retro del teatro (y = 14) -->
+  <box at="26 14 3" size="2 2 34" color="m"/>
+  <box at="38 14 3" size="2 2 34" color="m"/>
+  <box at="50 14 3" size="2 2 34" color="m"/>
+  <box at="62 14 3" size="2 2 34" color="m"/>
+
+  <!-- Marcapiano orizzontale in acciaio medio -->
+  <box at="14 47 18" size="1 66 1" color="S"/>
+  <box at="40 14 18" size="52 1 1" color="S"/>
+
+  <!-- ================================================================= -->
+  <!-- 3. FACCIATA FRONTALE UNIFICATA E INGRESSO (x = 14..98, y = 80..86) -->
+  <!-- ================================================================= -->
+  <!-- Corpo murario continuo della facciata frontale (z = 3..38) -->
+  <!-- Settore ovest/centrale (x = 14..72, z = 3..38) -->
+  <box at="43 83 3" size="58 6 35" color="M"/>
+  <!-- Settore est/uffici (x = 72..98, z = 3..36) -->
+  <box at="85 83 3" size="26 6 33" color="M"/>
+
+  <!-- Parapetto superiore di coronamento frontale con profilo neon pesca (p) -->
+  <box at="56 85 38" size="84 2 2" color="m"/>
+  <box at="56 85 40" size="84 2 1" color="S"/>
+  <box at="56 86 39" size="84 1 1" color="p"/>
+
+  <!-- Pilastri/lesene monumentali di facciata -->
+  <box at="16 86 3" size="2 2 35" color="m"/>
+  <box at="46 86 3" size="2 2 35" color="m"/>
+  <box at="66 86 3" size="2 2 35" color="m"/>
+  <box at="96 86 3" size="2 2 35" color="m"/>
+
+  <!-- ================================================================= -->
+  <!-- IL PORTONE DI POSA A SCORRIMENTO (STAGE 01 ELEPHANT DOOR)          -->
+  <!-- ================================================================= -->
+  <!-- Vano del portone scenografie (x = 18..44, y = 85..86, z = 3..25) -->
+  <box at="31 85 3" size="26 2 22" color="m"/>
+  <box at="31 86 4" size="12 1 20" color="m"/>
+  <box at="41 86 4" size="8 1 20" color="m"/>
+  <box at="25 86 14" size="10 1 1" color="S"/>
+  <box at="37 86 14" size="10 1 1" color="S"/>
+
+  <!-- Guida superiore di scorrimento pesante e carrelli a rulli -->
+  <box at="31 86 25" size="30 2 2" color="S"/>
+  <box at="22 87 26" size="2 1 1" color="m"/>
+  <box at="40 87 26" size="2 1 1" color="m"/>
+
+  <!-- Segnaletica di sicurezza a strisce alla base del portone -->
+  <box at="20 86 3" size="2 1 1" color="p"/>
+  <box at="24 86 3" size="2 1 1" color="p"/>
+  <box at="28 86 3" size="2 1 1" color="p"/>
+  <box at="32 86 3" size="2 1 1" color="p"/>
+  <box at="36 86 3" size="2 1 1" color="p"/>
+  <box at="40 86 3" size="2 1 1" color="p"/>
+
+  <!-- Targa STAGE 01 sopra il portone di carico -->
+  <box at="31 86 28" size="14 1 3" color="P"/>
+  <box at="31 87 29" size="12 1 1" color="p"/>
+
+  <!-- Segnale luminoso "ON AIR" accanto al portone (x = 45, y = 86, z = 22..25) -->
+  <box at="45 86 22" size="3 2 4" color="m"/>
+  <box at="45 87 22" size="2 1 3" color="u"/>
+
+  <!-- ================================================================= -->
+  <!-- PORTALE PEDONALE CENTRALE E ATRIO (x = 48..64, y = 85..86)        -->
+  <!-- ================================================================= -->
+  <!-- Cornice portale avanzato d'ingresso reception (x = 48..64, z = 1..22) -->
+  <box at="56 85 1" size="18 3 22" color="m"/>
+
+  <!-- Pensilina coperta in acciaio e vetro sopra l'ingresso -->
+  <box at="56 87 22" size="20 4 2" color="S"/>
+  <box at="56 87 23" size="16 2 1" color="V"/>
+
+  <!-- Atrio interno completamente sgombro e vuoto (y = 74..84, z = 0..22) -->
+  <box at="56 79 1" size="18 12 21" color="B"/>
+  <box at="56 79 0" size="18 12 1" color="C"/>
+
+  <!-- LA PORTA (lettera O, nome "porta", al centro x = 55.5, z = 0..19, y = 85) -->
+  <box at="55.5 85 0" size="16 1 20" color="O"/>
+
+  <!-- Cornice neon pesca del vano d'ingresso (fase p) -->
+  <box at="47 86 0" size="1 1 22" color="p"/>
+  <box at="64 86 0" size="1 1 22" color="p"/>
+  <box at="55.5 86 21" size="16 1 1" color="p"/>
+
+  <!-- ================================================================= -->
+  <!-- VETRATE DEGLI UFFICI DI PRODUZIONE (x = 68..94, y = 86, z = 8..20) -->
+  <!-- ================================================================= -->
+  <box at="81 86 8" size="24 1 12" color="V"/>
+  <!-- Riflessi diagonali nelle vetrate frontali -->
+  <box at="74 86 10" size="8 1 1" color="G"/>
+  <box at="86 86 15" size="10 1 1" color="G"/>
+  <!-- Telai e lesene delle vetrate uffici -->
+  <box at="81 86 8" size="24 1 1" color="S"/>
+  <box at="81 86 14" size="24 1 1" color="S"/>
+  <box at="81 86 20" size="24 1 1" color="S"/>
+  <box at="73 86 8" size="1 1 12" color="S"/>
+  <box at="81 86 8" size="1 1 12" color="S"/>
+  <box at="89 86 8" size="1 1 12" color="S"/>
+
+  <!-- ================================================================= -->
+  <!-- 4. TARGA SCURA OPACA DELL'INSEGNA (y = 86, z = 24..39)            -->
+  <!-- ================================================================= -->
+  <!-- Pannello sagomato ad alto contrasto per le scritte al neon -->
+  <box at="56 86 24" size="58 1 15" color="P"/>
+  <box at="56 86 23" size="60 1 1" color="S"/>
+  <box at="56 86 39" size="60 1 1" color="S"/>
+  <box at="26 86 24" size="1 1 15" color="S"/>
+  <box at="86 86 24" size="1 1 15" color="S"/>
+
+  <!-- ================================================================= -->
+  <!-- 5. L'INSEGNA NEON "LO STUDIO DEI PERSONAGGI" (y = 87, glow=True)  -->
+  <!-- Font pixel 3 × 5 voxel, perfettamente leggibile da sinistra a dx  -->
+  <!-- ================================================================= -->
+
+  <!-- RIGA 1: "LO STUDIO" (z = 33..37, y = 87, centrato a x = 56) -->
+
+  <!-- L (x = 40..42) -->
+  <box at="40 87 33" size="1 1 5" color="F"/>
+  <box at="41 87 33" size="1 1 1" color="F"/>
+  <box at="42 87 33" size="1 1 1" color="F"/>
+
+  <!-- O (x = 44..46) -->
+  <box at="44 87 34" size="1 1 3" color="F"/>
+  <box at="46 87 34" size="1 1 3" color="F"/>
+  <box at="45 87 37" size="3 1 1" color="F"/>
+  <box at="45 87 33" size="3 1 1" color="F"/>
+
+  <!-- S (x = 50..52) -->
+  <box at="51 87 37" size="3 1 1" color="F"/>
+  <box at="50 87 36" size="1 1 1" color="F"/>
+  <box at="51 87 35" size="3 1 1" color="F"/>
+  <box at="52 87 34" size="1 1 1" color="F"/>
+  <box at="51 87 33" size="3 1 1" color="F"/>
+
+  <!-- T (x = 54..56) -->
+  <box at="55 87 37" size="3 1 1" color="F"/>
+  <box at="55 87 33" size="1 1 4" color="F"/>
+
+  <!-- U (x = 58..60) -->
+  <box at="58 87 34" size="1 1 4" color="F"/>
+  <box at="60 87 34" size="1 1 4" color="F"/>
+  <box at="59 87 33" size="3 1 1" color="F"/>
+
+  <!-- D (x = 62..64) -->
+  <box at="62 87 33" size="1 1 5" color="F"/>
+  <box at="63 87 37" size="1 1 1" color="F"/>
+  <box at="64 87 34" size="1 1 3" color="F"/>
+  <box at="63 87 33" size="1 1 1" color="F"/>
+
+  <!-- I (x = 66..68) -->
+  <box at="67 87 37" size="3 1 1" color="F"/>
+  <box at="67 87 34" size="1 1 3" color="F"/>
+  <box at="67 87 33" size="3 1 1" color="F"/>
+
+  <!-- O (x = 70..72) -->
+  <box at="70 87 34" size="1 1 3" color="F"/>
+  <box at="72 87 34" size="1 1 3" color="F"/>
+  <box at="71 87 37" size="3 1 1" color="F"/>
+  <box at="71 87 33" size="3 1 1" color="F"/>
+
+  <!-- RIGA 2: "DEI PERSONAGGI" (z = 26..30, y = 87, centrato a x = 56) -->
+
+  <!-- D (x = 30..32) -->
+  <box at="30 87 26" size="1 1 5" color="F"/>
+  <box at="31 87 30" size="1 1 1" color="F"/>
+  <box at="32 87 27" size="1 1 3" color="F"/>
+  <box at="31 87 26" size="1 1 1" color="F"/>
+
+  <!-- E (x = 34..36) -->
+  <box at="34 87 26" size="1 1 5" color="F"/>
+  <box at="35 87 30" size="1 1 1" color="F"/>
+  <box at="36 87 30" size="1 1 1" color="F"/>
+  <box at="35 87 28" size="1 1 1" color="F"/>
+  <box at="35 87 26" size="1 1 1" color="F"/>
+  <box at="36 87 26" size="1 1 1" color="F"/>
+
+  <!-- I (x = 38..40) -->
+  <box at="39 87 30" size="3 1 1" color="F"/>
+  <box at="39 87 27" size="1 1 3" color="F"/>
+  <box at="39 87 26" size="3 1 1" color="F"/>
+
+  <!-- P (x = 44..46) -->
+  <box at="44 87 26" size="1 1 5" color="F"/>
+  <box at="45 87 30" size="3 1 1" color="F"/>
+  <box at="46 87 29" size="1 1 1" color="F"/>
+  <box at="45 87 28" size="3 1 1" color="F"/>
+
+  <!-- E (x = 48..50) -->
+  <box at="48 87 26" size="1 1 5" color="F"/>
+  <box at="49 87 30" size="1 1 1" color="F"/>
+  <box at="50 87 30" size="1 1 1" color="F"/>
+  <box at="49 87 28" size="1 1 1" color="F"/>
+  <box at="49 87 26" size="1 1 1" color="F"/>
+  <box at="50 87 26" size="1 1 1" color="F"/>
+
+  <!-- R (x = 52..54) -->
+  <box at="52 87 26" size="1 1 5" color="F"/>
+  <box at="53 87 30" size="1 1 1" color="F"/>
+  <box at="54 87 30" size="1 1 1" color="F"/>
+  <box at="54 87 29" size="1 1 1" color="F"/>
+  <box at="53 87 28" size="1 1 1" color="F"/>
+  <box at="54 87 26" size="1 1 2" color="F"/>
+
+  <!-- S (x = 56..58) -->
+  <box at="57 87 30" size="3 1 1" color="F"/>
+  <box at="56 87 29" size="1 1 1" color="F"/>
+  <box at="57 87 28" size="3 1 1" color="F"/>
+  <box at="58 87 27" size="1 1 1" color="F"/>
+  <box at="57 87 26" size="3 1 1" color="F"/>
+
+  <!-- O (x = 60..62) -->
+  <box at="60 87 27" size="1 1 3" color="F"/>
+  <box at="62 87 27" size="1 1 3" color="F"/>
+  <box at="61 87 30" size="3 1 1" color="F"/>
+  <box at="61 87 26" size="3 1 1" color="F"/>
+
+  <!-- N (x = 64..66) -->
+  <box at="64 87 26" size="1 1 5" color="F"/>
+  <box at="66 87 26" size="1 1 5" color="F"/>
+  <box at="65 87 28" size="1 1 1" color="F"/>
+
+  <!-- A (x = 68..70) -->
+  <box at="68 87 26" size="1 1 4" color="F"/>
+  <box at="70 87 26" size="1 1 4" color="F"/>
+  <box at="69 87 30" size="3 1 1" color="F"/>
+  <box at="69 87 28" size="3 1 1" color="F"/>
+
+  <!-- G (x = 72..74) -->
+  <box at="72 87 26" size="1 1 5" color="F"/>
+  <box at="73 87 30" size="3 1 1" color="F"/>
+  <box at="73 87 26" size="3 1 1" color="F"/>
+  <box at="74 87 27" size="1 1 1" color="F"/>
+  <box at="73.5 87 28" size="2 1 1" color="F"/>
+
+  <!-- G (x = 76..78) -->
+  <box at="76 87 26" size="1 1 5" color="F"/>
+  <box at="77 87 30" size="3 1 1" color="F"/>
+  <box at="77 87 26" size="3 1 1" color="F"/>
+  <box at="78 87 27" size="1 1 1" color="F"/>
+  <box at="77.5 87 28" size="2 1 1" color="F"/>
+
+  <!-- I (x = 80..82) -->
+  <box at="81 87 30" size="3 1 1" color="F"/>
+  <box at="81 87 27" size="1 1 3" color="F"/>
+  <box at="81 87 26" size="3 1 1" color="F"/>
+
+  <!-- ================================================================= -->
+  <!-- 6. ALA OFFICINE CON TETTO A SHED / DENTI DI SEGA (x = 66..100)    -->
+  <!-- ================================================================= -->
+  <!-- Corpo officine e laboratori costumi (z = 3..21, y = 14..80) -->
+  <box at="83 47 3" size="34 66 19" color="M"/>
+  <box at="83 47 3" size="36 68 3" color="m"/>
+
+  <!-- Ampie vetrate industriali con riflessi sul fianco est (x = 100) -->
+  <box at="100 24 8" size="1 14 10" color="V"/>
+  <box at="100 44 8" size="1 14 10" color="V"/>
+  <box at="100 64 8" size="1 14 10" color="V"/>
+  <!-- Riflessi diagonali del vetro -->
+  <box at="100 22 9" size="1 10 1" color="G"/>
+  <box at="100 26 13" size="1 8 1" color="G"/>
+  <box at="100 42 9" size="1 10 1" color="G"/>
+  <box at="100 46 13" size="1 8 1" color="G"/>
+  <box at="100 62 9" size="1 10 1" color="G"/>
+  <box at="100 66 13" size="1 8 1" color="G"/>
+  <!-- Lesene verticali est -->
+  <box at="100 16 3" size="2 2 19" color="m"/>
+  <box at="100 34 3" size="2 2 19" color="m"/>
+  <box at="100 54 3" size="2 2 19" color="m"/>
+  <box at="100 74 3" size="2 2 19" color="m"/>
+
+  <!-- ================================================================= -->
+  <!-- TETTO A SHED (4 DENTI DI SEGA RIVOLTI A NORD, z = 22..30)          -->
+  <!-- Vetrate verticali a nord (-y), falda metallica a sud (+y)         -->
+  <!-- ================================================================= -->
+
+  <!-- Dente 1 (y = 15..30) -->
+  <!-- Vetrata verticale nord a y = 15 (z = 22..29) -->
+  <box at="83 15 22" size="32 1 8" color="V"/>
+  <box at="75 15 24" size="8 1 1" color="G"/>
+  <box at="88 15 26" size="10 1 1" color="G"/>
+  <box at="83 15 22" size="32 1 1" color="S"/>
+  <box at="83 15 29" size="32 1 1" color="S"/>
+  <box at="74 15 22" size="1 1 8" color="S"/>
+  <box at="83 15 22" size="1 1 8" color="S"/>
+  <box at="92 15 22" size="1 1 8" color="S"/>
+  <!-- Falda inclinata discendente verso sud (y = 16..30) -->
+  <box at="83 17 28" size="32 3 2" color="m"/>
+  <box at="83 20 26" size="32 3 2" color="M"/>
+  <box at="83 23 24" size="32 3 2" color="m"/>
+  <box at="83 27 23" size="32 5 2" color="M"/>
+  <box at="83 30 22" size="32 2 2" color="m"/>
+
+  <!-- Dente 2 (y = 31..46) -->
+  <!-- Vetrata verticale nord a y = 31 (z = 22..29) -->
+  <box at="83 31 22" size="32 1 8" color="V"/>
+  <box at="77 31 24" size="8 1 1" color="G"/>
+  <box at="90 31 26" size="10 1 1" color="G"/>
+  <box at="83 31 22" size="32 1 1" color="S"/>
+  <box at="83 31 29" size="32 1 1" color="S"/>
+  <box at="74 31 22" size="1 1 8" color="S"/>
+  <box at="83 31 22" size="1 1 8" color="S"/>
+  <box at="92 31 22" size="1 1 8" color="S"/>
+  <!-- Falda inclinata discendente verso sud (y = 32..46) -->
+  <box at="83 33 28" size="32 3 2" color="m"/>
+  <box at="83 36 26" size="32 3 2" color="M"/>
+  <box at="83 39 24" size="32 3 2" color="m"/>
+  <box at="83 43 23" size="32 5 2" color="M"/>
+  <box at="83 46 22" size="32 2 2" color="m"/>
+
+  <!-- Dente 3 (y = 47..62) -->
+  <!-- Vetrata verticale nord a y = 47 (z = 22..29) -->
+  <box at="83 47 22" size="32 1 8" color="V"/>
+  <box at="75 47 24" size="8 1 1" color="G"/>
+  <box at="88 47 26" size="10 1 1" color="G"/>
+  <box at="83 47 22" size="32 1 1" color="S"/>
+  <box at="83 47 29" size="32 1 1" color="S"/>
+  <box at="74 47 22" size="1 1 8" color="S"/>
+  <box at="83 47 22" size="1 1 8" color="S"/>
+  <box at="92 47 22" size="1 1 8" color="S"/>
+  <!-- Falda inclinata discendente verso sud (y = 48..62) -->
+  <box at="83 49 28" size="32 3 2" color="m"/>
+  <box at="83 52 26" size="32 3 2" color="M"/>
+  <box at="83 55 24" size="32 3 2" color="m"/>
+  <box at="83 59 23" size="32 5 2" color="M"/>
+  <box at="83 62 22" size="32 2 2" color="m"/>
+
+  <!-- Dente 4 (y = 63..78) -->
+  <!-- Vetrata verticale nord a y = 63 (z = 22..29) -->
+  <box at="83 63 22" size="32 1 8" color="V"/>
+  <box at="78 63 24" size="8 1 1" color="G"/>
+  <box at="89 63 26" size="10 1 1" color="G"/>
+  <box at="83 63 22" size="32 1 1" color="S"/>
+  <box at="83 63 29" size="32 1 1" color="S"/>
+  <box at="74 63 22" size="1 1 8" color="S"/>
+  <box at="83 63 22" size="1 1 8" color="S"/>
+  <box at="92 63 22" size="1 1 8" color="S"/>
+  <!-- Falda inclinata discendente verso sud (y = 64..78) -->
+  <box at="83 65 28" size="32 3 2" color="m"/>
+  <box at="83 68 26" size="32 3 2" color="M"/>
+  <box at="83 71 24" size="32 3 2" color="m"/>
+  <box at="83 75 23" size="32 5 2" color="M"/>
+  <box at="83 78 22" size="32 2 2" color="m"/>
+
+  <!-- Chiusura laterale est dei denti di sega (x = 99..100) -->
+  <box at="99.5 23 22" size="1 16 6" color="m"/>
+  <box at="99.5 39 22" size="1 16 6" color="m"/>
+  <box at="99.5 55 22" size="1 16 6" color="m"/>
+  <box at="99.5 71 22" size="1 16 6" color="m"/>
+
+  <!-- ================================================================= -->
+  <!-- 7. IMPIANTI INDUSTRIALI, CONDOTTI E DOPPIA CIMINIERA              -->
+  <!-- ================================================================= -->
+  <!-- Doppia ciminiera industriale di ventilazione sul tetto del Soundstage -->
+  <!-- Ciminiera 1 (x = 25, y = 28, z = 37..50) -->
+  <cylinder at="25 28 37" size="8 8 13" color="s"/>
+  <cylinder at="25 28 49" size="10 10 2" color="S"/>
+  <cylinder at="25 28 43" size="9 9 1" color="p" on="B"/>
+  <cylinder at="25 28 50" size="4 4 1" color="B"/>
+
+  <!-- Ciminiera 2 (x = 37, y = 28, z = 37..50) -->
+  <cylinder at="37 28 37" size="8 8 13" color="s"/>
+  <cylinder at="37 28 49" size="10 10 2" color="S"/>
+  <cylinder at="37 28 43" size="9 9 1" color="p" on="B"/>
+  <cylinder at="37 28 50" size="4 4 1" color="B"/>
+
+  <!-- Raccordo strutturale tra le ciminiere -->
+  <box at="31 28 41" size="6 2 2" color="S"/>
+  <box at="31 28 47" size="6 2 1" color="S"/>
+
+  <!-- Unità trattamento aria (HVAC Chiller) sul tetto (x = 48..62, y = 24..38, z = 37..43) -->
+  <box at="55 31 37" size="14 14 6" color="s"/>
+  <box at="55 31 43" size="12 12 1" color="m"/>
+  <!-- Griglie circolari delle ventole sul tetto dell'unità -->
+  <cylinder at="51 31 43" size="5 5 1" color="S"/>
+  <cylinder at="59 31 43" size="5 5 1" color="S"/>
+
+  <!-- Grande condotta d'aria quadrata che corre sul tetto del teatro -->
+  <box at="55 45 37" size="6 16 4" color="s"/>
+  <box at="55 45 41" size="8 16 1" color="S"/>
+
+  <!-- Fascio di tubazioni tecnologiche industriali lungo la parete ovest (x = 12..14) -->
+  <!-- Tubo 1 (inferiore, z = 8) -->
+  <box at="13 47 8" size="1 54 2" color="S"/>
+  <!-- Tubo 2 (mediano, z = 12) -->
+  <box at="13 47 12" size="2 54 2" color="s"/>
+  <!-- Tubo 3 (superiore con nodi neon, z = 16) -->
+  <box at="13 47 16" size="1 54 1" color="S"/>
+  <box at="12 26 16" size="1 2 1" color="p"/>
+  <box at="12 42 16" size="1 2 1" color="p"/>
+  <box at="12 58 16" size="1 2 1" color="p"/>
+  <box at="12 70 16" size="1 2 1" color="p"/>
+
+  <!-- Staffe a parete di ancoraggio delle tubazioni ogni 14 voxel -->
+  <box at="14 26 6" size="2 2 13" color="m"/>
+  <box at="14 42 6" size="2 2 13" color="m"/>
+  <box at="14 58 6" size="2 2 13" color="m"/>
+  <box at="14 70 6" size="2 2 13" color="m"/>
+
+  <!-- Riser verticale delle tubazioni che sale fino alla copertura del tetto -->
+  <box at="13 70 17" size="2 2 21" color="s"/>
+  <box at="15 70 37" size="4 2 2" color="S"/>
+
+  <!-- Passerelle tecniche grigliate sul tetto con ringhiere di sicurezza -->
+  <box at="38 35 37" size="2 16 1" color="S"/>
+  <box at="44 43 37" size="12 2 1" color="S"/>
+</sequence>
+
+<!-- ================================================================= -->
+<!-- ANIMAZIONE CICLICA "STUDIO" (8 frame, 1.2s)                       -->
+<!-- 1. Respiro continuo delle lampade e raccordi neon pesca (p->q->r->t) -->
+<!-- 2. Lampeggio intermittente del segnale di registrazione "ON AIR"  -->
+<!-- ================================================================= -->
+<animation name="studio" frames="8">
+  <sequence>
+    <!-- Ciclo neon pesca -->
+    <all in="p" out="x"/>
+    <all in="t" out="p"/>
+    <all in="r" out="t"/>
+    <all in="q" out="r"/>
+    <all in="x" out="q"/>
+
+    <!-- Lampeggio ON AIR (rosso attivo u <-> rosso spento w) -->
+    <all in="u" out="y"/>
+    <all in="w" out="u"/>
+    <all in="y" out="w"/>
+  </sequence>
+</animation>

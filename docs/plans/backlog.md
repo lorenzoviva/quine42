@@ -579,7 +579,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   grafo **del mondo** (ADR-0045), non quello di Graphify sul codice (che non gira nel browser); con la luce piena l'ologramma
   era una palla abbagliante, quindi voxel piccoli a metà intensità; nessun ADR (interno della corona, come T21-T24).
 
-### T31 · Gli otto edifici della corona nella libreria — `in attesa` (dipende da T20 e dai programmi di T19)
+### T31 · Gli otto edifici della corona nella libreria — `fatto` (commit «Corona (T31)»)
 - Contesto: T20 ha fatto il motore (ADR-0049); mancano i programmi. **Per l'autore**: esegui il prompt di
   [`docs/prompts/gemini-strutture-corona.md`](../prompts/gemini-strutture-corona.md) in Gemini CLI, una struttura per
   sessione (`magia`, `persone`, `cose`, `oggetti`, `luoghi`, `sistemi`, `nucleo`, `concilio`), poi rimetti questo task
@@ -598,6 +598,17 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   anima i modelli («mostra» li nascondeva: corpo spento, nessun fotogramma acceso). ModelDirector e «riscolpisci» non
   toccano già i `corona-*` (il primo fa solo i modelli che mancano, il secondo solo moduli e oggetti). Mancano `persone` (scritta da Gemini in `bdd198e`, nel lab: da portare nel gioco),
   `cose`, `oggetti`, `luoghi`, `sistemi`, `nucleo`, `concilio`, `universo`, `galleria`, `mondo` (schede del 23/10); per ognuno aggiungere l'id alla lista del test.
+- Esito: **tutti e undici** nel seme (`universe/models/corona-*.xml`, copiati dal lab; voci `classe: edificio`, `vpt: 8`,
+  autore `gemini-3.8-flash (Gemini CLI, T19)`, senza `voto`: nessun giudizio dell'Artista). Anche `corona-magia.xml` è
+  aggiornato: nel gioco c'era la versione prima dell'animazione a 16 fotogrammi (`a0f1e4b`). `tests/campus.test.ts` prova
+  tutti gli undici (in Node: magia ~10 s al primo avvio a freddo, gli altri 0.6-1.3 s; tutti nel loro settore, porta dal
+  viale, animazioni che cambiano il modello); il test del modello di prova costruisce un campus senza i `corona-*` del
+  seme (prima contava sugli altri edifici a blocchi). Nel browser (build di produzione, `?offline`): undici strutture sui
+  loro modelli, nessun guasto, nessuna chiave in `dist/`. Diverso dal previsto: verifica visiva solo parziale (Sala del
+  Concilio, Ufficio dei luoghi, Biblioteca di giorno; non da quattro lati né di notte). Da guardare (T50 o un ritocco
+  dei programmi): da vicino il bagliore dei neon rosa della Sala del Concilio riempie lo schermo; con la camera girata,
+  dall'interno del modello tagliato, l'insegna dell'Ufficio dei luoghi si legge al contrario (da controllare dal viale).
+  Il `dev` di Vite su un'altra porta non caricava wasmoon (`LuaFactory` mancante); la build di produzione sì.
 
 ### T50 · La corona personalizzata: il viale e gli esterni — `in attesa` (dipende da T31)
 - Contesto: richiesta del 24/10 («La corona»): le strutture sono rifatte (T19, T31 in corso), ma viale, vicoli e prati

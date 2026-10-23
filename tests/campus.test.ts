@@ -20,10 +20,12 @@ const BUILDING = `<sequence values="BMO" size="48 40 32" name="Prova">
   <box at="24 35 0" size="8 2 16" color="O"/>
 </sequence>`;
 
+/** The seed without its campus buildings (every one has a program since T31), plus `id` as the test building. */
 function withModel(id: string, vpt?: number) {
-  const index = JSON.parse(bundledFiles['models/index.json']);
+  const files = Object.fromEntries(Object.entries(bundledFiles).filter(([p]) => !/^models\/corona-/.test(p)));
+  const index = Object.fromEntries(Object.entries(JSON.parse(bundledFiles['models/index.json'])).filter(([m]) => !m.startsWith('corona-')));
   index[id] = { classe: 'edificio', nome: 'Prova', autore: 'test', ...(vpt ? { vpt } : {}) };
-  return { ...bundledFiles, 'models/index.json': JSON.stringify(index), [`models/${id}.xml`]: BUILDING };
+  return { ...files, 'models/index.json': JSON.stringify(index), [`models/${id}.xml`]: BUILDING };
 }
 
 const boot = (files: Record<string, string>) => Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
@@ -100,7 +102,7 @@ describe('the buildings of the seed', () => {
     for (const id of written) expect(index[`corona-${id}`]).toMatchObject({ classe: 'edificio', vpt: 8 });
   });
 
-  for (const id of ['magia']) {
+  for (const id of ['magia', 'persone', 'cose', 'oggetti', 'luoghi', 'sistemi', 'nucleo', 'concilio', 'universo', 'galleria', 'mondo']) {
     it(`${id}: runs in time, stands in its sector, its door reached from the avenue, its animation a loop`, async () => {
       const k = await boot(bundledFiles);
       const t = Date.now();

@@ -153,5 +153,65 @@
   "nome": "Torre della Magia",
   "autore": "gemini-3.8-flash (Gemini CLI, T19)",
   "vpt": 8
+ },
+ "corona-concilio": {
+  "classe": "edificio",
+  "nome": "Sala del Concilio",
+  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+  "vpt": 8
+ },
+ "corona-cose": {
+  "classe": "edificio",
+  "nome": "Laboratorio delle cose",
+  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+  "vpt": 8
+ },
+ "corona-galleria": {
+  "classe": "edificio",
+  "nome": "Galleria dell'Artista",
+  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+  "vpt": 8
+ },
+ "corona-luoghi": {
+  "classe": "edificio",
+  "nome": "Ufficio dei luoghi",
+  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+  "vpt": 8
+ },
+ "corona-mondo": {
+  "classe": "edificio",
+  "nome": "Biblioteca del Mondo",
+  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+  "vpt": 8
+ },
+ "corona-nucleo": {
+  "classe": "edificio",
+  "nome": "Il Nucleo",
+  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+  "vpt": 8
+ },
+ "corona-oggetti": {
+  "classe": "edificio",
+  "nome": "Magazzino degli oggetti",
+  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+  "vpt": 8
+ },
+ "corona-persone": {
+  "classe": "edificio",
+  "nome": "Studio dei personaggi",
+  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+  "vpt": 8
+ },
+ "corona-sistemi": {
+  "classe": "edificio",
+  "nome": "Sala sistemi",
+  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+  "vpt": 8
+ },
+ "corona-universo": {
+  "classe": "edificio",
+  "nome": "La Direzione",
+  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+  "vpt": 8
  }
 }

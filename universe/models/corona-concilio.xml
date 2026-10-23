@@ -1,0 +1,643 @@
+<!--
+La Sala del Concilio (corona): imponente struttura esagonale monumentale, sede del Concilio degli agenti.
+Scritto da Gemini CLI (Gemini 3.8 Flash, abbonamento) il 23/10/2026, task T19.
+Scatola: 20 × 20 × 9 caselle, 160 × 160 × 72 voxel, 8 voxel per casella.
+Lettere chiave:
+  O = porta (lettera O, nome "porta", al centro x=80, y=131, z=0..23, atrio interno vuoto per oltre 20 voxel)
+  F = insegna ("SALA DEL CONCILIO", neon rosa ff8ad8 glow fisso sopra il portale monumentale)
+  P = targa scura opaca per l'insegna
+  M = metallo nero primario (piloni d'angolo, architravi, pinne e basamenti)
+  m = metallo secondario scuro (profilati, lesene e pannelli)
+  C = cemento grafite monumentale (gradoni, scalinata e terrazze)
+  S = acciaio chiaro / lesene e raccordi strutturali
+  s = acciaio scuro (cornici e intarsi del pavimento)
+  V = vetro scuro riflettente
+  v = fasce di riflesso azzurrato freddo
+  w = fasce di riflesso magenta caldo
+  n = neon rosa tenue per cornici (glow)
+  N = neon rosa vivo per portale e lanterna (glow)
+  x = buffer temporaneo per l'animazione (hidden)
+Fasi pulsanti del neon rosa (1..8):
+  1..8 = gradiente continuo di 8 fasi (da 8a2862 a ffa0e2) con onda di deliberazione del Concilio.
+Architettura:
+  Pianta esagonale monumentale (lato 56 voxel, ingombro 120 × 104 voxel, z=2..42), con 6 massicci piloni
+  verticali poligonali agli angoli e facciata principale a sud rivolta verso il viale.
+Portale monumentale:
+  Avancorpo monumentale (x=64..96, y=118..134, z=0..38) alto 4 caselle con pinne scanalate laterali in metallo e acciaio,
+  porta O centrata a x=80 e grande insegna "SALA DEL CONCILIO" su due righe sopra il portale.
+Copertura e lanterna sommitale:
+  Tetto a gradoni esagonali (z=42..65) che sale verso la lanterna centrale con nucleo rosa pulsante e guglia a z=70.
+Interno della Sala:
+  Ampia aula consiliare con pavimento in marmo grafite, tavolo rotondo centrale del Concilio con le postazioni degli 8 agenti
+  e ologramma dell'universo in rotazione.
+Animazione "delibera" (8 frame):
+  Onda di energia fluida che pulsa lungo i sei spigoli verticali, il portale monumentale e la lanterna zenitale.
+-->
+<sequence values="BMmCSsVvwNnFPOx12345678" size="160 160 72" symmetry="()" name="Sala del Concilio">
+  <!-- Materiali e palette -->
+  <color symbol="M" value="14141a" name="metallo primario"/>
+  <color symbol="m" value="22242e" name="metallo secondario"/>
+  <color symbol="C" value="32343c" name="cemento grafite"/>
+  <color symbol="S" value="8a8f9c" name="acciaio chiaro"/>
+  <color symbol="s" value="525662" name="acciaio scuro"/>
+  <color symbol="V" value="18202c" name="vetro scuro"/>
+  <color symbol="v" value="304458" name="riflesso vetro freddo"/>
+  <color symbol="w" value="4a243c" name="riflesso magenta"/>
+  <color symbol="N" value="ff8ad8" glow="True" name="neon rosa vivo"/>
+  <color symbol="n" value="c0589a" glow="True" name="neon rosa tenue"/>
+  <color symbol="P" value="0a0a10" name="targa insegna"/>
+  <color symbol="F" value="ff8ad8" glow="True" name="insegna fissa"/>
+  <color symbol="O" value="38182c" name="porta"/>
+  <color symbol="x" hidden="True" name="buffer animazione"/>
+
+  <!-- 8 Fasi dell'onda neon rosa (deliberazione del Concilio) -->
+  <color symbol="1" value="8a2862" glow="True" name="fase rosa 1"/>
+  <color symbol="2" value="a83278" glow="True" name="fase rosa 2"/>
+  <color symbol="3" value="c84292" glow="True" name="fase rosa 3"/>
+  <color symbol="4" value="e858ae" glow="True" name="fase rosa 4"/>
+  <color symbol="5" value="ffa0e2" glow="True" name="fase rosa apice"/>
+  <color symbol="6" value="e858ae" glow="True" name="fase rosa 6"/>
+  <color symbol="7" value="c84292" glow="True" name="fase rosa 7"/>
+  <color symbol="8" value="a83278" glow="True" name="fase rosa 8"/>
+
+  <!-- ================================================================= -->
+  <!-- 1. BASAMENTO MONUMENTALE E SCALINATA D'ONORE (z = 0..3)           -->
+  <!-- ================================================================= -->
+  <!-- Grande piattaforma ottagonale di fondazione (cx=80, cy=68) -->
+  <box at="80 68 0" size="140 120 2" color="C"/>
+  <box at="80 68 1" size="134 114 1" color="m"/>
+  <box at="80 68 2" size="130 110 1" color="C"/>
+
+  <!-- Scalinata cerimoniale e piazzale avanzato verso il viale (y=118..152) -->
+  <box at="80 134 0" size="72 36 2" color="C"/>
+  <box at="80 134 1" size="66 32 1" color="m"/>
+  <box at="80 142 2" size="52 20 1" color="C"/>
+
+  <!-- Guide luminose neon rosa lungo la scalinata d'onore (fasi 2 e 6) -->
+  <box at="58 142 2" size="1 20 1" color="2"/>
+  <box at="102 142 2" size="1 20 1" color="6"/>
+
+  <!-- Colonne d'onore all'inizio della scalinata (y=150) con fari neon rosa -->
+  <box at="56 150 0" size="4 4 12" color="M"/>
+  <box at="56 150 12" size="2 2 2" color="S"/>
+  <box at="56 150 14" size="1 1 2" color="5"/>
+  <box at="104 150 0" size="4 4 12" color="M"/>
+  <box at="104 150 12" size="2 2 2" color="S"/>
+  <box at="104 150 14" size="1 1 2" color="5"/>
+
+  <!-- ================================================================= -->
+  <!-- 2. I 6 GRANDI PILONI ANGOLARI DEL CONCILIO (z = 0..46)            -->
+  <!-- V_SW:(52,118); V_SE:(108,118); V_E:(138,68);                      -->
+  <!-- V_NE:(108,18); V_NW:(52,18);   V_W:(22,68)                        -->
+  <!-- ================================================================= -->
+  <!-- Pilon SW at (52, 118) -->
+  <box at="52 118 0" size="8 8 46" color="M"/>
+  <box at="52 118 0" size="6 6 46" color="m"/>
+  <box at="52 118 4" size="4 4 42" color="S"/>
+  <box at="49 121 2" size="1 1 44" color="1"/>
+  <box at="52 118 46" size="6 6 2" color="S"/>
+  <box at="52 118 48" size="2 2 2" color="5"/>
+  <!-- Pilon SE at (108, 118) -->
+  <box at="108 118 0" size="8 8 46" color="M"/>
+  <box at="108 118 0" size="6 6 46" color="m"/>
+  <box at="108 118 4" size="4 4 42" color="S"/>
+  <box at="111 121 2" size="1 1 44" color="2"/>
+  <box at="108 118 46" size="6 6 2" color="S"/>
+  <box at="108 118 48" size="2 2 2" color="5"/>
+  <!-- Pilon E at (138, 68) -->
+  <box at="138 68 0" size="8 8 46" color="M"/>
+  <box at="138 68 0" size="6 6 46" color="m"/>
+  <box at="138 68 4" size="4 4 42" color="S"/>
+  <box at="141 68 2" size="1 1 44" color="3"/>
+  <box at="138 68 46" size="6 6 2" color="S"/>
+  <box at="138 68 48" size="2 2 2" color="5"/>
+  <!-- Pilon NE at (108, 18) -->
+  <box at="108 18 0" size="8 8 46" color="M"/>
+  <box at="108 18 0" size="6 6 46" color="m"/>
+  <box at="108 18 4" size="4 4 42" color="S"/>
+  <box at="111 15 2" size="1 1 44" color="5"/>
+  <box at="108 18 46" size="6 6 2" color="S"/>
+  <box at="108 18 48" size="2 2 2" color="5"/>
+  <!-- Pilon NW at (52, 18) -->
+  <box at="52 18 0" size="8 8 46" color="M"/>
+  <box at="52 18 0" size="6 6 46" color="m"/>
+  <box at="52 18 4" size="4 4 42" color="S"/>
+  <box at="49 15 2" size="1 1 44" color="6"/>
+  <box at="52 18 46" size="6 6 2" color="S"/>
+  <box at="52 18 48" size="2 2 2" color="5"/>
+  <!-- Pilon W at (22, 68) -->
+  <box at="22 68 0" size="8 8 46" color="M"/>
+  <box at="22 68 0" size="6 6 46" color="m"/>
+  <box at="22 68 4" size="4 4 42" color="S"/>
+  <box at="19 68 2" size="1 1 44" color="7"/>
+  <box at="22 68 46" size="6 6 2" color="S"/>
+  <box at="22 68 48" size="2 2 2" color="5"/>
+
+  <!-- ================================================================= -->
+  <!-- 3. PARETI ESAGONALI DELL'EDIFICIO (z = 2..42)                    -->
+  <!-- ================================================================= -->
+  <!-- Parete Sud (facciata d'onore, y=118, x=52..108) -->
+  <box at="80 118 2" size="56 4 40" color="M"/>
+  <box at="80 118 4" size="52 2 36" color="V"/>
+  <box at="80 118 16" size="54 3 2" color="v"/>
+  <box at="80 118 28" size="54 3 2" color="w"/>
+
+  <!-- Parete Nord (fondo, y=18, x=52..108) -->
+  <box at="80 18 2" size="56 4 40" color="M"/>
+  <box at="80 18 4" size="52 2 36" color="V"/>
+  <box at="80 18 16" size="54 3 2" color="v"/>
+  <box at="80 18 28" size="54 3 2" color="w"/>
+
+  <!-- 4 Pareti Diagonali a lesene scalate (SE, NE, NW, SW) -->
+  <box at="110 116 2" size="5 7 40" color="M"/>
+  <box at="110 116 4" size="3 5 36" color="V"/>
+  <box at="110 116 16" size="4 6 2" color="v"/>
+  <box at="110 116 28" size="4 6 2" color="w"/>
+  <box at="137 66 2" size="5 7 40" color="M"/>
+  <box at="137 66 4" size="3 5 36" color="V"/>
+  <box at="137 66 16" size="4 6 2" color="v"/>
+  <box at="137 66 28" size="4 6 2" color="w"/>
+  <box at="51 21 2" size="5 7 40" color="M"/>
+  <box at="51 21 4" size="3 5 36" color="V"/>
+  <box at="51 21 16" size="4 6 2" color="v"/>
+  <box at="51 21 28" size="4 6 2" color="w"/>
+  <box at="24 71 2" size="5 7 40" color="M"/>
+  <box at="24 71 4" size="3 5 36" color="V"/>
+  <box at="24 71 16" size="4 6 2" color="v"/>
+  <box at="24 71 28" size="4 6 2" color="w"/>
+  <box at="113 111 2" size="5 7 40" color="M"/>
+  <box at="113 111 4" size="3 5 36" color="V"/>
+  <box at="113 111 16" size="4 6 2" color="v"/>
+  <box at="113 111 28" size="4 6 2" color="w"/>
+  <box at="134 61 2" size="5 7 40" color="M"/>
+  <box at="134 61 4" size="3 5 36" color="V"/>
+  <box at="134 61 16" size="4 6 2" color="v"/>
+  <box at="134 61 28" size="4 6 2" color="w"/>
+  <box at="48 26 2" size="5 7 40" color="M"/>
+  <box at="48 26 4" size="3 5 36" color="V"/>
+  <box at="48 26 16" size="4 6 2" color="v"/>
+  <box at="48 26 28" size="4 6 2" color="w"/>
+  <box at="27 76 2" size="5 7 40" color="M"/>
+  <box at="27 76 4" size="3 5 36" color="V"/>
+  <box at="27 76 16" size="4 6 2" color="v"/>
+  <box at="27 76 28" size="4 6 2" color="w"/>
+  <box at="116 106 2" size="5 7 40" color="M"/>
+  <box at="116 106 4" size="3 5 36" color="V"/>
+  <box at="116 106 16" size="4 6 2" color="v"/>
+  <box at="116 106 28" size="4 6 2" color="w"/>
+  <box at="131 56 2" size="5 7 40" color="M"/>
+  <box at="131 56 4" size="3 5 36" color="V"/>
+  <box at="131 56 16" size="4 6 2" color="v"/>
+  <box at="131 56 28" size="4 6 2" color="w"/>
+  <box at="45 31 2" size="5 7 40" color="M"/>
+  <box at="45 31 4" size="3 5 36" color="V"/>
+  <box at="45 31 16" size="4 6 2" color="v"/>
+  <box at="45 31 28" size="4 6 2" color="w"/>
+  <box at="30 81 2" size="5 7 40" color="M"/>
+  <box at="30 81 4" size="3 5 36" color="V"/>
+  <box at="30 81 16" size="4 6 2" color="v"/>
+  <box at="30 81 28" size="4 6 2" color="w"/>
+  <box at="119 101 2" size="5 7 40" color="M"/>
+  <box at="119 101 4" size="3 5 36" color="V"/>
+  <box at="119 101 16" size="4 6 2" color="v"/>
+  <box at="119 101 28" size="4 6 2" color="w"/>
+  <box at="128 51 2" size="5 7 40" color="M"/>
+  <box at="128 51 4" size="3 5 36" color="V"/>
+  <box at="128 51 16" size="4 6 2" color="v"/>
+  <box at="128 51 28" size="4 6 2" color="w"/>
+  <box at="42 36 2" size="5 7 40" color="M"/>
+  <box at="42 36 4" size="3 5 36" color="V"/>
+  <box at="42 36 16" size="4 6 2" color="v"/>
+  <box at="42 36 28" size="4 6 2" color="w"/>
+  <box at="33 86 2" size="5 7 40" color="M"/>
+  <box at="33 86 4" size="3 5 36" color="V"/>
+  <box at="33 86 16" size="4 6 2" color="v"/>
+  <box at="33 86 28" size="4 6 2" color="w"/>
+  <box at="122 96 2" size="5 7 40" color="M"/>
+  <box at="122 96 4" size="3 5 36" color="V"/>
+  <box at="122 96 16" size="4 6 2" color="v"/>
+  <box at="122 96 28" size="4 6 2" color="w"/>
+  <box at="125 46 2" size="5 7 40" color="M"/>
+  <box at="125 46 4" size="3 5 36" color="V"/>
+  <box at="125 46 16" size="4 6 2" color="v"/>
+  <box at="125 46 28" size="4 6 2" color="w"/>
+  <box at="39 41 2" size="5 7 40" color="M"/>
+  <box at="39 41 4" size="3 5 36" color="V"/>
+  <box at="39 41 16" size="4 6 2" color="v"/>
+  <box at="39 41 28" size="4 6 2" color="w"/>
+  <box at="36 91 2" size="5 7 40" color="M"/>
+  <box at="36 91 4" size="3 5 36" color="V"/>
+  <box at="36 91 16" size="4 6 2" color="v"/>
+  <box at="36 91 28" size="4 6 2" color="w"/>
+  <box at="125 91 2" size="5 7 40" color="M"/>
+  <box at="125 91 4" size="3 5 36" color="V"/>
+  <box at="125 91 16" size="4 6 2" color="v"/>
+  <box at="125 91 28" size="4 6 2" color="w"/>
+  <box at="122 41 2" size="5 7 40" color="M"/>
+  <box at="122 41 4" size="3 5 36" color="V"/>
+  <box at="122 41 16" size="4 6 2" color="v"/>
+  <box at="122 41 28" size="4 6 2" color="w"/>
+  <box at="36 46 2" size="5 7 40" color="M"/>
+  <box at="36 46 4" size="3 5 36" color="V"/>
+  <box at="36 46 16" size="4 6 2" color="v"/>
+  <box at="36 46 28" size="4 6 2" color="w"/>
+  <box at="39 96 2" size="5 7 40" color="M"/>
+  <box at="39 96 4" size="3 5 36" color="V"/>
+  <box at="39 96 16" size="4 6 2" color="v"/>
+  <box at="39 96 28" size="4 6 2" color="w"/>
+  <box at="128 86 2" size="5 7 40" color="M"/>
+  <box at="128 86 4" size="3 5 36" color="V"/>
+  <box at="128 86 16" size="4 6 2" color="v"/>
+  <box at="128 86 28" size="4 6 2" color="w"/>
+  <box at="119 36 2" size="5 7 40" color="M"/>
+  <box at="119 36 4" size="3 5 36" color="V"/>
+  <box at="119 36 16" size="4 6 2" color="v"/>
+  <box at="119 36 28" size="4 6 2" color="w"/>
+  <box at="33 51 2" size="5 7 40" color="M"/>
+  <box at="33 51 4" size="3 5 36" color="V"/>
+  <box at="33 51 16" size="4 6 2" color="v"/>
+  <box at="33 51 28" size="4 6 2" color="w"/>
+  <box at="42 101 2" size="5 7 40" color="M"/>
+  <box at="42 101 4" size="3 5 36" color="V"/>
+  <box at="42 101 16" size="4 6 2" color="v"/>
+  <box at="42 101 28" size="4 6 2" color="w"/>
+  <box at="131 81 2" size="5 7 40" color="M"/>
+  <box at="131 81 4" size="3 5 36" color="V"/>
+  <box at="131 81 16" size="4 6 2" color="v"/>
+  <box at="131 81 28" size="4 6 2" color="w"/>
+  <box at="116 31 2" size="5 7 40" color="M"/>
+  <box at="116 31 4" size="3 5 36" color="V"/>
+  <box at="116 31 16" size="4 6 2" color="v"/>
+  <box at="116 31 28" size="4 6 2" color="w"/>
+  <box at="30 56 2" size="5 7 40" color="M"/>
+  <box at="30 56 4" size="3 5 36" color="V"/>
+  <box at="30 56 16" size="4 6 2" color="v"/>
+  <box at="30 56 28" size="4 6 2" color="w"/>
+  <box at="45 106 2" size="5 7 40" color="M"/>
+  <box at="45 106 4" size="3 5 36" color="V"/>
+  <box at="45 106 16" size="4 6 2" color="v"/>
+  <box at="45 106 28" size="4 6 2" color="w"/>
+  <box at="134 76 2" size="5 7 40" color="M"/>
+  <box at="134 76 4" size="3 5 36" color="V"/>
+  <box at="134 76 16" size="4 6 2" color="v"/>
+  <box at="134 76 28" size="4 6 2" color="w"/>
+  <box at="113 26 2" size="5 7 40" color="M"/>
+  <box at="113 26 4" size="3 5 36" color="V"/>
+  <box at="113 26 16" size="4 6 2" color="v"/>
+  <box at="113 26 28" size="4 6 2" color="w"/>
+  <box at="27 61 2" size="5 7 40" color="M"/>
+  <box at="27 61 4" size="3 5 36" color="V"/>
+  <box at="27 61 16" size="4 6 2" color="v"/>
+  <box at="27 61 28" size="4 6 2" color="w"/>
+  <box at="48 111 2" size="5 7 40" color="M"/>
+  <box at="48 111 4" size="3 5 36" color="V"/>
+  <box at="48 111 16" size="4 6 2" color="v"/>
+  <box at="48 111 28" size="4 6 2" color="w"/>
+  <box at="137 71 2" size="5 7 40" color="M"/>
+  <box at="137 71 4" size="3 5 36" color="V"/>
+  <box at="137 71 16" size="4 6 2" color="v"/>
+  <box at="137 71 28" size="4 6 2" color="w"/>
+  <box at="110 21 2" size="5 7 40" color="M"/>
+  <box at="110 21 4" size="3 5 36" color="V"/>
+  <box at="110 21 16" size="4 6 2" color="v"/>
+  <box at="110 21 28" size="4 6 2" color="w"/>
+  <box at="24 66 2" size="5 7 40" color="M"/>
+  <box at="24 66 4" size="3 5 36" color="V"/>
+  <box at="24 66 16" size="4 6 2" color="v"/>
+  <box at="24 66 28" size="4 6 2" color="w"/>
+  <box at="51 116 2" size="5 7 40" color="M"/>
+  <box at="51 116 4" size="3 5 36" color="V"/>
+  <box at="51 116 16" size="4 6 2" color="v"/>
+  <box at="51 116 28" size="4 6 2" color="w"/>
+
+  <!-- ================================================================= -->
+  <!-- 4. SVUOTAMENTO DELL'AULA CONSILIARE INTERNA (z = 2..42)            -->
+  <!-- ================================================================= -->
+  <cylinder at="80 68 2" size="86 86 40" color="B"/>
+  <cylinder at="80 68 0" size="90 90 2" color="C"/>
+  <cylinder at="80 68 1" size="88 88 1" color="s"/>
+  <cylinder at="80 68 2" size="86 86 1" color="m"/>
+
+  <!-- ================================================================= -->
+  <!-- 5. TAVOLO ROTONDO DEL CONCILIO E SCULTURA CENTRALE (INTERNO)      -->
+  <!-- ================================================================= -->
+  <!-- Pedana circolare rialzata del Concilio -->
+  <cylinder at="80 68 3" size="36 36 2" color="C"/>
+  <cylinder at="80 68 5" size="32 32 1" color="m"/>
+
+  <!-- Il Tavolo Rotondo degli 8 Membri del Concilio -->
+  <cylinder at="80 68 6" size="24 24 3" color="M"/>
+  <cylinder at="80 68 8" size="26 26 1" color="S"/>
+  <cylinder at="80 68 6" size="14 14 4" color="B"/>
+
+  <!-- Postazioni degli 8 agenti attorno al tavolo con schienali neon rosa -->
+  <box at="96 68 6" size="3 3 4" color="m"/>
+  <box at="96 68 10" size="2 2 3" color="M"/>
+  <box at="96 68 13" size="1 1 1" color="1"/>
+  <box at="91 79 6" size="3 3 4" color="m"/>
+  <box at="91 79 10" size="2 2 3" color="M"/>
+  <box at="91 79 13" size="1 1 1" color="2"/>
+  <box at="80 84 6" size="3 3 4" color="m"/>
+  <box at="80 84 10" size="2 2 3" color="M"/>
+  <box at="80 84 13" size="1 1 1" color="3"/>
+  <box at="69 79 6" size="3 3 4" color="m"/>
+  <box at="69 79 10" size="2 2 3" color="M"/>
+  <box at="69 79 13" size="1 1 1" color="4"/>
+  <box at="64 68 6" size="3 3 4" color="m"/>
+  <box at="64 68 10" size="2 2 3" color="M"/>
+  <box at="64 68 13" size="1 1 1" color="5"/>
+  <box at="69 57 6" size="3 3 4" color="m"/>
+  <box at="69 57 10" size="2 2 3" color="M"/>
+  <box at="69 57 13" size="1 1 1" color="6"/>
+  <box at="80 52 6" size="3 3 4" color="m"/>
+  <box at="80 52 10" size="2 2 3" color="M"/>
+  <box at="80 52 13" size="1 1 1" color="7"/>
+  <box at="91 57 6" size="3 3 4" color="m"/>
+  <box at="91 57 10" size="2 2 3" color="M"/>
+  <box at="91 57 13" size="1 1 1" color="8"/>
+
+  <!-- Pilone olografico e globo dell'universo centrale (z=3..16) -->
+  <cylinder at="80 68 3" size="6 6 10" color="S"/>
+  <!-- 4 bracci stabilizzatori in acciaio dal tavolo all'orbe -->
+  <line at="76 68 9" to="78 68 13" r="0" color="S"/>
+  <line at="84 68 9" to="82 68 13" r="0" color="S"/>
+  <line at="80 64 9" to="80 66 13" r="0" color="S"/>
+  <line at="80 72 9" to="80 70 13" r="0" color="S"/>
+  <!-- Globo / ologramma dell'universo sospeso (tocca i bracci e il pilone) -->
+  <ellipsoid at="80 68 12" size="8 8 8" color="5"/>
+  <ellipsoid at="80 68 13" size="4 4 4" color="4"/>
+
+  <!-- ================================================================= -->
+  <!-- 6. PORTALE MONUMENTALE AVANZATO (FACCIA SUD, y=118..134, z=0..46) -->
+  <!-- ================================================================= -->
+  <!-- Taglio monumentale nella facciata sud (x=66..94, y=116..122, z=0..32) -->
+  <box at="80 118 0" size="28 8 32" color="B"/>
+
+  <!-- Corpo del portale avanzato in metallo primario e secondario -->
+  <box at="80 125 0" size="34 16 34" color="M"/>
+  <box at="80 126 2" size="30 14 32" color="m"/>
+
+  <!-- 2 Colossali pinne architettoniche scanalate ai lati del portale -->
+  <!-- Pinna Sinistra (x=61..66, y=122..134, z=0..40) -->
+  <box at="63 128 0" size="6 12 40" color="M"/>
+  <box at="63 128 4" size="4 10 36" color="S"/>
+  <box at="60 134 2" size="1 1 38" color="N"/>
+  <box at="63 128 40" size="6 12 2" color="S"/>
+  <box at="63 134 42" size="2 2 2" color="5"/>
+
+  <!-- Pinna Destra (x=94..99, y=122..134, z=0..40) -->
+  <box at="97 128 0" size="6 12 40" color="M"/>
+  <box at="97 128 4" size="4 10 36" color="S"/>
+  <box at="100 134 2" size="1 1 38" color="N"/>
+  <box at="97 128 40" size="6 12 2" color="S"/>
+  <box at="97 134 42" size="2 2 2" color="5"/>
+
+  <!-- Cornice neon rosa vivo e architrave dell'arco monumentale (y=132) -->
+  <box at="68 132 0" size="1 1 25" color="N"/>
+  <box at="92 132 0" size="1 1 25" color="N"/>
+  <box at="80 132 25" size="25 1 1" color="N"/>
+  <box at="80 131 26" size="27 3 3" color="S"/>
+  <box at="80 132 28" size="23 1 1" color="w"/>
+
+  <!-- I VOXEL DELLA PORTA O (z=0..23, x=71..89, larghezza 19, altezza 24) -->
+  <box at="80 130 0" size="19 1 24" color="O"/>
+  <!-- Atrio interno monumentale vuoto e sgombro per oltre 22 voxel (y=108..129) -->
+  <box at="80 119 0" size="19 22 24" color="B"/>
+  <box at="80 119 0" size="19 22 1" color="C"/>
+
+  <!-- ================================================================= -->
+  <!-- 7. L'INSEGNA NEON "SALA DEL CONCILIO" (y=133, z=33..44)          -->
+  <!-- ================================================================= -->
+  <!-- Targa opaca scura di fondo per l'insegna -->
+  <box at="80 132 32" size="42 1 14" color="P"/>
+  <box at="80 131 32" size="42 1 14" color="M"/>
+
+  <!-- Cornice al neon rosa della targa -->
+  <box at="80 132 31" size="44 1 1" color="n"/>
+  <box at="80 132 46" size="44 1 1" color="n"/>
+  <box at="58 132 32" size="1 1 14" color="n"/>
+  <box at="102 132 32" size="1 1 14" color="n"/>
+
+  <!-- RIGA 1: "SALA DEL" (z=40..44, y=133) -->
+  <box at="66 133 44" size="1 1 1" color="F"/>
+  <box at="67 133 44" size="1 1 1" color="F"/>
+  <box at="68 133 44" size="1 1 1" color="F"/>
+  <box at="66 133 43" size="1 1 1" color="F"/>
+  <box at="66 133 42" size="1 1 1" color="F"/>
+  <box at="67 133 42" size="1 1 1" color="F"/>
+  <box at="68 133 42" size="1 1 1" color="F"/>
+  <box at="68 133 41" size="1 1 1" color="F"/>
+  <box at="66 133 40" size="1 1 1" color="F"/>
+  <box at="67 133 40" size="1 1 1" color="F"/>
+  <box at="68 133 40" size="1 1 1" color="F"/>
+  <box at="70 133 44" size="1 1 1" color="F"/>
+  <box at="71 133 44" size="1 1 1" color="F"/>
+  <box at="72 133 44" size="1 1 1" color="F"/>
+  <box at="70 133 43" size="1 1 1" color="F"/>
+  <box at="72 133 43" size="1 1 1" color="F"/>
+  <box at="70 133 42" size="1 1 1" color="F"/>
+  <box at="71 133 42" size="1 1 1" color="F"/>
+  <box at="72 133 42" size="1 1 1" color="F"/>
+  <box at="70 133 41" size="1 1 1" color="F"/>
+  <box at="72 133 41" size="1 1 1" color="F"/>
+  <box at="70 133 40" size="1 1 1" color="F"/>
+  <box at="72 133 40" size="1 1 1" color="F"/>
+  <box at="74 133 40" size="1 1 1" color="F"/>
+  <box at="74 133 41" size="1 1 1" color="F"/>
+  <box at="74 133 42" size="1 1 1" color="F"/>
+  <box at="74 133 43" size="1 1 1" color="F"/>
+  <box at="74 133 44" size="1 1 1" color="F"/>
+  <box at="75 133 40" size="1 1 1" color="F"/>
+  <box at="76 133 40" size="1 1 1" color="F"/>
+  <box at="78 133 44" size="1 1 1" color="F"/>
+  <box at="79 133 44" size="1 1 1" color="F"/>
+  <box at="80 133 44" size="1 1 1" color="F"/>
+  <box at="78 133 43" size="1 1 1" color="F"/>
+  <box at="80 133 43" size="1 1 1" color="F"/>
+  <box at="78 133 42" size="1 1 1" color="F"/>
+  <box at="79 133 42" size="1 1 1" color="F"/>
+  <box at="80 133 42" size="1 1 1" color="F"/>
+  <box at="78 133 41" size="1 1 1" color="F"/>
+  <box at="80 133 41" size="1 1 1" color="F"/>
+  <box at="78 133 40" size="1 1 1" color="F"/>
+  <box at="80 133 40" size="1 1 1" color="F"/>
+  <box at="84 133 40" size="1 1 1" color="F"/>
+  <box at="84 133 41" size="1 1 1" color="F"/>
+  <box at="84 133 42" size="1 1 1" color="F"/>
+  <box at="84 133 43" size="1 1 1" color="F"/>
+  <box at="84 133 44" size="1 1 1" color="F"/>
+  <box at="85 133 44" size="1 1 1" color="F"/>
+  <box at="86 133 43" size="1 1 1" color="F"/>
+  <box at="86 133 42" size="1 1 1" color="F"/>
+  <box at="86 133 41" size="1 1 1" color="F"/>
+  <box at="85 133 40" size="1 1 1" color="F"/>
+  <box at="88 133 40" size="1 1 1" color="F"/>
+  <box at="88 133 41" size="1 1 1" color="F"/>
+  <box at="88 133 42" size="1 1 1" color="F"/>
+  <box at="88 133 43" size="1 1 1" color="F"/>
+  <box at="88 133 44" size="1 1 1" color="F"/>
+  <box at="89 133 44" size="1 1 1" color="F"/>
+  <box at="90 133 44" size="1 1 1" color="F"/>
+  <box at="89 133 42" size="1 1 1" color="F"/>
+  <box at="89 133 40" size="1 1 1" color="F"/>
+  <box at="90 133 40" size="1 1 1" color="F"/>
+  <box at="92 133 40" size="1 1 1" color="F"/>
+  <box at="92 133 41" size="1 1 1" color="F"/>
+  <box at="92 133 42" size="1 1 1" color="F"/>
+  <box at="92 133 43" size="1 1 1" color="F"/>
+  <box at="92 133 44" size="1 1 1" color="F"/>
+  <box at="93 133 40" size="1 1 1" color="F"/>
+  <box at="94 133 40" size="1 1 1" color="F"/>
+  <!-- RIGA 2: "CONCILIO" (z=33..37, y=133) -->
+  <box at="65 133 37" size="1 1 1" color="F"/>
+  <box at="66 133 37" size="1 1 1" color="F"/>
+  <box at="67 133 37" size="1 1 1" color="F"/>
+  <box at="65 133 34" size="1 1 1" color="F"/>
+  <box at="65 133 35" size="1 1 1" color="F"/>
+  <box at="65 133 36" size="1 1 1" color="F"/>
+  <box at="65 133 33" size="1 1 1" color="F"/>
+  <box at="66 133 33" size="1 1 1" color="F"/>
+  <box at="67 133 33" size="1 1 1" color="F"/>
+  <box at="69 133 37" size="1 1 1" color="F"/>
+  <box at="70 133 37" size="1 1 1" color="F"/>
+  <box at="71 133 37" size="1 1 1" color="F"/>
+  <box at="69 133 34" size="1 1 1" color="F"/>
+  <box at="71 133 34" size="1 1 1" color="F"/>
+  <box at="69 133 35" size="1 1 1" color="F"/>
+  <box at="71 133 35" size="1 1 1" color="F"/>
+  <box at="69 133 36" size="1 1 1" color="F"/>
+  <box at="71 133 36" size="1 1 1" color="F"/>
+  <box at="69 133 33" size="1 1 1" color="F"/>
+  <box at="70 133 33" size="1 1 1" color="F"/>
+  <box at="71 133 33" size="1 1 1" color="F"/>
+  <box at="73 133 33" size="1 1 1" color="F"/>
+  <box at="73 133 34" size="1 1 1" color="F"/>
+  <box at="73 133 35" size="1 1 1" color="F"/>
+  <box at="73 133 36" size="1 1 1" color="F"/>
+  <box at="73 133 37" size="1 1 1" color="F"/>
+  <box at="74 133 35" size="1 1 1" color="F"/>
+  <box at="75 133 33" size="1 1 1" color="F"/>
+  <box at="75 133 34" size="1 1 1" color="F"/>
+  <box at="75 133 35" size="1 1 1" color="F"/>
+  <box at="75 133 36" size="1 1 1" color="F"/>
+  <box at="75 133 37" size="1 1 1" color="F"/>
+  <box at="77 133 37" size="1 1 1" color="F"/>
+  <box at="78 133 37" size="1 1 1" color="F"/>
+  <box at="79 133 37" size="1 1 1" color="F"/>
+  <box at="77 133 34" size="1 1 1" color="F"/>
+  <box at="77 133 35" size="1 1 1" color="F"/>
+  <box at="77 133 36" size="1 1 1" color="F"/>
+  <box at="77 133 33" size="1 1 1" color="F"/>
+  <box at="78 133 33" size="1 1 1" color="F"/>
+  <box at="79 133 33" size="1 1 1" color="F"/>
+  <box at="81 133 37" size="1 1 1" color="F"/>
+  <box at="82 133 37" size="1 1 1" color="F"/>
+  <box at="83 133 37" size="1 1 1" color="F"/>
+  <box at="82 133 34" size="1 1 1" color="F"/>
+  <box at="82 133 35" size="1 1 1" color="F"/>
+  <box at="82 133 36" size="1 1 1" color="F"/>
+  <box at="81 133 33" size="1 1 1" color="F"/>
+  <box at="82 133 33" size="1 1 1" color="F"/>
+  <box at="83 133 33" size="1 1 1" color="F"/>
+  <box at="85 133 33" size="1 1 1" color="F"/>
+  <box at="85 133 34" size="1 1 1" color="F"/>
+  <box at="85 133 35" size="1 1 1" color="F"/>
+  <box at="85 133 36" size="1 1 1" color="F"/>
+  <box at="85 133 37" size="1 1 1" color="F"/>
+  <box at="86 133 33" size="1 1 1" color="F"/>
+  <box at="87 133 33" size="1 1 1" color="F"/>
+  <box at="89 133 37" size="1 1 1" color="F"/>
+  <box at="90 133 37" size="1 1 1" color="F"/>
+  <box at="91 133 37" size="1 1 1" color="F"/>
+  <box at="90 133 34" size="1 1 1" color="F"/>
+  <box at="90 133 35" size="1 1 1" color="F"/>
+  <box at="90 133 36" size="1 1 1" color="F"/>
+  <box at="89 133 33" size="1 1 1" color="F"/>
+  <box at="90 133 33" size="1 1 1" color="F"/>
+  <box at="91 133 33" size="1 1 1" color="F"/>
+  <box at="93 133 37" size="1 1 1" color="F"/>
+  <box at="94 133 37" size="1 1 1" color="F"/>
+  <box at="95 133 37" size="1 1 1" color="F"/>
+  <box at="93 133 34" size="1 1 1" color="F"/>
+  <box at="95 133 34" size="1 1 1" color="F"/>
+  <box at="93 133 35" size="1 1 1" color="F"/>
+  <box at="95 133 35" size="1 1 1" color="F"/>
+  <box at="93 133 36" size="1 1 1" color="F"/>
+  <box at="95 133 36" size="1 1 1" color="F"/>
+  <box at="93 133 33" size="1 1 1" color="F"/>
+  <box at="94 133 33" size="1 1 1" color="F"/>
+  <box at="95 133 33" size="1 1 1" color="F"/>
+
+  <!-- ================================================================= -->
+  <!-- 8. COPERTURA A GRADONI ESAGONALI (z = 42..65, cx=80, cy=68)       -->
+  <!-- ================================================================= -->
+  <!-- Cornicione perimetrale in metallo primario e acciaio sopra i muri -->
+  <cylinder at="80 68 42" size="126 108 2" color="M"/>
+  <cylinder at="80 68 43" size="128 110 1" color="N"/>
+  <cylinder at="80 68 44" size="122 104 2" color="S"/>
+
+  <!-- 5 Ordini di gradoni della cupola esagonale -->
+  <!-- Ordine 1 (z=44..48) -->
+  <cylinder at="80 68 44" size="112 96 4" color="M"/>
+  <cylinder at="80 68 46" size="114 98 1" color="v"/>
+  <!-- Ordine 2 (z=48..52) -->
+  <cylinder at="80 68 48" size="96 82 4" color="m"/>
+  <cylinder at="80 68 50" size="98 84 1" color="w"/>
+  <!-- Ordine 3 (z=52..56) -->
+  <cylinder at="80 68 52" size="80 68 4" color="M"/>
+  <cylinder at="80 68 54" size="82 70 1" color="v"/>
+  <!-- Ordine 4 (z=56..60) -->
+  <cylinder at="80 68 56" size="64 54 4" color="m"/>
+  <cylinder at="80 68 58" size="66 56 1" color="w"/>
+  <!-- Ordine 5 (z=60..64) -->
+  <cylinder at="80 68 60" size="48 40 4" color="M"/>
+  <cylinder at="80 68 62" size="50 42 1" color="S"/>
+
+  <!-- Nervature radiali neon rosa lungo i 6 spigoli del tetto -->
+  <line at="52 118 44" to="80 68 64" r="0" color="3"/>
+  <line at="52 118 44" to="80 68 64" r="0" color="N" on="M"/>
+  <line at="108 118 44" to="80 68 64" r="0" color="3"/>
+  <line at="108 118 44" to="80 68 64" r="0" color="N" on="M"/>
+  <line at="138 68 44" to="80 68 64" r="0" color="3"/>
+  <line at="138 68 44" to="80 68 64" r="0" color="N" on="M"/>
+  <line at="108 18 44" to="80 68 64" r="0" color="3"/>
+  <line at="108 18 44" to="80 68 64" r="0" color="N" on="M"/>
+  <line at="52 18 44" to="80 68 64" r="0" color="3"/>
+  <line at="52 18 44" to="80 68 64" r="0" color="N" on="M"/>
+  <line at="22 68 44" to="80 68 64" r="0" color="3"/>
+  <line at="22 68 44" to="80 68 64" r="0" color="N" on="M"/>
+
+  <!-- ================================================================= -->
+  <!-- 9. LANTERNA ZENITALE E GUGLIA SOMMITALE (z = 64..70)              -->
+  <!-- ================================================================= -->
+  <!-- Tamburo poligonale della lanterna con feritoie neon rosa vivo -->
+  <cylinder at="80 68 64" size="32 28 2" color="M"/>
+  <cylinder at="80 68 65" size="28 24 2" color="S"/>
+  <cylinder at="80 68 66" size="22 20 2" color="5"/>
+  <cylinder at="80 68 67" size="16 14 2" color="4"/>
+
+  <!-- Calotta e cuspide in metallo e acciaio -->
+  <cylinder at="80 68 68" size="20 18 1" color="M"/>
+  <cylinder at="80 68 69" size="12 10 1" color="S"/>
+  <!-- Guglia sommitale a z=70 (lascia margine di 1 voxel dal soffitto z=71) -->
+  <box at="80 68 70" size="2 2 1" color="N"/>
+
+</sequence>
+
+<!-- ================================================================= -->
+<!-- ANIMAZIONE CICLICA "DELIBERA" (8 frame, pulsazione del Concilio)  -->
+<!-- L'onda magenta fluisce attraverso i 6 piloni, il portale e il globo -->
+<!-- ================================================================= -->
+<animation name="delibera" frames="8">
+  <sequence>
+    <all in="1" out="x"/>
+    <all in="2" out="1"/>
+    <all in="3" out="2"/>
+    <all in="4" out="3"/>
+    <all in="5" out="4"/>
+    <all in="6" out="5"/>
+    <all in="7" out="6"/>
+    <all in="8" out="7"/>
+    <all in="x" out="8"/>
+  </sequence>
+</animation>

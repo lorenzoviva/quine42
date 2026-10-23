@@ -399,7 +399,7 @@ Prossimi passi (il dettaglio è nel backlog):
 1. Coerenza del mondo: canone delle rune, prompt narrativi più semplici, società e trame coerenti, il grafo del
    mondo come contesto degli agenti (T07-T13, fatti).
 2. Grafica e controlli 3D: voxel luminosi (T14, fatto), telecamera che ruota (T15, fatto), terreno con le altezze (T16, fatto), lotti in piano (T17, fatto).
-3. La corona più grande (T18, fatto), con gli esterni come modelli (motore: T20, fatto; i programmi: T31) e gli interni.
+3. La corona più grande (T18, fatto), con gli esterni come modelli (motore: T20, fatto; i programmi di tutti gli undici edifici: T31, fatto) e gli interni.
 4. Ancore del piano («vicino a…»), forme degli oggetti portati e dei terreni che cambiano con «Altro…».
 5. Multiplayer (ADR-0050): il server unica fonte di verità, modalità singola e multigiocatore, master fisso in god mode,
    crediti e carte; piano in [`docs/plans/multiplayer.md`](docs/plans/multiplayer.md), task T33-T45.
