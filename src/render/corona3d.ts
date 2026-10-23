@@ -167,7 +167,7 @@ export function buildRoom(k: Kernel, building: Building, floor: Floor): { group:
   glow.box(X + 0.98, H * 0.7, Z + 1, X + 1.02, H * 0.75, Z + ROOM_H - 1, rgbOf(col));
   glow.box(X + ROOM_W - 1.02, H * 0.7, Z + 1, X + ROOM_W - 0.98, H * 0.75, Z + ROOM_H - 1, rgbOf(col));
   // Racks under the rows of files and exhibits.
-  const shelf = floor.items.filter((i) => i.kind === 'file' || i.kind === 'sprite' || i.kind === 'tile');
+  const shelf = floor.items.filter((i) => i.kind === 'file' || i.kind === 'sprite' || i.kind === 'tile' || i.kind === 'layout');
   for (const y of new Set(shelf.map((i) => i.y))) {
     const xs = shelf.filter((i) => i.y === y).map((i) => i.x);
     const a0 = Math.min(...xs), a1 = Math.max(...xs) + 1;
@@ -194,6 +194,14 @@ export function buildRoom(k: Kernel, building: Building, floor: Floor): { group:
     m.scale.setScalar(s);
     m.position.set(it.x + 0.5, 0.46, it.y + 0.52);
     m.castShadow = true;
+    group.add(m);
+  }
+  // The environments of the sample room (T26d): each one's trial draft in miniature on its plinth, like a place.
+  for (const it of floor.items) {
+    const sample = it.kind === 'layout' && it.target ? k.layoutSample(it.target.replace(/^layout:/, '')) : undefined;
+    if (!sample) continue;
+    const m = buildMiniature(k, sample.mini, SAMPLE_SIDE);
+    m.position.set(it.x + (1 - SAMPLE_SIDE) / 2, 0.47, it.y + 0.525 - SAMPLE_SIDE / 2);
     group.add(m);
   }
   // The Nucleus's graph of the world (T28), turning above its pedestal.
@@ -305,6 +313,11 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
       // A plinth: the model stands on it (added in buildRoom when it is ready); a terrain is a sample slab.
       lit.box(x + 0.15, 0.38, z + 0.3, x + 0.85, 0.46, z + 0.75, rgbOf('#22263a'));
       if (it.kind === 'tile') lit.box(x + 0.25, 0.46, z + 0.38, x + 0.75, 0.52, z + 0.68, rgbOf(it.color ?? col));
+      break;
+    case 'layout':
+      // A square plinth with a neon rim: the environment in miniature stands on it (buildRoom).
+      lit.box(x + 0.12, 0.38, z + 0.15, x + 0.88, 0.46, z + 0.9, rgbOf('#22263a'));
+      glow.box(x + 0.12, 0.46, z + 0.88, x + 0.88, 0.47, z + 0.9, rgbOf(col, 0.6));
       break;
     case 'screen': {
       const w = it.w ?? 1;
@@ -418,6 +431,9 @@ function showcaseBody(lit: Builder, glow: Builder, it: StudioItem, col: string):
   glow.box(mx + 0.04, 0.3, mz + 0.1, mx + 0.1, 0.32, mz + 0.9, c);
   glow.box(mx + 0.9, 0.3, mz + 0.1, mx + 0.96, 0.32, mz + 0.9, c);
 }
+
+/** How wide an environment of the sample room is in miniature (T26d), on its plinth. */
+const SAMPLE_SIDE = 0.72;
 
 /** The height of the model of places' table, where the place in miniature stands. */
 const PLATE = 0.7;

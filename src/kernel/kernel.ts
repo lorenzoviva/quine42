@@ -186,6 +186,23 @@ export const PLACE_PHASES: ReadonlyArray<{ name: string; what: string }> = [
   { name: 'cose e rune', what: 'Le persone, le cose e le rune, ciascuna su una casella che si raggiunge.' },
 ];
 
+/**
+ * An environment in the sample room (T26d): its program run on a trial draft as the validator tries it (`layout()` on
+ * one of `sampleDrafts`, the one it changes most), shown in miniature like a place. `error` if it does not run.
+ */
+export interface LayoutSample {
+  id: string;
+  name: string;
+  description: string;
+  environment: string;
+  path: string;
+  /** Which of the trial drafts, and how many of its tiles the environment changed. */
+  draft: number;
+  changed: number;
+  mini: PlaceMiniature;
+  error?: string;
+}
+
 export interface Rule {
   chiave: string;
   testo: string;
@@ -346,6 +363,10 @@ export class Kernel {
   private showcaseCache = new Map<ShowcaseSource, { files: FileMap; stamp: string; entries: ShowcaseEntry[] }>();
   /** The places in miniature (T26), by chunk key, made once per state of the files. */
   private miniatures = new Map<string, { files: FileMap; mini?: PlaceMiniature }>();
+  /** The environments of the sample room on their trial drafts (T26d), made once per state of the files. */
+  private layoutSamples = new Map<string, { files: FileMap; sample?: LayoutSample }>();
+  /** The drafts layout programs are tried on (`sampleDrafts`), per state of the files. */
+  private trialDrafts?: { files: FileMap; drafts: string[][] };
   /** Grows when a miniature read from a saved plan is ready (the renderer's cache key). */
   miniatureVersion = 0;
   exitedOnce = false;
@@ -712,7 +733,7 @@ export class Kernel {
     if (sizeChanged || (before && before !== this.worldSignature())) this.clearChunks();
     else if (!this.terrain || changed.has(this.terrain.manifest.id) || opts.reset) for (const ch of this.chunks.values()) if (ch.stage === 'draft') this.regenerateDraft(ch);
 
-    this.corona.build(files, this.exhibits(files), this.terrainExhibits());
+    this.corona.build(files, this.exhibits(files), this.terrainExhibits(), this.layoutExhibits());
     this.placeCampus();
     // Things that wait for a model of their own wear it as soon as the library has it.
     for (const id of this.ecs.query('form')) {
@@ -2902,6 +2923,45 @@ export class Kernel {
     return out;
   }
 
+  /** What the sample room shows after the terrains (T26d): every environment, in the order of its module. */
+  private layoutExhibits(): Exhibit[] {
+    const out: Exhibit[] = [];
+    for (const m of this.modules.values())
+      for (const [id, def] of Object.entries(m.manifest.layouts ?? {})) if (this.content.layouts[id] === def) out.push({ label: def.name, path: m.manifestPath, target: `layout:${id}` });
+    return out;
+  }
+
+  /**
+   * An environment run on a trial draft (T26d), as the validator tries it: each of `sampleDrafts` laid out with its
+   * program, the one it changes most kept. Deterministic, made once per state of the files; it does not plan anything.
+   */
+  layoutSample(id: string): LayoutSample | undefined {
+    const hit = this.layoutSamples.get(id);
+    if (hit?.files === this.files) return hit.sample;
+    const def = this.content.layouts[id];
+    const entry: { files: FileMap; sample?: LayoutSample } = { files: this.files };
+    this.layoutSamples.set(id, entry);
+    if (!def) return undefined;
+    const S = this.config.chunkSize;
+    const path = [...this.modules.values()].find((m) => m.manifest.layouts?.[id] === def)?.manifestPath ?? '';
+    const drafts = this.sampleDrafts();
+    let best: { draft: number; changed: number; tiles: string } | undefined;
+    let error: string | undefined;
+    drafts.forEach((draft, i) => {
+      try {
+        const r = layout(draft, this.palette, { cx: 100 + i, cy: -100, seed: 1, program: def.program, pathCode: this.pathCode() });
+        const before = draft.join(''), tiles = r.grid.join('');
+        const changed = [...tiles].filter((c, j) => c !== before[j]).length;
+        if (!best || changed > best.changed) best = { draft: i, changed, tiles };
+      } catch (e) {
+        error ??= (e as Error).message;
+      }
+    });
+    const tiles = best?.tiles ?? drafts[0].join('');
+    const mini: PlaceMiniature = { cx: 0, cy: 0, size: S, tiles, levels: Array<number>(S * S).fill(0), structures: [], things: [], runes: [], phases: [] };
+    return (entry.sample = { id, name: def.name, description: def.description, environment: def.environment, path, draft: best?.draft ?? 0, changed: best?.changed ?? 0, mini, ...(best ? {} : { error }) });
+  }
+
   /** Files changed by the latest commits of this session: the studio shows them glowing. */
   recentChanges(): Map<string, { author: string; message: string; time: number }> {
     return this.repo.recentChanges(24);
@@ -2936,6 +2996,9 @@ export class Kernel {
       case 'sprite':
       case 'tile':
         this.bus.emit('ui:exhibit', { item: it, building: room.building.name });
+        return;
+      case 'layout':
+        this.openLayout(it, room.building.name);
         return;
       case 'screen':
         this.bus.emit('ui:board', { building: room.building.id, name: room.building.name });
@@ -2991,9 +3054,15 @@ export class Kernel {
    * The click falls on the ground, often behind something tall: the nearest of them to that point counts.
    * Returns whether it did something.
    */
+  /** An environment of the sample room (T26d): its panel, with the program on its trial draft. */
+  private openLayout(it: StudioItem, building: string): void {
+    const sample = it.target ? this.layoutSample(it.target.replace(/^layout:/, '')) : undefined;
+    if (sample) this.bus.emit('ui:layout', { sample, building });
+  }
+
   clickStudio(rx: number, ry: number): boolean {
     if (this.zone !== 'studio') return false;
-    const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next', 'less', 'more', 'grafo']);
+    const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'layout']);
     if (!it) return false;
     const p = this.playerPos();
     const c = cellNear(it, p.x, p.y);
@@ -3002,6 +3071,7 @@ export class Kernel {
       return false;
     }
     if (it.kind === 'grafo') this.bus.emit('ui:graph', {});
+    else if (it.kind === 'layout') this.openLayout(it, this.corona.roomAt(it.x, it.y)?.building.name ?? '');
     else if (it.kind === 'showcase') this.openShowcase(it.target!);
     else if (it.kind === 'less' || it.kind === 'more') this.stepPhase(it.target!, it.kind === 'less' ? -1 : 1);
     else this.stepShowcase(it.target!, it.kind === 'prev' ? -1 : 1);
@@ -4632,9 +4702,36 @@ export class Kernel {
     return this.forgeModule(prompt, 'agente');
   }
 
-  /** Real drafts to test layout programs on (forest-ish, open, watery). */
+  /**
+   * Real drafts to test layout programs on: one forest-ish, one open, one with water on land (T26d: with the biomes a
+   * fixed place can be all sea). Deterministic: the first place that fits each, from the old three outwards; a role no
+   * place fits keeps its old place. Made once per state of the files.
+   */
   sampleDrafts(): string[][] {
-    return [[3, -7], [-11, 4], [20, 13]].map(([cx, cy]) => this.rows(this.genDraft(cx, cy)));
+    if (this.trialDrafts?.files === this.files) return this.trialDrafts.drafts;
+    const old: Array<[number, number]> = [[3, -7], [-11, 4], [20, 13]];
+    const near: Array<[number, number]> = [];
+    for (let cy = -8; cy <= 8; cy += 2) for (let cx = -8; cx <= 8; cx += 2) near.push([cx, cy]);
+    near.sort((a, b) => Math.hypot(...a) - Math.hypot(...b) || a[1] - b[1] || a[0] - b[0]);
+    const share = (d: string, test: (t: TileDef | undefined) => boolean) => [...d].filter((c) => test(this.palette[c])).length / d.length;
+    const roles: Array<(d: string) => boolean> = [
+      (d) => share(d, (t) => t?.layer === 'vegetation') >= 0.25 && share(d, (t) => t?.layer === 'liquid') <= 0.2,
+      (d) => share(d, (t) => !!t && !t.solid) >= 0.8,
+      (d) => { const w = share(d, (t) => t?.layer === 'liquid'); return w >= 0.15 && w <= 0.5 && share(d, (t) => !!t && !t.solid) >= 0.4; },
+    ];
+    const picked: Array<string | undefined> = [undefined, undefined, undefined];
+    const used = new Set<string>();
+    for (const [cx, cy] of [...old, ...near]) {
+      if (picked.every(Boolean)) break;
+      const d = this.genDraft(cx, cy);
+      const role = roles.findIndex((fits, i) => !picked[i] && fits(d));
+      if (role < 0 || used.has(`${cx},${cy}`)) continue;
+      picked[role] = d;
+      used.add(`${cx},${cy}`);
+    }
+    const drafts = picked.map((d, i) => this.rows(d ?? this.genDraft(...old[i])));
+    this.trialDrafts = { files: this.files, drafts };
+    return drafts;
   }
 
   /** The Council generates a whole new universe from a theme. Constants (carpet, movement, physics, needs, runes) stay. */

@@ -10,7 +10,7 @@ import { footBlocks, toLocal, type Form } from './forms';
 import type { FileMap } from './types';
 
 export type FileLook = 'libro' | 'cristallo' | 'pergamena' | 'tavoletta';
-export type ItemKind = 'file' | 'sprite' | 'tile' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'less' | 'more' | 'grafo';
+export type ItemKind = 'file' | 'sprite' | 'tile' | 'layout' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'less' | 'more' | 'grafo';
 /** What a showcase shows (T21): the runes and spells, the people, the things, the objects of the packs, the places planned (T26). */
 export type ShowcaseSource = 'rune' | 'persone' | 'cose' | 'oggetti' | 'luoghi';
 /** How a showcase looks: a screen, a silo of liquid, a 3D printer, a holographic table with a place in miniature. */
@@ -42,7 +42,8 @@ export const PRINTER = 3;
 export const GRAPH_AT = { x: 15, y: 10, w: 3, h: 3 };
 /**
  * The Office of places is also the Cartographer's studio (T26c, ADR-0051): the atlas on a table against its back wall,
- * the terrains in the sample room, which starts on its own floor after the files.
+ * the terrains in the sample room, which starts on its own floor after the files; after them, from a shelf of their own, a
+ * sample for each environment (T26d): its program run on a trial draft, in miniature (`Kernel.layoutSample`).
  */
 export const ATLAS_AT = { x: 10, y: 1, w: 4 };
 export const SAMPLES = 'luoghi';
@@ -170,6 +171,7 @@ const FLOOR_STRIDE = 40;
 const SHELF_ROWS = [3, 6, 9];
 const SHELF_X0 = 3;
 const SHELF_X1 = ROOM_W - 4;
+const SHELF_W = SHELF_X1 - SHELF_X0 + 1;
 
 const ROOMS: Record<string, { name: string; color: string; team: string }> = {
   universo: { name: 'Direzione', color: '#ffcf5c', team: 'arbitro' },
@@ -260,7 +262,7 @@ export class Corona {
     return this.buildings.map((b) => ({ id: b.id, name: b.name, color: b.color, from: b.from, to: b.to, files: b.floors.flatMap((f) => f.items.filter((i) => i.kind === 'file').map((i) => i.path!)) }));
   }
 
-  build(files: FileMap, gallery: Exhibit[] = [], terrains: Exhibit[] = []): void {
+  build(files: FileMap, gallery: Exhibit[] = [], terrains: Exhibit[] = [], layouts: Exhibit[] = []): void {
     this.files = files;
     this.slots.clear();
     this.exterior.clear();
@@ -273,7 +275,9 @@ export class Corona {
     };
     for (const path of Object.keys(files).sort()) add(folderOf(path), { kind: 'file', path, label: path, look: lookOf(path), lines: files[path].split('\n').length });
     for (const g of gallery) add('galleria', { kind: 'sprite', label: g.label, color: g.color, path: g.path, target: g.target, model: g.model, tint: g.tint });
-    const samples = terrains.map((t): Omit<StudioItem, 'x' | 'y'> => ({ kind: 'tile', label: t.label, color: t.color, path: t.path, target: t.target }));
+    const samples: Array<Omit<StudioItem, 'x' | 'y'> | undefined> = terrains.map((t) => ({ kind: 'tile', label: t.label, color: t.color, path: t.path, target: t.target }));
+    // The environments start a shelf of their own (the empty slots before them stay empty).
+    if (layouts.length) samples.push(...Array<undefined>((SHELF_W - (samples.length % SHELF_W)) % SHELF_W), ...layouts.map((l): Omit<StudioItem, 'x' | 'y'> => ({ kind: 'layout', label: l.label, path: l.path, target: l.target })));
     if (samples.length && !groups.has(SAMPLES)) groups.set(SAMPLES, []);
     const ids = [...groups.keys()].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
     const total = ids.length;
@@ -283,7 +287,7 @@ export class Corona {
       const to = ((index + 1) / total) * Math.PI * 2;
       const mid = (from + to) / 2;
       const perFloor = SLOTS.length;
-      const chunk = (list: Array<Omit<StudioItem, 'x' | 'y'>>) => Array.from({ length: Math.ceil(list.length / perFloor) }, (_, i) => list.slice(i * perFloor, (i + 1) * perFloor));
+      const chunk = <T,>(list: T[]) => Array.from({ length: Math.ceil(list.length / perFloor) }, (_, i) => list.slice(i * perFloor, (i + 1) * perFloor));
       // The files floor by floor; the terrains of the sample room after them, from a floor of their own.
       const pages = [...chunk(groups.get(id)!), ...(id === SAMPLES ? chunk(samples) : [])];
       const firstSample = id === SAMPLES && samples.length ? pages.length - Math.ceil(samples.length / perFloor) : -1;
@@ -295,7 +299,7 @@ export class Corona {
         const council = id === 'concilio';
         // The Council's hall: its files on one shelf along the wall, the round table in the middle.
         const slots = council ? Array.from({ length: perFloor }, (_, i) => ({ x: SHELF_X0 + (i % (SHELF_X1 - SHELF_X0 + 1)), y: 2 + Math.floor(i / (SHELF_X1 - SHELF_X0 + 1)) })) : SLOTS;
-        const placed: StudioItem[] = (pages[f] ?? []).map((it, i) => ({ ...it, x: ox + slots[i].x, y: oy + slots[i].y }));
+        const placed: StudioItem[] = (pages[f] ?? []).flatMap((it, i) => (it ? [{ ...it, x: ox + slots[i].x, y: oy + slots[i].y }] : []));
         if (council && f === 0) {
           placed.push({ kind: 'table', label: "il tavolo del Concilio: al centro, l'universo", x: ox + Math.floor(TABLE.cx), y: oy + Math.floor(TABLE.cy) });
           SEATS.forEach((s, i) => {
@@ -324,7 +328,7 @@ export class Corona {
           }
         }
         if (f === 0) placed.push({ kind: 'exit', label: 'uscita', x: ox + Math.floor(ROOM_W / 2), y: oy + ROOM_H - 1 });
-        if (f < nFloors - 1) placed.push({ kind: 'up', label: `scala al piano ${f + 2}${f + 1 === firstSample ? ': il campionario dei terreni' : ''}`, x: ox + ROOM_W - 2, y: oy + 1 });
+        if (f < nFloors - 1) placed.push({ kind: 'up', label: `scala al piano ${f + 2}${f + 1 === firstSample ? `: il campionario dei terreni${layouts.length ? ' e degli ambienti' : ''}` : ''}`, x: ox + ROOM_W - 2, y: oy + 1 });
         if (f > 0) placed.push({ kind: 'down', label: `scala al piano ${f}`, x: ox + 1, y: oy + 1 });
         for (const it of placed) if (it.kind === 'file' && it.path) this.slots.set(it.path, { x: it.x, y: it.y });
         floors.push({ index: f, ox, oy, items: placed });

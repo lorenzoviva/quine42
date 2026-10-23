@@ -312,6 +312,7 @@ button[disabled] { opacity: 0.4; cursor: default; }
 #studio .frame img, #studio .frame .swatch { width: 100%; height: 100%; image-rendering: auto; object-fit: contain; background: #1c1a17; }
 #studio .row { display: flex; gap: 8px; align-items: center; }
 #studio .row.showcase { justify-content: center; }
+#studio pre.program { max-height: 220px; overflow: auto; margin: 0; padding: 6px 8px; background: #0b0b12; border: 1px solid var(--line); font-size: 11px; color: var(--fg); white-space: pre; }
 #studio .row.showcase > button { font-size: 20px; padding: 8px 14px; }
 #studio .frame .runes { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #0a0812; gap: 14px; font-size: 56px; text-shadow: 0 0 14px currentColor; }
 #studio .frame .plan { width: 100%; height: 100%; image-rendering: pixelated; background: #0a0812; }

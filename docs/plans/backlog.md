@@ -363,7 +363,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   un bordo al neon e un anello azzurro sotto l'universo; tutto nella mesh della stanza. Nel browser (offline): un pezzo
   solo, senza buchi. Diverso dal previsto: nessun modello MarkovJunior (bastano le quad del `Builder`), nessun ADR.
 
-### T26 · L'Ufficio dei luoghi, dentro — `in corso` (T26a, T26b e T26c fatti; resta T26d)
+### T26 · L'Ufficio dei luoghi, dentro — `fatto` (T26a, T26b, T26c, T26d)
 - Da progettare in funzione di come lavora il Cartografo (piani, lotti, atlante). **Proposta all'autore** prima
   di costruire.
 - Proposta scritta il 23/10/2026: [`corona-proposte.md`](corona-proposte.md) §1 — **il plastico**: un tavolo olografico
@@ -405,10 +405,16 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   Concilio porta all'Ufficio. `studio.ts`: la nota del pannello dei campioni senza «della <edificio>». ADR-0051. Test in
   `kernel.test.ts` (lo studio senza `cartografia`, il campionario su un piano suo, il teletrasporto, l'atlante libero e raggiungibile).
   Diverso dal previsto: il campionario degli ambienti della proposta (un riquadro per ambiente) non era nel pezzo: è T26d.
-- **T26d · il campionario degli ambienti — `da fare`**. Contesto: [`corona-proposte.md`](corona-proposte.md) §1, «Il campionario».
-  Fare: sul piano del campionario, accanto ai terreni, un riquadro per ambiente (`world.layouts`) con il suo programma fatto girare
-  su una bozza di prova (come il validatore: `layout()` su una bozza deterministica), in miniatura come il plastico; E apre il pannello
-  (nome, programma, «Apri il file»). Fatto quando: riquadri deterministici, test, verifica nel browser. Dipende da T26c.
+- **T26d · il campionario degli ambienti — `fatto`** (commit «Corona (T26d)»). `corona.ts`: oggetto `layout`, uno per ambiente
+  (`kernel.layoutExhibits`), sugli scaffali del campionario dopo i terreni, da uno scaffale suo; la scala dice «il campionario dei
+  terreni e degli ambienti». `kernel.ts`: `layoutSample(id)` (`LayoutSample`): il programma girato con `layout()` come nel validatore
+  su ciascuna delle `sampleDrafts`, tenuta quella che cambia di più, in cache per stato dei file; E o un clic (`ui:layout`).
+  `corona3d.ts`: un plinto con la miniatura (`buildMiniature` di T26a). `studio.ts`: il pannello (pianta, descrizione, spazio,
+  caselle cambiate, il programma in JSON, «Apri il file»). Test in `places.test.ts`. Nel browser (`aurora`, offline): 20 ambienti
+  sui piani 2 e 3, pannello di «Rovine», nessun errore. Diverso dal previsto: con i biomi due delle tre bozze di prova fisse
+  (`[3,-7] [-11,4] [20,13]`) erano tutto mare e la terza tutta neve, quindi anche il validatore provava gli ambienti quasi sul niente:
+  `sampleDrafts` ora sceglie in modo deterministico una bozza boscosa, una aperta e una con acqua (le tre vecchie per prime, poi
+  attorno all'origine), in cache; tutti gli ambienti del seme restano validi. Nessun ADR.
 
 ### T27 · La Sala sistemi, dentro — `da fare` (si comincia da T27a)
 - L'autore chiede un aiuto: far apprezzare la complessità del codice con esempi (cosa fa un sistema, casi d'uso).

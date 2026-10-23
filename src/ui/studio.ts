@@ -1,8 +1,8 @@
 // Panels of the studio (the corona): a thing on show seen up close — its model, or the terrain as the Artist
 // shows it, with «Riscolpisci» — a building's notice board, with the latest changes to its files, and what a
-// showcase shows (T21), with its arrows.
+// showcase shows (T21), with its arrows, and an environment of the sample room on its trial draft (T26d).
 
-import { PLACE_PHASES, type Kernel, type ShowcaseEntry } from '../kernel/kernel';
+import { PLACE_PHASES, type Kernel, type LayoutSample, type PlaceMiniature, type ShowcaseEntry } from '../kernel/kernel';
 import type { StudioItem } from '../kernel/corona';
 import { $, el } from './dom';
 import { icons } from './hud';
@@ -23,6 +23,7 @@ export class StudioPanel {
     k.bus.on('ui:exhibit', ({ item, building }: { item: StudioItem; building: string }) => this.exhibit(item, building));
     k.bus.on('ui:board', ({ building, name }: { building: string; name: string }) => this.board(building, name));
     k.bus.on('ui:showcase', (e: Shown) => this.showcase(e));
+    k.bus.on('ui:layout', ({ sample, building }: { sample: LayoutSample; building: string }) => this.layout(sample, building));
     // The arrows pressed with the panel open: it follows.
     k.bus.on('studio:showcase', (e: Shown) => {
       if (this.isOpen && this.shown === e.building) this.showcase({ ...e, name: this.k.corona.building(e.building)?.name ?? e.building });
@@ -118,7 +119,10 @@ export class StudioPanel {
    */
   private planOf(cx: number, cy: number, phase = PLACE_PHASES.length - 1): HTMLCanvasElement | undefined {
     const mini = this.k.miniature(cx, cy);
-    if (!mini) return undefined;
+    return mini && this.drawPlan(mini, phase);
+  }
+
+  private drawPlan(mini: PlaceMiniature, phase = PLACE_PHASES.length - 1): HTMLCanvasElement {
     const now = mini.phases[phase] ?? { tiles: mini.tiles, lit: [] };
     const finished = phase >= PLACE_PHASES.length - 1;
     const S = mini.size, px = 8;
@@ -147,6 +151,31 @@ export class StudioPanel {
       ctx.fillRect((r.x - 0.4) * px, (r.y - 0.4) * px, px * 0.8, px * 0.8);
     }
     return cv;
+  }
+
+  /** An environment of the sample room (T26d): its trial draft from above, what it is, its program, «Apri il file». */
+  layout(sample: LayoutSample, building: string): void {
+    const frame = el('div', { class: 'frame' }, this.drawPlan(sample.mini));
+    const S = sample.mini.size;
+    const tried = sample.error
+      ? `Non gira: ${sample.error}`
+      : `Il suo programma su una bozza di prova (la ${sample.draft + 1} di 3, quella che cambia di più, come la prova il validatore): ${sample.changed} caselle su ${S * S} cambiate.`;
+    const open = el('button', {}, 'Apri il file');
+    open.onclick = () => {
+      this.close();
+      if (sample.path) this.onEdit?.(sample.path);
+    };
+    this.show(
+      el('div', { class: 'title' }, sample.name),
+      el('div', { class: 'note' }, `Ambiente del campionario — ${building} — ${sample.path}`),
+      frame,
+      el('div', { class: 'item' }, el('span', { class: 'path' }, 'Descrizione'), ` ${sample.description}`),
+      el('div', { class: 'item' }, el('span', { class: 'path' }, 'Spazio'), ` ${sample.environment}`),
+      el('div', { class: 'note' }, tried),
+      el('div', { class: 'section' }, 'Il programma'),
+      el('pre', { class: 'program' }, JSON.stringify(this.k.content.layouts[sample.id]?.program ?? {}, null, 1)),
+      el('div', { class: 'row' }, open),
+    );
   }
 
   exhibit(item: StudioItem, building: string): void {

@@ -11,7 +11,7 @@ import { MockModels } from '../src/kernel/ai/mock';
 import { MemoryChunks } from '../src/kernel/chunks';
 import { LEVEL } from '../src/kernel/relief';
 import type { FormComp } from '../src/kernel/forms';
-import { gates } from '../src/kernel/layout';
+import { gates, layout } from '../src/kernel/layout';
 
 /** A kernel whose loaded chunks have all been planned by the Cartographer. */
 async function boot(chunks = new MemoryChunks()) {
@@ -182,5 +182,63 @@ describe('the model of places (T26)', () => {
     Object.assign(k.playerPos(), { x: show.x + 1.5, y: show.y + 3.5 });
     await k.interact();
     expect(panels.at(-1)?.phase).toBe(PLACE_PHASES.length - 1);
+  }, 30_000);
+});
+
+describe('the sample of environments (T26d)', () => {
+  it('shows every environment after the terrains, from a shelf of its own, each run on a trial draft', async () => {
+    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels(), chunks: new MemoryChunks() });
+    const office = k.corona.building('luoghi')!;
+    const items = office.floors.flatMap((f) => f.items);
+    const samples = items.filter((i) => i.kind === 'layout');
+    const ids = Object.keys(k.content.layouts);
+    expect(ids.length).toBeGreaterThan(5);
+    expect(samples.map((i) => i.target).sort()).toEqual(ids.map((id) => `layout:${id}`).sort());
+    // After the terrains, the first at the start of a shelf; never on a floor of files.
+    const order = items.filter((i) => i.kind === 'tile' || i.kind === 'layout');
+    expect(order.findIndex((i) => i.kind === 'layout')).toBe(order.filter((i) => i.kind === 'tile').length);
+    const floorOf = (it: { y: number }) => office.floors.find((f) => it.y >= f.oy && it.y < f.oy + 15)!;
+    expect(samples[0].x - floorOf(samples[0]).ox).toBe(3);
+    for (const s of samples) expect(floorOf(s).items.some((i) => i.kind === 'file')).toBe(false);
+    expect(k.corona.free(samples[0].x + 0.5, samples[0].y + 0.5)).toBe(false);
+    // The trial drafts, the validator's too: forest-ish, open, with water on land (never all sea).
+    const share = (d: string[], test: (c: string) => boolean) => [...d.join('')].filter(test).length / (d.length * d.length);
+    const [forest, open, wet] = k.sampleDrafts();
+    expect(share(forest, (c) => k.palette[c]?.layer === 'vegetation')).toBeGreaterThanOrEqual(0.25);
+    expect(share(open, (c) => k.palette[c]?.solid === false)).toBeGreaterThanOrEqual(0.8);
+    expect(share(wet, (c) => k.palette[c]?.layer === 'liquid')).toBeGreaterThanOrEqual(0.15);
+    expect(share(wet, (c) => k.palette[c]?.solid === false)).toBeGreaterThanOrEqual(0.4);
+    // The trial: the validator's layout() on the draft it changes most; deterministic, made once.
+    const id = ids[0];
+    const sample = k.layoutSample(id)!;
+    expect(k.layoutSample(id)).toBe(sample);
+    expect(sample.error).toBeUndefined();
+    const S = k.config.chunkSize;
+    expect(sample.mini.tiles).toHaveLength(S * S);
+    const draft = k.sampleDrafts()[sample.draft];
+    const r = layout(draft, k.palette, { cx: 100 + sample.draft, cy: -100, seed: 1, program: k.content.layouts[id].program, pathCode: 'p' });
+    expect(sample.mini.tiles).toBe(r.grid.join(''));
+    expect(sample.changed).toBe([...sample.mini.tiles].filter((c, i) => c !== draft.join('')[i]).length);
+    for (const other of k.sampleDrafts()) {
+      const before = other.join('');
+      const t = layout(other, k.palette, { cx: 100 + k.sampleDrafts().indexOf(other), cy: -100, seed: 1, program: k.content.layouts[id].program, pathCode: 'p' }).grid.join('');
+      expect([...t].filter((c, i) => c !== before[i]).length).toBeLessThanOrEqual(sample.changed);
+    }
+    // Every environment of the seed runs and changes its draft; another kernel shows the same.
+    for (const l of ids) expect(k.layoutSample(l)!.changed, l).toBeGreaterThan(0);
+    const k2 = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels(), chunks: new MemoryChunks() });
+    expect(k2.layoutSample(id)!.mini.tiles).toBe(sample.mini.tiles);
+    // E beside it (or a click) opens its panel: name, the module's file.
+    const panels: any[] = [];
+    k.bus.on('ui:layout', (e: any) => panels.push(e));
+    k.zone = 'studio';
+    Object.assign(k.playerPos(), { x: samples[0].x + 0.5, y: samples[0].y + 1.5 });
+    await k.interact();
+    const target = samples[0].target!.replace('layout:', '');
+    expect(panels.at(-1).sample.id).toBe(target);
+    expect(panels.at(-1).building).toBe('Ufficio dei Luoghi');
+    expect(JSON.parse(k.files[panels.at(-1).sample.path]).layouts[target]).toBeDefined();
+    expect(k.clickStudio(samples[0].x + 0.5, samples[0].y + 0.5)).toBe(true);
+    expect(panels).toHaveLength(2);
   }, 30_000);
 });

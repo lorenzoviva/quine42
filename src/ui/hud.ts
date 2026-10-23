@@ -215,12 +215,12 @@ export class Hud {
         const it = info.item;
         const LOOK: Record<string, string> = { libro: 'un libro: il manifest di un modulo', cristallo: 'un cristallo: codice Lua', pergamena: 'una pergamena: testo', tavoletta: 'una tavoletta: dati' };
         const what =
-          it.kind === 'file' ? `${LOOK[it.look ?? ''] ?? ''} — ${it.lines} righe` : it.kind === 'sprite' ? 'un modello in mostra' : it.kind === 'tile' ? 'un campione di terreno' : it.label;
+          it.kind === 'file' ? `${LOOK[it.look ?? ''] ?? ''} — ${it.lines} righe` : it.kind === 'sprite' ? 'un modello in mostra' : it.kind === 'tile' ? 'un campione di terreno' : it.kind === 'layout' ? "un ambiente, provato su una bozza" : it.label;
         return [
           el('div', { class: 'h code' }, it.kind === 'file' ? (it.path ?? '') : it.label),
           el('div', { class: 'doc' }, `${what}, in «${info.building}»`),
           ...(info.recent ? [el('div', { class: 'val' }, `✦ modificato di recente — ${info.recent}`)] : []),
-          el('div', { class: 'src' }, it.kind === 'file' ? 'E per aprirlo' : it.kind === 'sprite' || it.kind === 'tile' ? 'E per guardarlo (e farlo ridipingere)' : 'E'),
+          el('div', { class: 'src' }, it.kind === 'file' ? 'E per aprirlo' : it.kind === 'sprite' || it.kind === 'tile' ? 'E per guardarlo (e farlo ridipingere)' : it.kind === 'layout' ? 'E per guardarlo' : 'E'),
         ];
       }
       case 'door':
