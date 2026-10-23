@@ -17,6 +17,7 @@ import { repairProgram } from './mj';
 import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './universes';
 import { addPerson, applyRenames, dayPhase, defaultRoutine, freshName, greeting, guessGender, inferActivity, memorySummary, readPeople, remember, repairSociety, similarNames, societySummary, type Activity, type DayPhase, type Person, type Species } from './society';
 import { buildGraph, GRAPH_FILE, graphHash, mergePlaces, placesOf, readGraph, slug as nodeSlug, type GraphPlace, type WorldGraph } from './graph';
+import { situation as buildSituation, type Situation } from './situation';
 import { activeQuests, plotFromRaw, plotText, PLOTS_FILE, readPlots, reviewPlot, secretsOf, writePlots, type Plot } from './plots';
 import { Input } from './input';
 import { discoverModules, readConfig } from './universe';
@@ -407,6 +408,8 @@ export class Kernel {
     k.bus.on('lua:morte', (d: { fame?: boolean; sete?: boolean }) => k.die(d?.sete ? 'sete' : d?.fame ? 'fame' : 'ferite'));
     k.faults.onRaise = (f, isNew) => {
       if (isNew) k.log('fault', `${f.key}: ${f.message}`);
+      // Where it happened (T46a): the code that runs in the world, where the wanderer was; not loading nor manifests.
+      if (isNew && !f.at && k.zone === 'sim' && /^(module|rune):/.test(f.key) && !/:load$/.test(f.key)) f.at = { ...k.playerCarpet() };
       k.bus.emit('fault', { fault: f, isNew });
       if (isNew && !k.bench) void k.repairGenerated(f.key, f.message);
     };
@@ -3038,6 +3041,9 @@ export class Kernel {
       case 'grafo':
         this.bus.emit('ui:graph', {});
         return;
+      case 'situazione':
+        this.bus.emit('ui:situation', { situation: this.situation() });
+        return;
       case 'showcase':
         this.openShowcase(it.target!);
         return;
@@ -3091,7 +3097,7 @@ export class Kernel {
 
   clickStudio(rx: number, ry: number): boolean {
     if (this.zone !== 'studio') return false;
-    const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'layout']);
+    const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'situazione', 'layout']);
     if (!it) return false;
     const p = this.playerPos();
     const c = cellNear(it, p.x, p.y);
@@ -3100,6 +3106,7 @@ export class Kernel {
       return false;
     }
     if (it.kind === 'grafo') this.bus.emit('ui:graph', {});
+    else if (it.kind === 'situazione') this.bus.emit('ui:situation', { situation: this.situation() });
     else if (it.kind === 'layout') this.openLayout(it, this.corona.roomAt(it.x, it.y)?.building.name ?? '');
     else if (it.kind === 'showcase') this.openShowcase(it.target!);
     else if (it.kind === 'less' || it.kind === 'more') this.stepPhase(it.target!, it.kind === 'less' ? -1 : 1);
@@ -4279,6 +4286,37 @@ export class Kernel {
       testo: quest.testo,
       obiettivo: quest.obiettivo.tipo === 'porta' ? `porta ${quest.obiettivo.oggetto ?? 'ciò che serve'} a ${quest.obiettivo.a ?? quest.da}` : quest.obiettivo.tipo === 'vai' ? `vai a ${quest.obiettivo.luogo ?? '?'}` : `parla con ${quest.obiettivo.a ?? '?'}`,
     }));
+  }
+
+  /**
+   * The situation table of the Direction (T46a): the wanderer, the places being generated, the open plots at their beat,
+   * the quests, the faults, each on its chunk and region; from what there is already, generating nothing.
+   */
+  situation(): Situation {
+    const S = this.config.chunkSize;
+    const people = readPeople(this.files).persone;
+    const chunkOf = (x: number, y: number) => ({ cx: Math.floor(x / S), cy: Math.floor(y / S) });
+    const locate = (name: string) => {
+      const id = this.entityOf(name);
+      const pos = id === undefined ? undefined : this.ecs.get(id, 'pos');
+      if (pos) return chunkOf(pos.x, pos.y);
+      const p = people.find((x) => x.nome === name);
+      const m = /^(-?\d+),(-?\d+)#/.exec(p?.origine ?? '');
+      if (m) return { cx: Number(m[1]), cy: Number(m[2]) };
+      const ch = p?.luogo ? [...this.chunks.values()].find((c) => c.place?.name === p.luogo) : undefined;
+      return ch ? { cx: ch.cx, cy: ch.cy } : undefined;
+    };
+    // Seen from the studio, the wanderer is where they last stood in the world.
+    const pc = this.corona.isInterior(this.playerPos().x) || this.zone !== 'sim' ? this.lastWorld : this.playerCarpet();
+    return buildSituation({
+      atlas: readAtlas(this.files),
+      plots: readPlots(this.files),
+      faults: this.faults.list(),
+      wanderer: chunkOf(pc.x, pc.y),
+      chunks: [...this.chunks.values()].map((c) => ({ cx: c.cx, cy: c.cy, stage: c.stage, developing: c.developing, name: c.place?.name })),
+      locate,
+      chunkSize: S,
+    });
   }
 
   /** "Vai" quests are done by arriving: the place or the region you stand in. */

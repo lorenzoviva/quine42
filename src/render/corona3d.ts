@@ -14,6 +14,7 @@ import { MAT, rgbOf } from './materials';
 import { NODE_COLOR } from '../kernel/graph';
 import { geoOf, modelObject, showFrame } from './models';
 import { LEVEL } from '../kernel/relief';
+import { OPERATION_COLOR, type Situation } from '../kernel/situation';
 
 const TOWER_H = 4.5;
 const GROUND: Record<string, [string, string]> = { viale: ['#161824', '#12131d'], vicolo: ['#14141c', '#111119'], prato: ['#0b0f15', '#0b0f15'], bordo: ['#0d0d16', '#0d0d16'] };
@@ -335,6 +336,19 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
       glow.box(cx - 1.22, 0.14, cz + 1.18, cx + 1.22, 0.18, cz + 1.22, rgbOf(col, 0.4));
       break;
     }
+    case 'situazione': {
+      // The situation table (T46a): a long dark table lit from below, a glass top with a golden rim; the marks are on it (buildSituation).
+      const w = it.w ?? 1, d = it.h ?? 1;
+      lit.box(x + 0.1, 0, z + 0.1, x + w - 0.1, 0.12, z + d - 0.1, rgbOf('#0e0e18'));
+      lit.box(x + 0.35, 0.12, z + 0.35, x + w - 0.35, 0.62, z + d - 0.35, rgbOf('#141826'));
+      glow.box(x + 0.32, 0.04, z + 0.32, x + w - 0.32, 0.08, z + d - 0.32, rgbOf(col, 0.35));
+      lit.box(x, 0.62, z, x + w, 0.7, z + d, rgbOf('#0a0c14'));
+      glow.box(x, 0.7, z, x + w, 0.72, z + 0.05, rgbOf(col, 0.8));
+      glow.box(x, 0.7, z + d - 0.05, x + w, 0.72, z + d, rgbOf(col, 0.8));
+      glow.box(x, 0.7, z, x + 0.05, 0.72, z + d, rgbOf(col, 0.8));
+      glow.box(x + w - 0.05, 0.7, z, x + w, 0.72, z + d, rgbOf(col, 0.8));
+      break;
+    }
     case 'atlas':
       lit.box(x, 0, z + 0.1, x + (it.w ?? 1), 0.7, z + 0.9, rgbOf('#1a2a33'));
       glow.box(x + 0.1, 0.7, z + 0.2, x + (it.w ?? 1) - 0.1, 0.72, z + 0.8, rgbOf('#7dd87d', 0.6));
@@ -559,6 +573,67 @@ function padSign(x: number, z: number, text: string, color: string): THREE.Mesh 
   const m = textPlane([text], color, 0.4, 0.4, true);
   m.position.set(x + 0.5, 0.35, z + 0.5);
   return m;
+}
+
+/** The top of the situation table (T46a). */
+export const SITUATION_TOP = 0.72;
+
+/**
+ * The operations on the situation table (T46a): the chunks of `s.bounds` fitted on its top, the regions as faint golden
+ * plates with their outlines, a glowing mark for each operation (the wanderer a white pillar, plots gold, quests green,
+ * faults red, places cyan and flat, dim when only queued); the places being generated are in `pulse`, to pulse.
+ */
+export function buildSituation(it: StudioItem, s: Situation, color: string): { group: THREE.Group; pulse: THREE.Object3D[] } {
+  const g = new THREE.Group();
+  const w = it.w ?? 1, d = it.h ?? 1, m = 0.22;
+  const { x0, y0, x1, y1 } = s.bounds;
+  const cols = x1 - x0 + 1, rows = y1 - y0 + 1;
+  const cell = Math.min((w - 2 * m) / cols, (d - 2 * m) / rows);
+  const ox = it.x + (w - cols * cell) / 2, oz = it.y + (d - rows * cell) / 2;
+  const X = (cx: number) => ox + (cx - x0) * cell, Z = (cy: number) => oz + (cy - y0) * cell;
+  const top = SITUATION_TOP;
+  const glow = new Builder();
+  const gold = rgbOf(color, 0.18), rim = rgbOf(color, 0.6), t = Math.min(0.02, cell * 0.15);
+  for (const r of s.regions) {
+    const a = X(r.centro[0] - r.raggio), b = Z(r.centro[1] - r.raggio), e = X(r.centro[0] + r.raggio + 1), f = Z(r.centro[1] + r.raggio + 1);
+    glow.box(a, top, b, e, top + 0.004, f, gold);
+    glow.box(a, top, b, e, top + 0.012, b + t, rim);
+    glow.box(a, top, f - t, e, top + 0.012, f, rim);
+    glow.box(a, top, b, a + t, top + 0.012, f, rim);
+    glow.box(e - t, top, b, e, top + 0.012, f, rim);
+  }
+  // How tall each mark is, and how much of its cell it covers.
+  const look = { viandante: [0.32, 0.5], trama: [0.16, 0.55], missione: [0.12, 0.55], guasto: [0.2, 0.6], luogo: [0.015, 0.9] } as const;
+  const pulse: THREE.Object3D[] = [];
+  // More operations on one chunk stand side by side.
+  const seen = new Map<string, number>();
+  for (const o of s.ops) {
+    if (o.cx === undefined || o.cy === undefined) continue;
+    const [h, size] = look[o.kind];
+    const key = `${o.cx},${o.cy}`;
+    const n = o.kind === 'luogo' ? 0 : (seen.get(key) ?? 0);
+    if (o.kind !== 'luogo') seen.set(key, n + 1);
+    const half = (cell * size) / 2 / (n ? 1.6 : 1);
+    const cx = X(o.cx) + cell / 2 + (n ? Math.cos(n * 2.1) * cell * 0.28 : 0), cz = Z(o.cy) + cell / 2 + (n ? Math.sin(n * 2.1) * cell * 0.28 : 0);
+    const rgb = rgbOf(OPERATION_COLOR[o.kind], o.kind === 'luogo' && !o.live ? 0.3 : 1);
+    if (!o.live) {
+      glow.box(cx - half, top, cz - half, cx + half, top + h, cz + half, rgb);
+      continue;
+    }
+    // Pulsing: its own mesh, scaled from its base by the renderer.
+    const b = new Builder();
+    b.box(-half, 0, -half, half, 0.06, half, rgb);
+    const mesh = new THREE.Mesh(b.geometry(), MAT.glow);
+    mesh.position.set(cx, top, cz);
+    pulse.push(mesh);
+    g.add(mesh);
+  }
+  g.add(new THREE.Mesh(glow.geometry(), MAT.glow));
+  const name = textPlane([it.label], color, w - 0.4, 0.22);
+  // On the front of the pedestal, under the top.
+  name.position.set(it.x + w / 2, 0.36, it.y + d - 0.345);
+  g.add(name);
+  return { group: g, pulse };
 }
 
 /** An arrow button's sign, floating above its pillar. */

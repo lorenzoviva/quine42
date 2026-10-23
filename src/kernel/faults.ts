@@ -7,6 +7,8 @@ export interface Fault {
   message: string;
   since: number;
   count: number;
+  /** Where in the world (carpet space) it happened, if it happened there: the Direction shows it (T46a). */
+  at?: { x: number; y: number };
 }
 
 export class Faults {

@@ -10,7 +10,7 @@ import * as THREE from 'three';
 import type { Kernel } from '../kernel/kernel';
 import { Bloom } from './bloom';
 import { cellNear } from '../kernel/corona';
-import { animateRing, Avatars, buildCoronaRing, buildRoom, buildShowcase, campusKey } from './corona3d';
+import { animateRing, Avatars, buildCoronaRing, buildRoom, buildShowcase, buildSituation, campusKey } from './corona3d';
 import { CUT, U } from './materials';
 import { Overlay } from './overlay';
 import { buildChunk, chunkSig, disposeChunk, tileForms, type ChunkView } from './terrain';
@@ -48,6 +48,8 @@ export class Renderer {
   private ringKey = '';
   private rooms = new Map<string, { group: THREE.Group; globe?: THREE.Object3D; version: number }>();
   /** What the showcases of the studio show (T21), by building: rebuilt when the choice or the models change. */
+  /** The marks on the Direction's situation table (T46a): what they show, when it was last read, what pulses. */
+  private sit?: { key: string; at: number; group: THREE.Group; pulse: THREE.Object3D[] };
   private shows = new Map<string, { key: string; group: THREE.Group; spin?: THREE.Object3D; bubbles?: THREE.Object3D[]; silo: boolean }>();
   private overlay: Overlay;
   private flash = new THREE.PointLight(0xfff2c0, 0, 8, 1.4);
@@ -261,6 +263,21 @@ export class Renderer {
         const { x, z, speed, phase } = b.userData as { x: number; z: number; speed: number; phase: number };
         b.position.set(x + Math.sin(this.t * 0.8 + phase * 9) * 0.05, 0.35 + ((phase + this.t * speed * 0.5) % 1) * 1.9, z);
       }
+    }
+    const table = studio?.floor.items.find((i) => i.kind === 'situazione');
+    if (this.sit) this.sit.group.visible = !!table;
+    if (studio && table) {
+      // Read again once a second; built again only when something changed.
+      if (!this.sit || this.t - this.sit.at > 1) {
+        const s = k.situation();
+        const key = `${table.x},${table.y}|${JSON.stringify(s)}`;
+        if (this.sit?.key !== key) {
+          if (this.sit) this.scene.remove(this.sit.group);
+          this.sit = { key, at: this.t, ...buildSituation(table, s, studio.building.color) };
+          this.scene.add(this.sit.group);
+        } else this.sit.at = this.t;
+      }
+      for (const [i, m] of this.sit.pulse.entries()) m.scale.y = 1 + 2.5 * (0.5 + 0.5 * Math.sin(this.t * 4 + i));
     }
     this.avatars.update(k, this.t);
 

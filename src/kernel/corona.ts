@@ -10,7 +10,7 @@ import { footBlocks, toLocal, type Form } from './forms';
 import type { FileMap } from './types';
 
 export type FileLook = 'libro' | 'cristallo' | 'pergamena' | 'tavoletta';
-export type ItemKind = 'file' | 'sprite' | 'tile' | 'layout' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'less' | 'more' | 'grafo';
+export type ItemKind = 'file' | 'sprite' | 'tile' | 'layout' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'less' | 'more' | 'grafo' | 'situazione';
 /** What a showcase shows (T21): the runes and spells, the people, the things, the objects of the packs, the places planned (T26). */
 export type ShowcaseSource = 'rune' | 'persone' | 'cose' | 'oggetti' | 'luoghi';
 /** How a showcase looks: a screen, a silo of liquid, a 3D printer, a holographic table with a place in miniature. */
@@ -40,6 +40,11 @@ export const PRINTER = 3;
  * their showcase; E or a click opens it, navigable (src/ui/graph.ts).
  */
 export const GRAPH_AT = { x: 15, y: 10, w: 3, h: 3 };
+/**
+ * The Direction's situation table (T46a): 5 × 3 cells in the middle of its war room, where the others have their showcase;
+ * the operations under way on the world seen from above (`Kernel.situation`), E or a click opens them in a panel.
+ */
+export const SITUATION_AT = { x: 14, y: 10, w: 5, h: 3 };
 /**
  * The Office of places is also the Cartographer's studio (T26c, ADR-0051): the atlas on a table against its back wall,
  * the terrains in the sample room, which starts on its own floor after the files; after them, from a shelf of their own, a
@@ -315,6 +320,7 @@ export class Corona {
           placed.push({ kind: 'portal', label: 'teletrasporto: Sala del Concilio', target: 'concilio', x: ox + ROOM_W - 3, y: oy + ROOM_H - 3 });
           if (id === SAMPLES) placed.push({ kind: 'atlas', label: "l'atlante del mondo", ...ATLAS_AT, x: ox + ATLAS_AT.x, y: oy + ATLAS_AT.y });
           if (id === 'nucleo') placed.push({ kind: 'grafo', label: 'il grafo del mondo', ...GRAPH_AT, x: ox + GRAPH_AT.x, y: oy + GRAPH_AT.y });
+          if (id === 'universo') placed.push({ kind: 'situazione', label: 'il tavolo della situazione', ...SITUATION_AT, x: ox + SITUATION_AT.x, y: oy + SITUATION_AT.y });
           const show = SHOWCASES[id];
           if (show) {
             const { x, y, w } = SHOWCASE_AT;

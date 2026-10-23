@@ -466,16 +466,25 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   meccaniche altrove ci finisce solo un prefisso sconosciuto). Diverso dal previsto: la proposta numerava gli interni
   T32-T34, ma T33-T45 sono del multiplayer, quindi T46-T48.
 
-### T46 · La Direzione, dentro: la sala operativa — `da fare` (si comincia da T46a)
+### T46 · La Direzione, dentro: la sala operativa — `in corso` (T46a fatto; il prossimo è T46b)
 - Contesto: [`corona-proposte.md`](corona-proposte.md) §3.1 (approvata il 23/10). Oggi dentro la Direzione (`universo`,
   squadra dell'Arbitro, oro `ffcf5c`) ci sono solo gli scaffali di `universe.json` e le scrivanie. Gli apparecchi seguono
   le vetrine di T21-T28 (`SHOWCASES`/`GRAPH_AT` in `corona.ts`, `showcaseOf`/`stepShowcase`/`clickStudio` in
   `kernel.ts`, il disegno in `corona3d.ts`, il pannello in `studio.ts`). Guardare non cambia nulla.
-- **T46a · il tavolo della situazione**: al centro (5 × 3 caselle, al posto della vetrina) il mondo dall'alto come
+- **T46a · il tavolo della situazione — `fatto`** (commit «Corona (T46a)»): al centro (5 × 3 caselle, al posto della vetrina) il mondo dall'alto come
   operazioni: il viandante, i luoghi in generazione (pulsano), le trame aperte come segnalini sulla loro regione con la
   tappa, le missioni del diario, i guasti (`faults`) dove sono accaduti, in rosso. Un metodo del kernel (`situation()`)
   che raccoglie tutto dai dati che ci sono già (atlante, `plots.json`, guasti, luoghi in coda); E o clic → pannello con
   le operazioni in corso. Test: con trame, un guasto e un luogo in coda `situation()` li elenca con la regione giusta.
+  Esito: `src/kernel/situation.ts` (funzione pura, `OPERATION_COLOR`/`OPERATION_NAME`), `kernel.situation()` che la nutre;
+  voce `situazione` (`SITUATION_AT` in `corona.ts`, x 14-18, y 10-12); `corona3d.ts`: il tavolo e `buildSituation` (regioni come
+  lastre dorate, un segnalino per operazione, i luoghi in generazione pulsano), riletto dal renderer una volta al secondo e
+  ricostruito solo se cambia; pannello `ui:situation` in `studio.ts` (mappa su canvas e le operazioni per tipo). Test in
+  `tests/direction.test.ts`. Diverso dal previsto: i guasti non avevano un luogo, ora `Fault.at` (dove era il viandante quando nasce
+  un guasto `module:`/`rune:` nel mondo; caricamento e manifest restano «nel codice»); la trama sta dove sta chi fa la sua tappa
+  (entità, poi `origine`, poi `luogo`), la missione «vai a» sul luogo o la regione nominati. Nessun ADR (deciso in T32). Verifica:
+  build + preview, `aurora` offline, pannello aperto con E, nessun errore in console. Nel seme offline le regioni sono tante e
+  vicine: i loro nomi sulla mappa del pannello si sovrappongono (da rivedere con T46b se disturba).
 - **T46b · la parete di schermi**: sul davanti, larga quanto la sala, tre campi: a sinistra la **linea del tempo** dei
   commit (`repo.log()`, una pellicola; «<» «>» la scorrono, il clic dice cosa è cambiato e chi l'ha voluto; non torna
   indietro: `R` resta l'unico modo); al centro il **registro dal vivo** (`kernel.feed()`: chi lavora, a cosa, con quale

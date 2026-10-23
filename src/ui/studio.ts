@@ -4,6 +4,7 @@
 
 import { PLACE_PHASES, type Kernel, type LayoutSample, type PlaceMiniature, type ShowcaseEntry } from '../kernel/kernel';
 import type { StudioItem } from '../kernel/corona';
+import { OPERATION_COLOR, OPERATION_NAME, type Operation, type OperationKind, type Situation } from '../kernel/situation';
 import { $, el } from './dom';
 import { icons } from './hud';
 
@@ -23,6 +24,7 @@ export class StudioPanel {
     k.bus.on('ui:exhibit', ({ item, building }: { item: StudioItem; building: string }) => this.exhibit(item, building));
     k.bus.on('ui:board', ({ building, name }: { building: string; name: string }) => this.board(building, name));
     k.bus.on('ui:showcase', (e: Shown) => this.showcase(e));
+    k.bus.on('ui:situation', ({ situation }: { situation: Situation }) => this.situation(situation));
     k.bus.on('ui:layout', ({ sample, building }: { sample: LayoutSample; building: string }) => this.layout(sample, building));
     // The arrows pressed with the panel open: it follows.
     k.bus.on('studio:showcase', (e: Shown) => {
@@ -208,6 +210,63 @@ export class StudioPanel {
       out,
       el('div', { class: 'row' }, open),
     );
+  }
+
+  /**
+   * The situation table of the Direction (T46a): the operations under way on a small map (regions outlined, a mark for
+   * each, faults in red), then by kind, with where they are.
+   */
+  situation(s: Situation): void {
+    const where = (o: Operation) => (o.cx === undefined ? 'nel codice, non nel mondo' : [o.place, o.region, `${o.cx},${o.cy}`].filter(Boolean).join(' · '));
+    const row = (o: Operation) => el('div', { class: 'item' }, el('span', { style: `color:${OPERATION_COLOR[o.kind]}` }, '● '), el('span', { class: 'path' }, o.label), ` — ${o.detail} `, el('span', { class: 'note' }, `(${where(o)})`));
+    const of = (kind: OperationKind) => s.ops.filter((o) => o.kind === kind);
+    const places = of('luogo');
+    const live = places.filter((o) => o.live);
+    const queued = places.length - live.length;
+    const section = (kind: OperationKind, list: Operation[], none: string) => [el('div', { class: 'section' }, `${OPERATION_NAME[kind][0].toUpperCase()}${OPERATION_NAME[kind].slice(1)} (${list.length})`), ...(list.length ? list.map(row) : [el('div', { class: 'note' }, none)])];
+    this.show(
+      el('div', { class: 'title' }, 'Il tavolo della situazione — Direzione'),
+      el('div', { class: 'note' }, 'Il mondo dall\x27alto, come operazioni in corso. Guardare non cambia nulla.'),
+      el('div', { class: 'frame situation' }, this.situationMap(s)),
+      ...section('viandante', of('viandante'), ''),
+      ...section('luogo', live, 'Il Cartografo non sta pianificando nessun luogo.'),
+      ...(queued ? [el('div', { class: 'note' }, `In coda: ${queued} luogh${queued === 1 ? 'o' : 'i'} solo abbozzat${queued === 1 ? 'o' : 'i'}.`)] : []),
+      ...section('trama', of('trama'), 'Nessuna trama aperta.'),
+      ...section('missione', of('missione'), 'Nessuna missione accettata.'),
+      ...section('guasto', of('guasto'), 'Nessun guasto aperto.'),
+    );
+  }
+
+  /** The table seen from above: a cell per chunk, the regions outlined with their names, the marks. */
+  private situationMap(s: Situation): HTMLCanvasElement {
+    const { x0, y0, x1, y1 } = s.bounds;
+    const cols = x1 - x0 + 1, rows = y1 - y0 + 1;
+    const cell = Math.max(4, Math.floor(Math.min(236 / cols, 236 / rows)));
+    const c = el('canvas', { class: 'plan' }) as HTMLCanvasElement;
+    c.width = cols * cell;
+    c.height = rows * cell;
+    const g = c.getContext('2d')!;
+    g.fillStyle = '#0a0812';
+    g.fillRect(0, 0, c.width, c.height);
+    g.font = '10px monospace';
+    for (const r of s.regions) {
+      g.strokeStyle = 'rgba(255,207,92,0.45)';
+      g.strokeRect((r.centro[0] - r.raggio - x0) * cell + 0.5, (r.centro[1] - r.raggio - y0) * cell + 0.5, (r.raggio * 2 + 1) * cell - 1, (r.raggio * 2 + 1) * cell - 1);
+      g.fillStyle = 'rgba(255,207,92,0.7)';
+      g.fillText(r.nome, (r.centro[0] - r.raggio - x0) * cell + 2, (r.centro[1] - r.raggio - y0) * cell + 10);
+    }
+    // The places under the rest; the wanderer on top.
+    const order: OperationKind[] = ['luogo', 'trama', 'missione', 'guasto', 'viandante'];
+    for (const kind of order)
+      for (const o of s.ops) {
+        if (o.kind !== kind || o.cx === undefined || o.cy === undefined) continue;
+        g.fillStyle = OPERATION_COLOR[kind];
+        g.globalAlpha = kind === 'luogo' && !o.live ? 0.3 : 1;
+        const m = kind === 'luogo' ? 1 : Math.max(1, cell / 4);
+        g.fillRect((o.cx - x0) * cell + m, (o.cy - y0) * cell + m, cell - m * 2, cell - m * 2);
+      }
+    g.globalAlpha = 1;
+    return c;
   }
 
   board(building: string, name: string): void {
