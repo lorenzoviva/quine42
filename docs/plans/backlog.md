@@ -311,7 +311,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   punto; nessun ADR (meccanismo dentro la corona, non cambia l'architettura). Per T22-T24 resta: la combinazione di rune e
   l'effetto (T22), il liquido viscoso e l'individuo scelto (T23), la stampante 3 × 3 (T24; oggi 3 × 1).
 
-### T22 · La Torre della Magia, dentro — `fatto`
+### T22 · La Torre della Magia, dentro — `fatto` (`d2612e8`)
 - Lo schermo mostra una runa o una combinazione di rune (magiche e incantesimi noti), «<» «>» per cambiarla; il
   clic mostra nel pannello l'effetto.
 - Esito: `showcaseEntries('rune')` elenca le combinazioni: ogni runa magica da sola (con il suo incantesimo, se c'è),
