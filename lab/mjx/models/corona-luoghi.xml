@@ -1,0 +1,519 @@
+<!--
+L'Ufficio dei luoghi (corona): grande mezzo mobile da cantiere e terraformazione planetaria
+della squadra del Cartografo, con carrelli cingolati continui, cabina panoramica vetrata,
+gru articolata da rimodellamento, antenna radar LIDAR, trivella geologica di profondità,
+lama apripista da terraformazione, proiettore olografico di griglia cartografica a terra,
+passerella d'accesso con portale a terra e scritta adesiva neon "UFFICIO DEI LUOGHI".
+Scritto da Gemini CLI (Gemini 3.8 Flash, abbonamento) il 23/10/2026, task T19.
+Scatola: 14 × 9 × 7 caselle, 112 × 72 × 56 voxel, 8 voxel per casella.
+Lettere chiave:
+  O = porta (lettera O, nome "porta", vano pedonale d'ingresso a z=0..16, x=50..62, y=66..68, vano passante interno vuoto)
+  F = insegna ("UFFICIO DEI LUOGHI", neon verde 9ad27a glow fisso a filo della parete frontale dello scafo a z=21..25)
+  P = targa scura opaca per contrasto dell'insegna
+  M = metallo cybernetico nero primario (14141a, corazza scafo, montanti, paraste)
+  m = metallo secondario scuro (20242e, carter, pannellature, pedane, telaio)
+  C = cemento e composito grafite (30343e, basamenti, piastre d'attracco)
+  S = acciaio chiaro zincato (8a8f9c, pistoni idraulici, giunti, corrimano, tralicci gru)
+  s = acciaio scuro strutturale (525662, profilati, bracci, tubolari)
+  T = battistrada cingolato corazzato ad alta aderenza (1a1a20)
+  t = rulli di scorrimento e ruote dentate dei carrelli cingolati (2d3038)
+  V = vetro scuro riflettente della cabina (14222a)
+  v = fasce di riflesso azzurrato-cenerino freddo delle vetrate (284250)
+  N = neon verde vivo d'accento fisso (9ad27a glow)
+  n = neon verde tenue per fascette e indicatori (589e48 glow)
+  x = buffer temporaneo per l'animazione (hidden)
+Fasi pulsanti del verde (1..8):
+  1..8 = gradiente continuo di 8 fasi (da 489848 a 9ad27a con glow) per la respirazione e la scansione LIDAR.
+Architettura:
+  - Scafo potente e imponente lungo l'asse x (x=14..98, y=14..52, z=8..24) in metallo nero e acciaio.
+  - 4 enormi carrelli cingolati da scavo continentale (z=0..8) che poggiano saldamente a terra.
+  - Fascia di levitazione neon verde incassata sotto lo scafo.
+  - Cabina panoramica vetrata sfaccettata (x=30..74, y=24..46, z=22..34) con montanti neri e riflessi.
+  - Gru articolata con braccio meccatronico da terraformazione sul tetto (x=80..92, z=24..50).
+  - Antenna radar LIDAR di rilievo geografico sul tetto (x=20..30, z=24..46).
+  - Trivella geologica sul fianco ovest (x=8..15) e lama apripista da terraformazione a est (x=96..104).
+  - Proiettore frontale e griglia olografica verde a terra davanti al mezzo (y=56..68, z=0..1).
+  - Passerella d'accesso industriale con parapetti che scende dallo scafo fino a z=0 (y=52..68).
+  - Porta O centrata a sud a z=0 con atrio interno sgombro per oltre 16 voxel.
+  - Scritta adesiva neon "UFFICIO DEI LUOGHI" a filo della parete sud a z=21..25, perfettamente centrata.
+Animazione "scansione" (8 frame):
+  La griglia cartografica a terra avanza come un fascio radar LIDAR di scansione geografica continua.
+-->
+<sequence values="BMmCSsTtVvNnFPOx12345678" size="112 72 56" symmetry="()" name="Ufficio dei luoghi">
+  <!-- Materiali e palette neon punk -->
+  <color symbol="M" value="14141a" name="metallo primario"/>
+  <color symbol="m" value="20242e" name="metallo secondario"/>
+  <color symbol="C" value="30343e" name="composito grafite"/>
+  <color symbol="S" value="8a8f9c" name="acciaio chiaro"/>
+  <color symbol="s" value="525662" name="acciaio scuro"/>
+  <color symbol="T" value="1a1a20" name="battistrada cingoli"/>
+  <color symbol="t" value="2d3038" name="ruote e rulli cingoli"/>
+  <color symbol="V" value="14222a" name="vetro scuro"/>
+  <color symbol="v" value="284250" name="riflesso vetro"/>
+  <color symbol="N" value="9ad27a" glow="True" name="neon verde vivo"/>
+  <color symbol="n" value="589e48" glow="True" name="neon verde tenue"/>
+  <color symbol="P" value="0a100a" name="targa insegna"/>
+  <color symbol="F" value="9ad27a" glow="True" name="insegna"/>
+  <color symbol="O" value="1a2c1a" name="porta"/>
+  <color symbol="x" hidden="True" name="buffer animazione"/>
+
+  <!-- 8 Fasi della scansione radar e respirazione verde (1..8) -->
+  <color symbol="1" value="489848" glow="True" name="fase verde profondo"/>
+  <color symbol="2" value="5cb45c" glow="True" name="fase verde 2"/>
+  <color symbol="3" value="72cc72" glow="True" name="fase verde 3"/>
+  <color symbol="4" value="88e288" glow="True" name="fase verde 4"/>
+  <color symbol="5" value="9ad27a" glow="True" name="fase verde apice"/>
+  <color symbol="6" value="88e288" glow="True" name="fase verde 6"/>
+  <color symbol="7" value="72cc72" glow="True" name="fase verde 7"/>
+  <color symbol="8" value="5cb45c" glow="True" name="fase verde 8"/>
+
+  <!-- ================================================================= -->
+  <!-- 1. I 4 CARRELLI CINGOLATI CONTINUI (z = 0..8)                     -->
+  <!-- ================================================================= -->
+  <!-- Cingolo Anteriore Sinistro (cx=25, cy=42) -->
+  <box at="25 42 0" size="24 14 1" color="T"/>
+  <box at="25 42 1" size="22 12 5" color="m"/>
+  <box at="25 42 1" size="20 10 4" color="t"/>
+  <cylinder at="16 42 1" size="5 12 5" color="S"/>
+  <cylinder at="34 42 1" size="5 12 5" color="S"/>
+  <cylinder at="22 42 1" size="4 12 4" color="t"/>
+  <cylinder at="28 42 1" size="4 12 4" color="t"/>
+  <box at="25 35.5 1" size="24 1 6" color="T"/>
+  <box at="25 48.5 1" size="24 1 6" color="T"/>
+  <box at="15 35.5 2" size="1 1 4" color="s"/>
+  <box at="15 48.5 2" size="1 1 4" color="s"/>
+  <box at="18 35.5 2" size="1 1 4" color="s"/>
+  <box at="18 48.5 2" size="1 1 4" color="s"/>
+  <box at="21 35.5 2" size="1 1 4" color="s"/>
+  <box at="21 48.5 2" size="1 1 4" color="s"/>
+  <box at="24 35.5 2" size="1 1 4" color="s"/>
+  <box at="24 48.5 2" size="1 1 4" color="s"/>
+  <box at="27 35.5 2" size="1 1 4" color="s"/>
+  <box at="27 48.5 2" size="1 1 4" color="s"/>
+  <box at="30 35.5 2" size="1 1 4" color="s"/>
+  <box at="30 48.5 2" size="1 1 4" color="s"/>
+  <box at="33 35.5 2" size="1 1 4" color="s"/>
+  <box at="33 48.5 2" size="1 1 4" color="s"/>
+  <box at="25 42 6" size="24 14 1" color="T"/>
+  <box at="25 42 7" size="26 16 1" color="M"/>
+  <box at="25 42 8" size="24 14 1" color="m"/>
+  <cylinder at="20 42 6" size="4 4 5" color="S"/>
+  <cylinder at="30 42 6" size="4 4 5" color="S"/>
+  <box at="25 42 9" size="16 6 2" color="s"/>
+  <!-- Cingolo Anteriore Destro (cx=87, cy=42) -->
+  <box at="87 42 0" size="24 14 1" color="T"/>
+  <box at="87 42 1" size="22 12 5" color="m"/>
+  <box at="87 42 1" size="20 10 4" color="t"/>
+  <cylinder at="78 42 1" size="5 12 5" color="S"/>
+  <cylinder at="96 42 1" size="5 12 5" color="S"/>
+  <cylinder at="84 42 1" size="4 12 4" color="t"/>
+  <cylinder at="90 42 1" size="4 12 4" color="t"/>
+  <box at="87 35.5 1" size="24 1 6" color="T"/>
+  <box at="87 48.5 1" size="24 1 6" color="T"/>
+  <box at="77 35.5 2" size="1 1 4" color="s"/>
+  <box at="77 48.5 2" size="1 1 4" color="s"/>
+  <box at="80 35.5 2" size="1 1 4" color="s"/>
+  <box at="80 48.5 2" size="1 1 4" color="s"/>
+  <box at="83 35.5 2" size="1 1 4" color="s"/>
+  <box at="83 48.5 2" size="1 1 4" color="s"/>
+  <box at="86 35.5 2" size="1 1 4" color="s"/>
+  <box at="86 48.5 2" size="1 1 4" color="s"/>
+  <box at="89 35.5 2" size="1 1 4" color="s"/>
+  <box at="89 48.5 2" size="1 1 4" color="s"/>
+  <box at="92 35.5 2" size="1 1 4" color="s"/>
+  <box at="92 48.5 2" size="1 1 4" color="s"/>
+  <box at="95 35.5 2" size="1 1 4" color="s"/>
+  <box at="95 48.5 2" size="1 1 4" color="s"/>
+  <box at="87 42 6" size="24 14 1" color="T"/>
+  <box at="87 42 7" size="26 16 1" color="M"/>
+  <box at="87 42 8" size="24 14 1" color="m"/>
+  <cylinder at="82 42 6" size="4 4 5" color="S"/>
+  <cylinder at="92 42 6" size="4 4 5" color="S"/>
+  <box at="87 42 9" size="16 6 2" color="s"/>
+  <!-- Cingolo Posteriore Sinistro (cx=25, cy=20) -->
+  <box at="25 20 0" size="24 14 1" color="T"/>
+  <box at="25 20 1" size="22 12 5" color="m"/>
+  <box at="25 20 1" size="20 10 4" color="t"/>
+  <cylinder at="16 20 1" size="5 12 5" color="S"/>
+  <cylinder at="34 20 1" size="5 12 5" color="S"/>
+  <cylinder at="22 20 1" size="4 12 4" color="t"/>
+  <cylinder at="28 20 1" size="4 12 4" color="t"/>
+  <box at="25 13.5 1" size="24 1 6" color="T"/>
+  <box at="25 26.5 1" size="24 1 6" color="T"/>
+  <box at="15 13.5 2" size="1 1 4" color="s"/>
+  <box at="15 26.5 2" size="1 1 4" color="s"/>
+  <box at="18 13.5 2" size="1 1 4" color="s"/>
+  <box at="18 26.5 2" size="1 1 4" color="s"/>
+  <box at="21 13.5 2" size="1 1 4" color="s"/>
+  <box at="21 26.5 2" size="1 1 4" color="s"/>
+  <box at="24 13.5 2" size="1 1 4" color="s"/>
+  <box at="24 26.5 2" size="1 1 4" color="s"/>
+  <box at="27 13.5 2" size="1 1 4" color="s"/>
+  <box at="27 26.5 2" size="1 1 4" color="s"/>
+  <box at="30 13.5 2" size="1 1 4" color="s"/>
+  <box at="30 26.5 2" size="1 1 4" color="s"/>
+  <box at="33 13.5 2" size="1 1 4" color="s"/>
+  <box at="33 26.5 2" size="1 1 4" color="s"/>
+  <box at="25 20 6" size="24 14 1" color="T"/>
+  <box at="25 20 7" size="26 16 1" color="M"/>
+  <box at="25 20 8" size="24 14 1" color="m"/>
+  <cylinder at="20 20 6" size="4 4 5" color="S"/>
+  <cylinder at="30 20 6" size="4 4 5" color="S"/>
+  <box at="25 20 9" size="16 6 2" color="s"/>
+  <!-- Cingolo Posteriore Destro (cx=87, cy=20) -->
+  <box at="87 20 0" size="24 14 1" color="T"/>
+  <box at="87 20 1" size="22 12 5" color="m"/>
+  <box at="87 20 1" size="20 10 4" color="t"/>
+  <cylinder at="78 20 1" size="5 12 5" color="S"/>
+  <cylinder at="96 20 1" size="5 12 5" color="S"/>
+  <cylinder at="84 20 1" size="4 12 4" color="t"/>
+  <cylinder at="90 20 1" size="4 12 4" color="t"/>
+  <box at="87 13.5 1" size="24 1 6" color="T"/>
+  <box at="87 26.5 1" size="24 1 6" color="T"/>
+  <box at="77 13.5 2" size="1 1 4" color="s"/>
+  <box at="77 26.5 2" size="1 1 4" color="s"/>
+  <box at="80 13.5 2" size="1 1 4" color="s"/>
+  <box at="80 26.5 2" size="1 1 4" color="s"/>
+  <box at="83 13.5 2" size="1 1 4" color="s"/>
+  <box at="83 26.5 2" size="1 1 4" color="s"/>
+  <box at="86 13.5 2" size="1 1 4" color="s"/>
+  <box at="86 26.5 2" size="1 1 4" color="s"/>
+  <box at="89 13.5 2" size="1 1 4" color="s"/>
+  <box at="89 26.5 2" size="1 1 4" color="s"/>
+  <box at="92 13.5 2" size="1 1 4" color="s"/>
+  <box at="92 26.5 2" size="1 1 4" color="s"/>
+  <box at="95 13.5 2" size="1 1 4" color="s"/>
+  <box at="95 26.5 2" size="1 1 4" color="s"/>
+  <box at="87 20 6" size="24 14 1" color="T"/>
+  <box at="87 20 7" size="26 16 1" color="M"/>
+  <box at="87 20 8" size="24 14 1" color="m"/>
+  <cylinder at="82 20 6" size="4 4 5" color="S"/>
+  <cylinder at="92 20 6" size="4 4 5" color="S"/>
+  <box at="87 20 9" size="16 6 2" color="s"/>
+
+  <!-- ================================================================= -->
+  <!-- 2. TELAIO CHIGLIA E FASCE NEON DI LEVITAZIONE (z = 8..11)          -->
+  <!-- ================================================================= -->
+  <box at="56 31 8" size="76 34 3" color="M"/>
+  <box at="56 31 9" size="72 30 2" color="m"/>
+  <box at="56 31 8" size="86 12 3" color="s"/>
+  <box at="56 31 8" size="16 38 3" color="s"/>
+  <box at="56 12 8" size="74 1 2" color="n"/>
+  <box at="56 50 8" size="74 1 2" color="n"/>
+  <box at="12 31 8" size="1 34 2" color="n"/>
+  <box at="100 31 8" size="1 34 2" color="n"/>
+  <box at="13 13 8" size="2 2 2" color="1"/>
+  <box at="99 13 8" size="2 2 2" color="3"/>
+  <box at="13 49 8" size="2 2 2" color="5"/>
+  <box at="99 49 8" size="2 2 2" color="7"/>
+
+  <!-- ================================================================= -->
+  <!-- 3. PROPULSORI E GRIGLIE DI SCARICO POSTERIORI (y = 12..16)        -->
+  <!-- ================================================================= -->
+  <box at="56 13 10" size="64 4 12" color="M"/>
+  <box at="56 12 11" size="60 2 10" color="m"/>
+  <cylinder at="32 11 12" size="10 4 10" color="M"/>
+  <cylinder at="32 11 13" size="8 2 8" color="s"/>
+  <cylinder at="32 11 15" size="4 2 4" color="S"/>
+  <cylinder at="32 11 16" size="2 2 2" color="1"/>
+  <cylinder at="48 11 12" size="10 4 10" color="M"/>
+  <cylinder at="48 11 13" size="8 2 8" color="s"/>
+  <cylinder at="48 11 15" size="4 2 4" color="S"/>
+  <cylinder at="48 11 16" size="2 2 2" color="1"/>
+  <cylinder at="64 11 12" size="10 4 10" color="M"/>
+  <cylinder at="64 11 13" size="8 2 8" color="s"/>
+  <cylinder at="64 11 15" size="4 2 4" color="S"/>
+  <cylinder at="64 11 16" size="2 2 2" color="1"/>
+  <cylinder at="80 11 12" size="10 4 10" color="M"/>
+  <cylinder at="80 11 13" size="8 2 8" color="s"/>
+  <cylinder at="80 11 15" size="4 2 4" color="S"/>
+  <cylinder at="80 11 16" size="2 2 2" color="1"/>
+
+  <!-- ================================================================= -->
+  <!-- 4. SCUFO PRINCIPALE DEL MEZZO (x = 14..98, y = 14..52, z = 10..24) -->
+  <!-- ================================================================= -->
+  <box at="56 32 10" size="84 36 12" color="M"/>
+  <box at="56 32 11" size="82 34 10" color="m"/>
+  <box at="56 32 10" size="86 34 11" color="M"/>
+  <box at="56 32 10" size="82 38 11" color="M"/>
+  <box at="56 32 22" size="80 34 2" color="M"/>
+  <box at="56 32 23" size="78 32 1" color="m"/>
+  <box at="56 15 16" size="76 1 2" color="S"/>
+  <box at="56 15 19" size="76 1 1" color="s"/>
+  <box at="56 49 16" size="76 1 2" color="S"/>
+  <box at="56 49 19" size="76 1 1" color="s"/>
+
+  <!-- ================================================================= -->
+  <!-- 5. CABINA DI COMANDO VETRATA PANORAMICA (z = 22..35)              -->
+  <!-- ================================================================= -->
+  <box at="52 35 23" size="44 22 2" color="M"/>
+  <box at="52 35 24" size="42 20 1" color="m"/>
+  <box at="52 35 25" size="42 20 8" color="V"/>
+  <box at="52 35 25" size="38 16 8" color="B"/>
+  <box at="52 35 25" size="14 10 3" color="m"/>
+  <box at="52 35 28" size="12 8 1" color="N"/>
+  <box at="31 25 25" size="2 2 8" color="M"/>
+  <box at="73 25 25" size="2 2 8" color="M"/>
+  <box at="31 45 25" size="2 2 8" color="M"/>
+  <box at="73 45 25" size="2 2 8" color="M"/>
+  <box at="45 45 25" size="2 2 8" color="M"/>
+  <box at="59 45 25" size="2 2 8" color="M"/>
+  <box at="52 45 27" size="38 1 1" color="v"/>
+  <box at="52 45 30" size="38 1 1" color="v"/>
+  <box at="31 35 28" size="1 18 1" color="v"/>
+  <box at="73 35 28" size="1 18 1" color="v"/>
+  <box at="52 35 33" size="46 24 2" color="M"/>
+  <box at="52 35 34" size="44 22 1" color="m"/>
+  <box at="52 47 33" size="42 2 1" color="N"/>
+  <cylinder at="38 47 34" size="4 2 2" color="S"/>
+  <cylinder at="38 48 34" size="2 1 2" color="5"/>
+  <cylinder at="66 47 34" size="4 2 2" color="S"/>
+  <cylinder at="66 48 34" size="2 1 2" color="5"/>
+
+  <!-- ================================================================= -->
+  <!-- 6. ANTENNA RADAR LIDAR DI RILIEVO CARTOGRAFICO (x = 24, y = 22)   -->
+  <!-- ================================================================= -->
+  <cylinder at="24 22 24" size="12 12 2" color="M"/>
+  <cylinder at="24 22 26" size="10 10 1" color="m"/>
+  <box at="24 22 27" size="4 4 10" color="s"/>
+  <box at="24 22 27" size="6 2 9" color="S"/>
+  <box at="24 22 27" size="2 6 9" color="S"/>
+  <cylinder at="24 22 36" size="6 6 6" color="S"/>
+  <cylinder at="24 23 40" size="4 4 3" color="S"/>
+  <ellipsoid at="24 23 41" size="14 6 12" color="M"/>
+  <ellipsoid at="24 24 41" size="12 4 10" color="m"/>
+  <ellipsoid at="24 25 41" size="10 3 8" color="B"/>
+  <cylinder at="24 25 41" size="2 5 2" color="S"/>
+  <cylinder at="24 28 41" size="2 2 2" color="5"/>
+
+  <!-- ================================================================= -->
+  <!-- 7. GRU ARTICOLATA DA TERRAFORMAZIONE (x = 84, y = 28, z = 24..50)  -->
+  <!-- ================================================================= -->
+  <cylinder at="84 26 24" size="14 14 2" color="M"/>
+  <cylinder at="84 26 26" size="12 12 1" color="s"/>
+  <box at="84 26 27" size="10 10 5" color="M"/>
+  <box at="84 22 27" size="10 4 6" color="m"/>
+  <cylinder at="84 21 27" size="8 3 5" color="S"/>
+  <cylinder at="84 27 32" size="8 4 4" color="S"/>
+  <box at="84 30 34" size="4 4 4" color="M"/>
+  <box at="84 33 37" size="4 4 4" color="M"/>
+  <box at="84 36 40" size="4 4 4" color="M"/>
+  <box at="84 32 35" size="2 8 2" color="S"/>
+  <box at="84 35 38" size="2 8 2" color="S"/>
+  <cylinder at="81 29 32" size="2 8 2" color="S"/>
+  <cylinder at="87 29 32" size="2 8 2" color="S"/>
+  <cylinder at="84 38 42" size="6 4 4" color="S"/>
+  <box at="84 41 41" size="3 4 3" color="M"/>
+  <box at="84 44 39" size="3 4 3" color="s"/>
+  <box at="84 46 37" size="3 4 3" color="S"/>
+  <box at="84 48 35" size="3 3 3" color="S"/>
+  <cylinder at="84 49 35" size="4 4 3" color="S"/>
+  <cylinder at="84 49 34" size="6 6 1" color="N"/>
+  <cylinder at="84 49 33" size="2 2 3" color="5"/>
+
+  <!-- ================================================================= -->
+  <!-- 8. ATTREZZATURE FIANCHI: TRIVELLA OVEST E LAMA APRIPISTA EST       -->
+  <!-- ================================================================= -->
+  <!-- Bracci di supporto idraulici della trivella (ancorati a x=14) -->
+  <box at="12 32 18" size="4 2 2" color="S"/>
+  <box at="12 38 18" size="4 2 2" color="S"/>
+  <box at="10 35 17" size="4 10 3" color="M"/>
+  <cylinder at="10 35 19" size="6 6 4" color="m"/>
+  <cylinder at="10 35 22" size="4 4 2" color="S"/>
+  <cylinder at="10 35 12" size="6 6 6" color="s"/>
+  <cylinder at="10 35 12" size="8 8 1" color="S"/>
+  <cone at="10 35 4" size="6 6 8" color="S"/>
+  <cylinder at="10 35 8" size="7 7 1" color="s"/>
+  <cylinder at="10 35 15" size="7 7 1" color="N"/>
+  <!-- Supporti idraulici di spinta lama (ancorati a x=98) -->
+  <box at="100 32 10" size="4 2 2" color="S"/>
+  <box at="100 40 10" size="4 2 2" color="S"/>
+  <cylinder at="100 36 12" size="4 4 6" color="S"/>
+  <box at="102 36 2" size="2 20 12" color="M"/>
+  <box at="103 36 3" size="1 18 10" color="m"/>
+  <box at="102 36 1" size="2 20 2" color="S"/>
+  <box at="103 36 13" size="2 18 1" color="N"/>
+
+  <!-- ================================================================= -->
+  <!-- 9. PROIETTORE FRONTALE E GRIGLIA VERDE A TERRA (y = 54..68)        -->
+  <!-- ================================================================= -->
+  <cylinder at="36 51 16" size="4 4 4" color="M"/>
+  <cylinder at="36 52 16" size="3 3 3" color="S"/>
+  <cylinder at="36 53 16" size="2 1 2" color="5"/>
+  <cylinder at="44 51 16" size="4 4 4" color="M"/>
+  <cylinder at="44 52 16" size="3 3 3" color="S"/>
+  <cylinder at="44 53 16" size="2 1 2" color="5"/>
+  <cylinder at="68 51 16" size="4 4 4" color="M"/>
+  <cylinder at="68 52 16" size="3 3 3" color="S"/>
+  <cylinder at="68 53 16" size="2 1 2" color="5"/>
+  <cylinder at="76 51 16" size="4 4 4" color="M"/>
+  <cylinder at="76 52 16" size="3 3 3" color="S"/>
+  <cylinder at="76 53 16" size="2 1 2" color="5"/>
+  <box at="56 61 0" size="76 16 1" color="C"/>
+  <box at="56 61 0" size="74 14 1" color="m"/>
+  <box at="20 61 1" size="1 14 1" color="n"/>
+  <box at="28 61 1" size="1 14 1" color="n"/>
+  <box at="36 61 1" size="1 14 1" color="n"/>
+  <box at="44 61 1" size="1 14 1" color="n"/>
+  <box at="68 61 1" size="1 14 1" color="n"/>
+  <box at="76 61 1" size="1 14 1" color="n"/>
+  <box at="84 61 1" size="1 14 1" color="n"/>
+  <box at="92 61 1" size="1 14 1" color="n"/>
+  <box at="56 55 1" size="74 1 1" color="1"/>
+  <box at="56 57 1" size="74 1 1" color="2"/>
+  <box at="56 59 1" size="74 1 1" color="3"/>
+  <box at="56 61 1" size="74 1 1" color="4"/>
+  <box at="56 63 1" size="74 1 1" color="5"/>
+  <box at="56 65 1" size="74 1 1" color="6"/>
+  <box at="56 67 1" size="74 1 1" color="7"/>
+  <box at="56 69 1" size="74 1 1" color="8"/>
+  <box at="28 58 1" size="3 1 1" color="5"/>
+  <box at="28 58 1" size="1 3 1" color="5"/>
+  <box at="28 62 1" size="3 1 1" color="5"/>
+  <box at="28 62 1" size="1 3 1" color="5"/>
+  <box at="28 66 1" size="3 1 1" color="5"/>
+  <box at="28 66 1" size="1 3 1" color="5"/>
+  <box at="44 58 1" size="3 1 1" color="5"/>
+  <box at="44 58 1" size="1 3 1" color="5"/>
+  <box at="44 62 1" size="3 1 1" color="5"/>
+  <box at="44 62 1" size="1 3 1" color="5"/>
+  <box at="44 66 1" size="3 1 1" color="5"/>
+  <box at="44 66 1" size="1 3 1" color="5"/>
+  <box at="68 58 1" size="3 1 1" color="5"/>
+  <box at="68 58 1" size="1 3 1" color="5"/>
+  <box at="68 62 1" size="3 1 1" color="5"/>
+  <box at="68 62 1" size="1 3 1" color="5"/>
+  <box at="68 66 1" size="3 1 1" color="5"/>
+  <box at="68 66 1" size="1 3 1" color="5"/>
+  <box at="84 58 1" size="3 1 1" color="5"/>
+  <box at="84 58 1" size="1 3 1" color="5"/>
+  <box at="84 62 1" size="3 1 1" color="5"/>
+  <box at="84 62 1" size="1 3 1" color="5"/>
+  <box at="84 66 1" size="3 1 1" color="5"/>
+  <box at="84 66 1" size="1 3 1" color="5"/>
+
+  <!-- ================================================================= -->
+  <!-- 10. PASSERELLA D'ACCESSO, ATRIO E PORTA O (z = 0..16)              -->
+  <!-- ================================================================= -->
+  <box at="56 51 7" size="15 4 6" color="M"/>
+  <box at="56 51 8" size="13 4 5" color="m"/>
+  <box at="56 52 7" size="13 2 1" color="m"/>
+  <box at="56 54 6" size="13 2 1" color="m"/>
+  <box at="56 56 5" size="13 2 1" color="m"/>
+  <box at="56 58 4" size="13 2 1" color="m"/>
+  <box at="56 60 3" size="13 2 1" color="m"/>
+  <box at="56 62 2" size="13 2 1" color="m"/>
+  <box at="56 64 1" size="13 2 1" color="m"/>
+  <box at="56 66 0" size="13 4 1" color="C"/>
+  <box at="49 52 8" size="1 2 4" color="s"/>
+  <box at="63 52 8" size="1 2 4" color="s"/>
+  <box at="49 56 6" size="1 6 4" color="s"/>
+  <box at="63 56 6" size="1 6 4" color="s"/>
+  <box at="49 62 3" size="1 6 4" color="s"/>
+  <box at="63 62 3" size="1 6 4" color="s"/>
+  <box at="49 59 7" size="1 16 1" color="S"/>
+  <box at="63 59 7" size="1 16 1" color="S"/>
+  <box at="50 59 4" size="1 14 1" color="n"/>
+  <box at="62 59 4" size="1 14 1" color="n"/>
+  <box at="56 54 8" size="11 10 12" color="B"/>
+  <box at="56 46 9" size="13 12 11" color="B"/>
+  <box at="56 67 0" size="13 2 16" color="O"/>
+  <box at="49 67 0" size="1 2 17" color="M"/>
+  <box at="63 67 0" size="1 2 17" color="M"/>
+  <box at="56 67 17" size="15 2 1" color="M"/>
+  <box at="56 67 17" size="13 1 1" color="N"/>
+
+  <!-- ================================================================= -->
+  <!-- 11. SCRITTA ADESIVA NEON "UFFICIO DEI LUOGHI" (z = 21..25, y = 52) -->
+  <!-- Lettere a pixel 3×5 voxel con color="F", a filo della parete sud   -->
+  <!-- ================================================================= -->
+  <box at="56 52 20" size="72 1 7" color="P"/>
+  <box at="56 52 20" size="74 1 1" color="s"/>
+  <box at="56 52 26" size="74 1 1" color="s"/>
+  <!-- U (x=23..25) -->
+  <box at="23 52 21" size="1 1 5" color="F"/>
+  <box at="24 52 21" size="1 1 1" color="F"/>
+  <box at="25 52 21" size="1 1 5" color="F"/>
+  <!-- F (x=27..29) -->
+  <box at="27 52 21" size="1 1 5" color="F"/>
+  <box at="28.5 52 25" size="2 1 1" color="F"/>
+  <box at="28 52 23" size="1 1 1" color="F"/>
+  <!-- F (x=31..33) -->
+  <box at="31 52 21" size="1 1 5" color="F"/>
+  <box at="32.5 52 25" size="2 1 1" color="F"/>
+  <box at="32 52 23" size="1 1 1" color="F"/>
+  <!-- I (x=35..37) -->
+  <box at="36 52 21" size="1 1 5" color="F"/>
+  <box at="36 52 25" size="3 1 1" color="F"/>
+  <box at="36 52 21" size="3 1 1" color="F"/>
+  <!-- C (x=39..41) -->
+  <box at="39 52 21" size="1 1 5" color="F"/>
+  <box at="40.5 52 25" size="2 1 1" color="F"/>
+  <box at="40.5 52 21" size="2 1 1" color="F"/>
+  <!-- I (x=43..45) -->
+  <box at="44 52 21" size="1 1 5" color="F"/>
+  <box at="44 52 25" size="3 1 1" color="F"/>
+  <box at="44 52 21" size="3 1 1" color="F"/>
+  <!-- O (x=47..49) -->
+  <box at="47 52 21" size="1 1 5" color="F"/>
+  <box at="49 52 21" size="1 1 5" color="F"/>
+  <box at="48 52 25" size="1 1 1" color="F"/>
+  <box at="48 52 21" size="1 1 1" color="F"/>
+  <!-- D (x=53..55) -->
+  <box at="53 52 21" size="1 1 5" color="F"/>
+  <box at="54 52 25" size="1 1 1" color="F"/>
+  <box at="54 52 21" size="1 1 1" color="F"/>
+  <box at="55 52 22" size="1 1 3" color="F"/>
+  <!-- E (x=57..59) -->
+  <box at="57 52 21" size="1 1 5" color="F"/>
+  <box at="58.5 52 25" size="2 1 1" color="F"/>
+  <box at="58 52 23" size="1 1 1" color="F"/>
+  <box at="58.5 52 21" size="2 1 1" color="F"/>
+  <!-- I (x=61..63) -->
+  <box at="62 52 21" size="1 1 5" color="F"/>
+  <box at="62 52 25" size="3 1 1" color="F"/>
+  <box at="62 52 21" size="3 1 1" color="F"/>
+  <!-- L (x=67..69) -->
+  <box at="67 52 21" size="1 1 5" color="F"/>
+  <box at="68.5 52 21" size="2 1 1" color="F"/>
+  <!-- U (x=71..73) -->
+  <box at="71 52 21" size="1 1 5" color="F"/>
+  <box at="72 52 21" size="1 1 1" color="F"/>
+  <box at="73 52 21" size="1 1 5" color="F"/>
+  <!-- O (x=75..77) -->
+  <box at="75 52 21" size="1 1 5" color="F"/>
+  <box at="77 52 21" size="1 1 5" color="F"/>
+  <box at="76 52 25" size="1 1 1" color="F"/>
+  <box at="76 52 21" size="1 1 1" color="F"/>
+  <!-- G (x=79..81) -->
+  <box at="79 52 21" size="1 1 5" color="F"/>
+  <box at="80.5 52 25" size="2 1 1" color="F"/>
+  <box at="80.5 52 21" size="2 1 1" color="F"/>
+  <box at="81 52 22" size="1 1 2" color="F"/>
+  <box at="80 52 23" size="1 1 1" color="F"/>
+  <!-- H (x=83..85) -->
+  <box at="83 52 21" size="1 1 5" color="F"/>
+  <box at="85 52 21" size="1 1 5" color="F"/>
+  <box at="84 52 23" size="1 1 1" color="F"/>
+  <!-- I (x=87..89) -->
+  <box at="88 52 21" size="1 1 5" color="F"/>
+  <box at="88 52 25" size="3 1 1" color="F"/>
+  <box at="88 52 21" size="3 1 1" color="F"/>
+</sequence>
+
+<!-- ================================================================= -->
+<!-- ANIMAZIONE CICLICA "SCANSIONE" (8 frame, avanzamento radar LIDAR)-->
+<!-- ================================================================= -->
+<animation name="scansione" frames="8">
+  <sequence>
+    <all in="1" out="x"/>
+    <all in="2" out="1"/>
+    <all in="3" out="2"/>
+    <all in="4" out="3"/>
+    <all in="5" out="4"/>
+    <all in="6" out="5"/>
+    <all in="7" out="6"/>
+    <all in="8" out="7"/>
+    <all in="x" out="8"/>
+  </sequence>
+</animation>
