@@ -26,8 +26,17 @@ export const SHOWCASES: Record<string, { source: ShowcaseSource; device: Showcas
   cose: { source: 'cose', device: 'stampante', label: 'la stampante delle cose' },
   oggetti: { source: 'oggetti', device: 'stampante', label: 'la stampante degli oggetti' },
 };
-/** Where a showcase stands in its room (left cell, row) and how wide it is; the arrows are at its sides. */
+/**
+ * Where a showcase stands in its room (left cell, row of its arrows) and how wide it is; the arrows are at its sides.
+ * The printer (T24) is square: `PRINTER` rows deep, centred on the arrows' row, the thing on its middle cell.
+ */
 export const SHOWCASE_AT = { x: 15, y: 11, w: 3 };
+export const PRINTER = 3;
+
+/** The cell of a (wide or deep) studio item nearest to a point: distances are measured from it. */
+export function cellNear(it: StudioItem, x: number, y: number): { x: number; y: number } {
+  return { x: Math.max(it.x, Math.min(it.x + (it.w ?? 1) - 1, Math.floor(x))), y: Math.max(it.y, Math.min(it.y + (it.h ?? 1) - 1, Math.floor(y))) };
+}
 
 /** The Council at its round table: who sits where, and the room behind each seat's teleport. */
 export const SEATS: Array<{ agent: string; room: string }> = [
@@ -59,6 +68,8 @@ export interface StudioItem {
   target?: string;
   /** Width in cells (screens are wide). */
   w?: number;
+  /** Depth in cells (the printer is square), from `y` down. */
+  h?: number;
   /** A showcase: what it shows and how it looks; its arrows point to it with `target` (the building). */
   source?: ShowcaseSource;
   device?: ShowcaseDevice;
@@ -284,7 +295,8 @@ export class Corona {
           const show = SHOWCASES[id];
           if (show) {
             const { x, y, w } = SHOWCASE_AT;
-            placed.push({ kind: 'showcase', label: show.label, source: show.source, device: show.device, target: id, x: ox + x, y: oy + y, w });
+            const h = show.device === 'stampante' ? PRINTER : 1;
+            placed.push({ kind: 'showcase', label: show.label, source: show.source, device: show.device, target: id, x: ox + x, y: oy + y - Math.floor(h / 2), w, h });
             placed.push({ kind: 'prev', label: '«<» il precedente', target: id, x: ox + x - 1, y: oy + y });
             placed.push({ kind: 'next', label: '«>» il successivo', target: id, x: ox + x + w, y: oy + y });
           }
@@ -343,7 +355,7 @@ export class Corona {
       const lx = cx - room.floor.ox;
       const ly = cy - room.floor.oy;
       if (lx < 0 || ly < 0 || lx >= ROOM_W || ly >= ROOM_H) return null;
-      const item = room.floor.items.find((i) => i.y === cy && cx >= i.x && cx < i.x + (i.w ?? 1));
+      const item = room.floor.items.find((i) => cy >= i.y && cy < i.y + (i.h ?? 1) && cx >= i.x && cx < i.x + (i.w ?? 1));
       // The round table fills an ellipse in the middle of the Council's hall.
       if (!item && room.building.id === 'concilio' && room.floor.index === 0 && ((lx + 0.5 - TABLE.cx) / TABLE.rx) ** 2 + ((ly + 0.5 - TABLE.cy) / TABLE.ry) ** 2 <= 1) {
         const table = room.floor.items.find((i) => i.kind === 'table');
@@ -438,9 +450,9 @@ export class Corona {
     let bd = r;
     for (const it of room.floor.items) {
       if (it.kind === 'desk' || (kinds && !kinds.includes(it.kind))) continue;
-      // Wide things (screens, the atlas) are near from any of their cells; the table from its rim.
-      const cx = Math.max(it.x, Math.min(it.x + (it.w ?? 1) - 1, Math.floor(x)));
-      const d = it.kind === 'table' ? Math.hypot((x - TABLE.cx - this.roomAt(x, y)!.floor.ox) / TABLE.rx, (y - TABLE.cy - this.roomAt(x, y)!.floor.oy) / TABLE.ry) * 1.2 - 0.2 : Math.hypot(cx + 0.5 - x, it.y + 0.5 - y);
+      // Wide or deep things (screens, the atlas, the printer) are near from any of their cells; the table from its rim.
+      const c = cellNear(it, x, y);
+      const d = it.kind === 'table' ? Math.hypot((x - TABLE.cx - this.roomAt(x, y)!.floor.ox) / TABLE.rx, (y - TABLE.cy - this.roomAt(x, y)!.floor.oy) / TABLE.ry) * 1.2 - 0.2 : Math.hypot(c.x + 0.5 - x, c.y + 0.5 - y);
       if (d < bd) [best, bd] = [it, d];
     }
     return best;

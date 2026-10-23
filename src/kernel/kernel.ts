@@ -8,7 +8,7 @@ import { Faults } from './faults';
 import { Sandbox, type Host } from './sandbox';
 import { apiErrors, describeEffect, validateEffects, Validator } from './validator';
 import { Repo, type KeyValueStore } from './repo';
-import { Corona, campusModel, folderOf, type CoronaCell, type Exhibit, type ShowcaseSource, type StudioItem } from './corona';
+import { Corona, campusModel, cellNear, folderOf, type CoronaCell, type Exhibit, type ShowcaseSource, type StudioItem } from './corona';
 import { Archive } from './archive';
 import { bibleBreaks, cleanBible, metaBreak } from './fourthwall';
 import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, placeRegion, readAtlas, regionAt, writeAtlas, type Region } from './atlas';
@@ -2813,8 +2813,8 @@ export class Kernel {
     const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next']);
     if (!it) return false;
     const p = this.playerPos();
-    const cx = Math.max(it.x, Math.min(it.x + (it.w ?? 1) - 1, Math.floor(p.x)));
-    if (Math.hypot(cx + 0.5 - p.x, it.y + 0.5 - p.y) > 4) {
+    const c = cellNear(it, p.x, p.y);
+    if (Math.hypot(c.x + 0.5 - p.x, c.y + 0.5 - p.y) > 4) {
       this.message('Troppo lontano: avvicinati.');
       return false;
     }

@@ -9,6 +9,7 @@
 import * as THREE from 'three';
 import type { Kernel } from '../kernel/kernel';
 import { Bloom } from './bloom';
+import { cellNear } from '../kernel/corona';
 import { Avatars, buildCoronaRing, buildRoom, buildShowcase, campusKey } from './corona3d';
 import { CUT, U } from './materials';
 import { Overlay } from './overlay';
@@ -357,7 +358,10 @@ export class Renderer {
       const recent = k.recentChanges();
       const pulse = 0.5 + 0.5 * Math.sin(this.t * 4);
       for (const it of studio.floor.items) if (it.path && recent.has(it.path)) o.cell(it.x, it.y, `rgba(255, 220, 120, ${0.4 + 0.4 * pulse})`, `rgba(255, 220, 120, ${0.1 + 0.15 * pulse})`, 0.4);
-      if (near) o.cell(near.x, near.y, '#ffcf5c', undefined, 0.42);
+      if (near) {
+        const c = cellNear(near, k.playerPos().x, k.playerPos().y);
+        o.cell(c.x, c.y, '#ffcf5c', undefined, 0.42);
+      }
       const fl = studio.floor;
       o.title(`${studio.building.name.toUpperCase()}${studio.building.floors.length > 1 ? `  ·  PIANO ${fl.index + 1}/${studio.building.floors.length}` : ''}`, studio.building.color);
       const shown = near?.kind === 'showcase' ? k.showcaseOf(near.target!) : undefined;

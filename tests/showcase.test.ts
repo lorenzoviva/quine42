@@ -6,7 +6,7 @@ import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockModels } from '../src/kernel/ai/mock';
-import { SHOWCASES, type StudioItem } from '../src/kernel/corona';
+import { PRINTER, SHOWCASES, type StudioItem } from '../src/kernel/corona';
 
 const boot = () => Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
 
@@ -27,16 +27,23 @@ describe('the showcases of the studio', () => {
       const prev = f.items.find((i) => i.kind === 'prev')!;
       const next = f.items.find((i) => i.kind === 'next')!;
       expect(show.source, id).toBe(SHOWCASES[id].source);
-      expect([prev.x, prev.y, next.x, next.y]).toEqual([show.x - 1, show.y, show.x + show.w!, show.y]);
+      // The arrows on its middle row (the printer is PRINTER rows deep, T24).
+      const h = show.h ?? 1;
+      expect(h, id).toBe(SHOWCASES[id].device === 'stampante' ? PRINTER : 1);
+      const row = show.y + Math.floor(h / 2);
+      expect([prev.x, prev.y, next.x, next.y]).toEqual([show.x - 1, row, show.x + show.w!, row]);
       // Nothing else on its cells; they block, the row in front is free, and the entrance is not in the way.
       for (let x = prev.x; x <= next.x; x++) {
-        const here = f.items.filter((i) => i.y === show.y && x >= i.x && x < i.x + (i.w ?? 1));
-        expect(here.length, `${id} ${x}`).toBe(1);
-        expect(k.corona.free(x + 0.5, show.y + 0.5)).toBe(false);
-        expect(k.corona.free(x + 0.5, show.y + 1.5), `${id} ${x}`).toBe(true);
+        for (let y = show.y; y < show.y + h; y++) {
+          if (y !== row && (x === prev.x || x === next.x)) continue;
+          const here = f.items.filter((i) => y >= i.y && y < i.y + (i.h ?? 1) && x >= i.x && x < i.x + (i.w ?? 1));
+          expect(here.length, `${id} ${x},${y}`).toBe(1);
+          expect(k.corona.free(x + 0.5, y + 0.5)).toBe(false);
+        }
+        expect(k.corona.free(x + 0.5, show.y + h + 0.5), `${id} ${x}`).toBe(true);
       }
       const door = k.corona.entrance(k.corona.building(id)!);
-      expect(Math.floor(door.y) !== show.y || Math.floor(door.x) < prev.x || Math.floor(door.x) > next.x).toBe(true);
+      expect(Math.floor(door.y) < show.y || Math.floor(door.y) >= show.y + h || Math.floor(door.x) < prev.x || Math.floor(door.x) > next.x).toBe(true);
     }
   });
 
@@ -148,5 +155,31 @@ describe('the screen of the Tower of Magic (T22)', () => {
     expect(fact('Modulo')).toBe('npc.villager');
     expect(fact('Individui')).toBeUndefined();
     expect(mara.path).toBe(type.path);
+  });
+});
+
+describe('the printers of the things and of the objects (T24)', () => {
+  it('are 3 × 3, near and clickable from any side, and open what they print', async () => {
+    const k = await boot();
+    for (const id of ['cose', 'oggetti']) {
+      const f = k.corona.building(id)!.floors[0];
+      const show = f.items.find((i) => i.kind === 'showcase')!;
+      expect([show.device, show.w, show.h], id).toEqual(['stampante', 3, 3]);
+      // The middle cell is the printer, from the kernel's point of view.
+      const mid = { x: show.x + 1, y: show.y + 1 };
+      expect(k.corona.at(mid.x, mid.y)?.item, id).toBe(show);
+      // E from beside it (the far side from the arrows' row, or the row in front) finds it.
+      for (const [x, y] of [[show.x + 1.5, show.y + 3.5], [show.x - 0.5, show.y + 2.5], [show.x + 3.5, show.y + 0.5]]) {
+        stand(k, x, y);
+        expect(k.corona.itemNear(x, y, 1.6, ['showcase'])?.target, `${id} ${x},${y}`).toBe(id);
+      }
+      const panels: any[] = [];
+      k.bus.on('ui:showcase', (e: any) => panels.push(e));
+      stand(k, show.x + 1.5, show.y + 3.5);
+      // A click on its middle cell, where the thing is printed.
+      expect(k.clickStudio(mid.x + 0.5, mid.y + 0.5)).toBe(true);
+      expect(panels.at(-1).entry.id).toBe(k.showcaseOf(id)!.entry.id);
+      expect(panels.at(-1).entry.model).toBeTruthy();
+    }
   });
 });

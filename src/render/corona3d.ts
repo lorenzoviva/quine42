@@ -312,12 +312,26 @@ function showcaseBody(lit: Builder, glow: Builder, it: StudioItem, col: string):
     glow.box(cx - 1.1, 2.56, cz + 0.45, cx + 1.1, 2.6, cz + 0.5, c);
     return;
   }
-  // The printer: four posts, a beam with the head, a glowing bed.
-  for (const px of [x + 0.05, x + w - 0.2]) for (const pz of [z + 0.05, z + 0.8]) lit.box(px, 0, pz, px + 0.15, 2.2, pz + 0.15, dark);
-  lit.box(x + 0.05, 2.2, z + 0.05, x + w - 0.05, 2.35, z + 0.95, dark);
-  glow.box(x + w / 2 - 0.12, 1.95, z + 0.38, x + w / 2 + 0.12, 2.2, z + 0.62, c);
-  lit.box(x + 0.2, 0, z + 0.15, x + w - 0.2, 0.2, z + 0.85, rgbOf('#1a1e2e'));
-  glow.box(x + 0.25, 0.2, z + 0.2, x + w - 0.25, 0.22, z + 0.8, rgbOf(col, 0.35));
+  // The printer (T24): w × h cells, four posts and a frame, a gantry with the head over the middle cell, a bed of
+  // dark tiles, the middle one (where the thing is printed) outlined.
+  const d = it.h ?? 1;
+  const mx = x + Math.floor(w / 2), mz = z + Math.floor(d / 2);
+  for (const px of [x + 0.05, x + w - 0.2]) for (const pz of [z + 0.05, z + d - 0.2]) lit.box(px, 0, pz, px + 0.15, 2.6, pz + 0.15, dark);
+  lit.box(x + 0.05, 2.6, z + 0.05, x + w - 0.05, 2.72, z + 0.2, dark);
+  lit.box(x + 0.05, 2.6, z + d - 0.2, x + w - 0.05, 2.72, z + d - 0.05, dark);
+  lit.box(x + 0.05, 2.6, z + 0.2, x + 0.2, 2.72, z + d - 0.2, dark);
+  lit.box(x + w - 0.2, 2.6, z + 0.2, x + w - 0.05, 2.72, z + d - 0.2, dark);
+  lit.box(x + 0.2, 2.48, mz + 0.42, x + w - 0.2, 2.6, mz + 0.58, dark);
+  glow.box(mx + 0.36, 2.2, mz + 0.36, mx + 0.64, 2.48, mz + 0.64, c);
+  glow.box(mx + 0.47, 2.1, mz + 0.47, mx + 0.53, 2.2, mz + 0.53, rgbOf('#ffffff'));
+  glow.box(x + 0.05, 2.72, z + d - 0.08, x + w - 0.05, 2.76, z + d - 0.05, c);
+  lit.box(x + 0.1, 0, z + 0.1, x + w - 0.1, 0.28, z + d - 0.1, rgbOf('#1a1e2e'));
+  for (let i = 0; i < w; i++) for (let j = 0; j < d; j++) lit.box(x + i + 0.08, 0.28, z + j + 0.08, x + i + 0.92, 0.3, z + j + 0.92, rgbOf('#2a2e40'));
+  // The middle cell: a glowing outline, so what stands on it is seen against the dark bed.
+  glow.box(mx + 0.04, 0.3, mz + 0.04, mx + 0.96, 0.32, mz + 0.1, c);
+  glow.box(mx + 0.04, 0.3, mz + 0.9, mx + 0.96, 0.32, mz + 0.96, c);
+  glow.box(mx + 0.04, 0.3, mz + 0.1, mx + 0.1, 0.32, mz + 0.9, c);
+  glow.box(mx + 0.9, 0.3, mz + 0.1, mx + 0.96, 0.32, mz + 0.9, c);
 }
 
 /** Text on a glowing plane (canvas), w wide in cells. */
@@ -388,11 +402,14 @@ function arrowSign(x: number, z: number, text: string, color: string): THREE.Mes
  */
 export function buildShowcase(k: Kernel, it: StudioItem, entry: ShowcaseEntry, color: string): { group: THREE.Group; spin?: THREE.Object3D; bubbles?: THREE.Object3D[] } {
   const g = new THREE.Group();
-  const w = it.w ?? 1;
-  const cx = it.x + w / 2, cz = it.y + 0.5;
-  g.add(arrowSign(it.x - 1, it.y, '<', color), arrowSign(it.x + w, it.y, '>', color));
-  const name = textPlane([entry.label], color, w - 0.2, 0.32);
-  name.position.set(cx, it.device === 'schermo' ? 0.45 : 0.17, cz + (it.device === 'schermo' ? 0.73 : 0.52));
+  const w = it.w ?? 1, d = it.h ?? 1;
+  // The arrows are on the middle row; a deep printer shows its thing on the middle cell (T24).
+  const row = it.y + Math.floor(d / 2);
+  const cx = it.x + w / 2, cz = row + 0.5;
+  g.add(arrowSign(it.x - 1, row, '<', color), arrowSign(it.x + w, row, '>', color));
+  const printer = it.device === 'stampante';
+  const name = textPlane([entry.label], color, w - 0.2, printer ? 0.24 : 0.32);
+  name.position.set(cx, it.device === 'schermo' ? 0.45 : printer ? 0.14 : 0.17, it.device === 'schermo' ? cz + 0.73 : printer ? it.y + d - 0.09 : cz + 0.52);
   g.add(name);
   let bubbles: THREE.Object3D[] | undefined;
   if (it.device === 'silos') {
@@ -434,8 +451,8 @@ export function buildShowcase(k: Kernel, it: StudioItem, entry: ShowcaseEntry, c
   const size = new THREE.Vector3();
   const box = geo.body.boundingBox!;
   box.getSize(size);
-  // Things too big (structures) are brought down to the device: at most its width and 1.8 high.
-  const room = it.device === 'schermo' ? [w - 0.6, 1.6] : it.device === 'silos' ? [1.4, 1.8] : [w - 0.7, 1.6];
+  // Things too big are brought down to the device: on the printer, to its middle cell (structures to one cell).
+  const room = it.device === 'schermo' ? [w - 0.6, 1.6] : it.device === 'silos' ? [1.4, 1.8] : [0.9, 1.8];
   const s = Math.min(room[0] / Math.max(size.x, size.z, 0.01), room[1] / Math.max(size.y, 0.01), 1.5);
   const m = new THREE.Mesh(geo.body, MAT.corona);
   m.castShadow = true;
@@ -444,7 +461,7 @@ export function buildShowcase(k: Kernel, it: StudioItem, entry: ShowcaseEntry, c
   m.position.set(-centre.x * s, -box.min.y * s, -centre.z * s);
   const spin = new THREE.Group();
   spin.add(m);
-  spin.position.set(cx, it.device === 'silos' ? 0.5 : it.device === 'stampante' ? 0.22 : 0.6, cz);
+  spin.position.set(cx, it.device === 'silos' ? 0.5 : printer ? 0.3 : 0.6, cz);
   g.add(spin);
   return { group: g, spin, bubbles };
 }

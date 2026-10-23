@@ -200,7 +200,8 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   8 voxel per casella, ADR-0049) è quel modello: davanti al viale, la porta sulla lettera `porta`, collisione dai voxel
   (`placeStructure`, `kernel.placeCampus`); senza, il blocco. Dentro, le **vetrine** (T21, `SHOWCASES` in
   `corona.ts`): uno schermo (Torre della Magia: ogni runa magica e ogni combinazione nota, nei loro colori; il pannello dice l'effetto in parole, `describeEffect` in `validator.ts`), un silos (Studio dei personaggi: ogni tipo e dopo di lui i suoi individui, ciascuno col seme che ha nel mondo, che fluttuano in un liquido viscoso; il pannello dice l'individuo e il modulo), una stampante
-  (Laboratorio delle cose, Magazzino degli oggetti) con «<» «>» ai lati; E o un clic (`kernel.clickStudio`) cambiano ciò
+  3 × 3 (T24, `PRINTER`: Laboratorio delle cose, Magazzino degli oggetti; la cosa sulla casella centrale, ridotta a una casella se è
+  più grande) con «<» «>» ai lati; E o un clic (`kernel.clickStudio`) cambiano ciò
   che mostrano (`showcaseOf`, `stepShowcase`) o aprono il pannello (`ui:showcase`: modello, modulo, individui).
 - **Geografia** (ADR-0023): biomi nel generatore (`s j o k n`), 20 ambienti nel seme, nodo `stamp` di
   MarkovJunior, atlante di regioni (`world/atlas.json`), direzioni note a NPC e Cartografo.
