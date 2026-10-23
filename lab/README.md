@@ -32,6 +32,9 @@ Il motore, il front-end XML, la palette, le mesh, lo scheletro, le classi e le f
   zoom, tasto destro trascina per orbitare, E agisce (la porta della casa si apre), clic su un modello per
   ispezionarlo: XML modificabile («Esegui»), «Nuovo seme», «Cresci», «Mettilo davanti a me». In console
   `window.sandbox`.
+  Solo con `npm run dev`: gli XML di `lab/mjx/models/` entrano nella pagina quando si costruisce, quindi
+  `vite preview` mostra quelli dell'ultima `npm run build` (anche il seme `universe/` del gioco), e un file
+  cambiato si vede solo dopo una nuova build. Con `npm run dev` la pagina si ricarica appena il file cambia.
 - Un programma che non riesce: `npx vite-node lab/scripts/mjx-slice.ts -- <id> [seme] [z …]` stampa le sezioni
   in lettere; `mjx-render.ts -- <id> --frames --act apri` lo fotografa da quattro lati, con i fotogrammi delle
   animazioni e il risultato delle azioni; `mjx-stats.ts` dà tempi, voxel e triangoli di tutti i modelli.
