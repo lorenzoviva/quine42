@@ -373,4 +373,5 @@ Prossimi passi (il dettaglio è nel backlog):
 2. Grafica e controlli 3D: voxel luminosi (T14, fatto), telecamera che ruota (T15, fatto), terreno con le altezze (T16, fatto), lotti in piano (T17, fatto).
 3. La corona più grande (T18, fatto), con gli esterni come modelli (motore: T20, fatto; i programmi: T31) e gli interni.
 4. Ancore del piano («vicino a…»), forme degli oggetti portati e dei terreni che cambiano con «Altro…».
-5. Multiplayer con un master: piano e punti aperti in [`docs/plans/multiplayer.md`](docs/plans/multiplayer.md).
+5. Multiplayer (ADR-0050): il server unica fonte di verità, modalità singola e multigiocatore, master fisso in god mode,
+   crediti e carte; piano in [`docs/plans/multiplayer.md`](docs/plans/multiplayer.md), task T33-T45.

@@ -54,5 +54,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0047](0047-telecamera-che-ruota.md) | La telecamera ruota a quarti di giro (`,` `.`, trascinando col tasto centrale); l'input traduce le direzioni dello schermo in quelle del mondo | accettato |
 | [0048](0048-terreno-con-le-altezze.md) | Il terreno con le altezze: `Hills` di MarkovJunior su due piastrelle che si ripetono, livelli di un quarto di casella, gradini sempre salibili, acqua piana; `groundAt` nel kernel | accettato |
 | [0049](0049-densita-dei-modelli-e-campus.md) | Ogni modello dice la sua densità (`vpt` in `models/index.json`, senza 20); gli edifici del campus sono i loro modelli `corona-<id>` (davanti al viale, porta sulla lettera `porta`, collisione dai voxel) | accettato |
+| [0050](0050-multiplayer-server-unica-fonte.md) | Multiplayer: il server è l'unica fonte di verità (semi condivisi), modalità singola e multigiocatore, crediti e carte, master fisso in god mode, scelte definitive alla Genesi | accettato (piano) |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

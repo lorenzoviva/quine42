@@ -438,13 +438,120 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 
 ## Multiplayer
 
-### T29 · Aggiornare il piano del multiplayer — `da fare`
+Piano: [`multiplayer.md`](multiplayer.md) (ADR-0050). Le fasi 0 (T33-T37) servono anche da soli e non chiedono la rete;
+le fasi 1-3 (T38-T43) si provano con il server di Vite e più schede; la fase 4 (T44-T45) è la piattaforma e aspetta
+le risposte alle domande del piano.
+
+### T29 · Aggiornare il piano del multiplayer — `fatto`
 - Riscrivere [`docs/plans/multiplayer.md`](multiplayer.md) con le decisioni dell'autore del to-do (sezione «Multiplayer» di
   [`docs/userchats/to-do-2026-10-22.md`](../userchats/to-do-2026-10-22.md)): server unica fonte di
   verità, modalità singola e multigiocatore, crediti e proxy, contenuti come carte del giocatore (P#2), master in
   god mode e senza tappeto, punizione della morte configurabile, budget e modelli nella lobby, PvP e «Altro…» tra
   giocatori; togliere i riferimenti al 2D e alle immagini. Poi spezzare l'implementazione in task di questo
   backlog.
+- Esito: piano riscritto (le decisioni, la tabella «oggi / in multigiocatore», architettura, master, spesa e carte, le
+  criticità approvate, fasi, quattro domande nuove), ADR-0050, task T33-T45. Diverso dal previsto: in modalità singola
+  il kernel può restare nel browser (cambiano solo proxy e crediti); spostarlo sul server anche lì è rimandato.
+
+### T33 · La configurazione dell'universo alla Genesi — `da fare`
+- Contesto: decisione 9 del piano. Prima della Genesi si sceglie quanto è punitiva la morte (testo libero, o «molto» /
+  «poco punitiva»), PvP sì/no, «Altro…» tra giocatori sì/no, e la modalità (singola / multigiocatore). Sono definitive.
+- Fare: una sezione `partita` in `universe.json` (`modalita`, `morte`, `pvp`, `altroTraGiocatori`) con i valori di oggi
+  come predefiniti; la schermata della Genesi (`src/ui/genesis.ts`) la chiede; il validatore la ripara; la punizione
+  della morte va al Concilio come principio (con `canonSummary` o accanto ai principi di `fourthwall.ts`) e `kernel.die`
+  la passa al Narratore, che decide cosa si perde e dove si riparte (effetti esistenti). Nessuna UI per cambiarla dopo.
+- Fatto quando: test offline (due universi con punizioni diverse → richieste diverse al Narratore; il campo non si
+  cambia dopo la Genesi), typecheck, verifica nel browser della schermata.
+
+### T34 · Il viandante con un id e lo stato per giocatore — `da fare`
+- Contesto: oggi c'è un solo `playerId` e `world/stato.json` è il viandante; ricordi, legami e missioni parlano di «il
+  viandante».
+- Fare: un id stabile del viandante (in singola uno solo, `io`); lo stato del giocatore in `world/giocatori/<id>.json`
+  (inventario, bisogni, stati, slot, frase), letto anche dal vecchio `stato.json`; ricordi, legami, figli e missioni
+  in `people.json`/`plots.json` con l'id del viandante; il nodo del viandante nel grafo per id; il Narratore riceve il
+  nome del viandante con cui si parla.
+- Fatto quando: un universo vecchio si carica uguale; test con due viandanti nello stesso kernel (ricordi separati).
+
+### T35 · Semi condivisi e determinismo — `da fare`
+- Contesto: decisione 2. Ogni estrazione casuale (kernel, `hash` e `math.random` di Lua, `sys.wander`, fuoco, bottino)
+  deve venire da (seme dell'universo, tick, entità); niente orologio di sistema nella simulazione.
+- Fare: censire le fonti di casualità e di tempo (`Math.random`, `Date.now`, `performance.now` dentro il tick) e
+  passarle da `rng.ts`; `math.random` della sandbox con il seme del tick.
+- Fatto quando: test — due kernel con lo stesso universo e la stessa sequenza di input arrivano allo stesso stato dopo
+  N tick (entità, posizioni, persone).
+
+### T36 · Chi ha generato ogni contenuto (carte, P#2) — `da fare`
+- Contesto: decisioni 4 e 6. Ogni chiamata ha un `chi` (il giocatore) o è comune; ogni contenuto generato ha autore e
+  pagante e un contatore di utilizzi.
+- Fare: `chi` nel registro dei consumi (`ai/usage.ts`, `world/consumi.json`), con le chiamate del Concilio per il mondo
+  marcate comuni; `origin.autore` sui moduli, sui modelli (`models/index.json`), sui luoghi (`maps/`), su persone, trame
+  e regole; gli utilizzi (quante volte un contenuto entra in un luogo, in una trama, in un prompt) in un file
+  `world/carte.json`; una funzione che costruisce la collezione di un giocatore dal repository.
+- Fatto quando: test offline (una Genesi e due luoghi → carte con autore e utilizzi; le comuni estratte a sorte, col seme).
+
+### T37 · Rune e binding per ruolo — `da fare` (dipende da T33)
+- Contesto: decisioni 7 e 8. In multigiocatore i giocatori non hanno le rune del tappeto (`CARPET_TOKENS`) né quelle che
+  scrivono `x y speed carpet time`; il master ha la sola runa che porta nella Sala del Concilio.
+- Fare: con `partita.modalita = multigiocatore` niente rune del tappeto nei luoghi; il kernel ignora le scritture di quei
+  binding per i non master; la runa del Concilio (scorta illimitata, solo del master) che teletrasporta nella Sala del
+  Concilio; `R` (rollback del repository) solo del master, quello di un giocatore riguarda il suo tappeto e la sua frase.
+  In singola tutto resta com'è.
+- Fatto quando: test (un non master con `x = 9999` sul tappeto resta nel cerchio; il master arriva nella Sala).
+
+### T38 · Il kernel sul server — `da fare` (dipende da T34, T35)
+- Contesto: decisione 2 e «Architettura» del piano. Un processo per universo con il kernel headless, `universeStore`, il
+  proxy e un WebSocket `/api/session`.
+- Fare: il kernel avviabile in Node senza DOM (come nei test) dentro il server di Vite; protocollo: ingresso (istantanea:
+  file + stato), aggiornamenti delle entità vicine a ~10 Hz, messaggi del client (posizione, azioni, frase, chat,
+  «Altro…») con esito; la posizione controllata con la collisione del kernel. Un finto trasporto per i test.
+- Fatto quando: test headless — un server e due client nello stesso processo vedono lo stesso mondo; un client che
+  bara sulla velocità viene corretto.
+
+### T39 · Il client sottile e gli avatar — `da fare` (dipende da T38)
+- Fare: in multigiocatore `main.ts` non crea il kernel ma un client che riceve lo stato e lo dà al renderer; predizione del
+  proprio passo (il tappeto compensa come oggi) e correzione; entità `remote` per gli altri giocatori, con il modello
+  del viandante, il seme e il colore del profilo, interpolate, con arti e fumetti; l'esito delle azioni mostrato subito
+  e annullato se il server rifiuta.
+- Fatto quando: due schede del browser sullo stesso server di Vite si vedono camminare; test del client col finto trasporto.
+
+### T40 · Luoghi nuovi con il lock, a spese di chi esplora — `da fare` (dipende da T36, T38)
+- Fare: il primo che entra in un luogo nuovo lo chiede al server, che lo genera una volta (Cartografo, Scultore), lo
+  committa in `maps/` e lo addebita a lui (`chi`); gli altri lo ricevono pronto; un limite di luoghi nuovi al minuto
+  per universo. Il Concilio (sessioni, trame, Fucina) gira solo sul server, anche senza master collegato.
+- Fatto quando: test — due client che entrano insieme nello stesso luogo nuovo → una sola generazione.
+
+### T41 · Il client del giocatore senza corona né Concilio — `da fare` (dipende da T39)
+- Fare: corona, studio, pannello del Concilio, registro, console ed editor caricati solo dal master (import dinamici); il
+  server non manda ai giocatori il registro del Concilio, i file dello studio né gli interni della corona; `window.rune`
+  del giocatore espone solo il client.
+- Fatto quando: la build del giocatore non scarica i moduli della corona (verifica nel browser, rete); test sul server
+  (nessun messaggio del Concilio a un giocatore).
+
+### T42 · Il master — `da fare` (dipende da T37, T41)
+- Fare: il master è chi crea l'universo multigiocatore (non si cambia); god mode (niente morte, bisogni, danni, effetti dei
+  giocatori), visibile agli altri col suo viandante; dalla corona i giocatori sull'atlante e una vista che ne segue uno;
+  il ramo `master` per le sue modifiche, provate da solo e pubblicate con un gesto (merge e diffusione); clonare
+  l'universo con un altro master (le carte restano a chi le ha generate).
+- Fatto quando: test (il master non muore; una modifica sul ramo `master` arriva ai giocatori solo dopo la pubblicazione).
+
+### T43 · Tra giocatori — `da fare` (dipende da T33, T39)
+- Fare: «Altro…» su un altro giocatore giudicato come su una persona (se l'universo lo permette), effetti applicati dal
+  server; PvP secondo `partita.pvp`; scambi di oggetti; chat tra avatar vicini (fumetti, senza filtro della quarta
+  parete); morte in multigiocatore con la punizione di T33; ricollegamento con lo stato del giocatore.
+- Fatto quando: test headless di ogni interazione; verifica con due schede.
+
+### T44 · Account, profilo e viandante personalizzato — `in attesa` (domanda 1 del piano)
+- Fare: autenticazione sicura, un profilo ricco, il viandante personalizzabile (seme e colori del suo modello, nome);
+  l'id del viandante (T34) è quello dell'account.
+- **Domanda per l'autore**: quale fornitore per l'autenticazione (Firebase Auth / Identity Platform, altro)?
+
+### T45 · Crediti, lobby, carte e server su Google Cloud — `in attesa` (domande 1-4 del piano; dipende da T36, T44)
+- Fare, a pezzi (spezzare quando si comincia): crediti e pagamenti (P#1: l'1% sul costo); la lobby con il tetto di
+  crediti, i modelli degli agenti (oggi `ai.textModel` e la tabella delle classi dello Scultore), i coefficienti e i
+  minimi dell'universo; crediti finiti → ricarica, offline (modelli locali) o abbandona; la collezione di carte fuori
+  dalla partita, con gli utilizzi; il server su Google Cloud con i repository privati, sempre acceso.
+- **Domande per l'autore**: le domande 1-4 di [`multiplayer.md`](multiplayer.md) (pagamenti, «un'altra storia», spese
+  comuni, coefficienti).
 
 ## Varie
 
