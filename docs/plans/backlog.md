@@ -240,12 +240,20 @@ diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
   a gradini (482 caselle su 1505), quindi ogni specchio d'acqua di un chunk è piano al suo livello più basso
   (`waterLevels`); fra due chunk può restare un gradino. Corrette anche le sponde, che erano girate al contrario.
 
-### T17 · Lotti in piano — `da fare` (dipende da T16)
+### T17 · Lotti in piano — `fatto` (`c50490b`)
 - Le strutture su più caselle hanno bisogno di spazi piani: il piano spiana i lotti (e i sentieri) prima di
   posare i modelli. Test.
 - Da T16: oggi una struttura sta sul suolo sotto il suo centro, e sotto un lotto il rilievo varia fino a 2 livelli
   (mezza casella). Spianare vuol dire un livello per lotto nel piano (persistente, letto da `groundAt` prima del
   rilievo). Facoltativo: l'acqua che passa da un chunk all'altro allo stesso livello (oggi può scendere di un gradino).
+- Esito: ADR-0048 (punto 6). `chunkLevels` in `src/kernel/relief.ts`: ogni lotto è piano alla mediana dei suoi livelli, o
+  il più vicino che il bordo del chunk e i lotti già posati permettono (due livelli a casella di distanza), poi un anello di
+  una casella, piano dove si può; il resto del chunk si piega (vicini di terra entro due livelli), il bordo resta il
+  rilievo. `groundAt` lo tiene in cache per chunk (sostituisce la cache dell'acqua). `tests/relief.test.ts` (+4). Nel
+  browser (offline): i 7 lotti caricati hanno un'altezza sola ciascuno, la casa sta piana col sentiero. Diverso dal
+  previsto: non si salva nulla nel piano (i lotti sono già nel piano e il calcolo è deterministico, e così segue un
+  `world/rilievo.xml` nuovo); su un pendio ripido quanto il rilievo permette un lotto vicino al bordo lascia un gradino
+  più alto (solo estetico); l'acqua fra i chunk non è fatta.
 
 ## La corona
 
@@ -286,9 +294,22 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   corona sono a 8 voxel per casella, `VPT = 20` è fisso in `src/kernel/forms.ts`), con un ADR; la porta del campus va
   sulla lettera `name="porta"`, il davanti del modello (y grande) verso il viale.
 
-### T21 · La vetrina con selettore — `da fare`
+### T21 · La vetrina con selettore — `fatto` (commit sotto)
 - Un meccanismo comune agli interni: un oggetto (schermo, silos, stampante) con «<» «>» ai lati che sceglie
   cosa mostrare; un clic apre un pannello con le informazioni (il modello, il modulo). Base per T22-T24.
+- Esito: `corona.ts`: voci `showcase` (con `source` `rune | persone | cose | oggetti` e `device` `schermo | silos |
+  stampante`), `prev`, `next`; una vetrina al piano terra di Torre della Magia, Studio dei personaggi, Laboratorio delle
+  cose e Magazzino degli oggetti (`SHOWCASES`, `SHOWCASE_AT`: 3 caselle a (15, 11), le frecce ai lati). `kernel.ts`:
+  `showcaseEntries` (rune magiche e incantesimi; moduli `npc.*` con gli individui di `people.json`; moduli `obj.*`/`object.*`;
+  oggetti dei pacchetti: modello, file, fatti; in cache per stato dei file), `showcaseOf`, `stepShowcase` (gira in tondo,
+  `studio:showcase`), `openShowcase` (`ui:showcase`), `clickStudio` (clic sinistro entro 4 caselle). `corona3d.ts`: i tre
+  apparecchi, i pulsanti, `buildShowcase` (il modello ridotto all'apparecchio che gira, nel silos fluttua in un vetro
+  colorato; le rune sullo schermo; il nome sotto); il renderer lo rifà quando cambia la scelta o la libreria.
+  `ui/studio.ts`: pannello con foto (o rune), fatti, «<» «>» e «Apri il file». `tests/showcase.test.ts` (3). Nel browser
+  (offline): silos col gatto, schermo con la runa luce, stampante con le bacche; pannello e frecce funzionano.
+  Diverso dal previsto: il clic cade sul pavimento dietro le cose alte, quindi vale la vetrina (o freccia) più vicina al
+  punto; nessun ADR (meccanismo dentro la corona, non cambia l'architettura). Per T22-T24 resta: la combinazione di rune e
+  l'effetto (T22), il liquido viscoso e l'individuo scelto (T23), la stampante 3 × 3 (T24; oggi 3 × 1).
 
 ### T22 · La Torre della Magia, dentro — `da fare` (dipende da T21)
 - Lo schermo mostra una runa o una combinazione di rune (magiche e incantesimi noti), «<» «>» per cambiarla; il
@@ -302,8 +323,12 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 - Una stampante 3D di 3 × 3 caselle con l'oggetto scelto sulla casella centrale (le strutture ridotte alla scala
   di una casella); «<» «>»; il clic mostra le informazioni.
 
-### T25 · La Sala del Concilio: il tavolo unito — `da fare`
+### T25 · La Sala del Concilio: il tavolo unito — `fatto` (`70d3c4c`)
 - Il tavolo è fatto di cubi separati: farne un ellissoide unico (un modello o una mesh sola).
+- Esito: `roundTable` in `src/render/corona3d.ts`: un piano ellittico pieno sull'ellisse del kernel (3.4 × 2.3, quella
+  della collisione in `corona.ts`), il bordo arrotondato come mezzo ellissoide (64 spicchi, quad orientati da `facing`),
+  un bordo al neon e un anello azzurro sotto l'universo; tutto nella mesh della stanza. Nel browser (offline): un pezzo
+  solo, senza buchi. Diverso dal previsto: nessun modello MarkovJunior (bastano le quad del `Builder`), nessun ADR.
 
 ### T26 · L'Ufficio dei luoghi, dentro — `in attesa`
 - Da progettare in funzione di come lavora il Cartografo (piani, lotti, atlante). **Proposta all'autore** prima
