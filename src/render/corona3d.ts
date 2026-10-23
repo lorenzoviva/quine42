@@ -169,6 +169,49 @@ export function buildRoom(k: Kernel, building: Building, floor: Floor): { group:
   return { group, globe };
 }
 
+/** A quad wound so that its front faces along n (the builders draw one side). */
+function facing(b: Builder, p: number[][], n: number[], rgb: number[]): void {
+  const [a, q, c, d] = p;
+  const u = [q[0] - a[0], q[1] - a[1], q[2] - a[2]], v = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+  const dot = (u[1] * v[2] - u[2] * v[1]) * n[0] + (u[2] * v[0] - u[0] * v[2]) * n[1] + (u[0] * v[1] - u[1] * v[0]) * n[2];
+  if (dot >= 0) b.quad(a, q, c, d, n, rgb);
+  else b.quad(a, d, c, q, n, rgb);
+}
+
+/**
+ * The Council's round table as one piece (T25): an elliptical top on the kernel's ellipse (radii 3.4 × 2.3,
+ * src/kernel/corona.ts), its edge rounded like half an ellipsoid, a neon rim and a neon ring under the universe.
+ */
+function roundTable(lit: Builder, glow: Builder, cx: number, cz: number, col: string): void {
+  const RX = 3.4, RZ = 2.3, TOP = 0.6, N = 64;
+  // The edge, bottom to top: (scale of the ellipse, height).
+  const edge: Array<[number, number]> = [[0.8, 0], [0.9, 0.12], [0.97, 0.28], [1, 0.45], [0.97, TOP]];
+  const at = (s: number, y: number, t: number) => [cx + Math.cos(t) * RX * s, y, cz + Math.sin(t) * RZ * s];
+  const body = rgbOf('#1c1c2a'), top = rgbOf('#22223a');
+  const ring = (b: Builder, s0: number, s1: number, y: number, rgb: number[]) => {
+    for (let i = 0; i < N; i++) {
+      const t0 = (i / N) * Math.PI * 2, t1 = ((i + 1) / N) * Math.PI * 2;
+      facing(b, [at(s0, y, t0), at(s1, y, t0), at(s1, y, t1), at(s0, y, t1)], [0, 1, 0], rgb);
+    }
+  };
+  for (let i = 0; i < N; i++) {
+    const t0 = (i / N) * Math.PI * 2, t1 = ((i + 1) / N) * Math.PI * 2, tm = (t0 + t1) / 2;
+    // The outward direction of the ellipse at this slice.
+    const hx = Math.cos(tm) / RX, hz = Math.sin(tm) / RZ, hl = Math.hypot(hx, hz);
+    for (let j = 0; j + 1 < edge.length; j++) {
+      const [s0, y0] = edge[j], [s1, y1] = edge[j + 1];
+      const nr = y1 - y0, ny = -(s1 - s0) * (RX + RZ) / 2, nl = Math.hypot(nr, ny);
+      const n = [(hx / hl) * (nr / nl), ny / nl, (hz / hl) * (nr / nl)];
+      const shade = 0.8 + 0.25 * Math.max(0, n[1]) + 0.1 * (nr / nl);
+      facing(lit, [at(s0, y0, t0), at(s1, y1, t0), at(s1, y1, t1), at(s0, y0, t1)], n, body.map((v) => v * shade));
+    }
+    // The top, a fan from the centre to the rim.
+    facing(lit, [[cx, TOP, cz], at(0.97, TOP, t0), at(0.97, TOP, t1), [cx, TOP, cz]], [0, 1, 0], top);
+  }
+  ring(glow, 0.9, 0.95, TOP + 0.005, rgbOf(col, 0.6));
+  ring(glow, 0.26, 0.29, TOP + 0.005, rgbOf('#05d9e8', 0.7));
+}
+
 function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: Kernel): void {
   const x = it.x, z = it.y;
   switch (it.kind) {
@@ -200,17 +243,9 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
       glow.box(x + 0.45, 0.05, z + 0.45, x + 0.55, 1.1, z + 0.55, c.map((v) => v * 0.5));
       break;
     }
-    case 'table': {
-      // The round table: an ellipse of boxes.
-      const cx = x, cz = z + 0.5;
-      for (let a = 0; a < 24; a++) {
-        const t = (a / 24) * Math.PI * 2;
-        const px = cx + Math.cos(t) * 3.1, pz = cz + Math.sin(t) * 2.1;
-        lit.box(px - 0.3, 0, pz - 0.3, px + 0.3, 0.6, pz + 0.3, rgbOf('#1c1c2a'));
-        glow.box(px - 0.3, 0.6, pz - 0.3, px + 0.3, 0.62, pz + 0.3, rgbOf(col, 0.6));
-      }
+    case 'table':
+      roundTable(lit, glow, x, z + 0.5, col);
       break;
-    }
     case 'desk':
       glow.box(x + 0.1, 0.004, z + 0.45, x + 0.9, 0.012, z + 0.55, rgbOf(col, 0.6));
       break;
