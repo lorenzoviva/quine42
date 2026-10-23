@@ -67,6 +67,7 @@ const MODELS: Array<[string, string, Role, number?]> = [
   ['corona-galleria', "Galleria dell'Artista (corona)", 'structure', 8],
   ['corona-luoghi', 'Ufficio dei luoghi (corona)', 'structure', 8],
   ['corona-sistemi', 'Sala sistemi (corona)', 'structure', 8],
+  ['corona-nucleo', 'Il Nucleo (corona)', 'structure', 8],
 ];
 
 const sourceOf = (xml: string) => /^\s*<!--\s*([\s\S]*?)-->/.exec(xml)?.[1].replace(/\s+/g, ' ').trim() ?? '';
