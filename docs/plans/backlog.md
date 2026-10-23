@@ -323,7 +323,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 - Una stampante 3D di 3 × 3 caselle con l'oggetto scelto sulla casella centrale (le strutture ridotte alla scala
   di una casella); «<» «>»; il clic mostra le informazioni.
 
-### T25 · La Sala del Concilio: il tavolo unito — `fatto` (`70d3c4c`)
+### T25 · La Sala del Concilio: il tavolo unito — `fatto` (`aa4d322`)
 - Il tavolo è fatto di cubi separati: farne un ellissoide unico (un modello o una mesh sola).
 - Esito: `roundTable` in `src/render/corona3d.ts`: un piano ellittico pieno sull'ellisse del kernel (3.4 × 2.3, quella
   della collisione in `corona.ts`), il bordo arrotondato come mezzo ellissoide (64 spicchi, quad orientati da `facing`),
