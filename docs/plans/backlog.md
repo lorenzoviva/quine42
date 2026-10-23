@@ -188,10 +188,18 @@ diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
   tappa in un luogo ignoto. Nel browser (`aurora`, offline): 196 luoghi, 103 KB nel commit, nessuna incoerenza (dopo aver
   corretto la specie delle persone attese, che dava un falso «figlio di un gatto»).
 
-### T13 · Il contesto degli agenti dal grafo — `da fare` (dipende da T12)
+### T13 · Il contesto degli agenti dal grafo — `fatto` (`44c5dce`) (dipende da T12)
 - Ogni compito narrativo riceve i nodi rilevanti (le persone coinvolte e i loro legami, il luogo, le trame
   aperte, il canone) invece dei riassunti generici di oggi: meno token, meno invenzioni. Misurare i token prima e
   dopo con il registro dei consumi.
+- Esito: `CallOptions.focus` + `WorldView.graph`; `kernel.focusOn(cose, punto)` in 10 compiti del Narratore (`npc.reply
+  npc.dialogue npc.individuate text.examine text.read action.judge craft.free craft.judge spell.name plot.weave`); con un
+  focus noto al grafo il Narratore riceve testa della bibbia + canone + ultime 12 regole + vicinato (in fondo al system, per
+  la cache) al posto di bibbia intera e catalogo. `tests/focus.test.ts` (4). Su `valmora`: `npc.reply` 5 818 → 3 310 token
+  (−43 %), `plot.weave` 6 112 → 3 629 (−41 %). Diverso dal previsto: token **stimati** (4 caratteri) e passati dal registro
+  dei consumi, non da chiamate vere a Gemini; `graph.context` non attraversa più gli snodi (tipi, regioni, oggetti…) e non
+  dà righe alle foglie; il viandante non è nel focus (la sua riga era solo la borsa). Nel browser (`aurora`, offline) il
+  contesto è giusto (luogo 0,0, le persone che vi abitano, i loro legami).
 
 ## Grafica e controlli 3D
 
