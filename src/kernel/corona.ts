@@ -1,5 +1,5 @@
 // The corona as the studio of a game company: a campus on the ring around the simulation, one
-// building per folder of the universe (and a gallery, a map room), with a door on the walkway.
+// building per folder of the universe (and a gallery; the terrains and the atlas in the Office of places), with a door on the walkway.
 // Inside, buildings are bigger than outside (ADR-0022): rooms on several floors joined by stairs,
 // shelves with every file (book = manifest, crystal = Lua, scroll = text, tablet = data), framed
 // sprites and painted terrains, desks where the Council's teams work, a notice board with the latest
@@ -40,6 +40,12 @@ export const PRINTER = 3;
  * their showcase; E or a click opens it, navigable (src/ui/graph.ts).
  */
 export const GRAPH_AT = { x: 15, y: 10, w: 3, h: 3 };
+/**
+ * The Office of places is also the Cartographer's studio (T26c, ADR-0051): the atlas on a table against its back wall,
+ * the terrains in the sample room, which starts on its own floor after the files.
+ */
+export const ATLAS_AT = { x: 10, y: 1, w: 4 };
+export const SAMPLES = 'luoghi';
 
 /** The cell of a (wide or deep) studio item nearest to a point: distances are measured from it. */
 export function cellNear(it: StudioItem, x: number, y: number): { x: number; y: number } {
@@ -49,7 +55,7 @@ export function cellNear(it: StudioItem, x: number, y: number): { x: number; y: 
 /** The Council at its round table: who sits where, and the room behind each seat's teleport. */
 export const SEATS: Array<{ agent: string; room: string }> = [
   { agent: 'narratore', room: 'persone' },
-  { agent: 'cartografo', room: 'cartografia' },
+  { agent: 'cartografo', room: 'luoghi' },
   { agent: 'artista', room: 'galleria' },
   { agent: 'scultore', room: 'galleria' },
   { agent: 'fisico', room: 'oggetti' },
@@ -178,7 +184,6 @@ const ROOMS: Record<string, { name: string; color: string; team: string }> = {
   magia: { name: 'Torre della Magia', color: '#c48aff', team: 'narratore' },
   altro: { name: 'Archivio', color: '#9fb2a8', team: 'ingegnere' },
   galleria: { name: "Galleria dell'Artista", color: '#ff8ad8', team: 'artista' },
-  cartografia: { name: 'Studio del Cartografo', color: '#7dd87d', team: 'cartografo' },
 };
 
 /** Which building a file lives in. */
@@ -268,7 +273,8 @@ export class Corona {
     };
     for (const path of Object.keys(files).sort()) add(folderOf(path), { kind: 'file', path, label: path, look: lookOf(path), lines: files[path].split('\n').length });
     for (const g of gallery) add('galleria', { kind: 'sprite', label: g.label, color: g.color, path: g.path, target: g.target, model: g.model, tint: g.tint });
-    for (const t of terrains) add('cartografia', { kind: 'tile', label: t.label, color: t.color, path: t.path, target: t.target });
+    const samples = terrains.map((t): Omit<StudioItem, 'x' | 'y'> => ({ kind: 'tile', label: t.label, color: t.color, path: t.path, target: t.target }));
+    if (samples.length && !groups.has(SAMPLES)) groups.set(SAMPLES, []);
     const ids = [...groups.keys()].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
     const total = ids.length;
     this.buildings = ids.map((id, index) => {
@@ -276,17 +282,20 @@ export class Corona {
       const from = (index / total) * Math.PI * 2;
       const to = ((index + 1) / total) * Math.PI * 2;
       const mid = (from + to) / 2;
-      const items = groups.get(id)!;
       const perFloor = SLOTS.length;
+      const chunk = (list: Array<Omit<StudioItem, 'x' | 'y'>>) => Array.from({ length: Math.ceil(list.length / perFloor) }, (_, i) => list.slice(i * perFloor, (i + 1) * perFloor));
+      // The files floor by floor; the terrains of the sample room after them, from a floor of their own.
+      const pages = [...chunk(groups.get(id)!), ...(id === SAMPLES ? chunk(samples) : [])];
+      const firstSample = id === SAMPLES && samples.length ? pages.length - Math.ceil(samples.length / perFloor) : -1;
       const floors: Floor[] = [];
-      const nFloors = Math.max(1, Math.ceil(items.length / perFloor));
+      const nFloors = Math.max(1, pages.length);
       for (let f = 0; f < nFloors; f++) {
         const ox = INTERIOR_X + index * BUILDING_STRIDE;
         const oy = f * FLOOR_STRIDE;
         const council = id === 'concilio';
         // The Council's hall: its files on one shelf along the wall, the round table in the middle.
         const slots = council ? Array.from({ length: perFloor }, (_, i) => ({ x: SHELF_X0 + (i % (SHELF_X1 - SHELF_X0 + 1)), y: 2 + Math.floor(i / (SHELF_X1 - SHELF_X0 + 1)) })) : SLOTS;
-        const placed: StudioItem[] = items.slice(f * perFloor, (f + 1) * perFloor).map((it, i) => ({ ...it, x: ox + slots[i].x, y: oy + slots[i].y }));
+        const placed: StudioItem[] = (pages[f] ?? []).map((it, i) => ({ ...it, x: ox + slots[i].x, y: oy + slots[i].y }));
         if (council && f === 0) {
           placed.push({ kind: 'table', label: "il tavolo del Concilio: al centro, l'universo", x: ox + Math.floor(TABLE.cx), y: oy + Math.floor(TABLE.cy) });
           SEATS.forEach((s, i) => {
@@ -299,7 +308,7 @@ export class Corona {
           placed.push({ kind: 'screen', label: 'schermo: la storia di questa sala', x: ox + 3, y: oy + ROOM_H - 3, w: 6 });
           for (let d = 0; d < 3; d++) placed.push({ kind: 'desk', label: 'postazione', x: ox + 4 + d * 2, y: oy + ROOM_H - 4 });
           placed.push({ kind: 'portal', label: 'teletrasporto: Sala del Concilio', target: 'concilio', x: ox + ROOM_W - 3, y: oy + ROOM_H - 3 });
-          if (id === 'cartografia') placed.push({ kind: 'atlas', label: "l'atlante del mondo", x: ox + ROOM_W - 7, y: oy + ROOM_H - 3, w: 3 });
+          if (id === SAMPLES) placed.push({ kind: 'atlas', label: "l'atlante del mondo", ...ATLAS_AT, x: ox + ATLAS_AT.x, y: oy + ATLAS_AT.y });
           if (id === 'nucleo') placed.push({ kind: 'grafo', label: 'il grafo del mondo', ...GRAPH_AT, x: ox + GRAPH_AT.x, y: oy + GRAPH_AT.y });
           const show = SHOWCASES[id];
           if (show) {
@@ -315,7 +324,7 @@ export class Corona {
           }
         }
         if (f === 0) placed.push({ kind: 'exit', label: 'uscita', x: ox + Math.floor(ROOM_W / 2), y: oy + ROOM_H - 1 });
-        if (f < nFloors - 1) placed.push({ kind: 'up', label: `scala al piano ${f + 2}`, x: ox + ROOM_W - 2, y: oy + 1 });
+        if (f < nFloors - 1) placed.push({ kind: 'up', label: `scala al piano ${f + 2}${f + 1 === firstSample ? ': il campionario dei terreni' : ''}`, x: ox + ROOM_W - 2, y: oy + 1 });
         if (f > 0) placed.push({ kind: 'down', label: `scala al piano ${f}`, x: ox + 1, y: oy + 1 });
         for (const it of placed) if (it.kind === 'file' && it.path) this.slots.set(it.path, { x: it.x, y: it.y });
         floors.push({ index: f, ox, oy, items: placed });

@@ -173,7 +173,7 @@ export class StudioPanel {
     };
     this.show(
       el('div', { class: 'title' }, item.label),
-      el('div', { class: 'note' }, `${item.kind === 'tile' ? 'Terreno' : 'Modello'} della ${building} — ${item.path ?? ''}`),
+      el('div', { class: 'note' }, `${item.kind === 'tile' ? 'Terreno del campionario' : 'Modello in mostra'} — ${building} — ${item.path ?? ''}`),
       frame,
       el('div', { class: 'row' }, why, repaint),
       out,

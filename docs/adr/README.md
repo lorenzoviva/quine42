@@ -55,5 +55,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0048](0048-terreno-con-le-altezze.md) | Il terreno con le altezze: `Hills` di MarkovJunior su due piastrelle che si ripetono, livelli di un quarto di casella, gradini sempre salibili, acqua piana; `groundAt` nel kernel | accettato |
 | [0049](0049-densita-dei-modelli-e-campus.md) | Ogni modello dice la sua densità (`vpt` in `models/index.json`, senza 20); gli edifici del campus sono i loro modelli `corona-<id>` (davanti al viale, porta sulla lettera `porta`, collisione dai voxel) | accettato |
 | [0050](0050-multiplayer-server-unica-fonte.md) | Multiplayer: il server è l'unica fonte di verità (semi condivisi), modalità singola e multigiocatore, crediti e carte, master fisso in god mode, scelte definitive alla Genesi | accettato (piano) |
+| [0051](0051-ufficio-dei-luoghi-e-cartografo.md) | Lo Studio del Cartografo è l'Ufficio dei luoghi: niente edificio `cartografia`; i terreni nel campionario (da un piano loro, dopo i file), l'atlante contro la parete di fondo, il posto del Cartografo al tavolo porta lì | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

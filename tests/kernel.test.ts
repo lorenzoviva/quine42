@@ -6,6 +6,7 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockModels } from '../src/kernel/ai/mock';
 import { countItem } from '../src/kernel/inventory';
+import type { StudioItem } from '../src/kernel/corona';
 
 const DT = 1 / 60;
 
@@ -134,15 +135,22 @@ describe('kernel', () => {
   it('the corona is a studio: a building per folder, rooms on floors, galleries; teams go to the files they change', async () => {
     for (const f of Object.keys(k.files)) expect(k.corona.slotOf(f), f).toBeTruthy();
     const names = k.corona.buildings.map((b) => b.name);
-    expect(names).toEqual(expect.arrayContaining(['Sala del Concilio', 'Studio dei Personaggi', 'Sala Sistemi', 'Torre della Magia', "Galleria dell'Artista", 'Studio del Cartografo']));
+    expect(names).toEqual(expect.arrayContaining(['Sala del Concilio', 'Studio dei Personaggi', 'Sala Sistemi', 'Torre della Magia', "Galleria dell'Artista", 'Ufficio dei Luoghi']));
+    // The Cartographer's studio is the Office of places (T26c): one building for its work.
+    expect(names).not.toContain('Studio del Cartografo');
     const bOf = (p: string) => k.corona.buildingOf(p)!.id;
     expect(bOf('modules/npc.cat/manifest.json')).toBe(bOf('modules/npc.villager/manifest.json'));
     expect(bOf('modules/npc.cat/manifest.json')).not.toBe(bOf('modules/sys.needs/logic.lua'));
-    // The gallery shows every sprite and icon; the map room every terrain.
+    // The gallery shows every sprite and icon; the Office of places every terrain, from a floor after its files.
     const gallery = k.corona.building('galleria')!.floors.flatMap((f) => f.items.filter((i) => i.kind === 'sprite'));
     expect(gallery.some((i) => i.label === 'Mela rossa' || i.target?.startsWith('item:'))).toBe(true);
-    const tiles = k.corona.building('cartografia')!.floors.flatMap((f) => f.items.filter((i) => i.kind === 'tile'));
+    const office = k.corona.building('luoghi')!;
+    const tiles = office.floors.flatMap((f) => f.items.filter((i) => i.kind === 'tile'));
     expect(tiles.length).toBeGreaterThanOrEqual(Object.keys(k.palette).length - 1);
+    const sampleFloor = office.floors.findIndex((f) => f.items.some((i) => i.kind === 'tile'));
+    expect(sampleFloor).toBeGreaterThan(0);
+    expect(office.floors[sampleFloor].items.some((i) => i.kind === 'file')).toBe(false);
+    expect(office.floors[sampleFloor - 1].items.find((i) => i.kind === 'up')?.label).toMatch(/campionario/);
     // Big buildings have several floors joined by stairs.
     const big = k.corona.buildings.find((b) => b.floors.length > 1);
     if (big) expect(big.floors[0].items.some((i) => i.kind === 'up')).toBe(true);
@@ -925,18 +933,26 @@ describe('the neon studio', () => {
     expect(portals.length).toBe(8);
     for (const b of k.corona.buildings) if (b.id !== 'concilio') expect(b.floors[0].items.some((i) => i.kind === 'portal' && i.target === 'concilio'), b.id).toBe(true);
     for (const b of k.corona.buildings) if (b.id !== 'concilio') expect(b.floors[0].items.some((i) => i.kind === 'screen'), b.id).toBe(true);
-    // Through the cartographer's teleport, into its room, where the atlas is.
+    // Through the cartographer's teleport, into the Office of places, where the atlas is, by the model of places.
     k.exitedOnce = true;
     k.carpet()!.active = false;
-    const pad = portals.find((p) => p.target === 'cartografia')!;
+    const pad = portals.find((p) => p.target === 'luoghi')!;
+    expect(portals.some((p) => p.target === 'cartografia')).toBe(false);
     Object.assign(k.playerPos(), { x: pad.x + 0.5, y: pad.y + 0.5 });
     run(k, DT);
     await k.interact();
-    expect(k.corona.roomAt(k.playerPos().x, k.playerPos().y)?.building.id).toBe('cartografia');
-    const atlasItem = k.corona.building('cartografia')!.floors[0].items.find((i) => i.kind === 'atlas')!;
+    expect(k.corona.roomAt(k.playerPos().x, k.playerPos().y)?.building.id).toBe('luoghi');
+    const f0items = k.corona.building('luoghi')!.floors[0].items;
+    const atlasItem = f0items.find((i) => i.kind === 'atlas')!;
+    expect(f0items.some((i) => i.kind === 'showcase' && i.device === 'plastico')).toBe(true);
+    // Nothing of the room overlaps the atlas, and one can stand in front of it.
+    const cells = (i: StudioItem) => Array.from({ length: (i.w ?? 1) * (i.h ?? 1) }, (_, n) => `${i.x + (n % (i.w ?? 1))},${i.y + Math.floor(n / (i.w ?? 1))}`);
+    const taken = new Set(f0items.filter((i) => i !== atlasItem).flatMap(cells));
+    for (const c of cells(atlasItem)) expect(taken.has(c), c).toBe(false);
+    expect(k.corona.free(atlasItem.x + 1.5, atlasItem.y + 1.5)).toBe(true);
     let opened = false;
     k.bus.on('ui:atlas', () => (opened = true));
-    Object.assign(k.playerPos(), { x: atlasItem.x + 1.5, y: atlasItem.y - 0.6 });
+    Object.assign(k.playerPos(), { x: atlasItem.x + 1.5, y: atlasItem.y + 1.5 });
     await k.interact();
     expect(opened).toBe(true);
     const view = await k.atlasView();

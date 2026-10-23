@@ -183,6 +183,7 @@ scartata (didascalica). Tre alternative più eleganti, in cui il libro non si ve
   restano sulle pareti.
 
 ### 3.4 Lo Studio del Cartografo (`cartografia`)
+**Unito all'Ufficio dei luoghi** (T26c, ADR-0051): l'edificio non c'è più. Il testo che segue è la proposta di allora.
 Proposta: **unito all'Ufficio dei luoghi** (§1, domanda 1). Se invece vuoi tenerlo: un **osservatorio** (cupola con la
 fenditura e un telescopio che guarda verso il cerchio), dentro l'atlante come una mappa stellare sulla cupola.
 
