@@ -394,6 +394,11 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   Officina delle meccaniche.
 - Fare, dopo le risposte: le schede nel prompt di T19, gli id nuovi in T31, un task di interno per edificio.
 - **Domande per l'autore**: le tre proposte vanno bene come base? L'Archivio: riserva o Officina delle meccaniche?
+- Deciso (23/10): **Direzione** approvata come regia, dentro una **sala operativa** (war room: tavolo della situazione
+  con le operazioni in corso, parete di schermi con linea del tempo, registro dal vivo e costi, livello di allerta;
+  `corona-proposte.md` §3.1); **Galleria** approvata; le schede `universo` e `galleria` sono nel prompt di T19.
+  L'Archivio resta riserva (le meccaniche vanno nella Sala sistemi). **Biblioteca**: la pila di libri è scartata;
+  **in attesa** della scelta fra chiostro (proposta), stele e nastro (§3.2).
 
 ### T28 · Il Nucleo, dentro — `fatto` (`673eeba`) (dipende da T12)
 - Il grafo del mondo navigabile in UI.
@@ -428,8 +433,8 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   nuove di `models/index.json` anche agli universi che l'hanno riscritto (senza, la torre avrebbe 20 voxel per casella);
   `tests/campus.test.ts`: per ogni edificio del seme tempo, settore, porta dal viale, animazione. Nel lab la vetrina ora
   anima i modelli («mostra» li nascondeva: corpo spento, nessun fotogramma acceso). ModelDirector e «riscolpisci» non
-  toccano già i `corona-*` (il primo fa solo i modelli che mancano, il secondo solo moduli e oggetti). Mancano `persone`,
-  `cose`, `oggetti`, `luoghi`, `sistemi`, `nucleo`, `concilio`; per ognuno aggiungere l'id alla lista del test.
+  toccano già i `corona-*` (il primo fa solo i modelli che mancano, il secondo solo moduli e oggetti). Mancano (`persone` scritta da Gemini in `bdd198e`, da portare nel gioco) `persone`,
+  `cose`, `oggetti`, `luoghi`, `sistemi`, `nucleo`, `concilio`, `universo`, `galleria` (schede del 23/10; `mondo` quando la Biblioteca è decisa); per ognuno aggiungere l'id alla lista del test.
 
 ## Multiplayer
 

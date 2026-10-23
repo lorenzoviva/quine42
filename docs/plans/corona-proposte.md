@@ -130,30 +130,48 @@ Proposte di esterno (per una scheda del prompt di T19) e di interno, con lo stes
 mestiere, dentro c'è un apparecchio che lo fa vedere. Il colore è quello della sala (`ROOMS`).
 
 ### 3.1 La Direzione (`universo`, Arbitro, `ffcf5c` oro)
-È la regia della software house: dove si decide cosa va in onda, cosa costa e quale versione dell'universo vale.
+È la regia della software house, e dentro la sua **sala operativa** (war room): dove si vede, in un colpo d'occhio,
+che cosa sta succedendo all'universo, che cosa costa, che cosa si è rotto e quale versione vale. *(Approvata il 23/10.)*
 - **Esterno: la regia.** Un edificio basso e largo, a sbalzo su pilastri, la facciata intera un **maxischermo curvo**
   (pannelli neri con pixel oro che scorrono: un'animazione) e sopra una **torre di trasmissione** sottile con le luci
-  d'ostacolo. Insegna «DIREZIONE». Accanto alla Sala del Concilio fa la coppia: il Concilio decide, la Direzione registra.
-- **Interno: la linea del tempo e il quadro dei costi.**
-  - *La linea del tempo* (parete): ogni commit dell'universo è un fotogramma su una pellicola luminosa; «<» «>» la
-    scorrono; il clic dice cosa è cambiato (i file, chi l'ha voluto: Concilio, giocatore, Genesi). Guardare non torna
-    indietro (`R` resta l'unico modo).
-  - *Il quadro dei costi* (banco al centro): i consumi del registro (`kernel.usage`) come lancette e barre, per agente e
-    per compito, in dollari, con i budget di `universe.json` (`maxText`, `maxForges`…) come fondo scala. È il pannello `G`
-    reso un oggetto.
+  d'ostacolo che lampeggiano. Insegna «DIREZIONE». Accanto alla Sala del Concilio fa la coppia: il Concilio decide, la
+  Direzione dirige.
+- **Interno: la sala operativa.** Penombra, tutto rivolto verso la parete di schermi, luci dal basso.
+  - *Il tavolo della situazione* (al centro, 5 × 3 caselle, al posto della vetrina): il mondo visto dall'alto, ma non
+    come geografia (quella è l'atlante, nell'Ufficio dei luoghi): come **operazioni**. Il viandante, i luoghi che il
+    Concilio sta generando adesso (pulsano), le trame aperte come segnalini sulle loro regioni con la tappa a cui sono, le
+    missioni del diario, i guasti dove sono accaduti (rossi). Clic → pannello con le operazioni in corso.
+  - *La parete di schermi* (davanti, larga quanto la sala, il maxischermo visto da dentro), in tre campi:
+    a sinistra la **linea del tempo** dei commit (una pellicola: «<» «>» la scorrono, il clic dice cosa è cambiato e chi
+    l'ha voluto; guardare non torna indietro, `R` resta l'unico modo); al centro il **registro dal vivo** del Concilio
+    (`kernel.feed()`: chi sta lavorando, a cosa, con quale modello); a destra il **quadro dei costi** (`kernel.usage` per
+    agente e per compito, in dollari, con i budget di `universe.json` come fondo scala).
+  - *Il livello di allerta* (una fascia luminosa che corre sotto il soffitto): verde, ambra o rossa secondo lo stato
+    (guasti aperti, rifiuti del validatore nell'ultima ora, budget oltre l'80 %), con il motivo nel pannello.
+  - *Le postazioni* della squadra dell'Arbitro in file davanti agli schermi (le scrivanie di oggi): chi lavora nel
+    registro si vede alla sua console.
+  - Lavoro: tre pezzi (tavolo della situazione; parete di schermi; allerta e postazioni). Guardare non cambia nulla.
 
 ### 3.2 La Biblioteca del Mondo (`mondo`, Narratore, `7dd87d` verde)
-È la memoria del Narratore: la bibbia, il canone, lo stile, le regole, le persone, le trame.
-- **Esterno: i libri impilati.** Una torre di lastre sfalsate come una pila di libri enormi (ogni piano un libro, il
-  dorso verso il viale con una riga neon come titolo), finestre a feritoia come righe di testo che si accendono a
-  intermittenza. Insegna «BIBLIOTECA DEL MONDO».
-- **Interno: il leggio e le tavole della legge.**
-  - *Il leggio* (al posto della vetrina): un libro aperto enorme, olografico; «<» «>» sfogliano la bibbia (fatti,
-    luoghi, misteri, personaggi), il clic apre la pagina nel pannello con i nodi del grafo che la toccano.
-  - *Le tavole delle regole* (parete): ogni giudizio di `rules.json` è una lastra; le ultime brillano (come le bacheche).
-  - *Il canone* inciso in grande sopra la porta (le rune e ciò che fanno: `world/canone.md`).
+È la memoria del Narratore: la bibbia, il canone, lo stile, le regole, le persone, le trame. La pila di libri è stata
+scartata (didascalica). Tre alternative più eleganti, in cui il libro non si vede ma si sente:
+- **A · Il chiostro** *(proposta)*: un edificio basso e quadrato, un portico di pilastri neri sottilissimi e fitti (un
+  filo di neon verde alla base di ognuno) attorno a una **corte aperta** con uno specchio d'acqua scura; sul fondo
+  dell'acqua le rune del canone, accese. In mezzo, una sola lanterna alta e sottile. Orizzontale e quieto: è l'unico
+  edificio del campus che non sale, e per questo si nota accanto alla Torre e al Nucleo. La memoria come un luogo dove
+  si cammina piano.
+- **B · La stele**: un monolite nero, sottile e alto (meno della Torre), spaccato da una fenditura verticale di luce; la
+  facciata a lamelle verticali finissime, illuminate da dietro: pagine viste di taglio, ma astratte. Davanti, una vasca
+  che lo riflette.
+- **C · Il nastro**: una sola lastra che si avvolge salendo in spirale, come una pagina srotolata, con una linea di neon
+  sul bordo. La più scultorea; anche la più difficile da scrivere in MarkovJunior.
+- **Interno** (vale per tutte): *il leggio* (al posto della vetrina), un libro aperto olografico; «<» «>» sfogliano la
+  bibbia (fatti, luoghi, misteri, personaggi), il clic apre la pagina nel pannello con i nodi del grafo che la toccano.
+  *Le tavole delle regole* a parete (ogni giudizio di `rules.json` una lastra, le ultime brillano). *Il canone* inciso
+  sopra la porta. Con A, il leggio sta nella corte, sull'acqua.
 
 ### 3.3 La Galleria dell'Artista (`galleria`, Artista e Scultore, `ff8ad8` rosa)
+*(Approvata il 23/10.)*
 È il museo dei modelli e la bottega dello Scultore.
 - **Esterno: il museo-cubo.** Un cubo nero sollevato su un piedistallo di vetro, con una grande cornice neon sulla
   facciata come un quadro; nel piazzale davanti un **plinto** con una scultura che cambia (un modello della libreria:

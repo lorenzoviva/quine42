@@ -10,7 +10,7 @@ struttura per sessione; T20 li porta poi nel gioco.
 1. Apri Gemini CLI nel worktree `H:\projects\rune\.claude\worktrees\step8.2A-lab3d` (branch `3d`), con il modello
    più forte disponibile in ragionamento alto (oggi `gemini-3.8-flash`, effort *high*).
 2. Incolla il **prompt comune** qui sotto, sostituendo `<ID>` con l'id della struttura (in ordine: `magia`,
-   `persone`, `cose`, `oggetti`, `luoghi`, `sistemi`, `nucleo`, `concilio`). La scheda della struttura è più sotto
+   `persone`, `cose`, `oggetti`, `luoghi`, `sistemi`, `nucleo`, `concilio`, poi `universo` e `galleria`, aggiunte il 23/10). La scheda della struttura è più sotto
    in questo stesso file: Gemini la legge da qui.
 3. A fine sessione guarda le foto in `lab/out/mjx/corona-<ID>.png` e il modello nella sandbox; se va bene, il
    commit l'ha già fatto lui; altrimenti scrivigli cosa cambiare nella stessa sessione.
@@ -210,6 +210,32 @@ neon è quello della sala nel gioco (`ROOMS` in `corona.ts`), così fuori e dent
   guglia; neon lungo i sei spigoli verticali e la cornice del tetto. Facciata monumentale: portale alto (3 × 4
   caselle) con colonne o pinne laterali, l'insegna «SALA DEL CONCILIO» sopra il portale, grande. È l'edificio più
   imponente del campus: deve sembrarlo anche accanto alla Torre della Magia (che è più alta, ma più stretta).
+
+### `universo` — La Direzione
+- **Scatola**: 14 × 10 × 12 caselle → `size="112 80 96"`. Neon `ffcf5c` (oro).
+- **Esterno** (proposta approvata dall'autore il 23/10, [`corona-proposte.md`](../plans/corona-proposte.md) §3.1): la
+  regia della software house; dentro c'è la sala operativa.
+- Indicazioni: un volume basso e largo (alto ~4 caselle) **a sbalzo** su pilastri neri, sollevato di 1-2 caselle da
+  terra (sotto, ombra e la porta in un atrio vetrato a z = 0, al centro del davanti, sotto lo sbalzo). La facciata
+  davanti è un **maxischermo curvo** (un arco di cilindro largo quanto l'edificio, convesso verso y grande): pannelli neri
+  a griglia con pixel oro sparsi, e un'`<animation name="trasmette" frames="8">` che li fa scorrere in orizzontale (due
+  lettere, acceso `glow="True"` e spento, come il neon della Torre). Sul tetto, un poco arretrata, una **torre di
+  trasmissione** sottile a traliccio fino a z ~ 11 caselle, con due o tre luci d'ostacolo (lettere luminose rosse
+  `ff4a4a`) che si accendono nella stessa animazione. Insegna «DIREZIONE» sul bordo alto dello schermo (o sul cornicione
+  sopra), in oro. È la coppia della Sala del Concilio: meno imponente, più tecnica.
+
+### `galleria` — La Galleria dell'Artista
+- **Scatola**: 14 × 14 × 10 caselle → `size="112 112 80"`. Neon `ff8ad8` (rosa).
+- **Esterno** (proposta approvata dall'autore il 23/10, [`corona-proposte.md`](../plans/corona-proposte.md) §3.3): il
+  museo dei modelli e la bottega dello Scultore.
+- Indicazioni: un **cubo nero** (~9 caselle di lato, alto ~7) sollevato di una casella su uno zoccolo di vetro scuro
+  arretrato (sembra galleggiare), nella metà di fondo della scatola. Sulla facciata davanti una grande **cornice** al neon
+  rosa come quella di un quadro, con dentro il vetro; la porta al centro della base della cornice, a z = 0, con una
+  scaletta di due gradini che scende dallo zoccolo. Nella metà davanti della scatola, il **piazzale** (lastre di cemento
+  grafite) con al centro un **plinto** basso (2 × 2 caselle, alto 1) col piano vuoto: la sua lettera si chiama `plinto`
+  (`name="plinto"`), perché il gioco ci poserà sopra un modello della libreria che cambia a ogni visita (lascia libero lo
+  spazio sopra, almeno 3 caselle). Il plinto non sta davanti alla porta: spostalo di lato al percorso. Insegna «GALLERIA
+  DELL'ARTISTA» sopra la cornice, su due righe se serve.
 
 ## Dopo (T20)
 
