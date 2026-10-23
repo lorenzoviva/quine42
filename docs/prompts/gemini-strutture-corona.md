@@ -3,7 +3,7 @@
 Task T19 del [backlog](../plans/backlog.md). L'autore è abbonato a Gemini: Gemini CLI (un agente con i file del
 progetto, la shell e il browser) scrive **lui stesso** i programmi MarkovJunior degli esterni della corona e li
 collauda nel laboratorio, senza la `GEMINI_API_KEY` del progetto (le chiamate a pagamento restano al gioco). Una
-struttura per sessione; T20 li porta poi nel gioco.
+struttura per sessione; T31 li porta poi nel gioco (il motore l'ha fatto T20).
 
 ## Come si usa
 
@@ -14,7 +14,7 @@ struttura per sessione; T20 li porta poi nel gioco.
    in questo stesso file: Gemini la legge da qui.
 3. A fine sessione guarda le foto in `lab/out/mjx/corona-<ID>.png` e il modello nella sandbox; se va bene, il
    commit l'ha già fatto lui; altrimenti scrivigli cosa cambiare nella stessa sessione.
-4. Quando ci sono tutte (o quelle che ti bastano), T20 le mette nel gioco.
+4. Quando ci sono tutte (o quelle che ti bastano), T31 le mette nel gioco.
 
 ## Il prompt comune
 
@@ -36,7 +36,7 @@ struttura per sessione; T20 li porta poi nel gioco.
 > - una riga in `lab/3d/catalog.ts`, nell'elenco `MODELS`: `['corona-<ID>', '<nome> (corona)', 'structure', 8],`
 >   (l'8 sono i voxel per casella di questi modelli);
 > - `lab/out/` per le prove (è ignorata da git).
-> Non toccare `src/`, `universe/`, `tests/` né altri file: il gioco li prenderà dopo (task T20). Se ti sembra che
+> Non toccare `src/`, `universe/`, `tests/` né altri file: il gioco li prenderà dopo (task T31). Se ti sembra che
 > il motore abbia un difetto, non correggerlo: scrivilo nel resoconto finale.
 >
 > **Che cosa leggere prima** (in quest'ordine):
@@ -79,7 +79,7 @@ struttura per sessione; T20 li porta poi nel gioco.
 
 **Scala.** Questi modelli sono troppo grandi per i 20 voxel per casella degli altri (una struttura di 14 caselle
 sarebbe 280 voxel di lato): si scrivono a **8 voxel per casella**, come i modelli dello step 8A. Nel laboratorio
-lo dice la riga di `catalog.ts`; nel gioco lo farà T20. Il viandante è alto 1,5 caselle = **12 voxel**; una
+lo dice la riga di `catalog.ts`; nel gioco la `vpt: 8` della sua voce in `models/index.json` (T31). Il viandante è alto 1,5 caselle = **12 voxel**; una
 porta normale è larga 2 caselle e alta 2,5 (**16 × 20 voxel**); un piano di edificio è alto circa 3 caselle
 (24 voxel).
 
@@ -122,11 +122,14 @@ le lettere che contano (porta, insegna, neon), le animazioni e le azioni se ci s
 
 ## Le schede
 
-Le dimensioni sono in caselle (× 8 = voxel). Gli edifici del campus oggi hanno un blocco di 16 × ~20 caselle (T18)
-(`CAMPUS` in `src/kernel/corona.ts`); le scatole sotto ci stanno con il margine per il prato e i viali. Il colore
+Le dimensioni sono in caselle (× 8 = voxel). Un edificio con il suo modello prende il posto del blocco del campus
+(`CAMPUS` e `placeStructure` in `src/kernel/corona.ts`): la porta sta sul viale, 6,5 caselle oltre il cerchio, e il modello
+si allunga all'indietro fino al bordo (35 caselle oltre il cerchio); di lato deve restare nel suo settore, che con
+11 edifici è largo circa 29 caselle all'altezza della porta. Le scatole sotto ci stanno con il margine per il prato e i
+vicoli (la più grande, il Concilio di 20 × 20, arriva a 28 caselle oltre il cerchio). Il colore
 neon è quello della sala nel gioco (`ROOMS` in `corona.ts`), così fuori e dentro si riconoscono.
 
-### `magia` — La Torre della Magia
+### `magia` — La Torre della Magia — `fatto`
 - **Scatola**: 10 × 10 × 24 caselle → `size="80 80 192"`. Neon `c48aff` (viola).
 - **Esterno** (parole dell'autore): «cilindrica, alta e tutta incisa di rune, futuristica, non medioevale. In
   grande la scritta "La torre della Magia", sembra scritta con le rune.»
@@ -138,7 +141,7 @@ neon è quello della sala nel gioco (`ROOMS` in `corona.ts`), così fuori e dent
   righe su una lastra sopra la porta, grande: è la cosa che si legge da lontano. Porta alta e stretta (2 × 3
   caselle) con una cornice neon.
 
-### `persone` — Lo Studio dei personaggi
+### `persone` — Lo Studio dei personaggi — `fatto`
 - **Scatola**: 14 × 12 × 7 caselle → `size="112 96 56"`. Neon `ffb38a` (pesca).
 - **Esterno**: «studios ma anche un po' magazzino/fabbrica, sempre futuristico, poco. Un'insegna neon "Lo studio
   dei personaggi".»
@@ -148,7 +151,7 @@ neon è quello della sala nel gioco (`ROOMS` in `corona.ts`), così fuori e dent
   ventilazione, tubi lungo una parete. Futuristico «poco»: pannelli lisci, bordi neon sottili, l'insegna
   «LO STUDIO DEI PERSONAGGI» sopra il portone, su due righe se serve.
 
-### `cose` — Il Laboratorio delle cose
+### `cose` — Il Laboratorio delle cose — `fatto`
 - **Scatola**: 14 × 14 × 8 caselle → `size="112 112 64"`. Neon `d89a6a` (rame).
 - **Esterno**: «tensostruttura a semisfera in metallo nero e vetro riflettente. Un cartello (futuristico) con
   l'insegna neon: "Il laboratorio delle cose".»
@@ -157,7 +160,7 @@ neon è quello della sala nel gioco (`ROOMS` in `corona.ts`), così fuori e dent
   sul davanti. Il **cartello** è a parte ma attaccato a terra: un totem o un portale basso davanti alla cupola,
   di lato al sentiero, con «IL LABORATORIO DELLE COSE»; non sovrapporlo alla porta.
 
-### `oggetti` — Il Magazzino degli oggetti
+### `oggetti` — Il Magazzino degli oggetti — `fatto`
 - **Scatola**: 14 × 14 × 10 caselle → `size="112 112 80"`. Neon `e0b070` (ambra).
 - **Esterno**: «piramide in metallo nero e vetro riflettente. Un cartello (futuristico) con l'insegna neon:
   "Il magazzino degli oggetti".»
@@ -202,8 +205,8 @@ neon è quello della sala nel gioco (`ROOMS` in `corona.ts`), così fuori e dent
   (travi o fasci di luce, 1-2 voxel) che salgono dall'anello alla sfera. Insegna «IL NUCLEO» sulla facciata
   davanti dell'anello, sopra la porta.
 
-### `concilio` — La Sala del Concilio
-- **Scatola**: 16 × 16 × 9 caselle → `size="128 128 72"`. Neon `ff8ad8` (rosa).
+### `concilio` — La Sala del Concilio — `fatto`
+- **Scatola**: 20 × 20 × 9 caselle → `size="160 160 72"`. Neon `ff8ad8` (rosa).
 - **Esterno**: «struttura imponente esagonale, insegna neon sulla facciata.»
 - Indicazioni: pianta esagonale (un lato dell'esagono rivolto verso y grande: è la facciata), su un basamento a
   gradoni, pareti inclinate o a lesene, tetto a gradoni esagonali che sale verso una lanterna centrale o una
@@ -211,7 +214,7 @@ neon è quello della sala nel gioco (`ROOMS` in `corona.ts`), così fuori e dent
   caselle) con colonne o pinne laterali, l'insegna «SALA DEL CONCILIO» sopra il portale, grande. È l'edificio più
   imponente del campus: deve sembrarlo anche accanto alla Torre della Magia (che è più alta, ma più stretta).
 
-### `universo` — La Direzione
+### `universo` — La Direzione — `fatto`
 - **Scatola**: 14 × 10 × 12 caselle → `size="112 80 96"`. Neon `ffcf5c` (oro).
 - **Esterno** (proposta approvata dall'autore il 23/10, [`corona-proposte.md`](../plans/corona-proposte.md) §3.1): la
   regia della software house; dentro c'è la sala operativa.
@@ -224,7 +227,7 @@ neon è quello della sala nel gioco (`ROOMS` in `corona.ts`), così fuori e dent
   `ff4a4a`) che si accendono nella stessa animazione. Insegna «DIREZIONE» sul bordo alto dello schermo (o sul cornicione
   sopra), in oro. È la coppia della Sala del Concilio: meno imponente, più tecnica.
 
-### `galleria` — La Galleria dell'Artista
+### `galleria` — La Galleria dell'Artista — `fatto`
 - **Scatola**: 14 × 14 × 10 caselle → `size="112 112 80"`. Neon `ff8ad8` (rosa).
 - **Esterno** (proposta approvata dall'autore il 23/10, [`corona-proposte.md`](../plans/corona-proposte.md) §3.3): il
   museo dei modelli e la bottega dello Scultore.
@@ -237,7 +240,7 @@ neon è quello della sala nel gioco (`ROOMS` in `corona.ts`), così fuori e dent
   spazio sopra, almeno 3 caselle). Il plinto non sta davanti alla porta: spostalo di lato al percorso. Insegna «GALLERIA
   DELL'ARTISTA» sopra la cornice, su due righe se serve.
 
-### `mondo` — La Biblioteca del Mondo
+### `mondo` — La Biblioteca del Mondo — `fatto`
 - **Scatola**: 14 × 14 × 7 caselle → `size="112 112 56"`. Neon `7dd87d` (verde).
 - **Esterno** (proposta A, scelta dall'autore il 23/10, [`corona-proposte.md`](../plans/corona-proposte.md) §3.2):
   **il chiostro**. La memoria del Narratore come un luogo dove si cammina piano; elegante, niente libri da vedere.
@@ -252,10 +255,10 @@ neon è quello della sala nel gioco (`ROOMS` in `corona.ts`), così fuori e dent
   «BIBLIOTECA DEL MONDO» sul bordo del tetto sopra la porta, in lettere sottili (su due righe se serve). È l'unico edificio
   orizzontale del campus: niente torri, cupole o antenne.
 
-## Dopo (T20)
+## Dopo (T31)
 
-Quello che T20 dovrà fare con questi modelli, perché le convenzioni sopra non restino lettera morta: una densità di
-voxel per modello nella libreria (`models/index.json` o una classe `corona` a 8 voxel per casella, oggi `VPT = 20`
-è fisso in `src/kernel/forms.ts`), la copia dei programmi in `universe/models/corona-<id>.xml`, l'edificio del
-campus girato verso il viale con la collisione dai voxel, la porta del campus dove il modello mette la lettera
-`porta`.
+Il motore c'è già (T20, ADR-0049): la densità per modello (`vpt` nella voce di `models/index.json`), l'edificio del
+campus girato verso il viale con la collisione dai voxel, la porta del campus dove il modello mette la lettera `porta`,
+le animazioni degli edifici nel campus. T31 copia ogni programma finito in `universe/models/corona-<id>.xml` con la sua
+voce nell'indice (`classe: edificio`, `vpt: 8`) e aggiunge l'id alla lista di `tests/campus.test.ts` (tempo, settore,
+porta raggiungibile dal viale, animazione).
