@@ -322,7 +322,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   `tests/showcase.test.ts` (+1). Nel browser (offline): «Vapore» con Laguz e Kenaz sullo schermo e nel pannello.
   Diverso dal previsto: niente; nessun ADR. Le rune singole e i loro incantesimi sono una voce sola (prima erano due).
 
-### T23 · Lo Studio dei personaggi, dentro — `fatto` (COMMIT)
+### T23 · Lo Studio dei personaggi, dentro — `fatto` (`5058b48`)
 - Un silos al centro con il personaggio scelto che fluttua in un liquido viscoso; «<» «>»; il clic mostra il
   modulo e l'individuo.
 - Esito:  mette dopo ogni tipo i suoi individui (, «nome · mestiere»), ciascuno
