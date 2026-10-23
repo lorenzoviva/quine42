@@ -416,7 +416,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   `sampleDrafts` ora sceglie in modo deterministico una bozza boscosa, una aperta e una con acqua (le tre vecchie per prime, poi
   attorno all'origine), in cache; tutti gli ambienti del seme restano validi. Nessun ADR.
 
-### T27 · La Sala sistemi, dentro — `da fare` (T27c fatto; si continua da T27a)
+### T27 · La Sala sistemi, dentro — `da fare` (T27c e T27d fatti; si continua da T27a)
 - L'autore chiede un aiuto: far apprezzare la complessità del codice con esempi (cosa fa un sistema, casi d'uso).
   **Proposta all'autore** (es. ogni sistema come un «caso» animato: prima, regola, dopo).
 - Proposta scritta il 23/10/2026: [`corona-proposte.md`](corona-proposte.md) §2 — **la catena** (ogni sistema una
@@ -440,9 +440,11 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 - **T27b, dopo T27c**: i casi del seme vanno scritti come `casi` nei manifest di `sys.*` (il formato e `runCase` ci sono, provati
   con fuoco e bisogni); restano la teca, lo schermo con le `righe` e il pannello, che disegnano `BenchRun.frames`. Per i casi
   di `sys.wander`, `sys.follow` e `sys.physics` può servire un passo nuovo in `BenchStep` (es. l'ora del giorno, «segui»).
-- **T27d · le meccaniche nella Sala sistemi** (da T32): `folderOf` in `corona.ts` manda `mech.*` a `sistemi` (oggi
-  finiscono in `altro`, l'Archivio); nella catena di T27a una meccanica è una stazione col suo pannello (`manifest.ui`).
-  Test: un universo con una meccanica forgiata non ha l'Archivio nello studio.
+- **T27d · le meccaniche nella Sala sistemi — `fatto`** (commit «Corona (T27d)», da T32): `folderOf` in `corona.ts` manda `mech.*` a
+  `sistemi` (prima finivano in `altro`, l'Archivio, che ora nasce solo per un prefisso sconosciuto). Test in `tests/bench.test.ts`:
+  dopo `forgeMechanic` lo studio non ha l'Archivio e i file della meccanica sono sugli scaffali della Sala sistemi. Diverso dal
+  previsto: la stazione col pannello (`manifest.ui`) nella catena resta a **T27a**, che non c'è ancora: lì una meccanica è una
+  stazione come i `sys.*`, col suo pannello. Nessun ADR (deciso in T27/T32); nessuna prova nel browser (solo lo scaffale cambia edificio).
 
 ### T32 · Gli edifici dimenticati: Direzione, Biblioteca, Galleria, Archivio — `fatto` (commit «Corona (T32)»)
 - Contesto: nel seme il campus ha 12 edifici (13 con l'Archivio, dove oggi finiscono le meccaniche `mech.*`); le

@@ -116,6 +116,10 @@ describe('the bench of the Sala sistemi', () => {
     // The player rewrites the mechanic: the case shows what the new code does.
     const doubled = logic.replace('difesa = difesa + items.bonus(it, "difesa")', 'difesa = difesa + 2 * items.bonus(it, "difesa")');
     expect((await k.runBenchCase(manifest, doubled, manifest.casi![0])).dopo['difesa.valore']).toBe(6);
+    // T27d: the mechanic lives in the Sala sistemi, with the systems; the studio has no Archive for it.
+    const ids = k.corona.buildings.map((b) => b.id);
+    expect(ids).not.toContain('altro');
+    expect(k.corona.folders.find((f) => f.id === 'sistemi')!.files).toContain(`modules/${r.id}/manifest.json`);
   });
 
   it('a mechanic whose cases show nothing goes back to the Engineer once', async () => {

@@ -21,14 +21,14 @@ specifiche ne coprono 8:
 | `cose` | Laboratorio delle cose | fisico | `obj.*`, `object.*` | scheda T19 | ✔ T24 |
 | `oggetti` | Magazzino degli oggetti | fisico | `items.*`, `item.*` | scheda T19 | ✔ T24 |
 | `luoghi` | Ufficio dei luoghi | cartografo | `world.*` (terreni, ambienti) | scheda T19 | **T26 (§1)** |
-| `sistemi` | Sala sistemi | ingegnere | `sys.*` | scheda T19 | **T27 (§2)** |
+| `sistemi` | Sala sistemi | ingegnere | `sys.*`, le meccaniche `mech.*` (T27d) | scheda T19 | **T27 (§2)** |
 | `nucleo` | Il Nucleo | ingegnere | `core.*` | scheda T19 | ✔ T28 |
 | `concilio` | Sala del Concilio | arbitro | `prompts/` | scheda T19 | ✔ T25 |
 | `universo` | **Direzione** | arbitro | `universe.json` | — | solo scaffali |
 | `mondo` | **Biblioteca del Mondo** | narratore | `world/` (bibbia, stile, canone, atlante; poi persone, trame, regole, stato, consumi, grafo) | — | solo scaffali |
 | `galleria` | **Galleria dell'Artista** | artista, scultore | `models/` (i programmi) + i modelli esposti | — | modelli e «riscolpisci» |
 | `cartografia` | **Studio del Cartografo** | cartografo | i terreni esposti, l'atlante | — | terreni e atlante |
-| `altro` | **Archivio** | ingegnere | ciò che ha un prefisso sconosciuto: oggi **le meccaniche** (`mech.*`, `kernel.ts:3250`) | — | solo scaffali |
+| `altro` | **Archivio** | ingegnere | ciò che ha un prefisso sconosciuto (le meccaniche `mech.*` erano qui fino a T27d) | — | solo scaffali |
 
 Due cose da notare:
 - **Studio del Cartografo e Ufficio dei luoghi** sono la stessa squadra e lo stesso lavoro (i terreni stanno in

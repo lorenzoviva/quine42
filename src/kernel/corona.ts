@@ -194,7 +194,8 @@ export function folderOf(path: string): string {
   if (m) {
     const p = m[1];
     if (p === 'core') return 'nucleo';
-    if (p === 'sys') return 'sistemi';
+    // The forged mechanics are systems too (T27d): the Archive keeps only unknown prefixes.
+    if (p === 'sys' || p === 'mech') return 'sistemi';
     if (p === 'world') return 'luoghi';
     if (p === 'items' || p === 'item') return 'oggetti';
     if (p === 'obj' || p === 'object') return 'cose';
