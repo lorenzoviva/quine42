@@ -137,3 +137,94 @@ export function waterLevels(tiles: string, size: number, liquid: (code: string) 
   }
   return out;
 }
+
+/** A lot of a chunk, in its cells (inclusive): a structure stands on it (ADR-0043). */
+export interface Lot {
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+}
+
+/**
+ * The level of every tile of a chunk (ADR-0048, flat lots): water lies flat (`waterLevels`); every lot
+ * is flat at the median level of its tiles, or as near as the border and the lots already laid allow (the
+ * larger lots first, a tile keeps the first lot that takes it), and so is a ring of one tile around it where the land allows; the rest of the chunk bends towards
+ * them, so that neighbours on land still differ by at most two levels, while the chunk's border keeps the
+ * relief and meets the next chunk as before. Only the chunk's own tiles count, as for water.
+ */
+export function chunkLevels(tiles: string, size: number, liquid: (code: string) => boolean, level: (c: number, r: number) => number, lots: Lot[]): Int16Array {
+  const S = size;
+  const out = waterLevels(tiles, S, liquid, level);
+  const wet = (i: number) => liquid(tiles[i]);
+  // 0 free, 1 fixed by the relief (the border), 2 fixed by a lot, 3 free but starting at a lot's level (its ring, where it cannot be flat).
+  const fixed = new Uint8Array(S * S);
+  for (let i = 0; i < S * S; i++) {
+    if (wet(i)) continue;
+    const c = i % S, r = (i - c) / S;
+    out[i] = level(c, r);
+    if (c === 0 || r === 0 || c === S - 1 || r === S - 1) fixed[i] = 1;
+  }
+  const order = lots.map((l, i) => ({ l, i, area: (l.x1 - l.x0 + 1) * (l.y1 - l.y0 + 1) })).sort((a, b) => b.area - a.area || a.i - b.i);
+  // Within two levels a tile of what is already fixed, so that the land between can still be climbed.
+  const reach = (x0: number, y0: number, x1: number, y1: number) => {
+    let lo = -Infinity, hi = Infinity;
+    for (let i = 0; i < S * S; i++) {
+      if (fixed[i] !== 1 && fixed[i] !== 2) continue;
+      const c = i % S, r = (i - c) / S;
+      const d = Math.max(0, x0 - c, c - x1) + Math.max(0, y0 - r, r - y1);
+      if (d === 0) continue;
+      lo = Math.max(lo, out[i] - 2 * d);
+      hi = Math.min(hi, out[i] + 2 * d);
+    }
+    return [lo, hi];
+  };
+  // The lots first, then their rings (inside the border, which stays the relief), which yield where they must.
+  const flats = new Map<Lot, number>();
+  for (const { l } of order) {
+    const own: number[] = [];
+    for (let r = Math.max(0, l.y0); r <= Math.min(S - 1, l.y1); r++) for (let c = Math.max(0, l.x0); c <= Math.min(S - 1, l.x1); c++) if (!wet(r * S + c)) own.push(level(c, r));
+    if (!own.length) continue;
+    own.sort((a, b) => a - b);
+    const [lo, hi] = reach(l.x0, l.y0, l.x1, l.y1);
+    const flat = Math.min(hi, Math.max(lo, own[own.length >> 1]));
+    flats.set(l, flat);
+    for (let r = Math.max(0, l.y0); r <= Math.min(S - 1, l.y1); r++)
+      for (let c = Math.max(0, l.x0); c <= Math.min(S - 1, l.x1); c++) {
+        const i = r * S + c;
+        if (wet(i) || fixed[i] === 2) continue;
+        out[i] = flat;
+        fixed[i] = 2;
+      }
+  }
+  for (const [l, flat] of flats)
+    for (let r = Math.max(1, l.y0 - 1); r <= Math.min(S - 2, l.y1 + 1); r++)
+      for (let c = Math.max(1, l.x0 - 1); c <= Math.min(S - 2, l.x1 + 1); c++) {
+        const i = r * S + c;
+        if (wet(i) || fixed[i] >= 2) continue;
+        out[i] = flat;
+        const [lo, hi] = reach(c, r, c, r);
+        fixed[i] = flat >= lo && flat <= hi ? 2 : 3;
+      }
+  if (!order.length) return out;
+  // The free land between: each tile within two levels of its neighbours on land, until it settles.
+  for (let pass = 0, changed = true; changed && pass < 4 * S; pass++) {
+    changed = false;
+    for (let i = 0; i < S * S; i++) {
+      if ((fixed[i] && fixed[i] !== 3) || wet(i)) continue;
+      const c = i % S, r = (i - c) / S;
+      let lo = -Infinity, hi = Infinity;
+      for (const n of [c > 0 ? i - 1 : -1, c < S - 1 ? i + 1 : -1, r > 0 ? i - S : -1, r < S - 1 ? i + S : -1]) {
+        if (n < 0 || wet(n)) continue;
+        lo = Math.max(lo, out[n] - 2);
+        hi = Math.min(hi, out[n] + 2);
+      }
+      const v = lo <= hi ? Math.min(hi, Math.max(lo, out[i])) : Math.round((lo + hi) / 2);
+      if (v !== out[i]) {
+        out[i] = v;
+        changed = true;
+      }
+    }
+  }
+  return out;
+}

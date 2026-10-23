@@ -28,11 +28,21 @@ di MarkovJunior ha dei bordi e il mondo no; e la regola 10 (ciò che sembra inva
    più scuro; terra verso l'acqua) dove il vicino è più basso; muri, porte, alberi, massi, cose, strutture, rune e luci
    stanno sul suolo; i corpi salgono e scendono i gradini in un attimo (`climb`); la camera guarda il viandante alla sua
    altezza; il mouse sceglie la casella con un raggio che incontra il suolo dove atterra (qualche iterazione).
+6. **I lotti sono piani** (T17): il livello di ogni casella di un chunk pianificato è `chunkLevels` (`relief.ts`):
+   l'acqua come al punto 3; ogni lotto (il rettangolo di un edificio del piano, dove sta la sua struttura) è piano alla
+   mediana dei suoi livelli, o il più vicino che il bordo del chunk e i lotti già posati permettono (due livelli per
+   casella di distanza); prima i lotti più grandi, poi un anello di una casella attorno a ciascuno, piano dove si può.
+   Il resto del chunk si piega (ogni casella libera entro due livelli dai vicini di terra, finché non si ferma); il bordo
+   del chunk resta il rilievo, così i chunk si incontrano come prima. Non si salva nulla di nuovo: i lotti vengono dal
+   piano, che è già salvato, e il risultato è deterministico; `groundAt` lo tiene in cache per chunk finché caselle,
+   lotti e rilievo restano gli stessi. Dentro un lotto il sentiero che entra dalla porta è piano con lui.
 
 ## Conseguenze
 - La corona e lo studio restano piani a y = 0; la simulazione sta un poco più su (il livello più basso è 0) e il taglio
   al cerchio la mostra come un altopiano.
-- Le strutture stanno sul suolo sotto il loro centro: sotto un lotto il terreno può variare di mezza casella e
-  affiorare o lasciare un vuoto. Spianare i lotti è il task T17 (che può anche unire l'acqua fra i chunk).
+- Le strutture stanno sul suolo sotto il loro centro, che dopo T17 è il piano del loro lotto: niente terreno che affiora
+  dal pavimento né vuoti sotto i muri. Dove un pendio è ripido quanto il rilievo permette (due livelli a casella fino al
+  bordo) un lotto piano non entra senza un gradino: il lotto vince e resta un gradino più alto (solo estetico, punto 2).
+- L'acqua che passa da un chunk all'altro può ancora scendere di un gradino (facoltativo in T17, non fatto).
 - `Relief` costa ~0,45 s una volta per universo (al primo `groundAt`), poi è una lettura di due tabelle.
 - Il programma del rilievo è nell'universo: il Concilio potrà un giorno scriverne un altro; per ora nessun agente lo fa.

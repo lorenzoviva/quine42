@@ -231,7 +231,8 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 - **Rilievo** (ADR-0048): il terreno ha le altezze. `Relief` (`src/kernel/relief.ts`) fa girare `Hills` di MarkovJunior
   (o `world/rilievo.xml`) su due scatole di lati 64 e 45, lette come piastrelle che si ripetono e rammendate; il livello
   di una casella è la somma (un livello = un quarto di casella, fra vicini al più due: si sale sempre, non è mai un
-  ostacolo). Ogni specchio d'acqua di un chunk è piano, al suo livello più basso. `kernel.groundAt(x, y)` è l'altezza del
+  ostacolo). Ogni specchio d'acqua di un chunk è piano, al suo livello più basso; ogni lotto è piano, con un anello
+  attorno, e il resto del chunk si piega verso di lui lasciando il bordo al rilievo (`chunkLevels`). `kernel.groundAt(x, y)` è l'altezza del
   suolo, `floorAt` la comprende (i modelli stanno sul suolo sotto il loro centro); il renderer disegna colonne con i fianchi e
   posa tutto sul suolo. Corona e studio restano piani.
 - **Mappa** (ADR-0011, 0040): caselle colorate per terreno, strati `ground floor wall door liquid vegetation rock`: l'acqua è
@@ -357,7 +358,7 @@ giudice; lotti come strutture girate verso la porta, una struttura importante pe
 Prossimi passi (il dettaglio è nel backlog):
 1. Coerenza del mondo: canone delle rune, prompt narrativi più semplici, società e trame coerenti, il grafo del
    mondo come contesto degli agenti (T07-T13, fatti).
-2. Grafica e controlli 3D: voxel luminosi (T14, fatto), telecamera che ruota (T15, fatto), terreno con le altezze (T16, fatto), lotti in piano.
+2. Grafica e controlli 3D: voxel luminosi (T14, fatto), telecamera che ruota (T15, fatto), terreno con le altezze (T16, fatto), lotti in piano (T17, fatto).
 3. La corona più grande, con gli esterni e gli interni come modelli.
 4. Ancore del piano («vicino a…»), forme degli oggetti portati e dei terreni che cambiano con «Altro…».
 5. Multiplayer con un master: piano e punti aperti in [`docs/plans/multiplayer.md`](docs/plans/multiplayer.md).

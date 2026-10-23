@@ -41,7 +41,7 @@ import { councilSession, judgeAction, judgeCraft, nameSpell } from './agents/eff
 import { cleanPanel, designMechanic } from './agents/mechanics';
 import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Identity } from './agents/content';
 import { addItem, CARRY_CAPACITY, countItem, equippedItem, moveSlot, newInventory, putSlot, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
-import { HILLS, LEVEL, Relief, RELIEF_PATH, waterLevels } from './relief';
+import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH } from './relief';
 import type { ActionDef, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
 
 export interface Chunk {
@@ -235,8 +235,8 @@ export class Kernel {
   private solidCells = new Set<string>();
   /** Solid things with a model, by the cells their footprint reaches (they block by their voxels). */
   private reliefCache?: { key: string; relief: Relief };
-  /** The level of each body of water, per chunk, while its tiles stay the same. */
-  private waterCache = new WeakMap<Chunk, { tiles: string; levels: Int16Array }>();
+  /** The level of every tile, per chunk (flat water, flat lots), while its tiles, lots and relief stay the same. */
+  private levelCache = new WeakMap<Chunk, { tiles: string; lots: Building[]; relief: Relief; levels: Int16Array }>();
   private solidForms = new Map<string, Array<{ id: Id; x: number; y: number; yaw: number; form: Form; foot: Uint8Array }>>();
   /** Footprints of instances whose model was changed by an action (the door is open). */
   private instanceFeet = new Map<Id, { key: string; foot: Uint8Array }>();
@@ -1358,23 +1358,21 @@ export class Kernel {
     return this.reliefCache.relief;
   }
 
-  /** The height (tiles) of the ground at a point of the simulation: the relief of its tile; water lies flat. */
+  /** The height (tiles) of the ground at a point of the simulation: the relief of its tile; water lies flat, lots too. */
   groundAt(x: number, y: number): number {
     const col = Math.floor(x), row = Math.floor(y);
     const S = this.config.chunkSize;
     const cx = Math.floor(col / S), cy = Math.floor(row / S);
     const ch = this.chunks.get(this.chunkKey(cx, cy));
-    const i = (row - cy * S) * S + (col - cx * S);
-    if (ch && this.palette[ch.tiles[i]]?.layer === 'liquid') {
-      let w = this.waterCache.get(ch);
-      if (w?.tiles !== ch.tiles) {
-        const relief = this.relief;
-        w = { tiles: ch.tiles, levels: waterLevels(ch.tiles, S, (code) => this.palette[code]?.layer === 'liquid', (c, r) => relief.level(cx * S + c, cy * S + r)) };
-        this.waterCache.set(ch, w);
-      }
-      return w.levels[i] * LEVEL;
+    const relief = this.relief;
+    if (!ch) return relief.height(col, row);
+    let l = this.levelCache.get(ch);
+    if (l?.tiles !== ch.tiles || l.lots !== ch.buildings || l.relief !== relief) {
+      const levels = chunkLevels(ch.tiles, S, (code) => this.palette[code]?.layer === 'liquid', (c, r) => relief.level(cx * S + c, cy * S + r), ch.buildings);
+      l = { tiles: ch.tiles, lots: ch.buildings, relief, levels };
+      this.levelCache.set(ch, l);
     }
-    return this.relief.height(col, row);
+    return l.levels[(row - cy * S) * S + (col - cx * S)] * LEVEL;
   }
 
   /** The height (tiles) of what one stands on at a point of the simulation (the ground, a structure's floor, a step). */
