@@ -69,6 +69,8 @@ export interface Building {
 
 export interface CoronaCell {
   kind: 'floor' | 'building' | 'door' | 'room' | 'wall' | 'item';
+  /** Outside, what kind of ground a floor cell is: the avenue, an alley between sectors, a lawn, the edge. */
+  ground?: 'viale' | 'vicolo' | 'prato' | 'bordo';
   building?: string;
   item?: StudioItem;
   /** Compatibility with the hover/editor: the file under the cell. */
@@ -89,6 +91,13 @@ export interface Exhibit {
   model?: string;
   tint?: string;
 }
+
+/**
+ * The campus on the ring, in cells from the circle's edge (T18: four times the 2D one, the circle stays):
+ * the avenue along the circle with its neon line, the doors, the buildings (deep and wide enough for a
+ * model), lawns behind them, alleys between the sectors, a glowing edge.
+ */
+export const CAMPUS = { ring: 36, avenue: 6, line: 3, door: 6.5, front: 7, back: 23, span: 0.36, alley: 1.2 };
 
 export const ROOM_W = 24;
 export const ROOM_H = 15;
@@ -157,6 +166,15 @@ function angleOf(x: number, y: number): number {
   return t;
 }
 
+/** The ground of an outside cell at distance d from the centre and angle t, with n sectors around a circle of radius R. */
+function groundAt(d: number, R: number, t: number, n: number): CoronaCell['ground'] {
+  if (d - R < CAMPUS.avenue) return 'viale';
+  if (d - R >= CAMPUS.ring - 1) return 'bordo';
+  const sector = (Math.PI * 2) / Math.max(1, n);
+  const off = ((t % sector) + sector) % sector;
+  return Math.min(off, sector - off) * d < CAMPUS.alley ? 'vicolo' : 'prato';
+}
+
 /** Shelf positions of a floor, in reading order. */
 function shelfSlots(): Array<{ x: number; y: number }> {
   const out: Array<{ x: number; y: number }> = [];
@@ -173,7 +191,7 @@ export class Corona {
   private files: FileMap = {};
 
   constructor(readonly radius: number) {
-    this.outer = radius + 9;
+    this.outer = radius + CAMPUS.ring;
   }
 
   /** Compatibility: the folders are the buildings. */
@@ -186,7 +204,7 @@ export class Corona {
     this.slots.clear();
     this.exterior.clear();
     const R = this.radius;
-    this.outer = R + 9;
+    this.outer = R + CAMPUS.ring;
     const groups = new Map<string, Array<Omit<StudioItem, 'x' | 'y'>>>();
     const add = (room: string, item: Omit<StudioItem, 'x' | 'y'>) => {
       if (!groups.has(room)) groups.set(room, []);
@@ -233,19 +251,19 @@ export class Corona {
         for (const it of placed) if (it.kind === 'file' && it.path) this.slots.set(it.path, { x: it.x, y: it.y });
         floors.push({ index: f, ox, oy, items: placed });
       }
-      // Outside: a block on the outer part of the sector, the door towards the walkway.
-      const span = (to - from) * 0.36;
+      // Outside: a block in the middle of the sector, the door towards the avenue.
+      const span = (to - from) * CAMPUS.span;
       const cells = new Set<string>();
-      for (let r = R + 3.5; r < R + 7.5; r += 0.5)
+      for (let r = R + CAMPUS.front; r < R + CAMPUS.back; r += 0.5)
         for (let a = mid - span; a <= mid + span; a += 0.35 / r) {
           const c = polarCell(r, a);
           cells.add(`${c.x},${c.y}`);
         }
-      const door = polarCell(R + 3.2, mid);
+      const door = polarCell(R + CAMPUS.door, mid);
       cells.delete(`${door.x},${door.y}`);
       return { index, id, name: def.name, color: def.color, team: def.team, from, to, door, cells, floors };
     });
-    // The walkway and the lawns of the campus.
+    // The avenue, the alleys between the sectors, the lawns and the edge of the campus.
     const max = Math.ceil(this.outer) + 1;
     for (let y = -max; y < max; y++)
       for (let x = -max; x < max; x++) {
@@ -256,7 +274,7 @@ export class Corona {
         const key = `${x},${y}`;
         if (b?.cells.has(key)) this.exterior.set(key, { kind: 'building', building: b.id });
         else if (b && b.door.x === x && b.door.y === y) this.exterior.set(key, { kind: 'door', building: b.id });
-        else this.exterior.set(key, { kind: 'floor', building: b?.id, folder: b?.id });
+        else this.exterior.set(key, { kind: 'floor', ground: groundAt(d, R, t, total), building: b?.id, folder: b?.id });
       }
   }
 
@@ -341,10 +359,11 @@ export class Corona {
     return { x: f.ox + ROOM_W / 2 + 0.5, y: f.oy + ROOM_H - 2.5 };
   }
 
-  /** Where you come out of a building: on the walkway, in front of its door. */
+  /** Where you come out of a building: on the avenue, in front of its door. */
   exitPoint(b: Building): { x: number; y: number } {
     const mid = (b.from + b.to) / 2;
-    return { x: Math.sin(mid) * (this.radius + 2) + 0.5, y: -Math.cos(mid) * (this.radius + 2) + 0.5 };
+    const r = this.radius + CAMPUS.avenue - 1.5;
+    return { x: Math.sin(mid) * r + 0.5, y: -Math.cos(mid) * r + 0.5 };
   }
 
   building(id: string | undefined): Building | undefined {

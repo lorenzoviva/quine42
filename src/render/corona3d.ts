@@ -1,17 +1,19 @@
-// The corona in 3D: the studio's campus on the ring beyond the circle (a dark walkway with a glowing
-// line, one tower per folder with neon edges in its colour, a door), and inside each tower its rooms
+// The corona in 3D: the studio's campus on the ring beyond the circle (a dark avenue with a glowing
+// line, alleys between the sectors, lawns, one block per folder with neon edges in its colour, a door
+// under a neon sign with the building's name, a glowing edge), and inside each tower its rooms
 // (24 × 15 cells, several floors): neon grid on the floor, walls with a strip of light, racks of files,
 // the gallery's models on show, screens, teleports, stairs, the Council's round table with the universe
 // turning above it. Built from the kernel's cells (src/kernel/corona.ts): logic stays in the kernel.
 
 import * as THREE from 'three';
 import type { Kernel } from '../kernel/kernel';
-import { ROOM_H, ROOM_W, type Building, type Floor, type StudioItem } from '../kernel/corona';
+import { CAMPUS, ROOM_H, ROOM_W, type Building, type Floor, type StudioItem } from '../kernel/corona';
 import { Builder } from './terrain';
 import { MAT, rgbOf } from './materials';
 import { geoOf } from './models';
 
-const TOWER_H = 3.2;
+const TOWER_H = 4.5;
+const GROUND: Record<string, [string, string]> = { viale: ['#161824', '#12131d'], vicolo: ['#14141c', '#111119'], prato: ['#0b0f15', '#0b0f15'], bordo: ['#0d0d16', '#0d0d16'] };
 const LOOK_COLOR: Record<string, string> = { libro: '#a0683a', cristallo: '#5fe0ff', pergamena: '#e8dcb0', tavoletta: '#9aa3ad' };
 
 /** A thin glowing frame along the top edges of a cell block where it meets the outside. */
@@ -37,9 +39,11 @@ export function buildCoronaRing(k: Kernel): THREE.Group {
       const d = Math.hypot(x + 0.5, y + 0.5);
       const b = cell.building ? c.building(cell.building) : undefined;
       if (cell.kind === 'floor') {
-        const walk = d < R + 2.6;
-        lit.quad([x, 0, y], [x, 0, y + 1], [x + 1, 0, y + 1], [x + 1, 0, y], [0, 1, 0], rgbOf(walk ? ((x + y) & 1 ? '#161824' : '#12131d') : '#0b0f15'));
-        if (walk && Math.abs(d - (R + 1.3)) < 0.5) glow.box(x, 0.005, y + 0.45, x + 1, 0.02, y + 0.55, rgbOf('#05d9e8', 0.7));
+        const [a, b2] = GROUND[cell.ground ?? 'prato'];
+        lit.quad([x, 0, y], [x, 0, y + 1], [x + 1, 0, y + 1], [x + 1, 0, y], [0, 1, 0], rgbOf((x + y) & 1 ? a : b2));
+        if (cell.ground === 'viale' && Math.abs(d - (R + CAMPUS.line)) < 0.5) glow.box(x, 0.005, y + 0.45, x + 1, 0.02, y + 0.55, rgbOf('#05d9e8', 0.7));
+        if (cell.ground === 'vicolo' && (x * 7 + y * 3) % 5 === 0) glow.box(x + 0.45, 0.005, y + 0.45, x + 0.55, 0.02, y + 0.55, rgbOf('#ff2a6d', 0.6));
+        if (cell.ground === 'bordo') glow.box(x + 0.2, 0, y + 0.2, x + 0.8, 0.5, y + 0.8, rgbOf('#05d9e8', 0.5));
       } else if (cell.kind === 'building' && b) {
         lit.box(x, 0, y, x + 1, TOWER_H, y + 1, rgbOf((x + y) & 1 ? '#1a1a26' : '#16161f'));
         const out = (dx: number, dy: number) => c.at(x + dx, y + dy)?.kind !== 'building';
@@ -58,6 +62,49 @@ export function buildCoronaRing(k: Kernel): THREE.Group {
   const m = new THREE.Mesh(lit.geometry(), MAT.corona);
   m.receiveShadow = m.castShadow = true;
   g.add(m, new THREE.Mesh(glow.geometry(), MAT.glow));
+  for (const b of c.buildings) g.add(neonSign(b, R));
+  return g;
+}
+
+/** The building's name in neon above its door, facing the avenue (and, on its back, the lawns). */
+function neonSign(b: Building, R: number): THREE.Group {
+  const W = 1024, H = 160;
+  const cv = document.createElement('canvas');
+  cv.width = W;
+  cv.height = H;
+  const ctx = cv.getContext('2d')!;
+  ctx.fillStyle = 'rgba(8,8,15,0.85)';
+  ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = b.color;
+  ctx.shadowColor = b.color;
+  ctx.shadowBlur = 18;
+  ctx.lineWidth = 8;
+  ctx.strokeRect(10, 10, W - 20, H - 20);
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = `bold ${Math.min(96, Math.floor((W - 80) / Math.max(1, b.name.length) * 1.7))}px system-ui, sans-serif`;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(b.name, W / 2, H / 2 + 4);
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = b.color;
+  ctx.globalAlpha = 0.55;
+  ctx.fillText(b.name, W / 2, H / 2 + 4);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 4;
+  const mat = new THREE.MeshBasicMaterial({ map: tex, toneMapped: false });
+  const geo = new THREE.PlaneGeometry(9, 9 * (H / W));
+  const front = new THREE.Mesh(geo, mat);
+  const back = new THREE.Mesh(geo, mat);
+  back.rotation.y = Math.PI;
+  back.position.z = -0.06;
+  const g = new THREE.Group();
+  g.add(front, back);
+  // On the front of the block, over the door; the plane's +z faces the centre of the ring.
+  const mid = (b.from + b.to) / 2;
+  const r = R + CAMPUS.front - 0.1;
+  g.position.set(Math.sin(mid) * r, TOWER_H + 0.9, -Math.cos(mid) * r);
+  g.rotation.y = -mid;
   return g;
 }
 

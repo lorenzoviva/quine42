@@ -241,9 +241,15 @@ Dal to-do (testo completo, con le specifiche di ogni edificio, in
 [`docs/userchats/to-do-2026-10-22.md`](../userchats/to-do-2026-10-22.md)): la corona più grande, ogni edificio con un esterno e un interno neon-punk propri; dentro e fuori
 restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano ridondanti.
 
-### T18 · Corona quattro volte più grande — `da fare`
+### T18 · Corona quattro volte più grande — `fatto`
 - Raggio del campus ×4 (il cerchio della simulazione no), edifici ridisposti sull'anello, viale, insegne. Test
   dello studio aggiornati.
+- Esito: `CAMPUS` in `src/kernel/corona.ts`: l'anello va da 9 a 36 caselle oltre il cerchio (`outer` = R + 36 = 80); viale
+  di 6 caselle con la linea al neon, porta a R + 6.5, blocchi da R + 7 a R + 23 (16 di profondità, ~19-25 di larghezza),
+  prati dietro, vicoli tra i settori (`CoronaCell.ground`: `viale vicolo prato bordo`), bordo luminoso; uscita sul viale.
+  `corona3d.ts`: blocchi alti 4.5, insegne al neon (testo su canvas, due facce) sopra ogni porta. `tests/corona.test.ts`
+  (3: misure, porte raggiungibili, prati raggiunti dai vicoli). Nel browser (offline): viale, blocchi e insegne leggibili.
+  Diverso dal previsto: nessun ADR (è una misura, non una decisione); i test dello studio non dipendevano dal raggio.
 
 ### T19 · Prompt per Gemini (abbonamento): le strutture della corona — `da fare` (dipende da T14)
 - Un prompt per Gemini CLI (agente con file e browser, **senza** la `GEMINI_API_KEY`: genera lui stesso l'XML e
