@@ -325,12 +325,13 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 ### T23 · Lo Studio dei personaggi, dentro — `fatto` (`5058b48`)
 - Un silos al centro con il personaggio scelto che fluttua in un liquido viscoso; «<» «>»; il clic mostra il
   modulo e l'individuo.
-- Esito:  mette dopo ogni tipo i suoi individui (, «nome · mestiere»), ciascuno
-  con il  che ha nel mondo (, campo nuovo di , usato dal silos e dalla
+- Esito: `showcaseEntries('persone')` mette dopo ogni tipo i suoi individui (`person:<nome>`, «nome · mestiere»), ciascuno
+  con il `seed` che ha nel mondo (`seedFor(model, origine ?? nome)`, campo nuovo di `ShowcaseEntry`, usato dal silos e dalla
   foto del pannello); i fatti dicono l'individuo (chi è, mestiere, aspetto, carattere, storia, famiglia, legame col viandante,
-  giornata, dove l'ha incontrato, cosa porta, gli ultimi ricordi: ) e poi il modulo («Aspetto del tipo»,
-  «Carattere del tipo»). : il silos è pieno di un liquido viscoso del colore dell'edificio, con un anello
-  luminoso in superficie e sedici bolle che salgono; il renderer fa girare e fluttuare la figura piano.   (+1). Nel browser (offline): 13 voci (2 tipi, 11 individui), Ottone che fluttua nel liquido, pannello con foto, individuo e
+  giornata, dove l'ha incontrato, cosa porta, gli ultimi ricordi: `personFacts`) e poi il modulo («Aspetto del tipo»,
+  «Carattere del tipo»). `corona3d.ts`: il silos è pieno di un liquido viscoso del colore dell'edificio, con un anello
+  luminoso in superficie e sedici bolle che salgono; il renderer fa girare e fluttuare la figura piano. `tests/showcase.test.ts`
+  (+1). Nel browser (offline): 13 voci (2 tipi, 11 individui), Ottone che fluttua nel liquido, pannello con foto, individuo e
   modulo. Diverso dal previsto: il tipo resta una voce a sé, prima dei suoi individui; nessun ADR.
 
 ### T24 · Laboratorio delle cose e Magazzino degli oggetti, dentro — `da fare` (dipende da T21)
