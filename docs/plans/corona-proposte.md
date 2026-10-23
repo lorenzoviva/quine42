@@ -203,4 +203,5 @@ con un banco dove il pannello della meccanica si prova a vuoto) e merita una sch
 
 - Le schede approvate vanno nel prompt di T19 (`gemini-strutture-corona.md`): scatola, neon, parole tue, indicazioni.
 - T31 cresce con gli id nuovi (`universo`, `mondo`, `galleria`, ed eventualmente `altro`).
-- Nel backlog: T26a-c, T27a-c e un task di interno per Direzione, Biblioteca e Galleria (T32-T34).
+- Nel backlog: T26a-c, T27a-c e un task di interno per Direzione, Biblioteca e Galleria (T46-T48, pianificati da T32;
+  le meccaniche nella Sala sistemi sono T27d).

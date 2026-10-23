@@ -427,8 +427,11 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   meccaniche (`mech.*`, oggi nell'Archivio) vanno nella Sala sistemi?
 - Deciso (23/10): il caso con il **codice vero** (kernel in miniatura nella teca); le meccaniche `mech.*` vanno nella
   **Sala sistemi** (l'Archivio resta riserva).
+- **T27d · le meccaniche nella Sala sistemi** (da T32): `folderOf` in `corona.ts` manda `mech.*` a `sistemi` (oggi
+  finiscono in `altro`, l'Archivio); nella catena di T27a una meccanica è una stazione col suo pannello (`manifest.ui`).
+  Test: un universo con una meccanica forgiata non ha l'Archivio nello studio.
 
-### T32 · Gli edifici dimenticati: Direzione, Biblioteca, Galleria, Archivio — `da fare`
+### T32 · Gli edifici dimenticati: Direzione, Biblioteca, Galleria, Archivio — `fatto` (commit «Corona (T32)»)
 - Contesto: nel seme il campus ha 12 edifici (13 con l'Archivio, dove oggi finiscono le meccaniche `mech.*`); le
   specifiche del 22/10 e il prompt di T19 ne coprono 8. Proposte in [`corona-proposte.md`](corona-proposte.md) §3:
   Direzione come regia (maxischermo, torre di trasmissione; dentro la linea del tempo dei commit e il quadro dei costi),
@@ -442,6 +445,59 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   `corona-proposte.md` §3.1); **Galleria** approvata; le schede `universo` e `galleria` sono nel prompt di T19.
   L'Archivio resta riserva (le meccaniche vanno nella Sala sistemi). **Biblioteca**: la pila di libri è scartata;
   scelto **il chiostro** (§3.2), scheda `mondo` nel prompt di T19.
+- Esito (pianificazione, nessun codice): le schede `universo`, `galleria`, `mondo` erano già nel prompt di T19 e gli id
+  in T31; gli interni sono T46 (Direzione: T46a-c), T47 (Biblioteca: T47a-b), T48 (Galleria: T48a-b); lo spostamento di
+  `mech.*` nella Sala sistemi è un pezzo di T27 (T27d). L'Archivio resta senza scheda né interno nuovo (riserva: con le
+  meccaniche altrove ci finisce solo un prefisso sconosciuto). Diverso dal previsto: la proposta numerava gli interni
+  T32-T34, ma T33-T45 sono del multiplayer, quindi T46-T48.
+
+### T46 · La Direzione, dentro: la sala operativa — `da fare` (si comincia da T46a)
+- Contesto: [`corona-proposte.md`](corona-proposte.md) §3.1 (approvata il 23/10). Oggi dentro la Direzione (`universo`,
+  squadra dell'Arbitro, oro `ffcf5c`) ci sono solo gli scaffali di `universe.json` e le scrivanie. Gli apparecchi seguono
+  le vetrine di T21-T28 (`SHOWCASES`/`GRAPH_AT` in `corona.ts`, `showcaseOf`/`stepShowcase`/`clickStudio` in
+  `kernel.ts`, il disegno in `corona3d.ts`, il pannello in `studio.ts`). Guardare non cambia nulla.
+- **T46a · il tavolo della situazione**: al centro (5 × 3 caselle, al posto della vetrina) il mondo dall'alto come
+  operazioni: il viandante, i luoghi in generazione (pulsano), le trame aperte come segnalini sulla loro regione con la
+  tappa, le missioni del diario, i guasti (`faults`) dove sono accaduti, in rosso. Un metodo del kernel (`situation()`)
+  che raccoglie tutto dai dati che ci sono già (atlante, `plots.json`, guasti, luoghi in coda); E o clic → pannello con
+  le operazioni in corso. Test: con trame, un guasto e un luogo in coda `situation()` li elenca con la regione giusta.
+- **T46b · la parete di schermi**: sul davanti, larga quanto la sala, tre campi: a sinistra la **linea del tempo** dei
+  commit (`repo.log()`, una pellicola; «<» «>» la scorrono, il clic dice cosa è cambiato e chi l'ha voluto; non torna
+  indietro: `R` resta l'unico modo); al centro il **registro dal vivo** (`kernel.feed()`: chi lavora, a cosa, con quale
+  modello); a destra il **quadro dei costi** (`kernel.usage` per agente e compito, in dollari, i budget di
+  `universe.json → ai` come fondo scala). Le scritte sullo strato 2D o in texture (decidere misurando i fotogrammi).
+  Test: la pellicola si sposta e si ferma ai bordi; il quadro somma come il pannello del Concilio.
+- **T46c · allerta e postazioni**: una fascia luminosa sotto il soffitto verde/ambra/rossa (guasti aperti, rifiuti del
+  validatore nell'ultima ora, budget oltre l'80 %), il motivo nel pannello; le scrivanie della squadra dell'Arbitro in file
+  davanti agli schermi, chi lavora nel registro si vede alla sua console. Test: i tre livelli dai tre casi.
+- Fatto quando (per pezzo): test verdi, typecheck, verifica nel browser (`aurora`, offline) con pannello e nessun errore.
+
+### T47 · La Biblioteca del Mondo, dentro — `da fare` (si comincia da T47a)
+- Contesto: §3.2 (il chiostro, scelto il 23/10). Oggi dentro la Biblioteca (`mondo`, Narratore, verde `7dd87d`) ci sono
+  solo gli scaffali dei file di `world/`.
+- **T47a · il leggio**: al posto della vetrina, un libro aperto olografico; «<» «>» sfogliano la bibbia (`world/bible.json`:
+  `luoghi`, `personaggi`, `fatti`, `misteri`, una voce per pagina), E o clic aprono la pagina nel pannello con i nodi del
+  grafo che la toccano (`graph.find`/`neighbors`, cliccabili come nel Nucleo). L'interno è una stanza come le altre (il
+  chiostro è fuori): il leggio sta su una vasca d'acqua scura, come l'acqua della corte. Test: le pagine coprono la bibbia
+  intera, i bordi fermano, una pagina che nomina una persona ne trova il nodo.
+- **T47b · le tavole delle regole e il canone**: a parete una lastra per giudizio di `world/rules.json` (le ultime 12,
+  quelle che il Narratore riceve, brillano), clic → il giudizio nel pannello; il canone delle rune (`world/canone.md`)
+  inciso sopra la porta, le rune magiche nei loro colori. Test: le lastre sono quante le regole (o il massimo che la
+  parete tiene, con «<» «>»), le ultime marcate.
+- Fatto quando (per pezzo): test verdi, typecheck, verifica nel browser.
+
+### T48 · La Galleria dell'Artista, dentro e il plinto — `da fare` (si comincia da T48a)
+- Contesto: §3.3 (approvata il 23/10). Oggi la Galleria (`galleria`) espone i modelli come quadri con «riscolpisci».
+- **T48a · il tornio dello Scultore**: al posto della vetrina un piedistallo che gira con il modello scelto, il suo
+  programma eseguito **passo passo** (i passi di MarkovJunior, come nella sandbox del lab: i passi intermedi da
+  `src/mj/run.ts`, nei worker), «<» «>» cambiano modello; il pannello: le quattro foto (`src/mj/photo.ts`), voto e consigli
+  dell'Artista, il programma, «riscolpisci». I quadri restano alle pareti. Test: i passi di un modello del seme finiscono
+  nella griglia finale; «<» «>» scorrono la libreria.
+- **T48b · il plinto nel piazzale** (dipende da `corona-galleria.xml` in T31): sulla lettera `plinto` del modello della
+  Galleria il kernel posa un'istanza di un modello della libreria, scelto a ogni visita della corona (seme dal tick
+  dell'arrivo), ridotto a stare sul plinto; nessuna generazione, nessuna collisione nuova oltre al plinto. Test: il
+  modello cambia tra due visite, sta sopra la lettera `plinto`, la porta resta raggiungibile.
+- Fatto quando (per pezzo): test verdi, typecheck, verifica nel browser da vicino e dal viale.
 
 ### T28 · Il Nucleo, dentro — `fatto` (`673eeba`) (dipende da T12)
 - Il grafo del mondo navigabile in UI.
