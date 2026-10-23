@@ -433,7 +433,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   nuove di `models/index.json` anche agli universi che l'hanno riscritto (senza, la torre avrebbe 20 voxel per casella);
   `tests/campus.test.ts`: per ogni edificio del seme tempo, settore, porta dal viale, animazione. Nel lab la vetrina ora
   anima i modelli («mostra» li nascondeva: corpo spento, nessun fotogramma acceso). ModelDirector e «riscolpisci» non
-  toccano già i `corona-*` (il primo fa solo i modelli che mancano, il secondo solo moduli e oggetti). Mancano (`persone` scritta da Gemini in `bdd198e`, da portare nel gioco) `persone`,
+  toccano già i `corona-*` (il primo fa solo i modelli che mancano, il secondo solo moduli e oggetti). Mancano `persone` (scritta da Gemini in `bdd198e`, nel lab: da portare nel gioco),
   `cose`, `oggetti`, `luoghi`, `sistemi`, `nucleo`, `concilio`, `universo`, `galleria` (schede del 23/10; `mondo` quando la Biblioteca è decisa); per ognuno aggiungere l'id alla lista del test.
 
 ## Multiplayer
