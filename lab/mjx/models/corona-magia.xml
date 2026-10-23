@@ -1,0 +1,403 @@
+<!--
+La Torre della Magia (corona): la sede degli studi arcani e delle rune della corona.
+Scritto da Gemini CLI (Gemini 3.8 Flash, abbonamento) il 23/10/2026, task T19.
+Scatola: 10 × 10 × 24 caselle, 80 × 80 × 192 voxel, 8 voxel per casella.
+Lettere chiave:
+  O = porta (vano di ingresso a z=0 con atrio interno vuoto per oltre 6 voxel)
+  F = insegna ("LA TORRE DELLA MAGIA", neon viola c48aff glow)
+  N = neon viola (cornici, anelli e scintille delle rune, glow)
+  M, m = metallo nero cybernetico primario e secondario
+  C = cemento grafite della base
+  S = dettagli e ghiere in metallo chiaro
+  V, v = condotti verticali in vetro scuro riflettente
+  K = solchi scuri per incisioni runiche
+Struttura cilindrica scalare a tre ordini con basamento a contrafforti,
+portale monumentale avanzato a sud con insegna trilaterale, fasce di rune incise e halo arcano sommitale.
+-->
+<sequence values="BMmCSVvKFNnOP" size="80 80 192" symmetry="(xy)" name="Torre della Magia">
+  <color symbol="M" value="16161e" name="metallo primario"/>
+  <color symbol="m" value="242632" name="metallo secondario"/>
+  <color symbol="C" value="363842" name="cemento grafite"/>
+  <color symbol="S" value="8a8f9c" name="metallo chiaro"/>
+  <color symbol="V" value="1c2a3a" name="vetro scuro"/>
+  <color symbol="v" value="3d5a78" name="riflesso vetro"/>
+  <color symbol="K" value="0d0d12" name="solco runico"/>
+  <color symbol="P" value="0b0b10" name="targa insegna"/>
+  <color symbol="F" value="c48aff" glow="True" name="insegna"/>
+  <color symbol="N" value="c48aff" glow="True" name="neon viola"/>
+  <color symbol="n" value="9b5de5" glow="True" name="neon viola intenso"/>
+  <color symbol="O" value="2a1836" name="porta"/>
+
+  <!-- ================================================================= -->
+  <!-- 1. BASAMENTO E ZOCCOLO (z = 0..16)                                -->
+  <!-- ================================================================= -->
+  <!-- Zoccolo a gradoni in cemento grafite e anello neon di terra -->
+  <cylinder at="40 40 0" size="72 72 4" color="C"/>
+  <cylinder at="40 40 4" size="68 68 4" color="C"/>
+  <cylinder at="40 40 4" size="69 69 1" color="N" on="B"/>
+  <cylinder at="40 40 8" size="64 64 6" color="m"/>
+  <cylinder at="40 40 14" size="62 62 2" color="S"/>
+
+  <!-- 8 contrafforti poligonali di scarico alla base -->
+  <box at="40 8 0" size="8 8 16" color="C"/>
+  <box at="40 72 0" size="8 6 16" color="C"/>
+  <box at="8 40 0" size="8 8 16" color="C"/>
+  <box at="72 40 0" size="8 8 16" color="C"/>
+  <box at="17 17 0" size="8 8 14" color="C"/>
+  <box at="63 17 0" size="8 8 14" color="C"/>
+  <box at="17 63 0" size="8 8 14" color="C"/>
+  <box at="63 63 0" size="8 8 14" color="C"/>
+
+  <!-- Linee neon sui contrafforti -->
+  <box at="8 40 2" size="1 4 14" color="N"/>
+  <box at="72 40 2" size="1 4 14" color="N"/>
+  <box at="40 8 2" size="4 1 14" color="N"/>
+  <box at="17 17 2" size="2 2 12" color="N"/>
+  <box at="63 17 2" size="2 2 12" color="N"/>
+  <box at="17 63 2" size="2 2 12" color="N"/>
+  <box at="63 63 2" size="2 2 12" color="N"/>
+
+  <!-- ================================================================= -->
+  <!-- 2. ORDINE INFERIORE DEL FUSTO (z = 16..64)                        -->
+  <!-- ================================================================= -->
+  <!-- Corpo cilindrico principale -->
+  <cylinder at="40 40 16" size="56 56 48" color="M"/>
+  <cylinder at="40 40 16" size="50 50 48" color="m"/>
+
+  <!-- Fasce metalliche orizzontali e anelli di rinforzo -->
+  <cylinder at="40 40 32" size="58 58 2" color="m"/>
+  <cylinder at="40 40 33" size="59 59 1" color="N" on="B"/>
+  <cylinder at="40 40 48" size="58 58 2" color="m"/>
+  <cylinder at="40 40 49" size="59 59 1" color="N" on="B"/>
+
+  <!-- Condotti verticali a nastro in vetro scuro riflettente -->
+  <box at="40 12 18" size="4 2 44" color="V"/>
+  <box at="12 40 18" size="2 4 44" color="V"/>
+  <box at="68 40 18" size="2 4 44" color="V"/>
+
+  <!-- Profilo laterale dei condotti in metallo chiaro -->
+  <box at="37 12 18" size="1 2 44" color="S"/>
+  <box at="43 12 18" size="1 2 44" color="S"/>
+  <box at="12 37 18" size="2 1 44" color="S"/>
+  <box at="12 43 18" size="2 1 44" color="S"/>
+  <box at="68 37 18" size="2 1 44" color="S"/>
+  <box at="68 43 18" size="2 1 44" color="S"/>
+
+  <!-- Fascia runica inferiore 1 (z = 36..44) solchi scuri nel fusto -->
+  <!-- Quadrante nord/est/ovest -->
+  <box at="40 11 37" size="1 1 6" color="K"/>
+  <box at="38 11 39" size="1 1 2" color="K"/>
+  <box at="42 11 41" size="1 1 2" color="K"/>
+  <box at="46 13 37" size="1 1 6" color="K"/>
+  <box at="47 13 39" size="1 1 2" color="K"/>
+  <box at="34 13 37" size="1 1 6" color="K"/>
+  <box at="33 13 41" size="1 1 2" color="K"/>
+  <box at="52 17 37" size="1 1 6" color="K"/>
+  <box at="53 17 40" size="1 1 2" color="K"/>
+  <box at="28 17 37" size="1 1 6" color="K"/>
+  <box at="27 17 38" size="1 1 2" color="K"/>
+
+  <box at="67 34 37" size="1 1 6" color="K"/>
+  <box at="67 33 39" size="1 1 2" color="K"/>
+  <box at="67 46 37" size="1 1 6" color="K"/>
+  <box at="67 47 41" size="1 1 2" color="K"/>
+  <box at="13 34 37" size="1 1 6" color="K"/>
+  <box at="13 33 39" size="1 1 2" color="K"/>
+  <box at="13 46 37" size="1 1 6" color="K"/>
+  <box at="13 47 41" size="1 1 2" color="K"/>
+
+  <!-- ================================================================= -->
+  <!-- 3. BALCONATA DI TRANSIZIONE MEDIANA (z = 64..68)                  -->
+  <!-- ================================================================= -->
+  <cylinder at="40 40 64" size="62 62 2" color="C"/>
+  <cylinder at="40 40 66" size="60 60 2" color="S"/>
+  <cylinder at="40 40 66" size="61 61 1" color="N" on="B"/>
+
+  <!-- ================================================================= -->
+  <!-- 4. ORDINE MEDIANO DEL FUSTO (z = 68..120)                         -->
+  <!-- ================================================================= -->
+  <cylinder at="40 40 68" size="48 48 52" color="M"/>
+  <cylinder at="40 40 68" size="42 42 52" color="m"/>
+
+  <!-- Cornici intermedie -->
+  <cylinder at="40 40 84" size="50 50 2" color="S"/>
+  <cylinder at="40 40 85" size="51 51 1" color="N" on="B"/>
+  <cylinder at="40 40 102" size="50 50 2" color="S"/>
+  <cylinder at="40 40 103" size="51 51 1" color="N" on="B"/>
+
+  <!-- Condotti verticali mediani (4 lati) -->
+  <box at="40 16 70" size="3 2 48" color="V"/>
+  <box at="40 64 70" size="3 2 48" color="V"/>
+  <box at="16 40 70" size="2 3 48" color="V"/>
+  <box at="64 40 70" size="2 3 48" color="V"/>
+
+  <!-- Fascia runica mediana 2 (z = 88..98) -->
+  <box at="40 15 90" size="1 1 6" color="K"/>
+  <box at="38 15 92" size="1 1 2" color="K"/>
+  <box at="45 17 90" size="1 1 6" color="K"/>
+  <box at="46 17 93" size="1 1 2" color="K"/>
+  <box at="35 17 90" size="1 1 6" color="K"/>
+  <box at="34 17 91" size="1 1 2" color="K"/>
+  <box at="64 33 90" size="1 1 6" color="K"/>
+  <box at="64 32 92" size="1 1 2" color="K"/>
+  <box at="64 47 90" size="1 1 6" color="K"/>
+  <box at="64 48 94" size="1 1 2" color="K"/>
+  <box at="16 33 90" size="1 1 6" color="K"/>
+  <box at="16 32 92" size="1 1 2" color="K"/>
+  <box at="16 47 90" size="1 1 6" color="K"/>
+  <box at="16 48 94" size="1 1 2" color="K"/>
+
+  <!-- Fascia runica mediana 3 (z = 106..116) -->
+  <box at="40 15 108" size="1 1 6" color="K"/>
+  <box at="42 15 111" size="1 1 2" color="K"/>
+  <box at="45 17 108" size="1 1 6" color="K"/>
+  <box at="44 17 110" size="1 1 2" color="K"/>
+  <box at="35 17 108" size="1 1 6" color="K"/>
+  <box at="36 17 112" size="1 1 2" color="K"/>
+  <box at="64 35 108" size="1 1 6" color="K"/>
+  <box at="64 36 110" size="1 1 2" color="K"/>
+  <box at="64 45 108" size="1 1 6" color="K"/>
+  <box at="64 44 112" size="1 1 2" color="K"/>
+  <box at="16 35 108" size="1 1 6" color="K"/>
+  <box at="16 36 110" size="1 1 2" color="K"/>
+  <box at="16 45 108" size="1 1 6" color="K"/>
+  <box at="16 44 112" size="1 1 2" color="K"/>
+
+  <!-- ================================================================= -->
+  <!-- 5. COLLARE E ORDINE SUPERIORE (z = 120..166)                      -->
+  <!-- ================================================================= -->
+  <cylinder at="40 40 120" size="52 52 2" color="C"/>
+  <cylinder at="40 40 122" size="50 50 2" color="S"/>
+  <cylinder at="40 40 122" size="51 51 1" color="N" on="B"/>
+
+  <!-- Fusto superiore rastremato -->
+  <cylinder at="40 40 124" size="38 38 42" color="M"/>
+  <cylinder at="40 40 124" size="32 32 42" color="m"/>
+
+  <!-- 4 pinne radiatrici verticali in acciaio -->
+  <box at="40 21 126" size="2 2 36" color="S"/>
+  <box at="40 59 126" size="2 2 36" color="S"/>
+  <box at="21 40 126" size="2 2 36" color="S"/>
+  <box at="59 40 126" size="2 2 36" color="S"/>
+
+  <!-- Ghiera di mezza altezza -->
+  <cylinder at="40 40 144" size="40 40 2" color="S"/>
+  <cylinder at="40 40 145" size="41 41 1" color="N" on="B"/>
+
+  <!-- Fascia runica superiore 4 (z = 148..158) -->
+  <box at="40 21 150" size="1 1 6" color="K" on="Mm"/>
+  <box at="39 21 152" size="1 1 2" color="K" on="Mm"/>
+  <box at="40 59 150" size="1 1 6" color="K" on="Mm"/>
+  <box at="41 59 153" size="1 1 2" color="K" on="Mm"/>
+  <box at="21 40 150" size="1 1 6" color="K" on="Mm"/>
+  <box at="21 39 152" size="1 1 2" color="K" on="Mm"/>
+  <box at="59 40 150" size="1 1 6" color="K" on="Mm"/>
+  <box at="59 41 153" size="1 1 2" color="K" on="Mm"/>
+
+  <!-- ================================================================= -->
+  <!-- 6. CORONA SOMMITALE E HALO ARCANO (z = 166..190)                  -->
+  <!-- ================================================================= -->
+  <!-- Galleria panoramica / tamburo svasato -->
+  <cylinder at="40 40 166" size="44 44 3" color="C"/>
+  <cylinder at="40 40 169" size="46 46 2" color="m"/>
+  <cylinder at="40 40 171" size="48 48 1" color="S"/>
+  <cylinder at="40 40 171" size="49 49 1" color="N" on="B"/>
+
+  <!-- Svuotamento interno della galleria (atrio cielo) -->
+  <cylinder at="40 40 172" size="38 38 4" color="B"/>
+
+  <!-- 4 piloni a cavalletto che reggono l'anello arcano -->
+  <box at="40 23 172" size="4 3 12" color="m"/>
+  <box at="40 23 172" size="2 1 12" color="S"/>
+  <box at="40 57 172" size="4 3 12" color="m"/>
+  <box at="40 57 172" size="2 1 12" color="S"/>
+  <box at="23 40 172" size="3 4 12" color="m"/>
+  <box at="23 40 172" size="1 2 12" color="S"/>
+  <box at="57 40 172" size="3 4 12" color="m"/>
+  <box at="57 40 172" size="1 2 12" color="S"/>
+
+  <!-- Halo arcano sospeso (z = 178..182) -->
+  <cylinder at="40 40 178" size="44 44 4" color="m"/>
+  <cylinder at="40 40 179" size="46 46 2" color="N"/>
+  <cylinder at="40 40 177" size="43 43 1" color="S"/>
+  <cylinder at="40 40 182" size="43 43 1" color="S"/>
+  <!-- Svuotamento toroidale: lascia un'apertura centrale di diametro 34 attraverso tutta la halo -->
+  <cylinder at="40 40 176" size="34 34 8" color="B"/>
+
+  <!-- Guglia emettitrice centrale che sale attraverso l'apertura della halo -->
+  <cylinder at="40 40 172" size="10 10 7" color="S"/>
+  <cylinder at="40 40 176" size="6 6 9" color="m"/>
+  <box at="40 40 185" size="2 2 3" color="S"/>
+  <box at="40 40 188" size="1 1 2" color="N"/>
+
+  <!-- ================================================================= -->
+  <!-- 7. PORTALE MONUMENTALE D'INGRESSO E ATRIO (y >= 40, davanti)     -->
+  <!-- ================================================================= -->
+  <!-- Basamento avanzato del portale -->
+  <box at="40 66 0" size="38 16 4" color="C"/>
+  <box at="40 75 0" size="24 4 1" color="C"/>
+  <box at="40 73 0" size="22 4 2" color="C"/>
+
+  <!-- Corpo massiccio del portale cybernetico -->
+  <box at="40 64 4" size="36 18 50" color="M"/>
+
+  <!-- Piloni laterali di guardia al portale -->
+  <box at="25 71 0" size="6 6 56" color="m"/>
+  <box at="55 71 0" size="6 6 56" color="m"/>
+  <box at="23 72 6" size="1 1 48" color="N"/>
+  <box at="57 72 6" size="1 1 48" color="N"/>
+
+  <!-- Svuotamento dell'apertura del portale e atrio interno vuoto (y=60..73) -->
+  <box at="40 67 0" size="18 14 24" color="B"/>
+  <box at="40 61 0" size="18 10 24" color="B"/>
+
+  <!-- Pavimento dell'atrio a terra -->
+  <box at="40 66 0" size="18 16 1" color="C"/>
+
+  <!-- LA PORTA (lettera O, nome "porta", al centro x=40, z=0..23, y=67) -->
+  <!-- Dietro la porta, verso y=60, restano 7 voxel di atrio completamente vuoto -->
+  <box at="40 67 0" size="16 1 24" color="O"/>
+  <!-- Architrave e stipiti della porta in metallo scuro -->
+  <box at="32 67 0" size="1 1 24" color="m"/>
+  <box at="47 67 0" size="1 1 24" color="m"/>
+
+  <!-- Cornice neon viola del vano porta sulla facciata esterna (y=73) -->
+  <box at="31 73 0" size="1 1 25" color="N"/>
+  <box at="48 73 0" size="1 1 25" color="N"/>
+  <box at="40 73 24" size="18 1 1" color="N"/>
+  <box at="40 72 25" size="22 2 2" color="S"/>
+
+  <!-- ================================================================= -->
+  <!-- 8. LASTRA SCURA DELL'INSEGNA (y = 73, z = 26..52)                 -->
+  <!-- ================================================================= -->
+  <box at="40 73 27" size="36 1 25" color="P"/>
+  <box at="40 73 52" size="38 1 1" color="S"/>
+  <box at="40 73 26" size="38 1 1" color="S"/>
+  <box at="21 73 27" size="1 1 25" color="S"/>
+  <box at="59 73 27" size="1 1 25" color="S"/>
+
+  <!-- ================================================================= -->
+  <!-- 9. L'INSEGNA NEON "LA TORRE DELLA MAGIA" (y = 74, glow=True)      -->
+  <!-- ================================================================= -->
+
+  <!-- RIGA 1: "LA TORRE" (z = 45..49, y = 74) -->
+  <!-- L (x = 26..28) -->
+  <box at="26 74 45" size="1 1 5" color="F"/>
+  <box at="27 74 45" size="1 1 1" color="F"/>
+  <box at="28 74 45" size="1 1 1" color="F"/>
+
+  <!-- A (x = 30..32) -->
+  <box at="30 74 45" size="1 1 4" color="F"/>
+  <box at="32 74 45" size="1 1 4" color="F"/>
+  <box at="31 74 49" size="1 1 1" color="F"/>
+  <box at="31 74 47" size="1 1 1" color="F"/>
+
+  <!-- T (x = 36..38) -->
+  <box at="37 74 49" size="3 1 1" color="F"/>
+  <box at="37 74 45" size="1 1 4" color="F"/>
+
+  <!-- O (x = 40..42, runico romboidale) -->
+  <box at="40 74 46" size="1 1 3" color="F"/>
+  <box at="42 74 46" size="1 1 3" color="F"/>
+  <box at="41 74 49" size="1 1 1" color="F"/>
+  <box at="41 74 45" size="1 1 1" color="F"/>
+
+  <!-- R (x = 44..46) -->
+  <box at="44 74 45" size="1 1 5" color="F"/>
+  <box at="45 74 49" size="1 1 1" color="F"/>
+  <box at="46 74 48" size="1 1 1" color="F"/>
+  <box at="45 74 47" size="1 1 1" color="F"/>
+  <box at="45 74 46" size="1 1 1" color="F"/>
+  <box at="46 74 45" size="1 1 1" color="F"/>
+
+  <!-- R (x = 48..50) -->
+  <box at="48 74 45" size="1 1 5" color="F"/>
+  <box at="49 74 49" size="1 1 1" color="F"/>
+  <box at="50 74 48" size="1 1 1" color="F"/>
+  <box at="49 74 47" size="1 1 1" color="F"/>
+  <box at="49 74 46" size="1 1 1" color="F"/>
+  <box at="50 74 45" size="1 1 1" color="F"/>
+
+  <!-- E (x = 52..54) -->
+  <box at="52 74 45" size="1 1 5" color="F"/>
+  <box at="53 74 49" size="1 1 1" color="F"/>
+  <box at="54 74 49" size="1 1 1" color="F"/>
+  <box at="53 74 47" size="1 1 1" color="F"/>
+  <box at="53 74 45" size="1 1 1" color="F"/>
+  <box at="54 74 45" size="1 1 1" color="F"/>
+
+  <!-- RIGA 2: "DELLA" (z = 37..41, y = 74) -->
+  <!-- D (x = 31..33) -->
+  <box at="31 74 37" size="1 1 5" color="F"/>
+  <box at="32 74 41" size="1 1 1" color="F"/>
+  <box at="33 74 38" size="1 1 3" color="F"/>
+  <box at="32 74 37" size="1 1 1" color="F"/>
+
+  <!-- E (x = 35..37) -->
+  <box at="35 74 37" size="1 1 5" color="F"/>
+  <box at="36 74 41" size="1 1 1" color="F"/>
+  <box at="37 74 41" size="1 1 1" color="F"/>
+  <box at="36 74 39" size="1 1 1" color="F"/>
+  <box at="36 74 37" size="1 1 1" color="F"/>
+  <box at="37 74 37" size="1 1 1" color="F"/>
+
+  <!-- L (x = 39..41) -->
+  <box at="39 74 37" size="1 1 5" color="F"/>
+  <box at="40 74 37" size="1 1 1" color="F"/>
+  <box at="41 74 37" size="1 1 1" color="F"/>
+
+  <!-- L (x = 43..45) -->
+  <box at="43 74 37" size="1 1 5" color="F"/>
+  <box at="44 74 37" size="1 1 1" color="F"/>
+  <box at="45 74 37" size="1 1 1" color="F"/>
+
+  <!-- A (x = 47..49) -->
+  <box at="47 74 37" size="1 1 4" color="F"/>
+  <box at="49 74 37" size="1 1 4" color="F"/>
+  <box at="48 74 41" size="1 1 1" color="F"/>
+  <box at="48 74 39" size="1 1 1" color="F"/>
+
+  <!-- RIGA 3: "MAGIA" (z = 29..33, y = 74) -->
+  <!-- M (x = 31..33) -->
+  <box at="31 74 29" size="1 1 5" color="F"/>
+  <box at="33 74 29" size="1 1 5" color="F"/>
+  <box at="32 74 31" size="1 1 2" color="F"/>
+
+  <!-- A (x = 35..37) -->
+  <box at="35 74 29" size="1 1 4" color="F"/>
+  <box at="37 74 29" size="1 1 4" color="F"/>
+  <box at="36 74 33" size="1 1 1" color="F"/>
+  <box at="36 74 31" size="1 1 1" color="F"/>
+
+  <!-- G (x = 39..41) -->
+  <box at="39 74 29" size="1 1 5" color="F"/>
+  <box at="40 74 33" size="1 1 1" color="F"/>
+  <box at="41 74 33" size="1 1 1" color="F"/>
+  <box at="40 74 29" size="1 1 1" color="F"/>
+  <box at="41 74 29" size="1 1 1" color="F"/>
+  <box at="41 74 30" size="1 1 2" color="F"/>
+  <box at="40 74 31" size="1 1 1" color="F"/>
+
+  <!-- I (x = 43..45) -->
+  <box at="44 74 29" size="1 1 5" color="F"/>
+  <box at="43 74 33" size="1 1 1" color="F"/>
+  <box at="45 74 33" size="1 1 1" color="F"/>
+  <box at="43 74 29" size="1 1 1" color="F"/>
+  <box at="45 74 29" size="1 1 1" color="F"/>
+
+  <!-- A (x = 47..49) -->
+  <box at="47 74 29" size="1 1 4" color="F"/>
+  <box at="49 74 29" size="1 1 4" color="F"/>
+  <box at="48 74 33" size="1 1 1" color="F"/>
+  <box at="48 74 31" size="1 1 1" color="F"/>
+
+  <!-- ================================================================= -->
+  <!-- 10. REGOLE STOCASTICHE: PULSAZIONI RUNICHE E RIFLESSI DEL VETRO   -->
+  <!-- ================================================================= -->
+  <!-- Scintille neon nelle scanalature runiche (varianti uniche per seme) -->
+  <prl in="K" out="N" p="0.22" steps="1"/>
+  <prl in="N" out="n" p="0.30" steps="1"/>
+
+  <!-- Riflessi di luce sui condotti verticali in vetro scuro -->
+  <prl in="V" out="v" p="0.18" steps="1"/>
+</sequence>
