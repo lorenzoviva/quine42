@@ -442,7 +442,7 @@ Piano: [`multiplayer.md`](multiplayer.md) (ADR-0050). Le fasi 0 (T33-T37) servon
 le fasi 1-3 (T38-T43) si provano con il server di Vite e più schede; la fase 4 (T44-T45) è la piattaforma e aspetta
 le risposte alle domande del piano.
 
-### T29 · Aggiornare il piano del multiplayer — `fatto`
+### T29 · Aggiornare il piano del multiplayer — `fatto` (`a004e46`)
 - Riscrivere [`docs/plans/multiplayer.md`](multiplayer.md) con le decisioni dell'autore del to-do (sezione «Multiplayer» di
   [`docs/userchats/to-do-2026-10-22.md`](../userchats/to-do-2026-10-22.md)): server unica fonte di
   verità, modalità singola e multigiocatore, crediti e proxy, contenuti come carte del giocatore (P#2), master in
