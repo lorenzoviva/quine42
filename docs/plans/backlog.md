@@ -225,15 +225,27 @@ diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
   dispari; aiuto aggiornato. `tests/camera.test.ts` (3). Verificato nel browser (offline): da est `W` va a ovest,
   il trascinamento si posa su π. Diverso dal previsto: nessuno; le rune incise si leggono nel verso del mondo.
 
-### T16 · Terreno con le altezze (Hills) — `da fare`
+### T16 · Terreno con le altezze (Hills) — `fatto` (`8af0a7b`)
 - Dal to-do: il terreno con variazioni di altezza, partendo dal modello 3D `Hills` di MarkovJunior. ADR: campo di
   altezza a scala di casella, continuo fra i chunk (deterministico per seme e coordinate); il renderer lo disegna,
   il kernel lo usa per i pavimenti dei corpi. Da decidere nel task: altezze solo estetiche o anche ostacoli
   (pendenze invalicabili).
+- Esito: ADR-0048. `src/kernel/relief.ts`: `Hills` invariato (o `world/rilievo.xml`) gira su due scatole di lati 64 e 45
+  (semi dal seme dell'universo), lette come piastrelle che si ripetono e rammendate; livello = somma (periodo 2880 caselle,
+  ~7 livelli, ~0,45 s una volta). Deciso: **solo estetiche**, un livello = ¼ di casella, fra vicini al più due (mezza
+  casella, si sale sempre: la regola 10 non chiede controlli nuovi). `kernel.groundAt`, `floorAt` sul suolo; il renderer
+  disegna colonne con i fianchi, posa muri, alberi, cose, strutture, rune e luci sul suolo, i corpi salgono i gradini
+  (`climb`), la camera segue l'altezza, il mouse sceglie la casella sul rilievo. `tests/relief.test.ts` (6). Nel browser
+  (offline): colline a terrazze, lago piano con le sponde, taglio al cerchio pulito. Diverso dal previsto: l'acqua andava
+  a gradini (482 caselle su 1505), quindi ogni specchio d'acqua di un chunk è piano al suo livello più basso
+  (`waterLevels`); fra due chunk può restare un gradino. Corrette anche le sponde, che erano girate al contrario.
 
 ### T17 · Lotti in piano — `da fare` (dipende da T16)
 - Le strutture su più caselle hanno bisogno di spazi piani: il piano spiana i lotti (e i sentieri) prima di
   posare i modelli. Test.
+- Da T16: oggi una struttura sta sul suolo sotto il suo centro, e sotto un lotto il rilievo varia fino a 2 livelli
+  (mezza casella). Spianare vuol dire un livello per lotto nel piano (persistente, letto da `groundAt` prima del
+  rilievo). Facoltativo: l'acqua che passa da un chunk all'altro allo stesso livello (oggi può scendere di un gradino).
 
 ## La corona
 
