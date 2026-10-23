@@ -92,3 +92,33 @@ describe('the showcases of the studio', () => {
     expect(k.clickStudio(at('showcase').x + 0.5, at('showcase').y + 0.5)).toBe(false);
   });
 });
+
+describe('the screen of the Tower of Magic (T22)', () => {
+  it('shows every magic rune, then every known combination, with what speaking it does', async () => {
+    const k = await boot();
+    // A combination of three (it burns a crystal) and a rune nobody has spoken yet.
+    k.content.spells['luce fuoco vento'] = { name: 'Cometa', description: 'Una scia di fuoco e luce.', cost: 20, effects: [{ tipo: 'fuoco', raggio: 1, durata: 5 }, { tipo: 'luce', raggio: 4, durata: 30 }] };
+    delete k.content.spells.vita;
+    const all = k.showcaseEntries('rune');
+    const tokens = Object.keys(k.content.runes);
+    expect(all.slice(0, tokens.length).map((e) => e.id)).toEqual(tokens.map((t) => `rune:${t}`));
+    expect(all.slice(tokens.length).map((e) => e.id)).toEqual(['spell:acqua fuoco', 'spell:luce fuoco vento']);
+    const fact = (id: string, what: string) => all.find((e) => e.id === id)!.facts.find(([w]) => w === what)?.[1];
+    // A single rune with its spell: what it means, the spell, what it really does, its cost.
+    expect(all.find((e) => e.id === 'rune:acqua')!.label).toBe('Laguz · Polla');
+    expect(fact('rune:acqua', 'Significato')).toBe(k.content.runes.acqua.description);
+    expect(fact('rune:acqua', 'Cosa fa')).toContain(`diventa ${k.palette.w.name}`);
+    expect(fact('rune:acqua', 'Mana')).toBe('10');
+    expect(fact('rune:acqua', 'Cristallo')).toBeUndefined();
+    // Not spoken yet: no effect, the Narrator will name it.
+    expect(fact('rune:vita', 'Effetto')).toMatch(/Nessuno ancora/);
+    expect(fact('rune:vita', 'Incantesimo')).toBeUndefined();
+    // A combination: its runes in order, each with its name, all the effects, the crystal from three runes up.
+    const comet = all.find((e) => e.id === 'spell:luce fuoco vento')!;
+    expect(comet.runes).toEqual(['luce', 'fuoco', 'vento']);
+    expect(fact(comet.id, 'Rune')).toMatch(/Sowilo.*Kenaz.*Ansuz/);
+    expect(fact(comet.id, 'Cosa fa')).toBe('fuoco per 5 s, raggio 1; luce per 30 s, raggio 4');
+    expect(fact(comet.id, 'Cristallo')).toBe('ne consuma uno');
+    expect(all.every((e) => e.path === 'modules/magic.runes/manifest.json' && e.facts.some(([w]) => w === 'Effetto'))).toBe(true);
+  });
+});

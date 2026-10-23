@@ -65,7 +65,12 @@ export class StudioPanel {
     const { entry } = e;
     const frame = el('div', { class: 'frame' }, el('div', { class: 'swatch', style: `background:${entry.color ?? '#333'}` }));
     if (entry.runes?.length)
-      frame.replaceChildren(el('div', { class: 'runes', style: `color:${entry.color ?? '#c48aff'}` }, entry.runes.map((t) => this.k.content.get(`rune:${t}`)?.glyph ?? t).join(' ')));
+      frame.replaceChildren(
+        el('div', { class: 'runes' }, ...entry.runes.map((t) => {
+          const r = this.k.content.runes[t];
+          return el('span', { class: 'rune', style: `color:${r?.color ?? entry.color ?? '#c48aff'}` }, r?.glyph ?? t, el('small', {}, r?.name ?? t));
+        })),
+      );
     else if (entry.model)
       void icons.model?.(entry.model, entry.tint).then((src) => {
         if (src && this.shown === e.building) frame.replaceChildren(el('img', { src, alt: entry.label }));

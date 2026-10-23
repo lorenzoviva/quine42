@@ -311,9 +311,16 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   punto; nessun ADR (meccanismo dentro la corona, non cambia l'architettura). Per T22-T24 resta: la combinazione di rune e
   l'effetto (T22), il liquido viscoso e l'individuo scelto (T23), la stampante 3 × 3 (T24; oggi 3 × 1).
 
-### T22 · La Torre della Magia, dentro — `da fare` (dipende da T21)
+### T22 · La Torre della Magia, dentro — `fatto`
 - Lo schermo mostra una runa o una combinazione di rune (magiche e incantesimi noti), «<» «>» per cambiarla; il
   clic mostra nel pannello l'effetto.
+- Esito: `showcaseEntries('rune')` elenca le combinazioni: ogni runa magica da sola (con il suo incantesimo, se c'è),
+  poi gli incantesimi di più rune (per lunghezza). Il pannello dice le rune (glifo, nome, token, elemento), il significato,
+  l'incantesimo, l'effetto, «Cosa fa» (gli effetti validati come li applicherebbe il kernel, in parole: `describeEffect` in
+  `validator.ts`), mana, il cristallo da tre rune, come si pronuncia; una runa mai pronunciata dice che il Narratore le
+  darà un nome. Schermo 3D (`runeScreen` in `corona3d.ts`) e pannello: ogni runa nel suo colore con il nome sotto.
+  `tests/showcase.test.ts` (+1). Nel browser (offline): «Vapore» con Laguz e Kenaz sullo schermo e nel pannello.
+  Diverso dal previsto: niente; nessun ADR. Le rune singole e i loro incantesimi sono una voce sola (prima erano due).
 
 ### T23 · Lo Studio dei personaggi, dentro — `da fare` (dipende da T21)
 - Un silos al centro con il personaggio scelto che fluttua in un liquido viscoso; «<» «>»; il clic mostra il

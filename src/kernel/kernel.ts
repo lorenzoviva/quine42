@@ -6,7 +6,7 @@ import { World, type Id } from './ecs';
 import { EventBus } from './events';
 import { Faults } from './faults';
 import { Sandbox, type Host } from './sandbox';
-import { apiErrors, validateEffects, Validator } from './validator';
+import { apiErrors, describeEffect, validateEffects, Validator } from './validator';
 import { Repo, type KeyValueStore } from './repo';
 import { Corona, folderOf, type CoronaCell, type Exhibit, type ShowcaseSource, type StudioItem } from './corona';
 import { Archive } from './archive';
@@ -2830,10 +2830,44 @@ export class Kernel {
   private listShowcase(source: ShowcaseSource): ShowcaseEntry[] {
     const out: ShowcaseEntry[] = [];
     if (source === 'rune') {
-      for (const [token, r] of Object.entries(this.content.runes))
-        out.push({ id: `rune:${token}`, label: `Runa ${r.name} («${token}»)`, color: r.color, runes: [token], path: 'modules/magic.runes/manifest.json', facts: [['Elemento', r.element], ['Effetto', r.description]] });
-      for (const [seq, sp] of Object.entries(this.content.spells))
-        out.push({ id: `spell:${seq}`, label: sp.name, runes: seq.split(' '), path: this.files['modules/magic.spells/manifest.json'] ? 'modules/magic.spells/manifest.json' : 'modules/magic.runes/manifest.json', facts: [['Rune', seq], ['Effetto', sp.description], ['Mana', String(sp.cost)]] });
+      // T22: every magic rune on its own, then every known combination; each with what it does when spoken.
+      const runes = this.content.runes;
+      let discovered: Record<string, unknown> = {};
+      try {
+        discovered = JSON.parse(this.files['modules/magic.spells/manifest.json'] ?? '{}').spells ?? {};
+      } catch {
+        // A broken file of discovered spells: they are still in the content, only not pointed at.
+      }
+      const names = {
+        tile: (c: string) => this.palette[c]?.name,
+        item: (id: string) => this.content.get(id)?.name,
+        module: (id: string) => this.modules.get(id)?.manifest.name,
+      };
+      const combos = [...Object.keys(runes), ...Object.keys(this.content.spells).filter((s) => !runes[s] && s.split(' ').every((t) => runes[t])).sort((a, b) => a.split(' ').length - b.split(' ').length || a.localeCompare(b))];
+      for (const seq of combos) {
+        const tokens = seq.split(' ');
+        const sp = this.content.spells[seq];
+        const one = tokens.length === 1 ? runes[seq] : undefined;
+        const facts: Array<[string, string]> = [['Rune', tokens.map((t) => `${runes[t].glyph} ${runes[t].name} («${t}», ${runes[t].element})`).join(' · ')]];
+        if (one) facts.push(['Significato', one.description]);
+        if (sp) {
+          // What casting it really does: the effects as the kernel would apply them.
+          const does = validateEffects(sp.effects, { palette: this.palette, item: (x) => this.content.byName(x)?.id ?? (this.content.get(x) ? x : undefined), module: (x) => (this.modules.get(x)?.manifest.kind === 'entity' ? x : undefined), loot: new Set(Object.keys(this.content.loot)) }).effects.map((e) => describeEffect(e, names)).filter(Boolean);
+          facts.push(['Incantesimo', sp.name], ['Effetto', sp.description]);
+          if (does.length) facts.push(['Cosa fa', does.join('; ')]);
+          facts.push(['Mana', String(sp.cost)]);
+        } else facts.push(['Effetto', 'Nessuno ancora: la prima volta che qualcuno la pronuncia, il Narratore le dà un nome e un effetto.']);
+        if (tokens.length >= Kernel.CRYSTAL_RUNES) facts.push(['Cristallo', 'ne consuma uno']);
+        facts.push(['Si pronuncia', `con ${tokens.length > 1 ? 'queste rune in mano, in quest’ordine' : 'la runa in mano'}, premendo T; le rune si consumano`]);
+        out.push({
+          id: one ? `rune:${seq}` : `spell:${seq}`,
+          label: sp ? (one ? `${one.name} · ${sp.name}` : sp.name) : `${one?.name ?? seq}`,
+          color: runes[tokens[0]].color,
+          runes: tokens,
+          path: discovered[seq] ? 'modules/magic.spells/manifest.json' : 'modules/magic.runes/manifest.json',
+          facts,
+        });
+      }
       return out;
     }
     if (source === 'oggetti') {

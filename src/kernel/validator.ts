@@ -412,3 +412,57 @@ export function validateEffects(raw: unknown, ctx: EffectContext): EffectVerdict
   }
   return out;
 }
+
+/** Names for the ids an effect points at (terrains, items, modules); the id itself when unknown. */
+export interface EffectNames {
+  tile(code: string): string | undefined;
+  item(id: string): string | undefined;
+  module(id: string): string | undefined;
+}
+
+/** What a (validated) effect does, in a few words: the Tower of Magic shows it under a spell (T22). */
+export function describeEffect(e: Effect, names: EffectNames): string {
+  const signed = (n: number) => (n > 0 ? `+${n}` : `${n}`);
+  const radius = (r?: number) => (r ? `, raggio ${r}` : '');
+  const lasting = (d?: number) => (d ? ` per ${d} s` : '');
+  switch (e.tipo) {
+    case 'messaggio':
+      return `un messaggio: «${e.testo}»`;
+    case 'bisogni':
+      return (['salute', 'energia', 'fame', 'sete'] as const).filter((k) => e[k]).map((k) => `${k} ${signed(e[k]!)}`).join(', ');
+    case 'crea_oggetto':
+      return `crea ${e.quantita ?? 1} × ${names.item(e.oggetto) ?? e.oggetto}`;
+    case 'consuma':
+      return `consuma ${e.quantita ?? 1} × ${names.item(e.oggetto) ?? e.oggetto}`;
+    case 'distruggi':
+      return 'distrugge ciò che ha davanti';
+    case 'apri':
+      return 'apre ciò che ha davanti';
+    case 'contenitore':
+      return `ne fa un contenitore${e.capienza ? ` da ${e.capienza} posti` : ''}`;
+    case 'terreno':
+      return `${e.da ? (names.tile(e.da) ?? e.da) : 'il terreno'} diventa ${names.tile(e.a) ?? e.a}${radius(e.raggio)}`;
+    case 'fuoco':
+      return `fuoco${lasting(e.durata)}${radius(e.raggio)}`;
+    case 'luce':
+      return `luce${lasting(e.durata)}${radius(e.raggio)}`;
+    case 'scudo':
+      return `scudo${lasting(e.durata)}`;
+    case 'spingi':
+      return `spinge via${e.forza ? ` (forza ${e.forza})` : ''}`;
+    case 'evoca':
+      return `evoca ${names.module(e.modulo) ?? e.modulo}`;
+    case 'legame':
+      return `diventa ${e.legame} di chi la pronuncia`;
+    case 'ricordo':
+      return `lascia un ricordo: «${e.testo}»`;
+    case 'nascita':
+      return `fa nascere ${e.nome ?? 'qualcuno'}`;
+    case 'stato': {
+      const what = [e.velocita !== undefined && `velocità × ${e.velocita}`, e.peso && `peso ${signed(e.peso)}`, e.luce && `luce ${e.luce}`].filter(Boolean).join(', ');
+      return `stato «${e.nome}»${what ? ` (${what})` : ''}${e.durata ? lasting(e.durata) : ' finché non si toglie'}`;
+    }
+    case 'togli_stato':
+      return `toglie lo stato «${e.nome}»`;
+  }
+}

@@ -323,6 +323,36 @@ function textPlane(lines: string[], color: string, w: number, h: number, big = f
   return new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tex, toneMapped: false, transparent: true }));
 }
 
+/** The screen of the Tower of Magic (T22): a rune or a combination, each rune glowing in its colour, its name under it. */
+function runeScreen(runes: Array<{ glyph: string; color: string; name: string }>, w: number, h: number): THREE.Mesh {
+  const W = 512, H = Math.round((512 * h) / w);
+  const cv = document.createElement('canvas');
+  cv.width = W;
+  cv.height = H;
+  const ctx = cv.getContext('2d')!;
+  ctx.fillStyle = 'rgba(6,6,12,0.9)';
+  ctx.fillRect(0, 0, W, H);
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const cell = W / runes.length;
+  const size = Math.min(H * 0.5, cell * 0.8);
+  runes.forEach((r, i) => {
+    const x = cell * (i + 0.5);
+    ctx.shadowColor = r.color;
+    ctx.shadowBlur = 18;
+    ctx.fillStyle = r.color;
+    ctx.font = `bold ${Math.floor(size)}px system-ui, sans-serif`;
+    ctx.fillText(r.glyph, x, H * 0.42);
+    ctx.shadowBlur = 8;
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `bold ${Math.floor(Math.min(H * 0.12, (cell * 1.6) / Math.max(1, r.name.length)))}px system-ui, sans-serif`;
+    ctx.fillText(r.name, x, H * 0.82);
+  });
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tex, toneMapped: false, transparent: true }));
+}
+
 /** An arrow button's sign, floating above its pillar. */
 function arrowSign(x: number, z: number, text: string, color: string): THREE.Mesh {
   const m = textPlane([text], color, 0.5, 0.5, true);
@@ -348,8 +378,7 @@ export function buildShowcase(k: Kernel, it: StudioItem, entry: ShowcaseEntry, c
     g.add(glass);
   }
   if (entry.runes?.length) {
-    const glyphs = entry.runes.map((t) => k.content.get(`rune:${t}`)?.glyph ?? t).join(' ');
-    const screen = textPlane([glyphs, entry.runes.join(' · ')], entry.color ?? color, w - 0.4, 1.6, true);
+    const screen = runeScreen(entry.runes.map((t) => ({ glyph: k.content.runes[t]?.glyph ?? t, color: k.content.runes[t]?.color ?? color, name: k.content.runes[t]?.name ?? t })), w - 0.4, 1.6);
     screen.position.set(cx, 1.35, cz + 0.22);
     g.add(screen);
     return { group: g };
