@@ -294,7 +294,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   corona sono a 8 voxel per casella, `VPT = 20` è fisso in `src/kernel/forms.ts`), con un ADR; la porta del campus va
   sulla lettera `name="porta"`, il davanti del modello (y grande) verso il viale.
 
-### T21 · La vetrina con selettore — `fatto` (commit sotto)
+### T21 · La vetrina con selettore — `fatto` (`0021163`)
 - Un meccanismo comune agli interni: un oggetto (schermo, silos, stampante) con «<» «>» ai lati che sceglie
   cosa mostrare; un clic apre un pannello con le informazioni (il modello, il modulo). Base per T22-T24.
 - Esito: `corona.ts`: voci `showcase` (con `source` `rune | persone | cose | oggetti` e `device` `schermo | silos |
