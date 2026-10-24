@@ -345,6 +345,8 @@ export interface AiConfig {
   thinking?: 'low' | 'medium' | 'high' | 'off';
   /** Seconds before a request is given up (and not repeated). */
   timeout?: number;
+  /** New places a universe of many plans per minute, for everyone together (T40; default 20). */
+  placesPerMinute?: number;
 }
 
 export interface UniverseConfig {

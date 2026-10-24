@@ -66,6 +66,10 @@ export interface Chunk {
   plan?: ChunkPlan;
   buildings: Building[];
   developing?: boolean;
+  /** The wanderer who first wanted it (T40): a place new to the universe is planned at their expense. */
+  chi?: string;
+  /** Known to have no saved plan, and waiting for the universe's quota of new places (T40). */
+  held?: boolean;
 }
 
 export interface LineState {
@@ -374,6 +378,10 @@ export class Kernel {
   generationHeld = false;
   /** Terrain generation is Lua and costs a few ms: at most this many new chunks per tick. */
   static CHUNKS_PER_TICK = 1;
+  /** New places a universe of many plans per minute of the world, at most (T40; `ai.placesPerMinute`). */
+  static PLACES_PER_MINUTE = 20;
+  /** When (world time) the last new places were planned: the quota of a universe of many. */
+  private placesMade: number[] = [];
   private genBudget = 64;
   private tickCount = 0;
   /** Ticks since this kernel started (the clock of a session, T38). */
@@ -1267,7 +1275,7 @@ export class Kernel {
     if (this.genBudget <= 0 || this.mirror) return undefined;
     this.genBudget--;
     const draft = this.genDraft(cx, cy);
-    const ch: Chunk = { cx, cy, key, draft, tiles: draft, version: 0, stage: 'draft', buildings: [] };
+    const ch: Chunk = { cx, cy, key, draft, tiles: draft, version: 0, stage: 'draft', buildings: [], chi: this.wanderer().id };
     this.chunks.set(key, ch);
     return ch;
   }
@@ -1276,16 +1284,22 @@ export class Kernel {
     return this.chunks.get(ch.key) === ch;
   }
 
-  /** Plans the nearest drafts, a few at a time. */
+  /** Plans the drafts nearest to any wanderer in the world (T40: not in the studio), a few at a time. */
   private pumpDevelopment(): void {
-    if (this.corona.isInterior(this.playerPos().x)) return;
     if (this.generationHeld || this.developers >= 3) return;
     const S = this.config.chunkSize;
-    const pc = this.playerCarpet();
-    const pcx = pc.x / S - 0.5;
-    const pcy = pc.y / S - 0.5;
-    const drafts = [...this.chunks.values()].filter((c) => c.stage === 'draft' && !c.developing);
-    drafts.sort((a, b) => Math.hypot(a.cx - pcx, a.cy - pcy) - Math.hypot(b.cx - pcx, b.cy - pcy));
+    const at: Array<{ x: number; y: number }> = [];
+    for (const w of this.wanderersById.keys())
+      this.as(w, () => {
+        if (this.corona.isInterior(this.playerPos().x)) return;
+        const pc = this.playerCarpet();
+        at.push({ x: pc.x / S - 0.5, y: pc.y / S - 0.5 });
+      });
+    if (!at.length) return;
+    const quota = this.placeQuota();
+    const drafts = [...this.chunks.values()].filter((c) => c.stage === 'draft' && !c.developing && (quota || !c.held));
+    const dist = (c: Chunk) => Math.min(...at.map((p) => Math.hypot(c.cx - p.x, c.cy - p.y)));
+    drafts.sort((a, b) => dist(a) - dist(b));
     for (const ch of drafts.slice(0, 3 - this.developers)) {
       ch.developing = true;
       this.developers++;
@@ -1301,10 +1315,28 @@ export class Kernel {
     const rec = await this.chunkStore.load(this.recordKey(ch));
     if (!this.alive(ch)) return;
     if (rec) return this.applyPlan(ch, rec.plan);
+    // New to the universe: planned once, here, at the expense of who wanted it first (T40), within the quota.
+    if (!this.placeQuota()) {
+      if (!ch.held) this.council.say('kernel', 'info', `luogo ${ch.key}: troppi luoghi nuovi in un minuto, aspetta`, 'cartografo', 'chunk.plan');
+      ch.held = true;
+      return;
+    }
+    ch.held = false;
+    this.placesMade.push(this.time);
     const plan = await this.makePlan(ch);
-    this.cardPlace(ch, plan);
+    this.cardPlace(ch, plan, ch.chi);
     await this.chunkStore.save(this.recordKey(ch), { plan });
     if (this.alive(ch)) this.applyPlan(ch, plan);
+  }
+
+  /**
+   * Whether one more new place may be planned now: alone always; in a universe of many at most
+   * `ai.placesPerMinute` in a minute of the world, for everyone together (T40, costs).
+   */
+  private placeQuota(): boolean {
+    if (!this.manyPlayers()) return true;
+    this.placesMade = this.placesMade.filter((t) => this.time - t < 60);
+    return this.placesMade.length < (this.config.ai.placesPerMinute ?? Kernel.PLACES_PER_MINUTE);
   }
 
   private terrainSummary(draft: string): string {
@@ -1343,6 +1375,7 @@ export class Kernel {
           fragments: this.fragments.map((f) => f.line), wanted: [...this.wanted].map((id) => this.itemInfo(id).name).slice(0, 8), start, attempt, feedback,
           region: region ? { nome: region.nome, descrizione: region.descrizione } : undefined,
           importante: this.importantAllowed(ch),
+          chi: ch.chi,
         });
         const verdict = this.validator.validatePlan(raw, new Set(layouts.map((l) => l.id)), placeable);
         if (verdict.errors.length) {
@@ -1985,7 +2018,7 @@ export class Kernel {
     if (this.forging.has(tag) || this.forgesUsed >= this.config.ai.maxForges) return;
     this.forging.add(tag);
     this.forgesUsed++;
-    const r = await this.forgeModule(`${f.concept} (per il luogo «${ch.place?.name}»: ${ch.place?.description})`, 'cartografo');
+    const r = await this.forgeModule(`${f.concept} (per il luogo «${ch.place?.name}»: ${ch.place?.description})`, 'cartografo', undefined, false, ch.chi);
     this.forging.delete(tag);
     if (!r.ok || !r.id || !ch.plan) return;
     ch.plan.objects.push({ module: r.id, where: f.where });
@@ -5654,8 +5687,8 @@ export class Kernel {
   }
 
   /** A place planned for the first time: its card, and one use of every card it holds (T36). */
-  private cardPlace(ch: Chunk, plan: ChunkPlan): void {
-    plan.carta ??= this.sign(placeCardId(ch.cx, ch.cy), 'chunk.plan', 'cartografo');
+  private cardPlace(ch: Chunk, plan: ChunkPlan, chi?: string): void {
+    plan.carta ??= this.sign(placeCardId(ch.cx, ch.cy), 'chunk.plan', 'cartografo', chi);
     this.cards.addPlace(`${ch.cx}_${ch.cy}`, plan.place.name, plan.carta);
     const ids = [`ambiente:${nodeSlug(plan.layout)}`];
     for (const o of plan.objects) ids.push(...this.thingCards(o.module));

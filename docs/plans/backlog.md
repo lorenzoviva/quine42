@@ -959,11 +959,18 @@ le risposte alle domande del piano.
   impugnare e i contenitori sono ottimistici anche loro; il pannello delle meccaniche no (`on_slot` è Lua, gira solo sul server).
   Resta in `LATER` solo `rollback` (del master, T42).
 
-### T40 · Luoghi nuovi con il lock, a spese di chi esplora — `da fare` (dipende da T36, T38)
+### T40 · Luoghi nuovi con il lock, a spese di chi esplora — `fatto` (vedi il commit «Multiplayer (T40)»)
 - Fare: il primo che entra in un luogo nuovo lo chiede al server, che lo genera una volta (Cartografo, Scultore), lo
   committa in `maps/` e lo addebita a lui (`chi`); gli altri lo ricevono pronto; un limite di luoghi nuovi al minuto
   per universo. Il Concilio (sessioni, trame, Fucina) gira solo sul server, anche senza master collegato.
 - Fatto quando: test — due client che entrano insieme nello stesso luogo nuovo → una sola generazione.
+- Esito: ADR-0060. Il kernel del server pianificava già ogni luogo una volta (un kernel, `developing`, il piano in `maps/`); mancava
+  chi paga: il chunk ora ricorda chi lo ha voluto per primo (`Chunk.chi`), che paga la chiamata del Cartografo, la carta del luogo e la
+  Fucina di ciò che il piano chiede. Limite `ai.placesPerMinute` (20) per minuto del mondo, solo in multigiocatore: oltre, la bozza
+  aspetta (`Chunk.held`). `tests/explore.test.ts` (3 test). Diverso dal previsto: lo sviluppo guardava solo `io`, e con il master in
+  un interno dello studio non si pianificava più niente per nessuno: ora le bozze più vicine a qualunque viandante nel mondo. Il
+  Concilio era già solo sul server (lo specchio di T39 non ha generazione). Nessuna verifica nel browser: il gioco in singola non
+  cambia, e il multigiocatore è coperto dai test col finto trasporto.
 
 ### T41 · Il client del giocatore senza corona né Concilio — `da fare` (dipende da T39)
 - Fare: corona, studio, pannello del Concilio, registro, console ed editor caricati solo dal master (import dinamici); il

@@ -60,6 +60,8 @@ export interface PlanContext {
    * tiles); the kernel enforces it anyway.
    */
   importante?: boolean;
+  /** Who pays for the plan (T40): the wanderer who first came to the place. */
+  chi?: string;
 }
 
 const WHERE: Where[] = ['dentro', 'fuori', 'ovunque'];
@@ -99,7 +101,7 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
     .join('\n\n');
   // The environment can only be one of the existing ids: the schema says so.
   const schema: Schema = { ...PLAN_SCHEMA, properties: { ...PLAN_SCHEMA.properties!, ambiente: { type: 'STRING', enum: ctx.layouts.map((l) => l.id) } } };
-  const raw = await c.ask<any>('cartografo', 'chunk.plan', prompt, schema, { data: ctx, temperature: 0.9 });
+  const raw = await c.ask<any>('cartografo', 'chunk.plan', prompt, schema, { data: ctx, temperature: 0.9, chi: ctx.chi });
   const where = (w: unknown): Where => (WHERE.includes(w as Where) ? (w as Where) : 'ovunque');
   return {
     place: { name: String(raw?.luogo?.nome ?? '').trim(), description: String(raw?.luogo?.descrizione ?? '').trim() },
