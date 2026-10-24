@@ -1,23 +1,28 @@
 <!--
 Gerboa base (corona): avatar base per i membri del Concilio della corona (omaggio alla Guida Galattica per gli Autostoppisti).
-Scritto da Gemini CLI (Gemini 3.8 Flash, abbonamento), task T50a.
-Scatola: 1.2 × 1.0 × 1.5 caselle, 24 × 20 × 30 voxel, 20 voxel per casella (vpt: 20).
+Scritto da Gemini CLI (Gemini 3.8 Flash, abbonamento), task T50a — versione morfologicamente autentica ad alta fedeltà.
+Scatola: 1.6 × 2.2 × 2.1 caselle, 32 × 44 × 42 voxel, 20 voxel per casella (vpt: 20).
 Ruolo: npc.
-Design e concetto scultoreo:
-- Anatomia da gerboa bipede (saltatore del deserto) tenerissimo, soffice e pacioccoso;
-- Corpo tondo a goccia / pera rovesciata (z=4..14) con dorso fulvo nocciola caldo (F, f, D) e ampio ventre crema chiaro soffice (C, c);
-- Grandi zampe posteriori elastiche piegate a Z da saltatore bipede (G, g, P, p, part="gamba"):
-  cosce muscolose sui fianchi, stinchi allungati e piedoni piatti con dita che poggiano saldamente su z=0 garantendo ancoraggio e stabilità;
-- Zampette anteriori minuscole ed aggraziate (A, a, part="braccio") raccolte delicatamente sul petto crema;
-- Testa grande espressiva (T, t, U, u, part="testa", z=14..22) con guanciotte paffute crema, ponte frontale fulvo e musetto sporgente in avanti (+y);
-- Tartufo nasino scuro a bottone (N) e sottili baffetti vibrisse (W);
-- Occhi grandi profondi moro (E) di 2x2 voxel con punto luce riflesso bianco brillante (Z, glow="True") perfettamente visibili in visuale 3/4;
-- Grandi orecchie a conchiglia (O, o, R, r, part="testa", z=20..27) che svettano sopra la testa, con dorso fulvo e padiglione interno concavo in velluto rosa pesca;
-- Coda lunghissima e sinuosa (K, k, part="coda") che esce dal retro, si inarca verso il suolo e risale terminando con un vistoso pennacchio a batuffolo bicolore (base scura J, punta panna I);
-- Variazioni stocastiche nei semi: sfumature del manto, ciuffi di pelo e morbidezza della coda variano naturalmente tra i semi 1, 2 e 3.
+Design e concetto scultoreo (ispirato fedelmente ai riferimenti reali e pixel art dei dipodidi del deserto):
+- Morfologia autentica da saltatore bipede del deserto (Euchoreutes naso / Jaculus):
+  silhouette slanciata e agile, corpo ovoide compatto inclinato in avanti a 30 gradi, sospeso su lunghissime zampe a trampolo;
+- Zampe posteriori estesissime e ravvicinate sotto il corpo (G, g, P, p, part="gamba"):
+  - Cosce muscolose alte ancorate alla groppa posteriore (z=11..19, y=16..24, x=11 e x=20);
+  - Ginocchia piegate marcatamente in avanti (y=25, z=12);
+  - Stinchi e garretti lunghissimi e snelli (z=2..12, dislivello 10 voxel!) che scendono all'indietro verso il calcagno;
+  - Piedi lunghissimi piatti a terra (z=0..1, lunghezza 13 voxel, y=15..28!) con dita allungate e artiglietti;
+  - Il corpo "galleggia" visibilmente sollevato da terra sui trampoli elastici delle zampe;
+- Zampette anteriori minuscole e delicate (A, a, part="braccio") raccolte con grazia sotto la gola/petto;
+- Testa grande e tenerissima (T, t, U, u, part="testa", z=17..27) con musetto conico appuntito in avanti, guanciotte crema pulite e morbide, tartufo nasino scuro (N) e vibrisse discrete (W);
+- Occhi grandi profondi moro (E) di 3x2x3 voxel con punto luce riflesso bianco brillante (Z, glow="True") perfettamente visibili in visuale 3/4;
+- GIGANTESCHE ORECCHIE A CONCHIGLIA (O, o, R, r, part="testa", z=25..39, altezza 14 voxel!):
+  padiglioni ampi a spatola/parabola aperti a V sopra la testa, con dorso fulvo e interno concavo in velluto rosa carne;
+- Coda lunghissima (K, k, part="coda", oltre 30 voxel di estensione!):
+  esce dalla groppa posteriore alta, scende sfiorando il suolo e risale con una spettacolare curva a bandiera terminando con un vistoso pennacchio a batuffolo bicolore piumato (base scura J, grande ciuffo bianco candido I);
+- Variazioni stocastiche nei semi: sfumature del manto sabbia/dorso fulvo, morbidezza del pelo e ciuffi della coda.
 -->
-<sequence values="BFfDCcTtUuNWEZRrOoGgPpaAKkJI" size="24 20 30" symmetry="()" name="Gerboa">
-  <!-- Manto fulvo naturale / nocciola caldo del corpo e dorso -->
+<sequence values="BFfDCcTtUuNWEZRrOoGgPpaAKkJI" size="32 44 42" symmetry="()" name="Gerboa">
+  <!-- Manto fulvo naturale / sabbia caldo del corpo e dorso -->
   <color symbol="F" value="ab5236" name="fulvo base dorso"/>
   <color symbol="f" value="c87a48" name="fulvo chiaro luce"/>
   <color symbol="D" value="7a361e" name="fulvo scuro ombra"/>
@@ -59,122 +64,128 @@ Design e concetto scultoreo:
   <color symbol="I" value="fff1e8" part="coda" name="punta pennacchio bianca"/>
 
   <!-- ======================================================== -->
-  <!-- 1. PIEDONI E ZAMPE POSTERIORI SU z = 0 (part="gamba")     -->
+  <!-- 1. LUNGHE ZAMPE POSTERIORI DA SALTATORE (part="gamba")   -->
   <!-- ======================================================== -->
-  <!-- Piede sinistro al suolo (x=5..7, y=9..15, z=0..1)        -->
-  <box at="6 12 0" size="3 7 1" color="P"/>
-  <box at="5 15 0" size="1 1 1" color="p"/>
-  <box at="6 15 0" size="1 1 1" color="p"/>
-  <box at="7 15 0" size="1 1 1" color="p"/>
-  <box at="6 11 1" size="3 5 1" color="P"/>
-  <box at="6 8.5 0" size="3 2 2" color="g"/>
+  <!-- Piedone sinistro al suolo (x=10..12, y=15..28, z=0..1)   -->
+  <box at="11 21.5 0" size="3 14 1" color="P"/>
+  <box at="10 28 0" size="1 1 1" color="p"/>
+  <box at="11 28 0" size="1 1 1" color="p"/>
+  <box at="12 28 0" size="1 1 1" color="p"/>
+  <box at="11 20 1" size="3 8 1" color="P"/>
+  <box at="11 15.5 0" size="3 3 3" color="g"/>
 
-  <!-- Piede destro al suolo (x=16..18, y=9..15, z=0..1)        -->
-  <box at="17 12 0" size="3 7 1" color="P"/>
-  <box at="16 15 0" size="1 1 1" color="p"/>
-  <box at="17 15 0" size="1 1 1" color="p"/>
-  <box at="18 15 0" size="1 1 1" color="p"/>
-  <box at="17 11 1" size="3 5 1" color="P"/>
-  <box at="17 8.5 0" size="3 2 2" color="g"/>
+  <!-- Piedone destro al suolo (x=19..21, y=15..28, z=0..1)     -->
+  <box at="20 21.5 0" size="3 14 1" color="P"/>
+  <box at="19 28 0" size="1 1 1" color="p"/>
+  <box at="20 28 0" size="1 1 1" color="p"/>
+  <box at="21 28 0" size="1 1 1" color="p"/>
+  <box at="20 20 1" size="3 8 1" color="P"/>
+  <box at="20 15.5 0" size="3 3 3" color="g"/>
 
-  <!-- Stinchi / caviglie inclinate in avanti fino al ginocchio -->
-  <line at="6 9 1.5" to="6 12 5.5" r="0.8" color="g"/>
-  <line at="17 9 1.5" to="17 12 5.5" r="0.8" color="g"/>
+  <!-- Lunghi stinchi inclinati in avanti dal garretto al ginocchio (z=2..12) -->
+  <line at="11 15.5 2" to="11 24.5 11.5" r="1.1" color="g"/>
+  <line at="20 15.5 2" to="20 24.5 11.5" r="1.1" color="g"/>
 
-  <!-- Cosce muscolose piegate a Z sui fianchi (z=4..9)         -->
-  <ellipsoid at="6 9 6.5" size="4 6 5" color="G"/>
-  <ellipsoid at="17 9 6.5" size="4 6 5" color="G"/>
-
-  <!-- ======================================================== -->
-  <!-- 2. CORPO PAFFUTO A PERA E VENTRE CREMA (z = 3..14)       -->
-  <!-- ======================================================== -->
-  <!-- Pelvi e bacino inferiore (tocca cosce e piedi)           -->
-  <ellipsoid at="11.5 10 3.5" size="12 10 7" color="F"/>
-  <ellipsoid at="11.5 10.5 8" size="11 9 7" color="F"/>
-  <ellipsoid at="11.5 11 12" size="9 8 5" color="F"/>
-
-  <!-- Morbido ventre e petto crema soffice (+y)                -->
-  <ellipsoid at="11.5 12.5 4" size="8 5 6" color="C"/>
-  <ellipsoid at="11.5 12.5 8" size="7 5 6" color="C"/>
-  <ellipsoid at="11.5 12.5 11.5" size="5 4 4" color="c"/>
+  <!-- Cosce muscolose alte piegate a Z che raccordano ginocchio e bacino -->
+  <ellipsoid at="11 20 9.5" size="5 9 10" color="G"/>
+  <ellipsoid at="20 20 9.5" size="5 9 10" color="G"/>
 
   <!-- ======================================================== -->
-  <!-- 3. ZAMPETTE ANTERIORI RACCOLTE SUL PETTO (part="braccio") -->
+  <!-- 2. CORPO ALLUNGATO INCLINATO E VENTRE CREMA (z = 10..22)  -->
+  <!-- ======================================================== -->
+  <!-- Groppa posteriore alta (si salda alle cosce e alla coda) -->
+  <ellipsoid at="15.5 18 15" size="12 10 9" color="F"/>
+
+  <!-- Dorso medio allungato (inclinato verso il basso e in avanti) -->
+  <ellipsoid at="15.5 24 14" size="11 10 8" color="F"/>
+
+  <!-- Petto e spalle anteriori                                  -->
+  <ellipsoid at="15.5 29 14.5" size="10 8 8" color="F"/>
+
+  <!-- Soffice ventre e pettorina crema (+y e parte inferiore)  -->
+  <ellipsoid at="15.5 24 11" size="8 9 5" color="C"/>
+  <ellipsoid at="15.5 28 12.5" size="7 7 6" color="C"/>
+  <ellipsoid at="15.5 31 14" size="6 5 5" color="c"/>
+
+  <!-- ======================================================== -->
+  <!-- 3. ZAMPETTE ANTERIORI MINUSCOLE AL PETTO (part="braccio") -->
   <!-- ======================================================== -->
   <!-- Braccino sinistro e manina crema                         -->
-  <line at="7.5 12 11" to="9.5 14 9.5" r="0.6" color="A"/>
-  <box at="9.5 15 9.5" size="2 1 1" color="a"/>
+  <line at="12 29 14" to="13.5 32 12" r="0.6" color="A"/>
+  <box at="13.5 33 12" size="2 1 1" color="a"/>
 
   <!-- Braccino destro e manina crema                          -->
-  <line at="15.5 12 11" to="13.5 14 9.5" r="0.6" color="A"/>
-  <box at="13.5 15 9.5" size="2 1 1" color="a"/>
+  <line at="19 29 14" to="17.5 32 12" r="0.6" color="A"/>
+  <box at="17.5 33 12" size="2 1 1" color="a"/>
 
   <!-- ======================================================== -->
   <!-- 4. TESTA GRANDE, GUANCE, MUSETTO, OCCHI (part="testa")   -->
   <!-- ======================================================== -->
-  <!-- Cranio principale arretrato                              -->
-  <ellipsoid at="11.5 11 14.5" size="11 8 8" color="T"/>
-  
+  <!-- Cranio principale                                        -->
+  <ellipsoid at="15.5 31 19" size="13 11 10" color="T"/>
+
   <!-- Ponte frontale fulvo tra gli occhi                      -->
-  <box at="11.5 14 16" size="4 4 4" color="T"/>
-  <box at="11.5 15 17" size="2 2 2" color="t"/>
+  <box at="15.5 34 21" size="4 4 4" color="T"/>
+  <box at="15.5 36 22" size="2 2 2" color="t"/>
 
   <!-- Guanciotte paffute e morbide crema ai lati del viso      -->
-  <ellipsoid at="7.5 13.5 14" size="5 4 4" color="t"/>
-  <ellipsoid at="15.5 13.5 14" size="5 4 4" color="t"/>
-  <box at="7 14.5 14" size="3 2 2" color="U"/>
-  <box at="16 14.5 14" size="3 2 2" color="U"/>
+  <ellipsoid at="10.5 34 18.5" size="5 5 5" color="t"/>
+  <ellipsoid at="20.5 34 18.5" size="5 5 5" color="t"/>
+  <box at="10 35 18" size="3 3 3" color="U"/>
+  <box at="21 35 18" size="3 3 3" color="U"/>
 
-  <!-- Musetto sporgente in avanti crema (+y, z=14..15)         -->
-  <box at="11.5 16 14" size="4 3 2" color="U"/>
+  <!-- Musetto conico allungato in avanti crema (+y, z=18..19)  -->
+  <box at="15.5 37 18" size="5 4 3" color="U"/>
+  <box at="15.5 39 18" size="3 3 2" color="U"/>
   <!-- Tartufo nasino scuro                                     -->
-  <box at="11.5 17 15" size="2 1 1" color="N"/>
+  <box at="15.5 40 19" size="2 1 1" color="N"/>
 
-  <!-- Baffetti vibrisse sottili                                -->
-  <line at="9 16.5 14.5" to="6 17 15" r="0" color="W"/>
-  <line at="9 16.5 14" to="6 17 13.5" r="0" color="W"/>
-  <line at="14 16.5 14.5" to="17 17 15" r="0" color="W"/>
-  <line at="14 16.5 14" to="17 17 13.5" r="0" color="W"/>
+  <!-- Sottili accenni di vibrisse laterali sul muso -->
+  <box at="13 38 18" size="1 1 1" color="W"/>
+  <box at="18 38 18" size="1 1 1" color="W"/>
 
-  <!-- Grandi occhi scuri espressivi (2x2 voxel a z=16..17, y=15) -->
-  <box at="8.5 15 16" size="2 1 2" color="E"/>
-  <box at="14.5 15 16" size="2 1 2" color="E"/>
+  <!-- Grandi occhi scuri espressivi (3x2x3 voxel a z=20..22, y=34..35) -->
+  <box at="11 34.5 20" size="3 2 3" color="E"/>
+  <box at="20 34.5 20" size="3 2 3" color="E"/>
 
   <!-- Punti luce bianchi riflesso vispo (Z, glow="True") in alto a sx -->
-  <box at="8 15 17" size="1 1 1" color="Z"/>
-  <box at="14 15 17" size="1 1 1" color="Z"/>
+  <box at="10 35 22" size="1 1 1" color="Z"/>
+  <box at="19 35 22" size="1 1 1" color="Z"/>
 
   <!-- ======================================================== -->
-  <!-- 5. GRANDI ORECCHIE A CONCHIGLIA (part="testa", z=20..27) -->
+  <!-- 5. GIGANTESCHE ORECCHIE A CONCHIGLIA (part="testa", z=25..39) -->
   <!-- ======================================================== -->
   <!-- Orecchio sinistro: guscio fulvo posteriore/esterno       -->
-  <ellipsoid at="7.5 11 20" size="6 3 8" color="O"/>
-  <!-- Padiglione interno concavo velluto rosa                  -->
-  <ellipsoid at="7.5 12 21" size="4 2 7" color="R"/>
-  <box at="7.5 12 22" size="2 1 4" color="r"/>
-  <line at="5 11.5 22" to="7 11.5 26.5" r="0" color="o"/>
+  <ellipsoid at="9.5 29 25" size="8 4 15" color="O"/>
+  <!-- Padiglione interno concavo velluto rosa carne            -->
+  <ellipsoid at="9.5 30.5 26" size="6 3 13" color="R"/>
+  <box at="9.5 31 27" size="4 1 8" color="r"/>
+  <line at="6 30 28" to="9 30 38" r="0.5" color="o"/>
 
   <!-- Orecchio destro: guscio fulvo posteriore/esterno        -->
-  <ellipsoid at="15.5 11 20" size="6 3 8" color="O"/>
-  <!-- Padiglione interno concavo velluto rosa                  -->
-  <ellipsoid at="15.5 12 21" size="4 2 7" color="R"/>
-  <box at="15.5 12 22" size="2 1 4" color="r"/>
-  <line at="18 11.5 22" to="16 11.5 26.5" r="0" color="o"/>
+  <ellipsoid at="21.5 29 25" size="8 4 15" color="O"/>
+  <!-- Padiglione interno concavo velluto rosa carne            -->
+  <ellipsoid at="21.5 30.5 26" size="6 3 13" color="R"/>
+  <box at="21.5 31 27" size="4 1 8" color="r"/>
+  <line at="25 30 28" to="22 30 38" r="0.5" color="o"/>
 
   <!-- ======================================================== -->
-  <!-- 6. CODA SINUOSA E PENNACCHIO BICOLORE (part="coda")      -->
+  <!-- 6. LUNGHISSIMA CODA E PENNACCHIO BICOLORE (part="coda")  -->
   <!-- ======================================================== -->
-  <!-- Attacco al bacino posteriore e prima discesa             -->
-  <line at="11.5 6 4" to="11.5 4.5 1.5" r="0.7" color="K"/>
-  <!-- Tratto basso orizzontale (arriva a y=2.5, non tocca y=0) -->
-  <line at="11.5 4.5 1.5" to="11.5 3 1.5" r="0.7" color="K"/>
-  <!-- Risalita sinuosa verso l'alto                            -->
-  <line at="11.5 3 1.5" to="11.5 2.5 3.5" r="0.7" color="K"/>
-  <line at="11.5 2.5 3.5" to="11.5 2.5 5" r="0.7" color="k"/>
-  <!-- Pennacchio bicolore vaporoso: base nera, punta bianca    -->
-  <ellipsoid at="11.5 2.5 5.5" size="4 3 3" color="J"/>
-  <ellipsoid at="11.5 2.5 7.5" size="4 3 4" color="I"/>
-  <box at="11.5 2.5 9" size="2 2 1" color="I"/>
+  <!-- Attacco alla groppa posteriore alta (y=15, z=16)         -->
+  <line at="15.5 15 16" to="15.5 10 9" r="1.1" color="K"/>
+  <!-- Discesa sinuosa verso il terreno                         -->
+  <line at="15.5 10 9" to="15.5 6 4" r="0.9" color="K"/>
+  <line at="15.5 6 4" to="15.5 3.5 2.5" r="0.8" color="K"/>
+  <!-- Risalita verso l'alto                                    -->
+  <line at="15.5 3.5 2.5" to="15.5 2.5 5.5" r="0.8" color="k"/>
+  <line at="15.5 2.5 5.5" to="15.5 2.5 9" r="0.8" color="k"/>
+
+  <!-- Spettacolare pennacchio bicolore: collare scuro e grande batuffolo bianco saldato -->
+  <ellipsoid at="15.5 2.5 9" size="5 4 5" color="J"/>
+  <ellipsoid at="15.5 2.5 12" size="6 5 6" color="I"/>
+  <ellipsoid at="15.5 2.5 16" size="4 4 5" color="I"/>
+  <box at="15.5 2.5 18" size="2 2 2" color="I"/>
 
   <!-- ======================================================== -->
   <!-- 7. REGOLE GENERATIVE: SFUMATURE, PELO E TEXTURE          -->
@@ -187,5 +198,5 @@ Design e concetto scultoreo:
   <prl steps="1" p="0.35" in="F/C" out="*/c"/>
   <prl steps="1" p="0.25" in="FC" out="Fc" symmetry="(x)"/>
   <!-- Sfumatura delicata tra guance crema e muso               -->
-  <prl steps="1" p="0.2" in="t U" out="u *"/>
+  <prl steps="1" p="0.25" in="t U" out="u *"/>
 </sequence>
