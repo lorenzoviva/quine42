@@ -13,6 +13,7 @@ local setmetatable, rawset, pairs, ipairs, select = setmetatable, rawset, pairs,
 local gmatch, match, format, concat, pack, unpack =
   string.gmatch, string.match, string.format, table.concat, table.pack, table.unpack
 local mtype, floor = math.type, math.floor
+local randomseed = math.randomseed
 
 -- VM instructions allowed per call into universe code. Exceeding it is a fault, not a hang.
 local BUDGET = 2000000
@@ -156,6 +157,7 @@ local function player_binding(key)
 end
 
 function K.reset()
+  randomseed(0)
   overrides = {}
   bindings = {
     x = player_binding("x"),
@@ -174,6 +176,9 @@ function K.reset()
     ecs = ecs, input = input, world = world, bus = bus, inventory = inventory, items = items, ui = ui,
   }
   base.string.dump = nil
+  -- Shared seeds (T35): the kernel reseeds before every call into universe code; reseeding from the
+  -- universe is allowed, but never from the clock (Lua's randomseed() without arguments reads it).
+  base.math.randomseed = function(a, b) randomseed(floor(tonumber(a) or 0), floor(tonumber(b) or 0)) end
   U = setmetatable(base, {
     __index = function(_, k)
       local o = overrides[k]
@@ -207,6 +212,9 @@ function K.load_module(id, src, chunkname)
   modules[id] = M
   return nil
 end
+
+-- The random generator of universe code, from (universe seed, tick, module, entity): see Kernel.seedLua.
+function K.seed(n) randomseed(floor(n)) end
 
 function K.unload_module(id) modules[id] = nil end
 

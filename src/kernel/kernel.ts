@@ -358,6 +358,8 @@ export class Kernel {
   static CHUNKS_PER_TICK = 1;
   private genBudget = 64;
   private tickCount = 0;
+  /** Calls into Lua with the same key in this tick: each gets its own draws (T35). */
+  private luaCalls = new Map<number, number>();
 
   /** The entity of the wanderer acting now (the one the input moves, or another one inside `as`). */
   playerId: Id = 0;
@@ -591,10 +593,38 @@ export class Kernel {
   runModule(id: string, fn: string, ...args: unknown[]): { value: unknown; failed: boolean } {
     const key = `module:${id}:${fn}`;
     this.faultFlag = null;
+    this.seedLua(key, typeof args[0] === 'number' ? args[0] : 0);
     const value = this.sandbox.run(id, fn, ...args);
     const failed = this.faultFlag === key;
     if (!failed) this.faults.clear(key);
     return { value, failed };
+  }
+
+  /**
+   * Shared seeds (T35, ADR-0055): math.random of universe code draws from (universe seed, tick, who calls, entity),
+   * never from the clock, so two kernels with the same universe and the same input draw the same numbers.
+   */
+  private seedLua(key: string, entity: number): void {
+    const k = hash32(hashStr(key), Number.isFinite(entity) ? entity : 0);
+    const n = this.luaCalls.get(k) ?? 0;
+    this.luaCalls.set(k, n + 1);
+    this.sandbox.seed(hash32(this.config?.seed ?? 0, this.tickCount, k, n));
+  }
+
+  /** A generator for one draw of the kernel at this tick (T35): the same in every kernel of the universe. */
+  rngFor(...salt: number[]): Rng {
+    return new Rng(hash32(this.config?.seed ?? 0, this.tickCount, ...salt));
+  }
+
+  private lastStamp = '';
+  private stampN = 0;
+
+  /** A name unique in this universe from the time of the world, not of the machine (T35): the same in every kernel. */
+  worldStamp(): string {
+    const base = Math.round(this.time * 1000).toString(36);
+    this.stampN = base === this.lastStamp ? this.stampN + 1 : 0;
+    this.lastStamp = base;
+    return this.stampN ? `${base}-${this.stampN}` : base;
   }
 
   // --- Accessors -----------------------------------------------------------------------------
@@ -1951,7 +1981,8 @@ export class Kernel {
       if (this.content.get(d)) this.spawnItem(d, p.x, p.y);
       else if (this.modules.get(d)) this.spawnModuleEntity(this.modules.get(d)!, p.x, p.y);
     }
-    for (const s of box?.inv.slots ?? []) if (s) this.spawnItem(s.item, p.x + (Math.random() - 0.5) * 0.6, p.y + (Math.random() - 0.5) * 0.6, s.count);
+    const rng = this.rngFor(id, 77);
+    for (const s of box?.inv.slots ?? []) if (s) this.spawnItem(s.item, p.x + (rng.next() - 0.5) * 0.6, p.y + (rng.next() - 0.5) * 0.6, s.count);
   }
 
   private invAdd(id: Id, item: string, n: number): number {
@@ -2100,6 +2131,7 @@ export class Kernel {
       if (!st.compiled || (st.pure && !refresh && st.result !== null)) continue;
       const key = `rune:${st.line.key}`;
       this.faultFlag = null;
+      this.seedLua(key, 0);
       const r = this.sandbox.runLine(st.line.key);
       if (this.faultFlag === key) {
         st.error = this.faults.get(key)?.message ?? 'errore';
@@ -2824,7 +2856,7 @@ export class Kernel {
     const entry = this.modules.get(this.ecs.get(parentId, 'module')?.id);
     const p = this.ecs.get(parentId, 'pos');
     if (!parent || !entry || !p) return undefined;
-    const origin = `${this.ecs.get(parentId, 'origin')?.key ?? parent.name}#figlio${Date.now().toString(36)}`;
+    const origin = `${this.ecs.get(parentId, 'origin')?.key ?? parent.name}#figlio${this.worldStamp()}`;
     const child = this.spawnModuleEntity(entry, p.x + 0.7, p.y + 0.4, this.ecs.get(parentId, 'chunk')?.key, origin);
     const gender = name ? guessGender({ nome: name, mestiere: '', famiglia: [] }) : hashStr(origin) % 2 ? 'femmina' : 'maschio';
     // A name of their own, unlike anyone else's (not "Piccola Berta" beside Berta).
@@ -3702,7 +3734,7 @@ export class Kernel {
   }
 
   private rememberDeath(): void {
-    this.recordRule({ chiave: `morte|${Date.now()}`, testo: 'un viandante è morto', possibile: true, racconto: 'la gente ne parla ancora, in piazza' }, false);
+    this.recordRule({ chiave: `morte|${this.worldStamp()}`, testo: 'un viandante è morto', possibile: true, racconto: 'la gente ne parla ancora, in piazza' }, false);
   }
 
   // --- Interfaces of modules (ADR-0028) -------------------------------------------------------
@@ -4539,7 +4571,7 @@ export class Kernel {
     // The plot is checked against the people and the canon; what does not hold goes back to the
     // Narrator once, with the reasons; the second answer is repaired, or dropped if it cannot be.
     const attempt = async (feedback?: string) => {
-      const raw = plotFromRaw(await weavePlot(this.council, societySummary(society, 20), places, recent, feedback, this.focusOn(society.persone.slice(-20).map((p) => p.nome))), this.day(), `trama-${Date.now().toString(36)}`);
+      const raw = plotFromRaw(await weavePlot(this.council, societySummary(society, 20), places, recent, feedback, this.focusOn(society.persone.slice(-20).map((p) => p.nome))), this.day(), `trama-${this.worldStamp()}`);
       return { titolo: raw.titolo, ...reviewPlot(raw, society) };
     };
     let plot: Plot | undefined;
@@ -5504,6 +5536,7 @@ export class Kernel {
     const pl = this.ecs.get(this.playerId, 'player');
     if (pl) pl.passo = Math.max(0.2, Math.min(4, passo));
     this.tickCount++;
+    this.luaCalls.clear();
     if (this.campusVersion !== this.forms.version) this.placeCampus();
     this.archive.tick(dt);
     // Who works in the Council's log sits at their console in the Direction (T46c); looked at once a second.

@@ -70,6 +70,8 @@ export class MockModels implements Models {
   /** Probability that a first chunk plan is broken on purpose. */
   corruptRate = 0.15;
   latency = 15;
+  /** Individuals drawn so far: each a different person, the same ones in every run (T35). */
+  private drawn = 0;
 
   async text(call: TextCall): Promise<string> {
     this.usage.text++;
@@ -181,7 +183,7 @@ export class MockModels implements Models {
         return { ricette, bottino: [{ tabella: 'comune', voci: [{ tag: 'cibo', peso: 3 }, { tag: 'materiale', peso: 2 }] }] };
       }
       case 'npc.individuate': {
-        const rng = new Rng(hashStr(`${d.archetype?.name}|${d.ctx?.place}|${Math.random()}`));
+        const rng = new Rng(hashStr(`${d.archetype?.name}|${d.ctx?.place}|${this.drawn++}`));
         // A careful narrator: a name not taken (the kernel says which ones are).
         const avoid: string[] = d.ctx?.avoid ?? [];
         const nome = rng.pick(NAMES.filter((n) => !avoid.includes(n)).length ? NAMES.filter((n) => !avoid.includes(n)) : NAMES);

@@ -61,6 +61,7 @@ interface KernelLua {
   reset(): void;
   load_module(id: string, src: string, chunkname: string): string | null;
   unload_module(id: string): void;
+  seed(n: number): void;
   has(id: string, fn: string): boolean;
   run(id: string, fn: string, a?: unknown, b?: unknown, c?: unknown, d?: unknown): unknown;
   check(src: string, chunkname: string): string | null;
@@ -92,6 +93,11 @@ export class Sandbox {
 
   loadModule(id: string, src: string, chunkname = id): string | null {
     return this.K.load_module(id, src, chunkname) ?? null;
+  }
+
+  /** Reseeds math.random of universe code (T35): the same seed, the same draws, on every machine. */
+  seed(n: number): void {
+    this.K.seed(n >>> 0);
   }
 
   unloadModule(id: string): void {

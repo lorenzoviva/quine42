@@ -855,7 +855,7 @@ le risposte alle domande del piano.
   kernel ha un registro (`addWanderer`) e `as(id, fn)` sincrono, che fa agire un altro viandante su tutto ciò che oggi usa
   `playerId`, invece di passare un id a ogni funzione; gli altri viandanti non hanno ancora input né rendering (T38-T39).
 
-### T35 · Semi condivisi e determinismo — `da fare`
+### T35 · Semi condivisi e determinismo — `in corso`
 - Contesto: decisione 2. Ogni estrazione casuale (kernel, `hash` e `math.random` di Lua, `sys.wander`, fuoco, bottino)
   deve venire da (seme dell'universo, tick, entità); niente orologio di sistema nella simulazione.
 - Fare: censire le fonti di casualità e di tempo (`Math.random`, `Date.now`, `performance.now` dentro il tick) e
