@@ -717,7 +717,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   verifica visuale di giorno e di notte; commit.
 - Dipendenze: nessuna (T31 è completato). Domande per l'autore: nessuna (chiarite in `risposte-T50.md`).
 
-### T59 · Da Rune a QUINE42: refactoring del nome del gioco — `in corso`
+### T59 · Da Rune a QUINE42: refactoring del nome del gioco — `fatto` (`1133a70`)
 - Contesto: a seguito di consultazione, il nome provvisorio del gioco passa da «Rune» a «QUINE42» (tributo al concetto
   di quine — il programma che produce il proprio codice sorgente, cuore del gioco — e alla Risposta Fondamentale 42 della
   *Guida Galattica per gli Autostoppisti*).
@@ -743,6 +743,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
      - `npm run typecheck`, `npm test` e `npm run build` verdi.
 - Fatto quando: typecheck e test verdi, build funzionante, verifica nel browser di titolo, schermata iniziale intro, guida H e
   accesso via console (`window.quine` e `window.rune`), ADR-0062 registrato, commit.
+- Esito: `package.json` (`quine42`), `index.html` (title, intro .name, help h2), `src/main.ts` (`window.quine` e `window.quine42` con alias `window.rune`), documentazione (`README.md`, `AGENTS.md`, `GEMINI.md`, `CLAUDE.md`, `docs/design.md`), ADR-0062. Verificato nel browser: titolo, intro, help e `window.quine === window.rune`. Diverso dal previsto: nessuno.
 - Dipendenze: nessuna.
 
 ### T60 · Il raggio 42: i 42 passi verso la corona — `da fare` (dipende da T59)
