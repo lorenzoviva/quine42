@@ -6,30 +6,39 @@ Ruolo: tree.
 Fusto bionico slanciato ancorato su plinto circolare grafite (M) con radici compatte a sbalzo (z=0..2);
 il tronco sale snello (z=2..12) percorso da quattro canali verticali a fibra ottica ciano (C)
 incastonati in titanio grafite (m) e cinto da un collare zaffiro (Z); a quota z=11..13 si apre
-un'ampia architettura generativa stocastica di rami divergenti e frattali (m, C, Z) che si espandono
-a calice variando silhouette a ogni seme, sostenendo una ricca chioma cristallina a reticolo
-vitreo traslucido (V, T, G), coronata da gemme fogliari neon azzurre (L) e scintille fotoniche bianche (W).
+un'ampia chioma generativa a calice di rami frattali (m, C, Z), rivestita da cristalli ottici
+vitrei altamente traslucidi in aqua e ghiaccio etereo (V, T, G).
+Dalla chioma scendono liane penzolanti luminescenti ciano (H, glow="True").
+Animazione ciclica a 8 fotogrammi:
+- le liane penzolanti si allungano e accorciano organicamente;
+- i cristalli e le gemme della chioma scintillano e pulsano sporadicamente.
 -->
-<sequence values="BXmMZCVTGLW" size="16 16 28" symmetry="(xy)" name="Albero di luce">
-  <!-- Materiali di base e telaio: metalli scuri grafite e titanio -->
+<sequence values="BXmMZCVTGLWH" size="16 16 28" symmetry="(xy)" name="Albero di luce">
+  <!-- Materiali strutturali di base: metallo grafite scuro e titanio -->
   <color symbol="M" value="141418" name="grafite base"/>
-  <color symbol="m" value="262a38" name="cristallo fusto"/>
+  <color symbol="m" value="222634" name="titanio fusto"/>
   
-  <!-- Segnalatore invisibile di avanzamento e accrescimento stocastico -->
+  <!-- Segnalatore invisibile per la crescita generativa dei rami -->
   <color symbol="X" hidden="True" name="nodo di crescita"/>
 
   <!-- Vene luminose a fibra ottica e nodi di alimentazione neon -->
   <color symbol="C" value="05d9e8" glow="True" name="fibra ciano"/>
   <color symbol="Z" value="29adff" glow="True" name="zaffiro neon"/>
 
-  <!-- Polimeri e cristalli ottici a gradiente traslucido -->
-  <color symbol="V" value="1c2a3a" name="vetro indaco"/>
-  <color symbol="T" value="3d5a78" name="vetro aqua"/>
-  <color symbol="G" value="9badb7" name="cristallo ghiaccio"/>
+  <!-- Liane pendenti luminescenti al neon -->
+  <color symbol="H" value="00ffff" glow="True" name="liana neon pendente"/>
 
-  <!-- Punti luce di chioma: gemme luminescenti e fotoni terminali -->
+  <!-- Cristalli ottici traslucidi: aqua brillante, indaco profondo e ghiaccio etereo -->
+  <color symbol="V" value="162436" name="vetro indaco"/>
+  <color symbol="T" value="3ea8c8" name="vetro aqua traslucido"/>
+  <color symbol="G" value="b4f0ff" name="cristallo ghiaccio traslucido"/>
+
+  <!-- Punti luce di chioma: gemme azzurre e scintille fotoniche bianche -->
   <color symbol="L" value="6fc3ff" glow="True" name="gemma azzurra"/>
   <color symbol="W" value="ffffff" glow="True" name="scintilla fotonica"/>
+
+  <!-- Unione dei materiali della chioma da cui possono germogliare le liane pendenti -->
+  <union symbol="K" values="TVmZ"/>
 
   <!-- ======================================================== -->
   <!-- 1. BASAMENTO TECNOLOGICO E RADICI COMPATTE (z = 0..2)    -->
@@ -108,7 +117,7 @@ vitreo traslucido (V, T, G), coronata da gemme fogliari neon azzurre (L) e scint
   <all in="X" out="Z"/>
 
   <!-- ======================================================== -->
-  <!-- 6. FORMAZIONE DEI GRAPPOLI CRISTALLINI (V, T, G)         -->
+  <!-- 6. FORMAZIONE DEI CRISTALLI TRASLUCIDI (V, T, G)         -->
   <!-- ======================================================== -->
   <!-- Il vetro indaco si addensa attorno a tutti i nodi e rami della chioma -->
   <prl steps="1">
@@ -119,7 +128,7 @@ vitreo traslucido (V, T, G), coronata da gemme fogliari neon azzurre (L) e scint
     <rule in="B C" out="V *" p="0.45"/>
   </prl>
 
-  <!-- Cristallizzazione sfaccettata superficiale in vetro aqua (T) -->
+  <!-- Cristallizzazione superficiale in vetro aqua traslucido vivido (T) -->
   <prl steps="1">
     <rule in="B V" out="B T" p="0.7"/>
     <rule in="V B" out="T B" p="0.6"/>
@@ -130,14 +139,30 @@ vitreo traslucido (V, T, G), coronata da gemme fogliari neon azzurre (L) e scint
     <rule in="B" out="T" values="V T" sum="8..16"/>
   </convolution>
 
-  <!-- Sfaccettature riflettenti in cristallo ghiaccio (G) sulle facce esposte -->
+  <!-- Sfaccettature riflettenti in cristallo ghiaccio etereo (G) sulle facce esposte -->
   <prl steps="1">
     <rule in="B T" out="B G" p="0.65"/>
     <rule in="B V" out="B T" p="0.5"/>
   </prl>
 
   <!-- ======================================================== -->
-  <!-- 7. GEMME NEON TERMINALI (L) E SCINTILLE FOTONICHE (W)    -->
+  <!-- 7. LIANE NEON LUMINOSE PENDENTI (H)                      -->
+  <!-- ======================================================== -->
+  <!-- Spunta dei nodi di liana sotto la volta della chioma -->
+  <prl steps="1">
+    <rule in="K B" out="* H" p="0.32"/>
+  </prl>
+
+  <!-- Accrescimento verso il basso delle liane pendenti luminescenti -->
+  <one steps="44">
+    <!-- La liana scende se ci sono almeno due blocchi di aria sotto -->
+    <rule in="H B B" out="* H *" p="1.0"/>
+    <!-- Allungamento semplice -->
+    <rule in="H B" out="* H" p="0.4"/>
+  </one>
+
+  <!-- ======================================================== -->
+  <!-- 8. GEMME NEON TERMINALI (L) E SCINTILLE FOTONICHE (W)    -->
   <!-- ======================================================== -->
   <!-- Punti luce neon azzurri distribuiti sui cristalli esterni -->
   <prl steps="1">
@@ -150,3 +175,30 @@ vitreo traslucido (V, T, G), coronata da gemme fogliari neon azzurre (L) e scint
     <rule in="B L" out="B W" p="0.35"/>
   </prl>
 </sequence>
+
+<!-- ============================================================ -->
+<!-- 9. ANIMAZIONE CICLICA VITA (8 FRAMES): LIANE E SCINTILLIO    -->
+<!-- ============================================================ -->
+<animation name="vita" frames="8">
+  <sequence>
+    <!-- Le liane pendenti fluttuano: allungamento o ritrazione stocastica della punta -->
+    <prl steps="1">
+      <!-- Si allunga verso il basso di un voxel se c'è spazio d'aria sotto -->
+      <rule in="H B B" out="* H *" p="0.30"/>
+      <!-- Si accorcia ritirando la punta di un voxel (mantiene l'ancoraggio alla chioma) -->
+      <rule in="H H B" out="* B *" p="0.22"/>
+    </prl>
+
+    <!-- Scintillio sporadico nella chioma: gemme che si accendono e tornano cristallo -->
+    <prl steps="1">
+      <!-- Alcuni cristalli aqua si accendono sporadicamente in gemme neon azzurre -->
+      <rule in="T" out="L" p="0.08"/>
+      <!-- Alcuni cristalli ghiaccio si accendono in scintille fotoniche bianche -->
+      <rule in="G" out="W" p="0.06"/>
+      <!-- Le gemme accese tornano delicatamente cristallo traslucido -->
+      <rule in="L" out="T" p="0.32"/>
+      <!-- I fotoni bianchi tornano cristallo ghiaccio -->
+      <rule in="W" out="G" p="0.38"/>
+    </prl>
+  </sequence>
+</animation>
