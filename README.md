@@ -82,11 +82,21 @@ persone, Claude Code e Gemini CLI). Design originale in [docs/design.md](docs/de
 - South Park: Grounded Vindaloop
 - Matrix
 - Westworld
-- The Trueman Show
+- The Truman Show
 - The Hitchhiker's Guide to the Galaxy
 - Project Zomboid
 - Cyberpunk 
 - Dungeons & Dragons
+
+> Tutti i marchi, i titoli e le opere citate appartengono ai rispettivi proprietari e sono menzionati esclusivamente a scopo di tributo e ispirazione culturale, senza alcuna affiliazione o sponsorizzazione.
+
+## Ringraziamenti
+
+Un ringraziamento speciale a:
+- **Maxim Gumin**, per l'invenzione di [MarkovJunior](https://github.com/mxgmn/MarkovJunior) e i suoi paradigmi di riscrittura deterministica di pattern, che danno forma a ogni voxel e struttura di questo universo.
+- Gli autori e la comunità open source di **three.js**, **wasmoon** (Lua in WebAssembly), **Vite** e **TypeScript**.
+- I modelli di intelligenza artificiale che animano le squadre del Concilio (Google Gemini e Claude Code), instancabili compagni di viaggio nella costruzione del mondo.
+- E a chiunque si fermi ad ascoltare, a raccogliere una runa o a cercare una via per superare il tappeto.
 
 ## Licenza
 
