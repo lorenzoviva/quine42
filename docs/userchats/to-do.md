@@ -9,3 +9,4 @@ Le seguenti modifiche non sono ancora state pianificate, vanno formulate come st
 
 <!-- Pianificate il 22/10/2026 in docs/plans/backlog.md (testo originale: docs/userchats/to-do-2026-10-22.md). -->
 <!-- Pianificate il 24/10/2026 in docs/plans/backlog.md, T49-T57 (testo originale: docs/userchats/to-do-2026-10-24.md). -->
+<!-- Pianificate il 24/10/2026 (sera) in docs/plans/backlog.md, T58 (testo originale: docs/userchats/to-do-2026-10-24.md, «Luci del Nucleo e del silos»). -->

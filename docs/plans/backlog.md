@@ -505,7 +505,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 - Dipendenze: nessuna. T46c, T47, T48 dopo T49b (mettono apparecchi nelle stanze).
 - Domande per l'autore: nessuna (se il piano terra non tiene dispositivo e scaffali, la scelta è scritta nel task).
 
-### T46 · La Direzione, dentro: la sala operativa — `in corso` (T46a e T46b fatti; il prossimo è T46c)
+### T46 · La Direzione, dentro: la sala operativa — `in corso` (T46a e T46b fatti; T46c in corso)
 - Contesto: [`corona-proposte.md`](corona-proposte.md) §3.1 (approvata il 23/10). Oggi dentro la Direzione (`universo`,
   squadra dell'Arbitro, oro `ffcf5c`) ci sono solo gli scaffali di `universe.json` e le scrivanie. Gli apparecchi seguono
   le vetrine di T21-T28 (`SHOWCASES`/`GRAPH_AT` in `corona.ts`, `showcaseOf`/`stepShowcase`/`clickStudio` in
@@ -618,6 +618,21 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   dei programmi): da vicino il bagliore dei neon rosa della Sala del Concilio riempie lo schermo; con la camera girata,
   dall'interno del modello tagliato, l'insegna dell'Ufficio dei luoghi si legge al contrario (da controllare dal viale).
   Il `dev` di Vite su un'altra porta non caricava wasmoon (`LuaFactory` mancante); la build di produzione sì.
+
+### T58 · Ritocchi di luce: il piedistallo del Nucleo e il silos dei personaggi — `da fare` (si comincia da T58a)
+- Contesto: richiesta del 24/10, sera ([`to-do-2026-10-24.md`](../userchats/to-do-2026-10-24.md), «Luci del Nucleo e del silos»).
+  Il disegno è in `src/render/corona3d.ts`; non tocca il kernel.
+- **T58a · il piedistallo del grafo**: oggi (`itemMesh`, caso `grafo`) il gradino alto ha il neon solo sul bordo davanti e su
+  quello dietro, il basso solo davanti: da un lato si vedono due gradini accesi, dall'altro uno. Il neon gira tutto attorno
+  al bordo superiore di entrambi i gradini, su tutte e quattro le facce (come `rim`, già usato da scaffali e piedistalli).
+- **T58b · il silos**: oggi (`showcaseBody`, caso `silos`) la base e il coperchio sono parallelepipedi e sotto il vetro c'è una riga
+  di luce che sottolinea il nome dell'individuo e lo rende meno leggibile. Fare: via le due righe; alla base del cilindro di
+  vetro (raggio 0,95) un cerchio di luce; il coperchio diventa un cilindro solido opaco poco più largo del vetro, con un
+  cerchio di luce come quello della base che combacia con il bordo esterno del vetro. La base resta (o diventa anch'essa un
+  cilindro, se a vista il parallelepipedo stona col coperchio tondo: decidere guardando).
+- Fatto quando (per pezzo): typecheck e test verdi, verifica nel browser da vicino (Nucleo e Studio dei personaggi, anche con la
+  camera girata), foto prima/dopo, commit. Sono piccoli: si possono fare nella stessa sessione.
+- Dipendenze: nessuna. Domande per l'autore: nessuna.
 
 ### T50 · La corona personalizzata: il viale e gli esterni — `in attesa` (dipende da T31)
 - Contesto: richiesta del 24/10 («La corona»): le strutture sono rifatte (T19, T31 in corso), ma viale, vicoli e prati
