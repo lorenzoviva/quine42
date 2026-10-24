@@ -672,16 +672,91 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   camera girata), foto prima/dopo, commit. Sono piccoli: si possono fare nella stessa sessione.
 - Dipendenze: nessuna. Domande per l'autore: nessuna.
 
-### T50 · La corona personalizzata: il viale e gli esterni — `in attesa` (dipende da T31)
-- Contesto: richiesta del 24/10 («La corona»): le strutture sono rifatte (T19, T31 in corso), ma viale, vicoli e prati
-  (`groundAt`, `buildCoronaRing`) restano spogli e anonimi. L'autore vuole personalizzarli dopo che le strutture nuove sono
-  nel campus.
-- Fare (da precisare con l'autore): arredo del campus come modelli della libreria (`corona-*`, 8 voxel per casella come gli
-  edifici): lampioni al neon lungo il viale, panchine e cartelli nei vicoli, alberi o giardini di luce sui prati, insegne e
-  schermi pubblicitari dello studio; i membri del Concilio che camminano tra gli edifici quando lavorano.
-- Fatto quando: gli elementi scelti nel campus, collisione dai voxel, verifica di giorno e di notte, commit.
-- **Domande per l'autore**: che cosa vuoi vedere fuori (gli esempi sopra, altro)? Li scrive Gemini come le strutture (un
-  prompt come `gemini-strutture-corona.md`) o lo Scultore? Uno stile per settore (il colore dell'edificio) o uno solo?
+### T50 · La corona personalizzata: arredi futuristici, trasporti e Concilio di gerboa — `da fare` (si comincia da T50a)
+- Contesto: consultazione del 24/10 ([`risposte-T50.md`](../userchats/risposte-T50.md)). Gli undici edifici sono completati
+  nel campus (T31 fatto). L'ambientazione della corona deve essere marcatamente futuristica e artificiosa («lo studio che
+  programma la realtà»), sfruttando MarkovJunior a piena potenza: programmi con semi riutilizzabili ad altissima varietà visiva
+  e fotogrammi animati. Fuori non camminano i membri del Concilio, ma una vita robotica operosa; i membri del Concilio (negli
+  interni degli edifici e nella Direzione) sono un tributo alla *Guida Galattica per gli Autostoppisti*: gerboa giganti
+  pacioccosi con cappelli distintivi per ruolo.
+- **T50a · Prompt per Gemini CLI (`docs/prompts/gemini-esterni-corona.md`)**:
+  - Predisporre il file guida per Gemini CLI (stile `gemini-strutture-corona.md`) con schede dettagliate e istruzioni mirate
+    a sfruttare tutta l'espressività di MarkovJunior (regole generative ad albero/frattali, voxel luminosi `glow`, voxel
+    trasparenti/traslucidi, fotogrammi animati per i droni e seed riutilizzabili che producono varianti ricche).
+- **T50b · Modelli di arredo urbano futuristico (MarkovJunior, 8 voxel per casella)**:
+  - *Alberi di luce neon e trasparenti*: chiome sintetiche e ramificazioni di voxel neon e traslucidi; la forma varia
+    sensibilmente in base al seme (un solo programma generativo ad alta espressività).
+  - *Lampioni futuristici*: forme bizzarre, geometriche o sinuose, con sorgenti luminose neon che rischiarano il viale di notte.
+  - *Arredi per vicoli e prati*: panchine sintetiche, cartelli olografici di settore o totem informativi.
+- **T50c · Logistica e trasporti negli esterni (droni e trenini)**:
+  - Fuori dagli edifici non camminano i membri del Concilio, ma simpatiche entità logistiche futuristiche:
+    - *Robottini e droni*: piccoli droni volanti animati che fanno la spola tra una struttura e l'altra trasportando pacchetti di dati.
+    - *Trenini dei file*: piccoli convogli futuristici che viaggiano su percorsi dedicati o binari di luce trasportando archivi e file.
+  - Logica di animazione e percorsi in `src/render/corona3d.ts` (posizioni interpolate o orbite tra le strutture).
+- **T50d · Gli avatar del Concilio: gerboa giganti con cappello**:
+  - Tributo a *The Hitchhiker's Guide to the Galaxy*: i membri del Concilio (negli interni dello studio, alle console della
+    Direzione e al tavolo) non sono più sagome coniche provvisorie (`Avatars` in `corona3d.ts`), ma **gerboa giganti**,
+    carini e pacioccosi (non inquietanti).
+  - Modello MarkovJunior base: corpo soffice e rotondo, orecchie grandi, zampe lunghe, occhi espressivi; colore del mantello
+    o dettagli coordinati con la tinta dell'agente.
+  - Cappelli tematici distintivi per ciascun ruolo:
+    - *Narratore*: cilindro da cantastorie;
+    - *Cartografo*: berretto da esploratore o visiera con mappa;
+    - *Artista*: basco inclinato da pittore;
+    - *Scultore*: visiera protettiva o elmetto da cantiere;
+    - *Fisico*: occhialoni protettivi da laboratorio o tocco accademico;
+    - *Ingegnere*: berretto da tecnico con lente/monocolo;
+    - *Arbitro*: parrucca giudiziaria o tocco da magistrato;
+    - *Referente*: berretto da concierge o auricolare luminoso.
+  - Integrazione in `Avatars` (`src/render/corona3d.ts`) per mostrare i modelli voxel al posto delle geometrie provvisorie.
+- **T50e · Posizionamento, collisioni e rendering nel campus**:
+  - `buildCoronaRing` e `groundAt` in `src/render/corona3d.ts`: distribuire lampioni lungo la linea al neon del viale,
+    alberi di luce sui prati e arredi nei vicoli; collisione calibrata dai voxel per mantenere sgombri viali e ingressi.
+- Fatto quando: prompt per Gemini scritto; modelli di arredi, droni/trenini e gerboa generati e collaudati in sandbox;
+  campus popolato con arredi e droni in movimento; gerboa visibili con i loro cappelli negli interni; test di conformità verdi;
+  verifica visuale di giorno e di notte; commit.
+- Dipendenze: nessuna (T31 è completato). Domande per l'autore: nessuna (chiarite in `risposte-T50.md`).
+
+### T59 · Da Rune a QUINE42: refactoring del nome del gioco — `in corso`
+- Contesto: a seguito di consultazione, il nome provvisorio del gioco passa da «Rune» a «QUINE42» (tributo al concetto
+  di quine — il programma che produce il proprio codice sorgente, cuore del gioco — e alla Risposta Fondamentale 42 della
+  *Guida Galattica per gli Autostoppisti*).
+  *Distinzione fondamentale*: la meccanica delle **rune** (token Lua nel terreno, lastre luminose, canone delle rune,
+  magia e borsa delle rune) resta invariata e parte integrante del mondo e della diegesi; ciò che cambia è il **nome del
+  gioco** stesso, l'identità del progetto e il branding.
+- Fare:
+  1. **Configurazione e metadati di progetto**: `package.json` (`name: "quine42"`, eventuale descrizione); aggiornare
+     script o riferimenti correlati se presenti.
+  2. **Interfaccia utente e HTML**:
+     - `index.html`: `<title>QUINE42</title>`, schermata intro `#intro` (`.name`: `QUINE42`; il logo runico ᚱ ᚢ ᚾ ᛖ e
+       il payoff restano coerenti con il mondo), intestazione aiuto `<h2>QUINE42</h2>`.
+     - UI / messaggi di sistema: banner, schermata di caricamento o dialoghi di aiuto dove compare il nome «Rune».
+     - Console del browser: esporre `window.quine` (o `window.quine42`), mantenendo `window.rune` come alias per
+       retrocompatibilità con test e console.
+  3. **Documentazione e regole agenti**:
+     - Titoli e aperture in `README.md`, `AGENTS.md`, `GEMINI.md`, `CLAUDE.md`.
+     - Documenti di design (`docs/design.md`, sommario) indicando il nuovo nome del gioco e chiarendo la distinzione
+       dalle rune come token.
+  4. **Decisione architetturale**:
+     - Registrare la decisione in un ADR (`docs/adr/0062-da-rune-a-quine42.md`) e aggiornare `docs/adr/README.md`.
+  5. **Verifiche e test**:
+     - `npm run typecheck`, `npm test` e `npm run build` verdi.
+- Fatto quando: typecheck e test verdi, build funzionante, verifica nel browser di titolo, schermata iniziale intro, guida H e
+  accesso via console (`window.quine` e `window.rune`), ADR-0062 registrato, commit.
+- Dipendenze: nessuna.
+
+### T60 · Il raggio 42: i 42 passi verso la corona — `da fare` (dipende da T59)
+- Contesto: con il nuovo nome QUINE42 (T59, tributo alla Guida Galattica e alla ricorsione), il cerchio di simulazione
+  si allinea: 42 passi per uscire (non più 44). Il raggio del cerchio (`universe.json → circleRadius` e default in
+  `src/kernel/universe.ts`) diventa 42.
+- Fare: `circleRadius: 42` in `universe/universe.json` e nel kernel; la corona deve rimanere invisibile e fuori vista dal
+  centro finché il tappeto è attivo (ADR-0009); verificare con la camera 3/4 e il raggio di rendering che dal centro (0,0)
+  nessun edificio, strada o bagliore del campus entri nel frustum prima che il tappeto si fermi (`coronaRevealed()`);
+  aggiornare `README.md` (da 44 a 42 passi), AGENTS.md, il canone e i test esistenti (`tests/kernel.test.ts`,
+  `tests/campus.test.ts`, `tests/explore.test.ts`).
+- Fatto quando: test verdi, verifica nel browser che camminando normalmente la corona sia nascosta, e fermando il tappeto
+  (`carpet.active = false`) bastino esattamente 42 passi per varcare il cerchio e rivelare il campus; commit.
+- Dipendenze: T59.
 
 ## Terreno, strutture e taglie
 
