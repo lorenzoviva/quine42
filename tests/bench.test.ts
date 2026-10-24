@@ -7,7 +7,8 @@ import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockModels } from '../src/kernel/ai/mock';
-import { BENCH, benchFiles, cleanCases, trialId } from '../src/kernel/bench';
+import { BENCH, benchFiles, cleanCases, fieldLabel, trialId, valueText, type BenchShown } from '../src/kernel/bench';
+import { BENCH_AT } from '../src/kernel/corona';
 import type { BenchCase, Manifest } from '../src/kernel/types';
 
 const boot = () => Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
@@ -140,5 +141,104 @@ describe('the bench of the Sala sistemi', () => {
     expect(asked.length).toBe(2);
     expect(asked[1]).toMatch(/non mostrano la meccanica: .*non cambia nulla/);
     expect(seed(k, r.id!).manifest.casi?.length).toBe(1);
+  });
+});
+
+// T27b: the bench of the Systems Room with the cases of the seed: a glass case in the middle of the room, «<» «>» across
+// the cases of all the systems, each run with the code the system has now.
+describe('the bench with the cases of the seed', () => {
+  it('every system of the seed has cases, and each one shows its system working with the real code', async () => {
+    const k = await boot();
+    const systems = k.systems.map((m) => m.manifest.id).filter((id) => id.startsWith('sys.'));
+    expect(systems).toEqual(['sys.physics', 'sys.wander', 'sys.follow', 'sys.needs', 'sys.fire']);
+    for (const id of systems) {
+      const { manifest, logic } = seed(k, id);
+      expect(manifest.casi?.length, id).toBeGreaterThanOrEqual(2);
+      // The cases are already clean: the kernel would not change them.
+      expect(cleanCases(manifest.casi, manifest.ui, logic.split('\n').length).cases, id).toEqual(manifest.casi);
+      for (const c of manifest.casi!) {
+        const run = await k.runBenchCase(manifest, logic, c);
+        expect(run.errori, `${id}: ${c.titolo}`).toEqual([]);
+        expect(run.cambiati.length, `${id}: ${c.titolo}`).toBeGreaterThan(0);
+      }
+    }
+  }, 30000);
+
+  it('the cases say what the code does: the bramble burns and the crate not, the shield protects, the follower stops a step away', async () => {
+    const k = await boot();
+    const fire = seed(k, 'sys.fire');
+    const [burn, shield] = fire.manifest.casi!;
+    const a = await k.runBenchCase(fire.manifest, fire.logic, burn);
+    expect(a.dopo).toMatchObject({ '0:body.solid': 'assente', '1:body.solid': true, '2:effimero.fino': 'assente' });
+    expect(a.dopo['needs.health'] as number).toBeLessThan(100);
+    expect((await k.runBenchCase(fire.manifest, fire.logic, shield)).dopo['needs.health']).toBe(100);
+    const follow = seed(k, 'sys.follow');
+    const f = await k.runBenchCase(follow.manifest, follow.logic, follow.manifest.casi![0]);
+    const [px, py] = f.frames.at(-1)!.pos[0]!, [x, y] = f.frames.at(-1)!.pos[1]!;
+    expect(Math.hypot(x - px, y - py)).toBeGreaterThan(1.3);
+    expect(Math.hypot(x - px, y - py)).toBeLessThan(1.6);
+    // A walk of the wanderer pushes the crate.
+    const physics = seed(k, 'sys.physics');
+    const push = await k.runBenchCase(physics.manifest, physics.logic, physics.manifest.casi![0]);
+    expect(push.dopo['0:pos.x'] as number).toBeGreaterThan((push.prima['0:pos.x'] as number) + 1);
+  });
+
+  it('cleans the walks of the cases: the four directions, a time', () => {
+    const { cases, errors } = cleanCases([{ titolo: 'A', racconto: '', passi: [{ tipo: 'cammina', verso: 'Giù', secondi: 0.5 }, { tipo: 'cammina', verso: 'sopra' }, { tipo: 'cammina', verso: 'in diagonale' }], durata: 1, guarda: ['needs.thirst'] }], undefined, 5);
+    expect(cases[0].passi).toEqual([{ tipo: 'cammina', verso: 'giu', secondi: 0.5 }, { tipo: 'cammina', verso: 'su', secondi: 1 }]);
+    expect(errors.join()).toMatch(/in diagonale/);
+  });
+
+  it('stands in the middle of the Systems Room; «<» «>» go through the cases of all the systems in the order of the tick', async () => {
+    const k = await boot();
+    const room = k.corona.building('sistemi')!.floors[0];
+    const bench = room.items.find((i) => i.kind === 'banco')!;
+    expect([bench.x - room.ox, bench.y - room.oy, bench.w, bench.h]).toEqual([BENCH_AT.x, BENCH_AT.y, 3, 3]);
+    expect(room.items.filter((i) => (i.kind === 'prev' || i.kind === 'next') && i.target === 'banco').length).toBe(2);
+    const all = k.benchCases();
+    expect(all[0]).toMatchObject({ id: 'sys.physics#0', system: 'sys.physics', of: 0, path: 'modules/sys.physics/logic.lua' });
+    expect([...new Set(all.map((c) => c.system))]).toEqual(['sys.physics', 'sys.wander', 'sys.follow', 'sys.needs', 'sys.fire']);
+    // Asking for the bench starts its run; it arrives with studio:bench.
+    const done = new Promise<BenchShown>((ok) => k.bus.on('studio:bench', (b: BenchShown) => b?.run && ok(b)));
+    const first = k.benchOf()!;
+    expect(first.run).toBeUndefined();
+    expect(first.scene.tiles.length).toBe(25);
+    expect(first.scene.things).toEqual([expect.objectContaining({ name: expect.any(String), radius: 0.42, person: false, fire: false })]);
+    const ran = await done;
+    expect(ran.key).toBe(first.key);
+    expect(ran.run!.errori).toEqual([]);
+    expect(k.benchOf()!.run).toBe(ran.run);
+    k.stepBench(-1);
+    expect(k.benchOf()!.entry.id).toBe(all.at(-1)!.id);
+    k.stepBench(1);
+    expect(k.benchOf()!.entry.id).toBe('sys.physics#0');
+    const panels: Array<{ bench: BenchShown }> = [];
+    k.bus.on('ui:bench', (e: { bench: BenchShown }) => panels.push(e));
+    k.openBench();
+    expect(panels[0].bench.entry.id).toBe('sys.physics#0');
+  });
+
+  it('rewriting the system runs its case again with the new code', async () => {
+    const k = await boot();
+    const before = k.benchOf()!;
+    const path = 'modules/sys.physics/logic.lua';
+    k.applyFiles({ ...k.files, [path]: k.files[path].replace('local give = math.min(1, 30 / math.max(1, b.mass or 1))', 'local give = 0') });
+    const after = k.benchOf()!;
+    expect(after.key).not.toBe(before.key);
+    const run = await new Promise<BenchShown>((ok) => {
+      const check = (b?: BenchShown) => b?.key === after.key && b.run && ok(b);
+      k.bus.on('studio:bench', check);
+    });
+    // Nobody pushes any more: the crate stays where it was.
+    expect(run.run!.cambiati).toEqual([]);
+    expect(run.run!.errori.join()).toMatch(/non cambia nulla/);
+  });
+
+  it('says the watched fields in words', () => {
+    const scene = { tiles: [], things: [{ name: 'Rovo', color: '#0f0', radius: 0.45, person: false, fire: false }] };
+    expect(fieldLabel('needs.health')).toBe('salute');
+    expect(fieldLabel('0:body.solid', scene)).toBe('Rovo: c’è');
+    expect(fieldLabel('2:difesa.valore', scene)).toBe('cosa 2: difesa.valore');
+    expect([valueText(57.78), valueText(true), valueText('assente'), valueText(null)]).toEqual(['57,8', 'sì', 'sparita', '—']);
   });
 });

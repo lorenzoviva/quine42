@@ -12,7 +12,7 @@ import { SCREEN_NAME, type ScreenField } from './screens';
 import { AGENTS } from './agents/council';
 
 export type FileLook = 'libro' | 'cristallo' | 'pergamena' | 'tavoletta';
-export type ItemKind = 'file' | 'sprite' | 'tile' | 'layout' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'less' | 'more' | 'grafo' | 'situazione' | 'parete' | 'console' | 'stazione';
+export type ItemKind = 'file' | 'sprite' | 'tile' | 'layout' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'less' | 'more' | 'grafo' | 'situazione' | 'parete' | 'console' | 'stazione' | 'banco';
 /** What a showcase shows (T21): the runes and spells, the people, the things, the objects of the packs, the places planned (T26). */
 export type ShowcaseSource = 'rune' | 'persone' | 'cose' | 'oggetti' | 'luoghi';
 /** How a showcase looks: a screen, a silo of liquid, a 3D printer, a holographic table with a place in miniature. */
@@ -72,6 +72,12 @@ export const CONSOLES_AT = { x: 9, y: WALL_Y + 1 };
  * first `CHAIN.x1 - CHAIN.x0 + 1` of them (the panel lists them all).
  */
 export const CHAIN = { x0: 2, x1: 21, w: 3, room: 'sistemi' };
+/**
+ * The bench of the Systems Room (T27b, src/kernel/bench.ts): a glass case of 3 × 3 cells where the others have their
+ * showcase, a case of a system running in it with the real code, a screen with the lines that matter above it; «<» «>» at
+ * its sides pick the case (all the cases of all the systems, in the order of the tick).
+ */
+export const BENCH_AT = { x: SHOWCASE_AT.x, y: SHOWCASE_AT.y - 1, w: 3, h: 3, room: CHAIN.room };
 export function chainSlots(n: number): Array<{ x: number; w: number }> {
   const span = CHAIN.x1 - CHAIN.x0 + 1;
   const shown = Math.min(n, span);
@@ -294,7 +300,7 @@ function shelfSlots(sides = false): Array<{ x: number; y: number }> {
 const SLOTS = shelfSlots();
 const DEVICE_SLOTS = shelfSlots(true);
 /** The buildings with a device in the middle of their ground floor. */
-const DEVICES = new Set([...Object.keys(SHOWCASES), 'nucleo', 'universo']);
+const DEVICES = new Set([...Object.keys(SHOWCASES), 'nucleo', 'universo', BENCH_AT.room]);
 
 export class Corona {
   outer: number;
@@ -376,6 +382,11 @@ export class Corona {
             Object.entries(AGENTS).forEach(([agent, a], i) => placed.push({ kind: 'console', label: `la console ${ofThe(a.name)}`, target: agent, color: a.color, x: ox + CONSOLES_AT.x + i, y: oy + CONSOLES_AT.y }));
           }
           if (id === CHAIN.room) chainSlots(systems.length).forEach((s, i) => placed.push({ kind: 'stazione', label: `la catena dei sistemi: ${systems[i].name}`, target: systems[i].id, x: ox + s.x, y: oy + WALL_Y, w: s.w }));
+          if (id === BENCH_AT.room) {
+            placed.push({ kind: 'banco', label: 'il banco di prova', target: 'banco', x: ox + BENCH_AT.x, y: oy + BENCH_AT.y, w: BENCH_AT.w, h: BENCH_AT.h });
+            placed.push({ kind: 'prev', label: '«<» il caso precedente', target: 'banco', x: ox + BENCH_AT.x - 1, y: oy + SHOWCASE_AT.y });
+            placed.push({ kind: 'next', label: '«>» il caso successivo', target: 'banco', x: ox + BENCH_AT.x + BENCH_AT.w, y: oy + SHOWCASE_AT.y });
+          }
           const show = SHOWCASES[id];
           if (show) {
             const { x, y, w } = SHOWCASE_AT;

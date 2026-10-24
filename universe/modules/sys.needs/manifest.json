@@ -5,5 +5,128 @@
   "version": "0.1.0",
   "description": "Fame, sete ed energia calano col tempo; se fame o sete arrivano a zero cala la salute. Il mana torna piano da solo. A zero salute il viandante muore e la simulazione lo rimette in piedi.",
   "logic": "logic.lua",
-  "order": 40
+  "order": 40,
+  "casi": [
+    {
+      "titolo": "Senza mangiare",
+      "racconto": "Al viandante resta un boccone di fame: finita quella, la salute comincia a calare. La sete scende più in fretta della fame.",
+      "viandante": {
+        "componenti": {
+          "needs": {
+            "hunger": 1,
+            "thirst": 40,
+            "energy": 50,
+            "health": 60
+          }
+        }
+      },
+      "durata": 12,
+      "guarda": [
+        "needs.hunger",
+        "needs.thirst",
+        "needs.health"
+      ],
+      "righe": [
+        4,
+        10,
+        11,
+        13,
+        14
+      ]
+    },
+    {
+      "titolo": "Sazio e dissetato",
+      "racconto": "Con fame e sete sopra la metà la salute torna, piano; il mana torna da solo.",
+      "viandante": {
+        "componenti": {
+          "needs": {
+            "hunger": 90,
+            "thirst": 90,
+            "energy": 80,
+            "health": 50,
+            "mana": 10
+          }
+        }
+      },
+      "durata": 10,
+      "guarda": [
+        "needs.health",
+        "needs.mana",
+        "needs.thirst"
+      ],
+      "righe": [
+        15,
+        16,
+        19
+      ]
+    },
+    {
+      "titolo": "Camminare stanca",
+      "racconto": "Il viandante cammina avanti e indietro: sete ed energia calano più in fretta (la fatica), la fame no.",
+      "viandante": {
+        "componenti": {
+          "needs": {
+            "hunger": 80,
+            "thirst": 80,
+            "energy": 80,
+            "health": 100
+          }
+        }
+      },
+      "passi": [
+        {
+          "tipo": "cammina",
+          "verso": "destra",
+          "secondi": 0.35
+        },
+        {
+          "tipo": "cammina",
+          "verso": "sinistra",
+          "secondi": 0.35
+        },
+        {
+          "tipo": "cammina",
+          "verso": "destra",
+          "secondi": 0.35
+        },
+        {
+          "tipo": "cammina",
+          "verso": "sinistra",
+          "secondi": 0.35
+        },
+        {
+          "tipo": "cammina",
+          "verso": "destra",
+          "secondi": 0.35
+        },
+        {
+          "tipo": "cammina",
+          "verso": "sinistra",
+          "secondi": 0.35
+        },
+        {
+          "tipo": "cammina",
+          "verso": "destra",
+          "secondi": 0.35
+        },
+        {
+          "tipo": "cammina",
+          "verso": "sinistra",
+          "secondi": 0.35
+        }
+      ],
+      "durata": 0.5,
+      "guarda": [
+        "needs.thirst",
+        "needs.energy",
+        "needs.hunger"
+      ],
+      "righe": [
+        8,
+        9,
+        11,
+        12
+      ]
+    }
+  ]
 }

@@ -13,6 +13,7 @@ import { cellNear } from '../kernel/corona';
 import { animateRing, Avatars, buildCoronaRing, buildRoom, buildShowcase, buildSituation, campusKey } from './corona3d';
 import { ScreenWall } from './screens';
 import { ChainView } from './chain';
+import { BenchView } from './bench';
 import { CUT, U } from './materials';
 import { Overlay } from './overlay';
 import { buildChunk, chunkSig, disposeChunk, tileForms, type ChunkView } from './terrain';
@@ -56,6 +57,8 @@ export class Renderer {
   private wall?: { room: string; view: ScreenWall };
   /** The Systems Room's chain (T27a), for the room it stands in. */
   private chain?: { room: string; view: ChainView };
+  /** The Systems Room's bench (T27b): built again when the case, its code or its run change. */
+  private bench?: { key: string; at: number; view: BenchView };
   private shows = new Map<string, { key: string; group: THREE.Group; spin?: THREE.Object3D; bubbles?: THREE.Object3D[]; silo: boolean }>();
   private overlay: Overlay;
   private flash = new THREE.PointLight(0xfff2c0, 0, 8, 1.4);
@@ -324,6 +327,30 @@ export class Renderer {
       }
       this.chain.view.run(this.t);
     }
+    const bench = studio?.floor.items.find((i) => i.kind === 'banco');
+    if (this.bench && !bench) {
+      this.scene.remove(this.bench.view.group);
+      this.bench.view.dispose();
+      this.bench = undefined;
+    }
+    if (studio && bench && (!this.bench || this.t - this.bench.at > 0.3)) {
+      // Read three times a second: the run arrives from the kernel in miniature a moment after the case is chosen.
+      const now = k.benchOf();
+      const key = now ? `${here}|${now.key}|${!!now.run}` : '';
+      if (this.bench?.key !== key) {
+        if (this.bench) {
+          this.scene.remove(this.bench.view.group);
+          this.bench.view.dispose();
+          this.bench = undefined;
+        }
+        if (now) {
+          const arrow = (kind: string) => studio.floor.items.find((i) => i.kind === kind && i.target === 'banco');
+          this.bench = { key, at: this.t, view: new BenchView(bench, now, studio.building.color, arrow('prev'), arrow('next')) };
+          this.scene.add(this.bench.view.group);
+        }
+      } else if (this.bench) this.bench.at = this.t;
+    }
+    this.bench?.view.update(this.t);
     this.avatars.update(k, this.t);
 
     // Light: the day outside, a dim neon light in the studio.
@@ -431,7 +458,9 @@ export class Renderer {
       const fl = studio.floor;
       o.title(`${studio.building.name.toUpperCase()}${studio.building.floors.length > 1 ? `  ·  PIANO ${fl.index + 1}/${studio.building.floors.length}` : ''}`, studio.building.color);
       const shown = near?.kind === 'showcase' ? k.showcaseOf(near.target!) : undefined;
+      const tried = near?.kind === 'banco' ? k.benchOf() : undefined;
       if (shown) o.caption(`E: guarda «${shown.entry.label}» (${shown.index + 1}/${shown.count})`);
+      else if (tried) o.caption(`E: il banco di prova, ${tried.entry.name}: «${tried.entry.case.titolo}» (${tried.index + 1}/${tried.count})`);
       else if (near && near.kind !== 'desk') o.caption(`E: ${near.kind === 'file' ? `apri ${near.label}` : near.kind === 'sprite' || near.kind === 'tile' || near.kind === 'layout' ? `guarda «${near.label}»` : near.label}`);
     }
     if (this.mouse) {

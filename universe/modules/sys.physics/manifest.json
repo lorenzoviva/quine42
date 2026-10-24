@@ -5,5 +5,84 @@
   "version": "0.1.0",
   "description": "Le cose spingibili si spostano quando il viandante ci cammina contro, scivolano e si fermano secondo massa e attrito.",
   "logic": "logic.lua",
-  "order": 25
+  "order": 25,
+  "casi": [
+    {
+      "titolo": "La spinta",
+      "racconto": "Il viandante cammina contro una cassa: la cassa si sposta davanti a lui.",
+      "terreno": [
+        "ggggg",
+        "ggggg",
+        "ggggg",
+        "ggggg",
+        "ggggg"
+      ],
+      "cose": [
+        {
+          "modulo": "object.crate",
+          "x": 1,
+          "y": 0
+        }
+      ],
+      "passi": [
+        {
+          "tipo": "cammina",
+          "verso": "destra",
+          "secondi": 0.3
+        }
+      ],
+      "durata": 1.5,
+      "guarda": [
+        "0:pos.x",
+        "0:vel.x"
+      ],
+      "righe": [
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        17,
+        19
+      ]
+    },
+    {
+      "titolo": "Contro il masso",
+      "racconto": "Una cassa lanciata scivola, frenata dall’attrito, e si ferma contro la roccia.",
+      "terreno": [
+        "ggggr",
+        "ggggr",
+        "ggggr",
+        "ggggr",
+        "ggggr"
+      ],
+      "cose": [
+        {
+          "modulo": "object.crate",
+          "x": -2,
+          "y": -1,
+          "componenti": {
+            "vel": {
+              "x": 12,
+              "y": 0
+            }
+          }
+        }
+      ],
+      "durata": 3,
+      "guarda": [
+        "0:pos.x",
+        "0:vel.x"
+      ],
+      "righe": [
+        22,
+        23,
+        24,
+        26,
+        27,
+        28
+      ]
+    }
+  ]
 }

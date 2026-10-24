@@ -378,6 +378,17 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
       glow.box(x, 0.4, z + 1.12, x + w, 0.43, z + 1.18, rgbOf(col, 0.75));
       break;
     }
+    case 'banco': {
+      // The bench of the Systems Room (T27b): a dark plinth of w × h cells, the posts and the top frame of its glass case
+      // with neon edges; the glass, the scene in miniature and the screen above are src/render/bench.ts.
+      const w = it.w ?? 1, d = it.h ?? 1;
+      const dark = rgbOf('#10101a');
+      lit.box(x + 0.05, 0, z + 0.05, x + w - 0.05, BENCH_TOP, z + d - 0.05, dark);
+      for (const px of [x + 0.05, x + w - 0.13]) for (const pz of [z + 0.05, z + d - 0.13]) lit.box(px, BENCH_TOP, pz, px + 0.08, BENCH_TOP + BENCH_GLASS, pz + 0.08, dark);
+      rim(glow, x + 0.05, z + 0.05, x + w - 0.05, z + d - 0.05, BENCH_TOP - 0.03, rgbOf(col, 0.8));
+      rim(glow, x + 0.05, z + 0.05, x + w - 0.05, z + d - 0.05, BENCH_TOP + BENCH_GLASS, rgbOf(col, 0.8));
+      break;
+    }
     case 'console': {
       // A console of the Direction (T46c): a desk facing the wall of screens, its monitor lit in the colour of its agent.
       const c = it.color ?? col;
@@ -492,6 +503,10 @@ function showcaseBody(lit: Builder, glow: Builder, it: StudioItem, col: string):
   glow.box(mx + 0.04, 0.3, mz + 0.1, mx + 0.1, 0.32, mz + 0.9, c);
   glow.box(mx + 0.9, 0.3, mz + 0.1, mx + 0.96, 0.32, mz + 0.9, c);
 }
+
+/** The bench's plinth and the height of its glass case (T27b): the scene stands on the plinth. */
+export const BENCH_TOP = 0.55;
+export const BENCH_GLASS = 1.0;
 
 /** How wide an environment of the sample room is in miniature (T26d), on its plinth. */
 const SAMPLE_SIDE = 0.72;

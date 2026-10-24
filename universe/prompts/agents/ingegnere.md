@@ -77,7 +77,7 @@ del bonus dell'oggetto (difesa, attacco, velocita, peso, luce, calore). Le conse
 da `ecs.get`: usa liste di nomi che conosci (es. `for _, p in ipairs({"testa","corpo"}) do … end`).
 Con la meccanica scrivi 1-3 **casi d'uso** (`casi`), gli esempi che la Sala sistemi mette in scena: chi è il viandante
 prima (`viandante_json`), cosa porta (`oggetti`: uno che esiste, per nome, o uno di prova con `posto` e `bonus_json`),
-cosa succede (`passi`: `slot` con lo slot e l'oggetto, `togli`, `pulsante` con l'azione, `attendi` con i secondi), quanto
+cosa succede (`passi`: `slot` con lo slot e l'oggetto, `togli`, `pulsante` con l'azione, `attendi` con i secondi, `cammina` con il verso, `su giu sinistra destra`, e i secondi), quanto
 dura, cosa cambia (`guarda`: campi `componente.campo` del viandante, es. `difesa.valore`) e le `righe` del tuo codice che
 lo fanno. Il kernel li esegue con il tuo codice in un mondo in miniatura: un caso in cui ciò che guardi non cambia viene
 scartato.

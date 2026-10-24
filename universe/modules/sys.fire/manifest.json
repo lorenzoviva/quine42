@@ -5,5 +5,112 @@
   "version": "0.1.0",
   "description": "Il fuoco brucia ciò che è infiammabile e scotta chi non è protetto; le cose effimere (fiamme, luci evocate) svaniscono a tempo; gli scudi si spengono.",
   "logic": "logic.lua",
-  "order": 45
+  "order": 45,
+  "casi": [
+    {
+      "titolo": "Il rovo brucia, la cassa no",
+      "racconto": "Una fiamma tra un rovo, una cassa e il viandante: il rovo brucia, la cassa no; il viandante, troppo vicino, si scotta. Dopo tre secondi la fiamma svanisce.",
+      "terreno": [
+        "ggggg",
+        "ggggg",
+        "ggggg",
+        "ggggg",
+        "ggggg"
+      ],
+      "cose": [
+        {
+          "modulo": "object.bush",
+          "x": 1,
+          "y": 1
+        },
+        {
+          "modulo": "obj.cassa",
+          "x": -1,
+          "y": 1
+        },
+        {
+          "modulo": "object.sign",
+          "x": 0,
+          "y": 1,
+          "componenti": {
+            "effimero": {
+              "fino": 3
+            },
+            "fuoco": {
+              "raggio": 1
+            }
+          }
+        }
+      ],
+      "durata": 5,
+      "guarda": [
+        "0:body.solid",
+        "1:body.solid",
+        "needs.health",
+        "2:effimero.fino"
+      ],
+      "righe": [
+        15,
+        16,
+        17,
+        20,
+        23,
+        24,
+        25,
+        28,
+        30
+      ]
+    },
+    {
+      "titolo": "Lo scudo protegge",
+      "racconto": "La stessa fiamma, ma il viandante ha uno scudo acceso: il rovo brucia, la sua salute non cala.",
+      "terreno": [
+        "ggggg",
+        "ggggg",
+        "ggggg",
+        "ggggg",
+        "ggggg"
+      ],
+      "viandante": {
+        "componenti": {
+          "scudo": {
+            "fino": 99
+          }
+        }
+      },
+      "cose": [
+        {
+          "modulo": "object.bush",
+          "x": 1,
+          "y": 1
+        },
+        {
+          "modulo": "object.sign",
+          "x": 0,
+          "y": 1,
+          "componenti": {
+            "effimero": {
+              "fino": 99
+            },
+            "fuoco": {
+              "raggio": 1
+            }
+          }
+        }
+      ],
+      "durata": 3,
+      "guarda": [
+        "0:body.solid",
+        "needs.health",
+        "scudo.fino"
+      ],
+      "righe": [
+        9,
+        10,
+        14,
+        25,
+        28
+      ]
+    }
+  ]
 }

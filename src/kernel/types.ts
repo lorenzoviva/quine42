@@ -297,7 +297,7 @@ export interface BenchCase {
   viandante?: { componenti?: Record<string, Record<string, unknown>>; oggetti?: BenchItem[] };
   /** Things of the scene, by module, in tiles from the wanderer. */
   cose?: Array<{ modulo: string; x: number; y: number; componenti?: Record<string, Record<string, unknown>> }>;
-  /** What happens, in order: an object into a slot of the panel, out of it, a button, some time. */
+  /** What happens, in order: an object into a slot of the panel, out of it, a button, some time, a walk. */
   passi?: BenchStep[];
   /** Seconds the case lasts after its steps (at most 30). */
   durata: number;
@@ -315,7 +315,10 @@ export interface BenchItem {
   bonus?: Record<string, number>;
 }
 
-export type BenchStep = { tipo: 'slot'; slot: string; oggetto: string } | { tipo: 'togli'; slot: string } | { tipo: 'pulsante'; azione: string } | { tipo: 'attendi'; secondi: number };
+export type BenchStep = { tipo: 'slot'; slot: string; oggetto: string } | { tipo: 'togli'; slot: string } | { tipo: 'pulsante'; azione: string } | { tipo: 'attendi'; secondi: number } | { tipo: 'cammina'; verso: BenchWay; secondi: number };
+
+/** Where the wanderer walks in a case (T27b): the world's directions, held like the keys. */
+export type BenchWay = 'su' | 'giu' | 'sinistra' | 'destra';
 
 export interface ModuleEntry {
   manifest: Manifest;

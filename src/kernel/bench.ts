@@ -3,7 +3,7 @@
 // The Engineer writes the cases of the systems he forges; the kernel runs them before accepting them.
 
 import type { Kernel, KernelOptions } from './kernel';
-import type { BenchCase, BenchItem, BenchStep, FileMap, ItemDef, Manifest, UiPanel } from './types';
+import type { BenchCase, BenchItem, BenchStep, BenchWay, FileMap, ItemDef, Manifest, UiPanel } from './types';
 import { ITEM_CATEGORIES } from './types';
 import { memoryStore } from './repo';
 import { MockModels } from './ai/mock';
@@ -14,6 +14,8 @@ export const BENCH = 5;
 const HZ = 20;
 const MAX_SECONDS = 30;
 const MAX_CASES = 3;
+/** The keys a walk of a case holds. */
+const WAYS: Record<BenchWay, 'up' | 'down' | 'left' | 'right'> = { su: 'up', giu: 'down', sinistra: 'left', destra: 'right' };
 
 /** One moment of a case: the watched values and where the wanderer and the things are (carpet tiles). */
 export interface BenchFrame {
@@ -36,7 +38,47 @@ export interface BenchRun {
   errori: string[];
 }
 
-const PATH_RE = /^(?:(\d+):)?([a-z_][a-z0-9_]*)\.([a-z_][a-z0-9_]*)$/i;
+/** A case on the bench of the Systems Room (T27b): which system, which of its cases, where its code is. */
+export interface BenchEntry {
+  /** `<system>#<n>`. */
+  id: string;
+  system: string;
+  name: string;
+  description?: string;
+  path: string;
+  /** Its place among the cases of its system, and how many it has. */
+  of: number;
+  cases: number;
+  case: BenchCase;
+}
+
+/** What the glass case sets out: the 5 × 5 tiles (row by row, from the top) and the things of the case, in its order. */
+export interface BenchScene {
+  tiles: Array<{ color: string; layer?: string; solid: boolean }>;
+  /** `fire`: it burns (a `fuoco` component in the case): drawn as a flame. */
+  things: Array<{ name: string; color: string; radius: number; person: boolean; fire: boolean }>;
+}
+
+/** The bench now: the case, its place among all, its scene and code, and its run once the kernel in miniature has done it. */
+export interface BenchShown {
+  entry: BenchEntry;
+  index: number;
+  count: number;
+  /** The case and the code it ran with: a new key when the player rewrites the system. */
+  key: string;
+  scene: BenchScene;
+  code: string[];
+  run?: BenchRun;
+}
+
+/** A short fingerprint of a text (FNV-1a): the runs of the bench are kept by case and code. */
+export function textKey(s: string): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 0x01000193);
+  return (h >>> 0).toString(36);
+}
+
+const PATH_RE =/^(?:(\d+):)?([a-z_][a-z0-9_]*)\.([a-z_][a-z0-9_]*)$/i;
 
 const slugOf = (s: string) =>
   s
@@ -103,6 +145,11 @@ export function cleanCases(raw: unknown, panel: UiPanel | undefined, lines: numb
         if (buttons.has(azione)) passi.push({ tipo, azione });
         else errors.push(`«${titolo}»: il pulsante «${p.azione}» non è nel pannello`);
       } else if (tipo === 'attendi') passi.push({ tipo, secondi: num(p.secondi, 0.1, MAX_SECONDS, 1) });
+      else if (tipo === 'cammina') {
+        const verso = id(p.verso).replace(/^sotto$/, 'giu').replace(/^sopra$/, 'su');
+        if (verso in WAYS) passi.push({ tipo, verso: verso as BenchWay, secondi: num(p.secondi, 0.1, MAX_SECONDS, 1) });
+        else errors.push(`«${titolo}»: «${p.verso}» non è una direzione (su, giu, sinistra, destra)`);
+      }
     }
     const guarda = [...new Set((Array.isArray(r.guarda) ? r.guarda : []).map((g: unknown) => String(g).trim()).filter((g: string) => PATH_RE.test(g)))].slice(0, 6) as string[];
     if (!guarda.length) {
@@ -280,6 +327,11 @@ export async function runCase(
       if (panel) k.uiAction(panel, p.azione);
     }
     if (p.tipo === 'attendi') run(p.secondi);
+    else if (p.tipo === 'cammina') {
+      k.input.setHeld(WAYS[p.verso], true);
+      run(p.secondi);
+      k.input.releaseAll();
+    }
     else {
       k.tick(1 / HZ);
       t += 1 / HZ;
@@ -293,4 +345,39 @@ export async function runCase(
   if (!cambiati.length && !faults.size) errori.push(`non cambia nulla di ciò che guarda (${c.guarda.join(', ')})`);
   k.sandbox.close();
   return { prima, dopo, cambiati, frames, messaggi, errori };
+}
+
+/** The fields the systems of the seed watch, in words; the others keep their name. */
+const FIELD_NAME: Record<string, string> = {
+  'needs.health': 'salute',
+  'needs.hunger': 'fame',
+  'needs.thirst': 'sete',
+  'needs.energy': 'energia',
+  'needs.mana': 'mana',
+  'body.solid': 'c’è',
+  'scudo.fino': 'scudo fino a',
+  'effimero.fino': 'dura fino a',
+  'pos.x': 'x',
+  'pos.y': 'y',
+  'vel.x': 'velocità x',
+  'vel.y': 'velocità y',
+};
+
+/** «salute», «Rovo: c’è», «Abitante: x»: what a watched field is, with the name of its thing. */
+export function fieldLabel(path: string, scene?: BenchScene): string {
+  const m = PATH_RE.exec(path);
+  if (!m) return path;
+  const name = FIELD_NAME[`${m[2]}.${m[3]}`] ?? `${m[2]}.${m[3]}`;
+  if (m[1] === undefined) return name;
+  return `${scene?.things[Number(m[1])]?.name ?? `cosa ${m[1]}`}: ${name}`;
+}
+
+/** A watched value as the screen says it: a number to one decimal, yes/no, «sparita» for a thing that is gone. */
+export function valueText(v: unknown): string {
+  if (v === 'assente') return 'sparita';
+  if (v === null || v === undefined) return '—';
+  if (v === true) return 'sì';
+  if (v === false) return 'no';
+  if (typeof v === 'number') return String(Math.round(v * 10) / 10).replace('.', ',');
+  return typeof v === 'string' ? v : JSON.stringify(v);
 }

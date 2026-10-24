@@ -42,7 +42,7 @@ import { agentReply, examine, narrate, npcDialogue, npcReply, referenteReply, we
 import { planGenesis } from './agents/genesis';
 import { councilSession, judgeAction, judgeCraft, nameSpell } from './agents/effects';
 import { cleanPanel, designMechanic } from './agents/mechanics';
-import { BENCH, cleanCases, runCase, type BenchRun } from './bench';
+import { BENCH, cleanCases, runCase, textKey, type BenchEntry, type BenchRun, type BenchScene, type BenchShown } from './bench';
 import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Identity } from './agents/content';
 import { addItem, CARRY_CAPACITY, countItem, equippedItem, moveSlot, newInventory, putSlot, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
 import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH } from './relief';
@@ -364,6 +364,10 @@ export class Kernel {
   private showcaseIndex = new Map<string, number>();
   /** The phase each model of places shows (T26, an index of `PLACE_PHASES`): the finished place until it is moved. */
   private showcasePhase = new Map<string, number>();
+  /** The bench of the Systems Room (T27b): the case it shows, the runs it has (by case and code), those under way. */
+  private benchIndex = 0;
+  private benchRuns = new Map<string, BenchRun>();
+  private benchRunning = new Set<string>();
   /** The commit the Direction's timeline shows (T46b); none: the newest. */
   private filmAt?: string;
   /** What each system costs in the tick (T27a): the chain of the Systems Room shows it. */
@@ -978,7 +982,7 @@ export class Kernel {
   /** The scene of the bench (5 × 5 around the cell of the wanderer, (0, 0)); the first walkable terrain around it. */
   private benchDraft(cx: number, cy: number): string {
     const S = this.config.chunkSize;
-    const base = Object.keys(this.palette).find((c) => c !== '?' && !this.palette[c].solid && !this.palette[c].layer?.match(/liquid|wall|door/)) ?? '?';
+    const base = this.benchBase();
     const scene = this.bench?.terreno;
     const h = Math.floor(BENCH / 2);
     let out = '';
@@ -988,6 +992,11 @@ export class Kernel {
         out += code && this.palette[code] ? code : base;
       }
     return out;
+  }
+
+  /** The terrain of the bench's scene where its case says nothing: the first one that is walked on. */
+  private benchBase(): string {
+    return Object.keys(this.palette).find((c) => c !== '?' && !this.palette[c].solid && !this.palette[c].layer?.match(/liquid|wall|door/)) ?? '?';
   }
 
   private regenerateDraft(ch: Chunk): void {
@@ -3070,12 +3079,16 @@ export class Kernel {
       case 'stazione':
         this.openStation(it.target!);
         return;
+      case 'banco':
+        this.openBench();
+        return;
       case 'showcase':
         this.openShowcase(it.target!);
         return;
       case 'prev':
       case 'next':
         if (it.target === 'tempo') this.stepTimeline(it.kind === 'prev' ? 1 : -1);
+        else if (it.target === 'banco') this.stepBench(it.kind === 'prev' ? -1 : 1);
         else this.stepShowcase(it.target!, it.kind === 'prev' ? -1 : 1);
         return;
       case 'less':
@@ -3124,7 +3137,7 @@ export class Kernel {
 
   clickStudio(rx: number, ry: number): boolean {
     if (this.zone !== 'studio') return false;
-    const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'situazione', 'parete', 'console', 'stazione', 'layout']);
+    const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'situazione', 'parete', 'console', 'stazione', 'banco', 'layout']);
     if (!it) return false;
     const p = this.playerPos();
     const c = cellNear(it, p.x, p.y);
@@ -3137,7 +3150,9 @@ export class Kernel {
     else if (it.kind === 'parete') this.openScreen(it.target as ScreenField);
     else if (it.kind === 'console') this.openScreen('registro');
     else if (it.kind === 'stazione') this.openStation(it.target!);
+    else if (it.kind === 'banco') this.openBench();
     else if (it.target === 'tempo') this.stepTimeline(it.kind === 'prev' ? 1 : -1);
+    else if (it.target === 'banco') this.stepBench(it.kind === 'prev' ? -1 : 1);
     else if (it.kind === 'layout') this.openLayout(it, this.corona.roomAt(it.x, it.y)?.building.name ?? '');
     else if (it.kind === 'showcase') this.openShowcase(it.target!);
     else if (it.kind === 'less' || it.kind === 'more') this.stepPhase(it.target!, it.kind === 'less' ? -1 : 1);
@@ -3673,6 +3688,82 @@ export class Kernel {
   runBenchCase(manifest: Manifest, logic: string, c: BenchCase): Promise<BenchRun> {
     const known = (name: string) => this.content.byName(name)?.id ?? (this.content.get(name) ? name : undefined);
     return runCase(this.files, manifest, logic, c, { wasmUri: this.wasmUri, boot: (o) => Kernel.boot(o), known });
+  }
+
+  /** The cases of the bench (T27b): those of every system, in the order of the tick. */
+  benchCases(): BenchEntry[] {
+    return this.systems.flatMap((m) =>
+      (m.manifest.casi ?? []).map((c, i, all) => ({
+        id: `${m.manifest.id}#${i}`,
+        system: m.manifest.id,
+        name: m.manifest.name || m.manifest.id,
+        ...(m.manifest.description ? { description: m.manifest.description } : {}),
+        path: m.logicPath ?? `${m.dir}/logic.lua`,
+        of: i,
+        cases: all.length,
+        case: c,
+      })),
+    );
+  }
+
+  /** What the case sets out: its 5 × 5 tiles in the colours of the palette, its things with their colour and size. */
+  benchScene(c: BenchCase): BenchScene {
+    const base = this.benchBase();
+    const tiles = Array.from({ length: BENCH * BENCH }, (_, i) => {
+      const code = [...(c.terreno?.[Math.floor(i / BENCH)] ?? '')][i % BENCH];
+      const t = this.palette[code && this.palette[code] ? code : base];
+      return { color: t?.color ?? '#555555', ...(t?.layer ? { layer: t.layer } : {}), solid: !!t?.solid };
+    });
+    const things = (c.cose ?? []).map((t) => {
+      const m = this.modules.get(t.modulo)?.manifest;
+      const fire = !!t.componenti?.fuoco;
+      return { name: fire ? 'Fiamma' : (m?.name ?? t.modulo), color: fire ? '#ff8a2a' : (m?.appearance?.color ?? '#cccccc'), radius: m?.physics?.radius ?? 0.4, person: !!(m?.components?.wander || m?.persona || m?.interaction?.type === 'talk'), fire };
+    });
+    return { tiles, things };
+  }
+
+  /**
+   * The bench now (T27b): the case chosen and, once the kernel in miniature has run it with the code the system has now,
+   * its run (kept by case and code: rewriting the system runs it again). Asking starts the run; `studio:bench` says when it is done.
+   */
+  benchOf(): BenchShown | undefined {
+    const all = this.benchCases();
+    if (!all.length) return undefined;
+    const index = ((this.benchIndex % all.length) + all.length) % all.length;
+    const entry = all[index];
+    const m = this.modules.get(entry.system)!;
+    const logic = this.files[entry.path] ?? '';
+    const key = `${entry.id}|${textKey(JSON.stringify(m.manifest) + logic)}`;
+    const run = this.benchRuns.get(key);
+    if (!run && !this.benchRunning.has(key)) {
+      this.benchRunning.add(key);
+      void this.runBenchCase(m.manifest, logic, entry.case)
+        .catch((e): BenchRun => ({ prima: {}, dopo: {}, cambiati: [], frames: [], messaggi: [], errori: [`il banco non parte: ${e instanceof Error ? e.message : String(e)}`] }))
+        .then((r) => {
+          this.benchRunning.delete(key);
+          if (this.benchRuns.size >= 40) this.benchRuns.clear();
+          this.benchRuns.set(key, r);
+          this.bus.emit('studio:bench', this.benchOf());
+        });
+    }
+    return { entry, index, count: all.length, key, scene: this.benchScene(entry.case), code: logic.split('\n'), ...(run ? { run } : {}) };
+  }
+
+  /** «<» «>» of the bench: the case before or after, across the systems. */
+  stepBench(d: number): void {
+    const n = this.benchCases().length;
+    if (!n) return this.message('Il banco è vuoto: nessun sistema ha casi.');
+    this.benchIndex = (((this.benchIndex + d) % n) + n) % n;
+    const now = this.benchOf()!;
+    this.message(`${now.entry.name}: «${now.entry.case.titolo}» (${now.index + 1}/${now.count})`);
+    this.bus.emit('studio:bench', now);
+  }
+
+  /** The bench seen up close: the system, the case in words, before and after, the code with its lines, the station. */
+  openBench(): void {
+    const now = this.benchOf();
+    if (!now) return this.message('Il banco è vuoto: nessun sistema ha casi.');
+    this.bus.emit('ui:bench', { bench: now, station: this.chain().stations.find((s) => s.id === now.entry.system) });
   }
 
   /** States of the wanderer (on horseback, with a backpack…): what they change, until when. */

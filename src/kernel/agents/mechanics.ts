@@ -33,10 +33,10 @@ const CASE: Schema = {
     },
     passi: {
       type: 'ARRAY',
-      description: 'cosa succede, in ordine: un oggetto in uno slot del pannello, toglierlo, un pulsante, un po’ di tempo',
+      description: 'cosa succede, in ordine: un oggetto in uno slot del pannello, toglierlo, un pulsante, un po’ di tempo, il viandante che cammina (verso e secondi)',
       items: {
         type: 'OBJECT',
-        properties: { tipo: { type: 'STRING', enum: ['slot', 'togli', 'pulsante', 'attendi'] }, slot: { type: 'STRING' }, oggetto: { type: 'STRING' }, azione: { type: 'STRING' }, secondi: { type: 'NUMBER' } },
+        properties: { tipo: { type: 'STRING', enum: ['slot', 'togli', 'pulsante', 'attendi', 'cammina'] }, verso: { type: 'STRING', enum: ['su', 'giu', 'sinistra', 'destra'] }, slot: { type: 'STRING' }, oggetto: { type: 'STRING' }, azione: { type: 'STRING' }, secondi: { type: 'NUMBER' } },
         required: ['tipo'],
       },
     },

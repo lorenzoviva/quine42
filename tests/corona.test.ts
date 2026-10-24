@@ -74,13 +74,13 @@ describe('the corona campus', () => {
 
 // T49b: every room's device stands in the middle, with DEVICE_MARGIN free cells on every side, reachable from the door;
 // the ground floor's shelves are at its sides, the files that do not fit there go upstairs.
-const DEVICE_KINDS = ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'situazione'];
+const DEVICE_KINDS = ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'situazione', 'banco'];
 
 describe('the devices of the rooms', () => {
   it('stand in the middle, the cells around them free and reachable from the door', () => {
     const c = campus();
-    const rooms = c.buildings.filter((b) => b.floors[0].items.some((i) => ['showcase', 'grafo', 'situazione'].includes(i.kind)));
-    expect(rooms.map((b) => b.id).sort()).toEqual(['cose', 'luoghi', 'magia', 'nucleo', 'oggetti', 'persone', 'universo']);
+    const rooms = c.buildings.filter((b) => b.floors[0].items.some((i) => ['showcase', 'grafo', 'situazione', 'banco'].includes(i.kind)));
+    expect(rooms.map((b) => b.id).sort()).toEqual(['cose', 'luoghi', 'magia', 'nucleo', 'oggetti', 'persone', 'sistemi', 'universo']);
     for (const b of rooms) {
       const f = b.floors[0];
       const device = f.items.filter((i) => DEVICE_KINDS.includes(i.kind) && (i.kind !== 'prev' && i.kind !== 'next' || i.target !== 'tempo'));

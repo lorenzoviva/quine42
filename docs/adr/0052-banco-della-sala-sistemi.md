@@ -14,7 +14,7 @@ formato e l'esecuzione dei casi nascono qui.
 1. **Un caso è un dato del manifest** (`Manifest.casi`, `BenchCase` in `src/kernel/types.ts`): titolo e racconto, una scena
    di 5 × 5 caselle attorno al viandante (`terreno`, `cose` per modulo con i loro componenti), il viandante (componenti, ciò
    che porta: oggetti dell'universo per nome o **oggetti di prova**, con posto e bonus), i `passi` (`slot`, `togli`,
-   `pulsante`, `attendi`), la `durata` (al più 30 s), cosa `guarda` (`componente.campo` del viandante, `<n>:componente.campo`
+   `pulsante`, `attendi`, `cammina` con il verso `su giu sinistra destra`: tiene premuti i tasti, T27b), la `durata` (al più 30 s), cosa `guarda` (`componente.campo` del viandante, `<n>:componente.campo`
    della n-esima cosa) e le `righe` del codice che contano.
 2. **Il kernel in miniatura** è un `Kernel` vero (`KernelOptions.bench`): `runCase` in `src/kernel/bench.ts` lo avvia con i soli
    `universe.json`, `core.*`, i moduli che non sono sistemi (dati, cose, viandante, la tavolozza) e il sistema del caso; niente
@@ -34,5 +34,8 @@ formato e l'esecuzione dei casi nascono qui.
   costa un avvio del kernel in miniatura (~60-300 ms in Node, una sandbox Lua nuova, chiusa alla fine).
 - T27b userà lo stesso formato e lo stesso `runCase` per i casi del seme (`casi` nei manifest di `sys.*`) e disegnerà i
   fotogrammi nella teca; se il giocatore riscrive un sistema, la teca esegue il codice nuovo.
-- Il formato copre oggi ciò che serve a meccaniche e sistemi del seme; altri passi (usare un oggetto, muoversi) si aggiungono
+- Il formato copre oggi ciò che serve a meccaniche e sistemi del seme; altri passi (usare un oggetto) si aggiungono
   in `BenchStep` e in `runCase`.
+- T27b (fatto): ogni `sys.*` del seme ha 2-3 casi; nella Sala sistemi la teca 3 × 3 (`BENCH_AT`) li mostra tutti, nell'ordine
+  del tick, con «<» «>»; `kernel.benchOf()` esegue il caso scelto con il codice che il sistema ha adesso (in cache per caso e
+  codice: riscriverlo lo esegue di nuovo) e la teca ripete prima, la regola, dopo. Nel browser un caso costa meno di un secondo.

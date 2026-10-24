@@ -5,5 +5,92 @@
   "version": "0.1.0",
   "description": "Chi ha deciso di seguire il viandante lo segue, restando a un passo di distanza.",
   "logic": "logic.lua",
-  "order": 31
+  "order": 31,
+  "casi": [
+    {
+      "titolo": "Ti segue",
+      "racconto": "Un’abitante a cui il viandante ha chiesto di seguirlo gli va incontro e si ferma a un passo.",
+      "terreno": [
+        "ggggg",
+        "ggggg",
+        "ggggg",
+        "ggggg",
+        "ggggg"
+      ],
+      "cose": [
+        {
+          "modulo": "npc.villager",
+          "x": 2,
+          "y": 2,
+          "componenti": {
+            "mind": {
+              "mode": "segui",
+              "mood": "tranquillo",
+              "history": []
+            }
+          }
+        }
+      ],
+      "durata": 3,
+      "guarda": [
+        "0:pos.x",
+        "0:pos.y"
+      ],
+      "righe": [
+        7,
+        8,
+        9,
+        10,
+        13,
+        14,
+        15,
+        16
+      ]
+    },
+    {
+      "titolo": "Ti va dietro",
+      "racconto": "Il viandante si allontana: chi lo segue gli va dietro, un po’ più svelto di come vaga.",
+      "terreno": [
+        "ggggg",
+        "ggggg",
+        "ggggg",
+        "ggggg",
+        "ggggg"
+      ],
+      "cose": [
+        {
+          "modulo": "npc.villager",
+          "x": 1,
+          "y": 0,
+          "componenti": {
+            "mind": {
+              "mode": "segui",
+              "mood": "tranquillo",
+              "history": []
+            }
+          }
+        }
+      ],
+      "passi": [
+        {
+          "tipo": "cammina",
+          "verso": "sinistra",
+          "secondi": 0.35
+        }
+      ],
+      "durata": 2,
+      "guarda": [
+        "0:pos.x",
+        "0:pos.y"
+      ],
+      "righe": [
+        5,
+        8,
+        9,
+        11,
+        13,
+        14
+      ]
+    }
+  ]
 }

@@ -416,7 +416,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   `sampleDrafts` ora sceglie in modo deterministico una bozza boscosa, una aperta e una con acqua (le tre vecchie per prime, poi
   attorno all'origine), in cache; tutti gli ambienti del seme restano validi. Nessun ADR.
 
-### T27 · La Sala sistemi, dentro — `da fare` (T27a, T27c e T27d fatti; si continua da T27b)
+### T27 · La Sala sistemi, dentro — `fatto` (T27a, T27b, T27c, T27d)
 - L'autore chiede un aiuto: far apprezzare la complessità del codice con esempi (cosa fa un sistema, casi d'uso).
   **Proposta all'autore** (es. ogni sistema come un «caso» animato: prima, regola, dopo).
 - Proposta scritta il 23/10/2026: [`corona-proposte.md`](corona-proposte.md) §2 — **la catena** (ogni sistema una
@@ -448,9 +448,22 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   (`core.movement`, `core.carpet`), perché girano nella stessa catena; le rune del tappeto (che si eseguono prima) non sono una stazione.
   Nessun ADR (deciso in T27, ADR-0052). Per T27b: il banco va al centro del piano terra (`DEVICES` in `corona.ts`, scaffali ai lati);
   la catena resta alla riga 1, il passaggio davanti a lei alla riga 2.
-- **T27b, dopo T27c**: i casi del seme vanno scritti come `casi` nei manifest di `sys.*` (il formato e `runCase` ci sono, provati
-  con fuoco e bisogni); restano la teca, lo schermo con le `righe` e il pannello, che disegnano `BenchRun.frames`. Per i casi
-  di `sys.wander`, `sys.follow` e `sys.physics` può servire un passo nuovo in `BenchStep` (es. l'ora del giorno, «segui»).
+- **T27b · il banco con i casi del seme — `fatto`** (commit «Corona (T27b)»). Ogni `sys.*` del seme ha 2-3 `casi` nel manifest (11 in
+  tutto: la spinta e la cassa contro il masso; verso la meta e il gatto nel recinto; ti segue e ti va dietro; senza mangiare, sazio e
+  dissetato, camminare stanca; il rovo brucia e la cassa no, lo scudo protegge). Passo nuovo `cammina` (verso `su giu sinistra destra`,
+  secondi: tiene premuti i tasti) in `BenchStep`, `cleanCases`, `runCase`, schema e prompt dell'Ingegnere. `corona.ts`: `BENCH_AT`, voce
+  `banco` 3 × 3 al centro della Sala sistemi (ora una stanza con dispositivo: scaffali ai lati), «<» «>» con `target: 'banco'`. `kernel.ts`:
+  `benchCases` (tutti i casi, nell'ordine del tick), `benchScene`, `benchOf` (esegue il caso scelto con il codice attuale, in cache per
+  caso e codice, `studio:bench` quando arriva), `stepBench`, `openBench` (`ui:bench`), E e clic. `render/bench.ts`: la teca (caselle,
+  viandante, cose, fiamme), il ciclo prima → la regola → dopo, lo schermo basso sul coperchio con le righe accese e i valori; `studio.ts`:
+  il pannello (caso, passi, prima → dopo, messaggi, «Non va», stazione, codice aperto sulle righe accese, «<» «>», «Apri il file»).
+  `bench.ts`: `fieldLabel`, `valueText`, `textKey`. Test: `tests/bench.test.ts` (+6: ogni caso del seme regge, cosa dicono, i passi
+  `cammina`, il banco nella sala e le frecce, il codice riscritto rieseguito, i nomi dei campi), `tests/corona.test.ts` (la Sala sistemi
+  tra le stanze con dispositivo). Nel browser (`aurora`, offline): gli 11 casi girano nel kernel in miniatura in meno di un secondo l'uno,
+  la teca anima fuoco e spinte, pannello e frecce funzionano, nessun errore. Diverso dal previsto: per vagabondaggio e seguire non serve
+  l'ora del giorno (la meta si dà come componente `meta`), basta `cammina`; perdere di vista a 14 caselle non entra in una scena 5 × 5,
+  e nemmeno il gatto libero (va nel recinto). Lo schermo sopra la teca, alto, copriva la catena: è basso e largo, 5 righe e 4 valori
+  (il pannello li ha tutti). Le cose sono blocchi colorati, non i loro modelli (possibile seguito). ADR-0052 aggiornato.
 - **T27d · le meccaniche nella Sala sistemi — `fatto`** (commit «Corona (T27d)», da T32): `folderOf` in `corona.ts` manda `mech.*` a
   `sistemi` (prima finivano in `altro`, l'Archivio, che ora nasce solo per un prefisso sconosciuto). Test in `tests/bench.test.ts`:
   dopo `forgeMechanic` lo studio non ha l'Archivio e i file della meccanica sono sugli scaffali della Sala sistemi. Diverso dal

@@ -8,6 +8,8 @@ import { OPERATION_COLOR, OPERATION_NAME, type Operation, type OperationKind, ty
 import { ALERT_COLOR, ALERT_NAME, LIVE_LINES, SCREEN_NAME, fill, type Screens, type ScreenField } from '../kernel/screens';
 import { tallyLine, usd } from '../kernel/ai/usage';
 import { msText, STATION_KIND, type Chain, type Station } from '../kernel/chain';
+import { fieldLabel, valueText, type BenchShown } from '../kernel/bench';
+import type { BenchStep } from '../kernel/types';
 import { $, el } from './dom';
 import { icons } from './hud';
 
@@ -20,6 +22,8 @@ export class StudioPanel {
   private shown?: string;
   /** The field of the Direction's wall the panel shows, while it is open (T46b). */
   private screen?: ScreenField;
+  /** Whether the panel shows the bench of the Systems Room (T27b), while it is open. */
+  private benchOpen = false;
   onClose?: () => void;
   onEdit?: (path: string) => void;
 
@@ -36,6 +40,11 @@ export class StudioPanel {
       if (this.isOpen && this.screen === 'tempo') this.screens('tempo', screens);
     });
     k.bus.on('ui:station', ({ station, chain }: { station: Station; chain: Chain }) => this.station(station, chain));
+    k.bus.on('ui:bench', ({ bench, station }: { bench: BenchShown; station?: Station }) => this.bench(bench, station));
+    // Another case, or its run arrived, with the panel open: it follows.
+    k.bus.on('studio:bench', (b?: BenchShown) => {
+      if (this.isOpen && this.benchOpen && b) this.bench(b, this.k.chain().stations.find((x) => x.id === b.entry.system));
+    });
     k.bus.on('ui:layout', ({ sample, building }: { sample: LayoutSample; building: string }) => this.layout(sample, building));
     // The arrows pressed with the panel open: it follows.
     k.bus.on('studio:showcase', (e: Shown) => {
@@ -64,6 +73,7 @@ export class StudioPanel {
     close.onclick = () => this.close();
     this.shown = undefined;
     this.screen = undefined;
+    this.benchOpen = false;
     this.root.replaceChildren(el('div', { class: 'window' }, close, ...children));
     this.root.hidden = false;
     this.onClose?.();
@@ -73,6 +83,7 @@ export class StudioPanel {
     this.root.hidden = true;
     this.shown = undefined;
     this.screen = undefined;
+    this.benchOpen = false;
     this.onClose?.();
   }
 
@@ -308,6 +319,59 @@ export class StudioPanel {
       ...c.stations.map((x) => el('div', { class: 'item', ...(x.id === s.id ? { style: 'background:rgba(185,166,255,0.12)' } : {}) }, el('span', { class: 'path', ...(x.fault ? { style: 'color:#ff3b3b' } : {}) }, `${x.step}. ${x.name}`), ` — ${x.fault ? 'guasto' : measured(x)}`)),
       el('div', { class: 'row' }, open),
     );
+  }
+
+  /**
+   * The bench of the Systems Room (T27b): the system and its case in words, what the kernel in miniature did with the code
+   * the system has now (before → after, what it said, why it does not show the system working), the steps, the code with
+   * the lines of the case lit, the station of the chain, «<» «>» and «Apri il file».
+   */
+  bench(b: BenchShown, s?: Station): void {
+    const { entry, run, scene } = b;
+    const c = entry.case;
+    const item = (what: string, text: string, color?: string) => el('div', { class: 'item' }, el('span', { class: 'path', ...(color ? { style: `color:${color}` } : {}) }, what), ` ${text}`);
+    const step = (d: number, text: string) => {
+      const btn = el('button', {}, text);
+      btn.onclick = () => this.k.stepBench(d);
+      return btn;
+    };
+    const open = el('button', {}, 'Apri il file');
+    open.onclick = () => {
+      this.close();
+      this.onEdit?.(entry.path);
+    };
+    const STEP: Record<BenchStep['tipo'], (p: any) => string> = {
+      slot: (p) => `mette «${p.oggetto}» nello slot «${p.slot}»`,
+      togli: (p) => `toglie ciò che è nello slot «${p.slot}»`,
+      pulsante: (p) => `preme «${p.azione}»`,
+      attendi: (p) => `aspetta ${valueText(p.secondi)} s`,
+      cammina: (p) => `cammina verso ${p.verso === 'giu' ? 'giù' : p.verso} per ${valueText(p.secondi)} s`,
+    };
+    const lines = new Set(c.righe ?? []);
+    const code = el('pre', { class: 'program' }, ...b.code.map((l, i) => el('div', lines.has(i + 1) ? { style: 'background:rgba(255,207,92,0.18);color:#ffcf5c' } : {}, `${String(i + 1).padStart(3, ' ')}  ${l}`)));
+    this.show(
+      el('div', { class: 'title' }, `${entry.name}: «${c.titolo}» — Sala Sistemi`),
+      el('div', { class: 'note' }, `Il banco di prova, caso ${b.index + 1} di ${b.count}: un mondo in miniatura (5 × 5 caselle, il viandante al centro) dove gira il codice vero del sistema, quello che ha adesso. Se lo riscrivi, il caso cambia.`),
+      ...(entry.description ? [item('Che cosa fa', entry.description)] : []),
+      item('Il caso', c.racconto || c.titolo),
+      ...(c.passi?.length ? [item('Che cosa succede', `${c.passi.map((p) => STEP[p.tipo](p)).join(', poi ')}; poi ${valueText(c.durata)} s.`)] : [item('Quanto dura', `${valueText(c.durata)} s`)]),
+      el('div', { class: 'section' }, 'Prima e dopo'),
+      ...(run
+        ? [
+            ...c.guarda.map((g) => item(fieldLabel(g, scene), `${valueText(run.prima[g])} → ${valueText(run.dopo[g])}`, run.cambiati.includes(g) ? '#7dff9a' : undefined)),
+            ...run.messaggi.slice(0, 4).map((m) => item('Il viandante legge', `«${m}»`)),
+            ...run.errori.map((e) => item('Non va', e, '#ff3b3b')),
+          ]
+        : [el('div', { class: 'note' }, 'Il mondo in miniatura sta girando…')]),
+      ...(s ? [item('Nella catena', `stazione ${s.step}, ordine ${s.order}${s.measure ? `, ${msText(s.measure.ms)} a tick, ${s.measure.touched} entità` : ''}${s.fault ? `; guasto: ${s.fault.message}` : ''}`, s.fault ? '#ff3b3b' : undefined)] : []),
+      el('div', { class: 'section' }, `Il codice (${entry.path}), le righe del caso accese`),
+      code,
+      el('div', { class: 'row' }, step(-1, '« il precedente'), step(1, 'il successivo »'), open),
+    );
+    this.benchOpen = true;
+    // The code opens on the first lit line.
+    const first = code.children[Math.min(...(c.righe?.length ? c.righe : [1])) - 1] as HTMLElement | undefined;
+    if (first) code.scrollTop = Math.max(0, first.offsetTop - code.offsetTop - 40);
   }
 
   /**

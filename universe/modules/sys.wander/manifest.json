@@ -5,5 +5,83 @@
   "version": "0.1.0",
   "description": "Fa girovagare ogni entità con il componente wander.",
   "logic": "logic.lua",
-  "order": 30
+  "order": 30,
+  "casi": [
+    {
+      "titolo": "Verso la meta",
+      "racconto": "Un’abitante ha una meta (la casa, il lavoro, la piazza: la sceglie la sua giornata): ci cammina, e arrivata gironzola lì vicino.",
+      "terreno": [
+        "ggggg",
+        "ggggg",
+        "ggggg",
+        "ggggg",
+        "ggggg"
+      ],
+      "cose": [
+        {
+          "modulo": "npc.villager",
+          "x": -2,
+          "y": -2,
+          "componenti": {
+            "meta": {
+              "x": 2.5,
+              "y": 2.5
+            }
+          }
+        }
+      ],
+      "durata": 6,
+      "guarda": [
+        "0:pos.x",
+        "0:pos.y"
+      ],
+      "righe": [
+        9,
+        11,
+        12,
+        15,
+        16,
+        33,
+        34,
+        41
+      ]
+    },
+    {
+      "titolo": "A zonzo",
+      "racconto": "Un gatto senza meta, in un recinto: ogni tanto sceglie una direzione nuova, ogni tanto si ferma a guardare; contro la staccionata ne sceglie un’altra.",
+      "terreno": [
+        "ccccc",
+        "cgggc",
+        "cgggc",
+        "cgggc",
+        "ccccc"
+      ],
+      "cose": [
+        {
+          "modulo": "npc.cat",
+          "x": 1,
+          "y": -1
+        }
+      ],
+      "durata": 8,
+      "guarda": [
+        "0:pos.x",
+        "0:pos.y",
+        "0:wander.dx"
+      ],
+      "righe": [
+        43,
+        44,
+        45,
+        46,
+        48,
+        49,
+        52,
+        58,
+        60,
+        61,
+        63
+      ]
+    }
+  ]
 }
