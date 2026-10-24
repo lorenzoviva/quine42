@@ -855,13 +855,19 @@ le risposte alle domande del piano.
   kernel ha un registro (`addWanderer`) e `as(id, fn)` sincrono, che fa agire un altro viandante su tutto ciò che oggi usa
   `playerId`, invece di passare un id a ogni funzione; gli altri viandanti non hanno ancora input né rendering (T38-T39).
 
-### T35 · Semi condivisi e determinismo — `in corso`
+### T35 · Semi condivisi e determinismo — `fatto` (`965b494`)
 - Contesto: decisione 2. Ogni estrazione casuale (kernel, `hash` e `math.random` di Lua, `sys.wander`, fuoco, bottino)
   deve venire da (seme dell'universo, tick, entità); niente orologio di sistema nella simulazione.
 - Fare: censire le fonti di casualità e di tempo (`Math.random`, `Date.now`, `performance.now` dentro il tick) e
   passarle da `rng.ts`; `math.random` della sandbox con il seme del tick.
 - Fatto quando: test — due kernel con lo stesso universo e la stessa sequenza di input arrivano allo stesso stato dopo
   N tick (entità, posizioni, persone).
+- Esito: `K.seed` nel preludio e `Kernel.seedLua` prima di ogni chiamata nel Lua (`runModule`, righe delle rune) con
+  `hash32(seme, tick, chi chiama, entità, n)`; `math.randomseed()` senza argomenti vale 0; `rngFor` al posto di `Math.random`;
+  `worldStamp` (tempo del mondo) al posto di `Date.now()` per figli, regola della morte e trame; ADR-0055,
+  `tests/determinism.test.ts`. Diverso dal previsto: il censimento ha trovato poco (il kernel derivava già quasi tutto dal seme,
+  `sys.wander` e il fuoco usano `hash` e `time`); anche il `MockModels` tirava a caso i nomi degli individui (ora da un
+  contatore); l'orologio resta, documentato, in ciò che non è simulazione (registro, consumi, guasti, misure, scadenze di MJ).
 
 ### T36 · Chi ha generato ogni contenuto (carte, P#2) — `da fare`
 - Contesto: decisioni 4 e 6. Ogni chiamata ha un `chi` (il giocatore) o è comune; ogni contenuto generato ha autore e
