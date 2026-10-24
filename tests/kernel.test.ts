@@ -112,6 +112,7 @@ describe('kernel', () => {
   });
 
   it('runes that stop the carpet reveal the corona and let the player reach it', () => {
+    expect(k.config.circleRadius).toBe(42);
     clearArea(k);
     expect(k.inscribe(['carpet', '.', 'active', '=', 'false'])).toBe(false);
     giveRunes(k, ['carpet', '.', 'active', '=', 'false']);
@@ -119,6 +120,14 @@ describe('kernel', () => {
     expect(countItem(k.inventory(), 'rune:carpet')).toBe(0);
     run(k, DT * 2);
     expect(k.carpet()!.active).toBe(false);
+    // At 41 steps from (0,0) the wanderer is still inside the simulation; at 42 steps they cross the circle into the corona.
+    k.playerPos().x = 41;
+    run(k, DT * 2);
+    expect(k.zone).toBe('sim');
+    k.playerPos().x = 42;
+    run(k, DT * 2);
+    expect(k.zone).toBe('corona');
+    expect(k.coronaRevealed()).toBe(true);
     k.playerPos().x = k.config.circleRadius + 0.5;
     run(k, DT * 2);
     expect(k.zone).toBe('corona');

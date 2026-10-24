@@ -64,7 +64,7 @@ aprire, e le squadre del Concilio che ci lavorano (con `E` ci parli).
 Nella piazza iniziale ci sono `x`, `speed = speed` e la runa magica `luce`. Le rune del tappeto
 (`carpet`, `active`…) si trovano solo lontano dall'inizio, a qualche luogo di distanza. Raccogli `carpet`,
 `.`, `active`, prendi `=` dal centro di `speed = speed`, trova un `false`. Componi la frase
-`carpet . active = false`, premi `Q`, e cammina dritto per 44 passi. Ma ci sono molti altri modi.
+`carpet . active = false`, premi `Q`, e cammina dritto per 42 passi. Ma ci sono molti altri modi.
 </details>
 
 ## Per chi sviluppa

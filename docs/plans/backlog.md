@@ -746,7 +746,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 - Esito: `package.json` (`quine42`), `index.html` (title, intro .name, help h2), `src/main.ts` (`window.quine` e `window.quine42` con alias `window.rune`), documentazione (`README.md`, `AGENTS.md`, `GEMINI.md`, `CLAUDE.md`, `docs/design.md`), ADR-0062. Verificato nel browser: titolo, intro, help e `window.quine === window.rune`. Diverso dal previsto: nessuno.
 - Dipendenze: nessuna.
 
-### T60 · Il raggio 42: i 42 passi verso la corona — `da fare` (dipende da T59)
+### T60 · Il raggio 42: i 42 passi verso la corona — `fatto` (`bdacb5f`)
 - Contesto: con il nuovo nome QUINE42 (T59, tributo alla Guida Galattica e alla ricorsione), il cerchio di simulazione
   si allinea: 42 passi per uscire (non più 44). Il raggio del cerchio (`universe.json → circleRadius` e default in
   `src/kernel/universe.ts`) diventa 42.
@@ -757,6 +757,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   `tests/campus.test.ts`, `tests/explore.test.ts`).
 - Fatto quando: test verdi, verifica nel browser che camminando normalmente la corona sia nascosta, e fermando il tappeto
   (`carpet.active = false`) bastino esattamente 42 passi per varcare il cerchio e rivelare il campus; commit.
+- Esito: `universe/universe.json` e default `src/kernel/universe.ts` impostati a 42; `src/kernel/fourthwall.ts` include `42 passi|quarantadue passi`; aggiornati `README.md`, `AGENTS.md`, ADR-0063 (`docs/adr/0063-raggio-42-passi-corona.md`) e `docs/adr/README.md`. Test aggiornati (`tests/corona.test.ts` e `tests/kernel.test.ts` con verifica a 41 e 42 passi). Verificato nel browser: camera 3/4 dal centro non vede la corona, a 41 passi è ancora `sim`, a 42 passi `zone` diventa `corona`, `coronaRevealed() === true` e il campus viene renderizzato. Diverso dal previsto: nessuno.
 - Dipendenze: T59.
 
 ## Terreno, strutture e taglie

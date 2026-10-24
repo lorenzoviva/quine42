@@ -4,7 +4,7 @@ import { CAMPUS, Corona, DEVICE_MARGIN, ROOM_H, ROOM_W } from '../src/kernel/cor
 // T18: the campus on the ring is four times the 2D one (the circle stays): avenue, doors, buildings
 // big enough for a model, alleys, lawns, a glowing edge; every door reachable from the avenue.
 
-const R = 44;
+const R = 42;
 const files: Record<string, string> = {};
 for (const p of ['core.effects', 'sys.physics', 'world.forest', 'items.base', 'obj.well', 'npc.smith', 'magic.runes', 'misc.other'])
   files[`modules/${p}/manifest.json`] = '{}';

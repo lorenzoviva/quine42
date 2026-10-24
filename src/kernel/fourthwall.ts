@@ -34,7 +34,7 @@ const META_RE = new RegExp(
     // reality that cracks, abstract roles
     String.raw`crep[ae] (?:della|nella) realt\w*|tessuto della realt\w*|ancorare la realt\w*|realt[aà] (?:si|è) (?:instabil\w*|finta|falsa)|censor[ei] delle identit\w*|custod[ei] (?:della realt\w*|dei registri del mondo)|archivista supremo|misurator[ei] di (?:ombre|anomalie)|anomali[ae] del mondo`,
     // the measured edge, the world that repeats
-    String.raw`44 passi|quarantaquattro passi|bordo del (?:mondo|regno)[^.]{0,30}passi|(?:il )?mondo (?:si ripete|ricomincia|si riavvia)`,
+    String.raw`42 passi|quarantadue passi|44 passi|quarantaquattro passi|bordo del (?:mondo|regno)[^.]{0,30}passi|(?:il )?mondo (?:si ripete|ricomincia|si riavvia)`,
     // the carpet that brings you back to the square
     String.raw`(?:torna\w*|ritrov\w*|riport\w*|ricondu\w*) sempre[^.]{0,20}\bin piazza|si ritrova(?:no)? in piazza|chi cammina troppo|non (?:far |lascia )?perder(?:e|si) nessuno`,
     // someone watching every wanderer

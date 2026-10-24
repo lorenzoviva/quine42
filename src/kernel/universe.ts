@@ -9,7 +9,7 @@ export const DEFAULT_CONFIG: UniverseConfig = {
   name: 'universo',
   seed: 1,
   theme: 'prompts/theme.md',
-  circleRadius: 44,
+  circleRadius: 42,
   chunkSize: 18,
   ai: { textModel: 'gemini-3.1-flash-lite', maxText: 800, maxForges: 3, maxPacks: 4, maxCast: 3, thinking: 'low', timeout: 120 },
   partita: DEFAULT_PARTITA,
