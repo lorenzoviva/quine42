@@ -886,7 +886,7 @@ le risposte alle domande del piano.
   sono quelli del grafo; le carte dei luoghi stanno anche in `carte.json`, perché `maps/` è fuori dal testo dell'universo; il pagante di una
   chiamata è il viandante che agisce quando parte (dopo un `await` è `io`): il server di T38-T40 passerà `chi` esplicito.
 
-### T37 · Rune e binding per ruolo — `da fare` (dipende da T33)
+### T37 · Rune e binding per ruolo — `fatto` (`cfe85fa`)
 - Contesto: decisioni 7 e 8. In multigiocatore i giocatori non hanno le rune del tappeto (`CARPET_TOKENS`) né quelle che
   scrivono `x y speed carpet time`; il master ha la sola runa che porta nella Sala del Concilio.
 - Fare: con `partita.modalita = multigiocatore` niente rune del tappeto nei luoghi; il kernel ignora le scritture di quei
@@ -894,6 +894,13 @@ le risposte alle domande del piano.
   Concilio; `R` (rollback del repository) solo del master, quello di un giocatore riguarda il suo tappeto e la sua frase.
   In singola tutto resta com'è.
 - Fatto quando: test (un non master con `x = 9999` sul tappeto resta nel cerchio; il master arriva nella Sala).
+- Esito: `partita.master` (`repairPartita`, `io` per ora; in singola il campo non c'è e `isMaster()` è sempre vero), `carpetLine` e
+  `COUNCIL_RUNE` in `runes.ts`, `RuneComp.by`; le righe girano come chi le ha incise e quelle dei non master con i binding in sola
+  lettura (`K.run_line(key, lock)` nel preludio, copie di tappeto e posizioni dal `Host`); `councilRune`/`councilStock`, `offCarpet`;
+  `takeBackRunes`; ADR-0057, `tests/roles.test.ts`. Diverso dal previsto: il kernel non sapeva chi fosse il master, quindi T37 ha
+  anticipato `partita.master` (il resto del ruolo resta a T42); la runa del Concilio funziona sia pronunciata (T) sia incisa; il tappeto
+  è ancora uno solo, quindi il rollback di un giocatore riprende la sua frase ma non sposta il tappeto (arriva con T38). Nessuna verifica
+  nel browser: in singola il gioco non cambia, e per provare il multigiocatore servirebbe una Genesi nuova sul disco dell'autore.
 
 ### T38 · Il kernel sul server — `da fare` (dipende da T34, T35)
 - Contesto: decisione 2 e «Architettura» del piano. Un processo per universo con il kernel headless, `universeStore`, il
