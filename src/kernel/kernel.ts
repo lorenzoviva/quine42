@@ -281,6 +281,12 @@ export const zoneOf = (cx: number, cy: number) => `${Math.floor((cx + IMPORTANT_
 
 const clone = <T>(v: T): T => (v === undefined ? v : JSON.parse(JSON.stringify(v)));
 
+/**
+ * Systems that move one wanderer (T38): they run once for each wanderer the kernel moves itself, as that
+ * wanderer, and see no other wanderer. Those a session's client moves (`setRemote`) they skip.
+ */
+const PER_WANDERER = new Set(['core.movement', 'core.carpet']);
+
 export class Kernel {
   readonly ecs = new World();
   readonly bus = new EventBus();
@@ -365,13 +371,23 @@ export class Kernel {
   static CHUNKS_PER_TICK = 1;
   private genBudget = 64;
   private tickCount = 0;
+  /** Ticks since this kernel started (the clock of a session, T38). */
+  get ticks(): number {
+    return this.tickCount;
+  }
   /** Calls into Lua with the same key in this tick: each gets its own draws (T35). */
   private luaCalls = new Map<number, number>();
 
   /** The entity of the wanderer acting now (the one the input moves, or another one inside `as`). */
   playerId: Id = 0;
   /** The wanderers of this kernel by id (T34): `io` is the one of a game alone; others join with `addWanderer`. */
-  private wanderersById = new Map<string, Wanderer & { entity: Id }>();
+  private wanderersById = new Map<string, Wanderer & { entity: Id; tappeto?: { ox: number; oy: number } }>();
+  /** Every wanderer has a carpet of their own (T38): the carpet entity holds this one's offset, the others keep theirs in `tappeto`. */
+  private carpetHolder = SOLO;
+  /** The wanderers a session's client moves (T38): the kernel checks their steps and does not move them itself. */
+  private remote = new Set<string>();
+  /** The wanderer the keyboard of this kernel moves. */
+  inputFor = SOLO;
   time = 0;
   zone: 'sim' | 'corona' | 'studio' = 'sim';
   /** What each showcase of the studio shows: building → index in its entries (not saved). */
@@ -489,7 +505,9 @@ export class Kernel {
     const inv = (id: number): Inventory | undefined => this.ecs.get(id, 'inventory');
     return {
       query: (names) => {
-        const ids = this.ecs.query(...names.split(',').map((s) => s.trim()).filter(Boolean));
+        let ids = this.ecs.query(...names.split(',').map((s) => s.trim()).filter(Boolean));
+        // A system that moves one wanderer sees only the one acting (T38); the carpet lets go of whoever is off it.
+        if (this.runningSystem && PER_WANDERER.has(this.runningSystem)) ids = ids.filter((id) => id === this.playerId || !this.ecs.has(id, 'player'));
         return (this.runningSystem === 'core.carpet' && this.offCarpet.size ? ids.filter((id) => !this.offCarpet.has(id)) : ids).join(',');
       },
       get: (id, name) => {
@@ -518,7 +536,7 @@ export class Kernel {
         this.runesDirty = true;
       },
       first: (name) => this.ecs.query(name)[0],
-      held: (a) => this.input.isHeld(a),
+      held: (a) => this.wanderer().id === this.inputFor && this.input.isHeld(a),
       free: (x, y, r) => this.free(x, y, r),
       free_real: (x, y, r) => this.freeReal(x, y, r),
       tile: (x, y) => this.tileAt(Math.floor(x), Math.floor(y)) ?? '',
@@ -711,12 +729,26 @@ export class Kernel {
       return this.as(id, fn);
     }
     const was = this.playerId;
+    const holder = this.carpetHolder;
     this.playerId = w.entity;
+    this.holdCarpet(id);
     try {
       return fn();
     } finally {
+      this.holdCarpet(holder);
       this.playerId = was;
     }
+  }
+
+  /** The carpet entity takes the offset of this wanderer's carpet, and the one it held goes back to its owner. */
+  private holdCarpet(id: string): void {
+    if (id === this.carpetHolder) return;
+    const c = this.carpet();
+    const from = this.wanderersById.get(this.carpetHolder);
+    const to = this.wanderersById.get(id);
+    if (c && from) from.tappeto = { ox: c.ox, oy: c.oy };
+    if (c && to?.tappeto) Object.assign(c, to.tappeto);
+    this.carpetHolder = id;
   }
 
   /**
@@ -730,9 +762,89 @@ export class Kernel {
     const p = this.playerPos() ?? { x: 0, y: 0 };
     const entity = this.spawnWanderer(p.x + 1, p.y);
     const saved = readWandererState(this.files, id);
-    this.wanderersById.set(id, { id, nome: String(nome ?? saved?.nome ?? '').trim().slice(0, 40) || WANDERER_NAME, entity });
+    // Their carpet starts where the carpet of the one acting is: they appear beside them.
+    this.wanderersById.set(id, { id, nome: String(nome ?? saved?.nome ?? '').trim().slice(0, 40) || WANDERER_NAME, entity, tappeto: { ...this.offset() } });
     if (saved) this.as(id, () => this.applyWandererState(saved));
     return entity;
+  }
+
+  /**
+   * A wanderer leaves this world (T38: their client went away): what they carry is saved with the state of play,
+   * their entity goes. `io` stays, it is the one every universe has.
+   */
+  removeWanderer(id: string): boolean {
+    const w = this.wanderersById.get(id);
+    if (!w || id === SOLO) return false;
+    this.saveState();
+    this.ecs.destroy(w.entity);
+    this.wanderersById.delete(id);
+    this.remote.delete(id);
+    return true;
+  }
+
+  /** Whether a session's client moves this wanderer (T38): the kernel then neither walks nor carries them, it checks their steps. */
+  setRemote(id: string, on: boolean): void {
+    if (on && this.wanderersById.has(id)) this.remote.add(id);
+    else this.remote.delete(id);
+  }
+
+  /** A wanderer's entity and where they are in the world (carpet space), if they are in it. */
+  wandererAt(id: string): { entity: Id; x: number; y: number; facing: string } | undefined {
+    const w = this.wanderersById.get(id);
+    if (!w || !this.ecs.alive.has(w.entity)) return undefined;
+    return this.as(id, () => ({ entity: w.entity, ...this.playerCarpet(), facing: String(this.playerComp()?.facing ?? 'down') }));
+  }
+
+  /** How far a wanderer may walk in a second: their speed and states, on the fastest terrain around them. */
+  paceOf(id: string): number {
+    return this.as(id, () => {
+      const pl: any = this.playerComp();
+      const { x, y } = this.playerCarpet();
+      let terrain = 1;
+      for (let dy = -1; dy <= 1; dy++)
+        for (let dx = -1; dx <= 1; dx++) {
+          const t = this.tileAt(Math.floor(x) + dx, Math.floor(y) + dy);
+          terrain = Math.max(terrain, (t && Number(this.palette[t]?.speed)) || 1);
+        }
+      const speed = Math.max(0, Math.min(60, Number(pl?.speed) || 0));
+      const passo = Math.max(0.2, Math.min(4, Number(pl?.passo) || 1));
+      return speed * passo * Math.min(4, terrain);
+    });
+  }
+
+  /**
+   * The step a client claims for its wanderer (T38, rule 10): from where they are toward `to` (carpet space), at
+   * most `max` tiles, through the collision of the walk (`core.movement`: axis by axis, a box of the body's
+   * radius, and whoever the world grew around may always get out). Their carpet carries them there; where they
+   * end up is returned.
+   */
+  stepWanderer(id: string, to: { x: number; y: number }, max: number): { x: number; y: number } | undefined {
+    if (!this.wanderersById.has(id)) return undefined;
+    return this.as(id, () => {
+      const here = this.playerCarpet();
+      let { x, y } = here;
+      let dx = Number(to?.x) - x;
+      let dy = Number(to?.y) - y;
+      const d = Math.hypot(dx, dy);
+      if (!Number.isFinite(d) || d < 1e-6) return here;
+      const k = d > max ? Math.max(0, max) / d : 1;
+      dx *= k;
+      dy *= k;
+      const r = Number(this.ecs.get(this.playerId, 'body')?.r) || 0.3;
+      const n = Math.max(1, Math.ceil(Math.hypot(dx, dy) / 0.1));
+      for (let i = 0; i < n; i++) {
+        const stuck = !this.free(x, y, r);
+        if (stuck || this.free(x + dx / n, y, r)) x += dx / n;
+        if (stuck || this.free(x, y + dy / n, r)) y += dy / n;
+      }
+      const pl = this.playerComp();
+      if (pl && (Math.abs(dx) > 1e-6 || Math.abs(dy) > 1e-6)) pl.facing = Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : dy > 0 ? 'down' : 'up';
+      // The wanderer stays where they are on their circle: the carpet under them moves.
+      const c = this.carpet();
+      const p = this.playerPos();
+      if (c) Object.assign(c, { ox: x - p.x, oy: y - p.y });
+      return { x, y };
+    });
   }
 
   playerComp(): { speed: number; facing: string; load: number } {
@@ -1886,10 +1998,21 @@ export class Kernel {
     for (const ch of [...this.chunks.values()]) this.unloadChunk(ch);
   }
 
-  /** Loads the chunks needed to draw the visible area; unloads the far ones. */
+  /** Loads the chunks needed to draw the visible area of every wanderer (T38); unloads the far ones. */
   private updateChunks(): void {
+    const want = new Set<string>();
+    let any = false;
+    for (const w of this.wanderersById.keys()) any = this.as(w, () => this.wantChunks(want)) || any;
+    this.genBudget = Kernel.CHUNKS_PER_TICK;
+    if (any && this.chunks.size > want.size + 16) {
+      for (const ch of [...this.chunks.values()]) if (!want.has(ch.key)) this.unloadChunk(ch);
+    }
+  }
+
+  /** The chunks the wanderer acting sees, loaded and added to `want`; false inside the studio (nothing to load). */
+  private wantChunks(want: Set<string>): boolean {
     // Inside the studio there is no world to load (interiors are far away in real space on purpose).
-    if (this.zone === 'studio' || this.corona.isInterior(this.playerPos().x)) return;
+    if (this.corona.isInterior(this.playerPos().x)) return false;
     const S = this.config.chunkSize;
     const R = this.config.circleRadius;
     const p = this.playerPos();
@@ -1900,7 +2023,6 @@ export class Kernel {
     const x1 = Math.min(p.x + this.view.w / 2, clamp) + ox;
     const y0 = Math.max(p.y - this.view.h / 2, -clamp) + oy;
     const y1 = Math.min(p.y + this.view.h / 2, clamp) + oy;
-    const want = new Set<string>();
     const pc = this.playerCarpet();
     const pcx = Math.floor(pc.x / S);
     const pcy = Math.floor(pc.y / S);
@@ -1917,10 +2039,7 @@ export class Kernel {
         this.ensureChunk(cx, cy);
       }
     }
-    this.genBudget = Kernel.CHUNKS_PER_TICK;
-    if (this.chunks.size > want.size + 16) {
-      for (const ch of [...this.chunks.values()]) if (!want.has(ch.key)) this.unloadChunk(ch);
-    }
+    return true;
   }
 
   // --- Entities --------------------------------------------------------------------------------
@@ -3012,6 +3131,8 @@ export class Kernel {
   ): Promise<string> {
     const text = rawText.trim().slice(0, 200);
     if (!text) return '';
+    // Who asks: after the await what happens is theirs (`as` never spans an await).
+    const me = this.wanderer().id;
     const say = (t: string) => this.bus.emit('ui:dialog', { speaker: sub.name, text: t });
     // What its model already knows how to do (an action of the program) happens without asking.
     const own = sub.entity !== undefined ? this.modelActions(sub.entity).find((a) => normName(a.label) === normName(text) || normName(a.name) === normName(text)) : undefined;
@@ -3084,7 +3205,7 @@ export class Kernel {
     if (shaped) v.effects = v.effects.filter((e) => e.tipo !== 'distruggi');
     if (v.dropped.length) this.council.say('kernel', 'scarta', `azione «${text}»: ${v.dropped.join('; ')}`, 'narratore', 'action.judge');
     this.council.say('narratore', j.possible ? 'approva' : 'obietta', `«${text}» su ${sub.name}: ${j.story}${v.effects.length ? ` [${v.effects.map((e) => e.tipo).join(', ')}]` : ''}`, undefined, 'action.judge');
-    const out = j.possible ? this.applyOn(sub, v.effects) : [];
+    const out = j.possible ? this.as(me, () => this.applyOn(sub, v.effects)) : [];
     say([j.story, ...out].filter(Boolean).join(' ') || 'Non succede niente.');
     // The decision becomes a rule of the world; a possible action stays in the thing's menu.
     const lasting = v.effects.some((e) => e.tipo !== 'messaggio');
@@ -5703,17 +5824,7 @@ export class Kernel {
     // Dead: the world waits for the choice (continue or start again).
     if (this.dead) return;
     this.time += dt;
-    // The floor: states switched off by Lua are removed, and the pace they give is a plain number on the
-    // player (Lua must not iterate tables that live on the JS side: wasmoon cannot).
-    const stati = this.ecs.get(this.playerId, 'stati');
-    let passo = 1;
-    if (stati)
-      for (const k of Object.keys(stati)) {
-        if (!stati[k] || typeof stati[k] !== 'object') delete stati[k];
-        else passo *= Number(stati[k].velocita) || 1;
-      }
-    const pl = this.ecs.get(this.playerId, 'player');
-    if (pl) pl.passo = Math.max(0.2, Math.min(4, passo));
+    for (const w of this.wanderersById.keys()) this.as(w, () => this.paceTick());
     this.tickCount++;
     this.luaCalls.clear();
     if (this.campusVersion !== this.forms.version) this.placeCampus();
@@ -5731,10 +5842,13 @@ export class Kernel {
     }
     if (this.tickCount % 10 === 0) {
       this.councilStock();
-      this.syncHand();
-      this.statesTick();
-      const n = this.needs();
-      if (n && !Number.isFinite(n.mana)) n.mana = 60;
+      for (const w of this.wanderersById.keys())
+        this.as(w, () => {
+          this.syncHand();
+          this.statesTick();
+          const n = this.needs();
+          if (n && !Number.isFinite(n.mana)) n.mana = 60;
+        });
     }
     this.updateChunks();
     this.pumpDevelopment();
@@ -5743,7 +5857,7 @@ export class Kernel {
       this.sculpting.pump();
     }
     this.rebuildSolids();
-    this.playerComp().load = totalWeight(this.inventory(), this.itemSpec) / this.carryCapacity();
+    for (const w of this.wanderersById.keys()) this.as(w, () => (this.playerComp().load = totalWeight(this.inventory(), this.itemSpec) / this.carryCapacity()));
     this.syncRunes();
     this.runRunes();
     // Each system measured (T27a): how long it takes, how many entities it touches.
@@ -5752,7 +5866,8 @@ export class Kernel {
       this.touching.clear();
       const t0 = performance.now();
       this.runningSystem = s.manifest.id;
-      this.runModule(s.manifest.id, 'update', dt);
+      if (PER_WANDERER.has(s.manifest.id)) for (const w of this.wanderersById.keys()) !this.remote.has(w) && this.as(w, () => this.runModule(s.manifest.id, 'update', dt));
+      else this.runModule(s.manifest.id, 'update', dt);
       this.runningSystem = undefined;
       this.meter.record(s.manifest.id, performance.now() - t0, this.touching.size);
     }
@@ -5762,6 +5877,22 @@ export class Kernel {
     this.sanitize();
     this.updateZone();
     for (const [id, b] of this.bubbles) if (b.until < this.time || !this.ecs.alive.has(id)) this.bubbles.delete(id);
+  }
+
+  /**
+   * The floor, for the wanderer acting: states switched off by Lua are removed, and the pace they give is a plain
+   * number on the player (Lua must not iterate tables that live on the JS side: wasmoon cannot).
+   */
+  private paceTick(): void {
+    const stati = this.ecs.get(this.playerId, 'stati');
+    let passo = 1;
+    if (stati)
+      for (const k of Object.keys(stati)) {
+        if (!stati[k] || typeof stati[k] !== 'object') delete stati[k];
+        else passo *= Number(stati[k].velocita) || 1;
+      }
+    const pl = this.ecs.get(this.playerId, 'player');
+    if (pl) pl.passo = Math.max(0.2, Math.min(4, passo));
   }
 
   private rebuildSolids(): void {

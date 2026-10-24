@@ -88,6 +88,7 @@ In console del browser: `window.rune` è il kernel (`.feed()`, `.models.usage`, 
 ```
 server/geminiProxy.ts   proxy /api/gemini → Google, chiave da .env
 server/universeStore.ts /api/universe: ogni universo è un repository git in universes/<nome>/
+server/session.ts       /api/session (WebSocket, solo npm run dev): i client delle partite in multigiocatore (ADR-0058)
 src/
   main.ts               bootstrap: modelli, kernel, renderer, UI, loop a 60 Hz
   kernel/               IL PAVIMENTO — mai scrivibile da Lua
@@ -140,6 +141,8 @@ tests/  docs/
 src/mj/                 MarkovJunior del gioco (ADR-0036, 0038): engine.ts (motore 3D), xml.ts e model.ts (XML alla lettera), palette.ts,
                         run.ts (esecuzione, animazioni, azioni), rig.ts (arti), mesh.ts (voxel → triangoli, impronte, pavimenti),
                         classes.ts (classi e scatole), photo.ts (foto in 3/4 per l'Artista), check.ts (misure di un modello)
+src/session/             il kernel sul server (ADR-0058): protocol.ts (messaggi, fakeLink), server.ts (SessionServer), client.ts
+                        (SessionClient: ciò che un client sa del mondo), host.ts (apre un universo e fa girare il suo mondo)
 lab/                    laboratorio di MarkovJunior (ADR-0038): sandbox 3D /lab/3d/, modelli ufficiali e conformità, script per
                         affettare, fotografare, misurare e provare i programmi con Gemini; non importarlo da src/
 ```
@@ -278,6 +281,15 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   Il master porta sempre la runa `concilio` (`COUNCIL_RUNE`, `councilStock`): pronunciata o incisa lo porta nella Sala del Concilio
   senza consumarsi, e `core.carpet` non lo tiene (`offCarpet`) finché non rientra nel cerchio. `R`: il rollback del repository è del
   master (ogni runa incisa torna a chi l'ha scritta); un giocatore riprende solo le sue rune (`takeBackRunes`).
+- **Il kernel sul server** (ADR-0058, T38): ogni viandante ha il suo tappeto (`as` scambia anche lo scorrimento, `holdCarpet`);
+  `core.movement` e `core.carpet` (`PER_WANDERER`) girano una volta per viandante mosso dal kernel e vedono solo lui; la tastiera
+  muove `inputFor` (`io`); chunk, ritmo, frase e stati di ogni viandante. Un viandante di un client (`setRemote`) non lo muove il
+  kernel: il client manda dove è nel mondo e `stepWanderer` lo porta lì al più per il ritmo (`paceOf`), con la collisione del
+  cammino. `src/session/`: protocollo JSON (`entra passo frase incidi pronuncia azione altro chat` → `ingresso aggiorna correzione
+  esito rifiuto`), `SessionServer` (messaggi a ogni tick, aggiornamenti a 10 Hz di ciò che è cambiato vicino, credito di passo di
+  mezzo secondo, azioni a 3 caselle, chi esce è salvato e lascia il mondo), `fakeLink` nei test. Nel server di Vite il WebSocket
+  `/api/session?universo=<nome>` (`server/session.ts`, pacchetto `ws`) avvia al primo client il mondo dell'universo
+  (`host.ts` con `ssrLoadModule`), solo se è in multigiocatore. In singola nulla cambia.
 - **Sala del Concilio e studi** (ADR-0027): tavolo rotondo con l'universo che gira, gli otto membri seduti (con lo Scultore),
   teletrasporti verso le sale e ritorno, schermi della storia, stile neon punk; atlante navigabile.
 - **Vita degli NPC** (ADR-0024): attività visibili (`attivita {tipo, ferma}`), dialoghi tra persone,

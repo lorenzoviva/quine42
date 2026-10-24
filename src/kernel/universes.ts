@@ -150,29 +150,32 @@ function upgradeModels(mine: string | undefined, seed: string | undefined): stri
   }
 }
 
-/** Browser client of the universe store (server/universeStore.ts). */
+/** Client of the universe store (server/universeStore.ts): the browser's, or the session server's with an absolute `base` (T38). */
 export class UniverseClient implements UniverseBackend {
   private queue: Promise<unknown> = Promise.resolve();
   /** Commits not yet written to disk (shown by the console). */
   pending = 0;
   lastError = '';
 
-  private constructor(readonly name: string) {}
+  private constructor(
+    readonly name: string,
+    private base = '',
+  ) {}
 
   /** null when there is no universe store (static hosting, tests). */
-  static async connect(name: string): Promise<UniverseClient | null> {
+  static async connect(name: string, base = ''): Promise<UniverseClient | null> {
     try {
-      const r = await fetch('/api/universe');
+      const r = await fetch(`${base}/api/universe`);
       if (!r.ok) return null;
       const j = await r.json();
-      return j?.available ? new UniverseClient(name) : null;
+      return j?.available ? new UniverseClient(name, base) : null;
     } catch {
       return null;
     }
   }
 
   private url(op = ''): string {
-    return `/api/universe/${this.name}${op ? `/${op}` : ''}`;
+    return `${this.base}/api/universe/${this.name}${op ? `/${op}` : ''}`;
   }
 
   private async post(op: string, body: unknown): Promise<any> {
