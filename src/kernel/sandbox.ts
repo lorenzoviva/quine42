@@ -68,7 +68,7 @@ interface KernelLua {
   rune_kind(src: string): string;
   set_line(key: string, src: string): string | null;
   remove_line(key: string): void;
-  run_line(key: string): string | null;
+  run_line(key: string, lock?: boolean): string | null;
   eval(src: string): string | null;
 }
 
@@ -131,8 +131,9 @@ export class Sandbox {
     this.K.remove_line(key);
   }
 
-  runLine(key: string): string | null {
-    return this.K.run_line(key) ?? null;
+  /** Runs a rune line; `lock`: its writes to the bindings (x y speed carpet time) are ignored (T37). */
+  runLine(key: string, lock = false): string | null {
+    return this.K.run_line(key, lock) ?? null;
   }
 
   eval(src: string): string | null {

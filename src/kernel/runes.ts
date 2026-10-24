@@ -10,6 +10,8 @@ export interface RuneComp {
   source: 'gen' | 'player';
   /** For generated runes: stable origin "chunkKey#index", so a picked rune never respawns. */
   origin?: string;
+  /** For inscribed runes: the wanderer who wrote them (T37): the line runs as them, with their rights. */
+  by?: string;
 }
 
 export interface RuneLine {
@@ -91,3 +93,20 @@ export function runeGlyph(token: string, magic?: { glyph: string; color: string 
 
 /** Tokens that touch the carpet: rare, and never close to where the world begins. */
 export const CARPET_TOKENS = new Set(['carpet', 'active', 'strength', 'rate', 'ox', 'oy']);
+
+/** The symbols bound to the wanderer and the carpet (ADR-0002). */
+export const BINDINGS = new Set(['x', 'y', 'speed', 'carpet', 'time']);
+
+/** The master's only carpet rune in a game of many (T37): spoken or written, it takes them to the Council's hall. */
+export const COUNCIL_RUNE = 'concilio';
+
+/**
+ * A line of the carpet (T37): it touches the carpet, writes a binding (a binding before the first `=`, not
+ * as a field), or is the master's rune. In a game of many, none of these is generated for the players.
+ */
+export function carpetLine(line: string): boolean {
+  const t = lex(line);
+  if (t.some((w) => CARPET_TOKENS.has(w) || w === COUNCIL_RUNE)) return true;
+  const eq = t.indexOf('=');
+  return eq > 0 && t.slice(0, eq).some((w, i) => BINDINGS.has(w) && t[i - 1] !== '.');
+}

@@ -5,6 +5,7 @@
 import type { Sandbox } from './sandbox';
 import type { Effect, FileMap, ItemDef, LayoutDef, Manifest, ModuleKind, Partita, TileDef } from './types';
 import { DEATH_LEVELS, DEFAULT_PARTITA } from './partita';
+import { SOLO, validWandererId } from './wanderers';
 import { ITEM_CATEGORIES } from './types';
 import type { ChunkPlan } from './agents/cartography';
 import { lex, TOKEN_RE, tokenize } from './runes';
@@ -37,11 +38,14 @@ export function repairPartita(raw: unknown): Partita {
     else if (/\bmolto\b/.test(t)) morte = 4;
     else if (/\bpoco\b/.test(t)) morte = 1;
   }
+  const modalita = r.modalita === 'multigiocatore' ? 'multigiocatore' : 'singola';
   return {
-    modalita: r.modalita === 'multigiocatore' ? 'multigiocatore' : 'singola',
+    modalita,
     morte,
     pvp: flag(r.pvp, DEFAULT_PARTITA.pvp),
     altroTraGiocatori: flag(r.altroTraGiocatori, DEFAULT_PARTITA.altroTraGiocatori),
+    // Alone, the one who plays is the master of everything; in a game of many, who created it (T37).
+    ...(modalita === 'multigiocatore' ? { master: validWandererId(r.master) ? r.master : SOLO } : {}),
   };
 }
 

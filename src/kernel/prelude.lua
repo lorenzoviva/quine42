@@ -24,6 +24,7 @@ local lines = {}    -- rune line key -> { f = compiled, expr = boolean }
 local U             -- the universe environment shared by modules and runes
 local bindings      -- live symbols bound to kernel state (x, y, carpet, ...)
 local overrides     -- bindings that universe code reassigned (e.g. `carpet = nil`)
+local locked = false -- a line of a wanderer who may not write the bindings is running (T37)
 
 local getinfo = debug.getinfo
 local guarded
@@ -190,6 +191,8 @@ function K.reset()
     __newindex = function(t, k, v)
       local b = bindings[k]
       if b then
+        -- In a game of many only the master moves the carpet: the others' writes go nowhere (T37).
+        if locked then return end
         if b.set then b.set(v) else overrides[k] = { v } end
         return
       end
@@ -273,10 +276,12 @@ end
 
 function K.remove_line(key) lines[key] = nil end
 
-function K.run_line(key)
+function K.run_line(key, lock)
   local l = lines[key]
   if not l then return nil end
+  locked = lock == true
   local ok, r = guarded(l.f)
+  locked = false
   if not ok then
     host.fault("rune:" .. key, tostring(r))
     return nil

@@ -24,7 +24,7 @@ import { alertOf, clampFrame, costBoard, liveFeed, SCREEN_NAME, timeline, type B
 import { activeQuests, plotFromRaw, plotText, PLOTS_FILE, readPlots, reviewPlot, secretsOf, writePlots, type Plot } from './plots';
 import { Input } from './input';
 import { discoverModules, readConfig } from './universe';
-import { CARPET_TOKENS, cellIndex, extractLines, tokenize, type RuneComp, type RuneLine } from './runes';
+import { carpetLine, CARPET_TOKENS, cellIndex, COUNCIL_RUNE, extractLines, tokenize, type RuneComp, type RuneLine } from './runes';
 import { hash32, hashStr, hex, Rng } from './rng';
 import { BudgetError, type Models } from './ai/models';
 import { USAGE_FILE, UsageLedger } from './ai/usage';
@@ -388,6 +388,12 @@ export class Kernel {
   private meter = new ChainMeter();
   /** The entities the running system touches through the Host, while it runs. */
   private touching?: Set<number>;
+  /** The system running now (the carpet lets go of whoever is off it, T37). */
+  private runningSystem?: string;
+  /** A rune line whose writes to the bindings are ignored is running (T37): the Host hands out copies. */
+  private lockedLine = false;
+  /** The wanderers no carpet holds (T37): the master gone to the Council's hall by his rune, until back in the world. */
+  private offCarpet = new Set<Id>();
   /** The library's version when the campus last looked for its buildings' models (T20). */
   private campusVersion = -1;
   private showcaseCache = new Map<ShowcaseSource, { files: FileMap; stamp: string; entries: ShowcaseEntry[] }>();
@@ -482,10 +488,15 @@ export class Kernel {
   private makeHost(): Host {
     const inv = (id: number): Inventory | undefined => this.ecs.get(id, 'inventory');
     return {
-      query: (names) => this.ecs.query(...names.split(',').map((s) => s.trim()).filter(Boolean)).join(','),
+      query: (names) => {
+        const ids = this.ecs.query(...names.split(',').map((s) => s.trim()).filter(Boolean));
+        return (this.runningSystem === 'core.carpet' && this.offCarpet.size ? ids.filter((id) => !this.offCarpet.has(id)) : ids).join(',');
+      },
       get: (id, name) => {
         this.touching?.add(id);
-        return this.ecs.get(id, name) ?? undefined;
+        const c = this.ecs.get(id, name) ?? undefined;
+        // A line that may not move anyone reads the carpet and the positions, it does not hold them (T37).
+        return this.lockedLine && c && (name === 'carpet' || name === 'pos') ? clone(c) : c;
       },
       set: (id, name, data) => {
         this.touching?.add(id);
@@ -522,7 +533,7 @@ export class Kernel {
         else (this.playerComp() as any)[key] = v;
         return undefined;
       },
-      carpet: () => this.carpet(),
+      carpet: () => (this.lockedLine && this.carpet() ? clone(this.carpet()) : this.carpet()),
       time: () => this.time,
       log: (msg) => this.log('lua', msg),
       emit: (name, data) => this.bus.emit(`lua:${name}`, data),
@@ -1433,7 +1444,9 @@ export class Kernel {
     // touch the carpet only far from the start (you learn the logic before you can leave); sometimes a magic rune.
     const far = Math.max(Math.abs(ch.cx), Math.abs(ch.cy)) >= CARPET_RUNE_DISTANCE;
     const start = ch.cx === 0 && ch.cy === 0;
-    const lines = start ? [...STARTER_RUNES] : plan.runes.filter((l) => !tokenize(l).some((t) => CARPET_TOKENS.has(t)) || (far && rng.chance(0.5))).slice(0, far ? 2 : 1);
+    // In a game of many none of the runes that touch the carpet or write a binding are generated (T37).
+    const many = this.manyPlayers();
+    const lines = start ? STARTER_RUNES.filter((l) => !many || !carpetLine(l)) : plan.runes.filter((l) => (many ? !carpetLine(l) : !tokenize(l).some((t) => CARPET_TOKENS.has(t)) || (far && rng.chance(0.5)))).slice(0, far ? 2 : 1);
     const magic = Object.keys(this.content.runes);
     if (!start && magic.length && rng.chance(0.3)) lines.push(magic[rng.int(magic.length)]);
     const runes: Placements['runes'] = [];
@@ -2143,9 +2156,17 @@ export class Kernel {
     for (const st of this.lines.values()) {
       if (!st.compiled || (st.pure && !refresh && st.result !== null)) continue;
       const key = `rune:${st.line.key}`;
+      // A line runs as who wrote it (T37); in a game of many, only the master's may write the bindings.
+      const by = st.line.ids.map((id) => (this.ecs.get(id, 'rune') as RuneComp | undefined)?.by).find(Boolean);
       this.faultFlag = null;
       this.seedLua(key, 0);
-      const r = this.sandbox.runLine(st.line.key);
+      this.lockedLine = !this.isMaster(by);
+      let r: string | null;
+      try {
+        r = by ? this.as(by, () => this.sandbox.runLine(st.line.key, this.lockedLine)) : this.sandbox.runLine(st.line.key, this.lockedLine);
+      } finally {
+        this.lockedLine = false;
+      }
       if (this.faultFlag === key) {
         st.error = this.faults.get(key)?.message ?? 'errore';
       } else {
@@ -2208,6 +2229,7 @@ export class Kernel {
       this.message('Non hai rune in mano.', 'warn');
       return false;
     }
+    if (this.manyPlayers() && tokens.includes(COUNCIL_RUNE)) return this.councilRune();
     if (this.zone !== 'sim') {
       this.message("Qui non c'è tappeto su cui scrivere.", 'warn');
       return false;
@@ -2231,13 +2253,47 @@ export class Kernel {
     let c = start.col;
     for (const token of tokens) {
       removeItem(this.inventory(), `rune:${token}`, 1);
-      this.ecs.spawn({ rune: { token, col: c, row: start.row, source: 'player' } satisfies RuneComp });
+      this.ecs.spawn({ rune: { token, col: c, row: start.row, source: 'player', by: this.wanderer().id } satisfies RuneComp });
       c += 1;
     }
     this.runesDirty = true;
     this.bus.emit('rune:inscribed', { tokens });
     this.message(`Hai inciso: ${tokens.join(' ')}`);
     return true;
+  }
+
+  /**
+   * The master's rune (T37): spoken or written, it takes them to the Council's hall and is never spent.
+   * The carpet lets them go until they walk back into the world. For anyone else it does not exist.
+   */
+  councilRune(): boolean {
+    const hand = this.hand();
+    hand.tokens = hand.tokens.filter((t) => t !== COUNCIL_RUNE);
+    hand.sel = Math.max(0, Math.min(hand.sel, hand.tokens.length - 1));
+    const hall = this.corona.building('concilio');
+    if (!this.isMaster() || !hall) {
+      this.message('La runa resta muta.', 'warn');
+      return false;
+    }
+    this.offCarpet.add(this.playerId);
+    Object.assign(this.playerPos(), this.corona.entrance(hall));
+    this.updateZone();
+    this.bus.emit('studio:teleport', {});
+    this.message(hall.name, 'good');
+    return true;
+  }
+
+  /** In a game of many the master always carries the Council's rune, and nobody else does (T37). */
+  private councilStock(): void {
+    if (!this.manyPlayers()) return;
+    const item = `rune:${COUNCIL_RUNE}`;
+    for (const w of this.wanderersById.values())
+      this.as(w.id, () => {
+        const n = countItem(this.inventory(), item);
+        if (this.isMaster(w.id)) {
+          if (n < 1) this.give(item, 1);
+        } else if (n) removeItem(this.inventory(), item, n);
+      });
   }
 
   /** The first token of a phrase the player does not carry enough runes for, if any. */
@@ -3645,6 +3701,16 @@ export class Kernel {
     return this.config.partita;
   }
 
+  /** A game of many (ADR-0050): the carpet, the rollback and the Council are the master's. */
+  manyPlayers(): boolean {
+    return this.partita()?.modalita === 'multigiocatore';
+  }
+
+  /** Whether a wanderer (the one acting, by default) is the master (T37): alone, always. */
+  isMaster(id: string | undefined = this.wanderer().id): boolean {
+    return !this.manyPlayers() || (!!id && id === (this.partita().master ?? SOLO));
+  }
+
   /**
    * The game is chosen before the Genesis and never changes after (ADR-0053): the first universe.json
    * fixes it, a later one that says otherwise is written back; only `runGenesis` chooses a new one.
@@ -4014,6 +4080,7 @@ export class Kernel {
    */
   async castSpell(): Promise<boolean> {
     if (this.castingNow) return false;
+    if (this.manyPlayers() && this.hand().tokens.includes(COUNCIL_RUNE)) return this.councilRune();
     const seq = this.incantation();
     if (!seq.length) {
       this.message(this.hand().tokens.length ? 'Nessuna delle rune che hai in mano è magica.' : 'Non hai rune in mano.', 'warn');
@@ -5536,6 +5603,24 @@ export class Kernel {
     this.lastState = JSON.stringify(st);
   }
 
+  /**
+   * A player's rollback in a game of many (T37): the runes they wrote come back to their phrase, and with them
+   * goes whatever those lines were doing; the repository, and everyone else's world, stay as they are.
+   */
+  private takeBackRunes(): void {
+    const me = this.wanderer().id;
+    const hand = this.hand();
+    let n = 0;
+    for (const { id, rune } of this.runeList()) {
+      if (rune.source !== 'player' || rune.by !== me) continue;
+      if (this.give(`rune:${rune.token}`, 1)) hand.tokens.push(rune.token);
+      this.ecs.destroy(id);
+      n++;
+    }
+    this.runesDirty = true;
+    this.message(n ? 'Le rune che avevi inciso tornano a te.' : 'Non hai inciso niente da riprendere.', n ? 'good' : 'info');
+  }
+
   /** Back to a commit of an earlier session: only the universe repository on disk has its files. */
   async rollbackPast(commitId: string): Promise<boolean> {
     const files = await this.repo.backend?.checkout(commitId).catch(() => null);
@@ -5553,14 +5638,19 @@ export class Kernel {
   }
 
   rollback(commitId?: string): void {
+    // In a game of many the repository goes back only for the master (T37); a player takes back what they wrote.
+    if (!this.isMaster()) return this.takeBackRunes();
     if (commitId && !this.repo.find(commitId)) {
       void this.rollbackPast(commitId);
       return;
     }
-    const hand = this.hand();
+    const me = this.wanderer().id;
     for (const { id, rune } of this.runeList()) {
       if (rune.source !== 'player') continue;
-      if (this.give(`rune:${rune.token}`, 1)) hand.tokens.push(rune.token);
+      // Every rune goes back to whoever wrote it.
+      this.as(rune.by ?? me, () => {
+        if (this.give(`rune:${rune.token}`, 1)) this.hand().tokens.push(rune.token);
+      });
       this.ecs.destroy(id);
     }
     const files = commitId ? this.repo.checkout(commitId) : this.repo.restore();
@@ -5640,6 +5730,7 @@ export class Kernel {
       if (n) Object.assign(n, { hunger: 100, thirst: 100, energy: 100, health: 100 });
     }
     if (this.tickCount % 10 === 0) {
+      this.councilStock();
       this.syncHand();
       this.statesTick();
       const n = this.needs();
@@ -5660,7 +5751,9 @@ export class Kernel {
     for (const s of this.systems) {
       this.touching.clear();
       const t0 = performance.now();
+      this.runningSystem = s.manifest.id;
       this.runModule(s.manifest.id, 'update', dt);
+      this.runningSystem = undefined;
       this.meter.record(s.manifest.id, performance.now() - t0, this.touching.size);
     }
     this.touching = undefined;
@@ -5721,6 +5814,7 @@ export class Kernel {
   private updateZone(): void {
     const p = this.playerPos();
     const zone = this.corona.isInterior(p.x) ? 'studio' : Math.hypot(p.x, p.y) >= this.config.circleRadius ? 'corona' : 'sim';
+    if (zone === 'sim') this.offCarpet.delete(this.playerId);
     if (zone === this.zone) return;
     this.zone = zone;
     this.bus.emit('zone', { zone, first: zone === 'corona' && !this.exitedOnce });

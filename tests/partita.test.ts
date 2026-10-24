@@ -79,7 +79,7 @@ describe('the game chosen at the Genesis (T33)', () => {
 
   it('the game goes with every request of who builds on it, not with the Sculptor', async () => {
     const { k, models } = await bootWith({ modalita: 'multigiocatore', morte: 4, pvp: true, altroTraGiocatori: false });
-    expect(k.partita()).toEqual({ modalita: 'multigiocatore', morte: 4, pvp: true, altroTraGiocatori: false });
+    expect(k.partita()).toEqual({ modalita: 'multigiocatore', morte: 4, pvp: true, altroTraGiocatori: false, master: 'io' });
     k.die('fame');
     await k.continueAfterDeath();
     const narr = models.calls.find((c) => c.task === 'player.death')!;

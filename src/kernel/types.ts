@@ -367,6 +367,8 @@ export interface Partita {
   pvp: boolean;
   /** «Altro…» on another player (multiplayer). */
   altroTraGiocatori: boolean;
+  /** The master of a game of many (T37): the wanderer who created it, `io` until accounts exist (T44). Never changes. */
+  master?: string;
 }
 
 export interface Place {
