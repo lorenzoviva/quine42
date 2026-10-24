@@ -5,6 +5,7 @@
 // keeps the entities.
 
 import type { FileMap } from './types';
+import { hashStr } from './rng';
 
 /** The wanderer of a game alone (and of every universe before T34). */
 export const SOLO = 'io';
@@ -14,6 +15,21 @@ export const WANDERER_NAME = 'Viandante';
 export interface Wanderer {
   id: string;
   nome: string;
+}
+
+/**
+ * The colour of a wanderer's cloak (T39, the `tinta` of the program `viandante`): from their id, until the profile
+ * of T44 lets them choose it. `io` keeps the cloak of the program. Saturated and not dark, so it reads on the grass.
+ */
+export function wandererColor(id: string): string | undefined {
+  if (id === SOLO) return undefined;
+  const h = (hashStr(`mantello:${id}`) % 360) / 360;
+  const s = 0.55;
+  const l = 0.5;
+  const k = (n: number) => (n + h * 12) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const c = (n: number) => Math.round(255 * (l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1))));
+  return `#${[c(0), c(8), c(4)].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
 }
 
 /** What a wanderer carries and is, between sessions. */

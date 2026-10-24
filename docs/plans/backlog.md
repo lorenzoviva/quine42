@@ -923,12 +923,33 @@ le risposte alle domande del piano.
   cerchio e si sposta il suo tappeto. «Altro…» applica ciò che segue l'`await` a chi l'ha chiesto. Restano: `chi` dopo un `await` (è
   `io`, T40), `zone` e corona del solo `io` (T41-T42), nessuna verifica nel browser (il gioco in singola non usa la sessione: T39).
 
-### T39 · Il client sottile e gli avatar — `da fare` (dipende da T38)
+### T39 · Il client sottile e gli avatar — `fatto` (`COMMIT`)
 - Fare: in multigiocatore `main.ts` non crea il kernel ma un client che riceve lo stato e lo dà al renderer; predizione del
   proprio passo (il tappeto compensa come oggi) e correzione; entità `remote` per gli altri giocatori, con il modello
   del viandante, il seme e il colore del profilo, interpolate, con arti e fumetti; l'esito delle azioni mostrato subito
   e annullato se il server rifiuta.
 - Fatto quando: due schede del browser sullo stesso server di Vite si vedono camminare; test del client col finto trasporto.
+- Esito: ADR-0059. Il browser non rinuncia al kernel: avvia un **kernel specchio** (`mirror`: niente generazione, salvataggi né
+  Concilio, il tick muove solo il suo viandante) che `ThinClient` (`src/session/thin.ts`) riempie con luoghi (con i lotti), cose
+  (`THING_PARTS`) e altri viandanti (`remote`, interpolati, con arti e fumetti), così renderer, menu e HUD restano quelli di
+  sempre. Passo predetto e mandato ogni 50 ms, correzioni, il client segue il server oltre 8 caselle (e il server non muove chi
+  dichiara un punto più lontano, `FAR`); azioni inoltrate con esito ottimistico (raccogliere, `<action>` del modello, incidere)
+  annullato se rifiutato o smentito dal prossimo aggiornamento; la frase è del client. `src/session/socket.ts` (WebSocket, id della
+  scheda: `?viandante=`), in sviluppo `?universo=<nome>`; `tests/thin.test.ts`. Verificato con due schede (`anna`, `bruno`) su un
+  universo di prova poi tolto: si vedono, camminano, il server li segue senza correzioni. Diverso dal previsto: il «colore del
+  profilo» non c'è ancora (T44): ogni viandante oltre `io` ha un seme suo e il mantello di un colore dall'id (`tinta: N` nel
+  `viandante`); in sviluppo il gioco non caricava wasmoon (escluso dal pre-bundling dal primo commit, è UMD): ora Vite lo
+  pre-raggruppa; il primo passo dopo l'ingresso non partiva mai (trovato nel browser, coperto dal test). Inventario, borse,
+  contenitori, fabbricazione e azioni sulle caselle non sono nel protocollo: T39b.
+
+### T39b · Inventario e fabbricazione tra molti — `da fare` (dipende da T39)
+- Contesto: ADR-0059, punto 7. Nello specchio `useSlot equipSlot equip unequip dropSlot moveSlot craft combine freeCraft
+  freeItemAction itemAct takeFromContainer putIntoContainer putIntoBag takeFromBag uiAction freeTileAction openContainer`
+  (`LATER` in `thin.ts`) dicono «non ancora».
+- Fare: i messaggi del protocollo per usare, impugnare, posare e spostare gli oggetti, borse e contenitori (con il contenuto del
+  contenitore aperto nell'esito), fabbricazione (anche libera), pannelli delle meccaniche, azioni e «Altro…» sulle caselle; il
+  server le esegue come il viandante (`as`), il client mostra l'esito (ottimistico dove si può: lo slot spostato).
+- Fatto quando: test col finto trasporto per ognuno; nella scheda l'inventario si usa come in singola.
 
 ### T40 · Luoghi nuovi con il lock, a spese di chi esplora — `da fare` (dipende da T36, T38)
 - Fare: il primo che entra in un luogo nuovo lo chiede al server, che lo genera una volta (Cartografo, Scultore), lo

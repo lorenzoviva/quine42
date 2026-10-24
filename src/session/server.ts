@@ -6,7 +6,7 @@
 
 import type { Kernel } from '../kernel/kernel';
 import { validWandererId } from '../kernel/wanderers';
-import type { ClientMsg, Me, MyState, OtherView, PlaceView, ServerLink, ServerMsg, ThingView } from './protocol';
+import { THING_PARTS, type ClientMsg, type Dialog, type FormView, type Me, type MyState, type OtherView, type PlaceView, type ServerLink, type ServerMsg, type ThingView } from './protocol';
 
 export interface SessionOptions {
   /** Updates per second to every client. */
@@ -23,6 +23,11 @@ const BURST = 0.5;
 const TOLERANCE = 1.15;
 /** How far the server's position may be from the claimed one before the client is corrected. */
 const CORRECT = 0.05;
+/**
+ * A step claimed this far from where the wanderer is was not walked: it was sent before the world carried them
+ * elsewhere (T39), or it is a lie. Either way they stay where they are and the client is told.
+ */
+const FAR = 8;
 
 const round = (v: number) => Math.round(v * 1000) / 1000;
 
@@ -100,10 +105,12 @@ export class SessionServer {
     this.clients.set(id, c);
     const u = this.view(c);
     const w = this.kernel.wanderers().find((x) => x.id === id)!;
+    const forma = this.formOf(this.kernel.wandererAt(id)?.entity);
     link.send({
       t: 'ingresso',
       id,
       nome: w.nome,
+      ...(forma ? { forma } : {}),
       tick: u.tick,
       ora: u.ora,
       files: this.kernel.files,
@@ -156,6 +163,8 @@ export class SessionServer {
       case 'chat': {
         const why = this.outOfReach(c, msg.entita);
         if (why) return this.answer(c, seq, { ok: false, motivo: why });
+        // A rune on the ground is picked up as with E in front of it.
+        if (msg.t === 'azione' && msg.azione === 'raccogli' && k.ecs.has(msg.entita, 'rune')) return this.answer(c, seq, this.act(c, () => k.pickUpRune(msg.entita)));
         if (msg.t === 'azione') return void this.later(c, seq, () => k.perform(msg.entita, String(msg.azione ?? '')));
         if (msg.t === 'altro') return void this.later(c, seq, () => k.freeAction(msg.entita, String(msg.testo ?? '')));
         return void this.later(c, seq, async () => (await k.talk(msg.entita, String(msg.testo ?? ''), c.id)).say);
@@ -171,7 +180,7 @@ export class SessionServer {
     if (!at) return;
     // Only numbers: on the wire what is not a number becomes null, and null is not 0.
     const to = { x: typeof x === 'number' ? x : NaN, y: typeof y === 'number' ? y : NaN };
-    if (!Number.isFinite(to.x) || !Number.isFinite(to.y)) return c.link.send({ t: 'correzione', seq: Number(seq) || 0, x: round(at.x), y: round(at.y) });
+    if (!Number.isFinite(to.x) || !Number.isFinite(to.y) || Math.hypot(to.x - at.x, to.y - at.y) > FAR) return c.link.send({ t: 'correzione', seq: Number(seq) || 0, x: round(at.x), y: round(at.y) });
     const got = k.stepWanderer(c.id, to, Math.max(0, c.budget)) ?? at;
     c.budget -= Math.hypot(got.x - at.x, got.y - at.y);
     if (Math.hypot(got.x - to.x, got.y - to.y) > CORRECT) c.link.send({ t: 'correzione', seq: Number(seq) || 0, x: round(got.x), y: round(got.y) });
@@ -187,15 +196,19 @@ export class SessionServer {
   }
 
   /** Runs what the wanderer does, as them, and keeps what the world says meanwhile (messages and dialogs). */
-  private act<T>(c: Client, fn: () => T): { ok: boolean; value?: T; messaggi: string[] } {
+  private act<T>(c: Client, fn: () => T): { ok: boolean; value?: T; messaggi: string[]; dialoghi: Dialog[] } {
     const k = this.kernel;
     const said: string[] = [];
-    const off = [k.bus.on('ui:message', (m) => said.push(String(m?.text ?? ''))), k.bus.on('ui:dialog', (d) => said.push(d?.speaker ? `${d.speaker}: ${d.text}` : String(d?.text ?? '')))];
+    const dialogs: Dialog[] = [];
+    const off = [
+      k.bus.on('ui:message', (m) => said.push(String(m?.text ?? ''))),
+      k.bus.on('ui:dialog', (d) => d?.text && dialogs.push({ ...(d.speaker ? { speaker: String(d.speaker) } : {}), text: String(d.text) })),
+    ];
     try {
       const value = k.as(c.id, fn);
-      return { ok: value !== false, value, messaggi: said.filter(Boolean) };
+      return { ok: value !== false, value, messaggi: said.filter(Boolean), dialoghi: dialogs };
     } catch (e) {
-      return { ok: false, messaggi: [...said, (e as Error).message] };
+      return { ok: false, messaggi: [...said, (e as Error).message], dialoghi: dialogs };
     } finally {
       off.forEach((f) => f());
     }
@@ -214,10 +227,10 @@ export class SessionServer {
       ok = false;
       motivo = (e as Error).message;
     }
-    this.answer(c, seq, { ok, value, messaggi: started.messaggi, motivo });
+    this.answer(c, seq, { ok, value, messaggi: started.messaggi, dialoghi: started.dialoghi, motivo });
   }
 
-  private answer(c: Client, seq: number, r: { ok: boolean; value?: unknown; messaggi?: string[]; motivo?: string }): void {
+  private answer(c: Client, seq: number, r: { ok: boolean; value?: unknown; messaggi?: string[]; dialoghi?: Dialog[]; motivo?: string }): void {
     if (this.clients.get(c.id) !== c) return;
     c.link.send({
       t: 'esito',
@@ -225,6 +238,7 @@ export class SessionServer {
       ok: r.ok,
       ...(typeof r.value === 'string' && r.value ? { testo: r.value } : {}),
       ...(r.messaggi?.length ? { messaggi: r.messaggi } : {}),
+      ...(r.dialoghi?.length ? { dialoghi: r.dialoghi } : {}),
       ...(r.motivo ? { motivo: r.motivo } : {}),
     });
   }
@@ -249,7 +263,16 @@ export class SessionServer {
       const far = Math.max(Math.abs(ch.cx * S + S / 2 - at.x), Math.abs(ch.cy * S + S / 2 - at.y)) - S / 2;
       if (far > this.near || c.places.get(ch.key) === ch.version) continue;
       c.places.set(ch.key, ch.version);
-      places.push({ key: ch.key, cx: ch.cx, cy: ch.cy, tiles: ch.tiles, stage: ch.stage, version: ch.version, ...(ch.place?.name ? { nome: ch.place.name } : {}) });
+      places.push({
+        key: ch.key,
+        cx: ch.cx,
+        cy: ch.cy,
+        tiles: ch.tiles,
+        stage: ch.stage,
+        version: ch.version,
+        ...(ch.place?.name ? { nome: ch.place.name, descrizione: ch.place.description } : {}),
+        ...(ch.buildings.length ? { lotti: ch.buildings.map((b) => [b.x0, b.y0, b.x1, b.y1]) } : {}),
+      });
     }
     if (places.length) out.luoghi = places;
     const things: ThingView[] = [];
@@ -279,7 +302,9 @@ export class SessionServer {
       const o = k.wandererAt(w.id);
       if (!o || Math.hypot(o.x - at.x, o.y - at.y) > this.near) continue;
       near.add(w.id);
-      const v: OtherView = { id: w.id, nome: w.nome, x: round(o.x), y: round(o.y), facing: o.facing };
+      const form = this.formOf(o.entity);
+      const b = k.bubbles.get(o.entity);
+      const v: OtherView = { id: w.id, nome: w.nome, x: round(o.x), y: round(o.y), facing: o.facing, ...(form ? { form } : {}), ...(b ? { testo: b.text } : {}) };
       const key = JSON.stringify(v);
       if (c.others.get(w.id) !== key) others.push(v);
       c.others.set(w.id, key);
@@ -295,13 +320,25 @@ export class SessionServer {
   private lookOf(id: number): Omit<ThingView, 'id' | 'x' | 'y'> {
     const k = this.kernel;
     const m = k.ecs.get(id, 'module')?.id ?? k.ecs.get(id, 'pickup')?.item;
-    const f = k.ecs.get(id, 'form');
+    const form = this.formOf(id);
     const b = k.bubbles.get(id);
+    const parts: Record<string, unknown> = {};
+    for (const name of THING_PARTS) {
+      if (!k.ecs.has(id, name)) continue;
+      const v = k.ecs.get(id, name);
+      parts[name] = name === 'mind' ? {} : name === 'identity' ? { name: v?.name } : name === 'container' ? { size: v?.size } : v;
+    }
     return {
       ...(m ? { m: String(m) } : {}),
-      ...(f ? { form: { model: f.model, seed: f.seed, ...(f.yaw ? { yaw: f.yaw } : {}), ...(f.tint ? { tint: f.tint } : {}), ...(f.done?.length ? { done: [...f.done] } : {}) } } : {}),
+      ...(form ? { form } : {}),
       ...(k.ecs.has(id, 'glyph') ? { glyph: k.ecs.get(id, 'glyph') } : {}),
+      ...(Object.keys(parts).length ? { c: parts } : {}),
       ...(b ? { testo: b.text } : {}),
     };
+  }
+
+  private formOf(id: number | undefined): FormView | undefined {
+    const f = id !== undefined ? this.kernel.ecs.get(id, 'form') : undefined;
+    return f ? { model: f.model, seed: f.seed, ...(f.yaw ? { yaw: f.yaw } : {}), ...(f.tint ? { tint: f.tint } : {}), ...(f.done?.length ? { done: [...f.done] } : {}) } : undefined;
   }
 }

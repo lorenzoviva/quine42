@@ -33,7 +33,19 @@ export interface PlaceView {
   tiles: string;
   stage: 'draft' | 'planned';
   nome?: string;
+  descrizione?: string;
+  /** The lots of its structures (`x0 y0 x1 y1` in the place's cells): the ground is flat on them (ADR-0048). */
+  lotti?: number[][];
   version: number;
+}
+
+/** The form of a thing: its program, its seed, how it is turned and coloured, the actions done on it. */
+export interface FormView {
+  model: string;
+  seed: number | string;
+  yaw?: number;
+  tint?: string;
+  done?: string[];
 }
 
 /** A thing of the world near the wanderer; after the first time only what moved (`x`, `y`) or changed. */
@@ -43,11 +55,19 @@ export interface ThingView {
   y: number;
   /** Its module, or the item it is on the ground. */
   m?: string;
-  form?: { model: string; seed: number | string; yaw?: number; tint?: string; done?: string[] };
+  form?: FormView;
   glyph?: unknown;
+  /** The other components a client draws it and makes its menu with (`THING_PARTS`): to pick up, a rune, a body, a light… */
+  c?: Record<string, unknown>;
   /** What it is saying, while it says it. */
   testo?: string;
 }
+
+/**
+ * The components of a thing a client gets (T39): what the renderer and the menus read. Its mind, its memories and
+ * what it carries stay on the server; of `identity` only the name, of `mind` only that it has one.
+ */
+export const THING_PARTS = ['pickup', 'rune', 'body', 'interact', 'luce', 'fuoco', 'attivita', 'wander', 'container', 'identity', 'mind'] as const;
 
 /** Another wanderer in sight. */
 export interface OtherView {
@@ -56,6 +76,9 @@ export interface OtherView {
   x: number;
   y: number;
   facing: string;
+  form?: FormView;
+  /** What they are saying, while they say it. */
+  testo?: string;
 }
 
 export type ClientMsg =
@@ -72,13 +95,19 @@ export type ClientMsg =
   | { t: 'chat'; seq: number; entita: number; testo: string };
 
 export type ServerMsg =
-  | ({ t: 'ingresso'; id: string; nome: string; files: FileMap; me: Me; stato: MyState; luoghi: PlaceView[]; cose: ThingView[]; viandanti: OtherView[] } & Clock)
+  | ({ t: 'ingresso'; id: string; nome: string; files: FileMap; me: Me; forma?: FormView; stato: MyState; luoghi: PlaceView[]; cose: ThingView[]; viandanti: OtherView[] } & Clock)
   | ({ t: 'aggiorna'; me?: Me; stato?: MyState; luoghi?: PlaceView[]; cose?: ThingView[]; via?: number[]; viandanti?: OtherView[]; partiti?: string[] } & Clock)
   /** The step was not possible (too fast, through a wall): the wanderer is here. */
   | { t: 'correzione'; seq: number; x: number; y: number }
   /** What came of a message: what the world said back meanwhile, and the answer if there is one. */
-  | { t: 'esito'; seq: number; ok: boolean; testo?: string; messaggi?: string[]; motivo?: string }
+  | { t: 'esito'; seq: number; ok: boolean; testo?: string; messaggi?: string[]; dialoghi?: Dialog[]; motivo?: string }
   | { t: 'rifiuto'; motivo: string };
+
+/** A line someone (or something) said back, as the game shows it in its dialog box. */
+export interface Dialog {
+  speaker?: string;
+  text: string;
+}
 
 /** One side of a link between a client and the server. */
 export interface Link<In, Out> {

@@ -48,7 +48,7 @@ import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Ident
 import { addItem, CARRY_CAPACITY, countItem, equippedItem, moveSlot, newInventory, putSlot, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
 import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH } from './relief';
 import { CardLedger, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, payerOf, placeCardId, stampFiles, titolareOf, type Card, type Carta } from './cards';
-import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, SOLO, validWandererId, WANDERER_NAME, wandererOf, wanderersIn, type Wanderer, type WandererState } from './wanderers';
+import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Wanderer, type WandererState } from './wanderers';
 import type { ActionDef, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Partita, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
 
 export interface Chunk {
@@ -242,6 +242,11 @@ export interface KernelOptions {
   past?: PastCommit[];
   /** A kernel in miniature for the bench of the Sala sistemi (T27): a fixed scene, nothing generated, nothing saved. */
   bench?: { terreno?: string[] };
+  /**
+   * The world of a thin client (T39, ADR-0059): the server's world as it tells it. Nothing is generated, saved or
+   * judged here, no system runs but those that walk this client's wanderer: places and things are put in by the client.
+   */
+  mirror?: boolean;
 }
 
 /** Documentation of the live symbols runes can bind to. */
@@ -434,11 +439,13 @@ export class Kernel {
 
   /** The scene of a kernel in miniature (T27), if this is one. */
   readonly bench?: { terreno?: string[] };
+  readonly mirror: boolean;
   private wasmUri?: string;
 
   private constructor(opts: KernelOptions) {
     this.models = opts.models;
     this.bench = opts.bench;
+    this.mirror = !!opts.mirror;
     this.wasmUri = opts.wasmUri;
     this.chunkStore = opts.chunks ?? new MemoryChunks();
     this.forms = new Forms(opts.forms ?? new InlineRunner());
@@ -463,7 +470,7 @@ export class Kernel {
       // Where it happened (T46a): the code that runs in the world, where the wanderer was; not loading nor manifests.
       if (isNew && !f.at && k.zone === 'sim' && /^(module|rune):/.test(f.key) && !/:load$/.test(f.key)) f.at = { ...k.playerCarpet() };
       k.bus.emit('fault', { fault: f, isNew });
-      if (isNew && !k.bench) void k.repairGenerated(f.key, f.message);
+      if (isNew && !k.bench && !k.mirror) void k.repairGenerated(f.key, f.message);
     };
     // The usage ledger: every call is counted; the file is written before every commit (it survives rollbacks).
     k.usage.load(repo.working[USAGE_FILE]);
@@ -479,7 +486,7 @@ export class Kernel {
       k.writeGraph();
     };
     k.applyFiles(repo.working, { reset: true });
-    if (k.bench) {
+    if (k.bench || k.mirror) {
       k.generationHeld = true;
       return k;
     }
@@ -761,6 +768,9 @@ export class Kernel {
     if (known && this.ecs.alive.has(known.entity)) return known.entity;
     const p = this.playerPos() ?? { x: 0, y: 0 };
     const entity = this.spawnWanderer(p.x + 1, p.y);
+    // Each wanderer is a seed of the wanderer's program (T39): those who meet tell each other apart.
+    const form: FormComp | undefined = this.ecs.get(entity, 'form');
+    if (form && id !== SOLO) Object.assign(form, { seed: this.forms.seedFor(form.model, `viandante:${id}`), tint: wandererColor(id) });
     const saved = readWandererState(this.files, id);
     // Their carpet starts where the carpet of the one acting is: they appear beside them.
     this.wanderersById.set(id, { id, nome: String(nome ?? saved?.nome ?? '').trim().slice(0, 40) || WANDERER_NAME, entity, tappeto: { ...this.offset() } });
@@ -1253,7 +1263,8 @@ export class Kernel {
     const key = this.chunkKey(cx, cy);
     const existing = this.chunks.get(key);
     if (existing) return existing;
-    if (this.genBudget <= 0) return undefined;
+    // A thin client has only the places the server sent.
+    if (this.genBudget <= 0 || this.mirror) return undefined;
     this.genBudget--;
     const draft = this.genDraft(cx, cy);
     const ch: Chunk = { cx, cy, key, draft, tiles: draft, version: 0, stage: 'draft', buildings: [] };
@@ -2320,10 +2331,11 @@ export class Kernel {
     return Math.hypot(col + 0.5 - ox, row + 0.5 - oy) < this.config.circleRadius - 0.5;
   }
 
-  private pickUpRune(): boolean {
+  /** E on a rune: the one under the wanderer or in front of them, or the rune `which` (a client of a session names it). */
+  pickUpRune(which?: Id): boolean {
     const { col, row } = this.playerCell();
     const [dx, dy] = this.facingDelta();
-    const id = this.runeCells.get(`${col},${row}`) ?? this.runeCells.get(`${col + dx},${row + dy}`);
+    const id = which !== undefined ? (this.ecs.has(which, 'rune') ? which : undefined) : (this.runeCells.get(`${col},${row}`) ?? this.runeCells.get(`${col + dx},${row + dy}`));
     if (id === undefined) return false;
     const rune: RuneComp = this.ecs.get(id, 'rune');
     // A rune is a thing: it goes into the rune pouch (or the pockets), and onto the phrase being composed.
@@ -5517,7 +5529,7 @@ export class Kernel {
    * what was taken from the world, what is left in chests. Saved only while the universe is valid.
    */
   saveState(): boolean {
-    if (this.faults.size || this.generationHeld) return false;
+    if (this.faults.size || this.generationHeld || this.mirror) return false;
     const containers: Record<string, { inv: Inventory; filled: boolean }> = Object.fromEntries(this.savedContainers);
     for (const id of this.ecs.query('container', 'origin')) {
       const c: Container = this.ecs.get(id, 'container');
@@ -5688,6 +5700,7 @@ export class Kernel {
 
   /** On leaving: the spending of this session goes into the universe even if nothing else changed. */
   saveUsage(): boolean {
+    if (this.mirror) return false;
     // Only valid states are committed: with a fault the ledger waits for the next valid commit.
     if ((this.usage.version === this.usageWritten && this.cards.version === this.cardsWritten) || this.faults.size) return false;
     this.repo.commit('consumi dei modelli', 'kernel');
@@ -5823,6 +5836,7 @@ export class Kernel {
   tick(dt: number): void {
     // Dead: the world waits for the choice (continue or start again).
     if (this.dead) return;
+    if (this.mirror) return this.mirrorTick(dt);
     this.time += dt;
     for (const w of this.wanderersById.keys()) this.as(w, () => this.paceTick());
     this.tickCount++;
@@ -5874,6 +5888,28 @@ export class Kernel {
     this.touching = undefined;
     this.meter.endTick();
     this.syncRunes();
+    this.sanitize();
+    this.updateZone();
+    for (const [id, b] of this.bubbles) if (b.until < this.time || !this.ecs.alive.has(id)) this.bubbles.delete(id);
+  }
+
+  /**
+   * A thin client's tick (T39): its wanderer walks and the carpet carries them, as in a game alone, against the
+   * things the server sent; the rest of the world moves on the server and arrives with its updates.
+   */
+  private mirrorTick(dt: number): void {
+    this.time += dt;
+    this.tickCount++;
+    this.luaCalls.clear();
+    this.paceTick();
+    if (this.campusVersion !== this.forms.version) this.placeCampus();
+    this.rebuildSolids();
+    for (const s of this.systems) {
+      if (!PER_WANDERER.has(s.manifest.id)) continue;
+      this.runningSystem = s.manifest.id;
+      this.runModule(s.manifest.id, 'update', dt);
+      this.runningSystem = undefined;
+    }
     this.sanitize();
     this.updateZone();
     for (const [id, b] of this.bubbles) if (b.until < this.time || !this.ecs.alive.has(id)) this.bubbles.delete(id);

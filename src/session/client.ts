@@ -4,12 +4,13 @@
 // gives this to the renderer.
 
 import type { FileMap } from '../kernel/types';
-import type { ClientLink, ClientMsg, Me, MyState, OtherView, PlaceView, ServerMsg, ThingView } from './protocol';
+import type { ClientLink, ClientMsg, Dialog, FormView, Me, MyState, OtherView, PlaceView, ServerMsg, ThingView } from './protocol';
 
 export interface Outcome {
   ok: boolean;
   testo?: string;
   messaggi?: string[];
+  dialoghi?: Dialog[];
   motivo?: string;
 }
 
@@ -23,6 +24,8 @@ export class SessionClient {
   tick = 0;
   ora = 0;
   me?: Me;
+  /** The look of this client's wanderer. */
+  forma?: FormView;
   stato: MyState = {};
   readonly places = new Map<string, PlaceView>();
   readonly things = new Map<number, ThingView>();
@@ -79,7 +82,7 @@ export class SessionClient {
         this.entered?.();
         break;
       case 'ingresso':
-        Object.assign(this, { id: m.id, nome: m.nome, files: m.files, me: m.me, stato: m.stato });
+        Object.assign(this, { id: m.id, nome: m.nome, files: m.files, me: m.me, forma: m.forma, stato: m.stato });
         this.places.clear();
         this.things.clear();
         this.others.clear();
@@ -98,7 +101,7 @@ export class SessionClient {
       case 'esito': {
         const done = this.waiting.get(m.seq);
         this.waiting.delete(m.seq);
-        done?.({ ok: m.ok, testo: m.testo, messaggi: m.messaggi, motivo: m.motivo });
+        done?.({ ok: m.ok, testo: m.testo, messaggi: m.messaggi, dialoghi: m.dialoghi, motivo: m.motivo });
         break;
       }
     }
@@ -110,7 +113,7 @@ export class SessionClient {
     this.ora = m.ora;
     for (const p of m.luoghi ?? []) this.places.set(p.key, p);
     // A thing that only moved keeps what it is.
-    for (const t of m.cose ?? []) this.things.set(t.id, 'm' in t || 'form' in t || 'glyph' in t ? t : { ...(this.things.get(t.id) ?? t), x: t.x, y: t.y });
+    for (const t of m.cose ?? []) this.things.set(t.id, Object.keys(t).length > 3 ? t : { ...(this.things.get(t.id) ?? t), x: t.x, y: t.y });
     for (const id of m.via ?? []) this.things.delete(id);
     for (const o of m.viandanti ?? []) this.others.set(o.id, o);
     for (const id of m.partiti ?? []) this.others.delete(id);

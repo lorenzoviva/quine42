@@ -2,7 +2,7 @@ import wasmUri from 'wasmoon/dist/glue.wasm?url';
 import { Kernel } from './kernel/kernel';
 import { bundledFiles } from './kernel/bundle';
 import { localStore, memoryStore } from './kernel/repo';
-import { SEED_FILE, seedHashes, UniverseChunks, UniverseClient, upgradeFromSeed, type PastCommit } from './kernel/universes';
+import { SEED_FILE, seedHashes, UniverseChunks, UniverseClient, upgradeFromSeed, type PastCommit, type UniverseSnapshot } from './kernel/universes';
 import type { FileMap } from './kernel/types';
 import { readConfig } from './kernel/universe';
 import { IdbChunks } from './kernel/chunks';
@@ -23,6 +23,9 @@ import { ActionMenu } from './ui/actions';
 import { StudioPanel } from './ui/studio';
 import { AtlasPanel } from './ui/atlas';
 import { GraphPanel } from './ui/graph';
+import { SessionClient } from './session/client';
+import { ThinClient } from './session/thin';
+import { socketLink, tabWanderer } from './session/socket';
 import { Sfx } from './audio';
 import { $ } from './ui/dom';
 import './style.css';
@@ -31,20 +34,14 @@ const DT = 1 / 60;
 const params = new URLSearchParams(location.search);
 const dev = import.meta.env.DEV || params.has('dev');
 
-async function main() {
-  const loading = $('#loading');
-  loading.textContent = 'avvio del kernel…';
+/** A game alone: the kernel runs here, on the universe's repository (or in the browser's storage, without the server). */
+async function bootAlone(client: UniverseClient | null, snap: UniverseSnapshot | undefined, name: string): Promise<{ kernel: Kernel; online: boolean }> {
   const ai = readConfig(bundledFiles).config.ai;
   const online = !params.has('offline') && (await GeminiModels.available());
   const models: Models = online ? new GeminiModels({ textModel: ai.textModel, limits: { text: ai.maxText }, thinking: ai.thinking, timeout: (ai.timeout ?? 120) * 1000 }) : new MockModels();
-  // Two repositories (ADR-0021): the kernel's seed (bundled) and the universe's, on disk.
-  const name = readConfig(bundledFiles).config.name;
-  const client = await UniverseClient.connect(name);
   let files: FileMap = bundledFiles;
   let past: PastCommit[] = [];
-  if (client) {
-    loading.textContent = `apertura dell'universo «${name}»…`;
-    let snap = await client.load();
+  if (client && snap) {
     if (!snap.exists) {
       // A world played before this version lived in the browser: it becomes the universe's first commit.
       const legacy = (() => {
@@ -74,8 +71,39 @@ async function main() {
   }
   const chunks = client ? new UniverseChunks(client, new IdbChunks()) : new IdbChunks();
   const kernel = await Kernel.boot({ files, store: client ? memoryStore() : localStore, models, chunks, forms: new WorkerRunner(), wasmUri, backend: client ?? undefined, past });
-  // Leaving: the state of play goes into the universe (if it is valid).
+  return { kernel, online };
+}
+
+/**
+ * A game of many (T39, ADR-0059): the world runs on the server, this tab is one of its wanderers. The kernel here
+ * is a mirror the thin client fills with what the server tells.
+ */
+async function joinMany(name: string): Promise<ThinClient> {
+  const session = new SessionClient(socketLink(name, params.has('offline')), { id: tabWanderer(params) });
+  await session.ready;
+  if (session.refused || !session.me) throw new Error(session.refused ?? 'il mondo non risponde');
+  const mirror = await Kernel.boot({ files: session.files, store: memoryStore(), models: new MockModels(), forms: new WorkerRunner(), wasmUri, mirror: true });
+  return new ThinClient(mirror, session);
+}
+
+async function main() {
+  const loading = $('#loading');
+  loading.textContent = 'avvio del kernel…';
+  const ai = readConfig(bundledFiles).config.ai;
+  // Two repositories (ADR-0021): the kernel's seed (bundled) and the universe's, on disk. Dev: ?universo=<name>
+  // opens another universe of universes/ (a game of many to try, T39).
+  const other = dev ? params.get('universo') : null;
+  const name = other && /^[a-z0-9][a-z0-9-]{0,40}$/.test(other) ? other : readConfig(bundledFiles).config.name;
+  const client = await UniverseClient.connect(name);
+  if (client) loading.textContent = `apertura dell'universo «${name}»…`;
+  const snap = client ? await client.load() : undefined;
+  const many = !!snap?.files && readConfig(snap.files).config.partita?.modalita === 'multigiocatore';
+  if (many) loading.textContent = `ingresso nel mondo di «${name}»…`;
+  const thin = many ? await joinMany(name) : undefined;
+  const { kernel, online } = thin ? { kernel: thin.k, online: false } : await bootAlone(client, snap, name);
+  // Leaving: the state of play goes into the universe (if it is valid); in a game of many the server keeps it.
   window.addEventListener('pagehide', () => {
+    if (thin) return thin.session.leave();
     kernel.saveState();
     kernel.saveUsage();
   });
@@ -159,6 +187,8 @@ async function main() {
   const sfx = new Sfx();
   konsole.dev = dev;
   (window as any).rune = kernel;
+  // The session of a game of many (T39): what this tab knows of the server's world.
+  if (thin) (window as any).session = thin;
   // The 3D view, for the console (camera distance, scene).
   (window as any).view = renderer;
 
@@ -196,7 +226,7 @@ async function main() {
     syncFocus();
   };
   // A universe that was never generated waits for its genesis before the Council paints anything.
-  kernel.generationHeld = online && kernel.needsGenesis() && !params.has('skip');
+  if (!thin) kernel.generationHeld = online && kernel.needsGenesis() && !params.has('skip');
   konsole.onGenesis = () => void runGenesis();
   kernel.bus.on('ui:edit', ({ path, line }) => {
     editor.open(path, line);
@@ -215,11 +245,11 @@ async function main() {
     setTimeout(() => (intro.hidden = true), 700);
     sfx.unlock();
     sfx.chord([220, 330, 440]);
-    if (kernel.needsGenesis() && !params.has('skip')) void runGenesis();
+    if (!thin && kernel.needsGenesis() && !params.has('skip')) void runGenesis();
   };
   window.addEventListener('keydown', startGame);
   intro.addEventListener('click', startGame);
-  $('#models').textContent = online ? `Gemini · ${ai.textModel}` : 'offline: luoghi abbozzati, agenti locali';
+  $('#models').textContent = thin ? `partita di molti · ${thin.session.nome} (${thin.session.id})` : online ? `Gemini · ${ai.textModel}` : 'offline: luoghi abbozzati, agenti locali';
   if (params.has('skip')) intro.hidden = true;
   // Dev: ?dev&teleport=46,0 stops the carpet and drops you at real coordinates (e.g. in the corona).
   const tp = dev && params.get('teleport')?.split(',').map(Number);
@@ -326,6 +356,7 @@ async function main() {
       steps++;
     }
     if (steps === 4) acc = 0;
+    thin?.frame(elapsed);
     renderer.render(elapsed);
     hud.update(elapsed);
     requestAnimationFrame(frame);
@@ -335,7 +366,7 @@ async function main() {
 
   if (import.meta.hot) {
     import.meta.hot.accept('./kernel/bundle', (mod) => {
-      if (mod) kernel.syncFromDisk(mod.bundledFiles);
+      if (mod && !thin) kernel.syncFromDisk(mod.bundledFiles);
     });
   }
 }

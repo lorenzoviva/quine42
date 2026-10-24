@@ -78,7 +78,8 @@ npm run build        # typecheck + build (npx vite preview la serve, proxy inclu
 ```
 
 `.env`: `GEMINI_API_KEY=...` (ignorato da git). Senza chiave o con `?offline`: modelli locali, texture e
-ostacoli procedurali. URL: `?skip` salta intro e Genesi; `?dev&teleport=46,0` porta oltre il tappeto.
+ostacoli procedurali. URL: `?skip` salta intro e Genesi; `?dev&teleport=46,0` porta oltre il tappeto; in sviluppo `?universo=<nome>` apre un altro
+universo di `universes/` e `?viandante=<id>` sceglie il viandante della scheda in multigiocatore (due schede, due viandanti).
 Graphify (facoltativo, ADR-0045): `pip install graphifyy` in un ambiente a parte, poi `GRAPHIFY_BACKEND=none graphify update .`
 (solo codice, offline, ~12 s; `graphify-out/` è ignorato da git; niente skill, MCP né hook).
 In console del browser: `window.rune` è il kernel (`.feed()`, `.models.usage`, `.content`).
@@ -142,7 +143,8 @@ src/mj/                 MarkovJunior del gioco (ADR-0036, 0038): engine.ts (moto
                         run.ts (esecuzione, animazioni, azioni), rig.ts (arti), mesh.ts (voxel → triangoli, impronte, pavimenti),
                         classes.ts (classi e scatole), photo.ts (foto in 3/4 per l'Artista), check.ts (misure di un modello)
 src/session/             il kernel sul server (ADR-0058): protocol.ts (messaggi, fakeLink), server.ts (SessionServer), client.ts
-                        (SessionClient: ciò che un client sa del mondo), host.ts (apre un universo e fa girare il suo mondo)
+                        (SessionClient: ciò che un client sa del mondo), host.ts (apre un universo e fa girare il suo mondo);
+                        il client sottile (ADR-0059): thin.ts (ThinClient: riempie il kernel specchio), socket.ts (WebSocket, id della scheda)
 lab/                    laboratorio di MarkovJunior (ADR-0038): sandbox 3D /lab/3d/, modelli ufficiali e conformità, script per
                         affettare, fotografare, misurare e provare i programmi con Gemini; non importarlo da src/
 ```
@@ -290,6 +292,15 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   mezzo secondo, azioni a 3 caselle, chi esce è salvato e lascia il mondo), `fakeLink` nei test. Nel server di Vite il WebSocket
   `/api/session?universo=<nome>` (`server/session.ts`, pacchetto `ws`) avvia al primo client il mondo dell'universo
   (`host.ts` con `ssrLoadModule`), solo se è in multigiocatore. In singola nulla cambia.
+- **Il client sottile** (ADR-0059, T39): se l'universo è in multigiocatore `main.ts` entra nella sessione (`socket.ts`, il
+  viandante della scheda: `?viandante=<id>` o uno per scheda) e avvia un **kernel specchio** (`KernelOptions.mirror`: niente
+  generazione, salvataggi né Concilio; `mirrorTick` muove solo il suo viandante) che `ThinClient` (`thin.ts`) riempie: luoghi →
+  chunk (con i lotti), cose → entità con `THING_PARTS`, altri viandanti → entità `remote` interpolate (`FOLLOW`), con arti e
+  fumetti. Il passo è predetto e mandato ogni 50 ms, la `correzione` lo rimette a posto, oltre 8 caselle il client segue il server
+  (`FAR` sul server). Le azioni (`interact perform freeAction talk inscribeHand dropSelected castSpell action`) vanno al server
+  con esito ottimistico (la cosa raccolta sparisce, la porta si apre, la frase incisa lascia la mano), annullato se rifiutato o
+  se il prossimo aggiornamento dice altro; il resto (`LATER`: inventario, borse, contenitori, fabbricazione) non ancora. Ogni
+  viandante oltre `io` è un seme suo del `viandante` col mantello del suo colore (`wandererColor`, `tinta: N`).
 - **Sala del Concilio e studi** (ADR-0027): tavolo rotondo con l'universo che gira, gli otto membri seduti (con lo Scultore),
   teletrasporti verso le sale e ritorno, schermi della storia, stile neon punk; atlante navigabile.
 - **Vita degli NPC** (ADR-0024): attività visibili (`attivita {tipo, ferma}`), dialoghi tra persone,

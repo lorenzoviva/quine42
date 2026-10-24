@@ -2,7 +2,8 @@
  "viandante": {
   "classe": "persona",
   "nome": "Viandante",
-  "autore": "a mano (Claude Code)"
+  "autore": "a mano (Claude Code)",
+  "tinta": "N"
  },
  "contadina": {
   "classe": "persona",

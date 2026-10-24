@@ -14,7 +14,8 @@ export default defineConfig(({ mode }) => {
     plugins: [geminiProxy(env.GEMINI_API_KEY), universeStore(path.resolve(process.cwd(), 'universes')), sessionServer()],
     // Writing a universe must not reload the page (dev server watches the project folder).
     server: { port: 5173, watch: { ignored: ['**/universes/**'] } },
-    optimizeDeps: { exclude: ['wasmoon'] },
+    // wasmoon is UMD: pre-bundled, the browser can import it in dev (its glue.wasm comes by URL, `wasmUri`).
+    optimizeDeps: { include: ['wasmoon'] },
     // The MarkovJunior lab's sandbox (lab/3d) is a second page on the same server: /lab/3d/.
     build: { rollupOptions: { input: { main: path.resolve('index.html'), lab3d: path.resolve('lab/3d/index.html') } } },
     test: { environment: 'node', include: ['tests/**/*.test.ts', 'lab/**/*.test.ts'] },
