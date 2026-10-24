@@ -869,7 +869,7 @@ le risposte alle domande del piano.
   `sys.wander` e il fuoco usano `hash` e `time`); anche il `MockModels` tirava a caso i nomi degli individui (ora da un
   contatore); l'orologio resta, documentato, in ciò che non è simulazione (registro, consumi, guasti, misure, scadenze di MJ).
 
-### T36 · Chi ha generato ogni contenuto (carte, P#2) — `in corso`
+### T36 · Chi ha generato ogni contenuto (carte, P#2) — `fatto` (`6a3cce5`)
 - Contesto: decisioni 4 e 6. Ogni chiamata ha un `chi` (il giocatore) o è comune; ogni contenuto generato ha autore e
   pagante e un contatore di utilizzi.
 - Fare: `chi` nel registro dei consumi (`ai/usage.ts`, `world/consumi.json`), con le chiamate del Concilio per il mondo
@@ -877,6 +877,14 @@ le risposte alle domande del piano.
   e regole; gli utilizzi (quante volte un contenuto entra in un luogo, in una trama, in un prompt) in un file
   `world/carte.json`; una funzione che costruisce la collezione di un giocatore dal repository.
 - Fatto quando: test offline (una Genesi e due luoghi → carte con autore e utilizzi; le comuni estratte a sorte, col seme).
+- Esito: `src/kernel/cards.ts` (ADR-0056): `TextCall.chi`/`CallRecord.chi` messo dal Concilio con `payerOf` (comuni i compiti del mondo, il
+  resto del viandante che agisce; la Fucina e le meccaniche di una sessione o della Genesi passano `comune`), `world/consumi.json → paganti`;
+  `carta {autore, pagante, titolare}` su moduli, oggetti, ambienti, incantesimi, ricette, modelli, persone, trame, regole giudicate e piani
+  dei luoghi; `commitContent` + `stampFiles` timbrano ciò che un commit porta; `titolareOf` estrae le comuni col seme e l'id della carta;
+  `world/carte.json` con gli utilizzi (`luoghi trame prompt`) e le carte dei luoghi; `kernel.cardsOf(id)`; `tests/cards.test.ts`. Diverso dal
+  previsto: autore e pagante stanno in un campo `carta` e non in `origin` (che è già una stringa, come `ModelInfo.autore`); gli id delle carte
+  sono quelli del grafo; le carte dei luoghi stanno anche in `carte.json`, perché `maps/` è fuori dal testo dell'universo; il pagante di una
+  chiamata è il viandante che agisce quando parte (dopo un `await` è `io`): il server di T38-T40 passerà `chi` esplicito.
 
 ### T37 · Rune e binding per ruolo — `da fare` (dipende da T33)
 - Contesto: decisioni 7 e 8. In multigiocatore i giocatori non hanno le rune del tappeto (`CARPET_TOKENS`) né quelle che
