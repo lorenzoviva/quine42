@@ -450,6 +450,22 @@ function rim(glow: Builder, x0: number, z0: number, x1: number, z1: number, y: n
   glow.box(x1 - e, y, z0 + e, x1, y + t, z1 - e, c);
 }
 
+/** A neon ring all round a cylinder of outer radius r at height y, e wide and t thick (T58b). */
+function circleRim(glow: Builder, cx: number, cz: number, r: number, y: number, c: number[], e = 0.05, t = 0.03, n = 28): void {
+  glow.ring(cx, y, cz, r - e, r, c, n);
+  if (t !== 0) {
+    const y0 = Math.min(y, y + t), y1 = Math.max(y, y + t);
+    for (let i = 0; i < n; i++) {
+      const a0 = (i * Math.PI * 2) / n;
+      const a1 = ((i + 1) * Math.PI * 2) / n;
+      const x0 = cx + Math.cos(a0) * r, z0 = cz + Math.sin(a0) * r;
+      const x1 = cx + Math.cos(a1) * r, z1 = cz + Math.sin(a1) * r;
+      const nx = Math.cos((a0 + a1) / 2), nz = Math.sin((a0 + a1) / 2);
+      glow.quad([x0, y0, z0], [x1, y0, z1], [x1, y1, z1], [x0, y1, z0], [nx, 0, nz], c);
+    }
+  }
+}
+
 /** The device of a showcase: a screen, a silo (its glass is drawn with what it shows), a 3D printer, a holographic table. */
 function showcaseBody(lit: Builder, glow: Builder, it: StudioItem, col: string): void {
   const x = it.x, z = it.y, w = it.w ?? 1;
@@ -462,11 +478,12 @@ function showcaseBody(lit: Builder, glow: Builder, it: StudioItem, col: string):
     return;
   }
   if (it.device === 'silos') {
+    // T58b: cylindrical base and lid, circles of light around the glass at base and lid, no horizontal bars.
     const cx = x + w / 2, cz = z + 0.5;
-    lit.box(cx - 1.1, 0, cz - 0.5, cx + 1.1, 0.3, cz + 0.5, dark);
-    lit.box(cx - 1.1, 2.6, cz - 0.5, cx + 1.1, 2.85, cz + 0.5, dark);
-    glow.box(cx - 1.1, 0.3, cz + 0.45, cx + 1.1, 0.34, cz + 0.5, c);
-    glow.box(cx - 1.1, 2.56, cz + 0.45, cx + 1.1, 2.6, cz + 0.5, c);
+    lit.cylinder(cx, 0, cz, 1.05, 0.3, dark, 28, true, false);
+    lit.cylinder(cx, 2.56, cz, 1.05, 2.85, dark, 28, true, true);
+    circleRim(glow, cx, cz, 0.95, 0.30, rgbOf(col, 0.8), 0.05, 0.03);
+    circleRim(glow, cx, cz, 0.95, 2.56, rgbOf(col, 0.8), 0.05, -0.03);
     return;
   }
   if (it.device === 'plastico') {
@@ -719,7 +736,11 @@ export function buildShowcase(k: Kernel, it: StudioItem, entry: ShowcaseEntry, c
   const printer = it.device === 'stampante';
   const table = it.device === 'plastico';
   const name = textPlane([entry.label], color, w - 0.2, printer || table ? 0.24 : 0.32);
-  name.position.set(cx, it.device === 'schermo' ? 0.45 : table ? 0.38 : printer ? 0.14 : 0.17, it.device === 'schermo' ? cz + 0.73 : table ? it.y + d - 0.04 : printer ? it.y + d - 0.09 : cz + 0.52);
+  name.position.set(
+    cx,
+    it.device === 'schermo' ? 0.45 : table ? 0.38 : printer ? 0.14 : it.device === 'silos' ? 0.15 : 0.17,
+    it.device === 'schermo' ? cz + 0.73 : table ? it.y + d - 0.04 : printer ? it.y + d - 0.09 : it.device === 'silos' ? cz + 1.07 : cz + 0.52,
+  );
   g.add(name);
   if (entry.place) {
     // The model of places (T26): the place in miniature over the table, still; until it is read, the table is empty.

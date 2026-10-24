@@ -657,7 +657,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   dall'interno del modello tagliato, l'insegna dell'Ufficio dei luoghi si legge al contrario (da controllare dal viale).
   Il `dev` di Vite su un'altra porta non caricava wasmoon (`LuaFactory` mancante); la build di produzione sì.
 
-### T58 · Ritocchi di luce: il piedistallo del Nucleo e il silos dei personaggi — T58a `fatto` (`33638c4`), T58b `da fare`
+### T58 · Ritocchi di luce: il piedistallo del Nucleo e il silos dei personaggi — T58a `fatto` (`33638c4`), T58b `fatto`
 - Contesto: richiesta del 24/10, sera ([`to-do-2026-10-24.md`](../userchats/to-do-2026-10-24.md), «Luci del Nucleo e del silos»).
   Il disegno è in `src/render/corona3d.ts`; non tocca il kernel.
 - **T58a · il piedistallo del grafo**: oggi (`itemMesh`, caso `grafo`) il gradino alto ha il neon solo sul bordo davanti e su
@@ -671,6 +671,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   vetro (raggio 0,95) un cerchio di luce; il coperchio diventa un cilindro solido opaco poco più largo del vetro, con un
   cerchio di luce come quello della base che combacia con il bordo esterno del vetro. La base resta (o diventa anch'essa un
   cilindro, se a vista il parallelepipedo stona col coperchio tondo: decidere guardando).
+  Esito: base e coperchio trasformati in cilindri opachi solidi (raggio 1.05, dark `#10101a`) con metodi `cylinder` e `ring` in `Builder` (`src/render/terrain.ts`); rimossi i due rettangoli luminosi orizzontali; aggiunti cerchi di luce (`circleRim` in `src/render/corona3d.ts`) al perimetro del vetro (r = 0.95) sia alla base che sotto il coperchio; targhetta con il nome riposizionata sul fronte della base cilindrica (z = cz + 1.07, y = 0.15) perfettamente leggibile senza sovrapposizioni. Test geometrico dedicato in `tests/corona.test.ts`. Convalida visuale nel browser da fronte e ad angolo a quarto di giro: resa perfettamente simmetrica e pulita da ogni angolazione. Diverso dal previsto: anche la base è diventata un cilindro perché il parallelepipedo originale (profondo solo 1 casella) lasciava sporgere il vetro cilindrico di raggio 0.95.
 - Fatto quando (per pezzo): typecheck e test verdi, verifica nel browser da vicino (Nucleo e Studio dei personaggi, anche con la
   camera girata), foto prima/dopo, commit. Sono piccoli: si possono fare nella stessa sessione.
 - Dipendenze: nessuna. Domande per l'autore: nessuna.

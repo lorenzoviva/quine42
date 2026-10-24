@@ -43,6 +43,51 @@ export class Builder {
     if (bottom) this.quad([x0, y0, z0], [x1, y0, z0], [x1, y0, z1], [x0, y0, z1], [0, -1, 0], side);
   }
 
+  /** An n-sided vertical cylinder from y0 to y1 with radius r, centered at (cx, cz). */
+  cylinder(cx: number, y0: number, cz: number, r: number, y1: number, rgb: number[], n = 28, top = true, bottom = false): void {
+    const topCol = rgb.map((v) => v * 1.08);
+    const sideCol = rgb.map((v) => v * 0.9);
+    for (let i = 0; i < n; i++) {
+      const a0 = (i * Math.PI * 2) / n;
+      const a1 = ((i + 1) * Math.PI * 2) / n;
+      const c0 = Math.cos(a0), s0 = Math.sin(a0);
+      const c1 = Math.cos(a1), s1 = Math.sin(a1);
+      const x0 = cx + c0 * r, z0 = cz + s0 * r;
+      const x1 = cx + c1 * r, z1 = cz + s1 * r;
+      const nx = (c0 + c1) / 2, nz = (s0 + s1) / 2;
+      this.quad([x0, y0, z0], [x1, y0, z1], [x1, y1, z1], [x0, y1, z0], [nx, 0, nz], sideCol);
+      if (top) {
+        for (const v of [[cx, y1, cz], [x0, y1, z0], [x1, y1, z1]]) {
+          this.pos.push(v[0], v[1], v[2]);
+          this.nor.push(0, 1, 0);
+          this.col.push(topCol[0], topCol[1], topCol[2]);
+        }
+      }
+      if (bottom) {
+        for (const v of [[cx, y0, cz], [x1, y0, z1], [x0, y0, z0]]) {
+          this.pos.push(v[0], v[1], v[2]);
+          this.nor.push(0, -1, 0);
+          this.col.push(sideCol[0], sideCol[1], sideCol[2]);
+        }
+      }
+    }
+  }
+
+  /** A horizontal ring at height y from r0 to r1, centered at (cx, cz). */
+  ring(cx: number, y: number, cz: number, r0: number, r1: number, rgb: number[], n = 28): void {
+    for (let i = 0; i < n; i++) {
+      const a0 = (i * Math.PI * 2) / n;
+      const a1 = ((i + 1) * Math.PI * 2) / n;
+      const c0 = Math.cos(a0), s0 = Math.sin(a0);
+      const c1 = Math.cos(a1), s1 = Math.sin(a1);
+      const x0 = cx + c0 * r0, z0 = cz + s0 * r0;
+      const x1 = cx + c1 * r0, z1 = cz + s1 * r0;
+      const x2 = cx + c1 * r1, z2 = cz + s1 * r1;
+      const x3 = cx + c0 * r1, z3 = cz + s0 * r1;
+      this.quad([x0, y, z0], [x1, y, z1], [x2, y, z2], [x3, y, z3], [0, 1, 0], rgb);
+    }
+  }
+
   geometry(): THREE.BufferGeometry {
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(this.pos, 3));

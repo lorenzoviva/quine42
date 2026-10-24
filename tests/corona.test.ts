@@ -187,4 +187,62 @@ describe('the devices of the rooms', () => {
     expect(faces.upper.minZ).toBeGreaterThan(0);
     expect(faces.upper.maxZ).toBeGreaterThan(0);
   });
+
+  it('builds the character silo in Studio dei Personaggi with circular rims and cylindrical lid and base (T58b)', () => {
+    const c = campus();
+    const b = c.building('persone')!;
+    const f = b.floors[0];
+    const mockKernel: any = {
+      corona: c,
+      forms: { version: 0, ready: () => undefined },
+      layoutSample: () => undefined,
+      graph: () => ({ nodes: [], links: [] }),
+    };
+    const room = buildRoom(mockKernel, b, f);
+    expect(room.group).toBeDefined();
+
+    const litMesh = room.group.children[0] as THREE.Mesh;
+    const glowMesh = room.group.children[1] as THREE.Mesh;
+    expect(litMesh).toBeDefined();
+    expect(glowMesh).toBeDefined();
+
+    const litPos = litMesh.geometry.getAttribute('position');
+    const glowPos = glowMesh.geometry.getAttribute('position');
+    expect(litPos).toBeDefined();
+    expect(glowPos).toBeDefined();
+
+    const show = f.items.find((i) => i.kind === 'showcase')!;
+    const cx = show.x + (show.w ?? 1) / 2, cz = show.y + 0.5;
+
+    // Verify lit geometry has vertices for lid at y in [2.56, 2.85] and base at y in [0, 0.30]
+    let lidCount = 0, baseCount = 0;
+    for (let i = 0; i < litPos.count; i++) {
+      const vx = litPos.getX(i), vy = litPos.getY(i), vz = litPos.getZ(i);
+      const r = Math.hypot(vx - cx, vz - cz);
+      if (vy >= 2.55 && vy <= 2.86 && r <= 1.1) lidCount++;
+      if (vy >= -0.01 && vy <= 0.31 && r <= 1.1) baseCount++;
+    }
+    expect(lidCount).toBeGreaterThan(0);
+    expect(baseCount).toBeGreaterThan(0);
+
+    // Verify glow geometry has circular rims near radius 0.95 at base (y in [0.29, 0.34]) and top (y in [2.52, 2.57])
+    // and verify points exist in all 4 quadrants (angles around cx, cz)
+    const baseQuads = [0, 0, 0, 0];
+    const topQuads = [0, 0, 0, 0];
+    for (let i = 0; i < glowPos.count; i++) {
+      const vx = glowPos.getX(i), vy = glowPos.getY(i), vz = glowPos.getZ(i);
+      const dx = vx - cx, dz = vz - cz;
+      const r = Math.hypot(dx, dz);
+      if (r >= 0.85 && r <= 1.0) {
+        const q = (dx >= 0 ? 1 : 0) + (dz >= 0 ? 2 : 0);
+        if (vy >= 0.29 && vy <= 0.34) baseQuads[q]++;
+        if (vy >= 2.52 && vy <= 2.57) topQuads[q]++;
+      }
+    }
+    for (let q = 0; q < 4; q++) {
+      expect(baseQuads[q]).toBeGreaterThan(0);
+      expect(topQuads[q]).toBeGreaterThan(0);
+    }
+  });
 });
+
