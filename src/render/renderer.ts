@@ -9,11 +9,7 @@
 import * as THREE from 'three';
 import type { Kernel } from '../kernel/kernel';
 import { Bloom } from './bloom';
-import { cellNear } from '../kernel/corona';
-import { animateRing, Avatars, buildCoronaRing, buildRoom, buildShowcase, buildSituation, campusKey } from './corona3d';
-import { ScreenWall } from './screens';
-import { ChainView } from './chain';
-import { BenchView } from './bench';
+import type { CoronaView, StudioRoom } from './coronaview';
 import { CUT, U } from './materials';
 import { Overlay } from './overlay';
 import { buildChunk, chunkSig, disposeChunk, tileForms, type ChunkView } from './terrain';
@@ -45,21 +41,11 @@ export class Renderer {
   private runes: Runes;
   private wanderer: Wanderer;
   private lights: Lights;
-  private avatars: Avatars;
-  private ring?: THREE.Group;
-  /** What the campus wore when the ring was built (its buildings' models). */
-  private ringKey = '';
-  private rooms = new Map<string, { group: THREE.Group; globe?: THREE.Object3D; version: number }>();
-  /** What the showcases of the studio show (T21), by building: rebuilt when the choice or the models change. */
-  /** The marks on the Direction's situation table (T46a): what they show, when it was last read, what pulses. */
-  private sit?: { key: string; at: number; group: THREE.Group; pulse: THREE.Object3D[] };
-  /** The Direction's wall of screens (T46b), for the room it stands in. */
-  private wall?: { room: string; view: ScreenWall };
-  /** The Systems Room's chain (T27a), for the room it stands in. */
-  private chain?: { room: string; view: ChainView };
-  /** The Systems Room's bench (T27b): built again when the case, its code or its run change. */
-  private bench?: { key: string; at: number; view: BenchView };
-  private shows = new Map<string, { key: string; group: THREE.Group; spin?: THREE.Object3D; bubbles?: THREE.Object3D[]; silo: boolean }>();
+  /**
+   * The corona and the studio (T41): only the master's client has them (src/master.ts, loaded on demand); a
+   * player's never leaves the simulation.
+   */
+  private corona?: CoronaView;
   private overlay: Overlay;
   private flash = new THREE.PointLight(0xfff2c0, 0, 8, 1.4);
   private flashUntil = 0;
@@ -92,7 +78,6 @@ export class Renderer {
     this.runes = new Runes(kernel, this.world);
     this.wanderer = new Wanderer(this.scene);
     this.lights = new Lights(this.scene);
-    this.avatars = new Avatars(this.scene);
     this.overlay = new Overlay(overlay, this.camera);
     this.resize();
     window.addEventListener('resize', () => this.resize());
@@ -113,13 +98,14 @@ export class Renderer {
       disposeChunk(v);
     }
     this.chunks.clear();
-    if (this.ring) this.scene.remove(this.ring);
-    this.ring = undefined;
-    for (const r of this.rooms.values()) this.scene.remove(r.group);
-    this.rooms.clear();
-    for (const v of this.shows.values()) this.scene.remove(v.group);
-    this.shows.clear();
+    this.corona?.reset();
     this.things.clear();
+  }
+
+  /** The master's client draws the corona too. */
+  useCorona(view: CoronaView): void {
+    this.corona = view;
+    this.scene.add(view.root);
   }
 
   resize(): void {
@@ -215,143 +201,7 @@ export class Renderer {
     this.wanderer.update(k, dt, this.t);
 
     // The corona and the studio.
-    const campus = revealed ? campusKey(k) : this.ringKey;
-    if (this.ring && campus !== this.ringKey) {
-      this.scene.remove(this.ring);
-      this.ring = undefined;
-    }
-    if (revealed && !this.ring) {
-      this.scene.add((this.ring = buildCoronaRing(k)));
-      this.ringKey = campus;
-    }
-    if (this.ring) {
-      this.ring.visible = revealed && !interior;
-      if (this.ring.visible) animateRing(this.ring, this.t);
-    }
-    for (const [key, r] of this.rooms) r.group.visible = !!studio && key === `${studio.building.id}#${studio.floor.index}`;
-    if (studio) {
-      const key = `${studio.building.id}#${studio.floor.index}`;
-      let r = this.rooms.get(key);
-      // A room with things on show is built again when their models are ready.
-      if (r && r.version !== k.forms.version && studio.floor.items.some((i) => i.kind === 'sprite')) {
-        this.scene.remove(r.group);
-        r = undefined;
-      }
-      if (!r) {
-        this.rooms.set(key, (r = { ...buildRoom(k, studio.building, studio.floor), version: k.forms.version }));
-        this.scene.add(r.group);
-      }
-      r.group.visible = true;
-      if (r.globe) r.globe.rotation.y = this.t * 0.4;
-    }
-    for (const [id, v] of this.shows) v.group.visible = studio?.building.id === id && studio.floor.index === 0;
-    const show = studio?.floor.items.find((i) => i.kind === 'showcase');
-    if (studio && show) {
-      const now = k.showcaseOf(studio.building.id);
-      // A place in miniature (T26) read from its saved plan arrives later.
-      const key = now ? `${now.entry.id}|${k.forms.version}|${now.entry.place ? `${k.miniatureVersion}|${now.phase}` : 0}` : '';
-      let v = this.shows.get(studio.building.id);
-      if (v?.key !== key) {
-        if (v) this.scene.remove(v.group);
-        v = undefined;
-        if (now) {
-          v = { key, ...buildShowcase(k, show, now.entry, studio.building.color, now.phase), silo: show.device === 'silos' };
-          this.shows.set(studio.building.id, v);
-          this.scene.add(v.group);
-        } else this.shows.delete(studio.building.id);
-      }
-      if (v?.spin) {
-        // In the silo's thick liquid (T23) it turns and floats slowly, swaying a little.
-        v.spin.rotation.y = this.t * (v.silo ? 0.25 : 0.6);
-        if (v.silo) {
-          v.spin.position.y = 0.55 + Math.sin(this.t * 0.7) * 0.12;
-          v.spin.rotation.z = Math.sin(this.t * 0.45) * 0.05;
-        }
-      }
-      for (const b of v?.bubbles ?? []) {
-        const { x, z, speed, phase } = b.userData as { x: number; z: number; speed: number; phase: number };
-        b.position.set(x + Math.sin(this.t * 0.8 + phase * 9) * 0.05, 0.35 + ((phase + this.t * speed * 0.5) % 1) * 1.9, z);
-      }
-    }
-    const table = studio?.floor.items.find((i) => i.kind === 'situazione');
-    if (this.sit) this.sit.group.visible = !!table;
-    if (studio && table) {
-      // Read again once a second; built again only when something changed.
-      if (!this.sit || this.t - this.sit.at > 1) {
-        const s = k.situation();
-        const key = `${table.x},${table.y}|${JSON.stringify(s)}`;
-        if (this.sit?.key !== key) {
-          if (this.sit) this.scene.remove(this.sit.group);
-          this.sit = { key, at: this.t, ...buildSituation(table, s, studio.building.color) };
-          this.scene.add(this.sit.group);
-        } else this.sit.at = this.t;
-      }
-      for (const [i, m] of this.sit.pulse.entries()) m.scale.y = 1 + 2.5 * (0.5 + 0.5 * Math.sin(this.t * 4 + i));
-    }
-    const wall = studio?.floor.items.filter((i) => i.kind === 'parete') ?? [];
-    const here = studio ? `${studio.building.id}#${studio.floor.index}` : '';
-    if (this.wall && (this.wall.room !== here || !wall.length)) {
-      this.scene.remove(this.wall.view.group);
-      this.wall.view.dispose();
-      this.wall = undefined;
-    }
-    if (studio && wall.length) {
-      if (!this.wall) {
-        this.wall = { room: here, view: new ScreenWall(wall, studio.building.color, studio.floor) };
-        this.scene.add(this.wall.view.group);
-      }
-      // Read twice a second (the arrows answer at once enough); a field is drawn again only when it changed.
-      if (this.t - this.wall.view.at > 0.5) {
-        this.wall.view.at = this.t;
-        this.wall.view.draw(k.screens());
-      }
-      this.wall.view.blink(this.t);
-    }
-    const stations = studio?.floor.items.filter((i) => i.kind === 'stazione') ?? [];
-    // Built again when a system joins or leaves the chain.
-    const line = `${here}|${stations.map((i) => `${i.target}@${i.x}+${i.w}`).join(',')}`;
-    if (this.chain && (this.chain.room !== line || !stations.length)) {
-      this.scene.remove(this.chain.view.group);
-      this.chain.view.dispose();
-      this.chain = undefined;
-    }
-    if (studio && stations.length) {
-      if (!this.chain) {
-        this.chain = { room: line, view: new ChainView(stations, studio.building.color) };
-        this.scene.add(this.chain.view.group);
-      }
-      // The measures change once a second (the meter's window).
-      if (this.t - this.chain.view.at > 0.5) {
-        this.chain.view.at = this.t;
-        this.chain.view.draw(k.chain());
-      }
-      this.chain.view.run(this.t);
-    }
-    const bench = studio?.floor.items.find((i) => i.kind === 'banco');
-    if (this.bench && !bench) {
-      this.scene.remove(this.bench.view.group);
-      this.bench.view.dispose();
-      this.bench = undefined;
-    }
-    if (studio && bench && (!this.bench || this.t - this.bench.at > 0.3)) {
-      // Read three times a second: the run arrives from the kernel in miniature a moment after the case is chosen.
-      const now = k.benchOf();
-      const key = now ? `${here}|${now.key}|${!!now.run}` : '';
-      if (this.bench?.key !== key) {
-        if (this.bench) {
-          this.scene.remove(this.bench.view.group);
-          this.bench.view.dispose();
-          this.bench = undefined;
-        }
-        if (now) {
-          const arrow = (kind: string) => studio.floor.items.find((i) => i.kind === kind && i.target === 'banco');
-          this.bench = { key, at: this.t, view: new BenchView(bench, now, studio.building.color, arrow('prev'), arrow('next')) };
-          this.scene.add(this.bench.view.group);
-        }
-      } else if (this.bench) this.bench.at = this.t;
-    }
-    this.bench?.view.update(this.t);
-    this.avatars.update(k, this.t);
+    this.corona?.update(this.t, studio, revealed, interior);
 
     // Light: the day outside, a dim neon light in the studio.
     const day = k.daylight();
@@ -418,7 +268,7 @@ export class Renderer {
     }
   }
 
-  private drawOverlay(studio: ReturnType<Kernel['corona']['roomAt']>, revealed: boolean, interior: boolean, g: number): void {
+  private drawOverlay(studio: StudioRoom, revealed: boolean, interior: boolean, g: number): void {
     const k = this.kernel;
     const o = this.overlay;
     const { ox, oy } = k.offset();
@@ -440,29 +290,7 @@ export class Renderer {
         if (p) o.hint(p.x - ox, k.floorAt(p.x, p.y) + 1.5, p.y - oy);
       }
     }
-    if (revealed && !interior) for (const b of k.corona.buildings) o.label(b.door.x + 0.5, 2.1, b.door.y + 0.5, b.floors.length > 1 ? `${b.name} (${b.floors.length} piani)` : b.name, b.color, 12, true);
-    for (const a of k.archive.avatars.values()) {
-      if (Math.hypot(a.x - k.playerPos().x, a.y - k.playerPos().y) > this.distance * 2) continue;
-      o.label(a.x, 1.45, a.y, `${a.sigil} ${a.name}`, a.color, 11);
-      if (a.say) o.bubble(a.x, 1.75, a.y, a.say, true);
-    }
-    if (studio) {
-      const near = k.corona.itemNear(k.playerPos().x, k.playerPos().y);
-      const recent = k.recentChanges();
-      const pulse = 0.5 + 0.5 * Math.sin(this.t * 4);
-      for (const it of studio.floor.items) if (it.path && recent.has(it.path)) o.cell(it.x, it.y, `rgba(255, 220, 120, ${0.4 + 0.4 * pulse})`, `rgba(255, 220, 120, ${0.1 + 0.15 * pulse})`, 0.4);
-      if (near) {
-        const c = cellNear(near, k.playerPos().x, k.playerPos().y);
-        o.cell(c.x, c.y, '#ffcf5c', undefined, 0.42);
-      }
-      const fl = studio.floor;
-      o.title(`${studio.building.name.toUpperCase()}${studio.building.floors.length > 1 ? `  ·  PIANO ${fl.index + 1}/${studio.building.floors.length}` : ''}`, studio.building.color);
-      const shown = near?.kind === 'showcase' ? k.showcaseOf(near.target!) : undefined;
-      const tried = near?.kind === 'banco' ? k.benchOf() : undefined;
-      if (shown) o.caption(`E: guarda «${shown.entry.label}» (${shown.index + 1}/${shown.count})`);
-      else if (tried) o.caption(`E: il banco di prova, ${tried.entry.name}: «${tried.entry.case.titolo}» (${tried.index + 1}/${tried.count})`);
-      else if (near && near.kind !== 'desk') o.caption(`E: ${near.kind === 'file' ? `apri ${near.label}` : near.kind === 'sprite' || near.kind === 'tile' || near.kind === 'layout' ? `guarda «${near.label}»` : near.label}`);
-    }
+    this.corona?.overlay(o, this.t, studio, revealed, interior, this.distance);
     if (this.mouse) {
       const r = this.toReal(this.mouse.x, this.mouse.y);
       const inCorona = interior || (revealed && Math.hypot(r.x, r.y) >= k.config.circleRadius);

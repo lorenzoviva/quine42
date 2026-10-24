@@ -972,12 +972,22 @@ le risposte alle domande del piano.
   Concilio era già solo sul server (lo specchio di T39 non ha generazione). Nessuna verifica nel browser: il gioco in singola non
   cambia, e il multigiocatore è coperto dai test col finto trasporto.
 
-### T41 · Il client del giocatore senza corona né Concilio — `da fare` (dipende da T39)
+### T41 · Il client del giocatore senza corona né Concilio — `fatto` (COMMIT)
 - Fare: corona, studio, pannello del Concilio, registro, console ed editor caricati solo dal master (import dinamici); il
   server non manda ai giocatori il registro del Concilio, i file dello studio né gli interni della corona; `window.rune`
   del giocatore espone solo il client.
 - Fatto quando: la build del giocatore non scarica i moduli della corona (verifica nel browser, rete); test sul server
   (nessun messaggio del Concilio a un giocatore).
+- Esito: ADR-0061. `playerFiles` (`server.ts`): a un giocatore `universe.json`, `models/`, rilievo, atlante e i manifest senza `logic`
+  né `casi` (tranne `core.movement`/`core.carpet`, che lo specchio fa girare); il master riceve tutto, `ingresso.master` e il registro
+  (`concilio` all'ingresso e poi a ogni aggiornamento, solo a lui; `ThinClient` lo versa nello specchio). `src/master.ts` (`MasterTools`)
+  e `src/render/coronaview.ts` (`CoronaView`, tolta dal `Renderer`) caricati con `import()` solo dal master: nella build un chunk
+  `master-*.js` di ~89 kB. `window.rune` del giocatore è il `ThinClient`. `tests/players.test.ts` (3 test). Verificato nel browser con un
+  universo di prova poi tolto: la scheda di `anna` non scarica né `master.ts` né i moduli dello studio, ha 30 file oltre ai modelli e
+  nessun registro; quella di `io` li scarica, ha 97 file e il registro del Concilio dal server. Diverso dal previsto: il kernel resta
+  una classe sola, quindi la logica della corona (`corona.ts`, `archive.ts`, gli agenti) è ancora nel bundle principale; ciò che il
+  giocatore non ha sono i file del Concilio e il codice che disegna e mostra la corona. Gli interni della corona non passavano già
+  dal server (non sono entità); il master non riceveva il registro del Concilio, e ora sì.
 
 ### T42 · Il master — `da fare` (dipende da T37, T41)
 - Fare: il master è chi crea l'universo multigiocatore (non si cambia); god mode (niente morte, bisogni, danni, effetti dei

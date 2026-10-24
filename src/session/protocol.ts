@@ -5,6 +5,7 @@
 
 import type { FileMap } from '../kernel/types';
 import type { Inventory } from '../kernel/inventory';
+import type { FeedEntry } from '../kernel/agents/council';
 
 /** A tick of the server's world and its hour. */
 export interface Clock {
@@ -118,7 +119,11 @@ export interface ContainerView {
 }
 
 export type ServerMsg =
-  | ({ t: 'ingresso'; id: string; nome: string; files: FileMap; me: Me; forma?: FormView; stato: MyState; luoghi: PlaceView[]; cose: ThingView[]; viandanti: OtherView[] } & Clock)
+  /**
+   * Coming in: the files (a player gets only what a client draws and walks with, `playerFiles`), whether this
+   * wanderer is the master (T41) and, only for the master, the Council's feed so far.
+   */
+  | ({ t: 'ingresso'; id: string; nome: string; master?: true; concilio?: FeedEntry[]; files: FileMap; me: Me; forma?: FormView; stato: MyState; luoghi: PlaceView[]; cose: ThingView[]; viandanti: OtherView[] } & Clock)
   | ({ t: 'aggiorna'; me?: Me; stato?: MyState; luoghi?: PlaceView[]; cose?: ThingView[]; via?: number[]; viandanti?: OtherView[]; partiti?: string[] } & Clock)
   /** The step was not possible (too fast, through a wall): the wanderer is here. */
   | { t: 'correzione'; seq: number; x: number; y: number }
@@ -127,7 +132,9 @@ export type ServerMsg =
    * opened or changed, with what is in it, and the pocket of a bag it opened.
    */
   | { t: 'esito'; seq: number; ok: boolean; testo?: string; messaggi?: string[]; dialoghi?: Dialog[]; motivo?: string; contenitore?: ContainerView; borsa?: number }
-  | { t: 'rifiuto'; motivo: string };
+  | { t: 'rifiuto'; motivo: string }
+  /** What the Council said meanwhile (T41): only to the master, never to a player. */
+  | { t: 'concilio'; voci: FeedEntry[] };
 
 /** A line someone (or something) said back, as the game shows it in its dialog box. */
 export interface Dialog {

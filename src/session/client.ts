@@ -4,6 +4,7 @@
 // gives this to the renderer.
 
 import type { FileMap } from '../kernel/types';
+import type { FeedEntry } from '../kernel/agents/council';
 import type { ClientLink, ClientMsg, ContainerView, Dialog, FormView, Me, MyState, OtherView, PlaceView, ServerMsg, ThingView } from './protocol';
 
 export interface Outcome {
@@ -22,6 +23,10 @@ type WithoutSeq<T> = T extends { seq: number } ? Omit<T, 'seq'> : never;
 export class SessionClient {
   id = '';
   nome = '';
+  /** Whether this wanderer is the master (T41): only the master hears the Council and gets all the files. */
+  master = false;
+  /** What the Council said (the master's only), oldest first. */
+  readonly feed: FeedEntry[] = [];
   files: FileMap = {};
   tick = 0;
   ora = 0;
@@ -84,7 +89,8 @@ export class SessionClient {
         this.entered?.();
         break;
       case 'ingresso':
-        Object.assign(this, { id: m.id, nome: m.nome, files: m.files, me: m.me, forma: m.forma, stato: m.stato });
+        Object.assign(this, { id: m.id, nome: m.nome, master: !!m.master, files: m.files, me: m.me, forma: m.forma, stato: m.stato });
+        this.feed.splice(0, this.feed.length, ...(m.concilio ?? []));
         this.places.clear();
         this.things.clear();
         this.others.clear();
@@ -99,6 +105,10 @@ export class SessionClient {
       case 'correzione':
         this.corrections++;
         if (this.me) this.me = { ...this.me, x: m.x, y: m.y };
+        break;
+      case 'concilio':
+        this.feed.push(...m.voci);
+        if (this.feed.length > 400) this.feed.splice(0, this.feed.length - 400);
         break;
       case 'esito': {
         const done = this.waiting.get(m.seq);

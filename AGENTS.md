@@ -92,6 +92,7 @@ server/universeStore.ts /api/universe: ogni universo è un repository git in uni
 server/session.ts       /api/session (WebSocket, solo npm run dev): i client delle partite in multigiocatore (ADR-0058)
 src/
   main.ts               bootstrap: modelli, kernel, renderer, UI, loop a 60 Hz
+  master.ts             gli strumenti del master (editor, console, registro, Genesi, studio, atlante, grafo, corona), caricati con import() (ADR-0061)
   kernel/               IL PAVIMENTO — mai scrivibile da Lua
     kernel.ts           orchestratore: tick, luoghi, oggetti, contenitori, azioni (anche libere), effetti, magia, chat, Fucina, Genesi, rollback
     corona.ts           la corona come studio: edifici, interni su più piani, scaffali, gallerie
@@ -123,7 +124,7 @@ src/
     inventory.ts, bundle.ts, faults.ts, events.ts, input.ts, rng.ts, types.ts
   render/               renderer.ts (three.js: camera 3/4, luce, spazi), terrain.ts (chunk, muri, tetti), things.ts (entità, viandante,
                         rune, luci), models.ts (geometrie dei modelli), forms.ts + worker.ts (i programmi nei worker),
-                        thumbs.ts (icone: foto dei modelli), bloom.ts (bagliore dei voxel luminosi), corona3d.ts (corona, studio, avatar), screens.ts (la parete della Direzione), chain.ts (la catena della Sala sistemi), bench.ts (il banco di prova), overlay.ts (testi, E, mouse),
+                        thumbs.ts (icone: foto dei modelli), bloom.ts (bagliore dei voxel luminosi), corona3d.ts (corona, studio, avatar), coronaview.ts (la corona nel renderer, solo del master), screens.ts (la parete della Direzione), chain.ts (la catena della Sala sistemi), bench.ts (il banco di prova), overlay.ts (testi, E, mouse),
                         materials.ts, glitch.ts
   ui/                   hud.ts (anche il diario delle missioni), inventory.ts, actions.ts, chat.ts, feed.ts, genesis.ts, editor.ts, console.ts, studio.ts, atlas.ts,
                         graph.ts + graphlayout.ts (il grafo del mondo nel Nucleo), dom.ts
@@ -307,6 +308,12 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   in `maps/` lo paga lui (la chiamata del Cartografo, la carta del luogo, la Fucina di ciò che il piano chiede). Le bozze si pianificano
   vicino a qualunque viandante fuori dallo studio (il master nello studio o scollegato non ferma gli altri); in multigiocatore al più
   `ai.placesPerMinute` (20) luoghi nuovi per minuto del mondo, gli altri restano bozze (`Chunk.held`). Il Concilio gira solo sul server.
+- **Il client del giocatore** (ADR-0061, T41): a un giocatore il server manda solo i file che il client disegna (`playerFiles` in
+  `server.ts`: `universe.json`, `models/`, rilievo, atlante, manifest senza `logic` né `casi` tranne `PER_WANDERER`); prompt, bibbia,
+  persone, trame, regole, grafo, carte, consumi e viandanti restano sul server. L'`ingresso` dice `master`; il registro del Concilio
+  (`concilio`) va solo al master, e `ThinClient` lo versa nello specchio. Corona e strumenti del master (`src/master.ts`: editor,
+  console, registro, Genesi, pannelli dello studio, atlante, grafo; `src/render/coronaview.ts`: ciò che il renderer disegna della
+  corona) si caricano con `import()` solo dal master (in singola sempre); `window.rune` del giocatore è il `ThinClient`.
 - **Sala del Concilio e studi** (ADR-0027): tavolo rotondo con l'universo che gira, gli otto membri seduti (con lo Scultore),
   teletrasporti verso le sale e ritorno, schermi della storia, stile neon punk; atlante navigabile.
 - **Vita degli NPC** (ADR-0024): attività visibili (`attivita {tipo, ferma}`), dialoghi tra persone,

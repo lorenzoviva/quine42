@@ -64,7 +64,8 @@ describe('the kernel on the server (T38)', () => {
     expect(server.connected()).toEqual(['anna', 'bruno']);
     // They come in with the universe's files: the same world.
     expect(anna.files['universe.json']).toBe(k.files['universe.json']);
-    expect(Object.keys(bruno.files).length).toBe(Object.keys(k.files).length);
+    // A player gets what a client draws and walks with (T41): the same models and manifests.
+    expect(Object.keys(bruno.files).filter((p) => p.startsWith('models/')).length).toBe(Object.keys(k.files).filter((p) => p.startsWith('models/')).length);
     await settle(server);
     // The places both have are the same tiles as the server's.
     const common = [...anna.places.keys()].filter((key) => bruno.places.has(key));

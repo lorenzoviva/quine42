@@ -4,7 +4,11 @@
 // server checks the step with the kernel's collision and pace and corrects it, and answers every action with
 // what came of it. No DOM, no network here: the links are given (WebSocket in server/session.ts, fake in tests).
 
-import type { Kernel } from '../kernel/kernel';
+import { PER_WANDERER, type Kernel } from '../kernel/kernel';
+import type { FeedEntry } from '../kernel/agents/council';
+import { ATLAS_FILE } from '../kernel/atlas';
+import { RELIEF_PATH } from '../kernel/relief';
+import type { FileMap } from '../kernel/types';
 import { validWandererId } from '../kernel/wanderers';
 import { THING_PARTS, type ClientMsg, type ItemOp, type Dialog, type FormView, type Me, type MyState, type OtherView, type PlaceView, type ServerLink, type ServerMsg, type ThingView } from './protocol';
 
@@ -28,6 +32,37 @@ const CORRECT = 0.05;
  * elsewhere (T39), or it is a lie. Either way they stay where they are and the client is told.
  */
 const FAR = 8;
+
+/** What the Council said that the master has not heard yet: older words are dropped past this. */
+const FEED_KEEP = 400;
+
+/**
+ * The files a player's client gets (T41): what it draws and walks with. The universe's settings, the models, the
+ * relief and the atlas; the modules' manifests without their code and their cases, but for the systems the client
+ * runs itself (`PER_WANDERER`). Prompts, the bible, the rules, the people and their memories, the plots, the graph,
+ * the cards, the costs and the other wanderers stay on the server: they are the studio's, the master's.
+ */
+export function playerFiles(files: FileMap): FileMap {
+  const out: FileMap = {};
+  for (const [path, text] of Object.entries(files)) {
+    if (path === 'universe.json' || path === ATLAS_FILE || path === RELIEF_PATH || path.startsWith('models/')) out[path] = text;
+    if (!/^modules\/[^/]+\/manifest\.json$/.test(path)) continue;
+    let m: Record<string, unknown>;
+    try {
+      m = JSON.parse(text);
+    } catch {
+      // Unreadable on the server too: the client fails on it the same way.
+      out[path] = text;
+      continue;
+    }
+    const dir = path.slice(0, -'manifest.json'.length);
+    if (typeof m.logic === 'string' && PER_WANDERER.has(String(m.id)) && files[dir + m.logic] !== undefined) out[dir + m.logic] = files[dir + m.logic];
+    else delete m.logic;
+    delete m.casi;
+    out[path] = JSON.stringify(m, null, 2) + '\n';
+  }
+  return out;
+}
 
 const round = (v: number) => Math.round(v * 1000) / 1000;
 /** An index from the wire: an integer, or -1 (which no pocket is). */
@@ -80,6 +115,8 @@ export class SessionServer {
   private clients = new Map<string, Client>();
   private inbox: Array<{ c: Client; msg: ClientMsg }> = [];
   private since = 0;
+  /** The Council's feed since the last update, for the masters connected. */
+  private voices: FeedEntry[] = [];
   readonly hz: number;
   readonly near: number;
   readonly reach: number;
@@ -91,6 +128,10 @@ export class SessionServer {
     this.hz = opts.hz ?? 10;
     this.near = opts.near ?? 24;
     this.reach = opts.reach ?? 3;
+    kernel.bus.on('council', (e: FeedEntry) => {
+      this.voices.push(e);
+      if (this.voices.length > FEED_KEEP) this.voices.shift();
+    });
   }
 
   /** The wanderers connected now. */
@@ -138,14 +179,16 @@ export class SessionServer {
     const u = this.view(c);
     const w = this.kernel.wanderers().find((x) => x.id === id)!;
     const forma = this.formOf(this.kernel.wandererAt(id)?.entity);
+    const master = this.kernel.isMaster(id);
     link.send({
       t: 'ingresso',
       id,
       nome: w.nome,
+      ...(master ? { master: true as const, concilio: this.kernel.feed().slice(-FEED_KEEP) } : {}),
       ...(forma ? { forma } : {}),
       tick: u.tick,
       ora: u.ora,
-      files: this.kernel.files,
+      files: master ? this.kernel.files : playerFiles(this.kernel.files),
       me: u.me!,
       stato: u.stato ?? {},
       luoghi: u.luoghi ?? [],
@@ -165,7 +208,10 @@ export class SessionServer {
     this.since += dt;
     if (this.since + 1e-9 < 1 / this.hz) return;
     this.since = 0;
+    const voices = this.voices;
+    this.voices = [];
     for (const c of this.clients.values()) {
+      if (voices.length && this.kernel.isMaster(c.id)) c.link.send({ t: 'concilio', voci: voices });
       const u = this.view(c);
       if (u.me || u.stato || u.luoghi || u.cose || u.via || u.viandanti || u.partiti) c.link.send(u);
     }

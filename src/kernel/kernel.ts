@@ -294,7 +294,8 @@ const clone = <T>(v: T): T => (v === undefined ? v : JSON.parse(JSON.stringify(v
  * Systems that move one wanderer (T38): they run once for each wanderer the kernel moves itself, as that
  * wanderer, and see no other wanderer. Those a session's client moves (`setRemote`) they skip.
  */
-const PER_WANDERER = new Set(['core.movement', 'core.carpet']);
+/** The systems that run once per wanderer, the only ones a thin client runs too (T39). */
+export const PER_WANDERER = new Set(['core.movement', 'core.carpet']);
 
 export class Kernel {
   readonly ecs = new World();

@@ -13,21 +13,15 @@ import { Renderer } from './render/renderer';
 import { WorkerRunner } from './render/forms';
 import { Thumbs } from './render/thumbs';
 import { Hud, icons } from './ui/hud';
-import { Editor } from './ui/editor';
-import { Console } from './ui/console';
 import { InventoryPanel } from './ui/inventory';
 import { Chat } from './ui/chat';
-import { FeedPanel } from './ui/feed';
-import { GenesisScreen } from './ui/genesis';
 import { ActionMenu } from './ui/actions';
-import { StudioPanel } from './ui/studio';
-import { AtlasPanel } from './ui/atlas';
-import { GraphPanel } from './ui/graph';
 import { SessionClient } from './session/client';
 import { ThinClient } from './session/thin';
 import { socketLink, tabWanderer } from './session/socket';
 import { Sfx } from './audio';
 import { $ } from './ui/dom';
+import type { MasterTools } from './master';
 import './style.css';
 
 const DT = 1 / 60;
@@ -100,6 +94,10 @@ async function main() {
   const many = !!snap?.files && readConfig(snap.files).config.partita?.modalita === 'multigiocatore';
   if (many) loading.textContent = `ingresso nel mondo di «${name}»…`;
   const thin = many ? await joinMany(name) : undefined;
+  // The corona, the studio, the Council's feed, the console and the editor are the master's (T41): alone always, in a
+  // game of many only the wanderer who made the universe. A player's client never fetches them.
+  const master = !thin || thin.session.master;
+  const tooling = master ? import('./master') : undefined;
   const { kernel, online } = thin ? { kernel: thin.k, online: false } : await bootAlone(client, snap, name);
   // Leaving: the state of play goes into the universe (if it is valid); in a game of many the server keeps it.
   window.addEventListener('pagehide', () => {
@@ -112,14 +110,10 @@ async function main() {
   icons.get = (item) => thumbs.icon(item);
   icons.model = (model, tint, seed) => thumbs.model(model, tint, seed);
   const hud = new Hud(kernel, renderer);
-  const editor = new Editor(kernel);
-  const konsole = new Console(kernel);
   const inventory = new InventoryPanel(kernel);
   const chat = new Chat(kernel);
-  const feed = new FeedPanel($('#hud'), kernel);
-  const genesis = new GenesisScreen(kernel);
   const actions = new ActionMenu(kernel);
-  const studio = new StudioPanel(kernel);
+  const tools: MasterTools | undefined = tooling && new (await tooling).MasterTools(kernel, renderer, dev, () => syncFocus());
   // Right click on a tile near you: its context menu (with what stands on it, and "Altro…").
   $<HTMLCanvasElement>('#world').addEventListener('contextmenu', (e) => {
     e.preventDefault();
@@ -141,8 +135,6 @@ async function main() {
   });
   window.addEventListener('mousemove', (e) => renderer.dragMove(e.clientX));
   window.addEventListener('mouseup', (e) => e.button === 1 && renderer.dragEnd());
-  const atlas = new AtlasPanel(kernel);
-  const graph = new GraphPanel(kernel);
   // Death: the session ends; continue in the same universe or start again from the seed.
   const deathEl = $('#death');
   kernel.bus.on('ui:death', ({ cause, punizione }: { cause: string; punizione: { nome: string; testo: string } }) => {
@@ -185,53 +177,24 @@ async function main() {
     syncFocus();
   });
   const sfx = new Sfx();
-  konsole.dev = dev;
-  (window as any).rune = kernel;
+  // A player's console sees only the client (T41): what the server told this tab. The master's sees the kernel too.
+  (window as any).rune = master ? kernel : thin;
   // The session of a game of many (T39): what this tab knows of the server's world.
-  if (thin) (window as any).session = thin;
+  if (thin && master) (window as any).session = thin;
   // The 3D view, for the console (camera distance, scene).
   (window as any).view = renderer;
 
   const syncFocus = () => {
-    kernel.input.enabled = !editor.isOpen && !konsole.isOpen && !inventory.isOpen && !chat.isOpen && !genesis.isOpen && !actions.isOpen && !studio.isOpen && !atlas.isOpen && !graph.isOpen && !kernel.dead;
+    kernel.input.enabled = !tools?.isOpen && !inventory.isOpen && !chat.isOpen && !actions.isOpen && !kernel.dead;
     if (!kernel.input.enabled) kernel.input.releaseAll();
   };
-  editor.onClose = syncFocus;
-  konsole.onClose = syncFocus;
   inventory.onClose = syncFocus;
   chat.onClose = syncFocus;
   actions.onClose = syncFocus;
-  studio.onClose = syncFocus;
-  atlas.onClose = syncFocus;
-  graph.onClose = syncFocus;
-  graph.onEdit = (path) => {
-    graph.close();
-    editor.open(path);
-    syncFocus();
-  };
-  konsole.onEdit = (path) => {
-    konsole.close();
-    editor.open(path);
-    syncFocus();
-  };
-  studio.onEdit = (path) => {
-    editor.open(path);
-    syncFocus();
-  };
-  const runGenesis = async () => {
-    kernel.generationHeld = true;
-    syncFocus();
-    await genesis.show(online);
-    kernel.generationHeld = false;
-    syncFocus();
-  };
+  const runGenesis = async () => tools?.runGenesis(online, syncFocus);
   // A universe that was never generated waits for its genesis before the Council paints anything.
   if (!thin) kernel.generationHeld = online && kernel.needsGenesis() && !params.has('skip');
-  konsole.onGenesis = () => void runGenesis();
-  kernel.bus.on('ui:edit', ({ path, line }) => {
-    editor.open(path, line);
-    syncFocus();
-  });
+  if (tools) tools.konsole.onGenesis = () => void runGenesis();
   kernel.bus.on('genesis:done', ({ title }) => hud.showBanner(title.toUpperCase(), 'Un nuovo universo è stato scritto. Il tappeto ti riporta al centro.', 4000));
 
   kernel.input.attach(window);
@@ -306,7 +269,7 @@ async function main() {
         syncFocus();
         break;
       case 'feed':
-        feed.toggle();
+        tools?.feed.toggle();
         break;
       case 'walk':
         renderer.showWalk = !renderer.showWalk;
@@ -319,18 +282,18 @@ async function main() {
         break;
       case 'console':
         // The simulator's console belongs to those who left the simulation (or to developers).
-        if (!dev && !kernel.exitedOnce) {
+        if (!tools || (!dev && !kernel.exitedOnce)) {
           hud.message('Niente risponde.', 'warn');
           break;
         }
-        if (!editor.isOpen) konsole.toggle();
+        if (!tools.editor.isOpen) tools.konsole.toggle();
         syncFocus();
         break;
       case 'escape':
-        if (editor.isOpen) editor.close();
+        if (tools?.editor.isOpen) tools.editor.close();
         else if (chat.isOpen) chat.close();
         else if (inventory.isOpen) inventory.close();
-        else if (konsole.isOpen) konsole.close();
+        else if (tools?.konsole.isOpen) tools.konsole.close();
         else if (!help.hidden) help.hidden = true;
         else hud.hideDialog();
         syncFocus();

@@ -11,6 +11,7 @@
 import type { Kernel } from '../kernel/kernel';
 import type { Id } from '../kernel/ecs';
 import type { NpcReply } from '../kernel/agents/minds';
+import type { FeedEntry } from '../kernel/agents/council';
 import type { SessionClient, Outcome } from './client';
 import type { ContainerView, OtherView, PlaceView, ServerMsg, ThingView } from './protocol';
 import { takeFromSlot } from '../kernel/inventory';
@@ -76,6 +77,7 @@ export class ThinClient {
     if (s.forma) k.ecs.set(k.playerId, 'form', { ...k.ecs.get(k.playerId, 'form'), ...s.forma });
     this.state();
     this.told = [...(s.stato.hand?.tokens ?? [])];
+    this.heard(s.feed);
     s.onMessage = (m) => this.receive(m);
   }
 
@@ -132,6 +134,9 @@ export class ThinClient {
         for (const id of this.recheck) this.resync(id);
         this.recheck.clear();
         break;
+      case 'concilio':
+        this.heard(m.voci);
+        break;
       case 'correzione':
         // The latest word wins: an older correction, overtaken by steps already corrected, is not applied again.
         if (m.seq < this.lastCorrection) break;
@@ -139,6 +144,16 @@ export class ThinClient {
         this.putMe(m.x, m.y);
         this.lastStep = { x: m.x, y: m.y, t: this.clock };
         break;
+    }
+  }
+
+  /** The Council at work on the server (the master's client only, T41): its feed, its avatars in the studio. */
+  private heard(voices: FeedEntry[]): void {
+    const c = this.k.council;
+    for (const e of voices) {
+      c.feed.push(e);
+      if (c.feed.length > 400) c.feed.shift();
+      c.onFeed?.(e);
     }
   }
 
