@@ -169,7 +169,7 @@ neon è quello della sala nel gioco (`ROOMS` in `corona.ts`), così fuori e dent
   porta in un taglio rettangolare al centro della faccia sud, con un portale sporgente. Cartello come quello del
   Laboratorio delle cose (stessa famiglia: sono due magazzini gemelli) con «IL MAGAZZINO DEGLI OGGETTI».
 
-### `luoghi` — L'Ufficio dei luoghi
+### `luoghi` — L'Ufficio dei luoghi  — `fatto`
 - **Scatola**: 14 × 9 × 7 caselle → `size="112 72 56"`. Neon `9ad27a` (verde).
 - **Esterno**: «grande edificio mobile (forse su ruote ma non è abbastanza neon punk/futuristico) in metallo nero
   e vetro riflettente, attrezzato con strumenti di terraformazione futuristici. Su un lato, la scritta adesiva neon
@@ -181,7 +181,7 @@ neon è quello della sala nel gioco (`ROOMS` in `corona.ts`), così fuori e dent
   rivolto verso y grande, come un adesivo (le lettere a filo della parete). La porta: una scaletta o una passerella
   che scende dal fianco fino a z = 0.
 
-### `sistemi` — La Sala sistemi
+### `sistemi` — La Sala sistemi  — `fatto`
 - **Scatola**: 14 × 14 × 5 caselle → `size="112 112 40"`. Neon `b9a6ff` (lavanda).
 - **Esterno**: «una rampa che scende verso una base sotterranea. Insegna neon "Sala sistemi" e protezioni tipo
   base segreta futuristiche.»
@@ -193,7 +193,7 @@ neon è quello della sala nel gioco (`ROOMS` in `corona.ts`), così fuori e dent
   sbarra all'ingresso della trincea, griglie di ventilazione sul terrapieno, una cupola radar. Insegna «SALA
   SISTEMI» sopra il portellone, sulla parete di fondo della trincea, rivolta verso y grande.
 
-### `nucleo` — Il Nucleo
+### `nucleo` — Il Nucleo — `fatto`
 - **Scatola**: 14 × 14 × 14 caselle → `size="112 112 112"`. Neon `6fc3ff` (azzurro).
 - **Esterno**: «una sfera di voxel neri che si illuminano a intermittenza. La sfera fluttua in alto, sotto
   l'edificio del nucleo, a forma di corona circolare futuristico, insegna neon "Il nucleo".»
