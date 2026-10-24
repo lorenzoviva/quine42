@@ -64,7 +64,7 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
   il ragionamento (`thinking`, `low`) e il tempo massimo (`timeout`). Prezzi in `src/kernel/ai/prices.ts` (con la data).
 - **Vitest** in Node con modelli offline (`MockModels`): kernel, Concilio e layout testabili headless.
 - Persistenza: repository git dell'universo su disco tramite il server di Vite (`server/universeStore.ts`):
-  testi, `maps/` (piani dei luoghi), `world/stato.json` (la partita), `world/consumi.json` (i consumi). Senza server:
+  testi, `maps/` (piani dei luoghi), `world/stato.json` (lo stato del mondo), `world/giocatori/` (i viandanti), `world/consumi.json` (i consumi). Senza server:
   `localStorage` + IndexedDB.
 
 ## Comandi
@@ -110,6 +110,7 @@ src/
     chunks.ts           archivio dei piani dei luoghi
     bench.ts            il banco della Sala sistemi: i casi dei sistemi in un kernel in miniatura (ADR-0052)
     partita.ts          la partita scelta alla Genesi: livelli della morte, principio per il Concilio (ADR-0053)
+    wanderers.ts        i viandanti con un id (`io` in singola), il loro stato in `world/giocatori/`, legami e ricordi per id (ADR-0054)
     situation.ts, screens.ts  la Direzione: il tavolo della situazione e la parete di schermi (T46), funzioni pure
     chain.ts            la catena della Sala sistemi (T27a): misure di ogni sistema nel tick, stazioni
                         (bench.ts: anche il banco di prova, T27b: casi, scena, nomi dei campi)
@@ -127,7 +128,8 @@ universe/
   universe.json         nome, seme, raggio, chunk (18), modelli e budget, `partita` (scelta alla Genesi, ADR-0053)
   world/                bible.json (memoria del Narratore), style.md (guida di stile dei modelli), canone.md (le rune), consumi.json,
                         rules.json (regole), people.json (la società, con i ricordi), plots.json (trame),
-                        atlas.json (geografia), stato.json (la partita), grafo.json (il grafo del mondo, derivato)
+                        atlas.json (geografia), stato.json (lo stato del mondo), grafo.json (il grafo del mondo, derivato),
+                        giocatori/<id>.json (lo stato di ogni viandante: inventario, bisogni, stati, slot, frase)
   prompts/              theme.md, agents/<agente>.md
   models/               index.json + <id>.xml: i programmi MarkovJunior di ogni cosa (ADR-0041), uno per tipo
   modules/<id>/         manifest.json (+ logic.lua): sistemi, terreni, ambienti, pacchetti di oggetti, mobili, persone,
@@ -248,6 +250,13 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   la ripara, `keepGame` riscrive un `universe.json` che dice altro. Va come principio (`gameSummary`) a Narratore, Arbitro, Ingegnere
   e Referente. Alla morte il Narratore (`player.death`) traduce il livello (`DEATH_LEVELS`) in cosa si perde (`perde_tutto` o effetti
   che tolgono) e dove si riparte (`qui | piazza`); `continueAfterDeath` è asincrona; senza risposta vale `fallbackDeath`.
+- **I viandanti** (ADR-0054, T34): ogni viandante ha un id stabile (`io` in singola, `src/kernel/wanderers.ts`) e il suo stato
+  in `world/giocatori/<id>.json` (da uno `stato.json` vecchio per `io`); `world/stato.json` è lo stato del mondo. Il kernel ha un
+  registro (`wanderers()`, `addWanderer`); ciò che agisce su «il giocatore» agisce sul viandante che agisce (`wanderer()`), e
+  `as(id, fn)`, sincrono (mai attraverso un `await`), fa agire un altro. Legami e ricordi portano `viandante: <id>` (`readPeople`
+  migra «Viandante» e `legameViandante` a `io`; `bondWith`, `bondOf`, `memoriesFor`: una persona non racconta a un viandante ciò che ha
+  vissuto con un altro), le missioni `Quest.viandante`; `talk(id, testo, viandante?)` dà al Narratore il nome di chi parla; nel grafo
+  `persona:viandante` è `io`, `persona:viandante-<id>` gli altri.
 - **Sala del Concilio e studi** (ADR-0027): tavolo rotondo con l'universo che gira, gli otto membri seduti (con lo Scultore),
   teletrasporti verso le sale e ritorno, schermi della storia, stile neon punk; atlante navigabile.
 - **Vita degli NPC** (ADR-0024): attività visibili (`attivita {tipo, ferma}`), dialoghi tra persone,

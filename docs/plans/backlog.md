@@ -840,7 +840,7 @@ le risposte alle domande del piano.
   richieste), non solo con il canone; la ripartenza è `qui | piazza` perché «l'ultimo villaggio» non esiste ancora (da fare con
   T43 o dopo); `continueAfterDeath` è diventata asincrona (aspetta il Narratore).
 
-### T34 · Il viandante con un id e lo stato per giocatore — `da fare`
+### T34 · Il viandante con un id e lo stato per giocatore — `fatto` (COMMIT)
 - Contesto: oggi c'è un solo `playerId` e `world/stato.json` è il viandante; ricordi, legami e missioni parlano di «il
   viandante».
 - Fare: un id stabile del viandante (in singola uno solo, `io`); lo stato del giocatore in `world/giocatori/<id>.json`
@@ -848,6 +848,12 @@ le risposte alle domande del piano.
   in `people.json`/`plots.json` con l'id del viandante; il nodo del viandante nel grafo per id; il Narratore riceve il
   nome del viandante con cui si parla.
 - Fatto quando: un universo vecchio si carica uguale; test con due viandanti nello stesso kernel (ricordi separati).
+- Esito: `src/kernel/wanderers.ts` (id `io`, `world/giocatori/<id>.json`, `readWandererState` anche dal vecchio `stato.json`,
+  `wandererOf`, `bondWith`, `memoriesFor`), ADR-0054, `tests/wanderers.test.ts`. Legami e ricordi con `viandante: <id>` (il registro
+  vecchio migra in lettura, `legameViandante` non si scrive più), `Quest.viandante`, `Turn.con`, `NpcContext.wanderer`; nel grafo
+  `persona:viandante-<id>` per gli altri viandanti. Diverso dal previsto: per avere due viandanti nello stesso kernel già ora, il
+  kernel ha un registro (`addWanderer`) e `as(id, fn)` sincrono, che fa agire un altro viandante su tutto ciò che oggi usa
+  `playerId`, invece di passare un id a ogni funzione; gli altri viandanti non hanno ancora input né rendering (T38-T39).
 
 ### T35 · Semi condivisi e determinismo — `da fare`
 - Contesto: decisione 2. Ogni estrazione casuale (kernel, `hash` e `math.random` di Lua, `sys.wander`, fuoco, bottino)

@@ -6,6 +6,7 @@
 
 import { hashStr } from './rng';
 import type { FileMap } from './types';
+import { SOLO, WANDERER_NAME, wandererOf } from './wanderers';
 
 export type DayPhase = 'mattina' | 'giorno' | 'sera' | 'notte';
 export const DAY_PHASES: DayPhase[] = ['mattina', 'giorno', 'sera', 'notte'];
@@ -45,12 +46,16 @@ export interface Memory {
   quando: string;
   testo: string;
   con?: string;
+  /** The wanderer it is about (their id, T34): only they hear of it. */
+  viandante?: string;
   peso: number;
 }
 
 export interface Relation {
   nome: string;
   legame: string;
+  /** A relation with a wanderer: their id (`nome` is how they are called). */
+  viandante?: string;
 }
 
 export type Species = 'persona' | 'animale';
@@ -75,7 +80,7 @@ export interface Person {
   aspetto?: string;
   porta?: string[];
   ricordi?: Memory[];
-  /** What they are to the wanderer (amico, fidanzata, moglie, figlio…), if anything. */
+  /** Before T34: what they were to the only wanderer (read into `famiglia` with the id `io`). */
   legameViandante?: string;
 }
 
@@ -105,10 +110,19 @@ export interface People {
 export function readPeople(files: FileMap): People {
   try {
     const p = JSON.parse(files['world/people.json'] ?? '{}');
-    return { persone: p.persone ?? [], attesi: p.attesi ?? [] };
+    return { persone: (p.persone ?? []).map(withWandererIds), attesi: p.attesi ?? [] };
   } catch {
     return { persone: [], attesi: [] };
   }
+}
+
+/** A registry written before T34 speaks of «Viandante»: that is the wanderer `io`. */
+function withWandererIds(p: Person): Person {
+  const famiglia = (p.famiglia ?? []).map((r) => (r.viandante || wandererOf(r) !== SOLO ? r : { ...r, viandante: SOLO }));
+  if (p.legameViandante && !famiglia.some((r) => wandererOf(r) === SOLO)) famiglia.push({ nome: WANDERER_NAME, legame: p.legameViandante, viandante: SOLO });
+  const ricordi = p.ricordi?.map((m) => (m.viandante || wandererOf(m) !== SOLO ? m : { ...m, viandante: SOLO }));
+  const { legameViandante: _, ...rest } = p;
+  return { ...rest, famiglia, ...(ricordi ? { ricordi } : {}) };
 }
 
 // --- A coherent society: species, gender, relations both ways, names that do not repeat ----------
@@ -386,7 +400,7 @@ export function repairSociety(people: People, speciesOf: (tipo: string) => Speci
   };
   for (const p of persone) {
     for (const r of p.famiglia) {
-      if (r.nome.toLowerCase() === 'viandante') {
+      if (wandererOf(r)) {
         own.get(p)!.push(r);
         continue;
       }
@@ -479,7 +493,7 @@ export function repairSociety(people: People, speciesOf: (tipo: string) => Speci
   const attesi: People['attesi'] = [];
   for (const p of persone) {
     for (const r of p.famiglia) {
-      if (r.nome.toLowerCase() === 'viandante' || byName.has(r.nome.toLowerCase()) || attesi.some((a) => a.nome.toLowerCase() === r.nome.toLowerCase())) continue;
+      if (wandererOf(r) || byName.has(r.nome.toLowerCase()) || attesi.some((a) => a.nome.toLowerCase() === r.nome.toLowerCase())) continue;
       attesi.push({ nome: r.nome, legame: reverseRelation(r.legame, undefined, p.specie, p.specie), di: p.nome });
     }
   }

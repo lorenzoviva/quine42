@@ -12,11 +12,12 @@ import { readPlots } from './plots';
 import { readAtlas, regionAt } from './atlas';
 import { normName } from './content';
 import { hashStr, hex } from './rng';
+import { bondWith, playerFile, readWandererState, SOLO, wandererOf, wanderersIn } from './wanderers';
 
 export const GRAPH_FILE = 'world/grafo.json';
 export const GRAPH_SCHEMA = 1;
 /** The version of the builder: raise it when the graph is built differently, so the files are rewritten. */
-export const GRAPH_BUILD = 2;
+export const GRAPH_BUILD = 3;
 
 export type NodeType = 'persona' | 'tipo' | 'luogo' | 'regione' | 'ambiente' | 'struttura' | 'trama' | 'oggetto' | 'ricetta' | 'runa' | 'incantesimo' | 'regola' | 'fatto';
 
@@ -175,8 +176,17 @@ export function mergePlaces(files: FileMap, places: GraphPlace[]): GraphPlace[] 
   return [...known.values()].sort((a, b) => a.cx - b.cx || a.cy - b.cy);
 }
 
-/** What the wanderer carries (world/stato.json changes with every save: only this goes into the graph). */
-export function carriedOf(files: FileMap): string[] {
+/** The node of a wanderer (T34): `persona:viandante` for `io`, `persona:viandante-<id>` for the others. */
+export function wandererNode(id: string): string {
+  return `persona:${slug(wandererKey(id))}`;
+}
+
+function wandererKey(id: string): string {
+  return id === SOLO ? 'viandante' : `viandante-${id}`;
+}
+
+/** What a wanderer carries (their state changes with every save: only this goes into the graph). */
+export function carriedOf(files: FileMap, wanderer: string = SOLO): string[] {
   const out = new Set<string>();
   const walk = (inv: any) => {
     for (const s of Array.isArray(inv?.slots) ? inv.slots : []) {
@@ -184,13 +194,18 @@ export function carriedOf(files: FileMap): string[] {
       if (s?.inv) walk(s.inv);
     }
   };
-  walk(json(files, 'world/stato.json')?.viandante?.inventory);
+  walk(readWandererState(files, wanderer)?.inventory);
   return [...out].sort();
 }
 
 /** What the graph is made of, as a hash: the same hash, the same graph (the file is not rewritten). */
 export function graphHash(files: FileMap, places: GraphPlace[]): string {
-  return hex(hashStr(`${GRAPH_BUILD}|` + graphSources(files).map((p) => `${p}\0${files[p]}`).join('\u0001') + JSON.stringify(places) + carriedOf(files).join(',')));
+  return hex(hashStr(`${GRAPH_BUILD}|` + graphSources(files).map((p) => `${p}\0${files[p]}`).join('\u0001') + JSON.stringify(places) + wanderersOf(files).map((w) => `${w.id}:${w.nome}:${carriedOf(files, w.id).join(',')}`).join(';')));
+}
+
+/** The wanderers of the graph: `io` always, then one per player file. */
+function wanderersOf(files: FileMap): Array<{ id: string; nome: string }> {
+  return [{ id: SOLO, nome: 'il viandante' }, ...wanderersIn(files).filter((w) => w.id !== SOLO)];
 }
 
 export function readGraph(files: FileMap): GraphData | null {
@@ -320,7 +335,7 @@ export class WorldGraph {
     for (const l of this.out.get(id) ?? []) {
       const t = name(l.target);
       switch (l.relation) {
-        case 'legame': parts.push(`${l.legame} ${l.target === 'persona:viandante' ? 'del viandante' : `di ${t}`}`); break;
+        case 'legame': parts.push(`${l.legame} ${l.target === wandererNode(SOLO) ? 'del viandante' : `di ${t}`}`); break;
         case 'e_un': break;
         case 'abita': parts.push(`abita a ${t}`); break;
         case 'lavora': parts.push(`lavora a ${t}`); break;
@@ -572,12 +587,15 @@ export function buildGraph(files: FileMap, places: GraphPlace[] = [], speciesOf:
   const personByName = new Map<string, string>();
   const PF = 'world/people.json';
   for (const p of people.persone) {
-    const id = g.add('persona', p.nome, p.nome, PF, { specie: p.specie ?? speciesOf(p.tipo), genere: p.genere, tipo_modulo: p.tipo, mestiere: p.mestiere, eta: p.eta, luogo: p.luogo, legame_viandante: p.legameViandante });
+    const id = g.add('persona', p.nome, p.nome, PF, { specie: p.specie ?? speciesOf(p.tipo), genere: p.genere, tipo_modulo: p.tipo, mestiere: p.mestiere, eta: p.eta, luogo: p.luogo, legame_viandante: bondWith(p, SOLO) });
     personByName.set(p.nome, id);
   }
   // Someone named and not met is of the species of who named them (as the repair of the society assumes).
   for (const a of people.attesi) if (!personByName.has(a.nome)) personByName.set(a.nome, g.add('persona', a.nome, a.nome, PF, { atteso: true, specie: personByName.has(a.di) ? g.node(personByName.get(a.di)!)!.specie : undefined }));
-  const wanderer = g.add('persona', 'viandante', 'il viandante', 'world/stato.json', { viandante: true, specie: 'persona' }, true);
+  // One node per wanderer, by id; a relation with a wanderer the files do not know yet makes theirs.
+  const wandererAt = (id: string, nome?: string) =>
+    g.node(wandererNode(id)) ? wandererNode(id) : g.add('persona', wandererKey(id), id === SOLO ? 'il viandante' : nome ?? id, files[playerFile(id)] !== undefined || id !== SOLO ? playerFile(id) : 'world/stato.json', { viandante: true, giocatore: id, specie: 'persona' }, true);
+  for (const w of wanderersOf(files)) wandererAt(w.id, w.nome);
   for (const p of people.persone) {
     const id = personByName.get(p.nome)!;
     if (p.tipo) {
@@ -585,11 +603,11 @@ export function buildGraph(files: FileMap, places: GraphPlace[] = [], speciesOf:
       else g.missing(`${p.nome} è un ${p.tipo}, che non esiste`, [id]);
     }
     for (const r of p.famiglia ?? []) {
-      const t = personByName.get(r.nome) ?? (normName(r.nome) === 'viandante' ? wanderer : undefined);
+      const w = wandererOf(r);
+      const t = w ? wandererAt(w, r.nome) : personByName.get(r.nome);
       if (t) g.link(id, t, 'legame', PF, { legame: r.legame });
       else g.missing(`${p.nome} è ${r.legame} di ${r.nome}, che non esiste`, [id]);
     }
-    if (p.legameViandante && !(p.famiglia ?? []).some((r) => normName(r.nome) === 'viandante' && r.legame === p.legameViandante)) g.link(id, wanderer, 'legame', PF, { legame: p.legameViandante });
     const home = p.luogo ? placeIn(p.luogo) : undefined;
     if (home?.startsWith('luogo:')) {
       const where = new Set((p.routine ?? []).map((s) => s.dove));
@@ -602,7 +620,10 @@ export function buildGraph(files: FileMap, places: GraphPlace[] = [], speciesOf:
     const t = personByName.get(a.di);
     if (t) g.link(id, t, 'legame', PF, { legame: a.legame });
   }
-  for (const it of carriedOf(files)) if (g.node(`oggetto:${slug(it)}`)) g.link(wanderer, `oggetto:${slug(it)}`, 'porta', 'world/stato.json');
+  for (const w of wanderersOf(files)) {
+    const file = files[playerFile(w.id)] !== undefined ? playerFile(w.id) : 'world/stato.json';
+    for (const it of carriedOf(files, w.id)) if (g.node(`oggetto:${slug(it)}`)) g.link(wandererNode(w.id), `oggetto:${slug(it)}`, 'porta', file);
+  }
 
   // Plots.
   for (const t of readPlots(files)) {

@@ -10,6 +10,8 @@ export type NpcAction = (typeof NPC_ACTIONS)[number];
 export interface Turn {
   who: 'giocatore' | 'npc';
   text: string;
+  /** The wanderer of the exchange (their id, T34; `io` when missing). */
+  con?: string;
 }
 
 export interface NpcContext {
@@ -27,6 +29,8 @@ export interface NpcContext {
   memories?: string;
   bond?: string;
   secrets?: string;
+  /** The name of the wanderer they are talking to (T34): «Viandante» when nobody knows it. */
+  wanderer?: string;
 }
 
 export interface NpcReply {
@@ -59,10 +63,12 @@ const REPLY_SCHEMA: Schema = {
 };
 
 export async function npcReply(c: Council, npc: NpcContext, playerText: string, focus?: string[]): Promise<NpcReply> {
-  const history = npc.history.slice(-10).map((t) => `${t.who === 'giocatore' ? 'Viandante' : npc.name}: ${t.text}`).join('\n');
+  const named = npc.wanderer && npc.wanderer !== 'Viandante' ? npc.wanderer : '';
+  const history = npc.history.slice(-10).map((t) => `${t.who === 'giocatore' ? named || 'Viandante' : npc.name}: ${t.text}`).join('\n');
   const prompt = [
     `Interpreta questo personaggio, in prima persona, restando sempre nel personaggio.`,
     `SCHEDA DEL PERSONAGGIO\n${npc.persona}`,
+    named ? `Parli con ${named}, un viandante (qui sotto «il viandante» è ${named}).` : '',
     `Stato: umore ${npc.mood}; ora stai ${npc.mode === 'segui' ? 'seguendo il viandante' : npc.mode === 'resta' ? 'fermo' : 'girovagando'}; luogo: ${npc.place || 'sconosciuto'}; porti con te: ${npc.carrying.join(', ') || 'niente'}.`,
     npc.bond ? `Per il viandante sei: ${npc.bond}.` : '',
     npc.memories ? `I TUOI RICORDI (usali: chi ricorda le promesse, i torti, l'affetto è credibile):

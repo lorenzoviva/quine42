@@ -47,6 +47,7 @@ import { BENCH, cleanCases, runCase, textKey, type BenchEntry, type BenchRun, ty
 import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Identity } from './agents/content';
 import { addItem, CARRY_CAPACITY, countItem, equippedItem, moveSlot, newInventory, putSlot, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
 import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH } from './relief';
+import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, SOLO, validWandererId, WANDERER_NAME, wandererOf, type Wanderer, type WandererState } from './wanderers';
 import type { ActionDef, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Partita, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
 
 export interface Chunk {
@@ -358,7 +359,10 @@ export class Kernel {
   private genBudget = 64;
   private tickCount = 0;
 
+  /** The entity of the wanderer acting now (the one the input moves, or another one inside `as`). */
   playerId: Id = 0;
+  /** The wanderers of this kernel by id (T34): `io` is the one of a game alone; others join with `addWanderer`. */
+  private wanderersById = new Map<string, Wanderer & { entity: Id }>();
   time = 0;
   zone: 'sim' | 'corona' | 'studio' = 'sim';
   /** What each showcase of the studio shows: building → index in its entries (not saved). */
@@ -609,6 +613,73 @@ export class Kernel {
 
   playerPos(): { x: number; y: number } {
     return this.ecs.get(this.playerId, 'pos');
+  }
+
+  /** A wanderer's entity, with what they start with (e.g. a rune pouch). */
+  private spawnWanderer(x: number, y: number): Id {
+    const playerMod = [...this.modules.values()].find((m) => m.manifest.kind === 'player');
+    const defaults: Record<string, any> = clone(playerMod?.manifest.components ?? FALLBACK_PLAYER);
+    for (const [k, v] of Object.entries(FALLBACK_PLAYER)) if (!defaults[k]) defaults[k] = clone(v);
+    if (!defaults.inventory) defaults.inventory = newInventory();
+    const glyph = this.glyphOf(playerMod?.manifest.appearance ?? { glyph: '@', color: '#ffffff' });
+    const body = { r: playerMod?.manifest.physics?.radius ?? 0.3, solid: false };
+    const id = this.ecs.spawn({ ...defaults, pos: { x, y }, glyph, body, form: this.formFor(playerMod?.manifest, 'viandante'), module: { id: playerMod?.manifest.id ?? 'kernel.player' } });
+    const was = this.playerId;
+    this.playerId = id;
+    try {
+      for (const it of playerMod?.manifest.inventory ?? []) if (this.content.get(it)) this.give(it, 1);
+    } finally {
+      this.playerId = was || id;
+    }
+    return id;
+  }
+
+  /** The wanderer acting now: the one whose entity is `playerId`. */
+  wanderer(): Wanderer {
+    for (const w of this.wanderersById.values()) if (w.entity === this.playerId) return { id: w.id, nome: w.nome };
+    return { id: SOLO, nome: WANDERER_NAME };
+  }
+
+  wanderers(): Wanderer[] {
+    return [...this.wanderersById.values()].map((w) => ({ id: w.id, nome: w.nome }));
+  }
+
+  /**
+   * Runs `fn` as another wanderer: what it does to «the player» (inventory, needs, hand, memories, bonds,
+   * quests) is theirs. Synchronous on purpose: the swap never spans an await.
+   */
+  as<T>(id: string, fn: () => T): T {
+    const w = this.wanderersById.get(id);
+    if (!w || w.entity === this.playerId) return fn();
+    if (!this.ecs.alive.has(w.entity)) {
+      // Never someone else in their place: they come back with what was saved of them.
+      this.wanderersById.delete(id);
+      this.addWanderer(id, w.nome);
+      return this.as(id, fn);
+    }
+    const was = this.playerId;
+    this.playerId = w.entity;
+    try {
+      return fn();
+    } finally {
+      this.playerId = was;
+    }
+  }
+
+  /**
+   * Another wanderer in this world (T34; the server of T38 will add one per player): an entity of their own
+   * beside the first, with the state saved for them, if any. Returns their entity.
+   */
+  addWanderer(id: string, nome?: string): Id | undefined {
+    if (!validWandererId(id)) return undefined;
+    const known = this.wanderersById.get(id);
+    if (known && this.ecs.alive.has(known.entity)) return known.entity;
+    const p = this.playerPos() ?? { x: 0, y: 0 };
+    const entity = this.spawnWanderer(p.x + 1, p.y);
+    const saved = readWandererState(this.files, id);
+    this.wanderersById.set(id, { id, nome: String(nome ?? saved?.nome ?? '').trim().slice(0, 40) || WANDERER_NAME, entity });
+    if (saved) this.as(id, () => this.applyWandererState(saved));
+    return entity;
   }
 
   playerComp(): { speed: number; facing: string; load: number } {
@@ -919,12 +990,10 @@ export class Kernel {
     if (!defaults.inventory) defaults.inventory = newInventory();
     const app = playerMod?.manifest.appearance ?? { glyph: '@', color: '#ffffff' };
     const glyph = this.glyphOf(app);
-    const body = { r: playerMod?.manifest.physics?.radius ?? 0.3, solid: false };
 
     if (!this.playerId || !this.ecs.alive.has(this.playerId)) {
-      this.playerId = this.ecs.spawn({ ...defaults, pos: { x: 0, y: 0 }, glyph, body, form: this.formFor(playerMod?.manifest, 'viandante'), module: { id: playerMod?.manifest.id ?? 'kernel.player' } });
-      // What the wanderer starts with (e.g. a rune pouch).
-      for (const it of playerMod?.manifest.inventory ?? []) if (this.content.get(it)) this.give(it, 1);
+      this.playerId = this.spawnWanderer(0, 0);
+      this.wanderersById.set(SOLO, { id: SOLO, nome: this.wanderersById.get(SOLO)?.nome ?? WANDERER_NAME, entity: this.playerId });
     } else {
       this.ecs.set(this.playerId, 'glyph', glyph);
       this.ecs.set(this.playerId, 'form', this.formFor(playerMod?.manifest, 'viandante'));
@@ -2762,15 +2831,18 @@ export class Kernel {
     const taken = readPeople(this.files).persone.map((x) => x.nome);
     const nome = name && !taken.some((t) => similarNames(t, name)) ? name : freshName(this.speciesOf(entry.manifest.id) ?? 'persona', gender, taken, origin);
     const child_ = gender === 'femmina' ? 'figlia' : 'figlio';
+    const w = this.wanderer();
+    const other = this.wandererWord(w);
+    const ofOther = other === 'il viandante' ? 'del viandante' : `di ${other}`;
     const identity: Identity = {
       name: nome,
-      persona: `Sei ${nome}, ${gender === 'femmina' ? 'una bambina appena nata' : 'un bambino appena nato'}, ${child_} di ${parent.name} e del viandante. Parli a monosillabi, guardi tutto con meraviglia.`,
+      persona: `Sei ${nome}, ${gender === 'femmina' ? 'una bambina appena nata' : 'un bambino appena nato'}, ${child_} di ${parent.name} e ${ofOther}. Parli a monosillabi, guardi tutto con meraviglia.`,
       look: 'piccolissimo, in fasce',
       carrying: [],
       job: 'bambino',
       age: 'neonato',
       gender,
-      family: [{ nome: parent.name, legame: child_ }, { nome: 'Viandante', legame: child_ }],
+      family: [{ nome: parent.name, legame: child_ }, { nome: w.nome, legame: child_, viandante: w.id }],
       routine: [
         { quando: 'mattina', fa: 'gioca vicino a casa', dove: 'casa', azione: 'passeggia' },
         { quando: 'giorno', fa: 'segue il genitore al lavoro', dove: 'lavoro', azione: 'passeggia' },
@@ -2781,13 +2853,13 @@ export class Kernel {
     this.ecs.set(child, 'identity', identity);
     const glyph = this.ecs.get(child, 'glyph');
     if (glyph) glyph.scale = (glyph.scale ?? 1.1) * 0.6;
-    const next = addPerson(readPeople(this.files), { nome, tipo: entry.manifest.id, specie: this.speciesOf(entry.manifest.id) ?? 'persona', genere: gender, mestiere: 'bambino', eta: 'neonato', famiglia: identity.family!, routine: identity.routine!, origine: origin, persona: identity.persona, aspetto: identity.look, legameViandante: child_ }, (t) => this.speciesOf(t));
+    const next = addPerson(readPeople(this.files), { nome, tipo: entry.manifest.id, specie: this.speciesOf(entry.manifest.id) ?? 'persona', genere: gender, mestiere: 'bambino', eta: 'neonato', famiglia: identity.family!, routine: identity.routine!, origine: origin, persona: identity.persona, aspetto: identity.look }, (t) => this.speciesOf(t));
     this.repo.write('world/people.json', JSON.stringify(next, null, 2) + '\n');
     this.applyFiles({ ...this.repo.working });
-    this.repo.commit(`nascita: ${nome}, ${child_} di ${parent.name} e del viandante`, 'agent');
-    this.rememberAbout(parent.name, `è ${gender === 'femmina' ? 'nata nostra figlia' : 'nato nostro figlio'}, ${nome}`, 'Viandante', 3);
+    this.repo.commit(`nascita: ${nome}, ${child_} di ${parent.name} e ${ofOther}`, 'agent');
+    this.rememberWanderer(parent.name, `è ${gender === 'femmina' ? 'nata nostra figlia' : 'nato nostro figlio'}, ${nome}`, 3);
     this.message(`È ${gender === 'femmina' ? 'nata' : 'nato'} ${nome}!`, 'good');
-    this.council.say('narratore', 'approva', `nasce ${nome}, ${child_} di ${parent.name} e del viandante`, undefined, 'npc.birth');
+    this.council.say('narratore', 'approva', `nasce ${nome}, ${child_} di ${parent.name} e ${ofOther}`, undefined, 'npc.birth');
     return child;
   }
 
@@ -2812,7 +2884,7 @@ export class Kernel {
     if (who) {
       for (const e of social) {
         if (e.tipo === 'legame') this.setBond(who.name, e.legame);
-        else if (e.tipo === 'ricordo') this.rememberAbout(who.name, e.testo, 'Viandante', e.peso ?? 2);
+        else if (e.tipo === 'ricordo') this.rememberWanderer(who.name, e.testo, e.peso ?? 2);
         else if (e.tipo === 'nascita') void this.birth(sub.entity!, e.nome);
       }
     }
@@ -4265,20 +4337,38 @@ export class Kernel {
    * People remember: promises, favours, betrayals, what they saw. Memories are written in the society
    * registry (committed with the next save) and read back whenever they speak.
    */
-  rememberAbout(name: string, testo: string, con?: string, peso = 1): void {
+  rememberAbout(name: string, testo: string, con?: string, peso = 1, viandante?: string): void {
     if (!testo.trim()) return;
-    this.updatePerson(name, (p) => (p.ricordi = remember(p.ricordi, { quando: this.when(), testo: testo.slice(0, 200), ...(con ? { con } : {}), peso: Math.max(1, Math.min(3, peso)) })));
+    this.updatePerson(name, (p) => (p.ricordi = remember(p.ricordi, { quando: this.when(), testo: testo.slice(0, 200), ...(con ? { con } : {}), ...(viandante ? { viandante } : {}), peso: Math.max(1, Math.min(3, peso)) })));
   }
 
-  /** What someone becomes to the wanderer (friend, sweetheart, spouse, child…): a fact of the world. */
+  /** A memory of the wanderer acting now: only they hear of it again (T34). */
+  private rememberWanderer(name: string, testo: string, peso: number): void {
+    const w = this.wanderer();
+    this.rememberAbout(name, testo, w.nome, peso, w.id);
+  }
+
+  /** How the world speaks of a wanderer: «il viandante» when alone, their name otherwise. */
+  private wandererWord(w: Wanderer): string {
+    return w.id === SOLO && w.nome === WANDERER_NAME ? 'il viandante' : w.nome;
+  }
+
+  /** What someone becomes to the wanderer acting now (friend, sweetheart, spouse, child…): a fact of the world. */
   setBond(name: string, legame: string): void {
+    const w = this.wanderer();
     this.updatePerson(name, (p) => {
-      p.legameViandante = legame;
       // As everywhere in the registry: what this person is to the other one.
-      p.famiglia = [...p.famiglia.filter((f) => f.nome !== 'Viandante'), { nome: 'Viandante', legame }];
+      p.famiglia = [...p.famiglia.filter((f) => wandererOf(f) !== w.id), { nome: w.nome, legame, viandante: w.id }];
     });
-    this.recordRule({ chiave: `legame|${name}`, testo: `${name} e il viandante`, possibile: true, racconto: `${name} ora è ${legame} del viandante.`, effetti: ['legame'] }, false);
+    const who = this.wandererWord(w);
+    this.recordRule({ chiave: `legame|${name}${w.id === SOLO ? '' : `|${w.id}`}`, testo: `${name} e ${who}`, possibile: true, racconto: `${name} ora è ${legame} ${who === 'il viandante' ? 'del viandante' : `di ${who}`}.`, effetti: ['legame'] }, false);
     this.message(`${name} ora è: ${legame}.`, 'good');
+  }
+
+  /** What a person is to the wanderer acting now, if anything. */
+  bondOf(name: string): string | undefined {
+    const p = this.personOf(name);
+    return p ? bondWith(p, this.wanderer().id) : undefined;
   }
 
   /**
@@ -4483,9 +4573,9 @@ export class Kernel {
     this.files = { ...this.files, [PLOTS_FILE]: this.repo.working[PLOTS_FILE]! };
   }
 
-  /** Quests the wanderer is on (for the HUD). */
+  /** Quests the wanderer acting now is on (for the HUD). */
   quests(): Array<{ titolo: string; da: string; testo: string; obiettivo: string }> {
-    return activeQuests(readPlots(this.files)).map(({ plot, quest }) => ({
+    return activeQuests(readPlots(this.files), this.wanderer().id).map(({ plot, quest }) => ({
       titolo: plot.titolo,
       da: quest.da,
       testo: quest.testo,
@@ -4594,7 +4684,7 @@ export class Kernel {
   /** "Vai" quests are done by arriving: the place or the region you stand in. */
   private questTick(): void {
     const here = [this.placeHere()?.name ?? '', ...this.directionsAt(this.playerCarpet().x, this.playerCarpet().y).filter((d) => d.startsWith('qui siamo'))].join(' ').toLowerCase();
-    for (const { plot, quest } of activeQuests(readPlots(this.files))) {
+    for (const { plot, quest } of activeQuests(readPlots(this.files), this.wanderer().id)) {
       if (quest.obiettivo.tipo === 'vai' && quest.obiettivo.luogo && here.includes(normName(quest.obiettivo.luogo).split(' ')[0] ?? '~')) void this.completeQuest(plot.id);
     }
   }
@@ -4610,18 +4700,21 @@ export class Kernel {
     });
     if (!done?.missione) return;
     const q = done.missione;
-    this.rememberAbout(q.da, `il viandante ha mantenuto la promessa: ${q.testo}`, 'Viandante', 3);
-    this.recordRule({ chiave: `missione|${plotId}`, testo: `missione di ${q.da}: ${q.testo}`, possibile: true, racconto: 'compiuta dal viandante', effetti: ['missione'] }, false);
+    // Whoever accepted it is remembered and rewarded, wherever the others are.
+    const by = q.viandante ?? SOLO;
+    const who = this.as(by, () => this.wandererWord(this.wanderer()));
+    this.as(by, () => this.rememberWanderer(q.da, `${who} ha mantenuto la promessa: ${q.testo}`, 3));
+    this.recordRule({ chiave: `missione|${plotId}`, testo: `missione di ${q.da}: ${q.testo}`, possibile: true, racconto: `compiuta da${who === 'il viandante' ? 'l viandante' : ` ${who}`}`, effetti: ['missione'] }, false);
     this.message(`Missione compiuta: ${q.testo}`, 'good');
     if (q.ricompensa) {
       const d = this.content.byName(q.ricompensa) ?? (await this.introduceItems([q.ricompensa], `ricompensa di ${q.da}`))[0];
-      if (d && this.give(d.id, 1)) this.message(`${q.da} ti ricompensa: ${d.name}`, 'good');
+      if (d && this.as(by, () => this.give(d.id, 1))) this.message(`${q.da} ti ricompensa: ${d.name}`, 'good');
     }
   }
 
   /** Talking to someone may complete a quest: the one to talk to, or the one waiting for something. */
   private questsOnTalk(name: string): void {
-    for (const { plot, quest } of activeQuests(readPlots(this.files))) {
+    for (const { plot, quest } of activeQuests(readPlots(this.files), this.wanderer().id)) {
       const o = quest.obiettivo;
       if (o.tipo === 'parla' && o.a === name) void this.completeQuest(plot.id);
       if (o.tipo === 'porta' && (o.a ?? quest.da) === name && o.oggetto) {
@@ -4707,8 +4800,12 @@ export class Kernel {
     return undefined;
   }
 
-  /** Talks to an NPC: the Narrator plays the individual; the chosen action is validated and applied. */
-  async talk(id: Id, text: string): Promise<NpcReply> {
+  /**
+   * Talks to an NPC: the Narrator plays the individual; the chosen action is validated and applied. `wanderer`
+   * is who talks (T34; the one acting now by default): the person knows their name, their bond, what they did together.
+   */
+  async talk(id: Id, text: string, wanderer?: string): Promise<NpcReply> {
+    const me = wanderer && this.wanderersById.has(wanderer) ? this.wanderersById.get(wanderer)! : this.wanderer();
     const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
     if (!m?.persona || !this.ecs.alive.has(id)) return { say: '…', action: 'nessuna', mood: '' };
     const identity = await this.ensureIdentity(id);
@@ -4727,47 +4824,53 @@ export class Kernel {
       const person = this.personOf(name);
       reply = await npcReply(this.council, {
         name,
-        memories: memorySummary(person?.ricordi, 12),
-        bond: person?.legameViandante,
+        wanderer: me.nome,
+        memories: memorySummary(memoriesFor(person?.ricordi, me.id), 12),
+        bond: person ? bondWith(person, me.id) : undefined,
         secrets: secretsOf(readPlots(this.files), name, this.day()),
-        persona: (identity?.persona ?? m.persona) + social, mood: mind.mood, mode: mind.mode, carrying, place: this.placeHere()?.name ?? '', history: mind.history, facts: this.worldFacts() }, text, this.focusOn([name], this.ecs.get(id, 'pos')));
+        persona: (identity?.persona ?? m.persona) + social, mood: mind.mood, mode: mind.mode, carrying, place: this.placeHere()?.name ?? '', history: mind.history.filter((t) => (t.con ?? SOLO) === me.id), facts: this.worldFacts() }, text, this.focusOn([name], this.ecs.get(id, 'pos')));
     } catch (e) {
       return { say: `(${name} ti guarda in silenzio — ${(e as Error).message})`, action: 'nessuna', mood: mind.mood };
     }
-    mind.history.push({ who: 'giocatore', text }, { who: 'npc', text: reply.say });
+    mind.history.push({ who: 'giocatore', text, con: me.id }, { who: 'npc', text: reply.say, con: me.id });
     if (mind.history.length > 16) mind.history.splice(0, mind.history.length - 16);
     mind.mood = reply.mood;
     if (reply.action === 'segui' || reply.action === 'resta' || reply.action === 'vaga') mind.mode = reply.action;
-    if (reply.action === 'dai') {
-      const wantedName = normName(reply.item ?? '');
-      const slot = inv?.slots.find((s) => s && normName(this.itemInfo(s.item).name) === wantedName) ?? inv?.slots.find((s) => s && wantedName && normName(this.itemInfo(s.item).name).includes(wantedName));
-      if (slot && inv && this.give(slot.item, 1)) {
-        removeItem(inv, slot.item, 1);
-        this.message(`${name} ti dà: ${this.itemInfo(slot.item).name}`, 'good');
-      } else reply.action = 'nessuna';
-    }
-    if (reply.mentioned?.length) void this.noteMentions(reply.mentioned, `di cui si parla con ${name}`);
-    if (reply.memory) this.rememberAbout(name, reply.memory, 'Viandante', reply.weight ?? 1);
-    if (reply.bond && reply.bond !== this.personOf(name)?.legameViandante) this.setBond(name, reply.bond);
-    if (reply.action === 'missione') {
+    // What follows happens to the wanderer who talked (synchronous: `as` never spans an await).
+    const carry = this.as(me.id, () => {
+      if (reply.action === 'dai') {
+        const wantedName = normName(reply.item ?? '');
+        const slot = inv?.slots.find((s) => s && normName(this.itemInfo(s.item).name) === wantedName) ?? inv?.slots.find((s) => s && wantedName && normName(this.itemInfo(s.item).name).includes(wantedName));
+        if (slot && inv && this.give(slot.item, 1)) {
+          removeItem(inv, slot.item, 1);
+          this.message(`${name} ti dà: ${this.itemInfo(slot.item).name}`, 'good');
+        } else reply.action = 'nessuna';
+      }
+      if (reply.mentioned?.length) void this.noteMentions(reply.mentioned, `di cui si parla con ${name}`);
+      if (reply.memory) this.rememberWanderer(name, reply.memory, reply.weight ?? 1);
+      if (reply.bond && reply.bond !== this.bondOf(name)) this.setBond(name, reply.bond);
       let given = '';
       let carry: string | undefined;
-      this.updatePlots((plots) => {
-        const p = plots.find((x) => x.stato === 'attiva' && x.missione?.da === name && x.missione.stato === 'offerta');
-        if (!p?.missione) return false;
-        p.missione.stato = 'accettata';
-        given = p.missione.testo;
-        if (p.missione.obiettivo.tipo === 'porta') carry = p.missione.obiettivo.oggetto;
-        return true;
-      });
-      if (given) this.message(`Nuova missione da ${name}: ${given}`, 'good');
-      // "Take this to…": whoever asks hands over what is to be carried.
-      if (carry && !this.carriedByName(carry)) {
-        const d = this.content.byName(carry) ?? (await this.introduceItems([carry], `affidato da ${name} al viandante`))[0];
-        if (d && this.give(d.id, 1)) this.message(`${name} ti affida: ${d.name}`, 'good');
+      if (reply.action === 'missione') {
+        this.updatePlots((plots) => {
+          const p = plots.find((x) => x.stato === 'attiva' && x.missione?.da === name && x.missione.stato === 'offerta');
+          if (!p?.missione) return false;
+          p.missione.stato = 'accettata';
+          p.missione.viandante = me.id;
+          given = p.missione.testo;
+          if (p.missione.obiettivo.tipo === 'porta') carry = p.missione.obiettivo.oggetto;
+          return true;
+        });
+        if (given) this.message(`Nuova missione da ${name}: ${given}`, 'good');
       }
+      return carry && !this.carriedByName(carry) ? carry : undefined;
+    });
+    // "Take this to…": whoever asks hands over what is to be carried.
+    if (carry) {
+      const d = this.content.byName(carry) ?? (await this.introduceItems([carry], `affidato da ${name} a ${this.wandererWord(me)}`))[0];
+      if (d && this.as(me.id, () => this.give(d.id, 1))) this.message(`${name} ti affida: ${d.name}`, 'good');
     }
-    this.questsOnTalk(name);
+    this.as(me.id, () => this.questsOnTalk(name));
     this.speak(id, reply.say);
     return reply;
   }
@@ -5119,6 +5222,7 @@ export class Kernel {
       this.savedContainers.clear();
       this.importanti.clear();
       this.repo.write('world/stato.json', null);
+      for (const p of Object.keys(this.repo.working)) if (p.startsWith(PLAYERS_DIR)) this.repo.write(p, null);
       this.wanted.clear();
       onProgress?.('Il Narratore scrive gli oggetti comuni del mondo');
       if (!(await this.growContent('genesi', 30, true))) {
@@ -5179,22 +5283,53 @@ export class Kernel {
       const c: Container = this.ecs.get(id, 'container');
       if (c.filled) containers[this.ecs.get(id, 'origin').key] = { inv: c.inv, filled: true };
     }
-    const n = this.needs();
     const state = {
-      viandante: { inventory: this.inventory(), needs: n, hand: this.hand(), stati: this.states(), slots: this.slots(), trasceso: this.exitedOnce },
       consumati: [...this.consumed].slice(-5000),
       contenitori: containers,
       forme: this.formsToSave(),
       importanti: Object.fromEntries(this.importanti),
       ora: Math.round(this.time),
     };
-    const json = JSON.stringify(state);
+    // Each wanderer in their own file (T34); the world's state no longer carries one.
+    const players = Object.fromEntries([...this.wanderersById.values()].map((w) => [playerFile(w.id), this.as(w.id, () => this.wandererState(w))]));
+    const json = JSON.stringify([state, players]);
     if (json === this.lastState) return false;
     this.lastState = json;
-    this.repo.write('world/stato.json', JSON.stringify(state, null, 1) + '\n');
-    this.files = { ...this.files, 'world/stato.json': this.repo.working['world/stato.json']! };
+    const written: FileMap = {};
+    for (const [p, v] of Object.entries({ 'world/stato.json': state, ...players })) {
+      this.repo.write(p, JSON.stringify(v, null, 1) + '\n');
+      written[p] = this.repo.working[p]!;
+    }
+    this.files = { ...this.files, ...written };
     this.repo.commit('salvataggio della partita', 'player');
     return true;
+  }
+
+  /** What is saved of the wanderer acting now. */
+  private wandererState(w: Wanderer): WandererState {
+    return {
+      ...(w.nome !== WANDERER_NAME ? { nome: w.nome } : {}),
+      inventory: this.inventory(),
+      needs: this.needs() as unknown as Record<string, number>,
+      hand: this.hand(),
+      stati: this.states(),
+      slots: this.slots(),
+      ...(w.id === SOLO ? { trasceso: this.exitedOnce } : {}),
+    };
+  }
+
+  /** Gives the wanderer acting now what was saved of them. */
+  private applyWandererState(v: WandererState): void {
+    if (v.inventory?.slots) this.ecs.set(this.playerId, 'inventory', v.inventory);
+    if (v.needs) Object.assign(this.needs() ?? {}, v.needs);
+    if (v.hand?.tokens) Object.assign(this.hand(), v.hand);
+    if (v.stati) this.ecs.set(this.playerId, 'stati', Object.fromEntries(Object.entries(v.stati).filter(([, x]) => x && typeof x === 'object')));
+    if (v.slots && typeof v.slots === 'object') this.ecs.set(this.playerId, 'slots', v.slots);
+    // What the mechanics derive from the slots (defence, states) is rebuilt by their own on_slot.
+    for (const p of this.uiPanels()) {
+      const filled = Object.entries(this.slots()[p.panel.id] ?? {}).find(([, x]) => x);
+      if (filled) this.slotChanged(p.module, p.panel.id, filled[0], filled[1]!.item);
+    }
   }
 
   // --- The graph of the world (ADR-0045) -------------------------------------------------------
@@ -5263,19 +5398,15 @@ export class Kernel {
     } catch {
       st = null;
     }
-    if (!st) return;
-    const v = st.viandante ?? {};
-    if (v.inventory?.slots) this.ecs.set(this.playerId, 'inventory', v.inventory);
-    if (v.needs) Object.assign(this.needs() ?? {}, v.needs);
-    if (v.hand?.tokens) Object.assign(this.hand(), v.hand);
-    if (v.stati) this.ecs.set(this.playerId, 'stati', Object.fromEntries(Object.entries(v.stati).filter(([, x]) => x && typeof x === 'object')));
-    if (v.trasceso) this.exitedOnce = true;
-    if (v.slots && typeof v.slots === 'object') this.ecs.set(this.playerId, 'slots', v.slots);
-    // What the mechanics derive from the slots (defence, states) is rebuilt by their own on_slot.
-    for (const p of this.uiPanels()) {
-      const filled = Object.entries(this.slots()[p.panel.id] ?? {}).find(([, x]) => x);
-      if (filled) this.slotChanged(p.module, p.panel.id, filled[0], filled[1]!.item);
+    // Each wanderer from their own file, `io` also from the wanderer of an older stato.json.
+    for (const w of this.wanderersById.values()) {
+      const v = readWandererState(this.files, w.id);
+      if (!v) continue;
+      if (v.nome && w.id !== SOLO) w.nome = String(v.nome).slice(0, 40);
+      this.as(w.id, () => this.applyWandererState(v));
+      if (w.id === SOLO && v.trasceso) this.exitedOnce = true;
     }
+    if (!st) return;
     for (const k of st.consumati ?? []) this.consumed.add(String(k));
     for (const [k, c] of Object.entries(st.contenitori ?? {})) this.savedContainers.set(k, c as { inv: Inventory; filled: boolean });
     for (const [k, d] of Object.entries(st.forme ?? {})) if (Array.isArray(d)) this.savedForms.set(k, d.map(String));
@@ -5490,7 +5621,7 @@ function personFacts(p: Person, type: string): Array<[string, string]> {
   if (p.persona) out.push(['Carattere', p.persona]);
   if (p.storia) out.push(['Storia', p.storia]);
   if (p.famiglia?.length) out.push(['Famiglia', p.famiglia.map((r) => `${r.legame} di ${r.nome}`).join(', ')]);
-  if (p.legameViandante) out.push(['Per il viandante', p.legameViandante]);
+  for (const r of p.famiglia ?? []) if (wandererOf(r)) out.push([wandererOf(r) === SOLO && r.nome === WANDERER_NAME ? 'Per il viandante' : `Per ${r.nome}`, r.legame]);
   if (p.routine?.length) out.push(['Giornata', p.routine.map((r) => `${r.quando}: ${r.fa}`).join('; ')]);
   if (p.luogo) out.push(['Incontrato a', p.luogo]);
   if (p.porta?.length) out.push(['Porta con sé', p.porta.join(', ')]);

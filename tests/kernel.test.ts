@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { readPeople } from '../src/kernel/society';
+import { bondWith } from '../src/kernel/wanderers';
 import { readPlots } from '../src/kernel/plots';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
@@ -790,11 +791,11 @@ describe('the life of people', () => {
     const r = await k.talk(a.id, 'Ti ricordi cosa ti ho detto?');
     expect(r.say).toMatch(/lanterna/);
     await k.talk(a.id, 'Ti amo. Sposami!');
-    expect(k.personOf(a.name)!.legameViandante).toBe('moglie');
+    expect(k.bondOf(a.name)).toBe('moglie');
     expect(k.rules().some((x) => x.chiave === `legame|${a.name}`)).toBe(true);
     // "Altro…" on a person: judged by the Council, with social effects.
     await k.freeAction(a.id, 'vorrei avere un figlio con te');
-    const child = readPeople(k.files).persone.find((p) => /^figli[oa]$/.test(p.legameViandante ?? ''))!;
+    const child = readPeople(k.files).persone.find((p) => /^figli[oa]$/.test(bondWith(p, 'io') ?? ''))!;
     expect(child.famiglia.map((f) => f.nome)).toEqual(expect.arrayContaining([a.name, 'Viandante']));
     expect(k.ecs.query('identity').some((id) => k.ecs.get(id, 'identity').name === child.nome)).toBe(true);
   });

@@ -5,6 +5,7 @@
 
 import type { FileMap } from './types';
 import { metaBreak } from './fourthwall';
+import { SOLO } from './wanderers';
 import { BINDING_WORDS, relationKind, type DayPhase, type People } from './society';
 
 export interface Beat {
@@ -25,6 +26,8 @@ export interface Quest {
   obiettivo: { tipo: 'porta' | 'vai' | 'parla'; oggetto?: string; a?: string; luogo?: string };
   ricompensa?: string;
   stato: 'offerta' | 'accettata' | 'compiuta';
+  /** Who accepted it (the wanderer's id, T34; `io` when missing). */
+  viandante?: string;
 }
 
 export interface Plot {
@@ -66,9 +69,11 @@ export function secretsOf(plots: Plot[], name: string, day: number): string {
   return out.join('\n');
 }
 
-/** Quests the wanderer accepted and has not finished yet. */
-export function activeQuests(plots: Plot[]): Array<{ plot: Plot; quest: Quest }> {
-  return plots.filter((p) => p.missione?.stato === 'accettata').map((p) => ({ plot: p, quest: p.missione! }));
+/** Quests a wanderer accepted and has not finished yet (all of them, without an id). */
+export function activeQuests(plots: Plot[], wanderer?: string): Array<{ plot: Plot; quest: Quest }> {
+  return plots
+    .filter((p) => p.missione?.stato === 'accettata' && (!wanderer || (p.missione.viandante ?? SOLO) === wanderer))
+    .map((p) => ({ plot: p, quest: p.missione! }));
 }
 
 /** All the words of a plot, for the fourth-wall filter. */
