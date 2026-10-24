@@ -12,6 +12,7 @@ import { Bloom } from './bloom';
 import { cellNear } from '../kernel/corona';
 import { animateRing, Avatars, buildCoronaRing, buildRoom, buildShowcase, buildSituation, campusKey } from './corona3d';
 import { ScreenWall } from './screens';
+import { ChainView } from './chain';
 import { CUT, U } from './materials';
 import { Overlay } from './overlay';
 import { buildChunk, chunkSig, disposeChunk, tileForms, type ChunkView } from './terrain';
@@ -53,6 +54,8 @@ export class Renderer {
   private sit?: { key: string; at: number; group: THREE.Group; pulse: THREE.Object3D[] };
   /** The Direction's wall of screens (T46b), for the room it stands in. */
   private wall?: { room: string; view: ScreenWall };
+  /** The Systems Room's chain (T27a), for the room it stands in. */
+  private chain?: { room: string; view: ChainView };
   private shows = new Map<string, { key: string; group: THREE.Group; spin?: THREE.Object3D; bubbles?: THREE.Object3D[]; silo: boolean }>();
   private overlay: Overlay;
   private flash = new THREE.PointLight(0xfff2c0, 0, 8, 1.4);
@@ -300,6 +303,26 @@ export class Renderer {
         this.wall.view.draw(k.screens());
       }
       this.wall.view.blink(this.t);
+    }
+    const stations = studio?.floor.items.filter((i) => i.kind === 'stazione') ?? [];
+    // Built again when a system joins or leaves the chain.
+    const line = `${here}|${stations.map((i) => `${i.target}@${i.x}+${i.w}`).join(',')}`;
+    if (this.chain && (this.chain.room !== line || !stations.length)) {
+      this.scene.remove(this.chain.view.group);
+      this.chain.view.dispose();
+      this.chain = undefined;
+    }
+    if (studio && stations.length) {
+      if (!this.chain) {
+        this.chain = { room: line, view: new ChainView(stations, studio.building.color) };
+        this.scene.add(this.chain.view.group);
+      }
+      // The measures change once a second (the meter's window).
+      if (this.t - this.chain.view.at > 0.5) {
+        this.chain.view.at = this.t;
+        this.chain.view.draw(k.chain());
+      }
+      this.chain.view.run(this.t);
     }
     this.avatars.update(k, this.t);
 

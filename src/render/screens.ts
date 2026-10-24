@@ -15,19 +15,19 @@ import { MAT, rgbOf } from './materials';
  * The screen leans back on its plinth (itemMesh), its foot at the plinth's front edge, its top against the wall: the camera
  * looks down at 54°, a screen standing upright would be a third of its height on the picture; tilted, nearly all of it.
  */
-const TILT = 0.6;
-const FOOT = { y: 0.4, z: 1.15 };
+export const TILT = 0.6;
+export const FOOT = { y: 0.4, z: 1.15 };
 const LONG = 1.75;
 /** The band of the alert: above the screens along the back wall, on top of the side walls (they are 1.4 high). */
 const BAND = { back: 2.05, side: 1.4, t: 0.05, w: 0.08, light: 0.55 };
-const BEZEL = new THREE.MeshStandardMaterial({ color: '#0c0c16', roughness: 0.6 });
+export const BEZEL = new THREE.MeshStandardMaterial({ color: '#0c0c16', roughness: 0.6 });
 /** Texture pixels per cell. */
-const PX = 150;
+export const PX = 150;
 
-const DARK = '#06060c';
-const DIM = 'rgba(255,255,255,0.8)';
+export const DARK = '#06060c';
+export const DIM = 'rgba(255,255,255,0.8)';
 
-function fit(g: CanvasRenderingContext2D, text: string, max: number): string {
+export function fit(g: CanvasRenderingContext2D, text: string, max: number): string {
   if (g.measureText(text).width <= max) return text;
   let lo = 0, hi = text.length;
   while (lo < hi) {
@@ -39,7 +39,7 @@ function fit(g: CanvasRenderingContext2D, text: string, max: number): string {
 }
 
 /** Two lines at most, cut where the words allow. */
-function wrap2(g: CanvasRenderingContext2D, text: string, max: number): string[] {
+export function wrap2(g: CanvasRenderingContext2D, text: string, max: number): string[] {
   const words = text.split(/\s+/);
   let a = '';
   while (words.length && g.measureText(a ? `${a} ${words[0]}` : words[0]).width <= max) a = a ? `${a} ${words.shift()}` : words.shift()!;

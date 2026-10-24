@@ -12,7 +12,7 @@ import { SCREEN_NAME, type ScreenField } from './screens';
 import { AGENTS } from './agents/council';
 
 export type FileLook = 'libro' | 'cristallo' | 'pergamena' | 'tavoletta';
-export type ItemKind = 'file' | 'sprite' | 'tile' | 'layout' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'less' | 'more' | 'grafo' | 'situazione' | 'parete' | 'console';
+export type ItemKind = 'file' | 'sprite' | 'tile' | 'layout' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'less' | 'more' | 'grafo' | 'situazione' | 'parete' | 'console' | 'stazione';
 /** What a showcase shows (T21): the runes and spells, the people, the things, the objects of the packs, the places planned (T26). */
 export type ShowcaseSource = 'rune' | 'persone' | 'cose' | 'oggetti' | 'luoghi';
 /** How a showcase looks: a screen, a silo of liquid, a 3D printer, a holographic table with a place in miniature. */
@@ -66,6 +66,20 @@ export const WALL_Y = 1;
  * the live log on (the row in front of the film stays free between its arrows); who works sits at theirs (`Archive.consoles`).
  */
 export const CONSOLES_AT = { x: 9, y: WALL_Y + 1 };
+/**
+ * The chain of the Systems Room (T27a, src/kernel/chain.ts): against its back wall, a station per system in the order of
+ * the tick, side by side on a belt of light, centred on the exit's column; as wide as they fit (`CHAIN.w` at most), the
+ * first `CHAIN.x1 - CHAIN.x0 + 1` of them (the panel lists them all).
+ */
+export const CHAIN = { x0: 2, x1: 21, w: 3, room: 'sistemi' };
+export function chainSlots(n: number): Array<{ x: number; w: number }> {
+  const span = CHAIN.x1 - CHAIN.x0 + 1;
+  const shown = Math.min(n, span);
+  const w = Math.max(1, Math.min(CHAIN.w, Math.floor(span / Math.max(1, shown))));
+  // On the exit's cell when the chain is odd (like the showcases), across the middle of the room when it is even.
+  const x = Math.max(CHAIN.x0, Math.floor(ROOM_W / 2 + 0.5 - (shown * w) / 2));
+  return Array.from({ length: shown }, (_, i) => ({ x: x + i * w, w }));
+}
 /**
  * The Office of places is also the Cartographer's studio (T26c, ADR-0051): the atlas on a table against its back wall,
  * the terrains in the sample room, which starts on its own floor after the files; after them, from a shelf of their own, a
@@ -298,7 +312,7 @@ export class Corona {
     return this.buildings.map((b) => ({ id: b.id, name: b.name, color: b.color, from: b.from, to: b.to, files: b.floors.flatMap((f) => f.items.filter((i) => i.kind === 'file').map((i) => i.path!)) }));
   }
 
-  build(files: FileMap, gallery: Exhibit[] = [], terrains: Exhibit[] = [], layouts: Exhibit[] = []): void {
+  build(files: FileMap, gallery: Exhibit[] = [], terrains: Exhibit[] = [], layouts: Exhibit[] = [], systems: Array<{ id: string; name: string }> = []): void {
     this.files = files;
     this.slots.clear();
     this.exterior.clear();
@@ -361,6 +375,7 @@ export class Corona {
             placed.push({ kind: 'next', label: '«>» avanti nel tempo', target: film.field, x: ox + film.x + film.w - 1, y: oy + WALL_Y + 1 });
             Object.entries(AGENTS).forEach(([agent, a], i) => placed.push({ kind: 'console', label: `la console ${ofThe(a.name)}`, target: agent, color: a.color, x: ox + CONSOLES_AT.x + i, y: oy + CONSOLES_AT.y }));
           }
+          if (id === CHAIN.room) chainSlots(systems.length).forEach((s, i) => placed.push({ kind: 'stazione', label: `la catena dei sistemi: ${systems[i].name}`, target: systems[i].id, x: ox + s.x, y: oy + WALL_Y, w: s.w }));
           const show = SHOWCASES[id];
           if (show) {
             const { x, y, w } = SHOWCASE_AT;
@@ -524,9 +539,9 @@ export class Corona {
     for (const it of room.floor.items) {
       if (it.kind === 'desk' || (kinds && !kinds.includes(it.kind))) continue;
       // Wide or deep things (screens, the atlas, the printer) are near from any of their cells; the table from its rim; the
-      // Direction's wall of screens (T46b) from the foot of its screens, at the front of their cells.
+      // Direction's wall of screens (T46b) and the chain's stations (T27a) from the foot of their screens, at the front of their cells.
       const c = cellNear(it, x, y);
-      const d = it.kind === 'table' ? Math.hypot((x - TABLE.cx - this.roomAt(x, y)!.floor.ox) / TABLE.rx, (y - TABLE.cy - this.roomAt(x, y)!.floor.oy) / TABLE.ry) * 1.2 - 0.2 : Math.hypot(c.x + 0.5 - x, c.y + (it.kind === 'parete' ? 1 : 0.5) - y);
+      const d = it.kind === 'table' ? Math.hypot((x - TABLE.cx - this.roomAt(x, y)!.floor.ox) / TABLE.rx, (y - TABLE.cy - this.roomAt(x, y)!.floor.oy) / TABLE.ry) * 1.2 - 0.2 : Math.hypot(c.x + 0.5 - x, c.y + (it.kind === 'parete' || it.kind === 'stazione' ? 1 : 0.5) - y);
       if (d < bd) [best, bd] = [it, d];
     }
     return best;

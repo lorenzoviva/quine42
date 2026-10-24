@@ -7,6 +7,7 @@ import type { StudioItem } from '../kernel/corona';
 import { OPERATION_COLOR, OPERATION_NAME, type Operation, type OperationKind, type Situation } from '../kernel/situation';
 import { ALERT_COLOR, ALERT_NAME, LIVE_LINES, SCREEN_NAME, fill, type Screens, type ScreenField } from '../kernel/screens';
 import { tallyLine, usd } from '../kernel/ai/usage';
+import { msText, STATION_KIND, type Chain, type Station } from '../kernel/chain';
 import { $, el } from './dom';
 import { icons } from './hud';
 
@@ -34,6 +35,7 @@ export class StudioPanel {
     k.bus.on('studio:screens', ({ screens }: { screens: Screens }) => {
       if (this.isOpen && this.screen === 'tempo') this.screens('tempo', screens);
     });
+    k.bus.on('ui:station', ({ station, chain }: { station: Station; chain: Chain }) => this.station(station, chain));
     k.bus.on('ui:layout', ({ sample, building }: { sample: LayoutSample; building: string }) => this.layout(sample, building));
     // The arrows pressed with the panel open: it follows.
     k.bus.on('studio:showcase', (e: Shown) => {
@@ -278,6 +280,34 @@ export class StudioPanel {
       }
     g.globalAlpha = 1;
     return c;
+  }
+
+  /**
+   * A station of the Systems Room's chain (T27a): what the system does, its place in the tick, what it cost in the last
+   * second, its fault, the whole chain with it lit, «Apri il file».
+   */
+  station(s: Station, c: Chain): void {
+    const item = (what: string, text: string, color?: string) => el('div', { class: 'item' }, el('span', { class: 'path', ...(color ? { style: `color:${color}` } : {}) }, what), ` ${text}`);
+    const measured = (x: Station) => (x.measure ? `${msText(x.measure.ms)} · ${x.measure.touched} entità` : 'non ancora misurato');
+    const open = el('button', {}, 'Apri il file');
+    open.onclick = () => {
+      this.close();
+      this.onEdit?.(s.path);
+    };
+    this.show(
+      el('div', { class: 'title' }, `${s.name} — Sala Sistemi`),
+      el('div', { class: 'note' }, `Stazione ${s.step} di ${c.stations.length} della catena: a ogni tick, ${c.hz} volte al secondo, il kernel esegue i sistemi uno dopo l'altro, in quest'ordine.`),
+      ...(s.description ? [item('Che cosa fa', s.description)] : []),
+      item('Chi è', `${STATION_KIND[s.kind]}, ordine ${s.order}${s.panel ? `, con il pannello «${s.panel}» nell'inventario` : ''}`),
+      el('div', { class: 'section' }, "Nell'ultimo secondo, a tick"),
+      ...(s.measure
+        ? [item('Tempo', `${msText(s.measure.ms)} in media, ${msText(s.measure.peak)} al più`), item('Entità toccate', `${s.measure.touched} (lette, scritte, create o distrutte)`)]
+        : [el('div', { class: 'note' }, 'Non ancora misurato: la catena misura un secondo alla volta.')]),
+      ...(s.fault ? [el('div', { class: 'section' }, 'Guasto'), item('●', `${s.fault.message}${s.fault.count > 1 ? ` (${s.fault.count} volte)` : ''}`, '#ff3b3b')] : []),
+      el('div', { class: 'section' }, `La catena (${msText(c.ms)} a tick in tutto)`),
+      ...c.stations.map((x) => el('div', { class: 'item', ...(x.id === s.id ? { style: 'background:rgba(185,166,255,0.12)' } : {}) }, el('span', { class: 'path', ...(x.fault ? { style: 'color:#ff3b3b' } : {}) }, `${x.step}. ${x.name}`), ` — ${x.fault ? 'guasto' : measured(x)}`)),
+      el('div', { class: 'row' }, open),
+    );
   }
 
   /**

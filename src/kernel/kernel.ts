@@ -18,6 +18,7 @@ import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './univer
 import { addPerson, applyRenames, dayPhase, defaultRoutine, freshName, greeting, guessGender, inferActivity, memorySummary, readPeople, remember, repairSociety, similarNames, societySummary, type Activity, type DayPhase, type Person, type Species } from './society';
 import { buildGraph, GRAPH_FILE, graphHash, mergePlaces, placesOf, readGraph, slug as nodeSlug, type GraphPlace, type WorldGraph } from './graph';
 import { situation as buildSituation, type Situation } from './situation';
+import { ChainMeter, chainOf, type Chain } from './chain';
 import { alertOf, clampFrame, costBoard, liveFeed, SCREEN_NAME, timeline, type Budget, type ScreenField, type Screens } from './screens';
 import { activeQuests, plotFromRaw, plotText, PLOTS_FILE, readPlots, reviewPlot, secretsOf, writePlots, type Plot } from './plots';
 import { Input } from './input';
@@ -365,6 +366,10 @@ export class Kernel {
   private showcasePhase = new Map<string, number>();
   /** The commit the Direction's timeline shows (T46b); none: the newest. */
   private filmAt?: string;
+  /** What each system costs in the tick (T27a): the chain of the Systems Room shows it. */
+  private meter = new ChainMeter();
+  /** The entities the running system touches through the Host, while it runs. */
+  private touching?: Set<number>;
   /** The library's version when the campus last looked for its buildings' models (T20). */
   private campusVersion = -1;
   private showcaseCache = new Map<ShowcaseSource, { files: FileMap; stamp: string; entries: ShowcaseEntry[] }>();
@@ -451,16 +456,25 @@ export class Kernel {
     const inv = (id: number): Inventory | undefined => this.ecs.get(id, 'inventory');
     return {
       query: (names) => this.ecs.query(...names.split(',').map((s) => s.trim()).filter(Boolean)).join(','),
-      get: (id, name) => this.ecs.get(id, name) ?? undefined,
+      get: (id, name) => {
+        this.touching?.add(id);
+        return this.ecs.get(id, name) ?? undefined;
+      },
       set: (id, name, data) => {
+        this.touching?.add(id);
         // The floor protects what keeps the universe navigable: position, the player, the carpet.
         if (!this.ecs.alive.has(id) || ['pos', 'module', 'chunk', 'carpet', 'container'].includes(name) || (id === this.playerId && ['player', 'hand', 'inventory', 'needs', 'slots'].includes(name))) return false;
         if (data === null || typeof data !== 'object') return false;
         this.ecs.set(id, name, data);
         return true;
       },
-      spawn: (c) => this.spawnFromLua(c),
+      spawn: (c) => {
+        const id = this.spawnFromLua(c);
+        if (id !== undefined) this.touching?.add(id);
+        return id;
+      },
       destroy: (id) => {
+        this.touching?.add(id);
         if (id === this.playerId || [...this.singletons.values()].includes(id)) return;
         this.ecs.destroy(id);
         this.runesDirty = true;
@@ -752,7 +766,7 @@ export class Kernel {
     if (sizeChanged || (before && before !== this.worldSignature())) this.clearChunks();
     else if (!this.terrain || changed.has(this.terrain.manifest.id) || opts.reset) for (const ch of this.chunks.values()) if (ch.stage === 'draft') this.regenerateDraft(ch);
 
-    this.corona.build(files, this.exhibits(files), this.terrainExhibits(), this.layoutExhibits());
+    this.corona.build(files, this.exhibits(files), this.terrainExhibits(), this.layoutExhibits(), this.systems.map((m) => ({ id: m.manifest.id, name: m.manifest.name || m.manifest.id })));
     this.placeCampus();
     // Things that wait for a model of their own wear it as soon as the library has it.
     for (const id of this.ecs.query('form')) {
@@ -3053,6 +3067,9 @@ export class Kernel {
       case 'console':
         this.openScreen('registro');
         return;
+      case 'stazione':
+        this.openStation(it.target!);
+        return;
       case 'showcase':
         this.openShowcase(it.target!);
         return;
@@ -3107,7 +3124,7 @@ export class Kernel {
 
   clickStudio(rx: number, ry: number): boolean {
     if (this.zone !== 'studio') return false;
-    const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'situazione', 'parete', 'console', 'layout']);
+    const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'situazione', 'parete', 'console', 'stazione', 'layout']);
     if (!it) return false;
     const p = this.playerPos();
     const c = cellNear(it, p.x, p.y);
@@ -3119,6 +3136,7 @@ export class Kernel {
     else if (it.kind === 'situazione') this.bus.emit('ui:situation', { situation: this.situation() });
     else if (it.kind === 'parete') this.openScreen(it.target as ScreenField);
     else if (it.kind === 'console') this.openScreen('registro');
+    else if (it.kind === 'stazione') this.openStation(it.target!);
     else if (it.target === 'tempo') this.stepTimeline(it.kind === 'prev' ? 1 : -1);
     else if (it.kind === 'layout') this.openLayout(it, this.corona.roomAt(it.x, it.y)?.building.name ?? '');
     else if (it.kind === 'showcase') this.openShowcase(it.target!);
@@ -4373,6 +4391,21 @@ export class Kernel {
     this.bus.emit('studio:screens', { screens: this.screens() });
   }
 
+  /**
+   * The chain of the Systems Room (T27a): the systems in the order of the tick, each with what it cost in the last second
+   * (milliseconds and entities touched per tick) and its open fault; from what the tick measures, changing nothing.
+   */
+  chain(): Chain {
+    return chainOf(this.systems, this.meter, this.faults.list());
+  }
+
+  /** A station of the chain seen up close: what the system does, its place in the tick, its measures, its code. */
+  openStation(id: string): void {
+    const chain = this.chain();
+    const station = chain.stations.find((s) => s.id === id);
+    if (station) this.bus.emit('ui:station', { station, chain });
+  }
+
   /** The agents at work now, as the live log says (T46c). */
   working(now = Date.now()): AgentId[] {
     return liveFeed(this.feed(), this.usage.lastCall, now).desks.filter((d) => d.working).map((d) => d.agent);
@@ -5191,7 +5224,16 @@ export class Kernel {
     this.playerComp().load = totalWeight(this.inventory(), this.itemSpec) / this.carryCapacity();
     this.syncRunes();
     this.runRunes();
-    for (const s of this.systems) this.runModule(s.manifest.id, 'update', dt);
+    // Each system measured (T27a): how long it takes, how many entities it touches.
+    this.touching = new Set();
+    for (const s of this.systems) {
+      this.touching.clear();
+      const t0 = performance.now();
+      this.runModule(s.manifest.id, 'update', dt);
+      this.meter.record(s.manifest.id, performance.now() - t0, this.touching.size);
+    }
+    this.touching = undefined;
+    this.meter.endTick();
     this.syncRunes();
     this.sanitize();
     this.updateZone();

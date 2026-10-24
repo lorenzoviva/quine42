@@ -369,6 +369,15 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
       glow.box(x + 0.02, 0.4, z + 1.13, x + w - 0.02, 0.43, z + 1.17, rgbOf(col, 0.7));
       break;
     }
+    case 'stazione': {
+      // A station of the Systems Room's chain (T27a): a dark plinth against the back wall, its front edge a piece of the
+      // belt of light; the screen leans on it (src/render/chain.ts).
+      const w = it.w ?? 1;
+      lit.box(x + 0.03, 0, z, x + w - 0.03, 1.7, z + 0.12, rgbOf('#0c0c16'));
+      lit.box(x + 0.03, 0, z + 0.12, x + w - 0.03, 0.4, z + 1.15, rgbOf('#10101a'));
+      glow.box(x, 0.4, z + 1.12, x + w, 0.43, z + 1.18, rgbOf(col, 0.75));
+      break;
+    }
     case 'console': {
       // A console of the Direction (T46c): a desk facing the wall of screens, its monitor lit in the colour of its agent.
       const c = it.color ?? col;

@@ -416,7 +416,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   `sampleDrafts` ora sceglie in modo deterministico una bozza boscosa, una aperta e una con acqua (le tre vecchie per prime, poi
   attorno all'origine), in cache; tutti gli ambienti del seme restano validi. Nessun ADR.
 
-### T27 · La Sala sistemi, dentro — `da fare` (T27c e T27d fatti; si continua da T27a)
+### T27 · La Sala sistemi, dentro — `da fare` (T27a, T27c e T27d fatti; si continua da T27b)
 - L'autore chiede un aiuto: far apprezzare la complessità del codice con esempi (cosa fa un sistema, casi d'uso).
   **Proposta all'autore** (es. ogni sistema come un «caso» animato: prima, regola, dopo).
 - Proposta scritta il 23/10/2026: [`corona-proposte.md`](corona-proposte.md) §2 — **la catena** (ogni sistema una
@@ -437,6 +437,17 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   `tests/bench.test.ts` (7: un caso di `sys.needs` e uno di `sys.fire` col codice del seme, errori, file del banco, pulizia,
   la meccanica con il suo caso e il codice riscritto che cambia il caso, il ritorno all'Ingegnere). Diverso dal previsto: niente
   nel browser (nessun disegno: la teca è T27b); un caso costa ~60-300 ms in Node.
+- **T27a · la catena — `fatto`** (commit «Corona (T27a)»). `src/kernel/chain.ts`: `ChainMeter` (per sistema ms e entità toccate a
+  tick, medie pubblicate ogni `WINDOW` = 60 tick) e `chainOf` (stazioni nell'ordine del tick: passo, ordine, tipo `nucleo | sistema |
+  meccanica`, descrizione, file, pannello, misura, guasto `module:<id>…`). `kernel.ts`: il tick misura ogni `update`, lo `Host` segna
+  gli id toccati (`get set spawn destroy`), `chain()`, `openStation` (`ui:station`), E e clic. `corona.ts`: voci `stazione` contro la
+  parete di fondo della Sala sistemi (`CHAIN`, `chainSlots`: larghe 3 caselle al più, centrate sulla colonna dell'uscita, le prime 20).
+  `render/chain.ts`: schermi inclinati come la parete della Direzione (canvas ridisegnato solo se cambia), il nastro e l'impulso;
+  `studio.ts`: il pannello. Test in `tests/chain.test.ts` (8). Nel browser (`aurora`, offline): sette stazioni con ms ed entità dal vivo,
+  l'impulso sul nastro, il pannello di «Bisogni», nessun errore. Diverso dal previsto: le stazioni comprendono anche i sistemi del Nucleo
+  (`core.movement`, `core.carpet`), perché girano nella stessa catena; le rune del tappeto (che si eseguono prima) non sono una stazione.
+  Nessun ADR (deciso in T27, ADR-0052). Per T27b: il banco va al centro del piano terra (`DEVICES` in `corona.ts`, scaffali ai lati);
+  la catena resta alla riga 1, il passaggio davanti a lei alla riga 2.
 - **T27b, dopo T27c**: i casi del seme vanno scritti come `casi` nei manifest di `sys.*` (il formato e `runCase` ci sono, provati
   con fuoco e bisogni); restano la teca, lo schermo con le `righe` e il pannello, che disegnano `BenchRun.frames`. Per i casi
   di `sys.wander`, `sys.follow` e `sys.physics` può servire un passo nuovo in `BenchStep` (es. l'ora del giorno, «segui»).
