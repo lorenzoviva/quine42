@@ -21,11 +21,11 @@ Animazione ciclica a 8 fotogrammi:
   <!-- Segnalatore invisibile per la crescita generativa dei rami -->
   <color symbol="X" hidden="True" name="nodo di crescita"/>
 
-  <!-- Vene luminose a fibra ottica e nodi di alimentazione neon -->
-  <color symbol="C" value="05d9e8" glow="True" name="fibra ciano"/>
-  <color symbol="Z" value="29adff" glow="True" name="zaffiro neon"/>
+  <!-- Vene a fibra ottica e nodi di giunzione -->
+  <color symbol="C" value="05d9e8" name="fibra ciano"/>
+  <color symbol="Z" value="29adff" name="zaffiro nodi"/>
 
-  <!-- Liane pendenti luminescenti al neon -->
+  <!-- Liane pendenti luminescenti al neon: le uniche con emissione attiva glow -->
   <color symbol="H" value="00ffff" glow="True" name="liana neon pendente"/>
 
   <!-- Cristalli ottici traslucidi: aqua brillante, indaco profondo e ghiaccio etereo -->
@@ -33,9 +33,9 @@ Animazione ciclica a 8 fotogrammi:
   <color symbol="T" value="3ea8c8" name="vetro aqua traslucido"/>
   <color symbol="G" value="b4f0ff" name="cristallo ghiaccio traslucido"/>
 
-  <!-- Punti luce di chioma: gemme azzurre e scintille fotoniche bianche -->
-  <color symbol="L" value="6fc3ff" glow="True" name="gemma azzurra"/>
-  <color symbol="W" value="ffffff" glow="True" name="scintilla fotonica"/>
+  <!-- Punti di diffrazione della chioma: gemme azzurre e scintille bianche traslucide -->
+  <color symbol="L" value="6fc3ff" name="gemma azzurra"/>
+  <color symbol="W" value="ffffff" name="scintilla fotonica"/>
 
   <!-- Unione dei materiali della chioma da cui possono germogliare le liane pendenti -->
   <union symbol="K" values="TVmZ"/>

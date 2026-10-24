@@ -251,8 +251,8 @@ function place(a: Asset, x: number, z: number, yaw: number): Thing {
     t.light.position.set(0, 0.5, 0);
     root.add(t.light);
   } else if (e.id === 'corona-albero-luce') {
-    t.light = new THREE.PointLight(0x00ffff, 0, 8, 1.8);
-    t.light.position.set(0, 1.5, 0);
+    t.light = new THREE.PointLight(0x00ffff, 0, 5, 0.8);
+    t.light.position.set(0, 1.2, 0);
     root.add(t.light);
   }
   root.traverse((o) => (o.userData.thing = t));
