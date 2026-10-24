@@ -338,13 +338,12 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
       break;
     }
     case 'grafo': {
-      // A pedestal of dark metal under the hologram, with rings of light.
+      // A pedestal of dark metal under the hologram, with rings of light (T58a: rim on all four faces of both steps).
       const w = it.w ?? 1, d = it.h ?? 1, cx = x + w / 2, cz = z + d / 2;
       lit.box(cx - 1.2, 0, cz - 1.2, cx + 1.2, 0.18, cz + 1.2, rgbOf('#10101a'));
       lit.box(cx - 0.8, 0.18, cz - 0.8, cx + 0.8, 0.42, cz + 0.8, rgbOf('#161a28'));
-      glow.box(cx - 0.8, 0.4, cz - 0.82, cx + 0.8, 0.44, cz - 0.78, rgbOf(col, 0.5));
-      glow.box(cx - 0.8, 0.4, cz + 0.78, cx + 0.8, 0.44, cz + 0.82, rgbOf(col, 0.5));
-      glow.box(cx - 1.22, 0.14, cz + 1.18, cx + 1.22, 0.18, cz + 1.22, rgbOf(col, 0.4));
+      rim(glow, cx - 1.2, cz - 1.2, cx + 1.2, cz + 1.2, 0.18, rgbOf(col, 0.5));
+      rim(glow, cx - 0.8, cz - 0.8, cx + 0.8, cz + 0.8, 0.42, rgbOf(col, 0.5));
       break;
     }
     case 'situazione': {

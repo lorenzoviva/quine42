@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import * as THREE from 'three';
 import { CAMPUS, Corona, DEVICE_MARGIN, ROOM_H, ROOM_W } from '../src/kernel/corona';
+import { buildRoom } from '../src/render/corona3d';
 
 // T18: the campus on the ring is four times the 2D one (the circle stays): avenue, doors, buildings
 // big enough for a model, alleys, lawns, a glowing edge; every door reachable from the avenue.
@@ -128,5 +130,61 @@ describe('the devices of the rooms', () => {
     expect(b.floors.flatMap((f) => f.items.filter((i) => i.kind === 'file')).length).toBe(129);
     // The rooms without a device keep their full shelves on the ground floor.
     expect(c.building('galleria')!.floors[0].items.filter((i) => i.kind === 'file').length).toBe(1);
+  });
+
+  it('builds the graph pedestal in Il Nucleo with light rims around both steps on all four faces (T58a)', () => {
+    const c = campus();
+    const b = c.building('nucleo')!;
+    const f = b.floors[0];
+    const mockKernel: any = {
+      corona: c,
+      forms: { version: 0, ready: () => undefined },
+      layoutSample: () => undefined,
+      graph: () => ({ nodes: [], links: [] }),
+    };
+    const room = buildRoom(mockKernel, b, f);
+    expect(room.group).toBeDefined();
+    expect(room.globe).toBeDefined();
+
+    const glowMesh = room.group.children[1] as THREE.Mesh;
+    expect(glowMesh).toBeDefined();
+    const pos = glowMesh.geometry.getAttribute('position');
+    expect(pos).toBeDefined();
+
+    const grafo = f.items.find((i) => i.kind === 'grafo')!;
+    const cx = grafo.x + (grafo.w ?? 1) / 2, cz = grafo.y + (grafo.h ?? 1) / 2;
+    // Lower step rim at y in [0.18, 0.21], outer extents cx +- 1.2, cz +- 1.2
+    // Upper step rim at y in [0.42, 0.45], outer extents cx +- 0.8, cz +- 0.8
+    const faces = {
+      lower: { minX: 0, maxX: 0, minZ: 0, maxZ: 0 },
+      upper: { minX: 0, maxX: 0, minZ: 0, maxZ: 0 },
+    };
+    for (let i = 0; i < pos.count; i++) {
+      const vx = pos.getX(i);
+      const vy = pos.getY(i);
+      const vz = pos.getZ(i);
+      if (vy >= 0.179 && vy <= 0.211) {
+        if (Math.abs(vx - (cx - 1.2)) < 0.05) faces.lower.minX++;
+        if (Math.abs(vx - (cx + 1.2)) < 0.05) faces.lower.maxX++;
+        if (Math.abs(vz - (cz - 1.2)) < 0.05) faces.lower.minZ++;
+        if (Math.abs(vz - (cz + 1.2)) < 0.05) faces.lower.maxZ++;
+      }
+      if (vy >= 0.419 && vy <= 0.451) {
+        if (Math.abs(vx - (cx - 0.8)) < 0.05) faces.upper.minX++;
+        if (Math.abs(vx - (cx + 0.8)) < 0.05) faces.upper.maxX++;
+        if (Math.abs(vz - (cz - 0.8)) < 0.05) faces.upper.minZ++;
+        if (Math.abs(vz - (cz + 0.8)) < 0.05) faces.upper.maxZ++;
+      }
+    }
+    // All 4 faces on lower step must have neon
+    expect(faces.lower.minX).toBeGreaterThan(0);
+    expect(faces.lower.maxX).toBeGreaterThan(0);
+    expect(faces.lower.minZ).toBeGreaterThan(0);
+    expect(faces.lower.maxZ).toBeGreaterThan(0);
+    // All 4 faces on upper step must have neon
+    expect(faces.upper.minX).toBeGreaterThan(0);
+    expect(faces.upper.maxX).toBeGreaterThan(0);
+    expect(faces.upper.minZ).toBeGreaterThan(0);
+    expect(faces.upper.maxZ).toBeGreaterThan(0);
   });
 });

@@ -657,12 +657,15 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   dall'interno del modello tagliato, l'insegna dell'Ufficio dei luoghi si legge al contrario (da controllare dal viale).
   Il `dev` di Vite su un'altra porta non caricava wasmoon (`LuaFactory` mancante); la build di produzione sì.
 
-### T58 · Ritocchi di luce: il piedistallo del Nucleo e il silos dei personaggi — `da fare` (si comincia da T58a)
+### T58 · Ritocchi di luce: il piedistallo del Nucleo e il silos dei personaggi — T58a `fatto` (`a430037`), T58b `da fare`
 - Contesto: richiesta del 24/10, sera ([`to-do-2026-10-24.md`](../userchats/to-do-2026-10-24.md), «Luci del Nucleo e del silos»).
   Il disegno è in `src/render/corona3d.ts`; non tocca il kernel.
 - **T58a · il piedistallo del grafo**: oggi (`itemMesh`, caso `grafo`) il gradino alto ha il neon solo sul bordo davanti e su
   quello dietro, il basso solo davanti: da un lato si vedono due gradini accesi, dall'altro uno. Il neon gira tutto attorno
   al bordo superiore di entrambi i gradini, su tutte e quattro le facce (come `rim`, già usato da scaffali e piedistalli).
+  Esito: `rim` su entrambi i gradini (y = 0.18 e y = 0.42) con colore `#6fc3ff` (opacità 0.5) in `itemMesh` di `src/render/corona3d.ts`.
+  Test dedicato in `tests/corona.test.ts` con verifica geometrica dei vertici del glow su tutte e quattro le facce dei due gradini.
+  Verifica visuale nel browser con screenshot prima/dopo (frontale e angolata a quarto di giro): illuminazione perfettamente simmetrica da ogni angolazione. Diverso dal previsto: nessuno.
 - **T58b · il silos**: oggi (`showcaseBody`, caso `silos`) la base e il coperchio sono parallelepipedi e sotto il vetro c'è una riga
   di luce che sottolinea il nome dell'individuo e lo rende meno leggibile. Fare: via le due righe; alla base del cilindro di
   vetro (raggio 0,95) un cerchio di luce; il coperchio diventa un cilindro solido opaco poco più largo del vetro, con un
