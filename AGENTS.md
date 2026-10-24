@@ -51,7 +51,7 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
 8. **La corona è nascosta finché il tappeto funziona** (ADR-0009).
 9. **La chiave API non arriva mai al browser**: passa dal proxy di Vite (`server/geminiProxy.ts`).
 10. **Ciò che sembra invalicabile lo è**: il terreno blocca a caselle, i modelli con i loro voxel (ADR-0041);
-    ogni luogo è connesso (varchi + sentieri scavati dal kernel, porte delle strutture sul sentiero).
+    ogni luogo è connesso (varchi + sentieri scavati dal kernel, porte delle strutture sul sentiero; niente cose solide su punti di articolazione né davanti alle porte, ADR-0064).
 11. **Solo testo, niente immagini generate** (ADR-0037): contenuti come dati e ogni aspetto come programma
     MarkovJunior; un programma per tipo, le istanze sono semi diversi.
 
@@ -171,7 +171,7 @@ Il Narratore intreccia trame tra le persone e scrive i loro dialoghi.
 **Luogo** (18×18): bozza Lua continua (`g p t w r`) → piano del Cartografo (ambiente, cose `dentro`/
 `fuori`/`ovunque`, oggetti `a_terra`, rune, `strutture`) → layout (varchi deterministici, programma con bordo
 congelato, sentieri garantiti, edifici) → lotti: ogni edificio diventa una struttura, un modello intero girato
-verso la porta (ADR-0043) → cose su celle raggiungibili (quelle `dentro` sul pavimento del modello), bottino
+verso la porta (ADR-0043) → cose su celle raggiungibili (quelle `dentro` sul pavimento del modello; niente cose solide su punti di articolazione né davanti alle porte, ADR-0064), bottino
 `terreno`, rune su tratti liberi. Il chunk (0,0) ha sempre `x`, `speed = speed` e la runa magica `luce`.
 
 **Fucina**: concetto (tipo, contesto, aspetto, comandi, azioni, contenitore, cose portate, persona,

@@ -35,7 +35,7 @@ import { GENERIC, ModelDirector, ownModelId } from './modeldirector';
 import { categoryOf, DEFAULT_SCULPTORS, sculptAction, type SculptorModels } from './agents/sculptor';
 import { MODELS_INDEX, type ModelInfo } from './forms';
 import { Content, normName, specOf } from './content';
-import { layout, type Building, type LayoutResult } from './layout';
+import { layout, type Building, type LayoutResult, articulationPoints } from './layout';
 import { AGENTS, Council, readBible, type AgentId, type CatalogEntry, type FeedEntry } from './agents/council';
 import { designEnvironment, drawAtlas, planChunk, type ChunkPlan, type Where } from './agents/cartography';
 import { forge, judgeCombination, repairLogic, slug, type ForgeOrigin } from './agents/forge';
@@ -155,7 +155,7 @@ interface Placements {
   objects: Array<{ index: number; cell?: number }>;
   ground: Array<{ index: number; item?: string; cell?: number }>;
   loot: Array<{ index: number; item: string; count: number; cell?: number }>;
-  pick: (where: Where) => number | undefined;
+  pick: (where: Where, solid?: boolean) => number | undefined;
 }
 
 /** A lot of a planned place and the structure that stands on it (ADR-0043). */
@@ -1575,6 +1575,12 @@ export class Kernel {
     return { result, tiles };
   }
 
+  /** Whether a module entity represents a solid obstacle when placed in the world. */
+  isSolidModule(m?: ModuleEntry): boolean {
+    if (!m || m.manifest.kind === 'item') return false;
+    return !!m.manifest.physics?.solid && !m.manifest.physics?.pushable;
+  }
+
   /**
    * Where a plan puts its runes and things: reachable cells, inside or outside buildings, never on gates or doors.
    * Deterministic, the same for the world and for the model of places (T26): what was already taken keeps its cell,
@@ -1589,11 +1595,18 @@ export class Kernel {
     const reach = [...result.reachable];
     const indoor = reach.filter((i) => indoorSet.has(i));
     const outdoor = reach.filter((i) => !indoorSet.has(i) && this.palette[result.grid[Math.floor(i / S)][i % S]]?.layer !== 'door');
-    const pick = (where: Where): number | undefined => {
-      const pool = (where === 'dentro' && indoor.length ? indoor : where === 'fuori' && outdoor.length ? outdoor : reach).filter((i) => !occupied.has(i));
+    const freeCells = new Set<number>(result.reachable);
+    let arts = articulationPoints(freeCells, S);
+    const pick = (where: Where, solid = false): number | undefined => {
+      let pool = (where === 'dentro' && indoor.length ? indoor : where === 'fuori' && outdoor.length ? outdoor : reach).filter((i) => !occupied.has(i));
+      if (solid) pool = pool.filter((i) => !arts.has(i));
       if (!pool.length) return undefined;
       const cell = pool[rng.int(pool.length)];
       occupied.add(cell);
+      if (solid) {
+        freeCells.delete(cell);
+        arts = articulationPoints(freeCells, S);
+      }
       return cell;
     };
 
@@ -1622,13 +1635,16 @@ export class Kernel {
         break;
       }
     });
-    const objects = plan.objects.map((o, index) => ({ index, cell: this.modules.has(o.module) ? pick(o.where) : undefined }));
+    const objects = plan.objects.map((o, index) => {
+      const m = this.modules.get(o.module);
+      return { index, cell: m ? pick(o.where, this.isSolidModule(m)) : undefined };
+    });
     // Things lying around: named by the Cartographer (those not known yet are introduced later), plus what the ground loot table yields.
     const ground = plan.ground.map((name, index) => {
       const item = this.content.byName(name)?.id;
-      return { index, item, cell: item ? pick('fuori') : undefined };
+      return { index, item, cell: item ? pick('fuori', false) : undefined };
     });
-    const loot = this.content.roll('terreno', rng, [...this.wanted]).map((l, index) => ({ index, item: l.item, count: l.count, cell: pick('ovunque') }));
+    const loot = this.content.roll('terreno', rng, [...this.wanted]).map((l, index) => ({ index, item: l.item, count: l.count, cell: pick('ovunque', false) }));
     return { runes, objects, ground, loot, pick };
   }
 
@@ -1668,7 +1684,7 @@ export class Kernel {
       if (m.manifest.persona && loadedOf(m.manifest.id) >= Kernel.NPC_CAP) continue;
       const p = at(cell);
       const sid = inLot(cell);
-      if (sid !== undefined) void this.placeInside(ch, sid, p, (x, y) => this.spawnModuleEntity(m, x, y, ch.key, origin));
+      if (sid !== undefined) void this.placeInside(ch, sid, p, (x, y) => this.spawnModuleEntity(m, x, y, ch.key, origin), this.isSolidModule(m));
       else this.spawnModuleEntity(m, p.x, p.y, ch.key, origin);
     }
 
@@ -1691,7 +1707,7 @@ export class Kernel {
         if (cell !== undefined) this.spawnItem(d.id, at(cell).x, at(cell).y, 1, ch.key, `${ch.key}#n${i}`);
       });
     });
-    for (const f of plan.fresh) void this.forgeForChunk(ch, f, place.pick, at);
+    for (const f of plan.fresh ?? []) void this.forgeForChunk(ch, f, place.pick, at);
     this.runesDirty = true;
     this.bus.emit('chunk:planned', { key: ch.key });
     if (this.plannedCount % 10 === 0) void this.growContent('esplorazione');
@@ -1890,7 +1906,7 @@ export class Kernel {
   }
 
   /** Puts something inside a structure, on its floor, when its form is ready (or where the plan said, if it never is). */
-  private async placeInside(ch: Chunk, sid: Id, fallback: { x: number; y: number }, spawn: (x: number, y: number) => void): Promise<void> {
+  private async placeInside(ch: Chunk, sid: Id, fallback: { x: number; y: number }, spawn: (x: number, y: number) => void, solid = false): Promise<void> {
     const fc: FormComp | undefined = this.ecs.get(sid, 'form');
     if (fc) await this.forms.wait(fc.model, fc.seed, fc.tint);
     if (!this.alive(ch) || !this.ecs.alive.has(sid)) return;
@@ -1898,9 +1914,11 @@ export class Kernel {
     // Away from what already stands there (not the structure itself: its position is the middle of its floor);
     // a crowded floor is still better than the lot, which may be inside the walls.
     const taken = this.ecs.query('pos').filter((id) => id !== sid).map((id) => this.ecs.get(id, 'pos'));
+    const S = this.config.chunkSize;
+    const doorPositions = solid ? ch.buildings.flatMap((b) => b.doors).map((d) => ({ x: ch.cx * S + (d % S) + 0.5, y: ch.cy * S + Math.floor(d / S) + 0.5 })) : [];
     const inside = this.interiorPoints(sid);
-    const free = inside.filter((q) => taken.every((t) => Math.hypot(t.x - q.x, t.y - q.y) > 0.9));
-    const pool = free.length ? free : inside;
+    const free = inside.filter((q) => taken.every((t) => Math.hypot(t.x - q.x, t.y - q.y) > 0.9) && (!solid || doorPositions.every((dp) => Math.hypot(dp.x - q.x, dp.y - q.y) > 1.2)));
+    const pool = free.length ? free : (solid ? [] : inside);
     const p = pool.length ? pool[hash32(sid, pool.length, this.ecs.query('pos').length) % pool.length] : fallback;
     spawn(p.x, p.y);
   }
@@ -2014,7 +2032,7 @@ export class Kernel {
   }
 
   /** The Cartographer asked for something that does not exist yet: the Forge makes it, then it appears. */
-  private async forgeForChunk(ch: Chunk, f: { concept: string; where: Where }, pick: (w: Where) => number | undefined, at: (c: number) => { x: number; y: number }): Promise<void> {
+  private async forgeForChunk(ch: Chunk, f: { concept: string; where: Where }, pick: (w: Where, solid?: boolean) => number | undefined, at: (c: number) => { x: number; y: number }): Promise<void> {
     const tag = `${ch.key}:${f.concept}`;
     if (this.forging.has(tag) || this.forgesUsed >= this.config.ai.maxForges) return;
     this.forging.add(tag);
@@ -2026,7 +2044,7 @@ export class Kernel {
     ch.plan.fresh = ch.plan.fresh.filter((x) => x !== f);
     await this.chunkStore.save(this.recordKey(ch), { plan: ch.plan });
     const m = this.modules.get(r.id);
-    const cell = pick(f.where);
+    const cell = pick(f.where, this.isSolidModule(m));
     if (m && this.alive(ch) && cell !== undefined) this.spawnModuleEntity(m, at(cell).x, at(cell).y, ch.key, `${ch.key}#o${ch.plan.objects.length - 1}`);
   }
 

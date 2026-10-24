@@ -849,12 +849,15 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../userchats/to-do-2026-10-24.md), 
   morbido; `tests/camera.test.ts` (7 test), ADR-0047 e AGENTS.md aggiornati, verifica browser positiva. Diverso dal previsto:
   aggiunto lo zoom con rotellina e la protezione prospettica per il giocatore immerso nella simulazione richiesta dall'autore.
 
-### T56 · Il salto, e le cose che chiudono i sentieri — `da fare` (si comincia da T56a)
+### T56 · Il salto, e le cose che chiudono i sentieri — T56a `fatto` (`e5f8099`), T56b `da fare` (dopo T53a)
 - Contesto: richiesta del 24/10 con `docs/userchats/Blocchi.png`: un sentiero largo una casella su un lago, con un banco,
   una cassa e un letto messi sopra; i dislivelli piccoli si salgono già senza saltare (ADR-0048) e devono restare così.
-- **T56a · niente cose sui passaggi obbligati**: il piazzamento delle cose (`placeThings`/`placeInside`) non mette nulla di
+- **T56a · niente cose sui passaggi obbligati**: il piazzamento delle cose (`placementsOf`/`placeInside`) non mette nulla di
   solido su una casella la cui chiusura separerebbe il luogo (punto di articolazione del grafo delle caselle libere, varchi e
   sentieri garantiti compresi); regola 10. Test: un luogo con un unico sentiero largo uno non ha cose solide sul sentiero.
+  Esito: `articulationPoints` in `src/kernel/layout.ts` (algoritmo di Tarjan su grafo 4-connesso), `isSolidModule` e filtro dinamico
+  in `placementsOf` di `src/kernel/kernel.ts` (ogni solido piazzato aggiorna i punti di articolazione), filtro di sicurezza (distanza ≥ 1.2)
+  dalle porte in `placeInside`. Test dedicati in `tests/bottlenecks.test.ts` (8 test), ADR-0064, AGENTS.md aggiornati.
 - **T56b · il salto**: un tasto (Spazio) fa saltare il viandante: supera un ostacolo alto fino a ~1 casella (le cose dei
   mobili, una cassa, un gradino alto) se oltre c'è dove posare i piedi; arco visibile, ombra, niente salto nell'acqua
   profonda né oltre i muri dei modelli più alti; nella corona nulla cambia. Test: il viandante salta una cassa su un

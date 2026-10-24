@@ -68,5 +68,7 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0061](0061-il-client-del-giocatore.md) | Il client del giocatore senza corona né Concilio: a un giocatore solo i file che il client disegna (`playerFiles`: manifest senza codice, modelli, rilievo, atlante); il registro del Concilio (`concilio`) solo al master; corona, studio, registro, console, editor e Genesi in `src/master.ts` e `CoronaView`, caricati con `import()` solo dal master; `window.rune` del giocatore è il client | accettato |
 | [0062](0062-da-rune-a-quine42.md) | Da Rune a QUINE42: refactoring del nome del gioco (package.json `quine42`, UI e title `QUINE42`, `window.quine` e alias `window.rune`, documentazione; le rune restano token e meccanica diegetica) | accettato |
 | [0063](0063-raggio-42-passi-corona.md) | Il raggio 42: i 42 passi verso la corona (`universe.json → circleRadius` e default kernel a 42; corona invisibile finché il tappeto tiene; 42 passi esatti per uscire fermando il tappeto) | accettato |
+| [0064](0064-niente-cose-sui-passaggi-obbligati.md) | Niente cose solide sui passaggi obbligati: `articulationPoints` (Tarjan) individua i punti di articolazione delle caselle libere; `placementsOf` e `placeInside` non mettono cose solide su strettoie, colli di bottiglia o ingressi (regola 10) | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.
+

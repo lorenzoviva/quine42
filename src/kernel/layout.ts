@@ -233,3 +233,67 @@ export function layout(draft: string[], palette: Record<string, TileDef>, opts: 
   const grid = rows();
   return { grid, buildings: findBuildings(grid, size, palette), gates: gateCells, reachable: reach, carved, steps, ...(stages ? { stages } : {}) };
 }
+
+/**
+ * Articulation points (cut vertices) of an undirected 4-connected grid graph of free cells.
+ * Removing an articulation point increases the number of connected components of the free cells
+ * (rule 10: solid obstacles must not be placed on them, otherwise the place is separated).
+ */
+export function articulationPoints(freeCells: Set<number>, size: number): Set<number> {
+  const result = new Set<number>();
+  if (freeCells.size <= 2) return result;
+
+  const visited = new Set<number>();
+  const tin = new Map<number, number>();
+  const low = new Map<number, number>();
+  let timer = 0;
+
+  const neighborsOf = (u: number): number[] => {
+    const x = u % size;
+    const y = Math.floor(u / size);
+    const nbrs: number[] = [];
+    for (const [dx, dy] of DIRS) {
+      const nx = x + dx;
+      const ny = y + dy;
+      if (nx >= 0 && nx < size && ny >= 0 && ny < size) {
+        const v = ny * size + nx;
+        if (freeCells.has(v)) nbrs.push(v);
+      }
+    }
+    return nbrs;
+  };
+
+  const dfs = (u: number, p?: number) => {
+    visited.add(u);
+    tin.set(u, timer);
+    low.set(u, timer);
+    timer++;
+    let children = 0;
+
+    for (const to of neighborsOf(u)) {
+      if (to === p) continue;
+      if (visited.has(to)) {
+        low.set(u, Math.min(low.get(u)!, tin.get(to)!));
+      } else {
+        dfs(to, u);
+        low.set(u, Math.min(low.get(u)!, low.get(to)!));
+        if (low.get(to)! >= tin.get(u)! && p !== undefined) {
+          result.add(u);
+        }
+        children++;
+      }
+    }
+    if (p === undefined && children > 1) {
+      result.add(u);
+    }
+  };
+
+  for (const u of freeCells) {
+    if (!visited.has(u)) {
+      dfs(u);
+    }
+  }
+
+  return result;
+}
+
