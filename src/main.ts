@@ -106,6 +106,9 @@ async function main() {
     kernel.saveUsage();
   });
   const renderer = new Renderer($<HTMLCanvasElement>('#world'), $<HTMLCanvasElement>('#overlay'), kernel);
+  if (params.has('god') || params.has('master') || (thin && thin.session.master)) {
+    renderer.godMode = true;
+  }
   const thumbs = new Thumbs(kernel);
   icons.get = (item) => thumbs.icon(item);
   icons.model = (model, tint, seed) => thumbs.model(model, tint, seed);
@@ -120,8 +123,11 @@ async function main() {
     const r = renderer.toReal(e.offsetX, e.offsetY);
     kernel.contextAt(r.x, r.y);
   });
-  // The camera turns by quarter turns (, and .) or with the middle button dragged (ADR-0047).
-  kernel.input.onTurn = () => renderer.fitView();
+  // The camera turns by quarter turns (, and .) or with the middle button dragged freely (T55).
+  kernel.input.onTurn = () => {
+    renderer.yawGoal = kernel.input.angle;
+    renderer.fitView();
+  };
   $<HTMLCanvasElement>('#world').addEventListener('mousedown', (e) => {
     // A left click in the studio: a showcase or its arrows (T21).
     if (e.button === 0) {
@@ -131,9 +137,9 @@ async function main() {
     }
     if (e.button !== 1) return;
     e.preventDefault();
-    renderer.dragStart(e.clientX);
+    renderer.dragStart(e.clientX, e.clientY);
   });
-  window.addEventListener('mousemove', (e) => renderer.dragMove(e.clientX));
+  window.addEventListener('mousemove', (e) => renderer.dragMove(e.clientX, e.clientY));
   window.addEventListener('mouseup', (e) => e.button === 1 && renderer.dragEnd());
   // Death: the session ends; continue in the same universe or start again from the seed.
   const deathEl = $('#death');
@@ -185,6 +191,11 @@ async function main() {
   if (thin && master) (window as any).session = thin;
   // The 3D view, for the console (camera distance, scene).
   (window as any).view = renderer;
+  Object.defineProperty(kernel, 'godMode', {
+    get: () => renderer.godMode,
+    set: (v: boolean) => { renderer.godMode = !!v; },
+    configurable: true,
+  });
 
   const syncFocus = () => {
     kernel.input.enabled = !tools?.isOpen && !inventory.isOpen && !chat.isOpen && !actions.isOpen && !kernel.dead;
@@ -305,7 +316,16 @@ async function main() {
     }
   };
 
-  window.addEventListener('wheel', (e) => kernel.input.enabled && kernel.select(e.deltaY > 0 ? 1 : -1), { passive: true });
+  window.addEventListener(
+    'wheel',
+    (e) => {
+      if (!kernel.input.enabled) return;
+      if ((e.target as HTMLElement)?.closest?.('.panel, .dialog, #editor, #console, #inventory')) return;
+      e.preventDefault();
+      renderer.zoom(e.deltaY);
+    },
+    { passive: false }
+  );
 
   let last = performance.now();
   let acc = 0;

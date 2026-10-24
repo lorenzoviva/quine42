@@ -830,7 +830,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../userchats/to-do-2026-10-24.md), 
 
 ## Controlli
 
-### T55 · La camera libera (orbita) nel gioco — `da fare`
+### T55 · La camera libera (orbita) nel gioco — `fatto` (`b9d7de1`)
 - Contesto: richiesta del 24/10: nel laboratorio (`/lab/3d/`) il tasto destro trascinato fa orbitare la camera e all'autore
   piace; nel gioco la camera gira a quarti di giro (ADR-0047: `,` `.`, tasto centrale trascinato, `Input.turn`) e il tasto
   destro apre il menu della casella (ADR-0029).
@@ -841,6 +841,13 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../userchats/to-do-2026-10-24.md), 
   raggio del tasto destro, schermi inclinati della Direzione) controllate. Test: la traduzione delle direzioni per angoli
   qualsiasi; la camera torna a un quarto con `,` `.`.
 - Fatto quando: test verdi, verifica nel browser (mondo, corona, studio), ADR-0047 aggiornato, commit.
+- Esito: rotazione libera continua con tasto centrale (`Input.angle`, `Renderer.yaw`), `,` `.` riagganciano al quarto di giro;
+  l'input traduce i tasti WASD in coordinate mondo con angolo continuo sul settore a 8 direzioni più vicino; zoom in/out con
+  rotellina del mouse (`renderer.zoom`); in simulazione per i giocatori l'orbita resta solo orizzontale (pitch bloccato a 3/4,
+  `0.95`) e lo zoom-out non supera le 15 caselle per non vedere la corona anzitempo; in god mode (`?god`, `?master`) o nella
+  corona/studio l'orbita ruota in tutte le direzioni (pitch 0.2–1.45) e lo zoom out arriva a 45 caselle come nel lab 3d; rientro
+  morbido; `tests/camera.test.ts` (7 test), ADR-0047 e AGENTS.md aggiornati, verifica browser positiva. Diverso dal previsto:
+  aggiunto lo zoom con rotellina e la protezione prospettica per il giocatore immerso nella simulazione richiesta dall'autore.
 
 ### T56 · Il salto, e le cose che chiudono i sentieri — `da fare` (si comincia da T56a)
 - Contesto: richiesta del 24/10 con `docs/userchats/Blocchi.png`: un sentiero largo una casella su un lago, con un banco,

@@ -23,10 +23,15 @@ export class Renderer {
   mouse: { x: number; y: number } | null = null;
   /** Distance of the camera from the wanderer, in tiles. */
   distance = 15;
-  /** The camera's angle around the wanderer (0 = from the south; it follows `input.turn`). */
+  /** The camera's angle around the wanderer (0 = from the south; follows input or middle-click drag). */
   yaw = 0;
-  /** While the middle button drags: the angle under the mouse. */
-  private drag?: { x: number; yaw: number };
+  yawGoal = 0;
+  /** Camera pitch: 0.95 = 3/4 view. Clamped in simulation, free in god mode or corona. */
+  pitch = PITCH;
+  /** God mode: enables free orbit in all directions and far zoom out even in simulation. */
+  godMode = false;
+  /** While the middle button drags: the angle and pitch under the mouse. */
+  private drag?: { x: number; y: number; yaw: number; pitch: number };
 
   private gl: THREE.WebGLRenderer;
   private bloom: Bloom;
@@ -78,10 +83,16 @@ export class Renderer {
     this.runes = new Runes(kernel, this.world);
     this.wanderer = new Wanderer(this.scene);
     this.lights = new Lights(this.scene);
+    this.yaw = (kernel.input.turn * Math.PI) / 2;
+    this.yawGoal = this.yaw;
     this.overlay = new Overlay(overlay, this.camera);
     this.resize();
     window.addEventListener('resize', () => this.resize());
     kernel.bus.on('universe:reloaded', () => this.reset());
+    kernel.input.onTurn = () => {
+      this.yawGoal = this.kernel.input.angle;
+      this.fitView();
+    };
     kernel.bus.on('spell:cast', ({ at }: { at: { x: number; y: number } }) => {
       const { ox, oy } = kernel.offset();
       this.flash.position.set(at.x - ox, kernel.groundAt(at.x, at.y) + 1, at.y - oy);
@@ -121,27 +132,59 @@ export class Renderer {
     this.fitView();
   }
 
+  /** Whether the camera has full orbit in all directions and far zoom (god mode or outside the simulation / in corona/studio). */
+  canFreeOrbit(): boolean {
+    if (this.godMode) return true;
+    const k = this.kernel;
+    if (k.zone === 'corona' || k.zone === 'studio') return true;
+    if (k.coronaRevealed()) return true;
+    const p = k.playerPos();
+    if (p && Math.hypot(p.x, p.y) >= k.config.circleRadius) return true;
+    return false;
+  }
+
   /** What the kernel loads around the wanderer: what the camera sees, with the far side of the 3/4 view; turned with the camera. */
   fitView(): void {
     const across = Math.ceil(this.distance * 2.4 * Math.max(1, this.camera.aspect));
     const deep = Math.ceil(this.distance * 2.2);
-    const side = this.kernel.input.turn % 2 === 1;
-    this.kernel.view = { w: side ? deep : across, h: side ? across : deep };
+    const cos = Math.abs(Math.cos(this.yaw));
+    const sin = Math.abs(Math.sin(this.yaw));
+    const w = Math.ceil(cos * across + sin * deep);
+    const h = Math.ceil(sin * across + cos * deep);
+    this.kernel.view = { w, h };
   }
 
-  /** Middle-button drag: the camera follows the mouse, the keys follow the nearest quarter turn, and on release it settles there. */
-  dragStart(x: number): void {
-    this.drag = { x, yaw: this.yaw };
+  /** Middle-button drag: the camera rotates freely around the wanderer. */
+  dragStart(x: number, y = 0): void {
+    this.drag = { x, y, yaw: this.yaw, pitch: this.pitch };
   }
 
-  dragMove(x: number): void {
+  dragMove(x: number, y = 0): void {
     if (!this.drag) return;
-    this.yaw = this.drag.yaw - ((x - this.drag.x) / Math.max(1, this.w)) * Math.PI * 1.5;
-    this.kernel.input.setTurn(Math.round(this.yaw / (Math.PI / 2)));
+    const dx = x - this.drag.x;
+    const dy = y - this.drag.y;
+    this.yaw = this.drag.yaw - (dx / Math.max(1, this.w)) * Math.PI * 1.5;
+    this.yawGoal = this.yaw;
+    if (this.canFreeOrbit()) {
+      this.pitch = THREE.MathUtils.clamp(this.drag.pitch + dy * 0.004, 0.2, 1.45);
+    }
+    this.kernel.input.setAngle(this.yaw);
   }
 
   dragEnd(): void {
-    this.drag = undefined;
+    if (this.drag) {
+      this.yawGoal = this.yaw;
+      this.drag = undefined;
+    }
+  }
+
+  /** Zoom with mouse wheel: within [2.5, 15] in simulation; up to 45 in god mode / corona. */
+  zoom(deltaY: number): void {
+    const factor = deltaY > 0 ? 1.12 : 0.89;
+    const maxDist = this.canFreeOrbit() ? 45 : 15;
+    const minDist = 2.5;
+    this.distance = THREE.MathUtils.clamp(this.distance * factor, minDist, maxDist);
+    this.fitView();
   }
 
   /** The height of the ground at a real-space point: the relief in the simulation, flat in the corona. */
@@ -223,18 +266,35 @@ export class Renderer {
     this.lights.update(k, studio ? 0 : night, { ox, oy }, this.t);
     this.flash.intensity = this.flashUntil > this.t ? 6 * ((this.flashUntil - this.t) / 0.6) : 0;
 
-    // The camera follows the wanderer, from above, turned by the quarter turns of the input (the shortest way round).
+    // The camera follows the wanderer, from above.
     // It looks at the wanderer's middle, up and down the hills with it.
     const aim = new THREE.Vector3(p.x, this.wanderer.view.root.position.y + 0.6, p.y);
     this.target.lerp(aim, Math.min(1, dt * 8));
     if (this.target.distanceTo(aim) > 30) this.target.copy(aim);
-    if (!this.drag) {
-      const goal = (k.input.turn * Math.PI) / 2;
-      const off = Math.atan2(Math.sin(goal - this.yaw), Math.cos(goal - this.yaw));
-      this.yaw = Math.abs(off) < 0.001 ? goal : this.yaw + off * Math.min(1, dt * 9);
+
+    // In simulation without god mode: restore pitch to 3/4 (PITCH) and clamp distance to 15
+    if (!this.canFreeOrbit()) {
+      if (this.distance > 15) {
+        this.distance = Math.max(15, this.distance - dt * 20);
+        this.fitView();
+      }
+      if (Math.abs(this.pitch - PITCH) > 0.001) {
+        this.pitch += (PITCH - this.pitch) * Math.min(1, dt * 6);
+      }
     }
-    const flat = Math.cos(PITCH) * this.distance;
-    this.camera.position.set(this.target.x + Math.sin(this.yaw) * flat, this.target.y + Math.sin(PITCH) * this.distance, this.target.z + Math.cos(this.yaw) * flat);
+
+    if (!this.drag) {
+      const goal = this.yawGoal;
+      const off = Math.atan2(Math.sin(goal - this.yaw), Math.cos(goal - this.yaw));
+      if (Math.abs(off) < 0.001) {
+        this.yaw = goal;
+      } else {
+        this.yaw += off * Math.min(1, dt * 9);
+        this.kernel.input.setAngle(this.yaw);
+      }
+    }
+    const flat = Math.cos(this.pitch) * this.distance;
+    this.camera.position.set(this.target.x + Math.sin(this.yaw) * flat, this.target.y + Math.sin(this.pitch) * this.distance, this.target.z + Math.cos(this.yaw) * flat);
     if (g > 0.2) this.camera.position.x += (Math.random() - 0.5) * 0.15 * g;
     this.camera.lookAt(this.target);
     this.sun.position.copy(this.target).add(new THREE.Vector3(-14, 24, 10));
