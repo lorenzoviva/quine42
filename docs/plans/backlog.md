@@ -746,7 +746,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 - Esito: `package.json` (`quine42`), `index.html` (title, intro .name, help h2), `src/main.ts` (`window.quine` e `window.quine42` con alias `window.rune`), documentazione (`README.md`, `AGENTS.md`, `GEMINI.md`, `CLAUDE.md`, `docs/design.md`), ADR-0062. Verificato nel browser: titolo, intro, help e `window.quine === window.rune`. Diverso dal previsto: nessuno.
 - Dipendenze: nessuna.
 
-### T60 · Il raggio 42: i 42 passi verso la corona — `fatto` (`bdacb5f`)
+### T60 · Il raggio 42: i 42 passi verso la corona — `fatto` (`17045a9`)
 - Contesto: con il nuovo nome QUINE42 (T59, tributo alla Guida Galattica e alla ricorsione), il cerchio di simulazione
   si allinea: 42 passi per uscire (non più 44). Il raggio del cerchio (`universe.json → circleRadius` e default in
   `src/kernel/universe.ts`) diventa 42.
