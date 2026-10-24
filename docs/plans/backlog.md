@@ -959,7 +959,7 @@ le risposte alle domande del piano.
   impugnare e i contenitori sono ottimistici anche loro; il pannello delle meccaniche no (`on_slot` è Lua, gira solo sul server).
   Resta in `LATER` solo `rollback` (del master, T42).
 
-### T40 · Luoghi nuovi con il lock, a spese di chi esplora — `fatto` (vedi il commit «Multiplayer (T40)»)
+### T40 · Luoghi nuovi con il lock, a spese di chi esplora — `fatto` (`32f58bf`)
 - Fare: il primo che entra in un luogo nuovo lo chiede al server, che lo genera una volta (Cartografo, Scultore), lo
   committa in `maps/` e lo addebita a lui (`chi`); gli altri lo ricevono pronto; un limite di luoghi nuovi al minuto
   per universo. Il Concilio (sessioni, trame, Fucina) gira solo sul server, anche senza master collegato.
