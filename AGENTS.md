@@ -78,7 +78,7 @@ npm run build        # typecheck + build (npx vite preview la serve, proxy inclu
 ```
 
 `.env`: `GEMINI_API_KEY=...` (ignorato da git). Senza chiave o con `?offline`: modelli locali, texture e
-ostacoli procedurali. URL: `?skip` salta intro e Genesi; `?dev&teleport=46,0` porta oltre il tappeto (o `teleport=X,Y` davanti alla porta di un edificio della corona, poi `E` entra); in sviluppo `?universo=<nome>` apre un altro
+ostacoli procedurali. URL: `?skip` salta intro e Genesi; `?dev&teleport=46,0` porta oltre il tappeto (o `teleport=X,Y` dovunque: anche dentro una stanza, vedi «Convalida nel browser»); in sviluppo `?universo=<nome>` apre un altro
 universo di `universes/` e `?viandante=<id>` sceglie il viandante della scheda in multigiocatore (due schede, due viandanti).
 Graphify (facoltativo, ADR-0045): `pip install graphifyy` in un ambiente a parte, poi `GRAPHIFY_BACKEND=none graphify update .`
 (solo codice, offline, ~12 s; `graphify-out/` è ignorato da git; niente skill, MCP né hook).
@@ -441,17 +441,32 @@ lavoro vive nei file, non nella chat.
    cosa è cambiato rispetto al previsto; commit (mai su `main`). Poi **dai all'autore il prompt per la sessione
    successiva** (quello in testa al backlog, con il numero del prossimo task) e di' in una riga cosa farà.
 
-### Convalida nel browser (senza trial-and-error)
+### Convalida nel browser (senza tentativi)
 
-Per evitare costosi tentativi ed errori durante la convalida grafica/interattiva:
-- **Non modificare manualmente le coordinate ECS a runtime** (`playerPos`, `p.x = ...` via console con loop attivo): il tick del kernel (`sanitize()`, collisioni `freeReal`, movimento in Lua) le resetta o blocca la transizione di camera lasciando il rendering nella simulazione.
-- **Per gli esterni della corona**: naviga con `?skip&offline&dev&teleport=46,0` (disattiva il tappeto e atterra sul viale della corona).
-- **Per gli interni degli edifici della corona (silos dei personaggi, nucleo, banchi, schermi)**:
-  1. Ricava le coordinate della porta dell'edificio da console o dai test: `const b = window.quine.corona.building('<id>');` (es. `persone`, `nucleo`, `sistemi`), porta in `b.door.x, b.door.y`.
-  2. Apri direttamente l'URL con le coordinate della porta: `?skip&offline&dev&teleport=<door.x>,<door.y>` (il viandante compare sul viale davanti alla porta).
-  3. Premi `E` (o chiama `window.quine.interact()`): esegue la transizione canonica (`entrance(b)`), imposta `zone = 'studio'` e istanzia subito la stanza in `CoronaView`.
-  4. Usa `W/A/S/D` per avvicinarti all'oggetto e `,`/`.` (o rotazione libera con tasto centrale) per ruotare la visuale e scattare screenshot da più lati.
+Il kernel è in console come `window.quine` (o `window.rune`) in singola e per il master; per un giocatore in multigiocatore è il
+`ThinClient` (ADR-0061). Da lì si va dove serve e si fa ciò che farebbe un tasto: niente WASD per arrivare.
 
+- **Avvio**: `NODE_ENV=production npm run build`, poi `npx vite preview --port <n> --strictPort` (una porta libera: altre sessioni
+  possono averne una aperta), poi `http://localhost:<n>/?skip&offline`. Aspetta il kernel prima di usarlo:
+  `for (let i = 0; i < 40 && !window.quine?.corona; i++) await new Promise((r) => setTimeout(r, 500));`
+- **Spostarsi ovunque**: ciò che riporta il viandante al centro è il **tappeto** (non `sanitize()`, che tocca solo posizioni non
+  finite o fuori dal bordo del campus, mai gli interni). Fermalo e assegna la posizione, come fa `?dev&teleport=X,Y` in `main.ts`:
+  ```js
+  const k = window.quine;
+  k.carpet().active = false;
+  const f = k.corona.building('persone').floors[0];        // id dell'edificio (vedi ROOMS in corona.ts), piano
+  Object.assign(k.playerPos(), { x: f.ox + 12.5, y: f.oy + 10.5 }); // casella locale nella stanza 24 × 15
+  ```
+  La zona (`studio`, `corona`, `sim`) e la stanza disegnata seguono da sole al tick dopo; nessuna porta né `E`. Le caselle dei
+  dispositivi sono le costanti di `corona.ts` (`SHOWCASE_AT`, `GRAPH_AT`, `SITUATION_AT`, `WALL_AT`, `CONSOLES_AT`, `BENCH_AT`…,
+  relative a `f.ox`, `f.oy`); il dispositivo sta sulla colonna 12, l'uscita in basso (y 14): stare a y 10.5 lo inquadra con la
+  parete di fondo. Per gli esterni: `k.corona.building(id).door` (il viale davanti alla porta) o `?dev&teleport=46,0`.
+- **Agire**: `await k.interact()` è `E` (sul dispositivo o sullo scaffale più vicino), `k.clickStudio(x, y)` il clic sinistro su un punto;
+  i pannelli arrivano come eventi (`k.bus.on('ui:showcase', …)`, `ui:screens`, `ui:graph`…). Per far vedere uno stato senza Gemini:
+  `k.council.say(agente, tipo, testo, a, compito)` scrive nel registro, `k.faults.raise(chiave, messaggio)` apre un guasto.
+- **Guardare**: lo screenshot dello strumento del browser; la camera gira con i tasti `,` `.` mandati alla pagina (o trascinando col
+  tasto centrale), la rotellina fa lo zoom. Errori: i messaggi della console della pagina.
+- **Alla fine**: chiudi la scheda e ferma la preview.
 
 ## Convenzioni
 
