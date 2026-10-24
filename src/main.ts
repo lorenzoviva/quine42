@@ -179,6 +179,8 @@ async function main() {
   const sfx = new Sfx();
   // A player's console sees only the client (T41): what the server told this tab. The master's sees the kernel too.
   (window as any).rune = master ? kernel : thin;
+  (window as any).quine = (window as any).rune;
+  (window as any).quine42 = (window as any).rune;
   // The session of a game of many (T39): what this tab knows of the server's world.
   if (thin && master) (window as any).session = thin;
   // The 3D view, for the console (camera distance, scene).

@@ -1,4 +1,4 @@
-# RUNE
+# QUINE42
 
 *Il mondo è scritto. Tu sei al centro.*
 

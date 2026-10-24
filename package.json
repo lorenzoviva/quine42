@@ -1,8 +1,8 @@
 {
-  "name": "rune",
+  "name": "quine42",
   "version": "0.1.0",
   "private": true,
-  "description": "RUNE — un mondo in 3D fatto del proprio codice sorgente.",
+  "description": "QUINE42 — un mondo in 3D fatto del proprio codice sorgente.",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -15,8 +15,8 @@
   senza, la build ha `import.meta.env.DEV` sempre vero; il proxy Gemini funziona anche lì), poi apri
   `http://localhost:4173/` (`?skip` salta intro e Genesi, `?offline` forza i modelli locali,
   `?dev&teleport=46,0` mostra la corona). `vite preview` serve `dist/`: gli XML del lab e del seme
-  sono quelli dell'ultima build; per il laboratorio (`/lab/3d/`) usa `npm run dev`. `window.rune` espone il kernel; `window.rune.feed()` il registro
-  del Concilio, `window.rune.models.usage` i consumi.
+  sono quelli dell'ultima build; per il laboratorio (`/lab/3d/`) usa `npm run dev`. `window.quine` (o `window.rune`) espone il kernel; `window.quine.feed()` il registro
+  del Concilio, `window.quine.models.usage` i consumi.
 - Le prove con Gemini costano: una Genesi più qualche chunk ≈ 80 chiamate di testo e 20 immagini.
   Usa un profilo browser persistente per non rigenerare il mondo a ogni prova, e i test offline per il resto.
 - Mai stampare o registrare il valore di `GEMINI_API_KEY`; verifica che non finisca in `dist/`.

@@ -2,7 +2,7 @@
 
 ## Note specifiche per Gemini CLI
 
-Sei un collaboratore al progetto RUNE, un gioco 3D (voxel, vista dall'alto in 3/4) in cui il mondo è
+Sei un collaboratore al progetto QUINE42 (in precedenza RUNE), un gioco 3D (voxel, vista dall'alto in 3/4) in cui il mondo è
 composto dal codice sorgente del gioco stesso sotto forma di rune, e ogni aspetto è un programma MarkovJunior. Leggi `AGENTS.md` (importato sopra) e `docs/` prima di
 qualsiasi lavoro. Rispetta queste regole: il kernel TypeScript è immutabile dal gioco; tutta la logica
 di gioco è in Lua, eseguita in sandbox e ricaricata a caldo; lo stato vive nei componenti ECS, i sistemi

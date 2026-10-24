@@ -1,4 +1,4 @@
-# AGENTS.md — RUNE
+# AGENTS.md — QUINE42
 
 > **Unica fonte di verità per gli agenti** (Claude Code, Gemini CLI, chiunque altro).
 > Leggi questo file e `docs/` prima di qualsiasi lavoro. Ogni decisione architetturale va
@@ -6,7 +6,7 @@
 
 ## Visione in breve
 
-RUNE è un gioco 3D visto dall'alto in 3/4, fatto di voxel semplici e di contenuti ricchissimi, in cui il
+QUINE42 (in precedenza Rune, ADR-0062) è un gioco 3D visto dall'alto in 3/4, fatto di voxel semplici e di contenuti ricchissimi, in cui il
 mondo è generato da IA in ogni aspetto tranne il kernel, ed è fatto del proprio codice sorgente. Il giocatore
 vive in un cerchio di simulazione; un **tappeto** compensa ogni suo passo e lo riporta al centro. Attorno,
 ferma e **invisibile finché il tappeto lo tiene**, c'è la **corona**: il codice sorgente dell'universo,
@@ -82,7 +82,7 @@ ostacoli procedurali. URL: `?skip` salta intro e Genesi; `?dev&teleport=46,0` po
 universo di `universes/` e `?viandante=<id>` sceglie il viandante della scheda in multigiocatore (due schede, due viandanti).
 Graphify (facoltativo, ADR-0045): `pip install graphifyy` in un ambiente a parte, poi `GRAPHIFY_BACKEND=none graphify update .`
 (solo codice, offline, ~12 s; `graphify-out/` è ignorato da git; niente skill, MCP né hook).
-In console del browser: `window.rune` è il kernel (`.feed()`, `.models.usage`, `.content`).
+In console del browser: `window.quine` (o `window.rune`) è il kernel (`.feed()`, `.models.usage`, `.content`).
 
 ## Struttura
 
@@ -313,7 +313,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   persone, trame, regole, grafo, carte, consumi e viandanti restano sul server. L'`ingresso` dice `master`; il registro del Concilio
   (`concilio`) va solo al master, e `ThinClient` lo versa nello specchio. Corona e strumenti del master (`src/master.ts`: editor,
   console, registro, Genesi, pannelli dello studio, atlante, grafo; `src/render/coronaview.ts`: ciò che il renderer disegna della
-  corona) si caricano con `import()` solo dal master (in singola sempre); `window.rune` del giocatore è il `ThinClient`.
+  corona) si caricano con `import()` solo dal master (in singola sempre); `window.rune` (e `window.quine`) del giocatore è il `ThinClient`.
 - **Sala del Concilio e studi** (ADR-0027): tavolo rotondo con l'universo che gira, gli otto membri seduti (con lo Scultore),
   teletrasporti verso le sale e ritorno, schermi della storia, stile neon punk; atlante navigabile.
 - **Vita degli NPC** (ADR-0024): attività visibili (`attivita {tipo, ferma}`), dialoghi tra persone,

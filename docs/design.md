@@ -1,8 +1,8 @@
-# RUNE — Design Doc & Bootstrap per Claude Code e Gemini
+# QUINE42 (ex RUNE) — Design Doc & Bootstrap per Claude Code e Gemini
 
 Oct 19, 2026 · @Lollo1
 
-> Nome di lavoro provvisorio. Documento da passare a Claude Code (e Gemini) come punto di partenza.
+> Nome provvisorio iniziale: «Rune»; rinominato ufficialmente in «QUINE42» (ADR-0062). Le rune restano i token e la meccanica centrale del mondo. Documento da passare a Claude Code (e Gemini) come punto di partenza.
 >
 > *Documento originale dell'autore, conservato così com'è. Le decisioni prese in seguito sono negli ADR
 > (`docs/adr/`) e riassunte in `AGENTS.md`, che ha la precedenza.*
