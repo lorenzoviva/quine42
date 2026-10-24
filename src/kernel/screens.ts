@@ -2,6 +2,7 @@
 // commits (a film: «<» «>» move it, a click says what changed and who wanted it; looking never goes back, R is the
 // only way), in the middle the Council's live log (who is working, on what, with which model), on the right the
 // board of the costs (the usage ledger by agent and by task, in dollars, the budgets of universe.json as full scale).
+// Under the ceiling a band of light says how things are (T46c): green, amber or red, the reasons in the panel.
 // Everything comes from what the kernel already has; these are pure functions, the kernel feeds them.
 
 import type { Author, Commit } from './repo';
@@ -174,8 +175,45 @@ export function costBoard(usage: UsageLedger, budgets: Budget[]): CostBoard {
 /** How full a budget is (0-1; a budget of zero or less is full as soon as it is used). */
 export const fill = (b: Budget) => (b.max > 0 ? Math.min(1, b.usati / b.max) : b.usati > 0 ? 1 : 0);
 
+/** The alert of the Direction (T46c): the band of light under its ceiling. */
+export type AlertLevel = 'verde' | 'ambra' | 'rossa';
+
+export const ALERT_COLOR: Record<AlertLevel, string> = { verde: '#5cff8a', ambra: '#ffb000', rossa: '#ff3b3b' };
+export const ALERT_NAME: Record<AlertLevel, string> = { verde: 'tutto in ordine', ambra: 'attenzione', rossa: 'allarme' };
+
+export interface Alert {
+  level: AlertLevel;
+  /** Why, in words; empty when all is well. */
+  reasons: string[];
+}
+
+/** The validator's rejections count for an hour; a budget is a worry over 80 %, an alarm when used up. */
+export const REJECTS_S = 3600;
+export const BUDGET_WARN = 0.8;
+
+/**
+ * Red: faults open (code of the universe that fails now) or a budget used up (the Council stops there); amber: the validator
+ * rejected something in the last hour, or a budget is over 80 %; green otherwise.
+ */
+export function alertOf(faults: Array<{ key: string; message: string }>, feed: FeedEntry[], budgets: Budget[], now: number): Alert {
+  const red: string[] = [], amber: string[] = [];
+  if (faults.length) red.push(`${faults.length === 1 ? 'un guasto aperto' : `${faults.length} guasti aperti`}: ${faults[0].key} — ${faults[0].message.slice(0, 120)}`);
+  const rejects = feed.filter((e) => e.from === 'kernel' && e.kind === 'scarta' && now - e.time <= REJECTS_S * 1000);
+  if (rejects.length) {
+    const last = rejects[rejects.length - 1];
+    amber.push(`${rejects.length === 1 ? 'un rifiuto' : `${rejects.length} rifiuti`} del validatore nell'ultima ora (l'ultimo${last.to ? `, al ${AGENTS[last.to]?.name ?? last.to}` : ''}: ${last.text.slice(0, 120)})`);
+  }
+  for (const b of budgets) {
+    const v = fill(b);
+    if (v >= 1) red.push(`il budget «${b.nome}» è esaurito (${b.usati} di ${b.max})`);
+    else if (v > BUDGET_WARN) amber.push(`il budget «${b.nome}» è al ${Math.round(v * 100)} % (${b.usati} di ${b.max})`);
+  }
+  return { level: red.length ? 'rossa' : amber.length ? 'ambra' : 'verde', reasons: [...red, ...amber] };
+}
+
 export interface Screens {
   tempo: Timeline;
   registro: LiveFeed;
   costi: CostBoard;
+  allerta: Alert;
 }

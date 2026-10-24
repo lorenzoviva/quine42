@@ -5,7 +5,7 @@
 import { PLACE_PHASES, type Kernel, type LayoutSample, type PlaceMiniature, type ShowcaseEntry } from '../kernel/kernel';
 import type { StudioItem } from '../kernel/corona';
 import { OPERATION_COLOR, OPERATION_NAME, type Operation, type OperationKind, type Situation } from '../kernel/situation';
-import { LIVE_LINES, SCREEN_NAME, fill, type Screens, type ScreenField } from '../kernel/screens';
+import { ALERT_COLOR, ALERT_NAME, LIVE_LINES, SCREEN_NAME, fill, type Screens, type ScreenField } from '../kernel/screens';
 import { tallyLine, usd } from '../kernel/ai/usage';
 import { $, el } from './dom';
 import { icons } from './hud';
@@ -283,9 +283,18 @@ export class StudioPanel {
   /**
    * A field of the Direction's wall of screens (T46b): the commit chosen on the film (what changed, who wanted it) with
    * «<» «>»; the consoles of the Council and the last lines of the log; the costs by agent and by task with the budgets.
+   * Under the title, the band of the alert (T46c) and why.
    */
   screens(field: ScreenField, s: Screens): void {
-    const head = (text: string) => el('div', { class: 'title' }, `${text[0].toUpperCase()}${text.slice(1)} — Direzione`);
+    const a = s.allerta;
+    const head = (text: string) =>
+      el(
+        'div',
+        {},
+        el('div', { class: 'title' }, `${text[0].toUpperCase()}${text.slice(1)} — Direzione`),
+        el('div', { class: 'item' }, el('span', { class: 'path', style: `color:${ALERT_COLOR[a.level]}` }, `● Allerta ${a.level}: ${ALERT_NAME[a.level]}`)),
+        ...a.reasons.map((r) => el('div', { class: 'note', style: `color:${ALERT_COLOR[a.level]}` }, `— ${r}`)),
+      );
     const item = (what: string, text: string, color?: string) => el('div', { class: 'item' }, el('span', { class: 'path', ...(color ? { style: `color:${color}` } : {}) }, what), ` ${text}`);
     const time = (t: number) => new Date(t).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
     if (field === 'tempo') {

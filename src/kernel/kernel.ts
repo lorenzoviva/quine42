@@ -18,7 +18,7 @@ import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './univer
 import { addPerson, applyRenames, dayPhase, defaultRoutine, freshName, greeting, guessGender, inferActivity, memorySummary, readPeople, remember, repairSociety, similarNames, societySummary, type Activity, type DayPhase, type Person, type Species } from './society';
 import { buildGraph, GRAPH_FILE, graphHash, mergePlaces, placesOf, readGraph, slug as nodeSlug, type GraphPlace, type WorldGraph } from './graph';
 import { situation as buildSituation, type Situation } from './situation';
-import { clampFrame, costBoard, liveFeed, SCREEN_NAME, timeline, type Budget, type ScreenField, type Screens } from './screens';
+import { alertOf, clampFrame, costBoard, liveFeed, SCREEN_NAME, timeline, type Budget, type ScreenField, type Screens } from './screens';
 import { activeQuests, plotFromRaw, plotText, PLOTS_FILE, readPlots, reviewPlot, secretsOf, writePlots, type Plot } from './plots';
 import { Input } from './input';
 import { discoverModules, readConfig } from './universe';
@@ -3050,6 +3050,9 @@ export class Kernel {
       case 'parete':
         this.openScreen(it.target as ScreenField);
         return;
+      case 'console':
+        this.openScreen('registro');
+        return;
       case 'showcase':
         this.openShowcase(it.target!);
         return;
@@ -3104,7 +3107,7 @@ export class Kernel {
 
   clickStudio(rx: number, ry: number): boolean {
     if (this.zone !== 'studio') return false;
-    const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'situazione', 'parete', 'layout']);
+    const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'situazione', 'parete', 'console', 'layout']);
     if (!it) return false;
     const p = this.playerPos();
     const c = cellNear(it, p.x, p.y);
@@ -3115,6 +3118,7 @@ export class Kernel {
     if (it.kind === 'grafo') this.bus.emit('ui:graph', {});
     else if (it.kind === 'situazione') this.bus.emit('ui:situation', { situation: this.situation() });
     else if (it.kind === 'parete') this.openScreen(it.target as ScreenField);
+    else if (it.kind === 'console') this.openScreen('registro');
     else if (it.target === 'tempo') this.stepTimeline(it.kind === 'prev' ? 1 : -1);
     else if (it.kind === 'layout') this.openLayout(it, this.corona.roomAt(it.x, it.y)?.building.name ?? '');
     else if (it.kind === 'showcase') this.openShowcase(it.target!);
@@ -4330,7 +4334,8 @@ export class Kernel {
 
   /**
    * The Direction's wall of screens (T46b): the timeline of the commits around the one chosen, the live log of the
-   * Council, the board of the costs with the budgets of `universe.json → ai`; from what there is, changing nothing.
+   * Council, the board of the costs with the budgets of `universe.json → ai`; from what there is, changing nothing;
+   * and the band of alert under its ceiling (T46c): faults, the validator's rejections, the budgets.
    */
   screens(now = Date.now()): Screens {
     const log = this.repo.log();
@@ -4347,6 +4352,7 @@ export class Kernel {
       tempo: timeline(log, Math.max(0, i), (c) => (c.parent ? this.repo.find(c.parent) : undefined)),
       registro: liveFeed(this.feed(), this.usage.lastCall, now, this.models.name === 'offline' ? 'offline' : ai.textModel),
       costi: costBoard(this.usage, budgets),
+      allerta: alertOf(this.faults.list(), this.feed(), budgets, now),
     };
   }
 
@@ -4365,6 +4371,11 @@ export class Kernel {
     const t = this.screens().tempo;
     this.message(`${t.chosen?.message ?? ''} — ${t.chosen?.who ?? ''} (${t.count - t.index}/${t.count})`);
     this.bus.emit('studio:screens', { screens: this.screens() });
+  }
+
+  /** The agents at work now, as the live log says (T46c). */
+  working(now = Date.now()): AgentId[] {
+    return liveFeed(this.feed(), this.usage.lastCall, now).desks.filter((d) => d.working).map((d) => d.agent);
   }
 
   /** A field of the wall seen up close. */
@@ -5153,6 +5164,8 @@ export class Kernel {
     this.tickCount++;
     if (this.campusVersion !== this.forms.version) this.placeCampus();
     this.archive.tick(dt);
+    // Who works in the Council's log sits at their console in the Direction (T46c); looked at once a second.
+    if (this.tickCount % 60 === 0) this.archive.consoles(this.working());
     if (!this.corona.isInterior(this.playerPos().x)) this.lastWorld = { ...this.playerCarpet() };
     if (this.zone === 'corona') this.archive.meet(this.playerPos().x, this.playerPos().y);
     this.societyTick();

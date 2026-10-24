@@ -139,6 +139,29 @@ export class Archive {
     }
   }
 
+  /**
+   * The Direction's consoles (T46c): who works in the Council's log sits at their console, facing the wall of screens; who
+   * stops working gets up and goes. Called once a second by the kernel.
+   */
+  consoles(working: AgentId[]): void {
+    const desks = this.corona().building('universo')?.floors[0]?.items.filter((i) => i.kind === 'console') ?? [];
+    const keep = new Set<string>();
+    for (const d of desks) {
+      const agent = d.target as AgentId;
+      if (!working.includes(agent)) continue;
+      const key = `${agent}@universo#console`;
+      keep.add(key);
+      const p = { x: d.x + 0.5, y: d.y + 1.3 };
+      const a = this.avatars.get(key);
+      if (a) Object.assign(a, { x: p.x, y: p.y, tx: p.x, ty: p.y });
+      else {
+        const def = AGENTS[agent];
+        this.avatars.set(key, { agent, name: def.name, color: def.color, sigil: def.sigil, building: 'universo', ...p, tx: p.x, ty: p.y, sayUntil: 0, idleUntil: 0, speed: SPEED });
+      }
+    }
+    for (const k of [...this.avatars.keys()]) if (k.endsWith('@universo#console') && !keep.has(k)) this.avatars.delete(k);
+  }
+
   /** The Referente comes to meet the wanderer on the ring. */
   meet(px: number, py: number): void {
     const r = this.avatars.get('referente@');

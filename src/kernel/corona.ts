@@ -9,9 +9,10 @@
 import { footBlocks, toLocal, type Form } from './forms';
 import type { FileMap } from './types';
 import { SCREEN_NAME, type ScreenField } from './screens';
+import { AGENTS } from './agents/council';
 
 export type FileLook = 'libro' | 'cristallo' | 'pergamena' | 'tavoletta';
-export type ItemKind = 'file' | 'sprite' | 'tile' | 'layout' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'less' | 'more' | 'grafo' | 'situazione' | 'parete';
+export type ItemKind = 'file' | 'sprite' | 'tile' | 'layout' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'less' | 'more' | 'grafo' | 'situazione' | 'parete' | 'console';
 /** What a showcase shows (T21): the runes and spells, the people, the things, the objects of the packs, the places planned (T26). */
 export type ShowcaseSource = 'rune' | 'persone' | 'cose' | 'oggetti' | 'luoghi';
 /** How a showcase looks: a screen, a silo of liquid, a 3D printer, a holographic table with a place in miniature. */
@@ -61,12 +62,20 @@ export const WALL_AT: Array<{ field: ScreenField; x: number; w: number }> = [
 ];
 export const WALL_Y = 1;
 /**
+ * The Direction's consoles (T46c): a row of desks in front of the wall of screens, one per agent of the Council, from under
+ * the live log on (the row in front of the film stays free between its arrows); who works sits at theirs (`Archive.consoles`).
+ */
+export const CONSOLES_AT = { x: 9, y: WALL_Y + 1 };
+/**
  * The Office of places is also the Cartographer's studio (T26c, ADR-0051): the atlas on a table against its back wall,
  * the terrains in the sample room, which starts on its own floor after the files; after them, from a shelf of their own, a
  * sample for each environment (T26d): its program run on a trial draft, in miniature (`Kernel.layoutSample`).
  */
 export const ATLAS_AT = { x: 10, y: 1, w: 4 };
 export const SAMPLES = 'luoghi';
+
+/** «del Narratore», «dello Scultore», «dell'Artista». */
+export const ofThe = (name: string) => (/^[aeiou]/i.test(name) ? `dell'${name}` : /^(s[^aeiou]|z|gn|ps|x)/i.test(name) ? `dello ${name}` : `del ${name}`);
 
 /** The cell of a (wide or deep) studio item nearest to a point: distances are measured from it. */
 export function cellNear(it: StudioItem, x: number, y: number): { x: number; y: number } {
@@ -350,6 +359,7 @@ export class Corona {
             const film = WALL_AT[0];
             placed.push({ kind: 'prev', label: '«<» indietro nel tempo', target: film.field, x: ox + film.x, y: oy + WALL_Y + 1 });
             placed.push({ kind: 'next', label: '«>» avanti nel tempo', target: film.field, x: ox + film.x + film.w - 1, y: oy + WALL_Y + 1 });
+            Object.entries(AGENTS).forEach(([agent, a], i) => placed.push({ kind: 'console', label: `la console ${ofThe(a.name)}`, target: agent, color: a.color, x: ox + CONSOLES_AT.x + i, y: oy + CONSOLES_AT.y }));
           }
           const show = SHOWCASES[id];
           if (show) {

@@ -1,14 +1,16 @@
 // T46b: the Direction's wall of screens. Against its back wall, as wide as the room: the timeline of the commits (a film
 // that «<» «>» move and that stops at its ends, looking never goes back), the live log of the Council (who works, on
 // what, with which model), the board of the costs (by agent and by task, the budgets of universe.json as full scale).
+// T46c: the band of the alert under the ceiling (faults, the validator's rejections, the budgets) and the consoles.
 
 import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockModels } from '../src/kernel/ai/mock';
-import { ROOM_W, WALL_AT } from '../src/kernel/corona';
-import { FILM, liveFeed, timeline, whoWanted } from '../src/kernel/screens';
+import { CONSOLES_AT, DEVICE_MARGIN, ROOM_W, SITUATION_AT, WALL_AT, WALL_Y } from '../src/kernel/corona';
+import { alertOf, FILM, liveFeed, REJECTS_S, timeline, whoWanted } from '../src/kernel/screens';
+import { AGENTS } from '../src/kernel/agents/council';
 import { UsageLedger } from '../src/kernel/ai/usage';
 
 const boot = () => Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
@@ -169,5 +171,89 @@ describe('the wall of screens', () => {
     stand(k, mid.x + 2.5, mid.y + 10.5);
     expect(k.clickStudio(wall[0].x + 1.5, wall[0].y + 0.5)).toBe(false);
     expect(k.repo.head().id).toBe(head);
+  });
+});
+
+describe('the alert and the consoles of the Direction', () => {
+  const now = 10_000_000;
+  const budgets = [{ nome: 'testo', usati: 10, max: 100 }];
+  const reject = (ago: number) => ({ time: now - ago * 1000, from: 'kernel' as const, to: 'cartografo' as const, kind: 'scarta' as const, text: 'luogo 3,1: nessun varco' });
+
+  it('three levels from three cases: a fault is red, a rejection in the last hour amber, a budget over 80 % amber and used up red', () => {
+    expect(alertOf([], [], budgets, now)).toEqual({ level: 'verde', reasons: [] });
+    // The validator rejected a place ten minutes ago: amber, and who it went back to.
+    const amber = alertOf([], [reject(600)], budgets, now);
+    expect(amber.level).toBe('ambra');
+    expect(amber.reasons[0]).toContain('Cartografo');
+    // An hour and more ago it no longer counts; what the agents say is not a rejection.
+    expect(alertOf([], [reject(REJECTS_S + 1), { ...reject(5), from: 'narratore', kind: 'propone' }], budgets, now).level).toBe('verde');
+    expect(alertOf([], [], [{ nome: 'testo', usati: 81, max: 100 }], now)).toMatchObject({ level: 'ambra', reasons: [expect.stringContaining('81 %')] });
+    expect(alertOf([], [], [{ nome: 'testo', usati: 80, max: 100 }], now).level).toBe('verde');
+    expect(alertOf([], [], [{ nome: 'Fucina', usati: 3, max: 3 }], now).level).toBe('rossa');
+    // A fault open: red, whatever else there is, and every reason is told.
+    const red = alertOf([{ key: 'module:sys.fire', message: 'attempt to index a nil value' }], [reject(60)], budgets, now);
+    expect(red.level).toBe('rossa');
+    expect(red.reasons.length).toBe(2);
+    expect(red.reasons[0]).toContain('module:sys.fire');
+  });
+
+  it('the kernel feeds it from its faults, its log and its budgets', async () => {
+    const k = await boot();
+    expect(k.screens().allerta.level).toBe('verde');
+    k.council.say('kernel', 'scarta', 'azione «vola»: effetto sconosciuto', 'narratore', 'action.judge');
+    expect(k.screens().allerta.level).toBe('ambra');
+    k.faults.raise('module:sys.prova', 'errore di prova');
+    expect(k.screens().allerta).toMatchObject({ level: 'rossa', reasons: [expect.stringContaining('sys.prova'), expect.stringContaining('validatore')] });
+    k.faults.clear('module:sys.prova');
+    expect(k.screens().allerta.level).toBe('ambra');
+  });
+
+  it("a console per agent in a row in front of the wall, off the film's row and the table's margin; E on one opens the live log", async () => {
+    const k = await boot();
+    const f = k.corona.building('universo')!.floors[0];
+    const desks = f.items.filter((i) => i.kind === 'console');
+    expect(desks.map((d) => d.target)).toEqual(Object.keys(AGENTS));
+    expect(desks.map((d) => [d.x - f.ox, d.y - f.oy])).toEqual(desks.map((_, i) => [CONSOLES_AT.x + i, WALL_Y + 1]));
+    expect(desks.find((d) => d.target === 'artista')?.label).toBe("la console dell'Artista");
+    expect(desks.find((d) => d.target === 'scultore')?.label).toBe('la console dello Scultore');
+    // In front of the wall (under the log and the costs), not in front of the film, outside the table's margin.
+    const film = WALL_AT[0];
+    for (const d of desks) {
+      expect(d.x - f.ox).toBeGreaterThanOrEqual(film.x + film.w);
+      expect(d.x - f.ox).toBeLessThan(ROOM_W - 1);
+      expect(d.y - f.oy).toBeLessThan(SITUATION_AT.y - DEVICE_MARGIN);
+      expect(k.corona.free(d.x + 0.5, d.y + 0.5)).toBe(false);
+      // One can stand behind it.
+      expect(k.corona.free(d.x + 0.5, d.y + 1.5)).toBe(true);
+    }
+    // No other room has consoles.
+    expect(k.corona.buildings.filter((b) => b.floors.some((fl) => fl.items.some((i) => i.kind === 'console'))).map((b) => b.id)).toEqual(['universo']);
+    const opened: any[] = [];
+    k.bus.on('ui:screens', (e) => opened.push(e));
+    stand(k, desks[3].x + 0.5, desks[3].y + 1.5);
+    await k.interact();
+    expect(opened.map((o) => o.field)).toEqual(['registro']);
+    expect(opened[0].screens.allerta.level).toBeDefined();
+  });
+
+  it('who works in the log sits at their console, and gets up when they stop', async () => {
+    const k = await boot();
+    const desk = k.corona.building('universo')!.floors[0].items.find((i) => i.kind === 'console' && i.target === 'cartografo')!;
+    const atDesk = () => [...k.archive.avatars.entries()].filter(([key]) => key.endsWith('#console'));
+    k.archive.consoles([]);
+    expect(atDesk()).toEqual([]);
+    k.council.say('cartografo', 'propone', 'un borgo sul fiume', undefined, 'chunk.plan');
+    expect(k.working()).toContain('cartografo');
+    k.archive.consoles(k.working());
+    const seated = atDesk().find(([, a]) => a.agent === 'cartografo')?.[1];
+    expect(seated).toMatchObject({ building: 'universo', x: desk.x + 0.5 });
+    expect(Math.floor(seated!.y)).toBe(desk.y + 1);
+    // A minute and a half later they are no longer working: the console is empty.
+    expect(k.working(Date.now() + 120_000)).not.toContain('cartografo');
+    k.archive.consoles(k.working(Date.now() + 120_000));
+    expect(atDesk().some(([, a]) => a.agent === 'cartografo')).toBe(false);
+    // The tick looks once a second.
+    for (let i = 0; i < 60; i++) k.tick(1 / 60);
+    expect(atDesk().some(([, a]) => a.agent === 'cartografo')).toBe(true);
   });
 });

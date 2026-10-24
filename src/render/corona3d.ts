@@ -369,6 +369,16 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
       glow.box(x + 0.02, 0.4, z + 1.13, x + w - 0.02, 0.43, z + 1.17, rgbOf(col, 0.7));
       break;
     }
+    case 'console': {
+      // A console of the Direction (T46c): a desk facing the wall of screens, its monitor lit in the colour of its agent.
+      const c = it.color ?? col;
+      // Low, not to hide the foot of the screens behind it.
+      lit.box(x + 0.08, 0, z + 0.25, x + 0.92, 0.4, z + 0.8, rgbOf('#141826'));
+      lit.box(x + 0.15, 0.4, z + 0.3, x + 0.85, 0.66, z + 0.37, rgbOf('#0c0c16'));
+      glow.box(x + 0.2, 0.44, z + 0.37, x + 0.8, 0.63, z + 0.385, rgbOf(c, 0.3));
+      glow.box(x + 0.08, 0.4, z + 0.78, x + 0.92, 0.42, z + 0.8, rgbOf(c, 0.5));
+      break;
+    }
     case 'atlas':
       lit.box(x, 0, z + 0.1, x + (it.w ?? 1), 0.7, z + 0.9, rgbOf('#1a2a33'));
       glow.box(x + 0.1, 0.7, z + 0.2, x + (it.w ?? 1) - 0.1, 0.72, z + 0.8, rgbOf('#7dd87d', 0.6));

@@ -1,12 +1,15 @@
 // The Direction's wall of screens in 3D (T46b): a dark bezel per field against the back wall and on it a canvas
 // texture, drawn again only when what it shows changes (src/kernel/screens.ts gives the content). The writing is in
 // the texture, not on the 2D layer: it stays on the wall when the camera turns and costs nothing while it is the same.
+// Under the ceiling, the band of the alert (T46c): green, amber or red, built again only when the level changes; red blinks.
 
 import * as THREE from 'three';
-import type { StudioItem } from '../kernel/corona';
-import { fill, FILM, type CostBoard, type LiveFeed, type ScreenField, type Screens, type Timeline } from '../kernel/screens';
+import { ROOM_H, ROOM_W, type Floor, type StudioItem } from '../kernel/corona';
+import { ALERT_COLOR, fill, FILM, type AlertLevel, type CostBoard, type LiveFeed, type ScreenField, type Screens, type Timeline } from '../kernel/screens';
 import { usd } from '../kernel/ai/usage';
 import { arrowSign } from './corona3d';
+import { Builder } from './terrain';
+import { MAT, rgbOf } from './materials';
 
 /**
  * The screen leans back on its plinth (itemMesh), its foot at the plinth's front edge, its top against the wall: the camera
@@ -15,6 +18,8 @@ import { arrowSign } from './corona3d';
 const TILT = 0.6;
 const FOOT = { y: 0.4, z: 1.15 };
 const LONG = 1.75;
+/** The band of the alert: above the screens along the back wall, on top of the side walls (they are 1.4 high). */
+const BAND = { back: 2.05, side: 1.4, t: 0.05, w: 0.08, light: 0.55 };
 const BEZEL = new THREE.MeshStandardMaterial({ color: '#0c0c16', roughness: 0.6 });
 /** Texture pixels per cell. */
 const PX = 150;
@@ -175,10 +180,12 @@ export class ScreenWall {
   private fields: Array<{ field: ScreenField; cv: HTMLCanvasElement; tex: THREE.CanvasTexture; key: string }> = [];
   /** When it was last read (renderer time). */
   at = -Infinity;
+  private band?: { level: AlertLevel; mesh: THREE.Mesh };
 
   constructor(
     items: StudioItem[],
     private color: string,
+    private room?: Pick<Floor, 'ox' | 'oy'>,
   ) {
     for (const it of items) {
       const w = it.w ?? 1, h = LONG;
@@ -207,8 +214,31 @@ export class ScreenWall {
     }
   }
 
+  /** The band of the alert in the colour of its level, built again when the level changes. */
+  private alert(level: AlertLevel): void {
+    if (!this.room || this.band?.level === level) return;
+    if (this.band) {
+      this.group.remove(this.band.mesh);
+      this.band.mesh.geometry.dispose();
+    }
+    const X = this.room.ox, Z = this.room.oy, { back, side, t, w, light } = BAND, c = rgbOf(ALERT_COLOR[level], light);
+    const b = new Builder();
+    // Thin, on the inner edge: a whole wall's top lit was a halo over the room.
+    b.box(X + 1, back, Z + 1 - w, X + ROOM_W - 1, back + t, Z + 1, c);
+    b.box(X + 1 - w, side, Z + 1, X + 1, side + t, Z + ROOM_H - 1, c);
+    b.box(X + ROOM_W - 1, side, Z + 1, X + ROOM_W - 1 + w, side + t, Z + ROOM_H - 1, c);
+    this.band = { level, mesh: new THREE.Mesh(b.geometry(), MAT.glow) };
+    this.group.add(this.band.mesh);
+  }
+
+  /** Red blinks. */
+  blink(t: number): void {
+    if (this.band) this.band.mesh.visible = this.band.level !== 'rossa' || Math.sin(t * 5) > -0.4;
+  }
+
   /** Draws the fields whose content changed; returns how many. */
   draw(s: Screens): number {
+    this.alert(s.allerta.level);
     let n = 0;
     for (const f of this.fields) {
       const key = JSON.stringify(s[f.field]);
@@ -226,5 +256,6 @@ export class ScreenWall {
 
   dispose(): void {
     for (const f of this.fields) f.tex.dispose();
+    this.band?.mesh.geometry.dispose();
   }
 }

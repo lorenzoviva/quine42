@@ -291,7 +291,7 @@ export class Renderer {
     }
     if (studio && wall.length) {
       if (!this.wall) {
-        this.wall = { room: here, view: new ScreenWall(wall, studio.building.color) };
+        this.wall = { room: here, view: new ScreenWall(wall, studio.building.color, studio.floor) };
         this.scene.add(this.wall.view.group);
       }
       // Read twice a second (the arrows answer at once enough); a field is drawn again only when it changed.
@@ -299,6 +299,7 @@ export class Renderer {
         this.wall.view.at = this.t;
         this.wall.view.draw(k.screens());
       }
+      this.wall.view.blink(this.t);
     }
     this.avatars.update(k, this.t);
 

@@ -505,7 +505,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 - Dipendenze: nessuna. T46c, T47, T48 dopo T49b (mettono apparecchi nelle stanze).
 - Domande per l'autore: nessuna (se il piano terra non tiene dispositivo e scaffali, la scelta è scritta nel task).
 
-### T46 · La Direzione, dentro: la sala operativa — `in corso` (T46a e T46b fatti; T46c in corso)
+### T46 · La Direzione, dentro: la sala operativa — `fatto` (T46a, T46b, T46c)
 - Contesto: [`corona-proposte.md`](corona-proposte.md) §3.1 (approvata il 23/10). Oggi dentro la Direzione (`universo`,
   squadra dell'Arbitro, oro `ffcf5c`) ci sono solo gli scaffali di `universe.json` e le scrivanie. Gli apparecchi seguono
   le vetrine di T21-T28 (`SHOWCASES`/`GRAPH_AT` in `corona.ts`, `showcaseOf`/`stepShowcase`/`clickStudio` in
@@ -543,6 +543,20 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 - **T46c · allerta e postazioni** (dopo T49b): una fascia luminosa sotto il soffitto verde/ambra/rossa (guasti aperti, rifiuti del
   validatore nell'ultima ora, budget oltre l'80 %), il motivo nel pannello; le scrivanie della squadra dell'Arbitro in file
   davanti agli schermi, chi lavora nel registro si vede alla sua console. Test: i tre livelli dai tre casi.
+  Esito: `fatto` (commit «Corona (T46c)»). `alertOf` in `src/kernel/screens.ts` (funzione pura; `ALERT_COLOR`, `ALERT_NAME`,
+  `REJECTS_S` = 3600, `BUDGET_WARN` = 0,8) e `Screens.allerta`: **rossa** con guasti aperti o un budget esaurito, **ambra** con
+  rifiuti del validatore (voci `kernel`/`scarta` del registro) nell'ultima ora o un budget oltre l'80 %, **verde** altrimenti; i motivi
+  in parole in testa al pannello `ui:screens` (`studio.ts`). La fascia la disegna `ScreenWall` (`src/render/screens.ts`), ricostruita
+  solo quando cambia il livello, la rossa lampeggia: sopra la parete di schermi (a 2,05, sopra i loro sostegni) e sul bordo
+  interno dei muri laterali. Le console: voci `console` (`CONSOLES_AT`, riga 2, x 9..16, una per agente di `AGENTS`, sotto il
+  registro e l'inizio dei costi: la riga davanti alla pellicola resta libera, il margine del tavolo pure); `Archive.consoles`, chiamata
+  dal kernel una volta al secondo con `kernel.working()` (chi è al lavoro per `liveFeed`), fa sedere dietro la sua console chi lavora
+  e lo toglie quando smette; E o un clic su una console aprono il registro. `ofThe` in `corona.ts` per «dell'Artista», «dello
+  Scultore». Test in `tests/screens.test.ts` (4 nuovi). Diverso dal previsto: «sotto il soffitto» con la stanza aperta in alto è
+  una linea in cima ai muri; la prima prova accendeva tutta la cima dei muri laterali e faceva un alone, ora è una striscia sottile al
+  55 %. I budget a zero usati contano come esauriti (`fill`). Nessun ADR (interno della corona, deciso in T32). Verifica: build +
+  preview, `aurora` offline, verde → ambra (un rifiuto) → rossa (un guasto di prova), due agenti alle console, pannello con E,
+  nessun errore in console.
 - Fatto quando (per pezzo): test verdi, typecheck, verifica nel browser (`aurora`, offline) con pannello e nessun errore.
 
 ### T47 · La Biblioteca del Mondo, dentro — `da fare` (si comincia da T47a)
