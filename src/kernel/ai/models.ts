@@ -30,6 +30,8 @@ export interface TextCall {
   model?: string;
   /** Reasoning effort; default the configuration's (`low`). */
   thinking?: Thinking;
+  /** Who pays (T36): a wanderer's id, or `comune`. */
+  chi?: string;
 }
 
 /** Gemini 3 `thinkingLevel`; `off` sends nothing (the model's default). */

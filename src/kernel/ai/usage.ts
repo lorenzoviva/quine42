@@ -1,7 +1,8 @@
 // The usage ledger: what every call to a model cost, per day, model and task, in tokens and dollars.
 // GeminiModels reports each call (onCall); the kernel keeps the ledger and saves it in the universe
 // (world/consumi.json) with every commit, so the spending of every session stays with the world it made.
-// Google's own usage page lags hours behind: this one is right after every call.
+// Google's own usage page lags hours behind: this one is right after every call. Every call also has a payer
+// (`chi`, T36): the wanderer it was made for, or `comune` when the whole world asked for it.
 
 import { costOf, priceOf, PRICES_READ_ON } from './prices';
 
@@ -22,6 +23,8 @@ export interface CallRecord {
   failed?: 'timeout' | 'errore';
   /** ISO day; default today. */
   day?: string;
+  /** Who pays (T36): a wanderer's id, or `comune` (also when missing). */
+  chi?: string;
 }
 
 export interface Tally {
@@ -46,9 +49,13 @@ export interface UsageFile {
   prezzi: string;
   /** day → model → task → tally */
   giorni: Record<string, Record<string, Record<string, Tally>>>;
+  /** day → payer (a wanderer's id or `comune`) → tally (T36). */
+  paganti?: Record<string, Record<string, Tally>>;
 }
 
 export const USAGE_FILE = 'world/consumi.json';
+/** The payer of a call nobody in particular asked for (as COMUNE in cards.ts, which this layer does not import). */
+const COMMON = 'comune';
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -71,13 +78,15 @@ function sum(into: Tally, t: Tally): Tally {
 }
 
 export class UsageLedger {
-  private file: UsageFile = { prezzi: PRICES_READ_ON, giorni: {} };
+  private file: UsageFile & { paganti: Record<string, Record<string, Tally>> } = { prezzi: PRICES_READ_ON, giorni: {}, paganti: {} };
   /** This session only (since the page opened). */
   readonly session = emptyTally();
   readonly sessionByModel: Record<string, Tally> = {};
   /** This session by agent (the file keeps models and tasks only), and each agent's last call (the Direction's screens, T46b). */
   readonly sessionByAgent: Record<string, Tally> = {};
   readonly lastCall: Record<string, { model: string; task: string; time: number }> = {};
+  /** This session by payer (T36). */
+  readonly sessionByPayer: Record<string, Tally> = {};
   /** Bumped at every call: the kernel writes the file when it changed. */
   version = 0;
   onChange?: () => void;
@@ -93,6 +102,8 @@ export class UsageLedger {
             const slot = (((this.file.giorni[day] ??= {})[model] ??= {})[task] ??= emptyTally());
             sum(slot, { ...emptyTally(), ...t });
           }
+      for (const [day, payers] of Object.entries(f.paganti ?? {}))
+        for (const [chi, t] of Object.entries(payers ?? {})) sum(((this.file.paganti[day] ??= {})[chi] ??= emptyTally()), { ...emptyTally(), ...t });
     } catch {
       /* a broken file is replaced by this session's */
     }
@@ -105,6 +116,9 @@ export class UsageLedger {
     add(this.session, r, usd);
     add((this.sessionByModel[r.model] ??= emptyTally()), r, usd);
     add((this.sessionByAgent[r.agent] ??= emptyTally()), r, usd);
+    const chi = r.chi || COMMON;
+    add(((this.file.paganti[day] ??= {})[chi] ??= emptyTally()), r, usd);
+    add((this.sessionByPayer[chi] ??= emptyTally()), r, usd);
     this.lastCall[r.agent] = { model: r.model, task: r.task, time: Date.now() };
     this.version++;
     this.onChange?.();
@@ -129,6 +143,13 @@ export class UsageLedger {
     return t;
   }
 
+  /** What each payer spent: on a day, or (without one) on every day. */
+  payers(day?: string): Record<string, Tally> {
+    const out: Record<string, Tally> = {};
+    for (const d of day ? [day] : Object.keys(this.file.paganti)) for (const [chi, t] of Object.entries(this.file.paganti[d] ?? {})) sum((out[chi] ??= emptyTally()), t);
+    return out;
+  }
+
   /** The most expensive tasks of a day. */
   tasks(day = today()): Array<{ model: string; task: string; tally: Tally }> {
     const out: Array<{ model: string; task: string; tally: Tally }> = [];
@@ -142,7 +163,10 @@ export class UsageLedger {
     for (const day of Object.keys(this.file.giorni).sort())
       for (const [model, tasks] of Object.entries(this.file.giorni[day]))
         for (const [task, t] of Object.entries(tasks)) ((giorni[day] ??= {})[model] ??= {})[task] = round(t);
-    return JSON.stringify({ prezzi: PRICES_READ_ON, giorni } satisfies UsageFile, null, 1) + '\n';
+    const paganti: NonNullable<UsageFile['paganti']> = {};
+    for (const day of Object.keys(this.file.paganti).sort())
+      for (const chi of Object.keys(this.file.paganti[day]).sort()) (paganti[day] ??= {})[chi] = round(this.file.paganti[day][chi]);
+    return JSON.stringify({ prezzi: PRICES_READ_ON, giorni, paganti } satisfies UsageFile, null, 1) + '\n';
   }
 }
 

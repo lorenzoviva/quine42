@@ -4,6 +4,7 @@
 // At genesis the Cartographer writes the layout programs themselves.
 
 import type { Schema } from '../ai/models';
+import type { Carta } from '../cards';
 import type { LayoutDef, Place, TileDef } from '../types';
 import type { MjNode } from '../mj';
 import { STAMP_SHAPES } from '../stamps';
@@ -34,6 +35,8 @@ export interface ChunkPlan {
   strutture?: Array<{ concetto: string; importante?: boolean }>;
   /** Tiles changed after the layout (by effects, spells, Lua): cell index → tile code. */
   edits?: Record<string, string>;
+  /** Who planned the place and who paid for it (T36). */
+  carta?: Carta;
 }
 
 export interface PlanContext {

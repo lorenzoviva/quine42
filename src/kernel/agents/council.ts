@@ -4,6 +4,7 @@
 // narrative, graphics, engine and physics disagree.
 
 import { parseJson, type Models, type Schema, type Thinking } from '../ai/models';
+import { COMUNE } from '../cards';
 import { COUNCIL_PRINCIPLES } from '../fourthwall';
 import type { FileMap, MagicRune, Spell, TileDef } from '../types';
 import type { WorldGraph } from '../graph';
@@ -37,6 +38,8 @@ export interface CallOptions {
    * things): the agent gets their neighbourhood instead of the whole bible and catalog (T13).
    */
   focus?: string[];
+  /** Who pays (T36); default the Council's `payer` for the task. */
+  chi?: string;
 }
 
 export interface FeedEntry {
@@ -183,6 +186,10 @@ export function catalogSummary(catalog: CatalogEntry[]): string {
 export class Council {
   readonly feed: FeedEntry[] = [];
   onFeed?: (e: FeedEntry) => void;
+  /** Who pays for a task asked now (T36): the kernel's policy (cards.ts); without one, the world. */
+  payer?: (task: string) => string;
+  /** The nodes of the graph a prompt carried as its focus (the kernel counts the cards' uses, T36). */
+  onFocus?: (ids: string[]) => void;
 
   constructor(
     public models: Models,
@@ -276,6 +283,7 @@ export class Council {
     }
     const ids = graph?.resolve(focus) ?? [];
     if (!graph || !ids.length) return '';
+    this.onFocus?.(ids);
     return `## Ciò che il mondo sa di questo compito (usa questi nomi e questi legami, non inventarne altri)\n${graph.context(ids, FOCUS_BUDGET)}`;
   }
 
@@ -302,6 +310,7 @@ export class Council {
       data: opts.data,
       model: opts.model,
       thinking: opts.thinking,
+      chi: opts.chi ?? this.payer?.(task) ?? COMUNE,
     });
   }
 }

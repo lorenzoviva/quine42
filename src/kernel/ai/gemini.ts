@@ -80,7 +80,7 @@ export class GeminiModels implements Models {
     });
   }
 
-  private async post(model: string, body: unknown, call: { agent: string; task: string }): Promise<any> {
+  private async post(model: string, body: unknown, call: { agent: string; task: string; chi?: string }): Promise<any> {
     const report = (u: any, extra: Partial<CallRecord> = {}) => {
       const r: CallRecord = {
         model,
@@ -90,6 +90,7 @@ export class GeminiModels implements Models {
         cached: u?.cachedContentTokenCount ?? 0,
         output: u?.candidatesTokenCount ?? 0,
         thoughts: u?.thoughtsTokenCount ?? 0,
+        ...(call.chi ? { chi: call.chi } : {}),
         ...extra,
       };
       this.usage.inputTokens += r.prompt;

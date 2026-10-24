@@ -70,7 +70,7 @@ export interface MechanicDraft {
   cases: unknown[];
 }
 
-export async function designMechanic(c: Council, request: string, ctx: { items: string[]; mechanics: string[]; feedback?: string }): Promise<MechanicDraft> {
+export async function designMechanic(c: Council, request: string, ctx: { items: string[]; mechanics: string[]; feedback?: string; chi?: string }): Promise<MechanicDraft> {
   const r = await c.ask<{ nome: string; descrizione: string; pannello: { titolo: string; elementi: UiElement[] }; componenti_json?: string; logica: string; casi?: unknown[] }>(
     'ingegnere',
     'mechanic.design',
@@ -85,7 +85,7 @@ export async function designMechanic(c: Council, request: string, ctx: { items: 
       .filter(Boolean)
       .join('\n\n'),
     MECHANIC_SCHEMA,
-    { data: { request, ...ctx }, temperature: 0.4 },
+    { data: { request, ...ctx }, temperature: 0.4, chi: ctx.chi },
   );
   let components: Record<string, unknown> | undefined;
   try {

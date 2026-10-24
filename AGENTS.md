@@ -109,6 +109,7 @@ src/
     modeldirector.ts    i modelli che mancano, uno alla volta, entro `ai.maxModels`
     chunks.ts           archivio dei piani dei luoghi
     bench.ts            il banco della Sala sistemi: i casi dei sistemi in un kernel in miniatura (ADR-0052)
+    cards.ts            chi paga ogni chiamata, le carte dei contenuti, i loro utilizzi (`world/carte.json`), la collezione (ADR-0056)
     partita.ts          la partita scelta alla Genesi: livelli della morte, principio per il Concilio (ADR-0053)
     wanderers.ts        i viandanti con un id (`io` in singola), il loro stato in `world/giocatori/`, legami e ricordi per id (ADR-0054)
     situation.ts, screens.ts  la Direzione: il tavolo della situazione e la parete di schermi (T46), funzioni pure
@@ -129,7 +130,8 @@ universe/
   world/                bible.json (memoria del Narratore), style.md (guida di stile dei modelli), canone.md (le rune), consumi.json,
                         rules.json (regole), people.json (la società, con i ricordi), plots.json (trame),
                         atlas.json (geografia), stato.json (lo stato del mondo), grafo.json (il grafo del mondo, derivato),
-                        giocatori/<id>.json (lo stato di ogni viandante: inventario, bisogni, stati, slot, frase)
+                        giocatori/<id>.json (lo stato di ogni viandante: inventario, bisogni, stati, slot, frase),
+                        carte.json (gli utilizzi delle carte e le carte dei luoghi)
   prompts/              theme.md, agents/<agente>.md
   models/               index.json + <id>.xml: i programmi MarkovJunior di ogni cosa (ADR-0041), uno per tipo
   modules/<id>/         manifest.json (+ logic.lua): sistemi, terreni, ambienti, pacchetti di oggetti, mobili, persone,
@@ -262,6 +264,13 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   (`seedLua` → `Sandbox.seed`); `math.randomseed()` senza argomenti vale 0; il kernel tira da `rngFor(...sale)`, i nomi unici dal tempo
   del mondo (`worldStamp`). L'orologio solo fuori dalla simulazione (registro, consumi, commit, guasti, misure, schermi).
   Due kernel con lo stesso universo e lo stesso input arrivano allo stesso stato (`tests/determinism.test.ts`).
+- **Chi paga e le carte** (ADR-0056, T36): ogni chiamata ha un `chi` (un viandante o `comune`): lo mette il Concilio con la
+  politica di `payerOf` (`src/kernel/cards.ts`: comuni Genesi, sessioni, trame, revisioni, dialoghi tra persone, modelli che mancano,
+  pacchetti; il resto è del viandante che agisce), un `chi` esplicito vince; `world/consumi.json → paganti`. Ogni contenuto generato
+  porta `carta {autore, pagante, titolare}` (moduli, oggetti, ambienti, incantesimi, ricette, modelli, persone, trame, regole giudicate,
+  piani dei luoghi): i punti che creano contenuti committano con `commitContent`, che timbra ciò che il cambio porta (`stampFiles`); il
+  titolare delle comuni è un viandante estratto col seme (`titolareOf`). Gli utilizzi (`luoghi trame prompt`) e le carte dei luoghi in
+  `world/carte.json` (`CardLedger`, scritto prima di ogni commit); la collezione: `kernel.cardsOf(id)`, `collectionOf`.
 - **Sala del Concilio e studi** (ADR-0027): tavolo rotondo con l'universo che gira, gli otto membri seduti (con lo Scultore),
   teletrasporti verso le sale e ritorno, schermi della storia, stile neon punk; atlante navigabile.
 - **Vita degli NPC** (ADR-0024): attività visibili (`attivita {tipo, ferma}`), dialoghi tra persone,

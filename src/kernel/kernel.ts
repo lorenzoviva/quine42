@@ -8,7 +8,7 @@ import { Faults } from './faults';
 import { Sandbox, type Host } from './sandbox';
 import { apiErrors, describeEffect, repairPartita, validateEffects, Validator } from './validator';
 import { deathLevel, fallbackDeath, type DeathVerdict } from './partita';
-import { Repo, type KeyValueStore } from './repo';
+import { Repo, type Commit, type KeyValueStore } from './repo';
 import { Corona, campusModel, cellNear, folderOf, type CoronaCell, type Exhibit, type ShowcaseSource, type StudioItem } from './corona';
 import { Archive } from './archive';
 import { bibleBreaks, cleanBible, metaBreak } from './fourthwall';
@@ -47,7 +47,8 @@ import { BENCH, cleanCases, runCase, textKey, type BenchEntry, type BenchRun, ty
 import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Identity } from './agents/content';
 import { addItem, CARRY_CAPACITY, countItem, equippedItem, moveSlot, newInventory, putSlot, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
 import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH } from './relief';
-import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, SOLO, validWandererId, WANDERER_NAME, wandererOf, type Wanderer, type WandererState } from './wanderers';
+import { CardLedger, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, payerOf, placeCardId, stampFiles, titolareOf, type Card, type Carta } from './cards';
+import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, SOLO, validWandererId, WANDERER_NAME, wandererOf, wanderersIn, type Wanderer, type WandererState } from './wanderers';
 import type { ActionDef, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Partita, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
 
 export interface Chunk {
@@ -215,6 +216,8 @@ export interface Rule {
   possibile: boolean;
   racconto: string;
   effetti?: string[];
+  /** Who judged it and who paid (T36): only the Council's judgements are cards. */
+  carta?: Carta;
 }
 
 export interface Needs {
@@ -288,6 +291,10 @@ export class Kernel {
   /** What the models cost, per day, model and task (world/consumi.json). */
   readonly usage = new UsageLedger();
   private usageWritten = -1;
+  /** The cards' uses and the places' cards (T36): world/carte.json, written before every commit. */
+  readonly cards = new CardLedger();
+  private cardsWritten = -1;
+  private cardIdsOf?: { files: FileMap; ids: Set<string> };
   /** The places the graph of the world knows (ADR-0045): planned chunks, by key. */
   private graphPlaces = new Map<string, GraphPlace>();
   private graphCache?: { files: FileMap; places: number; graph: WorldGraph };
@@ -440,8 +447,13 @@ export class Kernel {
     k.usage.load(repo.working[USAGE_FILE]);
     k.models.onCall = (r) => k.usage.record(r);
     k.usage.onChange = () => k.bus.emit('usage', k.usage);
+    // The cards (T36): who pays for every call (cards.ts), and how often every card goes into a prompt.
+    k.cards.load(repo.working);
+    k.council.payer = (task) => payerOf(task, k.wanderer().id);
+    k.council.onFocus = (ids) => k.cards.use(ids, 'prompt', (id) => k.isCard(id));
     repo.beforeCommit = () => {
       k.writeUsage();
+      k.writeCards();
       k.writeGraph();
     };
     k.applyFiles(repo.working, { reset: true });
@@ -1156,6 +1168,7 @@ export class Kernel {
     if (!this.alive(ch)) return;
     if (rec) return this.applyPlan(ch, rec.plan);
     const plan = await this.makePlan(ch);
+    this.cardPlace(ch, plan);
     await this.chunkStore.save(this.recordKey(ch), { plan });
     if (this.alive(ch)) this.applyPlan(ch, plan);
   }
@@ -1316,7 +1329,7 @@ export class Kernel {
       this.applyFiles({ ...this.repo.working });
       const dist = Math.max(Math.abs(centro[0] - here[0]), Math.abs(centro[1] - here[1]));
       const where = `${direction(centro[0] - here[0], centro[1] - here[1])}, a ${dist} luoghi da qui`;
-      const c = this.repo.commit(`cartografo: ${region.nome} (${where})`, 'agent');
+      const c = this.commitContent(`cartografo: ${region.nome} (${where})`, 'cartographer.environment', 'cartografo');
       const summary = `«${region.nome}» — ${region.descrizione.replace(/\.$/, '')}. Si trova a ${where}.${Object.keys(added).length ? ` Terreni nuovi: ${Object.values(added).map((t) => t.name).join(', ')}.` : ''}`;
       this.council.say('cartografo', 'approva', `${summary} (commit ${c.id})`, undefined, 'cartographer.environment');
       return { ok: true, summary };
@@ -1812,9 +1825,9 @@ export class Kernel {
     }
     this.council.say('arbitro', 'info', `Sessione del Concilio: ${s.assessment}${s.action !== 'nessuno' ? ` → interviene: ${s.action}${s.request ? ` («${s.request}»)` : ''}` : ''}`, undefined, 'council.session');
     if (s.action === 'oggetti') await this.growContent(`sessione del Concilio: ${s.request ?? ''}`, 12, true);
-    else if (s.action === 'abitante') await this.forgeModule(s.request ?? 'un nuovo abitante del mondo', 'agente', 'npc');
-    else if (s.action === 'cosa' && s.request) await this.forgeModule(s.request, 'agente', 'oggetto');
-    else if (s.action === 'meccanica') await this.forgeMechanic(s.request ?? 'equipaggiamento: slot per indossare e impugnare');
+    else if (s.action === 'abitante') await this.forgeModule(s.request ?? 'un nuovo abitante del mondo', 'agente', 'npc', false, COMUNE);
+    else if (s.action === 'cosa' && s.request) await this.forgeModule(s.request, 'agente', 'oggetto', false, COMUNE);
+    else if (s.action === 'meccanica') await this.forgeMechanic(s.request ?? 'equipaggiamento: slot per indossare e impugnare', COMUNE);
     return s.action;
   }
 
@@ -2553,7 +2566,7 @@ export class Kernel {
     }
     const refuse = (why: string) => {
       this.council.say('narratore', 'obietta', `fabbricare «${text}»: ${why}`, undefined, 'craft.free');
-      this.recordRule({ chiave: key, testo: `fabbricare «${text}»`, possibile: false, racconto: why });
+      this.recordRule({ chiave: key, testo: `fabbricare «${text}»`, possibile: false, racconto: why }, true, { task: 'craft.free', autore: 'narratore' });
       return { ok: false, story: why };
     };
     if (!j.possible) return refuse(j.story || 'Non si può fare.');
@@ -2576,10 +2589,10 @@ export class Kernel {
     let id = `ricetta.${slug(result.name)}`;
     while (this.content.recipes.some((r) => r.id === id)) id += '-2';
     const recipe: Recipe = { id, name: result.name, inputs, ...(tools.length ? { tools } : {}), output: { item: result.id, count: j.count } };
-    this.recordRule({ chiave: key, testo: `fabbricare «${result.name}»`, possibile: true, racconto: j.story, effetti: [`ricetta: ${inputs.map((i) => `${this.itemInfo(i.item).name} ×${i.count}`).join(' + ')}`] }, false);
+    this.recordRule({ chiave: key, testo: `fabbricare «${result.name}»`, possibile: true, racconto: j.story, effetti: [`ricetta: ${inputs.map((i) => `${this.itemInfo(i.item).name} ×${i.count}`).join(' + ')}`] }, false, { task: 'craft.free', autore: 'narratore' });
     this.writePack('modules/items.scoperte/manifest.json', { id: 'items.scoperte', name: 'Ricette scoperte', description: 'Ricette che il viandante ha inventato e che il Concilio ha giudicato possibili: ora sono regole del mondo.' }, { items: [], recipes: [recipe], loot: {} });
     this.applyFiles({ ...this.repo.working });
-    const c = this.repo.commit(`ricetta scoperta: ${result.name}`, 'agent');
+    const c = this.commitContent(`ricetta scoperta: ${result.name}`, 'craft.free', 'narratore');
     this.council.say('narratore', 'approva', `nuova ricetta «${result.name}»: ${inputs.map((i) => `${this.itemInfo(i.item).name} ×${i.count}`).join(' + ')}${tools.length ? ` con ${tools.map((t) => this.itemInfo(t).name).join(', ')}` : ''} (commit ${c.id})`, undefined, 'craft.free');
     this.craft(id);
     return { ok: true, story: j.story };
@@ -2888,7 +2901,7 @@ export class Kernel {
     const next = addPerson(readPeople(this.files), { nome, tipo: entry.manifest.id, specie: this.speciesOf(entry.manifest.id) ?? 'persona', genere: gender, mestiere: 'bambino', eta: 'neonato', famiglia: identity.family!, routine: identity.routine!, origine: origin, persona: identity.persona, aspetto: identity.look }, (t) => this.speciesOf(t));
     this.repo.write('world/people.json', JSON.stringify(next, null, 2) + '\n');
     this.applyFiles({ ...this.repo.working });
-    this.repo.commit(`nascita: ${nome}, ${child_} di ${parent.name} e ${ofOther}`, 'agent');
+    this.commitContent(`nascita: ${nome}, ${child_} di ${parent.name} e ${ofOther}`, 'npc.birth', 'narratore');
     this.rememberWanderer(parent.name, `è ${gender === 'femmina' ? 'nata nostra figlia' : 'nato nostro figlio'}, ${nome}`, 3);
     this.message(`È ${gender === 'femmina' ? 'nata' : 'nato'} ${nome}!`, 'good');
     this.council.say('narratore', 'approva', `nasce ${nome}, ${child_} di ${parent.name} e ${ofOther}`, undefined, 'npc.birth');
@@ -3023,7 +3036,7 @@ export class Kernel {
     const pays = v.effects.some((e) => e.tipo === 'consuma') || !!need;
     // A rule of the model is already in every menu of the kind: the rest happened this once.
     const learn = j.possible && !shaped && lasting && (!creates || pays);
-    this.recordRule({ chiave: ruleKey, testo: `«${text}» su ${sub.name}`, possibile: j.possible && (v.effects.length > 0 || !!shaped), racconto: j.story, effetti: [...(shaped ? ['forma'] : []), ...v.effects.map((e) => e.tipo)] }, !learn);
+    this.recordRule({ chiave: ruleKey, testo: `«${text}» su ${sub.name}`, possibile: j.possible && (v.effects.length > 0 || !!shaped), racconto: j.story, effetti: [...(shaped ? ['forma'] : []), ...v.effects.map((e) => e.tipo)] }, !learn, { task: 'action.judge', autore: 'narratore' });
     if (learn) this.learnAction(sub, { id: '', label: j.label || text, requires: need?.id, effects: v.effects });
     return j.story;
   }
@@ -3052,7 +3065,9 @@ export class Kernel {
   }
 
   /** A judgement becomes a rule: written in the universe, shown to the Council in every later judgement. */
-  recordRule(r: Rule, commit = true): void {
+  recordRule(r: Rule, commit = true, card?: { task: string; autore: string }): void {
+    // A judgement of the Council is a card (T36); the facts the kernel notes (a death, a bond, a quest) are not.
+    if (card) r.carta = this.sign(`regola:${nodeSlug(r.chiave)}`, card.task, card.autore);
     const all = this.rules().filter((x) => x.chiave !== r.chiave);
     all.push(r);
     this.repo.write('world/rules.json', JSON.stringify({ regole: all.slice(-300) }, null, 2) + '\n');
@@ -3606,7 +3621,7 @@ export class Kernel {
       case 'meccanica':
         return { say: r.say, forged: (await this.forgeMechanic(req)).summary };
       case 'regola': {
-        this.recordRule({ chiave: `regola|${normName(req).slice(0, 60)}`, testo: req, possibile: true, racconto: 'stabilito dal viandante trasceso, accolto dal Concilio', effetti: ['regola'] });
+        this.recordRule({ chiave: `regola|${normName(req).slice(0, 60)}`, testo: req, possibile: true, racconto: 'stabilito dal viandante trasceso, accolto dal Concilio', effetti: ['regola'] }, true, { task: 'referente.coordinate', autore: this.wanderer().id });
         return { say: r.say, forged: `Nuova regola del mondo: ${req}` };
       }
       case 'riscolpisci': {
@@ -3817,14 +3832,14 @@ export class Kernel {
    * The Forge of mechanics: the Council adds a mechanic (equipment, a quiver, a reputation…) as a
    * system module with a panel and Lua logic; validated (panel cleaned, code compiled, dry-loaded).
    */
-  async forgeMechanic(request: string): Promise<{ ok: boolean; id?: string; summary: string }> {
+  async forgeMechanic(request: string, chi?: string): Promise<{ ok: boolean; id?: string; summary: string }> {
     const items = [...this.content.items.values()].filter((d) => d.equippable || d.slot || ['arma', 'vestiario'].includes(d.category)).map((d) => `${d.name}${d.slot ? ` [${d.slot}]` : ` (${d.category})`}${d.bonus ? ` ${JSON.stringify(d.bonus)}` : ''}`);
     const mechanics = this.uiPanels().map((p) => p.panel.titolo);
     let feedback = '';
     for (let attempt = 0; attempt < 2; attempt++) {
       let d;
       try {
-        d = await designMechanic(this.council, request, { items, mechanics, feedback });
+        d = await designMechanic(this.council, request, { items, mechanics, feedback, chi });
       } catch (e) {
         return { ok: false, summary: `L'Ingegnere non riesce: ${(e as Error).message}` };
       }
@@ -3861,7 +3876,7 @@ export class Kernel {
       // Starting components for the wanderer (e.g. a reputation at 0).
       for (const [name, data] of Object.entries(d.components ?? {})) if (data && typeof data === 'object' && !this.ecs.has(this.playerId, name) && !['player', 'hand', 'inventory', 'needs', 'pos', 'slots'].includes(name)) this.ecs.set(this.playerId, name, clone(data));
       this.applyFiles({ ...this.repo.working });
-      const c = this.repo.commit(`meccanica: ${d.name}`, 'agent');
+      const c = this.commitContent(`meccanica: ${d.name}`, 'mechanic.design', 'ingegnere', chi);
       this.council.say('ingegnere', 'approva', `nuova meccanica «${d.name}»: ${d.description} (pannello «${panel!.titolo}», commit ${c.id})`, undefined, 'mechanic.design');
       return { ok: true, id, summary: `Nuova meccanica: ${d.name} — ${d.description} (la trovi nell'inventario, scheda «${panel!.titolo}»).` };
     }
@@ -4086,7 +4101,7 @@ export class Kernel {
     man.spells = { ...(man.spells ?? {}), [seq.join(' ')]: spell };
     this.repo.write(path, JSON.stringify(man, null, 2) + '\n');
     this.applyFiles({ ...this.repo.working });
-    const c = this.repo.commit(`incantesimo: ${seq.join(' ')} → ${spell.name}`, 'agent');
+    const c = this.commitContent(`incantesimo: ${seq.join(' ')} → ${spell.name}`, 'spell.name', 'narratore');
     this.council.say('narratore', 'propone', `${seq.join(' ')} → «${spell.name}»: ${spell.description} [${spell.effects.map((e) => e.tipo).join(', ')}] (commit ${c.id})`, undefined, 'spell.name');
     return spell;
   }
@@ -4256,7 +4271,7 @@ export class Kernel {
       const next = addPerson(readPeople(this.files), person, (t) => this.speciesOf(t));
       this.repo.write('world/people.json', JSON.stringify(next, null, 2) + '\n');
       this.applyFiles({ ...this.repo.working });
-      this.repo.commit(`persone: ${identity.name}, ${person.mestiere}`, 'agent');
+      this.commitContent(`persone: ${identity.name}, ${person.mestiere}`, 'npc.individuate', 'narratore');
       // Relatives already met learn about the newcomer too (and the newcomer's relations may be corrected).
       for (const other of this.ecs.query('identity')) {
         const oi: Identity = this.ecs.get(other, 'identity');
@@ -4593,7 +4608,8 @@ export class Kernel {
     const plots = [...readPlots(this.files), plot];
     this.repo.write(PLOTS_FILE, writePlots(plots));
     this.applyFiles({ ...this.repo.working });
-    this.repo.commit(`trama: ${plot.titolo}`, 'agent');
+    this.commitContent(`trama: ${plot.titolo}`, 'plot.weave', 'narratore');
+    this.cards.use([...plot.coinvolti.map((n) => `persona:${nodeSlug(n)}`), ...this.graph().resolve(plot.tappe.map((t) => t.dove))], 'trame', (id) => this.isCard(id));
     this.council.say('narratore', 'propone', `nuova trama «${plot.titolo}» tra ${plot.coinvolti.join(', ')}${plot.missione ? `; ${plot.missione.da} avrà una richiesta per il viandante` : ''}`, undefined, 'plot.weave');
     return plot;
   }
@@ -4935,7 +4951,7 @@ export class Kernel {
     if (!defs.length) return [];
     this.writePack('modules/items.citati/manifest.json', { id: 'items.citati', name: 'Oggetti di cui si è parlato', description: 'Oggetti entrati nel mondo perché qualcuno ne ha parlato.' }, { items: defs, recipes: [], loot: {} });
     this.applyFiles({ ...this.repo.working });
-    this.repo.commit(`contenuti: ${defs.map((d) => d.name).join(', ')}`, 'agent');
+    this.commitContent(`contenuti: ${defs.map((d) => d.name).join(', ')}`, 'items.citati', 'narratore');
     return defs;
   }
 
@@ -4966,7 +4982,7 @@ export class Kernel {
       while (this.repo.working[`modules/items.pacco-${n}/manifest.json`]) n++;
       this.writePack(`modules/items.pacco-${n}/manifest.json`, { id: `items.pacco-${n}`, name: `Pacchetto ${n}`, description: `Oggetti scritti dal Concilio (${reason}).` }, pack);
       this.applyFiles({ ...this.repo.working });
-      const c = this.repo.commit(`contenuti: pacchetto ${n} (${pack.items.length} oggetti, ${pack.recipes.length} ricette)`, 'agent');
+      const c = this.commitContent(`contenuti: pacchetto ${n} (${pack.items.length} oggetti, ${pack.recipes.length} ricette)`, 'content.items', 'narratore');
       this.council.say('kernel', 'approva', `pacchetto ${n}: ${pack.items.length} oggetti, ${pack.recipes.length} ricette, ${Object.keys(pack.loot).length} tabelle → commit ${c.id}`);
       return true;
     } catch (e) {
@@ -5047,12 +5063,15 @@ export class Kernel {
   // --- The Forge and Genesis ---------------------------------------------------------------------
 
   /** Forges a module through the Council, then validates, commits and hot loads it; the Sculptor gives it a model. */
-  async forgeModule(prompt: string, origin: ForgeOrigin, kind?: 'npc' | 'oggetto' | 'strumento', permissive = false): Promise<{ ok: boolean; id?: string; summary: string }> {
+  async forgeModule(prompt: string, origin: ForgeOrigin, kind?: 'npc' | 'oggetto' | 'strumento', permissive = false, chi?: string): Promise<{ ok: boolean; id?: string; summary: string }> {
+    // The Genesis is the world's; what the wanderer who transcended asks is theirs, and they wrote it (T36).
+    if (origin === 'genesi') chi = COMUNE;
+    const autore = permissive ? this.wanderer().id : 'narratore';
     const ids = [...this.modules.keys()];
     try {
       const r = await forge(
         this.council,
-        { prompt, origin, kind, existingIds: ids, paletteCodes: Object.keys(this.palette).filter((c) => c !== '?' && !this.palette[c].solid), permissive, existingNames: [...this.modules.values()].filter((m) => m.manifest.kind === 'entity' || m.manifest.kind === 'item').map((m) => m.manifest.name) },
+        { prompt, origin, kind, chi, existingIds: ids, paletteCodes: Object.keys(this.palette).filter((c) => c !== '?' && !this.palette[c].solid), permissive, existingNames: [...this.modules.values()].filter((m) => m.manifest.kind === 'entity' || m.manifest.kind === 'item').map((m) => m.manifest.name) },
         (m, logic) => this.validator.validateForged(m, logic, new Set(ids)),
       );
       // What a character carries: existing items by name, new ones defined by the Narrator.
@@ -5067,7 +5086,7 @@ export class Kernel {
       this.repo.write(`${dir}logic.lua`, r.logic.endsWith('\n') ? r.logic : r.logic + '\n');
       this.recordInBible(r.manifest);
       this.applyFiles({ ...this.repo.working });
-      const c = this.repo.commit(`${origin}: ${r.summary}`, 'agent');
+      const c = this.commitContent(`${origin}: ${r.summary}`, 'forge.concept', autore, chi);
       this.log('agent', `${r.summary} (commit ${c.id})`);
       this.council.say('kernel', 'approva', `${r.summary} → validato, commit ${c.id}, caricato a caldo`);
       this.bus.emit('forge:done', { id: r.id, summary: r.summary });
@@ -5244,6 +5263,7 @@ export class Kernel {
       onProgress?.('Il Concilio si riunisce');
       const plan = await planGenesis(this.council, theme, this.repo.working, (id, def, palette) => this.validator.validateLayout(id, def, palette, this.sampleDrafts()));
       for (const [p, src] of Object.entries(plan.files)) this.repo.write(p, src);
+      this.stampContent('genesis.layouts', 'cartografo', COMUNE);
       // Example content shipped on disk makes room for the generated world.
       for (const m of this.modules.values()) {
         if (m.manifest.origin !== 'esempio') continue;
@@ -5282,7 +5302,7 @@ export class Kernel {
       this.applyFiles({ ...this.repo.working });
       this.clearChunks();
       const title = readBible(this.repo.working)?.titolo ?? 'nuovo universo';
-      const c = this.repo.commit(`genesi: ${title}`, 'agent');
+      const c = this.commitContent(`genesi: ${title}`, 'genesis.cast', 'narratore', COMUNE);
       this.council.say('kernel', 'approva', `Genesi completata: «${title}», ${done} moduli, ${this.content.items.size} oggetti, ${Object.keys(this.content.layouts).length} ambienti, commit ${c.id}.`);
       this.bus.emit('genesis:done', { title });
       return true;
@@ -5409,10 +5429,79 @@ export class Kernel {
     this.files = { ...this.files, [USAGE_FILE]: this.repo.working[USAGE_FILE]! };
   }
 
+  /** Puts the cards' ledger in the working files when it changed (T36). */
+  private writeCards(): void {
+    if (this.cards.version === this.cardsWritten || !this.repo) return;
+    this.cardsWritten = this.cards.version;
+    this.repo.write(CARDS_FILE, this.cards.toJson());
+    this.files = { ...this.files, [CARDS_FILE]: this.repo.working[CARDS_FILE]! };
+  }
+
+  // --- The cards (T36) -----------------------------------------------------------------------
+
+  /** Stamps the content the working files bring against the last commit (cards.ts, stampFiles). */
+  private stampContent(task: string, autore: string, chi?: string): void {
+    const changed = stampFiles(this.repo.working, this.repo.head().files, (id) => this.sign(id, task, autore, chi));
+    if (!Object.keys(changed).length) return;
+    for (const [p, src] of Object.entries(changed)) this.repo.write(p, src);
+    this.files = { ...this.files, ...changed };
+  }
+
+  /** A commit of generated content: what it brings becomes cards of whoever pays for the task. */
+  private commitContent(message: string, task: string, autore: string, chi?: string): Commit {
+    this.stampContent(task, autore, chi);
+    return this.repo.commit(message, 'agent');
+  }
+
+  /** A place planned for the first time: its card, and one use of every card it holds (T36). */
+  private cardPlace(ch: Chunk, plan: ChunkPlan): void {
+    plan.carta ??= this.sign(placeCardId(ch.cx, ch.cy), 'chunk.plan', 'cartografo');
+    this.cards.addPlace(`${ch.cx}_${ch.cy}`, plan.place.name, plan.carta);
+    const ids = [`ambiente:${nodeSlug(plan.layout)}`];
+    for (const o of plan.objects) ids.push(...this.thingCards(o.module));
+    for (const n of plan.ground) {
+      const d = this.content.byName(n);
+      if (d) ids.push(...this.thingCards(d.id));
+    }
+    for (const s of plan.strutture ?? []) ids.push(`modello:${nodeSlug(`struttura-${ownModelId(s.concetto).slice(0, 30)}`)}`);
+    this.cards.use(ids, 'luoghi', (id) => this.isCard(id));
+  }
+
+  /** The cards a thing in a place stands for: its module or item, and its model. */
+  private thingCards(id: string): string[] {
+    const m = this.modules.get(id)?.manifest;
+    if (m) return [moduleCardId(m), ...(m.appearance?.model ? [`modello:${nodeSlug(m.appearance.model)}`] : [])];
+    const d = this.content.get(id);
+    return d ? [`oggetto:${nodeSlug(d.id)}`, ...(d.model ? [`modello:${nodeSlug(d.model)}`] : [])] : [];
+  }
+
+  /**
+   * Who wrote and who pays for a piece of content made now by a task, and whose card it is: the payer, or for
+   * what the world pays one of the wanderers, drawn with the seed. `chi` overrides the task's payer.
+   */
+  sign(cardId: string, task: string, autore: string, chi?: string): Carta {
+    const pagante = chi ?? payerOf(task, this.wanderer().id);
+    const all = [...new Set([...this.wanderers().map((w) => w.id), ...wanderersIn(this.files).map((w) => w.id)])];
+    return { autore, pagante, titolare: titolareOf(cardId, pagante, all.length ? all : [SOLO], this.config?.seed ?? 0) };
+  }
+
+  /** Whether an id (of the graph's kind) is a card of this universe. */
+  isCard(id: string): boolean {
+    if (id.startsWith('luogo:')) return this.cards.hasPlace(id.slice(6));
+    if (this.cardIdsOf?.files !== this.files) this.cardIdsOf = { files: this.files, ids: new Set(allCards(this.files).map((c) => c.id)) };
+    return this.cardIdsOf.ids.has(id);
+  }
+
+  /** Every card of the universe, with its uses; with an id, that wanderer's collection. */
+  cardsOf(wanderer?: string): Card[] {
+    const files = { ...this.files, [CARDS_FILE]: this.cards.toJson() };
+    return wanderer === undefined ? allCards(files) : collectionOf(files, wanderer);
+  }
+
   /** On leaving: the spending of this session goes into the universe even if nothing else changed. */
   saveUsage(): boolean {
     // Only valid states are committed: with a fault the ledger waits for the next valid commit.
-    if (this.usage.version === this.usageWritten || this.faults.size) return false;
+    if ((this.usage.version === this.usageWritten && this.cards.version === this.cardsWritten) || this.faults.size) return false;
     this.repo.commit('consumi dei modelli', 'kernel');
     return true;
   }

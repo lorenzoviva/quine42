@@ -869,7 +869,7 @@ le risposte alle domande del piano.
   `sys.wander` e il fuoco usano `hash` e `time`); anche il `MockModels` tirava a caso i nomi degli individui (ora da un
   contatore); l'orologio resta, documentato, in ciò che non è simulazione (registro, consumi, guasti, misure, scadenze di MJ).
 
-### T36 · Chi ha generato ogni contenuto (carte, P#2) — `da fare`
+### T36 · Chi ha generato ogni contenuto (carte, P#2) — `in corso`
 - Contesto: decisioni 4 e 6. Ogni chiamata ha un `chi` (il giocatore) o è comune; ogni contenuto generato ha autore e
   pagante e un contatore di utilizzi.
 - Fare: `chi` nel registro dei consumi (`ai/usage.ts`, `world/consumi.json`), con le chiamate del Concilio per il mondo

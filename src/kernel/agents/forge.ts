@@ -29,6 +29,8 @@ export interface ForgeRequest {
   permissive?: boolean;
   /** Names of the modules that exist: no duplicates. */
   existingNames?: string[];
+  /** Who pays (T36): the world (`comune`) for the Genesis and the Council's sessions; default the Council's policy. */
+  chi?: string;
 }
 
 export interface Concept {
@@ -274,7 +276,7 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
         .filter(Boolean)
         .join('\n'),
       CONCEPT_SCHEMA,
-      { data },
+      { data, chi: req.chi },
     );
   const askPhysics = (concept: Concept, feedback = '') =>
     c.ask<PhysicsSpec>(
@@ -288,7 +290,7 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
         .filter(Boolean)
         .join('\n'),
       PHYSICS_SCHEMA,
-      { data: { ...data, concept } },
+      { chi: req.chi, data: { ...data, concept } },
     );
   const askCode = (concept: Concept, physics: PhysicsSpec, feedback = '') =>
     c.ask<CodeSpec>(
@@ -303,7 +305,7 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
         .filter(Boolean)
         .join('\n'),
       CODE_SCHEMA,
-      { data: { ...data, concept, physics }, temperature: 0.3 },
+      { chi: req.chi, data: { ...data, concept, physics }, temperature: 0.3 },
     );
 
   let concept = await askConcept();
@@ -340,7 +342,7 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
     'forge.review',
     `${req.permissive ? 'Il viandante è trasceso: è un membro del Concilio. Accogli la sua richiesta come vuole lui; rifiuta solo ciò che distruggerebbe l’universo, lui stesso o le leggi del gioco. Non obiettare sull\'idea in sé: solo su incoerenze tecniche che romperebbero il gioco.\n' : ''}Verifica la coerenza tra narrativa, aspetto, fisica e codice di questo modulo. Segnala solo incoerenze concrete, indicando l'agente responsabile.\nConcetto:\n${JSON.stringify(concept, null, 1)}\nFisica:\n${JSON.stringify(physics)}\nlogic.lua:\n${code.logic}`,
     REVIEW_SCHEMA,
-    { data: { ...data, concept, physics, code }, temperature: 0.2 },
+    { chi: req.chi, data: { ...data, concept, physics, code }, temperature: 0.2 },
   );
   if (review.approvato || !review.problemi?.length) c.say('arbitro', 'approva', `«${concept.nome}» è coerente.`);
   else {
