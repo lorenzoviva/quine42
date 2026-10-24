@@ -83,6 +83,15 @@ persone, Claude Code e Gemini CLI). Design originale in [docs/design.md](docs/de
 - Matrix
 - Westworld
 - The Trueman Show
+- The Hitchhiker's Guide to the Galaxy
 - Project Zomboid
 - Cyberpunk 
 - Dungeons & Dragons
+
+## Licenza
+
+Questo progetto è rilasciato sotto licenza source-available non-commerciale:
+- **Codice sorgente**: [PolyForm Noncommercial License 1.0.0](LICENSE.md)
+- **Asset, mondo, modelli 3D e testi**: [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)](LICENSE.md)
+
+Il codice è aperto: chiunque può leggerlo, imparare, compilarlo, fare Pull Request e giocarci in locale con la propria API key di Google Gemini. È fatto divieto assoluto di monetizzazione, vendita diretta o indiretta, o fornitura come servizio di hosting a pagamento. Dettagli completi in [LICENSE.md](LICENSE.md).

@@ -13,7 +13,7 @@
     "test:watch": "vitest"
   },
   "author": "lorenzoviva <lorenzo.vaccaro@hotmail.com>",
-  "license": "UNLICENSED",
+  "license": "PolyForm-Noncommercial-1.0.0",
   "dependencies": {
     "three": "^0.186.1",
     "wasmoon": "^1.16.0"
