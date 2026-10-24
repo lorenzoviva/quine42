@@ -16,7 +16,7 @@ import { floors, footprint, meshVoxels, type MeshData } from '../../src/mj/mesh'
 import type { BuildRequest, BuildResponse, Built } from './worker';
 import { makeLand, plan, type Land } from './world';
 import { Bloom } from '../../src/render/bloom';
-import { glowing } from '../../src/render/materials';
+import { addGlow, glowing } from '../../src/render/materials';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -84,8 +84,8 @@ scene.add(sun, sun.target);
 const uTime = { value: 0 };
 const uWind = { value: 0.05 };
 const matStatic = glowing(new THREE.MeshLambertMaterial({ vertexColors: true }), 'lab');
-/** Vegetation: the vertices move with the wind, more at the top (the `sway` attribute). */
-const matSway = new THREE.MeshLambertMaterial({ vertexColors: true });
+/** Vegetation: the vertices move with the wind, more at the top (the `sway` attribute), and glow voxels bloom. */
+const matSway = glowing(new THREE.MeshLambertMaterial({ vertexColors: true }), 'sway');
 matSway.onBeforeCompile = (sh) => {
   sh.uniforms.uTime = uTime;
   sh.uniforms.uWind = uWind;
@@ -97,8 +97,9 @@ matSway.onBeforeCompile = (sh) => {
     transformed.x += sway * uWind * (sin(ph) + 0.35 * sin(ph * 2.3 + 1.0));
     transformed.z += sway * uWind * 0.45 * cos(ph * 0.8);`,
   );
+  addGlow(sh);
 };
-matSway.customProgramCacheKey = () => 'sway';
+matSway.customProgramCacheKey = () => 'glow-sway';
 /** Structures: cut away above the head when the wanderer is inside. */
 const cut = new THREE.Plane(new THREE.Vector3(0, -1, 0), 1000);
 const matCut = glowing(new THREE.MeshLambertMaterial({ vertexColors: true, clippingPlanes: [cut] }), 'lab-cut');
@@ -248,6 +249,10 @@ function place(a: Asset, x: number, z: number, yaw: number): Thing {
   if (e.id === 'falo') {
     t.light = new THREE.PointLight(0xff9a40, 0, 7, 1.6);
     t.light.position.set(0, 0.5, 0);
+    root.add(t.light);
+  } else if (e.id === 'corona-albero-luce') {
+    t.light = new THREE.PointLight(0x00ffff, 0, 8, 1.8);
+    t.light.position.set(0, 1.5, 0);
     root.add(t.light);
   }
   root.traverse((o) => (o.userData.thing = t));
@@ -585,7 +590,7 @@ function light() {
   const bg = day > 0.25 ? sky.day.clone() : day > 0 ? sky.dusk.clone().lerp(sky.day, day * 4) : sky.night.clone().lerp(sky.dusk, Math.max(0, 1 + elev * 4));
   scene.background = bg;
   scene.fog = new THREE.Fog(bg, 30, 70);
-  for (const t of things) if (t.light) t.light.intensity = (day > 0.3 ? 0.8 : 3.5) * (0.85 + 0.15 * Math.sin(uTime.value * 13 + Math.sin(uTime.value * 7)));
+  for (const t of [...things, ...(showcase ? [showcase] : [])]) if (t.light) t.light.intensity = (day > 0.3 ? 0.8 : 3.5) * (0.85 + 0.15 * Math.sin(uTime.value * 13 + Math.sin(uTime.value * 7)));
 }
 
 // ------------------------------------------------------------------ the loop

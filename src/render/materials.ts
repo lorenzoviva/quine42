@@ -20,7 +20,7 @@ export const U = {
  * Glowing voxels in a shader: the `glow` attribute (0 where a geometry has none) adds the vertex colour to
  * the emitted light and marks the pixel for the bloom. `always`: the whole material glows (neon edges).
  */
-function addGlow(sh: THREE.WebGLProgramParametersWithUniforms, always = false): void {
+export function addGlow(sh: THREE.WebGLProgramParametersWithUniforms, always = false): void {
   sh.uniforms.uGlow = U.glow;
   sh.uniforms.uGlowMask = U.glowMask;
   const g = always ? '1.0' : 'vGlow';
