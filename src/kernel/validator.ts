@@ -3,7 +3,8 @@
 // validated against: the player is allowed to break the game.
 
 import type { Sandbox } from './sandbox';
-import type { Effect, FileMap, ItemDef, LayoutDef, Manifest, ModuleKind, TileDef } from './types';
+import type { Effect, FileMap, ItemDef, LayoutDef, Manifest, ModuleKind, Partita, TileDef } from './types';
+import { DEATH_LEVELS, DEFAULT_PARTITA } from './partita';
 import { ITEM_CATEGORIES } from './types';
 import type { ChunkPlan } from './agents/cartography';
 import { lex, TOKEN_RE, tokenize } from './runes';
@@ -18,6 +19,32 @@ import { runMjx } from '../mj/run';
 const KINDS: ModuleKind[] = ['system', 'entity', 'item', 'player', 'generator', 'data'];
 const LAYERS = ['ground', 'floor', 'wall', 'door', 'liquid', 'vegetation', 'rock'];
 const ID_RE = /^[a-z][a-z0-9-]*(\.[a-z0-9-]+)+$/;
+/**
+ * The game of universe.json (ADR-0053), whatever it says: an unknown mode is single, the death a level
+ * from 0 to 4 (the words of the plan, «molto» / «poco punitiva», or a level name, become one), the rest
+ * booleans; what is missing is the game of today.
+ */
+export function repairPartita(raw: unknown): Partita {
+  const r = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+  const flag = (v: unknown, d: boolean) => (typeof v === 'boolean' ? v : v === 'sì' || v === 'si' || v === 'true' ? true : v === 'no' || v === 'false' ? false : d);
+  let morte = DEFAULT_PARTITA.morte;
+  if (typeof r.morte === 'number' && Number.isFinite(r.morte)) morte = Math.max(0, Math.min(DEATH_LEVELS.length - 1, Math.round(r.morte)));
+  else if (typeof r.morte === 'string') {
+    const t = r.morte.trim().toLowerCase();
+    const named = DEATH_LEVELS.findIndex((l) => l.nome === t);
+    if (named >= 0) morte = named;
+    else if (/^\d$/.test(t)) morte = Math.min(DEATH_LEVELS.length - 1, Number(t));
+    else if (/\bmolto\b/.test(t)) morte = 4;
+    else if (/\bpoco\b/.test(t)) morte = 1;
+  }
+  return {
+    modalita: r.modalita === 'multigiocatore' ? 'multigiocatore' : 'singola',
+    morte,
+    pvp: flag(r.pvp, DEFAULT_PARTITA.pvp),
+    altroTraGiocatori: flag(r.altroTraGiocatori, DEFAULT_PARTITA.altroTraGiocatori),
+  };
+}
+
 /** Ids of the models of the library (`models/<id>.xml`). */
 export const MODEL_RE = /^[a-z0-9][a-z0-9-]{0,40}$/;
 

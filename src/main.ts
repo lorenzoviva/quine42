@@ -117,13 +117,15 @@ async function main() {
   const graph = new GraphPanel(kernel);
   // Death: the session ends; continue in the same universe or start again from the seed.
   const deathEl = $('#death');
-  kernel.bus.on('ui:death', ({ cause }: { cause: string }) => {
+  kernel.bus.on('ui:death', ({ cause, punizione }: { cause: string; punizione: { nome: string; testo: string } }) => {
     const again = document.createElement('button');
     again.className = 'primary';
     again.textContent = 'Continua in questo universo';
-    again.onclick = () => {
+    again.onclick = async () => {
+      // The Narrator decides what the punishment takes: wait for the verdict.
+      again.disabled = true;
+      await kernel.continueAfterDeath();
       deathEl.hidden = true;
-      kernel.continueAfterDeath();
       syncFocus();
     };
     const restart = document.createElement('button');
@@ -144,10 +146,13 @@ async function main() {
     const why = document.createElement('div');
     why.className = 'why';
     why.textContent = cause === 'sete' ? 'La sete ti ha vinto. La strada era lunga e i pozzi lontani.' : cause === 'fame' ? 'La fame ti ha vinto. Le dispense erano vuote, i campi lontani.' : 'Le ferite ti hanno vinto.';
+    const cost = document.createElement('div');
+    cost.className = 'why';
+    cost.textContent = `In questo universo la morte è ${punizione.nome}: ${punizione.testo}.`;
     const row = document.createElement('div');
     row.className = 'row';
     row.append(again, restart);
-    deathEl.replaceChildren(t, why, row);
+    deathEl.replaceChildren(t, why, cost, row);
     deathEl.hidden = false;
     syncFocus();
   });

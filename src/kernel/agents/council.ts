@@ -7,6 +7,8 @@ import { parseJson, type Models, type Schema, type Thinking } from '../ai/models
 import { COUNCIL_PRINCIPLES } from '../fourthwall';
 import type { FileMap, MagicRune, Spell, TileDef } from '../types';
 import type { WorldGraph } from '../graph';
+import { partitaSummary } from '../partita';
+import { repairPartita } from '../validator';
 
 export type AgentId = 'narratore' | 'cartografo' | 'artista' | 'scultore' | 'fisico' | 'ingegnere' | 'arbitro' | 'referente';
 
@@ -163,6 +165,17 @@ export function canonSummary(files: FileMap): string {
     .join('\n\n');
 }
 
+/** The game chosen before the Genesis (universe.json → partita), as a principle of the Council (ADR-0053). */
+export function gameSummary(files: FileMap): string {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(files['universe.json'] ?? '{}').partita;
+  } catch {
+    raw = undefined;
+  }
+  return partitaSummary(repairPartita(raw));
+}
+
 export function catalogSummary(catalog: CatalogEntry[]): string {
   return catalog.map((m) => `- ${m.id} «${m.name}» [${m.kind}] terreni ${m.tiles.join('') || '-'}: ${m.context}`).join('\n');
 }
@@ -203,6 +216,8 @@ export class Council {
     const rules = rulesSummary(v.files);
     // The rune canon goes with every narrative task (the Narrator's and the Arbiter's).
     const canon = agent === 'narratore' || agent === 'arbitro' ? canonSummary(v.files) : '';
+    // The game chosen at the Genesis goes to whoever builds on it: stories, coherence, mechanics, requests.
+    if (agent === 'narratore' || agent === 'arbitro' || agent === 'ingegnere' || agent === 'referente') parts.push(gameSummary(v.files));
     switch (agent) {
       case 'narratore':
         if (focused) parts.push(`## Il mondo\n${bibleHead(bible)}`);

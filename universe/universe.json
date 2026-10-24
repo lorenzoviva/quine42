@@ -4,6 +4,12 @@
   "theme": "prompts/theme.md",
   "circleRadius": 44,
   "chunkSize": 18,
+  "partita": {
+    "modalita": "singola",
+    "morte": 3,
+    "pvp": false,
+    "altroTraGiocatori": true
+  },
   "ai": {
     "textModel": "gemini-3.1-flash-lite",
     "maxText": 800,

@@ -260,3 +260,47 @@ export async function councilSession(c: Council, summary: string): Promise<{ ass
   const action = (['nessuno', 'oggetti', 'abitante', 'cosa', 'meccanica'] as const).find((a) => a === r.intervento) ?? 'nessuno';
   return { assessment: String(r.valutazione ?? ''), action, request: r.richiesta ? String(r.richiesta).slice(0, 200) : undefined };
 }
+
+export interface DeathContext {
+  cause: string;
+  /** The level chosen at the Genesis (0-4) and what it means. */
+  level: number;
+  punishment: string;
+  carried: Array<{ name: string; count: number }>;
+  states: string[];
+  place: string;
+}
+
+/** The effects death may use: it takes away, it never gives. */
+export const DEATH_EFFECTS = ['messaggio', 'bisogni', 'consuma', 'togli_stato', 'stato'] as const;
+
+const DEATH_SCHEMA: Schema = {
+  type: 'OBJECT',
+  properties: {
+    racconto: { type: 'STRING', description: 'come il viandante torna alla vita, 1-2 frasi, seconda persona' },
+    perde_tutto: { type: 'BOOLEAN', description: 'vero se perde tutto ciò che porta e ogni condizione' },
+    ripartenza: { type: 'STRING', enum: ['qui', 'piazza'], description: 'dove riapre gli occhi: dove è caduto o nella piazza' },
+    effetti: { type: 'ARRAY', items: EFFECT_SCHEMA },
+  },
+  required: ['racconto', 'perde_tutto', 'ripartenza', 'effetti'],
+};
+
+/**
+ * The wanderer died: the Narrator turns the punishment chosen at the Genesis into what is lost and where
+ * they wake up, with the effects that take away (the kernel validates them and gives back fresh needs).
+ */
+export async function judgeDeath(c: Council, ctx: DeathContext): Promise<{ story: string; loseAll: boolean; restart: 'qui' | 'piazza'; effects: unknown[] }> {
+  const prompt = [
+    `Il viandante è morto (${ctx.cause}) a ${ctx.place || 'un luogo senza nome'}. Torna alla vita: decidi cosa gli costa.`,
+    `La punizione della morte in questo mondo è scelta per sempre: ${ctx.punishment}. Rispettala alla lettera, né più né meno.`,
+    `Porta: ${ctx.carried.map((x) => `${x.name} ×${x.count}`).join(', ') || 'niente'}. Condizioni: ${ctx.states.join(', ') || 'nessuna'}.`,
+    `"perde_tutto" toglie tutto ciò che porta e ogni condizione. Altrimenti scegli gli effetti (al massimo 6) SOLO tra: consuma {oggetto, quantita} (perde ciò che porta), togli_stato {nome}, stato {nome, velocita, durata} (una debolezza passeggera), bisogni {…} (negativi), messaggio {testo}. I bisogni tornano comunque pieni prima degli effetti.`,
+  ].join('\n\n');
+  const r = await c.ask<{ racconto?: string; perde_tutto?: boolean; ripartenza?: string; effetti?: unknown[] }>('narratore', 'player.death', prompt, DEATH_SCHEMA, { data: ctx, temperature: 0.4 });
+  return {
+    story: String(r.racconto ?? '').slice(0, 300),
+    loseAll: !!r.perde_tutto,
+    restart: r.ripartenza === 'qui' ? 'qui' : 'piazza',
+    effects: (Array.isArray(r.effetti) ? r.effetti : []).filter((e) => (DEATH_EFFECTS as readonly string[]).includes(String((e as { tipo?: unknown })?.tipo))),
+  };
+}

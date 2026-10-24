@@ -8,6 +8,7 @@ import { tokenize } from '../runes';
 import type { PlanContext } from '../agents/cartography';
 import type { Concept, ForgeRequest, PhysicsSpec } from '../agents/forge';
 import type { NpcContext } from '../agents/minds';
+import { fallbackDeath } from '../partita';
 
 const PLACES: Record<string, { nouns: string[]; descr: string[] }> = {
   forest: {
@@ -326,6 +327,11 @@ export class MockModels implements Models {
         const t = String(d.text ?? '');
         if (!carrying.length || /drago|oro|stella|magia/i.test(t)) return { possibile: false, racconto: `Con quello che hai non puoi fare ${t}.` };
         return { possibile: true, racconto: `Lavori ${carrying[0]} con pazienza.`, risultato: t.replace(/^(un|una|uno|il|la)\s+/i, '').replace(/^./, (c) => c.toUpperCase()), descrizione: `${t}, fatto a mano`, quantita: 1, ingredienti: [{ oggetto: carrying[0], quantita: 1 }], attrezzi: [] };
+      }
+      case 'player.death': {
+        // The level, literally: what the kernel does when the Narrator is silent.
+        const v = fallbackDeath(Number(d.level), Array.isArray(d.carried) ? d.carried : []);
+        return { racconto: v.story, perde_tutto: v.loseAll, ripartenza: v.restart, effetti: v.effects };
       }
       case 'spell.name': {
         // Combines what the single runes already do, a little stronger.

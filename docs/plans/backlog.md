@@ -825,15 +825,20 @@ le risposte alle domande del piano.
   criticità approvate, fasi, quattro domande nuove), ADR-0050, task T33-T45. Diverso dal previsto: in modalità singola
   il kernel può restare nel browser (cambiano solo proxy e crediti); spostarlo sul server anche lì è rimandato.
 
-### T33 · La configurazione dell'universo alla Genesi — `da fare`
-- Contesto: decisione 9 del piano. Prima della Genesi si sceglie quanto è punitiva la morte (testo libero, o «molto» /
-  «poco punitiva»), PvP sì/no, «Altro…» tra giocatori sì/no, e la modalità (singola / multigiocatore). Sono definitive.
+### T33 · La configurazione dell'universo alla Genesi — `fatto`
+- Contesto: decisione 9 del piano. Prima della Genesi si sceglie quanto è punitiva la morte (uno slider da 0 a 4),
+  PvP sì/no, «Altro…» tra giocatori sì/no, e la modalità (singola / multigiocatore). Sono definitive.
 - Fare: una sezione `partita` in `universe.json` (`modalita`, `morte`, `pvp`, `altroTraGiocatori`) con i valori di oggi
   come predefiniti; la schermata della Genesi (`src/ui/genesis.ts`) la chiede; il validatore la ripara; la punizione
   della morte va al Concilio come principio (con `canonSummary` o accanto ai principi di `fourthwall.ts`) e `kernel.die`
   la passa al Narratore, che decide cosa si perde e dove si riparte (effetti esistenti). Nessuna UI per cambiarla dopo.
 - Fatto quando: test offline (due universi con punizioni diverse → richieste diverse al Narratore; il campo non si
   cambia dopo la Genesi), typecheck, verifica nel browser della schermata.
+- Esito: `partita` in `universe.json` (ADR-0053), `repairPartita`, `src/kernel/partita.ts` (cinque livelli: nessuna, lieve,
+  media, dura = la morte di prima, spietata), la sezione «La partita» della Genesi, la punizione nella schermata della morte,
+  `tests/partita.test.ts`. Diverso dal previsto: il principio va anche a Ingegnere e Referente (costruiscono meccaniche e
+  richieste), non solo con il canone; la ripartenza è `qui | piazza` perché «l'ultimo villaggio» non esiste ancora (da fare con
+  T43 o dopo); `continueAfterDeath` è diventata asincrona (aspetta il Narratore).
 
 ### T34 · Il viandante con un id e lo stato per giocatore — `da fare`
 - Contesto: oggi c'è un solo `playerId` e `world/stato.json` è il viandante; ricordi, legami e missioni parlano di «il

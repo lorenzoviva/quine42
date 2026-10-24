@@ -6,7 +6,8 @@ import { World, type Id } from './ecs';
 import { EventBus } from './events';
 import { Faults } from './faults';
 import { Sandbox, type Host } from './sandbox';
-import { apiErrors, describeEffect, validateEffects, Validator } from './validator';
+import { apiErrors, describeEffect, repairPartita, validateEffects, Validator } from './validator';
+import { deathLevel, fallbackDeath, type DeathVerdict } from './partita';
 import { Repo, type KeyValueStore } from './repo';
 import { Corona, campusModel, cellNear, folderOf, type CoronaCell, type Exhibit, type ShowcaseSource, type StudioItem } from './corona';
 import { Archive } from './archive';
@@ -40,13 +41,13 @@ import { designEnvironment, drawAtlas, planChunk, type ChunkPlan, type Where } f
 import { forge, judgeCombination, repairLogic, slug, type ForgeOrigin } from './agents/forge';
 import { agentReply, examine, narrate, npcDialogue, npcReply, referenteReply, weavePlot, type NpcReply, type Turn } from './agents/minds';
 import { planGenesis } from './agents/genesis';
-import { councilSession, judgeAction, judgeCraft, nameSpell } from './agents/effects';
+import { councilSession, judgeAction, judgeCraft, judgeDeath, nameSpell } from './agents/effects';
 import { cleanPanel, designMechanic } from './agents/mechanics';
 import { BENCH, cleanCases, runCase, textKey, type BenchEntry, type BenchRun, type BenchScene, type BenchShown } from './bench';
 import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Identity } from './agents/content';
 import { addItem, CARRY_CAPACITY, countItem, equippedItem, moveSlot, newInventory, putSlot, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
 import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH } from './relief';
-import type { ActionDef, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
+import type { ActionDef, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Partita, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
 
 export interface Chunk {
   cx: number;
@@ -388,6 +389,10 @@ export class Kernel {
   exitedOnce = false;
   /** The wanderer died: the session is over until they continue or start again. */
   dead = false;
+  /** What death costs this time: the Narrator's verdict, asked as soon as the wanderer dies. */
+  private deathVerdict?: Promise<DeathVerdict>;
+  /** The game chosen at the Genesis (ADR-0053): universe.json follows it, nothing else changes it. */
+  private game?: Partita;
   /** Size of the visible area in cells, set by the renderer. */
   view = { w: 32, h: 20 };
   readonly logs: LogEntry[] = [];
@@ -707,6 +712,7 @@ export class Kernel {
     const { config, error } = readConfig(files);
     if (error) this.faults.raise('universe:config', error);
     else this.faults.clear('universe:config');
+    this.keepGame(config, files);
     const radiusChanged = !this.config || this.config.circleRadius !== config.circleRadius;
     const sizeChanged = !this.config || this.config.chunkSize !== config.chunkSize || this.config.seed !== config.seed;
     this.config = config;
@@ -3515,9 +3521,49 @@ export class Kernel {
     return all.find((e) => normName(e.label) === n) ?? all.find((e) => n.includes(normName(e.label).split(' ')[0]) && normName(e.label).length >= 3) ?? all.find((e) => normName(e.label).includes(n));
   }
 
+  /** The game of this universe (universe.json → partita), chosen at the Genesis. */
+  partita(): Partita {
+    return this.config.partita;
+  }
+
+  /**
+   * The game is chosen before the Genesis and never changes after (ADR-0053): the first universe.json
+   * fixes it, a later one that says otherwise is written back; only `runGenesis` chooses a new one.
+   */
+  private keepGame(config: UniverseConfig, files: FileMap): void {
+    if (!this.game) {
+      this.game = config.partita;
+      return;
+    }
+    if (JSON.stringify(config.partita) === JSON.stringify(this.game)) return;
+    config.partita = this.game;
+    let raw: Record<string, unknown>;
+    try {
+      raw = JSON.parse(files['universe.json'] ?? '{}');
+    } catch {
+      return;
+    }
+    if (this.repo.working['universe.json'] !== undefined) this.repo.write('universe.json', JSON.stringify({ ...raw, partita: this.game }, null, 2) + '\n');
+    this.council?.say('kernel', 'scarta', "la partita (morte, modalità, PvP, «Altro…» tra giocatori) si sceglie solo alla Genesi: universe.json la tiene com'era");
+  }
+
+  /** Chooses the game of a universe that was never generated (the Genesis screen); after, it is fixed. */
+  private chooseGame(choice: Partial<Partita>): void {
+    const game = repairPartita({ ...this.partita(), ...choice });
+    let raw: Record<string, unknown>;
+    try {
+      raw = JSON.parse(this.repo.working['universe.json'] ?? '{}');
+    } catch {
+      raw = {};
+    }
+    this.game = game;
+    this.repo.write('universe.json', JSON.stringify({ ...raw, partita: game }, null, 2) + '\n');
+  }
+
   /**
    * Death: of thirst, of hunger, of wounds. The session ends; the wanderer may continue in the same
-   * universe (a new life at the starting square, the world as it is) or start again from the seed.
+   * universe or start again from the seed. What continuing costs is the punishment chosen at the Genesis,
+   * which the Narrator turns into what is lost and where one wakes up (asked now, applied on continue).
    * Who reached the corona cannot die any more.
    */
   die(cause: string): void {
@@ -3525,25 +3571,62 @@ export class Kernel {
     this.dead = true;
     this.log('kernel', `il viandante è morto (${cause})`);
     this.council.say('narratore', 'info', `il viandante è morto di ${cause}`, undefined, 'player.death');
-    this.bus.emit('ui:death', { cause });
+    this.deathVerdict = this.judgeDeath(cause);
+    this.bus.emit('ui:death', { cause, punizione: deathLevel(this.partita()) });
   }
 
-  /** A new life in the same universe: the starting square, fresh needs, the pouch; the world remembers. */
-  continueAfterDeath(): void {
+  /** What is carried, by item (the top level: what death can take). */
+  private carriedCounts(): Array<{ name: string; count: number }> {
+    const by = new Map<string, number>();
+    for (const s of this.inventory().slots) if (s) by.set(s.item, (by.get(s.item) ?? 0) + s.count);
+    return [...by].map(([id, count]) => ({ name: this.itemInfo(id).name, count }));
+  }
+
+  private async judgeDeath(cause: string): Promise<DeathVerdict> {
+    const level = this.partita().morte;
+    const carried = this.carriedCounts();
+    const d = deathLevel(this.partita());
+    try {
+      return await judgeDeath(this.council, { cause, level, punishment: `${d.nome} (${level} su 4): ${d.testo}`, carried, states: Object.keys(this.states()), place: this.placeHere()?.name ?? '' });
+    } catch (e) {
+      this.council.say('kernel', 'errore', `il Narratore tace sulla morte (${(e as Error).message}): vale la punizione alla lettera`, 'narratore', 'player.death');
+      return fallbackDeath(level, carried);
+    }
+  }
+
+  /**
+   * A new life in the same universe: fresh needs, then what the punishment takes (everything, or the
+   * effects the Narrator chose), at the square or where the wanderer fell; the world remembers.
+   */
+  async continueAfterDeath(): Promise<void> {
+    const v = (await this.deathVerdict) ?? fallbackDeath(this.partita().morte, this.carriedCounts());
+    this.deathVerdict = undefined;
     const playerMod = [...this.modules.values()].find((m) => m.manifest.kind === 'player');
     const defaults: Record<string, any> = clone(playerMod?.manifest.components ?? FALLBACK_PLAYER);
     Object.assign(this.needs() ?? {}, { ...FALLBACK_PLAYER.needs, ...(defaults.needs ?? {}), morto: false });
-    this.ecs.set(this.playerId, 'inventory', newInventory());
-    this.ecs.set(this.playerId, 'stati', {});
-    Object.assign(this.hand(), { tokens: [], sel: 0 });
-    for (const it of playerMod?.manifest.inventory ?? []) if (this.content.get(it)) this.give(it, 1);
-    Object.assign(this.playerPos(), { x: 0, y: 0 });
-    const c = this.carpet();
-    if (c) Object.assign(c, { ox: 0, oy: 0 });
+    if (v.loseAll) {
+      this.ecs.set(this.playerId, 'inventory', newInventory());
+      this.ecs.set(this.playerId, 'stati', {});
+      Object.assign(this.hand(), { tokens: [], sel: 0 });
+      for (const it of playerMod?.manifest.inventory ?? []) if (this.content.get(it)) this.give(it, 1);
+    }
+    if (v.restart === 'piazza') {
+      Object.assign(this.playerPos(), { x: 0, y: 0 });
+      const c = this.carpet();
+      if (c) Object.assign(c, { ox: 0, oy: 0 });
+    }
+    const ectx = { palette: this.palette, item: (n: string) => this.content.byName(n)?.id ?? (this.content.get(n) ? n : undefined), module: () => undefined, loot: new Set<string>() };
+    const effects = v.loseAll ? [] : validateEffects(v.effects, ectx).effects;
+    const said = effects.flatMap((e) => (e.tipo === 'messaggio' ? [e.testo] : []));
+    const out = this.applyEffects(effects.filter((e) => e.tipo !== 'messaggio'));
+    // Death takes, it never heals; but nobody wakes up dying.
+    const n = this.needs();
+    if (n && !(n.health > 10)) n.health = 10;
     this.dead = false;
+    this.council.say('narratore', 'approva', `il viandante torna alla vita: ${v.story}${effects.length ? ` [${effects.map((e) => e.tipo).join(', ')}]` : ''}${v.loseAll ? ' (perde tutto)' : ''}`, undefined, 'player.death');
     this.rememberDeath();
     this.saveState();
-    this.message('Riapri gli occhi nella piazza. È un nuovo giorno, e una nuova vita.', 'good');
+    this.message([v.story || 'Riapri gli occhi. È un nuovo giorno, e una nuova vita.', ...said, ...out].join(' '), 'good');
   }
 
   private rememberDeath(): void {
@@ -5016,10 +5099,13 @@ export class Kernel {
   }
 
   /** The Council generates a whole new universe from a theme. Constants (carpet, movement, physics, needs, runes) stay. */
-  async runGenesis(theme: string, onProgress?: (step: string) => void): Promise<boolean> {
+  async runGenesis(theme: string, onProgress?: (step: string) => void, game?: Partial<Partita>): Promise<boolean> {
     this.generationHeld = true;
     const backup = { ...this.repo.working };
+    const keptGame = this.game;
     try {
+      // The game is chosen once, for a universe that was never generated (ADR-0053).
+      if (game && this.needsGenesis()) this.chooseGame(game);
       onProgress?.('Il Concilio si riunisce');
       const plan = await planGenesis(this.council, theme, this.repo.working, (id, def, palette) => this.validator.validateLayout(id, def, palette, this.sampleDrafts()));
       for (const [p, src] of Object.entries(plan.files)) this.repo.write(p, src);
@@ -5066,6 +5152,7 @@ export class Kernel {
       return true;
     } catch (e) {
       this.council.say('kernel', 'errore', `Genesi fallita: ${(e as Error).message}`);
+      this.game = keptGame;
       this.repo.restore();
       this.applyFiles({ ...this.repo.working });
       return false;

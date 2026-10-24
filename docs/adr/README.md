@@ -57,5 +57,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0050](0050-multiplayer-server-unica-fonte.md) | Multiplayer: il server è l'unica fonte di verità (semi condivisi), modalità singola e multigiocatore, crediti e carte, master fisso in god mode, scelte definitive alla Genesi | accettato (piano) |
 | [0051](0051-ufficio-dei-luoghi-e-cartografo.md) | Lo Studio del Cartografo è l'Ufficio dei luoghi: niente edificio `cartografia`; i terreni nel campionario (da un piano loro, dopo i file), l'atlante contro la parete di fondo, il posto del Cartografo al tavolo porta lì | accettato |
 | [0052](0052-banco-della-sala-sistemi.md) | I casi dei sistemi (`Manifest.casi`) girano con il codice vero in un kernel in miniatura (`KernelOptions.bench`, `runCase` in `bench.ts`: `core.*`, i contenuti e quel sistema su una scena 5 × 5); l'Ingegnere scrive quelli delle meccaniche, il kernel tiene solo quelli in cui qualcosa cambia | accettato |
+| [0053](0053-la-partita-alla-genesi.md) | La partita (`universe.json → partita`: modalità, morte 0-4, PvP, «Altro…» tra giocatori) si sceglie alla Genesi e non cambia più; va al Concilio come principio; alla morte il Narratore decide cosa si perde e dove si riparte | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

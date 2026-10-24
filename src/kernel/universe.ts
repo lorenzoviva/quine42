@@ -2,7 +2,8 @@
 // Modules talk only through components and events; no implicit dependencies.
 
 import type { FileMap, ModuleEntry, UniverseConfig } from './types';
-import type { Validator } from './validator';
+import { repairPartita, type Validator } from './validator';
+import { DEFAULT_PARTITA } from './partita';
 
 export const DEFAULT_CONFIG: UniverseConfig = {
   name: 'universo',
@@ -11,6 +12,7 @@ export const DEFAULT_CONFIG: UniverseConfig = {
   circleRadius: 44,
   chunkSize: 18,
   ai: { textModel: 'gemini-3.1-flash-lite', maxText: 800, maxForges: 3, maxPacks: 4, maxCast: 3, thinking: 'low', timeout: 120 },
+  partita: DEFAULT_PARTITA,
 };
 
 export function readConfig(files: FileMap): { config: UniverseConfig; error?: string } {
@@ -18,7 +20,7 @@ export function readConfig(files: FileMap): { config: UniverseConfig; error?: st
   if (!src) return { config: DEFAULT_CONFIG, error: 'universe.json mancante' };
   try {
     const parsed = JSON.parse(src);
-    return { config: { ...DEFAULT_CONFIG, ...parsed, ai: { ...DEFAULT_CONFIG.ai, ...(parsed.ai ?? {}) } } };
+    return { config: { ...DEFAULT_CONFIG, ...parsed, ai: { ...DEFAULT_CONFIG.ai, ...(parsed.ai ?? {}) }, partita: repairPartita(parsed.partita) } };
   } catch (e) {
     return { config: DEFAULT_CONFIG, error: `universe.json: ${(e as Error).message}` };
   }

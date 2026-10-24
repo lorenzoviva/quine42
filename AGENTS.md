@@ -109,6 +109,7 @@ src/
     modeldirector.ts    i modelli che mancano, uno alla volta, entro `ai.maxModels`
     chunks.ts           archivio dei piani dei luoghi
     bench.ts            il banco della Sala sistemi: i casi dei sistemi in un kernel in miniatura (ADR-0052)
+    partita.ts          la partita scelta alla Genesi: livelli della morte, principio per il Concilio (ADR-0053)
     situation.ts, screens.ts  la Direzione: il tavolo della situazione e la parete di schermi (T46), funzioni pure
     chain.ts            la catena della Sala sistemi (T27a): misure di ogni sistema nel tick, stazioni
                         (bench.ts: anche il banco di prova, T27b: casi, scena, nomi dei campi)
@@ -123,7 +124,7 @@ src/
   ui/                   hud.ts (anche il diario delle missioni), inventory.ts, actions.ts, chat.ts, feed.ts, genesis.ts, editor.ts, console.ts, studio.ts, atlas.ts,
                         graph.ts + graphlayout.ts (il grafo del mondo nel Nucleo), dom.ts
 universe/
-  universe.json         nome, seme, raggio, chunk (18), modelli e budget
+  universe.json         nome, seme, raggio, chunk (18), modelli e budget, `partita` (scelta alla Genesi, ADR-0053)
   world/                bible.json (memoria del Narratore), style.md (guida di stile dei modelli), canone.md (le rune), consumi.json,
                         rules.json (regole), people.json (la società, con i ricordi), plots.json (trame),
                         atlas.json (geografia), stato.json (la partita), grafo.json (il grafo del mondo, derivato)
@@ -242,6 +243,11 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   si usa (cavallo, barca, zaino); componente `stati` del viandante.
 - **Morte e trascendenza** (ADR-0026): a salute zero la sessione finisce (continua nello stesso universo o
   ricomincia dal seme); dopo la corona non si muore e non si perde nulla.
+- **La partita** (ADR-0053, T33): `universe.json → partita` (`modalita`, `morte` 0-4, `pvp`, `altroTraGiocatori`; predefiniti:
+  singola, 3, no, sì) si sceglie nella schermata della Genesi di un universo mai generato e poi non cambia: `repairPartita` (validatore)
+  la ripara, `keepGame` riscrive un `universe.json` che dice altro. Va come principio (`gameSummary`) a Narratore, Arbitro, Ingegnere
+  e Referente. Alla morte il Narratore (`player.death`) traduce il livello (`DEATH_LEVELS`) in cosa si perde (`perde_tutto` o effetti
+  che tolgono) e dove si riparte (`qui | piazza`); `continueAfterDeath` è asincrona; senza risposta vale `fallbackDeath`.
 - **Sala del Concilio e studi** (ADR-0027): tavolo rotondo con l'universo che gira, gli otto membri seduti (con lo Scultore),
   teletrasporti verso le sale e ritorno, schermi della storia, stile neon punk; atlante navigabile.
 - **Vita degli NPC** (ADR-0024): attività visibili (`attivita {tipo, ferma}`), dialoghi tra persone,

@@ -906,7 +906,7 @@ describe('death and transcendence', () => {
     const t = k.time;
     run(k, 1);
     expect(k.time).toBe(t);
-    k.continueAfterDeath();
+    await k.continueAfterDeath();
     expect(k.dead).toBe(false);
     expect(k.needs()!.health).toBeGreaterThan(50);
     expect(countItem(k.inventory(), 'item.coltello')).toBe(0);

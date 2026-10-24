@@ -354,6 +354,19 @@ export interface UniverseConfig {
   circleRadius: number;
   chunkSize: number;
   ai: AiConfig;
+  /** Chosen before the Genesis, never changed after (ADR-0053). */
+  partita: Partita;
+}
+
+/** How the game is played in this universe: chosen before the Genesis, then fixed (ADR-0053). */
+export interface Partita {
+  modalita: 'singola' | 'multigiocatore';
+  /** How punishing death is: 0 (nothing is lost) to 4 (merciless). */
+  morte: number;
+  /** Players may hurt each other (multiplayer). */
+  pvp: boolean;
+  /** «Altro…» on another player (multiplayer). */
+  altroTraGiocatori: boolean;
 }
 
 export interface Place {
