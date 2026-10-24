@@ -825,7 +825,7 @@ le risposte alle domande del piano.
   criticità approvate, fasi, quattro domande nuove), ADR-0050, task T33-T45. Diverso dal previsto: in modalità singola
   il kernel può restare nel browser (cambiano solo proxy e crediti); spostarlo sul server anche lì è rimandato.
 
-### T33 · La configurazione dell'universo alla Genesi — `fatto`
+### T33 · La configurazione dell'universo alla Genesi — `fatto` (`5668808`)
 - Contesto: decisione 9 del piano. Prima della Genesi si sceglie quanto è punitiva la morte (uno slider da 0 a 4),
   PvP sì/no, «Altro…» tra giocatori sì/no, e la modalità (singola / multigiocatore). Sono definitive.
 - Fare: una sezione `partita` in `universe.json` (`modalita`, `morte`, `pvp`, `altroTraGiocatori`) con i valori di oggi
