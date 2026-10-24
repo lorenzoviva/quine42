@@ -840,7 +840,7 @@ le risposte alle domande del piano.
   richieste), non solo con il canone; la ripartenza è `qui | piazza` perché «l'ultimo villaggio» non esiste ancora (da fare con
   T43 o dopo); `continueAfterDeath` è diventata asincrona (aspetta il Narratore).
 
-### T34 · Il viandante con un id e lo stato per giocatore — `fatto` (COMMIT)
+### T34 · Il viandante con un id e lo stato per giocatore — `fatto` (`8df01dc`)
 - Contesto: oggi c'è un solo `playerId` e `world/stato.json` è il viandante; ricordi, legami e missioni parlano di «il
   viandante».
 - Fare: un id stabile del viandante (in singola uno solo, `io`); lo stato del giocatore in `world/giocatori/<id>.json`
