@@ -942,7 +942,7 @@ le risposte alle domande del piano.
   pre-raggruppa; il primo passo dopo l'ingresso non partiva mai (trovato nel browser, coperto dal test). Inventario, borse,
   contenitori, fabbricazione e azioni sulle caselle non sono nel protocollo: T39b.
 
-### T39b · Inventario e fabbricazione tra molti — `da fare` (dipende da T39)
+### T39b · Inventario e fabbricazione tra molti — `fatto` (`dc928a6`)
 - Contesto: ADR-0059, punto 7. Nello specchio `useSlot equipSlot equip unequip dropSlot moveSlot craft combine freeCraft
   freeItemAction itemAct takeFromContainer putIntoContainer putIntoBag takeFromBag uiAction freeTileAction openContainer`
   (`LATER` in `thin.ts`) dicono «non ancora».
@@ -950,6 +950,14 @@ le risposte alle domande del piano.
   contenitore aperto nell'esito), fabbricazione (anche libera), pannelli delle meccaniche, azioni e «Altro…» sulle caselle; il
   server le esegue come il viandante (`as`), il client mostra l'esito (ottimistico dove si può: lo slot spostato).
 - Fatto quando: test col finto trasporto per ognuno; nella scheda l'inventario si usa come in singola.
+- Esito: ADR-0059 punto 7 riscritto. Messaggi `oggetto contenitore fabbrica pannello casella` e `altro` su tasca o casella; il server li
+  esegue con `as`, controlla tasche e portata e cattura le finestre (`ui:container`, `ui:bag`): l'`esito` porta il contenitore con il
+  contenuto e la borsa da aprire, lo stato gli `slots` dei pannelli. Il client fa subito gli spostamenti (tasca, impugnare, borse,
+  contenitore, posare) e non lascia che l'inventario del server li sovrascriva finché sono in viaggio; l'inventario si ridisegna a
+  `inventory:changed`. `tests/thin.test.ts`: quattro test nuovi. Verificato nel browser con un universo di prova in multigiocatore
+  (poi tolto): raccolte e spostate delle bacche, mangiate, aperta una credenza e preso il sidro, senza errori. Diverso dal previsto:
+  impugnare e i contenitori sono ottimistici anche loro; il pannello delle meccaniche no (`on_slot` è Lua, gira solo sul server).
+  Resta in `LATER` solo `rollback` (del master, T42).
 
 ### T40 · Luoghi nuovi con il lock, a spese di chi esplora — `da fare` (dipende da T36, T38)
 - Fare: il primo che entra in un luogo nuovo lo chiede al server, che lo genera una volta (Cartografo, Scultore), lo
