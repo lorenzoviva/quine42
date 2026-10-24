@@ -902,7 +902,7 @@ le risposte alle domande del piano.
   è ancora uno solo, quindi il rollback di un giocatore riprende la sua frase ma non sposta il tappeto (arriva con T38). Nessuna verifica
   nel browser: in singola il gioco non cambia, e per provare il multigiocatore servirebbe una Genesi nuova sul disco dell'autore.
 
-### T38 · Il kernel sul server — `da fare` (dipende da T34, T35)
+### T38 · Il kernel sul server — `fatto` (`bdec7a9`)
 - Contesto: decisione 2 e «Architettura» del piano. Un processo per universo con il kernel headless, `universeStore`, il
   proxy e un WebSocket `/api/session`.
 - Fare: il kernel avviabile in Node senza DOM (come nei test) dentro il server di Vite; protocollo: ingresso (istantanea:
@@ -910,6 +910,18 @@ le risposte alle domande del piano.
   «Altro…») con esito; la posizione controllata con la collisione del kernel. Un finto trasporto per i test.
 - Fatto quando: test headless — un server e due client nello stesso processo vedono lo stesso mondo; un client che
   bara sulla velocità viene corretto.
+- Esito: `src/session/` (ADR-0058): `protocol.ts` (messaggi JSON `entra passo frase incidi pronuncia azione altro chat` →
+  `ingresso aggiorna correzione esito rifiuto`, `fakeLink`), `server.ts` (`SessionServer`: messaggi a ogni tick nell'ordine di arrivo,
+  aggiornamenti a 10 Hz di ciò che è cambiato entro 24 caselle, credito di passo di mezzo secondo, azioni a 3 caselle, chi esce salvato),
+  `client.ts` (`SessionClient`, ciò che un client sa), `host.ts` (apre un universo in multigiocatore e lo fa girare a 60 Hz);
+  `server/session.ts`: WebSocket `/api/session?universo=<nome>` (pacchetto `ws`, solo `npm run dev`); `tests/session.test.ts`.
+  Provato anche dal vero: un universo di prova, un client WebSocket di Node, ingresso con 98 file, un passo di 20 caselle corretto a 3,25,
+  lo stato di chi esce committato in `world/giocatori/` (poi l'universo di prova è stato tolto). Diverso dal previsto: perché due
+  viandanti non si muovano insieme serviva **un tappeto per viandante** già ora (`as` scambia lo scorrimento, `holdCarpet`), con
+  `core.movement`/`core.carpet` che girano per viandante e la tastiera che muove solo `io` (`inputFor`); i chunk si caricano attorno
+  a tutti. Il client manda la posizione nel mondo (spazio del tappeto), non i tasti: sul server il viandante resta fermo sul suo
+  cerchio e si sposta il suo tappeto. «Altro…» applica ciò che segue l'`await` a chi l'ha chiesto. Restano: `chi` dopo un `await` (è
+  `io`, T40), `zone` e corona del solo `io` (T41-T42), nessuna verifica nel browser (il gioco in singola non usa la sessione: T39).
 
 ### T39 · Il client sottile e gli avatar — `da fare` (dipende da T38)
 - Fare: in multigiocatore `main.ts` non crea il kernel ma un client che riceve lo stato e lo dà al renderer; predizione del
