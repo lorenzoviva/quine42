@@ -693,8 +693,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
     (`corona-gerboa-narratore`, `corona-gerboa-cartografo`, `corona-gerboa-artista`, `corona-gerboa-scultore`,
     `corona-gerboa-fisico`, `corona-gerboa-ingegnere`, `corona-gerboa-arbitro`, `corona-gerboa-referente`).
 - **T50b · Modelli di arredo urbano futuristico (MarkovJunior, 8 voxel per casella)**:
-  - *Alberi di luce neon e trasparenti*: chiome sintetiche e ramificazioni di voxel neon e traslucidi; la forma varia
-    sensibilmente in base al seme (un solo programma generativo ad alta espressività).
+  - *Alberi di luce neon e trasparenti* (`lab/mjx/models/corona-albero-luce.xml` — `fatto`, `6c3f58c`): chiome sintetiche a calice in cristalli traslucidi sfaccettati (aqua, indaco, ghiaccio) e liane penzolanti ciano luminescenti (`glow="True"`); fusto bionico slanciato in titanio con canali a fibra ottica; animazione a 8 frame stocastica (`vita`) di allungamento liane e diffrazione; glow circoscritto alle sole liane per contrasto pulito senza abbagliare.
   - *Lampioni futuristici*: forme bizzarre, geometriche o sinuose, con sorgenti luminose neon che rischiarano il viale di notte.
   - *Arredi per vicoli e prati*: panchine sintetiche, cartelli olografici di settore o totem informativi.
 - **T50c · Logistica e trasporti negli esterni (droni e trenini)**:
