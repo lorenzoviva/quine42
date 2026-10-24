@@ -972,7 +972,7 @@ le risposte alle domande del piano.
   Concilio era già solo sul server (lo specchio di T39 non ha generazione). Nessuna verifica nel browser: il gioco in singola non
   cambia, e il multigiocatore è coperto dai test col finto trasporto.
 
-### T41 · Il client del giocatore senza corona né Concilio — `fatto` (COMMIT)
+### T41 · Il client del giocatore senza corona né Concilio — `fatto` (`fdd9f42`)
 - Fare: corona, studio, pannello del Concilio, registro, console ed editor caricati solo dal master (import dinamici); il
   server non manda ai giocatori il registro del Concilio, i file dello studio né gli interni della corona; `window.rune`
   del giocatore espone solo il client.
