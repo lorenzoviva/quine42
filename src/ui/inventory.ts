@@ -35,6 +35,8 @@ export class InventoryPanel {
       if (e.target === this.root) this.close();
     });
     k.bus.on('item:picked', () => this.isOpen && this.render());
+    // In a game of many what is carried changes when the server says so (T39b).
+    k.bus.on('inventory:changed', () => this.isOpen && this.render());
     k.bus.on('ui:container', ({ id }: { id: number }) => {
       this.box = id;
       this.bagSlot = null;

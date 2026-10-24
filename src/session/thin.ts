@@ -4,14 +4,16 @@
 // fills it with what the session tells (places, things, the other wanderers, what this wanderer carries), walks
 // this wanderer at once (prediction: the carpet carries them as alone) and sends where they are; the server's
 // corrections put them back. What the wanderer does goes to the server; what can be shown at once is shown at
-// once (a thing picked up vanishes, a door opens, the inscribed phrase leaves the hand) and undone if the server
-// refuses it, or if its next update says that nothing changed.
+// once (a thing picked up vanishes, a door opens, the inscribed phrase leaves the hand, a slot moves) and undone if
+// the server refuses it, or if its next update says that nothing changed. What the wanderer carries (T39b) goes the
+// same way: pockets, bags, containers, crafting, the mechanics' panels, the actions on tiles.
 
 import type { Kernel } from '../kernel/kernel';
 import type { Id } from '../kernel/ecs';
 import type { NpcReply } from '../kernel/agents/minds';
 import type { SessionClient, Outcome } from './client';
-import type { OtherView, PlaceView, ServerMsg, ThingView } from './protocol';
+import type { ContainerView, OtherView, PlaceView, ServerMsg, ThingView } from './protocol';
+import { takeFromSlot } from '../kernel/inventory';
 import { THING_PARTS } from './protocol';
 
 /** Seconds between two steps sent (the server checks the walk at its pace; 20 a second are plenty). */
@@ -25,8 +27,10 @@ const CARRIED = 8;
 /** The components a thing of the server may have here (besides its place). */
 const MIRRORED = ['module', 'form', 'glyph', ...THING_PARTS];
 
-/** What the kernel does that goes to the server. The rest of what changes the world waits for later tasks. */
-const LATER = ['useSlot', 'equipSlot', 'equip', 'unequip', 'dropSlot', 'moveSlot', 'craft', 'combine', 'freeCraft', 'freeItemAction', 'itemAct', 'takeFromContainer', 'putIntoContainer', 'putIntoBag', 'takeFromBag', 'uiAction', 'freeTileAction', 'openContainer', 'rollback'] as const;
+/** What the kernel does that a game of many does not do from a client yet. */
+const LATER = ['rollback'] as const;
+
+type Act = Parameters<SessionClient['act']>[0];
 
 export class ThinClient {
   /** Server entity → entity of the mirror, and back. */
@@ -39,11 +43,17 @@ export class ThinClient {
   private hidden = new Set<number>();
   /** Things to set again as the server has them, once its next update has come (an optimistic change that may not hold). */
   private recheck = new Set<number>();
-  /** The phrase as the server has it (or will, once what was sent arrives), and the messages about it under way. */
+  /** The phrase as the server has it (or will, once what was sent arrives). */
   private told: string[] = [];
-  private phrases = 0;
-  /** The answers about the phrase are in: the next update says what the server's phrase is now. */
+  /**
+   * Messages under way that changed the hand or what is carried here at once: meanwhile the server's updates do
+   * not overwrite them (a slot moved here would jump back for a moment).
+   */
+  private pending = 0;
+  /** Those answers are in: the next update says what the server's hand and inventory are now. */
   private adopt = false;
+  /** What is carried as last set here from the server (to tell the inventory window when it changes). */
+  private carriedKey = '';
   private lastStep = { x: NaN, y: NaN, t: 0 };
   private clock = 0;
   private lastCorrection = 0;
@@ -97,7 +107,7 @@ export class ThinClient {
     }
     // The phrase is the wanderer's own: what they compose here goes to the server when nothing else is under way.
     const hand = k.hand();
-    if (hand && !this.phrases && hand.tokens.join(' ') !== this.told.join(' ')) this.phrase(hand.tokens);
+    if (hand && !this.pending && hand.tokens.join(' ') !== this.told.join(' ')) this.phrase(hand.tokens);
   }
 
   // --- What the server says ----------------------------------------------------------------------
@@ -190,7 +200,9 @@ export class ThinClient {
     if (t.form) parts.form = { ...t.form };
     if (t.glyph) parts.glyph = t.glyph;
     for (const name of MIRRORED) {
-      if (name in parts) k.ecs.set(id, name, parts[name]);
+      // An opened container keeps what it was seen to hold (the server sends only its size with the thing).
+      if (name === 'container' && name in parts) k.ecs.set(id, name, { ...k.ecs.get(id, name), ...(parts[name] as object) });
+      else if (name in parts) k.ecs.set(id, name, parts[name]);
       else k.ecs.remove(id, name);
     }
     if (t.testo) this.say(id, t.testo);
@@ -226,16 +238,25 @@ export class ThinClient {
     if (b?.text !== text) this.k.bubbles.set(id, { text, until: this.k.time + 4 + text.length / 25 });
   }
 
-  /** What the wanderer carries and is, as the server has it. The phrase only when the server changed it. */
+  /**
+   * What the wanderer carries and is, as the server has it: what is carried and the phrase only when nothing that
+   * changed them here is under way, the phrase only when the server changed it.
+   */
   private state(): void {
     const k = this.k;
     const s = this.session.stato;
     const pid = k.playerId;
     if (s.needs) k.ecs.set(pid, 'needs', { ...(k.needs() ?? {}), ...s.needs });
-    if (s.inventory) k.ecs.set(pid, 'inventory', structuredClone(s.inventory));
     if (s.stati) k.ecs.set(pid, 'stati', structuredClone(s.stati));
+    if (!this.pending) {
+      if (s.inventory) k.ecs.set(pid, 'inventory', structuredClone(s.inventory));
+      if (s.slots) k.ecs.set(pid, 'slots', structuredClone(s.slots));
+      const key = JSON.stringify([k.inventory(), k.slots()]);
+      if (key !== this.carriedKey) k.bus.emit('inventory:changed', {});
+      this.carriedKey = key;
+    }
     const tokens = s.hand?.tokens;
-    if (tokens && !this.phrases && tokens.join(' ') !== this.told.join(' ')) {
+    if (tokens && !this.pending && tokens.join(' ') !== this.told.join(' ')) {
       // A rune picked up, the phrase spoken or inscribed: the server's phrase becomes the hand's.
       this.told = [...tokens];
       const hand = k.hand();
@@ -260,10 +281,6 @@ export class ThinClient {
     const studio = k.interact.bind(k);
     k.interact = async () => (k.zone === 'sim' ? this.interact() : studio());
     k.perform = (id, action) => this.perform(id, action);
-    k.performMenu = async (option, entity) => {
-      if (option.startsWith('e:') && entity >= 0) return this.perform(entity, option.slice(2));
-      this.later();
-    };
     k.freeAction = async (id, text) => {
       const r = await this.send(id, { t: 'altro', testo: text });
       return r?.testo ?? r?.motivo ?? '';
@@ -295,7 +312,118 @@ export class ThinClient {
       if (sid === undefined) return k.message('Non c’è niente davanti a te.', 'warn');
       void this.show(this.session.act({ t: 'azione', entita: sid, azione: 'strumento' }));
     };
+    this.relayCarried();
     for (const name of LATER) (k as unknown as Record<string, () => undefined>)[name] = () => this.later();
+  }
+
+  /**
+   * What the wanderer carries (T39b): every change goes to the server, which does it as them. What only moves
+   * things between pockets, bags and an open container is done here at once too, without its words (the answer
+   * brings the server's); the rest shows when the answer and the next update come.
+   */
+  private relayCarried(): void {
+    const k = this.k;
+    const here = {
+      useSlot: k.useSlot.bind(k),
+      equipSlot: k.equipSlot.bind(k),
+      moveSlot: k.moveSlot.bind(k),
+      putIntoBag: k.putIntoBag.bind(k),
+      takeFromBag: k.takeFromBag.bind(k),
+      takeFromContainer: k.takeFromContainer.bind(k),
+      putIntoContainer: k.putIntoContainer.bind(k),
+      performMenu: k.performMenu.bind(k),
+    };
+    const words = async (r: Promise<Outcome>) => {
+      const o = await r;
+      return o.testo ?? o.motivo ?? '';
+    };
+    k.useSlot = (i) => {
+      const s = k.inventory().slots[i];
+      if (!s) return;
+      // A bag opens here, a rune joins the phrase here: both are the client's own.
+      if (k.content.get(s.item)?.container || s.item.startsWith('rune:')) return here.useSlot(i);
+      void this.carry({ t: 'oggetto', op: 'usa', slot: i });
+    };
+    k.equipSlot = (i) => void this.carry({ t: 'oggetto', op: 'impugna', slot: i }, () => here.equipSlot(i));
+    k.moveSlot = (a, b) => void this.carry({ t: 'oggetto', op: 'sposta', slot: a, verso: b }, () => here.moveSlot(a, b));
+    k.dropSlot = (i, n) => {
+      if (k.zone !== 'sim' || !k.inventory().slots[i]) return;
+      // Gone from the pocket at once; the thing on the ground comes with the next update.
+      void this.carry({ t: 'oggetto', op: 'posa', slot: i, ...(n !== undefined ? { quanti: n } : {}) }, () => void takeFromSlot(k.inventory(), i, n));
+    };
+    k.putIntoBag = (bag, i) => void this.carry({ t: 'oggetto', op: 'in_borsa', slot: i, borsa: bag }, () => here.putIntoBag(bag, i));
+    k.takeFromBag = (bag, i) => void this.carry({ t: 'oggetto', op: 'da_borsa', slot: i, borsa: bag }, () => here.takeFromBag(bag, i));
+    k.itemAct = (i, action) => void this.carry({ t: 'oggetto', op: 'azione', slot: i, azione: action });
+    k.freeItemAction = (i, text) => words(this.carry({ t: 'altro', slot: i, testo: text }));
+    k.craft = (id) => {
+      if (!k.recipes().available.has(id)) {
+        k.message('Ti manca qualcosa per farlo.', 'warn');
+        return false;
+      }
+      void this.carry({ t: 'fabbrica', ricetta: id });
+      return true;
+    };
+    k.freeCraft = async (text) => {
+      const r = await this.carry({ t: 'fabbrica', testo: text });
+      return { ok: r.ok, story: r.testo ?? r.motivo ?? '' };
+    };
+    k.combine = (a, b) => words(this.carry({ t: 'fabbrica', unisci: [a, b] }));
+    k.openContainer = (id) => {
+      const sid = this.server.get(id);
+      if (sid !== undefined) void this.carry({ t: 'contenitore', entita: sid, op: 'apri' });
+      return k.container(id);
+    };
+    const box = (id: number, op: 'prendi' | 'metti', slot: number, now: () => void) => {
+      const sid = this.server.get(id);
+      if (sid === undefined) return;
+      void this.carry({ t: 'contenitore', entita: sid, op, slot }, k.container(id)?.inv ? now : undefined);
+    };
+    k.takeFromContainer = (id, slot) => box(id, 'prendi', slot, () => here.takeFromContainer(id, slot));
+    k.putIntoContainer = (id, slot) => box(id, 'metti', slot, () => here.putIntoContainer(id, slot));
+    k.equip = (panel, slot, i) => {
+      void this.carry({ t: 'pannello', pannello: panel, op: 'metti', posto: slot, slot: i });
+      return true;
+    };
+    k.unequip = (panel, slot) => {
+      void this.carry({ t: 'pannello', pannello: panel, op: 'togli', posto: slot });
+      return true;
+    };
+    k.uiAction = (panel, action) => void this.carry({ t: 'pannello', pannello: panel, op: 'pulsante', azione: action });
+    k.performMenu = async (option, entity, col, row) => {
+      if (option.startsWith('e:') && entity >= 0) return this.perform(entity, option.slice(2));
+      // «Altro…» on the tile opens its window here; the words go with freeTileAction.
+      if (option === 't:altro') return here.performMenu(option, entity, col, row);
+      if (option.startsWith('t:')) await this.carry({ t: 'casella', col, row, azione: option.slice(2) });
+    };
+    k.freeTileAction = (col, row, text) => words(this.carry({ t: 'altro', col, row, testo: text }));
+  }
+
+  /**
+   * Something done with what the wanderer carries: `now`, if given, does here at once what the server will do (and
+   * meanwhile the server's updates do not undo it); the answer is shown.
+   */
+  private carry(msg: Act, now?: () => void): Promise<Outcome> {
+    const answer = this.session.act(msg);
+    if (!now) return this.show(answer);
+    const k = this.k;
+    const say = k.message;
+    k.message = () => undefined;
+    try {
+      now();
+    } finally {
+      k.message = say;
+    }
+    return this.show(this.sent(answer));
+  }
+
+  /** A container as the server has it: what it holds, and its window if the answer opened it. */
+  private container(v: ContainerView): void {
+    const k = this.k;
+    const id = this.local.get(v.entita);
+    if (id === undefined || !k.ecs.alive.has(id)) return;
+    k.ecs.set(id, 'container', { ...k.ecs.get(id, 'container'), inv: structuredClone(v.inv), filled: true });
+    if (v.apri) k.bus.emit('ui:container', { id, name: k.nameOf(id) });
+    else k.bus.emit('inventory:changed', {});
   }
 
   private later(): undefined {
@@ -386,16 +514,16 @@ export class ThinClient {
     void this.sent(this.session.act({ t: 'frase', tokens: [...tokens] }));
   }
 
-  /** A message about the phrase: while it is under way, the server's phrase does not overwrite the hand. */
+  /** A message that changed the hand or what is carried here: while it is under way, the server's do not overwrite them. */
   private async sent(answer: Promise<Outcome>): Promise<Outcome> {
-    this.phrases++;
+    this.pending++;
     try {
       return await answer;
     } finally {
-      this.phrases--;
+      this.pending--;
       // Once nothing is under way, the hand is what the server has (it may have kept fewer runes): the answer comes
       // before the update of the same tick, so it is the next update that says it.
-      if (!this.phrases) this.adopt = true;
+      if (!this.pending) this.adopt = true;
     }
   }
 
@@ -406,6 +534,9 @@ export class ThinClient {
     for (const m of r.messaggi ?? []) k.message(m);
     for (const d of r.dialoghi ?? []) k.bus.emit('ui:dialog', d);
     if (!r.ok && r.motivo) k.message(r.motivo, 'warn');
+    if (r.contenitore) this.container(r.contenitore);
+    // A bag the world opened (an action on something carried): its window is the client's.
+    if (r.borsa !== undefined) k.bus.emit('ui:bag', { slot: r.borsa });
     return r;
   }
 }

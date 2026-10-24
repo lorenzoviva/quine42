@@ -6,7 +6,7 @@
 
 import type { Kernel } from '../kernel/kernel';
 import { validWandererId } from '../kernel/wanderers';
-import { THING_PARTS, type ClientMsg, type Dialog, type FormView, type Me, type MyState, type OtherView, type PlaceView, type ServerLink, type ServerMsg, type ThingView } from './protocol';
+import { THING_PARTS, type ClientMsg, type ItemOp, type Dialog, type FormView, type Me, type MyState, type OtherView, type PlaceView, type ServerLink, type ServerMsg, type ThingView } from './protocol';
 
 export interface SessionOptions {
   /** Updates per second to every client. */
@@ -30,6 +30,38 @@ const CORRECT = 0.05;
 const FAR = 8;
 
 const round = (v: number) => Math.round(v * 1000) / 1000;
+/** An index from the wire: an integer, or -1 (which no pocket is). */
+const int = (v: unknown) => (typeof v === 'number' && Number.isInteger(v) ? v : -1);
+
+/** An answer that is both a verdict and words (a free craft that did not come off still tells why). */
+class Said {
+  constructor(
+    readonly ok: boolean,
+    readonly testo: string,
+  ) {}
+}
+
+/** What the world says back while a wanderer acts: messages, dialogs, the container or bag it opened. */
+interface Acted<T> {
+  ok: boolean;
+  value?: T;
+  messaggi: string[];
+  dialoghi: Dialog[];
+  opened?: number;
+  borsa?: number;
+}
+
+interface Answer {
+  ok: boolean;
+  value?: unknown;
+  messaggi?: string[];
+  dialoghi?: Dialog[];
+  motivo?: string;
+  opened?: number;
+  borsa?: number;
+  /** A container changed by the action (taken from, put into): its content goes with the answer. */
+  box?: number;
+}
 
 interface Client {
   id: string;
@@ -143,6 +175,7 @@ export class SessionServer {
     if (msg.t === 'passo') return this.step(c, msg.seq, msg.x, msg.y);
     const seq = Number((msg as { seq?: unknown }).seq) || 0;
     const k = this.kernel;
+    if (msg.t === 'altro' && (msg.slot !== undefined || msg.col !== undefined || msg.row !== undefined)) return this.freeOn(c, seq, msg);
     switch (msg.t) {
       case 'frase': {
         const tokens = Array.isArray(msg.tokens) ? msg.tokens.filter((t) => typeof t === 'string').slice(0, 24) : [];
@@ -158,6 +191,46 @@ export class SessionServer {
         return this.answer(c, seq, this.act(c, () => k.inscribeHand()));
       case 'pronuncia':
         return void this.later(c, seq, () => k.castSpell());
+      case 'oggetto':
+        return this.item(c, seq, msg);
+      case 'contenitore': {
+        const id = Number(msg.entita);
+        const why = this.outOfReach(c, id) ?? (k.ecs.has(id, 'container') ? undefined : 'non si apre');
+        if (why) return this.answer(c, seq, { ok: false, motivo: why });
+        const slot = int(msg.slot);
+        if (msg.op === 'apri') return this.answer(c, seq, this.act(c, () => !!k.openContainer(id)));
+        if (msg.op === 'prendi') return this.answer(c, seq, { ...this.act(c, () => k.takeFromContainer(id, slot)), box: id });
+        if (msg.op === 'metti') return this.answer(c, seq, { ...this.act(c, () => k.putIntoContainer(id, slot)), box: id });
+        break;
+      }
+      case 'fabbrica': {
+        const recipe = msg.ricetta;
+        const text = msg.testo;
+        if (typeof recipe === 'string') return this.answer(c, seq, this.act(c, () => k.craft(recipe)));
+        if (typeof text === 'string')
+          return void this.later(c, seq, async () => {
+            const r = await k.freeCraft(text);
+            return new Said(r.ok, r.story);
+          });
+        if (Array.isArray(msg.unisci)) {
+          const [a, b] = msg.unisci.map(int);
+          return void this.later(c, seq, () => k.combine(a, b));
+        }
+        break;
+      }
+      case 'pannello': {
+        const panel = String(msg.pannello ?? '');
+        const slot = String(msg.posto ?? '');
+        if (msg.op === 'metti') return this.answer(c, seq, this.act(c, () => k.equip(panel, slot, int(msg.slot))));
+        if (msg.op === 'togli') return this.answer(c, seq, this.act(c, () => k.unequip(panel, slot)));
+        if (msg.op === 'pulsante') return this.answer(c, seq, this.act(c, () => k.uiAction(panel, String(msg.azione ?? ''))));
+        break;
+      }
+      case 'casella': {
+        const why = this.tileOutOfReach(c, msg.col, msg.row) ?? (typeof msg.azione === 'string' && msg.azione && msg.azione !== 'altro' ? undefined : 'azione sconosciuta');
+        if (why) return this.answer(c, seq, { ok: false, motivo: why });
+        return void this.later(c, seq, () => k.performMenu(`t:${msg.azione}`, -1, msg.col, msg.row));
+      }
       case 'azione':
       case 'altro':
       case 'chat': {
@@ -166,7 +239,7 @@ export class SessionServer {
         // A rune on the ground is picked up as with E in front of it.
         if (msg.t === 'azione' && msg.azione === 'raccogli' && k.ecs.has(msg.entita, 'rune')) return this.answer(c, seq, this.act(c, () => k.pickUpRune(msg.entita)));
         if (msg.t === 'azione') return void this.later(c, seq, () => k.perform(msg.entita, String(msg.azione ?? '')));
-        if (msg.t === 'altro') return void this.later(c, seq, () => k.freeAction(msg.entita, String(msg.testo ?? '')));
+        if (msg.t === 'altro') return void this.later(c, seq, () => k.freeAction(Number(msg.entita), String(msg.testo ?? '')));
         return void this.later(c, seq, async () => (await k.talk(msg.entita, String(msg.testo ?? ''), c.id)).say);
       }
     }
@@ -186,6 +259,56 @@ export class SessionServer {
     if (Math.hypot(got.x - to.x, got.y - to.y) > CORRECT) c.link.send({ t: 'correzione', seq: Number(seq) || 0, x: round(got.x), y: round(got.y) });
   }
 
+  /** Something carried (T39b): what the kernel does with a pocket of the inventory, as the wanderer. */
+  private item(c: Client, seq: number, msg: Extract<ClientMsg, { t: 'oggetto' }>): void {
+    const k = this.kernel;
+    const slot = this.pocket(c, msg.slot);
+    const to = this.pocket(c, msg.verso);
+    const bag = this.pocket(c, msg.borsa);
+    const count = msg.quanti === undefined ? undefined : int(msg.quanti);
+    const ops: Record<ItemOp, () => unknown> = {
+      usa: () => k.useSlot(slot),
+      impugna: () => k.equipSlot(slot),
+      posa: () => (count === undefined || count > 0) && k.dropSlot(slot, count),
+      sposta: () => to >= 0 && k.moveSlot(slot, to),
+      in_borsa: () => k.putIntoBag(bag, slot),
+      // In a bag the index is of the bag's own pockets (the kernel checks it).
+      da_borsa: () => bag >= 0 && k.takeFromBag(bag, int(msg.slot)),
+      azione: () => k.itemAct(slot, String(msg.azione ?? '')),
+    };
+    if (!Object.hasOwn(ops, msg.op)) return this.answer(c, seq, { ok: false, motivo: 'messaggio sconosciuto' });
+    if (msg.op !== 'da_borsa' && slot < 0) return this.answer(c, seq, { ok: false, motivo: 'non porti niente lì' });
+    this.answer(c, seq, this.act(c, ops[msg.op]));
+  }
+
+  /** «Altro…» on something carried, or on a tile. */
+  private freeOn(c: Client, seq: number, msg: Extract<ClientMsg, { t: 'altro' }>): void {
+    const k = this.kernel;
+    const text = String(msg.testo ?? '');
+    if (msg.slot !== undefined) {
+      const slot = this.pocket(c, msg.slot);
+      if (slot < 0) return this.answer(c, seq, { ok: false, motivo: 'non porti niente lì' });
+      return void this.later(c, seq, () => k.freeItemAction(slot, text));
+    }
+    const why = this.tileOutOfReach(c, msg.col, msg.row);
+    if (why) return this.answer(c, seq, { ok: false, motivo: why });
+    void this.later(c, seq, () => k.freeTileAction(msg.col!, msg.row!, text));
+  }
+
+  /** A pocket of the wanderer's inventory from the wire, or -1. */
+  private pocket(c: Client, v: unknown): number {
+    const i = int(v);
+    return i >= 0 && i < this.kernel.as(c.id, () => this.kernel.inventory().slots.length) ? i : -1;
+  }
+
+  private tileOutOfReach(c: Client, col: unknown, row: unknown): string | undefined {
+    const x = int(col);
+    const y = int(row);
+    if (x !== col || y !== row) return 'non c’è niente lì';
+    const at = this.kernel.wandererAt(c.id)!;
+    return Math.hypot(x + 0.5 - at.x, y + 0.5 - at.y) > this.reach ? 'è troppo lontano' : undefined;
+  }
+
   private outOfReach(c: Client, entity: unknown): string | undefined {
     const k = this.kernel;
     const id = Number(entity);
@@ -196,19 +319,23 @@ export class SessionServer {
   }
 
   /** Runs what the wanderer does, as them, and keeps what the world says meanwhile (messages and dialogs). */
-  private act<T>(c: Client, fn: () => T): { ok: boolean; value?: T; messaggi: string[]; dialoghi: Dialog[] } {
+  private act<T>(c: Client, fn: () => T): Acted<T> {
     const k = this.kernel;
     const said: string[] = [];
     const dialogs: Dialog[] = [];
+    const seen: { opened?: number; borsa?: number } = {};
     const off = [
       k.bus.on('ui:message', (m) => said.push(String(m?.text ?? ''))),
       k.bus.on('ui:dialog', (d) => d?.text && dialogs.push({ ...(d.speaker ? { speaker: String(d.speaker) } : {}), text: String(d.text) })),
+      // A window the world would open: the container goes with the answer, the bag the client opens itself.
+      k.bus.on('ui:container', (b) => Number.isInteger(b?.id) && (seen.opened = b.id)),
+      k.bus.on('ui:bag', (b) => Number.isInteger(b?.slot) && (seen.borsa = b.slot)),
     ];
     try {
       const value = k.as(c.id, fn);
-      return { ok: value !== false, value, messaggi: said.filter(Boolean), dialoghi: dialogs };
+      return { ok: value !== false, value, messaggi: said.filter(Boolean), dialoghi: dialogs, ...seen };
     } catch (e) {
-      return { ok: false, messaggi: [...said, (e as Error).message], dialoghi: dialogs };
+      return { ok: false, messaggi: [...said, (e as Error).message], dialoghi: dialogs, ...seen };
     } finally {
       off.forEach((f) => f());
     }
@@ -223,15 +350,19 @@ export class SessionServer {
     try {
       value = await started.value;
       ok = value !== false;
+      if (value instanceof Said) ({ ok, testo: value } = value);
     } catch (e) {
       ok = false;
       motivo = (e as Error).message;
     }
-    this.answer(c, seq, { ok, value, messaggi: started.messaggi, dialoghi: started.dialoghi, motivo });
+    this.answer(c, seq, { ...started, ok, value, motivo });
   }
 
-  private answer(c: Client, seq: number, r: { ok: boolean; value?: unknown; messaggi?: string[]; dialoghi?: Dialog[]; motivo?: string }): void {
+  private answer(c: Client, seq: number, r: Answer): void {
     if (this.clients.get(c.id) !== c) return;
+    const k = this.kernel;
+    const boxId = r.opened ?? r.box;
+    const box = boxId !== undefined && k.ecs.alive.has(boxId) ? k.container(boxId) : undefined;
     c.link.send({
       t: 'esito',
       seq,
@@ -240,6 +371,8 @@ export class SessionServer {
       ...(r.messaggi?.length ? { messaggi: r.messaggi } : {}),
       ...(r.dialoghi?.length ? { dialoghi: r.dialoghi } : {}),
       ...(r.motivo ? { motivo: r.motivo } : {}),
+      ...(box ? { contenitore: { entita: boxId!, inv: box.inv, ...(r.opened !== undefined ? { apri: true } : {}) } } : {}),
+      ...(r.borsa !== undefined ? { borsa: r.borsa } : {}),
     });
   }
 
@@ -253,7 +386,7 @@ export class SessionServer {
     const meKey = JSON.stringify(me);
     if (meKey !== c.me) out.me = me;
     c.me = meKey;
-    const stato: MyState = k.as(c.id, () => ({ needs: k.needs() as unknown as Record<string, number>, hand: k.hand(), inventory: k.inventory(), stati: k.states() }));
+    const stato: MyState = k.as(c.id, () => ({ needs: k.needs() as unknown as Record<string, number>, hand: k.hand(), inventory: k.inventory(), stati: k.states(), slots: k.slots() }));
     const sKey = JSON.stringify(stato);
     if (sKey !== c.stato) out.stato = JSON.parse(sKey);
     c.stato = sKey;

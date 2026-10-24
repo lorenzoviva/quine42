@@ -34,8 +34,15 @@ per un client senza kernel avrebbe raddoppiato il codice del mondo.
    la risposta la cosa torna com'è sul server (se è ancora a terra, ricompare). La frase è del client: la compone in locale e la
    manda quando cambia; quella del server la sostituisce solo quando nessun messaggio sulla frase è in viaggio e il server l'ha
    cambiata (una runa raccolta, consumata, incisa).
-7. **Il resto aspetta.** Uso, equipaggiamento, borse, contenitori, fabbricazione, pannelli e azioni sulle caselle non sono ancora
-   nel protocollo: nello specchio dicono «Tra molti viandanti questo non si può ancora fare» e non cambiano nulla (`LATER`).
+7. **Ciò che si porta** (T39b). Messaggi `oggetto` (`usa impugna posa sposta in_borsa da_borsa azione` su una tasca),
+   `contenitore` (`apri prendi metti`), `fabbrica` (`ricetta`, `testo` libero, `unisci` due tasche), `pannello` (`metti togli
+   pulsante` di una meccanica), `casella` (un'azione imparata sul terreno); `altro` vale anche per una tasca (`slot`) o una casella
+   (`col row`). Il server li esegue con `as`, controlla tasche (indici veri) e portata (3 caselle, anche per le caselle) e cattura le
+   finestre che il mondo aprirebbe: l'`esito` porta il contenuto del contenitore aperto o cambiato (`contenitore {entita, inv, apri}`)
+   e la tasca della borsa da aprire (`borsa`); lo stato porta anche gli `slots` dei pannelli. Nel client gli spostamenti puri (tasca,
+   impugnare, borse, contenitore aperto, posare dalla tasca) si fanno subito senza le parole, che arrivano con l'esito; finché uno è in
+   viaggio inventario, slot e frase del server non sovrascrivono quelli del client, poi il primo aggiornamento li riallinea. Aprire
+   una borsa e comporre una runa restano del client. L'inventario si ridisegna a `inventory:changed`. Resta `LATER` solo `rollback`.
 8. **L'aspetto.** Ogni viandante oltre `io` è un seme suo del programma `viandante` e ha il mantello del suo colore (`tinta: N` nel
    programma, `wandererColor(id)` finché il profilo di T44 non lo fa scegliere); il server manda la forma all'ingresso e con gli
    altri viandanti.
@@ -48,7 +55,9 @@ per un client senza kernel avrebbe raddoppiato il codice del mondo.
 ## Conseguenze
 - Due schede sullo stesso server di Vite si vedono camminare (verificato con un universo di prova in multigiocatore, poi tolto).
 - In singola nulla cambia: il kernel resta nel browser e non c'è sessione.
-- Gli oggetti dell'inventario e le borse arrivano con le interazioni tra giocatori (T43) o un task loro; corona, studio e pannelli
+- Inventario, borse, contenitori, fabbricazione, pannelli e azioni sulle caselle sono nel protocollo da T39b (verificato con un
+  universo di prova: raccogliere, spostare, mangiare, aprire una credenza e prenderne il contenuto); corona, studio e pannelli
   del Concilio nel client del giocatore sono di T41 (oggi lo specchio li ha come in singola, vuoti di ciò che fa il server).
 - Lo specchio non scarica i luoghi lontani (il server non li rimanda): con viaggi lunghi la memoria del client cresce.
-- Test: `tests/thin.test.ts` (due client che si vedono camminare, la correzione, l'esito ottimistico e il suo annullamento, la frase).
+- Test: `tests/thin.test.ts` (due client che si vedono camminare, la correzione, l'esito ottimistico e il suo annullamento, la frase;
+  T39b: tasche, borse, azioni imparate, fabbricazione, contenitori, pannelli, azioni e «Altro…» sulle caselle).

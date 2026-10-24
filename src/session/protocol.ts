@@ -4,6 +4,7 @@
 // own, so a client draws itself where it likes on its circle and tells the server only where it is in the world.
 
 import type { FileMap } from '../kernel/types';
+import type { Inventory } from '../kernel/inventory';
 
 /** A tick of the server's world and its hour. */
 export interface Clock {
@@ -23,6 +24,8 @@ export interface MyState {
   hand?: { tokens: string[]; sel: number };
   inventory?: unknown;
   stati?: Record<string, unknown>;
+  /** What sits in the slots of the mechanics' panels (T39b). */
+  slots?: Record<string, Record<string, { item: string; count: number } | null>>;
 }
 
 /** A place near the wanderer: its tiles, sent again when they change. */
@@ -90,17 +93,40 @@ export type ClientMsg =
   | { t: 'pronuncia'; seq: number }
   /** An action of a thing's menu (`raccogli`, `apri`, `usa`, `leggi`, `modello:<nome>`…). */
   | { t: 'azione'; seq: number; entita: number; azione: string }
-  /** «Altro…» on a thing: what the wanderer tries, judged by the Council. */
-  | { t: 'altro'; seq: number; entita: number; testo: string }
-  | { t: 'chat'; seq: number; entita: number; testo: string };
+  /** «Altro…»: what the wanderer tries on a thing, on something they carry (`slot`) or on a tile (`col`, `row`), judged by the Council. */
+  | { t: 'altro'; seq: number; entita?: number; slot?: number; col?: number; row?: number; testo: string }
+  | { t: 'chat'; seq: number; entita: number; testo: string }
+  /** Something they carry (T39b): `slot` is a pocket; `verso` where it goes, `borsa` the pocket of the bag, `quanti` how many. */
+  | { t: 'oggetto'; seq: number; op: ItemOp; slot: number; verso?: number; borsa?: number; quanti?: number; azione?: string }
+  /** A container in the world: opened (its content comes in the answer), something taken from it or put into it. */
+  | { t: 'contenitore'; seq: number; entita: number; op: 'apri' | 'prendi' | 'metti'; slot?: number }
+  /** Making something: a known recipe, a free description, or two things carried put together. */
+  | { t: 'fabbrica'; seq: number; ricetta?: string; testo?: string; unisci?: [number, number] }
+  /** A panel of a mechanic (ADR-0028): something put into or taken from its slot `posto`, or a button. */
+  | { t: 'pannello'; seq: number; pannello: string; op: 'metti' | 'togli' | 'pulsante'; posto?: string; slot?: number; azione?: string }
+  /** An action learned on a kind of terrain, done on a tile (ADR-0029). */
+  | { t: 'casella'; seq: number; col: number; row: number; azione: string };
+
+/** What can be done with something carried: use, hold, drop, move, put into or take from a bag, a learned action. */
+export type ItemOp = 'usa' | 'impugna' | 'posa' | 'sposta' | 'in_borsa' | 'da_borsa' | 'azione';
+
+/** A container as the wanderer sees it once open; `apri` when this answer opened it. */
+export interface ContainerView {
+  entita: number;
+  inv: Inventory;
+  apri?: boolean;
+}
 
 export type ServerMsg =
   | ({ t: 'ingresso'; id: string; nome: string; files: FileMap; me: Me; forma?: FormView; stato: MyState; luoghi: PlaceView[]; cose: ThingView[]; viandanti: OtherView[] } & Clock)
   | ({ t: 'aggiorna'; me?: Me; stato?: MyState; luoghi?: PlaceView[]; cose?: ThingView[]; via?: number[]; viandanti?: OtherView[]; partiti?: string[] } & Clock)
   /** The step was not possible (too fast, through a wall): the wanderer is here. */
   | { t: 'correzione'; seq: number; x: number; y: number }
-  /** What came of a message: what the world said back meanwhile, and the answer if there is one. */
-  | { t: 'esito'; seq: number; ok: boolean; testo?: string; messaggi?: string[]; dialoghi?: Dialog[]; motivo?: string }
+  /**
+   * What came of a message: what the world said back meanwhile, and the answer if there is one; the container it
+   * opened or changed, with what is in it, and the pocket of a bag it opened.
+   */
+  | { t: 'esito'; seq: number; ok: boolean; testo?: string; messaggi?: string[]; dialoghi?: Dialog[]; motivo?: string; contenitore?: ContainerView; borsa?: number }
   | { t: 'rifiuto'; motivo: string };
 
 /** A line someone (or something) said back, as the game shows it in its dialog box. */

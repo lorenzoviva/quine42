@@ -4,7 +4,7 @@
 // gives this to the renderer.
 
 import type { FileMap } from '../kernel/types';
-import type { ClientLink, ClientMsg, Dialog, FormView, Me, MyState, OtherView, PlaceView, ServerMsg, ThingView } from './protocol';
+import type { ClientLink, ClientMsg, ContainerView, Dialog, FormView, Me, MyState, OtherView, PlaceView, ServerMsg, ThingView } from './protocol';
 
 export interface Outcome {
   ok: boolean;
@@ -12,6 +12,8 @@ export interface Outcome {
   messaggi?: string[];
   dialoghi?: Dialog[];
   motivo?: string;
+  contenitore?: ContainerView;
+  borsa?: number;
 }
 
 type Action = Exclude<ClientMsg, { t: 'entra' } | { t: 'passo' }>;
@@ -101,7 +103,8 @@ export class SessionClient {
       case 'esito': {
         const done = this.waiting.get(m.seq);
         this.waiting.delete(m.seq);
-        done?.({ ok: m.ok, testo: m.testo, messaggi: m.messaggi, dialoghi: m.dialoghi, motivo: m.motivo });
+        const { t: _t, seq: _seq, ...outcome } = m;
+        done?.(outcome);
         break;
       }
     }

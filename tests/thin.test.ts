@@ -7,6 +7,7 @@ import { fakeLink } from '../src/session/protocol';
 import { SessionServer } from '../src/session/server';
 import { SessionClient } from '../src/session/client';
 import { ThinClient } from '../src/session/thin';
+import { countItem } from '../src/kernel/inventory';
 
 const DT = 1 / 60;
 
@@ -201,7 +202,233 @@ describe('the thin client (T39)', () => {
     expect(anna.k.hand().tokens).toEqual(k.as('anna', () => k.hand().tokens));
     // What a game of many does not do yet says so, and changes nothing.
     const before = JSON.stringify(anna.k.inventory());
-    anna.k.useSlot(0);
+    anna.k.rollback();
     expect(JSON.stringify(anna.k.inventory())).toBe(before);
   });
 });
+
+/** Frames and ticks until what was asked has its answer, then the update after it. */
+async function until<T>(server: SessionServer, clients: ThinClient[], p: Promise<T>): Promise<T> {
+  let done = false;
+  let value: T | undefined;
+  void p.then((v) => {
+    done = true;
+    value = v;
+  });
+  for (let i = 0; i < 400 && !done; i++) {
+    run(server, clients, 1);
+    await new Promise((r) => setTimeout(r, 0));
+  }
+  expect(done).toBe(true);
+  await flush(server, clients);
+  return value as T;
+}
+
+/** A few rounds of messages, answers and updates (for what the kernel does without a promise). */
+async function flush(server: SessionServer, clients: ThinClient[]) {
+  for (let i = 0; i < 4; i++) {
+    run(server, clients, 4);
+    await new Promise((r) => setTimeout(r, 0));
+  }
+  run(server, clients, 8);
+}
+
+/** Anna in a game of many, on open ground, with what the test gives her. */
+async function annaAlone(prepare?: (k: Kernel) => Promise<void>) {
+  const k = await bootMany();
+  await prepare?.(k);
+  const server = new SessionServer(k);
+  const anna = await thin(server, 'anna');
+  await settle(server, [anna]);
+  const start = freeRunAway(k, 'anna', 8);
+  put(k, 'anna', start);
+  run(server, [anna], 12);
+  const said: string[] = [];
+  anna.k.bus.on('ui:message', (m) => said.push(m.text));
+  const dialogs: string[] = [];
+  anna.k.bus.on('ui:dialog', (d) => dialogs.push(d.text));
+  return { k, server, anna, start, said, dialogs };
+}
+
+const slotOf = (k: Kernel, item: string) => k.inventory().slots.findIndex((s) => s?.item === item);
+
+describe('what is carried, among many (T39b)', () => {
+  it('pockets: a slot moves at once, held, used, dropped, put into and taken from a bag, a learned action', async () => {
+    const { k, server, anna, start, said } = await annaAlone();
+    const serverInv = () => k.as('anna', () => k.inventory());
+    k.as('anna', () => {
+      k.give('item.mela-rossa', 3);
+      k.give('item.coltello', 1);
+      k.give('item.sacca', 1);
+      k.give('item.pane', 2);
+    });
+    const changed: number[] = [];
+    anna.k.bus.on('inventory:changed', () => changed.push(1));
+    run(server, [anna], 12);
+    expect(changed.length).toBeGreaterThan(0);
+    expect(countItem(anna.k.inventory(), 'item.mela-rossa')).toBe(3);
+    // Moved: in the new pocket at once here, then on the server too; the updates meanwhile do not move it back.
+    const apple = slotOf(anna.k, 'item.mela-rossa');
+    const free = anna.k.inventory().slots.findIndex((x, i) => !x && i > 6);
+    anna.k.moveSlot(apple, free);
+    expect(anna.k.inventory().slots[free]?.item).toBe('item.mela-rossa');
+    run(server, [anna], 1);
+    expect(anna.k.inventory().slots[free]?.item).toBe('item.mela-rossa');
+    await flush(server, [anna]);
+    expect(serverInv().slots[free]?.item).toBe('item.mela-rossa');
+    expect(anna.k.inventory().slots[free]?.item).toBe('item.mela-rossa');
+    // Held: at once here, with the server's words.
+    const knife = slotOf(anna.k, 'item.coltello');
+    anna.k.equipSlot(knife);
+    expect(anna.k.inventory().equipped).toBe(knife);
+    await flush(server, [anna]);
+    expect(serverInv().equipped).toBe(knife);
+    expect(said.some((m) => m.startsWith('Impugni'))).toBe(true);
+    // Eaten: one apple less, when the server says so.
+    anna.k.useSlot(free);
+    await flush(server, [anna]);
+    expect(countItem(serverInv(), 'item.mela-rossa')).toBe(2);
+    expect(countItem(anna.k.inventory(), 'item.mela-rossa')).toBe(2);
+    // Dropped: gone from the pocket at once, on the ground in front of her for the server and for her.
+    const before = anna.k.ecs.query('pickup').length;
+    anna.k.dropSlot(free, 1);
+    expect(countItem(anna.k.inventory(), 'item.mela-rossa')).toBe(1);
+    await flush(server, [anna]);
+    expect(countItem(serverInv(), 'item.mela-rossa')).toBe(1);
+    expect(countItem(anna.k.inventory(), 'item.mela-rossa')).toBe(1);
+    expect(anna.k.ecs.query('pickup').length).toBe(before + 1);
+    const dropped = anna.k.ecs.query('pickup').find((e) => anna.k.ecs.get(e, 'pickup').item === 'item.mela-rossa')!;
+    expect(Math.hypot(anna.k.ecs.get(dropped, 'pos').x - start.x, anna.k.ecs.get(dropped, 'pos').y - start.y)).toBeLessThan(1.5);
+    // The bag opens here; the bread goes in at once and on the server; then it comes out again.
+    const bag = slotOf(anna.k, 'item.sacca');
+    const bags: number[] = [];
+    anna.k.bus.on('ui:bag', ({ slot }) => bags.push(slot));
+    anna.k.useSlot(bag);
+    expect(bags).toEqual([bag]);
+    anna.k.putIntoBag(bag, slotOf(anna.k, 'item.pane'));
+    expect(countItem(anna.k.bag(bag)!, 'item.pane')).toBe(2);
+    await flush(server, [anna]);
+    expect(countItem(k.as('anna', () => k.bag(bag)!), 'item.pane')).toBe(2);
+    expect(countItem(anna.k.bag(bag)!, 'item.pane')).toBe(2);
+    anna.k.takeFromBag(bag, 0);
+    await flush(server, [anna]);
+    expect(countItem(serverInv(), 'item.pane')).toBe(2);
+    expect(countItem(anna.k.inventory(), 'item.pane')).toBe(2);
+    // A learned action of something carried: the server does it, its words come back.
+    k.content.get('item.pane')!.actions = [{ id: 'spezza', label: 'Spezza', effects: [{ tipo: 'messaggio', testo: 'Lo spezzi a metà.' }] }];
+    anna.k.itemAct(slotOf(anna.k, 'item.pane'), 'spezza');
+    await flush(server, [anna]);
+    expect(said.some((m) => m.includes('Lo spezzi a metà.'))).toBe(true);
+    // «Altro…» on it: the Council's answer.
+    expect(typeof (await until(server, [anna], anna.k.freeItemAction(slotOf(anna.k, 'item.pane'), 'lo annuso')))).toBe('string');
+    // A pocket that does not exist is refused, and nothing changes.
+    const was = JSON.stringify(serverInv());
+    const r = await until(server, [anna], anna.session.act({ t: 'oggetto', op: 'sposta', slot: 99, verso: 0 }));
+    expect(r.ok).toBe(false);
+    expect(JSON.stringify(serverInv())).toBe(was);
+  }, 30_000);
+
+  it('crafting: a known recipe, a free one, two things put together', async () => {
+    const { k, server, anna } = await annaAlone();
+    k.as('anna', () => {
+      k.give('item.stoffa', 2);
+      k.give('item.coltello', 1);
+      k.give('item.mela-rossa', 1);
+    });
+    run(server, [anna], 12);
+    expect(anna.k.recipes().available.has('ricetta.benda')).toBe(true);
+    expect(anna.k.craft('ricetta.benda')).toBe(true);
+    await flush(server, [anna]);
+    expect(countItem(k.as('anna', () => k.inventory()), 'item.benda')).toBe(2);
+    expect(countItem(anna.k.inventory(), 'item.benda')).toBe(2);
+    // Without what it takes, it is not even asked.
+    expect(anna.k.craft('ricetta.benda')).toBe(false);
+    const free = await until(server, [anna], anna.k.freeCraft('un fazzoletto con la stoffa che resta'));
+    expect(typeof free.story).toBe('string');
+    expect(typeof free.ok).toBe('boolean');
+    const a = slotOf(anna.k, 'item.coltello');
+    const b = slotOf(anna.k, 'item.mela-rossa');
+    expect(typeof (await until(server, [anna], anna.k.combine(a, b)))).toBe('string');
+  }, 30_000);
+
+  it('a container: opened with what is in it, taken from and put into; out of reach it does not open', async () => {
+    const { k, server, anna, start } = await annaAlone();
+    const cassa = k.modules.get('obj.cassa')!;
+    const near = k.spawnModuleEntity(cassa, start.x + 1.2, start.y);
+    const far = k.spawnModuleEntity(cassa, start.x + 7, start.y);
+    k.container(near)!.filled = true;
+    k.container(near)!.inv.slots[0] = { item: 'item.pane', count: 3 };
+    run(server, [anna], 12);
+    const mirror = (sid: number) => anna.k.ecs.query('container').find((e) => {
+      const p = anna.k.ecs.get(e, 'pos');
+      return Math.abs(p.x - k.ecs.get(sid, 'pos').x) < 0.01 && Math.abs(p.y - k.ecs.get(sid, 'pos').y) < 0.01;
+    })!;
+    const box = mirror(near);
+    expect(box).toBeDefined();
+    expect(anna.k.container(box)!.inv).toBeUndefined();
+    const opened: number[] = [];
+    anna.k.bus.on('ui:container', ({ id }) => opened.push(id));
+    // E on it: the server opens it, and what is inside comes with the answer.
+    void anna.k.perform(box, 'apri');
+    await flush(server, [anna]);
+    expect(opened).toEqual([box]);
+    expect(anna.k.container(box)!.inv.slots[0]).toEqual({ item: 'item.pane', count: 3 });
+    // Taken: at once here, then as the server has it.
+    anna.k.takeFromContainer(box, 0);
+    expect(countItem(anna.k.inventory(), 'item.pane')).toBe(3);
+    await flush(server, [anna]);
+    expect(countItem(k.container(near)!.inv, 'item.pane')).toBe(0);
+    expect(countItem(k.as('anna', () => k.inventory()), 'item.pane')).toBe(3);
+    expect(anna.k.container(box)!.inv.slots.some(Boolean)).toBe(false);
+    expect(countItem(anna.k.inventory(), 'item.pane')).toBe(3);
+    // Put back.
+    anna.k.putIntoContainer(box, slotOf(anna.k, 'item.pane'));
+    await flush(server, [anna]);
+    expect(countItem(k.container(near)!.inv, 'item.pane')).toBe(3);
+    expect(countItem(anna.k.container(box)!.inv, 'item.pane')).toBe(3);
+    expect(countItem(anna.k.inventory(), 'item.pane')).toBe(0);
+    // Too far: the server does not open it.
+    const r = await until(server, [anna], anna.session.act({ t: 'contenitore', entita: far, op: 'apri' }));
+    expect(r).toMatchObject({ ok: false, motivo: 'è troppo lontano' });
+    expect(k.container(far)!.filled).toBeFalsy();
+  }, 30_000);
+
+  it('a panel of a mechanic and the actions on a tile', async () => {
+    const { k, server, anna, start, said, dialogs } = await annaAlone(async (k) => {
+      expect((await k.forgeMechanic('equipaggiamento: slot per indossare e impugnare')).ok).toBe(true);
+      const items = JSON.parse(k.files['modules/items.base/manifest.json']);
+      items.items.push({ id: 'item.elmo', name: 'Elmo di ferro', description: 'un elmo', category: 'vestiario', weight: 2, stack: 1, tags: ['metallo'], glyph: 'Ʌ', color: '#999999', slot: 'testa', bonus: { difesa: 3 } });
+      k.saveFile('modules/items.base/manifest.json', JSON.stringify(items, null, 2) + '\n');
+    });
+    // The mirror has the panel too (the same files).
+    const panel = anna.k.uiPanels()[0].panel.id;
+    expect(panel).toBe(k.uiPanels()[0].panel.id);
+    k.as('anna', () => k.give('item.elmo', 1));
+    run(server, [anna], 12);
+    expect(anna.k.equip(panel, 'testa', slotOf(anna.k, 'item.elmo'))).toBe(true);
+    await flush(server, [anna]);
+    expect(k.as('anna', () => k.slots()[panel].testa?.item)).toBe('item.elmo');
+    expect(anna.k.slots()[panel].testa?.item).toBe('item.elmo');
+    expect(countItem(anna.k.inventory(), 'item.elmo')).toBe(0);
+    expect(k.as('anna', () => k.uiValue('difesa.valore'))).toBe(3);
+    anna.k.unequip(panel, 'testa');
+    await flush(server, [anna]);
+    expect(anna.k.slots()[panel].testa ?? null).toBeNull();
+    expect(countItem(anna.k.inventory(), 'item.elmo')).toBe(1);
+    // A button of the panel reaches the server (with nothing to do, it answers all the same).
+    expect((await until(server, [anna], anna.session.act({ t: 'pannello', pannello: panel, op: 'pulsante', azione: 'nulla' }))).ok).toBe(true);
+    // A learned action of the terrain under her: the server does it on that tile.
+    const col = Math.floor(start.x);
+    const row = Math.floor(start.y);
+    const code = k.tileAt(col, row)!;
+    k.palette[code].actions = [{ id: 'scava', label: 'Scava', effects: [{ tipo: 'messaggio', testo: 'Scavi un poco.' }] }];
+    await until(server, [anna], anna.k.performMenu('t:scava', -1, col, row));
+    expect(dialogs.some((d) => d.includes('Scavi un poco.'))).toBe(true);
+    // Too far from her, it is refused.
+    await until(server, [anna], anna.k.performMenu('t:scava', -1, col + 6, row));
+    expect(said).toContain('è troppo lontano');
+    // «Altro…» on the tile: the Council's answer.
+    expect(typeof (await until(server, [anna], anna.k.freeTileAction(col, row, 'tocco la terra')))).toBe('string');
+  }, 30_000);
+});
+

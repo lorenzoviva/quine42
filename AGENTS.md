@@ -287,8 +287,8 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   `core.movement` e `core.carpet` (`PER_WANDERER`) girano una volta per viandante mosso dal kernel e vedono solo lui; la tastiera
   muove `inputFor` (`io`); chunk, ritmo, frase e stati di ogni viandante. Un viandante di un client (`setRemote`) non lo muove il
   kernel: il client manda dove è nel mondo e `stepWanderer` lo porta lì al più per il ritmo (`paceOf`), con la collisione del
-  cammino. `src/session/`: protocollo JSON (`entra passo frase incidi pronuncia azione altro chat` → `ingresso aggiorna correzione
-  esito rifiuto`), `SessionServer` (messaggi a ogni tick, aggiornamenti a 10 Hz di ciò che è cambiato vicino, credito di passo di
+  cammino. `src/session/`: protocollo JSON (`entra passo frase incidi pronuncia azione altro chat oggetto contenitore fabbrica pannello
+  casella` → `ingresso aggiorna correzione esito rifiuto`), `SessionServer` (messaggi a ogni tick, aggiornamenti a 10 Hz di ciò che è cambiato vicino, credito di passo di
   mezzo secondo, azioni a 3 caselle, chi esce è salvato e lascia il mondo), `fakeLink` nei test. Nel server di Vite il WebSocket
   `/api/session?universo=<nome>` (`server/session.ts`, pacchetto `ws`) avvia al primo client il mondo dell'universo
   (`host.ts` con `ssrLoadModule`), solo se è in multigiocatore. In singola nulla cambia.
@@ -299,7 +299,9 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   fumetti. Il passo è predetto e mandato ogni 50 ms, la `correzione` lo rimette a posto, oltre 8 caselle il client segue il server
   (`FAR` sul server). Le azioni (`interact perform freeAction talk inscribeHand dropSelected castSpell action`) vanno al server
   con esito ottimistico (la cosa raccolta sparisce, la porta si apre, la frase incisa lascia la mano), annullato se rifiutato o
-  se il prossimo aggiornamento dice altro; il resto (`LATER`: inventario, borse, contenitori, fabbricazione) non ancora. Ogni
+  se il prossimo aggiornamento dice altro. Ciò che si porta (T39b): tasche, borse, contenitori (il contenuto arriva nell'`esito`),
+  fabbricazione, pannelli delle meccaniche, azioni e «Altro…» sulle caselle vanno al server, che li fa con `as`; gli spostamenti di
+  slot si vedono subito e, finché sono in viaggio, l'inventario del server non li sovrascrive (`pending`). Ogni
   viandante oltre `io` è un seme suo del `viandante` col mantello del suo colore (`wandererColor`, `tinta: N`).
 - **Sala del Concilio e studi** (ADR-0027): tavolo rotondo con l'universo che gira, gli otto membri seduti (con lo Scultore),
   teletrasporti verso le sale e ritorno, schermi della storia, stile neon punk; atlante navigabile.
