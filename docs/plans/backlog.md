@@ -676,17 +676,22 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   camera girata), foto prima/dopo, commit. Sono piccoli: si possono fare nella stessa sessione.
 - Dipendenze: nessuna. Domande per l'autore: nessuna.
 
-### T50 · La corona personalizzata: arredi futuristici, trasporti e Concilio di gerboa — `da fare` (si comincia da T50a)
+### T50 · La corona personalizzata: arredi futuristici, trasporti e Concilio di gerboa — T50a `fatto` (in corso per T50b-e)
 - Contesto: consultazione del 24/10 ([`risposte-T50.md`](../userchats/risposte-T50.md)). Gli undici edifici sono completati
   nel campus (T31 fatto). L'ambientazione della corona deve essere marcatamente futuristica e artificiosa («lo studio che
   programma la realtà»), sfruttando MarkovJunior a piena potenza: programmi con semi riutilizzabili ad altissima varietà visiva
   e fotogrammi animati. Fuori non camminano i membri del Concilio, ma una vita robotica operosa; i membri del Concilio (negli
   interni degli edifici e nella Direzione) sono un tributo alla *Guida Galattica per gli Autostoppisti*: gerboa giganti
   pacioccosi con cappelli distintivi per ruolo.
-- **T50a · Prompt per Gemini CLI (`docs/prompts/gemini-esterni-corona.md`)**:
-  - Predisporre il file guida per Gemini CLI (stile `gemini-strutture-corona.md`) con schede dettagliate e istruzioni mirate
-    a sfruttare tutta l'espressività di MarkovJunior (regole generative ad albero/frattali, voxel luminosi `glow`, voxel
-    trasparenti/traslucidi, fotogrammi animati per i droni e seed riutilizzabili che producono varianti ricche).
+- **T50a · Prompt per Gemini CLI (`docs/prompts/gemini-esterni-corona.md`) — `fatto`**:
+  - Predisposto il file guida per Gemini CLI ([`docs/prompts/gemini-esterni-corona.md`](../prompts/gemini-esterni-corona.md), stile `gemini-strutture-corona.md`)
+    con schede dettagliate, distinzione di scala (8 vpt per arredi e veicoli; 20 vpt per i gerboa del Concilio), regole sui costi,
+    e istruzioni mirate a sfruttare tutta l'espressività di MarkovJunior (regole generative ramificate ad albero/frattali,
+    voxel luminosi `glow="True"`, simulazione pittorica di superfici traslucide e riflettenti, fotogrammi animati `<animation>` e parti articolate `part`).
+    Schede pronte per: 4 arredi urbani (`corona-albero-luce`, `corona-lampione`, `corona-panchina`, `corona-totem`), 2 veicoli logistici
+    (`corona-drone`, `corona-treno`) e gli 8 membri del Concilio come gerboa pacioccosi con i loro cappelli distintivi
+    (`corona-gerboa-narratore`, `corona-gerboa-cartografo`, `corona-gerboa-artista`, `corona-gerboa-scultore`,
+    `corona-gerboa-fisico`, `corona-gerboa-ingegnere`, `corona-gerboa-arbitro`, `corona-gerboa-referente`).
 - **T50b · Modelli di arredo urbano futuristico (MarkovJunior, 8 voxel per casella)**:
   - *Alberi di luce neon e trasparenti*: chiome sintetiche e ramificazioni di voxel neon e traslucidi; la forma varia
     sensibilmente in base al seme (un solo programma generativo ad alta espressività).
