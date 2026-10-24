@@ -78,7 +78,7 @@ npm run build        # typecheck + build (npx vite preview la serve, proxy inclu
 ```
 
 `.env`: `GEMINI_API_KEY=...` (ignorato da git). Senza chiave o con `?offline`: modelli locali, texture e
-ostacoli procedurali. URL: `?skip` salta intro e Genesi; `?dev&teleport=46,0` porta oltre il tappeto; in sviluppo `?universo=<nome>` apre un altro
+ostacoli procedurali. URL: `?skip` salta intro e Genesi; `?dev&teleport=46,0` porta oltre il tappeto (o `teleport=X,Y` davanti alla porta di un edificio della corona, poi `E` entra); in sviluppo `?universo=<nome>` apre un altro
 universo di `universes/` e `?viandante=<id>` sceglie il viandante della scheda in multigiocatore (due schede, due viandanti).
 Graphify (facoltativo, ADR-0045): `pip install graphifyy` in un ambiente a parte, poi `GRAPHIFY_BACKEND=none graphify update .`
 (solo codice, offline, ~12 s; `graphify-out/` è ignorato da git; niente skill, MCP né hook).
@@ -436,10 +436,22 @@ lavoro vive nei file, non nella chat.
 2. **Il task**: esegui un solo task del backlog, quello indicato nel prompt (o il primo `da fare` con le
    dipendenze fatte). Segnalo `in corso`. Se scopri che è troppo grande, spezzalo nel backlog e fai il primo
    pezzo. Se serve una decisione dell'autore, segnalo `in attesa` con la domanda scritta nel task e chiedila.
-3. **Alla fine**: `npm test` e `npm run typecheck` verdi (e la verifica nel browser se tocca il gioco); ADR e
+3. **Alla fine**: `npm test` e `npm run typecheck` verdi (e la verifica nel browser se tocca il gioco, vedi sotto); ADR e
    questo file aggiornati se la decisione è architetturale; il task segnato `fatto` con il commit e una riga su
    cosa è cambiato rispetto al previsto; commit (mai su `main`). Poi **dai all'autore il prompt per la sessione
    successiva** (quello in testa al backlog, con il numero del prossimo task) e di' in una riga cosa farà.
+
+### Convalida nel browser (senza trial-and-error)
+
+Per evitare costosi tentativi ed errori durante la convalida grafica/interattiva:
+- **Non modificare manualmente le coordinate ECS a runtime** (`playerPos`, `p.x = ...` via console con loop attivo): il tick del kernel (`sanitize()`, collisioni `freeReal`, movimento in Lua) le resetta o blocca la transizione di camera lasciando il rendering nella simulazione.
+- **Per gli esterni della corona**: naviga con `?skip&offline&dev&teleport=46,0` (disattiva il tappeto e atterra sul viale della corona).
+- **Per gli interni degli edifici della corona (silos dei personaggi, nucleo, banchi, schermi)**:
+  1. Ricava le coordinate della porta dell'edificio da console o dai test: `const b = window.quine.corona.building('<id>');` (es. `persone`, `nucleo`, `sistemi`), porta in `b.door.x, b.door.y`.
+  2. Apri direttamente l'URL con le coordinate della porta: `?skip&offline&dev&teleport=<door.x>,<door.y>` (il viandante compare sul viale davanti alla porta).
+  3. Premi `E` (o chiama `window.quine.interact()`): esegue la transizione canonica (`entrance(b)`), imposta `zone = 'studio'` e istanzia subito la stanza in `CoronaView`.
+  4. Usa `W/A/S/D` per avvicinarti all'oggetto e `,`/`.` (o rotazione libera con tasto centrale) per ruotare la visuale e scattare screenshot da più lati.
+
 
 ## Convenzioni
 

@@ -15,4 +15,6 @@ Segui il «Protocollo delle sessioni» di `AGENTS.md`: all'inizio pianifica nel 
 ciò che è rimasto in `docs/userchats/to-do.md` e toglilo da lì; fai un solo task; alla fine dai il prompt per la
 sessione successiva.
 
+- **Convalida nel browser (senza trial-and-error)**: non modificare manualmente le coordinate ECS a runtime da console (vengono ripristinate dal tick di `sanitize`). Per gli interni degli edifici della corona (es. silos dei personaggi per T58b): ricava la porta dell'edificio `window.quine.corona.building('<id>').door`, carica `?skip&offline&dev&teleport=<door.x>,<door.y>`, premi `E` (o `window.quine.interact()`) per entrare regolarmente nella stanza (`zone = 'studio'`), avvicinati con WASD e ruota con `,`/`.` per fotografare da più lati.
+
 Se il tuo client non risolve l'import `@./AGENTS.md`, apri e leggi `AGENTS.md` manualmente.
