@@ -683,7 +683,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   e fotogrammi animati. Fuori non camminano i membri del Concilio, ma una vita robotica operosa; i membri del Concilio (negli
   interni degli edifici e nella Direzione) sono un tributo alla *Guida Galattica per gli Autostoppisti*: gerboa giganti
   pacioccosi con cappelli distintivi per ruolo.
-- **T50a · Prompt per Gemini CLI (`docs/prompts/gemini-esterni-corona.md`) — `fatto`**:
+- **T50a · Prompt per Gemini CLI (`docs/prompts/gemini-esterni-corona.md`) — `fatto` (`294a734`)**:
   - Predisposto il file guida per Gemini CLI ([`docs/prompts/gemini-esterni-corona.md`](../prompts/gemini-esterni-corona.md), stile `gemini-strutture-corona.md`)
     con schede dettagliate, distinzione di scala (8 vpt per arredi e veicoli; 20 vpt per i gerboa del Concilio), regole sui costi,
     e istruzioni mirate a sfruttare tutta l'espressività di MarkovJunior (regole generative ramificate ad albero/frattali,
