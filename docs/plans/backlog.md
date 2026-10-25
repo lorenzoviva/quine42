@@ -616,7 +616,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 
 ### T48 · La Galleria dell'Artista, dentro e il plinto — T48a `fatto`, si continua con T48b
 - Contesto: §3.3 (approvata il 23/10). Oggi la Galleria (`galleria`) espone i modelli come quadri con «riscolpisci».
-- **T48a · il tornio dello Scultore** — `fatto`: al posto della vetrina un piedistallo che gira con il modello scelto, il suo
+- **T48a · il tornio dello Scultore** — `fatto` (`a4483c7`): al posto della vetrina un piedistallo che gira con il modello scelto, il suo
   programma eseguito **passo passo** (i passi di MarkovJunior, come nella sandbox del lab: i passi intermedi da
   `src/mj/run.ts`, nei worker o renderizzati), «<» «>» cambiano modello; il pannello: le quattro foto (`src/mj/photo.ts`), voto e consigli
   dell'Artista, il programma, «riscolpisci». I quadri restano alle pareti. Test: i passi di un modello del seme finiscono
