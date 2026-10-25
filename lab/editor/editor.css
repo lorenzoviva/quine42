@@ -872,6 +872,36 @@ button.btn-primary:hover {
   box-shadow: 0 0 12px rgba(250, 204, 21, 0.4);
 }
 
+.btn-glow-toggle.glass-active {
+  background: rgba(56, 189, 248, 0.25);
+  color: #38bdf8;
+  border-color: #38bdf8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+}
+
+.swatch-btn.glass {
+  background-image: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.25) 0, rgba(255, 255, 255, 0.25) 2px, transparent 2px, transparent 4px);
+  border-style: dashed;
+}
+
+.cad-inspector.multi-mode #insp-size-row,
+.cad-inspector.multi-mode #insp-color-row {
+  display: none;
+}
+
+#btn-double-def {
+  color: #38bdf8;
+  font-weight: 700;
+  border-color: rgba(56, 189, 248, 0.35);
+  margin-left: 4px;
+}
+
+#btn-double-def:hover {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: #38bdf8;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+}
+
 .custom-color-label {
   display: flex;
   align-items: center;

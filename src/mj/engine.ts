@@ -76,6 +76,8 @@ export interface PaletteEntry {
   part?: Part;
   /** The letter gives light: drawn unshaded and bright, it blooms (flames, windows, neon). */
   glow?: boolean;
+  /** Translucent voxel (e.g. glass, water): alpha value between 0 and 1. */
+  alpha?: number;
 }
 
 export interface Program3 {

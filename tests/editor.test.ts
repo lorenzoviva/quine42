@@ -22,6 +22,11 @@ import {
   threeToVoxel,
   isVoxelInsideShape,
   findShapeAtVoxel,
+  getShapeVoxelBounds,
+  moveShapesInXml,
+  deleteShapesFromXml,
+  duplicateShapesInXml,
+  doubleDefinitionInXml,
 } from '../lab/editor/cad';
 import {
   buildPlaybackTracks,
@@ -846,6 +851,146 @@ describe('MarkovJunior Editor (T59a)', () => {
         expect(symMap.has('G')).toBe(true);
         expect(symMap.has('W')).toBe(true);
         expect(symMap.has('B')).toBe(true);
+      });
+    });
+
+    describe('CAD Advanced: Glass, Raycasting Bounds, Multi-Selection & Double Definition', () => {
+      it('parses translucent glass colors with alpha/opacity', () => {
+        const xml = `<sequence values="0VG">
+          <color symbol="V" value="88ccff" glass="true" name="Vetro"/>
+          <color symbol="T" value="ffffff" alpha="0.3"/>
+        </sequence>`;
+
+        const colors = parseColorsFromXml(xml);
+        expect(colors.V?.alpha).toBeCloseTo(0.45);
+        expect(colors.T?.alpha).toBeCloseTo(0.3);
+
+        const updated = setLetterColorInXml(xml, 'V', { glass: true });
+        expect(updated).toContain('alpha="0.45"');
+      });
+
+      it('computes exact integer voxel bounds with zero half-voxel offset', () => {
+        // A single voxel box at (5, 5, 0) with size (1, 1, 1)
+        const box1: CadShape = {
+          id: 1,
+          kind: 'box',
+          at: [5, 5, 0],
+          size: [1, 1, 1],
+          color: 'G',
+          line: 2,
+          startIndex: 0,
+          endIndex: 10,
+        };
+        const b1 = getShapeVoxelBounds(box1);
+        expect(b1.minX).toBe(5);
+        expect(b1.maxX).toBe(5);
+        expect(b1.minY).toBe(5);
+        expect(b1.maxY).toBe(5);
+        expect(b1.minZ).toBe(0);
+        expect(b1.maxZ).toBe(0);
+
+        // A 3x3x2 box at center (4, 4, 1)
+        const box2: CadShape = {
+          id: 2,
+          kind: 'box',
+          at: [4, 4, 1],
+          size: [3, 3, 2],
+          color: 'B',
+          line: 3,
+          startIndex: 11,
+          endIndex: 20,
+        };
+        const b2 = getShapeVoxelBounds(box2);
+        // x spans 4 - 1 to 4 + 1 = 3 to 5
+        expect(b2.minX).toBe(3);
+        expect(b2.maxX).toBe(5);
+        expect(b2.minY).toBe(3);
+        expect(b2.maxY).toBe(5);
+        expect(b2.minZ).toBe(1);
+        expect(b2.maxZ).toBe(2);
+      });
+
+      it('threeToVoxel uses floor so points inside voxel span map to the correct voxel', () => {
+        const grid = { X: 12, Y: 12, Z: 12 };
+        const vpt = 20;
+        const s = 1 / vpt; // 0.05
+        const px = 6;
+        const py = 6;
+
+        // Voxel x=5 spans Three.js X [(5 - 6)*0.05, (6 - 6)*0.05] = [-0.05, 0.0]
+        // Center of voxel 5 is at Three.js X = (5.5 - 6)*0.05 = -0.025
+        const insideVoxel5 = threeToVoxel([-0.025, 0.025, -0.025], grid, vpt);
+        expect(insideVoxel5[0]).toBe(5);
+        expect(insideVoxel5[1]).toBe(5);
+        expect(insideVoxel5[2]).toBe(0);
+      });
+
+      it('moves multiple shapes together in XML without index shifting bugs', () => {
+        const xml = `<sequence values="0RGB">
+  <box at="2 3 0" size="1 1 1" color="R"/>
+  <box at="4 5 1" size="2 2 2" color="G"/>
+  <box at="6 7 2" size="3 3 3" color="B"/>
+</sequence>`;
+
+        // Move shapes 0 and 2 by (+1, -1, +2)
+        const moved = moveShapesInXml(xml, [0, 2], [1, -1, 2]);
+        const shapes = parseShapesFromXml(moved);
+
+        expect(shapes[0].at).toEqual([3, 2, 2]);
+        expect(shapes[1].at).toEqual([4, 5, 1]); // Untouched
+        expect(shapes[2].at).toEqual([7, 6, 4]);
+      });
+
+      it('deletes and duplicates multiple shapes cleanly', () => {
+        const xml = `<sequence values="0RGB">
+  <box at="2 3 0" size="1 1 1" color="R"/>
+  <box at="4 5 1" size="2 2 2" color="G"/>
+  <box at="6 7 2" size="3 3 3" color="B"/>
+</sequence>`;
+
+        const deleted = deleteShapesFromXml(xml, [0, 2]);
+        const shapesAfterDel = parseShapesFromXml(deleted);
+        expect(shapesAfterDel.length).toBe(1);
+        expect(shapesAfterDel[0].color).toBe('G');
+
+        const { newXml, newIndices } = duplicateShapesInXml(xml, [0, 1], [0, 0, 5]);
+        const shapesAfterDup = parseShapesFromXml(newXml);
+        expect(shapesAfterDup.length).toBe(5);
+        expect(newIndices.length).toBe(2);
+        expect(shapesAfterDup[newIndices[0]].at).toEqual([2, 3, 5]);
+        expect(shapesAfterDup[newIndices[1]].at).toEqual([4, 5, 6]);
+      });
+
+      it('doubles definition (8x volume: 2x in X, Y, Z) leaving rules untouched', () => {
+        const xml = `<sequence values="0w" size="9 9 9">
+  <!-- Static CAD shapes -->
+  <box at="4 4 0" size="1 1 1" color="w"/>
+  <cylinder at="4 4 2" size="3 3 4" color="w"/>
+  <!-- Generative rules -->
+  <one steps="5">
+    <rule in="w" out="0"/>
+  </one>
+</sequence>`;
+
+        const doubled = doubleDefinitionInXml(xml);
+
+        // Size doubled
+        expect(doubled).toContain('size="18 18 18"');
+
+        // Static shapes doubled:
+        // box at cx=4, cy=4, bz=0 with w=1, d=1, h=1:
+        // new cx = 2*4 + 0.5 = 8.5, new cy = 8.5, new bz = 0
+        // new size = 2 2 2
+        expect(doubled).toContain('<box at="8.5 8.5 0" size="2 2 2" color="w"/>');
+
+        // cylinder at cx=4, cy=4, bz=2 with w=3, d=3, h=4:
+        // new cx = 8.5, new cy = 8.5, new bz = 4
+        // new size = 6 6 8
+        expect(doubled).toContain('<cylinder at="8.5 8.5 4" size="6 6 8" color="w"/>');
+
+        // Generative rules completely intact
+        expect(doubled).toContain('<one steps="5">');
+        expect(doubled).toContain('<rule in="w" out="0"/>');
       });
     });
   });

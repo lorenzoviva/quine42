@@ -110,6 +110,8 @@
                 <label title="Profondità (D)">D <input id="cad-dim-d" type="number" min="1" max="64" value="4" /></label>
                 <label title="Altezza (H)">H <input id="cad-dim-h" type="number" min="1" max="64" value="4" /></label>
               </div>
+
+              <button id="btn-double-def" class="cad-tool-btn" title="Raddoppia definizione (8× volume: 2× in X, Y, Z)">⚡ 2× HD</button>
             </div>
 
             <!-- Viewport Camera HUD -->
@@ -186,7 +188,7 @@
                 </div>
               </div>
 
-              <div class="insp-prop-row">
+              <div id="insp-color-row" class="insp-prop-row">
                 <span class="insp-label">Colore:</span>
                 <div class="insp-color-controls">
                   <div id="insp-color-swatch" class="insp-swatch"></div>
@@ -224,6 +226,9 @@
             <div class="palette-material-controls">
               <button id="btn-cad-glow" class="btn-glow-toggle" title="Attiva/disattiva bagliore emissivo per il colore">
                 ✨ Glow
+              </button>
+              <button id="btn-cad-glass" class="btn-glow-toggle" title="Attiva/disattiva voxel traslucido (semi-trasparente per vetri)">
+                🧊 Vetro
               </button>
               <label class="custom-color-label" title="Personalizza valore esadecimale (value=rrggbb)">
                 <span>Hex</span>

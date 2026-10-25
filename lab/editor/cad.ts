@@ -24,6 +24,7 @@ export interface CadColorDef {
   symbol: string;
   value?: string;
   glow?: boolean;
+  alpha?: number;
   part?: string;
   name?: string;
   line?: number;
@@ -136,6 +137,10 @@ export function parseColorsFromXml(xml: string): Record<string, CadColorDef> {
 
     const value = attrs.value?.replace(/^#/, '').toLowerCase();
     const glow = /^true$/i.test(attrs.glow || '');
+    const alphaAttr = attrs.alpha || attrs.opacity;
+    const isGlass = /^true$/i.test(attrs.glass || attrs.translucent || '');
+    const alphaVal = alphaAttr ? parseFloat(alphaAttr) : (isGlass ? 0.45 : undefined);
+    const alpha = (alphaVal !== undefined && Number.isFinite(alphaVal)) ? Math.max(0, Math.min(1, alphaVal)) : undefined;
     const part = attrs.part || undefined;
     const name = attrs.name || attrs.comment || undefined;
     const line = getLineNumber(xml, match.index);
@@ -144,6 +149,7 @@ export function parseColorsFromXml(xml: string): Record<string, CadColorDef> {
       symbol,
       value: value ? `#${value}` : undefined,
       glow,
+      alpha,
       part,
       name,
       line,
@@ -319,7 +325,7 @@ export function duplicateShapeInXml(
 export function setLetterColorInXml(
   xml: string,
   symbol: string,
-  opts: { value?: string; glow?: boolean; part?: string; name?: string },
+  opts: { value?: string; glow?: boolean; alpha?: number; glass?: boolean; part?: string; name?: string },
 ): string {
   if (!symbol || symbol.length !== 1) return xml;
   let updatedXml = ensureValueInRoot(xml, symbol);
@@ -329,6 +335,10 @@ export function setLetterColorInXml(
 
   const valHex = opts.value ? opts.value.replace(/^#/, '').toLowerCase() : undefined;
   const glowVal = opts.glow !== undefined ? opts.glow : existing?.glow;
+  let alphaVal = opts.alpha !== undefined ? opts.alpha : existing?.alpha;
+  if (opts.glass !== undefined) {
+    alphaVal = opts.glass ? 0.45 : undefined;
+  }
   const partVal = opts.part !== undefined ? opts.part : existing?.part;
   const nameVal = opts.name !== undefined ? opts.name : existing?.name;
 
@@ -342,6 +352,7 @@ export function setLetterColorInXml(
   }
 
   if (glowVal) parts.push('glow="True"');
+  if (alphaVal !== undefined) parts.push(`alpha="${alphaVal}"`);
   if (partVal) parts.push(`part="${partVal}"`);
   if (nameVal) parts.push(`name="${nameVal}"`);
 
@@ -394,13 +405,47 @@ export function threeToVoxel(
   const py = grid.Y / 2;
   const pz = 0;
   return [
-    Math.round(t[0] / s + px),
-    Math.round(t[2] / s + py),
-    Math.round(t[1] / s + pz),
+    Math.floor(t[0] / s + px),
+    Math.floor(t[2] / s + py),
+    Math.floor(t[1] / s + pz),
   ];
 }
 
-// ------------------------------------------------------------------ Shape Hit Testing
+// ------------------------------------------------------------------ Shape Hit Testing & Bounds
+
+export function getShapeVoxelBounds(shape: CadShape): {
+  minX: number;
+  maxX: number;
+  minY: number;
+  maxY: number;
+  minZ: number;
+  maxZ: number;
+} {
+  const [cx, cy, bz] = shape.at;
+  const [w, d, h] = shape.size;
+
+  if (shape.kind === 'line') {
+    const [x2, y2, z2] = shape.to ?? shape.at;
+    const r = Math.ceil(shape.r ?? 0);
+    return {
+      minX: Math.min(cx, x2) - r,
+      maxX: Math.max(cx, x2) + r,
+      minY: Math.min(cy, y2) - r,
+      maxY: Math.max(cy, y2) + r,
+      minZ: Math.min(bz, z2) - r,
+      maxZ: Math.max(bz, z2) + r,
+    };
+  }
+
+  const minX = Math.ceil(cx - (w - 1) / 2);
+  const maxX = Math.floor(cx + (w - 1) / 2);
+  const minY = Math.ceil(cy - (d - 1) / 2);
+  const maxY = Math.floor(cy + (d - 1) / 2);
+  const minZ = Math.floor(bz);
+  const maxZ = Math.floor(bz + h - 1);
+
+  return { minX, maxX, minY, maxY, minZ, maxZ };
+}
 
 export function isVoxelInsideShape(
   vx: number,
@@ -413,11 +458,24 @@ export function isVoxelInsideShape(
 
   if (shape.kind === 'box') {
     return (
-      Math.abs(vx - cx) <= (w - 1) / 2 &&
-      Math.abs(vy - cy) <= (d - 1) / 2 &&
-      vz >= bz &&
-      vz < bz + h
+      Math.abs(vx - cx) <= (w - 1) / 2 + 1e-5 &&
+      Math.abs(vy - cy) <= (d - 1) / 2 + 1e-5 &&
+      vz >= bz - 1e-5 &&
+      vz < bz + h - 1e-5
     );
+  }
+
+  if (shape.kind === 'line') {
+    const [x2, y2, z2] = shape.to ?? shape.at;
+    const r = shape.r ?? 0;
+    const dx = x2 - cx, dy = y2 - cy, dz = z2 - bz;
+    const lenSq = dx * dx + dy * dy + dz * dz;
+    if (lenSq === 0) {
+      return Math.hypot(vx - cx, vy - cy, vz - bz) <= r + 0.5 + 1e-5;
+    }
+    const t = Math.max(0, Math.min(1, ((vx - cx) * dx + (vy - cy) * dy + (vz - bz) * dz) / lenSq));
+    const px = cx + t * dx, py = cy + t * dy, pz = bz + t * dz;
+    return Math.hypot(vx - px, vy - py, vz - pz) <= r + 0.5 + 1e-5;
   }
 
   const a = w / 2;
@@ -426,19 +484,19 @@ export function isVoxelInsideShape(
   const v = (vy - cy) / b;
 
   if (shape.kind === 'cylinder') {
-    return u * u + v * v < 1 && vz >= bz && vz < bz + h;
+    return u * u + v * v < 1 + 1e-5 && vz >= bz - 1e-5 && vz < bz + h - 1e-5;
   }
 
   if (shape.kind === 'ellipsoid') {
     const c = h / 2;
     const s = (vz - (bz + (h - 1) / 2)) / c;
-    return u * u + v * v + s * s < 1;
+    return u * u + v * v + s * s < 1 + 1e-5;
   }
 
   if (shape.kind === 'cone') {
-    if (vz < bz || vz >= bz + h) return false;
+    if (vz < bz - 1e-5 || vz >= bz + h - 1e-5) return false;
     const k = 1 - (vz - bz) / h;
-    return u * u + v * v < k * k;
+    return u * u + v * v < k * k + 1e-5;
   }
 
   return false;
@@ -457,4 +515,170 @@ export function findShapeAtVoxel(
     }
   }
   return null;
+}
+
+// ------------------------------------------------------------------ Multi-Selection & Bulk Operations
+
+export function moveShapesInXml(
+  xml: string,
+  indices: number[],
+  delta: [number, number, number],
+): string {
+  if (!indices.length) return xml;
+  const shapes = parseShapesFromXml(xml);
+  const sorted = [...new Set(indices)].filter((i) => i >= 0 && i < shapes.length).sort((a, b) => b - a);
+
+  let updated = xml;
+  for (const idx of sorted) {
+    const s = shapes[idx];
+    const newAt: [number, number, number] = [
+      s.at[0] + delta[0],
+      s.at[1] + delta[1],
+      s.at[2] + delta[2],
+    ];
+    let newTo: [number, number, number] | undefined = undefined;
+    if (s.to) {
+      newTo = [s.to[0] + delta[0], s.to[1] + delta[1], s.to[2] + delta[2]];
+    }
+
+    const input: CadShapeInput = {
+      kind: s.kind,
+      at: newAt,
+      size: [...s.size],
+      to: newTo,
+      r: s.r,
+      color: s.color,
+      on: s.on,
+    };
+
+    const newTag = createShapeXml(input);
+    updated = updated.slice(0, s.startIndex) + newTag + updated.slice(s.endIndex);
+  }
+  return updated;
+}
+
+export function deleteShapesFromXml(xml: string, indices: number[]): string {
+  if (!indices.length) return xml;
+  const shapes = parseShapesFromXml(xml);
+  const sorted = [...new Set(indices)].filter((i) => i >= 0 && i < shapes.length).sort((a, b) => b - a);
+
+  let updated = xml;
+  for (const idx of sorted) {
+    const s = shapes[idx];
+    let start = s.startIndex;
+    let end = s.endIndex;
+
+    while (start > 0 && (updated[start - 1] === ' ' || updated[start - 1] === '\t')) {
+      start--;
+    }
+    if (updated[end] === '\r' && updated[end + 1] === '\n') {
+      end += 2;
+    } else if (updated[end] === '\n') {
+      end += 1;
+    }
+
+    updated = updated.slice(0, start) + updated.slice(end);
+  }
+  return updated;
+}
+
+export function duplicateShapesInXml(
+  xml: string,
+  indices: number[],
+  offset: [number, number, number] = [0, 0, 1],
+): { newXml: string; newIndices: number[] } {
+  if (!indices.length) return { newXml: xml, newIndices: [] };
+  const shapes = parseShapesFromXml(xml);
+  const valid = [...new Set(indices)].filter((i) => i >= 0 && i < shapes.length).sort((a, b) => a - b);
+  if (!valid.length) return { newXml: xml, newIndices: [] };
+
+  const lastShape = shapes[valid[valid.length - 1]];
+  const insertPoint = lastShape.endIndex;
+
+  const cloneTags: string[] = [];
+  for (const idx of valid) {
+    const s = shapes[idx];
+    const cloneInput: CadShapeInput = {
+      kind: s.kind,
+      at: [s.at[0] + offset[0], s.at[1] + offset[1], s.at[2] + offset[2]],
+      size: [...s.size],
+      color: s.color,
+      on: s.on,
+      to: s.to ? [s.to[0] + offset[0], s.to[1] + offset[1], s.to[2] + offset[2]] : undefined,
+      r: s.r,
+    };
+    cloneTags.push(createShapeXml(cloneInput));
+  }
+
+  const before = xml.slice(0, insertPoint);
+  const after = xml.slice(insertPoint);
+  const indentMatch = /(^|\n)([ \t]*)$/.exec(before.slice(0, lastShape.startIndex));
+  const indent = indentMatch ? indentMatch[2] : '  ';
+
+  const insertion = '\n' + cloneTags.map((tag) => `${indent}${tag}`).join('\n');
+  const newXml = before + insertion + after;
+
+  const newShapes = parseShapesFromXml(newXml);
+  const newIndices: number[] = [];
+  const startIdx = valid[valid.length - 1] + 1;
+  for (let k = 0; k < cloneTags.length; k++) {
+    if (startIdx + k < newShapes.length) newIndices.push(startIdx + k);
+  }
+
+  return { newXml, newIndices };
+}
+
+// ------------------------------------------------------------------ Double Definition (2x / 8x volume)
+
+export function doubleDefinitionInXml(xml: string): string {
+  // 1. Double the size attribute only on root/container tags (sequence, markov, all, one, prl, model):
+  let res = xml.replace(/(<(?:sequence|markov|all|one|prl|model)\b[^>]*?\bsize\s*=\s*")([^"]+)(")/gi, (match, prefix, val, suffix) => {
+    const parts = val.trim().split(/\s+/).map(Number);
+    if (parts.length === 3 && parts.every(Number.isFinite)) {
+      return `${prefix}${parts[0] * 2} ${parts[1] * 2} ${parts[2] * 2}${suffix}`;
+    }
+    return match;
+  });
+
+  // 2. Double all static CAD shapes: box, cylinder, ellipsoid, cone, line
+  const shapes = parseShapesFromXml(res);
+  for (let i = shapes.length - 1; i >= 0; i--) {
+    const s = shapes[i];
+    const [cx, cy, bz] = s.at;
+    const [w, d, h] = s.size;
+
+    // In 2x resolution, voxel x becomes 2x and 2x+1.
+    // The new center is 2*cx + 0.5, new width is 2*w.
+    // Bottom bz becomes 2*bz, new height is 2*h.
+    const newCx = Math.round((2 * cx + 0.5) * 100) / 100;
+    const newCy = Math.round((2 * cy + 0.5) * 100) / 100;
+    const newBz = Math.round(2 * bz * 100) / 100;
+
+    const newW = Math.round(2 * w * 100) / 100;
+    const newD = Math.round(2 * d * 100) / 100;
+    const newH = Math.round(2 * h * 100) / 100;
+
+    const doubledInput: CadShapeInput = {
+      kind: s.kind,
+      at: [newCx, newCy, newBz],
+      size: [newW, newD, newH],
+      color: s.color,
+      on: s.on,
+    };
+
+    if (s.kind === 'line') {
+      const [x2, y2, z2] = s.to ?? s.at;
+      doubledInput.to = [
+        Math.round((2 * x2 + 0.5) * 100) / 100,
+        Math.round((2 * y2 + 0.5) * 100) / 100,
+        Math.round(2 * z2 * 100) / 100,
+      ];
+      doubledInput.r = s.r !== undefined ? s.r * 2 : undefined;
+    }
+
+    const newTag = createShapeXml(doubledInput);
+    res = res.slice(0, s.startIndex) + newTag + res.slice(s.endIndex);
+  }
+
+  return res;
 }

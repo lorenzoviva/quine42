@@ -17,6 +17,8 @@ export interface MeshData {
   sway?: Float32Array;
   /** Per vertex, 1 where the voxel gives light (`<color glow="True">`): only if the mesh has some. */
   glow?: Float32Array;
+  /** Per vertex, alpha transparency in 0..1 (<color alpha="0.5">): only if the mesh has translucent voxels. */
+  alpha?: Float32Array;
 }
 
 export interface VoxelGrid {
@@ -49,6 +51,18 @@ export function colorTable(alphabet: string[], palette: Record<string, PaletteEn
   });
 }
 
+/** Per alphabet index: alpha in 0..1 (default 1.0). */
+export function alphaTable(alphabet: string[], palette: Record<string, PaletteEntry>): number[] {
+  return alphabet.map((ch, i) => {
+    const e = palette[ch];
+    if (i === 0 || !e) return 1.0;
+    if (typeof e.alpha === 'number' && Number.isFinite(e.alpha)) {
+      return Math.max(0.05, Math.min(1.0, e.alpha));
+    }
+    return 1.0;
+  });
+}
+
 // Faces: normal (engine axes), the four corners (as offsets 0/1), and the two tangent axes for AO.
 const FACES: Array<{ n: [number, number, number]; corners: Array<[number, number, number]> }> = [
   { n: [1, 0, 0], corners: [[1, 0, 0], [1, 1, 0], [1, 1, 1], [1, 0, 1]] },
@@ -70,10 +84,16 @@ export function meshVoxels(g: VoxelGrid, palette: Record<string, PaletteEntry>, 
   const XY = X * Y;
   const colors = colorTable(g.alphabet, palette);
   const glows = g.alphabet.map((ch) => !!palette[ch]?.glow);
+  const alphas = alphaTable(g.alphabet, palette);
   const solid = (x: number, y: number, z: number) => {
     if (x < 0 || y < 0 || z < 0 || x >= X || y >= Y || z >= Z) return false;
     const i = x + y * X + z * XY;
     return colors[cells[i]] !== null && (!o.only || o.only(i));
+  };
+  const cellAt = (x: number, y: number, z: number): number => {
+    if (x < 0 || y < 0 || z < 0 || x >= X || y >= Y || z >= Z) return 0;
+    const i = x + y * X + z * XY;
+    return (!o.only || o.only(i)) ? cells[i] : 0;
   };
   const s = 1 / o.vpt;
   const [px, py, pz] = o.pivot ?? [X / 2, Y / 2, 0];
@@ -88,20 +108,36 @@ export function meshVoxels(g: VoxelGrid, palette: Record<string, PaletteEntry>, 
   const col: number[] = [];
   const sw: number[] = [];
   const gl: number[] = [];
+  const al: number[] = [];
   let glowing = false;
+  let hasTranslucent = false;
   const idx: number[] = [];
   for (let z = 0; z < Z; z++)
     for (let y = 0; y < Y; y++)
       for (let x = 0; x < X; x++) {
         const i = x + y * X + z * XY;
-        const c = colors[cells[i]];
+        const cell = cells[i];
+        const c = colors[cell];
         if (!c || (o.only && !o.only(i))) continue;
         const grain = 0.93 + 0.1 * hash(x, y, z);
-        const glow = glows[cells[i]];
+        const glow = glows[cell];
         if (glow) glowing = true;
+        const alphaVal = alphas[cell];
+        if (alphaVal < 1.0) hasTranslucent = true;
+
         for (const f of FACES) {
           const [nx, ny, nz] = f.n;
-          if (solid(x + nx, y + ny, z + nz)) continue;
+          const nCell = cellAt(x + nx, y + ny, z + nz);
+          const nSolid = colors[nCell] !== null && nCell !== 0;
+
+          if (nSolid) {
+            const nAlpha = alphas[nCell];
+            // If both are opaque -> cull hidden internal face
+            if (alphaVal >= 1.0 && nAlpha >= 1.0) continue;
+            // If both are translucent and of identical material -> cull internal face
+            if (alphaVal < 1.0 && nAlpha < 1.0 && cell === nCell) continue;
+          }
+
           const base = pos.length / 3;
           for (const [cx, cy, cz] of f.corners) {
             // Ambient occlusion: the two side neighbours and the corner, in front of the face.
@@ -115,11 +151,12 @@ export function meshVoxels(g: VoxelGrid, palette: Record<string, PaletteEntry>, 
             const s2 = solid(ox + a2[0], oy + a2[1], oz + a2[2]);
             const sc = solid(ox + a1[0] + a2[0], oy + a1[1] + a2[1], oz + a1[2] + a2[2]);
             const occ = s1 && s2 ? 3 : (s1 ? 1 : 0) + (s2 ? 1 : 0) + (sc ? 1 : 0);
-            const light = glow ? grain : (1 - occ * 0.17) * grain;
+            const light = glow || alphaVal < 1.0 ? grain : (1 - occ * 0.17) * grain;
             const vx = x + cx, vy = y + cy, vz = z + cz;
             pos.push((vx - px) * s, (vz - pz) * s, (vy - py) * s);
             nor.push(nx, nz, ny);
             gl.push(glow ? 1 : 0);
+            al.push(alphaVal);
             col.push(c[0] * light, c[1] * light, c[2] * light);
             if (o.sway) {
               const h = Math.max(0, vz / top - 0.25) / 0.75;
@@ -143,6 +180,7 @@ export function meshVoxels(g: VoxelGrid, palette: Record<string, PaletteEntry>, 
     indices: new Uint32Array(idx),
     ...(o.sway ? { sway: new Float32Array(sw) } : {}),
     ...(glowing ? { glow: new Float32Array(gl) } : {}),
+    ...(hasTranslucent ? { alpha: new Float32Array(al) } : {}),
   };
 }
 

@@ -22,6 +22,7 @@ export interface PaletteColorInfo {
   color: string;
   name?: string;
   glow?: boolean;
+  alpha?: number;
 }
 
 export interface HighlightOptions {
@@ -268,9 +269,11 @@ export function highlightXml(src: string, options?: HighlightOptions): string {
               const hex = pal.color.startsWith('#') ? pal.color : `#${pal.color}`;
               const fg = getContrastColor(hex);
               const isGlowing = 'glow' in pal ? !!(pal as PaletteColorInfo).glow : false;
+              const isGlass = 'alpha' in pal ? (pal as PaletteColorInfo).alpha !== undefined && (pal as PaletteColorInfo).alpha! < 1.0 : false;
               const glowClass = isGlowing ? ' tok-glow' : '';
-              const title = `${escapeHtml(ch)}: ${escapeHtml(pal.name ?? ch)} (${hex}) · Clicca per cambiare`;
-              chipsHtml += `<span class="tok-color-chip${glowClass}" data-letter="${escapeHtml(ch)}" data-attr="${escapeHtml(attrName)}" data-pos="${charPos}" style="--chip-bg:${hex};--chip-text:${fg};" title="${title}">${escapeHtml(ch)}</span>`;
+              const glassClass = isGlass ? ' tok-glass' : '';
+              const title = `${escapeHtml(ch)}: ${escapeHtml(pal.name ?? ch)} (${hex}${isGlass ? ' · Vetro' : ''}) · Clicca per cambiare`;
+              chipsHtml += `<span class="tok-color-chip${glowClass}${glassClass}" data-letter="${escapeHtml(ch)}" data-attr="${escapeHtml(attrName)}" data-pos="${charPos}" style="--chip-bg:${hex};--chip-text:${fg};" title="${title}">${escapeHtml(ch)}</span>`;
             } else if (ch === '*') {
               chipsHtml += `<span class="tok-color-chip tok-wildcard" data-letter="*" data-attr="${escapeHtml(attrName)}" data-pos="${charPos}" title="Wildcard (*): qualsiasi voxel">*</span>`;
             } else if (ch === '.') {

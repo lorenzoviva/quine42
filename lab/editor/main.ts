@@ -21,10 +21,14 @@ import {
   insertShapeIntoXml,
   updateShapeInXml,
   deleteShapeFromXml,
-  duplicateShapeInXml,
   setLetterColorInXml,
   threeToVoxel,
   findShapeAtVoxel,
+  getShapeVoxelBounds,
+  moveShapesInXml,
+  deleteShapesFromXml,
+  duplicateShapesInXml,
+  doubleDefinitionInXml,
 } from './cad';
 import { MJ_PALETTE } from '../../src/mj/palette';
 import type { PaletteEntry } from '../../src/mj/engine';
@@ -125,7 +129,7 @@ gridHelper.position.y = -0.001;
 scene.add(gridHelper);
 
 // Materials & Bloom
-const matMesh = glowing(new THREE.MeshLambertMaterial({ vertexColors: true }), 'editor');
+const matMesh = glowing(new THREE.MeshLambertMaterial({ vertexColors: true, transparent: true, depthWrite: true }), 'editor');
 const bloom = new Bloom(renderer, scene, camera, 0.85, 0.4);
 
 // Active model mesh & bounding box
@@ -159,6 +163,7 @@ function createBufferGeometry(m: MeshData): THREE.BufferGeometry {
   geo.setAttribute('normal', new THREE.BufferAttribute(m.normals, 3));
   geo.setAttribute('color', new THREE.BufferAttribute(m.colors, 3));
   if (m.glow) geo.setAttribute('glow', new THREE.BufferAttribute(m.glow, 1));
+  if (m.alpha) geo.setAttribute('alpha', new THREE.BufferAttribute(m.alpha, 1));
   geo.setIndex(new THREE.BufferAttribute(m.indices, 1));
   geo.computeBoundingSphere();
   geo.computeBoundingBox();
@@ -193,7 +198,8 @@ type CadTool = 'select' | 'box' | 'voxel' | 'cylinder' | 'ellipsoid' | 'cone' | 
 let activeTool: CadTool = 'select';
 let activeColorSymbol = 'G';
 let activeGlow = false;
-let selectedShapeIndex: number | null = null;
+let activeGlass = false;
+const selectedShapeIndices = new Set<number>();
 let shapes: CadShape[] = [];
 let gridDims = { X: 12, Y: 12, Z: 12 };
 let currentVpt = 20;
@@ -222,8 +228,8 @@ const cam: CamState = {
 
 let isDragging = false;
 let isPanning = false;
+let dragStart = { x: 0, y: 0 };
 let dragPrev = { x: 0, y: 0 };
-let pointerMovedDist = 0;
 
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
@@ -233,15 +239,15 @@ canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
 canvas.addEventListener('pointerdown', (e) => {
   e.preventDefault();
+  dragStart = { x: e.clientX, y: e.clientY };
   dragPrev = { x: e.clientX, y: e.clientY };
-  pointerMovedDist = 0;
 
   if (e.button === 2) {
     // Right button: free orbit
     isDragging = true;
     isPanning = false;
-  } else if (e.button === 1 || (e.button === 0 && e.shiftKey)) {
-    // Middle button or Shift+Left: pan
+  } else if (e.button === 1 || (e.button === 0 && e.shiftKey && activeTool !== 'select')) {
+    // Middle button or Shift+Left (when not selecting): pan
     isPanning = true;
     isDragging = false;
   } else if (e.button === 0) {
@@ -259,7 +265,6 @@ canvas.addEventListener('pointermove', (e) => {
   if (!isDragging && !isPanning) return;
   const dx = e.clientX - dragPrev.x;
   const dy = e.clientY - dragPrev.y;
-  pointerMovedDist += Math.hypot(dx, dy);
   dragPrev = { x: e.clientX, y: e.clientY };
 
   if (isDragging) {
@@ -276,7 +281,8 @@ canvas.addEventListener('pointermove', (e) => {
 });
 
 const endDrag = (e: PointerEvent) => {
-  const wasClick = pointerMovedDist < 6 && e.button === 0;
+  const dist = Math.hypot(e.clientX - dragStart.x, e.clientY - dragStart.y);
+  const wasClick = dist < 8 && e.button === 0;
   isDragging = false;
   isPanning = false;
   try {
@@ -415,6 +421,8 @@ const activeColorName = $('active-color-name');
 const activeColorCode = $('active-color-code');
 const paletteSwatches = $('palette-swatches');
 const btnCadGlow = $('btn-cad-glow');
+const btnCadGlass = $('btn-cad-glass');
+const btnDoubleDef = $('btn-double-def');
 const cadCustomColor = $<HTMLInputElement>('cad-custom-color');
 const cadPartSelect = $<HTMLSelectElement>('cad-part-select');
 const paletteSourceSelect = $<HTMLSelectElement>('palette-source-select');
@@ -613,10 +621,10 @@ async function triggerBuild() {
     viewportInfo.textContent = `Griglia ${res.grid.X}×${res.grid.Y}×${res.grid.Z} · ${res.grid.solidCount.toLocaleString('it')} voxel · ${res.info.triangles.toLocaleString('it')} triangoli`;
 
     // Refresh active shape selection if any
-    if (selectedShapeIndex !== null && shapes[selectedShapeIndex]) {
-      updateSelectionBox(shapes[selectedShapeIndex]);
+    if (selectedShapeIndices.size > 0) {
+      updateSelectionBoxes();
     } else {
-      deselectShape();
+      deselectAllShapes();
     }
   } catch (err: unknown) {
     loadingOverlay.classList.add('hidden');
@@ -786,9 +794,11 @@ function handleCanvasClick(e: PointerEvent) {
   if (activeTool === 'select') {
     const hit = findShapeAtVoxel(vx, vy, vz, shapes);
     if (hit) {
-      selectShape(hit.index);
+      selectShape(hit.index, e.shiftKey);
     } else {
-      deselectShape();
+      if (!e.shiftKey) {
+        deselectAllShapes();
+      }
     }
     return;
   }
@@ -798,7 +808,7 @@ function handleCanvasClick(e: PointerEvent) {
     if (hit) {
       codeInput.value = deleteShapeFromXml(codeInput.value, hit.index);
       onCodeChange();
-      deselectShape();
+      deselectAllShapes();
     }
     return;
   }
@@ -826,69 +836,133 @@ function handleCanvasClick(e: PointerEvent) {
   jumpToLine(line);
 }
 
-// ------------------------------------------------------------------ Shape Inspector
+// ------------------------------------------------------------------ Shape Inspector & Multi-Selection
 
-function selectShape(index: number) {
+function selectShape(index: number, toggle = false) {
   if (index < 0 || index >= shapes.length) return;
-  selectedShapeIndex = index;
-  const shape = shapes[index];
+  if (toggle) {
+    if (selectedShapeIndices.has(index)) {
+      selectedShapeIndices.delete(index);
+    } else {
+      selectedShapeIndices.add(index);
+    }
+  } else {
+    selectedShapeIndices.clear();
+    selectedShapeIndices.add(index);
+  }
+  updateSelectionState();
+}
 
-  jumpToLine(shape.line);
+function deselectAllShapes() {
+  selectedShapeIndices.clear();
+  updateSelectionState();
+}
 
-  // Update Inspector UI
-  $('insp-shape-kind').textContent = shape.kind.toUpperCase();
-  $('insp-shape-info').textContent = `Forma #${shape.id} · Riga ${shape.line}`;
-
-  $<HTMLInputElement>('insp-at-x').value = String(shape.at[0]);
-  $<HTMLInputElement>('insp-at-y').value = String(shape.at[1]);
-  $<HTMLInputElement>('insp-at-z').value = String(shape.at[2]);
-
-  $<HTMLInputElement>('insp-size-w').value = String(shape.size[0]);
-  $<HTMLInputElement>('insp-size-d').value = String(shape.size[1]);
-  $<HTMLInputElement>('insp-size-h').value = String(shape.size[2]);
-
-  const colorSelect = $<HTMLSelectElement>('insp-color-select');
-  colorSelect.value = shape.color;
-  const hex = MJ_PALETTE[shape.color]?.color || '#ffffff';
-  $('insp-color-swatch').style.backgroundColor = hex;
+function updateSelectionState() {
+  if (selectedShapeIndices.size === 0) {
+    cadInspector.classList.add('hidden');
+    cadInspector.classList.remove('multi-mode');
+    if (selectionHelper) {
+      scene.remove(selectionHelper);
+      selectionHelper.dispose();
+      selectionHelper = null;
+    }
+    return;
+  }
 
   cadInspector.classList.remove('hidden');
-  updateSelectionBox(shape);
+
+  if (selectedShapeIndices.size === 1) {
+    cadInspector.classList.remove('multi-mode');
+    const index = Array.from(selectedShapeIndices)[0];
+    const shape = shapes[index];
+    if (!shape) {
+      deselectAllShapes();
+      return;
+    }
+
+    jumpToLine(shape.line);
+
+    // Update Inspector UI
+    $('insp-shape-kind').textContent = shape.kind.toUpperCase();
+    $('insp-shape-info').textContent = `Forma #${shape.id} · Riga ${shape.line}`;
+
+    $<HTMLInputElement>('insp-at-x').value = String(shape.at[0]);
+    $<HTMLInputElement>('insp-at-y').value = String(shape.at[1]);
+    $<HTMLInputElement>('insp-at-z').value = String(shape.at[2]);
+
+    $<HTMLInputElement>('insp-size-w').value = String(shape.size[0]);
+    $<HTMLInputElement>('insp-size-d').value = String(shape.size[1]);
+    $<HTMLInputElement>('insp-size-h').value = String(shape.size[2]);
+
+    const colorSelect = $<HTMLSelectElement>('insp-color-select');
+    colorSelect.value = shape.color;
+    const hex = MJ_PALETTE[shape.color]?.color || '#ffffff';
+    $('insp-color-swatch').style.backgroundColor = hex;
+
+    $('btn-insp-dup').textContent = '+ Duplica';
+    $('btn-insp-del').textContent = '🗑 Elimina';
+
+    updateSelectionBoxes();
+  } else {
+    // Multi-selection mode
+    cadInspector.classList.add('multi-mode');
+    $('insp-shape-kind').textContent = 'MULTI';
+    $('insp-shape-info').textContent = `${selectedShapeIndices.size} forme selezionate`;
+
+    $<HTMLInputElement>('insp-at-x').value = '0';
+    $<HTMLInputElement>('insp-at-y').value = '0';
+    $<HTMLInputElement>('insp-at-z').value = '0';
+
+    $('btn-insp-dup').textContent = `+ Duplica (${selectedShapeIndices.size})`;
+    $('btn-insp-del').textContent = `🗑 Elimina (${selectedShapeIndices.size})`;
+
+    updateSelectionBoxes();
+  }
 }
 
-function deselectShape() {
-  selectedShapeIndex = null;
-  cadInspector.classList.add('hidden');
+function updateSelectionBoxes() {
   if (selectionHelper) {
     scene.remove(selectionHelper);
     selectionHelper.dispose();
     selectionHelper = null;
   }
-}
+  if (selectedShapeIndices.size === 0) return;
 
-function updateSelectionBox(shape: CadShape) {
-  if (selectionHelper) {
-    scene.remove(selectionHelper);
-    selectionHelper.dispose();
-    selectionHelper = null;
+  let minVx = Infinity, maxVx = -Infinity;
+  let minVy = Infinity, maxVy = -Infinity;
+  let minVz = Infinity, maxVz = -Infinity;
+
+  for (const idx of selectedShapeIndices) {
+    const shape = shapes[idx];
+    if (!shape) continue;
+    const b = getShapeVoxelBounds(shape);
+    minVx = Math.min(minVx, b.minX);
+    maxVx = Math.max(maxVx, b.maxX);
+    minVy = Math.min(minVy, b.minY);
+    maxVy = Math.max(maxVy, b.maxY);
+    minVz = Math.min(minVz, b.minZ);
+    maxVz = Math.max(maxVz, b.maxZ);
   }
+
+  if (!Number.isFinite(minVx)) return;
 
   const s = 1 / currentVpt;
   const px = gridDims.X / 2;
   const py = gridDims.Y / 2;
   const pz = 0;
 
-  const [cx, cy, bz] = shape.at;
-  const [w, d, h] = shape.size;
+  const minThreeX = (minVx - px) * s;
+  const maxThreeX = (maxVx + 1 - px) * s;
+  const minThreeY = (minVz - pz) * s;
+  const maxThreeY = (maxVz + 1 - pz) * s;
+  const minThreeZ = (minVy - py) * s;
+  const maxThreeZ = (maxVy + 1 - py) * s;
 
-  const minX = (cx - w / 2 - px) * s;
-  const maxX = (cx + w / 2 - px) * s;
-  const minY = (bz - pz) * s;
-  const maxY = (bz + h - pz) * s;
-  const minZ = (cy - d / 2 - py) * s;
-  const maxZ = (cy + d / 2 - py) * s;
-
-  const box = new THREE.Box3(new THREE.Vector3(minX, minY, minZ), new THREE.Vector3(maxX, maxY, maxZ));
+  const box = new THREE.Box3(
+    new THREE.Vector3(minThreeX, minThreeY, minThreeZ),
+    new THREE.Vector3(maxThreeX, maxThreeY, maxThreeZ),
+  );
   selectionHelper = new THREE.Box3Helper(box, new THREE.Color(0xf59e0b));
   scene.add(selectionHelper);
 }
@@ -904,154 +978,177 @@ function getActivePaletteMap(): Record<string, PaletteColorInfo> {
       glow: false,
     };
   }
-  const customColors = parseColorsFromXml(codeInput.value);
-  for (const [sym, c] of Object.entries(customColors)) {
-    map[sym] = {
-      color: c.value ?? map[sym]?.color ?? '#ffffff',
-      name: c.name ?? map[sym]?.name ?? `Colore ${sym}`,
-      glow: !!c.glow,
-    };
-  }
-  return map;
-}
-
-function renderPaletteSwatches(source: 'model' | 'default') {
-  paletteSwatches.innerHTML = '';
-  const inspColorSelect = $<HTMLSelectElement>('insp-color-select');
-  inspColorSelect.innerHTML = '';
-
-  const symbolsToRender: Array<{ symbol: string; color: string; name: string; glow?: boolean }> = [];
-
-  if (source === 'model') {
-    const modelSymbols = getPaletteSymbols(codeInput.value);
-    for (const s of modelSymbols) {
-      symbolsToRender.push({
-        symbol: s.symbol,
-        color: s.color,
-        name: s.name ?? `Colore ${s.symbol}`,
-        glow: s.glow,
-      });
+    const customColors = parseColorsFromXml(codeInput.value);
+    for (const [sym, c] of Object.entries(customColors)) {
+      map[sym] = {
+        color: c.value ?? map[sym]?.color ?? '#ffffff',
+        name: c.name ?? map[sym]?.name ?? `Colore ${sym}`,
+        glow: !!c.glow,
+        alpha: c.alpha,
+      };
     }
-  } else {
-    for (const sym of SWATCH_LETTERS) {
-      const info = MJ_PALETTE[sym];
-      if (!info) continue;
-      symbolsToRender.push({
-        symbol: sym,
-        color: info.color,
-        name: info.name,
-        glow: false,
-      });
+    return map;
+  }
+
+  function renderPaletteSwatches(source: 'model' | 'default') {
+    paletteSwatches.innerHTML = '';
+    const inspColorSelect = $<HTMLSelectElement>('insp-color-select');
+    inspColorSelect.innerHTML = '';
+
+    const customColors = parseColorsFromXml(codeInput.value);
+    const symbolsToRender: Array<{ symbol: string; color: string; name: string; glow?: boolean; alpha?: number }> = [];
+
+    if (source === 'model') {
+      const modelSymbols = getPaletteSymbols(codeInput.value);
+      for (const s of modelSymbols) {
+        const cDef = customColors[s.symbol];
+        symbolsToRender.push({
+          symbol: s.symbol,
+          color: s.color,
+          name: s.name ?? `Colore ${s.symbol}`,
+          glow: s.glow,
+          alpha: cDef?.alpha,
+        });
+      }
+    } else {
+      for (const sym of SWATCH_LETTERS) {
+        const info = MJ_PALETTE[sym];
+        if (!info) continue;
+        const cDef = customColors[sym];
+        symbolsToRender.push({
+          symbol: sym,
+          color: cDef?.value ?? info.color,
+          name: cDef?.name ?? info.name,
+          glow: cDef?.glow,
+          alpha: cDef?.alpha,
+        });
+      }
+    }
+
+    for (const item of symbolsToRender) {
+      const isGlass = item.alpha !== undefined && item.alpha < 1.0;
+      const btn = document.createElement('button');
+      btn.className =
+        'swatch-btn' +
+        (item.symbol === activeColorSymbol ? ' active' : '') +
+        (item.glow ? ' glow' : '') +
+        (isGlass ? ' glass' : '');
+      btn.dataset.symbol = item.symbol;
+      btn.textContent = item.symbol;
+      btn.style.backgroundColor = item.color;
+      btn.style.color = getContrastColor(item.color);
+      btn.title = `${item.symbol}: ${item.name} (${item.color})${item.glow ? ' ✨ Glow' : ''}${isGlass ? ' 🧊 Vetro' : ''}`;
+      btn.onclick = () => setActiveColor(item.symbol);
+      paletteSwatches.appendChild(btn);
+
+      const opt = document.createElement('option');
+      opt.value = item.symbol;
+      opt.textContent = `${item.symbol} · ${item.name}${isGlass ? ' (Vetro)' : ''}`;
+      inspColorSelect.appendChild(opt);
+    }
+
+    updateActiveColorDetails();
+  }
+
+  function updateActiveColorDetails() {
+    const activeMap = getActivePaletteMap();
+    const info = activeMap[activeColorSymbol] || { color: '#ffffff', name: activeColorSymbol };
+    activeSwatch.style.backgroundColor = info.color;
+    const isGlass = info.alpha !== undefined && info.alpha < 1.0;
+    activeSwatch.classList.toggle('glass', isGlass);
+    activeColorName.textContent = `${info.name ?? activeColorSymbol}${isGlass ? ' (Vetro)' : ''}`;
+    activeColorCode.textContent = `${activeColorSymbol} · ${info.color}`;
+    cadCustomColor.value = info.color.startsWith('#') ? info.color : `#${info.color}`;
+
+    const customColors = parseColorsFromXml(codeInput.value);
+    const cur = customColors[activeColorSymbol];
+    activeGlow = !!cur?.glow;
+    btnCadGlow.classList.toggle('active', activeGlow);
+    activeGlass = cur?.alpha !== undefined && cur.alpha < 1.0;
+    btnCadGlass.classList.toggle('glass-active', activeGlass);
+
+    const swatches = paletteSwatches.querySelectorAll('.swatch-btn');
+    swatches.forEach((el) => {
+      el.classList.toggle('active', (el as HTMLElement).dataset.symbol === activeColorSymbol);
+    });
+  }
+
+  function setActiveColor(symbol: string) {
+    activeColorSymbol = symbol;
+    updateActiveColorDetails();
+
+    // If shapes are selected, apply color immediately
+    if (selectedShapeIndices.size > 0) {
+      let newXml = codeInput.value;
+      for (const idx of selectedShapeIndices) {
+        newXml = updateShapeInXml(newXml, idx, { color: symbol });
+      }
+      codeInput.value = newXml;
+      onCodeChange();
+      updateSelectionState();
     }
   }
 
-  for (const item of symbolsToRender) {
-    const btn = document.createElement('button');
-    btn.className =
-      'swatch-btn' +
-      (item.symbol === activeColorSymbol ? ' active' : '') +
-      (item.glow ? ' glow' : '');
-    btn.dataset.symbol = item.symbol;
-    btn.textContent = item.symbol;
-    btn.style.backgroundColor = item.color;
-    btn.style.color = getContrastColor(item.color);
-    btn.title = `${item.symbol}: ${item.name} (${item.color})${item.glow ? ' ✨ Glow' : ''}`;
-    btn.onclick = () => setActiveColor(item.symbol);
-    paletteSwatches.appendChild(btn);
+  function initPaletteBar() {
+    paletteSourceSelect.addEventListener('change', () => {
+      activePaletteSource = paletteSourceSelect.value as 'model' | 'default';
+      renderPaletteSwatches(activePaletteSource);
+      onCodeChange();
+    });
 
-    const opt = document.createElement('option');
-    opt.value = item.symbol;
-    opt.textContent = `${item.symbol} · ${item.name}`;
-    inspColorSelect.appendChild(opt);
-  }
-
-  updateActiveColorDetails();
-}
-
-function updateActiveColorDetails() {
-  const activeMap = getActivePaletteMap();
-  const info = activeMap[activeColorSymbol] || { color: '#ffffff', name: activeColorSymbol };
-  activeSwatch.style.backgroundColor = info.color;
-  activeColorName.textContent = info.name ?? activeColorSymbol;
-  activeColorCode.textContent = `${activeColorSymbol} · ${info.color}`;
-  cadCustomColor.value = info.color.startsWith('#') ? info.color : `#${info.color}`;
-
-  const swatches = paletteSwatches.querySelectorAll('.swatch-btn');
-  swatches.forEach((el) => {
-    el.classList.toggle('active', (el as HTMLElement).dataset.symbol === activeColorSymbol);
-  });
-}
-
-function setActiveColor(symbol: string) {
-  activeColorSymbol = symbol;
-  updateActiveColorDetails();
-
-  // If a shape is selected, apply color immediately
-  if (selectedShapeIndex !== null) {
-    codeInput.value = updateShapeInXml(codeInput.value, selectedShapeIndex, { color: symbol });
-    onCodeChange();
-    selectShape(selectedShapeIndex);
-  }
-}
-
-function initPaletteBar() {
-  paletteSourceSelect.addEventListener('change', () => {
-    activePaletteSource = paletteSourceSelect.value as 'model' | 'default';
     renderPaletteSwatches(activePaletteSource);
-    onCodeChange();
-  });
-
-  renderPaletteSwatches(activePaletteSource);
-  setActiveColor(activeColorSymbol);
-}
-
-function syncPaletteState() {
-  const customColors = parseColorsFromXml(codeInput.value);
-  const customCount = Object.keys(customColors).length;
-  const hasCustom = customCount > 0;
-
-  // Rebuild paletteSourceSelect options
-  paletteSourceSelect.innerHTML = '';
-
-  if (hasCustom) {
-    const optModel = document.createElement('option');
-    optModel.value = 'model';
-    optModel.textContent = `Modello (${customCount} col.)`;
-    paletteSourceSelect.appendChild(optModel);
+    setActiveColor(activeColorSymbol);
   }
 
-  const optDefault = document.createElement('option');
-  optDefault.value = 'default';
-  optDefault.textContent = 'Default MJ (26 col.)';
-  paletteSourceSelect.appendChild(optDefault);
+  function syncPaletteState() {
+    const customColors = parseColorsFromXml(codeInput.value);
+    const customCount = Object.keys(customColors).length;
+    const hasCustom = customCount > 0;
 
-  if (!hasCustom) {
-    const optModelDis = document.createElement('option');
-    optModelDis.value = 'model';
-    optModelDis.textContent = 'Modello (nessun colore)';
-    optModelDis.disabled = true;
-    paletteSourceSelect.appendChild(optModelDis);
+    // Rebuild paletteSourceSelect options
+    paletteSourceSelect.innerHTML = '';
+
+    if (hasCustom) {
+      const optModel = document.createElement('option');
+      optModel.value = 'model';
+      optModel.textContent = `Modello (${customCount} col.)`;
+      paletteSourceSelect.appendChild(optModel);
+    }
+
+    const optDefault = document.createElement('option');
+    optDefault.value = 'default';
+    optDefault.textContent = 'Default MJ (26 col.)';
+    paletteSourceSelect.appendChild(optDefault);
+
+    if (!hasCustom) {
+      const optModelDis = document.createElement('option');
+      optModelDis.value = 'model';
+      optModelDis.textContent = 'Modello (nessun colore)';
+      optModelDis.disabled = true;
+      paletteSourceSelect.appendChild(optModelDis);
+    }
+
+    // If custom colors defined, make it active by default on load or first detection
+    if (hasCustom && (hasCustomColorsPrev === false || hasCustomColorsPrev === null)) {
+      activePaletteSource = 'model';
+    } else if (!hasCustom) {
+      activePaletteSource = 'default';
+    }
+    hasCustomColorsPrev = hasCustom;
+
+    paletteSourceSelect.value = activePaletteSource;
+    renderPaletteSwatches(activePaletteSource);
+
+    const cur = customColors[activeColorSymbol];
+    activeGlow = !!cur?.glow;
+    btnCadGlow.classList.toggle('active', activeGlow);
+    activeGlass = cur?.alpha !== undefined && cur.alpha < 1.0;
+    btnCadGlass.classList.toggle('glass-active', activeGlass);
+    cadPartSelect.value = cur?.part || '';
+    if (cur?.value) {
+      cadCustomColor.value = cur.value.startsWith('#') ? cur.value : `#${cur.value}`;
+    }
   }
-
-  // If custom colors defined, make it active by default on load or first detection
-  if (hasCustom && (hasCustomColorsPrev === false || hasCustomColorsPrev === null)) {
-    activePaletteSource = 'model';
-  } else if (!hasCustom) {
-    activePaletteSource = 'default';
-  }
-  hasCustomColorsPrev = hasCustom;
-
-  paletteSourceSelect.value = activePaletteSource;
-  renderPaletteSwatches(activePaletteSource);
-
-  const cur = customColors[activeColorSymbol];
-  activeGlow = !!cur?.glow;
-  btnCadGlow.classList.toggle('active', activeGlow);
-  cadPartSelect.value = cur?.part || '';
-  if (cur?.value) {
-    cadCustomColor.value = cur.value.startsWith('#') ? cur.value : `#${cur.value}`;
-  }
-}
 
 // ------------------------------------------------------------------ XML Editor Inline Color Picker
 
@@ -1428,8 +1525,8 @@ playbackController.onFrameChange((frame, state) => {
   viewportInfo.textContent = `Griglia ${frame.grid.X}×${frame.grid.Y}×${frame.grid.Z} · ${frame.grid.solidCount?.toLocaleString('it') ?? 0} voxel · ${frame.label}`;
   gridDims = frame.grid;
 
-  if (selectedShapeIndex !== null && shapes[selectedShapeIndex]) {
-    updateSelectionBox(shapes[selectedShapeIndex]);
+  if (selectedShapeIndices.size > 0) {
+    updateSelectionBoxes();
   }
 });
 
@@ -1487,7 +1584,7 @@ function setCadTool(tool: CadTool) {
   cadSizeGroup.style.display = showDims ? 'flex' : 'none';
 
   if (tool !== 'select') {
-    deselectShape();
+    deselectAllShapes();
   }
   if (tool === 'select' || tool === 'erase') {
     ghostGroup.visible = false;
@@ -1510,6 +1607,21 @@ btnCadGlow.addEventListener('click', () => {
   onCodeChange();
 });
 
+// Palette glass toggle
+btnCadGlass.addEventListener('click', () => {
+  activeGlass = !activeGlass;
+  btnCadGlass.classList.toggle('glass-active', activeGlass);
+  codeInput.value = setLetterColorInXml(codeInput.value, activeColorSymbol, { glass: activeGlass });
+  onCodeChange();
+});
+
+// Double definition button (8x volume: 2x in X, Y, Z)
+btnDoubleDef.addEventListener('click', () => {
+  codeInput.value = doubleDefinitionInXml(codeInput.value);
+  onCodeChange();
+  deselectAllShapes();
+});
+
 // Custom color picker
 cadCustomColor.addEventListener('input', (e) => {
   const hex = (e.target as HTMLInputElement).value;
@@ -1525,43 +1637,64 @@ cadPartSelect.addEventListener('change', (e) => {
 });
 
 // Inspector Controls
-$('btn-insp-close').addEventListener('click', () => deselectShape());
+$('btn-insp-close').addEventListener('click', () => deselectAllShapes());
 
 $('btn-insp-dup').addEventListener('click', () => {
-  if (selectedShapeIndex === null) return;
-  const shape = shapes[selectedShapeIndex];
-  const offsetZ = Math.max(1, shape.size[2]);
-  const { newXml, newLine } = duplicateShapeInXml(codeInput.value, selectedShapeIndex, [0, 0, offsetZ]);
+  if (selectedShapeIndices.size === 0) return;
+  const indices = [...selectedShapeIndices];
+  const { newXml, newIndices } = duplicateShapesInXml(codeInput.value, indices, [0, 0, 1]);
   codeInput.value = newXml;
   onCodeChange();
-  jumpToLine(newLine);
-  selectShape(shapes.length);
+  selectedShapeIndices.clear();
+  newIndices.forEach((i) => selectedShapeIndices.add(i));
+  updateSelectionState();
 });
 
 $('btn-insp-del').addEventListener('click', () => {
-  if (selectedShapeIndex === null) return;
-  codeInput.value = deleteShapeFromXml(codeInput.value, selectedShapeIndex);
+  if (selectedShapeIndices.size === 0) return;
+  codeInput.value = deleteShapesFromXml(codeInput.value, [...selectedShapeIndices]);
   onCodeChange();
-  deselectShape();
+  deselectAllShapes();
 });
 
 $<HTMLSelectElement>('insp-color-select').addEventListener('change', (e) => {
-  if (selectedShapeIndex === null) return;
+  if (selectedShapeIndices.size === 0) return;
   const col = (e.target as HTMLSelectElement).value;
-  codeInput.value = updateShapeInXml(codeInput.value, selectedShapeIndex, { color: col });
+  let newXml = codeInput.value;
+  for (const idx of selectedShapeIndices) {
+    newXml = updateShapeInXml(newXml, idx, { color: col });
+  }
+  codeInput.value = newXml;
   onCodeChange();
-  selectShape(selectedShapeIndex);
+  updateSelectionState();
 });
 
 // Stepper buttons in Inspector
 document.querySelectorAll('.btn-step').forEach((btn) => {
   btn.addEventListener('click', (e) => {
-    if (selectedShapeIndex === null) return;
+    if (selectedShapeIndices.size === 0) return;
     const target = e.currentTarget as HTMLElement;
     const axis = target.dataset.axis;
     const isInc = target.dataset.action === 'inc';
     const delta = isInc ? 1 : -1;
 
+    if (selectedShapeIndices.size > 1) {
+      // Multi-selection: move all shapes together
+      const d: [number, number, number] = [
+        axis === 'at-x' ? delta : 0,
+        axis === 'at-y' ? delta : 0,
+        axis === 'at-z' ? delta : 0,
+      ];
+      if (d[0] !== 0 || d[1] !== 0 || d[2] !== 0) {
+        codeInput.value = moveShapesInXml(codeInput.value, [...selectedShapeIndices], d);
+        onCodeChange();
+        updateSelectionState();
+      }
+      return;
+    }
+
+    // Single selection:
+    const selectedShapeIndex = Array.from(selectedShapeIndices)[0];
     const shape = shapes[selectedShapeIndex];
     if (!shape) return;
 
@@ -1580,34 +1713,37 @@ document.querySelectorAll('.btn-step').forEach((btn) => {
       size: newSize,
     });
     onCodeChange();
-    selectShape(selectedShapeIndex);
+    updateSelectionState();
   });
 });
 
 // Inspector direct inputs
 const bindInput = (id: string, prop: 'at' | 'size', idx: number) => {
   $<HTMLInputElement>(id).addEventListener('change', (e) => {
-    if (selectedShapeIndex === null) return;
+    if (selectedShapeIndices.size === 0) return;
     const val = parseInt((e.target as HTMLInputElement).value, 10);
     if (!Number.isFinite(val)) return;
 
-    const shape = shapes[selectedShapeIndex];
-    if (!shape) return;
+    if (selectedShapeIndices.size === 1) {
+      const selectedShapeIndex = Array.from(selectedShapeIndices)[0];
+      const shape = shapes[selectedShapeIndex];
+      if (!shape) return;
 
-    const updates: Partial<{ at: [number, number, number]; size: [number, number, number] }> = {};
-    if (prop === 'at') {
-      const at: [number, number, number] = [...shape.at];
-      at[idx] = val;
-      updates.at = at;
-    } else {
-      const size: [number, number, number] = [...shape.size];
-      size[idx] = Math.max(1, val);
-      updates.size = size;
+      const updates: Partial<{ at: [number, number, number]; size: [number, number, number] }> = {};
+      if (prop === 'at') {
+        const at: [number, number, number] = [...shape.at];
+        at[idx] = val;
+        updates.at = at;
+      } else {
+        const size: [number, number, number] = [...shape.size];
+        size[idx] = Math.max(1, val);
+        updates.size = size;
+      }
+
+      codeInput.value = updateShapeInXml(codeInput.value, selectedShapeIndex, updates);
+      onCodeChange();
+      updateSelectionState();
     }
-
-    codeInput.value = updateShapeInXml(codeInput.value, selectedShapeIndex, updates);
-    onCodeChange();
-    selectShape(selectedShapeIndex);
   });
 };
 
@@ -1633,7 +1769,7 @@ window.addEventListener('keydown', (e) => {
   else if (e.key === 'k' || e.key === 'K') setCadTool('cone');
   else if (e.key === 'e' || e.key === 'E') setCadTool('erase');
   else if (e.key === 'Escape') {
-    deselectShape();
+    deselectAllShapes();
     playbackController.pause();
   } else if (e.key === ' ') {
     e.preventDefault();
@@ -1651,10 +1787,10 @@ window.addEventListener('keydown', (e) => {
     e.preventDefault();
     playbackController.jumpToLast();
   } else if (e.key === 'Delete' || e.key === 'Backspace') {
-    if (selectedShapeIndex !== null) {
-      codeInput.value = deleteShapeFromXml(codeInput.value, selectedShapeIndex);
+    if (selectedShapeIndices.size > 0) {
+      codeInput.value = deleteShapesFromXml(codeInput.value, [...selectedShapeIndices]);
       onCodeChange();
-      deselectShape();
+      deselectAllShapes();
     }
   }
 });

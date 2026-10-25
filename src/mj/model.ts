@@ -176,12 +176,22 @@ class Compiler {
         this.mend(el, `part "${part}" sconosciuta (${PARTS.join(', ')}): tolta`);
         part = undefined;
       }
+      let alpha: number | undefined;
+      const alphaAttr = el.attrs.alpha ?? el.attrs.opacity;
+      if (alphaAttr !== undefined) {
+        const parsed = parseFloat(alphaAttr);
+        if (Number.isFinite(parsed)) alpha = Math.max(0.05, Math.min(1.0, parsed));
+      } else if (/^true$/i.test(el.attrs.glass ?? '') || /^true$/i.test(el.attrs.translucent ?? '')) {
+        alpha = 0.5;
+      }
+
       this.colors[sym] = {
         ...(value ? { color: `#${value.toLowerCase()}` } : {}),
         ...(el.attrs.name || el.attrs.comment ? { name: el.attrs.name ?? el.attrs.comment } : {}),
         ...(part ? { part: part as Part } : {}),
         ...(/^true$/i.test(el.attrs.hidden ?? '') ? { hidden: true } : {}),
         ...(/^true$/i.test(el.attrs.glow ?? '') ? { glow: true } : {}),
+        ...(alpha !== undefined ? { alpha } : {}),
       };
     }
     for (const c of el.children) this.collect(c);

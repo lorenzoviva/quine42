@@ -17,6 +17,7 @@ export function geometry(m: MeshData): THREE.BufferGeometry {
   g.setAttribute('color', new THREE.BufferAttribute(m.colors, 3));
   if (m.sway) g.setAttribute('sway', new THREE.BufferAttribute(m.sway, 1));
   if (m.glow) g.setAttribute('glow', new THREE.BufferAttribute(m.glow, 1));
+  if (m.alpha) g.setAttribute('alpha', new THREE.BufferAttribute(m.alpha, 1));
   g.setIndex(new THREE.BufferAttribute(m.indices, 1));
   g.computeBoundingSphere();
   return g;
