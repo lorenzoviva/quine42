@@ -11,6 +11,8 @@ import type { ClientLink, ClientMsg, ContainerView, Dialog, FileChanges, FormVie
 export interface Outcome {
   ok: boolean;
   testo?: string;
+  /** What the Council made of a request (T42e). */
+  fatto?: string;
   messaggi?: string[];
   dialoghi?: Dialog[];
   motivo?: string;

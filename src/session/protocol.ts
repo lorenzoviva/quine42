@@ -116,7 +116,9 @@ export type ClientMsg =
   /** The master publishes their branch: it goes into the world, for everyone. */
   | { t: 'pubblica'; seq: number }
   /** The master follows a player (T42c): what is sent is what is around them; without `id`, around the master again. */
-  | { t: 'segui'; seq: number; id?: string };
+  | { t: 'segui'; seq: number; id?: string }
+  /** The master talks to an agent of the Council in the corona (T42e): what it makes goes on their branch. */
+  | { t: 'agente'; seq: number; agente: string; testo: string };
 
 /** Files changed: their new text, or null when they are gone. */
 export type FileChanges = Record<string, string | null>;
@@ -145,12 +147,14 @@ export type ServerMsg =
    * What came of a message: what the world said back meanwhile, and the answer if there is one; the container it
    * opened or changed, with what is in it, and the pocket of a bag it opened.
    */
-  | { t: 'esito'; seq: number; ok: boolean; testo?: string; messaggi?: string[]; dialoghi?: Dialog[]; motivo?: string; contenitore?: ContainerView; borsa?: number }
+  | { t: 'esito'; seq: number; ok: boolean; testo?: string; fatto?: string; messaggi?: string[]; dialoghi?: Dialog[]; motivo?: string; contenitore?: ContainerView; borsa?: number }
   | { t: 'rifiuto'; motivo: string }
   /** What the Council said meanwhile (T41): only to the master, never to a player. */
   | { t: 'concilio'; voci: FeedEntry[] }
   /** The world's files changed (the Council, a publication: T42b); a player hears only of those its client has. */
-  | { t: 'file'; files: FileChanges };
+  | { t: 'file'; files: FileChanges }
+  /** What the Council made on the master's branch (T42e): only to the master, the files it changed there. */
+  | { t: 'ramo'; files: FileChanges };
 
 /** A line someone (or something) said back, as the game shows it in its dialog box. */
 export interface Dialog {

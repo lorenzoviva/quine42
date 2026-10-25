@@ -8,7 +8,7 @@ import { Faults } from './faults';
 import { Sandbox, type Host } from './sandbox';
 import { apiErrors, describeEffect, repairPartita, validateEffects, Validator } from './validator';
 import { deathLevel, fallbackDeath, type DeathVerdict } from './partita';
-import { Repo, type Commit, type KeyValueStore } from './repo';
+import { Repo, memoryStore, type Commit, type KeyValueStore } from './repo';
 import { Corona, campusModel, cellNear, FOCUSED_RULES, folderOf, TABLETS_MAX, type CoronaCell, type Exhibit, type ShowcaseSource, type StudioItem } from './corona';
 import { Archive } from './archive';
 import { bibleBreaks, cleanBible, metaBreak } from './fourthwall';
@@ -6110,6 +6110,21 @@ export class Kernel {
     const commit = this.repo.commit(message, 'player');
     this.log('repo', `commit ${commit.id}: ${message}`);
     return { ok: true, commit };
+  }
+
+  /**
+   * A kernel on the master's branch (T42e): `files` are this world's with the branch on top. The same models (and their
+   * budget), the calls in this kernel's ledger, the Council's words in this feed; nothing generated, saved or ticking of
+   * its own (a mirror), the one acting is `wanderer`. What a request to the Council commits there is the branch's.
+   */
+  async branchKernel(files: FileMap, wanderer: string): Promise<Kernel> {
+    const k = await Kernel.boot({ files, store: memoryStore(), models: this.models, wasmUri: this.wasmUri, mirror: true });
+    this.models.onCall = (r) => this.usage.record(r);
+    k.bus.on('council', (e: FeedEntry) => this.council.say(e.from, e.kind, e.text, e.to, e.task));
+    const body = k.addWanderer(wanderer);
+    if (body !== undefined) k.playerId = body;
+    k.council.payer = (task) => payerOf(task, wanderer);
+    return k;
   }
 
   /**

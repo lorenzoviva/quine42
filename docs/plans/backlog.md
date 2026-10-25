@@ -1102,10 +1102,10 @@ le risposte alle domande del piano.
   giocatore non ha sono i file del Concilio e il codice che disegna e mostra la corona. Gli interni della corona non passavano già
   dal server (non sono entità); il master non riceveva il registro del Concilio, e ora sì.
 
-### T42 · Il master — spezzato in T42a-T42e (dipende da T37, T41)
+### T42 · Il master — spezzato in T42a-T42f (dipende da T37, T41)
 - Contesto: il piano del multigiocatore, «Il master». Troppo grande per una sessione: master fisso e god mode (T42a), il ramo
   `master` e la pubblicazione (T42b), i giocatori dalla corona (T42c), il clone con un altro master (T42d), le rune della corona e il
-  Referente sul ramo (T42e).
+  Referente sul ramo (T42e), le rune chieste al Referente (T42f).
 
 ### T42a · Il master in god mode, visibile solo nel mondo — `fatto` (`093d98e`)
 - Fare: il master è chi crea l'universo multigiocatore (non si cambia); god mode (niente morte, bisogni, danni, effetti dei
@@ -1140,12 +1140,33 @@ le risposte alle domande del piano.
   nella corona e le richieste al Referente non passano dal server in multigiocatore: spostate in T42e. Nessuna verifica nel browser:
   in singola nulla cambia (il pulsante non c'è) e il multigiocatore è coperto dai test col finto trasporto.
 
-### T42e · Le rune della corona e il Referente sul ramo `master` — `da fare` (dipende da T42b)
+### T42e · Le rune della corona e il Referente sul ramo `master` — `fatto` (`HASH`) (dipende da T42b)
 - Contesto: T42b porta sul ramo `master` le modifiche dell'editor (e il suo `R`); in multigiocatore le rune incise nella corona e le
   richieste al Referente non arrivano ancora al server (la corona è dello specchio del master, il Referente non è un'entità del server).
 - Fare: le rune scritte nella corona e ciò che il Referente fa fare alle squadre girano sul server per il master e committano sul suo
   ramo (non sul principale), da pubblicare come le modifiche dell'editor.
 - Fatto quando: test — una richiesta al Referente del master cambia il ramo, non il mondo dei giocatori, finché non pubblica.
+- Esito: ADR-0069. Nello specchio del master `talkToAgent` (Referente e squadre) diventa `agente {agente, testo}`; il server (solo dal master,
+  solo agenti di `AGENTS`, una richiesta alla volta) la esegue in un kernel del ramo (`kernel.branchKernel`: file del mondo più il ramo,
+  gli stessi modelli con `onCall` rimesso al registro del mondo, il suo registro ripetuto in quello del mondo, il master che agisce e paga,
+  `mirror` perché non generi né salvi nulla da sé), che prima di ogni richiesta torna al mondo e al ramo come sono. Ciò che vi si committa
+  entra nel ramo (anche su disco) e arriva al master (`ramo {files}`, poi l'`esito` con `fatto`); lo specchio lo committa, e il ramo
+  intero torna al server come in T42b. `tests/referente.test.ts` (2 test). Diverso dal previsto: nella corona le rune non si incidono
+  (niente tappeto) e la runa del Concilio non cambia file, quindi non c'è niente da portare sul ramo; «ogni altra runa la chiede al
+  Referente» del piano è un incarico nuovo, spostato in T42f. Lo Scultore non lavora nel kernel del ramo (i modelli nuovi li scrive il
+  mondo dopo la pubblicazione) e gli utilizzi delle carte nei suoi prompt non si contano. Nessuna verifica nel browser: in singola
+  nulla cambia (`talkToAgent` resta locale) e il multigiocatore è coperto dai test col finto trasporto.
+
+### T42f · Le rune che il master chiede al Referente — `da fare` (dipende da T42e)
+- Contesto: piano del multigiocatore, «Il master»: il master ha una sola runa del tappeto (quella del Concilio) e «ogni altra runa la
+  chiede al Referente». Oggi il Referente non ha un incarico per le rune (`referenteReply`: oggetto, cosa, personaggio, ambiente,
+  regola, riscolpisci, oggetti, meccanica, nessuno).
+- Fare: un incarico `runa` del Referente (schema, prompt, `MockModels`): dà al master le rune che chiede (token del canone o del
+  tappeto), nella borsa delle rune del suo viandante sul server; in singola nulla cambia (il trasceso ha già tutto). Le rune date non
+  sono file: non vanno sul ramo.
+- Fatto quando: test — il master chiede «dammi la runa speed» e la trova nell'inventario sul server; un giocatore non può chiederla.
+- Domanda per l'autore: quali rune può chiedere il master (tutte, o solo quelle del canone e del tappeto)? Proposta: tutte quelle che
+  il validatore delle rune accetta come token.
 
 ### T42c · I giocatori dalla corona — `fatto` (`d119c30`) (dipende da T42a)
 - Fare: nell'atlante della corona (Ufficio dei luoghi) e nel tavolo della situazione i giocatori collegati, ciascuno sul suo chunk;

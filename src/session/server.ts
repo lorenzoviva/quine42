@@ -5,7 +5,7 @@
 // what came of it. No DOM, no network here: the links are given (WebSocket in server/session.ts, fake in tests).
 
 import { PER_WANDERER, type Kernel } from '../kernel/kernel';
-import type { FeedEntry } from '../kernel/agents/council';
+import { AGENTS, type AgentId, type FeedEntry } from '../kernel/agents/council';
 import { ATLAS_FILE } from '../kernel/atlas';
 import { RELIEF_PATH } from '../kernel/relief';
 import type { FileMap } from '../kernel/types';
@@ -84,6 +84,16 @@ export function playerChanges(files: FileMap, changed: string[]): FileChanges {
   return out;
 }
 
+/** Files with changes on top (null: gone). */
+export function withChanges(files: FileMap, changes: FileChanges): FileMap {
+  const out = { ...files };
+  for (const [p, v] of Object.entries(changes)) {
+    if (v === null) delete out[p];
+    else out[p] = v;
+  }
+  return out;
+}
+
 /** What changed from one set of files to the next. */
 export function changesBetween(a: FileMap, b: FileMap): FileChanges {
   const out: FileChanges = {};
@@ -143,6 +153,8 @@ interface Acted<T> {
 interface Answer {
   ok: boolean;
   value?: unknown;
+  /** What the Council made of a request (T42e). */
+  fatto?: string;
   messaggi?: string[];
   dialoghi?: Dialog[];
   motivo?: string;
@@ -180,6 +192,9 @@ export class SessionServer {
    * from. The world does not have them until they publish.
    */
   private branch: { files: FileChanges; base: Record<string, string | null> } = { files: {}, base: {} };
+  /** The kernel of the master's branch, where their requests to the Council run (T42e), and the queue of those requests. */
+  private forked?: Promise<Kernel>;
+  private asking: Promise<unknown> = Promise.resolve();
   /** The world's files as the clients last heard of them (a copy: the kernel's may be the repository's working files, written in place). */
   private told: FileMap;
   readonly hz: number;
@@ -366,6 +381,8 @@ export class SessionServer {
         return this.answer(c, seq, this.publish(c));
       case 'segui':
         return this.answer(c, seq, this.watch(c, msg.id));
+      case 'agente':
+        return this.askOnBranch(c, seq, msg.agente, msg.testo);
       case 'casella': {
         const why = this.tileOutOfReach(c, msg.col, msg.row) ?? (typeof msg.azione === 'string' && msg.azione && msg.azione !== 'altro' ? undefined : 'azione sconosciuta');
         if (why) return this.answer(c, seq, { ok: false, motivo: why });
@@ -396,6 +413,56 @@ export class SessionServer {
     this.branch = { files: clean, base: Object.fromEntries(Object.keys(clean).map((p) => [p, typeof b[p] === 'string' ? (b[p] as string) : null])) };
     void k.repo.backend?.branch?.(BRANCH, clean, `ramo del master: ${listOf(Object.keys(clean)) || 'vuoto'}`, 'player');
     return { ok: true };
+  }
+
+  /**
+   * The master talks to an agent of the Council (T42e), the Referente or a team in the corona: the request runs here, on
+   * the server's Council, in a kernel of their branch, one at a time; what it commits there goes on the branch, the world
+   * does not have it until they publish. The master hears of the files (`ramo`), then the answer.
+   */
+  private askOnBranch(c: Client, seq: number, agente: unknown, testo: unknown): void {
+    if (!this.kernel.isMaster(c.id)) return this.answer(c, seq, { ok: false, motivo: 'solo il master parla con il Concilio' });
+    if (typeof agente !== 'string' || !(agente in AGENTS) || typeof testo !== 'string' || !testo.trim()) return this.answer(c, seq, { ok: false, motivo: 'richiesta non valida' });
+    const ask = this.asking.then(() => this.onBranch(c, agente as AgentId, testo.slice(0, 2000)));
+    this.asking = ask.catch(() => undefined);
+    void ask.then(
+      (r) => this.answer(c, seq, r),
+      (e) => this.answer(c, seq, { ok: false, motivo: (e as Error).message }),
+    );
+  }
+
+  private async onBranch(c: Client, agente: AgentId, testo: string): Promise<Answer> {
+    const k = this.kernel;
+    const main = { ...k.files };
+    const fork = await (this.forked ??= k.branchKernel(withChanges(main, this.branch.files), c.id));
+    // The branch kernel comes up to the world and the branch as they are now.
+    const repo = fork.repo;
+    const now = changesBetween(repo.restore(), withChanges(main, this.branch.files));
+    if (Object.keys(now).length) {
+      for (const [p, v] of Object.entries(now)) repo.write(p, v);
+      fork.applyFiles({ ...repo.working });
+      repo.commit('il mondo e il ramo del master', 'kernel');
+    }
+    const before = { ...repo.head().files };
+    const r = await fork.talkToAgent(agente, testo);
+    // Only what was committed (valid) goes on the branch.
+    const made = changesBetween(before, repo.head().files);
+    const paths = Object.keys(made);
+    if (paths.length) {
+      const { files, base } = this.branch;
+      for (const [p, v] of Object.entries(made)) {
+        if ((main[p] ?? null) === v) {
+          delete files[p];
+          delete base[p];
+          continue;
+        }
+        if (!(p in files)) base[p] = fileHash(main[p]);
+        files[p] = v;
+      }
+      void k.repo.backend?.branch?.(BRANCH, { ...files }, `ramo del master: ${AGENTS[agente].name}, ${listOf(paths)}`, 'agent');
+      if (this.clients.get(c.id) === c) c.link.send({ t: 'ramo', files: made });
+    }
+    return { ok: true, value: r.say, ...(r.forged ? { fatto: r.forged } : {}) };
   }
 
   /**
@@ -554,6 +621,7 @@ export class SessionServer {
       seq,
       ok: r.ok,
       ...(typeof r.value === 'string' && r.value ? { testo: r.value } : {}),
+      ...(r.fatto ? { fatto: r.fatto } : {}),
       ...(r.messaggi?.length ? { messaggi: r.messaggi } : {}),
       ...(r.dialoghi?.length ? { dialoghi: r.dialoghi } : {}),
       ...(r.motivo ? { motivo: r.motivo } : {}),

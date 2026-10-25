@@ -154,6 +154,9 @@ export class ThinClient {
       case 'file':
         this.worldFiles(m.files);
         break;
+      case 'ramo':
+        this.councilOnBranch(m.files);
+        break;
       case 'correzione':
         // The latest word wins: an older correction, overtaken by steps already corrected, is not applied again.
         if (m.seq < this.lastCorrection) break;
@@ -363,6 +366,24 @@ export class ThinClient {
     if (this.session.master) this.sendBranch();
   }
 
+  /**
+   * What the Council made on the master's branch (T42e), on the server: a commit of their mirror, and so of their branch.
+   * An edit not yet committed stays on top.
+   */
+  private councilOnBranch(changes: FileChanges): void {
+    const repo = this.k.repo;
+    const paths = Object.keys(changes);
+    if (!this.session.master || !paths.length) return;
+    const head = repo.head().files;
+    const dirty: FileChanges = {};
+    for (const p of new Set([...Object.keys(head), ...Object.keys(repo.working)])) if (repo.working[p] !== head[p]) dirty[p] = repo.working[p] ?? null;
+    repo.restore();
+    for (const [p, v] of Object.entries(changes)) repo.write(p, v);
+    repo.commit(`il Concilio sul tuo ramo: ${paths.slice(0, 6).join(', ')}${paths.length > 6 ? '…' : ''}`, 'agent');
+    for (const [p, v] of Object.entries(dirty)) repo.write(p, v);
+    this.k.applyFiles({ ...repo.working });
+  }
+
   /** The master's mirror: the branch the server kept comes back into it, and every commit of it goes to the server. */
   private openBranch(): void {
     const k = this.k;
@@ -468,7 +489,14 @@ export class ThinClient {
       void this.show(this.session.act({ t: 'azione', entita: sid, azione: 'strumento' }));
     };
     this.relayCarried();
-    if (this.session.master) k.rollback = (id?: string) => this.rollbackBranch(id);
+    if (this.session.master) {
+      k.rollback = (id?: string) => this.rollbackBranch(id);
+      // The Referente and the teams of the corona work on the server, on the master's branch (T42e).
+      k.talkToAgent = async (agent, text) => {
+        const r = await this.session.act({ t: 'agente', agente: agent, testo: text });
+        return r.ok ? { say: r.testo ?? '…', ...(r.fatto ? { forged: r.fatto } : {}) } : { say: `(${r.motivo ?? 'nessuna risposta'})` };
+      };
+    }
     else for (const name of LATER) (k as unknown as Record<string, () => undefined>)[name] = () => this.later();
   }
 

@@ -332,6 +332,9 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   I file del mondo che cambiano arrivano a ogni client a 10 Hz (`file`; ai giocatori `playerChanges`) e lo specchio li committa, tranne
   quelli del ramo del master. `R` del master riporta il ramo all'ultimo valido (o a un commit dello specchio); il mondo resta com'è.
   Il master prova da solo ciò che il suo client disegna (modelli, aspetto, terreni, corona, cammino): la logica del mondo gira sul server.
+  Il Concilio sul ramo (ADR-0069, T42e): ciò che il master chiede al Referente e alle squadre nella corona (`talkToAgent` dello specchio →
+  `agente`) gira sul server, una richiesta alla volta, in un kernel del ramo (`kernel.branchKernel`: file del mondo più il ramo, stessi modelli,
+  il master che agisce e paga); ciò che vi si committa entra nel ramo e arriva al master (`ramo`), da pubblicare come l'editor.
 - **Il clone con un altro master** (ADR-0068, T42d): il master non cambia; un altro master è un altro universo. `cloneUniverse`
   (`server/universeStore.ts`, `POST /api/universe/<nome>/clone {nome, master, titolari}`) copia la cartella intera (storia, `maps/`,
   viandanti, carte, consumi; non i rami `rami/*`) e committa ciò che dà `cloneChanges` (`src/kernel/clone.ts`): `name` e
