@@ -1106,7 +1106,7 @@ le risposte alle domande del piano.
 - Contesto: il piano del multigiocatore, «Il master». Troppo grande per una sessione: master fisso e god mode (T42a), il ramo
   `master` e la pubblicazione (T42b), i giocatori dalla corona (T42c), il clone con un altro master (T42d).
 
-### T42a · Il master in god mode, visibile solo nel mondo — `fatto` (vedi commit «Multigiocatore (T42a)»)
+### T42a · Il master in god mode, visibile solo nel mondo — `fatto` (`093d98e`)
 - Fare: il master è chi crea l'universo multigiocatore (non si cambia); god mode (niente morte, bisogni, danni, effetti dei
   giocatori), visibile agli altri col suo viandante solo quando è nel mondo.
 - Fatto quando: test (il master non muore; gli effetti di un giocatore non lo toccano; uscito dal cerchio gli altri non lo vedono).
