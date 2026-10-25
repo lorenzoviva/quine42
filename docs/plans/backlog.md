@@ -1289,7 +1289,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   highlighting e validazione immediata; viewport 3D Three.js a destra con rendering in tempo reale della mesh risultante,
   controlli camera e orbita libera con tasto destro). Esito: `lab/editor/` (`index.html`, `editor.css`, `syntax.ts`, `main.ts`, `worker.ts`),
   integrazione in `vite.config.ts`, test in `tests/editor.test.ts` (10 test), verifica nel browser confermata.
-- **T59b · Controlli CAD per voxel** — `fatto`: strumenti interattivi sulla griglia (creazione, cancellazione, spostamento di forme
+- **T59b · Controlli CAD per voxel** — `fatto` (`b4fda79`): strumenti interattivi sulla griglia (creazione, cancellazione, spostamento di forme
   base / blocchi; selezione palette colori, materiale e proprietà glow). Esito: `lab/editor/cad.ts` (manipolazione XML bidirezionale per forme base, colori, glow, arti, raycasting e hit testing), barra strumenti CAD (Seleziona, Box, Voxel 1x1, Cilindro, Sfera, Cono, Gomma; dimensioni W, D, H), anteprima 3D ghost con wireframe durante il puntamento, coordinate cursore (X, Y, Z), selezione forma con box highlight 3D e salto a riga nel codice, scheda Inspector con regolazione numerica e bottoni +/- per posizione e dimensioni, duplicazione ed eliminazione, barra palette swatches MarkovJunior con toggle Glow (`glow="True"`), colore personalizzato HEX e legame ad arti (`part="..."`), scorciatoie da tastiera; test in `tests/editor.test.ts` (18 test), verifica nel browser confermata. Diverso dal previsto: nessuno.
 - **T59c · Controllo esecuzione e animazione**: controlli temporali di esecuzione delle regole MarkovJunior (step singolo,
   loop continuo, pausa/stop) e anteprima sequenza fotogrammi per modelli animati.
