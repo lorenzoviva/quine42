@@ -9,10 +9,11 @@ import { Sandbox, type Host } from './sandbox';
 import { apiErrors, describeEffect, repairPartita, validateEffects, Validator } from './validator';
 import { deathLevel, fallbackDeath, type DeathVerdict } from './partita';
 import { Repo, type Commit, type KeyValueStore } from './repo';
-import { Corona, campusModel, cellNear, folderOf, type CoronaCell, type Exhibit, type ShowcaseSource, type StudioItem } from './corona';
+import { Corona, campusModel, cellNear, FOCUSED_RULES, folderOf, TABLETS_MAX, type CoronaCell, type Exhibit, type ShowcaseSource, type StudioItem } from './corona';
 import { Archive } from './archive';
 import { bibleBreaks, cleanBible, metaBreak } from './fourthwall';
 import { biblePages, touchingNodes, type BibleShown } from './bible';
+import type { Rule } from './types';
 import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, placeRegion, readAtlas, regionAt, writeAtlas, type Region } from './atlas';
 import { STAMP_SHAPES } from './stamps';
 import { repairProgram } from './mj';
@@ -215,14 +216,31 @@ export interface LayoutSample {
   error?: string;
 }
 
-export interface Rule {
-  chiave: string;
-  testo: string;
-  possibile: boolean;
-  racconto: string;
-  effetti?: string[];
-  /** Who judged it and who paid (T36): only the Council's judgements are cards. */
-  carta?: Carta;
+export type { Rule };
+
+export interface RuleShown {
+  rule: Rule;
+  index: number;
+  count: number;
+  marked: boolean;
+}
+
+export interface CanonShown {
+  text: string;
+  runes: Array<{
+    token: string;
+    name: string;
+    glyph: string;
+    color: string;
+    element: string;
+    description: string;
+  }>;
+  spells: Array<{
+    seq: string;
+    name: string;
+    description: string;
+    cost: number;
+  }>;
 }
 
 export interface Needs {
@@ -415,6 +433,8 @@ export class Kernel {
   private benchRunning = new Set<string>();
   /** The Library's lectern (T47a): which page of the bible it shows. */
   private bibleIndex = 0;
+  /** The Library's rules wall (T47b): which window of rules it shows. */
+  private rulesOffset = 0;
   /** The commit the Direction's timeline shows (T46b); none: the newest. */
   private filmAt?: string;
   /** What each system costs in the tick (T27a): the chain of the Systems Room shows it. */
@@ -1035,6 +1055,7 @@ export class Kernel {
     else if (!this.terrain || changed.has(this.terrain.manifest.id) || opts.reset) for (const ch of this.chunks.values()) if (ch.stage === 'draft') this.regenerateDraft(ch);
 
     this.corona.build(files, this.exhibits(files), this.terrainExhibits(), this.layoutExhibits(), this.systems.map((m) => ({ id: m.manifest.id, name: m.manifest.name || m.manifest.id })));
+    this.rulesOffset = this.corona.rulesOffset;
     this.placeCampus();
     // Things that wait for a model of their own wear it as soon as the library has it.
     for (const id of this.ecs.query('form')) {
@@ -3454,6 +3475,12 @@ export class Kernel {
       case 'leggio':
         this.openBible();
         return;
+      case 'lastra':
+        this.openRule(it.target ?? '');
+        return;
+      case 'canone':
+        this.openCanon();
+        return;
       case 'showcase':
         this.openShowcase(it.target!);
         return;
@@ -3462,6 +3489,7 @@ export class Kernel {
         if (it.target === 'tempo') this.stepTimeline(it.kind === 'prev' ? 1 : -1);
         else if (it.target === 'banco') this.stepBench(it.kind === 'prev' ? -1 : 1);
         else if (it.target === 'leggio') this.stepBible(it.kind === 'prev' ? -1 : 1);
+        else if (it.target === 'regole') this.stepRules(it.kind === 'prev' ? -1 : 1);
         else this.stepShowcase(it.target!, it.kind === 'prev' ? -1 : 1);
         return;
       case 'less':
@@ -3510,7 +3538,7 @@ export class Kernel {
 
   clickStudio(rx: number, ry: number): boolean {
     if (this.zone !== 'studio') return false;
-    const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'situazione', 'parete', 'console', 'stazione', 'banco', 'leggio', 'layout']);
+    const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'situazione', 'parete', 'console', 'stazione', 'banco', 'leggio', 'layout', 'lastra', 'canone']);
     if (!it) return false;
     const p = this.playerPos();
     const c = cellNear(it, p.x, p.y);
@@ -3525,9 +3553,12 @@ export class Kernel {
     else if (it.kind === 'stazione') this.openStation(it.target!);
     else if (it.kind === 'banco') this.openBench();
     else if (it.kind === 'leggio') this.openBible();
+    else if (it.kind === 'lastra') this.openRule(it.target ?? '');
+    else if (it.kind === 'canone') this.openCanon();
     else if (it.target === 'tempo') this.stepTimeline(it.kind === 'prev' ? 1 : -1);
     else if (it.target === 'banco') this.stepBench(it.kind === 'prev' ? -1 : 1);
     else if (it.target === 'leggio') this.stepBible(it.kind === 'prev' ? -1 : 1);
+    else if (it.target === 'regole') this.stepRules(it.kind === 'prev' ? -1 : 1);
     else if (it.kind === 'layout') this.openLayout(it, this.corona.roomAt(it.x, it.y)?.building.name ?? '');
     else if (it.kind === 'showcase') this.openShowcase(it.target!);
     else if (it.kind === 'less' || it.kind === 'more') this.stepPhase(it.target!, it.kind === 'less' ? -1 : 1);
@@ -4279,6 +4310,93 @@ export class Kernel {
     const now = this.bibleOf();
     if (!now) return this.message('La bibbia è vuota.');
     this.bus.emit('ui:bible', now);
+  }
+
+  /**
+   * The Library's rules wall (T47b): the current window of rules, and total count.
+   */
+  rulesWall(): { offset: number; count: number; visible: Rule[] } {
+    const all = this.rules();
+    const count = all.length;
+    const max = TABLETS_MAX;
+    const offset = Math.max(0, Math.min(Math.max(0, count - max), this.rulesOffset));
+    const visible = count <= max ? all : all.slice(offset, offset + max);
+    return { offset, count, visible };
+  }
+
+  /**
+   * «<» «>» of the rules wall: step backward (d < 0) or forward (d > 0) in the history of rules.
+   * Stops at the ends ("i bordi fermano").
+   */
+  stepRules(d: number): void {
+    const rules = this.rules();
+    if (!rules.length) return this.message('Non ci sono regole stabilite.');
+    const max = TABLETS_MAX;
+    if (rules.length <= max) return this.message('Tutte le regole stabilite sono già visibili a parete.');
+    const maxOffset = rules.length - max;
+    const prev = this.rulesOffset;
+    const next = Math.max(0, Math.min(maxOffset, prev + d));
+    if (next === prev) {
+      this.message(d < 0 ? 'Sei alle regole più antiche.' : 'Sei alle regole più recenti.');
+      return;
+    }
+    this.rulesOffset = next;
+    this.corona.setRulesOffset(this.rulesOffset);
+    this.message(`Regole a parete: dalla ${this.rulesOffset + 1} alla ${this.rulesOffset + max} di ${rules.length}`);
+    this.bus.emit('studio:rules_wall', { offset: this.rulesOffset, total: rules.length });
+  }
+
+  /** The rule seen up close or picked by key/index: its judgement and card data (T47b). */
+  ruleOf(chiaveOrIndex: string | number): RuleShown | undefined {
+    const rules = this.rules();
+    if (!rules.length) return undefined;
+    let idx = -1;
+    if (typeof chiaveOrIndex === 'number') {
+      idx = chiaveOrIndex;
+    } else {
+      idx = rules.findIndex((r) => r.chiave === chiaveOrIndex);
+    }
+    if (idx < 0 || idx >= rules.length) return undefined;
+    const rule = rules[idx];
+    const marked = idx >= rules.length - FOCUSED_RULES;
+    return { rule, index: idx, count: rules.length, marked };
+  }
+
+  /** Opens the panel of a rule's judgement (T47b). */
+  openRule(chiaveOrIndex: string | number): void {
+    const now = this.ruleOf(chiaveOrIndex);
+    if (!now) return this.message('Regola non trovata.');
+    this.bus.emit('ui:rule', now);
+  }
+
+  /**
+   * The rune canon (T47b): the text of world/canone.md, the magic runes with their colours,
+   * and the known incantations.
+   */
+  canonOf(): CanonShown | undefined {
+    const text = this.files['world/canone.md'] ?? '';
+    const runesList = Object.entries(this.content.runes).map(([token, r]) => ({
+      token,
+      name: r.name,
+      glyph: r.glyph,
+      color: r.color,
+      element: r.element,
+      description: r.description,
+    }));
+    const spellsList = Object.entries(this.content.spells).map(([seq, s]) => ({
+      seq,
+      name: s.name,
+      description: s.description,
+      cost: s.cost,
+    }));
+    return { text, runes: runesList, spells: spellsList };
+  }
+
+  /** Opens the panel of the rune canon engraved above the door (T47b). */
+  openCanon(): void {
+    const now = this.canonOf();
+    if (!now) return this.message('Il canone delle rune è vuoto.');
+    this.bus.emit('ui:canon', now);
   }
 
   /** States of the wanderer (on horseback, with a backpack…): what they change, until when. */

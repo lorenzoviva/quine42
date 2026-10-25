@@ -648,6 +648,88 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
       glow.box(cx - 0.52, 0.85, cz + 0.38, cx + 0.52, 0.87, cz + 0.42, green);
       break;
     }
+    case 'lastra': {
+      // A rule tablet on the wall of the Library of the World (T47b):
+      // A dark slate tablet against the back wall, with engraved runic text;
+      // the newest 12 rules shine with radiant emerald/golden light and floating embers.
+      const marked = !!it.marked;
+      const tabletCol = marked ? rgbOf('#ffcf5c') : rgbOf(col, 0.4);
+
+      // Low pedestal/bracket at the wall base
+      lit.box(x + 0.12, 0, z + 0.15, x + 0.88, 0.12, z + 0.48, rgbOf('#0e1218'));
+      rim(glow, x + 0.12, z + 0.15, x + 0.88, z + 0.48, 0.12, marked ? rgbOf(col, 0.6) : rgbOf('#1e2a22', 0.3));
+
+      // The vertical stone tablet
+      lit.box(x + 0.16, 0.12, z + 0.18, x + 0.84, 1.35, z + 0.38, rgbOf('#111622'));
+
+      if (marked) {
+        // Glowing neon rim around the tablet
+        glow.box(x + 0.14, 0.12, z + 0.17, x + 0.86, 1.37, z + 0.21, rgbOf('#7dd87d', 0.85));
+        glow.box(x + 0.14, 1.33, z + 0.17, x + 0.86, 1.37, z + 0.39, tabletCol);
+
+        // Engraved text lines glowing brightly
+        glow.box(x + 0.22, 0.45, z + 0.17, x + 0.78, 0.48, z + 0.20, tabletCol);
+        glow.box(x + 0.26, 0.70, z + 0.17, x + 0.72, 0.73, z + 0.20, rgbOf('#7dd87d', 0.9));
+        glow.box(x + 0.22, 0.95, z + 0.17, x + 0.78, 0.98, z + 0.20, tabletCol);
+        glow.box(x + 0.30, 1.15, z + 0.17, x + 0.70, 1.18, z + 0.20, rgbOf('#7dd87d', 0.9));
+
+        // Floating embers / sparks above the shining tablet
+        glow.box(x + 0.48, 1.45, z + 0.25, x + 0.52, 1.49, z + 0.29, tabletCol);
+        glow.box(x + 0.35, 1.55, z + 0.28, x + 0.39, 1.59, z + 0.32, rgbOf('#7dd87d', 0.8));
+      } else {
+        // Unmarked older tablet: subtle quiet carving
+        glow.box(x + 0.16, 0.12, z + 0.18, x + 0.84, 1.35, z + 0.20, rgbOf(col, 0.25));
+        glow.box(x + 0.25, 0.55, z + 0.18, x + 0.75, 0.57, z + 0.20, rgbOf(col, 0.3));
+        glow.box(x + 0.28, 0.85, z + 0.18, x + 0.72, 0.87, z + 0.20, rgbOf(col, 0.3));
+      }
+      break;
+    }
+    case 'canone': {
+      // The rune canon engraved above the door of the Library (T47b):
+      // A dark stone lintel/architrave spanning above the exit, framed in green neon,
+      // with the 7 magic runes of the universe glowing in their authentic individual colors.
+      const lintelY0 = 0.45;
+      const lintelY1 = 0.82;
+      const darkStone = rgbOf('#0d1117');
+      const greenGlow = rgbOf(col, 0.9);
+
+      // Dark lintel stone slab spanning across the top of the doorway
+      lit.box(x - 0.6, lintelY0, z + 0.80, x + 1.6, lintelY1, z + 0.98, darkStone);
+
+      // Neon glowing frame enclosing the canon lintel
+      glow.box(x - 0.62, lintelY1 - 0.03, z + 0.78, x + 1.62, lintelY1 + 0.01, z + 0.98, greenGlow);
+      glow.box(x - 0.62, lintelY0 - 0.01, z + 0.78, x + 1.62, lintelY0 + 0.03, z + 0.98, greenGlow);
+      glow.box(x - 0.62, lintelY0, z + 0.78, x - 0.58, lintelY1, z + 0.82, greenGlow);
+      glow.box(x + 1.58, lintelY0, z + 0.78, x + 1.62, lintelY1, z + 0.82, greenGlow);
+
+      // The 7 magic runes in their exact canon colors:
+      // luce (yellow), fuoco (orange), acqua (blue), terra (earth), vita (green), scudo (purple), vento (cyan/white)
+      const MAGIC_RUNE_COLORS = [
+        '#ffe27a', // luce
+        '#ff7a3a', // fuoco
+        '#5ab8ff', // acqua
+        '#c49a5a', // terra
+        '#7ee08a', // vita
+        '#b9a6ff', // scudo
+        '#d8f4ff', // vento
+      ];
+
+      const nRunes = MAGIC_RUNE_COLORS.length;
+      const startRx = x - 0.38;
+      const endRx = x + 1.38;
+      const stepRx = (endRx - startRx) / (nRunes - 1);
+
+      for (let i = 0; i < nRunes; i++) {
+        const rx = startRx + i * stepRx;
+        const runeColor = rgbOf(MAGIC_RUNE_COLORS[i], 0.95);
+
+        // Small dark stone backing socket for each rune glyph
+        lit.box(rx - 0.065, lintelY0 + 0.08, z + 0.79, rx + 0.065, lintelY1 - 0.08, z + 0.83, rgbOf('#06080c'));
+        // Radiant glowing magic rune tile
+        glow.box(rx - 0.045, lintelY0 + 0.11, z + 0.78, rx + 0.045, lintelY1 - 0.11, z + 0.81, runeColor);
+      }
+      break;
+    }
     case 'portal': {
       const c = rgbOf(it.target ? (k.corona.building(it.target)?.color ?? col) : '#ffffff');
       glow.box(x + 0.15, 0, z + 0.15, x + 0.85, 0.05, z + 0.85, c);

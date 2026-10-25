@@ -583,7 +583,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   nessun errore in console.
 - Fatto quando (per pezzo): test verdi, typecheck, verifica nel browser (`aurora`, offline) con pannello e nessun errore.
 
-### T47 · La Biblioteca del Mondo, dentro — T47a `fatto` (`a363021`), T47b `da fare`
+### T47 · La Biblioteca del Mondo, dentro — T47a `fatto` (`a363021`), T47b `fatto`
 - Contesto: §3.2 (il chiostro, scelto il 23/10). Oggi dentro la Biblioteca (`mondo`, Narratore, verde `7dd87d`) ci sono
   solo gli scaffali dei file di `world/`.
 - **T47a · il leggio**: al posto della vetrina, un libro aperto olografico; «<» «>» sfogliano la bibbia (`world/bible.json`:
@@ -605,6 +605,15 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   quelle che il Narratore riceve, brillano), clic → il giudizio nel pannello; il canone delle rune (`world/canone.md`)
   inciso sopra la porta, le rune magiche nei loro colori. Test: le lastre sono quante le regole (o il massimo che la
   parete tiene, con «<» «>»), le ultime marcate.
+  Esito: `fatto`. `TABLETS_WALL` (`{ x0: 3, x1: 20, y: 1 }`), `TABLETS_MAX = 16`, `FOCUSED_RULES = 12` e `ruleTablets` in `src/kernel/corona.ts`;
+  se le regole sono <= 16, vengono posizionate tutte le lastre centrate sulla parete nord (y = 1) senza frecce; se superano la capienza,
+  vengono mostrate 16 lastre con le frecce «<» e «>» (`target: 'regole'`, `stepRules(d)`, i bordi fermano); le ultime 12 regole stabilite in
+  `world/rules.json` hanno `marked = true` e brillano con bagliore smeraldo/oro e faville fluttuanti (`corona3d.ts`). Clic o E apre `ui:rule`
+  nel pannello (`studio.ts`) con esito («si può»/«non si può»), badge «Regola recente», racconto del Concilio, effetti e carta.
+  Sopra la porta a sud (`x: 12, y: 14`), architrave di pietra scura con cornice neon verde e incise le 7 rune magiche del canone nei loro colori autentici
+  (`luce` #ffe27a, `fuoco` #ff7a3a, `acqua` #5ab8ff, `terra` #c49a5a, `vita` #7ee08a, `scudo` #b9a6ff, `vento` #d8f4ff); E o clic aprono
+  `ui:canon` con le schede delle 7 rune, il testo completo di `world/canone.md` e gli incantesimi conosciuti.
+  `tests/rules_wall.test.ts` (9 test), typecheck e test verdi, verifica nel browser positiva con screenshot di lastre e canone.
 - Fatto quando (per pezzo): test verdi, typecheck, verifica nel browser.
 
 ### T48 · La Galleria dell'Artista, dentro e il plinto — `da fare` (si comincia da T48a)

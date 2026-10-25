@@ -2,7 +2,7 @@
 // shows it, with «Riscolpisci» — a building's notice board, with the latest changes to its files, and what a
 // showcase shows (T21), with its arrows, and an environment of the sample room on its trial draft (T26d).
 
-import { PLACE_PHASES, type Kernel, type LayoutSample, type PlaceMiniature, type ShowcaseEntry } from '../kernel/kernel';
+import { PLACE_PHASES, type CanonShown, type Kernel, type LayoutSample, type PlaceMiniature, type RuleShown, type ShowcaseEntry } from '../kernel/kernel';
 import type { StudioItem } from '../kernel/corona';
 import { OPERATION_COLOR, OPERATION_NAME, type Operation, type OperationKind, type Situation } from '../kernel/situation';
 import { ALERT_COLOR, ALERT_NAME, LIVE_LINES, SCREEN_NAME, fill, type Screens, type ScreenField } from '../kernel/screens';
@@ -55,6 +55,8 @@ export class StudioPanel {
     k.bus.on('studio:bible', (b: BibleShown) => {
       if (this.isOpen && this.bibleOpen) this.bible(b);
     });
+    k.bus.on('ui:rule', (r: RuleShown) => this.rule(r));
+    k.bus.on('ui:canon', (c: CanonShown) => this.canon(c));
     // The arrows pressed with the panel open: it follows.
     k.bus.on('studio:showcase', (e: Shown) => {
       if (this.isOpen && this.shown === e.building) this.showcase({ ...e, name: this.k.corona.building(e.building)?.name ?? e.building });
@@ -554,5 +556,138 @@ export class StudioPanel {
       ),
     );
     this.bibleOpen = true;
+  }
+
+  /**
+   * A rule tablet of the Library of the World (T47b): the judgement of world/rules.json.
+   */
+  rule(r: RuleShown): void {
+    const { rule, index, count, marked } = r;
+
+    const step = (d: number, text: string) => {
+      const btn = el('button', {}, text);
+      btn.onclick = () => {
+        const nextIdx = index + d;
+        if (nextIdx >= 0 && nextIdx < count) this.k.openRule(nextIdx);
+      };
+      if (index + d < 0 || index + d >= count) btn.setAttribute('disabled', 'true');
+      return btn;
+    };
+
+    const editBtn = el('button', {}, 'Apri world/rules.json');
+    editBtn.onclick = () => {
+      this.close();
+      this.onEdit?.('world/rules.json');
+    };
+
+    const outcomeTag = rule.possibile
+      ? el('span', { class: 'tag', style: 'background: #153820; color: #7ee08a; border: 1px solid #2a7a40; font-weight: bold; padding: 2px 8px; border-radius: 4px;' }, '✓ SI PUÒ')
+      : el('span', { class: 'tag', style: 'background: #381515; color: #ff8a8a; border: 1px solid #7a2a2a; font-weight: bold; padding: 2px 8px; border-radius: 4px;' }, '✗ NON SI PUÒ');
+
+    const recentBadge = marked
+      ? el('span', { class: 'tag', style: 'background: #3a2e10; color: #ffcf5c; border: 1px solid #7a6020; font-weight: bold; padding: 2px 8px; border-radius: 4px; margin-left: 6px;' }, '★ REGOLA RECENTE')
+      : undefined;
+
+    this.show(
+      el('div', { class: 'title' }, 'La Biblioteca del Mondo — Tavola della Regola'),
+      el('div', { class: 'note' }, `Regola ${index + 1} di ${count} stabilita dal Concilio (world/rules.json). Le ultime 12 guidano il Narratore e il mondo.`),
+      el(
+        'div',
+        { class: 'row', style: 'align-items: center; justify-content: space-between; margin-top: 8px;' },
+        el('div', { class: 'row', style: 'align-items: center;' }, outcomeTag, ...(recentBadge ? [recentBadge] : [])),
+        el('small', { style: 'color: var(--dim);' }, rule.chiave),
+      ),
+      el(
+        'div',
+        { class: 'item', style: 'margin-top: 8px;' },
+        el('strong', { style: 'font-size: 15px; color: var(--fg);' }, rule.testo),
+      ),
+      el('div', { class: 'section' }, 'Il giudizio del Concilio'),
+      el('div', { class: 'note', style: 'white-space: pre-wrap; font-size: 13px; line-height: 1.5; color: var(--fg); background: #0c0f14; border: 1px solid var(--line); padding: 10px 12px; margin: 4px 0;' }, rule.racconto),
+      ...(rule.effetti?.length
+        ? [
+            el('div', { class: 'section' }, `Effetti applicati (${rule.effetti.length})`),
+            el(
+              'div',
+              { class: 'row', style: 'flex-wrap: wrap; gap: 4px; margin: 4px 0;' },
+              ...rule.effetti.map((eff: string) => el('span', { class: 'tag', style: 'background: #182230; color: #6fc3ff; border: 1px solid #284460; padding: 2px 6px;' }, eff)),
+            ),
+          ]
+        : []),
+      ...(rule.carta
+        ? [
+            el('div', { class: 'section' }, 'Carta del giocatore'),
+            el('div', { class: 'note', style: 'font-size: 12px; color: var(--dim);' }, `Autore: ${rule.carta.autore ?? 'Concilio'} · Titolare: ${rule.carta.titolare ?? rule.carta.pagante}`),
+          ]
+        : []),
+      el(
+        'div',
+        { class: 'row', style: 'justify-content: space-between; margin-top: 12px;' },
+        el('div', { class: 'row' }, step(-1, '« precedente'), step(1, 'successiva »')),
+        editBtn,
+      ),
+    );
+  }
+
+  /**
+   * The rune canon engraved above the door (T47b): world/canone.md and the magic runes with their colours.
+   */
+  canon(c: CanonShown): void {
+    const editBtn = el('button', {}, 'Apri world/canone.md');
+    editBtn.onclick = () => {
+      this.close();
+      this.onEdit?.('world/canone.md');
+    };
+
+    const runeCard = (r: CanonShown['runes'][number]) =>
+      el(
+        'div',
+        {
+          style: `display: inline-flex; flex-direction: column; background: #0c1018; border: 1px solid ${r.color}55; border-radius: 4px; padding: 6px 8px; margin: 3px; min-width: 100px;`,
+        },
+        el('div', { style: 'display: flex; align-items: center; justify-content: space-between;' },
+          el('span', { style: `font-size: 20px; font-weight: bold; color: ${r.color}; line-height: 1;` }, r.glyph),
+          el('span', { style: 'font-size: 11px; text-transform: uppercase; color: var(--dim);' }, r.element),
+        ),
+        el('strong', { style: `font-size: 13px; color: ${r.color}; margin-top: 2px;` }, r.name),
+        el('small', { style: 'color: var(--dim); font-size: 11px;' }, `«${r.token}»`),
+        el('div', { style: 'font-size: 11px; color: var(--fg); margin-top: 4px; line-height: 1.2;' }, r.description),
+      );
+
+    this.show(
+      el('div', { class: 'title' }, 'La Biblioteca del Mondo — Il Canone delle Rune'),
+      el('div', { class: 'note' }, 'Ciò che chi vive nel mondo sa delle rune. È inciso sull\'architrave sopra la porta della Biblioteca (world/canone.md).'),
+      el('div', { class: 'section' }, `Le rune magiche di questo mondo (${c.runes.length})`),
+      el(
+        'div',
+        { class: 'row', style: 'flex-wrap: wrap; margin: 4px 0;' },
+        ...c.runes.map(runeCard),
+      ),
+      el('div', { class: 'section' }, 'Il testo del Canone'),
+      el('div', { class: 'note', style: 'white-space: pre-wrap; font-size: 12px; line-height: 1.5; color: var(--fg); background: #0c0f14; border: 1px solid var(--line); padding: 10px 12px; max-height: 220px; overflow-y: auto; margin: 4px 0;' }, c.text),
+      ...(c.spells.length
+        ? [
+            el('div', { class: 'section' }, `Incantesimi conosciuti (${c.spells.length})`),
+            el(
+              'div',
+              { style: 'max-height: 120px; overflow-y: auto;' },
+              ...c.spells.map((s) =>
+                el(
+                  'div',
+                  { class: 'item', style: 'margin: 2px 0;' },
+                  el('span', { class: 'path', style: 'color: #7dd87d;' }, s.seq),
+                  el('strong', { style: 'margin-left: 6px;' }, s.name),
+                  el('span', { style: 'color: var(--dim); margin-left: 6px; font-size: 12px;' }, s.description),
+                ),
+              ),
+            ),
+          ]
+        : []),
+      el(
+        'div',
+        { class: 'row', style: 'justify-content: flex-end; margin-top: 10px;' },
+        editBtn,
+      ),
+    );
   }
 }

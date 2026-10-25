@@ -32,7 +32,16 @@ export class CoronaView {
   /** What the showcases of the studio show (T21), by building: rebuilt when the choice or the models change. */
   private shows = new Map<string, { key: string; group: THREE.Group; spin?: THREE.Object3D; bubbles?: THREE.Object3D[]; silo: boolean }>();
 
-  constructor(private kernel: Kernel) {}
+  constructor(private kernel: Kernel) {
+    this.kernel.bus.on('studio:rules_wall', () => {
+      const key = 'mondo#0';
+      const r = this.rooms.get(key);
+      if (r) {
+        this.root.remove(r.group);
+        this.rooms.delete(key);
+      }
+    });
+  }
 
   /** The universe's files changed: the ring and the rooms are built again. */
   reset(): void {
@@ -211,6 +220,8 @@ export class CoronaView {
     if (shown) o.caption(`E: guarda «${shown.entry.label}» (${shown.index + 1}/${shown.count})`);
     else if (tried) o.caption(`E: il banco di prova, ${tried.entry.name}: «${tried.entry.case.titolo}» (${tried.index + 1}/${tried.count})`);
     else if (read) o.caption(`E: sfoglia la bibbia, «${read.page.titolo}» (${read.index + 1}/${read.count})`);
+    else if (near?.kind === 'lastra') o.caption(near.rule ? `E: la tavola della regola «${near.rule.testo}» (${near.rule.possibile ? 'si può' : 'non si può'}${near.marked ? ' · recente' : ''})` : `E: ${near.label}`);
+    else if (near?.kind === 'canone') o.caption('E: il canone delle rune inciso sopra la porta');
     else if (near && near.kind !== 'desk') o.caption(`E: ${near.kind === 'file' ? `apri ${near.label}` : near.kind === 'sprite' || near.kind === 'tile' || near.kind === 'layout' ? `guarda «${near.label}»` : near.label}`);
   }
 }

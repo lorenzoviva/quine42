@@ -1,6 +1,16 @@
-// Shared kernel types. The manifest schema is the contract between the kernel and universe modules.
+import type { Carta } from './cards';
 
 export type FileMap = Record<string, string>;
+
+export interface Rule {
+  chiave: string;
+  testo: string;
+  possibile: boolean;
+  racconto: string;
+  effetti?: string[];
+  /** Who judged it and who paid (T36): only the Council's judgements are cards. */
+  carta?: Carta;
+}
 
 /** entity = NPCs and objects in the world; item = things that go in the inventory. */
 export type ModuleKind = 'system' | 'entity' | 'item' | 'player' | 'generator' | 'data';

@@ -7,12 +7,12 @@
 // Deterministic: same files → same studio.
 
 import { footBlocks, toLocal, type Form } from './forms';
-import type { FileMap } from './types';
+import type { FileMap, Rule } from './types';
 import { SCREEN_NAME, type ScreenField } from './screens';
 import { AGENTS } from './agents/council';
 
 export type FileLook = 'libro' | 'cristallo' | 'pergamena' | 'tavoletta';
-export type ItemKind = 'file' | 'sprite' | 'tile' | 'layout' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'less' | 'more' | 'grafo' | 'situazione' | 'parete' | 'console' | 'stazione' | 'banco' | 'leggio';
+export type ItemKind = 'file' | 'sprite' | 'tile' | 'layout' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'less' | 'more' | 'grafo' | 'situazione' | 'parete' | 'console' | 'stazione' | 'banco' | 'leggio' | 'lastra' | 'canone';
 /** What a showcase shows (T21): the runes and spells, the people, the things, the objects of the packs, the places planned (T26). */
 export type ShowcaseSource = 'rune' | 'persone' | 'cose' | 'oggetti' | 'luoghi';
 /** How a showcase looks: a screen, a silo of liquid, a 3D printer, a holographic table with a place in miniature. */
@@ -83,6 +83,15 @@ export const BENCH_AT = { x: SHOWCASE_AT.x, y: SHOWCASE_AT.y - 1, w: 3, h: 3, ro
  * an open holographic book above it, «<» «>» at its sides to flip through the world's bible (src/kernel/bible.ts).
  */
 export const LEGGIO_AT = { x: SHOWCASE_AT.x, y: SHOWCASE_AT.y - 1, w: 3, h: 3, room: 'mondo' };
+/**
+ * The Library of the World (T47b): tablets of the rules (world/rules.json) along its back wall;
+ * the newest 12 rules (FOCUSED_RULES) shine, clicking one opens its judgement in a panel.
+ * When rules exceed what the wall holds (TABLETS_MAX), «<» «>» at the sides step through them.
+ */
+export const TABLETS_WALL = { x0: 3, x1: 20, y: 1 };
+export const TABLETS_MAX = 16;
+export const FOCUSED_RULES = 12;
+
 export function chainSlots(n: number): Array<{ x: number; w: number }> {
   const span = CHAIN.x1 - CHAIN.x0 + 1;
   const shown = Math.min(n, span);
@@ -98,6 +107,74 @@ export function chainSlots(n: number): Array<{ x: number; w: number }> {
  */
 export const ATLAS_AT = { x: 10, y: 1, w: 4 };
 export const SAMPLES = 'luoghi';
+
+/**
+ * Builds the tablet items for the rules wall (T47b).
+ * When rules fit (<= TABLETS_MAX), all are placed (centered along the wall) without arrows.
+ * When exceeding the wall's capacity, TABLETS_MAX tablets are shown with «<» «>» arrows at the sides.
+ * The newest 12 rules across all established rules are marked (shine).
+ */
+export function ruleTablets(ox: number, oy: number, allRules: Rule[], offset = 0): StudioItem[] {
+  const count = allRules.length;
+  if (!count) return [];
+  const items: StudioItem[] = [];
+  const max = TABLETS_MAX;
+
+  if (count <= max) {
+    const startX = Math.floor((ROOM_W - count) / 2);
+    for (let i = 0; i < count; i++) {
+      const r = allRules[i];
+      const marked = i >= count - FOCUSED_RULES;
+      items.push({
+        kind: 'lastra',
+        label: `la tavola della regola: «${r.testo}»`,
+        target: r.chiave,
+        rule: r,
+        marked,
+        color: marked ? '#ffcf5c' : '#7dd87d',
+        x: ox + startX + i,
+        y: oy + TABLETS_WALL.y,
+      });
+    }
+  } else {
+    const safeOffset = Math.max(0, Math.min(count - max, offset));
+    const visible = allRules.slice(safeOffset, safeOffset + max);
+
+    items.push({
+      kind: 'prev',
+      label: '«<» le regole precedenti',
+      target: 'regole',
+      x: ox + TABLETS_WALL.x0 - 1,
+      y: oy + TABLETS_WALL.y,
+    });
+
+    for (let i = 0; i < visible.length; i++) {
+      const r = visible[i];
+      const globalIndex = safeOffset + i;
+      const marked = globalIndex >= count - FOCUSED_RULES;
+      items.push({
+        kind: 'lastra',
+        label: `la tavola della regola: «${r.testo}»`,
+        target: r.chiave,
+        rule: r,
+        marked,
+        color: marked ? '#ffcf5c' : '#7dd87d',
+        x: ox + TABLETS_WALL.x0 + i,
+        y: oy + TABLETS_WALL.y,
+      });
+    }
+
+    items.push({
+      kind: 'next',
+      label: '«>» le regole successive',
+      target: 'regole',
+      x: ox + TABLETS_WALL.x0 + max,
+      y: oy + TABLETS_WALL.y,
+    });
+  }
+
+  return items;
+}
 
 /** «del Narratore», «dello Scultore», «dell'Artista». */
 export const ofThe = (name: string) => (/^[aeiou]/i.test(name) ? `dell'${name}` : /^(s[^aeiou]|z|gn|ps|x)/i.test(name) ? `dello ${name}` : `del ${name}`);
@@ -142,6 +219,10 @@ export interface StudioItem {
   /** A showcase: what it shows and how it looks; its arrows point to it with `target` (the building). */
   source?: ShowcaseSource;
   device?: ShowcaseDevice;
+  /** Whether the tablet shines / is marked as one of the recent rules (T47b). */
+  marked?: boolean;
+  /** For a rule tablet (T47b): the rule itself. */
+  rule?: Rule;
 }
 
 export interface Floor {
@@ -412,6 +493,24 @@ export class Corona {
             placed.push({ kind: 'leggio', label: 'il leggio della Biblioteca: la bibbia del mondo', target: 'leggio', x: ox + LEGGIO_AT.x, y: oy + LEGGIO_AT.y, w: LEGGIO_AT.w, h: LEGGIO_AT.h });
             placed.push({ kind: 'prev', label: '«<» la pagina precedente', target: 'leggio', x: ox + LEGGIO_AT.x - 1, y: oy + SHOWCASE_AT.y });
             placed.push({ kind: 'next', label: '«>» la pagina successiva', target: 'leggio', x: ox + LEGGIO_AT.x + LEGGIO_AT.w, y: oy + SHOWCASE_AT.y });
+
+            // The Library of the World (T47b): tablets of the rules (world/rules.json) along the back wall
+            let allRules: Rule[] = [];
+            try {
+              allRules = (JSON.parse(this.files['world/rules.json'] ?? '{}').regole ?? []) as Rule[];
+            } catch {}
+            this.rulesOffset = Math.max(0, allRules.length - TABLETS_MAX);
+            placed.push(...ruleTablets(ox, oy, allRules, this.rulesOffset));
+
+            // The rune canon (world/canone.md) engraved above the door (T47b)
+            placed.push({
+              kind: 'canone',
+              label: 'il canone delle rune: inciso sopra la porta',
+              target: 'canone',
+              x: ox + Math.floor(ROOM_W / 2),
+              y: oy + ROOM_H - 1,
+              color: '#7dd87d',
+            });
           }
           const show = SHOWCASES[id];
           if (show) {
@@ -682,5 +781,24 @@ export class Corona {
 
   fileCount(): number {
     return Object.keys(this.files).length;
+  }
+
+  /** Current window offset of the rules wall in the Library (T47b). */
+  rulesOffset = 0;
+
+  /** Updates the visible rule tablets on the ground floor of the Library (T47b). */
+  setRulesOffset(offset: number): void {
+    this.rulesOffset = offset;
+    const b = this.buildings.find((x) => x.id === 'mondo');
+    if (!b || !b.floors[0]) return;
+    const f = b.floors[0];
+    let allRules: Rule[] = [];
+    try {
+      allRules = (JSON.parse(this.files['world/rules.json'] ?? '{}').regole ?? []) as Rule[];
+    } catch {}
+    // Remove existing rule tablets and rule arrows
+    f.items = f.items.filter((it) => it.kind !== 'lastra' && !(it.target === 'regole' && (it.kind === 'prev' || it.kind === 'next')));
+    const tablets = ruleTablets(f.ox, f.oy, allRules, this.rulesOffset);
+    f.items.push(...tablets);
   }
 }
