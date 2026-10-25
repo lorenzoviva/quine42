@@ -582,3 +582,430 @@ button.btn-primary:hover {
 .tok-punct {
   color: #94a3b8;
 }
+
+/* ================================================================== CAD Voxel Tools (T59b) */
+
+/* CAD Toolbar (Top Left) */
+.cad-toolbar {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  padding: 5px 8px;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  z-index: 5;
+}
+
+.cad-tool-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cad-tool-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid transparent;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 5px;
+}
+
+.cad-tool-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.cad-tool-btn.active {
+  background: var(--accent-glow);
+  color: var(--accent);
+  border-color: rgba(56, 189, 248, 0.5);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.cad-size-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 8px;
+  border-left: 1px solid var(--border);
+}
+
+.cad-size-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.cad-size-group label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.cad-size-group input[type='number'] {
+  width: 44px;
+  padding: 2px 4px;
+  font-size: 11px;
+  text-align: center;
+}
+
+/* CAD Palette & Material Bar (Bottom Floating) */
+.cad-palette-bar {
+  position: absolute;
+  bottom: 46px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--bg-card);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  z-index: 5;
+}
+
+.palette-active-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 130px;
+  flex-shrink: 0;
+}
+
+.active-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.active-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+#active-color-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+
+#active-color-code {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.palette-swatches {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 2px 4px;
+  scrollbar-width: thin;
+  flex: 1;
+}
+
+.swatch-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  transition: transform 0.1s, border-color 0.1s;
+  padding: 0;
+}
+
+.swatch-btn:hover {
+  transform: scale(1.18);
+  border-color: #fff;
+  z-index: 2;
+}
+
+.swatch-btn.active {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px var(--accent), 0 0 8px var(--accent);
+  transform: scale(1.12);
+  z-index: 3;
+}
+
+.palette-material-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.btn-glow-toggle {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 5px;
+  transition: all 0.2s;
+}
+
+.btn-glow-toggle.active {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fde047;
+  border-color: #eab308;
+  box-shadow: 0 0 12px rgba(250, 204, 21, 0.4);
+}
+
+.custom-color-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.custom-color-label input[type='color'] {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  background: transparent;
+}
+
+#cad-part-select {
+  font-size: 11px;
+  max-width: 115px;
+  padding: 3px 6px;
+}
+
+/* CAD Floating Shape Inspector (Top Right) */
+.cad-inspector {
+  position: absolute;
+  top: 56px;
+  right: 12px;
+  width: 250px;
+  background: var(--bg-card);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.cad-inspector.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-8px);
+}
+
+.inspector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--border);
+}
+
+.inspector-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kind-badge {
+  background: var(--accent-glow);
+  color: var(--accent);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+#insp-shape-info {
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.btn-icon {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 12px;
+  padding: 2px 4px;
+  cursor: pointer;
+}
+
+.btn-icon:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.inspector-body {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.insp-prop-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.insp-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.coord-inputs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.coord-field {
+  display: flex;
+  align-items: center;
+  background: #141824;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 3px;
+  flex: 1;
+}
+
+.coord-field span {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-right: 2px;
+}
+
+.coord-field input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 2px 0;
+  font-size: 11px;
+  text-align: center;
+  box-shadow: none !important;
+}
+
+.btn-step {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 0 3px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.btn-step:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.insp-color-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.insp-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+#insp-color-select {
+  flex: 1;
+  font-size: 11px;
+}
+
+.inspector-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.btn-cad-act {
+  flex: 1;
+  padding: 5px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.btn-cad-act.btn-danger {
+  background: rgba(244, 63, 94, 0.15);
+  color: #fb7185;
+  border-color: rgba(244, 63, 94, 0.4);
+}
+
+.btn-cad-act.btn-danger:hover {
+  background: rgba(244, 63, 94, 0.25);
+  color: #fff;
+}
+
+/* Viewport Coordinates Readout */
+.viewport-coords {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--accent);
+  font-family: var(--editor-font);
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Adjust viewport-info position when coords are present */
+.viewport-info {
+  bottom: 12px;
+  left: 165px;
+}
+

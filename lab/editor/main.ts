@@ -1,4 +1,4 @@
-// MarkovJunior Model Editor: split-screen code editor & real-time 3D Three.js viewport.
+// MarkovJunior Model Editor: split-screen code editor, real-time 3D Three.js viewport & interactive CAD voxel tools (T59b).
 
 import * as THREE from 'three';
 import { CATALOG, GROUPS } from '../3d/catalog';
@@ -7,6 +7,20 @@ import type { EditorBuildRequest, EditorBuildResponse } from './worker';
 import { Bloom } from '../../src/render/bloom';
 import { glowing } from '../../src/render/materials';
 import type { MeshData } from '../../src/mj/mesh';
+import {
+  type CadShape,
+  type ShapeKind,
+  parseShapesFromXml,
+  parseColorsFromXml,
+  insertShapeIntoXml,
+  updateShapeInXml,
+  deleteShapeFromXml,
+  duplicateShapeInXml,
+  setLetterColorInXml,
+  threeToVoxel,
+  findShapeAtVoxel,
+} from './cad';
+import { MJ_PALETTE } from '../../src/mj/palette';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -94,6 +108,27 @@ const bloom = new Bloom(renderer, scene, camera, 0.85, 0.4);
 let currentMesh: THREE.Mesh | null = null;
 let currentBBox: THREE.Box3Helper | null = null;
 
+// CAD 3D Helpers
+const ghostGroup = new THREE.Group();
+ghostGroup.visible = false;
+scene.add(ghostGroup);
+
+const ghostMaterial = new THREE.MeshLambertMaterial({
+  color: 0x38bdf8,
+  transparent: true,
+  opacity: 0.55,
+  depthWrite: false,
+});
+const ghostWireMat = new THREE.LineBasicMaterial({
+  color: 0xffffff,
+  transparent: true,
+  opacity: 0.85,
+});
+let ghostMesh: THREE.Mesh | null = null;
+let ghostWire: THREE.LineSegments | null = null;
+
+let selectionHelper: THREE.Box3Helper | null = null;
+
 function createBufferGeometry(m: MeshData): THREE.BufferGeometry {
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.BufferAttribute(m.positions, 3));
@@ -106,7 +141,25 @@ function createBufferGeometry(m: MeshData): THREE.BufferGeometry {
   return geo;
 }
 
-// ------------------------------------------------------------------ Orbit Controls
+// ------------------------------------------------------------------ CAD State
+
+type CadTool = 'select' | 'box' | 'voxel' | 'cylinder' | 'ellipsoid' | 'cone' | 'erase';
+
+let activeTool: CadTool = 'select';
+let activeColorSymbol = 'G';
+let activeGlow = false;
+let selectedShapeIndex: number | null = null;
+let shapes: CadShape[] = [];
+let gridDims = { X: 12, Y: 12, Z: 12 };
+let currentVpt = 20;
+
+const SWATCH_LETTERS = [
+  'B', 'I', 'P', 'E', 'N', 'D', 'A', 'W',
+  'R', 'O', 'Y', 'G', 'U', 'S', 'K', 'F',
+  'C', 'H', 'J', 'L', 'M', 'Q', 'T', 'V', 'X', 'Z',
+];
+
+// ------------------------------------------------------------------ Orbit Controls & Mouse Interactions
 
 interface CamState {
   yaw: number;
@@ -125,12 +178,19 @@ const cam: CamState = {
 let isDragging = false;
 let isPanning = false;
 let dragPrev = { x: 0, y: 0 };
+let pointerMovedDist = 0;
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 
 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
 canvas.addEventListener('pointerdown', (e) => {
   e.preventDefault();
   dragPrev = { x: e.clientX, y: e.clientY };
+  pointerMovedDist = 0;
+
   if (e.button === 2) {
     // Right button: free orbit
     isDragging = true;
@@ -140,7 +200,7 @@ canvas.addEventListener('pointerdown', (e) => {
     isPanning = true;
     isDragging = false;
   } else if (e.button === 0) {
-    // Left button: orbit
+    // Left button: could be drag orbit or click
     isDragging = true;
     isPanning = false;
   }
@@ -148,9 +208,13 @@ canvas.addEventListener('pointerdown', (e) => {
 });
 
 canvas.addEventListener('pointermove', (e) => {
+  // Always update raycasting & hover readout when cursor is over viewport
+  handlePointerHover(e);
+
   if (!isDragging && !isPanning) return;
   const dx = e.clientX - dragPrev.x;
   const dy = e.clientY - dragPrev.y;
+  pointerMovedDist += Math.hypot(dx, dy);
   dragPrev = { x: e.clientX, y: e.clientY };
 
   if (isDragging) {
@@ -167,11 +231,16 @@ canvas.addEventListener('pointermove', (e) => {
 });
 
 const endDrag = (e: PointerEvent) => {
+  const wasClick = pointerMovedDist < 6 && e.button === 0;
   isDragging = false;
   isPanning = false;
   try {
     canvas.releasePointerCapture(e.pointerId);
   } catch {}
+
+  if (wasClick) {
+    handleCanvasClick(e);
+  }
 };
 
 canvas.addEventListener('pointerup', endDrag);
@@ -288,6 +357,21 @@ const vptSelect = $<HTMLSelectElement>('vpt-select');
 const cursorPos = $('cursor-pos');
 const loadingOverlay = $('loading-overlay');
 const viewportInfo = $('viewport-info');
+const viewportCoords = $('viewport-coords');
+
+// CAD elements
+const cadInspector = $('cad-inspector');
+const cadSizeGroup = $('cad-size-group');
+const cadDimW = $<HTMLInputElement>('cad-dim-w');
+const cadDimD = $<HTMLInputElement>('cad-dim-d');
+const cadDimH = $<HTMLInputElement>('cad-dim-h');
+const activeSwatch = $('active-swatch');
+const activeColorName = $('active-color-name');
+const activeColorCode = $('active-color-code');
+const paletteSwatches = $('palette-swatches');
+const btnCadGlow = $('btn-cad-glow');
+const cadCustomColor = $<HTMLInputElement>('cad-custom-color');
+const cadPartSelect = $<HTMLSelectElement>('cad-part-select');
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -387,12 +471,17 @@ async function triggerBuild() {
   const xml = codeInput.value;
   const seed = parseInt(seedInput.value, 10) || 1;
   const vpt = parseInt(vptSelect.value, 10) || 20;
+  currentVpt = vpt;
 
   // Immediate synchronous validation
   const val = validateMjx(xml);
 
   const lines = xml.split('\n');
   updateGutter(lines.length, val.ok ? undefined : val.line);
+
+  // Sync shapes & palette
+  shapes = parseShapesFromXml(xml);
+  syncPaletteState();
 
   if (!val.ok) {
     renderDiagnostics(val);
@@ -413,6 +502,7 @@ async function triggerBuild() {
     }
 
     renderDiagnostics(val, res);
+    gridDims = res.grid;
 
     // Update Three.js mesh
     if (currentMesh) {
@@ -438,6 +528,13 @@ async function triggerBuild() {
     scene.add(currentBBox);
 
     viewportInfo.textContent = `Griglia ${res.grid.X}×${res.grid.Y}×${res.grid.Z} · ${res.grid.solidCount.toLocaleString('it')} voxel · ${res.info.triangles.toLocaleString('it')} triangoli`;
+
+    // Refresh active shape selection if any
+    if (selectedShapeIndex !== null && shapes[selectedShapeIndex]) {
+      updateSelectionBox(shapes[selectedShapeIndex]);
+    } else {
+      deselectShape();
+    }
   } catch (err: unknown) {
     loadingOverlay.classList.add('hidden');
     renderDiagnostics({
@@ -459,10 +556,322 @@ function onCodeChange() {
   updateGutter(lines.length, val.ok ? undefined : val.line);
   renderDiagnostics(val);
 
+  shapes = parseShapesFromXml(code);
+  syncPaletteState();
+
   if (debounceTimer) clearTimeout(debounceTimer);
   debounceTimer = setTimeout(() => {
     void triggerBuild();
   }, 350);
+}
+
+// ------------------------------------------------------------------ CAD Ghost & Raycasting
+
+function getRaycastTarget(e: { clientX: number; clientY: number }): {
+  voxel: [number, number, number];
+  hitMesh: boolean;
+} {
+  const rect = canvas.getBoundingClientRect();
+  mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+
+  const s = 1 / currentVpt;
+
+  if (currentMesh) {
+    const hits = raycaster.intersectObject(currentMesh, false);
+    if (hits.length > 0) {
+      const hit = hits[0];
+      const normal = hit.face?.normal ?? new THREE.Vector3(0, 1, 0);
+
+      const isCreation = activeTool !== 'select' && activeTool !== 'erase';
+      // For creation: offset outward by half a voxel to place adjacent
+      // For selection / erasing: offset slightly inward to select the clicked voxel
+      const offsetPoint = hit.point.clone().addScaledVector(normal, isCreation ? 0.5 * s : -0.5 * s);
+      const [vx, vy, vz] = threeToVoxel([offsetPoint.x, offsetPoint.y, offsetPoint.z], gridDims, currentVpt);
+
+      return {
+        voxel: [
+          THREE.MathUtils.clamp(vx, 0, Math.max(1, gridDims.X - 1)),
+          THREE.MathUtils.clamp(vy, 0, Math.max(1, gridDims.Y - 1)),
+          THREE.MathUtils.clamp(vz, 0, Math.max(1, gridDims.Z - 1)),
+        ],
+        hitMesh: true,
+      };
+    }
+  }
+
+  // Fallback: intersect ground plane y = 0
+  const hitPoint = new THREE.Vector3();
+  if (raycaster.ray.intersectPlane(groundPlane, hitPoint)) {
+    const [vx, vy] = threeToVoxel([hitPoint.x, 0, hitPoint.z], gridDims, currentVpt);
+    return {
+      voxel: [
+        THREE.MathUtils.clamp(vx, 0, Math.max(1, gridDims.X - 1)),
+        THREE.MathUtils.clamp(vy, 0, Math.max(1, gridDims.Y - 1)),
+        0,
+      ],
+      hitMesh: false,
+    };
+  }
+
+  return { voxel: [Math.floor(gridDims.X / 2), Math.floor(gridDims.Y / 2), 0], hitMesh: false };
+}
+
+function updateGhostMesh(kind: ShapeKind, size: [number, number, number]) {
+  if (ghostMesh) {
+    ghostGroup.remove(ghostMesh);
+    ghostMesh.geometry.dispose();
+    ghostMesh = null;
+  }
+  if (ghostWire) {
+    ghostGroup.remove(ghostWire);
+    ghostWire.geometry.dispose();
+    ghostWire = null;
+  }
+
+  const s = 1 / currentVpt;
+  const [w, d, h] = size;
+
+  let geo: THREE.BufferGeometry;
+  if (kind === 'box') {
+    geo = new THREE.BoxGeometry(w * s, h * s, d * s);
+  } else if (kind === 'cylinder') {
+    const r = (Math.max(w, d) / 2) * s;
+    geo = new THREE.CylinderGeometry(r, r, h * s, 24);
+  } else if (kind === 'ellipsoid') {
+    geo = new THREE.SphereGeometry(1, 24, 24);
+    geo.scale((w / 2) * s, (h / 2) * s, (d / 2) * s);
+  } else if (kind === 'cone') {
+    const r = (Math.max(w, d) / 2) * s;
+    geo = new THREE.ConeGeometry(r, h * s, 24);
+  } else {
+    geo = new THREE.BoxGeometry(w * s, h * s, d * s);
+  }
+
+  const colorHex = MJ_PALETTE[activeColorSymbol]?.color || '#00e436';
+  ghostMaterial.color.set(colorHex);
+
+  ghostMesh = new THREE.Mesh(geo, ghostMaterial);
+  ghostWire = new THREE.LineSegments(new THREE.EdgesGeometry(geo), ghostWireMat);
+
+  ghostGroup.add(ghostMesh);
+  ghostGroup.add(ghostWire);
+}
+
+function handlePointerHover(e: PointerEvent) {
+  const { voxel } = getRaycastTarget(e);
+  viewportCoords.textContent = `Puntatore: (${voxel[0]}, ${voxel[1]}, ${voxel[2]})`;
+
+  const isCreation = activeTool !== 'select' && activeTool !== 'erase';
+  if (!isCreation) {
+    ghostGroup.visible = false;
+    return;
+  }
+
+  const kind: ShapeKind = activeTool === 'voxel' ? 'box' : (activeTool as ShapeKind);
+  const size: [number, number, number] =
+    activeTool === 'voxel'
+      ? [1, 1, 1]
+      : [
+          Math.max(1, parseInt(cadDimW.value, 10) || 4),
+          Math.max(1, parseInt(cadDimD.value, 10) || 4),
+          Math.max(1, parseInt(cadDimH.value, 10) || 4),
+        ];
+
+  updateGhostMesh(kind, size);
+
+  // Position ghost in Three.js coordinates
+  const s = 1 / currentVpt;
+  const px = gridDims.X / 2;
+  const py = gridDims.Y / 2;
+  const pz = 0;
+
+  const threeX = (voxel[0] - px) * s;
+  const threeY = (voxel[2] + size[2] / 2 - pz) * s;
+  const threeZ = (voxel[1] - py) * s;
+
+  ghostGroup.position.set(threeX, threeY, threeZ);
+  ghostGroup.visible = true;
+}
+
+function handleCanvasClick(e: PointerEvent) {
+  const { voxel } = getRaycastTarget(e);
+  const [vx, vy, vz] = voxel;
+
+  if (activeTool === 'select') {
+    const hit = findShapeAtVoxel(vx, vy, vz, shapes);
+    if (hit) {
+      selectShape(hit.index);
+    } else {
+      deselectShape();
+    }
+    return;
+  }
+
+  if (activeTool === 'erase') {
+    const hit = findShapeAtVoxel(vx, vy, vz, shapes);
+    if (hit) {
+      codeInput.value = deleteShapeFromXml(codeInput.value, hit.index);
+      onCodeChange();
+      deselectShape();
+    }
+    return;
+  }
+
+  // Shape creation tools: box, voxel, cylinder, ellipsoid, cone
+  const kind: ShapeKind = activeTool === 'voxel' ? 'box' : (activeTool as ShapeKind);
+  const size: [number, number, number] =
+    activeTool === 'voxel'
+      ? [1, 1, 1]
+      : [
+          Math.max(1, parseInt(cadDimW.value, 10) || 4),
+          Math.max(1, parseInt(cadDimD.value, 10) || 4),
+          Math.max(1, parseInt(cadDimH.value, 10) || 4),
+        ];
+
+  const { newXml, line } = insertShapeIntoXml(codeInput.value, {
+    kind,
+    at: [vx, vy, vz],
+    size,
+    color: activeColorSymbol,
+  });
+
+  codeInput.value = newXml;
+  onCodeChange();
+  jumpToLine(line);
+}
+
+// ------------------------------------------------------------------ Shape Inspector
+
+function selectShape(index: number) {
+  if (index < 0 || index >= shapes.length) return;
+  selectedShapeIndex = index;
+  const shape = shapes[index];
+
+  jumpToLine(shape.line);
+
+  // Update Inspector UI
+  $('insp-shape-kind').textContent = shape.kind.toUpperCase();
+  $('insp-shape-info').textContent = `Forma #${shape.id} · Riga ${shape.line}`;
+
+  $<HTMLInputElement>('insp-at-x').value = String(shape.at[0]);
+  $<HTMLInputElement>('insp-at-y').value = String(shape.at[1]);
+  $<HTMLInputElement>('insp-at-z').value = String(shape.at[2]);
+
+  $<HTMLInputElement>('insp-size-w').value = String(shape.size[0]);
+  $<HTMLInputElement>('insp-size-d').value = String(shape.size[1]);
+  $<HTMLInputElement>('insp-size-h').value = String(shape.size[2]);
+
+  const colorSelect = $<HTMLSelectElement>('insp-color-select');
+  colorSelect.value = shape.color;
+  const hex = MJ_PALETTE[shape.color]?.color || '#ffffff';
+  $('insp-color-swatch').style.backgroundColor = hex;
+
+  cadInspector.classList.remove('hidden');
+  updateSelectionBox(shape);
+}
+
+function deselectShape() {
+  selectedShapeIndex = null;
+  cadInspector.classList.add('hidden');
+  if (selectionHelper) {
+    scene.remove(selectionHelper);
+    selectionHelper.dispose();
+    selectionHelper = null;
+  }
+}
+
+function updateSelectionBox(shape: CadShape) {
+  if (selectionHelper) {
+    scene.remove(selectionHelper);
+    selectionHelper.dispose();
+    selectionHelper = null;
+  }
+
+  const s = 1 / currentVpt;
+  const px = gridDims.X / 2;
+  const py = gridDims.Y / 2;
+  const pz = 0;
+
+  const [cx, cy, bz] = shape.at;
+  const [w, d, h] = shape.size;
+
+  const minX = (cx - w / 2 - px) * s;
+  const maxX = (cx + w / 2 - px) * s;
+  const minY = (bz - pz) * s;
+  const maxY = (bz + h - pz) * s;
+  const minZ = (cy - d / 2 - py) * s;
+  const maxZ = (cy + d / 2 - py) * s;
+
+  const box = new THREE.Box3(new THREE.Vector3(minX, minY, minZ), new THREE.Vector3(maxX, maxY, maxZ));
+  selectionHelper = new THREE.Box3Helper(box, new THREE.Color(0xf59e0b));
+  scene.add(selectionHelper);
+}
+
+// ------------------------------------------------------------------ Palette & Materials
+
+function initPaletteBar() {
+  paletteSwatches.innerHTML = '';
+  const inspColorSelect = $<HTMLSelectElement>('insp-color-select');
+  inspColorSelect.innerHTML = '';
+
+  for (const sym of SWATCH_LETTERS) {
+    const info = MJ_PALETTE[sym];
+    if (!info) continue;
+
+    // Swatch button
+    const btn = document.createElement('button');
+    btn.className = 'swatch-btn' + (sym === activeColorSymbol ? ' active' : '');
+    btn.dataset.symbol = sym;
+    btn.textContent = sym;
+    btn.style.backgroundColor = info.color;
+    btn.title = `${sym}: ${info.name} (${info.color})`;
+    btn.onclick = () => setActiveColor(sym);
+    paletteSwatches.appendChild(btn);
+
+    // Inspector color option
+    const opt = document.createElement('option');
+    opt.value = sym;
+    opt.textContent = `${sym} · ${info.name}`;
+    inspColorSelect.appendChild(opt);
+  }
+
+  setActiveColor(activeColorSymbol);
+}
+
+function setActiveColor(symbol: string) {
+  activeColorSymbol = symbol;
+  const info = MJ_PALETTE[symbol] || { color: '#ffffff', name: symbol };
+
+  activeSwatch.style.backgroundColor = info.color;
+  activeColorName.textContent = info.name;
+  activeColorCode.textContent = `${symbol} · ${info.color}`;
+  cadCustomColor.value = info.color;
+
+  // Update swatch button active class
+  const swatches = paletteSwatches.querySelectorAll('.swatch-btn');
+  swatches.forEach((el) => {
+    el.classList.toggle('active', (el as HTMLElement).dataset.symbol === symbol);
+  });
+
+  // If a shape is selected, apply color immediately
+  if (selectedShapeIndex !== null) {
+    codeInput.value = updateShapeInXml(codeInput.value, selectedShapeIndex, { color: symbol });
+    onCodeChange();
+    selectShape(selectedShapeIndex);
+  }
+}
+
+function syncPaletteState() {
+  const colors = parseColorsFromXml(codeInput.value);
+  const cur = colors[activeColorSymbol];
+  activeGlow = !!cur?.glow;
+  btnCadGlow.classList.toggle('active', activeGlow);
+  cadPartSelect.value = cur?.part || '';
+  if (cur?.value) {
+    cadCustomColor.value = cur.value;
+  }
 }
 
 // ------------------------------------------------------------------ Event Listeners
@@ -512,7 +921,6 @@ $('btn-run').addEventListener('click', () => void triggerBuild());
 $('btn-format').addEventListener('click', () => {
   try {
     const raw = codeInput.value;
-    // Format simple indentation
     let formatted = '';
     let indent = 0;
     const tokens = raw.replace(/>\s*</g, '><').split(/(?=<)|(?<=>)/g);
@@ -606,6 +1014,175 @@ $('btn-toggle-bloom').addEventListener('click', () => {
   $('btn-toggle-bloom').classList.toggle('active', enableBloom);
 });
 
+// ------------------------------------------------------------------ CAD Tool Actions & Events
+
+function setCadTool(tool: CadTool) {
+  activeTool = tool;
+  const tools: CadTool[] = ['select', 'box', 'voxel', 'cylinder', 'ellipsoid', 'cone', 'erase'];
+  for (const t of tools) {
+    $(`tool-${t}`).classList.toggle('active', t === tool);
+  }
+
+  // Show/hide size controls for primitive shapes
+  const showDims = tool === 'box' || tool === 'cylinder' || tool === 'ellipsoid' || tool === 'cone';
+  cadSizeGroup.style.display = showDims ? 'flex' : 'none';
+
+  if (tool !== 'select') {
+    deselectShape();
+  }
+  if (tool === 'select' || tool === 'erase') {
+    ghostGroup.visible = false;
+  }
+}
+
+$('tool-select').addEventListener('click', () => setCadTool('select'));
+$('tool-box').addEventListener('click', () => setCadTool('box'));
+$('tool-voxel').addEventListener('click', () => setCadTool('voxel'));
+$('tool-cylinder').addEventListener('click', () => setCadTool('cylinder'));
+$('tool-ellipsoid').addEventListener('click', () => setCadTool('ellipsoid'));
+$('tool-cone').addEventListener('click', () => setCadTool('cone'));
+$('tool-erase').addEventListener('click', () => setCadTool('erase'));
+
+// Palette glow toggle
+btnCadGlow.addEventListener('click', () => {
+  activeGlow = !activeGlow;
+  btnCadGlow.classList.toggle('active', activeGlow);
+  codeInput.value = setLetterColorInXml(codeInput.value, activeColorSymbol, { glow: activeGlow });
+  onCodeChange();
+});
+
+// Custom color picker
+cadCustomColor.addEventListener('input', (e) => {
+  const hex = (e.target as HTMLInputElement).value;
+  codeInput.value = setLetterColorInXml(codeInput.value, activeColorSymbol, { value: hex });
+  onCodeChange();
+});
+
+// Part rigging selector
+cadPartSelect.addEventListener('change', (e) => {
+  const part = (e.target as HTMLSelectElement).value;
+  codeInput.value = setLetterColorInXml(codeInput.value, activeColorSymbol, { part: part || undefined });
+  onCodeChange();
+});
+
+// Inspector Controls
+$('btn-insp-close').addEventListener('click', () => deselectShape());
+
+$('btn-insp-dup').addEventListener('click', () => {
+  if (selectedShapeIndex === null) return;
+  const shape = shapes[selectedShapeIndex];
+  const offsetZ = Math.max(1, shape.size[2]);
+  const { newXml, newLine } = duplicateShapeInXml(codeInput.value, selectedShapeIndex, [0, 0, offsetZ]);
+  codeInput.value = newXml;
+  onCodeChange();
+  jumpToLine(newLine);
+  selectShape(shapes.length);
+});
+
+$('btn-insp-del').addEventListener('click', () => {
+  if (selectedShapeIndex === null) return;
+  codeInput.value = deleteShapeFromXml(codeInput.value, selectedShapeIndex);
+  onCodeChange();
+  deselectShape();
+});
+
+$<HTMLSelectElement>('insp-color-select').addEventListener('change', (e) => {
+  if (selectedShapeIndex === null) return;
+  const col = (e.target as HTMLSelectElement).value;
+  codeInput.value = updateShapeInXml(codeInput.value, selectedShapeIndex, { color: col });
+  onCodeChange();
+  selectShape(selectedShapeIndex);
+});
+
+// Stepper buttons in Inspector
+document.querySelectorAll('.btn-step').forEach((btn) => {
+  btn.addEventListener('click', (e) => {
+    if (selectedShapeIndex === null) return;
+    const target = e.currentTarget as HTMLElement;
+    const axis = target.dataset.axis;
+    const isInc = target.dataset.action === 'inc';
+    const delta = isInc ? 1 : -1;
+
+    const shape = shapes[selectedShapeIndex];
+    if (!shape) return;
+
+    const newAt: [number, number, number] = [...shape.at];
+    const newSize: [number, number, number] = [...shape.size];
+
+    if (axis === 'at-x') newAt[0] += delta;
+    else if (axis === 'at-y') newAt[1] += delta;
+    else if (axis === 'at-z') newAt[2] += delta;
+    else if (axis === 'size-w') newSize[0] = Math.max(1, newSize[0] + delta);
+    else if (axis === 'size-d') newSize[1] = Math.max(1, newSize[1] + delta);
+    else if (axis === 'size-h') newSize[2] = Math.max(1, newSize[2] + delta);
+
+    codeInput.value = updateShapeInXml(codeInput.value, selectedShapeIndex, {
+      at: newAt,
+      size: newSize,
+    });
+    onCodeChange();
+    selectShape(selectedShapeIndex);
+  });
+});
+
+// Inspector direct inputs
+const bindInput = (id: string, prop: 'at' | 'size', idx: number) => {
+  $<HTMLInputElement>(id).addEventListener('change', (e) => {
+    if (selectedShapeIndex === null) return;
+    const val = parseInt((e.target as HTMLInputElement).value, 10);
+    if (!Number.isFinite(val)) return;
+
+    const shape = shapes[selectedShapeIndex];
+    if (!shape) return;
+
+    const updates: Partial<{ at: [number, number, number]; size: [number, number, number] }> = {};
+    if (prop === 'at') {
+      const at: [number, number, number] = [...shape.at];
+      at[idx] = val;
+      updates.at = at;
+    } else {
+      const size: [number, number, number] = [...shape.size];
+      size[idx] = Math.max(1, val);
+      updates.size = size;
+    }
+
+    codeInput.value = updateShapeInXml(codeInput.value, selectedShapeIndex, updates);
+    onCodeChange();
+    selectShape(selectedShapeIndex);
+  });
+};
+
+bindInput('insp-at-x', 'at', 0);
+bindInput('insp-at-y', 'at', 1);
+bindInput('insp-at-z', 'at', 2);
+bindInput('insp-size-w', 'size', 0);
+bindInput('insp-size-d', 'size', 1);
+bindInput('insp-size-h', 'size', 2);
+
+// Global Keyboard Shortcuts
+window.addEventListener('keydown', (e) => {
+  const activeEl = document.activeElement;
+  if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'SELECT')) {
+    return;
+  }
+
+  if (e.key === 'v' || e.key === 'V') setCadTool('select');
+  else if (e.key === 'b' || e.key === 'B') setCadTool('box');
+  else if (e.key === 'x' || e.key === 'X') setCadTool('voxel');
+  else if (e.key === 'c' || e.key === 'C') setCadTool('cylinder');
+  else if (e.key === 's' || e.key === 'S') setCadTool('ellipsoid');
+  else if (e.key === 'k' || e.key === 'K') setCadTool('cone');
+  else if (e.key === 'e' || e.key === 'E') setCadTool('erase');
+  else if (e.key === 'Escape') deselectShape();
+  else if (e.key === 'Delete' || e.key === 'Backspace') {
+    if (selectedShapeIndex !== null) {
+      codeInput.value = deleteShapeFromXml(codeInput.value, selectedShapeIndex);
+      onCodeChange();
+      deselectShape();
+    }
+  }
+});
+
 // ------------------------------------------------------------------ Preset Catalog
 
 function populatePresets() {
@@ -662,6 +1239,7 @@ function loadSelectedPreset() {
 // ------------------------------------------------------------------ Initial Setup
 
 populatePresets();
+initPaletteBar();
 
 // Choose 'casetta' or 'barile' as default if available, otherwise template
 const defaultEntry = CATALOG.find((e) => e.id === 'casetta') || CATALOG.find((e) => e.id === 'barile');

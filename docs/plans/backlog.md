@@ -1284,13 +1284,13 @@ le risposte alle domande del piano.
 Richiesta del 25/10 ([`to-do-2026-10-25.md`](../userchats/to-do-2026-10-25.md)). La sandbox 3D `/lab/3d/` resta com'è per
 la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedicato a modellare le singole mesh.
 
-### T59 · Laboratorio: editor per modelli MarkovJunior — `in corso` (T59a fatto; prossimo: T59b)
+### T59 · Laboratorio: editor per modelli MarkovJunior — `in corso` (T59a e T59b fatti; prossimo: T59c)
 - **T59a · Split screen codice e rendering** — `fatto` (`6fb7faa`): interfaccia divisa a due riquadri (editor di testo/XML a sinistra con syntax
   highlighting e validazione immediata; viewport 3D Three.js a destra con rendering in tempo reale della mesh risultante,
   controlli camera e orbita libera con tasto destro). Esito: `lab/editor/` (`index.html`, `editor.css`, `syntax.ts`, `main.ts`, `worker.ts`),
   integrazione in `vite.config.ts`, test in `tests/editor.test.ts` (10 test), verifica nel browser confermata.
-- **T59b · Controlli CAD per voxel** — `da fare`: strumenti interattivi sulla griglia (creazione, cancellazione, spostamento di forme
-  base / blocchi; selezione palette colori, materiale e proprietà glow).
+- **T59b · Controlli CAD per voxel** — `fatto`: strumenti interattivi sulla griglia (creazione, cancellazione, spostamento di forme
+  base / blocchi; selezione palette colori, materiale e proprietà glow). Esito: `lab/editor/cad.ts` (manipolazione XML bidirezionale per forme base, colori, glow, arti, raycasting e hit testing), barra strumenti CAD (Seleziona, Box, Voxel 1x1, Cilindro, Sfera, Cono, Gomma; dimensioni W, D, H), anteprima 3D ghost con wireframe durante il puntamento, coordinate cursore (X, Y, Z), selezione forma con box highlight 3D e salto a riga nel codice, scheda Inspector con regolazione numerica e bottoni +/- per posizione e dimensioni, duplicazione ed eliminazione, barra palette swatches MarkovJunior con toggle Glow (`glow="True"`), colore personalizzato HEX e legame ad arti (`part="..."`), scorciatoie da tastiera; test in `tests/editor.test.ts` (18 test), verifica nel browser confermata. Diverso dal previsto: nessuno.
 - **T59c · Controllo esecuzione e animazione**: controlli temporali di esecuzione delle regole MarkovJunior (step singolo,
   loop continuo, pausa/stop) e anteprima sequenza fotogrammi per modelli animati.
 - **T59d · Strumenti per regole e WFC**: controlli per facilitare la stesura delle regole XML (menu di sostituzione con

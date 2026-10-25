@@ -8,6 +8,19 @@ import {
   MJ_ATTRS,
 } from '../lab/editor/syntax';
 import { CATALOG } from '../lab/3d/catalog';
+import {
+  parseShapesFromXml,
+  insertShapeIntoXml,
+  updateShapeInXml,
+  deleteShapeFromXml,
+  duplicateShapeInXml,
+  parseColorsFromXml,
+  setLetterColorInXml,
+  voxelToThree,
+  threeToVoxel,
+  isVoxelInsideShape,
+  findShapeAtVoxel,
+} from '../lab/editor/cad';
 
 describe('MarkovJunior Editor (T59a)', () => {
   describe('syntax highlighting & tokenizer', () => {
@@ -135,6 +148,141 @@ describe('MarkovJunior Editor (T59a)', () => {
         const res = validateMjx(casetta.xml);
         expect(res.ok).toBe(true);
       }
+    });
+  });
+
+  describe('CAD voxel tools & manipulation (T59b)', () => {
+    const SAMPLE_XML = `<sequence values="0BGY" size="12 12 12">
+  <box at="6 6 0" size="10 10 2" color="B"/>
+  <box at="6 6 2" size="8 8 4" color="G"/>
+  <cylinder at="6 6 6" size="6 6 4" color="Y"/>
+</sequence>`;
+
+    it('parses existing shapes from XML with lines and dimensions', () => {
+      const shapes = parseShapesFromXml(SAMPLE_XML);
+      expect(shapes).toHaveLength(3);
+
+      expect(shapes[0].kind).toBe('box');
+      expect(shapes[0].at).toEqual([6, 6, 0]);
+      expect(shapes[0].size).toEqual([10, 10, 2]);
+      expect(shapes[0].color).toBe('B');
+      expect(shapes[0].line).toBe(2);
+
+      expect(shapes[1].kind).toBe('box');
+      expect(shapes[1].at).toEqual([6, 6, 2]);
+      expect(shapes[1].color).toBe('G');
+
+      expect(shapes[2].kind).toBe('cylinder');
+      expect(shapes[2].at).toEqual([6, 6, 6]);
+      expect(shapes[2].size).toEqual([6, 6, 4]);
+      expect(shapes[2].color).toBe('Y');
+    });
+
+    it('inserts a new shape into XML and updates root values', () => {
+      const { newXml, line } = insertShapeIntoXml(SAMPLE_XML, {
+        kind: 'cone',
+        at: [6, 6, 10],
+        size: [4, 4, 2],
+        color: 'R',
+      });
+
+      expect(newXml).toContain('values="0BGYR"');
+      expect(newXml).toContain('<cone at="6 6 10" size="4 4 2" color="R"/>');
+      expect(line).toBeGreaterThan(3);
+
+      const parsed = parseShapesFromXml(newXml);
+      expect(parsed).toHaveLength(4);
+      expect(parsed[3].kind).toBe('cone');
+      expect(parsed[3].color).toBe('R');
+    });
+
+    it('updates position, size, and color of an existing shape', () => {
+      const updated = updateShapeInXml(SAMPLE_XML, 1, {
+        at: [7, 7, 3],
+        size: [6, 6, 3],
+        color: 'W',
+      });
+
+      expect(updated).toContain('values="0BGYW"');
+      expect(updated).toContain('<box at="7 7 3" size="6 6 3" color="W"/>');
+
+      const shapes = parseShapesFromXml(updated);
+      expect(shapes[1].at).toEqual([7, 7, 3]);
+      expect(shapes[1].size).toEqual([6, 6, 3]);
+      expect(shapes[1].color).toBe('W');
+    });
+
+    it('deletes a shape from XML cleanly', () => {
+      const deleted = deleteShapeFromXml(SAMPLE_XML, 1);
+      const shapes = parseShapesFromXml(deleted);
+      expect(shapes).toHaveLength(2);
+      expect(shapes[0].color).toBe('B');
+      expect(shapes[1].color).toBe('Y');
+      expect(deleted).not.toContain('size="8 8 4"');
+    });
+
+    it('duplicates a shape with coordinate offset', () => {
+      const { newXml } = duplicateShapeInXml(SAMPLE_XML, 0, [0, 0, 8]);
+      const shapes = parseShapesFromXml(newXml);
+      expect(shapes).toHaveLength(4);
+      expect(shapes[1].at).toEqual([6, 6, 8]);
+      expect(shapes[1].size).toEqual([10, 10, 2]);
+      expect(shapes[1].color).toBe('B');
+    });
+
+    it('manages palette, custom colors and glow properties', () => {
+      const withGlow = setLetterColorInXml(SAMPLE_XML, 'R', {
+        value: '#ff0055',
+        glow: true,
+        part: 'testa',
+      });
+
+      expect(withGlow).toContain('values="0BGYR"');
+      expect(withGlow).toContain('glow="True"');
+      expect(withGlow).toContain('value="ff0055"');
+      expect(withGlow).toContain('part="testa"');
+
+      const colors = parseColorsFromXml(withGlow);
+      expect(colors.R).toBeDefined();
+      expect(colors.R.glow).toBe(true);
+      expect(colors.R.value).toBe('#ff0055');
+      expect(colors.R.part).toBe('testa');
+    });
+
+    it('converts between voxel coordinates and Three.js 3D coordinates', () => {
+      const grid = { X: 12, Y: 12, Z: 12 };
+      const vpt = 20;
+
+      // Center of floor: (6, 6, 0) in voxel space -> (0, 0, 0) in Three.js space
+      const threePos = voxelToThree([6, 6, 0], grid, vpt);
+      expect(threePos).toEqual([0, 0, 0]);
+
+      // Roundtrip back to voxel
+      const voxelPos = threeToVoxel(threePos, grid, vpt);
+      expect(voxelPos).toEqual([6, 6, 0]);
+
+      // Elevated voxel
+      const elevatedThree = voxelToThree([8, 10, 4], grid, vpt);
+      const roundtripElevated = threeToVoxel(elevatedThree, grid, vpt);
+      expect(roundtripElevated).toEqual([8, 10, 4]);
+    });
+
+    it('tests voxel containment inside shapes for hit testing', () => {
+      const shapes = parseShapesFromXml(SAMPLE_XML);
+      const box0 = shapes[0]; // at="6 6 0" size="10 10 2"
+      // Voxel (6, 6, 0) is inside box0
+      expect(isVoxelInsideShape(6, 6, 0, box0)).toBe(true);
+      // Voxel (6, 6, 3) is outside box0 (z=3 > bz+h=2)
+      expect(isVoxelInsideShape(6, 6, 3, box0)).toBe(false);
+
+      const hit = findShapeAtVoxel(6, 6, 0, shapes);
+      expect(hit).not.toBeNull();
+      expect(hit?.shape.color).toBe('B');
+
+      const hitCylinder = findShapeAtVoxel(6, 6, 7, shapes);
+      expect(hitCylinder).not.toBeNull();
+      expect(hitCylinder?.shape.kind).toBe('cylinder');
+      expect(hitCylinder?.shape.color).toBe('Y');
     });
   });
 });

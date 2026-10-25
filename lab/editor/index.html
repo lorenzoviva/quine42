@@ -88,6 +88,27 @@
 
         <!-- Right Pane: 3D Viewport -->
         <section id="pane-view" aria-label="Viewport di rendering 3D">
+          <!-- CAD Tools Bar -->
+          <div id="cad-toolbar" class="cad-toolbar" aria-label="Strumenti CAD per voxel">
+            <div class="cad-tool-group">
+              <button id="tool-select" class="cad-tool-btn active" title="Seleziona e sposta forme (V)">⇱ Seleziona</button>
+              <button id="tool-box" class="cad-tool-btn" title="Crea un parallelepipedo (B)">▣ Box</button>
+              <button id="tool-voxel" class="cad-tool-btn" title="Disegna un singolo voxel 1×1×1 (X)">▪ Voxel</button>
+              <button id="tool-cylinder" class="cad-tool-btn" title="Crea un cilindro (C)">⌭ Cilindro</button>
+              <button id="tool-ellipsoid" class="cad-tool-btn" title="Crea una sfera/ellissoide (S)">⬭ Sfera</button>
+              <button id="tool-cone" class="cad-tool-btn" title="Crea un cono (K)">▲ Cono</button>
+              <button id="tool-erase" class="cad-tool-btn" title="Cancella forma cliccata (E / Del)">⌫ Gomma</button>
+            </div>
+
+            <div id="cad-size-group" class="cad-size-group">
+              <span class="cad-size-label">Dim:</span>
+              <label title="Larghezza (W)">W <input id="cad-dim-w" type="number" min="1" max="64" value="4" /></label>
+              <label title="Profondità (D)">D <input id="cad-dim-d" type="number" min="1" max="64" value="4" /></label>
+              <label title="Altezza (H)">H <input id="cad-dim-h" type="number" min="1" max="64" value="4" /></label>
+            </div>
+          </div>
+
+          <!-- Viewport Camera HUD -->
           <div class="viewport-hud">
             <button id="btn-cam-reset" title="Centra camera sul modello">⌖ Centra</button>
             <button id="btn-cam-iso" title="Vista isometrica 3/4">3/4</button>
@@ -100,10 +121,120 @@
             <button id="btn-toggle-bloom" class="active" title="Effetto bagliore voxel (Bloom)">Bagliore</button>
           </div>
 
+          <!-- CAD Floating Shape Inspector Card -->
+          <div id="cad-inspector" class="cad-inspector hidden" aria-label="Proprietà forma selezionata">
+            <div class="inspector-header">
+              <div class="inspector-title">
+                <span id="insp-shape-kind" class="kind-badge">BOX</span>
+                <span id="insp-shape-info">Forma #1</span>
+              </div>
+              <button id="btn-insp-close" class="btn-icon" title="Chiudi selezione">✕</button>
+            </div>
+
+            <div class="inspector-body">
+              <div class="insp-prop-row">
+                <span class="insp-label">Posizione (at):</span>
+                <div class="coord-inputs">
+                  <div class="coord-field">
+                    <span>X</span>
+                    <button class="btn-step" data-action="dec" data-axis="at-x">-</button>
+                    <input id="insp-at-x" type="number" />
+                    <button class="btn-step" data-action="inc" data-axis="at-x">+</button>
+                  </div>
+                  <div class="coord-field">
+                    <span>Y</span>
+                    <button class="btn-step" data-action="dec" data-axis="at-y">-</button>
+                    <input id="insp-at-y" type="number" />
+                    <button class="btn-step" data-action="inc" data-axis="at-y">+</button>
+                  </div>
+                  <div class="coord-field">
+                    <span>Z</span>
+                    <button class="btn-step" data-action="dec" data-axis="at-z">-</button>
+                    <input id="insp-at-z" type="number" />
+                    <button class="btn-step" data-action="inc" data-axis="at-z">+</button>
+                  </div>
+                </div>
+              </div>
+
+              <div id="insp-size-row" class="insp-prop-row">
+                <span class="insp-label">Dimensioni (size):</span>
+                <div class="coord-inputs">
+                  <div class="coord-field">
+                    <span>W</span>
+                    <button class="btn-step" data-action="dec" data-axis="size-w">-</button>
+                    <input id="insp-size-w" type="number" min="1" />
+                    <button class="btn-step" data-action="inc" data-axis="size-w">+</button>
+                  </div>
+                  <div class="coord-field">
+                    <span>D</span>
+                    <button class="btn-step" data-action="dec" data-axis="size-d">-</button>
+                    <input id="insp-size-d" type="number" min="1" />
+                    <button class="btn-step" data-action="inc" data-axis="size-d">+</button>
+                  </div>
+                  <div class="coord-field">
+                    <span>H</span>
+                    <button class="btn-step" data-action="dec" data-axis="size-h">-</button>
+                    <input id="insp-size-h" type="number" min="1" />
+                    <button class="btn-step" data-action="inc" data-axis="size-h">+</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="insp-prop-row">
+                <span class="insp-label">Colore:</span>
+                <div class="insp-color-controls">
+                  <div id="insp-color-swatch" class="insp-swatch"></div>
+                  <select id="insp-color-select" title="Cambia colore della forma"></select>
+                </div>
+              </div>
+
+              <div class="inspector-actions">
+                <button id="btn-insp-dup" class="btn-cad-act" title="Duplica questa forma">+ Duplica</button>
+                <button id="btn-insp-del" class="btn-cad-act btn-danger" title="Elimina questa forma">🗑 Elimina</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- CAD Palette & Material Bar -->
+          <div id="cad-palette-bar" class="cad-palette-bar" aria-label="Palette colori e materiale">
+            <div class="palette-active-info" title="Colore attivo per la creazione e colorazione">
+              <div id="active-swatch" class="active-swatch"></div>
+              <div class="active-meta">
+                <span id="active-color-name">Green</span>
+                <span id="active-color-code">G · #00e436</span>
+              </div>
+            </div>
+
+            <div id="palette-swatches" class="palette-swatches"></div>
+
+            <div class="palette-material-controls">
+              <button id="btn-cad-glow" class="btn-glow-toggle" title="Attiva/disattiva bagliore emissivo per il colore">
+                ✨ Glow
+              </button>
+              <label class="custom-color-label" title="Personalizza valore esadecimale (value=rrggbb)">
+                <span>Hex</span>
+                <input id="cad-custom-color" type="color" value="#00e436" />
+              </label>
+              <select id="cad-part-select" title="Collega il colore a un arto (rig camminata)">
+                <option value="">Nessun arto</option>
+                <option value="testa">Testa</option>
+                <option value="corpo">Corpo</option>
+                <option value="braccio_dx">Braccio Dx</option>
+                <option value="braccio_sx">Braccio Sx</option>
+                <option value="gamba_dx">Gamba Dx</option>
+                <option value="gamba_sx">Gamba Sx</option>
+                <option value="coda">Coda</option>
+                <option value="ala_dx">Ala Dx</option>
+                <option value="ala_sx">Ala Sx</option>
+              </select>
+            </div>
+          </div>
+
           <canvas id="viewport"></canvas>
 
           <div id="viewport-info" class="viewport-info">Caricamento modello…</div>
-          <div class="viewport-hints">Tasto destro o sinistro: orbita · Rotella: zoom · Shift + drag: sposta</div>
+          <div id="viewport-coords" class="viewport-coords">Puntatore: (0, 0, 0)</div>
+          <div class="viewport-hints">Click sx: azione CAD / seleziona · Click dx: orbita · Rotella: zoom · Shift+drag: sposta</div>
 
           <div id="loading-overlay" class="hidden">
             <div class="spinner"></div>
