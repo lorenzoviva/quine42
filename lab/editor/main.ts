@@ -2,7 +2,13 @@
 
 import * as THREE from 'three';
 import { CATALOG, GROUPS } from '../3d/catalog';
-import { highlightXml, validateMjx, type ValidationResult } from './syntax';
+import {
+  highlightXml,
+  validateMjx,
+  type ValidationResult,
+  type PaletteColorInfo,
+  getContrastColor,
+} from './syntax';
 import type { EditorBuildRequest, EditorBuildResponse } from './worker';
 import { Bloom } from '../../src/render/bloom';
 import { glowing } from '../../src/render/materials';
@@ -411,6 +417,20 @@ const paletteSwatches = $('palette-swatches');
 const btnCadGlow = $('btn-cad-glow');
 const cadCustomColor = $<HTMLInputElement>('cad-custom-color');
 const cadPartSelect = $<HTMLSelectElement>('cad-part-select');
+const paletteSourceSelect = $<HTMLSelectElement>('palette-source-select');
+
+// Inline Editor Color Picker Popup Elements
+const pickerPopup = $('editor-color-picker-popup');
+const pickerAttrInfo = $('picker-attr-info');
+const btnPickerClose = $('btn-picker-close');
+const tabPickerModel = $('tab-picker-model');
+const tabPickerDefault = $('tab-picker-default');
+const pickerSwatchesGrid = $('picker-swatches-grid');
+
+let activePaletteSource: 'model' | 'default' = 'model';
+let hasCustomColorsPrev: boolean | null = null;
+let pickerActiveTab: 'model' | 'default' = 'model';
+let pickerTargetPos: number | null = null;
 
 // Playback Elements (T59c)
 const playbackBar = $('playback-bar');
@@ -610,7 +630,8 @@ async function triggerBuild() {
 
 function onCodeChange() {
   const code = codeInput.value;
-  codeOutput.innerHTML = highlightXml(code) + '\n';
+  const activePaletteMap = getActivePaletteMap();
+  codeOutput.innerHTML = highlightXml(code, { colorChips: true, palette: activePaletteMap }) + '\n';
   syncScroll();
   updateCursorPos();
 
@@ -874,49 +895,96 @@ function updateSelectionBox(shape: CadShape) {
 
 // ------------------------------------------------------------------ Palette & Materials
 
-function initPaletteBar() {
+function getActivePaletteMap(): Record<string, PaletteColorInfo> {
+  const map: Record<string, PaletteColorInfo> = {};
+  for (const [sym, info] of Object.entries(MJ_PALETTE)) {
+    map[sym] = {
+      color: info.color,
+      name: info.name,
+      glow: false,
+    };
+  }
+  const customColors = parseColorsFromXml(codeInput.value);
+  for (const [sym, c] of Object.entries(customColors)) {
+    map[sym] = {
+      color: c.value ?? map[sym]?.color ?? '#ffffff',
+      name: c.name ?? map[sym]?.name ?? `Colore ${sym}`,
+      glow: !!c.glow,
+    };
+  }
+  return map;
+}
+
+function renderPaletteSwatches(source: 'model' | 'default') {
   paletteSwatches.innerHTML = '';
   const inspColorSelect = $<HTMLSelectElement>('insp-color-select');
   inspColorSelect.innerHTML = '';
 
-  for (const sym of SWATCH_LETTERS) {
-    const info = MJ_PALETTE[sym];
-    if (!info) continue;
+  const symbolsToRender: Array<{ symbol: string; color: string; name: string; glow?: boolean }> = [];
 
-    // Swatch button
+  if (source === 'model') {
+    const modelSymbols = getPaletteSymbols(codeInput.value);
+    for (const s of modelSymbols) {
+      symbolsToRender.push({
+        symbol: s.symbol,
+        color: s.color,
+        name: s.name ?? `Colore ${s.symbol}`,
+        glow: s.glow,
+      });
+    }
+  } else {
+    for (const sym of SWATCH_LETTERS) {
+      const info = MJ_PALETTE[sym];
+      if (!info) continue;
+      symbolsToRender.push({
+        symbol: sym,
+        color: info.color,
+        name: info.name,
+        glow: false,
+      });
+    }
+  }
+
+  for (const item of symbolsToRender) {
     const btn = document.createElement('button');
-    btn.className = 'swatch-btn' + (sym === activeColorSymbol ? ' active' : '');
-    btn.dataset.symbol = sym;
-    btn.textContent = sym;
-    btn.style.backgroundColor = info.color;
-    btn.title = `${sym}: ${info.name} (${info.color})`;
-    btn.onclick = () => setActiveColor(sym);
+    btn.className =
+      'swatch-btn' +
+      (item.symbol === activeColorSymbol ? ' active' : '') +
+      (item.glow ? ' glow' : '');
+    btn.dataset.symbol = item.symbol;
+    btn.textContent = item.symbol;
+    btn.style.backgroundColor = item.color;
+    btn.style.color = getContrastColor(item.color);
+    btn.title = `${item.symbol}: ${item.name} (${item.color})${item.glow ? ' ✨ Glow' : ''}`;
+    btn.onclick = () => setActiveColor(item.symbol);
     paletteSwatches.appendChild(btn);
 
-    // Inspector color option
     const opt = document.createElement('option');
-    opt.value = sym;
-    opt.textContent = `${sym} · ${info.name}`;
+    opt.value = item.symbol;
+    opt.textContent = `${item.symbol} · ${item.name}`;
     inspColorSelect.appendChild(opt);
   }
 
-  setActiveColor(activeColorSymbol);
+  updateActiveColorDetails();
+}
+
+function updateActiveColorDetails() {
+  const activeMap = getActivePaletteMap();
+  const info = activeMap[activeColorSymbol] || { color: '#ffffff', name: activeColorSymbol };
+  activeSwatch.style.backgroundColor = info.color;
+  activeColorName.textContent = info.name ?? activeColorSymbol;
+  activeColorCode.textContent = `${activeColorSymbol} · ${info.color}`;
+  cadCustomColor.value = info.color.startsWith('#') ? info.color : `#${info.color}`;
+
+  const swatches = paletteSwatches.querySelectorAll('.swatch-btn');
+  swatches.forEach((el) => {
+    el.classList.toggle('active', (el as HTMLElement).dataset.symbol === activeColorSymbol);
+  });
 }
 
 function setActiveColor(symbol: string) {
   activeColorSymbol = symbol;
-  const info = MJ_PALETTE[symbol] || { color: '#ffffff', name: symbol };
-
-  activeSwatch.style.backgroundColor = info.color;
-  activeColorName.textContent = info.name;
-  activeColorCode.textContent = `${symbol} · ${info.color}`;
-  cadCustomColor.value = info.color;
-
-  // Update swatch button active class
-  const swatches = paletteSwatches.querySelectorAll('.swatch-btn');
-  swatches.forEach((el) => {
-    el.classList.toggle('active', (el as HTMLElement).dataset.symbol === symbol);
-  });
+  updateActiveColorDetails();
 
   // If a shape is selected, apply color immediately
   if (selectedShapeIndex !== null) {
@@ -926,23 +994,266 @@ function setActiveColor(symbol: string) {
   }
 }
 
+function initPaletteBar() {
+  paletteSourceSelect.addEventListener('change', () => {
+    activePaletteSource = paletteSourceSelect.value as 'model' | 'default';
+    renderPaletteSwatches(activePaletteSource);
+    onCodeChange();
+  });
+
+  renderPaletteSwatches(activePaletteSource);
+  setActiveColor(activeColorSymbol);
+}
+
 function syncPaletteState() {
-  const colors = parseColorsFromXml(codeInput.value);
-  const cur = colors[activeColorSymbol];
+  const customColors = parseColorsFromXml(codeInput.value);
+  const customCount = Object.keys(customColors).length;
+  const hasCustom = customCount > 0;
+
+  // Rebuild paletteSourceSelect options
+  paletteSourceSelect.innerHTML = '';
+
+  if (hasCustom) {
+    const optModel = document.createElement('option');
+    optModel.value = 'model';
+    optModel.textContent = `Modello (${customCount} col.)`;
+    paletteSourceSelect.appendChild(optModel);
+  }
+
+  const optDefault = document.createElement('option');
+  optDefault.value = 'default';
+  optDefault.textContent = 'Default MJ (26 col.)';
+  paletteSourceSelect.appendChild(optDefault);
+
+  if (!hasCustom) {
+    const optModelDis = document.createElement('option');
+    optModelDis.value = 'model';
+    optModelDis.textContent = 'Modello (nessun colore)';
+    optModelDis.disabled = true;
+    paletteSourceSelect.appendChild(optModelDis);
+  }
+
+  // If custom colors defined, make it active by default on load or first detection
+  if (hasCustom && (hasCustomColorsPrev === false || hasCustomColorsPrev === null)) {
+    activePaletteSource = 'model';
+  } else if (!hasCustom) {
+    activePaletteSource = 'default';
+  }
+  hasCustomColorsPrev = hasCustom;
+
+  paletteSourceSelect.value = activePaletteSource;
+  renderPaletteSwatches(activePaletteSource);
+
+  const cur = customColors[activeColorSymbol];
   activeGlow = !!cur?.glow;
   btnCadGlow.classList.toggle('active', activeGlow);
   cadPartSelect.value = cur?.part || '';
   if (cur?.value) {
-    cadCustomColor.value = cur.value;
+    cadCustomColor.value = cur.value.startsWith('#') ? cur.value : `#${cur.value}`;
   }
+}
+
+// ------------------------------------------------------------------ XML Editor Inline Color Picker
+
+function openColorPickerPopup(pos: number, attr: string, letter: string, rect: DOMRect) {
+  pickerTargetPos = pos;
+
+  pickerAttrInfo.textContent = `${attr}="${letter}" · Voxel ${letter}`;
+
+  const customColors = parseColorsFromXml(codeInput.value);
+  const hasCustom = Object.keys(customColors).length > 0;
+
+  if (hasCustom) {
+    pickerActiveTab = 'model';
+  } else {
+    pickerActiveTab = 'default';
+  }
+
+  updatePickerTabs();
+  renderPickerSwatches();
+
+  pickerPopup.classList.remove('hidden');
+
+  const popupWidth = 290;
+  const popupHeight = 260;
+  let top = rect.bottom + 6;
+  let left = Math.max(12, Math.min(rect.left - 20, window.innerWidth - popupWidth - 16));
+
+  if (top + popupHeight > window.innerHeight) {
+    top = Math.max(12, rect.top - popupHeight - 6);
+  }
+
+  pickerPopup.style.top = `${top}px`;
+  pickerPopup.style.left = `${left}px`;
+}
+
+function closeColorPickerPopup() {
+  pickerPopup.classList.add('hidden');
+  pickerTargetPos = null;
+}
+
+function updatePickerTabs() {
+  tabPickerModel.classList.toggle('active', pickerActiveTab === 'model');
+  tabPickerDefault.classList.toggle('active', pickerActiveTab === 'default');
+}
+
+function renderPickerSwatches() {
+  pickerSwatchesGrid.innerHTML = '';
+
+  const symbols: Array<{ symbol: string; color: string; name: string; glow?: boolean }> = [];
+
+  if (pickerActiveTab === 'model') {
+    const modelSymbols = getPaletteSymbols(codeInput.value);
+    for (const s of modelSymbols) {
+      symbols.push({
+        symbol: s.symbol,
+        color: s.color,
+        name: s.name ?? `Colore ${s.symbol}`,
+        glow: s.glow,
+      });
+    }
+
+    if (symbols.length === 0) {
+      const hint = document.createElement('div');
+      hint.className = 'picker-empty-hint';
+      hint.textContent = 'Nessun colore dichiarato nel modello.';
+      pickerSwatchesGrid.appendChild(hint);
+      return;
+    }
+  } else {
+    for (const sym of SWATCH_LETTERS) {
+      const info = MJ_PALETTE[sym];
+      if (!info) continue;
+      symbols.push({
+        symbol: sym,
+        color: info.color,
+        name: info.name,
+        glow: false,
+      });
+    }
+  }
+
+  for (const item of symbols) {
+    const btn = document.createElement('button');
+    btn.className = 'picker-swatch-btn' + (item.glow ? ' picker-glow' : '');
+    btn.textContent = item.symbol;
+    btn.style.backgroundColor = item.color;
+    btn.style.color = getContrastColor(item.color);
+    btn.title = `${item.symbol}: ${item.name} (${item.color})${item.glow ? ' ✨ Glow' : ''}`;
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      applyPickerSelection(item.symbol);
+    };
+    pickerSwatchesGrid.appendChild(btn);
+  }
+}
+
+function applyPickerSelection(newChar: string) {
+  if (pickerTargetPos === null || pickerTargetPos < 0 || pickerTargetPos >= codeInput.value.length) {
+    closeColorPickerPopup();
+    return;
+  }
+
+  const val = codeInput.value;
+  const before = val.slice(0, pickerTargetPos);
+  const after = val.slice(pickerTargetPos + 1);
+  codeInput.value = before + newChar + after;
+
+  const nextPos = pickerTargetPos + 1;
+  closeColorPickerPopup();
+
+  onCodeChange();
+
+  codeInput.focus();
+  codeInput.setSelectionRange(nextPos, nextPos);
 }
 
 // ------------------------------------------------------------------ Event Listeners
 
 codeInput.addEventListener('input', onCodeChange);
-codeInput.addEventListener('scroll', syncScroll);
-codeInput.addEventListener('click', updateCursorPos);
+codeInput.addEventListener('scroll', () => {
+  syncScroll();
+  if (!pickerPopup.classList.contains('hidden')) {
+    closeColorPickerPopup();
+  }
+});
+
+codeInput.addEventListener('click', (e) => {
+  updateCursorPos();
+
+  // Temporarily disable pointer events to hit-test colored chips underneath textarea
+  codeInput.style.pointerEvents = 'none';
+  const hit = document.elementFromPoint(e.clientX, e.clientY);
+  codeInput.style.pointerEvents = 'auto';
+
+  const chip = hit?.closest('.tok-color-chip') as HTMLElement | null;
+
+  if (chip && chip.dataset.pos !== undefined) {
+    const pos = parseInt(chip.dataset.pos, 10);
+    const letter = chip.dataset.letter || '';
+    const attr = chip.dataset.attr || 'color';
+    openColorPickerPopup(pos, attr, letter, chip.getBoundingClientRect());
+  } else {
+    // Check fallback if cursor selection matches a chip pos exactly
+    const curPos = codeInput.selectionStart;
+    const fallbackChip = (
+      codeOutput.querySelector(`.tok-color-chip[data-pos="${curPos}"]`) ??
+      codeOutput.querySelector(`.tok-color-chip[data-pos="${curPos - 1}"]`)
+    ) as HTMLElement | null;
+
+    if (fallbackChip && fallbackChip.dataset.pos !== undefined) {
+      const rect = fallbackChip.getBoundingClientRect();
+      const dx = Math.abs(e.clientX - (rect.left + rect.width / 2));
+      const dy = Math.abs(e.clientY - (rect.top + rect.height / 2));
+      if (dx < 20 && dy < 20) {
+        const pos = parseInt(fallbackChip.dataset.pos, 10);
+        const letter = fallbackChip.dataset.letter || '';
+        const attr = fallbackChip.dataset.attr || 'color';
+        openColorPickerPopup(pos, attr, letter, rect);
+        return;
+      }
+    }
+    closeColorPickerPopup();
+  }
+});
+
 codeInput.addEventListener('keyup', updateCursorPos);
+
+// Picker tab and button handlers
+tabPickerModel.addEventListener('click', (e) => {
+  e.stopPropagation();
+  pickerActiveTab = 'model';
+  updatePickerTabs();
+  renderPickerSwatches();
+});
+
+tabPickerDefault.addEventListener('click', (e) => {
+  e.stopPropagation();
+  pickerActiveTab = 'default';
+  updatePickerTabs();
+  renderPickerSwatches();
+});
+
+btnPickerClose.addEventListener('click', (e) => {
+  e.stopPropagation();
+  closeColorPickerPopup();
+});
+
+document.querySelectorAll('.btn-picker-token').forEach((btn) => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const token = (btn as HTMLElement).dataset.token;
+    if (token) applyPickerSelection(token);
+  });
+});
+
+document.addEventListener('pointerdown', (e) => {
+  if (pickerPopup.classList.contains('hidden')) return;
+  const target = e.target as HTMLElement | null;
+  if (target && !pickerPopup.contains(target) && target !== codeInput) {
+    closeColorPickerPopup();
+  }
+});
 
 codeInput.addEventListener('keydown', (e) => {
   if (e.key === 'Tab') {
@@ -1849,6 +2160,10 @@ window.addEventListener('keydown', (e) => {
     return;
   }
   if (e.key === 'Escape') {
+    if (!pickerPopup.classList.contains('hidden')) {
+      closeColorPickerPopup();
+      return;
+    }
     if (!modalRulesBackdrop.classList.contains('hidden')) {
       closeRulesModal();
       return;
@@ -1889,6 +2204,7 @@ function populatePresets() {
 }
 
 function loadSelectedPreset() {
+  hasCustomColorsPrev = null;
   const val = presetSelect.value;
   if (val === 'template:cube') {
     codeInput.value = TEMPLATE_CUBE;

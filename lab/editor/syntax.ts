@@ -2,6 +2,7 @@
 
 import { compileMjx, type MjxModel } from '../../src/mj/model';
 import type { Vec3 } from '../../src/mj/engine';
+import { MJ_PALETTE } from '../../src/mj/palette';
 
 export interface ValidationSuccess {
   ok: true;
@@ -16,6 +17,38 @@ export interface ValidationError {
 }
 
 export type ValidationResult = ValidationSuccess | ValidationError;
+
+export interface PaletteColorInfo {
+  color: string;
+  name?: string;
+  glow?: boolean;
+}
+
+export interface HighlightOptions {
+  palette?: Record<string, PaletteColorInfo>;
+  colorChips?: boolean;
+}
+
+export const COLOR_ATTRS = new Set([
+  'color',
+  'on',
+  'symbol',
+  'values',
+  'in',
+  'out',
+  'ground',
+  'origin',
+]);
+
+export function getContrastColor(hex: string): string {
+  const c = hex.replace('#', '');
+  if (c.length !== 6) return '#ffffff';
+  const r = parseInt(c.slice(0, 2), 16);
+  const g = parseInt(c.slice(2, 4), 16);
+  const b = parseInt(c.slice(4, 6), 16);
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+  return yiq >= 150 ? '#0c0e14' : '#ffffff';
+}
 
 export const MJ_NODES = new Set([
   'sequence',
@@ -109,7 +142,7 @@ export function validateMjx(xml: string, sizeOverride?: Vec3): ValidationResult 
 /**
  * Tokenizes and highlights XML code with HTML markup for syntax highlighting.
  */
-export function highlightXml(src: string): string {
+export function highlightXml(src: string, options?: HighlightOptions): string {
   let i = 0;
   const n = src.length;
   let out = '';
@@ -212,7 +245,44 @@ export function highlightXml(src: string): string {
         out += '<span class="tok-punct">=</span>';
         const rawVal = match[2] ?? match[3] ?? match[4];
         const quote = match[2] !== undefined ? '"' : match[3] !== undefined ? "'" : '';
-        out += `<span class="tok-val">${quote}${escapeHtml(rawVal)}${quote}</span>`;
+
+        if (options?.colorChips && quote && COLOR_ATTRS.has(attrName.toLowerCase())) {
+          const attrStrStart = i + 1 + nameMatch[0].length;
+          const attrStartInSrc = attrStrStart + match.index;
+          const eqIdx = match[0].indexOf('=');
+          const quoteIdx = match[0].indexOf(quote, eqIdx);
+          const valStartInSrc = attrStartInSrc + quoteIdx + 1;
+
+          let chipsHtml = '';
+          for (let k = 0; k < rawVal.length; k++) {
+            const ch = rawVal[k];
+            const charPos = valStartInSrc + k;
+
+            if (/\s/.test(ch) || ch === '/' || ch === '[' || ch === ']') {
+              chipsHtml += escapeHtml(ch);
+              continue;
+            }
+
+            const pal = options.palette?.[ch] ?? MJ_PALETTE[ch];
+            if (pal?.color) {
+              const hex = pal.color.startsWith('#') ? pal.color : `#${pal.color}`;
+              const fg = getContrastColor(hex);
+              const isGlowing = 'glow' in pal ? !!(pal as PaletteColorInfo).glow : false;
+              const glowClass = isGlowing ? ' tok-glow' : '';
+              const title = `${escapeHtml(ch)}: ${escapeHtml(pal.name ?? ch)} (${hex}) · Clicca per cambiare`;
+              chipsHtml += `<span class="tok-color-chip${glowClass}" data-letter="${escapeHtml(ch)}" data-attr="${escapeHtml(attrName)}" data-pos="${charPos}" style="--chip-bg:${hex};--chip-text:${fg};" title="${title}">${escapeHtml(ch)}</span>`;
+            } else if (ch === '*') {
+              chipsHtml += `<span class="tok-color-chip tok-wildcard" data-letter="*" data-attr="${escapeHtml(attrName)}" data-pos="${charPos}" title="Wildcard (*): qualsiasi voxel">*</span>`;
+            } else if (ch === '.') {
+              chipsHtml += `<span class="tok-color-chip tok-air" data-letter="." data-attr="${escapeHtml(attrName)}" data-pos="${charPos}" title="Aria (.)">.</span>`;
+            } else {
+              chipsHtml += `<span class="tok-color-chip tok-unknown" data-letter="${escapeHtml(ch)}" data-attr="${escapeHtml(attrName)}" data-pos="${charPos}">${escapeHtml(ch)}</span>`;
+            }
+          }
+          out += `<span class="tok-val">${quote}${chipsHtml}${quote}</span>`;
+        } else {
+          out += `<span class="tok-val">${quote}${escapeHtml(rawVal)}${quote}</span>`;
+        }
       }
 
       lastIdx = attrRegex.lastIndex;

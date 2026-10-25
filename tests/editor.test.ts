@@ -4,6 +4,8 @@ import {
   extractLineFromError,
   highlightXml,
   validateMjx,
+  getContrastColor,
+  COLOR_ATTRS,
   MJ_NODES,
   MJ_ATTRS,
 } from '../lab/editor/syntax';
@@ -755,6 +757,95 @@ describe('MarkovJunior Editor (T59a)', () => {
         expect(html).toContain('<span class="tok-tag tok-mj-node">wfc</span>');
         expect(html).toContain('<span class="tok-attr tok-mj-attr">sample</span>');
         expect(html).toContain('<span class="tok-attr tok-mj-attr">periodic</span>');
+      });
+    });
+
+    describe('XML Editor Color Chips & Palette Interaction', () => {
+      it('calculates high contrast foreground color for hex background', () => {
+        expect(getContrastColor('#ffffff')).toBe('#0c0e14'); // light -> dark
+        expect(getContrastColor('#000000')).toBe('#ffffff'); // dark -> light
+        expect(getContrastColor('#ffec27')).toBe('#0c0e14'); // yellow -> dark
+        expect(getContrastColor('#1d2b53')).toBe('#ffffff'); // dark indigo -> white
+      });
+
+      it('recognizes color attribute names', () => {
+        expect(COLOR_ATTRS.has('color')).toBe(true);
+        expect(COLOR_ATTRS.has('on')).toBe(true);
+        expect(COLOR_ATTRS.has('values')).toBe(true);
+        expect(COLOR_ATTRS.has('in')).toBe(true);
+        expect(COLOR_ATTRS.has('out')).toBe(true);
+        expect(COLOR_ATTRS.has('symbol')).toBe(true);
+      });
+
+      it('generates colored chips with exact character offsets in highlightXml with colorChips', () => {
+        const xml = '<box color="G" size="4 4 4"/>';
+        const html = highlightXml(xml, { colorChips: true });
+
+        expect(html).toContain('tok-color-chip');
+        expect(html).toContain('data-letter="G"');
+        expect(html).toContain('data-attr="color"');
+
+        // Verify exact offset
+        const posMatch = /data-pos="(\d+)"/.exec(html);
+        expect(posMatch).not.toBeNull();
+        const offset = parseInt(posMatch![1], 10);
+        expect(xml[offset]).toBe('G');
+        expect(xml.slice(0, offset)).toBe('<box color="');
+      });
+
+      it('supports custom palette colors and glow class in highlightXml', () => {
+        const xml = '<color symbol="K" value="ff00aa" glow="true"/>\n<box color="K"/>';
+        const customPalette = {
+          K: { color: '#ff00aa', name: 'CustomPink', glow: true },
+        };
+        const html = highlightXml(xml, { colorChips: true, palette: customPalette });
+
+        expect(html).toContain('--chip-bg:#ff00aa');
+        expect(html).toContain('tok-glow');
+        expect(html).toContain('data-letter="K"');
+      });
+
+      it('renders wildcard (*) and air (.) chips in rules', () => {
+        const xml = '<rule in="*G." out="W*B"/>';
+        const html = highlightXml(xml, { colorChips: true });
+
+        expect(html).toContain('tok-wildcard');
+        expect(html).toContain('data-letter="*"');
+        expect(html).toContain('tok-air');
+        expect(html).toContain('data-letter="."');
+      });
+
+      it('allows replacing character at data-pos to modify color in XML', () => {
+        const xml = '<sequence values="BGW"><box color="B"/></sequence>';
+        const html = highlightXml(xml, { colorChips: true });
+
+        // Find chip for color="B" in box
+        const matches = [...html.matchAll(/data-letter="B"[^>]*data-pos="(\d+)"/g)];
+        expect(matches.length).toBeGreaterThan(0);
+        const lastMatch = matches[matches.length - 1];
+        const offset = parseInt(lastMatch[1], 10);
+
+        expect(xml[offset]).toBe('B');
+        const updated = xml.slice(0, offset) + 'G' + xml.slice(offset + 1);
+        expect(updated).toBe('<sequence values="BGW"><box color="G"/></sequence>');
+      });
+
+      it('resolves palette symbols combining custom colors and values', () => {
+        const xml = `<sequence values="0BWG" size="10 10 10">
+          <color symbol="N" value="8b5a2b" name="Legno"/>
+          <box color="N"/>
+        </sequence>`;
+
+        const symbols = getPaletteSymbols(xml);
+        const symMap = new Map(symbols.map((s) => [s.symbol, s]));
+
+        expect(symMap.has('N')).toBe(true);
+        expect(symMap.get('N')?.color).toBe('#8b5a2b');
+        expect(symMap.get('N')?.name).toBe('Legno');
+
+        expect(symMap.has('G')).toBe(true);
+        expect(symMap.has('W')).toBe(true);
+        expect(symMap.has('B')).toBe(true);
       });
     });
   });

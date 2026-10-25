@@ -90,38 +90,41 @@
 
         <!-- Right Pane: 3D Viewport -->
         <section id="pane-view" aria-label="Viewport di rendering 3D">
-          <!-- CAD Tools Bar -->
-          <div id="cad-toolbar" class="cad-toolbar" aria-label="Strumenti CAD per voxel">
-            <div class="cad-tool-group">
-              <button id="tool-select" class="cad-tool-btn active" title="Seleziona e sposta forme (V)">⇱ Seleziona</button>
-              <button id="tool-box" class="cad-tool-btn" title="Crea un parallelepipedo (B)">▣ Box</button>
-              <button id="tool-voxel" class="cad-tool-btn" title="Disegna un singolo voxel 1×1×1 (X)">▪ Voxel</button>
-              <button id="tool-cylinder" class="cad-tool-btn" title="Crea un cilindro (C)">⌭ Cilindro</button>
-              <button id="tool-ellipsoid" class="cad-tool-btn" title="Crea una sfera/ellissoide (S)">⬭ Sfera</button>
-              <button id="tool-cone" class="cad-tool-btn" title="Crea un cono (K)">▲ Cono</button>
-              <button id="tool-erase" class="cad-tool-btn" title="Cancella forma cliccata (E / Del)">⌫ Gomma</button>
+          <!-- Viewport Top Bars (CAD Tools & Camera HUD on two rows) -->
+          <div class="viewport-top-bars">
+            <!-- CAD Tools Bar -->
+            <div id="cad-toolbar" class="cad-toolbar" aria-label="Strumenti CAD per voxel">
+              <div class="cad-tool-group">
+                <button id="tool-select" class="cad-tool-btn active" title="Seleziona e sposta forme (V)">⇱ Seleziona</button>
+                <button id="tool-box" class="cad-tool-btn" title="Crea un parallelepipedo (B)">▣ Box</button>
+                <button id="tool-voxel" class="cad-tool-btn" title="Disegna un singolo voxel 1×1×1 (X)">▪ Voxel</button>
+                <button id="tool-cylinder" class="cad-tool-btn" title="Crea un cilindro (C)">⌭ Cilindro</button>
+                <button id="tool-ellipsoid" class="cad-tool-btn" title="Crea una sfera/ellissoide (S)">⬭ Sfera</button>
+                <button id="tool-cone" class="cad-tool-btn" title="Crea un cono (K)">▲ Cono</button>
+                <button id="tool-erase" class="cad-tool-btn" title="Cancella forma cliccata (E / Del)">⌫ Gomma</button>
+              </div>
+
+              <div id="cad-size-group" class="cad-size-group">
+                <span class="cad-size-label">Dim:</span>
+                <label title="Larghezza (W)">W <input id="cad-dim-w" type="number" min="1" max="64" value="4" /></label>
+                <label title="Profondità (D)">D <input id="cad-dim-d" type="number" min="1" max="64" value="4" /></label>
+                <label title="Altezza (H)">H <input id="cad-dim-h" type="number" min="1" max="64" value="4" /></label>
+              </div>
             </div>
 
-            <div id="cad-size-group" class="cad-size-group">
-              <span class="cad-size-label">Dim:</span>
-              <label title="Larghezza (W)">W <input id="cad-dim-w" type="number" min="1" max="64" value="4" /></label>
-              <label title="Profondità (D)">D <input id="cad-dim-d" type="number" min="1" max="64" value="4" /></label>
-              <label title="Altezza (H)">H <input id="cad-dim-h" type="number" min="1" max="64" value="4" /></label>
+            <!-- Viewport Camera HUD -->
+            <div class="viewport-hud">
+              <button id="btn-cam-reset" title="Centra camera sul modello">⌖ Centra</button>
+              <button id="btn-cam-iso" title="Vista isometrica 3/4">3/4</button>
+              <button id="btn-cam-top" title="Vista dall'alto">Alto</button>
+              <button id="btn-cam-front" title="Vista frontale">Fronte</button>
+              <button id="btn-cam-side" title="Vista laterale">Fianco</button>
+              <button id="btn-toggle-grid" class="active" title="Mostra/Nascondi griglia">Griglia</button>
+              <button id="btn-toggle-bounds" class="active" title="Mostra/Nascondi gabbia di ingombro">Box</button>
+              <button id="btn-toggle-wireframe" title="Modalità wireframe">Wireframe</button>
+              <button id="btn-toggle-bloom" class="active" title="Effetto bagliore voxel (Bloom)">Bagliore</button>
+              <button id="btn-toggle-playback" class="active" title="Mostra/Nascondi controlli di riproduzione e timeline">Timeline</button>
             </div>
-          </div>
-
-          <!-- Viewport Camera HUD -->
-          <div class="viewport-hud">
-            <button id="btn-cam-reset" title="Centra camera sul modello">⌖ Centra</button>
-            <button id="btn-cam-iso" title="Vista isometrica 3/4">3/4</button>
-            <button id="btn-cam-top" title="Vista dall'alto">Alto</button>
-            <button id="btn-cam-front" title="Vista frontale">Fronte</button>
-            <button id="btn-cam-side" title="Vista laterale">Fianco</button>
-            <button id="btn-toggle-grid" class="active" title="Mostra/Nascondi griglia">Griglia</button>
-            <button id="btn-toggle-bounds" class="active" title="Mostra/Nascondi gabbia di ingombro">Box</button>
-            <button id="btn-toggle-wireframe" title="Modalità wireframe">Wireframe</button>
-            <button id="btn-toggle-bloom" class="active" title="Effetto bagliore voxel (Bloom)">Bagliore</button>
-            <button id="btn-toggle-playback" class="active" title="Mostra/Nascondi controlli di riproduzione e timeline">Timeline</button>
           </div>
 
           <!-- CAD Floating Shape Inspector Card -->
@@ -206,6 +209,14 @@
                 <span id="active-color-name">Green</span>
                 <span id="active-color-code">G · #00e436</span>
               </div>
+            </div>
+
+            <div class="palette-source-group" title="Seleziona la palette attiva per il renderer">
+              <span class="palette-label">Palette:</span>
+              <select id="palette-source-select">
+                <option value="model">Modello</option>
+                <option value="default">Default MJ</option>
+              </select>
             </div>
 
             <div id="palette-swatches" class="palette-swatches"></div>
@@ -461,6 +472,34 @@
           <button id="btn-wfc-load-model" class="btn-primary" title="Carica questo modello nell'editor e mostra subito la generazione 3D">★ Carica come modello attivo</button>
           <button id="btn-wfc-insert-cursor" class="btn-secondary" title="Inserisci blocco al cursore">Inserisci al cursore</button>
           <button id="btn-wfc-copy" class="btn-secondary" title="Copia negli appunti">Copia XML</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Color Picker Popup for XML Editor (inline on color letters) -->
+    <div id="editor-color-picker-popup" class="editor-color-picker-popup hidden" role="dialog" aria-label="Selettore colore voxel">
+      <div class="picker-popup-header">
+        <div class="picker-popup-title">
+          <span class="picker-icon">🎨</span>
+          <span id="picker-attr-info">Colore: G</span>
+        </div>
+        <button id="btn-picker-close" class="btn-icon" title="Chiudi (Esc)">✕</button>
+      </div>
+
+      <div class="picker-tabs-row">
+        <button id="tab-picker-model" class="picker-tab active" title="Colori dichiarati nel modello">Modello</button>
+        <button id="tab-picker-default" class="picker-tab" title="Palette standard MarkovJunior">Default MJ</button>
+      </div>
+
+      <div id="picker-swatches-grid" class="picker-swatches-grid"></div>
+
+      <div class="picker-special-section">
+        <span class="picker-sub-label">Caratteri Speciali</span>
+        <div class="picker-special-tokens">
+          <button class="btn-picker-token" data-token="*" title="Asterisco / Wildcard: qualsiasi voxel">* Wildcard</button>
+          <button class="btn-picker-token" data-token="." title="Punto: aria / vuoto">. Aria</button>
+          <button class="btn-picker-token" data-token="0" title="Zero: vuoto / stato 0">0 Vuoto</button>
+          <button class="btn-picker-token" data-token="?" title="Punto di domanda: valore non vincolato">? Match</button>
         </div>
       </div>
     </div>
