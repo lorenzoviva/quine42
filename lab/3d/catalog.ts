@@ -75,6 +75,10 @@ const MODELS: Array<[string, string, Role, number?]> = [
   ['corona-drone', 'Drone (corona)', 'prop', 8],
   ['corona-treno', 'Treno pod (corona)', 'prop', 8],
   ['corona-gerboa', 'Gerboa base (corona)', 'npc', 20],
+  ['corona-gerboa-laterale', 'Gerboa (orecchie laterali)', 'npc', 20],
+  ['corona-gerboa-45', 'Gerboa (orecchie a 45°)', 'npc', 20],
+  ['corona-gerboa-narratore', 'Gerboa Narratore (corona)', 'npc', 20],
+  ['corona-gerboa-cartografo', 'Gerboa Cartografo (corona)', 'npc', 20],
 ];
 
 const sourceOf = (xml: string) => /^\s*<!--\s*([\s\S]*?)-->/.exec(xml)?.[1].replace(/\s+/g, ' ').trim() ?? '';

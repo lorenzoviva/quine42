@@ -1,0 +1,291 @@
+<!--
+corona-gerboa-cartografo: L'Esploratore dei Luoghi del Concilio (avatar della Corona).
+Membro del Concilio in forma di Gerboa gigante esploratore (scala 20 vpt, anatomia base con orecchie in avanti).
+Manto sabbia deserto caldo con sfumature dorate e sottotono oliva delicato.
+Indossa un caschetto bombato da safari/coloniale color kaki/oliva con visiera frontale pronunciata sopra gli occhioni,
+fascia in seta verde smeraldo (#7dd87d, colore araldico del Cartografo), un paio di lenti/occhialini da geodesia
+rialzati sulla fronte della visiera con vetri riflettenti verdi e riflesso glow, fazzoletto/sciarpetta verde annodata al collo,
+e a tracolla sulla schiena un cannocchiale in ottone lucido (#e4bb40) e un rotolo di mappa in pergamena legata con nastro verde.
+Scatola: 1.6 × 2.2 × 2.1 caselle, 32 × 44 × 42 voxel, 20 voxel per casella (vpt: 20).
+Ruolo: npc.
+-->
+<sequence values="BFfDCcTtUuNWEZRrOoGgPpaAKkJIHhSsMmVvYyLlXxQq" size="32 44 42" symmetry="()" name="GerboaCartografo">
+  <!-- Manto sabbia deserto con sfumature verdognole delicate del corpo e dorso -->
+  <color symbol="F" value="b09c6f" name="sabbia base dorso"/>
+  <color symbol="f" value="cbba8e" name="sabbia chiaro oliva luce"/>
+  <color symbol="D" value="7a6a44" name="sabbia scuro ombra"/>
+
+  <!-- Ventre, petto e gola in morbido crema chiaro -->
+  <color symbol="C" value="fff7ec" name="crema chiaro ventre"/>
+  <color symbol="c" value="eedec5" name="crema caldo sfumatura"/>
+
+  <!-- Testa, musetto, tartufo e baffi (part="testa") -->
+  <color symbol="T" value="b09c6f" part="testa" name="testa sabbia base"/>
+  <color symbol="t" value="cbba8e" part="testa" name="testa sabbia chiaro guance"/>
+  <color symbol="U" value="fff7ec" part="testa" name="musetto e guance crema"/>
+  <color symbol="u" value="eedec5" part="testa" name="sfumatura musetto"/>
+  <color symbol="N" value="241c16" part="testa" name="tartufo naso scuro"/>
+  <color symbol="W" value="504234" part="testa" name="baffetti vibrisse"/>
+  <color symbol="E" value="141418" part="testa" name="occhi scuri profondi"/>
+  <color symbol="Z" value="ffffff" glow="True" part="testa" name="riflesso occhi vispo"/>
+
+  <!-- Grandi orecchie a conchiglia (part="testa") -->
+  <color symbol="O" value="b09c6f" part="testa" name="dorso orecchio sabbia"/>
+  <color symbol="o" value="cbba8e" part="testa" name="bordo orecchio chiaro"/>
+  <color symbol="R" value="ffaec0" part="testa" name="interno orecchio rosa"/>
+  <color symbol="r" value="ffd2dc" part="testa" name="concavita orecchio rosa chiaro"/>
+
+  <!-- Zampe posteriori bipedali piegate a Z (part="gamba") -->
+  <color symbol="G" value="b09c6f" part="gamba" name="coscia sabbia"/>
+  <color symbol="g" value="82724a" part="gamba" name="stinco e garretto"/>
+  <color symbol="P" value="eedec5" part="gamba" name="piede crema dita"/>
+  <color symbol="p" value="cdae8c" part="gamba" name="polpastrelli unghie"/>
+
+  <!-- Zampette anteriori sul petto (part="braccio") -->
+  <color symbol="A" value="cbba8e" part="braccio" name="braccino sabbia"/>
+  <color symbol="a" value="fff7ec" part="braccio" name="manina crema"/>
+
+  <!-- Coda sinuosa e pennacchio bicolore (part="coda") -->
+  <color symbol="K" value="b09c6f" part="coda" name="fusto coda sabbia"/>
+  <color symbol="k" value="82724a" part="coda" name="giunto fusto coda"/>
+  <color symbol="J" value="241c16" part="coda" name="base pennacchio scura"/>
+  <color symbol="I" value="fff7ec" part="coda" name="punta pennacchio bianca"/>
+
+  <!-- Accessori del Cartografo: Casco coloniale, Fascia smeraldo, Occhialini geodesia, Sciarpetta (part="testa") -->
+  <color symbol="H" value="76823e" part="testa" name="casco coloniale kaki base"/>
+  <color symbol="h" value="96a252" part="testa" name="casco coloniale kaki chiaro visiera"/>
+  <color symbol="S" value="7dd87d" part="testa" name="fascia seta verde cartografo"/>
+  <color symbol="s" value="4ea84e" part="testa" name="fascia verde ombra"/>
+  <color symbol="M" value="3a3320" part="testa" name="montatura occhialini geodesia bronzo"/>
+  <color symbol="m" value="282314" part="testa" name="cinghia cuoio occhialini"/>
+  <color symbol="V" value="66dc74" part="testa" name="lenti geodesia verde riflettente"/>
+  <color symbol="v" value="d4ffd4" glow="True" part="testa" name="riflesso brillante lenti glow"/>
+  <color symbol="Y" value="7dd87d" part="testa" name="fazzoletto collo verde cartografo"/>
+  <color symbol="y" value="4ea84e" part="testa" name="nodo fazzoletto ombra"/>
+
+  <!-- Accessori a tracolla e sulla schiena: Tracolla, Cannocchiale ottone, Rotolo mappa -->
+  <color symbol="L" value="543820" name="tracolla cuoio bandoliera"/>
+  <color symbol="l" value="8f6d19" name="finiture ottone scuro"/>
+  <color symbol="X" value="e4bb40" name="cannocchiale ottone lucido"/>
+  <color symbol="x" value="f7e076" name="riflesso ottone cannocchiale"/>
+  <color symbol="Q" value="fff2c7" name="pergamena mappa rotolo"/>
+  <color symbol="q" value="4ea84e" name="nastro verde mappa"/>
+
+  <!-- ======================================================== -->
+  <!-- 1. LUNGHE ZAMPE POSTERIORI DA SALTATORE (part="gamba")   -->
+  <!-- ======================================================== -->
+  <!-- Piedone sinistro al suolo (x=10..12, y=15..28, z=0..1)   -->
+  <box at="11 21.5 0" size="3 14 1" color="P"/>
+  <box at="10 28 0" size="1 1 1" color="p"/>
+  <box at="11 28 0" size="1 1 1" color="p"/>
+  <box at="12 28 0" size="1 1 1" color="p"/>
+  <box at="11 20 1" size="3 8 1" color="P"/>
+  <box at="11 15.5 0" size="3 3 3" color="g"/>
+
+  <!-- Piedone destro al suolo (x=19..21, y=15..28, z=0..1)     -->
+  <box at="20 21.5 0" size="3 14 1" color="P"/>
+  <box at="19 28 0" size="1 1 1" color="p"/>
+  <box at="20 28 0" size="1 1 1" color="p"/>
+  <box at="21 28 0" size="1 1 1" color="p"/>
+  <box at="20 20 1" size="3 8 1" color="P"/>
+  <box at="20 15.5 0" size="3 3 3" color="g"/>
+
+  <!-- Lunghi stinchi inclinati in avanti dal garretto al ginocchio (z=2..12) -->
+  <line at="11 15.5 2" to="11 24.5 11.5" r="1.1" color="g"/>
+  <line at="20 15.5 2" to="20 24.5 11.5" r="1.1" color="g"/>
+
+  <!-- Cosce muscolose alte piegate a Z che raccordano ginocchio e bacino -->
+  <ellipsoid at="11 20 9.5" size="5 9 10" color="G"/>
+  <ellipsoid at="20 20 9.5" size="5 9 10" color="G"/>
+
+  <!-- ======================================================== -->
+  <!-- 2. CORPO ALLUNGATO INCLINATO E VENTRE CREMA (z = 10..22)  -->
+  <!-- ======================================================== -->
+  <!-- Groppa posteriore alta (si salda alle cosce e alla coda) -->
+  <ellipsoid at="15.5 18 15" size="12 10 9" color="F"/>
+
+  <!-- Dorso medio allungato (inclinato verso il basso e in avanti) -->
+  <ellipsoid at="15.5 24 14" size="11 10 8" color="F"/>
+
+  <!-- Petto e spalle anteriori -->
+  <ellipsoid at="15.5 29 14.5" size="10 8 8" color="F"/>
+
+  <!-- Soffice ventre e pettorina crema (+y e parte inferiore) -->
+  <ellipsoid at="15.5 24 11" size="8 9 5" color="C"/>
+  <ellipsoid at="15.5 28 12.5" size="7 7 6" color="C"/>
+  <ellipsoid at="15.5 31 14" size="6 5 5" color="c"/>
+
+  <!-- ======================================================== -->
+  <!-- 3. ZAMPETTE ANTERIORI MINUSCOLE AL PETTO (part="braccio") -->
+  <!-- ======================================================== -->
+  <!-- Braccino sinistro e manina crema -->
+  <line at="12 29 14" to="13.5 32 12" r="0.6" color="A"/>
+  <box at="13.5 33 12" size="2 1 1" color="a"/>
+
+  <!-- Braccino destro e manina crema -->
+  <line at="19 29 14" to="17.5 32 12" r="0.6" color="A"/>
+  <box at="17.5 33 12" size="2 1 1" color="a"/>
+
+  <!-- ======================================================== -->
+  <!-- 4. TESTA GRANDE, GUANCE, MUSETTO, OCCHI (part="testa")   -->
+  <!-- ======================================================== -->
+  <!-- Cranio principale -->
+  <ellipsoid at="15.5 31 19" size="13 11 10" color="T"/>
+
+  <!-- Ponte frontale sabbia tra gli occhi -->
+  <box at="15.5 34 21" size="4 4 4" color="T"/>
+  <box at="15.5 36 22" size="2 2 2" color="t"/>
+
+  <!-- Guanciotte paffute e morbide crema ai lati del viso -->
+  <ellipsoid at="10.5 34 18.5" size="5 5 5" color="t"/>
+  <ellipsoid at="20.5 34 18.5" size="5 5 5" color="t"/>
+  <box at="10 35 18" size="3 3 3" color="U"/>
+  <box at="21 35 18" size="3 3 3" color="U"/>
+
+  <!-- Musetto conico allungato in avanti crema (+y, z=18..19) -->
+  <box at="15.5 37 18" size="5 4 3" color="U"/>
+  <box at="15.5 39 18" size="3 3 2" color="U"/>
+  <!-- Tartufo nasino scuro -->
+  <box at="15.5 40 19" size="2 1 1" color="N"/>
+
+  <!-- Sottili accenni di vibrisse laterali sul muso -->
+  <box at="13 38 18" size="1 1 1" color="W"/>
+  <box at="18 38 18" size="1 1 1" color="W"/>
+
+  <!-- Grandi occhi scuri espressivi (3x2x3 voxel a z=20..22, y=34..35) -->
+  <box at="11 34.5 20" size="3 2 3" color="E"/>
+  <box at="20 34.5 20" size="3 2 3" color="E"/>
+
+  <!-- Punti luce bianchi riflesso vispo (Z, glow="True") in alto a sx -->
+  <box at="10 35 22" size="1 1 1" color="Z"/>
+  <box at="19 35 22" size="1 1 1" color="Z"/>
+
+  <!-- ======================================================== -->
+  <!-- 5. FAZZOLETTO / SCIARPETTA VERDE AL COLLO (part="testa") -->
+  <!-- ======================================================== -->
+  <!-- Collare attorno al collo sotto il mento -->
+  <cylinder at="15.5 32 16" size="8 7 1.8" color="Y"/>
+  <!-- Nodo centrale elegante da esploratore sotto la gola -->
+  <box at="15.5 35 15.5" size="3 1 2" color="y"/>
+  <!-- Lembi e drappeggio del fazzoletto sul petto -->
+  <box at="15 34.5 13.5" size="2 1 2.5" color="Y"/>
+  <box at="16.5 34.5 12" size="1 1 2" color="y"/>
+
+  <!-- ======================================================== -->
+  <!-- 6. GIGANTESCHE ORECCHIE A CONCHIGLIA (part="testa", z=25..39) -->
+  <!-- ======================================================== -->
+  <!-- Orecchio sinistro: guscio sabbia posteriore/esterno -->
+  <ellipsoid at="9.5 29 25" size="8 4 15" color="O"/>
+  <!-- Padiglione interno concavo velluto rosa carne -->
+  <ellipsoid at="9.5 30.5 26" size="6 3 13" color="R"/>
+  <box at="9.5 31 27" size="4 1 8" color="r"/>
+  <line at="6 30 28" to="9 30 38" r="0.5" color="o"/>
+
+  <!-- Orecchio destro: guscio sabbia posteriore/esterno -->
+  <ellipsoid at="21.5 29 25" size="8 4 15" color="O"/>
+  <!-- Padiglione interno concavo velluto rosa carne -->
+  <ellipsoid at="21.5 30.5 26" size="6 3 13" color="R"/>
+  <box at="21.5 31 27" size="4 1 8" color="r"/>
+  <line at="25 30 28" to="22 30 38" r="0.5" color="o"/>
+
+  <!-- ======================================================== -->
+  <!-- 7. CASCO COLONIALE DA ESPLORATORE (part="testa")          -->
+  <!-- ======================================================== -->
+  <!-- Base e tesa del casco con asole sartoriali per le orecchie -->
+  <cylinder at="15.5 32 25.5" size="8 8 1" color="H"/>
+  <!-- Visiera frontale pronunciata sopra gli occhioni (z=25..26) -->
+  <box at="15.5 36 25.5" size="10 4 1" color="H"/>
+  <box at="15.5 37.5 25" size="8 2 1" color="h"/>
+  <box at="15.5 38.5 24" size="6 1 1" color="h"/>
+  <!-- Falda coprinuca posteriore -->
+  <box at="15.5 27 25.5" size="8 3 1" color="H"/>
+
+  <!-- Cupola bombata del caschetto (alloggiata tra le orecchie) -->
+  <ellipsoid at="15.5 32 27" size="7.2 8.6 6.5" color="H"/>
+  <ellipsoid at="15.5 32 28.5" size="6.4 7.6 5.5" color="h"/>
+
+  <!-- Fascia in seta verde smeraldo araldico dell'agente -->
+  <cylinder at="15.5 32 26.5" size="7.6 9 1.5" color="S"/>
+  <box at="15.5 36 26.5" size="4 1 1.5" color="s"/>
+
+  <!-- Bottone/sfiatatoio centrale sommitale del caschetto -->
+  <cylinder at="15.5 32 33.5" size="2 2 1" color="H"/>
+  <box at="15.5 32 34" size="1 1 1" color="M"/>
+
+  <!-- ======================================================== -->
+  <!-- 8. OCCHIALINI DA GEODESIA RIALZATI SULLA FRONTE          -->
+  <!-- ======================================================== -->
+  <!-- Montatura bronzea occhialino sinistro (x=13, y=36..37, z=27..29) -->
+  <box at="13 36.5 27" size="3 2 3" color="M"/>
+  <!-- Lente riflettente verde minerale con riflesso glow -->
+  <box at="13.5 37 28" size="2 1 2" color="V"/>
+  <box at="13 37 29" size="1 1 1" color="v"/>
+
+  <!-- Montatura bronzea occhialino destro (x=18, y=36..37, z=27..29) -->
+  <box at="18 36.5 27" size="3 2 3" color="M"/>
+  <!-- Lente riflettente verde minerale con riflesso glow -->
+  <box at="17.5 37 28" size="2 1 2" color="V"/>
+  <box at="18 37 29" size="1 1 1" color="v"/>
+
+  <!-- Ponticello bronzo tra le lenti e cinghietta laterale -->
+  <box at="15.5 36 28" size="2 1 1" color="M"/>
+  <line at="11 36 28" to="11 32 28" r="0.6" color="m"/>
+  <line at="20 36 28" to="20 32 28" r="0.6" color="m"/>
+
+  <!-- ======================================================== -->
+  <!-- 9. CANNOCCHIALE IN OTTONE, MAPPA E TRACOLLA             -->
+  <!-- ======================================================== -->
+  <!-- Tracolla in cuoio diagonale dal dorso alla spalla -->
+  <line at="12 28 15" to="15 20 16" r="0.7" color="L"/>
+  <line at="15 20 16" to="18 22 13" r="0.7" color="L"/>
+  <line at="12 29 15" to="18 22 13" r="0.7" color="L"/>
+  <!-- Fibbia metallica della tracolla sul petto -->
+  <box at="14 27 15" size="1 1 1" color="X"/>
+
+  <!-- Cannocchiale in ottone lucido agganciato sul dorso -->
+  <line at="19 16 13" to="14 22 19" r="1.0" color="X"/>
+  <ellipsoid at="19 16 13" size="2.8 2.8 2.8" color="l"/>
+  <box at="16.5 19 16" size="2 2 2" color="x"/>
+  <ellipsoid at="14 22 19" size="3.0 3.0 3.0" color="X"/>
+  <box at="13.5 22.5 19.5" size="1 1 1" color="v"/>
+
+  <!-- Rotolo di mappa in pergamena con nastrino verde smeraldo -->
+  <line at="17 18 14" to="13 23 18" r="0.9" color="Q"/>
+  <box at="17 18 14" size="2 2 1" color="l"/>
+  <box at="13 23 18" size="2 2 1" color="l"/>
+  <box at="15 20.5 16" size="2 2 1" color="q"/>
+  <box at="15 21 15" size="1 1 1" color="S"/>
+
+  <!-- ======================================================== -->
+  <!-- 10. LUNGHISSIMA CODA E PENNACCHIO BICOLORE (part="coda") -->
+  <!-- ======================================================== -->
+  <!-- Attacco alla groppa posteriore alta (y=15, z=16) -->
+  <line at="15.5 15 16" to="15.5 10 9" r="1.1" color="K"/>
+  <!-- Discesa sinuosa verso il terreno -->
+  <line at="15.5 10 9" to="15.5 6 4" r="0.9" color="K"/>
+  <line at="15.5 6 4" to="15.5 3.5 2.5" r="0.8" color="K"/>
+  <!-- Risalita verso l'alto -->
+  <line at="15.5 3.5 2.5" to="15.5 2.5 5.5" r="0.8" color="k"/>
+  <line at="15.5 2.5 5.5" to="15.5 2.5 9" r="0.8" color="k"/>
+
+  <!-- Spettacolare pennacchio bicolore: collare scuro e grande batuffolo bianco saldato -->
+  <ellipsoid at="15.5 2.5 9" size="5 4 5" color="J"/>
+  <ellipsoid at="15.5 2.5 12" size="6 5 6" color="I"/>
+  <ellipsoid at="15.5 2.5 16" size="4 4 5" color="I"/>
+  <box at="15.5 2.5 18" size="2 2 2" color="I"/>
+
+  <!-- ======================================================== -->
+  <!-- 11. REGOLE GENERATIVE: SFUMATURE, PELO E TEXTURE         -->
+  <!-- ======================================================== -->
+  <!-- Illuminazione sommitale del dorso e delle spalle -->
+  <prl steps="1" p="0.3" in="B F" out="B f"/>
+  <!-- Ombreggiatura naturale nelle pieghe inferiori del dorso -->
+  <prl steps="1" p="0.15" in="F/B" out="D/*"/>
+  <!-- Transizione morbida tra pancia crema e fianchi sabbia -->
+  <prl steps="1" p="0.35" in="F/C" out="*/c"/>
+  <prl steps="1" p="0.25" in="FC" out="Fc" symmetry="(x)"/>
+  <!-- Sfumatura delicata tra guance crema e muso -->
+  <prl steps="1" p="0.25" in="t U" out="u *"/>
+  <!-- Trama organica sul caschetto safari -->
+  <prl steps="1" p="0.25" in="B H" out="B h"/>
+</sequence>
