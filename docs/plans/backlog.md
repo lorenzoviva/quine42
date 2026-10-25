@@ -1157,7 +1157,7 @@ le risposte alle domande del piano.
   mondo dopo la pubblicazione) e gli utilizzi delle carte nei suoi prompt non si contano. Nessuna verifica nel browser: in singola
   nulla cambia (`talkToAgent` resta locale) e il multigiocatore è coperto dai test col finto trasporto.
 
-### T42f · Le rune che il master chiede al Referente — `fatto` (dipende da T42e)
+### T42f · Le rune che il master chiede al Referente — `fatto` (`99b5fcc`) (dipende da T42e)
 - Contesto: piano del multigiocatore, «Il master»: il master ha una sola runa del tappeto (quella del Concilio) e «ogni altra runa la
   chiede al Referente». Oggi il Referente non ha un incarico per le rune (`referenteReply`: oggetto, cosa, personaggio, ambiente,
   regola, riscolpisci, oggetti, meccanica, nessuno).
@@ -1209,7 +1209,7 @@ le risposte alle domande del piano.
 - Fatto quando: test headless di ogni interazione; verifica con due schede.
 - Spezzato (troppo per una sessione): chat e doni (T43a), «Altro…» e PvP (T43b), morte e ricollegamento (T43c).
 
-### T43a · Parole e doni tra viandanti — `fatto` (dipende da T39)
+### T43a · Parole e doni tra viandanti — `fatto` (`c65398f`) (dipende da T39)
 - Contesto: il server rifiuta ogni azione su un altro viandante (`outOfReach`: «non c'è niente lì»); i fumetti dei viandanti
   già viaggiano (`OtherView.testo`), ma niente li scrive. Il piano: «gli scambi di oggetti e la chat tra avatar vicini (fumetti)
   ci sono sempre», senza filtro della quarta parete (sono persone vere).
