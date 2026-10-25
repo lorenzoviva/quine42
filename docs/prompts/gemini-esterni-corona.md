@@ -246,20 +246,18 @@ Ci sono **due scale dimensionali distinte**:
 ### SEZIONE 3 · Gli Avatar del Concilio: Gerboa giganti con cappello (Scala 20 vpt)
 
 Tutti i membri del Concilio condividono l'**anatomia base del Gerboa** (omaggio alla *Guida Galattica per gli Autostoppisti*):
-- **Scatola**: `size="24 20 30"`, `vpt: 20` (ingombro circa 1.2 × 1.0 × 1.5 caselle, altezza 26-29 voxel).
+- **Scatola standard del modello base**: `size="32 44 42"`, `vpt: 20` (ingombro 1.6 × 2.2 × 2.1 caselle, altezza 42 voxel).
 - **Ruolo catalogo**: `npc`.
-- **Anatomia base**:
-  - **Corpo**: tondo, paffuto, soffice, a forma di pera rovesciata o goccia (z da 4 a 14); ventre crema chiaro (`fff1e8` o `ffccaa`),
-    dorso soffice (tonalità coordinata all'agente o fulvo naturale `ab5236`, `d8a878`).
-  - **Testa (`part="testa"`)**: grande (un terzo del corpo totale!), musetto sporgente verso +y con tartufo scuro tenero (`291814`)
-    e minuscoli baffi laterali; **occhi grandi espressivi**: 2 × 2 voxel scuri profondi con punto luce bianco (`Z`) in alto a sinistra
-    (espressione vispa, intelligente, curiosa e tenerissima);
-  - **Grandi Orecchie**: enormi padiglioni a conchiglia orientati verso l'alto (svettano di 6-8 voxel sopra la testa), interno rosa chiaro (`ff77a8` o `ffccaa`);
-  - **Zampe posteriori (`part="gamba"`)**: lunghe e potenti zampe da salto bipede, piegate a Z, con zampette allungate che poggiano
-    saldamente su z = 0;
-  - **Zampette anteriori (`part="braccio"`)**: piccoline, corte e aggraziate, raccolte morbidamente sul petto;
-  - **Coda (`part="coda"`)**: lunghissima e sottile, esce dal retro (-y), si inarca sinuosa e termina con un bel **pennacchio a batuffolo bicolore**;
-- **Cappello distintivo**: elemento iconico del ruolo! Poggia tra le grandi orecchie con orgoglio.
+- **Anatomia base adottata**: Modello base `corona-gerboa.xml` (orecchie rivolte in avanti e leggermente divaricate a V). I tentativi con orecchie a 45° e laterali sono stati scartati: le orecchie risultavano visivamente troppo larghe ("grasse"), appesantendo la silhouette ed erodendo la grazia e la tenerezza del musetto.
+- **Canone Sartoriale Gerboa: Decisione Architetturale Copricapo / Grandi Orecchie**:
+  - **Le orecchie non vengono MAI nascoste né inglobate**: Le grandi orecchie a conchiglia (14 voxel di altezza) sono l'elemento identitario cardine della specie e della silhouette del Concilio. Se un copricapo contenesse le orecchie, il personaggio perderebbe la sua natura di gerboa, sembrando un roditore indistinto con un barattolo in testa.
+  - **Coerenza obbligata tra tutti i membri**: Un cilindro alto potrebbe teoricamente contenere le orecchie, ma il basco dell'Artista, il caschetto protettivo dello Scultore, il casco coloniale del Cartografo, il tocco accademico del Fisico o il berretto dell'Ingegnere non possono farlo in nessun modo. Trattare il cilindro diversamente renderebbe il Concilio disomogeneo e sbilanciato.
+  - **Copricapi su misura tra le orecchie (Asole anatomiche)**: Tutti i copricapi degli avatar sono realizzati dalla "sartoria della Corona" appositamente per la volta cranica del Gerboa:
+    1. **Alloggiamento**: Il copricapo poggia sulla sommità del cranio (`x = 15.5, y = 32, z = 26..27`), perfettamente incastonato nello spazio centrale tra le radici delle due orecchie;
+    2. **Tesa e asole**: La tesa/base del cappello si sviluppa verso la fronte e la nuca; ai fianchi segue la conformazione anatomica (asole sartoriali), lasciando emergere i padiglioni auricolari che svettano liberi verso l'alto;
+    3. **Incorniciatura maestosa**: Le due orecchie incorniciano il copricapo a destra e a sinistra come due grandi ali, preservando la piena visibilità sia del musetto/espressione sia del copricapo distintivo con la fascia nel colore araldico dell'agente;
+    4. **Copricapi inclinati / asimmetrici (es. Basco dell'Artista)**: Calzati con un'inclinazione vezzosa che si appoggia morbida contro la base di un'orecchio, lasciando l'altra completamente eretta;
+    5. **Accessori del ruolo al collo e al muso**: Ogni avatar integra un collare/sciarpetta annodata sotto il mento (`y = 32..35, z = 12..16`) o accessori specifici (stilo luminoso, lenti, visiere, monocoli) nel proprio colore agente.
 
 ---
 
@@ -296,12 +294,14 @@ Tutti i membri del Concilio condividono l'**anatomia base del Gerboa** (omaggio 
   - Robusti guantini da lavoro gommati sulle zampette anteriori.
 
 #### `corona-gerboa-fisico` — Lo Scienziato delle Regole
+- **Stato**: scolpito e collaudato (`lab/mjx/models/corona-gerboa-fisico.xml`, 4121 voxel, 112 passi, 0 errori, 0 colori inutilizzati).
 - **Colore agente**: `#6fc3ff` (azzurro ciano / blu cielo).
 - **Pelliccia**: manto azzurrino argentato con musetto bianco puro.
 - **Cappello**: **Tocco accademico con nappa e grandi occhialoni tondi**:
   - Berretto universitario quadrato (tocco a mortaio) in velluto blu notte con nappa pendente azzurra (`6fc3ff`);
   - Sul muso, enormi occhiali protettivi rotondi da laboratorio con montatura argentata e lenti spesse cerchiate di luce azzurra;
-  - Papillon geometrico azzurro sotto il mento.
+  - Papillon geometrico azzurro sotto il mento;
+  - Fialetta con reagente azzurro luminescente (`glow="True"`) alla cintura sul fianco.
 
 #### `corona-gerboa-ingegnere` — Il Tecnico dei Sistemi
 - **Colore agente**: `#b9a6ff` (lavanda / viola tecnologico).
