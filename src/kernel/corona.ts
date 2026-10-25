@@ -12,7 +12,7 @@ import { SCREEN_NAME, type ScreenField } from './screens';
 import { AGENTS } from './agents/council';
 
 export type FileLook = 'libro' | 'cristallo' | 'pergamena' | 'tavoletta';
-export type ItemKind = 'file' | 'sprite' | 'tile' | 'layout' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'less' | 'more' | 'grafo' | 'situazione' | 'parete' | 'console' | 'stazione' | 'banco';
+export type ItemKind = 'file' | 'sprite' | 'tile' | 'layout' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'less' | 'more' | 'grafo' | 'situazione' | 'parete' | 'console' | 'stazione' | 'banco' | 'leggio';
 /** What a showcase shows (T21): the runes and spells, the people, the things, the objects of the packs, the places planned (T26). */
 export type ShowcaseSource = 'rune' | 'persone' | 'cose' | 'oggetti' | 'luoghi';
 /** How a showcase looks: a screen, a silo of liquid, a 3D printer, a holographic table with a place in miniature. */
@@ -78,6 +78,11 @@ export const CHAIN = { x0: 2, x1: 21, w: 3, room: 'sistemi' };
  * its sides pick the case (all the cases of all the systems, in the order of the tick).
  */
 export const BENCH_AT = { x: SHOWCASE_AT.x, y: SHOWCASE_AT.y - 1, w: 3, h: 3, room: CHAIN.room };
+/**
+ * The Library of the World (T47a): the lectern on a dark water basin, where the other buildings have their showcase;
+ * an open holographic book above it, «<» «>» at its sides to flip through the world's bible (src/kernel/bible.ts).
+ */
+export const LEGGIO_AT = { x: SHOWCASE_AT.x, y: SHOWCASE_AT.y - 1, w: 3, h: 3, room: 'mondo' };
 export function chainSlots(n: number): Array<{ x: number; w: number }> {
   const span = CHAIN.x1 - CHAIN.x0 + 1;
   const shown = Math.min(n, span);
@@ -312,7 +317,7 @@ function shelfSlots(sides = false): Array<{ x: number; y: number }> {
 const SLOTS = shelfSlots();
 const DEVICE_SLOTS = shelfSlots(true);
 /** The buildings with a device in the middle of their ground floor. */
-const DEVICES = new Set([...Object.keys(SHOWCASES), 'nucleo', 'universo', BENCH_AT.room]);
+const DEVICES = new Set([...Object.keys(SHOWCASES), 'nucleo', 'universo', BENCH_AT.room, LEGGIO_AT.room]);
 
 export class Corona {
   outer: number;
@@ -402,6 +407,11 @@ export class Corona {
             placed.push({ kind: 'banco', label: 'il banco di prova', target: 'banco', x: ox + BENCH_AT.x, y: oy + BENCH_AT.y, w: BENCH_AT.w, h: BENCH_AT.h });
             placed.push({ kind: 'prev', label: '«<» il caso precedente', target: 'banco', x: ox + BENCH_AT.x - 1, y: oy + SHOWCASE_AT.y });
             placed.push({ kind: 'next', label: '«>» il caso successivo', target: 'banco', x: ox + BENCH_AT.x + BENCH_AT.w, y: oy + SHOWCASE_AT.y });
+          }
+          if (id === LEGGIO_AT.room) {
+            placed.push({ kind: 'leggio', label: 'il leggio della Biblioteca: la bibbia del mondo', target: 'leggio', x: ox + LEGGIO_AT.x, y: oy + LEGGIO_AT.y, w: LEGGIO_AT.w, h: LEGGIO_AT.h });
+            placed.push({ kind: 'prev', label: '«<» la pagina precedente', target: 'leggio', x: ox + LEGGIO_AT.x - 1, y: oy + SHOWCASE_AT.y });
+            placed.push({ kind: 'next', label: '«>» la pagina successiva', target: 'leggio', x: ox + LEGGIO_AT.x + LEGGIO_AT.w, y: oy + SHOWCASE_AT.y });
           }
           const show = SHOWCASES[id];
           if (show) {

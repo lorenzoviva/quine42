@@ -10,6 +10,8 @@ import { tallyLine, usd } from '../kernel/ai/usage';
 import { msText, STATION_KIND, type Chain, type Station } from '../kernel/chain';
 import { fieldLabel, valueText, type BenchShown } from '../kernel/bench';
 import type { BenchStep } from '../kernel/types';
+import type { BibleShown } from '../kernel/bible';
+import { NODE_COLOR, NODE_NAME, type GraphNode } from '../kernel/graph';
 import { $, el } from './dom';
 import { icons } from './hud';
 
@@ -24,6 +26,8 @@ export class StudioPanel {
   private screen?: ScreenField;
   /** Whether the panel shows the bench of the Systems Room (T27b), while it is open. */
   private benchOpen = false;
+  /** Whether the panel shows the Library's lectern (T47a), while it is open. */
+  private bibleOpen = false;
   onClose?: () => void;
   onEdit?: (path: string) => void;
 
@@ -46,6 +50,11 @@ export class StudioPanel {
       if (this.isOpen && this.benchOpen && b) this.bench(b, this.k.chain().stations.find((x) => x.id === b.entry.system));
     });
     k.bus.on('ui:layout', ({ sample, building }: { sample: LayoutSample; building: string }) => this.layout(sample, building));
+    k.bus.on('ui:bible', (b: BibleShown) => this.bible(b));
+    // The pages flipped with the panel open: it follows.
+    k.bus.on('studio:bible', (b: BibleShown) => {
+      if (this.isOpen && this.bibleOpen) this.bible(b);
+    });
     // The arrows pressed with the panel open: it follows.
     k.bus.on('studio:showcase', (e: Shown) => {
       if (this.isOpen && this.shown === e.building) this.showcase({ ...e, name: this.k.corona.building(e.building)?.name ?? e.building });
@@ -74,6 +83,7 @@ export class StudioPanel {
     this.shown = undefined;
     this.screen = undefined;
     this.benchOpen = false;
+    this.bibleOpen = false;
     this.root.replaceChildren(el('div', { class: 'window' }, close, ...children));
     this.root.hidden = false;
     this.onClose?.();
@@ -84,6 +94,7 @@ export class StudioPanel {
     this.shown = undefined;
     this.screen = undefined;
     this.benchOpen = false;
+    this.bibleOpen = false;
     this.onClose?.();
   }
 
@@ -475,5 +486,73 @@ export class StudioPanel {
       el('div', { class: 'section' }, "La storia dell'universo (ultimi commit)"),
       ...all.map((c) => el('div', { class: 'item' }, el('span', { class: 'path' }, c.id), ` ${c.author}: ${c.message}`)),
     );
+  }
+
+  /**
+   * The Library's lectern (T47a): the page of the bible, with touching graph nodes.
+   * Clicking a node opens the Nucleus's graph centered on it.
+   */
+  bible(b: BibleShown): void {
+    const { page } = b;
+    const secColor: Record<string, string> = {
+      prologo: '#ffcf5c',
+      luoghi: '#9ad27a',
+      personaggi: '#ffb38a',
+      fatti: '#6fc3ff',
+      misteri: '#c48aff',
+    };
+    const col = secColor[page.sezione] ?? '#7dd87d';
+
+    const step = (d: number, text: string) => {
+      const btn = el('button', {}, text);
+      btn.onclick = () => this.k.stepBible(d);
+      return btn;
+    };
+
+    const nodeChip = (n: GraphNode) => {
+      const chip = el(
+        'button',
+        { class: 'node', style: 'margin: 2px 4px 2px 0;' },
+        el('span', { class: 'dot', style: `background:${NODE_COLOR[n.tipo]}` }),
+        `${n.label} `,
+        el('small', { style: 'color: var(--dim);' }, `(${NODE_NAME[n.tipo] || n.tipo})`),
+      );
+      chip.onclick = () => {
+        this.close();
+        this.k.bus.emit('ui:graph', { node: n.id });
+      };
+      return chip;
+    };
+
+    const editBtn = el('button', {}, 'Apri world/bible.json');
+    editBtn.onclick = () => {
+      this.close();
+      this.onEdit?.('world/bible.json');
+    };
+
+    this.show(
+      el('div', { class: 'title' }, 'La Biblioteca del Mondo — Il Leggio'),
+      el('div', { class: 'note' }, `La bibbia del mondo, pagina ${b.index + 1} di ${b.count}. «<» «>» sfogliano le pagine; i nodi del grafo toccati da questa pagina sono navigabili nel Nucleo.`),
+      el(
+        'div',
+        { class: 'item', style: 'margin-top: 6px;' },
+        el('span', { class: 'path', style: `color:${col}; text-transform: uppercase; font-weight: bold;` }, `[${page.sezione}]`),
+        el('strong', { style: 'font-size: 15px; margin-left: 6px; color: var(--fg);' }, page.titolo),
+      ),
+      el('div', { class: 'note', style: 'white-space: pre-wrap; font-size: 13px; line-height: 1.5; color: var(--fg); background: #0c0f14; border: 1px solid var(--line); padding: 10px 12px; margin: 4px 0;' }, page.testo),
+      el('div', { class: 'section' }, `Nodi del grafo collegati (${b.nodes.length})`),
+      el(
+        'div',
+        { class: 'row', style: 'flex-wrap: wrap; max-height: 140px; overflow-y: auto; padding: 4px 0;' },
+        ...(b.nodes.length ? b.nodes.map(nodeChip) : [el('div', { class: 'note' }, 'Nessun nodo collegato direttamente a questa voce.')]),
+      ),
+      el(
+        'div',
+        { class: 'row', style: 'justify-content: space-between; margin-top: 8px;' },
+        el('div', { class: 'row' }, step(-1, '« precedente'), step(1, 'successivo »')),
+        editBtn,
+      ),
+    );
+    this.bibleOpen = true;
   }
 }

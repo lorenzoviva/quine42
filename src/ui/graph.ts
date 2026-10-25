@@ -49,7 +49,7 @@ export class GraphPanel {
   onEdit?: (path: string) => void;
 
   constructor(private k: Kernel) {
-    k.bus.on('ui:graph', () => this.open());
+    k.bus.on('ui:graph', (e?: { node?: string }) => this.open(e?.node));
     const c = this.canvas;
     c.addEventListener('mousedown', (e) => (this.drag = { x: this.sx(e), y: this.sy(e), cx: this.cam.x, cy: this.cam.y, moved: false }));
     window.addEventListener('mouseup', (e) => {
@@ -125,7 +125,7 @@ export class GraphPanel {
     return !this.root.hidden;
   }
 
-  open(): void {
+  open(nodeId?: string): void {
     const g = this.k.graph();
     if (g !== this.g) this.load(g);
     const close = el('button', { class: 'close' }, '×');
@@ -153,6 +153,10 @@ export class GraphPanel {
     this.onClose?.();
     this.renderLegend();
     this.renderSide();
+    if (nodeId) {
+      const idx = this.index.get(nodeId);
+      if (idx !== undefined) this.select(idx, true);
+    }
     this.animate();
   }
 

@@ -207,8 +207,10 @@ export class CoronaView {
     o.title(`${studio.building.name.toUpperCase()}${studio.building.floors.length > 1 ? `  ·  PIANO ${fl.index + 1}/${studio.building.floors.length}` : ''}`, studio.building.color);
     const shown = near?.kind === 'showcase' ? k.showcaseOf(near.target!) : undefined;
     const tried = near?.kind === 'banco' ? k.benchOf() : undefined;
+    const read = near?.kind === 'leggio' ? k.bibleOf() : undefined;
     if (shown) o.caption(`E: guarda «${shown.entry.label}» (${shown.index + 1}/${shown.count})`);
     else if (tried) o.caption(`E: il banco di prova, ${tried.entry.name}: «${tried.entry.case.titolo}» (${tried.index + 1}/${tried.count})`);
+    else if (read) o.caption(`E: sfoglia la bibbia, «${read.page.titolo}» (${read.index + 1}/${read.count})`);
     else if (near && near.kind !== 'desk') o.caption(`E: ${near.kind === 'file' ? `apri ${near.label}` : near.kind === 'sprite' || near.kind === 'tile' || near.kind === 'layout' ? `guarda «${near.label}»` : near.label}`);
   }
 }

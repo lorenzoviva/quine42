@@ -369,6 +369,13 @@ export function buildRoom(k: Kernel, building: Building, floor: Floor): { group:
     globe.position.set(graph.x + (graph.w ?? 1) / 2, 1.9, graph.y + (graph.h ?? 1) / 2);
     group.add(globe);
   }
+  // The Library's lectern: the open holographic book above the dark pool (T47a).
+  const lectern = floor.items.find((i) => i.kind === 'leggio');
+  if (lectern) {
+    const book = bookHologram(col);
+    book.position.set(lectern.x + (lectern.w ?? 3) / 2, 1.05, lectern.y + (lectern.h ?? 3) / 2);
+    group.add(book);
+  }
   // The universe turning above the Council's table.
   const table = floor.items.find((i) => i.kind === 'table');
   if (table) {
@@ -412,6 +419,67 @@ function graphHologram(k: Kernel): THREE.Group {
     group.add(new THREE.LineSegments(geo, new THREE.LineBasicMaterial({ color: '#6fc3ff', transparent: true, opacity: 0.25 })));
   }
   return group;
+}
+
+/**
+ * The open holographic book of the Library's lectern (T47a):
+ * an open book with glowing pages spreading out, glowing lines of text and hovering rune embers.
+ */
+function bookHologram(col = '#7dd87d'): THREE.Group {
+  const g = new THREE.Group();
+  const lit = new Builder();
+  const glow = new Builder();
+  const spineCol = rgbOf('#1b3d2f');
+  const pageGlow = rgbOf(col, 0.65);
+  const textCol = rgbOf('#c0ffd0', 0.9);
+
+  // Book spine along Z
+  lit.box(-0.04, 0, -0.3, 0.04, 0.05, 0.3, spineCol);
+  glow.box(-0.02, 0.04, -0.28, 0.02, 0.06, 0.28, pageGlow);
+
+  // Left page wing (curving/stepping up to the left)
+  const steps = 6;
+  const pw = 0.42 / steps;
+  for (let s = 0; s < steps; s++) {
+    const x0 = -0.04 - (s + 1) * pw;
+    const x1 = -0.04 - s * pw;
+    const y0 = 0.03 + s * 0.018;
+    const y1 = y0 + 0.025;
+    glow.box(x0, y0, -0.28, x1, y1, 0.28, pageGlow);
+    if (s % 2 === 1) {
+      glow.box(x0 + 0.01, y1, -0.22, x1 - 0.01, y1 + 0.008, 0.22, textCol);
+    }
+  }
+
+  // Right page wing (curving/stepping up to the right)
+  for (let s = 0; s < steps; s++) {
+    const x0 = 0.04 + s * pw;
+    const x1 = 0.04 + (s + 1) * pw;
+    const y0 = 0.03 + s * 0.018;
+    const y1 = y0 + 0.025;
+    glow.box(x0, y0, -0.28, x1, y1, 0.28, pageGlow);
+    if (s % 2 === 1) {
+      glow.box(x0 + 0.01, y1, -0.22, x1 - 0.01, y1 + 0.008, 0.22, textCol);
+    }
+  }
+
+  // Floating embers / light sparks above the open book
+  const embers = [
+    [-0.14, 0.22, -0.08],
+    [0.12, 0.25, 0.06],
+    [-0.05, 0.30, 0.12],
+    [0.18, 0.20, -0.10],
+  ];
+  for (const [ex, ey, ez] of embers) {
+    glow.box(ex - 0.015, ey - 0.015, ez - 0.015, ex + 0.015, ey + 0.015, ez + 0.015, textCol);
+  }
+
+  const litMesh = new THREE.Mesh(lit.geometry(), MAT.corona);
+  const glowMesh = new THREE.Mesh(glow.geometry(), MAT.glow);
+  g.add(litMesh);
+  g.add(glowMesh);
+  g.rotation.x = -0.22;
+  return g;
 }
 
 /** A quad wound so that its front faces along n (the builders draw one side). */
@@ -548,6 +616,38 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
       lit.box(x, 0, z + 0.1, x + (it.w ?? 1), 0.7, z + 0.9, rgbOf('#1a2a33'));
       glow.box(x + 0.1, 0.7, z + 0.2, x + (it.w ?? 1) - 0.1, 0.72, z + 0.8, rgbOf('#7dd87d', 0.6));
       break;
+    case 'leggio': {
+      // The lectern of the Library (T47a): a basin of dark water with a green neon rim,
+      // a dark stone pedestal rising from the water, and the slanted desk for the book.
+      const w = it.w ?? 3, d = it.h ?? 3;
+      const cx = x + w / 2, cz = z + d / 2;
+      const darkBorder = rgbOf('#0d1217');
+      const green = rgbOf(col, 0.85);
+
+      // Basin outer border (3x3 outer wall, low rim)
+      const rimH = 0.16;
+      lit.box(x, 0, z, x + w, rimH, z + 0.15, darkBorder);
+      lit.box(x, 0, z + d - 0.15, x + w, rimH, z + d, darkBorder);
+      lit.box(x, 0, z, x + 0.15, rimH, z + d, darkBorder);
+      lit.box(x + w - 0.15, 0, z, x + w, rimH, z + d, darkBorder);
+
+      // Inner edge neon glow rim around the water
+      rim(glow, x + 0.15, z + 0.15, x + w - 0.15, z + d - 0.15, rimH, rgbOf(col, 0.5));
+
+      // Basin floor and dark water surface inside
+      lit.box(x + 0.15, 0, z + 0.15, x + w - 0.15, 0.04, z + d - 0.15, rgbOf('#060a0e'));
+      // Water layer
+      glow.box(x + 0.15, 0.08, z + 0.15, x + w - 0.15, 0.11, z + d - 0.15, rgbOf('#082824', 0.65));
+
+      // Central stone pedestal / column rising from the water
+      lit.box(cx - 0.45, 0, cz - 0.45, cx + 0.45, 0.22, cz + 0.45, rgbOf('#121820'));
+      lit.box(cx - 0.25, 0.22, cz - 0.25, cx + 0.25, 0.78, cz + 0.25, rgbOf('#162028'));
+      // Lectern top desk (slanted towards +z, towards viewer)
+      lit.box(cx - 0.5, 0.78, cz - 0.4, cx + 0.5, 0.86, cz + 0.4, rgbOf('#10161c'));
+      glow.box(cx - 0.52, 0.85, cz - 0.42, cx + 0.52, 0.87, cz - 0.38, green);
+      glow.box(cx - 0.52, 0.85, cz + 0.38, cx + 0.52, 0.87, cz + 0.42, green);
+      break;
+    }
     case 'portal': {
       const c = rgbOf(it.target ? (k.corona.building(it.target)?.color ?? col) : '#ffffff');
       glow.box(x + 0.15, 0, z + 0.15, x + 0.85, 0.05, z + 0.85, c);

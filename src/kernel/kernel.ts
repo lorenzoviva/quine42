@@ -12,6 +12,7 @@ import { Repo, type Commit, type KeyValueStore } from './repo';
 import { Corona, campusModel, cellNear, folderOf, type CoronaCell, type Exhibit, type ShowcaseSource, type StudioItem } from './corona';
 import { Archive } from './archive';
 import { bibleBreaks, cleanBible, metaBreak } from './fourthwall';
+import { biblePages, touchingNodes, type BibleShown } from './bible';
 import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, placeRegion, readAtlas, regionAt, writeAtlas, type Region } from './atlas';
 import { STAMP_SHAPES } from './stamps';
 import { repairProgram } from './mj';
@@ -412,6 +413,8 @@ export class Kernel {
   private benchIndex = 0;
   private benchRuns = new Map<string, BenchRun>();
   private benchRunning = new Set<string>();
+  /** The Library's lectern (T47a): which page of the bible it shows. */
+  private bibleIndex = 0;
   /** The commit the Direction's timeline shows (T46b); none: the newest. */
   private filmAt?: string;
   /** What each system costs in the tick (T27a): the chain of the Systems Room shows it. */
@@ -3448,6 +3451,9 @@ export class Kernel {
       case 'banco':
         this.openBench();
         return;
+      case 'leggio':
+        this.openBible();
+        return;
       case 'showcase':
         this.openShowcase(it.target!);
         return;
@@ -3455,6 +3461,7 @@ export class Kernel {
       case 'next':
         if (it.target === 'tempo') this.stepTimeline(it.kind === 'prev' ? 1 : -1);
         else if (it.target === 'banco') this.stepBench(it.kind === 'prev' ? -1 : 1);
+        else if (it.target === 'leggio') this.stepBible(it.kind === 'prev' ? -1 : 1);
         else this.stepShowcase(it.target!, it.kind === 'prev' ? -1 : 1);
         return;
       case 'less':
@@ -3503,7 +3510,7 @@ export class Kernel {
 
   clickStudio(rx: number, ry: number): boolean {
     if (this.zone !== 'studio') return false;
-    const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'situazione', 'parete', 'console', 'stazione', 'banco', 'layout']);
+    const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'situazione', 'parete', 'console', 'stazione', 'banco', 'leggio', 'layout']);
     if (!it) return false;
     const p = this.playerPos();
     const c = cellNear(it, p.x, p.y);
@@ -3517,8 +3524,10 @@ export class Kernel {
     else if (it.kind === 'console') this.openScreen('registro');
     else if (it.kind === 'stazione') this.openStation(it.target!);
     else if (it.kind === 'banco') this.openBench();
+    else if (it.kind === 'leggio') this.openBible();
     else if (it.target === 'tempo') this.stepTimeline(it.kind === 'prev' ? 1 : -1);
     else if (it.target === 'banco') this.stepBench(it.kind === 'prev' ? -1 : 1);
+    else if (it.target === 'leggio') this.stepBible(it.kind === 'prev' ? -1 : 1);
     else if (it.kind === 'layout') this.openLayout(it, this.corona.roomAt(it.x, it.y)?.building.name ?? '');
     else if (it.kind === 'showcase') this.openShowcase(it.target!);
     else if (it.kind === 'less' || it.kind === 'more') this.stepPhase(it.target!, it.kind === 'less' ? -1 : 1);
@@ -4227,6 +4236,49 @@ export class Kernel {
     const now = this.benchOf();
     if (!now) return this.message('Il banco è vuoto: nessun sistema ha casi.');
     this.bus.emit('ui:bench', { bench: now, station: this.chain().stations.find((s) => s.id === now.entry.system) });
+  }
+
+  /**
+   * The Library's lectern (T47a): the current page of the world's bible and touching graph nodes.
+   */
+  bibleOf(): BibleShown | undefined {
+    const bible = readBible(this.files);
+    if (!bible) return undefined;
+    const pages = biblePages(bible);
+    if (!pages.length) return undefined;
+    this.bibleIndex = Math.max(0, Math.min(pages.length - 1, this.bibleIndex));
+    const page = pages[this.bibleIndex];
+    const g = this.graph();
+    const nodes = touchingNodes(page, g, bible);
+    return { page, index: this.bibleIndex, count: pages.length, nodes };
+  }
+
+  /**
+   * «<» «>» of the lectern: flip pages of the bible.
+   * Stops at the ends ("i bordi fermano", no wrap).
+   */
+  stepBible(d: number): void {
+    const bible = readBible(this.files);
+    if (!bible) return this.message('La bibbia è vuota.');
+    const pages = biblePages(bible);
+    if (!pages.length) return this.message('La bibbia è vuota.');
+    const prev = this.bibleIndex;
+    const next = Math.max(0, Math.min(pages.length - 1, prev + d));
+    if (next === prev) {
+      this.message(d < 0 ? 'Sei alla prima pagina.' : "Sei all'ultima pagina.");
+      return;
+    }
+    this.bibleIndex = next;
+    const now = this.bibleOf()!;
+    this.message(`Pagina ${now.index + 1} di ${now.count} (${now.page.sezione}): «${now.page.titolo}»`);
+    this.bus.emit('studio:bible', now);
+  }
+
+  /** The lectern seen up close: opens the Bible panel with touching graph nodes. */
+  openBible(): void {
+    const now = this.bibleOf();
+    if (!now) return this.message('La bibbia è vuota.');
+    this.bus.emit('ui:bible', now);
   }
 
   /** States of the wanderer (on horseback, with a backpack…): what they change, until when. */

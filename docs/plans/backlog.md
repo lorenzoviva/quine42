@@ -583,7 +583,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   nessun errore in console.
 - Fatto quando (per pezzo): test verdi, typecheck, verifica nel browser (`aurora`, offline) con pannello e nessun errore.
 
-### T47 · La Biblioteca del Mondo, dentro — `da fare` (si comincia da T47a)
+### T47 · La Biblioteca del Mondo, dentro — T47a `fatto` (`a363021`), T47b `da fare`
 - Contesto: §3.2 (il chiostro, scelto il 23/10). Oggi dentro la Biblioteca (`mondo`, Narratore, verde `7dd87d`) ci sono
   solo gli scaffali dei file di `world/`.
 - **T47a · il leggio**: al posto della vetrina, un libro aperto olografico; «<» «>» sfogliano la bibbia (`world/bible.json`:
@@ -591,6 +591,16 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   grafo che la toccano (`graph.find`/`neighbors`, cliccabili come nel Nucleo). L'interno è una stanza come le altre (il
   chiostro è fuori): il leggio sta su una vasca d'acqua scura, come l'acqua della corte. Test: le pagine coprono la bibbia
   intera, i bordi fermano, una pagina che nomina una persona ne trova il nodo.
+  Esito: `fatto`. `LEGGIO_AT` in `src/kernel/corona.ts` (al centro del piano terra della Biblioteca, 3 × 3, frecce «<» «>»
+  ai lati collegate a `target: 'leggio'`), vasca d'acqua scura con bordo neon verde `#7dd87d` e piedistallo con leggio inclinato;
+  sopra di lui il libro aperto olografico (`bookHologram` in `src/render/corona3d.ts`) con pagine che si aprono a ventaglio,
+  righe di testo luminose e faville runiche fluttuanti. `src/kernel/bible.ts` con funzioni pure `biblePages` (prologo, luoghi,
+  personaggi, fatti, misteri) e `touchingNodes` (risolve nodi del grafo per nome, citazioni dei fatti e menzioni testuali);
+  `kernel.bibleOf()`, `stepBible(d)` (i bordi si fermano a pagina 0 e a count - 1), `openBible()`. Pannello `ui:bible`
+  in `src/ui/studio.ts` con tag della sezione, titolo, testo, nodi del grafo collegati cliccabili (aprono il grafo nel Nucleo
+  centrati sul nodo) e pulsanti di navigazione. `tests/bible.test.ts` (6 test), test e typecheck verdi, verifica browser positiva.
+  Diverso dal previsto: la prima pagina è il prologo (titolo, sintesi, storia della bibbia) per coprire l'intera bibbia senza
+  tralasciare il racconto fondativo.
 - **T47b · le tavole delle regole e il canone**: a parete una lastra per giudizio di `world/rules.json` (le ultime 12,
   quelle che il Narratore riceve, brillano), clic → il giudizio nel pannello; il canone delle rune (`world/canone.md`)
   inciso sopra la porta, le rune magiche nei loro colori. Test: le lastre sono quante le regole (o il massimo che la
