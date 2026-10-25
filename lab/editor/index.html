@@ -119,6 +119,7 @@
             <button id="btn-toggle-bounds" class="active" title="Mostra/Nascondi gabbia di ingombro">Box</button>
             <button id="btn-toggle-wireframe" title="Modalità wireframe">Wireframe</button>
             <button id="btn-toggle-bloom" class="active" title="Effetto bagliore voxel (Bloom)">Bagliore</button>
+            <button id="btn-toggle-playback" class="active" title="Mostra/Nascondi controlli di riproduzione e timeline">Timeline</button>
           </div>
 
           <!-- CAD Floating Shape Inspector Card -->
@@ -226,6 +227,41 @@
                 <option value="coda">Coda</option>
                 <option value="ala_dx">Ala Dx</option>
                 <option value="ala_sx">Ala Sx</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Playback & Animation Timeline Bar (T59c) -->
+          <div id="playback-bar" class="playback-bar" aria-label="Controlli temporali ed animazione">
+            <div class="playback-track-selector">
+              <span class="playback-label">Traccia:</span>
+              <select id="playback-track-select" title="Seleziona la traccia temporale (Generazione o Animazione)"></select>
+            </div>
+
+            <div class="playback-transport-controls">
+              <button id="btn-play-first" class="transport-btn" title="Vai all'inizio (Home)">⏮</button>
+              <button id="btn-play-prev" class="transport-btn" title="Step indietro (Freccia Sx)">◀</button>
+              <button id="btn-play-toggle" class="transport-btn btn-play" title="Avvia/Pausa (Spazio)">▶</button>
+              <button id="btn-play-next" class="transport-btn" title="Step avanti (Freccia Dx)">▶|</button>
+              <button id="btn-play-last" class="transport-btn" title="Vai alla fine (End)">⏭</button>
+              <button id="btn-play-stop" class="transport-btn" title="Stop e reset (Esc)">⏹</button>
+              <button id="btn-play-loop" class="transport-btn btn-toggle" title="Ripeti in loop continuo">🔁</button>
+            </div>
+
+            <div class="playback-timeline-group">
+              <input id="playback-slider" type="range" min="0" max="0" value="0" title="Scorri timeline" />
+              <span id="playback-frame-indicator" class="playback-indicator">Passo 0 / 0</span>
+            </div>
+
+            <div class="playback-speed-group">
+              <span class="playback-label">Velocità:</span>
+              <select id="playback-fps-select" title="Velocità di riproduzione">
+                <option value="2">2 FPS</option>
+                <option value="5">5 FPS</option>
+                <option value="10" selected>10 FPS</option>
+                <option value="15">15 FPS</option>
+                <option value="24">24 FPS</option>
+                <option value="30">30 FPS</option>
               </select>
             </div>
           </div>

@@ -21,6 +21,8 @@ import {
   findShapeAtVoxel,
 } from './cad';
 import { MJ_PALETTE } from '../../src/mj/palette';
+import type { PaletteEntry } from '../../src/mj/engine';
+import { PlaybackController, getOrComputeFrameMesh } from './playback';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -139,6 +141,27 @@ function createBufferGeometry(m: MeshData): THREE.BufferGeometry {
   geo.computeBoundingSphere();
   geo.computeBoundingBox();
   return geo;
+}
+
+function applyFrameMesh(m: MeshData) {
+  if (!currentMesh) {
+    const geo = createBufferGeometry(m);
+    currentMesh = new THREE.Mesh(geo, matMesh);
+    currentMesh.castShadow = true;
+    currentMesh.receiveShadow = true;
+    scene.add(currentMesh);
+  } else {
+    currentMesh.geometry.dispose();
+    currentMesh.geometry = createBufferGeometry(m);
+  }
+
+  if (!currentBBox && currentMesh) {
+    const box = new THREE.Box3().setFromObject(currentMesh);
+    currentBBox = new THREE.Box3Helper(box, new THREE.Color(0x38bdf8));
+    scene.add(currentBBox);
+  } else if (currentBBox && currentMesh) {
+    currentBBox.box.setFromObject(currentMesh);
+  }
 }
 
 // ------------------------------------------------------------------ CAD State
@@ -373,6 +396,23 @@ const btnCadGlow = $('btn-cad-glow');
 const cadCustomColor = $<HTMLInputElement>('cad-custom-color');
 const cadPartSelect = $<HTMLSelectElement>('cad-part-select');
 
+// Playback Elements (T59c)
+const playbackBar = $('playback-bar');
+const playbackTrackSelect = $<HTMLSelectElement>('playback-track-select');
+const btnPlayFirst = $('btn-play-first');
+const btnPlayPrev = $('btn-play-prev');
+const btnPlayToggle = $('btn-play-toggle');
+const btnPlayNext = $('btn-play-next');
+const btnPlayLast = $('btn-play-last');
+const btnPlayStop = $('btn-play-stop');
+const btnPlayLoop = $('btn-play-loop');
+const playbackSlider = $<HTMLInputElement>('playback-slider');
+const playbackFrameIndicator = $('playback-frame-indicator');
+const playbackFpsSelect = $<HTMLSelectElement>('playback-fps-select');
+
+const playbackController = new PlaybackController();
+let currentPalette: Record<string, PaletteEntry> = {};
+
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 function updateGutter(lineCount: number, errorLine?: number) {
@@ -503,8 +543,9 @@ async function triggerBuild() {
 
     renderDiagnostics(val, res);
     gridDims = res.grid;
+    currentPalette = res.palette;
 
-    // Update Three.js mesh
+    // Reset current mesh and bounding box
     if (currentMesh) {
       scene.remove(currentMesh);
       currentMesh.geometry.dispose();
@@ -516,16 +557,22 @@ async function triggerBuild() {
       currentBBox = null;
     }
 
-    const geo = createBufferGeometry(res.mesh);
-    currentMesh = new THREE.Mesh(geo, matMesh);
-    currentMesh.castShadow = true;
-    currentMesh.receiveShadow = true;
-    scene.add(currentMesh);
+    // Set playback tracks: triggers onFrameChange which creates/updates currentMesh & currentBBox
+    playbackController.setTracks(res.tracks);
 
-    // Bounding Box Helper
-    const box = new THREE.Box3().setFromObject(currentMesh);
-    currentBBox = new THREE.Box3Helper(box, new THREE.Color(0x38bdf8));
-    scene.add(currentBBox);
+    // Ensure fallback mesh in case tracks were empty
+    if (!currentMesh) {
+      const geo = createBufferGeometry(res.mesh);
+      currentMesh = new THREE.Mesh(geo, matMesh);
+      currentMesh.castShadow = true;
+      currentMesh.receiveShadow = true;
+      scene.add(currentMesh);
+    }
+    if (!currentBBox && currentMesh) {
+      const box = new THREE.Box3().setFromObject(currentMesh);
+      currentBBox = new THREE.Box3Helper(box, new THREE.Color(0x38bdf8));
+      scene.add(currentBBox);
+    }
 
     viewportInfo.textContent = `Griglia ${res.grid.X}×${res.grid.Y}×${res.grid.Z} · ${res.grid.solidCount.toLocaleString('it')} voxel · ${res.info.triangles.toLocaleString('it')} triangoli`;
 
@@ -1014,6 +1061,91 @@ $('btn-toggle-bloom').addEventListener('click', () => {
   $('btn-toggle-bloom').classList.toggle('active', enableBloom);
 });
 
+$('btn-toggle-playback').addEventListener('click', () => {
+  const isHidden = playbackBar.classList.toggle('hidden');
+  $('btn-toggle-playback').classList.toggle('active', !isHidden);
+});
+
+// ------------------------------------------------------------------ Playback & Animation Controller (T59c)
+
+playbackController.onTracksChange((tracks, activeId) => {
+  playbackTrackSelect.innerHTML = '';
+  for (const t of tracks) {
+    const opt = document.createElement('option');
+    opt.value = t.id;
+    opt.textContent = t.name;
+    opt.selected = t.id === activeId;
+    playbackTrackSelect.appendChild(opt);
+  }
+  const current = tracks.find((t) => t.id === activeId);
+  const total = current?.frames.length ?? 0;
+  playbackSlider.max = String(Math.max(0, total - 1));
+});
+
+playbackController.onStateChange((state) => {
+  btnPlayToggle.textContent = state.isPlaying ? '⏸' : '▶';
+  btnPlayToggle.title = state.isPlaying ? 'Pausa (Spazio)' : 'Avvia (Spazio)';
+  btnPlayToggle.classList.toggle('playing', state.isPlaying);
+  btnPlayLoop.classList.toggle('active', state.isLooping);
+  playbackFpsSelect.value = String(state.fps);
+  playbackSlider.max = String(Math.max(0, state.totalFrames - 1));
+  playbackSlider.value = String(state.frameIndex);
+});
+
+playbackController.onFrameChange((frame, state) => {
+  const meshData = frame.mesh ?? getOrComputeFrameMesh(frame, currentPalette, currentVpt);
+  applyFrameMesh(meshData);
+
+  playbackSlider.value = String(state.frameIndex);
+  playbackFrameIndicator.textContent = `${frame.label} (${frame.grid.solidCount ?? 0} vox)`;
+  viewportInfo.textContent = `Griglia ${frame.grid.X}×${frame.grid.Y}×${frame.grid.Z} · ${frame.grid.solidCount?.toLocaleString('it') ?? 0} voxel · ${frame.label}`;
+  gridDims = frame.grid;
+
+  if (selectedShapeIndex !== null && shapes[selectedShapeIndex]) {
+    updateSelectionBox(shapes[selectedShapeIndex]);
+  }
+});
+
+playbackTrackSelect.addEventListener('change', () => {
+  playbackController.selectTrack(playbackTrackSelect.value);
+});
+
+btnPlayToggle.addEventListener('click', () => {
+  playbackController.togglePlay();
+});
+
+btnPlayStop.addEventListener('click', () => {
+  playbackController.stop();
+});
+
+btnPlayFirst.addEventListener('click', () => {
+  playbackController.jumpToFirst();
+});
+
+btnPlayPrev.addEventListener('click', () => {
+  playbackController.stepBackward();
+});
+
+btnPlayNext.addEventListener('click', () => {
+  playbackController.stepForward();
+});
+
+btnPlayLast.addEventListener('click', () => {
+  playbackController.jumpToLast();
+});
+
+btnPlayLoop.addEventListener('click', () => {
+  playbackController.setLoop(!playbackController.getState().isLooping);
+});
+
+playbackSlider.addEventListener('input', () => {
+  playbackController.jumpToFrame(parseInt(playbackSlider.value, 10));
+});
+
+playbackFpsSelect.addEventListener('change', () => {
+  playbackController.setFps(parseInt(playbackFpsSelect.value, 10));
+});
+
 // ------------------------------------------------------------------ CAD Tool Actions & Events
 
 function setCadTool(tool: CadTool) {
@@ -1173,8 +1305,25 @@ window.addEventListener('keydown', (e) => {
   else if (e.key === 's' || e.key === 'S') setCadTool('ellipsoid');
   else if (e.key === 'k' || e.key === 'K') setCadTool('cone');
   else if (e.key === 'e' || e.key === 'E') setCadTool('erase');
-  else if (e.key === 'Escape') deselectShape();
-  else if (e.key === 'Delete' || e.key === 'Backspace') {
+  else if (e.key === 'Escape') {
+    deselectShape();
+    playbackController.pause();
+  } else if (e.key === ' ') {
+    e.preventDefault();
+    playbackController.togglePlay();
+  } else if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    playbackController.stepBackward();
+  } else if (e.key === 'ArrowRight') {
+    e.preventDefault();
+    playbackController.stepForward();
+  } else if (e.key === 'Home') {
+    e.preventDefault();
+    playbackController.jumpToFirst();
+  } else if (e.key === 'End') {
+    e.preventDefault();
+    playbackController.jumpToLast();
+  } else if (e.key === 'Delete' || e.key === 'Backspace') {
     if (selectedShapeIndex !== null) {
       codeInput.value = deleteShapeFromXml(codeInput.value, selectedShapeIndex);
       onCodeChange();

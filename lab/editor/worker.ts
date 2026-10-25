@@ -1,10 +1,9 @@
-// Web Worker for MarkovJunior Model Editor: compiles, runs, and meshes off-thread.
-
 import { Mj3Error, type Grid3, type PaletteEntry, type Vec3 } from '../../src/mj/engine';
 import { compileMjx } from '../../src/mj/model';
 import { runMjx } from '../../src/mj/run';
 import { meshVoxels, type MeshData } from '../../src/mj/mesh';
 import { extractLineFromError } from './syntax';
+import { buildPlaybackTracks, type PlaybackTrack } from './playback';
 
 export interface EditorBuildRequest {
   id: number;
@@ -37,6 +36,7 @@ export interface EditorBuildSuccess {
   };
   actions: Array<{ name: string; label?: string }>;
   animations: Array<{ name: string; frames: number }>;
+  tracks: PlaybackTrack[];
 }
 
 export interface EditorBuildFailure {
@@ -63,6 +63,7 @@ self.onmessage = (ev: MessageEvent<EditorBuildRequest>) => {
     const m = compileMjx(q.xml, q.size ? { size: q.size } : {});
     const r = runMjx(m, q.seed, {
       deadline: 20_000,
+      snapshots: 60,
       ...(q.steps ? { maxSteps: q.steps } : {}),
     });
 
@@ -81,6 +82,9 @@ self.onmessage = (ev: MessageEvent<EditorBuildRequest>) => {
     }
 
     const triangles = mesh.indices.length / 3;
+
+    // Compute playback tracks for generation, animations and actions
+    const tracks = buildPlaybackTracks(m, g, pal, q.seed, q.vpt, r.snapshots, true);
 
     const res: EditorBuildSuccess = {
       id: q.id,
@@ -104,9 +108,24 @@ self.onmessage = (ev: MessageEvent<EditorBuildRequest>) => {
       },
       actions: m.actions.map((a) => ({ name: a.name, label: a.label })),
       animations: m.animations.map((a) => ({ name: a.name, frames: a.frames })),
+      tracks,
     };
 
-    const transfer = [g.cells.buffer, ...buffers(mesh)];
+    // Collect all unique buffers for transfer
+    const transferSet = new Set<ArrayBuffer>();
+    transferSet.add(g.cells.buffer);
+    for (const b of buffers(mesh)) transferSet.add(b);
+
+    for (const track of tracks) {
+      for (const frame of track.frames) {
+        transferSet.add(frame.grid.cells.buffer);
+        if (frame.mesh) {
+          for (const b of buffers(frame.mesh)) transferSet.add(b);
+        }
+      }
+    }
+
+    const transfer = Array.from(transferSet);
     (self as unknown as Worker).postMessage(res, transfer);
   } catch (e: unknown) {
     const msg = e instanceof Mj3Error ? e.message : e instanceof Error ? e.message : `errore: ${String(e)}`;
@@ -120,3 +139,4 @@ self.onmessage = (ev: MessageEvent<EditorBuildRequest>) => {
     (self as unknown as Worker).postMessage(failure);
   }
 };
+
