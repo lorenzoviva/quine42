@@ -1140,7 +1140,7 @@ le risposte alle domande del piano.
   nella corona e le richieste al Referente non passano dal server in multigiocatore: spostate in T42e. Nessuna verifica nel browser:
   in singola nulla cambia (il pulsante non c'è) e il multigiocatore è coperto dai test col finto trasporto.
 
-### T42e · Le rune della corona e il Referente sul ramo `master` — `fatto` (`HASH`) (dipende da T42b)
+### T42e · Le rune della corona e il Referente sul ramo `master` — `fatto` (`9e45c46`) (dipende da T42b)
 - Contesto: T42b porta sul ramo `master` le modifiche dell'editor (e il suo `R`); in multigiocatore le rune incise nella corona e le
   richieste al Referente non arrivano ancora al server (la corona è dello specchio del master, il Referente non è un'entità del server).
 - Fare: le rune scritte nella corona e ciò che il Referente fa fare alle squadre girano sul server per il master e committano sul suo
