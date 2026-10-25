@@ -1,14 +1,23 @@
 // The situation table of the Direction (T46a): the world seen from above, not as geography (that is the atlas) but
 // as operations — the wanderer, the places the Council is generating now, the open plots at the beat they are at, the
 // quests of the diary, the faults where they happened. Everything comes from what the kernel already has; looking
-// changes nothing. Positions are chunks (carpet space), as in the atlas.
+// changes nothing. Positions are chunks (carpet space), as in the atlas. In a game of many the master sees the
+// players connected too, each on their chunk (T42c).
 
 import { normName } from './content';
 import { regionAt, type Atlas } from './atlas';
 import type { Plot } from './plots';
 import type { Fault } from './faults';
 
-export type OperationKind = 'viandante' | 'luogo' | 'trama' | 'missione' | 'guasto';
+export type OperationKind = 'viandante' | 'giocatore' | 'luogo' | 'trama' | 'missione' | 'guasto';
+
+/** Another wanderer connected now (T42c): who, and where in the world (carpet space). */
+export interface PlayerSpot {
+  id: string;
+  nome: string;
+  x: number;
+  y: number;
+}
 
 export interface Operation {
   kind: OperationKind;
@@ -22,6 +31,8 @@ export interface Operation {
   place?: string;
   /** A place being generated now: it pulses. */
   live?: boolean;
+  /** A player connected: their id, to follow them. */
+  who?: string;
 }
 
 export interface Situation {
@@ -36,6 +47,8 @@ export interface SituationInput {
   plots: Plot[];
   faults: Fault[];
   wanderer: { cx: number; cy: number };
+  /** The other wanderers connected (a game of many). */
+  players?: PlayerSpot[];
   chunks: Array<{ cx: number; cy: number; stage: 'draft' | 'planned'; developing?: boolean; name?: string }>;
   /** Where a person is (their chunk), if anyone knows. */
   locate: (name: string) => { cx: number; cy: number } | undefined;
@@ -44,6 +57,7 @@ export interface SituationInput {
 
 export const OPERATION_NAME: Record<OperationKind, string> = {
   viandante: 'il viandante',
+  giocatore: 'giocatori collegati',
   luogo: 'luoghi in generazione',
   trama: 'trame aperte',
   missione: 'missioni',
@@ -53,6 +67,7 @@ export const OPERATION_NAME: Record<OperationKind, string> = {
 /** The colours of the marks, on the table and in the panel: faults in red. */
 export const OPERATION_COLOR: Record<OperationKind, string> = {
   viandante: '#ffffff',
+  giocatore: '#c77dff',
   luogo: '#05d9e8',
   trama: '#ffcf5c',
   missione: '#7dd87d',
@@ -79,6 +94,8 @@ export function situation(s: SituationInput): Situation {
   };
 
   ops.push(at({ kind: 'viandante', label: 'il viandante', detail: 'è qui' }, s.wanderer));
+  for (const p of s.players ?? [])
+    ops.push(at({ kind: 'giocatore', label: p.nome, detail: `collegato, a ${Math.floor(p.x)},${Math.floor(p.y)}`, who: p.id }, { cx: Math.floor(p.x / s.chunkSize), cy: Math.floor(p.y / s.chunkSize) }));
   for (const c of s.chunks) {
     if (c.stage !== 'draft') continue;
     ops.push(at({ kind: 'luogo', label: `luogo ${c.cx},${c.cy}`, detail: c.developing ? 'il Cartografo lo sta pianificando' : 'in coda', ...(c.developing ? { live: true } : {}) }, c));

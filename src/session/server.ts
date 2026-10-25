@@ -163,6 +163,10 @@ interface Client {
   /** What the client knows of each thing in sight: what it is, and where it last was. */
   things: Map<number, { look: string; x: number; y: number }>;
   others: Map<string, string>;
+  /** The master follows this player (T42c): what they get is what is around them. */
+  watch?: string;
+  /** The players connected, as the master last heard of them. */
+  players?: string;
 }
 
 export class SessionServer {
@@ -267,6 +271,7 @@ export class SessionServer {
       luoghi: u.luoghi ?? [],
       cose: u.cose ?? [],
       viandanti: u.viandanti ?? [],
+      ...(u.giocatori ? { giocatori: u.giocatori } : {}),
     });
     return c;
   }
@@ -359,6 +364,8 @@ export class SessionServer {
         return this.answer(c, seq, this.takeBranch(c, msg.files, msg.base));
       case 'pubblica':
         return this.answer(c, seq, this.publish(c));
+      case 'segui':
+        return this.answer(c, seq, this.watch(c, msg.id));
       case 'casella': {
         const why = this.tileOutOfReach(c, msg.col, msg.row) ?? (typeof msg.azione === 'string' && msg.azione && msg.azione !== 'altro' ? undefined : 'azione sconosciuta');
         if (why) return this.answer(c, seq, { ok: false, motivo: why });
@@ -408,6 +415,21 @@ export class SessionServer {
     this.branch = { files: {}, base: {} };
     void k.repo.backend?.merge?.(BRANCH, `il ramo ${BRANCH} nel mondo (${r.commit!.id})`);
     return { ok: true, value: `Pubblicato: ${paths.length} file${conflicts.length ? `, ${conflicts.length} cambiati anche nel mondo (resta il tuo)` : ''}.` };
+  }
+
+  /**
+   * The master follows a player (T42c), without leaving where they are: the places, things and wanderers sent are those
+   * around the player, until they stop (no id) or the player leaves.
+   */
+  private watch(c: Client, id: unknown): Answer {
+    if (!this.kernel.isMaster(c.id)) return { ok: false, motivo: 'solo il master segue i giocatori' };
+    if (id === undefined || id === null || id === '') {
+      c.watch = undefined;
+      return { ok: true };
+    }
+    if (typeof id !== 'string' || id === c.id || !this.clients.has(id)) return { ok: false, motivo: 'nessun giocatore collegato con questo nome' };
+    c.watch = id;
+    return { ok: true };
   }
 
   /** A step claimed by the client: as far as the pace allows and the world lets them, corrected if it differs. */
@@ -550,6 +572,18 @@ export class SessionServer {
     const meKey = JSON.stringify(me);
     if (meKey !== c.me) out.me = me;
     c.me = meKey;
+    // What is around: the wanderer, or the player the master follows (T42c), while they are in the world.
+    if (c.watch && (!this.clients.has(c.watch) || !k.inWorld(c.watch))) c.watch = undefined;
+    const centre = (c.watch && k.wandererAt(c.watch)) || at;
+    if (k.isMaster(c.id)) {
+      const players = [...this.clients.keys()].flatMap((id) => {
+        const o = id !== c.id && k.inWorld(id) ? k.wandererAt(id) : undefined;
+        return o ? [{ id, nome: k.wanderers().find((w) => w.id === id)?.nome ?? id, x: round(o.x), y: round(o.y) }] : [];
+      });
+      const key = JSON.stringify(players);
+      if (key !== c.players) out.giocatori = players;
+      c.players = key;
+    }
     const stato: MyState = k.as(c.id, () => ({ needs: k.needs() as unknown as Record<string, number>, hand: k.hand(), inventory: k.inventory(), stati: k.states(), slots: k.slots() }));
     const sKey = JSON.stringify(stato);
     if (sKey !== c.stato) out.stato = JSON.parse(sKey);
@@ -557,7 +591,7 @@ export class SessionServer {
     const S = k.config.chunkSize;
     const places: PlaceView[] = [];
     for (const ch of k.chunks.values()) {
-      const far = Math.max(Math.abs(ch.cx * S + S / 2 - at.x), Math.abs(ch.cy * S + S / 2 - at.y)) - S / 2;
+      const far = Math.max(Math.abs(ch.cx * S + S / 2 - centre.x), Math.abs(ch.cy * S + S / 2 - centre.y)) - S / 2;
       if (far > this.near || c.places.get(ch.key) === ch.version) continue;
       c.places.set(ch.key, ch.version);
       places.push({
@@ -577,7 +611,7 @@ export class SessionServer {
     for (const id of k.ecs.query('pos')) {
       if (k.ecs.has(id, 'player')) continue;
       const p = k.ecs.get(id, 'pos');
-      if (!Number.isFinite(p?.x) || !Number.isFinite(p?.y) || Math.hypot(p.x - at.x, p.y - at.y) > this.near) continue;
+      if (!Number.isFinite(p?.x) || !Number.isFinite(p?.y) || Math.hypot(p.x - centre.x, p.y - centre.y) > this.near) continue;
       inSight.add(id);
       const look = this.lookOf(id);
       const key = JSON.stringify(look);
@@ -597,7 +631,7 @@ export class SessionServer {
     for (const w of k.wanderers()) {
       if (w.id === c.id || !k.inWorld(w.id)) continue;
       const o = k.wandererAt(w.id);
-      if (!o || Math.hypot(o.x - at.x, o.y - at.y) > this.near) continue;
+      if (!o || Math.hypot(o.x - centre.x, o.y - centre.y) > this.near) continue;
       near.add(w.id);
       const form = this.formOf(o.entity);
       const b = k.bubbles.get(o.entity);

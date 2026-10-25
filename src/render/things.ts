@@ -384,13 +384,13 @@ export class Lights {
     }
   }
 
-  update(k: Kernel, night: number, offset: { ox: number; oy: number }, t: number): void {
-    const p = k.playerPos();
+  /** `p`: where the camera looks (the wanderer, or the player the master follows), for the nearest lights. */
+  update(k: Kernel, night: number, offset: { ox: number; oy: number }, t: number, p = k.playerPos()): void {
     const found: Array<{ x: number; z: number; r: number; color: string; d: number; id: number }> = [];
     for (const id of k.ecs.query('luce')) {
       const l = k.ecs.get(id, 'luce');
       if (!l?.accesa) continue;
-      const pos = id === k.playerId ? { x: p.x + offset.ox, y: p.y + offset.oy } : k.ecs.get(id, 'pos');
+      const pos = id === k.playerId ? k.playerCarpet() : k.ecs.get(id, 'pos');
       if (!pos) continue;
       const x = pos.x - offset.ox, z = pos.y - offset.oy;
       found.push({ x, z, r: Number(l.raggio) || 4, color: l.colore ?? '#ffb060', d: Math.hypot(x - p.x, z - p.y), id });

@@ -87,7 +87,11 @@ export class ThinClient {
     this.told = [...(s.stato.hand?.tokens ?? [])];
     this.heard(s.feed);
     s.onMessage = (m) => this.receive(m);
-    if (s.master) this.openBranch();
+    if (s.master) {
+      this.openBranch();
+      k.connected = [...s.players];
+      k.follow = (id) => void this.follow(id);
+    }
   }
 
   /** Every frame, after the kernel's ticks: what moves on the server glides, the wanderer's step and phrase go. */
@@ -135,6 +139,7 @@ export class ThinClient {
           if (e !== undefined) this.k.ecs.destroy(e);
           this.others.delete(id);
         }
+        if (m.giocatori && this.session.master) this.players();
         if (m.me) this.carried(m.me.x, m.me.y);
         if (m.stato || this.adopt) this.state();
         this.adopt = false;
@@ -157,6 +162,34 @@ export class ThinClient {
         this.lastStep = { x: m.x, y: m.y, t: this.clock };
         break;
     }
+  }
+
+  /** The players connected (the master's, T42c); the one followed has left: the view comes back to the master. */
+  private players(): void {
+    const k = this.k;
+    k.connected = [...this.session.players];
+    if (k.watching && !k.connected.some((p) => p.id === k.watching)) this.watching(undefined);
+  }
+
+  /**
+   * The master follows a player (T42c), or stops: the camera goes above them at once, the server sends what is around
+   * them; if it refuses, the view comes back.
+   */
+  private async follow(id?: string): Promise<void> {
+    const k = this.k;
+    if (id && !k.connected?.some((p) => p.id === id)) return k.message('Nessun giocatore collegato con questo nome.', 'warn');
+    this.watching(id);
+    const r = await this.session.act({ t: 'segui', ...(id ? { id } : {}) });
+    if (!r.ok && k.watching === id) {
+      this.watching(undefined);
+      k.message(r.motivo ?? 'Non si può seguire.', 'warn');
+    }
+  }
+
+  private watching(id: string | undefined): void {
+    if (this.k.watching === id) return;
+    this.k.watching = id;
+    this.k.bus.emit('watch:changed', { id });
   }
 
   /** The Council at work on the server (the master's client only, T41): its feed, its avatars in the studio. */

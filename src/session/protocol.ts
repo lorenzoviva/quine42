@@ -6,6 +6,7 @@
 import type { FileMap } from '../kernel/types';
 import type { Inventory } from '../kernel/inventory';
 import type { FeedEntry } from '../kernel/agents/council';
+import type { PlayerSpot } from '../kernel/situation';
 
 /** A tick of the server's world and its hour. */
 export interface Clock {
@@ -113,7 +114,9 @@ export type ClientMsg =
    */
   | { t: 'ramo'; seq: number; files: FileChanges; base: Record<string, string | null> }
   /** The master publishes their branch: it goes into the world, for everyone. */
-  | { t: 'pubblica'; seq: number };
+  | { t: 'pubblica'; seq: number }
+  /** The master follows a player (T42c): what is sent is what is around them; without `id`, around the master again. */
+  | { t: 'segui'; seq: number; id?: string };
 
 /** Files changed: their new text, or null when they are gone. */
 export type FileChanges = Record<string, string | null>;
@@ -131,10 +134,11 @@ export interface ContainerView {
 export type ServerMsg =
   /**
    * Coming in: the files (a player gets only what a client draws and walks with, `playerFiles`), whether this
-   * wanderer is the master (T41) and, only for the master, the Council's feed so far and their branch (T42b).
+   * wanderer is the master (T41) and, only for the master, the Council's feed so far and their branch (T42b); the
+   * master's updates say (`giocatori`) every player connected and where they are, when it changes (T42c).
    */
-  | ({ t: 'ingresso'; id: string; nome: string; master?: true; concilio?: FeedEntry[]; ramo?: FileChanges; files: FileMap; me: Me; forma?: FormView; stato: MyState; luoghi: PlaceView[]; cose: ThingView[]; viandanti: OtherView[] } & Clock)
-  | ({ t: 'aggiorna'; me?: Me; stato?: MyState; luoghi?: PlaceView[]; cose?: ThingView[]; via?: number[]; viandanti?: OtherView[]; partiti?: string[] } & Clock)
+  | ({ t: 'ingresso'; id: string; nome: string; master?: true; concilio?: FeedEntry[]; ramo?: FileChanges; files: FileMap; me: Me; forma?: FormView; stato: MyState; luoghi: PlaceView[]; cose: ThingView[]; viandanti: OtherView[]; giocatori?: PlayerSpot[] } & Clock)
+  | ({ t: 'aggiorna'; me?: Me; stato?: MyState; luoghi?: PlaceView[]; cose?: ThingView[]; via?: number[]; viandanti?: OtherView[]; partiti?: string[]; giocatori?: PlayerSpot[] } & Clock)
   /** The step was not possible (too fast, through a wall): the wanderer is here. */
   | { t: 'correzione'; seq: number; x: number; y: number }
   /**

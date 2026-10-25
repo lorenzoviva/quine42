@@ -940,7 +940,7 @@ export const SITUATION_TOP = 0.72;
 
 /**
  * The operations on the situation table (T46a): the chunks of `s.bounds` fitted on its top, the regions as faint golden
- * plates with their outlines, a glowing mark for each operation (the wanderer a white pillar, plots gold, quests green,
+ * plates with their outlines, a glowing mark for each operation (the wanderer a white pillar, the players connected violet ones (T42c), plots gold, quests green,
  * faults red, places cyan and flat, dim when only queued); the places being generated are in `pulse`, to pulse.
  */
 export function buildSituation(it: StudioItem, s: Situation, color: string): { group: THREE.Group; pulse: THREE.Object3D[] } {
@@ -963,7 +963,7 @@ export function buildSituation(it: StudioItem, s: Situation, color: string): { g
     glow.box(e - t, top, b, e, top + 0.012, f, rim);
   }
   // How tall each mark is, and how much of its cell it covers.
-  const look = { viandante: [0.32, 0.5], trama: [0.16, 0.55], missione: [0.12, 0.55], guasto: [0.2, 0.6], luogo: [0.015, 0.9] } as const;
+  const look = { viandante: [0.32, 0.5], giocatore: [0.26, 0.42], trama: [0.16, 0.55], missione: [0.12, 0.55], guasto: [0.2, 0.6], luogo: [0.015, 0.9] } as const;
   const pulse: THREE.Object3D[] = [];
   // More operations on one chunk stand side by side.
   const seen = new Map<string, number>();

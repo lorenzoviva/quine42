@@ -20,7 +20,7 @@ import { repairProgram } from './mj';
 import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './universes';
 import { addPerson, applyRenames, dayPhase, defaultRoutine, freshName, greeting, guessGender, inferActivity, memorySummary, readPeople, remember, repairSociety, similarNames, societySummary, type Activity, type DayPhase, type Person, type Species } from './society';
 import { buildGraph, GRAPH_FILE, graphHash, mergePlaces, placesOf, readGraph, slug as nodeSlug, type GraphPlace, type WorldGraph } from './graph';
-import { situation as buildSituation, type Situation } from './situation';
+import { situation as buildSituation, type PlayerSpot, type Situation } from './situation';
 import { ChainMeter, chainOf, type Chain } from './chain';
 import { alertOf, clampFrame, costBoard, liveFeed, SCREEN_NAME, timeline, type Budget, type ScreenField, type Screens } from './screens';
 import { activeQuests, plotFromRaw, plotText, PLOTS_FILE, readPlots, reviewPlot, secretsOf, writePlots, type Plot } from './plots';
@@ -459,6 +459,14 @@ export class Kernel {
    * gesture that publishes them. The editor and the console show it; alone there is none (every save is the world).
    */
   publisher?: { branch(): string[]; publish(): Promise<{ ok: boolean; motivo?: string; testo?: string }> };
+  /**
+   * In a game of many, the master's mirror (T42c): the players connected as the server tells them, and the view that
+   * follows one of them (their id; the camera goes above them, the master stays where they are). Alone there is none.
+   */
+  connected?: PlayerSpot[];
+  watching?: string;
+  /** Follows a player (or stops, without an id): the server sends the world around them. */
+  follow?: (id?: string) => void;
   private wasmUri?: string;
 
   private constructor(opts: KernelOptions) {
@@ -740,6 +748,34 @@ export class Kernel {
 
   wanderers(): Wanderer[] {
     return [...this.wanderersById.values()].map((w) => ({ id: w.id, nome: w.nome }));
+  }
+
+  /**
+   * The other wanderers in the world now and where they are (T42c): in the master's mirror what the server says, in a
+   * kernel that holds them (the server's) its registry, but for the one acting and those out of the world.
+   */
+  players(): PlayerSpot[] {
+    if (this.connected) return this.connected;
+    const me = this.wanderer().id;
+    const out: PlayerSpot[] = [];
+    for (const w of this.wanderers()) {
+      const at = w.id !== me && this.inWorld(w.id) ? this.wandererAt(w.id) : undefined;
+      if (at) out.push({ id: w.id, nome: w.nome, x: at.x, y: at.y });
+    }
+    return out;
+  }
+
+  /** Where the player followed is (T42c), in the world: their entity in the mirror, or the wanderer; undefined if not followed. */
+  watched(): { x: number; y: number } | undefined {
+    const id = this.watching;
+    if (!id) return undefined;
+    for (const e of this.ecs.query('remote', 'pos')) {
+      if (this.ecs.get(e, 'remote')?.id !== id) continue;
+      const p = this.ecs.get(e, 'pos');
+      if (Number.isFinite(p?.x) && Number.isFinite(p?.y)) return { x: p.x, y: p.y };
+    }
+    const p = this.connected?.find((x) => x.id === id) ?? (this.wanderersById.has(id) && id !== this.wanderer().id ? this.wandererAt(id) : undefined);
+    return p ? { x: p.x, y: p.y } : undefined;
   }
 
   /**
@@ -1532,7 +1568,7 @@ export class Kernel {
    * What the Cartographer's atlas shows, without generating anything: places planned (ever, from the
    * universe's maps, and now), places only sketched (drafts loaded, not yet planned), the regions, you.
    */
-  async atlasView(): Promise<{ planned: Array<{ cx: number; cy: number; name: string; layout: string }>; drafts: Array<{ cx: number; cy: number }>; regions: Region[]; here: { cx: number; cy: number } }> {
+  async atlasView(): Promise<{ planned: Array<{ cx: number; cy: number; name: string; layout: string }>; drafts: Array<{ cx: number; cy: number }>; regions: Region[]; here: { cx: number; cy: number }; players: Array<PlayerSpot & { cx: number; cy: number }> }> {
     const S = this.config.chunkSize;
     const planned = new Map<string, { cx: number; cy: number; name: string; layout: string }>();
     const prefix = this.recordKey({ cx: 0, cy: 0, key: '' } as Chunk).replace(/[:,]/g, '_');
@@ -1545,7 +1581,9 @@ export class Kernel {
     const drafts = [...this.chunks.values()].filter((c) => c.stage === 'draft' && !planned.has(c.key)).map((c) => ({ cx: c.cx, cy: c.cy }));
     // Seen from the studio, "here" is where the wanderer last stood in the world.
     const pc = this.corona.isInterior(this.playerPos().x) ? this.lastWorld : this.playerCarpet();
-    return { planned: [...planned.values()], drafts, regions: readAtlas(this.files).regioni, here: { cx: Math.floor(pc.x / S), cy: Math.floor(pc.y / S) } };
+    // The players connected (T42c), each on their chunk.
+    const players = this.players().map((p) => ({ ...p, cx: Math.floor(p.x / S), cy: Math.floor(p.y / S) }));
+    return { planned: [...planned.values()], drafts, regions: readAtlas(this.files).regioni, here: { cx: Math.floor(pc.x / S), cy: Math.floor(pc.y / S) }, players };
   }
 
   /** Where things are, seen from a carpet point: places nearby and regions of the atlas. */
@@ -5089,6 +5127,7 @@ export class Kernel {
       plots: readPlots(this.files),
       faults: this.faults.list(),
       wanderer: chunkOf(pc.x, pc.y),
+      players: this.players(),
       chunks: [...this.chunks.values()].map((c) => ({ cx: c.cx, cy: c.cy, stage: c.stage, developing: c.developing, name: c.place?.name })),
       locate,
       chunkSize: S,

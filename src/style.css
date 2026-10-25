@@ -346,6 +346,10 @@ button[disabled] { opacity: 0.4; cursor: default; }
 #atlas .legend .fog::before { background: #06070c; border: 1px solid #333; }
 #atlas .legend .region::before { border: 1px dashed #f5d300; }
 #atlas .legend .you::before { border: 2px solid #ff2a6d; }
+#atlas .legend .player::before { background: #c77dff; border-radius: 50%; }
+#atlas .row { display: flex; gap: 6px; flex-wrap: wrap; }
+/* The master following a player (T42c): a sign at the top, Esc to come back. */
+#watch { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 30; padding: 6px 12px; background: rgba(7,8,14,0.85); border: 1px solid #c77dff; color: #e6d0ff; box-shadow: 0 0 14px #c77dff55; font-size: 13px; display: flex; gap: 10px; align-items: center; }
 #graph { position: fixed; inset: 0; z-index: 41; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); }
 #graph .window { position: relative; background: #05060b; border: 1px solid #6fc3ff; box-shadow: 0 0 24px #6fc3ff55; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; max-width: 98vw; max-height: 96vh; }
 #graph .head { display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap; padding-right: 30px; }

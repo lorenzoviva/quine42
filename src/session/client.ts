@@ -5,6 +5,7 @@
 
 import type { FileMap } from '../kernel/types';
 import type { FeedEntry } from '../kernel/agents/council';
+import type { PlayerSpot } from '../kernel/situation';
 import type { ClientLink, ClientMsg, ContainerView, Dialog, FileChanges, FormView, Me, MyState, OtherView, PlaceView, ServerMsg, ThingView } from './protocol';
 
 export interface Outcome {
@@ -40,6 +41,8 @@ export class SessionClient {
   readonly places = new Map<string, PlaceView>();
   readonly things = new Map<number, ThingView>();
   readonly others = new Map<string, OtherView>();
+  /** The master's (T42c): every player connected and where they are, as the server last said. */
+  players: PlayerSpot[] = [];
   /** Steps the server did not let through. */
   corrections = 0;
   refused?: string;
@@ -133,9 +136,10 @@ export class SessionClient {
     this.onMessage?.(m);
   }
 
-  private apply(m: { tick: number; ora: number; luoghi?: PlaceView[]; cose?: ThingView[]; via?: number[]; viandanti?: OtherView[]; partiti?: string[] }): void {
+  private apply(m: { tick: number; ora: number; luoghi?: PlaceView[]; cose?: ThingView[]; via?: number[]; viandanti?: OtherView[]; partiti?: string[]; giocatori?: PlayerSpot[] }): void {
     this.tick = m.tick;
     this.ora = m.ora;
+    if (m.giocatori) this.players = m.giocatori;
     for (const p of m.luoghi ?? []) this.places.set(p.key, p);
     // A thing that only moved keeps what it is.
     for (const t of m.cose ?? []) this.things.set(t.id, Object.keys(t).length > 3 ? t : { ...(this.things.get(t.id) ?? t), x: t.x, y: t.y });

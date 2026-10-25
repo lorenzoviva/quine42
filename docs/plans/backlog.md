@@ -1147,10 +1147,18 @@ le risposte alle domande del piano.
   ramo (non sul principale), da pubblicare come le modifiche dell'editor.
 - Fatto quando: test — una richiesta al Referente del master cambia il ramo, non il mondo dei giocatori, finché non pubblica.
 
-### T42c · I giocatori dalla corona — `da fare` (dipende da T42a)
+### T42c · I giocatori dalla corona — `fatto` (commit in arrivo) (dipende da T42a)
 - Fare: nell'atlante della corona (Ufficio dei luoghi) e nel tavolo della situazione i giocatori collegati, ciascuno sul suo chunk;
   una vista che ne segue uno (la camera del master sopra di lui finché non la lascia), senza uscire dalla corona.
 - Fatto quando: test (la situazione elenca i giocatori collegati con la loro posizione); verifica nel browser con un universo di prova.
+- Esito: ADR-0067. Al master l'elenco `giocatori` (solo a lui, quando cambia); `kernel.players()` → operazioni `giocatore` (viola)
+  nel tavolo e nel pannello della situazione (con «Segui») e punti con il nome nell'atlante (con un pulsante per giocatore).
+  `segui {id}` sposta il centro della vista che il server manda al master; il renderer mette il giocatore al centro e nasconde
+  corona e viandante del master, che resta nello studio; Esc o «Torna» sull'insegna in alto. `tests/watch.test.ts` (3 test).
+  Verificato nel browser con un universo di prova poi tolto (`io` e `anna` in due schede): il pannello della Direzione elenca
+  `anna`, «Segui» porta la camera sopra di lei, la vista la segue mentre cammina, Esc torna alla Direzione, l'atlante la mostra.
+  Diverso dal previsto: l'atlante «della corona» è il pannello che si apre dall'Ufficio dei luoghi (nella stanza l'atlante è un
+  tavolo luminoso che apre il pannello, senza disegni dei luoghi); la vista seguita mostra soltanto: le azioni sulle caselle restano fuori portata.
 
 ### T42d · Clonare l'universo con un altro master — `da fare` (dipende da T42b)
 - Fare: copiare il repository dell'universo in un universo nuovo con `partita.master` diverso (l'unico modo di cambiare master); le

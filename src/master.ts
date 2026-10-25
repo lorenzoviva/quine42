@@ -13,7 +13,7 @@ import { GenesisScreen } from './ui/genesis';
 import { StudioPanel } from './ui/studio';
 import { AtlasPanel } from './ui/atlas';
 import { GraphPanel } from './ui/graph';
-import { $ } from './ui/dom';
+import { $, el } from './ui/dom';
 
 export class MasterTools {
   readonly editor: Editor;
@@ -55,6 +55,30 @@ export class MasterTools {
     };
     this.studio.onEdit = (path) => edit(path);
     kernel.bus.on('ui:edit', ({ path, line }) => edit(path, line));
+    this.watchSign();
+  }
+
+  /**
+   * Following a player (T42c): a sign at the top says whom, and Esc (or its button) brings the camera back to the
+   * master, who never left the studio.
+   */
+  private watchSign(): void {
+    const k = this.kernel;
+    const sign = el('div', { id: 'watch' });
+    sign.hidden = true;
+    document.body.append(sign);
+    k.bus.on('watch:changed', ({ id }: { id?: string }) => {
+      sign.hidden = !id;
+      if (!id) return;
+      const back = el('button', {}, 'Torna');
+      back.onclick = () => k.follow?.();
+      sign.replaceChildren(el('span', {}, `Segui ${k.connected?.find((p) => p.id === id)?.nome ?? id} — Esc per tornare`), back);
+    });
+    window.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape' || !k.watching || this.isOpen) return;
+      k.follow?.();
+      e.preventDefault();
+    });
   }
 
   /** Whether one of the master's windows holds the keys. */

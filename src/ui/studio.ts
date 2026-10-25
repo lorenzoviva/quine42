@@ -254,7 +254,16 @@ export class StudioPanel {
    */
   situation(s: Situation): void {
     const where = (o: Operation) => (o.cx === undefined ? 'nel codice, non nel mondo' : [o.place, o.region, `${o.cx},${o.cy}`].filter(Boolean).join(' · '));
-    const row = (o: Operation) => el('div', { class: 'item' }, el('span', { style: `color:${OPERATION_COLOR[o.kind]}` }, '● '), el('span', { class: 'path' }, o.label), ` — ${o.detail} `, el('span', { class: 'note' }, `(${where(o)})`));
+    // A player connected can be followed (T42c): the camera goes above them, the master stays in the studio.
+    const follow = (o: Operation) => {
+      const b = el('button', {}, 'Segui');
+      b.onclick = () => {
+        this.close();
+        this.k.follow?.(o.who);
+      };
+      return b;
+    };
+    const row = (o: Operation) => el('div', { class: 'item' }, el('span', { style: `color:${OPERATION_COLOR[o.kind]}` }, '● '), el('span', { class: 'path' }, o.label), ` — ${o.detail} `, el('span', { class: 'note' }, `(${where(o)})`), ...(o.who && this.k.follow ? [' ', follow(o)] : []));
     const of = (kind: OperationKind) => s.ops.filter((o) => o.kind === kind);
     const places = of('luogo');
     const live = places.filter((o) => o.live);
@@ -265,6 +274,7 @@ export class StudioPanel {
       el('div', { class: 'note' }, 'Il mondo dall\x27alto, come operazioni in corso. Guardare non cambia nulla.'),
       el('div', { class: 'frame situation' }, this.situationMap(s)),
       ...section('viandante', of('viandante'), ''),
+      ...(this.k.follow ? section('giocatore', of('giocatore'), 'Nessun giocatore collegato.') : []),
       ...section('luogo', live, 'Il Cartografo non sta pianificando nessun luogo.'),
       ...(queued ? [el('div', { class: 'note' }, `In coda: ${queued} luogh${queued === 1 ? 'o' : 'i'} solo abbozzat${queued === 1 ? 'o' : 'i'}.`)] : []),
       ...section('trama', of('trama'), 'Nessuna trama aperta.'),
@@ -292,7 +302,7 @@ export class StudioPanel {
       g.fillText(r.nome, (r.centro[0] - r.raggio - x0) * cell + 2, (r.centro[1] - r.raggio - y0) * cell + 10);
     }
     // The places under the rest; the wanderer on top.
-    const order: OperationKind[] = ['luogo', 'trama', 'missione', 'guasto', 'viandante'];
+    const order: OperationKind[] = ['luogo', 'trama', 'missione', 'guasto', 'giocatore', 'viandante'];
     for (const kind of order)
       for (const o of s.ops) {
         if (o.kind !== kind || o.cx === undefined || o.cy === undefined) continue;

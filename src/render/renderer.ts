@@ -94,7 +94,7 @@ export class Renderer {
       this.fitView();
     };
     kernel.bus.on('spell:cast', ({ at }: { at: { x: number; y: number } }) => {
-      const { ox, oy } = kernel.offset();
+      const { ox, oy } = this.offset();
       this.flash.position.set(at.x - ox, kernel.groundAt(at.x, at.y) + 1, at.y - oy);
       this.flashUntil = this.t + 0.6;
     });
@@ -136,6 +136,7 @@ export class Renderer {
   canFreeOrbit(): boolean {
     if (this.godMode) return true;
     const k = this.kernel;
+    if (k.watching) return true;
     if (k.zone === 'corona' || k.zone === 'studio') return true;
     if (k.coronaRevealed()) return true;
     const p = k.playerPos();
@@ -187,11 +188,20 @@ export class Renderer {
     this.fitView();
   }
 
+  /**
+   * How the simulation is shifted to be drawn: by the carpet's scroll, or (the master following a player, T42c) so that
+   * the player is in the middle.
+   */
+  private offset(): { ox: number; oy: number } {
+    const w = this.kernel.watched();
+    return w ? { ox: w.x, oy: w.y } : this.kernel.offset();
+  }
+
   /** The height of the ground at a real-space point: the relief in the simulation, flat in the corona. */
   groundReal(x: number, y: number): number {
     const k = this.kernel;
-    if (k.corona.isInterior(x) || (k.coronaRevealed() && Math.hypot(x, y) >= k.config.circleRadius)) return 0;
-    const { ox, oy } = k.offset();
+    if (!k.watching && (k.corona.isInterior(x) || (k.coronaRevealed() && Math.hypot(x, y) >= k.config.circleRadius))) return 0;
+    const { ox, oy } = this.offset();
     return k.groundAt(x + ox, y + oy);
   }
 
@@ -199,7 +209,7 @@ export class Renderer {
   toReal(sx: number, sy: number): { x: number; y: number } {
     this.ray.setFromCamera(new THREE.Vector2((sx / this.w) * 2 - 1, -(sy / this.h) * 2 + 1), this.camera);
     const hit = new THREE.Vector3();
-    const p = this.kernel.playerPos();
+    const p = this.kernel.watched() ? { x: 0, y: 0 } : this.kernel.playerPos();
     this.ground.constant = -this.groundReal(p.x, p.y);
     for (let i = 0; i < 4; i++) {
       if (!this.ray.ray.intersectPlane(this.ground, hit)) return { ...p };
@@ -215,15 +225,17 @@ export class Renderer {
     this.t += dt;
     U.time.value = this.t;
     const p = k.playerPos();
-    const studio = k.zone === 'studio' ? k.corona.roomAt(p.x, p.y) : undefined;
-    const interior = k.corona.isInterior(p.x);
-    const revealed = k.coronaRevealed();
-    const { ox, oy } = k.offset();
+    // The master following a player (T42c): the simulation around them, the corona and the master's wanderer hidden.
+    const watch = k.watched();
+    const studio = !watch && k.zone === 'studio' ? k.corona.roomAt(p.x, p.y) : undefined;
+    const interior = !watch && k.corona.isInterior(p.x);
+    const revealed = !watch && k.coronaRevealed();
+    const { ox, oy } = this.offset();
 
     // The broken universe trembles; a faint crack right at the edge of the world, sometimes.
     const broken = k.brokenness();
     this.glitchLevel += (broken - this.glitchLevel) * Math.min(1, dt * 4);
-    const edge = k.config.circleRadius - Math.hypot(p.x, p.y);
+    const edge = watch ? Infinity : k.config.circleRadius - Math.hypot(p.x, p.y);
     if (broken === 0 && edge < 3 && edge > 0 && Math.random() < dt / 8) this.crack = 0.08;
     this.crack = Math.max(0, this.crack - dt);
     const g = Math.max(this.glitchLevel, this.crack > 0 ? 0.22 : 0);
@@ -235,21 +247,23 @@ export class Renderer {
     if (!interior) {
       this.syncChunks();
       // Inside a structure its upper part is cut away, so the wanderer is seen.
-      const pc = k.playerCarpet();
+      const pc = watch ?? k.playerCarpet();
       const inside = k.structureAt(pc.x, pc.y);
       CUT.constant = inside !== undefined ? 1.15 + k.floorAt(pc.x, pc.y) : 1e9;
       this.things.update(dt, this.t, inside);
       this.runes.update(this.t);
     }
     this.wanderer.update(k, dt, this.t);
+    this.wanderer.view.root.visible = !watch;
 
     // The corona and the studio.
-    this.corona?.update(this.t, studio, revealed, interior);
+    if (this.corona) this.corona.root.visible = !watch;
+    if (!watch) this.corona?.update(this.t, studio, revealed, interior);
 
     // Light: the day outside, a dim neon light in the studio.
     const day = k.daylight();
     const night = 1 - day;
-    if (studio || k.zone === 'corona') {
+    if (!watch && (studio || k.zone === 'corona')) {
       // The studio and its campus have their own light, day and night: neon and screens.
       this.sun.intensity = studio ? 0 : 0.8;
       this.hemi.intensity = studio ? 0.9 : 1.0;
@@ -263,12 +277,12 @@ export class Renderer {
       this.scene.background = bg;
       this.scene.fog = new THREE.Fog(bg, this.distance * 2.2, this.distance * 4.5);
     }
-    this.lights.update(k, studio ? 0 : night, { ox, oy }, this.t);
+    this.lights.update(k, studio ? 0 : night, { ox, oy }, this.t, watch ? { x: 0, y: 0 } : p);
     this.flash.intensity = this.flashUntil > this.t ? 6 * ((this.flashUntil - this.t) / 0.6) : 0;
 
     // The camera follows the wanderer, from above.
     // It looks at the wanderer's middle, up and down the hills with it.
-    const aim = new THREE.Vector3(p.x, this.wanderer.view.root.position.y + 0.6, p.y);
+    const aim = watch ? new THREE.Vector3(0, k.floorAt(watch.x, watch.y) + 0.6, 0) : new THREE.Vector3(p.x, this.wanderer.view.root.position.y + 0.6, p.y);
     this.target.lerp(aim, Math.min(1, dt * 8));
     if (this.target.distanceTo(aim) > 30) this.target.copy(aim);
 
@@ -331,7 +345,8 @@ export class Renderer {
   private drawOverlay(studio: StudioRoom, revealed: boolean, interior: boolean, g: number): void {
     const k = this.kernel;
     const o = this.overlay;
-    const { ox, oy } = k.offset();
+    const { ox, oy } = this.offset();
+    const watch = !!k.watching;
     o.begin();
     if (!interior) {
       if (this.showWalk) o.walkability(k);
@@ -344,13 +359,13 @@ export class Renderer {
         const p = k.ecs.get(id, 'pos');
         if (a?.tipo && a.ferma) o.activity(p.x - ox, k.floorAt(p.x, p.y) + 1.6, p.y - oy, a.tipo, this.t);
       }
-      const target = k.targetInFront();
+      const target = watch ? undefined : k.targetInFront();
       if (target !== undefined) {
         const p = k.ecs.get(target, 'pos');
         if (p) o.hint(p.x - ox, k.floorAt(p.x, p.y) + 1.5, p.y - oy);
       }
     }
-    this.corona?.overlay(o, this.t, studio, revealed, interior, this.distance);
+    if (!watch) this.corona?.overlay(o, this.t, studio, revealed, interior, this.distance);
     if (this.mouse) {
       const r = this.toReal(this.mouse.x, this.mouse.y);
       const inCorona = interior || (revealed && Math.hypot(r.x, r.y) >= k.config.circleRadius);
