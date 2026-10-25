@@ -106,7 +106,17 @@ export type ClientMsg =
   /** A panel of a mechanic (ADR-0028): something put into or taken from its slot `posto`, or a button. */
   | { t: 'pannello'; seq: number; pannello: string; op: 'metti' | 'togli' | 'pulsante'; posto?: string; slot?: number; azione?: string }
   /** An action learned on a kind of terrain, done on a tile (ADR-0029). */
-  | { t: 'casella'; seq: number; col: number; row: number; azione: string };
+  | { t: 'casella'; seq: number; col: number; row: number; azione: string }
+  /**
+   * The master's branch (T42b), whole: every file it changes against the main line (null: deleted), and the hash of the
+   * main line's version it was changed from (null: it was not there), to tell what the world changed meanwhile.
+   */
+  | { t: 'ramo'; seq: number; files: FileChanges; base: Record<string, string | null> }
+  /** The master publishes their branch: it goes into the world, for everyone. */
+  | { t: 'pubblica'; seq: number };
+
+/** Files changed: their new text, or null when they are gone. */
+export type FileChanges = Record<string, string | null>;
 
 /** What can be done with something carried: use, hold, drop, move, put into or take from a bag, a learned action. */
 export type ItemOp = 'usa' | 'impugna' | 'posa' | 'sposta' | 'in_borsa' | 'da_borsa' | 'azione';
@@ -121,9 +131,9 @@ export interface ContainerView {
 export type ServerMsg =
   /**
    * Coming in: the files (a player gets only what a client draws and walks with, `playerFiles`), whether this
-   * wanderer is the master (T41) and, only for the master, the Council's feed so far.
+   * wanderer is the master (T41) and, only for the master, the Council's feed so far and their branch (T42b).
    */
-  | ({ t: 'ingresso'; id: string; nome: string; master?: true; concilio?: FeedEntry[]; files: FileMap; me: Me; forma?: FormView; stato: MyState; luoghi: PlaceView[]; cose: ThingView[]; viandanti: OtherView[] } & Clock)
+  | ({ t: 'ingresso'; id: string; nome: string; master?: true; concilio?: FeedEntry[]; ramo?: FileChanges; files: FileMap; me: Me; forma?: FormView; stato: MyState; luoghi: PlaceView[]; cose: ThingView[]; viandanti: OtherView[] } & Clock)
   | ({ t: 'aggiorna'; me?: Me; stato?: MyState; luoghi?: PlaceView[]; cose?: ThingView[]; via?: number[]; viandanti?: OtherView[]; partiti?: string[] } & Clock)
   /** The step was not possible (too fast, through a wall): the wanderer is here. */
   | { t: 'correzione'; seq: number; x: number; y: number }
@@ -134,7 +144,9 @@ export type ServerMsg =
   | { t: 'esito'; seq: number; ok: boolean; testo?: string; messaggi?: string[]; dialoghi?: Dialog[]; motivo?: string; contenitore?: ContainerView; borsa?: number }
   | { t: 'rifiuto'; motivo: string }
   /** What the Council said meanwhile (T41): only to the master, never to a player. */
-  | { t: 'concilio'; voci: FeedEntry[] };
+  | { t: 'concilio'; voci: FeedEntry[] }
+  /** The world's files changed (the Council, a publication: T42b); a player hears only of those its client has. */
+  | { t: 'file'; files: FileChanges };
 
 /** A line someone (or something) said back, as the game shows it in its dialog box. */
 export interface Dialog {

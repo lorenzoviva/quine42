@@ -70,6 +70,7 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0063](0063-raggio-42-passi-corona.md) | Il raggio 42: i 42 passi verso la corona (`universe.json → circleRadius` e default kernel a 42; corona invisibile finché il tappeto tiene; 42 passi esatti per uscire fermando il tappeto) | accettato |
 | [0064](0064-niente-cose-sui-passaggi-obbligati.md) | Niente cose solide sui passaggi obbligati: `articulationPoints` (Tarjan) individua i punti di articolazione delle caselle libere; `placementsOf` e `placeInside` non mettono cose solide su strettoie, colli di bottiglia o ingressi (regola 10) | accettato |
 | [0065](0065-il-master-in-god-mode.md) | Il master in god mode, visibile solo nel mondo: in multigiocatore `godMode` (bisogni pieni con `keepGods`, morte risparmiata da `spareGods`, effetti mirati dei giocatori ridotti a `messaggio`); `inWorld`: il server manda agli altri solo i viandanti sul loro tappeto dentro il cerchio | accettato |
+| [0066](0066-il-ramo-del-master.md) | Il ramo del master e la pubblicazione: i salvataggi validi dello specchio del master sono il suo ramo (`ramo`, su disco `refs/heads/rami/master`), il mondo non lo vede finché non pubblica (`pubblica`: commit del principale, vince il master, merge su disco); i file del mondo che cambiano arrivano ai client (`file`, `playerChanges`); `R` del master torna all'ultimo valido del ramo | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.
 

@@ -9,6 +9,9 @@
 //   POST /api/universe/<name>/commit          { changes, message, author }     → { head }
 //   POST /api/universe/<name>/checkout        { id }                            → { head, files }
 //   POST /api/universe/<name>/reset                                             → { trashed }
+//   POST /api/universe/<name>/branch          { branch, files, message, author } → { head }   (T42b: the master's branch)
+//   GET  /api/universe/<name>/branch/<branch> → { exists, files }                what it changes against the main line
+//   POST /api/universe/<name>/merge           { branch, message }               the branch published, then gone
 //   GET|PUT /api/universe/<name>/map/<key>    JSON
 //   GET  /api/universe/<name>/maps            → [{ file, name, layout }] every place ever planned
 
@@ -48,13 +51,78 @@ function readBody(req: IncomingMessage): Promise<string> {
   });
 }
 
-function git(cwd: string, args: string[], author?: [string, string]): Promise<string> {
+function git(cwd: string, args: string[], author?: [string, string], opts: { env?: NodeJS.ProcessEnv; input?: string } = {}): Promise<string> {
   // Identity only for this repository and this command: the machine's global config is never touched.
   const id = author ?? AUTHORS.kernel;
   const full = ['-c', `user.name=${id[0]}`, '-c', `user.email=${id[1]}`, '-c', 'core.autocrlf=false', '-c', 'core.quotepath=false', ...args];
-  return new Promise((resolve, reject) =>
-    execFile('git', full, { cwd, maxBuffer: 64 * 1024 * 1024, windowsHide: true }, (err, stdout, stderr) => (err ? reject(new Error(String(stderr || err.message).trim())) : resolve(String(stdout)))),
-  );
+  return new Promise((resolve, reject) => {
+    const child = execFile('git', full, { cwd, env: opts.env, maxBuffer: 64 * 1024 * 1024, windowsHide: true }, (err, stdout, stderr) => (err ? reject(new Error(String(stderr || err.message).trim())) : resolve(String(stdout))));
+    if (opts.input !== undefined) child.stdin?.end(opts.input, 'utf8');
+  });
+}
+
+// --- Branches (T42b) ----------------------------------------------------------------------------
+// The master's changes wait on a branch while the main line goes on (the Council commits there). A branch is written
+// without touching the working tree, which is the main line's: a temporary index made from the main line as it is now,
+// the branch's files on it, a commit on top of the branch's last one. Its message ends with the main line it was
+// written on, so what the branch changes can be read back after a restart. Branches live under `refs/heads/rami/`:
+// the main line itself may be called `master`.
+
+const BRANCH_RE = /^[a-z][a-z0-9-]{0,30}$/;
+const branchRef = (branch: string) => {
+  if (!BRANCH_RE.test(branch)) throw new Error(`ramo non valido: ${branch}`);
+  return `refs/heads/rami/${branch}`;
+};
+const revParse = (root: string, ref: string) => git(root, ['rev-parse', '--verify', '-q', ref]).then((s) => s.trim(), () => '');
+
+/** Writes a branch, whole: the main line as it is now with these files changed (null: deleted); none deletes it. */
+export async function writeBranch(root: string, branch: string, files: Record<string, string | null>, message: string, author: string): Promise<string | null> {
+  const ref = branchRef(branch);
+  for (const rel of Object.keys(files)) safePath(root, rel);
+  if (!Object.keys(files).length) {
+    await git(root, ['update-ref', '-d', ref]).catch(() => '');
+    return null;
+  }
+  const main = await revParse(root, 'HEAD');
+  const tip = await revParse(root, ref);
+  const index = path.join(root, '.git', `rune-ramo-${branch}.index`);
+  const env = { ...process.env, GIT_INDEX_FILE: index };
+  try {
+    await git(root, ['read-tree', main], undefined, { env });
+    for (const [rel, content] of Object.entries(files)) {
+      if (content === null) await git(root, ['update-index', '--force-remove', '--', rel], undefined, { env });
+      else {
+        const sha = (await git(root, ['hash-object', '-w', '--stdin'], undefined, { input: content })).trim();
+        await git(root, ['update-index', '--add', '--cacheinfo', `100644,${sha},${rel}`], undefined, { env });
+      }
+    }
+    const tree = (await git(root, ['write-tree'], undefined, { env })).trim();
+    const commit = (await git(root, ['commit-tree', tree, '-p', tip || main, '-m', `${message.slice(0, 500)}\n\nbase: ${main}`], AUTHORS[author] ?? AUTHORS.kernel)).trim();
+    await git(root, ['update-ref', ref, commit]);
+    return commit.slice(0, 7);
+  } finally {
+    await fs.rm(index, { force: true });
+  }
+}
+
+/** What a branch changes against the main line it was last written on, or null if there is no such branch. */
+export async function readBranch(root: string, branch: string): Promise<Record<string, string | null> | null> {
+  const tip = await revParse(root, branchRef(branch));
+  if (!tip) return null;
+  const body = await git(root, ['log', '-1', '--format=%B', tip]);
+  const base = /base: ([0-9a-f]{40})/.exec(body)?.[1] ?? (await git(root, ['merge-base', 'HEAD', tip])).trim();
+  const raw = (await git(root, ['diff', '--name-status', '--no-renames', '-z', base, tip])).split('\0').filter(Boolean);
+  const out: Record<string, string | null> = {};
+  for (let i = 0; i + 1 < raw.length; i += 2) out[raw[i + 1]] = raw[i] === 'D' ? null : await git(root, ['show', `${tip}:${raw[i + 1]}`]);
+  return out;
+}
+
+/** A branch published: merged into the main line, which already has its files (the main line's tree stays), then gone. */
+export async function mergeBranch(root: string, branch: string, message: string): Promise<void> {
+  const ref = branchRef(branch);
+  if (!(await revParse(root, ref))) return;
+  await git(root, ['merge', '-q', '-s', 'ours', '--no-ff', '-m', message.slice(0, 500), ref], AUTHORS.player);
+  await git(root, ['update-ref', '-d', ref]);
 }
 
 /** A universe-relative path that stays inside the universe and out of git's own folder. */
@@ -137,7 +205,7 @@ export function universeStore(baseDir: string): Plugin {
   const handler: Connect.NextHandleFunction = (req, res, next) => {
     if (!req.url?.startsWith('/api/universe')) return next();
     const url = req.url.split('?')[0];
-    const m = /^\/api\/universe\/([^/]+)(?:\/(create|commit|checkout|reset|map|maps)(?:\/([^/]+))?)?$/.exec(url);
+    const m = /^\/api\/universe\/([^/]+)(?:\/(create|commit|checkout|reset|map|maps|branch|merge)(?:\/([^/]+))?)?$/.exec(url);
     if (url === '/api/universe' || url === '/api/universe/') {
       void fs
         .readdir(baseDir, { withFileTypes: true })
@@ -202,6 +270,10 @@ export function universeStore(baseDir: string): Plugin {
         return;
       }
     }
+    if (op === 'branch' && arg && req.method === 'GET') {
+      void serial(name, () => readBranch(root, arg)).then((files) => send(res, 200, files ? { exists: true, files } : { exists: false }), fail);
+      return;
+    }
     if (req.method !== 'POST') return send(res, 405, { error: 'metodo non ammesso' });
     void readBody(req)
       .then((raw) => (raw ? JSON.parse(raw) : {}))
@@ -225,6 +297,11 @@ export function universeStore(baseDir: string): Plugin {
               const h = await commitAll(root, `ritorno a ${body.id}`, 'kernel');
               return { head: h, files: await readTree(root) };
             }
+            case 'branch':
+              return { head: await writeBranch(root, String(body.branch), body.files ?? {}, String(body.message ?? 'ramo'), String(body.author ?? 'player')) };
+            case 'merge':
+              await mergeBranch(root, String(body.branch), String(body.message ?? 'pubblicazione'));
+              return { head: await head(root) };
             case 'reset': {
               if (!(await exists(root))) return { trashed: null };
               // Never deleted: moved aside, so a universe can always be recovered by hand.

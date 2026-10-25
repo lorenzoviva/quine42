@@ -31,6 +31,12 @@ export interface UniverseBackend {
   commit(changes: Record<string, string | null>, message: string, author: Author): Promise<string | null>;
   checkout(id: string): Promise<FileMap | null>;
   reset(): Promise<void>;
+  /** A branch (T42b: the master's), whole: the main line as it is now with these files changed; none deletes it. */
+  branch?(name: string, files: Record<string, string | null>, message: string, author: Author): Promise<string | null>;
+  /** What a branch changes against the main line it was last written on, or null if there is none. */
+  readBranch?(name: string): Promise<Record<string, string | null> | null>;
+  /** A branch published: merged into the main line (whose files already are the branch's), then gone. */
+  merge?(name: string, message: string): Promise<void>;
 }
 
 /** Hash of every seed file a universe was made from (or last updated from): `seed.json`. */
@@ -220,6 +226,39 @@ export class UniverseClient implements UniverseBackend {
   async reset(): Promise<void> {
     await this.queue;
     await this.post('reset', {});
+  }
+
+  /** Branches are written in the same queue as the commits: a merge comes after the commit that publishes it. */
+  branch(name: string, files: Record<string, string | null>, message: string, author: Author): Promise<string | null> {
+    return this.queued(async () => (await this.post('branch', { branch: name, files, message, author })).head ?? null, null);
+  }
+
+  async readBranch(name: string): Promise<Record<string, string | null> | null> {
+    await this.queue;
+    const r = await fetch(this.url(`branch/${encodeURIComponent(name)}`)).catch(() => null);
+    const j = r?.ok ? await r.json().catch(() => null) : null;
+    return j?.exists ? j.files : null;
+  }
+
+  merge(name: string, message: string): Promise<void> {
+    return this.queued(async () => void (await this.post('merge', { branch: name, message })), undefined);
+  }
+
+  private queued<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
+    this.pending++;
+    const job = this.queue.then(async () => {
+      try {
+        return await fn();
+      } catch (e) {
+        this.lastError = (e as Error).message;
+        console.warn('[universo] ramo non scritto su disco:', this.lastError);
+        return fallback;
+      } finally {
+        this.pending--;
+      }
+    });
+    this.queue = job;
+    return job;
   }
 
   // Maps: files of the universe too, outside the text snapshot.

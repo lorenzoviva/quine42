@@ -10,7 +10,8 @@ import { ATLAS_FILE } from '../kernel/atlas';
 import { RELIEF_PATH } from '../kernel/relief';
 import type { FileMap } from '../kernel/types';
 import { validWandererId } from '../kernel/wanderers';
-import { THING_PARTS, type ClientMsg, type ItemOp, type Dialog, type FormView, type Me, type MyState, type OtherView, type PlaceView, type ServerLink, type ServerMsg, type ThingView } from './protocol';
+import { hashStr, hex } from '../kernel/rng';
+import { THING_PARTS, type ClientMsg, type FileChanges, type ItemOp, type Dialog, type FormView, type Me, type MyState, type OtherView, type PlaceView, type ServerLink, type ServerMsg, type ThingView } from './protocol';
 
 export interface SessionOptions {
   /** Updates per second to every client. */
@@ -64,6 +65,59 @@ export function playerFiles(files: FileMap): FileMap {
   return out;
 }
 
+/**
+ * What a player's client gets of the files that changed (T42b), as `playerFiles` gives them: a module goes again whole (its
+ * manifest without code, its code only for `PER_WANDERER`), a file gone goes as null if it is one a client would have.
+ */
+export function playerChanges(files: FileMap, changed: string[]): FileChanges {
+  const dirOf = (p: string) => /^modules\/[^/]+\//.exec(p)?.[0];
+  const dirs = new Set<string>();
+  const subset: FileMap = {};
+  for (const p of changed) {
+    const d = dirOf(p);
+    if (d) dirs.add(d);
+    else if (files[p] !== undefined) subset[p] = files[p];
+  }
+  for (const [p, v] of Object.entries(files)) if (dirs.has(dirOf(p) ?? '')) subset[p] = v;
+  const out: FileChanges = { ...playerFiles(subset) };
+  for (const p of changed) if (files[p] === undefined && (dirOf(p) || p in playerFiles({ [p]: '' }))) out[p] = null;
+  return out;
+}
+
+/** What changed from one set of files to the next. */
+export function changesBetween(a: FileMap, b: FileMap): FileChanges {
+  const out: FileChanges = {};
+  for (const [p, v] of Object.entries(b)) if (a[p] !== v) out[p] = v;
+  for (const p of Object.keys(a)) if (b[p] === undefined) out[p] = null;
+  return out;
+}
+
+/** The hash of a file's text as a branch's base says it (null: there was no such file). */
+export const fileHash = (text: string | undefined): string | null => (text === undefined ? null : hex(hashStr(text)));
+
+/** The branch of the universe's repository where the master's changes wait to be published (T42b). */
+export const BRANCH = 'master';
+/** At most this many files in a branch, each at most this long. */
+const BRANCH_FILES = 2000;
+const BRANCH_TEXT = 4 * 1024 * 1024;
+const PATH_RE = /^[\w.-]+(?:\/[\w.-]+)*$/;
+
+/** A branch from the wire: paths inside the universe, texts or null; undefined if anything is not so. */
+function cleanBranch(files: unknown): FileChanges | undefined {
+  if (!files || typeof files !== 'object' || Array.isArray(files)) return undefined;
+  const entries = Object.entries(files as Record<string, unknown>);
+  if (entries.length > BRANCH_FILES) return undefined;
+  const out: FileChanges = {};
+  for (const [p, v] of entries) {
+    if (!PATH_RE.test(p) || p.split('/').some((s) => s === '.' || s === '..' || s === '.git')) return undefined;
+    if (v !== null && (typeof v !== 'string' || v.length > BRANCH_TEXT)) return undefined;
+    out[p] = v;
+  }
+  return out;
+}
+
+/** The first files of a list, for a commit's message. */
+const listOf = (paths: string[]) => paths.slice(0, 6).join(', ') + (paths.length > 6 ? '…' : '');
 const round = (v: number) => Math.round(v * 1000) / 1000;
 /** An index from the wire: an integer, or -1 (which no pocket is). */
 const int = (v: unknown) => (typeof v === 'number' && Number.isInteger(v) ? v : -1);
@@ -117,6 +171,13 @@ export class SessionServer {
   private since = 0;
   /** The Council's feed since the last update, for the masters connected. */
   private voices: FeedEntry[] = [];
+  /**
+   * The master's branch (T42b): the files they changed and try alone, and the main line's version each was changed
+   * from. The world does not have them until they publish.
+   */
+  private branch: { files: FileChanges; base: Record<string, string | null> } = { files: {}, base: {} };
+  /** The world's files as the clients last heard of them (a copy: the kernel's may be the repository's working files, written in place). */
+  private told: FileMap;
   readonly hz: number;
   readonly near: number;
   readonly reach: number;
@@ -128,10 +189,22 @@ export class SessionServer {
     this.hz = opts.hz ?? 10;
     this.near = opts.near ?? 24;
     this.reach = opts.reach ?? 3;
+    this.told = { ...kernel.files };
     kernel.bus.on('council', (e: FeedEntry) => {
       this.voices.push(e);
       if (this.voices.length > FEED_KEEP) this.voices.shift();
     });
+  }
+
+  /** The master's branch now: what they changed that the world does not have yet. */
+  branchFiles(): FileChanges {
+    return { ...this.branch.files };
+  }
+
+  /** A branch kept on disk (the server started again): changed from the main line as it is now. */
+  restoreBranch(files: FileChanges): void {
+    const clean = cleanBranch(files) ?? {};
+    this.branch = { files: clean, base: Object.fromEntries(Object.keys(clean).map((p) => [p, fileHash(this.kernel.files[p])])) };
   }
 
   /** The wanderers connected now. */
@@ -184,7 +257,7 @@ export class SessionServer {
       t: 'ingresso',
       id,
       nome: w.nome,
-      ...(master ? { master: true as const, concilio: this.kernel.feed().slice(-FEED_KEEP) } : {}),
+      ...(master ? { master: true as const, concilio: this.kernel.feed().slice(-FEED_KEEP), ...(Object.keys(this.branch.files).length ? { ramo: { ...this.branch.files } } : {}) } : {}),
       ...(forma ? { forma } : {}),
       tick: u.tick,
       ora: u.ora,
@@ -210,8 +283,18 @@ export class SessionServer {
     this.since = 0;
     const voices = this.voices;
     this.voices = [];
+    const files = this.kernel.files;
+    const changed = changesBetween(this.told, files);
+    if (Object.keys(changed).length) this.told = { ...files };
+    const paths = Object.keys(changed);
+    let shown: FileChanges | undefined;
     for (const c of this.clients.values()) {
       if (voices.length && this.kernel.isMaster(c.id)) c.link.send({ t: 'concilio', voci: voices });
+      // The world's files that changed (the Council, a publication): the master hears of all, a player of what it has.
+      if (paths.length) {
+        const mine = this.kernel.isMaster(c.id) ? changed : (shown ??= playerChanges(files, paths));
+        if (Object.keys(mine).length) c.link.send({ t: 'file', files: mine });
+      }
       const u = this.view(c);
       if (u.me || u.stato || u.luoghi || u.cose || u.via || u.viandanti || u.partiti) c.link.send(u);
     }
@@ -272,6 +355,10 @@ export class SessionServer {
         if (msg.op === 'pulsante') return this.answer(c, seq, this.act(c, () => k.uiAction(panel, String(msg.azione ?? ''))));
         break;
       }
+      case 'ramo':
+        return this.answer(c, seq, this.takeBranch(c, msg.files, msg.base));
+      case 'pubblica':
+        return this.answer(c, seq, this.publish(c));
       case 'casella': {
         const why = this.tileOutOfReach(c, msg.col, msg.row) ?? (typeof msg.azione === 'string' && msg.azione && msg.azione !== 'altro' ? undefined : 'azione sconosciuta');
         if (why) return this.answer(c, seq, { ok: false, motivo: why });
@@ -290,6 +377,37 @@ export class SessionServer {
       }
     }
     this.answer(c, seq, { ok: false, motivo: 'messaggio sconosciuto' });
+  }
+
+  /** The master's branch, whole, as their client has it now; kept on disk too, on the branch `master`. */
+  private takeBranch(c: Client, files: unknown, base: unknown): Answer {
+    const k = this.kernel;
+    if (!k.isMaster(c.id)) return { ok: false, motivo: 'solo il master ha un ramo' };
+    const clean = cleanBranch(files);
+    if (!clean) return { ok: false, motivo: 'ramo non valido' };
+    const b = base && typeof base === 'object' ? (base as Record<string, unknown>) : {};
+    this.branch = { files: clean, base: Object.fromEntries(Object.keys(clean).map((p) => [p, typeof b[p] === 'string' ? (b[p] as string) : null])) };
+    void k.repo.backend?.branch?.(BRANCH, clean, `ramo del master: ${listOf(Object.keys(clean)) || 'vuoto'}`, 'player');
+    return { ok: true };
+  }
+
+  /**
+   * The master's branch into the world: one commit of the main line, then (on disk) the branch merged into it. What the
+   * world changed meanwhile in the same files gives way to the master's version, and the Council's feed says so.
+   */
+  private publish(c: Client): Answer {
+    const k = this.kernel;
+    if (!k.isMaster(c.id)) return { ok: false, motivo: 'solo il master pubblica' };
+    const { files, base } = this.branch;
+    const paths = Object.keys(files);
+    if (!paths.length) return { ok: false, motivo: 'niente da pubblicare' };
+    const conflicts = paths.filter((p) => base[p] !== fileHash(k.files[p]));
+    const r = k.publish(files, `pubblicazione del master: ${listOf(paths)}`);
+    if (!r.ok) return { ok: false, motivo: r.motivo };
+    for (const p of conflicts) k.council.say('kernel', 'info', `pubblicazione: ${p} era cambiato anche nel mondo, resta la versione del master`);
+    this.branch = { files: {}, base: {} };
+    void k.repo.backend?.merge?.(BRANCH, `il ramo ${BRANCH} nel mondo (${r.commit!.id})`);
+    return { ok: true, value: `Pubblicato: ${paths.length} file${conflicts.length ? `, ${conflicts.length} cambiati anche nel mondo (resta il tuo)` : ''}.` };
   }
 
   /** A step claimed by the client: as far as the pace allows and the world lets them, corrected if it differs. */

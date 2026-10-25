@@ -70,6 +70,8 @@ export class Repo {
   past: PastCommit[] = [];
   /** Runs before every commit: the kernel writes files it keeps in memory (the usage ledger). */
   beforeCommit?: () => void;
+  /** Runs after HEAD moved (a commit, a checkout): a master's client sends its branch (T42b). */
+  onCommit?: (c: Commit) => void;
 
   private constructor(
     data: RepoData,
@@ -167,6 +169,7 @@ export class Repo {
     if (this.data.commits.length > MAX_COMMITS) this.data.commits.splice(1, this.data.commits.length - MAX_COMMITS);
     this.data.head = c.id;
     this.persist();
+    this.onCommit?.(c);
     return c;
   }
 
@@ -177,6 +180,7 @@ export class Repo {
     this.data.head = c.id;
     this.working = { ...c.files };
     this.persist();
+    this.onCommit?.(c);
     return this.working;
   }
 

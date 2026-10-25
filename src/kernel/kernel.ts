@@ -454,6 +454,11 @@ export class Kernel {
   /** The scene of a kernel in miniature (T27), if this is one. */
   readonly bench?: { terreno?: string[] };
   readonly mirror: boolean;
+  /**
+   * In a game of many, the master's mirror (T42b): the files of their branch that the world does not have yet, and the
+   * gesture that publishes them. The editor and the console show it; alone there is none (every save is the world).
+   */
+  publisher?: { branch(): string[]; publish(): Promise<{ ok: boolean; motivo?: string; testo?: string }> };
   private wasmUri?: string;
 
   private constructor(opts: KernelOptions) {
@@ -494,7 +499,8 @@ export class Kernel {
     k.cards.load(repo.working);
     k.council.payer = (task) => payerOf(task, k.wanderer().id);
     k.council.onFocus = (ids) => k.cards.use(ids, 'prompt', (id) => k.isCard(id));
-    repo.beforeCommit = () => {
+    // A mirror saves nothing of its own: its commits hold only the files it was told and the master's edits (T42b).
+    if (!k.mirror) repo.beforeCommit = () => {
       k.writeUsage();
       k.writeCards();
       k.writeGraph();
@@ -6039,6 +6045,32 @@ export class Kernel {
       this.log('repo', `${path} scritto senza commit: l'universo è in uno stato non valido`);
     }
     return { errors, committed, written: true };
+  }
+
+  /**
+   * The master's branch published (T42b): its files, validated, go into the world at once and become one commit of
+   * the main line. A world they would break (a manifest, a module that does not load) is put back as it was.
+   */
+  publish(changes: Record<string, string | null>, message: string): { ok: boolean; motivo?: string; commit?: Commit } {
+    const paths = Object.keys(changes);
+    if (!paths.length) return { ok: false, motivo: 'niente da pubblicare' };
+    for (const p of paths) {
+      const v = changes[p];
+      const errors = v === null ? [] : this.validator.validateFile(p, v);
+      if (errors.length) return { ok: false, motivo: `${p}: ${errors.join(' · ')}` };
+    }
+    const before = Object.fromEntries(paths.map((p) => [p, this.repo.working[p] ?? null]));
+    for (const p of paths) this.repo.write(p, changes[p]);
+    this.applyFiles({ ...this.repo.working });
+    const broken = this.faults.list().find((f) => f.key.startsWith('manifest:') || f.key.endsWith(':load') || f.key === 'universe:config');
+    if (broken) {
+      for (const p of paths) this.repo.write(p, before[p]);
+      this.applyFiles({ ...this.repo.working });
+      return { ok: false, motivo: `il mondo si romperebbe: ${broken.message}` };
+    }
+    const commit = this.repo.commit(message, 'player');
+    this.log('repo', `commit ${commit.id}: ${message}`);
+    return { ok: true, commit };
   }
 
   /**

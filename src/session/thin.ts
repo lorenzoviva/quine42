@@ -6,14 +6,17 @@
 // corrections put them back. What the wanderer does goes to the server; what can be shown at once is shown at
 // once (a thing picked up vanishes, a door opens, the inscribed phrase leaves the hand, a slot moves) and undone if
 // the server refuses it, or if its next update says that nothing changed. What the wanderer carries (T39b) goes the
-// same way: pockets, bags, containers, crafting, the mechanics' panels, the actions on tiles.
+// same way: pockets, bags, containers, crafting, the mechanics' panels, the actions on tiles. The world's files that
+// change come into the mirror; the master's edits stay in theirs, on their branch, until they publish it (T42b).
 
 import type { Kernel } from '../kernel/kernel';
 import type { Id } from '../kernel/ecs';
 import type { NpcReply } from '../kernel/agents/minds';
 import type { FeedEntry } from '../kernel/agents/council';
 import type { SessionClient, Outcome } from './client';
-import type { ContainerView, OtherView, PlaceView, ServerMsg, ThingView } from './protocol';
+import type { ContainerView, FileChanges, OtherView, PlaceView, ServerMsg, ThingView } from './protocol';
+import type { FileMap } from '../kernel/types';
+import { hashStr, hex } from '../kernel/rng';
 import { takeFromSlot } from '../kernel/inventory';
 import { THING_PARTS } from './protocol';
 
@@ -28,7 +31,7 @@ const CARRIED = 8;
 /** The components a thing of the server may have here (besides its place). */
 const MIRRORED = ['module', 'form', 'glyph', ...THING_PARTS];
 
-/** What the kernel does that a game of many does not do from a client yet. */
+/** What the kernel does that a game of many does not do from a player's client yet (the master's R is their branch's). */
 const LATER = ['rollback'] as const;
 
 type Act = Parameters<SessionClient['act']>[0];
@@ -58,11 +61,16 @@ export class ThinClient {
   private lastStep = { x: NaN, y: NaN, t: 0 };
   private clock = 0;
   private lastCorrection = 0;
+  /** The world's files as the server last told them: the master's branch is what their mirror has that these do not. */
+  private main: FileMap = {};
+  /** The branch as the server has it (or will, once what was sent arrives). */
+  private branchKey = '';
 
   constructor(
     readonly k: Kernel,
     readonly session: SessionClient,
   ) {
+    this.main = { ...session.files };
     this.relay();
     const s = session;
     this.places([...s.places.values()]);
@@ -79,6 +87,7 @@ export class ThinClient {
     this.told = [...(s.stato.hand?.tokens ?? [])];
     this.heard(s.feed);
     s.onMessage = (m) => this.receive(m);
+    if (s.master) this.openBranch();
   }
 
   /** Every frame, after the kernel's ticks: what moves on the server glides, the wanderer's step and phrase go. */
@@ -136,6 +145,9 @@ export class ThinClient {
         break;
       case 'concilio':
         this.heard(m.voci);
+        break;
+      case 'file':
+        this.worldFiles(m.files);
         break;
       case 'correzione':
         // The latest word wins: an older correction, overtaken by steps already corrected, is not applied again.
@@ -288,6 +300,101 @@ export class ThinClient {
     else this.drop(sid);
   }
 
+  // --- The world's files, the master's branch (T42b) -----------------------------------------------
+
+  /**
+   * The world's files changed (the Council, a publication): the mirror takes them as a commit of its own, but where the
+   * master's branch has a version of theirs (it wins until they publish). An edit not yet committed stays on top.
+   */
+  private worldFiles(changes: FileChanges): void {
+    const k = this.k;
+    const repo = k.repo;
+    const mine = this.session.master ? this.branch().files : {};
+    for (const [p, v] of Object.entries(changes)) {
+      if (v === null) delete this.main[p];
+      else this.main[p] = v;
+    }
+    const head = repo.head().files;
+    const dirty: FileChanges = {};
+    for (const p of new Set([...Object.keys(head), ...Object.keys(repo.working)])) if (repo.working[p] !== head[p]) dirty[p] = repo.working[p] ?? null;
+    const took = Object.entries(changes).filter(([p, v]) => !(p in mine) && (head[p] ?? null) !== v);
+    const kept = Object.keys(mine).filter((p) => p in changes && (head[p] ?? null) !== changes[p]);
+    if (took.length) {
+      repo.restore();
+      for (const [p, v] of took) repo.write(p, v);
+      repo.commit(`dal mondo: ${took.slice(0, 6).map(([p]) => p).join(', ')}${took.length > 6 ? '…' : ''}`, 'kernel');
+      for (const [p, v] of Object.entries(dirty)) repo.write(p, v);
+      k.applyFiles({ ...repo.working });
+    }
+    for (const p of kept) k.log('repo', `${p} è cambiato nel mondo: nel tuo ramo resta la tua versione`);
+    if (this.session.master) this.sendBranch();
+  }
+
+  /** The master's mirror: the branch the server kept comes back into it, and every commit of it goes to the server. */
+  private openBranch(): void {
+    const k = this.k;
+    const kept = Object.entries(this.session.branch);
+    if (kept.length) {
+      for (const [p, v] of kept) k.repo.write(p, v);
+      k.repo.commit('il tuo ramo, com’era', 'player');
+      k.applyFiles({ ...k.repo.working });
+    }
+    this.branchKey = JSON.stringify(this.branch().files);
+    k.repo.onCommit = () => this.sendBranch();
+    k.publisher = { branch: () => Object.keys(this.branch().files).sort(), publish: () => this.publish() };
+  }
+
+  /** What the mirror's last valid commit has that the world does not, and the world's version each was changed from. */
+  private branch(): { files: FileChanges; base: Record<string, string | null> } {
+    const head = this.k.repo.head().files;
+    const files: FileChanges = {};
+    const base: Record<string, string | null> = {};
+    for (const p of new Set([...Object.keys(head), ...Object.keys(this.main)])) {
+      if (head[p] === this.main[p]) continue;
+      files[p] = head[p] ?? null;
+      base[p] = this.main[p] === undefined ? null : hex(hashStr(this.main[p]));
+    }
+    return { files, base };
+  }
+
+  /** The branch, whole, to the server when it changed. */
+  private sendBranch(): void {
+    const b = this.branch();
+    const key = JSON.stringify(b.files);
+    if (key === this.branchKey) return;
+    this.branchKey = key;
+    void this.session.act({ t: 'ramo', ...b }).then((r) => {
+      if (r.ok) return;
+      this.branchKey = '';
+      this.k.message(`Il tuo ramo non arriva al mondo: ${r.motivo ?? 'rifiutato'}`, 'warn');
+    });
+  }
+
+  /** The gesture of the master: their branch into the world, for everyone. */
+  private async publish(): Promise<Outcome> {
+    this.sendBranch();
+    const r = await this.show(this.session.act({ t: 'pubblica' }));
+    if (r.ok && r.testo) this.k.message(r.testo, 'good');
+    return r;
+  }
+
+  /**
+   * R of the master in a game of many: their branch back to its last valid state (or to a commit of it). The world, its
+   * runes and the server's repository stay as they are; what the branch is now goes to the server.
+   */
+  private rollbackBranch(id?: string): void {
+    const k = this.k;
+    const repo = k.repo;
+    if (id && !repo.find(id)) return void k.message('Quel momento non è nel tuo ramo.', 'warn');
+    const files = id ? repo.checkout(id) : repo.restore();
+    k.faults.clearAll();
+    k.applyFiles({ ...files });
+    const head = repo.head();
+    k.bus.emit('rollback', { commit: head });
+    k.message(`Il tuo ramo torna a «${head.message}» (${head.id})`, 'good');
+    this.sendBranch();
+  }
+
   // --- What the wanderer does ----------------------------------------------------------------------
 
   /** The kernel's actions that change the world become messages to the server. */
@@ -328,7 +435,8 @@ export class ThinClient {
       void this.show(this.session.act({ t: 'azione', entita: sid, azione: 'strumento' }));
     };
     this.relayCarried();
-    for (const name of LATER) (k as unknown as Record<string, () => undefined>)[name] = () => this.later();
+    if (this.session.master) k.rollback = (id?: string) => this.rollbackBranch(id);
+    else for (const name of LATER) (k as unknown as Record<string, () => undefined>)[name] = () => this.later();
   }
 
   /**

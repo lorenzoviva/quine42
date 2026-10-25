@@ -1102,9 +1102,10 @@ le risposte alle domande del piano.
   giocatore non ha sono i file del Concilio e il codice che disegna e mostra la corona. Gli interni della corona non passavano già
   dal server (non sono entità); il master non riceveva il registro del Concilio, e ora sì.
 
-### T42 · Il master — spezzato in T42a-T42d (dipende da T37, T41)
+### T42 · Il master — spezzato in T42a-T42e (dipende da T37, T41)
 - Contesto: il piano del multigiocatore, «Il master». Troppo grande per una sessione: master fisso e god mode (T42a), il ramo
-  `master` e la pubblicazione (T42b), i giocatori dalla corona (T42c), il clone con un altro master (T42d).
+  `master` e la pubblicazione (T42b), i giocatori dalla corona (T42c), il clone con un altro master (T42d), le rune della corona e il
+  Referente sul ramo (T42e).
 
 ### T42a · Il master in god mode, visibile solo nel mondo — `fatto` (`093d98e`)
 - Fare: il master è chi crea l'universo multigiocatore (non si cambia); god mode (niente morte, bisogni, danni, effetti dei
@@ -1117,7 +1118,7 @@ le risposte alle domande del piano.
   visibilità era il master sul viale del campus, che nello spazio del tappeto può cadere accanto a un giocatore. Nessuna verifica nel
   browser: in singola il gioco non cambia, e il multigiocatore è coperto dai test col finto trasporto.
 
-### T42b · Il ramo `master` e la pubblicazione — `da fare` (dipende da T42a)
+### T42b · Il ramo `master` e la pubblicazione — `fatto` (dipende da T42a)
 - Contesto: piano del multigiocatore, «Modifiche in prova»; `R` del master e `rollback` ancora in `LATER` di `thin.ts`.
 - Fare: le modifiche del master (editor, rune scritte nella corona, richieste al Referente) vanno su un ramo `master` del
   repository dell'universo; lui le prova da solo (il suo kernel vede il ramo, i giocatori no) e le **pubblica** con un gesto esplicito
@@ -1126,6 +1127,25 @@ le risposte alle domande del piano.
 - Fatto quando: test — una modifica sul ramo `master` arriva ai giocatori solo dopo la pubblicazione.
 - Domanda da tenere presente: cosa succede ai commit automatici del Concilio fatti sul principale mentre il ramo `master` è aperto
   (rebase del ramo alla pubblicazione, o merge)? Proposta: merge, con i conflitti risolti a favore del master e segnalati nel registro.
+- Esito: ADR-0066, con la proposta (merge, vince il master, il registro lo dice). Il ramo è ciò che l'ultimo commit dello specchio del
+  master ha di diverso dai file del mondo; va intero al server (`ramo`, con l'hash della versione del mondo di ogni file), che lo tiene
+  da parte, lo rimanda nell'`ingresso` del master e lo scrive su disco in `refs/heads/rami/master` (indice temporaneo, la cartella di
+  lavoro non si tocca; `rami/` perché il principale può chiamarsi già `master`). `pubblica` → `kernel.publish` (valida, applica,
+  committa, torna indietro se il mondo si rompe) e su disco `merge -s ours`. «Pubblica (n)» nell'editor e nei commit della console
+  (`kernel.publisher`); `R` del master riporta il ramo all'ultimo valido. `tests/branch.test.ts` (5 test, anche il ramo su disco in una
+  cartella temporanea); provato anche via HTTP sul server di sviluppo con un universo di prova poi tolto (ramo, rilettura, commit,
+  merge con due genitori). Diverso dal previsto: mancava del tutto la diffusione dei file del mondo dopo l'`ingresso` (ciò che il
+  Concilio committava non arrivava a nessun client), ora a 10 Hz (`file`, ai giocatori `playerChanges`); il master prova da solo ciò che
+  il suo client fa girare (modelli, aspetto, terreni, corona, cammino), non la logica del mondo, che è del server. Le rune incise
+  nella corona e le richieste al Referente non passano dal server in multigiocatore: spostate in T42e. Nessuna verifica nel browser:
+  in singola nulla cambia (il pulsante non c'è) e il multigiocatore è coperto dai test col finto trasporto.
+
+### T42e · Le rune della corona e il Referente sul ramo `master` — `da fare` (dipende da T42b)
+- Contesto: T42b porta sul ramo `master` le modifiche dell'editor (e il suo `R`); in multigiocatore le rune incise nella corona e le
+  richieste al Referente non arrivano ancora al server (la corona è dello specchio del master, il Referente non è un'entità del server).
+- Fare: le rune scritte nella corona e ciò che il Referente fa fare alle squadre girano sul server per il master e committano sul suo
+  ramo (non sul principale), da pubblicare come le modifiche dell'editor.
+- Fatto quando: test — una richiesta al Referente del master cambia il ramo, non il mondo dei giocatori, finché non pubblica.
 
 ### T42c · I giocatori dalla corona — `da fare` (dipende da T42a)
 - Fare: nell'atlante della corona (Ufficio dei luoghi) e nel tavolo della situazione i giocatori collegati, ciascuno sul suo chunk;

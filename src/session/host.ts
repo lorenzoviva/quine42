@@ -11,7 +11,7 @@ import { GeminiModels } from '../kernel/ai/gemini';
 import type { Models } from '../kernel/ai/models';
 import { readConfig } from '../kernel/universe';
 import { UniverseChunks, UniverseClient, upgradeFromSeed } from '../kernel/universes';
-import { SessionServer } from './server';
+import { BRANCH, SessionServer } from './server';
 
 const DT = 1 / 60;
 /** At most this many ticks to catch up after a pause of the process: the world does not run ahead in bursts. */
@@ -44,6 +44,9 @@ export async function openUniverse(opts: { name: string; base: string; offline?:
     : new MockModels();
   const kernel = await Kernel.boot({ files: up.files, store: memoryStore(), models, chunks: new UniverseChunks(client), backend: client, past: snap.log ?? [] });
   const session = new SessionServer(kernel);
+  // The master's branch waits on disk while the server is down (T42b).
+  const branch = await client.readBranch(BRANCH).catch(() => null);
+  if (branch) session.restoreBranch(branch);
   let last = performance.now();
   let owed = 0;
   const timer = setInterval(() => {

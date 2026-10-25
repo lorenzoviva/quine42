@@ -5,7 +5,7 @@
 
 import type { FileMap } from '../kernel/types';
 import type { FeedEntry } from '../kernel/agents/council';
-import type { ClientLink, ClientMsg, ContainerView, Dialog, FormView, Me, MyState, OtherView, PlaceView, ServerMsg, ThingView } from './protocol';
+import type { ClientLink, ClientMsg, ContainerView, Dialog, FileChanges, FormView, Me, MyState, OtherView, PlaceView, ServerMsg, ThingView } from './protocol';
 
 export interface Outcome {
   ok: boolean;
@@ -27,7 +27,10 @@ export class SessionClient {
   master = false;
   /** What the Council said (the master's only), oldest first. */
   readonly feed: FeedEntry[] = [];
+  /** The world's files: those it came in with, as the server said they changed since. */
   files: FileMap = {};
+  /** The master's branch as the server kept it (T42b): what they changed that the world does not have yet. */
+  branch: FileChanges = {};
   tick = 0;
   ora = 0;
   me?: Me;
@@ -89,7 +92,7 @@ export class SessionClient {
         this.entered?.();
         break;
       case 'ingresso':
-        Object.assign(this, { id: m.id, nome: m.nome, master: !!m.master, files: m.files, me: m.me, forma: m.forma, stato: m.stato });
+        Object.assign(this, { id: m.id, nome: m.nome, master: !!m.master, files: m.files, branch: m.ramo ?? {}, me: m.me, forma: m.forma, stato: m.stato });
         this.feed.splice(0, this.feed.length, ...(m.concilio ?? []));
         this.places.clear();
         this.things.clear();
@@ -106,6 +109,15 @@ export class SessionClient {
         this.corrections++;
         if (this.me) this.me = { ...this.me, x: m.x, y: m.y };
         break;
+      case 'file': {
+        const files = { ...this.files };
+        for (const [p, v] of Object.entries(m.files)) {
+          if (v === null) delete files[p];
+          else files[p] = v;
+        }
+        this.files = files;
+        break;
+      }
       case 'concilio':
         this.feed.push(...m.voci);
         if (this.feed.length > 400) this.feed.splice(0, this.feed.length - 400);

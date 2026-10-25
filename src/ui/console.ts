@@ -102,7 +102,12 @@ export class Console {
           };
           return el('div', { class: 'row' }, el('span', { class: 'id' }, c.id), el('span', { class: 's' }, c.author), `${c.message} — ${time(c.time)}`, b);
         });
-        return [el('div', { class: 'note' }, `Ogni universo è un repository. ${k.repo.isDirty() ? '⚠ modifiche non committate (universo rotto)' : 'Nessuna modifica in sospeso.'}`), ...rows];
+        const branch = k.publisher?.branch() ?? [];
+        const publish = el('button', { class: 'primary' }, `Pubblica il ramo (${branch.length} file)`);
+        publish.onclick = () => void k.publisher?.publish().then(() => this.render());
+        // In a game of many these are the master's branch (T42b): R and checkout move it, «Pubblica» gives it to the world.
+        const note = k.publisher ? `Il tuo ramo: ${branch.length ? branch.join(', ') : 'uguale al mondo'}.` : '';
+        return [el('div', { class: 'note' }, `Ogni universo è un repository. ${k.repo.isDirty() ? '⚠ modifiche non committate (universo rotto)' : 'Nessuna modifica in sospeso.'} ${note}`), ...(branch.length ? [el('div', { class: 'row' }, publish)] : []), ...rows];
       }
       case 'modules':
         return [...k.modules.values()].map((m) => {

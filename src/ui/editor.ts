@@ -1,6 +1,7 @@
 // The corona's editor: rewriting the universe from outside the simulation.
 // Valid code is hot reloaded and committed. Invalid code can still be written: it is the
-// player's right to break the world (rollback always brings it back).
+// player's right to break the world (rollback always brings it back). In a game of many the master's saves go on
+// their branch (T42b): they try them alone, and «Pubblica» gives them to the world.
 
 import type { Kernel } from '../kernel/kernel';
 import { $, el } from './dom';
@@ -13,6 +14,7 @@ export class Editor {
   private status = el('div', { class: 'status' });
   private title = el('div', { class: 'title' });
   private forceBtn = el('button', { class: 'danger' }, 'Scrivi comunque (rompe il mondo)');
+  private publishBtn = el('button', { class: 'primary' }, 'Pubblica');
   private path = '';
   onClose?: () => void;
 
@@ -25,9 +27,11 @@ export class Editor {
     close.onclick = () => this.close();
     this.forceBtn.onclick = () => this.save(true);
     this.forceBtn.hidden = true;
+    this.publishBtn.onclick = () => void this.publish();
+    this.publishBtn.hidden = true;
     const code = el('div', { class: 'code' }, this.gutter, this.area);
     this.root.append(
-      el('div', { class: 'head' }, this.title, el('div', { class: 'actions' }, check, save, this.forceBtn, close)),
+      el('div', { class: 'head' }, this.title, el('div', { class: 'actions' }, check, save, this.forceBtn, this.publishBtn, close)),
       el('div', { class: 'body' }, this.list, code),
       this.status,
     );
@@ -82,6 +86,7 @@ export class Editor {
     this.forceBtn.hidden = true;
     this.setStatus(`HEAD ${this.kernel.repo.head().id} — ${this.kernel.repo.head().message}`, 'info');
     this.renderList();
+    this.updatePublish();
     requestAnimationFrame(() => {
       this.area.focus();
       const lines = this.area.value.split('\n');
@@ -116,8 +121,26 @@ export class Editor {
       return;
     }
     this.forceBtn.hidden = true;
-    if (r.committed) this.setStatus(`✓ ricaricato a caldo — commit ${this.kernel.repo.head().id}`, 'ok');
+    this.updatePublish();
+    if (r.committed && this.kernel.publisher) this.setStatus(`✓ nel tuo ramo — commit ${this.kernel.repo.head().id}; il mondo lo vede quando pubblichi`, 'ok');
+    else if (r.committed) this.setStatus(`✓ ricaricato a caldo — commit ${this.kernel.repo.head().id}`, 'ok');
     else this.setStatus('⚠ scritto, ma l\'universo è rotto: nessun commit. R (fuori dall\'editor) per tornare indietro.', 'err');
+  }
+
+  /** «Pubblica (n)» while the master's branch has files the world does not. */
+  private updatePublish(): void {
+    const n = this.kernel.publisher?.branch().length ?? 0;
+    this.publishBtn.hidden = !n;
+    this.publishBtn.textContent = `Pubblica (${n})`;
+  }
+
+  private async publish(): Promise<void> {
+    const p = this.kernel.publisher;
+    if (!p) return;
+    this.setStatus('… pubblicazione in corso', 'info');
+    const r = await p.publish();
+    this.setStatus(r.ok ? `✓ ${r.testo ?? 'pubblicato'}` : `✗ ${r.motivo ?? 'non pubblicato'}`, r.ok ? 'ok' : 'err');
+    this.updatePublish();
   }
 
   close(): void {
