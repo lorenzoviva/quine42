@@ -573,6 +573,19 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
       glow.box(x + w - 0.05, 0.7, z, x + w, 0.72, z + d, rgbOf(col, 0.8));
       break;
     }
+    case 'tornio': {
+      // The Sculptor's lathe in the Artist's gallery (T48a):
+      // A tiered circular/octagonal base plinth of dark metal with glowing pink/magenta neon rims,
+      // supporting the rotating turntable disc where the model builds up step by step.
+      const w = it.w ?? 3, d = it.h ?? 3, cx = x + w / 2, cz = z + d / 2;
+      lit.box(cx - 1.25, 0, cz - 1.25, cx + 1.25, 0.16, cz + 1.25, rgbOf('#101018'));
+      lit.box(cx - 0.95, 0.16, cz - 0.95, cx + 0.95, 0.38, cz + 0.95, rgbOf('#161824'));
+      lit.box(cx - 0.65, 0.38, cz - 0.65, cx + 0.65, 0.46, cz + 0.65, rgbOf('#1c1e2c'));
+      rim(glow, cx - 1.25, cz - 1.25, cx + 1.25, cz + 1.25, 0.16, rgbOf(col, 0.65));
+      rim(glow, cx - 0.95, cz - 0.95, cx + 0.95, cz + 0.95, 0.38, rgbOf(col, 0.75));
+      rim(glow, cx - 0.65, cz - 0.65, cx + 0.65, cz + 0.65, 0.46, rgbOf(col, 0.85));
+      break;
+    }
     case 'parete': {
       // A field of the Direction's wall of screens (T46b): a dark plinth with a golden edge and a support against the
       // back wall; the screen leans on them, tilted towards the camera (src/render/screens.ts).
@@ -875,7 +888,7 @@ function buildMiniature(k: Kernel, mini: PlaceMiniature, side: number, phase = P
 }
 
 /** Text on a glowing plane (canvas), w wide in cells. */
-function textPlane(lines: string[], color: string, w: number, h: number, big = false): THREE.Mesh {
+export function textPlane(lines: string[], color: string, w: number, h: number, big = false): THREE.Mesh {
   const W = 512, H = Math.round((512 * h) / w);
   const cv = document.createElement('canvas');
   cv.width = W;

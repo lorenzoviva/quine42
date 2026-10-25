@@ -2,7 +2,7 @@
 // shows it, with «Riscolpisci» — a building's notice board, with the latest changes to its files, and what a
 // showcase shows (T21), with its arrows, and an environment of the sample room on its trial draft (T26d).
 
-import { PLACE_PHASES, type Kernel, type LayoutSample, type PlaceMiniature, type RuleShown, type ShowcaseEntry } from '../kernel/kernel';
+import { PLACE_PHASES, type Kernel, type LayoutSample, type PlaceMiniature, type RuleShown, type ShowcaseEntry, type TornioShown } from '../kernel/kernel';
 import type { StudioItem } from '../kernel/corona';
 import { OPERATION_COLOR, OPERATION_NAME, type Operation, type OperationKind, type Situation } from '../kernel/situation';
 import { ALERT_COLOR, ALERT_NAME, LIVE_LINES, SCREEN_NAME, fill, type Screens, type ScreenField } from '../kernel/screens';
@@ -12,6 +12,7 @@ import { fieldLabel, valueText, type BenchShown } from '../kernel/bench';
 import type { BenchStep } from '../kernel/types';
 import type { BibleShown } from '../kernel/bible';
 import { NODE_COLOR, NODE_NAME, type GraphNode } from '../kernel/graph';
+import type { Picture } from '../mj/photo';
 import { $, el } from './dom';
 import { icons } from './hud';
 
@@ -28,6 +29,8 @@ export class StudioPanel {
   private benchOpen = false;
   /** Whether the panel shows the Library's lectern (T47a), while it is open. */
   private bibleOpen = false;
+  /** Whether the panel shows the Sculptor's lathe (T48a), while it is open. */
+  private tornioOpen = false;
   onClose?: () => void;
   onEdit?: (path: string) => void;
 
@@ -56,6 +59,11 @@ export class StudioPanel {
       if (this.isOpen && this.bibleOpen) this.bible(b);
     });
     k.bus.on('ui:rule', (r: RuleShown) => this.rule(r));
+    k.bus.on('ui:tornio', (t: TornioShown) => this.tornio(t));
+    // Another model chosen on the lathe with the panel open: it follows.
+    k.bus.on('studio:tornio', (t: TornioShown) => {
+      if (this.isOpen && this.tornioOpen) this.tornio(t);
+    });
     // The arrows pressed with the panel open: it follows.
     k.bus.on('studio:showcase', (e: Shown) => {
       if (this.isOpen && this.shown === e.building) this.showcase({ ...e, name: this.k.corona.building(e.building)?.name ?? e.building });
@@ -85,6 +93,7 @@ export class StudioPanel {
     this.screen = undefined;
     this.benchOpen = false;
     this.bibleOpen = false;
+    this.tornioOpen = false;
     this.root.replaceChildren(el('div', { class: 'window' }, close, ...children));
     this.root.hidden = false;
     this.onClose?.();
@@ -96,6 +105,7 @@ export class StudioPanel {
     this.screen = undefined;
     this.benchOpen = false;
     this.bibleOpen = false;
+    this.tornioOpen = false;
     this.onClose?.();
   }
 
@@ -637,5 +647,115 @@ export class StudioPanel {
       ),
     );
   }
+
+  /**
+   * The Sculptor's lathe in the Artist's Gallery (T48a): four 3/4 photos of the model,
+   * Artist's critique (vote & advice), the MarkovJunior XML program, and «riscolpisci».
+   */
+  tornio(t: TornioShown): void {
+    const { entry } = t;
+
+    const step = (d: number, text: string) => {
+      const btn = el('button', {}, text);
+      btn.onclick = () => this.k.stepTornio(d);
+      return btn;
+    };
+
+    const why = el('input', {
+      type: 'text',
+      placeholder: 'Come lo vuoi? (es. «più alto, con radici più larghe e rami ritorti»)',
+      maxlength: '160',
+    }) as HTMLInputElement;
+
+    const out = el('div', { class: 'note' });
+    const repaint = el('button', { class: 'primary' }, 'Chiedi allo Scultore di riscolpirlo');
+    repaint.onclick = () => {
+      const ok = this.k.requestResculpt(`model:${entry.id}`, why.value.trim());
+      out.textContent = ok ? 'Lo Scultore lo riscolpirà: lo vedrai cambiare qui sul tornio e nel mondo.' : 'Questo modello non si può riscolpire.';
+    };
+
+    why.addEventListener('keydown', (e) => {
+      e.stopPropagation();
+      if (e.key === 'Enter') repaint.click();
+    });
+
+    const open = el('button', {}, 'Apri il file');
+    open.onclick = () => {
+      this.close();
+      this.onEdit?.(entry.path);
+    };
+
+    const viewNames = ['Fronte', 'Destra', 'Retro', 'Sinistra'];
+    const photoCards = t.photos.map((pic, idx) => {
+      const cv = photoToCanvas(pic);
+      return el(
+        'div',
+        { style: 'display: flex; flex-direction: column; align-items: center; gap: 4px;' },
+        cv,
+        el('small', { style: 'color: var(--dim); font-size: 11px; text-transform: uppercase; font-weight: 600;' }, viewNames[idx] ?? `Vista ${idx + 1}`),
+      );
+    });
+
+    const voteTag = entry.voto !== undefined
+      ? el(
+          'span',
+          {
+            class: 'tag',
+            style: `background: ${entry.voto >= 7 ? '#153820' : entry.voto >= 5 ? '#382a15' : '#381515'}; color: ${entry.voto >= 7 ? '#7ee08a' : entry.voto >= 5 ? '#ffcf5c' : '#ff8a8a'}; border: 1px solid ${entry.voto >= 7 ? '#2a7a40' : entry.voto >= 5 ? '#7a5a20' : '#7a2a2a'}; font-weight: bold; padding: 2px 8px; border-radius: 4px;`,
+          },
+          `★ VOTO DELL'ARTISTA: ${entry.voto}/10`,
+        )
+      : el(
+          'span',
+          {
+            class: 'tag',
+            style: 'background: #182230; color: #6fc3ff; border: 1px solid #284460; font-weight: bold; padding: 2px 8px; border-radius: 4px;',
+          },
+          'CANONE STILISTICO: APPROVATO',
+        );
+
+    const code = el('pre', { class: 'program' }, entry.xml);
+
+    this.show(
+      el('div', { class: 'title' }, `${entry.name} — Galleria dell'Artista`),
+      el('div', { class: 'note' }, `Il tornio dello Scultore · Modello ${t.index + 1} di ${t.count} · Classe «${entry.classe}» · ${entry.path}`),
+      el(
+        'div',
+        { class: 'row', style: 'justify-content: space-between; align-items: center; margin-top: 6px;' },
+        el('div', { class: 'row' }, step(-1, '« precedente'), step(1, 'successivo »')),
+        voteTag,
+      ),
+      el('div', { class: 'section' }, 'Le quattro foto (3/4 da quattro lati)'),
+      el('div', { class: 'row', style: 'justify-content: space-around; flex-wrap: wrap; gap: 8px; margin: 6px 0;' }, ...photoCards),
+      el('div', { class: 'section' }, "Giudizio e consigli dell'Artista"),
+      el('div', { class: 'item' }, el('span', { class: 'path' }, 'Autore'), ` ${entry.autore}`),
+      ...entry.consigli.map((c) => el('div', { class: 'item' }, el('span', { style: 'color: #7ee08a;' }, '✔ '), c)),
+      ...entry.problemi.map((p) => el('div', { class: 'item', style: 'color: #ff8a8a;' }, el('span', { style: 'color: #ff8a8a;' }, '✗ '), p)),
+      el('div', { class: 'section' }, `Il programma MarkovJunior (${entry.path})`),
+      code,
+      el('div', { class: 'section' }, 'Riscolpisci'),
+      el('div', { class: 'row' }, why, repaint),
+      out,
+      el('div', { class: 'row', style: 'justify-content: flex-end; margin-top: 8px;' }, open),
+    );
+    this.tornioOpen = true;
+  }
+}
+
+function photoToCanvas(pic: Picture): HTMLCanvasElement {
+  const cv = el('canvas', { width: String(pic.w), height: String(pic.h), class: 'photo' }) as HTMLCanvasElement;
+  cv.style.imageRendering = 'pixelated';
+  cv.style.width = `${Math.min(130, Math.max(70, pic.w * 2))}px`;
+  cv.style.height = `${Math.min(130, Math.max(70, pic.h * 2))}px`;
+  cv.style.background = '#0a0d14';
+  cv.style.border = '1px solid var(--line)';
+  cv.style.borderRadius = '4px';
+  const ctx = cv.getContext('2d');
+  if (ctx) {
+    const imgData = ctx.createImageData(pic.w, pic.h);
+    imgData.data.set(pic.data);
+    ctx.putImageData(imgData, 0, 0);
+  }
+  return cv;
 }
 

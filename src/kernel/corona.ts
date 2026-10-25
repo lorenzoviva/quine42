@@ -12,7 +12,7 @@ import { SCREEN_NAME, type ScreenField } from './screens';
 import { AGENTS } from './agents/council';
 
 export type FileLook = 'libro' | 'cristallo' | 'pergamena' | 'tavoletta';
-export type ItemKind = 'file' | 'sprite' | 'tile' | 'layout' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'less' | 'more' | 'grafo' | 'situazione' | 'parete' | 'console' | 'stazione' | 'banco' | 'leggio' | 'lastra';
+export type ItemKind = 'file' | 'sprite' | 'tile' | 'layout' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'less' | 'more' | 'grafo' | 'situazione' | 'parete' | 'console' | 'stazione' | 'banco' | 'leggio' | 'lastra' | 'tornio';
 /** What a showcase shows (T21): the runes and spells, the people, the things, the objects of the packs, the places planned (T26). */
 export type ShowcaseSource = 'rune' | 'persone' | 'cose' | 'oggetti' | 'luoghi';
 /** How a showcase looks: a screen, a silo of liquid, a 3D printer, a holographic table with a place in miniature. */
@@ -83,6 +83,11 @@ export const BENCH_AT = { x: SHOWCASE_AT.x, y: SHOWCASE_AT.y - 1, w: 3, h: 3, ro
  * an open holographic book above it, «<» «>» at its sides to flip through the world's bible (src/kernel/bible.ts).
  */
 export const LEGGIO_AT = { x: SHOWCASE_AT.x, y: SHOWCASE_AT.y - 1, w: 3, h: 3, room: 'mondo' };
+/**
+ * The Artist's Gallery (T48a): the Sculptor's lathe, a rotating turntable pedestal where the others have their showcase;
+ * the model chosen from the library executed step by step, «<» «>» at its sides to step through the models.
+ */
+export const TORNIO_AT = { x: SHOWCASE_AT.x, y: SHOWCASE_AT.y - 1, w: 3, h: 3, room: 'galleria' };
 /**
  * The Library of the World (T47b): tablets of the rules (world/rules.json) along its back wall;
  * the newest 12 rules (FOCUSED_RULES) shine, clicking one opens its judgement in a panel.
@@ -398,7 +403,7 @@ function shelfSlots(sides = false): Array<{ x: number; y: number }> {
 const SLOTS = shelfSlots();
 const DEVICE_SLOTS = shelfSlots(true);
 /** The buildings with a device in the middle of their ground floor. */
-const DEVICES = new Set([...Object.keys(SHOWCASES), 'nucleo', 'universo', BENCH_AT.room, LEGGIO_AT.room]);
+const DEVICES = new Set([...Object.keys(SHOWCASES), 'nucleo', 'universo', BENCH_AT.room, LEGGIO_AT.room, TORNIO_AT.room]);
 
 export class Corona {
   outer: number;
@@ -501,6 +506,11 @@ export class Corona {
             } catch {}
             this.rulesOffset = Math.max(0, allRules.length - TABLETS_MAX);
             placed.push(...ruleTablets(ox, oy, allRules, this.rulesOffset));
+          }
+          if (id === TORNIO_AT.room) {
+            placed.push({ kind: 'tornio', label: 'il tornio dello Scultore', target: 'tornio', x: ox + TORNIO_AT.x, y: oy + TORNIO_AT.y, w: TORNIO_AT.w, h: TORNIO_AT.h });
+            placed.push({ kind: 'prev', label: '«<» il modello precedente', target: 'tornio', x: ox + TORNIO_AT.x - 1, y: oy + SHOWCASE_AT.y });
+            placed.push({ kind: 'next', label: '«>» il modello successivo', target: 'tornio', x: ox + TORNIO_AT.x + TORNIO_AT.w, y: oy + SHOWCASE_AT.y });
           }
           const show = SHOWCASES[id];
           if (show) {

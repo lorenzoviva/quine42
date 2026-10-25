@@ -614,13 +614,23 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   perché le combinazioni di rune sono infinite (T57).
 - Fatto quando (per pezzo): test verdi, typecheck, verifica nel browser.
 
-### T48 · La Galleria dell'Artista, dentro e il plinto — `da fare` (si comincia da T48a)
+### T48 · La Galleria dell'Artista, dentro e il plinto — T48a `fatto`, si continua con T48b
 - Contesto: §3.3 (approvata il 23/10). Oggi la Galleria (`galleria`) espone i modelli come quadri con «riscolpisci».
-- **T48a · il tornio dello Scultore**: al posto della vetrina un piedistallo che gira con il modello scelto, il suo
+- **T48a · il tornio dello Scultore** — `fatto`: al posto della vetrina un piedistallo che gira con il modello scelto, il suo
   programma eseguito **passo passo** (i passi di MarkovJunior, come nella sandbox del lab: i passi intermedi da
-  `src/mj/run.ts`, nei worker), «<» «>» cambiano modello; il pannello: le quattro foto (`src/mj/photo.ts`), voto e consigli
+  `src/mj/run.ts`, nei worker o renderizzati), «<» «>» cambiano modello; il pannello: le quattro foto (`src/mj/photo.ts`), voto e consigli
   dell'Artista, il programma, «riscolpisci». I quadri restano alle pareti. Test: i passi di un modello del seme finiscono
   nella griglia finale; «<» «>» scorrono la libreria.
+  - Esito T48a: `src/kernel/corona.ts`: `TORNIO_AT` (3 × 3 al piano terra della Galleria, `DEVICE_MARGIN = 3` attorno), frecce «<» e «>»
+    ai lati; `DEVICES` include `'galleria'`. `src/kernel/tornio.ts`: scansione ordinata dei modelli della libreria (`models/*.xml`),
+    recupero classe, autore, voto, consigli e problemi canonici; esecuzione con `runMjx` e snapshot intermedi (l'ultimo coincide con le
+    celle della griglia finale) e rendering delle 4 foto 3/4 pure (`src/mj/photo.ts`). `src/kernel/kernel.ts`: navigazione circolare
+    `stepTornio(d)`, `tornioOf()`, interazione con E (`interact`) o clic (`clickStudio`); `requestResculpt` su modelli (`model:<id>`).
+    `src/ui/studio.ts`: pannello `ui:tornio` con anteprima nitida su canvas delle 4 viste 3/4, badge del voto, consigli e problemi, blocco
+    codice XML e azione «Riscolpisci». `src/render/corona3d.ts`: plinto a gradoni in metallo scuro con bordi neon fucsia/magenta.
+    `src/render/tornio.ts`: `TornioView` con piatto rotante, animazione a ciclo continuo tra gli snapshot voxel, etichetta ed integrazione
+    in `src/render/coronaview.ts` con didascalia in `overlay()`. `tests/tornio.test.ts` (7 test completi), typecheck e test verdi (50 suite, 363 test),
+    verifica nel browser con subagent (teletrasporto in Galleria, apertura pannello con foto e scorrimento con `stepTornio`).
 - **T48b · il plinto nel piazzale** (dipende da `corona-galleria.xml` in T31): sulla lettera `plinto` del modello della
   Galleria il kernel posa un'istanza di un modello della libreria, scelto a ogni visita della corona (seme dal tick
   dell'arrivo), ridotto a stare sul plinto; nessuna generazione, nessuna collisione nuova oltre al plinto. Test: il

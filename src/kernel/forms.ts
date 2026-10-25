@@ -38,6 +38,9 @@ export interface ModelInfo {
   tinta?: string;
   /** Voxels per tile, if not the usual 20 (ADR-0049): big models are written coarser. */
   vpt?: number;
+  /** Artist's critique advice and problems (T48a). */
+  consigli?: string[];
+  problemi?: string[];
 }
 
 /** What a thing's look is: which program, which seed, which way it faces, what has been done to it. */

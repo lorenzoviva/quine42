@@ -13,6 +13,7 @@ import { Corona, campusModel, cellNear, FOCUSED_RULES, folderOf, TABLETS_MAX, ty
 import { Archive } from './archive';
 import { bibleBreaks, cleanBible, metaBreak } from './fourthwall';
 import { biblePages, touchingNodes, type BibleShown } from './bible';
+import { tornioExecute, tornioModels, type TornioModelEntry, type TornioShown } from './tornio';
 import type { Rule } from './types';
 import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, placeRegion, readAtlas, regionAt, writeAtlas, type Region } from './atlas';
 import { STAMP_SHAPES } from './stamps';
@@ -225,6 +226,8 @@ export interface RuleShown {
   marked: boolean;
 }
 
+export type { TornioModelEntry, TornioShown };
+
 export interface Needs {
   hunger: number;
   thirst: number;
@@ -421,6 +424,9 @@ export class Kernel {
   private bibleIndex = 0;
   /** The Library's rules wall (T47b): which window of rules it shows. */
   private rulesOffset = 0;
+  /** The Sculptor's lathe (T48a): which model of the library it shows. */
+  private tornioIndex = 0;
+  private tornioCache = new Map<string, TornioShown>();
   /** The commit the Direction's timeline shows (T46b); none: the newest. */
   private filmAt?: string;
   /** What each system costs in the tick (T27a): the chain of the Systems Room shows it. */
@@ -3604,6 +3610,9 @@ export class Kernel {
       case 'lastra':
         this.openRule(it.target ?? '');
         return;
+      case 'tornio':
+        this.openTornio();
+        return;
       case 'showcase':
         this.openShowcase(it.target!);
         return;
@@ -3613,6 +3622,7 @@ export class Kernel {
         else if (it.target === 'banco') this.stepBench(it.kind === 'prev' ? -1 : 1);
         else if (it.target === 'leggio') this.stepBible(it.kind === 'prev' ? -1 : 1);
         else if (it.target === 'regole') this.stepRules(it.kind === 'prev' ? -1 : 1);
+        else if (it.target === 'tornio') this.stepTornio(it.kind === 'prev' ? -1 : 1);
         else this.stepShowcase(it.target!, it.kind === 'prev' ? -1 : 1);
         return;
       case 'less':
@@ -3661,7 +3671,7 @@ export class Kernel {
 
   clickStudio(rx: number, ry: number): boolean {
     if (this.zone !== 'studio') return false;
-    const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'situazione', 'parete', 'console', 'stazione', 'banco', 'leggio', 'layout', 'lastra']);
+    const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'situazione', 'parete', 'console', 'stazione', 'banco', 'leggio', 'layout', 'lastra', 'tornio']);
     if (!it) return false;
     const p = this.playerPos();
     const c = cellNear(it, p.x, p.y);
@@ -3677,10 +3687,12 @@ export class Kernel {
     else if (it.kind === 'banco') this.openBench();
     else if (it.kind === 'leggio') this.openBible();
     else if (it.kind === 'lastra') this.openRule(it.target ?? '');
+    else if (it.kind === 'tornio') this.openTornio();
     else if (it.target === 'tempo') this.stepTimeline(it.kind === 'prev' ? 1 : -1);
     else if (it.target === 'banco') this.stepBench(it.kind === 'prev' ? -1 : 1);
     else if (it.target === 'leggio') this.stepBible(it.kind === 'prev' ? -1 : 1);
     else if (it.target === 'regole') this.stepRules(it.kind === 'prev' ? -1 : 1);
+    else if (it.target === 'tornio') this.stepTornio(it.kind === 'prev' ? -1 : 1);
     else if (it.kind === 'layout') this.openLayout(it, this.corona.roomAt(it.x, it.y)?.building.name ?? '');
     else if (it.kind === 'showcase') this.openShowcase(it.target!);
     else if (it.kind === 'less' || it.kind === 'more') this.stepPhase(it.target!, it.kind === 'less' ? -1 : 1);
@@ -3930,6 +3942,13 @@ export class Kernel {
       if (!o) return false;
       const r = own(o, it?.name ?? man.name, id);
       req = { ...r, nome: it?.name ?? man.name, aspetto: o.aspetto ?? it?.description ?? man.name, classe: 'oggetto' };
+    } else if (kind === 'model') {
+      const info = this.forms.info(id);
+      const previous = this.repo.working[`models/${id}.xml`];
+      if (!previous) return false;
+      this.council.say('artista', 'propone', `da riscolpire: ${target}${why ? ` (${why})` : ''}`, 'scultore', 'model.resculpt');
+      void this.sculpting.make({ id, nome: info?.nome ?? id, aspetto: `${info?.nome ?? id}${why ? `; ${why}` : ''}`, classe: info?.classe ?? 'oggetto', previous, ...(why ? { desiderio: why } : {}) });
+      return true;
     } else return false;
     this.repo.write(path!, JSON.stringify(man, null, 2) + '\n');
     this.applyFiles({ ...this.repo.working });
@@ -4538,6 +4557,53 @@ export class Kernel {
     const now = this.ruleOf(chiaveOrIndex);
     if (!now) return this.message('Regola non trovata.');
     this.bus.emit('ui:rule', now);
+  }
+
+  /**
+   * The Sculptor's lathe in the Artist's gallery (T48a): all models in the library.
+   */
+  tornioModels(): TornioModelEntry[] {
+    return tornioModels(this.files, this.forms);
+  }
+
+  /**
+   * The model currently on the Sculptor's lathe (T48a): executed step by step with snapshots and 4 views.
+   */
+  tornioOf(): TornioShown | undefined {
+    const list = this.tornioModels();
+    if (!list.length) return undefined;
+    this.tornioIndex = (((this.tornioIndex % list.length) + list.length) % list.length);
+    const entry = list[this.tornioIndex];
+    const key = `${entry.id}@${entry.xml.length}@${entry.info.voto ?? ''}`;
+    const hit = this.tornioCache.get(key);
+    if (hit) {
+      return { ...hit, index: this.tornioIndex, count: list.length };
+    }
+    const shown = tornioExecute(entry, this.forms, 20, 1, this.tornioIndex, list.length);
+    if (this.tornioCache.size > 50) this.tornioCache.clear();
+    this.tornioCache.set(key, shown);
+    return shown;
+  }
+
+  /**
+   * «<» «>» of the Sculptor's lathe: step to the previous or next model in the library.
+   */
+  stepTornio(d: number): void {
+    const list = this.tornioModels();
+    if (!list.length) return this.message('Nessun modello nella libreria.');
+    this.tornioIndex = (((this.tornioIndex + d) % list.length) + list.length) % list.length;
+    const now = this.tornioOf()!;
+    this.message(`Il tornio dello Scultore: «${now.entry.name}» (${now.index + 1}/${now.count})`);
+    this.bus.emit('studio:tornio', now);
+  }
+
+  /**
+   * The Sculptor's lathe seen up close: opens the lathe panel (T48a).
+   */
+  openTornio(): void {
+    const now = this.tornioOf();
+    if (!now) return this.message('Nessun modello nella libreria.');
+    this.bus.emit('ui:tornio', now);
   }
 
   /** States of the wanderer (on horseback, with a backpack…): what they change, until when. */

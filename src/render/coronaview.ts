@@ -9,6 +9,7 @@ import { animateRing, Avatars, buildCoronaRing, buildRoom, buildShowcase, buildS
 import { ScreenWall } from './screens';
 import { ChainView } from './chain';
 import { BenchView } from './bench';
+import { TornioView } from './tornio';
 import type { Overlay } from './overlay';
 
 export type StudioRoom = ReturnType<Kernel['corona']['roomAt']>;
@@ -29,6 +30,8 @@ export class CoronaView {
   private chain?: { room: string; view: ChainView };
   /** The Systems Room's bench (T27b): built again when the case, its code or its run change. */
   private bench?: { key: string; at: number; view: BenchView };
+  /** The Sculptor's lathe in the Artist's gallery (T48a): turntable rotating with the selected model. */
+  private tornio?: { key: string; at: number; view: TornioView };
   /** What the showcases of the studio show (T21), by building: rebuilt when the choice or the models change. */
   private shows = new Map<string, { key: string; group: THREE.Group; spin?: THREE.Object3D; bubbles?: THREE.Object3D[]; silo: boolean }>();
 
@@ -51,6 +54,11 @@ export class CoronaView {
     this.rooms.clear();
     for (const v of this.shows.values()) this.root.remove(v.group);
     this.shows.clear();
+    if (this.tornio) {
+      this.root.remove(this.tornio.view.group);
+      this.tornio.view.dispose();
+      this.tornio = undefined;
+    }
   }
 
   update(t: number, studio: StudioRoom, revealed: boolean, interior: boolean): void {
@@ -191,6 +199,29 @@ export class CoronaView {
       } else if (this.bench) this.bench.at = t;
     }
     this.bench?.view.update(t);
+    const tornio = studio?.floor.items.find((i) => i.kind === 'tornio');
+    if (this.tornio && !tornio) {
+      this.root.remove(this.tornio.view.group);
+      this.tornio.view.dispose();
+      this.tornio = undefined;
+    }
+    if (studio && tornio && (!this.tornio || t - this.tornio.at > 0.3)) {
+      const now = k.tornioOf();
+      const key = now ? `${here}|${now.entry.id}|${now.index}` : '';
+      if (this.tornio?.key !== key) {
+        if (this.tornio) {
+          this.root.remove(this.tornio.view.group);
+          this.tornio.view.dispose();
+          this.tornio = undefined;
+        }
+        if (now) {
+          const arrow = (kind: string) => studio.floor.items.find((i) => i.kind === kind && i.target === 'tornio');
+          this.tornio = { key, at: t, view: new TornioView(tornio, now, studio.building.color, arrow('prev'), arrow('next')) };
+          this.root.add(this.tornio.view.group);
+        }
+      } else if (this.tornio) this.tornio.at = t;
+    }
+    this.tornio?.view.update(t);
     this.avatars.update(k, t);
   }
 
@@ -217,9 +248,11 @@ export class CoronaView {
     const shown = near?.kind === 'showcase' ? k.showcaseOf(near.target!) : undefined;
     const tried = near?.kind === 'banco' ? k.benchOf() : undefined;
     const read = near?.kind === 'leggio' ? k.bibleOf() : undefined;
+    const sculpted = near?.kind === 'tornio' ? k.tornioOf() : undefined;
     if (shown) o.caption(`E: guarda «${shown.entry.label}» (${shown.index + 1}/${shown.count})`);
     else if (tried) o.caption(`E: il banco di prova, ${tried.entry.name}: «${tried.entry.case.titolo}» (${tried.index + 1}/${tried.count})`);
     else if (read) o.caption(`E: sfoglia la bibbia, «${read.page.titolo}» (${read.index + 1}/${read.count})`);
+    else if (sculpted) o.caption(`E: il tornio dello Scultore, «${sculpted.entry.name}» (${sculpted.index + 1}/${sculpted.count})`);
     else if (near?.kind === 'lastra') o.caption(near.rule ? `E: la tavola della regola «${near.rule.testo}» (${near.rule.possibile ? 'si può' : 'non si può'}${near.marked ? ' · recente' : ''})` : `E: ${near.label}`);
     else if (near && near.kind !== 'desk') o.caption(`E: ${near.kind === 'file' ? `apri ${near.label}` : near.kind === 'sprite' || near.kind === 'tile' || near.kind === 'layout' ? `guarda «${near.label}»` : near.label}`);
   }
