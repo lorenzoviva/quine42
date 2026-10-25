@@ -1118,7 +1118,7 @@ le risposte alle domande del piano.
   visibilità era il master sul viale del campus, che nello spazio del tappeto può cadere accanto a un giocatore. Nessuna verifica nel
   browser: in singola il gioco non cambia, e il multigiocatore è coperto dai test col finto trasporto.
 
-### T42b · Il ramo `master` e la pubblicazione — `fatto` (dipende da T42a)
+### T42b · Il ramo `master` e la pubblicazione — `fatto` (`5973cae`) (dipende da T42a)
 - Contesto: piano del multigiocatore, «Modifiche in prova»; `R` del master e `rollback` ancora in `LATER` di `thin.ts`.
 - Fare: le modifiche del master (editor, rune scritte nella corona, richieste al Referente) vanno su un ramo `master` del
   repository dell'universo; lui le prova da solo (il suo kernel vede il ramo, i giocatori no) e le **pubblica** con un gesto esplicito
