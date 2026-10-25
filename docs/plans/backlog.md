@@ -1285,7 +1285,7 @@ Richiesta del 25/10 ([`to-do-2026-10-25.md`](../userchats/to-do-2026-10-25.md)).
 la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedicato a modellare le singole mesh.
 
 ### T59 · Laboratorio: editor per modelli MarkovJunior — `in corso` (T59a fatto; prossimo: T59b)
-- **T59a · Split screen codice e rendering** — `fatto` (`3aec90e`): interfaccia divisa a due riquadri (editor di testo/XML a sinistra con syntax
+- **T59a · Split screen codice e rendering** — `fatto` (`6fb7faa`): interfaccia divisa a due riquadri (editor di testo/XML a sinistra con syntax
   highlighting e validazione immediata; viewport 3D Three.js a destra con rendering in tempo reale della mesh risultante,
   controlli camera e orbita libera con tasto destro). Esito: `lab/editor/` (`index.html`, `editor.css`, `syntax.ts`, `main.ts`, `worker.ts`),
   integrazione in `vite.config.ts`, test in `tests/editor.test.ts` (10 test), verifica nel browser confermata.
