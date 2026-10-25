@@ -57,7 +57,7 @@ export class CoronaView {
     }
     if (this.ring) {
       this.ring.visible = revealed && !interior;
-      if (this.ring.visible) animateRing(this.ring, t);
+      if (this.ring.visible) animateRing(this.ring, t, k);
     }
     for (const [key, r] of this.rooms) r.group.visible = !!studio && key === `${studio.building.id}#${studio.floor.index}`;
     if (studio) {

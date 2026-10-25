@@ -1,0 +1,204 @@
+<!--
+Lampione futuristico ad arco del viale (corona): arredo urbano per il viale della corona.
+Scritto da Gemini CLI (Gemini 3.8 Flash, abbonamento), task T50a.
+Scatola: 1 × 1 × 2.5 caselle, 8 × 8 × 20 voxel, 8 voxel per casella (vpt: 8).
+Ruolo: prop.
+Stelo slanciato asimmetrico in titanio cybernetico scuro (M, m) con giunzioni e collari cromati (S, s);
+sale dritto fino a z=11 ancorato su un plinto ottagonale in carbonio (D) con indicatori telemetrici (E, e);
+all'altezza di z=11..12 si raccorda a un robusto snodo cilindrico cromato con aletta contrappeso posteriore;
+da quota z=12 a z=15 il braccio si proietta audacemente in avanti a sbalzo verso il viale (+y),
+sostenuto da pistoni idraulici e tiranti in cromo satinato variabili per seme;
+la testa a becco aerodinamico (z=15..18, y=3..6) alloggia alette di raffreddamento e sfiatatoi in vetro scuro (V, T);
+sul lato inferiore incassato (z=15, rivolto verso il suolo), la feritoia emette un potente fascio neon ciano (N, glow="True")
+con nucleo fotonico laser bianco (W, glow="True") e deflettori ottici prismatici (G, T) che irradiano luce sul selciato.
+Animazione telemetria (6 fotogrammi):
+- le spie diagnostiche del plinto pulsano e si alternano tra smeraldo (E) e cobalto (e);
+- il nucleo laser fotonico (W) vibra lungo la feritoia neon (N) simulando il flusso d'energia.
+-->
+<sequence values="BMmDSsVTGNWEeX" size="8 8 20" symmetry="(x)" name="Lampione">
+  <!-- Materiali strutturali: titanio cybernetico scuro e grafite carbonio -->
+  <color symbol="M" value="1a1b22" name="titanio primario"/>
+  <color symbol="m" value="2e303d" name="titanio secondario biselli"/>
+  <color symbol="D" value="141418" name="piastra base carbonio"/>
+
+  <!-- Meccanica, snodi, tenditori e finiture cromate -->
+  <color symbol="S" value="83769c" name="cromo satinato giunti"/>
+  <color symbol="s" value="c2c3c7" name="cromo lucido bulloni"/>
+
+  <!-- Ottiche, guide riflettenti e prismi -->
+  <color symbol="V" value="1c2a3a" name="vano ottico scuro"/>
+  <color symbol="T" value="3d5a78" name="riflettore ardesia"/>
+  <color symbol="G" value="b4f0ff" name="diffusore prismatico prisma"/>
+
+  <!-- Fonti luminose attive (glow="True") -->
+  <color symbol="N" value="05d9e8" glow="True" name="fascio neon ciano"/>
+  <color symbol="W" value="ffffff" glow="True" name="nucleo fotonico bianco"/>
+  <color symbol="E" value="00ff88" glow="True" name="led alimentazione verde"/>
+  <color symbol="e" value="29adff" glow="True" name="led uplink cobalto"/>
+
+  <!-- Segnaposto invisibile per regole generative -->
+  <color symbol="X" hidden="True" name="marker generativo"/>
+
+  <!-- ======================================================== -->
+  <!-- 1. PLINTO E FLANGIA DI FONDAZIONE (z = 0..2)             -->
+  <!-- ======================================================== -->
+  <!-- Piastra di fondazione a terra z=0 (x=2..5, y=1..5) in carbonio D -->
+  <box at="3.5 3.0 0" size="4 5 1" color="D"/>
+
+  <!-- 4 bulloni cromati esagonali di ancoraggio ai vertici del plinto -->
+  <box at="2 1 0" size="1 1 1" color="s"/>
+  <box at="5 1 0" size="1 1 1" color="s"/>
+  <box at="2 5 0" size="1 1 1" color="s"/>
+  <box at="5 5 0" size="1 1 1" color="s"/>
+
+  <!-- Zoccolo a gradino in titanio scuro a quota z=1 (x=2..5, y=2..4) -->
+  <box at="3.5 3.0 1" size="4 3 1" color="M"/>
+
+  <!-- Pannello telemetrico frontale sul plinto a z=1 (y=5):    -->
+  <!-- Spie diagnostiche: verde alimentazione (E) e cobalto dati (e) -->
+  <box at="2 5 1" size="1 1 1" color="m"/>
+  <box at="3 5 1" size="1 1 1" color="E"/>
+  <box at="4 5 1" size="1 1 1" color="e"/>
+  <box at="5 5 1" size="1 1 1" color="m"/>
+
+  <!-- Collare rastremato di ancoraggio colonna a quota z=2 -->
+  <box at="3.5 2.5 2" size="4 2 1" color="m"/>
+  <box at="3.5 2.5 2" size="2 2 1" color="S"/>
+
+  <!-- ======================================================== -->
+  <!-- 2. PILONE VERTICALE AERODINAMICO (z = 2..11)             -->
+  <!-- ======================================================== -->
+  <!-- Colonna principale a sezione 2x2 (x=3..4, y=2..3, z=2..11) -->
+  <box at="3.5 2.5 2" size="2 2 10" color="M"/>
+
+  <!-- Dorso posteriore sagomato (y=1, z=3..10) in titanio secondario -->
+  <box at="3.5 1.0 3" size="2 1 8" color="m"/>
+
+  <!-- Canalina di alimentazione centrale sul dorso in cromo satinato -->
+  <box at="3.5 1.0 4" size="2 1 6" color="S"/>
+
+  <!-- Anelli collare intermedi di irrigidimento a z=5 e z=9 -->
+  <box at="3.5 2.5 5" size="4 2 1" color="S"/>
+  <box at="3.5 2.5 5" size="2 2 1" color="M"/>
+  <box at="3.5 2.5 9" size="4 2 1" color="S"/>
+  <box at="3.5 2.5 9" size="2 2 1" color="M"/>
+
+  <!-- ======================================================== -->
+  <!-- 3. SNODO MECCANICO E GOMITO AD ARCO (z = 11..15)         -->
+  <!-- ======================================================== -->
+  <!-- Mozzo cilindrico dello snodo a quota z=11 (perno cromato passante) -->
+  <box at="3.5 2.5 11" size="4 2 1" color="S"/>
+  <box at="3.5 2.5 11" size="2 2 1" color="s"/>
+
+  <!-- Contrafforte dorsale posteriore a becco (z=12..13, y=1) -->
+  <box at="3.5 1.0 12" size="2 1 2" color="m"/>
+  <box at="3.5 1.0 13" size="2 1 1" color="s"/>
+
+  <!-- Raccordo inferiore dello snodo a quota z=12 (y=2..4) -->
+  <box at="3.5 2.5 12" size="2 2 1" color="M"/>
+  <box at="3.5 3.5 12" size="2 2 1" color="M"/>
+
+  <!-- Sbalzo progressivo in avanti (+y) verso il viale:        -->
+  <!-- z=13: y=3..5 con staffa di rinforzo laterale cromata     -->
+  <box at="3.5 4.0 13" size="2 3 1" color="M"/>
+  <box at="3.5 4.0 13" size="4 1 1" color="S"/>
+  <box at="3.5 4.0 13" size="2 1 1" color="M"/>
+
+  <!-- z=14: y=4..6 con pistone/tirante idraulico               -->
+  <box at="3.5 5.0 14" size="2 3 1" color="M"/>
+  <box at="3.5 4.5 14" size="4 2 1" color="m"/>
+  <box at="3.5 4.5 14" size="2 2 1" color="s"/>
+
+  <!-- z=15: y=4..6 raccordo avanzato alla base della testa      -->
+  <box at="3.5 5.0 15" size="2 3 1" color="M"/>
+  <box at="3.5 5.0 15" size="4 1 1" color="S"/>
+  <box at="3.5 5.0 15" size="2 1 1" color="M"/>
+
+  <!-- Alloggiamenti per dettagli generativi sul braccio (X)    -->
+  <box at="3.5 3.0 14" size="2 1 1" color="X"/>
+
+  <!-- ======================================================== -->
+  <!-- 4. CORPO E CALOTTA DELLA TESTA (z = 15..18, y = 3..6)    -->
+  <!-- ======================================================== -->
+  <!-- Fascia portante mediana a quota z=16 (x=2..5, y=3..6)    -->
+  <box at="3.5 4.5 16" size="4 4 1" color="M"/>
+  <!-- Fasce perimetrali lucide cromate a z=16                  -->
+  <box at="2 4.5 16" size="1 2 1" color="s"/>
+  <box at="5 4.5 16" size="1 2 1" color="s"/>
+  <box at="3.5 3.0 16" size="2 1 1" color="m"/>
+
+  <!-- Calotta superiore rastremata a quota z=17 (x=2..5, y=3..6)-->
+  <box at="3.5 4.5 17" size="4 2 1" color="M"/>
+  <box at="3.5 6.0 17" size="2 1 1" color="m"/>
+  <box at="3.5 3.5 17" size="2 2 1" color="m"/>
+
+  <!-- Cresta aerodinamica e griglie di dissipazione a quota z=18 (max z, z=19 libero) -->
+  <box at="3.5 4.5 18" size="2 3 1" color="m"/>
+  <box at="3.5 4.0 18" size="2 1 1" color="V"/>
+  <box at="3.5 5.0 18" size="2 1 1" color="T"/>
+  <box at="3.5 5.5 18" size="2 1 1" color="s"/>
+
+  <!-- ======================================================== -->
+  <!-- 5. FERITOIA OTTICA E FASCIO NEON VERSO IL BASSO (z = 15) -->
+  <!-- ======================================================== -->
+  <!-- Involucro riflettente concavo rivolto al terreno (z=15)  -->
+  <box at="3.5 5.0 15" size="4 3 1" color="T"/>
+  <!-- Diffusori ottici prismatici laterali                     -->
+  <box at="2 5.0 15" size="1 2 1" color="G"/>
+  <box at="5 5.0 15" size="1 2 1" color="G"/>
+  <!-- Puntale a becco aerodinamico chiuso sul davanti (y=6)   -->
+  <box at="3.5 6.0 15" size="2 1 1" color="m"/>
+
+  <!-- Fascio luminoso neon ciano incassato verso il basso (y=4..6, x=3..4) -->
+  <box at="3.5 5.0 15" size="2 3 1" color="N"/>
+  <!-- Nucleo fotonico laser bianco centrale incastonato a y=5 -->
+  <box at="3.5 5.0 15" size="2 1 1" color="W"/>
+
+  <!-- ======================================================== -->
+  <!-- 6. REGOLE GENERATIVE: VARIANTI NEI SEMI                  -->
+  <!-- ======================================================== -->
+  <!-- A) Risoluzione del tirante e del contrafforte superiore -->
+  <one steps="1">
+    <!-- Variante 1: tirante in acciaio cromato teso tra snodo e testa -->
+    <rule in="X" out="s" p="0.40"/>
+    <!-- Variante 2: nervatura in titanio fessurata -->
+    <rule in="X" out="m" p="0.30"/>
+    <!-- Variante 3: fessura aerea alleggerita -->
+    <rule in="X" out="B" p="0.30"/>
+  </one>
+  <all in="X" out="s"/>
+
+  <!-- B) Micro-dettagli stocastici sul pilone verticale -->
+  <prl steps="1" optional="True">
+    <!-- Fermagli di ancoraggio cromati sui fianchi del pilone -->
+    <rule in="B M M" out="* s *" p="0.25"/>
+    <rule in="M M B" out="* s *" p="0.25"/>
+    <!-- Intaglio di alleggerimento su facce del pilone -->
+    <rule in="M/M/M" out="*/m/*" p="0.15"/>
+  </prl>
+
+  <!-- C) Diffusione ottica prismatica sulla feritoia -->
+  <prl steps="1" optional="True">
+    <!-- Cristallizzazione sfaccettata dei riflettori -->
+    <rule in="T" out="G" p="0.25"/>
+  </prl>
+</sequence>
+
+<!-- ============================================================ -->
+<!-- 7. ANIMAZIONE TELEMETRIA (6 FRAMES): SPIE E PULSAZIONE FOTONI-->
+<!-- ============================================================ -->
+<animation name="telemetria" frames="6">
+  <sequence>
+    <!-- Le spie telemetriche sul plinto pulsano e si alternano -->
+    <prl steps="1">
+      <rule in="E" out="e" p="0.30"/>
+      <rule in="e" out="E" p="0.30"/>
+    </prl>
+
+    <!-- Il nucleo fotonico laser (W) vibra lungo la feritoia neon (N) in direzione Y -->
+    <prl steps="1">
+      <rule in="W/N" out="N/W" p="0.35"/>
+      <rule in="N/W" out="W/N" p="0.35"/>
+    </prl>
+  </sequence>
+</animation>

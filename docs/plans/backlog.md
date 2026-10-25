@@ -676,7 +676,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   camera girata), foto prima/dopo, commit. Sono piccoli: si possono fare nella stessa sessione.
 - Dipendenze: nessuna. Domande per l'autore: nessuna.
 
-### T50 · La corona personalizzata: arredi futuristici, trasporti e Concilio di gerboa — T50a `fatto` (in corso per T50b-e)
+### T50 · La corona personalizzata: arredi futuristici, trasporti e Concilio di gerboa — `fatto`
 - Contesto: consultazione del 24/10 ([`risposte-T50.md`](../userchats/risposte-T50.md)). Gli undici edifici sono completati
   nel campus (T31 fatto). L'ambientazione della corona deve essere marcatamente futuristica e artificiosa («lo studio che
   programma la realtà»), sfruttando MarkovJunior a piena potenza: programmi con semi riutilizzabili ad altissima varietà visiva
@@ -692,34 +692,35 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
     (`corona-drone`, `corona-treno`) e gli 8 membri del Concilio come gerboa pacioccosi con i loro cappelli distintivi
     (`corona-gerboa-narratore`, `corona-gerboa-cartografo`, `corona-gerboa-artista`, `corona-gerboa-scultore`,
     `corona-gerboa-fisico`, `corona-gerboa-ingegnere`, `corona-gerboa-arbitro`, `corona-gerboa-referente`).
-- **T50b · Modelli di arredo urbano futuristico (MarkovJunior, 8 voxel per casella)**:
-  - *Alberi di luce neon e trasparenti* (`lab/mjx/models/corona-albero-luce.xml` — `fatto`, `6c3f58c`): chiome sintetiche a calice in cristalli traslucidi sfaccettati (aqua, indaco, ghiaccio) e liane penzolanti ciano luminescenti (`glow="True"`); fusto bionico slanciato in titanio con canali a fibra ottica; animazione a 8 frame stocastica (`vita`) di allungamento liane e diffrazione; glow circoscritto alle sole liane per contrasto pulito senza abbagliare.
-  - *Lampioni futuristici*: forme bizzarre, geometriche o sinuose, con sorgenti luminose neon che rischiarano il viale di notte.
-  - *Arredi per vicoli e prati*: panchine sintetiche, cartelli olografici di settore o totem informativi.
-- **T50c · Logistica e trasporti negli esterni (droni e trenini)**:
-  - Fuori dagli edifici non camminano i membri del Concilio, ma simpatiche entità logistiche futuristiche:
-    - *Robottini e droni*: piccoli droni volanti animati che fanno la spola tra una struttura e l'altra trasportando pacchetti di dati.
-    - *Trenini dei file*: piccoli convogli futuristici che viaggiano su percorsi dedicati o binari di luce trasportando archivi e file.
-  - Logica di animazione e percorsi in `src/render/corona3d.ts` (posizioni interpolate o orbite tra le strutture).
-- **T50d · Gli avatar del Concilio: gerboa giganti con cappello**:
-  - Tributo a *The Hitchhiker's Guide to the Galaxy*: i membri del Concilio (negli interni dello studio, alle console della
-    Direzione e al tavolo) non sono più sagome coniche provvisorie (`Avatars` in `corona3d.ts`), ma **gerboa giganti**,
-    carini e pacioccosi (non inquietanti).
-  - Modello MarkovJunior base: corpo soffice e rotondo, orecchie grandi, zampe lunghe, occhi espressivi; colore del mantello
-    o dettagli coordinati con la tinta dell'agente.
-  - Cappelli tematici distintivi per ciascun ruolo:
-    - *Narratore*: cilindro da cantastorie;
-    - *Cartografo*: berretto da esploratore o visiera con mappa;
-    - *Artista*: basco inclinato da pittore;
-    - *Scultore*: visiera protettiva o elmetto da cantiere;
-    - *Fisico*: occhialoni protettivi da laboratorio o tocco accademico;
-    - *Ingegnere*: berretto da tecnico con lente/monocolo;
-    - *Arbitro*: parrucca giudiziaria o tocco da magistrato;
-    - *Referente*: berretto da concierge o auricolare luminoso.
-  - Integrazione in `Avatars` (`src/render/corona3d.ts`) per mostrare i modelli voxel al posto delle geometrie provvisorie.
-- **T50e · Posizionamento, collisioni e rendering nel campus**:
-  - `buildCoronaRing` e `groundAt` in `src/render/corona3d.ts`: distribuire lampioni lungo la linea al neon del viale,
-    alberi di luce sui prati e arredi nei vicoli; collisione calibrata dai voxel per mantenere sgombri viali e ingressi.
+- **T50b · Modelli di arredo urbano futuristico (MarkovJunior, 8 voxel per casella) — `fatto`**:
+  - *Alberi di luce neon e trasparenti* (`universe/models/corona-albero-luce.xml`): chiome sintetiche a calice in cristalli traslucidi sfaccettati e liane luminescenti (`glow="True"`); animazione a 8 frame stocastica (`vita`) di allungamento liane e diffrazione.
+  - *Lampioni futuristici* (`universe/models/corona-lampione.xml`): struttura a stelo ricurvo in lega scura con anello a sbalzo e lanterna al plasma ciano/ambra ad alta luminescenza.
+  - *Panchine sintetiche* (`universe/models/corona-panchina.xml`): seduta ergonomica sospesa a lama con cuscino a nido d'ape e basamento a levitazione o luce guida.
+  - *Totem informativi* (`universe/models/corona-totem.xml`): stele poliedrica con display a cascata olografica e bande laterali pulsanti.
+  - Sincronizzati in `universe/models/` e catalogati in `universe/models/index.json`.
+- **T50c · Logistica e trasporti negli esterni (droni e trenini) — `fatto`**:
+  - *Droni volanti* (`universe/models/corona-drone.xml`): telaio aerodinamico compatto, calotta sensoriale, propulsori a rotore e pod per il trasporto pacchetti.
+  - *Trenini dei file* (`universe/models/corona-treno.xml`): convoglio monorotaia magnetica con testata aerodinamica e carrozze a scomparti luminosi per cassette di dati.
+  - Animazione e percorsi in `src/render/corona3d.ts` (`animateRing`): 4 droni volanti lungo archi parabolici di Bézier tra gli edifici con roll/banking e rotori oscillanti; 2 trenini a levitazione che percorrono il binario anulare del viale a velocità costante.
+- **T50d · Gli avatar del Concilio: gerboa giganti con cappello — `fatto`**:
+  - Modello base `universe/models/corona-gerboa.xml` (tributo alla *Guida Galattica per gli Autostoppisti*): sagoma paffuta e soffice, orecchie ampie, lunghe zampe posteriori, coda con ciuffo e occhi grandi e luminosi.
+  - 8 modelli con cappello tematico distintivo per ruolo:
+    - *Narratore* (`corona-gerboa-narratore.xml`): cilindro da cantastorie;
+    - *Cartografo* (`corona-gerboa-cartografo.xml`): berretto coloniale da esploratore con visiera;
+    - *Artista* (`corona-gerboa-artista.xml`): basco inclinato da pittore bohémien;
+    - *Scultore* (`corona-gerboa-scultore.xml`): visiera da saldatore e caschetto protettivo;
+    - *Fisico* (`corona-gerboa-fisico.xml`): occhialoni protettivi da laboratorio e tocco;
+    - *Ingegnere* (`corona-gerboa-ingegnere.xml`): berretto da macchinista/tecnico con monocolo/lente;
+    - *Arbitro* (`corona-gerboa-arbitro.xml`): parrucca giudiziaria riccioluta d'epoca;
+    - *Referente* (`corona-gerboa-referente.xml`): berretto da concierge con auricolare luminoso.
+  - Integrazione completa in `Avatars` (`src/render/corona3d.ts`): rendering dei modelli MarkovJunior con fallback gerboa base, scala ~0.65, orientamento verso i tavoli/schermi e animazione corporea nel parlato e negli spostamenti.
+- **T50e · Posizionamento, collisioni e rendering nel campus — `fatto`**:
+  - Generazione procedurale degli arredi (`CampusProp`) in `src/kernel/corona.ts`: 81 oggetti posizionati strategicamente (lampioni lungo la linea al neon del viale, alberi di luce sui prati, panchine e totem olografici agli imbocchi dei vicoli).
+  - Pervietà garantita al 100%: viali di transito e ingressi delle porte degli 11 edifici lasciati rigorosamente liberi da collisioni solide.
+  - Collisione `free()` / `propAt()` gestita dal kernel per i prop solidi (alberi, lampioni, totem).
+  - Rendering istanziato con materiali specifici (`MAT.sway` per le fronde degli alberi di luce, `MAT.corona` per gli altri arredi) in `src/render/corona3d.ts`, aggiornamento reattivo al caricamento asincrono delle geometrie (`k.forms.version`).
+  - Prefetch nel kernel per riscaldamento worker (`kernel.ts`).
+  - Test dedicati in `tests/corona.test.ts` e `tests/campus.test.ts`, verifica nel browser positiva sia di giorno sia di notte.
 - Fatto quando: prompt per Gemini scritto; modelli di arredi, droni/trenini e gerboa generati e collaudati in sandbox;
   campus popolato con arredi e droni in movimento; gerboa visibili con i loro cappelli negli interni; test di conformità verdi;
   verifica visuale di giorno e di notte; commit.

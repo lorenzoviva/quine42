@@ -214,5 +214,95 @@
   "nome": "La Direzione",
   "autore": "gemini-3.8-flash (Gemini CLI, T19)",
   "vpt": 8
+ },
+ "corona-albero-luce": {
+  "classe": "albero",
+  "nome": "Albero di luce (corona)",
+  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "vpt": 8
+ },
+ "corona-lampione": {
+  "classe": "mobile",
+  "nome": "Lampione (corona)",
+  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "vpt": 8
+ },
+ "corona-panchina": {
+  "classe": "mobile",
+  "nome": "Panchina (corona)",
+  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "vpt": 8
+ },
+ "corona-totem": {
+  "classe": "monumento",
+  "nome": "Totem (corona)",
+  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "vpt": 8
+ },
+ "corona-drone": {
+  "classe": "oggetto",
+  "nome": "Drone (corona)",
+  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "vpt": 8
+ },
+ "corona-treno": {
+  "classe": "mobile",
+  "nome": "Treno pod (corona)",
+  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "vpt": 8
+ },
+ "corona-gerboa": {
+  "classe": "persona",
+  "nome": "Gerboa base (corona)",
+  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "vpt": 20
+ },
+ "corona-gerboa-narratore": {
+  "classe": "persona",
+  "nome": "Gerboa Narratore (corona)",
+  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "vpt": 20
+ },
+ "corona-gerboa-cartografo": {
+  "classe": "persona",
+  "nome": "Gerboa Cartografo (corona)",
+  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "vpt": 20
+ },
+ "corona-gerboa-artista": {
+  "classe": "persona",
+  "nome": "Gerboa Artista (corona)",
+  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "vpt": 20
+ },
+ "corona-gerboa-scultore": {
+  "classe": "persona",
+  "nome": "Gerboa Scultore (corona)",
+  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "vpt": 20
+ },
+ "corona-gerboa-fisico": {
+  "classe": "persona",
+  "nome": "Gerboa Fisico (corona)",
+  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "vpt": 20
+ },
+ "corona-gerboa-ingegnere": {
+  "classe": "persona",
+  "nome": "Gerboa Ingegnere (corona)",
+  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "vpt": 20
+ },
+ "corona-gerboa-arbitro": {
+  "classe": "persona",
+  "nome": "Gerboa Arbitro (corona)",
+  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "vpt": 20
+ },
+ "corona-gerboa-referente": {
+  "classe": "persona",
+  "nome": "Gerboa Referente (corona)",
+  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "vpt": 20
  }
 }

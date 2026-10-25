@@ -176,6 +176,18 @@ export interface CampusStructure {
   form: Form;
 }
 
+/** Urban furniture, trees and logistics props in the campus (T50b, T50e). */
+export interface CampusProp {
+  id: string;
+  kind: 'lampione' | 'albero' | 'panchina' | 'totem';
+  model: string;
+  x: number;
+  y: number;
+  yaw: number;
+  seed: number;
+  solid: boolean;
+}
+
 /** The model of a building of the campus, if the library has one. */
 export const campusModel = (id: string) => `corona-${id}`;
 
@@ -305,6 +317,8 @@ const DEVICES = new Set([...Object.keys(SHOWCASES), 'nucleo', 'universo', BENCH_
 export class Corona {
   outer: number;
   buildings: Building[] = [];
+  props: CampusProp[] = [];
+  private propCells = new Map<string, CampusProp>();
   private slots = new Map<string, { x: number; y: number }>();
   private exterior = new Map<string, CoronaCell>();
   private files: FileMap = {};
@@ -322,6 +336,8 @@ export class Corona {
     this.files = files;
     this.slots.clear();
     this.exterior.clear();
+    this.props = [];
+    this.propCells.clear();
     const R = this.radius;
     this.outer = R + CAMPUS.ring;
     const groups = new Map<string, Array<Omit<StudioItem, 'x' | 'y'>>>();
@@ -431,6 +447,49 @@ export class Corona {
         else if (b && b.door.x === x && b.door.y === y) this.exterior.set(key, { kind: 'door', building: b.id });
         else this.exterior.set(key, { kind: 'floor', ground: groundAt(d, R, t, total), building: b?.id, folder: b?.id });
       }
+
+    // Campus props (T50b, T50e): lampioni along the avenue, light trees on lawns, benches and totems
+    const addProp = (kind: CampusProp['kind'], model: string, x: number, y: number, yaw: number, seed: number, solid: boolean) => {
+      const cx = Math.floor(x), cy = Math.floor(y);
+      const key = `${cx},${cy}`;
+      const cell = this.exterior.get(key);
+      if (!cell || cell.kind !== 'floor') return;
+      if (this.buildings.some((b) => Math.hypot(b.door.x - cx, b.door.y - cy) < 2.0)) return;
+      const prop: CampusProp = { id: `${kind}_${cx}_${cy}`, kind, model, x, y, yaw, seed, solid };
+      this.props.push(prop);
+      if (solid) this.propCells.set(key, prop);
+    };
+
+    for (const b of this.buildings) {
+      const mid = (b.from + b.to) / 2;
+      const sector = b.to - b.from;
+
+      // Lampioni along the inner side of the avenue neon line (2 per sector)
+      for (const da of [-0.28, 0.28]) {
+        const a = mid + da * sector;
+        const r = R + CAMPUS.line - 0.8;
+        addProp('lampione', 'corona-lampione', Math.sin(a) * r + 0.5, -Math.cos(a) * r + 0.5, -a, 1, true);
+      }
+
+      // Light trees on lawns (3 per sector with varying seeds for generative diversity)
+      const treeConfigs = [
+        { r: R + 27, a: mid - sector * 0.20, seed: 1 + (b.index * 3) % 7 },
+        { r: R + 31, a: mid + sector * 0.20, seed: 1 + (b.index * 3 + 1) % 7 },
+        { r: R + 18, a: mid + sector * 0.36, seed: 1 + (b.index * 3 + 2) % 7 },
+      ];
+      for (const tc of treeConfigs) {
+        addProp('albero', 'corona-albero-luce', Math.sin(tc.a) * tc.r + 0.5, -Math.cos(tc.a) * tc.r + 0.5, (b.index * 1.7) % (Math.PI * 2), tc.seed, true);
+      }
+
+      // Panchine in alley and rear lawn
+      const alleyAngle = b.from + 0.025;
+      addProp('panchina', 'corona-panchina', Math.sin(alleyAngle) * (R + 14) + 0.5, -Math.cos(alleyAngle) * (R + 14) + 0.5, -alleyAngle + Math.PI / 2, 1, true);
+      const benchRearA = mid - sector * 0.08;
+      addProp('panchina', 'corona-panchina', Math.sin(benchRearA) * (R + 25) + 0.5, -Math.cos(benchRearA) * (R + 25) + 0.5, -benchRearA + Math.PI, 1, true);
+
+      // Totem at alley entrance from avenue
+      addProp('totem', 'corona-totem', Math.sin(alleyAngle) * (R + CAMPUS.avenue + 0.8) + 0.5, -Math.cos(alleyAngle) * (R + CAMPUS.avenue + 0.8) + 0.5, -alleyAngle, 1, true);
+    }
   }
 
   /** The room (building and floor) containing a real-space point, if it is inside. */
@@ -467,10 +526,19 @@ export class Corona {
     return this.exterior.get(`${cx},${cy}`) ?? null;
   }
 
+  /** Returns the campus prop on cell (cx, cy), if any. */
+  propAt(cx: number, cy: number): CampusProp | undefined {
+    return this.propCells.get(`${cx},${cy}`);
+  }
+
   /** Can one stand there? Walls, shelves, the Council's seats and the buildings' outside walls block. */
   free(x: number, y: number): boolean {
-    const c = this.at(Math.floor(x), Math.floor(y));
+    const cx = Math.floor(x), cy = Math.floor(y);
+    const c = this.at(cx, cy);
     if (!c) return false;
+    // Outside, solid campus props (lamp posts, tree trunks, benches, totems) block
+    const prop = this.propCells.get(`${cx},${cy}`);
+    if (prop?.solid) return false;
     // Outside, a building that is a model blocks with its voxels (and only with them).
     if (c.kind === 'floor' || c.kind === 'building' || c.kind === 'door') {
       const s = c.building ? this.building(c.building)?.structure : undefined;

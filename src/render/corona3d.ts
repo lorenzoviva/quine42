@@ -12,7 +12,7 @@ import { CAMPUS, ROOM_H, ROOM_W, type Building, type Floor, type StudioItem } fr
 import { Builder } from './terrain';
 import { MAT, rgbOf } from './materials';
 import { NODE_COLOR } from '../kernel/graph';
-import { geoOf, modelObject, showFrame } from './models';
+import { geoOf, modelObject, showFrame, type ModelObject } from './models';
 import { LEVEL } from '../kernel/relief';
 import { OPERATION_COLOR, type Situation } from '../kernel/situation';
 
@@ -95,20 +95,166 @@ export function buildCoronaRing(k: Kernel): THREE.Group {
     if (!geo.frames.length) place(geo.body);
     else frames.push(geo.frames.map(place));
   }
+
+  // Campus props (T50b, T50e): lampioni along the avenue, light trees on lawns, benches and totems
+  for (const p of c.props) {
+    const f = k.forms.ready(p.model, p.seed);
+    const geo = f && geoOf(f);
+    if (!geo) {
+      k.forms.get(p.model, p.seed);
+      continue;
+    }
+    const mat = p.kind === 'albero' ? MAT.sway : MAT.corona;
+    const placeProp = (bg: THREE.BufferGeometry) => {
+      const mesh = new THREE.Mesh(bg, mat);
+      mesh.castShadow = mesh.receiveShadow = true;
+      mesh.position.set(p.x, 0, p.y);
+      mesh.rotation.y = p.yaw;
+      g.add(mesh);
+      return mesh;
+    };
+    if (!geo.frames.length) placeProp(geo.body);
+    else frames.push(geo.frames.map(placeProp));
+  }
+
+  // Logistics (T50c): Flying data drones and magnetic pod trains
+  const droneForm = k.forms.ready('corona-drone', 1);
+  const droneGeo = droneForm && geoOf(droneForm);
+  if (!droneGeo) k.forms.get('corona-drone', 1);
+
+  const trainForm = k.forms.ready('corona-treno', 1);
+  const trainGeo = trainForm && geoOf(trainForm);
+  if (!trainGeo) k.forms.get('corona-treno', 1);
+
+  const drones: CampusDrone[] = [];
+  if (droneGeo) {
+    for (let i = 0; i < 4; i++) {
+      const dg = new THREE.Group();
+      const placeD = (bg: THREE.BufferGeometry) => {
+        const mesh = new THREE.Mesh(bg, MAT.corona);
+        mesh.castShadow = true;
+        dg.add(mesh);
+        return mesh;
+      };
+      const frms = droneGeo.frames.length ? droneGeo.frames.map(placeD) : [placeD(droneGeo.body)];
+      g.add(dg);
+      drones.push({
+        group: dg,
+        frames: frms,
+        fromBuilding: (i * 3) % Math.max(1, c.buildings.length),
+        toBuilding: (i * 3 + 4) % Math.max(1, c.buildings.length),
+        cycleTime: 14 + i * 2,
+        phase: i * 4.0,
+      });
+    }
+  }
+
+  const trains: CampusTrain[] = [];
+  if (trainGeo) {
+    for (let i = 0; i < 2; i++) {
+      const tg = new THREE.Group();
+      const placeT = (bg: THREE.BufferGeometry) => {
+        const mesh = new THREE.Mesh(bg, MAT.corona);
+        mesh.castShadow = true;
+        tg.add(mesh);
+        return mesh;
+      };
+      const frms = trainGeo.frames.length ? trainGeo.frames.map(placeT) : [placeT(trainGeo.body)];
+      g.add(tg);
+      trains.push({
+        group: tg,
+        frames: frms,
+        trackRadius: R + CAMPUS.avenue - 0.7,
+        speed: 0.08,
+        phase: i * Math.PI,
+      });
+    }
+  }
+
+  g.userData.drones = drones;
+  g.userData.trains = trains;
   g.userData.frames = frames;
   return g;
 }
 
-/** The frames of the campus's animated buildings, each building with its own beat. */
-export function animateRing(ring: THREE.Group, t: number): void {
-  (ring.userData.frames as THREE.Mesh[][] | undefined)?.forEach((f, i) => showFrame(f, t, i * 0.37));
+export interface CampusDrone {
+  group: THREE.Group;
+  frames: THREE.Mesh[];
+  fromBuilding: number;
+  toBuilding: number;
+  cycleTime: number;
+  phase: number;
 }
 
-/** What the campus wears (T20): the ring is built again when a building becomes its model. */
-export const campusKey = (k: Kernel) => k.corona.buildings.map((b) => (b.structure && geoOf(b.structure.form) ? b.structure.form.key : '')).join('|');
+export interface CampusTrain {
+  group: THREE.Group;
+  frames: THREE.Mesh[];
+  trackRadius: number;
+  speed: number;
+  phase: number;
+}
+
+/** The frames of the campus's animated buildings, props and logistics (T50c, T50e). */
+export function animateRing(ring: THREE.Group, t: number, k?: Kernel): void {
+  (ring.userData.frames as THREE.Mesh[][] | undefined)?.forEach((f, i) => showFrame(f, t, i * 0.37));
+
+  const drones = ring.userData.drones as CampusDrone[] | undefined;
+  if (drones && k) {
+    const c = k.corona;
+    const bCount = Math.max(1, c.buildings.length);
+    for (let i = 0; i < drones.length; i++) {
+      const d = drones[i];
+      showFrame(d.frames, t * 2, i * 0.25);
+      const p = ((t + d.phase) % d.cycleTime) / d.cycleTime;
+      const bA = c.buildings[d.fromBuilding % bCount];
+      const bB = c.buildings[d.toBuilding % bCount];
+      if (!bA || !bB) continue;
+      const angleA = (bA.from + bA.to) / 2;
+      let angleB = (bB.from + bB.to) / 2;
+      while (angleB - angleA > Math.PI) angleB -= Math.PI * 2;
+      while (angleB - angleA < -Math.PI) angleB += Math.PI * 2;
+
+      const ease = 0.5 - 0.5 * Math.cos(p * Math.PI);
+      const angle = angleA + (angleB - angleA) * ease;
+      const arcRadius = c.radius + CAMPUS.avenue + 1 + Math.sin(p * Math.PI) * 5;
+      const px = Math.sin(angle) * arcRadius;
+      const py = -Math.cos(angle) * arcRadius;
+      const alt = 2.4 + Math.sin(p * Math.PI) * 1.2 + Math.sin(t * 4 + i) * 0.12;
+
+      const nextP = Math.min(1, p + 0.02);
+      const nextEase = 0.5 - 0.5 * Math.cos(nextP * Math.PI);
+      const nextAngle = angleA + (angleB - angleA) * nextEase;
+      const nextRadius = c.radius + CAMPUS.avenue + 1 + Math.sin(nextP * Math.PI) * 5;
+      const nx = Math.sin(nextAngle) * nextRadius;
+      const ny = -Math.cos(nextAngle) * nextRadius;
+
+      d.group.position.set(px, alt, py);
+      d.group.rotation.y = Math.atan2(nx - px, ny - py);
+      d.group.rotation.z = Math.sin(t * 4 + i) * 0.06;
+    }
+  }
+
+  const trains = ring.userData.trains as CampusTrain[] | undefined;
+  if (trains) {
+    for (let i = 0; i < trains.length; i++) {
+      const tr = trains[i];
+      showFrame(tr.frames, t, i * 0.5);
+      const angle = (t * tr.speed + tr.phase) % (Math.PI * 2);
+      const px = Math.sin(angle) * tr.trackRadius;
+      const py = -Math.cos(angle) * tr.trackRadius;
+      tr.group.position.set(px, 0.08 + Math.sin(t * 6 + i) * 0.015, py);
+      tr.group.rotation.y = -angle - Math.PI / 2;
+    }
+  }
+}
+
+/** What the campus wears (T20, T50e): the ring is built again when a building or prop becomes ready. */
+export const campusKey = (k: Kernel) =>
+  `${k.forms.version}|` + k.corona.buildings.map((b) => (b.structure && geoOf(b.structure.form) ? b.structure.form.key : '')).join('|');
 
 /** The building's name in neon above its door, facing the avenue (and, on its back, the lawns). */
 function neonSign(b: Building, R: number): THREE.Group {
+  if (typeof document === 'undefined') return new THREE.Group();
   const W = 1024, H = 160;
   const cv = document.createElement('canvas');
   cv.width = W;
@@ -819,9 +965,16 @@ export function buildShowcase(k: Kernel, it: StudioItem, entry: ShowcaseEntry, c
   return { group: g, spin, bubbles };
 }
 
-/** The Council's people in the corona and in the studio: robed figures in their colour. */
+interface AvatarEntry {
+  group: THREE.Group;
+  modelObj?: ModelObject;
+  modelKey?: string;
+  standIn?: THREE.Group;
+}
+
+/** The Council's people in the corona and in the studio: giant cuddly gerboas with distinctive hats (T50d). */
 export class Avatars {
-  private views = new Map<string, THREE.Group>();
+  private views = new Map<string, AvatarEntry>();
   constructor(private scene: THREE.Object3D) {}
 
   update(k: Kernel, t: number): void {
@@ -830,20 +983,79 @@ export class Avatars {
       seen.add(key);
       let v = this.views.get(key);
       if (!v) {
-        v = new THREE.Group();
+        const group = new THREE.Group();
+        const standIn = new THREE.Group();
         const robe = new THREE.Mesh(new THREE.ConeGeometry(0.32, 1.0, 8), new THREE.MeshLambertMaterial({ color: a.color }));
         robe.position.y = 0.5;
         const head = new THREE.Mesh(new THREE.SphereGeometry(0.15, 10, 8), new THREE.MeshLambertMaterial({ color: '#14100c' }));
         head.position.y = 1.08;
         robe.castShadow = head.castShadow = true;
-        v.add(robe, head);
-        this.scene.add(v);
+        standIn.add(robe, head);
+        group.add(standIn);
+        this.scene.add(group);
+        v = { group, standIn };
         this.views.set(key, v);
       }
-      v.position.set(a.x, Math.abs(Math.sin(t * 4 + a.x)) * 0.03, a.y);
+
+      // Model for the agent: gerboa with role hat (T50d)
+      const model = a.agent ? `corona-gerboa-${a.agent}` : 'corona-gerboa';
+      const f = k.forms.ready(model, 1) ?? k.forms.ready('corona-gerboa', 1);
+      if (!f) {
+        k.forms.get(model, 1);
+      } else if (v.modelKey !== f.key) {
+        if (v.standIn) {
+          v.group.remove(v.standIn);
+          v.standIn = undefined;
+        }
+        if (v.modelObj) {
+          v.group.remove(v.modelObj.root);
+        }
+        const mo = modelObject(k, f, { model: f.model, seed: 1, yaw: 0 }, MAT.corona);
+        if (mo) {
+          mo.root.scale.setScalar(0.65);
+          v.group.add(mo.root);
+          v.modelObj = mo;
+          v.modelKey = f.key;
+        }
+      }
+
+      const walking = Math.hypot(a.tx - a.x, a.ty - a.y) > 0.05;
+      const bob = a.say
+        ? Math.abs(Math.sin(t * 8)) * 0.12
+        : walking
+        ? Math.abs(Math.sin(t * 6 + a.x)) * 0.06
+        : Math.sin(t * 2.5 + a.x * 2) * 0.02;
+
+      v.group.position.set(a.x, bob, a.y);
+
+      if (walking) {
+        v.group.rotation.y = Math.atan2(a.tx - a.x, a.ty - a.y);
+      } else if (a.building === 'concilio') {
+        // Face the round table center in the Council's hall
+        const room = k.corona.building('concilio')?.floors[0];
+        const cx = (room?.ox ?? 0) + 12;
+        const cy = (room?.oy ?? 0) + 8.5;
+        v.group.rotation.y = Math.atan2(cx - a.x, cy - a.y);
+      } else {
+        v.group.rotation.y = 0;
+      }
+
+      if (a.say) {
+        v.group.rotation.z = Math.sin(t * 10) * 0.04;
+      } else {
+        v.group.rotation.z = 0;
+      }
+
+      // Swing legs if walking
+      if (v.modelObj) {
+        const swing = walking ? Math.sin(t * 7) * 0.35 : 0;
+        for (const l of v.modelObj.limbs) {
+          if (l.part === 'gamba') l.pivot.rotation.x = l.phase ? swing : -swing;
+        }
+      }
     }
     for (const [key, v] of [...this.views]) if (!seen.has(key)) {
-      this.scene.remove(v);
+      this.scene.remove(v.group);
       this.views.delete(key);
     }
   }

@@ -3538,6 +3538,16 @@ export class Kernel {
       const f = this.forms.ready(model, 1);
       if (f) this.corona.placeStructure(b.id, model, f);
     }
+    const extra = [
+      'corona-albero-luce', 'corona-lampione', 'corona-panchina', 'corona-totem',
+      'corona-drone', 'corona-treno',
+      'corona-gerboa', 'corona-gerboa-narratore', 'corona-gerboa-cartografo',
+      'corona-gerboa-artista', 'corona-gerboa-scultore', 'corona-gerboa-fisico',
+      'corona-gerboa-ingegnere', 'corona-gerboa-arbitro', 'corona-gerboa-referente'
+    ];
+    for (const m of extra) {
+      if (this.forms.info(m)) this.forms.get(m, 1);
+    }
   }
 
   /** What a source of showcases has to show, in a stable order. */

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import * as THREE from 'three';
 import { CAMPUS, Corona, DEVICE_MARGIN, ROOM_H, ROOM_W } from '../src/kernel/corona';
-import { buildRoom } from '../src/render/corona3d';
+import { animateRing, Avatars, buildCoronaRing, buildRoom } from '../src/render/corona3d';
 
 // T18: the campus on the ring is four times the 2D one (the circle stays): avenue, doors, buildings
 // big enough for a model, alleys, lawns, a glowing edge; every door reachable from the avenue.
@@ -243,6 +243,50 @@ describe('the devices of the rooms', () => {
       expect(baseQuads[q]).toBeGreaterThan(0);
       expect(topQuads[q]).toBeGreaterThan(0);
     }
+  });
+
+  it('populates campus props and sets up logistics and gerboa avatars (T50)', () => {
+    const c = campus();
+    expect(c.props.length).toBeGreaterThanOrEqual(44);
+    const kinds = new Set(c.props.map((p) => p.kind));
+    expect([...kinds].sort()).toEqual(['albero', 'lampione', 'panchina', 'totem']);
+
+    // Solid props block their tile
+    const solid = c.props.find((p) => p.solid);
+    expect(solid).toBeDefined();
+    expect(c.free(solid!.x, solid!.y)).toBe(false);
+
+    // Verify buildCoronaRing creates drones and trains
+    const requested: string[] = [];
+    const mockKernel: any = {
+      corona: c,
+      forms: {
+        version: 1,
+        ready: (_m: string) => undefined,
+        get: (m: string) => { requested.push(m); return undefined; },
+      },
+      archive: {
+        avatars: new Map([
+          ['narratore@concilio', { agent: 'narratore', name: 'Narratore', color: '#ffcf5c', sigil: '📖', building: 'concilio', x: 12, y: 8, tx: 12, ty: 8, sayUntil: 0, idleUntil: 0, speed: 3.2 }],
+          ['ingegnere@sistemi', { agent: 'ingegnere', name: 'Ingegnere', color: '#b9a6ff', sigil: '⚙', building: 'sistemi', x: 5, y: 10, tx: 5, ty: 10, sayUntil: 0, idleUntil: 0, speed: 3.2 }],
+        ]),
+      },
+    };
+
+    const ring = buildCoronaRing(mockKernel);
+    expect(ring.userData.drones).toBeDefined();
+    expect(ring.userData.trains).toBeDefined();
+
+    // animateRing runs without throwing
+    expect(() => animateRing(ring, 1.5, mockKernel)).not.toThrow();
+
+    // Avatars create and request gerboa models
+    const scene = new THREE.Group();
+    const avatars = new Avatars(scene);
+    avatars.update(mockKernel, 0);
+    expect(scene.children.length).toBe(2);
+    expect(requested).toContain('corona-gerboa-narratore');
+    expect(requested).toContain('corona-gerboa-ingegnere');
   });
 });
 

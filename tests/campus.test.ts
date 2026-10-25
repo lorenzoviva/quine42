@@ -94,7 +94,8 @@ describe('the buildings of the campus as models', () => {
 
 // T31: the buildings Gemini wrote for the campus (lab/mjx/models/corona-<id>.xml, then in the seed).
 describe('the buildings of the seed', () => {
-  const written = Object.keys(bundledFiles).map((p) => /^models\/corona-([a-z]+)\.xml$/.exec(p)?.[1]).filter((id): id is string => !!id);
+  const BUILDINGS = ['magia', 'persone', 'cose', 'oggetti', 'luoghi', 'sistemi', 'nucleo', 'concilio', 'universo', 'galleria', 'mondo'];
+  const written = BUILDINGS.filter((id) => bundledFiles[`models/corona-${id}.xml`]);
 
   it('are in the library at 8 voxels per tile', () => {
     expect(written).toContain('magia');
