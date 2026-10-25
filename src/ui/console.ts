@@ -27,6 +27,8 @@ export class Console {
   onEdit?: (path: string) => void;
   onClose?: () => void;
   onGenesis?: () => void;
+  /** The master of a game of many (T42d): a copy of the universe with another master, under a new name. */
+  onClone?: (nome: string, master: string, titolari: 'restano' | 'master') => Promise<string | null>;
   dev = false;
 
   constructor(private kernel: Kernel) {
@@ -189,6 +191,32 @@ export class Console {
           }
           void k.chunkStore.clear().then(() => location.reload());
         };
+        const clone: HTMLElement[] = [];
+        if (this.onClone && k.partita().modalita === 'multigiocatore') {
+          const nome = el('input', { type: 'text', placeholder: 'nome del clone' }) as HTMLInputElement;
+          const master = el('input', { type: 'text', placeholder: 'id del nuovo master' }) as HTMLInputElement;
+          const pass = el('input', { type: 'checkbox' }) as HTMLInputElement;
+          const out = el('div', { class: 'note' });
+          const go = el('button', {}, 'Clona con un altro master');
+          go.onclick = async () => {
+            go.disabled = true;
+            try {
+              const head = await this.onClone!(nome.value.trim(), master.value.trim(), pass.checked ? 'master' : 'restano');
+              out.textContent = `Nato «${nome.value.trim()}» (${head ?? 'senza commit'}): lo stesso mondo e le stesse carte, il master è ${master.value.trim()}. Si apre con ?universo=${nome.value.trim()}.`;
+            } catch (e) {
+              out.textContent = `Clone non fatto: ${(e as Error).message}`;
+            } finally {
+              go.disabled = false;
+            }
+          };
+          clone.push(
+            el('div', { class: 'note' }, 'Il master non cambia: per un altro master si clona l\x27universo (storia, luoghi, viandanti e carte; non il ramo non pubblicato).'),
+            el('div', { class: 'row' }, nome, master),
+            el('div', { class: 'row' }, pass, ' le mie carte passano al nuovo master'),
+            el('div', { class: 'row' }, go),
+            out,
+          );
+        }
         return [
           el('div', { class: 'note' }, `Universo «${k.config.name}» — seme ${k.config.seed} — ${Object.keys(k.files).length} file — ${k.ecs.count()} entità — ${k.chunks.size} chunk`),
           el('div', { class: 'note' }, k.repo.backend ? `Due repository: il kernel (il seme, immutabile) e questo universo, un repository git su disco in universes/${k.config.name}/ — ogni commit valido vi viene scritto; la partita si salva da sola.` : 'Nessun repository su disco (hosting statico): l\'universo vive nel browser.'),
@@ -196,6 +224,7 @@ export class Console {
           el('div', { class: 'row' }, 'Importa: ', file),
           el('div', { class: 'row' }, genesis),
           el('div', { class: 'row' }, flush),
+          ...clone,
           el('div', { class: 'row' }, reset),
         ];
       }

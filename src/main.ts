@@ -208,6 +208,8 @@ async function main() {
   // A universe that was never generated waits for its genesis before the Council paints anything.
   if (!thin) kernel.generationHeld = online && kernel.needsGenesis() && !params.has('skip');
   if (tools) tools.konsole.onGenesis = () => void runGenesis();
+  // Another master is another universe (T42d): the store copies this one, from the main line on disk.
+  if (tools && thin && client) tools.konsole.onClone = (nome, master, titolari) => client.clone(nome, master, titolari);
   kernel.bus.on('genesis:done', ({ title }) => hud.showBanner(title.toUpperCase(), 'Un nuovo universo è stato scritto. Il tappeto ti riporta al centro.', 4000));
 
   kernel.input.attach(window);

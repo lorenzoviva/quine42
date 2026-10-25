@@ -37,6 +37,8 @@ export interface UniverseBackend {
   readBranch?(name: string): Promise<Record<string, string | null> | null>;
   /** A branch published: merged into the main line (whose files already are the branch's), then gone. */
   merge?(name: string, message: string): Promise<void>;
+  /** A copy of this universe with another master (T42d), under a new name; returns the clone's head. */
+  clone?(nome: string, master: string, titolari: 'restano' | 'master'): Promise<string | null>;
 }
 
 /** Hash of every seed file a universe was made from (or last updated from): `seed.json`. */
@@ -242,6 +244,12 @@ export class UniverseClient implements UniverseBackend {
 
   merge(name: string, message: string): Promise<void> {
     return this.queued(async () => void (await this.post('merge', { branch: name, message })), undefined);
+  }
+
+  /** After the commits in flight, so the clone has them. Throws with the store's reason (a name taken, a master already). */
+  async clone(nome: string, master: string, titolari: 'restano' | 'master' = 'restano'): Promise<string | null> {
+    await this.queue;
+    return (await this.post('clone', { nome, master, titolari })).head ?? null;
   }
 
   private queued<T>(fn: () => Promise<T>, fallback: T): Promise<T> {

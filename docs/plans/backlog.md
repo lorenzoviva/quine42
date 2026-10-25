@@ -1160,10 +1160,19 @@ le risposte alle domande del piano.
   Diverso dal previsto: l'atlante «della corona» è il pannello che si apre dall'Ufficio dei luoghi (nella stanza l'atlante è un
   tavolo luminoso che apre il pannello, senza disegni dei luoghi); la vista seguita mostra soltanto: le azioni sulle caselle restano fuori portata.
 
-### T42d · Clonare l'universo con un altro master — `da fare` (dipende da T42b)
+### T42d · Clonare l'universo con un altro master — `fatto` (`HASH`) (dipende da T42b)
 - Fare: copiare il repository dell'universo in un universo nuovo con `partita.master` diverso (l'unico modo di cambiare master); le
   carte restano a chi le ha generate (`carta.autore`, `pagante`), il titolare può restare o passare al nuovo master (da decidere).
 - Fatto quando: test (il clone ha lo stesso mondo, un altro master, le stesse carte).
+- Esito: ADR-0068. `cloneUniverse` in `server/universeStore.ts` (`POST /api/universe/<nome>/clone {nome, master, titolari}`) copia
+  la cartella intera dell'universo (storia, `maps/` anche non committati, `world/giocatori/`, carte, consumi), toglie i rami `rami/*`
+  (ciò che il vecchio master provava senza pubblicare è suo) e committa ciò che dà `cloneChanges` (`src/kernel/clone.ts`, funzione
+  pura e leggera perché la importa il server di Vite): `name` e `partita.master` in `universe.json`. Decisione sul titolare: resta
+  (predefinito); con `titolari: 'master'` le carte del vecchio master, comprese le comuni estratte a lui, passano al nuovo
+  (`passCards`); autore, pagante e utilizzi non cambiano mai. «Clona con un altro master» nella scheda «Universo» della console del
+  master in multigiocatore (`Console.onClone`). `tests/clone.test.ts` (5 test, anche su disco in una cartella temporanea e il kernel
+  del clone con il nuovo master in god mode). Diverso dal previsto: nulla di rilevante; nessuna verifica nel browser (il pulsante
+  c'è solo per il master in multigiocatore e chiama l'endpoint coperto dal test su disco; in singola nulla cambia).
 
 ### T43 · Tra giocatori — `da fare` (dipende da T33, T39)
 - Fare: «Altro…» su un altro giocatore giudicato come su una persona (se l'universo lo permette), effetti applicati dal

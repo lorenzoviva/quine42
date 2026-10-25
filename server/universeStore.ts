@@ -12,6 +12,7 @@
 //   POST /api/universe/<name>/branch          { branch, files, message, author } → { head }   (T42b: the master's branch)
 //   GET  /api/universe/<name>/branch/<branch> → { exists, files }                what it changes against the main line
 //   POST /api/universe/<name>/merge           { branch, message }               the branch published, then gone
+//   POST /api/universe/<name>/clone           { nome, master, titolari }        → { nome, head }  (T42d: another master)
 //   GET|PUT /api/universe/<name>/map/<key>    JSON
 //   GET  /api/universe/<name>/maps            → [{ file, name, layout }] every place ever planned
 
@@ -20,6 +21,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { execFile } from 'node:child_process';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
+import { cloneChanges, type CloneOptions } from '../src/kernel/clone';
 
 const MAX_BODY = 32 * 1024 * 1024;
 const NAME_RE = /^[a-z0-9][a-z0-9-]{0,40}$/;
@@ -125,6 +127,32 @@ export async function mergeBranch(root: string, branch: string, message: string)
   await git(root, ['update-ref', '-d', ref]);
 }
 
+// --- Clones (T42d) ------------------------------------------------------------------------------
+// The master of a game of many never changes: another master means another universe, copied whole — history, maps,
+// the state of every wanderer — with its name and master changed (and the old master's cards, if they pass) in one
+// more commit. What the old master was trying on their branch is theirs, unpublished: the clone has no branches.
+
+/** Copies the universe at `root` into `<baseDir>/<opts.nome>` with another master; the source is never touched. */
+export async function cloneUniverse(baseDir: string, root: string, opts: CloneOptions): Promise<{ nome: string; head: string | null; from: string }> {
+  if (!(await exists(path.join(root, '.git')))) throw new Error('universo sconosciuto');
+  const files = await readTree(root);
+  const { changes, from } = cloneChanges(files, opts);
+  const dest = path.join(baseDir, opts.nome);
+  if (await exists(dest)) throw new Error(`esiste già: ${opts.nome}`);
+  await fs.cp(root, dest, { recursive: true });
+  try {
+    const refs = await git(dest, ['for-each-ref', '--format=%(refname)', 'refs/heads/rami/']);
+    for (const ref of refs.split('\n').filter(Boolean)) await git(dest, ['update-ref', '-d', ref]);
+    for (const f of await fs.readdir(path.join(dest, '.git'))) if (/^rune-ramo-.*\.index$/.test(f)) await fs.rm(path.join(dest, '.git', f), { force: true });
+    await writeFiles(dest, changes);
+    const head = await commitAll(dest, `clone di «${path.basename(root)}»: il master è ${opts.master} (prima ${from})`, 'kernel');
+    return { nome: opts.nome, head, from };
+  } catch (e) {
+    await fs.rm(dest, { recursive: true, force: true });
+    throw e;
+  }
+}
+
 /** A universe-relative path that stays inside the universe and out of git's own folder. */
 function safePath(root: string, rel: string): string {
   const p = rel.replace(/\\/g, '/');
@@ -205,7 +233,7 @@ export function universeStore(baseDir: string): Plugin {
   const handler: Connect.NextHandleFunction = (req, res, next) => {
     if (!req.url?.startsWith('/api/universe')) return next();
     const url = req.url.split('?')[0];
-    const m = /^\/api\/universe\/([^/]+)(?:\/(create|commit|checkout|reset|map|maps|branch|merge)(?:\/([^/]+))?)?$/.exec(url);
+    const m = /^\/api\/universe\/([^/]+)(?:\/(create|commit|checkout|reset|map|maps|branch|merge|clone)(?:\/([^/]+))?)?$/.exec(url);
     if (url === '/api/universe' || url === '/api/universe/') {
       void fs
         .readdir(baseDir, { withFileTypes: true })
@@ -302,6 +330,10 @@ export function universeStore(baseDir: string): Plugin {
             case 'merge':
               await mergeBranch(root, String(body.branch), String(body.message ?? 'pubblicazione'));
               return { head: await head(root) };
+            case 'clone': {
+              const { nome, head: h } = await cloneUniverse(baseDir, root, { nome: String(body.nome ?? ''), master: String(body.master ?? ''), titolari: body.titolari === 'master' ? 'master' : 'restano' });
+              return { nome, head: h };
+            }
             case 'reset': {
               if (!(await exists(root))) return { trashed: null };
               // Never deleted: moved aside, so a universe can always be recovered by hand.
