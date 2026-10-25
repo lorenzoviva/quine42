@@ -445,6 +445,8 @@ export class SessionServer {
     }
     const before = { ...repo.head().files };
     const r = await fork.talkToAgent(agente, testo);
+    // Runes are not files (T42f): they go into the master's pouch in the world, now.
+    if (r.runes?.length) k.as(c.id, () => k.grantRunes(r.runes!));
     // Only what was committed (valid) goes on the branch.
     const made = changesBetween(before, repo.head().files);
     const paths = Object.keys(made);

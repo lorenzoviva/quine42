@@ -273,6 +273,7 @@ export class MockModels implements Models {
         const t = String(d.text ?? '');
         if (/distrugg.*universo|cancella tutto/i.test(t)) return { risposta: 'Questo no.', incarico: 'nessuno', rifiuto: "distruggerebbe l'universo" };
         if (/riscolp/i.test(t)) return { risposta: 'Lo dico allo Scultore.', incarico: 'riscolpisci', bersaglio: t.replace(/.*riscolpisci\s+(il |la |lo |l')?/i, '').split(' ')[0], richiesta: t };
+        if (/\brun[ae]\b/i.test(t)) return { risposta: 'Eccole.', incarico: 'runa', rune: [t.replace(/.*\brun[ae]\s+/i, '')] };
         if (/regola/i.test(t)) return { risposta: 'Sarà una regola del mondo.', incarico: 'regola', richiesta: t.replace(/.*regola:?\s*/i, '') };
         if (/bosco|luogo|regione|castello|deserto/i.test(t)) return { risposta: 'Il Cartografo ci pensa.', incarico: 'ambiente', richiesta: t };
         if (/personaggio|abitante|persona/i.test(t)) return { risposta: 'La Fucina lo farà nascere.', incarico: 'personaggio', richiesta: t };

@@ -8,6 +8,8 @@ import { fakeLink } from '../src/session/protocol';
 import { SessionServer } from '../src/session/server';
 import { SessionClient } from '../src/session/client';
 import { ThinClient } from '../src/session/thin';
+import { askedRunes, ASKED_RUNES_MAX } from '../src/kernel/runes';
+import { countItem } from '../src/kernel/inventory';
 
 const DT = 1 / 60;
 const RULES = 'world/rules.json';
@@ -115,4 +117,43 @@ describe('the Referente and the teams of the corona on the master’s branch (T4
     expect(rulesOf(server.branchFiles())).not.toMatch(/anna vince/);
     expect(rulesOf(k.files)).not.toMatch(/campane|corvi|anna/);
   }, 30_000);
+});
+
+describe('the runes the master asks the Referente for (T42f)', () => {
+  it('the words a model wrote become rune tokens, never the Council’s rune, at most a handful', () => {
+    expect(askedRunes(['speed'])).toEqual(['speed']);
+    expect(askedRunes(['carpet.active=false', 'x'])).toEqual(['carpet', '.', 'active', '=', 'false', 'x']);
+    expect(askedRunes(['concilio', '€', 7, 'speed speed'])).toEqual(['speed', 'speed']);
+    expect(askedRunes(Array(40).fill('x'))).toHaveLength(ASKED_RUNES_MAX);
+    expect(askedRunes('speed')).toEqual([]);
+  });
+
+  it('the master asks «dammi la runa speed» and finds it in their pouch on the server; a player cannot ask', async () => {
+    const k = await bootMany();
+    const server = new SessionServer(k);
+    const master = await thin(server, 'io');
+    const anna = await thin(server, 'anna');
+    run(server, [master, anna], 6);
+    const has = (id: string, token: string) => k.as(id, () => countItem(k.inventory(), `rune:${token}`));
+    expect(has('io', 'speed')).toBe(0);
+    const r = await until(server, [master, anna], master.k.talkToAgent('referente', 'dammi la runa speed'));
+    expect(r.forged).toMatch(/speed/);
+    expect(has('io', 'speed')).toBe(1);
+    expect(k.as('io', () => k.hand().tokens)).toContain('speed');
+    // Not a file: the branch has nothing, and the master's client hears of it in the next update.
+    expect(server.branchFiles()).toEqual({});
+    run(server, [master, anna], 12);
+    expect(countItem(master.k.inventory(), 'rune:speed')).toBe(1);
+    // A player's words to the Council go nowhere.
+    const refused = await until(server, [master, anna], anna.session.act({ t: 'agente', agente: 'referente', testo: 'dammi la runa speed' }));
+    expect(refused.ok).toBe(false);
+    expect(has('anna', 'speed')).toBe(0);
+  }, 30_000);
+
+  it('alone, runes are not asked for: they are found in the world', async () => {
+    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
+    const r = await k.talkToAgent('referente', 'dammi la runa speed');
+    expect(r.runes).toBeUndefined();
+    expect(countItem(k.inventory(), 'rune:speed')).toBe(0);
+  });
 });

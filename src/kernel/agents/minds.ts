@@ -130,9 +130,10 @@ const REFERENTE_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
     risposta: { type: 'STRING' },
-    incarico: { type: 'STRING', enum: ['nessuno', 'oggetto', 'personaggio', 'cosa', 'ambiente', 'regola', 'riscolpisci', 'oggetti', 'meccanica'] },
+    incarico: { type: 'STRING', enum: ['nessuno', 'oggetto', 'personaggio', 'cosa', 'ambiente', 'regola', 'riscolpisci', 'oggetti', 'meccanica', 'runa'] },
     richiesta: { type: 'STRING', description: "la richiesta riformulata per la squadra che se ne occupa, chiara e completa" },
     bersaglio: { type: 'STRING', description: 'per "riscolpisci": il nome di ciò da riscolpire' },
+    rune: { type: 'ARRAY', items: { type: 'STRING' }, description: 'per "runa": le parole del codice chieste, una per runa (una ripetuta conta due volte)' },
     rifiuto: { type: 'STRING', description: "solo se la richiesta distruggerebbe l'universo, il viandante stesso o le leggi fisiche del gioco: perché no" },
   },
   required: ['risposta', 'incarico'],
@@ -144,23 +145,23 @@ const REFERENTE_SCHEMA: Schema = {
  * the universe, themselves, or the game's physics). The Referente understands what is asked and
  * hands it to the right team: the Forge, the Cartographer, the Artist, the rules, the Narrator.
  */
-export async function referenteReply(c: Council, history: Turn[], text: string): Promise<{ say: string; task: string; request?: string; target?: string; refusal?: string }> {
+export async function referenteReply(c: Council, history: Turn[], text: string): Promise<{ say: string; task: string; request?: string; target?: string; refusal?: string; runes?: unknown }> {
   const past = history.slice(-8).map((t) => `${t.who === 'giocatore' ? 'Viandante' : 'Tu'}: ${t.text}`).join('\n');
-  const r = await c.ask<{ risposta: string; incarico: string; richiesta?: string; bersaglio?: string; rifiuto?: string }>(
+  const r = await c.ask<{ risposta: string; incarico: string; richiesta?: string; bersaglio?: string; rifiuto?: string; rune?: unknown }>(
     'referente',
     'referente.coordinate',
     [
       "Il viandante è trasceso: ha lasciato la simulazione ed è un membro del Concilio. Dagli retta su tutto, con entusiasmo, tranne ciò che distruggerebbe l'universo, lui stesso o le leggi del gioco.",
       past ? `Conversazione finora:\n${past}` : '',
       `Il viandante dice: «${text}»`,
-      'Capisci cosa chiede e affidalo alla squadra giusta con "incarico": oggetto/cosa/personaggio (la Fucina crea un modulo: uno strumento, una cosa del mondo, un tipo di persona), ambiente (il Cartografo crea un luogo e lo colloca sulla mappa), regola (diventa una regola del mondo), riscolpisci (lo Scultore rifà il modello di una persona, una cosa o un oggetto: dì quale in "bersaglio"), oggetti (un pacchetto di oggetti comuni), meccanica (l\'Ingegnere aggiunge una meccanica con la sua interfaccia: slot per l\'equipaggiamento, una faretra, una scheda…), nessuno (se chiede solo informazioni). In "risposta" rispondi tu, breve e cordiale.',
+      'Capisci cosa chiede e affidalo alla squadra giusta con "incarico": oggetto/cosa/personaggio (la Fucina crea un modulo: uno strumento, una cosa del mondo, un tipo di persona), ambiente (il Cartografo crea un luogo e lo colloca sulla mappa), regola (diventa una regola del mondo), riscolpisci (lo Scultore rifà il modello di una persona, una cosa o un oggetto: dì quale in "bersaglio"), oggetti (un pacchetto di oggetti comuni), meccanica (l\'Ingegnere aggiunge una meccanica con la sua interfaccia: slot per l\'equipaggiamento, una faretra, una scheda…), runa (gli dai le rune che chiede: in "rune" le parole del codice, una per runa, per esempio ["speed", "=", "3"]), nessuno (se chiede solo informazioni). In "risposta" rispondi tu, breve e cordiale.',
     ]
       .filter(Boolean)
       .join('\n\n'),
     REFERENTE_SCHEMA,
     { data: { text, history }, temperature: 0.6 },
   );
-  return { say: String(r.risposta ?? '…'), task: String(r.incarico ?? 'nessuno'), request: r.richiesta?.trim() || undefined, target: r.bersaglio?.trim() || undefined, refusal: r.rifiuto?.trim() || undefined };
+  return { say: String(r.risposta ?? '…'), task: String(r.incarico ?? 'nessuno'), request: r.richiesta?.trim() || undefined, target: r.bersaglio?.trim() || undefined, refusal: r.rifiuto?.trim() || undefined, runes: r.rune };
 }
 
 const AGENT_CHAT_SCHEMA: Schema = {

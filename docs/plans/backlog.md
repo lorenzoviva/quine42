@@ -1102,7 +1102,7 @@ le risposte alle domande del piano.
   giocatore non ha sono i file del Concilio e il codice che disegna e mostra la corona. Gli interni della corona non passavano già
   dal server (non sono entità); il master non riceveva il registro del Concilio, e ora sì.
 
-### T42 · Il master — spezzato in T42a-T42f (dipende da T37, T41)
+### T42 · Il master — `fatto` (T42a-T42f) (dipende da T37, T41)
 - Contesto: il piano del multigiocatore, «Il master». Troppo grande per una sessione: master fisso e god mode (T42a), il ramo
   `master` e la pubblicazione (T42b), i giocatori dalla corona (T42c), il clone con un altro master (T42d), le rune della corona e il
   Referente sul ramo (T42e), le rune chieste al Referente (T42f).
@@ -1157,7 +1157,7 @@ le risposte alle domande del piano.
   mondo dopo la pubblicazione) e gli utilizzi delle carte nei suoi prompt non si contano. Nessuna verifica nel browser: in singola
   nulla cambia (`talkToAgent` resta locale) e il multigiocatore è coperto dai test col finto trasporto.
 
-### T42f · Le rune che il master chiede al Referente — `da fare` (dipende da T42e)
+### T42f · Le rune che il master chiede al Referente — `fatto` (dipende da T42e)
 - Contesto: piano del multigiocatore, «Il master»: il master ha una sola runa del tappeto (quella del Concilio) e «ogni altra runa la
   chiede al Referente». Oggi il Referente non ha un incarico per le rune (`referenteReply`: oggetto, cosa, personaggio, ambiente,
   regola, riscolpisci, oggetti, meccanica, nessuno).
@@ -1167,6 +1167,13 @@ le risposte alle domande del piano.
 - Fatto quando: test — il master chiede «dammi la runa speed» e la trova nell'inventario sul server; un giocatore non può chiederla.
 - Domanda per l'autore: quali rune può chiedere il master (tutte, o solo quelle del canone e del tappeto)? Proposta: tutte quelle che
   il validatore delle rune accetta come token.
+- Esito: ADR-0070. Presa la proposta (la domanda resta aperta: basta restringere `askedRunes`): l'incarico `runa` del Referente con
+  `rune` (le parole del codice) nello schema, nel prompt e in `MockModels`; `askedRunes` (`runes.ts`) spezza come sul tappeto, tiene i
+  token di `TOKEN_RE` fino a 24 caratteri, mai `concilio`, al più 12. Il kernel del ramo risponde con le rune senza darle (è uno
+  specchio); il server le dà al master nel mondo (`as(master, grantRunes)`: borsa delle rune e frase), il client le riceve con
+  l'aggiornamento; il ramo non cambia. `tests/referente.test.ts` (3 test nuovi). Diverso dal previsto: in singola il trasceso non ha
+  già tutte le rune, ma per non cambiare il gioco da solo l'incarico lì non dà nulla («le rune si trovano nel mondo»). Nessuna verifica
+  nel browser: in singola nulla cambia di visibile e il multigiocatore è coperto dai test col finto trasporto.
 
 ### T42c · I giocatori dalla corona — `fatto` (`d119c30`) (dipende da T42a)
 - Fare: nell'atlante della corona (Ufficio dei luoghi) e nel tavolo della situazione i giocatori collegati, ciascuno sul suo chunk;

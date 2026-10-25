@@ -110,3 +110,21 @@ export function carpetLine(line: string): boolean {
   const eq = t.indexOf('=');
   return eq > 0 && t.slice(0, eq).some((w, i) => BINDINGS.has(w) && t[i - 1] !== '.');
 }
+
+/** At most this many runes come of one request to the Referente (T42f). */
+export const ASKED_RUNES_MAX = 12;
+
+/**
+ * The runes the master asked the Referente for (T42f): every word a model wrote, split into tokens as on the carpet
+ * ("carpet.active=false" → carpet . active = false), those a rune may carry, a repeated one twice; never the Council's
+ * rune (the master always has it), at most `ASKED_RUNES_MAX`.
+ */
+export function askedRunes(words: unknown): string[] {
+  if (!Array.isArray(words)) return [];
+  const out: string[] = [];
+  for (const w of words) {
+    if (typeof w !== 'string') continue;
+    for (const t of lex(w)) if (t.length <= 24 && TOKEN_RE.test(t) && t !== COUNCIL_RUNE && out.length < ASKED_RUNES_MAX) out.push(t);
+  }
+  return out;
+}

@@ -26,7 +26,7 @@ import { alertOf, clampFrame, costBoard, liveFeed, SCREEN_NAME, timeline, type B
 import { activeQuests, plotFromRaw, plotText, PLOTS_FILE, readPlots, reviewPlot, secretsOf, writePlots, type Plot } from './plots';
 import { Input } from './input';
 import { discoverModules, readConfig } from './universe';
-import { carpetLine, CARPET_TOKENS, cellIndex, COUNCIL_RUNE, extractLines, tokenize, type RuneComp, type RuneLine } from './runes';
+import { askedRunes, carpetLine, CARPET_TOKENS, cellIndex, COUNCIL_RUNE, extractLines, tokenize, type RuneComp, type RuneLine } from './runes';
 import { hash32, hashStr, hex, Rng } from './rng';
 import { BudgetError, type Models } from './ai/models';
 import { USAGE_FILE, UsageLedger } from './ai/usage';
@@ -2527,6 +2527,21 @@ export class Kernel {
     return true;
   }
 
+  /**
+   * Runes the Council gives the wanderer who acts (T42f: the master asked the Referente): into the rune pouch, onto the
+   * phrase. Returns those that fit.
+   */
+  grantRunes(tokens: string[]): string[] {
+    const given: string[] = [];
+    for (const t of askedRunes(tokens)) if (this.give(`rune:${t}`, 1)) given.push(t);
+    if (!given.length) return given;
+    const hand = this.hand();
+    hand.tokens.push(...given);
+    hand.sel = hand.tokens.length - 1;
+    this.message(`Il Concilio ti dà: ${given.map((t) => `«${t}»`).join(' ')}`, 'good');
+    return given;
+  }
+
   /** In a game of many the master always carries the Council's rune, and nobody else does (T37). */
   private councilStock(): void {
     if (!this.manyPlayers()) return;
@@ -3894,7 +3909,7 @@ export class Kernel {
   }
 
   /** The player talks to an agent of the Council, in the corona. It may accept to make something. */
-  async talkToAgent(agent: AgentId, text: string): Promise<{ say: string; forged?: string }> {
+  async talkToAgent(agent: AgentId, text: string): Promise<{ say: string; forged?: string; runes?: string[] }> {
     const history = this.agentTalks.get(agent) ?? [];
     this.agentTalks.set(agent, history);
     if (agent === 'referente') return this.askReferente(text, history);
@@ -3919,7 +3934,7 @@ export class Kernel {
    * The Referente takes the transcended wanderer's request to the right team: the Forge, the
    * Cartographer, the Artist, the rules, the Narrator's packs. The Council says yes to almost anything.
    */
-  private async askReferente(text: string, history: Turn[]): Promise<{ say: string; forged?: string }> {
+  private async askReferente(text: string, history: Turn[]): Promise<{ say: string; forged?: string; runes?: string[] }> {
     let r;
     try {
       r = await referenteReply(this.council, history, text);
@@ -3947,6 +3962,15 @@ export class Kernel {
       case 'regola': {
         this.recordRule({ chiave: `regola|${normName(req).slice(0, 60)}`, testo: req, possibile: true, racconto: 'stabilito dal viandante trasceso, accolto dal Concilio', effetti: ['regola'] }, true, { task: 'referente.coordinate', autore: this.wanderer().id });
         return { say: r.say, forged: `Nuova regola del mondo: ${req}` };
+      }
+      case 'runa': {
+        // The master's runes (T42f): in a game of many the Council gives them, alone they are found in the world.
+        if (!this.manyPlayers() || !this.isMaster()) return { say: r.say, forged: 'Le rune non si chiedono: si trovano nel mondo.' };
+        const runes = askedRunes(r.runes);
+        if (!runes.length) return { say: r.say, forged: 'Il Referente non capisce quali rune vuoi.' };
+        // A mirror (the kernel of the master's branch) gives nothing: the server gives them in the world.
+        if (!this.mirror) this.grantRunes(runes);
+        return { say: r.say, forged: `Il Concilio ti dà ${runes.length === 1 ? 'la runa' : 'le rune'} ${runes.map((t) => `«${t}»`).join(' ')}.`, runes };
       }
       case 'riscolpisci': {
         const target = this.findExhibit(r.target ?? req);

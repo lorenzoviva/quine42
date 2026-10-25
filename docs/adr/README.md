@@ -74,6 +74,7 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0067](0067-i-giocatori-dalla-corona.md) | I giocatori dalla corona: al master l'elenco dei giocatori collegati (`giocatori`), nel tavolo della situazione e nell'atlante (`kernel.players()`); `segui` sposta la sua vista attorno a un giocatore, il renderer lo mette al centro senza muovere il master; Esc per tornare | accettato |
 | [0068](0068-il-clone-con-un-altro-master.md) | Il clone con un altro master: l'unico modo di cambiare master è copiare l'universo (storia, luoghi, viandanti, carte; non il ramo del vecchio master) in uno nuovo con un altro `partita.master`; autore e pagante delle carte non cambiano, il titolare resta o (a scelta) le carte del vecchio master passano al nuovo | accettato |
 | [0069](0069-il-concilio-sul-ramo-del-master.md) | Il Concilio sul ramo del master: in multigiocatore le richieste del master al Referente e alle squadre girano sul server, in un kernel del ramo (file del mondo più il ramo, stessi modelli), e ciò che committano va sul ramo, da pubblicare; le rune nella corona non cambiano file | accettato |
+| [0070](0070-le-rune-chieste-al-referente.md) | Le rune chieste al Referente: in multigiocatore il master chiede al Referente ogni token che una runa può portare (incarico `runa`, al più 12, mai la runa del Concilio) e le trova nella borsa delle rune del suo viandante sul server; non sono file, non vanno sul ramo; in singola nulla cambia | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.
 
