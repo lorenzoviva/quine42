@@ -96,6 +96,37 @@ export function buildCoronaRing(k: Kernel): THREE.Group {
     else frames.push(geo.frames.map(place));
   }
 
+  // The Artist's gallery plinto sculpture (T48b): an instance of a library model on the plinto in the piazza
+  if (k.plintoSculpture) {
+    const ps = k.plintoSculpture;
+    const pf = k.forms.ready(ps.model, ps.seed);
+    const pgeo = pf && geoOf(pf);
+    if (!pgeo) {
+      k.forms.get(ps.model, ps.seed);
+    } else {
+      pgeo.body.computeBoundingBox();
+      const size = new THREE.Vector3();
+      const box = pgeo.body.boundingBox!;
+      box.getSize(size);
+      const maxHoriz = 1.7; // plinto surface is 2x2 tiles
+      const maxVert = 2.4;
+      const s = Math.min(maxHoriz / Math.max(size.x, size.z, 0.01), maxVert / Math.max(size.y, 0.01), 1.0);
+      ps.scale = s;
+
+      const m = modelObject(k, pf, { model: ps.model, seed: ps.seed, yaw: 0 }, MAT.corona);
+      if (m) {
+        for (const fr of m.frames) fr.visible = false;
+        for (const child of m.body.children) child.visible = true;
+        const centre = box.getCenter(new THREE.Vector3());
+        m.body.position.set(-centre.x, -box.min.y, -centre.z);
+        m.root.scale.setScalar(s);
+        m.root.position.set(ps.x, ps.z, ps.y);
+        m.root.rotation.y = ps.yaw;
+        g.add(m.root);
+      }
+    }
+  }
+
   // Campus props (T50b, T50e): lampioni along the avenue, light trees on lawns, benches and totems
   for (const p of c.props) {
     const f = k.forms.ready(p.model, p.seed);
@@ -250,7 +281,9 @@ export function animateRing(ring: THREE.Group, t: number, k?: Kernel): void {
 
 /** What the campus wears (T20, T50e): the ring is built again when a building or prop becomes ready. */
 export const campusKey = (k: Kernel) =>
-  `${k.forms.version}|` + k.corona.buildings.map((b) => (b.structure && geoOf(b.structure.form) ? b.structure.form.key : '')).join('|');
+  `${k.forms.version}|` +
+  (k.plintoSculpture ? `${k.plintoSculpture.model}#${k.plintoSculpture.seed}|` : '') +
+  k.corona.buildings.map((b) => (b.structure && geoOf(b.structure.form) ? b.structure.form.key : '')).join('|');
 
 /** The building's name in neon above its door, facing the avenue (and, on its back, the lawns). */
 function neonSign(b: Building, R: number): THREE.Group {

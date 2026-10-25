@@ -101,6 +101,17 @@ export type HoverInfo =
   | { kind: 'agent'; agent: AgentId; name: string; doing?: string }
   | { kind: 'player' };
 
+export interface PlintoSculpture {
+  model: string;
+  seed: number;
+  x: number;
+  y: number;
+  z: number;
+  yaw: number;
+  scale: number;
+  arrivalTick: number;
+}
+
 export interface ItemInfo {
   id: string;
   name: string;
@@ -427,6 +438,8 @@ export class Kernel {
   /** The Sculptor's lathe (T48a): which model of the library it shows. */
   private tornioIndex = 0;
   private tornioCache = new Map<string, TornioShown>();
+  /** The model on the plinto in the piazza of the Galleria (T48b). */
+  plintoSculpture?: PlintoSculpture;
   /** The commit the Direction's timeline shows (T46b); none: the newest. */
   private filmAt?: string;
   /** What each system costs in the tick (T27a): the chain of the Systems Room shows it. */
@@ -3722,6 +3735,8 @@ export class Kernel {
     for (const m of extra) {
       if (this.forms.info(m)) this.forms.get(m, 1);
     }
+    if (this.plintoSculpture) this.updatePlinto();
+    else if (this.zone === 'corona') this.visitCorona(this.tickCount);
   }
 
   /** What a source of showcases has to show, in a stable order. */
@@ -4604,6 +4619,76 @@ export class Kernel {
     const now = this.tornioOf();
     if (!now) return this.message('Nessun modello nella libreria.');
     this.bus.emit('ui:tornio', now);
+  }
+
+  /**
+   * Called on every visit to the corona (T48b): picks a library model (seed from arrival tick),
+   * reduced to fit on the plinto in front of the Artist's gallery, without generating or adding new collision.
+   */
+  visitCorona(tick = this.tickCount): void {
+    const pool = this.tornioModels()
+      .map((e) => e.id)
+      .filter((id) => !id.startsWith('corona-'));
+    const candidates = pool.length > 0 ? pool : this.tornioModels().map((e) => e.id);
+    if (!candidates.length) return;
+    const rng = new Rng(tick);
+    let model = rng.pick(candidates);
+    if (candidates.length > 1 && model === this.plintoSculpture?.model) {
+      const others = candidates.filter((m) => m !== this.plintoSculpture?.model);
+      model = rng.pick(others);
+    }
+    const seed = (tick % 10000) + 1;
+    this.forms.get(model, seed);
+    this.updatePlinto(model, seed, tick);
+  }
+
+  updatePlinto(model?: string, seed?: number, tick?: number): void {
+    if (!model) {
+      if (!this.plintoSculpture) return;
+      model = this.plintoSculpture.model;
+      seed = this.plintoSculpture.seed;
+      tick = this.plintoSculpture.arrivalTick;
+    }
+    const b = this.corona.building('galleria');
+    const s = b?.structure;
+    if (!s?.plinto) {
+      this.plintoSculpture = {
+        model,
+        seed: seed ?? 1,
+        x: 0,
+        y: 0,
+        z: 0,
+        yaw: 0,
+        scale: 1,
+        arrivalTick: tick ?? this.tickCount,
+      };
+      return;
+    }
+    let scale = 1.0;
+    const f = this.forms.ready(model, seed ?? 1);
+    if (f?.result?.grid) {
+      const g = f.result.grid;
+      const sizeX = g.X / f.vpt;
+      const sizeY = g.Y / f.vpt;
+      const sizeZ = g.Z / f.vpt;
+      const maxHoriz = Math.min(s.plinto.width, s.plinto.depth) * 0.85;
+      const maxHeight = 2.4;
+      scale = Math.min(maxHoriz / Math.max(sizeX, sizeY, 0.01), maxHeight / Math.max(sizeZ, 0.01), 1.0);
+    }
+    this.plintoSculpture = {
+      model,
+      seed: seed ?? 1,
+      x: s.plinto.x,
+      y: s.plinto.y,
+      z: s.plinto.z,
+      yaw: s.yaw,
+      scale,
+      arrivalTick: tick ?? this.tickCount,
+    };
+  }
+
+  plinto(): PlintoSculpture | undefined {
+    return this.plintoSculpture;
   }
 
   /** States of the wanderer (on horseback, with a backpack…): what they change, until when. */
@@ -6470,7 +6555,10 @@ export class Kernel {
     if (zone === this.zone) return;
     this.zone = zone;
     this.bus.emit('zone', { zone, first: zone === 'corona' && !this.exitedOnce });
-    if (zone === 'corona') this.exitedOnce = true;
+    if (zone === 'corona') {
+      this.exitedOnce = true;
+      this.visitCorona(this.tickCount);
+    }
   }
 
   /** 0..1, how broken the universe currently is. */

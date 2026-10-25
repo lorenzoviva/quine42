@@ -265,6 +265,14 @@ export interface CampusStructure {
   y: number;
   yaw: number;
   form: Form;
+  /** Plinto location and bounds for sculpture display (T48b, e.g. Galleria). */
+  plinto?: {
+    x: number;
+    y: number;
+    z: number;
+    width: number;
+    depth: number;
+  };
 }
 
 /** Urban furniture, trees and logistics props in the campus (T50b, T50e). */
@@ -693,6 +701,40 @@ export class Corona {
     const s: CampusStructure = { model, x: px - (lx * c + lz * sn), y: py - (-lx * sn + lz * c), yaw, form };
     b.structure = s;
     b.door = { x: Math.floor(px), y: Math.floor(py) };
+    // Letter named `plinto` (T48b): location and surface bounds of the plinto in the building's forecourt
+    const plintoSymbols = new Set(g.alphabet.map((sym, i) => (r.palette[sym]?.name === 'plinto' ? i : -1)).filter((i) => i >= 0));
+    if (plintoSymbols.size > 0) {
+      let px_sum = 0, py_sum = 0, pz_max = 0, pn = 0;
+      let min_x = Infinity, max_x = -Infinity, min_y = Infinity, max_y = -Infinity;
+      for (let i = 0; i < g.cells.length; i++) {
+        if (!plintoSymbols.has(g.cells[i])) continue;
+        const vx = i % g.X;
+        const vy = Math.floor((i % XY) / g.X);
+        const vz = Math.floor(i / XY);
+        px_sum += vx;
+        py_sum += vy;
+        pz_max = Math.max(pz_max, vz);
+        min_x = Math.min(min_x, vx);
+        max_x = Math.max(max_x, vx);
+        min_y = Math.min(min_y, vy);
+        max_y = Math.max(max_y, vy);
+        pn++;
+      }
+      if (pn > 0) {
+        const avg_vx = px_sum / pn + 0.5;
+        const avg_vy = py_sum / pn + 0.5;
+        const plx = (avg_vx - g.X / 2) / form.vpt;
+        const plz = (avg_vy - g.Y / 2) / form.vpt;
+        const ply = (pz_max + 1) / form.vpt;
+        s.plinto = {
+          x: s.x + (plx * c + plz * sn),
+          y: s.y + (-plx * sn + plz * c),
+          z: ply,
+          width: (max_x - min_x + 1) / form.vpt,
+          depth: (max_y - min_y + 1) / form.vpt,
+        };
+      }
+    }
     // Its cells: those it blocks; what was block and is not covered goes back to the ground of the campus.
     const total = this.buildings.length;
     for (const key of b.cells) {

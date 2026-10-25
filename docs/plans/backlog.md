@@ -614,7 +614,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   perché le combinazioni di rune sono infinite (T57).
 - Fatto quando (per pezzo): test verdi, typecheck, verifica nel browser.
 
-### T48 · La Galleria dell'Artista, dentro e il plinto — T48a `fatto`, si continua con T48b
+### T48 · La Galleria dell'Artista, dentro e il plinto — `fatto`
 - Contesto: §3.3 (approvata il 23/10). Oggi la Galleria (`galleria`) espone i modelli come quadri con «riscolpisci».
 - **T48a · il tornio dello Scultore** — `fatto` (`a4483c7`): al posto della vetrina un piedistallo che gira con il modello scelto, il suo
   programma eseguito **passo passo** (i passi di MarkovJunior, come nella sandbox del lab: i passi intermedi da
@@ -631,10 +631,17 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
     `src/render/tornio.ts`: `TornioView` con piatto rotante, animazione a ciclo continuo tra gli snapshot voxel, etichetta ed integrazione
     in `src/render/coronaview.ts` con didascalia in `overlay()`. `tests/tornio.test.ts` (7 test completi), typecheck e test verdi (50 suite, 363 test),
     verifica nel browser con subagent (teletrasporto in Galleria, apertura pannello con foto e scorrimento con `stepTornio`).
-- **T48b · il plinto nel piazzale** (dipende da `corona-galleria.xml` in T31): sulla lettera `plinto` del modello della
-  Galleria il kernel posa un'istanza di un modello della libreria, scelto a ogni visita della corona (seme dal tick
-  dell'arrivo), ridotto a stare sul plinto; nessuna generazione, nessuna collisione nuova oltre al plinto. Test: il
-  modello cambia tra due visite, sta sopra la lettera `plinto`, la porta resta raggiungibile.
+- **T48b · il plinto nel piazzale** — `fatto`: sulla lettera `plinto` (Q) del modello della Galleria (`corona-galleria.xml`),
+  il kernel rileva la superficie del plinto e posa un'istanza di un modello della libreria scelto ad ogni visita della corona
+  (seme derivato dal tick di arrivo, escludendo i modelli infrastrutturali `corona-*` e alternando sempre rispetto all'ultima visita),
+  ridotto in scala (`scale <= 1.0`) per alloggiare stabilmente sui 2 × 2 della superficie senza generazioni e senza aggiungere alcuna
+  collisione al suolo oltre al plinto stesso. La porta d'ingresso della Galleria rimane pienamente raggiungibile e libera dal viale.
+  - Esito T48b: `src/kernel/corona.ts`: `CampusStructure.plinto` e calcolo coordinate reali, altezza superficie (`z = 1.0`) e ingombro (`width`, `depth`)
+    dalle celle con colore `name: 'plinto'` in `placeStructure`. `src/kernel/kernel.ts`: `PlintoSculpture`, `visitCorona(tick)`, `updatePlinto()`,
+    `plinto()`, aggiornamento automatico su transizione zona verso `corona` e sincronizzazione in `placeCampus()`. `src/render/corona3d.ts`:
+    rendering della scultura centrata e posata sulla superficie del plinto con `modelObject` e scaling proporzionale ai limiti massimi di sicurezza,
+    inclusione di `plintoSculpture` in `campusKey(k)` per invalidazione cache e rendering reattivo. `tests/plinto.test.ts` (5 test completi),
+    typecheck e test verdi, verifica nel browser con screenshot da vicino (`galleria_plinto_closeup`) e dal viale (`galleria_avenue_view`).
 - Fatto quando (per pezzo): test verdi, typecheck, verifica nel browser da vicino e dal viale.
 
 ### T28 · Il Nucleo, dentro — `fatto` (`673eeba`) (dipende da T12)
@@ -1271,3 +1278,21 @@ le risposte alle domande del piano.
   di giorno, una persona con la chat, l'inventario con le icone dei modelli, la corona con `?dev&teleport=46,0`) con
   `vite preview` offline, salvarle in `docs/img/3d/` e rimetterle nel README.
 - Fatto quando: README con le immagini nuove, commit.
+
+## Laboratorio MarkovJunior
+
+Richiesta del 25/10 ([`to-do-2026-10-25.md`](../userchats/to-do-2026-10-25.md)). La sandbox 3D `/lab/3d/` resta com'è per
+la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedicato a modellare le singole mesh.
+
+### T59 · Laboratorio: editor per modelli MarkovJunior — `da fare` (si comincia da T59a)
+- **T59a · Split screen codice e rendering**: interfaccia divisa a due riquadri (editor di testo/XML a sinistra con syntax
+  highlighting e validazione immediata; viewport 3D Three.js a destra con rendering in tempo reale della mesh risultante,
+  controlli camera e orbita libera con tasto destro).
+- **T59b · Controlli CAD per voxel**: strumenti interattivi sulla griglia (creazione, cancellazione, spostamento di forme
+  base / blocchi; selezione palette colori, materiale e proprietà glow).
+- **T59c · Controllo esecuzione e animazione**: controlli temporali di esecuzione delle regole MarkovJunior (step singolo,
+  loop continuo, pausa/stop) e anteprima sequenza fotogrammi per modelli animati.
+- **T59d · Strumenti per regole e WFC**: controlli per facilitare la stesura delle regole XML (menu di sostituzione con
+  selezione all / one / parallel e menu guidato per la configurazione WFC).
+- Fatto quando (per pezzo): test verdi, typecheck, verifica nel browser.
+
