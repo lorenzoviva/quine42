@@ -1284,15 +1284,17 @@ le risposte alle domande del piano.
 Richiesta del 25/10 ([`to-do-2026-10-25.md`](../userchats/to-do-2026-10-25.md)). La sandbox 3D `/lab/3d/` resta com'è per
 la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedicato a modellare le singole mesh.
 
-### T59 · Laboratorio: editor per modelli MarkovJunior — `da fare` (si comincia da T59a)
-- **T59a · Split screen codice e rendering**: interfaccia divisa a due riquadri (editor di testo/XML a sinistra con syntax
+### T59 · Laboratorio: editor per modelli MarkovJunior — `in corso` (T59a fatto; prossimo: T59b)
+- **T59a · Split screen codice e rendering** — `fatto` (`3aec90e`): interfaccia divisa a due riquadri (editor di testo/XML a sinistra con syntax
   highlighting e validazione immediata; viewport 3D Three.js a destra con rendering in tempo reale della mesh risultante,
-  controlli camera e orbita libera con tasto destro).
-- **T59b · Controlli CAD per voxel**: strumenti interattivi sulla griglia (creazione, cancellazione, spostamento di forme
+  controlli camera e orbita libera con tasto destro). Esito: `lab/editor/` (`index.html`, `editor.css`, `syntax.ts`, `main.ts`, `worker.ts`),
+  integrazione in `vite.config.ts`, test in `tests/editor.test.ts` (10 test), verifica nel browser confermata.
+- **T59b · Controlli CAD per voxel** — `da fare`: strumenti interattivi sulla griglia (creazione, cancellazione, spostamento di forme
   base / blocchi; selezione palette colori, materiale e proprietà glow).
 - **T59c · Controllo esecuzione e animazione**: controlli temporali di esecuzione delle regole MarkovJunior (step singolo,
   loop continuo, pausa/stop) e anteprima sequenza fotogrammi per modelli animati.
 - **T59d · Strumenti per regole e WFC**: controlli per facilitare la stesura delle regole XML (menu di sostituzione con
   selezione all / one / parallel e menu guidato per la configurazione WFC).
 - Fatto quando (per pezzo): test verdi, typecheck, verifica nel browser.
+
 

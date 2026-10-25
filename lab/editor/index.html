@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QUINE42 · Laboratorio MarkovJunior — Editor modelli 3D</title>
+    <meta
+      name="description"
+      content="Editor split-screen per modelli MarkovJunior con syntax highlighting e rendering Three.js in tempo reale."
+    />
+    <link rel="stylesheet" href="./editor.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <div class="brand">
+          <h1>QUINE42</h1>
+          <span class="brand-badge">Editor MJ</span>
+        </div>
+
+        <div class="header-tools">
+          <div class="tool-group">
+            <span class="tool-label">Modello</span>
+            <select id="preset-select" title="Scegli un modello preimpostato"></select>
+          </div>
+
+          <div class="tool-group">
+            <span class="tool-label">Seme</span>
+            <input
+              id="seed-input"
+              type="number"
+              value="1"
+              min="1"
+              max="999999"
+              title="Seme per la generazione pseudocasuale"
+            />
+            <button id="btn-rand-seed" title="Genera un nuovo seme casuale">🎲</button>
+          </div>
+
+          <div class="tool-group">
+            <span class="tool-label">VPT</span>
+            <select id="vpt-select" title="Voxel per casella">
+              <option value="20" selected>20 vpt</option>
+              <option value="8">8 vpt</option>
+            </select>
+          </div>
+
+          <button id="btn-run" class="btn-primary" title="Esegui il programma (Ctrl+Enter)">▶ Esegui</button>
+
+          <div id="status-pill" class="status-pill valid">
+            <span class="dot"></span>
+            <span id="status-text">Valido</span>
+          </div>
+        </div>
+      </header>
+
+      <main id="main-split">
+        <!-- Left Pane: Code Editor -->
+        <section id="pane-code" aria-label="Editor di codice MarkovJunior">
+          <div class="editor-toolbar">
+            <span id="cursor-pos">Riga 1, Col 1</span>
+            <div class="editor-toolbar-actions">
+              <button id="btn-format" title="Formatta codice XML">Formatta</button>
+              <button id="btn-copy" title="Copia codice XML negli appunti">Copia</button>
+              <button id="btn-export" title="Scarica file XML">Esporta</button>
+            </div>
+          </div>
+
+          <div class="editor-container">
+            <div id="gutter" aria-hidden="true"></div>
+            <div class="editor-text-wrapper">
+              <pre id="highlight-layer" class="highlight-layer" aria-hidden="true"><code id="code-output"></code></pre>
+              <textarea
+                id="code-input"
+                class="input-layer"
+                spellcheck="false"
+                wrap="off"
+                aria-label="Codice XML MarkovJunior"
+              ></textarea>
+            </div>
+          </div>
+
+          <div id="diagnostics" aria-live="polite"></div>
+        </section>
+
+        <!-- Resizable Splitter -->
+        <div id="splitter" role="separator" aria-orientation="vertical" title="Trascina per ridimensionare"></div>
+
+        <!-- Right Pane: 3D Viewport -->
+        <section id="pane-view" aria-label="Viewport di rendering 3D">
+          <div class="viewport-hud">
+            <button id="btn-cam-reset" title="Centra camera sul modello">⌖ Centra</button>
+            <button id="btn-cam-iso" title="Vista isometrica 3/4">3/4</button>
+            <button id="btn-cam-top" title="Vista dall'alto">Alto</button>
+            <button id="btn-cam-front" title="Vista frontale">Fronte</button>
+            <button id="btn-cam-side" title="Vista laterale">Fianco</button>
+            <button id="btn-toggle-grid" class="active" title="Mostra/Nascondi griglia">Griglia</button>
+            <button id="btn-toggle-bounds" class="active" title="Mostra/Nascondi gabbia di ingombro">Box</button>
+            <button id="btn-toggle-wireframe" title="Modalità wireframe">Wireframe</button>
+            <button id="btn-toggle-bloom" class="active" title="Effetto bagliore voxel (Bloom)">Bagliore</button>
+          </div>
+
+          <canvas id="viewport"></canvas>
+
+          <div id="viewport-info" class="viewport-info">Caricamento modello…</div>
+          <div class="viewport-hints">Tasto destro o sinistro: orbita · Rotella: zoom · Shift + drag: sposta</div>
+
+          <div id="loading-overlay" class="hidden">
+            <div class="spinner"></div>
+            <span>Generazione mesh MarkovJunior…</span>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

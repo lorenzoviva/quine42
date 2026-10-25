@@ -14,6 +14,7 @@ nel [report dei costi](../docs/reports/costi-step8.2B.md) e nella storia di git 
 
 | percorso | cosa |
 |---|---|
+| `editor/` | l'editor di modelli MarkovJunior (`/lab/editor/`): split screen codice e rendering 3D Three.js in tempo reale, syntax highlighting, validazione immediata, controlli orbita |
 | `3d/` | la sandbox 3D (`/lab/3d/`): terreno dal modello `River`, i modelli posati, collisioni, case in cui si entra, azioni, pannello per ispezionare e modificare l'XML, «Scolpisci con Gemini» |
 | `mjx/official/` | 16 modelli 3D del repository di MarkovJunior, invariati (MIT): la prova che il front-end legge MarkovJunior alla lettera |
 | `mjx/models/` | modelli scritti a mano e portati dagli step 8A-8B (esempi dello Scultore del laboratorio); `gemini/` i programmi delle prove 8.2A e 8.2B |
@@ -28,6 +29,7 @@ Il motore, il front-end XML, la palette, le mesh, lo scheletro, le classi e le f
 
 ## Come si usa
 
+- Editor modelli MarkovJunior: `npm run dev` → <http://localhost:5173/lab/editor/>. Split screen con editor codice/XML a sinistra (syntax highlighting, numeri di riga con segnalazione errori immediata, formattazione, copia/esporta) e viewport 3D Three.js a destra (orbita libera con tasto destro o sinistro, zoom, pan con Shift, viste isometrica/alto/fronte/fianco, griglia, wireframe e bloom per voxel luminosi).
 - Sandbox: `npm run dev` → <http://localhost:5173/lab/3d/>. WASD (Shift corre), Q/R ruota la camera, rotella
   zoom, tasto destro trascina per orbitare, E agisce (la porta della casa si apre), clic su un modello per
   ispezionarlo: XML modificabile («Esegui»), «Nuovo seme», «Cresci», «Mettilo davanti a me». In console

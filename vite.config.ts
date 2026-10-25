@@ -16,8 +16,16 @@ export default defineConfig(({ mode }) => {
     server: { port: 5173, watch: { ignored: ['**/universes/**'] } },
     // wasmoon is UMD: pre-bundled, the browser can import it in dev (its glue.wasm comes by URL, `wasmUri`).
     optimizeDeps: { include: ['wasmoon'] },
-    // The MarkovJunior lab's sandbox (lab/3d) is a second page on the same server: /lab/3d/.
-    build: { rollupOptions: { input: { main: path.resolve('index.html'), lab3d: path.resolve('lab/3d/index.html') } } },
+    // The MarkovJunior lab has two dedicated pages: the sandbox (/lab/3d/) and the model editor (/lab/editor/).
+    build: {
+      rollupOptions: {
+        input: {
+          main: path.resolve('index.html'),
+          lab3d: path.resolve('lab/3d/index.html'),
+          labEditor: path.resolve('lab/editor/index.html'),
+        },
+      },
+    },
     // The session's tests boot several kernels each: with the whole suite in parallel they take longer than the default 5 s.
     test: { environment: 'node', include: ['tests/**/*.test.ts', 'lab/**/*.test.ts'], testTimeout: 30000 },
   };
