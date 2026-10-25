@@ -477,7 +477,7 @@ export class SessionServer {
     const others: OtherView[] = [];
     const near = new Set<string>();
     for (const w of k.wanderers()) {
-      if (w.id === c.id) continue;
+      if (w.id === c.id || !k.inWorld(w.id)) continue;
       const o = k.wandererAt(w.id);
       if (!o || Math.hypot(o.x - at.x, o.y - at.y) > this.near) continue;
       near.add(w.id);

@@ -1102,12 +1102,40 @@ le risposte alle domande del piano.
   giocatore non ha sono i file del Concilio e il codice che disegna e mostra la corona. Gli interni della corona non passavano già
   dal server (non sono entità); il master non riceveva il registro del Concilio, e ora sì.
 
-### T42 · Il master — `da fare` (dipende da T37, T41)
+### T42 · Il master — spezzato in T42a-T42d (dipende da T37, T41)
+- Contesto: il piano del multigiocatore, «Il master». Troppo grande per una sessione: master fisso e god mode (T42a), il ramo
+  `master` e la pubblicazione (T42b), i giocatori dalla corona (T42c), il clone con un altro master (T42d).
+
+### T42a · Il master in god mode, visibile solo nel mondo — `fatto` (vedi commit «Multigiocatore (T42a)»)
 - Fare: il master è chi crea l'universo multigiocatore (non si cambia); god mode (niente morte, bisogni, danni, effetti dei
-  giocatori), visibile agli altri col suo viandante; dalla corona i giocatori sull'atlante e una vista che ne segue uno;
-  il ramo `master` per le sue modifiche, provate da solo e pubblicate con un gesto (merge e diffusione); clonare
-  l'universo con un altro master (le carte restano a chi le ha generate).
-- Fatto quando: test (il master non muore; una modifica sul ramo `master` arriva ai giocatori solo dopo la pubblicazione).
+  giocatori), visibile agli altri col suo viandante solo quando è nel mondo.
+- Fatto quando: test (il master non muore; gli effetti di un giocatore non lo toccano; uscito dal cerchio gli altri non lo vedono).
+- Esito: ADR-0065. `godMode`, `keepGods` (dopo i sistemi del tick: fame, sete, energia, salute a 100; il mana no), `spareGods`
+  sulla morte annunciata da Lua (`die` resta com'è), `applyEffects` che sul corpo di un dio lascia passare solo `messaggio` se agisce
+  un altro, `inWorld` usato dal server per i viandanti da mandare. `tests/master.test.ts` (3 test). Diverso dal previsto: «non si
+  cambia» c'era già (`partita.master` è fisso con la partita, `keepGame`, coperto da `tests/partita.test.ts`); il problema vero della
+  visibilità era il master sul viale del campus, che nello spazio del tappeto può cadere accanto a un giocatore. Nessuna verifica nel
+  browser: in singola il gioco non cambia, e il multigiocatore è coperto dai test col finto trasporto.
+
+### T42b · Il ramo `master` e la pubblicazione — `da fare` (dipende da T42a)
+- Contesto: piano del multigiocatore, «Modifiche in prova»; `R` del master e `rollback` ancora in `LATER` di `thin.ts`.
+- Fare: le modifiche del master (editor, rune scritte nella corona, richieste al Referente) vanno su un ramo `master` del
+  repository dell'universo; lui le prova da solo (il suo kernel vede il ramo, i giocatori no) e le **pubblica** con un gesto esplicito
+  (merge su quello principale e diffusione ai client, che ricaricano i file cambiati). Il Concilio automatico committa direttamente
+  sul principale (passa dal validatore). Il rollback del master torna all'ultimo valido del suo ramo.
+- Fatto quando: test — una modifica sul ramo `master` arriva ai giocatori solo dopo la pubblicazione.
+- Domanda da tenere presente: cosa succede ai commit automatici del Concilio fatti sul principale mentre il ramo `master` è aperto
+  (rebase del ramo alla pubblicazione, o merge)? Proposta: merge, con i conflitti risolti a favore del master e segnalati nel registro.
+
+### T42c · I giocatori dalla corona — `da fare` (dipende da T42a)
+- Fare: nell'atlante della corona (Ufficio dei luoghi) e nel tavolo della situazione i giocatori collegati, ciascuno sul suo chunk;
+  una vista che ne segue uno (la camera del master sopra di lui finché non la lascia), senza uscire dalla corona.
+- Fatto quando: test (la situazione elenca i giocatori collegati con la loro posizione); verifica nel browser con un universo di prova.
+
+### T42d · Clonare l'universo con un altro master — `da fare` (dipende da T42b)
+- Fare: copiare il repository dell'universo in un universo nuovo con `partita.master` diverso (l'unico modo di cambiare master); le
+  carte restano a chi le ha generate (`carta.autore`, `pagante`), il titolare può restare o passare al nuovo master (da decidere).
+- Fatto quando: test (il clone ha lo stesso mondo, un altro master, le stesse carte).
 
 ### T43 · Tra giocatori — `da fare` (dipende da T33, T39)
 - Fare: «Altro…» su un altro giocatore giudicato come su una persona (se l'universo lo permette), effetti applicati dal

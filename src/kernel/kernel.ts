@@ -478,7 +478,7 @@ export class Kernel {
     const { repo, synced } = Repo.open(name, opts.files, opts.store);
     k.repo = repo;
     if (opts.backend) repo.attach(opts.backend, opts.past ?? []);
-    k.bus.on('lua:morte', (d: { fame?: boolean; sete?: boolean }) => k.die(d?.sete ? 'sete' : d?.fame ? 'fame' : 'ferite'));
+    k.bus.on('lua:morte', (d: { fame?: boolean; sete?: boolean }) => !k.spareGods() && k.die(d?.sete ? 'sete' : d?.fame ? 'fame' : 'ferite'));
     k.faults.onRaise = (f, isNew) => {
       if (isNew) k.log('fault', `${f.key}: ${f.message}`);
       // Where it happened (T46a): the code that runs in the world, where the wanderer was; not loading nor manifests.
@@ -813,6 +813,17 @@ export class Kernel {
   }
 
   /** A wanderer's entity and where they are in the world (carpet space), if they are in it. */
+  /**
+   * Whether a wanderer is in the world the others see: inside the circle, on their carpet. The master in the corona
+   * or in the studio is not (T42a): for the others their body disappears until they walk back.
+   */
+  inWorld(id: string): boolean {
+    const w = this.wanderersById.get(id);
+    if (!w || !this.ecs.alive.has(w.entity) || this.offCarpet.has(w.entity)) return false;
+    const p = this.ecs.get(w.entity, 'pos');
+    return !!p && !this.corona.isInterior(p.x) && Math.hypot(p.x, p.y) < this.config.circleRadius;
+  }
+
   wandererAt(id: string): { entity: Id; x: number; y: number; facing: string } | undefined {
     const w = this.wanderersById.get(id);
     if (!w || !this.ecs.alive.has(w.entity)) return undefined;
@@ -3924,6 +3935,39 @@ export class Kernel {
     return !this.manyPlayers() || (!!id && id === (this.partita().master ?? SOLO));
   }
 
+  /** God mode (T42a): in a game of many the master does not die, has no needs, takes no harm from the others. */
+  godMode(id: string | undefined = this.wanderer().id): boolean {
+    return this.manyPlayers() && this.isMaster(id);
+  }
+
+  /** The wanderer whose body an entity is, if any. */
+  wandererOf(entity: Id): string | undefined {
+    for (const w of this.wanderersById.values()) if (w.entity === entity) return w.id;
+    return undefined;
+  }
+
+  /** The gods' needs stay full, whatever the world's code did to them this tick. */
+  private keepGods(): void {
+    if (!this.manyPlayers()) return;
+    for (const w of this.wanderersById.values()) {
+      if (!this.godMode(w.id)) continue;
+      const n: any = this.ecs.get(w.entity, 'needs');
+      if (n) Object.assign(n, { hunger: 100, thirst: 100, energy: 100, health: 100, morto: false });
+    }
+  }
+
+  /** A death the world's code announces: true when only gods were dying (they are put back, nobody dies). */
+  spareGods(): boolean {
+    if (!this.manyPlayers()) return false;
+    let mortal = false;
+    for (const w of this.wanderersById.values()) {
+      const n: any = this.ecs.get(w.entity, 'needs');
+      if (n?.morto && !this.godMode(w.id)) mortal = true;
+    }
+    this.keepGods();
+    return !mortal;
+  }
+
   /**
    * The game is chosen before the Genesis and never changes after (ADR-0053): the first universe.json
    * fixes it, a later one that says otherwise is written back; only `runGenesis` chooses a new one.
@@ -4499,6 +4543,9 @@ export class Kernel {
   applyEffects(effects: Effect[], target?: Id, at?: { x: number; y: number }): string[] {
     const out: string[] = [];
     if (!this.modules.has('core.effects')) return out;
+    // Nobody touches a god but the god (T42a): on their body only words arrive.
+    const god = target !== undefined && this.wandererOf(target);
+    if (god && god !== this.wanderer().id && this.godMode(god)) effects = effects.filter((e) => e.tipo === 'messaggio');
     for (const e of effects) {
       if (target !== undefined && !this.ecs.alive.has(target)) target = undefined;
       const { value, failed } = this.runModule('core.effects', 'apply', target, this.playerId, clone(e), at?.x, at?.y);
@@ -6067,6 +6114,7 @@ export class Kernel {
     }
     this.touching = undefined;
     this.meter.endTick();
+    this.keepGods();
     this.syncRunes();
     this.sanitize();
     this.updateZone();
