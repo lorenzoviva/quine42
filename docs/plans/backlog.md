@@ -1160,7 +1160,7 @@ le risposte alle domande del piano.
   Diverso dal previsto: l'atlante «della corona» è il pannello che si apre dall'Ufficio dei luoghi (nella stanza l'atlante è un
   tavolo luminoso che apre il pannello, senza disegni dei luoghi); la vista seguita mostra soltanto: le azioni sulle caselle restano fuori portata.
 
-### T42d · Clonare l'universo con un altro master — `fatto` (`HASH`) (dipende da T42b)
+### T42d · Clonare l'universo con un altro master — `fatto` (`852be62`) (dipende da T42b)
 - Fare: copiare il repository dell'universo in un universo nuovo con `partita.master` diverso (l'unico modo di cambiare master); le
   carte restano a chi le ha generate (`carta.autore`, `pagante`), il titolare può restare o passare al nuovo master (da decidere).
 - Fatto quando: test (il clone ha lo stesso mondo, un altro master, le stesse carte).
