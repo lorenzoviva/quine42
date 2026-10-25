@@ -1147,7 +1147,7 @@ le risposte alle domande del piano.
   ramo (non sul principale), da pubblicare come le modifiche dell'editor.
 - Fatto quando: test — una richiesta al Referente del master cambia il ramo, non il mondo dei giocatori, finché non pubblica.
 
-### T42c · I giocatori dalla corona — `fatto` (commit in arrivo) (dipende da T42a)
+### T42c · I giocatori dalla corona — `fatto` (`d119c30`) (dipende da T42a)
 - Fare: nell'atlante della corona (Ufficio dei luoghi) e nel tavolo della situazione i giocatori collegati, ciascuno sul suo chunk;
   una vista che ne segue uno (la camera del master sopra di lui finché non la lascia), senza uscire dalla corona.
 - Fatto quando: test (la situazione elenca i giocatori collegati con la loro posizione); verifica nel browser con un universo di prova.
