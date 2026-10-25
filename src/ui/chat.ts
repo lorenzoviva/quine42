@@ -29,6 +29,12 @@ export class Chat {
     });
     k.bus.on('ui:chat', ({ id, name }) => this.open(id, name));
     k.bus.on('ui:agentchat', ({ agent, name }: { agent: AgentId; name: string }) => this.openAgent(agent, name));
+    // Another wanderer's words (T43a), when talking to them.
+    k.bus.on('ui:heard', ({ id, name, text }: { id: Id; name: string; text: string }) => {
+      if (this.npc !== id) return;
+      this.log.append(this.line(name, text, 'npc'));
+      this.log.scrollTop = this.log.scrollHeight;
+    });
   }
 
   get isOpen(): boolean {
@@ -98,8 +104,10 @@ export class Chat {
     const name = this.title.textContent ?? '';
     this.input.value = '';
     this.log.append(this.line('Tu', text, 'giocatore'));
+    // Another wanderer answers when they like (`ui:heard`): nobody thinks for them.
+    const person = this.k.otherWanderer(id) !== undefined;
     const typing = el('div', { class: 'note' }, `${name} pensa…`);
-    this.log.append(typing);
+    if (!person) this.log.append(typing);
     this.log.scrollTop = this.log.scrollHeight;
     this.waiting = true;
     this.input.disabled = true;
@@ -108,7 +116,7 @@ export class Chat {
     this.input.disabled = false;
     typing.remove();
     if (this.npc !== id) return;
-    this.log.append(this.line(name, reply.say, 'npc'));
+    if (reply.say) this.log.append(this.line(name, reply.say, person ? 'note' : 'npc'));
     if (reply.action !== 'nessuna') this.log.append(el('div', { class: 'note' }, `(${name} ${ACTIONS[reply.action] ?? reply.action})`));
     this.log.scrollTop = this.log.scrollHeight;
     this.input.focus();

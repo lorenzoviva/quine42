@@ -98,6 +98,10 @@ export type ClientMsg =
   /** «Altro…»: what the wanderer tries on a thing, on something they carry (`slot`) or on a tile (`col`, `row`), judged by the Council. */
   | { t: 'altro'; seq: number; entita?: number; slot?: number; col?: number; row?: number; testo: string }
   | { t: 'chat'; seq: number; entita: number; testo: string }
+  /** Words to another wanderer nearby (T43a): a bubble above who speaks, and who is spoken to hears them. */
+  | { t: 'dici'; seq: number; viandante: string; testo: string }
+  /** Something carried (`slot`, `quanti` of it: all by default) to another wanderer beside them (T43a). */
+  | { t: 'dai'; seq: number; viandante: string; slot: number; quanti?: number }
   /** Something they carry (T39b): `slot` is a pocket; `verso` where it goes, `borsa` the pocket of the bag, `quanti` how many. */
   | { t: 'oggetto'; seq: number; op: ItemOp; slot: number; verso?: number; borsa?: number; quanti?: number; azione?: string }
   /** A container in the world: opened (its content comes in the answer), something taken from it or put into it. */
@@ -140,7 +144,7 @@ export type ServerMsg =
    * master's updates say (`giocatori`) every player connected and where they are, when it changes (T42c).
    */
   | ({ t: 'ingresso'; id: string; nome: string; master?: true; concilio?: FeedEntry[]; ramo?: FileChanges; files: FileMap; me: Me; forma?: FormView; stato: MyState; luoghi: PlaceView[]; cose: ThingView[]; viandanti: OtherView[]; giocatori?: PlayerSpot[] } & Clock)
-  | ({ t: 'aggiorna'; me?: Me; stato?: MyState; luoghi?: PlaceView[]; cose?: ThingView[]; via?: number[]; viandanti?: OtherView[]; partiti?: string[]; giocatori?: PlayerSpot[] } & Clock)
+  | ({ t: 'aggiorna'; me?: Me; stato?: MyState; luoghi?: PlaceView[]; cose?: ThingView[]; via?: number[]; viandanti?: OtherView[]; partiti?: string[]; giocatori?: PlayerSpot[]; avvisi?: Notice[] } & Clock)
   /** The step was not possible (too fast, through a wall): the wanderer is here. */
   | { t: 'correzione'; seq: number; x: number; y: number }
   /**
@@ -155,6 +159,14 @@ export type ServerMsg =
   | { t: 'file'; files: FileChanges }
   /** What the Council made on the master's branch (T42e): only to the master, the files it changed there. */
   | { t: 'ramo'; files: FileChanges };
+
+/** What another wanderer did to this one (T43a): words said to them, something given (`testo`: what and how many). */
+export interface Notice {
+  tipo: 'dici' | 'dai';
+  da: string;
+  nome: string;
+  testo: string;
+}
 
 /** A line someone (or something) said back, as the game shows it in its dialog box. */
 export interface Dialog {

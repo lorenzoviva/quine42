@@ -6,7 +6,7 @@
 import type { FileMap } from '../kernel/types';
 import type { FeedEntry } from '../kernel/agents/council';
 import type { PlayerSpot } from '../kernel/situation';
-import type { ClientLink, ClientMsg, ContainerView, Dialog, FileChanges, FormView, Me, MyState, OtherView, PlaceView, ServerMsg, ThingView } from './protocol';
+import type { ClientLink, ClientMsg, ContainerView, Dialog, FileChanges, FormView, Me, MyState, Notice, OtherView, PlaceView, ServerMsg, ThingView } from './protocol';
 
 export interface Outcome {
   ok: boolean;
@@ -45,6 +45,8 @@ export class SessionClient {
   readonly others = new Map<string, OtherView>();
   /** The master's (T42c): every player connected and where they are, as the server last said. */
   players: PlayerSpot[] = [];
+  /** What the other wanderers said to this one and gave them (T43a), oldest first. */
+  readonly notices: Notice[] = [];
   /** Steps the server did not let through. */
   corrections = 0;
   refused?: string;
@@ -108,6 +110,8 @@ export class SessionClient {
       case 'aggiorna':
         if (m.me) this.me = m.me;
         if (m.stato) this.stato = m.stato;
+        this.notices.push(...(m.avvisi ?? []));
+        if (this.notices.length > 100) this.notices.splice(0, this.notices.length - 100);
         this.apply(m);
         break;
       case 'correzione':

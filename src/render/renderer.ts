@@ -351,7 +351,8 @@ export class Renderer {
     if (!interior) {
       if (this.showWalk) o.walkability(k);
       for (const [id, b] of k.bubbles) {
-        const p = k.ecs.get(id, 'pos');
+        // The wanderer is in real space, the rest on the carpet.
+        const p = id === k.playerId ? k.playerCarpet() : k.ecs.get(id, 'pos');
         if (p) o.bubble(p.x - ox, k.floorAt(p.x, p.y) + 1.9, p.y - oy, b.text);
       }
       for (const id of k.ecs.query('attivita', 'pos')) {

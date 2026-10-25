@@ -297,7 +297,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   muove `inputFor` (`io`); chunk, ritmo, frase e stati di ogni viandante. Un viandante di un client (`setRemote`) non lo muove il
   kernel: il client manda dove è nel mondo e `stepWanderer` lo porta lì al più per il ritmo (`paceOf`), con la collisione del
   cammino. `src/session/`: protocollo JSON (`entra passo frase incidi pronuncia azione altro chat oggetto contenitore fabbrica pannello
-  casella` → `ingresso aggiorna correzione esito rifiuto`), `SessionServer` (messaggi a ogni tick, aggiornamenti a 10 Hz di ciò che è cambiato vicino, credito di passo di
+  casella dici dai` → `ingresso aggiorna correzione esito rifiuto`), `SessionServer` (messaggi a ogni tick, aggiornamenti a 10 Hz di ciò che è cambiato vicino, credito di passo di
   mezzo secondo, azioni a 3 caselle, chi esce è salvato e lascia il mondo), `fakeLink` nei test. Nel server di Vite il WebSocket
   `/api/session?universo=<nome>` (`server/session.ts`, pacchetto `ws`) avvia al primo client il mondo dell'universo
   (`host.ts` con `ssrLoadModule`), solo se è in multigiocatore. In singola nulla cambia.
@@ -337,6 +337,11 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   il master che agisce e paga); ciò che vi si committa entra nel ramo e arriva al master (`ramo`), da pubblicare come l'editor.
   Le rune chieste al Referente (ADR-0070, T42f): l'incarico `runa` (`askedRunes` in `runes.ts`: ogni token che una runa può portare,
   al più 12, mai `concilio`) dà al master le rune nel mondo (`as(master, grantRunes)`), non sul ramo; in singola il Referente non dà rune.
+- **Parole e doni tra viandanti** (ADR-0071, T43a): nel menu di un altro viandante (`kernel.otherWanderer`: il registro o l'entità `remote`
+  dello specchio) «Parla» e «Dai <cosa>» per ogni tasca della barra rapida (`dai:<tasca>`). `dici {viandante, testo}` → `sayTo`: il fumetto
+  di chi parla, a chi è entro `HEAR` (8) caselle, senza filtro della quarta parete; `dai {viandante, slot, quanti}` → `giveTo`: entro `GIVE_REACH`
+  (3) caselle, dove andrebbe raccogliendolo, una borsa intera in una tasca vuota, la frase dimentica le rune date. Chi riceve lo sa
+  (`wanderer:said`/`wanderer:gave` → `avvisi` nell'`aggiorna`; la chat aperta con chi parla, `ui:heard`). Uno scambio sono due doni.
 - **Il clone con un altro master** (ADR-0068, T42d): il master non cambia; un altro master è un altro universo. `cloneUniverse`
   (`server/universeStore.ts`, `POST /api/universe/<nome>/clone {nome, master, titolari}`) copia la cartella intera (storia, `maps/`,
   viandanti, carte, consumi; non i rami `rami/*`) e committa ciò che dà `cloneChanges` (`src/kernel/clone.ts`): `name` e

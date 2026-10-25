@@ -1202,11 +1202,44 @@ le risposte alle domande del piano.
   del clone con il nuovo master in god mode). Diverso dal previsto: nulla di rilevante; nessuna verifica nel browser (il pulsante
   c'è solo per il master in multigiocatore e chiama l'endpoint coperto dal test su disco; in singola nulla cambia).
 
-### T43 · Tra giocatori — `da fare` (dipende da T33, T39)
+### T43 · Tra giocatori — spezzato in T43a-T43c (dipende da T33, T39)
 - Fare: «Altro…» su un altro giocatore giudicato come su una persona (se l'universo lo permette), effetti applicati dal
   server; PvP secondo `partita.pvp`; scambi di oggetti; chat tra avatar vicini (fumetti, senza filtro della quarta
   parete); morte in multigiocatore con la punizione di T33; ricollegamento con lo stato del giocatore.
 - Fatto quando: test headless di ogni interazione; verifica con due schede.
+- Spezzato (troppo per una sessione): chat e doni (T43a), «Altro…» e PvP (T43b), morte e ricollegamento (T43c).
+
+### T43a · Parole e doni tra viandanti — `fatto` (dipende da T39)
+- Contesto: il server rifiuta ogni azione su un altro viandante (`outOfReach`: «non c'è niente lì»); i fumetti dei viandanti
+  già viaggiano (`OtherView.testo`), ma niente li scrive. Il piano: «gli scambi di oggetti e la chat tra avatar vicini (fumetti)
+  ci sono sempre», senza filtro della quarta parete (sono persone vere).
+- Fare: nel menu di un altro viandante «Parla» e «Dai <ciò che impugni>»; `dici {viandante, testo}` mette il fumetto su chi parla
+  (lo sentono tutti i vicini) e lo porta a chi ascolta nella chat; `dai {viandante, slot, quanti}` sposta ciò che si porta (una
+  borsa intera, col suo contenuto) nelle tasche dell'altro, se c'è posto e se è vicino. Chi riceve lo sa (`avvisi`
+  nell'aggiornamento). Uno scambio sono due doni.
+- Fatto quando: test col finto trasporto (parole sentite dai vicini e non dai lontani, il dono arriva e lascia la frase, niente
+  posto o troppo lontano: rifiutato) e verifica con due schede.
+- Esito: ADR-0071. `kernel.sayTo` e `kernel.giveTo` (con `HEAR` 8, `GIVE_REACH` 3, `SAY_MAX` 140), `otherWanderer`; i messaggi `dici` e `dai`, gli
+  `avvisi` dell'`aggiorna` (`Notice`) dalla coda di chi riceve; nel client sottile `talk` e `perform` sulle entità `remote`, la chat che
+  aggiunge le parole sentite (`ui:heard`), il proprio fumetto disegnato dove è il viandante (il renderer lo cercava nello spazio del
+  tappeto). `tests/between.test.ts` (2 test con tre client sottili). Verificato con due schede (`anna`, `bruno`) su un universo di prova
+  poi tolto: menu «Parla» / «Dai Borsa delle rune», il fumetto sopra chi parla in tutte e due, l'avviso nei messaggi, la borsa passata.
+  Diverso dal previsto: «Dai» era per ciò che si impugna, ma la borsa delle rune non si impugna (trovato nel browser): ora una voce per
+  ogni tasca della barra rapida. `testTimeout` di 30 s in `vite.config.ts`: con un file di test in più quelli della sessione superavano i
+  5 s sotto carico. Una volta, a suite intera, `tests/determinism.test.ts` è fallito e poi è passato (tre volte): da tenere d'occhio.
+
+### T43b · «Altro…» e PvP tra viandanti — `da fare` (dipende da T43a)
+- Fare: «Altro…» su un altro viandante giudicato come su una persona, solo se `partita.altroTraGiocatori`; gli effetti li applica
+  il server sul corpo dell'altro (il master in god mode lascia passare solo `messaggio`, ADR-0065); ciò che ferisce
+  (bisogni che scendono, `spingi`, `fuoco`…) solo se `partita.pvp`, altrimenti il Narratore lo sa e il kernel lo toglie.
+- Fatto quando: test headless con PvP sì e no, con «Altro…» tra giocatori sì e no.
+
+### T43c · Morte e ricollegamento in multigiocatore — `da fare` (dipende da T43b)
+- Fare: a salute zero un giocatore (mai il master) muore con la punizione di T33 (`continueAfterDeath` sul server, come lui,
+  senza chiudere la sessione degli altri); il client lo mostra e riparte dove dice il verdetto. Chi si ricollega ritrova il suo
+  stato (`world/giocatori/<id>.json`): posizione, inventario, frase, stati; la carta e i legami restano.
+- Fatto quando: test headless (morte per sete di un giocatore, gli altri continuano; uscita e rientro con lo stesso stato) e
+  verifica con due schede.
 
 ### T44 · Account, profilo e viandante personalizzato — `in attesa` (domanda 1 del piano)
 - Fare: autenticazione sicura, un profilo ricco, il viandante personalizzabile (seme e colori del suo modello, nome);

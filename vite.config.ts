@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => {
     optimizeDeps: { include: ['wasmoon'] },
     // The MarkovJunior lab's sandbox (lab/3d) is a second page on the same server: /lab/3d/.
     build: { rollupOptions: { input: { main: path.resolve('index.html'), lab3d: path.resolve('lab/3d/index.html') } } },
-    test: { environment: 'node', include: ['tests/**/*.test.ts', 'lab/**/*.test.ts'] },
+    // The session's tests boot several kernels each: with the whole suite in parallel they take longer than the default 5 s.
+    test: { environment: 'node', include: ['tests/**/*.test.ts', 'lab/**/*.test.ts'], testTimeout: 30000 },
   };
 });

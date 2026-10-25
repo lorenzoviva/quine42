@@ -14,7 +14,7 @@ import type { Id } from '../kernel/ecs';
 import type { NpcReply } from '../kernel/agents/minds';
 import type { FeedEntry } from '../kernel/agents/council';
 import type { SessionClient, Outcome } from './client';
-import type { ContainerView, FileChanges, OtherView, PlaceView, ServerMsg, ThingView } from './protocol';
+import type { ContainerView, FileChanges, Notice, OtherView, PlaceView, ServerMsg, ThingView } from './protocol';
 import type { FileMap } from '../kernel/types';
 import { hashStr, hex } from '../kernel/rng';
 import { takeFromSlot } from '../kernel/inventory';
@@ -142,6 +142,7 @@ export class ThinClient {
         if (m.giocatori && this.session.master) this.players();
         if (m.me) this.carried(m.me.x, m.me.y);
         if (m.stato || this.adopt) this.state();
+        for (const n of m.avvisi ?? []) this.notice(n);
         this.adopt = false;
         if (Math.abs(m.ora - this.k.time) > 0.5) this.k.time = m.ora;
         // What was shown at once is now what the server says.
@@ -294,6 +295,15 @@ export class ThinClient {
     k.ecs.set(id, 'identity', { name: o.nome });
     if (o.form) k.ecs.set(id, 'form', { ...o.form });
     if (o.testo) this.say(id, o.testo);
+  }
+
+  /** What another wanderer did to this one (T43a): their words in the chat with them and in the messages, a gift. */
+  private notice(n: Notice): void {
+    const k = this.k;
+    if (n.tipo === 'dai') return k.message(`${n.nome} ti dà ${n.testo}.`, 'good');
+    const id = this.others.get(n.da);
+    if (id !== undefined) k.bus.emit('ui:heard', { id, name: n.nome, text: n.testo });
+    k.message(`${n.nome}: «${n.testo}»`);
   }
 
   private say(id: Id, text: string): void {
@@ -462,6 +472,8 @@ export class ThinClient {
       return r?.testo ?? r?.motivo ?? '';
     };
     k.talk = async (id, text): Promise<NpcReply> => {
+      const other = k.otherWanderer(id);
+      if (other !== undefined) return this.sayTo(other, text);
       const r = await this.send(id, { t: 'chat', testo: text });
       return { say: r?.testo ?? (r?.motivo ? `(${r.motivo})` : '…'), action: 'nessuna', mood: 'tranquillo' };
     };
@@ -635,8 +647,23 @@ export class ThinClient {
     k.openTileMenu(Math.floor(at.x), Math.floor(at.y), target);
   }
 
+  /** Words to another wanderer (T43a): the bubble shows at once above this one, the server says it to the others. */
+  private async sayTo(other: string, text: string): Promise<NpcReply> {
+    const k = this.k;
+    const r = await this.show(this.session.act({ t: 'dici', viandante: other, testo: text }));
+    if (r.ok && r.testo) k.speak(k.playerId, r.testo);
+    return { say: r.ok ? '' : `(${r.motivo ?? 'non ti sente'})`, action: 'nessuna', mood: 'tranquillo' };
+  }
+
   private async perform(id: Id, action: string): Promise<void> {
     const k = this.k;
+    const other = k.otherWanderer(id);
+    if (other !== undefined) {
+      if (action === 'parla') return void k.bus.emit('ui:chat', { id, name: k.nameOf(id) });
+      // What is given leaves the pocket when the update says so: the inventory is the server's.
+      if (action.startsWith('dai:')) await this.show(this.session.act({ t: 'dai', viandante: other, slot: Number(action.slice(4)) }));
+      return;
+    }
     const sid = this.server.get(id);
     if (sid === undefined) return;
     const name = k.nameOf(id);

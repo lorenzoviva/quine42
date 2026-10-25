@@ -11,7 +11,7 @@ import { RELIEF_PATH } from '../kernel/relief';
 import type { FileMap } from '../kernel/types';
 import { validWandererId } from '../kernel/wanderers';
 import { hashStr, hex } from '../kernel/rng';
-import { THING_PARTS, type ClientMsg, type FileChanges, type ItemOp, type Dialog, type FormView, type Me, type MyState, type OtherView, type PlaceView, type ServerLink, type ServerMsg, type ThingView } from './protocol';
+import { THING_PARTS, type ClientMsg, type FileChanges, type ItemOp, type Dialog, type FormView, type Me, type MyState, type Notice, type OtherView, type PlaceView, type ServerLink, type ServerMsg, type ThingView } from './protocol';
 
 export interface SessionOptions {
   /** Updates per second to every client. */
@@ -179,6 +179,8 @@ interface Client {
   watch?: string;
   /** The players connected, as the master last heard of them. */
   players?: string;
+  /** What the other wanderers did to this one since the last update (T43a). */
+  notices: Notice[];
 }
 
 export class SessionServer {
@@ -213,6 +215,14 @@ export class SessionServer {
       this.voices.push(e);
       if (this.voices.length > FEED_KEEP) this.voices.shift();
     });
+    // Words and gifts between wanderers (T43a): who they were for hears of them with the next update.
+    const notify = (tipo: Notice['tipo']) => (e: { da?: unknown; a?: unknown; testo?: unknown }) => {
+      const to = typeof e?.a === 'string' ? this.clients.get(e.a) : undefined;
+      const da = String(e?.da ?? '');
+      if (to && to.notices.length < 50) to.notices.push({ tipo, da, nome: kernel.wanderers().find((w) => w.id === da)?.nome ?? da, testo: String(e?.testo ?? '') });
+    };
+    kernel.bus.on('wanderer:said', notify('dici'));
+    kernel.bus.on('wanderer:gave', notify('dai'));
   }
 
   /** The master's branch now: what they changed that the world does not have yet. */
@@ -266,7 +276,7 @@ export class SessionServer {
       return undefined;
     }
     this.kernel.setRemote(id, true);
-    const c: Client = { id, link, budget: this.kernel.paceOf(id) * BURST, places: new Map(), things: new Map(), others: new Map() };
+    const c: Client = { id, link, budget: this.kernel.paceOf(id) * BURST, places: new Map(), things: new Map(), others: new Map(), notices: [] };
     this.clients.set(id, c);
     const u = this.view(c);
     const w = this.kernel.wanderers().find((x) => x.id === id)!;
@@ -316,7 +326,7 @@ export class SessionServer {
         if (Object.keys(mine).length) c.link.send({ t: 'file', files: mine });
       }
       const u = this.view(c);
-      if (u.me || u.stato || u.luoghi || u.cose || u.via || u.viandanti || u.partiti) c.link.send(u);
+      if (u.me || u.stato || u.luoghi || u.cose || u.via || u.viandanti || u.partiti || u.avvisi) c.link.send(u);
     }
   }
 
@@ -383,6 +393,13 @@ export class SessionServer {
         return this.answer(c, seq, this.watch(c, msg.id));
       case 'agente':
         return this.askOnBranch(c, seq, msg.agente, msg.testo);
+      case 'dici':
+        return this.answer(c, seq, this.act(c, () => k.sayTo(String(msg.viandante ?? ''), String(msg.testo ?? ''))));
+      case 'dai': {
+        const slot = this.pocket(c, msg.slot);
+        if (slot < 0) return this.answer(c, seq, { ok: false, motivo: 'non porti niente lì' });
+        return this.answer(c, seq, this.act(c, () => k.giveTo(String(msg.viandante ?? ''), slot, msg.quanti === undefined ? undefined : int(msg.quanti))));
+      }
       case 'casella': {
         const why = this.tileOutOfReach(c, msg.col, msg.row) ?? (typeof msg.azione === 'string' && msg.azione && msg.azione !== 'altro' ? undefined : 'azione sconosciuta');
         if (why) return this.answer(c, seq, { ok: false, motivo: why });
@@ -636,6 +653,7 @@ export class SessionServer {
   private view(c: Client): Extract<ServerMsg, { t: 'aggiorna' }> {
     const k = this.kernel;
     const out: Extract<ServerMsg, { t: 'aggiorna' }> = { t: 'aggiorna', tick: k.ticks, ora: round(k.time) };
+    if (c.notices.length) out.avvisi = c.notices.splice(0);
     const at = k.wandererAt(c.id);
     if (!at) return out;
     const me: Me = { x: round(at.x), y: round(at.y), facing: at.facing };

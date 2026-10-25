@@ -47,7 +47,7 @@ import { councilSession, judgeAction, judgeCraft, judgeDeath, nameSpell } from '
 import { cleanPanel, designMechanic } from './agents/mechanics';
 import { BENCH, cleanCases, runCase, textKey, type BenchEntry, type BenchRun, type BenchScene, type BenchShown } from './bench';
 import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Identity } from './agents/content';
-import { addItem, CARRY_CAPACITY, countItem, equippedItem, moveSlot, newInventory, putSlot, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
+import { addItem, CARRY_CAPACITY, countItem, HOTBAR, equippedItem, moveSlot, newInventory, putSlot, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
 import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH } from './relief';
 import { CardLedger, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, payerOf, placeCardId, stampFiles, titolareOf, type Card, type Carta } from './cards';
 import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Wanderer, type WandererState } from './wanderers';
@@ -297,6 +297,10 @@ const clone = <T>(v: T): T => (v === undefined ? v : JSON.parse(JSON.stringify(v
  */
 /** The systems that run once per wanderer, the only ones a thin client runs too (T39). */
 export const PER_WANDERER = new Set(['core.movement', 'core.carpet']);
+/** Between wanderers (T43a): how far words are heard, how near one gives something, how long words are. */
+export const HEAR = 8;
+export const GIVE_REACH = 3;
+export const SAY_MAX = 140;
 
 export class Kernel {
   readonly ecs = new World();
@@ -2220,7 +2224,7 @@ export class Kernel {
     let best: Id | undefined;
     let bestD = r;
     for (const id of this.ecs.query('pos')) {
-      if (id === this.playerId || exclude.includes(id) || (!this.ecs.has(id, 'module') && !this.ecs.has(id, 'pickup'))) continue;
+      if (id === this.playerId || exclude.includes(id) || (!this.ecs.has(id, 'module') && !this.ecs.has(id, 'pickup') && !this.ecs.has(id, 'remote'))) continue;
       if (tag && !this.hasTag(id, tag)) continue;
       const p = this.ecs.get(id, 'pos');
       const d = Math.hypot(p.x - x, p.y - y);
@@ -2948,6 +2952,12 @@ export class Kernel {
   /** What can be done to an entity: generic actions, its own actions, the held tool. */
   actionsFor(id: Id): ActionOption[] {
     const out: ActionOption[] = [];
+    // Another wanderer (T43a): one talks to them and gives them what is at hand (the hotbar); the rest comes with T43b.
+    if (this.otherWanderer(id) !== undefined) {
+      out.push({ id: 'parla', label: 'Parla', enabled: true });
+      this.inventory().slots.slice(0, HOTBAR).forEach((s, i) => s && out.push({ id: `dai:${i}`, label: `Dai ${this.itemInfo(s.item).name}${s.count > 1 ? ` ×${s.count}` : ''}`, enabled: true }));
+      return out;
+    }
     const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
     const inv = this.inventory();
     const has = (req: string) => countItem(inv, req) > 0 || inv.slots.some((s) => s && this.itemInfo(s.item).tags.includes(req));
@@ -2969,6 +2979,64 @@ export class Kernel {
     out.push({ id: 'esamina', label: 'Esamina', enabled: true });
     out.push({ id: 'altro', label: 'Altro…', enabled: true });
     return out;
+  }
+
+  /** Another wanderer in the world, near enough to the one acting (T43a): where both are, or why not. */
+  private besideWanderer(to: string, reach: number, far: string): { nome: string } | undefined {
+    const me = this.wanderer().id;
+    const a = to !== me && this.inWorld(me) ? this.wandererAt(me) : undefined;
+    const b = a && this.inWorld(to) ? this.wandererAt(to) : undefined;
+    if (!a || !b) return void this.message('Non c’è nessuno qui con questo nome.', 'warn');
+    if (Math.hypot(a.x - b.x, a.y - b.y) > reach) return void this.message(far, 'warn');
+    return { nome: this.wanderersById.get(to)!.nome };
+  }
+
+  /**
+   * Words to another wanderer nearby (T43a): a bubble above who speaks, which every wanderer near sees; who is spoken to
+   * hears them (`wanderer:said`). No filter of the fourth wall: they are people, not the Council.
+   */
+  sayTo(to: string, text: string): string | false {
+    const said = String(text ?? '').replace(/\s+/g, ' ').trim().slice(0, SAY_MAX);
+    if (!said || !this.besideWanderer(to, HEAR, 'È troppo lontano per sentirti.')) return false;
+    this.speak(this.playerId, said);
+    this.bus.emit('wanderer:said', { da: this.wanderer().id, a: to, testo: said });
+    return said;
+  }
+
+  /**
+   * Something carried, to another wanderer beside them (T43a): `count` of the pocket (all of it by default), where it would
+   * go if they picked it up; a bag goes whole, with what is in it, into an empty pocket. A trade is two gifts.
+   */
+  giveTo(to: string, slot: number, count?: number): string | false {
+    const inv = this.inventory();
+    const s = Number.isInteger(slot) ? inv.slots[slot] : undefined;
+    if (!s) return void this.message('Non porti niente lì.', 'warn'), false;
+    const n = Math.min(s.count, count === undefined ? s.count : Math.floor(Number(count)));
+    if (!(n >= 1)) return false;
+    const other = this.besideWanderer(to, GIVE_REACH, 'Avvicinati per dargli qualcosa.');
+    if (!other) return false;
+    const name = this.itemInfo(s.item).name;
+    const moved = this.as(to, () => {
+      if (!s.inv) return this.give(s.item, n);
+      const theirs = this.inventory();
+      const free = theirs.slots.findIndex((x) => !x);
+      if (free < 0) return 0;
+      theirs.slots[free] = s;
+      return s.count;
+    });
+    if (!moved) return void this.message(`${other.nome} non ha posto per ${name}.`, 'warn'), false;
+    s.count -= moved;
+    if (s.count <= 0 || s.inv) {
+      inv.slots[slot] = null;
+      if (inv.equipped === slot) inv.equipped = null;
+    }
+    // A rune given is no longer in the phrase.
+    this.syncHand();
+    const what = `${name}${moved > 1 ? ` ×${moved}` : ''}`;
+    this.bus.emit('inventory:changed', {});
+    this.bus.emit('wanderer:gave', { da: this.wanderer().id, a: to, oggetto: s.item, quanti: moved, testo: what });
+    this.message(`Dai ${what} a ${other.nome}.`, 'good');
+    return what;
   }
 
   /** E: corona → edit code; rune → pick; otherwise the menu of the nearest thing (or a pickup directly). */
@@ -3058,6 +3126,12 @@ export class Kernel {
 
   async perform(id: Id, action: string): Promise<void> {
     if (!this.ecs.alive.has(id)) return;
+    const other = this.otherWanderer(id);
+    if (other !== undefined) {
+      if (action === 'parla') this.bus.emit('ui:chat', { id, name: this.nameOf(id) });
+      if (action.startsWith('dai:')) this.giveTo(other, Number(action.slice(4)));
+      return;
+    }
     const modId: string | undefined = this.ecs.get(id, 'module')?.id;
     const m = modId ? this.modules.get(modId)?.manifest : undefined;
     const speaker = this.nameOf(id);
@@ -4012,6 +4086,13 @@ export class Kernel {
   wandererOf(entity: Id): string | undefined {
     for (const w of this.wanderersById.values()) if (w.entity === entity) return w.id;
     return undefined;
+  }
+
+  /** Another wanderer than the one acting (T43a), if the entity is one: in a kernel that holds them, or in a mirror (`remote`). */
+  otherWanderer(entity: Id): string | undefined {
+    if (entity === this.playerId) return undefined;
+    const remote = this.ecs.get(entity, 'remote')?.id;
+    return typeof remote === 'string' ? remote : this.wandererOf(entity);
   }
 
   /** The gods' needs stay full, whatever the world's code did to them this tick. */
