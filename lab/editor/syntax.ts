@@ -36,6 +36,12 @@ export const MJ_NODES = new Set([
   'path',
   'map',
   'union',
+  'wfc',
+  'overlapping',
+  'tileset',
+  'tile',
+  'tiles',
+  'rules',
 ]);
 
 export const MJ_ATTRS = new Set([
@@ -59,6 +65,14 @@ export const MJ_ATTRS = new Set([
   'at',
   'to',
   'r',
+  'sample',
+  'tilesize',
+  'periodic',
+  'overlap',
+  'd',
+  'n',
+  'weight',
+  'comment',
 ]);
 
 export function escapeHtml(str: string): string {

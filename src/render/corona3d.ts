@@ -195,7 +195,7 @@ export function buildCoronaRing(k: Kernel): THREE.Group {
       trains.push({
         group: tg,
         frames: frms,
-        trackRadius: R + CAMPUS.avenue - 0.7,
+        trackRadius: R + CAMPUS.avenue - 1.7,
         speed: 0.08,
         phase: i * Math.PI,
       });
@@ -247,21 +247,22 @@ export function animateRing(ring: THREE.Group, t: number, k?: Kernel): void {
 
       const ease = 0.5 - 0.5 * Math.cos(p * Math.PI);
       const angle = angleA + (angleB - angleA) * ease;
-      const arcRadius = c.radius + CAMPUS.avenue + 1 + Math.sin(p * Math.PI) * 5;
+      const arcRadius = c.radius + CAMPUS.avenue - 4 + Math.sin(p * Math.PI * 0.5) * 2;
       const px = Math.sin(angle) * arcRadius;
       const py = -Math.cos(angle) * arcRadius;
-      const alt = 2.4 + Math.sin(p * Math.PI) * 1.2 + Math.sin(t * 4 + i) * 0.12;
+      const alt = 2.4 + Math.sin(p * Math.PI) * 1.2 + Math.sin(t * 4 + i) * 0.24;
 
       const nextP = Math.min(1, p + 0.02);
       const nextEase = 0.5 - 0.5 * Math.cos(nextP * Math.PI);
       const nextAngle = angleA + (angleB - angleA) * nextEase;
-      const nextRadius = c.radius + CAMPUS.avenue + 1 + Math.sin(nextP * Math.PI) * 5;
+      const nextRadius = c.radius + CAMPUS.avenue - 4 + Math.sin(nextP * Math.PI * 0.5) * 2;
       const nx = Math.sin(nextAngle) * nextRadius;
       const ny = -Math.cos(nextAngle) * nextRadius;
 
       d.group.position.set(px, alt, py);
       d.group.rotation.y = Math.atan2(nx - px, ny - py);
       d.group.rotation.z = Math.sin(t * 4 + i) * 0.06;
+      d.group.rotation.z = Math.sin(p * Math.PI) * 0.06;
     }
   }
 
@@ -1157,7 +1158,7 @@ interface AvatarEntry {
 /** The Council's people in the corona and in the studio: giant cuddly gerboas with distinctive hats (T50d). */
 export class Avatars {
   private views = new Map<string, AvatarEntry>();
-  constructor(private scene: THREE.Object3D) {}
+  constructor(private scene: THREE.Object3D) { }
 
   update(k: Kernel, t: number): void {
     const seen = new Set<string>();
@@ -1205,8 +1206,8 @@ export class Avatars {
       const bob = a.say
         ? Math.abs(Math.sin(t * 8)) * 0.12
         : walking
-        ? Math.abs(Math.sin(t * 6 + a.x)) * 0.06
-        : Math.sin(t * 2.5 + a.x * 2) * 0.02;
+          ? Math.abs(Math.sin(t * 6 + a.x)) * 0.06
+          : Math.sin(t * 2.5 + a.x * 2) * 0.02;
 
       v.group.position.set(a.x, bob, a.y);
 

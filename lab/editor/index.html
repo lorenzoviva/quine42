@@ -60,6 +60,8 @@
           <div class="editor-toolbar">
             <span id="cursor-pos">Riga 1, Col 1</span>
             <div class="editor-toolbar-actions">
+              <button id="btn-open-rules" class="btn-rule-tool" title="Menu sostituzione e regole MarkovJunior all / one / prl (Alt+R)">⚡ Regole</button>
+              <button id="btn-open-wfc" class="btn-wfc-tool" title="Configurazione guidata WFC (Alt+W)">🧩 WFC</button>
               <button id="btn-format" title="Formatta codice XML">Formatta</button>
               <button id="btn-copy" title="Copia codice XML negli appunti">Copia</button>
               <button id="btn-export" title="Scarica file XML">Esporta</button>
@@ -278,6 +280,189 @@
           </div>
         </section>
       </main>
+    </div>
+
+    <!-- Modal Dialog: Menu Sostituisci & Regole MarkovJunior (T59d) -->
+    <div id="modal-rules-backdrop" class="modal-backdrop hidden" aria-hidden="true">
+      <div id="modal-rules" class="modal-dialog" role="dialog" aria-labelledby="rules-modal-title">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="modal-icon">⚡</span>
+            <h2 id="rules-modal-title">Sostituzione & Regole MarkovJunior</h2>
+          </div>
+          <button id="btn-rules-close" class="btn-icon" title="Chiudi (Esc)">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Node Type Selection -->
+          <div class="modal-section">
+            <span class="modal-section-title">Tipo di Regola</span>
+            <div class="rule-type-selector">
+              <label class="rule-type-option active">
+                <input type="radio" name="rule-node-type" value="all" checked />
+                <span class="type-badge">ALL</span>
+                <span class="type-desc">Tutti i match non sovrapposti</span>
+              </label>
+              <label class="rule-type-option">
+                <input type="radio" name="rule-node-type" value="one" />
+                <span class="type-badge">ONE</span>
+                <span class="type-desc">Un singolo match casuale</span>
+              </label>
+              <label class="rule-type-option">
+                <input type="radio" name="rule-node-type" value="prl" />
+                <span class="type-badge">PRL</span>
+                <span class="type-desc">Parallelo probabilistico (p)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Parameters: Steps, p, Symmetry -->
+          <div class="modal-section">
+            <span class="modal-section-title">Parametri di Esecuzione</span>
+            <div class="rule-params-grid">
+              <div class="param-field">
+                <label for="rule-steps">Passi (steps)</label>
+                <input id="rule-steps" type="number" min="1" max="9999" value="1" title="Numero di iterazioni della regola" />
+              </div>
+
+              <div id="rule-p-group" class="param-field disabled">
+                <label for="rule-p-num">Probabilità (p)</label>
+                <div class="range-with-num">
+                  <input id="rule-p-slider" type="range" min="0.01" max="1" step="0.01" value="0.5" />
+                  <input id="rule-p-num" type="number" min="0.01" max="1" step="0.01" value="0.5" />
+                </div>
+              </div>
+
+              <div class="param-field">
+                <label for="rule-symmetry">Simmetria</label>
+                <select id="rule-symmetry" title="Gruppo di simmetria per la ricerca dei match">
+                  <option value="(xy)" selected>(xy) Pianale (rotazioni orizzontali)</option>
+                  <option value="()">() Nessuna (direzione esatta)</option>
+                  <option value="(x)">(x) Specchio asse X</option>
+                  <option value="(y)">(y) Specchio asse Y</option>
+                  <option value="(z)">(z) Specchio asse Z</option>
+                  <option value="(xyz+)">(xyz+) Tutte le 24 rotazioni 3D</option>
+                  <option value="(xyz)">(xyz) Completa 3D (48 simmetrie)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Palette Picker -->
+          <div class="modal-section">
+            <div class="palette-pick-header">
+              <span class="modal-section-title">Tavolozza Modello</span>
+              <span class="field-hint">Clicca uno swatch per inserire il simbolo</span>
+            </div>
+            <div id="rule-palette-swatches" class="rule-palette-swatches"></div>
+          </div>
+
+          <!-- Rules List -->
+          <div class="modal-section">
+            <div class="rules-list-header">
+              <span class="modal-section-title">Pattern di Sostituzione (In ➔ Out)</span>
+              <button id="btn-add-rule-row" class="btn-sm btn-outline">+ Aggiungi riga regola</button>
+            </div>
+            <div id="rule-rows-container" class="rule-rows-container"></div>
+          </div>
+
+          <!-- Live XML Preview -->
+          <div class="modal-section">
+            <span class="modal-section-title">Anteprima XML Generato</span>
+            <pre class="modal-code-preview"><code id="rule-xml-preview"></code></pre>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="btn-insert-rule-cursor" class="btn-primary" title="Inserisci il blocco al cursore nel codice">Inserisci al cursore</button>
+          <button id="btn-insert-rule-end" class="btn-secondary" title="Inserisci prima della chiusura della sequenza">Inserisci in fondo</button>
+          <button id="btn-copy-rule" class="btn-secondary" title="Copia negli appunti">Copia XML</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Dialog: Menu Guidato WFC (T59d) -->
+    <div id="modal-wfc-backdrop" class="modal-backdrop hidden" aria-hidden="true">
+      <div id="modal-wfc" class="modal-dialog modal-dialog-lg" role="dialog" aria-labelledby="wfc-modal-title">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="modal-icon">🧩</span>
+            <h2 id="wfc-modal-title">Configurazione Guidata WFC (WaveFunctionCollapse)</h2>
+          </div>
+          <button id="btn-wfc-close" class="btn-icon" title="Chiudi (Esc)">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Preset Selector -->
+          <div class="modal-section">
+            <span class="modal-section-title">Scegli un Preset Procedurale</span>
+            <div id="wfc-presets-grid" class="wfc-presets-grid"></div>
+          </div>
+
+          <!-- Generation Settings -->
+          <div class="modal-section">
+            <span class="modal-section-title">Opzioni e Modalità di Output</span>
+            <div class="wfc-modes-row">
+              <label class="wfc-mode-option active">
+                <input type="radio" name="wfc-output-mode" value="mj_native" checked />
+                <span class="mode-title">⚡ MarkovJunior Nativo</span>
+                <span class="mode-desc">Compila ed esegue all'istante nel viewport 3D del gioco</span>
+              </label>
+              <label class="wfc-mode-option">
+                <input type="radio" name="wfc-output-mode" value="wfc_standard" />
+                <span class="mode-title">📄 WFC Standard (&lt;wfc/&gt;)</span>
+                <span class="mode-desc">Definizione standard MarkovJunior per export e architettura</span>
+              </label>
+            </div>
+
+            <div class="wfc-params-grid">
+              <div class="param-field">
+                <label>Dimensioni (X Y Z)</label>
+                <div class="xyz-inputs">
+                  <label>X <input id="wfc-dim-x" type="number" min="4" max="64" value="12" /></label>
+                  <label>Y <input id="wfc-dim-y" type="number" min="4" max="64" value="12" /></label>
+                  <label>Z <input id="wfc-dim-z" type="number" min="2" max="64" value="12" /></label>
+                </div>
+              </div>
+
+              <div class="param-field">
+                <label for="wfc-symmetry">Simmetria</label>
+                <select id="wfc-symmetry">
+                  <option value="(xy)" selected>(xy) Pianale orizzontale</option>
+                  <option value="()">() Nessuna</option>
+                  <option value="(xyz+)">(xyz+) Rotazioni 3D complete</option>
+                  <option value="(xyz)">(xyz) Cubo 48 simmetrie</option>
+                </select>
+              </div>
+
+              <div class="param-field checkbox-field">
+                <label>
+                  <input id="wfc-periodic" type="checkbox" />
+                  <span>Bordi Periodici (Toroidale)</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tiles & Constraints Summary -->
+          <div class="modal-section">
+            <span class="modal-section-title">Tessere e Vincoli del Modello</span>
+            <div id="wfc-tiles-container" class="wfc-tiles-container"></div>
+          </div>
+
+          <!-- Live XML Preview -->
+          <div class="modal-section">
+            <span class="modal-section-title">Anteprima Codice Generato</span>
+            <pre class="modal-code-preview"><code id="wfc-xml-preview"></code></pre>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="btn-wfc-load-model" class="btn-primary" title="Carica questo modello nell'editor e mostra subito la generazione 3D">★ Carica come modello attivo</button>
+          <button id="btn-wfc-insert-cursor" class="btn-secondary" title="Inserisci blocco al cursore">Inserisci al cursore</button>
+          <button id="btn-wfc-copy" class="btn-secondary" title="Copia negli appunti">Copia XML</button>
+        </div>
+      </div>
     </div>
 
     <script type="module" src="./main.ts"></script>

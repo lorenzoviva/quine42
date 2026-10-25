@@ -31,6 +31,18 @@ import {
 } from '../lab/editor/playback';
 import { compileMjx } from '../src/mj/model';
 import { runMjx } from '../src/mj/run';
+import {
+  generateRuleXml,
+  getPaletteSymbols,
+  insertRuleIntoXmlAt,
+  insertRuleAtEndOfSequence,
+  type RuleBlockConfig,
+} from '../lab/editor/rules';
+import {
+  WFC_PRESETS,
+  generateWfcXml,
+  type WfcConfig,
+} from '../lab/editor/wfc';
 
 describe('MarkovJunior Editor (T59a)', () => {
   describe('syntax highlighting & tokenizer', () => {
@@ -523,5 +535,229 @@ describe('MarkovJunior Editor (T59a)', () => {
       expect(frame.mesh).toBe(mesh); // Cached
     });
   });
+
+  describe('MarkovJunior Rule & WFC Tools (T59d)', () => {
+    describe('rules & substitution generator', () => {
+      it('generates a concise single rule line for <all>', () => {
+        const config: RuleBlockConfig = {
+          type: 'all',
+          steps: 4,
+          symmetry: '(xy)',
+          rules: [{ in: 'B', out: 'W' }],
+        };
+        const xml = generateRuleXml(config);
+        expect(xml.trim()).toBe('<all in="B" out="W" steps="4" symmetry="(xy)"/>');
+      });
+
+      it('generates a block form with child <rule> elements for multiple rules', () => {
+        const config: RuleBlockConfig = {
+          type: 'prl',
+          steps: 2,
+          p: 0.5,
+          symmetry: '(xy)',
+          rules: [
+            { in: 'P', out: 'S', p: 0.15 },
+            { in: 'P', out: 'D', p: 0.1, comment: 'pietra scura' },
+          ],
+          comment: 'Sfumature pietra',
+        };
+        const xml = generateRuleXml(config);
+        expect(xml).toContain('<!-- Sfumature pietra -->');
+        expect(xml).toContain('<prl steps="2" p="0.5" symmetry="(xy)">');
+        expect(xml).toContain('<rule in="P" out="S" p="0.15"/>');
+        expect(xml).toContain('<rule in="P" out="D" p="0.1"/> <!-- pietra scura -->');
+        expect(xml).toContain('</prl>');
+      });
+
+      it('generates a <one> rule block with weights', () => {
+        const config: RuleBlockConfig = {
+          type: 'one',
+          steps: 10,
+          rules: [
+            { in: '0', out: 'R', p: 0.8 },
+            { in: '0', out: 'G', p: 0.2 },
+          ],
+        };
+        const xml = generateRuleXml(config);
+        expect(xml).toContain('<one steps="10">');
+        expect(xml).toContain('<rule in="0" out="R" p="0.8"/>');
+        expect(xml).toContain('<rule in="0" out="G" p="0.2"/>');
+        expect(xml).toContain('</one>');
+      });
+
+      it('returns empty string if all rules are blank', () => {
+        const config: RuleBlockConfig = {
+          type: 'all',
+          rules: [{ in: '', out: '' }, { in: '   ', out: '  ' }],
+        };
+        const xml = generateRuleXml(config);
+        expect(xml).toBe('');
+      });
+
+      it('extracts palette symbols accurately from XML', () => {
+        const sampleXml = `
+<sequence values="0BGY" size="10 10 10">
+  <color symbol="B" value="1a1e2e" name="nero"/>
+  <color symbol="G" value="00e436" name="verde" glow="True"/>
+</sequence>`;
+        const symbols = getPaletteSymbols(sampleXml);
+        expect(symbols.length).toBeGreaterThanOrEqual(4);
+
+        const bSym = symbols.find((s) => s.symbol === 'B');
+        expect(bSym).toBeDefined();
+        expect(bSym?.color).toBe('#1a1e2e');
+        expect(bSym?.name).toBe('nero');
+
+        const gSym = symbols.find((s) => s.symbol === 'G');
+        expect(gSym).toBeDefined();
+        expect(gSym?.glow).toBe(true);
+
+        const ySym = symbols.find((s) => s.symbol === 'Y');
+        expect(ySym).toBeDefined();
+      });
+
+      it('inserts rule into XML at cursor position with clean newlines', () => {
+        const xml = '<sequence values="BW" size="4 4 4">\n  <box at="2 2 0" size="2 2 2" color="B"/>\n</sequence>';
+        const ruleXml = '  <all in="B" out="W"/>';
+        const cursor = xml.indexOf('</sequence>');
+
+        const res = insertRuleIntoXmlAt(xml, ruleXml, cursor);
+        expect(res.newXml).toContain('  <box at="2 2 0" size="2 2 2" color="B"/>\n  <all in="B" out="W"/>\n</sequence>');
+        expect(res.newCursor).toBeGreaterThan(cursor);
+      });
+
+      it('inserts rule at the end of root sequence or markov tag', () => {
+        const xml = '<sequence values="BW" size="4 4 4">\n  <box at="2 2 0" size="2 2 2" color="B"/>\n</sequence>';
+        const ruleXml = '  <prl in="B" out="W" p="0.5"/>';
+
+        const res = insertRuleAtEndOfSequence(xml, ruleXml);
+        expect(res.newXml).toContain('<prl in="B" out="W" p="0.5"/>\n</sequence>');
+      });
+
+      it('produces valid XML that passes validateMjx', () => {
+        const baseXml = '<sequence values="0BW" size="6 6 6">\n  <box at="3 3 0" size="4 4 4" color="B"/>\n</sequence>';
+        const ruleXml = generateRuleXml({
+          type: 'all',
+          steps: 2,
+          symmetry: '(xy)',
+          rules: [{ in: 'B', out: 'W' }],
+        });
+
+        const res = insertRuleAtEndOfSequence(baseXml, ruleXml);
+        const val = validateMjx(res.newXml);
+        expect(val.ok).toBe(true);
+      });
+    });
+
+    describe('WFC guided configuration & generation', () => {
+      it('has predefined presets with valid metadata', () => {
+        expect(WFC_PRESETS.length).toBeGreaterThanOrEqual(5);
+        const presetIds = WFC_PRESETS.map((p) => p.id);
+        expect(presetIds).toContain('pipes');
+        expect(presetIds).toContain('maze');
+        expect(presetIds).toContain('castle');
+        expect(presetIds).toContain('dungeon');
+        expect(presetIds).toContain('islands');
+
+        for (const p of WFC_PRESETS) {
+          expect(p.name).toBeTruthy();
+          expect(p.tiles.length).toBeGreaterThanOrEqual(3);
+          expect(p.size.length).toBe(3);
+          expect(p.nativeMjXml).toContain('<sequence');
+        }
+      });
+
+      it('generates standard WFC specification XML', () => {
+        const config: WfcConfig = {
+          presetId: 'pipes',
+          mode: 'wfc_standard',
+          size: [16, 16, 16],
+          periodic: true,
+          symmetry: '(xyz+)',
+          tiles: [
+            { name: 'Aria', symbol: 'B', color: '#000000', weight: 5 },
+            { name: 'Tubo', symbol: 'R', color: '#ff0000', weight: 2 },
+          ],
+          comment: 'WFC Tubi 3D',
+        };
+
+        const xml = generateWfcXml(config);
+        expect(xml).toContain('<!-- WFC Tubi 3D -->');
+        expect(xml).toContain('<wfc sample="PIPES3D" size="16 16 16" n="2" periodic="True" symmetry="(xyz+)">');
+        expect(xml).toContain('weight="5"');
+        expect(xml).toContain('weight="2"');
+        expect(xml).toContain('</wfc>');
+      });
+
+      it('generates native MarkovJunior model from preset that compiles and runs in runMjx', () => {
+        for (const preset of WFC_PRESETS) {
+          const config: WfcConfig = {
+            presetId: preset.id,
+            mode: 'mj_native',
+            size: preset.size,
+            periodic: preset.periodic,
+            symmetry: preset.symmetry,
+            tiles: preset.tiles,
+          };
+
+          const xml = generateWfcXml(config);
+          expect(xml).toContain('<sequence');
+
+          // Validate compilation
+          const val = validateMjx(xml);
+          expect(val.ok).toBe(true);
+
+          if (val.ok) {
+            // Test execution
+            const runRes = runMjx(val.model, 1);
+            expect(runRes.grid).toBeDefined();
+            expect(runRes.grid.cells.length).toBeGreaterThan(0);
+          }
+        }
+      });
+
+      it('generates custom native MarkovJunior constraint model when no preset id is given', () => {
+        const config: WfcConfig = {
+          mode: 'mj_native',
+          size: [8, 8, 8],
+          periodic: false,
+          symmetry: '(xy)',
+          tiles: [
+            { name: 'Pavimento', symbol: 'F', color: '#444444' },
+            { name: 'Muro', symbol: 'W', color: '#888888' },
+          ],
+          comment: 'Custom room',
+        };
+
+        const xml = generateWfcXml(config);
+        expect(xml).toContain('<!-- Custom room -->');
+        expect(xml).toContain('<sequence values="0FW" size="8 8 8" symmetry="(xy)">');
+        expect(xml).toContain('<color symbol="F" value="444444" name="pavimento"/>');
+        expect(xml).toContain('<color symbol="W" value="888888" name="muro"/>');
+
+        const val = validateMjx(xml);
+        expect(val.ok).toBe(true);
+      });
+
+      it('recognizes WFC tags and attributes in syntax highlighter', () => {
+        expect(MJ_NODES.has('wfc')).toBe(true);
+        expect(MJ_NODES.has('tileset')).toBe(true);
+        expect(MJ_NODES.has('tile')).toBe(true);
+        expect(MJ_NODES.has('overlapping')).toBe(true);
+
+        expect(MJ_ATTRS.has('sample')).toBe(true);
+        expect(MJ_ATTRS.has('tilesize')).toBe(true);
+        expect(MJ_ATTRS.has('periodic')).toBe(true);
+        expect(MJ_ATTRS.has('weight')).toBe(true);
+
+        const wfcXml = '<wfc sample="Test" size="10 10 10" periodic="True"/>';
+        const html = highlightXml(wfcXml);
+        expect(html).toContain('<span class="tok-tag tok-mj-node">wfc</span>');
+        expect(html).toContain('<span class="tok-attr tok-mj-attr">sample</span>');
+        expect(html).toContain('<span class="tok-attr tok-mj-attr">periodic</span>');
+      });
+    });
+  });
 });
+
 

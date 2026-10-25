@@ -23,6 +23,22 @@ import {
 import { MJ_PALETTE } from '../../src/mj/palette';
 import type { PaletteEntry } from '../../src/mj/engine';
 import { PlaybackController, getOrComputeFrameMesh } from './playback';
+import {
+  type RuleNodeType,
+  type SymmetryType,
+  type SingleRuleItem,
+  type RuleBlockConfig,
+  generateRuleXml,
+  getPaletteSymbols,
+  insertRuleIntoXmlAt,
+  insertRuleAtEndOfSequence,
+} from './rules';
+import {
+  type WfcOutputMode,
+  type WfcConfig,
+  WFC_PRESETS,
+  generateWfcXml,
+} from './wfc';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -1328,6 +1344,518 @@ window.addEventListener('keydown', (e) => {
       codeInput.value = deleteShapeFromXml(codeInput.value, selectedShapeIndex);
       onCodeChange();
       deselectShape();
+    }
+  }
+});
+
+// ------------------------------------------------------------------ Rules & Sostituisci Modal (T59d)
+
+const modalRulesBackdrop = $('modal-rules-backdrop');
+const btnOpenRules = $('btn-open-rules');
+const btnRulesClose = $('btn-rules-close');
+const ruleNodeRadios = document.querySelectorAll<HTMLInputElement>('input[name="rule-node-type"]');
+const ruleStepsInput = $<HTMLInputElement>('rule-steps');
+const rulePSlider = $<HTMLInputElement>('rule-p-slider');
+const rulePNum = $<HTMLInputElement>('rule-p-num');
+const rulePGroup = $('rule-p-group');
+const ruleSymmetrySelect = $<HTMLSelectElement>('rule-symmetry');
+const rulePaletteSwatches = $('rule-palette-swatches');
+const ruleRowsContainer = $('rule-rows-container');
+const btnAddRuleRow = $('btn-add-rule-row');
+const ruleXmlPreview = $<HTMLElement>('rule-xml-preview');
+const btnInsertRuleCursor = $('btn-insert-rule-cursor');
+const btnInsertRuleEnd = $('btn-insert-rule-end');
+const btnCopyRule = $('btn-copy-rule');
+
+let activeRuleFocusField: HTMLInputElement | null = null;
+
+function getSelectedRuleNodeType(): RuleNodeType {
+  for (const r of ruleNodeRadios) {
+    if (r.checked) return r.value as RuleNodeType;
+  }
+  return 'all';
+}
+
+function updateRulesPreview() {
+  const nodeType = getSelectedRuleNodeType();
+  const stepsVal = parseInt(ruleStepsInput.value, 10);
+  const steps = Number.isFinite(stepsVal) && stepsVal > 0 ? stepsVal : undefined;
+  const pVal = parseFloat(rulePNum.value);
+  const p = nodeType === 'prl' && Number.isFinite(pVal) ? pVal : undefined;
+  const symmetry = (ruleSymmetrySelect.value || '(xy)') as SymmetryType;
+
+  const rules: SingleRuleItem[] = [];
+  const rowEls = ruleRowsContainer.querySelectorAll('.rule-row-card');
+  rowEls.forEach((row) => {
+    const inInput = row.querySelector<HTMLInputElement>('.rule-in-input');
+    const outInput = row.querySelector<HTMLInputElement>('.rule-out-input');
+    const pInput = row.querySelector<HTMLInputElement>('.rule-row-prob');
+    if (inInput && outInput) {
+      const inVal = inInput.value.trim();
+      const outVal = outInput.value.trim();
+      if (inVal && outVal) {
+        const itemP = pInput && nodeType === 'prl' ? parseFloat(pInput.value) : undefined;
+        rules.push({
+          in: inVal,
+          out: outVal,
+          p: Number.isFinite(itemP) && itemP! > 0 && itemP! <= 1 ? itemP : undefined,
+        });
+      }
+    }
+  });
+
+  const config: RuleBlockConfig = {
+    type: nodeType,
+    steps,
+    p,
+    symmetry,
+    rules: rules.length > 0 ? rules : [{ in: 'A', out: 'B' }],
+  };
+
+  const xml = generateRuleXml(config);
+  ruleXmlPreview.textContent = xml || '<!-- Nessuna regola valida configurata -->';
+}
+
+function createRuleRow(inVal = '', outVal = '', pVal?: number): HTMLElement {
+  const row = document.createElement('div');
+  row.className = 'rule-row-card';
+
+  // In box
+  const inBox = document.createElement('div');
+  inBox.className = 'rule-io-box';
+  const inLabel = document.createElement('span');
+  inLabel.textContent = 'In:';
+  const inInput = document.createElement('input');
+  inInput.type = 'text';
+  inInput.className = 'rule-in-input';
+  inInput.value = inVal;
+  inInput.placeholder = 'es. P o B T';
+  inInput.addEventListener('focus', () => {
+    activeRuleFocusField = inInput;
+  });
+  inInput.addEventListener('input', updateRulesPreview);
+  inBox.appendChild(inLabel);
+  inBox.appendChild(inInput);
+
+  // Arrow
+  const arrow = document.createElement('span');
+  arrow.className = 'rule-arrow';
+  arrow.textContent = '➔';
+
+  // Out box
+  const outBox = document.createElement('div');
+  outBox.className = 'rule-io-box';
+  const outLabel = document.createElement('span');
+  outLabel.textContent = 'Out:';
+  const outInput = document.createElement('input');
+  outInput.type = 'text';
+  outInput.className = 'rule-out-input';
+  outInput.value = outVal;
+  outInput.placeholder = 'es. S o B H';
+  outInput.addEventListener('focus', () => {
+    activeRuleFocusField = outInput;
+  });
+  outInput.addEventListener('input', updateRulesPreview);
+  outBox.appendChild(outLabel);
+  outBox.appendChild(outInput);
+
+  // Prob input (for prl)
+  const probInput = document.createElement('input');
+  probInput.type = 'number';
+  probInput.className = 'rule-row-prob';
+  probInput.min = '0.01';
+  probInput.max = '1';
+  probInput.step = '0.05';
+  probInput.placeholder = 'p';
+  probInput.title = 'Probabilità p individuale per questa regola (opzionale)';
+  if (pVal !== undefined) probInput.value = String(pVal);
+  probInput.addEventListener('input', updateRulesPreview);
+
+  // Remove button
+  const btnRemove = document.createElement('button');
+  btnRemove.className = 'btn-remove-rule';
+  btnRemove.innerHTML = '🗑';
+  btnRemove.title = 'Rimuovi questa riga';
+  btnRemove.addEventListener('click', () => {
+    row.remove();
+    updateRulesPreview();
+  });
+
+  row.appendChild(inBox);
+  row.appendChild(arrow);
+  row.appendChild(outBox);
+  row.appendChild(probInput);
+  row.appendChild(btnRemove);
+
+  return row;
+}
+
+function populateRulesPaletteSwatches() {
+  rulePaletteSwatches.innerHTML = '';
+  const symbols = getPaletteSymbols(codeInput.value);
+
+  for (const s of symbols) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'rule-swatch-btn';
+    btn.title = `${s.name ?? s.symbol} (${s.symbol}) · Clicca per inserire`;
+
+    const colorDot = document.createElement('span');
+    colorDot.className = 'rule-swatch-color';
+    colorDot.style.backgroundColor = s.color;
+
+    const label = document.createElement('span');
+    label.textContent = s.symbol;
+
+    btn.appendChild(colorDot);
+    btn.appendChild(label);
+
+    btn.addEventListener('click', () => {
+      if (activeRuleFocusField) {
+        activeRuleFocusField.value = s.symbol;
+        activeRuleFocusField.dispatchEvent(new Event('input'));
+      } else {
+        // Fallback: pick first empty input or add to in
+        const firstIn = ruleRowsContainer.querySelector<HTMLInputElement>('.rule-in-input');
+        if (firstIn && !firstIn.value) {
+          firstIn.value = s.symbol;
+          firstIn.dispatchEvent(new Event('input'));
+        }
+      }
+    });
+
+    rulePaletteSwatches.appendChild(btn);
+  }
+}
+
+function openRulesModal() {
+  modalRulesBackdrop.classList.remove('hidden');
+  modalRulesBackdrop.setAttribute('aria-hidden', 'false');
+  populateRulesPaletteSwatches();
+
+  if (ruleRowsContainer.children.length === 0) {
+    const symbols = getPaletteSymbols(codeInput.value);
+    const inSym = symbols[0]?.symbol || 'P';
+    const outSym = symbols[1]?.symbol || 'S';
+    ruleRowsContainer.appendChild(createRuleRow(inSym, outSym));
+  }
+
+  updateRulesPreview();
+}
+
+function closeRulesModal() {
+  modalRulesBackdrop.classList.add('hidden');
+  modalRulesBackdrop.setAttribute('aria-hidden', 'true');
+}
+
+function toggleRulesModal() {
+  if (modalRulesBackdrop.classList.contains('hidden')) {
+    openRulesModal();
+  } else {
+    closeRulesModal();
+  }
+}
+
+// Rules Modal Event Listeners
+btnOpenRules.addEventListener('click', openRulesModal);
+btnRulesClose.addEventListener('click', closeRulesModal);
+modalRulesBackdrop.addEventListener('click', (e) => {
+  if (e.target === modalRulesBackdrop) closeRulesModal();
+});
+
+ruleNodeRadios.forEach((radio) => {
+  radio.addEventListener('change', () => {
+    ruleNodeRadios.forEach((r) => {
+      r.closest('.rule-type-option')?.classList.toggle('active', r.checked);
+    });
+    const type = getSelectedRuleNodeType();
+    rulePGroup.classList.toggle('disabled', type !== 'prl');
+    updateRulesPreview();
+  });
+});
+
+ruleStepsInput.addEventListener('input', updateRulesPreview);
+ruleSymmetrySelect.addEventListener('change', updateRulesPreview);
+
+rulePSlider.addEventListener('input', () => {
+  rulePNum.value = rulePSlider.value;
+  updateRulesPreview();
+});
+
+rulePNum.addEventListener('input', () => {
+  rulePSlider.value = rulePNum.value;
+  updateRulesPreview();
+});
+
+btnAddRuleRow.addEventListener('click', () => {
+  ruleRowsContainer.appendChild(createRuleRow());
+  updateRulesPreview();
+});
+
+btnInsertRuleCursor.addEventListener('click', () => {
+  const xml = ruleXmlPreview.textContent;
+  if (!xml || xml.startsWith('<!-- Nessuna')) return;
+
+  const start = codeInput.selectionStart;
+  const { newXml, newCursor } = insertRuleIntoXmlAt(codeInput.value, xml, start);
+  codeInput.value = newXml;
+  codeInput.setSelectionRange(newCursor, newCursor);
+  onCodeChange();
+  void triggerBuild();
+  closeRulesModal();
+});
+
+btnInsertRuleEnd.addEventListener('click', () => {
+  const xml = ruleXmlPreview.textContent;
+  if (!xml || xml.startsWith('<!-- Nessuna')) return;
+
+  const { newXml, newCursor } = insertRuleAtEndOfSequence(codeInput.value, xml);
+  codeInput.value = newXml;
+  codeInput.setSelectionRange(newCursor, newCursor);
+  onCodeChange();
+  void triggerBuild();
+  closeRulesModal();
+});
+
+btnCopyRule.addEventListener('click', () => {
+  const xml = ruleXmlPreview.textContent;
+  if (!xml) return;
+  void navigator.clipboard.writeText(xml).then(() => {
+    const orig = btnCopyRule.textContent;
+    btnCopyRule.textContent = 'Copiato! ✓';
+    setTimeout(() => {
+      btnCopyRule.textContent = orig;
+    }, 1500);
+  });
+});
+
+// ------------------------------------------------------------------ WFC Guided Modal (T59d)
+
+const modalWfcBackdrop = $('modal-wfc-backdrop');
+const btnOpenWfc = $('btn-open-wfc');
+const btnWfcClose = $('btn-wfc-close');
+const wfcPresetsGrid = $('wfc-presets-grid');
+const wfcModeRadios = document.querySelectorAll<HTMLInputElement>('input[name="wfc-output-mode"]');
+const wfcDimX = $<HTMLInputElement>('wfc-dim-x');
+const wfcDimY = $<HTMLInputElement>('wfc-dim-y');
+const wfcDimZ = $<HTMLInputElement>('wfc-dim-z');
+const wfcSymmetry = $<HTMLSelectElement>('wfc-symmetry');
+const wfcPeriodic = $<HTMLInputElement>('wfc-periodic');
+const wfcTilesContainer = $('wfc-tiles-container');
+const wfcXmlPreview = $<HTMLElement>('wfc-xml-preview');
+const btnWfcLoadModel = $('btn-wfc-load-model');
+const btnWfcInsertCursor = $('btn-wfc-insert-cursor');
+const btnWfcCopy = $('btn-wfc-copy');
+
+let selectedWfcPresetId: string = WFC_PRESETS[0]?.id || 'pipes';
+
+function getSelectedWfcMode(): WfcOutputMode {
+  for (const r of wfcModeRadios) {
+    if (r.checked) return r.value as WfcOutputMode;
+  }
+  return 'mj_native';
+}
+
+function updateWfcPreview() {
+  const mode = getSelectedWfcMode();
+  const preset = WFC_PRESETS.find((p) => p.id === selectedWfcPresetId);
+
+  const dimX = parseInt(wfcDimX.value, 10) || preset?.size[0] || 12;
+  const dimY = parseInt(wfcDimY.value, 10) || preset?.size[1] || 12;
+  const dimZ = parseInt(wfcDimZ.value, 10) || preset?.size[2] || 12;
+  const symmetry = wfcSymmetry.value || preset?.symmetry || '(xy)';
+  const periodic = wfcPeriodic.checked;
+
+  const config: WfcConfig = {
+    presetId: selectedWfcPresetId,
+    mode,
+    size: [dimX, dimY, dimZ],
+    periodic,
+    symmetry,
+    tiles: preset?.tiles || [],
+    comment: preset?.description,
+  };
+
+  const xml = generateWfcXml(config);
+  wfcXmlPreview.textContent = xml;
+}
+
+function selectWfcPreset(presetId: string) {
+  selectedWfcPresetId = presetId;
+  const preset = WFC_PRESETS.find((p) => p.id === presetId);
+  if (!preset) return;
+
+  // Update card highlights
+  const cards = wfcPresetsGrid.querySelectorAll('.wfc-preset-card');
+  cards.forEach((card) => {
+    card.classList.toggle('active', card.getAttribute('data-id') === presetId);
+  });
+
+  // Apply preset parameters
+  wfcDimX.value = String(preset.size[0]);
+  wfcDimY.value = String(preset.size[1]);
+  wfcDimZ.value = String(preset.size[2]);
+  wfcSymmetry.value = preset.symmetry;
+  wfcPeriodic.checked = preset.periodic;
+
+  // Render tile badges
+  wfcTilesContainer.innerHTML = '';
+  for (const t of preset.tiles) {
+    const badge = document.createElement('div');
+    badge.className = 'wfc-tile-badge';
+
+    const dot = document.createElement('span');
+    dot.className = 'wfc-tile-dot';
+    dot.style.backgroundColor = t.color;
+
+    const sym = document.createElement('span');
+    sym.className = 'wfc-tile-sym';
+    sym.textContent = t.symbol;
+
+    const name = document.createElement('span');
+    name.textContent = t.name;
+
+    badge.appendChild(dot);
+    badge.appendChild(sym);
+    badge.appendChild(name);
+    wfcTilesContainer.appendChild(badge);
+  }
+
+  updateWfcPreview();
+}
+
+function renderWfcPresets() {
+  wfcPresetsGrid.innerHTML = '';
+  for (const p of WFC_PRESETS) {
+    const card = document.createElement('div');
+    card.className = 'wfc-preset-card' + (p.id === selectedWfcPresetId ? ' active' : '');
+    card.setAttribute('data-id', p.id);
+
+    const icon = document.createElement('span');
+    icon.className = 'wfc-preset-icon';
+    icon.textContent = p.icon;
+
+    const name = document.createElement('span');
+    name.className = 'wfc-preset-name';
+    name.textContent = p.name;
+
+    const desc = document.createElement('span');
+    desc.className = 'wfc-preset-desc';
+    desc.textContent = p.description;
+
+    card.appendChild(icon);
+    card.appendChild(name);
+    card.appendChild(desc);
+
+    card.addEventListener('click', () => {
+      selectWfcPreset(p.id);
+    });
+
+    wfcPresetsGrid.appendChild(card);
+  }
+}
+
+function openWfcModal() {
+  modalWfcBackdrop.classList.remove('hidden');
+  modalWfcBackdrop.setAttribute('aria-hidden', 'false');
+  renderWfcPresets();
+  selectWfcPreset(selectedWfcPresetId);
+}
+
+function closeWfcModal() {
+  modalWfcBackdrop.classList.add('hidden');
+  modalWfcBackdrop.setAttribute('aria-hidden', 'true');
+}
+
+function toggleWfcModal() {
+  if (modalWfcBackdrop.classList.contains('hidden')) {
+    openWfcModal();
+  } else {
+    closeWfcModal();
+  }
+}
+
+// WFC Modal Event Listeners
+btnOpenWfc.addEventListener('click', openWfcModal);
+btnWfcClose.addEventListener('click', closeWfcModal);
+modalWfcBackdrop.addEventListener('click', (e) => {
+  if (e.target === modalWfcBackdrop) closeWfcModal();
+});
+
+wfcModeRadios.forEach((radio) => {
+  radio.addEventListener('change', () => {
+    wfcModeRadios.forEach((r) => {
+      r.closest('.wfc-mode-option')?.classList.toggle('active', r.checked);
+    });
+    updateWfcPreview();
+  });
+});
+
+wfcDimX.addEventListener('input', updateWfcPreview);
+wfcDimY.addEventListener('input', updateWfcPreview);
+wfcDimZ.addEventListener('input', updateWfcPreview);
+wfcSymmetry.addEventListener('change', updateWfcPreview);
+wfcPeriodic.addEventListener('change', updateWfcPreview);
+
+btnWfcLoadModel.addEventListener('click', () => {
+  const xml = wfcXmlPreview.textContent;
+  if (!xml) return;
+
+  codeInput.value = xml;
+  // If native MJ, reset preset select or select custom
+  presetSelect.value = '';
+  onCodeChange();
+  void triggerBuild().then(() => {
+    if (currentMesh) fitCameraToMesh(new THREE.Box3().setFromObject(currentMesh));
+  });
+  closeWfcModal();
+});
+
+btnWfcInsertCursor.addEventListener('click', () => {
+  const xml = wfcXmlPreview.textContent;
+  if (!xml) return;
+
+  const start = codeInput.selectionStart;
+  const { newXml, newCursor } = insertRuleIntoXmlAt(codeInput.value, xml, start);
+  codeInput.value = newXml;
+  codeInput.setSelectionRange(newCursor, newCursor);
+  onCodeChange();
+  void triggerBuild();
+  closeWfcModal();
+});
+
+btnWfcCopy.addEventListener('click', () => {
+  const xml = wfcXmlPreview.textContent;
+  if (!xml) return;
+  void navigator.clipboard.writeText(xml).then(() => {
+    const orig = btnWfcCopy.textContent;
+    btnWfcCopy.textContent = 'Copiato! ✓';
+    setTimeout(() => {
+      btnWfcCopy.textContent = orig;
+    }, 1500);
+  });
+});
+
+// Update global keydown to handle Alt+R and Alt+W and Escape in modals
+window.addEventListener('keydown', (e) => {
+  if (e.altKey && (e.key === 'r' || e.key === 'R')) {
+    e.preventDefault();
+    toggleRulesModal();
+    return;
+  }
+  if (e.altKey && (e.key === 'w' || e.key === 'W')) {
+    e.preventDefault();
+    toggleWfcModal();
+    return;
+  }
+  if (e.key === 'Escape') {
+    if (!modalRulesBackdrop.classList.contains('hidden')) {
+      closeRulesModal();
+      return;
+    }
+    if (!modalWfcBackdrop.classList.contains('hidden')) {
+      closeWfcModal();
+      return;
     }
   }
 });
