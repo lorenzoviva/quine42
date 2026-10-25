@@ -225,24 +225,6 @@ export interface RuleShown {
   marked: boolean;
 }
 
-export interface CanonShown {
-  text: string;
-  runes: Array<{
-    token: string;
-    name: string;
-    glyph: string;
-    color: string;
-    element: string;
-    description: string;
-  }>;
-  spells: Array<{
-    seq: string;
-    name: string;
-    description: string;
-    cost: number;
-  }>;
-}
-
 export interface Needs {
   hunger: number;
   thirst: number;
@@ -3478,9 +3460,6 @@ export class Kernel {
       case 'lastra':
         this.openRule(it.target ?? '');
         return;
-      case 'canone':
-        this.openCanon();
-        return;
       case 'showcase':
         this.openShowcase(it.target!);
         return;
@@ -3538,7 +3517,7 @@ export class Kernel {
 
   clickStudio(rx: number, ry: number): boolean {
     if (this.zone !== 'studio') return false;
-    const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'situazione', 'parete', 'console', 'stazione', 'banco', 'leggio', 'layout', 'lastra', 'canone']);
+    const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'situazione', 'parete', 'console', 'stazione', 'banco', 'leggio', 'layout', 'lastra']);
     if (!it) return false;
     const p = this.playerPos();
     const c = cellNear(it, p.x, p.y);
@@ -3554,7 +3533,6 @@ export class Kernel {
     else if (it.kind === 'banco') this.openBench();
     else if (it.kind === 'leggio') this.openBible();
     else if (it.kind === 'lastra') this.openRule(it.target ?? '');
-    else if (it.kind === 'canone') this.openCanon();
     else if (it.target === 'tempo') this.stepTimeline(it.kind === 'prev' ? 1 : -1);
     else if (it.target === 'banco') this.stepBench(it.kind === 'prev' ? -1 : 1);
     else if (it.target === 'leggio') this.stepBible(it.kind === 'prev' ? -1 : 1);
@@ -4367,36 +4345,6 @@ export class Kernel {
     const now = this.ruleOf(chiaveOrIndex);
     if (!now) return this.message('Regola non trovata.');
     this.bus.emit('ui:rule', now);
-  }
-
-  /**
-   * The rune canon (T47b): the text of world/canone.md, the magic runes with their colours,
-   * and the known incantations.
-   */
-  canonOf(): CanonShown | undefined {
-    const text = this.files['world/canone.md'] ?? '';
-    const runesList = Object.entries(this.content.runes).map(([token, r]) => ({
-      token,
-      name: r.name,
-      glyph: r.glyph,
-      color: r.color,
-      element: r.element,
-      description: r.description,
-    }));
-    const spellsList = Object.entries(this.content.spells).map(([seq, s]) => ({
-      seq,
-      name: s.name,
-      description: s.description,
-      cost: s.cost,
-    }));
-    return { text, runes: runesList, spells: spellsList };
-  }
-
-  /** Opens the panel of the rune canon engraved above the door (T47b). */
-  openCanon(): void {
-    const now = this.canonOf();
-    if (!now) return this.message('Il canone delle rune è vuoto.');
-    this.bus.emit('ui:canon', now);
   }
 
   /** States of the wanderer (on horseback, with a backpack…): what they change, until when. */

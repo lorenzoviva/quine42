@@ -2,7 +2,7 @@
 // shows it, with «Riscolpisci» — a building's notice board, with the latest changes to its files, and what a
 // showcase shows (T21), with its arrows, and an environment of the sample room on its trial draft (T26d).
 
-import { PLACE_PHASES, type CanonShown, type Kernel, type LayoutSample, type PlaceMiniature, type RuleShown, type ShowcaseEntry } from '../kernel/kernel';
+import { PLACE_PHASES, type Kernel, type LayoutSample, type PlaceMiniature, type RuleShown, type ShowcaseEntry } from '../kernel/kernel';
 import type { StudioItem } from '../kernel/corona';
 import { OPERATION_COLOR, OPERATION_NAME, type Operation, type OperationKind, type Situation } from '../kernel/situation';
 import { ALERT_COLOR, ALERT_NAME, LIVE_LINES, SCREEN_NAME, fill, type Screens, type ScreenField } from '../kernel/screens';
@@ -56,7 +56,6 @@ export class StudioPanel {
       if (this.isOpen && this.bibleOpen) this.bible(b);
     });
     k.bus.on('ui:rule', (r: RuleShown) => this.rule(r));
-    k.bus.on('ui:canon', (c: CanonShown) => this.canon(c));
     // The arrows pressed with the panel open: it follows.
     k.bus.on('studio:showcase', (e: Shown) => {
       if (this.isOpen && this.shown === e.building) this.showcase({ ...e, name: this.k.corona.building(e.building)?.name ?? e.building });
@@ -628,66 +627,5 @@ export class StudioPanel {
       ),
     );
   }
-
-  /**
-   * The rune canon engraved above the door (T47b): world/canone.md and the magic runes with their colours.
-   */
-  canon(c: CanonShown): void {
-    const editBtn = el('button', {}, 'Apri world/canone.md');
-    editBtn.onclick = () => {
-      this.close();
-      this.onEdit?.('world/canone.md');
-    };
-
-    const runeCard = (r: CanonShown['runes'][number]) =>
-      el(
-        'div',
-        {
-          style: `display: inline-flex; flex-direction: column; background: #0c1018; border: 1px solid ${r.color}55; border-radius: 4px; padding: 6px 8px; margin: 3px; min-width: 100px;`,
-        },
-        el('div', { style: 'display: flex; align-items: center; justify-content: space-between;' },
-          el('span', { style: `font-size: 20px; font-weight: bold; color: ${r.color}; line-height: 1;` }, r.glyph),
-          el('span', { style: 'font-size: 11px; text-transform: uppercase; color: var(--dim);' }, r.element),
-        ),
-        el('strong', { style: `font-size: 13px; color: ${r.color}; margin-top: 2px;` }, r.name),
-        el('small', { style: 'color: var(--dim); font-size: 11px;' }, `«${r.token}»`),
-        el('div', { style: 'font-size: 11px; color: var(--fg); margin-top: 4px; line-height: 1.2;' }, r.description),
-      );
-
-    this.show(
-      el('div', { class: 'title' }, 'La Biblioteca del Mondo — Il Canone delle Rune'),
-      el('div', { class: 'note' }, 'Ciò che chi vive nel mondo sa delle rune. È inciso sull\'architrave sopra la porta della Biblioteca (world/canone.md).'),
-      el('div', { class: 'section' }, `Le rune magiche di questo mondo (${c.runes.length})`),
-      el(
-        'div',
-        { class: 'row', style: 'flex-wrap: wrap; margin: 4px 0;' },
-        ...c.runes.map(runeCard),
-      ),
-      el('div', { class: 'section' }, 'Il testo del Canone'),
-      el('div', { class: 'note', style: 'white-space: pre-wrap; font-size: 12px; line-height: 1.5; color: var(--fg); background: #0c0f14; border: 1px solid var(--line); padding: 10px 12px; max-height: 220px; overflow-y: auto; margin: 4px 0;' }, c.text),
-      ...(c.spells.length
-        ? [
-            el('div', { class: 'section' }, `Incantesimi conosciuti (${c.spells.length})`),
-            el(
-              'div',
-              { style: 'max-height: 120px; overflow-y: auto;' },
-              ...c.spells.map((s) =>
-                el(
-                  'div',
-                  { class: 'item', style: 'margin: 2px 0;' },
-                  el('span', { class: 'path', style: 'color: #7dd87d;' }, s.seq),
-                  el('strong', { style: 'margin-left: 6px;' }, s.name),
-                  el('span', { style: 'color: var(--dim); margin-left: 6px; font-size: 12px;' }, s.description),
-                ),
-              ),
-            ),
-          ]
-        : []),
-      el(
-        'div',
-        { class: 'row', style: 'justify-content: flex-end; margin-top: 10px;' },
-        editBtn,
-      ),
-    );
-  }
 }
+

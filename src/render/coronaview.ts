@@ -221,7 +221,6 @@ export class CoronaView {
     else if (tried) o.caption(`E: il banco di prova, ${tried.entry.name}: «${tried.entry.case.titolo}» (${tried.index + 1}/${tried.count})`);
     else if (read) o.caption(`E: sfoglia la bibbia, «${read.page.titolo}» (${read.index + 1}/${read.count})`);
     else if (near?.kind === 'lastra') o.caption(near.rule ? `E: la tavola della regola «${near.rule.testo}» (${near.rule.possibile ? 'si può' : 'non si può'}${near.marked ? ' · recente' : ''})` : `E: ${near.label}`);
-    else if (near?.kind === 'canone') o.caption('E: il canone delle rune inciso sopra la porta');
     else if (near && near.kind !== 'desk') o.caption(`E: ${near.kind === 'file' ? `apri ${near.label}` : near.kind === 'sprite' || near.kind === 'tile' || near.kind === 'layout' ? `guarda «${near.label}»` : near.label}`);
   }
 }

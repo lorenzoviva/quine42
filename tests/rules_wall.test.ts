@@ -103,8 +103,8 @@ describe('ruleTablets function', () => {
   });
 });
 
-describe('the Library of the World (T47b): rules wall and rune canon in Kernel', () => {
-  it('builds the ground floor of the Library with rule tablets and canon above the door', async () => {
+describe('the Library of the World (T47b): rules wall in Kernel', () => {
+  it('builds the ground floor of the Library with rule tablets on the back wall', async () => {
     const rules = createSampleRules(6);
     const k = await bootWithRules(rules);
     const b = k.corona.building('mondo')!;
@@ -114,11 +114,8 @@ describe('the Library of the World (T47b): rules wall and rune canon in Kernel',
     expect(tablets.length).toBe(6);
     expect(tablets.every((t) => t.marked === true)).toBe(true);
 
-    const canon = f.items.find((it) => it.kind === 'canone');
-    expect(canon).toBeDefined();
-    expect(canon?.label).toContain('canone');
-    expect(canon?.x).toBe(f.ox + 12);
-    expect(canon?.y).toBe(f.oy + 14);
+    const canon = f.items.find((it) => it.kind === ('canone' as any));
+    expect(canon).toBeUndefined();
   });
 
   it('steps through rules with stepRules and stops at the edges', async () => {
@@ -171,40 +168,5 @@ describe('the Library of the World (T47b): rules wall and rune canon in Kernel',
     expect(k.clickStudio(firstTablet.x + 0.5, firstTablet.y + 0.5)).toBe(false);
     expect(opened.length).toBe(2);
   });
-
-  it('canonOf returns world/canone.md and magic runes with their colors', async () => {
-    const k = await bootWithRules([]);
-    const c = k.canonOf()!;
-
-    expect(c).toBeDefined();
-    expect(c.text).toContain('Il canone delle rune');
-    expect(c.runes.length).toBeGreaterThanOrEqual(7);
-
-    // Check specific magic runes
-    const luce = c.runes.find((r) => r.token === 'luce');
-    const fuoco = c.runes.find((r) => r.token === 'fuoco');
-    expect(luce).toBeDefined();
-    expect(luce?.color).toBe('#ffe27a');
-    expect(fuoco).toBeDefined();
-    expect(fuoco?.color).toBe('#ff7a3a');
-  });
-
-  it('opens canon panel on E in front of door or click on the canon', async () => {
-    const k = await bootWithRules([]);
-    const b = k.corona.building('mondo')!;
-    const f = b.floors[0];
-    const canon = f.items.find((it) => it.kind === 'canone')!;
-
-    const opened: unknown[] = [];
-    k.bus.on('ui:canon', (e) => opened.push(e));
-
-    // Stand in front of the canon above the door
-    stand(k, canon.x + 0.5, canon.y - 0.5);
-    await k.interact();
-    expect(opened.length).toBe(1);
-
-    // Click on the canon within reach
-    expect(k.clickStudio(canon.x + 0.5, canon.y + 0.5)).toBe(true);
-    expect(opened.length).toBe(2);
-  });
 });
+

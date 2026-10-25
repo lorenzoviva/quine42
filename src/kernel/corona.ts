@@ -12,7 +12,7 @@ import { SCREEN_NAME, type ScreenField } from './screens';
 import { AGENTS } from './agents/council';
 
 export type FileLook = 'libro' | 'cristallo' | 'pergamena' | 'tavoletta';
-export type ItemKind = 'file' | 'sprite' | 'tile' | 'layout' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'less' | 'more' | 'grafo' | 'situazione' | 'parete' | 'console' | 'stazione' | 'banco' | 'leggio' | 'lastra' | 'canone';
+export type ItemKind = 'file' | 'sprite' | 'tile' | 'layout' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'less' | 'more' | 'grafo' | 'situazione' | 'parete' | 'console' | 'stazione' | 'banco' | 'leggio' | 'lastra';
 /** What a showcase shows (T21): the runes and spells, the people, the things, the objects of the packs, the places planned (T26). */
 export type ShowcaseSource = 'rune' | 'persone' | 'cose' | 'oggetti' | 'luoghi';
 /** How a showcase looks: a screen, a silo of liquid, a 3D printer, a holographic table with a place in miniature. */
@@ -501,16 +501,6 @@ export class Corona {
             } catch {}
             this.rulesOffset = Math.max(0, allRules.length - TABLETS_MAX);
             placed.push(...ruleTablets(ox, oy, allRules, this.rulesOffset));
-
-            // The rune canon (world/canone.md) engraved above the door (T47b)
-            placed.push({
-              kind: 'canone',
-              label: 'il canone delle rune: inciso sopra la porta',
-              target: 'canone',
-              x: ox + Math.floor(ROOM_W / 2),
-              y: oy + ROOM_H - 1,
-              color: '#7dd87d',
-            });
           }
           const show = SHOWCASES[id];
           if (show) {

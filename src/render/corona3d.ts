@@ -684,52 +684,6 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
       }
       break;
     }
-    case 'canone': {
-      // The rune canon engraved above the door of the Library (T47b):
-      // A dark stone lintel/architrave spanning above the exit, framed in green neon,
-      // with the 7 magic runes of the universe glowing in their authentic individual colors.
-      const lintelY0 = 0.45;
-      const lintelY1 = 0.82;
-      const darkStone = rgbOf('#0d1117');
-      const greenGlow = rgbOf(col, 0.9);
-
-      // Dark lintel stone slab spanning across the top of the doorway
-      lit.box(x - 0.6, lintelY0, z + 0.80, x + 1.6, lintelY1, z + 0.98, darkStone);
-
-      // Neon glowing frame enclosing the canon lintel
-      glow.box(x - 0.62, lintelY1 - 0.03, z + 0.78, x + 1.62, lintelY1 + 0.01, z + 0.98, greenGlow);
-      glow.box(x - 0.62, lintelY0 - 0.01, z + 0.78, x + 1.62, lintelY0 + 0.03, z + 0.98, greenGlow);
-      glow.box(x - 0.62, lintelY0, z + 0.78, x - 0.58, lintelY1, z + 0.82, greenGlow);
-      glow.box(x + 1.58, lintelY0, z + 0.78, x + 1.62, lintelY1, z + 0.82, greenGlow);
-
-      // The 7 magic runes in their exact canon colors:
-      // luce (yellow), fuoco (orange), acqua (blue), terra (earth), vita (green), scudo (purple), vento (cyan/white)
-      const MAGIC_RUNE_COLORS = [
-        '#ffe27a', // luce
-        '#ff7a3a', // fuoco
-        '#5ab8ff', // acqua
-        '#c49a5a', // terra
-        '#7ee08a', // vita
-        '#b9a6ff', // scudo
-        '#d8f4ff', // vento
-      ];
-
-      const nRunes = MAGIC_RUNE_COLORS.length;
-      const startRx = x - 0.38;
-      const endRx = x + 1.38;
-      const stepRx = (endRx - startRx) / (nRunes - 1);
-
-      for (let i = 0; i < nRunes; i++) {
-        const rx = startRx + i * stepRx;
-        const runeColor = rgbOf(MAGIC_RUNE_COLORS[i], 0.95);
-
-        // Small dark stone backing socket for each rune glyph
-        lit.box(rx - 0.065, lintelY0 + 0.08, z + 0.79, rx + 0.065, lintelY1 - 0.08, z + 0.83, rgbOf('#06080c'));
-        // Radiant glowing magic rune tile
-        glow.box(rx - 0.045, lintelY0 + 0.11, z + 0.78, rx + 0.045, lintelY1 - 0.11, z + 0.81, runeColor);
-      }
-      break;
-    }
     case 'portal': {
       const c = rgbOf(it.target ? (k.corona.building(it.target)?.color ?? col) : '#ffffff');
       glow.box(x + 0.15, 0, z + 0.15, x + 0.85, 0.05, z + 0.85, c);

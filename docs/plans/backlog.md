@@ -601,19 +601,17 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   centrati sul nodo) e pulsanti di navigazione. `tests/bible.test.ts` (6 test), test e typecheck verdi, verifica browser positiva.
   Diverso dal previsto: la prima pagina è il prologo (titolo, sintesi, storia della bibbia) per coprire l'intera bibbia senza
   tralasciare il racconto fondativo.
-- **T47b · le tavole delle regole e il canone**: a parete una lastra per giudizio di `world/rules.json` (le ultime 12,
-  quelle che il Narratore riceve, brillano), clic → il giudizio nel pannello; il canone delle rune (`world/canone.md`)
-  inciso sopra la porta, le rune magiche nei loro colori. Test: le lastre sono quante le regole (o il massimo che la
+- **T47b · le tavole delle regole**: a parete una lastra per giudizio di `world/rules.json` (le ultime 12,
+  quelle che il Narratore riceve, brillano), clic → il giudizio nel pannello. Test: le lastre sono quante le regole (o il massimo che la
   parete tiene, con «<» «>»), le ultime marcate.
   Esito: `fatto`. `TABLETS_WALL` (`{ x0: 3, x1: 20, y: 1 }`), `TABLETS_MAX = 16`, `FOCUSED_RULES = 12` e `ruleTablets` in `src/kernel/corona.ts`;
   se le regole sono <= 16, vengono posizionate tutte le lastre centrate sulla parete nord (y = 1) senza frecce; se superano la capienza,
   vengono mostrate 16 lastre con le frecce «<» e «>» (`target: 'regole'`, `stepRules(d)`, i bordi fermano); le ultime 12 regole stabilite in
   `world/rules.json` hanno `marked = true` e brillano con bagliore smeraldo/oro e faville fluttuanti (`corona3d.ts`). Clic o E apre `ui:rule`
   nel pannello (`studio.ts`) con esito («si può»/«non si può»), badge «Regola recente», racconto del Concilio, effetti e carta.
-  Sopra la porta a sud (`x: 12, y: 14`), architrave di pietra scura con cornice neon verde e incise le 7 rune magiche del canone nei loro colori autentici
-  (`luce` #ffe27a, `fuoco` #ff7a3a, `acqua` #5ab8ff, `terra` #c49a5a, `vita` #7ee08a, `scudo` #b9a6ff, `vento` #d8f4ff); E o clic aprono
-  `ui:canon` con le schede delle 7 rune, il testo completo di `world/canone.md` e gli incantesimi conosciuti.
-  `tests/rules_wall.test.ts` (9 test), typecheck e test verdi, verifica nel browser positiva con screenshot di lastre e canone.
+  `tests/rules_wall.test.ts` (3 suite / 7 test), typecheck e test verdi, verifica nel browser positiva con screenshot delle lastre.
+  Diverso dal previsto: il canone inciso sopra la porta è stato rimosso per non ostruire l'uscita, non creare sovrapposizioni visive e
+  perché le combinazioni di rune sono infinite (T57).
 - Fatto quando (per pezzo): test verdi, typecheck, verifica nel browser.
 
 ### T48 · La Galleria dell'Artista, dentro e il plinto — `da fare` (si comincia da T48a)
