@@ -29,6 +29,8 @@ import {
   deleteShapesFromXml,
   duplicateShapesInXml,
   doubleDefinitionInXml,
+  alignCenterToSize,
+  alignShapeAt,
 } from './cad';
 import { MJ_PALETTE } from '../../src/mj/palette';
 import type { PaletteEntry } from '../../src/mj/engine';
@@ -129,7 +131,8 @@ gridHelper.position.y = -0.001;
 scene.add(gridHelper);
 
 // Materials & Bloom
-const matMesh = glowing(new THREE.MeshLambertMaterial({ vertexColors: true, transparent: true, depthWrite: true }), 'editor');
+const matMesh = glowing(new THREE.MeshLambertMaterial({ vertexColors: true }), 'editor');
+const matMeshGlass = glowing(new THREE.MeshLambertMaterial({ vertexColors: true, transparent: true, depthWrite: false }), 'editor-glass');
 const bloom = new Bloom(renderer, scene, camera, 0.85, 0.4);
 
 // Active model mesh & bounding box
@@ -165,21 +168,28 @@ function createBufferGeometry(m: MeshData): THREE.BufferGeometry {
   if (m.glow) geo.setAttribute('glow', new THREE.BufferAttribute(m.glow, 1));
   if (m.alpha) geo.setAttribute('alpha', new THREE.BufferAttribute(m.alpha, 1));
   geo.setIndex(new THREE.BufferAttribute(m.indices, 1));
+  if (m.opaqueCount !== undefined) {
+    if (m.opaqueCount > 0) geo.addGroup(0, m.opaqueCount, 0);
+    const transCount = m.indices.length - m.opaqueCount;
+    if (transCount > 0) geo.addGroup(m.opaqueCount, transCount, 1);
+  }
   geo.computeBoundingSphere();
   geo.computeBoundingBox();
   return geo;
 }
 
 function applyFrameMesh(m: MeshData) {
+  const geo = createBufferGeometry(m);
+  const mat = geo.groups.length > 0 ? [matMesh, matMeshGlass] : matMesh;
   if (!currentMesh) {
-    const geo = createBufferGeometry(m);
-    currentMesh = new THREE.Mesh(geo, matMesh);
+    currentMesh = new THREE.Mesh(geo, mat);
     currentMesh.castShadow = true;
     currentMesh.receiveShadow = true;
     scene.add(currentMesh);
   } else {
     currentMesh.geometry.dispose();
-    currentMesh.geometry = createBufferGeometry(m);
+    currentMesh.geometry = geo;
+    currentMesh.material = mat;
   }
 
   if (!currentBBox && currentMesh) {
@@ -607,7 +617,7 @@ async function triggerBuild() {
     // Ensure fallback mesh in case tracks were empty
     if (!currentMesh) {
       const geo = createBufferGeometry(res.mesh);
-      currentMesh = new THREE.Mesh(geo, matMesh);
+      currentMesh = new THREE.Mesh(geo, geo.groups.length > 0 ? [matMesh, matMeshGlass] : matMesh);
       currentMesh.castShadow = true;
       currentMesh.receiveShadow = true;
       scene.add(currentMesh);
@@ -773,15 +783,17 @@ function handlePointerHover(e: PointerEvent) {
 
   updateGhostMesh(kind, size);
 
+  const at = alignShapeAt([voxel[0], voxel[1], voxel[2]], size);
+
   // Position ghost in Three.js coordinates
   const s = 1 / currentVpt;
   const px = gridDims.X / 2;
   const py = gridDims.Y / 2;
   const pz = 0;
 
-  const threeX = (voxel[0] - px) * s;
-  const threeY = (voxel[2] + size[2] / 2 - pz) * s;
-  const threeZ = (voxel[1] - py) * s;
+  const threeX = (at[0] - px) * s;
+  const threeY = (at[2] + size[2] / 2 - pz) * s;
+  const threeZ = (at[1] - py) * s;
 
   ghostGroup.position.set(threeX, threeY, threeZ);
   ghostGroup.visible = true;
@@ -824,9 +836,11 @@ function handleCanvasClick(e: PointerEvent) {
           Math.max(1, parseInt(cadDimH.value, 10) || 4),
         ];
 
+  const at = alignShapeAt([vx, vy, vz], size);
+
   const { newXml, line } = insertShapeIntoXml(codeInput.value, {
     kind,
-    at: [vx, vy, vz],
+    at,
     size,
     color: activeColorSymbol,
   });
@@ -1477,6 +1491,7 @@ $('btn-toggle-bounds').addEventListener('click', () => {
 
 $('btn-toggle-wireframe').addEventListener('click', () => {
   matMesh.wireframe = !matMesh.wireframe;
+  matMeshGlass.wireframe = matMesh.wireframe;
   $('btn-toggle-wireframe').classList.toggle('active', matMesh.wireframe);
 });
 
@@ -1701,12 +1716,18 @@ document.querySelectorAll('.btn-step').forEach((btn) => {
     const newAt: [number, number, number] = [...shape.at];
     const newSize: [number, number, number] = [...shape.size];
 
-    if (axis === 'at-x') newAt[0] += delta;
-    else if (axis === 'at-y') newAt[1] += delta;
-    else if (axis === 'at-z') newAt[2] += delta;
-    else if (axis === 'size-w') newSize[0] = Math.max(1, newSize[0] + delta);
-    else if (axis === 'size-d') newSize[1] = Math.max(1, newSize[1] + delta);
-    else if (axis === 'size-h') newSize[2] = Math.max(1, newSize[2] + delta);
+    if (axis === 'at-x') newAt[0] = alignCenterToSize(newAt[0] + delta, shape.size[0]);
+    else if (axis === 'at-y') newAt[1] = alignCenterToSize(newAt[1] + delta, shape.size[1]);
+    else if (axis === 'at-z') newAt[2] = Math.round(newAt[2] + delta);
+    else if (axis === 'size-w') {
+      newSize[0] = Math.max(1, newSize[0] + delta);
+      newAt[0] = alignCenterToSize(newAt[0], newSize[0]);
+    } else if (axis === 'size-d') {
+      newSize[1] = Math.max(1, newSize[1] + delta);
+      newAt[1] = alignCenterToSize(newAt[1], newSize[1]);
+    } else if (axis === 'size-h') {
+      newSize[2] = Math.max(1, newSize[2] + delta);
+    }
 
     codeInput.value = updateShapeInXml(codeInput.value, selectedShapeIndex, {
       at: newAt,
@@ -1721,8 +1742,8 @@ document.querySelectorAll('.btn-step').forEach((btn) => {
 const bindInput = (id: string, prop: 'at' | 'size', idx: number) => {
   $<HTMLInputElement>(id).addEventListener('change', (e) => {
     if (selectedShapeIndices.size === 0) return;
-    const val = parseInt((e.target as HTMLInputElement).value, 10);
-    if (!Number.isFinite(val)) return;
+    const rawVal = parseFloat((e.target as HTMLInputElement).value);
+    if (!Number.isFinite(rawVal)) return;
 
     if (selectedShapeIndices.size === 1) {
       const selectedShapeIndex = Array.from(selectedShapeIndices)[0];
@@ -1732,12 +1753,21 @@ const bindInput = (id: string, prop: 'at' | 'size', idx: number) => {
       const updates: Partial<{ at: [number, number, number]; size: [number, number, number] }> = {};
       if (prop === 'at') {
         const at: [number, number, number] = [...shape.at];
-        at[idx] = val;
+        if (idx === 0) at[0] = alignCenterToSize(rawVal, shape.size[0]);
+        else if (idx === 1) at[1] = alignCenterToSize(rawVal, shape.size[1]);
+        else at[2] = Math.round(rawVal);
         updates.at = at;
       } else {
         const size: [number, number, number] = [...shape.size];
-        size[idx] = Math.max(1, val);
+        const newDim = Math.max(1, Math.round(rawVal));
+        size[idx] = newDim;
         updates.size = size;
+
+        // Auto-align center when dimension changes
+        const at: [number, number, number] = [...shape.at];
+        if (idx === 0) at[0] = alignCenterToSize(at[0], newDim);
+        else if (idx === 1) at[1] = alignCenterToSize(at[1], newDim);
+        updates.at = at;
       }
 
       codeInput.value = updateShapeInXml(codeInput.value, selectedShapeIndex, updates);

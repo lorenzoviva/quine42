@@ -4,7 +4,7 @@
 import type { Vec3 } from '../../src/mj/engine';
 import { OFFICIAL } from '../mjx/official';
 
-export type Role = 'player' | 'npc' | 'animal' | 'tree' | 'plant' | 'rock' | 'prop' | 'structure' | 'official';
+export type Role = 'player' | 'npc' | 'animal' | 'tree' | 'plant' | 'rock' | 'prop' | 'structure' | 'official' | 'handmade';
 
 export interface Entry {
   id: string;
@@ -23,6 +23,8 @@ export interface Entry {
   steps?: number;
   /** Written by Gemini in the step 8.2A trial (kept out of the world, shown in the panel). */
   trial?: boolean;
+  /** Written by Human in the editor */
+  handmade?: boolean;
 }
 
 const files = import.meta.glob('../mjx/models/*.xml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
@@ -110,6 +112,18 @@ for (const [file, xml] of Object.entries(trial)) {
   CATALOG.push({ id: `g:${target}.${model}`, name: `${target} · ${model}`, role: TRIAL_ROLE[target] ?? 'prop', xml, vpt: 20, source: sourceOf(xml) || `scolpito da ${model} nello step 8.2A`, trial: true, ...(target === 'mulino' ? { size: [100, 100, 80] as Vec3 } : {}) });
 }
 
+
+// Hand drawn models
+const handmade = import.meta.glob('../mjx/models/handmade/*.xml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+for (const [file, xml] of Object.entries(handmade)) {
+  const base = file.replace(/^.*\//, '').replace(/\.xml$/, '');
+  const target = base.split('.')[0];
+  // The windmill of step 8.2B is a large structure: its box is the class's (5 × 5 × 4 tiles).
+  CATALOG.push({ id: `g:${target}`, name: `${target}`, role: 'handmade', xml, vpt: 20, source: sourceOf(xml) || `scolpito a mano da un autore umano`, handmade: true });
+}
+
+
+
 export const byId = (id: string) => CATALOG.find((e) => e.id === id);
 export const GROUPS: Array<[string, (e: Entry) => boolean]> = [
   ['Persone e animali', (e) => !e.trial && ['player', 'npc', 'animal'].includes(e.role)],
@@ -117,4 +131,6 @@ export const GROUPS: Array<[string, (e: Entry) => boolean]> = [
   ['Oggetti e strutture', (e) => !e.trial && ['prop', 'structure'].includes(e.role)],
   ['MarkovJunior (originali)', (e) => e.role === 'official'],
   ['Gemini: prove degli step 8.2A e 8.2B', (e) => !!e.trial],
+  ['Modelli dell\'editor', (e) => !!e.handmade],
+
 ];

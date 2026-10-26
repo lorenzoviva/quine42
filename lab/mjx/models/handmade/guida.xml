@@ -1,0 +1,36 @@
+<sequence values="GS" size="8 8 20" symmetry="()" name="Screen">
+
+  <color symbol="G" value="00e436" alpha="0.45" name="Scritte terminale verde"/>
+  <color symbol="S" value="e8edf7" alpha="0.1" name="Schermo"/>
+  <color symbol="s" value="e8edf7" alpha="0.1" name="Schermo dopo prima lettera"/>
+
+<!-- 
+x slash 2
+y spazio 3
+z consecutiva 1
+ -->
+
+  <box at="0 4 0" size="1 8 20" color="S"/>  
+  <animation name="scritta" frames="10">
+
+          <one in="./S/S" out="./S/G" steps="1"/>
+
+
+   <!-- <one in="SSS/SSS/SSS" out="SSS/SGS/SSS" steps="1" symmetry="(xyz+)"/> -->
+      <!-- <one in="S/S/S" out="S/G/S" steps="1"/> -->
+      <!-- <one in="S S S/S S S/S S S" out="S S S/S G S/S S S" steps="1"/> -->
+      <one in="S/S/S S/S/S S/S/S" out="S/S/S S/G/S S/S/S" steps="1"/>
+
+      <!-- <one in="SSS/SSS/SSS SSS/SSS/SSS SSS/SSS/SSS" out="SSS/SSS/SSS SSS/SGS/SSS SSS/SSS/SSS" steps="1"/> -->
+
+   <all in="S" out="s"/>
+   <!-- <one in="ss/Gs/ss" out="ss/Gs/Gs" steps="1"/> -->
+    <one in="s/s/s G/s/s s/s/s" out="s/s/s G/G/s s/s/s" steps="1"/>
+   <!-- <one in="s/s G/s s/s" out="s/s G/s G/s" steps="1"/> -->
+
+   <!-- <one in="G * s" out="G G s" steps="1" symmetry="(x)"/> -->
+    <!-- <prl in="G * s" out="G G s" steps="1" p="0.1"  symmetry="(xyz+)"/> -->
+
+  </animation>
+  
+</sequence>

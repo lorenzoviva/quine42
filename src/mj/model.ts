@@ -444,7 +444,7 @@ export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean } 
     const base = MJ_PALETTE[ch];
     const own = c.colors[ch];
     if (!base && !own?.color && !own?.hidden) throw new Mj3Error(`la lettera "${ch}" non ha colore nella palette di MarkovJunior: dagliene uno con <color symbol="${ch}" value="rrggbb"/>`);
-    palette[ch] = { name: own?.name ?? base?.name, ...(own?.color ?? base?.color ? { color: own?.color ?? base!.color } : {}), ...(own?.part ? { part: own.part } : {}), ...(own?.hidden ? { hidden: true } : {}), ...(own?.glow ? { glow: true } : {}) };
+    palette[ch] = { name: own?.name ?? base?.name, ...(own?.color ?? base?.color ? { color: own?.color ?? base!.color } : {}), ...(own?.part ? { part: own.part } : {}), ...(own?.hidden ? { hidden: true } : {}), ...(own?.glow ? { glow: true } : {}), ...(typeof own?.alpha === 'number' ? { alpha: own.alpha } : {}) };
   }
   for (const ch of Object.keys(c.colors)) if (!c.declared.has(ch)) c.warnings.push(`<color symbol="${ch}">: la lettera non è in nessun values`);
   const unions: Record<string, string> = {};

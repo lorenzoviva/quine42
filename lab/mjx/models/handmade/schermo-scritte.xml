@@ -1,0 +1,43 @@
+<sequence values="BSabcg" size="23 1 35" symmetry="()" name="Screen">
+ <!-- 1 voxel in piu e richiesto per il matching vuoto -->
+  <color symbol="S" value="e8edf7" alpha="0.1" name="Schermo"/>
+  
+  <color symbol="a" value="e8edf7" alpha="0.1" name="Schermo dopo prima lettera"/>
+  <color symbol="b" value="e8edf7" alpha="0.1" name="Schermo dopo prima riga a dx"/>
+  <color symbol="c" value="e8edf7" alpha="0.1" name="Schermo dopo prima riga a sx"/>
+
+  <color symbol="g" value="00e436" glow="true" alpha="0.45" name="Scritte terminale verde"/>
+
+
+<!-- 
+x consecutiva 1
+y slash 2
+z spazio 3
+ -->
+
+  <box at="11 0 0" size="21 1 34" color="S"/>  
+  <animation name="scritta" frames="100">
+    <!-- First pixel (random) -->
+    <one in="BSS BSS BSS" out="BSS BSg BSS" steps="5"/>
+
+    <!-- Phase I: first line -->
+    <all in="S" out="a"/>
+
+    <one in="aaa gaa aaa" out="aaa gga aaa" steps="5"/>
+    <one in="aaa gaa bbb" out="aaa gga bbb" steps="5"/> <!-- Lines on top of first generated -->
+    <one in="bbb gaa aaa" out="bbb gga aaa" steps="5"/> <!-- Lines under first line generated -->
+    <one in="aaB gaB aaB" out="bbB gbB bbB" steps="1"/>
+    <one in="aaB gaB bbB" out="bbB gbB bbB" steps="1"/> <!-- Top -->
+    <one in="bbB gaB aaB" out="bbB gbB bbB" steps="1"/> <!-- Bot -->
+
+    <all in="ab" out="bb"/>
+
+    
+    <!-- Phase II: Loop -->
+
+    <one in="Baa Baa Bbb Bag" out="Baa Bag Bbb Bag" steps="1"/>  <!-- Top -->
+    <one in="Bag Bbb Baa Baa" out="Bag Bbb Bag Baa" steps="1"/>  <!-- Bot -->
+
+  </animation>
+  
+</sequence>

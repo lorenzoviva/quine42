@@ -103,6 +103,8 @@ matSway.customProgramCacheKey = () => 'glow-sway';
 /** Structures: cut away above the head when the wanderer is inside. */
 const cut = new THREE.Plane(new THREE.Vector3(0, -1, 0), 1000);
 const matCut = glowing(new THREE.MeshLambertMaterial({ vertexColors: true, clippingPlanes: [cut] }), 'lab-cut');
+const matGlass = glowing(new THREE.MeshLambertMaterial({ vertexColors: true, transparent: true, depthWrite: false }), 'lab-glass');
+const matCutGlass = glowing(new THREE.MeshLambertMaterial({ vertexColors: true, clippingPlanes: [cut], transparent: true, depthWrite: false }), 'lab-cut-glass');
 /** Glowing voxels (`<color glow="True">`) bloom as in the game. */
 const bloom = new Bloom(renderer, scene, camera);
 
@@ -113,7 +115,13 @@ function geometry(m: MeshData): THREE.BufferGeometry {
   g.setAttribute('color', new THREE.BufferAttribute(m.colors, 3));
   if (m.sway) g.setAttribute('sway', new THREE.BufferAttribute(m.sway, 1));
   if (m.glow) g.setAttribute('glow', new THREE.BufferAttribute(m.glow, 1));
+  if (m.alpha) g.setAttribute('alpha', new THREE.BufferAttribute(m.alpha, 1));
   g.setIndex(new THREE.BufferAttribute(m.indices, 1));
+  if (m.opaqueCount !== undefined) {
+    if (m.opaqueCount > 0) g.addGroup(0, m.opaqueCount, 0);
+    const transCount = m.indices.length - m.opaqueCount;
+    if (transCount > 0) g.addGroup(m.opaqueCount, transCount, 1);
+  }
   g.computeBoundingSphere();
   return g;
 }
@@ -216,8 +224,9 @@ function place(a: Asset, x: number, z: number, yaw: number): Thing {
   root.position.set(x, 0, z);
   root.rotation.y = yaw;
   const mat = e.role === 'structure' ? matCut : sways(e) ? matSway : matStatic;
+  const glass = e.role === 'structure' ? matCutGlass : matGlass;
   const mesh = (g: THREE.BufferGeometry) => {
-    const m = new THREE.Mesh(g, mat);
+    const m = new THREE.Mesh(g, g.groups.length > 0 ? [mat, glass] : mat);
     m.castShadow = true;
     m.receiveShadow = true;
     return m;

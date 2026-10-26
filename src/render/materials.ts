@@ -36,7 +36,15 @@ export function addGlow(sh: THREE.WebGLProgramParametersWithUniforms, always = f
   totalEmissiveRadiance += vColor.rgb * ${g} * uGlow;
   #endif`,
     )
-    .replace('#include <opaque_fragment>', `#include <opaque_fragment>\n  gl_FragColor.a *= (1.0 - uGlowMask * ${g})${always ? '' : ' * vAlpha'};`);
+    .replace(
+      '#include <opaque_fragment>',
+      `#include <opaque_fragment>
+#ifdef OPAQUE
+  gl_FragColor.a = 1.0 - uGlowMask * ${g};
+#else
+  gl_FragColor.a = ${always ? '1.0' : 'vAlpha'};
+#endif`,
+    );
 }
 
 /** Geometries without the attribute read 0 for glow, 1 for alpha (otherwise WebGL keeps whatever value it was given last). */
@@ -110,13 +118,19 @@ export const CUT = new THREE.Plane(new THREE.Vector3(0, -1, 0), 1e9);
 
 export const MAT = {
   /** The structure the wanderer is in: cut above the head. */
-  cut: clipped(new THREE.MeshLambertMaterial({ vertexColors: true, clippingPlanes: [CUT], transparent: true, depthWrite: true }), 'cut'),
+  cut: clipped(new THREE.MeshLambertMaterial({ vertexColors: true, clippingPlanes: [CUT] }), 'cut'),
   /** The simulation: ground, things, people. */
-  world: clipped(new THREE.MeshLambertMaterial({ vertexColors: true, transparent: true, depthWrite: true }), 'world'),
+  world: clipped(new THREE.MeshLambertMaterial({ vertexColors: true }), 'world'),
   /** Vegetation: the wind moves the top (the `sway` attribute). */
   sway: clipped(new THREE.MeshLambertMaterial({ vertexColors: true }), 'sway', true),
   /** The corona and the studio: never clipped. */
-  corona: glowing(new THREE.MeshLambertMaterial({ vertexColors: true, transparent: true, depthWrite: true }), 'corona'),
+  corona: glowing(new THREE.MeshLambertMaterial({ vertexColors: true }), 'corona'),
+  /** Translucent voxels (glass screens, translucent panels) in the simulation. */
+  glass: clipped(new THREE.MeshLambertMaterial({ vertexColors: true, transparent: true, depthWrite: false }), 'glass'),
+  /** Translucent voxels inside a cut structure. */
+  cutGlass: clipped(new THREE.MeshLambertMaterial({ vertexColors: true, clippingPlanes: [CUT], transparent: true, depthWrite: false }), 'cut-glass'),
+  /** Translucent voxels in the corona. */
+  coronaGlass: glowing(new THREE.MeshLambertMaterial({ vertexColors: true, transparent: true, depthWrite: false }), 'corona-glass'),
   /** Neon edges and glowing things (unlit, they bloom). */
   glow: glowing(new THREE.MeshBasicMaterial({ vertexColors: true }), 'neon', true),
   /** Faint lines (the studio's floor grid): unlit, but outside the bloom, so they cast no halo (T49a). */

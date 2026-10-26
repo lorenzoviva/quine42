@@ -19,6 +19,11 @@ export function geometry(m: MeshData): THREE.BufferGeometry {
   if (m.glow) g.setAttribute('glow', new THREE.BufferAttribute(m.glow, 1));
   if (m.alpha) g.setAttribute('alpha', new THREE.BufferAttribute(m.alpha, 1));
   g.setIndex(new THREE.BufferAttribute(m.indices, 1));
+  if (m.opaqueCount !== undefined) {
+    if (m.opaqueCount > 0) g.addGroup(0, m.opaqueCount, 0);
+    const transCount = m.indices.length - m.opaqueCount;
+    if (transCount > 0) g.addGroup(m.opaqueCount, transCount, 1);
+  }
   g.computeBoundingSphere();
   return g;
 }
@@ -67,8 +72,9 @@ export function modelObject(k: Kernel, f: Form, fc: FormComp | undefined, materi
   const g = geoOf(f);
   if (!g) return undefined;
   const mat = material ?? (g.sway ? MAT.sway : MAT.world);
+  const glassMat = material === MAT.cut ? MAT.cutGlass : material === MAT.corona ? MAT.coronaGlass : MAT.glass;
   const mesh = (geo: THREE.BufferGeometry) => {
-    return casts(new THREE.Mesh(geo, mat), true);
+    return casts(new THREE.Mesh(geo, geo.groups.length > 0 ? [mat, glassMat] : mat), true);
   };
   const root = new THREE.Group();
   const bodyMesh = mesh(fc?.done?.length ? changedBody(k, f, fc.done) : g.body);

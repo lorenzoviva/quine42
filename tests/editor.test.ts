@@ -11,6 +11,7 @@ import {
 } from '../lab/editor/syntax';
 import { CATALOG } from '../lab/3d/catalog';
 import {
+  type CadShape,
   parseShapesFromXml,
   insertShapeIntoXml,
   updateShapeInXml,
@@ -27,6 +28,8 @@ import {
   deleteShapesFromXml,
   duplicateShapesInXml,
   doubleDefinitionInXml,
+  alignCenterToSize,
+  alignShapeAt,
 } from '../lab/editor/cad';
 import {
   buildPlaybackTracks,
@@ -38,6 +41,7 @@ import {
 } from '../lab/editor/playback';
 import { compileMjx } from '../src/mj/model';
 import { runMjx } from '../src/mj/run';
+import { meshVoxels } from '../src/mj/mesh';
 import {
   generateRuleXml,
   getPaletteSymbols,
@@ -880,6 +884,7 @@ describe('MarkovJunior Editor (T59a)', () => {
           line: 2,
           startIndex: 0,
           endIndex: 10,
+          rawTag: '<box at="5 5 0" size="1 1 1" color="G"/>',
         };
         const b1 = getShapeVoxelBounds(box1);
         expect(b1.minX).toBe(5);
@@ -899,6 +904,7 @@ describe('MarkovJunior Editor (T59a)', () => {
           line: 3,
           startIndex: 11,
           endIndex: 20,
+          rawTag: '<box at="4 4 1" size="3 3 2" color="B"/>',
         };
         const b2 = getShapeVoxelBounds(box2);
         // x spans 4 - 1 to 4 + 1 = 3 to 5
@@ -913,9 +919,6 @@ describe('MarkovJunior Editor (T59a)', () => {
       it('threeToVoxel uses floor so points inside voxel span map to the correct voxel', () => {
         const grid = { X: 12, Y: 12, Z: 12 };
         const vpt = 20;
-        const s = 1 / vpt; // 0.05
-        const px = 6;
-        const py = 6;
 
         // Voxel x=5 spans Three.js X [(5 - 6)*0.05, (6 - 6)*0.05] = [-0.05, 0.0]
         // Center of voxel 5 is at Three.js X = (5.5 - 6)*0.05 = -0.025
@@ -991,6 +994,65 @@ describe('MarkovJunior Editor (T59a)', () => {
         // Generative rules completely intact
         expect(doubled).toContain('<one steps="5">');
         expect(doubled).toContain('<rule in="w" out="0"/>');
+      });
+
+      it('alignCenterToSize and alignShapeAt automatically align half-units for even lengths', () => {
+        // Odd sizes align to integer
+        expect(alignCenterToSize(4.3, 1)).toBe(4);
+        expect(alignCenterToSize(4, 3)).toBe(4);
+
+        // Even sizes align to half-integer (.5)
+        expect(alignCenterToSize(4, 2)).toBe(4.5);
+        expect(alignCenterToSize(4.5, 2)).toBe(4.5);
+        expect(alignCenterToSize(4, 4)).toBe(4.5);
+        expect(alignCenterToSize(5, 6)).toBe(5.5);
+
+        // alignShapeAt aligns cx for w, cy for d, and bz (integer floor)
+        const alignedEven = alignShapeAt([4, 4, 1.2], [2, 2, 2]);
+        expect(alignedEven).toEqual([4.5, 4.5, 1]);
+
+        const alignedOdd = alignShapeAt([4.5, 4.5, 1.2], [3, 1, 4]);
+        expect(alignedOdd).toEqual([5, 5, 1]);
+
+        // A box with w=2, cx=4.5 covers exactly 2 voxels: 4 and 5
+        const box2: CadShape = {
+          id: 1,
+          kind: 'box',
+          at: [4.5, 5.5, 0],
+          size: [2, 2, 2],
+          color: 'G',
+          line: 1,
+          startIndex: 0,
+          endIndex: 10,
+          rawTag: '<box at="4.5 5.5 0" size="2 2 2" color="G"/>',
+        };
+        const bounds = getShapeVoxelBounds(box2);
+        expect(bounds.minX).toBe(4);
+        expect(bounds.maxX).toBe(5);
+        expect(bounds.maxX - bounds.minX + 1).toBe(2);
+        expect(bounds.minY).toBe(5);
+        expect(bounds.maxY).toBe(6);
+        expect(bounds.maxY - bounds.minY + 1).toBe(2);
+      });
+
+      it('compiles model with alpha attribute and produces separated opaque/translucent mesh groups', () => {
+        const xml = `<sequence values="0Sg" size="6 6 6">
+  <color symbol="S" value="e8edf7" alpha="0.1" name="Schermo"/>
+  <color symbol="g" value="00e436" name="Solido"/>
+  <box at="3 3 0" size="2 2 2" color="g"/>
+  <box at="3 3 2" size="2 2 1" color="S"/>
+</sequence>`;
+
+        const m = compileMjx(xml);
+        expect(m.program.palette.S.alpha).toBe(0.1);
+        expect(m.program.palette.g.alpha).toBeUndefined();
+
+        const r = runMjx(m, 1);
+        const mesh = meshVoxels(r.grid, m.program.palette, { vpt: 20 });
+        expect(mesh.alpha).toBeDefined();
+        expect(mesh.opaqueCount).toBeDefined();
+        expect(mesh.opaqueCount).toBeGreaterThan(0);
+        expect(mesh.indices.length).toBeGreaterThan(mesh.opaqueCount!);
       });
     });
   });

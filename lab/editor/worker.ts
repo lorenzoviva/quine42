@@ -55,6 +55,7 @@ const buffers = (m: MeshData) => [
   m.indices.buffer,
   ...(m.sway ? [m.sway.buffer] : []),
   ...(m.glow ? [m.glow.buffer] : []),
+  ...(m.alpha ? [m.alpha.buffer] : []),
 ];
 
 self.onmessage = (ev: MessageEvent<EditorBuildRequest>) => {

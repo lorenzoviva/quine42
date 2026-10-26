@@ -411,6 +411,34 @@ export function threeToVoxel(
   ];
 }
 
+/**
+ * Automatically aligns/snaps a center coordinate for a given dimension size:
+ * - If size is even, the center must be a half-integer (e.g. 0.5, 1.5, 2.5...) so it covers exactly `size` voxels.
+ * - If size is odd, the center must be an integer (e.g. 0, 1, 2...) so it covers exactly `size` voxels.
+ */
+export function alignCenterToSize(coord: number, size: number): number {
+  const s = Math.max(1, Math.round(size));
+  if (s % 2 === 0) {
+    return Math.floor(coord) + 0.5;
+  }
+  return Math.round(coord);
+}
+
+/**
+ * Automatically aligns [cx, cy, bz] based on shape size [w, d, h].
+ * `cx` is aligned for `w`, `cy` is aligned for `d`, and `bz` (the bottom floor) is rounded to integer.
+ */
+export function alignShapeAt(
+  at: [number, number, number],
+  size: [number, number, number],
+): [number, number, number] {
+  return [
+    alignCenterToSize(at[0], size[0]),
+    alignCenterToSize(at[1], size[1]),
+    Math.round(at[2]),
+  ];
+}
+
 // ------------------------------------------------------------------ Shape Hit Testing & Bounds
 
 export function getShapeVoxelBounds(shape: CadShape): {

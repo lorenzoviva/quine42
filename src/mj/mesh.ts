@@ -19,6 +19,8 @@ export interface MeshData {
   glow?: Float32Array;
   /** Per vertex, alpha transparency in 0..1 (<color alpha="0.5">): only if the mesh has translucent voxels. */
   alpha?: Float32Array;
+  /** Number of opaque indices at start of indices array, when mesh has translucent voxels. */
+  opaqueCount?: number;
 }
 
 export interface VoxelGrid {
@@ -111,7 +113,8 @@ export function meshVoxels(g: VoxelGrid, palette: Record<string, PaletteEntry>, 
   const al: number[] = [];
   let glowing = false;
   let hasTranslucent = false;
-  const idx: number[] = [];
+  const opaqueIdx: number[] = [];
+  const translucentIdx: number[] = [];
   for (let z = 0; z < Z; z++)
     for (let y = 0; y < Y; y++)
       for (let x = 0; x < X; x++) {
@@ -169,18 +172,20 @@ export function meshVoxels(g: VoxelGrid, palette: Record<string, PaletteEntry>, 
           const l2 = col[(base + 2) * 3] + col[(base + 2) * 3 + 1];
           const l1 = col[(base + 1) * 3] + col[(base + 1) * 3 + 1];
           const l3 = col[(base + 3) * 3] + col[(base + 3) * 3 + 1];
-          if (l0 + l2 >= l1 + l3) idx.push(base, base + 2, base + 1, base, base + 3, base + 2);
-          else idx.push(base + 1, base + 3, base + 2, base + 1, base, base + 3);
+          const targetIdx = alphaVal < 1.0 ? translucentIdx : opaqueIdx;
+          if (l0 + l2 >= l1 + l3) targetIdx.push(base, base + 2, base + 1, base, base + 3, base + 2);
+          else targetIdx.push(base + 1, base + 3, base + 2, base + 1, base, base + 3);
         }
       }
+  const allIndices = hasTranslucent ? [...opaqueIdx, ...translucentIdx] : opaqueIdx;
   return {
     positions: new Float32Array(pos),
     normals: new Float32Array(nor),
     colors: new Float32Array(col),
-    indices: new Uint32Array(idx),
+    indices: new Uint32Array(allIndices),
     ...(o.sway ? { sway: new Float32Array(sw) } : {}),
     ...(glowing ? { glow: new Float32Array(gl) } : {}),
-    ...(hasTranslucent ? { alpha: new Float32Array(al) } : {}),
+    ...(hasTranslucent ? { alpha: new Float32Array(al), opaqueCount: opaqueIdx.length } : {}),
   };
 }
 
