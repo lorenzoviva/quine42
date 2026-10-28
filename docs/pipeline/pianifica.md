@@ -20,7 +20,9 @@ Sei l'agente che pianifica, nel worktree del branch base (`3d`). Non esegui task
      senza `approvato`.
    - Stima: % del limite settimanale del provider. Parti da `docs/pipeline/consumi.jsonl` (task simili, stima e
      tentativi) e, se è vuoto: piccolo 1-2 %, medio 3-5 %, grande 6-10 %; oltre 10 % il task va spezzato.
-   - Priorità: prima ciò che sblocca altri task.
+   - Priorità: quella della richiesta («> Priorità: n»), altrimenti prima ciò che sblocca altri task; «> Dipende da:»
+     diventa «dipende da Txx» nel task.
+   - I contatori attuali (5 ore e settimana, per provider) sono in `docs/pipeline/PIANO.md` dopo `pipeline.mjs uso`.
 4. **Il piano.** `node tools/pipeline/pipeline.mjs stato` (rigenera `docs/pipeline/PIANO.md`), controlla che le
    code tornino, committa (`Pipeline: pianifica …`). Di' all'autore cosa è pronto, cosa aspetta la sua
    approvazione e cosa le sue risposte, e il comando per eseguire: `node tools/pipeline/pipeline.mjs esegui`.

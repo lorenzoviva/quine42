@@ -16,8 +16,10 @@ senza che un agente si interrompa a metà per risparmiare (to-do del 28/10/2026,
    `docs/pipeline/domande/<Txx>.md`, sblocco degli `in attesa`, provider e stima) è un compito dell'agente che lancia la pipeline
    (`docs/pipeline/pianifica.md`, `/pipeline` in Claude Code), con il filtro che l'autore gli dà. L'esecuzione è deterministica:
    `tools/pipeline/pipeline.mjs` (Node, senza dipendenze).
-3. **Il budget lo tiene lo script, non gli agenti**: residuo per provider (`.pipeline/budget.json`, locale), che l'autore corregge e
-   che torna a 100 al reset settimanale; un task parte se la stima sta nel residuo meno ciò che i task in corso impegnano e una
+3. **Il budget lo tiene lo script, non gli agenti**: i contatori di ogni provider letti da `claude -p /usage` e `agy -p /usage`
+   (finestra di 5 ore e settimanale; in Antigravity per gruppo di modelli, filtrati da `contatori` in `config.json`) in
+   `.pipeline/budget.json`, locale; il residuo è il settimanale più basso, un contatore vuoto ferma il provider fino al suo reset
+   (a mano, con `budget`, solo se `/usage` non risponde); un task parte se la stima sta nel residuo meno ciò che i task in corso impegnano e una
    riserva; al più 5 in parallelo, uno solo per provider sotto il 10 %. Un limite toccato sospende il task con la sua sessione, che
    lo script riprende al reset («Ti sei fermato in questo punto, riprendi.»). Lo storico (`docs/pipeline/consumi.jsonl`) serve alle stime.
 4. **Un worktree per task** (`.claude/worktrees/<txx>`, branch `task/<Txx>` dal base, `node_modules` del base per junction), con le

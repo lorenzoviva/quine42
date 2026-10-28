@@ -5,7 +5,8 @@ Le seguenti modifiche sono ancora da valutare.
 
 # Modifiche da fare
 
-Le seguenti modifiche non sono ancora state pianificate, vanno formulate come steps e mandate al momento opportuno. Aiutami a scrivere i prompts e a gestire la pianificazione.
+Le seguenti modifiche non sono ancora state pianificate. Le porta nel backlog la pipeline (`/pipeline` in Claude Code, «lancia la pipeline» in Antigravity; vedi `docs/pipeline/README.md`), che stima, sceglie il provider e le esegue con `node tools/pipeline/pipeline.mjs esegui`.
+Per ogni richiesta, facoltativi: `> Provider proposto: Claude Code | Antigravity` (adottato e approvato subito), `> Priorità: <n>`, `> Dipende da: <richiesta o Txx>`. Se la pipeline ha domande, le scrive in `docs/pipeline/domande/Txx.md`: rispondi lì.
 
 <!-- Pianificate il 22/10/2026 in docs/plans/backlog.md (testo originale: docs/userchats/to-do-2026-10-22.md). -->
 <!-- Pianificate il 24/10/2026 in docs/plans/backlog.md, T49-T57 (testo originale: docs/userchats/to-do-2026-10-24.md). -->
@@ -39,7 +40,7 @@ Voglio implementare un linguaggio, solo alcune parole verrebbero sostituite. Gli
 # Riorganizzare i file di documentazione e di sviluppo
 
 
-Dobbiamo rimettere a posto le directory sotto docs/, la metodologia di sviluppo è passata da un singolo thread di Claude Code a un approccio basato su steps, poi to-do e backlog e infine, ora, lo stiamo cambiando nuovamente per andare verso un approccio basato su pipeline, multi-worktree, e distribuizione del carico (vedi punto precedente). Voglio che la documentazione relativa a tutte le metodologie precedenti siano archiviate in cartelle ben organizzate e con un resoconto, a livello di root, dell'approccio utilizzato e dei files presenti. Voglio che i files rimangano quelli originali, nessun refactoring dei link interni ad altri documenti. Le sostituzioni da effettuare (dove trovare veramente il file citato) verranno riportate nel resoconto. 
+Dobbiamo rimettere a posto le directory sotto docs/, la metodologia di sviluppo è passata da un singolo thread di Claude Code a un approccio basato su steps, poi to-do e backlog e infine, ora, lo stiamo cambiando nuovamente per andare verso un approccio basato su pipeline, multi-worktree, e distribuizione del carico (fatto in T61: `docs/pipeline/README.md`, ADR-0072; la richiesta originale è in `docs/userchats/to-do-2026-10-28.md`). `docs/pipeline/`, `tools/pipeline/`, `docs/plans/backlog.md` e `docs/userchats/to-do.md` sono la metodologia attuale e restano dove sono (la pipeline li legge da lì). Voglio che la documentazione relativa a tutte le metodologie precedenti siano archiviate in cartelle ben organizzate e con un resoconto, a livello di root, dell'approccio utilizzato e dei files presenti. Voglio che i files rimangano quelli originali, nessun refactoring dei link interni ad altri documenti. Le sostituzioni da effettuare (dove trovare veramente il file citato) verranno riportate nel resoconto. 
 
 > Provider proposto: Antigravity
 
@@ -56,6 +57,7 @@ Per i grafi voglio che vengano espressi in mermaid.
 Il punto precedente, inoltre, apre la strada verso un nuovo modo di generare gli universi.
 Abbiamo suddiviso il gioco in due componenti software. Da una parte il kernel con le funzionalità di base, l'engine, il 3D la corona etc. Questo espone primitive e funzionalità implementabili in lua all'interno dell'universo. Dall'altra parte l'universo in corso di generazione, in "sessione", che gira su server in caso di multiplayer (ora non so, ma credo che in single gira tutto sul client). In ogni caso sono componenti software distinti, ogniuno con il proprio versionamento. Ad oggi l'ambiente di sviluppo del kernel è misto gemini antigravity e claude code, tutto da desktop. L'ambiente di sviluppo dell'universo, ovvero dei vari moduli, della narrativa e dei vari contenuti di gioco, è gestito interamente tramite dagli agenti del concilio, che sono interpretati dai modelli di Gemini chiamando API a consumo. 
 Una volta che avremo centralizzato queste chiamate ad API, possiamo fare un passo ulteriore e generalizzarle per farle "girare su server", ovvero alimentate da CLI Claude Code o Gemini Antigravity. Possiamo riadattare il metodo di sviluppo del kernel per venire in contro alla necessita di generare i contenuti dell'universo quasi in real-time. Quindi per esempio facendo lei "loop" su claude code molto frequenti sulla coda delle richieste in modo da evaderle in fretta.
+La base c'è già nella pipeline del kernel (T61, `tools/pipeline/pipeline.mjs`): `claude -p` / `agy -p` lanciati da uno script, i contatori letti da `/usage` (5 ore e settimana, per gruppo di modelli in Antigravity), il parallelismo entro il budget, la ripresa dopo un limite. Per l'universo va adattata a una coda di richieste del Concilio (al posto del backlog) con risposte in secondi, non task da ore.
 In questo modo possiamo sfruttare gli abbonamenti ai providers. Per gli sviluppi e la prototipazione mi farà risparmiare molto.
 Inoltre avendo un repository pubblico, permetterò agli sviluppatori in possesso di un abbonamento Claude o Gemini (o entrambi), di sfruttarli per la generazione e provare il gioco in locale scaricandolo dal repository. Voglio che la community di sviluppatori sia incentivata a provarlo.
 

@@ -56,9 +56,17 @@ node tools/pipeline/pipeline.mjs integra T43b           # merge --no-ff di task/
 - se l'uscita dice che il limite è finito, il task è `sospeso` con la sua sessione; quando il limite si resetta
   (l'ora che la CLI dice, o `attesaLimiteMinuti`) lo script riprende la stessa conversazione con
   «Ti sei fermato in questo punto, riprendi.» (`--resume` / `--conversation`), senza intervento umano;
-- quando il task finisce scala la stima dal residuo e scrive una riga in `consumi.jsonl` (stima, costo in dollari
-  se la CLI lo dice, minuti, tentativi, esito). Il residuo vero lo dice solo l'autore: `budget <provider> <%>`
-  lo corregge; al reset settimanale (`resetSettimanale`, es. `gio 10:00`) torna a 100.
+- **i contatori** li legge da `claude -p /usage` e `agy -p /usage` (al più ogni `usoSecondi`, 300; `uso` li rilegge
+  subito), entrambe le finestre: le **5 ore** e la **settimana**; per Antigravity un contatore per gruppo di modelli
+  (`Gemini Models`, `Claude and GPT models`, `Gemini 4 Argon`…), e `contatori` in `config.json` (un'espressione
+  regolare sul nome) dice quali contano per i modelli che la pipeline usa con `agy` (oggi `^Gemini Models$`; se aggiungi
+  `--model` con Argon, aggiungi il suo). Il budget di un provider è il contatore settimanale più basso; sotto
+  `sogliaUnSolo` (anche nelle 5 ore) parte un task alla volta; un contatore vuoto (settimana sotto la `riserva`, 5 ore a 0)
+  ferma il provider fino al suo reset. Tutto in `PIANO.md`, sezione «Budget»;
+- quando il task finisce scala la stima dal residuo fino alla lettura successiva e scrive una riga in `consumi.jsonl`
+  (stima, costo in dollari se la CLI lo dice, minuti, tentativi, esito): confrontata con i contatori prima e dopo, serve a
+  stimare meglio. Se `/usage` non risponde vale il residuo a mano (`budget <provider> <%>`), che torna a 100 a
+  `resetSettimanale`.
 
 I limiti non li gestiscono gli agenti: un task non si ferma a metà per risparmiare, è lo script che decide quanti
 partono. Il merge nel base non lo fa nessun agente: dopo `ESITO: fatto` l'autore guarda il branch e lancia `integra`

@@ -68,11 +68,66 @@ const isDone = (s) => s.startsWith('fatto');
 
 // --- Budget and limits -----------------------------------------------------------------------------------------
 
-/** The remaining share (in % of the weekly limit) of each provider, refilled when its weekly reset has passed. */
-function loadBudget() {
+/**
+ * The counters of a provider from its `/usage` (both windows, 5 hours and weekly; Gemini one per model group):
+ * [{ nome, finestra: '5h' | 'settimana', residuo (%), reset (ISO) }], or undefined if the CLI does not answer.
+ */
+export function parseUsage(provider, text) {
+  const counters = [];
+  if (provider === 'claude') {
+    // «Current week (all models): 99% used · resets Oct 29, 5pm (Europe/Rome)»
+    for (const m of text.matchAll(/^Current (session|week[^:]*):\s*(\d+)% used · resets (.+)$/gm))
+      counters.push({ nome: m[1], finestra: m[1] === 'session' ? '5h' : 'settimana', residuo: 100 - Number(m[2]), reset: localDate(m[3]) });
+  } else {
+    // «Gemini Models<TAB>Weekly Limit Remaining<TAB>100%<TAB>2026-11-04T18:44:53Z»
+    for (const line of text.split('\n')) {
+      const [nome, label, pct, reset] = line.split('\t').map((s) => s?.trim());
+      if (!/%$/.test(pct ?? '')) continue;
+      counters.push({ nome, finestra: /five hour/i.test(label) ? '5h' : 'settimana', residuo: Number(pct.slice(0, -1)), reset: new Date(reset).toISOString() });
+    }
+  }
+  return counters.length ? counters : undefined;
+}
+
+/** «Oct 29, 12:10am (Europe/Rome)» or «5pm» in the machine's time zone (the CLI's), as ISO. */
+function localDate(text) {
+  const m = /(?:([A-Z][a-z]{2}) (\d+),?\s*)?(\d+)(?::(\d+))?\s*(am|pm)/i.exec(text);
+  if (!m) return undefined;
+  const d = new Date();
+  if (m[1]) d.setMonth(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(m[1]), Number(m[2]));
+  d.setHours((Number(m[3]) % 12) + (m[5].toLowerCase() === 'pm' ? 12 : 0), Number(m[4] ?? 0), 0, 0);
+  if (d < new Date(Date.now() - 86_400_000)) d.setFullYear(d.getFullYear() + 1); // December → January
+  return d.toISOString();
+}
+
+function readUsage(provider) {
+  const conf = CONFIG.providers[provider];
+  try {
+    const text = execFileSync(conf.cmd, ['-p', '/usage'], { encoding: 'utf8', timeout: 120_000, env: { ...process.env, MSYS_NO_PATHCONV: '1' }, windowsHide: true });
+    return parseUsage(provider, text)?.filter((c) => new RegExp(conf.contatori ?? '.').test(c.nome));
+  } catch { return undefined; }
+}
+
+/**
+ * The budget of each provider: its counters read from `/usage` (at most every `usoSecondi`); `residuo` is the lowest
+ * weekly one, `sessione` the lowest 5-hour one; an empty counter stops the provider until it resets. Without counters,
+ * the remaining share set by hand (`budget`), refilled at `resetSettimanale`.
+ */
+const lowest = (counters, w) => Math.min(100, ...counters.filter((c) => c.finestra === w).map((c) => c.residuo));
+
+function loadBudget({ read = true } = {}) {
   const budget = readJson(BUDGET, {});
   for (const [prov, conf] of Object.entries(CONFIG.providers)) {
     const b = (budget[prov] ??= { residuo: 100, aggiornato: now() });
+    if (read && !(b.letto && Date.now() - Date.parse(b.letto) < CONFIG.usoSecondi * 1000)) {
+      const counters = readUsage(prov);
+      if (counters) Object.assign(b, { contatori: counters, letto: now(), residuo: lowest(counters, 'settimana'), sessione: lowest(counters, '5h') });
+    }
+    if (b.contatori && b.letto && Date.now() - Date.parse(b.letto) < CONFIG.usoSecondi * 2000) {
+      const empty = b.contatori.filter((c) => c.residuo <= (c.finestra === 'settimana' ? CONFIG.riserva : 0) && c.reset);
+      b.fermoFino = empty.length ? empty.map((c) => c.reset).sort().at(-1) : b.fermoFino && new Date(b.fermoFino) > new Date() ? b.fermoFino : undefined;
+      continue;
+    }
     const reset = lastReset(conf.resetSettimanale);
     if (reset && new Date(b.aggiornato) < reset) Object.assign(b, { residuo: 100, aggiornato: now(), fermoFino: undefined });
   }
@@ -123,10 +178,13 @@ function plan(tasks, runs, budget, only) {
   return queues;
 }
 
+const describe = (b) => `settimana ${b.residuo} %, 5 ore ${b.sessione ?? '?'} %${b.fermoFino ? `, fermo fino a ${b.fermoFino}` : ''}`;
+
 function writePlan(queues, budget) {
   const line = (t) => `- **${t.id}** ${t.title}${t.provider ? ` — ${t.provider}, ${t.estimate ?? '?'} %` : ''}${t.missing ? ` (aspetta ${t.missing.join(', ')})` : ''}`;
   const section = (title, list) => `## ${title} (${list.length})\n\n${list.map(line).join('\n') || '_nessuno_'}\n`;
-  const budgets = Object.entries(budget).map(([p, b]) => `- ${p}: ${b.residuo} % residuo${b.fermoFino ? `, fermo fino a ${b.fermoFino}` : ''}`).join('\n');
+  const budgets = Object.entries(budget).map(([p, b]) => `- **${p}**: ${describe(b)}${b.letto ? ` (letto da /usage il ${b.letto})` : ' (impostato a mano)'}` +
+    (b.contatori ?? []).map((c) => `\n  - ${c.nome}, ${c.finestra}: ${c.residuo} % residuo, reset ${c.reset}`).join('')).join('\n');
   const text = `# Il piano della pipeline\n\n> Generato da \`node tools/pipeline/pipeline.mjs stato\` il ${now()}: non modificarlo a mano,\n> la fonte è \`docs/plans/backlog.md\` (righe \`- Pipeline:\`).\n\n## Budget\n\n${budgets}\n\n` +
     [['In corso', queues.inCorso], ['Pronti, in ordine di priorità', queues.pronti], ['Da approvare (provider e stima proposti)', queues.daApprovare],
       ['Da stimare (manca la riga `- Pipeline:`)', queues.daStimare], ['Bloccati da dipendenze', queues.bloccati], ['In attesa dell\'autore', queues.inAttesa]]
@@ -215,7 +273,7 @@ async function execute({ max = CONFIG.maxParalleli, only, task } = {}) {
       if (b.fermoFino && new Date(b.fermoFino) > new Date()) continue;
       const committed = [...active.keys()].map((id) => runs[id]).filter((r) => r.provider === t.provider).reduce((s, r) => s + r.stima, 0);
       const left = b.residuo - committed;
-      const cap = left < CONFIG.sogliaUnSolo ? 1 : max;
+      const cap = left < CONFIG.sogliaUnSolo || (b.sessione ?? 100) < CONFIG.sogliaUnSolo ? 1 : max;
       const running = [...active.keys()].filter((id) => runs[id].provider === t.provider).length;
       if (active.size >= max || running >= cap || (!runs[t.id] && t.estimate > left - CONFIG.riserva)) continue;
       const run = runs[t.id] ?? { id: t.id, provider: t.provider, stima: t.estimate, tentativi: 0, inizio: now(), ...(() => { const w = taskWorktree(t.id); return { dir: w.dir, branch: w.branch }; })() };
@@ -266,7 +324,9 @@ function status() {
   const queues = plan(loadTasks(), readJson(RUNS, {}), budget);
   writePlan(queues, budget);
   for (const [k, l] of Object.entries(queues)) console.log(`${k}: ${l.map((t) => t.id).join(' ') || '—'}`);
-  console.log(`Budget: ${Object.entries(budget).map(([p, b]) => `${p} ${b.residuo} %`).join(', ')}. Piano in docs/pipeline/PIANO.md`);
+  for (const [p, b] of Object.entries(budget))
+    console.log(`${p}: ${describe(b)}${(b.contatori ?? []).map((c) => `\n  ${c.nome} (${c.finestra}): ${c.residuo} %, reset ${c.reset}`).join('')}`);
+  console.log('Piano in docs/pipeline/PIANO.md');
 }
 
 function listWorktrees() {
@@ -292,8 +352,9 @@ const flag = (name) => { const i = rest.indexOf(`--${name}`); return i >= 0 ? re
 if (process.argv[1]?.endsWith('pipeline.mjs')) {
   if (cmd === 'stato' || !cmd) status();
   else if (cmd === 'esegui') await execute({ max: Number(flag('max') ?? CONFIG.maxParalleli), only: flag('solo'), task: flag('task') });
+  else if (cmd === 'uso') { const b = readJson(BUDGET, {}); for (const p of Object.keys(b)) delete b[p].letto; writeJson(BUDGET, b); status(); }
   else if (cmd === 'budget') { const b = loadBudget(); b[rest[0]] = { ...b[rest[0]], residuo: Number(rest[1]), aggiornato: now(), fermoFino: undefined }; writeJson(BUDGET, b); status(); }
   else if (cmd === 'worktree') listWorktrees();
   else if (cmd === 'integra') integrate(rest[0]);
-  else console.log('Comandi: stato | esegui [--max N] [--solo claude|gemini] [--task Txx] | budget <claude|gemini> <residuo %> | worktree | integra <Txx>');
+  else console.log('Comandi: stato | uso (rilegge /usage) | esegui [--max N] [--solo claude|gemini] [--task Txx] | budget <claude|gemini> <residuo %> | worktree | integra <Txx>');
 }
