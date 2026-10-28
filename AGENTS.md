@@ -147,6 +147,7 @@ src/mj/                 MarkovJunior del gioco (ADR-0036, 0038): engine.ts (moto
 src/session/             il kernel sul server (ADR-0058): protocol.ts (messaggi, fakeLink), server.ts (SessionServer), client.ts
                         (SessionClient: ciò che un client sa del mondo), host.ts (apre un universo e fa girare il suo mondo);
                         il client sottile (ADR-0059): thin.ts (ThinClient: riempie il kernel specchio), socket.ts (WebSocket, id della scheda)
+tools/pipeline/          la pipeline agentica (ADR-0072): pipeline.mjs (code, budget, esecuzione nei worktree, ripresa dopo i limiti), config.json
 lab/                    laboratorio di MarkovJunior (ADR-0038): sandbox 3D /lab/3d/, editor modelli /lab/editor/ (T59a, T59b, T59c, T59d), modelli ufficiali e conformità, script per
                         affettare, fotografare, misurare e provare i programmi con Gemini; non importarlo da src/
 ```
@@ -482,6 +483,13 @@ lavoro vive nei file, non nella chat.
    questo file aggiornati se la decisione è architetturale; il task segnato `fatto` con il commit e una riga su
    cosa è cambiato rispetto al previsto; commit (mai su `main`). Poi **dai all'autore il prompt per la sessione
    successiva** (quello in testa al backlog, con il numero del prossimo task) e di' in una riga cosa farà.
+
+**La pipeline** (ADR-0072, [`docs/pipeline/README.md`](docs/pipeline/README.md)): la pianificazione (to-do → backlog → stima e
+provider nella riga `- Pipeline:` del task) la fa un agente con [`docs/pipeline/pianifica.md`](docs/pipeline/pianifica.md) (`/pipeline` in Claude Code);
+l'esecuzione la fa `node tools/pipeline/pipeline.mjs esegui`: fino a 5 task in parallelo su Claude Code e Gemini, uno per worktree
+(`task/<Txx>`), entro il budget di ogni provider, ripresi dopo un limite. **Chi esegue un task lanciato dalla pipeline è in un ambiente
+condiviso**: segue le «Regole per chi esegue un task» del README (solo il suo worktree e il suo blocco del backlog, niente merge né
+domande: le scrive in `docs/pipeline/domande/<Txx>.md`) al posto dei punti 1 e 3 sul to-do e sul prompt successivo.
 
 ### Convalida nel browser (senza tentativi)
 

@@ -1300,3 +1300,16 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 
 
+
+## Ambiente di sviluppo
+
+### T60 · La pipeline agentica e i worktree — `fatto`
+- Dal to-do del 28/10/2026 (`docs/userchats/to-do-2026-10-28.md`): «Strutturare meglio l'ambiente di sviluppo agentico» (ordine nei
+  worktree) e «Automatizzare il lavoro agentico» (la pipeline to-do → scambio → backlog → piano → esecuzione per provider).
+- Fare: la pipeline (ADR-0072), le regole dell'ambiente condiviso, un worktree per task, lo storico dei consumi; non perdere i task del backlog.
+- Esito: `tools/pipeline/pipeline.mjs` + `config.json` (`stato esegui budget worktree integra`), `docs/pipeline/` (README con le
+  regole per chi esegue, `pianifica.md` per le fasi 1-4, `PIANO.md` generato, `domande/`, `consumi.jsonl`), `/pipeline` in
+  `.claude/commands/`, AGENTS.md, GEMINI.md, ADR-0072. Diverso dal previsto: niente PLAN_*/TASK_* per provider, il backlog resta la
+  fonte con la riga `- Pipeline:` e le code sono in `PIANO.md`; il consumo vero non si legge dalle CLI, lo corregge l'autore
+  (`budget`). I vecchi worktree non sono stati toccati (elencati nel README). Provati `stato` e `worktree` sul backlog vero;
+  `esegui` non è stato lanciato (consumerebbe i limiti): la prima esecuzione va guardata.

@@ -8,3 +8,4 @@ dist/
 universes/
 lab/out/
 graphify-out/
+.pipeline/

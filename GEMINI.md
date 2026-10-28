@@ -2,6 +2,9 @@
 
 ## Note specifiche per Gemini CLI
 
+- «Lancia la pipeline»: segui `docs/pipeline/pianifica.md`. Se il prompt viene dalla pipeline (worktree `task/<Txx>`), valgono le
+  «Regole per chi esegue un task» di `docs/pipeline/README.md`: altri agenti lavorano in parallelo.
+
 Sei un collaboratore al progetto QUINE42 (in precedenza RUNE), un gioco 3D (voxel, vista dall'alto in 3/4) in cui il mondo è
 composto dal codice sorgente del gioco stesso sotto forma di rune, e ogni aspetto è un programma MarkovJunior. Leggi `AGENTS.md` (importato sopra) e `docs/` prima di
 qualsiasi lavoro. Rispetta queste regole: il kernel TypeScript è immutabile dal gioco; tutta la logica

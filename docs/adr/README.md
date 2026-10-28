@@ -76,6 +76,7 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0069](0069-il-concilio-sul-ramo-del-master.md) | Il Concilio sul ramo del master: in multigiocatore le richieste del master al Referente e alle squadre girano sul server, in un kernel del ramo (file del mondo più il ramo, stessi modelli), e ciò che committano va sul ramo, da pubblicare; le rune nella corona non cambiano file | accettato |
 | [0070](0070-le-rune-chieste-al-referente.md) | Le rune chieste al Referente: in multigiocatore il master chiede al Referente ogni token che una runa può portare (incarico `runa`, al più 12, mai la runa del Concilio) e le trova nella borsa delle rune del suo viandante sul server; non sono file, non vanno sul ramo; in singola nulla cambia | accettato |
 | [0071](0071-parole-e-doni-tra-viandanti.md) | Parole e doni tra viandanti: nel menu di un altro viandante «Parla» (`dici`: il fumetto di chi parla, a chi è entro 8 caselle, senza filtro della quarta parete) e «Dai» per ogni tasca della barra rapida (`dai`: entro 3 caselle, una borsa intera); chi riceve lo sa dagli `avvisi` dell'aggiornamento | accettato |
+| [0072](0072-la-pipeline-agentica.md) | La pipeline agentica: il backlog resta la fonte (riga `- Pipeline:` con provider, stima e approvazione), un agente pianifica, `tools/pipeline/pipeline.mjs` esegue fino a 5 task in parallelo, uno per worktree, entro il budget di ogni provider, e li riprende dopo un limite | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.
 
