@@ -1,0 +1,65 @@
+<sequence values="BSabcg" size="23 23 35" symmetry="()" name="JSON screen">
+ <!-- 1 voxel in piu e richiesto per il matching vuoto -->
+  <color symbol="S" value="e8edf7" alpha="0.1" name="Schermo"/>
+  
+  <color symbol="a" value="e8edf7" alpha="0.1" name="Schermo dopo prima lettera"/>
+  <color symbol="b" value="e8edf7" alpha="0.1" name="Schermo dopo prima riga a dx"/>
+  <color symbol="c" value="e8edf7" alpha="0.1" name="Schermo dopo prima riga a sx"/>
+
+  <color symbol="g" value="00e436" glow="true" alpha="0.45" name="Scritte terminale verde"/>
+
+
+
+
+<!-- 
+x consecutiva 1
+y slash 2
+z spazio 3
+ -->
+
+  <box at="11 11 1" size="21 21 34" color="S"/>  
+
+    <!-- First pixel (random) -->
+    <one in="SSS/SSS/SSS SSS/SSS/SSS BBB/BBB/BBB" out="SSS/SgS/SSS BBB/BBB/BBB SSS/SSS/SSS" steps="1"/>
+
+    <!-- Phase I: first line -->
+    <all in="S" out="a"/>
+
+    <one steps="500">
+      <rule in="*a*/aaa/*a* ***/*g*/***" out="*a*/aga/*a* ***/*g*/***" p="0.9"/> <!-- Center -->
+      <rule in="**a/*aa/**a ***/*g*/***" out="**a/*ag/**a ***/*g*/***" p="0.1"/> <!-- +x -->
+      <rule in="a**/aa*/a** ***/*g*/***" out="a**/ga*/a** ***/*g*/***" p="0.1"/> <!-- -x -->
+      <rule in="*a*/*a*/aaa ***/*g*/***" out="*a*/*a*/aga ***/*g*/***" p="0.05"/> <!-- +y -->
+      <rule in="aaa/*a*/*a* ***/*g*/***" out="aga/*a*/*a* ***/*g*/***" p="0.05"/> <!-- -y -->
+    </one>
+
+
+
+
+  <animation name="scritta" frames="32">
+
+    <!-- <one in="aaaa/agaa/aaaa/aaaa" out="aaaa/agga/agga/aaaa" steps="4" simmetry="(xy)"/> -->
+
+    <all in="S" out="a"/>
+
+
+
+    <!-- <one steps="15">
+      <rule in="***/***/*** ***/*g*/***" out="***/*g*/*** ***/*g*/***"/>
+      <rule in="***/***/*** ***/*g*/***" out="***/**g/*** ***/*g*/***"/>
+      <rule in="***/***/*** ***/*g*/***" out="***/g**/*** ***/*g*/***"/>
+      <rule in="***/***/*** ***/*g*/***" out="***/***/*g* ***/*g*/***"/>
+      <rule in="***/***/*** ***/*g*/***" out="*g*/***/*** ***/*g*/***"/>
+    </one> -->
+
+    <!-- <one in="***/***/*** ***/*g*/***" out="***/*g*/*** ***/*g*/***" steps="15" simmetry="(xy)"/> -->
+
+   
+    <!-- <convolution neighborhood="Moore" steps="3">
+      <rule in="g" out="a" values="g" sum="15..26"/>
+      <rule in="g" out="a" values="g" sum="0..7"/>
+    </convolution> -->
+
+  </animation>
+  
+</sequence>

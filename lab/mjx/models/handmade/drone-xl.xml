@@ -17,7 +17,7 @@ Scatola aggiornata: 10 × 10 × 8 voxel (drone centrato con offset +1 su X e +1 
 
   <!-- Vano ottico, visore e lenti sensore espressive -->
   <color symbol="V" value="1c2a3a" name="vano ottico vetro scuro visore"/>
-  <color symbol="I" value="00ffff" glow="True" name="lente sensore occhio ciano"/>
+  <color symbol="I" value="006666" glow="True" name="lente sensore occhio ciano"/>
 
   <!-- Quattro fasi plasma ciano per rotazione rotori (glow="True") -->
   <color symbol="a" value="ffffff" glow="True" name="lama plasma bianco-ciano laser"/>

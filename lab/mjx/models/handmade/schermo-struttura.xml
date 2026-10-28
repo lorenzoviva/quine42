@@ -1,0 +1,108 @@
+<sequence values="BSabcp" size="23 23 35" symmetry="()" name="JSON screen">
+ <!-- 1 voxel in piu e richiesto per il matching vuoto -->
+  <color symbol="S" value="e8edf7" alpha="0.1" name="Schermo"/>
+  
+  <color symbol="a" value="e8edf7" alpha="0.1" name="Schermo dopo prima lettera"/>
+  <color symbol="b" value="e8edf7" alpha="0.1" name="Schermo dopo prima riga a dx"/>
+  <color symbol="c" value="e8edf7" alpha="0.1" name="Schermo dopo prima riga a sx"/>
+
+  <color symbol="t" value="6d5e26" glow="true" alpha="0.45" name="tronco 1"/>
+  <color symbol="p" value="6d5e26" glow="true" alpha="0.45" name="tronco 2"/>
+
+  
+  <color symbol="g" value="e6b400" glow="true" name="scritte"/>
+
+
+
+
+<!-- 
+x consecutiva 1
+y slash 2
+z spazio 3
+ -->
+
+  <box at="11 11 1" size="21 21 34" color="S"/>  
+
+    <!-- First pixel (random) -->
+    <!-- <one in="SSS/SSS/SSS SSS/SSS/SSS BBB/BBB/BBB" out="SSS/StS/SSS SSS/SSS/SSS BBB/BBB/BBB" steps="1"/> -->
+    <!-- First pixel (fixed) -->
+    <box at="16 11 1" size="1 1 1" color="t"/>  
+
+
+    <one in="SSSSSS/StSSSS/SSSSSS/SSSSSS SSSSSS/SSSSSS/SSSSSS/SSSSSS BBBBBB/BBBBBB/BBBBBB/BBBBBB" out="SSSSSS/SttttS/SttSSS/SSSSSS SSSSSS/SSSSSS/SSSSSS/SSSSSS BBBBBB/BBBBBB/BBBBBB/BBBBBB" steps="1" symmetry="(xy)"/>
+   
+    <one in="SSSSS/ttSSS/SSSSS SSSSS/SSSSS/SSSSS BBBBB/BBBBB/BBBBB" out="SSSSS/rrrrS/SSSSS SSSSS/SSSSS/SSSSS BBBBB/BBBBB/BBBBB" steps="3" symmetry="(xy)"/>
+    <!-- Phase I: first line -->
+    <all in="S" out="a"/>
+    <one in="aaaa/ataa/aaaa/aaaa" out="aaaa/atta/atta/aaaa" steps="4" simmetry="(xy)"/>
+
+    <one steps="8">
+          <!-- <rule in="aaaa/at*a/a**a/aaaa" out="aaaa/atta/atta/aaaa" steps="1" simmetry="(xy)"/> -->
+          <rule in="aaaa/aaaa/aaaa/aaaa aaaa/atta/atta/aaaa" out="aaaa/atta/atta/aaaa aaaa/atta/atta/aaaa" steps="1" symmetry="(xy)"/>
+          <rule in="aaaa/aaaa/aaaa/aaaa *aaa/*att/*att/*aaa" out="aaaa/atta/atta/aaaa *aaa/*att/*att/*aaa" steps="1" symmetry="(xy)"/>
+          <rule in="aaaa/aaaa/aaaa/aaaa atta/atta/aaaa/****" out="aaaa/atta/atta/aaaa atta/atta/aaaa/****" steps="1" symmetry="(xy)"/>
+          <rule in="aaaa/aaaa/aaaa/aaaa aaa*/tta*/tta*/aaa*" out="aaaa/atta/atta/aaaa aaa*/tta*/tta*/aaa*" steps="1" symmetry="(xy)"/>
+          <rule in="aaaa/aaaa/aaaa/aaaa *aaa/*att/*att/*aaa" out="aaaa/atta/atta/aaaa *aaa/*att/*att/*aaa" steps="1" symmetry="(xy)"/>
+          <rule in="aaaa/aaaa/aaaa/aaaa *aaa/*att/*att/*aaa" out="aaaa/atta/atta/aaaa *aaa/*att/*att/*aaa" steps="1" symmetry="(xy)"/>
+    </one>
+  
+  <convolution neighborhood="Moore" steps="2" simmetry="(xyz)">
+    <rule in="a" out="r" values="t" steps="4" sum="4..8"/>
+    <rule in="a" out="r" values="r" steps="5" sum="3..5"/>
+  </convolution>
+    <all in="r" out="t"/>
+
+
+    <one steps="12">
+          <rule in="aaaa/aaaa/aaaa/aaaa aaaa/atta/atta/aaaa" out="aaaa/atta/atta/aaaa aaaa/atta/atta/aaaa" steps="1" symmetry="(xy)"/>
+          <rule in="aaaa/aaaa/aaaa/aaaa *aaa/*att/*att/*aaa" out="aaaa/atta/atta/aaaa *aaa/*att/*att/*aaa" steps="1" symmetry="(xy)"/>
+          <rule in="aaaa/aaaa/aaaa/aaaa atta/atta/aaaa/****" out="aaaa/atta/atta/aaaa atta/atta/aaaa/****" steps="1" symmetry="(xy)"/>
+          <rule in="aaaa/aaaa/aaaa/aaaa aaa*/tta*/tta*/aaa*" out="aaaa/atta/atta/aaaa aaa*/tta*/tta*/aaa*" steps="1" symmetry="(xy)"/>
+          <rule in="aaaa/aaaa/aaaa/aaaa *aaa/*att/*att/*aaa" out="aaaa/atta/atta/aaaa *aaa/*att/*att/*aaa" steps="1" symmetry="(xy)"/>
+          <rule in="aaaa/aaaa/aaaa/aaaa *aaa/*att/*att/*aaa" out="aaaa/atta/atta/aaaa *aaa/*att/*att/*aaa" steps="1" symmetry="(xy)"/>
+    </one>
+
+
+    <one in="a a a t" out="a a p t" steps="4" symmetry="(xy)"/>
+    <one in="aa/ra" out="aa/pp" steps="5" simmetry="(xy)" />
+    <one in="ra/aa" out="pp/aa" steps="5" simmetry="(xy)" />
+    <one in="ar/aa" out="pp/aa" steps="5" simmetry="(xy)" />
+    <one in="aa/ar" out="aa/pp" steps="5" simmetry="(xy)" />
+
+    <one steps="70">
+
+      
+      <rule in="aaa/ppa/aaa" out="aaa/ppp/aaa" steps="1" p="0.3"/>
+      <rule in="aaa/app/aaa" out="aaa/ppp/aaa" steps="1" p="0.3"/>
+      <rule in="apa/apa/aaa" out="apa/apa/apa" steps="1" p="0.3"/>
+      <rule in="aaa/apa/apa" out="apa/apa/apa" steps="1" p="0.3"/>
+
+
+      <rule in="apa/aaa" out="apa/aap" steps="1" p="0.1"/>
+      <rule in="apa/aaa" out="apa/paa" steps="1" p="0.1"/>
+      <rule in="aaa/apa" out="paa/apa" steps="1" p="0.1"/>
+      <rule in="aaa/apa" out="aap/apa" steps="1" p="0.1"/>
+
+
+      <rule in="aa/aa/aa aa/ap/aa" out="aa/pa/aa aa/ap/aa" steps="1" p="0.6"/>
+      <rule in="aa/aa/aa aa/pa/aa" out="aa/ap/aa aa/pa/aa" steps="1" p="0.6"/>
+      <rule in="aaa/aaa apa/aaa" out="aaa/apa apa/aaa" steps="1" p="0.6"/>
+      <rule in="aaa/aaa aaa/apa" out="apa/aaa aaa/apa" steps="1" p="0.6"/>
+    </one>
+   
+
+  <animation name="scritta" frames="32">
+<!-- 
+    <one in="a a p" out="a g p"/>
+    <one in="a a g" out="a g g" steps="1"/> -->
+
+    
+    <!-- <one in="aap" out="agp"/>
+    <one in="aag" out="agg" steps="5"/> -->
+
+    
+    <one in="***/aaa/*** aaa/aap/aaa ***/aaa/***" out="***/aaa/*** aaa/agp/aaa ***/aaa/***"/>
+    <one in="***/aaa/*** aaa/aag/aaa ***/aaa/***" out="***/aaa/*** aaa/agg/aaa ***/aaa/***" steps="5"/>
+  </animation>
+  
+</sequence>

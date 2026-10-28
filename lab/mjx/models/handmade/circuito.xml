@@ -1,0 +1,104 @@
+<sequence values="BtEDGANYOWUa" size="37 37 47"  origin="True" name="Circuito a colori neon">
+
+  <!-- ======================================================== -->
+  <!-- 1. MATERIALI E COLORI                                    -->
+  <!-- ======================================================== -->
+  <color symbol="t" value="7a66b8" alpha="0.5" name="Piazzola chip / via"/>
+  <color symbol="E" value="9F97BA" alpha="0.5" name="Pista conduttiva spenta"/>
+  <color symbol="D" value="ff8ad8" alpha="0.7" name="Corpo Chip silicio 1"/>
+  <color symbol="F" value="c0589a" alpha="0.7" name="Corpo Chip silicio 2"/>
+  <color symbol="G" value="0b5e28" name="Pista tracciata grezza"/>
+  <color symbol="P" value="b9a6ff" alpha="0.5" name="Pista"/>
+  <color symbol="a" value="ae2929" name="Pin / Connettore chip inattivo sorgente"/>  
+  <color symbol="u" value="1404f1" name="Pin / Connettore chip inattivo destinazione"/>  
+  <color symbol="A" value="ffffff" alpha="0.7" name="Pin / Connettore chip sorgente temporaneo"/>
+  <color symbol="U" value="ffffff" alpha="0.7" ame="Pin / Connettore chip destinazione temporaneo"/>
+  <color symbol="Y" value="ffec27" glow="True" name="Testa impulso elettrico"/>
+  <color symbol="O" value="ffa300" glow="True" name="Coda impulso elettrico"/>
+  <color symbol="i" value="f104d1" name="Segnaposto routing pista irraggiungibile"/>  
+  <color symbol="r" value="edf104" name="Segnaposto routing pista raggiungibile"/>  
+
+
+  <!-- Base verticale su piano XZ -->
+  <box at="19 2 0" size="35 1 45" color="E"/>
+  <box at="19 36 0" size="35 1 45" color="E"/>
+  <box at="2 19 0" size="1 35 45" color="E"/>
+  <box at="36 19 0" size="1 35 45" color="E"/>
+
+  <!-- ======================================================== -->
+  <!-- 2. RETICOLO E PIAZZAMENTO A MANO DEL CHIP (5x7 su XZ)    -->
+  <!-- ======================================================== -->
+  <one in="BBB BEE BEE" out="BBB BtE BEE"/>
+  <all in="tEE" out="tEt"/>
+  <all in="t/E/E" out="t/E/t"/>
+  <all in="t E E" out="t E t"/>
+
+  <!-- 
+    Sostituzione inline del file "Chip":
+    Matrice 5x7 su XZ: 5 colonne (X) per 7 righe (Z separate da spazio).
+    Dispone i pin perimetrali A, il clock N e il package centrale D.
+  -->
+
+
+  <!-- mette i primi due chip -->
+  <one in="tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt" 
+       out="tEtEtEtEt EEtatatEE ttFDFDFtt EaDFDFDaE ttFDFDFtt EaDFDFDaE ttFDFDFtt EaDFDFDaE ttFDFDFtt EEtatatEE tEtEtEtEt" 
+       steps="1" symmetry="(xyz)"/>
+  <one in="tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt" 
+      out="tEtEtEtEt EEtututEE ttFDFDFtt EuDFDFDuE ttFDFDFtt EuDFDFDuE ttFDFDFtt EuDFDFDuE ttFDFDFtt EEtututEE tEtEtEtEt" 
+      steps="1" symmetry="(xyz)"/>
+
+  <!-- finche puo collega, poi aggiunge un chip e riparte finche puo -->
+  <markov>
+    <markov>
+      <!-- <path from="a" to="u" on="E" color="G" inertia="longest" steps="1"/> -->
+      <path from="a" to="u" on="E" color="G" inertia="True" steps="1"/>
+      <all in="EG" out="tG" symmetry="(xyz)"/>
+    </markov>
+    <all in="u" out="a"/>
+    <one in="tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt" 
+          out="tEtEtEtEt EEtututEE ttFDFDFtt EuDFDFDuE ttFDFDFtt EuDFDFDuE ttFDFDFtt EuDFDFDuE ttFDFDFtt EEtututEE tEtEtEtEt" 
+          steps="1" symmetry="(xyz)"/>
+  </markov>
+
+  <!-- Pulizia -->
+
+  <all in="aE" out="EE" symmetry="(xyz)"/>
+  <all in="EEE EtE EtE" out="EEE EEE EEE" symmetry="(xyz)"/>
+  <all in="EtE EEE EEE" out="EtE EEE EtE" symmetry="(xyz)"/>
+
+  <!-- Connessioni -->
+  <markov>
+    <one in="DaGG" out="DPAG" steps="1" symmetry="(xyz)"/>
+    <markov>
+      <sequence>
+        <one in="PAG" out="PPA" steps="1"  symmetry="(xyz)"/>
+        <one in="P AG" out="P PA" steps="1"  symmetry="(xyz)"/>
+        <one in="PA G" out="PP A" steps="1"  symmetry="(xyz)"/>
+      </sequence>
+    </markov>
+    <one in="aA" out="AP" steps="1"  symmetry="(xyz)"/>
+  </markov>
+
+
+   <!-- Pin -->
+  <all in="DP" out="DU" steps="1" symmetry="(xyz)"/>
+  <!-- <all in="DP" out="DA" steps="1" symmetry="(xyz)"/> -->
+
+  <!-- Pulizia -->
+  <!-- <all in="a" out="U" steps="1"/> -->
+  <all in="a" out="E" steps="1"/>
+
+
+
+
+    <animation name="impulso_verticale11" frames="32">
+    <all steps="1">
+      <rule in="FD" out="DF" symmetry="(xyz)" steps="1"/>
+      <rule in="DAPP" out="DAYO" symmetry="(xyz)" steps="1" p="0.2"/>
+      <rule in="YOP" out="PYO" symmetry="(xyz)" steps="1"/>
+      <rule in="YO *P" out="PY *O" symmetry="(xyz)" steps="1"/>
+      <rule in="YOUD" out="PPUF" symmetry="(xyz)" steps="1"/>
+    </all>
+  </animation>
+</sequence>

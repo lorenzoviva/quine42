@@ -5,10 +5,15 @@
   <color symbol="s" value="e8edf7" alpha="0.1" name="Schermo dopo prima lettera"/>
 
 <!-- 
-x slash 2
-y spazio 3
-z consecutiva 1
- -->
+x consecutiva: xxx matcha tre voxel "x" sull'asse x. Gli elementi vanno ordinati prima per X
+y slash: y/y/y matcha tre voxel "y" sull'asse y. Gli elementi vanno ordinati per secondi per Y
+z spazio: z z z matcha tre voxel "z" sull'asse z. Gli elementi vanno ordinati per terzi per Z
+
+L'ordinamento per un cubo 3x3 è il seguente:
+abc/def/ghi jkl/mno/pqr stu/vwx/yzù
+
+
+-->
 
   <box at="0 4 0" size="1 8 20" color="S"/>  
   <animation name="scritta" frames="10">
@@ -27,6 +32,12 @@ z consecutiva 1
    <!-- <one in="ss/Gs/ss" out="ss/Gs/Gs" steps="1"/> -->
     <one in="s/s/s G/s/s s/s/s" out="s/s/s G/G/s s/s/s" steps="1"/>
    <!-- <one in="s/s G/s s/s" out="s/s G/s G/s" steps="1"/> -->
+
+   
+  <!-- <all in="E" out="t"/>
+  <one in="tE/Et" out="aa/aa" steps="1" simmetry="()"/>
+  <one in="tE/Et" out="uu/uu" steps="1" symmetry="()"/>
+  <path from="aa/aa" to="uu/uu" on="t" color="G" inertia="True" steps="1"/> -->
 
    <!-- <one in="G * s" out="G G s" steps="1" symmetry="(x)"/> -->
     <!-- <prl in="G * s" out="G G s" steps="1" p="0.1"  symmetry="(xyz+)"/> -->

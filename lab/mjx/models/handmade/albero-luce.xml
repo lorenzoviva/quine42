@@ -1,0 +1,204 @@
+<!--
+Albero di luce neon e traslucido (corona): arredo urbano futuristico per il campus della corona.
+Scritto da Gemini CLI (Gemini 3.8 Flash, abbonamento), task T50a.
+Scatola: 2 × 2 × 3.5 caselle, 16 × 16 × 28 voxel, 8 voxel per casella (vpt: 8).
+Ruolo: tree.
+Fusto bionico slanciato ancorato su plinto circolare grafite (M) con radici compatte a sbalzo (z=0..2);
+il tronco sale snello (z=2..12) percorso da quattro canali verticali a fibra ottica ciano (C)
+incastonati in titanio grafite (m) e cinto da un collare zaffiro (Z); a quota z=11..13 si apre
+un'ampia chioma generativa a calice di rami frattali (m, C, Z), rivestita da cristalli ottici
+vitrei altamente traslucidi in aqua e ghiaccio etereo (V, T, G).
+Dalla chioma scendono liane penzolanti luminescenti ciano (H, glow="True").
+Animazione ciclica a 8 fotogrammi:
+- le liane penzolanti si allungano e accorciano organicamente;
+- i cristalli e le gemme della chioma scintillano e pulsano sporadicamente.
+-->
+<sequence values="BXmMZCVTGLWH" size="16 16 28" symmetry="(xy)" name="Albero di luce">
+  <!-- Materiali strutturali di base: metallo grafite scuro e titanio -->
+  <color symbol="M" value="141418" name="grafite base"/>
+  <color symbol="m" value="222634" name="titanio fusto"/>
+  
+  <!-- Segnalatore invisibile per la crescita generativa dei rami -->
+  <color symbol="X" hidden="True" name="nodo di crescita"/>
+
+  <!-- Vene a fibra ottica e nodi di giunzione -->
+  <color symbol="C" value="05d9e8" name="fibra ciano"/>
+  <color symbol="Z" value="29adff" alpha="0.45" name="zaffiro nodi"/>
+
+  <!-- Liane pendenti luminescenti al neon: le uniche con emissione attiva glow -->
+  <color symbol="H" value="00ffff" glow="True" name="liana neon pendente"/>
+
+  <!-- Cristalli ottici traslucidi: aqua brillante, indaco profondo e ghiaccio etereo -->
+  <color symbol="V" value="162436" name="vetro indaco"/>
+  <color symbol="T" value="3ea8c8" alpha="0.45" name="vetro aqua traslucido"/>
+  <color symbol="G" value="b4f0ff" alpha="0.45" name="cristallo ghiaccio traslucido"/>
+
+  <!-- Punti di diffrazione della chioma: gemme azzurre e scintille bianche traslucide -->
+  <color symbol="L" value="6fc3ff" alpha="0.45" name="gemma azzurra"/>
+  <color symbol="W" value="ffffff" alpha="0.45" name="scintilla fotonica"/>
+
+  <!-- Unione dei materiali della chioma da cui possono germogliare le liane pendenti -->
+  <union symbol="K" values="TVmZ"/>
+
+  <!-- ======================================================== -->
+  <!-- 1. BASAMENTO TECNOLOGICO E RADICI COMPATTE (z = 0..2)    -->
+  <!-- ======================================================== -->
+  <!-- Plinto circolare scuro a terra z=0 -->
+  <cylinder at="7.5 7.5 0" size="4 4 2" color="M"/>
+  <cylinder at="7.5 7.5 0" size="2 2 2" color="m"/>
+
+  <!-- 4 radici tecnologiche che si diramano verso i quadranti -->
+  <line at="7.5 7.5 1" to="4.5 4.5 0" r="0.7" color="M"/>
+  <line at="7.5 7.5 1" to="10.5 4.5 0" r="0.7" color="M"/>
+  <line at="7.5 7.5 1" to="4.5 10.5 0" r="0.7" color="M"/>
+  <line at="7.5 7.5 1" to="10.5 10.5 0" r="0.7" color="M"/>
+
+  <!-- ======================================================== -->
+  <!-- 2. FUSTO SLANCIATO CON FIBRE E TORSIONE (z = 2..12)      -->
+  <!-- ======================================================== -->
+  <!-- Fusto centrale in titanio grafite -->
+  <cylinder at="7.5 7.5 2" size="3 3 9" color="m"/>
+  <cylinder at="7.5 7.5 2" size="3.5 3.5 2" color="M"/>
+
+  <!-- 4 canali verticali di fibra ottica ciano brillante a vista lungo il fusto -->
+  <box at="5 7 3" size="1 2 7" color="C"/>
+  <box at="9 7 3" size="1 2 7" color="C"/>
+  <box at="7 5 3" size="2 1 7" color="C"/>
+  <box at="7 9 3" size="2 1 7" color="C"/>
+
+  <!-- Collare energetico zaffiro a quota z=9 -->
+  <cylinder at="7.5 7.5 9" size="4 4 1" color="Z"/>
+  <!-- Corona di raccordo e alloggiamento rami a quota z=11 -->
+  <cylinder at="7.5 7.5 11" size="4 4 1" color="m"/>
+  <cylinder at="7.5 7.5 11" size="2 2 1" color="C"/>
+
+  <!-- ======================================================== -->
+  <!-- 3. INNOCULO DEI RAMI GENERATIVI (z = 12)                 -->
+  <!-- ======================================================== -->
+  <!-- 4 nodi di diramazione iniziale su coordinate intere solide -->
+  <box at="6 6 12" size="1 1 1" color="X"/>
+  <box at="9 6 12" size="1 1 1" color="X"/>
+  <box at="6 9 12" size="1 1 1" color="X"/>
+  <box at="9 9 12" size="1 1 1" color="X"/>
+
+  <!-- ======================================================== -->
+  <!-- 4. CRESCITA GENERATIVA PRIMARIA DEI RAMI (z = 12..20)    -->
+  <!-- ======================================================== -->
+  <!-- I rami salgono allargandosi a coppa divergente -->
+  <one steps="32">
+    <!-- Slancio ascensionale dritto con fibra ciano -->
+    <rule in="B X" out="X C" p="1.6"/>
+    <!-- Slancio ascensionale dritto con fusto titanio -->
+    <rule in="B X" out="X m" p="1.2"/>
+    <!-- Avanzamento diagonale verso l'esterno (+x o +y, +z) -->
+    <rule in="*B X*" out="*X *m" p="0.6"/>
+    <!-- Avanzamento diagonale d'angolo (+x, +y, +z) -->
+    <rule in="**/*B X*/**" out="**/*X *m/**" p="0.45"/>
+    <!-- Venatura zaffiro lungo il ramo -->
+    <rule in="*B X*" out="*X *Z" p="0.35"/>
+  </one>
+
+  <!-- ======================================================== -->
+  <!-- 5. BIFORCAZIONE FRATTALE E CHIOMA SUPERIORE (z = 19..25) -->
+  <!-- ======================================================== -->
+  <!-- I rami si biforcano e aprono la chioma in alto -->
+  <one steps="24">
+    <!-- Slancio finale verso l'apice con zaffiro -->
+    <rule in="B X" out="X Z" p="1.4"/>
+    <!-- Sdoppiamento a calice del ramo -->
+    <rule in="B*B *X*" out="X*X *m*" p="0.25"/>
+    <!-- Ramo secondario divergente con nodo neon zaffiro -->
+    <rule in="*B X*" out="*X *Z" p="0.5"/>
+    <!-- Ramo angolare verso la volta con fibra ciano -->
+    <rule in="**/*B X*/**" out="**/*X *C/**" p="0.4"/>
+  </one>
+
+  <!-- Cristallizzazione definitiva dei fronti terminali X in nodi zaffiro -->
+  <all in="X" out="Z"/>
+
+  <!-- ======================================================== -->
+  <!-- 6. FORMAZIONE DEI CRISTALLI TRASLUCIDI (V, T, G)         -->
+  <!-- ======================================================== -->
+  <!-- Il vetro indaco si addensa attorno a tutti i nodi e rami della chioma -->
+  <prl steps="1">
+    <rule in="B Z" out="V *" p="0.85"/>
+    <rule in="ZB" out="*V" p="0.75"/>
+    <rule in="Z/B" out="*/V" p="0.75"/>
+    <rule in="B/Z" out="V/*" p="0.75"/>
+    <rule in="B C" out="V *" p="0.45"/>
+  </prl>
+
+  <!-- Cristallizzazione superficiale in vetro aqua traslucido vivido (T) -->
+  <prl steps="1">
+    <rule in="B V" out="B T" p="0.7"/>
+    <rule in="V B" out="T B" p="0.6"/>
+  </prl>
+
+  <!-- Fusione organica e saldatura interna dei prismi con NoCorners -->
+  <convolution neighborhood="NoCorners" steps="1" optional="True">
+    <rule in="B" out="T" values="V T" sum="8..16"/>
+  </convolution>
+
+  <!-- Sfaccettature riflettenti in cristallo ghiaccio etereo (G) sulle facce esposte -->
+  <prl steps="1">
+    <rule in="B T" out="B G" p="0.65"/>
+    <rule in="B V" out="B T" p="0.5"/>
+  </prl>
+
+  <!-- ======================================================== -->
+  <!-- 7. LIANE NEON LUMINOSE PENDENTI (H)                      -->
+  <!-- ======================================================== -->
+  <!-- Spunta dei nodi di liana sotto la volta della chioma -->
+  <prl steps="1">
+    <rule in="K B" out="* H" p="0.32"/>
+  </prl>
+
+  <!-- Accrescimento verso il basso delle liane pendenti luminescenti -->
+  <one steps="44">
+    <!-- La liana scende se ci sono almeno due blocchi di aria sotto -->
+    <rule in="H B B" out="* H *" p="1.0"/>
+    <!-- Allungamento semplice -->
+    <rule in="H B" out="* H" p="0.4"/>
+  </one>
+
+  <!-- ======================================================== -->
+  <!-- 8. GEMME NEON TERMINALI (L) E SCINTILLE FOTONICHE (W)    -->
+  <!-- ======================================================== -->
+  <!-- Punti luce neon azzurri distribuiti sui cristalli esterni -->
+  <prl steps="1">
+    <rule in="B G" out="B L" p="0.45"/>
+    <rule in="B T" out="B L" p="0.30"/>
+  </prl>
+
+  <!-- Fotoni bianchi stellari sulle sommità delle gemme neon -->
+  <prl steps="1">
+    <rule in="B L" out="B W" p="0.35"/>
+  </prl>
+</sequence>
+
+<!-- ============================================================ -->
+<!-- 9. ANIMAZIONE CICLICA VITA (8 FRAMES): LIANE E SCINTILLIO    -->
+<!-- ============================================================ -->
+<animation name="vita" frames="8">
+  <sequence>
+    <!-- Le liane pendenti fluttuano: allungamento o ritrazione stocastica della punta -->
+    <prl steps="1">
+      <!-- Si allunga verso il basso di un voxel se c'è spazio d'aria sotto -->
+      <rule in="H B B" out="* H *" p="0.30"/>
+      <!-- Si accorcia ritirando la punta di un voxel (mantiene l'ancoraggio alla chioma) -->
+      <rule in="H H B" out="* B *" p="0.22"/>
+    </prl>
+
+    <!-- Scintillio sporadico nella chioma: gemme che si accendono e tornano cristallo -->
+    <prl steps="1">
+      <!-- Alcuni cristalli aqua si accendono sporadicamente in gemme neon azzurre -->
+      <rule in="T" out="L" p="0.08"/>
+      <!-- Alcuni cristalli ghiaccio si accendono in scintille fotoniche bianche -->
+      <rule in="G" out="W" p="0.06"/>
+      <!-- Le gemme accese tornano delicatamente cristallo traslucido -->
+      <rule in="L" out="T" p="0.32"/>
+      <!-- I fotoni bianchi tornano cristallo ghiaccio -->
+      <rule in="W" out="G" p="0.38"/>
+    </prl>
+  </sequence>
+</animation>

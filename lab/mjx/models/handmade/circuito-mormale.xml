@@ -1,0 +1,205 @@
+<sequence values="BtEDGANYOWUa" size="37 37 47"  origin="True" name="Circuito colori normali">
+
+  <!-- ======================================================== -->
+  <!-- 1. MATERIALI E COLORI                                    -->
+  <!-- ======================================================== -->
+  <!-- <color symbol="B" value="1a1a1a" name="Sfondo PCB scuro"/> -->
+  <color symbol="t" value="10381f" alpha="0.5" name="Piazzola chip / via"/>
+  <color symbol="E" value="00e436" alpha="0.5" name="Pista conduttiva spenta"/>
+  <color symbol="D" value="4f2b1d" alpha="0.7" name="Corpo Chip silicio 1"/>
+  <color symbol="F" value="b16d4e" alpha="0.7" name="Corpo Chip silicio 2"/>
+  <color symbol="G" value="0b5e28" name="Pista tracciata grezza"/>
+  <color symbol="P" value="00e436" alpha="0.5" name="Pista"/>
+  <color symbol="a" value="ae2929" name="Pin / Connettore chip inattivo sorgente"/>  
+  <color symbol="u" value="1404f1" name="Pin / Connettore chip inattivo destinazione"/>  
+  <color symbol="A" value="ffffff" alpha="0.7" name="Pin / Connettore chip sorgente temporaneo"/>
+  <color symbol="U" value="ffffff" alpha="0.7" ame="Pin / Connettore chip destinazione temporaneo"/>
+  <color symbol="Y" value="ffec27" glow="True" name="Testa impulso elettrico"/>
+  <color symbol="O" value="ffa300" glow="True" name="Coda impulso elettrico"/>
+  <color symbol="i" value="f104d1" name="Segnaposto routing pista irraggiungibile"/>  
+  <color symbol="r" value="edf104" name="Segnaposto routing pista raggiungibile"/>  
+
+
+  <!-- Base verticale su piano XZ -->
+  <box at="19 2 0" size="35 1 45" color="E"/>
+  <box at="19 36 0" size="35 1 45" color="E"/>
+  <box at="2 19 0" size="1 35 45" color="E"/>
+  <box at="36 19 0" size="1 35 45" color="E"/>
+
+  <!-- ======================================================== -->
+  <!-- 2. RETICOLO E PIAZZAMENTO A MANO DEL CHIP (5x7 su XZ)    -->
+  <!-- ======================================================== -->
+  <one in="BBB BEE BEE" out="BBB BtE BEE"/>
+  <all in="tEE" out="tEt"/>
+  <all in="t/E/E" out="t/E/t"/>
+  <all in="t E E" out="t E t"/>
+
+  <!-- 
+    Sostituzione inline del file "Chip":
+    Matrice 5x7 su XZ: 5 colonne (X) per 7 righe (Z separate da spazio).
+    Dispone i pin perimetrali A, il clock N e il package centrale D.
+  -->
+
+
+  <!-- mette i primi due chip -->
+  <one in="tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt" 
+       out="tEtEtEtEt EEtatatEE ttFDFDFtt EaDFDFDaE ttFDFDFtt EaDFDFDaE ttFDFDFtt EaDFDFDaE ttFDFDFtt EEtatatEE tEtEtEtEt" 
+       steps="1" symmetry="(xyz)"/>
+  <one in="tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt" 
+      out="tEtEtEtEt EEtututEE ttFDFDFtt EuDFDFDuE ttFDFDFtt EuDFDFDuE ttFDFDFtt EuDFDFDuE ttFDFDFtt EEtututEE tEtEtEtEt" 
+      steps="1" symmetry="(xyz)"/>
+
+  <!-- finche puo collega, poi aggiunge un chip e riparte finche puo -->
+  <markov>
+    <markov>
+      <!-- <path from="a" to="u" on="E" color="G" inertia="longest" steps="1"/> -->
+      <path from="a" to="u" on="E" color="G" inertia="True" steps="1"/>
+      <all in="EG" out="tG" symmetry="(xyz)"/>
+    </markov>
+    <all in="u" out="a"/>
+    <one in="tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt" 
+          out="tEtEtEtEt EEtututEE ttFDFDFtt EuDFDFDuE ttFDFDFtt EuDFDFDuE ttFDFDFtt EuDFDFDuE ttFDFDFtt EEtututEE tEtEtEtEt" 
+          steps="1" symmetry="(xyz)"/>
+  </markov>
+
+  <!-- Pulizia -->
+
+  <all in="aE" out="EE" symmetry="(xyz)"/>
+  <all in="EEE EtE EtE" out="EEE EEE EEE" symmetry="(xyz)"/>
+  <all in="EtE EEE EEE" out="EtE EEE EtE" symmetry="(xyz)"/>
+
+  <!-- Connessioni -->
+  <markov>
+    <one in="DaGG" out="DPAG" steps="1" symmetry="(xyz)"/>
+    <markov>
+      <sequence>
+        <one in="PAG" out="PPA" steps="1"  symmetry="(xyz)"/>
+        <one in="P AG" out="P PA" steps="1"  symmetry="(xyz)"/>
+        <one in="PA G" out="PP A" steps="1"  symmetry="(xyz)"/>
+      </sequence>
+    </markov>
+    <one in="aA" out="AP" steps="1"  symmetry="(xyz)"/>
+  </markov>
+
+
+   <!-- Pin -->
+  <all in="DP" out="DU" steps="1" symmetry="(xyz)"/>
+  <!-- <all in="DP" out="DA" steps="1" symmetry="(xyz)"/> -->
+
+  <!-- Pulizia -->
+  <!-- <all in="a" out="U" steps="1"/> -->
+  <all in="a" out="E" steps="1"/>
+
+
+
+
+
+  <animation name="impulso_verticale1" frames="24">
+    <!-- <all in="FD" out="DF" symmetry="(xyz)"/> -->
+    <all in="DAPP" out="DAYO" symmetry="(xyz)"/>
+    <all in="YOP" out="PYO" symmetry="(xyz)"/>
+    <all in="YO *P" out="PY *O" symmetry="(xyz)"/>
+    <all in="YOAD" out="PPAF" symmetry="(xyz)"/>
+  </animation>
+
+
+
+  <animation name="impulso_verticale2" frames="24">
+    <!-- <one in="FD" out="DF" symmetry="(xyz)"/> -->
+    <one in="DAPP" out="DAYO" symmetry="(xyz+)"/>
+    <one in="YOP" out="PYO" symmetry="(xyz+)"/>
+    <one in="YO *P" out="PY *O" symmetry="(xyz+)"/>
+    <one in="YOAD" out="PPAF" symmetry="(xyz+)"/>
+  </animation>
+
+
+
+  <animation name="impulso_verticale3" frames="24">
+    <sequence>
+        <!-- <one in="FD" out="DF" symmetry="(xyz)"/> -->
+        <one in="DAPP" out="DAYO" symmetry="(xyz)"/>
+        <one in="YOP" out="PYO" symmetry="(xyz)"/>
+        <one in="YO *P" out="PY *O" symmetry="(xyz)"/>
+        <one in="YOAD" out="PPAF" symmetry="(xyz)"/>
+    </sequence>
+  </animation>
+
+
+  <animation name="impulso_verticale4" frames="24">
+    <markov>
+        <!-- <all in="FD" out="DF" symmetry="(xyz)"/> -->
+        <all in="DAPP" out="DAYO" symmetry="(xyz)"/>
+        <all in="YOP" out="PYO" symmetry="(xyz)"/>
+        <all in="YO *P" out="PY *O" symmetry="(xyz)"/>
+        <all in="YOAD" out="PPAF" symmetry="(xyz)"/>
+    </markov>
+  </animation>
+
+  <animation name="impulso_verticale5" frames="24">
+    <markov>
+      <sequence>
+        <!-- <all in="FD" out="DF" symmetry="(xyz)"/> -->
+        <all in="DAPP" out="DAYO" symmetry="(xyz)"/>
+        <all in="YOP" out="PYO" symmetry="(xyz)"/>
+        <all in="YO *P" out="PY *O" symmetry="(xyz)"/>
+        <all in="YOAD" out="PPAF" symmetry="(xyz)"/>
+      </sequence>
+    </markov>
+  </animation>
+
+  
+  <animation name="impulso_verticale6" frames="24">
+    <all>
+      <rule in="FD" out="DF" symmetry="(xyz)" steps="1"/>
+      <rule in="DAPP" out="DAYO" symmetry="(xyz)" steps="1"/>
+      <rule in="YOP" out="PYO" symmetry="(xyz)" steps="1"/>
+      <rule in="YO *P" out="PY *O" symmetry="(xyz)" steps="1"/>
+      <rule in="YOAD" out="PPAF" symmetry="(xyz)" steps="1"/>
+    </all>
+  </animation>
+
+  
+  <animation name="impulso_verticale7" frames="24">
+    <one steps="5">
+      <rule in="FD" out="DF" symmetry="(xyz)" steps="1"/>
+      <rule in="DAPP" out="DAYO" symmetry="(xyz)" steps="1"/>
+      <rule in="YOP" out="PYO" symmetry="(xyz)" steps="1"/>
+      <rule in="YO *P" out="PY *O" symmetry="(xyz)" steps="1"/>
+      <rule in="YOAD" out="PPAF" symmetry="(xyz)" steps="1"/>
+    </one>
+  </animation>
+
+  <animation name="impulso_verticale8" frames="24">
+    <one>
+      <rule in="FD" out="DF" symmetry="(xyz)" steps="1"/>
+      <rule in="DAPP" out="DAYO" symmetry="(xyz)" steps="1"/>
+      <rule in="YOP" out="PYO" symmetry="(xyz)" steps="1"/>
+    </one>
+  </animation>
+  
+  <animation name="impulso_verticale9" frames="24">
+    <one>
+      <rule in="FD" out="DF" symmetry="(xyz)" steps="1"/>
+      <rule in="DAPP" out="DAYO" symmetry="(xyz)" steps="1"/>
+      <rule in="YOP" out="PYO" symmetry="(xyz)" steps="1"/>
+      <rule in="YO *P" out="PY *O" symmetry="(xyz)" steps="1"/>
+    </one>
+  </animation>
+  
+  <animation name="impulso_verticale10" frames="24">
+    <one>
+      <rule in="FD" out="DF" symmetry="(xyz)" steps="1"/>
+      <rule in="DAPP" out="DAYO" symmetry="(xyz)" steps="1"/>
+    </one>
+  </animation>
+
+    <animation name="impulso_verticale11" frames="32">
+    <all steps="1">
+      <rule in="FD" out="DF" symmetry="(xyz)" steps="1"/>
+      <rule in="DAPP" out="DAYO" symmetry="(xyz)" steps="1" p="0.2"/>
+      <rule in="YOP" out="PYO" symmetry="(xyz)" steps="1"/>
+      <rule in="YO *P" out="PY *O" symmetry="(xyz)" steps="1"/>
+      <rule in="YOUD" out="PPUF" symmetry="(xyz)" steps="1"/>
+    </all>
+  </animation>
+</sequence>
