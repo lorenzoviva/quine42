@@ -1,6 +1,6 @@
 # ADR-0072 — La pipeline agentica
 
-Data: 2026-10-28 · Stato: accettato (task T60 del backlog) · Estende il protocollo delle sessioni di `AGENTS.md`.
+Data: 2026-10-28 · Stato: accettato (task T61 del backlog) · Estende il protocollo delle sessioni di `AGENTS.md`.
 
 ## Contesto
 Il kernel si sviluppa con due provider in abbonamento (Claude Code CLI, Gemini con Antigravity IDE e CLI), senza cloud, con limiti

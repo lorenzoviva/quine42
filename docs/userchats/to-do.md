@@ -34,7 +34,7 @@ Voglio implementare un linguaggio, solo alcune parole verrebbero sostituite. Gli
 
 > Provider proposto: Claude Code   
 
-<!-- Pianificate il 28/10/2026 in docs/plans/backlog.md, T60 (testo originale: docs/userchats/to-do-2026-10-28.md, «Strutturare meglio l'ambiente di sviluppo agentico» e «Automatizzare il lavoro agentico»). -->
+<!-- Pianificate il 28/10/2026 in docs/plans/backlog.md, T61 (testo originale: docs/userchats/to-do-2026-10-28.md, «Strutturare meglio l'ambiente di sviluppo agentico» e «Automatizzare il lavoro agentico»). -->
 
 # Riorganizzare i file di documentazione e di sviluppo
 

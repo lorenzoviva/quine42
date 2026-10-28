@@ -1303,7 +1303,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ## Ambiente di sviluppo
 
-### T60 · La pipeline agentica e i worktree — `fatto` (`3312c23`)
+### T61 · La pipeline agentica e i worktree — `fatto` (`3312c23`)
 - Dal to-do del 28/10/2026 (`docs/userchats/to-do-2026-10-28.md`): «Strutturare meglio l'ambiente di sviluppo agentico» (ordine nei
   worktree) e «Automatizzare il lavoro agentico» (la pipeline to-do → scambio → backlog → piano → esecuzione per provider).
 - Fare: la pipeline (ADR-0072), le regole dell'ambiente condiviso, un worktree per task, lo storico dei consumi; non perdere i task del backlog.
