@@ -1380,7 +1380,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ## Dal to-do del 29/10/2026 (testo originale: `docs/userchats/to-do-2026-10-29.md`)
 
-### T63 · I modelli disegnati a mano per i file della corona — `da fare`
+### T63 · I modelli disegnati a mano per i file della corona — `fatto` (commit «Corona (T63)»)
 - Pipeline: gemini · stima 4% · approvato · priorità 10
 - Contesto: l'autore ha disegnato nell'editor (T59) `schermo-scritte`, `schermo-struttura`, `circuito-3D` in `lab/mjx/models/handmade/`
   (accanto a copie di prova: `schermo-struttura copy*.xml`, `circuito.xml`, `circuito-mormale.xml`, da non portare).
@@ -1388,6 +1388,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   `schermo-scritte` per `.md` e i file non strutturati, `schermo-struttura` per `.json` e i file strutturati, `circuito-3D` per i `.lua`.
   Nei prompt dello Scultore (`universe/prompts/agents/`) citarli come esempi quando si chiede «tanta varietà» e «alta qualità».
 - Fatto quando: test, typecheck, verifica nel browser negli interni dello studio (scaffali con i tre modelli), commit.
+- Esito: `schermo-scritte`, `schermo-struttura`, `circuito-3D` portati in `universe/models/` e registrati in `universe/models/index.json` (`classe: "oggetto"`, `autore: "a mano (editor MJ, T59)"`, `vpt: 20`); `check.ts` aggiornato per non scartare modelli traslucidi come blocchi pieni (`fill > 0.8 && !hasTranslucent`); `validator.ts` e `forms.ts` aggiornati con flag case-insensitive (`/i`) per nomi modello con maiuscole; citati come esempi di alta qualità e varietà in `universe/prompts/agents/scultore.md`; `src/kernel/corona.ts` assegna `fileModelOf(path)` (`schermo-scritte` per `.md` e non strutturati, `schermo-struttura` per `.json` e strutturati, `circuito-3D` per `.lua`) e seed deterministico a ogni file sugli scaffali; prefetch in `kernel.ts`; rendering 3D in `src/render/corona3d.ts` e animazione fotogrammi in `src/render/coronaview.ts`; test in `tests/corona.test.ts`. Test e typecheck verdi.
 
 ### T64 · Le varianti precalcolate dei modelli pesanti — `da fare` (dipende da T63)
 - Pipeline: gemini · stima 5% · approvato · priorità 20

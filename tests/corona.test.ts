@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import * as THREE from 'three';
-import { CAMPUS, Corona, DEVICE_MARGIN, ROOM_H, ROOM_W } from '../src/kernel/corona';
+import { CAMPUS, Corona, DEVICE_MARGIN, ROOM_H, ROOM_W, fileModelOf, fileSeedOf } from '../src/kernel/corona';
 import { animateRing, Avatars, buildCoronaRing, buildRoom } from '../src/render/corona3d';
+import { bundledFiles } from '../src/kernel/bundle';
 
 // T18: the campus on the ring is four times the 2D one (the circle stays): avenue, doors, buildings
 // big enough for a model, alleys, lawns, a glowing edge; every door reachable from the avenue.
@@ -287,6 +288,57 @@ describe('the devices of the rooms', () => {
     expect(scene.children.length).toBe(2);
     expect(requested).toContain('corona-gerboa-narratore');
     expect(requested).toContain('corona-gerboa-ingegnere');
+  });
+
+  it('uses handmade 3D models for files on shelves (T63)', () => {
+    // 1. fileModelOf mappings
+    expect(fileModelOf('modules/core.carpet/logic.lua')).toBe('circuito-3D');
+    expect(fileModelOf('modules/sys.physics/manifest.json')).toBe('schermo-struttura');
+    expect(fileModelOf('world/rules.json')).toBe('schermo-struttura');
+    expect(fileModelOf('models/albero.xml')).toBe('schermo-struttura');
+    expect(fileModelOf('prompts/theme.md')).toBe('schermo-scritte');
+    expect(fileModelOf('world/canone.md')).toBe('schermo-scritte');
+    expect(fileModelOf('world/notes.txt')).toBe('schermo-scritte');
+
+    // 2. fileSeedOf returns deterministic 1..4
+    expect([1, 2, 3, 4]).toContain(fileSeedOf('logic.lua'));
+    expect(fileSeedOf('logic.lua')).toBe(fileSeedOf('logic.lua'));
+
+    // 3. Library registration and metadata
+    const index = JSON.parse(bundledFiles['models/index.json']);
+    for (const id of ['schermo-scritte', 'schermo-struttura', 'circuito-3D']) {
+      expect(bundledFiles[`models/${id}.xml`], id).toBeDefined();
+      expect(index[id], id).toBeDefined();
+      expect(index[id].classe, id).toBe('oggetto');
+      expect(index[id].vpt, id).toBe(20);
+    }
+
+    // 4. Corona building populates items with models and seeds
+    const c = campus();
+    const allFiles = c.buildings.flatMap((b) => b.floors.flatMap((f) => f.items.filter((i) => i.kind === 'file')));
+    expect(allFiles.length).toBeGreaterThan(0);
+    for (const f of allFiles) {
+      expect(f.model).toBe(fileModelOf(f.path!));
+      expect(f.seed).toBe(fileSeedOf(f.path!));
+    }
+
+    // 5. buildRoom requests models and renders them on shelves
+    const requested: Array<{ model: string; seed: number }> = [];
+    const b = c.buildings.find((x) => x.id === 'nucleo')!;
+    const fl = b.floors[0];
+    const mockKernel: any = {
+      corona: c,
+      forms: {
+        version: 1,
+        ready: (_m: string, _s: number) => undefined,
+        get: (m: string, s: number) => { requested.push({ model: m, seed: s }); return undefined; },
+      },
+      graph: () => ({ nodes: [], links: [] }),
+    };
+    const room = buildRoom(mockKernel, b, fl);
+    expect(room.group).toBeDefined();
+    // Files on shelves triggered get calls
+    expect(requested.some((r) => r.model === 'circuito-3D' || r.model === 'schermo-struttura' || r.model === 'schermo-scritte')).toBe(true);
   });
 });
 

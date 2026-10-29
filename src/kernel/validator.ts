@@ -50,7 +50,7 @@ export function repairPartita(raw: unknown): Partita {
 }
 
 /** Ids of the models of the library (`models/<id>.xml`). */
-export const MODEL_RE = /^[a-z0-9][a-z0-9-]{0,40}$/;
+export const MODEL_RE = /^[a-z0-9][a-z0-9-]{0,40}$/i;
 
 /**
  * A model of the library must compile, finish and build something that stands: what the front-end can

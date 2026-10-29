@@ -304,5 +304,23 @@
   "nome": "Gerboa Referente (corona)",
   "autore": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
+ },
+ "schermo-scritte": {
+  "classe": "oggetto",
+  "nome": "Schermo scritte",
+  "autore": "a mano (editor MJ, T59)",
+  "vpt": 20
+ },
+ "schermo-struttura": {
+  "classe": "oggetto",
+  "nome": "Schermo struttura",
+  "autore": "a mano (editor MJ, T59)",
+  "vpt": 20
+ },
+ "circuito-3D": {
+  "classe": "oggetto",
+  "nome": "Circuito 3D",
+  "autore": "a mano (editor MJ, T59)",
+  "vpt": 20
  }
 }

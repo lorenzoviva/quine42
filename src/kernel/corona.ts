@@ -10,6 +10,7 @@ import { footBlocks, toLocal, type Form } from './forms';
 import type { FileMap, Rule } from './types';
 import { SCREEN_NAME, type ScreenField } from './screens';
 import { AGENTS } from './agents/council';
+import { hashStr } from './rng';
 
 export type FileLook = 'libro' | 'cristallo' | 'pergamena' | 'tavoletta';
 export type ItemKind = 'file' | 'sprite' | 'tile' | 'layout' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'less' | 'more' | 'grafo' | 'situazione' | 'parete' | 'console' | 'stazione' | 'banco' | 'leggio' | 'lastra' | 'tornio';
@@ -213,6 +214,7 @@ export interface StudioItem {
   /** Colour of a terrain or a thing on display. */
   /** A thing on display: its model (and tint). */
   model?: string;
+  seed?: number;
   tint?: string;
   color?: string;
   /** What to re-sculpt when asked (module id, item id, tile code); for seats the agent, for portals the room. */
@@ -379,6 +381,18 @@ export function lookOf(path: string): FileLook {
   return 'tavoletta';
 }
 
+/** 3D handmade model for files on shelves in the corona (T63). */
+export function fileModelOf(path: string): string {
+  if (path.endsWith('.lua')) return 'circuito-3D';
+  if (path.endsWith('.json') || path.endsWith('.xml') || path.endsWith('.yaml') || path.endsWith('.yml')) return 'schermo-struttura';
+  return 'schermo-scritte';
+}
+
+/** Deterministic seed (1-4) for a file's model variant on shelves. */
+export function fileSeedOf(path: string): number {
+  return (Math.abs(hashStr(path)) % 4) + 1;
+}
+
 const ORDER = Object.keys(ROOMS);
 
 /** Real-space cell at radius r and angle t (clockwise from the top). */
@@ -444,7 +458,16 @@ export class Corona {
       if (!groups.has(room)) groups.set(room, []);
       groups.get(room)!.push(item);
     };
-    for (const path of Object.keys(files).sort()) add(folderOf(path), { kind: 'file', path, label: path, look: lookOf(path), lines: files[path].split('\n').length });
+    for (const path of Object.keys(files).sort())
+      add(folderOf(path), {
+        kind: 'file',
+        path,
+        label: path,
+        model: fileModelOf(path),
+        seed: fileSeedOf(path),
+        look: lookOf(path),
+        lines: files[path].split('\n').length,
+      });
     for (const g of gallery) add('galleria', { kind: 'sprite', label: g.label, color: g.color, path: g.path, target: g.target, model: g.model, tint: g.tint });
     const samples: Array<Omit<StudioItem, 'x' | 'y'> | undefined> = terrains.map((t) => ({ kind: 'tile', label: t.label, color: t.color, path: t.path, target: t.target }));
     // The environments start a shelf of their own (the empty slots before them stay empty).
