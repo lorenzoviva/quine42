@@ -35,7 +35,7 @@ export function parseBacklog(text) {
     const [, id, title, tail = ''] = m;
     const deps = new Set();
     for (const d of block.matchAll(/(?:dipende da|dipendenze:|dopo)\s*:?\s*([^)\n;.]*)/gi))
-      for (const t of d[1].matchAll(/T\d+[a-z]?/g)) if (!t[0].startsWith(id)) deps.add(t[0]);
+      for (const t of d[1].matchAll(/T\d+[a-z]?/g)) if (!new RegExp(`^${id}[a-z]?$`).test(t[0])) deps.add(t[0]); // not itself nor its sub-tasks (T6 ≠ T63)
     const pipe = /^- Pipeline:\s*(.+)$/m.exec(block);
     const info = pipe ? parsePipelineLine(pipe[1]) : {};
     // A header that lists sub-tasks («T56a `fatto`, T56b `da fare`») gives one task per sub-task.
@@ -84,11 +84,13 @@ export function parseUsage(provider, text) {
     for (const line of text.split('\n')) {
       const [nome, label, pct, reset] = line.split('\t').map((s) => s?.trim());
       if (!/%$/.test(pct ?? '')) continue;
-      counters.push({ nome, finestra: /five hour/i.test(label) ? '5h' : 'settimana', residuo: Number(pct.slice(0, -1)), reset: new Date(reset).toISOString() });
+      counters.push({ nome, finestra: /five hour/i.test(label) ? '5h' : 'settimana', residuo: Number(pct.slice(0, -1)), reset: isoOrUndefined(reset) });
     }
   }
   return counters.length ? counters : undefined;
 }
+
+const isoOrUndefined = (text) => { const d = new Date(text ?? NaN); return Number.isNaN(d.getTime()) ? undefined : d.toISOString(); };
 
 /** «Oct 29, 12:10am (Europe/Rome)» or «5pm» in the machine's time zone (the CLI's), as ISO. */
 function localDate(text) {
@@ -150,7 +152,7 @@ function lastReset(spec) {
 
 /** Recognises the message of a usage limit in a CLI's output; gives when it resets, if it says so. */
 export function usageLimit(output) {
-  if (!/usage limit|limit reached|hit your limit|rate limit|quota|resource_exhausted|429/i.test(output)) return undefined;
+  if (!/usage limit|limit reached|hit your limit|rate limit|quota|resource_exhausted|429/i.test(output)) return undefined;
   const epoch = /\|(\d{10})\b/.exec(output);
   if (epoch) return new Date(Number(epoch[1]) * 1000);
   return new Date(Date.now() + CONFIG.attesaLimiteMinuti * 60_000);
@@ -242,8 +244,8 @@ function launch(t, run) {
 /** What a CLI said, from its JSON output (Claude: `session_id`, `total_cost_usd`, `result`; Gemini: what it has). */
 export function readOutput(text) {
   let json;
-  for (const line of text.trim().split('\n').reverse()) { try { json = JSON.parse(line); break; } catch { /* not JSON */ } }
-  if (!json) { try { json = JSON.parse(text); } catch { json = {}; } }
+  for (const line of text.trim().split('\n').reverse()) { try { const v = JSON.parse(line); if (v && typeof v === 'object') { json = v; break; } } catch { /* not JSON */ } }
+  if (!json) { try { const v = JSON.parse(text); json = v && typeof v === 'object' ? v : {}; } catch { json = {}; } }
   const result = String(json.result ?? json.response ?? json.text ?? text);
   return {
     session: json.session_id ?? json.sessionId ?? json.conversation_id ?? json.conversationId,
