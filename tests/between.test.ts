@@ -237,3 +237,104 @@ describe('«Altro…» and PvP between wanderers (T43b)', () => {
     expect(k.feed().some((e) => e.task === 'action.judge')).toBe(false);
   }, 60000);
 });
+
+describe('death and reconnection among many (T43c)', () => {
+  const thirst = (k: Kernel, id: string) =>
+    k.as(id, () => Object.assign(k.needs()!, { thirst: 0, health: 0.2 }));
+
+  async function tickUntil(server: SessionServer, clients: ThinClient[], done: () => boolean) {
+    for (let i = 0; i < 240 && !done(); i++) {
+      run(server, clients, 1);
+      await new Promise((r) => setTimeout(r, 0));
+    }
+    run(server, clients, 8);
+  }
+
+  it('a player dies of thirst with the punishment of the game while the others go on; the master never dies', async () => {
+    const { k, server, anna, bruno, all } = await three({ morte: 3 });
+    const item = stackable(k);
+    put(k, 'anna', { x: 5.5, y: 0.5 });
+    k.as('anna', () => {
+      k.give(item, 2);
+      k.give('rune:luce', 1);
+      Object.assign(k.hand(), { tokens: ['luce'], sel: 0 });
+      k.applyEffects([{ tipo: 'stato', nome: 'febbre', velocita: 0.9 }]);
+    });
+    k.as('bruno', () => k.give(item, 1));
+    run(server, all, 8);
+    const said: string[] = [];
+    anna.k.bus.on('ui:message', (m) => said.push(m.text));
+    const calls: Array<{ task: string; chi?: string; data?: unknown }> = [];
+    const origText = k.models.text.bind(k.models);
+    k.models.text = (c) => {
+      calls.push({ task: c.task, chi: c.chi, data: c.data });
+      return origText(c);
+    };
+    const brunoBefore = k.time;
+    // Both the master and Anna run out of water and health: only the player dies, the world does not stop.
+    thirst(k, 'io');
+    thirst(k, 'anna');
+    await tickUntil(server, all, () => anna.session.notices.some((n) => n.tipo === 'morte'));
+    expect(k.dead).toBe(false);
+    expect(k.as('io', () => k.needs())).toMatchObject({ hunger: 100, thirst: 100, health: 100, morto: false });
+    expect(k.time).toBeGreaterThan(brunoBefore);
+    expect(countItem(bruno.k.inventory(), item)).toBe(1);
+    expect(calls.find((c) => c.task === 'player.death')).toMatchObject({ chi: 'anna' });
+    // Punishment 3 (dura): back at the square (0, 0), nothing left of what she carried or her states, fresh needs.
+    expect(k.wandererAt('anna')).toMatchObject({ x: 0, y: 0 });
+    expect(anna.k.playerCarpet()).toMatchObject({ x: 0, y: 0 });
+    expect(countItem(anna.k.inventory(), item)).toBe(0);
+    expect(anna.k.hand().tokens).toEqual([]);
+    expect(anna.k.states()).toEqual({});
+    expect(anna.k.needs()!.health).toBeGreaterThan(50);
+    expect(anna.k.needs()!.thirst).toBeGreaterThan(50);
+    expect(said.some((m) => /Sei morto di sete/.test(m))).toBe(true);
+
+    // Punishment 0 (nessuna): she wakes up where she fell, with what she carried.
+    const mild = await three({ morte: 0 });
+    put(mild.k, 'anna', { x: 6.5, y: -3.5 });
+    mild.k.as('anna', () => mild.k.give(item, 2));
+    run(mild.server, mild.all, 8);
+    thirst(mild.k, 'anna');
+    await tickUntil(mild.server, mild.all, () => mild.anna.session.notices.some((n) => n.tipo === 'morte'));
+    expect(mild.anna.k.playerCarpet()).toMatchObject({ x: 6.5, y: -3.5 });
+    expect(countItem(mild.anna.k.inventory(), item)).toBe(2);
+    expect(mild.anna.k.needs()!.health).toBeGreaterThan(50);
+  }, 60000);
+
+  it('who leaves and comes back finds their position, inventory, phrase, states, card and bonds as they left them', async () => {
+    const { k, server, anna, bruno, carlo, all } = await three();
+    const item = stackable(k);
+    put(k, 'anna', { x: 6.5, y: -2.5 });
+    const npc = k.spawnModuleEntity(k.modules.get('npc.villager')!, 6.5, -1.5, undefined, 't43c#v');
+    const vName = (await k.ensureIdentity(npc))!.name;
+    k.as('anna', () => {
+      k.give(item, 2);
+      k.give('rune:luce', 1);
+      Object.assign(k.hand(), { tokens: ['luce'], sel: 0 });
+      k.applyEffects([{ tipo: 'stato', nome: 'benedizione', velocita: 1.2 }]);
+      k.setBond(vName, 'amica');
+      k.recordRule({ chiave: 'azione|canto', testo: 'cantare', possibile: true, racconto: 'canti' }, true, { task: 'action.judge', autore: 'narratore' });
+    });
+    run(server, all, 8);
+    expect(k.cardsOf('anna').some((c) => c.id === 'regola:azione-canto')).toBe(true);
+
+    // Anna leaves while Bruno and Carlo stay in the world.
+    anna.session.leave();
+    run(server, [bruno, carlo], 8);
+    expect(server.connected()).toEqual(['bruno', 'carlo']);
+    expect(JSON.parse(k.files['world/giocatori/anna.json']).pos).toEqual({ x: 6.5, y: -2.5 });
+
+    // Anna reconnects: her state, card and bond are all there.
+    const back = await thin(server, 'anna', 'Anna');
+    run(server, [back, bruno, carlo], 8);
+    expect(k.wandererAt('anna')).toMatchObject({ x: 6.5, y: -2.5 });
+    expect(back.k.playerCarpet()).toMatchObject({ x: 6.5, y: -2.5 });
+    expect(countItem(back.k.inventory(), item)).toBe(2);
+    expect(countItem(back.k.inventory(), 'rune:luce')).toBe(1);
+    expect(back.k.hand().tokens).toEqual(['luce']);
+    expect(back.k.states().benedizione).toMatchObject({ velocita: 1.2 });
+    expect(k.cardsOf('anna').some((c) => c.id === 'regola:azione-canto')).toBe(true);
+    expect(k.as('anna', () => k.bondOf(vName))).toBe('amica');
+  }, 60000);
+});

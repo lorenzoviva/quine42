@@ -1265,13 +1265,23 @@ le risposte alle domande del piano.
   `togli_stato` e gli stati che rallentano contano come ferire. Nessuna verifica nel browser (il task chiede i test headless; la verifica con
   due schede è di T43c).
 
-### T43c · Morte e ricollegamento in multigiocatore — `da fare` (dipende da T43b)
+### T43c · Morte e ricollegamento in multigiocatore — `fatto` (5979812) (dipende da T43b)
 - Pipeline: claude · stima 5% · approvato · priorità 2
 - Fare: a salute zero un giocatore (mai il master) muore con la punizione di T33 (`continueAfterDeath` sul server, come lui,
   senza chiudere la sessione degli altri); il client lo mostra e riparte dove dice il verdetto. Chi si ricollega ritrova il suo
   stato (`world/giocatori/<id>.json`): posizione, inventario, frase, stati; la carta e i legami restano.
 - Fatto quando: test headless (morte per sete di un giocatore, gli altri continuano; uscita e rientro con lo stesso stato) e
   verifica con due schede.
+- **Esito**: ADR-0076. Su `lua:morte` `mortalDies` (al posto di `spareGods`) risparmia il master (`keepGods`) e chiama `as(id, () => die(cause))`
+  per ogni viandante mortale con `needs.morto`. Per un viandante remoto (`remote.has(id)`) `die` avvia `judgeDeath` pagato da lui
+  (`deathVerdicts.get(id)`) e concatena `continueAfterDeath(id, cause)` (`dying.get(id)`, che blocca `stepWanderer` finché non finisce), senza
+  alzare `dead` né fermare gli altri; `continueAfterDeath` gira come `id`, applica la punizione della partita, salva lo stato ed emette
+  `wanderer:died {id, causa, testo}`. `SessionServer` azzera il credito di passo e la vista precedente (`me`, `stato`) del client e manda
+  l'avviso `morte`; `ThinClient` porta il viandante dove il verdetto lo fa risvegliare (`putMe`), allinea stato e frase e mostra il messaggio
+  della morte. `WandererState` (`world/giocatori/<id>.json`) salva e ripristina anche `pos {x, y}` in coordinate del mondo (del tappeto), con
+  `morto: false` al caricamento. `tests/between.test.ts` (2 test nuovi: morte per sete con punizione 3 e 0 mentre gli altri continuano e il
+  master non muore; uscita e rientro con posizione, inventario, frase, stati, carta e legame) e verifica con due schede Chromium contro il
+  server di sviluppo.
 
 ### T44 · Account, profilo e viandante personalizzato — spezzato in T44a e T44b
 - Fare: autenticazione sicura, un profilo ricco, il viandante personalizzabile (seme e colori del suo modello, nome);

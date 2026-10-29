@@ -308,9 +308,20 @@ export class ThinClient {
     if (o.testo) this.say(id, o.testo);
   }
 
-  /** What another wanderer did to this one (T43a): their words in the chat with them and in the messages, a gift. */
+  /** What another wanderer did to this one (T43a, T43b), or what death cost them (T43c). */
   private notice(n: Notice): void {
     const k = this.k;
+    if (n.tipo === 'morte') {
+      if (this.session.me) {
+        this.putMe(this.session.me.x, this.session.me.y);
+        this.lastStep = { x: this.session.me.x, y: this.session.me.y, t: this.clock };
+      }
+      this.pending = 0;
+      this.told = [...(this.session.stato.hand?.tokens ?? [])];
+      Object.assign(k.hand(), { tokens: [...this.told], sel: 0 });
+      this.state();
+      return k.message(`Sei morto di ${n.nome}. ${n.testo}`, 'warn');
+    }
     if (n.tipo === 'dai') return k.message(`${n.nome} ti dà ${n.testo}.`, 'good');
     if (n.tipo === 'altro') return k.message(`${n.nome}: ${n.testo}`);
     const id = this.others.get(n.da);

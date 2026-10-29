@@ -466,8 +466,10 @@ export class Kernel {
   exitedOnce = false;
   /** The wanderer died: the session is over until they continue or start again. */
   dead = false;
-  /** What death costs this time: the Narrator's verdict, asked as soon as the wanderer dies. */
-  private deathVerdict?: Promise<DeathVerdict>;
+  /** What death costs this time: the Narrator's verdict per wanderer, asked as soon as they die. */
+  private deathVerdicts = new Map<string, Promise<DeathVerdict>>();
+  /** The wanderers of a session whose death verdict is under way on the server (T43c). */
+  private dying = new Map<string, Promise<void>>();
   /** The game chosen at the Genesis (ADR-0053): universe.json follows it, nothing else changes it. */
   private game?: Partita;
   /** Size of the visible area in cells, set by the renderer. */
@@ -514,7 +516,7 @@ export class Kernel {
     const { repo, synced } = Repo.open(name, opts.files, opts.store);
     k.repo = repo;
     if (opts.backend) repo.attach(opts.backend, opts.past ?? []);
-    k.bus.on('lua:morte', (d: { fame?: boolean; sete?: boolean }) => !k.spareGods() && k.die(d?.sete ? 'sete' : d?.fame ? 'fame' : 'ferite'));
+    k.bus.on('lua:morte', (d: { fame?: boolean; sete?: boolean }) => k.mortalDies(d?.sete ? 'sete' : d?.fame ? 'fame' : 'ferite'));
     k.faults.onRaise = (f, isNew) => {
       if (isNew) k.log('fault', `${f.key}: ${f.message}`);
       // Where it happened (T46a): the code that runs in the world, where the wanderer was; not loading nor manifests.
@@ -962,7 +964,7 @@ export class Kernel {
    * end up is returned.
    */
   stepWanderer(id: string, to: { x: number; y: number }, max: number): { x: number; y: number } | undefined {
-    if (!this.wanderersById.has(id)) return undefined;
+    if (!this.wanderersById.has(id) || this.dying.has(id)) return undefined;
     return this.as(id, () => {
       const here = this.playerCarpet();
       let { x, y } = here;
@@ -4267,6 +4269,23 @@ export class Kernel {
     return !mortal;
   }
 
+  /** Whether a wanderer of a session is dying right now (waiting for the Narrator's verdict on their death). */
+  isDying(id: string = this.wanderer().id): boolean {
+    return this.dying.has(id);
+  }
+
+  /** A death the world's code announces: gods are put back; any mortal whose health ran out dies as themselves (T43c). */
+  private mortalDies(cause: string): void {
+    if (!this.manyPlayers()) return this.die(cause);
+    this.keepGods();
+    for (const w of this.wanderersById.values()) {
+      const n: any = this.ecs.get(w.entity, 'needs');
+      if (!n?.morto || this.godMode(w.id) || this.deathVerdicts.has(w.id)) continue;
+      const why = n.thirst <= 0 ? 'sete' : n.hunger <= 0 ? 'fame' : cause;
+      this.as(w.id, () => this.die(why));
+    }
+  }
+
   /**
    * The game is chosen before the Genesis and never changes after (ADR-0053): the first universe.json
    * fixes it, a later one that says otherwise is written back; only `runGenesis` chooses a new one.
@@ -4302,17 +4321,24 @@ export class Kernel {
   }
 
   /**
-   * Death: of thirst, of hunger, of wounds. The session ends; the wanderer may continue in the same
-   * universe or start again from the seed. What continuing costs is the punishment chosen at the Genesis,
-   * which the Narrator turns into what is lost and where one wakes up (asked now, applied on continue).
+   * Death: of thirst, of hunger, of wounds. Alone, the session ends and the wanderer may continue in the
+   * same universe or start again from the seed; in a session of many (T43c), `continueAfterDeath` runs on
+   * the server as the player who died, without closing the others' session. What continuing costs is the
+   * punishment chosen at the Genesis, which the Narrator turns into what is lost and where one wakes up.
    * Who reached the corona cannot die any more.
    */
   die(cause: string): void {
-    if (this.dead || this.exitedOnce) return;
-    this.dead = true;
+    const id = this.wanderer().id;
+    if (this.mirror || (this.dead && !this.remote.has(id)) || this.deathVerdicts.has(id) || (id === SOLO && this.exitedOnce)) return;
     this.log('kernel', `il viandante è morto (${cause})`);
     this.council.say('narratore', 'info', `il viandante è morto di ${cause}`, undefined, 'player.death');
-    this.deathVerdict = this.judgeDeath(cause);
+    this.deathVerdicts.set(id, this.judgeDeath(cause));
+    if (this.remote.has(id)) {
+      const p = this.continueAfterDeath(id, cause).finally(() => this.dying.delete(id));
+      this.dying.set(id, p);
+      return;
+    }
+    this.dead = true;
     this.bus.emit('ui:death', { cause, punizione: deathLevel(this.partita()) });
   }
 
@@ -4339,35 +4365,44 @@ export class Kernel {
    * A new life in the same universe: fresh needs, then what the punishment takes (everything, or the
    * effects the Narrator chose), at the square or where the wanderer fell; the world remembers.
    */
-  async continueAfterDeath(): Promise<void> {
-    const v = (await this.deathVerdict) ?? fallbackDeath(this.partita().morte, this.carriedCounts());
-    this.deathVerdict = undefined;
-    const playerMod = [...this.modules.values()].find((m) => m.manifest.kind === 'player');
-    const defaults: Record<string, any> = clone(playerMod?.manifest.components ?? FALLBACK_PLAYER);
-    Object.assign(this.needs() ?? {}, { ...FALLBACK_PLAYER.needs, ...(defaults.needs ?? {}), morto: false });
-    if (v.loseAll) {
-      this.ecs.set(this.playerId, 'inventory', newInventory());
-      this.ecs.set(this.playerId, 'stati', {});
-      Object.assign(this.hand(), { tokens: [], sel: 0 });
-      for (const it of playerMod?.manifest.inventory ?? []) if (this.content.get(it)) this.give(it, 1);
-    }
-    if (v.restart === 'piazza') {
-      Object.assign(this.playerPos(), { x: 0, y: 0 });
-      const c = this.carpet();
-      if (c) Object.assign(c, { ox: 0, oy: 0 });
-    }
-    const ectx = { palette: this.palette, item: (n: string) => this.content.byName(n)?.id ?? (this.content.get(n) ? n : undefined), module: () => undefined, loot: new Set<string>() };
-    const effects = v.loseAll ? [] : validateEffects(v.effects, ectx).effects;
-    const said = effects.flatMap((e) => (e.tipo === 'messaggio' ? [e.testo] : []));
-    const out = this.applyEffects(effects.filter((e) => e.tipo !== 'messaggio'));
-    // Death takes, it never heals; but nobody wakes up dying.
-    const n = this.needs();
-    if (n && !(n.health > 10)) n.health = 10;
-    this.dead = false;
-    this.council.say('narratore', 'approva', `il viandante torna alla vita: ${v.story}${effects.length ? ` [${effects.map((e) => e.tipo).join(', ')}]` : ''}${v.loseAll ? ' (perde tutto)' : ''}`, undefined, 'player.death');
-    this.rememberDeath();
-    this.saveState();
-    this.message([v.story || 'Riapri gli occhi. È un nuovo giorno, e una nuova vita.', ...said, ...out].join(' '), 'good');
+  async continueAfterDeath(id: string = this.wanderer().id, cause?: string): Promise<void> {
+    if (cause === undefined && this.dying.has(id)) return this.dying.get(id)!;
+    const carried = this.as(id, () => this.carriedCounts());
+    const verdict = this.deathVerdicts.get(id);
+    const v = (await verdict) ?? fallbackDeath(this.partita().morte, carried);
+    this.deathVerdicts.delete(id);
+    if (!this.wanderersById.has(id)) return;
+    this.as(id, () => {
+      const playerMod = [...this.modules.values()].find((m) => m.manifest.kind === 'player');
+      const defaults: Record<string, any> = clone(playerMod?.manifest.components ?? FALLBACK_PLAYER);
+      Object.assign(this.needs() ?? {}, { ...FALLBACK_PLAYER.needs, ...(defaults.needs ?? {}), morto: false });
+      if (v.loseAll) {
+        this.ecs.set(this.playerId, 'inventory', newInventory());
+        this.ecs.set(this.playerId, 'stati', {});
+        Object.assign(this.hand(), { tokens: [], sel: 0 });
+        for (const it of playerMod?.manifest.inventory ?? []) if (this.content.get(it)) this.give(it, 1);
+      }
+      if (v.restart === 'piazza') {
+        Object.assign(this.playerPos(), { x: 0, y: 0 });
+        const c = this.carpet();
+        if (c) Object.assign(c, { ox: 0, oy: 0 });
+      }
+      const ectx = { palette: this.palette, item: (n: string) => this.content.byName(n)?.id ?? (this.content.get(n) ? n : undefined), module: () => undefined, loot: new Set<string>() };
+      const effects = v.loseAll ? [] : validateEffects(v.effects, ectx).effects;
+      const said = effects.flatMap((e) => (e.tipo === 'messaggio' ? [e.testo] : []));
+      const out = this.applyEffects(effects.filter((e) => e.tipo !== 'messaggio'));
+      this.syncHand();
+      // Death takes, it never heals; but nobody wakes up dying.
+      const n = this.needs();
+      if (n && !(n.health > 10)) n.health = 10;
+      if (!this.remote.has(id)) this.dead = false;
+      this.council.say('narratore', 'approva', `il viandante torna alla vita: ${v.story}${effects.length ? ` [${effects.map((e) => e.tipo).join(', ')}]` : ''}${v.loseAll ? ' (perde tutto)' : ''}`, undefined, 'player.death');
+      this.rememberDeath();
+      this.saveState();
+      const words = [v.story || 'Riapri gli occhi. È un nuovo giorno, e una nuova vita.', ...said, ...out].join(' ');
+      this.message(words, 'good');
+      if (this.remote.has(id)) this.bus.emit('wanderer:died', { id, causa: cause ?? 'ferite', testo: words });
+    });
   }
 
   private rememberDeath(): void {
@@ -6205,9 +6240,11 @@ export class Kernel {
 
   /** What is saved of the wanderer acting now. */
   private wandererState(w: Wanderer): WandererState {
+    const at = this.corona.isInterior(this.playerPos().x) ? this.lastWorld : this.playerCarpet();
     return {
       ...(w.nome !== WANDERER_NAME ? { nome: w.nome } : {}),
       ...(this.wanderersById.get(w.id)?.profilo ? { profilo: this.wanderersById.get(w.id)!.profilo } : {}),
+      pos: { x: Math.round(at.x * 1000) / 1000, y: Math.round(at.y * 1000) / 1000 },
       inventory: this.inventory(),
       needs: this.needs() as unknown as Record<string, number>,
       hand: this.hand(),
@@ -6219,8 +6256,13 @@ export class Kernel {
 
   /** Gives the wanderer acting now what was saved of them. */
   private applyWandererState(v: WandererState): void {
+    if (Number.isFinite(v.pos?.x) && Number.isFinite(v.pos?.y)) {
+      const c = this.carpet();
+      const p = this.playerPos();
+      if (c && p) Object.assign(c, { ox: v.pos!.x - p.x, oy: v.pos!.y - p.y });
+    }
     if (v.inventory?.slots) this.ecs.set(this.playerId, 'inventory', v.inventory);
-    if (v.needs) Object.assign(this.needs() ?? {}, v.needs);
+    if (v.needs) Object.assign(this.needs() ?? {}, v.needs, { morto: false });
     if (v.hand?.tokens) Object.assign(this.hand(), v.hand);
     if (v.stati) this.ecs.set(this.playerId, 'stati', Object.fromEntries(Object.entries(v.stati).filter(([, x]) => x && typeof x === 'object')));
     if (v.slots && typeof v.slots === 'object') this.ecs.set(this.playerId, 'slots', v.slots);

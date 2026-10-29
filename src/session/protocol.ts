@@ -166,9 +166,9 @@ export type ServerMsg =
   /** What the Council made on the master's branch (T42e): only to the master, the files it changed there. */
   | { t: 'ramo'; files: FileChanges };
 
-/** What another wanderer did to this one (T43a): words said to them, something given (`testo`: what and how many). */
+/** What another wanderer did to this one (T43a, T43b), or what death cost them (T43c). */
 export interface Notice {
-  tipo: 'dici' | 'dai' | 'altro';
+  tipo: 'dici' | 'dai' | 'altro' | 'morte';
   da: string;
   nome: string;
   testo: string;

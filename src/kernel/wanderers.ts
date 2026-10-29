@@ -147,6 +147,7 @@ export interface WandererState {
   nome?: string;
   /** Who they are to the others (T44a). */
   profilo?: Profile;
+  pos?: { x: number; y: number };
   inventory?: any;
   needs?: Record<string, number>;
   hand?: { tokens: string[]; sel: number };

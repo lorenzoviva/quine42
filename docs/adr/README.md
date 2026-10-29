@@ -80,6 +80,7 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0073](0073-altro-e-pvp-tra-viandanti.md) | «Altro…» e PvP tra viandanti: «Altro…» su un altro viandante solo se `partita.altroTraGiocatori`, giudicato come su una persona; il server applica gli effetti al suo corpo (`touchWanderer`); ciò che ferisce solo con `partita.pvp` (`unharmed`), sul master solo parole | accettato |
 | [0074](0074-il-profilo-del-viandante.md) | Il profilo del viandante: nome, seme del programma `viandante`, colore del mantello, presentazione, in `world/giocatori/<id>.json`; riparato dal kernel (nome breve e non simile a persone o viandanti, seme e colore nei limiti) e dato agli altri; `P` apre il pannello con le foto del modello | accettato |
 | [0075](0075-il-lessico.md) | Il lessico di QUINE42: `world/lessico.md` del seme (parole sostituite, saluti, buone maniere, usanze, modi di dire) va con ogni compito del Narratore e dell'Arbitro; la bibbia aggiunge al più 3 usanze sue; nessun testo del mondo spiega il lessico come un glossario (`glossaryBreak`) | accettato |
+| [0076](0076-morte-e-ricollegamento-in-multigiocatore.md) | Morte e ricollegamento in multigiocatore: a salute zero un giocatore (mai il master) muore sul server con la punizione di T33 (`continueAfterDeath` come lui, senza fermare gli altri, avviso `morte`); `world/giocatori/<id>.json` salva anche `pos` e chi rientra ritrova posizione, inventario, frase, stati, carte e legami | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.
 
