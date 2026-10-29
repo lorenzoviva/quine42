@@ -1249,7 +1249,7 @@ le risposte alle domande del piano.
   ogni tasca della barra rapida. `testTimeout` di 30 s in `vite.config.ts`: con un file di test in più quelli della sessione superavano i
   5 s sotto carico. Una volta, a suite intera, `tests/determinism.test.ts` è fallito e poi è passato (tre volte): da tenere d'occhio.
 
-### T43b · «Altro…» e PvP tra viandanti — `fatto` (dipende da T43a)
+### T43b · «Altro…» e PvP tra viandanti — `fatto` (`655fe3c`) (dipende da T43a)
 - Pipeline: claude · stima 5% · approvato · priorità 1
 - Fare: «Altro…» su un altro viandante giudicato come su una persona, solo se `partita.altroTraGiocatori`; gli effetti li applica
   il server sul corpo dell'altro (il master in god mode lascia passare solo `messaggio`, ADR-0065); ciò che ferisce
