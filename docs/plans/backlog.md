@@ -1373,13 +1373,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   `docs/adr/`, `docs/design.md`. Aggiornare i percorsi in AGENTS.md, CLAUDE.md, GEMINI.md se cambiano.
 - Fatto quando: niente perso (`git status` mostra solo spostamenti), il resoconto, commit.
 
-### T67 · Il grafo delle conversazioni con Gemini — `da fare`
+### T67 · Il grafo delle conversazioni con Gemini — `fatto`
 - Pipeline: gemini · stima 4% · approvato · priorità 25
 - Contesto: per tradurre il gioco in quattro lingue (fine della fase I) servono i riferimenti a tutti i testi, compresi i prompt.
 - Fare: `docs/conversazioni.md`: per ogni compito degli agenti (`src/kernel/agents/`, `src/kernel/ai/`) chi chiama, con quale prompt
   (`universe/prompts/`, testi nel codice), quali parti del contesto, quale schema di risposta; grafi in mermaid. Un elenco dei testi
   sparsi nel codice da portare a fattor comune (md, yaml, json o properties), senza spostarli in questo task.
 - Fatto quando: il documento, commit.
+- Esito: redatto `docs/conversazioni.md` con l'architettura end-to-end, i diagrammi Mermaid dei flussi, le schede dettagliate di tutti i 38 task degli agenti (Genesi, Cartografia, Fucina, Contenuti, Azioni ed effetti, Menti e dialoghi, Scultura 3D, Meccaniche) con ruoli, prompt di sistema, prompt utente, response schema e flussi di validazione. Censimento completo di tutti i testi hardcoded in italiano nel codice (template dei prompt, descrizioni degli schemi, principi e filtri della quarta parete, narrazione di fallback, testi UI e HUD) con proposta di organizzazione per la futura localizzazione multi-lingua e per la coda abbonamenti (T68).
 
 ### T68 · Generare l'universo con gli abbonamenti — `in attesa` (domande in `docs/pipeline/domande/T68.md`; dipende da T67)
 - Pipeline: claude · stima 8% · approvato · priorità 40
