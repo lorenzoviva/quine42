@@ -72,7 +72,7 @@ Nella piazza iniziale ci sono `x`, `speed = speed` e la runa magica `luce`. Le r
 Leggi **[AGENTS.md](AGENTS.md)**: architettura, Concilio, regole inviolabili, convenzioni (vale per
 persone, Claude Code e Gemini CLI). Design originale in [docs/design.md](docs/design.md), decisioni in
 [docs/adr/](docs/adr/README.md), lavoro da fare in [docs/plans/backlog.md](docs/plans/backlog.md), il passaggio al
-3D in [docs/reports/step9.md](docs/reports/step9.md). Il laboratorio di MarkovJunior è in [lab/](lab/README.md).
+3D in [docs/archivio/2-step/reports/step9.md](docs/archivio/2-step/reports/step9.md). Il laboratorio di MarkovJunior è in [lab/](lab/README.md).
 
 ## Riferimenti e ispirazioni
 

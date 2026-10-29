@@ -1385,7 +1385,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fare (dopo le risposte): il lessico come dato che va con ogni compito narrativo (come il canone delle rune), il Narratore che lo usa
   in dialoghi, oggetti e bibbia, un controllo che non diventi meta-gioco; test con `MockModels`.
 
-### T66 · Riorganizzare la documentazione per metodologia — `da fare`
+### T66 · Riorganizzare la documentazione per metodologia — `fatto`
 - Pipeline: gemini · stima 3% · approvato · priorità 15
 - Contesto: in `docs/` convivono le metodologie passate (thread unico, step, to-do e backlog) e quella attuale (pipeline, T61).
 - Fare: archiviare i documenti delle metodologie precedenti in cartelle ordinate, senza modificarne il contenuto né i link interni;
@@ -1393,6 +1393,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   Restano dove sono (li leggono la pipeline e gli agenti): `docs/pipeline/`, `docs/plans/backlog.md`, `docs/userchats/to-do.md`,
   `docs/adr/`, `docs/design.md`. Aggiornare i percorsi in AGENTS.md, CLAUDE.md, GEMINI.md se cambiano.
 - Fatto quando: niente perso (`git status` mostra solo spostamenti), il resoconto, commit.
+- Esito: archiviati i documenti delle 3 metodologie precedenti in `docs/archivio/` (`1-thread-unico/userchats/`, `2-step/` con `plans/`, `reports/`, `userchats/`, `3-to-do-backlog/` con `plans/`, `prompts/`, `userchats/`), preservando byte-for-byte contenuti e link interni; redatto `docs/README.md` con l'analisi cronologica delle 4 metodologie, mappa delle cartelle e tabella completa «link citato → dove è ora»; aggiornati i percorsi in `AGENTS.md` e `README.md`; lasciati intatti i file e cartelle attivi (`docs/pipeline/`, `docs/plans/backlog.md`, `docs/userchats/to-do.md`, `docs/adr/`, `docs/design.md`, `docs/conversazioni.md`, `docs/img/`).
 
 ### T67 · Il grafo delle conversazioni con Gemini — `fatto`
 - Pipeline: gemini · stima 4% · approvato · priorità 25
