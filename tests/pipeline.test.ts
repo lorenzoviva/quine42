@@ -9,8 +9,9 @@ type Pipeline = {
   parseBacklog(text: string): Task[];
   parsePipelineLine(line: string): { provider?: string; estimate?: number; approved: boolean; priority: number };
   parseUsage(provider: string, text: string): Counter[] | undefined;
-  usageLimit(output: string): Date | undefined;
-  readOutput(text: string): { session?: string; cost?: number; error: boolean; result: string; outcome?: string };
+  usageLimit(output: string, from?: Date): Date | undefined;
+  readOutput(text: string): { session?: string; cost?: number; error: boolean; result: string; outcome?: string; browser?: string };
+  capOf(o: { left: number; session?: number; provider: string; orchestrator?: string; max: number; threshold: number }): number;
 };
 
 let P: Pipeline;
@@ -147,10 +148,42 @@ describe('usageLimit', () => {
     expect(P.usageLimit('Tutto bene, 14290 righe lette')).toBeUndefined();
     expect(P.usageLimit('')).toBeUndefined();
   });
+
+  it('«429» da solo è un limite', () => {
+    expect(P.usageLimit('HTTP 429 Too Many Requests')).toBeDefined();
+  });
+
+  it('il limite delle 5 ore di Claude riparte all\'ora che dice, il giorno dopo se è passata', () => {
+    const from = new Date(2026, 9, 29, 20, 15);
+    expect(P.usageLimit('You\'ve hit your 5-hour limit · resets 10pm (Europe/Rome)', from)).toEqual(new Date(2026, 9, 29, 22, 1));
+    expect(P.usageLimit('You\'ve hit your limit · resets 9:30am', from)).toEqual(new Date(2026, 9, 30, 9, 31));
+  });
+});
+
+describe('capOf', () => {
+  const base = { max: 5, threshold: 10, orchestrator: 'claude' };
+
+  it('sopra la soglia: fino a `max`', () => {
+    expect(P.capOf({ ...base, left: 50, session: 80, provider: 'claude' })).toBe(5);
+  });
+
+  it('sotto la soglia: uno, nessuno sul provider dell\'orchestratore', () => {
+    expect(P.capOf({ ...base, left: 8, provider: 'argon' })).toBe(1);
+    expect(P.capOf({ ...base, left: 8, provider: 'claude' })).toBe(0);
+    expect(P.capOf({ ...base, left: 50, session: 5, provider: 'claude' })).toBe(0);
+    expect(P.capOf({ ...base, orchestrator: 'argon', left: 8, provider: 'argon' })).toBe(0);
+    expect(P.capOf({ ...base, orchestrator: 'argon', left: 8, provider: 'claude' })).toBe(1);
+  });
 });
 
 describe('readOutput', () => {
   const json = { type: 'result', is_error: false, session_id: 'abc-123', total_cost_usd: 0.42, result: 'Fatto il lavoro.\n\nESITO: fatto — test della pipeline\n' };
+
+  it('la riga BROWSER, se c\'è', () => {
+    const result = 'ESITO: fatto — il pannello\nBROWSER: da verificare — niente strumenti del browser\n';
+    expect(P.readOutput(JSON.stringify({ ...json, result })).browser).toBe('BROWSER: da verificare — niente strumenti del browser');
+    expect(P.readOutput(JSON.stringify(json)).browser).toBeUndefined();
+  });
 
   it('il JSON di claude --output-format json', () => {
     expect(P.readOutput(JSON.stringify(json))).toEqual({ session: 'abc-123', cost: 0.42, error: false, result: json.result, outcome: 'ESITO: fatto — test della pipeline' });

@@ -514,6 +514,11 @@ l'esecuzione la fa `node tools/pipeline/pipeline.mjs esegui`: fino a 5 task in p
 (`task/<Txx>`), entro il budget di ogni provider, ripresi dopo un limite. **Chi esegue un task lanciato dalla pipeline è in un ambiente
 condiviso**: segue le «Regole per chi esegue un task» del README (solo il suo worktree e il suo blocco del backlog, niente merge né
 domande: le scrive in `docs/pipeline/domande/<Txx>.md`) al posto dei punti 1 e 3 sul to-do e sul prompt successivo.
+**L'orchestratore** (ADR-0078, [`docs/pipeline/orchestra.md`](docs/pipeline/orchestra.md), `/pipeline` in Claude Code e in Antigravity)
+è l'agente da cui l'autore lancia sempre la pipeline: pianifica, lancia `esegui`, riporta ogni task, delega a un subagente la verifica nel
+browser che il task chiede e non ha fatto (riga `BROWSER:`), integra rinumerando gli ADR che si scontrano, e tiene
+[`docs/pipeline/orchestrazione.md`](docs/pipeline/orchestrazione.md) (passaggio di consegne e diario). Il suo provider
+(`orchestratore <provider>`, a mano quando i crediti finiscono) sotto `sogliaUnSolo` non riceve task.
 
 ### Convalida nel browser (senza tentativi)
 

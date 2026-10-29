@@ -15,12 +15,36 @@ const RUNS = path.join(STATE_DIR, 'esecuzioni.json');
 const BUDGET = path.join(STATE_DIR, 'budget.json');
 const HISTORY = path.join(REPO, 'docs', 'pipeline', 'consumi.jsonl');
 const PLAN = path.join(REPO, 'docs', 'pipeline', 'PIANO.md');
+const REPORT = path.join(REPO, 'docs', 'pipeline', 'orchestrazione.md');
+const ORCHESTRATOR = path.join(STATE_DIR, 'orchestratore.json');
 const RESUME = 'Ti sei fermato in questo punto, riprendi.';
 
 const readJson = (file, fallback) => { try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return fallback; } };
 const writeJson = (file, data) => { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, JSON.stringify(data, null, 2) + '\n'); };
 const git = (args, cwd = REPO) => execFileSync('git', args, { cwd, encoding: 'utf8' }).trim();
 const now = () => new Date().toISOString();
+
+/** Prints an event and appends it to the diary of `orchestrazione.md`, so the next orchestrator knows what happened. */
+function say(text) {
+  const line = `[${now()}] ${text}`;
+  console.log(line);
+  try { fs.appendFileSync(REPORT, `- ${line}
+`); } catch { /* the report is a convenience */ }
+}
+
+/** The provider the orchestrating agent runs on (`orchestratore`, set by hand when its credits end). */
+function orchestrator() {
+  return readJson(ORCHESTRATOR, {}).provider ?? CONFIG.orchestratore;
+}
+
+/**
+ * How many tasks a provider may run at once: `max`, one under `sogliaUnSolo` (week or 5 hours), none if the
+ * orchestrator runs on it, so the tasks never take the credits the orchestration needs to go on.
+ */
+export function capOf({ left, session = 100, provider, orchestrator: orch, max, threshold }) {
+  if (left >= threshold && session >= threshold) return max;
+  return provider === orch ? 0 : 1;
+}
 
 // --- The backlog -----------------------------------------------------------------------------------------------
 
@@ -160,11 +184,19 @@ function lastReset(spec) {
 }
 
 /** Recognises the message of a usage limit in a CLI's output; gives when it resets, if it says so. */
-export function usageLimit(output) {
-  if (!/usage limit|limit reached|hit your limit|rate limit|quota|resource_exhausted|429/i.test(output)) return undefined;
+export function usageLimit(output, from = new Date()) {
+  if (!/usage limit|limit reached|hit your (?:[\w-]+ )?limit|rate limit|quota|resource_exhausted|\b429\b/i.test(output)) return undefined;
   const epoch = /\|(\d{10})\b/.exec(output);
   if (epoch) return new Date(Number(epoch[1]) * 1000);
-  return new Date(Date.now() + CONFIG.attesaLimiteMinuti * 60_000);
+  // «resets 10pm», «resets 9:30am»: the next time it is that hour (local time), a minute after.
+  const at = /resets\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/i.exec(output);
+  if (at) {
+    const d = new Date(from);
+    d.setHours((Number(at[1]) % 12) + (at[3].toLowerCase() === 'pm' ? 12 : 0), Number(at[2] ?? 0), 0, 0);
+    if (d <= from) d.setDate(d.getDate() + 1);
+    return new Date(d.getTime() + 60_000);
+  }
+  return new Date(from.getTime() + CONFIG.attesaLimiteMinuti * 60_000);
 }
 
 // --- The plan --------------------------------------------------------------------------------------------------
@@ -176,7 +208,7 @@ function plan(tasks, runs, budget, only) {
   const queues = { inCorso: [], daIntegrare: [], pronti: [], daApprovare: [], daStimare: [], bloccati: [], inAttesa: [] };
   for (const t of open) {
     if (runs[t.id] && runs[t.id].stato !== 'finito') { queues.inCorso.push(t); continue; }
-    if (runs[t.id]) { queues.daIntegrare.push({ ...t, provider: runs[t.id].provider, title: `${t.title} — ${runs[t.id].esito}` }); continue; }
+    if (runs[t.id] && !runs[t.id].integrato) { queues.daIntegrare.push({ ...t, provider: runs[t.id].provider, title: `${t.title} — ${runs[t.id].esito}` }); continue; }
     if (t.status.startsWith('in attesa')) { queues.inAttesa.push(t); continue; }
     if (!t.status.startsWith('da fare')) continue; // in corso by hand, or split into sub-tasks
     // A dependency without a block of its own (T53a) is its parent's (T53).
@@ -198,7 +230,7 @@ function writePlan(queues, budget) {
   const section = (title, list) => `## ${title} (${list.length})\n\n${list.map(line).join('\n') || '_nessuno_'}\n`;
   const budgets = Object.entries(budget).map(([p, b]) => `- **${p}**: ${describe(b)}${b.letto ? ` (letto da /usage il ${b.letto})` : ' (impostato a mano)'}` +
     (b.contatori ?? []).map((c) => `\n  - ${c.nome}, ${c.finestra}: ${c.residuo} % residuo, reset ${c.reset}`).join('')).join('\n');
-  const text = `# Il piano della pipeline\n\n> Generato da \`node tools/pipeline/pipeline.mjs stato\` il ${now()}: non modificarlo a mano,\n> la fonte è \`docs/plans/backlog.md\` (righe \`- Pipeline:\`).\n\n## Budget\n\n${budgets}\n\n` +
+  const text = `# Il piano della pipeline\n\n> Generato da \`node tools/pipeline/pipeline.mjs stato\` il ${now()}: non modificarlo a mano,\n> la fonte è \`docs/plans/backlog.md\` (righe \`- Pipeline:\`).\n\n## Budget\n\nOrchestratore: **${orchestrator()}** (sotto il ${CONFIG.sogliaUnSolo} % nessun task su di lui; si cambia con \`orchestratore <provider>\`).\n\n${budgets}\n\n` +
     [['In corso', queues.inCorso], ['Finiti, da guardare e integrare (`integra Txx`)', queues.daIntegrare], ['Pronti, in ordine di priorità', queues.pronti], ['Da approvare (provider e stima proposti)', queues.daApprovare],
       ['Da stimare (manca la riga `- Pipeline:`)', queues.daStimare], ['Bloccati da dipendenze', queues.bloccati], ['In attesa dell\'autore', queues.inAttesa]]
       .map(([t, l]) => section(t, l)).join('\n');
@@ -263,14 +295,24 @@ export function readOutput(text) {
     error: Boolean(json.is_error),
     result,
     outcome: /ESITO:\s*(fatto|in attesa|fallito)[^\n]*/i.exec(result)?.[0],
+    browser: /BROWSER:\s*(verificato|da verificare)[^\n]*/i.exec(result)?.[0],
   };
 }
 
 async function execute({ max = CONFIG.maxParalleli, only, task, always = false } = {}) {
   const runs = readJson(RUNS, {});
   const active = new Map(); // id → promise
-  const saveRuns = () => writeJson(RUNS, runs);
+  // The file wins for the runs this process is not following: `integra` and `riprendi` change it while `esegui` runs.
+  const saveRuns = (...ids) => {
+    const disk = readJson(RUNS, {});
+    for (const id of new Set([...active.keys(), ...ids])) disk[id] = runs[id];
+    writeJson(RUNS, disk);
+  };
   for (;;) {
+    const disk = readJson(RUNS, {});
+    for (const id of Object.keys(runs)) if (!active.has(id) && !disk[id]) delete runs[id];
+    for (const [id, r] of Object.entries(disk)) if (!active.has(id)) runs[id] = r;
+    const orch = orchestrator();
     const budget = loadBudget();
     const tasks = loadTasks();
     const queues = plan(tasks, runs, budget, only);
@@ -287,7 +329,7 @@ async function execute({ max = CONFIG.maxParalleli, only, task, always = false }
       if (!b || (b.fermoFino && new Date(b.fermoFino) > new Date())) return false;
       const committed = [...active.keys()].map((id) => runs[id]).filter((r) => r.provider === prov).reduce((s, r) => s + r.stima, 0);
       const left = b.residuo - committed;
-      const cap = left < CONFIG.sogliaUnSolo || (b.sessione ?? 100) < CONFIG.sogliaUnSolo ? 1 : max;
+      const cap = capOf({ left, session: b.sessione, provider: prov, orchestrator: orch, max, threshold: CONFIG.sogliaUnSolo });
       const running = [...active.keys()].filter((id) => runs[id].provider === prov).length;
       return running < cap && (resuming || estimate <= left - CONFIG.riserva);
     };
@@ -297,7 +339,7 @@ async function execute({ max = CONFIG.maxParalleli, only, task, always = false }
       const resuming = Boolean(runs[t.id]);
       const prov = resuming ? t.provider : [t.provider, ...(CONFIG.alternative?.[t.provider] ?? [])].find((p) => (!only || p === only) && fits(p, t.estimate, false));
       if (!prov || !fits(prov, t.estimate, resuming)) continue;
-      if (prov !== t.provider) console.log(`[${now()}] ${t.id}: ${t.provider} non può, va su ${prov}`);
+      if (prov !== t.provider) say(`${t.id}: ${t.provider} non può, va su ${prov}`);
       const b = budget[prov];
       t.provider = prov;
       const run = runs[t.id] ?? { id: t.id, provider: prov, stima: t.estimate, tentativi: 0, inizio: now(), ...(() => { const w = taskWorktree(t.id); return { dir: w.dir, branch: w.branch }; })() };
@@ -305,8 +347,8 @@ async function execute({ max = CONFIG.maxParalleli, only, task, always = false }
       run.stato = 'in corso';
       run.prima ??= { settimana: b.residuo, sessione: b.sessione };
       runs[t.id] = run;
-      saveRuns();
-      console.log(`[${now()}] ${run.sessione ? 'riprendo' : 'lancio'} ${t.id} su ${t.provider} (${run.dir})`);
+      saveRuns(t.id);
+      say(`${run.sessione ? 'riprendo' : 'lancio'} ${t.id} su ${t.provider} (${run.dir})`);
       active.set(t.id, launch(t, run).then((r) => finish(run, r, runs, saveRuns)).finally(() => active.delete(t.id)));
     }
     if (!active.size) {
@@ -314,7 +356,7 @@ async function execute({ max = CONFIG.maxParalleli, only, task, always = false }
       if (!waiting.length && !always) { console.log('Niente da lanciare: fine.'); return; }
       if (waiting.length) {
         const next = Math.min(...waiting.map((r) => new Date(r.fermoFino).getTime()));
-        console.log(`[${now()}] tutti fermi per i limiti; riprendo il ${new Date(next).toISOString()}`);
+        say(`tutti fermi per i limiti; riprendo il ${new Date(next).toISOString()}`);
       }
     }
     await new Promise((r) => setTimeout(r, CONFIG.controlloSecondi * 1000));
@@ -332,9 +374,9 @@ function finish(run, { code, text, log }, runs, saveRuns) {
     Object.assign(run, { stato: 'sospeso', fermoFino: limit.toISOString() });
     budget[run.provider].fermoFino = limit.toISOString();
     budget[run.provider].residuo = Math.min(budget[run.provider].residuo, CONFIG.sogliaUnSolo - 1);
-    console.log(`[${now()}] ${run.id}: limite di ${run.provider}, riprendo dopo ${run.fermoFino}`);
+    say(`${run.id}: limite di ${run.provider}, riprendo dopo ${run.fermoFino}`);
   } else {
-    Object.assign(run, { stato: 'finito', fine: now(), esito: out.outcome ?? (code === 0 ? 'ESITO: ? (senza riga)' : `ESITO: fallito (codice ${code})`) });
+    Object.assign(run, { stato: 'finito', fine: now(), esito: out.outcome ?? (code === 0 ? 'ESITO: ? (senza riga)' : `ESITO: fallito (codice ${code})`), browser: out.browser });
     // The counters just read (loadBudget above) say what the task really cost, other work on the same account included.
     const b = budget[run.provider];
     const dopo = b.letto && Date.now() - Date.parse(b.letto) < 60_000 ? { settimana: b.residuo, sessione: b.sessione } : undefined;
@@ -342,10 +384,10 @@ function finish(run, { code, text, log }, runs, saveRuns) {
     b.aggiornato = now();
     fs.mkdirSync(path.dirname(HISTORY), { recursive: true });
     fs.appendFileSync(HISTORY, JSON.stringify({ task: run.id, provider: run.provider, stima: run.stima, prima: run.prima, dopo, costoUsd: out.cost, minuti: Math.round((Date.parse(run.fine) - Date.parse(run.inizio)) / 60000), tentativi: run.tentativi, esito: run.esito, data: run.fine }) + '\n');
-    console.log(`[${now()}] ${run.id}: ${run.esito} (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia ${run.id})`);
+    say(`${run.id}: ${run.esito}${run.browser ? ` · ${run.browser}` : ''} (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia ${run.id})`);
   }
   writeJson(BUDGET, budget);
-  saveRuns();
+  saveRuns(run.id);
 }
 
 // --- Commands --------------------------------------------------------------------------------------------------
@@ -402,6 +444,17 @@ function trace(id) {
   console.log(`Log: ${log}\n\n--- Riepilogo dell'agente ---\n${out?.result ?? '(nessun log)'}`);
 }
 
+/** Puts back in the queue a run that stopped without a usage limit being recognised: it resumes its conversation. */
+function resume(id) {
+  const runs = readJson(RUNS, {});
+  const run = runs[id];
+  if (!run) { console.log(`${id}: nessuna esecuzione`); return; }
+  if (run.sessione) Object.assign(run, { stato: 'sospeso', fermoFino: now(), esito: undefined, fine: undefined });
+  else delete runs[id];
+  writeJson(RUNS, runs);
+  say(`${id}: rimesso in coda (${run.sessione ? 'riprende la sua conversazione' : 'riparte da capo'})`);
+}
+
 function integrate(id) {
   const base = worktrees().find((w) => w.branch === CONFIG.base);
   git(['merge', '--no-ff', '-m', `Pipeline: integra ${id}`, `task/${id}`], base.path);
@@ -415,7 +468,7 @@ function integrate(id) {
     git(['worktree', 'remove', wt.path], base.path);
   }
   git(['branch', '-d', `task/${id}`], base.path);
-  console.log(`task/${id} integrato in ${CONFIG.base}; worktree e branch tolti.`);
+  say(`task/${id} integrato in ${CONFIG.base}; worktree e branch tolti.`);
 }
 
 const [cmd, ...rest] = process.argv.slice(2);
@@ -428,5 +481,12 @@ if (process.argv[1]?.endsWith('pipeline.mjs')) {
   else if (cmd === 'worktree') listWorktrees();
   else if (cmd === 'integra') integrate(rest[0]);
   else if (cmd === 'traccia') trace(rest[0]);
-  else console.log('Comandi: stato | uso (rilegge /usage) | esegui [--sempre] [--max N] [--solo claude|gemini] [--task Txx] | budget <claude|gemini> <residuo %> | worktree | traccia <Txx> | integra <Txx>');
+  else if (cmd === 'riprendi') resume(rest[0]);
+  else if (cmd === 'nota') say(`nota: ${rest.join(' ')}`);
+  else if (cmd === 'orchestratore') {
+    if (rest[0] && !CONFIG.providers[rest[0]]) console.log(`Provider sconosciuto: ${rest[0]} (${Object.keys(CONFIG.providers).join(', ')})`);
+    else if (rest[0]) { writeJson(ORCHESTRATOR, { provider: rest[0], dal: now() }); say(`orchestratore: ${rest[0]}`); }
+    else console.log(orchestrator());
+  }
+  else console.log('Comandi: stato | uso (rilegge /usage) | esegui [--sempre] [--max N] [--solo claude|gemini|argon] [--task Txx] | budget <provider> <residuo %> | worktree | traccia <Txx> | integra <Txx> | riprendi <Txx> | orchestratore [provider] | nota <testo>');
 }

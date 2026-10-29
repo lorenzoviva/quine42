@@ -828,7 +828,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
   nuovo (T51b), commit.
 - **Domanda per l'autore**: va bene l'automa cellulare del kernel per la fisica dell'acqua (MarkovJunior solo per generare)?
 
-### T52 · I sotterranei — `in attesa` (decisione di progetto prima del codice)
+### T52 · I sotterranei — `in attesa` (domande in `docs/pipeline/domande/T52.md`)
 - Contesto: oggi niente sta sotto il livello del terreno (il rilievo è una colonna piena, i modelli stanno sul suolo,
   `floorAt`). L'autore vuole i sotterranei (anche un edificio seminterrato nella corona, come la Sala sistemi).
 - **T52a · il progetto** (ADR, nessun codice): come esiste uno spazio sotto il terreno (un piano sotto il luogo come zona a
@@ -858,7 +858,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
   aggiornato).
 - Dipendenze: nessuna. Utile prima di T52 e di T56.
 
-### T54 · Le taglie di D&D per strutture e creature — `in attesa` (domande sotto)
+### T54 · Le taglie di D&D per strutture e creature — `in attesa` (domande in `docs/pipeline/domande/T54.md`)
 - Contesto: richiesta del 24/10. Oggi le classi (`CLASSES` in `src/mj/classes.ts`: `persona`, `animale`, `bestia`,
   `edificio`, `grande`…) danno la scatola in caselle, e una struttura «importante» (Argon) per zona di 56 × 56 luoghi.
   L'autore vuole riferirsi alla taglia di D&D: Minuscola, Piccola, Media, Grande, Enorme, Gargantuesca, più una ancora più
@@ -1306,17 +1306,78 @@ le risposte alle domande del piano.
   programma `viandante`, che ha una sola lettera da ricolorare); il nome doppio non si rifiuta, si ripara con `freshName`; vale anche in
   singola per `io`. **Non fatta** la verifica con due schede: in questa sessione non c'erano strumenti del browser (build di produzione ok).
 
-### T44b · L'account e l'autenticazione — `in attesa` (domande in `docs/pipeline/domande/T44b.md`; dipende da T44a)
-- Fare: autenticazione sicura; l'id del viandante (T34) è quello dell'account; il profilo di T44a legato all'account.
-- **Domanda per l'autore**: quale fornitore per l'autenticazione (domanda 1 di [`multiplayer.md`](../archivio/3-to-do-backlog/plans/multiplayer.md)).
+### T44b · L'account e l'autenticazione — `da fare` (risposte in `docs/pipeline/domande/T44b.md`; dipende da T44a)
+- Pipeline: claude · stima 5% · priorità 4
+- Decisioni dell'autore (29/10/2026): Firebase Auth / Identity Platform di Google Cloud, accesso con Google e anonimo; in singola
+  nessun account (il viandante resta `io`). Un anonimo non può recuperare l'account: non compra crediti e gioca solo offline
+  (modelli locali), finché non lo lega a un account Google.
+- Fare: l'accesso nel client (Google, anonimo) e il token verificato dal server della sessione (`firebase-admin`, chiave del
+  progetto solo sul server, mai nel browser né in `dist/`); l'id del viandante è l'uid dell'account e il profilo di T44a gli resta
+  legato; un anonimo che si lega a Google tiene lo stesso viandante; chi è anonimo entra in un universo multigiocatore solo offline.
+  Senza configurazione di Firebase (sviluppo, test) vale l'id di oggi (`?viandante=`).
+- Fatto quando: test con un verificatore finto (token valido, scaduto, anonimo che si lega), verifica nel browser con l'emulatore di
+  Firebase o un progetto di prova, commit. Se serve creare il progetto Firebase, la domanda va in `docs/pipeline/domande/T44b.md`.
 
-### T45 · Crediti, lobby, carte e server su Google Cloud — `in attesa` (domande in `docs/pipeline/domande/T45.md`; dipende da T36, T44b)
+### T45 · Crediti, lobby, carte e server su Google Cloud — spezzato in T45a-T45f (risposte in `docs/pipeline/domande/T45.md`)
 - Fare, a pezzi (spezzare quando si comincia): crediti e pagamenti (P#1: l'1% sul costo); la lobby con il tetto di
   crediti, i modelli degli agenti (oggi `ai.textModel` e la tabella delle classi dello Scultore), i coefficienti e i
   minimi dell'universo; crediti finiti → ricarica, offline (modelli locali) o abbandona; la collezione di carte fuori
   dalla partita, con gli utilizzi; il server su Google Cloud con i repository privati, sempre acceso.
 - **Domande per l'autore**: le domande 1-4 di [`multiplayer.md`](../archivio/3-to-do-backlog/plans/multiplayer.md) (pagamenti, «un'altra storia», spese
   comuni, coefficienti).
+
+- Decisioni dell'autore (29/10/2026): pagamenti prima nessuno (crediti dati a mano dal master), poi Stripe (con Google Pay, che
+  Stripe accetta come metodo di pagamento); i contenuti passano solo nei cloni, con una gerarchia di titolari e una quota per chi ha
+  dato origine al contenuto; spese comuni tra i giocatori collegati, master compreso; i coefficienti regolano quanto spesso gli agenti
+  chiamano l'IA (una partita «Low Detail» a risparmio), e la lobby fa scegliere i modelli.
+
+### T45a · I crediti e le spese comuni — `da fare` (dipende da T36)
+- Pipeline: claude · stima 5% · priorità 5
+- Fare: un saldo di crediti per viandante (in `world/giocatori/<id>.json`, scritto solo dal server), dati a mano dal master
+  (console, o il Referente); ogni chiamata scala dal suo `chi` (T36: `payerOf`) il costo più l'1 % (P#1); le spese `comune` si
+  dividono tra i giocatori collegati in quel momento, master compreso; crediti finiti → ciò che il viandante chiede si fa con i
+  modelli locali (come senza chiave) e lo sa. Un anonimo (T44b) non ha crediti.
+- Fatto quando: test headless (due giocatori e il master collegati, una spesa comune divisa in tre; crediti finiti → modelli locali), commit.
+
+### T45b · I coefficienti di generazione e la partita «Low Detail» — `da fare`
+- Pipeline: claude · stima 6% · priorità 6
+- Contesto: l'autore vuole poter giocare a risparmio. I coefficienti regolano **quanto spesso ogni agente chiama l'IA**: direttamente
+  dove c'è un ritmo (sessioni del Concilio ogni N luoghi, dialoghi tra persone, revisioni dello Scultore, trame), indirettamente dove
+  no (meno persone per luogo, pacchetti di oggetti più rari, meno cose per luogo), e dove non si può si dice al giocatore cosa costa.
+- Fare: `universe.json → ai.coefficienti` (uno per agente o compito, 0-1, riparati dal validatore) e un preset «Low Detail»; il
+  censimento di ogni chiamata (`docs/conversazioni.md` di T67) diviso in diretta, indiretta, non regolabile; nella schermata della
+  Genesi (e poi nella lobby) i coefficienti e la scelta dei modelli degli agenti (`ai.textModel`, la tabella delle classi dello
+  Scultore); la stima del costo per ora di gioco.
+- Fatto quando: test (con «Low Detail» un giro di gioco offline fa meno chiamate in `MockModels`, nella misura attesa), commit.
+
+### T45c · L'eredità dei cloni — `da fare` (dipende da T42d, T36)
+- Pipeline: claude · stima 5% · priorità 7
+- Contesto: un clone di un clone porta contenuti cambiati più volte; chi li ha creati per primo deve ricevere una quota.
+- Fare: nella carta (`carta`) la catena dei titolari precedenti (`origini`), allungata da `cloneChanges`; a ogni utilizzo di un
+  contenuto (T36: `luoghi trame prompt`) le quote: una base fissa di eredità (10 %, in `universe.json`) più una parte in funzione di
+  quanto il contenuto è stato cambiato rispetto all'originale (misura dal diff del file); il resto al titolare attuale; la collezione
+  mostra ciò che si riceve dagli universi clonati.
+- Fatto quando: test (clone di un clone, contenuto cambiato poco o tanto: le quote attese), ADR, commit.
+
+### T45d · La lobby — `da fare` (dipende da T45a, T45b, T44b)
+- Pipeline: claude · stima 5% · priorità 8
+- Fare: prima di entrare in un universo multigiocatore la lobby: il tetto di crediti di chi entra (si somma ai budget di `ai`), i
+  coefficienti e i modelli dell'universo (del master), i minimi; crediti finiti in partita → ricarica, offline o abbandona; la
+  collezione di carte fuori dalla partita, con gli utilizzi.
+- Fatto quando: test del flusso, verifica nel browser con due schede, commit.
+
+### T45e · I pagamenti con Stripe — `da fare` (dipende da T45a, T44b)
+- Pipeline: claude · stima 5% · priorità 9
+- Fare: la ricarica dei crediti con Stripe Checkout (Google Pay compreso) in modalità di prova; il webhook sul server accredita
+  (idempotente); chiavi solo sul server; un anonimo non compra.
+- Fatto quando: test con il webhook finto, una ricarica di prova nel browser con le chiavi di test, commit. Le chiavi di Stripe le
+  dà l'autore: se mancano, la domanda va in `docs/pipeline/domande/T45e.md`.
+
+### T45f · Il server su Google Cloud — `da fare` (dipende da T44b, T45d)
+- Pipeline: claude · stima 6% · priorità 10
+- Fare: il server della sessione e i repository degli universi su Google Cloud, sempre acceso (Cloud Run con istanza minima o una VM,
+  disco persistente per `universes/`, repository privati), il deploy da script, i segreti in Secret Manager.
+- Fatto quando: un universo multigiocatore giocato da due browser sul server di prova, commit. Il progetto Google Cloud lo dà l'autore.
 
 ## Varie
 
@@ -1434,8 +1495,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fatto quando: il documento, commit.
 - Esito: redatto `docs/conversazioni.md` con l'architettura end-to-end, i diagrammi Mermaid dei flussi, le schede dettagliate di tutti i 38 task degli agenti (Genesi, Cartografia, Fucina, Contenuti, Azioni ed effetti, Menti e dialoghi, Scultura 3D, Meccaniche) con ruoli, prompt di sistema, prompt utente, response schema e flussi di validazione. Censimento completo di tutti i testi hardcoded in italiano nel codice (template dei prompt, descrizioni degli schemi, principi e filtri della quarta parete, narrazione di fallback, testi UI e HUD) con proposta di organizzazione per la futura localizzazione multi-lingua e per la coda abbonamenti (T68).
 
-### T68 · Generare l'universo con gli abbonamenti — spezzato in T68a (`fatto`), T68b, T68c (risposte in `docs/pipeline/domande/T68.md`; dipende da T67)
-- Pipeline: claude · stima 8% · approvato · priorità 40
+### T68 · Generare l'universo con gli abbonamenti — spezzato in T68a, T68b, T68c (risposte in `docs/pipeline/domande/T68.md`)
 - Decisioni dell'autore (29/10/2026): solo in locale con l'abbonamento di chi gioca (singola e sviluppo), mai il server del
   multigiocatore; solo i compiti già lenti (Genesi, Fucina, modelli dello Scultore, sessioni del Concilio), il resto sulle API;
   quale provider per quale agente in una tabella in `universe.json → ai`, con un provider predefinito.
@@ -1446,7 +1506,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   con lo stesso schema delle risposte e lo stesso registro dei consumi; da spezzare prima di cominciare.
 - Spezzato (29/10/2026) in tre pezzi, ADR-0077:
 
-#### T68a · La tabella dei provider e la coda su disco — `fatto`
+### T68a · La tabella dei provider e la coda su disco — `fatto`
 - Fare: `universe.json → ai.provider`/`agenti` (riparati), i compiti lenti, `RoutedModels`, `QueueModels` (client di `/api/coda`),
   la coda su disco `server/subscriptionQueue.ts` (richiesta → presa → risposta, battito del servitore), prezzi a zero nel registro.
 - Fatto quando: test della coda e dell'instradamento, ADR, commit.
@@ -1454,7 +1514,8 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   `SUBSCRIPTION_PRICES` in `prices.ts`, `tests/subscription.test.ts`, ADR-0077. Rispetto al previsto: anche `mechanic.design` (la Fucina
   delle meccaniche) e `model.resculpt` tra i compiti lenti; `model.judge` (foto) resta sulle API. Nel gioco non è ancora collegato.
 
-#### T68b · Il processo che serve la coda con le CLI — `da fare` (dipende da T68a)
+### T68b · Il processo che serve la coda con le CLI — `da fare` (dipende da T68a)
+- Pipeline: claude · stima 4% · priorità 20
 - Contesto: `take`/`answer`/`beat` di `server/subscriptionQueue.ts` sono il protocollo; il lancio delle CLI e il riconoscimento dei
   limiti sono in `tools/pipeline/pipeline.mjs` (`usageLimit`).
 - Fare: `tools/abbonamenti/servi.mjs` (o `.ts` con vite-node) `--provider claude|antigravity`: battito ogni 10 s, prende la richiesta più
@@ -1463,7 +1524,8 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   accetta (o errore), token da ciò che la CLI riporta, un limite dell'abbonamento → `errore` chiaro e pausa fino al reset. `npm run abbonamento`.
 - Fatto quando: test con una CLI finta (script che risponde), una prova vera con Claude Code su un `model.sculpt`, commit.
 
-#### T68c · Gli abbonamenti nel gioco — `da fare` (dipende da T68b)
+### T68c · Gli abbonamenti nel gioco — `da fare` (dipende da T68b)
+- Pipeline: claude · stima 3% · priorità 21
 - Fare: `main.ts` costruisce `RoutedModels` se `usesSubscriptions` e la coda è servita (`QueueModels.available`), solo se l'universo
   è in singola (mai in `host.ts`); `#models` e il pannello del Concilio dicono quali agenti vanno su quale abbonamento e cosa c'è in coda;
   documentazione per chi scarica il repository (README: impostare la tabella, lanciare il servitore).
