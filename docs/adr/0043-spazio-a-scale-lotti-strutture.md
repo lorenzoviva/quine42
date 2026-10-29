@@ -37,6 +37,18 @@ tre per sessione dipendeva da quante volte si gioca, non da quanto è grande il 
    generico della sua classe con `form.wanted`; quando lo Scultore lo scrive (`addModel` → `applyFiles`) la cosa
    lo indossa subito, con il seme della sua origine.
 7. Il raggio del viandante passa da 0,3 a 0,22: le porte delle case sono larghe 0,6 caselle.
+8. **Le scale come rampe** (T53a, 29/10/2026): il pavimento di una colonna di voxel è l'altezza del pieno che parte da
+   terra senza buchi, senza limite (`floors` in `src/mj/mesh.ts`). Un gradino è 0,2 caselle (`stepOf`). Ci si sta
+   (`bodyGround` in `forms.ts` → `Form.floor`, `Form.block`) se nulla è ad altezza del corpo sopra quel pavimento
+   (`headroom`) e se il pavimento si raggiunge: quelli fino a un gradino da terra, gli altri salendo colonne vicine al più
+   un gradino alla volta (un riempimento dalle colonne basse). Il corpo (la sua scatola) è fermato se sotto di lui c'è una
+   colonna dove non si sta o due colonne vicine con più di un gradino di differenza (`rampBlocks`, `kernel.formBlocks`):
+   una scala di gradini piccoli porta in alto e si riscende, un muro resta un muro, il bordo di un pianerottolo non si
+   scavalca. `floorAt` dà l'altezza del pavimento della colonna (il renderer la ammorbidisce con `climb`); le azioni
+   del modello (la porta che si apre) cambiano anche pavimenti e blocchi dell'istanza. Le cose `dentro` vanno solo sul
+   piano terra (pavimenti fino a un gradino). Senza più piani per colonna (T53b) si sta sempre sull'unico pavimento: ciò
+   che resta sotto un pianerottolo sospeso non è un posto. La canna chiusa di un pozzo, che prima si attraversava, ora
+   è irraggiungibile.
 
 Le **ancore** previste dal piano (cose messe «vicino a» altre) non sono in questo ADR: le cose stanno ancora
 dove le mette il piano (`dentro fuori ovunque`).
@@ -48,4 +60,4 @@ dove le mette il piano (`dentro fuori ovunque`).
   restano dove le metteva il piano.
 - Il Cartografo descrive le costruzioni con parole, il kernel decide dove e come stanno: gli agenti non contano
   caselle (lezione ricorrente).
-- Test: `tests/lots.test.ts`.
+- Test: `tests/lots.test.ts`, `tests/ramps.test.ts` (la scala di dieci gradini, il muro, le strutture del seme).

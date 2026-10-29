@@ -191,17 +191,35 @@ export function meshVoxels(g: VoxelGrid, palette: Record<string, PaletteEntry>, 
 
 /**
  * What one can stand on: per voxel column, how many voxels of solid start at the floor and go up without
- * a gap, if no more than `step` (a floor, a doorstep), else 0.
+ * a gap (at most 255), if no more than `cap`, else 0. Without a cap every column has its height: a step of a
+ * stair is a floor as high as it is, and whether one gets up there is a matter of the steps around (ADR-0043).
  */
-export function floors(g: VoxelGrid, palette: Record<string, PaletteEntry>, step: number): Uint8Array {
+export function floors(g: VoxelGrid, palette: Record<string, PaletteEntry>, cap = Infinity): Uint8Array {
   const colors = colorTable(g.alphabet, palette);
   const out = new Uint8Array(g.X * g.Y);
   const XY = g.X * g.Y;
   for (let i = 0; i < XY; i++) {
     let h = 0;
     while (h < g.Z && colors[g.cells[i + h * XY]]) h++;
-    out[i] = h <= step ? h : 0;
+    out[i] = h <= cap ? Math.min(255, h) : 0;
   }
+  return out;
+}
+
+/**
+ * Where a body standing on a column's floor hits its head: per voxel column, whether something solid is
+ * between `from` and `to` voxels above that column's own floor (a table top, a lintel too low).
+ */
+export function headroom(g: VoxelGrid, palette: Record<string, PaletteEntry>, floor: Uint8Array, from: number, to: number): Uint8Array {
+  const colors = colorTable(g.alphabet, palette);
+  const out = new Uint8Array(g.X * g.Y);
+  const XY = g.X * g.Y;
+  for (let i = 0; i < XY; i++)
+    for (let z = Math.max(0, floor[i] + from); z < Math.min(g.Z, floor[i] + to); z++)
+      if (colors[g.cells[i + z * XY]]) {
+        out[i] = 1;
+        break;
+      }
   return out;
 }
 

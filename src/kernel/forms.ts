@@ -9,7 +9,7 @@
 
 import { boxOf, classOf, CLASSES, type AssetClass } from '../mj/classes';
 import type { PaletteEntry, Vec3 } from '../mj/engine';
-import { floors, footprint, type VoxelGrid } from '../mj/mesh';
+import { floors, footprint, headroom, type VoxelGrid } from '../mj/mesh';
 import { compileMjx } from '../mj/model';
 import { act, runMjx } from '../mj/run';
 import { hashStr } from './rng';
@@ -95,8 +95,10 @@ export interface Form {
   result?: FormResult;
   /** Per voxel column: something solid at body height (between a step and a head). */
   foot?: Uint8Array;
-  /** Per voxel column: the height (voxels) of a floor or step one stands on. */
+  /** Per voxel column: the height (voxels) of the solid that starts at the ground and goes up without a gap. */
   floor?: Uint8Array;
+  /** Per voxel column: a body cannot stand there (something at body height above its floor, or out of reach). */
+  block?: Uint8Array;
   cls: AssetClass;
   /** Half the diagonal of the footprint, in tiles: the reach of its collision. */
   reach: number;
@@ -108,7 +110,7 @@ export interface Form {
 const SEEDS: Record<string, number> = { albero: 3, cespuglio: 3, roccia: 3, sasso: 3, persona: 8, animale: 4, bestia: 4, edificio: 1, grande: 1, monumento: 2 };
 
 /** A step one walks up without noticing (a doorstep, a floor): 0.2 tiles, in voxels of a density. */
-const stepOf = (vpt: number) => Math.round(0.2 * vpt);
+export const stepOf = (vpt: number) => Math.round(0.2 * vpt);
 
 /**
  * The box a program runs in: its own `size` if it says one (structures decide on a coarse grid and `map`
@@ -121,6 +123,55 @@ function sizeFor(xml: string, cls: AssetClass): Vec3 | undefined {
 
 /** Where a body cannot go: voxel columns solid between a step and a head. */
 export const bodyFoot = (g: VoxelGrid, palette: Record<string, PaletteEntry>, vpt = VPT) => footprint(g, palette, stepOf(vpt) + 1, Math.ceil(0.7 * vpt));
+
+/**
+ * What a body stands on in a model (ADR-0043, T53a): every column's floor, and where a body cannot stand — it
+ * hits something at body height, or the floor is out of reach. A floor no higher than a step is reached from the
+ * ground; a higher one only going up neighbouring columns a step at a time: a stair is a ramp, a wall is not.
+ */
+export function bodyGround(g: VoxelGrid, palette: Record<string, PaletteEntry>, vpt = VPT): { floor: Uint8Array; block: Uint8Array } {
+  const floor = floors(g, palette);
+  const block = headroom(g, palette, floor, stepOf(vpt) + 1, Math.ceil(0.7 * vpt));
+  const step = stepOf(vpt);
+  const reached = new Uint8Array(g.X * g.Y);
+  const queue: number[] = [];
+  for (let i = 0; i < floor.length; i++) if (floor[i] <= step && !block[i]) (reached[i] = 1), queue.push(i);
+  while (queue.length) {
+    const i = queue.pop()!;
+    const x = i % g.X, y = (i - x) / g.X;
+    for (const [nx, ny] of [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]]) {
+      if (nx < 0 || ny < 0 || nx >= g.X || ny >= g.Y) continue;
+      const n = nx + ny * g.X;
+      if (reached[n] || block[n] || Math.abs(floor[n] - floor[i]) > step) continue;
+      reached[n] = 1;
+      queue.push(n);
+    }
+  }
+  for (let i = 0; i < block.length; i++) if (!reached[i]) block[i] = 1;
+  return { floor, block };
+}
+
+/**
+ * Whether a body whose box covers a rectangle of the model's own frame (tiles from its centre) is blocked: a
+ * column under it where it cannot stand, or two neighbouring columns under it whose floors differ by more than
+ * a step (the edge of a landing, of a table). Columns outside the model are its ground (floor 0).
+ */
+export function rampBlocks(f: Form, floor: Uint8Array, block: Uint8Array, x0: number, z0: number, x1: number, z1: number): boolean {
+  const g = f.result!.grid;
+  const vx0 = Math.max(-1, Math.floor(x0 * f.vpt + g.X / 2)), vx1 = Math.min(g.X, Math.floor(x1 * f.vpt + g.X / 2));
+  const vy0 = Math.max(-1, Math.floor(z0 * f.vpt + g.Y / 2)), vy1 = Math.min(g.Y, Math.floor(z1 * f.vpt + g.Y / 2));
+  if (vx1 < 0 || vy1 < 0 || vx0 >= g.X || vy0 >= g.Y) return false;
+  const step = stepOf(f.vpt);
+  const at = (x: number, y: number) => (x >= 0 && y >= 0 && x < g.X && y < g.Y ? floor[x + y * g.X] : 0);
+  for (let y = vy0; y <= vy1; y++)
+    for (let x = vx0; x <= vx1; x++) {
+      const inside = x >= 0 && y >= 0 && x < g.X && y < g.Y;
+      if (inside && block[x + y * g.X]) return true;
+      const h = at(x, y);
+      if ((x < vx1 && Math.abs(at(x + 1, y) - h) > step) || (y < vy1 && Math.abs(at(x, y + 1) - h) > step)) return true;
+    }
+  return false;
+}
 
 /** Runs programs in this thread (Node, tests): no meshes. */
 export class InlineRunner implements FormRunner {
@@ -223,7 +274,7 @@ export class Forms {
       .then((result) => {
         form.result = result;
         form.foot = bodyFoot(result.grid, result.palette, vpt);
-        form.floor = floors(result.grid, result.palette, stepOf(vpt));
+        Object.assign(form, bodyGround(result.grid, result.palette, vpt));
         form.reach = Math.hypot(result.grid.X, result.grid.Y) / 2 / vpt;
         form.status = 'ready';
         this.version++;

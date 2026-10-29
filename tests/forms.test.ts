@@ -78,15 +78,17 @@ describe('forms in the kernel', () => {
     const form = await k.forms.wait(fc.model, fc.seed);
     expect(form?.status).toBe('ready');
     k.tick(1 / 60);
-    // Where its voxels stand (the rim) one cannot go; where they do not (the shaft, the corners of its
-    // box) one can, even in the same tile: the footprint, not the cell.
+    // Where its voxels stand (the rim) one cannot go, nor where only climbing over the rim would get one
+    // (the shaft, T53a); where they do not (the corners of its box) one can, even in the same tile: the
+    // footprint, not the cell.
     const g = form!.result!.grid;
     const at = (vx: number, vy: number) => [x + (vx + 0.5 - g.X / 2) / 20, y + (vy + 0.5 - g.Y / 2) / 20] as const;
     let blocked = 0, open = 0;
     for (let vy = 0; vy < g.Y; vy += 3)
       for (let vx = 0; vx < g.X; vx += 3) {
         const [px, py] = at(vx, vy);
-        const solid = !!form!.foot![vx + vy * g.X];
+        const solid = !!form!.block![vx + vy * g.X];
+        if (form!.foot![vx + vy * g.X]) expect(solid).toBe(true);
         expect(k.free(px, py, 0.001), `${vx},${vy}`).toBe(!solid);
         solid ? blocked++ : open++;
       }
