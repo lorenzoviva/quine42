@@ -14,7 +14,11 @@ brillano **rune**: token Lua veri. Ciò che è scritto sul tappeto si esegue. Co
 tappeto si ferma: puoi camminare fino al bordo ed entrare nella **corona**, il codice sorgente
 dell'universo, e riscriverlo.
 
-> Le immagini del gioco 2D (fino allo step 8) sono in `docs/img/`; quelle del 3D sono da rifare.
+![Il borgo di giorno: voxel, modelli MarkovJunior, rilievo e rune nel terreno](docs/img/3d/world.png)
+
+| Una persona con la chat | L'inventario con le icone dei modelli | Oltre il tappeto: la corona |
+|---|---|---|
+| ![chat](docs/img/3d/chat.png) | ![inventario](docs/img/3d/inventory.png) | ![corona](docs/img/3d/corona.png) |
 
 ## Avvio
 
