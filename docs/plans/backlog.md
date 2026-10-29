@@ -807,16 +807,22 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 
 Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/userchats/to-do-2026-10-24.md), «Generazione della heightmap» e «taglia»).
 
-### T51 · Il livello del mare e un motore dell'acqua — `da fare` (si comincia da T51a; T51b in attesa della domanda)
+### T51 · Il livello del mare e un motore dell'acqua — `in attesa` (T51a fatto; T51b attende la risposta in `docs/pipeline/domande/T51.md`)
 - Pipeline: claude · stima 6% · approvato · priorità 50
 - Contesto: ADR-0048. Oggi ogni specchio d'acqua è piano **dentro il suo chunk** (`waterLevels` in `relief.ts`: al livello
   più basso delle sue caselle, contando solo il chunk); lo stesso lago o fiume su due chunk ha due livelli, e laghi vicini
   livelli diversi: a vista l'acqua ha dei dislivelli (si vede anche in `Blocchi.png`).
-- **T51a · il livello del mare**: un livello dell'acqua per il mondo (`universe.json → rilievo.mare`, o derivato dal rilievo
+- **T51a · il livello del mare** — `fatto` (commit b3f4f53): un livello dell'acqua per il mondo (`universe.json → rilievo.mare`, o derivato dal rilievo
   alla Genesi): il mare e ciò che lo tocca stanno lì, il terreno sotto viene scavato fino a lui con le sponde (si sale sempre,
   come ora); laghi e fiumi interni hanno un livello per specchio **intero** (attraverso i chunk: lo specchio si segue fino
   al bordo del mondo caricato, deterministico, cache per regione). Test: lo stesso specchio su due chunk ha un livello; due
   chunk caricati in ordine diverso danno gli stessi livelli; nessuna casella d'acqua sopra la terra che la circonda.
+  - Esito: `worldLevels` (`relief.ts`) è un campo dei livelli di tutto il mondo caricato (cammino minimo: acqua piana e mai
+    sopra la riva, sponde di due livelli a casella, terra mai sotto il mare), su cui `chunkLevels` posa i lotti; mare da
+    `rilievo.mare` o `Relief.sea` (10 % delle caselle sotto). Rispetto al previsto: la terra sotto il mare **sale** al mare
+    invece di scavare il fondo; niente cache per regione, il campo si rifà quando cambia un chunk (pochi ms) e `Chunk.levels`
+    fa ridisegnare chi cambia livelli senza cambiare caselle; il client sottile riceve le caselle di mare (`PlaceView.mare`);
+    la miniatura usa il luogo da solo. Nel browser: 292 attraversamenti d'acqua tra chunk, tutti allo stesso livello.
 - **T51b · il motore dell'acqua** (ADR): l'acqua che scorre quando il terreno cambia (incantesimi che alzano o abbassano
   il terreno, T57; «Altro…» che scava). Proposta: MarkovJunior resta per **generare** (rilievo, fiumi alla Genesi); per la
   fisica un automa cellulare del kernel sui chunk caricati (quantità d'acqua per casella, scorre verso i vicini più bassi,

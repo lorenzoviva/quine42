@@ -49,7 +49,7 @@ import { cleanPanel, designMechanic } from './agents/mechanics';
 import { BENCH, cleanCases, runCase, textKey, type BenchEntry, type BenchRun, type BenchScene, type BenchShown } from './bench';
 import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Identity } from './agents/content';
 import { addItem, CARRY_CAPACITY, countItem, HOTBAR, equippedItem, moveSlot, newInventory, putSlot, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
-import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH } from './relief';
+import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH, worldLevels } from './relief';
 import { CardLedger, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, payerOf, placeCardId, stampFiles, titolareOf, type Card, type Carta } from './cards';
 import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState } from './wanderers';
 import type { ActionDef, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Partita, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
@@ -76,6 +76,8 @@ export interface Chunk {
   tiles: string;
   /** Bumped whenever tiles change (renderer cache key). */
   version: number;
+  /** Bumped when its levels change and its tiles do not (T51a: water found beyond it); renderer cache key too. */
+  levels?: number;
   stage: 'draft' | 'planned';
   place?: Place;
   plan?: ChunkPlan;
@@ -380,8 +382,10 @@ export class Kernel {
   private solidCells = new Set<string>();
   /** Solid things with a model, by the cells their footprint reaches (they block by their voxels). */
   private reliefCache?: { key: string; relief: Relief };
-  /** The level of every tile, per chunk (flat water, flat lots), while its tiles, lots and relief stay the same. */
-  private levelCache = new WeakMap<Chunk, { tiles: string; lots: Building[]; relief: Relief; levels: Int16Array }>();
+  /** The level of every tile, per chunk (flat water, flat lots), while its tiles, lots and the world's levels stay the same. */
+  private levelCache = new WeakMap<Chunk, { tiles: string; lots: Building[]; field: Int16Array; levels: Int16Array }>();
+  /** The levels of the loaded world before the lots (T51a), while its places, their tiles, the relief and the sea stay the same. */
+  private worldField?: { relief: Relief; sea: number; tiles: Map<Chunk, string>; levels: Map<Chunk, Int16Array> };
   private solidForms = new Map<string, Array<SolidForm>>();
   /** Footprints of instances whose model was changed by an action (the door is open). */
   private instanceFeet = new Map<Id, { key: string; foot: Uint8Array; floor: Uint8Array; block: Uint8Array }>();
@@ -1990,9 +1994,10 @@ export class Kernel {
     const { result, tiles: laid } = this.layoutOf(ch, plan, pathCode, true);
     const { tiles, lots } = this.lotsOf({ ...ch, tiles: laid, buildings: result.buildings }, plan, pathCode);
     const place = this.placementsOf(ch, plan, result);
-    const relief = this.relief;
     const liquid = (code: string) => this.palette[code]?.layer === 'liquid';
-    const height = (c: number, r: number) => relief.level(ch.cx * S + c, ch.cy * S + r);
+    // Its own levels, as if alone (T51a): the same miniature whether or not the places around are loaded.
+    const field = worldLevels([{ ...ch, tiles }], S, liquid, (c, r) => this.relief.level(c, r), this.seaLevel)[0];
+    const height = (c: number, r: number) => field[r * S + c];
     const levels = chunkLevels(tiles, S, liquid, height, result.buildings);
     const local = (cell: number) => ({ x: (cell % S) + 0.5, y: Math.floor(cell / S) + 0.5 });
     const things: PlaceMiniature['things'] = [];
@@ -2100,18 +2105,47 @@ export class Kernel {
     return this.reliefCache.relief;
   }
 
-  /** The height (tiles) of the ground at a point of the simulation: the relief of its tile; water lies flat, lots too. */
+  /** The sea's level (T51a): `universe.json → rilievo.mare`, or the one the relief gives. */
+  get seaLevel(): number {
+    const m = this.config.rilievo?.mare;
+    return typeof m === 'number' && Number.isFinite(m) ? Math.round(m) : this.relief.sea;
+  }
+
+  /**
+   * The levels of a loaded place before its lots (T51a): one field for the whole loaded world (`worldLevels`:
+   * the sea at its level, each body of water flat as a whole, the banks), made again when a place comes, goes
+   * or changes its tiles. A place whose levels change while its tiles do not is drawn again (`Chunk.levels`).
+   */
+  private levelsOf(ch: Chunk): Int16Array {
+    const relief = this.relief, sea = this.seaLevel;
+    const f = this.worldField;
+    let fresh = !!f && f.relief === relief && f.sea === sea && f.tiles.size === this.chunks.size;
+    if (fresh) for (const c of this.chunks.values()) if (f!.tiles.get(c) !== c.tiles) { fresh = false; break; }
+    if (!fresh) {
+      const list = [...this.chunks.values()];
+      const out = worldLevels(list, this.config.chunkSize, (code) => this.palette[code]?.layer === 'liquid', (c, r) => relief.level(c, r), sea);
+      const levels = new Map(list.map((c, i) => [c, out[i]]));
+      if (f) for (const c of list) {
+        const old = f.levels.get(c);
+        if (old && f.tiles.get(c) === c.tiles && old.some((v, i) => v !== levels.get(c)![i])) c.levels = (c.levels ?? 0) + 1;
+      }
+      this.worldField = { relief, sea, tiles: new Map(list.map((c) => [c, c.tiles])), levels };
+    }
+    return this.worldField!.levels.get(ch)!;
+  }
+
+  /** The height (tiles) of the ground at a point of the simulation: the world's levels (T51a); lots lie flat. */
   groundAt(x: number, y: number): number {
     const col = Math.floor(x), row = Math.floor(y);
     const S = this.config.chunkSize;
     const cx = Math.floor(col / S), cy = Math.floor(row / S);
     const ch = this.chunks.get(this.chunkKey(cx, cy));
-    const relief = this.relief;
-    if (!ch) return relief.height(col, row);
+    if (!ch) return Math.max(this.seaLevel, this.relief.level(col, row)) * LEVEL;
+    const field = this.levelsOf(ch);
     let l = this.levelCache.get(ch);
-    if (l?.tiles !== ch.tiles || l.lots !== ch.buildings || l.relief !== relief) {
-      const levels = chunkLevels(ch.tiles, S, (code) => this.palette[code]?.layer === 'liquid', (c, r) => relief.level(cx * S + c, cy * S + r), ch.buildings);
-      l = { tiles: ch.tiles, lots: ch.buildings, relief, levels };
+    if (l?.tiles !== ch.tiles || l.lots !== ch.buildings || l.field !== field) {
+      const levels = chunkLevels(ch.tiles, S, (code) => this.palette[code]?.layer === 'liquid', (c, r) => field[r * S + c], ch.buildings);
+      l = { tiles: ch.tiles, lots: ch.buildings, field, levels };
       this.levelCache.set(ch, l);
     }
     return l.levels[(row - cy * S) * S + (col - cx * S)] * LEVEL;

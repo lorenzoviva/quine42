@@ -6,7 +6,7 @@ import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockModels } from '../src/kernel/ai/mock';
-import { chunkLevels, LEVEL, mend, Relief, RELIEF_PATH, waterLevels } from '../src/kernel/relief';
+import { chunkLevels, LEVEL, mend, Relief, RELIEF_PATH, SEA_SHARE, waterLevels, worldLevels, type WaterChunk } from '../src/kernel/relief';
 
 describe('relief', () => {
   const r = new Relief(12345);
@@ -60,6 +60,88 @@ describe('relief', () => {
     expect([lv[3], lv[7], lv[11]]).toEqual([3, 3, 3]);
     expect(lv[2]).toBe(-1);
     expect(lv[12]).toBe(-1);
+  });
+});
+
+describe('the levels of the world (T51a)', () => {
+  const S = 6;
+  const wet = (c: string) => c === 'w';
+  /** Two places side by side; a lake crosses their border, the relief rises to the east. */
+  const lakeWest = '......' + '...www' + '...www' + '......' + '......' + '......';
+  const lakeEast = '......' + 'ww....' + 'www...' + '......' + '......' + '......';
+  const pair: WaterChunk[] = [
+    { cx: 0, cy: 0, tiles: lakeWest },
+    { cx: 1, cy: 0, tiles: lakeEast },
+  ];
+  const rise = (c: number, r: number) => 4 + Math.floor(c / 2) + (r % 2);
+  const levelOf = (out: Int16Array[], chunks: WaterChunk[], col: number, row: number) => {
+    const k = chunks.findIndex((c) => c.cx === Math.floor(col / S) && c.cy === Math.floor(row / S));
+    return out[k][(row - chunks[k].cy * S) * S + (col - chunks[k].cx * S)];
+  };
+
+  it('lays a body of water flat as a whole across two places, at the lowest of its tiles', () => {
+    const out = worldLevels(pair, S, wet, rise, 0);
+    const lake: number[] = [];
+    for (const ch of pair) for (let i = 0; i < S * S; i++) if (wet(ch.tiles[i])) lake.push(out[pair.indexOf(ch)][i]);
+    expect(new Set(lake).size).toBe(1);
+    expect(lake[0]).toBe(Math.min(rise(3, 1), rise(3, 2))); // the westmost tiles, the lowest
+    // Each place alone would have had two levels.
+    const alone = pair.map((c) => worldLevels([c], S, wet, rise, 0)[0]);
+    expect(alone[1][6]).toBeGreaterThan(lake[0]);
+  });
+
+  it('gives the same levels whatever the order of the places', () => {
+    const three: WaterChunk[] = [...pair, { cx: 0, cy: 1, tiles: 'w'.repeat(S) + '.'.repeat(S * (S - 1)) }];
+    const a = worldLevels(three, S, wet, rise, 2);
+    const order = [2, 0, 1];
+    const b = worldLevels(order.map((i) => three[i]), S, wet, rise, 2);
+    order.forEach((i, j) => expect([...b[j]]).toEqual([...a[i]]));
+  });
+
+  it('never has water above the land around it; the banks are climbed, the land never above the relief', () => {
+    const r = new Relief(4242);
+    const chunks: WaterChunk[] = [];
+    // Lakes scattered over nine places, with the sea in one corner.
+    for (let cy = 0; cy < 3; cy++)
+      for (let cx = 0; cx < 3; cx++) {
+        const tiles = Array.from({ length: S * S }, (_, i) => ((i * 7 + cx * 5 + cy * 11) % 9 < 2 ? 'w' : '.')).join('');
+        chunks.push({ cx, cy, tiles, draft: cx === 0 && cy === 0 ? 'o'.repeat(S * S) : undefined });
+      }
+    const sea = r.sea;
+    const level = (c: number, row: number) => r.level(c, row);
+    const out = worldLevels(chunks, S, wet, level, sea);
+    const tile = (c: number, row: number) => chunks.find((ch) => ch.cx === Math.floor(c / S) && ch.cy === Math.floor(row / S))!.tiles[(row % S) * S + (c % S)];
+    for (let row = 0; row < 3 * S; row++)
+      for (let c = 0; c < 3 * S; c++) {
+        const v = levelOf(out, chunks, c, row);
+        if (!wet(tile(c, row))) expect(v).toBeLessThanOrEqual(Math.max(sea, level(c, row)));
+        expect(v).toBeGreaterThanOrEqual(sea);
+        for (const [dc, dr] of [[1, 0], [0, 1]]) {
+          if (c + dc >= 3 * S || row + dr >= 3 * S) continue;
+          const u = levelOf(out, chunks, c + dc, row + dr);
+          const [a, b] = [wet(tile(c, row)), wet(tile(c + dc, row + dr))];
+          if (a && b) expect(u).toBe(v);
+          else if (a) expect(v).toBeLessThanOrEqual(u);
+          else if (b) expect(u).toBeLessThanOrEqual(v);
+          else expect(Math.abs(u - v)).toBeLessThanOrEqual(2);
+        }
+      }
+    // The sea lies at its level, so does the water that touches it.
+    for (let i = 0; i < S * S; i++) if (wet(chunks[0].tiles[i])) expect(out[0][i]).toBe(sea);
+  });
+
+  it('puts the sea where a share of the world lies below it', () => {
+    const r = new Relief(12345);
+    let below = 0, all = 0;
+    for (let y = 0; y < 90; y++)
+      for (let x = 0; x < 128; x++) {
+        all++;
+        if (r.level(x, y) <= r.sea) below++;
+      }
+    expect(r.sea).toBeGreaterThanOrEqual(0);
+    expect(r.sea).toBeLessThan(r.max);
+    expect(below / all).toBeGreaterThanOrEqual(SEA_SHARE * 0.5);
+    expect(below / all).toBeLessThan(0.5);
   });
 });
 
@@ -124,24 +206,71 @@ describe('the kernel on the relief', () => {
   it('stands on the ground of the universe’s relief, and falls back to Hills if the program is broken', async () => {
     const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
     const r = new Relief(k.config.seed);
-    // Far from the loaded chunks there is no water: the ground is the relief.
+    // Far from the loaded chunks there is no water: the ground is the relief, never below the sea.
+    const ground = (x: number, y: number) => Math.max(r.sea, r.level(x, y)) * LEVEL;
+    expect(k.seaLevel).toBe(r.sea);
     for (const [x, y] of [[1000.5, 0.5], [-1300.2, 40.9], [100, -700]]) {
-      expect(k.groundAt(x, y)).toBe(r.height(Math.floor(x), Math.floor(y)));
+      expect(k.groundAt(x, y)).toBe(ground(Math.floor(x), Math.floor(y)));
       expect(k.floorAt(x, y)).toBeGreaterThanOrEqual(k.groundAt(x, y));
     }
-    // Water in the loaded chunks lies flat, never above the relief under it.
+    // Water in the loaded chunks lies flat, never above the ground under it.
     const S = k.config.chunkSize;
     for (const ch of k.chunks.values())
       for (let i = 0; i < S * S; i++) {
         if (k.palette[ch.tiles[i]]?.layer !== 'liquid') continue;
         const x = ch.cx * S + (i % S), y = ch.cy * S + Math.floor(i / S);
-        expect(k.groundAt(x, y)).toBeLessThanOrEqual(r.height(x, y));
+        expect(k.groundAt(x, y)).toBeLessThanOrEqual(ground(x, y));
         if ((i % S) + 1 < S && k.palette[ch.tiles[i + 1]]?.layer === 'liquid') expect(k.groundAt(x + 1, y)).toBe(k.groundAt(x, y));
       }
     // A broken program is a fault, never a broken world.
     k.applyFiles({ ...k.files, [RELIEF_PATH]: '<sequence values="BA"><nonsense/></sequence>' });
-    expect(k.groundAt(100, -700)).toBe(r.height(100, -700));
+    expect(k.groundAt(100, -700)).toBe(ground(100, -700));
     expect(k.faults.has('universe:relief')).toBe(true);
+  }, 30_000);
+
+  it('takes the sea from universe.json, and keeps a body of water at one level across the loaded places', async () => {
+    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...JSON.parse(bundledFiles['universe.json']), rilievo: { mare: 3 } }) };
+    const k = await Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+    expect(k.seaLevel).toBe(3);
+    expect(k.groundAt(1000.5, 0.5)).toBeGreaterThanOrEqual(3 * LEVEL);
+    const S = k.config.chunkSize;
+    const liquid = (x: number, y: number) => k.palette[k.tileAt(x, y) ?? '']?.layer === 'liquid';
+    // A pond across the border of two places, its east half on the higher ground.
+    const water = Object.keys(k.palette).find((c) => k.palette[c].layer === 'liquid')!;
+    k.tick(1 / 60);
+    const [west, east] = [k.chunks.get('0,0')!, k.chunks.get('1,0')!];
+    const wet = (t: string, cols: number[]) => [...t].map((c, i) => (cols.includes(i % S) && i >= 5 * S && i < 9 * S ? water : c)).join('');
+    west.tiles = wet(west.tiles, [S - 2, S - 1]);
+    east.tiles = wet(east.tiles, [0, 1]);
+    const levelsBefore = east.levels ?? 0;
+    // Water touching water is at one level, across the places' borders too; never above the land beside it.
+    let crossings = 0, shores = 0;
+    for (const ch of k.chunks.values())
+      for (let i = 0; i < S * S; i++) {
+        const x = ch.cx * S + (i % S), y = ch.cy * S + Math.floor(i / S);
+        if (!liquid(x, y)) continue;
+        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          if (!k.chunks.has(`${Math.floor((x + dx) / S)},${Math.floor((y + dy) / S)}`)) continue;
+          if (liquid(x + dx, y + dy)) {
+            if (Math.floor((x + dx) / S) !== ch.cx || Math.floor((y + dy) / S) !== ch.cy) crossings++;
+            expect(k.groundAt(x + dx, y + dy)).toBe(k.groundAt(x, y));
+          } else {
+            shores++;
+            expect(k.groundAt(x + dx, y + dy), `${x},${y}`).toBeGreaterThanOrEqual(k.groundAt(x, y));
+          }
+        }
+      }
+    expect(shores).toBeGreaterThan(0);
+    expect(crossings).toBeGreaterThan(0);
+    // The pond grows over the whole east place, down to its lowest tile: the west half, its tiles the same,
+    // goes down with it and is drawn again.
+    k.config.rilievo = { mare: 0 };
+    const pond = k.groundAt(S - 1, 6);
+    const low = Math.min(pond / LEVEL, ...Array.from({ length: S * S }, (_, i) => k.relief.level(S + (i % S), Math.floor(i / S))));
+    east.tiles = water.repeat(S * S);
+    expect(k.groundAt(S - 1, 6)).toBe(low * LEVEL);
+    expect(k.groundAt(S + 9, 9)).toBe(low * LEVEL);
+    if (low * LEVEL < pond) expect(west.levels ?? 0).toBeGreaterThan(levelsBefore);
   }, 30_000);
 
   it('lays the lots of the planned places flat, their structures on them, the land around still climbable', async () => {

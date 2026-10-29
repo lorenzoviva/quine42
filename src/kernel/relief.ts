@@ -95,6 +95,31 @@ export class Relief {
     this.max = hi[0] + hi[1] - this.base;
   }
 
+  /**
+   * The sea's level when the universe does not say it (T51a): the level below which (or at which) lies a
+   * `SEA_SHARE` of the world's tiles. The sides are coprime, so every pair of the two boxes' tiles is a tile
+   * of the world once in a period: the share is counted exactly from the two boxes alone.
+   */
+  get sea(): number {
+    if (this.seaLevel !== undefined) return this.seaLevel;
+    const [a, b] = this.tiles.map((t) => {
+      const h = new Array<number>(DEPTH + 1).fill(0);
+      for (const v of t.h) h[v]++;
+      return h;
+    });
+    const total = this.tiles[0].h.length * this.tiles[1].h.length;
+    const count = new Array<number>(2 * DEPTH + 1).fill(0);
+    for (let i = 0; i <= DEPTH; i++) for (let j = 0; j <= DEPTH; j++) count[i + j] += a[i] * b[j];
+    let seen = 0, level = 0;
+    for (let s = 0; s < count.length; s++) {
+      seen += count[s];
+      if (count[s]) level = s;
+      if (seen >= SEA_SHARE * total) break;
+    }
+    return (this.seaLevel = level - this.base);
+  }
+  private seaLevel?: number;
+
   /** The level of a tile (an integer, 0 the lowest). */
   level(col: number, row: number): number {
     let s = -this.base;
@@ -135,6 +160,94 @@ export function waterLevels(tiles: string, size: number, liquid: (code: string) 
     }
     for (const t of body) out[t] = low;
   }
+  return out;
+}
+
+/** Where the sea lies by default: this share of the world's tiles is below it (or as low). */
+export const SEA_SHARE = 0.1;
+
+/** A place of the loaded world, for `worldLevels`: its tiles, and the draft that says where the sea is. */
+export interface WaterChunk {
+  cx: number;
+  cy: number;
+  tiles: string;
+  draft?: string;
+}
+
+/** A draft's code for the open sea (the terrain's biomes, ADR-0023). */
+export const SEA_DRAFT = 'o';
+
+/**
+ * The level of every tile of the loaded world, before its lots (ADR-0048, T51a): the relief, never below
+ * the sea; the sea (water where the draft says `o`, and all the water it touches) lies at the sea's level; every
+ * other body of water lies flat, as a whole across the places, at the lowest of its tiles and never above
+ * the land around it; the land goes down towards the water at most two levels a tile (its banks), so it
+ * is climbed as ever. Only the given places count: the result is the same in whatever order they come,
+ * and where a body of water goes on beyond them, it is followed as far as they go.
+ *
+ * It is the greatest field below the relief that keeps those bounds: a tile's level is the least, over all
+ * tiles, of their start plus the way between them (two levels for each tile of land entered, none for water),
+ * found with a queue in buckets of levels.
+ */
+export function worldLevels(chunks: WaterChunk[], size: number, liquid: (code: string) => boolean, level: (col: number, row: number) => number, sea: number): Int16Array[] {
+  const S = size, A = S * S;
+  const index = new Map<string, number>();
+  chunks.forEach((c, i) => index.set(`${c.cx},${c.cy}`, i));
+  const n = chunks.length * A;
+  const out = chunks.map(() => new Int16Array(A));
+  const wet = new Uint8Array(n);
+  const val = new Int32Array(n);
+  let hi = sea;
+  for (let k = 0; k < chunks.length; k++) {
+    const ch = chunks[k];
+    for (let i = 0; i < A; i++) {
+      const t = k * A + i;
+      const c = i % S, r = (i - c) / S;
+      wet[t] = liquid(ch.tiles[i]) ? 1 : 0;
+      val[t] = wet[t] && ch.draft?.[i] === SEA_DRAFT ? sea : Math.max(sea, level(ch.cx * S + c, ch.cy * S + r));
+      hi = Math.max(hi, val[t]);
+    }
+  }
+  // The neighbours of a tile across the places' borders (-1 where nothing is loaded).
+  const near = (t: number, out4: number[]) => {
+    const k = Math.floor(t / A), i = t - k * A;
+    const c = i % S, r = (i - c) / S;
+    const ch = chunks[k];
+    let m = 0;
+    for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      let nc = c + dc, nr = r + dr, kk = k;
+      if (nc < 0 || nr < 0 || nc >= S || nr >= S) {
+        const o = index.get(`${ch.cx + Math.floor(nc / S)},${ch.cy + Math.floor(nr / S)}`);
+        if (o === undefined) continue;
+        kk = o;
+        nc = (nc + S) % S;
+        nr = (nr + S) % S;
+      }
+      out4[m++] = kk * A + nr * S + nc;
+    }
+    return m;
+  };
+  const buckets: number[][] = Array.from({ length: hi - sea + 1 }, () => []);
+  for (let t = 0; t < n; t++) buckets[val[t] - sea].push(t);
+  const done = new Uint8Array(n);
+  const nb = [0, 0, 0, 0];
+  for (let b = 0; b < buckets.length; b++) {
+    const q = buckets[b];
+    // Water entered from here joins this bucket, so it is read as it grows.
+    for (let j = 0; j < q.length; j++) {
+      const t = q[j];
+      if (done[t] || val[t] !== b + sea) continue;
+      done[t] = 1;
+      for (let m = near(t, nb), x = 0; x < m; x++) {
+        const u = nb[x];
+        const v = val[t] + (wet[u] ? 0 : 2);
+        if (done[u] || v >= val[u]) continue;
+        val[u] = v;
+        buckets[v - sea].push(u);
+      }
+    }
+  }
+  for (let t = 0; t < n; t++) out[Math.floor(t / A)][t % A] = val[t];
   return out;
 }
 
@@ -215,7 +328,12 @@ export function chunkLevels(tiles: string, size: number, liquid: (code: string) 
       const c = i % S, r = (i - c) / S;
       let lo = -Infinity, hi = Infinity;
       for (const n of [c > 0 ? i - 1 : -1, c < S - 1 ? i + 1 : -1, r > 0 ? i - S : -1, r < S - 1 ? i + S : -1]) {
-        if (n < 0 || wet(n)) continue;
+        if (n < 0) continue;
+        // Never below the water beside it.
+        if (wet(n)) {
+          lo = Math.max(lo, out[n]);
+          continue;
+        }
         lo = Math.max(lo, out[n] - 2);
         hi = Math.min(hi, out[n] + 2);
       }

@@ -105,7 +105,7 @@ src/
     plots.ts            trame orizzontali e missioni
     graph.ts            il grafo del mondo: nodi e archi dai file dell'universo, interrogazioni, controlli
     atlas.ts            l'atlante: regioni geolocalizzate, direzioni
-    relief.ts           il rilievo: Hills di MarkovJunior → livello di ogni casella, acqua piana (ADR-0048)
+    relief.ts           il rilievo: Hills di MarkovJunior → livello di ogni casella, mare, acqua piana tra i chunk (ADR-0048)
     stamps.ts           timbri di strutture (castelli, torri, templi, piramidi, sotterranei…)
     universes.ts        client del repository dell'universo, aggiornamenti dal seme
     fourthwall.ts       principi del Concilio (due tavoli) e filtro della quarta parete
@@ -135,7 +135,7 @@ src/
   ui/                   hud.ts (anche il diario delle missioni), profile.ts (il profilo del viandante), inventory.ts, actions.ts, chat.ts, feed.ts, genesis.ts, editor.ts, console.ts, studio.ts, atlas.ts,
                         graph.ts + graphlayout.ts (il grafo del mondo nel Nucleo), dom.ts
 universe/
-  universe.json         nome, seme, raggio, chunk (18), modelli e budget, `partita` (scelta alla Genesi, ADR-0053)
+  universe.json         nome, seme, raggio, chunk (18), modelli e budget, `partita` (scelta alla Genesi, ADR-0053), `rilievo.mare` (facoltativo)
   world/                bible.json (memoria del Narratore), style.md (guida di stile dei modelli), canone.md (le rune), lessico.md (come parla la gente), consumi.json,
                         rules.json (regole), people.json (la società, con i ricordi), plots.json (trame),
                         atlas.json (geografia), stato.json (lo stato del mondo), grafo.json (il grafo del mondo, derivato),
@@ -432,8 +432,11 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 - **Rilievo** (ADR-0048): il terreno ha le altezze. `Relief` (`src/kernel/relief.ts`) fa girare `Hills` di MarkovJunior
   (o `world/rilievo.xml`) su due scatole di lati 64 e 45, lette come piastrelle che si ripetono e rammendate; il livello
   di una casella è la somma (un livello = un quarto di casella, fra vicini al più due: si sale sempre, non è mai un
-  ostacolo). Ogni specchio d'acqua di un chunk è piano, al suo livello più basso; ogni lotto è piano, con un anello
-  attorno, e il resto del chunk si piega verso di lui lasciando il bordo al rilievo (`chunkLevels`). `kernel.groundAt(x, y)` è l'altezza del
+  ostacolo). Il mare sta al suo livello (`universe.json → rilievo.mare`, o `Relief.sea`), la terra mai sotto; ogni specchio
+  d'acqua è piano per intero attraverso i chunk caricati, al suo livello più basso e mai sopra la riva, con sponde che
+  scendono di due livelli a casella (T51a, `worldLevels`: un campo per il mondo caricato, uguale in qualunque ordine arrivino
+  i chunk; `Chunk.levels` ridisegna chi cambia livelli); ogni lotto è piano, con un anello
+  attorno, e il resto del chunk si piega verso di lui lasciando il bordo al campo (`chunkLevels`). `kernel.groundAt(x, y)` è l'altezza del
   suolo, `floorAt` la comprende (i modelli stanno sul suolo sotto il loro centro); il renderer disegna colonne con i fianchi e
   posa tutto sul suolo. Corona e studio restano piani.
 - **Mappa** (ADR-0011, 0040): caselle colorate per terreno, strati `ground floor wall door liquid vegetation rock`: l'acqua è

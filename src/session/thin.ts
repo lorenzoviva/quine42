@@ -20,6 +20,7 @@ import type { Profile } from '../kernel/wanderers';
 import { hashStr, hex } from '../kernel/rng';
 import { takeFromSlot } from '../kernel/inventory';
 import { THING_PARTS } from './protocol';
+import { SEA_DRAFT } from '../kernel/relief';
 
 /** Seconds between two steps sent (the server checks the walk at its pace; 20 a second are plenty). */
 const STEP_EVERY = 0.05;
@@ -233,18 +234,21 @@ export class ThinClient {
   }
 
   private places(list: PlaceView[]): void {
-    for (const v of list)
+    for (const v of list) {
+      const sea = new Set(v.mare);
       this.k.chunks.set(v.key, {
         cx: v.cx,
         cy: v.cy,
         key: v.key,
-        draft: v.tiles,
+        // Only where the sea is, of the draft (T51a): the rest is the server's.
+        draft: v.mare ? [...v.tiles].map((c, i) => (sea.has(i) ? SEA_DRAFT : c)).join('') : v.tiles,
         tiles: v.tiles,
         version: v.version,
         stage: v.stage,
         ...(v.nome ? { place: { name: v.nome, description: v.descrizione ?? '' } } : {}),
         buildings: (v.lotti ?? []).map(([x0, y0, x1, y1]) => ({ x0, y0, x1, y1, floor: [], walls: [], doors: [] })),
       });
+    }
   }
 
   private things(list: ThingView[]): void {
