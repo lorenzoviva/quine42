@@ -26,7 +26,9 @@
       "args": [
         "--output-format",
         "json",
-        "--dangerously-skip-permissions"
+        "--dangerously-skip-permissions",
+        "--model",
+        "gemini-3.8-flash-high"
       ],
       "resume": [
         "--conversation",
@@ -34,6 +36,22 @@
       ],
       "resetSettimanale": "",
       "contatori": "^Gemini Models$"
+    },
+    "argon": {
+      "cmd": "agy",
+      "args": [
+        "--output-format",
+        "json",
+        "--dangerously-skip-permissions",
+        "--model",
+        "gemini-4-argon-high"
+      ],
+      "resume": [
+        "--conversation",
+        "{sessione}"
+      ],
+      "resetSettimanale": "",
+      "contatori": "^Gemini 4 Argon"
     }
   },
   "prompt": "Lavora nel worktree `{dir}` (branch `{branch}`, nato da `{base}`). Leggi `AGENTS.md`, poi esegui il task **{id}** di `docs/plans/backlog.md` seguendo il protocollo delle sessioni, con le regole dell'ambiente condiviso (`docs/pipeline/README.md`, «Regole per chi esegue un task»): altri agenti lavorano in parallelo in altri worktree; non pianificare il to-do; nel backlog cambia solo il blocco di {id}; niente merge, push o modifiche fuori dal tuo worktree; non fare domande: se serve una decisione dell'autore scrivila in `docs/pipeline/domande/{id}.md`, segna {id} `in attesa`, committa e termina. Alla fine committa sul tuo branch e chiudi la risposta con una riga `ESITO: fatto|in attesa|fallito — <cosa è cambiato>`.",

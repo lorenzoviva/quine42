@@ -1,0 +1,1 @@
+{"task":"T62","provider":"claude","stima":1,"costoUsd":0.8978906000000001,"minuti":4,"tentativi":1,"esito":"ESITO: fatto — aggiunto tests/pipeline.test.ts (17 casi) e corretti in pipeline.mjs quattro difetti: id corti, reset mancante in /usage, «429» dentro un numero, JSON non oggetto in readOutput","data":"2026-10-29T17:28:37.105Z"}

@@ -1,24 +1,25 @@
 # Il piano della pipeline
 
-> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-29T17:17:56.547Z: non modificarlo a mano,
+> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-29T17:37:12.151Z: non modificarlo a mano,
 > la fonte è `docs/plans/backlog.md` (righe `- Pipeline:`).
 
 ## Budget
 
-- **claude**: settimana 98 %, 5 ore 86 % (letto da /usage il 2026-10-29T17:16:31.681Z)
-  - session, 5h: 86 % residuo, reset 2026-10-29T21:00:00.000Z
-  - week (all models), settimana: 98 % residuo, reset 2026-11-05T16:00:00.000Z
-- **gemini**: settimana 100 %, 5 ore 100 % (letto da /usage il 2026-10-29T17:16:37.465Z)
-  - Gemini Models, settimana: 100 % residuo, reset 2026-11-05T17:16:36.000Z
-  - Gemini Models, 5h: 100 % residuo, reset 2026-10-29T22:16:36.000Z
+- **claude**: settimana 97 %, 5 ore 75 % (letto da /usage il 2026-10-29T17:37:08.046Z)
+  - session, 5h: 75 % residuo, reset 2026-10-29T21:00:00.000Z
+  - week (all models), settimana: 97 % residuo, reset 2026-11-05T16:00:00.000Z
+- **gemini**: settimana 100 %, 5 ore 100 % (letto da /usage il 2026-10-29T17:37:12.146Z)
+  - Gemini Models, settimana: 100 % residuo, reset 2026-11-05T17:37:12.000Z
+  - Gemini Models, 5h: 100 % residuo, reset 2026-10-29T22:37:12.000Z
+- **argon**: settimana 100 %, 5 ore 100 % (letto da /usage il 2026-10-29T17:37:12.146Z)
+  - Gemini 4 Argon, settimana: 100 % residuo, reset 2026-11-04T18:44:35.000Z
 
 ## In corso (0)
 
 _nessuno_
 
-## Pronti, in ordine di priorità (4)
+## Pronti, in ordine di priorità (3)
 
-- **T62** I test della pipeline — claude, 1 %
 - **T63** I modelli disegnati a mano per i file della corona — gemini, 4 %
 - **T66** Riorganizzare la documentazione per metodologia — gemini, 3 %
 - **T67** Il grafo delle conversazioni con Gemini — gemini, 4 %

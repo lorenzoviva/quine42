@@ -56,7 +56,7 @@ export function parsePipelineLine(line) {
   const parts = line.split('·').map((s) => s.trim().toLowerCase());
   const out = { provider: undefined, estimate: undefined, approved: false, priority: 100 };
   for (const p of parts) {
-    if (p === 'claude' || p === 'gemini') out.provider = p;
+    if (CONFIG.providers[p]) out.provider = p;
     else if (/^stima\s+[\d.]+\s*%$/.test(p)) out.estimate = Number(/[\d.]+/.exec(p)[0]);
     else if (p === 'approvato') out.approved = true;
     else if (/^priorit[àa]\s+\d+$/.test(p)) out.priority = Number(/\d+/.exec(p)[0]);
@@ -103,11 +103,19 @@ function localDate(text) {
   return d.toISOString();
 }
 
-function readUsage(provider) {
+/**
+ * Every counter of a provider's CLI (`tutti`: in Antigravity one per model group, also the ones the pipeline does not use)
+ * and the ones that decide for it (`contatori`, matching `contatori` in config.json). One `/usage` per CLI per read.
+ */
+function readUsage(provider, cache) {
   const conf = CONFIG.providers[provider];
   try {
-    const text = execFileSync(conf.cmd, ['-p', '/usage'], { encoding: 'utf8', timeout: 120_000, env: { ...process.env, MSYS_NO_PATHCONV: '1' }, windowsHide: true });
-    return parseUsage(provider, text)?.filter((c) => new RegExp(conf.contatori ?? '.').test(c.nome));
+    if (!cache.has(conf.cmd)) {
+      const text = execFileSync(conf.cmd, ['-p', '/usage'], { encoding: 'utf8', timeout: 120_000, env: { ...process.env, MSYS_NO_PATHCONV: '1' }, windowsHide: true });
+      cache.set(conf.cmd, parseUsage(conf.cmd === 'claude' ? 'claude' : 'gemini', text));
+    }
+    const all = cache.get(conf.cmd);
+    return all && { tutti: all, contatori: all.filter((c) => new RegExp(conf.contatori ?? '.').test(c.nome)) };
   } catch { return undefined; }
 }
 
@@ -120,11 +128,12 @@ const lowest = (counters, w) => Math.min(100, ...counters.filter((c) => c.finest
 
 function loadBudget({ read = true } = {}) {
   const budget = readJson(BUDGET, {});
+  const cache = new Map();
   for (const [prov, conf] of Object.entries(CONFIG.providers)) {
     const b = (budget[prov] ??= { residuo: 100, aggiornato: now() });
     if (read && !(b.letto && Date.now() - Date.parse(b.letto) < CONFIG.usoSecondi * 1000)) {
-      const counters = readUsage(prov);
-      if (counters) Object.assign(b, { contatori: counters, letto: now(), residuo: lowest(counters, 'settimana'), sessione: lowest(counters, '5h') });
+      const usage = readUsage(prov, cache);
+      if (usage?.contatori.length) Object.assign(b, { ...usage, letto: now(), residuo: lowest(usage.contatori, 'settimana'), sessione: lowest(usage.contatori, '5h') });
     }
     if (b.contatori && b.letto && Date.now() - Date.parse(b.letto) < CONFIG.usoSecondi * 2000) {
       const empty = b.contatori.filter((c) => c.residuo <= (c.finestra === 'settimana' ? CONFIG.riserva : 0) && c.reset);
@@ -282,6 +291,7 @@ async function execute({ max = CONFIG.maxParalleli, only, task } = {}) {
       const run = runs[t.id] ?? { id: t.id, provider: t.provider, stima: t.estimate, tentativi: 0, inizio: now(), ...(() => { const w = taskWorktree(t.id); return { dir: w.dir, branch: w.branch }; })() };
       run.tentativi += 1;
       run.stato = 'in corso';
+      run.prima ??= { settimana: b.residuo, sessione: b.sessione };
       runs[t.id] = run;
       saveRuns();
       console.log(`[${now()}] ${run.sessione ? 'riprendo' : 'lancio'} ${t.id} su ${t.provider} (${run.dir})`);
@@ -301,6 +311,8 @@ function finish(run, { code, text, log }, runs, saveRuns) {
   const out = readOutput(text);
   if (out.session) run.sessione = out.session;
   const limit = usageLimit(out.error || code !== 0 ? text : '');
+  const stale = readJson(BUDGET, {});
+  if (stale[run.provider]) { delete stale[run.provider].letto; writeJson(BUDGET, stale); }
   const budget = loadBudget();
   if (limit) {
     Object.assign(run, { stato: 'sospeso', fermoFino: limit.toISOString() });
@@ -309,10 +321,13 @@ function finish(run, { code, text, log }, runs, saveRuns) {
     console.log(`[${now()}] ${run.id}: limite di ${run.provider}, riprendo dopo ${run.fermoFino}`);
   } else {
     Object.assign(run, { stato: 'finito', fine: now(), esito: out.outcome ?? (code === 0 ? 'ESITO: ? (senza riga)' : `ESITO: fallito (codice ${code})`) });
-    budget[run.provider].residuo = Math.max(0, budget[run.provider].residuo - run.stima);
-    budget[run.provider].aggiornato = now();
+    // The counters just read (loadBudget above) say what the task really cost, other work on the same account included.
+    const b = budget[run.provider];
+    const dopo = b.letto && Date.now() - Date.parse(b.letto) < 60_000 ? { settimana: b.residuo, sessione: b.sessione } : undefined;
+    if (!dopo) b.residuo = Math.max(0, b.residuo - run.stima);
+    b.aggiornato = now();
     fs.mkdirSync(path.dirname(HISTORY), { recursive: true });
-    fs.appendFileSync(HISTORY, JSON.stringify({ task: run.id, provider: run.provider, stima: run.stima, costoUsd: out.cost, minuti: Math.round((Date.parse(run.fine) - Date.parse(run.inizio)) / 60000), tentativi: run.tentativi, esito: run.esito, data: run.fine }) + '\n');
+    fs.appendFileSync(HISTORY, JSON.stringify({ task: run.id, provider: run.provider, stima: run.stima, prima: run.prima, dopo, costoUsd: out.cost, minuti: Math.round((Date.parse(run.fine) - Date.parse(run.inizio)) / 60000), tentativi: run.tentativi, esito: run.esito, data: run.fine }) + '\n');
     console.log(`[${now()}] ${run.id}: ${run.esito} (log ${log})`);
   }
   writeJson(BUDGET, budget);
@@ -329,6 +344,10 @@ function status() {
   for (const [k, l] of Object.entries(queues)) console.log(`${k}: ${l.map((t) => t.id).join(' ') || '—'}`);
   for (const [p, b] of Object.entries(budget))
     console.log(`${p}: ${describe(b)}${(b.contatori ?? []).map((c) => `\n  ${c.nome} (${c.finestra}): ${c.residuo} %, reset ${c.reset}`).join('')}`);
+  const others = new Map();
+  for (const b of Object.values(budget)) for (const c of b.tutti ?? []) others.set(`${c.nome} (${c.finestra})`, c);
+  for (const b of Object.values(budget)) for (const c of b.contatori ?? []) others.delete(`${c.nome} (${c.finestra})`);
+  if (others.size) console.log(`non usati dalla pipeline:${[...others].map(([k, c]) => `\n  ${k}: ${c.residuo} %, reset ${c.reset}`).join('')}`);
   console.log('Piano in docs/pipeline/PIANO.md');
 }
 
@@ -347,7 +366,15 @@ function integrate(id) {
   git(['merge', '--no-ff', '-m', `Pipeline: integra ${id}`, `task/${id}`], base.path);
   const runs = readJson(RUNS, {});
   if (runs[id]) { runs[id].integrato = now(); writeJson(RUNS, runs); }
-  console.log(`task/${id} integrato in ${CONFIG.base}. Per togliere il worktree: git worktree remove ${runs[id]?.dir ?? `<dir di ${id}>`}`);
+  // The worktree goes: first the junction alone (removing it as a folder would empty the base's node_modules).
+  const wt = worktrees().find((w) => w.branch === `task/${id}`);
+  if (wt) {
+    const nm = path.join(wt.path, 'node_modules');
+    if (fs.existsSync(nm) && fs.lstatSync(nm).isSymbolicLink()) fs.unlinkSync(nm);
+    git(['worktree', 'remove', wt.path], base.path);
+  }
+  git(['branch', '-d', `task/${id}`], base.path);
+  console.log(`task/${id} integrato in ${CONFIG.base}; worktree e branch tolti.`);
 }
 
 const [cmd, ...rest] = process.argv.slice(2);
