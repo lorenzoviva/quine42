@@ -808,7 +808,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 Richieste del 24/10 ([`to-do-2026-10-24.md`](../userchats/to-do-2026-10-24.md), «Generazione della heightmap» e «taglia»).
 
 ### T51 · Il livello del mare e un motore dell'acqua — `da fare` (si comincia da T51a; T51b in attesa della domanda)
-- Pipeline: claude · stima 6% · priorità 50
+- Pipeline: claude · stima 6% · approvato · priorità 50
 - Contesto: ADR-0048. Oggi ogni specchio d'acqua è piano **dentro il suo chunk** (`waterLevels` in `relief.ts`: al livello
   più basso delle sue caselle, contando solo il chunk); lo stesso lago o fiume su due chunk ha due livelli, e laghi vicini
   livelli diversi: a vista l'acqua ha dei dislivelli (si vede anche in `Blocchi.png`).
@@ -841,7 +841,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../userchats/to-do-2026-10-24.md), 
   strutture (cantine, cripte), o entrambi?
 
 ### T53 · Le scale come rampe e le strutture su più piani — `da fare` (si comincia da T53a)
-- Pipeline: claude · stima 6% · priorità 50
+- Pipeline: claude · stima 6% · approvato · priorità 50
 - Contesto: richiesta del 24/10: le strutture devono essere navigabili appena generate; l'autore sceglie la seconda via
   (la scala è una lastra inclinata, il viandante ci sale camminando), non «E → Sali». Oggi `floors()` in `src/mj/mesh.ts`
   dà un'altezza per colonna di voxel e **solo** fino a un gradino (`h <= step`, oltre vale 0 e l'impronta blocca): una scala
@@ -895,7 +895,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../userchats/to-do-2026-10-24.md), 
   aggiunto lo zoom con rotellina e la protezione prospettica per il giocatore immerso nella simulazione richiesta dall'autore.
 
 ### T56 · Il salto, e le cose che chiudono i sentieri — T56a `fatto` (`e5f8099`), T56b `da fare` (dopo T53a)
-- Pipeline: claude · stima 4% · priorità 55
+- Pipeline: claude · stima 4% · approvato · priorità 55
 - Contesto: richiesta del 24/10 con `docs/userchats/Blocchi.png`: un sentiero largo una casella su un lago, con un banco,
   una cassa e un letto messi sopra; i dislivelli piccoli si salgono già senza saltare (ADR-0048) e devono restare così.
 - **T56a · niente cose sui passaggi obbligati**: il piazzamento delle cose (`placementsOf`/`placeInside`) non mette nulla di
@@ -915,7 +915,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../userchats/to-do-2026-10-24.md), 
 ## Le rune
 
 ### T57 · Le rune come codice: sequenze ordinate, effetti, rune nuove — `da fare` (si comincia da T57a)
-- Pipeline: claude · stima 8% · priorità 60
+- Pipeline: claude · stima 8% · approvato · priorità 60
 - Contesto: richiesta del 24/10 («Le rune»). L'esempio del seme `acqua fuoco` → «Vapore» (si annullano, un messaggio, in
   `universe/modules/magic.runes/manifest.json`) non è l'idea: le rune sono come codice, una **sequenza ordinata** produce
   un effetto specifico, e l'ordine conta (`aria terra` ≠ `terra aria`). Effetti come incantesimi di D&D (`terra fuoco` →
@@ -1250,14 +1250,14 @@ le risposte alle domande del piano.
   5 s sotto carico. Una volta, a suite intera, `tests/determinism.test.ts` è fallito e poi è passato (tre volte): da tenere d'occhio.
 
 ### T43b · «Altro…» e PvP tra viandanti — `da fare` (dipende da T43a)
-- Pipeline: claude · stima 5% · priorità 1
+- Pipeline: claude · stima 5% · approvato · priorità 1
 - Fare: «Altro…» su un altro viandante giudicato come su una persona, solo se `partita.altroTraGiocatori`; gli effetti li applica
   il server sul corpo dell'altro (il master in god mode lascia passare solo `messaggio`, ADR-0065); ciò che ferisce
   (bisogni che scendono, `spingi`, `fuoco`…) solo se `partita.pvp`, altrimenti il Narratore lo sa e il kernel lo toglie.
 - Fatto quando: test headless con PvP sì e no, con «Altro…» tra giocatori sì e no.
 
 ### T43c · Morte e ricollegamento in multigiocatore — `da fare` (dipende da T43b)
-- Pipeline: claude · stima 5% · priorità 2
+- Pipeline: claude · stima 5% · approvato · priorità 2
 - Fare: a salute zero un giocatore (mai il master) muore con la punizione di T33 (`continueAfterDeath` sul server, come lui,
   senza chiudere la sessione degli altri); il client lo mostra e riparte dove dice il verdetto. Chi si ricollega ritrova il suo
   stato (`world/giocatori/<id>.json`): posizione, inventario, frase, stati; la carta e i legami restano.
@@ -1271,7 +1271,7 @@ le risposte alle domande del piano.
   dell'autenticazione (T44a); l'account sì (T44b).
 
 ### T44a · Il profilo e il viandante personalizzato — `da fare` (dipende da T43a)
-- Pipeline: claude · stima 4% · priorità 3
+- Pipeline: claude · stima 4% · approvato · priorità 3
 - Contesto: oggi il mantello di un viandante viene dal suo id (`wandererColor` in `src/kernel/wanderers.ts`, «until the profile»)
   e il nome è l'id (`?viandante=<id>` o uno per scheda, `socket.ts`). Il profilo è di chi gioca, non dell'universo.
 - Fare: un profilo del viandante (`nome`, `seme` del programma `viandante`, `colori`/`tinta` del mantello, poche righe di
@@ -1297,7 +1297,7 @@ le risposte alle domande del piano.
 ## Varie
 
 ### T30 · Immagini del 3D nel README — `da fare`
-- Pipeline: gemini · stima 2% · priorità 60
+- Pipeline: gemini · stima 2% · approvato · priorità 60
 - Il README mostrava le immagini del 2D (`docs/img/`): ora non le mostra più. Fare quattro schermate del 3D (il borgo
   di giorno, una persona con la chat, l'inventario con le icone dei modelli, la corona con `?dev&teleport=46,0`) con
   `vite preview` offline, salvarle in `docs/img/3d/` e rimetterle nel README.

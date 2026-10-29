@@ -1,6 +1,6 @@
 # Il piano della pipeline
 
-> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-29T18:49:54.749Z: non modificarlo a mano,
+> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-29T18:52:26.128Z: non modificarlo a mano,
 > la fonte è `docs/plans/backlog.md` (righe `- Pipeline:`).
 
 ## Budget
@@ -22,19 +22,20 @@ _nessuno_
 
 - **T67** Il grafo delle conversazioni con Gemini — ESITO: fatto — redatto docs/conversazioni.md con i grafi Mermaid, le schede dei 38 task del Concilio e il censimento dei testi da localizzare — gemini, 4 %
 
-## Pronti, in ordine di priorità (3)
+## Pronti, in ordine di priorità (8)
 
+- **T43b** «Altro…» e PvP tra viandanti — claude, 5 %
+- **T44a** Il profilo e il viandante personalizzato — claude, 4 %
 - **T63** I modelli disegnati a mano per i file della corona — gemini, 4 %
 - **T66** Riorganizzare la documentazione per metodologia — gemini, 3 %
 - **T65** Il lessico di QUINE42 — claude, 5 %
-
-## Da approvare (provider e stima proposti) (5)
-
 - **T51** Il livello del mare e un motore dell'acqua — claude, 6 %
 - **T53** Le scale come rampe e le strutture su più piani — claude, 6 %
-- **T43b** «Altro…» e PvP tra viandanti — claude, 5 %
-- **T44a** Il profilo e il viandante personalizzato — claude, 4 %
 - **T30** Immagini del 3D nel README — gemini, 2 %
+
+## Da approvare (provider e stima proposti) (0)
+
+_nessuno_
 
 ## Da stimare (manca la riga `- Pipeline:`) (0)
 
