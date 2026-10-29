@@ -568,7 +568,7 @@ Il kernel è in console come `window.quine` (o `window.rune`) in singola e per i
 > **Step 9 fatto (ADR-0037 attuato): il gioco è 3D.** Niente immagini generate; ogni aspetto è un programma
 > MarkovJunior scritto dallo Scultore e giudicato dall'Artista; lo spazio è una scala di griglie (atlante → piano a
 > caselle → lotti e strutture → modelli a voxel → corpi). Riassunto, costi e ciò che manca:
-> [`docs/reports/step9.md`](docs/reports/step9.md); piano e diario delle fasi: [`docs/plans/step9-3d.md`](docs/plans/step9-3d.md).
+> [`docs/archivio/2-step/reports/step9.md`](docs/archivio/2-step/reports/step9.md); piano e diario delle fasi: [`docs/archivio/2-step/plans/step9-3d.md`](docs/archivio/2-step/plans/step9-3d.md).
 > Il lavoro va avanti un task per sessione dal [backlog](docs/plans/backlog.md). Il gioco 2D è su `main` e negli
 > universi `valmora` (backup in `H:/projects/rune-backup/universi-2d/`); il seme del 3D si chiama `aurora`.
 
@@ -598,4 +598,4 @@ Prossimi passi (il dettaglio è nel backlog):
 3. La corona più grande (T18, fatto), con gli esterni come modelli (motore: T20, fatto; i programmi di tutti gli undici edifici: T31, fatto) e gli interni.
 4. Ancore del piano («vicino a…»), forme degli oggetti portati e dei terreni che cambiano con «Altro…».
 5. Multiplayer (ADR-0050): il server unica fonte di verità, modalità singola e multigiocatore, master fisso in god mode,
-   crediti e carte; piano in [`docs/plans/multiplayer.md`](docs/plans/multiplayer.md), task T33-T45.
+   crediti e carte; piano in [`docs/archivio/3-to-do-backlog/plans/multiplayer.md`](docs/archivio/3-to-do-backlog/plans/multiplayer.md), task T33-T45.
