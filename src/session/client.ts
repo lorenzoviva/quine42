@@ -6,11 +6,15 @@
 import type { FileMap } from '../kernel/types';
 import type { FeedEntry } from '../kernel/agents/council';
 import type { PlayerSpot } from '../kernel/situation';
+import type { Profile } from '../kernel/wanderers';
 import type { ClientLink, ClientMsg, ContainerView, Dialog, FileChanges, FormView, Me, MyState, Notice, OtherView, PlaceView, ServerMsg, ThingView } from './protocol';
 
 export interface Outcome {
   ok: boolean;
   testo?: string;
+  /** The profile as the server repaired it, and the look that came of it (T44a). */
+  profilo?: Profile;
+  forma?: FormView;
   /** What the Council made of a request (T42e). */
   fatto?: string;
   messaggi?: string[];
@@ -26,6 +30,9 @@ type WithoutSeq<T> = T extends { seq: number } ? Omit<T, 'seq'> : never;
 export class SessionClient {
   id = '';
   nome = '';
+  /** Who this wanderer is to the others (T44a), as the server repaired it; what it repaired when they came in. */
+  profilo?: Profile;
+  riparato: string[] = [];
   /** Whether this wanderer is the master (T41): only the master hears the Council and gets all the files. */
   master = false;
   /** What the Council said (the master's only), oldest first. */
@@ -59,7 +66,7 @@ export class SessionClient {
 
   constructor(
     private link: ClientLink,
-    who: { id: string; nome?: string },
+    who: { id: string; nome?: string; profilo?: Partial<Profile> },
   ) {
     this.ready = new Promise((r) => (this.entered = r));
     link.onMessage((m) => this.receive(m));
@@ -68,7 +75,7 @@ export class SessionClient {
       this.waiting.clear();
       this.entered?.();
     });
-    link.send({ t: 'entra', id: who.id, ...(who.nome ? { nome: who.nome } : {}) });
+    link.send({ t: 'entra', id: who.id, ...(who.nome ? { nome: who.nome } : {}), ...(who.profilo ? { profilo: who.profilo } : {}) });
   }
 
   /** The wanderer walked here (world space): it is so here at once, the server may correct it. */
@@ -99,7 +106,7 @@ export class SessionClient {
         this.entered?.();
         break;
       case 'ingresso':
-        Object.assign(this, { id: m.id, nome: m.nome, master: !!m.master, files: m.files, branch: m.ramo ?? {}, me: m.me, forma: m.forma, stato: m.stato });
+        Object.assign(this, { id: m.id, nome: m.nome, profilo: m.profilo, riparato: m.riparato ?? [], master: !!m.master, files: m.files, branch: m.ramo ?? {}, me: m.me, forma: m.forma, stato: m.stato });
         this.feed.splice(0, this.feed.length, ...(m.concilio ?? []));
         this.places.clear();
         this.things.clear();
@@ -135,6 +142,8 @@ export class SessionClient {
         const done = this.waiting.get(m.seq);
         this.waiting.delete(m.seq);
         const { t: _t, seq: _seq, ...outcome } = m;
+        if (m.profilo) Object.assign(this, { profilo: m.profilo, nome: m.profilo.nome });
+        if (m.forma) this.forma = m.forma;
         done?.(outcome);
         break;
       }

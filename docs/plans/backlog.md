@@ -1270,7 +1270,7 @@ le risposte alle domande del piano.
 - Spezzato il 29/10/2026 (multigiocatore in testa): il profilo e il viandante personalizzato non aspettano il fornitore
   dell'autenticazione (T44a); l'account sì (T44b).
 
-### T44a · Il profilo e il viandante personalizzato — `da fare` (dipende da T43a)
+### T44a · Il profilo e il viandante personalizzato — `fatto` (dipende da T43a)
 - Pipeline: claude · stima 4% · approvato · priorità 3
 - Contesto: oggi il mantello di un viandante viene dal suo id (`wandererColor` in `src/kernel/wanderers.ts`, «until the profile»)
   e il nome è l'id (`?viandante=<id>` o uno per scheda, `socket.ts`). Il profilo è di chi gioca, non dell'universo.
@@ -1281,6 +1281,11 @@ le risposte alle domande del piano.
   (foto come le icone). L'id resta quello di oggi: T44b lo legherà all'account.
 - Fatto quando: test col finto trasporto (profilo valido arriva agli altri; nome doppio o fuori misura riparato; rientro con lo
   stesso profilo) e verifica con due schede (mantelli e nomi diversi).
+- Fatto (ADR-0073): `Profile` e `repairProfile` in `wanderers.ts`, `kernel.setProfile`/`profileOf`/`introOf`, `entra {profilo}` e il
+  messaggio `profilo`, `OtherView.presentazione` e «Chi è» nel menu, la presentazione al Narratore, il pannello `P` (`src/ui/profile.ts`, una
+  foto per seme) e il profilo in `localStorage`; `tests/profile.test.ts` (5 test). Rispetto al previsto: un solo colore (la `tinta` del
+  programma `viandante`, che ha una sola lettera da ricolorare); il nome doppio non si rifiuta, si ripara con `freshName`; vale anche in
+  singola per `io`. **Non fatta** la verifica con due schede: in questa sessione non c'erano strumenti del browser (build di produzione ok).
 
 ### T44b · L'account e l'autenticazione — `in attesa` (domande in `docs/pipeline/domande/T44b.md`; dipende da T44a)
 - Fare: autenticazione sicura; l'id del viandante (T34) è quello dell'account; il profilo di T44a legato all'account.

@@ -77,6 +77,7 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0070](0070-le-rune-chieste-al-referente.md) | Le rune chieste al Referente: in multigiocatore il master chiede al Referente ogni token che una runa può portare (incarico `runa`, al più 12, mai la runa del Concilio) e le trova nella borsa delle rune del suo viandante sul server; non sono file, non vanno sul ramo; in singola nulla cambia | accettato |
 | [0071](0071-parole-e-doni-tra-viandanti.md) | Parole e doni tra viandanti: nel menu di un altro viandante «Parla» (`dici`: il fumetto di chi parla, a chi è entro 8 caselle, senza filtro della quarta parete) e «Dai» per ogni tasca della barra rapida (`dai`: entro 3 caselle, una borsa intera); chi riceve lo sa dagli `avvisi` dell'aggiornamento | accettato |
 | [0072](0072-la-pipeline-agentica.md) | La pipeline agentica: il backlog resta la fonte (riga `- Pipeline:` con provider, stima e approvazione), un agente pianifica, `tools/pipeline/pipeline.mjs` esegue fino a 5 task in parallelo, uno per worktree, entro il budget di ogni provider, e li riprende dopo un limite | accettato |
+| [0073](0073-il-profilo-del-viandante.md) | Il profilo del viandante: nome, seme del programma `viandante`, colore del mantello, presentazione, in `world/giocatori/<id>.json`; riparato dal kernel (nome breve e non simile a persone o viandanti, seme e colore nei limiti) e dato agli altri; `P` apre il pannello con le foto del modello | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.
 

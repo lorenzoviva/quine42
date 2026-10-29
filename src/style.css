@@ -240,6 +240,21 @@ button[disabled] { opacity: 0.4; cursor: default; }
 #chat .row { padding: 8px; border-top: 1px solid var(--line); }
 #chat input { width: 100%; background: #050a07; color: var(--fg); border: 1px solid var(--line); padding: 7px 9px; font: inherit; }
 
+#profile {
+  position: fixed; right: 16px; top: 16px; z-index: 33; width: min(460px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: auto;
+  display: flex; flex-direction: column; gap: 8px; padding-bottom: 10px; background: var(--panel); border: 1px solid var(--gold);
+}
+#profile .head { display: flex; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+#profile .title { color: var(--gold); flex: 1; letter-spacing: 0.05em; }
+#profile .close { padding: 0 8px; }
+#profile label, #profile .label, #profile .row, #profile .status { display: flex; flex-direction: column; gap: 4px; padding: 0 12px; font-size: 13px; }
+#profile label.row, #profile div.row { flex-direction: row; align-items: center; gap: 10px; }
+#profile input[type='text'], #profile textarea { background: #050a07; color: var(--fg); border: 1px solid var(--line); padding: 7px 9px; font: inherit; resize: vertical; }
+#profile .seeds { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px; }
+#profile .seed { width: 96px; height: 96px; padding: 0; display: flex; align-items: center; justify-content: center; border: 1px solid var(--line); }
+#profile .seed.on { border-color: var(--gold); box-shadow: 0 0 6px var(--gold); }
+#profile .status { color: var(--gold); min-height: 1.2em; }
+
 #feed {
   position: absolute; right: 16px; bottom: 120px; width: min(380px, 40vw); pointer-events: auto;
   display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
