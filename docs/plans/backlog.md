@@ -1305,12 +1305,12 @@ le risposte alle domande del piano.
 
 ## Varie
 
-### T30 · Immagini del 3D nel README — `da fare`
+### T30 · Immagini del 3D nel README — `fatto`
 - Pipeline: gemini · stima 2% · approvato · priorità 60
 - Il README mostrava le immagini del 2D (`docs/img/`): ora non le mostra più. Fare quattro schermate del 3D (il borgo
   di giorno, una persona con la chat, l'inventario con le icone dei modelli, la corona con `?dev&teleport=46,0`) con
   `vite preview` offline, salvarle in `docs/img/3d/` e rimetterle nel README.
-- Fatto quando: README con le immagini nuove, commit.
+- Fatto quando: README con le immagini nuove, commit. Esito: acquisite quattro schermate del gioco 3D (`world.png`, `chat.png`, `inventory.png`, `corona.png`) con `vite preview` offline e Chrome headless (D3D11 / ANGLE), salvate in `docs/img/3d/` e ripristinata la vetrina grafica nel `README.md`.
 
 ## Laboratorio MarkovJunior
 
