@@ -20,6 +20,8 @@ sostituire i modelli dei files (md, json, lua) con quelli disegnati da me:
 - schermo-struttura per i json e i file strutturati (3D, non leggero da generare)
 - circuito-3D per i lua (3D, pesante da generare e da animare) -> vedi prossimo punto
 Vorrei che questi modelli siano presi come spunto per generare i modelli futuri quando chiedo "tanta varietà" e "alta qualità". 
+Inoltre ho anche rifatto il modello del drone, aumentando la risoluzione di due volte.
+Utilizza drone-xl per il drone
 
 > Provider proposto: Antigravity   
 
@@ -60,5 +62,11 @@ Una volta che avremo centralizzato queste chiamate ad API, possiamo fare un pass
 La base c'è già nella pipeline del kernel (T61, `tools/pipeline/pipeline.mjs`): `claude -p` / `agy -p` lanciati da uno script, i contatori letti da `/usage` (5 ore e settimana, per gruppo di modelli in Antigravity), il parallelismo entro il budget, la ripresa dopo un limite. Per l'universo va adattata a una coda di richieste del Concilio (al posto del backlog) con risposte in secondi, non task da ore.
 In questo modo possiamo sfruttare gli abbonamenti ai providers. Per gli sviluppi e la prototipazione mi farà risparmiare molto.
 Inoltre avendo un repository pubblico, permetterò agli sviluppatori in possesso di un abbonamento Claude o Gemini (o entrambi), di sfruttarli per la generazione e provare il gioco in locale scaricandolo dal repository. Voglio che la community di sviluppatori sia incentivata a provarlo.
+
+> Provider proposto: Claude Code
+
+# Grafica a cartone
+
+Ho visto questo gioco su reddit (https://www.reddit.com/r/ClaudeGameDev/comments/1x2ldgg/stompworks_a_small_books_worth_of_prompts_in/) realizzato con claude code, adoro la grafica, mi piacerebbe che l'universo generato sia così. Ho messo una foto in questa cartella: docs\userchats\grafica_cartone.png
 
 > Provider proposto: Claude Code
