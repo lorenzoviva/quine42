@@ -119,7 +119,7 @@ for (const [file, xml] of Object.entries(handmade)) {
   const base = file.replace(/^.*\//, '').replace(/\.xml$/, '');
   const target = base.split('.')[0];
   // The windmill of step 8.2B is a large structure: its box is the class's (5 × 5 × 4 tiles).
-  CATALOG.push({ id: `g:${target}`, name: `${target}`, role: 'handmade', xml, vpt: 20, source: sourceOf(xml) || `scolpito a mano da un autore umano`, handmade: true });
+  CATALOG.push({ id: `${target}`, name: `${target}`, role: 'handmade', xml, vpt: 20, source: sourceOf(xml) || `scolpito a mano da un autore umano`, handmade: true });
 }
 
 
