@@ -812,7 +812,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../userchats/to-do-2026-10-24.md), 
 - Contesto: ADR-0048. Oggi ogni specchio d'acqua è piano **dentro il suo chunk** (`waterLevels` in `relief.ts`: al livello
   più basso delle sue caselle, contando solo il chunk); lo stesso lago o fiume su due chunk ha due livelli, e laghi vicini
   livelli diversi: a vista l'acqua ha dei dislivelli (si vede anche in `Blocchi.png`).
-- **T51a · il livello del mare** — `fatto` (commit sul branch `task/T51`): un livello dell'acqua per il mondo (`universe.json → rilievo.mare`, o derivato dal rilievo
+- **T51a · il livello del mare** — `fatto` (commit b3f4f53): un livello dell'acqua per il mondo (`universe.json → rilievo.mare`, o derivato dal rilievo
   alla Genesi): il mare e ciò che lo tocca stanno lì, il terreno sotto viene scavato fino a lui con le sponde (si sale sempre,
   come ora); laghi e fiumi interni hanno un livello per specchio **intero** (attraverso i chunk: lo specchio si segue fino
   al bordo del mondo caricato, deterministico, cache per regione). Test: lo stesso specchio su due chunk ha un livello; due
