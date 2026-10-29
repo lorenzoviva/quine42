@@ -1321,7 +1321,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   (`budget`). I vecchi worktree non sono stati toccati (elencati nel README). Provati `stato` e `worktree` sul backlog vero;
   `esegui` non è stato lanciato (consumerebbe i limiti): la prima esecuzione va guardata.
 
-### T62 · I test della pipeline — `da fare`
+### T62 · I test della pipeline — `fatto`
 - Pipeline: claude · stima 1% · approvato · priorità 1
 - Contesto: la prima esecuzione end-to-end della pipeline (T61, ADR-0072) su un caso semplice. `tools/pipeline/pipeline.mjs` esporta
   `parseBacklog`, `parsePipelineLine`, `parseUsage`, `usageLimit`, `readOutput`, ma nessun test li prova.
@@ -1332,6 +1332,10 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   «Weekly Limit Remaining», «100%», data ISO); `usageLimit` (epoca dopo `|`, nessun limite); `readOutput` (JSON di
   `claude --output-format json` con `session_id`, `total_cost_usd` e `ESITO:` nel `result`). Se un test trova un difetto, correggilo.
 - Fatto quando: test e typecheck verdi, commit sul branch del task.
+- Esito: `tests/pipeline.test.ts` (17 casi). I test hanno trovato quattro difetti, corretti in `pipeline.mjs`: un id corto
+  scambiava per sé i task che iniziano come lui (T6 perdeva la dipendenza da T63); una riga di `agy /usage` senza data del reset
+  faceva cadere `parseUsage` (`RangeError`), ora il reset è `undefined`; «429» dentro un numero (14290) era un limite (ora `429`);
+  `readOutput` si fermava a un'ultima riga JSON non oggetto (`0`) e perdeva `session_id`.
 
 ## Dal to-do del 29/10/2026 (testo originale: `docs/userchats/to-do-2026-10-29.md`)
 
