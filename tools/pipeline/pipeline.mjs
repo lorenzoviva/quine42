@@ -342,7 +342,7 @@ function finish(run, { code, text, log }, runs, saveRuns) {
     b.aggiornato = now();
     fs.mkdirSync(path.dirname(HISTORY), { recursive: true });
     fs.appendFileSync(HISTORY, JSON.stringify({ task: run.id, provider: run.provider, stima: run.stima, prima: run.prima, dopo, costoUsd: out.cost, minuti: Math.round((Date.parse(run.fine) - Date.parse(run.inizio)) / 60000), tentativi: run.tentativi, esito: run.esito, data: run.fine }) + '\n');
-    console.log(`[${now()}] ${run.id}: ${run.esito} (log ${log})`);
+    console.log(`[${now()}] ${run.id}: ${run.esito} (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia ${run.id})`);
   }
   writeJson(BUDGET, budget);
   saveRuns();
@@ -375,6 +375,33 @@ function listWorktrees() {
   }
 }
 
+/**
+ * The trace of a task's run: where its CLI keeps the whole conversation (Claude: the session's `.jsonl` under
+ * `~/.claude/projects/`; Antigravity: the conversation's SQLite under `~/.gemini/antigravity-cli/conversations/`), whether the
+ * agent had `AGENTS.md` (Claude: its text in the transcript, imported by CLAUDE.md; Antigravity: the file opened), and the
+ * agent's closing summary from the last log.
+ */
+function trace(id) {
+  const run = readJson(RUNS, {})[id];
+  if (!run) { console.log(`${id}: nessuna esecuzione in .pipeline/esecuzioni.json`); return; }
+  const home = process.env.USERPROFILE ?? process.env.HOME;
+  let file;
+  if (CONFIG.providers[run.provider].cmd === 'claude') {
+    const root = path.join(home, '.claude', 'projects');
+    file = fs.readdirSync(root).map((d) => path.join(root, d, `${run.sessione}.jsonl`)).find((f) => fs.existsSync(f));
+  } else file = path.join(home, '.gemini', 'antigravity-cli', 'conversations', `${run.sessione}.db`);
+  const exists = file && fs.existsSync(file);
+  const text = exists ? fs.readFileSync(file).toString('latin1') : '';
+  const agents = run.provider === 'claude' ? text.includes('Regole inviolabili') : /[\\/]AGENTS\.md/.test(text);
+  const log = path.join(LOGS, `${id}.${run.tentativi}.log`);
+  const out = fs.existsSync(log) ? readOutput(fs.readFileSync(log, 'utf8')) : undefined;
+  console.log(`${id} su ${run.provider}, ${run.tentativi} tentativo/i, ${run.stato}${run.esito ? ` — ${run.esito}` : ''}`);
+  console.log(`Conversazione: ${exists ? file : '(non trovata)'}${run.provider === 'claude' ? '' : `  (riprendila con: agy --conversation ${run.sessione})`}`);
+  if (run.provider === 'claude') console.log(`  (riprendila con: claude --resume ${run.sessione}, dalla cartella ${run.dir})`);
+  console.log(`AGENTS.md: ${exists ? (agents ? 'letto' : 'NON trovato nella conversazione') : '?'}`);
+  console.log(`Log: ${log}\n\n--- Riepilogo dell'agente ---\n${out?.result ?? '(nessun log)'}`);
+}
+
 function integrate(id) {
   const base = worktrees().find((w) => w.branch === CONFIG.base);
   git(['merge', '--no-ff', '-m', `Pipeline: integra ${id}`, `task/${id}`], base.path);
@@ -400,5 +427,6 @@ if (process.argv[1]?.endsWith('pipeline.mjs')) {
   else if (cmd === 'budget') { const b = loadBudget(); b[rest[0]] = { ...b[rest[0]], residuo: Number(rest[1]), aggiornato: now(), fermoFino: undefined }; writeJson(BUDGET, b); status(); }
   else if (cmd === 'worktree') listWorktrees();
   else if (cmd === 'integra') integrate(rest[0]);
-  else console.log('Comandi: stato | uso (rilegge /usage) | esegui [--sempre] [--max N] [--solo claude|gemini] [--task Txx] | budget <claude|gemini> <residuo %> | worktree | integra <Txx>');
+  else if (cmd === 'traccia') trace(rest[0]);
+  else console.log('Comandi: stato | uso (rilegge /usage) | esegui [--sempre] [--max N] [--solo claude|gemini] [--task Txx] | budget <claude|gemini> <residuo %> | worktree | traccia <Txx> | integra <Txx>');
 }

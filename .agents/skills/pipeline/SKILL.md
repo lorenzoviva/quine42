@@ -9,4 +9,4 @@ Segui `docs/pipeline/pianifica.md` (il processo è in `docs/pipeline/README.md`)
 `/pipeline`, è il filtro: lavora solo sulle richieste o sui task che indica.
 
 Alla fine, se l'autore lo chiede, lancia l'esecuzione: `node tools/pipeline/pipeline.mjs esegui` (con `--sempre` resta attiva e
-riprende da sola quando arrivano task nuovi o si resettano i limiti).
+riprende da sola quando arrivano task nuovi o si resettano i limiti). Per ogni task finito riporta all'autore l'esito e il riepilogo di `node tools/pipeline/pipeline.mjs traccia <Txx>`.

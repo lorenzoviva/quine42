@@ -41,6 +41,7 @@ node tools/pipeline/pipeline.mjs stato                  # rigenera PIANO.md e st
 node tools/pipeline/pipeline.mjs budget claude 40       # il residuo attuale (%) del limite settimanale
 node tools/pipeline/pipeline.mjs esegui [--sempre] [--max 5] [--solo claude|gemini|argon] [--task T43b]
 node tools/pipeline/pipeline.mjs worktree               # i worktree, cosa resta in ciascuno
+node tools/pipeline/pipeline.mjs traccia T43b           # la conversazione dell'agente, se ha letto AGENTS.md, il suo riepilogo
 node tools/pipeline/pipeline.mjs integra T43b           # merge --no-ff di task/T43b nel base, poi toglie worktree e branch
 ```
 
@@ -137,6 +138,15 @@ partono. Il merge nel base non lo fa nessun agente: dopo `ESITO: fatto` il task 
 **Permessi.** In `config.json` le CLI girano con `--dangerously-skip-permissions`: niente prompt, perché nessuno
 risponde. Ogni task è nel suo worktree, ma l'agente ha la shell: toglilo (e dai un allowlist in
 `.claude/settings.json`) se non lo vuoi.
+
+## La traccia di un task
+
+Ogni esecuzione lascia la conversazione intera dove la tiene la sua CLI, anche dopo che il worktree è tolto: Claude in
+`~/.claude/projects/<cartella del worktree>/<sessione>.jsonl` (si riapre con `claude --resume <sessione>` dalla cartella del
+worktree), Antigravity in `~/.gemini/antigravity-cli/conversations/<id>.db` (SQLite; `agy --conversation <id>`). L'id è in
+`.pipeline/esecuzioni.json`, l'uscita finale in `.pipeline/log/<Txx>.<tentativo>.log`. `traccia <Txx>` li trova, dice se l'agente ha
+avuto `AGENTS.md` (Claude lo riceve da `CLAUDE.md`, che lo importa; Antigravity lo apre) e stampa il suo riepilogo finale.
+**La sessione che lancia `esegui`** riporta all'autore, per ogni task finito, l'esito e il riepilogo di `traccia`.
 
 ## Regole per chi esegue un task (ambiente condiviso)
 
