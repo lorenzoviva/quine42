@@ -357,6 +357,10 @@ export interface AiConfig {
   timeout?: number;
   /** New places a universe of many plans per minute, for everyone together (T40; default 20). */
   placesPerMinute?: number;
+  /** Where the slow tasks of every agent run (T68, ADR-0077): `api` (default) or a subscription's CLI, `claude` or `antigravity`. */
+  provider?: import('./ai/subscription').Provider;
+  /** Agent id → provider, the exceptions to `provider`. Only in single play and development, never on the server of many. */
+  agenti?: Record<string, import('./ai/subscription').Provider>;
 }
 
 export interface UniverseConfig {

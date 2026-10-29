@@ -62,6 +62,9 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
 - **Google Gemini**: `gemini-3.1-flash-lite` (testo), in
   `universe/universe.json → ai` con i budget (`maxText`, `maxForges`, `maxPacks`, `maxCast`; in multigiocatore `placesPerMinute`),
   il ragionamento (`thinking`, `low`) e il tempo massimo (`timeout`). Prezzi in `src/kernel/ai/prices.ts` (con la data).
+  Gli abbonamenti (ADR-0077, T68): `ai.provider` (`api` predefinito, `claude`, `antigravity`) e `ai.agenti` (agente → provider)
+  mandano i compiti lenti (Genesi, Fucina, modelli dello Scultore, sessioni del Concilio, meccaniche) alla coda `/api/coda`, servita
+  da un processo che usa le CLI dell'abbonamento di chi gioca; il resto resta sulle API. Solo in locale, mai sul server del multigiocatore.
 - **Vitest** in Node con modelli offline (`MockModels`): kernel, Concilio e layout testabili headless.
 - Persistenza: repository git dell'universo su disco tramite il server di Vite (`server/universeStore.ts`):
   testi, `maps/` (piani dei luoghi), `world/stato.json` (lo stato del mondo), `world/giocatori/` (i viandanti), `world/consumi.json` (i consumi). Senza server:
@@ -89,6 +92,7 @@ In console del browser: `window.quine` (o `window.rune`) è il kernel (`.feed()`
 ```
 server/geminiProxy.ts   proxy /api/gemini → Google, chiave da .env
 server/universeStore.ts /api/universe: ogni universo è un repository git in universes/<nome>/ (e il ramo del master, `rami/master`; il clone)
+server/subscriptionQueue.ts /api/coda: la coda su disco degli abbonamenti (`universes/.coda/`), servita da un processo che usa le CLI (ADR-0077)
 server/session.ts       /api/session (WebSocket, solo npm run dev): i client delle partite in multigiocatore (ADR-0058)
 src/
   main.ts               bootstrap: modelli, kernel, renderer, UI, loop a 60 Hz
@@ -119,7 +123,8 @@ src/
     clone.ts            il clone con un altro master: `universe.json` e le carte che passano (ADR-0068)
     chain.ts            la catena della Sala sistemi (T27a): misure di ogni sistema nel tick, stazioni
                         (bench.ts: anche il banco di prova, T27b: casi, scena, nomi dei campi)
-    ai/                 models.ts, gemini.ts, mock.ts, prices.ts (prezzi, con la data), usage.ts (registro dei consumi)
+    ai/                 models.ts, gemini.ts, mock.ts, prices.ts (prezzi, con la data), usage.ts (registro dei consumi),
+                        subscription.ts (la tabella dei provider, RoutedModels, QueueModels: i compiti lenti sugli abbonamenti, ADR-0077)
     agents/             council.ts, cartography.ts, forge.ts, genesis.ts, minds.ts, content.ts, sculptor.ts, effects.ts, mechanics.ts
     ecs.ts, sandbox.ts, prelude.lua, validator.ts, runes.ts, repo.ts, universe.ts,
     inventory.ts, bundle.ts, faults.ts, events.ts, input.ts, rng.ts, types.ts

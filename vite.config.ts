@@ -4,6 +4,7 @@ import { defineConfig, loadEnv } from 'vite';
 import { geminiProxy } from './server/geminiProxy';
 import { universeStore } from './server/universeStore';
 import { sessionServer } from './server/session';
+import { subscriptionQueue } from './server/subscriptionQueue';
 
 export default defineConfig(({ mode }) => {
   // '' prefix: read every variable, but only server-side. Nothing without VITE_ reaches the client.
@@ -11,7 +12,13 @@ export default defineConfig(({ mode }) => {
   return {
     // Universes live next to the kernel, each a git repository of its own (ignored by the kernel's).
     // The games of many (T38): their worlds run in this process, one per universe, clients over /api/session.
-    plugins: [geminiProxy(env.GEMINI_API_KEY), universeStore(path.resolve(process.cwd(), 'universes')), sessionServer()],
+    // The subscriptions' queue (T68): the slow requests on disk until a process using the CLIs serves them.
+    plugins: [
+      geminiProxy(env.GEMINI_API_KEY),
+      universeStore(path.resolve(process.cwd(), 'universes')),
+      sessionServer(),
+      subscriptionQueue(path.resolve(process.cwd(), 'universes', '.coda')),
+    ],
     // Writing a universe must not reload the page (dev server watches the project folder).
     server: { port: 5173, watch: { ignored: ['**/universes/**'] } },
     // wasmoon is UMD: pre-bundled, the browser can import it in dev (its glue.wasm comes by URL, `wasmUri`).
