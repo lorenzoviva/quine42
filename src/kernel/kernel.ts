@@ -32,7 +32,7 @@ import { hash32, hashStr, hex, Rng } from './rng';
 import { BudgetError, type Models } from './ai/models';
 import { USAGE_FILE, UsageLedger } from './ai/usage';
 import { MemoryChunks, type ChunkStore } from './chunks';
-import { bodyFoot, footBlocks, Forms, InlineRunner, instanceGrid, toLocal, type Form, type FormComp, type FormRunner } from './forms';
+import { bodyFoot, bodyGround, Forms, InlineRunner, instanceGrid, rampBlocks, stepOf, toLocal, type Form, type FormComp, type FormRunner } from './forms';
 import { guessClass } from '../mj/classes';
 import { GENERIC, ModelDirector, ownModelId } from './modeldirector';
 import { categoryOf, DEFAULT_SCULPTORS, sculptAction, type SculptorModels } from './agents/sculptor';
@@ -53,6 +53,18 @@ import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH } from './relief';
 import { CardLedger, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, payerOf, placeCardId, stampFiles, titolareOf, type Card, type Carta } from './cards';
 import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState } from './wanderers';
 import type { ActionDef, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Partita, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
+
+/** A solid thing with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
+interface SolidForm {
+  id: Id;
+  x: number;
+  y: number;
+  yaw: number;
+  form: Form;
+  foot: Uint8Array;
+  floor: Uint8Array;
+  block: Uint8Array;
+}
 
 export interface Chunk {
   cx: number;
@@ -370,9 +382,9 @@ export class Kernel {
   private reliefCache?: { key: string; relief: Relief };
   /** The level of every tile, per chunk (flat water, flat lots), while its tiles, lots and relief stay the same. */
   private levelCache = new WeakMap<Chunk, { tiles: string; lots: Building[]; relief: Relief; levels: Int16Array }>();
-  private solidForms = new Map<string, Array<{ id: Id; x: number; y: number; yaw: number; form: Form; foot: Uint8Array }>>();
+  private solidForms = new Map<string, Array<SolidForm>>();
   /** Footprints of instances whose model was changed by an action (the door is open). */
-  private instanceFeet = new Map<Id, { key: string; foot: Uint8Array }>();
+  private instanceFeet = new Map<Id, { key: string; foot: Uint8Array; floor: Uint8Array; block: Uint8Array }>();
   /** What was done to models of things, by stable origin (saved with the game). */
   private savedForms = new Map<string, string[]>();
   /** Zones of the world that already have their important structure: zone → the chunk that has it (saved with the game). */
@@ -1269,24 +1281,37 @@ export class Kernel {
     return name;
   }
 
-  /** Where a solid thing blocks: its model's footprint, or the changed one of this instance. */
-  private footOf(id: Id, fc: FormComp, f: Form): Uint8Array {
-    if (!fc.done?.length) return f.foot!;
+  /** Where a solid thing blocks and what one stands on in it: its model's, or the changed ones of this instance. */
+  private groundOf(id: Id, fc: FormComp, f: Form): { foot: Uint8Array; floor: Uint8Array; block: Uint8Array } {
+    if (!fc.done?.length) return { foot: f.foot!, floor: f.floor!, block: f.block! };
     const key = `${f.key}|${fc.done.join(',')}`;
     const c = this.instanceFeet.get(id);
-    if (c?.key === key) return c.foot;
+    if (c?.key === key) return c;
     const r = f.result!;
-    const foot = bodyFoot(instanceGrid(this.forms, f, fc.done), r.palette, f.vpt);
-    this.instanceFeet.set(id, { key, foot });
-    return foot;
+    const g = instanceGrid(this.forms, f, fc.done);
+    const out = { key, foot: bodyFoot(g, r.palette, f.vpt), ...bodyGround(g, r.palette, f.vpt) };
+    this.instanceFeet.set(id, out);
+    return out;
   }
 
-  /** Carpet-space point blocked by the voxels of a solid thing. */
-  private formBlocks(x: number, y: number): boolean {
-    for (const s of this.solidForms.get(`${Math.floor(x)},${Math.floor(y)}`) ?? []) {
-      const [lx, lz] = toLocal(x - s.x, y - s.y, s.yaw);
-      if (footBlocks(s.form, s.foot, lx, lz)) return true;
-    }
+  /**
+   * Carpet-space box (half-size r) blocked by the voxels of a solid thing (T53a): something at body height over
+   * a column under it, or a rise of more than a step between two columns under it. A stair is a ramp.
+   */
+  private formBlocks(x: number, y: number, r: number): boolean {
+    const seen = new Set<SolidForm>();
+    for (const [dx, dy] of [[-r, -r], [r, -r], [-r, r], [r, r]])
+      for (const s of this.solidForms.get(`${Math.floor(x + dx)},${Math.floor(y + dy)}`) ?? []) {
+        if (seen.has(s)) continue;
+        seen.add(s);
+        // The box in the model's own frame (exact for quarter turns, a little larger otherwise).
+        let x0 = Infinity, z0 = Infinity, x1 = -Infinity, z1 = -Infinity;
+        for (const [ex, ey] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
+          const [lx, lz] = toLocal(x + ex - s.x, y + ey - s.y, s.yaw);
+          x0 = Math.min(x0, lx), z0 = Math.min(z0, lz), x1 = Math.max(x1, lx), z1 = Math.max(z1, lz);
+        }
+        if (rampBlocks(s.form, s.floor, s.block, x0, z0, x1, z1)) return true;
+      }
     return false;
   }
 
@@ -2018,11 +2043,13 @@ export class Kernel {
     const p = this.ecs.get(sid, 'pos');
     if (!fc || !f?.floor || !p) return [];
     const g = f.result!.grid;
-    const foot = this.footOf(sid, fc, f);
+    const { foot, floor } = this.groundOf(sid, fc, f);
+    const step = stepOf(f.vpt);
+    // The ground floor: a floor no higher than a step (what goes indoors does not go up the stairs).
     const clear = (vx: number, vy: number) => {
       for (let dy = -6; dy <= 6; dy += 2) for (let dx = -6; dx <= 6; dx += 2) {
         const x = vx + dx, y = vy + dy;
-        if (x < 0 || y < 0 || x >= g.X || y >= g.Y || foot[x + y * g.X] || !f.floor![x + y * g.X]) return false;
+        if (x < 0 || y < 0 || x >= g.X || y >= g.Y || foot[x + y * g.X] || !floor[x + y * g.X] || floor[x + y * g.X] > step) return false;
       }
       return true;
     };
@@ -2090,14 +2117,14 @@ export class Kernel {
     return l.levels[(row - cy * S) * S + (col - cx * S)] * LEVEL;
   }
 
-  /** The height (tiles) of what one stands on at a point of the simulation (the ground, a structure's floor, a step). */
+  /** The height (tiles) of what one stands on at a point of the simulation (the ground, a structure's floor, a step of a stair). */
   floorAt(x: number, y: number): number {
     let h = this.groundAt(x, y);
     for (const s of this.solidForms.get(`${Math.floor(x)},${Math.floor(y)}`) ?? []) {
       const [lx, lz] = toLocal(x - s.x, y - s.y, s.yaw);
       const g = s.form.result!.grid;
       const vx = Math.floor(lx * s.form.vpt + g.X / 2), vy = Math.floor(lz * s.form.vpt + g.Y / 2);
-      const f = vx >= 0 && vy >= 0 && vx < g.X && vy < g.Y ? (s.form.floor?.[vx + vy * g.X] ?? 0) : 0;
+      const f = vx >= 0 && vy >= 0 && vx < g.X && vy < g.Y ? s.floor[vx + vy * g.X] : 0;
       // A model stands on the ground under its middle.
       if (f) h = Math.max(h, this.groundAt(s.x, s.y) + f / s.form.vpt);
     }
@@ -2111,7 +2138,7 @@ export class Kernel {
       const [lx, lz] = toLocal(x - s.x, y - s.y, s.yaw);
       const g = s.form.result!.grid;
       const vx = Math.floor(lx * s.form.vpt + g.X / 2), vy = Math.floor(lz * s.form.vpt + g.Y / 2);
-      if (vx >= 0 && vy >= 0 && vx < g.X && vy < g.Y && s.form.floor?.[vx + vy * g.X]) return s.id;
+      if (vx >= 0 && vy >= 0 && vx < g.X && vy < g.Y && s.floor[vx + vy * g.X]) return s.id;
     }
     return undefined;
   }
@@ -2403,8 +2430,8 @@ export class Kernel {
   /** Carpet-space collision test of a box of half-size r. */
   free(x: number, y: number, r: number): boolean {
     if (![x, y, r].every(Number.isFinite)) return false;
-    for (const [dx, dy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) if (!this.freeCell(Math.floor(x + dx), Math.floor(y + dy)) || this.formBlocks(x + dx, y + dy)) return false;
-    return true;
+    for (const [dx, dy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) if (!this.freeCell(Math.floor(x + dx), Math.floor(y + dy))) return false;
+    return !this.formBlocks(x, y, r);
   }
 
   /** Real-space collision: carpet inside the circle, corona walkable, nothing beyond it. */
@@ -2414,6 +2441,7 @@ export class Kernel {
     const { ox, oy } = this.offset();
     // Inside the studio's buildings: rooms with walls, shelves and desks.
     if (this.corona.isInterior(x)) return [[-r, -r], [r, -r], [-r, r], [r, r]].every(([dx, dy]) => this.corona.free(x + dx, y + dy));
+    let sim = false;
     for (const [dx, dy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
       const px = x + dx;
       const py = y + dy;
@@ -2423,9 +2451,10 @@ export class Kernel {
         if (!this.corona.free(px, py)) return false;
         continue;
       }
-      if (!this.freeCell(Math.floor(px + ox), Math.floor(py + oy)) || this.formBlocks(px + ox, py + oy)) return false;
+      sim = true;
+      if (!this.freeCell(Math.floor(px + ox), Math.floor(py + oy))) return false;
     }
-    return true;
+    return !sim || !this.formBlocks(x + ox, y + oy, r);
   }
 
   // --- Runes ---------------------------------------------------------------------------------
@@ -6679,7 +6708,7 @@ export class Kernel {
         continue;
       }
       // A thing with a model blocks with its voxels: it is listed in every cell its footprint may reach.
-      const s = { id, x: p.x, y: p.y, yaw: fc.yaw, form: f, foot: this.footOf(id, fc, f) };
+      const s: SolidForm = { id, x: p.x, y: p.y, yaw: fc.yaw, form: f, ...this.groundOf(id, fc, f) };
       for (let cy = Math.floor(p.y - f.reach); cy <= Math.floor(p.y + f.reach); cy++)
         for (let cx = Math.floor(p.x - f.reach); cx <= Math.floor(p.x + f.reach); cx++) {
           const key = `${cx},${cy}`;

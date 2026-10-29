@@ -840,7 +840,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 - **Domanda per l'autore**: sotterranei come luoghi a parte sotto il mondo (dungeon) o come parti sotterranee delle
   strutture (cantine, cripte), o entrambi?
 
-### T53 · Le scale come rampe e le strutture su più piani — `da fare` (si comincia da T53a)
+### T53 · Le scale come rampe e le strutture su più piani — T53a `fatto` (`d7812ae`), T53b `da fare`
 - Pipeline: claude · stima 6% · approvato · priorità 50
 - Contesto: richiesta del 24/10: le strutture devono essere navigabili appena generate; l'autore sceglie la seconda via
   (la scala è una lastra inclinata, il viandante ci sale camminando), non «E → Sali». Oggi `floors()` in `src/mj/mesh.ts`
@@ -854,6 +854,15 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 - **T53b · i piani**: più pavimenti per colonna (il piano terra sotto il soffitto, il primo piano sopra): `floors` dà una
   lista di altezze, si sta su quella raggiunta salendo; il renderer taglia sopra il piano in cui si è (oggi taglia la
   struttura a `1.15 + floorAt`). Test: una torre di prova a due piani con la scala si percorre fino al tetto.
+- Esito T53a: `floors` senza limite (il pavimento di ogni colonna è il pieno da terra), `bodyGround` in `forms.ts`
+  (`Form.block`: colonne con qualcosa ad altezza del corpo sopra il loro pavimento o irraggiungibili; si raggiungono quelle
+  fino a un gradino e, da lì, le vicine al più un gradino più alte), `rampBlocks` + `kernel.formBlocks(x, y, r)`: la
+  scatola del corpo si ferma su colonne bloccate o su un dislivello oltre un gradino tra colonne vicine sotto di lei;
+  pavimenti e blocchi anche per istanza (`groundOf`); le cose `dentro` solo sul piano terra. `tests/ramps.test.ts` (scala
+  di dieci gradini su e giù, fianco come muro, gradino sì e muro no, strutture del seme attraversabili come prima).
+  Diverso dal previsto: niente interpolazione nuova dell'altezza (bastano i gradini di 0,2 caselle e `climb` del renderer);
+  la canna chiusa del pozzo, che prima si attraversava, ora è irraggiungibile (test di `forms.test.ts` aggiornato).
+  Verifica nel browser: la scala aggiunta con `addModel` accanto al borgo si sale e si scende, il fianco ferma, nessun errore.
 - Fatto quando (per pezzo): test verdi, verifica nel browser su una struttura generata con le scale, commit (ADR-0043
   aggiornato).
 - Dipendenze: nessuna. Utile prima di T52 e di T56.
