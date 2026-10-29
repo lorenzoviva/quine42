@@ -13,9 +13,9 @@ import { ThinClient } from '../src/session/thin';
 
 const DT = 1 / 60;
 
-async function bootMany(): Promise<Kernel> {
+async function bootMany(game: Record<string, unknown> = {}): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
+  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3, ...game } }, null, 2) };
   return Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
 }
 
@@ -60,8 +60,8 @@ async function ask<T>(server: SessionServer, clients: ThinClient[], p: Promise<T
 const avatarOf = (c: ThinClient, id: string) => c.k.ecs.query('remote').find((e) => c.k.ecs.get(e, 'remote').id === id);
 
 /** Anna and Bruno side by side, Carlo far from both, each with a browser of their own. */
-async function three() {
-  const k = await bootMany();
+async function three(game: Record<string, unknown> = {}) {
+  const k = await bootMany(game);
   const server = new SessionServer(k);
   const anna = await thin(server, 'anna', 'Anna');
   const bruno = await thin(server, 'bruno', 'Bruno');
@@ -173,5 +173,67 @@ describe('words and gifts between wanderers (T43a)', () => {
     expect(k.as('anna', () => countItem(k.inventory(), item))).toBe(1);
     // A pocket that is not there: refused before the kernel.
     expect((await ask(server, all, anna.session.act({ t: 'dai', viandante: 'bruno', slot: 99 }))).ok).toBe(false);
+  }, 60000);
+});
+
+describe('«Altro…» and PvP between wanderers (T43b)', () => {
+  const health = (k: Kernel, id: string) => k.ecs.get(k.wandererAt(id)!.entity, 'needs').health as number;
+  const hurt = (k: Kernel, id: string, to: number) => (k.ecs.get(k.wandererAt(id)!.entity, 'needs').health = to);
+
+  it('without PvP: judged as on a person, what helps arrives on the other, what harms the kernel takes away', async () => {
+    const { k, server, anna, bruno, all } = await three({ pvp: false });
+    const b = avatarOf(anna, 'bruno')!;
+    expect(anna.k.actionsFor(b).map((o) => o.id)).toContain('altro');
+    hurt(k, 'bruno', 50);
+    const before = k.wandererAt('bruno')!;
+    await ask(server, all, anna.k.freeAction(b, 'colpisci'));
+    expect(health(k, 'bruno')).toBeCloseTo(50, 0);
+    await ask(server, all, anna.k.freeAction(b, 'spingi'));
+    const after = k.wandererAt('bruno')!;
+    expect(Math.hypot(after.x - before.x, after.y - before.y)).toBeLessThan(0.3);
+    expect(k.feed().some((e) => e.task === 'action.judge' && /tra viandanti non ci si ferisce/.test(e.text))).toBe(true);
+    // Care is not harm: it heals Bruno, not Anna.
+    hurt(k, 'anna', 40);
+    await ask(server, all, anna.k.freeAction(b, 'curi le ferite'));
+    expect(health(k, 'bruno')).toBeCloseTo(65, 0);
+    expect(health(k, 'anna')).toBeCloseTo(40, 0);
+    run(server, all, 8);
+    expect(bruno.session.notices.filter((n) => n.tipo === 'altro').map((n) => n.da)).toEqual(['anna', 'anna', 'anna']);
+  }, 60000);
+
+  it('with PvP: a blow hurts the other, a push moves them on their carpet; the master in god mode takes only words', async () => {
+    const { k, server, anna, all } = await three({ pvp: true });
+    const b = avatarOf(anna, 'bruno')!;
+    hurt(k, 'bruno', 50);
+    hurt(k, 'anna', 50);
+    await ask(server, all, anna.k.freeAction(b, 'colpisci'));
+    expect(health(k, 'bruno')).toBeCloseTo(30, 0);
+    expect(health(k, 'anna')).toBeCloseTo(50, 0);
+    const before = k.wandererAt('bruno')!;
+    k.as('anna', () => k.touchWanderer('bruno', [{ tipo: 'spingi', forza: 2 }]));
+    const after = k.wandererAt('bruno')!;
+    expect(after.x - before.x).toBeGreaterThan(0.5);
+    // The master: nothing but words reach them, PvP or not.
+    const master = k.partita().master ?? 'io';
+    const at = k.wandererAt('anna')!;
+    put(k, master, { x: at.x, y: at.y + 1 });
+    const m = k.wandererAt(master)!;
+    k.ecs.get(m.entity, 'needs').health = 100;
+    const out = k.as('anna', () => k.touchWanderer(master, [{ tipo: 'bisogni', salute: -30 }, { tipo: 'spingi', forza: 3 }, { tipo: 'messaggio', testo: 'Prendi!' }]));
+    expect(out).toContain('Prendi!');
+    expect(k.ecs.get(m.entity, 'needs').health).toBe(100);
+    const still = k.wandererAt(master)!;
+    expect(Math.hypot(still.x - m.x, still.y - m.y)).toBeLessThan(1e-6);
+  }, 60000);
+
+  it('without «Altro…» between players: not in the menu, refused by the server, no call to the Council', async () => {
+    const { k, server, anna, all } = await three({ pvp: true, altroTraGiocatori: false });
+    const b = avatarOf(anna, 'bruno')!;
+    expect(anna.k.actionsFor(b).map((o) => o.id)).not.toContain('altro');
+    hurt(k, 'bruno', 50);
+    const r = await ask(server, all, anna.session.act({ t: 'altro', viandante: 'bruno', testo: 'colpisci' }));
+    expect(r.messaggi?.join(' ')).toMatch(/non si fa «Altro…»/);
+    expect(health(k, 'bruno')).toBeCloseTo(50, 0);
+    expect(k.feed().some((e) => e.task === 'action.judge')).toBe(false);
   }, 60000);
 });

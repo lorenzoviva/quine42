@@ -223,6 +223,12 @@ export class SessionServer {
     };
     kernel.bus.on('wanderer:said', notify('dici'));
     kernel.bus.on('wanderer:gave', notify('dai'));
+    kernel.bus.on('wanderer:acted', notify('altro'));
+    // A wanderer pushed by another (T43b) walks back only with the credit of their steps from now on.
+    kernel.bus.on('wanderer:pushed', (e: { id?: unknown }) => {
+      const c = typeof e?.id === 'string' ? this.clients.get(e.id) : undefined;
+      if (c) c.budget = 0;
+    });
   }
 
   /** The master's branch now: what they changed that the world does not have yet. */
@@ -334,6 +340,7 @@ export class SessionServer {
     if (msg.t === 'passo') return this.step(c, msg.seq, msg.x, msg.y);
     const seq = Number((msg as { seq?: unknown }).seq) || 0;
     const k = this.kernel;
+    if (msg.t === 'altro' && typeof msg.viandante === 'string') return void this.later(c, seq, () => k.freeOnWanderer(String(msg.viandante), String(msg.testo ?? '')));
     if (msg.t === 'altro' && (msg.slot !== undefined || msg.col !== undefined || msg.row !== undefined)) return this.freeOn(c, seq, msg);
     switch (msg.t) {
       case 'frase': {

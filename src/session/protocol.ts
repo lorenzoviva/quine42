@@ -96,7 +96,7 @@ export type ClientMsg =
   /** An action of a thing's menu (`raccogli`, `apri`, `usa`, `leggi`, `modello:<nome>`…). */
   | { t: 'azione'; seq: number; entita: number; azione: string }
   /** «Altro…»: what the wanderer tries on a thing, on something they carry (`slot`) or on a tile (`col`, `row`), judged by the Council. */
-  | { t: 'altro'; seq: number; entita?: number; slot?: number; col?: number; row?: number; testo: string }
+  | { t: 'altro'; seq: number; entita?: number; slot?: number; col?: number; row?: number; viandante?: string; testo: string }
   | { t: 'chat'; seq: number; entita: number; testo: string }
   /** Words to another wanderer nearby (T43a): a bubble above who speaks, and who is spoken to hears them. */
   | { t: 'dici'; seq: number; viandante: string; testo: string }
@@ -162,7 +162,7 @@ export type ServerMsg =
 
 /** What another wanderer did to this one (T43a): words said to them, something given (`testo`: what and how many). */
 export interface Notice {
-  tipo: 'dici' | 'dai';
+  tipo: 'dici' | 'dai' | 'altro';
   da: string;
   nome: string;
   testo: string;
