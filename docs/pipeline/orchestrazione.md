@@ -52,3 +52,16 @@ T66, T43c, T30).
 - [2026-10-29T21:08:00.000Z] nota: verifica nel browser di T44a delegata a un subagente: fermato dal limite delle 5 ore dopo l'avvio del server e la prima scheda (nessun esito). T43c (morte, ricollegamento, due schede) non verificato.
 - [2026-10-29T21:23:54.971Z] T51: rimesso in coda (riprende la sua conversazione)
 - [2026-10-29T21:23:55.040Z] T53: rimesso in coda (riprende la sua conversazione)
+- [2026-10-29T21:26:28.866Z] riprendo T51 su claude (H:\projects\rune\.claude\worktrees\t51)
+- [2026-10-29T21:26:28.890Z] riprendo T53 su claude (H:\projects\rune\.claude\worktrees\t53)
+- [2026-10-29T21:26:30.319Z] lancio T64 su gemini (H:\projects\rune\.claude\worktrees\t64)
+- [2026-10-29T21:32:16.155Z] T64: ESITO: fallito (codice 1) (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T64)
+- [2026-10-29T21:32:32.009Z] T64: rimesso in coda (riprende la sua conversazione)
+- [2026-10-29T21:32:32.211Z] nota: T64: connessione con agy interrotta (stream lost), non un errore del task: riprendi
+- [2026-10-29T21:32:37.238Z] riprendo T64 su gemini (H:\projects\rune\.claude\worktrees\t64)
+- [2026-10-29T21:34:36.158Z] T53: ESITO: fatto — T53a: le scale sono rampe (ogni colonna ha il suo pavimento, si sale al più un gradino alla volta, i muri restano muri); T53b (più piani) resta da fare. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T53)
+- [2026-10-29T21:34:58.486Z] task/T53 integrato in 3d; worktree e branch tolti.
+- [2026-10-29T21:35:39.241Z] lancio T53b su claude (H:\projects\rune\.claude\worktrees\t53b)
+- [2026-10-29T21:35:41.516Z] lancio T56b su claude (H:\projects\rune\.claude\worktrees\t56b)
+- [2026-10-29T21:41:14.696Z] T51: ESITO: in attesa — T51a fatto (livello del mare, laghi e fiumi a un solo livello tra i chunk, mai sopra la riva, test e verifica nel browser); T51b aspetta la risposta in `docs/pipeline/domande/T51.md`. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T51)
+- [2026-10-29T21:50:47.762Z] nota: verifica nel browser di T44a e T43c (subagente, 4025cba): profilo, nome doppio riparato, morte di un giocatore (gli altri continuano), uscita e rientro con posizione, inventario e bisogni OK; KO «Chi è» nel client sottile e il profilo di localStorage condiviso tra viandanti (sovrascrive quello salvato): task T44c

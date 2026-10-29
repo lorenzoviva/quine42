@@ -33,7 +33,9 @@ Se il «Fatto quando» del task chiede una verifica nel browser e la riga `BROWS
 un **subagente** (Claude Code: Agent con Claude in Chrome; Antigravity: il suo subagente con il browser) con: il commit da
 provare, un worktree staccato tutto suo fuori dal base (`git worktree add --detach <dir> <commit>`, `node_modules` come
 junction da togliere **prima** del worktree), una porta libera, `?offline` (niente chiamate a Gemini), ciò che il task dice
-di guardare, e l'ordine di pulire tutto. Il suo esito va nel diario (`nota`) e all'autore; un difetto trovato diventa un task.
+di guardare, e l'ordine di pulire tutto. Finché T44c non lo corregge, il server di sviluppo in un worktree con la junction serve
+male `glue.wasm` di wasmoon («KERNEL PANIC: expected magic word»): una configurazione locale con `resolve.preserveSymlinks` e
+`server.fs.allow` sul percorso reale di `node_modules`, da togliere alla fine (o build + `vite preview`, se il multigiocatore non serve). Il suo esito va nel diario (`nota`) e all'autore; un difetto trovato diventa un task.
 
 ## 4. Integra (quando l'autore lo chiede)
 

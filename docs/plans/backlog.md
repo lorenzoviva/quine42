@@ -1327,6 +1327,28 @@ le risposte alle domande del piano.
 - Fatto quando: test con un verificatore finto (token valido, scaduto, anonimo che si lega), verifica nel browser con l'emulatore di
   Firebase o un progetto di prova, commit. Se serve creare il progetto Firebase, la domanda va in `docs/pipeline/domande/T44b.md`.
 
+### T44c · Correzioni dalla verifica nel browser di T44a e T43c — `da fare` (dipende da T44a, T43c)
+- Pipeline: claude · stima 3% · priorità 3
+- Contesto: verifica con due schede del 29/10/2026 (diario di `docs/pipeline/orchestrazione.md`): profilo, nome doppio, morte di un
+  giocatore, uscita e rientro funzionano; restano questi difetti.
+- Fare:
+  - «Chi è» nel client sottile non fa nulla: `ThinClient.perform` (`src/session/thin.ts`, ~683) gestisce sugli altri viandanti solo
+    `parla`, `dai:` e `altro`; deve mostrare la presentazione (come `kernel.ts` ~3201 in singola).
+  - Il profilo nel browser sta sotto una sola chiave per origine (`rune:profilo`, `src/session/socket.ts` ~40-51): due schede (o due
+    viandanti) se lo scambiano e il server **sovrascrive** il profilo salvato di uno con quello dell'altro. Una chiave per universo e id
+    (`rune:profilo:<universo>:<id>`); e quando il server ha già un profilo salvato, quello del client che entra non lo sostituisce senza
+    un cambio esplicito (`profilo`).
+  - Il passaggio del mouse su un altro viandante dice «undefined. undefined» (`thin.ts` ~306 mette `identity {name}` senza modulo,
+    `kernel.ts` ~5938): il nome e la prima riga della presentazione.
+  - Il clic destro tra due viandanti vicini apre il menu dell'altro (il passaggio del mouse diceva il giusto).
+  - Chi muore in multigiocatore vede solo un avviso di pochi secondi (`hud.ts` ~55): una schermata come in singola, con ciò che ha
+    perso e dove riparte.
+  - Le verifiche nel browser in un worktree della pipeline: con `node_modules` per junction il server di sviluppo serve `glue.wasm` di
+    wasmoon da fuori la radice e la pagina dà «KERNEL PANIC: expected magic word»; `vite.config.ts` deve permetterlo
+    (`server.fs.allow` con il percorso reale di `node_modules`).
+- Fatto quando: test del client sottile per «Chi è» e per il profilo di due viandanti nella stessa origine, verifica con due schede
+  in un worktree della pipeline (`BROWSER: verificato`), commit.
+
 ### T45 · Crediti, lobby, carte e server su Google Cloud — spezzato in T45a-T45f (risposte in `docs/pipeline/domande/T45.md`)
 - Fare, a pezzi (spezzare quando si comincia): crediti e pagamenti (P#1: l'1% sul costo); la lobby con il tetto di
   crediti, i modelli degli agenti (oggi `ai.textModel` e la tabella delle classi dello Scultore), i coefficienti e i
