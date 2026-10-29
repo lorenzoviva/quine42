@@ -18,7 +18,8 @@ import { Chat } from './ui/chat';
 import { ActionMenu } from './ui/actions';
 import { SessionClient } from './session/client';
 import { ThinClient } from './session/thin';
-import { socketLink, tabWanderer } from './session/socket';
+import { keepProfile, savedProfile, socketLink, tabWanderer } from './session/socket';
+import { ProfilePanel } from './ui/profile';
 import { Sfx } from './audio';
 import { $ } from './ui/dom';
 import type { MasterTools } from './master';
@@ -73,7 +74,7 @@ async function bootAlone(client: UniverseClient | null, snap: UniverseSnapshot |
  * is a mirror the thin client fills with what the server tells.
  */
 async function joinMany(name: string): Promise<ThinClient> {
-  const session = new SessionClient(socketLink(name, params.has('offline')), { id: tabWanderer(params) });
+  const session = new SessionClient(socketLink(name, params.has('offline')), { id: tabWanderer(params), profilo: savedProfile() });
   await session.ready;
   if (session.refused || !session.me) throw new Error(session.refused ?? 'il mondo non risponde');
   const mirror = await Kernel.boot({ files: session.files, store: memoryStore(), models: new MockModels(), forms: new WorkerRunner(), wasmUri, mirror: true });
@@ -116,6 +117,22 @@ async function main() {
   const inventory = new InventoryPanel(kernel);
   const chat = new Chat(kernel);
   const actions = new ActionMenu(kernel);
+  // Who the wanderer is (T44a): in a game of many the server repairs it and tells the others; alone the kernel keeps it.
+  const profile = new ProfilePanel(
+    kernel,
+    async (p) => {
+      if (thin) {
+        const o = await thin.setProfile(p);
+        if (o.profilo) keepProfile(o.profilo);
+        return o;
+      }
+      const r = kernel.setProfile(kernel.wanderer().id, p);
+      if (!r) return { ok: false, motivo: 'Non è stato possibile.' };
+      kernel.saveState();
+      return { ok: true, profilo: r.profilo, testo: r.riparato.join('; ') };
+    },
+    () => (thin ? thin.session.profilo : kernel.profileOf(kernel.wanderer().id)),
+  );
   const tools: MasterTools | undefined = tooling && new (await tooling).MasterTools(kernel, renderer, dev, () => syncFocus());
   // Right click on a tile near you: its context menu (with what stands on it, and "Altro…").
   $<HTMLCanvasElement>('#world').addEventListener('contextmenu', (e) => {
@@ -198,11 +215,14 @@ async function main() {
   });
 
   const syncFocus = () => {
-    kernel.input.enabled = !tools?.isOpen && !inventory.isOpen && !chat.isOpen && !actions.isOpen && !kernel.dead;
+    kernel.input.enabled = !tools?.isOpen && !inventory.isOpen && !chat.isOpen && !actions.isOpen && !profile.isOpen && !kernel.dead;
     if (!kernel.input.enabled) kernel.input.releaseAll();
   };
   inventory.onClose = syncFocus;
   chat.onClose = syncFocus;
+  profile.onClose = syncFocus;
+  if (thin?.session.profilo) keepProfile(thin.session.profilo);
+  if (thin?.session.riparato.length) hud.message(`Il tuo profilo: ${thin.session.riparato.join('; ')}.`, 'warn');
   actions.onClose = syncFocus;
   const runGenesis = async () => tools?.runGenesis(online, syncFocus);
   // A universe that was never generated waits for its genesis before the Council paints anything.
@@ -279,6 +299,10 @@ async function main() {
       case 'action':
         kernel.action();
         break;
+      case 'profile':
+        profile.toggle();
+        syncFocus();
+        break;
       case 'inventory':
         inventory.toggle();
         syncFocus();
@@ -307,6 +331,7 @@ async function main() {
       case 'escape':
         if (tools?.editor.isOpen) tools.editor.close();
         else if (chat.isOpen) chat.close();
+        else if (profile.isOpen) profile.close();
         else if (inventory.isOpen) inventory.close();
         else if (tools?.konsole.isOpen) tools.konsole.close();
         else if (!help.hidden) help.hidden = true;

@@ -195,10 +195,14 @@ export class Forms {
     return classOf(this.info(model)?.classe) ?? classOf(model) ?? CLASSES.find((c) => c.id === 'oggetto')!;
   }
 
+  /** How many seeds a program has in the world: the few of its class. */
+  seedsOf(model: string): number {
+    return SEEDS[this.classOf(model).id] ?? 2;
+  }
+
   /** A seed for an instance: stable for who it is, among the few seeds of its kind. */
   seedFor(model: string, who: string): number {
-    const n = SEEDS[this.classOf(model).id] ?? 2;
-    return 1 + (hashStr(who) % n);
+    return 1 + (hashStr(who) % this.seedsOf(model));
   }
 
   /** The form of a program with a seed, if ready; starts running it otherwise. */

@@ -7,6 +7,7 @@ import type { FileMap } from '../kernel/types';
 import type { Inventory } from '../kernel/inventory';
 import type { FeedEntry } from '../kernel/agents/council';
 import type { PlayerSpot } from '../kernel/situation';
+import type { Profile } from '../kernel/wanderers';
 
 /** A tick of the server's world and its hour. */
 export interface Clock {
@@ -84,10 +85,15 @@ export interface OtherView {
   form?: FormView;
   /** What they are saying, while they say it. */
   testo?: string;
+  /** What they say of themselves (their profile, T44a). */
+  presentazione?: string;
 }
 
 export type ClientMsg =
-  | { t: 'entra'; id: string; nome?: string }
+  /** Coming in, as who (T44a): the profile, if the client has one, is checked and repaired by the server. */
+  | { t: 'entra'; id: string; nome?: string; profilo?: Partial<Profile> }
+  /** The wanderer chooses again who they are (T44a): the answer says the profile as the server repaired it. */
+  | { t: 'profilo'; seq: number; profilo: Partial<Profile> }
   /** Where the client's wanderer is now, in the world: the server checks the step and may correct it. */
   | { t: 'passo'; seq: number; x: number; y: number }
   | { t: 'frase'; seq: number; tokens: string[] }
@@ -143,7 +149,7 @@ export type ServerMsg =
    * wanderer is the master (T41) and, only for the master, the Council's feed so far and their branch (T42b); the
    * master's updates say (`giocatori`) every player connected and where they are, when it changes (T42c).
    */
-  | ({ t: 'ingresso'; id: string; nome: string; master?: true; concilio?: FeedEntry[]; ramo?: FileChanges; files: FileMap; me: Me; forma?: FormView; stato: MyState; luoghi: PlaceView[]; cose: ThingView[]; viandanti: OtherView[]; giocatori?: PlayerSpot[] } & Clock)
+  | ({ t: 'ingresso'; id: string; nome: string; profilo?: Profile; riparato?: string[]; master?: true; concilio?: FeedEntry[]; ramo?: FileChanges; files: FileMap; me: Me; forma?: FormView; stato: MyState; luoghi: PlaceView[]; cose: ThingView[]; viandanti: OtherView[]; giocatori?: PlayerSpot[] } & Clock)
   | ({ t: 'aggiorna'; me?: Me; stato?: MyState; luoghi?: PlaceView[]; cose?: ThingView[]; via?: number[]; viandanti?: OtherView[]; partiti?: string[]; giocatori?: PlayerSpot[]; avvisi?: Notice[] } & Clock)
   /** The step was not possible (too fast, through a wall): the wanderer is here. */
   | { t: 'correzione'; seq: number; x: number; y: number }
@@ -151,7 +157,7 @@ export type ServerMsg =
    * What came of a message: what the world said back meanwhile, and the answer if there is one; the container it
    * opened or changed, with what is in it, and the pocket of a bag it opened.
    */
-  | { t: 'esito'; seq: number; ok: boolean; testo?: string; fatto?: string; messaggi?: string[]; dialoghi?: Dialog[]; motivo?: string; contenitore?: ContainerView; borsa?: number }
+  | { t: 'esito'; seq: number; ok: boolean; testo?: string; profilo?: Profile; forma?: FormView; fatto?: string; messaggi?: string[]; dialoghi?: Dialog[]; motivo?: string; contenitore?: ContainerView; borsa?: number }
   | { t: 'rifiuto'; motivo: string }
   /** What the Council said meanwhile (T41): only to the master, never to a player. */
   | { t: 'concilio'; voci: FeedEntry[] }

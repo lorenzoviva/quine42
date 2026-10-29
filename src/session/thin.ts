@@ -16,6 +16,7 @@ import type { FeedEntry } from '../kernel/agents/council';
 import type { SessionClient, Outcome } from './client';
 import type { ContainerView, FileChanges, Notice, OtherView, PlaceView, ServerMsg, ThingView } from './protocol';
 import type { FileMap } from '../kernel/types';
+import type { Profile } from '../kernel/wanderers';
 import { hashStr, hex } from '../kernel/rng';
 import { takeFromSlot } from '../kernel/inventory';
 import { THING_PARTS } from './protocol';
@@ -92,6 +93,16 @@ export class ThinClient {
       k.connected = [...s.players];
       k.follow = (id) => void this.follow(id);
     }
+  }
+
+  /**
+   * The wanderer chooses who they are (T44a): the server repairs the profile and gives it to the others; here the
+   * wanderer wears the look that came of it. What was repaired, if anything, is in the answer's `testo`.
+   */
+  async setProfile(p: Partial<Profile>): Promise<Outcome> {
+    const o = await this.session.act({ t: 'profilo', profilo: p });
+    if (o.forma) this.k.ecs.set(this.k.playerId, 'form', { ...this.k.ecs.get(this.k.playerId, 'form'), ...o.forma });
+    return o;
   }
 
   /** Every frame, after the kernel's ticks: what moves on the server glides, the wanderer's step and phrase go. */
@@ -291,7 +302,7 @@ export class ThinClient {
       id = k.ecs.spawn({ pos: { x: o.x, y: o.y }, glyph: { ...(me ?? { glyph: '@', color: '#ffffff' }) }, body: { r: 0.3, solid: false }, wander: {} });
       this.others.set(o.id, id);
     } else this.targets.set(id, { x: o.x, y: o.y });
-    k.ecs.set(id, 'remote', { id: o.id, nome: o.nome });
+    k.ecs.set(id, 'remote', { id: o.id, nome: o.nome, presentazione: o.presentazione ?? '' });
     k.ecs.set(id, 'identity', { name: o.nome });
     if (o.form) k.ecs.set(id, 'form', { ...o.form });
     if (o.testo) this.say(id, o.testo);

@@ -1,7 +1,7 @@
 // The browser's end of a session (T39): a WebSocket at /api/session (server/session.ts) as a link of the protocol,
 // and who this browser's wanderer is. What is sent before the socket opens waits for it.
 
-import { validWandererId } from '../kernel/wanderers';
+import { validWandererId, type Profile } from '../kernel/wanderers';
 import type { ClientLink, ClientMsg, ServerMsg } from './protocol';
 
 export function socketLink(universe: string, offline: boolean): ClientLink {
@@ -34,6 +34,24 @@ export function socketLink(universe: string, offline: boolean): ClientLink {
     onClose: (fn) => void closes.push(fn),
     close: () => ws.close(),
   };
+}
+
+/** The profile this browser keeps (T44a): it is the player's, not the universe's, and goes with them into any world. */
+export function savedProfile(): Partial<Profile> | undefined {
+  try {
+    const p = JSON.parse(localStorage.getItem('rune:profilo') ?? 'null');
+    return p && typeof p === 'object' ? p : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export function keepProfile(p: Profile): void {
+  try {
+    localStorage.setItem('rune:profilo', JSON.stringify(p));
+  } catch {
+    /* nowhere to keep it: the server has it */
+  }
 }
 
 /**

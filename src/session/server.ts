@@ -9,7 +9,7 @@ import { AGENTS, type AgentId, type FeedEntry } from '../kernel/agents/council';
 import { ATLAS_FILE } from '../kernel/atlas';
 import { RELIEF_PATH } from '../kernel/relief';
 import type { FileMap } from '../kernel/types';
-import { validWandererId } from '../kernel/wanderers';
+import { validWandererId, type Profile } from '../kernel/wanderers';
 import { hashStr, hex } from '../kernel/rng';
 import { THING_PARTS, type ClientMsg, type FileChanges, type ItemOp, type Dialog, type FormView, type Me, type MyState, type Notice, type OtherView, type PlaceView, type ServerLink, type ServerMsg, type ThingView } from './protocol';
 
@@ -153,6 +153,9 @@ interface Acted<T> {
 interface Answer {
   ok: boolean;
   value?: unknown;
+  /** The profile as it was repaired (T44a), and the wanderer's look with it. */
+  profilo?: Profile;
+  forma?: FormView;
   /** What the Council made of a request (T42e). */
   fatto?: string;
   messaggi?: string[];
@@ -256,7 +259,7 @@ export class SessionServer {
         return;
       }
       if (msg?.t !== 'entra') return;
-      client = this.join(link, msg.id, msg.nome);
+      client = this.join(link, msg.id, msg.nome, msg.profilo);
       if (!client) link.close();
     });
     link.onClose(() => {
@@ -268,7 +271,7 @@ export class SessionServer {
     });
   }
 
-  private join(link: ServerLink, id: unknown, nome: unknown): Client | undefined {
+  private join(link: ServerLink, id: unknown, nome: unknown, profilo: unknown): Client | undefined {
     if (!validWandererId(id)) {
       link.send({ t: 'rifiuto', motivo: 'id del viandante non valido' });
       return undefined;
@@ -282,6 +285,8 @@ export class SessionServer {
       return undefined;
     }
     this.kernel.setRemote(id, true);
+    // Who they say they are (T44a): repaired against everyone else in the world; without one, the profile saved.
+    const fixed = profilo && typeof profilo === 'object' ? this.kernel.setProfile(id, profilo) : undefined;
     const c: Client = { id, link, budget: this.kernel.paceOf(id) * BURST, places: new Map(), things: new Map(), others: new Map(), notices: [] };
     this.clients.set(id, c);
     const u = this.view(c);
@@ -292,6 +297,8 @@ export class SessionServer {
       t: 'ingresso',
       id,
       nome: w.nome,
+      ...(this.kernel.profileOf(id) ? { profilo: this.kernel.profileOf(id) } : {}),
+      ...(fixed?.riparato.length ? { riparato: fixed.riparato } : {}),
       ...(master ? { master: true as const, concilio: this.kernel.feed().slice(-FEED_KEEP), ...(Object.keys(this.branch.files).length ? { ramo: { ...this.branch.files } } : {}) } : {}),
       ...(forma ? { forma } : {}),
       tick: u.tick,
@@ -400,6 +407,12 @@ export class SessionServer {
         return this.answer(c, seq, this.watch(c, msg.id));
       case 'agente':
         return this.askOnBranch(c, seq, msg.agente, msg.testo);
+      case 'profilo': {
+        const r = msg.profilo && typeof msg.profilo === 'object' ? k.setProfile(c.id, msg.profilo) : undefined;
+        if (!r) return this.answer(c, seq, { ok: false, motivo: 'profilo non valido' });
+        k.saveState();
+        return this.answer(c, seq, { ok: true, value: r.riparato.join('; '), profilo: r.profilo, forma: this.formOf(k.wandererAt(c.id)?.entity) });
+      }
       case 'dici':
         return this.answer(c, seq, this.act(c, () => k.sayTo(String(msg.viandante ?? ''), String(msg.testo ?? ''))));
       case 'dai': {
@@ -648,6 +661,8 @@ export class SessionServer {
       ok: r.ok,
       ...(typeof r.value === 'string' && r.value ? { testo: r.value } : {}),
       ...(r.fatto ? { fatto: r.fatto } : {}),
+      ...(r.profilo ? { profilo: r.profilo } : {}),
+      ...(r.forma ? { forma: r.forma } : {}),
       ...(r.messaggi?.length ? { messaggi: r.messaggi } : {}),
       ...(r.dialoghi?.length ? { dialoghi: r.dialoghi } : {}),
       ...(r.motivo ? { motivo: r.motivo } : {}),
@@ -730,7 +745,8 @@ export class SessionServer {
       near.add(w.id);
       const form = this.formOf(o.entity);
       const b = k.bubbles.get(o.entity);
-      const v: OtherView = { id: w.id, nome: w.nome, x: round(o.x), y: round(o.y), facing: o.facing, ...(form ? { form } : {}), ...(b ? { testo: b.text } : {}) };
+      const intro = k.profileOf(w.id)?.presentazione;
+      const v: OtherView = { id: w.id, nome: w.nome, x: round(o.x), y: round(o.y), facing: o.facing, ...(form ? { form } : {}), ...(b ? { testo: b.text } : {}), ...(intro ? { presentazione: intro } : {}) };
       const key = JSON.stringify(v);
       if (c.others.get(w.id) !== key) others.push(v);
       c.others.set(w.id, key);

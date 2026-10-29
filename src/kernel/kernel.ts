@@ -51,7 +51,7 @@ import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Ident
 import { addItem, CARRY_CAPACITY, countItem, HOTBAR, equippedItem, moveSlot, newInventory, putSlot, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
 import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH } from './relief';
 import { CardLedger, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, payerOf, placeCardId, stampFiles, titolareOf, type Card, type Carta } from './cards';
-import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Wanderer, type WandererState } from './wanderers';
+import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState } from './wanderers';
 import type { ActionDef, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Partita, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
 
 export interface Chunk {
@@ -414,7 +414,7 @@ export class Kernel {
   /** The entity of the wanderer acting now (the one the input moves, or another one inside `as`). */
   playerId: Id = 0;
   /** The wanderers of this kernel by id (T34): `io` is the one of a game alone; others join with `addWanderer`. */
-  private wanderersById = new Map<string, Wanderer & { entity: Id; tappeto?: { ox: number; oy: number } }>();
+  private wanderersById = new Map<string, Wanderer & { entity: Id; tappeto?: { ox: number; oy: number }; profilo?: Profile }>();
   /** Every wanderer has a carpet of their own (T38): the carpet entity holds this one's offset, the others keep theirs in `tappeto`. */
   private carpetHolder = SOLO;
   /** The wanderers a session's client moves (T38): the kernel checks their steps and does not move them itself. */
@@ -847,14 +847,57 @@ export class Kernel {
     if (known && this.ecs.alive.has(known.entity)) return known.entity;
     const p = this.playerPos() ?? { x: 0, y: 0 };
     const entity = this.spawnWanderer(p.x + 1, p.y);
-    // Each wanderer is a seed of the wanderer's program (T39): those who meet tell each other apart.
-    const form: FormComp | undefined = this.ecs.get(entity, 'form');
-    if (form && id !== SOLO) Object.assign(form, { seed: this.forms.seedFor(form.model, `viandante:${id}`), tint: wandererColor(id) });
     const saved = readWandererState(this.files, id);
     // Their carpet starts where the carpet of the one acting is: they appear beside them.
     this.wanderersById.set(id, { id, nome: String(nome ?? saved?.nome ?? '').trim().slice(0, 40) || WANDERER_NAME, entity, tappeto: { ...this.offset() } });
+    // The profile they had (T44a), checked again: the world may have someone of that name by now.
+    if (saved?.profilo) this.setProfile(id, nome ? { ...saved.profilo, nome } : saved.profilo);
+    else this.dressWanderer(id);
     if (saved) this.as(id, () => this.applyWandererState(saved));
     return entity;
+  }
+
+  /**
+   * A wanderer's look (T39, T44a): the seed and the cloak of their profile, or, for those who chose none, a seed and a
+   * colour of their id: those who meet tell each other apart.
+   */
+  private dressWanderer(id: string): void {
+    const w = this.wanderersById.get(id);
+    const form: FormComp | undefined = w && this.ecs.get(w.entity, 'form');
+    if (!w || !form) return;
+    const pr = w.profilo;
+    const seed = pr?.seme ?? (id !== SOLO ? this.forms.seedFor(form.model, `viandante:${id}`) : form.seed);
+    const tint = pr?.tinta ?? wandererColor(id) ?? form.tint;
+    Object.assign(form, { seed, tint });
+    if (!tint) delete form.tint;
+  }
+
+  /** The names a wanderer's must not be like (T44a): the people of the world, and every other wanderer, here or saved. */
+  private namesTaken(id: string): string[] {
+    const out = readPeople(this.files).persone.map((p) => p.nome);
+    for (const w of [...wanderersIn(this.files), ...this.wanderersById.values()]) if (w.id !== id) out.push(w.nome);
+    return out;
+  }
+
+  /** A wanderer's profile (T44a), if they chose one. */
+  profileOf(id: string): Profile | undefined {
+    const pr = this.wanderersById.get(id)?.profilo;
+    return pr ? { ...pr } : undefined;
+  }
+
+  /**
+   * A wanderer chooses who they are (T44a): the profile is repaired (`repairProfile`: the name unlike everyone else's, seed
+   * and colour within the limits), it becomes their name and their look, and it is saved with them.
+   */
+  setProfile(id: string, raw: unknown): ProfileRepair | undefined {
+    const w = this.wanderersById.get(id);
+    if (!w) return undefined;
+    const model: string = this.ecs.get(w.entity, 'form')?.model ?? 'viandante';
+    const r = repairProfile(raw, id, this.namesTaken(id), this.forms.seedsOf(model));
+    w.profilo = r.profilo;
+    w.nome = r.profilo.nome;
+    this.dressWanderer(id);
+    return r;
   }
 
   /**
@@ -1263,6 +1306,9 @@ export class Kernel {
     } else {
       this.ecs.set(this.playerId, 'glyph', glyph);
       this.ecs.set(this.playerId, 'form', this.formFor(playerMod?.manifest, 'viandante'));
+      // The look a profile chose stays (T44a).
+      const me = [...this.wanderersById.values()].find((w) => w.entity === this.playerId);
+      if (me?.profilo) this.dressWanderer(me.id);
       if (reset) this.resetComponents(this.playerId, defaults, [...(playerMod?.manifest.persist ?? []), 'inventory.slots', 'inventory.equipped']);
     }
 
@@ -2974,6 +3020,7 @@ export class Kernel {
     // Another wanderer (T43a): one talks to them and gives them what is at hand (the hotbar); «Altro…» if the game allows it (T43b).
     if (this.otherWanderer(id) !== undefined) {
       out.push({ id: 'parla', label: 'Parla', enabled: true });
+      if (this.introOf(id)) out.push({ id: 'chi', label: 'Chi è', enabled: true });
       this.inventory().slots.slice(0, HOTBAR).forEach((s, i) => s && out.push({ id: `dai:${i}`, label: `Dai ${this.itemInfo(s.item).name}${s.count > 1 ? ` ×${s.count}` : ''}`, enabled: true }));
       if (this.partita()?.altroTraGiocatori !== false) out.push({ id: 'altro', label: 'Altro…', enabled: true });
       return out;
@@ -3149,6 +3196,7 @@ export class Kernel {
     const other = this.otherWanderer(id);
     if (other !== undefined) {
       if (action === 'parla') this.bus.emit('ui:chat', { id, name: this.nameOf(id) });
+      if (action === 'chi') this.bus.emit('ui:dialog', { speaker: this.nameOf(id), text: this.introOf(id) ?? '' });
       if (action.startsWith('dai:')) this.giveTo(other, Number(action.slice(4)));
       if (action === 'altro' && this.partita()?.altroTraGiocatori !== false) this.bus.emit('ui:freeaction', { id, name: this.nameOf(id) });
       return;
@@ -4187,6 +4235,14 @@ export class Kernel {
     if (entity === this.playerId) return undefined;
     const remote = this.ecs.get(entity, 'remote')?.id;
     return typeof remote === 'string' ? remote : this.wandererOf(entity);
+  }
+
+  /** What another wanderer says of themselves (T44a): their profile here, or what the server told a mirror. */
+  introOf(entity: Id): string | undefined {
+    const remote = this.ecs.get(entity, 'remote');
+    if (typeof remote?.presentazione === 'string') return remote.presentazione || undefined;
+    const id = this.otherWanderer(entity);
+    return id ? this.profileOf(id)?.presentazione : undefined;
   }
 
   /** The gods' needs stay full, whatever the world's code did to them this tick. */
@@ -5661,6 +5717,7 @@ export class Kernel {
       reply = await npcReply(this.council, {
         name,
         wanderer: me.nome,
+        presentazione: this.profileOf(me.id)?.presentazione,
         memories: memorySummary(memoriesFor(person?.ricordi, me.id), 12),
         bond: person ? bondWith(person, me.id) : undefined,
         secrets: secretsOf(readPlots(this.files), name, this.day()),
@@ -6149,6 +6206,7 @@ export class Kernel {
   private wandererState(w: Wanderer): WandererState {
     return {
       ...(w.nome !== WANDERER_NAME ? { nome: w.nome } : {}),
+      ...(this.wanderersById.get(w.id)?.profilo ? { profilo: this.wanderersById.get(w.id)!.profilo } : {}),
       inventory: this.inventory(),
       needs: this.needs() as unknown as Record<string, number>,
       hand: this.hand(),
@@ -6313,6 +6371,7 @@ export class Kernel {
       const v = readWandererState(this.files, w.id);
       if (!v) continue;
       if (v.nome && w.id !== SOLO) w.nome = String(v.nome).slice(0, 40);
+      if (v.profilo && !this.mirror) this.setProfile(w.id, v.profilo);
       this.as(w.id, () => this.applyWandererState(v));
       if (w.id === SOLO && v.trasceso) this.exitedOnce = true;
     }

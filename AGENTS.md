@@ -127,7 +127,7 @@ src/
                         rune, luci), models.ts (geometrie dei modelli), forms.ts + worker.ts (i programmi nei worker),
                         thumbs.ts (icone: foto dei modelli), bloom.ts (bagliore dei voxel luminosi), corona3d.ts (corona, studio, avatar), coronaview.ts (la corona nel renderer, solo del master), screens.ts (la parete della Direzione), chain.ts (la catena della Sala sistemi), bench.ts (il banco di prova), overlay.ts (testi, E, mouse),
                         materials.ts, glitch.ts
-  ui/                   hud.ts (anche il diario delle missioni), inventory.ts, actions.ts, chat.ts, feed.ts, genesis.ts, editor.ts, console.ts, studio.ts, atlas.ts,
+  ui/                   hud.ts (anche il diario delle missioni), profile.ts (il profilo del viandante), inventory.ts, actions.ts, chat.ts, feed.ts, genesis.ts, editor.ts, console.ts, studio.ts, atlas.ts,
                         graph.ts + graphlayout.ts (il grafo del mondo nel Nucleo), dom.ts
 universe/
   universe.json         nome, seme, raggio, chunk (18), modelli e budget, `partita` (scelta alla Genesi, ADR-0053)
@@ -348,6 +348,12 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   sul suo corpo (`touchWanderer`: bisogni, scudo, stati come lui; `spingi` sul suo tappeto, `wanderer:pushed` azzera il suo credito di passo); ciò che
   ferisce (`unharmed`: bisogni che scendono, `spingi`, `fuoco`, `togli_stato`, stati che rallentano) solo con `partita.pvp`; sul master solo `messaggio`.
   Chi lo subisce lo sa (`wanderer:acted` → avviso `altro`).
+- **Il profilo del viandante** (ADR-0074, T44a): `Profile {nome, seme, tinta, presentazione}` in `world/giocatori/<id>.json`; `repairProfile`
+  (`wanderers.ts`) lo ripara (nome di 2-24 caratteri e non simile a persone o viandanti, altrimenti `freshName`; seme tra quelli della classe;
+  mantello né scuro né chiaro né grigio; 4 righe) e `kernel.setProfile` lo fa nome e aspetto (`dressWanderer`). `entra {profilo}` e `profilo`
+  nel protocollo, l'`ingresso`/`esito` dicono il profilo riparato e `riparato`; agli altri con `OtherView` (+ `presentazione`, «Chi è» nel
+  menu). Il Narratore riceve la presentazione come affermazione del viandante. Il client lo tiene in `localStorage`; `P` apre il pannello
+  (`src/ui/profile.ts`, una foto del modello per seme).
 - **Il clone con un altro master** (ADR-0068, T42d): il master non cambia; un altro master è un altro universo. `cloneUniverse`
   (`server/universeStore.ts`, `POST /api/universe/<nome>/clone {nome, master, titolari}`) copia la cartella intera (storia, `maps/`,
   viandanti, carte, consumi; non i rami `rami/*`) e committa ciò che dà `cloneChanges` (`src/kernel/clone.ts`): `name` e

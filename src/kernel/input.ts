@@ -4,7 +4,7 @@ export type Action =
   | 'up' | 'down' | 'left' | 'right'
   | 'interact' | 'inscribe' | 'drop' | 'rollback'
   | 'prev' | 'next' | 'movePrev' | 'moveNext'
-  | 'help' | 'console' | 'escape'
+  | 'help' | 'console' | 'escape' | 'profile'
   | 'inventory' | 'action' | 'feed' | 'walk' | 'cast'
   | 'hot1' | 'hot2' | 'hot3' | 'hot4' | 'hot5' | 'hot6';
 
@@ -28,6 +28,7 @@ const PRESS: Record<string, Action> = {
   Escape: 'escape',
   KeyI: 'inventory', Tab: 'inventory',
   KeyF: 'action',
+  KeyP: 'profile',
   KeyG: 'feed',
   KeyV: 'walk',
   Digit1: 'hot1', Digit2: 'hot2', Digit3: 'hot3', Digit4: 'hot4', Digit5: 'hot5', Digit6: 'hot6',
