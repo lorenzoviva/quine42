@@ -22,7 +22,7 @@ Senza numero («esegui il prossimo task del backlog») vale il primo `da fare` c
 ## Step 9 — chiusura
 
 ### T01 · Lotti e strutture: test, ADR, documenti — `fatto` (`34adee7`)
-- Contesto: F7 di [`step9-3d.md`](step9-3d.md) (codice fatto: `settleLots`, `placeInside`, `floorAt`,
+- Contesto: F7 di [`step9-3d.md`](../archivio/2-step/plans/step9-3d.md) (codice fatto: `settleLots`, `placeInside`, `floorAt`,
   `structureAt`, una struttura importante per zona, `form.wanted`).
 - Fare: test in `tests/` (gli edifici del borgo diventano strutture girate verso la porta; le caselle del lotto
   sono terreno; le cose `dentro` stanno sul pavimento del modello e non nei muri; una sola struttura importante
@@ -95,7 +95,7 @@ Senza numero («esegui il prossimo task del backlog») vale il primo `da fare` c
 Dal to-do: personaggi, trame e bibbia incoerenti (gatti trattati come umani, nomi quasi uguali, legami
 impossibili, trame che non rispettano le persone, allusioni alla quarta parete, rune che si comportano in modo
 diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
-[`docs/userchats/to-do-2026-10-22.md`](../userchats/to-do-2026-10-22.md) (sezione «Incoerenze personaggi e trame»).
+[`docs/userchats/to-do-2026-10-22.md`](../archivio/3-to-do-backlog/userchats/to-do-2026-10-22.md) (sezione «Incoerenze personaggi e trame»).
 
 ### T07 · Decisione: Graphify e il grafo del mondo — `fatto` (`faa0bc7`)
 - **Risposta dell'autore** (22/10/2026): approvato il grafo nativo del kernel («in casa») per l'uso (b); resta da
@@ -258,7 +258,7 @@ diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
 ## La corona
 
 Dal to-do (testo completo, con le specifiche di ogni edificio, in
-[`docs/userchats/to-do-2026-10-22.md`](../userchats/to-do-2026-10-22.md)): la corona più grande, ogni edificio con un esterno e un interno neon-punk propri; dentro e fuori
+[`docs/userchats/to-do-2026-10-22.md`](../archivio/3-to-do-backlog/userchats/to-do-2026-10-22.md)): la corona più grande, ogni edificio con un esterno e un interno neon-punk propri; dentro e fuori
 restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano ridondanti.
 
 ### T18 · Corona quattro volte più grande — `fatto` (`151549f`)
@@ -279,7 +279,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   (piramide nera e vetro), Ufficio dei luoghi (edificio mobile con strumenti di terraformazione), Sala sistemi
   (rampa verso una base sotterranea), Il Nucleo (sfera di voxel neri sotto un edificio ad anello), Sala del
   Concilio (esagonale). In `docs/prompts/gemini-strutture-corona.md`.
-- Esito: [`docs/prompts/gemini-strutture-corona.md`](../prompts/gemini-strutture-corona.md): un prompt comune (niente
+- Esito: [`docs/prompts/gemini-strutture-corona.md`](../archivio/3-to-do-backlog/prompts/gemini-strutture-corona.md): un prompt comune (niente
   chiave né script a pagamento; scrive solo `lab/mjx/models/corona-<id>.xml` e una riga di `lab/3d/catalog.ts`; collaudo
   con `mjx-render`, `mjx-slice`, la sandbox e il giudizio da Artista; un commit per struttura) e una scheda per ciascuna
   delle otto strutture, con le parole dell'autore, la scatola e il neon della sala. Diverso dal previsto: la scala. A 20
@@ -366,7 +366,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 ### T26 · L'Ufficio dei luoghi, dentro — `fatto` (T26a, T26b, T26c, T26d)
 - Da progettare in funzione di come lavora il Cartografo (piani, lotti, atlante). **Proposta all'autore** prima
   di costruire.
-- Proposta scritta il 23/10/2026: [`corona-proposte.md`](corona-proposte.md) §1 — **il plastico**: un tavolo olografico
+- Proposta scritta il 23/10/2026: [`corona-proposte.md`](../archivio/3-to-do-backlog/plans/corona-proposte.md) §1 — **il plastico**: un tavolo olografico
   3 × 3 con un luogo già pianificato in miniatura («<» «>» per il luogo), una leva che scorre le sei fasi del Cartografo
   (bozza, varchi, ambiente, sentieri, lotti e strutture, cose e rune), pannello con il piano; l'atlante e i terreni dello
   Studio del Cartografo qui. Pezzi: T26a plastico, T26b fasi, T26c unione con lo Studio del Cartografo.
@@ -419,7 +419,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 ### T27 · La Sala sistemi, dentro — `fatto` (T27a, T27b, T27c, T27d)
 - L'autore chiede un aiuto: far apprezzare la complessità del codice con esempi (cosa fa un sistema, casi d'uso).
   **Proposta all'autore** (es. ogni sistema come un «caso» animato: prima, regola, dopo).
-- Proposta scritta il 23/10/2026: [`corona-proposte.md`](corona-proposte.md) §2 — **la catena** (ogni sistema una
+- Proposta scritta il 23/10/2026: [`corona-proposte.md`](../archivio/3-to-do-backlog/plans/corona-proposte.md) §2 — **la catena** (ogni sistema una
   stazione nell'ordine del tick, con entità toccate, ms e guasti dal vivo) e **il banco di prova** (una teca 3 × 3 con un
   caso d'uso a ciclo: prima, la regola, dopo). Pezzi: T27a catena, T27b banco con i casi del seme, T27c casi dei sistemi
   forgiati.
@@ -472,7 +472,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 
 ### T32 · Gli edifici dimenticati: Direzione, Biblioteca, Galleria, Archivio — `fatto` (commit «Corona (T32)»)
 - Contesto: nel seme il campus ha 12 edifici (13 con l'Archivio, dove oggi finiscono le meccaniche `mech.*`); le
-  specifiche del 22/10 e il prompt di T19 ne coprono 8. Proposte in [`corona-proposte.md`](corona-proposte.md) §3:
+  specifiche del 22/10 e il prompt di T19 ne coprono 8. Proposte in [`corona-proposte.md`](../archivio/3-to-do-backlog/plans/corona-proposte.md) §3:
   Direzione come regia (maxischermo, torre di trasmissione; dentro la linea del tempo dei commit e il quadro dei costi),
   Biblioteca del Mondo come pila di libri (dentro il leggio della bibbia e le tavole delle regole), Galleria dell'Artista
   come museo-cubo con una scultura nel piazzale (dentro il tornio dello Scultore), Archivio come pila di container o
@@ -491,7 +491,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   T32-T34, ma T33-T45 sono del multiplayer, quindi T46-T48.
 
 ### T49 · Gli interni della corona: aria, simmetria, luci più tenui — `fatto` (T49a, T49b)
-- Contesto: richiesta del 24/10 ([`to-do-2026-10-24.md`](../userchats/to-do-2026-10-24.md), «Interni edifici della corona»,
+- Contesto: richiesta del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/userchats/to-do-2026-10-24.md), «Interni edifici della corona»,
   con `docs/userchats/direzione.png`). Vale per tutte le stanze (`buildRoom`/`itemMesh` in `corona3d.ts`, le posizioni in
   `corona.ts`). Oggi: tre postazioni (`desk`, `x 4/6/8, y ROOM_H-4`) davanti allo schermo della storia sono celle bloccate
   (`Corona.free` le esclude) che a vista sono solo tre trattini; il dispositivo centrale (tavolo della situazione, plastico,
@@ -530,7 +530,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 - Domande per l'autore: nessuna (se il piano terra non tiene dispositivo e scaffali, la scelta è scritta nel task).
 
 ### T46 · La Direzione, dentro: la sala operativa — `fatto` (T46a, T46b, T46c)
-- Contesto: [`corona-proposte.md`](corona-proposte.md) §3.1 (approvata il 23/10). Oggi dentro la Direzione (`universo`,
+- Contesto: [`corona-proposte.md`](../archivio/3-to-do-backlog/plans/corona-proposte.md) §3.1 (approvata il 23/10). Oggi dentro la Direzione (`universo`,
   squadra dell'Arbitro, oro `ffcf5c`) ci sono solo gli scaffali di `universe.json` e le scrivanie. Gli apparecchi seguono
   le vetrine di T21-T28 (`SHOWCASES`/`GRAPH_AT` in `corona.ts`, `showcaseOf`/`stepShowcase`/`clickStudio` in
   `kernel.ts`, il disegno in `corona3d.ts`, il pannello in `studio.ts`). Guardare non cambia nulla.
@@ -662,7 +662,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 
 ### T31 · Gli otto edifici della corona nella libreria — `fatto` (commit «Corona (T31)»)
 - Contesto: T20 ha fatto il motore (ADR-0049); mancano i programmi. **Per l'autore**: esegui il prompt di
-  [`docs/prompts/gemini-strutture-corona.md`](../prompts/gemini-strutture-corona.md) in Gemini CLI, una struttura per
+  [`docs/prompts/gemini-strutture-corona.md`](../archivio/3-to-do-backlog/prompts/gemini-strutture-corona.md) in Gemini CLI, una struttura per
   sessione (`magia`, `persone`, `cose`, `oggetti`, `luoghi`, `sistemi`, `nucleo`, `concilio`), poi rimetti questo task
   `da fare` (bastano anche alcune).
 - Fare: copiare `lab/mjx/models/corona-<id>.xml` in `universe/models/` con la voce in `models/index.json`
@@ -692,7 +692,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   Il `dev` di Vite su un'altra porta non caricava wasmoon (`LuaFactory` mancante); la build di produzione sì.
 
 ### T58 · Ritocchi di luce: il piedistallo del Nucleo e il silos dei personaggi — T58a `fatto` (`33638c4`), T58b `fatto` (`93da812`)
-- Contesto: richiesta del 24/10, sera ([`to-do-2026-10-24.md`](../userchats/to-do-2026-10-24.md), «Luci del Nucleo e del silos»).
+- Contesto: richiesta del 24/10, sera ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/userchats/to-do-2026-10-24.md), «Luci del Nucleo e del silos»).
   Il disegno è in `src/render/corona3d.ts`; non tocca il kernel.
 - **T58a · il piedistallo del grafo**: oggi (`itemMesh`, caso `grafo`) il gradino alto ha il neon solo sul bordo davanti e su
   quello dietro, il basso solo davanti: da un lato si vedono due gradini accesi, dall'altro uno. Il neon gira tutto attorno
@@ -711,14 +711,14 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 - Dipendenze: nessuna. Domande per l'autore: nessuna.
 
 ### T50 · La corona personalizzata: arredi futuristici, trasporti e Concilio di gerboa — `fatto`
-- Contesto: consultazione del 24/10 ([`risposte-T50.md`](../userchats/risposte-T50.md)). Gli undici edifici sono completati
+- Contesto: consultazione del 24/10 ([`risposte-T50.md`](../archivio/3-to-do-backlog/userchats/risposte-T50.md)). Gli undici edifici sono completati
   nel campus (T31 fatto). L'ambientazione della corona deve essere marcatamente futuristica e artificiosa («lo studio che
   programma la realtà»), sfruttando MarkovJunior a piena potenza: programmi con semi riutilizzabili ad altissima varietà visiva
   e fotogrammi animati. Fuori non camminano i membri del Concilio, ma una vita robotica operosa; i membri del Concilio (negli
   interni degli edifici e nella Direzione) sono un tributo alla *Guida Galattica per gli Autostoppisti*: gerboa giganti
   pacioccosi con cappelli distintivi per ruolo.
 - **T50a · Prompt per Gemini CLI (`docs/prompts/gemini-esterni-corona.md`) — `fatto` (`294a734`)**:
-  - Predisposto il file guida per Gemini CLI ([`docs/prompts/gemini-esterni-corona.md`](../prompts/gemini-esterni-corona.md), stile `gemini-strutture-corona.md`)
+  - Predisposto il file guida per Gemini CLI ([`docs/prompts/gemini-esterni-corona.md`](../archivio/3-to-do-backlog/prompts/gemini-esterni-corona.md), stile `gemini-strutture-corona.md`)
     con schede dettagliate, distinzione di scala (8 vpt per arredi e veicoli; 20 vpt per i gerboa del Concilio), regole sui costi,
     e istruzioni mirate a sfruttare tutta l'espressività di MarkovJunior (regole generative ramificate ad albero/frattali,
     voxel luminosi `glow="True"`, simulazione pittorica di superfici traslucide e riflettenti, fotogrammi animati `<animation>` e parti articolate `part`).
@@ -805,7 +805,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 
 ## Terreno, strutture e taglie
 
-Richieste del 24/10 ([`to-do-2026-10-24.md`](../userchats/to-do-2026-10-24.md), «Generazione della heightmap» e «taglia»).
+Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/userchats/to-do-2026-10-24.md), «Generazione della heightmap» e «taglia»).
 
 ### T51 · Il livello del mare e un motore dell'acqua — `da fare` (si comincia da T51a; T51b in attesa della domanda)
 - Pipeline: claude · stima 6% · approvato · priorità 50
@@ -944,13 +944,13 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../userchats/to-do-2026-10-24.md), 
 
 ## Multiplayer
 
-Piano: [`multiplayer.md`](multiplayer.md) (ADR-0050). Le fasi 0 (T33-T37) servono anche da soli e non chiedono la rete;
+Piano: [`multiplayer.md`](../archivio/3-to-do-backlog/plans/multiplayer.md) (ADR-0050). Le fasi 0 (T33-T37) servono anche da soli e non chiedono la rete;
 le fasi 1-3 (T38-T43) si provano con il server di Vite e più schede; la fase 4 (T44-T45) è la piattaforma e aspetta
 le risposte alle domande del piano.
 
 ### T29 · Aggiornare il piano del multiplayer — `fatto` (`a004e46`)
-- Riscrivere [`docs/plans/multiplayer.md`](multiplayer.md) con le decisioni dell'autore del to-do (sezione «Multiplayer» di
-  [`docs/userchats/to-do-2026-10-22.md`](../userchats/to-do-2026-10-22.md)): server unica fonte di
+- Riscrivere [`docs/plans/multiplayer.md`](../archivio/3-to-do-backlog/plans/multiplayer.md) con le decisioni dell'autore del to-do (sezione «Multiplayer» di
+  [`docs/userchats/to-do-2026-10-22.md`](../archivio/3-to-do-backlog/userchats/to-do-2026-10-22.md)): server unica fonte di
   verità, modalità singola e multigiocatore, crediti e proxy, contenuti come carte del giocatore (P#2), master in
   god mode e senza tappeto, punizione della morte configurabile, budget e modelli nella lobby, PvP e «Altro…» tra
   giocatori; togliere i riferimenti al 2D e alle immagini. Poi spezzare l'implementazione in task di questo
@@ -1308,14 +1308,14 @@ le risposte alle domande del piano.
 
 ### T44b · L'account e l'autenticazione — `in attesa` (domande in `docs/pipeline/domande/T44b.md`; dipende da T44a)
 - Fare: autenticazione sicura; l'id del viandante (T34) è quello dell'account; il profilo di T44a legato all'account.
-- **Domanda per l'autore**: quale fornitore per l'autenticazione (domanda 1 di [`multiplayer.md`](multiplayer.md)).
+- **Domanda per l'autore**: quale fornitore per l'autenticazione (domanda 1 di [`multiplayer.md`](../archivio/3-to-do-backlog/plans/multiplayer.md)).
 
 ### T45 · Crediti, lobby, carte e server su Google Cloud — `in attesa` (domande in `docs/pipeline/domande/T45.md`; dipende da T36, T44b)
 - Fare, a pezzi (spezzare quando si comincia): crediti e pagamenti (P#1: l'1% sul costo); la lobby con il tetto di
   crediti, i modelli degli agenti (oggi `ai.textModel` e la tabella delle classi dello Scultore), i coefficienti e i
   minimi dell'universo; crediti finiti → ricarica, offline (modelli locali) o abbandona; la collezione di carte fuori
   dalla partita, con gli utilizzi; il server su Google Cloud con i repository privati, sempre acceso.
-- **Domande per l'autore**: le domande 1-4 di [`multiplayer.md`](multiplayer.md) (pagamenti, «un'altra storia», spese
+- **Domande per l'autore**: le domande 1-4 di [`multiplayer.md`](../archivio/3-to-do-backlog/plans/multiplayer.md) (pagamenti, «un'altra storia», spese
   comuni, coefficienti).
 
 ## Varie
@@ -1329,7 +1329,7 @@ le risposte alle domande del piano.
 
 ## Laboratorio MarkovJunior
 
-Richiesta del 25/10 ([`to-do-2026-10-25.md`](../userchats/to-do-2026-10-25.md)). La sandbox 3D `/lab/3d/` resta com'è per
+Richiesta del 25/10 ([`to-do-2026-10-25.md`](../archivio/3-to-do-backlog/userchats/to-do-2026-10-25.md)). La sandbox 3D `/lab/3d/` resta com'è per
 la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedicato a modellare le singole mesh.
 
 ### T59 · Laboratorio: editor per modelli MarkovJunior — `fatto` (T59a, T59b, T59c e T59d fatti)
