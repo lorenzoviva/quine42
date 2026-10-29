@@ -3844,7 +3844,7 @@ export class Kernel {
       'schermo-scritte', 'schermo-struttura', 'circuito-3D'
     ];
     for (const m of extra) {
-      if (this.forms.info(m)) this.forms.get(m, 1);
+      if (this.forms.info(m)) this.forms.preload(m);
     }
     if (this.plintoSculpture) this.updatePlinto();
     else if (this.zone === 'corona') this.visitCorona(this.tickCount);

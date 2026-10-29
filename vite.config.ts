@@ -34,6 +34,6 @@ export default defineConfig(({ mode }) => {
       },
     },
     // The session's tests boot several kernels each: with the whole suite in parallel they take longer than the default 5 s.
-    test: { environment: 'node', include: ['tests/**/*.test.ts', 'lab/**/*.test.ts'], testTimeout: 30000 },
+    test: { environment: 'node', include: ['tests/**/*.test.ts', 'lab/**/*.test.ts'], testTimeout: 60000 },
   };
 });
