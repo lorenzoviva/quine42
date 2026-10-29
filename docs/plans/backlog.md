@@ -1249,12 +1249,21 @@ le risposte alle domande del piano.
   ogni tasca della barra rapida. `testTimeout` di 30 s in `vite.config.ts`: con un file di test in più quelli della sessione superavano i
   5 s sotto carico. Una volta, a suite intera, `tests/determinism.test.ts` è fallito e poi è passato (tre volte): da tenere d'occhio.
 
-### T43b · «Altro…» e PvP tra viandanti — `da fare` (dipende da T43a)
+### T43b · «Altro…» e PvP tra viandanti — `fatto` (`655fe3c`) (dipende da T43a)
 - Pipeline: claude · stima 5% · approvato · priorità 1
 - Fare: «Altro…» su un altro viandante giudicato come su una persona, solo se `partita.altroTraGiocatori`; gli effetti li applica
   il server sul corpo dell'altro (il master in god mode lascia passare solo `messaggio`, ADR-0065); ciò che ferisce
   (bisogni che scendono, `spingi`, `fuoco`…) solo se `partita.pvp`, altrimenti il Narratore lo sa e il kernel lo toglie.
 - Fatto quando: test headless con PvP sì e no, con «Altro…» tra giocatori sì e no.
+- Esito: ADR-0073. `kernel.freeOnWanderer` (dal menu, o dal messaggio `altro {viandante, testo}`: nello specchio il corpo dell'altro non ha
+  un id del server) rifiuta senza chiamate se la partita non lo permette e oltre `GIVE_REACH`; `judgeFree` sul bersaglio `altro viandante`
+  senza azioni del modello, forma né apprendimento; il Narratore riceve `between {pvp, god}`. `kernel.touchWanderer` applica gli effetti: bisogni,
+  scudo, stati sul corpo dell'altro (`as`), `spingi` sul suo tappeto (`stepWanderer`, e il server gli azzera il credito di passo), il resto dove
+  sta; senza PvP `unharmed` toglie ciò che ferisce (registro `scarta`), sul master solo `messaggio`. Avviso `altro` a chi lo subisce. Nel
+  `MockModels` «colpisci» e «curi» su un viandante. `tests/between.test.ts` (3 test nuovi: PvP no, PvP sì col master, «Altro…» no).
+  Diverso dal previsto: in `core.effects` i bisogni valgono per chi agisce, quindi su un viandante il kernel li applica come lui; anche
+  `togli_stato` e gli stati che rallentano contano come ferire. Nessuna verifica nel browser (il task chiede i test headless; la verifica con
+  due schede è di T43c).
 
 ### T43c · Morte e ricollegamento in multigiocatore — `da fare` (dipende da T43b)
 - Pipeline: claude · stima 5% · approvato · priorità 2

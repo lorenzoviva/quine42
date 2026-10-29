@@ -2971,10 +2971,11 @@ export class Kernel {
   /** What can be done to an entity: generic actions, its own actions, the held tool. */
   actionsFor(id: Id): ActionOption[] {
     const out: ActionOption[] = [];
-    // Another wanderer (T43a): one talks to them and gives them what is at hand (the hotbar); the rest comes with T43b.
+    // Another wanderer (T43a): one talks to them and gives them what is at hand (the hotbar); «Altro…» if the game allows it (T43b).
     if (this.otherWanderer(id) !== undefined) {
       out.push({ id: 'parla', label: 'Parla', enabled: true });
       this.inventory().slots.slice(0, HOTBAR).forEach((s, i) => s && out.push({ id: `dai:${i}`, label: `Dai ${this.itemInfo(s.item).name}${s.count > 1 ? ` ×${s.count}` : ''}`, enabled: true }));
+      if (this.partita()?.altroTraGiocatori !== false) out.push({ id: 'altro', label: 'Altro…', enabled: true });
       return out;
     }
     const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
@@ -3149,6 +3150,7 @@ export class Kernel {
     if (other !== undefined) {
       if (action === 'parla') this.bus.emit('ui:chat', { id, name: this.nameOf(id) });
       if (action.startsWith('dai:')) this.giveTo(other, Number(action.slice(4)));
+      if (action === 'altro' && this.partita()?.altroTraGiocatori !== false) this.bus.emit('ui:freeaction', { id, name: this.nameOf(id) });
       return;
     }
     const modId: string | undefined = this.ecs.get(id, 'module')?.id;
@@ -3230,6 +3232,8 @@ export class Kernel {
    */
   async freeAction(id: Id, text: string): Promise<string> {
     if (!this.ecs.alive.has(id)) return '';
+    const other = this.otherWanderer(id);
+    if (other !== undefined) return this.freeOnWanderer(other, text);
     const modId: string | undefined = this.ecs.get(id, 'module')?.id;
     const entry = modId ? this.modules.get(modId) : undefined;
     const m = entry?.manifest;
@@ -3250,6 +3254,21 @@ export class Kernel {
       },
       text,
     );
+  }
+
+  /**
+   * «Altro…» on another wanderer beside them (T43b), only if the game allows it (`partita.altroTraGiocatori`): judged as on
+   * a person; the server applies the effects to the other's body (`touchWanderer`). Nothing is learned: they are not a thing.
+   */
+  async freeOnWanderer(to: string, text: string): Promise<string> {
+    if (this.partita()?.altroTraGiocatori === false) {
+      this.message('In questo mondo non si fa «Altro…» su un altro viandante.', 'warn');
+      return '';
+    }
+    const other = this.besideWanderer(to, GIVE_REACH, 'Avvicinati per farlo.');
+    if (!other) return '';
+    const entity = this.wanderersById.get(to)!.entity;
+    return this.judgeFree({ entity, wanderer: to, key: 'viandante', name: other.nome, description: `un altro viandante come te, una persona vera: ${other.nome}`, tags: ['viandante'], container: false, kind: 'altro viandante' }, text);
   }
 
   /** "Altro…" on something the player carries: a fanciful use, judged like any other action. */
@@ -3326,6 +3345,45 @@ export class Kernel {
     this.message(out.join(' ') || `${a.label}: fatto.`);
   }
 
+  /**
+   * The effects of «Altro…» on another wanderer (T43b), by the one acting: on a god only words (ADR-0065); what harms only
+   * if the game has PvP (`harms`), otherwise the kernel takes it away. Needs, shield and states are the other's body's; a
+   * push moves them on their carpet; the rest happens where they stand. Bonds, memories, births, breaking, opening: not on people.
+   */
+  touchWanderer(to: string, all: Effect[], text = ''): string[] {
+    const b = this.wandererAt(to);
+    const me = this.wandererAt(this.wanderer().id);
+    if (!b || !me || to === this.wanderer().id) return [];
+    let effects = all.filter((e) => !['legame', 'ricordo', 'nascita', 'distruggi', 'apri', 'contenitore'].includes(e.tipo));
+    const dropped: string[] = [];
+    if (this.godMode(to)) {
+      dropped.push(...effects.filter((e) => e.tipo !== 'messaggio').map((e) => e.tipo));
+      effects = effects.filter((e) => e.tipo === 'messaggio');
+    } else if (!this.partita()?.pvp) {
+      effects = effects.flatMap((e) => {
+        const kept = unharmed(e);
+        if (!kept) dropped.push(e.tipo);
+        return kept ? [kept] : [];
+      });
+    }
+    if (dropped.length) this.council.say('kernel', 'scarta', `azione «${text}» su ${this.wanderersById.get(to)?.nome ?? to}: ${dropped.join(', ')} (${this.godMode(to) ? 'nessuno tocca il master' : 'tra viandanti non ci si ferisce'})`, 'narratore', 'action.judge');
+    const body: Effect[] = effects.filter((e) => e.tipo === 'bisogni' || e.tipo === 'scudo' || e.tipo === 'stato' || e.tipo === 'togli_stato');
+    const out: string[] = [];
+    for (const e of effects) {
+      if (e.tipo === 'spingi') {
+        const dx = b.x - me.x;
+        const dy = b.y - me.y;
+        const d = Math.hypot(dx, dy) || 1;
+        const force = Math.max(0, Math.min(6, Number(e.forza ?? 3) || 0));
+        this.stepWanderer(to, { x: b.x + (dx / d) * force, y: b.y + (dy / d) * force }, force);
+        this.bus.emit('wanderer:pushed', { id: to });
+      } else if (!body.includes(e)) out.push(...this.applyEffects([e], undefined, { x: b.x, y: b.y }));
+    }
+    if (body.length) out.push(...this.as(to, () => this.applyEffects(body)));
+    if (dropped.length) out.push(this.godMode(to) ? 'Non succede niente.' : 'Ma tra viandanti non ci si ferisce.');
+    return out;
+  }
+
   /** Applies effects to the subject of an action: a thing in the world, or something carried. */
   private applyOn(sub: { entity?: Id; slot?: number; tile?: { col: number; row: number }; key: string }, all: Effect[]): string[] {
     // Acting on something never spends it by accident: only "distruggi" breaks or uses it up.
@@ -3359,7 +3417,7 @@ export class Kernel {
   }
 
   private async judgeFree(
-    sub: { entity?: Id; slot?: number; tile?: { col: number; row: number }; key: string; name: string; description: string; tags: string[]; container: boolean; kind: string; learnModule?: ModuleEntry; learnItem?: string; learnTile?: string },
+    sub: { entity?: Id; wanderer?: string; slot?: number; tile?: { col: number; row: number }; key: string; name: string; description: string; tags: string[]; container: boolean; kind: string; learnModule?: ModuleEntry; learnItem?: string; learnTile?: string },
     rawText: string,
   ): Promise<string> {
     const text = rawText.trim().slice(0, 200);
@@ -3368,7 +3426,7 @@ export class Kernel {
     const me = this.wanderer().id;
     const say = (t: string) => this.bus.emit('ui:dialog', { speaker: sub.name, text: t });
     // What its model already knows how to do (an action of the program) happens without asking.
-    const own = sub.entity !== undefined ? this.modelActions(sub.entity).find((a) => normName(a.label) === normName(text) || normName(a.name) === normName(text)) : undefined;
+    const own = sub.entity !== undefined && !sub.wanderer ? this.modelActions(sub.entity).find((a) => normName(a.label) === normName(text) || normName(a.name) === normName(text)) : undefined;
     if (own && this.doModelAction(sub.entity!, own.name)) {
       say(`${own.label}.`);
       return own.label;
@@ -3389,7 +3447,7 @@ export class Kernel {
       say(ruled.racconto);
       return ruled.racconto;
     }
-    const p = sub.entity !== undefined ? this.ecs.get(sub.entity, 'pos') : sub.tile ? { x: sub.tile.col + 0.5, y: sub.tile.row + 0.5 } : this.playerCarpet();
+    const p = sub.wanderer ? this.wandererAt(sub.wanderer) : sub.entity !== undefined ? this.ecs.get(sub.entity, 'pos') : sub.tile ? { x: sub.tile.col + 0.5, y: sub.tile.row + 0.5 } : this.playerCarpet();
     const tile = p ? (this.palette[this.tileAt(Math.floor(p.x), Math.floor(p.y)) ?? '']?.name ?? '?') : '?';
     const inv = this.inventory();
     const held = equippedItem(inv);
@@ -3408,7 +3466,8 @@ export class Kernel {
         loot: Object.keys(this.content.loot),
         place: this.placeHere()?.name ?? '',
         transcended: this.exitedOnce,
-        shape: sub.entity !== undefined && !!this.shapeModel(sub.entity),
+        shape: sub.entity !== undefined && !sub.wanderer && !!this.shapeModel(sub.entity),
+        between: sub.wanderer ? { pvp: !!this.partita()?.pvp, god: this.godMode(sub.wanderer) } : undefined,
       }, this.focusOn([sub.name, sub.learnModule && `tipo:${nodeSlug(sub.learnModule.manifest.id)}`, sub.learnItem && `oggetto:${nodeSlug(sub.learnItem)}`], p));
     } catch (e) {
       const msg = `(il Concilio tace: ${(e as Error).message})`;
@@ -3438,7 +3497,8 @@ export class Kernel {
     if (shaped) v.effects = v.effects.filter((e) => e.tipo !== 'distruggi');
     if (v.dropped.length) this.council.say('kernel', 'scarta', `azione «${text}»: ${v.dropped.join('; ')}`, 'narratore', 'action.judge');
     this.council.say('narratore', j.possible ? 'approva' : 'obietta', `«${text}» su ${sub.name}: ${j.story}${v.effects.length ? ` [${v.effects.map((e) => e.tipo).join(', ')}]` : ''}`, undefined, 'action.judge');
-    const out = j.possible ? this.as(me, () => this.applyOn(sub, v.effects)) : [];
+    const out = j.possible ? this.as(me, () => (sub.wanderer ? this.touchWanderer(sub.wanderer, v.effects, text) : this.applyOn(sub, v.effects))) : [];
+    if (sub.wanderer && j.possible) this.bus.emit('wanderer:acted', { da: me, a: sub.wanderer, testo: [j.story, ...out].filter(Boolean).join(' ') });
     say([j.story, ...out].filter(Boolean).join(' ') || 'Non succede niente.');
     // The decision becomes a rule of the world; a possible action stays in the thing's menu.
     const lasting = v.effects.some((e) => e.tipo !== 'messaggio');
@@ -6583,4 +6643,25 @@ function personFacts(p: Person, type: string): Array<[string, string]> {
   if (p.porta?.length) out.push(['Porta con sé', p.porta.join(', ')]);
   if (p.ricordi?.length) out.push(['Ricorda', p.ricordi.slice(-3).map((m) => m.testo).join(' · ')]);
   return out;
+}
+
+/**
+ * An effect on another wanderer without what would harm them (T43b, no PvP): needs only where they go up, no push, no fire,
+ * no state that slows them, none of theirs taken away; undefined when nothing is left.
+ */
+export function unharmed(e: Effect): Effect | undefined {
+  switch (e.tipo) {
+    case 'bisogni': {
+      const kept = Object.fromEntries((['fame', 'sete', 'energia', 'salute'] as const).filter((k) => Number(e[k]) > 0).map((k) => [k, e[k]]));
+      return Object.keys(kept).length ? { tipo: 'bisogni', ...kept } : undefined;
+    }
+    case 'spingi':
+    case 'fuoco':
+    case 'togli_stato':
+      return undefined;
+    case 'stato':
+      return e.velocita !== undefined && Number(e.velocita) < 1 ? undefined : e;
+    default:
+      return e;
+  }
 }

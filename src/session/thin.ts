@@ -301,6 +301,7 @@ export class ThinClient {
   private notice(n: Notice): void {
     const k = this.k;
     if (n.tipo === 'dai') return k.message(`${n.nome} ti dà ${n.testo}.`, 'good');
+    if (n.tipo === 'altro') return k.message(`${n.nome}: ${n.testo}`);
     const id = this.others.get(n.da);
     if (id !== undefined) k.bus.emit('ui:heard', { id, name: n.nome, text: n.testo });
     k.message(`${n.nome}: «${n.testo}»`);
@@ -468,7 +469,9 @@ export class ThinClient {
     k.interact = async () => (k.zone === 'sim' ? this.interact() : studio());
     k.perform = (id, action) => this.perform(id, action);
     k.freeAction = async (id, text) => {
-      const r = await this.send(id, { t: 'altro', testo: text });
+      // On another wanderer (T43b) by their id: their body has no id of its own on the server.
+      const other = k.otherWanderer(id);
+      const r = other !== undefined ? await this.show(this.session.act({ t: 'altro', viandante: other, testo: text })) : await this.send(id, { t: 'altro', testo: text });
       return r?.testo ?? r?.motivo ?? '';
     };
     k.talk = async (id, text): Promise<NpcReply> => {
@@ -662,6 +665,7 @@ export class ThinClient {
       if (action === 'parla') return void k.bus.emit('ui:chat', { id, name: k.nameOf(id) });
       // What is given leaves the pocket when the update says so: the inventory is the server's.
       if (action.startsWith('dai:')) await this.show(this.session.act({ t: 'dai', viandante: other, slot: Number(action.slice(4)) }));
+      if (action === 'altro' && k.partita()?.altroTraGiocatori !== false) k.bus.emit('ui:freeaction', { id, name: k.nameOf(id) });
       return;
     }
     const sid = this.server.get(id);

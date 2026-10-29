@@ -25,6 +25,8 @@ export interface ActionContext {
   transcended?: boolean;
   /** The thing has a model of its own: what changes its look can become a rule of the model (ADR-0044). */
   shape?: boolean;
+  /** The target is another wanderer (T43b): whether they may be harmed (`partita.pvp`), whether they are the master (a god). */
+  between?: { pvp: boolean; god: boolean };
 }
 
 export interface ActionJudgement {
@@ -112,6 +114,15 @@ export async function judgeAction(c: Council, ctx: ActionContext, focus?: string
     `Terreni esistenti: ${ctx.terrains.join(', ')}. Cose evocabili: ${ctx.summonable.slice(0, 30).join(', ') || 'nessuna'}. Tabelle di bottino: ${ctx.loot.join(', ')}.`,
     `Sii fedele alla fisica: niente miracoli senza strumenti o rune; serve il giusto attrezzo per scassinare, tagliare, scavare. Se serve un oggetto che il viandante porta, mettilo in "serve".`,
     `Fai evolvere il gioco: se l'azione apre una meccanica nuova sensata (montare il cavallo sellato, remare sulla barca, indossare lo zaino), rendila possibile con uno "stato", e diventerà un'azione ripetibile della cosa.`,
+    ctx.between &&
+      [
+        `«${t.name}» è un altro viandante, una persona vera come lui: giudica come su una persona. Gli effetti bisogni, scudo, stato e togli_stato valgono per «${t.name}», non per chi agisce; spingi lo spinge via; niente legame, ricordo, nascita, distruggi, apri, contenitore.`,
+        ctx.between.god
+          ? `Su «${t.name}» non arriva niente: solo un messaggio.`
+          : ctx.between.pvp
+            ? 'In questo mondo i viandanti possono ferirsi tra loro.'
+            : 'In questo mondo i viandanti non possono ferirsi tra loro: niente bisogni che scendono, spingi, fuoco, stati che rallentano, togli_stato; se l’azione vuole ferire, non riesce (o resta un messaggio).',
+      ].join(' '),
     ctx.shape &&
       `Se ciò che il viandante fa cambia l'aspetto della cosa, che resta lì (si apre, si scheggia, si accende, si spegne, si piega, si macchia), scrivi in "forma" come cambia, in poche parole: diventerà una regola della sua forma, per tutte le cose di questo tipo. In quel caso niente "distruggi"; gli effetti servono per ciò che non è aspetto (luce, fuoco, bisogni, oggetti).`,
   ]
