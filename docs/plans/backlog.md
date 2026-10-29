@@ -1265,7 +1265,7 @@ le risposte alle domande del piano.
   `togli_stato` e gli stati che rallentano contano come ferire. Nessuna verifica nel browser (il task chiede i test headless; la verifica con
   due schede è di T43c).
 
-### T43c · Morte e ricollegamento in multigiocatore — `fatto` (dipende da T43b)
+### T43c · Morte e ricollegamento in multigiocatore — `fatto` (5979812) (dipende da T43b)
 - Pipeline: claude · stima 5% · approvato · priorità 2
 - Fare: a salute zero un giocatore (mai il master) muore con la punizione di T33 (`continueAfterDeath` sul server, come lui,
   senza chiudere la sessione degli altri); il client lo mostra e riparte dove dice il verdetto. Chi si ricollega ritrova il suo
