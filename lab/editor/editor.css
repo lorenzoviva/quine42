@@ -259,6 +259,98 @@ button.btn-primary:hover {
   font-size: 11px;
 }
 
+/* XML Tag Attribute Inspector Bar (T59d) */
+.tag-inspector-bar {
+  min-height: 28px;
+  background: #111522;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  font-size: 11px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.tag-inspector-bar.hidden {
+  display: none;
+}
+
+.tag-badge-group {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.tag-name-badge {
+  background: rgba(129, 140, 248, 0.2);
+  border: 1px solid rgba(129, 140, 248, 0.5);
+  color: #a5b4fc;
+  font-family: var(--editor-font);
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+.tag-attrs-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  overflow-x: auto;
+}
+
+.tag-attr-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: var(--editor-font);
+  font-size: 10.5px;
+  line-height: 14px;
+  user-select: none;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.tag-attr-chip.declared {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+}
+
+.tag-attr-chip.declared .attr-chip-val {
+  color: #34d399;
+  font-weight: 600;
+}
+
+.tag-attr-chip.default {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  color: var(--text-dim);
+}
+
+.tag-attr-chip.default:hover {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: #38bdf8;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.tag-attr-chip.default .attr-chip-def {
+  color: #fbbf24;
+  font-size: 9.5px;
+  opacity: 0.85;
+}
+
 /* Editor Container */
 .editor-container {
   display: flex;
@@ -277,11 +369,12 @@ button.btn-primary:hover {
   font-family: var(--editor-font);
   font-size: 12px;
   line-height: 20px;
-  padding: 12px 6px 12px 0;
+  padding: 12px 6px 42px 0;
   text-align: right;
   overflow: hidden;
   user-select: none;
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .gutter-line {
@@ -328,7 +421,8 @@ button.btn-primary:hover {
   padding: 12px;
   font-family: var(--editor-font);
   font-size: 12px;
-  line-height: 20px;
+  line-height: 20px !important;
+  letter-spacing: 2.5px;
   tab-size: 2;
   white-space: pre;
   word-wrap: normal;
@@ -348,6 +442,15 @@ button.btn-primary:hover {
 .highlight-layer code {
   font-family: inherit;
   font-size: inherit;
+  line-height: 20px !important;
+  white-space: pre;
+  word-wrap: normal;
+  display: block;
+  padding-bottom: 30px;
+  box-sizing: border-box;
+}
+
+.highlight-layer code * {
   line-height: inherit;
 }
 
@@ -359,6 +462,26 @@ button.btn-primary:hover {
   resize: none;
   overflow: auto;
   user-select: text;
+}
+
+/* Custom Clean Scrollbars for Input Layer */
+.input-layer::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.input-layer::-webkit-scrollbar-track {
+  background: #0c0e14;
+}
+
+.input-layer::-webkit-scrollbar-thumb {
+  background: #232b3d;
+  border-radius: 5px;
+  border: 2px solid #0c0e14;
+}
+
+.input-layer::-webkit-scrollbar-thumb:hover {
+  background: #38bdf8;
 }
 
 /* Diagnostics / Messages Bar */
@@ -601,28 +724,37 @@ button.btn-primary:hover {
 
 /* Color Chips in XML Editor (voxel color on letters) */
 .tok-color-chip {
-  display: inline-block;
-  width: 1ch;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  max-height: 14px;
+  line-height: 14px;
   text-align: center;
   background-color: var(--chip-bg, rgba(56, 189, 248, 0.2));
   color: var(--chip-text, #ffffff);
   font-weight: 700;
   font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
+  font-size: 11px;
   border-radius: 3px;
   cursor: pointer;
   position: relative;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
   transition: filter 0.12s, transform 0.1s;
-  vertical-align: baseline;
+  vertical-align: -1px;
   margin: 0;
   padding: 0;
+  letter-spacing: 0;
+  box-sizing: border-box;
+  pointer-events: auto;
 }
 
 .tok-color-chip:hover {
   filter: brightness(1.25);
   outline: 1px solid rgba(255, 255, 255, 0.8);
+  transform: scale(1.15);
+  z-index: 5;
 }
 
 .tok-color-chip.tok-glow {
@@ -642,6 +774,78 @@ button.btn-primary:hover {
 .tok-color-chip.tok-unknown {
   background-color: rgba(255, 255, 255, 0.15);
   color: #cbd5e1;
+}
+
+/* Inline 3D Filter Button next to in/out/from/to */
+.tok-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  max-height: 14px;
+  margin: 0 2px;
+  padding: 0;
+  font-size: 9px;
+  line-height: 14px;
+  color: var(--accent, #38bdf8);
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  border-radius: 3px;
+  cursor: pointer;
+  vertical-align: -1px;
+  letter-spacing: 0;
+  transition: all 0.12s ease;
+  pointer-events: auto;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.tok-filter-btn:hover {
+  background: rgba(56, 189, 248, 0.4);
+  color: #ffffff;
+  border-color: #38bdf8;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.7);
+  transform: scale(1.18);
+  z-index: 5;
+}
+
+/* Hex Color Chip & Swatch for Symbol Definitions */
+.tok-hex-code {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 14px;
+  max-height: 14px;
+  line-height: 14px;
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 0 3px;
+  letter-spacing: 0.5px;
+  transition: background 0.12s, box-shadow 0.12s;
+  pointer-events: auto;
+  user-select: none;
+  vertical-align: -1px;
+  box-sizing: border-box;
+}
+
+.tok-hex-code:hover {
+  background: rgba(56, 189, 248, 0.2);
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.5);
+}
+
+.tok-hex-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  max-height: 10px;
+  border-radius: 2px;
+  background-color: var(--swatch-hex, #ffffff);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.4);
+  vertical-align: 0px;
+  margin-right: 2px;
+  box-sizing: border-box;
 }
 
 /* ================================================================== CAD Voxel Tools (T59b) */
@@ -1365,7 +1569,7 @@ button.btn-primary:hover {
 }
 
 .modal-dialog-lg {
-  max-width: 820px;
+  max-width: min(960px, 95vw);
 }
 
 @keyframes modalScaleIn {
@@ -1435,12 +1639,17 @@ button.btn-primary:hover {
   gap: 10px;
 }
 
+.rule-type-selector.grid-methods {
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+}
+
 .rule-type-option {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  padding: 10px;
+  padding: 8px 6px;
   background: #181d2e;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -1468,20 +1677,72 @@ button.btn-primary:hover {
 
 .type-badge {
   font-family: var(--editor-font);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
   color: #e2e8f0;
+}
+
+.type-badge.badge-flow {
+  color: #fbbf24;
+}
+
+.type-badge.badge-algo {
+  color: #a855f7;
+}
+
+.type-badge.badge-shape {
+  color: #34d399;
 }
 
 .rule-type-option.active .type-badge {
   color: var(--accent);
 }
+.rule-type-option.active .type-badge.badge-flow {
+  color: #fbbf24;
+  text-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
+}
+.rule-type-option.active .type-badge.badge-algo {
+  color: #c084fc;
+  text-shadow: 0 0 8px rgba(192, 132, 252, 0.5);
+}
+.rule-type-option.active .type-badge.badge-shape {
+  color: #6ee7b7;
+  text-shadow: 0 0 8px rgba(110, 231, 183, 0.5);
+}
 
 .type-desc {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-dim);
   text-align: center;
+  line-height: 1.2;
+}
+
+/* Method Panels */
+.method-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.method-panel.hidden {
+  display: none !important;
+}
+
+.checkbox-field {
+  display: flex;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 14px;
+}
+
+.checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #cbd5e1;
 }
 
 /* Parameters Grid */
@@ -2042,6 +2303,483 @@ button.btn-primary:hover {
   border-color: var(--accent);
   color: var(--accent);
 }
+
+/* ================================================================== Multi-Dimensional Filter Editor (In / Out) */
+
+.filter-editor-section {
+  background: #111522;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.filter-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.filter-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.filter-editor-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.filter-editor-body.collapsed {
+  display: none;
+}
+
+/* Dimensions Toolbar */
+.filter-dims-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #161b2b;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.dim-picker-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dim-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #94a3b8;
+}
+
+.dim-stepper {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: #0f121d;
+  padding: 2px 4px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.dim-stepper span {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-right: 2px;
+}
+
+.dim-stepper input {
+  width: 28px;
+  height: 22px;
+  background: transparent;
+  border: none;
+  color: #f1f5f9;
+  text-align: center;
+  font-size: 12px;
+  font-family: var(--editor-font);
+  font-weight: bold;
+  -moz-appearance: textfield;
+}
+
+.dim-stepper input::-webkit-outer-spin-button,
+.dim-stepper input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.btn-step-filter {
+  width: 20px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border);
+  color: #f1f5f9;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  transition: background 0.1s, border-color 0.1s;
+}
+
+.btn-step-filter:hover {
+  background: rgba(56, 189, 248, 0.25);
+  border-color: var(--accent);
+}
+
+.filter-presets-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.btn-filter-preset {
+  background: #0f121d;
+  border: 1px solid var(--border);
+  color: #cbd5e1;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  cursor: pointer;
+  font-family: var(--editor-font);
+  transition: all 0.12s ease;
+}
+
+.btn-filter-preset:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-filter-preset.active {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* Brush Bar */
+.filter-brush-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #0c0e16;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.brush-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-brush-chip {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--editor-font);
+  font-size: 11px;
+  font-weight: 800;
+  background: #475569;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.filter-brush-palette {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.filter-brush-item {
+  width: 17px;
+  height: 17px;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--editor-font);
+  font-size: 9px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3);
+  transition: transform 0.1s, filter 0.1s;
+}
+
+.filter-brush-item:hover {
+  transform: scale(1.15);
+  filter: brightness(1.2);
+  z-index: 2;
+}
+
+.filter-brush-item.active {
+  outline: 2px solid #ffffff;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+  transform: scale(1.1);
+}
+
+/* Filter Actions */
+.filter-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Dual Grids */
+.filter-dual-grids {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+@media (max-width: 800px) {
+  .filter-dual-grids {
+    grid-template-columns: 1fr;
+  }
+}
+
+.filter-grid-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #0c0f18;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px;
+  min-width: 0;
+}
+
+.filter-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.panel-tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.panel-tag.in-tag {
+  color: var(--accent);
+}
+
+.panel-tag.out-tag {
+  color: var(--emerald);
+}
+
+.filter-layers-nav {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+
+.btn-filter-layer {
+  font-size: 9px;
+  padding: 1px 5px;
+  background: #181d2e;
+  border: 1px solid var(--border);
+  color: #94a3b8;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.btn-filter-layer.active {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.filter-voxel-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--filter-cols, 3), minmax(10px, 22px));
+  gap: 1.5px;
+  background: #080a12;
+  padding: 4px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  overflow: auto;
+  max-height: 330px;
+  justify-content: center;
+  align-content: center;
+}
+
+.filter-voxel-cell {
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  min-width: 10px;
+  min-height: 10px;
+  max-width: 22px;
+  max-height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  font-family: var(--editor-font);
+  font-size: 9px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.4);
+  transition: transform 0.08s, filter 0.08s, box-shadow 0.08s;
+  user-select: none;
+}
+
+.filter-voxel-cell:hover {
+  transform: scale(1.15);
+  filter: brightness(1.25);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+  z-index: 2;
+}
+
+.filter-raw-string {
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+}
+
+.filter-raw-string label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  color: var(--text-dim);
+  font-family: var(--editor-font);
+}
+
+.filter-raw-string input {
+  flex: 1;
+  height: 26px;
+  background: #141826;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: #f1f5f9;
+  padding: 0 8px;
+  font-family: var(--editor-font);
+  font-size: 12px;
+}
+
+/* ================================================================== Color Refactoring Modal */
+
+.refactor-source-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.refactor-current-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #141826;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.refactor-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.refactor-sym {
+  font-family: var(--editor-font);
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.refactor-name {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.refactor-input-symbol {
+  width: 60px;
+  height: 42px;
+  font-size: 22px;
+  font-weight: 800;
+  text-align: center;
+  font-family: var(--editor-font);
+  color: var(--accent);
+  background: #181d2e;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+}
+
+.refactor-input-symbol:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+}
+
+.refactor-summary-box {
+  background: #090c14;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #e2e8f0;
+}
+
+.refactor-warning-box {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid #f59e0b;
+  color: #fbbf24;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  margin-top: 8px;
+}
+
+.refactor-warning-box.hidden {
+  display: none !important;
+}
+
+/* Linked Code Filter Banner */
+.filter-linked-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: var(--accent);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.filter-linked-badge.hidden {
+  display: none !important;
+}
+
+.btn-unlink-code {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.btn-unlink-code:hover {
+  color: #f43f5e;
+  background: rgba(244, 63, 94, 0.15);
+}
+
 
 
 

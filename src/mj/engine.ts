@@ -108,7 +108,7 @@ export interface GridLimits {
 }
 export const MODEL_LIMITS: GridLimits = { side: MAX_SIDE, cells: MAX_CELLS };
 
-export class Mj3Error extends Error {}
+export class Mj3Error extends Error { }
 
 export interface Grid3 {
   X: number;
@@ -192,7 +192,7 @@ function parsePattern(rule: Rule3, alpha: Alphabet): Pattern {
   const dx = li[0][0].length;
   const same = (ls: string[][][]) => ls.length === dz && ls.every((l) => l.length === dy && l.every((r) => r.length === dx));
   if (!same(li) || !same(lo)) throw new Mj3Error(`in e out devono avere la stessa forma: "${rule.in}" → "${rule.out}"`);
-  if (dx * dy * dz > 216) throw new Mj3Error(`regola troppo grande (max 216 celle): ${rule.in}`);
+  if (dx * dy * dz > 1728) throw new Mj3Error(`regola troppo grande (max 1728 celle): ${rule.in}`);
   const input = new Int32Array(dx * dy * dz);
   const output = new Int16Array(dx * dy * dz);
   for (let k = 0; k < dz; k++)
@@ -273,7 +273,7 @@ abstract class Runner {
   total = 0;
   /** Why it did nothing the first time it was asked (for a node that never did anything). */
   why?: string;
-  constructor(protected limit?: number) {}
+  constructor(protected limit?: number) { }
   reset(): void {
     this.count = 0;
   }
@@ -728,7 +728,7 @@ class MapRunner extends Runner {
 /** A box of cells turned the way transform() turns patterns. */
 function turnCells<T extends Int32Array | Int16Array>(src: T, d: Vec3, perm: Vec3, flip: Vec3): [T, Vec3] {
   const nd: Vec3 = [d[perm[0]], d[perm[1]], d[perm[2]]];
-  const out = new (src.constructor as { new (n: number): T })(src.length);
+  const out = new (src.constructor as { new(n: number): T })(src.length);
   for (let k = 0; k < d[2]; k++)
     for (let j = 0; j < d[1]; j++)
       for (let i = 0; i < d[0]; i++) {
@@ -840,7 +840,15 @@ class MarkovRunner extends Runner {
     for (const c of this.children) c.reset();
   }
   go(g: Grid3, rng: Rng): boolean {
-    for (const c of this.children) if (c.go(g, rng)) return true;
+    // for (const c of this.children) if (c.go(g, rng)) { c.reset(); return true; };
+    // for (const c of this.children) if (c.go(g, rng)) return true;
+    for (let index: number = 0; index < this.children.length; index++) {
+      const c = this.children[index];
+      if (c.go(g, rng)) {
+        if (index === this.children.length - 1) for (const c of this.children) c.reset();
+        return true
+      }
+    }
     return false;
   }
 }

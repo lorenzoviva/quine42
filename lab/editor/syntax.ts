@@ -33,12 +33,13 @@ export interface HighlightOptions {
 export const COLOR_ATTRS = new Set([
   'color',
   'on',
-  'symbol',
   'values',
   'in',
   'out',
+  'from',
+  'to',
+  'symbol',
   'ground',
-  'origin',
 ]);
 
 export function getContrastColor(hex: string): string {
@@ -240,20 +241,28 @@ export function highlightXml(src: string, options?: HighlightOptions): string {
       const attrName = match[1];
       const isMjAttr = MJ_ATTRS.has(attrName.toLowerCase());
       const attrCls = isMjAttr ? 'tok-attr tok-mj-attr' : 'tok-attr';
-      out += `<span class="${attrCls}">${escapeHtml(attrName)}</span>`;
+
+      const attrStrStart = i + 1 + nameMatch[0].length;
+      const attrStartInSrc = attrStrStart + match.index;
+      const eqIdx = match[0].indexOf('=');
+      const quote = match[2] !== undefined ? '"' : match[3] !== undefined ? "'" : '';
+      const quoteIdx = quote ? match[0].indexOf(quote, eqIdx) : -1;
+      const rawVal = match[2] ?? match[3] ?? match[4];
+      const valStartInSrc = quoteIdx >= 0 ? attrStartInSrc + quoteIdx + 1 : attrStartInSrc;
+
+      const isFilterAttr = ['in', 'out', 'from', 'to'].includes(attrName.toLowerCase());
+      let filterBtn = '';
+      if (isFilterAttr && options?.colorChips && rawVal !== undefined) {
+        filterBtn = `<button class="tok-filter-btn" type="button" data-tag="${escapeHtml(tagName)}" data-attr="${escapeHtml(attrName)}" data-pos="${valStartInSrc}" data-len="${rawVal.length}" data-val="${escapeHtml(rawVal)}" title="Apri '${escapeHtml(attrName)}' nel Filtro 3D">▦</button>`;
+      }
+
+      out += `<span class="${attrCls}">${escapeHtml(attrName)}${filterBtn}</span>`;
 
       if (match[2] !== undefined || match[3] !== undefined || match[4] !== undefined) {
         out += '<span class="tok-punct">=</span>';
-        const rawVal = match[2] ?? match[3] ?? match[4];
-        const quote = match[2] !== undefined ? '"' : match[3] !== undefined ? "'" : '';
 
-        if (options?.colorChips && quote && COLOR_ATTRS.has(attrName.toLowerCase())) {
-          const attrStrStart = i + 1 + nameMatch[0].length;
-          const attrStartInSrc = attrStrStart + match.index;
-          const eqIdx = match[0].indexOf('=');
-          const quoteIdx = match[0].indexOf(quote, eqIdx);
-          const valStartInSrc = attrStartInSrc + quoteIdx + 1;
-
+        const isSymbolDef = tagName.toLowerCase() === 'color' && attrName.toLowerCase() === 'symbol';
+        if (options?.colorChips && quote && COLOR_ATTRS.has(attrName.toLowerCase()) && !isSymbolDef) {
           let chipsHtml = '';
           for (let k = 0; k < rawVal.length; k++) {
             const ch = rawVal[k];
@@ -283,6 +292,15 @@ export function highlightXml(src: string, options?: HighlightOptions): string {
             }
           }
           out += `<span class="tok-val">${quote}${chipsHtml}${quote}</span>`;
+        } else if (options?.colorChips && quote && (attrName.toLowerCase() === 'value' || tagName.toLowerCase() === 'color')) {
+          const cleanHex = rawVal.replace(/^#/, '');
+          if (/^[0-9a-fA-F]{6}$/i.test(cleanHex)) {
+            const hash = rawVal.startsWith('#') ? '#' : '';
+            const title = `Colore hex #${cleanHex} · Clicca per aprire il color picker`;
+            out += `<span class="tok-val">${quote}<span class="tok-hex-code" data-tag="${escapeHtml(tagName)}" data-attr="${escapeHtml(attrName)}" data-pos="${valStartInSrc}" data-len="${rawVal.length}" data-hex="${cleanHex}" title="${title}"><span class="tok-hex-swatch" style="--swatch-hex:#${cleanHex};"></span>${hash}${cleanHex}</span>${quote}</span>`;
+          } else {
+            out += `<span class="tok-val">${quote}${escapeHtml(rawVal)}${quote}</span>`;
+          }
         } else {
           out += `<span class="tok-val">${quote}${escapeHtml(rawVal)}${quote}</span>`;
         }
@@ -305,4 +323,225 @@ export function highlightXml(src: string, options?: HighlightOptions): string {
   }
 
   return out;
+}
+
+export interface TagAttrDef {
+  name: string;
+  default?: string;
+  description?: string;
+  type?: 'string' | 'number' | 'boolean' | 'color';
+}
+
+export const TAG_SCHEMAS: Record<string, TagAttrDef[]> = {
+  sequence: [
+    { name: 'values', default: 'BW', description: 'Simboli colori usati nel modello' },
+    { name: 'size', default: '20 20 20', description: 'Dimensioni griglia X Y Z' },
+    { name: 'scale', default: '1 1 1', description: 'Fattore di scala' },
+    { name: 'origin', default: 'False', description: 'Centrato nell\'origine' },
+    { name: 'name', default: '', description: 'Nome modello' },
+    { name: 'steps', default: '', description: 'Limite passi esecuzione' },
+  ],
+  markov: [
+    { name: 'steps', default: '', description: 'Iterazioni massime del loop' },
+    { name: 'symmetry', default: '(xy)', description: 'Simmetria di rotazione/riflessione' },
+    { name: 'comment', default: '', description: 'Descrizione opzionale' },
+  ],
+  all: [
+    { name: 'in', default: '*', description: 'Pattern di ricerca' },
+    { name: 'out', default: '*', description: 'Pattern di sostituzione' },
+    { name: 'steps', default: '1', description: 'Numero di passi' },
+    { name: 'symmetry', default: '(xy)', description: 'Simmetria pattern' },
+    { name: 'p', default: '1.0', description: 'Probabilità' },
+    { name: 'comment', default: '', description: 'Descrizione opzionale' },
+  ],
+  one: [
+    { name: 'in', default: '*', description: 'Pattern di ricerca' },
+    { name: 'out', default: '*', description: 'Pattern di sostituzione' },
+    { name: 'steps', default: '1', description: 'Numero di passi' },
+    { name: 'symmetry', default: '(xy)', description: 'Simmetria pattern' },
+    { name: 'comment', default: '', description: 'Descrizione opzionale' },
+  ],
+  prl: [
+    { name: 'in', default: '*', description: 'Pattern di ricerca' },
+    { name: 'out', default: '*', description: 'Pattern di sostituzione' },
+    { name: 'steps', default: '1', description: 'Numero di passi' },
+    { name: 'symmetry', default: '(xy)', description: 'Simmetria pattern' },
+    { name: 'p', default: '0.5', description: 'Probabilità parallela stocastica' },
+    { name: 'comment', default: '', description: 'Descrizione opzionale' },
+  ],
+  path: [
+    { name: 'from', default: 'a', description: 'Simbolo/pattern di partenza' },
+    { name: 'to', default: 'u', description: 'Simbolo/pattern di destinazione' },
+    { name: 'on', default: 'E', description: 'Simboli substrato transitabile' },
+    { name: 'color', default: 'G', description: 'Colore del sentiero scavato' },
+    { name: 'steps', default: '1', description: 'Numero iterazioni' },
+    { name: 'inertia', default: 'False', description: 'Privilegia linee rette' },
+    { name: 'longest', default: 'False', description: 'Cerca il percorso più lungo' },
+    { name: 'comment', default: '', description: 'Descrizione opzionale' },
+  ],
+  convolution: [
+    { name: 'neighborhood', default: 'Moore', description: 'Tipo vicinato (Moore, VonNeumann, NoCorners)' },
+    { name: 'in', default: 'B', description: 'Voxel centrale da considerare' },
+    { name: 'out', default: 'W', description: 'Voxel trasformato' },
+    { name: 'values', default: '', description: 'Simboli contati nel vicinato' },
+    { name: 'sum', default: '', description: 'Intervallo conteggio es. 4..8' },
+    { name: 'steps', default: '1', description: 'Numero di passi' },
+    { name: 'p', default: '1.0', description: 'Probabilità' },
+    { name: 'periodic', default: 'False', description: 'Bordi periodici' },
+    { name: 'comment', default: '', description: 'Descrizione opzionale' },
+  ],
+  map: [
+    { name: 'scale', default: '2 2 2', description: 'Moltiplicatore risoluzione X Y Z' },
+    { name: 'values', default: 'BW', description: 'Simboli considerati' },
+    { name: 'comment', default: '', description: 'Descrizione opzionale' },
+  ],
+  rule: [
+    { name: 'in', default: '*', description: 'Pattern di match' },
+    { name: 'out', default: '*', description: 'Pattern di sostituzione' },
+    { name: 'p', default: '1.0', description: 'Probabilità individuale' },
+    { name: 'comment', default: '', description: 'Descrizione opzionale' },
+  ],
+  color: [
+    { name: 'symbol', default: '', description: 'Carattere univoco identificativo' },
+    { name: 'value', default: 'ffffff', description: 'Colore esadecimale RRGGBB' },
+    { name: 'name', default: '', description: 'Nome descrittivo' },
+    { name: 'alpha', default: '1.0', description: 'Trasparenza / vetro (0.0..1.0)' },
+    { name: 'glow', default: 'False', description: 'Emissione luminosa bloom' },
+    { name: 'part', default: '', description: 'Arto per animazione rig' },
+  ],
+  box: [
+    { name: 'at', default: '0 0 0', description: 'Posizione minima angolo' },
+    { name: 'size', default: '4 4 4', description: 'Larghezza, profondità, altezza' },
+    { name: 'color', default: 'W', description: 'Colore voxel' },
+    { name: 'on', default: '', description: 'Filtro substrato (opzionale)' },
+    { name: 'comment', default: '', description: 'Descrizione opzionale' },
+  ],
+  cylinder: [
+    { name: 'at', default: '0 0 0', description: 'Posizione base' },
+    { name: 'size', default: '4 4 4', description: 'Dimensioni raggio/altezza' },
+    { name: 'color', default: 'W', description: 'Colore voxel' },
+    { name: 'on', default: '', description: 'Filtro substrato' },
+  ],
+  cone: [
+    { name: 'at', default: '0 0 0', description: 'Posizione vertice/base' },
+    { name: 'size', default: '4 4 4', description: 'Dimensioni cono' },
+    { name: 'color', default: 'W', description: 'Colore voxel' },
+    { name: 'on', default: '', description: 'Filtro substrato' },
+  ],
+  ellipsoid: [
+    { name: 'at', default: '0 0 0', description: 'Posizione centro' },
+    { name: 'size', default: '4 4 4', description: 'Semiassi ellissoide' },
+    { name: 'color', default: 'W', description: 'Colore voxel' },
+    { name: 'on', default: '', description: 'Filtro substrato' },
+  ],
+  line: [
+    { name: 'at', default: '0 0 0', description: 'Punto di partenza' },
+    { name: 'to', default: '4 0 0', description: 'Punto di arrivo' },
+    { name: 'r', default: '1', description: 'Raggio spessore' },
+    { name: 'color', default: 'W', description: 'Colore voxel' },
+    { name: 'on', default: '', description: 'Filtro substrato' },
+  ],
+  wfc: [
+    { name: 'sample', default: '', description: 'Modello sorgente di esempio' },
+    { name: 'tilesize', default: '3', description: 'Dimensione pattern sovrapposti' },
+    { name: 'periodic', default: 'False', description: 'Bordi periodici' },
+    { name: 'name', default: '', description: 'Identificativo' },
+  ],
+  overlapping: [
+    { name: 'sample', default: '', description: 'File o nome campione di input' },
+    { name: 'n', default: '3', description: 'Dimensione N×N×N dei blocchi' },
+    { name: 'periodic', default: 'False', description: 'Wrap periodico' },
+    { name: 'symmetry', default: '8', description: 'Simmetrie usate' },
+  ],
+  animation: [
+    { name: 'name', default: '', description: 'Nome traccia animazione' },
+    { name: 'frames', default: '16', description: 'Numero di fotogrammi totali' },
+  ],
+  action: [
+    { name: 'name', default: '', description: 'Identificativo azione Concilio' },
+    { name: 'label', default: '', description: 'Etichetta visualizzata nel gioco' },
+    { name: 'steps', default: '1', description: 'Passi di esecuzione' },
+  ],
+};
+
+export interface ParsedTagAtCursor {
+  tag: string;
+  tagStart: number;
+  tagEnd: number;
+  declaredAttrs: Array<{ name: string; value: string; raw: string }>;
+  isSelfClosing: boolean;
+  isClosing: boolean;
+}
+
+/**
+ * Inspects XML around the cursor position to find if it is on/inside an XML tag.
+ */
+export function parseTagAtCursor(xml: string, pos: number): ParsedTagAtCursor | null {
+  if (!xml || pos < 0 || pos > xml.length) return null;
+
+  // Search backward for '<'
+  let tagStart = -1;
+  for (let i = pos; i >= 0; i--) {
+    if (xml[i] === '<') {
+      // Check if it's a comment
+      if (xml.slice(i, i + 4) === '<!--') {
+        const commentEnd = xml.indexOf('-->', i);
+        if (commentEnd !== -1 && pos <= commentEnd + 3) {
+          return null;
+        }
+      }
+      tagStart = i;
+      break;
+    }
+    if (xml[i] === '>' && i < pos) {
+      // Cursor is after a tag close
+      break;
+    }
+  }
+
+  if (tagStart === -1) {
+    // Check if cursor is right before or on a '<'
+    if (xml[pos] === '<') {
+      tagStart = pos;
+    } else {
+      return null;
+    }
+  }
+
+  const closeIdx = xml.indexOf('>', tagStart);
+  if (closeIdx === -1) return null;
+  const tagEnd = closeIdx + 1;
+
+  // Verify pos is within tagStart and tagEnd
+  if (pos < tagStart || pos > tagEnd) return null;
+
+  const rawTag = xml.slice(tagStart, tagEnd);
+  const isClosing = rawTag.startsWith('</');
+  const isSelfClosing = rawTag.endsWith('/>');
+
+  const nameMatch = isClosing ? /^<\/([\w:.-]+)/.exec(rawTag) : /^<([\w:.-]+)/.exec(rawTag);
+  if (!nameMatch) return null;
+
+  const tag = nameMatch[1];
+  const declaredAttrs: Array<{ name: string; value: string; raw: string }> = [];
+
+  if (!isClosing) {
+    const attrBody = rawTag.slice(nameMatch[0].length, isSelfClosing ? -2 : -1);
+    const attrRegex = /([^\s=]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?/g;
+    let m: RegExpExecArray | null;
+    while ((m = attrRegex.exec(attrBody)) !== null) {
+      const name = m[1];
+      const value = m[2] ?? m[3] ?? m[4] ?? '';
+      declaredAttrs.push({ name, value, raw: m[0] });
+    }
+  }
+
+  return {
+    tag,
+    tagStart,
+    tagEnd,
+    declaredAttrs,
+    isSelfClosing,
+    isClosing,
+  };
 }

@@ -8,6 +8,10 @@ import {
   type ValidationResult,
   type PaletteColorInfo,
   getContrastColor,
+  escapeHtml,
+  TAG_SCHEMAS,
+  parseTagAtCursor,
+  type ParsedTagAtCursor,
 } from './syntax';
 import type { EditorBuildRequest, EditorBuildResponse } from './worker';
 import { Bloom } from '../../src/render/bloom';
@@ -39,11 +43,19 @@ import {
   type RuleNodeType,
   type SymmetryType,
   type SingleRuleItem,
-  type RuleBlockConfig,
-  generateRuleXml,
+  type AnyMjNodeConfig,
+  type CodeRuleInfo,
+  generateNodeXml,
   getPaletteSymbols,
   insertRuleIntoXmlAt,
   insertRuleAtEndOfSequence,
+  parsePattern3D,
+  formatPattern3D,
+  resizePattern3D,
+  countColorSymbolOccurrences,
+  refactorColorSymbol,
+  extractRuleAtPos,
+  replaceRuleInCode,
 } from './rules';
 import {
   type WfcOutputMode,
@@ -297,7 +309,7 @@ const endDrag = (e: PointerEvent) => {
   isPanning = false;
   try {
     canvas.releasePointerCapture(e.pointerId);
-  } catch {}
+  } catch { }
 
   if (wasClick) {
     handleCanvasClick(e);
@@ -399,7 +411,7 @@ window.addEventListener('pointerup', (e) => {
   splitter.classList.remove('dragging');
   try {
     splitter.releasePointerCapture(e.pointerId);
-  } catch {}
+  } catch { }
   updateViewportSize();
 });
 
@@ -416,6 +428,9 @@ const presetSelect = $<HTMLSelectElement>('preset-select');
 const seedInput = $<HTMLInputElement>('seed-input');
 const vptSelect = $<HTMLSelectElement>('vpt-select');
 const cursorPos = $('cursor-pos');
+const tagInspectorBar = $('tag-inspector-bar');
+const tagInspectorName = $('tag-inspector-name');
+const tagInspectorAttrs = $('tag-inspector-attrs');
 const loadingOverlay = $('loading-overlay');
 const viewportInfo = $('viewport-info');
 const viewportCoords = $('viewport-coords');
@@ -495,6 +510,77 @@ function updateCursorPos() {
   const line = lines.length;
   const col = lines[lines.length - 1].length + 1;
   cursorPos.textContent = `Riga ${line}, Col ${col}`;
+  updateTagInspector();
+}
+
+function updateTagInspector() {
+  const pos = codeInput.selectionStart;
+  const parsed = parseTagAtCursor(codeInput.value, pos);
+
+  if (!parsed) {
+    tagInspectorBar.classList.add('hidden');
+    return;
+  }
+
+  tagInspectorBar.classList.remove('hidden');
+  tagInspectorName.textContent = `<${parsed.isClosing ? '/' : ''}${parsed.tag}>`;
+
+  if (parsed.isClosing) {
+    tagInspectorAttrs.innerHTML = '<span class="dim-label">Tag di chiusura</span>';
+    return;
+  }
+
+  tagInspectorAttrs.innerHTML = '';
+  const schema = TAG_SCHEMAS[parsed.tag.toLowerCase()];
+  const declaredNames = new Set(parsed.declaredAttrs.map((a) => a.name.toLowerCase()));
+
+  // 1. Declared attributes
+  for (const attr of parsed.declaredAttrs) {
+    const chip = document.createElement('span');
+    chip.className = 'tag-attr-chip declared';
+    chip.title = `Attributo dichiarato: ${attr.name}="${attr.value}"`;
+    chip.innerHTML = `<span class="attr-chip-name">${escapeHtml(attr.name)}</span>=<span class="attr-chip-val">"${escapeHtml(attr.value)}"</span>`;
+    tagInspectorAttrs.appendChild(chip);
+  }
+
+  // 2. Default undeclared attributes
+  if (schema) {
+    for (const def of schema) {
+      if (!declaredNames.has(def.name.toLowerCase())) {
+        const chip = document.createElement('span');
+        chip.className = 'tag-attr-chip default';
+        const defVal = def.default !== undefined && def.default !== '' ? `="${def.default}"` : '';
+        chip.title = `${def.description ? def.description + ' · ' : ''}Default: ${def.default || 'nessuno'} · Clicca per inserire`;
+        chip.innerHTML = `<span class="attr-chip-name">+ ${escapeHtml(def.name)}</span><span class="attr-chip-def">${escapeHtml(defVal)} (def)</span>`;
+        chip.addEventListener('click', () => {
+          insertAttrIntoCurrentTag(parsed, def.name, def.default || '');
+        });
+        tagInspectorAttrs.appendChild(chip);
+      }
+    }
+  }
+}
+
+function insertAttrIntoCurrentTag(parsed: ParsedTagAtCursor, attrName: string, defaultValue: string) {
+  const currentXml = codeInput.value;
+  // Verify tag is still at the same position
+  if (currentXml.slice(parsed.tagStart, parsed.tagEnd).startsWith('<') === false) return;
+
+  const rawTag = currentXml.slice(parsed.tagStart, parsed.tagEnd);
+  const isSelf = rawTag.endsWith('/>');
+  const insertOffset = isSelf ? parsed.tagEnd - 2 : parsed.tagEnd - 1;
+
+  const attrStr = ` ${attrName}="${defaultValue}"`;
+  const newXml = currentXml.slice(0, insertOffset) + attrStr + currentXml.slice(insertOffset);
+  codeInput.value = newXml;
+
+  // Move cursor inside the quotes of the newly inserted attribute
+  const newCursor = insertOffset + attrStr.length - 1;
+  codeInput.setSelectionRange(newCursor, newCursor);
+
+  onCodeChange();
+  void triggerBuild();
+  updateCursorPos();
 }
 
 function jumpToLine(line: number) {
@@ -776,10 +862,10 @@ function handlePointerHover(e: PointerEvent) {
     activeTool === 'voxel'
       ? [1, 1, 1]
       : [
-          Math.max(1, parseInt(cadDimW.value, 10) || 4),
-          Math.max(1, parseInt(cadDimD.value, 10) || 4),
-          Math.max(1, parseInt(cadDimH.value, 10) || 4),
-        ];
+        Math.max(1, parseInt(cadDimW.value, 10) || 4),
+        Math.max(1, parseInt(cadDimD.value, 10) || 4),
+        Math.max(1, parseInt(cadDimH.value, 10) || 4),
+      ];
 
   updateGhostMesh(kind, size);
 
@@ -831,10 +917,10 @@ function handleCanvasClick(e: PointerEvent) {
     activeTool === 'voxel'
       ? [1, 1, 1]
       : [
-          Math.max(1, parseInt(cadDimW.value, 10) || 4),
-          Math.max(1, parseInt(cadDimD.value, 10) || 4),
-          Math.max(1, parseInt(cadDimH.value, 10) || 4),
-        ];
+        Math.max(1, parseInt(cadDimW.value, 10) || 4),
+        Math.max(1, parseInt(cadDimD.value, 10) || 4),
+        Math.max(1, parseInt(cadDimH.value, 10) || 4),
+      ];
 
   const at = alignShapeAt([vx, vy, vz], size);
 
@@ -992,177 +1078,177 @@ function getActivePaletteMap(): Record<string, PaletteColorInfo> {
       glow: false,
     };
   }
-    const customColors = parseColorsFromXml(codeInput.value);
-    for (const [sym, c] of Object.entries(customColors)) {
-      map[sym] = {
-        color: c.value ?? map[sym]?.color ?? '#ffffff',
-        name: c.name ?? map[sym]?.name ?? `Colore ${sym}`,
-        glow: !!c.glow,
-        alpha: c.alpha,
-      };
-    }
-    return map;
+  const customColors = parseColorsFromXml(codeInput.value);
+  for (const [sym, c] of Object.entries(customColors)) {
+    map[sym] = {
+      color: c.value ?? map[sym]?.color ?? '#ffffff',
+      name: c.name ?? map[sym]?.name ?? `Colore ${sym}`,
+      glow: !!c.glow,
+      alpha: c.alpha,
+    };
   }
+  return map;
+}
 
-  function renderPaletteSwatches(source: 'model' | 'default') {
-    paletteSwatches.innerHTML = '';
-    const inspColorSelect = $<HTMLSelectElement>('insp-color-select');
-    inspColorSelect.innerHTML = '';
+function renderPaletteSwatches(source: 'model' | 'default') {
+  paletteSwatches.innerHTML = '';
+  const inspColorSelect = $<HTMLSelectElement>('insp-color-select');
+  inspColorSelect.innerHTML = '';
 
-    const customColors = parseColorsFromXml(codeInput.value);
-    const symbolsToRender: Array<{ symbol: string; color: string; name: string; glow?: boolean; alpha?: number }> = [];
+  const customColors = parseColorsFromXml(codeInput.value);
+  const symbolsToRender: Array<{ symbol: string; color: string; name: string; glow?: boolean; alpha?: number }> = [];
 
-    if (source === 'model') {
-      const modelSymbols = getPaletteSymbols(codeInput.value);
-      for (const s of modelSymbols) {
-        const cDef = customColors[s.symbol];
-        symbolsToRender.push({
-          symbol: s.symbol,
-          color: s.color,
-          name: s.name ?? `Colore ${s.symbol}`,
-          glow: s.glow,
-          alpha: cDef?.alpha,
-        });
-      }
-    } else {
-      for (const sym of SWATCH_LETTERS) {
-        const info = MJ_PALETTE[sym];
-        if (!info) continue;
-        const cDef = customColors[sym];
-        symbolsToRender.push({
-          symbol: sym,
-          color: cDef?.value ?? info.color,
-          name: cDef?.name ?? info.name,
-          glow: cDef?.glow,
-          alpha: cDef?.alpha,
-        });
-      }
+  if (source === 'model') {
+    const modelSymbols = getPaletteSymbols(codeInput.value);
+    for (const s of modelSymbols) {
+      const cDef = customColors[s.symbol];
+      symbolsToRender.push({
+        symbol: s.symbol,
+        color: s.color,
+        name: s.name ?? `Colore ${s.symbol}`,
+        glow: s.glow,
+        alpha: cDef?.alpha,
+      });
     }
-
-    for (const item of symbolsToRender) {
-      const isGlass = item.alpha !== undefined && item.alpha < 1.0;
-      const btn = document.createElement('button');
-      btn.className =
-        'swatch-btn' +
-        (item.symbol === activeColorSymbol ? ' active' : '') +
-        (item.glow ? ' glow' : '') +
-        (isGlass ? ' glass' : '');
-      btn.dataset.symbol = item.symbol;
-      btn.textContent = item.symbol;
-      btn.style.backgroundColor = item.color;
-      btn.style.color = getContrastColor(item.color);
-      btn.title = `${item.symbol}: ${item.name} (${item.color})${item.glow ? ' ✨ Glow' : ''}${isGlass ? ' 🧊 Vetro' : ''}`;
-      btn.onclick = () => setActiveColor(item.symbol);
-      paletteSwatches.appendChild(btn);
-
-      const opt = document.createElement('option');
-      opt.value = item.symbol;
-      opt.textContent = `${item.symbol} · ${item.name}${isGlass ? ' (Vetro)' : ''}`;
-      inspColorSelect.appendChild(opt);
-    }
-
-    updateActiveColorDetails();
-  }
-
-  function updateActiveColorDetails() {
-    const activeMap = getActivePaletteMap();
-    const info = activeMap[activeColorSymbol] || { color: '#ffffff', name: activeColorSymbol };
-    activeSwatch.style.backgroundColor = info.color;
-    const isGlass = info.alpha !== undefined && info.alpha < 1.0;
-    activeSwatch.classList.toggle('glass', isGlass);
-    activeColorName.textContent = `${info.name ?? activeColorSymbol}${isGlass ? ' (Vetro)' : ''}`;
-    activeColorCode.textContent = `${activeColorSymbol} · ${info.color}`;
-    cadCustomColor.value = info.color.startsWith('#') ? info.color : `#${info.color}`;
-
-    const customColors = parseColorsFromXml(codeInput.value);
-    const cur = customColors[activeColorSymbol];
-    activeGlow = !!cur?.glow;
-    btnCadGlow.classList.toggle('active', activeGlow);
-    activeGlass = cur?.alpha !== undefined && cur.alpha < 1.0;
-    btnCadGlass.classList.toggle('glass-active', activeGlass);
-
-    const swatches = paletteSwatches.querySelectorAll('.swatch-btn');
-    swatches.forEach((el) => {
-      el.classList.toggle('active', (el as HTMLElement).dataset.symbol === activeColorSymbol);
-    });
-  }
-
-  function setActiveColor(symbol: string) {
-    activeColorSymbol = symbol;
-    updateActiveColorDetails();
-
-    // If shapes are selected, apply color immediately
-    if (selectedShapeIndices.size > 0) {
-      let newXml = codeInput.value;
-      for (const idx of selectedShapeIndices) {
-        newXml = updateShapeInXml(newXml, idx, { color: symbol });
-      }
-      codeInput.value = newXml;
-      onCodeChange();
-      updateSelectionState();
+  } else {
+    for (const sym of SWATCH_LETTERS) {
+      const info = MJ_PALETTE[sym];
+      if (!info) continue;
+      const cDef = customColors[sym];
+      symbolsToRender.push({
+        symbol: sym,
+        color: cDef?.value ?? info.color,
+        name: cDef?.name ?? info.name,
+        glow: cDef?.glow,
+        alpha: cDef?.alpha,
+      });
     }
   }
 
-  function initPaletteBar() {
-    paletteSourceSelect.addEventListener('change', () => {
-      activePaletteSource = paletteSourceSelect.value as 'model' | 'default';
-      renderPaletteSwatches(activePaletteSource);
-      onCodeChange();
-    });
+  for (const item of symbolsToRender) {
+    const isGlass = item.alpha !== undefined && item.alpha < 1.0;
+    const btn = document.createElement('button');
+    btn.className =
+      'swatch-btn' +
+      (item.symbol === activeColorSymbol ? ' active' : '') +
+      (item.glow ? ' glow' : '') +
+      (isGlass ? ' glass' : '');
+    btn.dataset.symbol = item.symbol;
+    btn.textContent = item.symbol;
+    btn.style.backgroundColor = item.color;
+    btn.style.color = getContrastColor(item.color);
+    btn.title = `${item.symbol}: ${item.name} (${item.color})${item.glow ? ' ✨ Glow' : ''}${isGlass ? ' 🧊 Vetro' : ''}`;
+    btn.onclick = () => setActiveColor(item.symbol);
+    paletteSwatches.appendChild(btn);
 
+    const opt = document.createElement('option');
+    opt.value = item.symbol;
+    opt.textContent = `${item.symbol} · ${item.name}${isGlass ? ' (Vetro)' : ''}`;
+    inspColorSelect.appendChild(opt);
+  }
+
+  updateActiveColorDetails();
+}
+
+function updateActiveColorDetails() {
+  const activeMap = getActivePaletteMap();
+  const info = activeMap[activeColorSymbol] || { color: '#ffffff', name: activeColorSymbol };
+  activeSwatch.style.backgroundColor = info.color;
+  const isGlass = info.alpha !== undefined && info.alpha < 1.0;
+  activeSwatch.classList.toggle('glass', isGlass);
+  activeColorName.textContent = `${info.name ?? activeColorSymbol}${isGlass ? ' (Vetro)' : ''}`;
+  activeColorCode.textContent = `${activeColorSymbol} · ${info.color}`;
+  cadCustomColor.value = info.color.startsWith('#') ? info.color : `#${info.color}`;
+
+  const customColors = parseColorsFromXml(codeInput.value);
+  const cur = customColors[activeColorSymbol];
+  activeGlow = !!cur?.glow;
+  btnCadGlow.classList.toggle('active', activeGlow);
+  activeGlass = cur?.alpha !== undefined && cur.alpha < 1.0;
+  btnCadGlass.classList.toggle('glass-active', activeGlass);
+
+  const swatches = paletteSwatches.querySelectorAll('.swatch-btn');
+  swatches.forEach((el) => {
+    el.classList.toggle('active', (el as HTMLElement).dataset.symbol === activeColorSymbol);
+  });
+}
+
+function setActiveColor(symbol: string) {
+  activeColorSymbol = symbol;
+  updateActiveColorDetails();
+
+  // If shapes are selected, apply color immediately
+  if (selectedShapeIndices.size > 0) {
+    let newXml = codeInput.value;
+    for (const idx of selectedShapeIndices) {
+      newXml = updateShapeInXml(newXml, idx, { color: symbol });
+    }
+    codeInput.value = newXml;
+    onCodeChange();
+    updateSelectionState();
+  }
+}
+
+function initPaletteBar() {
+  paletteSourceSelect.addEventListener('change', () => {
+    activePaletteSource = paletteSourceSelect.value as 'model' | 'default';
     renderPaletteSwatches(activePaletteSource);
-    setActiveColor(activeColorSymbol);
+    onCodeChange();
+  });
+
+  renderPaletteSwatches(activePaletteSource);
+  setActiveColor(activeColorSymbol);
+}
+
+function syncPaletteState() {
+  const customColors = parseColorsFromXml(codeInput.value);
+  const customCount = Object.keys(customColors).length;
+  const hasCustom = customCount > 0;
+
+  // Rebuild paletteSourceSelect options
+  paletteSourceSelect.innerHTML = '';
+
+  if (hasCustom) {
+    const optModel = document.createElement('option');
+    optModel.value = 'model';
+    optModel.textContent = `Modello (${customCount} col.)`;
+    paletteSourceSelect.appendChild(optModel);
   }
 
-  function syncPaletteState() {
-    const customColors = parseColorsFromXml(codeInput.value);
-    const customCount = Object.keys(customColors).length;
-    const hasCustom = customCount > 0;
+  const optDefault = document.createElement('option');
+  optDefault.value = 'default';
+  optDefault.textContent = 'Default MJ (26 col.)';
+  paletteSourceSelect.appendChild(optDefault);
 
-    // Rebuild paletteSourceSelect options
-    paletteSourceSelect.innerHTML = '';
-
-    if (hasCustom) {
-      const optModel = document.createElement('option');
-      optModel.value = 'model';
-      optModel.textContent = `Modello (${customCount} col.)`;
-      paletteSourceSelect.appendChild(optModel);
-    }
-
-    const optDefault = document.createElement('option');
-    optDefault.value = 'default';
-    optDefault.textContent = 'Default MJ (26 col.)';
-    paletteSourceSelect.appendChild(optDefault);
-
-    if (!hasCustom) {
-      const optModelDis = document.createElement('option');
-      optModelDis.value = 'model';
-      optModelDis.textContent = 'Modello (nessun colore)';
-      optModelDis.disabled = true;
-      paletteSourceSelect.appendChild(optModelDis);
-    }
-
-    // If custom colors defined, make it active by default on load or first detection
-    if (hasCustom && (hasCustomColorsPrev === false || hasCustomColorsPrev === null)) {
-      activePaletteSource = 'model';
-    } else if (!hasCustom) {
-      activePaletteSource = 'default';
-    }
-    hasCustomColorsPrev = hasCustom;
-
-    paletteSourceSelect.value = activePaletteSource;
-    renderPaletteSwatches(activePaletteSource);
-
-    const cur = customColors[activeColorSymbol];
-    activeGlow = !!cur?.glow;
-    btnCadGlow.classList.toggle('active', activeGlow);
-    activeGlass = cur?.alpha !== undefined && cur.alpha < 1.0;
-    btnCadGlass.classList.toggle('glass-active', activeGlass);
-    cadPartSelect.value = cur?.part || '';
-    if (cur?.value) {
-      cadCustomColor.value = cur.value.startsWith('#') ? cur.value : `#${cur.value}`;
-    }
+  if (!hasCustom) {
+    const optModelDis = document.createElement('option');
+    optModelDis.value = 'model';
+    optModelDis.textContent = 'Modello (nessun colore)';
+    optModelDis.disabled = true;
+    paletteSourceSelect.appendChild(optModelDis);
   }
+
+  // If custom colors defined, make it active by default on load or first detection
+  if (hasCustom && (hasCustomColorsPrev === false || hasCustomColorsPrev === null)) {
+    activePaletteSource = 'model';
+  } else if (!hasCustom) {
+    activePaletteSource = 'default';
+  }
+  hasCustomColorsPrev = hasCustom;
+
+  paletteSourceSelect.value = activePaletteSource;
+  renderPaletteSwatches(activePaletteSource);
+
+  const cur = customColors[activeColorSymbol];
+  activeGlow = !!cur?.glow;
+  btnCadGlow.classList.toggle('active', activeGlow);
+  activeGlass = cur?.alpha !== undefined && cur.alpha < 1.0;
+  btnCadGlass.classList.toggle('glass-active', activeGlass);
+  cadPartSelect.value = cur?.part || '';
+  if (cur?.value) {
+    cadCustomColor.value = cur.value.startsWith('#') ? cur.value : `#${cur.value}`;
+  }
+}
 
 // ------------------------------------------------------------------ XML Editor Inline Color Picker
 
@@ -1279,6 +1365,89 @@ function applyPickerSelection(newChar: string) {
   codeInput.setSelectionRange(nextPos, nextPos);
 }
 
+// ------------------------------------------------------------------ Inline Hex Color Picker
+
+let hexTargetPos: number | null = null;
+let hexTargetLen = 6;
+let hexHasHash = false;
+
+const editorHexColorPicker = document.createElement('input');
+editorHexColorPicker.type = 'color';
+editorHexColorPicker.id = 'editor-hex-color-picker';
+editorHexColorPicker.style.position = 'fixed';
+editorHexColorPicker.style.opacity = '0';
+editorHexColorPicker.style.pointerEvents = 'none';
+editorHexColorPicker.style.width = '0';
+editorHexColorPicker.style.height = '0';
+document.body.appendChild(editorHexColorPicker);
+
+editorHexColorPicker.addEventListener('input', (e) => {
+  if (hexTargetPos === null || hexTargetPos < 0 || hexTargetPos >= codeInput.value.length) return;
+  const rawHex = (e.target as HTMLInputElement).value; // e.g. "#e64539"
+  const clean = rawHex.replace('#', '');
+  const replacement = hexHasHash ? '#' + clean : clean;
+
+  const val = codeInput.value;
+  const before = val.slice(0, hexTargetPos);
+  const after = val.slice(hexTargetPos + hexTargetLen);
+  codeInput.value = before + replacement + after;
+  hexTargetLen = replacement.length;
+
+  onCodeChange();
+});
+
+function openHexColorPicker(pos: number, len: number, hex: string, rect: DOMRect) {
+  hexTargetPos = pos;
+  hexTargetLen = len;
+  const currentStr = codeInput.value.slice(pos, pos + len);
+  hexHasHash = currentStr.startsWith('#');
+
+  editorHexColorPicker.value = '#' + hex.replace('#', '');
+  editorHexColorPicker.style.top = `${rect.bottom}px`;
+  editorHexColorPicker.style.left = `${rect.left}px`;
+
+  if (typeof (editorHexColorPicker as any).showPicker === 'function') {
+    try {
+      (editorHexColorPicker as any).showPicker();
+      return;
+    } catch {
+      // Fallback
+    }
+  }
+  editorHexColorPicker.click();
+}
+
+/**
+ * Robust hit testing through the transparent textarea overlay to elements in #code-output.
+ */
+function findElementAtPoint<T extends HTMLElement>(
+  clientX: number,
+  clientY: number,
+  selector: string,
+  margin = 4,
+): T | null {
+  codeInput.style.pointerEvents = 'none';
+  const hit = document.elementFromPoint(clientX, clientY);
+  codeInput.style.pointerEvents = 'auto';
+
+  const direct = hit?.closest(selector) as T | null;
+  if (direct) return direct;
+
+  const all = codeOutput.querySelectorAll<T>(selector);
+  for (let i = 0; i < all.length; i++) {
+    const r = all[i].getBoundingClientRect();
+    if (
+      clientX >= r.left - margin &&
+      clientX <= r.right + margin &&
+      clientY >= r.top - margin &&
+      clientY <= r.bottom + margin
+    ) {
+      return all[i];
+    }
+  }
+  return null;
+}
+
 // ------------------------------------------------------------------ Event Listeners
 
 codeInput.addEventListener('input', onCodeChange);
@@ -1292,40 +1461,42 @@ codeInput.addEventListener('scroll', () => {
 codeInput.addEventListener('click', (e) => {
   updateCursorPos();
 
-  // Temporarily disable pointer events to hit-test colored chips underneath textarea
-  codeInput.style.pointerEvents = 'none';
-  const hit = document.elementFromPoint(e.clientX, e.clientY);
-  codeInput.style.pointerEvents = 'auto';
+  // 1. Check if an inline filter button was clicked (tok-filter-btn next to in, out, from, to)
+  const filterBtn = findElementAtPoint<HTMLElement>(e.clientX, e.clientY, '.tok-filter-btn', 6);
+  if (filterBtn) {
+    const pos = parseInt(filterBtn.dataset.pos || '0', 10);
+    closeColorPickerPopup();
+    openFilterFromCode(pos);
+    return;
+  }
 
-  const chip = hit?.closest('.tok-color-chip') as HTMLElement | null;
+  // 2. Check if a hex code was clicked (tok-hex-code on symbol value definitions)
+  const hexEl = findElementAtPoint<HTMLElement>(e.clientX, e.clientY, '.tok-hex-code', 4);
+  if (hexEl && hexEl.dataset.pos !== undefined) {
+    const pos = parseInt(hexEl.dataset.pos, 10);
+    const len = parseInt(hexEl.dataset.len || '6', 10);
+    const hex = hexEl.dataset.hex || 'ffffff';
+    closeColorPickerPopup();
+    openHexColorPicker(pos, len, hex, hexEl.getBoundingClientRect());
+    return;
+  }
 
+  // 3. Check if a color chip was clicked (tok-color-chip in rule patterns)
+  const chip = findElementAtPoint<HTMLElement>(e.clientX, e.clientY, '.tok-color-chip', 4);
   if (chip && chip.dataset.pos !== undefined) {
+    const attr = chip.dataset.attr || 'color';
+    // User request: DO NOT show symbol menu on symbol definition (confusing)
+    if (attr === 'symbol') {
+      closeColorPickerPopup();
+      return;
+    }
     const pos = parseInt(chip.dataset.pos, 10);
     const letter = chip.dataset.letter || '';
-    const attr = chip.dataset.attr || 'color';
     openColorPickerPopup(pos, attr, letter, chip.getBoundingClientRect());
-  } else {
-    // Check fallback if cursor selection matches a chip pos exactly
-    const curPos = codeInput.selectionStart;
-    const fallbackChip = (
-      codeOutput.querySelector(`.tok-color-chip[data-pos="${curPos}"]`) ??
-      codeOutput.querySelector(`.tok-color-chip[data-pos="${curPos - 1}"]`)
-    ) as HTMLElement | null;
-
-    if (fallbackChip && fallbackChip.dataset.pos !== undefined) {
-      const rect = fallbackChip.getBoundingClientRect();
-      const dx = Math.abs(e.clientX - (rect.left + rect.width / 2));
-      const dy = Math.abs(e.clientY - (rect.top + rect.height / 2));
-      if (dx < 20 && dy < 20) {
-        const pos = parseInt(fallbackChip.dataset.pos, 10);
-        const letter = fallbackChip.dataset.letter || '';
-        const attr = fallbackChip.dataset.attr || 'color';
-        openColorPickerPopup(pos, attr, letter, rect);
-        return;
-      }
-    }
-    closeColorPickerPopup();
+    return;
   }
+
+  closeColorPickerPopup();
 });
 
 codeInput.addEventListener('keyup', updateCursorPos);
@@ -1421,7 +1592,7 @@ $('btn-format').addEventListener('click', () => {
     }
     codeInput.value = formatted.trim();
     onCodeChange();
-  } catch {}
+  } catch { }
 });
 
 // Copy XML
@@ -1432,7 +1603,7 @@ $('btn-copy').addEventListener('click', async () => {
     const oldText = btn.textContent;
     btn.textContent = 'Copiato!';
     setTimeout(() => (btn.textContent = oldText), 1500);
-  } catch {}
+  } catch { }
 });
 
 // Export XML
@@ -1644,6 +1815,18 @@ cadCustomColor.addEventListener('input', (e) => {
   onCodeChange();
 });
 
+activeSwatch.style.cursor = 'pointer';
+activeSwatch.title = 'Clicca per scegliere un nuovo colore per questo simbolo (Color Picker)';
+activeSwatch.addEventListener('click', () => {
+  cadCustomColor.click();
+});
+
+activeColorCode.style.cursor = 'pointer';
+activeColorCode.title = 'Clicca per scegliere un nuovo colore per questo simbolo (Color Picker)';
+activeColorCode.addEventListener('click', () => {
+  cadCustomColor.click();
+});
+
 // Part rigging selector
 cadPartSelect.addEventListener('change', (e) => {
   const part = (e.target as HTMLSelectElement).value;
@@ -1825,10 +2008,11 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
-// ------------------------------------------------------------------ Rules & Sostituisci Modal (T59d)
+// ------------------------------------------------------------------ Rules, Metodi & Sostituisci Modal (T59d)
 
 const modalRulesBackdrop = $('modal-rules-backdrop');
 const btnOpenRules = $('btn-open-rules');
+const btnOpenFilter = $('btn-open-filter');
 const btnRulesClose = $('btn-rules-close');
 const ruleNodeRadios = document.querySelectorAll<HTMLInputElement>('input[name="rule-node-type"]');
 const ruleStepsInput = $<HTMLInputElement>('rule-steps');
@@ -1839,11 +2023,109 @@ const ruleSymmetrySelect = $<HTMLSelectElement>('rule-symmetry');
 const rulePaletteSwatches = $('rule-palette-swatches');
 const ruleRowsContainer = $('rule-rows-container');
 const btnAddRuleRow = $('btn-add-rule-row');
+const rulesListTitle = $('rules-list-title');
 const ruleXmlPreview = $<HTMLElement>('rule-xml-preview');
 const btnInsertRuleCursor = $('btn-insert-rule-cursor');
 const btnInsertRuleEnd = $('btn-insert-rule-end');
 const btnCopyRule = $('btn-copy-rule');
 
+// Method panels
+const methodPanelRules = $('method-panel-rules');
+const methodPanelPath = $('method-panel-path');
+const methodPanelConv = $('method-panel-convolution');
+const methodPanelMap = $('method-panel-map');
+const methodPanelShape = $('method-panel-shape');
+
+// Path method inputs
+const pathFromInput = $<HTMLInputElement>('path-from');
+const pathToInput = $<HTMLInputElement>('path-to');
+const pathOnInput = $<HTMLInputElement>('path-on');
+const pathColorInput = $<HTMLInputElement>('path-color');
+const pathStepsInput = $<HTMLInputElement>('path-steps');
+const pathInertiaInput = $<HTMLInputElement>('path-inertia');
+const pathLongestInput = $<HTMLInputElement>('path-longest');
+
+// Convolution inputs
+const convNeighborhood = $<HTMLSelectElement>('conv-neighborhood');
+const convIn = $<HTMLInputElement>('conv-in');
+const convOut = $<HTMLInputElement>('conv-out');
+const convValues = $<HTMLInputElement>('conv-values');
+const convSum = $<HTMLInputElement>('conv-sum');
+const convSteps = $<HTMLInputElement>('conv-steps');
+const convPeriodic = $<HTMLInputElement>('conv-periodic');
+
+// Map inputs
+const mapScaleX = $<HTMLInputElement>('map-scale-x');
+const mapScaleY = $<HTMLInputElement>('map-scale-y');
+const mapScaleZ = $<HTMLInputElement>('map-scale-z');
+const mapValues = $<HTMLInputElement>('map-values');
+
+// Shape inputs
+const shapeKind = $<HTMLSelectElement>('shape-kind');
+const shapeAtX = $<HTMLInputElement>('shape-at-x');
+const shapeAtY = $<HTMLInputElement>('shape-at-y');
+const shapeAtZ = $<HTMLInputElement>('shape-at-z');
+const shapeSizeW = $<HTMLInputElement>('shape-size-w');
+const shapeSizeD = $<HTMLInputElement>('shape-size-d');
+const shapeSizeH = $<HTMLInputElement>('shape-size-h');
+const shapeToX = $<HTMLInputElement>('shape-to-x');
+const shapeToY = $<HTMLInputElement>('shape-to-y');
+const shapeToZ = $<HTMLInputElement>('shape-to-z');
+const shapeR = $<HTMLInputElement>('shape-r');
+const shapeColor = $<HTMLInputElement>('shape-color');
+const shapeOn = $<HTMLInputElement>('shape-on');
+const shapeSizeGroup = $('shape-size-group');
+const shapeLineGroup = $('shape-line-group');
+
+// Multi-Dimensional Filter Editor elements
+const filterEditorSection = $('filter-editor-section');
+const btnToggleFilterCollapse = $('btn-toggle-filter-collapse');
+const filterEditorBody = $('filter-editor-body');
+const filterDimX = $<HTMLInputElement>('filter-dim-x');
+const filterDimY = $<HTMLInputElement>('filter-dim-y');
+const filterDimZ = $<HTMLInputElement>('filter-dim-z');
+const btnFilterDecX = $('btn-filter-dec-x');
+const btnFilterIncX = $('btn-filter-inc-x');
+const btnFilterDecY = $('btn-filter-dec-y');
+const btnFilterIncY = $('btn-filter-inc-y');
+const btnFilterDecZ = $('btn-filter-dec-z');
+const btnFilterIncZ = $('btn-filter-inc-z');
+const filterActiveBrush = $('filter-active-brush');
+const filterBrushPalette = $('filter-brush-palette');
+const btnFilterCopyInOut = $('btn-filter-copy-in-out');
+const btnFilterSwapInOut = $('btn-filter-swap-in-out');
+const btnFilterFillIn = $('btn-filter-fill-in');
+const btnFilterFillOut = $('btn-filter-fill-out');
+const btnFilterClearAll = $('btn-filter-clear-all');
+const btnFilterApplyToRule = $('btn-filter-apply-to-rule');
+const filterInLayersNav = $('filter-in-layers-nav');
+const filterInGridContainer = $('filter-in-grid-container');
+const filterInText = $<HTMLInputElement>('filter-in-text');
+const filterOutLayersNav = $('filter-out-layers-nav');
+const filterOutGridContainer = $('filter-out-grid-container');
+const filterOutText = $<HTMLInputElement>('filter-out-text');
+const filterLinkedCodeBadge = $('filter-linked-code-badge');
+const filterLinkedCodeText = $('filter-linked-code-text');
+const btnFilterUnlinkCode = $('btn-filter-unlink-code');
+
+// State for Filter Editor
+let activeLinkedCodeRule: CodeRuleInfo | null = null;
+let filterCurDimX = 3;
+let filterCurDimY = 3;
+let filterCurDimZ = 1;
+let filterActiveLayerZ = 0;
+let filterBrushChar = '*';
+let filterInLayersData: string[][][] = [[
+  ['B', 'B', 'B'],
+  ['B', '*', 'B'],
+  ['B', 'B', 'B'],
+]];
+let filterOutLayersData: string[][][] = [[
+  ['B', 'B', 'B'],
+  ['B', 'H', 'B'],
+  ['B', 'B', 'B'],
+]];
+let activeLinkedRuleRow: HTMLElement | null = null;
 let activeRuleFocusField: HTMLInputElement | null = null;
 
 function getSelectedRuleNodeType(): RuleNodeType {
@@ -1851,6 +2133,46 @@ function getSelectedRuleNodeType(): RuleNodeType {
     if (r.checked) return r.value as RuleNodeType;
   }
   return 'all';
+}
+
+function setRuleNodeType(type: string) {
+  ruleNodeRadios.forEach((r) => {
+    r.checked = (r.value === type);
+    r.closest('.rule-type-option')?.classList.toggle('active', r.checked);
+  });
+  updateMethodPanelsVisibility();
+}
+
+function updateMethodPanelsVisibility() {
+  const nodeType = getSelectedRuleNodeType();
+
+  // Hide all panels
+  methodPanelRules.classList.add('hidden');
+  methodPanelPath.classList.add('hidden');
+  methodPanelConv.classList.add('hidden');
+  methodPanelMap.classList.add('hidden');
+  methodPanelShape.classList.add('hidden');
+
+  if (nodeType === 'all' || nodeType === 'one' || nodeType === 'prl' || nodeType === 'markov' || nodeType === 'sequence') {
+    methodPanelRules.classList.remove('hidden');
+    rulePGroup.classList.toggle('disabled', nodeType !== 'prl');
+
+    if (nodeType === 'markov') {
+      rulesListTitle.textContent = 'Sotto-regole Markov (esegue in priorità finché almeno una matcha)';
+    } else if (nodeType === 'sequence') {
+      rulesListTitle.textContent = 'Sotto-passi in Sequenza (eseguiti in ordine)';
+    } else {
+      rulesListTitle.textContent = 'Pattern di Sostituzione (In ➔ Out)';
+    }
+  } else if (nodeType === 'path') {
+    methodPanelPath.classList.remove('hidden');
+  } else if (nodeType === 'convolution') {
+    methodPanelConv.classList.remove('hidden');
+  } else if (nodeType === 'map') {
+    methodPanelMap.classList.remove('hidden');
+  } else if (nodeType === 'shape') {
+    methodPanelShape.classList.remove('hidden');
+  }
 }
 
 function updateRulesPreview() {
@@ -1861,35 +2183,137 @@ function updateRulesPreview() {
   const p = nodeType === 'prl' && Number.isFinite(pVal) ? pVal : undefined;
   const symmetry = (ruleSymmetrySelect.value || '(xy)') as SymmetryType;
 
-  const rules: SingleRuleItem[] = [];
-  const rowEls = ruleRowsContainer.querySelectorAll('.rule-row-card');
-  rowEls.forEach((row) => {
-    const inInput = row.querySelector<HTMLInputElement>('.rule-in-input');
-    const outInput = row.querySelector<HTMLInputElement>('.rule-out-input');
-    const pInput = row.querySelector<HTMLInputElement>('.rule-row-prob');
-    if (inInput && outInput) {
-      const inVal = inInput.value.trim();
-      const outVal = outInput.value.trim();
-      if (inVal && outVal) {
-        const itemP = pInput && nodeType === 'prl' ? parseFloat(pInput.value) : undefined;
-        rules.push({
-          in: inVal,
-          out: outVal,
-          p: Number.isFinite(itemP) && itemP! > 0 && itemP! <= 1 ? itemP : undefined,
-        });
+  let config: AnyMjNodeConfig;
+
+  if (nodeType === 'path') {
+    const pStepsVal = parseInt(pathStepsInput.value, 10);
+    config = {
+      type: 'path',
+      from: pathFromInput.value.trim() || 'a',
+      to: pathToInput.value.trim() || 'u',
+      on: pathOnInput.value.trim() || 'E',
+      color: pathColorInput.value.trim() || 'G',
+      steps: Number.isFinite(pStepsVal) && pStepsVal > 0 ? pStepsVal : 1,
+      inertia: pathInertiaInput.checked,
+      longest: pathLongestInput.checked,
+    };
+  } else if (nodeType === 'convolution') {
+    const cStepsVal = parseInt(convSteps.value, 10);
+    config = {
+      type: 'convolution',
+      neighborhood: convNeighborhood.value as 'Moore' | 'VonNeumann' | 'NoCorners',
+      in: convIn.value.trim() || 'B',
+      out: convOut.value.trim() || 'W',
+      values: convValues.value.trim() || undefined,
+      sum: convSum.value.trim() || undefined,
+      steps: Number.isFinite(cStepsVal) && cStepsVal > 0 ? cStepsVal : undefined,
+      periodic: convPeriodic.checked,
+    };
+  } else if (nodeType === 'map') {
+    const sx = Math.max(1, parseInt(mapScaleX.value, 10) || 2);
+    const sy = Math.max(1, parseInt(mapScaleY.value, 10) || 2);
+    const sz = Math.max(1, parseInt(mapScaleZ.value, 10) || 2);
+    const rules: SingleRuleItem[] = [];
+    ruleRowsContainer.querySelectorAll('.rule-row-card').forEach((row) => {
+      const inInput = row.querySelector<HTMLInputElement>('.rule-in-input');
+      const outInput = row.querySelector<HTMLInputElement>('.rule-out-input');
+      if (inInput?.value.trim() && outInput?.value.trim()) {
+        rules.push({ in: inInput.value.trim(), out: outInput.value.trim() });
       }
+    });
+    config = {
+      type: 'map',
+      scale: [sx, sy, sz],
+      values: mapValues.value.trim() || 'BW',
+      rules: rules.length > 0 ? rules : [{ in: 'B', out: 'BB/BB BB/BB' }],
+    };
+  } else if (nodeType === 'shape') {
+    const kind = shapeKind.value as 'box' | 'cylinder' | 'ellipsoid' | 'cone' | 'line';
+    const at: [number, number, number] = [
+      parseFloat(shapeAtX.value) || 0,
+      parseFloat(shapeAtY.value) || 0,
+      parseFloat(shapeAtZ.value) || 0,
+    ];
+    if (kind === 'line') {
+      const to: [number, number, number] = [
+        parseFloat(shapeToX.value) || 4,
+        parseFloat(shapeToY.value) || 0,
+        parseFloat(shapeToZ.value) || 0,
+      ];
+      const r = parseFloat(shapeR.value) || 1;
+      config = {
+        type: 'shape',
+        shape: kind,
+        at,
+        to,
+        r,
+        color: shapeColor.value.trim() || 'W',
+        on: shapeOn.value.trim() || undefined,
+      };
+    } else {
+      const size: [number, number, number] = [
+        Math.max(1, parseFloat(shapeSizeW.value) || 4),
+        Math.max(1, parseFloat(shapeSizeD.value) || 4),
+        Math.max(1, parseFloat(shapeSizeH.value) || 4),
+      ];
+      config = {
+        type: 'shape',
+        shape: kind,
+        at,
+        size,
+        color: shapeColor.value.trim() || 'W',
+        on: shapeOn.value.trim() || undefined,
+      };
     }
-  });
+  } else {
+    // all, one, prl, markov, sequence
+    const rules: SingleRuleItem[] = [];
+    const rowEls = ruleRowsContainer.querySelectorAll('.rule-row-card');
+    rowEls.forEach((row) => {
+      const inInput = row.querySelector<HTMLInputElement>('.rule-in-input');
+      const outInput = row.querySelector<HTMLInputElement>('.rule-out-input');
+      const pInput = row.querySelector<HTMLInputElement>('.rule-row-prob');
+      if (inInput && outInput) {
+        const inVal = inInput.value.trim();
+        const outVal = outInput.value.trim();
+        if (inVal && outVal) {
+          const itemP = pInput && nodeType === 'prl' ? parseFloat(pInput.value) : undefined;
+          rules.push({
+            in: inVal,
+            out: outVal,
+            p: Number.isFinite(itemP) && itemP! > 0 && itemP! <= 1 ? itemP : undefined,
+          });
+        }
+      }
+    });
 
-  const config: RuleBlockConfig = {
-    type: nodeType,
-    steps,
-    p,
-    symmetry,
-    rules: rules.length > 0 ? rules : [{ in: 'A', out: 'B' }],
-  };
+    const activeRules = rules.length > 0 ? rules : [{ in: 'A', out: 'B' }];
 
-  const xml = generateRuleXml(config);
+    if (nodeType === 'markov') {
+      config = {
+        type: 'markov',
+        steps,
+        symmetry,
+        rules: activeRules,
+      };
+    } else if (nodeType === 'sequence') {
+      config = {
+        type: 'sequence',
+        steps,
+        rules: activeRules,
+      };
+    } else {
+      config = {
+        type: nodeType,
+        steps,
+        p,
+        symmetry,
+        rules: activeRules,
+      };
+    }
+  }
+
+  const xml = generateNodeXml(config);
   ruleXmlPreview.textContent = xml || '<!-- Nessuna regola valida configurata -->';
 }
 
@@ -1906,11 +2330,18 @@ function createRuleRow(inVal = '', outVal = '', pVal?: number): HTMLElement {
   inInput.type = 'text';
   inInput.className = 'rule-in-input';
   inInput.value = inVal;
-  inInput.placeholder = 'es. P o B T';
+  inInput.placeholder = 'es. P o BBB/B*B/BBB';
   inInput.addEventListener('focus', () => {
     activeRuleFocusField = inInput;
+    activeLinkedRuleRow = row;
+    loadRowIntoFilter(row);
   });
-  inInput.addEventListener('input', updateRulesPreview);
+  inInput.addEventListener('input', () => {
+    updateRulesPreview();
+    if (activeLinkedRuleRow === row) {
+      loadRowIntoFilter(row);
+    }
+  });
   inBox.appendChild(inLabel);
   inBox.appendChild(inInput);
 
@@ -1928,11 +2359,18 @@ function createRuleRow(inVal = '', outVal = '', pVal?: number): HTMLElement {
   outInput.type = 'text';
   outInput.className = 'rule-out-input';
   outInput.value = outVal;
-  outInput.placeholder = 'es. S o B H';
+  outInput.placeholder = 'es. S o BBB/BHB/BBB';
   outInput.addEventListener('focus', () => {
     activeRuleFocusField = outInput;
+    activeLinkedRuleRow = row;
+    loadRowIntoFilter(row);
   });
-  outInput.addEventListener('input', updateRulesPreview);
+  outInput.addEventListener('input', () => {
+    updateRulesPreview();
+    if (activeLinkedRuleRow === row) {
+      loadRowIntoFilter(row);
+    }
+  });
   outBox.appendChild(outLabel);
   outBox.appendChild(outInput);
 
@@ -1948,12 +2386,26 @@ function createRuleRow(inVal = '', outVal = '', pVal?: number): HTMLElement {
   if (pVal !== undefined) probInput.value = String(pVal);
   probInput.addEventListener('input', updateRulesPreview);
 
+  // Button to open/edit in Multi-D Filter
+  const btnEditFilter = document.createElement('button');
+  btnEditFilter.className = 'btn-sm btn-outline';
+  btnEditFilter.textContent = '▦ Filtro';
+  btnEditFilter.title = 'Modifica questo pattern visivamente nel filtro 3D';
+  btnEditFilter.addEventListener('click', (e) => {
+    e.stopPropagation();
+    loadRowIntoFilter(row);
+    filterEditorBody.classList.remove('collapsed');
+    filterEditorSection.scrollIntoView({ behavior: 'smooth' });
+  });
+
   // Remove button
   const btnRemove = document.createElement('button');
   btnRemove.className = 'btn-remove-rule';
   btnRemove.innerHTML = '🗑';
   btnRemove.title = 'Rimuovi questa riga';
-  btnRemove.addEventListener('click', () => {
+  btnRemove.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (activeLinkedRuleRow === row) activeLinkedRuleRow = null;
     row.remove();
     updateRulesPreview();
   });
@@ -1962,10 +2414,426 @@ function createRuleRow(inVal = '', outVal = '', pVal?: number): HTMLElement {
   row.appendChild(arrow);
   row.appendChild(outBox);
   row.appendChild(probInput);
+  row.appendChild(btnEditFilter);
   row.appendChild(btnRemove);
+
+  row.addEventListener('click', (e) => {
+    if (!(e.target as HTMLElement)?.closest('.btn-remove-rule')) {
+      loadRowIntoFilter(row);
+    }
+  });
 
   return row;
 }
+
+function loadRuleValuesIntoFilter(inVal: string, outVal: string) {
+  const parsedIn = parsePattern3D(inVal.trim() || '*');
+  const parsedOut = parsePattern3D(outVal.trim() || '*');
+
+  const targetX = Math.max(1, Math.min(12, Math.max(parsedIn.x, parsedOut.x)));
+  const targetY = Math.max(1, Math.min(12, Math.max(parsedIn.y, parsedOut.y)));
+  const targetZ = Math.max(1, Math.min(12, Math.max(parsedIn.z, parsedOut.z)));
+
+  filterInLayersData = resizePattern3D(parsedIn.layers, targetX, targetY, targetZ, '*');
+  filterOutLayersData = resizePattern3D(parsedOut.layers, targetX, targetY, targetZ, '*');
+
+  setFilterDimensions(targetX, targetY, targetZ, false);
+  renderFilterLayersNav();
+  renderFilterGrids();
+}
+
+function loadRowIntoFilter(row: HTMLElement) {
+  activeLinkedRuleRow = row;
+  ruleRowsContainer.querySelectorAll('.rule-row-card').forEach((r) => r.classList.remove('linked-filter'));
+  row.classList.add('linked-filter');
+
+  const inInput = row.querySelector<HTMLInputElement>('.rule-in-input');
+  const outInput = row.querySelector<HTMLInputElement>('.rule-out-input');
+  if (inInput && outInput) {
+    loadRuleValuesIntoFilter(inInput.value, outInput.value);
+  }
+}
+
+// ------------------------------------------------------------------ Multi-Dimensional Filter Editor Logic
+
+function setFilterDimensions(x: number, y: number, z: number, resizeData = true) {
+  filterCurDimX = Math.max(1, Math.min(12, x));
+  filterCurDimY = Math.max(1, Math.min(12, y));
+  filterCurDimZ = Math.max(1, Math.min(12, z));
+
+  filterDimX.value = String(filterCurDimX);
+  filterDimY.value = String(filterCurDimY);
+  filterDimZ.value = String(filterCurDimZ);
+
+  if (filterActiveLayerZ >= filterCurDimZ) {
+    filterActiveLayerZ = filterCurDimZ - 1;
+  }
+
+  // Update preset buttons active state
+  document.querySelectorAll<HTMLButtonElement>('.btn-filter-preset').forEach((btn) => {
+    const px = parseInt(btn.dataset.x || '0', 10);
+    const py = parseInt(btn.dataset.y || '0', 10);
+    const pz = parseInt(btn.dataset.z || '0', 10);
+    btn.classList.toggle('active', px === filterCurDimX && py === filterCurDimY && pz === filterCurDimZ);
+  });
+
+  if (resizeData) {
+    filterInLayersData = resizePattern3D(filterInLayersData, filterCurDimX, filterCurDimY, filterCurDimZ, '*');
+    filterOutLayersData = resizePattern3D(filterOutLayersData, filterCurDimX, filterCurDimY, filterCurDimZ, '*');
+  }
+
+  syncFilterToTextInputs();
+  renderFilterLayersNav();
+  renderFilterGrids();
+}
+
+function setFilterBrush(ch: string) {
+  filterBrushChar = ch;
+  filterActiveBrush.textContent = ch;
+
+  const pal = getActivePaletteMap()[ch] ?? MJ_PALETTE[ch];
+  if (pal?.color) {
+    const hex = pal.color.startsWith('#') ? pal.color : `#${pal.color}`;
+    filterActiveBrush.style.backgroundColor = hex;
+    filterActiveBrush.style.color = getContrastColor(hex);
+  } else if (ch === '*') {
+    filterActiveBrush.style.backgroundColor = '#475569';
+    filterActiveBrush.style.color = '#ffffff';
+  } else if (ch === '.') {
+    filterActiveBrush.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
+    filterActiveBrush.style.color = '#94a3b8';
+  } else {
+    filterActiveBrush.style.backgroundColor = '#38bdf8';
+    filterActiveBrush.style.color = '#ffffff';
+  }
+
+  document.querySelectorAll<HTMLElement>('.filter-brush-item').forEach((item) => {
+    item.classList.toggle('active', item.dataset.symbol === ch);
+  });
+}
+
+function renderFilterBrushPalette() {
+  filterBrushPalette.innerHTML = '';
+
+  // 1. Wildcard (*) and Air (.)
+  const tokens = ['*', '.'];
+  for (const tok of tokens) {
+    const item = document.createElement('div');
+    item.className = 'filter-brush-item' + (tok === filterBrushChar ? ' active' : '');
+    item.dataset.symbol = tok;
+    item.textContent = tok;
+    item.title = tok === '*' ? 'Wildcard (*): qualsiasi voxel' : 'Aria (.): vuoto';
+    if (tok === '*') {
+      item.style.backgroundColor = '#475569';
+      item.style.color = '#ffffff';
+    } else {
+      item.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
+      item.style.color = '#94a3b8';
+    }
+    item.onclick = () => setFilterBrush(tok);
+    filterBrushPalette.appendChild(item);
+  }
+
+  // 2. Model palette symbols
+  const symbols = getPaletteSymbols(codeInput.value);
+  for (const s of symbols) {
+    const item = document.createElement('div');
+    item.className = 'filter-brush-item' + (s.symbol === filterBrushChar ? ' active' : '');
+    item.dataset.symbol = s.symbol;
+    item.textContent = s.symbol;
+    item.title = `${s.name ?? s.symbol} (${s.symbol})`;
+    item.style.backgroundColor = s.color;
+    item.style.color = getContrastColor(s.color);
+    item.onclick = () => setFilterBrush(s.symbol);
+    filterBrushPalette.appendChild(item);
+  }
+
+  setFilterBrush(filterBrushChar);
+}
+
+function renderFilterLayersNav() {
+  filterInLayersNav.innerHTML = '';
+  filterOutLayersNav.innerHTML = '';
+
+  if (filterCurDimZ <= 1) return;
+
+  for (let z = 0; z < filterCurDimZ; z++) {
+    const btnIn = document.createElement('button');
+    btnIn.className = 'btn-filter-layer' + (z === filterActiveLayerZ ? ' active' : '');
+    btnIn.textContent = `Z=${z + 1}`;
+    btnIn.title = `Visualizza strato Z=${z + 1} (${z === 0 ? 'Top' : z === filterCurDimZ - 1 ? 'Base' : 'Intermedio'})`;
+    btnIn.onclick = () => {
+      filterActiveLayerZ = z;
+      renderFilterLayersNav();
+      renderFilterGrids();
+    };
+    filterInLayersNav.appendChild(btnIn);
+
+    const btnOut = document.createElement('button');
+    btnOut.className = 'btn-filter-layer' + (z === filterActiveLayerZ ? ' active' : '');
+    btnOut.textContent = `Z=${z + 1}`;
+    btnOut.title = `Visualizza strato Z=${z + 1}`;
+    btnOut.onclick = () => {
+      filterActiveLayerZ = z;
+      renderFilterLayersNav();
+      renderFilterGrids();
+    };
+    filterOutLayersNav.appendChild(btnOut);
+  }
+}
+
+function renderFilterGrids() {
+  const activePal = getActivePaletteMap();
+
+  const layerIdx = Math.max(0, Math.min(filterCurDimZ - 1, filterActiveLayerZ));
+
+  // Render IN Grid
+  filterInGridContainer.innerHTML = '';
+  filterInGridContainer.style.setProperty('--filter-cols', String(filterCurDimX));
+
+  const inLayer = filterInLayersData[layerIdx] ?? [];
+  for (let y = 0; y < filterCurDimY; y++) {
+    for (let x = 0; x < filterCurDimX; x++) {
+      const char = inLayer[y]?.[x] ?? '*';
+      const cell = document.createElement('div');
+      cell.className = 'filter-voxel-cell';
+      cell.textContent = char;
+
+      const pal = activePal[char] ?? MJ_PALETTE[char];
+      if (pal?.color) {
+        const hex = pal.color.startsWith('#') ? pal.color : `#${pal.color}`;
+        cell.style.backgroundColor = hex;
+        cell.style.color = getContrastColor(hex);
+      } else if (char === '*') {
+        cell.style.backgroundColor = '#475569';
+        cell.style.color = '#f8fafc';
+      } else if (char === '.') {
+        cell.style.backgroundColor = 'rgba(255, 255, 255, 0.12)';
+        cell.style.color = '#94a3b8';
+      } else {
+        cell.style.backgroundColor = '#38bdf8';
+        cell.style.color = '#ffffff';
+      }
+
+      cell.title = `IN (X:${x + 1}, Y:${y + 1}, Z:${layerIdx + 1}): ${char}`;
+      cell.onclick = () => {
+        if (!filterInLayersData[layerIdx]) filterInLayersData[layerIdx] = [];
+        if (!filterInLayersData[layerIdx][y]) filterInLayersData[layerIdx][y] = [];
+        filterInLayersData[layerIdx][y][x] = filterBrushChar;
+        syncFilterToTextInputs();
+        renderFilterGrids();
+      };
+
+      filterInGridContainer.appendChild(cell);
+    }
+  }
+
+  // Render OUT Grid
+  filterOutGridContainer.innerHTML = '';
+  filterOutGridContainer.style.setProperty('--filter-cols', String(filterCurDimX));
+
+  const outLayer = filterOutLayersData[layerIdx] ?? [];
+  for (let y = 0; y < filterCurDimY; y++) {
+    for (let x = 0; x < filterCurDimX; x++) {
+      const char = outLayer[y]?.[x] ?? '*';
+      const cell = document.createElement('div');
+      cell.className = 'filter-voxel-cell';
+      cell.textContent = char;
+
+      const pal = activePal[char] ?? MJ_PALETTE[char];
+      if (pal?.color) {
+        const hex = pal.color.startsWith('#') ? pal.color : `#${pal.color}`;
+        cell.style.backgroundColor = hex;
+        cell.style.color = getContrastColor(hex);
+      } else if (char === '*') {
+        cell.style.backgroundColor = '#475569';
+        cell.style.color = '#f8fafc';
+      } else if (char === '.') {
+        cell.style.backgroundColor = 'rgba(255, 255, 255, 0.12)';
+        cell.style.color = '#94a3b8';
+      } else {
+        cell.style.backgroundColor = '#38bdf8';
+        cell.style.color = '#ffffff';
+      }
+
+      cell.title = `OUT (X:${x + 1}, Y:${y + 1}, Z:${layerIdx + 1}): ${char}`;
+      cell.onclick = () => {
+        if (!filterOutLayersData[layerIdx]) filterOutLayersData[layerIdx] = [];
+        if (!filterOutLayersData[layerIdx][y]) filterOutLayersData[layerIdx][y] = [];
+        filterOutLayersData[layerIdx][y][x] = filterBrushChar;
+        syncFilterToTextInputs();
+        renderFilterGrids();
+      };
+
+      filterOutGridContainer.appendChild(cell);
+    }
+  }
+}
+
+function syncFilterToTextInputs() {
+  const inStr = formatPattern3D(filterInLayersData);
+  const outStr = formatPattern3D(filterOutLayersData);
+
+  filterInText.value = inStr;
+  filterOutText.value = outStr;
+
+  if (getSelectedRuleNodeType() === 'path') {
+    pathFromInput.value = inStr;
+    pathToInput.value = outStr;
+    updateRulesPreview();
+  } else if (activeLinkedRuleRow) {
+    const inInput = activeLinkedRuleRow.querySelector<HTMLInputElement>('.rule-in-input');
+    const outInput = activeLinkedRuleRow.querySelector<HTMLInputElement>('.rule-out-input');
+    if (inInput) inInput.value = inStr;
+    if (outInput) outInput.value = outStr;
+    updateRulesPreview();
+  }
+}
+
+/**
+ * Opens the 3D multi-dimensional filter editor pre-loaded with an existing rule
+ * from the XML code editor at or around `pos`.
+ */
+function openFilterFromCode(pos: number) {
+  codeInput.selectionStart = codeInput.selectionEnd = pos;
+  updateCursorPos();
+
+  const ruleInfo = extractRuleAtPos(codeInput.value, pos);
+  if (!ruleInfo) {
+    activeLinkedCodeRule = null;
+    filterLinkedCodeBadge.classList.add('hidden');
+    btnFilterApplyToRule.textContent = '✓ Applica a Regola';
+    openRulesModal();
+    filterEditorBody.classList.remove('collapsed');
+    filterEditorSection.scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
+
+  activeLinkedCodeRule = ruleInfo;
+
+  // Unlink active rule card row
+  activeLinkedRuleRow = null;
+  document.querySelectorAll('.rule-row-card').forEach((c) => c.classList.remove('linked-filter'));
+
+  const inVal = ruleInfo.attrs?.['from'] ?? ruleInfo.inAttr?.value ?? '*';
+  const outVal = ruleInfo.attrs?.['to'] ?? ruleInfo.outAttr?.value ?? '*';
+  loadRuleValuesIntoFilter(inVal, outVal);
+
+  // Show linked badge
+  filterLinkedCodeBadge.classList.remove('hidden');
+  filterLinkedCodeText.textContent = `🔗 Regola collegata dal codice: <${ruleInfo.tag}> (riga ${ruleInfo.line})`;
+  btnFilterApplyToRule.textContent = `✓ Applica a Riga ${ruleInfo.line} nel Codice`;
+
+  openRulesModal(ruleInfo);
+  filterEditorBody.classList.remove('collapsed');
+  setTimeout(() => {
+    filterEditorSection.scrollIntoView({ behavior: 'smooth' });
+  }, 60);
+}
+
+// ------------------------------------------------------------------ Color Symbol Refactoring Modal Logic
+
+const modalRefactorBackdrop = $('modal-refactor-backdrop');
+const btnRefactorSymbol = $('btn-refactor-symbol');
+const btnRefactorClose = $('btn-refactor-close');
+const btnRefactorCancel = $('btn-refactor-cancel');
+const btnRefactorApply = $('btn-refactor-apply');
+const refactorOldSwatch = $('refactor-old-swatch');
+const refactorOldSymbol = $('refactor-old-symbol');
+const refactorOldName = $('refactor-old-name');
+const refactorNewSymbol = $<HTMLInputElement>('refactor-new-symbol');
+const refactorOccurrencesSummary = $('refactor-occurrences-summary');
+const refactorTargetWarning = $('refactor-target-warning');
+
+function openRefactorModal() {
+  modalRefactorBackdrop.classList.remove('hidden');
+  modalRefactorBackdrop.setAttribute('aria-hidden', 'false');
+
+  const oldSym = activeColorSymbol;
+  refactorOldSymbol.textContent = oldSym;
+
+  const pal = getActivePaletteMap()[oldSym] ?? MJ_PALETTE[oldSym];
+  const hex = pal?.color ? (pal.color.startsWith('#') ? pal.color : `#${pal.color}`) : '#888888';
+  refactorOldSwatch.style.backgroundColor = hex;
+  refactorOldName.textContent = pal?.name ? `${pal.name} (${hex})` : hex;
+
+  refactorNewSymbol.value = '';
+  refactorTargetWarning.classList.add('hidden');
+
+  // Compute occurrences
+  const info = countColorSymbolOccurrences(codeInput.value, oldSym);
+  if (info.total === 0) {
+    refactorOccurrencesSummary.innerHTML = `Nessuna occorrenza del simbolo <b>"${oldSym}"</b> trovata nel codice attuale.`;
+    btnRefactorApply.setAttribute('disabled', 'true');
+  } else {
+    btnRefactorApply.removeAttribute('disabled');
+    refactorOccurrencesSummary.innerHTML = `
+      <b>${info.total} occorrenze</b> del simbolo <b>"${oldSym}"</b> trovate nel modello:
+      <ul style="margin: 6px 0 0 16px; padding: 0;">
+        ${info.details.map((d) => `<li>${d}</li>`).join('')}
+      </ul>
+    `;
+  }
+
+  refactorNewSymbol.focus();
+}
+
+function closeRefactorModal() {
+  modalRefactorBackdrop.classList.add('hidden');
+  modalRefactorBackdrop.setAttribute('aria-hidden', 'true');
+}
+
+refactorNewSymbol.addEventListener('input', () => {
+  const newSym = refactorNewSymbol.value.trim();
+  if (!newSym) {
+    refactorTargetWarning.classList.add('hidden');
+    return;
+  }
+
+  const existingSymbols = getPaletteSymbols(codeInput.value).map((s) => s.symbol);
+  if (existingSymbols.includes(newSym) && newSym !== activeColorSymbol) {
+    refactorTargetWarning.classList.remove('hidden');
+    refactorTargetWarning.textContent = `⚠️ Attenzione: il simbolo "${newSym}" è già utilizzato nel modello! La sostituzione unificherà tutte le occorrenze di "${activeColorSymbol}" con "${newSym}".`;
+  } else {
+    refactorTargetWarning.classList.add('hidden');
+  }
+});
+
+btnRefactorApply.addEventListener('click', () => {
+  const oldSym = activeColorSymbol;
+  const newSym = refactorNewSymbol.value.trim();
+
+  if (!newSym || newSym.length !== 1) {
+    alert('Inserisci un singolo carattere valido per il nuovo simbolo.');
+    return;
+  }
+
+  if (newSym === oldSym) {
+    closeRefactorModal();
+    return;
+  }
+
+  const { newXml, count } = refactorColorSymbol(codeInput.value, oldSym, newSym);
+  if (count > 0) {
+    codeInput.value = newXml;
+    activeColorSymbol = newSym;
+    onCodeChange();
+    void triggerBuild();
+    syncPaletteState();
+    setActiveColor(newSym);
+  }
+
+  closeRefactorModal();
+});
+
+btnRefactorSymbol.addEventListener('click', openRefactorModal);
+btnRefactorClose.addEventListener('click', closeRefactorModal);
+btnRefactorCancel.addEventListener('click', closeRefactorModal);
+modalRefactorBackdrop.addEventListener('click', (e) => {
+  if (e.target === modalRefactorBackdrop) closeRefactorModal();
+});
+
+// ------------------------------------------------------------------ Rules & Sostituisci Listeners
 
 function populateRulesPaletteSwatches() {
   rulePaletteSwatches.innerHTML = '';
@@ -1992,7 +2860,6 @@ function populateRulesPaletteSwatches() {
         activeRuleFocusField.value = s.symbol;
         activeRuleFocusField.dispatchEvent(new Event('input'));
       } else {
-        // Fallback: pick first empty input or add to in
         const firstIn = ruleRowsContainer.querySelector<HTMLInputElement>('.rule-in-input');
         if (firstIn && !firstIn.value) {
           firstIn.value = s.symbol;
@@ -2005,18 +2872,62 @@ function populateRulesPaletteSwatches() {
   }
 }
 
-function openRulesModal() {
+function openRulesModal(explicitRule?: CodeRuleInfo | null) {
   modalRulesBackdrop.classList.remove('hidden');
   modalRulesBackdrop.setAttribute('aria-hidden', 'false');
   populateRulesPaletteSwatches();
+  renderFilterBrushPalette();
 
-  if (ruleRowsContainer.children.length === 0) {
-    const symbols = getPaletteSymbols(codeInput.value);
-    const inSym = symbols[0]?.symbol || 'P';
-    const outSym = symbols[1]?.symbol || 'S';
-    ruleRowsContainer.appendChild(createRuleRow(inSym, outSym));
+  const curPos = codeInput.selectionStart ?? 0;
+  const codeRule = explicitRule !== undefined ? explicitRule : extractRuleAtPos(codeInput.value, curPos);
+
+  if (codeRule) {
+    activeLinkedCodeRule = codeRule;
+    filterLinkedCodeBadge.classList.remove('hidden');
+    filterLinkedCodeText.textContent = `🔗 Regola collegata dal codice: <${codeRule.tag}> (riga ${codeRule.line})`;
+    btnFilterApplyToRule.textContent = `✓ Applica a Riga ${codeRule.line} nel Codice`;
+
+    setRuleNodeType(codeRule.tag);
+
+    if (codeRule.tag === 'path') {
+      const fromVal = codeRule.attrs?.['from'] ?? codeRule.inAttr?.value ?? 'a';
+      const toVal = codeRule.attrs?.['to'] ?? codeRule.outAttr?.value ?? 'u';
+      pathFromInput.value = fromVal;
+      pathToInput.value = toVal;
+      if (codeRule.attrs?.['on']) pathOnInput.value = codeRule.attrs['on'];
+      if (codeRule.attrs?.['color']) pathColorInput.value = codeRule.attrs['color'];
+      if (codeRule.attrs?.['steps']) pathStepsInput.value = codeRule.attrs['steps'];
+      pathInertiaInput.checked = codeRule.attrs?.['inertia']?.toLowerCase() === 'true';
+      pathLongestInput.checked = codeRule.attrs?.['longest']?.toLowerCase() === 'true';
+      loadRuleValuesIntoFilter(fromVal, toVal);
+    } else {
+      ruleRowsContainer.innerHTML = '';
+      const newRow = createRuleRow(codeRule.inAttr?.value || '*', codeRule.outAttr?.value || '*');
+      ruleRowsContainer.appendChild(newRow);
+      loadRowIntoFilter(newRow);
+    }
+  } else {
+    if (!activeLinkedCodeRule) {
+      filterLinkedCodeBadge.classList.add('hidden');
+      btnFilterApplyToRule.textContent = '✓ Applica a Regola';
+    }
+
+    if (ruleRowsContainer.children.length === 0) {
+      const symbols = getPaletteSymbols(codeInput.value);
+      const inSym = symbols[0]?.symbol || 'P';
+      const outSym = symbols[1]?.symbol || 'S';
+      const newRow = createRuleRow(inSym, outSym);
+      ruleRowsContainer.appendChild(newRow);
+      loadRowIntoFilter(newRow);
+    } else if (activeLinkedRuleRow && ruleRowsContainer.contains(activeLinkedRuleRow)) {
+      loadRowIntoFilter(activeLinkedRuleRow);
+    } else {
+      const firstRow = ruleRowsContainer.querySelector<HTMLElement>('.rule-row-card');
+      if (firstRow) loadRowIntoFilter(firstRow);
+    }
   }
 
+  updateMethodPanelsVisibility();
   updateRulesPreview();
 }
 
@@ -2034,7 +2945,22 @@ function toggleRulesModal() {
 }
 
 // Rules Modal Event Listeners
-btnOpenRules.addEventListener('click', openRulesModal);
+btnOpenRules.addEventListener('click', () => openRulesModal());
+btnOpenFilter.addEventListener('click', () => {
+  const curPos = codeInput.selectionStart;
+  const ruleInfo = extractRuleAtPos(codeInput.value, curPos);
+  if (ruleInfo) {
+    openFilterFromCode(curPos);
+  } else {
+    activeLinkedCodeRule = null;
+    filterLinkedCodeBadge.classList.add('hidden');
+    btnFilterApplyToRule.textContent = '✓ Applica a Regola';
+    openRulesModal();
+    filterEditorBody.classList.remove('collapsed');
+    filterEditorSection.scrollIntoView({ behavior: 'smooth' });
+  }
+});
+
 btnRulesClose.addEventListener('click', closeRulesModal);
 modalRulesBackdrop.addEventListener('click', (e) => {
   if (e.target === modalRulesBackdrop) closeRulesModal();
@@ -2045,9 +2971,20 @@ ruleNodeRadios.forEach((radio) => {
     ruleNodeRadios.forEach((r) => {
       r.closest('.rule-type-option')?.classList.toggle('active', r.checked);
     });
-    const type = getSelectedRuleNodeType();
-    rulePGroup.classList.toggle('disabled', type !== 'prl');
+    updateMethodPanelsVisibility();
     updateRulesPreview();
+
+    const nodeType = getSelectedRuleNodeType();
+    if (nodeType === 'path') {
+      loadRuleValuesIntoFilter(pathFromInput.value, pathToInput.value);
+    } else if (['all', 'one', 'prl', 'markov', 'sequence'].includes(nodeType)) {
+      if (activeLinkedRuleRow && ruleRowsContainer.contains(activeLinkedRuleRow)) {
+        loadRowIntoFilter(activeLinkedRuleRow);
+      } else {
+        const firstRow = ruleRowsContainer.querySelector<HTMLElement>('.rule-row-card');
+        if (firstRow) loadRowIntoFilter(firstRow);
+      }
+    }
   });
 });
 
@@ -2064,9 +3001,194 @@ rulePNum.addEventListener('input', () => {
   updateRulesPreview();
 });
 
-btnAddRuleRow.addEventListener('click', () => {
-  ruleRowsContainer.appendChild(createRuleRow());
+// Path method event listeners
+[pathFromInput, pathToInput, pathOnInput, pathColorInput, pathStepsInput].forEach((el) => {
+  el.addEventListener('input', () => {
+    updateRulesPreview();
+    if (el === pathFromInput || el === pathToInput) {
+      loadRuleValuesIntoFilter(pathFromInput.value, pathToInput.value);
+    }
+  });
+});
+pathInertiaInput.addEventListener('change', updateRulesPreview);
+pathLongestInput.addEventListener('change', updateRulesPreview);
+
+// Convolution method event listeners
+[convNeighborhood].forEach((el) => el.addEventListener('change', updateRulesPreview));
+[convIn, convOut, convValues, convSum, convSteps].forEach((el) => el.addEventListener('input', updateRulesPreview));
+convPeriodic.addEventListener('change', updateRulesPreview);
+
+// Map method event listeners
+[mapScaleX, mapScaleY, mapScaleZ, mapValues].forEach((el) => el.addEventListener('input', updateRulesPreview));
+
+// Shape method event listeners
+shapeKind.addEventListener('change', () => {
+  const isLine = shapeKind.value === 'line';
+  shapeLineGroup.classList.toggle('hidden', !isLine);
+  shapeSizeGroup.classList.toggle('hidden', isLine);
   updateRulesPreview();
+});
+[shapeAtX, shapeAtY, shapeAtZ, shapeSizeW, shapeSizeD, shapeSizeH, shapeToX, shapeToY, shapeToZ, shapeR, shapeColor, shapeOn].forEach((el) => {
+  el.addEventListener('input', updateRulesPreview);
+});
+
+btnAddRuleRow.addEventListener('click', () => {
+  const row = createRuleRow();
+  ruleRowsContainer.appendChild(row);
+  loadRowIntoFilter(row);
+  updateRulesPreview();
+});
+
+btnToggleFilterCollapse.addEventListener('click', () => {
+  filterEditorBody.classList.toggle('collapsed');
+});
+
+// Stepper buttons for dimensions
+btnFilterDecX.addEventListener('click', () => setFilterDimensions(filterCurDimX - 1, filterCurDimY, filterCurDimZ));
+btnFilterIncX.addEventListener('click', () => setFilterDimensions(filterCurDimX + 1, filterCurDimY, filterCurDimZ));
+btnFilterDecY.addEventListener('click', () => setFilterDimensions(filterCurDimX, filterCurDimY - 1, filterCurDimZ));
+btnFilterIncY.addEventListener('click', () => setFilterDimensions(filterCurDimX, filterCurDimY + 1, filterCurDimZ));
+btnFilterDecZ.addEventListener('click', () => setFilterDimensions(filterCurDimX, filterCurDimY, filterCurDimZ - 1));
+btnFilterIncZ.addEventListener('click', () => setFilterDimensions(filterCurDimX, filterCurDimY, filterCurDimZ + 1));
+
+filterDimX.addEventListener('change', () => setFilterDimensions(parseInt(filterDimX.value, 10), filterCurDimY, filterCurDimZ));
+filterDimY.addEventListener('change', () => setFilterDimensions(filterCurDimX, parseInt(filterDimY.value, 10), filterCurDimZ));
+filterDimZ.addEventListener('change', () => setFilterDimensions(filterCurDimX, filterCurDimY, parseInt(filterDimZ.value, 10)));
+
+document.querySelectorAll<HTMLButtonElement>('.btn-filter-preset').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const x = parseInt(btn.dataset.x || '3', 10);
+    const y = parseInt(btn.dataset.y || '3', 10);
+    const z = parseInt(btn.dataset.z || '1', 10);
+    setFilterDimensions(x, y, z);
+  });
+});
+
+filterInText.addEventListener('input', () => {
+  const parsed = parsePattern3D(filterInText.value);
+  filterInLayersData = parsed.layers;
+  setFilterDimensions(parsed.x, parsed.y, parsed.z, false);
+  renderFilterGrids();
+});
+
+filterOutText.addEventListener('input', () => {
+  const parsed = parsePattern3D(filterOutText.value);
+  filterOutLayersData = parsed.layers;
+  setFilterDimensions(parsed.x, parsed.y, parsed.z, false);
+  renderFilterGrids();
+});
+
+btnFilterCopyInOut.addEventListener('click', () => {
+  filterOutLayersData = JSON.parse(JSON.stringify(filterInLayersData));
+  syncFilterToTextInputs();
+  renderFilterGrids();
+});
+
+btnFilterSwapInOut.addEventListener('click', () => {
+  const tmp = filterInLayersData;
+  filterInLayersData = filterOutLayersData;
+  filterOutLayersData = tmp;
+  syncFilterToTextInputs();
+  renderFilterGrids();
+});
+
+btnFilterFillIn.addEventListener('click', () => {
+  for (let z = 0; z < filterCurDimZ; z++) {
+    for (let y = 0; y < filterCurDimY; y++) {
+      for (let x = 0; x < filterCurDimX; x++) {
+        filterInLayersData[z][y][x] = filterBrushChar;
+      }
+    }
+  }
+  syncFilterToTextInputs();
+  renderFilterGrids();
+});
+
+btnFilterFillOut.addEventListener('click', () => {
+  for (let z = 0; z < filterCurDimZ; z++) {
+    for (let y = 0; y < filterCurDimY; y++) {
+      for (let x = 0; x < filterCurDimX; x++) {
+        filterOutLayersData[z][y][x] = filterBrushChar;
+      }
+    }
+  }
+  syncFilterToTextInputs();
+  renderFilterGrids();
+});
+
+btnFilterClearAll.addEventListener('click', () => {
+  for (let z = 0; z < filterCurDimZ; z++) {
+    for (let y = 0; y < filterCurDimY; y++) {
+      for (let x = 0; x < filterCurDimX; x++) {
+        filterInLayersData[z][y][x] = '*';
+        filterOutLayersData[z][y][x] = '*';
+      }
+    }
+  }
+  syncFilterToTextInputs();
+  renderFilterGrids();
+});
+
+btnFilterApplyToRule.addEventListener('click', () => {
+  if (activeLinkedCodeRule) {
+    const newIn = filterInText.value;
+    const newOut = filterOutText.value;
+    const newXml = replaceRuleInCode(codeInput.value, activeLinkedCodeRule, newIn, newOut);
+    codeInput.value = newXml;
+    onCodeChange();
+
+    if (activeLinkedRuleRow) {
+      const inInput = activeLinkedRuleRow.querySelector<HTMLInputElement>('.rule-in-input');
+      const outInput = activeLinkedRuleRow.querySelector<HTMLInputElement>('.rule-out-input');
+      if (inInput) inInput.value = newIn;
+      if (outInput) outInput.value = newOut;
+      updateRulesPreview();
+    } else if (getSelectedRuleNodeType() === 'path') {
+      pathFromInput.value = newIn;
+      pathToInput.value = newOut;
+      updateRulesPreview();
+    }
+
+    // Re-extract rule to refresh offsets for subsequent edits
+    const refreshed = extractRuleAtPos(newXml, activeLinkedCodeRule.tagStart);
+    if (refreshed) {
+      activeLinkedCodeRule = refreshed;
+    }
+
+    const prevText = btnFilterApplyToRule.textContent;
+    btnFilterApplyToRule.textContent = '✓ Applicato al Codice!';
+    btnFilterApplyToRule.style.background = 'var(--emerald, #10b981)';
+    setTimeout(() => {
+      btnFilterApplyToRule.textContent = prevText;
+      btnFilterApplyToRule.style.background = '';
+    }, 1200);
+    return;
+  }
+
+  if (activeLinkedRuleRow) {
+    const inInput = activeLinkedRuleRow.querySelector<HTMLInputElement>('.rule-in-input');
+    const outInput = activeLinkedRuleRow.querySelector<HTMLInputElement>('.rule-out-input');
+    if (inInput) inInput.value = filterInText.value;
+    if (outInput) outInput.value = filterOutText.value;
+    updateRulesPreview();
+    const prevBg = activeLinkedRuleRow.style.background;
+    activeLinkedRuleRow.style.background = 'rgba(56, 189, 248, 0.2)';
+    setTimeout(() => {
+      activeLinkedRuleRow!.style.background = prevBg;
+    }, 400);
+  } else {
+    // Add as new row
+    const row = createRuleRow(filterInText.value, filterOutText.value);
+    ruleRowsContainer.appendChild(row);
+    loadRowIntoFilter(row);
+    updateRulesPreview();
+  }
+});
+
+btnFilterUnlinkCode.addEventListener('click', () => {
+  activeLinkedCodeRule = null;
+  filterLinkedCodeBadge.classList.add('hidden');
+  btnFilterApplyToRule.textContent = '✓ Applica a Regola';
 });
 
 btnInsertRuleCursor.addEventListener('click', () => {
@@ -2074,9 +3196,12 @@ btnInsertRuleCursor.addEventListener('click', () => {
   if (!xml || xml.startsWith('<!-- Nessuna')) return;
 
   const start = codeInput.selectionStart;
-  const { newXml, newCursor } = insertRuleIntoXmlAt(codeInput.value, xml, start);
+  const { newXml, newCursor } = insertRuleIntoXmlAt(codeInput.value, xml, start, activeLinkedCodeRule);
   codeInput.value = newXml;
   codeInput.setSelectionRange(newCursor, newCursor);
+  activeLinkedCodeRule = null;
+  filterLinkedCodeBadge.classList.add('hidden');
+  btnFilterApplyToRule.textContent = '✓ Applica a Regola';
   onCodeChange();
   void triggerBuild();
   closeRulesModal();
@@ -2400,8 +3525,8 @@ function loadSelectedPreset() {
 populatePresets();
 initPaletteBar();
 
-// Choose 'casetta' or 'barile' as default if available, otherwise template
-const defaultEntry = CATALOG.find((e) => e.id === 'casetta') || CATALOG.find((e) => e.id === 'barile');
+// Choose default if available, otherwise template
+const defaultEntry = CATALOG.find((e) => e.id === 'schermo-struttura') || CATALOG.find((e) => e.id === 'barile');
 if (defaultEntry) {
   presetSelect.value = defaultEntry.id;
   loadSelectedPreset();

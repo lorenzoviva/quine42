@@ -60,12 +60,21 @@
           <div class="editor-toolbar">
             <span id="cursor-pos">Riga 1, Col 1</span>
             <div class="editor-toolbar-actions">
-              <button id="btn-open-rules" class="btn-rule-tool" title="Menu sostituzione e regole MarkovJunior all / one / prl (Alt+R)">⚡ Regole</button>
+              <button id="btn-open-rules" class="btn-rule-tool" title="Menu sostituzione e metodi MarkovJunior (Alt+R)">⚡ Metodi MJ</button>
+              <button id="btn-open-filter" class="btn-filter-tool" title="Editor visivo filtri In/Out multi-dimensione">▦ Filtro 3D</button>
               <button id="btn-open-wfc" class="btn-wfc-tool" title="Configurazione guidata WFC (Alt+W)">🧩 WFC</button>
               <button id="btn-format" title="Formatta codice XML">Formatta</button>
               <button id="btn-copy" title="Copia codice XML negli appunti">Copia</button>
               <button id="btn-export" title="Scarica file XML">Esporta</button>
             </div>
+          </div>
+
+          <!-- XML Tag Attribute Inspector Bar (declared & defaults) -->
+          <div id="tag-inspector-bar" class="tag-inspector-bar hidden" aria-live="polite">
+            <div class="tag-badge-group">
+              <span class="tag-name-badge" id="tag-inspector-name">&lt;tag&gt;</span>
+            </div>
+            <div class="tag-attrs-container" id="tag-inspector-attrs"></div>
           </div>
 
           <div class="editor-container">
@@ -224,6 +233,9 @@
             <div id="palette-swatches" class="palette-swatches"></div>
 
             <div class="palette-material-controls">
+              <button id="btn-refactor-symbol" class="btn-glow-toggle" title="Refactoring / Rinomina simbolo colore in tutto il modello (es. cambia B in X)">
+                ⇄ Refactor
+              </button>
               <button id="btn-cad-glow" class="btn-glow-toggle" title="Attiva/disattiva bagliore emissivo per il colore">
                 ✨ Glow
               </button>
@@ -300,11 +312,11 @@
 
     <!-- Modal Dialog: Menu Sostituisci & Regole MarkovJunior (T59d) -->
     <div id="modal-rules-backdrop" class="modal-backdrop hidden" aria-hidden="true">
-      <div id="modal-rules" class="modal-dialog" role="dialog" aria-labelledby="rules-modal-title">
+      <div id="modal-rules" class="modal-dialog modal-dialog-lg" role="dialog" aria-labelledby="rules-modal-title">
         <div class="modal-header">
           <div class="modal-title-group">
             <span class="modal-icon">⚡</span>
-            <h2 id="rules-modal-title">Sostituzione & Regole MarkovJunior</h2>
+            <h2 id="rules-modal-title">Metodi & Regole MarkovJunior</h2>
           </div>
           <button id="btn-rules-close" class="btn-icon" title="Chiudi (Esc)">✕</button>
         </div>
@@ -312,74 +324,365 @@
         <div class="modal-body">
           <!-- Node Type Selection -->
           <div class="modal-section">
-            <span class="modal-section-title">Tipo di Regola</span>
-            <div class="rule-type-selector">
-              <label class="rule-type-option active">
+            <span class="modal-section-title">Metodo MarkovJunior</span>
+            <div class="rule-type-selector grid-methods">
+              <label class="rule-type-option active" data-type="all">
                 <input type="radio" name="rule-node-type" value="all" checked />
                 <span class="type-badge">ALL</span>
                 <span class="type-desc">Tutti i match non sovrapposti</span>
               </label>
-              <label class="rule-type-option">
+              <label class="rule-type-option" data-type="one">
                 <input type="radio" name="rule-node-type" value="one" />
                 <span class="type-badge">ONE</span>
                 <span class="type-desc">Un singolo match casuale</span>
               </label>
-              <label class="rule-type-option">
+              <label class="rule-type-option" data-type="prl">
                 <input type="radio" name="rule-node-type" value="prl" />
                 <span class="type-badge">PRL</span>
-                <span class="type-desc">Parallelo probabilistico (p)</span>
+                <span class="type-desc">Parallelo stocastico (p)</span>
+              </label>
+              <label class="rule-type-option" data-type="markov">
+                <input type="radio" name="rule-node-type" value="markov" />
+                <span class="type-badge badge-flow">MARKOV</span>
+                <span class="type-desc">Loop: cicla finché una sotto-regola matcha</span>
+              </label>
+              <label class="rule-type-option" data-type="sequence">
+                <input type="radio" name="rule-node-type" value="sequence" />
+                <span class="type-badge badge-flow">SEQUENCE</span>
+                <span class="type-desc">Passi eseguiti in sequenza ordinata</span>
+              </label>
+              <label class="rule-type-option" data-type="path">
+                <input type="radio" name="rule-node-type" value="path" />
+                <span class="type-badge badge-algo">PATH</span>
+                <span class="type-desc">Pathfinding da from a to su celle on</span>
+              </label>
+              <label class="rule-type-option" data-type="convolution">
+                <input type="radio" name="rule-node-type" value="convolution" />
+                <span class="type-badge badge-algo">CONV</span>
+                <span class="type-desc">Automa cellulare (conteggio vicini)</span>
+              </label>
+              <label class="rule-type-option" data-type="map">
+                <input type="radio" name="rule-node-type" value="map" />
+                <span class="type-badge badge-algo">MAP</span>
+                <span class="type-desc">Raffinamento e riscalatura griglia</span>
+              </label>
+              <label class="rule-type-option" data-type="shape">
+                <input type="radio" name="rule-node-type" value="shape" />
+                <span class="type-badge badge-shape">SHAPE</span>
+                <span class="type-desc">Primitiva 3D (box, cilindro, sfera, cono...)</span>
               </label>
             </div>
           </div>
 
-          <!-- Parameters: Steps, p, Symmetry -->
-          <div class="modal-section">
-            <span class="modal-section-title">Parametri di Esecuzione</span>
-            <div class="rule-params-grid">
-              <div class="param-field">
-                <label for="rule-steps">Passi (steps)</label>
-                <input id="rule-steps" type="number" min="1" max="9999" value="1" title="Numero di iterazioni della regola" />
+          <!-- Method Specific Parameters: Rules (all, one, prl, markov, sequence) -->
+          <div id="method-panel-rules" class="method-panel active">
+            <div class="modal-section">
+              <span class="modal-section-title">Parametri di Esecuzione</span>
+              <div class="rule-params-grid">
+                <div class="param-field">
+                  <label for="rule-steps">Passi (steps)</label>
+                  <input id="rule-steps" type="number" min="1" max="9999" value="1" title="Numero di iterazioni della regola" />
+                </div>
+
+                <div id="rule-p-group" class="param-field disabled">
+                  <label for="rule-p-num">Probabilità (p)</label>
+                  <div class="range-with-num">
+                    <input id="rule-p-slider" type="range" min="0.01" max="1" step="0.01" value="0.5" />
+                    <input id="rule-p-num" type="number" min="0.01" max="1" step="0.01" value="0.5" />
+                  </div>
+                </div>
+
+                <div id="rule-symmetry-group" class="param-field">
+                  <label for="rule-symmetry">Simmetria</label>
+                  <select id="rule-symmetry" title="Gruppo di simmetria per la ricerca dei match">
+                    <option value="(xy)" selected>(xy) Pianale (rotazioni orizzontali)</option>
+                    <option value="()">() Nessuna (direzione esatta)</option>
+                    <option value="(x)">(x) Specchio asse X</option>
+                    <option value="(y)">(y) Specchio asse Y</option>
+                    <option value="(z)">(z) Specchio asse Z</option>
+                    <option value="(xyz+)">(xyz+) Tutte le 24 rotazioni 3D</option>
+                    <option value="(xyz)">(xyz) Completa 3D (48 simmetrie)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Palette Picker for Rules -->
+            <div class="modal-section">
+              <div class="palette-pick-header">
+                <span class="modal-section-title">Tavolozza Modello</span>
+                <span class="field-hint">Clicca uno swatch per inserire il simbolo</span>
+              </div>
+              <div id="rule-palette-swatches" class="rule-palette-swatches"></div>
+            </div>
+
+            <!-- Rules List -->
+            <div class="modal-section">
+              <div class="rules-list-header">
+                <span class="modal-section-title" id="rules-list-title">Regole di Sostituzione (In ➔ Out)</span>
+                <button id="btn-add-rule-row" class="btn-sm btn-outline">+ Aggiungi riga regola</button>
+              </div>
+              <div id="rule-rows-container" class="rule-rows-container"></div>
+            </div>
+          </div>
+
+          <!-- Method Specific Parameters: PATH -->
+          <div id="method-panel-path" class="method-panel hidden">
+            <div class="modal-section">
+              <span class="modal-section-title">Configurazione Pathfinding (&lt;path/&gt;)</span>
+              <div class="rule-params-grid">
+                <div class="param-field">
+                  <label for="path-from">Origine (from)</label>
+                  <input id="path-from" type="text" maxlength="8" value="a" placeholder="es. a" title="Simbolo cella di partenza" />
+                </div>
+                <div class="param-field">
+                  <label for="path-to">Destinazione (to)</label>
+                  <input id="path-to" type="text" maxlength="8" value="u" placeholder="es. u" title="Simbolo cella di arrivo" />
+                </div>
+                <div class="param-field">
+                  <label for="path-on">Celle calpestabili (on)</label>
+                  <input id="path-on" type="text" value="E" placeholder="es. E o EW" title="Simboli su cui il percorso può muoversi" />
+                </div>
+                <div class="param-field">
+                  <label for="path-color">Colore tracciato (color)</label>
+                  <input id="path-color" type="text" maxlength="8" value="G" placeholder="es. G" title="Simbolo con cui dipingere il percorso" />
+                </div>
+                <div class="param-field">
+                  <label for="path-steps">Passi massimi (steps)</label>
+                  <input id="path-steps" type="number" min="1" max="9999" value="1" />
+                </div>
+                <div class="param-field checkbox-field">
+                  <label class="checkbox-label">
+                    <input id="path-inertia" type="checkbox" />
+                    <span>Inertia (linee rette)</span>
+                  </label>
+                  <label class="checkbox-label">
+                    <input id="path-longest" type="checkbox" />
+                    <span>Longest (percorso più lungo)</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Method Specific Parameters: CONVOLUTION -->
+          <div id="method-panel-convolution" class="method-panel hidden">
+            <div class="modal-section">
+              <span class="modal-section-title">Configurazione Automa Cellulare (&lt;convolution/&gt;)</span>
+              <div class="rule-params-grid">
+                <div class="param-field">
+                  <label for="conv-neighborhood">Vicinato (neighborhood)</label>
+                  <select id="conv-neighborhood">
+                    <option value="Moore" selected>Moore (26 vicini 3D)</option>
+                    <option value="VonNeumann">VonNeumann (6 facce)</option>
+                    <option value="NoCorners">NoCorners (18 facce+spigoli)</option>
+                  </select>
+                </div>
+                <div class="param-field">
+                  <label for="conv-in">In (cella attuale)</label>
+                  <input id="conv-in" type="text" maxlength="1" value="B" placeholder="es. B" />
+                </div>
+                <div class="param-field">
+                  <label for="conv-out">Out (nuovo valore)</label>
+                  <input id="conv-out" type="text" maxlength="1" value="W" placeholder="es. W" />
+                </div>
+                <div class="param-field">
+                  <label for="conv-values">Valori vicini contati (values)</label>
+                  <input id="conv-values" type="text" value="BR" placeholder="es. BR" />
+                </div>
+                <div class="param-field">
+                  <label for="conv-sum">Somma valida (sum)</label>
+                  <input id="conv-sum" type="text" value="5..8" placeholder="es. 5..8 o 1,3,5" />
+                </div>
+                <div class="param-field">
+                  <label for="conv-steps">Passi (steps)</label>
+                  <input id="conv-steps" type="number" min="1" max="999" value="1" />
+                </div>
+                <div class="param-field checkbox-field">
+                  <label class="checkbox-label">
+                    <input id="conv-periodic" type="checkbox" />
+                    <span>Periodico (toroidale)</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Method Specific Parameters: MAP -->
+          <div id="method-panel-map" class="method-panel hidden">
+            <div class="modal-section">
+              <span class="modal-section-title">Configurazione Raffinamento Griglia (&lt;map/&gt;)</span>
+              <div class="rule-params-grid">
+                <div class="param-field">
+                  <label>Scala (scale X Y Z)</label>
+                  <div class="xyz-inputs">
+                    <label>X <input id="map-scale-x" type="number" min="1" max="16" value="2" /></label>
+                    <label>Y <input id="map-scale-y" type="number" min="1" max="16" value="2" /></label>
+                    <label>Z <input id="map-scale-z" type="number" min="1" max="16" value="2" /></label>
+                  </div>
+                </div>
+                <div class="param-field">
+                  <label for="map-values">Valori target (values)</label>
+                  <input id="map-values" type="text" value="BWRP" placeholder="es. BWRP" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Method Specific Parameters: SHAPE -->
+          <div id="method-panel-shape" class="method-panel hidden">
+            <div class="modal-section">
+              <span class="modal-section-title">Configurazione Primitiva Solida</span>
+              <div class="rule-params-grid">
+                <div class="param-field">
+                  <label for="shape-kind">Tipo Forma</label>
+                  <select id="shape-kind">
+                    <option value="box" selected>Parallelepipedo (&lt;box/&gt;)</option>
+                    <option value="cylinder">Cilindro (&lt;cylinder/&gt;)</option>
+                    <option value="ellipsoid">Sfera / Ellissoide (&lt;ellipsoid/&gt;)</option>
+                    <option value="cone">Cono (&lt;cone/&gt;)</option>
+                    <option value="line">Linea (&lt;line/&gt;)</option>
+                  </select>
+                </div>
+                <div class="param-field">
+                  <label>Posizione base (at X Y Z)</label>
+                  <div class="xyz-inputs">
+                    <label>X <input id="shape-at-x" type="number" value="0" /></label>
+                    <label>Y <input id="shape-at-y" type="number" value="0" /></label>
+                    <label>Z <input id="shape-at-z" type="number" value="0" /></label>
+                  </div>
+                </div>
+                <div id="shape-size-group" class="param-field">
+                  <label>Dimensioni (size W D H)</label>
+                  <div class="xyz-inputs">
+                    <label>W <input id="shape-size-w" type="number" min="1" value="4" /></label>
+                    <label>D <input id="shape-size-d" type="number" min="1" value="4" /></label>
+                    <label>H <input id="shape-size-h" type="number" min="1" value="4" /></label>
+                  </div>
+                </div>
+                <div id="shape-line-group" class="param-field hidden">
+                  <label>Punto finale linea (to X Y Z, raggio r)</label>
+                  <div class="xyz-inputs">
+                    <label>X <input id="shape-to-x" type="number" value="4" /></label>
+                    <label>Y <input id="shape-to-y" type="number" value="0" /></label>
+                    <label>Z <input id="shape-to-z" type="number" value="0" /></label>
+                    <label>r <input id="shape-r" type="number" min="1" value="1" /></label>
+                  </div>
+                </div>
+                <div class="param-field">
+                  <label for="shape-color">Colore (color)</label>
+                  <input id="shape-color" type="text" maxlength="8" value="W" placeholder="es. W" />
+                </div>
+                <div class="param-field">
+                  <label for="shape-on">Condizione substrato (on, opzionale)</label>
+                  <input id="shape-on" type="text" placeholder="es. B (scrive solo su B)" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Multi-Dimensional In/Out Filter Editor Section -->
+          <div id="filter-editor-section" class="modal-section filter-editor-section">
+            <div class="filter-header-row">
+              <div class="filter-title-group">
+                <span class="modal-section-title">▦ Editor Filtro Multi-Dimensione (In / Out)</span>
+                <span class="field-hint">Configura le dimensioni del filtro, seleziona i voxel e dipingi i pattern</span>
+              </div>
+              <div class="filter-controls-group">
+                <button id="btn-toggle-filter-collapse" class="btn-sm btn-outline">Comprimi/Espandi</button>
+              </div>
+            </div>
+
+            <div id="filter-editor-body" class="filter-editor-body">
+              <!-- Linked Code Rule Badge (when opened from XML) -->
+              <div id="filter-linked-code-badge" class="filter-linked-badge hidden">
+                <span id="filter-linked-code-text">🔗 Regola collegata dal codice: &lt;all&gt; alla riga 12</span>
+                <button id="btn-filter-unlink-code" class="btn-unlink-code" title="Scollega dal codice per creare una nuova regola">✕ Scollega</button>
               </div>
 
-              <div id="rule-p-group" class="param-field disabled">
-                <label for="rule-p-num">Probabilità (p)</label>
-                <div class="range-with-num">
-                  <input id="rule-p-slider" type="range" min="0.01" max="1" step="0.01" value="0.5" />
-                  <input id="rule-p-num" type="number" min="0.01" max="1" step="0.01" value="0.5" />
+              <!-- Dimensions Controls & Presets -->
+              <div class="filter-dims-toolbar">
+                <div class="dim-picker-group">
+                  <span class="dim-label">Dimensioni Filtro:</span>
+                  <div class="dim-stepper">
+                    <span>X</span>
+                    <button class="btn-step-filter" id="btn-filter-dec-x">−</button>
+                    <input id="filter-dim-x" type="number" min="1" max="12" value="3" />
+                    <button class="btn-step-filter" id="btn-filter-inc-x">+</button>
+                  </div>
+                  <div class="dim-stepper">
+                    <span>Y</span>
+                    <button class="btn-step-filter" id="btn-filter-dec-y">−</button>
+                    <input id="filter-dim-y" type="number" min="1" max="12" value="3" />
+                    <button class="btn-step-filter" id="btn-filter-inc-y">+</button>
+                  </div>
+                  <div class="dim-stepper">
+                    <span>Z</span>
+                    <button class="btn-step-filter" id="btn-filter-dec-z">−</button>
+                    <input id="filter-dim-z" type="number" min="1" max="12" value="1" />
+                    <button class="btn-step-filter" id="btn-filter-inc-z">+</button>
+                  </div>
+                </div>
+
+                <div class="filter-presets-row">
+                  <span class="dim-label">Preset:</span>
+                  <button class="btn-filter-preset" data-x="1" data-y="1" data-z="1">1×1×1</button>
+                  <button class="btn-filter-preset" data-x="2" data-y="2" data-z="1">2×2</button>
+                  <button class="btn-filter-preset active" data-x="3" data-y="3" data-z="1">3×3</button>
+                  <button class="btn-filter-preset" data-x="5" data-y="5" data-z="1">5×5</button>
+                  <button class="btn-filter-preset" data-x="3" data-y="3" data-z="3">3×3×3 Cubo</button>
+                  <button class="btn-filter-preset" data-x="5" data-y="5" data-z="5">5×5×5 Cubo</button>
+                  <button class="btn-filter-preset" data-x="12" data-y="12" data-z="1">12×12</button>
+                  <button class="btn-filter-preset" data-x="12" data-y="12" data-z="12">12×12×12 Cubo</button>
                 </div>
               </div>
 
-              <div class="param-field">
-                <label for="rule-symmetry">Simmetria</label>
-                <select id="rule-symmetry" title="Gruppo di simmetria per la ricerca dei match">
-                  <option value="(xy)" selected>(xy) Pianale (rotazioni orizzontali)</option>
-                  <option value="()">() Nessuna (direzione esatta)</option>
-                  <option value="(x)">(x) Specchio asse X</option>
-                  <option value="(y)">(y) Specchio asse Y</option>
-                  <option value="(z)">(z) Specchio asse Z</option>
-                  <option value="(xyz+)">(xyz+) Tutte le 24 rotazioni 3D</option>
-                  <option value="(xyz)">(xyz) Completa 3D (48 simmetrie)</option>
-                </select>
+              <!-- Filter Brush Bar -->
+              <div class="filter-brush-bar">
+                <div class="brush-indicator">
+                  <span class="dim-label">Pennello attivo:</span>
+                  <div id="filter-active-brush" class="filter-brush-chip" title="Simbolo attivo per dipingere i voxel">*</div>
+                </div>
+                <div id="filter-brush-palette" class="filter-brush-palette"></div>
+              </div>
+
+              <!-- Filter Actions -->
+              <div class="filter-actions-row">
+                <button id="btn-filter-copy-in-out" class="btn-sm btn-outline" title="Copia pattern IN dentro OUT">Copia IN ➔ OUT</button>
+                <button id="btn-filter-swap-in-out" class="btn-sm btn-outline" title="Inverti pattern IN e OUT">Inverti IN ⇄ OUT</button>
+                <button id="btn-filter-fill-in" class="btn-sm btn-outline" title="Riempi IN con il simbolo attivo">Riempi IN</button>
+                <button id="btn-filter-fill-out" class="btn-sm btn-outline" title="Riempi OUT con il simbolo attivo">Riempi OUT</button>
+                <button id="btn-filter-clear-all" class="btn-sm btn-outline" title="Resetta voxel a wildcard (*)">Resetta (*)</button>
+                <button id="btn-filter-apply-to-rule" class="btn-sm btn-primary" title="Applica questo filtro alla regola selezionata">✓ Applica a Regola</button>
+              </div>
+
+              <!-- Dual Grids Container (Side by Side IN and OUT) -->
+              <div class="filter-dual-grids">
+                <!-- IN Grid -->
+                <div class="filter-grid-panel">
+                  <div class="filter-panel-header">
+                    <span class="panel-tag in-tag">PATTERN IN (Ricerca / Match)</span>
+                    <div id="filter-in-layers-nav" class="filter-layers-nav"></div>
+                  </div>
+                  <div id="filter-in-grid-container" class="filter-voxel-grid"></div>
+                  <div class="filter-raw-string">
+                    <label>Stringa IN: <input id="filter-in-text" type="text" value="BBB/B*B/BBB" /></label>
+                  </div>
+                </div>
+
+                <!-- OUT Grid -->
+                <div class="filter-grid-panel">
+                  <div class="filter-panel-header">
+                    <span class="panel-tag out-tag">PATTERN OUT (Sostituzione)</span>
+                    <div id="filter-out-layers-nav" class="filter-layers-nav"></div>
+                  </div>
+                  <div id="filter-out-grid-container" class="filter-voxel-grid"></div>
+                  <div class="filter-raw-string">
+                    <label>Stringa OUT: <input id="filter-out-text" type="text" value="BBB/BHB/BBB" /></label>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-
-          <!-- Quick Palette Picker -->
-          <div class="modal-section">
-            <div class="palette-pick-header">
-              <span class="modal-section-title">Tavolozza Modello</span>
-              <span class="field-hint">Clicca uno swatch per inserire il simbolo</span>
-            </div>
-            <div id="rule-palette-swatches" class="rule-palette-swatches"></div>
-          </div>
-
-          <!-- Rules List -->
-          <div class="modal-section">
-            <div class="rules-list-header">
-              <span class="modal-section-title">Pattern di Sostituzione (In ➔ Out)</span>
-              <button id="btn-add-rule-row" class="btn-sm btn-outline">+ Aggiungi riga regola</button>
-            </div>
-            <div id="rule-rows-container" class="rule-rows-container"></div>
           </div>
 
           <!-- Live XML Preview -->
@@ -393,6 +696,61 @@
           <button id="btn-insert-rule-cursor" class="btn-primary" title="Inserisci il blocco al cursore nel codice">Inserisci al cursore</button>
           <button id="btn-insert-rule-end" class="btn-secondary" title="Inserisci prima della chiusura della sequenza">Inserisci in fondo</button>
           <button id="btn-copy-rule" class="btn-secondary" title="Copia negli appunti">Copia XML</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Dialog: Refactoring Simboli Colore (T59d) -->
+    <div id="modal-refactor-backdrop" class="modal-backdrop hidden" aria-hidden="true">
+      <div id="modal-refactor" class="modal-dialog" role="dialog" aria-labelledby="refactor-modal-title">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="modal-icon">⇄</span>
+            <h2 id="refactor-modal-title">Refactoring Simbolo Colore</h2>
+          </div>
+          <button id="btn-refactor-close" class="btn-icon" title="Chiudi (Esc)">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="modal-section">
+            <div class="refactor-source-row">
+              <span class="dim-label">Simbolo attuale da rinominare:</span>
+              <div class="refactor-current-chip">
+                <span id="refactor-old-swatch" class="refactor-swatch"></span>
+                <span id="refactor-old-symbol" class="refactor-sym">P</span>
+                <span id="refactor-old-name" class="refactor-name">Pista</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-section">
+            <div class="param-field">
+              <label for="refactor-new-symbol">Nuovo simbolo (una singola lettera o cifra):</label>
+              <input
+                id="refactor-new-symbol"
+                type="text"
+                maxlength="1"
+                placeholder="es. X"
+                autocomplete="off"
+                class="refactor-input-symbol"
+              />
+            </div>
+          </div>
+
+          <div class="modal-section">
+            <span class="modal-section-title">Occorrenze nel modello</span>
+            <div id="refactor-occurrences-summary" class="refactor-summary-box">
+              Scansione in corso...
+            </div>
+            <div id="refactor-target-warning" class="refactor-warning-box hidden">
+              ⚠️ Attenzione: il simbolo selezionato è già utilizzato nel modello! La sostituzione unificherà tutte le occorrenze.
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="btn-refactor-apply" class="btn-primary" title="Esegui refactoring su tutto il file">Applica Refactoring</button>
+          <button id="btn-refactor-cancel" class="btn-secondary" title="Annulla operazione">Annulla</button>
         </div>
       </div>
     </div>
