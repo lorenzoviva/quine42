@@ -41,6 +41,8 @@ export interface PlaceView {
   descrizione?: string;
   /** The lots of its structures (`x0 y0 x1 y1` in the place's cells): the ground is flat on them (ADR-0048). */
   lotti?: number[][];
+  /** The cells where its draft has the open sea: its water lies at the sea's level (T51a). */
+  mare?: number[];
   version: number;
 }
 

@@ -7,7 +7,7 @@
 import { PER_WANDERER, type Kernel } from '../kernel/kernel';
 import { AGENTS, type AgentId, type FeedEntry } from '../kernel/agents/council';
 import { ATLAS_FILE } from '../kernel/atlas';
-import { RELIEF_PATH } from '../kernel/relief';
+import { RELIEF_PATH, SEA_DRAFT } from '../kernel/relief';
 import type { FileMap } from '../kernel/types';
 import { validWandererId } from '../kernel/wanderers';
 import { hashStr, hex } from '../kernel/rng';
@@ -691,6 +691,7 @@ export class SessionServer {
         version: ch.version,
         ...(ch.place?.name ? { nome: ch.place.name, descrizione: ch.place.description } : {}),
         ...(ch.buildings.length ? { lotti: ch.buildings.map((b) => [b.x0, b.y0, b.x1, b.y1]) } : {}),
+        ...(ch.draft.includes(SEA_DRAFT) ? { mare: [...ch.draft].flatMap((c, i) => (c === SEA_DRAFT ? [i] : [])) } : {}),
       });
     }
     if (places.length) out.luoghi = places;

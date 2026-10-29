@@ -143,10 +143,13 @@ export function tileForms(k: Kernel, code: string): Array<{ form: Form; geo: Mod
   return out;
 }
 
-/** What a chunk's meshes depend on: its tiles, its neighbours' (banks and walls look across the edge), the terrains' models. */
+/** What a chunk's meshes depend on: its tiles and levels, its neighbours' (banks and walls look across the edge), the terrains' models. */
 export function chunkSig(k: Kernel, ch: Chunk, models = ''): string {
-  const v = (dx: number, dy: number) => k.chunks.get(`${ch.cx + dx},${ch.cy + dy}`)?.version ?? -1;
-  return `${ch.version}|${v(1, 0)}|${v(-1, 0)}|${v(0, 1)}|${v(0, -1)}|${models}`;
+  const v = (dx: number, dy: number) => {
+    const n = k.chunks.get(`${ch.cx + dx},${ch.cy + dy}`);
+    return n ? `${n.version}.${n.levels ?? 0}` : -1;
+  };
+  return `${ch.version}.${ch.levels ?? 0}|${v(1, 0)}|${v(-1, 0)}|${v(0, 1)}|${v(0, -1)}|${models}`;
 }
 
 export function buildChunk(k: Kernel, ch: Chunk, models = ''): ChunkView {

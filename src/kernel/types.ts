@@ -368,6 +368,8 @@ export interface UniverseConfig {
   ai: AiConfig;
   /** Chosen before the Genesis, never changed after (ADR-0053). */
   partita: Partita;
+  /** The relief (ADR-0048): `mare` is the sea's level (T51a); without it, the one the relief gives. */
+  rilievo?: { mare?: number };
 }
 
 /** How the game is played in this universe: chosen before the Genesis, then fixed (ADR-0053). */

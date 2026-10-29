@@ -9,7 +9,7 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockModels } from '../src/kernel/ai/mock';
 import { MemoryChunks } from '../src/kernel/chunks';
-import { LEVEL } from '../src/kernel/relief';
+import { chunkLevels, LEVEL, worldLevels } from '../src/kernel/relief';
 import type { FormComp } from '../src/kernel/forms';
 import { gates, layout } from '../src/kernel/layout';
 
@@ -67,7 +67,13 @@ describe('the model of places (T26)', () => {
     expect(mini).toBeDefined();
     expect(mini.size).toBe(S);
     expect(mini.tiles).toBe(ch.tiles);
-    for (let i = 0; i < S * S; i += 7) expect(mini.levels[i] * LEVEL, `casella ${i}`).toBeCloseTo(k.groundAt(i % S + 0.5, Math.floor(i / S) + 0.5));
+    // Its levels are the place's own, as if alone (T51a): the world's may follow its water beyond it.
+    const liquid = (c: string) => k.palette[c]?.layer === 'liquid';
+    const own = worldLevels([ch], S, liquid, (c, r) => k.relief.level(c, r), k.seaLevel)[0];
+    expect(mini.levels).toEqual([...chunkLevels(ch.tiles, S, liquid, (c, r) => own[r * S + c], ch.buildings)]);
+    let same = 0;
+    for (let i = 0; i < S * S; i++) if (mini.levels[i] * LEVEL === k.groundAt((i % S) + 0.5, Math.floor(i / S) + 0.5)) same++;
+    expect(same).toBeGreaterThan((S * S) / 2);
     // The structures where the world has them, with their models, turned the same way.
     const structures = k.ecs.query('struttura', 'origin').filter((id) => k.ecs.get(id, 'chunk')?.key === ch.key);
     expect(mini.structures.length).toBe(structures.length);
