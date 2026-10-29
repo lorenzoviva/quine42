@@ -173,9 +173,10 @@ export function usageLimit(output) {
 function plan(tasks, runs, budget, only) {
   const byId = new Map(tasks.map((t) => [t.id, t]));
   const open = tasks.filter((t) => !isDone(t.status));
-  const queues = { inCorso: [], pronti: [], daApprovare: [], daStimare: [], bloccati: [], inAttesa: [] };
+  const queues = { inCorso: [], daIntegrare: [], pronti: [], daApprovare: [], daStimare: [], bloccati: [], inAttesa: [] };
   for (const t of open) {
     if (runs[t.id] && runs[t.id].stato !== 'finito') { queues.inCorso.push(t); continue; }
+    if (runs[t.id]) { queues.daIntegrare.push({ ...t, provider: runs[t.id].provider, title: `${t.title} — ${runs[t.id].esito}` }); continue; }
     if (t.status.startsWith('in attesa')) { queues.inAttesa.push(t); continue; }
     if (!t.status.startsWith('da fare')) continue; // in corso by hand, or split into sub-tasks
     // A dependency without a block of its own (T53a) is its parent's (T53).
@@ -198,7 +199,7 @@ function writePlan(queues, budget) {
   const budgets = Object.entries(budget).map(([p, b]) => `- **${p}**: ${describe(b)}${b.letto ? ` (letto da /usage il ${b.letto})` : ' (impostato a mano)'}` +
     (b.contatori ?? []).map((c) => `\n  - ${c.nome}, ${c.finestra}: ${c.residuo} % residuo, reset ${c.reset}`).join('')).join('\n');
   const text = `# Il piano della pipeline\n\n> Generato da \`node tools/pipeline/pipeline.mjs stato\` il ${now()}: non modificarlo a mano,\n> la fonte è \`docs/plans/backlog.md\` (righe \`- Pipeline:\`).\n\n## Budget\n\n${budgets}\n\n` +
-    [['In corso', queues.inCorso], ['Pronti, in ordine di priorità', queues.pronti], ['Da approvare (provider e stima proposti)', queues.daApprovare],
+    [['In corso', queues.inCorso], ['Finiti, da guardare e integrare (`integra Txx`)', queues.daIntegrare], ['Pronti, in ordine di priorità', queues.pronti], ['Da approvare (provider e stima proposti)', queues.daApprovare],
       ['Da stimare (manca la riga `- Pipeline:`)', queues.daStimare], ['Bloccati da dipendenze', queues.bloccati], ['In attesa dell\'autore', queues.inAttesa]]
       .map(([t, l]) => section(t, l)).join('\n');
   fs.writeFileSync(PLAN, text);
@@ -265,7 +266,7 @@ export function readOutput(text) {
   };
 }
 
-async function execute({ max = CONFIG.maxParalleli, only, task } = {}) {
+async function execute({ max = CONFIG.maxParalleli, only, task, always = false } = {}) {
   const runs = readJson(RUNS, {});
   const active = new Map(); // id → promise
   const saveRuns = () => writeJson(RUNS, runs);
@@ -280,15 +281,26 @@ async function execute({ max = CONFIG.maxParalleli, only, task } = {}) {
         .map((r) => ({ ...tasks.find((t) => t.id === r.id), id: r.id, provider: r.provider, estimate: r.stima })),
       ...queues.pronti.filter((t) => !runs[t.id] && (!task || t.id === task)),
     ];
-    for (const t of candidates) {
-      const b = budget[t.provider];
-      if (b.fermoFino && new Date(b.fermoFino) > new Date()) continue;
-      const committed = [...active.keys()].map((id) => runs[id]).filter((r) => r.provider === t.provider).reduce((s, r) => s + r.stima, 0);
+    // Whether a provider can take one more task now (a suspended run only checks that the provider is not stopped).
+    const fits = (prov, estimate, resuming) => {
+      const b = budget[prov];
+      if (!b || (b.fermoFino && new Date(b.fermoFino) > new Date())) return false;
+      const committed = [...active.keys()].map((id) => runs[id]).filter((r) => r.provider === prov).reduce((s, r) => s + r.stima, 0);
       const left = b.residuo - committed;
       const cap = left < CONFIG.sogliaUnSolo || (b.sessione ?? 100) < CONFIG.sogliaUnSolo ? 1 : max;
-      const running = [...active.keys()].filter((id) => runs[id].provider === t.provider).length;
-      if (active.size >= max || running >= cap || (!runs[t.id] && t.estimate > left - CONFIG.riserva)) continue;
-      const run = runs[t.id] ?? { id: t.id, provider: t.provider, stima: t.estimate, tentativi: 0, inizio: now(), ...(() => { const w = taskWorktree(t.id); return { dir: w.dir, branch: w.branch }; })() };
+      const running = [...active.keys()].filter((id) => runs[id].provider === prov).length;
+      return running < cap && (resuming || estimate <= left - CONFIG.riserva);
+    };
+    for (const t of candidates) {
+      if (active.size >= max) break;
+      // A new task goes to its provider or, if that one cannot take it, to its alternatives in order (`alternative`).
+      const resuming = Boolean(runs[t.id]);
+      const prov = resuming ? t.provider : [t.provider, ...(CONFIG.alternative?.[t.provider] ?? [])].find((p) => (!only || p === only) && fits(p, t.estimate, false));
+      if (!prov || !fits(prov, t.estimate, resuming)) continue;
+      if (prov !== t.provider) console.log(`[${now()}] ${t.id}: ${t.provider} non può, va su ${prov}`);
+      const b = budget[prov];
+      t.provider = prov;
+      const run = runs[t.id] ?? { id: t.id, provider: prov, stima: t.estimate, tentativi: 0, inizio: now(), ...(() => { const w = taskWorktree(t.id); return { dir: w.dir, branch: w.branch }; })() };
       run.tentativi += 1;
       run.stato = 'in corso';
       run.prima ??= { settimana: b.residuo, sessione: b.sessione };
@@ -299,9 +311,11 @@ async function execute({ max = CONFIG.maxParalleli, only, task } = {}) {
     }
     if (!active.size) {
       const waiting = Object.values(runs).filter((r) => r.stato === 'sospeso');
-      if (!waiting.length) { console.log('Niente da lanciare: fine.'); return; }
-      const next = Math.min(...waiting.map((r) => new Date(r.fermoFino).getTime()));
-      console.log(`[${now()}] tutti fermi per i limiti; riprendo il ${new Date(next).toISOString()}`);
+      if (!waiting.length && !always) { console.log('Niente da lanciare: fine.'); return; }
+      if (waiting.length) {
+        const next = Math.min(...waiting.map((r) => new Date(r.fermoFino).getTime()));
+        console.log(`[${now()}] tutti fermi per i limiti; riprendo il ${new Date(next).toISOString()}`);
+      }
     }
     await new Promise((r) => setTimeout(r, CONFIG.controlloSecondi * 1000));
   }
@@ -381,10 +395,10 @@ const [cmd, ...rest] = process.argv.slice(2);
 const flag = (name) => { const i = rest.indexOf(`--${name}`); return i >= 0 ? rest[i + 1] : undefined; };
 if (process.argv[1]?.endsWith('pipeline.mjs')) {
   if (cmd === 'stato' || !cmd) status();
-  else if (cmd === 'esegui') await execute({ max: Number(flag('max') ?? CONFIG.maxParalleli), only: flag('solo'), task: flag('task') });
+  else if (cmd === 'esegui') await execute({ max: Number(flag('max') ?? CONFIG.maxParalleli), only: flag('solo'), task: flag('task'), always: rest.includes('--sempre') });
   else if (cmd === 'uso') { const b = readJson(BUDGET, {}); for (const p of Object.keys(b)) delete b[p].letto; writeJson(BUDGET, b); status(); }
   else if (cmd === 'budget') { const b = loadBudget(); b[rest[0]] = { ...b[rest[0]], residuo: Number(rest[1]), aggiornato: now(), fermoFino: undefined }; writeJson(BUDGET, b); status(); }
   else if (cmd === 'worktree') listWorktrees();
   else if (cmd === 'integra') integrate(rest[0]);
-  else console.log('Comandi: stato | uso (rilegge /usage) | esegui [--max N] [--solo claude|gemini] [--task Txx] | budget <claude|gemini> <residuo %> | worktree | integra <Txx>');
+  else console.log('Comandi: stato | uso (rilegge /usage) | esegui [--sempre] [--max N] [--solo claude|gemini] [--task Txx] | budget <claude|gemini> <residuo %> | worktree | integra <Txx>');
 }

@@ -19,7 +19,7 @@ stanno nel task, le code per provider sono sezioni di `PIANO.md`, l'esecuzione �
 ## Le fasi 1-4: la pianificazione (un agente)
 
 Si lancia dal prompt di Claude Code (`/pipeline`, eventualmente con un filtro: `/pipeline solo le richieste per Claude Code`)
-o di Antigravity («Lancia la pipeline: segui `docs/pipeline/pianifica.md`»). L'agente segue
+o di Antigravity (`/pipeline`, la skill in `.agents/skills/pipeline/SKILL.md`; per la pianificazione con Argon: `agy --model gemini-4-argon-high`, poi `/pipeline`). L'agente segue
 [`pianifica.md`](pianifica.md): to-do → backlog, sblocca gli `in attesa` con risposta, stima e assegna, poi
 `node tools/pipeline/pipeline.mjs stato`. Si committa sul branch base (`3d`).
 
@@ -39,16 +39,18 @@ già `approvato`. Per approvare basta aggiungere `· approvato` alla riga.
 ```bash
 node tools/pipeline/pipeline.mjs stato                  # rigenera PIANO.md e stampa le code
 node tools/pipeline/pipeline.mjs budget claude 40       # il residuo attuale (%) del limite settimanale
-node tools/pipeline/pipeline.mjs esegui [--max 5] [--solo claude|gemini] [--task T43b]
+node tools/pipeline/pipeline.mjs esegui [--sempre] [--max 5] [--solo claude|gemini|argon] [--task T43b]
 node tools/pipeline/pipeline.mjs worktree               # i worktree, cosa resta in ciascuno
 node tools/pipeline/pipeline.mjs integra T43b           # merge --no-ff di task/T43b nel base, poi toglie worktree e branch
 ```
 
-`esegui` gira finché c'è qualcosa da fare (lascialo in un terminale a parte, o in background):
+`esegui` gira finché c'è qualcosa da fare; con `--sempre` non si ferma mai: rilegge backlog e contatori a ogni controllo, e i task che pianifichi intanto partono da soli (lascialo in un terminale a parte):
 
 - lancia i task **pronti** (dipendenze `fatto` nel base, approvati, con stima) fino a `maxParalleli` (5), se la
   stima sta nel residuo del provider meno ciò che i task in corso hanno già impegnato e la `riserva`;
   sotto `sogliaUnSolo` (10 %) un solo task per provider;
+- **alternative** (`alternative` in `config.json`: oggi `claude → argon → gemini`, `argon → gemini`): se il provider di un task nuovo è fermo per i limiti o la stima non entra nel suo residuo, il task va al primo che può, con la stessa stima; un task sospeso riprende sempre sul suo. Così finiti i crediti di Claude la pipeline continua su Argon e poi su Gemini 3.8. Toglile se un task delicato deve aspettare Claude;
+- i provider girano **in parallelo** tra loro (ognuno con i suoi contatori), al più `maxParalleli` in tutto;
 - ogni task ha un worktree `.claude/worktrees/<txx>` sul branch `task/<Txx>` nato dal base, con il
   `node_modules` del base collegato (junction); il prompt è quello di `config.json`;
 - `claude -p … --output-format json` / `agy -p … --output-format json`; ogni `controlloSecondi` guarda chi ha finito
@@ -129,7 +131,7 @@ node tools/pipeline/pipeline.mjs integra T43b           # merge --no-ff di task/
   `resetSettimanale`.
 
 I limiti non li gestiscono gli agenti: un task non si ferma a metà per risparmiare, è lo script che decide quanti
-partono. Il merge nel base non lo fa nessun agente: dopo `ESITO: fatto` l'autore guarda il branch e lancia `integra`
+partono. Il merge nel base non lo fa nessun agente: dopo `ESITO: fatto` il task è in «Finiti, da guardare e integrare» di `PIANO.md`; l'autore guarda il branch e lancia `integra` (che toglie anche worktree e branch)
 (le dipendenze contano come fatte solo quando il loro `fatto` è nel base).
 
 **Permessi.** In `config.json` le CLI girano con `--dangerously-skip-permissions`: niente prompt, perché nessuno

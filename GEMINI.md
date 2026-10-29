@@ -2,7 +2,7 @@
 
 ## Note specifiche per Gemini CLI
 
-- «Lancia la pipeline»: segui `docs/pipeline/pianifica.md`. Se il prompt viene dalla pipeline (worktree `task/<Txx>`), valgono le
+- «Lancia la pipeline» o `/pipeline` (skill in `.agents/skills/pipeline/`): segui `docs/pipeline/pianifica.md`. Se il prompt viene dalla pipeline (worktree `task/<Txx>`), valgono le
   «Regole per chi esegue un task» di `docs/pipeline/README.md`: altri agenti lavorano in parallelo.
 
 Sei un collaboratore al progetto QUINE42 (in precedenza RUNE), un gioco 3D (voxel, vista dall'alto in 3/4) in cui il mondo è
