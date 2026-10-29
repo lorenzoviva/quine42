@@ -47,24 +47,69 @@ const META_RE = new RegExp(
   'i',
 );
 
-/** Whether a text breaks the fourth wall (what it says, for the feedback). */
-export function metaBreak(text: string): string | undefined {
+/**
+ * Whether a text breaks the fourth wall (what it says, for the feedback); with the lexicon's words, also
+ * whether it explains one of them like a glossary.
+ */
+export function metaBreak(text: string, words: string[] = []): string | undefined {
   const m = META_RE.exec(text);
-  return m ? m[0] : undefined;
+  return m ? m[0] : glossaryBreak(text, words);
 }
 
 /** The bible's lines that break the fourth wall (as «line» → what breaks it). */
-export function bibleBreaks(b: Bible): string[] {
-  return [b.tono, b.sintesi, b.storia ?? '', ...(b.personaggi ?? []), ...(b.fatti ?? []), ...(b.misteri ?? [])]
+export function bibleBreaks(b: Bible, words: string[] = []): string[] {
+  return [b.tono, b.sintesi, b.storia ?? '', ...(b.personaggi ?? []), ...(b.fatti ?? []), ...(b.misteri ?? []), ...(b.usanze ?? [])]
     .flatMap((l) => {
-      const m = metaBreak(l);
+      const m = metaBreak(l, words);
       return m ? [`«${l.slice(0, 120)}» («${m}»)`] : [];
     });
 }
 
-/** The bible without the lines of lists that break the fourth wall (and without the old «crepe»). */
-export function cleanBible(b: Bible): Bible {
-  const keep = (ls?: string[]) => (ls ?? []).filter((l) => !metaBreak(l));
-  const { crepe: _, ...rest } = b;
-  return { ...rest, personaggi: keep(b.personaggi), fatti: keep(b.fatti), misteri: keep(b.misteri) };
+/** How many customs of its own a universe adds to the lexicon (T65: few, the common thread stays). */
+export const OWN_CUSTOMS = 3;
+
+/**
+ * The bible without the lines of lists that break the fourth wall (and without the old «crepe»); its own
+ * customs at most OWN_CUSTOMS, none that explains or redefines a word of the lexicon.
+ */
+export function cleanBible(b: Bible, words: string[] = []): Bible {
+  const keep = (ls?: string[]) => (ls ?? []).filter((l) => typeof l === 'string' && !metaBreak(l, words));
+  const { crepe: _, usanze, ...rest } = b;
+  const own = keep(usanze).filter((l) => !redefines(l, words)).slice(0, OWN_CUSTOMS);
+  return { ...rest, personaggi: keep(b.personaggi), fatti: keep(b.fatti), misteri: keep(b.misteri), ...(own.length ? { usanze: own } : {}) };
+}
+
+/** A custom that starts from a word of the lexicon («bonombo: …») gives it a meaning again: it contradicts the lexicon. */
+function redefines(line: string, words: string[]): boolean {
+  const head = line.trim().replace(/^[-*«"“\s]+/, '').toLowerCase();
+  return words.some((w) => new RegExp(`^${escape(w.toLowerCase())}(?![\p{L}])[»"”\s]*[:=—–-]`, 'u').test(head));
+}
+
+/** The lexicon's words (world/lessico.md, «Parole che si dicono così»), every form: what no one in the world explains. */
+export function lexiconWords(lexicon: string): string[] {
+  const section = /^## Parole[^\n]*\n([\s\S]*?)(?=^## |$(?![\s\S]))/m.exec(lexicon)?.[1] ?? '';
+  return [...section.matchAll(/^- \*\*([^*]+)\*\*/gm)].flatMap((m) => m[1].split('/').map((w) => w.trim()).filter(Boolean));
+}
+
+const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * Whether a text of the world explains a word of the lexicon like a glossary («bonombo» significa ciao): the
+ * people speak their language, nobody translates it (T65). What it says, for the feedback.
+ */
+export function glossaryBreak(text: string, words: string[]): string | undefined {
+  if (!words.length) return undefined;
+  const w = `(?:${words.map(escape).join('|')})`;
+  const re = new RegExp(
+    [
+      // «bonombo» significa ciao; lerpio vuol dire bello
+      String.raw`(?<![\p{L}])${w}[»"”']?\s*,?\s*(?:significa|vuol(?:e)? dire|si traduce|equivale a|(?:è|e') (?:una )?parol\w* (?:per|che))`,
+      // «macico», cioè un tale (quoted only: «il macico sta per partire» is just speech)
+      String.raw`[«"“']${w}[»"”']\s*,?\s*(?:sta per|cioè|ovvero|nel senso di)`,
+      // la parola bonombo
+      String.raw`(?<![\p{L}])(?:la|una|questa|quella) (?:parol\w*|termin\w*|espression\w*) [«"“]?${w}(?![\p{L}])`,
+    ].join('|'),
+    'iu',
+  );
+  return re.exec(text)?.[0];
 }

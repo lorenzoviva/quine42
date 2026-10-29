@@ -106,7 +106,7 @@ export class MockModels implements Models {
       case 'text.read':
         return { testo: this.sign(d.facts ?? {}, d.what?.name ?? '') };
       case 'genesis.bible':
-        return { misteri: ['i vecchi non calpestano le rune: dicono che porti sfortuna'], titolo: 'Il Regno di Valmora', tono: 'concreto e caldo', sintesi: 'Un regno quieto di prati, boschi e borghi.', storia: '', luoghi: ['Piazza di Valmora'], personaggi: ['Abitanti di Valmora'], fatti: ['Il pane del forno di piazza è famoso in tutto il regno.'] };
+        return { misteri: ['i vecchi non calpestano le rune: dicono che porti sfortuna'], titolo: 'Il Regno di Valmora', tono: 'concreto e caldo', sintesi: 'Un regno quieto di prati, boschi e borghi.', storia: '', luoghi: ['Piazza di Valmora'], personaggi: ['Abitanti di Valmora'], fatti: ['Il pane del forno di piazza è famoso in tutto il regno.'], usanze: ['Chi sforna il primo pane del giorno lo lascia sulla soglia per il primo che passa.'] };
       case 'genesis.style':
         return { stile: 'voxel medievale, semplice e caldo', forme: 'persone tozze dalla testa grande, case basse', palette: ['verde', 'ocra', 'blu'], luce: 'diurna morbida', regole: ['niente testo'], protagonista: 'un viandante incappucciato' };
       case 'model.sculpt':

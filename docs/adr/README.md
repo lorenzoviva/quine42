@@ -79,6 +79,7 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0072](0072-la-pipeline-agentica.md) | La pipeline agentica: il backlog resta la fonte (riga `- Pipeline:` con provider, stima e approvazione), un agente pianifica, `tools/pipeline/pipeline.mjs` esegue fino a 5 task in parallelo, uno per worktree, entro il budget di ogni provider, e li riprende dopo un limite | accettato |
 | [0073](0073-altro-e-pvp-tra-viandanti.md) | «Altro…» e PvP tra viandanti: «Altro…» su un altro viandante solo se `partita.altroTraGiocatori`, giudicato come su una persona; il server applica gli effetti al suo corpo (`touchWanderer`); ciò che ferisce solo con `partita.pvp` (`unharmed`), sul master solo parole | accettato |
 | [0074](0074-il-profilo-del-viandante.md) | Il profilo del viandante: nome, seme del programma `viandante`, colore del mantello, presentazione, in `world/giocatori/<id>.json`; riparato dal kernel (nome breve e non simile a persone o viandanti, seme e colore nei limiti) e dato agli altri; `P` apre il pannello con le foto del modello | accettato |
+| [0075](0075-il-lessico.md) | Il lessico di QUINE42: `world/lessico.md` del seme (parole sostituite, saluti, buone maniere, usanze, modi di dire) va con ogni compito del Narratore e dell'Arbitro; la bibbia aggiunge al più 3 usanze sue; nessun testo del mondo spiega il lessico come un glossario (`glossaryBreak`) | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.
 

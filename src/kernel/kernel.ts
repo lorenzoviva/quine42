@@ -39,7 +39,7 @@ import { categoryOf, DEFAULT_SCULPTORS, sculptAction, type SculptorModels } from
 import { MODELS_INDEX, type ModelInfo } from './forms';
 import { Content, normName, specOf } from './content';
 import { layout, type Building, type LayoutResult, articulationPoints } from './layout';
-import { AGENTS, Council, readBible, type AgentId, type CatalogEntry, type FeedEntry } from './agents/council';
+import { AGENTS, Council, readBible, wordsOf, type AgentId, type CatalogEntry, type FeedEntry } from './agents/council';
 import { designEnvironment, drawAtlas, planChunk, type ChunkPlan, type Where } from './agents/cartography';
 import { forge, judgeCombination, repairLogic, slug, type ForgeOrigin } from './agents/forge';
 import { agentReply, examine, narrate, npcDialogue, npcReply, referenteReply, weavePlot, type NpcReply, type Turn } from './agents/minds';
@@ -5081,7 +5081,7 @@ export class Kernel {
         identity = await ask();
         // A person of the world, not of the Council's table: once more if the fourth wall breaks,
         // or if the name is like someone else's.
-        if (metaBreak(`${identity.persona} ${identity.story ?? ''} ${identity.job ?? ''}`)) identity = await ask();
+        if (metaBreak(`${identity.persona} ${identity.story ?? ''} ${identity.job ?? ''}`, wordsOf(this.files))) identity = await ask();
         else if (alike(identity.name).length) {
           this.council.say('kernel', 'scarta', `il nome «${identity.name}» è troppo simile a ${alike(identity.name).join(', ')}`, 'narratore', 'npc.individuate');
           identity = await ask([...alike(identity.name), identity.name]);
@@ -5196,7 +5196,7 @@ export class Kernel {
         kept.push(p);
         continue;
       }
-      const r = reviewPlot(p, people);
+      const r = reviewPlot(p, people, wordsOf(this.files));
       if (!r.problems.length) kept.push(p);
       else if (r.plot) kept.push(r.plot), fixes.push(`«${p.titolo}»: ${r.problems.join('; ')}`);
       else fixes.push(`«${p.titolo}» ritirata: ${r.problems.join('; ')}`);
@@ -5430,7 +5430,7 @@ export class Kernel {
     // Narrator once, with the reasons; the second answer is repaired, or dropped if it cannot be.
     const attempt = async (feedback?: string) => {
       const raw = plotFromRaw(await weavePlot(this.council, societySummary(society, 20), places, recent, feedback, this.focusOn(society.persone.slice(-20).map((p) => p.nome))), this.day(), `trama-${this.worldStamp()}`);
-      return { titolo: raw.titolo, ...reviewPlot(raw, society) };
+      return { titolo: raw.titolo, ...reviewPlot(raw, society, wordsOf(this.files)) };
     };
     let plot: Plot | undefined;
     try {
@@ -6005,9 +6005,10 @@ export class Kernel {
     const generated = [...this.modules.values()].filter((m) => m.manifest.origin && m.manifest.origin !== 'esempio' && (m.manifest.kind === 'entity' || m.manifest.kind === 'item'));
     const oldBible = readBible(this.repo.working);
     const plots = readPlots(this.repo.working);
-    const brokenPlots = plots.filter((p) => metaBreak(plotText(p)));
+    const words = wordsOf(this.repo.working);
+    const brokenPlots = plots.filter((p) => metaBreak(plotText(p), words));
     // Nothing created yet (a universe just born from the seed): nothing to review.
-    if (!generated.length && !brokenPlots.length && !(oldBible && bibleBreaks(oldBible).length)) return [];
+    if (!generated.length && !brokenPlots.length && !(oldBible && bibleBreaks(oldBible, words).length)) return [];
     const retire = new Set<string>();
     const seen = new Map<string, string>();
     // The first of a kind (the shortest id: "-2", "-3" came later) is the one that stays.
@@ -6043,7 +6044,7 @@ export class Kernel {
     }
     if (oldBible) {
       const gone = new Set(names.map(normName));
-      const bible = cleanBible(oldBible);
+      const bible = cleanBible(oldBible, words);
       bible.personaggi = bible.personaggi.filter((l) => !gone.has(normName(l.split(' — ')[0])));
       bible.fatti = bible.fatti.filter((l) => !gone.has(normName(l.split(' — ')[0])));
       this.repo.write('world/bible.json', JSON.stringify(bible, null, 2) + '\n');

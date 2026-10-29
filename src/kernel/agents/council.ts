@@ -5,7 +5,7 @@
 
 import { parseJson, type Models, type Schema, type Thinking } from '../ai/models';
 import { COMUNE } from '../cards';
-import { COUNCIL_PRINCIPLES } from '../fourthwall';
+import { COUNCIL_PRINCIPLES, lexiconWords } from '../fourthwall';
 import type { FileMap, MagicRune, Spell, TileDef } from '../types';
 import type { WorldGraph } from '../graph';
 import { partitaSummary } from '../partita';
@@ -78,6 +78,8 @@ export interface Bible {
   fatti: string[];
   /** Legends and mysteries of the world, told from inside it. */
   misteri?: string[];
+  /** Customs and sayings of this universe that enrich the lexicon (world/lessico.md) without contradicting it (T65). */
+  usanze?: string[];
   /** Old bibles: hints that the world was a simulation. No longer used (no meta-game, ADR-0025). */
   crepe?: string[];
 }
@@ -168,6 +170,28 @@ export function canonSummary(files: FileMap): string {
     .join('\n\n');
 }
 
+/** The words of the lexicon (world/lessico.md) no text of the world explains (T65). */
+export function wordsOf(files: FileMap): string[] {
+  return lexiconWords(files['world/lessico.md'] ?? '');
+}
+
+/**
+ * The lexicon (world/lessico.md): how people speak and behave in every universe, whatever the setting, plus
+ * the few customs this universe added (bible → usanze). Every narrative task gets it, like the rune canon.
+ */
+export function lexiconSummary(files: FileMap): string {
+  const lexicon = (files['world/lessico.md'] ?? '').replace(/^# .*\n+/, '').trim();
+  if (!lexicon) return '';
+  const own = readBible(files)?.usanze ?? [];
+  return [
+    "## Lessico del mondo (vale sempre: le persone parlano e si comportano così, in ogni epoca; usalo nei dialoghi, nelle cose e nella bibbia, senza mai spiegarlo)",
+    lexicon,
+    own.length ? `### Usanze di questo mondo\n${own.map((l) => `- ${l}`).join('\n')}` : '',
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+}
+
 /** The game chosen before the Genesis (universe.json → partita), as a principle of the Council (ADR-0053). */
 export function gameSummary(files: FileMap): string {
   let raw: unknown;
@@ -223,6 +247,8 @@ export class Council {
     const rules = rulesSummary(v.files);
     // The rune canon goes with every narrative task (the Narrator's and the Arbiter's).
     const canon = agent === 'narratore' || agent === 'arbitro' ? canonSummary(v.files) : '';
+    // So does the lexicon: how people speak and behave, the same in every universe (T65).
+    const lexicon = agent === 'narratore' || agent === 'arbitro' ? lexiconSummary(v.files) : '';
     // The game chosen at the Genesis goes to whoever builds on it: stories, coherence, mechanics, requests.
     if (agent === 'narratore' || agent === 'arbitro' || agent === 'ingegnere' || agent === 'referente') parts.push(gameSummary(v.files));
     switch (agent) {
@@ -230,6 +256,7 @@ export class Council {
         if (focused) parts.push(`## Il mondo\n${bibleHead(bible)}`);
         else parts.push(`## Bibbia del mondo\n${bibleSummary(bible, true)}`, `## Moduli esistenti\n${catalogSummary(v.catalog)}`);
         if (canon) parts.push(canon);
+        if (lexicon) parts.push(lexicon);
         if (rules) parts.push(focused ? rulesSummary(v.files, FOCUSED_RULES) : rules);
         break;
       case 'cartografo': {
@@ -259,6 +286,7 @@ export class Council {
       case 'arbitro':
         parts.push(`## Bibbia del mondo\n${bibleSummary(bible)}`, `## Guida di stile\n${style}`, `## Terreni\n${paletteSummary(v.palette)}`);
         if (canon) parts.push(canon);
+        if (lexicon) parts.push(lexicon);
         if (rules) parts.push(rules);
         break;
       case 'referente':

@@ -5,6 +5,7 @@
 import type { Schema } from '../ai/models';
 import type { FileMap, LayoutDef, TileDef, TileLayer } from '../types';
 import type { AgentId, Bible, Council } from './council';
+import { wordsOf } from './council';
 import { designLayouts } from './cartography';
 import { repairProgram } from '../mj';
 import { bibleBreaks, cleanBible } from '../fourthwall';
@@ -50,6 +51,7 @@ const BIBLE_SCHEMA: Schema = {
     personaggi: { type: 'ARRAY', items: { type: 'STRING' } },
     fatti: { type: 'ARRAY', items: { type: 'STRING' } },
     misteri: { type: 'ARRAY', items: { type: 'STRING' }, description: 'leggende raccontate dalla gente del mondo (persone, bestie, dei, re del passato)' },
+    usanze: { type: 'ARRAY', items: { type: 'STRING' }, description: 'al più 3 usanze o modi di dire propri di questo mondo, che arricchiscono il lessico senza contraddirlo né spiegarlo' },
   },
   required: ['titolo', 'tono', 'sintesi', 'storia', 'luoghi', 'personaggi', 'fatti', 'misteri'],
 };
@@ -191,7 +193,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     c.ask<Bible>(
       'narratore',
       'genesis.bible',
-      `Crea la bibbia di un nuovo universo a partire da questo tema:\n${theme}\n\nPer chi ci vive il mondo è reale (vedi i principi). Scrivi un mondo semplice e concreto, fatto di persone e mestieri. Le rune sono come le dice il canone: non aggiungere nulla. Elenca 6-10 luoghi, 4-6 personaggi con mestieri concreti, 6-10 fatti, 2-4 leggende raccontate dalla gente (storie di persone, bestie, dei, re del passato: mai sul mondo stesso, né sulle rune oltre il canone).${feedback ? `\nL'Arbitro ha obiettato: ${feedback}` : ''}`,
+      `Crea la bibbia di un nuovo universo a partire da questo tema:\n${theme}\n\nPer chi ci vive il mondo è reale (vedi i principi). Scrivi un mondo semplice e concreto, fatto di persone e mestieri. Le rune sono come le dice il canone: non aggiungere nulla. Elenca 6-10 luoghi, 4-6 personaggi con mestieri concreti, 6-10 fatti, 2-4 leggende raccontate dalla gente (storie di persone, bestie, dei, re del passato: mai sul mondo stesso, né sulle rune oltre il canone). La gente parla e si comporta come dice il lessico: usalo dove viene da sé, senza spiegarlo; in «usanze» al più 3 usanze o modi di dire propri di questo mondo, che non contraddicono il lessico e non aggiungono parole che ne sostituiscono altre.${feedback ? `\nL'Arbitro ha obiettato: ${feedback}` : ''}`,
       BIBLE_SCHEMA,
       { data },
     );
@@ -214,14 +216,15 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
 
   // A bible of the world, not of the Council's table: asked once more if it breaks the fourth wall, then cleaned.
   const worldBible = async (feedback = '') => {
+    const words = wordsOf(base);
     let b = await askBible(feedback);
-    const breaks = bibleBreaks(b);
+    const breaks = bibleBreaks(b, words);
     if (breaks.length) {
-      const why = `rompe la quarta parete o duplica le rune: ${breaks.slice(0, 4).join('; ')}. Dentro il mondo nessuno sa di essere in un gioco.`;
+      const why = `rompe la quarta parete, duplica le rune o spiega il lessico come un glossario: ${breaks.slice(0, 4).join('; ')}. Dentro il mondo nessuno sa di essere in un gioco.`;
       c.say('kernel', 'scarta', why, 'narratore');
       b = await askBible([feedback, why].filter(Boolean).join('; '));
     }
-    return cleanBible(b);
+    return cleanBible(b, words);
   };
   let bible = await worldBible();
   c.say('narratore', 'propone', `«${bible.titolo}» — ${bible.sintesi}`);

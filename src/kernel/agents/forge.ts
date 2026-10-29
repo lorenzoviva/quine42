@@ -14,7 +14,7 @@ import { normName } from '../content';
 import type { Manifest } from '../types';
 import { classOf, CLASSES, guessClass } from '../../mj/classes';
 import { ownModelId } from '../modeldirector';
-import { AGENTS, type AgentId, type Council } from './council';
+import { AGENTS, wordsOf, type AgentId, type Council } from './council';
 
 export type ForgeOrigin = 'genesi' | 'agente' | 'cartografo' | 'combinazione';
 
@@ -313,7 +313,7 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
   c.say('narratore', 'propone', `«${concept.nome}» (${concept.tipo}): ${concept.descrizione}`);
   // Inside the world nothing knows of the Council's table; nor is anything made twice.
   for (let tries = 0; tries < 2; tries++) {
-    const meta = metaBreak(`${concept.nome} ${concept.descrizione} ${concept.persona ?? ''} ${concept.lore ?? ''}`);
+    const meta = metaBreak(`${concept.nome} ${concept.descrizione} ${concept.persona ?? ''} ${concept.lore ?? ''}`, wordsOf(c.files));
     const dup = req.existingNames?.find((n) => normName(n) === normName(concept.nome));
     if (!meta && !dup) break;
     const why = meta ? `«${concept.nome}» rompe la quarta parete («${meta}»): dentro il mondo nessuno sa di codice, simulazioni o del Concilio. Crea una persona o una cosa vera del mondo.` : `«${concept.nome}» esiste già: crea qualcosa di diverso.`;
