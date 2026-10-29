@@ -35,6 +35,7 @@ export function wandererColor(id: string): string | undefined {
 /** What a wanderer carries and is, between sessions. */
 export interface WandererState {
   nome?: string;
+  pos?: { x: number; y: number };
   inventory?: any;
   needs?: Record<string, number>;
   hand?: { tokens: string[]; sel: number };

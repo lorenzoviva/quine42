@@ -229,6 +229,15 @@ export class SessionServer {
       const c = typeof e?.id === 'string' ? this.clients.get(e.id) : undefined;
       if (c) c.budget = 0;
     });
+    // A wanderer who died in the world (T43c) wakes up where the verdict says, with the words of their new life.
+    kernel.bus.on('wanderer:died', (e: { id?: unknown; causa?: unknown; testo?: unknown }) => {
+      const c = typeof e?.id === 'string' ? this.clients.get(e.id) : undefined;
+      if (!c) return;
+      c.budget = 0;
+      c.me = undefined;
+      c.stato = undefined;
+      if (c.notices.length < 50) c.notices.push({ tipo: 'morte', da: c.id, nome: String(e?.causa ?? 'ferite'), testo: String(e?.testo ?? '') });
+    });
   }
 
   /** The master's branch now: what they changed that the world does not have yet. */
@@ -530,6 +539,10 @@ export class SessionServer {
     const k = this.kernel;
     const at = k.wandererAt(c.id);
     if (!at) return;
+    if (k.isDying(c.id) || c.notices.some((n) => n.tipo === 'morte')) {
+      c.budget = 0;
+      return c.link.send({ t: 'correzione', seq: Number(seq) || 0, x: round(at.x), y: round(at.y) });
+    }
     // Only numbers: on the wire what is not a number becomes null, and null is not 0.
     const to = { x: typeof x === 'number' ? x : NaN, y: typeof y === 'number' ? y : NaN };
     if (!Number.isFinite(to.x) || !Number.isFinite(to.y) || Math.hypot(to.x - at.x, to.y - at.y) > FAR) return c.link.send({ t: 'correzione', seq: Number(seq) || 0, x: round(at.x), y: round(at.y) });
