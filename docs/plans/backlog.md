@@ -1250,26 +1250,43 @@ le risposte alle domande del piano.
   5 s sotto carico. Una volta, a suite intera, `tests/determinism.test.ts` è fallito e poi è passato (tre volte): da tenere d'occhio.
 
 ### T43b · «Altro…» e PvP tra viandanti — `da fare` (dipende da T43a)
-- Pipeline: claude · stima 5% · priorità 35
+- Pipeline: claude · stima 5% · priorità 1
 - Fare: «Altro…» su un altro viandante giudicato come su una persona, solo se `partita.altroTraGiocatori`; gli effetti li applica
   il server sul corpo dell'altro (il master in god mode lascia passare solo `messaggio`, ADR-0065); ciò che ferisce
   (bisogni che scendono, `spingi`, `fuoco`…) solo se `partita.pvp`, altrimenti il Narratore lo sa e il kernel lo toglie.
 - Fatto quando: test headless con PvP sì e no, con «Altro…» tra giocatori sì e no.
 
 ### T43c · Morte e ricollegamento in multigiocatore — `da fare` (dipende da T43b)
-- Pipeline: claude · stima 5% · priorità 45
+- Pipeline: claude · stima 5% · priorità 2
 - Fare: a salute zero un giocatore (mai il master) muore con la punizione di T33 (`continueAfterDeath` sul server, come lui,
   senza chiudere la sessione degli altri); il client lo mostra e riparte dove dice il verdetto. Chi si ricollega ritrova il suo
   stato (`world/giocatori/<id>.json`): posizione, inventario, frase, stati; la carta e i legami restano.
 - Fatto quando: test headless (morte per sete di un giocatore, gli altri continuano; uscita e rientro con lo stesso stato) e
   verifica con due schede.
 
-### T44 · Account, profilo e viandante personalizzato — `in attesa` (domanda 1 del piano)
+### T44 · Account, profilo e viandante personalizzato — spezzato in T44a e T44b
 - Fare: autenticazione sicura, un profilo ricco, il viandante personalizzabile (seme e colori del suo modello, nome);
   l'id del viandante (T34) è quello dell'account.
-- **Domanda per l'autore**: quale fornitore per l'autenticazione (Firebase Auth / Identity Platform, altro)?
+- Spezzato il 29/10/2026 (multigiocatore in testa): il profilo e il viandante personalizzato non aspettano il fornitore
+  dell'autenticazione (T44a); l'account sì (T44b).
 
-### T45 · Crediti, lobby, carte e server su Google Cloud — `in attesa` (domande 1-4 del piano; dipende da T36, T44)
+### T44a · Il profilo e il viandante personalizzato — `da fare` (dipende da T43a)
+- Pipeline: claude · stima 4% · priorità 3
+- Contesto: oggi il mantello di un viandante viene dal suo id (`wandererColor` in `src/kernel/wanderers.ts`, «until the profile»)
+  e il nome è l'id (`?viandante=<id>` o uno per scheda, `socket.ts`). Il profilo è di chi gioca, non dell'universo.
+- Fare: un profilo del viandante (`nome`, `seme` del programma `viandante`, `colori`/`tinta` del mantello, poche righe di
+  presentazione) salvato in `world/giocatori/<id>.json` e mandato nell'`entra`; il server lo valida (nome breve e non simile a
+  quello di un altro viandante o di una persona, seme e colori nei limiti) e lo dà agli altri client (`OtherView`); il Narratore
+  chiama il viandante col suo nome (`talk`, `sayTo`). Un pannello per scegliere nome, seme e colori, con l'anteprima del modello
+  (foto come le icone). L'id resta quello di oggi: T44b lo legherà all'account.
+- Fatto quando: test col finto trasporto (profilo valido arriva agli altri; nome doppio o fuori misura riparato; rientro con lo
+  stesso profilo) e verifica con due schede (mantelli e nomi diversi).
+
+### T44b · L'account e l'autenticazione — `in attesa` (domande in `docs/pipeline/domande/T44b.md`; dipende da T44a)
+- Fare: autenticazione sicura; l'id del viandante (T34) è quello dell'account; il profilo di T44a legato all'account.
+- **Domanda per l'autore**: quale fornitore per l'autenticazione (domanda 1 di [`multiplayer.md`](multiplayer.md)).
+
+### T45 · Crediti, lobby, carte e server su Google Cloud — `in attesa` (domande in `docs/pipeline/domande/T45.md`; dipende da T36, T44b)
 - Fare, a pezzi (spezzare quando si comincia): crediti e pagamenti (P#1: l'1% sul costo); la lobby con il tetto di
   crediti, i modelli degli agenti (oggi `ai.textModel` e la tabella delle classi dello Scultore), i coefficienti e i
   minimi dell'universo; crediti finiti → ricarica, offline (modelli locali) o abbandona; la collezione di carte fuori
@@ -1356,8 +1373,12 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   così il mondo mostra molte varianti senza rigenerarle. Prima di scrivere la cache, controllare cosa fa già `src/render/forms.ts`.
 - Fatto quando: misure prima e dopo nel task, test, typecheck, verifica nel browser, commit.
 
-### T65 · Il lessico di QUINE42 — `in attesa` (domande in `docs/pipeline/domande/T65.md`)
+### T65 · Il lessico di QUINE42 — `da fare` (risposte in `docs/pipeline/domande/T65.md`)
 - Pipeline: claude · stima 5% · approvato · priorità 30
+- Decisioni dell'autore (29/10/2026): il lessico è un file del seme, `universe/world/lessico.md`, che ogni universo eredita e il
+  Narratore può arricchire ma non contraddire, con **pochi** termini nuovi generati; la prima versione la propone l'agente del task
+  (15-20 voci: usanze, saluti, modi di dire, bon ton, parole sostituite); al più 5-6 parole sostituite, le stesse in ogni
+  ambientazione, spiegate dal contesto e mai da un glossario dentro il gioco.
 - Contesto: usanze, modi di dire, espressioni gergali e bon ton costanti in ogni universo, qualunque l'ambientazione (anche moderna,
   steampunk, futuristica): una società credibile, non lontana dalla nostra ma diversa, che faccia guardare le nostre stranezze da
   fuori. Solo alcune parole sostituite. Appunti dell'autore: `docs/userchats/idee-costumi-parole-etc.md`.
@@ -1381,8 +1402,11 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   sparsi nel codice da portare a fattor comune (md, yaml, json o properties), senza spostarli in questo task.
 - Fatto quando: il documento, commit.
 
-### T68 · Generare l'universo con gli abbonamenti — `in attesa` (domande in `docs/pipeline/domande/T68.md`; dipende da T67)
+### T68 · Generare l'universo con gli abbonamenti — `da fare` (risposte in `docs/pipeline/domande/T68.md`; dipende da T67)
 - Pipeline: claude · stima 8% · approvato · priorità 40
+- Decisioni dell'autore (29/10/2026): solo in locale con l'abbonamento di chi gioca (singola e sviluppo), mai il server del
+  multigiocatore; solo i compiti già lenti (Genesi, Fucina, modelli dello Scultore, sessioni del Concilio), il resto sulle API;
+  quale provider per quale agente in una tabella in `universe.json → ai`, con un provider predefinito.
 - Contesto: il Concilio oggi chiama le API di Gemini a consumo. L'autore vuole far girare le stesse richieste su Claude Code o
   Antigravity in abbonamento (anche chi scarica il repository), con una coda servita quasi in tempo reale; la base è la pipeline
   (T61: CLI lanciate da script, contatori da `/usage`, ripresa dopo i limiti).
