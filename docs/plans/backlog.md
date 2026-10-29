@@ -1403,7 +1403,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fatto quando: il documento, commit.
 - Esito: redatto `docs/conversazioni.md` con l'architettura end-to-end, i diagrammi Mermaid dei flussi, le schede dettagliate di tutti i 38 task degli agenti (Genesi, Cartografia, Fucina, Contenuti, Azioni ed effetti, Menti e dialoghi, Scultura 3D, Meccaniche) con ruoli, prompt di sistema, prompt utente, response schema e flussi di validazione. Censimento completo di tutti i testi hardcoded in italiano nel codice (template dei prompt, descrizioni degli schemi, principi e filtri della quarta parete, narrazione di fallback, testi UI e HUD) con proposta di organizzazione per la futura localizzazione multi-lingua e per la coda abbonamenti (T68).
 
-### T68 · Generare l'universo con gli abbonamenti — `da fare` (risposte in `docs/pipeline/domande/T68.md`; dipende da T67)
+### T68 · Generare l'universo con gli abbonamenti — spezzato in T68a (`fatto`), T68b, T68c (risposte in `docs/pipeline/domande/T68.md`; dipende da T67)
 - Pipeline: claude · stima 8% · approvato · priorità 40
 - Decisioni dell'autore (29/10/2026): solo in locale con l'abbonamento di chi gioca (singola e sviluppo), mai il server del
   multigiocatore; solo i compiti già lenti (Genesi, Fucina, modelli dello Scultore, sessioni del Concilio), il resto sulle API;
@@ -1413,3 +1413,27 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   (T61: CLI lanciate da script, contatori da `/usage`, ripresa dopo i limiti).
 - Fare (dopo le risposte): un `Models` del kernel che mette le richieste in una coda su disco servita da un processo che usa le CLI,
   con lo stesso schema delle risposte e lo stesso registro dei consumi; da spezzare prima di cominciare.
+- Spezzato (29/10/2026) in tre pezzi, ADR-0073:
+
+#### T68a · La tabella dei provider e la coda su disco — `fatto`
+- Fare: `universe.json → ai.provider`/`agenti` (riparati), i compiti lenti, `RoutedModels`, `QueueModels` (client di `/api/coda`),
+  la coda su disco `server/subscriptionQueue.ts` (richiesta → presa → risposta, battito del servitore), prezzi a zero nel registro.
+- Fatto quando: test della coda e dell'instradamento, ADR, commit.
+- Esito: `src/kernel/ai/subscription.ts`, `server/subscriptionQueue.ts` (in `vite.config.ts`, cartella `universes/.coda/`),
+  `SUBSCRIPTION_PRICES` in `prices.ts`, `tests/subscription.test.ts`, ADR-0073. Rispetto al previsto: anche `mechanic.design` (la Fucina
+  delle meccaniche) e `model.resculpt` tra i compiti lenti; `model.judge` (foto) resta sulle API. Nel gioco non è ancora collegato.
+
+#### T68b · Il processo che serve la coda con le CLI — `da fare` (dipende da T68a)
+- Contesto: `take`/`answer`/`beat` di `server/subscriptionQueue.ts` sono il protocollo; il lancio delle CLI e il riconoscimento dei
+  limiti sono in `tools/pipeline/pipeline.mjs` (`usageLimit`).
+- Fare: `tools/abbonamenti/servi.mjs` (o `.ts` con vite-node) `--provider claude|antigravity`: battito ogni 10 s, prende la richiesta più
+  vecchia, lancia la CLI in modo non interattivo senza strumenti (Claude: `claude -p --output-format json`, system come
+  `--system-prompt`, schema nel prompt e risposta controllata/riparata con `parseJson`; Antigravity: `agy -p`), immagini se la CLI le
+  accetta (o errore), token da ciò che la CLI riporta, un limite dell'abbonamento → `errore` chiaro e pausa fino al reset. `npm run abbonamento`.
+- Fatto quando: test con una CLI finta (script che risponde), una prova vera con Claude Code su un `model.sculpt`, commit.
+
+#### T68c · Gli abbonamenti nel gioco — `da fare` (dipende da T68b)
+- Fare: `main.ts` costruisce `RoutedModels` se `usesSubscriptions` e la coda è servita (`QueueModels.available`), solo se l'universo
+  è in singola (mai in `host.ts`); `#models` e il pannello del Concilio dicono quali agenti vanno su quale abbonamento e cosa c'è in coda;
+  documentazione per chi scarica il repository (README: impostare la tabella, lanciare il servitore).
+- Fatto quando: Genesi offline con la coda servita da una CLI finta nel browser, commit.

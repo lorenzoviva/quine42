@@ -38,9 +38,15 @@ export const ESTIMATED: Record<string, Price> = {
 };
 export const UNPRICED = Object.keys(ESTIMATED);
 
+/** The calls served by a subscription's CLI (T68): already paid with the subscription, zero dollars per call. */
+export const SUBSCRIPTION_PRICES: Record<string, Price> = {
+  'abbonamento-claude': { input: 0, output: 0, cached: 0, note: 'abbonamento (Claude Code)' },
+  'abbonamento-antigravity': { input: 0, output: 0, cached: 0, note: 'abbonamento (Antigravity)' },
+};
+
 export function priceOf(model: string, date = new Date().toISOString().slice(0, 10)): Price | undefined {
   const id = model.replace(/^models\//, '');
-  const p = PRICES[id] ?? ESTIMATED[id];
+  const p = PRICES[id] ?? ESTIMATED[id] ?? SUBSCRIPTION_PRICES[id];
   if (!p) return undefined;
   return p.until && p.next && date >= p.until ? { ...p.next } : p;
 }
