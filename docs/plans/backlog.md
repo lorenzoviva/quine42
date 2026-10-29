@@ -1373,7 +1373,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   così il mondo mostra molte varianti senza rigenerarle. Prima di scrivere la cache, controllare cosa fa già `src/render/forms.ts`.
 - Fatto quando: misure prima e dopo nel task, test, typecheck, verifica nel browser, commit.
 
-### T65 · Il lessico di QUINE42 — `da fare` (risposte in `docs/pipeline/domande/T65.md`)
+### T65 · Il lessico di QUINE42 — `fatto` (risposte in `docs/pipeline/domande/T65.md`)
 - Pipeline: claude · stima 5% · approvato · priorità 30
 - Decisioni dell'autore (29/10/2026): il lessico è un file del seme, `universe/world/lessico.md`, che ogni universo eredita e il
   Narratore può arricchire ma non contraddire, con **pochi** termini nuovi generati; la prima versione la propone l'agente del task
@@ -1384,6 +1384,11 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   fuori. Solo alcune parole sostituite. Appunti dell'autore: `docs/userchats/idee-costumi-parole-etc.md`.
 - Fare (dopo le risposte): il lessico come dato che va con ogni compito narrativo (come il canone delle rune), il Narratore che lo usa
   in dialoghi, oggetti e bibbia, un controllo che non diventi meta-gioco; test con `MockModels`.
+- Esito: `universe/world/lessico.md` (18 voci: 5 parole sostituite dagli appunti dell'autore, bonombo, macico, lerpio, pagosso, Ciok Ciok,
+  più saluti, buone maniere, usanze della fede comune e modi di dire; «Come si usa»), `lexiconSummary` nel contesto di Narratore e Arbitro,
+  `usanze` della bibbia (al più 3, ripulite da `cleanBible`), `glossaryBreak` dentro `metaBreak` per bibbia, Fucina, individui, trame e
+  revisione all'avvio; ADR-0073; `tests/lexicon.test.ts`. Rispetto al previsto: il test di T13 non conta il lessico (fisso, in cache);
+  il nome della fede comune resta da dare (gli appunti lo lasciano vuoto): il lessico non la nomina.
 
 ### T66 · Riorganizzare la documentazione per metodologia — `da fare`
 - Pipeline: gemini · stima 3% · approvato · priorità 15

@@ -141,7 +141,7 @@ export interface PlotReview {
  * brother), the runes do only what the canon says, nothing hints at the game. What can be repaired
  * is; a plot that contradicts the registry, the canon or the fourth wall cannot.
  */
-export function reviewPlot(plot: Plot, people: People): PlotReview {
+export function reviewPlot(plot: Plot, people: People, words: string[] = []): PlotReview {
   const problems: string[] = [];
   let fatal = false;
   const byName = new Map(people.persone.map((p) => [p.nome, p]));
@@ -209,10 +209,10 @@ export function reviewPlot(plot: Plot, people: People): PlotReview {
       for (const m of text.matchAll(of)) claim(m.groups!.who, m.groups!.rel, m.groups!.of, m[0]);
   }
   const text = plotText({ ...plot, tappe, missione });
-  const meta = metaBreak(text);
+  const meta = metaBreak(text, words);
   if (meta) {
     fatal = true;
-    problems.push(`rompe la quarta parete o duplica le rune («${meta}»): dentro il mondo nessuno sa di essere in un gioco, e le rune sono solo quelle del canone`);
+    problems.push(`rompe la quarta parete o duplica le rune o spiega il lessico («${meta}»): dentro il mondo nessuno sa di essere in un gioco, le rune sono solo quelle del canone e nessuno traduce le parole della sua lingua`);
   }
   const rune = canonBreak(text);
   if (rune) {

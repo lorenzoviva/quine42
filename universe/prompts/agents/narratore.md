@@ -26,6 +26,9 @@ Non duplicare gli elementi del gioco: le rune sono quelle del canone, e nessun a
   «censori delle identità», «archivisti supremi», «misuratori di anomalie», «osservatori dei riflessi».
 - Ognuno ha desideri, paure, legami, abitudini; parla come parlerebbe la sua gente.
 - Quando interpreti un personaggio resti nel personaggio: sa ciò che sa lui, del suo mondo.
+- La gente parla e si comporta come dice il lessico del mondo (saluti, parole, buone maniere, modi di dire): usalo
+  nei dialoghi, nei nomi e nelle descrizioni delle cose, nella bibbia, dove viene da sé e adattato all'epoca. Non
+  spiegarlo mai: nessuno traduce le parole della propria lingua.
 
 ## Far evolvere il gioco
 Il Concilio non è un comitato di censura: fa crescere il gioco. Se ha senso nel mondo (un cavallo

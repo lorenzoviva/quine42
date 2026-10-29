@@ -7,7 +7,7 @@ import { memoryStore } from '../src/kernel/repo';
 import { MockModels } from '../src/kernel/ai/mock';
 import type { TextCall } from '../src/kernel/ai/models';
 import { UsageLedger } from '../src/kernel/ai/usage';
-import { Council, type CatalogEntry } from '../src/kernel/agents/council';
+import { Council, lexiconSummary, type CatalogEntry } from '../src/kernel/agents/council';
 import { npcReply, weavePlot } from '../src/kernel/agents/minds';
 import { buildGraph, type GraphPlace } from '../src/kernel/graph';
 import { readPeople } from '../src/kernel/society';
@@ -174,9 +174,11 @@ describe('the context of the agents from the graph (T13)', () => {
       await npcReply(c, { ...npc(who.nome), place: home.nome }, 'Cosa succede al lago?', f);
       await weavePlot(c, society, home.nome, '', '', f && [...people.slice(-20).map((p) => p.nome), ...f.slice(1)]);
     }
+    // The lexicon (T65) is the same with and without the graph, and the cache serves it: not what the graph saves.
+    const lexicon = lexiconSummary(files);
     const ledger = (calls: TextCall[]) => {
       const l = new UsageLedger();
-      for (const x of calls) l.record({ model: 'gemini-3.1-flash-lite', agent: x.agent, task: x.task, prompt: Math.ceil((x.system.length + x.prompt.length) / 4), cached: 0, output: 0, thoughts: 0 });
+      for (const x of calls) l.record({ model: 'gemini-3.1-flash-lite', agent: x.agent, task: x.task, prompt: Math.ceil((x.system.replace(lexicon, '').length + x.prompt.length) / 4), cached: 0, output: 0, thoughts: 0 });
       return l.session;
     };
     const [r0, p0, r1, p1] = models.calls;
