@@ -5,22 +5,22 @@
 
 ## Passaggio di consegne
 
-Aggiornato il 29/10/2026 sera, orchestratore `claude` (Claude Code), dopo la prima esecuzione completa (T43b, T44a, T65, T68, T63,
-T66, T43c, T30).
+Aggiornato il 29/10/2026 alle 23 circa, orchestratore `claude` (Claude Code), con le 5 ore di Claude al 13 %.
 
-- **In corso / in coda**: T51 e T53 rimessi in coda con `riprendi` (riprendono la loro conversazione: si erano fermati al limite
-  delle 5 ore). `esegui` non gira: rilancialo.
-- **Da integrare**: nessuno. Tutto ciò che è finito è nel base (`3d`), con gli ADR rinumerati: 0073 «Altro…» e PvP (T43b),
-  0074 profilo (T44a), 0075 lessico (T65), 0076 morte e ricollegamento (T43c), 0077 abbonamenti (T68).
-- **Verifiche nel browser da fare** (le chiede il «Fatto quando»): T44a (due schede: profilo, mantello, «Chi è», nome doppio,
-  ricarica) e T43c (due schede: morte di un giocatore, gli altri continuano, uscita e rientro). Vanno delegate a un subagente
-  (`orchestra.md`, punto 3); il primo tentativo per T44a si è fermato al limite.
-- **Da approvare** (pianificati il 29/10 sera, priorità al multigiocatore): T44b (account), T45a (crediti), T45b («Low Detail»),
-  T45c (eredità dei cloni), T68b (il servitore della coda); dopo di loro T45d, T45e, T45f, T68c.
-- **Domande aperte**: `domande/T52.md` (sotterranei), `domande/T54.md` (taglie).
-- **Da sapere**: `tests/referente.test.ts` e `tests/determinism.test.ts` a volte falliscono nella suite intera e passano da soli;
-  `docs/plans/multiplayer.md` è finito in `docs/archivio/` con T66 ma è ancora il piano del multigiocatore.
-- **Prossimo passo**: approvare, `node tools/pipeline/pipeline.mjs esegui`, verificare T44a e T43c nel browser.
+- **In corso** (`esegui` in background dalla sessione dell'orchestratore): T53b (strutture su più piani) e T56b (il salto) su
+  Claude, T64 (varianti precalcolate) su Gemini, ripreso dopo una connessione di agy interrotta. Se l'orchestratore si ferma,
+  `esegui` si ferma con lui: rilancialo, e i task sospesi riprendono la loro conversazione.
+- **Da integrare**: nessuno finora. Integrati il 29/10: T43b, T44a, T65, T43c, T68, T66, T63, T30, T53 (T53a), T51 (T51a).
+  ADR rinumerati: 0073 «Altro…» e PvP, 0074 profilo, 0075 lessico, 0076 morte e ricollegamento, 0077 abbonamenti; 0078 l'orchestratore.
+- **Suite intera da rifare a macchina ferma**: con tre agenti al lavoro i test vanno in timeout (hook di 10 s del kernel, il modello
+  `circuito-3D` in `forms.test.ts`, `referente.test.ts`); ognuno passa da solo, typecheck pulito.
+- **Verifiche nel browser**: T44a e T43c fatte (diario, 21:50); i difetti sono in **T44c**. T51a e T53a verificate da chi le ha eseguite.
+- **Da approvare**: T44c (correzioni), T44b (account), T45a, T45b, T45c, T68b; dopo di loro T45d, T45e, T45f, T68c.
+- **Domande aperte**: `domande/T51.md` (T51b, il motore dell'acqua: automa cellulare del kernel?), `domande/T52.md`, `domande/T54.md`.
+  T57 aspetta T51.
+- **Da sapere**: `docs/plans/multiplayer.md` è finito in `docs/archivio/` con T66 ma è il piano attivo del multigiocatore.
+- **Prossimo passo**: riportare gli esiti di T53b, T56b e T64 e integrarli; quando Claude scende sotto il 10 %, passare
+  l'orchestrazione ad Antigravity (`orchestratore argon`) o aspettare il reset delle 5 ore.
 
 ## Diario
 
@@ -65,3 +65,5 @@ T66, T43c, T30).
 - [2026-10-29T21:35:41.516Z] lancio T56b su claude (H:\projects\rune\.claude\worktrees\t56b)
 - [2026-10-29T21:41:14.696Z] T51: ESITO: in attesa — T51a fatto (livello del mare, laghi e fiumi a un solo livello tra i chunk, mai sopra la riva, test e verifica nel browser); T51b aspetta la risposta in `docs/pipeline/domande/T51.md`. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T51)
 - [2026-10-29T21:50:47.762Z] nota: verifica nel browser di T44a e T43c (subagente, 4025cba): profilo, nome doppio riparato, morte di un giocatore (gli altri continuano), uscita e rientro con posizione, inventario e bisogni OK; KO «Chi è» nel client sottile e il profilo di localStorage condiviso tra viandanti (sovrascrive quello salvato): task T44c
+- [2026-10-29T21:59:44.693Z] task/T51 integrato in 3d; worktree e branch tolti.
+- [2026-10-29T21:59:44.850Z] nota: integrati T53 (T53a rampe) e T51 (T51a mare; conflitti in kernel.ts: cache dei livelli di T51 e SolidForm di T53). Con tre agenti al lavoro i test vanno in timeout (hook di 10 s, forms.test con circuito-3D): passano da soli; suite intera da rifare a macchina ferma
