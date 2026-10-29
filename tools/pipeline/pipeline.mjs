@@ -43,7 +43,8 @@ export function parseBacklog(text) {
     if (subs.length) {
       for (const [, sub, status] of subs) tasks.push({ id: sub, title, status, deps: [...deps].filter((d) => d !== sub), ...info, parent: id });
     } else {
-      const status = /`([^`]+)`/.exec(tail)?.[1] ?? 'da fare';
+      // Without a status in backticks the tail says what the task is («spezzato in T43a-T43c»): not runnable by itself.
+      const status = /`([^`]+)`/.exec(tail)?.[1] ?? (tail.trim() || 'da fare');
       tasks.push({ id, title, status, deps: [...deps], ...info });
     }
   }
@@ -165,7 +166,7 @@ function plan(tasks, runs, budget, only) {
   for (const t of open) {
     if (runs[t.id] && runs[t.id].stato !== 'finito') { queues.inCorso.push(t); continue; }
     if (t.status.startsWith('in attesa')) { queues.inAttesa.push(t); continue; }
-    if (t.status.startsWith('in corso')) continue; // someone is working on it by hand
+    if (!t.status.startsWith('da fare')) continue; // in corso by hand, or split into sub-tasks
     // A dependency without a block of its own (T53a) is its parent's (T53).
     const missing = t.deps.map((d) => (byId.has(d) ? d : d.replace(/[a-z]$/, ''))).filter((d) => byId.has(d) && !isDone(byId.get(d).status));
     if (missing.length) { queues.bloccati.push({ ...t, missing }); continue; }

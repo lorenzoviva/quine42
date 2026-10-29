@@ -808,6 +808,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 Richieste del 24/10 ([`to-do-2026-10-24.md`](../userchats/to-do-2026-10-24.md), «Generazione della heightmap» e «taglia»).
 
 ### T51 · Il livello del mare e un motore dell'acqua — `da fare` (si comincia da T51a; T51b in attesa della domanda)
+- Pipeline: claude · stima 6% · priorità 50
 - Contesto: ADR-0048. Oggi ogni specchio d'acqua è piano **dentro il suo chunk** (`waterLevels` in `relief.ts`: al livello
   più basso delle sue caselle, contando solo il chunk); lo stesso lago o fiume su due chunk ha due livelli, e laghi vicini
   livelli diversi: a vista l'acqua ha dei dislivelli (si vede anche in `Blocchi.png`).
@@ -840,6 +841,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../userchats/to-do-2026-10-24.md), 
   strutture (cantine, cripte), o entrambi?
 
 ### T53 · Le scale come rampe e le strutture su più piani — `da fare` (si comincia da T53a)
+- Pipeline: claude · stima 6% · priorità 50
 - Contesto: richiesta del 24/10: le strutture devono essere navigabili appena generate; l'autore sceglie la seconda via
   (la scala è una lastra inclinata, il viandante ci sale camminando), non «E → Sali». Oggi `floors()` in `src/mj/mesh.ts`
   dà un'altezza per colonna di voxel e **solo** fino a un gradino (`h <= step`, oltre vale 0 e l'impronta blocca): una scala
@@ -893,6 +895,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../userchats/to-do-2026-10-24.md), 
   aggiunto lo zoom con rotellina e la protezione prospettica per il giocatore immerso nella simulazione richiesta dall'autore.
 
 ### T56 · Il salto, e le cose che chiudono i sentieri — T56a `fatto` (`e5f8099`), T56b `da fare` (dopo T53a)
+- Pipeline: claude · stima 4% · priorità 55
 - Contesto: richiesta del 24/10 con `docs/userchats/Blocchi.png`: un sentiero largo una casella su un lago, con un banco,
   una cassa e un letto messi sopra; i dislivelli piccoli si salgono già senza saltare (ADR-0048) e devono restare così.
 - **T56a · niente cose sui passaggi obbligati**: il piazzamento delle cose (`placementsOf`/`placeInside`) non mette nulla di
@@ -912,6 +915,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../userchats/to-do-2026-10-24.md), 
 ## Le rune
 
 ### T57 · Le rune come codice: sequenze ordinate, effetti, rune nuove — `da fare` (si comincia da T57a)
+- Pipeline: claude · stima 8% · priorità 60
 - Contesto: richiesta del 24/10 («Le rune»). L'esempio del seme `acqua fuoco` → «Vapore» (si annullano, un messaggio, in
   `universe/modules/magic.runes/manifest.json`) non è l'idea: le rune sono come codice, una **sequenza ordinata** produce
   un effetto specifico, e l'ordine conta (`aria terra` ≠ `terra aria`). Effetti come incantesimi di D&D (`terra fuoco` →
@@ -1246,12 +1250,14 @@ le risposte alle domande del piano.
   5 s sotto carico. Una volta, a suite intera, `tests/determinism.test.ts` è fallito e poi è passato (tre volte): da tenere d'occhio.
 
 ### T43b · «Altro…» e PvP tra viandanti — `da fare` (dipende da T43a)
+- Pipeline: claude · stima 5% · priorità 35
 - Fare: «Altro…» su un altro viandante giudicato come su una persona, solo se `partita.altroTraGiocatori`; gli effetti li applica
   il server sul corpo dell'altro (il master in god mode lascia passare solo `messaggio`, ADR-0065); ciò che ferisce
   (bisogni che scendono, `spingi`, `fuoco`…) solo se `partita.pvp`, altrimenti il Narratore lo sa e il kernel lo toglie.
 - Fatto quando: test headless con PvP sì e no, con «Altro…» tra giocatori sì e no.
 
 ### T43c · Morte e ricollegamento in multigiocatore — `da fare` (dipende da T43b)
+- Pipeline: claude · stima 5% · priorità 45
 - Fare: a salute zero un giocatore (mai il master) muore con la punizione di T33 (`continueAfterDeath` sul server, come lui,
   senza chiudere la sessione degli altri); il client lo mostra e riparte dove dice il verdetto. Chi si ricollega ritrova il suo
   stato (`world/giocatori/<id>.json`): posizione, inventario, frase, stati; la carta e i legami restano.
@@ -1274,6 +1280,7 @@ le risposte alle domande del piano.
 ## Varie
 
 ### T30 · Immagini del 3D nel README — `da fare`
+- Pipeline: gemini · stima 2% · priorità 60
 - Il README mostrava le immagini del 2D (`docs/img/`): ora non le mostra più. Fare quattro schermate del 3D (il borgo
   di giorno, una persona con la chat, l'inventario con le icone dei modelli, la corona con `?dev&teleport=46,0`) con
   `vite preview` offline, salvarle in `docs/img/3d/` e rimetterle nel README.
@@ -1313,3 +1320,67 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   fonte con la riga `- Pipeline:` e le code sono in `PIANO.md`; il consumo vero non si legge dalle CLI, lo corregge l'autore
   (`budget`). I vecchi worktree non sono stati toccati (elencati nel README). Provati `stato` e `worktree` sul backlog vero;
   `esegui` non è stato lanciato (consumerebbe i limiti): la prima esecuzione va guardata.
+
+### T62 · I test della pipeline — `da fare`
+- Pipeline: claude · stima 1% · approvato · priorità 1
+- Contesto: la prima esecuzione end-to-end della pipeline (T61, ADR-0072) su un caso semplice. `tools/pipeline/pipeline.mjs` esporta
+  `parseBacklog`, `parsePipelineLine`, `parseUsage`, `usageLimit`, `readOutput`, ma nessun test li prova.
+- Fare: `tests/pipeline.test.ts` (Vitest, import dinamico del `.mjs`): `parseBacklog` su un backlog in miniatura (stato tra backtick,
+  sotto-task nell'intestazione «T56a `fatto`, T56b `da fare`», «spezzato in …», «dipende da» e «dopo», la riga `- Pipeline:`);
+  `parseUsage` sugli output di `claude -p /usage` («Current session: 6% used · resets Oct 29, 12:10am (Europe/Rome)», «Current week
+  (all models): 99% used · resets Oct 29, 5pm (Europe/Rome)») e di `agy -p /usage` (righe separate da tabulazioni: «Gemini Models»,
+  «Weekly Limit Remaining», «100%», data ISO); `usageLimit` (epoca dopo `|`, nessun limite); `readOutput` (JSON di
+  `claude --output-format json` con `session_id`, `total_cost_usd` e `ESITO:` nel `result`). Se un test trova un difetto, correggilo.
+- Fatto quando: test e typecheck verdi, commit sul branch del task.
+
+## Dal to-do del 29/10/2026 (testo originale: `docs/userchats/to-do-2026-10-29.md`)
+
+### T63 · I modelli disegnati a mano per i file della corona — `da fare`
+- Pipeline: gemini · stima 4% · approvato · priorità 10
+- Contesto: l'autore ha disegnato nell'editor (T59) `schermo-scritte`, `schermo-struttura`, `circuito-3D` in `lab/mjx/models/handmade/`
+  (accanto a copie di prova: `schermo-struttura copy*.xml`, `circuito.xml`, `circuito-mormale.xml`, da non portare).
+- Fare: portarli nella libreria (`universe/models/` + `index.json`, con `vpt`) e usarli per i file sugli scaffali della corona:
+  `schermo-scritte` per `.md` e i file non strutturati, `schermo-struttura` per `.json` e i file strutturati, `circuito-3D` per i `.lua`.
+  Nei prompt dello Scultore (`universe/prompts/agents/`) citarli come esempi quando si chiede «tanta varietà» e «alta qualità».
+- Fatto quando: test, typecheck, verifica nel browser negli interni dello studio (scaffali con i tre modelli), commit.
+
+### T64 · Le varianti precalcolate dei modelli pesanti — `da fare` (dipende da T63)
+- Pipeline: gemini · stima 5% · approvato · priorità 20
+- Contesto: i modelli dell'autore (es. `circuito-3D`) danno a ogni seme risultati molto diversi e sono pesanti da generare e animare.
+- Fare: misurare prima (tempo di generazione e di animazione di `circuito-3D` nei worker); se serve, una cache per (programma, seme)
+  della griglia finita e dei fotogrammi delle animazioni (in memoria e IndexedDB nel browser), precaricata per pochi semi per tipo,
+  così il mondo mostra molte varianti senza rigenerarle. Prima di scrivere la cache, controllare cosa fa già `src/render/forms.ts`.
+- Fatto quando: misure prima e dopo nel task, test, typecheck, verifica nel browser, commit.
+
+### T65 · Il lessico di QUINE42 — `in attesa` (domande in `docs/pipeline/domande/T65.md`)
+- Pipeline: claude · stima 5% · approvato · priorità 30
+- Contesto: usanze, modi di dire, espressioni gergali e bon ton costanti in ogni universo, qualunque l'ambientazione (anche moderna,
+  steampunk, futuristica): una società credibile, non lontana dalla nostra ma diversa, che faccia guardare le nostre stranezze da
+  fuori. Solo alcune parole sostituite. Appunti dell'autore: `docs/userchats/idee-costumi-parole-etc.md`.
+- Fare (dopo le risposte): il lessico come dato che va con ogni compito narrativo (come il canone delle rune), il Narratore che lo usa
+  in dialoghi, oggetti e bibbia, un controllo che non diventi meta-gioco; test con `MockModels`.
+
+### T66 · Riorganizzare la documentazione per metodologia — `da fare`
+- Pipeline: gemini · stima 3% · approvato · priorità 15
+- Contesto: in `docs/` convivono le metodologie passate (thread unico, step, to-do e backlog) e quella attuale (pipeline, T61).
+- Fare: archiviare i documenti delle metodologie precedenti in cartelle ordinate, senza modificarne il contenuto né i link interni;
+  a livello di `docs/` un resoconto: le metodologie in ordine, cosa contiene ogni cartella, e una tabella «link citato → dove è ora».
+  Restano dove sono (li leggono la pipeline e gli agenti): `docs/pipeline/`, `docs/plans/backlog.md`, `docs/userchats/to-do.md`,
+  `docs/adr/`, `docs/design.md`. Aggiornare i percorsi in AGENTS.md, CLAUDE.md, GEMINI.md se cambiano.
+- Fatto quando: niente perso (`git status` mostra solo spostamenti), il resoconto, commit.
+
+### T67 · Il grafo delle conversazioni con Gemini — `da fare`
+- Pipeline: gemini · stima 4% · approvato · priorità 25
+- Contesto: per tradurre il gioco in quattro lingue (fine della fase I) servono i riferimenti a tutti i testi, compresi i prompt.
+- Fare: `docs/conversazioni.md`: per ogni compito degli agenti (`src/kernel/agents/`, `src/kernel/ai/`) chi chiama, con quale prompt
+  (`universe/prompts/`, testi nel codice), quali parti del contesto, quale schema di risposta; grafi in mermaid. Un elenco dei testi
+  sparsi nel codice da portare a fattor comune (md, yaml, json o properties), senza spostarli in questo task.
+- Fatto quando: il documento, commit.
+
+### T68 · Generare l'universo con gli abbonamenti — `in attesa` (domande in `docs/pipeline/domande/T68.md`; dipende da T67)
+- Pipeline: claude · stima 8% · approvato · priorità 40
+- Contesto: il Concilio oggi chiama le API di Gemini a consumo. L'autore vuole far girare le stesse richieste su Claude Code o
+  Antigravity in abbonamento (anche chi scarica il repository), con una coda servita quasi in tempo reale; la base è la pipeline
+  (T61: CLI lanciate da script, contatori da `/usage`, ripresa dopo i limiti).
+- Fare (dopo le risposte): un `Models` del kernel che mette le richieste in una coda su disco servita da un processo che usa le CLI,
+  con lo stesso schema delle risposte e lo stesso registro dei consumi; da spezzare prima di cominciare.
