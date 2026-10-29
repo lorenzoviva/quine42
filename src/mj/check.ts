@@ -36,12 +36,14 @@ export function analyse(r: RunResult, palette: Record<string, PaletteEntry>, opt
   const min: Vec3 = [Infinity, Infinity, Infinity];
   const max: Vec3 = [-1, -1, -1];
   let ground = 0;
+  let hasTranslucent = false;
   for (let i = 0; i < g.cells.length; i++) {
     if (!vis[g.cells[i]]) continue;
     solid[i] = 1;
     voxels++;
     const ch = g.alphabet[g.cells[i]];
     colors[ch] = (colors[ch] ?? 0) + 1;
+    if ((palette[ch]?.alpha ?? 1) < 1) hasTranslucent = true;
     const p: Vec3 = [i % g.X, Math.floor(i / g.X) % g.Y, Math.floor(i / XY)];
     for (let a = 0; a < 3; a++) {
       min[a] = Math.min(min[a], p[a]);
@@ -107,7 +109,7 @@ export function analyse(r: RunResult, palette: Record<string, PaletteEntry>, opt
     else if (opts.grounded !== false && !biggestGrounded) a.errors.push('il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato)');
     if (a.mainPart < 0.92) a.errors.push(`pezzi staccati: ${pct(1 - a.mainPart)} dei voxel non è attaccato al corpo principale (${parts} pezzi)`);
     else if (parts > 1) a.warnings.push(`${parts - 1} frammenti staccati (${pct(1 - a.mainPart)} dei voxel)`);
-    if (a.fill > 0.8) a.errors.push(`riempie ${pct(a.fill)} della griglia: sembra un blocco, non una forma`);
+    if (a.fill > 0.8 && !hasTranslucent) a.errors.push(`riempie ${pct(a.fill)} della griglia: sembra un blocco, non una forma`);
     if (voxels < 12) a.errors.push(`troppo piccolo: solo ${voxels} voxel`);
     if (opts.minHeight && bbox && max[2] + 1 < opts.minHeight) a.errors.push(`troppo basso: alto ${max[2] + 1} voxel, la sua classe chiede almeno ${opts.minHeight} (le cose simili hanno le stesse proporzioni)`);
     if (Object.keys(colors).length < 2) a.warnings.push('un solo colore: poca leggibilità, usa toni chiari e scuri');

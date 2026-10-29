@@ -3730,7 +3730,8 @@ export class Kernel {
       'corona-drone', 'corona-treno',
       'corona-gerboa', 'corona-gerboa-narratore', 'corona-gerboa-cartografo',
       'corona-gerboa-artista', 'corona-gerboa-scultore', 'corona-gerboa-fisico',
-      'corona-gerboa-ingegnere', 'corona-gerboa-arbitro', 'corona-gerboa-referente'
+      'corona-gerboa-ingegnere', 'corona-gerboa-arbitro', 'corona-gerboa-referente',
+      'schermo-scritte', 'schermo-struttura', 'circuito-3D'
     ];
     for (const m of extra) {
       if (this.forms.info(m)) this.forms.get(m, 1);

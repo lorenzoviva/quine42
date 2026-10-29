@@ -6,6 +6,7 @@ import * as THREE from 'three';
 import type { Kernel } from '../kernel/kernel';
 import { cellNear } from '../kernel/corona';
 import { animateRing, Avatars, buildCoronaRing, buildRoom, buildShowcase, buildSituation, campusKey } from './corona3d';
+import { showFrame } from './models';
 import { ScreenWall } from './screens';
 import { ChainView } from './chain';
 import { BenchView } from './bench';
@@ -81,7 +82,7 @@ export class CoronaView {
       const key = `${studio.building.id}#${studio.floor.index}`;
       let r = this.rooms.get(key);
       // A room with things on show is built again when their models are ready.
-      if (r && r.version !== k.forms.version && studio.floor.items.some((i) => i.kind === 'sprite')) {
+      if (r && r.version !== k.forms.version && studio.floor.items.some((i) => i.kind === 'sprite' || i.kind === 'file')) {
         this.root.remove(r.group);
         r = undefined;
       }
@@ -91,6 +92,8 @@ export class CoronaView {
       }
       r.group.visible = true;
       if (r.globe) r.globe.rotation.y = t * 0.4;
+      const anims = r.group.userData.animatedFiles as Array<{ frames: THREE.Mesh[]; offset: number }> | undefined;
+      anims?.forEach((a) => showFrame(a.frames, t, a.offset));
     }
     for (const [id, v] of this.shows) v.group.visible = studio?.building.id === id && studio.floor.index === 0;
     const show = studio?.floor.items.find((i) => i.kind === 'showcase');

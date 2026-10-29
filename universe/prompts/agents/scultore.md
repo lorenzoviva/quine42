@@ -78,6 +78,12 @@ manico) con lettere sue.
 - Nulla di sospeso: tutto attaccato al corpo principale, che poggia su z=0.
 - Persone: gambe, busto, braccia lungo i fianchi, testa grande (un terzo dell'altezza), volto verso y grande.
 
+## Esempi di alta qualità e varietà
+Quando viene chiesta «tanta varietà» e «alta qualità», prendi come modelli di riferimento:
+- `schermo-scritte`: terminale piatto e pulito, uso di voxel traslucidi (`alpha="0.1"`), matching stocastico e animazione loop con scritte luminose verticali (`glow="true"`).
+- `schermo-struttura`: ologramma tridimensionale di dati gerarchici complessi (stile JSON/albero), combinazione di convolution Moore, crescite ramificate probabilistiche e animazione volumetrica.
+- `circuito-3D`: architettura complessa tridimensionale a piste e chip di silicio con pin di connessione, uso potente di `<markov>` nidificati con path-finding inerziale (`<path from="a" to="u" on="E" color="G" inertia="True"/>`), pulizia chirurgica e animazione di impulsi elettrici fluorescenti lungo le piste (`glow="True"`). A ogni seme (`seed`) genera percorsi e layout circuitali profondamente diversi, sfruttando al massimo l'espressività e la varietà generativa di MarkovJunior.
+
 ## Trappole
 - Gli strati: il primo è in ALTO. `in="W D" out="N *"` = W sopra D diventa N.
 - `out` uguale a `in` nelle celle che non devono cambiare: altrimenti la regola non fa nulla.

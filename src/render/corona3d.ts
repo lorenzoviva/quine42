@@ -388,6 +388,34 @@ export function buildRoom(k: Kernel, building: Building, floor: Floor): { group:
     m.castShadow = true;
     group.add(m);
   }
+  // The files on their shelves (T63): handmade models, scaled to fit the shelf.
+  const animatedFiles: Array<{ frames: THREE.Mesh[]; offset: number }> = [];
+  for (const it of floor.items) {
+    if (it.kind !== 'file' || !it.model) continue;
+    const seed = it.seed ?? 1;
+    const f = k.forms?.ready?.(it.model, seed);
+    if (!f) {
+      if (typeof k.forms?.get === 'function') k.forms.get(it.model, seed);
+      continue;
+    }
+    const mo = modelObject(k, f, { model: it.model, seed, yaw: 0 }, MAT.corona);
+    if (!mo) continue;
+    const geo = geoOf(f);
+    if (!geo) continue;
+    geo.body.computeBoundingBox();
+    const size = new THREE.Vector3();
+    geo.body.boundingBox!.getSize(size);
+    const s = Math.min(0.65 / Math.max(size.x, 0.01), 0.55 / Math.max(size.y, 0.01), 0.4 / Math.max(size.z, 0.1), 1);
+    mo.root.scale.setScalar(s);
+    mo.root.position.set(it.x + 0.5, 0.35, it.y + 0.525);
+    group.add(mo.root);
+    if (mo.frames.length) {
+      animatedFiles.push({ frames: mo.frames, offset: (it.x * 7 + it.y * 13) * 0.1 });
+    }
+  }
+  if (animatedFiles.length) {
+    group.userData.animatedFiles = animatedFiles;
+  }
   // The environments of the sample room (T26d): each one's trial draft in miniature on its plinth, like a place.
   for (const it of floor.items) {
     const sample = it.kind === 'layout' && it.target ? k.layoutSample(it.target.replace(/^layout:/, '')) : undefined;
@@ -563,9 +591,13 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
   const x = it.x, z = it.y;
   switch (it.kind) {
     case 'file': {
-      const c = rgbOf(LOOK_COLOR[it.look ?? 'tavoletta']);
-      const h = 0.25 + Math.min(0.35, (it.lines ?? 10) / 400);
-      (it.look === 'cristallo' ? glow : lit).box(x + 0.3, 0.38, z + 0.38, x + 0.7, 0.38 + h, z + 0.62, c);
+      const f = it.model ? k.forms?.ready?.(it.model, it.seed ?? 1) : undefined;
+      if (!f) {
+        if (it.model && typeof k.forms?.get === 'function') k.forms.get(it.model, it.seed ?? 1);
+        const c = rgbOf(LOOK_COLOR[it.look ?? 'tavoletta']);
+        const h = 0.25 + Math.min(0.35, (it.lines ?? 10) / 400);
+        (it.look === 'cristallo' ? glow : lit).box(x + 0.3, 0.38, z + 0.38, x + 0.7, 0.38 + h, z + 0.62, c);
+      }
       break;
     }
     case 'sprite':

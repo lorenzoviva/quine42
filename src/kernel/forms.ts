@@ -171,7 +171,7 @@ export class Forms {
   models(): Record<string, ModelInfo> {
     const out: Record<string, ModelInfo> = {};
     for (const p of Object.keys(this.files)) {
-      const m = /^models\/([a-z0-9-]+)\.xml$/.exec(p);
+      const m = /^models\/([a-z0-9-]+)\.xml$/i.exec(p);
       if (m) out[m[1]] = this.library[m[1]] ?? { classe: 'oggetto' };
     }
     return out;
