@@ -497,3 +497,8 @@
 - [2026-10-30T18:03:42.150Z] nota: T83 congelato: limite di Claude, riprenderà dopo le 22:01 UTC.
 - [2026-10-30T19:15:36.921Z] nota: Chiusura temporanea richiesta dall'autore: nessun processo attivo, T83 congelato fino alle 22:01 UTC. Quadro e stato allineati.
 - [2026-10-30T22:00:44.520Z] nota: Claude ha di nuovo crediti (5h al 49 %, reset 22:00 UTC). Quadro aggiornato per passaggio epoca a Claude.
+- [2026-10-30T22:00:54.191Z] orchestratore: epoca 160 su claude (claude ha di nuovo crediti)
+- [2026-10-30T22:01:13.899Z] riprendo T83 su claude (H:\projects\rune\.claude\worktrees\t83)
+- [2026-10-30T22:13:27.535Z] T83: ESITO: fatto — turni su disco per verifica nel browser e suite intera (`pipeline.mjs turno browser|test -- <comando>`), lanci distanziati e mai due task col browser insieme (ADR-0088); test della pipeline 60/60 e typecheck verdi, suite intera 554/609 con fallimenti fuori dalla pipeline. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T83)
+- [2026-10-30T22:13:40.202Z] task/T83 integrato in 3d; worktree e branch tolti.
+- [2026-10-30T22:14:16.993Z] nota: T83 integrato; T84 pronto ma fermo per slot dinamici a 0 su Claude (previsione prima del reset)

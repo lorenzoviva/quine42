@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 22:01 UTC, fine epoca 159 su **gemini** (claude ha di nuovo crediti: 5h al 49 %, settimana al 49 %; passaggio a claude per la prossima epoca). **Ordine dell'autore: finire i task sulla pipeline (T82-T87 e la catena T83-T86), poi nessun task nuovo; quando finiscono i task in corso, dirgli che può chiudere con Ctrl-C.** Tolta l'approvazione a T52, T54, T57. T70, T53b, T81, T87, T82 e T90 integrati. In corso: T83 su Claude (turni per operazioni pesanti, codice e ADR-0088 già committati, riprende ora con i crediti ripristinati per completare la suite e integrare). Poi la catena T84 → T85 → T86. T51/T89 non approvati. Gemini libero, nessun task nuovo assegnato.
+Aggiornato il 30/10/2026 alle 22:20 UTC, epoca 160 su **claude**. **T83 integrato** (turni su disco, ADR-0088). T84 pronto ma fermo: la previsione dei crediti (ADR-0087) ha portato a 0 gli slot di Claude (esaurimento previsto 05/11 13:19, prima del reset delle 16:00; la domanda conta 6 task, anche T88/T57 che non partiranno). Chiesto all'autore se far partire T84 lo stesso. Da guardare a parte: `branch.test.ts` e un test di `between.test.ts` falliscono anche da soli (segnalati da T83). **Ordine dell'autore invariato: finire T84-T86, poi nessun task nuovo, poi dirgli che può chiudere con Ctrl-C.**
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -36,7 +36,7 @@ Aggiornato il 30/10/2026 alle 22:01 UTC, fine epoca 159 su **gemini** (claude ha
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T83** (claude) in corso (turni per operazioni pesanti), poi la catena T84 → T85 → T86.
+  - **T84** (claude) pronto, fermo per slot 0; poi T85 → T86.
   - **T52** risulta "in corso" nello stato ma è interrotto nel dossier.
 - **Da guardare (non integrare)**: **T54** finito con errore (codice 1), non approvato.
 - **Completati e integrati nel base `3d`**:
