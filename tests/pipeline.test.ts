@@ -388,6 +388,9 @@ type Orchestra = {
   pickOrchestrator(order: string[], budget: Record<string, { residuo?: number; sessione?: number; fermoFino?: string }>, threshold: number, at?: Date): string | undefined;
   composeTurn(messages: string[], events: { testo: string }[]): string;
   wakes(line: string): boolean;
+  shouldRunTurn(messages?: string[], events?: { testo?: string; sveglia?: boolean }[]): boolean;
+  compactChat(chatLines?: unknown[], maxItems?: number, maxLen?: number): string[];
+  startPage(s: { epoca: number; provider: string }, reason: string, opts?: unknown): string;
 };
 type Edits = {
   taskBlock(text: string, id: string): string | undefined;
@@ -463,6 +466,82 @@ describe('orchestra', () => {
     expect(O.wakes('[t] T1: ESITO: fatto — x')).toBe(true);
     expect(O.wakes('[t] T1: limite di claude, riprendo dopo …')).toBe(true);
     expect(O.wakes('[t] lancio T1 su claude (…)')).toBe(false);
+  });
+
+  it('con soli eventi di routine non apre turni (T84)', () => {
+    const routine = [
+      '[t] lancio T1 su claude (H:/worktree/t1)',
+      '[t] riprendo T1 su claude (H:/worktree/t1)',
+      '[t] T1: ancora al lavoro (processo 1234), lo seguo',
+      '[t] T1: il suo processo non c\'è più, riprende la sua conversazione',
+      '[t] T1: claude non può, va su argon',
+      '[t] T1: rimesso in coda (riprende la sua conversazione)',
+      '[t] task/T1 integrato in 3d; worktree e branch tolti.',
+      '[t] tutti fermi per i limiti; riprendo il 2026-10-30T22:00:00.000Z',
+      '[t] orchestratore: epoca 2 su claude (avvio)',
+      '[t] nota: quadro aggiornato',
+    ];
+    for (const line of routine) {
+      expect(O.wakes(line)).toBe(false);
+    }
+    const events = routine.map((testo) => ({ testo, sveglia: O.wakes(testo) }));
+    // Nessun messaggio dell'autore e soli eventi di routine: non apre turni
+    expect(O.shouldRunTurn([], events)).toBe(false);
+
+    // Eventi che chiedono decisioni: svegliano e aprono il turno
+    const decisionLines = [
+      '[t] T1: ESITO: fatto — completato',
+      '[t] T1: ESITO: fallito (codice 1)',
+      '[t] T1: ESITO: in attesa — domande in T1.md',
+      '[t] T1: fallito (codice 1)',
+      '[t] T1: limite di claude, riprendo dopo 2026-10-30T22:00:00.000Z',
+      '[t] orchestratore: limite di gemini fino a 2026-10-30T22:00:00.000Z',
+      '[t] integra T1: conflitti in kernel.ts; il base è com\'era',
+    ];
+    for (const line of decisionLines) {
+      expect(O.wakes(line)).toBe(true);
+      expect(O.shouldRunTurn([], [{ testo: line, sveglia: O.wakes(line) }])).toBe(true);
+    }
+    // Un messaggio dell'autore apre sempre il turno
+    expect(O.shouldRunTurn(['ciao'], events)).toBe(true);
+  });
+
+  it('misura del contesto corretta senza raddoppio della cache Gemini (T84)', () => {
+    // Claude con iterazioni: prende l'ultima iterazione
+    expect(O.contextOf({ iterations: [{ input_tokens: 5, cache_read_input_tokens: 1000, output_tokens: 10 }, { input_tokens: 2, cache_read_input_tokens: 90_000, cache_creation_input_tokens: 500, output_tokens: 300 }] })).toBe(90_802);
+    // Anthropic con cache_read_input_tokens separato
+    expect(O.contextOf({ usage: { input_tokens: 20_000, cache_read_input_tokens: 100_000 }, num_turns: 4 })).toBe(30_000);
+    // Gemini/agy: input_tokens include già la cache (promptTokenCount), non va sommata due volte
+    expect(O.contextOf({ usage: { input_tokens: 570_000, cache_read_tokens: 550_000 } })).toBe(570_000);
+    expect(O.contextOf({ usage: { input_tokens: 100_000, cache_read_tokens: 80_000 }, num_turns: 1 })).toBe(100_000);
+    // Valore nullo o vuoto
+    expect(O.contextOf(undefined)).toBe(0);
+  });
+
+  it('avvio.md d\'esempio è compatto e sotto il tetto di dimensione (T84)', () => {
+    const rawChat = [
+      { t: '12:00', chi: 'autore', testo: 'puoi controllare T83?' },
+      { t: '12:01', chi: 'orchestratore', provider: 'claude', testo: 'controllo subito il dossier di T83 e lo stato.' },
+      { t: '12:02', chi: 'orchestratore', provider: 'claude', testo: 'quadro aggiornato' },
+      { t: '12:03', chi: 'orchestratore', provider: 'claude', testo: 'quadro aggiornato' }, // duplicato/boilerplate
+      { t: '12:04', chi: 'pipeline', testo: 'T83: ESITO: fatto' },
+      { t: '12:05', chi: 'orchestratore', provider: 'claude', testo: 'T83 finito, integro e passo a T84.'.repeat(20) }, // lungo, da troncare
+    ];
+    const page = O.startPage({ epoca: 3, provider: 'gemini' }, 'contesto a metà finestra', {
+      chat: rawChat,
+      maxChat: 8,
+      maxLen: 200,
+      quadro: path.resolve(__dirname, '../docs/pipeline/quadro.md'),
+    });
+    // Niente indice intero dei task
+    expect(page).not.toContain('## Indice dei task');
+    expect(page).not.toContain('node tools/pipeline/pipeline.mjs indice');
+    // Chat troncata e senza messaggi ripetuti dell'orchestratore
+    expect(page).toContain('puoi controllare T83?');
+    expect(page).not.toContain('quadro aggiornato');
+    // Sotto il tetto di dimensione (es. 8000 caratteri)
+    expect(page.length).toBeLessThan(8000);
+    expect(Buffer.byteLength(page, 'utf8')).toBeLessThan(10000);
   });
 });
 

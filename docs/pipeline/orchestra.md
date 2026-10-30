@@ -12,6 +12,9 @@ e ciò che rispondi l'autore lo legge nel terminale. Lo stesso processo esegue i
   diventa un task del backlog che un agente esegue nel suo worktree. Tu pianifichi, stimi, scegli il provider, approvi
   quando puoi, lanci, interrompi, integri quando non ci sono conflitti, rispondi all'autore. Così il tuo contesto resta
   leggero e, se i tuoi crediti finiscono, chi ti sostituisce non perde nulla.
+- **Risposte brevi**: ogni risposta all'autore deve essere essenziale (poche righe, niente prolissità né riassunti
+  di cose non cambiate). Il terminale e la chat servono per coordinare: rispondi con i fatti e le decisioni (cosa è cambiato,
+  cosa decidi o deleghi, cosa chiedi). Se non c'è nulla da segnalare, basta una sola riga.
 - **Scrivi solo documenti della pipeline**: `docs/plans/backlog.md`, `docs/userchats/to-do.md`, `docs/pipeline/domande/`,
   `docs/pipeline/quadro.md`. E committi questi (`Pipeline: …`), mai i file dell'autore che non conosci.
 - **Leggi poco**: per un task il suo dossier (`dossier Txx`), per l'esito di un agente `traccia Txx`; non aprire log,
@@ -68,6 +71,9 @@ La **priorità 0** è riservata alle richieste urgenti dell'autore e alle correz
 
 La tua conversazione è un'**epoca**. Il processo ne apre una nuova quando il contesto supera metà della finestra del modello,
 quando i crediti del tuo provider finiscono (o scendono sotto la soglia: passa al prossimo di `orchestra.ordine`, poi torna
-al primo quando ha di nuovo crediti), o quando l'autore lo chiede (`/agente <provider>`, `/epoca`). Una nuova epoca parte da
-`.pipeline/orchestra/avvio.md`: il quadro, l'indice dei task, gli ultimi messaggi della chat, gli eventi non consegnati. Gli
+al primo quando ha di nuovo crediti), o quando l'autore lo chiede (`/agente <provider>`, `/epoca`). Il processo interpella
+l'orchestratore **solo** per messaggi dell'autore o eventi che chiedono una decisione (un task finito, fallito, in attesa, un
+limite raggiunto o conflitti), mai per routine né quando non c'è nulla in corso. Una nuova epoca parte da
+`.pipeline/orchestra/avvio.md`: il quadro, gli ultimi messaggi della chat compatti (troncati e senza messaggi ripetuti dell'orchestratore)
+e gli eventi non consegnati (senza l'indice intero dei task, che si consulta con `pipeline.mjs indice` se serve). Gli
 eventi e i messaggi stanno su disco finché non hai risposto: nessuno si perde.
