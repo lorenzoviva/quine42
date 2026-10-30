@@ -238,3 +238,5 @@
 - [2026-10-30T09:31:59.198Z] T70: interrotto (riprende con riprendi T70)
 - [2026-10-30T09:32:01.689Z] T70: rimesso in coda (riprende la sua conversazione)
 - [2026-10-30T09:33:10.906Z] nota: Epoca 54 (Gemini): T45e approvato e instradato su Gemini in worktree t45e; T70 sospeso in attesa del reset Claude (12:00 UTC); quadro aggiornato.
+- [2026-10-30T09:34:10.310Z] orchestratore: epoca 55 su gemini (contesto a 365 % della finestra)
+- [2026-10-30T09:35:54.283Z] nota: Epoca 55 (Gemini): presa in carico avvio epoca; T45e attivo su Gemini, T70 sospeso per reset Claude (11:59 UTC); quadro aggiornato.
