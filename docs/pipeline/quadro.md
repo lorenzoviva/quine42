@@ -3,33 +3,30 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026, rotazione epoca 11 dell'orchestratore (gemini: chiusura per contesto a 125%).
+Aggiornato il 30/10/2026, epoca 12 dell'orchestratore (gemini).
 
 ## Le priorità dell'autore
 
 1. Il multigiocatore (T43-T45) prima del resto.
 2. Il nuovo ambiente della pipeline e l'interfaccia web (**T69**, integrata in `3d` e attiva su `http://localhost:4242`).
-3. Argon utilizzato con moderazione: massimo 1 task alla volta (`capOf` garantisce 1 task sotto soglia, 7 % settimanale residuo).
+3. Argon esaurito per la settimana (1% residuo, quota 429 fino al 04/11): tutti i task complessi/multiplayer dovranno passare su Claude non appena resetta.
 
 ## Stato e decisioni
 
-- **Decisioni prese**:
-  - **Script della pipeline riavviato dall'autore**: attive le soglie settimanali Argon (`finestra5h: false`) e l'interfaccia web locale su `http://localhost:4242`.
-  - **Argon riattivato (1 task alla volta)**: riallineato il worktree `t45a` a `3d` e lanciato **T45a** su Argon (stima 5%, priorità 5, approvato, test headless).
-  - **T45b, T45c, T68b**: restano interrotti/in attesa; nessun altro task partirà su Argon finché T45a è in corso.
+- **Decisioni prese e fatti recenti**:
+  - **Argon ha esaurito la quota (429 RESOURCE_EXHAUSTED)**: al primo turno di esecuzione di **T45a**, l'API di Argon ha restituito quota raggiunta (reset tra 134 ore, il 04/11/2026 alle 18:44 UTC). Lo script della pipeline ha posto **T45a in stato sospeso**; Argon è all'1% residuo e bloccato da soglia. Nessun task potrà girare su Argon fino alla settimana prossima.
+  - **T45b, T45c, T68b**: rimangono interrotti/in attesa; andranno riassegnati a Claude.
 - **Cosa si aspetta**:
-  1. Completamento ed esito di **T45a** su Argon (in corso).
-  2. Il reset della sessione di 5 ore di Claude alle `07:00 UTC` (`08:00` locali).
+  1. Il reset della sessione di 5 ore di Claude alle **07:00 UTC** (**08:00** locali, ~2h30m rimanenti; Claude ha il 69% settimanale disponibile).
 - **Intenzioni al reset di Claude / prossimi passi**:
   1. Completare **T70** (integrazione T53b con salto T56b, priorità 0 su Claude), poi `integra T70` e `integra T53b`.
   2. Procedere con **T44c** (priorità 3) e **T44b** (priorità 4, che sblocca T45d/e/f).
-  3. Al termine di T45a, valutare il budget residuo di Argon prima di assegnare T45b (stima 6%).
+  3. Riassegnare **T45a** (priorità 5) a Claude (e a seguire T45b e T45c) per proseguire il multigiocatore senza attendere il reset settimanale di Argon.
 
 ## Task sospesi e in attesa
 
-- **In corso su Argon (max 1):** **T45a** (priorità 5, crediti e spese comuni, in esecuzione nel worktree `t45a`).
+- **Sospesi per quota Argon (fino al 04/11):** **T45a** (priorità 5, crediti e spese comuni; da passare a Claude al reset), **T45b**, **T45c**, **T68b**.
 - **Sospesi su Claude fino alle 07:00 UTC (`08:00` locali):** **T70** (priorità 0), **T44c** (priorità 3), **T44b** (priorità 4), **T52**, **T54** e **T51**.
-- **Interrotti in attesa:** **T45b**, **T45c**, **T68b**.
 - **T53b** (strutture su più piani) è finito e verificato nel browser, ma aspetta **T70** per risolvere i conflitti con **T56b**. Quando T70 è finito: `integra T70`, poi `integra T53b`.
 
 ## Da fare appena possibile
