@@ -76,16 +76,112 @@ export function setOrchestrator(provider, opts) {
 }
 
 /**
- * How many tasks a provider may run at once: `max`, one under `sogliaUnSolo` (week or 5 hours), none if the
- * orchestrator runs on it, so the tasks never take the credits the orchestration needs to go on.
- * For weekly-only providers (Argon or finestra5h === false), session is based on the weekly limit.
+ * How many tasks a provider may run at once (ADR-0087): its dynamic slots (`slot`, between 0 and the ceiling), one more for an
+ * urgent request of the author (priority 0), never over its ceiling (`tetto`). Near 0 % (`sogliaUnSolo`, week or 5 hours)
+ * nothing new starts and at most one task goes on (resumed), none on the orchestrator's provider, so the tasks never take
+ * the credits the orchestration needs to go on. For weekly-only providers (Argon or finestra5h === false), session is the week.
  */
-export function capOf({ left, session, provider, orchestrator: orch, max, threshold }) {
+export function capOf({ left, session, provider, orchestrator: orch, slot = 1, tetto = 1, threshold, urgent = false, resuming = false }) {
   const conf = CONFIG.providers?.[provider];
   const isWeeklyOnly = conf?.finestra5h === false || provider === 'argon';
   const sess = isWeeklyOnly ? left : (session ?? left);
-  if (left >= threshold && sess >= threshold) return max;
-  return provider === orch ? 0 : 1;
+  if (left < threshold || sess < threshold) return resuming && provider !== orch ? 1 : 0;
+  return Math.min(tetto, resuming ? Math.max(slot, 1) : slot + (urgent ? 1 : 0));
+}
+
+/**
+ * The ceiling of a provider, decided by the author (`limiti` in config.json): the one of its model (`modello`: the entries
+ * of `providers`) and the one of its CLI (`provider`: `claude`, `agy`), the lower; without `limiti`, `maxParalleli`.
+ */
+export function ceilingOf(provider, config = CONFIG) {
+  const l = config.limiti ?? {};
+  const cmd = config.providers?.[provider]?.cmd;
+  return Math.min(config.maxParalleli ?? Infinity, l.modello?.[provider] ?? Infinity, l.provider?.[cmd] ?? Infinity);
+}
+
+/**
+ * When the week of a provider reaches 100 % at the pace of the last days (`storia`: [{ t, residuo }] from `budget.json`):
+ * the samples since the last refill (a residuo that went up is a reset), within `giorni`; undefined if it is not
+ * being used (or there is too little to say).
+ */
+export function forecastEmpty(storia = [], nowMs = Date.now(), giorni = 3) {
+  const recent = storia.filter((s) => nowMs - Date.parse(s.t) <= giorni * 86_400_000);
+  let start = 0;
+  for (let i = 1; i < recent.length; i++) if (recent[i].residuo > recent[i - 1].residuo) start = i;
+  const seg = recent.slice(start);
+  if (seg.length < 2) return undefined;
+  const first = seg[0], last = seg.at(-1);
+  const ms = Date.parse(last.t) - Date.parse(first.t);
+  const used = first.residuo - last.residuo;
+  if (ms < 3_600_000 || used <= 0) return undefined; // under an hour of samples the pace is noise
+  return new Date(Date.parse(last.t) + (last.residuo / used) * ms).toISOString();
+}
+
+/** The next weekly reset of a provider: its weekly counter's (`/usage`), or the next `resetSettimanale`. */
+export function weeklyResetOf(b = {}, conf = {}, nowMs = Date.now()) {
+  const weekly = (b.contatori ?? []).filter((c) => c.finestra === 'settimana' && c.reset && Date.parse(c.reset) > nowMs).sort((x, y) => x.residuo - y.residuo)[0];
+  if (weekly) return weekly.reset;
+  const last = lastReset(conf.resetSettimanale, new Date(nowMs));
+  return last && new Date(last.getTime() + 7 * 86_400_000).toISOString();
+}
+
+/**
+ * The dynamic slots of a provider after a check: one more if the week would end after its reset (or it is not being used),
+ * one less if before; between 0 and the ceiling, and no more than its schedule needs (`domanda`, at least one).
+ * Without a reset to compare with, they stay.
+ */
+export function nextSlot({ slot = 1, tetto = 1, previsione, reset, domanda = Infinity }) {
+  if (!reset) return Math.min(slot, tetto);
+  const after = !previsione || Date.parse(previsione) > Date.parse(reset);
+  const next = after ? Math.max(slot, Math.min(slot + 1, Math.max(1, domanda))) : slot - 1;
+  return Math.max(0, Math.min(tetto, next));
+}
+
+/**
+ * The schedule of each provider: the tasks it could run (in progress, ready) and those blocked only by other tasks of the
+ * backlog; not the ones that wait for the author (`in attesa`, also through their dependencies).
+ */
+export function demandOf(queues) {
+  const waiting = new Set(queues.inAttesa.map((t) => t.id));
+  const blocked = new Map(queues.bloccati.map((t) => [t.id, t]));
+  const waitsForAuthor = (id, seen = new Set()) => {
+    if (waiting.has(id)) return true;
+    const t = blocked.get(id);
+    if (!t || seen.has(id)) return false;
+    seen.add(id);
+    return t.missing.some((d) => waitsForAuthor(d, seen));
+  };
+  const out = {};
+  for (const t of [...queues.inCorso, ...queues.pronti, ...queues.bloccati.filter((t) => !waitsForAuthor(t.id))])
+    if (t.provider) out[t.provider] = (out[t.provider] ?? 0) + 1;
+  return out;
+}
+
+/**
+ * At each check, for every provider: the sample of its week (`storia`, the last `giorniStoria` days, one every `usoSecondi`),
+ * the forecast, the reset and its slots (moved at most once every `usoSecondi`). Writes into `budget`.
+ */
+export function updateSlots(budget, queues, { config = CONFIG, nowMs = Date.now() } = {}) {
+  const demand = demandOf(queues);
+  for (const [prov, conf] of Object.entries(config.providers)) {
+    const b = (budget[prov] ??= { residuo: 100 });
+    const storia = (b.storia ??= []);
+    const keep = (config.giorniStoria ?? 7) * 86_400_000;
+    const step = (config.usoSecondi ?? 300) * 1000;
+    if (!storia.length || nowMs - Date.parse(storia.at(-1).t) >= step || storia.at(-1).residuo !== b.residuo) storia.push({ t: new Date(nowMs).toISOString(), residuo: b.residuo });
+    b.storia = storia.filter((s) => nowMs - Date.parse(s.t) <= keep);
+    b.tetto = ceilingOf(prov, config);
+    b.previsione = forecastEmpty(b.storia, nowMs, config.giorniPrevisione ?? 3);
+    b.resetSettimana = weeklyResetOf(b, conf, nowMs);
+    b.domanda = demand[prov] ?? 0;
+    if (b.slot === undefined) b.slot = Math.min(1, b.tetto);
+    else if (!b.slotAggiornato || nowMs - Date.parse(b.slotAggiornato) >= step) {
+      b.slot = nextSlot({ slot: b.slot, tetto: b.tetto, previsione: b.previsione, reset: b.resetSettimana, domanda: b.domanda });
+      b.slotAggiornato = new Date(nowMs).toISOString();
+    }
+    b.slot = Math.min(b.slot, b.tetto);
+  }
+  return budget;
 }
 
 // --- The backlog -----------------------------------------------------------------------------------------------
@@ -242,15 +338,15 @@ export function loadBudget({ read = true } = {}) {
 }
 
 /** The last weekly reset before now, from «giorno ora» (`gio 09:00`). */
-function lastReset(spec) {
+function lastReset(spec, from = new Date()) {
   if (!spec) return undefined;
   const days = ['dom', 'lun', 'mar', 'mer', 'gio', 'ven', 'sab'];
   const [day, hm = '00:00'] = spec.split(/\s+/);
   const [h, min] = hm.split(':').map(Number);
-  const d = new Date();
+  const d = new Date(from);
   d.setHours(h, min, 0, 0);
   d.setDate(d.getDate() - ((d.getDay() - days.indexOf(day) + 7) % 7));
-  if (d > new Date()) d.setDate(d.getDate() - 7);
+  if (d > from) d.setDate(d.getDate() - 7);
   return d;
 }
 
@@ -298,7 +394,8 @@ export function plan(tasks, runs, budget, only) {
   return queues;
 }
 
-const describe = (b) => `settimana ${b.residuo} %, 5 ore ${b.sessione ?? '?'} %${b.fermoFino ? `, fermo fino a ${b.fermoFino}` : ''}`;
+const describe = (b) => `settimana ${b.residuo} %, 5 ore ${b.sessione ?? '?'} %${b.fermoFino ? `, fermo fino a ${b.fermoFino}` : ''}` +
+  `; tetto ${b.tetto ?? '?'}, slot ${b.slot ?? '?'}${b.domanda !== undefined ? ` (task in programma ${b.domanda})` : ''}, esaurimento previsto ${b.previsione ?? 'mai a questo ritmo'}, reset ${b.resetSettimana ?? '?'}`;
 
 export function writePlan(queues, budget, opts) {
   const p = pathsOf(opts);
@@ -435,6 +532,8 @@ export async function execute({ max = CONFIG.maxParalleli, only, task, always = 
     const budget = loadBudget();
     const tasks = loadTasks();
     const queues = plan(tasks, runs, budget, only);
+    updateSlots(budget, queues);
+    writeJson(BUDGET, budget);
     writePlan(queues, budget);
     // Suspended runs whose limit has reset come first; then ready tasks within the budget.
     const candidates = [
@@ -442,15 +541,18 @@ export async function execute({ max = CONFIG.maxParalleli, only, task, always = 
         .map((r) => ({ ...tasks.find((t) => t.id === r.id), id: r.id, provider: r.provider, estimate: r.stima })),
       ...queues.pronti.filter((t) => !runs[t.id] && (!task || t.id === task)),
     ];
-    // Whether a provider can take one more task now (a suspended run only checks that the provider is not stopped).
-    const fits = (prov, estimate, resuming) => {
+    // Whether a provider can take one more task now: under its slots and its ceiling, and its CLI under its own
+    // (`limiti.provider`); a new task also needs its estimate to fit (a suspended run only that the provider is not stopped).
+    const fits = (prov, t, resuming) => {
       const b = budget[prov];
       if (!b || (b.fermoFino && new Date(b.fermoFino) > new Date())) return false;
-      const committed = [...active.keys()].map((id) => runs[id]).filter((r) => r.provider === prov).reduce((s, r) => s + r.stima, 0);
-      const left = b.residuo - committed;
-      const cap = capOf({ left, session: b.sessione, provider: prov, orchestrator: orch, max, threshold: CONFIG.sogliaUnSolo });
-      const running = [...active.keys()].filter((id) => runs[id].provider === prov).length;
-      return running < cap && (resuming || estimate <= left - CONFIG.riserva);
+      const live = [...active.keys()].map((id) => runs[id]);
+      const mine = live.filter((r) => r.provider === prov);
+      const left = b.residuo - mine.reduce((s, r) => s + r.stima, 0);
+      const cap = capOf({ left, session: b.sessione, provider: prov, orchestrator: orch, slot: b.slot, tetto: b.tetto ?? ceilingOf(prov), threshold: CONFIG.sogliaUnSolo, urgent: t.priority === 0, resuming });
+      const cmd = CONFIG.providers[prov].cmd;
+      const cli = live.filter((r) => CONFIG.providers[r.provider]?.cmd === cmd).length;
+      return mine.length < cap && cli < (CONFIG.limiti?.provider?.[cmd] ?? Infinity) && (resuming || t.estimate <= left - CONFIG.riserva);
     };
     for (const t of candidates) {
       if (active.size >= max) break;
@@ -459,8 +561,8 @@ export async function execute({ max = CONFIG.maxParalleli, only, task, always = 
       const allowed = t.needsBrowser
         ? [t.provider, ...(CONFIG.alternative?.[t.provider] ?? [])].filter((p) => CONFIG.providers[p]?.browser ?? p === 'claude')
         : [t.provider, ...(CONFIG.alternative?.[t.provider] ?? [])];
-      const prov = resuming ? t.provider : allowed.find((p) => (!only || p === only) && fits(p, t.estimate, false));
-      if (!prov || !fits(prov, t.estimate, resuming)) continue;
+      const prov = resuming ? t.provider : allowed.find((p) => (!only || p === only) && fits(p, t, false));
+      if (!prov || !fits(prov, t, resuming)) continue;
       if (t.needsBrowser && !(CONFIG.providers[prov]?.browser ?? prov === 'claude')) continue;
       if (prov !== t.provider) say(`${t.id}: ${t.provider} non può, va su ${prov}`);
       const b = budget[prov];
@@ -527,12 +629,23 @@ function finish(run, { code, text, log }, runs, saveRuns) {
   saveRuns(run.id);
 }
 
+/** What `stato` shows without moving the slots (only `esegui` moves them): ceiling, forecast, reset, schedule. */
+function showSlots(budget, queues) {
+  const demand = demandOf(queues);
+  for (const [prov, conf] of Object.entries(CONFIG.providers)) {
+    const b = (budget[prov] ??= { residuo: 100 });
+    Object.assign(b, { tetto: ceilingOf(prov), previsione: forecastEmpty(b.storia, Date.now(), CONFIG.giorniPrevisione ?? 3), resetSettimana: weeklyResetOf(b, conf), domanda: demand[prov] ?? 0 });
+    b.slot = Math.min(b.slot ?? 1, b.tetto);
+  }
+}
+
 // --- Commands --------------------------------------------------------------------------------------------------
 
 function status() {
   const budget = loadBudget();
-  writeJson(BUDGET, budget);
   const queues = plan(loadTasks(), readJson(RUNS, {}), budget);
+  showSlots(budget, queues);
+  writeJson(BUDGET, budget);
   writePlan(queues, budget);
   for (const [k, l] of Object.entries(queues)) console.log(`${k}: ${l.map((t) => t.id).join(' ') || '—'}`);
   for (const [p, b] of Object.entries(budget))

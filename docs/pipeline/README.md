@@ -104,16 +104,24 @@ muore, al riavvio `esegui` segue i task ancora vivi e riprende la conversazione 
 
 **L'orchestratore non resta senza crediti.** Il provider su cui gira l'orchestratore (`.pipeline/orchestratore.json`, lo scrive
 `orchestra`; senza, `orchestratore` di `config.json`): sotto `sogliaUnSolo` (settimana o 5 ore) su di lui non parte **nessun** task
-(sugli altri uno), così i task non consumano i crediti che servono all'orchestrazione. In Antigravity conta il modello che usa
+(sugli altri nessuno nuovo e al più uno in corso), così i task non consumano i crediti che servono all'orchestrazione. In Antigravity conta il modello che usa
 (`argon` con Gemini 4 Argon, `gemini` con 3.8 Flash).
 
 `esegui` gira finché c'è qualcosa da fare; con `--sempre` non si ferma mai: rilegge backlog e contatori a ogni controllo, e i task che pianifichi intanto partono da soli (lascialo in un terminale a parte):
 
-- lancia i task **pronti** (dipendenze `fatto` nel base, approvati, con stima) fino a `maxParalleli` (5), se la
+- lancia i task **pronti** (dipendenze `fatto` nel base, approvati, con stima) entro gli **slot** del provider, se la
   stima sta nel residuo del provider meno ciò che i task in corso hanno già impegnato e la `riserva`;
-  sotto `sogliaUnSolo` (10 %) un solo task per provider, nessuno su quello dell'orchestratore;
+- **tetti e slot** (ADR-0087): il tetto lo decide l'autore in `limiti` (`limiti.provider` per CLI, `claude` e `agy`;
+  `limiti.modello` per voce di `providers`; oggi 1 ciascuno: un task su Claude e uno su `agy` alla volta); sotto il tetto gli
+  **slot dinamici** (da 0, partendo da 1): a ogni controllo la pipeline campiona il residuo settimanale (`budget.json → storia`,
+  ultimi `giorniStoria` giorni) e prevede dal ritmo degli ultimi `giorniPrevisione` giorni quando la settimana arriva al 100 %;
+  se cade dopo il reset settimanale (o il provider non consuma) aggiunge uno slot, se cade prima lo toglie (al più uno spostamento
+  ogni `usoSecondi`), mai oltre i task che il provider ha in programma (in corso, pronti, bloccati solo da altri task: non quelli
+  in attesa dell'autore). Sotto `sogliaUnSolo` (10 %, settimana o 5 ore) nessun task nuovo e al più uno in corso, nessuno su
+  quello dell'orchestratore. Un task a **priorità 0** (le urgenze dell'autore) può usare uno slot in più, mai oltre il tetto.
+  `stato` (e `PIANO.md`, l'interfaccia web) mostra per provider tetto, slot, task in programma, esaurimento previsto e reset;
 - **alternative** (`alternative` in `config.json`: oggi `claude → argon → gemini`, `argon → gemini`): se il provider di un task nuovo è fermo per i limiti o la stima non entra nel suo residuo, il task va al primo che può, con la stessa stima; un task sospeso riprende sempre sul suo. Così finiti i crediti di Claude la pipeline continua su Argon e poi su Gemini 3.8. Toglile se un task delicato deve aspettare Claude;
-- i provider girano **in parallelo** tra loro (ognuno con i suoi contatori), al più `maxParalleli` in tutto;
+- i provider girano **in parallelo** tra loro (ognuno con i suoi contatori e i suoi slot), al più `maxParalleli` in tutto;
 - ogni task ha un worktree `.claude/worktrees/<txx>` sul branch `task/<Txx>` nato dal base, con il
   `node_modules` del base collegato (junction); il prompt è quello di `config.json`;
 - `claude -p … --output-format json` / `agy -p … --output-format json`; ogni `controlloSecondi` guarda chi ha finito
@@ -125,7 +133,7 @@ muore, al riavvio `esegui` segue i task ancora vivi e riprende la conversazione 
   subito), entrambe le finestre: le **5 ore** e la **settimana**; per Antigravity un contatore per gruppo di modelli
   (`Gemini Models`, `Claude and GPT models`, `Gemini 4 Argon`…), e `contatori` in `config.json` (un'espressione
   regolare sul nome) dice quali contano per i modelli che la pipeline usa con `agy` (`gemini`: `^Gemini Models$`, `argon`: `^Gemini 4 Argon`); `stato` mostra anche i contatori che nessun provider usa (es. «Claude and GPT models» di Antigravity). Il budget di un provider è il contatore settimanale più basso; sotto
-  `sogliaUnSolo` (anche nelle 5 ore) parte un task alla volta; un contatore vuoto (settimana sotto la `riserva`, 5 ore a 0)
+  `sogliaUnSolo` (anche nelle 5 ore) non parte nessun task nuovo e ne resta al più uno in corso; un contatore vuoto (settimana sotto la `riserva`, 5 ore a 0)
   ferma il provider fino al suo reset. Tutto in `PIANO.md`, sezione «Budget»;
 - quando il task finisce scala la stima dal residuo fino alla lettura successiva e scrive una riga in `consumi.jsonl`
   (stima, costo in dollari se la CLI lo dice, minuti, tentativi, esito): confrontata con i contatori prima e dopo, serve a

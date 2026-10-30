@@ -1814,7 +1814,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fatto quando: la pagina carica senza errori in console (verifica con il browser se lo hai, altrimenti il test di parse basta), test e typecheck verdi.
 - Esito: corretto l'escape della regex `replace(/^\/nota\s+/i, '')` in `tools/pipeline/web.mjs` dentro il template string di `renderHtml()` (usando `^\\/nota\\s+` per non perdere i backslash nel codice client generato); aggiunto test in `tests/pipeline.test.ts` che valida con `new Function(script)` lo script inline estratto da `renderHtml()`; verificati `tests/pipeline.test.ts` (43/43 passati) e `npm run typecheck` con esito verde.
 
-### T82 · Un task per provider: tetti di parallelismo per provider e modello — `da fare`
+### T82 · Un task per provider: tetti di parallelismo per provider e modello — `fatto`
 - Pipeline: claude · stima 4% · approvato · priorità 1
 - Dipende da: T70 (gira su Claude: aspetta che finisca).
 - Contesto: oggi `maxParalleli` (5) è uno solo per tutta la pipeline. Troppi task in parallelo: lasciarne due a metà al reset costa più che finirne uno,
@@ -1830,6 +1830,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   - lo schedule conta solo i task eseguibili e quelli bloccati solo da altri task del backlog (non quelli in attesa dell'autore);
   - `stato` mostra per provider tetto, slot, previsione di esaurimento e reset.
 - Fatto quando: test della pipeline sul calcolo degli slot (previsione prima/dopo il reset, tetto, riserva, 0 %) e typecheck verdi; `orchestra.md`, `docs/pipeline/README.md` e un ADR aggiornati.
+- Esito: ADR-0087. `config.json → limiti` (`provider`: `claude` 1, `agy` 1; `modello`: `claude gemini argon` 1), `giorniPrevisione` (3), `giorniStoria` (7); in `pipeline.mjs` `ceilingOf`, `forecastEmpty`, `weeklyResetOf`, `nextSlot`, `demandOf`, `updateSlots` e il nuovo `capOf` (slot, tetto, riserva a priorità 0, resuming); `esegui` scrive `budget.json` a ogni controllo (storia, slot, anche `letto`); `stato`, `PIANO.md` e la scheda del budget nel web mostrano tetto, slot, task in programma, esaurimento previsto e reset. 9 test nuovi in `tests/pipeline.test.ts` (50/50), typecheck verde; la suite intera non l'ho lanciata (tocca solo la pipeline). Diverso dal previsto: la «riserva» per le urgenze è la priorità 0 (nessun campo nuovo); vicino a 0 % un task sospeso può riprendere se non ce n'è un altro in corso; gli slot non salgono oltre i task in programma ma non scendono per questo.
 
 ### T83 · Il carico della macchina: un solo browser e una sola suite pesante alla volta — `da fare`
 - Pipeline: claude · stima 3% · approvato · priorità 2
@@ -1878,11 +1879,12 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fatto quando: una verifica di prova su una pagina locale riesce da `agy -p`, oppure il README dice che non si può e la pipeline non manda più ad agy i task che chiedono il browser.
 - Esito: verificato sperimentalmente con `agy -p` che Antigravity CLI non supporta flag browser (es. `--chrome` non definito) e non espone strumenti di navigazione/ispezione; il subagente `/browser` cerca `DevToolsActivePort` su Chrome utente e non avvia Chrome in autonomia. Aggiornato `tools/pipeline/config.json` con `"browser": true` per Claude e `false` per Gemini/Argon, aggiornato il prompt comune; in `tools/pipeline/pipeline.mjs` aggiunti `taskNeedsBrowser`, riconoscimento `needsBrowser` nel backlog e nella riga pipeline, blocco in `plan` e `assignTask` se un task browser è indirizzato a provider non-browser, e filtro in `execute` che impedisce il fallback di task browser su Gemini o Argon; documentate le cause e la regola esclusiva per Claude in `docs/pipeline/README.md`, `pianifica.md` e `orchestra.md`; test completi in `tests/pipeline.test.ts`.
 
-### T90 · Integrare T82 (tetti per provider) con T87 (browser solo su Claude) in pipeline.mjs — `da fare`
+### T90 · Integrare T82 (tetti per provider) con T87 (browser solo su Claude) in pipeline.mjs — `fatto`
 - Pipeline: claude · stima 1% · approvato · priorità 0
 - Contesto: `integra T82` del 30/10/2026 si è fermato su un conflitto in `tools/pipeline/pipeline.mjs`: T87 (già nel base `3d`) manda i task con verifica nel browser solo a Claude, mai ad agy; T82 aggiunge i tetti per CLI e modello (`config.json → limiti`), gli slot dinamici e lo slot di riserva (ADR-0087). Leggi `node tools/pipeline/pipeline.mjs dossier T82`, `traccia T82` e `traccia T87`.
 - Fare: nel tuo worktree `git merge task/T82` e risolvi tenendo entrambe le regole (i task col browser solo su Claude e dentro i tetti di T82). Se ci sono conflitti anche in `docs/plans/backlog.md`, tieni lo stato `fatto` e l'esito di T82 e T87 e questo blocco. Esegui solo i test della pipeline (`npx vitest run tests/pipeline.test.ts` e quelli che T82 ha aggiunto) e `npm run typecheck`, NON la suite intera.
 - Fatto quando: test della pipeline e typecheck verdi, commit su `task/T90`. Poi l'orchestratore fa `integra T90` e `integra T82`.
+- Fatto: merge di `task/T82` su `task/T90`; un solo conflitto in `execute()` di `pipeline.mjs`: tenuto il filtro `allowed` di T87 (col browser solo i provider con `browser`, predefinito Claude) con la firma nuova di T82 `fits(prov, t, resuming)` (tetti per CLI, slot, riserva a priorità 0). Il backlog si è fuso da solo. `tests/pipeline.test.ts` (54) e typecheck verdi; nessuna differenza dal previsto.
 
 ### T88 · Spendere i crediti che avanzano generando l'universo con gli abbonamenti — `da fare`
 - Pipeline: claude · stima 4% · priorità 90
