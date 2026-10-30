@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026, epoca 2 dell'orchestratore (argon: subentrato perché claude ha esaurito i crediti delle 5 ore, reset 06:59 UTC, e ha il 9 % settimanale).
+Aggiornato il 30/10/2026, epoca 2 dell'orchestratore (argon: subentrato perché claude ha esaurito i crediti delle 5 ore, reset 06:59 UTC; argon è al 28 % settimanale, riservato a T69).
 
 ## Le priorità dell'autore
 
@@ -14,8 +14,8 @@ Aggiornato il 30/10/2026, epoca 2 dell'orchestratore (argon: subentrato perché 
 
 ## In corso
 
-- **Su Argon (5 slot attivi):** **T69** (interfaccia web della pipeline, il task dedicato ad Argon), più **T45a**, **T45b**, **T45c** e **T68b** (deviati automaticamente dallo script quando Claude si è fermato).
-- **Sospesi su Claude fino alle 07:01 UTC (`08:00` locali):** **T70** (priorità 0, integrazione di T53b con il salto di T56b), **T44c** (priorità 3), **T44b** (priorità 4, blocca T45d/T45e/T45f), **T52** e **T54**. Restano su Claude come richiesto dall'autore (Argon riservato a T69).
+- **Su Argon (unico attivo):** **T69** (interfaccia web della pipeline). I quattro task deviati automaticamente dallo script (**T45a**, **T45b**, **T45c**, **T68b**) sono stati interrotti su richiesta dell'autore per preservare il budget settimanale di Argon (`28 %` residuo) per T69; si riprendono con cautela quando T69 finisce (o quando Claude torna disponibile).
+- **Sospesi su Claude fino alle 07:01 UTC (`08:00` locali):** **T70** (priorità 0, integrazione di T53b con il salto di T56b), **T44c** (priorità 3), **T44b** (priorità 4, blocca T45d/T45e/T45f), **T52** e **T54**; anche **T51** (che ha già una sessione Claude di T51a) aspetta Claude.
 - **T53b** (strutture su più piani) è finito e verificato nel browser dall'agente, ma aspetta **T70** per risolvere i conflitti con **T56b** (il salto, già integrato, ADR-0080). Quando T70 è finito: `integra T70`, poi `integra T53b` (toglie worktree e branch).
 
 ## Da fare appena possibile
