@@ -157,3 +157,5 @@
 - [2026-10-30T05:53:10.701Z] lancio T68c su gemini (H:\projects\rune\.claude\worktrees\t68c)
 - [2026-10-30T05:54:10.914Z] orchestratore: epoca 27 su gemini (contesto a 209 % della finestra)
 - [2026-10-30T05:55:03.948Z] nota: Epoca 27 avviata su Gemini: T68c attivo nel worktree t68c su Gemini (routing automatico da Claude), attesa reset 5h di Claude alle 06:59 UTC (~08:00 locali, ~1h rimanente)
+- [2026-10-30T05:56:28.648Z] orchestratore: epoca 28 su gemini (contesto a 68 % della finestra)
+- [2026-10-30T05:57:29.791Z] nota: Epoca 28 avviata su Gemini: T68c in corso su Gemini, attesa reset sessione 5h Claude alle 06:59 UTC (~08:00 locali)
