@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026, passaggio a Claude / fine epoca 45 (gemini).
+Aggiornato il 30/10/2026 alle 07:02 UTC, epoca 46 (claude).
 
 ## Le priorità dell'autore
 
@@ -28,17 +28,10 @@ Aggiornato il 30/10/2026, passaggio a Claude / fine epoca 45 (gemini).
 
 ## Task attivi e in corso
 
-- **In corso / pronti su Claude (crediti ripristinati a 69%):**
-  - **T70** (priorità 0, risoluzione conflitti T53b / T56b con test salto + torre).
-  - **T44c** (priorità 3, correzioni da verifica browser T44a/T43c).
-  - **T44b** (priorità 4, account e autenticazione).
-  - **T45b** (priorità 6, coefficienti di generazione e «Low Detail»).
-  - **T45c** (priorità 7, eredità dei cloni).
-  - **T51** (priorità 50), **T52**, **T54**.
-- **Da integrare:**
-  - **T53b** (in attesa di T70).
-- **Gemini:**
-  - 5h al 30%, settimana al 66%. Riservato per compiti idonei e supporto.
+- **Su Claude (crediti tornati: 5h 69 %, settimana 69 %)**, ripresi alle 07:01: **T70** (p0), **T44c** (p3), **T44b** (p4), **T45b** (p6), **T45c** (p7).
+- **Interrotti dall'orchestratore** alle 07:01 per lasciare i posti al multigiocatore (priorità 1 dell'autore): **T52** e **T54** (p50; T54 risulta «fallito (codice 1)» solo per l'interruzione). Da riprendere con `riprendi T52 T54` quando si libera un posto.
+- **Da integrare:** **T53b** (dopo T70: `integra T70`, poi `integra T53b`).
+- **Gemini:** 5h al 30 %, settimana al 66 %. **Argon:** fermo fino al 04/11.
 
 ## Da fare appena possibile
 
