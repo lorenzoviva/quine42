@@ -73,10 +73,64 @@ Nella piazza iniziale ci sono `x`, `speed = speed` e la runa magica `luce`. Le r
 
 ## Per chi sviluppa
 
-Leggi **[AGENTS.md](AGENTS.md)**: architettura, Concilio, regole inviolabili, convenzioni (vale per
-persone, Claude Code e Gemini CLI). Design originale in [docs/design.md](docs/design.md), decisioni in
-[docs/adr/](docs/adr/README.md), lavoro da fare in [docs/plans/backlog.md](docs/plans/backlog.md), il passaggio al
-3D in [docs/archivio/2-step/reports/step9.md](docs/archivio/2-step/reports/step9.md). Il laboratorio di MarkovJunior è in [lab/](lab/README.md).
+Leggi **[AGENTS.md](AGENTS.md)**: architettura, Concilio, regole inviolabili, convenzioni (vale per persone, Claude Code
+e Antigravity). Come è organizzata la documentazione e come ci siamo arrivati: [docs/README.md](docs/README.md).
+
+| Dove | Cosa |
+|---|---|
+| [docs/adr/](docs/adr/README.md) | le decisioni, una per file |
+| [docs/plans/backlog.md](docs/plans/backlog.md) | i task, fatti e da fare, uno per sessione |
+| [docs/userchats/to-do.md](docs/userchats/to-do.md) | le richieste nuove, in testo libero: le pianifica la pipeline |
+| [docs/pipeline/](docs/pipeline/README.md) | la pipeline agentica: piano, domande, consumi, il diario dell'orchestratore |
+| [lab/](lab/README.md) | il laboratorio di MarkovJunior: sandbox 3D, editor dei modelli |
+| [docs/design.md](docs/design.md) | il design originale |
+
+```bash
+npm run dev          # il gioco, con il proxy di Gemini e il server degli universi
+npm test             # i test in Node, con i modelli offline
+npm run typecheck
+npm run build        # poi npx vite preview: la build servita con il proxy
+```
+
+In sviluppo: `?skip` salta intro e Genesi, `?offline` usa i modelli locali, `?universo=<nome>` apre un altro universo di
+`universes/`, `?dev&teleport=46,0` porta oltre il tappeto, `?viandante=<id>` sceglie il viandante della scheda in multigiocatore.
+In console `window.quine` è il kernel.
+
+### La pipeline agentica
+
+Il lavoro va avanti per task, eseguiti da agenti (Claude Code, Antigravity con Gemini 3.8 Flash o Gemini 4 Argon) in parallelo,
+ciascuno nel suo worktree, entro i limiti di consumo di ogni abbonamento ([ADR-0072](docs/adr/0072-la-pipeline-agentica.md),
+[ADR-0078](docs/adr/0078-l-orchestratore-della-pipeline.md)). Le richieste si scrivono in `docs/userchats/to-do.md`; un agente
+orchestratore le trasforma in task, stima, sceglie il provider, li fa eseguire, riporta, fa verificare nel browser e integra.
+
+```bash
+node tools/pipeline/pipeline.mjs stato        # le code e i contatori (docs/pipeline/PIANO.md)
+node tools/pipeline/pipeline.mjs esegui       # esegue i task pronti e approvati
+node tools/pipeline/pipeline.mjs traccia T43b # cosa ha fatto l'agente di un task
+node tools/pipeline/pipeline.mjs integra T43b # porta un task finito nel ramo base
+```
+
+Oggi l'orchestratore è una sessione di Claude Code (`/pipeline`) o di Antigravity (la skill `pipeline`); tutti i comandi sono in
+[docs/pipeline/README.md](docs/pipeline/README.md).
+
+### Generare con gli abbonamenti (in costruzione)
+
+Il Concilio chiama Gemini a consumo con la chiave di `.env`. I compiti lenti (Genesi, Fucina, modelli dello Scultore, sessioni
+del Concilio, meccaniche) potranno girare invece sull'abbonamento di chi gioca in locale, Claude Code o Antigravity
+([ADR-0077](docs/adr/0077-generare-con-gli-abbonamenti.md)); il resto resta sulle API. Solo in singola e in sviluppo, mai sul server
+del multigiocatore: l'abbonamento è personale. Si sceglie in `universe.json` del proprio universo:
+
+```json
+"ai": {
+  "provider": "api",
+  "agenti": { "scultore": "claude", "narratore": "antigravity" }
+}
+```
+
+`provider` vale per ogni agente che `agenti` non nomina (`api`, `claude` o `antigravity`). Oggi c'è la tabella e la coda su disco
+dove il gioco lascia le richieste (`/api/coda`, `universes/.coda/`); mancano il processo che la serve con le CLI (T68b: sarà
+`npm run abbonamento`, con Claude Code o Antigravity installati e collegati al proprio account) e il collegamento nel gioco (T68c).
+Finché non ci sono, tutto va sulle API.
 
 ## Riferimenti e ispirazioni
 
