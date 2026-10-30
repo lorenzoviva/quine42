@@ -1455,12 +1455,13 @@ le risposte alle domande del piano.
   si misura dal nome (il piano non si riscrive); la collezione «fuori dalla partita», sommando gli universi, resta a T45d (qui la
   funzione per universo); nessuna verifica nel browser (niente di visibile).
 
-### T45d · La lobby — `da fare` (dipende da T45a, T45b, T44b)
+### T45d · La lobby — `fatto`
 - Pipeline: claude · stima 5% · priorità 8
 - Fare: prima di entrare in un universo multigiocatore la lobby: il tetto di crediti di chi entra (si somma ai budget di `ai`), i
   coefficienti e i modelli dell'universo (del master), i minimi; crediti finiti in partita → ricarica, offline o abbandona; la
   collezione di carte fuori dalla partita, con gli utilizzi.
 - Fatto quando: test del flusso, verifica nel browser con due schede, commit.
+- Esito: ADR-0086; `universe.json → ai.minimi` (tetto minimo, modello testo, modello scultore, luoghi/minuto) riparato da `repairMinimi`; `addBudgetFromTetto` in `credits.ts` aggiunge quote proporzionali a `maxText`, `maxForges`, `maxPacks`, `maxCast`, `maxModels`; `Kernel.setSessionTetto` e `sessionSpentOf` tracciano la spesa del viandante, emettendo `credits:exhausted` (`tetto` o `finiti`); avviso di rete `tipo: 'crediti'` e modale `CreditExhaustedModal` con le 3 scelte (ricarica Stripe, offline con `MockModels`, abbandona sessione); `LobbyScreen` multigiocatore con modelli e coefficienti del master, stima oraria, requisiti minimi, selettore tetto di spesa ($1, $2, $5, tutto) e collezione carte (`collectionOf`) con contatori di utilizzo (luoghi, trame, prompt, totale). Test in `tests/lobby.test.ts` (6/6 passati).
 
 ### T45e · I pagamenti con Stripe — `in attesa` (aspetta le chiavi di Stripe di prova dall'autore in `docs/pipeline/domande/T45e.md`; dipende da T45a, T44b)
 - Pipeline: claude · stima 5% · priorità 9

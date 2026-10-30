@@ -68,7 +68,7 @@ export class SessionClient {
 
   constructor(
     private link: ClientLink,
-    who: { id: string; nome?: string; profilo?: Partial<Profile>; token?: string; anonimo?: boolean },
+    who: { id: string; nome?: string; profilo?: Partial<Profile>; token?: string; anonimo?: boolean; tetto?: number },
   ) {
     this.ready = new Promise((r) => (this.entered = r));
     link.onMessage((m) => this.receive(m));
@@ -84,6 +84,7 @@ export class SessionClient {
       ...(who.profilo ? { profilo: who.profilo } : {}),
       ...(who.token ? { token: who.token } : {}),
       ...(who.anonimo ? { anonimo: true } : {}),
+      ...(typeof who.tetto === 'number' ? { tetto: who.tetto } : {}),
     });
   }
 
