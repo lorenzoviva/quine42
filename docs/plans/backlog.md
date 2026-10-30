@@ -1780,12 +1780,13 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 > dopo l'altra (catena di dipendenze) per non creare conflitti. Entrano in funzione al riavvio di `pipeline.mjs orchestra`.
 > Nessuna lancia la suite intera di `npm test`: bastano i test della pipeline (o quelli che toccano) e `npm run typecheck`.
 
-### T81 · Bug: la pagina web della pipeline non parte (SyntaxError nella regex) — `da fare`
+### T81 · Bug: la pagina web della pipeline non parte (SyntaxError nella regex) — `fatto`
 - Pipeline: gemini · stima 1% · approvato · priorità 0
 - Contesto: aprendo `http://localhost:4242` la console dice `Uncaught SyntaxError: Invalid regular expression flags (at (index):1264:44)`:
   probabilmente una regex nello script inline di `tools/pipeline/web.mjs` perde i `\` dentro il template string del server. Nasce da T69: `dossier T69`.
 - Fare: trovare la riga 1264 della pagina servita, correggere l'escape; un test che fa il parse dello script servito (`new Function(script)` in Node) per non ricaderci.
 - Fatto quando: la pagina carica senza errori in console (verifica con il browser se lo hai, altrimenti il test di parse basta), test e typecheck verdi.
+- Esito: corretto l'escape della regex `replace(/^\/nota\s+/i, '')` in `tools/pipeline/web.mjs` dentro il template string di `renderHtml()` (usando `^\\/nota\\s+` per non perdere i backslash nel codice client generato); aggiunto test in `tests/pipeline.test.ts` che valida con `new Function(script)` lo script inline estratto da `renderHtml()`; verificati `tests/pipeline.test.ts` (43/43 passati) e `npm run typecheck` con esito verde.
 
 ### T82 · Un task per provider: tetti di parallelismo per provider e modello — `da fare`
 - Pipeline: claude · stima 4% · approvato · priorità 1
