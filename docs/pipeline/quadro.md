@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle ~08:52 UTC, avvio epoca 49 (gemini orchestratore: claude all'8 % della sessione 5h, reset 12:00 UTC; settimana 61 %; gemini 5h al 96 %, settimana 65 %; argon fermo fino al 04/11).
+Aggiornato il 30/10/2026 alle ~08:55 UTC, fine epoca 49 (gemini orchestratore: claude all'8 % della sessione 5h, reset 12:00 UTC; settimana 61 %; gemini 5h al 96 %, settimana 65 %; argon fermo fino al 04/11).
 
 ## Le priorità dell'autore
 
@@ -17,7 +17,7 @@ Aggiornato il 30/10/2026 alle ~08:52 UTC, avvio epoca 49 (gemini orchestratore: 
   - **T44c completato e verificato nel browser** (due schede, «Chi è» nel client sottile, profilo isolato per universo/viandante, hover e clic destro corretti, schermata di morte multigiocatore, fix junction `node_modules` per wasmoon).
   - **T44c integrato in `3d`** (`integra T44c`, commit `906ed6a`): worktree e branch rimossi, typecheck verde.
   - **T44b completato** (account e autenticazione con Firebase Auth, Google/anonimo, verificato con emulatore). In attesa del merge di T75.
-  - **T75 in corso su Gemini** (worktree `t75`): integra T44b con T45a, rinumera ADR di T44b in ADR-0082, unifica la gestione dell'anonimo e finalizza i test.
+  - **T75 in corso su Gemini** (worktree `t75`, pid 28788): integra T44b con T45a, rinumera ADR di T44b in ADR-0082, unifica la gestione dell'anonimo; typecheck, `tests/account.test.ts` e `tests/credits.test.ts` (6/6) passati verdi, suite `tests/session.test.ts` in corso.
   - **T70 in corso su Claude** (p0, pid 23712): integra T53b (più piani) con T56b (salto).
   - **T45a, T68b, T68c, T74 già integrati nel base `3d`**: crediti viandante, servi CLI abbonamenti e integrazione gioco operativi.
 - **Cosa si aspetta**:
