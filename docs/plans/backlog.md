@@ -1606,7 +1606,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   `SUBSCRIPTION_PRICES` in `prices.ts`, `tests/subscription.test.ts`, ADR-0077. Rispetto al previsto: anche `mechanic.design` (la Fucina
   delle meccaniche) e `model.resculpt` tra i compiti lenti; `model.judge` (foto) resta sulle API. Nel gioco non è ancora collegato.
 
-### T68b · Il processo che serve la coda con le CLI — `da fare` (dipende da T68a)
+### T68b · Il processo che serve la coda con le CLI — `fatto` (dipende da T68a)
 - Pipeline: claude · stima 4% · approvato · priorità 20
 - Contesto: `take`/`answer`/`beat` di `server/subscriptionQueue.ts` sono il protocollo; il lancio delle CLI e il riconoscimento dei
   limiti sono in `tools/pipeline/pipeline.mjs` (`usageLimit`).
@@ -1615,6 +1615,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   `--system-prompt`, schema nel prompt e risposta controllata/riparata con `parseJson`; Antigravity: `agy -p`), immagini se la CLI le
   accetta (o errore), token da ciò che la CLI riporta, un limite dell'abbonamento → `errore` chiaro e pausa fino al reset. `npm run abbonamento`.
 - Fatto quando: test con una CLI finta (script che risponde), una prova vera con Claude Code su un `model.sculpt`, commit.
+- Esito: `tools/abbonamenti/servi.ts`, `npm run abbonamento`, test con CLI mock e con Claude Code reale su `model.sculpt` in `tests/abbonamenti.test.ts`.
 
 ### T68c · Gli abbonamenti nel gioco — `da fare` (dipende da T68b)
 - Pipeline: claude · stima 3% · priorità 21
@@ -1652,7 +1653,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   farà `integra T72` e `integra T71`.
 - Esito: eseguito merge di `task/T71` in `task/T72`; risolti i conflitti in `tools/pipeline/pipeline.mjs` mantenendo tutti gli export e le funzioni di T69 (`web.mjs`, `refreshUsage`, `setBudgetManual`, `traceOf`, `parseConversation`, `integrateTask`, ecc.) e combinandoli con le logiche di T71 (`computeBudget`, `capOf`, `loadBudget`, gestione `"finestra5h": false` e allineamento di `sessione` al residuo settimanale per Argon anche in `setBudgetManual`); preservati e integrati i test sia di T69 sia di T71 in `tests/pipeline.test.ts` (42 test passati); `npm run typecheck` verde.
 
-### T73 · Integrare T68b (processo abbonamenti CLI) con T45a in AGENTS.md — `da fare`
+### T73 · Integrare T68b (processo abbonamenti CLI) con T45a in AGENTS.md — `fatto`
 - Pipeline: gemini · stima 1% · approvato · priorità 0
 - Contesto: `integra T68b` del 30/10/2026 si è fermato su un conflitto in `AGENTS.md` (perché nel frattempo è stato
   integrato T45a con crediti e spese comuni). Leggi `node tools/pipeline/pipeline.mjs dossier T68b` e `dossier T45a`.
@@ -1663,4 +1664,5 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   NON lanciare `npm test` sull'intera suite per evitare timeout o backgrounding).
 - Fatto quando: `npx vitest run tests/abbonamenti.test.ts` e `npm run typecheck` verdi, commit sul branch `task/T73`.
   Poi l'orchestratore farà `integra T73` e `integra T68b`.
+- Esito: eseguito merge di `task/T68b` in `task/T73`; risolto il conflitto in `AGENTS.md` preservando sia le aggiunte di T45a (modulo `credits.ts` nell'albero, sezione «Crediti e spese comuni» con ADR-0081) sia quelle di T68b (`npm run abbonamento` nei comandi, `tools/abbonamenti/servi.ts` nell'albero) e mantenendo `web.mjs` di T69; eseguiti `tests/abbonamenti.test.ts` (12/12) e `npm run typecheck` con esito verde.
 
