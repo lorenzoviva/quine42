@@ -192,3 +192,5 @@
 - [2026-10-30T06:27:40.712Z] nota: Epoca 41 avviata su Gemini. Nessun evento pendente; T68c e T74 pienamente integrati in 3d. In attesa del reset della finestra di 5h di Claude alle 07:00 UTC (~08:00 locali, ~30m) per la ripresa di T70 e della sequenza multiplayer.
 - [2026-10-30T06:28:29.877Z] orchestratore: epoca 42 su gemini (contesto a 75 % della finestra)
 - [2026-10-30T06:29:50.562Z] nota: Epoca 42 avviata su Gemini. T68c e T74 integrati nel base. In attesa del reset della finestra di 5h di Claude alle 07:00 UTC (~08:00 locali, ~30m) per l'avvio di T70 e della sequenza multiplayer.
+- [2026-10-30T06:30:52.074Z] orchestratore: epoca 43 su gemini (contesto a 70 % della finestra)
+- [2026-10-30T06:31:47.422Z] nota: Epoca 43 avviata su Gemini. T68c e T74 integrati nel base. In attesa del reset della finestra di 5h di Claude alle 07:00 UTC (~08:00 locali, ~28m) per l'avvio di T70 e della sequenza multiplayer.
