@@ -32,7 +32,7 @@ import { hash32, hashStr, hex, Rng } from './rng';
 import { BudgetError, type Models } from './ai/models';
 import { USAGE_FILE, UsageLedger } from './ai/usage';
 import { MemoryChunks, type ChunkStore } from './chunks';
-import { bodyFoot, bodyGround, Forms, InlineRunner, instanceGrid, rampBlocks, stepOf, toLocal, type Form, type FormComp, type FormRunner } from './forms';
+import { bodyFoot, bodyGround, Forms, InlineRunner, instanceGrid, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner } from './forms';
 import { guessClass } from '../mj/classes';
 import { GENERIC, ModelDirector, ownModelId } from './modeldirector';
 import { categoryOf, DEFAULT_SCULPTORS, sculptAction, type SculptorModels } from './agents/sculptor';
@@ -64,7 +64,23 @@ interface SolidForm {
   foot: Uint8Array;
   floor: Uint8Array;
   block: Uint8Array;
+  top: Uint8Array;
 }
+
+/** A jump under way (T56b), on the wanderer: from and to in carpet space, the floors there, how high it goes, its clock. */
+export interface JumpComp {
+  da: { x: number; y: number };
+  a: { x: number; y: number };
+  h0: number;
+  h1: number;
+  alto: number;
+  t: number;
+  dur: number;
+}
+
+/** How high a jump clears (tiles above where it starts) and how far it can land (tiles). */
+export const JUMP_UP = 1.05;
+export const JUMP_FAR = 2.6;
 
 export interface Chunk {
   cx: number;
@@ -384,7 +400,7 @@ export class Kernel {
   private levelCache = new WeakMap<Chunk, { tiles: string; lots: Building[]; relief: Relief; levels: Int16Array }>();
   private solidForms = new Map<string, Array<SolidForm>>();
   /** Footprints of instances whose model was changed by an action (the door is open). */
-  private instanceFeet = new Map<Id, { key: string; foot: Uint8Array; floor: Uint8Array; block: Uint8Array }>();
+  private instanceFeet = new Map<Id, { key: string; foot: Uint8Array; floor: Uint8Array; block: Uint8Array; top: Uint8Array }>();
   /** What was done to models of things, by stable origin (saved with the game). */
   private savedForms = new Map<string, string[]>();
   /** Zones of the world that already have their important structure: zone → the chunk that has it (saved with the game). */
@@ -1282,8 +1298,8 @@ export class Kernel {
   }
 
   /** Where a solid thing blocks and what one stands on in it: its model's, or the changed ones of this instance. */
-  private groundOf(id: Id, fc: FormComp, f: Form): { foot: Uint8Array; floor: Uint8Array; block: Uint8Array } {
-    if (!fc.done?.length) return { foot: f.foot!, floor: f.floor!, block: f.block! };
+  private groundOf(id: Id, fc: FormComp, f: Form): { foot: Uint8Array; floor: Uint8Array; block: Uint8Array; top: Uint8Array } {
+    if (!fc.done?.length) return { foot: f.foot!, floor: f.floor!, block: f.block!, top: f.top! };
     const key = `${f.key}|${fc.done.join(',')}`;
     const c = this.instanceFeet.get(id);
     if (c?.key === key) return c;
@@ -1299,20 +1315,8 @@ export class Kernel {
    * a column under it, or a rise of more than a step between two columns under it. A stair is a ramp.
    */
   private formBlocks(x: number, y: number, r: number): boolean {
-    const seen = new Set<SolidForm>();
-    for (const [dx, dy] of [[-r, -r], [r, -r], [-r, r], [r, r]])
-      for (const s of this.solidForms.get(`${Math.floor(x + dx)},${Math.floor(y + dy)}`) ?? []) {
-        if (seen.has(s)) continue;
-        seen.add(s);
-        // The box in the model's own frame (exact for quarter turns, a little larger otherwise).
-        let x0 = Infinity, z0 = Infinity, x1 = -Infinity, z1 = -Infinity;
-        for (const [ex, ey] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
-          const [lx, lz] = toLocal(x + ex - s.x, y + ey - s.y, s.yaw);
-          x0 = Math.min(x0, lx), z0 = Math.min(z0, lz), x1 = Math.max(x1, lx), z1 = Math.max(z1, lz);
-        }
-        if (rampBlocks(s.form, s.floor, s.block, x0, z0, x1, z1)) return true;
-      }
-    return false;
+    // The box in the model's own frame (exact for quarter turns, a little larger otherwise).
+    return this.formsUnder(x, y, r).some(({ s, box }) => rampBlocks(s.form, s.floor, s.block, ...box));
   }
 
   private glyphOf(app: NonNullable<Manifest['appearance']>) {
@@ -2455,6 +2459,111 @@ export class Kernel {
       if (!this.freeCell(Math.floor(px + ox), Math.floor(py + oy))) return false;
     }
     return !sim || !this.formBlocks(x + ox, y + oy, r);
+  }
+
+  /** The models under a box (carpet space, half-size r), each with the box in its own frame. */
+  private formsUnder(x: number, y: number, r: number): Array<{ s: SolidForm; box: [number, number, number, number] }> {
+    const corners = [[-r, -r], [r, -r], [-r, r], [r, r]];
+    const seen = new Set<SolidForm>();
+    const out: Array<{ s: SolidForm; box: [number, number, number, number] }> = [];
+    for (const [dx, dy] of corners)
+      for (const s of this.solidForms.get(`${Math.floor(x + dx)},${Math.floor(y + dy)}`) ?? []) {
+        if (seen.has(s)) continue;
+        seen.add(s);
+        let x0 = Infinity, z0 = Infinity, x1 = -Infinity, z1 = -Infinity;
+        for (const [ex, ey] of corners) {
+          const [lx, lz] = toLocal(x + ex - s.x, y + ey - s.y, s.yaw);
+          x0 = Math.min(x0, lx), z0 = Math.min(z0, lz), x1 = Math.max(x1, lx), z1 = Math.max(z1, lz);
+        }
+        out.push({ s, box: [x0, z0, x1, z1] });
+      }
+    return out;
+  }
+
+  /** How high the tallest thing under a box goes (carpet space, tiles): the ground if nothing is there. */
+  private heightOver(x: number, y: number, r: number): number {
+    let h = this.groundAt(x, y);
+    for (const { s, box } of this.formsUnder(x, y, r)) {
+      const t = topUnder(s.form, s.top, ...box);
+      if (t !== undefined) h = Math.max(h, this.groundAt(s.x, s.y) + t);
+    }
+    return h;
+  }
+
+  /**
+   * Whether a box (carpet space, half-size r) can be flown over by a jump that starts on a floor `base` high (T56b):
+   * water and things no higher than JUMP_UP above it can, walls and rocks of the terrain and taller models cannot.
+   */
+  private airFree(x: number, y: number, r: number, base: number): boolean {
+    for (const [dx, dy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
+      const t = this.tileAt(Math.floor(x + dx), Math.floor(y + dy));
+      const def = t ? this.palette[t] : undefined;
+      if (!t || (def?.solid && def.layer !== 'liquid')) return false;
+    }
+    return this.heightOver(x, y, r) - base <= JUMP_UP;
+  }
+
+  /**
+   * A jump (T56b, Space): towards where the wanderer walks (or faces), over what is no higher than JUMP_UP, to the
+   * nearest place a tile or more away and within JUMP_FAR where the feet can rest (not water, not a floor out of
+   * reach); with none, a jump on the spot. Only in the simulation: false in the corona and the studio (nothing
+   * changes there), in a thin client (the server would put the wanderer back) or while already in the air.
+   */
+  jump(): boolean {
+    if (this.mirror || this.zone !== 'sim' || this.ecs.has(this.playerId, 'salto')) return false;
+    const pl = this.playerComp();
+    const r = Number(this.ecs.get(this.playerId, 'body')?.r) || 0.3;
+    let dx = 0, dy = 0;
+    if (this.wanderer().id === this.inputFor) {
+      dx = (this.input.isHeld('right') ? 1 : 0) - (this.input.isHeld('left') ? 1 : 0);
+      dy = (this.input.isHeld('down') ? 1 : 0) - (this.input.isHeld('up') ? 1 : 0);
+    }
+    if (!dx && !dy) [dx, dy] = ({ left: [-1, 0], right: [1, 0], up: [0, -1], down: [0, 1] } as Record<string, number[]>)[pl?.facing] ?? [0, 1];
+    const n = Math.hypot(dx, dy);
+    dx /= n;
+    dy /= n;
+    const from = this.playerCarpet();
+    const real = this.playerPos();
+    const h0 = this.floorAt(from.x, from.y);
+    let land: { d: number; h: number } | undefined;
+    let clear = 0;
+    for (let i = 1; i * 0.1 <= JUMP_FAR + 1e-6 && !land; i++) {
+      const d = i * 0.1, x = from.x + dx * d, y = from.y + dy * d;
+      // Never out of the circle: what lies beyond is not jumped into.
+      if (Math.hypot(real.x + dx * d, real.y + dy * d) > this.config.circleRadius - r - 0.5) break;
+      if (!this.airFree(x, y, r, h0)) break;
+      clear = Math.max(clear, this.heightOver(x, y, r) - h0);
+      if (i < 10 || !this.free(x, y, r)) continue;
+      const h = this.floorAt(x, y);
+      if (h - h0 <= JUMP_UP) land = { d, h };
+    }
+    const to = land ? { x: from.x + dx * land.d, y: from.y + dy * land.d } : from;
+    const jc: JumpComp = { da: from, a: to, h0, h1: land?.h ?? h0, alto: Math.min(JUMP_UP + 0.25, Math.max(0.45, clear + 0.25)), t: 0, dur: 0.32 + 0.08 * (land?.d ?? 0) };
+    this.ecs.set(this.playerId, 'salto', jc);
+    if (pl && land) pl.facing = Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : dy > 0 ? 'down' : 'up';
+    this.bus.emit('wanderer:jumped', { id: this.wanderer().id, far: land?.d ?? 0 });
+    return true;
+  }
+
+  /** The jump under way, if any: how far along it is (0-1) and the height of the feet (tiles), for the renderer. */
+  jumping(): { s: number; y: number } | undefined {
+    const j: JumpComp | undefined = this.ecs.get(this.playerId, 'salto');
+    if (!j) return undefined;
+    const s = Math.max(0, Math.min(1, j.t / j.dur));
+    return { s, y: j.h0 + (j.h1 - j.h0) * s + 4 * j.alto * s * (1 - s) };
+  }
+
+  /** The jump carries the wanderer along its line, whatever the walking did this tick; landed, it ends. */
+  private jumpTick(dt: number): void {
+    const j: JumpComp | undefined = this.ecs.get(this.playerId, 'salto');
+    if (!j) return;
+    const ok = [j.da?.x, j.da?.y, j.a?.x, j.a?.y, j.t, j.dur, j.h0, j.h1, j.alto].every(Number.isFinite) && j.dur > 0;
+    if (!ok || this.zone !== 'sim') return void this.ecs.remove(this.playerId, 'salto');
+    j.t += dt;
+    const s = Math.min(1, j.t / j.dur);
+    const { ox, oy } = this.offset();
+    Object.assign(this.playerPos(), { x: j.da.x + (j.a.x - j.da.x) * s - ox, y: j.da.y + (j.a.y - j.da.y) * s - oy });
+    if (s >= 1) this.ecs.remove(this.playerId, 'salto');
   }
 
   // --- Runes ---------------------------------------------------------------------------------
@@ -6648,6 +6757,7 @@ export class Kernel {
     }
     this.touching = undefined;
     this.meter.endTick();
+    for (const w of this.wanderersById.keys()) !this.remote.has(w) && this.as(w, () => this.jumpTick(dt));
     this.keepGods();
     this.syncRunes();
     this.sanitize();

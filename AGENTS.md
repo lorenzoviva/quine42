@@ -414,6 +414,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 - **Menu delle caselle** (ADR-0029): `E`/clic destro su una casella → azioni dell'entità, della casella, «Altro…»;
   le azioni libere ripetibili si imparano per tipo di terreno (`TileDef.actions`). Le `<action>` del modello di una
   cosa sono voci del suo menu (`modello:<nome>`), anche quelle nate da «Altro…» (ADR-0044).
+- **Il salto** (ADR-0079, T56b): Spazio (`kernel.jump()`) nella simulazione: verso dove si cammina o si guarda, sopra ciò che non va più in alto di `JUMP_UP` (1,05 caselle, `Form.top`/`topUnder`) e sopra l'acqua, mai sopra muri, rocce o caselle solide del terreno; atterra nel primo punto da 1 a `JUMP_FAR` (2,6) caselle dove il corpo sta, altrimenti salto sul posto. Componente `salto` del viandante portato da `jumpTick` dopo i sistemi; `kernel.jumping()` per arco e ombra. Nella corona, nello studio e nel kernel specchio Spazio fa ciò che fa `E`.
 - **Il mondo in 3D** (ADR-0040, 0047): three.js, camera in 3/4 da sud che gira liberamente trascinando col tasto centrale
   o a quarti di giro (`,` `.`), zoom in/out con rotellina; l'input traduce le direzioni dello schermo in quelle del mondo
   con l'angolo continuo, così il movimento del kernel resta in coordinate del mondo e `W` va sempre in alto; in simulazione l'orbita

@@ -255,6 +255,7 @@ export class Renderer {
     }
     this.wanderer.update(k, dt, this.t);
     this.wanderer.view.root.visible = !watch;
+    if (watch) this.wanderer.hideShadow();
 
     // The corona and the studio.
     if (this.corona) this.corona.root.visible = !watch;
@@ -282,7 +283,7 @@ export class Renderer {
 
     // The camera follows the wanderer, from above.
     // It looks at the wanderer's middle, up and down the hills with it.
-    const aim = watch ? new THREE.Vector3(0, k.floorAt(watch.x, watch.y) + 0.6, 0) : new THREE.Vector3(p.x, this.wanderer.view.root.position.y + 0.6, p.y);
+    const aim = watch ? new THREE.Vector3(0, k.floorAt(watch.x, watch.y) + 0.6, 0) : new THREE.Vector3(p.x, this.wanderer.view.root.position.y - this.wanderer.lift + 0.6, p.y);
     this.target.lerp(aim, Math.min(1, dt * 8));
     if (this.target.distanceTo(aim) > 30) this.target.copy(aim);
 
