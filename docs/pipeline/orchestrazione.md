@@ -335,3 +335,8 @@
 - [2026-10-30T14:32:37.216Z] lancio T80 su gemini (H:\projects\rune\.claude\worktrees\t80)
 - [2026-10-30T14:32:44.750Z] nota: T45d completato su Gemini (commit c803df1, ADR-0086, 18/18 test passati). Tentativo di integra T45d con conflitto su backlog.md: creato e approvato T80 (gemini, 1%, p0) per merge e risoluzione. Quadro aggiornato.
 - [2026-10-30T14:33:33.695Z] orchestratore: epoca 94 su gemini (contesto a 540 % della finestra)
+- [2026-10-30T14:37:21.584Z] orchestratore: epoca 95 su gemini (contesto a 121 % della finestra)
+- [2026-10-30T14:39:30.825Z] T80: ESITO: fatto — eseguito merge di `task/T45d` in `task/T80`, risolto il conflitto in `docs/plans/backlog.md` (stato `fatto`, pipeline e esito di T45d mantenuti) preservando tutti i blocchi T75-T79 e completando T80; typecheck e suite vitest (lobby, credits, coefficients) verdi (18/18). (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T80)
+- [2026-10-30T14:39:46.165Z] task/T80 integrato in 3d; worktree e branch tolti.
+- [2026-10-30T14:39:52.417Z] task/T45d integrato in 3d; worktree e branch tolti.
+- [2026-10-30T14:41:51.070Z] nota: Epoca 95 su Gemini: integrati con successo T80 e T45d nel base 3d (ADR-0086, lobby multigiocatore, rimossi branch e worktree). T45f sbloccato; predisposte domande per l'infrastruttura Google Cloud. T70 in attesa del reset crediti Claude (16:59 UTC). Quadro aggiornato.
