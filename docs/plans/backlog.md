@@ -1732,7 +1732,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 
 ### T78 · Integrare T45c (l'eredità dei cloni) nel base 3d — `da fare`
-- Pipeline: gemini · stima 2% · approvato · priorità 0
+- Pipeline: claude · stima 2% · approvato · priorità 0
 - Contesto: T45c (`task/T45c`, `ce4b2db`) ha scritto il suo ADR come `docs/adr/0081-l-eredita-dei-cloni.md`, ma nel base 0081 è già «Crediti e spese comuni» (0082 l'account, 0083 Stripe). Leggi `node tools/pipeline/pipeline.mjs dossier T45c` e `traccia T45c`. L'agente ha lasciato 8 test in timeout (`between`, `referente`, `thin`, `wanderers`, `watch`), attribuiti al carico della macchina; per `between`, `referente`, `thin` il confronto con il commit di partenza non è stato fatto.
 - Fare: nel tuo worktree `git merge task/T45c`; rinomina l'ADR in `docs/adr/0084-l-eredita-dei-cloni.md` (o il primo numero libero) e correggi ogni riferimento a ADR-0081 che parla dell'eredità (AGENTS.md, `docs/adr/README.md`, backlog, commenti in `src/kernel/heritage.ts`, `cards.ts`, `clone.ts`, test), lasciando ADR-0081 ai crediti. Risolvi i conflitti tenendo entrambe le aggiunte. Fai girare `npm run typecheck`, `npx vitest run tests/heritage.test.ts tests/clone.test.ts tests/cards.test.ts tests/credits.test.ts` e, uno per volta, `tests/between.test.ts tests/referente.test.ts tests/thin.test.ts tests/wanderers.test.ts tests/watch.test.ts`: se uno fallisce, provalo anche su `3d` e di' nell'esito se il guasto c'era già.
 - Fatto quando: typecheck e test indicati verdi (o fallimenti dimostrati preesistenti), commit su `task/T78`. Poi l'orchestratore fa `integra T78` e `integra T45c`.
