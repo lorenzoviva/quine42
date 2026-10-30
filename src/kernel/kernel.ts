@@ -4598,12 +4598,15 @@ export class Kernel {
     const next = Math.round(amount * 1e6) / 1e6;
     const entry = this.wanderersById.get(id);
     if (entry) entry.crediti = next;
-    const file = playerFile(id);
-    const saved = readWandererState(this.files, id) ?? { nome: entry?.nome ?? id };
-    saved.crediti = next;
-    const text = JSON.stringify(saved, null, 1) + '\n';
-    this.files[file] = text;
-    this.repo.write(file, text);
+    // A mirror only shows what the server says: the player file is the server's, never a commit of the master's branch.
+    if (!this.mirror) {
+      const file = playerFile(id);
+      const saved = readWandererState(this.files, id) ?? { nome: entry?.nome ?? id };
+      saved.crediti = next;
+      const text = JSON.stringify(saved, null, 1) + '\n';
+      this.files[file] = text;
+      this.repo.write(file, text);
+    }
     this.bus.emit('credits:changed', { id, crediti: next });
     return true;
   }
