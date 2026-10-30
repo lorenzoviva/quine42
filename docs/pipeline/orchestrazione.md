@@ -511,3 +511,6 @@
 - [2026-10-30T22:41:20.002Z] orchestratore: epoca 162 su claude (contesto a 59 % della finestra)
 - [2026-10-30T22:52:40.198Z] T91: ESITO: fatto — lo specchio non scrive più il file del viandante con il saldo (i crediti uscivano nel ramo del master); il test della morte dà crediti ad Anna e ha 180 s; annotato che ogni avvio di un kernel costa circa 10 s per i programmi della corona. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T91)
 - [2026-10-30T22:52:50.968Z] task/T91 integrato in 3d; worktree e branch tolti.
+- [2026-10-30T22:54:29.183Z] lancio T85 su claude (H:\projects\rune\.claude\worktrees\t85)
+- [2026-10-30T23:23:39.268Z] T85: ESITO: fatto — `ferma --ora|--dopo` (anche `/ferma`, chat web, orchestratore, Ctrl+C) con il registro dello spegnimento e il riepilogo in `avvio.md` al riavvio; gli interrotti riprendono da soli e i task finiti da spenti non ripartono; ADR-0090 (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T85)
+- [2026-10-30T23:23:50.770Z] task/T85 integrato in 3d; worktree e branch tolti.
