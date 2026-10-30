@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 17:05 UTC, epoca 146 su **claude** (di nuovo crediti: 5 ore al 55 %, settimana al 55 %): **T70 ripreso** su Claude (la sua conversazione riparte; risolve i conflitti tra T53b e T56b). Gemini al 26 % (5h), argon fermo fino al 04/11. **T45f** aspetta le risposte in `docs/pipeline/domande/T45f.md` (Project ID, Cloud Run vs VM GCE, regione). T45e aspetta le chiavi Stripe di test per la verifica nel browser.
+Aggiornato il 30/10/2026 alle 17:10 UTC, epoca 146 su **claude** (5 ore 55 %, settimana 55 %). In corso, **un task per provider**: **T70** su Claude (conflitti T53b/T56b; poi integra T70 e T53b), **T81** su Gemini (pagina web della pipeline rotta). T45b fermato (già integrato, ripartiva per errore). Pianificate T81-T89 dalla chat dell'autore. **T45f** aspetta le risposte in `docs/pipeline/domande/T45f.md`; T45e le chiavi Stripe di test.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -37,7 +37,9 @@ Aggiornato il 30/10/2026 alle 17:05 UTC, epoca 146 su **claude** (di nuovo credi
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T70** (claude, p0): worktree t70, merge in corso con risoluzione conflitti; ripreso dopo reset crediti Claude.
+  - **T70** (claude, p0): conflitti T53b/T56b, ripreso dopo il reset.
+  - **T81** (gemini, p0): la pagina web della pipeline (SyntaxError regex). Dopo di lui su Gemini T87.
+  - Dopo T70 su Claude: T82 → T83 → T84 → T85 → T86 (correzioni della pipeline, attive al riavvio di orchestra).
 - **Completati in attesa di integrazione**:
   - **T53b** (claude): in attesa del merge di T70.
 - **Completati e integrati nel base `3d`**:
