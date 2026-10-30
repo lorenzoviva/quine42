@@ -1878,6 +1878,12 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fatto quando: una verifica di prova su una pagina locale riesce da `agy -p`, oppure il README dice che non si può e la pipeline non manda più ad agy i task che chiedono il browser.
 - Esito: verificato sperimentalmente con `agy -p` che Antigravity CLI non supporta flag browser (es. `--chrome` non definito) e non espone strumenti di navigazione/ispezione; il subagente `/browser` cerca `DevToolsActivePort` su Chrome utente e non avvia Chrome in autonomia. Aggiornato `tools/pipeline/config.json` con `"browser": true` per Claude e `false` per Gemini/Argon, aggiornato il prompt comune; in `tools/pipeline/pipeline.mjs` aggiunti `taskNeedsBrowser`, riconoscimento `needsBrowser` nel backlog e nella riga pipeline, blocco in `plan` e `assignTask` se un task browser è indirizzato a provider non-browser, e filtro in `execute` che impedisce il fallback di task browser su Gemini o Argon; documentate le cause e la regola esclusiva per Claude in `docs/pipeline/README.md`, `pianifica.md` e `orchestra.md`; test completi in `tests/pipeline.test.ts`.
 
+### T90 · Integrare T82 (tetti per provider) con T87 (browser solo su Claude) in pipeline.mjs — `da fare`
+- Pipeline: claude · stima 1% · approvato · priorità 0
+- Contesto: `integra T82` del 30/10/2026 si è fermato su un conflitto in `tools/pipeline/pipeline.mjs`: T87 (già nel base `3d`) manda i task con verifica nel browser solo a Claude, mai ad agy; T82 aggiunge i tetti per CLI e modello (`config.json → limiti`), gli slot dinamici e lo slot di riserva (ADR-0087). Leggi `node tools/pipeline/pipeline.mjs dossier T82`, `traccia T82` e `traccia T87`.
+- Fare: nel tuo worktree `git merge task/T82` e risolvi tenendo entrambe le regole (i task col browser solo su Claude e dentro i tetti di T82). Se ci sono conflitti anche in `docs/plans/backlog.md`, tieni lo stato `fatto` e l'esito di T82 e T87 e questo blocco. Esegui solo i test della pipeline (`npx vitest run tests/pipeline.test.ts` e quelli che T82 ha aggiunto) e `npm run typecheck`, NON la suite intera.
+- Fatto quando: test della pipeline e typecheck verdi, commit su `task/T90`. Poi l'orchestratore fa `integra T90` e `integra T82`.
+
 ### T88 · Spendere i crediti che avanzano generando l'universo con gli abbonamenti — `da fare`
 - Pipeline: claude · stima 4% · priorità 90
 - Contesto: obiettivo dell'autore: arrivare al reset settimanale senza crediti residui; ciò che i task non usano va alla generazione dell'universo con le CLI
