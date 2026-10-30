@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 14:36 UTC, epoca 94 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset 17:00 UTC / ~18:00 locali, settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h al 63 %, settimana 43 %; argon fermo fino al 04/11). **T45d (la lobby multigiocatore, ADR-0086)** è completato con successo su Gemini (test 18/18 passati, typecheck pulito, commit `c803df1`). L'integrazione **T80** (p0, Gemini) è in esecuzione nel worktree `t80` per risolvere il conflitto su `docs/plans/backlog.md` (merge di `task/T45d` avviato). T70 (integrazione più piani T53b e salto T56b) è sospeso in attesa del reset crediti su Claude.
+Aggiornato il 30/10/2026 alle 14:37 UTC, epoca 94 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset 17:00 UTC / ~18:00 locali, settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h al 61 %, settimana 43 %; argon fermo fino al 04/11). **T45d (la lobby multigiocatore, ADR-0086)** è completato con successo su Gemini (test 18/18 passati, typecheck pulito, commit `c803df1`). L'integrazione **T80** (p0, Gemini) è in esecuzione attiva nel worktree `t80` per risolvere il conflitto su `docs/plans/backlog.md` (merge di `task/T45d` avviato, conflitti risolti, verifiche in corso). T70 (integrazione più piani T53b e salto T56b) è sospeso in attesa del reset crediti su Claude.
 
 ## Le priorità dell'autore
 
@@ -45,7 +45,7 @@ Aggiornato il 30/10/2026 alle 14:36 UTC, epoca 94 su gemini: **claude ha esaurit
   - **T52** e **T54** (p50): interrotti per dare precedenza al multigiocatore.
 - **Crediti**:
   - **Claude**: 5h al 0 %, settimana al 55 % (fermo fino alle 17:00 UTC / ~18:00 locali, orchestratore su Gemini).
-  - **Gemini**: 5h al 63 %, settimana al 43 % (orchestratore attuale ed esecuzione di T80).
+  - **Gemini**: 5h al 61 %, settimana al 43 % (orchestratore attuale ed esecuzione di T80).
   - **Argon**: fermo fino al 04/11.
 
 ## Da fare appena possibile
