@@ -1842,7 +1842,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fatto quando: test del semaforo verdi; il prompt in `config.json` e il README dicono di usare il turno.
 - Esito: ADR-0088. `pipeline.mjs turno browser|test -- <comando>` (`runInTurn`): semaforo in `.pipeline/lock/` della cartella principale (`lockDir`, `PIPELINE_LOCK`), file del titolare creato in modo esclusivo, coda nell'ordine d'arrivo (`<tipo>.attesa/`, `tryTurn`, `leaveTurn`, `holderOf`), un processo morto o un turno oltre `turni.<tipo>.massimoMinuti` (45/60) non blocca; `turno` da solo e `stato` dicono chi lo tiene; la CLI di ogni task riceve `PIPELINE_TASK`. In `esegui` `holdBack`: mai due task col browser insieme (anche riprendendo), lanci nuovi distanziati di `intervalloLanciMinuti` (10). Prompt di `config.json`, README (regole 6-7), `orchestra.md`, AGENTS.md aggiornati. 6 test nuovi in `tests/pipeline.test.ts` (60/60, uno con due processi veri), typecheck verde. La suite intera, lanciata nel turno: 554/609, i 55 falliti sono in file che non toccano la pipeline (timeout per il carico della macchina; `branch.test.ts` e un test di `between.test.ts` falliscono anche da soli, già sul base: da guardare a parte). Diverso dal previsto: la verifica nel browser tiene il turno con la sua preview (`turno browser -- npx vite preview …` in background), non con un comando a parte.
 
-### T84 · L'orchestratore parla solo quando serve, e con meno epoche — `da fare`
+### T84 · L'orchestratore parla solo quando serve, e con meno epoche — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 3
 - Dipende da: T83.
 - Contesto: in attesa dei reset Gemini ha aperto più di 100 epoche senza portare avanti nessun task («contesto a 114 % della finestra»), con risposte prolisse ogni volta:
@@ -1851,6 +1851,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   non per gli eventi di routine né quando non c'è nulla in corso; capire e correggere la misura del contesto; un `avvio.md` compatto (niente indice intero, ultime chat troncate,
   niente messaggi ripetuti dell'orchestratore); in `orchestra.md` la regola delle risposte brevi.
 - Fatto quando: un test che con soli eventi di routine non apre turni, uno sulla misura del contesto, un `avvio.md` d'esempio sotto un tetto di dimensione.
+- Esito: ADR-0089. Il ciclo dell'orchestratore (`pump`) interpella l'agente solo quando `shouldRunTurn` rileva messaggi dell'autore in coda o eventi di decisione (`wakes`: esiti `ESITO: fatto|fallito|in attesa`, `limite di`, `fallito`, `conflitti`), mai per eventi di routine né quando non c'è nulla in corso o a inizio epoca vuota. Misura del contesto corretta in `contextOf`: per Gemini/agy `input_tokens` contiene già la cache (`cache_read_tokens`) e non viene sommata due volte quando `input_tokens >= cache_read_tokens`. Pagina di avvio `avvio.md` compatta (`startPage`, `compactChat`): rimosso l'indice intero dei task, chat troncata a 250 caratteri su max 8 elementi e deduplicata (niente boilerplate ripetuti dell'orchestratore come «quadro aggiornato»). Regola delle risposte brevi documentata in `docs/pipeline/orchestra.md`. 3 test nuovi in `tests/pipeline.test.ts` (63/63), typecheck a zero errori.
 
 ### T85 · Spegnere la pipeline in modo sicuro — `da fare`
 - Pipeline: claude · stima 3% · approvato · priorità 4

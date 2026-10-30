@@ -58,20 +58,37 @@ const append = (file, v) => { fs.mkdirSync(path.dirname(file), { recursive: true
 
 // --- Pure parts (tested) -------------------------------------------------------------------------------------------
 
-/** Lines of the diary that need the orchestrator (a launch does not; an outcome, a limit, a stop do). */
-export const wakes = (line) => /ESITO|BROWSER|limite|interrott|non c'è più|integra |conflitti|errore|fallito|fermi/i.test(line);
+/** Lines of the diary that need the orchestrator (only outcomes, limits, stop/conflicts; routine events do not). */
+export const wakes = (line) =>
+  /ESITO\b|\bfallito\b|\bin attesa\b|\bconflitti\b|\blimite di\b|\berrore\b/i.test(line) &&
+  !/tutti fermi per i limiti/i.test(line);
 
 /**
  * How full the orchestrator's context is after a turn, in tokens: Claude gives each model call of the turn
- * (`iterations`), the last one is the whole context; otherwise the turn's input over its calls.
+ * (`iterations`), the last one is the whole context; Anthropic usage reports input_tokens excluding cache;
+ * Gemini/agy reports input_tokens (promptTokenCount) already including cache_read_tokens: adding it doubles the cache.
  */
 export function contextOf(json) {
   const it = Array.isArray(json?.iterations) ? json.iterations.at(-1) : undefined;
   const u = it ?? json?.usage ?? {};
-  const input = (u.input_tokens ?? 0) + (u.cache_read_input_tokens ?? u.cache_read_tokens ?? 0) + (u.cache_creation_input_tokens ?? 0);
+  const hasAnthropicCache = u.cache_read_input_tokens !== undefined || u.cache_creation_input_tokens !== undefined;
+  let input = 0;
+  if (hasAnthropicCache) {
+    input = (u.input_tokens ?? 0) + (u.cache_read_input_tokens ?? 0) + (u.cache_creation_input_tokens ?? 0);
+  } else if (u.cache_read_tokens !== undefined) {
+    const raw = u.input_tokens ?? u.prompt_tokens ?? 0;
+    input = raw >= u.cache_read_tokens ? raw : raw + u.cache_read_tokens;
+  } else {
+    input = u.input_tokens ?? u.prompt_tokens ?? 0;
+  }
   if (it) return input + (u.output_tokens ?? 0);
   const calls = Math.max(1, json?.num_turns ?? 1);
   return Math.round(input / calls);
+}
+
+/** Whether the orchestrator should run a turn: only for author messages or decision-asking events. */
+export function shouldRunTurn(messages = [], events = []) {
+  return messages.length > 0 || events.some((e) => Boolean(e.sveglia));
 }
 
 /** The provider the orchestrator should run on: the first of `order` that is not stopped and above the threshold. */
@@ -105,27 +122,45 @@ function log(chi, testo, provider) {
   append(CHAT, { t: now(), chi, provider, testo });
 }
 
-/** The page a new epoch starts from. */
-function startPage(s, reason) {
-  const quadro = fs.existsSync(QUADRO) ? fs.readFileSync(QUADRO, 'utf8') : '(ancora nessun quadro: scrivilo tu)';
-  const index = spawnSync(process.execPath, [path.join(REPO, 'tools', 'pipeline', 'pipeline.mjs'), 'indice'], { cwd: REPO, encoding: 'utf8' }).stdout;
-  const chat = lines(CHAT).slice(-OPTS.chat).map((c) => `- ${c.t} ${c.chi}${c.provider ? ` (${c.provider})` : ''}: ${c.testo.length > 1500 ? `${c.testo.slice(0, 1500)}…` : c.testo}`);
+/** Compacts recent chat messages: truncates length and filters duplicate/boilerplate orchestrator messages. */
+export function compactChat(chatLines = [], maxItems = 8, maxLen = 250) {
+  const filtered = [];
+  let lastOrch = '';
+  for (const c of chatLines) {
+    const text = String(c?.testo ?? '').trim();
+    if (c?.chi === 'orchestratore') {
+      if (text === lastOrch || text === 'quadro aggiornato' || text.startsWith('orchestratore: epoca')) continue;
+      lastOrch = text;
+    } else {
+      lastOrch = '';
+    }
+    filtered.push(c);
+  }
+  return filtered.slice(-maxItems).map((c) => {
+    const clean = String(c.testo ?? '').replace(/\s+/g, ' ').trim();
+    const short = clean.length > maxLen ? `${clean.slice(0, maxLen)}…` : clean;
+    return `- ${c.t} ${c.chi}${c.provider ? ` (${c.provider})` : ''}: ${short}`;
+  });
+}
+
+/** The page a new epoch starts from: compact start page without whole task index and with truncated chat. */
+export function startPage(s, reason, opts = {}) {
+  const repo = opts.repo ?? REPO;
+  const quadroPath = opts.quadro ?? path.join(repo, 'docs', 'pipeline', 'quadro.md');
+  const chatFile = opts.chatFile ?? path.join(opts.stateDir ?? STATE_DIR, 'orchestra', 'chat.jsonl');
+  const chatList = opts.chat ?? lines(chatFile);
+  const quadro = fs.existsSync(quadroPath) ? fs.readFileSync(quadroPath, 'utf8') : '(ancora nessun quadro: scrivilo tu)';
+  const chat = compactChat(chatList, opts.maxChat ?? 8, opts.maxLen ?? 250);
   return [
     `# Avvio dell'epoca ${s.epoca} dell'orchestratore (${s.provider})`,
     '',
     `Motivo: ${reason}. Sei l'orchestratore della pipeline di QUINE42: segui \`docs/pipeline/orchestra.md\` (leggilo ora, e \`AGENTS.md\`).`,
     'Il processo che ti fa girare (`node tools/pipeline/pipeline.mjs orchestra`) ti porta i messaggi dell\'autore e gli eventi della pipeline;',
-    'ciò che rispondi l\'autore lo legge nel terminale. Non fare lavoro sul codice: decidi e delega.',
+    'ciò che rispondi l\'autore lo legge nel terminale. Risposte brevi ed essenziali (fatti e decisioni, poche righe). Non fare lavoro sul codice: decidi e delega.',
     '',
     '## Il quadro (docs/pipeline/quadro.md, lo tieni tu)',
     '',
     quadro.trim(),
-    '',
-    '## Indice dei task (`node tools/pipeline/pipeline.mjs indice`)',
-    '',
-    '```',
-    index.trim(),
-    '```',
     '',
     '## Gli ultimi messaggi della chat',
     '',
@@ -233,8 +268,7 @@ export async function orchestra({ agente, porta } = {}) {
 
         const st = state();
         const events = lines(EVENTS).filter((e) => e.n > st.consegnati);
-        const urgent = events.some((e) => e.sveglia);
-        if (!queued.length && !urgent && st.sessione) break;
+        if (!shouldRunTurn(queued, events)) break;
         const messages = queued.map((q) => q.testo);
         const body = composeTurn(messages, events) || '[pipeline] Nuova epoca: leggi la pagina di avvio e di\' all\'autore a che punto siamo.';
         let prompt;
