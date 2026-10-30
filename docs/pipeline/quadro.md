@@ -33,7 +33,8 @@ Aggiornato il 30/10/2026 alle ~12:01 UTC (~13:01 locali), epoca 70 su claude (or
 
 - **Pronti / In corso**:
   - **T70** (claude, p0, sessione preservata): ripreso alle 12:00 UTC nel worktree t70.
-  - **T45b** (claude, p6) e **T45c** (claude, p7): rimessi in coda alle 12:01 UTC (ripartono da capo), priorità multigiocatore.
+  - **T45b** (claude, p6): lanciato alle 12:02 UTC.
+  - **T45c** (claude): fatto alle 12:58 (catena `origini` nelle carte, quote di eredità con MinHash, coefficienti `eredita` in universe.json). Il suo ADR usa 0081, già preso dai crediti: **T78** (claude, p0) fa il merge, rinumera l'ADR (0084) e verifica i test in timeout; poi `integra T78` e `integra T45c`.
 - **Completati e integrati nel base `3d`**:
   - **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **Completati in attesa di integrazione**:
