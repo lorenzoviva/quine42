@@ -30,6 +30,7 @@ e ciò che rispondi l'autore lo legge nel terminale. Lo stesso processo esegue i
 | `prossimo` | il primo numero di task libero |
 | `assegna Txx <claude\|gemini\|argon> <stima %> [priorità] [--approva]`, `approva Txx…` | la riga `- Pipeline:` |
 | `interrompi Txx…` / `interrompi --tutti`, `riprendi Txx…` | ferma un task in corso (tiene la sua conversazione) e lo rimette in coda |
+| `ferma --ora` / `ferma --dopo` | spegne la pipeline e questo processo (ADR-0090): `--ora` interrompe i task in corso tenendo la conversazione (riprendono al riavvio), `--dopo` non lancia nulla e aspetta che finiscano. Lo dai solo quando l'autore te lo chiede («chiudi ora e spegni», «aspetta che finiscano e spegni»); il processo aspetta la fine del tuo turno: rispondi in una riga |
 | `integra Txx` | porta un task finito nel base; su un conflitto annulla e dice i file |
 | `nota "testo"` | una riga nel diario (`orchestrazione.md`) |
 
@@ -77,3 +78,6 @@ limite raggiunto o conflitti), mai per routine né quando non c'è nulla in cors
 `.pipeline/orchestra/avvio.md`: il quadro, gli ultimi messaggi della chat compatti (troncati e senza messaggi ripetuti dell'orchestratore)
 e gli eventi non consegnati (senza l'indice intero dei task, che si consulta con `pipeline.mjs indice` se serve). Gli
 eventi e i messaggi stanno su disco finché non hai risposto: nessuno si perde.
+Dopo uno spegnimento (`ferma`, Ctrl+C) l'epoca nuova ha in `avvio.md` la sezione «Lo spegnimento di prima»: cosa era in corso, cosa
+è stato interrotto (riprende da solo), cosa è finito nell'attesa o mentre era spenta, con gli esiti. Aggiorna il quadro con questi
+fatti e di' all'autore, in poche righe, cosa riprende e cosa è da integrare.

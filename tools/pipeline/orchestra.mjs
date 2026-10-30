@@ -11,7 +11,7 @@ import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
-import { bus, BUDGET, CONFIG, execute, loadBudget, now, readJson, readOutput, REPO, say, setOrchestrator, STATE_DIR, usageLimit, writeJson } from './pipeline.mjs';
+import { bus, BUDGET, CONFIG, execute, loadBudget, now, readJson, readOutput, REPO, requestStop, say, setOrchestrator, SHUTDOWN, shutdownRecord, shutdownSummary, STATE_DIR, usageLimit, writeJson } from './pipeline.mjs';
 
 const DIR = path.join(STATE_DIR, 'orchestra');
 const STATE = path.join(DIR, 'stato.json');
@@ -21,6 +21,7 @@ const INBOX = path.join(DIR, 'coda.json');
 const START = path.join(DIR, 'avvio.md');
 const LONG = path.join(DIR, 'messaggio.md');
 const QUADRO = path.join(REPO, 'docs', 'pipeline', 'quadro.md');
+const RUNS = path.join(STATE_DIR, 'esecuzioni.json');
 const OPTS = { ordine: ['claude', 'argon', 'gemini'], finestra: { claude: 200_000, argon: 1_000_000, gemini: 1_000_000 }, rotazione: 0.5, soglia: CONFIG.sogliaUnSolo, chat: 20, porta: 4242, ...CONFIG.orchestra };
 
 const inboxFile = (stateDir = STATE_DIR) => path.join(stateDir, 'orchestra', 'coda.json');
@@ -162,12 +163,22 @@ export function startPage(s, reason, opts = {}) {
     '',
     quadro.trim(),
     '',
+    ...(s.riavvio?.length ? [
+      '## Lo spegnimento di prima (ADR-0090)',
+      '',
+      ...s.riavvio,
+      '',
+      'Il quadro è di prima dello spegnimento: aggiornalo con questi fatti, e di\' all\'autore cosa riprende e cosa è da integrare.',
+      '',
+    ] : []),
     '## Gli ultimi messaggi della chat',
     '',
     ...(chat.length ? chat : ['(nessuno)']),
     '',
   ].join('\n');
 }
+
+let turn; // the CLI of the turn running now (Ctrl+C stops it)
 
 /** Runs one turn of the orchestrator on its CLI; never throws. */
 function runTurn(provider, sessione, prompt) {
@@ -176,6 +187,7 @@ function runTurn(provider, sessione, prompt) {
   return new Promise((resolve) => {
     let text = '';
     const child = spawn(conf.cmd, args, { cwd: REPO, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
+    turn = child;
     child.stdout.on('data', (d) => { text += d; });
     child.stderr.on('data', (d) => { text += d; });
     child.on('error', (e) => resolve({ code: -1, text: `${text}\n${e.message}` }));
@@ -226,6 +238,7 @@ export async function orchestra({ agente, porta } = {}) {
         const cmdIds = [];
         for (const item of rawInbox) {
           if (item.testo === '/epoca') { rotate = 'chiesto dall\'autore'; cmdIds.push(item.id); }
+          else if (/^\/ferma\s+(ora|dopo)$/.test(item.testo)) { requestStop(item.testo.split(/\s+/)[1], { chi: 'autore' }); cmdIds.push(item.id); }
           else if (item.testo.startsWith('/agente')) {
             const p = item.testo.split(/\s+/)[1];
             if (CONFIG.providers[p]) wanted = p;
@@ -304,6 +317,7 @@ export async function orchestra({ agente, porta } = {}) {
         try { json = JSON.parse(r.text.trim().split('\n').reverse().find((l) => l.startsWith('{')) ?? '{}'); } catch { /* not JSON */ }
         const s3 = state();
         Object.assign(s3, { sessione: out.session ?? s3.sessione, contesto: contextOf(json), consegnati: events.at(-1)?.n ?? s3.consegnati });
+        if (out.session) s3.riavvio = undefined; // told, in its start page
         saveState(s3);
         for (const m of messages) log('autore', m);
         if (events.length) log('pipeline', events.map((e) => e.testo).join('\n'));
@@ -318,8 +332,29 @@ export async function orchestra({ agente, porta } = {}) {
     }
   }
 
-  // The pipeline runs in this process; its diary lines become events.
-  void execute({ always: true });
+  // The pipeline runs in this process; its diary lines become events. When it has shut down (`ferma`, `/ferma`, Ctrl+C:
+  // ADR-0090) the process ends, after the orchestrator's turn (it may be the one that asked) and, for `dopo`, its quadro.
+  let stopping; // why: Ctrl+C does not wait for the turn
+  const idle = async (ms) => { for (const end = Date.now() + ms; busy && Date.now() < end;) await new Promise((r) => setTimeout(r, 500)); };
+  void execute({ always: true }).then(async (res) => {
+    if (!res?.fermata) return;
+    await idle(stopping === 'Ctrl+C' ? 0 : 120_000);
+    const s = state();
+    if (res.fermata === 'dopo' && s.sessione && !busy) { busy = true; await closeEpoch(s, 'la pipeline si spegne'); }
+    print('·', `pipeline spenta (${res.fermata}): al prossimo avvio l'orchestratore saprà cosa è stato interrotto e cosa è finito`);
+    process.exit(0);
+  });
+
+  // What the last shutdown left (the start of `execute` above has already resumed or finished its runs): the new epoch's
+  // start page says it.
+  const record = readJson(SHUTDOWN, undefined);
+  if (record) {
+    fs.rmSync(SHUTDOWN, { force: true });
+    const s = state();
+    Object.assign(s, { sessione: undefined, riavvio: shutdownSummary(record, readJson(RUNS, {})), motivo: 'riavvio dopo lo spegnimento', epoca: s.provider ? s.epoca + 1 : s.epoca, contesto: 0 });
+    saveState(s);
+    queue(`pipeline riaccesa dopo lo spegnimento del ${record.t} (ferma --${record.modo})`, true);
+  }
   setInterval(() => void pump(), 60_000);
   setInterval(() => { if (!busy && readInbox(STATE_DIR).length) void pump(); }, 2_000);
 
@@ -332,15 +367,33 @@ export async function orchestra({ agente, porta } = {}) {
   }
 
   const s = state();
-  console.log(`Orchestratore: ${s.provider ? `${s.provider}, epoca ${s.epoca}` : 'nuovo'} · scrivi un messaggio, oppure /stato /agente <provider> /epoca /esci`);
+  console.log(`Orchestratore: ${s.provider ? `${s.provider}, epoca ${s.epoca}` : 'nuovo'} · scrivi un messaggio, oppure /stato /agente <provider> /epoca /ferma ora|dopo /esci (Ctrl+C: /ferma ora)`);
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout, prompt: '> ' });
   rl.prompt();
+  // Ctrl+C is `ferma --ora`, clean: the tasks are interrupted with their conversation and resume at the next start.
+  const interrupt = () => {
+    if (stopping) process.exit(130);
+    stopping = 'Ctrl+C';
+    print('·', 'Ctrl+C: interrompo i task in corso (riprendono al riavvio) e spengo; Ctrl+C di nuovo per uscire subito');
+    turn?.kill();
+    requestStop('ora', { chi: 'Ctrl+C' });
+    setTimeout(() => process.exit(0), 30_000).unref();
+  };
+  rl.on('SIGINT', interrupt);
+  process.on('SIGINT', interrupt);
   rl.on('line', (raw) => {
     const line = raw.trim();
     if (!line) return rl.prompt();
     if (line === '/esci') {
+      writeJson(SHUTDOWN, shutdownRecord(readJson(RUNS, {}), { modo: 'esci', t: now(), chi: 'autore' }));
       console.log('I task in corso continuano: al prossimo avvio li ritrovo.');
       process.exit(0);
+    }
+    if (line === '/ferma ora' || line === '/ferma dopo') {
+      const modo = line.split(' ')[1];
+      console.log(modo === 'ora' ? 'Interrompo i task in corso (riprendono al riavvio) e spengo.' : 'Niente lanci nuovi: spengo quando i task in corso finiscono.');
+      requestStop(modo, { chi: 'autore' });
+      return rl.prompt();
     }
     if (line === '/stato') {
       console.log(spawnSync(process.execPath, [path.join(REPO, 'tools', 'pipeline', 'pipeline.mjs'), 'stato'], { cwd: REPO, encoding: 'utf8' }).stdout);
