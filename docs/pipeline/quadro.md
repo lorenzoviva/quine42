@@ -36,11 +36,11 @@ Aggiornato il 30/10/2026 alle 23:33 UTC, epoca 162 su **claude**. **Catena delle
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T91** in corso su claude (non interrompere). **Ordine dell'autore (22:35): solo T85 e T86 (T87 è già fatto), su claude, uno alla volta, dopo T91; niente altri task; poi avvisarlo che chiude con Ctrl-C e riavvia.** T85 tolto dagli approvati apposta (altrimenti la pipeline lo manda su gemini per le alternative di config.json): riapprovarlo quando T91 è finito e integrato, e badare che parta su claude.
+  - Nessuno al lavoro. Catena T82→T86 e T91 integrate. In attesa che l'autore riavvii; poi a regime: un task per provider, priorità multigiocatore.
   - **T52** risulta "in corso" nello stato ma è interrotto nel dossier.
 - **Da guardare (non integrare)**: **T54** finito con errore (codice 1), non approvato.
 - **Completati e integrati nel base `3d`**:
-  - **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
+  - **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **In attesa di chiavi/risposte/verifica browser**:
   - **T45f**: sbloccato, in attesa di GCP Project ID e scelte di deploy (`docs/pipeline/domande/T45f.md`).
   - **T45e**: codice e test integrati, in attesa credenziali test Stripe per prova interattiva browser.
@@ -48,7 +48,6 @@ Aggiornato il 30/10/2026 alle 23:33 UTC, epoca 162 su **claude**. **Catena delle
   - **T51** (livello mare e motore acqua, p50).
   - **T52** e **T54** (p50): interrotti per dare precedenza al multigiocatore.
   - **T57** (rune come codice, bloccato da T51a).
-  - **T84**, **T85**, **T86** (bloccati a cascata da T83).
 - **Crediti**:
   - **Claude**: 5h al 49 % (reset effettuato alle 22:00 UTC), settimana al 49 % (riprende T83).
   - **Gemini**: 5h al 100 %, settimana al 30 %.
