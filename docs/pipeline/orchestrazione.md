@@ -297,3 +297,8 @@
 - [2026-10-30T13:37:39.217Z] orchestratore: epoca 79 su gemini (contesto a 70 % della finestra)
 - [2026-10-30T13:39:02.261Z] T78: ESITO: fatto — eseguito merge di task/T45c con ADR rinumerato in 0084, typecheck e test dell'eredità/clone/cards/credits passati (23/23) e aggiornato backlog.md (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T78)
 - [2026-10-30T13:39:08.422Z] nota: Epoca 79 avviata su Gemini. T78 in verifica finale su Gemini, T45b e T70 in attesa. Quadro aggiornato.
+- [2026-10-30T13:40:10.354Z] orchestratore: epoca 80 su gemini (contesto a 97 % della finestra)
+- [2026-10-30T13:40:41.434Z] integra T78: conflitti in docs/plans/backlog.md; il base è com'era
+- [2026-10-30T13:42:37.356Z] task/T78 integrato in 3d; worktree e branch tolti.
+- [2026-10-30T13:42:42.031Z] task/T45c integrato in 3d; worktree e branch tolti.
+- [2026-10-30T13:45:16.706Z] nota: Epoca 80 avviata su Gemini. T78 e T45c (eredità cloni, ADR-0084) integrati nel base 3d. Creato T79 (p0, Gemini) per integrare T45b (coefficienti e Low Detail, ADR-0085) e sbloccare T45d. Quadro aggiornato.
