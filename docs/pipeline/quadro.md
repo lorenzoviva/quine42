@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026, fine dell'epoca 2 dell'orchestratore (argon sceso al 9 % settimanale, sotto il 10 %; passa a gemini).
+Aggiornato il 30/10/2026, avvio dell'epoca 3 dell'orchestratore (gemini: argon sceso al 9 % settimanale, sotto il 10 %).
 
 ## Le priorità dell'autore
 
