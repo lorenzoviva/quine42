@@ -97,9 +97,9 @@ export type ClientMsg =
   /**
    * Coming in, as who (T44a): the profile, if the client has one, is checked and repaired by the server. With accounts
    * (T44b, ADR-0082) `token` is the account's (Firebase) and the server makes the id from it; `id` is then not heard;
-   * anonimo (T44b, T45a, ADR-0081).
+   * anonimo (T44b, T45a, ADR-0081); tetto di spesa in USD per questa sessione (T45d, ADR-0086).
    */
-  | { t: 'entra'; id: string; nome?: string; profilo?: Partial<Profile>; token?: string; anonimo?: boolean }
+  | { t: 'entra'; id: string; nome?: string; profilo?: Partial<Profile>; token?: string; anonimo?: boolean; tetto?: number }
   /** The wanderer chooses again who they are (T44a): the answer says the profile as the server repaired it. */
   | { t: 'profilo'; seq: number; profilo: Partial<Profile> }
   /** Where the client's wanderer is now, in the world: the server checks the step and may correct it. */
@@ -174,15 +174,17 @@ export type ServerMsg =
   /** What the Council made on the master's branch (T42e): only to the master, the files it changed there. */
   | { t: 'ramo'; files: FileChanges };
 
-/** What another wanderer did to this one (T43a, T43b), or what death cost them (T43c). */
+/** What another wanderer did to this one (T43a, T43b), what death cost them (T43c), or credits notice (T45d). */
 export interface Notice {
-  tipo: 'dici' | 'dai' | 'altro' | 'morte';
+  tipo: 'dici' | 'dai' | 'altro' | 'morte' | 'crediti';
   da: string;
   nome: string;
   testo: string;
   /** A death (T44c): what it took, and where the wanderer wakes up. */
   perso?: string[];
   dove?: 'qui' | 'piazza';
+  /** Reason when credits or tetto are exhausted (T45d). */
+  motivo?: 'finiti' | 'tetto';
 }
 
 /** A line someone (or something) said back, as the game shows it in its dialog box. */

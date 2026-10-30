@@ -1,7 +1,7 @@
 // Module discovery: every directory under modules/ with a manifest.json is a self-contained module.
 // Modules talk only through components and events; no implicit dependencies.
 
-import type { FileMap, ModuleEntry, UniverseConfig } from './types';
+import type { AiMinimi, FileMap, ModuleEntry, UniverseConfig } from './types';
 import { repairCoefficients, repairPartita, type Validator } from './validator';
 import { DEFAULT_PARTITA } from './partita';
 
@@ -15,12 +15,36 @@ export const DEFAULT_CONFIG: UniverseConfig = {
   partita: DEFAULT_PARTITA,
 };
 
+/** Repairs quality and spending minimums of an universe (T45d). */
+export function repairMinimi(raw: unknown): AiMinimi | undefined {
+  if (!raw || typeof raw !== 'object') return undefined;
+  const r = raw as Record<string, unknown>;
+  const out: AiMinimi = {};
+  if (typeof r.textModel === 'string' && r.textModel.trim()) out.textModel = r.textModel.trim();
+  if (r.scultori && typeof r.scultori === 'object') out.scultori = { ...(r.scultori as any) };
+  if (typeof r.tetto === 'number' && Number.isFinite(r.tetto) && r.tetto >= 0) out.tetto = Math.round(r.tetto * 100) / 100;
+  if (r.coefficienti && typeof r.coefficienti === 'object') out.coefficienti = repairCoefficients(r.coefficienti);
+  return Object.keys(out).length > 0 ? out : undefined;
+}
+
 export function readConfig(files: FileMap): { config: UniverseConfig; error?: string } {
   const src = files['universe.json'];
   if (!src) return { config: DEFAULT_CONFIG, error: 'universe.json mancante' };
   try {
     const parsed = JSON.parse(src);
-    return { config: { ...DEFAULT_CONFIG, ...parsed, ai: { ...DEFAULT_CONFIG.ai, ...(parsed.ai ?? {}), coefficienti: repairCoefficients(parsed.ai?.coefficienti) }, partita: repairPartita(parsed.partita) } };
+    return {
+      config: {
+        ...DEFAULT_CONFIG,
+        ...parsed,
+        ai: {
+          ...DEFAULT_CONFIG.ai,
+          ...(parsed.ai ?? {}),
+          coefficienti: repairCoefficients(parsed.ai?.coefficienti),
+          minimi: repairMinimi(parsed.ai?.minimi),
+        },
+        partita: repairPartita(parsed.partita),
+      },
+    };
   } catch (e) {
     return { config: DEFAULT_CONFIG, error: `universe.json: ${(e as Error).message}` };
   }

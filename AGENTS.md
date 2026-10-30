@@ -66,6 +66,7 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
   da 0 a 1, riparati dal validatore; diretti (`sessioni dialoghi trame revisioni modelli`: ritmi allungati) e indiretti (`persone abitanti
   pacchetti cose`: meno di ciò che causa le chiamate); il censimento delle chiamate in `CENSUS`, il preset «Low Detail» (`LOW_DETAIL`, anche
   lo Scultore su Flash-Lite), la stima di un'ora di gioco (`hourlyEstimate`); nella Genesi si scelgono con i modelli (`kernel.setAi`).
+  La **lobby multigiocatore** (ADR-0086, T45d): mostra modelli, coefficienti del master, minimi (`ai.minimi`), tetto crediti che incrementa i budget (`addBudgetFromTetto`); a crediti esauriti o al tetto, tre scelte (ricarica, offline, abbandona); la collezione carte fuori dalla partita con utilizzi.
   Gli abbonamenti (ADR-0077, T68): `ai.provider` (`api` predefinito, `claude`, `antigravity`) e `ai.agenti` (agente → provider)
   mandano i compiti lenti (Genesi, Fucina, modelli dello Scultore, sessioni del Concilio, meccaniche) alla coda `/api/coda`, servita
   da un processo che usa le CLI dell'abbonamento di chi gioca; il resto resta sulle API. Solo in locale, mai sul server del multigiocatore.
@@ -144,9 +145,9 @@ src/
                         thumbs.ts (icone: foto dei modelli), bloom.ts (bagliore dei voxel luminosi), corona3d.ts (corona, studio, avatar), coronaview.ts (la corona nel renderer, solo del master), screens.ts (la parete della Direzione), chain.ts (la catena della Sala sistemi), bench.ts (il banco di prova), overlay.ts (testi, E, mouse),
                         materials.ts, glitch.ts
   ui/                   hud.ts (anche il diario delle missioni), profile.ts (il profilo del viandante), inventory.ts, actions.ts, chat.ts, feed.ts, genesis.ts, editor.ts, console.ts, studio.ts, atlas.ts,
-                        graph.ts + graphlayout.ts (il grafo del mondo nel Nucleo), dom.ts
+                        graph.ts + graphlayout.ts (il grafo del mondo nel Nucleo), dom.ts, lobby.ts (la lobby multigiocatore, minimi, tetto e carte, ADR-0086), creditdialog.ts (la modale crediti esauriti, ADR-0086)
 universe/
-  universe.json         nome, seme, raggio, chunk (18), modelli e budget, `partita` (scelta alla Genesi, ADR-0053), `rilievo.mare` (facoltativo), `eredita` (le quote dei cloni, ADR-0084)
+  universe.json         nome, seme, raggio, chunk (18), modelli e budget, `partita` (scelta alla Genesi, ADR-0053), `ai.minimi` (ADR-0086), `rilievo.mare` (facoltativo), `eredita` (le quote dei cloni, ADR-0084)
   world/                bible.json (memoria del Narratore), style.md (guida di stile dei modelli), canone.md (le rune), lessico.md (come parla la gente), consumi.json,
                         rules.json (regole), people.json (la società, con i ricordi), plots.json (trame),
                         atlas.json (geografia), stato.json (lo stato del mondo), grafo.json (il grafo del mondo, derivato),
