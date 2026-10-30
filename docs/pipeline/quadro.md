@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 17:37 UTC, fine epoca 148 su **claude** (5 ore al 6 %, reset 22:00 UTC; settimana 49 %). **Ordine dell'autore: finire T82-T87 (correzioni della pipeline), poi nessun task nuovo; quando finiscono i task in corso, dirgli che può chiudere con Ctrl-C.** Tolta l'approvazione a T52, T54, T57 perché non partano. T70, T53b, T81, T87 integrati. T82 e T90 integrati (i tetti valgono al riavvio di orchestra). In corso: T83 (claude, partito 17:3x); se si ferma per il limite delle 5 ore riprende dopo le 22:00 UTC. Poi T84-T86. T51 riapparso tra i da approvare: NON approvarlo (ordine dell’autore). Gemini libero, nessun task nuovo.
+Aggiornato il 30/10/2026 alle 17:38 UTC, epoca 149 su **gemini** (claude sotto il 10 %, a 6 %; reset 22:00 UTC). **Ordine dell'autore: finire T82-T87 (correzioni della pipeline), poi nessun task nuovo; quando finiscono i task in corso, dirgli che può chiudere con Ctrl-C.** Tolta l'approvazione a T52, T54, T57 perché non partano. T70, T53b, T81, T87, T82 e T90 integrati. In corso: T83 su Claude (turni per operazioni pesanti); se si ferma per il limite delle 5 ore riprende dopo le 22:00 UTC. Poi la catena T84 → T85 → T86. T51/T89 non approvati. Gemini libero, nessun task nuovo assegnato.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -37,11 +37,11 @@ Aggiornato il 30/10/2026 alle 17:37 UTC, fine epoca 148 su **claude** (5 ore al 
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T82** (claude) in coda/in corso, poi T83 → T84 → T85 → T86; **T87** (gemini) in corso.
-  - Dopo T70 su Claude: T82 → T83 → T84 → T85 → T86 (correzioni della pipeline, attive al riavvio di orchestra).
+  - **T83** (claude) in corso (turni per operazioni pesanti), poi la catena T84 → T85 → T86.
+  - **T52** risulta "in corso" nello stato ma è interrotto nel dossier.
 - **Da guardare (non integrare)**: **T54** finito con errore (codice 1), non approvato.
 - **Completati e integrati nel base `3d`**:
-  - **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
+  - **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **In attesa di chiavi/risposte/verifica browser**:
   - **T45f**: sbloccato, in attesa di GCP Project ID e scelte di deploy (`docs/pipeline/domande/T45f.md`).
   - **T45e**: codice e test integrati, in attesa credenziali test Stripe per prova interattiva browser.
@@ -49,9 +49,10 @@ Aggiornato il 30/10/2026 alle 17:37 UTC, fine epoca 148 su **claude** (5 ore al 
   - **T51** (livello mare e motore acqua, p50).
   - **T52** e **T54** (p50): interrotti per dare precedenza al multigiocatore.
   - **T57** (rune come codice, bloccato da T51a).
+  - **T84**, **T85**, **T86** (bloccati a cascata da T83).
 - **Crediti**:
-  - **Claude**: 5h al 55 %, settimana al 55 % (attivo, sta eseguendo T70).
-  - **Gemini**: 5h al 26 %, settimana al 33 % (orchestratore attuale).
+  - **Claude**: 5h al 6 % (reset 22:00 UTC), settimana al 49 % (sta eseguendo T83).
+  - **Gemini**: 5h al 18 %, settimana al 31 % (orchestratore attuale).
   - **Argon**: fermo fino al 04/11.
 
 ## Da fare appena possibile
