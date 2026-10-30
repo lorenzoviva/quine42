@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 13:58 UTC, epoca 82 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset 16:59 UTC / ~18:00 locali, settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h all'87 %, settimana 50 %; argon fermo fino al 04/11). **T79** e **T45b** (coefficienti e Low Detail, ADR-0085) sono stati integrati con successo nel base `3d` (worktree e branch rimossi), con test mirati (35/35) e typecheck a 0 errori. **T45d (la lobby)** è sbloccato, approvato e assegnato a Gemini (stima 5%, p1) ed è pronto per l'avvio da parte di `esegui`. T70 (integrazione più piani T53b e salto T56b) è sospeso per limite crediti su Claude.
+Aggiornato il 30/10/2026 alle 13:59 UTC, fine epoca 82 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset 16:59 UTC / ~18:00 locali, settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h all'86 %, settimana 50 %; argon fermo fino al 04/11). **T79** e **T45b** (coefficienti e Low Detail, ADR-0085) sono stati integrati con successo nel base `3d` (worktree e branch rimossi), con test mirati (35/35) e typecheck a 0 errori. **T45d (la lobby)** è sbloccato, approvato e in esecuzione attiva su Gemini (stima 5%, p1, worktree `t45d`). T70 (integrazione più piani T53b e salto T56b) è sospeso per limite crediti su Claude.
 
 ## Le priorità dell'autore
 
@@ -19,19 +19,18 @@ Aggiornato il 30/10/2026 alle 13:58 UTC, epoca 82 su gemini: **claude ha esaurit
   - **Suite di test verdi nel base**: test mirati `tests/heritage.test.ts`, `tests/session.test.ts`, `tests/coefficients.test.ts`, `tests/account.test.ts`, `tests/stripe.test.ts`, `tests/credits.test.ts` (35/35 passati) e `npm run typecheck` a 0 errori in `3d`.
   - **Chiavi Stripe per test nel browser**: T45e resta segnato `in attesa` per la verifica browser (in attesa di `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` in `.env` o in chat, segnalate in `docs/pipeline/domande/T45e.md`).
 - **Cosa si aspetta**:
-  1. **Avvio ed esecuzione di T45d** (gemini, p1) da parte di `esegui` nel worktree `t45d`.
+  1. **Esecuzione ed esito di T45d** (gemini, p1) nel worktree `t45d` (la lobby: crediti, coefficienti/modelli, collezione carte fuori partita).
   2. **Reset crediti Claude** (alle 16:59 UTC / ~18:00 locali): ripresa di T70 (integrazione T53b più piani con salto T56b).
   3. **Chiavi di test Stripe** dall'autore per la verifica finale nel browser di T45e.
 - **Intenzioni / prossimi passi**:
-  1. Monitorare l'avvio e l'esecuzione di T45d su Gemini.
-  2. Al termine di T45d: integrare nel base `3d`, preparare task di verifica browser a due schede per Claude dopo il reset.
+  1. Monitorare l'avanzamento di T45d su Gemini.
+  2. Al termine di T45d: integrare nel base `3d`, sbloccare T45f (server su Google Cloud), preparare task di verifica browser a due schede per Claude dopo il reset.
   3. Al reset di Claude: chiudere T70 (`integra T70` e `integra T53b`).
-  4. Procedere poi con T45f (server su Google Cloud).
 
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T45d** (gemini, 5%, p1, approvato): pronto per `esegui`. La lobby: tetto crediti, coefficienti/modelli dell'universo, minimi, esaurimento crediti in partita, collezione carte.
+  - **T45d** (gemini, 5%, p1, approvato): in esecuzione attiva nel worktree t45d. La lobby: tetto crediti, coefficienti/modelli dell'universo, minimi, esaurimento crediti in partita, collezione carte.
   - **T70** (claude, p0): worktree t70 in merge; agente fermo per limite 5h (reset 16:59 UTC).
 - **Completati e integrati nel base `3d`**:
   - **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
@@ -45,7 +44,7 @@ Aggiornato il 30/10/2026 alle 13:58 UTC, epoca 82 su gemini: **claude ha esaurit
   - **T52** e **T54** (p50): interrotti per dare precedenza al multigiocatore.
 - **Crediti**:
   - **Claude**: 5h al 0 %, settimana al 55 % (fermo fino alle 16:59 UTC / ~18:00 locali, orchestratore su Gemini).
-  - **Gemini**: 5h all'87 %, settimana al 50 % (orchestratore attuale e pronto per T45d).
+  - **Gemini**: 5h all'86 %, settimana al 50 % (orchestratore attuale e agente attivo su T45d).
   - **Argon**: fermo fino al 04/11.
 
 ## Da fare appena possibile
