@@ -312,3 +312,5 @@
 - [2026-10-30T13:58:00.553Z] nota: Epoca 82: T79 e T45b (coefficienti e Low Detail, ADR-0085) integrati nel base 3d. Suite verde (35/35 test). T45d (lobby) sbloccato, approvato e assegnato a Gemini (stima 5%, p1), pronto per esegui.
 - [2026-10-30T13:59:22.005Z] orchestratore: epoca 83 su gemini (contesto a 398 % della finestra)
 - [2026-10-30T14:01:34.395Z] orchestratore: epoca 84 su gemini (contesto a 78 % della finestra)
+- [2026-10-30T14:03:50.826Z] orchestratore: epoca 85 su gemini (contesto a 66 % della finestra)
+- [2026-10-30T14:06:49.831Z] nota: Epoca 85 avviata su Gemini. T45d in corso nel worktree t45d su Gemini. T70 sospeso per reset Claude (16:59 UTC). Quadro aggiornato.
