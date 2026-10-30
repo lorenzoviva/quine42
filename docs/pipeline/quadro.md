@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle ~12:01 UTC (~13:01 locali), epoca 70 su claude (orchestratore tornato a claude dopo il reset; claude 5h e settimana al 61 %; gemini 5h al 65 %, settimana 56 %; argon fermo fino al 04/11).
+Aggiornato il 30/10/2026 dopo le 12:58 UTC, fine epoca 70 su claude: **claude sotto il 10 %**, l'orchestratore passa a gemini (gemini 5h al 65 %, settimana 56 % alle 12:00; argon fermo fino al 04/11). I task claude in corso (T70, T45b) e T78 (claude, p0) aspettano crediti: se claude resta fermo a lungo, valuta di riassegnare T78 a gemini (è un merge con rinumerazione ADR, 2 %).
 
 ## Le priorità dell'autore
 
