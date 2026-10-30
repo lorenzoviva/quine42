@@ -182,6 +182,7 @@ export function buildStateSnapshot(opts = {}) {
       sogliaUnSolo: p.config.sogliaUnSolo,
       riserva: p.config.riserva,
       maxParalleli: p.config.maxParalleli,
+      limiti: p.config.limiti ?? {},
       approvazione: p.config.approvazione,
       ordine: p.config.orchestra?.ordine ?? ['claude', 'argon', 'gemini'],
       alternative: p.config.alternative ?? {},
@@ -1434,6 +1435,7 @@ export function renderHtml() {
           <div style="display:flex; justify-content:space-between; font-size:12px;"><span>Finestra 5 ore</span><strong>\${b.sessione ?? '—'}% residuo</strong></div>
           <div class="progress-bar"><div class="progress-fill" style="width:\${Math.max(0, Math.min(100, h5))}%; background:\${hColor};"></div></div>
           <div style="margin:8px 0;">\${counters}</div>
+          <div style="font-size:12px; color:var(--muted);">Slot <strong>\${b.slot ?? '?'}</strong> / tetto \${b.tetto ?? '?'} · in programma \${b.domanda ?? '?'} · esaurimento \${b.previsione ? esc(b.previsione.slice(0, 16).replace('T', ' ')) : '—'} · reset \${b.resetSettimana ? esc(b.resetSettimana.slice(0, 16).replace('T', ' ')) : '—'}</div>
           <div style="display:flex; gap:6px; align-items:center; margin-top:10px;">
             <input type="number" id="manual-budget-\${esc(prov)}" min="0" max="100" value="\${w}" style="width:70px;" />
             <button onclick="setManualBudget('\${esc(prov)}')">Imposta % manuale</button>

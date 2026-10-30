@@ -2,6 +2,19 @@
   "base": "3d",
   "orchestratore": "claude",
   "maxParalleli": 5,
+  "limiti": {
+    "provider": {
+      "claude": 1,
+      "agy": 1
+    },
+    "modello": {
+      "claude": 1,
+      "gemini": 1,
+      "argon": 1
+    }
+  },
+  "giorniPrevisione": 3,
+  "giorniStoria": 7,
   "approvazione": "manuale",
   "riserva": 3,
   "sogliaUnSolo": 10,

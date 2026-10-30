@@ -1814,7 +1814,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fatto quando: la pagina carica senza errori in console (verifica con il browser se lo hai, altrimenti il test di parse basta), test e typecheck verdi.
 - Esito: corretto l'escape della regex `replace(/^\/nota\s+/i, '')` in `tools/pipeline/web.mjs` dentro il template string di `renderHtml()` (usando `^\\/nota\\s+` per non perdere i backslash nel codice client generato); aggiunto test in `tests/pipeline.test.ts` che valida con `new Function(script)` lo script inline estratto da `renderHtml()`; verificati `tests/pipeline.test.ts` (43/43 passati) e `npm run typecheck` con esito verde.
 
-### T82 · Un task per provider: tetti di parallelismo per provider e modello — `da fare`
+### T82 · Un task per provider: tetti di parallelismo per provider e modello — `fatto`
 - Pipeline: claude · stima 4% · approvato · priorità 1
 - Dipende da: T70 (gira su Claude: aspetta che finisca).
 - Contesto: oggi `maxParalleli` (5) è uno solo per tutta la pipeline. Troppi task in parallelo: lasciarne due a metà al reset costa più che finirne uno,
@@ -1830,6 +1830,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   - lo schedule conta solo i task eseguibili e quelli bloccati solo da altri task del backlog (non quelli in attesa dell'autore);
   - `stato` mostra per provider tetto, slot, previsione di esaurimento e reset.
 - Fatto quando: test della pipeline sul calcolo degli slot (previsione prima/dopo il reset, tetto, riserva, 0 %) e typecheck verdi; `orchestra.md`, `docs/pipeline/README.md` e un ADR aggiornati.
+- Esito: ADR-0087. `config.json → limiti` (`provider`: `claude` 1, `agy` 1; `modello`: `claude gemini argon` 1), `giorniPrevisione` (3), `giorniStoria` (7); in `pipeline.mjs` `ceilingOf`, `forecastEmpty`, `weeklyResetOf`, `nextSlot`, `demandOf`, `updateSlots` e il nuovo `capOf` (slot, tetto, riserva a priorità 0, resuming); `esegui` scrive `budget.json` a ogni controllo (storia, slot, anche `letto`); `stato`, `PIANO.md` e la scheda del budget nel web mostrano tetto, slot, task in programma, esaurimento previsto e reset. 9 test nuovi in `tests/pipeline.test.ts` (50/50), typecheck verde; la suite intera non l'ho lanciata (tocca solo la pipeline). Diverso dal previsto: la «riserva» per le urgenze è la priorità 0 (nessun campo nuovo); vicino a 0 % un task sospeso può riprendere se non ce n'è un altro in corso; gli slot non salgono oltre i task in programma ma non scendono per questo.
 
 ### T83 · Il carico della macchina: un solo browser e una sola suite pesante alla volta — `da fare`
 - Pipeline: claude · stima 3% · approvato · priorità 2
