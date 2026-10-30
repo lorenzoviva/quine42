@@ -129,3 +129,5 @@
 - [2026-10-30T05:25:05.818Z] T45a: ESITO: fatto — crediti per viandante, spese comuni divise tra i collegati (+1% P#1), modelli locali a crediti esauriti, assegnazione dal master via console e Referente (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T45a)
 - [2026-10-30T05:25:29.342Z] task/T45a integrato in 3d; worktree e branch tolti.
 - [2026-10-30T05:26:45.255Z] nota: T45a completato su Gemini e integrato in 3d; worktree t45a rimosso.
+- [2026-10-30T05:27:22.202Z] orchestratore: epoca 17 su gemini (contesto a 74 % della finestra)
+- [2026-10-30T05:29:09.823Z] orchestratore: epoca 18 su gemini (contesto a 88 % della finestra)
