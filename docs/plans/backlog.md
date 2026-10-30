@@ -1620,3 +1620,18 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   è in singola (mai in `host.ts`); `#models` e il pannello del Concilio dicono quali agenti vanno su quale abbonamento e cosa c'è in coda;
   documentazione per chi scarica il repository (README: impostare la tabella, lanciare il servitore).
 - Fatto quando: Genesi offline con la coda servita da una CLI finta nel browser, commit.
+
+### T71 · Soglie della pipeline e dell'orchestratore sul limite settimanale per Argon — `da fare`
+- Pipeline: gemini · stima 2% · approvato · priorità 0
+- Contesto: richiesta urgente dell'autore in chat (30/10/2026). La pipeline e l'orchestratore (`tools/pipeline/pipeline.mjs`,
+  `tools/pipeline/orchestra.mjs`, `tools/pipeline/config.json`) fanno affidamento su soglie specifiche (es. per l'orchestratore il 50 %
+  della sessione, o `sogliaUnSolo` / `riserva` / cambio provider dell'orchestratore), ma in `agy -p /usage` **Argon** (`Gemini 4 Argon`)
+  ha **solo il limite settimanale** (nessuna riga per le 5 ore, quindi il contatore `5h` resta a `100 %` predefinito). Poiché Argon è
+  attualmente l'orchestratore, qualsiasi controllo che guardi la sessione di 5 ore invece del limite settimanale per Argon vede `100 %`
+  invece del vero residuo settimanale (`28 %`). Nasce da T61 e T62: leggi `node tools/pipeline/pipeline.mjs dossier T61` e `dossier T62`.
+- Fare: in `tools/pipeline/pipeline.mjs`, `tools/pipeline/orchestra.mjs` e `tools/pipeline/config.json`, verificare tutte le soglie di
+  budget (scelta e rotazione del provider dell'orchestratore, soglia del 50 % o `riserva`/`sogliaUnSolo`, blocco dei task sul provider
+  dell'orchestratore, fallback) e fare in modo che per `argon` (o quando un provider ha solo il limite settimanale e non ha una finestra
+  di 5 ore reale) ogni soglia — inclusa quella della sessione dell'orchestratore — si basi sul **limite settimanale**. Aggiungere i test
+  in `tests/pipeline.test.ts` per il calcolo dei limiti e delle soglie di Argon (settimanale senza 5h) per task e orchestratore.
+- Fatto quando: `tests/pipeline.test.ts` e `npm run typecheck` verdi, commit.

@@ -1,20 +1,20 @@
 # Il piano della pipeline
 
-> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-30T03:13:30.510Z: non modificarlo a mano,
+> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-30T03:18:52.526Z: non modificarlo a mano,
 > la fonte è `docs/plans/backlog.md` (righe `- Pipeline:`).
 
 ## Budget
 
 Orchestratore: **argon** (sotto il 10 % nessun task su di lui; si cambia con `orchestratore <provider>`).
 
-- **claude**: settimana 69 %, 5 ore 0 %, fermo fino a 2026-10-30T06:59:00.000Z (letto da /usage il 2026-10-30T03:12:54.902Z)
+- **claude**: settimana 69 %, 5 ore 0 %, fermo fino a 2026-10-30T06:59:00.000Z (letto da /usage il 2026-10-30T03:18:49.922Z)
   - session, 5h: 0 % residuo, reset 2026-10-30T06:59:00.000Z
   - week (all models), settimana: 69 % residuo, reset 2026-11-05T15:59:00.000Z
-- **gemini**: settimana 86 %, 5 ore 100 % (letto da /usage il 2026-10-30T03:12:57.325Z)
+- **gemini**: settimana 86 %, 5 ore 100 % (letto da /usage il 2026-10-30T03:18:52.521Z)
   - Gemini Models, settimana: 86 % residuo, reset 2026-11-05T17:37:53.000Z
-  - Gemini Models, 5h: 100 % residuo, reset 2026-10-30T08:12:57.000Z
-- **argon**: settimana 28 %, 5 ore 100 % (letto da /usage il 2026-10-30T03:12:57.325Z)
-  - Gemini 4 Argon, settimana: 28 % residuo, reset 2026-11-04T18:44:35.000Z
+  - Gemini Models, 5h: 100 % residuo, reset 2026-10-30T08:18:52.000Z
+- **argon**: settimana 23 %, 5 ore 100 % (letto da /usage il 2026-10-30T03:18:52.521Z)
+  - Gemini 4 Argon, settimana: 23 % residuo, reset 2026-11-04T18:44:35.000Z
 
 ## In corso (9)
 
@@ -33,8 +33,9 @@ Orchestratore: **argon** (sotto il 10 % nessun task su di lui; si cambia con `or
 - **T53b** Le scale come rampe e le strutture su più piani — ESITO: fatto — le strutture hanno più piani: un pavimento per tratto di pieno, `pos.z` tenuta dal kernel, collisione, `floorAt` e taglio del renderer sul piano in cui si è; test della torre a due piani. — claude, 6 %
 - **T68b** Il processo che serve la coda con le CLI — ESITO: fallito (codice 1) — argon, 4 %
 
-## Pronti, in ordine di priorità (1)
+## Pronti, in ordine di priorità (2)
 
+- **T71** Soglie della pipeline e dell'orchestratore sul limite settimanale per Argon — gemini, 2 %
 - **T51** Il livello del mare e un motore dell'acqua — claude, 6 %
 
 ## Da approvare (provider e stima proposti) (0)
