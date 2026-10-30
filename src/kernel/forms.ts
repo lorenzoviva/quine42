@@ -38,6 +38,8 @@ export interface ModelInfo {
   tinta?: string;
   /** Voxels per tile, if not the usual 20 (ADR-0049): big models are written coarser. */
   vpt?: number;
+  /** Milliseconds the program may run, if not `MODEL_TIME`: slow programs drawn by hand (circuito-3D). */
+  tempo?: number;
   /** Artist's critique advice and problems (T48a). */
   consigli?: string[];
   problemi?: string[];
@@ -71,7 +73,12 @@ export interface FormRequest {
   /** Vegetation: per-vertex wind weight (browser runners). */
   sway?: boolean;
   vpt: number;
+  /** Milliseconds the program may run (`ModelInfo.tempo`, else `MODEL_TIME`). */
+  tempo?: number;
 }
+
+/** How long a model's program may run, unless its entry in the index says otherwise. */
+export const MODEL_TIME = 8_000;
 
 export interface FormResult {
   grid: VoxelGrid;
@@ -184,7 +191,7 @@ export class InlineRunner implements FormRunner {
 export function runForm(q: FormRequest): FormResult & { model: ReturnType<typeof compileMjx> } {
   const m = compileMjx(q.xml, q.size ? { size: q.size } : {});
   if (q.tint && m.program.palette[q.tint.symbol]) m.program.palette[q.tint.symbol] = { ...m.program.palette[q.tint.symbol], color: q.tint.color };
-  const r = runMjx(m, q.seed, { deadline: 8_000 });
+  const r = runMjx(m, q.seed, { deadline: q.tempo ?? MODEL_TIME });
   const g = r.grid;
   return {
     model: m,
@@ -274,7 +281,7 @@ export class Forms {
     this.forms.set(key, f);
     const form = f;
     void this.runner
-      .run({ xml, seed, size, tint: tinta, rig: cls.animation === 'camminata', sway: cls.animation === 'vento', vpt })
+      .run({ xml, seed, size, tint: tinta, rig: cls.animation === 'camminata', sway: cls.animation === 'vento', vpt, ...(info?.tempo ? { tempo: info.tempo } : {}) })
       .then((result) => {
         form.result = result;
         form.foot = bodyFoot(result.grid, result.palette, vpt);

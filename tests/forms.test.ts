@@ -21,7 +21,7 @@ describe('the library of models', () => {
       const id = p.slice('models/'.length, -'.xml'.length);
       expect(index[id], id).toBeDefined();
       expect(classOf(index[id].classe), id).toBeDefined();
-      expect(modelErrors(p, bundledFiles[p]), id).toEqual([]);
+      expect(modelErrors(p, bundledFiles[p], index[id].tempo), id).toEqual([]);
     }
     // Every class has its generic model, used when a thing has none of its own.
     for (const c of ['persona', 'animale', 'bestia', 'albero', 'cespuglio', 'roccia', 'sasso', 'oggetto', 'mobile', 'edificio', 'monumento', 'grande']) expect(bundledFiles[`models/${c}.xml`], c).toBeDefined();

@@ -523,6 +523,7 @@ export class Kernel {
     const k = new Kernel(opts);
     k.sandbox = await Sandbox.create(k.makeHost(), opts.wasmUri);
     k.validator = new Validator(k.sandbox);
+    k.validator.modelTime = (id) => k.forms.info(id)?.tempo;
     k.council = new Council(opts.models, () => ({ files: k.files, palette: k.palette, catalog: k.catalog(), graph: () => k.graph() }));
     k.council.onFeed = (e) => {
       k.archive.onFeed(e, (x) => k.pathForFeed(x));

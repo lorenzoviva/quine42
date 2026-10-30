@@ -56,12 +56,12 @@ export const MODEL_RE = /^[a-z0-9][a-z0-9-]{0,40}$/i;
  * A model of the library must compile, finish and build something that stands: what the front-end can
  * mend it mends (ADR-0036), the rest goes back with the line of the error.
  */
-export function modelErrors(path: string, xml: string): string[] {
+export function modelErrors(path: string, xml: string, time = 8_000): string[] {
   try {
     const size = /<(?!!)[a-z]+\b[^>]*\ssize="/i.test(xml) ? undefined : boxOf(classOf('oggetto')!);
     const m = compileMjx(xml, size ? { size } : {});
-    const r = runMjx(m, 1, { deadline: 8_000 });
-    if (!r.finished) return [`${path}: il programma non finisce in 8 secondi (ogni crescita deve avere steps)`];
+    const r = runMjx(m, 1, { deadline: time });
+    if (!r.finished) return [`${path}: il programma non finisce in ${Math.round(time / 1000)} secondi (ogni crescita deve avere steps; un programma lento scritto a mano può avere \`tempo\` in models/index.json)`];
     return analyse(r, m.program.palette, { grounded: true }).errors.map((e) => `${path}: ${e}`);
   } catch (e) {
     return [`${path}: ${e instanceof Mj3Error ? e.message : (e as Error).message}`];
@@ -104,6 +104,9 @@ export interface PlanVerdict {
 }
 
 export class Validator {
+  /** The time a model of the library may run (its `tempo` in the index), set by the kernel. */
+  modelTime: (id: string) => number | undefined = () => undefined;
+
   constructor(private sandbox: Sandbox) {}
 
   parseManifest(path: string, src: string): { manifest?: Manifest; errors: string[] } {
@@ -190,7 +193,7 @@ export class Validator {
 
   validateFile(path: string, content: string): string[] {
     if (path.endsWith('.lua')) return this.checkLua(path, content);
-    if (/^models\/[^/]+\.xml$/.test(path)) return modelErrors(path, content);
+    if (/^models\/[^/]+\.xml$/.test(path)) return modelErrors(path, content, this.modelTime(path.slice('models/'.length, -'.xml'.length)));
     if (path.endsWith('manifest.json')) return this.parseManifest(path, content).errors;
     if (path.endsWith('.json')) {
       try {

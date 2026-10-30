@@ -321,6 +321,7 @@
   "classe": "oggetto",
   "nome": "Circuito 3D",
   "autore": "a mano (editor MJ, T59)",
-  "vpt": 20
+  "vpt": 20,
+  "tempo": 30000
  }
 }
