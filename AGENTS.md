@@ -121,6 +121,7 @@ src/
     chunks.ts           archivio dei piani dei luoghi
     bench.ts            il banco della Sala sistemi: i casi dei sistemi in un kernel in miniatura (ADR-0052)
     cards.ts            chi paga ogni chiamata, le carte dei contenuti, i loro utilizzi (`world/carte.json`), la collezione (ADR-0056)
+    heritage.ts         l'eredità dei cloni: catena dei titolari, impronte, quote (ADR-0084)
     partita.ts          la partita scelta alla Genesi: livelli della morte, principio per il Concilio (ADR-0053)
     wanderers.ts        i viandanti con un id (`io` in singola), il loro stato in `world/giocatori/`, legami e ricordi per id (ADR-0054)
     situation.ts, screens.ts  la Direzione: il tavolo della situazione e la parete di schermi (T46), funzioni pure
@@ -140,7 +141,7 @@ src/
   ui/                   hud.ts (anche il diario delle missioni), profile.ts (il profilo del viandante), inventory.ts, actions.ts, chat.ts, feed.ts, genesis.ts, editor.ts, console.ts, studio.ts, atlas.ts,
                         graph.ts + graphlayout.ts (il grafo del mondo nel Nucleo), dom.ts
 universe/
-  universe.json         nome, seme, raggio, chunk (18), modelli e budget, `partita` (scelta alla Genesi, ADR-0053), `rilievo.mare` (facoltativo)
+  universe.json         nome, seme, raggio, chunk (18), modelli e budget, `partita` (scelta alla Genesi, ADR-0053), `rilievo.mare` (facoltativo), `eredita` (le quote dei cloni, ADR-0084)
   world/                bible.json (memoria del Narratore), style.md (guida di stile dei modelli), canone.md (le rune), lessico.md (come parla la gente), consumi.json,
                         rules.json (regole), people.json (la società, con i ricordi), plots.json (trame),
                         atlas.json (geografia), stato.json (lo stato del mondo), grafo.json (il grafo del mondo, derivato),
@@ -391,6 +392,11 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   viandanti, carte, consumi; non i rami `rami/*`) e committa ciò che dà `cloneChanges` (`src/kernel/clone.ts`): `name` e
   `partita.master` in `universe.json`; autore e pagante delle carte restano, il titolare resta o, con `titolari: 'master'`, le carte
   del vecchio master passano al nuovo (`passCards`). Nella console del master in multigiocatore, scheda «Universo» (`Console.onClone`).
+- **L'eredità dei cloni** (ADR-0084, T45c): a ogni clone `inheritCards` (`clone.ts`) allunga la catena di ogni carta (`carta.origini`:
+  titolare, universo, impronta MinHash del contenuto, `src/kernel/heritage.ts`) e mette gli utilizzi di allora in `world/carte.json →
+  allaNascita`. A ogni utilizzo dopo, risalendo la catena ogni anello passa indietro `base + copia × (1 − cambio)` (`universe.json →
+  eredita`, 0,1 e 0,4; `sharesOf`), il resto al titolare; `allCards(files, true)` dà le `quote`, `receivedBy` / `kernel.received(id)`
+  ciò che un viandante riceve come titolare di prima.
 - **Il master in god mode** (ADR-0065, T42a): in multigiocatore il master (`partita.master`, fisso come la partita) è un dio
   (`godMode`): dopo i sistemi di ogni tick `keepGods` gli rimette i bisogni pieni (non il mana), la morte annunciata da Lua passa da
   `spareGods` (muore solo un giocatore), `applyEffects` sul suo corpo da parte di un altro lascia passare solo `messaggio`. Gli altri

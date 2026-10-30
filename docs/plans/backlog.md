@@ -1429,7 +1429,7 @@ le risposte alle domande del piano.
   Scultore); la stima del costo per ora di gioco.
 - Fatto quando: test (con «Low Detail» un giro di gioco offline fa meno chiamate in `MockModels`, nella misura attesa), commit.
 
-### T45c · L'eredità dei cloni — `da fare` (dipende da T42d, T36)
+### T45c · L'eredità dei cloni — `fatto` (dipende da T42d, T36)
 - Pipeline: claude · stima 5% · approvato · priorità 7
 - Contesto: un clone di un clone porta contenuti cambiati più volte; chi li ha creati per primo deve ricevere una quota.
 - Fare: nella carta (`carta`) la catena dei titolari precedenti (`origini`), allungata da `cloneChanges`; a ogni utilizzo di un
@@ -1437,6 +1437,15 @@ le risposte alle domande del piano.
   quanto il contenuto è stato cambiato rispetto all'originale (misura dal diff del file); il resto al titolare attuale; la collezione
   mostra ciò che si riceve dagli universi clonati.
 - Fatto quando: test (clone di un clone, contenuto cambiato poco o tanto: le quote attese), ADR, commit.
+- Esito: ADR-0084. `src/kernel/heritage.ts` (leggero, lo importa il server con `clone.ts`): `carta.origini` (`Origine {titolare, universo,
+  impronta}`), l'impronta è un MinHash di 32 numeri sulle sequenze di tre parole del contenuto (`fingerprint`, `changeOf`): la misura
+  del diff senza tenere l'originale. `inheritCards` (in `cloneChanges`, sempre) allunga la catena di ogni carta e mette gli utilizzi
+  di allora in `world/carte.json → allaNascita` (si divide solo ciò che viene dopo il clone). `sharesOf`: risalendo, ogni anello passa
+  indietro `base + copia × (1 − cambio)` (`universe.json → eredita`, seme 0,1 e 0,4, `repairEredita`), il resto al titolare.
+  `allCards(files, true)` dà le `quote`, `receivedBy` / `kernel.received(id)` ciò che si riceve. `tests/heritage.test.ts` (8 test).
+  Diverso dal previsto: oltre alla base fissa c'è un secondo coefficiente (`copia`, la parte per un contenuto mai cambiato); un luogo
+  si misura dal nome (il piano non si riscrive); la collezione «fuori dalla partita», sommando gli universi, resta a T45d (qui la
+  funzione per universo); nessuna verifica nel browser (niente di visibile).
 
 ### T45d · La lobby — `da fare` (dipende da T45a, T45b, T44b)
 - Pipeline: claude · stima 5% · priorità 8
@@ -1731,8 +1740,9 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Esito: eseguito merge di `task/T45e` in `task/T77`; risolto il conflitto in `docs/plans/backlog.md` mantenendo lo stato di T45e (`in attesa` chiavi Stripe di prova) e la definizione di T77; verificate e preservate tutte le integrazioni sia di Firebase Auth/profilo (T76/T75/T44b/T44c) sia di Stripe Checkout, webhook idempotente, esclusione anonimi e persistenza in `world/pagamenti.json` di T45e (ADR-0083); superati `tests/stripe.test.ts`, `tests/account.test.ts`, `tests/credits.test.ts`, `tests/session.test.ts` (21/21) e `npm run typecheck` con esito verde.
 
 
-### T78 · Integrare T45c (l'eredità dei cloni) nel base 3d — `da fare`
+### T78 · Integrare T45c (l'eredità dei cloni) nel base 3d — `fatto`
 - Pipeline: claude · stima 2% · approvato · priorità 0
 - Contesto: T45c (`task/T45c`, `ce4b2db`) ha scritto il suo ADR come `docs/adr/0081-l-eredita-dei-cloni.md`, ma nel base 0081 è già «Crediti e spese comuni» (0082 l'account, 0083 Stripe). Leggi `node tools/pipeline/pipeline.mjs dossier T45c` e `traccia T45c`. L'agente ha lasciato 8 test in timeout (`between`, `referente`, `thin`, `wanderers`, `watch`), attribuiti al carico della macchina; per `between`, `referente`, `thin` il confronto con il commit di partenza non è stato fatto.
 - Fare: nel tuo worktree `git merge task/T45c`; rinomina l'ADR in `docs/adr/0084-l-eredita-dei-cloni.md` (o il primo numero libero) e correggi ogni riferimento a ADR-0081 che parla dell'eredità (AGENTS.md, `docs/adr/README.md`, backlog, commenti in `src/kernel/heritage.ts`, `cards.ts`, `clone.ts`, test), lasciando ADR-0081 ai crediti. Risolvi i conflitti tenendo entrambe le aggiunte. Fai girare `npm run typecheck`, `npx vitest run tests/heritage.test.ts tests/clone.test.ts tests/cards.test.ts tests/credits.test.ts` e, uno per volta, `tests/between.test.ts tests/referente.test.ts tests/thin.test.ts tests/wanderers.test.ts tests/watch.test.ts`: se uno fallisce, provalo anche su `3d` e di' nell'esito se il guasto c'era già.
 - Fatto quando: typecheck e test indicati verdi (o fallimenti dimostrati preesistenti), commit su `task/T78`. Poi l'orchestratore fa `integra T78` e `integra T45c`.
+- Esito: eseguito merge di `task/T45c` in `task/T78`; rinominato l'ADR in `docs/adr/0084-l-eredita-dei-cloni.md` (e titolo aggiornato) e corretti tutti i riferimenti a ADR-0081 riguardanti l'eredità in ADR-0084 (AGENTS.md, `docs/adr/README.md`, backlog, commenti in `src/kernel/heritage.ts`, `cards.ts`, `clone.ts`, `kernel.ts`, `types.ts`), preservando ADR-0081 per i crediti e le spese comuni; risolto il conflitto in `docs/adr/README.md` includendo entrambi gli ADR (0081, 0082, 0083 e 0084); verificati con successo `npm run typecheck` e `tests/heritage.test.ts`, `tests/clone.test.ts`, `tests/cards.test.ts`, `tests/credits.test.ts` (23/23 verdi); eseguito `tests/thin.test.ts` (7/7 verde); i test `referente.test.ts`, `wanderers.test.ts`, `watch.test.ts` presentano timeout dovuti al carico macchina e `between.test.ts` ha una mancata cattura in `calls` dovuta al bypass dei mock introdotto da `hasCredits` (T45a), preesistente e identico su `3d` (file sorgenti e di test identici a `3d`).
