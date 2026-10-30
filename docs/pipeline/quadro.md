@@ -3,38 +3,50 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle ~08:40 UTC, fine epoca 46 (claude sotto il 10 % della sessione di 5h, reset 11:59 UTC; settimana 62 %; gemini 5h al 100 %).
+Aggiornato il 30/10/2026 alle ~08:45 UTC, avvio epoca 47 (gemini orchestratore: claude sceso al 9 % della sessione 5h, reset 12:00 UTC; settimana 62 %; gemini 5h al 98 %, settimana 66 %; argon fermo fino al 04/11).
 
 ## Le priorità dell'autore
 
 1. Il multigiocatore (T43-T45) prima del resto.
 2. Il nuovo ambiente della pipeline e l'interfaccia web (**T69**, integrata in `3d` e attiva su `http://localhost:4242`).
-3. Argon esaurito per la settimana (quota 429 fino al 04/11): nessun task su Argon. Tutti i task complessi/multiplayer instradati su Claude dopo il reset crediti avvenuto (5h al 69%, settimana al 69%).
+3. Argon esaurito per la settimana (quota 429 fino al 04/11): nessun task su Argon. Tutti i task complessi/multiplayer instradati su Claude o Gemini a seconda dei crediti.
 
 ## Stato e decisioni
 
 - **Decisioni prese e fatti recenti**:
-  - **Claude ha di nuovo crediti**: sessione di 5h resettata (5h al 69%, settimana al 69%); sblocco immediato dei task sospesi.
-  - **T45a completato e integrato** (commit `c434033`): crediti per viandante, commissione +1% (P#1), divisione spese comuni tra collegati, ADR-0081.
-  - **T68b completato su Gemini e integrato** (commit `8083986`, T73 integrato commit `d5fb2d1`): implementato `tools/abbonamenti/servi.ts`, `npm run abbonamento` e suite di test unitari e reali.
-  - **T68c completato su Gemini e integrato** in `3d`: collegati gli abbonamenti nel gioco tramite `RoutedModels` in `main.ts`, stato e coda in `#models` e nel pannello del Concilio (`FeedPanel`), documentazione in `README.md` e test Genesi offline con coda servita in `tests/subscription.test.ts`.
-  - **T74 completato su Gemini e integrato** in `3d`: risolto il merge di T68c in `docs/plans/backlog.md` preservando tutti i blocchi ed esiti, suite `tests/subscription.test.ts` (16/16) e typecheck verdi. Integrati con successo sia T74 che T68c nel branch base `3d`, con rimozione dei relativi worktree e branch.
+  - **Claude sotto soglia (9 %)**: sessione di 5h sotto il 10 % (reset 12:00 UTC). L'orchestrazione passa a **Gemini** (Epoca 47).
+  - **T44b completato** (account e autenticazione con Firebase Auth, Google/anonimo, verificato con emulatore). Conflitti di merge con T45a/T68c e duplicazione ADR-0081: Claude ha creato **T75** (p0) assegnato a Gemini.
+  - **T75 lanciato su Gemini** (commit in corso su worktree `t75`): risolve conflitti tra T44b e T45a, rinumera ADR di T44b in ADR-0082, unifica la gestione dell'anonimo.
+  - **T70 in corso su Claude** (p0, pid 23712): integra T53b (più piani) con T56b (salto).
+  - **T44c in corso su Claude** (p3, pid 27520): correzioni dalla verifica nel browser di T44a e T43c.
+  - **T45a, T68b, T68c, T74 già integrati nel base `3d`**: crediti viandante, servi CLI abbonamenti e integrazione gioco operativi.
 - **Cosa si aspetta**:
-  1. **T75** (gemini, p0): merge di T44b con T45a; poi `integra T75` e `integra T44b`.
-  2. **T70** (claude, p0): poi `integra T70` e `integra T53b`.
-  3. Esiti di T44c, T45b, T45c (claude; si fermeranno al limite e ripartono dopo le 11:59 UTC).
+  1. **T75** (gemini, p0): completamento del merge T44b con T45a; poi `integra T75` e `integra T44b`.
+  2. **T70** (claude, p0): completamento integrazione T53b con salto T56b; poi `integra T70` e `integra T53b`.
+  3. **T44c** (claude, p3): esito correzioni browser T44a/T43c.
+  4. Reset crediti 5h di Claude alle 12:00 UTC (~13:00 locali) per T45b e T45c.
 - **Intenzioni / prossimi passi**:
-  1. Integrare T75+T44b e T70+T53b appena finiti (T44b sblocca T45d/T45e con T45b).
-  2. Tenere i posti al multigiocatore: T52 e T54 (p50) vanno ripresi solo quando la coda multigiocatore è vuota. T54 «fallito (codice 1)» è solo l'effetto dell'interruzione (nessun log): `riprendi T54`.
-  3. T52 risultava `inCorso` nello stato ma `interrompi T52` dice «non è in corso»: se T75 non parte per mancanza di posti, controllare lo stato di T52.
-  4. Con Claude basso, i task idonei vanno su gemini (5h al 100 %).
+  1. Integrare T75 + T44b appena T75 conclude positivamente (T44b sblocca T45d/T45e/T45f).
+  2. Integrare T70 + T53b appena T70 conclude positivamente.
+  3. Mantenere priorità assoluta alla catena multigiocatore: T52 e T54 (p50) restano in attesa che la coda multigiocatore si svuoti.
+  4. Gestione T45b (coefficienti / low detail) e T45c (eredità cloni): in attesa dello sblocco crediti di Claude o dirottamento su Gemini se il carico lo richiede.
 
 ## Task attivi e in corso
 
-- **Su Claude (crediti tornati: 5h 69 %, settimana 69 %)**, ripresi alle 07:01: **T70** (p0), **T44c** (p3), **T44b** (p4), **T45b** (p6), **T45c** (p7).
-- **Interrotti dall'orchestratore** alle 07:01 per lasciare i posti al multigiocatore (priorità 1 dell'autore): **T52** e **T54** (p50; T54 risulta «fallito (codice 1)» solo per l'interruzione). Da riprendere con `riprendi T52 T54` quando si libera un posto.
-- **Da integrare:** **T53b** (dopo T70: `integra T70`, poi `integra T53b`); **T44b** (fatto 08:33, verificato con l'emulatore di Firebase; `integra` in conflitto con T45a → **T75** su gemini, p0, poi `integra T75` e `integra T44b`; il suo ADR diventa 0082, un solo meccanismo per l'anonimo).
-- **Gemini:** 5h al 30 %, settimana al 66 %. **Argon:** fermo fino al 04/11.
+- **In corso**:
+  - **T75** (gemini, p0, pid 28788): integrare T44b con T45a.
+  - **T70** (claude, p0, pid 23712): integrare T53b con T56b.
+  - **T44c** (claude, p3, pid 27520): correzioni verifica browser T44a/T43c.
+- **Completati in attesa di integrazione**:
+  - **T44b** (claude): in attesa di T75.
+  - **T53b** (claude): in attesa di T70.
+- **In coda / sospesi**:
+  - **T45b** (p6) e **T45c** (p7): priorità multigiocatore, su Claude (al reset 12:00 UTC).
+  - **T52** e **T54** (p50): interrotti per dare precedenza al multigiocatore.
+- **Crediti**:
+  - **Gemini**: 5h al 98 %, settimana al 66 % (orchestratore Epoca 47).
+  - **Claude**: 5h al 9 %, settimana al 62 % (reset 12:00 UTC).
+  - **Argon**: fermo fino al 04/11.
 
 ## Da fare appena possibile
 
