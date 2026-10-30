@@ -3,18 +3,18 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026, epoca 2 dell'orchestratore (argon: al 13 % settimanale dopo il completamento di T69; claude fermo fino alle 07:00 UTC).
+Aggiornato il 30/10/2026, fine dell'epoca 2 dell'orchestratore (argon sceso al 9 % settimanale, sotto il 10 %; passa a gemini).
 
 ## Le priorità dell'autore
 
 1. Il multigiocatore (T43-T45) prima del resto.
 2. Il nuovo ambiente della pipeline (questo) e l'interfaccia web (**T69**, fatta e integrata in `3d`).
-3. Contenere i crediti: Argon è al `13 %` settimanale, non lanciare altri task su Argon.
+3. Contenere i crediti: Argon è al `9 %` settimanale (non lanciare nulla su Argon); l'autore ha chiesto di aspettare il completamento e l'integrazione di **T71** (tramite **T72**) per riavviare lo script della pipeline.
 
 ## In corso
 
-- **T72** (urgente, `gemini`, priorità 0, stima 1 %, approvato): integrare **T71** (soglie settimanali per Argon, `ESITO: fatto`) con **T69** in `tools/pipeline/pipeline.mjs` (unico file in conflitto su `integra T71`). Quando T72 finisce: `integra T72` e `integra T71`, poi l'autore riavvia lo script della pipeline.
-- **Interrotti per preservare Argon (`13 %` settimanale):** **T45a**, **T45b**, **T45c** e **T68b**. Da riprendere su Claude dopo il reset delle `07:00 UTC` (o su Gemini se l'autore lo chiede), non su Argon.
+- **T72** (urgente, `gemini`, priorità 0, stima 1 %, approvato): integrare **T71** (soglie settimanali per Argon, `ESITO: fatto` su `task/T71`) con **T69** in `tools/pipeline/pipeline.mjs` (unico file in conflitto su `integra T71`). **Appena T72 finisce:** eseguire `integra T72` e poi `integra T71` (che pulisce worktree e branch di T71), e avvisare subito l'autore così può riavviare `node tools/pipeline/pipeline.mjs orchestra`.
+- **Interrotti su richiesta dell'autore (NON riprendere su Argon):** **T45a**, **T45b**, **T45c** e **T68b** (erano stati deviati su Argon quando Claude si è fermato; T68b risulta `fallito (codice 1)` per l'interruzione). Aspettano indicazioni dell'autore dopo il riavvio dello script o il reset di Claude delle `07:00 UTC`.
 - **Sospesi su Claude fino alle 07:00 UTC (`08:00` locali):** **T70** (priorità 0, integrazione di T53b con il salto di T56b), **T44c** (priorità 3), **T44b** (priorità 4, blocca T45d/T45e/T45f), **T52** e **T54**; anche **T51** (che ha già una sessione Claude di T51a) aspetta Claude.
 - **T53b** (strutture su più piani) è finito e verificato nel browser dall'agente, ma aspetta **T70** per risolvere i conflitti con **T56b** (il salto, già integrato, ADR-0080). Quando T70 è finito: `integra T70`, poi `integra T53b` (toglie worktree e branch).
 
