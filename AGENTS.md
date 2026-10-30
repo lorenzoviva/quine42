@@ -62,6 +62,10 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
 - **Google Gemini**: `gemini-3.1-flash-lite` (testo), in
   `universe/universe.json → ai` con i budget (`maxText`, `maxForges`, `maxPacks`, `maxCast`; in multigiocatore `placesPerMinute`),
   il ragionamento (`thinking`, `low`) e il tempo massimo (`timeout`). Prezzi in `src/kernel/ai/prices.ts` (con la data).
+  I **coefficienti di generazione** (`ai.coefficienti`, ADR-0081, T45b, `src/kernel/coefficients.ts`): quanto spesso ogni agente chiama l'IA,
+  da 0 a 1, riparati dal validatore; diretti (`sessioni dialoghi trame revisioni modelli`: ritmi allungati) e indiretti (`persone abitanti
+  pacchetti cose`: meno di ciò che causa le chiamate); il censimento delle chiamate in `CENSUS`, il preset «Low Detail» (`LOW_DETAIL`, anche
+  lo Scultore su Flash-Lite), la stima di un'ora di gioco (`hourlyEstimate`); nella Genesi si scelgono con i modelli (`kernel.setAi`).
   Gli abbonamenti (ADR-0077, T68): `ai.provider` (`api` predefinito, `claude`, `antigravity`) e `ai.agenti` (agente → provider)
   mandano i compiti lenti (Genesi, Fucina, modelli dello Scultore, sessioni del Concilio, meccaniche) alla coda `/api/coda`, servita
   da un processo che usa le CLI dell'abbonamento di chi gioca; il resto resta sulle API. Solo in locale, mai sul server del multigiocatore.
@@ -123,6 +127,7 @@ src/
     cards.ts            chi paga ogni chiamata, le carte dei contenuti, i loro utilizzi (`world/carte.json`), la collezione (ADR-0056)
     heritage.ts         l'eredità dei cloni: catena dei titolari, impronte, quote (ADR-0084)
     partita.ts          la partita scelta alla Genesi: livelli della morte, principio per il Concilio (ADR-0053)
+    coefficients.ts     i coefficienti di generazione: quanto spesso ogni agente chiama l'IA, «Low Detail», censimento, stima oraria (ADR-0081)
     wanderers.ts        i viandanti con un id (`io` in singola), il loro stato in `world/giocatori/`, legami e ricordi per id (ADR-0054)
     situation.ts, screens.ts  la Direzione: il tavolo della situazione e la parete di schermi (T46), funzioni pure
     clone.ts            il clone con un altro master: `universe.json` e le carte che passano (ADR-0068)

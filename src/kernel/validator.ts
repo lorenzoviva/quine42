@@ -12,6 +12,7 @@ import { lex, TOKEN_RE, tokenize } from './runes';
 import { compile, writtenCodes, MjError } from './mj';
 import { layout } from './layout';
 import { analyse } from '../mj/check';
+export { repairCoefficients } from './coefficients';
 import { boxOf, classOf, CLASSES } from '../mj/classes';
 import { Mj3Error } from '../mj/engine';
 import { compileMjx } from '../mj/model';

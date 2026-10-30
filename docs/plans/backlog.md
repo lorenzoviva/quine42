@@ -1418,7 +1418,7 @@ le risposte alle domande del piano.
 - Fatto quando: test headless (due giocatori e il master collegati, una spesa comune divisa in tre; crediti finiti → modelli locali), commit.
 - Esito: modulo `src/kernel/credits.ts` (`costWithFee` con +1% P#1, `splitCost` a quote esatte); saldo crediti in `world/giocatori/<id>.json` gestito solo dal server (`kernel.creditsOf`, `giveCredits`, `deductCredits`); addebito automatico su `models.onCall` con ripartizione delle spese `comune` tra i viandanti connessi (esclusi anonimi); ricarica crediti dal master via console (`src/ui/console.ts`) e via Referente (`askReferente` con incarico `crediti`); a crediti esauriti (`crediti <= 0`) `Council.write` devia sui modelli locali (`MockModels`) e avvisa nel feed; il viandante anonimo (`anonimo: true`) ha 0 crediti non ricaricabili e usa sempre modelli locali; ADR-0081 registrato; test headless in `tests/credits.test.ts` (6/6 passati). Nessuna verifica nel browser richiesta dal criterio (logica headless multiplayer e server).
 
-### T45b · I coefficienti di generazione e la partita «Low Detail» — `da fare`
+### T45b · I coefficienti di generazione e la partita «Low Detail» — `fatto`
 - Pipeline: claude · stima 6% · approvato · priorità 6
 - Contesto: l'autore vuole poter giocare a risparmio. I coefficienti regolano **quanto spesso ogni agente chiama l'IA**: direttamente
   dove c'è un ritmo (sessioni del Concilio ogni N luoghi, dialoghi tra persone, revisioni dello Scultore, trame), indirettamente dove
@@ -1428,6 +1428,14 @@ le risposte alle domande del piano.
   Genesi (e poi nella lobby) i coefficienti e la scelta dei modelli degli agenti (`ai.textModel`, la tabella delle classi dello
   Scultore); la stima del costo per ora di gioco.
 - Fatto quando: test (con «Low Detail» un giro di gioco offline fa meno chiamate in `MockModels`, nella misura attesa), commit.
+- Fatto (ADR-0081): `src/kernel/coefficients.ts` con nove coefficienti (diretti `sessioni dialoghi trame revisioni modelli`, indiretti
+  `persone abitanti pacchetti cose`), riparati dal validatore (`repairCoefficients`, anche il nome di un preset), il censimento `CENSUS`
+  delle 38 chiamate di `docs/conversazioni.md`, il preset `LOW_DETAIL` (che porta anche lo Scultore su Flash-Lite) e `hourlyEstimate`;
+  nella Genesi la sezione «Il dettaglio e i modelli» (preset, cursori, modello del Concilio, modelli dello Scultore per classe, stima
+  di un'ora e ciò che non si regola), scritta da `kernel.setAi`; il modello del testo cambia senza ricaricare (`Models.textModel`).
+  Test: `tests/coefficients.test.ts` (riparazione, ritmi, Scultore, stima, un giro di 12 passi del tappeto: stessi luoghi, sessioni e
+  pacchetti esattamente quanti dicono i coefficienti, meno della metà di ciò che il mondo aggiunge da sé). Rispetto al previsto: le
+  persone, le cose nuove e gli oggetti ignoti scartati sono un'estrazione del seme per origine (uguale a ogni caricamento).
 
 ### T45c · L'eredità dei cloni — `fatto` (dipende da T42d, T36)
 - Pipeline: claude · stima 5% · approvato · priorità 7
