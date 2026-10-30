@@ -51,8 +51,8 @@ Aggiornato il 30/10/2026 alle 13:10 UTC, avvio epoca 72 su gemini: **claude sott
   - **T51** (livello mare e motore acqua, p50).
   - **T52** e **T54** (p50): interrotti per dare precedenza al multigiocatore.
 - **Crediti**:
-  - **Claude**: 5h al 9 %, settimana al 55 % (sotto il 10 %, orchestratore su Gemini).
-  - **Gemini**: 5h al 65 %, settimana al 56 % (orchestratore attuale).
+  - **Claude**: 5h al 7 %, settimana al 55 % (sotto il 10 %, orchestratore su Gemini).
+  - **Gemini**: 5h al 63 %, settimana al 56 % (orchestratore attuale).
   - **Argon**: fermo fino al 04/11.
 
 ## Da fare appena possibile
