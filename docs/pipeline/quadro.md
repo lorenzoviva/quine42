@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 13:49 UTC, rotazione epoca 81 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset 16:59 UTC / ~18:00 locali, settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h al 91 %, settimana 52 %; argon fermo fino al 04/11). **T78** e **T45c** (eredità dei cloni, ADR-0084) sono stati integrati con successo nel base `3d` (worktree e branch rimossi). **T79** è in esecuzione attiva su Gemini (p0, worktree `t79`, PID attivo) per integrare **T45b** (coefficienti e Low Detail, commit `bc77bd9`) con rinumerazione ADR a 0085 per sbloccare la lobby (**T45d**) senza attendere il reset di Claude. T70 (integrazione più piani T53b e salto T56b) è sospeso per limite crediti su Claude.
+Aggiornato il 30/10/2026 alle 13:52 UTC, rotazione epoca 82 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset 16:59 UTC / ~18:00 locali, settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h all'88 %, settimana 51 %; argon fermo fino al 04/11). **T78** e **T45c** (eredità dei cloni, ADR-0084) sono stati integrati con successo nel base `3d` (worktree e branch rimossi). **T79** è in esecuzione attiva su Gemini (p0, worktree `t79`, PID 30488 attivo) per integrare **T45b** (coefficienti e Low Detail, commit `bc77bd9`) con rinumerazione ADR a 0085 per sbloccare la lobby (**T45d**) senza attendere il reset di Claude: merge effettuato, rinominato ADR-0085 e aggiornati i riferimenti, test mirati in corso. T70 (integrazione più piani T53b e salto T56b) è sospeso per limite crediti su Claude.
 
 ## Le priorità dell'autore
 
@@ -49,7 +49,7 @@ Aggiornato il 30/10/2026 alle 13:49 UTC, rotazione epoca 81 su gemini: **claude 
   - **T52** e **T54** (p50): interrotti per dare precedenza al multigiocatore.
 - **Crediti**:
   - **Claude**: 5h al 0 %, settimana al 55 % (fermo fino alle 16:59 UTC / ~18:00 locali, orchestratore su Gemini).
-  - **Gemini**: 5h al 91 %, settimana al 52 % (orchestratore attuale).
+  - **Gemini**: 5h all'88 %, settimana al 51 % (orchestratore attuale e agente su T79).
   - **Argon**: fermo fino al 04/11.
 
 ## Da fare appena possibile

@@ -302,3 +302,6 @@
 - [2026-10-30T13:42:37.356Z] task/T78 integrato in 3d; worktree e branch tolti.
 - [2026-10-30T13:42:42.031Z] task/T45c integrato in 3d; worktree e branch tolti.
 - [2026-10-30T13:45:16.706Z] nota: Epoca 80 avviata su Gemini. T78 e T45c (eredità cloni, ADR-0084) integrati nel base 3d. Creato T79 (p0, Gemini) per integrare T45b (coefficienti e Low Detail, ADR-0085) e sbloccare T45d. Quadro aggiornato.
+- [2026-10-30T13:45:26.964Z] lancio T79 su gemini (H:\projects\rune\.claude\worktrees\t79)
+- [2026-10-30T13:46:33.250Z] orchestratore: epoca 81 su gemini (contesto a 285 % della finestra)
+- [2026-10-30T13:50:03.692Z] orchestratore: epoca 82 su gemini (contesto a 159 % della finestra)
