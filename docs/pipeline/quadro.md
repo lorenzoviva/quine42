@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026, epoca 8 dell'orchestratore (gemini).
+Aggiornato il 30/10/2026, rotazione epoca 8 dell'orchestratore (gemini: chiusura per contesto a 309%).
 
 ## Le priorità dell'autore
 
@@ -15,10 +15,10 @@ Aggiornato il 30/10/2026, epoca 8 dell'orchestratore (gemini).
 
 - **Decisioni prese**:
   - **Script della pipeline riavviato dall'autore**: attive le soglie settimanali Argon (`finestra5h: false`) e l'interfaccia web locale su `http://localhost:4242`.
-  - **Argon riattivato (1 task alla volta)**: riallineato il worktree `t45a` a `3d` e assegnato **T45a** ad Argon (stima 5%, priorità 5, approvato, test headless).
+  - **Argon riattivato (1 task alla volta)**: riallineato il worktree `t45a` a `3d` e lanciato **T45a** su Argon (stima 5%, priorità 5, approvato, test headless).
   - **T45b, T45c, T68b**: restano interrotti/in attesa; nessun altro task partirà su Argon finché T45a è in corso.
 - **Cosa si aspetta**:
-  1. Completamento ed esito di **T45a** su Argon.
+  1. Completamento ed esito di **T45a** su Argon (in corso).
   2. Il reset della sessione di 5 ore di Claude alle `07:00 UTC` (`08:00` locali).
 - **Intenzioni al reset di Claude / prossimi passi**:
   1. Completare **T70** (integrazione T53b con salto T56b, priorità 0 su Claude), poi `integra T70` e `integra T53b`.
@@ -27,7 +27,7 @@ Aggiornato il 30/10/2026, epoca 8 dell'orchestratore (gemini).
 
 ## Task sospesi e in attesa
 
-- **In esecuzione / pronto su Argon (max 1):** **T45a** (priorità 5, pronto per essere lanciato dallo script).
+- **In corso su Argon (max 1):** **T45a** (priorità 5, crediti e spese comuni, in esecuzione nel worktree `t45a`).
 - **Sospesi su Claude fino alle 07:00 UTC (`08:00` locali):** **T70** (priorità 0), **T44c** (priorità 3), **T44b** (priorità 4), **T52**, **T54** e **T51**.
 - **Interrotti in attesa:** **T45b**, **T45c**, **T68b**.
 - **T53b** (strutture su più piani) è finito e verificato nel browser, ma aspetta **T70** per risolvere i conflitti con **T56b**. Quando T70 è finito: `integra T70`, poi `integra T53b`.
