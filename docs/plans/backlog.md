@@ -1651,3 +1651,16 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fatto quando: `npx vitest run tests/pipeline.test.ts` e `npm run typecheck` verdi, commit sul branch `task/T72`. Poi l'orchestratore
   farà `integra T72` e `integra T71`.
 - Esito: eseguito merge di `task/T71` in `task/T72`; risolti i conflitti in `tools/pipeline/pipeline.mjs` mantenendo tutti gli export e le funzioni di T69 (`web.mjs`, `refreshUsage`, `setBudgetManual`, `traceOf`, `parseConversation`, `integrateTask`, ecc.) e combinandoli con le logiche di T71 (`computeBudget`, `capOf`, `loadBudget`, gestione `"finestra5h": false` e allineamento di `sessione` al residuo settimanale per Argon anche in `setBudgetManual`); preservati e integrati i test sia di T69 sia di T71 in `tests/pipeline.test.ts` (42 test passati); `npm run typecheck` verde.
+
+### T73 · Integrare T68b (processo abbonamenti CLI) con T45a in AGENTS.md — `da fare`
+- Pipeline: gemini · stima 1% · approvato · priorità 0
+- Contesto: `integra T68b` del 30/10/2026 si è fermato su un conflitto in `AGENTS.md` (perché nel frattempo è stato
+  integrato T45a con crediti e spese comuni). Leggi `node tools/pipeline/pipeline.mjs dossier T68b` e `dossier T45a`.
+- Fare: nel tuo worktree esegui `git merge task/T68b` e risolvi i conflitti in `AGENTS.md` mantenendo sia le aggiunte
+  di T45a (crediti per viandante, commissione piattaforma +1%, divisione spese comuni, ADR-0081) sia quelle di T68b
+  (`npm run abbonamento` nei comandi e `tools/abbonamenti/` nell'albero).
+  IMPORTANTE: esegui solo `npx vitest run tests/abbonamenti.test.ts` e `npm run typecheck` (con `WaitMsBeforeAsync: 10000`,
+  NON lanciare `npm test` sull'intera suite per evitare timeout o backgrounding).
+- Fatto quando: `npx vitest run tests/abbonamenti.test.ts` e `npm run typecheck` verdi, commit sul branch `task/T73`.
+  Poi l'orchestratore farà `integra T73` e `integra T68b`.
+
