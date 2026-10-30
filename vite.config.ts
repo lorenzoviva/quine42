@@ -4,8 +4,9 @@ import path from 'node:path';
 import { defineConfig, loadEnv, searchForWorkspaceRoot } from 'vite';
 import { geminiProxy } from './server/geminiProxy';
 import { universeStore } from './server/universeStore';
-import { sessionServer } from './server/session';
+import { sessionServer, getActiveUniverseKernel } from './server/session';
 import { accountRoute, accountSettings } from './server/account';
+import { stripeRoute, stripeSettings } from './server/stripe';
 import { subscriptionQueue } from './server/subscriptionQueue';
 
 export default defineConfig(({ mode }) => {
@@ -13,14 +14,21 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   // Accounts (T44b): on only with FIREBASE_PROJECT_ID; the browser asks /api/account how to sign in.
   const accounts = accountSettings(env);
+  const universesDir = path.resolve(process.cwd(), 'universes');
   return {
     // Universes live next to the kernel, each a git repository of its own (ignored by the kernel's).
     // The games of many (T38): their worlds run in this process, one per universe, clients over /api/session.
     // The subscriptions' queue (T68): the slow requests on disk until a process using the CLIs serves them.
     plugins: [
       geminiProxy(env.GEMINI_API_KEY),
-      universeStore(path.resolve(process.cwd(), 'universes')),
+      universeStore(universesDir),
       accountRoute(accounts),
+      stripeRoute({
+        settings: stripeSettings(env),
+        accounts,
+        universesDir,
+        getActiveKernel: getActiveUniverseKernel,
+      }),
       sessionServer(accounts),
       subscriptionQueue(path.resolve(process.cwd(), 'universes', '.coda')),
     ],

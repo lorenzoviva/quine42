@@ -32,7 +32,7 @@ import { hash32, hashStr, hex, Rng } from './rng';
 import { BudgetError, type Models } from './ai/models';
 import { costOf } from './ai/prices';
 import { USAGE_FILE, UsageLedger, type CallRecord } from './ai/usage';
-import { costWithFee, splitCost } from './credits';
+import { costWithFee, splitCost, PAYMENTS_FILE, type PaymentRecord, isPaymentProcessed, recordPayment } from './credits';
 import { MemoryChunks, type ChunkStore } from './chunks';
 import { bodyFoot, bodyGround, Forms, InlineRunner, instanceGrid, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner } from './forms';
 import { guessClass } from '../mj/classes';
@@ -4485,6 +4485,26 @@ export class Kernel {
     this.repo.write(file, text);
     this.bus.emit('credits:changed', { id, crediti: next, delta: amount });
     return true;
+  }
+
+  /**
+   * Applies an idempotent credit recharge from Stripe (T45e).
+   * Refuses anonymous wanderers and already processed events.
+   */
+  creditRecharge(payment: PaymentRecord): { ok: boolean; motivo?: string; duplica?: boolean } {
+    if (!payment.eventId) return { ok: false, motivo: 'manca eventId' };
+    if (isPaymentProcessed(this.files, payment.eventId)) {
+      return { ok: true, duplica: true };
+    }
+    if (this.isAnonymous(payment.wandererId)) {
+      return { ok: false, motivo: 'un anonimo non compra crediti' };
+    }
+    const credited = this.giveCredits(payment.wandererId, payment.crediti);
+    if (!credited) return { ok: false, motivo: 'impossibile accreditare' };
+    recordPayment(this.files, payment);
+    this.repo.write(PAYMENTS_FILE, this.files[PAYMENTS_FILE]);
+    this.bus.emit('payment:received', payment);
+    return { ok: true };
   }
 
   /** Sets a wanderer's credit balance directly (T45a). Returns false for anonymous wanderers. */
