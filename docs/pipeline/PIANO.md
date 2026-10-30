@@ -1,6 +1,6 @@
 # Il piano della pipeline
 
-> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-30T05:57:27.719Z: non modificarlo a mano,
+> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-30T05:58:34.074Z: non modificarlo a mano,
 > la fonte è `docs/plans/backlog.md` (righe `- Pipeline:`).
 
 ## Budget
@@ -10,9 +10,9 @@ Orchestratore: **gemini** (sotto il 10 % nessun task su di lui; si cambia con `o
 - **claude**: settimana 69 %, 5 ore 0 %, fermo fino a 2026-10-30T06:59:00.000Z (letto da /usage il 2026-10-30T05:56:48.540Z)
   - session, 5h: 0 % residuo, reset 2026-10-30T06:59:00.000Z
   - week (all models), settimana: 69 % residuo, reset 2026-11-05T15:59:00.000Z
-- **gemini**: settimana 71 %, 5 ore 47 % (letto da /usage il 2026-10-30T05:57:27.716Z)
+- **gemini**: settimana 71 %, 5 ore 46 % (letto da /usage il 2026-10-30T05:58:34.066Z)
   - Gemini Models, settimana: 71 % residuo, reset 2026-11-05T17:37:53.000Z
-  - Gemini Models, 5h: 47 % residuo, reset 2026-10-30T08:19:40.000Z
+  - Gemini Models, 5h: 46 % residuo, reset 2026-10-30T08:19:40.000Z
 - **argon**: settimana 0 %, 5 ore 0 %, fermo fino a 2026-11-04T18:44:35.000Z (letto da /usage il 2026-10-30T05:56:51.785Z)
   - Gemini 4 Argon, settimana: 0 % residuo, reset 2026-11-04T18:44:35.000Z
 
