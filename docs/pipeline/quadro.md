@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 15:37 UTC, fine epoca 115 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset 17:00 UTC / ~18:00 locali, tra circa 23 minuti; settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h al 48 %, settimana 40 %; argon fermo fino al 04/11). **T80 e T45d (la lobby multigiocatore, ADR-0086)** integrati con successo nel base `3d` (test 18/18 passati, typecheck pulito, rimossi worktree e branch). **T45f (server su Google Cloud)** sbloccato e pronto in attesa delle risposte in `docs/pipeline/domande/T45f.md` (Project ID, architettura Cloud Run vs VM GCE, regione). T70 (integrazione più piani T53b e salto T56b) resta sospeso in attesa del reset crediti su Claude.
+Aggiornato il 30/10/2026 alle 15:39 UTC, epoca 116 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset 16:59 UTC / ~18:00 locali, tra circa 20 minuti; settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h al 46 %, settimana 39 %; argon fermo fino al 04/11). **T80 e T45d (la lobby multigiocatore, ADR-0086)** integrati con successo nel base `3d` (test 18/18 passati, typecheck pulito, rimossi worktree e branch). **T45f (server su Google Cloud)** sbloccato e pronto in attesa delle risposte in `docs/pipeline/domande/T45f.md` (Project ID, architettura Cloud Run vs VM GCE, regione). T70 (integrazione più piani T53b e salto T56b) resta sospeso in attesa del reset crediti su Claude.
 
 ## Le priorità dell'autore
 
@@ -43,8 +43,8 @@ Aggiornato il 30/10/2026 alle 15:37 UTC, fine epoca 115 su gemini: **claude ha e
   - **T52** e **T54** (p50): interrotti per dare precedenza al multigiocatore.
   - **T57** (rune come codice, bloccato da T51a).
 - **Crediti**:
-  - **Claude**: 5h al 0 %, settimana al 55 % (fermo fino alle 17:00 UTC / ~18:00 locali, orchestratore su Gemini).
-  - **Gemini**: 5h al 48 %, settimana al 40 % (orchestratore attuale).
+  - **Claude**: 5h al 0 %, settimana al 55 % (fermo fino alle 16:59 UTC / ~18:00 locali, orchestratore su Gemini).
+  - **Gemini**: 5h al 46 %, settimana al 39 % (orchestratore attuale).
   - **Argon**: fermo fino al 04/11.
 
 ## Da fare appena possibile
