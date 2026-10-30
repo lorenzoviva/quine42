@@ -502,3 +502,12 @@
 - [2026-10-30T22:13:27.535Z] T83: ESITO: fatto — turni su disco per verifica nel browser e suite intera (`pipeline.mjs turno browser|test -- <comando>`), lanci distanziati e mai due task col browser insieme (ADR-0088); test della pipeline 60/60 e typecheck verdi, suite intera 554/609 con fallimenti fuori dalla pipeline. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T83)
 - [2026-10-30T22:13:40.202Z] task/T83 integrato in 3d; worktree e branch tolti.
 - [2026-10-30T22:14:16.993Z] nota: T83 integrato; T84 pronto ma fermo per slot dinamici a 0 su Claude (previsione prima del reset)
+- [2026-10-30T22:14:30.111Z] T84: claude non può, va su gemini
+- [2026-10-30T22:14:30.760Z] lancio T84 su gemini (H:\projects\rune\.claude\worktrees\t84)
+- [2026-10-30T22:24:38.048Z] orchestratore: epoca 161 su claude (contesto a 60 % della finestra)
+- [2026-10-30T22:24:42.551Z] lancio T91 su claude (H:\projects\rune\.claude\worktrees\t91)
+- [2026-10-30T22:28:24.024Z] T84: ESITO: fatto|fallito|in attesa`), i fallimenti (`fallito`), i limiti raggiunti (`limite di <provider>`) e i conflitti di merge (`conflitti`). Gli eventi di routine (`lancio`, `riprendo`, `ancora al lavoro`, `rimesso in coda`, `integrato in`, `tutti fermi per i limiti`, cambi provider) non attivano la sveglia. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T84)
+- [2026-10-30T22:28:37.539Z] task/T84 integrato in 3d; worktree e branch tolti.
+- [2026-10-30T22:41:20.002Z] orchestratore: epoca 162 su claude (contesto a 59 % della finestra)
+- [2026-10-30T22:52:40.198Z] T91: ESITO: fatto — lo specchio non scrive più il file del viandante con il saldo (i crediti uscivano nel ramo del master); il test della morte dà crediti ad Anna e ha 180 s; annotato che ogni avvio di un kernel costa circa 10 s per i programmi della corona. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T91)
+- [2026-10-30T22:52:50.968Z] task/T91 integrato in 3d; worktree e branch tolti.
