@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle ~10:19 UTC (~11:19 locali), epoca 67 (gemini orchestratore: claude al 0 % della sessione 5h, reset 12:00 UTC / ~13:00 locali, ~41m; settimana 61 %; gemini 5h al 66 %, settimana 56 %; argon fermo fino al 04/11).
+Aggiornato il 30/10/2026 alle ~10:22 UTC (~11:22 locali), epoca 68 (gemini orchestratore: claude al 0 % della sessione 5h, reset 12:00 UTC / ~13:00 locali, ~38m; settimana 61 %; gemini 5h al 66 %, settimana 56 %; argon fermo fino al 04/11).
 
 ## Le priorità dell'autore
 
@@ -18,10 +18,10 @@ Aggiornato il 30/10/2026 alle ~10:19 UTC (~11:19 locali), epoca 67 (gemini orche
   - **T45e integrato nel base `3d`**: ricarica crediti con Stripe Checkout (supporto carte e Google Pay), webhook idempotente crittografico HMAC-SHA256, salvataggio in `world/pagamenti.json`, esclusione anonimi, bottoni di ricarica rapida nel profilo (`P`), ADR-0083. Worktree e branch di T45e e T77 rimossi.
   - **Suite di test verdi nel base**: test mirati `tests/stripe.test.ts`, `tests/account.test.ts`, `tests/credits.test.ts`, `tests/session.test.ts` (21/21) e `npm run typecheck` completamente verdi in `3d`.
   - **Chiavi Stripe per test nel browser**: T45e resta segnato `in attesa` per la verifica browser (in attesa di `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` in `.env` o in chat, segnalate in `docs/pipeline/domande/T45e.md`).
-  - **T70 sospeso in attesa del reset di Claude**: sessione preservata; riprenderà automaticamente alle 12:00 UTC (~13:00 locali, ~41m) per completare l'integrazione di T53b con T56b.
+  - **T70 sospeso in attesa del reset di Claude**: sessione preservata; riprenderà automaticamente alle 12:00 UTC (~13:00 locali, ~38m) per completare l'integrazione di T53b con T56b.
 - **Cosa si aspetta**:
   1. **Chiavi di test Stripe** dall'autore in `.env` o in chat per la verifica finale nel browser di T45e.
-  2. **Reset crediti Claude** alle ~12:00 UTC (~13:00 locali, ~41m): ripresa automatica di **T70** (integrazione T53b e salto T56b), poi avanzamento di **T45b** (coefficienti e Low Detail, sbloccando T45d lobby) e **T45c** (eredità cloni).
+  2. **Reset crediti Claude** alle ~12:00 UTC (~13:00 locali, ~38m): ripresa automatica di **T70** (integrazione T53b e salto T56b), poi avanzamento di **T45b** (coefficienti e Low Detail, sbloccando T45d lobby) e **T45c** (eredità cloni).
 - **Intenzioni / prossimi passi**:
   1. Ricevute le chiavi Stripe: eseguire verifica nel browser per T45e.
   2. Al reset di Claude (12:00 UTC): completare T70, eseguire `integra T70` e `integra T53b`.
@@ -45,7 +45,7 @@ Aggiornato il 30/10/2026 alle ~10:19 UTC (~11:19 locali), epoca 67 (gemini orche
   - **T52** e **T54** (p50): interrotti per dare precedenza al multigiocatore.
 - **Crediti**:
   - **Gemini**: 5h al 66 %, settimana al 56 % (orchestratore).
-  - **Claude**: 5h a 0 %, settimana al 61 % (reset 12:00 UTC / ~13:00 locali, ~41m).
+  - **Claude**: 5h a 0 %, settimana al 61 % (reset 12:00 UTC / ~13:00 locali, ~38m).
   - **Argon**: fermo fino al 04/11.
 
 ## Da fare appena possibile

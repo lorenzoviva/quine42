@@ -268,3 +268,5 @@
 - [2026-10-30T10:15:48.148Z] nota: Epoca 66 avviata su Gemini. In attesa del reset crediti Claude (11:59 UTC / ~13:00 locali, ~43m) per ripresa automatica T70 e delle credenziali Stripe di test per T45e.
 - [2026-10-30T10:17:11.970Z] orchestratore: epoca 67 su gemini (contesto a 82 % della finestra)
 - [2026-10-30T10:18:13.325Z] nota: Epoca 67 avviata su Gemini. In attesa del reset crediti Claude (11:59 UTC / ~13:00 locali, ~41m) per ripresa automatica T70 e delle credenziali Stripe di test per T45e.
+- [2026-10-30T10:19:42.600Z] orchestratore: epoca 68 su gemini (contesto a 63 % della finestra)
+- [2026-10-30T10:21:35.792Z] nota: Epoca 68 avviata su Gemini. In attesa del reset crediti Claude (12:00 UTC / ~13:00 locali, ~38m) per ripresa automatica T70 e delle credenziali Stripe di test per T45e.
