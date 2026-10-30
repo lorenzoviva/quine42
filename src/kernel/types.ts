@@ -374,6 +374,8 @@ export interface UniverseConfig {
   partita: Partita;
   /** The relief (ADR-0048): `mare` is the sea's level (T51a); without it, the one the relief gives. */
   rilievo?: { mare?: number };
+  /** The heritage of clones (T45c, ADR-0081): what of every use of a cloned card goes back to who held it before. */
+  eredita?: import('./heritage').Eredita;
 }
 
 /** How the game is played in this universe: chosen before the Genesis, then fixed (ADR-0053). */

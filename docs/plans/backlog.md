@@ -1407,7 +1407,7 @@ le risposte alle domande del piano.
   Scultore); la stima del costo per ora di gioco.
 - Fatto quando: test (con «Low Detail» un giro di gioco offline fa meno chiamate in `MockModels`, nella misura attesa), commit.
 
-### T45c · L'eredità dei cloni — `da fare` (dipende da T42d, T36)
+### T45c · L'eredità dei cloni — `fatto` (dipende da T42d, T36)
 - Pipeline: claude · stima 5% · approvato · priorità 7
 - Contesto: un clone di un clone porta contenuti cambiati più volte; chi li ha creati per primo deve ricevere una quota.
 - Fare: nella carta (`carta`) la catena dei titolari precedenti (`origini`), allungata da `cloneChanges`; a ogni utilizzo di un
@@ -1415,6 +1415,15 @@ le risposte alle domande del piano.
   quanto il contenuto è stato cambiato rispetto all'originale (misura dal diff del file); il resto al titolare attuale; la collezione
   mostra ciò che si riceve dagli universi clonati.
 - Fatto quando: test (clone di un clone, contenuto cambiato poco o tanto: le quote attese), ADR, commit.
+- Esito: ADR-0081. `src/kernel/heritage.ts` (leggero, lo importa il server con `clone.ts`): `carta.origini` (`Origine {titolare, universo,
+  impronta}`), l'impronta è un MinHash di 32 numeri sulle sequenze di tre parole del contenuto (`fingerprint`, `changeOf`): la misura
+  del diff senza tenere l'originale. `inheritCards` (in `cloneChanges`, sempre) allunga la catena di ogni carta e mette gli utilizzi
+  di allora in `world/carte.json → allaNascita` (si divide solo ciò che viene dopo il clone). `sharesOf`: risalendo, ogni anello passa
+  indietro `base + copia × (1 − cambio)` (`universe.json → eredita`, seme 0,1 e 0,4, `repairEredita`), il resto al titolare.
+  `allCards(files, true)` dà le `quote`, `receivedBy` / `kernel.received(id)` ciò che si riceve. `tests/heritage.test.ts` (8 test).
+  Diverso dal previsto: oltre alla base fissa c'è un secondo coefficiente (`copia`, la parte per un contenuto mai cambiato); un luogo
+  si misura dal nome (il piano non si riscrive); la collezione «fuori dalla partita», sommando gli universi, resta a T45d (qui la
+  funzione per universo); nessuna verifica nel browser (niente di visibile).
 
 ### T45d · La lobby — `da fare` (dipende da T45a, T45b, T44b)
 - Pipeline: claude · stima 5% · priorità 8
