@@ -192,6 +192,8 @@ interface Client {
   players?: string;
   /** What the other wanderers did to this one since the last update (T43a). */
   notices: Notice[];
+  /** Spending ceiling for this session in USD (T45d: lobby). */
+  tetto?: number;
 }
 
 export class SessionServer {
@@ -256,6 +258,24 @@ export class SessionServer {
       c.stato = undefined;
       if (c.notices.length < 50) c.notices.push({ tipo: 'morte', da: c.id, nome: String(e?.causa ?? 'ferite'), testo: String(e?.testo ?? ''), perso: Array.isArray(e?.perso) ? e.perso.map(String) : [], dove: e?.dove === 'piazza' ? 'piazza' : 'qui' });
     });
+    // Exhausted credits or spending ceiling reached (T45d: lobby).
+    kernel.bus.on('credits:exhausted', (e: { id?: unknown; motivo?: unknown }) => {
+      const c = typeof e?.id === 'string' ? this.clients.get(e.id) : undefined;
+      if (!c) return;
+      const motivo = e?.motivo === 'tetto' ? 'tetto' : 'finiti';
+      if (c.notices.length < 50) {
+        c.notices.push({
+          tipo: 'crediti',
+          da: 'server',
+          nome: motivo,
+          motivo,
+          testo:
+            motivo === 'tetto'
+              ? 'Hai raggiunto il tetto di crediti fissato per questa sessione nella lobby: le tue richieste useranno i modelli locali.'
+              : 'I tuoi crediti sono esauriti: le tue richieste useranno i modelli locali.',
+        });
+      }
+    });
   }
 
   /** The master's branch now: what they changed that the world does not have yet. */
@@ -299,8 +319,9 @@ export class SessionServer {
         return;
       }
       if (msg?.t !== 'entra' || entering) return;
+      const tetto = typeof (msg as { tetto?: number }).tetto === 'number' && Number.isFinite((msg as { tetto?: number }).tetto) ? (msg as { tetto?: number }).tetto : undefined;
       if (!this.verify) {
-        client = this.join(link, msg.id, msg.nome, msg.profilo, (msg as { anonimo?: boolean }).anonimo);
+        client = this.join(link, msg.id, msg.nome, msg.profilo, (msg as { anonimo?: boolean }).anonimo, tetto);
         if (!client) link.close();
         return;
       }
@@ -317,7 +338,7 @@ export class SessionServer {
         const known = !!readWandererState(this.kernel.files, id);
         if (a.anonimo) this.anonymous.add(id);
         else this.anonymous.delete(id);
-        client = this.join(link, id, known ? msg.nome : (a.nome ?? msg.nome), msg.profilo, a.anonimo);
+        client = this.join(link, id, known ? msg.nome : (a.nome ?? msg.nome), msg.profilo, a.anonimo, tetto);
         if (!client) link.close();
       });
     });
@@ -331,7 +352,7 @@ export class SessionServer {
     });
   }
 
-  private join(link: ServerLink, id: unknown, nome: unknown, profilo: unknown, anonimo?: boolean): Client | undefined {
+  private join(link: ServerLink, id: unknown, nome: unknown, profilo: unknown, anonimo?: boolean, tetto?: number): Client | undefined {
     if (!validWandererId(id)) {
       link.send({ t: 'rifiuto', motivo: 'id del viandante non valido' });
       return undefined;
@@ -349,10 +370,13 @@ export class SessionServer {
       return undefined;
     }
     this.kernel.setRemote(id, true);
+    if (typeof tetto === 'number' && Number.isFinite(tetto) && tetto >= 0) {
+      this.kernel.setSessionTetto(id, tetto);
+    }
     // Who they say they are (T44a): repaired against everyone else in the world. A profile already saved stays (T44c): only
     // `profilo` changes it, what a browser brings on entering may be another wanderer's.
     const fixed = profilo && typeof profilo === 'object' && !this.kernel.profileOf(id) ? this.kernel.setProfile(id, profilo) : undefined;
-    const c: Client = { id, link, budget: this.kernel.paceOf(id) * BURST, places: new Map(), things: new Map(), others: new Map(), notices: [] };
+    const c: Client = { id, link, budget: this.kernel.paceOf(id) * BURST, places: new Map(), things: new Map(), others: new Map(), notices: [], tetto };
     this.clients.set(id, c);
     const u = this.view(c);
     const w = this.kernel.wanderers().find((x) => x.id === id)!;

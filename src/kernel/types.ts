@@ -363,6 +363,20 @@ export interface AiConfig {
   agenti?: Record<string, import('./ai/subscription').Provider>;
   /** How often every agent asks the model, 0-1 (T45b, ADR-0085): an object or a preset's name (`low detail`); repaired by the validator. */
   coefficienti?: Partial<import('./coefficients').Coefficients> | string;
+  /** Quality and spending minimums set by the master for multiplayer (T45d). */
+  minimi?: AiMinimi;
+}
+
+/** Quality and spending minimums of an universe (T45d). */
+export interface AiMinimi {
+  /** Minimum text model (e.g. 'gemini-3.1-flash-lite'). */
+  textModel?: string;
+  /** Minimum sculptor models per class (e.g. { struttura: 'gemini-3.8-flash' }). */
+  scultori?: Partial<import('./agents/sculptor').SculptorModels>;
+  /** Minimum credit spending ceiling (USD) to enter the world. */
+  tetto?: number;
+  /** Minimum coefficient values. */
+  coefficienti?: Partial<import('./coefficients').Coefficients>;
 }
 
 export interface UniverseConfig {

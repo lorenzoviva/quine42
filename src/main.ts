@@ -22,7 +22,10 @@ import { ThinClient } from './session/thin';
 import { keepProfile, savedProfile, socketLink, tabWanderer } from './session/socket';
 import { accountConfig, signIn, type SignedIn } from './session/login';
 import { accountWanderer } from './session/account';
+import { readWandererState } from './kernel/wanderers';
 import { ProfilePanel } from './ui/profile';
+import { LobbyScreen } from './ui/lobby';
+import { CreditExhaustedModal } from './ui/creditdialog';
 import { Sfx } from './audio';
 import { $ } from './ui/dom';
 import type { MasterTools } from './master';
@@ -94,15 +97,16 @@ let account: SignedIn | undefined;
  * A game of many (T39, ADR-0059): the world runs on the server, this tab is one of its wanderers. The kernel here
  * is a mirror the thin client fills with what the server tells.
  */
-async function joinMany(name: string): Promise<ThinClient> {
+async function joinMany(name: string, lobbyChoice?: { tetto?: number; offline?: boolean }): Promise<ThinClient> {
   // With accounts (T44b) the wanderer is the account's: the server makes the id from the token.
   const config = await accountConfig();
-  account = config ? await signIn(config) : undefined;
+  if (!account) account = config ? await signIn(config) : undefined;
   const id = account ? accountWanderer(account.uid) : tabWanderer(params);
-  const session = new SessionClient(socketLink(name, params.has('offline')), {
+  const session = new SessionClient(socketLink(name, params.has('offline') || !!lobbyChoice?.offline), {
     id,
     profilo: savedProfile(name, id),
     ...(account ? { token: account.token } : {}),
+    ...(typeof lobbyChoice?.tetto === 'number' ? { tetto: lobbyChoice.tetto } : {}),
   });
   await session.ready;
   if (session.refused || !session.me) throw new Error(session.refused ?? 'il mondo non risponde');
@@ -121,9 +125,45 @@ async function main() {
   const client = await UniverseClient.connect(name);
   if (client) loading.textContent = `apertura dell'universo «${name}»…`;
   const snap = client ? await client.load() : undefined;
-  const many = !!snap?.files && readConfig(snap.files).config.partita?.modalita === 'multigiocatore';
+  const snapFiles = snap?.files;
+  const many = !!snapFiles && readConfig(snapFiles).config.partita?.modalita === 'multigiocatore';
+  let lobbyChoice: { tetto?: number; offline?: boolean } | undefined;
+  if (many && snapFiles && !params.has('skip')) {
+    loading.hidden = true;
+    const config = await accountConfig();
+    if (!account) account = config ? await signIn(config) : undefined;
+    const id = account ? accountWanderer(account.uid) : tabWanderer(params);
+    const wandererState = readWandererState(snapFiles, id);
+    const credits = wandererState?.crediti ?? 0;
+    const isAnon = account?.anonimo ?? false;
+    const lobby = new LobbyScreen({
+      name,
+      files: snapFiles,
+      wandererId: id,
+      wandererName: wandererState?.nome,
+      credits,
+      isAnonymous: isAnon,
+      onRecharge: async (amount: number) => {
+        const token = account?.token;
+        const res = await fetch('/api/stripe/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            universo: name,
+            wandererId: id,
+            crediti: amount,
+            token,
+            returnUrl: window.location.href,
+          }),
+        });
+        return (await res.json()) as { ok: boolean; url?: string; motivo?: string };
+      },
+    });
+    lobbyChoice = await lobby.open();
+    loading.hidden = false;
+  }
   if (many) loading.textContent = `ingresso nel mondo di «${name}»…`;
-  const thin = many ? await joinMany(name) : undefined;
+  const thin = many ? await joinMany(name, lobbyChoice) : undefined;
   // The corona, the studio, the Council's feed, the console and the editor are the master's (T41): alone always, in a
   // game of many only the wanderer who made the universe. A player's client never fetches them.
   const master = !thin || thin.session.master;
@@ -185,6 +225,41 @@ async function main() {
         }
       : undefined,
   );
+  // Credit exhaustion modal in multiplayer (T45d): recharge, offline, or abandon
+  const creditModal = thin
+    ? new CreditExhaustedModal({
+        onRecharge: async () => {
+          const id = kernel.wanderer().id;
+          const token = account?.token;
+          const res = await fetch('/api/stripe/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              universo: name,
+              wandererId: id,
+              crediti: 5,
+              token,
+              returnUrl: window.location.href,
+            }),
+          });
+          const data = (await res.json()) as { ok: boolean; url?: string; motivo?: string };
+          if (data.url) window.location.href = data.url;
+        },
+        onOffline: () => {
+          kernel.message('Stai giocando in modalità offline con i modelli locali.', 'info');
+        },
+        onAbandon: () => {
+          thin.session.leave();
+          window.location.reload();
+        },
+      })
+    : undefined;
+
+  if (thin && creditModal) {
+    kernel.bus.on('ui:credits:exhausted', (e: { motivo?: 'finiti' | 'tetto'; testo?: string }) => {
+      creditModal.show(e);
+    });
+  }
   const tools: MasterTools | undefined = tooling && new (await tooling).MasterTools(kernel, renderer, dev, () => syncFocus());
   // Right click on a tile near you: its context menu (with what stands on it, and "Altro…").
   $<HTMLCanvasElement>('#world').addEventListener('contextmenu', (e) => {

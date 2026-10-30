@@ -1455,12 +1455,13 @@ le risposte alle domande del piano.
   si misura dal nome (il piano non si riscrive); la collezione «fuori dalla partita», sommando gli universi, resta a T45d (qui la
   funzione per universo); nessuna verifica nel browser (niente di visibile).
 
-### T45d · La lobby — `da fare` (dipende da T45a, T45b, T44b)
+### T45d · La lobby — `fatto`
 - Pipeline: gemini · stima 5% · approvato · priorità 1
 - Fare: prima di entrare in un universo multigiocatore la lobby: il tetto di crediti di chi entra (si somma ai budget di `ai`), i
   coefficienti e i modelli dell'universo (del master), i minimi; crediti finiti in partita → ricarica, offline o abbandona; la
   collezione di carte fuori dalla partita, con gli utilizzi.
 - Fatto quando: test del flusso, verifica nel browser con due schede, commit.
+- Esito: ADR-0086; `universe.json → ai.minimi` (tetto minimo, modello testo, modello scultore, luoghi/minuto) riparato da `repairMinimi`; `addBudgetFromTetto` in `credits.ts` aggiunge quote proporzionali a `maxText`, `maxForges`, `maxPacks`, `maxCast`, `maxModels`; `Kernel.setSessionTetto` e `sessionSpentOf` tracciano la spesa del viandante, emettendo `credits:exhausted` (`tetto` o `finiti`); avviso di rete `tipo: 'crediti'` e modale `CreditExhaustedModal` con le 3 scelte (ricarica Stripe, offline con `MockModels`, abbandona sessione); `LobbyScreen` multigiocatore con modelli e coefficienti del master, stima oraria, requisiti minimi, selettore tetto di spesa ($1, $2, $5, tutto) e collezione carte (`collectionOf`) con contatori di utilizzo (luoghi, trame, prompt, totale). Test in `tests/lobby.test.ts` (6/6 passati).
 
 ### T45e · I pagamenti con Stripe — `in attesa` (aspetta le chiavi di Stripe di prova dall'autore in `docs/pipeline/domande/T45e.md`; dipende da T45a, T44b)
 - Pipeline: claude · stima 5% · priorità 9
@@ -1763,7 +1764,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fatto quando: i test specificati e `npm run typecheck` sono verdi, commit su branch `task/T79`. Poi l'orchestratore farà `integra T79` e `integra T45b`.
 - Esito: eseguito merge di task/T45b in task/T79; rinominato l'ADR in docs/adr/0085-i-coefficienti-di-generazione.md (aggiornato titolo interno a ADR-0085); aggiornati tutti i riferimenti ad ADR-0081 relativi ai coefficienti di generazione in ADR-0085 in AGENTS.md, docs/adr/README.md, backlog.md (esito T45b), src/kernel/coefficients.ts, src/kernel/types.ts, src/ui/genesis.ts e tests/coefficients.test.ts, lasciando intatti i riferimenti ad ADR-0081 per i crediti e le spese comuni; preservate tutte le integrazioni preesistenti (eredità cloni ADR-0084, Stripe ADR-0083, crediti ADR-0081); verificati con esito verde npm run typecheck e vitest su tests/coefficients.test.ts, tests/heritage.test.ts, tests/stripe.test.ts, tests/credits.test.ts (26/26 passati).
 
-### T80 · Integrare T45d (la lobby multigiocatore) nel base 3d — `da fare`
+### T80 · Integrare T45d (la lobby multigiocatore) nel base 3d — `fatto`
 - Pipeline: gemini · stima 1% · approvato · priorità 0
 - Contesto: `integra T45d` del 30/10/2026 si è fermato su un conflitto in `docs/plans/backlog.md` dovuto ai commit dell'orchestratore nel base `3d`. Tutti i file sorgente di codice, `AGENTS.md` e `docs/adr/README.md` si fondono senza conflitti e ADR-0086 è già numerato correttamente. Leggi `node tools/pipeline/pipeline.mjs dossier T45d` e `traccia T45d`.
 - Fare: nel tuo worktree esegui `git merge task/T45d` e risolvi il conflitto in `docs/plans/backlog.md`:
@@ -1771,3 +1772,4 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   - Mantieni intatti i blocchi di T75, T76, T77, T78, T79 e questo blocco T80.
   - IMPORTANTE: esegui solo `npx vitest run tests/lobby.test.ts tests/credits.test.ts tests/coefficients.test.ts` e `npm run typecheck` (con `WaitMsBeforeAsync: 10000`, NON lanciare `npm test` sull'intera suite per evitare timeout o sovraccarico macchina).
 - Fatto quando: i test specificati e `npm run typecheck` sono verdi, commit su branch `task/T80`. Poi l'orchestratore farà `integra T80` e `integra T45d`.
+- Esito: eseguito merge di `task/T45d` in `task/T80`; risolto il conflitto in `docs/plans/backlog.md` preservando per T45d lo stato `fatto`, la riga pipeline approvata su gemini e l'esito di T45d; preservati intatti i blocchi T75-T79 e completato T80; verificate tutte le integrazioni con `npm run typecheck` e `npx vitest run tests/lobby.test.ts tests/credits.test.ts tests/coefficients.test.ts` (18/18 passati).

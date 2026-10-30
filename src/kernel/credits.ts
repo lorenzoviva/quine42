@@ -72,3 +72,26 @@ export function recordPayment(files: Record<string, string>, payment: PaymentRec
   files[PAYMENTS_FILE] = JSON.stringify(store, null, 1) + '\n';
 }
 
+/**
+ * Additional AI budget derived from an entrant's credit cap (T45d: "il tetto di crediti si somma ai budget di ai").
+ * When a player sets a spending ceiling in the lobby, it expands the session limits for calls and content.
+ */
+export function addBudgetFromTetto(
+  ai: { textModel?: string; maxText: number; maxForges: number; maxPacks?: number; maxCast?: number; maxModels?: number },
+  tetto: number,
+): { textCalls: number; forges: number; packs: number; cast: number; models: number } {
+  if (tetto <= 0) return { textCalls: 0, forges: 0, packs: 0, cast: 0, models: 0 };
+  const textCalls = Math.max(1, Math.round(tetto * 750));
+  const forges = Math.max(0, Math.floor(tetto * 2));
+  const packs = Math.max(0, Math.floor(tetto * 2));
+  const cast = Math.max(0, Math.floor(tetto * 1));
+  const models = Math.max(0, Math.floor(tetto * 5));
+  ai.maxText += textCalls;
+  ai.maxForges += forges;
+  if (ai.maxPacks !== undefined) ai.maxPacks += packs;
+  if (ai.maxCast !== undefined) ai.maxCast += cast;
+  if (ai.maxModels !== undefined) ai.maxModels += models;
+  return { textCalls, forges, packs, cast, models };
+}
+
+

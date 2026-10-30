@@ -33,7 +33,7 @@ import { onBeat, repairCoefficients, stretch, type Coefficients } from './coeffi
 import { BudgetError, type Models } from './ai/models';
 import { costOf } from './ai/prices';
 import { USAGE_FILE, UsageLedger, type CallRecord } from './ai/usage';
-import { costWithFee, splitCost, PAYMENTS_FILE, type PaymentRecord, isPaymentProcessed, recordPayment } from './credits';
+import { addBudgetFromTetto, costWithFee, splitCost, PAYMENTS_FILE, type PaymentRecord, isPaymentProcessed, recordPayment } from './credits';
 import { MemoryChunks, type ChunkStore } from './chunks';
 import { bodyFoot, bodyGround, Forms, InlineRunner, instanceGrid, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner } from './forms';
 import { guessClass } from '../mj/classes';
@@ -450,6 +450,10 @@ export class Kernel {
   playerId: Id = 0;
   /** The wanderers of this kernel by id (T34): `io` is the one of a game alone; others join with `addWanderer`. */
   private wanderersById = new Map<string, Wanderer & { entity: Id; tappeto?: { ox: number; oy: number }; profilo?: Profile; crediti?: number; anonimo?: boolean }>();
+  /** Spending ceiling for this session per wanderer (T45d: lobby). */
+  private sessionTetto = new Map<string, number>();
+  /** Credits spent in this session per wanderer (T45d). */
+  private sessionSpent = new Map<string, number>();
   /** Every wanderer has a carpet of their own (T38): the carpet entity holds this one's offset, the others keep theirs in `tappeto`. */
   private carpetHolder = SOLO;
   /** The wanderers a session's client moves (T38): the kernel checks their steps and does not move them itself. */
@@ -4449,11 +4453,39 @@ export class Kernel {
     return readWandererState(this.files, id)?.crediti ?? 0;
   }
 
-  /** Whether a wanderer has credits to pay for model calls (T45a). */
+  /** Sets a wanderer's credit spending cap for this session (T45d: lobby). */
+  setSessionTetto(id: string, tetto: number): void {
+    if (tetto <= 0) {
+      this.sessionTetto.set(id, 0);
+      this.sessionSpent.set(id, 0);
+      return;
+    }
+    this.sessionTetto.set(id, tetto);
+    this.sessionSpent.set(id, 0);
+    const added = addBudgetFromTetto(this.config.ai, tetto);
+    if (this.models?.limits) {
+      this.models.limits.text += added.textCalls;
+    }
+  }
+
+  /** Credit spending cap set for this session, if any (T45d). */
+  sessionTettoOf(id: string = this.wanderer().id): number | undefined {
+    return this.sessionTetto.get(id);
+  }
+
+  /** Amount of credits spent in this session (T45d). */
+  sessionSpentOf(id: string = this.wanderer().id): number {
+    return this.sessionSpent.get(id) ?? 0;
+  }
+
+  /** Whether a wanderer has credits to pay for model calls (T45a, T45d: checks balance and session tetto). */
   hasCredits(id: string = this.wanderer().id): boolean {
     if (id === COMUNE) return true;
     if (!this.manyPlayers()) return true;
     if (this.isAnonymous(id)) return false;
+    const tetto = this.sessionTetto.get(id);
+    const spent = this.sessionSpent.get(id) ?? 0;
+    if (tetto !== undefined && spent >= tetto) return false;
     return this.creditsOf(id) > 0;
   }
 
@@ -4540,13 +4572,16 @@ export class Kernel {
     return true;
   }
 
-  /** Deducts credits from a wanderer (T45a), clamping to 0. */
+  /** Deducts credits from a wanderer (T45a), clamping to 0. Tracks session spending against tetto (T45d). */
   deductCredits(id: string, amount: number): number {
     if (amount <= 0) return this.creditsOf(id);
     const entry = this.wanderersById.get(id);
     const cur = entry?.crediti ?? readWandererState(this.files, id)?.crediti ?? 0;
     const next = Math.max(0, Math.round((cur - amount) * 1e6) / 1e6);
     if (entry) entry.crediti = next;
+    const spentBefore = this.sessionSpent.get(id) ?? 0;
+    const spentAfter = Math.round((spentBefore + amount) * 1e6) / 1e6;
+    this.sessionSpent.set(id, spentAfter);
     const file = playerFile(id);
     const saved = readWandererState(this.files, id) ?? { nome: entry?.nome ?? id };
     saved.crediti = next;
@@ -4554,8 +4589,17 @@ export class Kernel {
     this.files[file] = text;
     this.repo.write(file, text);
     this.bus.emit('credits:changed', { id, crediti: next, delta: -amount });
+    const tetto = this.sessionTetto.get(id);
+    if (tetto !== undefined && spentBefore < tetto && spentAfter >= tetto) {
+      this.council.say('kernel', 'info', `${id} ha raggiunto il tetto di crediti fissato (${tetto} USD): le sue richieste useranno i modelli locali.`);
+      this.bus.emit('credits:exhausted', { id, motivo: 'tetto' });
+      if (this.wanderer().id === id) {
+        this.message('Hai raggiunto il tetto di crediti per questa sessione: le tue richieste saranno gestite dai modelli locali.', 'warn');
+      }
+    }
     if (cur > 0 && next === 0) {
       this.council.say('kernel', 'info', `I crediti di ${id} sono esauriti: le sue richieste useranno i modelli locali.`);
+      this.bus.emit('credits:exhausted', { id, motivo: 'finiti' });
       if (this.wanderer().id === id) {
         this.message('Hai esaurito i crediti: le tue richieste saranno gestite dai modelli locali.', 'warn');
       }

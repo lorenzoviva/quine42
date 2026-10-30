@@ -328,6 +328,10 @@ export class ThinClient {
       k.bus.emit('ui:died', { cause: n.nome, testo: n.testo, perso: n.perso ?? [], dove: n.dove ?? 'qui' });
       return k.message(`Sei morto di ${n.nome}. ${n.testo}`, 'warn');
     }
+    if (n.tipo === 'crediti') {
+      k.bus.emit('ui:credits:exhausted', { motivo: n.motivo ?? 'finiti', testo: n.testo });
+      return k.message(n.testo, 'warn');
+    }
     if (n.tipo === 'dai') return k.message(`${n.nome} ti dà ${n.testo}.`, 'good');
     if (n.tipo === 'altro') return k.message(`${n.nome}: ${n.testo}`);
     const id = this.others.get(n.da);
@@ -350,7 +354,13 @@ export class ThinClient {
     const pid = k.playerId;
     if (s.needs) k.ecs.set(pid, 'needs', { ...(k.needs() ?? {}), ...s.needs });
     if (s.stati) k.ecs.set(pid, 'stati', structuredClone(s.stati));
-    if (typeof s.crediti === 'number') k.setCredits(k.wanderer().id, s.crediti);
+    if (typeof s.crediti === 'number') {
+      const prev = k.creditsOf(k.wanderer().id);
+      k.setCredits(k.wanderer().id, s.crediti);
+      if (prev > 0 && s.crediti === 0) {
+        k.bus.emit('ui:credits:exhausted', { motivo: 'finiti' });
+      }
+    }
     if (!this.pending) {
       if (s.inventory) k.ecs.set(pid, 'inventory', structuredClone(s.inventory));
       if (s.slots) k.ecs.set(pid, 'slots', structuredClone(s.slots));
