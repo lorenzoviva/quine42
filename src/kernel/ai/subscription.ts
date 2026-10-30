@@ -59,12 +59,12 @@ export function providerFor(s: Subscriptions, agent: string, task: string): Prov
  */
 export class RoutedModels implements Models {
   readonly name: string;
-  private routes: Partial<Record<Provider, Models>>;
+  readonly routes: Partial<Record<Provider, Models>>;
 
   constructor(
-    private api: Models,
-    private table: Subscriptions,
-    queues: Partial<Record<Exclude<Provider, 'api'>, Models>>,
+    readonly api: Models,
+    readonly table: Subscriptions,
+    readonly queues: Partial<Record<Exclude<Provider, 'api'>, Models>>,
   ) {
     this.name = api.name;
     this.routes = { ...queues, api };
@@ -120,6 +120,20 @@ export interface QueueOptions {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+export interface QueueItem {
+  id: string;
+  provider: Exclude<Provider, 'api'>;
+  agent: string;
+  task: string;
+}
+
+export interface QueueState {
+  serviti: Array<Exclude<Provider, 'api'>>;
+  inCoda: number;
+  richieste?: QueueItem[];
+  inEsecuzione?: QueueItem[];
+}
+
 /** A subscription's CLI, through the queue on disk. A request that is not answered in time is not repeated. */
 export class QueueModels implements Models {
   readonly name: string;
@@ -127,11 +141,11 @@ export class QueueModels implements Models {
   /** The queue has no budget of its own: the CLI's limits are the subscription's. */
   limits: Limits = { text: Infinity };
   onCall?: (r: CallRecord) => void;
+  readonly endpoint: string;
+  readonly fetchImpl: typeof fetch;
   private gate: Semaphore;
-  private endpoint: string;
-  private fetchImpl: typeof fetch;
 
-  constructor(private opts: QueueOptions) {
+  constructor(readonly opts: QueueOptions) {
     this.name = opts.provider;
     this.endpoint = opts.endpoint ?? '/api/coda';
     this.fetchImpl = opts.fetchImpl ?? ((...a) => fetch(...a));
@@ -146,6 +160,23 @@ export class QueueModels implements Models {
       return Array.isArray(j?.serviti) && j.serviti.includes(provider);
     } catch {
       return false;
+    }
+  }
+
+  /** The state of the queue and the requests waiting or running. */
+  static async queryState(endpoint = '/api/coda', fetchImpl: typeof fetch = (...a) => fetch(...a)): Promise<QueueState | undefined> {
+    try {
+      const r = await fetchImpl(`${endpoint}/stato`);
+      const j = r.ok ? await r.json() : undefined;
+      if (!j || typeof j !== 'object') return undefined;
+      return {
+        serviti: Array.isArray(j.serviti) ? j.serviti : [],
+        inCoda: typeof j.inCoda === 'number' ? j.inCoda : 0,
+        richieste: Array.isArray(j.richieste) ? j.richieste : [],
+        inEsecuzione: Array.isArray(j.inEsecuzione) ? j.inEsecuzione : [],
+      };
+    } catch {
+      return undefined;
     }
   }
 
@@ -220,4 +251,79 @@ export class QueueModels implements Models {
       return fail('tempo scaduto', 'timeout');
     });
   }
+}
+
+/**
+ * Describes which agents go to which subscription according to the table.
+ * Examples:
+ *   "abbonamenti: claude (tutti gli agenti)"
+ *   "abbonamenti: claude (scultore)"
+ *   "abbonamenti: claude (altri agenti), antigravity (scultore)"
+ */
+export function describeSubscriptions(s: Subscriptions): string {
+  if (!usesSubscriptions(s)) return 'nessun abbonamento';
+  const parts: string[] = [];
+  if (s.provider !== 'api') {
+    const exceptions = Object.entries(s.agenti).filter(([, p]) => p !== s.provider);
+    if (exceptions.length === 0) {
+      parts.push(`${s.provider} (tutti gli agenti)`);
+    } else {
+      parts.push(`${s.provider} (altri agenti)`);
+    }
+  }
+  const byProv: Record<string, string[]> = {};
+  for (const [agent, prov] of Object.entries(s.agenti)) {
+    if (prov !== s.provider) {
+      if (!byProv[prov]) byProv[prov] = [];
+      byProv[prov].push(agent);
+    }
+  }
+  for (const [prov, agents] of Object.entries(byProv)) {
+    agents.sort();
+    parts.push(`${prov} (${agents.join(', ')})`);
+  }
+  return `abbonamenti: ${parts.join(', ')}`;
+}
+
+/**
+ * Short summary of what is waiting or running in the queue.
+ * Examples:
+ *   "in coda: 0"
+ *   "in coda: 1 (scultore: model.sculpt)"
+ *   "in coda: 0 · in corso: scultore: model.sculpt"
+ */
+export function describeQueue(state?: QueueState): string {
+  if (!state) return 'coda non disponibile';
+  const parts: string[] = [];
+  if (state.inCoda > 0) {
+    const list = state.richieste?.length ? ` (${state.richieste.map((r) => `${r.agent}: ${r.task}`).join(', ')})` : '';
+    parts.push(`in coda: ${state.inCoda}${list}`);
+  } else {
+    parts.push('in coda: 0');
+  }
+  if (state.inEsecuzione && state.inEsecuzione.length > 0) {
+    parts.push(`in corso: ${state.inEsecuzione.map((r) => `${r.agent}: ${r.task}`).join(', ')}`);
+  }
+  return parts.join(' · ');
+}
+
+/** Multiline detail for tooltip or console. */
+export function describeQueueDetails(state?: QueueState): string {
+  if (!state) return '';
+  const lines: string[] = [];
+  if (state.inCoda > 0) {
+    lines.push(`Richieste in coda (${state.inCoda}):`);
+    for (const r of state.richieste ?? []) {
+      lines.push(`  - [${r.provider}] ${r.agent} (${r.task})`);
+    }
+  } else {
+    lines.push('Coda vuota');
+  }
+  if (state.inEsecuzione && state.inEsecuzione.length > 0) {
+    lines.push('In corso:');
+    for (const r of state.inEsecuzione) {
+      lines.push(`  - [${r.provider}] ${r.agent} (${r.task})`);
+    }
+  }
+  return lines.join('\n');
 }

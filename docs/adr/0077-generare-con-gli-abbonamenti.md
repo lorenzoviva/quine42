@@ -1,6 +1,6 @@
 # ADR-0077 — Generare l'universo con gli abbonamenti
 
-Data: 2026-10-29 · Stato: accettato (task T68 del backlog; primo pezzo T68a) · Estende ADR-0039 (registro dei consumi) e ADR-0072 (pipeline).
+Data: 2026-10-29 · Stato: accettato (task T68 del backlog; completato con T68a, T68b, T68c) · Estende ADR-0039 (registro dei consumi) e ADR-0072 (pipeline).
 
 ## Contesto
 Il Concilio chiama le API di Gemini a consumo. L'autore vuole far girare le stesse richieste sull'abbonamento di chi gioca (Claude Code
@@ -27,5 +27,6 @@ della pipeline (T61). Risposte dell'autore (`docs/pipeline/domande/T68.md`, 29/1
    e sviluppo (T68c).
 
 ## Conseguenze
-- Il processo che serve la coda con le CLI (`tools/abbonamenti/servi.ts`, `npm run abbonamento`: risposta JSON controllata e riparata con `parseJson`, token estratti da usage, limiti dell'abbonamento con pausa fino al reset) è T68b; il collegamento nel gioco, lo stato nell'HUD e la prova nel browser T68c.
+- Il processo che serve la coda con le CLI (`tools/abbonamenti/servi.ts`, `npm run abbonamento`: risposta JSON controllata e riparata con `parseJson`, token estratti da usage, limiti dell'abbonamento con pausa fino al reset) è T68b.
+- Il collegamento nel gioco (`main.ts` con `RoutedModels` se la tabella usa gli abbonamenti e il servitore risponde, `#models` e `FeedPanel` con il riepilogo degli agenti e delle richieste in coda/in corso), la documentazione nel README e la prova della Genesi offline sono completati in T68c.
 - Senza tabella (o tutta `api`) nulla cambia.

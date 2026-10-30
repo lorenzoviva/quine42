@@ -154,6 +154,49 @@ export async function waiting(dir: string): Promise<number> {
   return names.filter((n) => n.endsWith('.richiesta.json')).length;
 }
 
+export interface QueuedItemInfo {
+  id: string;
+  provider: Exclude<Provider, 'api'>;
+  agent: string;
+  task: string;
+}
+
+/** Lists the waiting requests with their agent and task. */
+export async function listWaiting(dir: string): Promise<QueuedItemInfo[]> {
+  const names = await fs.readdir(dir).catch(() => [] as string[]);
+  const items: QueuedItemInfo[] = [];
+  for (const name of names.filter((n) => n.endsWith('.richiesta.json')).sort()) {
+    const id = name.slice(0, -'.richiesta.json'.length);
+    try {
+      const req = JSON.parse(await fs.readFile(path.join(dir, name), 'utf8'));
+      if (req && typeof req.provider === 'string') {
+        items.push({ id, provider: req.provider, agent: req.agent ?? '', task: req.task ?? '' });
+      }
+    } catch {
+      /* ignore broken file */
+    }
+  }
+  return items;
+}
+
+/** Lists the requests currently taken by a CLI process. */
+export async function listInProgress(dir: string): Promise<QueuedItemInfo[]> {
+  const names = await fs.readdir(dir).catch(() => [] as string[]);
+  const items: QueuedItemInfo[] = [];
+  for (const name of names.filter((n) => n.endsWith('.presa.json')).sort()) {
+    const id = name.slice(0, -'.presa.json'.length);
+    try {
+      const req = JSON.parse(await fs.readFile(path.join(dir, name), 'utf8'));
+      if (req && typeof req.provider === 'string') {
+        items.push({ id, provider: req.provider, agent: req.agent ?? '', task: req.task ?? '' });
+      }
+    } catch {
+      /* ignore broken file */
+    }
+  }
+  return items;
+}
+
 function send(res: ServerResponse, status: number, body: unknown): void {
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json');
@@ -191,7 +234,15 @@ export function subscriptionQueue(dir: string): Plugin {
         if (why) return send(res, 400, { errore: why });
         return send(res, 200, { id: await enqueue(dir, raw as QueuedRequest) });
       }
-      if (route === 'stato' && req.method === 'GET') return send(res, 200, { serviti: await served(dir), inCoda: await waiting(dir) });
+      if (route === 'stato' && req.method === 'GET') {
+        const [serviti, inCoda, richieste, inEsecuzione] = await Promise.all([
+          served(dir),
+          waiting(dir),
+          listWaiting(dir),
+          listInProgress(dir),
+        ]);
+        return send(res, 200, { serviti, inCoda, richieste, inEsecuzione });
+      }
       if (route && req.method === 'GET') return send(res, 200, await look(dir, decodeURIComponent(route)));
       if (route && req.method === 'DELETE') {
         await withdraw(dir, decodeURIComponent(route));
