@@ -1342,7 +1342,7 @@ le risposte alle domande del piano.
   singola per `io`. **Non fatta** la verifica con due schede: in questa sessione non c'erano strumenti del browser (build di produzione ok).
 
 ### T44b · L'account e l'autenticazione — `da fare` (risposte in `docs/pipeline/domande/T44b.md`; dipende da T44a)
-- Pipeline: claude · stima 5% · priorità 4
+- Pipeline: claude · stima 5% · approvato · priorità 4
 - Decisioni dell'autore (29/10/2026): Firebase Auth / Identity Platform di Google Cloud, accesso con Google e anonimo; in singola
   nessun account (il viandante resta `io`). Un anonimo non può recuperare l'account: non compra crediti e gioca solo offline
   (modelli locali), finché non lo lega a un account Google.
@@ -1354,7 +1354,7 @@ le risposte alle domande del piano.
   Firebase o un progetto di prova, commit. Se serve creare il progetto Firebase, la domanda va in `docs/pipeline/domande/T44b.md`.
 
 ### T44c · Correzioni dalla verifica nel browser di T44a e T43c — `da fare` (dipende da T44a, T43c)
-- Pipeline: claude · stima 3% · priorità 3
+- Pipeline: claude · stima 3% · approvato · priorità 3
 - Contesto: verifica con due schede del 29/10/2026 (diario di `docs/pipeline/orchestrazione.md`): profilo, nome doppio, morte di un
   giocatore, uscita e rientro funzionano; restano questi difetti.
 - Fare:
@@ -1389,7 +1389,7 @@ le risposte alle domande del piano.
   chiamano l'IA (una partita «Low Detail» a risparmio), e la lobby fa scegliere i modelli.
 
 ### T45a · I crediti e le spese comuni — `da fare` (dipende da T36)
-- Pipeline: claude · stima 5% · priorità 5
+- Pipeline: claude · stima 5% · approvato · priorità 5
 - Fare: un saldo di crediti per viandante (in `world/giocatori/<id>.json`, scritto solo dal server), dati a mano dal master
   (console, o il Referente); ogni chiamata scala dal suo `chi` (T36: `payerOf`) il costo più l'1 % (P#1); le spese `comune` si
   dividono tra i giocatori collegati in quel momento, master compreso; crediti finiti → ciò che il viandante chiede si fa con i
@@ -1397,7 +1397,7 @@ le risposte alle domande del piano.
 - Fatto quando: test headless (due giocatori e il master collegati, una spesa comune divisa in tre; crediti finiti → modelli locali), commit.
 
 ### T45b · I coefficienti di generazione e la partita «Low Detail» — `da fare`
-- Pipeline: claude · stima 6% · priorità 6
+- Pipeline: claude · stima 6% · approvato · priorità 6
 - Contesto: l'autore vuole poter giocare a risparmio. I coefficienti regolano **quanto spesso ogni agente chiama l'IA**: direttamente
   dove c'è un ritmo (sessioni del Concilio ogni N luoghi, dialoghi tra persone, revisioni dello Scultore, trame), indirettamente dove
   no (meno persone per luogo, pacchetti di oggetti più rari, meno cose per luogo), e dove non si può si dice al giocatore cosa costa.
@@ -1408,7 +1408,7 @@ le risposte alle domande del piano.
 - Fatto quando: test (con «Low Detail» un giro di gioco offline fa meno chiamate in `MockModels`, nella misura attesa), commit.
 
 ### T45c · L'eredità dei cloni — `da fare` (dipende da T42d, T36)
-- Pipeline: claude · stima 5% · priorità 7
+- Pipeline: claude · stima 5% · approvato · priorità 7
 - Contesto: un clone di un clone porta contenuti cambiati più volte; chi li ha creati per primo deve ricevere una quota.
 - Fare: nella carta (`carta`) la catena dei titolari precedenti (`origini`), allungata da `cloneChanges`; a ogni utilizzo di un
   contenuto (T36: `luoghi trame prompt`) le quote: una base fissa di eredità (10 %, in `universe.json`) più una parte in funzione di
@@ -1453,7 +1453,7 @@ le risposte alle domande del piano.
   l'orchestratore fa `integra T70` e `integra T53b` (che toglie worktree e branch di T53b).
 
 ### T69 · L'interfaccia web della pipeline — `da fare` (dipende da T61)
-- Pipeline: argon · stima 6% · priorità 60
+- Pipeline: argon · stima 6% · approvato · priorità 60
 - Contesto: richiesta dell'autore del 30/10/2026 (non prioritaria: prima si usa il nuovo ambiente, ADR-0079). Oggi la pipeline si
   segue dal terminale di `node tools/pipeline/pipeline.mjs orchestra` e dai file (`docs/pipeline/PIANO.md`, `quadro.md`,
   `orchestrazione.md`, `.pipeline/esecuzioni.json`, `.pipeline/budget.json`, `.pipeline/orchestra/chat.jsonl`, `eventi.jsonl`).
@@ -1605,7 +1605,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   delle meccaniche) e `model.resculpt` tra i compiti lenti; `model.judge` (foto) resta sulle API. Nel gioco non è ancora collegato.
 
 ### T68b · Il processo che serve la coda con le CLI — `da fare` (dipende da T68a)
-- Pipeline: claude · stima 4% · priorità 20
+- Pipeline: claude · stima 4% · approvato · priorità 20
 - Contesto: `take`/`answer`/`beat` di `server/subscriptionQueue.ts` sono il protocollo; il lancio delle CLI e il riconoscimento dei
   limiti sono in `tools/pipeline/pipeline.mjs` (`usageLimit`).
 - Fare: `tools/abbonamenti/servi.mjs` (o `.ts` con vite-node) `--provider claude|antigravity`: battito ogni 10 s, prende la richiesta più

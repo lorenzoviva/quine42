@@ -29,10 +29,7 @@ Aggiornato il 30/10/2026, epoca 1 dell'orchestratore (claude).
 - **Verifiche nel browser** (un task di verifica su `claude`, che ha `--chrome`): T64 (le varianti in cache, anche IndexedDB, di
   `circuito-3D` sugli scaffali della corona, ora che ha 30 s per finire), T56b (l'arco del salto e l'ombra: l'agente ha visto solo la
   scena, poi l'estensione di Chrome si è scollegata), T53b quando finisce. I difetti della verifica di T44a e T43c sono già in **T44c**.
-- **Da approvare dall'autore**: T44c (correzioni del profilo e della morte, priorità 3), T44b (account), T45a, T45b, T45c, T68b;
-  dopo di loro T45d, T45e, T45f, T68c.
-- **T69** (interfaccia web della pipeline): l'autore l'ha chiesta su Argon, non prioritaria. Approvala tu (`approva T69`) quando il
-  nuovo ambiente è in uso e i suoi file (`.pipeline/orchestra/`) non cambiano più.
+- **Approvati dall'autore (30/10)**: T44b, T44c, T45a, T45b, T45c, T68b, T69; restano bloccati da dipendenze T45d, T45e, T45f, T68c.
 
 ## Da sapere
 
