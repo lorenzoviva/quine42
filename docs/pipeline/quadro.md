@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026, avvio dell'epoca 3 dell'orchestratore (gemini: argon sceso al 9 % settimanale, sotto il 10 %).
+Aggiornato il 30/10/2026, rotazione epoca 3 dell'orchestratore (gemini: contesto a metà finestra).
 
 ## Le priorità dell'autore
 
@@ -13,7 +13,7 @@ Aggiornato il 30/10/2026, avvio dell'epoca 3 dell'orchestratore (gemini: argon s
 
 ## In corso
 
-- **T72** (urgente, `gemini`, priorità 0, stima 1 %, approvato): integrare **T71** (soglie settimanali per Argon, `ESITO: fatto` su `task/T71`) con **T69** in `tools/pipeline/pipeline.mjs` (unico file in conflitto su `integra T71`). **Appena T72 finisce:** eseguire `integra T72` e poi `integra T71` (che pulisce worktree e branch di T71), e avvisare subito l'autore così può riavviare `node tools/pipeline/pipeline.mjs orchestra`.
+- **T72** (urgente, `gemini`, priorità 0, stima 1 %, approvato): integrare **T71** (soglie settimanali per Argon, `ESITO: fatto` su `task/T71`) con **T69** in `tools/pipeline/pipeline.mjs`. Conflitti risolti in `pipeline.mjs`, `backlog.md` e `tests/pipeline.test.ts`, 42/42 test passati e typecheck verde; commit in chiusura. **Appena T72 finisce:** eseguire `integra T72` e poi `integra T71` (che pulisce worktree e branch di T71), e avvisare subito l'autore così può riavviare `node tools/pipeline/pipeline.mjs orchestra`.
 - **Interrotti su richiesta dell'autore (NON riprendere su Argon):** **T45a**, **T45b**, **T45c** e **T68b** (erano stati deviati su Argon quando Claude si è fermato; T68b risulta `fallito (codice 1)` per l'interruzione). Aspettano indicazioni dell'autore dopo il riavvio dello script o il reset di Claude delle `07:00 UTC`.
 - **Sospesi su Claude fino alle 07:00 UTC (`08:00` locali):** **T70** (priorità 0, integrazione di T53b con il salto di T56b), **T44c** (priorità 3), **T44b** (priorità 4, blocca T45d/T45e/T45f), **T52** e **T54**; anche **T51** (che ha già una sessione Claude di T51a) aspetta Claude.
 - **T53b** (strutture su più piani) è finito e verificato nel browser dall'agente, ma aspetta **T70** per risolvere i conflitti con **T56b** (il salto, già integrato, ADR-0080). Quando T70 è finito: `integra T70`, poi `integra T53b` (toglie worktree e branch).
