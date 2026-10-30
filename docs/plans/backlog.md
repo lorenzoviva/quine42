@@ -840,7 +840,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 - **Domanda per l'autore**: sotterranei come luoghi a parte sotto il mondo (dungeon) o come parti sotterranee delle
   strutture (cantine, cripte), o entrambi?
 
-### T53 · Le scale come rampe e le strutture su più piani — T53a `fatto` (`d7812ae`), T53b `da fare`
+### T53 · Le scale come rampe e le strutture su più piani — T53a `fatto` (`d7812ae`), T53b `fatto`
 - Pipeline: claude · stima 6% · approvato · priorità 50
 - Contesto: richiesta del 24/10: le strutture devono essere navigabili appena generate; l'autore sceglie la seconda via
   (la scala è una lastra inclinata, il viandante ci sale camminando), non «E → Sali». Oggi `floors()` in `src/mj/mesh.ts`
@@ -863,6 +863,17 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
   Diverso dal previsto: niente interpolazione nuova dell'altezza (bastano i gradini di 0,2 caselle e `climb` del renderer);
   la canna chiusa del pozzo, che prima si attraversava, ora è irraggiungibile (test di `forms.test.ts` aggiornato).
   Verifica nel browser: la scala aggiunta con `addModel` accanto al borgo si sale e si scende, il fianco ferma, nessun errore.
+- Esito T53b: `surfaces` in `mesh.ts` (per colonna la cima di ogni tratto di pieno, più il suolo se comincia vuota, ciascuna con
+  il suo blocco di testa) → `Form.levels`; il riempimento di `bodyGround` va da pavimento a pavimento delle colonne vicine
+  (`floor`/`block` restano il piano terra). Il corpo sta sul pavimento più vicino all'altezza dei piedi, `pos.z`, che il kernel
+  tiene dopo ogni tick (`settleHeights`, anche nello specchio; solo sulle caselle con un modello solido, altrove niente `z`: il tick resta leggero) e `stepWanderer` passo dopo passo; `free`/`free_real` (anche da Lua,
+  quarto argomento facoltativo: i sistemi del seme passano `p.z`), `floorAt`, `rampBlocks` la prendono, senza vale il piano terra.
+  Il renderer posa ciascuno sul suo pavimento e taglia sopra il piano in cui si è. `tests/storeys.test.ts`: una torre di due
+  piani con due scale si percorre dalla porta al tetto e ritorno, sotto il primo piano si cammina al piano terra, il bordo della
+  tromba ferma, `pos.z` resta sul piano sopra. Diverso dal previsto: il piano non si «sceglie salendo» con uno stato a parte, è
+  il più vicino ai piedi; `headroom` sostituita da `surfaces`. Verifica nel browser: la torre aggiunta con `addModel` accanto
+  al borgo (con il componente `struttura`) si percorre con `stepWanderer` dal piano terra (3) al primo piano (54) al tetto (104) e
+  ritorno; al primo piano il tetto è tagliato, al piano terra il primo piano; nessun errore del gioco in console.
 - Fatto quando (per pezzo): test verdi, verifica nel browser su una struttura generata con le scale, commit (ADR-0043
   aggiornato).
 - Dipendenze: nessuna. Utile prima di T52 e di T56.

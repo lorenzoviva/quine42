@@ -106,8 +106,8 @@ local function make_api()
 
   local input = { held = function(action) return host.held(action) end }
   local world = {
-    free = function(x, y, r) return host.free(x, y, r or 0) end,
-    free_real = function(x, y, r) return host.free_real(x, y, r or 0) end,
+    free = function(x, y, r, z) return host.free(x, y, r or 0, z) end,
+    free_real = function(x, y, r, z) return host.free_real(x, y, r or 0, z) end,
     tile = function(x, y) return host.tile(x, y) end,
     speed_at = function(x, y) return host.speed_at(x, y) end,
     spawn = function(module, x, y) return host.spawn_module(tostring(module), x, y) end,

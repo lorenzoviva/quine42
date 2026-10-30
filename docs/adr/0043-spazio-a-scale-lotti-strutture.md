@@ -40,15 +40,27 @@ tre per sessione dipendeva da quante volte si gioca, non da quanto è grande il 
 8. **Le scale come rampe** (T53a, 29/10/2026): il pavimento di una colonna di voxel è l'altezza del pieno che parte da
    terra senza buchi, senza limite (`floors` in `src/mj/mesh.ts`). Un gradino è 0,2 caselle (`stepOf`). Ci si sta
    (`bodyGround` in `forms.ts` → `Form.floor`, `Form.block`) se nulla è ad altezza del corpo sopra quel pavimento
-   (`headroom`) e se il pavimento si raggiunge: quelli fino a un gradino da terra, gli altri salendo colonne vicine al più
+   e se il pavimento si raggiunge: quelli fino a un gradino da terra, gli altri salendo colonne vicine al più
    un gradino alla volta (un riempimento dalle colonne basse). Il corpo (la sua scatola) è fermato se sotto di lui c'è una
    colonna dove non si sta o due colonne vicine con più di un gradino di differenza (`rampBlocks`, `kernel.formBlocks`):
    una scala di gradini piccoli porta in alto e si riscende, un muro resta un muro, il bordo di un pianerottolo non si
    scavalca. `floorAt` dà l'altezza del pavimento della colonna (il renderer la ammorbidisce con `climb`); le azioni
    del modello (la porta che si apre) cambiano anche pavimenti e blocchi dell'istanza. Le cose `dentro` vanno solo sul
-   piano terra (pavimenti fino a un gradino). Senza più piani per colonna (T53b) si sta sempre sull'unico pavimento: ciò
-   che resta sotto un pianerottolo sospeso non è un posto. La canna chiusa di un pozzo, che prima si attraversava, ora
-   è irraggiungibile.
+   piano terra (pavimenti fino a un gradino). La canna chiusa di un pozzo, che prima si attraversava, ora è
+   irraggiungibile.
+9. **I piani** (T53b, 29/10/2026): una colonna ha un pavimento per ogni tratto di pieno, la sua cima (il piano terra,
+   il piano sopra, il tetto), più il suolo se comincia vuota (`surfaces` in `mesh.ts` → `Form.levels`: per colonna le
+   altezze dal basso, ciascuna con il suo blocco). Il riempimento di `bodyGround` va da pavimento a pavimento: da uno
+   si passa a uno della colonna vicina al più un gradino più alto o più basso, così la scala porta al piano sopra e una
+   seconda scala al tetto; `Form.floor`/`Form.block` restano il piano terra. Un corpo sta sul pavimento della colonna
+   **più vicino all'altezza dei suoi piedi**, che il kernel tiene in `pos.z` (caselle del mondo): dopo i sistemi di ogni
+   tick `settleHeights` lo rimette al pavimento più vicino a dov'era (i viandanti dal loro tappeto; fuori dal cerchio
+   e lontano dai modelli solidi non c'è, così il tick costa quanto prima); `stepWanderer` lo porta con sé passo dopo passo. `free`, `free_real` (anche da Lua, `world.free(x, y, r, z)`,
+   i sistemi del seme passano `p.z`), `floorAt` e `rampBlocks` prendono quell'altezza; senza, il piano terra (come prima:
+   il codice generato che non la passa vede il mondo di T53a). Sotto il piano sopra si cammina sul piano terra, sopra di
+   lui sul suo pavimento; il bordo della tromba delle scale è un salto e ferma. Il renderer posa ciascuno sul suo
+   pavimento e taglia la struttura sopra il piano in cui si è (`1.15 + floorAt(x, y, z)`). Le cose `dentro` restano
+   sul piano terra; ciò che sta sotto un pianerottolo sospeso ora è un posto.
 
 Le **ancore** previste dal piano (cose messe «vicino a» altre) non sono in questo ADR: le cose stanno ancora
 dove le mette il piano (`dentro fuori ovunque`).

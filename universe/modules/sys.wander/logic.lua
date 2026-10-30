@@ -12,8 +12,8 @@ local function verso(id, w, p, b, meta, dt)
   local v = (w.speed + 0.4) * world.speed_at(p.x, p.y) * dt
   local ux, uy = dx / d, dy / d
   local moved = false
-  if world.free(p.x + ux * v, p.y, b.r) then p.x = p.x + ux * v moved = true end
-  if world.free(p.x, p.y + uy * v, b.r) then p.y = p.y + uy * v moved = true end
+  if world.free(p.x + ux * v, p.y, b.r, p.z) then p.x = p.x + ux * v moved = true end
+  if world.free(p.x, p.y + uy * v, b.r, p.z) then p.y = p.y + uy * v moved = true end
   if not moved then
     -- Ostacolo: si scansa di lato per un po'.
     w.sx, w.sy, w.scansa = -uy, ux, 0.8
@@ -35,7 +35,7 @@ function M.update(dt)
       if (w.scansa or 0) > 0 then
         w.scansa = w.scansa - dt
         local v = w.speed * dt
-        if world.free(p.x + w.sx * v, p.y + w.sy * v, b.r) then p.x, p.y = p.x + w.sx * v, p.y + w.sy * v else w.scansa = 0 end
+        if world.free(p.x + w.sx * v, p.y + w.sy * v, b.r, p.z) then p.x, p.y = p.x + w.sx * v, p.y + w.sy * v else w.scansa = 0 end
         return
       end
       if verso(id, w, p, b, meta, dt) then return end
@@ -57,7 +57,7 @@ function M.update(dt)
     if dx == 0 and dy == 0 then return end
     local v = w.speed * world.speed_at(p.x, p.y) * dt
     local nx, ny = p.x + dx * v, p.y + dy * v
-    if world.free(nx, ny, b.r) then
+    if world.free(nx, ny, b.r, p.z) then
       p.x, p.y = nx, ny
     else
       w.t = 0

@@ -14,15 +14,15 @@ function M.update(dt)
       local give = math.min(1, 30 / math.max(1, b.mass or 1))
       local push = (reach - d) * give
       local ux, uy = dx / d, dy / d
-      if world.free(p.x + ux * push, p.y, b.r) then p.x = p.x + ux * push end
-      if world.free(p.x, p.y + uy * push, b.r) then p.y = p.y + uy * push end
+      if world.free(p.x + ux * push, p.y, b.r, p.z) then p.x = p.x + ux * push end
+      if world.free(p.x, p.y + uy * push, b.r, p.z) then p.y = p.y + uy * push end
       v.x, v.y = ux * push / dt * 0.3, uy * push / dt * 0.3
       return
     end
     if v.x == 0 and v.y == 0 then return end
     local nx, ny = p.x + v.x * dt, p.y + v.y * dt
-    if world.free(nx, p.y, b.r) then p.x = nx else v.x = 0 end
-    if world.free(p.x, ny, b.r) then p.y = ny else v.y = 0 end
+    if world.free(nx, p.y, b.r, p.z) then p.x = nx else v.x = 0 end
+    if world.free(p.x, ny, b.r, p.z) then p.y = ny else v.y = 0 end
     local keep = math.max(0, 1 - (b.friction or 0.6) * 6 * dt)
     v.x, v.y = v.x * keep, v.y * keep
     if math.abs(v.x) < 0.01 then v.x = 0 end

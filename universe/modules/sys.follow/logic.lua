@@ -12,8 +12,8 @@ function M.update(dt)
     local w = ecs.get(id, "wander")
     local v = ((w and w.speed or 1.2) + 1.5) * world.speed_at(p.x, p.y) * dt
     local nx, ny = p.x + dx / d * v, p.y + dy / d * v
-    if world.free(nx, p.y, b.r) then p.x = nx end
-    if world.free(p.x, ny, b.r) then p.y = ny end
+    if world.free(nx, p.y, b.r, p.z) then p.x = nx end
+    if world.free(p.x, ny, b.r, p.z) then p.y = ny end
   end)
 end
 

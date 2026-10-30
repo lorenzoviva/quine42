@@ -32,7 +32,7 @@ import { hash32, hashStr, hex, Rng } from './rng';
 import { BudgetError, type Models } from './ai/models';
 import { USAGE_FILE, UsageLedger } from './ai/usage';
 import { MemoryChunks, type ChunkStore } from './chunks';
-import { bodyFoot, bodyGround, Forms, InlineRunner, instanceGrid, rampBlocks, stepOf, toLocal, type Form, type FormComp, type FormRunner } from './forms';
+import { bodyFoot, bodyGround, Forms, InlineRunner, instanceGrid, levelAt, rampBlocks, stepOf, toLocal, type Form, type FormComp, type FormRunner, type Ground } from './forms';
 import { guessClass } from '../mj/classes';
 import { GENERIC, ModelDirector, ownModelId } from './modeldirector';
 import { categoryOf, DEFAULT_SCULPTORS, sculptAction, type SculptorModels } from './agents/sculptor';
@@ -55,15 +55,13 @@ import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, repa
 import type { ActionDef, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Partita, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
 
 /** A solid thing with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
-interface SolidForm {
+interface SolidForm extends Ground {
   id: Id;
   x: number;
   y: number;
   yaw: number;
   form: Form;
   foot: Uint8Array;
-  floor: Uint8Array;
-  block: Uint8Array;
 }
 
 export interface Chunk {
@@ -384,7 +382,7 @@ export class Kernel {
   private levelCache = new WeakMap<Chunk, { tiles: string; lots: Building[]; relief: Relief; levels: Int16Array }>();
   private solidForms = new Map<string, Array<SolidForm>>();
   /** Footprints of instances whose model was changed by an action (the door is open). */
-  private instanceFeet = new Map<Id, { key: string; foot: Uint8Array; floor: Uint8Array; block: Uint8Array }>();
+  private instanceFeet = new Map<Id, Ground & { key: string; foot: Uint8Array }>();
   /** What was done to models of things, by stable origin (saved with the game). */
   private savedForms = new Map<string, string[]>();
   /** Zones of the world that already have their important structure: zone → the chunk that has it (saved with the game). */
@@ -609,8 +607,8 @@ export class Kernel {
       },
       first: (name) => this.ecs.query(name)[0],
       held: (a) => this.wanderer().id === this.inputFor && this.input.isHeld(a),
-      free: (x, y, r) => this.free(x, y, r),
-      free_real: (x, y, r) => this.freeReal(x, y, r),
+      free: (x, y, r, z) => this.free(x, y, r, typeof z === 'number' ? z : undefined),
+      free_real: (x, y, r, z) => this.freeReal(x, y, r, typeof z === 'number' ? z : undefined),
       tile: (x, y) => this.tileAt(Math.floor(x), Math.floor(y)) ?? '',
       speed_at: (x, y) => {
         const t = this.tileAt(Math.floor(x), Math.floor(y));
@@ -754,7 +752,7 @@ export class Kernel {
     return { ox: Number.isFinite(ox) ? ox : this.lastGood.ox, oy: Number.isFinite(oy) ? oy : this.lastGood.oy };
   }
 
-  playerPos(): { x: number; y: number } {
+  playerPos(): { x: number; y: number; z?: number } {
     return this.ecs.get(this.playerId, 'pos');
   }
 
@@ -803,13 +801,13 @@ export class Kernel {
   }
 
   /** Where the player followed is (T42c), in the world: their entity in the mirror, or the wanderer; undefined if not followed. */
-  watched(): { x: number; y: number } | undefined {
+  watched(): { x: number; y: number; z?: number } | undefined {
     const id = this.watching;
     if (!id) return undefined;
     for (const e of this.ecs.query('remote', 'pos')) {
       if (this.ecs.get(e, 'remote')?.id !== id) continue;
       const p = this.ecs.get(e, 'pos');
-      if (Number.isFinite(p?.x) && Number.isFinite(p?.y)) return { x: p.x, y: p.y };
+      if (Number.isFinite(p?.x) && Number.isFinite(p?.y)) return { x: p.x, y: p.y, z: p.z };
     }
     const p = this.connected?.find((x) => x.id === id) ?? (this.wanderersById.has(id) && id !== this.wanderer().id ? this.wandererAt(id) : undefined);
     return p ? { x: p.x, y: p.y } : undefined;
@@ -989,10 +987,13 @@ export class Kernel {
       dy *= k;
       const r = Number(this.ecs.get(this.playerId, 'body')?.r) || 0.3;
       const n = Math.max(1, Math.ceil(Math.hypot(dx, dy) / 0.1));
+      // The floor they walk on goes with them (T53b): up a stair, on the floor above.
+      let z = this.playerPos().z;
       for (let i = 0; i < n; i++) {
-        const stuck = !this.free(x, y, r);
-        if (stuck || this.free(x + dx / n, y, r)) x += dx / n;
-        if (stuck || this.free(x, y + dy / n, r)) y += dy / n;
+        const stuck = !this.free(x, y, r, z);
+        if (stuck || this.free(x + dx / n, y, r, z)) x += dx / n;
+        if (stuck || this.free(x, y + dy / n, r, z)) y += dy / n;
+        z = this.floorAt(x, y, z);
       }
       const pl = this.playerComp();
       if (pl && (Math.abs(dx) > 1e-6 || Math.abs(dy) > 1e-6)) pl.facing = Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : dy > 0 ? 'down' : 'up';
@@ -1000,6 +1001,7 @@ export class Kernel {
       const c = this.carpet();
       const p = this.playerPos();
       if (c) Object.assign(c, { ox: x - p.x, oy: y - p.y });
+      p.z = z;
       return { x, y };
     });
   }
@@ -1282,8 +1284,8 @@ export class Kernel {
   }
 
   /** Where a solid thing blocks and what one stands on in it: its model's, or the changed ones of this instance. */
-  private groundOf(id: Id, fc: FormComp, f: Form): { foot: Uint8Array; floor: Uint8Array; block: Uint8Array } {
-    if (!fc.done?.length) return { foot: f.foot!, floor: f.floor!, block: f.block! };
+  private groundOf(id: Id, fc: FormComp, f: Form): Ground & { foot: Uint8Array } {
+    if (!fc.done?.length) return { foot: f.foot!, floor: f.floor!, block: f.block!, levels: f.levels! };
     const key = `${f.key}|${fc.done.join(',')}`;
     const c = this.instanceFeet.get(id);
     if (c?.key === key) return c;
@@ -1296,9 +1298,11 @@ export class Kernel {
 
   /**
    * Carpet-space box (half-size r) blocked by the voxels of a solid thing (T53a): something at body height over
-   * a column under it, or a rise of more than a step between two columns under it. A stair is a ramp.
+   * a column under it, or a rise of more than a step between two columns under it. A stair is a ramp. With the
+   * height of the feet (`z`, tiles) the floors are those nearest to it (T53b): one walks under the floor above,
+   * and on it; without, the ground floor.
    */
-  private formBlocks(x: number, y: number, r: number): boolean {
+  private formBlocks(x: number, y: number, r: number, z?: number): boolean {
     const seen = new Set<SolidForm>();
     for (const [dx, dy] of [[-r, -r], [r, -r], [-r, r], [r, r]])
       for (const s of this.solidForms.get(`${Math.floor(x + dx)},${Math.floor(y + dy)}`) ?? []) {
@@ -1310,7 +1314,7 @@ export class Kernel {
           const [lx, lz] = toLocal(x + ex - s.x, y + ey - s.y, s.yaw);
           x0 = Math.min(x0, lx), z0 = Math.min(z0, lz), x1 = Math.max(x1, lx), z1 = Math.max(z1, lz);
         }
-        if (rampBlocks(s.form, s.floor, s.block, x0, z0, x1, z1)) return true;
+        if (rampBlocks(s.form, s, x0, z0, x1, z1, this.levelIn(s, z))) return true;
       }
     return false;
   }
@@ -2117,14 +2121,23 @@ export class Kernel {
     return l.levels[(row - cy * S) * S + (col - cx * S)] * LEVEL;
   }
 
-  /** The height (tiles) of what one stands on at a point of the simulation (the ground, a structure's floor, a step of a stair). */
-  floorAt(x: number, y: number): number {
+  /** A height of the world (tiles) as voxels above the base of a solid thing (it stands on the ground under its middle); none is its ground floor. */
+  private levelIn(s: SolidForm, z: number | undefined): number {
+    return z === undefined || !Number.isFinite(z) ? 0 : (z - this.groundAt(s.x, s.y)) * s.form.vpt;
+  }
+
+  /**
+   * The height (tiles) of what one stands on at a point of the simulation (the ground, a structure's floor, a step
+   * of a stair): with the height of the feet (`z`), the floor nearest to it (T53b: the floor above, the roof), else
+   * the ground floor.
+   */
+  floorAt(x: number, y: number, z?: number): number {
     let h = this.groundAt(x, y);
     for (const s of this.solidForms.get(`${Math.floor(x)},${Math.floor(y)}`) ?? []) {
       const [lx, lz] = toLocal(x - s.x, y - s.y, s.yaw);
       const g = s.form.result!.grid;
       const vx = Math.floor(lx * s.form.vpt + g.X / 2), vy = Math.floor(lz * s.form.vpt + g.Y / 2);
-      const f = vx >= 0 && vy >= 0 && vx < g.X && vy < g.Y ? s.floor[vx + vy * g.X] : 0;
+      const f = vx >= 0 && vy >= 0 && vx < g.X && vy < g.Y ? s.levels.z[levelAt(s.levels, vx + vy * g.X, this.levelIn(s, z))] : 0;
       // A model stands on the ground under its middle.
       if (f) h = Math.max(h, this.groundAt(s.x, s.y) + f / s.form.vpt);
     }
@@ -2427,15 +2440,15 @@ export class Kernel {
     return !this.solidCells.has(`${col},${row}`);
   }
 
-  /** Carpet-space collision test of a box of half-size r. */
-  free(x: number, y: number, r: number): boolean {
+  /** Carpet-space collision test of a box of half-size r, whose feet are at height z (tiles; none: the ground floor). */
+  free(x: number, y: number, r: number, z?: number): boolean {
     if (![x, y, r].every(Number.isFinite)) return false;
     for (const [dx, dy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) if (!this.freeCell(Math.floor(x + dx), Math.floor(y + dy))) return false;
-    return !this.formBlocks(x, y, r);
+    return !this.formBlocks(x, y, r, z);
   }
 
   /** Real-space collision: carpet inside the circle, corona walkable, nothing beyond it. */
-  freeReal(x: number, y: number, r: number): boolean {
+  freeReal(x: number, y: number, r: number, z?: number): boolean {
     if (![x, y, r].every(Number.isFinite)) return false;
     const R = this.config.circleRadius;
     const { ox, oy } = this.offset();
@@ -2454,7 +2467,7 @@ export class Kernel {
       sim = true;
       if (!this.freeCell(Math.floor(px + ox), Math.floor(py + oy))) return false;
     }
-    return !sim || !this.formBlocks(x + ox, y + oy, r);
+    return !sim || !this.formBlocks(x + ox, y + oy, r, z);
   }
 
   // --- Runes ---------------------------------------------------------------------------------
@@ -6651,6 +6664,7 @@ export class Kernel {
     this.keepGods();
     this.syncRunes();
     this.sanitize();
+    this.settleHeights();
     this.updateZone();
     for (const [id, b] of this.bubbles) if (b.until < this.time || !this.ecs.alive.has(id)) this.bubbles.delete(id);
   }
@@ -6673,6 +6687,7 @@ export class Kernel {
       this.runningSystem = undefined;
     }
     this.sanitize();
+    this.settleHeights();
     this.updateZone();
     for (const [id, b] of this.bubbles) if (b.until < this.time || !this.ecs.alive.has(id)) this.bubbles.delete(id);
   }
@@ -6738,6 +6753,36 @@ export class Kernel {
     else if (!okPos) Object.assign(p, { x: this.lastGood.px, y: this.lastGood.py });
     if (c && !okCarpet) Object.assign(c, { ox: this.lastGood.ox, oy: this.lastGood.oy });
     this.faults.raise('kernel:sanitize', 'stato del mondo non valido: il kernel ha ripristinato posizione e tappeto');
+  }
+
+  /**
+   * Where every body stands (T53b): the floor under it nearest to where its feet were, in `pos.z` (tiles). Who
+   * went up the stairs stays on the floor above, who walks under it on the ground floor. The wanderers by their
+   * carpet; out of the circle (corona, studio) they have no floor of the simulation. Away from things with a model
+   * there is only the ground: no height is kept (the tick stays cheap).
+   */
+  private settleHeights(): void {
+    const settle = (p: { x: number; y: number; z?: number }, x: number, y: number) => {
+      if (!this.solidForms.has(`${Math.floor(x)},${Math.floor(y)}`)) delete p.z;
+      else p.z = this.floorAt(x, y, Number.isFinite(p.z) ? p.z : undefined);
+    };
+    const wanderers = new Set<Id>();
+    for (const w of this.wanderersById.keys())
+      this.as(w, () => {
+        wanderers.add(this.playerId);
+        const p = this.playerPos();
+        if (!p) return;
+        if (this.corona.isInterior(p.x) || Math.hypot(p.x, p.y) >= this.config.circleRadius) delete p.z;
+        else {
+          const c = this.playerCarpet();
+          settle(p, c.x, c.y);
+        }
+      });
+    for (const id of this.ecs.query('body', 'pos')) {
+      if (wanderers.has(id)) continue;
+      const p = this.ecs.get(id, 'pos');
+      if (Number.isFinite(p.x) && Number.isFinite(p.y)) settle(p, p.x, p.y);
+    }
   }
 
   private updateZone(): void {

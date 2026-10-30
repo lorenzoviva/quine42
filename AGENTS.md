@@ -454,7 +454,10 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   al centro del lotto, girato verso la porta; le caselle del lotto tornano terreno. Dentro = sul pavimento del modello
   (`placeInside`, `floorAt`, `structureAt`); il renderer taglia la struttura in cui si è. Le scale sono rampe (T53a):
   ogni colonna di voxel ha il suo pavimento, ci si sale se è più alta al più di un gradino (0,2 caselle) di quelle vicine
-  (`bodyGround`, `rampBlocks` in `forms.ts`); un muro resta un muro. Una struttura `importante`
+  (`bodyGround`, `rampBlocks` in `forms.ts`); un muro resta un muro. Le strutture hanno più piani (T53b): una colonna ha un
+  pavimento per ogni tratto di pieno (`surfaces`, `Form.levels`), il corpo sta su quello più vicino all'altezza dei suoi piedi,
+  `pos.z`, che il kernel tiene dopo ogni tick (`settleHeights`) e che `free`/`free_real`/`floorAt` prendono (senza: il piano terra);
+  il renderer taglia sopra il piano in cui si è. Una struttura `importante`
   (Argon) per zona di 56 × 56 luoghi (`zoneOf`, `stato.json → importanti`).
 - **Grafo del mondo** (ADR-0045): `src/kernel/graph.ts` costruisce dai file dell'universo e dai luoghi pianificati un grafo
   di nodi tipizzati (`<tipo>:<slug>`: persone col viandante e gli attesi, tipi, luoghi `luogo:<cx>_<cy>`, regioni, ambienti,
