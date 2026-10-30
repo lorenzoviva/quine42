@@ -49,7 +49,10 @@ export function pickOrchestrator(order, budget, threshold, at = new Date()) {
     const b = budget[p];
     if (!b) return false;
     if (b.fermoFino && new Date(b.fermoFino) > at) return false;
-    return (b.residuo ?? 100) >= threshold && (b.sessione ?? 100) >= threshold;
+    const conf = CONFIG.providers?.[p];
+    const isWeeklyOnly = conf?.finestra5h === false || p === 'argon' || (b.contatori && !b.contatori.some((c) => c.finestra === '5h'));
+    const session = isWeeklyOnly ? (b.residuo ?? 100) : (b.sessione ?? b.residuo ?? 100);
+    return (b.residuo ?? 100) >= threshold && session >= threshold;
   };
   return order.find(usable);
 }
@@ -205,7 +208,8 @@ export async function orchestra({ agente } = {}) {
         if (limit) {
           // Its credits are over: the provider is stopped until it resets, the turn goes to the next one, whole.
           const b = readJson(BUDGET, {});
-          b[st.provider] = { ...b[st.provider], fermoFino: limit.toISOString(), residuo: Math.min(b[st.provider]?.residuo ?? 100, OPTS.soglia - 1) };
+          const residuo = Math.min(b[st.provider]?.residuo ?? 100, OPTS.soglia - 1);
+          b[st.provider] = { ...b[st.provider], fermoFino: limit.toISOString(), residuo, sessione: residuo };
           writeJson(BUDGET, b);
           say(`orchestratore: limite di ${st.provider} fino a ${limit.toISOString()}`);
           const s2 = state();

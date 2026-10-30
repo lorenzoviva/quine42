@@ -1621,7 +1621,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   documentazione per chi scarica il repository (README: impostare la tabella, lanciare il servitore).
 - Fatto quando: Genesi offline con la coda servita da una CLI finta nel browser, commit.
 
-### T71 · Soglie della pipeline e dell'orchestratore sul limite settimanale per Argon — `da fare`
+### T71 · Soglie della pipeline e dell'orchestratore sul limite settimanale per Argon — `fatto`
 - Pipeline: gemini · stima 2% · approvato · priorità 0
 - Contesto: richiesta urgente dell'autore in chat (30/10/2026). La pipeline e l'orchestratore (`tools/pipeline/pipeline.mjs`,
   `tools/pipeline/orchestra.mjs`, `tools/pipeline/config.json`) fanno affidamento su soglie specifiche (es. per l'orchestratore il 50 %
@@ -1635,3 +1635,4 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   di 5 ore reale) ogni soglia — inclusa quella della sessione dell'orchestratore — si basi sul **limite settimanale**. Aggiungere i test
   in `tests/pipeline.test.ts` per il calcolo dei limiti e delle soglie di Argon (settimanale senza 5h) per task e orchestratore.
 - Fatto quando: `tests/pipeline.test.ts` e `npm run typecheck` verdi, commit.
+- Esito: configurato `"finestra5h": false` per Argon in `config.json`; introdotta `computeBudget` e aggiornato `loadBudget` in `pipeline.mjs` affinché per i provider con solo limite settimanale `sessione` sia allineata a `residuo` settimanale anziché a un 100% predefinito; aggiornato `capOf` in `pipeline.mjs` affinché il controllo di sessione si basi sul limite settimanale (`left`) per Argon; aggiornato `pickOrchestrator` in `orchestra.mjs` affinché le decisioni di scelta, rotazione e disponibilità dell'orchestratore considerino sempre il limite settimanale effettivo per Argon; aggiunti test dedicati in `tests/pipeline.test.ts`.

@@ -51,9 +51,13 @@ export function setOrchestrator(provider) {
 /**
  * How many tasks a provider may run at once: `max`, one under `sogliaUnSolo` (week or 5 hours), none if the
  * orchestrator runs on it, so the tasks never take the credits the orchestration needs to go on.
+ * For weekly-only providers (Argon or finestra5h === false), session is based on the weekly limit.
  */
-export function capOf({ left, session = 100, provider, orchestrator: orch, max, threshold }) {
-  if (left >= threshold && session >= threshold) return max;
+export function capOf({ left, session, provider, orchestrator: orch, max, threshold }) {
+  const conf = CONFIG.providers?.[provider];
+  const isWeeklyOnly = conf?.finestra5h === false || provider === 'argon';
+  const sess = isWeeklyOnly ? left : (session ?? left);
+  if (left >= threshold && sess >= threshold) return max;
   return provider === orch ? 0 : 1;
 }
 
@@ -161,6 +165,18 @@ function readUsage(provider, cache) {
  */
 const lowest = (counters, w) => Math.min(100, ...counters.filter((c) => c.finestra === w).map((c) => c.residuo));
 
+/**
+ * Computes residuo and sessione from counters for a provider.
+ * When a provider has no 5-hour window (finestra5h === false, or no '5h' counters),
+ * its session limit is based on its weekly limit.
+ */
+export function computeBudget(provider, conf = CONFIG.providers?.[provider], counters = []) {
+  const residuo = lowest(counters, 'settimana');
+  const has5h = conf?.finestra5h !== false && provider !== 'argon' && counters.some((c) => c.finestra === '5h');
+  const sessione = has5h ? lowest(counters, '5h') : residuo;
+  return { residuo, sessione };
+}
+
 export function loadBudget({ read = true } = {}) {
   const budget = readJson(BUDGET, {});
   const cache = new Map();
@@ -168,15 +184,20 @@ export function loadBudget({ read = true } = {}) {
     const b = (budget[prov] ??= { residuo: 100, aggiornato: now() });
     if (read && !(b.letto && Date.now() - Date.parse(b.letto) < CONFIG.usoSecondi * 1000)) {
       const usage = readUsage(prov, cache);
-      if (usage?.contatori.length) Object.assign(b, { ...usage, letto: now(), residuo: lowest(usage.contatori, 'settimana'), sessione: lowest(usage.contatori, '5h') });
+      if (usage?.contatori.length) {
+        const { residuo, sessione } = computeBudget(prov, conf, usage.contatori);
+        Object.assign(b, { ...usage, letto: now(), residuo, sessione });
+      }
     }
+    const isWeeklyOnly = conf.finestra5h === false || prov === 'argon' || (b.contatori && !b.contatori.some((c) => c.finestra === '5h'));
+    if (isWeeklyOnly) b.sessione = b.residuo;
     if (b.contatori && b.letto && Date.now() - Date.parse(b.letto) < CONFIG.usoSecondi * 2000) {
       const empty = b.contatori.filter((c) => c.residuo <= (c.finestra === 'settimana' ? CONFIG.riserva : 0) && c.reset);
       b.fermoFino = empty.length ? empty.map((c) => c.reset).sort().at(-1) : b.fermoFino && new Date(b.fermoFino) > new Date() ? b.fermoFino : undefined;
       continue;
     }
     const reset = lastReset(conf.resetSettimanale);
-    if (reset && new Date(b.aggiornato) < reset) Object.assign(b, { residuo: 100, aggiornato: now(), fermoFino: undefined });
+    if (reset && new Date(b.aggiornato) < reset) Object.assign(b, { residuo: 100, sessione: 100, aggiornato: now(), fermoFino: undefined });
   }
   return budget;
 }
@@ -436,7 +457,11 @@ function finish(run, { code, text, log }, runs, saveRuns) {
   if (limit) {
     Object.assign(run, { stato: 'sospeso', fermoFino: limit.toISOString() });
     budget[run.provider].fermoFino = limit.toISOString();
-    budget[run.provider].residuo = Math.min(budget[run.provider].residuo, CONFIG.sogliaUnSolo - 1);
+    const residuo = Math.min(budget[run.provider].residuo, CONFIG.sogliaUnSolo - 1);
+    budget[run.provider].residuo = residuo;
+    if (CONFIG.providers?.[run.provider]?.finestra5h === false || run.provider === 'argon') {
+      budget[run.provider].sessione = residuo;
+    }
     say(`${run.id}: limite di ${run.provider}, riprendo dopo ${run.fermoFino}`);
   } else {
     Object.assign(run, { stato: 'finito', fine: now(), esito: out.outcome ?? (code === 0 ? 'ESITO: ? (senza riga)' : `ESITO: fallito (codice ${code})`), browser: out.browser });
@@ -653,7 +678,16 @@ if (process.argv[1]?.endsWith('pipeline.mjs')) {
   if (cmd === 'stato' || !cmd) status();
   else if (cmd === 'esegui') await execute({ max: Number(flag('max') ?? CONFIG.maxParalleli), only: flag('solo'), task: flag('task'), always: rest.includes('--sempre') });
   else if (cmd === 'uso') { const b = readJson(BUDGET, {}); for (const p of Object.keys(b)) delete b[p].letto; writeJson(BUDGET, b); status(); }
-  else if (cmd === 'budget') { const b = loadBudget(); b[rest[0]] = { ...b[rest[0]], residuo: Number(rest[1]), aggiornato: now(), fermoFino: undefined }; writeJson(BUDGET, b); status(); }
+  else if (cmd === 'budget') {
+    const b = loadBudget();
+    const prov = rest[0];
+    const residuo = Number(rest[1]);
+    const conf = CONFIG.providers?.[prov];
+    const isWeeklyOnly = conf?.finestra5h === false || prov === 'argon';
+    b[prov] = { ...b[prov], residuo, ...(isWeeklyOnly ? { sessione: residuo } : {}), aggiornato: now(), fermoFino: undefined };
+    writeJson(BUDGET, b);
+    status();
+  }
   else if (cmd === 'worktree') listWorktrees();
   else if (cmd === 'integra') integrate(rest[0]);
   else if (cmd === 'traccia') trace(rest[0]);

@@ -57,7 +57,8 @@
         "{sessione}"
       ],
       "resetSettimanale": "",
-      "contatori": "^Gemini 4 Argon"
+      "contatori": "^Gemini 4 Argon",
+      "finestra5h": false
     }
   },
   "alternative": {

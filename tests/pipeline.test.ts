@@ -12,6 +12,7 @@ type Pipeline = {
   usageLimit(output: string, from?: Date): Date | undefined;
   readOutput(text: string): { session?: string; cost?: number; error: boolean; result: string; outcome?: string; browser?: string };
   capOf(o: { left: number; session?: number; provider: string; orchestrator?: string; max: number; threshold: number }): number;
+  computeBudget(provider: string, conf?: unknown, counters?: Counter[]): { residuo: number; sessione: number };
 };
 
 let P: Pipeline;
@@ -132,6 +133,40 @@ describe('parseUsage', () => {
     expect(P.parseUsage('claude', 'Error: not logged in')).toBeUndefined();
     expect(P.parseUsage('gemini', '')).toBeUndefined();
   });
+
+  it('Argon in agy /usage ha solo il limite settimanale (senza 5h)', () => {
+    const text = [
+      'Model\tLimit\tRemaining\tResets',
+      'Gemini 4 Argon\tGemini 4 Argon Weekly Limit\t28%\t2026-11-04T18:44:35Z',
+    ].join('\n');
+    expect(P.parseUsage('argon', text)).toEqual([
+      { nome: 'Gemini 4 Argon', finestra: 'settimana', residuo: 28, reset: '2026-11-04T18:44:35.000Z' },
+    ]);
+  });
+});
+
+describe('computeBudget', () => {
+  it('calcola residuo e sessione per claude con sessione di 5h', () => {
+    const counters: Counter[] = [
+      { nome: 'session', finestra: '5h', residuo: 94 },
+      { nome: 'week', finestra: 'settimana', residuo: 1 },
+    ];
+    expect(P.computeBudget('claude', { finestra5h: true }, counters)).toEqual({ residuo: 1, sessione: 94 });
+  });
+
+  it('per Argon (settimanale senza 5h) la sessione si basa sul limite settimanale', () => {
+    const counters: Counter[] = [
+      { nome: 'Gemini 4 Argon', finestra: 'settimana', residuo: 28 },
+    ];
+    expect(P.computeBudget('argon', { finestra5h: false }, counters)).toEqual({ residuo: 28, sessione: 28 });
+  });
+
+  it('anche senza configurazione esplicita, un provider senza contatore 5h basa la sessione sul settimanale', () => {
+    const counters: Counter[] = [
+      { nome: 'SoloSettimanale', finestra: 'settimana', residuo: 35 },
+    ];
+    expect(P.computeBudget('custom', {}, counters)).toEqual({ residuo: 35, sessione: 35 });
+  });
 });
 
 describe('usageLimit', () => {
@@ -173,6 +208,17 @@ describe('capOf', () => {
     expect(P.capOf({ ...base, left: 50, session: 5, provider: 'claude' })).toBe(0);
     expect(P.capOf({ ...base, orchestrator: 'argon', left: 8, provider: 'argon' })).toBe(0);
     expect(P.capOf({ ...base, orchestrator: 'argon', left: 8, provider: 'claude' })).toBe(1);
+  });
+
+  it('per Argon (senza 5h) le soglie dei task si basano sul limite settimanale', () => {
+    expect(P.capOf({ ...base, left: 28, provider: 'argon' })).toBe(5);
+    expect(P.capOf({ ...base, orchestrator: 'argon', left: 28, provider: 'argon' })).toBe(5);
+    // Sotto la soglia (8%): 1 se non è orchestratore, 0 se è orchestratore
+    expect(P.capOf({ ...base, left: 8, provider: 'argon' })).toBe(1);
+    expect(P.capOf({ ...base, orchestrator: 'argon', left: 8, provider: 'argon' })).toBe(0);
+    // Anche se un vecchio stato passasse session: 100, per Argon vale il residuo settimanale (left)
+    expect(P.capOf({ ...base, left: 8, session: 100, provider: 'argon' })).toBe(1);
+    expect(P.capOf({ ...base, orchestrator: 'argon', left: 8, session: 100, provider: 'argon' })).toBe(0);
   });
 });
 
@@ -257,6 +303,23 @@ describe('orchestra', () => {
     expect(O.pickOrchestrator(['claude', 'argon', 'gemini'], { ...budget, claude: { residuo: 50, sessione: 40 } }, 10, at)).toBe('claude');
     expect(O.pickOrchestrator(['argon'], budget, 10, new Date('2026-10-30T13:00:00Z'))).toBe('argon');
     expect(O.pickOrchestrator(['claude'], budget, 10, at)).toBeUndefined();
+  });
+
+  it('per Argon (senza 5h) l\'orchestratore si basa sul limite settimanale', () => {
+    const at = new Date('2026-10-30T10:00:00Z');
+    // Argon con 28% settimanale e senza sessione 5h è sopra la soglia (10%)
+    expect(O.pickOrchestrator(['argon'], { argon: { residuo: 28 } }, 10, at)).toBe('argon');
+    // Argon sotto la soglia (8%): non è usabile come orchestratore
+    expect(O.pickOrchestrator(['argon'], { argon: { residuo: 8 } }, 10, at)).toBeUndefined();
+    // Anche se nel budget ci fosse sessione: 100 fittizia, per Argon vale il limite settimanale (8%)
+    expect(O.pickOrchestrator(['argon'], { argon: { residuo: 8, sessione: 100 } }, 10, at)).toBeUndefined();
+    // Fallback su Gemini se Claude è a 0% e Argon è a 8% (anche con sessione: 100 fittizia)
+    const budget = {
+      claude: { residuo: 50, sessione: 0 },
+      argon: { residuo: 8, sessione: 100 },
+      gemini: { residuo: 80, sessione: 100 },
+    };
+    expect(O.pickOrchestrator(['claude', 'argon', 'gemini'], budget, 10, at)).toBe('gemini');
   });
 
   it('un turno: prima gli eventi, poi i messaggi dell\'autore', () => {
