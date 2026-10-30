@@ -470,10 +470,26 @@ export function launch(t, run, saveRuns = () => {}) {
   fs.closeSync(fd);
   Object.assign(run, { pid: child.pid, log });
   saveRuns(run.id);
+  // agy cannot be given an id and says it only at the end: it is read from its files as soon as it writes them (T86).
+  const watch = !run.sessione && conf.cmd === 'agy' ? watchAgyConversation(t.id, run, saveRuns) : undefined;
   return new Promise((resolve) => {
-    child.on('error', (e) => resolve({ code: -1, text: `${readText(log)}\n${e.message}`, log }));
-    child.on('close', (code) => resolve({ code, text: readText(log), log }));
+    const done = (r) => { if (watch) clearInterval(watch); resolve(r); };
+    child.on('error', (e) => done({ code: -1, text: `${readText(log)}\n${e.message}`, log }));
+    child.on('close', (code) => done({ code, text: readText(log), log }));
   });
+}
+
+/** Looks every few seconds (for at most ten minutes) for the conversation agy has begun for a run, and keeps its id. */
+export function watchAgyConversation(id, run, saveRuns, { every = 5000, home = process.env.USERPROFILE ?? process.env.HOME } = {}) {
+  const since = now();
+  const until = Date.now() + 10 * 60_000;
+  const timer = setInterval(() => {
+    const found = !run.sessione && findAgyConversation({ home, dir: run.dir, id, dal: since });
+    if (found) { run.sessione = found; saveRuns(id); }
+    if (run.sessione || Date.now() > until) clearInterval(timer);
+  }, every);
+  timer.unref?.();
+  return timer;
 }
 
 /** Whether a process is still there. */
@@ -948,61 +964,128 @@ export function parseConversation(text, isClaude = true) {
   return steps;
 }
 
+/** Antigravity's folders under the home: `brain/<id>/…/transcript.jsonl` (the steps) and `conversations/<id>.db`. */
+const agyDirs = (home) => ({ brain: path.join(home, '.gemini', 'antigravity-cli', 'brain'), db: path.join(home, '.gemini', 'antigravity-cli', 'conversations') });
+const agyTranscript = (home, id) => path.join(agyDirs(home).brain, id, '.system_generated', 'logs', 'transcript.jsonl');
+
 /**
- * The trace of a task's run: where its CLI keeps the whole conversation (Claude: the session's `.jsonl` under
- * `~/.claude/projects/`; Antigravity: `transcript.jsonl` under `~/.gemini/antigravity-cli/brain/` or SQLite under
- * `conversations/`), whether the agent had `AGENTS.md`, the closing summary from the log, and the live conversation steps.
+ * The Antigravity conversation of a run, found on disk: agy cannot be given an id (no `--session-id`) and prints it only
+ * at the end, so it is the newest conversation, begun after `dal`, whose first request names the task's worktree or
+ * the task (`**Txx**` in the pipeline's prompt). Undefined while agy has not written it yet.
+ */
+export function findAgyConversation({ home, dir, id, dal }) {
+  const { brain } = agyDirs(home);
+  if (!fs.existsSync(brain)) return undefined;
+  const since = dal ? Date.parse(dal) - 60_000 : 0;
+  const norm = (s) => s.toLowerCase().replaceAll('\\\\', '/').replaceAll('\\', '/');
+  const escape = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // The worktree's folder as a whole (`…/t8` is not `…/t84`), or the task in bold as the prompt writes it.
+  const wanted = [dir && new RegExp(`${escape(norm(dir).replace(/\/+$/, ''))}(?![\\w-])`), id && new RegExp(escape(`**${id.toLowerCase()}**`))].filter(Boolean);
+  const recent = fs.readdirSync(brain).map((d) => {
+    const tf = agyTranscript(home, d);
+    try { return { d, tf, mtime: fs.statSync(tf).mtimeMs }; } catch { return undefined; }
+  }).filter((x) => x && x.mtime >= since).sort((a, b) => b.mtime - a.mtime).slice(0, 30);
+  for (const x of recent) {
+    let head;
+    try { head = fs.readFileSync(x.tf, 'utf8').slice(0, 6000); } catch { continue; }
+    let start;
+    try { start = Date.parse(JSON.parse(head.split('\n')[0]).created_at); } catch { start = NaN; }
+    if (Number.isFinite(start) && start < since) continue;
+    if (wanted.some((w) => w.test(norm(head)))) return x.d;
+  }
+  return undefined;
+}
+
+/**
+ * Where a CLI keeps a conversation: Claude the session's `.jsonl` under `~/.claude/projects/` (else the newest one of
+ * the folder it ran in); Antigravity the `.db` under `conversations/` and the readable `transcript.jsonl` under `brain/`.
+ */
+export function conversationFiles({ home, claude, sessione, dir, id, dal }) {
+  if (claude) {
+    const root = path.join(home, '.claude', 'projects');
+    if (!fs.existsSync(root)) return {};
+    let file = sessione && fs.readdirSync(root).map((d) => path.join(root, d, `${sessione}.jsonl`)).find((f) => fs.existsSync(f));
+    if (!file && dir) {
+      const sub = path.join(root, dir.replace(/[^A-Za-z0-9]/g, '-'));
+      if (fs.existsSync(sub)) {
+        file = fs.readdirSync(sub).filter((f) => f.endsWith('.jsonl')).map((f) => path.join(sub, f))
+          .sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs)[0];
+      }
+    }
+    return { sessione: file && path.basename(file, '.jsonl'), file, transcriptFile: file };
+  }
+  const found = sessione ?? (dir || id ? findAgyConversation({ home, dir, id, dal }) : undefined);
+  if (!found) return {};
+  const tf = agyTranscript(home, found);
+  const db = path.join(agyDirs(home).db, `${found}.db`);
+  return { sessione: found, file: fs.existsSync(db) ? db : tf, transcriptFile: fs.existsSync(tf) ? tf : undefined };
+}
+
+/**
+ * What a conversation has used so far, from its transcript: model calls and tokens (fresh input, cache read and
+ * written, output). Claude repeats a call's usage on each of its content blocks: counted once per message id.
+ * Antigravity's `input_tokens` already include the cache read.
+ */
+export function usageOf(text) {
+  const u = { chiamate: 0, input: 0, cache: 0, scritti: 0, output: 0 };
+  const seen = new Set();
+  for (const raw of text.split('\n')) {
+    if (!raw.startsWith('{')) continue;
+    let j;
+    try { j = JSON.parse(raw); } catch { continue; }
+    if (j.type === 'assistant' && j.message?.usage) {
+      const key = j.message.id ?? j.uuid;
+      if (key && seen.has(key)) continue;
+      seen.add(key);
+      const m = j.message.usage;
+      u.chiamate++;
+      u.input += m.input_tokens ?? 0;
+      u.cache += m.cache_read_input_tokens ?? 0;
+      u.scritti += m.cache_creation_input_tokens ?? 0;
+      u.output += m.output_tokens ?? 0;
+    } else if (j.type === 'PLANNER_RESPONSE' && (j.input_tokens !== undefined || j.output_tokens !== undefined)) {
+      const cache = j.cache_read_tokens ?? 0;
+      const input = j.input_tokens ?? 0;
+      u.chiamate++;
+      u.input += input >= cache ? input - cache : input;
+      u.cache += cache;
+      u.output += j.output_tokens ?? 0;
+    }
+  }
+  return u;
+}
+
+/** The last steps of a conversation, one line each (what the agent is doing now). */
+export function lastSteps(steps, n = 8) {
+  const one = (s) => `${s.ruolo}: ${String(s.ruolo === 'strumento' ? `${s.nome} ${s.argomenti ?? ''}` : s.testo).replace(/\s+/g, ' ').trim().slice(0, 160)}`;
+  return steps.filter((s) => s.ruolo !== 'utente').slice(-n).map(one);
+}
+
+/** The command that resumes a conversation from its folder, so the author can follow it and suggest. */
+export function resumeCommand(conf, sessione, dir) {
+  if (!sessione || !conf) return undefined;
+  const args = (conf.resume ?? []).map((a) => a.replace('{sessione}', sessione)).join(' ');
+  return `${dir ? `cd "${dir}" && ` : ''}${conf.cmd} ${args}`;
+}
+
+/**
+ * The trace of a task's run: where its CLI keeps the whole conversation, the command that resumes it, whether the agent
+ * had `AGENTS.md`, what it has used so far, its last steps, and the closing summary from the log. For a run of agy still
+ * without its id (agy says it only at the end) the conversation is looked for on disk (`findAgyConversation`).
  */
 export function traceOf(id, opts) {
   const p = pathsOf(opts);
   const run = readJson(p.runs, {})[id];
   if (!run) return undefined;
   const home = opts?.home ?? process.env.USERPROFILE ?? process.env.HOME;
-  const isClaude = p.config.providers[run.provider]?.cmd === 'claude';
+  const conf = p.config.providers[run.provider];
+  const isClaude = conf?.cmd === 'claude';
   const localConv = path.join(p.stateDir, 'conversazioni', `${id}.jsonl`);
-  let file;
-  let transcriptFile;
-  if (fs.existsSync(localConv)) {
-    file = localConv;
-    transcriptFile = localConv;
-  } else if (isClaude) {
-    const root = path.join(home, '.claude', 'projects');
-    if (fs.existsSync(root)) {
-      if (run.sessione) file = fs.readdirSync(root).map((d) => path.join(root, d, `${run.sessione}.jsonl`)).find((f) => fs.existsSync(f));
-      if (!file && run.dir) {
-        const sub = path.join(root, run.dir.replace(/[^A-Za-z0-9]/g, '-'));
-        if (fs.existsSync(sub)) {
-          file = fs.readdirSync(sub).filter((f) => f.endsWith('.jsonl')).map((f) => path.join(sub, f))
-            .sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs)[0];
-        }
-      }
-      transcriptFile = file;
-    }
-  } else {
-    const brain = path.join(home, '.gemini', 'antigravity-cli', 'brain');
-    if (run.sessione) {
-      file = path.join(home, '.gemini', 'antigravity-cli', 'conversations', `${run.sessione}.db`);
-      const tf = path.join(brain, run.sessione, '.system_generated', 'logs', 'transcript.jsonl');
-      if (fs.existsSync(tf)) transcriptFile = tf;
-    }
-    if (!transcriptFile && fs.existsSync(brain)) {
-      try {
-        const recent = fs.readdirSync(brain).map((d) => {
-          const tf = path.join(brain, d, '.system_generated', 'logs', 'transcript.jsonl');
-          return fs.existsSync(tf) ? { d, tf, mtime: fs.statSync(tf).mtimeMs } : null;
-        }).filter(Boolean).sort((a, b) => b.mtime - a.mtime).slice(0, 15);
-        const hit = recent.find((x) => {
-          const head = fs.readFileSync(x.tf, 'utf8').slice(0, 2500);
-          return head.includes(`**${id}**`) || head.toLowerCase().includes(`worktrees\\${id.toLowerCase()}`) || head.toLowerCase().includes(`worktrees/${id.toLowerCase()}`);
-        });
-        if (hit) {
-          transcriptFile = hit.tf;
-          if (!file) file = hit.tf;
-        }
-      } catch { /* ignore */ }
-    }
-    if (!file && run.sessione) file = path.join(home, '.gemini', 'antigravity-cli', 'conversations', `${run.sessione}.db`);
-  }
+  const found = fs.existsSync(localConv)
+    ? { file: localConv, transcriptFile: localConv }
+    : conversationFiles({ home, claude: isClaude, sessione: run.sessione, dir: run.dir, id, dal: run.inizio });
+  const sessione = run.sessione ?? found.sessione;
+  const { file, transcriptFile } = found;
   const exists = Boolean((file && fs.existsSync(file)) || (transcriptFile && fs.existsSync(transcriptFile)));
   const rawCheck = file && fs.existsSync(file) ? fs.readFileSync(file).toString('latin1') : transcriptFile && fs.existsSync(transcriptFile) ? fs.readFileSync(transcriptFile, 'utf8') : '';
   const agents = isClaude ? rawCheck.includes('Regole inviolabili') : /[\\/]AGENTS\.md/.test(rawCheck);
@@ -1011,18 +1094,82 @@ export function traceOf(id, opts) {
   const out = logText ? readOutput(logText) : undefined;
   const convText = transcriptFile && fs.existsSync(transcriptFile) ? fs.readFileSync(transcriptFile, 'utf8') : '';
   const conversazione = convText ? parseConversation(convText, isClaude) : [];
-  return { id, run, file: file ?? transcriptFile, transcriptFile, exists, agents, log, logText, out, conversazione };
+  return {
+    id, run, sessione, file: file ?? transcriptFile, transcriptFile, exists, agents, log, logText, out, conversazione,
+    riprendi: resumeCommand(conf, sessione, run.dir), consumo: usageOf(convText), ultime: lastSteps(conversazione),
+  };
 }
 
+/**
+ * The orchestrator's epochs (`.pipeline/orchestra/stato.json → epoche`, ADR-0079): each with provider, conversation,
+ * turns, cost and tokens; the current one also with its file, resume command, use so far and last steps.
+ */
+export function traceOrchestrator(opts) {
+  const p = pathsOf(opts);
+  const home = opts?.home ?? process.env.USERPROFILE ?? process.env.HOME;
+  const s = readJson(path.join(p.stateDir, 'orchestra', 'stato.json'), {});
+  const epoche = (s.epoche ?? []).map((e) => ({ ...e }));
+  if (s.provider && !epoche.some((e) => e.epoca === s.epoca)) epoche.push({ epoca: s.epoca, provider: s.provider, sessione: s.sessione });
+  const current = epoche.find((e) => e.epoca === s.epoca);
+  if (current) {
+    current.sessione ??= s.sessione;
+    const conf = p.config.providers[current.provider];
+    const isClaude = conf?.cmd === 'claude';
+    // Without its id yet (the first turn of an epoch still running) there is nothing to look for.
+    const { file, transcriptFile } = current.sessione ? conversationFiles({ home, claude: isClaude, sessione: current.sessione }) : {};
+    const text = transcriptFile && fs.existsSync(transcriptFile) ? fs.readFileSync(transcriptFile, 'utf8') : '';
+    Object.assign(current, {
+      inCorso: true, file, riprendi: resumeCommand(conf, current.sessione, p.repo), contesto: s.contesto,
+      consumo: usageOf(text), ultime: lastSteps(text ? parseConversation(text, isClaude) : []),
+    });
+  }
+  return { provider: s.provider, epoca: s.epoca ?? 0, epoche };
+}
+
+/** The conversations running now: every task in progress and the orchestrator's current epoch (web interface, T86). */
+export function liveConversations(opts) {
+  const p = pathsOf(opts);
+  const list = [];
+  for (const [id, run] of Object.entries(readJson(p.runs, {}))) {
+    if (run?.stato !== 'in corso') continue;
+    const t = traceOf(id, opts);
+    list.push({ chi: id, provider: run.provider, dal: run.inizio, sessione: t.sessione, file: t.file, riprendi: t.riprendi, consumo: t.consumo, ultime: t.ultime });
+  }
+  const cur = traceOrchestrator(opts).epoche.find((e) => e.inCorso);
+  if (cur) list.push({ chi: 'orchestratore', provider: cur.provider, epoca: cur.epoca, dal: cur.dal, sessione: cur.sessione, file: cur.file, riprendi: cur.riprendi, consumo: cur.consumo, ultime: cur.ultime, costoUsd: cur.costoUsd });
+  return list;
+}
+
+const tokens = (u) => `${u.chiamate} chiamate, ${u.input} token nuovi, ${u.cache} dalla cache${u.scritti ? `, ${u.scritti} scritti in cache` : ''}, ${u.output} in uscita`;
+
 function trace(id) {
+  if (id === 'orchestratore') { traceOrchestratorCli(); return; }
   const t = traceOf(id);
   if (!t) { console.log(`${id}: nessuna esecuzione in .pipeline/esecuzioni.json`); return; }
   const { run, file, exists, agents, log, out } = t;
   console.log(`${id} su ${run.provider}, ${run.tentativi} tentativo/i, ${run.stato}${run.esito ? ` — ${run.esito}` : ''}`);
-  console.log(`Conversazione: ${exists ? file : '(non trovata)'}${run.provider === 'claude' ? '' : `  (riprendila con: agy --conversation ${run.sessione})`}`);
-  if (run.provider === 'claude') console.log(`  (riprendila con: claude --resume ${run.sessione}, dalla cartella ${run.dir})`);
+  console.log(`Conversazione: ${t.sessione ?? '(id non ancora noto)'} · ${exists ? file : '(file non trovato)'}`);
+  if (t.riprendi) console.log(`Riprendila con: ${t.riprendi}`);
   console.log(`AGENTS.md: ${exists ? (agents ? 'letto' : 'NON trovato nella conversazione') : '?'}`);
-  console.log(`Log: ${log}\n\n--- Riepilogo dell'agente ---\n${out?.result ?? '(nessun log)'}`);
+  console.log(`Consumo finora: ${tokens(t.consumo)}${out?.cost !== undefined ? ` · ${out.cost.toFixed(2)} $` : ''}`);
+  if (t.ultime.length) console.log(`\n--- Ultime azioni ---\n${t.ultime.join('\n')}`);
+  console.log(`\nLog: ${log}\n\n--- Riepilogo dell'agente ---\n${out?.result ?? (run.stato === 'in corso' ? '(ancora al lavoro)' : '(nessun log)')}`);
+}
+
+function traceOrchestratorCli() {
+  const o = traceOrchestrator();
+  if (!o.epoche.length) { console.log('orchestratore: nessuna epoca in .pipeline/orchestra/stato.json'); return; }
+  console.log(`Orchestratore: ${o.provider ?? '?'}, epoca ${o.epoca}`);
+  for (const e of o.epoche) {
+    const cost = e.costoUsd !== undefined ? ` · ${e.costoUsd.toFixed(2)} $` : '';
+    console.log(`- epoca ${e.epoca} su ${e.provider}${e.dal ? ` dal ${e.dal}` : ''}${e.motivo ? ` (${e.motivo})` : ''}: ${e.turni ?? 0} turni${cost}${e.token ? ` · ${e.token} token` : ''} · conversazione ${e.sessione ?? '(nessuna)'}${e.inCorso ? ' · IN CORSO' : ''}`);
+  }
+  const cur = o.epoche.find((e) => e.inCorso);
+  if (!cur) return;
+  console.log(`\nConversazione: ${cur.file ?? '(file non trovato)'}`);
+  if (cur.riprendi) console.log(`Riprendila con: ${cur.riprendi}`);
+  console.log(`Contesto: ${cur.contesto ?? 0} token · consumo finora: ${tokens(cur.consumo)}`);
+  if (cur.ultime.length) console.log(`\n--- Ultime azioni ---\n${cur.ultime.join('\n')}`);
 }
 
 /** Puts back in the queue a run that stopped without a usage limit being recognised: it resumes its conversation. */
@@ -1329,7 +1476,7 @@ if (process.argv[1]?.endsWith('pipeline.mjs')) {
   else console.log(`Comandi:
   orchestra [--agente claude|argon|gemini] [--porta 4242]   l'orchestratore, la pipeline e l'interfaccia web
   web [--porta 4242]                                        solo l'interfaccia web della pipeline
-  stato | uso | indice | dossier <Txx> | traccia <Txx> | worktree | prossimo
+  stato | uso | indice | dossier <Txx> | traccia <Txx>|orchestratore | worktree | prossimo
   esegui [--sempre] [--max N] [--solo <provider>] [--task Txx]
   approva <Txx…> | assegna <Txx> <provider> <stima %> [priorità] [--approva]
   interrompi <Txx…|--tutti> | riprendi <Txx…> | integra <Txx>

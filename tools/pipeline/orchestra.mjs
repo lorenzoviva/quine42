@@ -87,6 +87,35 @@ export function contextOf(json) {
   return Math.round(input / calls);
 }
 
+const EPOCHS_KEPT = 30;
+
+/** Opens epoch `s.epoca` in the state's list of epochs (`traccia orchestratore`, T86): provider, start, why. */
+export function openEpoch(s, at = now()) {
+  const list = (s.epoche ?? []).filter((e) => e.epoca !== s.epoca);
+  list.push({ epoca: s.epoca, provider: s.provider, dal: at, motivo: s.motivo, turni: 0, token: 0 });
+  s.epoche = list.slice(-EPOCHS_KEPT);
+  return s;
+}
+
+/**
+ * Adds a turn to the current epoch: its conversation, the cost Claude reports (`total_cost_usd`) and the tokens of the
+ * turn (Anthropic's input excludes the cache, agy's includes it).
+ */
+export function noteTurn(s, json, session) {
+  if (!s.epoche?.some((e) => e.epoca === s.epoca)) openEpoch(s);
+  const e = s.epoche.find((x) => x.epoca === s.epoca);
+  const u = json?.usage ?? {};
+  const cache = u.cache_read_input_tokens ?? u.cache_read_tokens ?? 0;
+  const input = u.cache_read_input_tokens !== undefined || u.cache_creation_input_tokens !== undefined
+    ? (u.input_tokens ?? 0) + cache + (u.cache_creation_input_tokens ?? 0)
+    : Math.max(u.input_tokens ?? u.prompt_tokens ?? 0, cache);
+  e.sessione = session ?? e.sessione;
+  e.turni = (e.turni ?? 0) + 1;
+  e.token = (e.token ?? 0) + input + (u.output_tokens ?? 0);
+  if (typeof json?.total_cost_usd === 'number') e.costoUsd = Math.round(((e.costoUsd ?? 0) + json.total_cost_usd) * 10_000) / 10_000;
+  return s;
+}
+
 /** Whether the orchestrator should run a turn: only for author messages or decision-asking events. */
 export function shouldRunTurn(messages = [], events = []) {
   return messages.length > 0 || events.some((e) => Boolean(e.sveglia));
@@ -216,7 +245,7 @@ export async function orchestra({ agente, porta } = {}) {
   /** Starts a new epoch on `provider`: the next turn opens a new conversation from the start page. */
   const newEpoch = (s, provider, reason) => {
     Object.assign(s, { provider, sessione: undefined, epoca: s.epoca + 1, contesto: 0, motivo: reason });
-    saveState(s);
+    saveState(openEpoch(s));
     setOrchestrator(provider);
     say(`orchestratore: epoca ${s.epoca} su ${provider} (${reason})`);
   };
@@ -318,7 +347,7 @@ export async function orchestra({ agente, porta } = {}) {
         const s3 = state();
         Object.assign(s3, { sessione: out.session ?? s3.sessione, contesto: contextOf(json), consegnati: events.at(-1)?.n ?? s3.consegnati });
         if (out.session) s3.riavvio = undefined; // told, in its start page
-        saveState(s3);
+        saveState(noteTurn(s3, json, out.session));
         for (const m of messages) log('autore', m);
         if (events.length) log('pipeline', events.map((e) => e.testo).join('\n'));
         log('orchestratore', out.result, s3.provider);
@@ -352,7 +381,7 @@ export async function orchestra({ agente, porta } = {}) {
     fs.rmSync(SHUTDOWN, { force: true });
     const s = state();
     Object.assign(s, { sessione: undefined, riavvio: shutdownSummary(record, readJson(RUNS, {})), motivo: 'riavvio dopo lo spegnimento', epoca: s.provider ? s.epoca + 1 : s.epoca, contesto: 0 });
-    saveState(s);
+    saveState(s.provider ? openEpoch(s) : s);
     queue(`pipeline riaccesa dopo lo spegnimento del ${record.t} (ferma --${record.modo})`, true);
   }
   setInterval(() => void pump(), 60_000);

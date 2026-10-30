@@ -9,6 +9,7 @@ import {
   dossierOf,
   integrateTask,
   interruptTasks,
+  liveConversations,
   now,
   orchestrator,
   parseBacklog,
@@ -244,6 +245,10 @@ export function handleApi(method, rawUrl, body = {}, opts = {}) {
           domandeMarkdown: domandeContent ?? null,
         },
       };
+    }
+
+    if (method === 'GET' && pathname === '/api/conversazioni') {
+      return { status: 200, data: liveConversations(opts) };
     }
 
     if (method === 'POST' && pathname === '/api/chat') {
@@ -904,6 +909,7 @@ export function renderHtml() {
       <button class="tab-btn" data-view="tabella">Tabella Task (<span id="count-all">0</span>)</button>
       <button class="tab-btn" data-view="domande">Domande &amp; To-Do (<span id="count-domande">0</span>)</button>
       <button class="tab-btn" data-view="consumi">Consumo &amp; Budget</button>
+      <button class="tab-btn" data-view="conversazioni">Conversazioni in corso (<span id="count-conv">0</span>)</button>
       <button id="btn-refresh" title="Ricarica stato adesso">↻ Aggiorna</button>
     </div>
   </header>
@@ -1094,6 +1100,12 @@ export function renderHtml() {
           <tbody id="consumi-tbody"></tbody>
         </table>
       </div>
+    </section>
+
+    <!-- VISTA 5: CONVERSAZIONI IN CORSO (T86) -->
+    <section id="view-conversazioni" class="view">
+      <h3 style="margin:0 0 12px;">Conversazioni in corso: i task al lavoro e l'epoca dell'orchestratore</h3>
+      <div class="budget-grid" id="conv-grid"></div>
     </section>
   </main>
 
@@ -1473,6 +1485,28 @@ export function renderHtml() {
       }).join('');
     }
 
+    function renderConversations(list) {
+      document.getElementById('count-conv').textContent = list.length;
+      const k = (n) => n >= 1000 ? Math.round(n / 1000) + 'k' : String(n);
+      document.getElementById('conv-grid').innerHTML = list.length ? list.map((c) => {
+        const u = c.consumo || { chiamate: 0, input: 0, cache: 0, scritti: 0, output: 0 };
+        const who = c.chi === 'orchestratore'
+          ? \`<strong>orchestratore</strong> · epoca \${c.epoca}\`
+          : \`<a class="task-id" onclick="openTask('\${esc(c.chi)}')">\${esc(c.chi)}</a>\`;
+        return \`<div class="budget-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div>\${who} \${provBadge(c.provider)}</div>
+            <small style="color:var(--muted);">\${c.dal ? 'dal ' + esc(c.dal.slice(0, 16).replace('T', ' ')) : ''}</small>
+          </div>
+          <div style="font-size:12px;">Conversazione: <code>\${esc(c.sessione || 'id non ancora noto')}</code></div>
+          <div style="font-size:12px; color:var(--muted); word-break:break-all;">\${esc(c.file || '')}</div>
+          \${c.riprendi ? \`<pre class="code-block" style="margin:6px 0;">\${esc(c.riprendi)}</pre>\` : ''}
+          <div style="font-size:12px; margin:6px 0;">Consumo: <strong>\${u.chiamate}</strong> chiamate · \${k(u.input)} nuovi · \${k(u.cache)} dalla cache\${u.scritti ? ' · ' + k(u.scritti) + ' scritti' : ''} · \${k(u.output)} in uscita\${c.costoUsd !== undefined ? ' · $' + Number(c.costoUsd).toFixed(2) : ''}</div>
+          <pre class="code-block" style="max-height:180px; overflow-y:auto; font-size:11px;">\${esc((c.ultime || []).join('\\n') || 'nessun passo ancora')}</pre>
+        </div>\`;
+      }).join('') : '<div style="color:var(--muted);">Nessuna conversazione in corso.</div>';
+    }
+
     async function loadState() {
       try {
         STATE = await api('GET', '/api/stato');
@@ -1482,6 +1516,7 @@ export function renderHtml() {
         renderTasksTable(STATE);
         renderDomandeAndTodo(STATE);
         renderConsumiAndBudget(STATE);
+        renderConversations(await api('GET', '/api/conversazioni'));
         if (OPEN_TASK_ID) await refreshOpenTask(OPEN_TASK_ID);
       } catch (e) {
         console.error(e);
