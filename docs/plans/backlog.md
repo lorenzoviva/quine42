@@ -1445,12 +1445,13 @@ le risposte alle domande del piano.
   collezione di carte fuori dalla partita, con gli utilizzi.
 - Fatto quando: test del flusso, verifica nel browser con due schede, commit.
 
-### T45e · I pagamenti con Stripe — `da fare` (dipende da T45a, T44b)
-- Pipeline: claude · stima 5% · approvato · priorità 9
+### T45e · I pagamenti con Stripe — `in attesa` (aspetta le chiavi di Stripe di prova dall'autore in `docs/pipeline/domande/T45e.md`; dipende da T45a, T44b)
+- Pipeline: claude · stima 5% · priorità 9
 - Fare: la ricarica dei crediti con Stripe Checkout (Google Pay compreso) in modalità di prova; il webhook sul server accredita
   (idempotente); chiavi solo sul server; un anonimo non compra.
 - Fatto quando: test con il webhook finto, una ricarica di prova nel browser con le chiavi di test, commit. Le chiavi di Stripe le
   dà l'autore: se mancano, la domanda va in `docs/pipeline/domande/T45e.md`.
+- Esito: implementati gli endpoint server (`/api/stripe/checkout`, `/api/stripe/webhook`) con verifica firma HMAC-SHA256 (`stripe-signature`), accredito crediti idempotente (`Kernel.creditRecharge` e persistenza `world/pagamenti.json`), blocco acquisti per anonimi (403), interfaccia di ricarica rapida e saldo nel profilo (`P`); test headless in `tests/stripe.test.ts` (6/6 passati); ADR-0083 registrato. In attesa delle chiavi di test `STRIPE_SECRET_KEY` e `STRIPE_WEBHOOK_SECRET` dall'autore nel `.env` per la verifica nel browser.
 
 ### T45f · Il server su Google Cloud — `da fare` (dipende da T44b, T45d)
 - Pipeline: claude · stima 6% · priorità 10
@@ -1719,7 +1720,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fatto quando: i test sopra indicati e `npm run typecheck` sono verdi, commit sul branch `task/T76`. Poi l'orchestratore farà `integra T76`, `integra T75` e `integra T44b`.
 - Esito: eseguito merge di `task/T75` in `task/T76`; risolti i conflitti in `src/main.ts` e `docs/plans/backlog.md` preservando sia le novità di T44c (`savedProfile(name, id)`, gestione `ui:died` in multigiocatore, profilo salvato per universo/viandante) sia quelle di T75/T44b/T45a (account Firebase, login Google/anonimo, `accountWanderer` per id e profilo, crediti per anonimo e profilo account); superati `tests/account.test.ts` (6/6), `tests/credits.test.ts` (6/6), `tests/subscription.test.ts` (16/16), `tests/session.test.ts` (3/3) e `npm run typecheck` con esito verde.
 
-### T77 · Integrare T45e (i pagamenti con Stripe) nel base 3d — `da fare`
+### T77 · Integrare T45e (i pagamenti con Stripe) nel base 3d — `fatto`
 - Pipeline: gemini · stima 1% · approvato · priorità 0
 - Contesto: `integra T45e` del 30/10/2026 si è fermato su un conflitto in `docs/plans/backlog.md` (e possibili sovrapposizioni nei file aggiornati da T76/T75/T44b in `3d`). Leggi `node tools/pipeline/pipeline.mjs dossier T45e` e `dossier T76`.
 - Fare: nel tuo worktree esegui `git merge task/T45e` e risolvi i conflitti:
@@ -1727,4 +1728,5 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   - In `src/main.ts`, `server/session.ts`, `src/kernel/credits.ts`, `src/ui/profile.ts`, `vite.config.ts`, `AGENTS.md` o eventuali altri file, preserva attentamente sia l'autenticazione Firebase, i crediti anonimi e il profilo di T76/T75/T44b/T44c, sia l'integrazione di Stripe Checkout (`/api/stripe/checkout`), il webhook idempotente (`/api/stripe/webhook`), il blocco degli utenti anonimi dai pagamenti e la memorizzazione in `world/pagamenti.json` di T45e (ADR-0083).
   IMPORTANTE: esegui solo `npx vitest run tests/stripe.test.ts tests/account.test.ts tests/credits.test.ts tests/session.test.ts` e `npm run typecheck` (con `WaitMsBeforeAsync: 10000`, NON lanciare `npm test` sull'intera suite per evitare timeout).
 - Fatto quando: i test specificati e `npm run typecheck` sono verdi, commit sul branch `task/T77`. Poi l'orchestratore farà `integra T77` e `integra T45e`.
+- Esito: eseguito merge di `task/T45e` in `task/T77`; risolto il conflitto in `docs/plans/backlog.md` mantenendo lo stato di T45e (`in attesa` chiavi Stripe di prova) e la definizione di T77; verificate e preservate tutte le integrazioni sia di Firebase Auth/profilo (T76/T75/T44b/T44c) sia di Stripe Checkout, webhook idempotente, esclusione anonimi e persistenza in `world/pagamenti.json` di T45e (ADR-0083); superati `tests/stripe.test.ts`, `tests/account.test.ts`, `tests/credits.test.ts`, `tests/session.test.ts` (21/21) e `npm run typecheck` con esito verde.
 

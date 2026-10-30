@@ -161,7 +161,29 @@ async function main() {
       return { ok: true, profilo: r.profilo, testo: r.riparato.join('; ') };
     },
     () => (thin ? thin.session.profilo : kernel.profileOf(kernel.wanderer().id)),
-    account && thin ? { anonimo: thin.session.anonimo, linkGoogle: () => account!.linkGoogle(), signOut: () => account!.signOut() } : undefined,
+    account && thin
+      ? {
+          anonimo: thin.session.anonimo,
+          linkGoogle: () => account!.linkGoogle(),
+          signOut: () => account!.signOut(),
+          crediti: () => kernel.creditsOf(),
+          recharge: async (amount: number) => {
+            const token = account?.token;
+            const res = await fetch('/api/stripe/checkout', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                universo: name,
+                wandererId: kernel.wanderer().id,
+                crediti: amount,
+                token,
+                returnUrl: window.location.href,
+              }),
+            });
+            return (await res.json()) as { ok: boolean; url?: string; motivo?: string };
+          },
+        }
+      : undefined,
   );
   const tools: MasterTools | undefined = tooling && new (await tooling).MasterTools(kernel, renderer, dev, () => syncFocus());
   // Right click on a tile near you: its context menu (with what stands on it, and "Altro…").
@@ -325,6 +347,18 @@ async function main() {
   void updateModelsHud();
   kernel.bus.on('usage', () => void updateModelsHud());
   if (params.has('skip')) intro.hidden = true;
+  if (params.has('ricarica')) {
+    const outcome = params.get('ricarica');
+    if (outcome === 'successo') {
+      hud.message('Ricarica completata! I crediti verranno accreditati dal server.', 'info');
+    } else if (outcome === 'annullata') {
+      hud.message('Ricarica annullata.', 'warn');
+    }
+    const cleanUrl = new URL(window.location.href);
+    cleanUrl.searchParams.delete('ricarica');
+    cleanUrl.searchParams.delete('session_id');
+    window.history.replaceState({}, '', cleanUrl.toString());
+  }
   // Dev: ?dev&teleport=46,0 stops the carpet and drops you at real coordinates (e.g. in the corona).
   const tp = dev && params.get('teleport')?.split(',').map(Number);
   if (tp && tp.length === 2 && tp.every(Number.isFinite)) {

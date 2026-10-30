@@ -17,6 +17,10 @@ export interface AccountView {
   anonimo: boolean;
   linkGoogle(): Promise<void>;
   signOut(): Promise<void>;
+  /** Wanderer's current credit balance (T45e). */
+  crediti?: () => number;
+  /** Initiates Stripe Checkout to buy credits (T45e). */
+  recharge?: (amount: number) => Promise<{ ok: boolean; url?: string; motivo?: string }>;
 }
 
 export class ProfilePanel {
@@ -59,6 +63,7 @@ export class ProfilePanel {
   }
 
   private accountRow(a: AccountView): HTMLElement {
+    const container = el('div', { class: 'account-section' });
     const out = el('button', {}, 'Esci');
     out.onclick = () => void a.signOut();
     const row = el(
@@ -72,7 +77,37 @@ export class ProfilePanel {
       row.append(link);
     }
     row.append(out);
-    return row;
+    container.append(row);
+
+    // If not anonymous and recharge is available, show credit balance and Stripe top-up presets (T45e)
+    if (!a.anonimo && a.crediti && a.recharge) {
+      const creditsRow = el('div', { class: 'row ricarica' });
+      const balanceEl = el('div', { class: 'saldo' }, `Saldo crediti: $${a.crediti().toFixed(2)}`);
+      const ricaricaTitle = el('div', { class: 'label' }, 'Ricarica crediti (Stripe / Google Pay):');
+      const buttons = el('div', { class: 'presets' });
+
+      const amounts = [5, 10, 20];
+      for (const amount of amounts) {
+        const b = el('button', { class: 'preset-btn primary' }, `+${amount} $`);
+        b.onclick = async () => {
+          this.status.textContent = `Apertura Stripe Checkout (+${amount} $)...`;
+          try {
+            const res = await a.recharge!(amount);
+            if (res.ok && res.url) {
+              window.location.href = res.url;
+            } else {
+              this.status.textContent = res.motivo ?? 'Ricarica non riuscita.';
+            }
+          } catch (e) {
+            this.status.textContent = (e as Error).message;
+          }
+        };
+        buttons.append(b);
+      }
+      creditsRow.append(balanceEl, ricaricaTitle, buttons);
+      container.append(creditsRow);
+    }
+    return container;
   }
 
   get isOpen(): boolean {

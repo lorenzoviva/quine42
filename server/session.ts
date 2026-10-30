@@ -11,12 +11,23 @@ import type { AddressInfo } from 'node:net';
 import type { Duplex } from 'node:stream';
 import { WebSocketServer, type WebSocket } from 'ws';
 import type { AccountSettings } from './account';
+import type { Kernel } from '../src/kernel/kernel';
 
 const NAME_RE = /^[a-z0-9][a-z0-9-]{0,40}$/;
 /** A message bigger than this is not a client's (the files go the other way). */
 const MAX_MESSAGE = 256 * 1024;
 
-type Host = { name: string; session: { connect(link: unknown): void }; stop(): void };
+export type ActiveHost = { name: string; session: { connect(link: unknown): void; readonly kernel: Kernel }; stop(): void };
+export const activeHosts = new Map<string, Promise<ActiveHost | { error: string }>>();
+
+/** Returns the running kernel of an active universe session, if open. */
+export async function getActiveUniverseKernel(name: string): Promise<Kernel | undefined> {
+  const h = await activeHosts.get(name);
+  if (h && 'session' in h && h.session?.kernel) {
+    return h.session.kernel;
+  }
+  return undefined;
+}
 
 /** A WebSocket as a link of the protocol: what arrives before anyone listens is kept for them. */
 function wsLink(ws: WebSocket) {
@@ -48,22 +59,21 @@ function wsLink(ws: WebSocket) {
 }
 
 export function sessionServer(accounts?: AccountSettings): Plugin {
-  const hosts = new Map<string, Promise<Host | { error: string }>>();
   return {
     name: 'rune-session',
     configureServer(server: ViteDevServer) {
       const wss = new WebSocketServer({ noServer: true, maxPayload: MAX_MESSAGE });
       const open = (name: string, offline: boolean) => {
-        let h = hosts.get(name);
+        let h = activeHosts.get(name);
         if (!h) {
           const port = (server.httpServer?.address() as AddressInfo | null)?.port ?? 5173;
           h = server
             .ssrLoadModule('/src/session/host.ts')
             .then((mod) => mod.openUniverse({ name, base: `http://localhost:${port}`, offline, verify: accounts?.verify, masterUid: accounts?.masterUid }))
             .catch((e: Error) => ({ error: e.message }));
-          hosts.set(name, h);
+          activeHosts.set(name, h);
           // A universe that could not open is tried again by the next client.
-          void h.then((r) => 'error' in r && hosts.delete(name));
+          void h.then((r) => 'error' in r && activeHosts.delete(name));
         }
         return h;
       };
@@ -88,7 +98,8 @@ export function sessionServer(accounts?: AccountSettings): Plugin {
         });
       });
       server.httpServer?.on('close', () => {
-        for (const h of hosts.values()) void h.then((x) => 'stop' in x && x.stop());
+        for (const h of activeHosts.values()) void h.then((x) => 'stop' in x && x.stop());
+        activeHosts.clear();
         wss.close();
       });
     },
