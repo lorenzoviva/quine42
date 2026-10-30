@@ -44,7 +44,7 @@ Aggiornato il 30/10/2026 alle ~10:14 UTC (~11:14 locali), epoca 65 (gemini orche
   - **T51** (livello mare e motore acqua, p50).
   - **T52** e **T54** (p50): interrotti per dare precedenza al multigiocatore.
 - **Crediti**:
-  - **Gemini**: 5h al 68 %, settimana al 56 % (orchestratore).
+  - **Gemini**: 5h al 67 %, settimana al 56 % (orchestratore).
   - **Claude**: 5h a 0 %, settimana al 61 % (reset 11:59 UTC / ~13:00 locali).
   - **Argon**: fermo fino al 04/11.
 
