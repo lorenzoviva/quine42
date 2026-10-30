@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 22:25 UTC, fine epoca 160 su **claude**. **T83 integrato** (turni su disco, ADR-0088). **T84 in corso su gemini** (la pipeline l'ha spostato da sola: Claude a slot 0 per la previsione dei crediti, ADR-0087; l'autore ha detto di lanciarlo comunque). **T91 creato su richiesta dell'autore** (approvato, claude, p3): `branch.test.ts` e un test di `between.test.ts` che falliscono anche da soli (trovati da T83); aspetta uno slot di Claude (se resta a 0, proporre all'autore di spostarlo su gemini; non alzare i tetti senza sua istruzione). Poi T85 → T86. **Ordine dell'autore: finire T84-T86 (e ora T91), poi nessun task nuovo, poi dirgli che può chiudere con Ctrl-C.**
+Aggiornato il 30/10/2026 alle 22:30 UTC, epoca 161 su **claude**. **T91 partito su claude** (slot tornato a 1). **T83 integrato** (turni su disco, ADR-0088). **T84 in corso su gemini** (la pipeline l'ha spostato da sola: Claude a slot 0 per la previsione dei crediti, ADR-0087; l'autore ha detto di lanciarlo comunque). **T91 creato su richiesta dell'autore** (approvato, claude, p3): `branch.test.ts` e un test di `between.test.ts` che falliscono anche da soli (trovati da T83); aspetta uno slot di Claude (se resta a 0, proporre all'autore di spostarlo su gemini; non alzare i tetti senza sua istruzione). Poi T85 → T86. **Ordine dell'autore: finire T84-T86 (e ora T91), poi nessun task nuovo, poi dirgli che può chiudere con Ctrl-C.**
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -36,7 +36,7 @@ Aggiornato il 30/10/2026 alle 22:25 UTC, fine epoca 160 su **claude**. **T83 int
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T84** in corso su gemini; poi T85 → T86. **T91** (claude, p3) pronto, in attesa di slot.
+  - **T84** in corso su gemini; **T91** in corso su claude; poi T85 → T86.
   - **T52** risulta "in corso" nello stato ma è interrotto nel dossier.
 - **Da guardare (non integrare)**: **T54** finito con errore (codice 1), non approvato.
 - **Completati e integrati nel base `3d`**:
