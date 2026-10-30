@@ -348,6 +348,7 @@ export class ThinClient {
     const pid = k.playerId;
     if (s.needs) k.ecs.set(pid, 'needs', { ...(k.needs() ?? {}), ...s.needs });
     if (s.stati) k.ecs.set(pid, 'stati', structuredClone(s.stati));
+    if (typeof s.crediti === 'number') k.setCredits(k.wanderer().id, s.crediti);
     if (!this.pending) {
       if (s.inventory) k.ecs.set(pid, 'inventory', structuredClone(s.inventory));
       if (s.slots) k.ecs.set(pid, 'slots', structuredClone(s.slots));

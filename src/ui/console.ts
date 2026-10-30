@@ -217,6 +217,33 @@ export class Console {
             out,
           );
         }
+        const creditiRows: HTMLElement[] = [];
+        if (k.partita().modalita === 'multigiocatore') {
+          const wanderers = k.wanderers();
+          const target = el('select', {}) as HTMLSelectElement;
+          for (const w of wanderers) {
+            target.append(el('option', { value: w.id }, `${w.nome} (${w.id}) — ${k.creditsOf(w.id).toFixed(3)} crediti${w.anonimo ? ' [anonimo]' : ''}`));
+          }
+          const amt = el('input', { type: 'number', step: '1', min: '0.1', value: '5', style: 'width: 5rem;' }) as HTMLInputElement;
+          const assegna = el('button', {}, 'Assegna crediti');
+          const msg = el('span', { class: 'note' });
+          assegna.onclick = () => {
+            const id = target.value;
+            const n = parseFloat(amt.value);
+            if (!id || isNaN(n) || n <= 0) return;
+            const ok = k.giveCredits(id, n);
+            if (ok) {
+              msg.textContent = `Assegnati ${n} crediti a ${id} (saldo: ${k.creditsOf(id).toFixed(3)})`;
+              this.render();
+            } else {
+              msg.textContent = `Impossibile assegnare crediti a ${id} (anonimo o inesistente)`;
+            }
+          };
+          creditiRows.push(
+            el('div', { class: 'note' }, 'Crediti dei viandanti (multigiocatore, T45a): spese comuni divise tra i connessi, costo modello + 1% piattaforma. Crediti esauriti o anonimo → modelli locali.'),
+            el('div', { class: 'row' }, target, amt, assegna, msg),
+          );
+        }
         return [
           el('div', { class: 'note' }, `Universo «${k.config.name}» — seme ${k.config.seed} — ${Object.keys(k.files).length} file — ${k.ecs.count()} entità — ${k.chunks.size} chunk`),
           el('div', { class: 'note' }, k.repo.backend ? `Due repository: il kernel (il seme, immutabile) e questo universo, un repository git su disco in universes/${k.config.name}/ — ogni commit valido vi viene scritto; la partita si salva da sola.` : 'Nessun repository su disco (hosting statico): l\'universo vive nel browser.'),
@@ -225,6 +252,7 @@ export class Console {
           el('div', { class: 'row' }, genesis),
           el('div', { class: 'row' }, flush),
           ...clone,
+          ...creditiRows,
           el('div', { class: 'row' }, reset),
         ];
       }

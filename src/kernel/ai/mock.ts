@@ -274,6 +274,22 @@ export class MockModels implements Models {
         if (/distrugg.*universo|cancella tutto/i.test(t)) return { risposta: 'Questo no.', incarico: 'nessuno', rifiuto: "distruggerebbe l'universo" };
         if (/riscolp/i.test(t)) return { risposta: 'Lo dico allo Scultore.', incarico: 'riscolpisci', bersaglio: t.replace(/.*riscolpisci\s+(il |la |lo |l')?/i, '').split(' ')[0], richiesta: t };
         if (/\brun[ae]\b/i.test(t)) return { risposta: 'Eccole.', incarico: 'runa', rune: [t.replace(/.*\brun[ae]\s+/i, '')] };
+        if (/\bcredit[io]\b/i.test(t)) {
+          let quanti = 10;
+          let a: string | undefined;
+          const m1 = /(\d+(?:[.,]\d+)?)\s*credit[io](?:\s+(?:ad?|per)\s+([a-z0-9_-]+))?/i.exec(t);
+          if (m1) {
+            quanti = parseFloat(m1[1].replace(',', '.'));
+            a = m1[2];
+          } else {
+            const m2 = /(?:ad?|per)\s+([a-z0-9_-]+)\s+(\d+(?:[.,]\d+)?)\s*credit[io]/i.exec(t);
+            if (m2) {
+              a = m2[1];
+              quanti = parseFloat(m2[2].replace(',', '.'));
+            }
+          }
+          return { risposta: `Assegno ${quanti} crediti${a ? ` a ${a}` : ''}.`, incarico: 'crediti', richiesta: String(quanti), bersaglio: a };
+        }
         if (/regola/i.test(t)) return { risposta: 'Sarà una regola del mondo.', incarico: 'regola', richiesta: t.replace(/.*regola:?\s*/i, '') };
         if (/bosco|luogo|regione|castello|deserto/i.test(t)) return { risposta: 'Il Cartografo ci pensa.', incarico: 'ambiente', richiesta: t };
         if (/personaggio|abitante|persona/i.test(t)) return { risposta: 'La Fucina lo farà nascere.', incarico: 'personaggio', richiesta: t };
@@ -481,21 +497,24 @@ export class MockModels implements Models {
     return `-- ${name}: generato offline. Il dialogo è simulato dal Narratore (persona).\nlocal M = {}\n\nfunction M.on_spawn(id)\nend\n\nreturn M\n`;
   }
 
-  private reply(npc: NpcContext, text: string): unknown {
+  private reply(npc: Partial<NpcContext> | undefined, text: string): unknown {
     const t = text.toLowerCase();
-    const rng = new Rng(hashStr(`${npc.name}|${npc.history.length}|${text}`));
-    if (npc.persona.includes('gatto')) return { dice: rng.pick(CAT), azione: rng.chance(0.3) ? 'segui' : 'nessuna', umore: 'felino' };
+    const name = npc?.name ?? 'Villico';
+    const histLen = npc?.history?.length ?? 0;
+    const persona = npc?.persona ?? '';
+    const rng = new Rng(hashStr(`${name}|${histLen}|${text}`));
+    if (persona.includes('gatto')) return { dice: rng.pick(CAT), azione: rng.chance(0.3) ? 'segui' : 'nessuna', umore: 'felino' };
     if (/segui|vieni|accompagn/.test(t)) return { dice: 'Va bene, ti seguo. Tanto si torna sempre qui.', azione: 'segui', umore: 'curioso' };
     if (/ferm|aspett|resta/.test(t)) return { dice: 'Resto qui. Il mondo verrà da me.', azione: 'resta', umore: 'calmo' };
     if (/vai|lascia|addio/.test(t)) return { dice: 'Torno ai miei giri.', azione: 'vaga', umore: 'tranquillo' };
-    if (/dammi|hai qualcosa|regal|scambi/.test(t) && npc.carrying.length) return { dice: `Tieni, prendi questo: ${npc.carrying[0]}.`, azione: 'dai', oggetto: npc.carrying[0], umore: 'generoso' };
+    if (/dammi|hai qualcosa|regal|scambi/.test(t) && npc?.carrying?.length) return { dice: `Tieni, prendi questo: ${npc.carrying[0]}.`, azione: 'dai', oggetto: npc.carrying[0], umore: 'generoso' };
     // Feelings, promises, requests: what a person will remember.
     if (/sposami|ti amo|vuoi essere mia|vuoi essere mio/.test(t)) return { dice: 'Sì… sì, lo voglio.', azione: 'resta', umore: 'felice', ricordo: 'il viandante mi ha chiesto di sposarlo, e ho detto sì', importanza: 3, legame: 'moglie' };
     if (/prometto|giuro/.test(t)) return { dice: 'Lo terrò a mente. Non deludermi.', azione: 'nessuna', umore: 'speranzoso', ricordo: `il viandante ha promesso: ${text.slice(0, 80)}`, importanza: 3 };
-    if (/aiut|posso fare|serve qualcosa|richiesta/.test(t) && npc.secrets?.includes('richiesta per il viandante')) return { dice: 'Sì. Ho bisogno di te. Ti spiego tutto.', azione: 'missione', umore: 'sollevato', ricordo: 'ho affidato una richiesta al viandante', importanza: 2 };
-    if (npc.memories && /ricord|ti ricordi/.test(t)) return { dice: `Mi ricordo, eccome: ${npc.memories.split('\n').pop()?.replace(/^- \([^)]*\) /, '') ?? ''}`, azione: 'nessuna', umore: npc.mood };
+    if (/aiut|posso fare|serve qualcosa|richiesta/.test(t) && npc?.secrets?.includes('richiesta per il viandante')) return { dice: 'Sì. Ho bisogno di te. Ti spiego tutto.', azione: 'missione', umore: 'sollevato', ricordo: 'ho affidato una richiesta al viandante', importanza: 2 };
+    if (npc?.memories && /ricord|ti ricordi/.test(t)) return { dice: `Mi ricordo, eccome: ${npc.memories.split('\n').pop()?.replace(/^- \([^)]*\) /, '') ?? ''}`, azione: 'nessuna', umore: npc.mood };
     const mention = /\b(?:un|una|uno|del|della|dello)\s+([a-zàèéìòù]{4,})/i.exec(text);
-    return { dice: VILLAGER[(npc.history.length + rng.int(3)) % VILLAGER.length], azione: 'nessuna', umore: npc.mood, oggetti_citati: mention ? [mention[1]] : [] };
+    return { dice: VILLAGER[(histLen + rng.int(3)) % VILLAGER.length], azione: 'nessuna', umore: npc?.mood ?? 'calmo', oggetti_citati: mention ? [mention[1]] : [] };
   }
 
   private sign(facts: Record<string, unknown>, name: string): string {

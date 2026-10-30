@@ -1388,13 +1388,14 @@ le risposte alle domande del piano.
   dato origine al contenuto; spese comuni tra i giocatori collegati, master compreso; i coefficienti regolano quanto spesso gli agenti
   chiamano l'IA (una partita «Low Detail» a risparmio), e la lobby fa scegliere i modelli.
 
-### T45a · I crediti e le spese comuni — `da fare` (dipende da T36)
+### T45a · I crediti e le spese comuni — `fatto` (dipende da T36)
 - Pipeline: claude · stima 5% · approvato · priorità 5
 - Fare: un saldo di crediti per viandante (in `world/giocatori/<id>.json`, scritto solo dal server), dati a mano dal master
   (console, o il Referente); ogni chiamata scala dal suo `chi` (T36: `payerOf`) il costo più l'1 % (P#1); le spese `comune` si
   dividono tra i giocatori collegati in quel momento, master compreso; crediti finiti → ciò che il viandante chiede si fa con i
   modelli locali (come senza chiave) e lo sa. Un anonimo (T44b) non ha crediti.
 - Fatto quando: test headless (due giocatori e il master collegati, una spesa comune divisa in tre; crediti finiti → modelli locali), commit.
+- Esito: modulo `src/kernel/credits.ts` (`costWithFee` con +1% P#1, `splitCost` a quote esatte); saldo crediti in `world/giocatori/<id>.json` gestito solo dal server (`kernel.creditsOf`, `giveCredits`, `deductCredits`); addebito automatico su `models.onCall` con ripartizione delle spese `comune` tra i viandanti connessi (esclusi anonimi); ricarica crediti dal master via console (`src/ui/console.ts`) e via Referente (`askReferente` con incarico `crediti`); a crediti esauriti (`crediti <= 0`) `Council.write` devia sui modelli locali (`MockModels`) e avvisa nel feed; il viandante anonimo (`anonimo: true`) ha 0 crediti non ricaricabili e usa sempre modelli locali; ADR-0081 registrato; test headless in `tests/credits.test.ts` (6/6 passati). Nessuna verifica nel browser richiesta dal criterio (logica headless multiplayer e server).
 
 ### T45b · I coefficienti di generazione e la partita «Low Detail» — `da fare`
 - Pipeline: claude · stima 6% · approvato · priorità 6
