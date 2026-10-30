@@ -40,7 +40,7 @@ e ciò che rispondi l'autore lo legge nel terminale. Lo stesso processo esegue i
    lo legge. Il testo del to-do lo sposti come dice [`pianifica.md`](pianifica.md). A una domanda che puoi chiarire con i file
    rispondi tu; se serve una decisione dell'autore, chiedila in chat o in `domande/Txx.md`.
 2. **Provider e stima**: come [`pianifica.md`](pianifica.md), ma guardando i crediti di adesso (`stato`): un task urgente va a
-   chi ha crediti (Argon o Gemini se Claude è basso), mai sul provider su cui giri tu se è sotto la soglia: lo script non lo
+   chi ha crediti (Argon o Gemini se Claude è basso; ma i task con verifica nel browser vanno **solo su Claude**, T87), mai sul provider su cui giri tu se è sotto la soglia: lo script non lo
    lancerebbe.
 3. **Approvazioni**: approvi da solo i task nati da una richiesta esplicita dell'autore e le correzioni urgenti; le tue
    proposte (spezzature, task nuovi, cambi di piano) aspettano che l'autore approvi in chat.

@@ -90,6 +90,16 @@ export function capOf({ left, session, provider, orchestrator: orch, max, thresh
 
 // --- The backlog -----------------------------------------------------------------------------------------------
 
+/** Recognises whether a task requires browser verification from its text or pipeline line. */
+export function taskNeedsBrowser(block) {
+  const fattoQuando = /-\s*Fatto quando:([^\n]+)/i.exec(block)?.[1] ?? '';
+  const fare = /-\s*Fare:([^\n]+)/i.exec(block)?.[1] ?? '';
+  const pipe = /^- Pipeline:\s*(.+)$/m.exec(block)?.[1] ?? '';
+  return /\bbrowser\b/i.test(pipe)
+    || /\b(?:verifica(?:re)?\s+nel\s+browser|nel\s+browser|screenshot)\b/i.test(fattoQuando)
+    || /\bverifica(?:re)?\s+nel\s+browser\b/i.test(fare);
+}
+
 /** Every task of the backlog: id, title, status, dependencies, and the `- Pipeline:` line if the planner wrote one. */
 export function parseBacklog(text) {
   const tasks = [];
@@ -104,28 +114,30 @@ export function parseBacklog(text) {
       for (const t of d[1].matchAll(/T\d+[a-z]?/g)) if (!new RegExp(`^${id}[a-z]?$`).test(t[0])) deps.add(t[0]); // not itself nor its sub-tasks (T6 ≠ T63)
     const pipe = /^- Pipeline:\s*(.+)$/m.exec(block);
     const info = pipe ? parsePipelineLine(pipe[1]) : {};
+    const needsBrowser = Boolean(info.needsBrowser || taskNeedsBrowser(block));
     // A header that lists sub-tasks («T56a `fatto`, T56b `da fare`») gives one task per sub-task.
     const subs = [...tail.matchAll(/(T\d+[a-z])\s+`([^`]+)`/g)];
     if (subs.length) {
-      for (const [, sub, status] of subs) tasks.push({ id: sub, title, status, deps: [...deps].filter((d) => d !== sub), ...info, parent: id });
+      for (const [, sub, status] of subs) tasks.push({ id: sub, title, status, deps: [...deps].filter((d) => d !== sub), ...info, needsBrowser, parent: id });
     } else {
       // Without a status in backticks the tail says what the task is («spezzato in T43a-T43c»): not runnable by itself.
       const status = /`([^`]+)`/.exec(tail)?.[1] ?? (tail.trim() || 'da fare');
-      tasks.push({ id, title, status, deps: [...deps], ...info });
+      tasks.push({ id, title, status, deps: [...deps], ...info, needsBrowser });
     }
   }
   return tasks;
 }
 
-/** `claude · stima 4% · approvato · priorità 2` → { provider, estimate, approved, priority }. */
+/** `claude · stima 4% · approvato · priorità 2` → { provider, estimate, approved, priority, needsBrowser }. */
 export function parsePipelineLine(line) {
   const parts = line.split('·').map((s) => s.trim().toLowerCase());
-  const out = { provider: undefined, estimate: undefined, approved: false, priority: 100 };
+  const out = { provider: undefined, estimate: undefined, approved: false, priority: 100, needsBrowser: false };
   for (const p of parts) {
     if (CONFIG.providers[p]) out.provider = p;
     else if (/^stima\s+[\d.]+\s*%$/.test(p)) out.estimate = Number(/[\d.]+/.exec(p)[0]);
     else if (p === 'approvato') out.approved = true;
     else if (/^priorit[àa]\s+\d+$/.test(p)) out.priority = Number(/\d+/.exec(p)[0]);
+    else if (p === 'browser') out.needsBrowser = true;
   }
   return out;
 }
@@ -274,6 +286,10 @@ export function plan(tasks, runs, budget, only) {
     const missing = t.deps.map((d) => (byId.has(d) ? d : d.replace(/[a-z]$/, ''))).filter((d) => byId.has(d) && !isDone(byId.get(d).status));
     if (missing.length) { queues.bloccati.push({ ...t, missing }); continue; }
     if (!t.provider || t.estimate === undefined) { queues.daStimare.push(t); continue; }
+    if (t.needsBrowser && !(CONFIG.providers[t.provider]?.browser ?? t.provider === 'claude')) {
+      queues.bloccati.push({ ...t, missing: ['provider con browser (claude)'] });
+      continue;
+    }
     if (!t.approved && CONFIG.approvazione === 'manuale') { queues.daApprovare.push(t); continue; }
     if (only && t.provider !== only) continue;
     queues.pronti.push(t);
@@ -440,8 +456,12 @@ export async function execute({ max = CONFIG.maxParalleli, only, task, always = 
       if (active.size >= max) break;
       // A new task goes to its provider or, if that one cannot take it, to its alternatives in order (`alternative`).
       const resuming = Boolean(runs[t.id]);
-      const prov = resuming ? t.provider : [t.provider, ...(CONFIG.alternative?.[t.provider] ?? [])].find((p) => (!only || p === only) && fits(p, t.estimate, false));
+      const allowed = t.needsBrowser
+        ? [t.provider, ...(CONFIG.alternative?.[t.provider] ?? [])].filter((p) => CONFIG.providers[p]?.browser ?? p === 'claude')
+        : [t.provider, ...(CONFIG.alternative?.[t.provider] ?? [])];
+      const prov = resuming ? t.provider : allowed.find((p) => (!only || p === only) && fits(p, t.estimate, false));
       if (!prov || !fits(prov, t.estimate, resuming)) continue;
+      if (t.needsBrowser && !(CONFIG.providers[prov]?.browser ?? prov === 'claude')) continue;
       if (prov !== t.provider) say(`${t.id}: ${t.provider} non può, va su ${prov}`);
       const b = budget[prov];
       t.provider = prov;
@@ -745,7 +765,8 @@ export function setPipelineLine(text, id, change) {
   if (!block) throw new Error(`${id}: non c'è nel backlog`);
   const old = /^- Pipeline:\s*(.+)$/m.exec(block);
   const info = change(old ? parsePipelineLine(old[1]) : undefined);
-  const line = `- Pipeline: ${info.provider} · stima ${info.estimate}%${info.approved ? ' · approvato' : ''} · priorità ${info.priority}`;
+  const browserTag = info.needsBrowser ? ' · browser' : '';
+  const line = `- Pipeline: ${info.provider} · stima ${info.estimate}%${info.approved ? ' · approvato' : ''}${browserTag} · priorità ${info.priority}`;
   const next = old ? block.replace(old[0], line) : block.replace(/\n/, `\n${line}\n`);
   return text.replace(block, next);
 }
@@ -771,11 +792,19 @@ export function assignTask(id, { provider, stima, priorita, approva }, opts) {
   if (!p.config.providers[provider] || !(Number(stima) > 0)) {
     throw new Error('Uso: assegna <Txx> <claude|gemini|argon> <stima %> [priorità] [--approva]');
   }
+  const tasks = parseBacklog(readText(p.backlog));
+  const t = tasks.find((x) => x.id === id);
+  const provConf = p.config.providers[provider];
+  if (t?.needsBrowser && !(provConf?.browser ?? provider === 'claude')) {
+    const valid = Object.keys(p.config.providers).filter((k) => p.config.providers[k].browser ?? k === 'claude').join(', ');
+    throw new Error(`${id}: richiede verifica nel browser, va solo su un provider con browser (${valid})`);
+  }
   editPipeline(id, (i) => ({
     provider,
     estimate: Number(stima),
     priority: priorita !== undefined && priorita !== '' && !String(priorita).startsWith('--') ? Number(priorita) : i?.priority ?? 100,
     approved: Boolean(approva || i?.approved),
+    needsBrowser: t?.needsBrowser ?? i?.needsBrowser ?? false,
   }), opts);
   return { id, provider, stima: Number(stima) };
 }

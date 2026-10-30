@@ -139,9 +139,11 @@ worktree e branch). Le dipendenze contano come fatte solo quando il loro `fatto`
 integrato presto. Il diario di `orchestrazione.md` lo scrive lo script (lanci, esiti, limiti, integrazioni) e l'orchestratore
 (`nota`, il passaggio di consegne).
 
-**Verifica nel browser.** Se il «Fatto quando» di un task la chiede, chi esegue la fa (Claude gira con `--chrome`; in Antigravity
-il suo browser) e chiude con `BROWSER: verificato|da verificare — …`, che `esegui` riporta nel diario; se manca, l'orchestratore la
-delega a un subagente prima di integrare.
+**Verifica nel browser.** Se il «Fatto quando» di un task la chiede, chi esegue la fa e chiude con
+`BROWSER: verificato|da verificare — …`, che `esegui` riporta nel diario.
+- **Solo su Claude Code**: Claude gira con `--chrome` (`"browser": true` in `config.json`), che avvia un'istanza Chromium isolata ed espone gli strumenti del browser all'agente.
+- **Perché agy non supporta la verifica nel browser (T87)**: in modalità non interattiva (`agy -p`), Antigravity CLI non ha il flag `--chrome` e non fornisce strumenti di navigazione/ispezione browser all'agente primario. Il subagente `/browser` si appoggia su Chrome DevTools cercando una porta attiva (`DevToolsActivePort`) sul profilo Chrome utente predefinito, ma da istruzioni non avvia Chrome direttamente; se Chrome non è già stato lanciato manualmente con `--remote-debugging-port`, la connessione fallisce. Pertanto da `agy -p` le verifiche nel browser non sono possibili.
+- **Regola della pipeline**: la pipeline riconosce i task che richiedono una verifica nel browser (o screenshot): non li invia mai ad agy (`gemini` o `argon`), non li fa ripiegare sulle alternative non-browser e li assegna esclusivamente a `claude`. Se un task con browser è configurato su un provider senza browser, la pipeline lo blocca.
 
 **Permessi.** In `config.json` le CLI girano con `--dangerously-skip-permissions`: niente prompt, perché nessuno
 risponde. Ogni task è nel suo worktree, ma l'agente ha la shell: toglilo (e dai un allowlist in

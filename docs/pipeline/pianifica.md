@@ -17,7 +17,7 @@ Sei l'agente che pianifica, nel worktree del branch base (`3d`). Non esegui task
    - Provider: quello scritto dall'autore («> Provider proposto: …», Antigravity = `gemini`) e allora `approvato`;
      altrimenti `claude` per ciò che è delicato (architettura, kernel, multigiocatore, sicurezza, ciò che tocca
      molti file), `gemini` per ciò che è semplice o meccanico (modelli MarkovJunior, documenti, test, UI isolata),
-     senza `approvato`; `argon` (Gemini 4 Argon in Antigravity: molto più forte, limiti settimanali più stretti e suoi) per ciò che è difficile ma Claude non deve fare (strutture complesse, programmi MarkovJunior importanti). La stima è sempre la quota del limite del provider scelto.
+     senza `approvato`; `argon` (Gemini 4 Argon in Antigravity: molto più forte, limiti settimanali più stretti e suoi) per ciò che è difficile ma Claude non deve fare (strutture complesse, programmi MarkovJunior importanti). La stima è sempre la quota del limite del provider scelto. I task che richiedono una verifica nel browser (o screenshot) vanno **sempre e solo su `claude`** (T87: l'unico con `--chrome`; `agy -p` non ha il browser).
    - Stima: % del limite settimanale del provider. Parti da `docs/pipeline/consumi.jsonl` (task simili, stima e
      tentativi) e, se è vuoto: piccolo 1-2 %, medio 3-5 %, grande 6-10 %; oltre 10 % il task va spezzato.
    - Priorità: quella della richiesta («> Priorità: n»), altrimenti prima ciò che sblocca altri task; «> Dipende da:»
