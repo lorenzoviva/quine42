@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 22:20 UTC, epoca 160 su **claude**. **T83 integrato** (turni su disco, ADR-0088). T84 pronto ma fermo: la previsione dei crediti (ADR-0087) ha portato a 0 gli slot di Claude (esaurimento previsto 05/11 13:19, prima del reset delle 16:00; la domanda conta 6 task, anche T88/T57 che non partiranno). Chiesto all'autore se far partire T84 lo stesso. Da guardare a parte: `branch.test.ts` e un test di `between.test.ts` falliscono anche da soli (segnalati da T83). **Ordine dell'autore invariato: finire T84-T86, poi nessun task nuovo, poi dirgli che può chiudere con Ctrl-C.**
+Aggiornato il 30/10/2026 alle 22:25 UTC, fine epoca 160 su **claude**. **T83 integrato** (turni su disco, ADR-0088). **T84 in corso su gemini** (la pipeline l'ha spostato da sola: Claude a slot 0 per la previsione dei crediti, ADR-0087; l'autore ha detto di lanciarlo comunque). **T91 creato su richiesta dell'autore** (approvato, claude, p3): `branch.test.ts` e un test di `between.test.ts` che falliscono anche da soli (trovati da T83); aspetta uno slot di Claude (se resta a 0, proporre all'autore di spostarlo su gemini; non alzare i tetti senza sua istruzione). Poi T85 → T86. **Ordine dell'autore: finire T84-T86 (e ora T91), poi nessun task nuovo, poi dirgli che può chiudere con Ctrl-C.**
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -36,7 +36,7 @@ Aggiornato il 30/10/2026 alle 22:20 UTC, epoca 160 su **claude**. **T83 integrat
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T84** (claude) pronto, fermo per slot 0; poi T85 → T86.
+  - **T84** in corso su gemini; poi T85 → T86. **T91** (claude, p3) pronto, in attesa di slot.
   - **T52** risulta "in corso" nello stato ma è interrotto nel dossier.
 - **Da guardare (non integrare)**: **T54** finito con errore (codice 1), non approvato.
 - **Completati e integrati nel base `3d`**:
