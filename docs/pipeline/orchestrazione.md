@@ -270,3 +270,14 @@
 - [2026-10-30T10:18:13.325Z] nota: Epoca 67 avviata su Gemini. In attesa del reset crediti Claude (11:59 UTC / ~13:00 locali, ~41m) per ripresa automatica T70 e delle credenziali Stripe di test per T45e.
 - [2026-10-30T10:19:42.600Z] orchestratore: epoca 68 su gemini (contesto a 63 % della finestra)
 - [2026-10-30T10:21:35.792Z] nota: Epoca 68 avviata su Gemini. In attesa del reset crediti Claude (12:00 UTC / ~13:00 locali, ~38m) per ripresa automatica T70 e delle credenziali Stripe di test per T45e.
+- [2026-10-30T10:22:46.146Z] orchestratore: epoca 69 su gemini (contesto a 135 % della finestra)
+- [2026-10-30T12:00:00.290Z] riprendo T70 su claude (H:\projects\rune\.claude\worktrees\t70)
+- [2026-10-30T12:00:53.044Z] orchestratore: epoca 70 su claude (claude ha di nuovo crediti)
+- [2026-10-30T12:01:14.649Z] T45b: rimesso in coda (riparte da capo)
+- [2026-10-30T12:01:14.657Z] T45c: rimesso in coda (riparte da capo)
+- [2026-10-30T12:02:00.384Z] lancio T45b su claude (H:/projects/rune/.claude/worktrees/t45b)
+- [2026-10-30T12:02:00.453Z] lancio T45c su claude (H:/projects/rune/.claude/worktrees/t45c)
+- [2026-10-30T12:58:11.107Z] T45c: ESITO: fatto — catena `origini` nelle carte, quote di eredità per utilizzo misurate dal cambio del contenuto (ADR-0081); 8 test della suite ancora in timeout per il carico della macchina, già sul commit di partenza per `wanderers` e `watch`, gli altri tre file non confrontati (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T45c)
+- [2026-10-30T12:59:21.343Z] lancio T78 su claude (H:\projects\rune\.claude\worktrees\t78)
+- [2026-10-30T13:03:47.860Z] orchestratore: epoca 71 su gemini (claude sotto il 10 %)
+- [2026-10-30T13:06:25.134Z] nota: Epoca 71 avviata su Gemini (Claude session 5h al 9 %). T78 (p0), T70 (p0) e T45b (p6) attivi su Claude nei worktree; monitoraggio per riassegnazione T78 a Gemini in caso di arresto crediti Claude.

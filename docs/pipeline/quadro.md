@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 dopo le 12:58 UTC, fine epoca 70 su claude: **claude sotto il 10 %**, l'orchestratore passa a gemini (gemini 5h al 65 %, settimana 56 % alle 12:00; argon fermo fino al 04/11). I task claude in corso (T70, T45b) e T78 (claude, p0) aspettano crediti: se claude resta fermo a lungo, valuta di riassegnare T78 a gemini (è un merge con rinumerazione ADR, 2 %).
+Aggiornato il 30/10/2026 alle 13:05 UTC, avvio epoca 71 su gemini: **claude sotto il 10 %** (sessione 5h al 9 %, settimana 55 %), l'orchestratore passa a gemini (gemini 5h al 65 %, settimana 56 %; argon fermo fino al 04/11). I task claude avviati prima del limite (T78 p0, T70 p0, T45b p6) sono attivi e in esecuzione nei worktree. T78 sta già integrando T45c e rinumerando l'ADR in 0084; se uno dei task claude si arresta per limiti di crediti, T78 sarà riassegnato a gemini (merge + test, ~2 %). Inoltre T45b sta usando provvisoriamente il numero ADR 0081 che andrà rinumerato a 0085.
 
 ## Le priorità dell'autore
 
@@ -32,13 +32,15 @@ Aggiornato il 30/10/2026 dopo le 12:58 UTC, fine epoca 70 su claude: **claude so
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T70** (claude, p0, sessione preservata): ripreso alle 12:00 UTC nel worktree t70.
-  - **T45b** (claude, p6): lanciato alle 12:02 UTC.
-  - **T45c** (claude): fatto alle 12:58 (catena `origini` nelle carte, quote di eredità con MinHash, coefficienti `eredita` in universe.json). Il suo ADR usa 0081, già preso dai crediti: **T78** (claude, p0) fa il merge, rinumera l'ADR (0084) e verifica i test in timeout; poi `integra T78` e `integra T45c`.
+  - **T78** (claude, p0): in esecuzione nel worktree t78. Sta eseguendo merge di `task/T45c`, rinumerando l'ADR in 0084 e testando i file indicati. Monitorato da vicino per riassegnazione a Gemini se Claude si ferma.
+  - **T70** (claude, p0): in esecuzione nel worktree t70 (integrazione T53b più piani con salto T56b).
+  - **T45b** (claude, p6): in esecuzione nel worktree t45b (coefficienti e Low Detail). Attenzione: ha creato bozza ADR-0081 che andrà rinumerata a 0085.
+  - **T45c** (claude): completato con successo (quote di eredità per clone); in attesa dell'integrazione da parte di T78.
 - **Completati e integrati nel base `3d`**:
   - **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **Completati in attesa di integrazione**:
   - **T53b** (claude): in attesa di T70.
+  - **T45c** (claude): in attesa di T78.
 - **In attesa di chiavi/verifica browser**:
   - **T45e**: codice e test integrati, in attesa credenziali test Stripe per prova interattiva browser.
 - **Sbloccati / In coda**:
@@ -46,8 +48,8 @@ Aggiornato il 30/10/2026 dopo le 12:58 UTC, fine epoca 70 su claude: **claude so
   - **T51** (livello mare e motore acqua, p50).
   - **T52** e **T54** (p50): interrotti per dare precedenza al multigiocatore.
 - **Crediti**:
-  - **Claude**: 5h al 61 %, settimana al 61 % (reset avvenuto, torna orchestratore).
-  - **Gemini**: 5h al 65 %, settimana al 56 %.
+  - **Claude**: 5h al 9 %, settimana al 55 % (sotto il 10 %, orchestratore su Gemini).
+  - **Gemini**: 5h al 65 %, settimana al 56 % (orchestratore attuale).
   - **Argon**: fermo fino al 04/11.
 
 ## Da fare appena possibile
