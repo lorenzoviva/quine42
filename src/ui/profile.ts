@@ -12,6 +12,13 @@ export type ProfileKeeper = (p: Partial<Profile>) => Promise<{ ok: boolean; prof
 
 const PREVIEW = 96;
 
+/** The account behind the wanderer (T44b): anonymous ones may link to Google and keep the wanderer. */
+export interface AccountView {
+  anonimo: boolean;
+  linkGoogle(): Promise<void>;
+  signOut(): Promise<void>;
+}
+
 export class ProfilePanel {
   private root = $('#profile');
   private nome = el('input', { type: 'text', maxlength: String(PROFILE_LIMITS.nome[1]), placeholder: 'Come ti chiamano' });
@@ -26,6 +33,7 @@ export class ProfilePanel {
     private k: Kernel,
     private keep: ProfileKeeper,
     private current: () => Profile | undefined,
+    account?: AccountView,
   ) {
     const close = el('button', { class: 'close' }, '×');
     close.onclick = () => this.close();
@@ -42,11 +50,29 @@ export class ProfilePanel {
       el('div', { class: 'row' }, save),
       this.status,
     );
+    if (account) this.root.append(this.accountRow(account));
     this.root.addEventListener('keydown', (e) => {
       // Typing is not playing.
       e.stopPropagation();
       if (e.key === 'Escape') this.close();
     });
+  }
+
+  private accountRow(a: AccountView): HTMLElement {
+    const out = el('button', {}, 'Esci');
+    out.onclick = () => void a.signOut();
+    const row = el(
+      'div',
+      { class: 'row account' },
+      a.anonimo ? 'Account anonimo: giochi con i modelli locali e non puoi recuperarlo.' : 'Account Google.',
+    );
+    if (a.anonimo) {
+      const link = el('button', { class: 'primary' }, 'Lega a Google');
+      link.onclick = () => a.linkGoogle().catch((e: Error) => (this.status.textContent = e.message));
+      row.append(link);
+    }
+    row.append(out);
+    return row;
   }
 
   get isOpen(): boolean {

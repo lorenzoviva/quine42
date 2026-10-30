@@ -9,7 +9,8 @@ import { AGENTS, type AgentId, type FeedEntry } from '../kernel/agents/council';
 import { ATLAS_FILE } from '../kernel/atlas';
 import { RELIEF_PATH, SEA_DRAFT } from '../kernel/relief';
 import type { FileMap } from '../kernel/types';
-import { validWandererId, type Profile } from '../kernel/wanderers';
+import { readWandererState, SOLO, validWandererId, type Profile } from '../kernel/wanderers';
+import { accountWanderer, type Account, type Verifier } from './account';
 import { hashStr, hex } from '../kernel/rng';
 import { THING_PARTS, type ClientMsg, type FileChanges, type ItemOp, type Dialog, type FormView, type Me, type MyState, type Notice, type OtherView, type PlaceView, type ServerLink, type ServerMsg, type ThingView } from './protocol';
 
@@ -20,6 +21,13 @@ export interface SessionOptions {
   near?: number;
   /** How far (tiles) a wanderer reaches the things they act on. */
   reach?: number;
+  /**
+   * Accounts (T44b): with a verifier, who comes in is the account their token proves (`entra.token`), not the id they say.
+   * Without one (development, tests) the id goes as before.
+   */
+  verify?: Verifier;
+  /** The account of whoever runs this server: they are the master `io` of the universes made before accounts (T44b). */
+  masterUid?: string;
 }
 
 /** Seconds of walking a client may send at once (the network bunches steps): more than that is too fast. */
@@ -205,6 +213,10 @@ export class SessionServer {
   readonly hz: number;
   readonly near: number;
   readonly reach: number;
+  private verify?: Verifier;
+  private masterUid?: string;
+  /** The wanderers whose account is anonymous (T44b), as they last came in: they play with the local models only. */
+  private anonymous = new Set<string>();
 
   constructor(
     readonly kernel: Kernel,
@@ -213,6 +225,8 @@ export class SessionServer {
     this.hz = opts.hz ?? 10;
     this.near = opts.near ?? 24;
     this.reach = opts.reach ?? 3;
+    this.verify = opts.verify;
+    this.masterUid = opts.masterUid;
     this.told = { ...kernel.files };
     kernel.bus.on('council', (e: FeedEntry) => {
       this.voices.push(e);
@@ -259,19 +273,55 @@ export class SessionServer {
     return [...this.clients.keys()];
   }
 
-  /** A new link: the client says who it is (`entra`), then it is a wanderer of this world until the link closes. */
+  /** Whether a wanderer plays as an anonymous account (T44b): what they ask is made with the local models. */
+  isAnonymous(id: string | undefined): boolean {
+    return !!id && this.anonymous.has(id);
+  }
+
+  /** The wanderer of an account: the uid's, but the server's own account is the master `io` of a universe made before accounts. */
+  private wandererOf(a: Account): string {
+    if (!a.anonimo && this.masterUid && a.uid === this.masterUid && this.kernel.isMaster(SOLO)) return SOLO;
+    return accountWanderer(a.uid);
+  }
+
+  /**
+   * A new link: the client says who it is (`entra`), then it is a wanderer of this world until the link closes. With
+   * accounts (T44b) its token is verified first; what it sends meanwhile is not heard.
+   */
   connect(link: ServerLink): void {
     let client: Client | undefined;
+    let entering = false;
+    let closed = false;
     link.onMessage((msg) => {
       if (client) {
         if (msg && typeof msg === 'object') this.inbox.push({ c: client, msg });
         return;
       }
-      if (msg?.t !== 'entra') return;
-      client = this.join(link, msg.id, msg.nome, msg.profilo);
-      if (!client) link.close();
+      if (msg?.t !== 'entra' || entering) return;
+      if (!this.verify) {
+        client = this.join(link, msg.id, msg.nome, msg.profilo);
+        if (!client) link.close();
+        return;
+      }
+      entering = true;
+      const token = typeof msg.token === 'string' ? msg.token : '';
+      void (token ? this.verify(token).catch(() => undefined) : Promise.resolve(undefined)).then((a) => {
+        if (closed) return;
+        if (!a || typeof a.uid !== 'string' || !a.uid) {
+          link.send({ t: 'rifiuto', motivo: token ? 'accesso non valido o scaduto: entra di nuovo' : 'serve un account per entrare' });
+          return link.close();
+        }
+        const id = this.wandererOf(a);
+        if (a.anonimo) this.anonymous.add(id);
+        else this.anonymous.delete(id);
+        // The account's name only names a wanderer who is new: one who has been here keeps the name they chose.
+        const known = !!readWandererState(this.kernel.files, id);
+        client = this.join(link, id, known ? msg.nome : (a.nome ?? msg.nome), msg.profilo);
+        if (!client) link.close();
+      });
     });
     link.onClose(() => {
+      closed = true;
       if (!client || this.clients.get(client.id) !== client) return;
       this.clients.delete(client.id);
       this.kernel.setRemote(client.id, false);
@@ -308,6 +358,7 @@ export class SessionServer {
       nome: w.nome,
       ...(this.kernel.profileOf(id) ? { profilo: this.kernel.profileOf(id) } : {}),
       ...(fixed?.riparato.length ? { riparato: fixed.riparato } : {}),
+      ...(this.anonymous.has(id) ? { anonimo: true as const } : {}),
       ...(master ? { master: true as const, concilio: this.kernel.feed().slice(-FEED_KEEP), ...(Object.keys(this.branch.files).length ? { ramo: { ...this.branch.files } } : {}) } : {}),
       ...(forma ? { forma } : {}),
       tick: u.tick,

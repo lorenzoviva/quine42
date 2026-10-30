@@ -1341,7 +1341,7 @@ le risposte alle domande del piano.
   programma `viandante`, che ha una sola lettera da ricolorare); il nome doppio non si rifiuta, si ripara con `freshName`; vale anche in
   singola per `io`. **Non fatta** la verifica con due schede: in questa sessione non c'erano strumenti del browser (build di produzione ok).
 
-### T44b · L'account e l'autenticazione — `da fare` (risposte in `docs/pipeline/domande/T44b.md`; dipende da T44a)
+### T44b · L'account e l'autenticazione — `fatto` (risposte in `docs/pipeline/domande/T44b.md`; dipende da T44a)
 - Pipeline: claude · stima 5% · approvato · priorità 4
 - Decisioni dell'autore (29/10/2026): Firebase Auth / Identity Platform di Google Cloud, accesso con Google e anonimo; in singola
   nessun account (il viandante resta `io`). Un anonimo non può recuperare l'account: non compra crediti e gioca solo offline
@@ -1352,6 +1352,20 @@ le risposte alle domande del piano.
   Senza configurazione di Firebase (sviluppo, test) vale l'id di oggi (`?viandante=`).
 - Fatto quando: test con un verificatore finto (token valido, scaduto, anonimo che si lega), verifica nel browser con l'emulatore di
   Firebase o un progetto di prova, commit. Se serve creare il progetto Firebase, la domanda va in `docs/pipeline/domande/T44b.md`.
+- Fatto (ADR-0081): `src/session/account.ts` (`Account`, `Verifier`, `accountWanderer`: l'uid in minuscolo), `server/account.ts`
+  (`firebase-admin`, `GET /api/account` con le impostazioni web, `anonymousToken`), `SessionOptions.verify`/`masterUid` e
+  `isAnonymous` in `server.ts`, `PayerModels` (`src/kernel/ai/local.ts`: le chiamate pagate da un anonimo ai modelli locali) in
+  `host.ts`, `src/session/login.ts` (Google o anonimo, Firebase con `import()`), «Lega a Google» ed «Esci» nel pannello `P`;
+  `tests/account.test.ts` (6 test). Verificato nel browser con l'emulatore di Firebase Auth (`demo-quine42`): accesso anonimo
+  (id = uid, «anonimo: modelli locali»), legame a Google con lo stesso viandante (nome e presentazione restano), token falso e
+  ingresso senza token rifiutati, «Esci» riporta alla scelta. Rispetto al previsto: dopo il legame il token dice ancora
+  `sign_in_provider: anonymous` (lo ha mostrato l'emulatore), quindi l'anonimo si riconosce dalle `identities`; il client prende un
+  token fresco a ogni ingresso; `QUINE_MASTER` (uid) è il master `io` degli universi fatti prima degli account. Il popup di Google
+  dell'emulatore si apre fuori dalla scheda dello strumento: il legame nel browser è stato fatto con l'API REST dell'emulatore
+  (`signInWithIdp` sullo stesso utente), non cliccando il popup. Il worktree ha ora un `node_modules` suo (non più la junction).
+  Test: `npm run typecheck` verde, `tests/account.test.ts` e `tests/session.test.ts` verdi; nella suite intera 52 test vanno in
+  timeout (kernel, thin, between, referente…): l'avvio di un kernel su questa macchina il 30/10 impiega 11-15 s, oltre l'hook di 10 s, e
+  fallisce allo stesso modo sul commit di partenza (`ab79ce4`), quindi non viene da T44b; nessuna asserzione fallita.
 
 ### T44c · Correzioni dalla verifica nel browser di T44a e T43c — `da fare` (dipende da T44a, T43c)
 - Pipeline: claude · stima 3% · approvato · priorità 3

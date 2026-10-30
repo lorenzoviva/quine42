@@ -11,7 +11,9 @@ import { GeminiModels } from '../kernel/ai/gemini';
 import type { Models } from '../kernel/ai/models';
 import { readConfig } from '../kernel/universe';
 import { UniverseChunks, UniverseClient, upgradeFromSeed } from '../kernel/universes';
+import { PayerModels } from '../kernel/ai/local';
 import { BRANCH, SessionServer } from './server';
+import type { Verifier } from './account';
 
 const DT = 1 / 60;
 /** At most this many ticks to catch up after a pause of the process: the world does not run ahead in bursts. */
@@ -28,7 +30,7 @@ export interface UniverseHost {
  * proxy are its HTTP routes). A universe that does not exist, or is a game alone, is not opened: alone the
  * kernel stays in the browser.
  */
-export async function openUniverse(opts: { name: string; base: string; offline?: boolean }): Promise<UniverseHost | { error: string }> {
+export async function openUniverse(opts: { name: string; base: string; offline?: boolean; verify?: Verifier; masterUid?: string }): Promise<UniverseHost | { error: string }> {
   const client = await UniverseClient.connect(opts.name, opts.base);
   if (!client) return { error: 'nessun archivio degli universi' };
   const snap = await client.load();
@@ -39,11 +41,17 @@ export async function openUniverse(opts: { name: string; base: string; offline?:
   const ai = readConfig(up.files).config.ai;
   const endpoint = `${opts.base}/api/gemini`;
   const online = !opts.offline && (await GeminiModels.available(endpoint));
+  // What an anonymous account pays for is made by the local models (T44b): `session` is there before the first call.
+  let session: SessionServer | undefined;
   const models: Models = online
-    ? new GeminiModels({ endpoint, textModel: ai.textModel, limits: { text: ai.maxText }, thinking: ai.thinking, timeout: (ai.timeout ?? 120) * 1000 })
+    ? new PayerModels(
+        new GeminiModels({ endpoint, textModel: ai.textModel, limits: { text: ai.maxText }, thinking: ai.thinking, timeout: (ai.timeout ?? 120) * 1000 }),
+        new MockModels(),
+        (chi) => !!session?.isAnonymous(chi),
+      )
     : new MockModels();
   const kernel = await Kernel.boot({ files: up.files, store: memoryStore(), models, chunks: new UniverseChunks(client), backend: client, past: snap.log ?? [] });
-  const session = new SessionServer(kernel);
+  session = new SessionServer(kernel, { verify: opts.verify, masterUid: opts.masterUid });
   // The master's branch waits on disk while the server is down (T42b).
   const branch = await client.readBranch(BRANCH).catch(() => null);
   if (branch) session.restoreBranch(branch);
