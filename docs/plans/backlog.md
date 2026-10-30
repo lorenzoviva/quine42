@@ -840,7 +840,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 - **Domanda per l'autore**: sotterranei come luoghi a parte sotto il mondo (dungeon) o come parti sotterranee delle
   strutture (cantine, cripte), o entrambi?
 
-### T53 · Le scale come rampe e le strutture su più piani — T53a `fatto` (`d7812ae`), T53b `fatto`
+### T53 · Le scale come rampe e le strutture su più piani — T53a `fatto` (`d7812ae`), T53b `fatto` (`eb03038`)
 - Pipeline: claude · stima 6% · approvato · priorità 50
 - Contesto: richiesta del 24/10: le strutture devono essere navigabili appena generate; l'autore sceglie la seconda via
   (la scala è una lastra inclinata, il viandante ci sale camminando), non «E → Sali». Oggi `floors()` in `src/mj/mesh.ts`
