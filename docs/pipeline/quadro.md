@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle ~12:00 UTC (~13:00 locali), epoca 69 (gemini cede a claude orchestratore: claude reset avvenuto, 5h al 61 %, settimana al 61 %; gemini 5h al 65 %, settimana 56 %; argon fermo fino al 04/11).
+Aggiornato il 30/10/2026 alle ~12:01 UTC (~13:01 locali), epoca 70 su claude (orchestratore tornato a claude dopo il reset; claude 5h e settimana al 61 %; gemini 5h al 65 %, settimana 56 %; argon fermo fino al 04/11).
 
 ## Le priorità dell'autore
 
@@ -32,8 +32,8 @@ Aggiornato il 30/10/2026 alle ~12:00 UTC (~13:00 locali), epoca 69 (gemini cede 
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T70** (claude, p0, sessione preservata): riprende ora con il reset dei crediti Claude.
-  - **T45b** (claude, p6) e **T45c** (claude, p7): priorità multigiocatore (pronti per essere eseguiti).
+  - **T70** (claude, p0, sessione preservata): ripreso alle 12:00 UTC nel worktree t70.
+  - **T45b** (claude, p6) e **T45c** (claude, p7): rimessi in coda alle 12:01 UTC (ripartono da capo), priorità multigiocatore.
 - **Completati e integrati nel base `3d`**:
   - **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **Completati in attesa di integrazione**:
