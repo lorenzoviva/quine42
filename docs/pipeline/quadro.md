@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 08:35 UTC, epoca 46 (claude: 5h al 16 %, settimana 62 %; gemini 5h al 100 %).
+Aggiornato il 30/10/2026 alle ~08:40 UTC, fine epoca 46 (claude sotto il 10 % della sessione di 5h, reset 11:59 UTC; settimana 62 %; gemini 5h al 100 %).
 
 ## Le priorità dell'autore
 
@@ -20,11 +20,14 @@ Aggiornato il 30/10/2026 alle 08:35 UTC, epoca 46 (claude: 5h al 16 %, settimana
   - **T68c completato su Gemini e integrato** in `3d`: collegati gli abbonamenti nel gioco tramite `RoutedModels` in `main.ts`, stato e coda in `#models` e nel pannello del Concilio (`FeedPanel`), documentazione in `README.md` e test Genesi offline con coda servita in `tests/subscription.test.ts`.
   - **T74 completato su Gemini e integrato** in `3d`: risolto il merge di T68c in `docs/plans/backlog.md` preservando tutti i blocchi ed esiti, suite `tests/subscription.test.ts` (16/16) e typecheck verdi. Integrati con successo sia T74 che T68c nel branch base `3d`, con rimozione dei relativi worktree e branch.
 - **Cosa si aspetta**:
-  1. Completamento ed esito di **T70** su Claude per procedere all'integrazione di T70 e T53b nel base `3d`.
+  1. **T75** (gemini, p0): merge di T44b con T45a; poi `integra T75` e `integra T44b`.
+  2. **T70** (claude, p0): poi `integra T70` e `integra T53b`.
+  3. Esiti di T44c, T45b, T45c (claude; si fermeranno al limite e ripartono dopo le 11:59 UTC).
 - **Intenzioni / prossimi passi**:
-  1. Esecuzione di **T70** (integrazione T53b con salto T56b, priorità 0 su Claude), poi `integra T70` e `integra T53b`.
-  2. Procedere con **T44c** (priorità 3) e **T44b** (priorità 4, che con T45a completato sblocca a cascata T45d/e/f).
-  3. Proseguire con **T45b** (priorità 6) e **T45c** (priorità 7).
+  1. Integrare T75+T44b e T70+T53b appena finiti (T44b sblocca T45d/T45e con T45b).
+  2. Tenere i posti al multigiocatore: T52 e T54 (p50) vanno ripresi solo quando la coda multigiocatore è vuota. T54 «fallito (codice 1)» è solo l'effetto dell'interruzione (nessun log): `riprendi T54`.
+  3. T52 risultava `inCorso` nello stato ma `interrompi T52` dice «non è in corso»: se T75 non parte per mancanza di posti, controllare lo stato di T52.
+  4. Con Claude basso, i task idonei vanno su gemini (5h al 100 %).
 
 ## Task attivi e in corso
 
