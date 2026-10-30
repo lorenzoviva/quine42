@@ -1424,7 +1424,7 @@ le risposte alle domande del piano.
 
 ## Varie
 
-### T70 · Integrare T53b (più piani) con il salto di T56b — `da fare`
+### T70 · Integrare T53b (più piani) con il salto di T56b — `in corso`
 - Pipeline: claude · stima 3% · approvato · priorità 0
 - Contesto: `integra T53b` del 30/10/2026 si è fermato sui conflitti (il base è com'era): T53b (strutture su più piani: un pavimento
   per tratto di pieno, `pos.z`, `free`/`free_real`/`floorAt` con l'altezza, taglio del renderer sul piano) e T56b (il salto, già nel
