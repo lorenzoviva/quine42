@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026, epoca 1 dell'orchestratore (claude).
+Aggiornato il 30/10/2026, epoca 2 dell'orchestratore (argon: subentrato perché claude ha esaurito i crediti delle 5 ore, reset 06:59 UTC, e ha il 9 % settimanale).
 
 ## Le priorità dell'autore
 
