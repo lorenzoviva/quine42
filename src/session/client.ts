@@ -33,6 +33,8 @@ export class SessionClient {
   /** Who this wanderer is to the others (T44a), as the server repaired it; what it repaired when they came in. */
   profilo?: Profile;
   riparato: string[] = [];
+  /** Signed in anonymously (T44b): what they ask is made with the local models, until they link a Google account. */
+  anonimo = false;
   /** Whether this wanderer is the master (T41): only the master hears the Council and gets all the files. */
   master = false;
   /** What the Council said (the master's only), oldest first. */
@@ -66,7 +68,7 @@ export class SessionClient {
 
   constructor(
     private link: ClientLink,
-    who: { id: string; nome?: string; profilo?: Partial<Profile>; anonimo?: boolean },
+    who: { id: string; nome?: string; profilo?: Partial<Profile>; token?: string; anonimo?: boolean },
   ) {
     this.ready = new Promise((r) => (this.entered = r));
     link.onMessage((m) => this.receive(m));
@@ -80,6 +82,7 @@ export class SessionClient {
       id: who.id,
       ...(who.nome ? { nome: who.nome } : {}),
       ...(who.profilo ? { profilo: who.profilo } : {}),
+      ...(who.token ? { token: who.token } : {}),
       ...(who.anonimo ? { anonimo: true } : {}),
     });
   }
@@ -112,7 +115,7 @@ export class SessionClient {
         this.entered?.();
         break;
       case 'ingresso':
-        Object.assign(this, { id: m.id, nome: m.nome, profilo: m.profilo, riparato: m.riparato ?? [], master: !!m.master, files: m.files, branch: m.ramo ?? {}, me: m.me, forma: m.forma, stato: m.stato });
+        Object.assign(this, { id: m.id, nome: m.nome, profilo: m.profilo, riparato: m.riparato ?? [], anonimo: !!m.anonimo, master: !!m.master, files: m.files, branch: m.ramo ?? {}, me: m.me, forma: m.forma, stato: m.stato });
         this.feed.splice(0, this.feed.length, ...(m.concilio ?? []));
         this.places.clear();
         this.things.clear();

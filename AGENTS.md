@@ -81,7 +81,8 @@ npm run build        # typecheck + build (npx vite preview la serve, proxy inclu
 npm run abbonamento  # serve la coda /api/coda con le CLI (Claude, Antigravity, ADR-0077)
 ```
 
-`.env`: `GEMINI_API_KEY=...` (ignorato da git). Senza chiave o con `?offline`: modelli locali, texture e
+`.env`: `GEMINI_API_KEY=...` (ignorato da git); per gli account in multigiocatore `FIREBASE_PROJECT_ID` (e `FIREBASE_API_KEY`,
+`FIREBASE_AUTH_DOMAIN`, `QUINE_MASTER`; con l'emulatore `FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099` e un progetto `demo-…`, ADR-0082). Senza chiave o con `?offline`: modelli locali, texture e
 ostacoli procedurali. URL: `?skip` salta intro e Genesi; `?dev&teleport=46,0` porta oltre il tappeto (o `teleport=X,Y` dovunque: anche dentro una stanza, vedi «Convalida nel browser»); in sviluppo `?universo=<nome>` apre un altro
 universo di `universes/` e `?viandante=<id>` sceglie il viandante della scheda in multigiocatore (due schede, due viandanti).
 Graphify (facoltativo, ADR-0045): `pip install graphifyy` in un ambiente a parte, poi `GRAPHIFY_BACKEND=none graphify update .`
@@ -95,6 +96,7 @@ server/geminiProxy.ts   proxy /api/gemini → Google, chiave da .env
 server/universeStore.ts /api/universe: ogni universo è un repository git in universes/<nome>/ (e il ramo del master, `rami/master`; il clone)
 server/subscriptionQueue.ts /api/coda: la coda su disco degli abbonamenti (`universes/.coda/`), servita da un processo che usa le CLI (ADR-0077)
 server/session.ts       /api/session (WebSocket, solo npm run dev): i client delle partite in multigiocatore (ADR-0058)
+server/account.ts       /api/account e la verifica dei token di Firebase Auth (ADR-0082)
 src/
   main.ts               bootstrap: modelli, kernel, renderer, UI, loop a 60 Hz
   master.ts             gli strumenti del master (editor, console, registro, Genesi, studio, atlante, grafo, corona), caricati con import() (ADR-0061)
@@ -152,7 +154,7 @@ src/mj/                 MarkovJunior del gioco (ADR-0036, 0038): engine.ts (moto
                         run.ts (esecuzione, animazioni, azioni), rig.ts (arti), mesh.ts (voxel → triangoli, impronte, pavimenti),
                         classes.ts (classi e scatole), photo.ts (foto in 3/4 per l'Artista), check.ts (misure di un modello)
 src/session/             il kernel sul server (ADR-0058): protocol.ts (messaggi, fakeLink), server.ts (SessionServer), client.ts
-                        (SessionClient: ciò che un client sa del mondo), host.ts (apre un universo e fa girare il suo mondo);
+                        (SessionClient: ciò che un client sa del mondo), host.ts (apre un universo e fa girare il suo mondo), account.ts e login.ts (l'account, ADR-0082);
                         il client sottile (ADR-0059): thin.ts (ThinClient: riempie il kernel specchio), socket.ts (WebSocket, id della scheda)
 tools/pipeline/          la pipeline agentica (ADR-0072, 0079): pipeline.mjs (code, budget, esecuzione nei worktree, ripresa dopo i limiti, dossier),
                         orchestra.mjs (il processo dell'orchestratore: chat, eventi, epoche), web.mjs (l'interfaccia web locale, T69), config.json
@@ -368,6 +370,15 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   nel protocollo, l'`ingresso`/`esito` dicono il profilo riparato e `riparato`; agli altri con `OtherView` (+ `presentazione`, «Chi è» nel
   menu). Il Narratore riceve la presentazione come affermazione del viandante. Il client lo tiene in `localStorage`; `P` apre il pannello
   (`src/ui/profile.ts`, una foto del modello per seme).
+- **L'account** (ADR-0082, T44b): in multigiocatore, se il server ha `FIREBASE_PROJECT_ID` nel `.env`, si entra con Firebase Auth
+  (Google o anonimo; `src/session/login.ts`, Firebase caricato con `import()`, le impostazioni web da `GET /api/account`): l'ID token va
+  nell'`entra`, il server lo verifica (`firebase-admin` in `server/account.ts`, `SessionOptions.verify`) e il viandante è l'uid
+  (`accountWanderer` in `src/session/account.ts`); token falso o scaduto → `rifiuto`. L'anonimo (`ingresso.anonimo`,
+  `SessionServer.isAnonymous`, `kernel.isAnonymous`) usa il meccanismo unico dei crediti di ADR-0081: 0 crediti non ricaricabili,
+  escluso dalle spese comuni, richieste personali gestite con i modelli locali (`MockModels` a crediti esauriti); legandosi a Google
+  (pannello `P`, «Lega a Google») smette di essere anonimo (`setAnonymous`), tiene lo stesso uid e viandante e può ricevere crediti.
+  `QUINE_MASTER` (uid) è il master `io` degli universi fatti prima degli account. Senza `FIREBASE_PROJECT_ID` (sviluppo, test) vale l'id di
+  oggi; in singola nessun account.
 - **Morte e ricollegamento in multigiocatore** (ADR-0076, T43c): a salute zero un giocatore (mai il master: `mortalDies`) muore sul server con la
   punizione della partita (`continueAfterDeath(id, cause)` concatenata da `die` come lui, senza alzare `dead` né fermare gli altri; `wanderer:died` →
   avviso `morte`, il client lo mostra e riparte dove il verdetto dice). `world/giocatori/<id>.json` salva anche `pos {x, y}`: chi esce e rientra ritrova

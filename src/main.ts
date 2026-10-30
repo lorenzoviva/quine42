@@ -20,6 +20,7 @@ import { ActionMenu } from './ui/actions';
 import { SessionClient } from './session/client';
 import { ThinClient } from './session/thin';
 import { keepProfile, savedProfile, socketLink, tabWanderer } from './session/socket';
+import { accountConfig, signIn, type SignedIn } from './session/login';
 import { ProfilePanel } from './ui/profile';
 import { Sfx } from './audio';
 import { $ } from './ui/dom';
@@ -85,12 +86,18 @@ async function bootAlone(client: UniverseClient | null, snap: UniverseSnapshot |
   return { kernel, online };
 }
 
+/** The account this tab signed in with, in a game of many on a server with accounts (T44b). */
+let account: SignedIn | undefined;
+
 /**
  * A game of many (T39, ADR-0059): the world runs on the server, this tab is one of its wanderers. The kernel here
  * is a mirror the thin client fills with what the server tells.
  */
 async function joinMany(name: string): Promise<ThinClient> {
-  const session = new SessionClient(socketLink(name, params.has('offline')), { id: tabWanderer(params), profilo: savedProfile() });
+  // With accounts (T44b) the wanderer is the account's: the server makes the id from the token.
+  const config = await accountConfig();
+  account = config ? await signIn(config) : undefined;
+  const session = new SessionClient(socketLink(name, params.has('offline')), { id: account ? '' : tabWanderer(params), profilo: savedProfile(), ...(account ? { token: account.token } : {}) });
   await session.ready;
   if (session.refused || !session.me) throw new Error(session.refused ?? 'il mondo non risponde');
   const mirror = await Kernel.boot({ files: session.files, store: memoryStore(), models: new MockModels(), forms: new WorkerRunner(), wasmUri, mirror: true });
@@ -148,6 +155,7 @@ async function main() {
       return { ok: true, profilo: r.profilo, testo: r.riparato.join('; ') };
     },
     () => (thin ? thin.session.profilo : kernel.profileOf(kernel.wanderer().id)),
+    account && thin ? { anonimo: thin.session.anonimo, linkGoogle: () => account!.linkGoogle(), signOut: () => account!.signOut() } : undefined,
   );
   const tools: MasterTools | undefined = tooling && new (await tooling).MasterTools(kernel, renderer, dev, () => syncFocus());
   // Right click on a tile near you: its context menu (with what stands on it, and "Altro…").
@@ -265,7 +273,7 @@ async function main() {
   intro.addEventListener('click', startGame);
   const updateModelsHud = async () => {
     if (thin) {
-      $('#models').textContent = `partita di molti · ${thin.session.nome} (${thin.session.id})`;
+      $('#models').textContent = `partita di molti · ${thin.session.nome} (${thin.session.id})${thin.session.anonimo ? ' · anonimo: modelli locali' : ''}`;
       return;
     }
     const base = online ? `Gemini · ${ai.textModel}` : 'offline: luoghi abbozzati, agenti locali';

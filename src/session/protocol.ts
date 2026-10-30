@@ -94,8 +94,12 @@ export interface OtherView {
 }
 
 export type ClientMsg =
-  /** Coming in, as who (T44a): the profile, if the client has one, is checked and repaired by the server; anonimo (T44b, T45a). */
-  | { t: 'entra'; id: string; nome?: string; profilo?: Partial<Profile>; anonimo?: boolean }
+  /**
+   * Coming in, as who (T44a): the profile, if the client has one, is checked and repaired by the server. With accounts
+   * (T44b, ADR-0082) `token` is the account's (Firebase) and the server makes the id from it; `id` is then not heard;
+   * anonimo (T44b, T45a, ADR-0081).
+   */
+  | { t: 'entra'; id: string; nome?: string; profilo?: Partial<Profile>; token?: string; anonimo?: boolean }
   /** The wanderer chooses again who they are (T44a): the answer says the profile as the server repaired it. */
   | { t: 'profilo'; seq: number; profilo: Partial<Profile> }
   /** Where the client's wanderer is now, in the world: the server checks the step and may correct it. */
@@ -153,7 +157,7 @@ export type ServerMsg =
    * wanderer is the master (T41) and, only for the master, the Council's feed so far and their branch (T42b); the
    * master's updates say (`giocatori`) every player connected and where they are, when it changes (T42c).
    */
-  | ({ t: 'ingresso'; id: string; nome: string; profilo?: Profile; riparato?: string[]; master?: true; concilio?: FeedEntry[]; ramo?: FileChanges; files: FileMap; me: Me; forma?: FormView; stato: MyState; luoghi: PlaceView[]; cose: ThingView[]; viandanti: OtherView[]; giocatori?: PlayerSpot[] } & Clock)
+  | ({ t: 'ingresso'; id: string; nome: string; profilo?: Profile; riparato?: string[]; anonimo?: true; master?: true; concilio?: FeedEntry[]; ramo?: FileChanges; files: FileMap; me: Me; forma?: FormView; stato: MyState; luoghi: PlaceView[]; cose: ThingView[]; viandanti: OtherView[]; giocatori?: PlayerSpot[] } & Clock)
   | ({ t: 'aggiorna'; me?: Me; stato?: MyState; luoghi?: PlaceView[]; cose?: ThingView[]; via?: number[]; viandanti?: OtherView[]; partiti?: string[]; giocatori?: PlayerSpot[]; avvisi?: Notice[] } & Clock)
   /** The step was not possible (too fast, through a wall): the wanderer is here. */
   | { t: 'correzione'; seq: number; x: number; y: number }

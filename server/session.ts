@@ -2,13 +2,15 @@
 // is a client of that universe; the first one starts its world (src/session/host.ts, loaded through Vite so the
 // kernel's imports resolve as in the browser), which then keeps running in this process. Each message is
 // one JSON object of src/session/protocol.ts. `?offline` starts a world with the local models.
-// Only `npm run dev`: the preview server cannot load the kernel's sources.
+// Only `npm run dev`: the preview server cannot load the kernel's sources. With accounts (server/account.ts, T44b) every
+// world verifies the token of who comes in.
 
 import type { Plugin, ViteDevServer } from 'vite';
 import type { IncomingMessage } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import type { Duplex } from 'node:stream';
 import { WebSocketServer, type WebSocket } from 'ws';
+import type { AccountSettings } from './account';
 
 const NAME_RE = /^[a-z0-9][a-z0-9-]{0,40}$/;
 /** A message bigger than this is not a client's (the files go the other way). */
@@ -45,7 +47,7 @@ function wsLink(ws: WebSocket) {
   };
 }
 
-export function sessionServer(): Plugin {
+export function sessionServer(accounts?: AccountSettings): Plugin {
   const hosts = new Map<string, Promise<Host | { error: string }>>();
   return {
     name: 'rune-session',
@@ -57,7 +59,7 @@ export function sessionServer(): Plugin {
           const port = (server.httpServer?.address() as AddressInfo | null)?.port ?? 5173;
           h = server
             .ssrLoadModule('/src/session/host.ts')
-            .then((mod) => mod.openUniverse({ name, base: `http://localhost:${port}`, offline }))
+            .then((mod) => mod.openUniverse({ name, base: `http://localhost:${port}`, offline, verify: accounts?.verify, masterUid: accounts?.masterUid }))
             .catch((e: Error) => ({ error: e.message }));
           hosts.set(name, h);
           // A universe that could not open is tried again by the next client.
