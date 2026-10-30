@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 17:10 UTC, epoca 146 su **claude** (5 ore 55 %, settimana 55 %). In corso, **un task per provider**: **T70** su Claude (conflitti T53b/T56b; poi integra T70 e T53b), **T81** su Gemini (pagina web della pipeline rotta). T45b fermato (già integrato, ripartiva per errore). Pianificate T81-T89 dalla chat dell'autore. **T45f** aspetta le risposte in `docs/pipeline/domande/T45f.md`; T45e le chiavi Stripe di test.
+Aggiornato il 30/10/2026 alle 17:30 UTC, epoca 147 su **claude**. **Ordine dell'autore: finire T82-T87 (correzioni della pipeline), poi nessun task nuovo; quando finiscono i task in corso, dirgli che può chiudere con Ctrl-C.** Tolta l'approvazione a T52, T54, T57 perché non partano. T70, T53b, T81 integrati. In corso: T82 (claude), T87 (gemini).
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 

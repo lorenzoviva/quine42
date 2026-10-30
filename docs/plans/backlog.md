@@ -836,7 +836,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
   `dossier T51`.
 
 ### T52 · I sotterranei — `da fare` (risposte in `docs/pipeline/domande/T52.md`)
-- Pipeline: claude · stima 3% · approvato · priorità 50
+- Pipeline: claude · stima 3% · priorità 50
 - Contesto: oggi niente sta sotto il livello del terreno (il rilievo è una colonna piena, i modelli stanno sul suolo,
   `floorAt`). L'autore vuole i sotterranei (anche un edificio seminterrato nella corona, come la Sala sistemi).
 - **T52a · il progetto** (ADR, nessun codice): come esiste uno spazio sotto il terreno (un piano sotto il luogo come zona a
@@ -896,7 +896,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 - Dipendenze: nessuna. Utile prima di T52 e di T56.
 
 ### T54 · Le taglie di D&D per strutture e creature — `da fare` (risposte in `docs/pipeline/domande/T54.md`)
-- Pipeline: claude · stima 6% · approvato · priorità 50
+- Pipeline: claude · stima 6% · priorità 50
 - Contesto: richiesta del 24/10. Oggi le classi (`CLASSES` in `src/mj/classes.ts`: `persona`, `animale`, `bestia`,
   `edificio`, `grande`…) danno la scatola in caselle, e una struttura «importante» (Argon) per zona di 56 × 56 luoghi.
   L'autore vuole riferirsi alla taglia di D&D: Minuscola, Piccola, Media, Grande, Enorme, Gargantuesca. **Gargantuesca è la
@@ -961,7 +961,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 ## Le rune
 
 ### T57 · Le rune come codice: sequenze ordinate, effetti, rune nuove — `da fare` (si comincia da T57a)
-- Pipeline: claude · stima 8% · approvato · priorità 60
+- Pipeline: claude · stima 8% · priorità 60
 - Contesto: richiesta del 24/10 («Le rune»). L'esempio del seme `acqua fuoco` → «Vapore» (si annullano, un messaggio, in
   `universe/modules/magic.runes/manifest.json`) non è l'idea: le rune sono come codice, una **sequenza ordinata** produce
   un effetto specifico, e l'ordine conta (`aria terra` ≠ `terra aria`). Effetti come incantesimi di D&D (`terra fuoco` →
