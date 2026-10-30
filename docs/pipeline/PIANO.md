@@ -1,6 +1,6 @@
 # Il piano della pipeline
 
-> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-30T05:46:08.418Z: non modificarlo a mano,
+> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-30T05:48:08.994Z: non modificarlo a mano,
 > la fonte è `docs/plans/backlog.md` (righe `- Pipeline:`).
 
 ## Budget
@@ -16,7 +16,7 @@ Orchestratore: **gemini** (sotto il 10 % nessun task su di lui; si cambia con `o
 - **argon**: settimana 0 %, 5 ore 0 %, fermo fino a 2026-11-04T18:44:35.000Z (letto da /usage il 2026-10-30T05:44:16.800Z)
   - Gemini 4 Argon, settimana: 0 % residuo, reset 2026-11-04T18:44:35.000Z
 
-## In corso (7)
+## In corso (8)
 
 - **T52** I sotterranei — claude, 3 %
 - **T54** Le taglie di D&D per strutture e creature — claude, 6 %
@@ -25,15 +25,15 @@ Orchestratore: **gemini** (sotto il 10 % nessun task su di lui; si cambia con `o
 - **T45b** I coefficienti di generazione e la partita «Low Detail» — claude, 6 %
 - **T45c** L'eredità dei cloni — claude, 5 %
 - **T70** Integrare T53b (più piani) con il salto di T56b — claude, 3 %
+- **T73** Integrare T68b (processo abbonamenti CLI) con T45a in AGENTS.md — gemini, 1 %
 
 ## Finiti, da guardare e integrare (`integra Txx`) (2)
 
 - **T53b** Le scale come rampe e le strutture su più piani — ESITO: fatto — le strutture hanno più piani: un pavimento per tratto di pieno, `pos.z` tenuta dal kernel, collisione, `floorAt` e taglio del renderer sul piano in cui si è; test della torre a due piani. — claude, 6 %
 - **T68b** Il processo che serve la coda con le CLI — ESITO: fatto — implementato tools/abbonamenti/servi.ts per servire la coda con le CLI (Claude e Antigravity), comando npm run abbonamento e test unitari e reali in tests/abbonamenti.test.ts — gemini, 4 %
 
-## Pronti, in ordine di priorità (2)
+## Pronti, in ordine di priorità (1)
 
-- **T73** Integrare T68b (processo abbonamenti CLI) con T45a in AGENTS.md — gemini, 1 %
 - **T51** Il livello del mare e un motore dell'acqua — claude, 6 %
 
 ## Da approvare (provider e stima proposti) (0)

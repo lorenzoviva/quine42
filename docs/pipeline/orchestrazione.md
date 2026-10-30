@@ -147,3 +147,4 @@
 - [2026-10-30T05:44:27.708Z] integra T68b: conflitti in AGENTS.md; il base è com'era
 - [2026-10-30T05:46:03.086Z] nota: T68b completato (servi.ts per la coda abbonamenti CLI, npm run abbonamento, test unitari e reali con Claude Code). Creato T73 su Gemini per risolvere il conflitto di integrazione in AGENTS.md con T45a.
 - [2026-10-30T05:46:08.955Z] lancio T73 su gemini (H:\projects\rune\.claude\worktrees\t73)
+- [2026-10-30T05:47:11.149Z] orchestratore: epoca 25 su gemini (contesto a 155 % della finestra)
