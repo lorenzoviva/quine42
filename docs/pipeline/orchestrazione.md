@@ -326,3 +326,5 @@
 - [2026-10-30T14:18:48.420Z] nota: Epoca 90 avviata su Gemini. T45d in esecuzione attiva nel worktree t45d (suite lobby e test in dirittura d'arrivo). T70 sospeso per reset Claude (16:59 UTC). Quadro aggiornato.
 - [2026-10-30T14:20:03.821Z] orchestratore: epoca 91 su gemini (contesto a 156 % della finestra)
 - [2026-10-30T14:22:30.512Z] nota: Epoca 91 avviata su Gemini. T45d in esecuzione attiva nel worktree t45d (5/6 test passati in tests/lobby.test.ts, rifinitura test DOM). T70 sospeso per reset Claude (16:59 UTC). Quadro aggiornato.
+- [2026-10-30T14:23:45.504Z] orchestratore: epoca 92 su gemini (contesto a 131 % della finestra)
+- [2026-10-30T14:25:52.533Z] nota: Epoca 92 avviata su Gemini. T45d in dirittura finale nel worktree t45d (tests/lobby.test.ts 6/6 passati, pulizia typecheck, ADR-0086 e commit in corso). T70 in attesa del reset Claude (16:59 UTC). Quadro aggiornato.

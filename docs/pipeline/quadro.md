@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 14:23 UTC, epoca 91 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset 16:59 UTC / ~18:00 locali, settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h al 74 %, settimana 46 %; argon fermo fino al 04/11). **T79** e **T45b** (coefficienti e Low Detail, ADR-0085) sono stati integrati con successo nel base `3d` (worktree e branch rimossi), con test mirati (35/35) e typecheck a 0 errori. **T45d (la lobby)** è in esecuzione attiva su Gemini (stima 5%, p1, worktree `t45d`, implementazione completata, suite `tests/lobby.test.ts` in esecuzione e rifinitura finale prima del commit). T70 (integrazione più piani T53b e salto T56b) è sospeso per limite crediti su Claude.
+Aggiornato il 30/10/2026 alle 14:25 UTC, epoca 92 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset 16:59 UTC / ~18:00 locali, settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h al 67 %, settimana 45 %; argon fermo fino al 04/11). **T79** e **T45b** (coefficienti e Low Detail, ADR-0085) sono integrati nel base `3d`. **T45d (la lobby)** è alle battute conclusive su Gemini (stima 5%, p1, worktree `t45d`: suite `tests/lobby.test.ts` superata 6/6, pulizia finale typecheck, ADR-0086 e commit in corso). T70 (integrazione più piani T53b e salto T56b) è sospeso in attesa del reset crediti su Claude.
 
 ## Le priorità dell'autore
 
@@ -44,7 +44,7 @@ Aggiornato il 30/10/2026 alle 14:23 UTC, epoca 91 su gemini: **claude ha esaurit
   - **T52** e **T54** (p50): interrotti per dare precedenza al multigiocatore.
 - **Crediti**:
   - **Claude**: 5h al 0 %, settimana al 55 % (fermo fino alle 16:59 UTC / ~18:00 locali, orchestratore su Gemini).
-  - **Gemini**: 5h al 74 %, settimana al 46 % (orchestratore attuale ed esecuzione attiva di T45d).
+  - **Gemini**: 5h al 67 %, settimana al 45 % (orchestratore attuale ed esecuzione attiva di T45d).
   - **Argon**: fermo fino al 04/11.
 
 ## Da fare appena possibile
