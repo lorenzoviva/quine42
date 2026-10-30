@@ -3,21 +3,21 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026, rotazione epoca 6 dell'orchestratore (gemini: chiusura per contesto a 74%).
+Aggiornato il 30/10/2026, avvio epoca 7 dell'orchestratore (gemini: confermato riavvio script e interfaccia web).
 
 ## Le priorità dell'autore
 
 1. Il multigiocatore (T43-T45) prima del resto.
-2. Il nuovo ambiente della pipeline e l'interfaccia web (**T69**, integrata in `3d`).
-3. Contenere i crediti: Argon è all'`8 %` settimanale (NON lanciare né riprendere nulla su Argon); **T71** e **T72** sono completati e integrati in `3d`. L'autore può ora riavviare lo script della pipeline.
+2. Il nuovo ambiente della pipeline e l'interfaccia web (**T69**, integrata in `3d` e attiva su `http://localhost:4242`).
+3. Contenere i crediti: Argon è all'`8 %` settimanale (NON lanciare né riprendere nulla su Argon); **T71** e **T72** sono completati e integrati in `3d`. Lo script della pipeline è riavviato e operativo.
 
 ## Stato e decisioni
 
 - **Decisioni prese**:
-  - **T71 e T72 integrati in `3d`**: risolto il conflitto di merge tra T71 e T69 in `tools/pipeline/pipeline.mjs`. Soglie settimanali Argon attive (`finestra5h: false`), 42/42 test passati e typecheck verde. Worktree e branch di T71 e T72 rimossi.
+  - **Script della pipeline riavviato dall'autore**: attive le soglie settimanali Argon (`finestra5h: false`) e l'interfaccia web locale su `http://localhost:4242`.
   - **Argon protetto**: fermati e non ripresi su Argon **T45a**, **T45b**, **T45c** e **T68b**. Nessun task è in esecuzione su Argon.
 - **Cosa si aspetta**:
-  1. Il riavvio dello script da parte dell'autore (`node tools/pipeline/pipeline.mjs orchestra`).
+  1. La scelta dell'autore sull'anticipare **T45a** su Gemini (84% residuo) prima delle 08:00.
   2. Il reset della sessione di 5 ore di Claude alle `07:00 UTC` (`08:00` locali).
 - **Intenzioni al reset / ripresa**:
   1. Completare **T70** (integrazione T53b con salto T56b, priorità 0 su Claude), poi integrare T70 e T53b.
