@@ -3,47 +3,47 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026, rotazione epoca 12 dell'orchestratore (gemini: chiusura per contesto a 194%).
+Aggiornato il 30/10/2026, epoca 13 dell'orchestratore (gemini: riassegnazione T45a e avvio T45a + T68b su Gemini).
 
 ## Le priorità dell'autore
 
 1. Il multigiocatore (T43-T45) prima del resto.
 2. Il nuovo ambiente della pipeline e l'interfaccia web (**T69**, integrata in `3d` e attiva su `http://localhost:4242`).
-3. Argon esaurito per la settimana (1% residuo, quota 429 fino al 04/11): tutti i task complessi/multiplayer dovranno passare su Claude non appena resetta.
+3. Argon esaurito per la settimana (quota 429 fino al 04/11): nessun task su Argon. Tutti i task complessi/multiplayer instradati su Claude al reset, con Gemini attivo subito per i task pronti compatibili.
 
 ## Stato e decisioni
 
 - **Decisioni prese e fatti recenti**:
-  - **Argon ha esaurito la quota (429 RESOURCE_EXHAUSTED)**: al primo turno di esecuzione di **T45a**, l'API di Argon ha restituito quota raggiunta (reset tra 134 ore, il 04/11/2026 alle 18:44 UTC). Lo script della pipeline ha posto **T45a in stato sospeso**; Argon è all'1% residuo e bloccato da soglia. Nessun task potrà girare su Argon fino alla settimana prossima.
-  - **T45b, T45c, T68b**: rimangono interrotti/in attesa; andranno riassegnati a Claude.
+  - **Argon ha esaurito la quota settimanale (429 RESOURCE_EXHAUSTED)** al tentativo di T45a; bloccato fino al 04/11.
+  - **T45a riassegnato da Argon a Claude (priorità 5, approvato)**: grazie alla catena di fallback (`alternative.claude: ['argon', 'gemini']`) e con Claude in pausa sessione, lo scheduler della pipeline ha preso in carico ed **avviato T45a su Gemini** (worktree `t45a`, sessione attiva `af57b0ff`).
+  - **T68b rimesso in coda ed avviato su Gemini** (worktree `t68b`, sessione attiva `270cce41`), sfruttando la capienza di Gemini (82% settimanale, 84% 5h).
 - **Cosa si aspetta**:
-  1. Il reset della sessione di 5 ore di Claude alle **07:00 UTC** (**08:00** locali, ~2h30m rimanenti; Claude ha il 69% settimanale disponibile).
+  1. Il reset della sessione di 5 ore di Claude alle **07:00 UTC** (**08:00** locali, ~2h25m rimanenti; Claude ha il 69% settimanale disponibile).
 - **Intenzioni al reset di Claude / prossimi passi**:
   1. Completare **T70** (integrazione T53b con salto T56b, priorità 0 su Claude), poi `integra T70` e `integra T53b`.
   2. Procedere con **T44c** (priorità 3) e **T44b** (priorità 4, che sblocca T45d/e/f).
-  3. Riassegnare **T45a** (priorità 5) a Claude (e a seguire T45b e T45c) per proseguire il multigiocatore senza attendere il reset settimanale di Argon.
+  3. Proseguire con **T45b** (priorità 6) e **T45c** (priorità 7).
 
-## Task sospesi e in attesa
+## Task attivi e in corso
 
-- **Sospesi per quota Argon (fino al 04/11):** **T45a** (priorità 5, crediti e spese comuni; da passare a Claude al reset), **T45b**, **T45c**, **T68b**.
-- **Sospesi su Claude fino alle 07:00 UTC (`08:00` locali):** **T70** (priorità 0), **T44c** (priorità 3), **T44b** (priorità 4), **T52**, **T54** e **T51**.
-- **T53b** (strutture su più piani) è finito e verificato nel browser, ma aspetta **T70** per risolvere i conflitti con **T56b**. Quando T70 è finito: `integra T70`, poi `integra T53b`.
+- **In corso su Gemini:**
+  - **T45a** (priorità 5, crediti e spese comuni): attivo nel worktree `t45a`.
+  - **T68b** (priorità 20, processo che serve la coda con le CLI): attivo nel worktree `t68b`.
+- **Sospesi su Claude fino alle 07:00 UTC (`08:00` locali):**
+  - **T70** (priorità 0, risoluzione conflitti T53b / T56b con test salto + torre).
+  - **T44c** (priorità 3, correzioni da verifica browser T44a/T43c).
+  - **T44b** (priorità 4, account e autenticazione).
+  - **T45b** (priorità 6, coefficienti di generazione e «Low Detail»).
+  - **T45c** (priorità 7, eredità dei cloni).
+  - **T52**, **T54**, **T51**.
+- **T53b** (strutture su più piani): finito e verificato nel browser; in attesa del completamento di **T70** per l'integrazione pulita.
 
 ## Da fare appena possibile
 
-- **Pianificate (30/10) le risposte dell'autore**: T51b (automa cellulare del kernel), T52a (progetto dei sotterranei come parti
-  sotterranee delle strutture, profondità generata come X e Y; T52c la Sala sistemi seminterrata solo fuori), T54 (Gargantuesca
-  la massima, il castello di oggi Enorme; Gargantuesca una per **reame** = 4 × 4 zone, nome scelto da me, da confermare). Tutti e
-  tre approvati, priorità 50, dietro il multigiocatore (che aspetta le approvazioni dell'autore).
-- **Verifiche nel browser** (un task di verifica su `claude`, che ha `--chrome`): T64 (le varianti in cache, anche IndexedDB, di
-  `circuito-3D` sugli scaffali della corona, ora che ha 30 s per finire), T56b (l'arco del salto e l'ombra: l'agente ha visto solo la
-  scena, poi l'estensione di Chrome si è scollegata), T69 (l'interfaccia web della pipeline: verificata dall'agente via HTTP reale, manca la vista nel browser), T53b quando finisce. I difetti della verifica di T44a e T43c sono già in **T44c**.
-- **Approvati dall'autore (30/10)**: T44b, T44c, T45a, T45b, T45c, T68b, T69; restano bloccati da dipendenze T45d, T45e, T45f, T68c.
+- **Pianificate (30/10) le risposte dell'autore**: T51b (automa cellulare del kernel), T52a (progetto dei sotterranei come parti sotterranee delle strutture, profondità generata come X e Y; T52c la Sala sistemi seminterrata solo fuori), T54 (Gargantuesca la massima, il castello di oggi Enorme; Gargantuesca una per **reame** = 4 × 4 zone, nome scelto da me, da confermare). Tutti e tre approvati, priorità 50, dietro il multigiocatore.
+- **Verifiche nel browser** (un task di verifica su `claude`, che ha `--chrome`): T64 (le varianti in cache di `circuito-3D` sugli scaffali della corona), T56b (l'arco del salto e l'ombra), T69 (interfaccia web della pipeline: vista browser).
 
 ## Da sapere
 
-- Il 30/10 sono stati corretti, fuori dalla pipeline: lo sfarfallio del bagliore (`aaacca6`: valori predefiniti degli attributi
-  di WebGL, da `379636a`) e il tempo di `circuito-3D` (`32f2949`: `tempo` per modello in `models/index.json`, 30 s).
-- Con tre agenti al lavoro i test vanno in timeout (l'avvio del kernel oltre 10 s): un test che fallisce nella suite intera e
-  passa da solo non è un difetto del task.
-- `docs/plans/multiplayer.md` è in `docs/archivio/3-to-do-backlog/plans/` (T66) ma è ancora il piano del multigiocatore.
+- Il 30/10 sono stati corretti fuori dalla pipeline lo sfarfallio del bagliore e il tempo di `circuito-3D` (30 s).
+- Con tre agenti al lavoro i test possono andare in timeout per carico macchina: un test che fallisce nella suite intera e passa da solo non è un difetto del task.

@@ -1389,7 +1389,7 @@ le risposte alle domande del piano.
   chiamano l'IA (una partita «Low Detail» a risparmio), e la lobby fa scegliere i modelli.
 
 ### T45a · I crediti e le spese comuni — `da fare` (dipende da T36)
-- Pipeline: argon · stima 5% · approvato · priorità 5
+- Pipeline: claude · stima 5% · approvato · priorità 5
 - Fare: un saldo di crediti per viandante (in `world/giocatori/<id>.json`, scritto solo dal server), dati a mano dal master
   (console, o il Referente); ogni chiamata scala dal suo `chi` (T36: `payerOf`) il costo più l'1 % (P#1); le spese `comune` si
   dividono tra i giocatori collegati in quel momento, master compreso; crediti finiti → ciò che il viandante chiede si fa con i

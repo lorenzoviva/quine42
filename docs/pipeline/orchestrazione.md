@@ -117,3 +117,9 @@
 - [2026-10-30T04:23:49.868Z] orchestratore: epoca 11 su gemini (contesto a 62 % della finestra)
 - [2026-10-30T04:25:50.214Z] orchestratore: epoca 12 su gemini (contesto a 125 % della finestra)
 - [2026-10-30T04:26:31.103Z] T45a: limite di argon, riprendo dopo 2026-10-30T05:26:28.597Z
+- [2026-10-30T04:30:01.616Z] orchestratore: epoca 13 su gemini (contesto a 194 % della finestra)
+- [2026-10-30T04:32:29.114Z] T68b: rimesso in coda (riparte da capo)
+- [2026-10-30T04:33:26.832Z] T68b: claude non può, va su gemini
+- [2026-10-30T04:33:26.898Z] lancio T68b su gemini (H:/projects/rune/.claude/worktrees/t68b)
+- [2026-10-30T04:34:26.928Z] T45a: claude non può, va su gemini
+- [2026-10-30T04:34:26.980Z] lancio T45a su gemini (H:/projects/rune/.claude/worktrees/t45a)
