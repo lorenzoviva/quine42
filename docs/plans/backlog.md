@@ -1604,7 +1604,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   `SUBSCRIPTION_PRICES` in `prices.ts`, `tests/subscription.test.ts`, ADR-0077. Rispetto al previsto: anche `mechanic.design` (la Fucina
   delle meccaniche) e `model.resculpt` tra i compiti lenti; `model.judge` (foto) resta sulle API. Nel gioco non è ancora collegato.
 
-### T68b · Il processo che serve la coda con le CLI — `da fare` (dipende da T68a)
+### T68b · Il processo che serve la coda con le CLI — `fatto` (dipende da T68a)
 - Pipeline: claude · stima 4% · approvato · priorità 20
 - Contesto: `take`/`answer`/`beat` di `server/subscriptionQueue.ts` sono il protocollo; il lancio delle CLI e il riconoscimento dei
   limiti sono in `tools/pipeline/pipeline.mjs` (`usageLimit`).
@@ -1613,6 +1613,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   `--system-prompt`, schema nel prompt e risposta controllata/riparata con `parseJson`; Antigravity: `agy -p`), immagini se la CLI le
   accetta (o errore), token da ciò che la CLI riporta, un limite dell'abbonamento → `errore` chiaro e pausa fino al reset. `npm run abbonamento`.
 - Fatto quando: test con una CLI finta (script che risponde), una prova vera con Claude Code su un `model.sculpt`, commit.
+- Esito: `tools/abbonamenti/servi.ts`, `npm run abbonamento`, test con CLI mock e con Claude Code reale su `model.sculpt` in `tests/abbonamenti.test.ts`.
 
 ### T68c · Gli abbonamenti nel gioco — `da fare` (dipende da T68b)
 - Pipeline: claude · stima 3% · priorità 21

@@ -27,6 +27,5 @@ della pipeline (T61). Risposte dell'autore (`docs/pipeline/domande/T68.md`, 29/1
    e sviluppo (T68c).
 
 ## Conseguenze
-- Il processo che serve la coda con le CLI (risposta JSON secondo lo schema, token da ciò che la CLI riporta, limiti dell'abbonamento)
-  è T68b; il collegamento nel gioco, lo stato nell'HUD e la prova nel browser T68c.
+- Il processo che serve la coda con le CLI (`tools/abbonamenti/servi.ts`, `npm run abbonamento`: risposta JSON controllata e riparata con `parseJson`, token estratti da usage, limiti dell'abbonamento con pausa fino al reset) è T68b; il collegamento nel gioco, lo stato nell'HUD e la prova nel browser T68c.
 - Senza tabella (o tutta `api`) nulla cambia.
