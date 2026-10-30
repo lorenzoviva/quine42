@@ -1887,6 +1887,12 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fatto quando: test della pipeline e typecheck verdi, commit su `task/T90`. Poi l'orchestratore fa `integra T90` e `integra T82`.
 - Fatto: merge di `task/T82` su `task/T90`; un solo conflitto in `execute()` di `pipeline.mjs`: tenuto il filtro `allowed` di T87 (col browser solo i provider con `browser`, predefinito Claude) con la firma nuova di T82 `fits(prov, t, resuming)` (tetti per CLI, slot, riserva a priorità 0). Il backlog si è fuso da solo. `tests/pipeline.test.ts` (54) e typecheck verdi; nessuna differenza dal previsto.
 
+### T91 · I test che falliscono anche da soli: `branch.test.ts` e `between.test.ts` — `da fare`
+- Pipeline: claude · stima 2% · approvato · priorità 3
+- Contesto: chiesto dall'autore il 30/10/2026. T83 (`dossier T83`, `traccia T83`) ha trovato nella suite intera 55 test falliti su 609: quasi tutti timeout per carico della macchina, ma due file falliscono anche da soli: `tests/branch.test.ts` (tre test si aspettano un solo file cambiato, `modules/npc.cat/manifest.json`, e ne ricevono due) e un test di `tests/between.test.ts`.
+- Fare: verifica sul base `3d` che falliscano davvero; trova la causa (il test vecchio o un cambio del codice, per esempio un task integrato dopo) e correggi ciò che è sbagliato, senza indebolire ciò che il test garantisce. Lancia i due file da soli; la suite intera solo nel suo turno (`node tools/pipeline/pipeline.mjs turno test -- npm test`). Se i timeout della suite intera hanno una causa comune evidente (non il carico), annotala nel blocco senza correggerla.
+- Fatto quando: `branch.test.ts` e `between.test.ts` verdi da soli, typecheck verde, commit su `task/T91` con una riga sulla causa.
+
 ### T88 · Spendere i crediti che avanzano generando l'universo con gli abbonamenti — `da fare`
 - Pipeline: claude · stima 4% · priorità 90
 - Contesto: obiettivo dell'autore: arrivare al reset settimanale senza crediti residui; ciò che i task non usano va alla generazione dell'universo con le CLI
