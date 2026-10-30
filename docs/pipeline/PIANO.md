@@ -1,13 +1,13 @@
 # Il piano della pipeline
 
-> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-30T03:05:13.869Z: non modificarlo a mano,
+> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-30T03:06:17.201Z: non modificarlo a mano,
 > la fonte è `docs/plans/backlog.md` (righe `- Pipeline:`).
 
 ## Budget
 
 Orchestratore: **argon** (sotto il 10 % nessun task su di lui; si cambia con `orchestratore <provider>`).
 
-- **claude**: settimana 9 %, 5 ore 0 %, fermo fino a 2026-10-30T06:59:00.000Z (letto da /usage il 2026-10-30T03:04:34.188Z)
+- **claude**: settimana 9 %, 5 ore 0 %, fermo fino a 2026-10-30T06:59:00.000Z (letto da /usage il 2026-10-30T03:05:20.518Z)
   - session, 5h: 0 % residuo, reset 2026-10-30T06:59:00.000Z
   - week (all models), settimana: 69 % residuo, reset 2026-11-05T15:59:00.000Z
 - **gemini**: settimana 86 %, 5 ore 100 % (letto da /usage il 2026-10-30T03:04:44.295Z)
@@ -16,24 +16,24 @@ Orchestratore: **argon** (sotto il 10 % nessun task su di lui; si cambia con `or
 - **argon**: settimana 63 %, 5 ore 100 % (letto da /usage il 2026-10-30T03:04:44.295Z)
   - Gemini 4 Argon, settimana: 63 % residuo, reset 2026-11-04T18:44:35.000Z
 
-## In corso (5)
+## In corso (9)
 
 - **T52** I sotterranei — claude, 3 %
 - **T54** Le taglie di D&D per strutture e creature — claude, 6 %
 - **T44b** L'account e l'autenticazione — claude, 5 %
 - **T44c** Correzioni dalla verifica nel browser di T44a e T43c — claude, 3 %
+- **T45a** I crediti e le spese comuni — claude, 5 %
+- **T45b** I coefficienti di generazione e la partita «Low Detail» — claude, 6 %
+- **T45c** L'eredità dei cloni — claude, 5 %
 - **T70** Integrare T53b (più piani) con il salto di T56b — claude, 3 %
+- **T68b** Il processo che serve la coda con le CLI — claude, 4 %
 
 ## Finiti, da guardare e integrare (`integra Txx`) (1)
 
 - **T53b** Le scale come rampe e le strutture su più piani — ESITO: fatto — le strutture hanno più piani: un pavimento per tratto di pieno, `pos.z` tenuta dal kernel, collisione, `floorAt` e taglio del renderer sul piano in cui si è; test della torre a due piani. — claude, 6 %
 
-## Pronti, in ordine di priorità (6)
+## Pronti, in ordine di priorità (2)
 
-- **T45a** I crediti e le spese comuni — claude, 5 %
-- **T45b** I coefficienti di generazione e la partita «Low Detail» — claude, 6 %
-- **T45c** L'eredità dei cloni — claude, 5 %
-- **T68b** Il processo che serve la coda con le CLI — claude, 4 %
 - **T51** Il livello del mare e un motore dell'acqua — claude, 6 %
 - **T69** L'interfaccia web della pipeline — argon, 6 %
 
