@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 13:20 UTC, chiusura epoca 73 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset 16:59 UTC / ~18:00 locali, settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h al 60 %, settimana 55 %; argon fermo fino al 04/11). **T78** (integrazione T45c ed eredità cloni) si è arrestato per limite crediti su Claude ed è stato immediatamente riassegnato a Gemini (stima 2 %, p0, approvato) e rilanciato nel worktree t78 pulito. T45b ha il commit pronto (`bc77bd9`) con bozza ADR-0081 (da rinumerare a 0085). T70 sta eseguendo i test di integrazione tra più piani (T53b) e salto (T56b).
+Aggiornato il 30/10/2026 alle 13:25 UTC, avvio epoca 74 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset 16:59 UTC / ~18:00 locali, settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h al 60 %, settimana 55 %; argon fermo fino al 04/11). **T78** (integrazione T45c ed eredità cloni) è in corso avanzato su Gemini nel worktree t78: merge completato, ADR rinumerato in 0084, typecheck e test mirati (23/23) superati, verifica dei test in timeout in corso. T45b ha il commit pronto (`bc77bd9`) con bozza ADR-0081 (da rinumerare a 0085). T70 (integrazione più piani T53b e salto T56b) è sospeso per limite crediti su Claude.
 
 ## Le priorità dell'autore
 
@@ -22,23 +22,22 @@ Aggiornato il 30/10/2026 alle 13:20 UTC, chiusura epoca 73 su gemini: **claude h
   - **Suite di test verdi nel base**: test mirati `tests/stripe.test.ts`, `tests/account.test.ts`, `tests/credits.test.ts`, `tests/session.test.ts` (21/21) e `npm run typecheck` a 0 errori in `3d`.
   - **Chiavi Stripe per test nel browser**: T45e resta segnato `in attesa` per la verifica browser (in attesa di `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` in `.env` o in chat, segnalate in `docs/pipeline/domande/T45e.md`).
 - **Cosa si aspetta**:
-  1. **Esito di T78** (gemini, p0): completamento del merge di T45c, rinumerazione ADR in 0084 e verifica test.
-  2. **Esito di T70** (claude, p0): integrazione T53b (strutture a più piani) con T56b (salto), attualmente in esecuzione della suite di test.
-  3. **Esito finale di T45b** (claude, p6): ripresa o integrazione con rinumerazione ADR a 0085 per sbloccare T45d.
-  4. **Chiavi di test Stripe** dall'autore per la verifica finale nel browser di T45e.
+  1. **Esito di T78** (gemini, p0): commit finale in `task/T78` con test superati e merge di T45c con ADR-0084.
+  2. **Reset crediti Claude** (alle 16:59 UTC / ~18:00 locali): ripresa di T70 (integrazione T53b più piani con salto T56b) e finalizzazione T45b (oppure integrazione di T45b via Gemini/task dedicato per non attendere le 18:00).
+  3. **Chiavi di test Stripe** dall'autore per la verifica finale nel browser di T45e.
 - **Intenzioni / prossimi passi**:
   1. Appena T78 finisce: `integra T78` e `integra T45c` nel base.
-  2. Appena T70 finisce: `integra T70` e `integra T53b` nel base.
-  3. Appena T45b si conclude: rinumerare ADR in 0085 e integrare nel base per sbloccare T45d (lobby).
+  2. Per T45b: commit `bc77bd9` già presente in `task/T45b`; valutare task di integrazione (T79) su Gemini per rinumerare ADR a 0085 e integrare subito nel base, sbloccando T45d senza aspettare il reset di Claude alle 18:00.
+  3. Al reset di Claude o quando riprende: chiudere T70 (`integra T70` e `integra T53b`).
   4. Mantenere priorità assoluta alla catena multigiocatore (T52 e T54 p50 restano in attesa).
 
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T78** (gemini, p0): in esecuzione attiva su Gemini nel worktree t78. Esegue merge di `task/T45c`, rinumerando l'ADR in 0084 e testando i file indicati.
-  - **T70** (claude, p0): in esecuzione nel worktree t70 (integrazione T53b più piani con salto T56b, esecuzione suite test).
-  - **T45b** (claude, p6): commit completato `bc77bd9` nel worktree t45b (coefficienti e Low Detail).
-  - **T45c** (claude): completato con successo (quote di eredità per clone); in attesa dell'integrazione da parte di T78.
+  - **T78** (gemini, p0): in esecuzione attiva su Gemini nel worktree t78. Esegue merge di `task/T45c`, rinumerando l'ADR in 0084; typecheck e suite mirata (23/23) superati, verifica dei test in timeout in corso.
+  - **T45b** (claude, p6): commit completato `bc77bd9` nel worktree t45b (coefficienti e Low Detail); agente fermo per limite 5h.
+  - **T70** (claude, p0): worktree t70 in merge; agente fermo per limite 5h (reset 16:59 UTC).
+  - **T45c** (claude): completato con successo (quote di eredità per clone); in fase di integrazione da parte di T78.
 - **Completati e integrati nel base `3d`**:
   - **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **Completati in attesa di integrazione**:
