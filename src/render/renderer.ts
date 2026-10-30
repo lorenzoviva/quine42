@@ -246,10 +246,10 @@ export class Renderer {
     U.clipR.value = revealed ? k.config.circleRadius : 1e9;
     if (!interior) {
       this.syncChunks();
-      // Inside a structure its upper part is cut away, so the wanderer is seen.
-      const pc = watch ?? k.playerCarpet();
+      // Inside a structure what is above the floor one is on is cut away, so the wanderer is seen (T53b).
+      const pc = watch ?? { ...k.playerCarpet(), z: k.playerPos().z };
       const inside = k.structureAt(pc.x, pc.y);
-      CUT.constant = inside !== undefined ? 1.15 + k.floorAt(pc.x, pc.y) : 1e9;
+      CUT.constant = inside !== undefined ? 1.15 + k.floorAt(pc.x, pc.y, pc.z) : 1e9;
       this.things.update(dt, this.t, inside);
       this.runes.update(this.t);
     }
@@ -283,7 +283,7 @@ export class Renderer {
 
     // The camera follows the wanderer, from above.
     // It looks at the wanderer's middle, up and down the hills with it.
-    const aim = watch ? new THREE.Vector3(0, k.floorAt(watch.x, watch.y) + 0.6, 0) : new THREE.Vector3(p.x, this.wanderer.view.root.position.y - this.wanderer.lift + 0.6, p.y);
+    const aim = watch ? new THREE.Vector3(0, k.floorAt(watch.x, watch.y, watch.z) + 0.6, 0) : new THREE.Vector3(p.x, this.wanderer.view.root.position.y - this.wanderer.lift + 0.6, p.y);
     this.target.lerp(aim, Math.min(1, dt * 8));
     if (this.target.distanceTo(aim) > 30) this.target.copy(aim);
 
@@ -353,18 +353,18 @@ export class Renderer {
       if (this.showWalk) o.walkability(k);
       for (const [id, b] of k.bubbles) {
         // The wanderer is in real space, the rest on the carpet.
-        const p = id === k.playerId ? k.playerCarpet() : k.ecs.get(id, 'pos');
-        if (p) o.bubble(p.x - ox, k.floorAt(p.x, p.y) + 1.9, p.y - oy, b.text);
+        const p = id === k.playerId ? { ...k.playerCarpet(), z: k.playerPos().z } : k.ecs.get(id, 'pos');
+        if (p) o.bubble(p.x - ox, k.floorAt(p.x, p.y, p.z) + 1.9, p.y - oy, b.text);
       }
       for (const id of k.ecs.query('attivita', 'pos')) {
         const a = k.ecs.get(id, 'attivita');
         const p = k.ecs.get(id, 'pos');
-        if (a?.tipo && a.ferma) o.activity(p.x - ox, k.floorAt(p.x, p.y) + 1.6, p.y - oy, a.tipo, this.t);
+        if (a?.tipo && a.ferma) o.activity(p.x - ox, k.floorAt(p.x, p.y, p.z) + 1.6, p.y - oy, a.tipo, this.t);
       }
       const target = watch ? undefined : k.targetInFront();
       if (target !== undefined) {
         const p = k.ecs.get(target, 'pos');
-        if (p) o.hint(p.x - ox, k.floorAt(p.x, p.y) + 1.5, p.y - oy);
+        if (p) o.hint(p.x - ox, k.floorAt(p.x, p.y, p.z) + 1.5, p.y - oy);
       }
     }
     if (!watch) this.corona?.overlay(o, this.t, studio, revealed, interior, this.distance);

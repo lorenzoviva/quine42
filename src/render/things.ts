@@ -206,8 +206,8 @@ export class Things {
         }
         continue;
       }
-      // People stand on what is under them: the ground, a house's floor, a step.
-      v.root.position.set(p.x, climb(v.root, k.floorAt(p.x, p.y), dt), p.y);
+      // People stand on what is under them: the ground, a house's floor, a step, the floor above (T53b).
+      v.root.position.set(p.x, climb(v.root, k.floorAt(p.x, p.y, p.z), dt), p.y);
       // What they are doing, seen: lying down to sleep.
       const att = k.ecs.get(id, 'attivita');
       v.root.rotation.z = att?.tipo === 'dorme' && att.ferma ? Math.PI / 2.2 : 0;
@@ -283,7 +283,7 @@ export class Wanderer {
     const moved = Math.hypot(dx, dy);
     this.last = { x: p.x, y: p.y };
     const pcf = k.playerCarpet();
-    const floor = climb(this.view.root, k.zone === 'sim' ? k.floorAt(pcf.x, pcf.y) : 0, dt);
+    const floor = climb(this.view.root, k.zone === 'sim' ? k.floorAt(pcf.x, pcf.y, p.z) : 0, dt);
     // A jump (T56b): an arc over what it clears, and its shadow on what is under it, smaller the higher it goes.
     const jump = k.zone === 'sim' ? k.jumping() : undefined;
     const y = jump ? Math.max(floor, jump.y) : floor;

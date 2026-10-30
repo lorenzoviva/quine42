@@ -9,7 +9,7 @@
 
 import { boxOf, classOf, CLASSES, type AssetClass } from '../mj/classes';
 import type { PaletteEntry, Vec3 } from '../mj/engine';
-import { floors, footprint, headroom, tops, type VoxelGrid } from '../mj/mesh';
+import { floors, footprint, surfaces, type Levels, type VoxelGrid } from '../mj/mesh';
 import { compileMjx } from '../mj/model';
 import { act, runMjx } from '../mj/run';
 import { hashStr } from './rng';
@@ -106,10 +106,10 @@ export interface Form {
   foot?: Uint8Array;
   /** Per voxel column: the height (voxels) of the solid that starts at the ground and goes up without a gap. */
   floor?: Uint8Array;
-  /** Per voxel column: a body cannot stand there (something at body height above its floor, or out of reach). */
+  /** Per voxel column: a body cannot stand on its ground floor (something at body height above it, or out of reach). */
   block?: Uint8Array;
-  /** Per voxel column: how high it goes, in voxels (what a jump has to clear, T56b). */
-  top?: Uint8Array;
+  /** Every floor of every column (T53b). */
+  levels?: Levels;
   cls: AssetClass;
   /** Half the diagonal of the footprint, in tiles: the reach of its collision. */
   reach: number;
@@ -135,65 +135,103 @@ function sizeFor(xml: string, cls: AssetClass): Vec3 | undefined {
 /** Where a body cannot go: voxel columns solid between a step and a head. */
 export const bodyFoot = (g: VoxelGrid, palette: Record<string, PaletteEntry>, vpt = VPT) => footprint(g, palette, stepOf(vpt) + 1, Math.ceil(0.7 * vpt));
 
+/** What a body stands on in a model: the ground floor of every column (T53a) and all its floors (T53b). */
+export interface Ground {
+  /** Per voxel column: the height (voxels) of the solid that starts at the ground and goes up without a gap. */
+  floor: Uint8Array;
+  /** Per voxel column: a body cannot stand on its ground floor. */
+  block: Uint8Array;
+  /** Every floor of every column, each with whether a body cannot stand there. */
+  levels: Levels;
+}
+
 /**
- * What a body stands on in a model (ADR-0043, T53a): every column's floor, and where a body cannot stand — it
- * hits something at body height, or the floor is out of reach. A floor no higher than a step is reached from the
- * ground; a higher one only going up neighbouring columns a step at a time: a stair is a ramp, a wall is not.
+ * What a body stands on in a model (ADR-0043, T53a, T53b): every floor of every column (the top of each run of
+ * solid), and where a body cannot stand — it hits something at body height, or the floor is out of reach. A floor
+ * no higher than a step is reached from the ground; a higher one only going to a floor of a neighbouring column at
+ * most a step higher or lower: a stair is a ramp, a wall is not, and the stair leads to the floor above.
  */
-export function bodyGround(g: VoxelGrid, palette: Record<string, PaletteEntry>, vpt = VPT): { floor: Uint8Array; block: Uint8Array; top: Uint8Array } {
-  const floor = floors(g, palette);
-  const block = headroom(g, palette, floor, stepOf(vpt) + 1, Math.ceil(0.7 * vpt));
+export function bodyGround(g: VoxelGrid, palette: Record<string, PaletteEntry>, vpt = VPT): Ground {
   const step = stepOf(vpt);
-  const reached = new Uint8Array(g.X * g.Y);
+  const levels = surfaces(g, palette, step + 1, Math.ceil(0.7 * vpt));
+  const { start, z, block } = levels;
+  const reached = new Uint8Array(z.length);
   const queue: number[] = [];
-  for (let i = 0; i < floor.length; i++) if (floor[i] <= step && !block[i]) (reached[i] = 1), queue.push(i);
+  for (let i = 0; i < g.X * g.Y; i++) if (z[start[i]] <= step && !block[start[i]]) (reached[start[i]] = 1), queue.push(start[i], i);
   while (queue.length) {
-    const i = queue.pop()!;
+    const i = queue.pop()!, l = queue.pop()!;
     const x = i % g.X, y = (i - x) / g.X;
     for (const [nx, ny] of [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]]) {
       if (nx < 0 || ny < 0 || nx >= g.X || ny >= g.Y) continue;
       const n = nx + ny * g.X;
-      if (reached[n] || block[n] || Math.abs(floor[n] - floor[i]) > step) continue;
-      reached[n] = 1;
-      queue.push(n);
+      for (let m = start[n]; m < start[n + 1]; m++) {
+        if (reached[m] || block[m] || Math.abs(z[m] - z[l]) > step) continue;
+        reached[m] = 1;
+        queue.push(m, n);
+      }
     }
   }
-  for (let i = 0; i < block.length; i++) if (!reached[i]) block[i] = 1;
-  return { floor, block, top: tops(g, palette) };
+  for (let l = 0; l < block.length; l++) if (!reached[l]) block[l] = 1;
+  const floor = floors(g, palette);
+  const ground = new Uint8Array(g.X * g.Y);
+  for (let i = 0; i < ground.length; i++) ground[i] = block[start[i]];
+  return { floor, block: ground, levels };
+}
+
+/** The floor of a voxel column nearest to a height (voxels): the one a body at that height stands on (T53b). */
+export function levelAt(levels: Levels, i: number, at: number): number {
+  const { start, z } = levels;
+  let best = start[i];
+  for (let l = start[i] + 1; l < start[i + 1]; l++) if (Math.abs(z[l] - at) < Math.abs(z[best] - at)) best = l;
+  return best;
 }
 
 /**
- * Whether a body whose box covers a rectangle of the model's own frame (tiles from its centre) is blocked: a
- * column under it where it cannot stand, or two neighbouring columns under it whose floors differ by more than
- * a step (the edge of a landing, of a table). Columns outside the model are its ground (floor 0).
+ * Whether a body whose box covers a rectangle of the model's own frame (tiles from its centre) and whose feet are
+ * at height `at` (voxels above the model's base) is blocked: under it, the floor of a column nearest to its feet
+ * is one where it cannot stand, or two neighbouring columns have floors more than a step apart (the edge of a
+ * landing, of a stairwell, of a table). Columns outside the model are its ground (floor 0).
  */
-export function rampBlocks(f: Form, floor: Uint8Array, block: Uint8Array, x0: number, z0: number, x1: number, z1: number): boolean {
+export function rampBlocks(f: Form, ground: Ground, x0: number, z0: number, x1: number, z1: number, at = 0): boolean {
   const g = f.result!.grid;
   const vx0 = Math.max(-1, Math.floor(x0 * f.vpt + g.X / 2)), vx1 = Math.min(g.X, Math.floor(x1 * f.vpt + g.X / 2));
   const vy0 = Math.max(-1, Math.floor(z0 * f.vpt + g.Y / 2)), vy1 = Math.min(g.Y, Math.floor(z1 * f.vpt + g.Y / 2));
   if (vx1 < 0 || vy1 < 0 || vx0 >= g.X || vy0 >= g.Y) return false;
   const step = stepOf(f.vpt);
-  const at = (x: number, y: number) => (x >= 0 && y >= 0 && x < g.X && y < g.Y ? floor[x + y * g.X] : 0);
+  const { levels } = ground;
+  const w = vx1 - vx0 + 1;
+  const h = new Float64Array(w * (vy1 - vy0 + 1));
   for (let y = vy0; y <= vy1; y++)
     for (let x = vx0; x <= vx1; x++) {
-      const inside = x >= 0 && y >= 0 && x < g.X && y < g.Y;
-      if (inside && block[x + y * g.X]) return true;
-      const h = at(x, y);
-      if ((x < vx1 && Math.abs(at(x + 1, y) - h) > step) || (y < vy1 && Math.abs(at(x, y + 1) - h) > step)) return true;
+      if (x < 0 || y < 0 || x >= g.X || y >= g.Y) continue;
+      const l = levelAt(levels, x + y * g.X, at);
+      if (levels.block[l]) return true;
+      h[x - vx0 + (y - vy0) * w] = levels.z[l];
+    }
+  for (let y = 0; y <= vy1 - vy0; y++)
+    for (let x = 0; x < w; x++) {
+      const v = h[x + y * w];
+      if ((x + 1 < w && Math.abs(h[x + 1 + y * w] - v) > step) || (y < vy1 - vy0 && Math.abs(h[x + (y + 1) * w] - v) > step)) return true;
     }
   return false;
 }
 
 /**
- * How high a model goes (tiles above its ground) under a rectangle of its own frame (tiles from its centre), or
- * undefined if nothing of it is there: what a jump over it has to clear (T56b).
+ * How high a model goes (tiles above its ground) under a rectangle of its own frame (tiles from its centre), for a
+ * jump whose feet start `at` voxels above its base and clear `up` voxels: the top of every run of solid that starts
+ * below `at + up` (a crate, a wall up to the roof; not the ceiling above, T70), or undefined if none is there (T56b).
  */
-export function topUnder(f: Form, top: Uint8Array, x0: number, z0: number, x1: number, z1: number): number | undefined {
+export function topUnder(f: Form, levels: Levels, x0: number, z0: number, x1: number, z1: number, at = 0, up = Infinity): number | undefined {
   const g = f.result!.grid;
   const vx0 = Math.max(0, Math.floor(x0 * f.vpt + g.X / 2)), vx1 = Math.min(g.X - 1, Math.floor(x1 * f.vpt + g.X / 2));
   const vy0 = Math.max(0, Math.floor(z0 * f.vpt + g.Y / 2)), vy1 = Math.min(g.Y - 1, Math.floor(z1 * f.vpt + g.Y / 2));
+  const { start, z, base } = levels;
   let h = 0;
-  for (let y = vy0; y <= vy1; y++) for (let x = vx0; x <= vx1; x++) h = Math.max(h, top[x + y * g.X]);
+  for (let y = vy0; y <= vy1; y++)
+    for (let x = vx0; x <= vx1; x++) {
+      const i = x + y * g.X;
+      for (let l = start[i]; l < start[i + 1]; l++) if (base[l] < at + up) h = Math.max(h, z[l]);
+    }
   return h ? h / f.vpt : undefined;
 }
 
