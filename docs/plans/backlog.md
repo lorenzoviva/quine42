@@ -807,7 +807,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 
 Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/userchats/to-do-2026-10-24.md), «Generazione della heightmap» e «taglia»).
 
-### T51 · Il livello del mare e un motore dell'acqua — `in attesa` (T51a fatto; T51b attende la risposta in `docs/pipeline/domande/T51.md`)
+### T51 · Il livello del mare e un motore dell'acqua — `da fare` (T51a fatto; T51b da fare: l'autore ha scelto l'automa cellulare, `docs/pipeline/domande/T51.md`)
 - Pipeline: claude · stima 6% · approvato · priorità 50
 - Contesto: ADR-0048. Oggi ogni specchio d'acqua è piano **dentro il suo chunk** (`waterLevels` in `relief.ts`: al livello
   più basso delle sue caselle, contando solo il chunk); lo stesso lago o fiume su due chunk ha due livelli, e laghi vicini
@@ -832,9 +832,11 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
   attorno al punto cambiato. Test: una conca scavata accanto a un lago si riempie e il lago si abbassa del giusto.
 - Fatto quando (per pezzo): test verdi, verifica nel browser su un lago tra due chunk, ADR-0048 aggiornato (T51a) o ADR
   nuovo (T51b), commit.
-- **Domanda per l'autore**: va bene l'automa cellulare del kernel per la fisica dell'acqua (MarkovJunior solo per generare)?
+- **Risposta dell'autore** (30/10): sì, l'automa cellulare del kernel (opzione 1); MarkovJunior resta per generare. Nasce da T51a:
+  `dossier T51`.
 
-### T52 · I sotterranei — `in attesa` (domande in `docs/pipeline/domande/T52.md`)
+### T52 · I sotterranei — `da fare` (risposte in `docs/pipeline/domande/T52.md`)
+- Pipeline: claude · stima 3% · approvato · priorità 50
 - Contesto: oggi niente sta sotto il livello del terreno (il rilievo è una colonna piena, i modelli stanno sul suolo,
   `floorAt`). L'autore vuole i sotterranei (anche un edificio seminterrato nella corona, come la Sala sistemi).
 - **T52a · il progetto** (ADR, nessun codice): come esiste uno spazio sotto il terreno (un piano sotto il luogo come zona a
@@ -843,8 +845,17 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
   un modello che scende sotto lo zero); come si vede (taglio sopra il viandante, luce); collisione e connettività (regola 10).
   Poi spezzare in task di codice.
 - Dipendenze: T53a (le scale come rampe sono il modo di scendere).
-- **Domanda per l'autore**: sotterranei come luoghi a parte sotto il mondo (dungeon) o come parti sotterranee delle
-  strutture (cantine, cripte), o entrambi?
+- **Risposte dell'autore** (30/10, `docs/pipeline/domande/T52.md`): **(b)**, parti sotterranee delle strutture (cantine, cripte):
+  il modello scende sotto lo zero e il terreno si taglia; forse poi anche (c), mai (a) da sola (un dungeon a parte rompe la
+  coerenza visiva del mondo simulato). La **profondità del terreno** si genera con lo stesso meccanismo con cui il Cartografo
+  genera su X e Y (bozza → programma → piano), limitata a poche caselle sotto la più profonda visibile. Nella corona la
+  coerenza non serve (luogo mistico, «più grande dentro»): dell'edificio seminterrato cambia **solo l'esterno**.
+- T52a resta il progetto (ADR, poi spezzare in task di codice su queste risposte): come il luogo ha una profondità (strati
+  sotto il rilievo, quante caselle, chi li scrive), come il modello di una struttura scende sotto il suolo (classe, `floorAt`,
+  rampe di T53 verso il basso, cose `dentro` sui piani sotterranei), come si vede (taglio del terreno e della struttura sopra
+  il viandante, luce), collisione e connettività (regola 10), multigiocatore (`PlaceView`). Nasce da T53a: `dossier T53`.
+- **T52c · la Sala sistemi seminterrata, fuori**: solo il modello esterno dell'edificio nella corona (`models/corona-<id>.xml`)
+  scende sotto il viale; l'interno resta com'è. Dopo T52a (si appoggia al taglio del terreno che il progetto decide).
 
 ### T53 · Le scale come rampe e le strutture su più piani — T53a `fatto` (`d7812ae`), T53b `da fare`
 - Pipeline: claude · stima 6% · approvato · priorità 50
@@ -873,20 +884,23 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
   aggiornato).
 - Dipendenze: nessuna. Utile prima di T52 e di T56.
 
-### T54 · Le taglie di D&D per strutture e creature — `in attesa` (domande in `docs/pipeline/domande/T54.md`)
+### T54 · Le taglie di D&D per strutture e creature — `da fare` (risposte in `docs/pipeline/domande/T54.md`)
+- Pipeline: claude · stima 6% · approvato · priorità 50
 - Contesto: richiesta del 24/10. Oggi le classi (`CLASSES` in `src/mj/classes.ts`: `persona`, `animale`, `bestia`,
   `edificio`, `grande`…) danno la scatola in caselle, e una struttura «importante» (Argon) per zona di 56 × 56 luoghi.
-  L'autore vuole riferirsi alla taglia di D&D: Minuscola, Piccola, Media, Grande, Enorme, Gargantuesca, più una ancora più
-  grande e più rara; il castello più grande di oggi è «Enorme».
+  L'autore vuole riferirsi alla taglia di D&D: Minuscola, Piccola, Media, Grande, Enorme, Gargantuesca. **Gargantuesca è la
+  massima** (non c'è una settima); il castello «importante» di oggi diventa **Enorme**, e Gargantuesca è una taglia nuova sopra.
 - Fare: un campo `taglia` per creature e strutture (manifest, piano del Cartografo, richieste allo Scultore), con la scatola
   in caselle di ogni taglia (per le creature lo spazio di D&D: Media 1 casella, Grande 2 × 2, Enorme 3 × 3, Gargantuesca
   4 × 4 o più; per le strutture una scala loro); la classe resta per la forma (persona, animale, edificio), la taglia dà le
-  misure; «importante» diventa la rarità delle taglie più grandi (Enorme per zona, Gargantuesca per regione, la settima per
-  mondo, da decidere); prompt di Cartografo, Narratore e Scultore; validatore. Test: una richiesta «Enorme» dà la scatola
+  misure; «importante» diventa la rarità delle taglie più grandi: **Enorme** una per zona (56 × 56 luoghi, come le importanti di
+  oggi), **Gargantuesca** una per **reame** (4 × 4 zone, cioè 224 × 224 luoghi, ~4032 caselle di lato; nome nuovo per non
+  confondersi con le regioni dell'atlante, che sono di 3-4 luoghi); `stato.json → importanti` migra; prompt di Cartografo, Narratore e Scultore; validatore. Test: una richiesta «Enorme» dà la scatola
   giusta; la rarità per zona regge.
 - Fatto quando: test verdi, AGENTS.md e un ADR (sostituisce in parte ADR-0043 sulle importanti), commit.
-- **Domande per l'autore**: il nome della settima taglia (es. «Colossale», «Titanica»)? Le taglie delle strutture seguono
-  quelle delle creature (Media = una casa, Enorme = il castello) o una scala a parte? Quanto rare sono le ultime tre?
+- **Risposte dell'autore** (30/10): niente settima taglia, Gargantuesca la massima; **stessa scala** per creature e strutture
+  (la scatola in caselle la dà la classe: una struttura Media è più grande di una creatura Media); rarità come sopra. Il nome
+  «reame» l'ha scelto l'orchestratore: si può cambiare.
 
 ## Controlli
 

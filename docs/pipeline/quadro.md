@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026, prima del primo avvio di `pipeline.mjs orchestra` (scritto dalla sessione di Claude Code che lo ha costruito).
+Aggiornato il 30/10/2026, epoca 1 dell'orchestratore (claude).
 
 ## Le priorità dell'autore
 
@@ -22,14 +22,10 @@ Aggiornato il 30/10/2026, prima del primo avvio di `pipeline.mjs orchestra` (scr
 
 ## Da fare appena possibile
 
-- **Pianificare le risposte dell'autore** (le domande hanno tutte risposta):
-  - `domande/T51.md`: T51b con un **automa cellulare del kernel** (opzione 1); MarkovJunior resta per generare.
-  - `domande/T52.md`: sotterranei come parti sotterranee delle strutture (b), forse poi anche (c), mai (a) da sola: la
-    profondità del terreno generata con lo stesso meccanismo del Cartografo su X e Y, poche caselle sotto la più profonda
-    visibile. Nella corona l'edificio seminterrato cambia solo fuori (dentro può essere diverso, è un luogo mistico).
-  - `domande/T54.md`: la taglia massima è **Gargantuesca**; il castello «importante» di oggi diventa **Enorme**; stessa scala per
-    creature e strutture; Enorme una per zona (56 × 56 luoghi), Gargantuesca una ogni 4 × 4 zone (serve un nome per quest'area,
-    non «regione», che è dell'atlante).
+- **Pianificate (30/10) le risposte dell'autore**: T51b (automa cellulare del kernel), T52a (progetto dei sotterranei come parti
+  sotterranee delle strutture, profondità generata come X e Y; T52c la Sala sistemi seminterrata solo fuori), T54 (Gargantuesca
+  la massima, il castello di oggi Enorme; Gargantuesca una per **reame** = 4 × 4 zone, nome scelto da me, da confermare). Tutti e
+  tre approvati, priorità 50, dietro il multigiocatore (che aspetta le approvazioni dell'autore).
 - **Verifiche nel browser** (un task di verifica su `claude`, che ha `--chrome`): T64 (le varianti in cache, anche IndexedDB, di
   `circuito-3D` sugli scaffali della corona, ora che ha 30 s per finire), T56b (l'arco del salto e l'ombra: l'agente ha visto solo la
   scena, poi l'estensione di Chrome si è scollegata), T53b quando finisce. I difetti della verifica di T44a e T43c sono già in **T44c**.
