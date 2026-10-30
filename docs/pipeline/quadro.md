@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026, rotazione epoca 10 dell'orchestratore (gemini: avvio epoca 10).
+Aggiornato il 30/10/2026, rotazione epoca 10 dell'orchestratore (gemini: chiusura per contesto a 62%).
 
 ## Le priorità dell'autore
 
