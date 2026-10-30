@@ -7,6 +7,7 @@
 // tasks, the events not yet delivered, the last messages of the chat. Nothing the orchestrator had only in its head
 // is needed, and nothing the pipeline said is lost.
 import { spawn, spawnSync } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
@@ -16,10 +17,40 @@ const DIR = path.join(STATE_DIR, 'orchestra');
 const STATE = path.join(DIR, 'stato.json');
 const EVENTS = path.join(DIR, 'eventi.jsonl');
 const CHAT = path.join(DIR, 'chat.jsonl');
+const INBOX = path.join(DIR, 'coda.json');
 const START = path.join(DIR, 'avvio.md');
 const LONG = path.join(DIR, 'messaggio.md');
 const QUADRO = path.join(REPO, 'docs', 'pipeline', 'quadro.md');
-const OPTS = { ordine: ['claude', 'argon', 'gemini'], finestra: { claude: 200_000, argon: 1_000_000, gemini: 1_000_000 }, rotazione: 0.5, soglia: CONFIG.sogliaUnSolo, chat: 20, ...CONFIG.orchestra };
+const OPTS = { ordine: ['claude', 'argon', 'gemini'], finestra: { claude: 200_000, argon: 1_000_000, gemini: 1_000_000 }, rotazione: 0.5, soglia: CONFIG.sogliaUnSolo, chat: 20, porta: 4242, ...CONFIG.orchestra };
+
+const inboxFile = (stateDir = STATE_DIR) => path.join(stateDir, 'orchestra', 'coda.json');
+
+/** Reads the shared queue of author messages waiting for the orchestrator (terminal and web UI). */
+export function readInbox(stateDir = STATE_DIR) {
+  const list = readJson(inboxFile(stateDir), []);
+  return Array.isArray(list) ? list : [];
+}
+
+/** Puts a message or command (`/epoca`, `/agente <provider>`) into the shared orchestrator queue and wakes it. */
+export function enqueueMessage(testo, stateDir = STATE_DIR) {
+  const text = String(testo ?? '').trim();
+  if (!text) return undefined;
+  const file = inboxFile(stateDir);
+  const list = readInbox(stateDir);
+  const item = { id: randomUUID(), t: now(), testo: text };
+  list.push(item);
+  writeJson(file, list);
+  bus.emit('messaggio', item);
+  return item;
+}
+
+/** Removes delivered messages from the shared queue by id. */
+export function dequeueMessages(ids, stateDir = STATE_DIR) {
+  const remove = new Set(ids);
+  const next = readInbox(stateDir).filter((m) => !remove.has(m.id));
+  writeJson(inboxFile(stateDir), next);
+  return next;
+}
 
 const rel = (p) => path.relative(REPO, p).split(path.sep).join('/');
 const lines = (file) => { try { return fs.readFileSync(file, 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l)); } catch { return []; } };
@@ -114,11 +145,10 @@ function runTurn(provider, sessione, prompt) {
   });
 }
 
-export async function orchestra({ agente } = {}) {
+export async function orchestra({ agente, porta } = {}) {
   fs.mkdirSync(DIR, { recursive: true });
   const order = agente ? [agente, ...OPTS.ordine.filter((p) => p !== agente)] : OPTS.ordine;
   if (!CONFIG.providers[order[0]]) throw new Error(`agente sconosciuto: ${order[0]}`);
-  const inbox = []; // the author's messages not yet answered
   let busy = false;
   let wanted; // a provider the author asked for (`/agente`)
   let rotate; // why the next turn starts a new epoch
@@ -131,6 +161,7 @@ export async function orchestra({ agente } = {}) {
     if (sveglia) void pump();
   };
   bus.on('diario', (line) => queue(line, wakes(line)));
+  bus.on('messaggio', () => void pump());
 
   /** Starts a new epoch on `provider`: the next turn opens a new conversation from the start page. */
   const newEpoch = (s, provider, reason) => {
@@ -152,6 +183,20 @@ export async function orchestra({ agente } = {}) {
     busy = true;
     try {
       for (;;) {
+        // Commands (`/epoca`, `/agente <provider>`) written to the shared queue from the web UI or terminal.
+        const rawInbox = readInbox(STATE_DIR);
+        const cmdIds = [];
+        for (const item of rawInbox) {
+          if (item.testo === '/epoca') { rotate = 'chiesto dall\'autore'; cmdIds.push(item.id); }
+          else if (item.testo.startsWith('/agente')) {
+            const p = item.testo.split(/\s+/)[1];
+            if (CONFIG.providers[p]) wanted = p;
+            cmdIds.push(item.id);
+          }
+        }
+        if (cmdIds.length) dequeueMessages(cmdIds, STATE_DIR);
+        const queued = readInbox(STATE_DIR);
+
         const s = state();
         const budget = loadBudget();
         // Which provider: the author's choice; else the current one while it has credits; else the first of the order
@@ -173,7 +218,7 @@ export async function orchestra({ agente } = {}) {
           newEpoch(s, best, `${s.provider} sotto il ${OPTS.soglia} %`);
         } else if (!s.sessione && best && order.indexOf(best) < order.indexOf(s.provider)) {
           newEpoch(s, best, `${best} ha di nuovo crediti`);
-        } else if (s.sessione && !inbox.length && s.provider !== order[0] && pickOrchestrator([order[0]], budget, 3 * OPTS.soglia)) {
+        } else if (s.sessione && !queued.length && s.provider !== order[0] && pickOrchestrator([order[0]], budget, 3 * OPTS.soglia)) {
           // Back to the preferred provider, at a quiet moment, once its credits are well back.
           await closeEpoch(s, `${order[0]} ha di nuovo crediti`);
           newEpoch(s, order[0], `${order[0]} ha di nuovo crediti`);
@@ -186,8 +231,8 @@ export async function orchestra({ agente } = {}) {
         const st = state();
         const events = lines(EVENTS).filter((e) => e.n > st.consegnati);
         const urgent = events.some((e) => e.sveglia);
-        if (!inbox.length && !urgent && st.sessione) break;
-        const messages = inbox.slice();
+        if (!queued.length && !urgent && st.sessione) break;
+        const messages = queued.map((q) => q.testo);
         const body = composeTurn(messages, events) || '[pipeline] Nuova epoca: leggi la pagina di avvio e di\' all\'autore a che punto siamo.';
         let prompt;
         if (!st.sessione) {
@@ -225,7 +270,7 @@ export async function orchestra({ agente } = {}) {
         for (const m of messages) log('autore', m);
         if (events.length) log('pipeline', events.map((e) => e.testo).join('\n'));
         log('orchestratore', out.result, s3.provider);
-        inbox.splice(0, messages.length);
+        dequeueMessages(queued.map((q) => q.id), STATE_DIR);
         print(`orchestratore (${s3.provider})>`, out.result);
         const window = OPTS.finestra[s3.provider] ?? 200_000;
         if (s3.contesto > OPTS.rotazione * window) rotate = `contesto a ${Math.round((100 * s3.contesto) / window)} % della finestra`;
@@ -238,6 +283,15 @@ export async function orchestra({ agente } = {}) {
   // The pipeline runs in this process; its diary lines become events.
   void execute({ always: true });
   setInterval(() => void pump(), 60_000);
+  setInterval(() => { if (!busy && readInbox(STATE_DIR).length) void pump(); }, 2_000);
+
+  if (porta !== false) {
+    void import('./web.mjs').then((m) => m.startWebServer({
+      port: porta ?? OPTS.porta ?? 4242,
+      fallbackPort: porta === undefined,
+      getLive: () => ({ busy, wanted, rotate }),
+    }));
+  }
 
   const s = state();
   console.log(`Orchestratore: ${s.provider ? `${s.provider}, epoca ${s.epoca}` : 'nuovo'} · scrivi un messaggio, oppure /stato /agente <provider> /epoca /esci`);
@@ -261,8 +315,7 @@ export async function orchestra({ agente } = {}) {
       return rl.prompt();
     }
     if (line === '/epoca') { rotate = 'chiesto dall\'autore'; void pump(); return rl.prompt(); }
-    inbox.push(line);
-    void pump();
+    enqueueMessage(line, STATE_DIR);
   });
   void pump();
 }

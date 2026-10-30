@@ -1452,7 +1452,7 @@ le risposte alle domande del piano.
   `npm test` e `npm run typecheck`, verifica nel browser (salire la torre, saltare una cassa al piano terra e al primo piano), commit. Poi
   l'orchestratore fa `integra T70` e `integra T53b` (che toglie worktree e branch di T53b).
 
-### T69 · L'interfaccia web della pipeline — `da fare` (dipende da T61)
+### T69 · L'interfaccia web della pipeline — `fatto` (dipende da T61)
 - Pipeline: argon · stima 6% · approvato · priorità 60
 - Contesto: richiesta dell'autore del 30/10/2026 (non prioritaria: prima si usa il nuovo ambiente, ADR-0079). Oggi la pipeline si
   segue dal terminale di `node tools/pipeline/pipeline.mjs orchestra` e dai file (`docs/pipeline/PIANO.md`, `quadro.md`,
@@ -1469,6 +1469,7 @@ le risposte alle domande del piano.
   - il **consumo**: i contatori di ogni provider (5 ore e settimana) e lo storico di `consumi.jsonl`.
 - Fatto quando: la pagina mostra lo stato reale e ogni azione passa dai comandi della pipeline (test dei punti del server senza
   browser), verifica nel browser con l'orchestratore acceso, README della pipeline aggiornato, commit.
+- Esito: `tools/pipeline/web.mjs` (server HTTP locale senza dipendenze, avviato in automatico da `orchestra` su `:4242` con fallback di porta o da solo con `node tools/pipeline/pipeline.mjs web [--porta 4242]`), coda condivisa dei messaggi in `.pipeline/orchestra/coda.json` (`readInbox`, `enqueueMessage`, `dequeueMessages` in `tools/pipeline/orchestra.mjs`, usata sia dal terminale sia da `POST /api/chat` con risveglio immediato di `pump()`), funzioni esportate in `tools/pipeline/pipeline.mjs` (`pathsOf`, `writePlan`, `parseConversation`, `traceOf`, `resumeTasks`, `interruptTasks`, `integrateTask`, `approveTasks`, `assignTask`, `setBudgetManual`, `refreshUsage`, `dossierOf`) con parsing in diretta delle conversazioni `.jsonl` di Claude Code e `transcript.jsonl` di Antigravity CLI, vista a 5 schede (Chat & Orchestra, Lavagna Kanban, Tabella Task, Domande & To-Do, Budget & Consumi) e cassetto laterale di dettaglio task (Conversazione dal vivo, Dossier, Log, Azioni), 7 test dei punti del server e HTTP in `tests/pipeline.test.ts` (36 test totali), `docs/pipeline/README.md` e `AGENTS.md` aggiornati.
 
 ### T30 · Immagini del 3D nel README — `fatto`
 - Pipeline: gemini · stima 2% · approvato · priorità 60
