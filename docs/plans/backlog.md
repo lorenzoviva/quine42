@@ -1424,6 +1424,20 @@ le risposte alle domande del piano.
 
 ## Varie
 
+### T70 · Integrare T53b (più piani) con il salto di T56b — `da fare`
+- Pipeline: claude · stima 3% · approvato · priorità 0
+- Contesto: `integra T53b` del 30/10/2026 si è fermato sui conflitti (il base è com'era): T53b (strutture su più piani: un pavimento
+  per tratto di pieno, `pos.z`, `free`/`free_real`/`floorAt` con l'altezza, taglio del renderer sul piano) e T56b (il salto, già nel
+  base, ADR-0080: altezza delle cose da `mesh.ts`/`forms.ts`, `jump`/`jumpTick`, arco e ombra in `things.ts`) toccano gli stessi punti.
+  Conflitti: `src/kernel/forms.ts` (4 blocchi), `src/kernel/kernel.ts` (5), `src/mj/mesh.ts`, `src/render/renderer.ts`, `src/render/things.ts`.
+  Leggi i dossier: `dossier T53b`, `dossier T56b`.
+- Fare: nel tuo worktree `git merge task/T53b` e risolvi tenendo entrambi i comportamenti: il salto tiene conto del piano in cui si è
+  (`pos.z`: si salta da un piano, si atterra su un pavimento raggiungibile), i piani funzionano come in T53b. Se T53b ha preso un numero di
+  ADR già usato, prendi il primo libero.
+- Fatto quando: `tests/storeys.test.ts`, `tests/jump.test.ts`, `tests/ramps.test.ts` verdi e un test che salta dentro la torre a due piani,
+  `npm test` e `npm run typecheck`, verifica nel browser (salire la torre, saltare una cassa al piano terra e al primo piano), commit. Poi
+  l'orchestratore fa `integra T70` e `integra T53b` (che toglie worktree e branch di T53b).
+
 ### T69 · L'interfaccia web della pipeline — `da fare` (dipende da T61)
 - Pipeline: argon · stima 6% · priorità 60
 - Contesto: richiesta dell'autore del 30/10/2026 (non prioritaria: prima si usa il nuovo ambiente, ADR-0079). Oggi la pipeline si

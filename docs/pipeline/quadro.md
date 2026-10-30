@@ -14,8 +14,9 @@ Aggiornato il 30/10/2026, prima del primo avvio di `pipeline.mjs orchestra` (scr
 
 ## In corso
 
-- **T53b** (strutture su più piani) su Claude, ripreso il 30/10 alle 03:13. Se all'avvio di `orchestra` risulta «in corso», il
-  processo lo riprende dalla sua conversazione (fu lanciato dal vecchio `esegui`: niente pid).
+- **T53b** (strutture su più piani) è finito e verificato nel browser dall'agente, ma `integra T53b` si è fermato sui conflitti con
+  il salto di T56b (5 file di codice): la risoluzione è **T70** (claude, priorità 0, approvato), il primo lavoro di questo ambiente.
+  Quando T70 è finito: `integra T70`, poi `integra T53b` (toglie worktree e branch).
 - **T56b** (il salto) è integrato (ADR-0080): Spazio salta casse e acqua stretta; in multigiocatore e nella corona resta `E`
   (il messaggio `salta` del protocollo è annotato nel backlog come lavoro a parte).
 
