@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026, chiusura epoca 40 dell'orchestratore (gemini).
+Aggiornato il 30/10/2026, epoca 41 dell'orchestratore (gemini).
 
 ## Le priorità dell'autore
 
@@ -19,7 +19,7 @@ Aggiornato il 30/10/2026, chiusura epoca 40 dell'orchestratore (gemini).
   - **T68c completato su Gemini e integrato** in `3d`: collegati gli abbonamenti nel gioco tramite `RoutedModels` in `main.ts`, stato e coda in `#models` e nel pannello del Concilio (`FeedPanel`), documentazione in `README.md` e test Genesi offline con coda servita in `tests/subscription.test.ts`.
   - **T74 completato su Gemini e integrato** in `3d`: risolto il merge di T68c in `docs/plans/backlog.md` preservando tutti i blocchi ed esiti, suite `tests/subscription.test.ts` (16/16) e typecheck verdi. Integrati con successo sia T74 che T68c nel branch base `3d`, con rimozione dei relativi worktree e branch.
 - **Cosa si aspetta**:
-  1. Reset della sessione di 5 ore di Claude alle **06:59 UTC** (**~08:00** locali, ~35m rimanenti; quota settimanale al 69%).
+  1. Reset della sessione di 5 ore di Claude alle **06:59 UTC** (**~08:00** locali, ~30m rimanenti; quota settimanale al 69%).
 - **Intenzioni al reset di Claude / prossimi passi**:
   1. Completare **T70** (integrazione T53b con salto T56b, priorità 0 su Claude), poi `integra T70` e `integra T53b`.
   2. Procedere con **T44c** (priorità 3) e **T44b** (priorità 4, che con T45a completato sblocca a cascata T45d/e/f).
@@ -28,12 +28,12 @@ Aggiornato il 30/10/2026, chiusura epoca 40 dell'orchestratore (gemini).
 ## Task attivi e in corso
 
 - **In corso su Gemini:**
-  - Nessuno (Gemini riservato per l'orchestrazione; 5h al 34%).
+  - Nessuno (Gemini riservato per l'orchestrazione; 5h al 32%).
 - **Da integrare:**
   - **T53b** (in attesa di T70).
 - **Pronti:**
   - **T51** (priorità 50 su Claude).
-- **Sospesi su Claude fino alle 06:59 UTC (`~08:00` locali, ~35m):**
+- **Sospesi su Claude fino alle 06:59 UTC (`~08:00` locali, ~30m):**
   - **T70** (priorità 0, risoluzione conflitti T53b / T56b con test salto + torre).
   - **T44c** (priorità 3, correzioni da verifica browser T44a/T43c).
   - **T44b** (priorità 4, account e autenticazione).
