@@ -44,7 +44,7 @@ Aggiornato il 30/10/2026 alle 14:52 UTC, epoca 98 su gemini: **claude ha esaurit
   - **T57** (rune come codice, bloccato da T51a).
 - **Crediti**:
   - **Claude**: 5h al 0 %, settimana al 55 % (fermo fino alle 17:00 UTC / ~18:00 locali, orchestratore su Gemini).
-  - **Gemini**: 5h al 58 %, settimana al 42 % (orchestratore attuale).
+  - **Gemini**: 5h al 57 %, settimana al 42 % (orchestratore attuale).
   - **Argon**: fermo fino al 04/11.
 
 ## Da fare appena possibile
