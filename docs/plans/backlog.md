@@ -1617,12 +1617,13 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fatto quando: test con una CLI finta (script che risponde), una prova vera con Claude Code su un `model.sculpt`, commit.
 - Esito: `tools/abbonamenti/servi.ts`, `npm run abbonamento`, test con CLI mock e con Claude Code reale su `model.sculpt` in `tests/abbonamenti.test.ts`.
 
-### T68c · Gli abbonamenti nel gioco — `da fare` (dipende da T68b)
+### T68c · Gli abbonamenti nel gioco — `fatto` (dipende da T68b)
 - Pipeline: claude · stima 3% · priorità 21
 - Fare: `main.ts` costruisce `RoutedModels` se `usesSubscriptions` e la coda è servita (`QueueModels.available`), solo se l'universo
   è in singola (mai in `host.ts`); `#models` e il pannello del Concilio dicono quali agenti vanno su quale abbonamento e cosa c'è in coda;
   documentazione per chi scarica il repository (README: impostare la tabella, lanciare il servitore).
 - Fatto quando: Genesi offline con la coda servita da una CLI finta nel browser, commit.
+- Esito: `main.ts` costruisce `RoutedModels` in singola quando la tabella `ai` usa abbonamenti e `QueueModels.available` è vero per i provider richiesti; `/api/coda/stato` e `QueueModels.queryState` riportano lo stato completo con richieste in attesa e in corso; `#models` e il pannello del Concilio (`FeedPanel`, tasto G) mostrano il riepilogo dei provider/agenti e della coda con dettagli tooltip; documentazione aggiunta nel README per tabella e comando `npm run abbonamento`; test completi e prova della Genesi offline con coda servita in `tests/subscription.test.ts`.
 
 ### T71 · Soglie della pipeline e dell'orchestratore sul limite settimanale per Argon — `fatto`
 - Pipeline: gemini · stima 2% · approvato · priorità 0

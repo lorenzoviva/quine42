@@ -113,24 +113,40 @@ verificare nel browser e integra. Non lavora sul codice: delega. Quando i suoi c
 partendo dal suo quadro (`docs/pipeline/quadro.md`), senza perdere gli eventi in corso. Le richieste si possono scrivere anche in
 `docs/userchats/to-do.md`. Comandi e regole: [docs/pipeline/README.md](docs/pipeline/README.md).
 
-### Generare con gli abbonamenti (in costruzione)
+### Generare con gli abbonamenti
 
-Il Concilio chiama Gemini a consumo con la chiave di `.env`. I compiti lenti (Genesi, Fucina, modelli dello Scultore, sessioni
-del Concilio, meccaniche) potranno girare invece sull'abbonamento di chi gioca in locale, Claude Code o Antigravity
-([ADR-0077](docs/adr/0077-generare-con-gli-abbonamenti.md)); il resto resta sulle API. Solo in singola e in sviluppo, mai sul server
-del multigiocatore: l'abbonamento è personale. Si sceglie in `universe.json` del proprio universo:
+Il Concilio chiama Gemini a consumo con la chiave in `.env`. I compiti lenti (Genesi, Fucina, modelli dello Scultore, sessioni
+del Concilio, meccaniche) possono invece girare sull'abbonamento personale di chi gioca in locale, Claude Code o Antigravity
+([ADR-0077](docs/adr/0077-generare-con-gli-abbonamenti.md)), a costo zero nel registro dei consumi; il resto resta sulle API
+(o sui modelli locali offline). Solo in singola e in sviluppo, mai sul server del multigiocatore: l'abbonamento è personale.
+
+1. **Impostare la tabella**: in `universe.json` del proprio universo (in `universes/<nome>/universe.json` o nel seme `universe/universe.json`):
 
 ```json
 "ai": {
-  "provider": "api",
+  "provider": "claude",
   "agenti": { "scultore": "claude", "narratore": "antigravity" }
 }
 ```
 
-`provider` vale per ogni agente che `agenti` non nomina (`api`, `claude` o `antigravity`). Oggi c'è la tabella e la coda su disco
-dove il gioco lascia le richieste (`/api/coda`, `universes/.coda/`); mancano il processo che la serve con le CLI (T68b: sarà
-`npm run abbonamento`, con Claude Code o Antigravity installati e collegati al proprio account) e il collegamento nel gioco (T68c).
-Finché non ci sono, tutto va sulle API.
+`provider` stabilisce il provider predefinito (`api`, `claude` o `antigravity`) per ogni agente che `agenti` non nomina; `agenti` definisce le eccezioni per singolo agente.
+
+2. **Lanciare il servitore della coda**: in un terminale separato (richiede la CLI `claude` o `agy` installata e collegata al proprio account):
+
+```bash
+npm run abbonamento                       # serve le richieste sia di Claude Code che di Antigravity
+# oppure solo per un provider specifico:
+npm run abbonamento -- --provider claude
+npm run abbonamento -- --provider antigravity
+```
+
+3. **Avviare il gioco**:
+
+```bash
+npm run dev                               # http://localhost:5173
+```
+
+All'avvio in singola o sviluppo, se il servitore è attivo il gioco costruisce automaticamente i modelli instradati (`RoutedModels`): la schermata introduttiva (`#models`) e il pannello del Concilio (`G`) mostrano quali agenti vanno su quale abbonamento e quante richieste sono in coda o in corso. Se il servitore non è avviato o si interrompe, le richieste ricadono in modo trasparente sulle API (o sui modelli locali se offline).
 
 ## Riferimenti e ispirazioni
 
