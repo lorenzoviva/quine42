@@ -334,3 +334,4 @@
 - [2026-10-30T14:31:16.267Z] integra T45d: conflitti in docs/plans/backlog.md; il base è com'era
 - [2026-10-30T14:32:37.216Z] lancio T80 su gemini (H:\projects\rune\.claude\worktrees\t80)
 - [2026-10-30T14:32:44.750Z] nota: T45d completato su Gemini (commit c803df1, ADR-0086, 18/18 test passati). Tentativo di integra T45d con conflitto su backlog.md: creato e approvato T80 (gemini, 1%, p0) per merge e risoluzione. Quadro aggiornato.
+- [2026-10-30T14:33:33.695Z] orchestratore: epoca 94 su gemini (contesto a 540 % della finestra)

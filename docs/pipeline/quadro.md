@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 14:32 UTC, epoca 93 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset 17:00 UTC / ~18:00 locali, settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h al 63 %, settimana 43 %; argon fermo fino al 04/11). **T45d (la lobby multigiocatore, ADR-0086)** è completato con successo su Gemini (test 18/18 passati, typecheck pulito, commit `c803df1`). Creata e approvata l'integrazione **T80** (p0, Gemini) per risolvere il conflitto sul backlog. T70 (integrazione più piani T53b e salto T56b) è sospeso in attesa del reset crediti su Claude.
+Aggiornato il 30/10/2026 alle 14:36 UTC, epoca 94 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset 17:00 UTC / ~18:00 locali, settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h al 63 %, settimana 43 %; argon fermo fino al 04/11). **T45d (la lobby multigiocatore, ADR-0086)** è completato con successo su Gemini (test 18/18 passati, typecheck pulito, commit `c803df1`). L'integrazione **T80** (p0, Gemini) è in esecuzione nel worktree `t80` per risolvere il conflitto su `docs/plans/backlog.md` (merge di `task/T45d` avviato). T70 (integrazione più piani T53b e salto T56b) è sospeso in attesa del reset crediti su Claude.
 
 ## Le priorità dell'autore
 
@@ -51,7 +51,7 @@ Aggiornato il 30/10/2026 alle 14:32 UTC, epoca 93 su gemini: **claude ha esaurit
 ## Da fare appena possibile
 
 - **Pianificate (30/10) le risposte dell'autore**: T51b (automa cellulare del kernel), T52a (progetto dei sotterranei come parti sotterranee delle strutture, profondità generata come X e Y; T52c la Sala sistemi seminterrata solo fuori), T54 (Gargantuesca la massima, il castello di oggi Enorme; Gargantuesca una per **reame** = 4 × 4 zone, nome scelto da me, da confermare). Tutti e tre approvati, priorità 50, dietro il multigiocatore.
-- **Verifiche nel browser** (un task di verifica su `claude`, che ha `--chrome`): T64 (le varianti in cache di `circuito-3D` sugli scaffali della corona), T56b (l'arco del salto e l'ombra), T69 (interfaccia web della pipeline: vista browser), T68c (stato provider e coda abbonamenti in `#models` e pannello del Concilio), T45e (ricarica di prova Stripe con chiavi di test).
+- **Verifiche nel browser** (un task di verifica su `claude`, che ha `--chrome`): T45d (la lobby multigiocatore, selezione tetto e modale crediti esauriti), T64 (le varianti in cache di `circuito-3D` sugli scaffali della corona), T56b (l'arco del salto e l'ombra), T69 (interfaccia web della pipeline: vista browser), T68c (stato provider e coda abbonamenti in `#models` e pannello del Concilio), T45e (ricarica di prova Stripe con chiavi di test).
 
 ## Da sapere
 
