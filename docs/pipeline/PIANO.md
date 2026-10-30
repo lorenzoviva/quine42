@@ -1,6 +1,6 @@
 # Il piano della pipeline
 
-> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-30T14:32:36.675Z: non modificarlo a mano,
+> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-30T14:32:56.185Z: non modificarlo a mano,
 > la fonte è `docs/plans/backlog.md` (righe `- Pipeline:`).
 
 ## Budget
@@ -16,10 +16,11 @@ Orchestratore: **gemini** (sotto il 10 % nessun task su di lui; si cambia con `o
 - **argon**: settimana 0 %, 5 ore 0 %, fermo fino a 2026-11-04T18:44:35.000Z (letto da /usage il 2026-10-30T14:31:06.326Z)
   - Gemini 4 Argon, settimana: 0 % residuo, reset 2026-11-04T18:44:35.000Z
 
-## In corso (2)
+## In corso (3)
 
 - **T52** I sotterranei — claude, 3 %
 - **T70** Integrare T53b (più piani) con il salto di T56b — claude, 3 %
+- **T80** Integrare T45d (la lobby multigiocatore) nel base 3d — gemini, 1 %
 
 ## Finiti, da guardare e integrare (`integra Txx`) (3)
 
@@ -27,9 +28,8 @@ Orchestratore: **gemini** (sotto il 10 % nessun task su di lui; si cambia con `o
 - **T54** Le taglie di D&D per strutture e creature — ESITO: fallito (codice 1) — claude, 6 %
 - **T45d** La lobby — ESITO: fatto — implementata la lobby multigiocatore con modelli/coefficienti master, minimi, tetto crediti che incrementa i budget, collezione carte con utilizzi e modale a 3 scelte a crediti esauriti (ADR-0086, test in lobby.test.ts) — gemini, 5 %
 
-## Pronti, in ordine di priorità (2)
+## Pronti, in ordine di priorità (1)
 
-- **T80** Integrare T45d (la lobby multigiocatore) nel base 3d — gemini, 1 %
 - **T51** Il livello del mare e un motore dell'acqua — claude, 6 %
 
 ## Da approvare (provider e stima proposti) (0)
