@@ -262,3 +262,5 @@
 - [2026-10-30T10:08:40.959Z] nota: Epoca 63 avviata su Gemini. T77 e T45e integrati nel base 3d. In attesa reset Claude (11:59 UTC / ~13:00 locali) per T70 e delle credenziali Stripe di test per T45e.
 - [2026-10-30T10:10:02.906Z] orchestratore: epoca 64 su gemini (contesto a 82 % della finestra)
 - [2026-10-30T10:11:12.876Z] nota: Epoca 64 avviata su Gemini. T77 e T45e integrati nel base 3d. In attesa reset Claude (11:59 UTC / ~13:00 locali) per T70 e delle credenziali Stripe di test per T45e.
+- [2026-10-30T10:12:11.773Z] orchestratore: epoca 65 su gemini (contesto a 59 % della finestra)
+- [2026-10-30T10:13:54.686Z] nota: Epoca 65 avviata su Gemini. T77 e T45e integrati nel base 3d. In attesa reset Claude (11:59 UTC / ~13:00 locali, ~45m) per T70 e delle credenziali Stripe di test per T45e.
