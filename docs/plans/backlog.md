@@ -1674,3 +1674,18 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fatto quando: `npx vitest run tests/subscription.test.ts` e `npm run typecheck` verdi, commit sul branch `task/T74`. Poi l'orchestratore farà `integra T74` e `integra T68c`.
 - Esito: eseguito merge di `task/T68c` in `task/T74`; risolto il conflitto in `docs/plans/backlog.md` mantenendo lo stato `fatto` e l'esito di T68c insieme a tutti i task recenti (T71, T72, T73, T74); verificati `tests/subscription.test.ts` (16/16) e `npm run typecheck` con esito verde.
 
+
+### T75 · Integrare T44b (l'account e l'autenticazione) con T45a (i crediti) — `da fare`
+- Pipeline: gemini · stima 3% · approvato · priorità 0
+- Contesto: `integra T44b` del 30/10/2026 si è fermato su conflitti in `docs/adr/README.md`, `src/main.ts`, `src/session/client.ts`,
+  `src/session/protocol.ts`, `src/session/server.ts`: T44b è partito da `ab79ce4`, prima che entrassero T45a (crediti, `38dcd69`) e T68c
+  (abbonamenti, `7f9c965`). Nasce da T44b: `node tools/pipeline/pipeline.mjs dossier T44b`; leggi anche `dossier T45a`.
+- Fare: nel tuo worktree `git merge task/T44b` e risolvi. Due aggiunte nello stesso punto restano entrambe (messaggi del protocollo,
+  campi dell'`ingresso`, opzioni del server). L'ADR di T44b (`docs/adr/0081-l-account.md`) si scontra con ADR-0081 di T45a: diventa
+  **ADR-0082** (file, `docs/adr/README.md`, riferimenti in `AGENTS.md`, nel backlog e nel messaggio del commit). **L'anonimo**: T44b
+  (`PayerModels`, `src/kernel/ai/local.ts`) e T45a (`anonimo: true`, 0 crediti, `MockModels` a crediti esauriti) fanno la stessa cosa:
+  tienine **un solo meccanismo** (quello di T45a sui crediti, con l'anonimo che viene dall'account di T44b; un anonimo legato a Google
+  smette di essere anonimo e tiene il viandante), e dillo in ADR-0082 e in `AGENTS.md`.
+- Fatto quando: `npx vitest run tests/session* tests/credits* tests/subscription.test.ts` (i file che esistono) e `npm run typecheck`
+  verdi (non la suite intera: va in timeout per carico macchina), commit sul branch `task/T75`. Poi l'orchestratore farà `integra T75`
+  e `integra T44b`.
