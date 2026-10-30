@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 14:43 UTC, epoca 95 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset 17:00 UTC / ~18:00 locali, settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h al 60 %, settimana 42 %; argon fermo fino al 04/11). **T80 e T45d (la lobby multigiocatore, ADR-0086)** sono stati integrati con successo nel base `3d` (test 18/18 passati, typecheck pulito, rimosso worktree e branch). **T45f (server su Google Cloud)** è sbloccato: predisposte le domande in `docs/pipeline/domande/T45f.md` (Project ID, architettura Cloud Run vs VM GCE, regione). T70 (integrazione più piani T53b e salto T56b) resta sospeso in attesa del reset crediti su Claude.
+Aggiornato il 30/10/2026 alle 14:45 UTC, epoca 96 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset 17:00 UTC / ~18:00 locali, settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h al 60 %, settimana 42 %; argon fermo fino al 04/11). **T80 e T45d (la lobby multigiocatore, ADR-0086)** integrati con successo nel base `3d` (test 18/18 passati, typecheck pulito, rimossi worktree e branch). **T45f (server su Google Cloud)** sbloccato e pronto in attesa delle risposte in `docs/pipeline/domande/T45f.md` (Project ID, architettura Cloud Run vs VM GCE, regione). T70 (integrazione più piani T53b e salto T56b) resta sospeso in attesa del reset crediti su Claude.
 
 ## Le priorità dell'autore
 

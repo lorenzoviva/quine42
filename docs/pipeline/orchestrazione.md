@@ -340,3 +340,5 @@
 - [2026-10-30T14:39:46.165Z] task/T80 integrato in 3d; worktree e branch tolti.
 - [2026-10-30T14:39:52.417Z] task/T45d integrato in 3d; worktree e branch tolti.
 - [2026-10-30T14:41:51.070Z] nota: Epoca 95 su Gemini: integrati con successo T80 e T45d nel base 3d (ADR-0086, lobby multigiocatore, rimossi branch e worktree). T45f sbloccato; predisposte domande per l'infrastruttura Google Cloud. T70 in attesa del reset crediti Claude (16:59 UTC). Quadro aggiornato.
+- [2026-10-30T14:43:22.425Z] orchestratore: epoca 96 su gemini (contesto a 343 % della finestra)
+- [2026-10-30T14:45:07.782Z] nota: Epoca 96 su Gemini avviata. Quadro confermato: T80 e T45d integrati, T45f pronto in attesa risposte GCP, T70 in attesa reset Claude (17:00 UTC), T45e in attesa chiavi Stripe.
