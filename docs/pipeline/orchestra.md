@@ -26,7 +26,8 @@ e ciò che rispondi l'autore lo legge nel terminale. Lo stesso processo esegue i
 |---|---|
 | `stato`, `indice` | le code e i contatori; una riga per task |
 | `dossier Txx` | tutto di un task: blocco, esecuzione, commit, file, ADR, task collegati (anche per file in comune) |
-| `traccia Txx` | il riepilogo dell'agente che l'ha eseguito |
+| `traccia Txx` | il riepilogo dell'agente che l'ha eseguito; mentre lavora: la sua conversazione, il consumo, le ultime azioni |
+| `traccia orchestratore` | le tue epoche: provider, turni, token, costo, la conversazione in corso |
 | `prossimo` | il primo numero di task libero |
 | `assegna Txx <claude\|gemini\|argon> <stima %> [priorità] [--approva]`, `approva Txx…` | la riga `- Pipeline:` |
 | `interrompi Txx…` / `interrompi --tutti`, `riprendi Txx…` | ferma un task in corso (tiene la sua conversazione) e lo rimette in coda |

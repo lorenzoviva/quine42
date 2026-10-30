@@ -1036,3 +1036,153 @@ describe('spegnere la pipeline (T85)', () => {
     expect(S.shutdownSummary(record, runs).join('\n')).toMatch(/Finiti mentre aspettava di spegnersi: T1 — ESITO: fatto/);
   }, 60_000);
 });
+
+type Usage = { chiamate: number; input: number; cache: number; scritti: number; output: number };
+type Trace = { sessione?: string; file?: string; riprendi?: string; consumo: Usage; ultime: string[]; agents: boolean };
+type Tracing = {
+  traceOf(id: string, opts?: unknown): Trace | undefined;
+  findAgyConversation(o: { home: string; dir?: string; id?: string; dal?: string }): string | undefined;
+  watchAgyConversation(id: string, run: { dir?: string; sessione?: string }, save: (id: string) => void, o?: { every?: number; home?: string }): ReturnType<typeof setInterval>;
+  traceOrchestrator(opts?: unknown): { provider?: string; epoca: number; epoche: Record<string, any>[] };
+  liveConversations(opts?: unknown): Record<string, any>[];
+};
+
+describe('tracciare le conversazioni in corso (T86)', () => {
+  let P: Tracing;
+  let O: { openEpoch(s: Record<string, any>, at?: string): Record<string, any>; noteTurn(s: Record<string, any>, json: unknown, session?: string): Record<string, any> };
+  let W: { handleApi(method: string, url: string, body?: unknown, opts?: unknown): { status: number; data: any } };
+  let fsMod: typeof import('node:fs');
+  let osMod: typeof import('node:os');
+  beforeAll(async () => {
+    const at = (f: string) => pathToFileURL(path.resolve(__dirname, '../tools/pipeline', f)).href;
+    P = (await import(/* @vite-ignore */ at('pipeline.mjs'))) as Tracing;
+    O = (await import(/* @vite-ignore */ at('orchestra.mjs'))) as typeof O;
+    W = (await import(/* @vite-ignore */ at('web.mjs'))) as typeof W;
+    fsMod = await import('node:fs');
+    osMod = await import('node:os');
+  });
+
+  const config = {
+    providers: {
+      claude: { cmd: 'claude', args: [], resume: ['--resume', '{sessione}'], sessioneNuova: ['--session-id', '{sessione}'] },
+      gemini: { cmd: 'agy', args: [], resume: ['--conversation', '{sessione}'] },
+    },
+  };
+  const jsonl = (rows: unknown[]) => rows.map((r) => JSON.stringify(r)).join('\n') + '\n';
+  const write = (file: string, text: string) => { fsMod.mkdirSync(path.dirname(file), { recursive: true }); fsMod.writeFileSync(file, text); };
+  const brain = (home: string, conv: string) => path.join(home, '.gemini', 'antigravity-cli', 'brain', conv, '.system_generated', 'logs', 'transcript.jsonl');
+  /** A home with Claude sessions and Antigravity conversations, and a state with a run per provider. */
+  const world = () => {
+    const root = fsMod.mkdtempSync(path.join(osMod.tmpdir(), 'quine-traccia-'));
+    const home = path.join(root, 'home');
+    const stateDir = path.join(root, 'stato');
+    const wt = (id: string) => path.join(root, 'worktrees', id);
+    const ago = (min: number) => new Date(Date.now() - min * 60_000).toISOString();
+    // Claude: the task's session and the orchestrator's (a call repeated on two blocks counts once).
+    const claudeTurn = (id: string, text: string) => [
+      { type: 'user', message: { content: 'Regole inviolabili: leggi AGENTS.md' } },
+      { type: 'assistant', message: { id: `${id}-1`, usage: { input_tokens: 10, cache_read_input_tokens: 1000, cache_creation_input_tokens: 200, output_tokens: 50 }, content: [{ type: 'thinking', thinking: 'penso' }] } },
+      { type: 'assistant', message: { id: `${id}-1`, usage: { input_tokens: 10, cache_read_input_tokens: 1000, cache_creation_input_tokens: 200, output_tokens: 50 }, content: [{ type: 'tool_use', name: 'Bash', input: { command: 'npm test' } }] } },
+      { type: 'assistant', message: { id: `${id}-2`, usage: { input_tokens: 5, cache_read_input_tokens: 2000, output_tokens: 20 }, content: [{ type: 'text', text }] } },
+    ];
+    write(path.join(home, '.claude', 'projects', 'progetto', 'sess-t1.jsonl'), jsonl(claudeTurn('t1', 'fatto il primo pezzo')));
+    write(path.join(home, '.claude', 'projects', 'repo', 'sess-orch.jsonl'), jsonl(claudeTurn('o', 'T2 va integrato')));
+    // Antigravity: the task's conversation, one of a worktree with a longer name, one older than the run.
+    const agy = (conv: string, dir: string, created: string) => write(brain(home, conv), jsonl([
+      { type: 'USER_INPUT', source: 'USER_EXPLICIT', created_at: created, content: `Lavora nel worktree \`${dir}\` (branch \`task/T2\`). Leggi \`AGENTS.md\`` },
+      { type: 'PLANNER_RESPONSE', created_at: created, input_tokens: 3000, cache_read_tokens: 2500, output_tokens: 40, tool_calls: [{ name: 'view_file', args: { Path: `${dir}\\AGENTS.md` } }] },
+      { type: 'PLANNER_RESPONSE', created_at: created, input_tokens: 4000, cache_read_tokens: 3000, output_tokens: 60, content: 'scrivo i test' },
+    ]));
+    agy('conv-t2', wt('t2'), ago(9));
+    agy('conv-t20', wt('t20'), ago(8));
+    agy('conv-vecchia', wt('t2'), ago(3000));
+    const old = new Date(ago(3000));
+    fsMod.utimesSync(brain(home, 'conv-vecchia'), old, old);
+    write(path.join(stateDir, 'esecuzioni.json'), JSON.stringify({
+      T1: { id: 'T1', provider: 'claude', stato: 'in corso', tentativi: 1, sessione: 'sess-t1', inizio: ago(10), dir: wt('t1') },
+      T2: { id: 'T2', provider: 'gemini', stato: 'in corso', tentativi: 1, inizio: ago(10), dir: wt('t2') },
+      T3: { id: 'T3', provider: 'claude', stato: 'finito', tentativi: 1, sessione: 'sess-t3', dir: wt('t3') },
+    }));
+    return { home, stateDir, wt, ago, opts: { repo: path.join(root, 'repo'), stateDir, home, config } };
+  };
+  const until = async (ok: () => boolean) => { for (let i = 0; i < 100 && !ok(); i++) await new Promise((r) => setTimeout(r, 20)); };
+
+  it('traccia di un task Claude in corso: id, file, comando per riprenderlo, consumo e ultime azioni', () => {
+    const w = world();
+    const t = P.traceOf('T1', w.opts)!;
+    expect(t.sessione).toBe('sess-t1');
+    expect(t.file).toBe(path.join(w.home, '.claude', 'projects', 'progetto', 'sess-t1.jsonl'));
+    expect(t.riprendi).toBe(`cd "${w.wt('t1')}" && claude --resume sess-t1`);
+    expect(t.agents).toBe(true);
+    expect(t.consumo).toEqual({ chiamate: 2, input: 15, cache: 3000, scritti: 200, output: 70 });
+    expect(t.ultime).toEqual(['pensiero: penso', 'strumento: Bash npm test', 'agente: fatto il primo pezzo']);
+  });
+
+  it('traccia di un task agy in corso: l\'id trovato dai file di Antigravity, prima che agy lo dica', () => {
+    const w = world();
+    expect(P.findAgyConversation({ home: w.home, dir: w.wt('t2'), dal: w.ago(10) })).toBe('conv-t2');
+    expect(P.findAgyConversation({ home: w.home, dir: w.wt('t9'), dal: w.ago(10) })).toBeUndefined();
+    const t = P.traceOf('T2', w.opts)!;
+    expect(t.sessione).toBe('conv-t2');
+    expect(t.riprendi).toBe(`cd "${w.wt('t2')}" && agy --conversation conv-t2`);
+    expect(t.agents).toBe(true);
+    // agy counts the cache inside input_tokens.
+    expect(t.consumo).toEqual({ chiamate: 2, input: 1500, cache: 5500, scritti: 0, output: 100 });
+    expect(t.ultime.at(-1)).toBe('agente: scrivo i test');
+  });
+
+  it('all\'avvio di agy l\'id della conversazione si salva appena agy la scrive', async () => {
+    const w = world();
+    const run: { dir: string; sessione?: string } = { dir: w.wt('t2') };
+    const saved: string[] = [];
+    const first = P.watchAgyConversation('T2', run, (id) => saved.push(id), { every: 20, home: w.home });
+    await until(() => Boolean(run.sessione));
+    clearInterval(first);
+    // Started now: the conversations begun before it (a minute of margin) are not its own.
+    expect(run.sessione).toBeUndefined();
+    write(brain(w.home, 'conv-nuova'), jsonl([{ type: 'USER_INPUT', created_at: new Date().toISOString(), content: `Lavora nel worktree \`${w.wt('t2')}\`` }]));
+    const second = P.watchAgyConversation('T2', run, (id) => saved.push(id), { every: 20, home: w.home });
+    await until(() => Boolean(run.sessione));
+    clearInterval(second);
+    expect(run.sessione).toBe('conv-nuova');
+    expect(saved).toEqual(['T2']);
+  });
+
+  it('traccia orchestratore: le epoche con provider, turni, consumi, e la conversazione di quella in corso', () => {
+    const w = world();
+    const s: Record<string, any> = { provider: 'gemini', epoca: 1, motivo: 'avvio' };
+    O.openEpoch(s, '2026-10-31T08:00:00Z');
+    O.noteTurn(s, { usage: { input_tokens: 9000, cache_read_tokens: 8000, output_tokens: 100 } }, 'conv-orch-vecchia');
+    Object.assign(s, { provider: 'claude', epoca: 2, motivo: 'gemini sotto il 10 %', sessione: undefined });
+    O.openEpoch(s, '2026-10-31T09:00:00Z');
+    O.noteTurn(s, { usage: { input_tokens: 10, cache_read_input_tokens: 1000, cache_creation_input_tokens: 90, output_tokens: 50 }, total_cost_usd: 0.25 }, 'sess-orch');
+    O.noteTurn(s, { usage: { input_tokens: 5, cache_read_input_tokens: 1100, output_tokens: 20 }, total_cost_usd: 0.05 });
+    expect(s.epoche).toEqual([
+      { epoca: 1, provider: 'gemini', dal: '2026-10-31T08:00:00Z', motivo: 'avvio', turni: 1, token: 9100, sessione: 'conv-orch-vecchia' },
+      { epoca: 2, provider: 'claude', dal: '2026-10-31T09:00:00Z', motivo: 'gemini sotto il 10 %', turni: 2, token: 2275, sessione: 'sess-orch', costoUsd: 0.3 },
+    ]);
+    write(path.join(w.stateDir, 'orchestra', 'stato.json'), JSON.stringify({ ...s, sessione: 'sess-orch', contesto: 3000 }));
+    const o = P.traceOrchestrator(w.opts);
+    expect(o).toMatchObject({ provider: 'claude', epoca: 2 });
+    expect(o.epoche[0].inCorso).toBeUndefined();
+    const cur = o.epoche[1];
+    expect(cur).toMatchObject({ inCorso: true, sessione: 'sess-orch', contesto: 3000, costoUsd: 0.3 });
+    expect(cur.file).toBe(path.join(w.home, '.claude', 'projects', 'repo', 'sess-orch.jsonl'));
+    expect(cur.riprendi).toBe(`cd "${w.opts.repo}" && claude --resume sess-orch`);
+    expect(cur.consumo.chiamate).toBe(2);
+    expect(cur.ultime.at(-1)).toBe('agente: T2 va integrato');
+  });
+
+  it('nell\'interfaccia web le conversazioni in corso, con il consumo di ciascuna', () => {
+    const w = world();
+    write(path.join(w.stateDir, 'orchestra', 'stato.json'), JSON.stringify({ provider: 'claude', epoca: 1, sessione: 'sess-orch', epoche: [{ epoca: 1, provider: 'claude', turni: 1, token: 10 }] }));
+    const r = W.handleApi('GET', '/api/conversazioni', {}, w.opts);
+    expect(r.status).toBe(200);
+    const byWho = new Map(r.data.map((c: any) => [c.chi, c]));
+    expect([...byWho.keys()].sort()).toEqual(['T1', 'T2', 'orchestratore']); // T3 è finito
+    expect(byWho.get('T1')).toMatchObject({ provider: 'claude', sessione: 'sess-t1', consumo: { chiamate: 2 } });
+    expect(byWho.get('T2')).toMatchObject({ provider: 'gemini', sessione: 'conv-t2', consumo: { output: 100 } });
+    expect(byWho.get('orchestratore')).toMatchObject({ epoca: 1, sessione: 'sess-orch', riprendi: expect.stringContaining('claude --resume sess-orch') });
+    expect(P.liveConversations(w.opts)).toHaveLength(3);
+  });
+});

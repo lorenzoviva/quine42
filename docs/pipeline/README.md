@@ -91,7 +91,8 @@ node tools/pipeline/pipeline.mjs stato                  # rigenera PIANO.md e st
 node tools/pipeline/pipeline.mjs budget claude 40       # il residuo attuale (%) del limite settimanale
 node tools/pipeline/pipeline.mjs esegui [--sempre] [--max 5] [--solo claude|gemini|argon] [--task T43b]
 node tools/pipeline/pipeline.mjs worktree               # i worktree, cosa resta in ciascuno
-node tools/pipeline/pipeline.mjs traccia T43b           # la conversazione dell'agente, se ha letto AGENTS.md, il suo riepilogo
+node tools/pipeline/pipeline.mjs traccia T43b           # la conversazione dell'agente (id, file, come riprenderla), consumo, ultime azioni, riepilogo
+node tools/pipeline/pipeline.mjs traccia orchestratore  # le epoche dell'orchestratore (provider, turni, token, costo) e la conversazione in corso
 node tools/pipeline/pipeline.mjs integra T43b           # merge --no-ff di task/T43b nel base, poi toglie worktree e branch
 node tools/pipeline/pipeline.mjs riprendi T51           # rimette in coda un task fermato o interrotto: riprende la sua conversazione
 node tools/pipeline/pipeline.mjs interrompi T51         # ferma un task in corso (o --tutti), tenendo la conversazione
@@ -181,6 +182,14 @@ Ogni esecuzione lascia la conversazione intera dove la tiene la sua CLI, anche d
 worktree), Antigravity in `~/.gemini/antigravity-cli/conversations/<id>.db` (SQLite; `agy --conversation <id>`). L'id è in
 `.pipeline/esecuzioni.json`, l'uscita finale in `.pipeline/log/<Txx>.<tentativo>.log`. `traccia <Txx>` li trova, dice se l'agente ha
 avuto `AGENTS.md` (Claude lo riceve da `CLAUDE.md`, che lo importa; Antigravity lo apre) e stampa il suo riepilogo finale.
+Anche **mentre il task lavora** (T86): l'id e il comando per riprendere la conversazione (per seguirla o suggerire), il consumo finora
+letto dalla trascrizione (chiamate, token nuovi, dalla cache, scritti in cache, in uscita; agy conta la cache dentro i token in ingresso)
+e le ultime azioni. Claude ha l'id dall'avvio (`--session-id`); agy non lo accetta e lo dice solo alla fine, così la pipeline lo legge
+dai file di Antigravity appena li scrive (`findAgyConversation`: la conversazione più recente, nata dopo l'avvio, la cui prima richiesta
+nomina il worktree del task) e lo salva in `.pipeline/esecuzioni.json`. `traccia orchestratore` fa lo stesso per l'orchestratore: ogni
+epoca in `.pipeline/orchestra/stato.json → epoche` con provider, motivo, conversazione, turni, token e costo (Claude), e per quella in
+corso il file, il comando e le ultime azioni. Nell'interfaccia web la scheda «Conversazioni in corso» (`GET /api/conversazioni`) le
+mostra tutte, con il consumo di ciascuna.
 **L'orchestratore** riporta all'autore, per ogni task finito, l'esito e il riepilogo di `traccia`.
 
 ## Regole per chi esegue un task (ambiente condiviso)
