@@ -314,3 +314,5 @@
 - [2026-10-30T14:01:34.395Z] orchestratore: epoca 84 su gemini (contesto a 78 % della finestra)
 - [2026-10-30T14:03:50.826Z] orchestratore: epoca 85 su gemini (contesto a 66 % della finestra)
 - [2026-10-30T14:06:49.831Z] nota: Epoca 85 avviata su Gemini. T45d in corso nel worktree t45d su Gemini. T70 sospeso per reset Claude (16:59 UTC). Quadro aggiornato.
+- [2026-10-30T14:07:46.561Z] orchestratore: epoca 86 su gemini (contesto a 261 % della finestra)
+- [2026-10-30T14:09:27.222Z] nota: Epoca 86 avviata su Gemini. T45d in corso nel worktree t45d su Gemini. T70 sospeso per reset Claude (16:59 UTC). Quadro aggiornato.
