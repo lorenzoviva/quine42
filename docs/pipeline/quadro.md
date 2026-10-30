@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026, chiusura epoca 20 dell'orchestratore (gemini: contesto a 82%).
+Aggiornato il 30/10/2026, avvio epoca 21 dell'orchestratore (gemini).
 
 ## Le priorità dell'autore
 
@@ -14,11 +14,11 @@ Aggiornato il 30/10/2026, chiusura epoca 20 dell'orchestratore (gemini: contesto
 ## Stato e decisioni
 
 - **Decisioni prese e fatti recenti**:
-  - **T45a completato e integrato** (commit `c434033`): eseguito con successo su Gemini (sessione `af57b0ff`), verificati i test headless (`tests/credits.test.ts`), registrato ADR-0081 e integrato senza conflitti in `3d`.
-  - **T68b in corso su Gemini** (worktree `t68b`, sessione attiva `270cce41`), implementa `tools/abbonamenti/` e `tests/abbonamenti.test.ts`, sfruttando la capienza di Gemini (75% settimanale, 59% 5h).
+  - **T45a completato e integrato** (commit `c434033`): crediti per viandante, commissione +1% (P#1), divisione spese comuni tra collegati, ADR-0081.
+  - **T68b ripreso su Gemini** (worktree `t68b`, sessione `270cce41`): il primo turno si era concluso senza riga di esito durante l'attesa dei test; ripreso con `riprendi T68b` per consentire all'agente di completare l'esito e il commit.
 - **Cosa si aspetta**:
-  1. Il completamento di **T68b** in corso su Gemini.
-  2. Il reset della sessione di 5 ore di Claude alle **06:59 UTC** (**~08:00** locali, ~24 minuti rimanenti; Claude ha il 69% settimanale disponibile).
+  1. Il completamento di **T68b** in ripresa su Gemini.
+  2. Il reset della sessione di 5 ore di Claude alle **06:59 UTC** (**~08:00** locali, ~1h20m rimanenti; Claude ha il 69% settimanale disponibile).
 - **Intenzioni al reset di Claude / prossimi passi**:
   1. Completare **T70** (integrazione T53b con salto T56b, priorità 0 su Claude), poi `integra T70` e `integra T53b`.
   2. Procedere con **T44c** (priorità 3) e **T44b** (priorità 4, che con T45a completato sblocca a cascata T45d/e/f).
@@ -27,7 +27,7 @@ Aggiornato il 30/10/2026, chiusura epoca 20 dell'orchestratore (gemini: contesto
 ## Task attivi e in corso
 
 - **In corso su Gemini:**
-  - **T68b** (priorità 20, processo che serve la coda con le CLI): attivo nel worktree `t68b`.
+  - **T68b** (priorità 20, processo che serve la coda con le CLI): ripreso nel worktree `t68b` (sessione `270cce41`).
 - **Sospesi su Claude fino alle 06:59 UTC (`~08:00` locali):**
   - **T70** (priorità 0, risoluzione conflitti T53b / T56b con test salto + torre).
   - **T44c** (priorità 3, correzioni da verifica browser T44a/T43c).
