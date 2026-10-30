@@ -251,3 +251,10 @@
 - [2026-10-30T09:52:29.696Z] integra T45e: conflitti in docs/plans/backlog.md; il base è com'era
 - [2026-10-30T09:54:32.917Z] lancio T77 su gemini (H:\projects\rune\.claude\worktrees\t77)
 - [2026-10-30T09:54:37.393Z] nota: T45e completato (webhook Stripe idempotente, blocco anonimi, ADR-0083, test verdi); integra T45e bloccato su conflitto in backlog.md: creato T77 su Gemini (p0) per integrare task/T45e nel base 3d; attesa chiavi di test per verifica browser.
+- [2026-10-30T09:55:58.986Z] orchestratore: epoca 60 su gemini (contesto a 262 % della finestra)
+- [2026-10-30T09:58:04.810Z] orchestratore: epoca 61 su gemini (contesto a 59 % della finestra)
+- [2026-10-30T10:00:22.553Z] orchestratore: epoca 62 su gemini (contesto a 84 % della finestra)
+- [2026-10-30T10:01:36.638Z] T77: ESITO: fatto — integrato task/T45e nel base 3d risolvendo il conflitto nel backlog e preservando sia l'autenticazione account/profili (T76/T75/T44b/T44c) sia Stripe Checkout, webhook idempotente ed esclusione anonimi (ADR-0083); test account, credits, session, stripe e typecheck verdi · BROWSER: da verificare — nessun tool browser interattivo disponibile nella sessione; verifica manuale della ricarica di prova in attesa delle chiavi STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET dell'autore come segnalato in docs/pipeline/domande/T45e.md (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T77)
+- [2026-10-30T10:01:47.108Z] task/T77 integrato in 3d; worktree e branch tolti.
+- [2026-10-30T10:01:50.750Z] task/T45e integrato in 3d; worktree e branch tolti.
+- [2026-10-30T10:04:53.141Z] nota: T77 completato con successo su Gemini e integrato in 3d; T45e integrato nel base. Typecheck e test (21/21: session, account, stripe, credits) verdi.
