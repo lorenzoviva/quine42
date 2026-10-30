@@ -29,6 +29,7 @@ import { Input } from './input';
 import { discoverModules, readConfig } from './universe';
 import { askedRunes, carpetLine, CARPET_TOKENS, cellIndex, COUNCIL_RUNE, extractLines, tokenize, type RuneComp, type RuneLine } from './runes';
 import { hash32, hashStr, hex, Rng } from './rng';
+import { onBeat, repairCoefficients, stretch, type Coefficients } from './coefficients';
 import { BudgetError, type Models } from './ai/models';
 import { costOf } from './ai/prices';
 import { USAGE_FILE, UsageLedger, type CallRecord } from './ai/usage';
@@ -54,7 +55,7 @@ import { addItem, CARRY_CAPACITY, countItem, HOTBAR, equippedItem, moveSlot, new
 import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH, worldLevels } from './relief';
 import { CardLedger, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, receivedBy, type Received, payerOf, placeCardId, stampFiles, titolareOf, type Card, type Carta } from './cards';
 import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState } from './wanderers';
-import type { ActionDef, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Partita, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
+import type { ActionDef, AiConfig, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Partita, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
 
 /** A solid thing with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
 interface SolidForm {
@@ -1144,6 +1145,7 @@ export class Kernel {
     const radiusChanged = !this.config || this.config.circleRadius !== config.circleRadius;
     const sizeChanged = !this.config || this.config.chunkSize !== config.chunkSize || this.config.seed !== config.seed;
     this.config = config;
+    if (this.models?.textModel !== undefined && config.ai.textModel) this.models.textModel = config.ai.textModel;
     this.forms.load(files);
     if (radiusChanged) this.corona = new Corona(config.circleRadius);
 
@@ -1855,6 +1857,7 @@ export class Kernel {
 
     for (const r of place.runes) if (!this.consumed.has(r.origin)) this.ecs.spawn({ rune: { token: r.token, col: r.col, row: r.row, source: 'gen', origin: r.origin } satisfies RuneComp, chunk: { key: ch.key } });
 
+    const coef = this.coefficients();
     const loadedOf = (id: string) => this.ecs.query('module').filter((e) => this.ecs.get(e, 'module').id === id).length;
     for (const { index, cell } of place.objects) {
       const m = this.modules.get(plan.objects[index].module);
@@ -1862,6 +1865,8 @@ export class Kernel {
       if (!m || cell === undefined || this.consumed.has(origin) || this.uniqueTaken(m)) continue;
       // Variety: not the same kind of person in every place.
       if (m.manifest.persona && loadedOf(m.manifest.id) >= Kernel.NPC_CAP) continue;
+      // Fewer people per place (T45b): fewer individuals, words and dialogues.
+      if (m.manifest.persona && !this.kept(origin, coef.persone)) continue;
       const p = at(cell);
       const sid = inLot(cell);
       if (sid !== undefined) void this.placeInside(ch, sid, p, (x, y) => this.spawnModuleEntity(m, x, y, ch.key, origin), this.isSolidModule(m));
@@ -1879,7 +1884,7 @@ export class Kernel {
       if (sid !== undefined) void this.placeInside(ch, sid, at(l.cell), (x, y) => this.spawnItem(l.item, x, y, l.count, ch.key, origin));
       else this.spawnItem(l.item, at(l.cell).x, at(l.cell).y, l.count, ch.key, origin);
     }
-    const unknown = place.ground.filter((g) => !g.item).map((g) => plan.ground[g.index]);
+    const unknown = place.ground.filter((g) => !g.item && this.kept(`${ch.key}#g${g.index}`, coef.cose)).map((g) => plan.ground[g.index]);
     if (unknown.length) void this.introduceItems(unknown, `trovati a terra in «${plan.place.name}»`).then((defs) => {
       if (!this.alive(ch)) return;
       defs.forEach((d, i) => {
@@ -1887,12 +1892,23 @@ export class Kernel {
         if (cell !== undefined) this.spawnItem(d.id, at(cell).x, at(cell).y, 1, ch.key, `${ch.key}#n${i}`);
       });
     });
-    for (const f of plan.fresh ?? []) void this.forgeForChunk(ch, f, place.pick, at);
+    for (const f of plan.fresh ?? []) if (this.kept(`${ch.key}:${f.concept}`, coef.cose)) void this.forgeForChunk(ch, f, place.pick, at);
     this.runesDirty = true;
     this.bus.emit('chunk:planned', { key: ch.key });
-    if (this.plannedCount % 10 === 0) void this.growContent('esplorazione');
-    if (this.plannedCount % 7 === 0) void this.growCast(plan.place);
-    if (this.plannedCount === 3 || this.plannedCount % 12 === 0) void this.holdSession();
+    // The rhythms of the world (T45b): stretched by the coefficients of generation.
+    if (onBeat(this.plannedCount, 10, coef.pacchetti)) void this.growContent('esplorazione');
+    if (onBeat(this.plannedCount, 7, coef.abitanti)) void this.growCast(plan.place);
+    if ((this.plannedCount === 3 && coef.sessioni > 0) || onBeat(this.plannedCount, 12, coef.sessioni)) void this.holdSession();
+  }
+
+  /** How often every agent asks the model (T45b): universe.json → ai.coefficienti, repaired. */
+  coefficients(): Coefficients {
+    return repairCoefficients(this.config.ai.coefficienti);
+  }
+
+  /** Whether a thing of a place stays with a coefficient: a draw of the universe for that origin, the same at every load. */
+  private kept(origin: string, c: number): boolean {
+    return c >= 1 || (c > 0 && hash32(this.config.seed, hashStr(origin), 4545) / 4294967296 < c);
   }
 
   /** Whether a place may still have an important structure: its zone has none, or this place is the one that has it. */
@@ -4652,6 +4668,23 @@ export class Kernel {
     this.council?.say('kernel', 'scarta', "la partita (morte, modalità, PvP, «Altro…» tra giocatori) si sceglie solo alla Genesi: universe.json la tiene com'era");
   }
 
+  /**
+   * The detail of generation and the agents' models (T45b): the Genesis screen (and then the lobby) writes them in
+   * universe.json → ai; unlike the game they may change, and they hold from the next call.
+   */
+  setAi(patch: Partial<Pick<AiConfig, 'textModel' | 'scultori' | 'coefficienti'>>): void {
+    let raw: Record<string, any>;
+    try {
+      raw = JSON.parse(this.repo.working['universe.json'] ?? '{}');
+    } catch {
+      raw = {};
+    }
+    const ai = { ...(raw.ai ?? {}), ...patch, ...(patch.coefficienti !== undefined ? { coefficienti: repairCoefficients(patch.coefficienti) } : {}) };
+    this.repo.write('universe.json', JSON.stringify({ ...raw, ai }, null, 2) + '\n');
+    this.config = { ...this.config, ai: { ...this.config.ai, ...ai } };
+    if (this.models.textModel !== undefined && this.config.ai.textModel) this.models.textModel = this.config.ai.textModel;
+  }
+
   /** Chooses the game of a universe that was never generated (the Genesis screen); after, it is fixed. */
   private chooseGame(choice: Partial<Partita>): void {
     const game = repairPartita({ ...this.partita(), ...choice });
@@ -5712,7 +5745,7 @@ export class Kernel {
         if ((this.greeted.get(key) ?? -1e9) > this.time - (rel ? 90 : 240)) continue;
         const near = Math.hypot(pa.x - pc.x, pa.y - pc.y) < 10;
         // A real conversation (the Narrator) when the wanderer can hear it, at most one at a time.
-        if (near && !this.talking && this.time - this.lastTalk > 40 && !this.generationHeld) {
+        if (near && !this.talking && this.time - this.lastTalk > stretch(40, this.coefficients().dialoghi) && !this.generationHeld) {
           this.greeted.set(key, this.time);
           void this.converse(a, b, ia, ib, rel?.legame);
           return;
@@ -5801,8 +5834,9 @@ export class Kernel {
       this.repo.write(PLOTS_FILE, writePlots(plots));
       this.files = { ...this.files, [PLOTS_FILE]: this.repo.working[PLOTS_FILE]! };
     }
-    // A new day without a story: the Narrator weaves one among the people already met.
-    if (!first && !plots.some((p) => p.stato === 'attiva')) void this.weaveStory();
+    // A new day without a story: the Narrator weaves one among the people already met (every few days with fewer plots).
+    const every = stretch(1, this.coefficients().trame);
+    if (!first && !plots.some((p) => p.stato === 'attiva') && Number.isFinite(every) && day % every === 0) void this.weaveStory();
   }
 
   /** The Narrator weaves a horizontal plot among existing people and places (westworld-like). */

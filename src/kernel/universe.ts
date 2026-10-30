@@ -2,7 +2,7 @@
 // Modules talk only through components and events; no implicit dependencies.
 
 import type { FileMap, ModuleEntry, UniverseConfig } from './types';
-import { repairPartita, type Validator } from './validator';
+import { repairCoefficients, repairPartita, type Validator } from './validator';
 import { DEFAULT_PARTITA } from './partita';
 
 export const DEFAULT_CONFIG: UniverseConfig = {
@@ -20,7 +20,7 @@ export function readConfig(files: FileMap): { config: UniverseConfig; error?: st
   if (!src) return { config: DEFAULT_CONFIG, error: 'universe.json mancante' };
   try {
     const parsed = JSON.parse(src);
-    return { config: { ...DEFAULT_CONFIG, ...parsed, ai: { ...DEFAULT_CONFIG.ai, ...(parsed.ai ?? {}) }, partita: repairPartita(parsed.partita) } };
+    return { config: { ...DEFAULT_CONFIG, ...parsed, ai: { ...DEFAULT_CONFIG.ai, ...(parsed.ai ?? {}), coefficienti: repairCoefficients(parsed.ai?.coefficienti) }, partita: repairPartita(parsed.partita) } };
   } catch (e) {
     return { config: DEFAULT_CONFIG, error: `universe.json: ${(e as Error).message}` };
   }

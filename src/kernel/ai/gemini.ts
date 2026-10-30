@@ -42,6 +42,13 @@ export class GeminiModels implements Models {
   private endpoint: string;
   private fetchImpl: typeof fetch;
 
+  get textModel(): string {
+    return this.opts.textModel;
+  }
+  set textModel(m: string) {
+    this.opts.textModel = m;
+  }
+
   constructor(private opts: GeminiOptions) {
     this.limits = opts.limits;
     this.endpoint = opts.endpoint ?? '/api/gemini';

@@ -239,7 +239,11 @@ async function write(c: Council, req: SculptRequest, cls: AssetClass, model: str
  * Sculpts a model: the program (with its box written in), who wrote it, the Artist's vote. Undefined
  * if no program passed the checks (the thing keeps the generic model of its class).
  */
-export async function sculpt(c: Council, req: SculptRequest, m: SculptorModels = DEFAULT_SCULPTORS): Promise<SculptResult | undefined> {
+/**
+ * `plan` (T45b, `sculptPlan` of the coefficient of revisions): how many programs for the simple things, whether a
+ * figure is revised, whether the Artist judges at all (without, the first program that passes is the model).
+ */
+export async function sculpt(c: Council, req: SculptRequest, m: SculptorModels = DEFAULT_SCULPTORS, plan = { semplici: 2, revisione: true, giudizio: true }): Promise<SculptResult | undefined> {
   const cls = classOf(req.classe) ?? classOf('oggetto')!;
   const model = modelFor(req, cls, m);
   const cat = categoryOf(cls);
@@ -247,12 +251,12 @@ export async function sculpt(c: Council, req: SculptRequest, m: SculptorModels =
   let calls = 0;
   const candidates: Array<{ checked: Checked; critique?: Critique }> = [];
   // Simple things: two independent programs. Figures and structures: one, and a revision if needed.
-  for (let n = 0; n < (cat === 'semplice' && !req.previous ? 2 : 1); n++) {
+  for (let n = 0; n < (cat === 'semplice' && !req.previous ? plan.semplici : 1); n++) {
     const w = await write(c, req, cls, model);
     calls += w.calls;
-    if (w.checked) candidates.push({ checked: w.checked, critique: await judge(c, req, cls, w.checked, m.artista) });
+    if (w.checked) candidates.push({ checked: w.checked, critique: plan.giudizio ? await judge(c, req, cls, w.checked, m.artista) : undefined });
   }
-  if (cat !== 'semplice' && candidates[0]?.critique && candidates[0].critique.voto < 7) {
+  if (plan.revisione && cat !== 'semplice' && candidates[0]?.critique && candidates[0].critique.voto < 7) {
     const w = await write(c, req, cls, model, { checked: candidates[0].checked, critique: candidates[0].critique }, 1);
     calls += w.calls;
     if (w.checked) candidates.push({ checked: w.checked, critique: await judge(c, req, cls, w.checked, m.artista) });

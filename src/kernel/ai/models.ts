@@ -60,6 +60,8 @@ export interface Models {
   readonly name: string;
   readonly usage: Usage;
   limits: Limits;
+  /** The configured text model, where there is one (T45b: chosen at the Genesis, it changes without a reload). */
+  textModel?: string;
   /** Every call, with its tokens (the kernel's usage ledger listens). */
   onCall?: (r: CallRecord) => void;
   text(call: TextCall): Promise<string>;

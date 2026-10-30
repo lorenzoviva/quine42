@@ -1418,7 +1418,7 @@ le risposte alle domande del piano.
 - Fatto quando: test headless (due giocatori e il master collegati, una spesa comune divisa in tre; crediti finiti → modelli locali), commit.
 - Esito: modulo `src/kernel/credits.ts` (`costWithFee` con +1% P#1, `splitCost` a quote esatte); saldo crediti in `world/giocatori/<id>.json` gestito solo dal server (`kernel.creditsOf`, `giveCredits`, `deductCredits`); addebito automatico su `models.onCall` con ripartizione delle spese `comune` tra i viandanti connessi (esclusi anonimi); ricarica crediti dal master via console (`src/ui/console.ts`) e via Referente (`askReferente` con incarico `crediti`); a crediti esauriti (`crediti <= 0`) `Council.write` devia sui modelli locali (`MockModels`) e avvisa nel feed; il viandante anonimo (`anonimo: true`) ha 0 crediti non ricaricabili e usa sempre modelli locali; ADR-0081 registrato; test headless in `tests/credits.test.ts` (6/6 passati). Nessuna verifica nel browser richiesta dal criterio (logica headless multiplayer e server).
 
-### T45b · I coefficienti di generazione e la partita «Low Detail» — `da fare`
+### T45b · I coefficienti di generazione e la partita «Low Detail» — `fatto`
 - Pipeline: claude · stima 6% · approvato · priorità 6
 - Contesto: l'autore vuole poter giocare a risparmio. I coefficienti regolano **quanto spesso ogni agente chiama l'IA**: direttamente
   dove c'è un ritmo (sessioni del Concilio ogni N luoghi, dialoghi tra persone, revisioni dello Scultore, trame), indirettamente dove
@@ -1428,6 +1428,14 @@ le risposte alle domande del piano.
   Genesi (e poi nella lobby) i coefficienti e la scelta dei modelli degli agenti (`ai.textModel`, la tabella delle classi dello
   Scultore); la stima del costo per ora di gioco.
 - Fatto quando: test (con «Low Detail» un giro di gioco offline fa meno chiamate in `MockModels`, nella misura attesa), commit.
+- Fatto (ADR-0085): `src/kernel/coefficients.ts` con nove coefficienti (diretti `sessioni dialoghi trame revisioni modelli`, indiretti
+  `persone abitanti pacchetti cose`), riparati dal validatore (`repairCoefficients`, anche il nome di un preset), il censimento `CENSUS`
+  delle 38 chiamate di `docs/conversazioni.md`, il preset `LOW_DETAIL` (che porta anche lo Scultore su Flash-Lite) e `hourlyEstimate`;
+  nella Genesi la sezione «Il dettaglio e i modelli» (preset, cursori, modello del Concilio, modelli dello Scultore per classe, stima
+  di un'ora e ciò che non si regola), scritta da `kernel.setAi`; il modello del testo cambia senza ricaricare (`Models.textModel`).
+  Test: `tests/coefficients.test.ts` (riparazione, ritmi, Scultore, stima, un giro di 12 passi del tappeto: stessi luoghi, sessioni e
+  pacchetti esattamente quanti dicono i coefficienti, meno della metà di ciò che il mondo aggiunge da sé). Rispetto al previsto: le
+  persone, le cose nuove e gli oggetti ignoti scartati sono un'estrazione del seme per origine (uguale a ogni caricamento).
 
 ### T45c · L'eredità dei cloni — `fatto` (dipende da T42d, T36)
 - Pipeline: claude · stima 5% · approvato · priorità 7
@@ -1747,9 +1755,10 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fatto quando: typecheck e test indicati verdi (o fallimenti dimostrati preesistenti), commit su `task/T78`. Poi l'orchestratore fa `integra T78` e `integra T45c`.
 - Esito: eseguito merge di `task/T45c` in `task/T78`; rinominato l'ADR in `docs/adr/0084-l-eredita-dei-cloni.md` (e titolo aggiornato) e corretti tutti i riferimenti a ADR-0081 riguardanti l'eredità in ADR-0084 (AGENTS.md, `docs/adr/README.md`, backlog, commenti in `src/kernel/heritage.ts`, `cards.ts`, `clone.ts`, `kernel.ts`, `types.ts`), preservando ADR-0081 per i crediti e le spese comuni; risolto il conflitto in `docs/adr/README.md` includendo entrambi gli ADR (0081, 0082, 0083 e 0084); verificati con successo `npm run typecheck` e `tests/heritage.test.ts`, `tests/clone.test.ts`, `tests/cards.test.ts`, `tests/credits.test.ts` (23/23 verdi); eseguito `tests/thin.test.ts` (7/7 verde); i test `referente.test.ts`, `wanderers.test.ts`, `watch.test.ts` presentano timeout dovuti al carico macchina e `between.test.ts` ha una mancata cattura in `calls` dovuta al bypass dei mock introdotto da `hasCredits` (T45a), preesistente e identico su `3d` (file sorgenti e di test identici a `3d`).
 
-### T79 · Integrare T45b (coefficienti di generazione e partita Low Detail) nel base 3d — `da fare`
+### T79 · Integrare T45b (coefficienti di generazione e partita Low Detail) nel base 3d — `fatto`
 - Pipeline: gemini · stima 2% · approvato · priorità 0
 - Contesto: T45b (`task/T45b`, `bc77bd9`) ha completato i coefficienti di generazione e la partita Low Detail ma ha scritto il suo ADR come `docs/adr/0081-i-coefficienti-di-generazione.md`. Nel base, 0081 è «Crediti e spese comuni», 0082 l'account, 0083 Stripe, 0084 l'eredità dei cloni (ADR-0084, T78). Claude è fermo per limite 5 ore fino alle 17:00 UTC. Leggi `node tools/pipeline/pipeline.mjs dossier T45b`.
 - Fare: nel tuo worktree esegui `git merge task/T45b`; rinomina l'ADR in `docs/adr/0085-i-coefficienti-di-generazione.md` (e aggiorna il titolo interno e i riferimenti ad ADR-0081 che parlano dei coefficienti in ADR-0085 in `AGENTS.md`, `docs/adr/README.md`, backlog, commenti in `src/kernel/coefficients.ts`, `src/ui/genesis.ts`, test). Risolvi i conflitti in `docs/plans/backlog.md`, `AGENTS.md`, `docs/adr/README.md` e in `src/kernel/kernel.ts` / `src/kernel/types.ts` tenendo entrambe le aggiunte (sia l'eredità dei cloni ADR-0084 e Stripe ADR-0083 sia i coefficienti ADR-0085).
   IMPORTANTE: esegui solo `npx vitest run tests/coefficients.test.ts tests/heritage.test.ts tests/stripe.test.ts tests/credits.test.ts` e `npm run typecheck` (con timeout adeguato, NON lanciare l'intera suite).
 - Fatto quando: i test specificati e `npm run typecheck` sono verdi, commit su branch `task/T79`. Poi l'orchestratore farà `integra T79` e `integra T45b`.
+- Esito: eseguito merge di task/T45b in task/T79; rinominato l'ADR in docs/adr/0085-i-coefficienti-di-generazione.md (aggiornato titolo interno a ADR-0085); aggiornati tutti i riferimenti ad ADR-0081 relativi ai coefficienti di generazione in ADR-0085 in AGENTS.md, docs/adr/README.md, backlog.md (esito T45b), src/kernel/coefficients.ts, src/kernel/types.ts, src/ui/genesis.ts e tests/coefficients.test.ts, lasciando intatti i riferimenti ad ADR-0081 per i crediti e le spese comuni; preservate tutte le integrazioni preesistenti (eredità cloni ADR-0084, Stripe ADR-0083, crediti ADR-0081); verificati con esito verde npm run typecheck e vitest su tests/coefficients.test.ts, tests/heritage.test.ts, tests/stripe.test.ts, tests/credits.test.ts (26/26 passati).

@@ -361,6 +361,8 @@ export interface AiConfig {
   provider?: import('./ai/subscription').Provider;
   /** Agent id → provider, the exceptions to `provider`. Only in single play and development, never on the server of many. */
   agenti?: Record<string, import('./ai/subscription').Provider>;
+  /** How often every agent asks the model, 0-1 (T45b, ADR-0085): an object or a preset's name (`low detail`); repaired by the validator. */
+  coefficienti?: Partial<import('./coefficients').Coefficients> | string;
 }
 
 export interface UniverseConfig {

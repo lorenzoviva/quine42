@@ -7,6 +7,7 @@ import type { Kernel } from './kernel';
 import { sculpt, type SculptRequest } from './agents/sculptor';
 import { guessClass } from '../mj/classes';
 import { BudgetError } from './ai/models';
+import { modelGap, sculptPlan } from './coefficients';
 
 /** Common shapes of items: one program each, tinted with each item's colour. */
 export const FORME = ['sacco', 'bottiglia', 'vaso', 'cesto', 'frutto', 'pane', 'formaggio', 'attrezzo', 'lama', 'arco', 'gemma', 'cristallo', 'libro', 'pergamena', 'abito', 'cappello', 'scarpe', 'anello', 'moneta', 'erba', 'fiore', 'fungo', 'pietra', 'legna', 'carne', 'pesce', 'chiave', 'candela', 'lanterna', 'corda'] as const;
@@ -24,6 +25,8 @@ export class ModelDirector {
   private used = 0;
   private skip = new Set<string>();
   private stopped = false;
+  /** World time before which no model starts (T45b: the pause of the coefficient of models). */
+  private nextAt = 0;
 
   constructor(private k: Kernel) {}
 
@@ -70,7 +73,7 @@ export class ModelDirector {
 
   /** Called every few seconds: starts the next model if idle. */
   pump(): void {
-    if (!this.active || this.busy || this.k.generationHeld || this.used >= (this.k.config.ai.maxModels ?? 40)) return;
+    if (!this.active || this.busy || this.k.generationHeld || this.used >= (this.k.config.ai.maxModels ?? 40) || this.k.time < this.nextAt || this.k.coefficients().modelli <= 0) return;
     const req = this.missing()[0];
     if (req) void this.make(req);
   }
@@ -80,7 +83,9 @@ export class ModelDirector {
     this.busy = true;
     this.used++;
     try {
-      const r = await sculpt(this.k.council, req, this.k.sculptors());
+      const coef = this.k.coefficients();
+      const r = await sculpt(this.k.council, req, this.k.sculptors(), sculptPlan(coef.revisioni));
+      this.nextAt = this.k.time + modelGap(coef.modelli);
       if (!r) {
         this.skip.add(req.id);
         return false;
