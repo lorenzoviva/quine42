@@ -895,6 +895,10 @@ export class Kernel {
     const crediti = isAnon ? 0 : (saved?.crediti ?? 0);
     // Their carpet starts where the carpet of the one acting is: they appear beside them.
     this.wanderersById.set(id, { id, nome: String(nome ?? saved?.nome ?? '').trim().slice(0, 40) || WANDERER_NAME, entity, tappeto: { ...this.offset() }, crediti, anonimo: isAnon });
+    if (saved?.anonimo && anonimo === false) {
+      delete saved.anonimo;
+      this.setAnonymous(id, false);
+    }
     // The profile they had (T44a), checked again: the world may have someone of that name by now.
     if (saved?.profilo) this.setProfile(id, nome ? { ...saved.profilo, nome } : saved.profilo);
     else this.dressWanderer(id);
@@ -4452,10 +4456,12 @@ export class Kernel {
       if (anonimo) entry.crediti = 0;
     }
     const file = playerFile(id);
-    const saved = readWandererState(this.files, id) ?? { nome: entry?.nome ?? id };
-    saved.anonimo = anonimo ? true : undefined;
-    if (anonimo) saved.crediti = 0;
-    const text = JSON.stringify(saved, null, 1) + '\n';
+    const saved = readWandererState(this.files, id);
+    if (!saved && !anonimo) return;
+    const updated = saved ?? { nome: entry?.nome ?? id };
+    updated.anonimo = anonimo ? true : undefined;
+    if (anonimo) updated.crediti = 0;
+    const text = JSON.stringify(updated, null, 1) + '\n';
     this.files[file] = text;
     this.repo.write(file, text);
   }
@@ -6597,15 +6603,12 @@ export class Kernel {
     if (v.hand?.tokens) Object.assign(this.hand(), v.hand);
     if (v.stati) this.ecs.set(this.playerId, 'stati', Object.fromEntries(Object.entries(v.stati).filter(([, x]) => x && typeof x === 'object')));
     if (v.slots && typeof v.slots === 'object') this.ecs.set(this.playerId, 'slots', v.slots);
-    if (typeof v.crediti === 'number') {
-      const entry = this.wanderersById.get(this.wanderer().id);
-      if (entry && !entry.anonimo) entry.crediti = v.crediti;
-    }
-    if (v.anonimo) {
-      const entry = this.wanderersById.get(this.wanderer().id);
-      if (entry) {
-        entry.anonimo = true;
+    const entry = this.wanderersById.get(this.wanderer().id);
+    if (entry) {
+      if (entry.anonimo) {
         entry.crediti = 0;
+      } else if (typeof v.crediti === 'number') {
+        entry.crediti = v.crediti;
       }
     }
     // What the mechanics derive from the slots (defence, states) is rebuilt by their own on_slot.
