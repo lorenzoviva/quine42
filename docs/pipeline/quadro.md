@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 13:05 UTC, avvio epoca 71 su gemini: **claude sotto il 10 %** (sessione 5h al 9 %, settimana 55 %), l'orchestratore passa a gemini (gemini 5h al 65 %, settimana 56 %; argon fermo fino al 04/11). I task claude avviati prima del limite (T78 p0, T70 p0, T45b p6) sono attivi e in esecuzione nei worktree. T78 sta già integrando T45c e rinumerando l'ADR in 0084; se uno dei task claude si arresta per limiti di crediti, T78 sarà riassegnato a gemini (merge + test, ~2 %). Inoltre T45b sta usando provvisoriamente il numero ADR 0081 che andrà rinumerato a 0085.
+Aggiornato il 30/10/2026 alle 13:07 UTC, passaggio epoca su gemini: **claude sotto il 10 %** (sessione 5h al 9 %, settimana 55 %), l'orchestratore è attivo su gemini (gemini 5h al 65 %, settimana 56 %; argon fermo fino al 04/11). I task claude avviati prima del limite (T78 p0, T70 p0, T45b p6) sono attivi e in esecuzione nei rispettivi worktree. T78 sta integrando T45c e rinumerando l'ADR in 0084; se uno dei task claude si arresta per limiti di crediti, T78 sarà riassegnato immediatamente a gemini (merge + test, ~2 %). Inoltre T45b ha predisposto bozza ADR-0081 che andrà rinumerata a 0085 in integrazione.
 
 ## Le priorità dell'autore
 
@@ -14,20 +14,23 @@ Aggiornato il 30/10/2026 alle 13:05 UTC, avvio epoca 71 su gemini: **claude sott
 ## Stato e decisioni
 
 - **Decisioni prese e fatti recenti**:
-  - **Reset Claude avvenuto alle 12:00 UTC**: Claude ha di nuovo crediti (sessione 5h al 61%, settimana 61%); l'orchestratore torna a Claude come da configurazione.
-  - **T77 completato con successo su Gemini e integrato nel base `3d`**: risolto il conflitto di merge tra `task/T45e` e il base `3d`, preservando account/crediti e Stripe Checkout.
-  - **T45e integrato nel base `3d`**: ricarica crediti con Stripe Checkout (supporto carte e Google Pay), webhook idempotente crittografico HMAC-SHA256, salvataggio in `world/pagamenti.json`, esclusione anonimi, bottoni di ricarica rapida nel profilo (`P`), ADR-0083. Worktree e branch di T45e e T77 rimossi.
-  - **Suite di test verdi nel base**: test mirati `tests/stripe.test.ts`, `tests/account.test.ts`, `tests/credits.test.ts`, `tests/session.test.ts` (21/21) e `npm run typecheck` completamente verdi in `3d`.
+  - **Claude sceso sotto il 10 % sulle 5h (9 %)**: orchestratore ruotato su Gemini (epoca 71).
+  - **T45c completato con successo**: quote di eredità per i cloni implementate con catena `origini` e MinHash; ADR in conflitto temporaneo con 0081.
+  - **Creato T78 (p0) per integrare T45c nel base 3d**: merge, risoluzione conflitti, rinumerazione ADR a 0084 e verifica individuale dei test in timeout.
+  - **T45e integrato nel base `3d`**: ricarica crediti con Stripe Checkout, webhook idempotente crittografico HMAC-SHA256, salvataggio in `world/pagamenti.json`, esclusione anonimi, bottoni ricarica rapida nel profilo (`P`), ADR-0083.
+  - **Suite di test verdi nel base**: test mirati `tests/stripe.test.ts`, `tests/account.test.ts`, `tests/credits.test.ts`, `tests/session.test.ts` (21/21) e `npm run typecheck` a 0 errori in `3d`.
   - **Chiavi Stripe per test nel browser**: T45e resta segnato `in attesa` per la verifica browser (in attesa di `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` in `.env` o in chat, segnalate in `docs/pipeline/domande/T45e.md`).
 - **Cosa si aspetta**:
-  1. **Chiavi di test Stripe** dall'autore in `.env` o in chat per la verifica finale nel browser di T45e.
-  2. **Completamento di T70** (claude, p0): ripresa della sessione preservata per integrare T53b (strutture a più piani) con T56b (salto).
-  3. **Avanzamento multigiocatore**: T45b (coefficienti e Low Detail) e T45c (eredità cloni) su Claude, per sbloccare T45d (lobby).
+  1. **Esito di T78** (claude, p0): completamento del merge di T45c e rinumerazione ADR 0084; se Claude si arresta per crediti, riassegnazione immediata a Gemini.
+  2. **Esito di T70** (claude, p0): integrazione T53b (strutture a più piani) con T56b (salto).
+  3. **Esito di T45b** (claude, p6): coefficienti di generazione e partita Low Detail (ADR da rinumerare a 0085 per sbloccare T45d).
+  4. **Chiavi di test Stripe** dall'autore per la verifica finale nel browser di T45e.
 - **Intenzioni / prossimi passi**:
-  1. Claude riprende ed esegue **T70** (p0): risoluzione conflitti e test, poi `integra T70` e `integra T53b`.
-  2. Avanzare con **T45b** (p6) e **T45c** (p7) per completare la catena multigiocatore.
-  3. Ricevute le chiavi Stripe: eseguire verifica nel browser per T45e.
-  4. Mantenere priorità assoluta alla catena multigiocatore (T52 e T54 p50 restano in attesa).
+  1. Appena T78 finisce: `integra T78` e `integra T45c` nel base.
+  2. Appena T70 finisce: `integra T70` e `integra T53b` nel base.
+  3. Se Claude si ferma per limite crediti 5h su T78: `assegna T78 gemini 2% 0 --approva` per completare il merge su Gemini.
+  4. Appena T45b finisce: rinumerare ADR in 0085 e integrare nel base per sbloccare T45d (lobby).
+  5. Mantenere priorità assoluta alla catena multigiocatore (T52 e T54 p50 restano in attesa).
 
 ## Task attivi e in corso
 
