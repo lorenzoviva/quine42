@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 13:07 UTC, passaggio epoca su gemini: **claude sotto il 10 %** (sessione 5h al 9 %, settimana 55 %), l'orchestratore è attivo su gemini (gemini 5h al 65 %, settimana 56 %; argon fermo fino al 04/11). I task claude avviati prima del limite (T78 p0, T70 p0, T45b p6) sono attivi e in esecuzione nei rispettivi worktree. T78 sta integrando T45c e rinumerando l'ADR in 0084; se uno dei task claude si arresta per limiti di crediti, T78 sarà riassegnato immediatamente a gemini (merge + test, ~2 %). Inoltre T45b ha predisposto bozza ADR-0081 che andrà rinumerata a 0085 in integrazione.
+Aggiornato il 30/10/2026 alle 13:10 UTC, avvio epoca 72 su gemini: **claude sotto il 10 %** (sessione 5h al 9 %, settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h al 65 %, settimana 56 %; argon fermo fino al 04/11). I task claude avviati prima del limite (T78 p0, T70 p0, T45b p6) sono attivi e in esecuzione nei rispettivi worktree. T78 sta integrando T45c e rinumerando l'ADR in 0084; se uno dei task claude si arresta per limiti di crediti, T78 sarà riassegnato immediatamente a gemini (merge + test, ~2 %). Inoltre T45b ha predisposto bozza ADR (da rinumerare a 0085 in integrazione).
 
 ## Le priorità dell'autore
 
