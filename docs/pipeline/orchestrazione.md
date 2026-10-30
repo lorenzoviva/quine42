@@ -61,3 +61,5 @@
 - [2026-10-30T02:13:13.346Z] riprendo T56b su claude (H:\projects\rune\.claude\worktrees\t56b)
 - [2026-10-30T02:22:12.919Z] task/T64 integrato in 3d; worktree e branch tolti.
 - [2026-10-30T02:36:21.055Z] T56b: ESITO: fatto — Spazio salta sopra casse e mobili fino a ~1 casella e sopra l'acqua stretta, non sopra muri né dentro l'acqua profonda; arco e ombra; nella corona e in multigiocatore Spazio resta `E`; test verdi · BROWSER: da verificare — scena di `Blocchi.png` e barra dei tasti viste; l'arco del salto e l'ombra no, perché l'estensione di Chrome si è scollegata (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T56b)
+- [2026-10-30T02:40:16.374Z] integra T56b: conflitti in docs/adr/README.md; il base è com'era
+- [2026-10-30T02:42:05.761Z] task/T56b integrato in 3d; worktree e branch tolti.

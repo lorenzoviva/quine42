@@ -1,28 +1,28 @@
 # Il piano della pipeline
 
-> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-30T02:39:55.324Z: non modificarlo a mano,
+> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-30T02:42:01.088Z: non modificarlo a mano,
 > la fonte è `docs/plans/backlog.md` (righe `- Pipeline:`).
 
 ## Budget
 
 Orchestratore: **claude** (sotto il 10 % nessun task su di lui; si cambia con `orchestratore <provider>`).
 
-- **claude**: settimana 73 %, 5 ore 44 % (letto da /usage il 2026-10-30T02:36:16.262Z)
-  - session, 5h: 44 % residuo, reset 2026-10-30T06:59:00.000Z
+- **claude**: settimana 73 %, 5 ore 40 % (letto da /usage il 2026-10-30T02:41:57.864Z)
+  - session, 5h: 40 % residuo, reset 2026-10-30T06:59:00.000Z
   - week (all models), settimana: 73 % residuo, reset 2026-11-05T15:59:00.000Z
-- **gemini**: settimana 86 %, 5 ore 100 % (letto da /usage il 2026-10-30T02:36:21.053Z)
+- **gemini**: settimana 86 %, 5 ore 100 % (letto da /usage il 2026-10-30T02:42:01.086Z)
   - Gemini Models, settimana: 86 % residuo, reset 2026-11-05T17:37:53.000Z
-  - Gemini Models, 5h: 100 % residuo, reset 2026-10-30T07:36:20.000Z
-- **argon**: settimana 64 %, 5 ore 100 % (letto da /usage il 2026-10-30T02:36:21.053Z)
+  - Gemini Models, 5h: 100 % residuo, reset 2026-10-30T07:42:00.000Z
+- **argon**: settimana 64 %, 5 ore 100 % (letto da /usage il 2026-10-30T02:42:01.086Z)
   - Gemini 4 Argon, settimana: 64 % residuo, reset 2026-11-04T18:44:35.000Z
 
 ## In corso (1)
 
 - **T53b** Le scale come rampe e le strutture su più piani — claude, 6 %
 
-## Finiti, da guardare e integrare (`integra Txx`) (1)
+## Finiti, da guardare e integrare (`integra Txx`) (0)
 
-- **T56b** Il salto, e le cose che chiudono i sentieri — ESITO: fatto — Spazio salta sopra casse e mobili fino a ~1 casella e sopra l'acqua stretta, non sopra muri né dentro l'acqua profonda; arco e ombra; nella corona e in multigiocatore Spazio resta `E`; test verdi — claude, 4 %
+_nessuno_
 
 ## Pronti, in ordine di priorità (0)
 

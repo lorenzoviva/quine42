@@ -14,9 +14,10 @@ Aggiornato il 30/10/2026, prima del primo avvio di `pipeline.mjs orchestra` (scr
 
 ## In corso
 
-- **T53b** (strutture su più piani) e **T56b** (il salto) su Claude: ripresi il 30/10 alle 03:13 dopo che il processo di `esegui`
-  era morto con la sessione che lo aveva lanciato (il lavoro a metà era nei loro worktree). Al primo avvio di `orchestra`, se il
-  loro processo c'è ancora lo segue, altrimenti li riprende.
+- **T53b** (strutture su più piani) su Claude, ripreso il 30/10 alle 03:13. Se all'avvio di `orchestra` risulta «in corso», il
+  processo lo riprende dalla sua conversazione (fu lanciato dal vecchio `esegui`: niente pid).
+- **T56b** (il salto) è integrato (ADR-0080): Spazio salta casse e acqua stretta; in multigiocatore e nella corona resta `E`
+  (il messaggio `salta` del protocollo è annotato nel backlog come lavoro a parte).
 
 ## Da fare appena possibile
 
@@ -28,8 +29,9 @@ Aggiornato il 30/10/2026, prima del primo avvio di `pipeline.mjs orchestra` (scr
   - `domande/T54.md`: la taglia massima è **Gargantuesca**; il castello «importante» di oggi diventa **Enorme**; stessa scala per
     creature e strutture; Enorme una per zona (56 × 56 luoghi), Gargantuesca una ogni 4 × 4 zone (serve un nome per quest'area,
     non «regione», che è dell'atlante).
-- **Verifiche nel browser**: T64 (le varianti in cache, anche IndexedDB, di `circuito-3D` negli scaffali della corona), poi T53b e
-  T56b quando finiscono. I difetti della verifica di T44a e T43c sono già in **T44c**.
+- **Verifiche nel browser** (un task di verifica su `claude`, che ha `--chrome`): T64 (le varianti in cache, anche IndexedDB, di
+  `circuito-3D` sugli scaffali della corona, ora che ha 30 s per finire), T56b (l'arco del salto e l'ombra: l'agente ha visto solo la
+  scena, poi l'estensione di Chrome si è scollegata), T53b quando finisce. I difetti della verifica di T44a e T43c sono già in **T44c**.
 - **Da approvare dall'autore**: T44c (correzioni del profilo e della morte, priorità 3), T44b (account), T45a, T45b, T45c, T68b;
   dopo di loro T45d, T45e, T45f, T68c.
 - **T69** (interfaccia web della pipeline): l'autore l'ha chiesta su Argon, non prioritaria. Approvala tu (`approva T69`) quando il
