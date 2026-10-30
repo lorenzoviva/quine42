@@ -46,7 +46,7 @@ Aggiornato il 30/10/2026 alle ~10:00 UTC, epoca 61 (gemini orchestratore: claude
   - **T51** (livello mare e motore acqua, p50).
   - **T52** e **T54** (p50): interrotti per dare precedenza al multigiocatore.
 - **Crediti**:
-  - **Gemini**: 5h al 73 %, settimana al 58 % (orchestratore e T77).
+  - **Gemini**: 5h al 72 %, settimana al 58 % (orchestratore e T77).
   - **Claude**: 5h a 0 %, settimana al 61 % (reset 12:00 UTC / ~13:00 locali).
   - **Argon**: fermo fino al 04/11.
 
