@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle ~09:28 UTC, fine epoca 53 (gemini orchestratore: claude al 0 % della sessione 5h, reset 12:00 UTC; settimana 61 %; gemini 5h all'81 %, settimana 60 %; argon fermo fino al 04/11).
+Aggiornato il 30/10/2026 alle ~09:35 UTC, epoca 54 (gemini orchestratore: claude al 0 % della sessione 5h, reset 11:59 UTC / ~13:00 locali; settimana 61 %; gemini 5h all'80 %, settimana 60 %; argon fermo fino al 04/11).
 
 ## Le priorità dell'autore
 
@@ -14,34 +14,34 @@ Aggiornato il 30/10/2026 alle ~09:28 UTC, fine epoca 53 (gemini orchestratore: c
 ## Stato e decisioni
 
 - **Decisioni prese e fatti recenti**:
-  - **T76 completato**: risolto il conflitto in `src/main.ts` preservando sia T44c (`savedProfile`, `ui:died`, hover/clic) sia T75/T44b/T45a (account Firebase, crediti anonimo).
-  - **Integrati in `3d` con successo**: eseguiti in sequenza `integra T76`, `integra T75` e `integra T44b`. Installate le dipendenze npm (Firebase/firebase-admin), verificati con esito positivo `npm run typecheck` (pulito) e `npx vitest run tests/account.test.ts tests/credits.test.ts tests/session.test.ts` (15/15 verdi).
-  - Sbloccato **T45e** (pagamenti Stripe) e sbloccato il percorso verso **T45d** (lobby, subordinata a T45b).
-  - **T70 in corso su Claude** (p0, pid 23712): integra T53b (più piani) con T56b (salto).
+  - **T76, T75 e T44b integrati con successo in `3d`**: dipendenze npm Firebase installate, typecheck e test account/credits/session (15/15) verdi nel branch base.
+  - **T45e approvato e avviato su Gemini**: approvate le specifiche di ricarica Stripe (Checkout/Google Pay di prova, webhook server idempotente, anonimi esclusi). Poiché Claude è fermo per limite 5h e Argon è bloccato, la pipeline ha instradato T45e su Gemini (Antigravity), dove è attualmente in corso nel worktree `t45e`.
+  - **T70 sospeso in modo pulito in attesa del reset di Claude**: Claude ha raggiunto il limite 5h alle 10:17 («resets 1pm / 12:00 UTC»). Il task è stato interrotto e rimesso in coda (`interrompi T70` e `riprendi T70`), preservando la sessione; riprenderà automaticamente al reset delle 12:00 UTC.
 - **Cosa si aspetta**:
-  1. **T70** (claude, p0): completamento integrazione T53b con salto T56b; poi `integra T70` e `integra T53b`.
-  2. Reset crediti 5h di Claude alle 12:00 UTC (~13:00 locali) per l'avanzamento dei task multigiocatore T45b, T45c e T45e.
+  1. **T45e** in corso su Gemini (pagamenti Stripe): completamento dell'implementazione e dei test con webhook finto.
+  2. **Reset crediti Claude** alle ~12:00 UTC (13:00 locali): ripresa automatica di **T70** (integrazione T53b e salto T56b), poi avanzamento di **T45b** (coefficienti e Low Detail, sbloccando T45d lobby) e **T45c** (eredità cloni).
 - **Intenzioni / prossimi passi**:
-  1. Integrare T70 + T53b appena T70 conclude positivamente.
-  2. Al reset di Claude (12:00 UTC): avanzare T45b (coefficienti e Low Detail), sbloccando T45d (lobby), e T45c (eredità cloni).
+  1. All'esito positivo di T45e: verifica ed eventuale `integra T45e`.
+  2. Al reset di Claude (12:00 UTC): completare T70, eseguire `integra T70` e `integra T53b`.
   3. Mantenere priorità assoluta alla catena multigiocatore: T52 e T54 (p50) restano in attesa che la coda multigiocatore si svuoti.
 
 ## Task attivi e in corso
 
 - **In corso**:
-  - **T70** (claude, p0, pid 23712): integrare T53b con T56b.
+  - **T45e** (gemini, p9, worktree `t45e`, pid 11792): pagamenti Stripe Checkout e webhook server.
+  - **T70** (claude, p0, sessione preservata): sospeso per limite 5h Claude, riprenderà alle 12:00 UTC.
   - **T45b** (claude, p6) e **T45c** (claude, p7): priorità multigiocatore (in attesa reset crediti Claude).
 - **Completati e integrati nel base `3d`**:
   - **T76**, **T75**, **T44b**, **T44c**.
 - **Completati in attesa di integrazione**:
   - **T53b** (claude): in attesa di T70.
 - **Sbloccati / In coda**:
-  - **T45e** (da approvare / pagamenti Stripe).
   - **T45d** (lobby, attende T45b).
+  - **T51** (livello mare e motore acqua, p50).
   - **T52** e **T54** (p50): interrotti per dare precedenza al multigiocatore.
 - **Crediti**:
-  - **Gemini**: 5h all'81 %, settimana al 60 % (orchestratore Epoca 53).
-  - **Claude**: 5h a 0 %, settimana al 61 % (reset 12:00 UTC).
+  - **Gemini**: 5h all'80 %, settimana al 60 % (orchestratore e T45e).
+  - **Claude**: 5h a 0 %, settimana al 61 % (reset 12:00 UTC / ~13:00 locali).
   - **Argon**: fermo fino al 04/11.
 
 ## Da fare appena possibile

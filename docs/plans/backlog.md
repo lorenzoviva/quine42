@@ -1446,7 +1446,7 @@ le risposte alle domande del piano.
 - Fatto quando: test del flusso, verifica nel browser con due schede, commit.
 
 ### T45e · I pagamenti con Stripe — `da fare` (dipende da T45a, T44b)
-- Pipeline: claude · stima 5% · priorità 9
+- Pipeline: claude · stima 5% · approvato · priorità 9
 - Fare: la ricarica dei crediti con Stripe Checkout (Google Pay compreso) in modalità di prova; il webhook sul server accredita
   (idempotente); chiavi solo sul server; un anonimo non compra.
 - Fatto quando: test con il webhook finto, una ricarica di prova nel browser con le chiavi di test, commit. Le chiavi di Stripe le
