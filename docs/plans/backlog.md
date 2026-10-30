@@ -1636,3 +1636,15 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   di 5 ore reale) ogni soglia — inclusa quella della sessione dell'orchestratore — si basi sul **limite settimanale**. Aggiungere i test
   in `tests/pipeline.test.ts` per il calcolo dei limiti e delle soglie di Argon (settimanale senza 5h) per task e orchestratore.
 - Fatto quando: `tests/pipeline.test.ts` e `npm run typecheck` verdi, commit.
+
+### T72 · Integrare T71 (soglie settimanali Argon) con T69 (interfaccia web) — `da fare`
+- Pipeline: gemini · stima 1% · approvato · priorità 0
+- Contesto: `integra T71` del 30/10/2026 si è fermato su un conflitto in `tools/pipeline/pipeline.mjs` (perché nel frattempo è stato
+  integrato T69). Leggi `node tools/pipeline/pipeline.mjs dossier T71` e `dossier T69`.
+- Fare: nel tuo worktree esegui `git merge task/T71` e risolvi i conflitti in `tools/pipeline/pipeline.mjs` (ed eventuali altri file)
+  mantenendo sia le funzioni e gli export di T69 (`web.mjs`, `setBudgetManual`, `refreshUsage`, `traceOf`, ecc.) sia le modifiche di
+  T71 (`computeBudget`, `capOf`, `loadBudget`, `finestra5h: false`, `pickOrchestrator` e i test di entrambi in `tests/pipeline.test.ts`).
+  IMPORTANTE: esegui solo `npx vitest run tests/pipeline.test.ts` e `npm run typecheck` (con `WaitMsBeforeAsync: 10000`, NON lanciare
+  `npm test` sull'intera suite per non mandare il comando in background).
+- Fatto quando: `npx vitest run tests/pipeline.test.ts` e `npm run typecheck` verdi, commit sul branch `task/T72`. Poi l'orchestratore
+  farà `integra T72` e `integra T71`.
