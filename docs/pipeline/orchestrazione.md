@@ -305,3 +305,8 @@
 - [2026-10-30T13:45:26.964Z] lancio T79 su gemini (H:\projects\rune\.claude\worktrees\t79)
 - [2026-10-30T13:46:33.250Z] orchestratore: epoca 81 su gemini (contesto a 285 % della finestra)
 - [2026-10-30T13:50:03.692Z] orchestratore: epoca 82 su gemini (contesto a 159 % della finestra)
+- [2026-10-30T13:52:57.057Z] T79: ESITO: fatto — eseguito merge di `task/T45b`, rinominato l'ADR in `docs/adr/0085-i-coefficienti-di-generazione.md` con riferimenti aggiornati in AGENTS.md, README.md, backlog.md, commenti e test preservando ADR-0081..ADR-0084; typecheck e suite di test specificata verdi (26/26). (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T79)
+- [2026-10-30T13:53:05.254Z] task/T79 integrato in 3d; worktree e branch tolti.
+- [2026-10-30T13:53:22.504Z] task/T45b integrato in 3d; worktree e branch tolti.
+- [2026-10-30T13:57:38.683Z] lancio T45d su gemini (H:\projects\rune\.claude\worktrees\t45d)
+- [2026-10-30T13:58:00.553Z] nota: Epoca 82: T79 e T45b (coefficienti e Low Detail, ADR-0085) integrati nel base 3d. Suite verde (35/35 test). T45d (lobby) sbloccato, approvato e assegnato a Gemini (stima 5%, p1), pronto per esegui.

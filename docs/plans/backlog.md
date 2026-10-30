@@ -1456,7 +1456,7 @@ le risposte alle domande del piano.
   funzione per universo); nessuna verifica nel browser (niente di visibile).
 
 ### T45d · La lobby — `da fare` (dipende da T45a, T45b, T44b)
-- Pipeline: claude · stima 5% · priorità 8
+- Pipeline: gemini · stima 5% · approvato · priorità 1
 - Fare: prima di entrare in un universo multigiocatore la lobby: il tetto di crediti di chi entra (si somma ai budget di `ai`), i
   coefficienti e i modelli dell'universo (del master), i minimi; crediti finiti in partita → ricarica, offline o abbandona; la
   collezione di carte fuori dalla partita, con gli utilizzi.

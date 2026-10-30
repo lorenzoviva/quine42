@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 13:52 UTC, rotazione epoca 82 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset 16:59 UTC / ~18:00 locali, settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h all'88 %, settimana 51 %; argon fermo fino al 04/11). **T78** e **T45c** (eredità dei cloni, ADR-0084) sono stati integrati con successo nel base `3d` (worktree e branch rimossi). **T79** è in esecuzione attiva su Gemini (p0, worktree `t79`, PID 30488 attivo) per integrare **T45b** (coefficienti e Low Detail, commit `bc77bd9`) con rinumerazione ADR a 0085 per sbloccare la lobby (**T45d**) senza attendere il reset di Claude: merge effettuato, rinominato ADR-0085 e aggiornati i riferimenti, test mirati in corso. T70 (integrazione più piani T53b e salto T56b) è sospeso per limite crediti su Claude.
+Aggiornato il 30/10/2026 alle 13:58 UTC, epoca 82 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset 16:59 UTC / ~18:00 locali, settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h all'87 %, settimana 50 %; argon fermo fino al 04/11). **T79** e **T45b** (coefficienti e Low Detail, ADR-0085) sono stati integrati con successo nel base `3d` (worktree e branch rimossi), con test mirati (35/35) e typecheck a 0 errori. **T45d (la lobby)** è sbloccato, approvato e assegnato a Gemini (stima 5%, p1) ed è pronto per l'avvio da parte di `esegui`. T70 (integrazione più piani T53b e salto T56b) è sospeso per limite crediti su Claude.
 
 ## Le priorità dell'autore
 
@@ -14,42 +14,38 @@ Aggiornato il 30/10/2026 alle 13:52 UTC, rotazione epoca 82 su gemini: **claude 
 ## Stato e decisioni
 
 - **Decisioni prese e fatti recenti**:
-  - **T78 e T45c integrati nel base `3d`**: T78 ha completato l'integrazione di T45c con ADR-0084, superando test e typecheck. Eseguito `integra T78` e `integra T45c`; worktree e branch rimossi.
-  - **Avviato T79 per integrare T45b**: per non attendere il reset di Claude delle 17:00 UTC, T79 integra il commit `bc77bd9` di T45b su Gemini (stima 2%, p0, approvato), rinumerando ADR-0081 in ADR-0085 e preservando le integrazioni precedenti (Stripe ADR-0083, eredità cloni ADR-0084). T79 è attualmente in esecuzione nel worktree `t79`.
-  - **T45e integrato nel base `3d`**: ricarica crediti con Stripe Checkout, webhook idempotente crittografico HMAC-SHA256, salvataggio in `world/pagamenti.json`, esclusione anonimi, bottoni ricarica rapida nel profilo (`P`), ADR-0083.
-  - **Suite di test verdi nel base**: test mirati `tests/stripe.test.ts`, `tests/account.test.ts`, `tests/credits.test.ts`, `tests/session.test.ts`, `tests/heritage.test.ts`, `tests/clone.test.ts`, `tests/cards.test.ts` e `npm run typecheck` a 0 errori in `3d`.
+  - **T79 e T45b integrati nel base `3d`**: T79 ha integrato T45b su Gemini rinumerando l'ADR in 0085, preservando le integrazioni precedenti (Stripe ADR-0083, eredità cloni ADR-0084). Superati 26/26 test e typecheck. Eseguito `integra T79` e `integra T45b`, worktree e branch rimossi.
+  - **T45d (la lobby) approvato e assegnato a Gemini**: per non attendere il reset di Claude delle 17:00 UTC e dare continuità alla priorità multigiocatore, T45d è assegnato a Gemini (stima 5%, priorità 1, approvato).
+  - **Suite di test verdi nel base**: test mirati `tests/heritage.test.ts`, `tests/session.test.ts`, `tests/coefficients.test.ts`, `tests/account.test.ts`, `tests/stripe.test.ts`, `tests/credits.test.ts` (35/35 passati) e `npm run typecheck` a 0 errori in `3d`.
   - **Chiavi Stripe per test nel browser**: T45e resta segnato `in attesa` per la verifica browser (in attesa di `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` in `.env` o in chat, segnalate in `docs/pipeline/domande/T45e.md`).
 - **Cosa si aspetta**:
-  1. **Esecuzione ed esito di T79** (gemini, p0): commit finale in `task/T79` con test superati e merge di T45b con ADR-0085.
-  2. **Sblocco di T45d (lobby)**: appena T79 e T45b entrano nel base `3d`, T45d diventa sbloccato.
-  3. **Reset crediti Claude** (alle 16:59 UTC / ~18:00 locali): ripresa di T70 (integrazione T53b più piani con salto T56b).
-  4. **Chiavi di test Stripe** dall'autore per la verifica finale nel browser di T45e.
+  1. **Avvio ed esecuzione di T45d** (gemini, p1) da parte di `esegui` nel worktree `t45d`.
+  2. **Reset crediti Claude** (alle 16:59 UTC / ~18:00 locali): ripresa di T70 (integrazione T53b più piani con salto T56b).
+  3. **Chiavi di test Stripe** dall'autore per la verifica finale nel browser di T45e.
 - **Intenzioni / prossimi passi**:
-  1. Attendere completamento di T79 su Gemini.
-  2. Appena T79 finisce: `integra T79` e `integra T45b` nel base `3d`.
-  3. Assegnare e avviare T45d (lobby) non appena sbloccato.
-  4. Al reset di Claude: chiudere T70 (`integra T70` e `integra T53b`).
-  5. Mantenere priorità assoluta alla catena multigiocatore (T52 e T54 p50 restano in attesa).
+  1. Monitorare l'avvio e l'esecuzione di T45d su Gemini.
+  2. Al termine di T45d: integrare nel base `3d`, preparare task di verifica browser a due schede per Claude dopo il reset.
+  3. Al reset di Claude: chiudere T70 (`integra T70` e `integra T53b`).
+  4. Procedere poi con T45f (server su Google Cloud).
 
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T79** (gemini, p0): in esecuzione attiva nel worktree t79. Integrazione T45b, rinumerazione ADR a 0085.
-  - **T45b** (claude, p6): commit completato `bc77bd9` nel worktree t45b (coefficienti e Low Detail); in integrazione tramite T79.
+  - **T45d** (gemini, 5%, p1, approvato): pronto per `esegui`. La lobby: tetto crediti, coefficienti/modelli dell'universo, minimi, esaurimento crediti in partita, collezione carte.
   - **T70** (claude, p0): worktree t70 in merge; agente fermo per limite 5h (reset 16:59 UTC).
 - **Completati e integrati nel base `3d`**:
-  - **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
+  - **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **Completati in attesa di integrazione**:
   - **T53b** (claude): in attesa di T70.
 - **In attesa di chiavi/verifica browser**:
   - **T45e**: codice e test integrati, in attesa credenziali test Stripe per prova interattiva browser.
-- **Sbloccati / In coda**:
-  - **T45d** (lobby, attende T45b/T79).
+- **In coda / Bloccati**:
+  - **T45f** (server su Google Cloud, attende T45d).
   - **T51** (livello mare e motore acqua, p50).
   - **T52** e **T54** (p50): interrotti per dare precedenza al multigiocatore.
 - **Crediti**:
   - **Claude**: 5h al 0 %, settimana al 55 % (fermo fino alle 16:59 UTC / ~18:00 locali, orchestratore su Gemini).
-  - **Gemini**: 5h all'88 %, settimana al 51 % (orchestratore attuale e agente su T79).
+  - **Gemini**: 5h all'87 %, settimana al 50 % (orchestratore attuale e pronto per T45d).
   - **Argon**: fermo fino al 04/11.
 
 ## Da fare appena possibile
