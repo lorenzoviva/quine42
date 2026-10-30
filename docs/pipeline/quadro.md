@@ -30,20 +30,18 @@ Aggiornato il 30/10/2026 alle 17:30 UTC, epoca 147 su **claude**. **Ordine dell'
   2. **Risposte dell'autore per T45f**: GCP Project ID, preferenza architetturale (Cloud Run vs VM GCE) e regione in `docs/pipeline/domande/T45f.md`.
   3. **Chiavi di test Stripe** dall'autore per la verifica finale nel browser di T45e.
 - **Intenzioni / prossimi passi**:
-  1. Non appena T70 termina con esito positivo: eseguire `integra T70` e `integra T53b`.
+  0. Integrare T82…T87 man mano che finiscono (senza conflitti). Finito l'ultimo, NON approvare nulla e dire all'autore che può chiudere con Ctrl-C.
   2. Ricevute le risposte su T45f, approvare e lanciare l'allestimento dell'infrastruttura Google Cloud.
   3. Preparare il task di verifica browser multigiocatore a due schede (lobby T45d, account T44b, profilo T44a, crediti T45a).
 
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T70** (claude, p0): conflitti T53b/T56b, ripreso dopo il reset.
-  - **T81** (gemini, p0): la pagina web della pipeline (SyntaxError regex). Dopo di lui su Gemini T87.
+  - **T82** (claude) in coda/in corso, poi T83 → T84 → T85 → T86; **T87** (gemini) in corso.
   - Dopo T70 su Claude: T82 → T83 → T84 → T85 → T86 (correzioni della pipeline, attive al riavvio di orchestra).
-- **Completati in attesa di integrazione**:
-  - **T53b** (claude): in attesa del merge di T70.
+- **Da guardare (non integrare)**: **T54** finito con errore (codice 1), non approvato.
 - **Completati e integrati nel base `3d`**:
-  - **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
+  - **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **In attesa di chiavi/risposte/verifica browser**:
   - **T45f**: sbloccato, in attesa di GCP Project ID e scelte di deploy (`docs/pipeline/domande/T45f.md`).
   - **T45e**: codice e test integrati, in attesa credenziali test Stripe per prova interattiva browser.
