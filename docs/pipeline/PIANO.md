@@ -1,6 +1,6 @@
 # Il piano della pipeline
 
-> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-30T17:51:11.767Z: non modificarlo a mano,
+> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-30T17:54:11.815Z: non modificarlo a mano,
 > la fonte è `docs/plans/backlog.md` (righe `- Pipeline:`).
 
 ## Budget

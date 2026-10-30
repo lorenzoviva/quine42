@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 17:52 UTC, fine epoca 154 su **gemini** (rotazione per contesto al 93 %; claude al limite 5h: 0 %, reset 22:00 UTC). **Ordine dell'autore: finire i task sulla pipeline (T82-T87 e la catena T83-T86), poi nessun task nuovo; quando finiscono i task in corso, dirgli che può chiudere con Ctrl-C.** Tolta l'approvazione a T52, T54, T57 perché non partano. T70, T53b, T81, T87, T82 e T90 integrati. In corso: T83 su Claude (turni per operazioni pesanti); se si ferma per il limite delle 5 ore riprende dopo le 22:00 UTC. Poi la catena T84 → T85 → T86. T51/T89 non approvati. Gemini libero, nessun task nuovo assegnato.
+Aggiornato il 30/10/2026 alle 17:55 UTC, avvio epoca 155 su **gemini** (rotazione per contesto al 93 % in epoca 154; claude al limite 5h: 0 %, fermo fino al reset delle 22:00 UTC). **Ordine dell'autore: finire i task sulla pipeline (T82-T87 e la catena T83-T86), poi nessun task nuovo; quando finiscono i task in corso, dirgli che può chiudere con Ctrl-C.** Tolta l'approvazione a T52, T54, T57 perché non partano. T70, T53b, T81, T87, T82 e T90 integrati. In corso: T83 su Claude (turni per operazioni pesanti, ha committato ADR-0088 e codice, congelato al rate limit durante la suite; riprende alle 22:00 UTC). Poi la catena T84 → T85 → T86. T51/T89 non approvati. Gemini libero, nessun task nuovo assegnato.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
