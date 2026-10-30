@@ -261,6 +261,8 @@ describe('death and reconnection among many (T43c)', () => {
       k.applyEffects([{ tipo: 'stato', nome: 'febbre', velocita: 0.9 }]);
     });
     k.as('bruno', () => k.give(item, 1));
+    // With credits (T45a): her verdict goes to the world's models, paid by her, not to the local ones.
+    k.giveCredits('anna', 10);
     run(server, all, 8);
     const said: string[] = [];
     anna.k.bus.on('ui:message', (m) => said.push(m.text));
@@ -305,7 +307,8 @@ describe('death and reconnection among many (T43c)', () => {
     expect(mild.anna.session.notices.find((n) => n.tipo === 'morte')).toMatchObject({ dove: 'qui', perso: [] });
     expect(countItem(mild.anna.k.inventory(), item)).toBe(2);
     expect(mild.anna.k.needs()!.health).toBeGreaterThan(50);
-  }, 60000);
+    // Two worlds of three wanderers: every kernel's boot runs the corona's programs again (T91).
+  }, 180_000);
 
   it('who leaves and comes back finds their position, inventory, phrase, states, card and bonds as they left them', async () => {
     const { k, server, anna, bruno, carlo, all } = await three();
@@ -341,5 +344,6 @@ describe('death and reconnection among many (T43c)', () => {
     expect(back.k.states().benedizione).toMatchObject({ velocita: 1.2 });
     expect(k.cardsOf('anna').some((c) => c.id === 'regola:azione-canto')).toBe(true);
     expect(k.as('anna', () => k.bondOf(vName))).toBe('amica');
-  }, 60000);
+    // A fourth kernel for who comes back, and every boot runs the corona's programs again (T91).
+  }, 180_000);
 });
