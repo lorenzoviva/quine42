@@ -514,3 +514,6 @@
 - [2026-10-30T22:54:29.183Z] lancio T85 su claude (H:\projects\rune\.claude\worktrees\t85)
 - [2026-10-30T23:23:39.268Z] T85: ESITO: fatto — `ferma --ora|--dopo` (anche `/ferma`, chat web, orchestratore, Ctrl+C) con il registro dello spegnimento e il riepilogo in `avvio.md` al riavvio; gli interrotti riprendono da soli e i task finiti da spenti non ripartono; ADR-0090 (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T85)
 - [2026-10-30T23:23:50.770Z] task/T85 integrato in 3d; worktree e branch tolti.
+- [2026-10-30T23:24:24.836Z] lancio T86 su claude (H:\projects\rune\.claude\worktrees\t86)
+- [2026-10-30T23:32:37.217Z] T86: ESITO: fatto — `traccia` dà id, file, comando per riprendere, consumo e ultime azioni dei task in corso su Claude e agy (l'id di agy letto dai suoi file appena li scrive); `traccia orchestratore` mostra le epoche con i consumi; la scheda web «Conversazioni in corso». (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T86)
+- [2026-10-30T23:32:50.414Z] task/T86 integrato in 3d; worktree e branch tolti.
