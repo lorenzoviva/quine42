@@ -1,28 +1,27 @@
 # Il piano della pipeline
 
-> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-30T04:34:36.833Z: non modificarlo a mano,
+> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-30T05:26:44.147Z: non modificarlo a mano,
 > la fonte è `docs/plans/backlog.md` (righe `- Pipeline:`).
 
 ## Budget
 
 Orchestratore: **gemini** (sotto il 10 % nessun task su di lui; si cambia con `orchestratore <provider>`).
 
-- **claude**: settimana 69 %, 5 ore 0 %, fermo fino a 2026-10-30T07:00:00.000Z (letto da /usage il 2026-10-30T04:32:46.909Z)
+- **claude**: settimana 69 %, 5 ore 0 %, fermo fino a 2026-10-30T07:00:00.000Z (letto da /usage il 2026-10-30T05:25:03.158Z)
   - session, 5h: 0 % residuo, reset 2026-10-30T07:00:00.000Z
   - week (all models), settimana: 69 % residuo, reset 2026-11-05T16:00:00.000Z
-- **gemini**: settimana 82 %, 5 ore 84 % (letto da /usage il 2026-10-30T04:32:49.358Z)
-  - Gemini Models, settimana: 82 % residuo, reset 2026-11-05T17:37:53.000Z
-  - Gemini Models, 5h: 84 % residuo, reset 2026-10-30T08:19:40.000Z
-- **argon**: settimana 0 %, 5 ore 0 %, fermo fino a 2026-11-04T18:44:35.000Z (letto da /usage il 2026-10-30T04:32:49.358Z)
+- **gemini**: settimana 75 %, 5 ore 61 % (letto da /usage il 2026-10-30T05:25:05.818Z)
+  - Gemini Models, settimana: 75 % residuo, reset 2026-11-05T17:37:53.000Z
+  - Gemini Models, 5h: 61 % residuo, reset 2026-10-30T08:19:40.000Z
+- **argon**: settimana 0 %, 5 ore 0 %, fermo fino a 2026-11-04T18:44:35.000Z (letto da /usage il 2026-10-30T05:25:05.818Z)
   - Gemini 4 Argon, settimana: 0 % residuo, reset 2026-11-04T18:44:35.000Z
 
-## In corso (9)
+## In corso (8)
 
 - **T52** I sotterranei — claude, 3 %
 - **T54** Le taglie di D&D per strutture e creature — claude, 6 %
 - **T44b** L'account e l'autenticazione — claude, 5 %
 - **T44c** Correzioni dalla verifica nel browser di T44a e T43c — claude, 3 %
-- **T45a** I crediti e le spese comuni — claude, 5 %
 - **T45b** I coefficienti di generazione e la partita «Low Detail» — claude, 6 %
 - **T45c** L'eredità dei cloni — claude, 5 %
 - **T70** Integrare T53b (più piani) con il salto di T56b — claude, 3 %
@@ -47,8 +46,8 @@ _nessuno_
 ## Bloccati da dipendenze (5)
 
 - **T57** Le rune come codice: sequenze ordinate, effetti, rune nuove — claude, 8 % (aspetta T51)
-- **T45d** La lobby — claude, 5 % (aspetta T45a, T45b, T44b)
-- **T45e** I pagamenti con Stripe — claude, 5 % (aspetta T45a, T44b)
+- **T45d** La lobby — claude, 5 % (aspetta T45b, T44b)
+- **T45e** I pagamenti con Stripe — claude, 5 % (aspetta T44b)
 - **T45f** Il server su Google Cloud — claude, 6 % (aspetta T44b, T45d)
 - **T68c** Gli abbonamenti nel gioco — claude, 3 % (aspetta T68b)
 
