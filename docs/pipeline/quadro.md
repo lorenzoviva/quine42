@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 17:01 UTC, epoca 145 su gemini: **reset crediti di Claude avvenuto con successo** (5 ore al 55 %, settimana al 55 %); **T70 ripreso** (`riprendi T70`) e rimesso in coda su Claude (p0) per completare la risoluzione dei conflitti tra T53b (più piani) e T56b (salto). L'orchestratore prosegue su gemini (gemini 5h al 26 %, settimana 33 %; argon fermo fino al 04/11). **T45f (server su Google Cloud)** sbloccato e pronto in attesa delle risposte in `docs/pipeline/domande/T45f.md` (Project ID, architettura Cloud Run vs VM GCE, regione). T45e in attesa credenziali Stripe di test per verifica browser.
+Aggiornato il 30/10/2026 alle 17:05 UTC, epoca 146 su **claude** (di nuovo crediti: 5 ore al 55 %, settimana al 55 %): **T70 ripreso** su Claude (la sua conversazione riparte; risolve i conflitti tra T53b e T56b). Gemini al 26 % (5h), argon fermo fino al 04/11. **T45f** aspetta le risposte in `docs/pipeline/domande/T45f.md` (Project ID, Cloud Run vs VM GCE, regione). T45e aspetta le chiavi Stripe di test per la verifica nel browser.
 
 ## Le priorità dell'autore
 
