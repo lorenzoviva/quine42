@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle ~11:05 UTC, epoca 62 (gemini orchestratore: claude al 0 % della sessione 5h, reset 12:00 UTC / ~13:00 locali; settimana 61 %; gemini 5h al 70 %, settimana 57 %; argon fermo fino al 04/11).
+Aggiornato il 30/10/2026 alle ~10:10 UTC (~11:10 locali), epoca 63 (gemini orchestratore: claude al 0 % della sessione 5h, reset 11:59 UTC / ~13:00 locali, ~50m; settimana 61 %; gemini 5h al 68 %, settimana 56 %; argon fermo fino al 04/11).
 
 ## Le priorità dell'autore
 
@@ -44,8 +44,8 @@ Aggiornato il 30/10/2026 alle ~11:05 UTC, epoca 62 (gemini orchestratore: claude
   - **T51** (livello mare e motore acqua, p50).
   - **T52** e **T54** (p50): interrotti per dare precedenza al multigiocatore.
 - **Crediti**:
-  - **Gemini**: 5h al 70 %, settimana al 57 % (orchestratore).
-  - **Claude**: 5h a 0 %, settimana al 61 % (reset 12:00 UTC / ~13:00 locali).
+  - **Gemini**: 5h al 68 %, settimana al 56 % (orchestratore).
+  - **Claude**: 5h a 0 %, settimana al 61 % (reset 11:59 UTC / ~13:00 locali).
   - **Argon**: fermo fino al 04/11.
 
 ## Da fare appena possibile
