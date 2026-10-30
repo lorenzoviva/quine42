@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 16:59 UTC, fine epoca 144 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset previsto alle 17:00 UTC / ~18:00 locali, imminente a minuti; settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h al 27 %, settimana 33 %; argon fermo fino al 04/11). **T80 e T45d (la lobby multigiocatore, ADR-0086)** integrati con successo nel base `3d` (test 18/18 passati, typecheck pulito, rimossi worktree e branch). **T45f (server su Google Cloud)** sbloccato e pronto in attesa delle risposte in `docs/pipeline/domande/T45f.md` (Project ID, architettura Cloud Run vs VM GCE, regione). T70 (integrazione più piani T53b e salto T56b) resta sospeso in attesa del reset crediti su Claude.
+Aggiornato il 30/10/2026 alle 17:01 UTC, epoca 145 su gemini: **reset crediti di Claude avvenuto con successo** (5 ore al 55 %, settimana al 55 %); **T70 ripreso** (`riprendi T70`) e rimesso in coda su Claude (p0) per completare la risoluzione dei conflitti tra T53b (più piani) e T56b (salto). L'orchestratore prosegue su gemini (gemini 5h al 26 %, settimana 33 %; argon fermo fino al 04/11). **T45f (server su Google Cloud)** sbloccato e pronto in attesa delle risposte in `docs/pipeline/domande/T45f.md` (Project ID, architettura Cloud Run vs VM GCE, regione). T45e in attesa credenziali Stripe di test per verifica browser.
 
 ## Le priorità dell'autore
 
@@ -19,20 +19,20 @@ Aggiornato il 30/10/2026 alle 16:59 UTC, fine epoca 144 su gemini: **claude ha e
   - **T45f sbloccato e preparato**: dipendeva da T44b e T45d, ora entrambi integrati. Aperte le domande su GCP Project ID, architettura di hosting (Cloud Run vs VM GCE) e regione in `docs/pipeline/domande/T45f.md`.
   - **Chiavi Stripe per test nel browser**: T45e resta segnato `in attesa` per la verifica browser (in attesa di `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` in `.env` o in chat, segnalate in `docs/pipeline/domande/T45e.md`).
 - **Cosa si aspetta**:
-  1. **Risposte dell'autore per T45f**: GCP Project ID, preferenza architetturale (Cloud Run vs VM GCE) e regione.
-  2. **Reset crediti Claude** (alle 17:00 UTC / ~18:00 locali, imminente tra 1-2 minuti): ripresa di T70 (integrazione T53b più piani con salto T56b).
+  1. **Completamento di T70** su Claude: risoluzione conflitti tra T53b e T56b, esecuzione test e commit.
+  2. **Risposte dell'autore per T45f**: GCP Project ID, preferenza architetturale (Cloud Run vs VM GCE) e regione in `docs/pipeline/domande/T45f.md`.
   3. **Chiavi di test Stripe** dall'autore per la verifica finale nel browser di T45e.
 - **Intenzioni / prossimi passi**:
-  1. Ricevute le risposte su T45f, approvare e lanciare l'allestimento dell'infrastruttura Google Cloud.
-  2. Al reset crediti di Claude: chiudere T70 (`integra T70` e `integra T53b`) e preparare task di verifica browser multigiocatore a due schede (lobby T45d, account T44b, profilo T44a, crediti T45a).
+  1. Non appena T70 termina con esito positivo: eseguire `integra T70` e `integra T53b`.
+  2. Ricevute le risposte su T45f, approvare e lanciare l'allestimento dell'infrastruttura Google Cloud.
+  3. Preparare il task di verifica browser multigiocatore a due schede (lobby T45d, account T44b, profilo T44a, crediti T45a).
 
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - Nessun task attivo al momento.
-  - **T70** (claude, p0): worktree t70 in merge; agente fermo per limite 5h (reset 17:00 UTC / ~18:00 locali, imminente tra 1-2 minuti).
+  - **T70** (claude, p0): worktree t70, merge in corso con risoluzione conflitti; ripreso dopo reset crediti Claude.
 - **Completati in attesa di integrazione**:
-  - **T53b** (claude): in attesa di T70.
+  - **T53b** (claude): in attesa del merge di T70.
 - **Completati e integrati nel base `3d`**:
   - **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **In attesa di chiavi/risposte/verifica browser**:
@@ -43,8 +43,8 @@ Aggiornato il 30/10/2026 alle 16:59 UTC, fine epoca 144 su gemini: **claude ha e
   - **T52** e **T54** (p50): interrotti per dare precedenza al multigiocatore.
   - **T57** (rune come codice, bloccato da T51a).
 - **Crediti**:
-  - **Claude**: 5h al 0 %, settimana al 55 % (fermo fino alle 17:00 UTC / ~18:00 locali, imminente tra 1-2 minuti, orchestratore su Gemini).
-  - **Gemini**: 5h al 27 %, settimana al 33 % (orchestratore attuale).
+  - **Claude**: 5h al 55 %, settimana al 55 % (attivo, sta eseguendo T70).
+  - **Gemini**: 5h al 26 %, settimana al 33 % (orchestratore attuale).
   - **Argon**: fermo fino al 04/11.
 
 ## Da fare appena possibile
