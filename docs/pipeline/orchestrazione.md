@@ -282,3 +282,7 @@
 - [2026-10-30T13:03:47.860Z] orchestratore: epoca 71 su gemini (claude sotto il 10 %)
 - [2026-10-30T13:06:25.134Z] nota: Epoca 71 avviata su Gemini (Claude session 5h al 9 %). T78 (p0), T70 (p0) e T45b (p6) attivi su Claude nei worktree; monitoraggio per riassegnazione T78 a Gemini in caso di arresto crediti Claude.
 - [2026-10-30T13:07:47.403Z] orchestratore: epoca 72 su gemini (contesto a 179 % della finestra)
+- [2026-10-30T13:11:20.765Z] orchestratore: epoca 73 su gemini (contesto a 92 % della finestra)
+- [2026-10-30T13:13:41.335Z] T78: limite di claude, riprendo dopo 2026-10-30T17:01:00.000Z
+- [2026-10-30T13:16:32.751Z] nota: T78 riassegnato a Gemini (stima 2%, p0, approvato) dopo esaurimento limite 5h di Claude; worktree t78 pulito e pronto per il merge di T45c.
+- [2026-10-30T13:16:44.495Z] lancio T78 su gemini (H:/projects/rune/.claude/worktrees/t78)
