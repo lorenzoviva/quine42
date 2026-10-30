@@ -3,32 +3,30 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026, avvio epoca 16 dell'orchestratore (gemini).
+Aggiornato il 30/10/2026 (epoca 16 orchestratore gemini, completato e integrato T45a).
 
 ## Le priorità dell'autore
 
 1. Il multigiocatore (T43-T45) prima del resto.
 2. Il nuovo ambiente della pipeline e l'interfaccia web (**T69**, integrata in `3d` e attiva su `http://localhost:4242`).
-3. Argon esaurito per la settimana (quota 429 fino al 04/11): nessun task su Argon. Tutti i task complessi/multiplayer instradati su Claude al reset, con Gemini attivo subito per i task pronti compatibili.
+3. Argon esaurito per la settimana (quota 429 fino al 04/11): nessun task su Argon. Tutti i task complessi/multiplayer instradati su Claude al reset, con Gemini attivo per i task pronti compatibili.
 
 ## Stato e decisioni
 
 - **Decisioni prese e fatti recenti**:
-  - **Argon ha esaurito la quota settimanale (429 RESOURCE_EXHAUSTED)** al tentativo di T45a; bloccato fino al 04/11.
-  - **T45a riassegnato da Argon a Claude (priorità 5, approvato)**: grazie alla catena di fallback (`alternative.claude: ['argon', 'gemini']`) e con Claude in pausa sessione, lo scheduler della pipeline ha preso in carico ed **avviato T45a su Gemini** (worktree `t45a`, sessione attiva `af57b0ff`).
-  - **T68b rimesso in coda ed avviato su Gemini** (worktree `t68b`, sessione attiva `270cce41`), sfruttando la capienza di Gemini (81% settimanale, 80% 5h).
+  - **T45a completato e integrato** (commit `c434033`): eseguito con successo su Gemini (sessione `af57b0ff`), verificati i test headless (`tests/credits.test.ts`), registrato ADR-0081 e integrato senza conflitti in `3d`.
+  - **T68b in corso su Gemini** (worktree `t68b`, sessione attiva `270cce41`), sfruttando la capienza di Gemini (75% settimanale, 61% 5h).
 - **Cosa si aspetta**:
-  1. Il completamento di **T45a** e **T68b** in corso su Gemini.
-  2. Il reset della sessione di 5 ore di Claude alle **07:00 UTC** (**08:00** locali, ~2h10m rimanenti; Claude ha il 69% settimanale disponibile).
+  1. Il completamento di **T68b** in corso su Gemini.
+  2. Il reset della sessione di 5 ore di Claude alle **07:00 UTC** (**08:00** locali, ~1h34m rimanenti; Claude ha il 69% settimanale disponibile).
 - **Intenzioni al reset di Claude / prossimi passi**:
   1. Completare **T70** (integrazione T53b con salto T56b, priorità 0 su Claude), poi `integra T70` e `integra T53b`.
-  2. Procedere con **T44c** (priorità 3) e **T44b** (priorità 4, che sblocca T45d/e/f).
+  2. Procedere con **T44c** (priorità 3) e **T44b** (priorità 4, che con T45a completato sblocca a cascata T45d/e/f).
   3. Proseguire con **T45b** (priorità 6) e **T45c** (priorità 7).
 
 ## Task attivi e in corso
 
 - **In corso su Gemini:**
-  - **T45a** (priorità 5, crediti e spese comuni): attivo nel worktree `t45a`.
   - **T68b** (priorità 20, processo che serve la coda con le CLI): attivo nel worktree `t68b`.
 - **Sospesi su Claude fino alle 07:00 UTC (`08:00` locali):**
   - **T70** (priorità 0, risoluzione conflitti T53b / T56b con test salto + torre).
