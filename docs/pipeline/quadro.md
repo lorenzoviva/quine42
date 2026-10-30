@@ -38,4 +38,3 @@ Aggiornato il 30/10/2026, epoca 1 dell'orchestratore (claude).
 - Con tre agenti al lavoro i test vanno in timeout (l'avvio del kernel oltre 10 s): un test che fallisce nella suite intera e
   passa da solo non è un difetto del task.
 - `docs/plans/multiplayer.md` è in `docs/archivio/3-to-do-backlog/plans/` (T66) ma è ancora il piano del multigiocatore.
-- `docs/img/3d/corona2.png` non è committato e nessuno lo usa: chiedere all'autore.
