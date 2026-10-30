@@ -32,20 +32,47 @@ export const now = () => new Date().toISOString();
 export const bus = new EventEmitter();
 
 /** Prints an event and appends it to the diary of `orchestrazione.md`, so the next orchestrator knows what happened. */
-export function say(text) {
+export function say(text, reportFile = REPORT) {
   const line = `[${now()}] ${text}`;
   console.log(line);
-  try { fs.appendFileSync(REPORT, `- ${line}\n`); } catch { /* the report is a convenience */ }
+  try { fs.mkdirSync(path.dirname(reportFile), { recursive: true }); fs.appendFileSync(reportFile, `- ${line}\n`); } catch { /* the report is a convenience */ }
   bus.emit('diario', line);
 }
 
-/** The provider the orchestrating agent runs on (`orchestratore`: set by orchestra.mjs, or by hand). */
-export function orchestrator() {
-  return readJson(ORCHESTRATOR, {}).provider ?? CONFIG.orchestratore;
+/** Paths of all pipeline files for the repository or an isolated test directory. */
+export function pathsOf(opts = {}) {
+  const repo = opts.repo ?? REPO;
+  const stateDir = opts.stateDir ?? (opts.repo ? path.join(repo, '.pipeline') : STATE_DIR);
+  const config = opts.config ?? CONFIG;
+  const customState = Boolean((opts.stateDir || process.env.PIPELINE_STATE) && !opts.repo);
+  return {
+    repo,
+    stateDir,
+    config,
+    logs: path.join(stateDir, 'log'),
+    runs: path.join(stateDir, 'esecuzioni.json'),
+    budget: path.join(stateDir, 'budget.json'),
+    orchestrator: path.join(stateDir, 'orchestratore.json'),
+    history: path.join(repo, 'docs', 'pipeline', 'consumi.jsonl'),
+    plan: customState ? path.join(stateDir, 'PIANO.md') : path.join(repo, 'docs', 'pipeline', 'PIANO.md'),
+    report: customState ? path.join(stateDir, 'diario.md') : path.join(repo, 'docs', 'pipeline', 'orchestrazione.md'),
+    backlog: path.join(repo, 'docs', 'plans', 'backlog.md'),
+    quadro: path.join(repo, 'docs', 'pipeline', 'quadro.md'),
+    todo: path.join(repo, 'docs', 'userchats', 'to-do.md'),
+    domande: path.join(repo, 'docs', 'pipeline', 'domande'),
+    adrDir: path.join(repo, 'docs', 'adr'),
+  };
 }
 
-export function setOrchestrator(provider) {
-  writeJson(ORCHESTRATOR, { provider, dal: now() });
+/** The provider the orchestrating agent runs on (`orchestratore`: set by orchestra.mjs, or by hand). */
+export function orchestrator(opts) {
+  const p = pathsOf(opts);
+  return readJson(p.orchestrator, {}).provider ?? p.config.orchestratore;
+}
+
+export function setOrchestrator(provider, opts) {
+  const p = pathsOf(opts);
+  writeJson(p.orchestrator, { provider, dal: now() });
 }
 
 /**
@@ -236,16 +263,18 @@ export function plan(tasks, runs, budget, only) {
 
 const describe = (b) => `settimana ${b.residuo} %, 5 ore ${b.sessione ?? '?'} %${b.fermoFino ? `, fermo fino a ${b.fermoFino}` : ''}`;
 
-function writePlan(queues, budget) {
+export function writePlan(queues, budget, opts) {
+  const p = pathsOf(opts);
   const line = (t) => `- **${t.id}** ${t.title}${t.provider ? ` — ${t.provider}, ${t.estimate ?? '?'} %` : ''}${t.missing ? ` (aspetta ${t.missing.join(', ')})` : ''}`;
   const section = (title, list) => `## ${title} (${list.length})\n\n${list.map(line).join('\n') || '_nessuno_'}\n`;
-  const budgets = Object.entries(budget).map(([p, b]) => `- **${p}**: ${describe(b)}${b.letto ? ` (letto da /usage il ${b.letto})` : ' (impostato a mano)'}` +
+  const budgets = Object.entries(budget).map(([prov, b]) => `- **${prov}**: ${describe(b)}${b.letto ? ` (letto da /usage il ${b.letto})` : ' (impostato a mano)'}` +
     (b.contatori ?? []).map((c) => `\n  - ${c.nome}, ${c.finestra}: ${c.residuo} % residuo, reset ${c.reset}`).join('')).join('\n');
-  const text = `# Il piano della pipeline\n\n> Generato da \`node tools/pipeline/pipeline.mjs stato\` il ${now()}: non modificarlo a mano,\n> la fonte è \`docs/plans/backlog.md\` (righe \`- Pipeline:\`).\n\n## Budget\n\nOrchestratore: **${orchestrator()}** (sotto il ${CONFIG.sogliaUnSolo} % nessun task su di lui; si cambia con \`orchestratore <provider>\`).\n\n${budgets}\n\n` +
+  const text = `# Il piano della pipeline\n\n> Generato da \`node tools/pipeline/pipeline.mjs stato\` il ${now()}: non modificarlo a mano,\n> la fonte è \`docs/plans/backlog.md\` (righe \`- Pipeline:\`).\n\n## Budget\n\nOrchestratore: **${orchestrator(opts)}** (sotto il ${p.config.sogliaUnSolo} % nessun task su di lui; si cambia con \`orchestratore <provider>\`).\n\n${budgets}\n\n` +
     [['In corso', queues.inCorso], ['Finiti, da guardare e integrare (`integra Txx`)', queues.daIntegrare], ['Pronti, in ordine di priorità', queues.pronti], ['Da approvare (provider e stima proposti)', queues.daApprovare],
       ['Da stimare (manca la riga `- Pipeline:`)', queues.daStimare], ['Bloccati da dipendenze', queues.bloccati], ['In attesa dell\'autore', queues.inAttesa]]
       .map(([t, l]) => section(t, l)).join('\n');
-  fs.writeFileSync(PLAN, text);
+  fs.mkdirSync(path.dirname(p.plan), { recursive: true });
+  fs.writeFileSync(p.plan, text);
 }
 
 // --- Worktrees -------------------------------------------------------------------------------------------------
@@ -480,26 +509,124 @@ function listWorktrees() {
   }
 }
 
+const summarizeToolInput = (input) => {
+  if (!input || typeof input !== 'object') return String(input ?? '');
+  const pick = input.file_path ?? input.path ?? input.Path ?? input.command ?? input.CommandLine ?? input.pattern ?? input.query ?? input.url;
+  if (pick !== undefined) return String(pick).slice(0, 200);
+  try { return JSON.stringify(input).slice(0, 200); } catch { return ''; }
+};
+
+/**
+ * Parses a live or completed agent conversation transcript (Claude `.jsonl` or Antigravity `transcript.jsonl`)
+ * into structured steps for the web interface (`utente`, `pensiero`, `strumento`, `agente`).
+ */
+export function parseConversation(text, isClaude = true) {
+  const steps = [];
+  for (const raw of text.split('\n')) {
+    const line = raw.trim();
+    if (!line.startsWith('{')) continue;
+    let j;
+    try { j = JSON.parse(line); } catch { continue; }
+    if (!j || typeof j !== 'object') continue;
+    if (j.type === 'USER_INPUT' || (!isClaude && j.source === 'USER_EXPLICIT')) {
+      if (j.content) steps.push({ ruolo: 'utente', t: j.created_at, testo: String(j.content) });
+      continue;
+    }
+    if (j.type === 'PLANNER_RESPONSE') {
+      if (j.thinking) steps.push({ ruolo: 'pensiero', t: j.created_at, testo: String(j.thinking) });
+      if (Array.isArray(j.tool_calls)) {
+        for (const tc of j.tool_calls) {
+          steps.push({ ruolo: 'strumento', t: j.created_at, nome: tc.name ?? tc.tool_name ?? 'tool', argomenti: summarizeToolInput(tc.args ?? tc.arguments ?? tc.input) });
+        }
+      }
+      if (j.content) steps.push({ ruolo: 'agente', t: j.created_at, testo: String(j.content) });
+      continue;
+    }
+    if (j.type === 'user' && !j.isMeta) {
+      if (typeof j.message?.content === 'string') steps.push({ ruolo: 'utente', t: j.timestamp, testo: j.message.content });
+      continue;
+    }
+    if (j.type === 'assistant' && Array.isArray(j.message?.content)) {
+      for (const c of j.message.content) {
+        if (c.type === 'thinking' && c.thinking) steps.push({ ruolo: 'pensiero', t: j.timestamp, testo: String(c.thinking) });
+        else if (c.type === 'tool_use') steps.push({ ruolo: 'strumento', t: j.timestamp, nome: c.name ?? 'tool', argomenti: summarizeToolInput(c.input) });
+        else if (c.type === 'text' && c.text) steps.push({ ruolo: 'agente', t: j.timestamp, testo: String(c.text) });
+      }
+    }
+  }
+  return steps;
+}
+
 /**
  * The trace of a task's run: where its CLI keeps the whole conversation (Claude: the session's `.jsonl` under
- * `~/.claude/projects/`; Antigravity: the conversation's SQLite under `~/.gemini/antigravity-cli/conversations/`), whether the
- * agent had `AGENTS.md` (Claude: its text in the transcript, imported by CLAUDE.md; Antigravity: the file opened), and the
- * agent's closing summary from the last log.
+ * `~/.claude/projects/`; Antigravity: `transcript.jsonl` under `~/.gemini/antigravity-cli/brain/` or SQLite under
+ * `conversations/`), whether the agent had `AGENTS.md`, the closing summary from the log, and the live conversation steps.
  */
-function trace(id) {
-  const run = readJson(RUNS, {})[id];
-  if (!run) { console.log(`${id}: nessuna esecuzione in .pipeline/esecuzioni.json`); return; }
-  const home = process.env.USERPROFILE ?? process.env.HOME;
+export function traceOf(id, opts) {
+  const p = pathsOf(opts);
+  const run = readJson(p.runs, {})[id];
+  if (!run) return undefined;
+  const home = opts?.home ?? process.env.USERPROFILE ?? process.env.HOME;
+  const isClaude = p.config.providers[run.provider]?.cmd === 'claude';
+  const localConv = path.join(p.stateDir, 'conversazioni', `${id}.jsonl`);
   let file;
-  if (CONFIG.providers[run.provider].cmd === 'claude') {
+  let transcriptFile;
+  if (fs.existsSync(localConv)) {
+    file = localConv;
+    transcriptFile = localConv;
+  } else if (isClaude) {
     const root = path.join(home, '.claude', 'projects');
-    file = fs.readdirSync(root).map((d) => path.join(root, d, `${run.sessione}.jsonl`)).find((f) => fs.existsSync(f));
-  } else file = path.join(home, '.gemini', 'antigravity-cli', 'conversations', `${run.sessione}.db`);
-  const exists = file && fs.existsSync(file);
-  const text = exists ? fs.readFileSync(file).toString('latin1') : '';
-  const agents = run.provider === 'claude' ? text.includes('Regole inviolabili') : /[\\/]AGENTS\.md/.test(text);
-  const log = path.join(LOGS, `${id}.${run.tentativi}.log`);
-  const out = fs.existsSync(log) ? readOutput(fs.readFileSync(log, 'utf8')) : undefined;
+    if (fs.existsSync(root)) {
+      if (run.sessione) file = fs.readdirSync(root).map((d) => path.join(root, d, `${run.sessione}.jsonl`)).find((f) => fs.existsSync(f));
+      if (!file && run.dir) {
+        const sub = path.join(root, run.dir.replace(/[^A-Za-z0-9]/g, '-'));
+        if (fs.existsSync(sub)) {
+          file = fs.readdirSync(sub).filter((f) => f.endsWith('.jsonl')).map((f) => path.join(sub, f))
+            .sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs)[0];
+        }
+      }
+      transcriptFile = file;
+    }
+  } else {
+    const brain = path.join(home, '.gemini', 'antigravity-cli', 'brain');
+    if (run.sessione) {
+      file = path.join(home, '.gemini', 'antigravity-cli', 'conversations', `${run.sessione}.db`);
+      const tf = path.join(brain, run.sessione, '.system_generated', 'logs', 'transcript.jsonl');
+      if (fs.existsSync(tf)) transcriptFile = tf;
+    }
+    if (!transcriptFile && fs.existsSync(brain)) {
+      try {
+        const recent = fs.readdirSync(brain).map((d) => {
+          const tf = path.join(brain, d, '.system_generated', 'logs', 'transcript.jsonl');
+          return fs.existsSync(tf) ? { d, tf, mtime: fs.statSync(tf).mtimeMs } : null;
+        }).filter(Boolean).sort((a, b) => b.mtime - a.mtime).slice(0, 15);
+        const hit = recent.find((x) => {
+          const head = fs.readFileSync(x.tf, 'utf8').slice(0, 2500);
+          return head.includes(`**${id}**`) || head.toLowerCase().includes(`worktrees\\${id.toLowerCase()}`) || head.toLowerCase().includes(`worktrees/${id.toLowerCase()}`);
+        });
+        if (hit) {
+          transcriptFile = hit.tf;
+          if (!file) file = hit.tf;
+        }
+      } catch { /* ignore */ }
+    }
+    if (!file && run.sessione) file = path.join(home, '.gemini', 'antigravity-cli', 'conversations', `${run.sessione}.db`);
+  }
+  const exists = Boolean((file && fs.existsSync(file)) || (transcriptFile && fs.existsSync(transcriptFile)));
+  const rawCheck = file && fs.existsSync(file) ? fs.readFileSync(file).toString('latin1') : transcriptFile && fs.existsSync(transcriptFile) ? fs.readFileSync(transcriptFile, 'utf8') : '';
+  const agents = isClaude ? rawCheck.includes('Regole inviolabili') : /[\\/]AGENTS\.md/.test(rawCheck);
+  const log = path.join(p.logs, `${id}.${run.tentativi}.log`);
+  const logText = fs.existsSync(log) ? fs.readFileSync(log, 'utf8') : '';
+  const out = logText ? readOutput(logText) : undefined;
+  const convText = transcriptFile && fs.existsSync(transcriptFile) ? fs.readFileSync(transcriptFile, 'utf8') : '';
+  const conversazione = convText ? parseConversation(convText, isClaude) : [];
+  return { id, run, file: file ?? transcriptFile, transcriptFile, exists, agents, log, logText, out, conversazione };
+}
+
+function trace(id) {
+  const t = traceOf(id);
+  if (!t) { console.log(`${id}: nessuna esecuzione in .pipeline/esecuzioni.json`); return; }
+  const { run, file, exists, agents, log, out } = t;
   console.log(`${id} su ${run.provider}, ${run.tentativi} tentativo/i, ${run.stato}${run.esito ? ` — ${run.esito}` : ''}`);
   console.log(`Conversazione: ${exists ? file : '(non trovata)'}${run.provider === 'claude' ? '' : `  (riprendila con: agy --conversation ${run.sessione})`}`);
   if (run.provider === 'claude') console.log(`  (riprendila con: claude --resume ${run.sessione}, dalla cartella ${run.dir})`);
@@ -508,47 +635,59 @@ function trace(id) {
 }
 
 /** Puts back in the queue a run that stopped without a usage limit being recognised: it resumes its conversation. */
-function resume(id) {
-  const runs = readJson(RUNS, {});
-  const run = runs[id];
-  if (!run) { console.log(`${id}: nessuna esecuzione`); return; }
-  if (run.sessione) Object.assign(run, { stato: 'sospeso', fermoFino: now(), esito: undefined, fine: undefined, pid: undefined });
-  else delete runs[id];
-  writeJson(RUNS, runs);
-  say(`${id}: rimesso in coda (${run.sessione ? 'riprende la sua conversazione' : 'riparte da capo'})`);
+export function resumeTasks(ids, opts) {
+  const p = pathsOf(opts);
+  const runs = readJson(p.runs, {});
+  const resumed = [];
+  for (const id of ids) {
+    const run = runs[id];
+    if (!run) { console.log(`${id}: nessuna esecuzione`); continue; }
+    if (run.sessione) Object.assign(run, { stato: 'sospeso', fermoFino: now(), esito: undefined, fine: undefined, pid: undefined });
+    else delete runs[id];
+    writeJson(p.runs, runs);
+    say(`${id}: rimesso in coda (${run.sessione ? 'riprende la sua conversazione' : 'riparte da capo'})`, p.report);
+    resumed.push(id);
+  }
+  return resumed;
 }
 
 /** Stops a running task (the orchestrator does it when a bug would spoil its checks): it keeps its conversation. */
-function interrupt(ids) {
-  const runs = readJson(RUNS, {});
+export function interruptTasks(ids, opts) {
+  const p = pathsOf(opts);
+  const runs = readJson(p.runs, {});
   const list = ids.includes('--tutti') ? Object.values(runs).filter((r) => r.stato === 'in corso').map((r) => r.id) : ids;
+  const interrupted = [];
   for (const id of list) {
     const run = runs[id];
     if (run?.stato !== 'in corso') { console.log(`${id}: non è in corso`); continue; }
     Object.assign(run, { stato: 'interrotto', interrotto: now() });
-    writeJson(RUNS, runs);
+    writeJson(p.runs, runs);
     if (run.pid) killTree(run.pid);
-    say(`${id}: interrotto dall'orchestratore (riprende con riprendi ${id})`);
+    say(`${id}: interrotto dall'orchestratore (riprende con riprendi ${id})`, p.report);
+    interrupted.push(id);
   }
+  return interrupted;
 }
 
 /**
  * Merges a finished task into the base. A conflict leaves the base as it was: the merge is aborted and the files are
  * named, so whoever orchestrates delegates the merge to an agent (a task that merges `task/<Txx>` in its own worktree).
  */
-function integrate(id) {
-  const base = worktrees().find((w) => w.branch === CONFIG.base);
+export function integrateTask(id, opts) {
+  const p = pathsOf(opts);
+  const base = worktrees().find((w) => w.branch === p.config.base);
   try {
     git(['merge', '--no-ff', '-m', `Pipeline: integra ${id}`, `task/${id}`], base.path);
   } catch (e) {
     const conflicts = (() => { try { return git(['diff', '--name-only', '--diff-filter=U'], base.path).split('\n').filter(Boolean); } catch { return []; } })();
     try { git(['merge', '--abort'], base.path); } catch { /* nothing to abort: the merge did not start */ }
-    say(`integra ${id}: ${conflicts.length ? `conflitti in ${conflicts.join(', ')}` : `non riuscito (${String(e.stderr ?? e.message).trim().split('\n')[0]})`}; il base è com'era`);
+    const msg = `integra ${id}: ${conflicts.length ? `conflitti in ${conflicts.join(', ')}` : `non riuscito (${String(e.stderr ?? e.message).trim().split('\n')[0]})`}; il base è com'era`;
+    say(msg, p.report);
     process.exitCode = 1;
-    return;
+    return { ok: false, message: msg, conflicts };
   }
-  const runs = readJson(RUNS, {});
-  if (runs[id]) { runs[id].integrato = now(); writeJson(RUNS, runs); }
+  const runs = readJson(p.runs, {});
+  if (runs[id]) { runs[id].integrato = now(); writeJson(p.runs, runs); }
   // The worktree goes: first the junction alone (removing it as a folder would empty the base's node_modules).
   const wt = worktrees().find((w) => w.branch === `task/${id}`);
   if (wt) {
@@ -557,7 +696,9 @@ function integrate(id) {
     git(['worktree', 'remove', wt.path], base.path);
   }
   git(['branch', '-d', `task/${id}`], base.path);
-  say(`task/${id} integrato in ${CONFIG.base}; worktree e branch tolti.`);
+  const msg = `task/${id} integrato in ${p.config.base}; worktree e branch tolti.`;
+  say(msg, p.report);
+  return { ok: true, message: msg };
 }
 
 // --- What the orchestrator reads and changes ---------------------------------------------------------------------
@@ -584,9 +725,55 @@ export function setPipelineLine(text, id, change) {
   return text.replace(block, next);
 }
 
-function editPipeline(id, change) {
-  const text = fs.readFileSync(BACKLOG, 'utf8');
-  fs.writeFileSync(BACKLOG, setPipelineLine(text, id, change));
+function editPipeline(id, change, opts) {
+  const p = pathsOf(opts);
+  const text = fs.readFileSync(p.backlog, 'utf8');
+  fs.writeFileSync(p.backlog, setPipelineLine(text, id, change));
+}
+
+export function approveTasks(ids, opts) {
+  for (const id of ids) {
+    editPipeline(id, (i) => {
+      if (!i?.provider) throw new Error(`${id}: senza provider e stima (assegna prima)`);
+      return { ...i, approved: true };
+    }, opts);
+  }
+  return ids;
+}
+
+export function assignTask(id, { provider, stima, priorita, approva }, opts) {
+  const p = pathsOf(opts);
+  if (!p.config.providers[provider] || !(Number(stima) > 0)) {
+    throw new Error('Uso: assegna <Txx> <claude|gemini|argon> <stima %> [priorità] [--approva]');
+  }
+  editPipeline(id, (i) => ({
+    provider,
+    estimate: Number(stima),
+    priority: priorita !== undefined && priorita !== '' && !String(priorita).startsWith('--') ? Number(priorita) : i?.priority ?? 100,
+    approved: Boolean(approva || i?.approved),
+  }), opts);
+  return { id, provider, stima: Number(stima) };
+}
+
+export function setBudgetManual(provider, residuo, opts) {
+  const p = pathsOf(opts);
+  const b = readJson(p.budget, {});
+  b[provider] = { ...b[provider], residuo: Number(residuo), aggiornato: now(), fermoFino: undefined };
+  writeJson(p.budget, b);
+  return b;
+}
+
+export function refreshUsage(opts) {
+  const p = pathsOf(opts);
+  const b = readJson(p.budget, {});
+  for (const k of Object.keys(b)) delete b[k].letto;
+  writeJson(p.budget, b);
+  if (!opts?.repo) {
+    const fresh = loadBudget();
+    writeJson(p.budget, fresh);
+    return fresh;
+  }
+  return b;
 }
 
 /** The first task number nobody has used. */
@@ -610,41 +797,62 @@ function index() {
  * block, its run, its commits and files, the ADRs it names, the tasks it depends on, those that depend on it, and
  * the tasks whose commits touched the same files. The orchestrator opens it on demand and passes it on.
  */
-function dossier(id) {
-  const text = fs.readFileSync(BACKLOG, 'utf8');
+export function dossierOf(id, opts) {
+  const p = pathsOf(opts);
+  const safeGit = (args) => { try { return execFileSync('git', args, { cwd: p.repo, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch { return ''; } };
+  const text = fs.readFileSync(p.backlog, 'utf8');
   const tasks = parseBacklog(text);
   const block = taskBlock(text, id) ?? taskBlock(text, id.replace(/[a-z]$/, ''));
-  const run = readJson(RUNS, {})[id];
+  const run = readJson(p.runs, {})[id];
   const out = [`# Dossier di ${id}`, '', block?.trim() ?? '(non c\'è nel backlog)', ''];
   if (run) out.push('## Esecuzione', '', `${run.provider}, ${run.tentativi} tentativo/i, ${run.stato}${run.integrato ? `, integrato il ${run.integrato}` : ''}`,
     ...[run.esito, run.browser, run.sessione && `sessione ${run.sessione} (traccia: node tools/pipeline/pipeline.mjs traccia ${id})`].filter(Boolean), '');
   const word = new RegExp(`\\b${id}\\b`);
   // The id in the subject or in the body (a fix of T63 made by another task says so in its message).
-  const commits = git(['log', '--all', '--format=%h %ad %s%x01%b%x02', '--date=short', `--grep=${id}`, '-n', '60']).split('\x02')
+  const commits = safeGit(['log', '--all', '--format=%h %ad %s%x01%b%x02', '--date=short', `--grep=${id}`, '-n', '60']).split('\x02')
     .map((c) => c.trim()).filter((c) => word.test(c)).map((c) => c.split('\x01')[0]).slice(0, 30);
   if (commits.length) out.push('## Commit', '', ...commits.map((c) => `- ${c}`), '');
   const files = new Set();
   for (const c of commits.map((l) => l.split(' ')[0])) {
-    const merge = git(['rev-list', '--parents', '-n', '1', c]).split(' ').length > 2;
-    for (const f of git(['show', '--format=', '--name-only', ...(merge ? ['-m', '--first-parent'] : []), c]).split('\n').filter(Boolean)) files.add(f);
+    const merge = safeGit(['rev-list', '--parents', '-n', '1', c]).split(' ').length > 2;
+    for (const f of safeGit(['show', '--format=', '--name-only', ...(merge ? ['-m', '--first-parent'] : []), c]).split('\n').filter(Boolean)) files.add(f);
   }
   if (files.size) out.push('## File', '', ...[...files].sort().map((f) => `- ${f}`), '');
   const adrs = new Set([...`${block ?? ''}\n${commits.join('\n')}`.matchAll(/ADR-(\d{4})/g)].map((m) => m[1]));
-  const adrDir = path.join(REPO, 'docs', 'adr');
-  const adrFiles = fs.existsSync(adrDir) ? fs.readdirSync(adrDir) : [];
-  if (adrs.size) out.push('## ADR', '', ...[...adrs].sort().map((n) => `- docs/adr/${adrFiles.find((f) => f.startsWith(n)) ?? `${n}-…`}`), '');
+  const adrFiles = fs.existsSync(p.adrDir) ? fs.readdirSync(p.adrDir) : [];
+  const adrList = [...adrs].sort().map((n) => `docs/adr/${adrFiles.find((f) => f.startsWith(n)) ?? `${n}-…`}`);
+  if (adrList.length) out.push('## ADR', '', ...adrList.map((a) => `- ${a}`), '');
   const me = tasks.find((t) => t.id === id);
   const after = tasks.filter((t) => t.deps.includes(id)).map((t) => t.id);
   const near = new Map();
   if (files.size) {
-    const subjects = git(['log', '--format=%s', '-n', '400', '--', ...[...files].filter((f) => !/backlog|PIANO|consumi|orchestrazione|AGENTS\.md|README/.test(f)).slice(0, 40)]);
+    const cleanFiles = [...files].filter((f) => !/backlog|PIANO|consumi|orchestrazione|AGENTS\.md|README/.test(f)).slice(0, 40);
+    const subjects = cleanFiles.length ? safeGit(['log', '--format=%s', '-n', '400', '--', ...cleanFiles]) : '';
     for (const m of subjects.matchAll(/\bT\d+[a-z]?\b/g)) if (m[0] !== id) near.set(m[0], (near.get(m[0]) ?? 0) + 1);
   }
+  const sameFiles = [...near].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([t, n]) => ({ id: t, count: n }));
   out.push('## Collegati', '', `- dipende da: ${me?.deps.join(', ') || '—'}`, `- dipendono da lui: ${after.join(', ') || '—'}`,
-    `- stessi file: ${[...near].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([t, n]) => `${t} (${n})`).join(', ') || '—'}`);
-  const q = path.join(REPO, 'docs', 'pipeline', 'domande', `${id}.md`);
-  if (fs.existsSync(q)) out.push(`- domande: docs/pipeline/domande/${id}.md`);
-  console.log(out.join('\n'));
+    `- stessi file: ${sameFiles.map((s) => `${s.id} (${s.count})`).join(', ') || '—'}`);
+  const q = path.join(p.domande, `${id}.md`);
+  const hasQuestions = fs.existsSync(q);
+  if (hasQuestions) out.push(`- domande: docs/pipeline/domande/${id}.md`);
+  return {
+    id,
+    markdown: out.join('\n'),
+    block: block?.trim(),
+    run,
+    commits,
+    files: [...files].sort(),
+    adrs: adrList,
+    deps: me?.deps ?? [],
+    after,
+    sameFiles,
+    hasQuestions,
+  };
+}
+
+function dossier(id) {
+  console.log(dossierOf(id).markdown);
 }
 
 const [cmd, ...rest] = process.argv.slice(2);
@@ -652,21 +860,21 @@ const flag = (name) => { const i = rest.indexOf(`--${name}`); return i >= 0 ? re
 if (process.argv[1]?.endsWith('pipeline.mjs')) {
   if (cmd === 'stato' || !cmd) status();
   else if (cmd === 'esegui') await execute({ max: Number(flag('max') ?? CONFIG.maxParalleli), only: flag('solo'), task: flag('task'), always: rest.includes('--sempre') });
-  else if (cmd === 'uso') { const b = readJson(BUDGET, {}); for (const p of Object.keys(b)) delete b[p].letto; writeJson(BUDGET, b); status(); }
+  else if (cmd === 'uso') { refreshUsage(); status(); }
   else if (cmd === 'budget') { const b = loadBudget(); b[rest[0]] = { ...b[rest[0]], residuo: Number(rest[1]), aggiornato: now(), fermoFino: undefined }; writeJson(BUDGET, b); status(); }
   else if (cmd === 'worktree') listWorktrees();
-  else if (cmd === 'integra') integrate(rest[0]);
+  else if (cmd === 'integra') integrateTask(rest[0]);
   else if (cmd === 'traccia') trace(rest[0]);
-  else if (cmd === 'riprendi') for (const id of rest) resume(id);
-  else if (cmd === 'interrompi') interrupt(rest);
+  else if (cmd === 'riprendi') resumeTasks(rest);
+  else if (cmd === 'interrompi') interruptTasks(rest);
   else if (cmd === 'dossier') dossier(rest[0]);
   else if (cmd === 'indice') index();
   else if (cmd === 'prossimo') console.log(nextTaskId(fs.readFileSync(BACKLOG, 'utf8')));
-  else if (cmd === 'approva') for (const id of rest) { editPipeline(id, (i) => { if (!i?.provider) throw new Error(`${id}: senza provider e stima (assegna prima)`); return { ...i, approved: true }; }); console.log(`${id}: approvato`); }
+  else if (cmd === 'approva') { approveTasks(rest); for (const id of rest) console.log(`${id}: approvato`); }
   else if (cmd === 'assegna') {
     const [id, provider, stima, priorita] = rest;
     if (!CONFIG.providers[provider] || !(Number(stima) > 0)) console.log('Uso: assegna <Txx> <claude|gemini|argon> <stima %> [priorità] [--approva]');
-    else { editPipeline(id, (i) => ({ provider, estimate: Number(stima), priority: priorita && !priorita.startsWith('--') ? Number(priorita) : i?.priority ?? 100, approved: rest.includes('--approva') || Boolean(i?.approved) })); console.log(`${id}: ${provider}, ${stima}%`); }
+    else { assignTask(id, { provider, stima, priorita, approva: rest.includes('--approva') }); console.log(`${id}: ${provider}, ${stima}%`); }
   }
   else if (cmd === 'nota') say(`nota: ${rest.join(' ')}`);
   else if (cmd === 'orchestratore') {
@@ -674,10 +882,12 @@ if (process.argv[1]?.endsWith('pipeline.mjs')) {
     else if (rest[0]) { writeJson(ORCHESTRATOR, { provider: rest[0], dal: now() }); say(`orchestratore: ${rest[0]}`); }
     else console.log(orchestrator());
   }
-  // Not awaited: orchestra.mjs imports this module, which must finish evaluating first.
-  else if (cmd === 'orchestra') void import('./orchestra.mjs').then((m) => m.orchestra({ agente: flag('agente') }));
+  // Not awaited: orchestra.mjs and web.mjs import this module, which must finish evaluating first.
+  else if (cmd === 'orchestra') void import('./orchestra.mjs').then((m) => m.orchestra({ agente: flag('agente'), porta: flag('porta') ? Number(flag('porta')) : undefined }));
+  else if (cmd === 'web') void import('./web.mjs').then((m) => m.startWebServer({ port: Number(flag('porta') ?? CONFIG.orchestra?.porta ?? 4242) }));
   else console.log(`Comandi:
-  orchestra [--agente claude|argon|gemini]   l'orchestratore e la pipeline, con la chat nel terminale
+  orchestra [--agente claude|argon|gemini] [--porta 4242]   l'orchestratore, la pipeline e l'interfaccia web
+  web [--porta 4242]                                        solo l'interfaccia web della pipeline
   stato | uso | indice | dossier <Txx> | traccia <Txx> | worktree | prossimo
   esegui [--sempre] [--max N] [--solo <provider>] [--task Txx]
   approva <Txx…> | assegna <Txx> <provider> <stima %> [priorità] [--approva]

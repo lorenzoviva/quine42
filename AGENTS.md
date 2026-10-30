@@ -153,7 +153,7 @@ src/session/             il kernel sul server (ADR-0058): protocol.ts (messaggi,
                         (SessionClient: ciò che un client sa del mondo), host.ts (apre un universo e fa girare il suo mondo);
                         il client sottile (ADR-0059): thin.ts (ThinClient: riempie il kernel specchio), socket.ts (WebSocket, id della scheda)
 tools/pipeline/          la pipeline agentica (ADR-0072, 0079): pipeline.mjs (code, budget, esecuzione nei worktree, ripresa dopo i limiti, dossier),
-                        orchestra.mjs (il processo dell'orchestratore: chat, eventi, epoche), config.json
+                        orchestra.mjs (il processo dell'orchestratore: chat, eventi, epoche), web.mjs (l'interfaccia web locale, T69), config.json
 lab/                    laboratorio di MarkovJunior (ADR-0038): sandbox 3D /lab/3d/, editor modelli /lab/editor/ (T59a, T59b, T59c, T59d), modelli ufficiali e conformità, script per
                         affettare, fotografare, misurare e provare i programmi con Gemini; non importarlo da src/
 ```
@@ -526,9 +526,9 @@ domande: le scrive in `docs/pipeline/domande/<Txx>.md`) al posto dei punti 1 e 3
 browser che il task chiede e non ha fatto (riga `BROWSER:`), integra rinumerando gli ADR che si scontrano, e tiene
 [`docs/pipeline/orchestrazione.md`](docs/pipeline/orchestrazione.md) (passaggio di consegne e diario). Il suo provider
 (`orchestratore <provider>`, a mano quando i crediti finiscono) sotto `sogliaUnSolo` non riceve task.
-**L'ambiente dell'orchestratore** (ADR-0079): la pipeline si lancia con `node tools/pipeline/pipeline.mjs orchestra [--agente claude|argon|gemini]`
-(`tools/pipeline/orchestra.mjs`): un processo con `esegui` sempre acceso e la conversazione con l'orchestratore a turni (`claude -p --resume`,
-`agy -p --conversation`), la chat nel terminale, eventi e chat su disco (`.pipeline/orchestra/`), epoche che ripartono dal **quadro**
+**L'ambiente dell'orchestratore** (ADR-0079): la pipeline si lancia con `node tools/pipeline/pipeline.mjs orchestra [--agente claude|argon|gemini] [--porta 4242]`
+(`tools/pipeline/orchestra.mjs`): un processo con `esegui` sempre acceso, l'interfaccia web locale (`tools/pipeline/web.mjs`, T69; anche da sola con `node tools/pipeline/pipeline.mjs web`) e la conversazione con l'orchestratore a turni (`claude -p --resume`,
+`agy -p --conversation`), la chat nel terminale e sul web (stessa coda `.pipeline/orchestra/coda.json`), eventi e chat su disco (`.pipeline/orchestra/`), epoche che ripartono dal **quadro**
 (`docs/pipeline/quadro.md`) a metà finestra o quando i crediti finiscono (provider successivo di `orchestra.ordine`). L'orchestratore
 decide e delega (`interrompi`, `approva`, `assegna`, `dossier`, `indice`, `prossimo`; `integra` su un conflitto annulla e la risoluzione
 diventa un task); i task sopravvivono al processo (log diretti, `--session-id`, ripresi al riavvio).

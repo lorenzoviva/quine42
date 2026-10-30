@@ -9,7 +9,7 @@ docs/userchats/to-do.md        (1) le richieste dell'autore, testo libero, con �
 docs/plans/backlog.md          (3) i task, uno per sessione; ogni task pianificato ha la riga «- Pipeline:»
 docs/pipeline/PIANO.md         (4) il piano: le code per provider (generato dallo script, non toccarlo)
 .pipeline/                     (5) l'esecuzione: esecuzioni.json, budget.json, orchestratore.json, log/ (locale, ignorato da git)
-  └─ orchestra/                    la conversazione dell'orchestratore: stato.json, eventi.jsonl, chat.jsonl, avvio.md
+  └─ orchestra/                    la conversazione dell'orchestratore: stato.json, eventi.jsonl, chat.jsonl, coda.json, avvio.md
 docs/pipeline/quadro.md            lo stato e le intenzioni, scritti dall'orchestratore: chi lo sostituisce parte da qui
 docs/pipeline/orchestrazione.md    il diario: lanci, esiti, limiti, integrazioni, note
 docs/pipeline/consumi.jsonl        lo storico dei consumi, per stimare meglio
@@ -18,15 +18,26 @@ docs/pipeline/consumi.jsonl        lo storico dei consumi, per stimare meglio
 ## Avviare la pipeline
 
 ```bash
-node tools/pipeline/pipeline.mjs orchestra                 # orchestratore su Claude Code (poi Argon, poi Gemini)
+node tools/pipeline/pipeline.mjs orchestra                 # orchestratore su Claude Code (poi Argon, poi Gemini) + web su :4242
 node tools/pipeline/pipeline.mjs orchestra --agente argon  # su Gemini 4 Argon in Antigravity
+node tools/pipeline/pipeline.mjs web [--porta 4242]        # solo l'interfaccia web (stessi file e comandi della pipeline)
 ```
 
-Un solo processo, in un terminale: esegue i task (`esegui`, sempre acceso) e tiene la conversazione con l'**orchestratore**, un agente
-che gira a turni con la sua CLI e segue [`orchestra.md`](orchestra.md). Gli scrivi come in una chat: richieste, bug, domande,
+Un solo processo, in un terminale: esegue i task (`esegui`, sempre acceso), apre l'**interfaccia web** (`http://localhost:4242`,
+`tools/pipeline/web.mjs`, T69) e tiene la conversazione con l'**orchestratore**, un agente
+che gira a turni con la sua CLI e segue [`orchestra.md`](orchestra.md). Gli scrivi come in una chat (dal terminale o dalla pagina web,
+che usano la stessa coda in `.pipeline/orchestra/coda.json`): richieste, bug, domande,
 correzioni ai task fatti. Lui pianifica, stima, sceglie il provider, approva ciò che gli chiedi, lancia, interrompe, riporta gli esiti,
 fa verificare nel browser e integra; non lavora sul codice, delega. Gli eventi della pipeline (esiti, limiti) gli arrivano tra un
 turno e l'altro, anche se non scrivi nulla.
+
+**L'interfaccia web** (`tools/pipeline/web.mjs`) legge e scrive gli stessi file e comandi della pipeline, senza una seconda fonte di verità:
+1. **Chat e Orchestra**: chat con l'orchestratore (`.pipeline/orchestra/chat.jsonl` + `coda.json`), eventi (`eventi.jsonl`), il quadro (`quadro.md`) e il diario (`orchestrazione.md`).
+2. **Lavagna e Tabella**: lavagna Kanban a colonne con le code di `PIANO.md` (In corso, Finiti da integrare, Pronti, Da approvare / stimare, Bloccati, In attesa) e tabella filtrabile di tutti i task del backlog.
+3. **Dettaglio di un task**: dossier completo (`dossier`), log dell'esecuzione (`log/<Txx>.<tentativo>.log`) e **conversazione in diretta** dell'agente che sta lavorando (letta dal `.jsonl` di Claude o da `transcript.jsonl` di Antigravity).
+4. **Azioni dirette**: approvare (`approva`), assegnare provider/stima/priorità (`assegna`), interrompere (`interrompi`), riprendere (`riprendi`) e integrare (`integra`).
+5. **Domande & To-Do**: rispondere alle domande in `docs/pipeline/domande/*.md` e aggiungere o modificare richieste in `docs/userchats/to-do.md`.
+6. **Budget & Consumi**: i contatori a 5 ore e settimanali di ogni provider (`.pipeline/budget.json`, rilettura `/usage` o impostazione manuale `budget`) e lo storico di `docs/pipeline/consumi.jsonl`.
 
 | Nel terminale | |
 |---|---|

@@ -270,3 +270,218 @@ describe('orchestra', () => {
     expect(O.wakes('[t] lancio T1 su claude (…)')).toBe(false);
   });
 });
+
+type WebModule = {
+  handleApi(method: string, rawUrl: string, body?: unknown, opts?: { repo?: string; stateDir?: string }): { status: number; data: Record<string, any> };
+  parseQuestionFile(id: string, text: string): { id: string; items: { numero: number; domanda: string; risposta: string }[]; answered: boolean };
+  applyAnswersToMarkdown(text: string, risposte: Record<string, string>): string;
+  renderHtml(): string;
+  startWebServer(opts?: { port?: number; fallbackPort?: boolean; repo?: string; stateDir?: string }): Promise<{ server: import('node:http').Server; port: number }>;
+};
+
+describe('interfaccia web della pipeline (T69)', () => {
+  let W: WebModule;
+  let fsMod: typeof import('node:fs');
+  let osMod: typeof import('node:os');
+  let tmpRepo: string;
+
+  beforeAll(async () => {
+    fsMod = await import('node:fs');
+    osMod = await import('node:os');
+    W = (await import(/* @vite-ignore */ pathToFileURL(path.resolve(__dirname, '../tools/pipeline/web.mjs')).href)) as WebModule;
+  });
+
+  const makeSandbox = () => {
+    tmpRepo = fsMod.mkdtempSync(path.join(osMod.tmpdir(), 'quine-pipe-web-'));
+    fsMod.mkdirSync(path.join(tmpRepo, 'docs', 'plans'), { recursive: true });
+    fsMod.mkdirSync(path.join(tmpRepo, 'docs', 'pipeline', 'domande'), { recursive: true });
+    fsMod.mkdirSync(path.join(tmpRepo, 'docs', 'userchats'), { recursive: true });
+    fsMod.mkdirSync(path.join(tmpRepo, '.pipeline', 'orchestra'), { recursive: true });
+    fsMod.mkdirSync(path.join(tmpRepo, '.pipeline', 'log'), { recursive: true });
+    fsMod.mkdirSync(path.join(tmpRepo, '.pipeline', 'conversazioni'), { recursive: true });
+
+    fsMod.writeFileSync(path.join(tmpRepo, 'docs', 'plans', 'backlog.md'), [
+      '# Backlog',
+      '',
+      '### T1 · Base fatta — `fatto` (`111aaaa`)',
+      '- Fare: base.',
+      '',
+      '### T2 · In corso adesso — `in corso` (dipende da T1)',
+      '- Pipeline: claude · stima 4% · approvato · priorità 1',
+      '- Fare: lavoro attivo.',
+      '',
+      '### T3 · Pronto da approvare — `da fare` (dipende da T1)',
+      '- Pipeline: argon · stima 5% · priorità 10',
+      '- Fare: aspetta approvazione.',
+      '',
+      '### T4 · Da stimare — `da fare`',
+      '- Fare: senza riga pipeline.',
+      '',
+      '### T5 · In attesa di risposta — `in attesa`',
+      '- Pipeline: gemini · stima 3% · approvato · priorità 20',
+      '- Fare: aspetta domande.',
+      '',
+      '### T6 · Bloccato — `da fare` (dipende da T3)',
+      '- Pipeline: claude · stima 2% · approvato · priorità 30',
+      '- Fare: aspetta T3.',
+      '',
+    ].join('\n'));
+
+    fsMod.writeFileSync(path.join(tmpRepo, 'docs', 'pipeline', 'domande', 'T5.md'), [
+      '# T5 · Domande',
+      '',
+      '1. **Quale opzione scegli?** Opzione A o B.',
+      '   Risposta: ',
+      '2. **Confermi?** Sì o no.',
+      '   Risposta: ',
+      '',
+    ].join('\n'));
+
+    fsMod.writeFileSync(path.join(tmpRepo, 'docs', 'userchats', 'to-do.md'), '# Modifiche da fare\n\n');
+    fsMod.writeFileSync(path.join(tmpRepo, 'docs', 'pipeline', 'quadro.md'), '# Il quadro\n\nTutto sotto controllo.\n');
+    fsMod.writeFileSync(path.join(tmpRepo, 'docs', 'pipeline', 'consumi.jsonl'),
+      JSON.stringify({ task: 'T1', provider: 'claude', stima: 3, prima: { settimana: 90, sessione: 80 }, dopo: { settimana: 87, sessione: 70 }, costoUsd: 1.25, minuti: 6, tentativi: 1, esito: 'ESITO: fatto — base', data: '2026-10-30T01:00:00Z' }) + '\n');
+
+    fsMod.writeFileSync(path.join(tmpRepo, '.pipeline', 'esecuzioni.json'), JSON.stringify({
+      T2: { id: 'T2', provider: 'claude', stima: 4, tentativi: 1, stato: 'in corso', sessione: 'sess-t2', dir: tmpRepo },
+    }, null, 2));
+    fsMod.writeFileSync(path.join(tmpRepo, '.pipeline', 'budget.json'), JSON.stringify({
+      claude: { residuo: 75, sessione: 60, letto: '2026-10-30T03:00:00Z', contatori: [{ nome: 'session', finestra: '5h', residuo: 60 }] },
+      argon: { residuo: 88, sessione: 100 },
+      gemini: { residuo: 92, sessione: 100 },
+    }, null, 2));
+    fsMod.writeFileSync(path.join(tmpRepo, '.pipeline', 'log', 'T2.1.log'),
+      JSON.stringify({ session_id: 'sess-t2', result: 'Sto lavorando su T2.\nESITO: fatto — T2 completato' }) + '\n');
+    fsMod.writeFileSync(path.join(tmpRepo, '.pipeline', 'conversazioni', 'T2.jsonl'), [
+      JSON.stringify({ type: 'user', timestamp: '2026-10-30T03:01:00Z', message: { role: 'user', content: 'Lavora su T2. Regole inviolabili in AGENTS.md.' } }),
+      JSON.stringify({ type: 'assistant', timestamp: '2026-10-30T03:01:05Z', message: { role: 'assistant', content: [{ type: 'thinking', thinking: 'Controllo i file' }, { type: 'tool_use', name: 'Read', input: { file_path: 'AGENTS.md' } }, { type: 'text', text: 'Ho letto AGENTS.md e procedo.' }] } }),
+    ].join('\n') + '\n');
+
+    return { repo: tmpRepo };
+  };
+
+  afterEach(() => {
+    if (tmpRepo && fsMod.existsSync(tmpRepo)) {
+      fsMod.rmSync(tmpRepo, { recursive: true, force: true });
+    }
+  });
+
+  it('GET /api/stato restituisce lavagne, tabella dei task, budget, consumi, domande e to-do', () => {
+    const opts = makeSandbox();
+    const res = W.handleApi('GET', '/api/stato', {}, opts);
+    expect(res.status).toBe(200);
+    expect(res.data.code.inCorso.map((t: any) => t.id)).toEqual(['T2']);
+    expect(res.data.code.daApprovare.map((t: any) => t.id)).toEqual(['T3']);
+    expect(res.data.code.daStimare.map((t: any) => t.id)).toEqual(['T4']);
+    expect(res.data.code.inAttesa.map((t: any) => t.id)).toEqual(['T5']);
+    expect(res.data.code.bloccati.map((t: any) => t.id)).toEqual(['T6']);
+    expect(res.data.consumi).toHaveLength(1);
+    expect(res.data.domande[0]).toMatchObject({ id: 'T5', answered: false });
+    expect(W.renderHtml()).toContain('QUINE42 · Pipeline Agentica');
+  });
+
+  it('POST /api/assegna e POST /api/approva aggiornano il backlog e le code di PIANO.md', () => {
+    const opts = makeSandbox();
+    expect(W.handleApi('POST', '/api/assegna', { id: 'T4', provider: 'argon', stima: 6, priorita: 5, approva: false }, opts).status).toBe(200);
+    let st = W.handleApi('GET', '/api/stato', {}, opts).data;
+    expect(st.code.daApprovare.map((t: any) => t.id).sort()).toEqual(['T3', 'T4']);
+
+    expect(W.handleApi('POST', '/api/approva', { ids: ['T3', 'T4'] }, opts).status).toBe(200);
+    st = W.handleApi('GET', '/api/stato', {}, opts).data;
+    expect(st.code.pronti.map((t: any) => t.id)).toEqual(['T4', 'T3']); // p5 before p10
+    const piano = fsMod.readFileSync(path.join(tmpRepo, 'docs', 'pipeline', 'PIANO.md'), 'utf8');
+    expect(piano).toContain('**T4**');
+  });
+
+  it('POST /api/interrompi e POST /api/riprendi fermano e rimettono in coda un task', () => {
+    const opts = makeSandbox();
+    const intRes = W.handleApi('POST', '/api/interrompi', { ids: ['T2'] }, opts);
+    expect(intRes.status).toBe(200);
+    expect(intRes.data.interrotti).toEqual(['T2']);
+
+    let st = W.handleApi('GET', '/api/stato', {}, opts).data;
+    expect(st.tasks.find((t: any) => t.id === 'T2').esecuzione.stato).toBe('interrotto');
+
+    const resRes = W.handleApi('POST', '/api/riprendi', { ids: ['T2'] }, opts);
+    expect(resRes.status).toBe(200);
+    expect(resRes.data.ripresi).toEqual(['T2']);
+
+    st = W.handleApi('GET', '/api/stato', {}, opts).data;
+    expect(st.tasks.find((t: any) => t.id === 'T2').esecuzione.stato).toBe('sospeso');
+  });
+
+  it('GET /api/task/:id restituisce il dossier, il log e la conversazione dal vivo', () => {
+    const opts = makeSandbox();
+    const res = W.handleApi('GET', '/api/task/T2', {}, opts);
+    expect(res.status).toBe(200);
+    expect(res.data.dossier.markdown).toContain('# Dossier di T2');
+    expect(res.data.dossier.deps).toEqual(['T1']);
+    expect(res.data.traccia.agents).toBe(true);
+    expect(res.data.traccia.conversazione.map((c: any) => c.ruolo)).toEqual(['utente', 'pensiero', 'strumento', 'agente']);
+    expect(res.data.traccia.conversazione[2]).toMatchObject({ nome: 'Read', argomenti: 'AGENTS.md' });
+  });
+
+  it('POST /api/chat, POST /api/domande/:id e POST /api/todo scrivono nella coda e nei file reali', () => {
+    const opts = makeSandbox();
+    const chatRes = W.handleApi('POST', '/api/chat', { testo: 'Stato dei lavori?' }, opts);
+    expect(chatRes.status).toBe(200);
+    expect(chatRes.data.inCoda).toHaveLength(1);
+    expect(chatRes.data.inCoda[0].testo).toBe('Stato dei lavori?');
+
+    const domRes = W.handleApi('POST', '/api/domande/T5', { risposte: { 1: 'Opzione A', 2: 'Sì, confermo' }, avvisa: true }, opts);
+    expect(domRes.status).toBe(200);
+    expect(domRes.data.parsed.answered).toBe(true);
+    const savedDom = fsMod.readFileSync(path.join(tmpRepo, 'docs', 'pipeline', 'domande', 'T5.md'), 'utf8');
+    expect(savedDom).toContain('Risposta: Opzione A');
+    expect(savedDom).toContain('Risposta: Sì, confermo');
+
+    const todoRes = W.handleApi('POST', '/api/todo', {
+      aggiungi: { titolo: 'Nuovo strumento', testo: 'Descrizione', provider: 'Antigravity', dipende: 'T1' },
+      avvisa: false,
+    }, opts);
+    expect(todoRes.status).toBe(200);
+    expect(todoRes.data.todo).toContain('## Nuovo strumento');
+    expect(todoRes.data.todo).toContain('> Provider proposto: Antigravity');
+
+    const st = W.handleApi('GET', '/api/stato', {}, opts).data;
+    expect(st.orchestratore.inCoda).toHaveLength(2); // chat message + domande notification
+  });
+
+  it('POST /api/budget e POST /api/orchestratore aggiornano budget.json e orchestratore.json', () => {
+    const opts = makeSandbox();
+    expect(W.handleApi('POST', '/api/budget', { provider: 'claude', residuo: 42 }, opts).status).toBe(200);
+    expect(W.handleApi('POST', '/api/orchestratore', { provider: 'argon' }, opts).status).toBe(200);
+
+    const st = W.handleApi('GET', '/api/stato', {}, opts).data;
+    expect(st.budget.claude.residuo).toBe(42);
+    expect(st.orchestratore.provider).toBe('argon');
+  });
+
+  it('legge la conversazione dal vivo anche nel formato transcript.jsonl di Antigravity e serve HTTP su porta effimera', async () => {
+    const opts = makeSandbox();
+    const runs = JSON.parse(fsMod.readFileSync(path.join(tmpRepo, '.pipeline', 'esecuzioni.json'), 'utf8'));
+    runs.T3 = { id: 'T3', provider: 'argon', stima: 5, tentativi: 1, stato: 'in corso' };
+    fsMod.writeFileSync(path.join(tmpRepo, '.pipeline', 'esecuzioni.json'), JSON.stringify(runs, null, 2));
+    fsMod.writeFileSync(path.join(tmpRepo, '.pipeline', 'conversazioni', 'T3.jsonl'), [
+      JSON.stringify({ step_index: 0, type: 'USER_INPUT', created_at: '2026-10-30T04:00:00Z', content: 'Esegui T3' }),
+      JSON.stringify({ step_index: 1, type: 'PLANNER_RESPONSE', created_at: '2026-10-30T04:00:05Z', thinking: 'Leggo AGENTS.md', tool_calls: [{ name: 'read_file', args: { Path: 'H:/projects/rune/AGENTS.md' } }], content: 'Fatto.' }),
+    ].join('\n') + '\n');
+
+    const { server, port } = await W.startWebServer({ port: 0, ...opts });
+    try {
+      const htmlRes = await fetch(`http://127.0.0.1:${port}/`);
+      expect(htmlRes.status).toBe(200);
+      expect(await htmlRes.text()).toContain('Lavagne &amp; Chat');
+
+      const taskRes = await fetch(`http://127.0.0.1:${port}/api/task/T3`);
+      expect(taskRes.status).toBe(200);
+      const taskData = await taskRes.json();
+      expect(taskData.traccia.agents).toBe(true);
+      expect(taskData.traccia.conversazione.map((c: any) => c.ruolo)).toEqual(['utente', 'pensiero', 'strumento', 'agente']);
+      expect(taskData.traccia.conversazione[2]).toMatchObject({ nome: 'read_file', argomenti: 'H:/projects/rune/AGENTS.md' });
+    } finally {
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+    }
+  });
+});
+
