@@ -290,3 +290,4 @@
 - [2026-10-30T13:21:20.123Z] T45b: limite di claude, riprendo dopo 2026-10-30T17:01:00.000Z
 - [2026-10-30T13:25:02.873Z] orchestratore: epoca 75 su gemini (contesto a 340 % della finestra)
 - [2026-10-30T13:29:06.664Z] orchestratore: epoca 76 su gemini (contesto a 221 % della finestra)
+- [2026-10-30T13:32:07.923Z] orchestratore: epoca 77 su gemini (contesto a 110 % della finestra)
