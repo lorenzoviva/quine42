@@ -3,13 +3,13 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026, rotazione epoca 8 dell'orchestratore (gemini: chiusura per contesto a 309%).
+Aggiornato il 30/10/2026, avvio epoca 9 dell'orchestratore (gemini).
 
 ## Le priorità dell'autore
 
 1. Il multigiocatore (T43-T45) prima del resto.
 2. Il nuovo ambiente della pipeline e l'interfaccia web (**T69**, integrata in `3d` e attiva su `http://localhost:4242`).
-3. Argon utilizzato con moderazione: massimo 1 task alla volta (`capOf` garantisce 1 task sotto soglia, 8 % settimanale residuo).
+3. Argon utilizzato con moderazione: massimo 1 task alla volta (`capOf` garantisce 1 task sotto soglia, 7 % settimanale residuo).
 
 ## Stato e decisioni
 
