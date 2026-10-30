@@ -3,43 +3,42 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026, avvio epoca 45 dell'orchestratore (gemini).
+Aggiornato il 30/10/2026, passaggio a Claude / fine epoca 45 (gemini).
 
 ## Le priorità dell'autore
 
 1. Il multigiocatore (T43-T45) prima del resto.
 2. Il nuovo ambiente della pipeline e l'interfaccia web (**T69**, integrata in `3d` e attiva su `http://localhost:4242`).
-3. Argon esaurito per la settimana (quota 429 fino al 04/11): nessun task su Argon. Tutti i task complessi/multiplayer instradati su Claude al reset, con Gemini attivo come orchestratore e per task pronti compatibili.
+3. Argon esaurito per la settimana (quota 429 fino al 04/11): nessun task su Argon. Tutti i task complessi/multiplayer instradati su Claude dopo il reset crediti avvenuto (5h al 69%, settimana al 69%).
 
 ## Stato e decisioni
 
 - **Decisioni prese e fatti recenti**:
+  - **Claude ha di nuovo crediti**: sessione di 5h resettata (5h al 69%, settimana al 69%); sblocco immediato dei task sospesi.
   - **T45a completato e integrato** (commit `c434033`): crediti per viandante, commissione +1% (P#1), divisione spese comuni tra collegati, ADR-0081.
   - **T68b completato su Gemini e integrato** (commit `8083986`, T73 integrato commit `d5fb2d1`): implementato `tools/abbonamenti/servi.ts`, `npm run abbonamento` e suite di test unitari e reali.
   - **T68c completato su Gemini e integrato** in `3d`: collegati gli abbonamenti nel gioco tramite `RoutedModels` in `main.ts`, stato e coda in `#models` e nel pannello del Concilio (`FeedPanel`), documentazione in `README.md` e test Genesi offline con coda servita in `tests/subscription.test.ts`.
   - **T74 completato su Gemini e integrato** in `3d`: risolto il merge di T68c in `docs/plans/backlog.md` preservando tutti i blocchi ed esiti, suite `tests/subscription.test.ts` (16/16) e typecheck verdi. Integrati con successo sia T74 che T68c nel branch base `3d`, con rimozione dei relativi worktree e branch.
 - **Cosa si aspetta**:
-  1. Reset della sessione di 5 ore di Claude alle **07:00 UTC** (**~08:00** locali, ~25m rimanenti; quota settimanale al 69%).
-- **Intenzioni al reset di Claude / prossimi passi**:
-  1. Completare **T70** (integrazione T53b con salto T56b, priorità 0 su Claude), poi `integra T70` e `integra T53b`.
+  1. Completamento ed esito di **T70** su Claude per procedere all'integrazione di T70 e T53b nel base `3d`.
+- **Intenzioni / prossimi passi**:
+  1. Esecuzione di **T70** (integrazione T53b con salto T56b, priorità 0 su Claude), poi `integra T70` e `integra T53b`.
   2. Procedere con **T44c** (priorità 3) e **T44b** (priorità 4, che con T45a completato sblocca a cascata T45d/e/f).
   3. Proseguire con **T45b** (priorità 6) e **T45c** (priorità 7).
 
 ## Task attivi e in corso
 
-- **In corso su Gemini:**
-  - Nessuno (Gemini riservato per l'orchestrazione; 5h al 31%, settimana al 66%).
-- **Da integrare:**
-  - **T53b** (in attesa di T70).
-- **Pronti:**
-  - **T51** (priorità 50 su Claude).
-- **Sospesi su Claude fino alle 07:00 UTC (`~08:00` locali, ~25m):**
+- **In corso / pronti su Claude (crediti ripristinati a 69%):**
   - **T70** (priorità 0, risoluzione conflitti T53b / T56b con test salto + torre).
   - **T44c** (priorità 3, correzioni da verifica browser T44a/T43c).
   - **T44b** (priorità 4, account e autenticazione).
   - **T45b** (priorità 6, coefficienti di generazione e «Low Detail»).
   - **T45c** (priorità 7, eredità dei cloni).
-  - **T52**, **T54**.
+  - **T51** (priorità 50), **T52**, **T54**.
+- **Da integrare:**
+  - **T53b** (in attesa di T70).
+- **Gemini:**
+  - 5h al 30%, settimana al 66%. Riservato per compiti idonei e supporto.
 
 ## Da fare appena possibile
 
