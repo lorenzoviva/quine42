@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 16:20 UTC, avvio epoca 129 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset previsto alle 17:00 UTC / ~18:00 locali, tra circa 39 minuti; settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h al 37 %, settimana 36 %; argon fermo fino al 04/11). **T80 e T45d (la lobby multigiocatore, ADR-0086)** integrati con successo nel base `3d` (test 18/18 passati, typecheck pulito, rimossi worktree e branch). **T45f (server su Google Cloud)** sbloccato e pronto in attesa delle risposte in `docs/pipeline/domande/T45f.md` (Project ID, architettura Cloud Run vs VM GCE, regione). T70 (integrazione più piani T53b e salto T56b) resta sospeso in attesa del reset crediti su Claude.
+Aggiornato il 30/10/2026 alle 16:21 UTC, fine epoca 129 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset previsto alle 17:00 UTC / ~18:00 locali, tra circa 39 minuti; settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h al 37 %, settimana 36 %; argon fermo fino al 04/11). **T80 e T45d (la lobby multigiocatore, ADR-0086)** integrati con successo nel base `3d` (test 18/18 passati, typecheck pulito, rimossi worktree e branch). **T45f (server su Google Cloud)** sbloccato e pronto in attesa delle risposte in `docs/pipeline/domande/T45f.md` (Project ID, architettura Cloud Run vs VM GCE, regione). T70 (integrazione più piani T53b e salto T56b) resta sospeso in attesa del reset crediti su Claude.
 
 ## Le priorità dell'autore
 
@@ -20,7 +20,7 @@ Aggiornato il 30/10/2026 alle 16:20 UTC, avvio epoca 129 su gemini: **claude ha 
   - **Chiavi Stripe per test nel browser**: T45e resta segnato `in attesa` per la verifica browser (in attesa di `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` in `.env` o in chat, segnalate in `docs/pipeline/domande/T45e.md`).
 - **Cosa si aspetta**:
   1. **Risposte dell'autore per T45f**: GCP Project ID, preferenza architetturale (Cloud Run vs VM GCE) e regione.
-  2. **Reset crediti Claude** (alle 16:59 UTC / ~18:00 locali, tra circa 40 minuti): ripresa di T70 (integrazione T53b più piani con salto T56b).
+  2. **Reset crediti Claude** (alle 17:00 UTC / ~18:00 locali, tra circa 39 minuti): ripresa di T70 (integrazione T53b più piani con salto T56b).
   3. **Chiavi di test Stripe** dall'autore per la verifica finale nel browser di T45e.
 - **Intenzioni / prossimi passi**:
   1. Ricevute le risposte su T45f, approvare e lanciare l'allestimento dell'infrastruttura Google Cloud.
@@ -30,7 +30,7 @@ Aggiornato il 30/10/2026 alle 16:20 UTC, avvio epoca 129 su gemini: **claude ha 
 
 - **Pronti / In corso**:
   - Nessun task attivo al momento.
-  - **T70** (claude, p0): worktree t70 in merge; agente fermo per limite 5h (reset 16:59 UTC / ~18:00 locali).
+  - **T70** (claude, p0): worktree t70 in merge; agente fermo per limite 5h (reset 17:00 UTC / ~18:00 locali).
 - **Completati in attesa di integrazione**:
   - **T53b** (claude): in attesa di T70.
 - **Completati e integrati nel base `3d`**:
