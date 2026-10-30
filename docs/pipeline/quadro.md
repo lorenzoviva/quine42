@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026, epoca 34 dell'orchestratore (gemini: contesto a 81%).
+Aggiornato il 30/10/2026, chiusura epoca 34 dell'orchestratore (gemini: contesto a 56%).
 
 ## Le priorità dell'autore
 
@@ -20,7 +20,7 @@ Aggiornato il 30/10/2026, epoca 34 dell'orchestratore (gemini: contesto a 81%).
   - **T68c avviato su Gemini**: con Claude fermo al limite delle 5h, T68c (priorità 21) è stato instradato automaticamente su Gemini nel worktree `t68c` ed è attualmente in esecuzione.
 - **Cosa si aspetta**:
   1. Completamento di **T68c** su Gemini (integrazione abbonamenti nel gioco, `main.ts`, pannello Concilio, documentazione).
-  2. Reset della sessione di 5 ore di Claude alle **07:00 UTC** (**~08:00** locali, ~53m rimanenti; quota settimanale al 69%).
+  2. Reset della sessione di 5 ore di Claude alle **07:00 UTC** (**~08:00** locali, ~51m rimanenti; quota settimanale al 69%).
 - **Intenzioni al reset di Claude / prossimi passi**:
   1. Completare **T70** (integrazione T53b con salto T56b, priorità 0 su Claude), poi `integra T70` e `integra T53b`.
   2. Procedere con **T44c** (priorità 3) e **T44b** (priorità 4, che con T45a completato sblocca a cascata T45d/e/f).
@@ -35,7 +35,7 @@ Aggiornato il 30/10/2026, epoca 34 dell'orchestratore (gemini: contesto a 81%).
   - **T53b** (in attesa di T70).
 - **Pronti:**
   - **T51** (priorità 50 su Claude).
-- **Sospesi su Claude fino alle 07:00 UTC (`~08:00` locali, ~53m):**
+- **Sospesi su Claude fino alle 07:00 UTC (`~08:00` locali, ~51m):**
   - **T70** (priorità 0, risoluzione conflitti T53b / T56b con test salto + torre).
   - **T44c** (priorità 3, correzioni da verifica browser T44a/T43c).
   - **T44b** (priorità 4, account e autenticazione).
