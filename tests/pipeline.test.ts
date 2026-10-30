@@ -12,7 +12,13 @@ type Pipeline = {
   parseUsage(provider: string, text: string): Counter[] | undefined;
   usageLimit(output: string, from?: Date): Date | undefined;
   readOutput(text: string): { session?: string; cost?: number; error: boolean; result: string; outcome?: string; browser?: string };
-  capOf(o: { left: number; session?: number; provider: string; orchestrator?: string; max: number; threshold: number }): number;
+  capOf(o: { left: number; session?: number; provider: string; orchestrator?: string; slot?: number; tetto?: number; threshold: number; urgent?: boolean; resuming?: boolean }): number;
+  ceilingOf(provider: string, config: unknown): number;
+  forecastEmpty(storia: { t: string; residuo: number }[], nowMs?: number, giorni?: number): string | undefined;
+  weeklyResetOf(b: unknown, conf: unknown, nowMs?: number): string | undefined;
+  nextSlot(o: { slot?: number; tetto?: number; previsione?: string; reset?: string; domanda?: number }): number;
+  demandOf(queues: Record<string, (Task & { missing?: string[] })[]>): Record<string, number>;
+  updateSlots(budget: Record<string, Record<string, unknown>>, queues: Record<string, (Task & { missing?: string[] })[]>, o?: { config?: unknown; nowMs?: number }): Record<string, Record<string, unknown>>;
   computeBudget(provider: string, conf?: unknown, counters?: Counter[]): { residuo: number; sessione: number };
   plan(tasks: Task[], runs: Record<string, any>, budget: Record<string, any>, only?: string): { inCorso: any[]; daIntegrare: any[]; pronti: any[]; daApprovare: any[]; daStimare: any[]; bloccati: any[]; inAttesa: any[] };
 };
@@ -237,29 +243,114 @@ describe('usageLimit', () => {
 });
 
 describe('capOf', () => {
-  const base = { max: 5, threshold: 10, orchestrator: 'claude' };
+  const base = { threshold: 10, orchestrator: 'claude', slot: 2, tetto: 3 };
 
-  it('sopra la soglia: fino a `max`', () => {
-    expect(P.capOf({ ...base, left: 50, session: 80, provider: 'claude' })).toBe(5);
+  it('sopra la soglia: gli slot dinamici, mai oltre il tetto', () => {
+    expect(P.capOf({ ...base, left: 50, session: 80, provider: 'claude' })).toBe(2);
+    expect(P.capOf({ ...base, slot: 5, left: 50, session: 80, provider: 'claude' })).toBe(3);
+    expect(P.capOf({ ...base, slot: 0, left: 50, session: 80, provider: 'claude' })).toBe(0);
   });
 
-  it('sotto la soglia: uno, nessuno sul provider dell\'orchestratore', () => {
-    expect(P.capOf({ ...base, left: 8, provider: 'argon' })).toBe(1);
-    expect(P.capOf({ ...base, left: 8, provider: 'claude' })).toBe(0);
-    expect(P.capOf({ ...base, left: 50, session: 5, provider: 'claude' })).toBe(0);
-    expect(P.capOf({ ...base, orchestrator: 'argon', left: 8, provider: 'argon' })).toBe(0);
-    expect(P.capOf({ ...base, orchestrator: 'argon', left: 8, provider: 'claude' })).toBe(1);
+  it('la riserva: un task urgente usa uno slot oltre quelli dinamici, mai oltre il tetto', () => {
+    expect(P.capOf({ ...base, left: 50, session: 80, provider: 'claude', urgent: true })).toBe(3);
+    expect(P.capOf({ ...base, slot: 0, left: 50, session: 80, provider: 'claude', urgent: true })).toBe(1);
+    expect(P.capOf({ ...base, slot: 3, left: 50, session: 80, provider: 'claude', urgent: true })).toBe(3);
   });
 
-  it('per Argon (senza 5h) le soglie dei task si basano sul limite settimanale', () => {
-    expect(P.capOf({ ...base, left: 28, provider: 'argon' })).toBe(5);
-    expect(P.capOf({ ...base, orchestrator: 'argon', left: 28, provider: 'argon' })).toBe(5);
-    // Sotto la soglia (8%): 1 se non è orchestratore, 0 se è orchestratore
-    expect(P.capOf({ ...base, left: 8, provider: 'argon' })).toBe(1);
-    expect(P.capOf({ ...base, orchestrator: 'argon', left: 8, provider: 'argon' })).toBe(0);
-    // Anche se un vecchio stato passasse session: 100, per Argon vale il residuo settimanale (left)
-    expect(P.capOf({ ...base, left: 8, session: 100, provider: 'argon' })).toBe(1);
-    expect(P.capOf({ ...base, orchestrator: 'argon', left: 8, session: 100, provider: 'argon' })).toBe(0);
+  it('vicino a 0 %: nessun task nuovo, al più uno in corso, nessuno sul provider dell\'orchestratore', () => {
+    expect(P.capOf({ ...base, left: 8, provider: 'argon' })).toBe(0);
+    expect(P.capOf({ ...base, left: 8, provider: 'argon', urgent: true })).toBe(0);
+    expect(P.capOf({ ...base, left: 8, provider: 'argon', resuming: true })).toBe(1);
+    expect(P.capOf({ ...base, left: 50, session: 5, provider: 'gemini', resuming: true })).toBe(1);
+    expect(P.capOf({ ...base, left: 50, session: 5, provider: 'claude', resuming: true })).toBe(0);
+    expect(P.capOf({ ...base, orchestrator: 'argon', left: 8, provider: 'argon', resuming: true })).toBe(0);
+  });
+
+  it('per Argon (senza 5h) conta solo la settimana', () => {
+    expect(P.capOf({ ...base, left: 28, session: 2, provider: 'argon' })).toBe(2);
+    expect(P.capOf({ ...base, left: 8, session: 100, provider: 'argon', resuming: true })).toBe(1);
+    expect(P.capOf({ ...base, orchestrator: 'argon', left: 8, session: 100, provider: 'argon', resuming: true })).toBe(0);
+  });
+});
+
+describe('gli slot dinamici', () => {
+  const NOW = Date.parse('2026-10-30T12:00:00Z');
+  const at = (h: number, residuo: number) => ({ t: new Date(NOW - h * 3_600_000).toISOString(), residuo });
+
+  it('il tetto: il più basso tra quello del modello e quello della CLI, senza limiti maxParalleli', () => {
+    const providers = { claude: { cmd: 'claude' }, gemini: { cmd: 'agy' }, argon: { cmd: 'agy' } };
+    const config = { maxParalleli: 5, providers, limiti: { provider: { claude: 3, agy: 1 }, modello: { claude: 2, gemini: 4 } } };
+    expect(P.ceilingOf('claude', config)).toBe(2);
+    expect(P.ceilingOf('gemini', config)).toBe(1);
+    expect(P.ceilingOf('argon', config)).toBe(1);
+    expect(P.ceilingOf('claude', { maxParalleli: 5, providers })).toBe(5);
+  });
+
+  it('la previsione: al ritmo degli ultimi giorni, dall\'ultimo reset', () => {
+    // 10 % in 10 ore, ne restano 50: altre 50 ore.
+    expect(P.forecastEmpty([at(10, 60), at(5, 55), at(0, 50)], NOW)).toBe(new Date(NOW + 50 * 3_600_000).toISOString());
+    // Un residuo che risale è un reset: conta solo da lì.
+    expect(P.forecastEmpty([at(30, 5), at(20, 100), at(0, 80)], NOW)).toBe(new Date(NOW + 80 * 3_600_000).toISOString());
+    // Fermo, o troppo poco da dire: nessuna previsione.
+    expect(P.forecastEmpty([at(10, 60), at(0, 60)], NOW)).toBeUndefined();
+    expect(P.forecastEmpty([at(0.5, 61), at(0, 60)], NOW)).toBeUndefined();
+    expect(P.forecastEmpty([at(0, 60)], NOW)).toBeUndefined();
+    // Oltre i giorni della previsione non conta.
+    expect(P.forecastEmpty([at(100, 100), at(80, 60), at(0, 60)], NOW, 3)).toBeUndefined();
+  });
+
+  it('il reset: dal contatore settimanale o da `resetSettimanale`', () => {
+    const contatori = [{ nome: 'session', finestra: '5h', residuo: 10, reset: '2026-10-30T15:00:00Z' }, { nome: 'week', finestra: 'settimana', residuo: 40, reset: '2026-11-05T09:00:00Z' }];
+    expect(P.weeklyResetOf({ contatori }, {}, NOW)).toBe('2026-11-05T09:00:00Z');
+    const reset = P.weeklyResetOf({}, { resetSettimanale: 'gio 10:00' }, NOW)!;
+    expect(new Date(reset).getDay()).toBe(4);
+    expect(Date.parse(reset)).toBeGreaterThan(NOW);
+    expect(Date.parse(reset) - NOW).toBeLessThanOrEqual(7 * 86_400_000);
+    expect(P.weeklyResetOf({}, { resetSettimanale: '' }, NOW)).toBeUndefined();
+  });
+
+  it('dopo il reset uno slot in più, prima uno in meno, tra 0 e il tetto', () => {
+    const reset = '2026-11-05T09:00:00Z';
+    expect(P.nextSlot({ slot: 1, tetto: 3, previsione: '2026-11-06T00:00:00Z', reset })).toBe(2);
+    expect(P.nextSlot({ slot: 1, tetto: 3, previsione: undefined, reset })).toBe(2); // non si consuma
+    expect(P.nextSlot({ slot: 3, tetto: 3, previsione: '2026-11-06T00:00:00Z', reset })).toBe(3);
+    expect(P.nextSlot({ slot: 2, tetto: 3, previsione: '2026-11-01T00:00:00Z', reset })).toBe(1);
+    expect(P.nextSlot({ slot: 0, tetto: 3, previsione: '2026-11-01T00:00:00Z', reset })).toBe(0);
+    expect(P.nextSlot({ slot: 4, tetto: 2, previsione: '2026-11-06T00:00:00Z', reset })).toBe(2); // il tetto scende
+    expect(P.nextSlot({ slot: 2, tetto: 3, previsione: '2026-11-01T00:00:00Z' })).toBe(2); // senza reset restano
+    // Non salgono oltre ciò che il programma chiede.
+    expect(P.nextSlot({ slot: 1, tetto: 3, reset, domanda: 1 })).toBe(1);
+    expect(P.nextSlot({ slot: 2, tetto: 3, reset, domanda: 0 })).toBe(2);
+  });
+
+  it('il programma: eseguibili e bloccati da altri task, non chi aspetta l\'autore', () => {
+    const t = (id: string, provider: string, missing?: string[]) => ({ id, title: id, status: 'da fare', deps: missing ?? [], provider, missing });
+    const queues = {
+      inCorso: [t('T1', 'claude')], pronti: [t('T2', 'claude'), t('T3', 'gemini')],
+      bloccati: [t('T4', 'claude', ['T1']), t('T5', 'claude', ['T9']), t('T6', 'gemini', ['T5']), t('T7', 'argon', ['T4'])],
+      inAttesa: [t('T9', 'claude')], daIntegrare: [], daApprovare: [], daStimare: [],
+    };
+    expect(P.demandOf(queues)).toEqual({ claude: 3, gemini: 1, argon: 1 });
+  });
+
+  it('a ogni controllo: storia, previsione, reset, e gli slot si muovono al più ogni `usoSecondi`', () => {
+    const providers = { claude: { cmd: 'claude', resetSettimanale: 'gio 10:00' } };
+    const config = { maxParalleli: 5, usoSecondi: 300, providers, limiti: { modello: { claude: 3 } } };
+    const queues = { inCorso: [], pronti: ['T1', 'T2', 'T3'].map((id) => ({ id, title: id, status: 'da fare', deps: [], provider: 'claude' })), bloccati: [], inAttesa: [], daIntegrare: [], daApprovare: [], daStimare: [] };
+    const budget: Record<string, Record<string, unknown>> = { claude: { residuo: 90 } };
+    P.updateSlots(budget, queues, { config, nowMs: NOW });
+    expect(budget.claude).toMatchObject({ slot: 1, tetto: 3, domanda: 3 });
+    P.updateSlots(budget, queues, { config, nowMs: NOW + 60_000 });
+    expect(budget.claude.slot).toBe(2); // primo spostamento
+    P.updateSlots(budget, queues, { config, nowMs: NOW + 120_000 });
+    expect(budget.claude.slot).toBe(2); // meno di usoSecondi dopo
+    // Consumo forte: 50 % in due ore, la settimana finirebbe prima del reset.
+    budget.claude.residuo = 40;
+    budget.claude.storia = [{ t: new Date(NOW - 2 * 3_600_000).toISOString(), residuo: 90 }];
+    P.updateSlots(budget, queues, { config, nowMs: NOW + 600_000 });
+    expect(Date.parse(budget.claude.previsione as string)).toBeLessThan(Date.parse(budget.claude.resetSettimana as string));
+    expect(budget.claude.slot).toBe(1);
+    expect((budget.claude.storia as unknown[]).length).toBe(2);
   });
 });
 

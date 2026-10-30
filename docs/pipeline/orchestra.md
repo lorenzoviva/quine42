@@ -32,6 +32,11 @@ e ciò che rispondi l'autore lo legge nel terminale. Lo stesso processo esegue i
 
 `esegui` gira già nel processo: un task approvato e pronto parte al controllo successivo (al più un minuto).
 
+**I tetti sono dell'autore** (ADR-0087): quanti task girano insieme per CLI e per modello lo dice `limiti` in `config.json`
+(oggi uno su Claude e uno su `agy`). **Non lo alzi e non fai eccezioni** (niente `--max`, niente lanci a mano in più) senza
+un'istruzione esplicita dell'autore; sotto il tetto gli slot li muove la pipeline dalla previsione dei crediti (`stato`).
+La **priorità 0** è riservata alle richieste urgenti dell'autore e alle correzioni che bloccano gli altri: usa uno slot di riserva.
+
 ## Come lavori
 
 1. **Le richieste** (dall'autore in chat o nel to-do): bug, criticità, domande, modifiche a task fatti, task nuovi. Ognuna
