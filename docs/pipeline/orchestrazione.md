@@ -434,3 +434,5 @@
 - [2026-10-30T16:50:32.473Z] nota: Epoca 141 avviata su Gemini. In attesa delle risposte dell'autore su T45f (GCP, docs/pipeline/domande/T45f.md) e del reset crediti Claude (~18:00 locali / 17:00 UTC, tra circa 10 min) per la ripresa di T70.
 - [2026-10-30T16:51:59.743Z] orchestratore: epoca 142 su gemini (contesto a 55 % della finestra)
 - [2026-10-30T16:52:51.503Z] nota: Epoca 142 avviata su Gemini. In attesa delle risposte dell'autore su T45f (GCP) e del reset crediti Claude (~18:00 locali / 17:00 UTC, tra circa 7 min) per la ripresa di T70.
+- [2026-10-30T16:54:09.590Z] orchestratore: epoca 143 su gemini (contesto a 76 % della finestra)
+- [2026-10-30T16:55:04.715Z] nota: Epoca 143 avviata su Gemini. In attesa delle risposte dell'autore su T45f (GCP, docs/pipeline/domande/T45f.md) e del reset crediti Claude (~18:00 locali / 17:00 UTC) per la ripresa di T70.
