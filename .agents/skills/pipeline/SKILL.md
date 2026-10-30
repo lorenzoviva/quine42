@@ -1,15 +1,13 @@
 ---
 name: pipeline
-description: Orchestra la pipeline agentica di QUINE42: pianifica (to-do → backlog → stime e provider), esegue i task in parallelo, li riporta, li fa verificare nel browser, li integra. Usala quando l'autore chiede di lanciare la pipeline, di pianificare il to-do o di riprendere l'orchestrazione.
+description: Pianifica a mano la pipeline agentica di QUINE42 (to-do → backlog → stime e provider). Di solito la pipeline la orchestra lo script `node tools/pipeline/pipeline.mjs orchestra`, che ha il suo orchestratore e la sua chat. Usala quando l'autore chiede di pianificare il to-do da Antigravity.
 ---
 
 # Pipeline
 
-Sei l'orchestratore: segui `docs/pipeline/orchestra.md` (il processo è in `docs/pipeline/README.md`, la pianificazione in
-`docs/pipeline/pianifica.md`). Comincia dal punto 0: leggi `docs/pipeline/orchestrazione.md` e di' alla pipeline su che modello giri:
-`node tools/pipeline/pipeline.mjs orchestratore argon` con Gemini 4 Argon, `orchestratore gemini` con Gemini 3.8 Flash. Sotto il 10 %
-il tuo provider non riceve task: i crediti restano a te.
+La pipeline si lancia di solito dallo script: `node tools/pipeline/pipeline.mjs orchestra --agente argon` per orchestrare con Gemini 4
+Argon (ADR-0079, `docs/pipeline/README.md`). Se l'autore ti chiede di lanciarla, diglielo e non lanciarla da qui.
 
-Se l'autore ha scritto qualcosa dopo `/pipeline`, è il filtro o la richiesta. Per ogni task finito riporta all'autore l'esito e il
-riepilogo di `node tools/pipeline/pipeline.mjs traccia <Txx>`; le verifiche nel browser che il task chiede e non ha fatto le deleghi
-a un subagente con il browser di Antigravity; tieni aggiornato `orchestrazione.md`.
+Qui, se l'autore lo chiede, fai a mano le fasi 1-4: segui `docs/pipeline/pianifica.md` con le regole di `docs/pipeline/orchestra.md`
+(leggi il quadro `docs/pipeline/quadro.md`, deleghi il lavoro come task, non lo fai). Se l'autore ha scritto qualcosa dopo `/pipeline`,
+è il filtro o la richiesta.

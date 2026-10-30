@@ -1,26 +1,7 @@
-# L'orchestrazione della pipeline
+# Il diario dell'orchestrazione
 
-> La memoria tra un orchestratore e il successivo (`docs/pipeline/orchestra.md`). Il **passaggio di consegne** lo riscrive
-> l'orchestratore; il **diario** in fondo lo allunga lo script (lanci, esiti, limiti, integrazioni) e l'orchestratore con `nota`.
-
-## Passaggio di consegne
-
-Aggiornato il 29/10/2026 alle 23 circa, orchestratore `claude` (Claude Code), con le 5 ore di Claude al 13 %.
-
-- **In corso** (`esegui` in background dalla sessione dell'orchestratore): T53b (strutture su più piani) e T56b (il salto) su
-  Claude, T64 (varianti precalcolate) su Gemini, ripreso dopo una connessione di agy interrotta. Se l'orchestratore si ferma,
-  `esegui` si ferma con lui: rilancialo, e i task sospesi riprendono la loro conversazione.
-- **Da integrare**: nessuno finora. Integrati il 29/10: T43b, T44a, T65, T43c, T68, T66, T63, T30, T53 (T53a), T51 (T51a).
-  ADR rinumerati: 0073 «Altro…» e PvP, 0074 profilo, 0075 lessico, 0076 morte e ricollegamento, 0077 abbonamenti; 0078 l'orchestratore.
-- **Suite intera da rifare a macchina ferma**: con tre agenti al lavoro i test vanno in timeout (hook di 10 s del kernel, il modello
-  `circuito-3D` in `forms.test.ts`, `referente.test.ts`); ognuno passa da solo, typecheck pulito.
-- **Verifiche nel browser**: T44a e T43c fatte (diario, 21:50); i difetti sono in **T44c**. T51a e T53a verificate da chi le ha eseguite.
-- **Da approvare**: T44c (correzioni), T44b (account), T45a, T45b, T45c, T68b; dopo di loro T45d, T45e, T45f, T68c.
-- **Domande aperte**: `domande/T51.md` (T51b, il motore dell'acqua: automa cellulare del kernel?), `domande/T52.md`, `domande/T54.md`.
-  T57 aspetta T51.
-- **Da sapere**: `docs/plans/multiplayer.md` è finito in `docs/archivio/` con T66 ma è il piano attivo del multigiocatore.
-- **Prossimo passo**: riportare gli esiti di T53b, T56b e T64 e integrarli; quando Claude scende sotto il 10 %, passare
-  l'orchestrazione ad Antigravity (`orchestratore argon`) o aspettare il reset delle 5 ore.
+> Gli eventi della pipeline, uno per riga: li scrive lo script (lanci, esiti, limiti, integrazioni) e l'orchestratore
+> (`nota`). Lo stato e le intenzioni sono nel [quadro](quadro.md).
 
 ## Diario
 
@@ -78,3 +59,5 @@ Aggiornato il 29/10/2026 alle 23 circa, orchestratore `claude` (Claude Code), co
 - [2026-10-30T02:13:10.324Z] nota: esegui era morto con la sessione dell'orchestratore dopo aver ripreso T53b e T56b alle 03:01 (log vuoti, lavoro a metà nei worktree): rimessi in coda
 - [2026-10-30T02:13:13.321Z] riprendo T53b su claude (H:\projects\rune\.claude\worktrees\t53b)
 - [2026-10-30T02:13:13.346Z] riprendo T56b su claude (H:\projects\rune\.claude\worktrees\t56b)
+- [2026-10-30T02:22:12.919Z] task/T64 integrato in 3d; worktree e branch tolti.
+- [2026-10-30T02:36:21.055Z] T56b: ESITO: fatto — Spazio salta sopra casse e mobili fino a ~1 casella e sopra l'acqua stretta, non sopra muri né dentro l'acqua profonda; arco e ombra; nella corona e in multigiocatore Spazio resta `E`; test verdi · BROWSER: da verificare — scena di `Blocchi.png` e barra dei tasti viste; l'arco del salto e l'ombra no, perché l'estensione di Chrome si è scollegata (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T56b)

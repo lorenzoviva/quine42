@@ -3,38 +3,49 @@
 // CLI), runs them in parallel, one worktree each, within the usage budget, and resumes them after a usage limit.
 // No dependencies; state that is only local lives in `.pipeline/` (ignored by git). See docs/pipeline/README.md.
 import { spawn, execFileSync } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
+import { EventEmitter } from 'node:events';
 import fs from 'node:fs';
 import path from 'node:path';
 
 const HERE = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'));
-const REPO = path.resolve(HERE, '..', '..');
-const CONFIG = JSON.parse(fs.readFileSync(path.join(HERE, 'config.json'), 'utf8'));
-const STATE_DIR = path.join(REPO, '.pipeline');
+export const REPO = path.resolve(HERE, '..', '..');
+// PIPELINE_CONFIG and PIPELINE_STATE: another configuration and another state (with its own diary), for trying the
+// pipeline with fake CLIs without touching the real runs.
+export const CONFIG = JSON.parse(fs.readFileSync(process.env.PIPELINE_CONFIG ?? path.join(HERE, 'config.json'), 'utf8'));
+export const STATE_DIR = process.env.PIPELINE_STATE ?? path.join(REPO, '.pipeline');
 const LOGS = path.join(STATE_DIR, 'log');
 const RUNS = path.join(STATE_DIR, 'esecuzioni.json');
-const BUDGET = path.join(STATE_DIR, 'budget.json');
+export const BUDGET = path.join(STATE_DIR, 'budget.json');
 const HISTORY = path.join(REPO, 'docs', 'pipeline', 'consumi.jsonl');
-const PLAN = path.join(REPO, 'docs', 'pipeline', 'PIANO.md');
-const REPORT = path.join(REPO, 'docs', 'pipeline', 'orchestrazione.md');
+const PLAN = process.env.PIPELINE_STATE ? path.join(STATE_DIR, 'PIANO.md') : path.join(REPO, 'docs', 'pipeline', 'PIANO.md');
+const REPORT = process.env.PIPELINE_STATE ? path.join(STATE_DIR, 'diario.md') : path.join(REPO, 'docs', 'pipeline', 'orchestrazione.md');
 const ORCHESTRATOR = path.join(STATE_DIR, 'orchestratore.json');
 const RESUME = 'Ti sei fermato in questo punto, riprendi.';
 
-const readJson = (file, fallback) => { try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return fallback; } };
-const writeJson = (file, data) => { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, JSON.stringify(data, null, 2) + '\n'); };
+export const readJson = (file, fallback) => { try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return fallback; } };
+export const writeJson = (file, data) => { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, JSON.stringify(data, null, 2) + '\n'); };
 const git = (args, cwd = REPO) => execFileSync('git', args, { cwd, encoding: 'utf8' }).trim();
-const now = () => new Date().toISOString();
+export const now = () => new Date().toISOString();
+
+/** The diary's lines as they are written, for the orchestrator's process (orchestra.mjs). */
+export const bus = new EventEmitter();
 
 /** Prints an event and appends it to the diary of `orchestrazione.md`, so the next orchestrator knows what happened. */
-function say(text) {
+export function say(text) {
   const line = `[${now()}] ${text}`;
   console.log(line);
-  try { fs.appendFileSync(REPORT, `- ${line}
-`); } catch { /* the report is a convenience */ }
+  try { fs.appendFileSync(REPORT, `- ${line}\n`); } catch { /* the report is a convenience */ }
+  bus.emit('diario', line);
 }
 
-/** The provider the orchestrating agent runs on (`orchestratore`, set by hand when its credits end). */
-function orchestrator() {
+/** The provider the orchestrating agent runs on (`orchestratore`: set by orchestra.mjs, or by hand). */
+export function orchestrator() {
   return readJson(ORCHESTRATOR, {}).provider ?? CONFIG.orchestratore;
+}
+
+export function setOrchestrator(provider) {
+  writeJson(ORCHESTRATOR, { provider, dal: now() });
 }
 
 /**
@@ -88,7 +99,7 @@ export function parsePipelineLine(line) {
   return out;
 }
 
-const loadTasks = () => parseBacklog(fs.readFileSync(path.join(REPO, 'docs', 'plans', 'backlog.md'), 'utf8'));
+export const loadTasks =() => parseBacklog(fs.readFileSync(path.join(REPO, 'docs', 'plans', 'backlog.md'), 'utf8'));
 const isDone = (s) => s.startsWith('fatto');
 
 // --- Budget and limits -----------------------------------------------------------------------------------------
@@ -150,7 +161,7 @@ function readUsage(provider, cache) {
  */
 const lowest = (counters, w) => Math.min(100, ...counters.filter((c) => c.finestra === w).map((c) => c.residuo));
 
-function loadBudget({ read = true } = {}) {
+export function loadBudget({ read = true } = {}) {
   const budget = readJson(BUDGET, {});
   const cache = new Map();
   for (const [prov, conf] of Object.entries(CONFIG.providers)) {
@@ -202,7 +213,7 @@ export function usageLimit(output, from = new Date()) {
 // --- The plan --------------------------------------------------------------------------------------------------
 
 /** Tasks by queue: running, ready (dependencies done, approved, a provider and an estimate), waiting, blocked. */
-function plan(tasks, runs, budget, only) {
+export function plan(tasks, runs, budget, only) {
   const byId = new Map(tasks.map((t) => [t.id, t]));
   const open = tasks.filter((t) => !isDone(t.status));
   const queues = { inCorso: [], daIntegrare: [], pronti: [], daApprovare: [], daStimare: [], bloccati: [], inAttesa: [] };
@@ -266,21 +277,49 @@ function taskPrompt(t, wt) {
   return CONFIG.prompt.replaceAll('{id}', t.id).replaceAll('{dir}', wt.dir).replaceAll('{branch}', wt.branch).replaceAll('{base}', CONFIG.base);
 }
 
-/** Starts (or resumes) the CLI of a task's provider; resolves with the run when the process ends. */
-function launch(t, run) {
+const readText = (file) => { try { return fs.readFileSync(file, 'utf8'); } catch { return ''; } };
+
+/**
+ * Starts (or resumes) the CLI of a task's provider; resolves with the run when the process ends. The process writes
+ * straight into its log and is detached: it outlives the pipeline's process, which finds it again when it restarts
+ * (`adopt`). A provider that lets us name the session (`sessioneNuova`: Claude's `--session-id`) has it from the start,
+ * so even a run killed before its first answer resumes its conversation.
+ */
+export function launch(t, run, saveRuns = () => {}) {
   const conf = CONFIG.providers[t.provider];
   const resume = Boolean(run.sessione);
+  if (!resume && conf.sessioneNuova) run.sessione = randomUUID();
   const args = resume
     ? [...conf.args, ...conf.resume.map((a) => a.replace('{sessione}', run.sessione)), '-p', RESUME]
-    : [...conf.args, '-p', taskPrompt(t, run)];
+    : [...conf.args, ...(conf.sessioneNuova ?? []).map((a) => a.replace('{sessione}', run.sessione)), '-p', taskPrompt(t, run)];
   fs.mkdirSync(LOGS, { recursive: true });
   const log = path.join(LOGS, `${t.id}.${run.tentativi}.log`);
-  const out = fs.createWriteStream(log);
-  const child = spawn(conf.cmd, args, { cwd: run.dir, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
-  let text = '';
-  child.stdout.on('data', (d) => { text += d; out.write(d); });
-  child.stderr.on('data', (d) => { text += d; out.write(d); });
-  return new Promise((resolve) => child.on('close', (code) => { out.end(); resolve({ code, text, log }); }));
+  const fd = fs.openSync(log, 'w');
+  const child = spawn(conf.cmd, args, { cwd: run.dir, stdio: ['ignore', fd, fd], windowsHide: true, detached: true });
+  fs.closeSync(fd);
+  Object.assign(run, { pid: child.pid, log });
+  saveRuns(run.id);
+  return new Promise((resolve) => {
+    child.on('error', (e) => resolve({ code: -1, text: `${readText(log)}\n${e.message}`, log }));
+    child.on('close', (code) => resolve({ code, text: readText(log), log }));
+  });
+}
+
+/** Whether a process is still there. */
+export function alive(pid) {
+  if (!pid) return false;
+  try { process.kill(pid, 0); return true; } catch (e) { return e.code === 'EPERM'; }
+}
+
+/** Waits until a process is gone (one this process did not start: it cannot wait on its exit). */
+const gone = (pid) => new Promise((resolve) => { const t = setInterval(() => { if (!alive(pid)) { clearInterval(t); resolve(); } }, 5000); });
+
+/** Kills a process and its children (the CLI and what it started). */
+function killTree(pid) {
+  try {
+    if (process.platform === 'win32') execFileSync('taskkill', ['/PID', String(pid), '/T', '/F'], { stdio: 'ignore' });
+    else process.kill(-pid, 'SIGTERM');
+  } catch { /* already gone */ }
 }
 
 /** What a CLI said, from its JSON output (Claude: `session_id`, `total_cost_usd`, `result`; Gemini: what it has). */
@@ -299,7 +338,7 @@ export function readOutput(text) {
   };
 }
 
-async function execute({ max = CONFIG.maxParalleli, only, task, always = false } = {}) {
+export async function execute({ max = CONFIG.maxParalleli, only, task, always = false } = {}) {
   const runs = readJson(RUNS, {});
   const active = new Map(); // id → promise
   let waitingUntil = 0;
@@ -309,6 +348,19 @@ async function execute({ max = CONFIG.maxParalleli, only, task, always = false }
     for (const id of new Set([...active.keys(), ...ids])) disk[id] = runs[id];
     writeJson(RUNS, disk);
   };
+  // Runs left «in corso» by a process that died: the CLI is still working (follow it) or gone (resume it).
+  for (const r of Object.values(runs)) {
+    if (r.stato !== 'in corso') continue;
+    if (alive(r.pid)) {
+      say(`${r.id}: ancora al lavoro (processo ${r.pid}), lo seguo`);
+      const log = r.log ?? path.join(LOGS, `${r.id}.${r.tentativi}.log`);
+      active.set(r.id, gone(r.pid).then(() => finish(r, { code: null, text: readText(log), log }, runs, saveRuns)).finally(() => active.delete(r.id)));
+    } else {
+      Object.assign(r, { stato: 'sospeso', fermoFino: now(), pid: undefined });
+      say(`${r.id}: il suo processo non c'è più, riprende${r.sessione ? ' la sua conversazione' : ' da capo'}`);
+    }
+    saveRuns(r.id);
+  }
   for (;;) {
     const disk = readJson(RUNS, {});
     for (const id of Object.keys(runs)) if (!active.has(id) && !disk[id]) delete runs[id];
@@ -350,7 +402,7 @@ async function execute({ max = CONFIG.maxParalleli, only, task, always = false }
       runs[t.id] = run;
       saveRuns(t.id);
       say(`${run.sessione ? 'riprendo' : 'lancio'} ${t.id} su ${t.provider} (${run.dir})`);
-      active.set(t.id, launch(t, run).then((r) => finish(run, r, runs, saveRuns)).finally(() => active.delete(t.id)));
+      active.set(t.id, launch(t, run, saveRuns).then((r) => finish(run, r, runs, saveRuns)).finally(() => active.delete(t.id)));
     }
     if (!active.size) {
       const waiting = Object.values(runs).filter((r) => r.stato === 'sospeso');
@@ -369,6 +421,14 @@ async function execute({ max = CONFIG.maxParalleli, only, task, always = false }
 function finish(run, { code, text, log }, runs, saveRuns) {
   const out = readOutput(text);
   if (out.session) run.sessione = out.session;
+  run.pid = undefined;
+  // Stopped on purpose (`interrompi`): it waits, with its conversation, for `riprendi`.
+  if (readJson(RUNS, {})[run.id]?.stato === 'interrotto') {
+    run.stato = 'interrotto';
+    say(`${run.id}: interrotto (riprende con riprendi ${run.id})`);
+    saveRuns(run.id);
+    return;
+  }
   const limit = usageLimit(out.error || code !== 0 ? text : '');
   const stale = readJson(BUDGET, {});
   if (stale[run.provider]) { delete stale[run.provider].letto; writeJson(BUDGET, stale); }
@@ -452,15 +512,41 @@ function resume(id) {
   const runs = readJson(RUNS, {});
   const run = runs[id];
   if (!run) { console.log(`${id}: nessuna esecuzione`); return; }
-  if (run.sessione) Object.assign(run, { stato: 'sospeso', fermoFino: now(), esito: undefined, fine: undefined });
+  if (run.sessione) Object.assign(run, { stato: 'sospeso', fermoFino: now(), esito: undefined, fine: undefined, pid: undefined });
   else delete runs[id];
   writeJson(RUNS, runs);
   say(`${id}: rimesso in coda (${run.sessione ? 'riprende la sua conversazione' : 'riparte da capo'})`);
 }
 
+/** Stops a running task (the orchestrator does it when a bug would spoil its checks): it keeps its conversation. */
+function interrupt(ids) {
+  const runs = readJson(RUNS, {});
+  const list = ids.includes('--tutti') ? Object.values(runs).filter((r) => r.stato === 'in corso').map((r) => r.id) : ids;
+  for (const id of list) {
+    const run = runs[id];
+    if (run?.stato !== 'in corso') { console.log(`${id}: non è in corso`); continue; }
+    Object.assign(run, { stato: 'interrotto', interrotto: now() });
+    writeJson(RUNS, runs);
+    if (run.pid) killTree(run.pid);
+    say(`${id}: interrotto dall'orchestratore (riprende con riprendi ${id})`);
+  }
+}
+
+/**
+ * Merges a finished task into the base. A conflict leaves the base as it was: the merge is aborted and the files are
+ * named, so whoever orchestrates delegates the merge to an agent (a task that merges `task/<Txx>` in its own worktree).
+ */
 function integrate(id) {
   const base = worktrees().find((w) => w.branch === CONFIG.base);
-  git(['merge', '--no-ff', '-m', `Pipeline: integra ${id}`, `task/${id}`], base.path);
+  try {
+    git(['merge', '--no-ff', '-m', `Pipeline: integra ${id}`, `task/${id}`], base.path);
+  } catch (e) {
+    const conflicts = (() => { try { return git(['diff', '--name-only', '--diff-filter=U'], base.path).split('\n').filter(Boolean); } catch { return []; } })();
+    try { git(['merge', '--abort'], base.path); } catch { /* nothing to abort: the merge did not start */ }
+    say(`integra ${id}: ${conflicts.length ? `conflitti in ${conflicts.join(', ')}` : `non riuscito (${String(e.stderr ?? e.message).trim().split('\n')[0]})`}; il base è com'era`);
+    process.exitCode = 1;
+    return;
+  }
   const runs = readJson(RUNS, {});
   if (runs[id]) { runs[id].integrato = now(); writeJson(RUNS, runs); }
   // The worktree goes: first the junction alone (removing it as a folder would empty the base's node_modules).
@@ -474,6 +560,93 @@ function integrate(id) {
   say(`task/${id} integrato in ${CONFIG.base}; worktree e branch tolti.`);
 }
 
+// --- What the orchestrator reads and changes ---------------------------------------------------------------------
+
+const BACKLOG = path.join(REPO, 'docs', 'plans', 'backlog.md');
+
+/** The block of a task in the backlog: from its `### Txx ·` line to the next heading. */
+export function taskBlock(text, id) {
+  const m = new RegExp(`^### ${id} · [^\\n]*\\n(?:(?!#{2,4} )[^\\n]*\\n?)*`, 'm').exec(text);
+  return m?.[0];
+}
+
+/**
+ * Sets the `- Pipeline:` line of a task (`approva`, `assegna`): `change` gets the parsed line (or nothing) and
+ * gives the new one; the line goes right under the heading.
+ */
+export function setPipelineLine(text, id, change) {
+  const block = taskBlock(text, id);
+  if (!block) throw new Error(`${id}: non c'è nel backlog`);
+  const old = /^- Pipeline:\s*(.+)$/m.exec(block);
+  const info = change(old ? parsePipelineLine(old[1]) : undefined);
+  const line = `- Pipeline: ${info.provider} · stima ${info.estimate}%${info.approved ? ' · approvato' : ''} · priorità ${info.priority}`;
+  const next = old ? block.replace(old[0], line) : block.replace(/\n/, `\n${line}\n`);
+  return text.replace(block, next);
+}
+
+function editPipeline(id, change) {
+  const text = fs.readFileSync(BACKLOG, 'utf8');
+  fs.writeFileSync(BACKLOG, setPipelineLine(text, id, change));
+}
+
+/** The first task number nobody has used. */
+export function nextTaskId(text) {
+  const n = Math.max(0, ...[...text.matchAll(/^#{3,4} T(\d+)/gm)].map((m) => Number(m[1])));
+  return `T${n + 1}`;
+}
+
+/** One line per task: the orchestrator's view of the whole backlog. */
+function index() {
+  const runs = readJson(RUNS, {});
+  for (const t of loadTasks()) {
+    const r = runs[t.id];
+    const run = r && !r.integrato ? ` [${r.stato}${r.esito ? `: ${r.esito.replace(/^ESITO:\s*/, '').slice(0, 60)}` : ''}]` : '';
+    console.log(`${t.id} · ${t.status}${t.provider ? ` · ${t.provider} ${t.estimate ?? '?'}%${t.approved ? ' ✓' : ''} p${t.priority}` : ''}${t.deps.length ? ` · dopo ${t.deps.join(' ')}` : ''} · ${t.title}${run}`);
+  }
+}
+
+/**
+ * Everything about a task that whoever works on it needs, built from the files and git (no agent writes it): its
+ * block, its run, its commits and files, the ADRs it names, the tasks it depends on, those that depend on it, and
+ * the tasks whose commits touched the same files. The orchestrator opens it on demand and passes it on.
+ */
+function dossier(id) {
+  const text = fs.readFileSync(BACKLOG, 'utf8');
+  const tasks = parseBacklog(text);
+  const block = taskBlock(text, id) ?? taskBlock(text, id.replace(/[a-z]$/, ''));
+  const run = readJson(RUNS, {})[id];
+  const out = [`# Dossier di ${id}`, '', block?.trim() ?? '(non c\'è nel backlog)', ''];
+  if (run) out.push('## Esecuzione', '', `${run.provider}, ${run.tentativi} tentativo/i, ${run.stato}${run.integrato ? `, integrato il ${run.integrato}` : ''}`,
+    ...[run.esito, run.browser, run.sessione && `sessione ${run.sessione} (traccia: node tools/pipeline/pipeline.mjs traccia ${id})`].filter(Boolean), '');
+  const word = new RegExp(`\\b${id}\\b`);
+  // The id in the subject or in the body (a fix of T63 made by another task says so in its message).
+  const commits = git(['log', '--all', '--format=%h %ad %s%x01%b%x02', '--date=short', `--grep=${id}`, '-n', '60']).split('\x02')
+    .map((c) => c.trim()).filter((c) => word.test(c)).map((c) => c.split('\x01')[0]).slice(0, 30);
+  if (commits.length) out.push('## Commit', '', ...commits.map((c) => `- ${c}`), '');
+  const files = new Set();
+  for (const c of commits.map((l) => l.split(' ')[0])) {
+    const merge = git(['rev-list', '--parents', '-n', '1', c]).split(' ').length > 2;
+    for (const f of git(['show', '--format=', '--name-only', ...(merge ? ['-m', '--first-parent'] : []), c]).split('\n').filter(Boolean)) files.add(f);
+  }
+  if (files.size) out.push('## File', '', ...[...files].sort().map((f) => `- ${f}`), '');
+  const adrs = new Set([...`${block ?? ''}\n${commits.join('\n')}`.matchAll(/ADR-(\d{4})/g)].map((m) => m[1]));
+  const adrDir = path.join(REPO, 'docs', 'adr');
+  const adrFiles = fs.existsSync(adrDir) ? fs.readdirSync(adrDir) : [];
+  if (adrs.size) out.push('## ADR', '', ...[...adrs].sort().map((n) => `- docs/adr/${adrFiles.find((f) => f.startsWith(n)) ?? `${n}-…`}`), '');
+  const me = tasks.find((t) => t.id === id);
+  const after = tasks.filter((t) => t.deps.includes(id)).map((t) => t.id);
+  const near = new Map();
+  if (files.size) {
+    const subjects = git(['log', '--format=%s', '-n', '400', '--', ...[...files].filter((f) => !/backlog|PIANO|consumi|orchestrazione|AGENTS\.md|README/.test(f)).slice(0, 40)]);
+    for (const m of subjects.matchAll(/\bT\d+[a-z]?\b/g)) if (m[0] !== id) near.set(m[0], (near.get(m[0]) ?? 0) + 1);
+  }
+  out.push('## Collegati', '', `- dipende da: ${me?.deps.join(', ') || '—'}`, `- dipendono da lui: ${after.join(', ') || '—'}`,
+    `- stessi file: ${[...near].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([t, n]) => `${t} (${n})`).join(', ') || '—'}`);
+  const q = path.join(REPO, 'docs', 'pipeline', 'domande', `${id}.md`);
+  if (fs.existsSync(q)) out.push(`- domande: docs/pipeline/domande/${id}.md`);
+  console.log(out.join('\n'));
+}
+
 const [cmd, ...rest] = process.argv.slice(2);
 const flag = (name) => { const i = rest.indexOf(`--${name}`); return i >= 0 ? rest[i + 1] : undefined; };
 if (process.argv[1]?.endsWith('pipeline.mjs')) {
@@ -484,12 +657,30 @@ if (process.argv[1]?.endsWith('pipeline.mjs')) {
   else if (cmd === 'worktree') listWorktrees();
   else if (cmd === 'integra') integrate(rest[0]);
   else if (cmd === 'traccia') trace(rest[0]);
-  else if (cmd === 'riprendi') resume(rest[0]);
+  else if (cmd === 'riprendi') for (const id of rest) resume(id);
+  else if (cmd === 'interrompi') interrupt(rest);
+  else if (cmd === 'dossier') dossier(rest[0]);
+  else if (cmd === 'indice') index();
+  else if (cmd === 'prossimo') console.log(nextTaskId(fs.readFileSync(BACKLOG, 'utf8')));
+  else if (cmd === 'approva') for (const id of rest) { editPipeline(id, (i) => { if (!i?.provider) throw new Error(`${id}: senza provider e stima (assegna prima)`); return { ...i, approved: true }; }); console.log(`${id}: approvato`); }
+  else if (cmd === 'assegna') {
+    const [id, provider, stima, priorita] = rest;
+    if (!CONFIG.providers[provider] || !(Number(stima) > 0)) console.log('Uso: assegna <Txx> <claude|gemini|argon> <stima %> [priorità] [--approva]');
+    else { editPipeline(id, (i) => ({ provider, estimate: Number(stima), priority: priorita && !priorita.startsWith('--') ? Number(priorita) : i?.priority ?? 100, approved: rest.includes('--approva') || Boolean(i?.approved) })); console.log(`${id}: ${provider}, ${stima}%`); }
+  }
   else if (cmd === 'nota') say(`nota: ${rest.join(' ')}`);
   else if (cmd === 'orchestratore') {
     if (rest[0] && !CONFIG.providers[rest[0]]) console.log(`Provider sconosciuto: ${rest[0]} (${Object.keys(CONFIG.providers).join(', ')})`);
     else if (rest[0]) { writeJson(ORCHESTRATOR, { provider: rest[0], dal: now() }); say(`orchestratore: ${rest[0]}`); }
     else console.log(orchestrator());
   }
-  else console.log('Comandi: stato | uso (rilegge /usage) | esegui [--sempre] [--max N] [--solo claude|gemini|argon] [--task Txx] | budget <provider> <residuo %> | worktree | traccia <Txx> | integra <Txx> | riprendi <Txx> | orchestratore [provider] | nota <testo>');
+  // Not awaited: orchestra.mjs imports this module, which must finish evaluating first.
+  else if (cmd === 'orchestra') void import('./orchestra.mjs').then((m) => m.orchestra({ agente: flag('agente') }));
+  else console.log(`Comandi:
+  orchestra [--agente claude|argon|gemini]   l'orchestratore e la pipeline, con la chat nel terminale
+  stato | uso | indice | dossier <Txx> | traccia <Txx> | worktree | prossimo
+  esegui [--sempre] [--max N] [--solo <provider>] [--task Txx]
+  approva <Txx…> | assegna <Txx> <provider> <stima %> [priorità] [--approva]
+  interrompi <Txx…|--tutti> | riprendi <Txx…> | integra <Txx>
+  budget <provider> <residuo %> | orchestratore [provider] | nota <testo>`);
 }

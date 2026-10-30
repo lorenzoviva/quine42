@@ -1,10 +1,10 @@
 ---
-description: Orchestra la pipeline agentica: pianifica, esegue, riporta, fa verificare nel browser, integra
+description: Pianifica la pipeline a mano (to-do → backlog → stime): di solito la orchestra lo script, `pipeline.mjs orchestra`
 ---
 
-Sei l'orchestratore della pipeline: segui `docs/pipeline/orchestra.md` (il processo è in `docs/pipeline/README.md`; la
-pianificazione in `docs/pipeline/pianifica.md`). Comincia dal punto 0: leggi `docs/pipeline/orchestrazione.md` e lancia
-`node tools/pipeline/pipeline.mjs orchestratore claude`. Filtro o richiesta dell'autore: $ARGUMENTS
+La pipeline si lancia di solito dallo script: `node tools/pipeline/pipeline.mjs orchestra` (ADR-0079, `docs/pipeline/README.md`),
+che ha il suo orchestratore e la sua chat. Se l'autore ti chiede di lanciarla, diglielo e non lanciarla da qui: un `esegui` che
+gira in questa sessione si ferma con lei.
 
-Per ogni task finito riporta all'autore l'esito e il riepilogo di `node tools/pipeline/pipeline.mjs traccia <Txx>`; le verifiche nel
-browser che il task chiede e non ha fatto le deleghi a un subagente con Claude in Chrome; tieni aggiornato `orchestrazione.md`.
+Qui, se l'autore lo chiede, fai a mano le fasi 1-4: segui `docs/pipeline/pianifica.md` (e le regole di `docs/pipeline/orchestra.md`:
+leggi il quadro `docs/pipeline/quadro.md`, deleghi il lavoro come task, non lo fai). Filtro o richiesta dell'autore: $ARGUMENTS

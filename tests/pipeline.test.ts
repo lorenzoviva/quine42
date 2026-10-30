@@ -203,3 +203,70 @@ describe('readOutput', () => {
     expect(out).toMatchObject({ session: undefined, cost: undefined, error: false, outcome: 'ESITO: in attesa — domande in T62.md' });
   });
 });
+
+// The orchestrator's environment (ADR-0079): what it reads and changes in the backlog, and its own pure parts.
+type Orchestra = {
+  contextOf(json: unknown): number;
+  pickOrchestrator(order: string[], budget: Record<string, { residuo?: number; sessione?: number; fermoFino?: string }>, threshold: number, at?: Date): string | undefined;
+  composeTurn(messages: string[], events: { testo: string }[]): string;
+  wakes(line: string): boolean;
+};
+type Edits = {
+  taskBlock(text: string, id: string): string | undefined;
+  setPipelineLine(text: string, id: string, change: (i?: { provider?: string; estimate?: number; approved: boolean; priority: number }) => { provider: string; estimate: number; approved: boolean; priority: number }): string;
+  nextTaskId(text: string): string;
+};
+
+describe('il backlog per l\'orchestratore', () => {
+  const text = '## Sezione\n\n### T7 · Uno — `da fare`\n- Fare: qualcosa.\n\n### T8 · Due — `da fare`\n- Pipeline: gemini · stima 3% · priorità 5\n- Fare: altro.\n\n#### T9a · Pezzo — `fatto`\n';
+  let E: Edits;
+  beforeAll(async () => { E = (await import(/* @vite-ignore */ pathToFileURL(path.resolve(__dirname, '../tools/pipeline/pipeline.mjs')).href)) as Edits; });
+
+  it('il blocco di un task arriva fino al titolo dopo', () => {
+    expect(E.taskBlock(text, 'T7')).toBe('### T7 · Uno — `da fare`\n- Fare: qualcosa.\n\n');
+    expect(E.taskBlock(text, 'T99')).toBeUndefined();
+  });
+
+  it('approva e assegna scrivono la riga Pipeline, sotto il titolo se manca', () => {
+    const a = E.setPipelineLine(text, 'T8', (i) => ({ ...i!, provider: i!.provider!, estimate: i!.estimate!, approved: true }));
+    expect(a).toContain('- Pipeline: gemini · stima 3% · approvato · priorità 5\n- Fare: altro.');
+    const b = E.setPipelineLine(text, 'T7', () => ({ provider: 'argon', estimate: 2, approved: false, priority: 0 }));
+    expect(b).toContain('### T7 · Uno — `da fare`\n- Pipeline: argon · stima 2% · priorità 0\n- Fare: qualcosa.');
+    expect(() => E.setPipelineLine(text, 'T99', (i) => i as never)).toThrow(/non c'è/);
+  });
+
+  it('il prossimo numero libero conta anche i pezzi', () => {
+    expect(E.nextTaskId(text)).toBe('T10');
+  });
+});
+
+describe('orchestra', () => {
+  let O: Orchestra;
+  beforeAll(async () => { O = (await import(/* @vite-ignore */ pathToFileURL(path.resolve(__dirname, '../tools/pipeline/orchestra.mjs')).href)) as Orchestra; });
+
+  it('il contesto: l\'ultima chiamata del turno di Claude, altrimenti la media', () => {
+    expect(O.contextOf({ iterations: [{ input_tokens: 5, cache_read_input_tokens: 1000, output_tokens: 10 }, { input_tokens: 2, cache_read_input_tokens: 90_000, cache_creation_input_tokens: 500, output_tokens: 300 }] })).toBe(90_802);
+    expect(O.contextOf({ usage: { input_tokens: 20_000, cache_read_tokens: 100_000 }, num_turns: 4 })).toBe(30_000);
+    expect(O.contextOf(undefined)).toBe(0);
+  });
+
+  it('l\'orchestratore va sul primo provider dell\'ordine che ha crediti', () => {
+    const at = new Date('2026-10-30T10:00:00Z');
+    const budget = { claude: { residuo: 50, sessione: 8 }, argon: { residuo: 60, fermoFino: '2026-10-30T12:00:00Z' }, gemini: { residuo: 80 } };
+    expect(O.pickOrchestrator(['claude', 'argon', 'gemini'], budget, 10, at)).toBe('gemini');
+    expect(O.pickOrchestrator(['claude', 'argon', 'gemini'], { ...budget, claude: { residuo: 50, sessione: 40 } }, 10, at)).toBe('claude');
+    expect(O.pickOrchestrator(['argon'], budget, 10, new Date('2026-10-30T13:00:00Z'))).toBe('argon');
+    expect(O.pickOrchestrator(['claude'], budget, 10, at)).toBeUndefined();
+  });
+
+  it('un turno: prima gli eventi, poi i messaggi dell\'autore', () => {
+    expect(O.composeTurn(['ciao'], [{ testo: 'T1: ESITO: fatto' }])).toBe('[eventi della pipeline]\n- T1: ESITO: fatto\n\n[autore] ciao');
+    expect(O.composeTurn([], [])).toBe('');
+  });
+
+  it('svegliano l\'orchestratore gli esiti e i limiti, non i lanci', () => {
+    expect(O.wakes('[t] T1: ESITO: fatto — x')).toBe(true);
+    expect(O.wakes('[t] T1: limite di claude, riprendo dopo …')).toBe(true);
+    expect(O.wakes('[t] lancio T1 su claude (…)')).toBe(false);
+  });
+});

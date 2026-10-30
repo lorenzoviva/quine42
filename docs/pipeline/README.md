@@ -1,20 +1,47 @@
-# La pipeline agentica (ADR-0072)
+# La pipeline agentica (ADR-0072, ADR-0078, ADR-0079)
 
 Il lavoro sul kernel va avanti da solo: richieste dell'autore → task → piano → esecuzione in parallelo su
 Claude Code e Gemini (Antigravity CLI), ciascun task nel suo worktree, entro i limiti di consumo di ogni provider.
 
 ```
-docs/userchats/to-do.md        (1) le richieste dell'autore, testo libero, con «> Provider proposto: …»
+docs/userchats/to-do.md        (1) le richieste dell'autore, testo libero, con «> Provider proposto: …» (o in chat all'orchestratore)
   └─ docs/pipeline/domande/Txx.md   (2, facoltativa) lo scambio: l'agente chiede, l'autore risponde nello stesso file
 docs/plans/backlog.md          (3) i task, uno per sessione; ogni task pianificato ha la riga «- Pipeline:»
 docs/pipeline/PIANO.md         (4) il piano: le code per provider (generato dallo script, non toccarlo)
 .pipeline/                     (5) l'esecuzione: esecuzioni.json, budget.json, orchestratore.json, log/ (locale, ignorato da git)
-docs/pipeline/orchestrazione.md    (6) il report dell'orchestratore: passaggio di consegne e diario (integrazioni, verifiche)
+  └─ orchestra/                    la conversazione dell'orchestratore: stato.json, eventi.jsonl, chat.jsonl, avvio.md
+docs/pipeline/quadro.md            lo stato e le intenzioni, scritti dall'orchestratore: chi lo sostituisce parte da qui
+docs/pipeline/orchestrazione.md    il diario: lanci, esiti, limiti, integrazioni, note
 docs/pipeline/consumi.jsonl        lo storico dei consumi, per stimare meglio
 ```
 
-Tutto parte da un **agente orchestratore** (Claude Code o Antigravity) che segue [`orchestra.md`](orchestra.md): pianifica,
-lancia `esegui`, riporta ogni task finito, fa verificare nel browser ciò che il task chiede, integra, e tiene il report.
+## Avviare la pipeline
+
+```bash
+node tools/pipeline/pipeline.mjs orchestra                 # orchestratore su Claude Code (poi Argon, poi Gemini)
+node tools/pipeline/pipeline.mjs orchestra --agente argon  # su Gemini 4 Argon in Antigravity
+```
+
+Un solo processo, in un terminale: esegue i task (`esegui`, sempre acceso) e tiene la conversazione con l'**orchestratore**, un agente
+che gira a turni con la sua CLI e segue [`orchestra.md`](orchestra.md). Gli scrivi come in una chat: richieste, bug, domande,
+correzioni ai task fatti. Lui pianifica, stima, sceglie il provider, approva ciò che gli chiedi, lancia, interrompe, riporta gli esiti,
+fa verificare nel browser e integra; non lavora sul codice, delega. Gli eventi della pipeline (esiti, limiti) gli arrivano tra un
+turno e l'altro, anche se non scrivi nulla.
+
+| Nel terminale | |
+|---|---|
+| un messaggio | va all'orchestratore (se sta rispondendo, al turno dopo) |
+| `/stato` | le code e i contatori |
+| `/agente argon` | l'orchestrazione passa ad Argon (il quadro aggiornato, poi una conversazione nuova) |
+| `/epoca` | una conversazione nuova sullo stesso provider |
+| `/esci` | chiude il processo; i task in corso continuano e al prossimo avvio li ritrova |
+
+**Epoche e crediti.** La conversazione dell'orchestratore è un'epoca: ne parte una nuova quando il contesto supera metà della
+finestra del modello, quando i crediti del suo provider finiscono o scendono sotto `sogliaUnSolo` (passa al prossimo di
+`orchestra.ordine` in `config.json`, e torna al primo quando ha di nuovo crediti), o quando lo chiedi. Prima di chiuderla il
+processo gli fa aggiornare il quadro; la nuova parte da quadro, indice dei task, ultimi messaggi ed eventi non consegnati. Se i
+crediti finiscono a metà turno, il turno passa intero al provider successivo. Sul provider dell'orchestratore, sotto la soglia,
+non parte nessun task.
 
 Al posto di PLAN_CLAUDE.md/PLAN_GEMINI.md/TASK_*.md c'è **una sola fonte**, il backlog: il provider e la stima
 stanno nel task, le code per provider sono sezioni di `PIANO.md`, l'esecuzione è stato locale. Così nessun task
@@ -22,7 +49,7 @@ stanno nel task, le code per provider sono sezioni di `PIANO.md`, l'esecuzione �
 
 ## Le fasi 1-4: la pianificazione (un agente)
 
-Si lancia dal prompt di Claude Code (`/pipeline`, eventualmente con un filtro: `/pipeline solo le richieste per Claude Code`)
+La fa l'orchestratore. A mano, senza lo script, si lancia dal prompt di Claude Code (`/pipeline`, eventualmente con un filtro: `/pipeline solo le richieste per Claude Code`)
 o di Antigravity (`/pipeline`, la skill in `.agents/skills/pipeline/SKILL.md`; per la pianificazione con Argon: `agy --model gemini-4-argon-high`, poi `/pipeline`). L'agente segue
 [`pianifica.md`](pianifica.md): to-do → backlog, sblocca gli `in attesa` con risposta, stima e assegna, poi
 `node tools/pipeline/pipeline.mjs stato`. Si committa sul branch base (`3d`).
@@ -47,17 +74,27 @@ node tools/pipeline/pipeline.mjs esegui [--sempre] [--max 5] [--solo claude|gemi
 node tools/pipeline/pipeline.mjs worktree               # i worktree, cosa resta in ciascuno
 node tools/pipeline/pipeline.mjs traccia T43b           # la conversazione dell'agente, se ha letto AGENTS.md, il suo riepilogo
 node tools/pipeline/pipeline.mjs integra T43b           # merge --no-ff di task/T43b nel base, poi toglie worktree e branch
-node tools/pipeline/pipeline.mjs riprendi T51           # rimette in coda un task fermato senza che il limite fosse riconosciuto
-node tools/pipeline/pipeline.mjs orchestratore argon    # su quale provider gira l'orchestratore (senza argomento: lo dice)
+node tools/pipeline/pipeline.mjs riprendi T51           # rimette in coda un task fermato o interrotto: riprende la sua conversazione
+node tools/pipeline/pipeline.mjs interrompi T51         # ferma un task in corso (o --tutti), tenendo la conversazione
+node tools/pipeline/pipeline.mjs dossier T63            # tutto di un task: blocco, esecuzione, commit, file, ADR, task collegati
+node tools/pipeline/pipeline.mjs indice                 # una riga per task
+node tools/pipeline/pipeline.mjs assegna T69 argon 6 60 [--approva]   # la riga Pipeline: provider, stima, priorità
+node tools/pipeline/pipeline.mjs approva T69            # aggiunge «approvato»
+node tools/pipeline/pipeline.mjs prossimo               # il primo numero di task libero
+node tools/pipeline/pipeline.mjs orchestratore argon    # su quale provider gira l'orchestratore (lo scrive orchestra da solo)
 node tools/pipeline/pipeline.mjs nota "testo"           # una riga nel diario di orchestrazione.md
 ```
 
-**L'orchestratore non resta senza crediti.** `orchestratore` in `config.json` (predefinito `claude`), o quello scelto a mano
-con `orchestratore <provider>` (in `.pipeline/orchestratore.json`), è il provider su cui gira l'agente che lancia `esegui`:
-sotto `sogliaUnSolo` (settimana o 5 ore) su di lui non parte **nessun** task (sugli altri uno), così i task non consumano i
-crediti che servono all'orchestrazione per andare avanti. Se l'orchestratore gira in Antigravity conta il modello che usa
-(`argon` con Gemini 4 Argon, `gemini` con 3.8 Flash). Quando i crediti dell'orchestratore finiscono, l'autore apre un agente
-sull'altro provider, lancia `orchestratore <provider>` e quello riprende da `orchestrazione.md`.
+`integra` su un conflitto annulla il merge e lascia il base com'era (dice i file): la risoluzione la fa un agente, in un task.
+
+**I task sopravvivono al processo.** La CLI di un task scrive direttamente nel suo log in `.pipeline/log/` ed è staccata dal
+processo che la lancia; Claude ha l'id della sessione fissato prima di partire (`sessioneNuova`). Se il processo della pipeline
+muore, al riavvio `esegui` segue i task ancora vivi e riprende la conversazione di quelli il cui processo non c'è più.
+
+**L'orchestratore non resta senza crediti.** Il provider su cui gira l'orchestratore (`.pipeline/orchestratore.json`, lo scrive
+`orchestra`; senza, `orchestratore` di `config.json`): sotto `sogliaUnSolo` (settimana o 5 ore) su di lui non parte **nessun** task
+(sugli altri uno), così i task non consumano i crediti che servono all'orchestrazione. In Antigravity conta il modello che usa
+(`argon` con Gemini 4 Argon, `gemini` con 3.8 Flash).
 
 `esegui` gira finché c'è qualcosa da fare; con `--sempre` non si ferma mai: rilegge backlog e contatori a ogni controllo, e i task che pianifichi intanto partono da soli (lascialo in un terminale a parte):
 
@@ -106,23 +143,25 @@ Ogni esecuzione lascia la conversazione intera dove la tiene la sua CLI, anche d
 worktree), Antigravity in `~/.gemini/antigravity-cli/conversations/<id>.db` (SQLite; `agy --conversation <id>`). L'id è in
 `.pipeline/esecuzioni.json`, l'uscita finale in `.pipeline/log/<Txx>.<tentativo>.log`. `traccia <Txx>` li trova, dice se l'agente ha
 avuto `AGENTS.md` (Claude lo riceve da `CLAUDE.md`, che lo importa; Antigravity lo apre) e stampa il suo riepilogo finale.
-**La sessione che lancia `esegui`** riporta all'autore, per ogni task finito, l'esito e il riepilogo di `traccia`.
+**L'orchestratore** riporta all'autore, per ogni task finito, l'esito e il riepilogo di `traccia`.
 
 ## Regole per chi esegue un task (ambiente condiviso)
 
 Altri agenti, di altri provider, lavorano nello stesso repository nello stesso momento.
 
 1. Lavora solo nel tuo worktree e sul tuo branch (`task/<Txx>`); niente merge, push, `git stash` né `checkout` di
-   altri branch; non toccare gli altri worktree né la cartella principale.
-2. Non pianificare il to-do e non toccare altri task del backlog: cambia solo il blocco del tuo (stato, esito).
-3. Non fare domande e non aspettare risposte: se serve una decisione dell'autore scrivila in
+   altri branch; non toccare gli altri worktree né la cartella principale. Unica eccezione: un task «Integrare Txx» fa
+   `git merge task/Txx` nel suo branch, risolve i conflitti (l'ADR che entra prende il primo numero libero) e committa.
+2. Se il tuo task nasce da un altro o lo cita (un bug di T63), leggi prima il suo dossier: `node tools/pipeline/pipeline.mjs dossier T63`.
+3. Non pianificare il to-do e non toccare altri task del backlog: cambia solo il blocco del tuo (stato, esito).
+4. Non fare domande e non aspettare risposte: se serve una decisione dell'autore scrivila in
    `docs/pipeline/domande/<Txx>.md` (contesto, domanda, opzioni con la tua raccomandazione), segna il task
    `in attesa`, committa e termina.
-4. I numeri di ADR possono scontrarsi tra task paralleli: prendi il primo libero nel tuo branch; chi integra
+5. I numeri di ADR possono scontrarsi tra task paralleli: prendi il primo libero nel tuo branch; chi integra
    rinumera se serve.
-5. Se il task chiede una verifica nel browser, falla (`AGENTS.md`, «Convalida nel browser»: porta libera, scheda tua, chiudi
+6. Se il task chiede una verifica nel browser, falla (`AGENTS.md`, «Convalida nel browser»: porta libera, scheda tua, chiudi
    tutto alla fine); altri agenti usano lo stesso browser nello stesso momento.
-6. Chiudi con `npm test` e `npm run typecheck` verdi, un commit sul tuo branch e la riga
+7. Chiudi con `npm test` e `npm run typecheck` verdi, un commit sul tuo branch e la riga
    `ESITO: fatto|in attesa|fallito — <cosa è cambiato>` (e `BROWSER: verificato|da verificare — …` se il task la chiede).
 
 ## I worktree

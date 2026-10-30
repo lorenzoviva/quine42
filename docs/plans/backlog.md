@@ -1355,7 +1355,7 @@ le risposte alle domande del piano.
 - Fatto quando: test del client sottile per «Chi è» e per il profilo di due viandanti nella stessa origine, verifica con due schede
   in un worktree della pipeline (`BROWSER: verificato`), commit.
 
-### T45 · Crediti, lobby, carte e server su Google Cloud — spezzato in T45a-T45f (risposte in `docs/pipeline/domande/T45.md`)
+### T45 · Crediti, lobby, carte e server su Google Cloud — spezzato in T45a-T45f (risposte in docs/pipeline/domande/T45.md)
 - Fare, a pezzi (spezzare quando si comincia): crediti e pagamenti (P#1: l'1% sul costo); la lobby con il tetto di
   crediti, i modelli degli agenti (oggi `ai.textModel` e la tabella delle classi dello Scultore), i coefficienti e i
   minimi dell'universo; crediti finiti → ricarica, offline (modelli locali) o abbandona; la collezione di carte fuori
@@ -1417,6 +1417,24 @@ le risposte alle domande del piano.
 - Fatto quando: un universo multigiocatore giocato da due browser sul server di prova, commit. Il progetto Google Cloud lo dà l'autore.
 
 ## Varie
+
+### T69 · L'interfaccia web della pipeline — `da fare` (dipende da T61)
+- Pipeline: argon · stima 6% · priorità 60
+- Contesto: richiesta dell'autore del 30/10/2026 (non prioritaria: prima si usa il nuovo ambiente, ADR-0079). Oggi la pipeline si
+  segue dal terminale di `node tools/pipeline/pipeline.mjs orchestra` e dai file (`docs/pipeline/PIANO.md`, `quadro.md`,
+  `orchestrazione.md`, `.pipeline/esecuzioni.json`, `.pipeline/budget.json`, `.pipeline/orchestra/chat.jsonl`, `eventi.jsonl`).
+  La pagina legge e scrive **gli stessi file e gli stessi comandi**: non è una seconda fonte di verità.
+- Fare: una pagina locale (servita dal processo di `orchestra` o da un piccolo server Node in `tools/pipeline/`, senza dipendenze
+  nuove se si può) con:
+  - la **chat** con l'orchestratore (scrive nella stessa coda dei messaggi del terminale) e gli eventi della pipeline;
+  - la **tabella** di tutti i task (id, titolo, stato, provider, stima, priorità, approvato, dipendenze, esecuzione) e le **lavagne**
+    tipo Trello con le code di `PIANO.md` (in corso, da integrare, pronti, da approvare, bloccati, in attesa);
+  - il **dettaglio** di un task: il suo dossier (`dossier Txx`), il log e la conversazione dell'agente in corso, seguita dal vivo;
+  - **approvare** provider e stime proposti (`approva`, `assegna`), **interrompere** e **riprendere** un task;
+  - **rispondere alle domande** (`docs/pipeline/domande/*.md`) e **modificare** `docs/userchats/to-do.md`;
+  - il **consumo**: i contatori di ogni provider (5 ore e settimana) e lo storico di `consumi.jsonl`.
+- Fatto quando: la pagina mostra lo stato reale e ogni azione passa dai comandi della pipeline (test dei punti del server senza
+  browser), verifica nel browser con l'orchestratore acceso, README della pipeline aggiornato, commit.
 
 ### T30 · Immagini del 3D nel README — `fatto`
 - Pipeline: gemini · stima 2% · approvato · priorità 60
@@ -1533,7 +1551,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fatto quando: il documento, commit.
 - Esito: redatto `docs/conversazioni.md` con l'architettura end-to-end, i diagrammi Mermaid dei flussi, le schede dettagliate di tutti i 38 task degli agenti (Genesi, Cartografia, Fucina, Contenuti, Azioni ed effetti, Menti e dialoghi, Scultura 3D, Meccaniche) con ruoli, prompt di sistema, prompt utente, response schema e flussi di validazione. Censimento completo di tutti i testi hardcoded in italiano nel codice (template dei prompt, descrizioni degli schemi, principi e filtri della quarta parete, narrazione di fallback, testi UI e HUD) con proposta di organizzazione per la futura localizzazione multi-lingua e per la coda abbonamenti (T68).
 
-### T68 · Generare l'universo con gli abbonamenti — spezzato in T68a, T68b, T68c (risposte in `docs/pipeline/domande/T68.md`)
+### T68 · Generare l'universo con gli abbonamenti — spezzato in T68a, T68b, T68c (risposte in docs/pipeline/domande/T68.md)
 - Decisioni dell'autore (29/10/2026): solo in locale con l'abbonamento di chi gioca (singola e sviluppo), mai il server del
   multigiocatore; solo i compiti già lenti (Genesi, Fucina, modelli dello Scultore, sessioni del Concilio), il resto sulle API;
   quale provider per quale agente in una tabella in `universe.json → ai`, con un provider predefinito.

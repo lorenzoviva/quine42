@@ -100,18 +100,18 @@ In console `window.quine` è il kernel.
 
 Il lavoro va avanti per task, eseguiti da agenti (Claude Code, Antigravity con Gemini 3.8 Flash o Gemini 4 Argon) in parallelo,
 ciascuno nel suo worktree, entro i limiti di consumo di ogni abbonamento ([ADR-0072](docs/adr/0072-la-pipeline-agentica.md),
-[ADR-0078](docs/adr/0078-l-orchestratore-della-pipeline.md)). Le richieste si scrivono in `docs/userchats/to-do.md`; un agente
-orchestratore le trasforma in task, stima, sceglie il provider, li fa eseguire, riporta, fa verificare nel browser e integra.
+[ADR-0079](docs/adr/0079-l-ambiente-dell-orchestratore.md)). Si lancia così, in un terminale:
 
 ```bash
-node tools/pipeline/pipeline.mjs stato        # le code e i contatori (docs/pipeline/PIANO.md)
-node tools/pipeline/pipeline.mjs esegui       # esegue i task pronti e approvati
-node tools/pipeline/pipeline.mjs traccia T43b # cosa ha fatto l'agente di un task
-node tools/pipeline/pipeline.mjs integra T43b # porta un task finito nel ramo base
+node tools/pipeline/pipeline.mjs orchestra                 # l'orchestratore su Claude Code (poi Argon, poi Gemini)
+node tools/pipeline/pipeline.mjs orchestra --agente argon  # su Gemini 4 Argon
 ```
 
-Oggi l'orchestratore è una sessione di Claude Code (`/pipeline`) o di Antigravity (la skill `pipeline`); tutti i comandi sono in
-[docs/pipeline/README.md](docs/pipeline/README.md).
+Il processo esegue i task e tiene la conversazione con un agente **orchestratore**: gli scrivi in chat richieste, bug, domande,
+correzioni; lui le trasforma in task, stima, sceglie il provider secondo i crediti rimasti, li fa eseguire, ti riporta gli esiti, fa
+verificare nel browser e integra. Non lavora sul codice: delega. Quando i suoi crediti finiscono passa la mano a un altro provider
+partendo dal suo quadro (`docs/pipeline/quadro.md`), senza perdere gli eventi in corso. Le richieste si possono scrivere anche in
+`docs/userchats/to-do.md`. Comandi e regole: [docs/pipeline/README.md](docs/pipeline/README.md).
 
 ### Generare con gli abbonamenti (in costruzione)
 
