@@ -302,6 +302,7 @@ export function readOutput(text) {
 async function execute({ max = CONFIG.maxParalleli, only, task, always = false } = {}) {
   const runs = readJson(RUNS, {});
   const active = new Map(); // id → promise
+  let waitingUntil = 0;
   // The file wins for the runs this process is not following: `integra` and `riprendi` change it while `esegui` runs.
   const saveRuns = (...ids) => {
     const disk = readJson(RUNS, {});
@@ -356,7 +357,9 @@ async function execute({ max = CONFIG.maxParalleli, only, task, always = false }
       if (!waiting.length && !always) { console.log('Niente da lanciare: fine.'); return; }
       if (waiting.length) {
         const next = Math.min(...waiting.map((r) => new Date(r.fermoFino).getTime()));
-        say(`tutti fermi per i limiti; riprendo il ${new Date(next).toISOString()}`);
+        // Once per wait, and only on the console: the diary is for events.
+        if (next !== waitingUntil) console.log(`[${now()}] tutti fermi per i limiti; riprendo il ${new Date(next).toISOString()}`);
+        waitingUntil = next;
       }
     }
     await new Promise((r) => setTimeout(r, CONFIG.controlloSecondi * 1000));

@@ -67,3 +67,14 @@ Aggiornato il 29/10/2026 alle 23 circa, orchestratore `claude` (Claude Code), co
 - [2026-10-29T21:50:47.762Z] nota: verifica nel browser di T44a e T43c (subagente, 4025cba): profilo, nome doppio riparato, morte di un giocatore (gli altri continuano), uscita e rientro con posizione, inventario e bisogni OK; KO «Chi è» nel client sottile e il profilo di localStorage condiviso tra viandanti (sovrascrive quello salvato): task T44c
 - [2026-10-29T21:59:44.693Z] task/T51 integrato in 3d; worktree e branch tolti.
 - [2026-10-29T21:59:44.850Z] nota: integrati T53 (T53a rampe) e T51 (T51a mare; conflitti in kernel.ts: cache dei livelli di T51 e SolidForm di T53). Con tre agenti al lavoro i test vanno in timeout (hook di 10 s, forms.test con circuito-3D): passano da soli; suite intera da rifare a macchina ferma
+- [2026-10-29T22:05:59.224Z] T56b: limite di claude, riprendo dopo 2026-10-30T02:01:00.000Z
+- [2026-10-29T22:06:31.619Z] T64: ESITO: fatto — implementata cache su due livelli (in memoria e IndexedDB) per le varianti e animazioni dei modelli pesanti con precaricamento di 4 semi per i modelli di scaffale · BROWSER: da verificare — Nessuno strumento browser disponibile nell'ambiente di esecuzione headless; typecheck, test Vitest (11/11 in forms.test.ts) e build di produzione verificati con successo. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T64)
+- [2026-10-29T22:07:53.720Z] T53b: limite di claude, riprendo dopo 2026-10-30T02:01:00.000Z
+- [2026-10-29T22:08:06.375Z] tutti fermi per i limiti; riprendo il 2026-10-30T02:01:00.000Z
+- [2026-10-30T02:01:40.407Z] riprendo T53b su claude (H:\projects\rune\.claude\worktrees\t53b)
+- [2026-10-30T02:01:40.421Z] riprendo T56b su claude (H:\projects\rune\.claude\worktrees\t56b)
+- [2026-10-30T02:13:10.168Z] T53b: rimesso in coda (riprende la sua conversazione)
+- [2026-10-30T02:13:10.254Z] T56b: rimesso in coda (riprende la sua conversazione)
+- [2026-10-30T02:13:10.324Z] nota: esegui era morto con la sessione dell'orchestratore dopo aver ripreso T53b e T56b alle 03:01 (log vuoti, lavoro a metà nei worktree): rimessi in coda
+- [2026-10-30T02:13:13.321Z] riprendo T53b su claude (H:\projects\rune\.claude\worktrees\t53b)
+- [2026-10-30T02:13:13.346Z] riprendo T56b su claude (H:\projects\rune\.claude\worktrees\t56b)
