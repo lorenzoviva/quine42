@@ -458,7 +458,8 @@ export function launch(t, run, saveRuns = () => {}) {
   fs.mkdirSync(LOGS, { recursive: true });
   const log = path.join(LOGS, `${t.id}.${run.tentativi}.log`);
   const fd = fs.openSync(log, 'w');
-  const child = spawn(conf.cmd, args, { cwd: run.dir, stdio: ['ignore', fd, fd], windowsHide: true, detached: true });
+  // PIPELINE_TASK: who holds a turn (`turno`) started by the task.
+  const child = spawn(conf.cmd, args, { cwd: run.dir, stdio: ['ignore', fd, fd], windowsHide: true, detached: true, env: { ...process.env, PIPELINE_TASK: t.id } });
   fs.closeSync(fd);
   Object.assign(run, { pid: child.pid, log });
   saveRuns(run.id);
@@ -505,6 +506,7 @@ export async function execute({ max = CONFIG.maxParalleli, only, task, always = 
   const runs = readJson(RUNS, {});
   const active = new Map(); // id → promise
   let waitingUntil = 0;
+  let lastLaunch = 0; // the last new task: they are spaced (holdBack)
   // The file wins for the runs this process is not following: `integra` and `riprendi` change it while `esegui` runs.
   const saveRuns = (...ids) => {
     const disk = readJson(RUNS, {});
@@ -564,11 +566,14 @@ export async function execute({ max = CONFIG.maxParalleli, only, task, always = 
       const prov = resuming ? t.provider : allowed.find((p) => (!only || p === only) && fits(p, t, false));
       if (!prov || !fits(prov, t, resuming)) continue;
       if (t.needsBrowser && !(CONFIG.providers[prov]?.browser ?? prov === 'claude')) continue;
+      if (holdBack(t, [...active.keys()].map((id) => runs[id]), { resuming, lastLaunch })) continue;
       if (prov !== t.provider) say(`${t.id}: ${t.provider} non può, va su ${prov}`);
       const b = budget[prov];
       t.provider = prov;
       const run = runs[t.id] ?? { id: t.id, provider: prov, stima: t.estimate, tentativi: 0, inizio: now(), ...(() => { const w = taskWorktree(t.id); return { dir: w.dir, branch: w.branch }; })() };
       run.tentativi += 1;
+      run.needsBrowser = Boolean(t.needsBrowser);
+      if (!resuming) lastLaunch = Date.now();
       run.stato = 'in corso';
       run.prima ??= { settimana: b.residuo, sessione: b.sessione };
       runs[t.id] = run;
@@ -639,6 +644,115 @@ function showSlots(budget, queues) {
   }
 }
 
+// --- Turns (ADR-0088) ------------------------------------------------------------------------------------------
+
+/**
+ * The lock of the heavy operations, shared by every worktree: `.pipeline/lock/` of the main repository (the worktrees of the
+ * tasks have their own `.pipeline/`), or `PIPELINE_LOCK`.
+ */
+export function lockDir() {
+  if (process.env.PIPELINE_LOCK) return process.env.PIPELINE_LOCK;
+  try { return path.join(path.resolve(git(['rev-parse', '--path-format=absolute', '--git-common-dir']), '..'), '.pipeline', 'lock'); }
+  catch { return path.join(STATE_DIR, 'lock'); }
+}
+
+/** The kinds of turn and how long one may hold it before it counts as abandoned (`turni` in config.json). */
+export const TURNS = { browser: 45, test: 60, ...Object.fromEntries(Object.entries(CONFIG.turni ?? {}).map(([k, v]) => [k, v.massimoMinuti ?? v])) };
+
+/** Who holds a turn now (`{ chi, pid, comando, dal }`), or undefined: a holder whose process is gone or older than its limit does not. */
+export function holderOf(kind, { dir = lockDir(), nowMs = Date.now(), isAlive = alive, minutes = TURNS[kind] ?? 60 } = {}) {
+  const h = readJson(path.join(dir, `${kind}.json`), undefined);
+  if (!h) return undefined;
+  if (!isAlive(h.pid) || nowMs - Date.parse(h.dal) > minutes * 60_000) return undefined;
+  return h;
+}
+
+/**
+ * Tries to take a turn for `me` (`{ chi, pid, comando }`): free, and `me` first among the living waiting (a queue in arrival
+ * order, `<kind>.attesa/`), so nobody waits forever behind newcomers. Taken: the holder's file, created exclusively (two
+ * processes at once: one wins). Not taken: `me` is in the queue, and the answer says who holds it.
+ */
+export function tryTurn(kind, me, { dir = lockDir(), nowMs = Date.now(), isAlive = alive } = {}) {
+  const queue = path.join(dir, `${kind}.attesa`);
+  fs.mkdirSync(queue, { recursive: true });
+  const mine = path.join(queue, `${String(me.arrivo ?? nowMs).padStart(15, '0')}-${me.pid}.json`);
+  if (!fs.readdirSync(queue).some((f) => f.endsWith(`-${me.pid}.json`))) writeJson(mine, { ...me, arrivo: me.arrivo ?? nowMs });
+  const waiting = fs.readdirSync(queue).sort().filter((f) => {
+    const w = readJson(path.join(queue, f), undefined);
+    if (w && isAlive(w.pid)) return true;
+    try { fs.rmSync(path.join(queue, f)); } catch { /* another one cleaned it */ }
+    return false;
+  });
+  const lock = path.join(dir, `${kind}.json`);
+  const holder = holderOf(kind, { dir, nowMs, isAlive });
+  if (holder) return { taken: holder.pid === me.pid, holder };
+  if (!waiting[0]?.endsWith(`-${me.pid}.json`)) return { taken: false, holder: readJson(path.join(queue, waiting[0]), undefined), queued: true };
+  try { fs.rmSync(lock, { force: true }); } catch { /* gone already */ }
+  try {
+    fs.writeFileSync(lock, JSON.stringify({ chi: me.chi, pid: me.pid, comando: me.comando, dal: new Date(nowMs).toISOString() }, null, 2) + '\n', { flag: 'wx' });
+  } catch { return { taken: false, holder: holderOf(kind, { dir, nowMs, isAlive }) }; }
+  for (const f of fs.readdirSync(queue)) if (f.endsWith(`-${me.pid}.json`)) fs.rmSync(path.join(queue, f), { force: true });
+  return { taken: true };
+}
+
+/** Leaves a turn (only its holder) and the queue. */
+export function leaveTurn(kind, pid, { dir = lockDir() } = {}) {
+  const lock = path.join(dir, `${kind}.json`);
+  if (readJson(lock, {}).pid === pid) fs.rmSync(lock, { force: true });
+  const queue = path.join(dir, `${kind}.attesa`);
+  if (fs.existsSync(queue)) for (const f of fs.readdirSync(queue)) if (f.endsWith(`-${pid}.json`)) fs.rmSync(path.join(queue, f), { force: true });
+}
+
+/** Every turn: who holds it and how many wait. */
+export function turnsOf({ dir = lockDir() } = {}) {
+  return Object.fromEntries(Object.keys(TURNS).map((kind) => {
+    const queue = path.join(dir, `${kind}.attesa`);
+    const waiting = fs.existsSync(queue) ? fs.readdirSync(queue).filter((f) => alive(readJson(path.join(queue, f), {}).pid)).length : 0;
+    return [kind, { ...holderOf(kind, { dir }), attesa: waiting }];
+  }));
+}
+
+/**
+ * `turno <kind> -- <command>`: waits for the turn, runs the command (its output is ours, its exit code too) and leaves the turn
+ * when it ends, however it ends. A preview started this way holds the browser's turn until it is stopped.
+ */
+export async function runInTurn(kind, command, { dir = lockDir(), every = Number(process.env.PIPELINE_TURNO_OGNI ?? 5000) } = {}) {
+  if (!TURNS[kind]) { console.error(`Turno sconosciuto: ${kind} (${Object.keys(TURNS).join(', ')})`); return 2; }
+  const me = { chi: process.env.PIPELINE_TASK ?? path.basename(process.cwd()), pid: process.pid, comando: command.join(' '), arrivo: Date.now() };
+  const leave = () => leaveTurn(kind, me.pid, { dir });
+  process.on('exit', leave);
+  for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP']) process.on(sig, () => { leave(); process.exit(130); });
+  let told;
+  for (;;) {
+    const r = tryTurn(kind, me, { dir });
+    if (r.taken) break;
+    const who = r.holder ? `${r.holder.chi} (${r.holder.comando}, dal ${r.holder.dal ?? 'in coda prima di te'})` : '?';
+    if (who !== told) console.error(`[turno ${kind}] aspetto: tocca prima a ${who}`);
+    told = who;
+    await new Promise((res) => setTimeout(res, every));
+  }
+  console.error(`[turno ${kind}] è mio: ${me.comando}`);
+  const code = await new Promise((resolve) => {
+    const child = spawn(command.join(' '), { stdio: 'inherit', shell: true, env: { ...process.env, PIPELINE_TURNO: kind } });
+    child.on('error', (e) => { console.error(e.message); resolve(1); });
+    child.on('close', (c) => resolve(c ?? 1));
+  });
+  leave();
+  console.error(`[turno ${kind}] lasciato`);
+  return code;
+}
+
+/**
+ * Whether the pipeline may start a task now, given the live runs (ADR-0088): never two that verify in the browser together,
+ * and new tasks spaced by `intervalloLanciMinuti`, so their full test suites do not land at the same time. A resumed run only
+ * waits for the browser. The reason, or undefined.
+ */
+export function holdBack(t, live, { resuming = false, lastLaunch = 0, nowMs = Date.now(), minutes = CONFIG.intervalloLanciMinuti ?? 0 } = {}) {
+  if (t.needsBrowser && live.some((r) => r.needsBrowser)) return 'un altro task verifica già nel browser';
+  if (!resuming && live.length && nowMs - lastLaunch < minutes * 60_000) return `un lancio ogni ${minutes} minuti`;
+  return undefined;
+}
+
 // --- Commands --------------------------------------------------------------------------------------------------
 
 function status() {
@@ -654,6 +768,7 @@ function status() {
   for (const b of Object.values(budget)) for (const c of b.tutti ?? []) others.set(`${c.nome} (${c.finestra})`, c);
   for (const b of Object.values(budget)) for (const c of b.contatori ?? []) others.delete(`${c.nome} (${c.finestra})`);
   if (others.size) console.log(`non usati dalla pipeline:${[...others].map(([k, c]) => `\n  ${k}: ${c.residuo} %, reset ${c.reset}`).join('')}`);
+  for (const [kind, h] of Object.entries(turnsOf())) console.log(`turno ${kind}: ${h.chi ? `${h.chi} (${h.comando}, dal ${h.dal})` : 'libero'}${h.attesa ? `, ${h.attesa} in attesa` : ''}`);
   console.log('Piano in docs/pipeline/PIANO.md');
 }
 
@@ -1061,6 +1176,13 @@ if (process.argv[1]?.endsWith('pipeline.mjs')) {
     if (!CONFIG.providers[provider] || !(Number(stima) > 0)) console.log('Uso: assegna <Txx> <claude|gemini|argon> <stima %> [priorità] [--approva]');
     else { assignTask(id, { provider, stima, priorita, approva: rest.includes('--approva') }); console.log(`${id}: ${provider}, ${stima}%`); }
   }
+  else if (cmd === 'turno') {
+    const sep = rest.indexOf('--');
+    if (!rest[0] || sep < 0 || sep === rest.length - 1) {
+      for (const [kind, h] of Object.entries(turnsOf())) console.log(`turno ${kind}: ${h.chi ? `${h.chi} (${h.comando}, dal ${h.dal})` : 'libero'}${h.attesa ? `, ${h.attesa} in attesa` : ''}`);
+      if (rest[0]) console.log('Uso: turno browser|test -- <comando>');
+    } else process.exitCode = await runInTurn(rest[0], rest.slice(sep + 1));
+  }
   else if (cmd === 'nota') say(`nota: ${rest.join(' ')}`);
   else if (cmd === 'orchestratore') {
     if (rest[0] && !CONFIG.providers[rest[0]]) console.log(`Provider sconosciuto: ${rest[0]} (${Object.keys(CONFIG.providers).join(', ')})`);
@@ -1077,5 +1199,6 @@ if (process.argv[1]?.endsWith('pipeline.mjs')) {
   esegui [--sempre] [--max N] [--solo <provider>] [--task Txx]
   approva <Txx…> | assegna <Txx> <provider> <stima %> [priorità] [--approva]
   interrompi <Txx…|--tutti> | riprendi <Txx…> | integra <Txx>
-  budget <provider> <residuo %> | orchestratore [provider] | nota <testo>`);
+  budget <provider> <residuo %> | orchestratore [provider] | nota <testo>
+  turno [browser|test -- <comando>]                         aspetta il turno, esegue, lo lascia (ADR-0088)`);
 }
