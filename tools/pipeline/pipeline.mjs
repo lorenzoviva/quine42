@@ -17,10 +17,15 @@ export const STATE_DIR = process.env.PIPELINE_STATE ?? path.join(REPO, '.pipelin
 const LOGS = path.join(STATE_DIR, 'log');
 const RUNS = path.join(STATE_DIR, 'esecuzioni.json');
 export const BUDGET = path.join(STATE_DIR, 'budget.json');
-const HISTORY = path.join(REPO, 'docs', 'pipeline', 'consumi.jsonl');
+const HISTORY = process.env.PIPELINE_STATE ? path.join(STATE_DIR, 'consumi.jsonl') : path.join(REPO, 'docs', 'pipeline', 'consumi.jsonl');
 const PLAN = process.env.PIPELINE_STATE ? path.join(STATE_DIR, 'PIANO.md') : path.join(REPO, 'docs', 'pipeline', 'PIANO.md');
 const REPORT = process.env.PIPELINE_STATE ? path.join(STATE_DIR, 'diario.md') : path.join(REPO, 'docs', 'pipeline', 'orchestrazione.md');
 const ORCHESTRATOR = path.join(STATE_DIR, 'orchestratore.json');
+// The shutdown (ADR-0090): the request (`ferma --ora|--dopo`) the running pipeline obeys, and the record of the last shutdown
+// the next start reads (what was running, what was interrupted).
+export const STOP = path.join(STATE_DIR, 'arresto.json');
+export const SHUTDOWN = path.join(STATE_DIR, 'spegnimento.json');
+const PROCESS = path.join(STATE_DIR, 'processo.json');
 const RESUME = 'Ti sei fermato in questo punto, riprendi.';
 
 export const readJson = (file, fallback) => { try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return fallback; } };
@@ -53,6 +58,8 @@ export function pathsOf(opts = {}) {
     runs: path.join(stateDir, 'esecuzioni.json'),
     budget: path.join(stateDir, 'budget.json'),
     orchestrator: path.join(stateDir, 'orchestratore.json'),
+    stop: path.join(stateDir, 'arresto.json'),
+    shutdown: path.join(stateDir, 'spegnimento.json'),
     history: path.join(repo, 'docs', 'pipeline', 'consumi.jsonl'),
     plan: customState ? path.join(stateDir, 'PIANO.md') : path.join(repo, 'docs', 'pipeline', 'PIANO.md'),
     report: customState ? path.join(stateDir, 'diario.md') : path.join(repo, 'docs', 'pipeline', 'orchestrazione.md'),
@@ -510,23 +517,40 @@ export async function execute({ max = CONFIG.maxParalleli, only, task, always = 
   // The file wins for the runs this process is not following: `integra` and `riprendi` change it while `esegui` runs.
   const saveRuns = (...ids) => {
     const disk = readJson(RUNS, {});
-    for (const id of new Set([...active.keys(), ...ids])) disk[id] = runs[id];
+    for (const id of new Set([...active.keys(), ...ids])) {
+      // An interruption written by another process (`interrompi`, `ferma --ora`) is not undone by this one's copy.
+      if (disk[id]?.stato === 'interrotto' && runs[id]?.stato === 'in corso') keepInterruption(runs[id], disk[id]);
+      disk[id] = runs[id];
+    }
     writeJson(RUNS, disk);
   };
-  // Runs left «in corso» by a process that died: the CLI is still working (follow it) or gone (resume it).
-  for (const r of Object.values(runs)) {
-    if (r.stato !== 'in corso') continue;
-    if (alive(r.pid)) {
-      say(`${r.id}: ancora al lavoro (processo ${r.pid}), lo seguo`);
-      const log = r.log ?? path.join(LOGS, `${r.id}.${r.tentativi}.log`);
-      active.set(r.id, gone(r.pid).then(() => finish(r, { code: null, text: readText(log), log }, runs, saveRuns)).finally(() => active.delete(r.id)));
-    } else {
-      Object.assign(r, { stato: 'sospeso', fermoFino: now(), pid: undefined });
-      say(`${r.id}: il suo processo non c'è più, riprende${r.sessione ? ' la sua conversazione' : ' da capo'}`);
-    }
-    saveRuns(r.id);
+  // A shutdown request older than this process was for one that is gone.
+  fs.rmSync(STOP, { force: true });
+  writeJson(PROCESS, { pid: process.pid, dal: now() });
+  // Runs left by a process that died or was shut down: the CLI still working (follow it), finished while nobody watched
+  // (its outcome is in the log), gone (resume it), interrupted by `ferma --ora` (resume it).
+  const logOf = (r) => r.log ?? path.join(LOGS, `${r.id}.${r.tentativi}.log`);
+  const found = recoverRuns(runs, { readLog: (r) => readText(logOf(r)) });
+  for (const r of found.seguiti) {
+    say(`${r.id}: ancora al lavoro (processo ${r.pid}), lo seguo`);
+    active.set(r.id, gone(r.pid).then(() => finish(r, { code: null, text: readText(logOf(r)), log: logOf(r) }, runs, saveRuns)).finally(() => active.delete(r.id)));
   }
+  for (const r of found.finiti) finish(r, { code: 0, text: readText(logOf(r)), log: logOf(r) }, runs, saveRuns);
+  for (const r of found.persi) say(`${r.id}: il suo processo non c'è più, riprende${r.sessione ? ' la sua conversazione' : ' da capo'}`);
+  for (const r of found.ripresi) say(`${r.id}: interrotto allo spegnimento, riprende la sua conversazione`);
+  saveRuns(...[...found.seguiti, ...found.persi, ...found.ripresi].map((r) => r.id));
+  let stopSeen; // the shutdown request this process is obeying
   for (;;) {
+    const stop = readJson(STOP, undefined);
+    if (stop && stopSeen?.t !== stop.t) {
+      stopSeen = stop;
+      const live = [...active.keys()];
+      if (stop.modo === 'ora') {
+        // `ferma --ora` interrupted what was running when it was given; what this process started since, it interrupts.
+        const disk = readJson(RUNS, {});
+        interruptTasks(live.filter((id) => disk[id]?.stato === 'in corso'), { spegnimento: true });
+      } else say(`ferma --dopo: niente lanci nuovi${live.length ? `, aspetto ${live.join(', ')}` : ''}`);
+    }
     const disk = readJson(RUNS, {});
     for (const id of Object.keys(runs)) if (!active.has(id) && !disk[id]) delete runs[id];
     for (const [id, r] of Object.entries(disk)) if (!active.has(id)) runs[id] = r;
@@ -556,7 +580,7 @@ export async function execute({ max = CONFIG.maxParalleli, only, task, always = 
       const cli = live.filter((r) => CONFIG.providers[r.provider]?.cmd === cmd).length;
       return mine.length < cap && cli < (CONFIG.limiti?.provider?.[cmd] ?? Infinity) && (resuming || t.estimate <= left - CONFIG.riserva);
     };
-    for (const t of candidates) {
+    for (const t of stop ? [] : candidates) {
       if (active.size >= max) break;
       // A new task goes to its provider or, if that one cannot take it, to its alternatives in order (`alternative`).
       const resuming = Boolean(runs[t.id]);
@@ -581,9 +605,17 @@ export async function execute({ max = CONFIG.maxParalleli, only, task, always = 
       say(`${run.sessione ? 'riprendo' : 'lancio'} ${t.id} su ${t.provider} (${run.dir})`);
       active.set(t.id, launch(t, run, saveRuns).then((r) => finish(run, r, runs, saveRuns)).finally(() => active.delete(t.id)));
     }
+    if (stop && !active.size) {
+      const record = shutdownRecord(readJson(RUNS, {}), stop);
+      writeJson(SHUTDOWN, record);
+      fs.rmSync(STOP, { force: true });
+      fs.rmSync(PROCESS, { force: true });
+      say(`pipeline spenta (ferma --${stop.modo}${stop.chi ? `, ${stop.chi}` : ''})${record.interrotti.length ? `: interrotti ${record.interrotti.join(', ')}, riprendono al riavvio` : ''}`);
+      return { fermata: stop.modo, record };
+    }
     if (!active.size) {
       const waiting = Object.values(runs).filter((r) => r.stato === 'sospeso');
-      if (!waiting.length && !always) { console.log('Niente da lanciare: fine.'); return; }
+      if (!waiting.length && !always) { fs.rmSync(PROCESS, { force: true }); console.log('Niente da lanciare: fine.'); return; }
       if (waiting.length) {
         const next = Math.min(...waiting.map((r) => new Date(r.fermoFino).getTime()));
         // Once per wait, and only on the console: the diary is for events.
@@ -591,18 +623,104 @@ export async function execute({ max = CONFIG.maxParalleli, only, task, always = 
         waitingUntil = next;
       }
     }
-    await new Promise((r) => setTimeout(r, CONFIG.controlloSecondi * 1000));
+    // The wait ends early when a task ends or a shutdown is asked for.
+    const size = active.size;
+    for (let i = 0; i < CONFIG.controlloSecondi && active.size === size && (stop || !fs.existsSync(STOP)); i++) await new Promise((r) => setTimeout(r, 1000));
   }
+}
+
+/** Copies an interruption from the runs on disk into a run this process holds (`stato`, when, why). */
+function keepInterruption(run, disk) {
+  Object.assign(run, { stato: 'interrotto', interrotto: disk.interrotto, spegnimento: disk.spegnimento });
+}
+
+/**
+ * What a starting pipeline finds in the runs a process before it left (mutates them): `seguiti` still working (followed),
+ * `finiti` whose CLI ended with an outcome in its log while nobody watched (to finish), `persi` gone without one (resumed),
+ * `ripresi` interrupted by `ferma --ora` (resumed with their conversation).
+ */
+export function recoverRuns(runs, { isAlive = alive, readLog = () => '', at = now() } = {}) {
+  const found = { seguiti: [], finiti: [], persi: [], ripresi: [] };
+  for (const r of Object.values(runs)) {
+    if (r.stato === 'interrotto' && r.spegnimento) {
+      Object.assign(r, { stato: 'sospeso', fermoFino: at, pid: undefined, spegnimento: undefined });
+      found.ripresi.push(r);
+    } else if (r.stato !== 'in corso') continue;
+    else if (isAlive(r.pid)) found.seguiti.push(r);
+    else if (readOutput(readLog(r)).outcome) found.finiti.push(r);
+    else {
+      Object.assign(r, { stato: 'sospeso', fermoFino: at, pid: undefined });
+      found.persi.push(r);
+    }
+  }
+  return found;
+}
+
+/** The record of a shutdown (`spegnimento.json`): how and when, and where each run was left. */
+export function shutdownRecord(runs, stop, at = now()) {
+  const all = Object.values(runs);
+  const ids = (f) => all.filter(f).map((r) => r.id);
+  return {
+    t: at,
+    modo: stop.modo,
+    chi: stop.chi,
+    richiesta: stop.t,
+    interrotti: ids((r) => r.stato === 'interrotto' && r.spegnimento),
+    finitiNellAttesa: ids((r) => r.stato === 'finito' && stop.t && r.fine >= stop.t),
+    inCorso: ids((r) => r.stato === 'in corso'),
+    sospesi: ids((r) => r.stato === 'sospeso'),
+  };
+}
+
+/**
+ * What the orchestrator of the next start is told about the last shutdown: what was running and was interrupted, what
+ * finished while the pipeline waited or was off (with the outcomes), what is still working, what waits for its limits.
+ */
+export function shutdownSummary(record, runs) {
+  if (!record?.t) return [];
+  const how = { ora: 'ferma --ora: i task in corso interrotti', dopo: 'ferma --dopo: dopo la fine dei task in corso', esci: '/esci: i task in corso lasciati al lavoro' }[record.modo] ?? record.modo;
+  const outcome = (id) => `${id}${runs[id]?.esito ? ` — ${runs[id].esito}` : ` (${runs[id]?.stato ?? 'non più nelle esecuzioni'})`}`;
+  const after = Object.values(runs).filter((r) => r.fine && r.fine >= record.t).map((r) => r.id);
+  const lines = [`- Spenta il ${record.t} (${how}${record.chi ? `, ${record.chi}` : ''}).`];
+  if (record.interrotti?.length) lines.push(`- Interrotti allo spegnimento, riprendono ora la loro conversazione: ${record.interrotti.join(', ')}.`);
+  if (record.finitiNellAttesa?.length) lines.push(`- Finiti mentre aspettava di spegnersi: ${record.finitiNellAttesa.map(outcome).join('; ')}.`);
+  if (after.length) lines.push(`- Finiti mentre era spenta: ${after.map(outcome).join('; ')}.`);
+  const still = (record.inCorso ?? []).filter((id) => runs[id]?.stato === 'in corso');
+  if (still.length) lines.push(`- Ancora al lavoro: ${still.join(', ')}.`);
+  if (record.sospesi?.length) lines.push(`- Fermi per i limiti allo spegnimento: ${record.sospesi.join(', ')}.`);
+  if (lines.length === 1) lines.push('- Nessun task era in corso.');
+  return lines;
+}
+
+/**
+ * Asks the running pipeline to shut down (ADR-0090): `ora` interrupts every running task now, keeping its conversation
+ * (it resumes at the next start); `dopo` launches nothing new and waits for the running ones. The process that runs the
+ * pipeline (`esegui`, `orchestra`) obeys and ends; without one, `ora` still interrupts and the record is written here.
+ */
+export function requestStop(modo, { chi, ...opts } = {}) {
+  const p = pathsOf(opts);
+  const stop = { modo, t: now(), chi };
+  writeJson(p.stop, stop);
+  const interrupted = modo === 'ora' ? interruptTasks(['--tutti'], { ...opts, spegnimento: true }) : [];
+  const owner = readJson(path.join(p.stateDir, 'processo.json'), undefined);
+  const running = owner?.pid && owner.pid !== process.pid && !alive(owner.pid) ? undefined : owner?.pid;
+  if (!running) {
+    // Nobody to obey it: the shutdown is already done.
+    writeJson(p.shutdown, shutdownRecord(readJson(p.runs, {}), stop));
+    fs.rmSync(p.stop, { force: true });
+  }
+  return { stop, interrupted, running };
 }
 
 function finish(run, { code, text, log }, runs, saveRuns) {
   const out = readOutput(text);
   if (out.session) run.sessione = out.session;
   run.pid = undefined;
-  // Stopped on purpose (`interrompi`): it waits, with its conversation, for `riprendi`.
-  if (readJson(RUNS, {})[run.id]?.stato === 'interrotto') {
-    run.stato = 'interrotto';
-    say(`${run.id}: interrotto (riprende con riprendi ${run.id})`);
+  // Stopped on purpose (`interrompi`, `ferma --ora`): it waits, with its conversation, for `riprendi` or the next start.
+  const disk = readJson(RUNS, {})[run.id];
+  if (disk?.stato === 'interrotto' || run.stato === 'interrotto') {
+    keepInterruption(run, disk?.stato === 'interrotto' ? disk : run);
+    say(`${run.id}: interrotto (${run.spegnimento ? 'riprende al riavvio' : `riprende con riprendi ${run.id}`})`);
     saveRuns(run.id);
     return;
   }
@@ -933,10 +1051,10 @@ export function interruptTasks(ids, opts) {
   for (const id of list) {
     const run = runs[id];
     if (run?.stato !== 'in corso') { console.log(`${id}: non è in corso`); continue; }
-    Object.assign(run, { stato: 'interrotto', interrotto: now() });
+    Object.assign(run, { stato: 'interrotto', interrotto: now(), spegnimento: opts?.spegnimento || undefined });
     writeJson(p.runs, runs);
     if (run.pid) killTree(run.pid);
-    say(`${id}: interrotto dall'orchestratore (riprende con riprendi ${id})`, p.report);
+    say(opts?.spegnimento ? `${id}: interrotto per lo spegnimento (riprende al riavvio)` : `${id}: interrotto dall'orchestratore (riprende con riprendi ${id})`, p.report);
     interrupted.push(id);
   }
   return interrupted;
@@ -1150,7 +1268,23 @@ const [cmd, ...rest] = process.argv.slice(2);
 const flag = (name) => { const i = rest.indexOf(`--${name}`); return i >= 0 ? rest[i + 1] : undefined; };
 if (process.argv[1]?.endsWith('pipeline.mjs')) {
   if (cmd === 'stato' || !cmd) status();
-  else if (cmd === 'esegui') await execute({ max: Number(flag('max') ?? CONFIG.maxParalleli), only: flag('solo'), task: flag('task'), always: rest.includes('--sempre') });
+  else if (cmd === 'esegui') {
+    // Ctrl+C is `ferma --ora`: the running tasks are interrupted with their conversation; a second one quits at once.
+    let stopping = false;
+    process.on('SIGINT', () => { if (stopping) process.exit(130); stopping = true; requestStop('ora', { chi: 'Ctrl+C' }); });
+    await execute({ max: Number(flag('max') ?? CONFIG.maxParalleli), only: flag('solo'), task: flag('task'), always: rest.includes('--sempre') });
+  }
+  else if (cmd === 'ferma') {
+    const modo = rest.includes('--dopo') ? 'dopo' : rest.includes('--ora') ? 'ora' : undefined;
+    if (!modo) console.log('Uso: ferma --ora | --dopo');
+    else {
+      const r = requestStop(modo, { chi: flag('chi') });
+      const list = r.interrupted.length ? `: interrotti ${r.interrupted.join(', ')}` : '';
+      console.log(r.running
+        ? `La pipeline (processo ${r.running}) si spegne ${modo === 'ora' ? `ora${list}` : 'dopo la fine dei task in corso'}.`
+        : `Nessuna pipeline accesa${list}; lo spegnimento è registrato per il prossimo avvio.`);
+    }
+  }
   else if (cmd === 'uso') { refreshUsage(); status(); }
   else if (cmd === 'budget') {
     const b = loadBudget();
@@ -1199,6 +1333,7 @@ if (process.argv[1]?.endsWith('pipeline.mjs')) {
   esegui [--sempre] [--max N] [--solo <provider>] [--task Txx]
   approva <Txx…> | assegna <Txx> <provider> <stima %> [priorità] [--approva]
   interrompi <Txx…|--tutti> | riprendi <Txx…> | integra <Txx>
+  ferma --ora | --dopo                                      spegne la pipeline: interrompe i task (riprendono al riavvio) o aspetta che finiscano
   budget <provider> <residuo %> | orchestratore [provider] | nota <testo>
   turno [browser|test -- <comando>]                         aspetta il turno, esegue, lo lascia (ADR-0088)`);
 }

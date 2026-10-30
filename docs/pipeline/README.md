@@ -45,6 +45,8 @@ turno e l'altro, anche se non scrivi nulla.
 | `/stato` | le code e i contatori |
 | `/agente argon` | l'orchestrazione passa ad Argon (il quadro aggiornato, poi una conversazione nuova) |
 | `/epoca` | una conversazione nuova sullo stesso provider |
+| `/ferma ora` (o Ctrl+C) | interrompe i task in corso tenendo la loro conversazione e spegne; al riavvio riprendono da soli (un secondo Ctrl+C esce subito) |
+| `/ferma dopo` | niente lanci nuovi: aspetta che i task in corso finiscano, fa aggiornare il quadro all'orchestratore e spegne |
 | `/esci` | chiude il processo; i task in corso continuano e al prossimo avvio li ritrova |
 
 **Epoche e crediti.** La conversazione dell'orchestratore è un'epoca: ne parte una nuova quando il contesto supera metà della
@@ -53,6 +55,12 @@ finestra del modello, quando i crediti del suo provider finiscono o scendono sot
 processo gli fa aggiornare il quadro; la nuova parte da quadro, indice dei task, ultimi messaggi ed eventi non consegnati. Se i
 crediti finiscono a metà turno, il turno passa intero al provider successivo. Sul provider dell'orchestratore, sotto la soglia,
 non parte nessun task.
+
+**Spegnere** (ADR-0090). `ferma --ora` e `ferma --dopo` (dal terminale, da `/ferma`, dalla chat web o dall'orchestratore quando glielo
+chiedi: «chiudi ora tutti i task e spegni», «aspetta che finiscano e spegni») scrivono la richiesta in `.pipeline/arresto.json`; il
+processo che fa girare la pipeline la vede entro un secondo e si spegne lasciando `.pipeline/spegnimento.json`. Al riavvio gli interrotti
+riprendono la loro conversazione, un task finito mentre la pipeline era spenta (l'esito è nel suo log) si chiude invece di ripartire, e la
+pagina di avvio dell'epoca nuova dice all'orchestratore cosa era in corso, cosa è stato interrotto e cosa è finito nel frattempo.
 
 Al posto di PLAN_CLAUDE.md/PLAN_GEMINI.md/TASK_*.md c'è **una sola fonte**, il backlog: il provider e la stima
 stanno nel task, le code per provider sono sezioni di `PIANO.md`, l'esecuzione è stato locale. Così nessun task
@@ -87,6 +95,7 @@ node tools/pipeline/pipeline.mjs traccia T43b           # la conversazione dell'
 node tools/pipeline/pipeline.mjs integra T43b           # merge --no-ff di task/T43b nel base, poi toglie worktree e branch
 node tools/pipeline/pipeline.mjs riprendi T51           # rimette in coda un task fermato o interrotto: riprende la sua conversazione
 node tools/pipeline/pipeline.mjs interrompi T51         # ferma un task in corso (o --tutti), tenendo la conversazione
+node tools/pipeline/pipeline.mjs ferma --ora            # spegne la pipeline: interrompe i task (riprendono al riavvio); --dopo aspetta che finiscano
 node tools/pipeline/pipeline.mjs dossier T63            # tutto di un task: blocco, esecuzione, commit, file, ADR, task collegati
 node tools/pipeline/pipeline.mjs indice                 # una riga per task
 node tools/pipeline/pipeline.mjs assegna T69 argon 6 60 [--approva]   # la riga Pipeline: provider, stima, priorità

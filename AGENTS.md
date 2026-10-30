@@ -563,7 +563,7 @@ browser che il task chiede e non ha fatto (riga `BROWSER:`), integra rinumerando
 (`tools/pipeline/orchestra.mjs`): un processo con `esegui` sempre acceso, l'interfaccia web locale (`tools/pipeline/web.mjs`, T69; anche da sola con `node tools/pipeline/pipeline.mjs web`) e la conversazione con l'orchestratore a turni (`claude -p --resume`,
 `agy -p --conversation`), la chat nel terminale e sul web (stessa coda `.pipeline/orchestra/coda.json`), eventi e chat su disco (`.pipeline/orchestra/`), epoche che ripartono dal **quadro**
 (`docs/pipeline/quadro.md`) a metà finestra o quando i crediti finiscono (provider successivo di `orchestra.ordine`), con `avvio.md` compatto (senza indice intero, chat troncata e deduplicata) e interpellando l'orchestratore solo per messaggi dell'autore o decisioni (esiti, limiti, conflitti; ADR-0089). L'orchestratore
-decide e delega (`interrompi`, `approva`, `assegna`, `dossier`, `indice`, `prossimo`; `integra` su un conflitto annulla e la risoluzione
+decide e delega (`interrompi`, `approva`, `assegna`, `dossier`, `indice`, `prossimo`, `ferma --ora|--dopo` quando l'autore chiede di spegnere, ADR-0090: Ctrl+C è `ferma --ora`, i task interrotti riprendono al riavvio e `avvio.md` dice cosa era in corso e cosa è finito; `integra` su un conflitto annulla e la risoluzione
 diventa un task); i task sopravvivono al processo (log diretti, `--session-id`, ripresi al riavvio).
 
 ### Convalida nel browser (senza tentativi)

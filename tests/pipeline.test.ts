@@ -518,7 +518,8 @@ describe('orchestra', () => {
     expect(O.contextOf(undefined)).toBe(0);
   });
 
-  it('avvio.md d\'esempio è compatto e sotto il tetto di dimensione (T84)', () => {
+  it('avvio.md d\'esempio è compatto e sotto il tetto di dimensione (T84)', async () => {
+    const fsMod = await import('node:fs');
     const rawChat = [
       { t: '12:00', chi: 'autore', testo: 'puoi controllare T83?' },
       { t: '12:01', chi: 'orchestratore', provider: 'claude', testo: 'controllo subito il dossier di T83 e lo stato.' },
@@ -539,9 +540,10 @@ describe('orchestra', () => {
     // Chat troncata e senza messaggi ripetuti dell'orchestratore
     expect(page).toContain('puoi controllare T83?');
     expect(page).not.toContain('quadro aggiornato');
-    // Sotto il tetto di dimensione (es. 8000 caratteri)
-    expect(page.length).toBeLessThan(8000);
-    expect(Buffer.byteLength(page, 'utf8')).toBeLessThan(10000);
+    // Sotto il tetto di dimensione: oltre al quadro (che l'orchestratore tiene e cresce), al più 2000 caratteri
+    const quadro = fsMod.readFileSync(path.resolve(__dirname, '../docs/pipeline/quadro.md'), 'utf8').trim();
+    expect(page.length - quadro.length).toBeLessThan(2000);
+    expect(Buffer.byteLength(page, 'utf8') - Buffer.byteLength(quadro, 'utf8')).toBeLessThan(2500);
   });
 });
 
@@ -891,4 +893,146 @@ describe('i turni delle operazioni pesanti (T83)', () => {
     expect(lines[0][0]).toBe(lines[1][0]);
     expect(fsMod.existsSync(path.join(dir, 'test.json'))).toBe(false); // lasciato
   }, 20_000);
+});
+
+// Spegnere la pipeline (T85, ADR-0090): `ferma --ora`, `ferma --dopo`, ciò che il riavvio ritrova e dice all'orchestratore.
+type Run = { id: string; provider: string; stima: number; tentativi: number; stato: string; sessione?: string; pid?: number; dir?: string; inizio?: string; fine?: string; esito?: string; fermoFino?: string; spegnimento?: boolean; log?: string };
+type Stop = {
+  requestStop(modo: 'ora' | 'dopo', o?: { chi?: string; stateDir?: string }): { stop: { modo: string; t: string }; interrupted: string[]; running?: number };
+  recoverRuns(runs: Record<string, Run>, o?: { isAlive?: (pid?: number) => boolean; readLog?: (r: Run) => string; at?: string }): Record<'seguiti' | 'finiti' | 'persi' | 'ripresi', Run[]>;
+  shutdownRecord(runs: Record<string, Run>, stop: { modo: string; t?: string; chi?: string }, at?: string): { t: string; modo: string; interrotti: string[]; finitiNellAttesa: string[]; inCorso: string[]; sospesi: string[] };
+  shutdownSummary(record: unknown, runs: Record<string, Run>): string[];
+};
+
+describe('spegnere la pipeline (T85)', () => {
+  let S: Stop;
+  let O: { startPage(s: { epoca: number; provider: string; riavvio?: string[] }, reason: string, opts?: unknown): string };
+  let fsMod: typeof import('node:fs');
+  let osMod: typeof import('node:os');
+  const script = path.resolve(__dirname, '../tools/pipeline/pipeline.mjs');
+  beforeAll(async () => {
+    S = (await import(/* @vite-ignore */ pathToFileURL(script).href)) as Stop;
+    O = (await import(/* @vite-ignore */ pathToFileURL(path.resolve(__dirname, '../tools/pipeline/orchestra.mjs')).href)) as typeof O;
+    fsMod = await import('node:fs');
+    osMod = await import('node:os');
+  });
+  const tmp = () => fsMod.mkdtempSync(path.join(osMod.tmpdir(), 'quine-ferma-'));
+  const run = (id: string, o: Partial<Run> = {}): Run => ({ id, provider: 'finto', stima: 1, tentativi: 1, stato: 'in corso', sessione: `s-${id}`, inizio: '2026-10-30T10:00:00.000Z', ...o });
+
+  it('ferma --ora senza una pipeline accesa interrompe, tiene la conversazione e registra lo spegnimento', () => {
+    const dir = tmp();
+    fsMod.writeFileSync(path.join(dir, 'esecuzioni.json'), JSON.stringify({ T1: run('T1'), T2: run('T2', { stato: 'sospeso' }), T3: run('T3', { stato: 'finito', esito: 'ESITO: fatto' }) }));
+    const r = S.requestStop('ora', { stateDir: dir, chi: 'prova' });
+    expect(r.interrupted).toEqual(['T1']);
+    expect(r.running).toBeUndefined();
+    const runs = JSON.parse(fsMod.readFileSync(path.join(dir, 'esecuzioni.json'), 'utf8'));
+    expect(runs.T1).toMatchObject({ stato: 'interrotto', spegnimento: true, sessione: 's-T1' });
+    expect(runs.T2.stato).toBe('sospeso');
+    const record = JSON.parse(fsMod.readFileSync(path.join(dir, 'spegnimento.json'), 'utf8'));
+    expect(record).toMatchObject({ modo: 'ora', chi: 'prova', interrotti: ['T1'], sospesi: ['T2'] });
+    expect(fsMod.existsSync(path.join(dir, 'arresto.json'))).toBe(false); // nessuno a cui chiederlo: già fatto
+  });
+
+  it('al riavvio gli interrotti riprendono, chi ha finito da spento si chiude, chi è sparito riprende', () => {
+    const runs: Record<string, Run> = {
+      A: run('A', { stato: 'interrotto', spegnimento: true, pid: 11 }),
+      B: run('B', { pid: 12 }), // ancora vivo (lasciato con /esci)
+      C: run('C', { pid: 13 }), // finito mentre era spenta: l'esito è nel log
+      D: run('D', { pid: 14 }), // sparito senza esito
+      E: run('E', { stato: 'interrotto' }), // interrotto dall'orchestratore: aspetta riprendi
+    };
+    const found = S.recoverRuns(runs, { isAlive: (pid) => pid === 12, readLog: (r) => (r.id === 'C' ? '{"result":"ESITO: fatto — prova","session_id":"s-C"}' : ''), at: '2026-10-31T08:00:00.000Z' });
+    expect(found.ripresi.map((r) => r.id)).toEqual(['A']);
+    expect(found.seguiti.map((r) => r.id)).toEqual(['B']);
+    expect(found.finiti.map((r) => r.id)).toEqual(['C']);
+    expect(found.persi.map((r) => r.id)).toEqual(['D']);
+    expect(runs.A).toMatchObject({ stato: 'sospeso', fermoFino: '2026-10-31T08:00:00.000Z', sessione: 's-A' });
+    expect(runs.A.spegnimento).toBeUndefined();
+    expect(runs.E.stato).toBe('interrotto');
+  });
+
+  it('il riepilogo del riavvio va nella pagina di avvio dell\'orchestratore', () => {
+    const t = '2026-10-30T20:00:00.000Z';
+    const record = { t, modo: 'ora', chi: 'Ctrl+C', richiesta: t, interrotti: ['T1'], finitiNellAttesa: [], inCorso: ['T4'], sospesi: ['T2'] };
+    const runs: Record<string, Run> = {
+      T1: run('T1', { stato: 'sospeso' }),
+      T2: run('T2', { stato: 'sospeso' }),
+      T3: run('T3', { stato: 'finito', fine: '2026-10-31T07:00:00.000Z', esito: 'ESITO: fatto — il menu' }),
+      T4: run('T4'),
+      T5: run('T5', { stato: 'finito', fine: '2026-10-29T07:00:00.000Z', esito: 'ESITO: fatto — vecchio' }),
+    };
+    const lines = S.shutdownSummary(record, runs);
+    const text = lines.join('\n');
+    expect(text).toContain('ferma --ora');
+    expect(text).toMatch(/Interrotti allo spegnimento.*T1/);
+    expect(text).toMatch(/Finiti mentre era spenta: T3 — ESITO: fatto — il menu/);
+    expect(text).toMatch(/Ancora al lavoro: T4/);
+    expect(text).toMatch(/limiti.*T2/);
+    expect(text).not.toContain('T5');
+    expect(S.shutdownSummary(undefined, runs)).toEqual([]);
+    const page = O.startPage({ epoca: 4, provider: 'claude', riavvio: lines }, 'riavvio dopo lo spegnimento', { chat: [], quadro: path.join(tmp(), 'nessuno.md') });
+    expect(page).toContain('## Lo spegnimento di prima');
+    expect(page).toContain('Finiti mentre era spenta: T3');
+    expect(O.startPage({ epoca: 4, provider: 'claude' }, 'avvio', { chat: [], quadro: path.join(tmp(), 'nessuno.md') })).not.toContain('Lo spegnimento');
+  });
+
+  // La pipeline vera (`esegui`) con una CLI finta: un processo node che dorme e poi risponde come Claude.
+  const world = (ms: number, ids: string[]) => {
+    const dir = tmp();
+    const cli = path.join(dir, 'cli.cjs');
+    fsMod.writeFileSync(cli, `setTimeout(() => console.log(JSON.stringify({ session_id: 'nuova', result: 'ESITO: fatto — prova' })), ${ms});\n`);
+    const config = {
+      base: '3d', orchestratore: 'nessuno', maxParalleli: 1, riserva: 0, sogliaUnSolo: 0, attesaLimiteMinuti: 60, controlloSecondi: 1, usoSecondi: 3600,
+      intervalloLanciMinuti: 0, approvazione: 'manuale', prompt: 'prova {id}',
+      providers: { finto: { cmd: process.execPath, args: [cli], resume: ['--resume', '{sessione}'], resetSettimanale: '', browser: true } },
+    };
+    fsMod.writeFileSync(path.join(dir, 'config.json'), JSON.stringify(config));
+    const letto = new Date().toISOString();
+    fsMod.writeFileSync(path.join(dir, 'budget.json'), JSON.stringify({ finto: { residuo: 100, sessione: 100, letto, aggiornato: letto, contatori: [{ nome: 'x', finestra: 'settimana', residuo: 100 }] } }));
+    const runs = Object.fromEntries(ids.map((id) => [id, run(id, { stato: 'sospeso', tentativi: 0, fermoFino: '2026-01-01T00:00:00.000Z', dir })]));
+    fsMod.writeFileSync(path.join(dir, 'esecuzioni.json'), JSON.stringify(runs));
+    return { dir, env: { ...process.env, PIPELINE_STATE: dir, PIPELINE_CONFIG: path.join(dir, 'config.json') } };
+  };
+  const readRuns = (dir: string): Record<string, Run> => { try { return JSON.parse(fsMod.readFileSync(path.join(dir, 'esecuzioni.json'), 'utf8')); } catch { return {}; } };
+  const until = async (ok: () => boolean, ms = 20_000) => { for (const end = Date.now() + ms; !ok(); ) { if (Date.now() > end) throw new Error('tempo scaduto'); await new Promise((r) => setTimeout(r, 200)); } };
+  const pipeline = async (w: { dir: string; env: NodeJS.ProcessEnv }) => {
+    const { spawn, spawnSync } = await import('node:child_process');
+    let out = '';
+    const child = spawn(process.execPath, [script, 'esegui', '--sempre', '--solo', 'finto', '--max', '1'], { env: w.env, stdio: ['ignore', 'pipe', 'pipe'] });
+    child.stdout.on('data', (d) => { out += d; });
+    child.stderr.on('data', (d) => { out += d; });
+    const ended = new Promise<number>((resolve) => child.on('close', (c) => resolve(c ?? -1)));
+    const ferma = (modo: string) => spawnSync(process.execPath, [script, 'ferma', `--${modo}`], { env: w.env, encoding: 'utf8' }).stdout;
+    return { ended, ferma, out: () => out };
+  };
+  const within = (p: Promise<number>) => Promise.race([p, new Promise<number>((r) => setTimeout(() => r(-2), 30_000))]);
+
+  it('ferma --ora: la pipeline accesa interrompe il task, tiene la sua conversazione e si spegne', async () => {
+    const w = world(60_000, ['T1']);
+    const p = await pipeline(w);
+    await until(() => readRuns(w.dir).T1?.stato === 'in corso' && Boolean(readRuns(w.dir).T1?.pid));
+    expect(p.ferma('ora')).toMatch(/si spegne ora: interrotti T1/);
+    expect(await within(p.ended), p.out()).toBe(0);
+    const runs = readRuns(w.dir);
+    expect(runs.T1).toMatchObject({ stato: 'interrotto', spegnimento: true, sessione: 's-T1' });
+    const record = JSON.parse(fsMod.readFileSync(path.join(w.dir, 'spegnimento.json'), 'utf8'));
+    expect(record).toMatchObject({ modo: 'ora', interrotti: ['T1'] });
+    expect(fsMod.existsSync(path.join(w.dir, 'arresto.json'))).toBe(false);
+    expect(p.out()).toContain('pipeline spenta (ferma --ora)');
+  }, 60_000);
+
+  it('ferma --dopo: niente lanci nuovi, aspetta che il task in corso finisca e si spegne', async () => {
+    const w = world(3_000, ['T1', 'T2']);
+    const p = await pipeline(w);
+    await until(() => readRuns(w.dir).T1?.stato === 'in corso' && Boolean(readRuns(w.dir).T1?.pid));
+    expect(p.ferma('dopo')).toMatch(/si spegne dopo la fine/);
+    expect(await within(p.ended), p.out()).toBe(0);
+    const runs = readRuns(w.dir);
+    expect(runs.T1).toMatchObject({ stato: 'finito', esito: 'ESITO: fatto — prova' });
+    expect(runs.T2).toMatchObject({ stato: 'sospeso', tentativi: 0 }); // mai lanciato
+    const record = JSON.parse(fsMod.readFileSync(path.join(w.dir, 'spegnimento.json'), 'utf8'));
+    expect(record).toMatchObject({ modo: 'dopo', interrotti: [], finitiNellAttesa: ['T1'], sospesi: ['T2'] });
+    // Al riavvio l'orchestratore lo sa.
+    expect(S.shutdownSummary(record, runs).join('\n')).toMatch(/Finiti mentre aspettava di spegnersi: T1 — ESITO: fatto/);
+  }, 60_000);
 });
