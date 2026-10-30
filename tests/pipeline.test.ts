@@ -549,5 +549,13 @@ describe('interfaccia web della pipeline (T69)', () => {
       await new Promise<void>((resolve) => server.close(() => resolve()));
     }
   });
+
+  it('renderHtml serve uno script inline sintatticamente valido senza errori di regex (T81)', () => {
+    const html = W.renderHtml();
+    const scriptMatch = /<script>([\s\S]*?)<\/script>/i.exec(html);
+    expect(scriptMatch).not.toBeNull();
+    const script = scriptMatch![1];
+    expect(() => new Function(script)).not.toThrow();
+  });
 });
 

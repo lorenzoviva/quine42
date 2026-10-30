@@ -1650,7 +1650,7 @@ export function renderHtml() {
     document.getElementById('btn-quick-nota').addEventListener('click', async () => {
       const inp = document.getElementById('chat-input');
       if (!inp.value.trim()) { inp.value = '/nota '; inp.focus(); return; }
-      const raw = inp.value.trim().replace(/^\/nota\s+/i, '');
+      const raw = inp.value.trim().replace(/^\\/nota\\s+/i, '');
       inp.value = '';
       await api('POST', '/api/orchestratore', { nota: raw });
       showToast('Nota aggiunta al diario');
