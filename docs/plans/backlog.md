@@ -1718,3 +1718,13 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   IMPORTANTE: esegui solo `npx vitest run tests/account.test.ts tests/credits.test.ts tests/session.test.ts tests/subscription.test.ts` e `npm run typecheck` (con `WaitMsBeforeAsync: 10000`, NON lanciare `npm test` sull'intera suite per evitare timeout o backgrounding).
 - Fatto quando: i test sopra indicati e `npm run typecheck` sono verdi, commit sul branch `task/T76`. Poi l'orchestratore farà `integra T76`, `integra T75` e `integra T44b`.
 - Esito: eseguito merge di `task/T75` in `task/T76`; risolti i conflitti in `src/main.ts` e `docs/plans/backlog.md` preservando sia le novità di T44c (`savedProfile(name, id)`, gestione `ui:died` in multigiocatore, profilo salvato per universo/viandante) sia quelle di T75/T44b/T45a (account Firebase, login Google/anonimo, `accountWanderer` per id e profilo, crediti per anonimo e profilo account); superati `tests/account.test.ts` (6/6), `tests/credits.test.ts` (6/6), `tests/subscription.test.ts` (16/16), `tests/session.test.ts` (3/3) e `npm run typecheck` con esito verde.
+
+### T77 · Integrare T45e (i pagamenti con Stripe) nel base 3d — `da fare`
+- Pipeline: gemini · stima 1% · approvato · priorità 0
+- Contesto: `integra T45e` del 30/10/2026 si è fermato su un conflitto in `docs/plans/backlog.md` (e possibili sovrapposizioni nei file aggiornati da T76/T75/T44b in `3d`). Leggi `node tools/pipeline/pipeline.mjs dossier T45e` e `dossier T76`.
+- Fare: nel tuo worktree esegui `git merge task/T45e` e risolvi i conflitti:
+  - In `docs/plans/backlog.md` mantieni lo stato aggiornato di T45e (con le sue note/esito e domanda chiavi Stripe) e aggiungi T77.
+  - In `src/main.ts`, `server/session.ts`, `src/kernel/credits.ts`, `src/ui/profile.ts`, `vite.config.ts`, `AGENTS.md` o eventuali altri file, preserva attentamente sia l'autenticazione Firebase, i crediti anonimi e il profilo di T76/T75/T44b/T44c, sia l'integrazione di Stripe Checkout (`/api/stripe/checkout`), il webhook idempotente (`/api/stripe/webhook`), il blocco degli utenti anonimi dai pagamenti e la memorizzazione in `world/pagamenti.json` di T45e (ADR-0083).
+  IMPORTANTE: esegui solo `npx vitest run tests/stripe.test.ts tests/account.test.ts tests/credits.test.ts tests/session.test.ts` e `npm run typecheck` (con `WaitMsBeforeAsync: 10000`, NON lanciare `npm test` sull'intera suite per evitare timeout).
+- Fatto quando: i test specificati e `npm run typecheck` sono verdi, commit sul branch `task/T77`. Poi l'orchestratore farà `integra T77` e `integra T45e`.
+

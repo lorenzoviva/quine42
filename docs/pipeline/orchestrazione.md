@@ -246,3 +246,8 @@
 - [2026-10-30T09:44:07.588Z] nota: Epoca 57 avviata su Gemini. T45e attivo nel worktree t45e, T70 sospeso in attesa del reset Claude (11:59 UTC); quadro aggiornato.
 - [2026-10-30T09:46:46.525Z] orchestratore: epoca 58 su gemini (contesto a 119 % della finestra)
 - [2026-10-30T09:48:27.994Z] nota: Epoca 58 avviata su Gemini. T45e attivo nel worktree t45e, T70 sospeso in attesa del reset Claude (11:59 UTC); quadro aggiornato.
+- [2026-10-30T09:50:39.240Z] orchestratore: epoca 59 su gemini (contesto a 84 % della finestra)
+- [2026-10-30T09:51:02.272Z] T45e: ESITO: in attesa — implementata la ricarica crediti con Stripe Checkout, webhook idempotente, blocco anonimi e test headless; in attesa delle chiavi di test dell'autore in docs/pipeline/domande/T45e.md · BROWSER: da verificare — mancano le chiavi Stripe di test in .env per completare la transazione di prova nel browser (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T45e)
+- [2026-10-30T09:52:29.696Z] integra T45e: conflitti in docs/plans/backlog.md; il base è com'era
+- [2026-10-30T09:54:32.917Z] lancio T77 su gemini (H:\projects\rune\.claude\worktrees\t77)
+- [2026-10-30T09:54:37.393Z] nota: T45e completato (webhook Stripe idempotente, blocco anonimi, ADR-0083, test verdi); integra T45e bloccato su conflitto in backlog.md: creato T77 su Gemini (p0) per integrare task/T45e nel base 3d; attesa chiavi di test per verifica browser.
