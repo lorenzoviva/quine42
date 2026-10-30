@@ -494,3 +494,4 @@
 - [2026-10-30T18:01:51.683Z] orchestratore: epoca 159 su gemini (contesto a 63 % della finestra)
 - [2026-10-30T18:02:51.387Z] nota: Epoca 159 avviata su Gemini (rotazione per contesto al 63 % in epoca 158). T83 congelato su Claude al limite 5h (reset 22:00 UTC). Quadro aggiornato.
 - [2026-10-30T18:03:06.673Z] T83: limite di claude, riprendo dopo 2026-10-30T22:01:00.000Z
+- [2026-10-30T18:03:42.150Z] nota: T83 congelato: limite di Claude, riprenderà dopo le 22:01 UTC.
