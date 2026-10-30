@@ -89,11 +89,11 @@ export class MockModels implements Models {
       case 'chunk.survey':
         return { griglia: d.grid, note: 'nessuna differenza' };
       case 'forge.concept':
-        return this.concept(d.request as ForgeRequest);
+        return this.concept((d.request ?? { prompt: call.prompt }) as ForgeRequest);
       case 'forge.physics':
-        return this.physics(d.concept as Concept);
+        return this.physics((d.concept ?? { nome: 'Cosa', tipo: 'oggetto', descrizione: call.prompt, aspetto: call.prompt, classe: 'oggetto' }) as Concept);
       case 'forge.code':
-        return { logic: this.code(d.concept as Concept), componenti_json: '{}' };
+        return { logic: this.code((d.concept ?? { nome: 'Cosa', tipo: 'oggetto', descrizione: call.prompt, aspetto: call.prompt, classe: 'oggetto' }) as Concept), componenti_json: '{}' };
       case 'forge.fix':
         return { logic: `-- ${d.manifest?.name ?? 'modulo'}: riparato offline.\nlocal M = {}\n\nreturn M\n` };
       case 'forge.review':
@@ -468,7 +468,7 @@ export class MockModels implements Models {
       lore: `Nessuno ricorda da quando ${tipo === 'npc' ? 'vive' : 'si trova'} qui.`,
       aspetto: req.prompt,
       classe: tipo === 'npc' ? (/gatto|cane|pecora|uccello|corvo|volpe/.test(req.prompt.toLowerCase()) ? 'animale' : 'persona') : tipo === 'strumento' ? 'oggetto' : 'mobile',
-      contesto: { terreni: req.paletteCodes.filter((c) => c === 'g' || c === 'p'), luoghi: 'prati e sentieri', rarita: 0.2 },
+      contesto: { terreni: (req.paletteCodes ?? ['g', 'p']).filter((c) => c === 'g' || c === 'p'), luoghi: 'prati e sentieri', rarita: 0.2 },
       interazione: tipo === 'npc' ? 'parla' : tipo === 'oggetto' ? 'usa' : 'nessuna',
       comandi: tipo === 'strumento' ? [edible ? { azione: 'usa', descrizione: 'mangialo' } : { azione: 'azione', descrizione: 'usalo su ciò che hai davanti' }] : [],
       unico: tipo === 'npc' && !/gatto|cane|pecora|uccello|corvo/.test(req.prompt.toLowerCase()),
@@ -483,17 +483,20 @@ export class MockModels implements Models {
   private physics(c: Concept): PhysicsSpec {
     const npc = c.tipo === 'npc';
     const item = c.tipo === 'strumento';
-    return { solido: !npc && !item, spingibile: false, massa: npc ? 70 : item ? 0.5 : 40, attrito: 0.6, raggio: npc ? 0.35 : item ? 0.25 : 0.45, velocita: npc ? 1.1 : 0, peso: item ? 1 : 0, impilabile: item && EDIBLE.includes(words(c.nome)[0] ?? ''), max_pila: 10, equipaggiabile: item && !c.comandi.some((x) => x.azione === 'usa') };
+    const comandi = c.comandi ?? [];
+    return { solido: !npc && !item, spingibile: false, massa: npc ? 70 : item ? 0.5 : 40, attrito: 0.6, raggio: npc ? 0.35 : item ? 0.25 : 0.45, velocita: npc ? 1.1 : 0, peso: item ? 1 : 0, impilabile: item && EDIBLE.includes(words(c.nome ?? '')[0] ?? ''), max_pila: 10, equipaggiabile: item && !comandi.some((x) => x.azione === 'usa') };
   }
 
   private code(c: Concept): string {
-    const name = c.nome.replace(/"/g, '');
+    const name = (c.nome ?? 'Cosa').replace(/"/g, '');
+    const lore = (c.lore ?? '').replace(/"/g, '');
+    const comandi = c.comandi ?? [];
     if (c.tipo === 'strumento') {
-      if (c.comandi.some((x) => x.azione === 'usa'))
+      if (comandi.some((x) => x.azione === 'usa'))
         return `-- ${name}: generato offline.\nlocal M = {}\n\nfunction M.on_use(user, item)\n  inventory.remove(user, item, 1)\n  return "Hai consumato: ${name}."\nend\n\nreturn M\n`;
       return `-- ${name}: generato offline.\nlocal M = {}\n\nfunction M.on_action(user, target, item)\n  if not target then return "Non c'è niente davanti a te." end\n  if world.has_tag(target, "tagliabile") then\n    world.break_entity(target)\n    return "Fatto."\n  end\n  return "Non funziona su questo."\nend\n\nreturn M\n`;
     }
-    if (c.tipo === 'oggetto') return `-- ${name}: generato offline.\nlocal M = {}\n\nfunction M.on_act(id, user, action)\n  return "${name}. ${c.lore.replace(/"/g, '')}"\nend\n\nfunction M.on_interact(id)\n  return "${name}."\nend\n\nreturn M\n`;
+    if (c.tipo === 'oggetto') return `-- ${name}: generato offline.\nlocal M = {}\n\nfunction M.on_act(id, user, action)\n  return "${name}. ${lore}"\nend\n\nfunction M.on_interact(id)\n  return "${name}."\nend\n\nreturn M\n`;
     return `-- ${name}: generato offline. Il dialogo è simulato dal Narratore (persona).\nlocal M = {}\n\nfunction M.on_spawn(id)\nend\n\nreturn M\n`;
   }
 

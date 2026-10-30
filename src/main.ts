@@ -9,6 +9,7 @@ import { IdbChunks } from './kernel/chunks';
 import { GeminiModels } from './kernel/ai/gemini';
 import { MockModels } from './kernel/ai/mock';
 import type { Models } from './kernel/ai/models';
+import { describeQueue, describeSubscriptions, QueueModels, RoutedModels, SUBSCRIPTIONS, subscriptionsOf, usesSubscriptions, type Provider } from './kernel/ai/subscription';
 import { Renderer } from './render/renderer';
 import { WorkerRunner } from './render/forms';
 import { Thumbs } from './render/thumbs';
@@ -31,9 +32,6 @@ const dev = import.meta.env.DEV || params.has('dev');
 
 /** A game alone: the kernel runs here, on the universe's repository (or in the browser's storage, without the server). */
 async function bootAlone(client: UniverseClient | null, snap: UniverseSnapshot | undefined, name: string): Promise<{ kernel: Kernel; online: boolean }> {
-  const ai = readConfig(bundledFiles).config.ai;
-  const online = !params.has('offline') && (await GeminiModels.available());
-  const models: Models = online ? new GeminiModels({ textModel: ai.textModel, limits: { text: ai.maxText }, thinking: ai.thinking, timeout: (ai.timeout ?? 120) * 1000 }) : new MockModels();
   let files: FileMap = bundledFiles;
   let past: PastCommit[] = [];
   if (client && snap) {
@@ -63,6 +61,24 @@ async function bootAlone(client: UniverseClient | null, snap: UniverseSnapshot |
     if (Object.keys(up.changes).length) await client.commit(up.changes, `aggiornamento dal kernel: ${up.updated.slice(0, 6).join(', ') || 'seme'}${up.updated.length > 6 ? '…' : ''}`, 'kernel');
     files = up.files;
     past = snap.log ?? [];
+  }
+  const ai = readConfig(files).config.ai;
+  const online = !params.has('offline') && (await GeminiModels.available());
+  const baseModels: Models = online ? new GeminiModels({ textModel: ai.textModel, limits: { text: ai.maxText }, thinking: ai.thinking, timeout: (ai.timeout ?? 120) * 1000 }) : new MockModels();
+  const table = subscriptionsOf(ai);
+  let models: Models = baseModels;
+  if (usesSubscriptions(table)) {
+    const queues: Partial<Record<Exclude<Provider, 'api'>, Models>> = {};
+    for (const p of SUBSCRIPTIONS) {
+      if (table.provider === p || Object.values(table.agenti).includes(p)) {
+        if (await QueueModels.available(p)) {
+          queues[p] = new QueueModels({ provider: p });
+        }
+      }
+    }
+    if (Object.keys(queues).length > 0) {
+      models = new RoutedModels(baseModels, table, queues);
+    }
   }
   const chunks = client ? new UniverseChunks(client, new IdbChunks()) : new IdbChunks();
   const kernel = await Kernel.boot({ files, store: client ? memoryStore() : localStore, models, chunks, forms: new WorkerRunner(), wasmUri, backend: client ?? undefined, past });
@@ -247,7 +263,22 @@ async function main() {
   };
   window.addEventListener('keydown', startGame);
   intro.addEventListener('click', startGame);
-  $('#models').textContent = thin ? `partita di molti · ${thin.session.nome} (${thin.session.id})` : online ? `Gemini · ${ai.textModel}` : 'offline: luoghi abbozzati, agenti locali';
+  const updateModelsHud = async () => {
+    if (thin) {
+      $('#models').textContent = `partita di molti · ${thin.session.nome} (${thin.session.id})`;
+      return;
+    }
+    const base = online ? `Gemini · ${ai.textModel}` : 'offline: luoghi abbozzati, agenti locali';
+    if (kernel.models instanceof RoutedModels) {
+      const firstQueue = Object.values(kernel.models.queues)[0] as QueueModels | undefined;
+      const qState = await QueueModels.queryState(firstQueue?.endpoint, firstQueue?.fetchImpl);
+      $('#models').textContent = `${base} · ${describeSubscriptions(kernel.models.table)} · ${describeQueue(qState)}`;
+    } else {
+      $('#models').textContent = base;
+    }
+  };
+  void updateModelsHud();
+  kernel.bus.on('usage', () => void updateModelsHud());
   if (params.has('skip')) intro.hidden = true;
   // Dev: ?dev&teleport=46,0 stops the carpet and drops you at real coordinates (e.g. in the corona).
   const tp = dev && params.get('teleport')?.split(',').map(Number);
