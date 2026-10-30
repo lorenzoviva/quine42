@@ -75,6 +75,8 @@ export interface FormRequest {
   vpt: number;
   /** Milliseconds the program may run (`ModelInfo.tempo`, else `MODEL_TIME`). */
   tempo?: number;
+  /** Model id for diagnostics and cache key (T64). */
+  model?: string;
 }
 
 /** How long a model's program may run, unless its entry in the index says otherwise. */
@@ -182,8 +184,20 @@ export function rampBlocks(f: Form, floor: Uint8Array, block: Uint8Array, x0: nu
 
 /** Runs programs in this thread (Node, tests): no meshes. */
 export class InlineRunner implements FormRunner {
+  private cache = new Map<string, FormResult>();
+
   async run(q: FormRequest): Promise<FormResult> {
-    return runForm(q);
+    const key = `${q.model ?? ''}#${q.seed}#${q.vpt}#${q.tint ? `${q.tint.symbol}:${q.tint.color}` : ''}#${hashStr(q.xml)}`;
+    let hit = this.cache.get(key);
+    if (!hit) {
+      hit = runForm(q);
+      this.cache.set(key, hit);
+    }
+    return hit;
+  }
+
+  clear(): void {
+    this.cache.clear();
   }
 }
 
@@ -253,9 +267,20 @@ export class Forms {
     return classOf(this.info(model)?.classe) ?? classOf(model) ?? CLASSES.find((c) => c.id === 'oggetto')!;
   }
 
-  /** How many seeds a program has in the world: the few of its class. */
+  /** How many seeds a program has in the world: the few of its class (T64: 4 for shelf file models). */
   seedsOf(model: string): number {
+    if (model === 'circuito-3D' || model === 'schermo-struttura' || model === 'schermo-scritte') return 4;
     return SEEDS[this.classOf(model).id] ?? 2;
+  }
+
+  /** Preloads forms for a model for the given number of seeds (default: seedsOf(model)). */
+  preload(model: string, seeds = this.seedsOf(model), tint?: string): Form[] {
+    const out: Form[] = [];
+    for (let s = 1; s <= seeds; s++) {
+      const f = this.get(model, s, tint);
+      if (f) out.push(f);
+    }
+    return out;
   }
 
   /** A seed for an instance: stable for who it is, among the few seeds of its kind. */
@@ -281,7 +306,7 @@ export class Forms {
     this.forms.set(key, f);
     const form = f;
     void this.runner
-      .run({ xml, seed, size, tint: tinta, rig: cls.animation === 'camminata', sway: cls.animation === 'vento', vpt, ...(info?.tempo ? { tempo: info.tempo } : {}) })
+      .run({ xml, seed, size, tint: tinta, rig: cls.animation === 'camminata', sway: cls.animation === 'vento', vpt, model, ...(info?.tempo ? { tempo: info.tempo } : {}) })
       .then((result) => {
         form.result = result;
         form.foot = bodyFoot(result.grid, result.palette, vpt);
