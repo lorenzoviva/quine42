@@ -311,3 +311,4 @@
 - [2026-10-30T13:57:38.683Z] lancio T45d su gemini (H:\projects\rune\.claude\worktrees\t45d)
 - [2026-10-30T13:58:00.553Z] nota: Epoca 82: T79 e T45b (coefficienti e Low Detail, ADR-0085) integrati nel base 3d. Suite verde (35/35 test). T45d (lobby) sbloccato, approvato e assegnato a Gemini (stima 5%, p1), pronto per esegui.
 - [2026-10-30T13:59:22.005Z] orchestratore: epoca 83 su gemini (contesto a 398 % della finestra)
+- [2026-10-30T14:01:34.395Z] orchestratore: epoca 84 su gemini (contesto a 78 % della finestra)
