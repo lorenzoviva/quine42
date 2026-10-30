@@ -42,21 +42,38 @@ export function addGlow(sh: THREE.WebGLProgramParametersWithUniforms, always = f
 #ifdef OPAQUE
   gl_FragColor.a = 1.0 - uGlowMask * ${g};
 #else
-  gl_FragColor.a = ${always ? '1.0' : 'vAlpha'};
+  gl_FragColor.a *= ${always ? '1.0' : 'vAlpha'};
 #endif`,
     );
 }
 
-/** Geometries without the attribute read 0 for glow, 1 for alpha (otherwise WebGL keeps whatever value it was given last). */
+/** The attributes `noGlow` added, which follow their geometry's vertex count. */
+const fillers = new WeakSet<THREE.BufferAttribute>();
+
+/**
+ * Geometries without the attributes get them before they are drawn: glow 0, alpha 1. Not WebGL's constant attribute
+ * values (`defaultAttributeValues`): those are global per location and three sets them only when it rebuilds a
+ * geometry's bindings, so a geometry without `glow` read whatever another program had left at that location, often
+ * the alpha 1 of a translucent model (things glowing at random, the frame turning white in the bloom).
+ */
 function noGlow(m: THREE.Material): void {
-  (m as unknown as { defaultAttributeValues: Record<string, number[]> }).defaultAttributeValues = { glow: [0], alpha: [1] };
+  m.onBeforeRender = (_r, _s, _c, geometry) => {
+    const n = geometry.attributes.position?.count ?? 0;
+    for (const [name, value] of [['glow', 0], ['alpha', 1]] as const) {
+      const a = geometry.getAttribute(name) as THREE.BufferAttribute | undefined;
+      if (a && (!fillers.has(a) || a.count === n)) continue;
+      const filler = new THREE.BufferAttribute(new Float32Array(n).fill(value), 1);
+      fillers.add(filler);
+      geometry.setAttribute(name, filler);
+    }
+  };
 }
 
 /** A material that shows glowing voxels without the clip (the corona, the icons). `always`: all of it glows. */
 export function glowing<M extends THREE.Material>(m: M, key: string, always = false): M {
   m.onBeforeCompile = (sh) => addGlow(sh, always);
   m.customProgramCacheKey = () => `glow-${key}`;
-  noGlow(m);
+  if (!always) noGlow(m);
   return m;
 }
 
