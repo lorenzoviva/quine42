@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 17:38 UTC, epoca 149 su **gemini** (claude sotto il 10 %, a 6 %; reset 22:00 UTC). **Ordine dell'autore: finire T82-T87 (correzioni della pipeline), poi nessun task nuovo; quando finiscono i task in corso, dirgli che può chiudere con Ctrl-C.** Tolta l'approvazione a T52, T54, T57 perché non partano. T70, T53b, T81, T87, T82 e T90 integrati. In corso: T83 su Claude (turni per operazioni pesanti); se si ferma per il limite delle 5 ore riprende dopo le 22:00 UTC. Poi la catena T84 → T85 → T86. T51/T89 non approvati. Gemini libero, nessun task nuovo assegnato.
+Aggiornato il 30/10/2026 alle 17:40 UTC, fine epoca 149 su **gemini** (claude sotto il 10 %, a 6 %; reset 22:00 UTC). **Ordine dell'autore: finire i task sulla pipeline (T82-T87 e la catena T83-T86), poi nessun task nuovo; quando finiscono i task in corso, dirgli che può chiudere con Ctrl-C.** Tolta l'approvazione a T52, T54, T57 perché non partano. T70, T53b, T81, T87, T82 e T90 integrati. In corso: T83 su Claude (turni per operazioni pesanti); se si ferma per il limite delle 5 ore riprende dopo le 22:00 UTC. Poi la catena T84 → T85 → T86. T51/T89 non approvati. Gemini libero, nessun task nuovo assegnato.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -26,13 +26,12 @@ Aggiornato il 30/10/2026 alle 17:38 UTC, epoca 149 su **gemini** (claude sotto i
   - **T45f sbloccato e preparato**: dipendeva da T44b e T45d, ora entrambi integrati. Aperte le domande su GCP Project ID, architettura di hosting (Cloud Run vs VM GCE) e regione in `docs/pipeline/domande/T45f.md`.
   - **Chiavi Stripe per test nel browser**: T45e resta segnato `in attesa` per la verifica browser (in attesa di `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` in `.env` o in chat, segnalate in `docs/pipeline/domande/T45e.md`).
 - **Cosa si aspetta**:
-  1. **Completamento di T70** su Claude: risoluzione conflitti tra T53b e T56b, esecuzione test e commit.
-  2. **Risposte dell'autore per T45f**: GCP Project ID, preferenza architetturale (Cloud Run vs VM GCE) e regione in `docs/pipeline/domande/T45f.md`.
-  3. **Chiavi di test Stripe** dall'autore per la verifica finale nel browser di T45e.
+  1. **Completamento di T83** su Claude (turni su disco operazioni pesanti). Se Claude tocca il limite 5h, riprenderà dopo le 22:00 UTC.
+  2. **Esecuzione e integrazione di T84, T85, T86** su Claude uno alla volta.
+  3. **Risposte dell'autore per T45f** e chiavi di test Stripe per T45e (per quando riprenderanno i task normali).
 - **Intenzioni / prossimi passi**:
-  0. Integrare T82…T87 man mano che finiscono (senza conflitti). Finito l'ultimo, NON approvare nulla e dire all'autore che può chiudere con Ctrl-C.
-  2. Ricevute le risposte su T45f, approvare e lanciare l'allestimento dell'infrastruttura Google Cloud.
-  3. Preparare il task di verifica browser multigiocatore a due schede (lobby T45d, account T44b, profilo T44a, crediti T45a).
+  0. Integrare la catena T83 → T84 → T85 → T86 man mano che finiscono. Finito T86 (ultimo task di correzione della pipeline), NON approvare nulla e comunicare all'autore che può chiudere con Ctrl-C.
+  1. Ricevute le risposte su T45f e le chiavi Stripe per T45e, riprendere il multigiocatore nelle prossime sessioni.
 
 ## Task attivi e in corso
 
