@@ -481,3 +481,5 @@
 - [2026-10-30T17:46:41.698Z] nota: Epoca 152 avviata su Gemini (rotazione per contesto al 78 % in epoca 151). T83 in corso su Claude. Quadro aggiornato.
 - [2026-10-30T17:47:20.163Z] orchestratore: epoca 153 su gemini (contesto a 82 % della finestra)
 - [2026-10-30T17:48:11.749Z] nota: Epoca 153 avviata su Gemini (rotazione per contesto all'82 % in epoca 152). T83 in corso su Claude. Quadro aggiornato.
+- [2026-10-30T17:49:11.739Z] orchestratore: epoca 154 su gemini (contesto a 67 % della finestra)
+- [2026-10-30T17:51:11.878Z] nota: Epoca 154 avviata su Gemini (rotazione per contesto al 67 % in epoca 153). T83 in corso su Claude (limite 5h Claude a 0 %, test in corso). Quadro aggiornato.

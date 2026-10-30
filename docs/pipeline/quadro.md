@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 17:49 UTC, fine epoca 153 su **gemini** (rotazione per contesto; claude al limite 5h: 1 %, reset 22:00 UTC). **Ordine dell'autore: finire i task sulla pipeline (T82-T87 e la catena T83-T86), poi nessun task nuovo; quando finiscono i task in corso, dirgli che può chiudere con Ctrl-C.** Tolta l'approvazione a T52, T54, T57 perché non partano. T70, T53b, T81, T87, T82 e T90 integrati. In corso: T83 su Claude (turni per operazioni pesanti); se si ferma per il limite delle 5 ore riprende dopo le 22:00 UTC. Poi la catena T84 → T85 → T86. T51/T89 non approvati. Gemini libero, nessun task nuovo assegnato.
+Aggiornato il 30/10/2026 alle 17:51 UTC, avvio epoca 154 su **gemini** (rotazione per contesto; claude al limite 5h: 0 %, reset 22:00 UTC). **Ordine dell'autore: finire i task sulla pipeline (T82-T87 e la catena T83-T86), poi nessun task nuovo; quando finiscono i task in corso, dirgli che può chiudere con Ctrl-C.** Tolta l'approvazione a T52, T54, T57 perché non partano. T70, T53b, T81, T87, T82 e T90 integrati. In corso: T83 su Claude (turni per operazioni pesanti); se si ferma per il limite delle 5 ore riprende dopo le 22:00 UTC. Poi la catena T84 → T85 → T86. T51/T89 non approvati. Gemini libero, nessun task nuovo assegnato.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -50,8 +50,8 @@ Aggiornato il 30/10/2026 alle 17:49 UTC, fine epoca 153 su **gemini** (rotazione
   - **T57** (rune come codice, bloccato da T51a).
   - **T84**, **T85**, **T86** (bloccati a cascata da T83).
 - **Crediti**:
-  - **Claude**: 5h all'1 % (reset 22:00 UTC), settimana al 49 % (sta eseguendo T83).
-  - **Gemini**: 5h al 18 %, settimana al 31 % (orchestratore attuale).
+  - **Claude**: 5h allo 0 % (reset 22:00 UTC), settimana al 49 % (sta eseguendo T83).
+  - **Gemini**: 5h al 16 %, settimana al 31 % (orchestratore attuale).
   - **Argon**: fermo fino al 04/11.
 
 ## Da fare appena possibile
