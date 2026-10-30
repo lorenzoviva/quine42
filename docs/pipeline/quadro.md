@@ -14,8 +14,8 @@ Aggiornato il 30/10/2026, epoca 2 dell'orchestratore (argon: subentrato perché 
 
 ## In corso
 
-- **Su Argon (avviati automaticamente come alternativa a Claude):** **T45a** (crediti e spese comuni), **T45b** (coefficienti di generazione e Low Detail), **T45c** (eredità dei cloni) e **T68b** (processo della coda con le CLI); al prossimo controllo parte anche il quinto (**T51** o **T69**).
-- **Sospesi su Claude fino alle 07:01 UTC (`08:00` locali):** **T70** (priorità 0, integrazione di T53b con il salto di T56b), **T44c** (priorità 3), **T44b** (priorità 4, blocca T45d/T45e/T45f), **T52** e **T54**. Hanno tutti toccato il limite delle 5 ore appena partiti (solo lettura di `AGENTS.md`).
+- **Su Argon (5 slot attivi):** **T69** (interfaccia web della pipeline, il task dedicato ad Argon), più **T45a**, **T45b**, **T45c** e **T68b** (deviati automaticamente dallo script quando Claude si è fermato).
+- **Sospesi su Claude fino alle 07:01 UTC (`08:00` locali):** **T70** (priorità 0, integrazione di T53b con il salto di T56b), **T44c** (priorità 3), **T44b** (priorità 4, blocca T45d/T45e/T45f), **T52** e **T54**. Restano su Claude come richiesto dall'autore (Argon riservato a T69).
 - **T53b** (strutture su più piani) è finito e verificato nel browser dall'agente, ma aspetta **T70** per risolvere i conflitti con **T56b** (il salto, già integrato, ADR-0080). Quando T70 è finito: `integra T70`, poi `integra T53b` (toglie worktree e branch).
 
 ## Da fare appena possibile
