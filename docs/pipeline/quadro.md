@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle ~10:24 UTC (~11:24 locali), epoca 69 (gemini orchestratore: claude al 0 % della sessione 5h, reset 12:00 UTC / ~13:00 locali, ~36m; settimana 61 %; gemini 5h al 66 %, settimana 56 %; argon fermo fino al 04/11).
+Aggiornato il 30/10/2026 alle ~12:00 UTC (~13:00 locali), epoca 69 (gemini cede a claude orchestratore: claude reset avvenuto, 5h al 61 %, settimana al 61 %; gemini 5h al 65 %, settimana 56 %; argon fermo fino al 04/11).
 
 ## Le priorità dell'autore
 
@@ -14,25 +14,26 @@ Aggiornato il 30/10/2026 alle ~10:24 UTC (~11:24 locali), epoca 69 (gemini orche
 ## Stato e decisioni
 
 - **Decisioni prese e fatti recenti**:
+  - **Reset Claude avvenuto alle 12:00 UTC**: Claude ha di nuovo crediti (sessione 5h al 61%, settimana 61%); l'orchestratore torna a Claude come da configurazione.
   - **T77 completato con successo su Gemini e integrato nel base `3d`**: risolto il conflitto di merge tra `task/T45e` e il base `3d`, preservando account/crediti e Stripe Checkout.
   - **T45e integrato nel base `3d`**: ricarica crediti con Stripe Checkout (supporto carte e Google Pay), webhook idempotente crittografico HMAC-SHA256, salvataggio in `world/pagamenti.json`, esclusione anonimi, bottoni di ricarica rapida nel profilo (`P`), ADR-0083. Worktree e branch di T45e e T77 rimossi.
   - **Suite di test verdi nel base**: test mirati `tests/stripe.test.ts`, `tests/account.test.ts`, `tests/credits.test.ts`, `tests/session.test.ts` (21/21) e `npm run typecheck` completamente verdi in `3d`.
   - **Chiavi Stripe per test nel browser**: T45e resta segnato `in attesa` per la verifica browser (in attesa di `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` in `.env` o in chat, segnalate in `docs/pipeline/domande/T45e.md`).
-  - **T70 sospeso in attesa del reset di Claude**: sessione preservata; riprenderà automaticamente alle 12:00 UTC (~13:00 locali, ~38m) per completare l'integrazione di T53b con T56b.
 - **Cosa si aspetta**:
   1. **Chiavi di test Stripe** dall'autore in `.env` o in chat per la verifica finale nel browser di T45e.
-  2. **Reset crediti Claude** alle ~12:00 UTC (~13:00 locali, ~38m): ripresa automatica di **T70** (integrazione T53b e salto T56b), poi avanzamento di **T45b** (coefficienti e Low Detail, sbloccando T45d lobby) e **T45c** (eredità cloni).
+  2. **Completamento di T70** (claude, p0): ripresa della sessione preservata per integrare T53b (strutture a più piani) con T56b (salto).
+  3. **Avanzamento multigiocatore**: T45b (coefficienti e Low Detail) e T45c (eredità cloni) su Claude, per sbloccare T45d (lobby).
 - **Intenzioni / prossimi passi**:
-  1. Ricevute le chiavi Stripe: eseguire verifica nel browser per T45e.
-  2. Al reset di Claude (12:00 UTC): completare T70, eseguire `integra T70` e `integra T53b`.
-  3. Avanzare con T45b (coefficienti e Low Detail) e T45c (eredità cloni) per completare la catena multigiocatore.
+  1. Claude riprende ed esegue **T70** (p0): risoluzione conflitti e test, poi `integra T70` e `integra T53b`.
+  2. Avanzare con **T45b** (p6) e **T45c** (p7) per completare la catena multigiocatore.
+  3. Ricevute le chiavi Stripe: eseguire verifica nel browser per T45e.
   4. Mantenere priorità assoluta alla catena multigiocatore (T52 e T54 p50 restano in attesa).
 
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T70** (claude, p0, sessione preservata): sospeso per limite 5h Claude, riprenderà alle 11:59 UTC.
-  - **T45b** (claude, p6) e **T45c** (claude, p7): priorità multigiocatore (in attesa reset crediti Claude).
+  - **T70** (claude, p0, sessione preservata): riprende ora con il reset dei crediti Claude.
+  - **T45b** (claude, p6) e **T45c** (claude, p7): priorità multigiocatore (pronti per essere eseguiti).
 - **Completati e integrati nel base `3d`**:
   - **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **Completati in attesa di integrazione**:
@@ -44,8 +45,8 @@ Aggiornato il 30/10/2026 alle ~10:24 UTC (~11:24 locali), epoca 69 (gemini orche
   - **T51** (livello mare e motore acqua, p50).
   - **T52** e **T54** (p50): interrotti per dare precedenza al multigiocatore.
 - **Crediti**:
-  - **Gemini**: 5h al 66 %, settimana al 56 % (orchestratore).
-  - **Claude**: 5h a 0 %, settimana al 61 % (reset 12:00 UTC / ~13:00 locali, ~38m).
+  - **Claude**: 5h al 61 %, settimana al 61 % (reset avvenuto, torna orchestratore).
+  - **Gemini**: 5h al 65 %, settimana al 56 %.
   - **Argon**: fermo fino al 04/11.
 
 ## Da fare appena possibile
