@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 13:18 UTC, avvio epoca 73 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset 16:59 UTC / ~18:00 locali, settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h al 60 %, settimana 55 %; argon fermo fino al 04/11). **T78** (integrazione T45c ed eredità cloni) si è arrestato per limite crediti su Claude ed è stato immediatamente riassegnato a Gemini (stima 2 %, p0, approvato) e rilanciato nel worktree t78 pulito. T45b ha il commit pronto (`bc77bd9`) con bozza ADR-0081 (da rinumerare a 0085). T70 sta eseguendo i test di integrazione tra più piani (T53b) e salto (T56b).
+Aggiornato il 30/10/2026 alle 13:20 UTC, chiusura epoca 73 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset 16:59 UTC / ~18:00 locali, settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h al 60 %, settimana 55 %; argon fermo fino al 04/11). **T78** (integrazione T45c ed eredità cloni) si è arrestato per limite crediti su Claude ed è stato immediatamente riassegnato a Gemini (stima 2 %, p0, approvato) e rilanciato nel worktree t78 pulito. T45b ha il commit pronto (`bc77bd9`) con bozza ADR-0081 (da rinumerare a 0085). T70 sta eseguendo i test di integrazione tra più piani (T53b) e salto (T56b).
 
 ## Le priorità dell'autore
 

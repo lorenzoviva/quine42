@@ -3526,7 +3526,7 @@ populatePresets();
 initPaletteBar();
 
 // Choose default if available, otherwise template
-const defaultEntry = CATALOG.find((e) => e.id === 'schermo-struttura') || CATALOG.find((e) => e.id === 'barile');
+const defaultEntry = CATALOG.find((e) => e.id === 'lampione') || CATALOG.find((e) => e.id === 'barile');
 if (defaultEntry) {
   presetSelect.value = defaultEntry.id;
   loadSelectedPreset();
