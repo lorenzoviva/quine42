@@ -1,19 +1,19 @@
 # Il piano della pipeline
 
-> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-30T06:11:40.745Z: non modificarlo a mano,
+> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-30T06:16:41.331Z: non modificarlo a mano,
 > la fonte è `docs/plans/backlog.md` (righe `- Pipeline:`).
 
 ## Budget
 
 Orchestratore: **gemini** (sotto il 10 % nessun task su di lui; si cambia con `orchestratore <provider>`).
 
-- **claude**: settimana 69 %, 5 ore 0 %, fermo fino a 2026-10-30T07:00:00.000Z (letto da /usage il 2026-10-30T06:07:08.336Z)
-  - session, 5h: 0 % residuo, reset 2026-10-30T07:00:00.000Z
-  - week (all models), settimana: 69 % residuo, reset 2026-11-05T16:00:00.000Z
-- **gemini**: settimana 69 %, 5 ore 39 % (letto da /usage il 2026-10-30T06:11:40.744Z)
+- **claude**: settimana 69 %, 5 ore 0 %, fermo fino a 2026-10-30T06:59:00.000Z (letto da /usage il 2026-10-30T06:12:35.664Z)
+  - session, 5h: 0 % residuo, reset 2026-10-30T06:59:00.000Z
+  - week (all models), settimana: 69 % residuo, reset 2026-11-05T15:59:00.000Z
+- **gemini**: settimana 69 %, 5 ore 38 % (letto da /usage il 2026-10-30T06:12:38.168Z)
   - Gemini Models, settimana: 69 % residuo, reset 2026-11-05T17:37:53.000Z
-  - Gemini Models, 5h: 39 % residuo, reset 2026-10-30T08:19:40.000Z
-- **argon**: settimana 0 %, 5 ore 0 %, fermo fino a 2026-11-04T18:44:35.000Z (letto da /usage il 2026-10-30T06:07:10.904Z)
+  - Gemini Models, 5h: 38 % residuo, reset 2026-10-30T08:19:40.000Z
+- **argon**: settimana 0 %, 5 ore 0 %, fermo fino a 2026-11-04T18:44:35.000Z (letto da /usage il 2026-10-30T06:12:38.168Z)
   - Gemini 4 Argon, settimana: 0 % residuo, reset 2026-11-04T18:44:35.000Z
 
 ## In corso (8)
@@ -25,11 +25,12 @@ Orchestratore: **gemini** (sotto il 10 % nessun task su di lui; si cambia con `o
 - **T45b** I coefficienti di generazione e la partita «Low Detail» — claude, 6 %
 - **T45c** L'eredità dei cloni — claude, 5 %
 - **T70** Integrare T53b (più piani) con il salto di T56b — claude, 3 %
-- **T68c** Gli abbonamenti nel gioco — claude, 3 %
+- **T74** Integrare T68c (gli abbonamenti nel gioco) in backlog.md — gemini, 1 %
 
-## Finiti, da guardare e integrare (`integra Txx`) (1)
+## Finiti, da guardare e integrare (`integra Txx`) (2)
 
 - **T53b** Le scale come rampe e le strutture su più piani — ESITO: fatto — le strutture hanno più piani: un pavimento per tratto di pieno, `pos.z` tenuta dal kernel, collisione, `floorAt` e taglio del renderer sul piano in cui si è; test della torre a due piani. — claude, 6 %
+- **T68c** Gli abbonamenti nel gioco — ESITO: fatto — collegati gli abbonamenti nel gioco tramite RoutedModels in main.ts, stato e coda in #models e nel pannello del Concilio, documentazione in README e test Genesi offline con coda servita — gemini, 3 %
 
 ## Pronti, in ordine di priorità (1)
 

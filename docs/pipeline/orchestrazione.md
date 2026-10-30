@@ -174,3 +174,9 @@
 - [2026-10-30T06:08:22.193Z] orchestratore: epoca 35 su gemini (contesto a 56 % della finestra)
 - [2026-10-30T06:09:44.279Z] orchestratore: epoca 36 su gemini (contesto a 53 % della finestra)
 - [2026-10-30T06:11:34.959Z] nota: Epoca 36 avviata su Gemini: T68c in corso nel worktree t68c, attesa completamento T68c e reset sessione 5h Claude alle 07:00 UTC (~08:00 locali)
+- [2026-10-30T06:12:29.475Z] orchestratore: epoca 37 su gemini (contesto a 133 % della finestra)
+- [2026-10-30T06:12:38.169Z] T68c: ESITO: fatto — collegati gli abbonamenti nel gioco tramite RoutedModels in main.ts, stato e coda in #models e nel pannello del Concilio, documentazione in README e test Genesi offline con coda servita · BROWSER: da verificare — strumento browser non disponibile nell'ambiente di esecuzione Antigravity CLI (verifica funzionale completata via test vitest end-to-end su Genesi offline e pannello del Concilio) (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T68c)
+- [2026-10-30T06:12:56.087Z] integra T68c: conflitti in docs/plans/backlog.md; il base è com'era
+- [2026-10-30T06:14:39.889Z] nota: Epoca 37 avviata su Gemini. T68c completato da Gemini; integra T68c ha rilevato conflitto isolato in docs/plans/backlog.md per via di T71-T73; creato e approvato T74 (priorità 0 su Gemini) per merge e risoluzione conflitto.
+- [2026-10-30T06:14:41.305Z] lancio T74 su gemini (H:\projects\rune\.claude\worktrees\t74)
+- [2026-10-30T06:15:46.890Z] orchestratore: epoca 38 su gemini (contesto a 132 % della finestra)
