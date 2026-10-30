@@ -29,6 +29,8 @@ export interface MyState {
   stati?: Record<string, unknown>;
   /** What sits in the slots of the mechanics' panels (T39b). */
   slots?: Record<string, Record<string, { item: string; count: number } | null>>;
+  /** The wanderer's credit balance in USD (T45a). */
+  crediti?: number;
 }
 
 /** A place near the wanderer: its tiles, sent again when they change. */
@@ -92,8 +94,8 @@ export interface OtherView {
 }
 
 export type ClientMsg =
-  /** Coming in, as who (T44a): the profile, if the client has one, is checked and repaired by the server. */
-  | { t: 'entra'; id: string; nome?: string; profilo?: Partial<Profile> }
+  /** Coming in, as who (T44a): the profile, if the client has one, is checked and repaired by the server; anonimo (T44b, T45a). */
+  | { t: 'entra'; id: string; nome?: string; profilo?: Partial<Profile>; anonimo?: boolean }
   /** The wanderer chooses again who they are (T44a): the answer says the profile as the server repaired it. */
   | { t: 'profilo'; seq: number; profilo: Partial<Profile> }
   /** Where the client's wanderer is now, in the world: the server checks the step and may correct it. */

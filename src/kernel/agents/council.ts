@@ -4,6 +4,7 @@
 // narrative, graphics, engine and physics disagree.
 
 import { parseJson, type Models, type Schema, type Thinking } from '../ai/models';
+import { MockModels } from '../ai/mock';
 import { COMUNE } from '../cards';
 import { COUNCIL_PRINCIPLES, lexiconWords } from '../fourthwall';
 import type { FileMap, MagicRune, Spell, TileDef } from '../types';
@@ -212,6 +213,9 @@ export class Council {
   onFeed?: (e: FeedEntry) => void;
   /** Who pays for a task asked now (T36): the kernel's policy (cards.ts); without one, the world. */
   payer?: (task: string) => string;
+  /** Whether a wanderer has credits for online calls (T45a); when false, local models are used. */
+  hasCredits?: (chi: string) => boolean;
+  localModels: Models = new MockModels();
   /** The nodes of the graph a prompt carried as its focus (the kernel counts the cards' uses, T36). */
   onFocus?: (ids: string[]) => void;
 
@@ -327,7 +331,13 @@ export class Council {
     const role = opts.role ?? this.files[`prompts/agents/${agent}.md`] ?? `Sei il ${AGENTS[agent].name} del gioco.`;
     // The focus goes last: what comes before it is the same for every focused task of the agent (the cache).
     const focus = this.focusContext(opts.focus);
-    return this.models.text({
+    const chi = opts.chi ?? this.payer?.(task) ?? COMUNE;
+    const useLocal = chi !== COMUNE && !!this.hasCredits && !this.hasCredits(chi);
+    if (useLocal) {
+      this.say('kernel', 'info', `I crediti di ${chi} sono esauriti: la richiesta «${task}» viene gestita con i modelli locali.`, undefined, task);
+    }
+    const models = useLocal ? this.localModels : this.models;
+    return models.text({
       agent,
       task,
       system: [role, COUNCIL_PRINCIPLES, this.context(agent, !!focus), opts.system, focus].filter(Boolean).join('\n\n'),
@@ -338,7 +348,7 @@ export class Council {
       data: opts.data,
       model: opts.model,
       thinking: opts.thinking,
-      chi: opts.chi ?? this.payer?.(task) ?? COMUNE,
+      chi,
     });
   }
 }

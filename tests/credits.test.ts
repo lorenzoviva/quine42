@@ -1,0 +1,252 @@
+import { describe, expect, it } from 'vitest';
+import { Kernel } from '../src/kernel/kernel';
+import { bundledFiles } from '../src/kernel/bundle';
+import { memoryStore } from '../src/kernel/repo';
+import { MockModels } from '../src/kernel/ai/mock';
+import { COMUNE } from '../src/kernel/cards';
+import { costWithFee, splitCost } from '../src/kernel/credits';
+import { fakeLink } from '../src/session/protocol';
+import { SessionServer } from '../src/session/server';
+import { SessionClient } from '../src/session/client';
+import { ThinClient } from '../src/session/thin';
+import type { TextCall } from '../src/kernel/ai/models';
+
+const DT = 1 / 60;
+
+async function bootMany(): Promise<Kernel> {
+  const cfg = JSON.parse(bundledFiles['universe.json']);
+  const files = {
+    ...bundledFiles,
+    'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2),
+  };
+  return Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+}
+
+async function thin(server: SessionServer, id: string, anonimo = false): Promise<ThinClient> {
+  const { server: s, client: c } = fakeLink();
+  server.connect(s);
+  const session = new SessionClient(c, { id, ...(anonimo ? { anonimo: true } : {}) } as any);
+  await session.ready;
+  const k = await Kernel.boot({ files: session.files, store: memoryStore(), models: new MockModels(), mirror: true });
+  return new ThinClient(k, session);
+}
+
+function run(server: SessionServer, clients: ThinClient[], frames: number) {
+  for (let i = 0; i < frames; i++) {
+    for (const c of clients) {
+      c.k.tick(DT);
+      c.frame(DT);
+    }
+    server.tick(DT);
+  }
+}
+
+async function until<T>(server: SessionServer, clients: ThinClient[], p: Promise<T>): Promise<T> {
+  let done = false;
+  let out!: T;
+  void p.then((v) => {
+    done = true;
+    out = v;
+  });
+  for (let i = 0; i < 400 && !done; i++) {
+    run(server, clients, 2);
+    await new Promise((r) => setTimeout(r, 0));
+  }
+  expect(done).toBe(true);
+  return out;
+}
+
+describe('credits and common costs (T45a)', () => {
+  it('platform fee (+1%) and cost splitting', () => {
+    expect(costWithFee(10)).toBeCloseTo(10.1, 5);
+    expect(costWithFee(0.25)).toBeCloseTo(0.2525, 5);
+
+    const shares = splitCost(0.2525, 3);
+    expect(shares).toHaveLength(3);
+    const sum = shares.reduce((a, b) => a + b, 0);
+    expect(sum).toBeCloseTo(0.2525, 6);
+    expect(shares[0]).toBeCloseTo(0.084167, 5);
+  });
+
+  it('credits balance stored in world/giocatori/<id>.json only by server', async () => {
+    const k = await bootMany();
+    k.addWanderer('anna', 'Anna');
+    expect(k.creditsOf('anna')).toBe(0);
+
+    k.giveCredits('anna', 15.5);
+    expect(k.creditsOf('anna')).toBe(15.5);
+
+    const file = JSON.parse(k.files['world/giocatori/anna.json'] ?? '{}');
+    expect(file.crediti).toBe(15.5);
+  });
+
+  it('master can grant credits via console and Referente; players cannot', async () => {
+    const k = await bootMany();
+    const server = new SessionServer(k);
+    const master = await thin(server, 'io');
+    const anna = await thin(server, 'anna');
+    run(server, [master, anna], 6);
+
+    // Initial credits
+    expect(k.creditsOf('anna')).toBe(0);
+
+    // Master grants credits directly (console)
+    expect(k.giveCredits('anna', 2.5)).toBe(true);
+    expect(k.creditsOf('anna')).toBe(2.5);
+
+    // Master grants credits via Referente
+    const r = await until(server, [master, anna], master.k.talkToAgent('referente', 'ricarica 5 crediti ad anna'));
+    expect(r.forged).toMatch(/anna/);
+    expect(k.creditsOf('anna')).toBe(7.5);
+
+    // Player cannot ask Referente
+    const refused = await until(
+      server,
+      [master, anna],
+      anna.session.act({ t: 'agente', agente: 'referente', testo: 'ricarica 10 crediti ad anna' }),
+    );
+    expect(refused.ok).toBe(false);
+    expect(k.creditsOf('anna')).toBe(7.5);
+  });
+
+  it('two players and master connected: common expense split in three (+1% fee)', async () => {
+    const k = await bootMany();
+    const server = new SessionServer(k);
+    const master = await thin(server, 'io');
+    const anna = await thin(server, 'anna');
+    const bruno = await thin(server, 'bruno');
+    run(server, [master, anna, bruno], 6);
+
+    // Initial balances
+    k.giveCredits('io', 10);
+    k.giveCredits('anna', 10);
+    k.giveCredits('bruno', 10);
+
+    expect(server.connected().sort()).toEqual(['anna', 'bruno', 'io']);
+
+    // Trigger a common model call: gemini-3.1-flash-lite prompt: 1_000_000 tokens
+    // Base cost: $0.25. Total cost (+1%): 0.25 * 1.01 = 0.2525.
+    // Split in three: each ~0.084167.
+    k.models.onCall!({
+      model: 'gemini-3.1-flash-lite',
+      agent: 'narratore',
+      task: 'council.session',
+      prompt: 1_000_000,
+      cached: 0,
+      output: 0,
+      thoughts: 0,
+      chi: COMUNE,
+    });
+
+    const expectedShare = 0.2525 / 3;
+    expect(k.creditsOf('io')).toBeCloseTo(10 - expectedShare, 4);
+    expect(k.creditsOf('anna')).toBeCloseTo(10 - expectedShare, 4);
+    expect(k.creditsOf('bruno')).toBeCloseTo(10 - expectedShare, 4);
+
+    const totalDeducted = (10 - k.creditsOf('io')) + (10 - k.creditsOf('anna')) + (10 - k.creditsOf('bruno'));
+    expect(totalDeducted).toBeCloseTo(0.2525, 5);
+
+    // Personal expense for anna:
+    // prompt 100_000 tokens of gemini-3.1-flash-lite ($0.025) + 1% = $0.02525
+    const annaBefore = k.creditsOf('anna');
+    const ioBefore = k.creditsOf('io');
+    const brunoBefore = k.creditsOf('bruno');
+
+    k.models.onCall!({
+      model: 'gemini-3.1-flash-lite',
+      agent: 'narratore',
+      task: 'npc.reply',
+      prompt: 100_000,
+      cached: 0,
+      output: 0,
+      thoughts: 0,
+      chi: 'anna',
+    });
+
+    expect(k.creditsOf('anna')).toBeCloseTo(annaBefore - 0.02525, 5);
+    expect(k.creditsOf('io')).toBe(ioBefore);
+    expect(k.creditsOf('bruno')).toBe(brunoBefore);
+  });
+
+  it('credits exhausted (crediti <= 0): wanderer requests served by local models and wanderer knows', async () => {
+    class TrackingOnlineModels extends MockModels {
+      onlineCalls: string[] = [];
+      async text(call: TextCall): Promise<string> {
+        this.onlineCalls.push(call.task);
+        return super.text(call);
+      }
+    }
+
+    const online = new TrackingOnlineModels();
+    const cfg = JSON.parse(bundledFiles['universe.json']);
+    const files = {
+      ...bundledFiles,
+      'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2),
+    };
+    const k = await Kernel.boot({ files, store: memoryStore(), models: online });
+    const server = new SessionServer(k);
+    const master = await thin(server, 'io');
+    const anna = await thin(server, 'anna');
+    run(server, [master, anna], 6);
+
+    // Anna has 0 credits initially
+    expect(k.creditsOf('anna')).toBe(0);
+    expect(k.hasCredits('anna')).toBe(false);
+
+    // Anna asks Council a personal task
+    const ans = await k.council.write('narratore', 'npc.reply', 'Dimmi un segreto', { chi: 'anna' });
+    expect(ans).toBeTruthy();
+
+    // Online models were NOT called because credits were exhausted!
+    expect(online.onlineCalls).not.toContain('npc.reply');
+
+    // Feed logs that credits are exhausted
+    expect(
+      k.feed().some((f) => f.kind === 'info' && f.text.includes('crediti di anna sono esauriti')),
+    ).toBe(true);
+
+    // Client anna receives crediti in updated state
+    run(server, [master, anna], 6);
+    expect(anna.k.creditsOf('anna')).toBe(0);
+
+    // Once master gives credits to anna
+    k.giveCredits('anna', 5);
+    expect(k.hasCredits('anna')).toBe(true);
+
+    await k.council.write('narratore', 'npc.reply', 'Un altro segreto', { chi: 'anna' });
+    expect(online.onlineCalls).toContain('npc.reply');
+  });
+
+  it('anonymous wanderer (T44b) has 0 credits, cannot receive credits, always uses local models', async () => {
+    const k = await bootMany();
+    const server = new SessionServer(k);
+    const master = await thin(server, 'io');
+    const anon = await thin(server, 'anon1', true);
+    run(server, [master, anon], 6);
+
+    expect(k.isAnonymous('anon1')).toBe(true);
+    expect(k.creditsOf('anon1')).toBe(0);
+    expect(k.hasCredits('anon1')).toBe(false);
+
+    // Cannot receive credits
+    expect(k.giveCredits('anon1', 10)).toBe(false);
+    expect(k.creditsOf('anon1')).toBe(0);
+
+    // Common expenses are split among eligible non-anonymous wanderers only
+    k.giveCredits('io', 10);
+    k.models.onCall!({
+      model: 'gemini-3.1-flash-lite',
+      agent: 'narratore',
+      task: 'council.session',
+      prompt: 1_000_000,
+      cached: 0,
+      output: 0,
+      thoughts: 0,
+      chi: COMUNE,
+    });
+
+    // Entire common expense is paid by 'io' (the only non-anonymous connected wanderer)
+    expect(k.creditsOf('io')).toBeCloseTo(10 - 0.2525, 4);
+    expect(k.creditsOf('anon1')).toBe(0);
+  });
+});

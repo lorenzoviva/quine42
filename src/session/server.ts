@@ -214,6 +214,7 @@ export class SessionServer {
     this.near = opts.near ?? 24;
     this.reach = opts.reach ?? 3;
     this.told = { ...kernel.files };
+    kernel.connectedWanderers = () => this.connected();
     kernel.bus.on('council', (e: FeedEntry) => {
       this.voices.push(e);
       if (this.voices.length > FEED_KEEP) this.voices.shift();
@@ -268,7 +269,7 @@ export class SessionServer {
         return;
       }
       if (msg?.t !== 'entra') return;
-      client = this.join(link, msg.id, msg.nome, msg.profilo);
+      client = this.join(link, msg.id, msg.nome, msg.profilo, (msg as { anonimo?: boolean }).anonimo);
       if (!client) link.close();
     });
     link.onClose(() => {
@@ -280,7 +281,7 @@ export class SessionServer {
     });
   }
 
-  private join(link: ServerLink, id: unknown, nome: unknown, profilo: unknown): Client | undefined {
+  private join(link: ServerLink, id: unknown, nome: unknown, profilo: unknown, anonimo?: boolean): Client | undefined {
     if (!validWandererId(id)) {
       link.send({ t: 'rifiuto', motivo: 'id del viandante non valido' });
       return undefined;
@@ -289,7 +290,7 @@ export class SessionServer {
       link.send({ t: 'rifiuto', motivo: 'questo viandante è già nel mondo' });
       return undefined;
     }
-    if (this.kernel.addWanderer(id, typeof nome === 'string' ? nome : undefined) === undefined) {
+    if (this.kernel.addWanderer(id, typeof nome === 'string' ? nome : undefined, anonimo) === undefined) {
       link.send({ t: 'rifiuto', motivo: 'il viandante non può entrare' });
       return undefined;
     }
@@ -493,6 +494,8 @@ export class SessionServer {
     const r = await fork.talkToAgent(agente, testo);
     // Runes are not files (T42f): they go into the master's pouch in the world, now.
     if (r.runes?.length) k.as(c.id, () => k.grantRunes(r.runes!));
+    // Credits are not files (T45a): awarded directly to the wanderer on the world kernel.
+    if (r.credits) k.giveCredits(r.credits.target, r.credits.amount);
     // Only what was committed (valid) goes on the branch.
     const made = changesBetween(before, repo.head().files);
     const paths = Object.keys(made);
@@ -707,7 +710,14 @@ export class SessionServer {
       if (key !== c.players) out.giocatori = players;
       c.players = key;
     }
-    const stato: MyState = k.as(c.id, () => ({ needs: k.needs() as unknown as Record<string, number>, hand: k.hand(), inventory: k.inventory(), stati: k.states(), slots: k.slots() }));
+    const stato: MyState = k.as(c.id, () => ({
+      needs: k.needs() as unknown as Record<string, number>,
+      hand: k.hand(),
+      inventory: k.inventory(),
+      stati: k.states(),
+      slots: k.slots(),
+      crediti: k.creditsOf(c.id),
+    }));
     const sKey = JSON.stringify(stato);
     if (sKey !== c.stato) out.stato = JSON.parse(sKey);
     c.stato = sKey;

@@ -66,7 +66,7 @@ export class SessionClient {
 
   constructor(
     private link: ClientLink,
-    who: { id: string; nome?: string; profilo?: Partial<Profile> },
+    who: { id: string; nome?: string; profilo?: Partial<Profile>; anonimo?: boolean },
   ) {
     this.ready = new Promise((r) => (this.entered = r));
     link.onMessage((m) => this.receive(m));
@@ -75,7 +75,13 @@ export class SessionClient {
       this.waiting.clear();
       this.entered?.();
     });
-    link.send({ t: 'entra', id: who.id, ...(who.nome ? { nome: who.nome } : {}), ...(who.profilo ? { profilo: who.profilo } : {}) });
+    link.send({
+      t: 'entra',
+      id: who.id,
+      ...(who.nome ? { nome: who.nome } : {}),
+      ...(who.profilo ? { profilo: who.profilo } : {}),
+      ...(who.anonimo ? { anonimo: true } : {}),
+    });
   }
 
   /** The wanderer walked here (world space): it is so here at once, the server may correct it. */

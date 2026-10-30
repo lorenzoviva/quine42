@@ -16,6 +16,7 @@ export const WANDERER_NAME = 'Viandante';
 export interface Wanderer {
   id: string;
   nome: string;
+  anonimo?: boolean;
 }
 
 /** A colour from hue, saturation and lightness (0-1). */
@@ -154,6 +155,10 @@ export interface WandererState {
   stati?: Record<string, unknown>;
   slots?: Record<string, unknown>;
   trasceso?: boolean;
+  /** Credit balance in USD (T45a), written only by the server. */
+  crediti?: number;
+  /** Whether the wanderer is anonymous (T44b, T45a): has no credits and plays with local models. */
+  anonimo?: boolean;
 }
 
 export const PLAYERS_DIR = 'world/giocatori/';
