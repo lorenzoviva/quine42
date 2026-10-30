@@ -18,20 +18,20 @@ Aggiornato il 30/10/2026 alle ~10:10 UTC (~11:10 locali), epoca 63 (gemini orche
   - **T45e integrato nel base `3d`**: ricarica crediti con Stripe Checkout (supporto carte e Google Pay), webhook idempotente crittografico HMAC-SHA256, salvataggio in `world/pagamenti.json`, esclusione anonimi, bottoni di ricarica rapida nel profilo (`P`), ADR-0083. Worktree e branch di T45e e T77 rimossi.
   - **Suite di test verdi nel base**: test mirati `tests/stripe.test.ts`, `tests/account.test.ts`, `tests/credits.test.ts`, `tests/session.test.ts` (21/21) e `npm run typecheck` completamente verdi in `3d`.
   - **Chiavi Stripe per test nel browser**: T45e resta segnato `in attesa` per la verifica browser (in attesa di `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` in `.env` o in chat, segnalate in `docs/pipeline/domande/T45e.md`).
-  - **T70 sospeso in attesa del reset di Claude**: sessione preservata; riprenderà automaticamente alle 12:00 UTC (~13:00 locali, ~55m) per completare l'integrazione di T53b con T56b.
+  - **T70 sospeso in attesa del reset di Claude**: sessione preservata; riprenderà automaticamente alle 11:59 UTC (~13:00 locali, ~50m) per completare l'integrazione di T53b con T56b.
 - **Cosa si aspetta**:
   1. **Chiavi di test Stripe** dall'autore in `.env` o in chat per la verifica finale nel browser di T45e.
-  2. **Reset crediti Claude** alle ~12:00 UTC (~13:00 locali): ripresa automatica di **T70** (integrazione T53b e salto T56b), poi avanzamento di **T45b** (coefficienti e Low Detail, sbloccando T45d lobby) e **T45c** (eredità cloni).
+  2. **Reset crediti Claude** alle ~11:59 UTC (~13:00 locali, ~50m): ripresa automatica di **T70** (integrazione T53b e salto T56b), poi avanzamento di **T45b** (coefficienti e Low Detail, sbloccando T45d lobby) e **T45c** (eredità cloni).
 - **Intenzioni / prossimi passi**:
   1. Ricevute le chiavi Stripe: eseguire verifica nel browser per T45e.
-  2. Al reset di Claude (12:00 UTC): completare T70, eseguire `integra T70` e `integra T53b`.
+  2. Al reset di Claude (11:59 UTC): completare T70, eseguire `integra T70` e `integra T53b`.
   3. Avanzare con T45b (coefficienti e Low Detail) e T45c (eredità cloni) per completare la catena multigiocatore.
   4. Mantenere priorità assoluta alla catena multigiocatore (T52 e T54 p50 restano in attesa).
 
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T70** (claude, p0, sessione preservata): sospeso per limite 5h Claude, riprenderà alle 12:00 UTC.
+  - **T70** (claude, p0, sessione preservata): sospeso per limite 5h Claude, riprenderà alle 11:59 UTC.
   - **T45b** (claude, p6) e **T45c** (claude, p7): priorità multigiocatore (in attesa reset crediti Claude).
 - **Completati e integrati nel base `3d`**:
   - **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
