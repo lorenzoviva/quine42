@@ -350,3 +350,5 @@
 - [2026-10-30T14:54:53.847Z] nota: Epoca 99 avviata su Gemini. Quadro confermato: T80 e T45d integrati, T45f pronto in attesa risposte GCP, T70 in attesa reset Claude (17:00 UTC), T45e in attesa chiavi Stripe.
 - [2026-10-30T14:55:32.520Z] orchestratore: epoca 100 su gemini (contesto a 146 % della finestra)
 - [2026-10-30T14:56:30.294Z] nota: Epoca 100 avviata su Gemini. Quadro confermato: T80 e T45d integrati, T45f pronto in attesa risposte GCP, T70 in attesa reset Claude (16:59 UTC), T45e in attesa chiavi Stripe.
+- [2026-10-30T14:57:49.124Z] orchestratore: epoca 101 su gemini (contesto a 78 % della finestra)
+- [2026-10-30T14:59:00.571Z] nota: Epoca 101 avviata su Gemini. Quadro confermato: T80 e T45d integrati, T45f pronto in attesa risposte GCP, T70 in attesa reset Claude (16:59 UTC), T45e in attesa chiavi Stripe.
