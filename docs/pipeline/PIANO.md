@@ -1,13 +1,13 @@
 # Il piano della pipeline
 
-> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-30T22:52:57.952Z: non modificarlo a mano,
+> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-30T22:53:25.602Z: non modificarlo a mano,
 > la fonte è `docs/plans/backlog.md` (righe `- Pipeline:`).
 
 ## Budget
 
 Orchestratore: **claude** (sotto il 10 % nessun task su di lui; si cambia con `orchestratore <provider>`).
 
-- **claude**: settimana 46 %, 5 ore 66 %; tetto 1, slot 0 (task in programma 5), esaurimento previsto 2026-11-02T03:56:44.539Z, reset 2026-11-05T16:00:00.000Z (letto da /usage il 2026-10-30T22:52:40.197Z)
+- **claude**: settimana 46 %, 5 ore 66 %; tetto 1, slot 0 (task in programma 4), esaurimento previsto 2026-11-02T03:56:44.539Z, reset 2026-11-05T16:00:00.000Z (letto da /usage il 2026-10-30T22:52:40.197Z)
   - session, 5h: 66 % residuo, reset 2026-10-31T03:00:00.000Z
   - week (all models), settimana: 46 % residuo, reset 2026-11-05T16:00:00.000Z
 - **gemini**: settimana 29 %, 5 ore 95 %; tetto 1, slot 0 (task in programma 0), esaurimento previsto 2026-11-03T00:55:35.323Z, reset 2026-11-05T17:37:53.000Z (letto da /usage il 2026-10-30T22:49:22.297Z)
@@ -24,14 +24,15 @@ Orchestratore: **claude** (sotto il 10 % nessun task su di lui; si cambia con `o
 
 - **T54** Le taglie di D&D per strutture e creature — ESITO: fallito (codice 1) — claude, 6 %
 
-## Pronti, in ordine di priorità (1)
+## Pronti, in ordine di priorità (0)
 
-- **T85** Spegnere la pipeline in modo sicuro — claude, 3 %
+_nessuno_
 
-## Da approvare (provider e stima proposti) (3)
+## Da approvare (provider e stima proposti) (4)
 
 - **T51** Il livello del mare e un motore dell'acqua — claude, 6 %
 - **T45f** Il server su Google Cloud — claude, 6 %
+- **T85** Spegnere la pipeline in modo sicuro — claude, 3 %
 - **T89** La grafica a cartone — claude, 5 %
 
 ## Da stimare (manca la riga `- Pipeline:`) (0)
