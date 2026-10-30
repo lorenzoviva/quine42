@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 07:02 UTC, epoca 46 (claude).
+Aggiornato il 30/10/2026 alle 08:35 UTC, epoca 46 (claude: 5h al 16 %, settimana 62 %; gemini 5h al 100 %).
 
 ## Le priorità dell'autore
 
@@ -30,7 +30,7 @@ Aggiornato il 30/10/2026 alle 07:02 UTC, epoca 46 (claude).
 
 - **Su Claude (crediti tornati: 5h 69 %, settimana 69 %)**, ripresi alle 07:01: **T70** (p0), **T44c** (p3), **T44b** (p4), **T45b** (p6), **T45c** (p7).
 - **Interrotti dall'orchestratore** alle 07:01 per lasciare i posti al multigiocatore (priorità 1 dell'autore): **T52** e **T54** (p50; T54 risulta «fallito (codice 1)» solo per l'interruzione). Da riprendere con `riprendi T52 T54` quando si libera un posto.
-- **Da integrare:** **T53b** (dopo T70: `integra T70`, poi `integra T53b`).
+- **Da integrare:** **T53b** (dopo T70: `integra T70`, poi `integra T53b`); **T44b** (fatto 08:33, verificato con l'emulatore di Firebase; `integra` in conflitto con T45a → **T75** su gemini, p0, poi `integra T75` e `integra T44b`; il suo ADR diventa 0082, un solo meccanismo per l'anonimo).
 - **Gemini:** 5h al 30 %, settimana al 66 %. **Argon:** fermo fino al 04/11.
 
 ## Da fare appena possibile
