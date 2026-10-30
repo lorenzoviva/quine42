@@ -1,5 +1,5 @@
 // Genesis screen: the player gives a theme and chooses the game (how punishing death is, the mode, PvP,
-// «Altro…» between players: fixed forever after, ADR-0053) and the detail of generation with the agents' models (T45b:
+// «Altro…» between players: fixed forever after, ADR-0053) and the detail of generation with the agents' models (T45b, ADR-0085:
 // how often every agent asks the model, «Low Detail» to save, what an hour of play costs); the Council generates the
 // universe while they watch.
 

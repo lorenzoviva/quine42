@@ -1,4 +1,4 @@
-# ADR-0081 — I coefficienti di generazione e la partita «Low Detail»
+# ADR-0085 — I coefficienti di generazione e la partita «Low Detail»
 
 Data: 2026-10-30 · Stato: accettato (task T45b del backlog) · Riferimenti: ADR-0039 (registro dei consumi), ADR-0042 (lo Scultore per
 classe), ADR-0053 (la partita), ADR-0056 (chi paga), T67 (`docs/conversazioni.md`), risposta 4 in `docs/pipeline/domande/T45.md`

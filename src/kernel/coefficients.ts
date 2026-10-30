@@ -1,4 +1,4 @@
-// The coefficients of generation (T45b, ADR-0081): how often every agent asks the model, from 0 (never) to 1 (as
+// The coefficients of generation (T45b, ADR-0085): how often every agent asks the model, from 0 (never) to 1 (as
 // the game always did). Where a call has a rhythm the coefficient stretches it (sessions every N places, dialogues
 // between people, the Sculptor's revisions, plots, models); where it has none it thins what causes it (fewer people
 // per place, rarer item packs and new kinds, fewer new things per place); what the wanderer asks for themselves

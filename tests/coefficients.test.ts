@@ -1,3 +1,4 @@
+// Tests for generation coefficients and «Low Detail» (T45b, ADR-0085)
 import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
