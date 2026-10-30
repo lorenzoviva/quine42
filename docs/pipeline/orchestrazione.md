@@ -443,3 +443,35 @@
 - [2026-10-30T17:01:22.049Z] riprendo T70 su claude (H:\projects\rune\.claude\worktrees\t70)
 - [2026-10-30T17:01:22.074Z] riprendo T45b su claude (H:/projects/rune/.claude/worktrees/t45b)
 - [2026-10-30T17:01:42.598Z] nota: Epoca 145 avviata su Gemini. Reset crediti Claude completato (5h 55%, settimana 55%), T70 ripreso in coda per completare integrazione T53b+T56b. In attesa risposte GCP per T45f.
+- [2026-10-30T17:02:47.945Z] T70: il suo processo non c'è più, riprende la sua conversazione
+- [2026-10-30T17:02:47.954Z] orchestratore: epoca 146 su claude (claude ha di nuovo crediti)
+- [2026-10-30T17:02:48.056Z] T45b: il suo processo non c'è più, riprende la sua conversazione
+- [2026-10-30T17:02:48.081Z] riprendo T70 su claude (H:\projects\rune\.claude\worktrees\t70)
+- [2026-10-30T17:02:48.108Z] riprendo T45b su claude (H:/projects/rune/.claude/worktrees/t45b)
+- [2026-10-30T17:04:06.193Z] T45b: interrotto dall'orchestratore (riprende con riprendi T45b)
+- [2026-10-30T17:04:06.214Z] T45b: interrotto (riprende con riprendi T45b)
+- [2026-10-30T17:05:54.321Z] lancio T81 su gemini (H:\projects\rune\.claude\worktrees\t81)
+- [2026-10-30T17:06:34.992Z] orchestratore: epoca 147 su claude (contesto a 52 % della finestra)
+- [2026-10-30T17:10:05.974Z] T81: ESITO: fatto — corretto l'escape della regex in tools/pipeline/web.mjs e aggiunto test di parse dello script servito in tests/pipeline.test.ts · BROWSER: da verificare — Antigravity CLI (agy) non dispone dello strumento di automazione del browser in sessione; il corretto parsing dello script è garantito dal test headless con new Function (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T81)
+- [2026-10-30T17:10:18.963Z] task/T81 integrato in 3d; worktree e branch tolti.
+- [2026-10-30T17:10:22.885Z] nota: T81 fatto e integrato (24c8acd): regex di web.mjs corretta, test di parse; verifica browser all'autore (ricaricare 4242 dopo il riavvio di orchestra). Su Gemini ora T87.
+- [2026-10-30T17:10:54.994Z] lancio T87 su gemini (H:\projects\rune\.claude\worktrees\t87)
+- [2026-10-30T17:23:04.942Z] T70: ESITO: fatto — merge di T53b con il salto sui piani, correzione del cartello che bloccava il primo piano, test della torre con le casse; i 6 test ancora in timeout falliscono identici sulla base · BROWSER: verificato — dalla porta la cassa del piano terra si salta, la scala porta al primo piano (z 54) anche sopra il cartello, la cassa del primo piano si salta e si atterra a z 54; la struttura è tagliata sopra il piano in cui si è; in console nessun errore del gioco (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T70)
+- [2026-10-30T17:23:18.755Z] task/T70 integrato in 3d; worktree e branch tolti.
+- [2026-10-30T17:23:19.940Z] task/T53b integrato in 3d; worktree e branch tolti.
+- [2026-10-30T17:23:23.204Z] nota: T70 fatto (browser verificato), integrati T70 e T53b. Su Claude parte T82.
+- [2026-10-30T17:23:54.731Z] lancio T82 su claude (H:\projects\rune\.claude\worktrees\t82)
+- [2026-10-30T17:24:13.242Z] orchestratore: epoca 148 su claude (contesto a 59 % della finestra)
+- [2026-10-30T17:27:30.660Z] T87: ESITO: fatto — individuate le cause in agy -p (mancanza flag/strumenti isolati e dipendenza da DevToolsActivePort); configurata la pipeline per assegnare ed eseguire i task con verifica browser esclusivamente su Claude Code, bloccando assegnazioni e fallback su agy · BROWSER: da verificare — agy -p non dispone di strumenti browser (manca flag --chrome, chrome-devtools richiede Chrome attivo con DevToolsActivePort); verifiche demandate a Claude Code (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T87)
+- [2026-10-30T17:27:40.873Z] task/T87 integrato in 3d; worktree e branch tolti.
+- [2026-10-30T17:29:11.246Z] T82: ESITO: fatto — tetti per CLI e modello in `config.json → limiti` (a 1), slot dinamici dalla previsione di esaurimento della settimana, niente task nuovi vicino a 0 %, uno slot di riserva per la priorità 0, mostrati in `stato`/`PIANO.md`/web; ADR-0087, 9 test nuovi. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T82)
+- [2026-10-30T17:29:23.451Z] integra T82: conflitti in tools/pipeline/pipeline.mjs; il base è com'era
+- [2026-10-30T17:30:01.756Z] lancio T90 su claude (H:\projects\rune\.claude\worktrees\t90)
+- [2026-10-30T17:31:29.652Z] T90: ESITO: fatto — merge di T82 su T90 con il conflitto in `execute()` risolto: i task col browser vanno solo a Claude e restano dentro i tetti per provider di T82; test della pipeline e typecheck verdi. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T90)
+- [2026-10-30T17:31:40.144Z] task/T90 integrato in 3d; worktree e branch tolti.
+- [2026-10-30T17:31:40.635Z] task/T82 integrato in 3d; worktree e branch tolti.
+- [2026-10-30T17:32:02.375Z] lancio T83 su claude (H:\projects\rune\.claude\worktrees\t83)
+- [2026-10-30T17:37:40.129Z] orchestratore: epoca 149 su gemini (claude sotto il 10 %)
+- [2026-10-30T17:39:46.405Z] nota: Epoca 149 avviata su Gemini (Claude sotto il 10 %, a 6 %). T83 in corso su Claude. Quadro aggiornato.
+- [2026-10-30T17:40:36.456Z] orchestratore: epoca 150 su gemini (contesto a 91 % della finestra)
+- [2026-10-30T17:42:16.759Z] nota: Epoca 150 avviata su Gemini (rotazione per contesto al 91 % in epoca 149). T83 in corso su Claude. Quadro aggiornato.
