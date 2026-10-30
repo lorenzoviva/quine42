@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 14:14 UTC, epoca 88 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset 16:59 UTC / ~18:00 locali, settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h al 79 %, settimana 48 %; argon fermo fino al 04/11). **T79** e **T45b** (coefficienti e Low Detail, ADR-0085) sono stati integrati con successo nel base `3d` (worktree e branch rimossi), con test mirati (35/35) e typecheck a 0 errori. **T45d (la lobby)** è in esecuzione attiva su Gemini (stima 5%, p1, worktree `t45d`, fase finale: UI lobby, dialogo esaurimento crediti, collegamento sessione). T70 (integrazione più piani T53b e salto T56b) è sospeso per limite crediti su Claude.
+Aggiornato il 30/10/2026 alle 14:15 UTC, epoca 89 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset 16:59 UTC / ~18:00 locali, settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h al 79 %, settimana 48 %; argon fermo fino al 04/11). **T79** e **T45b** (coefficienti e Low Detail, ADR-0085) sono stati integrati con successo nel base `3d` (worktree e branch rimossi), con test mirati (35/35) e typecheck a 0 errori. **T45d (la lobby)** è in esecuzione attiva su Gemini (stima 5%, p1, worktree `t45d`, finitura UI lobby, gestione crediti e carte, collegamento sessione). T70 (integrazione più piani T53b e salto T56b) è sospeso per limite crediti su Claude.
 
 ## Le priorità dell'autore
 
