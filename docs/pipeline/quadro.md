@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 13:46 UTC, fine epoca 80 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset 16:59 UTC / ~18:00 locali, settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h al 91 %, settimana 52 %; argon fermo fino al 04/11). **T78** e **T45c** (eredità dei cloni, ADR-0084) sono stati integrati con successo nel base `3d` (worktree e branch rimossi). **T79** è in esecuzione attiva su Gemini (p0, worktree `t79`) per integrare **T45b** (coefficienti e Low Detail, commit `bc77bd9`) con rinumerazione ADR a 0085 per sbloccare la lobby (**T45d**) senza attendere il reset di Claude. T70 (integrazione più piani T53b e salto T56b) è sospeso per limite crediti su Claude.
+Aggiornato il 30/10/2026 alle 13:47 UTC, avvio epoca 81 su gemini: **claude ha esaurito il limite di 5 ore (0 %)** (reset 16:59 UTC / ~18:00 locali, settimana 55 %), l'orchestratore prosegue su gemini (gemini 5h al 91 %, settimana 52 %; argon fermo fino al 04/11). **T78** e **T45c** (eredità dei cloni, ADR-0084) sono stati integrati con successo nel base `3d` (worktree e branch rimossi). **T79** è in esecuzione attiva su Gemini (p0, worktree `t79`, PID attivo) per integrare **T45b** (coefficienti e Low Detail, commit `bc77bd9`) con rinumerazione ADR a 0085 per sbloccare la lobby (**T45d**) senza attendere il reset di Claude. T70 (integrazione più piani T53b e salto T56b) è sospeso per limite crediti su Claude.
 
 ## Le priorità dell'autore
 
@@ -37,20 +37,6 @@ Aggiornato il 30/10/2026 alle 13:46 UTC, fine epoca 80 su gemini: **claude ha es
   - **T79** (gemini, p0): in esecuzione attiva nel worktree t79. Integrazione T45b, rinumerazione ADR a 0085.
   - **T45b** (claude, p6): commit completato `bc77bd9` nel worktree t45b (coefficienti e Low Detail); in integrazione tramite T79.
   - **T70** (claude, p0): worktree t70 in merge; agente fermo per limite 5h (reset 16:59 UTC).
-- **Completati e integrati nel base `3d`**:
-  - **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
-- **Completati in attesa di integrazione**:
-  - **T53b** (claude): in attesa di T70.
-- **In attesa di chiavi/verifica browser**:
-  - **T45e**: codice e test integrati, in attesa credenziali test Stripe per prova interattiva browser.
-- **Sbloccati / In coda**:
-  - **T45d** (lobby, attende T45b/T79).
-  - **T51** (livello mare e motore acqua, p50).
-  - **T52** e **T54** (p50): interrotti per dare precedenza al multigiocatore.
-- **Crediti**:
-  - **Claude**: 5h al 0 %, settimana al 55 % (fermo fino alle 16:59 UTC / ~18:00 locali, orchestratore su Gemini).
-  - **Gemini**: 5h al 91 %, settimana al 52 % (orchestratore attuale).
-  - **Argon**: fermo fino al 04/11.
 - **Completati e integrati nel base `3d`**:
   - **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **Completati in attesa di integrazione**:
