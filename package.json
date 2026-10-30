@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "abbonamento": "vite-node --script tools/abbonamenti/servi.ts"
   },
   "author": "lorenzoviva <lorenzo.vaccaro@hotmail.com>",
   "license": "PolyForm-Noncommercial-1.0.0",
