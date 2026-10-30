@@ -217,3 +217,9 @@
 - [2026-10-30T08:46:41.467Z] T44c: ESITO: fatto — «Chi è» nel client sottile, profilo per universo e viandante (il server tiene quello salvato), passaggio del mouse e clic destro corretti, schermata della morte in multigiocatore, `server.fs.allow` per la junction di `node_modules` · BROWSER: verificato — due schede (anna, bruno) col server di sviluppo nel worktree: niente KERNEL PANIC, «Chi è», passaggio del mouse e clic destro giusti, schermata della morte, profilo salvato non sovrascritto al rientro (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T44c)
 - [2026-10-30T08:47:33.467Z] task/T44c integrato in 3d; worktree e branch tolti.
 - [2026-10-30T08:48:07.956Z] nota: Epoca 48 avviata su Gemini. T44c completato e verificato nel browser; integrato con successo in 3d (typecheck verde). T75 (merge T44b/T45a) in corso su Gemini in fase di test finale.
+- [2026-10-30T08:49:47.474Z] orchestratore: epoca 49 su gemini (contesto a 205 % della finestra)
+- [2026-10-30T08:54:49.713Z] orchestratore: epoca 50 su gemini (contesto a 255 % della finestra)
+- [2026-10-30T08:57:01.929Z] T75: ESITO: fatto — integrato T44b con T45a, ADR-0082 registrato, meccanismo anonimo unificato sui crediti e suite di test/typecheck verdi (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T75)
+- [2026-10-30T08:57:17.131Z] orchestratore: epoca 51 su gemini (contesto a 88 % della finestra)
+- [2026-10-30T08:57:44.016Z] integra T75: conflitti in src/main.ts; il base è com'era
+- [2026-10-30T09:01:27.949Z] lancio T76 su gemini (H:\projects\rune\.claude\worktrees\t76)

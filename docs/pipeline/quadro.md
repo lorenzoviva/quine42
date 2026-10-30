@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle ~08:57 UTC, fine epoca 50 (gemini orchestratore: claude all'8 % della sessione 5h, reset 12:00 UTC; settimana 61 %; gemini 5h al 91 %, settimana 64 %; argon fermo fino al 04/11).
+Aggiornato il 30/10/2026 alle ~09:02 UTC, avvio epoca 51 (gemini orchestratore: claude all'8 % della sessione 5h, reset 12:00 UTC; settimana 61 %; gemini 5h all'89 %, settimana 63 %; argon fermo fino al 04/11).
 
 ## Le priorità dell'autore
 
@@ -14,18 +14,17 @@ Aggiornato il 30/10/2026 alle ~08:57 UTC, fine epoca 50 (gemini orchestratore: c
 ## Stato e decisioni
 
 - **Decisioni prese e fatti recenti**:
-  - **T44c completato e verificato nel browser** (due schede, «Chi è» nel client sottile, profilo isolato per universo/viandante, hover e clic destro corretti, schermata di morte multigiocatore, fix junction `node_modules` per wasmoon).
-  - **T44c integrato in `3d`** (`integra T44c`, commit `906ed6a`): worktree e branch rimossi, typecheck verde.
-  - **T44b completato** (account e autenticazione con Firebase Auth, Google/anonimo, verificato con emulatore). In attesa del merge di T75.
-  - **T75 in corso su Gemini** (worktree `t75`, pid 28788): integra T44b con T45a, rinumera ADR di T44b in ADR-0082, unifica la gestione dell'anonimo; typecheck, `tests/account.test.ts` e `tests/credits.test.ts` (6/6) passati verdi, suite `tests/session.test.ts` in corso.
+  - **T75 completato con successo**: integrato T44b (account/Firebase) con T45a (crediti), ADR-0082 registrato, meccanismo anonimo unificato sui crediti e suite di test/typecheck verdi nel worktree `t75`.
+  - **Tentativo di merge `integra T75`**: riscontrato conflitto in `src/main.ts` con T44c (che era stato integrato nel base `3d` durante l'esecuzione di T75).
+  - **Creato e avviato T76** (gemini, p0, stima 1%, approvato): integra `task/T75` nel base `3d` risolvendo il conflitto in `src/main.ts` preservando sia le novità di T44c (profilo per universo/viandante, «Chi è», hover/clic destro, schermata della morte) sia quelle di T75/T44b/T45a (gestione account Firebase, login Google/anonimo, crediti anonimo).
   - **T70 in corso su Claude** (p0, pid 23712): integra T53b (più piani) con T56b (salto).
-  - **T45a, T68b, T68c, T74 già integrati nel base `3d`**: crediti viandante, servi CLI abbonamenti e integrazione gioco operativi.
+  - **T44c integrato nel base `3d`**: fix «Chi è», profilo per universo/viandante, hover/clic destro e schermata della morte.
 - **Cosa si aspetta**:
-  1. **T75** (gemini, p0): completamento del merge T44b con T45a; poi `integra T75` e `integra T44b`.
+  1. **T76** (gemini, p0): completamento del merge di T75 con `src/main.ts`; poi `integra T76`, `integra T75` e `integra T44b`. Questo sblocca T45d/T45e/T45f.
   2. **T70** (claude, p0): completamento integrazione T53b con salto T56b; poi `integra T70` e `integra T53b`.
   3. Reset crediti 5h di Claude alle 12:00 UTC (~13:00 locali) per T45b e T45c.
 - **Intenzioni / prossimi passi**:
-  1. Integrare T75 + T44b appena T75 conclude positivamente (T44b sblocca T45d/T45e/T45f).
+  1. Integrare T76, T75 e T44b appena T76 conclude positivamente (sblocca T45d lobby, T45e Stripe, T45f server cloud).
   2. Integrare T70 + T53b appena T70 conclude positivamente.
   3. Mantenere priorità assoluta alla catena multigiocatore: T52 e T54 (p50) restano in attesa che la coda multigiocatore si svuoti.
   4. Gestione T45b (coefficienti / low detail) e T45c (eredità cloni): in attesa dello sblocco crediti di Claude o dirottamento su Gemini se il carico lo richiede.
@@ -33,16 +32,17 @@ Aggiornato il 30/10/2026 alle ~08:57 UTC, fine epoca 50 (gemini orchestratore: c
 ## Task attivi e in corso
 
 - **In corso**:
-  - **T75** (gemini, p0, pid 28788): integrare T44b con T45a.
+  - **T76** (gemini, p0): integrare T75 (account T44b e crediti T45a) con T44c in `src/main.ts`.
   - **T70** (claude, p0, pid 23712): integrare T53b con T56b.
   - **T45b** (claude, p6) e **T45c** (claude, p7): priorità multigiocatore.
 - **Completati in attesa di integrazione**:
-  - **T44b** (claude): in attesa di T75.
+  - **T75** (gemini): in attesa di T76.
+  - **T44b** (claude): in attesa di T76.
   - **T53b** (claude): in attesa di T70.
 - **In coda / sospesi**:
   - **T52** e **T54** (p50): interrotti per dare precedenza al multigiocatore.
 - **Crediti**:
-  - **Gemini**: 5h al 91 %, settimana al 64 % (orchestratore Epoca 50).
+  - **Gemini**: 5h all'89 %, settimana al 63 % (orchestratore Epoca 51 e task T76).
   - **Claude**: 5h all'8 %, settimana al 61 % (reset 12:00 UTC).
   - **Argon**: fermo fino al 04/11.
 

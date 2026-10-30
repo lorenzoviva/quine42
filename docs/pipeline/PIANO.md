@@ -1,34 +1,34 @@
 # Il piano della pipeline
 
-> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-30T06:35:08.244Z: non modificarlo a mano,
+> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-30T09:01:34.208Z: non modificarlo a mano,
 > la fonte è `docs/plans/backlog.md` (righe `- Pipeline:`).
 
 ## Budget
 
 Orchestratore: **gemini** (sotto il 10 % nessun task su di lui; si cambia con `orchestratore <provider>`).
 
-- **claude**: settimana 69 %, 5 ore 0 %, fermo fino a 2026-10-30T07:00:00.000Z (letto da /usage il 2026-10-30T06:31:06.440Z)
-  - session, 5h: 0 % residuo, reset 2026-10-30T07:00:00.000Z
-  - week (all models), settimana: 69 % residuo, reset 2026-11-05T16:00:00.000Z
-- **gemini**: settimana 66 %, 5 ore 31 % (letto da /usage il 2026-10-30T06:32:57.188Z)
-  - Gemini Models, settimana: 66 % residuo, reset 2026-11-05T17:37:53.000Z
-  - Gemini Models, 5h: 31 % residuo, reset 2026-10-30T08:19:40.000Z
-- **argon**: settimana 0 %, 5 ore 0 %, fermo fino a 2026-11-04T18:44:35.000Z (letto da /usage il 2026-10-30T06:31:09.035Z)
+- **claude**: settimana 61 %, 5 ore 8 % (letto da /usage il 2026-10-30T09:01:31.338Z)
+  - session, 5h: 8 % residuo, reset 2026-10-30T12:00:00.000Z
+  - week (all models), settimana: 61 % residuo, reset 2026-11-05T16:00:00.000Z
+- **gemini**: settimana 63 %, 5 ore 89 % (letto da /usage il 2026-10-30T08:57:01.929Z)
+  - Gemini Models, settimana: 63 % residuo, reset 2026-11-05T17:37:53.000Z
+  - Gemini Models, 5h: 89 % residuo, reset 2026-10-30T13:19:40.000Z
+- **argon**: settimana 0 %, 5 ore 0 %, fermo fino a 2026-11-04T18:44:35.000Z (letto da /usage il 2026-10-30T09:01:34.202Z)
   - Gemini 4 Argon, settimana: 0 % residuo, reset 2026-11-04T18:44:35.000Z
 
-## In corso (7)
+## In corso (5)
 
 - **T52** I sotterranei — claude, 3 %
-- **T54** Le taglie di D&D per strutture e creature — claude, 6 %
-- **T44b** L'account e l'autenticazione — claude, 5 %
-- **T44c** Correzioni dalla verifica nel browser di T44a e T43c — claude, 3 %
 - **T45b** I coefficienti di generazione e la partita «Low Detail» — claude, 6 %
 - **T45c** L'eredità dei cloni — claude, 5 %
 - **T70** Integrare T53b (più piani) con il salto di T56b — claude, 3 %
+- **T76** Integrare T75 (account T44b e crediti T45a) con T44c in src/main.ts — gemini, 1 %
 
-## Finiti, da guardare e integrare (`integra Txx`) (1)
+## Finiti, da guardare e integrare (`integra Txx`) (3)
 
 - **T53b** Le scale come rampe e le strutture su più piani — ESITO: fatto — le strutture hanno più piani: un pavimento per tratto di pieno, `pos.z` tenuta dal kernel, collisione, `floorAt` e taglio del renderer sul piano in cui si è; test della torre a due piani. — claude, 6 %
+- **T54** Le taglie di D&D per strutture e creature — ESITO: fallito (codice 1) — claude, 6 %
+- **T44b** L'account e l'autenticazione — ESITO: fatto — accesso con Firebase (Google o anonimo) nelle partite multigiocatore, viandante legato all'account, anonimo con i modelli locali che tiene il viandante quando si lega a Google; nella suite intera 52 timeout, presenti anche sul commit di partenza — claude, 5 %
 
 ## Pronti, in ordine di priorità (1)
 

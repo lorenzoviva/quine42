@@ -1682,7 +1682,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Esito: eseguito merge di `task/T68c` in `task/T74`; risolto il conflitto in `docs/plans/backlog.md` mantenendo lo stato `fatto` e l'esito di T68c insieme a tutti i task recenti (T71, T72, T73, T74); verificati `tests/subscription.test.ts` (16/16) e `npm run typecheck` con esito verde.
 
 
-### T75 · Integrare T44b (l'account e l'autenticazione) con T45a (i crediti) — `da fare`
+### T75 · Integrare T44b (l'account e l'autenticazione) con T45a (i crediti) — `fatto`
 - Pipeline: gemini · stima 3% · approvato · priorità 0
 - Contesto: `integra T44b` del 30/10/2026 si è fermato su conflitti in `docs/adr/README.md`, `src/main.ts`, `src/session/client.ts`,
   `src/session/protocol.ts`, `src/session/server.ts`: T44b è partito da `ab79ce4`, prima che entrassero T45a (crediti, `38dcd69`) e T68c
@@ -1696,3 +1696,11 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fatto quando: `npx vitest run tests/session* tests/credits* tests/subscription.test.ts` (i file che esistono) e `npm run typecheck`
   verdi (non la suite intera: va in timeout per carico macchina), commit sul branch `task/T75`. Poi l'orchestratore farà `integra T75`
   e `integra T44b`.
+- Esito: eseguito merge di `task/T44b` in `task/T75`; risolti i conflitti in `docs/adr/README.md`, `src/main.ts`, `src/session/client.ts`, `src/session/protocol.ts`, `src/session/server.ts`; ADR-0081 di T44b rinumerato in ADR-0082 (`docs/adr/0082-l-account.md`, `README.md`, `AGENTS.md`, `backlog.md`); unificato il meccanismo dell'anonimo sul sistema dei crediti di ADR-0081 (`anonimo: true`, 0 crediti non ricaricabili, escluso dalle spese comuni, richieste personali gestite con `MockModels` a crediti esauriti; legandosi a Google smette di essere anonimo, sblocca i crediti e tiene viandante e profilo; rimosso `src/kernel/ai/local.ts`); verificati `tests/account.test.ts`, `tests/credits.test.ts`, `tests/session.test.ts`, `tests/subscription.test.ts` e `npm run typecheck` con esito verde.
+
+### T76 · Integrare T75 (account T44b e crediti T45a) con T44c in src/main.ts — `da fare`
+- Pipeline: gemini · stima 1% · approvato · priorità 0
+- Contesto: `integra T75` del 30/10/2026 si è fermato su un conflitto in `src/main.ts` (perché nel frattempo nel base `3d` è stato integrato T44c, commit `906ed6a`). Leggi `node tools/pipeline/pipeline.mjs dossier T75` e `dossier T44c`.
+- Fare: nel tuo worktree esegui `git merge task/T75` e risolvi il conflitto in `src/main.ts` (e se si presenta in `docs/plans/backlog.md` mantenendo sia T75 sia T76) preservando sia le novità di T44c (`savedProfile(name, id)`, «Chi è» nel client sottile, profilo per universo e viandante, hover/clic destro corretti, schermata della morte in multigiocatore) sia quelle di T75/T44b/T45a (gestione account Firebase, login con Google/anonimo, crediti anonimo).
+  IMPORTANTE: esegui solo `npx vitest run tests/account.test.ts tests/credits.test.ts tests/session.test.ts tests/subscription.test.ts` e `npm run typecheck` (con `WaitMsBeforeAsync: 10000`, NON lanciare `npm test` sull'intera suite per evitare timeout o backgrounding).
+- Fatto quando: i test sopra indicati e `npm run typecheck` sono verdi, commit sul branch `task/T76`. Poi l'orchestratore farà `integra T76`, `integra T75` e `integra T44b`.
