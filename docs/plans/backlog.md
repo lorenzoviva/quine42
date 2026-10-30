@@ -1445,12 +1445,13 @@ le risposte alle domande del piano.
   collezione di carte fuori dalla partita, con gli utilizzi.
 - Fatto quando: test del flusso, verifica nel browser con due schede, commit.
 
-### T45e · I pagamenti con Stripe — `da fare` (dipende da T45a, T44b)
+### T45e · I pagamenti con Stripe — `in attesa` (aspetta le chiavi di Stripe di prova dall'autore in `docs/pipeline/domande/T45e.md`; dipende da T45a, T44b)
 - Pipeline: claude · stima 5% · priorità 9
 - Fare: la ricarica dei crediti con Stripe Checkout (Google Pay compreso) in modalità di prova; il webhook sul server accredita
   (idempotente); chiavi solo sul server; un anonimo non compra.
 - Fatto quando: test con il webhook finto, una ricarica di prova nel browser con le chiavi di test, commit. Le chiavi di Stripe le
   dà l'autore: se mancano, la domanda va in `docs/pipeline/domande/T45e.md`.
+- Esito: implementati gli endpoint server (`/api/stripe/checkout`, `/api/stripe/webhook`) con verifica firma HMAC-SHA256 (`stripe-signature`), accredito crediti idempotente (`Kernel.creditRecharge` e persistenza `world/pagamenti.json`), blocco acquisti per anonimi (403), interfaccia di ricarica rapida e saldo nel profilo (`P`); test headless in `tests/stripe.test.ts` (6/6 passati); ADR-0083 registrato. In attesa delle chiavi di test `STRIPE_SECRET_KEY` e `STRIPE_WEBHOOK_SECRET` dall'autore nel `.env` per la verifica nel browser.
 
 ### T45f · Il server su Google Cloud — `da fare` (dipende da T44b, T45d)
 - Pipeline: claude · stima 6% · priorità 10
