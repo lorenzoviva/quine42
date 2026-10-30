@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle ~10:22 UTC (~11:22 locali), epoca 68 (gemini orchestratore: claude al 0 % della sessione 5h, reset 12:00 UTC / ~13:00 locali, ~38m; settimana 61 %; gemini 5h al 66 %, settimana 56 %; argon fermo fino al 04/11).
+Aggiornato il 30/10/2026 alle ~10:24 UTC (~11:24 locali), epoca 69 (gemini orchestratore: claude al 0 % della sessione 5h, reset 12:00 UTC / ~13:00 locali, ~36m; settimana 61 %; gemini 5h al 66 %, settimana 56 %; argon fermo fino al 04/11).
 
 ## Le priorità dell'autore
 
