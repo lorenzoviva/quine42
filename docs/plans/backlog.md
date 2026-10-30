@@ -1869,13 +1869,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   web una vista delle conversazioni in corso con il consumo di ciascuna.
 - Fatto quando: test su `traccia` di un task in corso per entrambi i provider e sull'orchestratore verdi.
 
-### T87 · Le verifiche nel browser di agy non funzionano — `da fare`
+### T87 · Le verifiche nel browser di agy non funzionano — `fatto`
 - Pipeline: gemini · stima 2% · approvato · priorità 6
 - Dipende da: T81 (un task alla volta su Gemini).
 - Contesto: l'autore nota che i task su Gemini/Argon (agy) non riescono a fare le verifiche nel browser.
 - Fare: capire perché (`agy -p` non ha il browser di Antigravity in modalità non interattiva? manca un flag?) e correggere `tools/pipeline/config.json`; se non si può,
   la pipeline lo deve sapere: i task con verifica nel browser vanno solo su Claude. Scrivi ciò che scopri nel README della pipeline.
 - Fatto quando: una verifica di prova su una pagina locale riesce da `agy -p`, oppure il README dice che non si può e la pipeline non manda più ad agy i task che chiedono il browser.
+- Esito: verificato sperimentalmente con `agy -p` che Antigravity CLI non supporta flag browser (es. `--chrome` non definito) e non espone strumenti di navigazione/ispezione; il subagente `/browser` cerca `DevToolsActivePort` su Chrome utente e non avvia Chrome in autonomia. Aggiornato `tools/pipeline/config.json` con `"browser": true` per Claude e `false` per Gemini/Argon, aggiornato il prompt comune; in `tools/pipeline/pipeline.mjs` aggiunti `taskNeedsBrowser`, riconoscimento `needsBrowser` nel backlog e nella riga pipeline, blocco in `plan` e `assignTask` se un task browser è indirizzato a provider non-browser, e filtro in `execute` che impedisce il fallback di task browser su Gemini o Argon; documentate le cause e la regola esclusiva per Claude in `docs/pipeline/README.md`, `pianifica.md` e `orchestra.md`; test completi in `tests/pipeline.test.ts`.
 
 ### T88 · Spendere i crediti che avanzano generando l'universo con gli abbonamenti — `da fare`
 - Pipeline: claude · stima 4% · priorità 90

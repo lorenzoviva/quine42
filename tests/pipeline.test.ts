@@ -3,16 +3,18 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 // The pipeline is a plain `.mjs` with no types: imported by a computed URL so tsc does not look for a declaration.
-type Task = { id: string; title: string; status: string; deps: string[]; provider?: string; estimate?: number; approved?: boolean; priority?: number; parent?: string };
+type Task = { id: string; title: string; status: string; deps: string[]; provider?: string; estimate?: number; approved?: boolean; priority?: number; parent?: string; needsBrowser?: boolean };
 type Counter = { nome: string; finestra: '5h' | 'settimana'; residuo: number; reset?: string };
 type Pipeline = {
   parseBacklog(text: string): Task[];
-  parsePipelineLine(line: string): { provider?: string; estimate?: number; approved: boolean; priority: number };
+  parsePipelineLine(line: string): { provider?: string; estimate?: number; approved: boolean; priority: number; needsBrowser: boolean };
+  taskNeedsBrowser(block: string): boolean;
   parseUsage(provider: string, text: string): Counter[] | undefined;
   usageLimit(output: string, from?: Date): Date | undefined;
   readOutput(text: string): { session?: string; cost?: number; error: boolean; result: string; outcome?: string; browser?: string };
   capOf(o: { left: number; session?: number; provider: string; orchestrator?: string; max: number; threshold: number }): number;
   computeBudget(provider: string, conf?: unknown, counters?: Counter[]): { residuo: number; sessione: number };
+  plan(tasks: Task[], runs: Record<string, any>, budget: Record<string, any>, only?: string): { inCorso: any[]; daIntegrare: any[]; pronti: any[]; daApprovare: any[]; daStimare: any[]; bloccati: any[]; inAttesa: any[] };
 };
 
 let P: Pipeline;
@@ -85,8 +87,47 @@ describe('parseBacklog', () => {
 
 describe('parsePipelineLine', () => {
   it('provider, stima, approvazione e priorità in qualunque ordine', () => {
-    expect(P.parsePipelineLine('gemini · priorità 7 · stima 2.5 %')).toEqual({ provider: 'gemini', estimate: 2.5, approved: false, priority: 7 });
-    expect(P.parsePipelineLine('Claude · Approvato')).toEqual({ provider: 'claude', estimate: undefined, approved: true, priority: 100 });
+    expect(P.parsePipelineLine('gemini · priorità 7 · stima 2.5 %')).toEqual({ provider: 'gemini', estimate: 2.5, approved: false, priority: 7, needsBrowser: false });
+    expect(P.parsePipelineLine('Claude · Approvato')).toEqual({ provider: 'claude', estimate: undefined, approved: true, priority: 100, needsBrowser: false });
+    expect(P.parsePipelineLine('claude · stima 3% · approvato · browser')).toEqual({ provider: 'claude', estimate: 3, approved: true, priority: 100, needsBrowser: true });
+  });
+});
+
+describe('taskNeedsBrowser e gestione browser (T87)', () => {
+  it('riconosce richieste di verifica nel browser da Fatto quando, Fare o riga Pipeline', () => {
+    expect(P.taskNeedsBrowser('### T1\n- Fare: qualcosa\n- Fatto quando: verificare nel browser con ?dev\n')).toBe(true);
+    expect(P.taskNeedsBrowser('### T2\n- Fare: verificare nel browser se il pulsante clicca\n- Fatto quando: commit\n')).toBe(true);
+    expect(P.taskNeedsBrowser('### T3\n- Fare: altro\n- Fatto quando: screenshot della prova confrontato con la foto\n')).toBe(true);
+    expect(P.taskNeedsBrowser('### T4\n- Pipeline: claude · stima 2% · browser\n- Fare: niente\n- Fatto quando: commit\n')).toBe(true);
+    expect(P.taskNeedsBrowser('### T5\n- Fare: codice puro\n- Fatto quando: test verdi\n')).toBe(false);
+  });
+
+  it('parseBacklog marca needsBrowser per i task pertinenti', () => {
+    const text = [
+      '### T90 · Task browser — `da fare`',
+      '- Pipeline: claude · stima 2% · approvato',
+      '- Fare: correggi la vista',
+      '- Fatto quando: verificare nel browser con ?dev&teleport=46,0',
+      '',
+      '### T91 · Task senza browser — `da fare`',
+      '- Pipeline: gemini · stima 1% · approvato',
+      '- Fare: scrivi documentazione',
+      '- Fatto quando: test verdi',
+    ].join('\n');
+    const tasks = P.parseBacklog(text);
+    expect(tasks.find((t) => t.id === 'T90')?.needsBrowser).toBe(true);
+    expect(tasks.find((t) => t.id === 'T91')?.needsBrowser).toBe(false);
+  });
+
+  it('plan blocca i task con needsBrowser assegnati a provider senza browser (gemini/argon)', () => {
+    const tasks: Task[] = [
+      { id: 'T92', title: 'Task UI', status: 'da fare', deps: [], provider: 'gemini', estimate: 2, approved: true, priority: 10, needsBrowser: true },
+      { id: 'T93', title: 'Task UI Claude', status: 'da fare', deps: [], provider: 'claude', estimate: 2, approved: true, priority: 10, needsBrowser: true },
+    ];
+    const queues = P.plan(tasks, {}, {});
+    expect(queues.pronti.map((t: any) => t.id)).toEqual(['T93']);
+    expect(queues.bloccati.map((t: any) => t.id)).toEqual(['T92']);
+    expect(queues.bloccati[0].missing).toEqual(['provider con browser (claude)']);
   });
 });
 
@@ -556,6 +597,21 @@ describe('interfaccia web della pipeline (T69)', () => {
     expect(scriptMatch).not.toBeNull();
     const script = scriptMatch![1];
     expect(() => new Function(script)).not.toThrow();
+  });
+
+  it('assignTask impedisce l\'assegnazione a gemini o argon di un task con verifica nel browser (T87)', () => {
+    const opts = makeSandbox();
+    fsMod.appendFileSync(path.join(tmpRepo, 'docs', 'plans', 'backlog.md'), [
+      '',
+      '### T99 · Task con browser — `da fare`',
+      '- Fare: correggi la vista',
+      '- Fatto quando: verificare nel browser con ?dev',
+      '',
+    ].join('\n'));
+    const badRes = W.handleApi('POST', '/api/assegna', { id: 'T99', provider: 'gemini', stima: 2, approva: false }, opts);
+    expect(badRes.status).toBe(400);
+    expect(badRes.data.error).toMatch(/richiede verifica nel browser/);
+    expect(W.handleApi('POST', '/api/assegna', { id: 'T99', provider: 'claude', stima: 2, approva: false }, opts).status).toBe(200);
   });
 });
 
