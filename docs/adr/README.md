@@ -88,3 +88,4 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.
 
+| [0081](0081-i-coefficienti-di-generazione.md) | I coefficienti di generazione: `ai.coefficienti` (nove, 0-1, riparati dal validatore) regolano quanto spesso ogni agente chiama l'IA, direttamente (sessioni, dialoghi, trame, revisioni, modelli) o indirettamente (persone, abitanti, pacchetti, cose); il censimento delle chiamate; il preset «Low Detail»; nella Genesi coefficienti, modelli e stima di un'ora di gioco | accettato |

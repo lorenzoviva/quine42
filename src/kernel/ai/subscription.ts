@@ -82,6 +82,12 @@ export class RoutedModels implements Models {
   get onCall() {
     return this.api.onCall;
   }
+  get textModel(): string | undefined {
+    return this.api.textModel;
+  }
+  set textModel(m: string | undefined) {
+    if (m && this.api.textModel !== undefined) this.api.textModel = m;
+  }
   set onCall(f: ((r: CallRecord) => void) | undefined) {
     for (const m of Object.values(this.routes)) m.onCall = f;
   }
