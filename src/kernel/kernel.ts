@@ -52,7 +52,7 @@ import { BENCH, cleanCases, runCase, textKey, type BenchEntry, type BenchRun, ty
 import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Identity } from './agents/content';
 import { addItem, CARRY_CAPACITY, countItem, HOTBAR, equippedItem, moveSlot, newInventory, putSlot, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
 import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH, worldLevels } from './relief';
-import { CardLedger, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, payerOf, placeCardId, stampFiles, titolareOf, type Card, type Carta } from './cards';
+import { CardLedger, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, receivedBy, type Received, payerOf, placeCardId, stampFiles, titolareOf, type Card, type Carta } from './cards';
 import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState } from './wanderers';
 import type { ActionDef, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Partita, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
 
@@ -6750,6 +6750,11 @@ export class Kernel {
   cardsOf(wanderer?: string): Card[] {
     const files = { ...this.files, [CARDS_FILE]: this.cards.toJson() };
     return wanderer === undefined ? allCards(files) : collectionOf(files, wanderer);
+  }
+
+  /** What a wanderer receives from this universe's cards as one who held them before a clone (T45c, ADR-0084). */
+  received(wanderer = this.wanderer().id): Received[] {
+    return receivedBy({ ...this.files, [CARDS_FILE]: this.cards.toJson() }, wanderer);
   }
 
   /** On leaving: the spending of this session goes into the universe even if nothing else changed. */

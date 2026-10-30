@@ -40,7 +40,8 @@ describe('cloning a universe with another master (T42d)', () => {
     const files = many();
     const { changes, from } = cloneChanges(files, { nome: 'seconda', master: 'anna' });
     expect(from).toBe('io');
-    expect(Object.keys(changes)).toEqual(['universe.json']);
+    // One more origin on every card (T45c): the files with cards change, nothing else.
+    expect(Object.keys(changes).sort()).toEqual([CARPET, 'universe.json', CARDS_FILE].sort());
     const clone = { ...files, ...changes };
     const cfg = JSON.parse(clone['universe.json']);
     expect(cfg.name).toBe('seconda');
