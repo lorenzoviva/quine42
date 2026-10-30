@@ -7,6 +7,7 @@ import { fakeLink } from '../src/session/protocol';
 import { SessionServer } from '../src/session/server';
 import { SessionClient } from '../src/session/client';
 import { ThinClient } from '../src/session/thin';
+import { keepProfile, savedProfile } from '../src/session/socket';
 import { PROFILE_LIMITS, repairProfile, WANDERER_NAME, type Profile } from '../src/kernel/wanderers';
 
 // The wanderer's profile (T44a): a name, a seed and a cloak, a few lines; repaired by the server, seen by the others.
@@ -150,4 +151,71 @@ describe('the profile in a game of many (T44a)', () => {
     expect(again.wanderer().nome).toBe('Ilaria');
     expect(again.ecs.get(again.playerId, 'form')).toMatchObject({ seed: 2, tint: '#3060c0' });
   });
+});
+
+describe('the other wanderer in the thin client (T44c)', () => {
+  it('«Chi è» shows the presentation; the hover says the name and its first line; the right click opens the one under the pointer', async () => {
+    const k = await bootMany();
+    const server = new SessionServer(k);
+    const anna = await thin(server, 'anna', { nome: 'Ilaria', presentazione: 'Tessitrice del nord.\nAmo i fiumi.' });
+    const bruno = await thin(server, 'bruno', { nome: 'Bruno', presentazione: 'Pescatore.' });
+    const carlo = await thin(server, 'carlo', { nome: 'Carlo' });
+    const all = [anna, bruno, carlo];
+    run(server, all, 6);
+    // Anna and Carlo side by side, a step from Bruno.
+    const at = bruno.k.playerPos();
+    const put = (id: string, x: number, y: number) => {
+      const w = k.wandererAt(id)!;
+      Object.assign(k.ecs.get(w.entity, 'pos'), { x, y });
+    };
+    put('anna', at.x + 1.2, at.y + 0.5);
+    put('carlo', at.x + 1.8, at.y + 0.5);
+    run(server, all, 40);
+    const a = avatarOf(bruno, 'anna')!;
+    const c = avatarOf(bruno, 'carlo')!;
+    const dialogs: Array<{ speaker: string; text: string }> = [];
+    bruno.k.bus.on('ui:dialog', (d) => dialogs.push(d));
+    await bruno.k.performMenu('e:chi', a, 0, 0);
+    expect(dialogs).toEqual([{ speaker: 'Ilaria', text: 'Tessitrice del nord.\nAmo i fiumi.' }]);
+
+    const { ox, oy } = bruno.k.offset();
+    const pa = bruno.k.ecs.get(a, 'pos');
+    expect(bruno.k.hoverAt(pa.x - ox, pa.y - oy)).toMatchObject({ kind: 'entity', name: 'Ilaria', description: 'Tessitrice del nord.' });
+    const pc = bruno.k.ecs.get(c, 'pos');
+    expect(bruno.k.hoverAt(pc.x - ox, pc.y - oy)).toMatchObject({ kind: 'entity', name: 'Carlo', description: '' });
+
+    const menus: Array<{ id: number }> = [];
+    bruno.k.bus.on('ui:actions', (m) => menus.push(m));
+    bruno.k.contextAt(pc.x - ox, pc.y - oy);
+    bruno.k.contextAt(pa.x - ox, pa.y - oy);
+    expect(menus.map((m) => m.id)).toEqual([c, a]);
+  }, 180000);
+});
+
+describe('the profiles of two wanderers in the same browser (T44c)', () => {
+  it('one key per universe and wanderer; a profile already saved is not replaced by the one a client brings', async () => {
+    const store = new Map<string, string>();
+    const storage = { getItem: (key: string) => store.get(key) ?? null, setItem: (key: string, v: string) => void store.set(key, v) };
+    keepProfile('aurora', 'anna', { nome: 'Ilaria' }, storage);
+    keepProfile('aurora', 'bruno', { nome: 'Bruno' }, storage);
+    keepProfile('altrove', 'anna', { nome: 'Anna' }, storage);
+    expect(savedProfile('aurora', 'anna', storage)).toEqual({ nome: 'Ilaria' });
+    expect(savedProfile('aurora', 'bruno', storage)).toEqual({ nome: 'Bruno' });
+    expect(savedProfile('altrove', 'anna', storage)).toEqual({ nome: 'Anna' });
+    expect(savedProfile('aurora', 'carlo', storage)).toBeUndefined();
+
+    const k = await bootMany();
+    const server = new SessionServer(k);
+    const anna = await thin(server, 'anna', { nome: 'Ilaria', presentazione: 'Tessitrice.' });
+    run(server, [anna], 6);
+    anna.session.leave();
+    run(server, [], 2);
+    // Anna comes back with Bruno's profile (an old key shared by the origin): hers stays.
+    const again = await thin(server, 'anna', { nome: 'Bruno', presentazione: 'Pescatore.' });
+    expect(again.session.profilo).toEqual({ nome: 'Ilaria', presentazione: 'Tessitrice.' });
+    expect(JSON.parse(k.files['world/giocatori/anna.json']).profilo).toMatchObject({ nome: 'Ilaria' });
+    // Only an explicit change does.
+    const o = await ask(server, [again], again.setProfile({ nome: 'Ilenia' }));
+    expect(o.profilo?.nome).toBe('Ilenia');
+  }, 180000);
 });

@@ -1353,7 +1353,7 @@ le risposte alle domande del piano.
 - Fatto quando: test con un verificatore finto (token valido, scaduto, anonimo che si lega), verifica nel browser con l'emulatore di
   Firebase o un progetto di prova, commit. Se serve creare il progetto Firebase, la domanda va in `docs/pipeline/domande/T44b.md`.
 
-### T44c · Correzioni dalla verifica nel browser di T44a e T43c — `da fare` (dipende da T44a, T43c)
+### T44c · Correzioni dalla verifica nel browser di T44a e T43c — `fatto` (dipende da T44a, T43c)
 - Pipeline: claude · stima 3% · approvato · priorità 3
 - Contesto: verifica con due schede del 29/10/2026 (diario di `docs/pipeline/orchestrazione.md`): profilo, nome doppio, morte di un
   giocatore, uscita e rientro funzionano; restano questi difetti.
@@ -1374,6 +1374,13 @@ le risposte alle domande del piano.
     (`server.fs.allow` con il percorso reale di `node_modules`).
 - Fatto quando: test del client sottile per «Chi è» e per il profilo di due viandanti nella stessa origine, verifica con due schede
   in un worktree della pipeline (`BROWSER: verificato`), commit.
+- Esito: «Chi è» nel client sottile (`ui:dialog`); profilo sotto `rune:profilo:<universo>:<id>` (`socket.ts`) e il server tiene quello
+  salvato all'ingresso; passaggio del mouse su un altro viandante: nome e prima riga della presentazione; il clic destro sceglie
+  l'entità sotto il puntatore (`contextAt`); morte in multigiocatore: l'avviso porta `perso` e `dove` e il client mostra la schermata
+  (`ui:died`, un solo «Continua»: il server ha già deciso); `server.fs.allow` con il percorso reale di `node_modules`. In più del
+  previsto: nessuno. Verificato con due schede in questo worktree (server di sviluppo, junction): niente «KERNEL PANIC».
+  Test: 518, verdi; sulla macchina carica dagli altri worktree 7 test di sessione superano il loro timeout esplicito (20-60 s) e passano
+  con il timeout alzato (nessuna asserzione fallita).
 
 ### T45 · Crediti, lobby, carte e server su Google Cloud — spezzato in T45a-T45f (risposte in docs/pipeline/domande/T45.md)
 - Fare, a pezzi (spezzare quando si comincia): crediti e pagamenti (P#1: l'1% sul costo); la lobby con il tetto di

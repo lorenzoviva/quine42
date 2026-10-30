@@ -233,13 +233,13 @@ export class SessionServer {
       if (c) c.budget = 0;
     });
     // A wanderer who died in the world (T43c) wakes up where the verdict says, with the words of their new life.
-    kernel.bus.on('wanderer:died', (e: { id?: unknown; causa?: unknown; testo?: unknown }) => {
+    kernel.bus.on('wanderer:died', (e: { id?: unknown; causa?: unknown; testo?: unknown; perso?: unknown; dove?: unknown }) => {
       const c = typeof e?.id === 'string' ? this.clients.get(e.id) : undefined;
       if (!c) return;
       c.budget = 0;
       c.me = undefined;
       c.stato = undefined;
-      if (c.notices.length < 50) c.notices.push({ tipo: 'morte', da: c.id, nome: String(e?.causa ?? 'ferite'), testo: String(e?.testo ?? '') });
+      if (c.notices.length < 50) c.notices.push({ tipo: 'morte', da: c.id, nome: String(e?.causa ?? 'ferite'), testo: String(e?.testo ?? ''), perso: Array.isArray(e?.perso) ? e.perso.map(String) : [], dove: e?.dove === 'piazza' ? 'piazza' : 'qui' });
     });
   }
 
@@ -294,8 +294,9 @@ export class SessionServer {
       return undefined;
     }
     this.kernel.setRemote(id, true);
-    // Who they say they are (T44a): repaired against everyone else in the world; without one, the profile saved.
-    const fixed = profilo && typeof profilo === 'object' ? this.kernel.setProfile(id, profilo) : undefined;
+    // Who they say they are (T44a): repaired against everyone else in the world. A profile already saved stays (T44c): only
+    // `profilo` changes it, what a browser brings on entering may be another wanderer's.
+    const fixed = profilo && typeof profilo === 'object' && !this.kernel.profileOf(id) ? this.kernel.setProfile(id, profilo) : undefined;
     const c: Client = { id, link, budget: this.kernel.paceOf(id) * BURST, places: new Map(), things: new Map(), others: new Map(), notices: [] };
     this.clients.set(id, c);
     const u = this.view(c);

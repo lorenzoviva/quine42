@@ -36,19 +36,26 @@ export function socketLink(universe: string, offline: boolean): ClientLink {
   };
 }
 
-/** The profile this browser keeps (T44a): it is the player's, not the universe's, and goes with them into any world. */
-export function savedProfile(): Partial<Profile> | undefined {
+/**
+ * The profile this browser keeps (T44a), one per universe and wanderer (T44c): two tabs of the same origin are two
+ * wanderers, and neither must bring the other's profile into the world.
+ */
+export function profileKey(universe: string, id: string): string {
+  return `rune:profilo:${universe}:${id}`;
+}
+
+export function savedProfile(universe: string, id: string, store: Pick<Storage, 'getItem'> = localStorage): Partial<Profile> | undefined {
   try {
-    const p = JSON.parse(localStorage.getItem('rune:profilo') ?? 'null');
+    const p = JSON.parse(store.getItem(profileKey(universe, id)) ?? 'null');
     return p && typeof p === 'object' ? p : undefined;
   } catch {
     return undefined;
   }
 }
 
-export function keepProfile(p: Profile): void {
+export function keepProfile(universe: string, id: string, p: Profile, store: Pick<Storage, 'setItem'> = localStorage): void {
   try {
-    localStorage.setItem('rune:profilo', JSON.stringify(p));
+    store.setItem(profileKey(universe, id), JSON.stringify(p));
   } catch {
     /* nowhere to keep it: the server has it */
   }
