@@ -322,3 +322,5 @@
 - [2026-10-30T14:13:55.510Z] nota: Epoca 88 avviata su Gemini. T45d in dirittura d'arrivo nel worktree t45d su Gemini (UI lobby, gestione crediti, sessione). T70 sospeso per reset Claude (16:59 UTC). Quadro aggiornato.
 - [2026-10-30T14:14:50.351Z] orchestratore: epoca 89 su gemini (contesto a 92 % della finestra)
 - [2026-10-30T14:15:34.935Z] nota: Epoca 89 avviata su Gemini. T45d in esecuzione attiva nel worktree t45d su Gemini (finitura UI lobby e collezione carte). T70 sospeso per reset Claude (16:59 UTC). Quadro aggiornato.
+- [2026-10-30T14:16:49.829Z] orchestratore: epoca 90 su gemini (contesto a 67 % della finestra)
+- [2026-10-30T14:18:48.420Z] nota: Epoca 90 avviata su Gemini. T45d in esecuzione attiva nel worktree t45d (suite lobby e test in dirittura d'arrivo). T70 sospeso per reset Claude (16:59 UTC). Quadro aggiornato.
