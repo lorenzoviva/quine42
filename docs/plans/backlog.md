@@ -808,7 +808,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/userchats/to-do-2026-10-24.md), «Generazione della heightmap» e «taglia»).
 
 ### T51 · Il livello del mare e un motore dell'acqua — `da fare` (T51a fatto; T51b da fare: l'autore ha scelto l'automa cellulare, `docs/pipeline/domande/T51.md`)
-- Pipeline: claude · stima 6% · approvato · priorità 50
+- Pipeline: claude · stima 6% · priorità 50 (approvazione sospesa il 30/10: un task per provider, riprende dopo T82)
 - Contesto: ADR-0048. Oggi ogni specchio d'acqua è piano **dentro il suo chunk** (`waterLevels` in `relief.ts`: al livello
   più basso delle sue caselle, contando solo il chunk); lo stesso lago o fiume su due chunk ha due livelli, e laghi vicini
   livelli diversi: a vista l'acqua ha dei dislivelli (si vede anche in `Blocchi.png`).
@@ -1773,3 +1773,97 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   - IMPORTANTE: esegui solo `npx vitest run tests/lobby.test.ts tests/credits.test.ts tests/coefficients.test.ts` e `npm run typecheck` (con `WaitMsBeforeAsync: 10000`, NON lanciare `npm test` sull'intera suite per evitare timeout o sovraccarico macchina).
 - Fatto quando: i test specificati e `npm run typecheck` sono verdi, commit su branch `task/T80`. Poi l'orchestratore farà `integra T80` e `integra T45d`.
 - Esito: eseguito merge di `task/T45d` in `task/T80`; risolto il conflitto in `docs/plans/backlog.md` preservando per T45d lo stato `fatto`, la riga pipeline approvata su gemini e l'esito di T45d; preservati intatti i blocchi T75-T79 e completato T80; verificate tutte le integrazioni con `npm run typecheck` e `npx vitest run tests/lobby.test.ts tests/credits.test.ts tests/coefficients.test.ts` (18/18 passati).
+
+## Dalla chat del 30/10/2026 (testo originale: `docs/userchats/to-do-2026-10-30.md`)
+
+> Le correzioni della pipeline toccano `tools/pipeline/` (soprattutto `pipeline.mjs` e `orchestra.mjs`): su Claude vanno una
+> dopo l'altra (catena di dipendenze) per non creare conflitti. Entrano in funzione al riavvio di `pipeline.mjs orchestra`.
+> Nessuna lancia la suite intera di `npm test`: bastano i test della pipeline (o quelli che toccano) e `npm run typecheck`.
+
+### T81 · Bug: la pagina web della pipeline non parte (SyntaxError nella regex) — `da fare`
+- Pipeline: gemini · stima 1% · approvato · priorità 0
+- Contesto: aprendo `http://localhost:4242` la console dice `Uncaught SyntaxError: Invalid regular expression flags (at (index):1264:44)`:
+  probabilmente una regex nello script inline di `tools/pipeline/web.mjs` perde i `\` dentro il template string del server. Nasce da T69: `dossier T69`.
+- Fare: trovare la riga 1264 della pagina servita, correggere l'escape; un test che fa il parse dello script servito (`new Function(script)` in Node) per non ricaderci.
+- Fatto quando: la pagina carica senza errori in console (verifica con il browser se lo hai, altrimenti il test di parse basta), test e typecheck verdi.
+
+### T82 · Un task per provider: tetti di parallelismo per provider e modello — `da fare`
+- Pipeline: claude · stima 4% · approvato · priorità 1
+- Dipende da: T70 (gira su Claude: aspetta che finisca).
+- Contesto: oggi `maxParalleli` (5) è uno solo per tutta la pipeline. Troppi task in parallelo: lasciarne due a metà al reset costa più che finirne uno,
+  i cambi di provider moltiplicano il costo, crescono i conflitti, i crediti finiscono in modo imprevedibile, la macchina rallenta.
+- Fare:
+  - in `config.json` un tetto per provider e per modello (`limiti`, all'inizio 1 per provider), deciso dall'autore: l'orchestratore non lo alza né fa eccezioni senza
+    un'istruzione esplicita dell'autore (scriverlo in `orchestra.md`);
+  - **slot dinamici sotto il tetto** (per provider, tra 0 e il tetto, partendo da 1): a ogni controllo la pipeline prevede dal ritmo di consumo (gli ultimi giorni di
+    `budget.json`) quando la settimana del provider arriva al 100 %; se la previsione cade **dopo** il reset settimanale aggiunge uno slot, se cade **prima** lo toglie.
+    Così, se l'abbonamento cresce (Claude ×5), gli slot salgono da soli fino al tetto. Per Argon solo la settimana;
+  - vicino a 0 % (5 ore o settimana) al più un task in corso su quel provider, e nessuno nuovo;
+  - una **riserva** per le richieste urgenti dell'autore (un task a priorità 0 chiesto dall'autore può usare uno slot oltre quelli dinamici, mai oltre il tetto);
+  - lo schedule conta solo i task eseguibili e quelli bloccati solo da altri task del backlog (non quelli in attesa dell'autore);
+  - `stato` mostra per provider tetto, slot, previsione di esaurimento e reset.
+- Fatto quando: test della pipeline sul calcolo degli slot (previsione prima/dopo il reset, tetto, riserva, 0 %) e typecheck verdi; `orchestra.md`, `docs/pipeline/README.md` e un ADR aggiornati.
+
+### T83 · Il carico della macchina: un solo browser e una sola suite pesante alla volta — `da fare`
+- Pipeline: claude · stima 3% · approvato · priorità 2
+- Dipende da: T82.
+- Contesto: `npm test` intero dura ~30 minuti e, lanciato da più agenti insieme, rallenta tutto (anche `agy -p usage` ci mette 2 minuti); più verifiche nel browser insieme sono deleterie.
+- Fare: un semaforo su disco (`.pipeline/lock/`) per le operazioni pesanti: **al più una verifica nel browser** in tutta la pipeline e **al più una suite intera** di vitest;
+  chi le vuole fare aspetta il suo turno (un comando come `pipeline.mjs turno browser|test -- <comando>` che il prompt dei task chiede di usare); la pipeline non lancia
+  insieme due task che chiedono il browser e distribuisce nel tempo quelli pesanti.
+- Fatto quando: test del semaforo verdi; il prompt in `config.json` e il README dicono di usare il turno.
+
+### T84 · L'orchestratore parla solo quando serve, e con meno epoche — `da fare`
+- Pipeline: claude · stima 3% · approvato · priorità 3
+- Dipende da: T83.
+- Contesto: in attesa dei reset Gemini ha aperto più di 100 epoche senza portare avanti nessun task («contesto a 114 % della finestra»), con risposte prolisse ogni volta:
+  rumore e crediti sprecati. Forse il quadro e l'`avvio.md` sono troppo grandi (l'avvio ripete chat lunghe), forse il contesto è misurato male (token cumulati, cache comprese).
+- Fare: il processo interpella l'orchestratore **solo** per messaggi dell'autore o eventi che chiedono una decisione (un task finito, fallito, in attesa, un limite raggiunto),
+  non per gli eventi di routine né quando non c'è nulla in corso; capire e correggere la misura del contesto; un `avvio.md` compatto (niente indice intero, ultime chat troncate,
+  niente messaggi ripetuti dell'orchestratore); in `orchestra.md` la regola delle risposte brevi.
+- Fatto quando: un test che con soli eventi di routine non apre turni, uno sulla misura del contesto, un `avvio.md` d'esempio sotto un tetto di dimensione.
+
+### T85 · Spegnere la pipeline in modo sicuro — `da fare`
+- Pipeline: claude · stima 3% · approvato · priorità 4
+- Dipende da: T84.
+- Contesto: l'autore vuole fermare tutto senza Ctrl+C brutale, anche chiedendolo all'orchestratore in chat («chiudi ora tutti i task e spegni», «aspetta che finiscano e spegni»).
+- Fare: comandi `ferma --ora` (interrompe ogni task tenendo la sua conversazione, salva lo stato, spegne `orchestra`) e `ferma --dopo` (niente lanci nuovi, aspetta che i task
+  in corso finiscano, poi spegne); l'orchestratore li può dare; Ctrl+C fa `ferma --ora` pulito; al riavvio l'`avvio.md` dice al nuovo orchestratore cosa era in corso, cosa è
+  stato interrotto e cosa è finito mentre era spento.
+- Fatto quando: test dei due spegnimenti e del riepilogo al riavvio verdi; README e `orchestra.md` aggiornati.
+
+### T86 · Tracciare tutte le conversazioni in corso, anche quelle di agy e dell'orchestratore — `da fare`
+- Pipeline: claude · stima 3% · approvato · priorità 5
+- Dipende da: T85.
+- Contesto: `traccia Txx` su un task Claude in corso dà l'id e il file della conversazione (si può seguire e suggerire); per agy l'id arriva solo alla fine. L'autore vuole poter
+  sempre seguire tutte le conversazioni in corso, anche per valutare qualità ed efficienza dell'uso dei crediti, compreso il thread dell'orchestratore.
+- Fare: per agy l'id della conversazione dall'avvio (passarlo noi come per Claude se la CLI lo consente, o leggerlo dal primo output o dai file di Antigravity); `traccia` di un
+  task in corso dà id, file, comando per riprenderlo e un riepilogo parziale (ultime azioni); `traccia orchestratore` per le epoche (id, provider, consumi); nell'interfaccia
+  web una vista delle conversazioni in corso con il consumo di ciascuna.
+- Fatto quando: test su `traccia` di un task in corso per entrambi i provider e sull'orchestratore verdi.
+
+### T87 · Le verifiche nel browser di agy non funzionano — `da fare`
+- Pipeline: gemini · stima 2% · approvato · priorità 6
+- Dipende da: T81 (un task alla volta su Gemini).
+- Contesto: l'autore nota che i task su Gemini/Argon (agy) non riescono a fare le verifiche nel browser.
+- Fare: capire perché (`agy -p` non ha il browser di Antigravity in modalità non interattiva? manca un flag?) e correggere `tools/pipeline/config.json`; se non si può,
+  la pipeline lo deve sapere: i task con verifica nel browser vanno solo su Claude. Scrivi ciò che scopri nel README della pipeline.
+- Fatto quando: una verifica di prova su una pagina locale riesce da `agy -p`, oppure il README dice che non si può e la pipeline non manda più ad agy i task che chiedono il browser.
+
+### T88 · Spendere i crediti che avanzano generando l'universo con gli abbonamenti — `da fare`
+- Pipeline: claude · stima 4% · priorità 90
+- Contesto: obiettivo dell'autore: arrivare al reset settimanale senza crediti residui; ciò che i task non usano va alla generazione dell'universo con le CLI
+  (ADR-0077, la coda `/api/coda`, `npm run abbonamento`). **Non ora**: si fa quando ci saranno meno task. Nasce da T68: `dossier T68`.
+- Fare: con la previsione degli slot di T82, quando un provider finirebbe la settimana con crediti avanzati e non ha task eseguibili, la pipeline avvia `npm run abbonamento`
+  su un universo scelto dall'autore, entro i crediti che avanzano, e lo ferma quando servono a un task o all'autore.
+- Dipende da: T82, T85.
+
+### T89 · La grafica a cartone — `da fare`
+- Pipeline: claude · stima 5% · priorità 50 (approvato dall'autore; l'orchestratore lo approva quando Claude è libero, un task per provider)
+- Contesto: richiesta del to-do del 29/10 che la pianificazione aveva saltato (`docs/archivio/3-to-do-backlog/userchats/to-do-2026-10-29.md`, «Grafica a cartone»):
+  l'autore vuole che l'universo abbia l'aspetto di Stompworks (https://www.reddit.com/r/ClaudeGameDev/comments/1x2ldgg/stompworks_a_small_books_worth_of_prompts_in/),
+  foto in `docs/archivio/3-to-do-backlog/userchats/grafica_cartone.png`. Provider proposto dall'autore: Claude Code.
+- Fare (primo pezzo, il progetto): guardare la foto, descrivere ciò che fa quell'aspetto (contorni, ombreggiatura a fasce, palette, luce, proporzioni) e come ottenerlo nel
+  renderer three.js (materiali toon, contorni in post-processing, bloom, ombre) e nella guida di stile dell'Artista e dello Scultore, senza immagini generate (regola 11);
+  un ADR e i task di codice nel backlog; una prova nel browser con un materiale toon su un chunk per confrontare.
+- Fatto quando: ADR e task di codice scritti, screenshot della prova confrontato con la foto. Dietro il multigiocatore.

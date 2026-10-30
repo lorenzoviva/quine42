@@ -5,6 +5,13 @@
 
 Aggiornato il 30/10/2026 alle 17:05 UTC, epoca 146 su **claude** (di nuovo crediti: 5 ore al 55 %, settimana al 55 %): **T70 ripreso** su Claude (la sua conversazione riparte; risolve i conflitti tra T53b e T56b). Gemini al 26 % (5h), argon fermo fino al 04/11. **T45f** aspetta le risposte in `docs/pipeline/domande/T45f.md` (Project ID, Cloud Run vs VM GCE, regione). T45e aspetta le chiavi Stripe di test per la verifica nel browser.
 
+## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
+
+- **Un solo task per provider alla volta** (finché T82 non mette i tetti per provider in `config.json`: approvare a mano al più un task per provider). I tetti li decide l'autore; l'orchestratore non li alza senza sua istruzione.
+- Obiettivi: niente parallelismo che aumenta il lavoro; a 0 % uno o zero task sul provider; finire i crediti entro il reset settimanale (non prima); distribuire i task pesanti nel tempo; tenere un margine per le urgenze dell'autore; i crediti avanzati andranno alla generazione con gli abbonamenti (T88, non ora).
+- Al più **una verifica nel browser** alla volta. Risposte brevi.
+- Catena delle correzioni della pipeline su Claude dopo T70: T82 → T83 → T84 → T85 → T86; su Gemini T81 (pagina web rotta) → T87 (browser di agy). T51 e T89 da approvare quando Claude è libero. T45b fermato (era già integrato e ripartiva per errore).
+
 ## Le priorità dell'autore
 
 1. Il multigiocatore (T43-T45) prima del resto.
