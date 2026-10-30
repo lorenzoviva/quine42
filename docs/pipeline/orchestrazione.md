@@ -489,3 +489,5 @@
 - [2026-10-30T17:56:24.628Z] nota: Epoca 156 avviata su Gemini (rotazione per contesto al 122 % in epoca 155). T83 congelato su Claude al limite 5h (reset 22:00 UTC). Quadro aggiornato.
 - [2026-10-30T17:57:41.777Z] orchestratore: epoca 157 su gemini (contesto a 66 % della finestra)
 - [2026-10-30T17:58:44.675Z] nota: Epoca 157 avviata su Gemini (rotazione per contesto al 66 % in epoca 156). T83 congelato su Claude al limite 5h (reset 22:00 UTC). Quadro aggiornato.
+- [2026-10-30T17:59:37.176Z] orchestratore: epoca 158 su gemini (contesto a 56 % della finestra)
+- [2026-10-30T18:00:45.983Z] nota: Epoca 158 avviata su Gemini (rotazione per contesto al 56 % in epoca 157). T83 congelato su Claude al limite 5h (reset 21:59/22:00 UTC). Quadro aggiornato.
