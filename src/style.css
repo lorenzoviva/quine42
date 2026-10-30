@@ -408,3 +408,12 @@ button[disabled] { opacity: 0.4; cursor: default; }
 #inventory .uislot { width: 44px; height: 44px; border: 1px dashed var(--line); display: flex; align-items: center; justify-content: center; cursor: pointer; }
 #inventory .uislot.full { border-style: solid; border-color: var(--gold); }
 #inventory .uislot .hint { color: var(--dim); }
+
+#login {
+  position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 80; width: min(380px, calc(100vw - 32px));
+  display: flex; flex-direction: column; gap: 10px; padding: 16px; background: var(--panel); border: 1px solid var(--gold);
+}
+#login .title { color: var(--gold); letter-spacing: 0.05em; }
+#login p { margin: 0; font-size: 13px; }
+#login .dim { color: var(--dim); }
+#profile .account { flex-wrap: wrap; color: var(--dim); border-top: 1px solid var(--line); padding-top: 8px; }
