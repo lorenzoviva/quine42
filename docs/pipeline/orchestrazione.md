@@ -65,3 +65,44 @@
 - [2026-10-30T02:42:05.761Z] task/T56b integrato in 3d; worktree e branch tolti.
 - [2026-10-30T02:53:43.805Z] T53b: ESITO: fatto — le strutture hanno più piani: un pavimento per tratto di pieno, `pos.z` tenuta dal kernel, collisione, `floorAt` e taglio del renderer sul piano in cui si è; test della torre a due piani. · BROWSER: verificato — torre a due piani percorsa dalla porta al tetto e ritorno (piedi a 3, 54, 104 voxel), taglio corretto al primo piano e al piano terra, nessun errore del gioco. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T53b)
 - [2026-10-30T02:53:53.440Z] integra T53b: conflitti in src/kernel/forms.ts, src/kernel/kernel.ts, src/mj/mesh.ts, src/render/renderer.ts, src/render/things.ts; il base è com'era
+- [2026-10-30T02:59:10.334Z] lancio T70 su claude (H:\projects\rune\.claude\worktrees\t70)
+- [2026-10-30T02:59:15.724Z] orchestratore: epoca 1 su claude (avvio)
+- [2026-10-30T03:01:11.154Z] lancio T52 su claude (H:\projects\rune\.claude\worktrees\t52)
+- [2026-10-30T03:01:12.008Z] lancio T54 su claude (H:\projects\rune\.claude\worktrees\t54)
+- [2026-10-30T03:02:12.807Z] lancio T44c su claude (H:\projects\rune\.claude\worktrees\t44c)
+- [2026-10-30T03:02:13.792Z] lancio T44b su claude (H:\projects\rune\.claude\worktrees\t44b)
+- [2026-10-30T03:04:20.245Z] T70: limite di claude, riprendo dopo 2026-10-30T07:01:00.000Z
+- [2026-10-30T03:04:22.778Z] orchestratore: epoca 2 su argon (claude senza crediti)
+- [2026-10-30T03:04:25.322Z] T54: limite di claude, riprendo dopo 2026-10-30T07:01:00.000Z
+- [2026-10-30T03:04:27.889Z] T44c: limite di claude, riprendo dopo 2026-10-30T07:01:00.000Z
+- [2026-10-30T03:04:34.188Z] T52: limite di claude, riprendo dopo 2026-10-30T07:01:00.000Z
+- [2026-10-30T03:05:13.869Z] T45a: claude non può, va su argon
+- [2026-10-30T03:05:14.661Z] lancio T45a su argon (H:\projects\rune\.claude\worktrees\t45a)
+- [2026-10-30T03:05:14.675Z] T45b: claude non può, va su argon
+- [2026-10-30T03:05:15.447Z] lancio T45b su argon (H:\projects\rune\.claude\worktrees\t45b)
+- [2026-10-30T03:05:15.469Z] T45c: claude non può, va su argon
+- [2026-10-30T03:05:16.294Z] lancio T45c su argon (H:\projects\rune\.claude\worktrees\t45c)
+- [2026-10-30T03:05:16.313Z] T68b: claude non può, va su argon
+- [2026-10-30T03:05:17.166Z] lancio T68b su argon (H:\projects\rune\.claude\worktrees\t68b)
+- [2026-10-30T03:05:20.518Z] T44b: limite di claude, riprendo dopo 2026-10-30T07:01:00.000Z
+- [2026-10-30T03:06:17.879Z] lancio T69 su argon (H:\projects\rune\.claude\worktrees\t69)
+- [2026-10-30T03:12:51.825Z] T45a: interrotto dall'orchestratore (riprende con riprendi T45a)
+- [2026-10-30T03:12:51.849Z] T45a: interrotto (riprende con riprendi T45a)
+- [2026-10-30T03:12:51.923Z] T45b: interrotto dall'orchestratore (riprende con riprendi T45b)
+- [2026-10-30T03:12:51.946Z] T45b: interrotto (riprende con riprendi T45b)
+- [2026-10-30T03:12:52.016Z] T45c: interrotto dall'orchestratore (riprende con riprendi T45c)
+- [2026-10-30T03:12:52.037Z] T45c: interrotto (riprende con riprendi T45c)
+- [2026-10-30T03:12:52.117Z] T68b: interrotto dall'orchestratore (riprende con riprendi T68b)
+- [2026-10-30T03:12:57.288Z] T68b: ESITO: fallito (codice 1) (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T68b)
+- [2026-10-30T03:19:36.688Z] lancio T71 su gemini (H:\projects\rune\.claude\worktrees\t71)
+- [2026-10-30T03:49:13.829Z] T69: ESITO: fatto — creata l'interfaccia web locale della pipeline in `tools/pipeline/web.mjs` collegata a `orchestra.mjs` e `pipeline.mjs` (coda messaggi condivisa `coda.json`, lavagna Kanban, tabella task, dossier/log/conversazione in diretta Claude e Antigravity, approvazione/assegnazione/interruzione/ripresa/integrazione, risposte alle domande, editor to-do, budget e storico consumi), con 7 test in `tests/pipeline.test.ts` e documentazione aggiornata. · BROWSER: da verificare — l'ambiente `agy -p` non dispone dello strumento browser interattivo (ADR-0079); verificati via HTTP reale su porta effimera `GET /`, `GET /api/stato` (97 task, 18 consumi, 7 domande), `GET /api/task/T69` (108 passi della conversazione `transcript.jsonl` letti dal vivo) e tutti gli endpoint POST nei test. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T69)
+- [2026-10-30T03:50:21.655Z] task/T69 integrato in 3d; worktree e branch tolti.
+- [2026-10-30T03:53:49.845Z] T71: ESITO: fatto — soglie della pipeline e dell'orchestratore basate sul limite settimanale per Argon (finestra5h: false, computeBudget, capOf e pickOrchestrator allineati al settimanale, test verdi) (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T71)
+- [2026-10-30T03:54:34.604Z] integra T71: conflitti in tools/pipeline/pipeline.mjs; il base è com'era
+- [2026-10-30T03:55:30.909Z] lancio T72 su gemini (H:\projects\rune\.claude\worktrees\t72)
+- [2026-10-30T03:56:29.591Z] orchestratore: epoca 3 su gemini (argon sotto il 10 %)
+- [2026-10-30T04:00:30.996Z] orchestratore: epoca 4 su gemini (contesto a 198 % della finestra)
+- [2026-10-30T04:01:00.981Z] T72: ESITO: fatto — risolti i conflitti di merge tra T71 e T69 in pipeline.mjs preservando le logiche di soglia settimanale per Argon e tutte le API/export dell'interfaccia web, con typecheck e 42 test di pipeline.test.ts verdi. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T72)
+- [2026-10-30T04:01:48.426Z] task/T72 integrato in 3d; worktree e branch tolti.
+- [2026-10-30T04:01:52.063Z] task/T71 integrato in 3d; worktree e branch tolti.
+- [2026-10-30T04:02:30.915Z] nota: T72 e T71 integrati in 3d: soglie settimanali Argon e interfaccia web attive; pronto per il riavvio dello script da parte dell'autore

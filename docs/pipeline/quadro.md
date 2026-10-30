@@ -3,18 +3,18 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026, rotazione epoca 3 dell'orchestratore (gemini: contesto a metà finestra).
+Aggiornato il 30/10/2026, epoca 4 dell'orchestratore (gemini).
 
 ## Le priorità dell'autore
 
 1. Il multigiocatore (T43-T45) prima del resto.
-2. Il nuovo ambiente della pipeline (questo) e l'interfaccia web (**T69**, fatta e integrata in `3d`).
-3. Contenere i crediti: Argon è al `9 %` settimanale (non lanciare nulla su Argon); l'autore ha chiesto di aspettare il completamento e l'integrazione di **T71** (tramite **T72**) per riavviare lo script della pipeline.
+2. Il nuovo ambiente della pipeline e l'interfaccia web (**T69**, integrata in `3d`).
+3. Contenere i crediti: Argon è all'`8 %` settimanale (non lanciare nulla su Argon); **T71** e **T72** sono completati e integrati in `3d`. L'autore può ora riavviare lo script della pipeline.
 
-## In corso
+## In corso e stato task
 
-- **T72** (urgente, `gemini`, priorità 0, stima 1 %, approvato): integrare **T71** (soglie settimanali per Argon, `ESITO: fatto` su `task/T71`) con **T69** in `tools/pipeline/pipeline.mjs`. Conflitti risolti in `pipeline.mjs`, `backlog.md` e `tests/pipeline.test.ts`, 42/42 test passati e typecheck verde; commit in chiusura. **Appena T72 finisce:** eseguire `integra T72` e poi `integra T71` (che pulisce worktree e branch di T71), e avvisare subito l'autore così può riavviare `node tools/pipeline/pipeline.mjs orchestra`.
-- **Interrotti su richiesta dell'autore (NON riprendere su Argon):** **T45a**, **T45b**, **T45c** e **T68b** (erano stati deviati su Argon quando Claude si è fermato; T68b risulta `fallito (codice 1)` per l'interruzione). Aspettano indicazioni dell'autore dopo il riavvio dello script o il reset di Claude delle `07:00 UTC`.
+- **T71 e T72 integrati in `3d`:** **T72** ha risolto il merge tra **T71** e **T69** in `tools/pipeline/pipeline.mjs`. Ora le soglie della pipeline e dell'orchestratore per Argon si basano sul limite settimanale (`finestra5h: false`). I 42 test della suite pipeline e typecheck sono verdi. Entrambi i worktree e branch sono stati rimossi dopo l'integrazione.
+- **Interrotti su richiesta dell'autore (NON riprendere su Argon):** **T45a**, **T45b**, **T45c** e **T68b** (erano stati deviati su Argon quando Claude si è fermato; T68b risulta `fallito (codice 1)` per l'interruzione). Aspettano indicazioni dell'autore dopo il riavvio dello script o il reset di Claude delle `07:00 UTC` (`08:00` locali).
 - **Sospesi su Claude fino alle 07:00 UTC (`08:00` locali):** **T70** (priorità 0, integrazione di T53b con il salto di T56b), **T44c** (priorità 3), **T44b** (priorità 4, blocca T45d/T45e/T45f), **T52** e **T54**; anche **T51** (che ha già una sessione Claude di T51a) aspetta Claude.
 - **T53b** (strutture su più piani) è finito e verificato nel browser dall'agente, ma aspetta **T70** per risolvere i conflitti con **T56b** (il salto, già integrato, ADR-0080). Quando T70 è finito: `integra T70`, poi `integra T53b` (toglie worktree e branch).
 
