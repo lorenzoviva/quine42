@@ -1461,6 +1461,8 @@ le risposte alle domande del piano.
   taglio del renderer sul piano giusto, nessun errore del gioco in console. `npm run typecheck` verde; `npm test` con la macchina carica
   (altri agenti, CPU al 99 %) va in timeout (solo timeout, nessuna asserzione; l'avvio del kernel impiega 10 s anche sulla base): in serie
   con timeout larghi 511/520, i 9 restanti (`between`, `referente`, `wanderers`, `watch`) in timeout sui limiti scritti nei test.
+  A CPU scarica 6 di loro restano in timeout, identici sulla base `2948f60` (stessi file, stessi test): lentezza che c'era già, non
+  una regressione di T70.
 
 ### T69 · L'interfaccia web della pipeline — `da fare` (dipende da T61)
 - Pipeline: argon · stima 6% · priorità 60
