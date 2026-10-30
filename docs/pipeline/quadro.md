@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026, chiusura epoca 26 dell'orchestratore (gemini: contesto a 209%).
+Aggiornato il 30/10/2026, avvio epoca 27 dell'orchestratore (gemini).
 
 ## Le priorità dell'autore
 
@@ -17,25 +17,25 @@ Aggiornato il 30/10/2026, chiusura epoca 26 dell'orchestratore (gemini: contesto
   - **T45a completato e integrato** (commit `c434033`): crediti per viandante, commissione +1% (P#1), divisione spese comuni tra collegati, ADR-0081.
   - **T68b completato su Gemini** (commit `8083986`): implementato `tools/abbonamenti/servi.ts`, script `npm run abbonamento` e suite di test unitari e reali con Claude Code in `tests/abbonamenti.test.ts`.
   - **T73 completato e integrato con T68b**: risolto il conflitto in `AGENTS.md` preservando sia `credits.ts` (T45a) che `servi.ts`/`npm run abbonamento` (T68b) e `web.mjs` (T69). Task T73 e T68b integrati con successo nel branch base `3d`.
-  - **T68c sbloccato e approvato**: dipendenza T68b risolta, approvato con priorità 21 su Claude.
+  - **T68c avviato su Gemini**: con Claude fermo al limite delle 5h, T68c (priorità 21) è stato instradato automaticamente su Gemini nel worktree `t68c` ed è attualmente in esecuzione.
 - **Cosa si aspetta**:
-  1. Il reset della sessione di 5 ore di Claude alle **06:59 UTC** (**~08:00** locali, ~5 minuti rimanenti; Claude ha il 69% settimanale disponibile).
+  1. Completamento di **T68c** su Gemini (integrazione abbonamenti nel gioco, `main.ts`, pannello Concilio, documentazione).
+  2. Reset della sessione di 5 ore di Claude alle **06:59 UTC** (**~08:00** locali, ~1h rimanente; quota settimanale al 69%).
 - **Intenzioni al reset di Claude / prossimi passi**:
   1. Completare **T70** (integrazione T53b con salto T56b, priorità 0 su Claude), poi `integra T70` e `integra T53b`.
   2. Procedere con **T44c** (priorità 3) e **T44b** (priorità 4, che con T45a completato sblocca a cascata T45d/e/f).
   3. Proseguire con **T45b** (priorità 6) e **T45c** (priorità 7).
-  4. Eseguire **T68c** (priorità 21).
+  4. Integrare **T68c** al termine.
 
 ## Task attivi e in corso
 
 - **In corso su Gemini:**
-  - Nessuno (Gemini conservato per l'orchestrazione: quota 50% residua sulla finestra 5h).
+  - **T68c** (priorità 21, integrazione abbonamenti nel gioco, worktree `t68c`).
 - **Da integrare:**
   - **T53b** (in attesa di T70).
 - **Pronti:**
-  - **T68c** (priorità 21 su Claude).
   - **T51** (priorità 50 su Claude).
-- **Sospesi su Claude fino alle 06:59 UTC (`~08:00` locali, ~5 min):**
+- **Sospesi su Claude fino alle 06:59 UTC (`~08:00` locali, ~1h):**
   - **T70** (priorità 0, risoluzione conflitti T53b / T56b con test salto + torre).
   - **T44c** (priorità 3, correzioni da verifica browser T44a/T43c).
   - **T44b** (priorità 4, account e autenticazione).

@@ -155,3 +155,5 @@
 - [2026-10-30T05:52:50.152Z] nota: integrati T73 e T68b in 3d: processo abbonamenti CLI (tools/abbonamenti/servi.ts, npm run abbonamento, tests/abbonamenti.test.ts) e risoluzione conflitto AGENTS.md con crediti.ts (T45a, ADR-0081). Sbloccato e approvato T68c.
 - [2026-10-30T05:53:09.085Z] T68c: claude non può, va su gemini
 - [2026-10-30T05:53:10.701Z] lancio T68c su gemini (H:\projects\rune\.claude\worktrees\t68c)
+- [2026-10-30T05:54:10.914Z] orchestratore: epoca 27 su gemini (contesto a 209 % della finestra)
+- [2026-10-30T05:55:03.948Z] nota: Epoca 27 avviata su Gemini: T68c attivo nel worktree t68c su Gemini (routing automatico da Claude), attesa reset 5h di Claude alle 06:59 UTC (~08:00 locali, ~1h rimanente)
