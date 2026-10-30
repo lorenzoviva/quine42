@@ -496,3 +496,4 @@
 - [2026-10-30T18:03:06.673Z] T83: limite di claude, riprendo dopo 2026-10-30T22:01:00.000Z
 - [2026-10-30T18:03:42.150Z] nota: T83 congelato: limite di Claude, riprenderà dopo le 22:01 UTC.
 - [2026-10-30T19:15:36.921Z] nota: Chiusura temporanea richiesta dall'autore: nessun processo attivo, T83 congelato fino alle 22:01 UTC. Quadro e stato allineati.
+- [2026-10-30T22:00:44.520Z] nota: Claude ha di nuovo crediti (5h al 49 %, reset 22:00 UTC). Quadro aggiornato per passaggio epoca a Claude.

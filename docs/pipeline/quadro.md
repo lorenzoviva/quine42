@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 19:15 UTC, epoca 159 su **gemini** (claude al limite 5h: 0 %, congelato fino al reset delle 22:01 UTC). **Nessun processo agentico è attivamente in esecuzione in questo momento.** T83 è fermo in attesa del reset di Claude (22:01 UTC, riprenderà la sessione per completare la suite e integrare). L'autore può chiudere l'orchestratore con `Ctrl-C` in tutta sicurezza; alla ripartenza lo stato e la catena T83 → T84 → T85 → T86 sono preservati su disco e nel quadro. Tolta l'approvazione a T52, T54, T57. T70, T53b, T81, T87, T82 e T90 integrati. T51/T89 non approvati. Gemini libero, nessun task nuovo assegnato.
+Aggiornato il 30/10/2026 alle 22:01 UTC, fine epoca 159 su **gemini** (claude ha di nuovo crediti: 5h al 49 %, settimana al 49 %; passaggio a claude per la prossima epoca). **Ordine dell'autore: finire i task sulla pipeline (T82-T87 e la catena T83-T86), poi nessun task nuovo; quando finiscono i task in corso, dirgli che può chiudere con Ctrl-C.** Tolta l'approvazione a T52, T54, T57. T70, T53b, T81, T87, T82 e T90 integrati. In corso: T83 su Claude (turni per operazioni pesanti, codice e ADR-0088 già committati, riprende ora con i crediti ripristinati per completare la suite e integrare). Poi la catena T84 → T85 → T86. T51/T89 non approvati. Gemini libero, nessun task nuovo assegnato.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -26,7 +26,7 @@ Aggiornato il 30/10/2026 alle 19:15 UTC, epoca 159 su **gemini** (claude al limi
   - **T45f sbloccato e preparato**: dipendeva da T44b e T45d, ora entrambi integrati. Aperte le domande su GCP Project ID, architettura di hosting (Cloud Run vs VM GCE) e regione in `docs/pipeline/domande/T45f.md`.
   - **Chiavi Stripe per test nel browser**: T45e resta segnato `in attesa` per la verifica browser (in attesa di `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` in `.env` o in chat, segnalate in `docs/pipeline/domande/T45e.md`).
 - **Cosa si aspetta**:
-  1. **Completamento di T83** su Claude (turni su disco operazioni pesanti). Se Claude tocca il limite 5h, riprenderà dopo le 22:00 UTC.
+  1. **Completamento di T83** su Claude (turni su disco operazioni pesanti), ora che il reset delle 22:00 UTC ha ripristinato i crediti.
   2. **Esecuzione e integrazione di T84, T85, T86** su Claude uno alla volta.
   3. **Risposte dell'autore per T45f** e chiavi di test Stripe per T45e (per quando riprenderanno i task normali).
 - **Intenzioni / prossimi passi**:
@@ -50,8 +50,8 @@ Aggiornato il 30/10/2026 alle 19:15 UTC, epoca 159 su **gemini** (claude al limi
   - **T57** (rune come codice, bloccato da T51a).
   - **T84**, **T85**, **T86** (bloccati a cascata da T83).
 - **Crediti**:
-  - **Claude**: 5h allo 0 % (reset 22:00 UTC), settimana al 49 % (sta eseguendo T83, congelato fino al reset).
-  - **Gemini**: 5h al 15 %, settimana al 30 % (orchestratore attuale).
+  - **Claude**: 5h al 49 % (reset effettuato alle 22:00 UTC), settimana al 49 % (riprende T83).
+  - **Gemini**: 5h al 100 %, settimana al 30 %.
   - **Argon**: fermo fino al 04/11.
 
 ## Da fare appena possibile
