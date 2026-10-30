@@ -109,3 +109,5 @@
 - [2026-10-30T04:04:02.216Z] orchestratore: epoca 5 su gemini (contesto a 142 % della finestra)
 - [2026-10-30T04:07:44.035Z] orchestratore: epoca 6 su gemini (contesto a 71 % della finestra)
 - [2026-10-30T04:09:36.921Z] orchestratore: epoca 7 su gemini (contesto a 74 % della finestra)
+- [2026-10-30T04:15:54.070Z] orchestratore: epoca 8 su gemini (contesto a 370 % della finestra)
+- [2026-10-30T04:18:27.289Z] T45a: rimesso in coda (riparte da capo)
