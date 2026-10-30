@@ -111,7 +111,7 @@ function F.spingi(target, user, e)
   local passi = math.floor((e.forza or 3) * 4)
   for _ = 1, passi do
     local nx, ny = p.x + dx / d * 0.25, p.y + dy / d * 0.25
-    if not world.free(nx, ny, r) then break end
+    if not world.free(nx, ny, r, p.z) then break end
     p.x, p.y = nx, ny
   end
   return nil

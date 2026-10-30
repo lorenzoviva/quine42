@@ -206,35 +206,53 @@ export function floors(g: VoxelGrid, palette: Record<string, PaletteEntry>, cap 
   return out;
 }
 
-/** How high each voxel column goes: one above its highest solid voxel (0 if it has none), at most 255 (T56b). */
-export function tops(g: VoxelGrid, palette: Record<string, PaletteEntry>): Uint8Array {
-  const colors = colorTable(g.alphabet, palette);
-  const out = new Uint8Array(g.X * g.Y);
-  const XY = g.X * g.Y;
-  for (let i = 0; i < XY; i++)
-    for (let z = g.Z - 1; z >= 0; z--)
-      if (colors[g.cells[i + z * XY]]) {
-        out[i] = Math.min(255, z + 1);
-        break;
-      }
-  return out;
+/** Every floor of a model, per voxel column (T53b): the heights one may stand at, bottom up, from `start[i]` to `start[i + 1]`. */
+export interface Levels {
+  start: Uint32Array;
+  /** The height (voxels) of each floor: the top of a run of solid, or 0 if the column starts empty. */
+  z: Uint16Array;
+  /** Where the run of solid under each floor starts (voxels; 0 for the ground of a column that starts empty): what a jump meets (T56b). */
+  base: Uint16Array;
+  /** Whether something solid is between `from` and `to` voxels above that floor (a ceiling too low). */
+  block: Uint8Array;
 }
 
 /**
- * Where a body standing on a column's floor hits its head: per voxel column, whether something solid is
- * between `from` and `to` voxels above that column's own floor (a table top, a lintel too low).
+ * Every floor of every column (T53b): the top of each run of solid (the ground floor, the floor above, the roof),
+ * and the ground itself where the column starts empty; for each, whether a body standing there hits its head.
  */
-export function headroom(g: VoxelGrid, palette: Record<string, PaletteEntry>, floor: Uint8Array, from: number, to: number): Uint8Array {
+export function surfaces(g: VoxelGrid, palette: Record<string, PaletteEntry>, from: number, to: number): Levels {
   const colors = colorTable(g.alphabet, palette);
-  const out = new Uint8Array(g.X * g.Y);
   const XY = g.X * g.Y;
-  for (let i = 0; i < XY; i++)
-    for (let z = Math.max(0, floor[i] + from); z < Math.min(g.Z, floor[i] + to); z++)
-      if (colors[g.cells[i + z * XY]]) {
-        out[i] = 1;
+  const start = new Uint32Array(XY + 1);
+  const zs: number[] = [];
+  const bases: number[] = [];
+  const blocks: number[] = [];
+  const add = (i: number, z: number, b0: number) => {
+    zs.push(z);
+    bases.push(b0);
+    let b = 0;
+    for (let k = Math.max(0, z + from); k < Math.min(g.Z, z + to); k++)
+      if (colors[g.cells[i + k * XY]]) {
+        b = 1;
         break;
       }
-  return out;
+    blocks.push(b);
+  };
+  for (let i = 0; i < XY; i++) {
+    start[i] = zs.length;
+    let z = 0;
+    if (!colors[g.cells[i]]) add(i, 0, 0);
+    while (z < g.Z) {
+      while (z < g.Z && !colors[g.cells[i + z * XY]]) z++;
+      if (z >= g.Z) break;
+      const b0 = z;
+      while (z < g.Z && colors[g.cells[i + z * XY]]) z++;
+      add(i, z, b0);
+    }
+  }
+  start[XY] = zs.length;
+  return { start, z: Uint16Array.from(zs), base: Uint16Array.from(bases), block: Uint8Array.from(blocks) };
 }
 
 /** Where a person or an animal can stand: per voxel column, whether something solid is at body height. */

@@ -17,8 +17,9 @@ export interface Host {
   destroy(id: number): void;
   first(name: string): number | undefined;
   held(action: string): boolean;
-  free(x: number, y: number, r: number): boolean;
-  free_real(x: number, y: number, r: number): boolean;
+  /** z: the height of the feet (tiles, `pos.z`), the floor of a structure one is on (T53b). */
+  free(x: number, y: number, r: number, z?: number): boolean;
+  free_real(x: number, y: number, r: number, z?: number): boolean;
   tile(x: number, y: number): string;
   player_get(key: string): unknown;
   /** Returns an error message to raise in Lua, or undefined. */

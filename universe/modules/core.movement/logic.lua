@@ -3,11 +3,12 @@
 local M = {}
 
 local function step(p, b, dx, dy)
+  -- p.z è l'altezza dei piedi (il piano su cui si sta, la tiene il kernel): sopra un piano si cammina su di lui.
   -- Se il mondo ti è cresciuto addosso (una casella appena diventata solida), puoi sempre uscirne.
-  local stuck = not world.free_real(p.x, p.y, b.r)
+  local stuck = not world.free_real(p.x, p.y, b.r, p.z)
   local nx, ny = p.x + dx, p.y + dy
-  if stuck or world.free_real(nx, p.y, b.r) then p.x = nx end
-  if stuck or world.free_real(p.x, ny, b.r) then p.y = ny end
+  if stuck or world.free_real(nx, p.y, b.r, p.z) then p.x = nx end
+  if stuck or world.free_real(p.x, ny, b.r, p.z) then p.y = ny end
 end
 
 function M.update(dt)
