@@ -706,3 +706,110 @@ describe('interfaccia web della pipeline (T69)', () => {
   });
 });
 
+
+// The turns of the heavy operations (ADR-0088): one browser verification and one full test suite at a time.
+type Turns = {
+  tryTurn(kind: string, me: { chi: string; pid: number; comando: string; arrivo?: number }, o: { dir: string; nowMs?: number; isAlive?: (pid: number) => boolean }): { taken: boolean; holder?: { chi: string; pid: number }; queued?: boolean };
+  leaveTurn(kind: string, pid: number, o: { dir: string }): void;
+  holderOf(kind: string, o: { dir: string; nowMs?: number; isAlive?: (pid: number) => boolean; minutes?: number }): { chi: string; pid: number; dal: string } | undefined;
+  holdBack(t: { needsBrowser?: boolean }, live: { needsBrowser?: boolean }[], o?: { resuming?: boolean; lastLaunch?: number; nowMs?: number; minutes?: number }): string | undefined;
+};
+
+describe('i turni delle operazioni pesanti (T83)', () => {
+  let T: Turns;
+  let fsMod: typeof import('node:fs');
+  let osMod: typeof import('node:os');
+  let dir: string;
+  const living = new Set<number>();
+  const isAlive = (pid: number) => living.has(pid);
+  const me = (pid: number, arrivo: number) => ({ chi: `T${pid}`, pid, comando: 'npm test', arrivo });
+
+  beforeAll(async () => {
+    fsMod = await import('node:fs');
+    osMod = await import('node:os');
+    T = (await import(/* @vite-ignore */ pathToFileURL(path.resolve(__dirname, '../tools/pipeline/pipeline.mjs')).href)) as Turns;
+  });
+  const fresh = () => { dir = fsMod.mkdtempSync(path.join(osMod.tmpdir(), 'quine-turni-')); living.clear(); };
+
+  it('uno alla volta, gli altri in coda nell\'ordine d\'arrivo', () => {
+    fresh();
+    [1, 2, 3].forEach((p) => living.add(p));
+    expect(T.tryTurn('test', me(1, 100), { dir, isAlive }).taken).toBe(true);
+    expect(T.tryTurn('test', me(3, 300), { dir, isAlive })).toMatchObject({ taken: false, holder: { chi: 'T1' } });
+    expect(T.tryTurn('test', me(2, 200), { dir, isAlive }).taken).toBe(false);
+    T.leaveTurn('test', 1, { dir });
+    // Il 3 ha chiesto per primo un nuovo tentativo, ma il 2 è arrivato prima.
+    expect(T.tryTurn('test', me(3, 300), { dir, isAlive })).toMatchObject({ taken: false, queued: true, holder: { chi: 'T2' } });
+    expect(T.tryTurn('test', me(2, 200), { dir, isAlive }).taken).toBe(true);
+    T.leaveTurn('test', 2, { dir });
+    expect(T.tryTurn('test', me(3, 300), { dir, isAlive }).taken).toBe(true);
+  });
+
+  it('i turni sono indipendenti: il browser non aspetta i test', () => {
+    fresh();
+    [1, 2].forEach((p) => living.add(p));
+    expect(T.tryTurn('test', me(1, 100), { dir, isAlive }).taken).toBe(true);
+    expect(T.tryTurn('browser', me(2, 200), { dir, isAlive }).taken).toBe(true);
+  });
+
+  it('chi è morto o lo tiene da troppo non lo tiene più, e chi è morto in coda non blocca', () => {
+    fresh();
+    [1, 2, 3].forEach((p) => living.add(p));
+    const t0 = Date.parse('2026-10-30T12:00:00Z');
+    expect(T.tryTurn('browser', me(1, 100), { dir, isAlive, nowMs: t0 }).taken).toBe(true);
+    expect(T.tryTurn('browser', me(2, 200), { dir, isAlive, nowMs: t0 }).taken).toBe(false);
+    expect(T.tryTurn('browser', me(3, 300), { dir, isAlive, nowMs: t0 }).taken).toBe(false);
+    living.delete(1); // il task 1 è stato ucciso senza lasciare il turno
+    living.delete(2); // il 2 ha smesso di aspettare
+    expect(T.holderOf('browser', { dir, isAlive })).toBeUndefined();
+    expect(T.tryTurn('browser', me(3, 300), { dir, isAlive, nowMs: t0 }).taken).toBe(true);
+    // Oltre il limite (45 minuti per il browser) il turno è abbandonato.
+    living.add(4);
+    expect(T.holderOf('browser', { dir, isAlive, nowMs: t0 + 10 * 60_000 })).toMatchObject({ chi: 'T3' });
+    expect(T.tryTurn('browser', me(4, 400), { dir, isAlive, nowMs: t0 + 46 * 60_000 }).taken).toBe(true);
+  });
+
+  it('solo chi lo tiene lo lascia', () => {
+    fresh();
+    [1, 2].forEach((p) => living.add(p));
+    T.tryTurn('test', me(1, 100), { dir, isAlive });
+    T.leaveTurn('test', 2, { dir });
+    expect(T.holderOf('test', { dir, isAlive })).toMatchObject({ chi: 'T1' });
+  });
+
+  it('la pipeline non lancia insieme due task col browser e distanzia i lanci nuovi', () => {
+    const NOW = Date.parse('2026-10-30T12:00:00Z');
+    const o = { nowMs: NOW, minutes: 10 };
+    expect(T.holdBack({ needsBrowser: true }, [{ needsBrowser: true }], { ...o, lastLaunch: NOW - 3_600_000 })).toMatch(/browser/);
+    expect(T.holdBack({ needsBrowser: true }, [{ needsBrowser: true }], { ...o, resuming: true })).toMatch(/browser/);
+    expect(T.holdBack({ needsBrowser: true }, [{ needsBrowser: false }], { ...o, lastLaunch: NOW - 3_600_000 })).toBeUndefined();
+    expect(T.holdBack({}, [{}], { ...o, lastLaunch: NOW - 5 * 60_000 })).toMatch(/10 minuti/);
+    expect(T.holdBack({}, [{}], { ...o, lastLaunch: NOW - 5 * 60_000, resuming: true })).toBeUndefined();
+    expect(T.holdBack({}, [], { ...o, lastLaunch: NOW - 60_000 })).toBeUndefined(); // niente in corso: si parte
+  });
+
+  it('turno test -- <comando>: due processi veri non si sovrappongono, il codice d\'uscita passa', async () => {
+    fresh();
+    const { spawn } = await import('node:child_process');
+    const script = path.resolve(__dirname, '../tools/pipeline/pipeline.mjs');
+    const out = path.join(dir, 'tempi.txt');
+    const work = path.join(dir, 'lavoro.cjs');
+    fsMod.writeFileSync(work, [
+      "const fs = require('fs'); const [out, name, code] = process.argv.slice(2);",
+      "fs.appendFileSync(out, name + '+' + String.fromCharCode(10));",
+      "setTimeout(() => { fs.appendFileSync(out, name + '-' + String.fromCharCode(10)); process.exit(Number(code)); }, 600);",
+    ].join('\n'));
+    const job = (name: string, code: number) => new Promise<number>((resolve) => {
+      const c = spawn(process.execPath, [script, 'turno', 'test', '--', `"${process.execPath}"`, `"${work}"`, `"${out}"`, name, String(code)], {
+        env: { ...process.env, PIPELINE_LOCK: dir, PIPELINE_TURNO_OGNI: '100', PIPELINE_TASK: name }, stdio: 'ignore',
+      });
+      c.on('close', (k) => resolve(k ?? -1));
+    });
+    const codes = await Promise.all([job('A', 0), job('B', 3)]);
+    expect(codes).toEqual([0, 3]);
+    const lines = fsMod.readFileSync(out, 'utf8').trim().split('\n');
+    expect(lines.map((l) => l.slice(1))).toEqual(['+', '-', '+', '-']);
+    expect(lines[0][0]).toBe(lines[1][0]);
+    expect(fsMod.existsSync(path.join(dir, 'test.json'))).toBe(false); // lasciato
+  }, 20_000);
+});

@@ -121,6 +121,14 @@ muore, al riavvio `esegui` segue i task ancora vivi e riprende la conversazione 
   quello dell'orchestratore. Un task a **priorità 0** (le urgenze dell'autore) può usare uno slot in più, mai oltre il tetto.
   `stato` (e `PIANO.md`, l'interfaccia web) mostra per provider tetto, slot, task in programma, esaurimento previsto e reset;
 - **alternative** (`alternative` in `config.json`: oggi `claude → argon → gemini`, `argon → gemini`): se il provider di un task nuovo è fermo per i limiti o la stima non entra nel suo residuo, il task va al primo che può, con la stessa stima; un task sospeso riprende sempre sul suo. Così finiti i crediti di Claude la pipeline continua su Argon e poi su Gemini 3.8. Toglile se un task delicato deve aspettare Claude;
+- **turni delle operazioni pesanti** (ADR-0088): in tutta la pipeline al più **una verifica nel browser** e **una suite intera** di vitest
+  alla volta; chi le vuole fare le lancia con `node tools/pipeline/pipeline.mjs turno browser|test -- <comando>`, che aspetta il turno
+  (in coda, nell'ordine d'arrivo), esegue il comando (uscita e codice sono i suoi) e lo lascia quando finisce. Il semaforo è su disco,
+  `.pipeline/lock/` della cartella principale (lo stesso per tutti i worktree): `<tipo>.json` dice chi lo tiene (task, comando, da
+  quando), `<tipo>.attesa/` chi aspetta; un processo morto o un turno tenuto oltre `turni.<tipo>.massimoMinuti` (45 il browser, 60 i
+  test) non blocca più. `turno` da solo (e `stato`) dice chi tiene ogni turno. La pipeline poi non lancia insieme due task che chiedono
+  il browser (nemmeno riprendendone uno) e distanzia i lanci nuovi di `intervalloLanciMinuti` (10) mentre altri sono in corso, così le
+  loro suite finali non arrivano tutte insieme;
 - i provider girano **in parallelo** tra loro (ognuno con i suoi contatori e i suoi slot), al più `maxParalleli` in tutto;
 - ogni task ha un worktree `.claude/worktrees/<txx>` sul branch `task/<Txx>` nato dal base, con il
   `node_modules` del base collegato (junction); il prompt è quello di `config.json`;
@@ -181,8 +189,11 @@ Altri agenti, di altri provider, lavorano nello stesso repository nello stesso m
 5. I numeri di ADR possono scontrarsi tra task paralleli: prendi il primo libero nel tuo branch; chi integra
    rinumera se serve.
 6. Se il task chiede una verifica nel browser, falla (`AGENTS.md`, «Convalida nel browser»: porta libera, scheda tua, chiudi
-   tutto alla fine); altri agenti usano lo stesso browser nello stesso momento.
-7. Chiudi con `npm test` e `npm run typecheck` verdi, un commit sul tuo branch e la riga
+   tutto alla fine) nel suo turno: la preview con `node tools/pipeline/pipeline.mjs turno browser -- npx vite preview --port <n> --strictPort`
+   in background; il browser è tuo finché la preview vive, fermarla lo lascia.
+7. La suite intera dei test nel suo turno: `node tools/pipeline/pipeline.mjs turno test -- npm test` (un solo file di test, `npx vitest run
+   <file>`, anche senza). Aspettare il turno è normale: non aggirarlo.
+8. Chiudi con `npm test` e `npm run typecheck` verdi, un commit sul tuo branch e la riga
    `ESITO: fatto|in attesa|fallito — <cosa è cambiato>` (e `BROWSER: verificato|da verificare — …` se il task la chiede).
 
 ## I worktree

@@ -15,6 +15,15 @@
   },
   "giorniPrevisione": 3,
   "giorniStoria": 7,
+  "turni": {
+    "browser": {
+      "massimoMinuti": 45
+    },
+    "test": {
+      "massimoMinuti": 60
+    }
+  },
+  "intervalloLanciMinuti": 10,
   "approvazione": "manuale",
   "riserva": 3,
   "sogliaUnSolo": 10,
@@ -86,7 +95,7 @@
       "gemini"
     ]
   },
-  "prompt": "Lavora nel worktree `{dir}` (branch `{branch}`, nato da `{base}`). Leggi `AGENTS.md`, poi esegui il task **{id}** di `docs/plans/backlog.md` seguendo il protocollo delle sessioni, con le regole dell'ambiente condiviso (`docs/pipeline/README.md`, «Regole per chi esegue un task»): altri agenti lavorano in parallelo in altri worktree; non pianificare il to-do; nel backlog cambia solo il blocco di {id}; niente merge, push o modifiche fuori dal tuo worktree; non fare domande: se serve una decisione dell'autore scrivila in `docs/pipeline/domande/{id}.md`, segna {id} `in attesa`, committa e termina. Se il tuo task nasce da un altro (un bug di T63, una correzione di T44a) o lo cita, leggi prima il suo dossier: `node tools/pipeline/pipeline.mjs dossier <Txx>`. Se il «Fatto quando» del task chiede una verifica nel browser (o il task cambia ciò che si vede), falla con lo strumento del browser che hai (Claude in Chrome in Claude Code; su agy non è disponibile: scrivi BROWSER: da verificare) seguendo `AGENTS.md`, «Convalida nel browser»: una porta libera, una scheda tua, chiudi scheda e preview alla fine; se lo strumento non c’è, non inventarla. Alla fine committa sul tuo branch e chiudi la risposta con una riga `ESITO: fatto|in attesa|fallito — <cosa è cambiato>` e, se il task la chiede, una riga `BROWSER: verificato|da verificare — <cosa hai visto o perché manca>`.",
+  "prompt": "Lavora nel worktree `{dir}` (branch `{branch}`, nato da `{base}`). Leggi `AGENTS.md`, poi esegui il task **{id}** di `docs/plans/backlog.md` seguendo il protocollo delle sessioni, con le regole dell'ambiente condiviso (`docs/pipeline/README.md`, «Regole per chi esegue un task»): altri agenti lavorano in parallelo in altri worktree; non pianificare il to-do; nel backlog cambia solo il blocco di {id}; niente merge, push o modifiche fuori dal tuo worktree; non fare domande: se serve una decisione dell'autore scrivila in `docs/pipeline/domande/{id}.md`, segna {id} `in attesa`, committa e termina. Se il tuo task nasce da un altro (un bug di T63, una correzione di T44a) o lo cita, leggi prima il suo dossier: `node tools/pipeline/pipeline.mjs dossier <Txx>`. Se il «Fatto quando» del task chiede una verifica nel browser (o il task cambia ciò che si vede), falla con lo strumento del browser che hai (Claude in Chrome in Claude Code; su agy non è disponibile: scrivi BROWSER: da verificare) seguendo `AGENTS.md`, «Convalida nel browser»: una porta libera, una scheda tua, chiudi scheda e preview alla fine; se lo strumento non c’è, non inventarla. Le operazioni pesanti hanno un turno in tutta la pipeline (ADR-0088): la suite intera dei test lanciala con `node tools/pipeline/pipeline.mjs turno test -- npm test` (un solo file di test anche senza turno); la preview della verifica nel browser con `node tools/pipeline/pipeline.mjs turno browser -- npx vite preview --port <n> --strictPort`, in background: il browser è tuo finché la preview vive, fermarla lo lascia; aspettare il turno è normale, non aggirarlo. Alla fine committa sul tuo branch e chiudi la risposta con una riga `ESITO: fatto|in attesa|fallito — <cosa è cambiato>` e, se il task la chiede, una riga `BROWSER: verificato|da verificare — <cosa hai visto o perché manca>`.",
   "usoSecondi": 300,
   "orchestra": {
     "ordine": [
