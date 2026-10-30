@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 23:33 UTC, epoca 162 su **claude**. **Catena delle correzioni della pipeline finita: T91, T85 (ADR-0090), T86 integrati.** Nessun task in corso né approvato (T52 è solo segnato in corso: interrotto). L'autore chiude con Ctrl-C e riavvia: dal riavvio valgono ADR-0089 e ADR-0090; poi si riprende a regime (un task per provider, multigiocatore prima: T45f in attesa di risposte, T45e delle chiavi Stripe). T85 e T86 erano lanciati con priorità 0 per scavalcare lo slot 0 della previsione: non serve più.
+Aggiornato il 30/10/2026 alle 23:46 UTC, epoca 163 su **claude**. **Riavviato: ADR-0089 e ADR-0090 attivi, a regime** (un task per provider). Multigiocatore fermo (T45f senza risposte, T45e senza chiavi Stripe): rimessi in coda **T54** (fallito per il limite delle 5 ore a metà lavoro) e **T52**, su Claude, uno alla volta; partono quando la previsione dà uno slot (ora 0 su Claude e Gemini). T51, T88, T89 non approvati.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
