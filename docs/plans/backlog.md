@@ -1618,7 +1618,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Esito: `tools/abbonamenti/servi.ts`, `npm run abbonamento`, test con CLI mock e con Claude Code reale su `model.sculpt` in `tests/abbonamenti.test.ts`.
 
 ### T68c · Gli abbonamenti nel gioco — `da fare` (dipende da T68b)
-- Pipeline: claude · stima 3% · priorità 21
+- Pipeline: claude · stima 3% · approvato · priorità 21
 - Fare: `main.ts` costruisce `RoutedModels` se `usesSubscriptions` e la coda è servita (`QueueModels.available`), solo se l'universo
   è in singola (mai in `host.ts`); `#models` e il pannello del Concilio dicono quali agenti vanno su quale abbonamento e cosa c'è in coda;
   documentazione per chi scarica il repository (README: impostare la tabella, lanciare il servitore).

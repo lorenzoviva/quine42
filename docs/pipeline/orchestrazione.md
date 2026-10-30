@@ -148,3 +148,10 @@
 - [2026-10-30T05:46:03.086Z] nota: T68b completato (servi.ts per la coda abbonamenti CLI, npm run abbonamento, test unitari e reali con Claude Code). Creato T73 su Gemini per risolvere il conflitto di integrazione in AGENTS.md con T45a.
 - [2026-10-30T05:46:08.955Z] lancio T73 su gemini (H:\projects\rune\.claude\worktrees\t73)
 - [2026-10-30T05:47:11.149Z] orchestratore: epoca 25 su gemini (contesto a 155 % della finestra)
+- [2026-10-30T05:49:20.280Z] orchestratore: epoca 26 su gemini (contesto a 61 % della finestra)
+- [2026-10-30T05:52:00.053Z] T73: ESITO: fatto — integrato task/T68b in task/T73 risolvendo il conflitto in AGENTS.md, preservando crediti.ts (T45a), servi.ts/abbonamento (T68b) e web.mjs (T69); test abbonamenti e typecheck verdi (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T73)
+- [2026-10-30T05:52:08.774Z] task/T73 integrato in 3d; worktree e branch tolti.
+- [2026-10-30T05:52:12.493Z] task/T68b integrato in 3d; worktree e branch tolti.
+- [2026-10-30T05:52:50.152Z] nota: integrati T73 e T68b in 3d: processo abbonamenti CLI (tools/abbonamenti/servi.ts, npm run abbonamento, tests/abbonamenti.test.ts) e risoluzione conflitto AGENTS.md con crediti.ts (T45a, ADR-0081). Sbloccato e approvato T68c.
+- [2026-10-30T05:53:09.085Z] T68c: claude non può, va su gemini
+- [2026-10-30T05:53:10.701Z] lancio T68c su gemini (H:\projects\rune\.claude\worktrees\t68c)
