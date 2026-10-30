@@ -268,6 +268,12 @@ async function main() {
 
   const handle = (a: string) => {
     switch (a) {
+      case 'jump':
+        // Space jumps in the simulation (T56b); in the corona and the studio it still does what E does.
+        if (kernel.jump()) break;
+        hud.hideDialog();
+        void kernel.interact();
+        break;
       case 'interact':
         hud.hideDialog();
         void kernel.interact();

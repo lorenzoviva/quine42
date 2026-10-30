@@ -9,7 +9,7 @@
 
 import { boxOf, classOf, CLASSES, type AssetClass } from '../mj/classes';
 import type { PaletteEntry, Vec3 } from '../mj/engine';
-import { floors, footprint, headroom, type VoxelGrid } from '../mj/mesh';
+import { floors, footprint, headroom, tops, type VoxelGrid } from '../mj/mesh';
 import { compileMjx } from '../mj/model';
 import { act, runMjx } from '../mj/run';
 import { hashStr } from './rng';
@@ -108,6 +108,8 @@ export interface Form {
   floor?: Uint8Array;
   /** Per voxel column: a body cannot stand there (something at body height above its floor, or out of reach). */
   block?: Uint8Array;
+  /** Per voxel column: how high it goes, in voxels (what a jump has to clear, T56b). */
+  top?: Uint8Array;
   cls: AssetClass;
   /** Half the diagonal of the footprint, in tiles: the reach of its collision. */
   reach: number;
@@ -138,7 +140,7 @@ export const bodyFoot = (g: VoxelGrid, palette: Record<string, PaletteEntry>, vp
  * hits something at body height, or the floor is out of reach. A floor no higher than a step is reached from the
  * ground; a higher one only going up neighbouring columns a step at a time: a stair is a ramp, a wall is not.
  */
-export function bodyGround(g: VoxelGrid, palette: Record<string, PaletteEntry>, vpt = VPT): { floor: Uint8Array; block: Uint8Array } {
+export function bodyGround(g: VoxelGrid, palette: Record<string, PaletteEntry>, vpt = VPT): { floor: Uint8Array; block: Uint8Array; top: Uint8Array } {
   const floor = floors(g, palette);
   const block = headroom(g, palette, floor, stepOf(vpt) + 1, Math.ceil(0.7 * vpt));
   const step = stepOf(vpt);
@@ -157,7 +159,7 @@ export function bodyGround(g: VoxelGrid, palette: Record<string, PaletteEntry>, 
     }
   }
   for (let i = 0; i < block.length; i++) if (!reached[i]) block[i] = 1;
-  return { floor, block };
+  return { floor, block, top: tops(g, palette) };
 }
 
 /**
@@ -180,6 +182,19 @@ export function rampBlocks(f: Form, floor: Uint8Array, block: Uint8Array, x0: nu
       if ((x < vx1 && Math.abs(at(x + 1, y) - h) > step) || (y < vy1 && Math.abs(at(x, y + 1) - h) > step)) return true;
     }
   return false;
+}
+
+/**
+ * How high a model goes (tiles above its ground) under a rectangle of its own frame (tiles from its centre), or
+ * undefined if nothing of it is there: what a jump over it has to clear (T56b).
+ */
+export function topUnder(f: Form, top: Uint8Array, x0: number, z0: number, x1: number, z1: number): number | undefined {
+  const g = f.result!.grid;
+  const vx0 = Math.max(0, Math.floor(x0 * f.vpt + g.X / 2)), vx1 = Math.min(g.X - 1, Math.floor(x1 * f.vpt + g.X / 2));
+  const vy0 = Math.max(0, Math.floor(z0 * f.vpt + g.Y / 2)), vy1 = Math.min(g.Y - 1, Math.floor(z1 * f.vpt + g.Y / 2));
+  let h = 0;
+  for (let y = vy0; y <= vy1; y++) for (let x = vx0; x <= vx1; x++) h = Math.max(h, top[x + y * g.X]);
+  return h ? h / f.vpt : undefined;
 }
 
 /** Runs programs in this thread (Node, tests): no meshes. */

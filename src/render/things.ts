@@ -242,8 +242,17 @@ export class Wanderer {
   view: { root: THREE.Group; body: THREE.Object3D; limbs: Limb[]; yaw: number; phase: number };
   private last = { x: 0, y: 0 };
   private sig = '';
+  /** How high above its floor a jump carries it (T56b): the camera does not follow it up. */
+  lift = 0;
+  /** The shadow on the floor under a jump. */
+  private shadow: THREE.Mesh;
   constructor(private scene: THREE.Object3D) {
     this.view = this.make();
+    this.shadow = new THREE.Mesh(new THREE.CircleGeometry(0.32, 20), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.35, depthWrite: false }));
+    this.shadow.rotation.x = -Math.PI / 2;
+    this.shadow.visible = false;
+    this.shadow.userData.player = true;
+    scene.add(this.shadow);
   }
 
   private make(k?: Kernel): Wanderer['view'] {
@@ -254,6 +263,10 @@ export class Wanderer {
     m.root.traverse((o) => (o.userData.player = true));
     this.scene.add(m.root);
     return { root: m.root, body: m.body, limbs: m.limbs, yaw: this.view?.yaw ?? 0, phase: 0 };
+  }
+
+  hideShadow(): void {
+    this.shadow.visible = false;
   }
 
   update(k: Kernel, dt: number, t: number): void {
@@ -270,7 +283,17 @@ export class Wanderer {
     const moved = Math.hypot(dx, dy);
     this.last = { x: p.x, y: p.y };
     const pcf = k.playerCarpet();
-    this.view.root.position.set(p.x, climb(this.view.root, k.zone === 'sim' ? k.floorAt(pcf.x, pcf.y) : 0, dt), p.y);
+    const floor = climb(this.view.root, k.zone === 'sim' ? k.floorAt(pcf.x, pcf.y) : 0, dt);
+    // A jump (T56b): an arc over what it clears, and its shadow on what is under it, smaller the higher it goes.
+    const jump = k.zone === 'sim' ? k.jumping() : undefined;
+    const y = jump ? Math.max(floor, jump.y) : floor;
+    this.lift = y - floor;
+    this.view.root.position.set(p.x, y, p.y);
+    this.shadow.visible = !!jump;
+    if (jump) {
+      this.shadow.position.set(p.x, floor + 0.03, p.y);
+      this.shadow.scale.setScalar(1 / (1 + this.lift * 0.6));
+    }
     const facing = k.playerComp()?.facing;
     const goal = facing === 'left' ? -Math.PI / 2 : facing === 'right' ? Math.PI / 2 : facing === 'up' ? Math.PI : 0;
     // The carpet pulls the wanderer back: what counts for the legs is the walking, not the real motion.
@@ -279,8 +302,8 @@ export class Wanderer {
     this.view.root.userData.cx = pc.x;
     this.view.root.userData.cy = pc.y;
     turnTowards(this.view, goal, dt);
-    if (walking) this.view.phase += Math.max(moved, 0.05) * 7;
-    animateLimbs(this.view, walking, dt, t);
+    if (walking && !jump) this.view.phase += Math.max(moved, 0.05) * 7;
+    animateLimbs(this.view, walking && !jump, dt, t);
   }
 }
 

@@ -909,7 +909,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
   morbido; `tests/camera.test.ts` (7 test), ADR-0047 e AGENTS.md aggiornati, verifica browser positiva. Diverso dal previsto:
   aggiunto lo zoom con rotellina e la protezione prospettica per il giocatore immerso nella simulazione richiesta dall'autore.
 
-### T56 · Il salto, e le cose che chiudono i sentieri — T56a `fatto` (`e5f8099`), T56b `da fare` (dopo T53a)
+### T56 · Il salto, e le cose che chiudono i sentieri — T56a `fatto` (`e5f8099`), T56b `fatto` (`f91b6fe`)
 - Pipeline: claude · stima 4% · approvato · priorità 55
 - Contesto: richiesta del 24/10 con `docs/userchats/Blocchi.png`: un sentiero largo una casella su un lago, con un banco,
   una cassa e un letto messi sopra; i dislivelli piccoli si salgono già senza saltare (ADR-0048) e devono restare così.
@@ -926,6 +926,12 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 - Fatto quando (per pezzo): test verdi, verifica nel browser (la scena di `Blocchi.png`), aiuto (`H`) e barra dei tasti
   aggiornati per T56b, commit.
 - Dipendenze: T56b dopo T53a (l'altezza su cui si atterra è quella delle rampe).
+  Esito T56b: `kernel.jump()` in TypeScript (nessuna API Lua nuova), componente `salto` portato da `jumpTick` dopo i sistemi;
+  passa sopra ciò che non supera `JUMP_UP` (1,05 caselle, altezza delle colonne di voxel: `tops` in `mesh.ts`, `Form.top`, `topUnder`) e
+  sopra l'acqua, mai sopra muri, rocce o caselle solide del terreno; atterra nel primo punto da 1 a 2,6 caselle dove il corpo sta,
+  altrimenti salto sul posto. Arco e ombra nel renderer (`kernel.jumping()`), la camera non segue l'arco. ADR-0080, AGENTS.md,
+  `tests/jump.test.ts` (4 test). Diverso dal previsto: Spazio non è più un secondo `E` nella simulazione, ma nella corona, nello
+  studio e nel kernel specchio (multigiocatore) fa ancora ciò che fa `E`: il salto tra più giocatori (messaggio `salta`) resta da fare.
 
 ## Le rune
 

@@ -206,6 +206,20 @@ export function floors(g: VoxelGrid, palette: Record<string, PaletteEntry>, cap 
   return out;
 }
 
+/** How high each voxel column goes: one above its highest solid voxel (0 if it has none), at most 255 (T56b). */
+export function tops(g: VoxelGrid, palette: Record<string, PaletteEntry>): Uint8Array {
+  const colors = colorTable(g.alphabet, palette);
+  const out = new Uint8Array(g.X * g.Y);
+  const XY = g.X * g.Y;
+  for (let i = 0; i < XY; i++)
+    for (let z = g.Z - 1; z >= 0; z--)
+      if (colors[g.cells[i + z * XY]]) {
+        out[i] = Math.min(255, z + 1);
+        break;
+      }
+  return out;
+}
+
 /**
  * Where a body standing on a column's floor hits its head: per voxel column, whether something solid is
  * between `from` and `to` voxels above that column's own floor (a table top, a lintel too low).
