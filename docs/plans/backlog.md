@@ -1666,3 +1666,10 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   Poi l'orchestratore farà `integra T73` e `integra T68b`.
 - Esito: eseguito merge di `task/T68b` in `task/T73`; risolto il conflitto in `AGENTS.md` preservando sia le aggiunte di T45a (modulo `credits.ts` nell'albero, sezione «Crediti e spese comuni» con ADR-0081) sia quelle di T68b (`npm run abbonamento` nei comandi, `tools/abbonamenti/servi.ts` nell'albero) e mantenendo `web.mjs` di T69; eseguiti `tests/abbonamenti.test.ts` (12/12) e `npm run typecheck` con esito verde.
 
+### T74 · Integrare T68c (gli abbonamenti nel gioco) in backlog.md — `da fare`
+- Pipeline: gemini · stima 1% · approvato · priorità 0
+- Contesto: `integra T68c` del 30/10/2026 si è fermato su un conflitto in `docs/plans/backlog.md` (dovuto alle integrazioni concorrenti di T71, T72 e T73 nel branch base). Leggi `node tools/pipeline/pipeline.mjs dossier T68c`.
+- Fare: nel tuo worktree esegui `git merge task/T68c` e risolvi il conflitto in `docs/plans/backlog.md` mantenendo sia le aggiunte recenti (T71, T72, T73, T74) sia lo stato `fatto` e l'esito di T68c. IMPORTANTE: esegui solo `npx vitest run tests/subscription.test.ts` e `npm run typecheck` (con `WaitMsBeforeAsync: 10000`, NON lanciare `npm test` sull'intera suite per evitare timeout o backgrounding).
+- Fatto quando: `npx vitest run tests/subscription.test.ts` e `npm run typecheck` verdi, commit sul branch `task/T74`. Poi l'orchestratore farà `integra T74` e `integra T68c`.
+
+
