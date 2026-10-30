@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026, epoca 13 dell'orchestratore (gemini: riassegnazione T45a e avvio T45a + T68b su Gemini).
+Aggiornato il 30/10/2026, rotazione epoca 13 dell'orchestratore (gemini: chiusura per contesto a 363%).
 
 ## Le priorità dell'autore
 
