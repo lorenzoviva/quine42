@@ -289,6 +289,10 @@ describe('death and reconnection among many (T43c)', () => {
     expect(anna.k.needs()!.health).toBeGreaterThan(50);
     expect(anna.k.needs()!.thirst).toBeGreaterThan(50);
     expect(said.some((m) => /Sei morto di sete/.test(m))).toBe(true);
+    // Her screen (T44c): what death took and where she wakes up.
+    const death = anna.session.notices.find((n) => n.tipo === 'morte')!;
+    expect(death.dove).toBe('piazza');
+    expect(death.perso?.some((p) => p.startsWith(k.itemInfo(item).name))).toBe(true);
 
     // Punishment 0 (nessuna): she wakes up where she fell, with what she carried.
     const mild = await three({ morte: 0 });
@@ -298,6 +302,7 @@ describe('death and reconnection among many (T43c)', () => {
     thirst(mild.k, 'anna');
     await tickUntil(mild.server, mild.all, () => mild.anna.session.notices.some((n) => n.tipo === 'morte'));
     expect(mild.anna.k.playerCarpet()).toMatchObject({ x: 6.5, y: -3.5 });
+    expect(mild.anna.session.notices.find((n) => n.tipo === 'morte')).toMatchObject({ dove: 'qui', perso: [] });
     expect(countItem(mild.anna.k.inventory(), item)).toBe(2);
     expect(mild.anna.k.needs()!.health).toBeGreaterThan(50);
   }, 60000);

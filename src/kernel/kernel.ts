@@ -3343,7 +3343,8 @@ export class Kernel {
       this.message('Troppo lontano: avvicinati.');
       return false;
     }
-    this.openTileMenu(col, row);
+    // What is under the pointer, as the hover says (T44c): of two wanderers side by side, the one clicked.
+    this.openTileMenu(col, row, this.nearest(rx + ox, ry + oy, 0.6));
     return true;
   }
 
@@ -4719,7 +4720,14 @@ export class Kernel {
       this.saveState();
       const words = [v.story || 'Riapri gli occhi. È un nuovo giorno, e una nuova vita.', ...said, ...out].join(' ');
       this.message(words, 'good');
-      if (this.remote.has(id)) this.bus.emit('wanderer:died', { id, causa: cause ?? 'ferite', testo: words });
+      if (!this.remote.has(id)) return;
+      // What death took (T44c): the dead player's screen says it, with where they wake up.
+      const now = new Map(this.carriedCounts().map((c) => [c.name, c.count]));
+      const perso = carried.flatMap((c) => {
+        const lost = c.count - (now.get(c.name) ?? 0);
+        return lost > 0 ? [`${c.name}${lost > 1 ? ` ×${lost}` : ''}`] : [];
+      });
+      this.bus.emit('wanderer:died', { id, causa: cause ?? 'ferite', testo: words, perso, dove: v.restart });
     });
   }
 
@@ -6241,6 +6249,8 @@ export class Kernel {
       if (eid === this.playerId) continue;
       const ep = this.ecs.get(eid, 'pos');
       if (Math.hypot(ep.x - cx, ep.y - cy) >= 0.6) continue;
+      // Another wanderer (T44c): their name and the first line of what they say of themselves.
+      if (this.otherWanderer(eid) !== undefined) return { kind: 'entity', name: this.nameOf(eid), description: this.introOf(eid)?.split('\n')[0] ?? '' };
       const pk = this.ecs.get(eid, 'pickup');
       if (pk) {
         const info = this.itemInfo(pk.item);

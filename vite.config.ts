@@ -1,6 +1,7 @@
 /// <reference types="vitest" />
+import fs from 'node:fs';
 import path from 'node:path';
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig, loadEnv, searchForWorkspaceRoot } from 'vite';
 import { geminiProxy } from './server/geminiProxy';
 import { universeStore } from './server/universeStore';
 import { sessionServer } from './server/session';
@@ -20,7 +21,9 @@ export default defineConfig(({ mode }) => {
       subscriptionQueue(path.resolve(process.cwd(), 'universes', '.coda')),
     ],
     // Writing a universe must not reload the page (dev server watches the project folder).
-    server: { port: 5173, watch: { ignored: ['**/universes/**'] } },
+    // In a worktree of the pipeline node_modules is a junction to another folder (T44c): wasmoon's glue.wasm is served
+    // from its real path, outside the root, so it must be allowed too.
+    server: { port: 5173, watch: { ignored: ['**/universes/**'] }, fs: { allow: [searchForWorkspaceRoot(process.cwd()), realModules()] } },
     // wasmoon is UMD: pre-bundled, the browser can import it in dev (its glue.wasm comes by URL, `wasmUri`).
     optimizeDeps: { include: ['wasmoon'] },
     // The MarkovJunior lab has two dedicated pages: the sandbox (/lab/3d/) and the model editor (/lab/editor/).
@@ -37,3 +40,13 @@ export default defineConfig(({ mode }) => {
     test: { environment: 'node', include: ['tests/**/*.test.ts', 'lab/**/*.test.ts'], testTimeout: 60000 },
   };
 });
+
+/** Where node_modules really is (a junction in the pipeline's worktrees). */
+function realModules(): string {
+  const dir = path.resolve(process.cwd(), 'node_modules');
+  try {
+    return fs.realpathSync(dir);
+  } catch {
+    return dir;
+  }
+}

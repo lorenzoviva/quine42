@@ -176,6 +176,9 @@ export interface Notice {
   da: string;
   nome: string;
   testo: string;
+  /** A death (T44c): what it took, and where the wanderer wakes up. */
+  perso?: string[];
+  dove?: 'qui' | 'piazza';
 }
 
 /** A line someone (or something) said back, as the game shows it in its dialog box. */

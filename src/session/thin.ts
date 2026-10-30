@@ -324,6 +324,8 @@ export class ThinClient {
       this.told = [...(this.session.stato.hand?.tokens ?? [])];
       Object.assign(k.hand(), { tokens: [...this.told], sel: 0 });
       this.state();
+      // The screen of death (T44c), as alone, but the world goes on: what was lost and where one wakes up.
+      k.bus.emit('ui:died', { cause: n.nome, testo: n.testo, perso: n.perso ?? [], dove: n.dove ?? 'qui' });
       return k.message(`Sei morto di ${n.nome}. ${n.testo}`, 'warn');
     }
     if (n.tipo === 'dai') return k.message(`${n.nome} ti dà ${n.testo}.`, 'good');
@@ -690,6 +692,7 @@ export class ThinClient {
     const other = k.otherWanderer(id);
     if (other !== undefined) {
       if (action === 'parla') return void k.bus.emit('ui:chat', { id, name: k.nameOf(id) });
+      if (action === 'chi') return void k.bus.emit('ui:dialog', { speaker: k.nameOf(id), text: k.introOf(id) ?? '' });
       // What is given leaves the pocket when the update says so: the inventory is the server's.
       if (action.startsWith('dai:')) await this.show(this.session.act({ t: 'dai', viandante: other, slot: Number(action.slice(4)) }));
       if (action === 'altro' && k.partita()?.altroTraGiocatori !== false) k.bus.emit('ui:freeaction', { id, name: k.nameOf(id) });

@@ -366,11 +366,12 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   (`wanderers.ts`) lo ripara (nome di 2-24 caratteri e non simile a persone o viandanti, altrimenti `freshName`; seme tra quelli della classe;
   mantello né scuro né chiaro né grigio; 4 righe) e `kernel.setProfile` lo fa nome e aspetto (`dressWanderer`). `entra {profilo}` e `profilo`
   nel protocollo, l'`ingresso`/`esito` dicono il profilo riparato e `riparato`; agli altri con `OtherView` (+ `presentazione`, «Chi è» nel
-  menu). Il Narratore riceve la presentazione come affermazione del viandante. Il client lo tiene in `localStorage`; `P` apre il pannello
+  menu). Il Narratore riceve la presentazione come affermazione del viandante. Il client lo tiene in `localStorage` sotto `rune:profilo:<universo>:<id>` (T44c); un profilo già salvato sul server non lo
+  sostituisce quello che il client porta entrando, solo il messaggio `profilo`. `P` apre il pannello
   (`src/ui/profile.ts`, una foto del modello per seme).
 - **Morte e ricollegamento in multigiocatore** (ADR-0076, T43c): a salute zero un giocatore (mai il master: `mortalDies`) muore sul server con la
   punizione della partita (`continueAfterDeath(id, cause)` concatenata da `die` come lui, senza alzare `dead` né fermare gli altri; `wanderer:died` →
-  avviso `morte`, il client lo mostra e riparte dove il verdetto dice). `world/giocatori/<id>.json` salva anche `pos {x, y}`: chi esce e rientra ritrova
+  avviso `morte` con `perso` e `dove`, il client mostra la schermata della morte, `ui:died`, e riparte dove il verdetto dice). `world/giocatori/<id>.json` salva anche `pos {x, y}`: chi esce e rientra ritrova
   posizione, inventario, frase, stati, carte e legami.
 - **Il clone con un altro master** (ADR-0068, T42d): il master non cambia; un altro master è un altro universo. `cloneUniverse`
   (`server/universeStore.ts`, `POST /api/universe/<nome>/clone {nome, master, titolari}`) copia la cartella intera (storia, `maps/`,

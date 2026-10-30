@@ -90,7 +90,8 @@ async function bootAlone(client: UniverseClient | null, snap: UniverseSnapshot |
  * is a mirror the thin client fills with what the server tells.
  */
 async function joinMany(name: string): Promise<ThinClient> {
-  const session = new SessionClient(socketLink(name, params.has('offline')), { id: tabWanderer(params), profilo: savedProfile() });
+  const id = tabWanderer(params);
+  const session = new SessionClient(socketLink(name, params.has('offline')), { id, profilo: savedProfile(name, id) });
   await session.ready;
   if (session.refused || !session.me) throw new Error(session.refused ?? 'il mondo non risponde');
   const mirror = await Kernel.boot({ files: session.files, store: memoryStore(), models: new MockModels(), forms: new WorkerRunner(), wasmUri, mirror: true });
@@ -139,7 +140,7 @@ async function main() {
     async (p) => {
       if (thin) {
         const o = await thin.setProfile(p);
-        if (o.profilo) keepProfile(o.profilo);
+        if (o.profilo) keepProfile(name, thin.session.id, o.profilo);
         return o;
       }
       const r = kernel.setProfile(kernel.wanderer().id, p);
@@ -215,6 +216,37 @@ async function main() {
     deathEl.hidden = false;
     syncFocus();
   });
+  // Death in a game of many (T44c): the server has already decided; the screen says what was lost and where one wakes up.
+  kernel.bus.on('ui:died', ({ cause, testo, perso, dove }: { cause: string; testo: string; perso: string[]; dove: 'qui' | 'piazza' }) => {
+    const on = document.createElement('button');
+    on.className = 'primary';
+    on.textContent = 'Continua';
+    on.onclick = () => {
+      deathEl.hidden = true;
+      syncFocus();
+    };
+    const t = document.createElement('div');
+    t.className = 'title';
+    t.textContent = 'SEI MORTO';
+    const lines = [
+      cause === 'sete' ? 'La sete ti ha vinto.' : cause === 'fame' ? 'La fame ti ha vinto.' : 'Le ferite ti hanno vinto.',
+      perso.length ? `Hai perso: ${perso.join(', ')}.` :'Non hai perso nulla di ciò che portavi.',
+      dove === 'piazza' ? 'Riparti dalla piazza.' : 'Riparti da dove sei caduto.',
+      testo,
+    ].filter(Boolean);
+    const why = lines.map((l) => {
+      const d = document.createElement('div');
+      d.className = 'why';
+      d.textContent = l;
+      return d;
+    });
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.append(on);
+    deathEl.replaceChildren(t, ...why, row);
+    deathEl.hidden = false;
+    syncFocus();
+  });
   const sfx = new Sfx();
   // A player's console sees only the client (T41): what the server told this tab. The master's sees the kernel too.
   (window as any).rune = master ? kernel : thin;
@@ -237,7 +269,7 @@ async function main() {
   inventory.onClose = syncFocus;
   chat.onClose = syncFocus;
   profile.onClose = syncFocus;
-  if (thin?.session.profilo) keepProfile(thin.session.profilo);
+  if (thin?.session.profilo) keepProfile(name, thin.session.id, thin.session.profilo);
   if (thin?.session.riparato.length) hud.message(`Il tuo profilo: ${thin.session.riparato.join('; ')}.`, 'warn');
   actions.onClose = syncFocus;
   const runGenesis = async () => tools?.runGenesis(online, syncFocus);
