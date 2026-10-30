@@ -198,3 +198,22 @@
 - [2026-10-30T06:33:35.059Z] nota: Epoca 44 avviata su Gemini. T68c e T74 integrati nel base. In attesa del reset della finestra di 5h di Claude alle 07:00 UTC (~08:00 locali, ~26m) per l'avvio di T70 e della sequenza multiplayer.
 - [2026-10-30T06:34:23.573Z] orchestratore: epoca 45 su gemini (contesto a 73 % della finestra)
 - [2026-10-30T06:35:10.705Z] nota: Epoca 45 avviata su Gemini. Situazione allineata: T68c e T74 integrati in 3d. In attesa del reset della sessione di 5h di Claude alle 07:00 UTC (~08:00 locali, ~25m) per T70 e la catena multiplayer.
+- [2026-10-30T07:01:02.103Z] orchestratore: epoca 46 su claude (claude ha di nuovo crediti)
+- [2026-10-30T07:01:02.896Z] riprendo T70 su claude (H:\projects\rune\.claude\worktrees\t70)
+- [2026-10-30T07:01:02.926Z] riprendo T52 su claude (H:\projects\rune\.claude\worktrees\t52)
+- [2026-10-30T07:01:02.955Z] riprendo T54 su claude (H:\projects\rune\.claude\worktrees\t54)
+- [2026-10-30T07:01:02.985Z] riprendo T44c su claude (H:\projects\rune\.claude\worktrees\t44c)
+- [2026-10-30T07:01:03.022Z] riprendo T44b su claude (H:\projects\rune\.claude\worktrees\t44b)
+- [2026-10-30T07:01:28.487Z] T52: interrotto dall'orchestratore (riprende con riprendi T52)
+- [2026-10-30T07:01:28.509Z] T52: interrotto (riprende con riprendi T52)
+- [2026-10-30T07:01:28.592Z] T54: interrotto dall'orchestratore (riprende con riprendi T54)
+- [2026-10-30T07:01:31.405Z] T54: ESITO: fallito (codice 1) (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T54)
+- [2026-10-30T08:33:04.646Z] T44b: ESITO: fatto — accesso con Firebase (Google o anonimo) nelle partite multigiocatore, viandante legato all'account, anonimo con i modelli locali che tiene il viandante quando si lega a Google; nella suite intera 52 timeout, presenti anche sul commit di partenza · BROWSER: verificato — con l'emulatore di Firebase Auth: anonimo, legame a Google con lo stesso viandante, token falso e assente rifiutati, «Esci»; il legame fatto chiamando l'emulatore, non dal popup (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T44b)
+- [2026-10-30T08:33:23.815Z] integra T44b: conflitti in docs/adr/README.md, src/main.ts, src/session/client.ts, src/session/protocol.ts, src/session/server.ts; il base è com'era
+- [2026-10-30T08:34:36.485Z] lancio T75 su gemini (H:\projects\rune\.claude\worktrees\t75)
+- [2026-10-30T08:40:12.593Z] orchestratore: epoca 47 su gemini (claude sotto il 10 %)
+- [2026-10-30T08:44:48.931Z] nota: avvio epoca 47 su gemini (claude sotto il 10 %), quadro aggiornato
+- [2026-10-30T08:45:22.521Z] orchestratore: epoca 48 su gemini (contesto a 199 % della finestra)
+- [2026-10-30T08:46:41.467Z] T44c: ESITO: fatto — «Chi è» nel client sottile, profilo per universo e viandante (il server tiene quello salvato), passaggio del mouse e clic destro corretti, schermata della morte in multigiocatore, `server.fs.allow` per la junction di `node_modules` · BROWSER: verificato — due schede (anna, bruno) col server di sviluppo nel worktree: niente KERNEL PANIC, «Chi è», passaggio del mouse e clic destro giusti, schermata della morte, profilo salvato non sovrascritto al rientro (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T44c)
+- [2026-10-30T08:47:33.467Z] task/T44c integrato in 3d; worktree e branch tolti.
+- [2026-10-30T08:48:07.956Z] nota: Epoca 48 avviata su Gemini. T44c completato e verificato nel browser; integrato con successo in 3d (typecheck verde). T75 (merge T44b/T45a) in corso su Gemini in fase di test finale.
