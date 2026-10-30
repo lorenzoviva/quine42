@@ -36,7 +36,7 @@ Aggiornato il 30/10/2026 alle 22:30 UTC, epoca 161 su **claude**. **T84 integrat
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T91** in corso su claude; **T85** pronto (andrà su gemini se claude è occupato), poi T86.
+  - **T91** in corso su claude (non interrompere). **Ordine dell'autore (22:35): solo T85 e T86 (T87 è già fatto), su claude, uno alla volta, dopo T91; niente altri task; poi avvisarlo che chiude con Ctrl-C e riavvia.** T85 tolto dagli approvati apposta (altrimenti la pipeline lo manda su gemini, ): riapprovarlo quando T91 è finito e integrato, e badare che parta su claude.
   - **T52** risulta "in corso" nello stato ma è interrotto nel dossier.
 - **Da guardare (non integrare)**: **T54** finito con errore (codice 1), non approvato.
 - **Completati e integrati nel base `3d`**:

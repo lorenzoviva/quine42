@@ -1854,7 +1854,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Esito: ADR-0089. Il ciclo dell'orchestratore (`pump`) interpella l'agente solo quando `shouldRunTurn` rileva messaggi dell'autore in coda o eventi di decisione (`wakes`: esiti `ESITO: fatto|fallito|in attesa`, `limite di`, `fallito`, `conflitti`), mai per eventi di routine né quando non c'è nulla in corso o a inizio epoca vuota. Misura del contesto corretta in `contextOf`: per Gemini/agy `input_tokens` contiene già la cache (`cache_read_tokens`) e non viene sommata due volte quando `input_tokens >= cache_read_tokens`. Pagina di avvio `avvio.md` compatta (`startPage`, `compactChat`): rimosso l'indice intero dei task, chat troncata a 250 caratteri su max 8 elementi e deduplicata (niente boilerplate ripetuti dell'orchestratore come «quadro aggiornato»). Regola delle risposte brevi documentata in `docs/pipeline/orchestra.md`. 3 test nuovi in `tests/pipeline.test.ts` (63/63), typecheck a zero errori.
 
 ### T85 · Spegnere la pipeline in modo sicuro — `da fare`
-- Pipeline: claude · stima 3% · approvato · priorità 4
+- Pipeline: claude · stima 3% · priorità 4
 - Dipende da: T84.
 - Contesto: l'autore vuole fermare tutto senza Ctrl+C brutale, anche chiedendolo all'orchestratore in chat («chiudi ora tutti i task e spegni», «aspetta che finiscano e spegni»).
 - Fare: comandi `ferma --ora` (interrompe ogni task tenendo la sua conversazione, salva lo stato, spegne `orchestra`) e `ferma --dopo` (niente lanci nuovi, aspetta che i task
