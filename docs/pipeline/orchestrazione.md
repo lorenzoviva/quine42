@@ -330,3 +330,7 @@
 - [2026-10-30T14:25:52.533Z] nota: Epoca 92 avviata su Gemini. T45d in dirittura finale nel worktree t45d (tests/lobby.test.ts 6/6 passati, pulizia typecheck, ADR-0086 e commit in corso). T70 in attesa del reset Claude (16:59 UTC). Quadro aggiornato.
 - [2026-10-30T14:26:53.839Z] orchestratore: epoca 93 su gemini (contesto a 127 % della finestra)
 - [2026-10-30T14:29:55.109Z] nota: Epoca 93 avviata su Gemini. T45d in dirittura finale nel worktree t45d (test 18/18 passati tra lobby, credits e coefficients, typecheck a 0 errori, ADR-0086 e commit in corso). T70 sospeso per reset Claude (16:59 UTC). Quadro aggiornato.
+- [2026-10-30T14:31:06.326Z] T45d: ESITO: fatto — implementata la lobby multigiocatore con modelli/coefficienti master, minimi, tetto crediti che incrementa i budget, collezione carte con utilizzi e modale a 3 scelte a crediti esauriti (ADR-0086, test in lobby.test.ts) · BROWSER: da verificare — strumento di controllo browser non disponibile nell'ambiente di esecuzione (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T45d)
+- [2026-10-30T14:31:16.267Z] integra T45d: conflitti in docs/plans/backlog.md; il base è com'era
+- [2026-10-30T14:32:37.216Z] lancio T80 su gemini (H:\projects\rune\.claude\worktrees\t80)
+- [2026-10-30T14:32:44.750Z] nota: T45d completato su Gemini (commit c803df1, ADR-0086, 18/18 test passati). Tentativo di integra T45d con conflitto su backlog.md: creato e approvato T80 (gemini, 1%, p0) per merge e risoluzione. Quadro aggiornato.
