@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 31/10/2026 alle 16:50 UTC, epoca 175 su **claude**. **T96 integrato** (mai zero slot, comandi `sospendi`/`riattiva`): tolti i fermi a mano degli slot (`slotAggiornato`) in `.pipeline/budget.json`. In corso **T57** su Claude e **T97** (il sito) su Gemini (dirottato dalla pipeline: Claude occupato). Poi **T98** su Claude. Da approvare: T45f (risposte GCP), T88, T95, T89a-e.
+Aggiornato il 31/10/2026 alle 17:10 UTC, epoca 175 su **claude**. **T96 integrato** (mai zero slot, `sospendi`/`riattiva`); tolti i fermi a mano degli slot. **T57a fatto** (rune composte come programma), `integra T57` in conflitto solo su `backlog.md`: **T99** (integrare T57, priorità 5, Claude) poi **T98** su Claude; T57 riparte per T57b dopo T99. **T97** (il sito) su Gemini. Da approvare: T45f (risposte GCP), T88, T95, T89a-e.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -38,7 +38,7 @@ Aggiornato il 31/10/2026 alle 16:50 UTC, epoca 175 su **claude**. **T96 integrat
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T57** su Claude (in corso dal 16:13 UTC), **T97** su Gemini (dal 16:47), poi **T98** (40) su Claude.
+  - **T97** su Gemini (dal 16:47); su Claude **T99** (integrare T57), poi **T98** (40), poi T57b (T57, 60).
 - **Completati e integrati nel base `3d`**:
   - **T96** (31/10 16:48), **T51b** (ADR-0094, integrato il 31/10 16:13), **T89**, **T94**, **T54**, **T52b**, **T93**, **T92**, **T52**, **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **Da integrare**:
