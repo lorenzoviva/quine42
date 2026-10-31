@@ -835,7 +835,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 - **Risposta dell'autore** (30/10): sì, l'automa cellulare del kernel (opzione 1); MarkovJunior resta per generare. Nasce da T51a:
   `dossier T51`.
 
-### T52 · I sotterranei — T52a `fatto` (progetto, ADR-0091), T52b `da fare`
+### T52 · I sotterranei — T52a `fatto` (progetto, ADR-0091), T52b `fatto`, T52c-f `da fare`
 - Pipeline: claude · stima 3% · approvato · priorità 50
 - Contesto: oggi niente sta sotto il livello del terreno (il rilievo è una colonna piena, i modelli stanno sul suolo,
   `floorAt`). L'autore vuole i sotterranei (anche un edificio seminterrato nella corona, come la Sala sistemi).
@@ -857,6 +857,16 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
   `sotto` tolto. Test: un modello di prova con una cantina e una scala che scende (si scende, si risale, dalla cantina non si esce
   altrove, il salto non ci entra); i modelli senza `sotto` come prima. Verifica nel browser con `addModel` accanto al borgo.
   Dipendenze: T53b integrato (T70).
+  **Fatto** (T52b): `sottoOf`, `Form.base`/`Form.hole`, `surfaces(…, fill)`, `groundOfForm` (la cantina tiene se ogni pavimento
+  sotto il suolo si raggiunge dal piano terra, altrimenti resta dentro la terra), `levelIn`/`floorAt`/`floorBelow`/`topUnder`/
+  `rampBlocks`/`interiorPoints` da `base`, `kernel.sunk(id)` e `kernel.holesIn(chunk)` nel renderer; test in `tests/cellar.test.ts`;
+  verificato nel browser con `addModel` accanto al borgo (si scende a −0,9, la tromba si vede, dal muro non si esce, si risale).
+  Diverso dal previsto: il controllo sta nella forma (in ogni client) e non rimanda allo Scultore (lo farà T52f); i programmi
+  della libreria hanno sempre `size` sulla radice (il validatore la chiede), quindi la cantina sono i voxel più bassi della loro
+  scatola: la scatola allungata vale solo per i programmi senza `size`, e T52f deve far scrivere a `withSize` la scatola
+  della classe più `sotto · vpt` in basso. Suite intera: 56 file verdi, 12 con timeout (avvio del kernel ~9,7 s contro hook da
+  10 s) che falliscono uguali sul base senza T52b (provato su `partita.test.ts` e `kernel.test.ts`); verdi `cellar`, `ramps`,
+  `storeys`, `jump`, `forms`, `determinism`.
 - **T52d · la profondità del terreno** (ADR-0091 punto 5): terreni `layer: 'strato'` (predefiniti nel seme; alla Genesi il Cartografo
   ne scrive 2-4 con gli altri terreni, il Fisico li vede), bozza degli strati per colonna (deterministica, dalla casella e dal bioma),
   programma `sottosuolo` facoltativo dell'ambiente (MarkovJunior 3D, cima congelata, provato su `sampleDrafts`), `strati` nel piano

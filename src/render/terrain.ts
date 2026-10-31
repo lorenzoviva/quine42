@@ -143,13 +143,20 @@ export function tileForms(k: Kernel, code: string): Array<{ form: Form; geo: Mod
   return out;
 }
 
-/** What a chunk's meshes depend on: its tiles and levels, its neighbours' (banks and walls look across the edge), the terrains' models. */
+/** The cellars' holes in a chunk (T52b), as a key: tile and depth. */
+const holesKey = (k: Kernel, ch: Chunk) => [...k.holesIn(ch)].map(([i, d]) => `${i}:${d.toFixed(2)}`).join(',');
+
+/** What a chunk's meshes depend on: its tiles and levels, its neighbours' (banks and walls look across the edge), the terrains' models, the cellars' holes. */
 export function chunkSig(k: Kernel, ch: Chunk, models = ''): string {
   const v = (dx: number, dy: number) => {
     const n = k.chunks.get(`${ch.cx + dx},${ch.cy + dy}`);
     return n ? `${n.version}.${n.levels ?? 0}` : -1;
   };
-  return `${ch.version}.${ch.levels ?? 0}|${v(1, 0)}|${v(-1, 0)}|${v(0, 1)}|${v(0, -1)}|${models}`;
+  const n = (dx: number, dy: number) => {
+    const o = k.chunks.get(`${ch.cx + dx},${ch.cy + dy}`);
+    return o ? holesKey(k, o) : '';
+  };
+  return `${ch.version}.${ch.levels ?? 0}|${v(1, 0)}|${v(-1, 0)}|${v(0, 1)}|${v(0, -1)}|${models}|${holesKey(k, ch)}|${n(1, 0)}|${n(-1, 0)}|${n(0, 1)}|${n(0, -1)}`;
 }
 
 export function buildChunk(k: Kernel, ch: Chunk, models = ''): ChunkView {
@@ -162,7 +169,14 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): ChunkView {
   // Instances of the terrains' models, by form: where, how turned, how big.
   const instances = new Map<string, { geo: ModelGeo; mats: THREE.Matrix4[] }>();
   const formsOf = new Map<string, ReturnType<typeof tileForms>>();
-  const top = (x: number, z: number) => k.groundAt(x, z) + groundY(tile(x, z));
+  // Where a model has its cellar the terrain goes down to the cellar's bottom (T52b, the hole): its banks are the hole's sides.
+  const holes = new Map<string, number>();
+  for (const [dx, dy] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    const o = k.chunks.get(`${ch.cx + dx},${ch.cy + dy}`);
+    if (o) for (const [i, d] of k.holesIn(o)) holes.set(`${o.cx * S + (i % S)},${o.cy * S + Math.floor(i / S)}`, d);
+  }
+  const ground0 = (x: number, z: number) => k.groundAt(x, z) - (holes.get(`${x},${z}`) ?? 0);
+  const top = (x: number, z: number) => ground0(x, z) + groundY(tile(x, z));
   const place = (code: string, x: number, y: number, z: number, h: number, every: number): boolean => {
     if (!formsOf.has(code)) formsOf.set(code, tileForms(k, code));
     const fs = formsOf.get(code);
@@ -186,7 +200,7 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): ChunkView {
       const t = pal[code] ?? pal['?'];
       const x = X0 + c, z = Z0 + r;
       const h = hash32(x, z, 77);
-      const g0 = k.groundAt(x, z);
+      const g0 = ground0(x, z);
       const y = g0 + groundY(t);
       const k0 = 0.92 + (h % 13) / 100;
       const base = rgbOf(t?.color, k0);

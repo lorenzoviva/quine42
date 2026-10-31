@@ -1,6 +1,6 @@
 # ADR-0091 — I sotterranei
 
-Data: 2026-10-30 · Stato: accettato, da attuare (progetto di T52a; codice in T52b, T52c, T52d, T52e, T52f) · Riferimenti: Regola 10,
+Data: 2026-10-30 · Stato: accettato, attuato in parte (progetto di T52a; T52b fatto; codice ancora in T52c, T52d, T52e, T52f) · Riferimenti: Regola 10,
 ADR-0043 (lotti, strutture, rampe di T53a, piani di T53b), ADR-0048 (il rilievo), ADR-0049 (gli edifici della corona come modelli),
 ADR-0059 (il client sottile), ADR-0080 (il salto)
 
@@ -84,6 +84,25 @@ centro (`floorAt`), il renderer taglia solo la struttura in cui si è, sopra il 
 
 8. **Multigiocatore.** Nulla di nuovo nel protocollo oltre `PlaceView.strati`: `sotto` sta in `models/index.json` (che i giocatori
    ricevono), `pos.z` di T53b porta anche le altezze negative. Ogni client calcola buco, taglio e luce da sé.
+
+## Attuazione
+
+- **T52b** (il modello che scende, punti 2-3). `sottoOf(info)` legge `sotto` (1-3) dalla voce; la scatola della classe
+  cresce di `sotto · vpt` voxel in basso (un programma con la sua `size` la tiene), `Form.base` sono quei voxel. Le colonne
+  del modello con voxel sotto il suolo sono la cantina (`holesOf`, `Form.hole`); sulle altre la terra è piena fino a `base`
+  (`surfaces` con `fill`), così il suolo attorno e il pavimento dei piani sono a `base` e la cantina, più di un gradino sotto,
+  si raggiunge solo per la scala. `groundOfForm` tiene la cantina se un corpo vi sta e ogni pavimento sotto il suolo dove
+  potrebbe stare è raggiunto dal piano terra; altrimenti `Form.hole` manca (la cantina resta dentro la terra, il modello è
+  comunque posato più in basso perché i voxel di sopra stiano sul suolo). Diverso dal previsto: il controllo sta nella forma
+  (a ogni esecuzione, anche nei client) e non torna allo Scultore: lo farà T52f, che chiede le cantine. I programmi della libreria
+  portano sempre `size` sulla radice (`withSize`, il validatore la chiede): la cantina sono allora i voxel più bassi della loro
+  scatola, e T52f farà scrivere a `withSize` la scatola della classe più `sotto · vpt` in basso. Nel kernel `levelIn`
+  aggiunge `base`, `floorAt` sulle colonne della cantina non prende il terreno, `rampBlocks` fa aria della tromba delle scale
+  (nessun pavimento entro un gradino dai piedi), `floorBelow` e `topUnder` non vedono ciò che sta sotto il suolo (il salto non
+  entra), `interiorPoints` non mette cose sopra la tromba. Nel renderer `kernel.sunk(id)` abbassa il modello e
+  `kernel.holesIn(chunk)` dà le caselle il cui centro cade su una colonna della cantina, con la profondità: il terreno lì scende
+  al fondo del modello e i fianchi delle caselle vicine fanno le pareti del buco (senza strati, T52e). Test in
+  `tests/cellar.test.ts`.
 
 ## Conseguenze
 - Il mondo resta uno: una cantina sta davvero sotto la sua casa, la si vede scendere e il terreno attorno ha i suoi strati.
