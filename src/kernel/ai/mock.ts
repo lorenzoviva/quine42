@@ -353,10 +353,14 @@ export class MockModels implements Models {
         return { racconto: v.story, perde_tutto: v.loseAll, ripartenza: v.restart, effetti: v.effects };
       }
       case 'spell.name': {
-        // Combines what the single runes already do, a little stronger.
+        // A program (T57a): the first rune gives the main effect, stronger for every time it is repeated;
+        // the others follow, weaker. Order matters: «terra vento» is not «vento terra».
         const runes: Array<{ token: string; name: string; element: string }> = d.runes ?? [];
-        const BASE: Record<string, unknown> = { luce: { tipo: 'luce', raggio: 7, durata: 120 }, fuoco: { tipo: 'fuoco', raggio: 2, durata: 10 }, vita: { tipo: 'bisogni', salute: 30 }, scudo: { tipo: 'scudo', durata: 45 }, vento: { tipo: 'spingi', forza: 7 }, terra: { tipo: 'terreno', a: 'sentiero', raggio: 2 }, acqua: { tipo: 'terreno', a: 'acqua', raggio: 1 } };
-        const effetti = [...new Set(runes.map((r) => r.token))].map((t) => BASE[t]).filter(Boolean).slice(0, 3);
+        const BASE: Record<string, Record<string, unknown>> = { luce: { tipo: 'luce', raggio: 4, durata: 60 }, fuoco: { tipo: 'fuoco', raggio: 1, durata: 6 }, vita: { tipo: 'bisogni', salute: 15 }, scudo: { tipo: 'scudo', durata: 20 }, vento: { tipo: 'spingi', forza: 4 }, terra: { tipo: 'terreno', a: 'sentiero', raggio: 1 }, acqua: { tipo: 'terreno', a: 'acqua', raggio: 0 } };
+        const times = (t: string) => runes.filter((r) => r.token === t).length;
+        const scaled = (t: string, k: number) => Object.fromEntries(Object.entries(BASE[t] ?? {}).map(([f, v]) => [f, typeof v === 'number' ? Math.min(f === 'raggio' ? 3 : 40, Math.round(v * k)) : v]));
+        const order = [...new Set(runes.map((r) => r.token))].filter((t) => BASE[t]);
+        const effetti = order.map((t, i) => scaled(t, i === 0 ? 1 + times(t) : 0.5 * times(t) + 0.5)).slice(0, 3);
         return { nome: runes.map((r) => r.name.slice(0, 3)).join('').replace(/^./, (c) => c.toUpperCase()), descrizione: `Le rune ${runes.map((r) => r.element).join(' e ')} insieme.`, costo: 8 * runes.length, effetti };
       }
       case 'text.examine':

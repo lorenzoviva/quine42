@@ -26,7 +26,7 @@ describe('the rune canon', () => {
       expect(ctx).toMatch(/## Canone delle rune[\s\S]*nessuna trama/);
       expect(ctx).toContain('Non si spostano');
       expect(ctx).toMatch(/ᛊ Sowilo \(«luce», luce\)/);
-      expect(ctx).toMatch(/acqua \+ fuoco → Vapore/);
+      expect(ctx).toMatch(/terra \+ fuoco → Palla di fuoco/);
     }
     for (const agent of ['scultore', 'artista', 'fisico', 'ingegnere', 'cartografo', 'referente'] as const) expect(c.context(agent)).not.toContain('Canone delle rune');
     await c.ask('narratore', 'plot.weave', 'una trama', { type: 'OBJECT' });

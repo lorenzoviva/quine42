@@ -1016,7 +1016,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 
 ## Le rune
 
-### T57 · Le rune come codice: sequenze ordinate, effetti, rune nuove — `da fare` (si comincia da T57a)
+### T57 · Le rune come codice: sequenze ordinate, effetti, rune nuove — `da fare` (T57a fatto; poi T57b)
 - Pipeline: claude · stima 8% · approvato · priorità 60
 - Contesto: richiesta del 24/10 («Le rune»). L'esempio del seme `acqua fuoco` → «Vapore» (si annullano, un messaggio, in
   `universe/modules/magic.runes/manifest.json`) non è l'idea: le rune sono come codice, una **sequenza ordinata** produce
@@ -1031,6 +1031,13 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
   stati), validati come oggi; il seme perde «Vapore» per un esempio vero. La chiave delle combinazioni rispetta già l'ordine
   (`seq.join(' ')` in `castSpell`, senza ordinare): resta così. Test offline: `terra aria` e `aria terra`
   danno incantesimi diversi; il MockModels risponde con effetti diversi per ordini diversi.
+  **Fatto** (commit su `task/T57`): canone (formula, ordine, ripetizione, esempi), `SPELL_GUIDE` e le permutazioni già
+  note nel prompt di `nameSpell`, prompt di Narratore, Fisico (la misura della magia) e Arbitro; il seme ha `terra fuoco` →
+  «Palla di fuoco» al posto di «Vapore»; il mock: la prima runa dà l'effetto principale, rafforzato da ogni ripetizione.
+  Diverso dal previsto: gli esempi di terraformazione usano per ora `terreno` (roccia, sentiero) finché T57c non dà `rilievo`.
+  Test: typecheck verde; i test toccati (`kernel` rune e T57a, `canon`, `showcase`, `focus`) verdi; la suite intera ha fallimenti
+  che ci sono uguali sulla base (`beforeEach` di `kernel.test.ts` oltre 10 s sotto carico, `explore` T40, `partita` «goes with every
+  request»): provati sui file di `3d` con lo stesso esito. Il canone resta corto perché va con ogni compito narrativo (`focus` T13).
 - **T57b · rune nuove dal Concilio**: una via per inventare una runa magica (nome, glifo, colore, cosa significa nel
   canone) in una sessione del Concilio o quando una combinazione la chiede: modulo `magic.runes` riscritto, validatore
   (glifo unico, nome non simile alle altre, niente meta-gioco), canone aggiornato; la runa compare nel mondo come le altre
@@ -2116,10 +2123,11 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fatto quando: typecheck e test verdi; nel browser con `?cartone`, dalla corona (`?dev&teleport=46,0`) oltre il cerchio niente
   contorni della simulazione, dentro il cerchio i contorni come prima; niente errori in console.
 
-### T99 · Integrare T57 (T57a) — `da fare`
+### T99 · Integrare T57 (T57a) — `fatto`
 - Pipeline: claude · stima 1% · approvato · priorità 5
 - Contesto: `integra T57` va in conflitto con il base `3d` solo in `docs/plans/backlog.md` (il base ha aggiunto T96-T98 e
   aggiornato altri blocchi). T57 ha fatto il pezzo T57a (rune composte come programma); T57b e T57c restano da fare. Nasce da T57: `dossier T57`.
 - Cosa fare: nel worktree `git merge task/T57`; in `backlog.md` tieni tutti i blocchi del base e, per il blocco di T57, la versione
   di `task/T57` (T57a fatto con il suo commit, T57b prossimo pezzo, il blocco resta `da fare`); nessun altro file.
 - Quando è fatto: merge committato, `npm run typecheck` verde, i test toccati da T57 (`traccia T57`) verdi.
+  Esito: merge di `task/T57` sul branch `task/T99`; unico conflitto l'intestazione del blocco T57 in `backlog.md`, presa da `task/T57` (T57a fatto; poi T57b) tenendo «approvato» del base. Typecheck verde; `canon`, `showcase`, `focus` verdi; `kernel.test.ts` 57/57 verde con `--hookTimeout=120000` (senza, i `beforeEach` superano 10 s sotto il carico della pipeline, come già notato in T57a). Come previsto.

@@ -109,7 +109,7 @@ describe('the screen of the Tower of Magic (T22)', () => {
     const all = k.showcaseEntries('rune');
     const tokens = Object.keys(k.content.runes);
     expect(all.slice(0, tokens.length).map((e) => e.id)).toEqual(tokens.map((t) => `rune:${t}`));
-    expect(all.slice(tokens.length).map((e) => e.id)).toEqual(['spell:acqua fuoco', 'spell:luce fuoco vento']);
+    expect(all.slice(tokens.length).map((e) => e.id)).toEqual(['spell:terra fuoco', 'spell:luce fuoco vento']);
     const fact = (id: string, what: string) => all.find((e) => e.id === id)!.facts.find(([w]) => w === what)?.[1];
     // A single rune with its spell: what it means, the spell, what it really does, its cost.
     expect(all.find((e) => e.id === 'rune:acqua')!.label).toBe('Laguz · Polla');
