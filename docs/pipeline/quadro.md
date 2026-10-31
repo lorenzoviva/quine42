@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 31/10/2026 alle 04:02 UTC, epoca 169 su **claude**. **T54 fatto** (taglie D&D) ma `integra` va in conflitto (AGENTS.md, README ADR, backlog, kernel.ts, validator.ts; ADR-0081 già preso): approvato **T94** «Integrare T54» su Claude (priorità 8, prima di T93). Multigiocatore: T45f aspetta risposte GCP (`docs/pipeline/domande/T45f.md`). T88, T89 da approvare.
+Aggiornato il 31/10/2026 alle 04:02 UTC, epoca 169 su **claude**. **T54 fatto** (taglie D&D) ma `integra` va in conflitto (AGENTS.md, README ADR, backlog, kernel.ts, validator.ts; ADR-0081 già preso): approvato **T94** «Integrare T54» su Claude (priorità 8, prima di T93). Multigiocatore: T45f aspetta risposte GCP (`docs/pipeline/domande/T45f.md`). T88 da approvare; T89 approvato (Claude, priorità 100).
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -48,7 +48,7 @@ Aggiornato il 31/10/2026 alle 04:02 UTC, epoca 169 su **claude**. **T54 fatto** 
 - **In attesa di chiavi/risposte**:
   - **T45f**: sbloccato, in attesa di GCP Project ID e scelte di deploy (`docs/pipeline/domande/T45f.md`).
 - **In coda / Bloccati**:
-  - **T88**, **T89** (in coda da approvare).
+  - **T88** (in coda da approvare); **T89** approvato, in coda su Claude.
   - **T57** (rune come codice, bloccato da T51a).
 - **Crediti**:
   - **Claude**: 5h all' 87 % (reset 08:00 UTC), settimana al 40 %.

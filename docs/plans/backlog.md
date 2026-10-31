@@ -1927,7 +1927,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Dipende da: T82, T85.
 
 ### T89 · La grafica a cartone — `da fare`
-- Pipeline: claude · stima 5% · priorità 50 (approvato dall'autore; l'orchestratore lo approva quando Claude è libero, un task per provider)
+- Pipeline: claude · stima 5% · approvato · priorità 100
 - Contesto: richiesta del to-do del 29/10 che la pianificazione aveva saltato (`docs/archivio/3-to-do-backlog/userchats/to-do-2026-10-29.md`, «Grafica a cartone»):
   l'autore vuole che l'universo abbia l'aspetto di Stompworks (https://www.reddit.com/r/ClaudeGameDev/comments/1x2ldgg/stompworks_a_small_books_worth_of_prompts_in/),
   foto in `docs/archivio/3-to-do-backlog/userchats/grafica_cartone.png`. Provider proposto dall'autore: Claude Code.
