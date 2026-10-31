@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 31/10/2026 alle 00:31 UTC, epoca 164 su **gemini** (subentrato: claude sotto il 10 %). **T52 completato** (progetto sotterranei), `integra T52` in conflitto su ADR (0081 occupato da crediti, ora ADR-0091), AGENTS e backlog: creato **T92** (integrazione T52 su Gemini, p0, stima 1%). **T54** in corso su Claude (riprende le taglie di creature e strutture). **T51** (T51b automa cellulare) approvato dall'autore su Claude, in coda. Multigiocatore fermo (T45f aspetta risposte GCP, T45e aspetta chiavi test Stripe). T88, T89 non approvati.
+Aggiornato il 31/10/2026 alle 00:33 UTC, epoca 165 su **gemini** (avvio nuova epoca: contesto precedente al 270%). **T92** in corso su Gemini (integrazione T52 nel base `3d`). **T54** su Claude ha raggiunto il limite 5h (0%), riprende dopo le 03:01 UTC. **T51** approvato su Claude, in coda. Multigiocatore fermo (T45f aspetta risposte GCP, T45e aspetta chiavi test Stripe). T88, T89 non approvati.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -38,8 +38,8 @@ Aggiornato il 31/10/2026 alle 00:31 UTC, epoca 164 su **gemini** (subentrato: cl
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T54** in corso su Claude (taglie creature e strutture).
-  - **T92** pronto e approvato su Gemini (integrazione T52 nel base `3d`).
+  - **T92** in corso su Gemini (integrazione T52 nel base `3d`).
+  - **T54** in corso su Claude (limite 5h raggiunto a 0%, riprende dopo le 03:01 UTC).
   - **T51** approvato su Claude (in coda dopo T54, aspetta pazientemente su Claude come confermato dall'autore).
 - **Completati e integrati nel base `3d`**:
   - **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
@@ -51,7 +51,7 @@ Aggiornato il 31/10/2026 alle 00:31 UTC, epoca 164 su **gemini** (subentrato: cl
 - **In coda / Bloccati**:
   - **T57** (rune come codice, bloccato da T51a).
 - **Crediti**:
-  - **Claude**: 5h al 9 % (sotto soglia 10 %, reset alle 03:00 UTC), settimana al 41 %.
+  - **Claude**: 5h al 0 % (reset alle 02:59 UTC / 03:01 UTC), settimana al 41 % (9% per Claude and GPT models).
   - **Gemini**: 5h al 100 %, settimana al 29 % (orchestratore + T92).
   - **Argon**: fermo fino al 04/11.
 
