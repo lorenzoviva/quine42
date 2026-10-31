@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 31/10/2026 alle 11:20 UTC, epoca 169 su **claude**. T93 e **T52b** (cantine nei modelli) integrati. **T54 fatto** (taglie D&D) ma `integra` va in conflitto (AGENTS.md, README ADR, backlog, kernel.ts, validator.ts; ADR-0081 già preso): approvato **T94** «Integrare T54» su Claude (priorità 8, prima di T93). Multigiocatore: T45f aspetta risposte GCP (`docs/pipeline/domande/T45f.md`). T88 da approvare; T89 approvato (Claude, priorità 100).
+Aggiornato il 31/10/2026 alle 11:25 UTC, epoca 169 su **claude** (fine epoca). Integrati T93 (Stripe verificato nel browser) e T52b (cantine). **T54 fatto ma da integrare via T94** (pronto, priorità 8, primo su Claude). Pronti dopo: T51, T89 (approvato dall'autore). Da approvare: T45f (aspetta risposte GCP), T88, **T95** (proposto: test explore/partita/subscription rossi anche da soli). Claude: settimana 35 %, 5h 63 %; slot 0 al momento (previsione crediti).
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
