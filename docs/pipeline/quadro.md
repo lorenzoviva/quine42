@@ -7,6 +7,7 @@ Aggiornato il 31/10/2026 alle 11:52 UTC, epoca 170 su **claude**. Integrati T94 
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
+- **31/10: mai zero slot per Claude.** Slot di Claude fissato a 1 a mano in  ( al 05/11, così la previsione non lo riabbassa) finché **T96** (su Gemini, approvato) non mette  in . T51 ha la precedenza (priorità 50); T89 interrotto, da riprendere () dopo T51.
 - **Un solo task per provider alla volta** (finché T82 non mette i tetti per provider in `config.json`: approvare a mano al più un task per provider). I tetti li decide l'autore; l'orchestratore non li alza senza sua istruzione.
 - Obiettivi: niente parallelismo che aumenta il lavoro; a 0 % uno o zero task sul provider; finire i crediti entro il reset settimanale (non prima); distribuire i task pesanti nel tempo; tenere un margine per le urgenze dell'autore; i crediti avanzati andranno alla generazione con gli abbonamenti (T88, non ora).
 - Al più **una verifica nel browser** alla volta. Risposte brevi.
