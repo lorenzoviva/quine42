@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 31/10/2026 alle 18:10 UTC, epoca 177 su **claude**. **T107 (difetti del sito) e T108 (verifica nel browser, nessun difetto) integrati.** **T98 integrato** (contorni del cartone con le normali delle mesh; suite intera con 48 fallimenti non suoi → vedi T95). Prossimo su Claude: T57b.
+Aggiornato il 31/10/2026 alle 18:40 UTC, epoca 177 su **claude** (fine epoca). **T107 (difetti del sito) e T108 (verifica nel browser, nessun difetto) integrati.** **T98 integrato** (contorni del cartone con le normali delle mesh; suite intera con 48 fallimenti non suoi → vedi T95). Prossimo su Claude: T57b.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -31,16 +31,16 @@ Aggiornato il 31/10/2026 alle 18:10 UTC, epoca 177 su **claude**. **T107 (difett
   2. Proposto **T95** (test explore/partita/subscription rossi anche da soli): aspetta l'approvazione dell'autore.
   2. **Risposte dell'autore per T45f** (`docs/pipeline/domande/T45f.md`).
 - **Intenzioni / prossimi passi**:
-  1. Seguire T107 (Gemini) e poi creare il task di verifica nel browser su Claude; T98 e T57b su Claude. Proporre all'autore T101-T106 (sito) da approvare; se T97 riceve risposta sui template di Claude Design (domande/T97.md), proposta docs/design/sito/. Lezione: non accodare blocchi al backlog accanto a un task che lo sta modificando (conflitti di integra): se capita, togliere il blocco, integrare, rimetterlo.
+  1. Seguire T57b su Claude. Suite intera: 48 fallimenti non dei task (erano 33): spingere l'approvazione di **T95**. Proporre all'autore T101-T106 (sito) da approvare; se T97 riceve risposta sui template di Claude Design (domande/T97.md), proposta docs/design/sito/. Lezione: non accodare blocchi al backlog accanto a un task che lo sta modificando (conflitti di integra): se capita, togliere il blocco, integrare, rimetterlo.
   2. Proporre all'autore approvazione di T89a-e (cartone), T95 (test rossi), T101-T106 (sito). Nota: un «dipende da Txx» verso un task fatto solo nel suo branch blocca il task.
   3. Ricevute le risposte su T45f, riprendere il deploy del multigiocatore su GCP.
 
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - Su Claude **T98** (40) → T57b (60). Su Gemini **T107**; T107 poi chiede una verifica nel browser (su Claude).
+  - Su Claude **T57** (T57b, 60) pronto/in partenza. Gemini libero: nessun task approvato per lui (proporre T95 o uno dei T101-T106).
 - **Completati e integrati nel base `3d`**:
-  - **T96** (31/10 16:48), **T51b** (ADR-0094, integrato il 31/10 16:13), **T89**, **T94**, **T54**, **T52b**, **T93**, **T92**, **T52**, **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
+  - **T98**, **T108**, **T107** (31/10 sera), **T96** (31/10 16:48), **T51b** (ADR-0094, integrato il 31/10 16:13), **T89**, **T94**, **T54**, **T52b**, **T93**, **T92**, **T52**, **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **Da integrare**:
   - Nessuno.
 - **In attesa di chiavi/risposte**:
