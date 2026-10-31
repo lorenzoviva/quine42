@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 31/10/2026 alle 02:01 UTC, epoca 167 su **gemini**. **T45e completato e integrato nel base `3d`**; l'autore ha aggiornato `.env` e configurato il listener locale del webhook su `localhost:5173/api/stripe/webhook` (porta dev standard); approvato **T93** su Claude (priorità 9) per la verifica browser. **T92 e T52 integrati nel base `3d`** (ADR-0091). **T54** su Claude ha raggiunto il limite 5h (0%), riprende dopo le 02:59 UTC. Multigiocatore: T45f aspetta risposte GCP (`docs/pipeline/domande/T45f.md`). T88, T89 in coda da approvare.
+Aggiornato il 31/10/2026 alle 04:02 UTC, epoca 169 su **claude**. **T54 fatto** (taglie D&D) ma `integra` va in conflitto (AGENTS.md, README ADR, backlog, kernel.ts, validator.ts; ADR-0081 già preso): approvato **T94** «Integrare T54» su Claude (priorità 8, prima di T93). Multigiocatore: T45f aspetta risposte GCP (`docs/pipeline/domande/T45f.md`). T88, T89 da approvare.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -22,12 +22,12 @@ Aggiornato il 31/10/2026 alle 02:01 UTC, epoca 167 su **gemini**. **T45e complet
 
 - **Decisioni prese e fatti recenti**:
   - **T92 e T52 integrati nel base `3d`**: task/T92 ha risolto i conflitti con task/T52, rinumerato l'ADR in ADR-0091, aggiornato `AGENTS.md`, `README.md` e `backlog.md` (T52a fatto, T52b-f definiti). Eseguiti `integra T92` e `integra T52`, worktree e branch rimossi, typecheck e test pipeline verdi.
-  - **T54 in corso su Claude**: in attesa reset limite 5h (alle 02:59 UTC) per completare le taglie D&D e la Fucina.
+  - **T54 fatto**, da integrare tramite **T94** (conflitti; ADR da rinumerare in ADR-0092). Suite intera con 33 timeout di carico: T94 la rilancia col turno test.
   - **T45d integrato nel base `3d` (ADR-0086)**: requisiti minimi, tetto crediti, modale esaurimento, lobby multigiocatore e collezione carte integrati.
   - **T45f sbloccato e preparato**: dipendeva da T44b e T45d, ora entrambi integrati. Aperte le domande su GCP Project ID, hosting e regione in `docs/pipeline/domande/T45f.md`.
   - **T45e completato e chiavi Stripe fornite**: l'autore ha risposto in `docs/pipeline/domande/T45e.md` inserendo le credenziali di test in `.env` e impostando il listener locale su `localhost:5173/api/stripe/webhook`. T45e segnato `fatto` e approvato **T93** per la verifica nel browser su Claude (priorità 9).
 - **Cosa si aspetta**:
-  1. **Reset limite 5h di Claude** (02:59 UTC) per completare T54 e lanciare la verifica browser T93.
+  1. **T94** (integrare T54), poi **T93** (verifica browser Stripe).
   2. **Risposte dell'autore per T45f** (`docs/pipeline/domande/T45f.md`).
 - **Intenzioni / prossimi passi**:
   1. Al ripristino di Claude, seguire l'avanzamento di T54 e l'esecuzione di T93 (verifica browser Stripe).
@@ -37,7 +37,7 @@ Aggiornato il 31/10/2026 alle 02:01 UTC, epoca 167 su **gemini**. **T45e complet
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T54** in corso su Claude (limite 5h raggiunto a 0%, riprende dopo le 02:59 UTC).
+  - **T94** approvato su Claude (integrare T54, priorità 8).
   - **T93** approvato su Claude (verifica browser Stripe, in testa ai pronti con priorità 9).
   - **T52b** pronto su Claude (in coda dopo T93, priorità 50).
   - **T51** approvato su Claude (in coda dopo T52b, priorità 100).
@@ -51,8 +51,8 @@ Aggiornato il 31/10/2026 alle 02:01 UTC, epoca 167 su **gemini**. **T45e complet
   - **T88**, **T89** (in coda da approvare).
   - **T57** (rune come codice, bloccato da T51a).
 - **Crediti**:
-  - **Claude**: 5h al 0 % (reset alle 02:59 UTC / 03:01 UTC), settimana al 41 % (9% per Claude and GPT models).
-  - **Gemini**: 5h al 96 %, settimana al 28 %.
+  - **Claude**: 5h all' 87 % (reset 08:00 UTC), settimana al 40 %.
+  - **Gemini**: 5h al 94 %, settimana al 27 %.
   - **Argon**: fermo fino al 04/11.
 
 ## Da fare appena possibile
