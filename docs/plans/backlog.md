@@ -1973,7 +1973,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 
 
-### T94 · Integrare T54 — `da fare` (dipende da T54)
+### T94 · Integrare T54 — `da fare`
 - Pipeline: claude · stima 3% · approvato · priorità 8
 - Contesto: `integra T54` va in conflitto con il base `3d` in `AGENTS.md`, `docs/adr/README.md`, `docs/plans/backlog.md`,
   `src/kernel/kernel.ts`, `src/kernel/validator.ts`. T54 ha scritto l'ADR come ADR-0081, numero già preso

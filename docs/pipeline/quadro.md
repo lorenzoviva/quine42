@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 31/10/2026 alle 04:02 UTC, epoca 169 su **claude**. **T54 fatto** (taglie D&D) ma `integra` va in conflitto (AGENTS.md, README ADR, backlog, kernel.ts, validator.ts; ADR-0081 già preso): approvato **T94** «Integrare T54» su Claude (priorità 8, prima di T93). Multigiocatore: T45f aspetta risposte GCP (`docs/pipeline/domande/T45f.md`). T88 da approvare; T89 approvato (Claude, priorità 100).
+Aggiornato il 31/10/2026 alle 11:20 UTC, epoca 169 su **claude**. T93 e **T52b** (cantine nei modelli) integrati. **T54 fatto** (taglie D&D) ma `integra` va in conflitto (AGENTS.md, README ADR, backlog, kernel.ts, validator.ts; ADR-0081 già preso): approvato **T94** «Integrare T54» su Claude (priorità 8, prima di T93). Multigiocatore: T45f aspetta risposte GCP (`docs/pipeline/domande/T45f.md`). T88 da approvare; T89 approvato (Claude, priorità 100).
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -32,17 +32,16 @@ Aggiornato il 31/10/2026 alle 04:02 UTC, epoca 169 su **claude**. **T54 fatto** 
   2. **Risposte dell'autore per T45f** (`docs/pipeline/domande/T45f.md`).
 - **Intenzioni / prossimi passi**:
   1. Al ripristino di Claude, seguire l'avanzamento di T54 e l'esecuzione di T93 (verifica browser Stripe).
-  2. Seguire poi T52b e T51 in coda.
+  2. Seguire poi T51 e T89 in coda. Nota: un «dipende da Txx» verso un task fatto solo nel suo branch blocca il task (T94 era fermo per questo).
   3. Ricevute le risposte su T45f, riprendere il deploy del multigiocatore su GCP.
 
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
   - **T94** approvato su Claude (integrare T54, priorità 8).
-  - **T52b** pronto su Claude (in coda dopo T93, priorità 50).
   - **T51** approvato su Claude (in coda dopo T52b, priorità 100).
 - **Completati e integrati nel base `3d`**:
-  - **T93**, **T92**, **T52**, **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
+  - **T52b**, **T93**, **T92**, **T52**, **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **Da integrare**:
   - Nessuno.
 - **In attesa di chiavi/risposte**:
