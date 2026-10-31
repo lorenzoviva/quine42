@@ -2112,7 +2112,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Esito: ADR-0095 (`docs/adr/0095-il-sito-progetto-pagine-e-stile.md`) con stack multi-entry Vite, mappa delle pagine, riuso di Firebase, Stripe e store git, three.js fuori dal gioco e il segreto dei gerboa; variabili CSS unificate per sito e gioco in `src/theme.css` (neon punk, retro arcade, fumetti pop e synthwave, importato in `src/style.css`); pagina dimostrativa del tema in `site/index.html` con hero 3D interattivo Three.js (`site/preview.ts`), carta 3D con shader olografico e flip, preview moduli sessioni/pagamenti e footer con la sagoma delle orecchie dei gerboa; configurazione multi-page in `vite.config.ts`; domanda per l'autore in `docs/pipeline/domande/T97.md` sulla collocazione del template Claude Design; pianificati nel backlog i task atomici T99-T104 (rinumerati T101-T106 da T100) (ciascuno con «dipende da»).
 
 
-### T98 · Cartone: fuori dalla corona i contorni della simulazione nascosta — `da fare`
+### T98 · Cartone: fuori dalla corona i contorni della simulazione nascosta — `fatto`
 - Pipeline: claude · stima 2% · priorità 40 · approvato
 - Contesto: segnalazione dell'autore del 31/10 (to-do, «Bug grafica cartoon», foto in `docs/userchats/image.png`): con `?cartone`,
   quando la corona si vede, oltre il cerchio compaiono i contorni a inchiostro delle cose che starebbero lì se si fosse ancora sul
@@ -2123,6 +2123,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   mesh tagliate escluse/rese col loro taglio) e la visibilità di ciò che il frame non mostra; vale anche per il futuro disegno degli id di T89b.
 - Fatto quando: typecheck e test verdi; nel browser con `?cartone`, dalla corona (`?dev&teleport=46,0`) oltre il cerchio niente
   contorni della simulazione, dentro il cerchio i contorni come prima; niente errori in console.
+- Esito: niente più `scene.overrideMaterial`: `Ink.prepare` dà a ogni mesh visibile la sua normale (`normalsOf` in `materials.ts`, in cache per materiale): con il taglio al cerchio (`clipped`, anche il vento) se il materiale lo ha, gli stessi `clippingPlanes` (il taglio sopra la testa) e le facce; fuori ciò che non scrive né colore né profondità, linee, punti e sprite. `normalsOf` arriva a `Ink` da `bloom.ts` (`materials.ts` importa `cartoon.ts`: importarlo da lì era un ciclo che rompeva l'avvio). Visto nel browser con `?cartone`: dalla corona (46,0) oltre il cerchio niente contorni, dentro i contorni come prima, niente errori.
 
 ### T99 · Integrare T57 (T57a) — `fatto`
 - Pipeline: claude · stima 1% · approvato · priorità 5
