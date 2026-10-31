@@ -1,4 +1,6 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -21,6 +23,9 @@ type Pipeline = {
   updateSlots(budget: Record<string, Record<string, unknown>>, queues: Record<string, (Task & { missing?: string[] })[]>, o?: { config?: unknown; nowMs?: number }): Record<string, Record<string, unknown>>;
   computeBudget(provider: string, conf?: unknown, counters?: Counter[]): { residuo: number; sessione: number };
   plan(tasks: Task[], runs: Record<string, any>, budget: Record<string, any>, only?: string): { inCorso: any[]; daIntegrare: any[]; pronti: any[]; daApprovare: any[]; daStimare: any[]; bloccati: any[]; inAttesa: any[] };
+  isSuspended(b: unknown, nowMs?: number): boolean;
+  suspendProvider(provider: string, finoA?: string, opts?: unknown): { provider: string; sospeso: string | boolean };
+  resumeProvider(provider: string, opts?: unknown): { provider: string; sospeso: boolean };
 };
 
 let P: Pipeline;
@@ -309,13 +314,14 @@ describe('gli slot dinamici', () => {
     expect(P.weeklyResetOf({}, { resetSettimanale: '' }, NOW)).toBeUndefined();
   });
 
-  it('dopo il reset uno slot in più, prima uno in meno, tra 0 e il tetto', () => {
+  it('dopo il reset uno slot in più, prima uno in meno, mai sotto 1 e fino al tetto (T96)', () => {
     const reset = '2026-11-05T09:00:00Z';
     expect(P.nextSlot({ slot: 1, tetto: 3, previsione: '2026-11-06T00:00:00Z', reset })).toBe(2);
     expect(P.nextSlot({ slot: 1, tetto: 3, previsione: undefined, reset })).toBe(2); // non si consuma
     expect(P.nextSlot({ slot: 3, tetto: 3, previsione: '2026-11-06T00:00:00Z', reset })).toBe(3);
     expect(P.nextSlot({ slot: 2, tetto: 3, previsione: '2026-11-01T00:00:00Z', reset })).toBe(1);
-    expect(P.nextSlot({ slot: 0, tetto: 3, previsione: '2026-11-01T00:00:00Z', reset })).toBe(0);
+    expect(P.nextSlot({ slot: 1, tetto: 3, previsione: '2026-11-01T00:00:00Z', reset })).toBe(1); // non scende mai sotto 1
+    expect(P.nextSlot({ slot: 0, tetto: 3, previsione: '2026-11-01T00:00:00Z', reset })).toBe(1); // da 0 risale ad almeno 1
     expect(P.nextSlot({ slot: 4, tetto: 2, previsione: '2026-11-06T00:00:00Z', reset })).toBe(2); // il tetto scende
     expect(P.nextSlot({ slot: 2, tetto: 3, previsione: '2026-11-01T00:00:00Z' })).toBe(2); // senza reset restano
     // Non salgono oltre ciò che il programma chiede.
@@ -351,6 +357,9 @@ describe('gli slot dinamici', () => {
     expect(Date.parse(budget.claude.previsione as string)).toBeLessThan(Date.parse(budget.claude.resetSettimana as string));
     expect(budget.claude.slot).toBe(1);
     expect((budget.claude.storia as unknown[]).length).toBe(2);
+    // Un ulteriore controllo prima del reset non porta mai lo slot a zero (T96).
+    P.updateSlots(budget, queues, { config, nowMs: NOW + 1_200_000 });
+    expect(budget.claude.slot).toBe(1);
   });
 });
 
@@ -1184,5 +1193,100 @@ describe('tracciare le conversazioni in corso (T86)', () => {
     expect(byWho.get('T2')).toMatchObject({ provider: 'gemini', sessione: 'conv-t2', consumo: { output: 100 } });
     expect(byWho.get('orchestratore')).toMatchObject({ epoca: 1, sessione: 'sess-orch', riprendi: expect.stringContaining('claude --resume sess-orch') });
     expect(P.liveConversations(w.opts)).toHaveLength(3);
+  });
+});
+
+describe('mai zero slot e sospendi/riattiva (T96)', () => {
+  const NOW = Date.parse('2026-10-31T12:00:00Z');
+
+  it('isSuspended riconosce sospensione indefinita, a tempo, scaduta o assente', () => {
+    const nowMs = 1700000000000;
+    expect(P.isSuspended(undefined, nowMs)).toBe(false);
+    expect(P.isSuspended({}, nowMs)).toBe(false);
+    expect(P.isSuspended({ sospeso: false }, nowMs)).toBe(false);
+    expect(P.isSuspended({ sospeso: true }, nowMs)).toBe(true);
+    expect(P.isSuspended({ sospeso: new Date(nowMs + 60_000).toISOString() }, nowMs)).toBe(true);
+    expect(P.isSuspended({ sospeso: new Date(nowMs - 60_000).toISOString() }, nowMs)).toBe(false);
+    expect(P.isSuspended({ sospeso: { fino: new Date(nowMs + 60_000).toISOString() } }, nowMs)).toBe(true);
+    expect(P.isSuspended({ sospeso: { fino: new Date(nowMs - 60_000).toISOString() } }, nowMs)).toBe(false);
+  });
+
+  it('suspendProvider e resumeProvider scrivono budget.json e diario in directory isolata', () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'pipeline-t96-'));
+    const stateDir = path.join(root, '.pipeline');
+    const config = { providers: { claude: { cmd: 'claude' }, gemini: { cmd: 'agy' } } };
+    const opts = { stateDir, config };
+
+    // Sospensione a tempo
+    const future = new Date(Date.now() + 3_600_000).toISOString();
+    const r1 = P.suspendProvider('claude', future, opts);
+    expect(r1.provider).toBe('claude');
+    expect(r1.sospeso).toBe(future);
+
+    const b1 = JSON.parse(fs.readFileSync(path.join(stateDir, 'budget.json'), 'utf8'));
+    expect(b1.claude.sospeso).toBe(future);
+
+    // Riattivazione
+    const r2 = P.resumeProvider('claude', opts);
+    expect(r2.provider).toBe('claude');
+    expect(r2.sospeso).toBe(false);
+
+    const b2 = JSON.parse(fs.readFileSync(path.join(stateDir, 'budget.json'), 'utf8'));
+    expect(b2.claude.sospeso).toBeUndefined();
+
+    // Sospensione indefinita (senza data)
+    const r3 = P.suspendProvider('gemini', undefined, opts);
+    expect(r3.provider).toBe('gemini');
+    expect(r3.sospeso).toBe(true);
+
+    const b3 = JSON.parse(fs.readFileSync(path.join(stateDir, 'budget.json'), 'utf8'));
+    expect(b3.gemini.sospeso).toBe(true);
+
+    // Errori su provider sconosciuto o data invalida
+    expect(() => P.suspendProvider('sconosciuto', undefined, opts)).toThrow('Provider sconosciuto');
+    expect(() => P.suspendProvider('claude', 'data-non-valida', opts)).toThrow('Data non valida');
+    expect(() => P.resumeProvider('sconosciuto', opts)).toThrow('Provider sconosciuto');
+
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+
+  it('web /api/chat gestisce comandi /sospendi e /riattiva', async () => {
+    const W = (await import(/* @vite-ignore */ pathToFileURL(path.resolve(__dirname, '../tools/pipeline/web.mjs')).href)) as any;
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'pipeline-t96-web-'));
+    const stateDir = path.join(root, '.pipeline');
+    const config = { providers: { claude: { cmd: 'claude' } } };
+    const opts = { stateDir, config };
+
+    const future = new Date(Date.now() + 86_400_000).toISOString();
+    const res1 = W.handleApi('POST', '/api/chat', { testo: `/sospendi claude fino a ${future}` }, opts);
+    expect(res1.status).toBe(200);
+
+    const b1 = JSON.parse(fs.readFileSync(path.join(stateDir, 'budget.json'), 'utf8'));
+    expect(b1.claude.sospeso).toBe(future);
+
+    const res2 = W.handleApi('POST', '/api/chat', { testo: '/riattiva claude' }, opts);
+    expect(res2.status).toBe(200);
+
+    const b2 = JSON.parse(fs.readFileSync(path.join(stateDir, 'budget.json'), 'utf8'));
+    expect(b2.claude.sospeso).toBeUndefined();
+
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+
+  it('showSlots e updateSlots correggono slot da 0 a 1 quando tetto >= 1', () => {
+    const providers = { claude: { cmd: 'claude', resetSettimanale: 'gio 10:00' } };
+    const config = { maxParalleli: 5, usoSecondi: 300, providers, limiti: { modello: { claude: 3 } } };
+    const queues = { inCorso: [], pronti: [], bloccati: [], inAttesa: [], daIntegrare: [], daApprovare: [], daStimare: [] };
+    const budget: Record<string, Record<string, unknown>> = { claude: { residuo: 90, slot: 0 } };
+
+    P.updateSlots(budget, queues, { config, nowMs: NOW });
+    expect(budget.claude.slot).toBe(1); // non resta a 0
+
+    budget.claude.slot = 0;
+    // updateSlots con previsione prima del reset non porta mai a zero
+    budget.claude.storia = [{ t: new Date(NOW - 2 * 3_600_000).toISOString(), residuo: 90 }];
+    budget.claude.residuo = 20;
+    P.updateSlots(budget, queues, { config, nowMs: NOW + 600_000 });
+    expect(budget.claude.slot).toBe(1);
   });
 });

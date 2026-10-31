@@ -568,7 +568,7 @@ lavoro vive nei file, non nella chat.
 
 **La pipeline** (ADR-0072, [`docs/pipeline/README.md`](docs/pipeline/README.md)): la pianificazione (to-do → backlog → stima e
 provider nella riga `- Pipeline:` del task) la fa un agente con [`docs/pipeline/pianifica.md`](docs/pipeline/pianifica.md) (`/pipeline` in Claude Code);
-l'esecuzione la fa `node tools/pipeline/pipeline.mjs esegui`: task in parallelo su Claude Code e Gemini entro i tetti dell'autore (`limiti`) e gli slot dinamici dalla previsione dei crediti (ADR-0087), una verifica nel browser e una suite intera di test alla volta (`pipeline.mjs turno browser|test -- <comando>`, ADR-0088), uno per worktree
+l'esecuzione la fa `node tools/pipeline/pipeline.mjs esegui`: task in parallelo su Claude Code e Gemini entro i tetti dell'autore (`limiti`) e gli slot dinamici dalla previsione dei crediti (ADR-0087, mai sotto 1 e sospendi/riattiva T96), una verifica nel browser e una suite intera di test alla volta (`pipeline.mjs turno browser|test -- <comando>`, ADR-0088), uno per worktree
 (`task/<Txx>`), entro il budget di ogni provider, ripresi dopo un limite. **Chi esegue un task lanciato dalla pipeline è in un ambiente
 condiviso**: segue le «Regole per chi esegue un task» del README (solo il suo worktree e il suo blocco del backlog, niente merge né
 domande: le scrive in `docs/pipeline/domande/<Txx>.md`) al posto dei punti 1 e 3 sul to-do e sul prompt successivo.

@@ -17,10 +17,12 @@ import {
   plan,
   readJson,
   refreshUsage,
+  resumeProvider,
   resumeTasks,
   say,
   setBudgetManual,
   setOrchestrator,
+  suspendProvider,
   traceOf,
   writeJson,
   writePlan,
@@ -257,6 +259,32 @@ export function handleApi(method, rawUrl, body = {}, opts = {}) {
       if (testo === '/stato') {
         syncPlanFile(opts);
         return { status: 200, data: { ok: true, inCoda: readInbox(p.stateDir) } };
+      }
+      if (testo.startsWith('/sospendi ')) {
+        const parts = testo.split(/\s+/).slice(1);
+        const prov = parts[0];
+        const dateStr = parts.slice(1).join(' ').trim().replace(/^fino\s+a\s+/i, '').replace(/^fino\s+/i, '').trim() || undefined;
+        if (p.config.providers?.[prov]) {
+          try {
+            suspendProvider(prov, dateStr, opts);
+            syncPlanFile(opts);
+            return { status: 200, data: { ok: true, inCoda: readInbox(p.stateDir) } };
+          } catch (e) {
+            return { status: 400, data: { error: e.message } };
+          }
+        }
+      }
+      if (testo.startsWith('/riattiva ')) {
+        const prov = testo.split(/\s+/)[1];
+        if (p.config.providers?.[prov]) {
+          try {
+            resumeProvider(prov, opts);
+            syncPlanFile(opts);
+            return { status: 200, data: { ok: true, inCoda: readInbox(p.stateDir) } };
+          } catch (e) {
+            return { status: 400, data: { error: e.message } };
+          }
+        }
       }
       if (testo.startsWith('/nota ')) {
         say(`nota: ${testo.slice(6).trim()}`, p.report);
@@ -1442,6 +1470,7 @@ export function renderHtml() {
             <small style="color:var(--muted);">\${b.letto ? 'letto ' + esc(b.letto.slice(11, 19)) : 'manuale'}</small>
           </div>
           \${b.fermoFino ? \`<div class="badge st-errore" style="margin-bottom:8px;">Fermo fino a \${esc(b.fermoFino)}</div>\` : ''}
+          \${b.sospeso ? \`<div class="badge st-in-attesa" style="margin-bottom:8px;">Sospeso\${typeof b.sospeso === 'string' && b.sospeso !== 'true' ? ' fino a ' + esc(b.sospeso) : ''}</div>\` : ''}
           <div style="display:flex; justify-content:space-between; font-size:12px;"><span>Settimana</span><strong>\${w}% residuo</strong></div>
           <div class="progress-bar"><div class="progress-fill" style="width:\${Math.max(0, Math.min(100, w))}%; background:\${wColor};"></div></div>
           <div style="display:flex; justify-content:space-between; font-size:12px;"><span>Finestra 5 ore</span><strong>\${b.sessione ?? '—'}% residuo</strong></div>

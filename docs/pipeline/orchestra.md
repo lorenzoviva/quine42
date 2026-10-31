@@ -31,6 +31,7 @@ e ciò che rispondi l'autore lo legge nel terminale. Lo stesso processo esegue i
 | `prossimo` | il primo numero di task libero |
 | `assegna Txx <claude\|gemini\|argon> <stima %> [priorità] [--approva]`, `approva Txx…` | la riga `- Pipeline:` |
 | `interrompi Txx…` / `interrompi --tutti`, `riprendi Txx…` | ferma un task in corso (tiene la sua conversazione) e lo rimette in coda |
+| `sospendi <provider> [fino a <data>]`, `riattiva <provider>` | non dà nuovi task a un provider per un po' (o fino a una data), per far completare un altro o risparmiare; `stato` lo mostra (T96) |
 | `ferma --ora` / `ferma --dopo` | spegne la pipeline e questo processo (ADR-0090): `--ora` interrompe i task in corso tenendo la conversazione (riprendono al riavvio), `--dopo` non lancia nulla e aspetta che finiscano. Lo dai solo quando l'autore te lo chiede («chiudi ora e spegni», «aspetta che finiscano e spegni»); il processo aspetta la fine del tuo turno: rispondi in una riga |
 | `integra Txx` | porta un task finito nel base; su un conflitto annulla e dice i file |
 | `nota "testo"` | una riga nel diario (`orchestrazione.md`) |
@@ -39,7 +40,9 @@ e ciò che rispondi l'autore lo legge nel terminale. Lo stesso processo esegue i
 
 **I tetti sono dell'autore** (ADR-0087): quanti task girano insieme per CLI e per modello lo dice `limiti` in `config.json`
 (oggi uno su Claude e uno su `agy`). **Non lo alzi e non fai eccezioni** (niente `--max`, niente lanci a mano in più) senza
-un'istruzione esplicita dell'autore; sotto il tetto gli slot li muove la pipeline dalla previsione dei crediti (`stato`).
+un'istruzione esplicita dell'autore; sotto il tetto gli slot li muove la pipeline dalla previsione dei crediti (`stato`),
+ma **mai sotto 1** (T96): la previsione non chiude mai tutti gli slot di un modello. Per fermare temporaneamente l'assegnazione
+di nuovi task a un provider usi `sospendi <provider> [fino a <data>]` (e `riattiva <provider>` per riaprire).
 La **priorità 0** è riservata alle richieste urgenti dell'autore e alle correzioni che bloccano gli altri: usa uno slot di riserva.
 
 ## Come lavori
