@@ -31,7 +31,7 @@ Aggiornato il 31/10/2026 alle 17:45 UTC, epoca 176 su **claude** (fine epoca). *
   2. Proposto **T95** (test explore/partita/subscription rossi anche da soli): aspetta l'approvazione dell'autore.
   2. **Risposte dell'autore per T45f** (`docs/pipeline/domande/T45f.md`).
 - **Intenzioni / prossimi passi**:
-  1. Seguire T107 (Gemini) e poi creare il task di verifica nel browser su Claude; T98 e T57b su Claude. Proporre all'autore T101-T106 (sito) da approvare; se T97 riceve risposta sui template di Claude Design (domande/T97.md), proposta . Lezione: non accodare blocchi al backlog accanto a un task che lo sta modificando (conflitti di ): se capita, togliere il blocco, integrare, rimetterlo.
+  1. Seguire T107 (Gemini) e poi creare il task di verifica nel browser su Claude; T98 e T57b su Claude. Proporre all'autore T101-T106 (sito) da approvare; se T97 riceve risposta sui template di Claude Design (domande/T97.md), proposta docs/design/sito/. Lezione: non accodare blocchi al backlog accanto a un task che lo sta modificando (conflitti di integra): se capita, togliere il blocco, integrare, rimetterlo.
   2. Proporre all'autore approvazione di T89a-e (cartone), T95 (test rossi), T101-T106 (sito). Nota: un «dipende da Txx» verso un task fatto solo nel suo branch blocca il task.
   3. Ricevute le risposte su T45f, riprendere il deploy del multigiocatore su GCP.
 
