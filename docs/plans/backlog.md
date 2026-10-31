@@ -808,7 +808,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/userchats/to-do-2026-10-24.md), «Generazione della heightmap» e «taglia»).
 
 ### T51 · Il livello del mare e un motore dell'acqua — `da fare` (T51a fatto; T51b da fare: l'autore ha scelto l'automa cellulare, `docs/pipeline/domande/T51.md`)
-- Pipeline: claude · stima 6% · approvato · priorità 100
+- Pipeline: claude · stima 6% · approvato · priorità 50
 - Contesto: ADR-0048. Oggi ogni specchio d'acqua è piano **dentro il suo chunk** (`waterLevels` in `relief.ts`: al livello
   più basso delle sue caselle, contando solo il chunk); lo stesso lago o fiume su due chunk ha due livelli, e laghi vicini
   livelli diversi: a vista l'acqua ha dei dislivelli (si vede anche in `Blocchi.png`).
