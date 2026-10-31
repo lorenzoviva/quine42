@@ -1914,3 +1914,15 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   renderer three.js (materiali toon, contorni in post-processing, bloom, ombre) e nella guida di stile dell'Artista e dello Scultore, senza immagini generate (regola 11);
   un ADR e i task di codice nel backlog; una prova nel browser con un materiale toon su un chunk per confrontare.
 - Fatto quando: ADR e task di codice scritti, screenshot della prova confrontato con la foto. Dietro il multigiocatore.
+
+### T92 · Integrare T52 (i sotterranei) nel base 3d — `da fare`
+- Pipeline: gemini · stima 1% · approvato · priorità 0
+- Contesto: `integra T52` del 31/10/2026 si è fermato su conflitti in `AGENTS.md`, `docs/adr/README.md` e `docs/plans/backlog.md`. Nel frattempo nel base `3d` sono entrati ADR-0081..ADR-0090. L'ADR dei sotterranei scritto da T52a deve diventare ADR-0091 (`docs/adr/0091-i-sotterranei.md`). T52 è un task di solo progetto (nessun codice sorgente di gioco modificato). Leggi `node tools/pipeline/pipeline.mjs dossier T52` e `traccia T52`.
+- Fare: nel tuo worktree esegui `git merge task/T52` e risolvi i conflitti:
+  - Rinomina `docs/adr/0081-i-sotterranei.md` in `docs/adr/0091-i-sotterranei.md`, aggiorna il titolo/numero al suo interno ("# ADR-0091: I sotterranei"), e inseriscilo in `docs/adr/README.md` in fondo alla lista dopo ADR-0090.
+  - In `AGENTS.md`, mantieni la riga dei sotterranei aggiornando il riferimento da ADR-0081 a ADR-0091.
+  - In `docs/plans/backlog.md`, preserva intatti tutti i blocchi T75-T91 e questo blocco T92; per T52 mantieni lo stato `fatto`, la riga pipeline e l'esito di T52, inserendo i sotto-task T52b-f definiti da T52a con i loro riferimenti aggiornati ad ADR-0091.
+  - Esegui `npm run typecheck` e verifica che sia verde. NON lanciare `npm test` sull'intera suite per evitare timeout o sovraccarico macchina (se serve un test, lancia `npx vitest run tests/pipeline.test.ts`).
+  - Committa sul branch `task/T92`.
+- Fatto quando: typecheck verde, ADR-0091 a posto, commit su branch `task/T92`. Poi l'orchestratore farà `integra T92` e `integra T52`.
+

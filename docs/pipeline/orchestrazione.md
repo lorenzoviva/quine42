@@ -517,3 +517,12 @@
 - [2026-10-30T23:24:24.836Z] lancio T86 su claude (H:\projects\rune\.claude\worktrees\t86)
 - [2026-10-30T23:32:37.217Z] T86: ESITO: fatto — `traccia` dà id, file, comando per riprendere, consumo e ultime azioni dei task in corso su Claude e agy (l'id di agy letto dai suoi file appena li scrive); `traccia orchestratore` mostra le epoche con i consumi; la scheda web «Conversazioni in corso». (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T86)
 - [2026-10-30T23:32:50.414Z] task/T86 integrato in 3d; worktree e branch tolti.
+- [2026-10-30T23:33:17.897Z] orchestratore: epoca 163 su claude (contesto a 59 % della finestra)
+- [2026-10-30T23:45:57.793Z] T54: rimesso in coda (riprende la sua conversazione)
+- [2026-10-30T23:45:57.800Z] T52: rimesso in coda (riprende la sua conversazione)
+- [2026-10-30T23:46:27.192Z] riprendo T52 su claude (H:\projects\rune\.claude\worktrees\t52)
+- [2026-10-31T00:26:43.360Z] T52: ESITO: fatto — progetto dei sotterranei in ADR-0081 e AGENTS.md, T52 spezzato in T52b, T52c, T52d, T52e, T52f (typecheck verde; test con 46 fallimenti, tutti timeout per la macchina carica, da rilanciare) (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T52)
+- [2026-10-31T00:27:01.095Z] orchestratore: epoca 164 su gemini (claude sotto il 10 %)
+- [2026-10-31T00:27:36.940Z] integra T52: conflitti in AGENTS.md, docs/adr/README.md, docs/plans/backlog.md; il base è com'era
+- [2026-10-31T00:27:46.524Z] riprendo T54 su claude (H:\projects\rune\.claude\worktrees\t54)
+- [2026-10-31T00:31:03.581Z] nota: T52 completato; conflitti di integrazione (ADR-0081 occupato da crediti, ora ADR-0091; backlog e AGENTS): creato T92 su gemini per integrare

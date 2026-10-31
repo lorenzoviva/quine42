@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 23:46 UTC, epoca 163 su **claude**. **Riavviato: ADR-0089 e ADR-0090 attivi, a regime** (un task per provider). Multigiocatore fermo (T45f senza risposte, T45e senza chiavi Stripe): rimessi in coda **T54** (fallito per il limite delle 5 ore a metà lavoro) e **T52**, su Claude, uno alla volta; partono quando la previsione dà uno slot (ora 0 su Claude e Gemini). **T51** (T51b, automa cellulare) approvato dall'autore il 30/10 alle 23:50: resta su Claude (ha già un'esecuzione, non passa alle alternative), aspetta il suo turno. T88, T89 non approvati.
+Aggiornato il 31/10/2026 alle 00:31 UTC, epoca 164 su **gemini** (subentrato: claude sotto il 10 %). **T52 completato** (progetto sotterranei), `integra T52` in conflitto su ADR (0081 occupato da crediti, ora ADR-0091), AGENTS e backlog: creato **T92** (integrazione T52 su Gemini, p0, stima 1%). **T54** in corso su Claude (riprende le taglie di creature e strutture). **T51** (T51b automa cellulare) approvato dall'autore su Claude, in coda. Multigiocatore fermo (T45f aspetta risposte GCP, T45e aspetta chiavi test Stripe). T88, T89 non approvati.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -21,43 +21,46 @@ Aggiornato il 30/10/2026 alle 23:46 UTC, epoca 163 su **claude**. **Riavviato: A
 ## Stato e decisioni
 
 - **Decisioni prese e fatti recenti**:
-  - **T80 completato su Gemini e integrato nel base `3d`**: T80 ha unito `task/T45d` risolvendo il conflitto in `docs/plans/backlog.md`, preservando lo stato `fatto` e l'esito di T45d e mantenendo intatti i blocchi T75-T79. Suite `tests/lobby.test.ts`, `tests/credits.test.ts`, `tests/coefficients.test.ts` (18/18) superata e typecheck a 0 errori. Eseguiti `integra T80` e `integra T45d`, worktree e branch rimossi.
-  - **T45d integrato nel base `3d` (ADR-0086)**: implementati requisiti minimi `ai.minimi`, tetto crediti con incremento budget in `credits.ts`, evento e modale a 3 scelte a crediti esauriti (`CreditExhaustedModal`), schermata lobby multigiocatore (`LobbyScreen`) e collezione carte con contatori di utilizzo.
-  - **T45f sbloccato e preparato**: dipendeva da T44b e T45d, ora entrambi integrati. Aperte le domande su GCP Project ID, architettura di hosting (Cloud Run vs VM GCE) e regione in `docs/pipeline/domande/T45f.md`.
+  - **T52 completato su Claude**: progetto dei sotterranei (ADR-0081 originario, da rinumerare in ADR-0091; AGENTS.md; T52 spezzato in T52b-f). Typecheck verde. Tentativo di integrazione automatica in conflitto su `AGENTS.md`, `docs/adr/README.md` e `docs/plans/backlog.md`.
+  - **Creato T92 su Gemini**: task di integrazione per fondere `task/T52` nel base `3d`, rinumerare ADR-0081 in ADR-0091, aggiornare `AGENTS.md` e `README.md`, e incorporare i sotto-task T52b-f nel backlog.
+  - **T54 in corso su Claude**: ripreso nel suo worktree per completare le taglie D&D e la Fucina.
+  - **T45d integrato nel base `3d` (ADR-0086)**: requisiti minimi, tetto crediti, modale esaurimento, lobby multigiocatore e collezione carte integrati.
+  - **T45f sbloccato e preparato**: dipendeva da T44b e T45d, ora entrambi integrati. Aperte le domande su GCP Project ID, hosting e regione in `docs/pipeline/domande/T45f.md`.
   - **Chiavi Stripe per test nel browser**: T45e resta segnato `in attesa` per la verifica browser (in attesa di `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` in `.env` o in chat, segnalate in `docs/pipeline/domande/T45e.md`).
 - **Cosa si aspetta**:
-  1. **Completamento di T83** su Claude (turni su disco operazioni pesanti), ora che il reset delle 22:00 UTC ha ripristinato i crediti.
-  2. **Esecuzione e integrazione di T84, T85, T86** su Claude uno alla volta.
-  3. **Risposte dell'autore per T45f** e chiavi di test Stripe per T45e (per quando riprenderanno i task normali).
+  1. **Esecuzione e integrazione di T92** su Gemini per chiudere e rimuovere `task/T52`.
+  2. **Completamento di T54** su Claude (o avanzamento prima/dopo il reset delle 03:00 UTC).
+  3. **Risposte dell'autore per T45f** e chiavi di test Stripe per T45e.
 - **Intenzioni / prossimi passi**:
-  0. Integrare la catena T83 → T84 → T85 → T86 man mano che finiscono. Finito T86 (ultimo task di correzione della pipeline), NON approvare nulla e comunicare all'autore che può chiudere con Ctrl-C.
-  1. Ricevute le risposte su T45f e le chiavi Stripe per T45e, riprendere il multigiocatore nelle prossime sessioni.
+  1. Integrare T92 appena terminato ed eseguire `integra T52`.
+  2. Ricevute le risposte su T45f e le chiavi Stripe per T45e, riprendere il multigiocatore.
 
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T52** in corso su Claude (ripreso alle 23:46). In coda su Claude, uno alla volta: **T54** (ripreso, era fallito per il limite), poi **T51** (approvato, non cambiargli provider: l'autore vuole che aspetti Claude).
-  - Crediti di Claude sotto il 10 % (5 ore) alle ~23:55 del 30/10: l'orchestratore passa al provider successivo; i task di Claude aspettano il reset (5 ore alle 03:00 UTC).
+  - **T54** in corso su Claude (taglie creature e strutture).
+  - **T92** pronto e approvato su Gemini (integrazione T52 nel base `3d`).
+  - **T51** approvato su Claude (in coda dopo T54, aspetta pazientemente su Claude come confermato dall'autore).
 - **Completati e integrati nel base `3d`**:
   - **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
+- **Da integrare**:
+  - **T52** (i sotterranei, gestito da T92).
 - **In attesa di chiavi/risposte/verifica browser**:
   - **T45f**: sbloccato, in attesa di GCP Project ID e scelte di deploy (`docs/pipeline/domande/T45f.md`).
   - **T45e**: codice e test integrati, in attesa credenziali test Stripe per prova interattiva browser.
 - **In coda / Bloccati**:
-  - **T51** (livello mare e motore acqua, p50).
-  - **T52** e **T54** (p50): interrotti per dare precedenza al multigiocatore.
   - **T57** (rune come codice, bloccato da T51a).
 - **Crediti**:
-  - **Claude**: 5h al 49 % (reset effettuato alle 22:00 UTC), settimana al 49 % (riprende T83).
-  - **Gemini**: 5h al 100 %, settimana al 30 %.
+  - **Claude**: 5h al 9 % (sotto soglia 10 %, reset alle 03:00 UTC), settimana al 41 %.
+  - **Gemini**: 5h al 100 %, settimana al 29 % (orchestratore + T92).
   - **Argon**: fermo fino al 04/11.
 
 ## Da fare appena possibile
 
-- **Pianificate (30/10) le risposte dell'autore**: T51b (automa cellulare del kernel), T52a (progetto dei sotterranei come parti sotterranee delle strutture, profondità generata come X e Y; T52c la Sala sistemi seminterrata solo fuori), T54 (Gargantuesca la massima, il castello di oggi Enorme; Gargantuesca una per **reame** = 4 × 4 zone, nome scelto da me, da confermare). Tutti e tre approvati, priorità 50, dietro il multigiocatore.
-- **Verifiche nel browser** (un task di verifica su `claude`, che ha `--chrome`): T45d (la lobby multigiocatore, selezione tetto e modale crediti esauriti), T64 (le varianti in cache di `circuito-3D` sugli scaffali della corona), T56b (l'arco del salto e l'ombra), T69 (interfaccia web della pipeline: vista browser), T68c (stato provider e coda abbonamenti in `#models` e pannello del Concilio), T45e (ricarica di prova Stripe con chiavi di test).
+- **Pianificate le risposte dell'autore**: T51b (automa cellulare del kernel), T52a (progetto dei sotterranei fatto, in integrazione con T92), T54 (in corso su Claude).
+- **Verifiche nel browser** (un task di verifica alla volta su `claude`, che ha `--chrome`): T45d (lobby multigiocatore), T64 (varianti in cache circuito-3D), T56b (arco salto e ombra), T69 (interfaccia web), T68c (stato provider coda abbonamenti), T45e (ricarica Stripe).
 
 ## Da sapere
 
 - Il 30/10 sono stati corretti fuori dalla pipeline lo sfarfallio del bagliore e il tempo di `circuito-3D` (30 s).
-- Con tre agenti al lavoro i test possono andare in timeout per carico macchina: un test che fallisce nella suite intera e passa da solo non è un difetto del task.
+- Con più agenti al lavoro i test possono andare in timeout per carico macchina: un test che fallisce nella suite intera e passa da solo non è un difetto del task.
