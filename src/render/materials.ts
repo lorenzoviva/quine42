@@ -117,7 +117,30 @@ export function clipped<M extends THREE.Material>(m: M, key: string, sway = fals
   m.customProgramCacheKey = () => key;
   noGlow(m);
   m.userData.clipped = true;
+  m.userData.clipKey = key;
+  m.userData.sway = sway;
   return m;
+}
+
+/** The normals of the cartoon's ink (ADR-0093), one per material drawn: clipped like it, cut like it. */
+const normalsCache = new WeakMap<THREE.Material, THREE.Material>();
+const PLAIN_NORMALS = new THREE.MeshNormalMaterial();
+
+/**
+ * The normal material that stands in for `m` when the ink draws the frame's normals and depth (T98): with the circle
+ * clip if `m` has it (the simulation beyond the circle stays hidden once the corona shows), the same clipping planes
+ * (the cut above the head), sway and faces. Undefined for what writes neither colour nor depth (nothing to outline).
+ */
+export function normalsOf(m: THREE.Material): THREE.Material | undefined {
+  if (!m.visible || (!m.colorWrite && !m.depthWrite)) return undefined;
+  if (!m.userData?.clipped && !m.clippingPlanes?.length && m.side === THREE.FrontSide) return PLAIN_NORMALS;
+  let n = normalsCache.get(m);
+  if (!n) {
+    n = new THREE.MeshNormalMaterial({ side: m.side, clippingPlanes: m.clippingPlanes ?? null });
+    if (m.userData?.clipped) clipped(n, `normal-${m.userData.clipKey}`, !!m.userData.sway);
+    normalsCache.set(m, n);
+  }
+  return n;
 }
 
 /** The shadow pass draws with its own depth material: clipped too, or what is cut still casts its shadow. */

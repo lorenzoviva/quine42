@@ -9,7 +9,7 @@ import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { CARTOON, Ink } from './cartoon';
-import { U } from './materials';
+import { normalsOf, U } from './materials';
 
 /** In place of the bloom's luminosity threshold: the glow marked in alpha. */
 const GLOW_PASS = `uniform sampler2D tDiffuse;
@@ -36,7 +36,7 @@ export class Bloom {
     this.composer = new EffectComposer(gl, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 }));
     this.composer.addPass(new RenderPass(scene, camera));
     if (CARTOON && camera instanceof THREE.PerspectiveCamera) {
-      this.ink = new Ink(scene, camera);
+      this.ink = new Ink(scene, camera, normalsOf);
       this.composer.addPass(this.ink.pass);
     }
     this.pass = new UnrealBloomPass(new THREE.Vector2(1, 1), strength, radius, 0);

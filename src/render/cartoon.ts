@@ -56,16 +56,21 @@ void main() {
 
 /**
  * Ink outlines: before the frame, the scene is drawn once more with its normals into a target with a depth texture;
- * the pass darkens where depth or normal jump (silhouettes and the voxels' creases).
+ * the pass darkens where depth or normal jump (silhouettes and the voxels' creases). Each mesh draws with the normal
+ * material of its own (`normalsOf`), never one override for all: the circle clip and the cut above the head stay, or
+ * the simulation hidden beyond the circle would show its outlines around the corona (T98).
  */
 export class Ink {
   readonly pass: ShaderPass;
   private target = new THREE.WebGLRenderTarget(1, 1, { depthTexture: new THREE.DepthTexture(1, 1) });
-  private normals = new THREE.MeshNormalMaterial();
+  /** The materials swapped for their normals while `prepare` draws, to put back after. */
+  private swapped: [THREE.Mesh, THREE.Material | THREE.Material[]][] = [];
 
   constructor(
     private scene: THREE.Scene,
     private camera: THREE.PerspectiveCamera,
+    /** The normal material that stands in for each one (`normalsOf` of materials.ts, passed in: materials imports this file). */
+    private normalsOf: (m: THREE.Material) => THREE.Material | undefined,
   ) {
     this.pass = new ShaderPass({
       uniforms: {
@@ -101,14 +106,35 @@ export class Ink {
     const fog = this.scene.fog;
     this.scene.background = null;
     this.scene.fog = null;
-    this.scene.overrideMaterial = this.normals;
+    this.swap();
     gl.setRenderTarget(this.target);
     gl.setClearColor(0x8080ff, 1);
     gl.clear();
     gl.render(this.scene, this.camera);
     gl.setRenderTarget(null);
-    this.scene.overrideMaterial = null;
+    this.restore();
     this.scene.background = bg;
     this.scene.fog = fog;
   }
+
+  private swap(): void {
+    this.scene.traverseVisible((o) => {
+      const mesh = o as THREE.Mesh;
+      if (!mesh.material) return;
+      const was = mesh.material;
+      // Lines, points and sprites have no normals to outline: they stay out of the target.
+      const of = (m: THREE.Material) => (mesh.isMesh ? this.normalsOf(m) : undefined) ?? HIDDEN;
+      const now = Array.isArray(was) ? was.map(of) : of(was);
+      this.swapped.push([mesh, was]);
+      mesh.material = now;
+    });
+  }
+
+  private restore(): void {
+    for (const [mesh, was] of this.swapped) mesh.material = was;
+    this.swapped.length = 0;
+  }
 }
+
+/** What draws nothing in the normals (a material that is not drawn). */
+const HIDDEN = new THREE.MeshBasicMaterial({ visible: false });
