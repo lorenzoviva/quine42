@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 31/10/2026 alle 02:00 UTC, epoca 167 su **gemini**. **T45e completato e integrato nel base `3d`**; l'autore ha aggiornato `.env` e configurato il listener locale del webhook su `localhost:5173/api/stripe/webhook` (porta dev standard); approvato **T93** su Claude (priorità 9) per la verifica browser. **T92 e T52 integrati nel base `3d`** (ADR-0091). **T54** su Claude ha raggiunto il limite 5h (0%), riprende dopo le 02:59 UTC. Multigiocatore: T45f aspetta risposte GCP (`docs/pipeline/domande/T45f.md`). T88, T89 in coda da approvare.
+Aggiornato il 31/10/2026 alle 02:01 UTC, epoca 167 su **gemini**. **T45e completato e integrato nel base `3d`**; l'autore ha aggiornato `.env` e configurato il listener locale del webhook su `localhost:5173/api/stripe/webhook` (porta dev standard); approvato **T93** su Claude (priorità 9) per la verifica browser. **T92 e T52 integrati nel base `3d`** (ADR-0091). **T54** su Claude ha raggiunto il limite 5h (0%), riprende dopo le 02:59 UTC. Multigiocatore: T45f aspetta risposte GCP (`docs/pipeline/domande/T45f.md`). T88, T89 in coda da approvare.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -22,7 +22,7 @@ Aggiornato il 31/10/2026 alle 02:00 UTC, epoca 167 su **gemini**. **T45e complet
 
 - **Decisioni prese e fatti recenti**:
   - **T92 e T52 integrati nel base `3d`**: task/T92 ha risolto i conflitti con task/T52, rinumerato l'ADR in ADR-0091, aggiornato `AGENTS.md`, `README.md` e `backlog.md` (T52a fatto, T52b-f definiti). Eseguiti `integra T92` e `integra T52`, worktree e branch rimossi, typecheck e test pipeline verdi.
-  - **T54 in corso su Claude**: in attesa reset limite 5h (alle 03:01 UTC) per completare le taglie D&D e la Fucina.
+  - **T54 in corso su Claude**: in attesa reset limite 5h (alle 02:59 UTC) per completare le taglie D&D e la Fucina.
   - **T45d integrato nel base `3d` (ADR-0086)**: requisiti minimi, tetto crediti, modale esaurimento, lobby multigiocatore e collezione carte integrati.
   - **T45f sbloccato e preparato**: dipendeva da T44b e T45d, ora entrambi integrati. Aperte le domande su GCP Project ID, hosting e regione in `docs/pipeline/domande/T45f.md`.
   - **T45e completato e chiavi Stripe fornite**: l'autore ha risposto in `docs/pipeline/domande/T45e.md` inserendo le credenziali di test in `.env` e impostando il listener locale su `localhost:5173/api/stripe/webhook`. T45e segnato `fatto` e approvato **T93** per la verifica nel browser su Claude (priorità 9).
