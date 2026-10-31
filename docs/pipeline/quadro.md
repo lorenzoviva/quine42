@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 31/10/2026 alle 00:33 UTC, epoca 165 su **gemini** (avvio nuova epoca: contesto precedente al 270%). **T92** in corso su Gemini (integrazione T52 nel base `3d`). **T54** su Claude ha raggiunto il limite 5h (0%), riprende dopo le 03:01 UTC. **T51** approvato su Claude, in coda. Multigiocatore fermo (T45f aspetta risposte GCP, T45e aspetta chiavi test Stripe). T88, T89 non approvati.
+Aggiornato il 31/10/2026 alle 00:40 UTC, epoca 165 su **gemini**. **T92 e T52 integrati nel base `3d`** (ADR-0091, AGENTS.md, backlog aggiornati; rami e worktree rimossi; typecheck e test pipeline 73/73 verdi). **T54** su Claude ha raggiunto il limite 5h (0%), riprende dopo le 03:01 UTC. **T51** approvato su Claude, in coda. Multigiocatore fermo (T45f aspetta risposte GCP, T45e aspetta chiavi test Stripe). T88, T89 non approvati.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -21,30 +21,28 @@ Aggiornato il 31/10/2026 alle 00:33 UTC, epoca 165 su **gemini** (avvio nuova ep
 ## Stato e decisioni
 
 - **Decisioni prese e fatti recenti**:
-  - **T52 completato su Claude**: progetto dei sotterranei (ADR-0081 originario, da rinumerare in ADR-0091; AGENTS.md; T52 spezzato in T52b-f). Typecheck verde. Tentativo di integrazione automatica in conflitto su `AGENTS.md`, `docs/adr/README.md` e `docs/plans/backlog.md`.
-  - **Creato T92 su Gemini**: task di integrazione per fondere `task/T52` nel base `3d`, rinumerare ADR-0081 in ADR-0091, aggiornare `AGENTS.md` e `README.md`, e incorporare i sotto-task T52b-f nel backlog.
-  - **T54 in corso su Claude**: ripreso nel suo worktree per completare le taglie D&D e la Fucina.
+  - **T92 e T52 integrati nel base `3d`**: task/T92 ha risolto i conflitti con task/T52, rinumerato l'ADR in ADR-0091, aggiornato `AGENTS.md`, `README.md` e `backlog.md` (T52a fatto, T52b-f definiti). Eseguiti `integra T92` e `integra T52`, worktree e branch rimossi, typecheck e test pipeline verdi.
+  - **T54 in corso su Claude**: in attesa reset limite 5h (alle 03:01 UTC) per completare le taglie D&D e la Fucina.
   - **T45d integrato nel base `3d` (ADR-0086)**: requisiti minimi, tetto crediti, modale esaurimento, lobby multigiocatore e collezione carte integrati.
   - **T45f sbloccato e preparato**: dipendeva da T44b e T45d, ora entrambi integrati. Aperte le domande su GCP Project ID, hosting e regione in `docs/pipeline/domande/T45f.md`.
   - **Chiavi Stripe per test nel browser**: T45e resta segnato `in attesa` per la verifica browser (in attesa di `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` in `.env` o in chat, segnalate in `docs/pipeline/domande/T45e.md`).
 - **Cosa si aspetta**:
-  1. **Esecuzione e integrazione di T92** su Gemini per chiudere e rimuovere `task/T52`.
-  2. **Completamento di T54** su Claude (o avanzamento prima/dopo il reset delle 03:00 UTC).
-  3. **Risposte dell'autore per T45f** e chiavi di test Stripe per T45e.
+  1. **Reset limite 5h di Claude** (02:59/03:01 UTC) per completare T54 e far avanzare T51.
+  2. **Risposte dell'autore per T45f** e chiavi di test Stripe per T45e.
 - **Intenzioni / prossimi passi**:
-  1. Integrare T92 appena terminato ed eseguire `integra T52`.
-  2. Ricevute le risposte su T45f e le chiavi Stripe per T45e, riprendere il multigiocatore.
+  1. Ricevute le risposte su T45f e le chiavi Stripe per T45e, riprendere il multigiocatore.
+  2. Al ripristino di Claude, seguire l'avanzamento di T54 e l'avvio di T51.
 
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T92** in corso su Gemini (integrazione T52 nel base `3d`).
   - **T54** in corso su Claude (limite 5h raggiunto a 0%, riprende dopo le 03:01 UTC).
   - **T51** approvato su Claude (in coda dopo T54, aspetta pazientemente su Claude come confermato dall'autore).
+  - **T52b** pronto su Claude (in coda dopo T51).
 - **Completati e integrati nel base `3d`**:
-  - **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
+  - **T92**, **T52**, **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **Da integrare**:
-  - **T52** (i sotterranei, gestito da T92).
+  - Nessuno.
 - **In attesa di chiavi/risposte/verifica browser**:
   - **T45f**: sbloccato, in attesa di GCP Project ID e scelte di deploy (`docs/pipeline/domande/T45f.md`).
   - **T45e**: codice e test integrati, in attesa credenziali test Stripe per prova interattiva browser.
@@ -52,12 +50,12 @@ Aggiornato il 31/10/2026 alle 00:33 UTC, epoca 165 su **gemini** (avvio nuova ep
   - **T57** (rune come codice, bloccato da T51a).
 - **Crediti**:
   - **Claude**: 5h al 0 % (reset alle 02:59 UTC / 03:01 UTC), settimana al 41 % (9% per Claude and GPT models).
-  - **Gemini**: 5h al 100 %, settimana al 29 % (orchestratore + T92).
+  - **Gemini**: 5h al 97 %, settimana al 28 %.
   - **Argon**: fermo fino al 04/11.
 
 ## Da fare appena possibile
 
-- **Pianificate le risposte dell'autore**: T51b (automa cellulare del kernel), T52a (progetto dei sotterranei fatto, in integrazione con T92), T54 (in corso su Claude).
+- **Pianificate le risposte dell'autore**: T51b (automa cellulare del kernel), T52a (progetto fatto e integrato), T54 (in corso su Claude).
 - **Verifiche nel browser** (un task di verifica alla volta su `claude`, che ha `--chrome`): T45d (lobby multigiocatore), T64 (varianti in cache circuito-3D), T56b (arco salto e ombra), T69 (interfaccia web), T68c (stato provider coda abbonamenti), T45e (ricarica Stripe).
 
 ## Da sapere
