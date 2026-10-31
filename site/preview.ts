@@ -181,12 +181,8 @@ export function initHeroCanvas() {
 export function initCardInteractions() {
   const card = document.getElementById('demo-card');
   if (card) {
-    let flipped = false;
     card.addEventListener('click', () => {
-      flipped = !flipped;
-      card.style.transform = flipped
-        ? 'rotateY(180deg) scale(1.06)'
-        : '';
+      card.classList.toggle('is-flipped');
     });
   }
 }

@@ -2212,7 +2212,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Esito: `task/T107` (`e107d92`): retro vero della carta (`backface-visibility`), testi corretti (carta CSS 3D), motto e tooltip velati,
   niente riferimenti ADR, font in `public/fonts/`. Da integrare dopo la verifica nel browser (T108).
 
-### T108 · Verificare T107 (il sito corretto) nel browser — `da fare`
+### T108 · Verificare T107 (il sito corretto) nel browser — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 30
 - Contesto: T107 ha corretto i cinque difetti trovati da T100 su `site/index.html` ma su Antigravity non c'era il browser
   (`BROWSER: da verificare`). Nasce da T107 e T100: `dossier T107`, `dossier T100`.
@@ -2223,3 +2223,10 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   poi `/?skip&offline`: HUD del gioco come prima.
 - Quando è fatto: merge committato, verifica scritta nel blocco; ogni difetto come riga «difetto:» per l'orchestratore.
 - Dipende da T107.
+- Esito: merge di `task/T107` (`67dee84`, conflitto solo nel backlog: tenuto il blocco di 3d); typecheck e build verdi. In `dist/` nessun
+  valore di `GEMINI_API_KEY` (solo i messaggi d'aiuto); `googleapis` solo nel SDK di Firebase (`index.esm-*.js`, il login del
+  multigiocatore caricato con `import()` dal gioco), mai dal sito. Nel browser (preview 4817): hero three.js che gira; Bangers e Press
+  Start 2P da `/fonts/`, VT323 (solo fallback) anche, nessuna richiesta a terzi; la carta girata mostra il retro vero («QUINE42», «Carta
+  del mondo», non specchiato); motto del footer e tooltip dei gerboa allusivi, senza corona, Concilio né studio; nessun «ADR-» nei testi
+  visibili (resta in due commenti HTML); in console solo errori di estensioni del browser. `/?skip&offline`: HUD come prima, nessun errore.
+  Nessun difetto.
