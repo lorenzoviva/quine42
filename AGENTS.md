@@ -115,6 +115,7 @@ src/
     graph.ts            il grafo del mondo: nodi e archi dai file dell'universo, interrogazioni, controlli
     atlas.ts            l'atlante: regioni geolocalizzate, direzioni
     relief.ts           il rilievo: Hills di MarkovJunior → livello di ogni casella, mare, acqua piana tra i chunk (ADR-0048)
+    water.ts            l'acqua che scorre: l'automa cellulare del kernel sui luoghi caricati (ADR-0094)
     stamps.ts           timbri di strutture (castelli, torri, templi, piramidi, sotterranei…)
     universes.ts        client del repository dell'universo, aggiornamenti dal seme
     fourthwall.ts       principi del Concilio (due tavoli) e filtro della quarta parete
@@ -476,6 +477,12 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   attorno, e il resto del chunk si piega verso di lui lasciando il bordo al campo (`chunkLevels`). `kernel.groundAt(x, y)` è l'altezza del
   suolo, `floorAt` la comprende (i modelli stanno sul suolo sotto il loro centro); il renderer disegna colonne con i fianchi e
   posa tutto sul suolo. Corona e studio restano piani.
+- **L'acqua che scorre** (ADR-0094, T51b): un automa cellulare del kernel (`src/kernel/water.ts`, `kernel.water`): letto e quantità
+  d'acqua per casella, scorre verso i vicini più bassi solo dove qualcosa è cambiato (100 passi al secondo, `waterTick`), si ferma in
+  equilibrio, conserva la quantità, il mare è una sorgente. `kernel.dig(col, row, delta)` scava o alza il suolo (lo strumento di T57c e
+  di «Altro…» che scava); il piano tiene `scavi` e `acqua` (il campo di `worldLevels` li prende: la superficie dell'acqua che ha scorso
+  è fissata), le caselle che si riempiono o si asciugano cambiano tipo con `setTile`; il client sottile li riceve nel `PlaceView`.
+  MarkovJunior resta per generare.
 - **Mappa** (ADR-0011, 0040): caselle colorate per terreno, strati `ground floor wall door liquid vegetation rock`: l'acqua è
   più bassa con le sponde, i muri sono estrusi, le porte un varco sotto l'architrave; gli edifici dei luoghi non sono più caselle ma strutture; sulle caselle con `TileDef.model` (bosco, roccia) stanno istanze di quel modello, ruotate e spostate.
 - **Voxel luminosi** (ADR-0046): `<color glow="True">` fa brillare una lettera (fiamme, finestre, rune, neon): attributo

@@ -825,7 +825,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
     la miniatura usa il luogo da solo. Nel browser: 292 attraversamenti d'acqua tra chunk, tutti allo stesso livello.
 
 
-### T51b · Il motore dell'acqua — `da fare` (dipende da T51)
+### T51b · Il motore dell'acqua — `fatto` (dipende da T51)
 - Pipeline: claude · stima 5% · approvato · priorità 50
 - Contesto: spezzato da T51 il 31/10 (T51a fatto; `dossier T51`, `docs/pipeline/domande/T51.md`). Si appoggia a `worldLevels` di T51a.
 - Fare (ADR nuovo): l'acqua che scorre quando il terreno cambia (incantesimi che alzano o abbassano
@@ -838,6 +838,17 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 - Fatto quando: test verdi, verifica nel browser su un lago tra due chunk (una conca scavata accanto che si riempie), ADR nuovo, commit.
 - **Risposta dell'autore** (30/10): sì, l'automa cellulare del kernel (opzione 1); MarkovJunior resta per generare. Nasce da T51a:
   `dossier T51`.
+- Esito: [ADR-0094](../adr/0094-il-motore-dell-acqua.md). `src/kernel/water.ts` (`WaterFlow`): letto e quantità per casella, scorre verso i
+  vicini più bassi (0,2 della differenza), solo sulle caselle attive, si ferma in equilibrio, conserva la quantità; il mare (acqua al
+  livello del mare) è una sorgente; una casella d'acqua porta dentro tutto il suo specchio prima di scorrere. Nel kernel `kernel.dig(col,
+  row, delta)` (lo strumento per T57c e «Altro…» che scava; nessuna API Lua), `waterTick` (10 passi ogni 6 tick), `applyWater` (le caselle
+  che si riempiono o si asciugano cambiano tipo con `setTile`); il piano tiene `scavi` e `acqua`, `worldLevels` li prende (`pinned`); il
+  `PlaceView` li porta al client sottile. Test in `tests/water.test.ts` (conca accanto a un lago: 100·(L−6)+20·(L−4)=200, il lago scende a
+  22/3; nel kernel uno stagno tra due chunk). Nel browser: specchio di 28 caselle tra (0,0) e (1,0), conca di 8 caselle scavata accanto:
+  si riempie, un solo livello su 36 caselle, volume 56 conservato, superficie 28/36 come atteso. Diverso dal previsto: la profondità di
+  un'acqua mai mossa è nominale (`DEEP`, 2 livelli: il rilievo sotto l'acqua è sopra la sua superficie, non un fondo); lo specchio al livello
+  del mare è mare (sorgente), e nel browser per vederlo scendere il mare è stato abbassato a 0; suite intera: falliscono per timeout sotto
+  carico e, anche sul base, `explore.test.ts` (3) e `partita.test.ts` (1).
 
 ### T52 · I sotterranei — T52a `fatto` (progetto, ADR-0091), T52b `fatto`, T52c-f `da fare`
 - Pipeline: claude · stima 3% · approvato · priorità 50

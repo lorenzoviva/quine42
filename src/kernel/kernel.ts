@@ -43,7 +43,8 @@ import { MODELS_INDEX, type ModelInfo } from './forms';
 import { Content, normName, specOf } from './content';
 import { layout, type Building, type LayoutResult, articulationPoints } from './layout';
 import { AGENTS, Council, readBible, wordsOf, type AgentId, type CatalogEntry, type FeedEntry } from './agents/council';
-import { designEnvironment, drawAtlas, planChunk, readStructure, type ChunkPlan, type Where } from './agents/cartography';
+import { designEnvironment, drawAtlas, planChunk, readStructure, type ChunkPlan, type WaterRecord, type Where } from './agents/cartography';
+import { WaterFlow, WET, type WaterChange } from './water';
 import { forge, judgeCombination, repairLogic, slug, type ForgeOrigin } from './agents/forge';
 import { agentReply, examine, narrate, npcDialogue, npcReply, referenteReply, weavePlot, type NpcReply, type Turn } from './agents/minds';
 import { planGenesis } from './agents/genesis';
@@ -81,6 +82,10 @@ export interface JumpComp {
 /** How high a jump clears (tiles above where it starts) and how far it can land (tiles). */
 export const JUMP_UP = 1.05;
 export const JUMP_FAR = 2.6;
+/** The water (T51b): steps of the automaton every so many ticks (100 steps a second at 60 Hz); a dig moves at most so many levels. */
+const WATER_EVERY = 6;
+const WATER_STEPS = 10;
+const MAX_DIG = 8;
 
 export interface Chunk {
   cx: number;
@@ -103,6 +108,9 @@ export interface Chunk {
   chi?: string;
   /** Known to have no saved plan, and waiting for the universe's quota of new places (T40). */
   held?: boolean;
+  /** In a thin client (T51b): the ground dug and the water that has flowed, as the server's plan has them. */
+  scavi?: Record<string, number>;
+  acqua?: Record<string, WaterRecord>;
 }
 
 export interface LineState {
@@ -412,7 +420,18 @@ export class Kernel {
   /** The level of every tile, per chunk (flat water, flat lots), while its tiles, lots and the world's levels stay the same. */
   private levelCache = new WeakMap<Chunk, { tiles: string; lots: Building[]; field: Int16Array; levels: Int16Array }>();
   /** The levels of the loaded world before the lots (T51a), while its places, their tiles, the relief and the sea stay the same. */
-  private worldField?: { relief: Relief; sea: number; tiles: Map<Chunk, string>; levels: Map<Chunk, Int16Array> };
+  private worldField?: { relief: Relief; sea: number; ground: number; tiles: Map<Chunk, string>; levels: Map<Chunk, Int16Array> };
+  /** Bumped when the ground is dug or the water flows (T51b): the world's levels are made again. */
+  private groundVersion = 0;
+  /** The water that flows (T51b, ADR-0094): the kernel's cellular automaton on the loaded places. */
+  readonly water = new WaterFlow({
+    loaded: (c, r) => this.chunkAt(c, r)?.stage === 'planned',
+    wet: (c, r) => this.palette[this.tileAt(c, r) ?? '']?.layer === 'liquid',
+    surface: (c, r) => this.fieldAt(c, r),
+    ground: (c, r) => Math.max(this.seaLevel, this.relief.level(c, r) + this.digAt(c, r)),
+    record: (c, r) => this.waterAt(c, r),
+    sea: () => this.seaLevel,
+  });
   private solidForms = new Map<string, Array<SolidForm>>();
   /** The solid things whose model has a cellar (T52b): where the terrain has a hole. */
   private cellars: SolidForm[] = [];
@@ -2198,19 +2217,132 @@ export class Kernel {
   private levelsOf(ch: Chunk): Int16Array {
     const relief = this.relief, sea = this.seaLevel;
     const f = this.worldField;
-    let fresh = !!f && f.relief === relief && f.sea === sea && f.tiles.size === this.chunks.size;
+    let fresh = !!f && f.relief === relief && f.sea === sea && f.ground === this.groundVersion && f.tiles.size === this.chunks.size;
     if (fresh) for (const c of this.chunks.values()) if (f!.tiles.get(c) !== c.tiles) { fresh = false; break; }
     if (!fresh) {
       const list = [...this.chunks.values()];
-      const out = worldLevels(list, this.config.chunkSize, (code) => this.palette[code]?.layer === 'liquid', (c, r) => relief.level(c, r), sea);
+      const S = this.config.chunkSize;
+      const out = worldLevels(list, S, (code) => this.palette[code]?.layer === 'liquid', (c, r) => relief.level(c, r) + this.digAt(c, r), sea, (k, i) => {
+        const w = this.waterOf(list[k])?.[i];
+        return w && w[1] > WET ? w[0] + w[1] : undefined;
+      });
       const levels = new Map(list.map((c, i) => [c, out[i]]));
       if (f) for (const c of list) {
         const old = f.levels.get(c);
         if (old && f.tiles.get(c) === c.tiles && old.some((v, i) => v !== levels.get(c)![i])) c.levels = (c.levels ?? 0) + 1;
       }
-      this.worldField = { relief, sea, tiles: new Map(list.map((c) => [c, c.tiles])), levels };
+      this.worldField = { relief, sea, ground: this.groundVersion, tiles: new Map(list.map((c) => [c, c.tiles])), levels };
     }
     return this.worldField!.levels.get(ch)!;
+  }
+
+  /** The ground dug or raised and the water that has flowed of a place (T51b): its plan's, or what the server said. */
+  private digsOf(ch: Chunk): Record<string, number> | undefined {
+    return ch.plan?.scavi ?? ch.scavi;
+  }
+  private waterOf(ch: Chunk): Record<string, WaterRecord> | undefined {
+    return ch.plan?.acqua ?? ch.acqua;
+  }
+  private cellOf(col: number, row: number): { ch: Chunk; cell: number } | undefined {
+    const ch = this.chunkAt(col, row);
+    if (!ch) return undefined;
+    const S = this.config.chunkSize;
+    return { ch, cell: (Math.floor(row) - ch.cy * S) * S + (Math.floor(col) - ch.cx * S) };
+  }
+  /** Levels the ground of a tile was dug (negative) or raised (T51b). */
+  private digAt(col: number, row: number): number {
+    const at = this.cellOf(col, row);
+    const d = at && this.digsOf(at.ch)?.[at.cell];
+    return typeof d === 'number' && Number.isFinite(d) ? d : 0;
+  }
+  private waterAt(col: number, row: number): WaterRecord | undefined {
+    const at = this.cellOf(col, row);
+    return at && this.waterOf(at.ch)?.[at.cell];
+  }
+  /** The level of a tile in the world's field before the lots (T51a): the water's surface for water. */
+  private fieldAt(col: number, row: number): number {
+    const at = this.cellOf(col, row);
+    if (!at) return Math.max(this.seaLevel, this.relief.level(Math.floor(col), Math.floor(row)));
+    return this.levelsOf(at.ch)[at.cell];
+  }
+
+  /**
+   * Digs (negative) or raises the ground of a tile by whole levels (T51b, ADR-0094): persisted in the place's plan
+   * (`scavi`), never below the sea; the water around flows into the hollow (or out of what rose) in the next ticks,
+   * as the kernel's cellular automaton (`water.ts`) has it. Only a planned place of the simulation; false otherwise.
+   */
+  dig(col: number, row: number, delta: number): boolean {
+    if (this.mirror || !Number.isFinite(col) || !Number.isFinite(row) || !Number.isFinite(delta)) return false;
+    const d = Math.max(-MAX_DIG, Math.min(MAX_DIG, Math.round(delta)));
+    const at = this.cellOf(col, row);
+    if (!d || !at || at.ch.stage !== 'planned' || !at.ch.plan) return false;
+    const { ch, cell } = at;
+    const plan = ch.plan!;
+    const c = Math.floor(col), r = Math.floor(row);
+    // The flow takes the tile as it is before the dig: its bed moves by what the ground moves.
+    this.water.wake(c, r);
+    const before = this.relief.level(c, r) + this.digAt(c, r);
+    const scavi = (plan.scavi ??= {});
+    const next = Math.max(-2 * MAX_DIG, Math.min(2 * MAX_DIG, (scavi[cell] ?? 0) + d));
+    if (next) scavi[cell] = next;
+    else delete scavi[cell];
+    const moved = this.relief.level(c, r) + next - before;
+    const rec = plan.acqua?.[cell];
+    if (rec) rec[0] += moved;
+    // Under water the bed moves as it is dug; land never goes below the sea.
+    const wet = !!rec || this.palette[ch.tiles[cell]]?.layer === 'liquid';
+    this.water.dig(c, r, wet ? moved : Math.max(this.seaLevel, before + moved) - Math.max(this.seaLevel, before));
+    this.groundVersion++;
+    ch.version++;
+    this.saveChunkSoon(ch);
+    return true;
+  }
+
+  /** The water's steps (T51b): `WATER_STEPS` every `WATER_EVERY` ticks while it moves; what one sees changes in the plans. */
+  private waterTick(): void {
+    if (!this.water.moving || this.tickCount % WATER_EVERY !== 0) return;
+    for (let i = 0; i < WATER_STEPS && this.water.step(); i++);
+    this.applyWater(this.water.changed(!this.water.moving));
+    this.water.rest();
+  }
+
+  /** Writes what the flow changed into the places: the water of each tile, and the tiles that became water or land. */
+  private applyWater(list: WaterChange[]): void {
+    if (!list.length) return;
+    const touched = new Set<Chunk>();
+    const isWet = (code?: string) => this.palette[code ?? '']?.layer === 'liquid';
+    for (const x of list) {
+      const at = this.cellOf(x.col, x.row);
+      if (!at?.ch.plan || at.ch.stage !== 'planned') continue;
+      const { ch, cell } = at;
+      const acqua = (at.ch.plan.acqua ??= {});
+      const old = acqua[cell];
+      const code = ch.tiles[cell];
+      const round = (v: number) => Math.round(v * 1000) / 1000;
+      let prima = old?.[2];
+      if (x.wet && !isWet(code)) {
+        // Land that became water: the kind of water it came from, or of a neighbour, or the first of the palette.
+        const near = [x.from, [x.col + 1, x.row], [x.col - 1, x.row], [x.col, x.row + 1], [x.col, x.row - 1]].map((p) => p && this.tileAt(p[0], p[1]));
+        const wetCode = near.find((t) => isWet(t)) ?? Object.keys(this.palette).find((t) => isWet(t));
+        if (!wetCode) continue;
+        prima = code;
+        this.setTile(x.col, x.row, wetCode);
+      } else if (!x.wet && isWet(code)) {
+        // Water that dried: what it was, or the land beside it that does not block.
+        const near = [[x.col + 1, x.row], [x.col - 1, x.row], [x.col, x.row + 1], [x.col, x.row - 1]].map(([a, b]) => this.tileAt(a, b));
+        const land = prima && this.palette[prima] ? prima : (near.find((t) => t && !isWet(t) && !this.palette[t]?.solid) ?? this.pathCode());
+        this.setTile(x.col, x.row, land);
+        prima = undefined;
+      }
+      if (x.water < 0.001 && !isWet(ch.tiles[cell])) delete acqua[cell];
+      else acqua[cell] = prima ? [round(x.bed), round(x.water), prima] : [round(x.bed), round(x.water)];
+      touched.add(ch);
+    }
+    for (const ch of touched) {
+      ch.version++;
+      this.saveChunkSoon(ch);
+    }
+    this.groundVersion++;
   }
 
   /** The height (tiles) of the ground at a point of the simulation: the world's levels (T51a); lots lie flat. */
@@ -2391,6 +2523,7 @@ export class Kernel {
       this.ecs.destroy(id);
     }
     this.chunks.delete(ch.key);
+    this.water.forget();
   }
 
   private clearChunks(): void {
@@ -7163,6 +7296,7 @@ export class Kernel {
         });
     }
     this.updateChunks();
+    this.waterTick();
     this.pumpDevelopment();
     if (this.time - this.lastSculptPump > 2) {
       this.lastSculptPump = this.time;

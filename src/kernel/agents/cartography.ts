@@ -18,6 +18,9 @@ export interface PlacedObject {
   where: Where;
 }
 
+/** The water of a tile that has flowed (T51b): its bed, its water (levels), the tile it was before it became water. */
+export type WaterRecord = [number, number] | [number, number, string];
+
 export interface ChunkPlan {
   place: Place;
   /** Layout (environment) id. */
@@ -37,6 +40,10 @@ export interface ChunkPlan {
   strutture?: Array<{ concetto: string; taglia?: Taglia }>;
   /** Tiles changed after the layout (by effects, spells, Lua): cell index → tile code. */
   edits?: Record<string, string>;
+  /** The ground dug (negative) or raised after the layout (T51b): cell index → levels. */
+  scavi?: Record<string, number>;
+  /** The water that has flowed (T51b, `water.ts`): cell index → its bed and its water (levels), and the tile it was before it became water. */
+  acqua?: Record<string, WaterRecord>;
   /** Who planned the place and who paid for it (T36). */
   carta?: Carta;
 }

@@ -188,8 +188,11 @@ export const SEA_DRAFT = 'o';
  * It is the greatest field below the relief that keeps those bounds: a tile's level is the least, over all
  * tiles, of their start plus the way between them (two levels for each tile of land entered, none for water),
  * found with a queue in buckets of levels.
+ *
+ * `pinned` (T51b) gives the surface of the water that has flowed (`water.ts`): those tiles of water keep it, never
+ * lowered by what is around them, and the water they touch that has not flowed goes down to them as to any lower water.
  */
-export function worldLevels(chunks: WaterChunk[], size: number, liquid: (code: string) => boolean, level: (col: number, row: number) => number, sea: number): Int16Array[] {
+export function worldLevels(chunks: WaterChunk[], size: number, liquid: (code: string) => boolean, level: (col: number, row: number) => number, sea: number, pinned?: (chunk: number, cell: number) => number | undefined): Int16Array[] {
   const S = size, A = S * S;
   const index = new Map<string, number>();
   chunks.forEach((c, i) => index.set(`${c.cx},${c.cy}`, i));
@@ -197,6 +200,7 @@ export function worldLevels(chunks: WaterChunk[], size: number, liquid: (code: s
   const out = chunks.map(() => new Int16Array(A));
   const wet = new Uint8Array(n);
   const val = new Int32Array(n);
+  const pin = new Uint8Array(n);
   let hi = sea;
   for (let k = 0; k < chunks.length; k++) {
     const ch = chunks[k];
@@ -204,7 +208,9 @@ export function worldLevels(chunks: WaterChunk[], size: number, liquid: (code: s
       const t = k * A + i;
       const c = i % S, r = (i - c) / S;
       wet[t] = liquid(ch.tiles[i]) ? 1 : 0;
-      val[t] = wet[t] && ch.draft?.[i] === SEA_DRAFT ? sea : Math.max(sea, level(ch.cx * S + c, ch.cy * S + r));
+      const p = wet[t] ? pinned?.(k, i) : undefined;
+      if (p !== undefined && Number.isFinite(p)) pin[t] = 1;
+      val[t] = pin[t] ? Math.max(sea, Math.round(p!)) : wet[t] && ch.draft?.[i] === SEA_DRAFT ? sea : Math.max(sea, level(ch.cx * S + c, ch.cy * S + r));
       hi = Math.max(hi, val[t]);
     }
   }
@@ -241,7 +247,7 @@ export function worldLevels(chunks: WaterChunk[], size: number, liquid: (code: s
       for (let m = near(t, nb), x = 0; x < m; x++) {
         const u = nb[x];
         const v = val[t] + (wet[u] ? 0 : 2);
-        if (done[u] || v >= val[u]) continue;
+        if (done[u] || pin[u] || v >= val[u]) continue;
         val[u] = v;
         buckets[v - sea].push(u);
       }
