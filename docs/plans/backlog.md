@@ -2115,3 +2115,11 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   mesh tagliate escluse/rese col loro taglio) e la visibilità di ciò che il frame non mostra; vale anche per il futuro disegno degli id di T89b.
 - Fatto quando: typecheck e test verdi; nel browser con `?cartone`, dalla corona (`?dev&teleport=46,0`) oltre il cerchio niente
   contorni della simulazione, dentro il cerchio i contorni come prima; niente errori in console.
+
+### T99 · Integrare T57 (T57a) — `da fare`
+- Pipeline: claude · stima 1% · approvato · priorità 5
+- Contesto: `integra T57` va in conflitto con il base `3d` solo in `docs/plans/backlog.md` (il base ha aggiunto T96-T98 e
+  aggiornato altri blocchi). T57 ha fatto il pezzo T57a (rune composte come programma); T57b e T57c restano da fare. Nasce da T57: `dossier T57`.
+- Cosa fare: nel worktree `git merge task/T57`; in `backlog.md` tieni tutti i blocchi del base e, per il blocco di T57, la versione
+  di `task/T57` (T57a fatto con il suo commit, T57b prossimo pezzo, il blocco resta `da fare`); nessun altro file.
+- Quando è fatto: merge committato, `npm run typecheck` verde, i test toccati da T57 (`traccia T57`) verdi.
