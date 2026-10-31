@@ -45,6 +45,7 @@ export default defineConfig(({ mode }) => {
           main: path.resolve('index.html'),
           lab3d: path.resolve('lab/3d/index.html'),
           labEditor: path.resolve('lab/editor/index.html'),
+          site: path.resolve('site/index.html'),
         },
       },
     },

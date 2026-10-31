@@ -57,7 +57,8 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
 
 ## Stack
 
-- **Vite 5 + TypeScript 5** (strict), **three.js** per il mondo (ADR-0040), DOM per HUD/pannelli, uno strato 2D sopra per i testi.
+- **Vite 5 + TypeScript 5** (strict), **three.js** per il mondo (ADR-0040) e per le pagine out-game (ADR-0095), DOM per HUD/pannelli, uno strato 2D sopra per i testi.
+- **Il sito e il tema** (ADR-0095, T97): pop art a fumetti, retro arcade, neon punk e retrowave; variabili CSS unificate in `src/theme.css` per sito e gioco; pagine Vite in `site/` senza framework pesanti; three.js fuori dal gioco (hero canvas, carte 3D animate, profilo); il segreto dei gerboa nel footer.
 - **Lua 5.4 via wasmoon** (WebAssembly), sandbox gestita dal kernel.
 - **Google Gemini**: `gemini-3.1-flash-lite` (testo), in
   `universe/universe.json → ai` con i budget (`maxText`, `maxForges`, `maxPacks`, `maxCast`; in multigiocatore `placesPerMinute`),
@@ -170,6 +171,7 @@ tools/pipeline/          la pipeline agentica (ADR-0072, 0079): pipeline.mjs (co
 tools/abbonamenti/      servi.ts (il processo che serve la coda degli abbonamenti con le CLI, ADR-0077)
 lab/                    laboratorio di MarkovJunior (ADR-0038): sandbox 3D /lab/3d/, editor modelli /lab/editor/ (T59a, T59b, T59c, T59d), modelli ufficiali e conformità, script per
                         affettare, fotografare, misurare e provare i programmi con Gemini; non importarlo da src/
+site/                   il sito web (ADR-0095, T97): landing, carte 3D, sessioni, profilo e crediti; theme.css condiviso con il gioco
 ```
 
 ## Il Concilio (ADR-0008, 0011, 0012, 0013, 0014, 0016, 0042)

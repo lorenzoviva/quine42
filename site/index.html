@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QUINE42 · Il Gioco Fatto del Proprio Codice</title>
+    <!-- Google Fonts for Comic & Arcade Retrowave Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bangers&family=Press+Start+2P&family=VT323&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./site.css" />
+  </head>
+  <body>
+    <!-- Top Navigation Bar -->
+    <header class="site-nav">
+      <a href="./index.html" class="nav-brand">
+        <span class="nav-logo">QUINE42</span>
+        <span class="nav-tagline">// ARCADE · VOXEL · IA</span>
+      </a>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="#mondo" class="nav-link active">Mondo</a></li>
+          <li><a href="#carte" class="nav-link">Carte 3D</a></li>
+          <li><a href="#sessioni" class="nav-link">Sessioni</a></li>
+          <li><a href="#profilo" class="nav-link">Profilo</a></li>
+          <li><a href="#crediti" class="nav-link">Crediti</a></li>
+        </ul>
+      </nav>
+      <div class="nav-actions">
+        <a href="../index.html" class="comic-btn arcade cyan">GIOCA SUBITO</a>
+        <button id="nav-login-btn" class="comic-btn arcade">ACCEDI</button>
+      </div>
+    </header>
+
+    <!-- Main Hero Section -->
+    <main>
+      <section class="hero" id="mondo">
+        <div class="hero-content">
+          <div class="hero-subtitle">
+            <span class="comic-badge yellow">ONLINE</span>
+            <span>UN MONDO CHE SI SCRIVE DA SÉ</span>
+          </div>
+          <h1 class="hero-title">IL MONDO È FATTO DEL SUO STESSO CODICE</h1>
+          <p class="hero-desc">
+            Vivi in un universo 3D a voxel generato da un Concilio di IA. Raccogli rune che contengono
+            codice Lua vivo, evoca incantesimi, colleziona carte animate 3D ed esplora le sessioni multigiocatore.
+          </p>
+          <div class="hero-cta">
+            <a href="../index.html" class="comic-btn pink">ENTRA IN GIOCO</a>
+            <a href="#carte" class="comic-btn cyan">SCOPRI LE CARTE</a>
+            <a href="#sessioni" class="comic-btn">CREA UNIVERSO</a>
+          </div>
+        </div>
+
+        <div class="hero-3d-container">
+          <span class="hero-3d-badge comic-badge green">THREE.JS 3D LIVE</span>
+          <canvas id="hero-canvas"></canvas>
+          <span class="hero-3d-hint">MUOVI IL MOUSE PER ESPLORARE</span>
+        </div>
+      </section>
+
+      <!-- Key Pillars Section (Pop Art Comics) -->
+      <section class="section-wrap">
+        <div class="section-head">
+          <h2 class="comic-title">I QUATTRO PILASTRI DI QUINE42</h2>
+          <p>// ZERO META-GIOCO DENTRO IL MONDO · REGOLA PURA</p>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-box">
+            <span class="feature-icon">⚡</span>
+            <h3 class="feature-title">RUNE E MAGIA</h3>
+            <p class="feature-text">
+              Sul terreno brillano token di codice Lua vero. Componi le frasi col tuo passo: ciò che è scritto si esegue nel mondo e le rune magiche scatenano forze reali.
+            </p>
+          </div>
+
+          <div class="feature-box">
+            <span class="feature-icon">🧊</span>
+            <h3 class="feature-title">MARKOV JUNIOR 3D</h3>
+            <p class="feature-text">
+              Nessuna immagine raster generata: ogni creatura, oggetto o tempio è un algoritmo MarkovJunior tridimensionale scolpito in tempo reale.
+            </p>
+          </div>
+
+          <div class="feature-box">
+            <span class="feature-icon">🃏</span>
+            <h3 class="feature-title">CARTE COLLEZIONABILI</h3>
+            <p class="feature-text">
+              Possiedi pezzi del mondo! Le carte tracciano gli utilizzi (luoghi, trame, prompt) e trasferiscono quote di eredità economica nei cloni multigiocatore.
+            </p>
+          </div>
+
+          <div class="feature-box">
+            <span class="feature-icon">🏛️</span>
+            <h3 class="feature-title">IL CONCILIO DI IA</h3>
+            <p class="feature-text">
+              Narratore, Cartografo, Fisico, Scultore e Ingegnere animano una società viva con mestieri, famiglie e trame, protetti dal pavimento inviolabile del kernel.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Showcase Cards & Multiplayer Hub (ADR-0095) -->
+      <section class="section-wrap" id="carte">
+        <div class="section-head">
+          <h2 class="comic-title">AREA CARTE E MULTIGIOCATORE</h2>
+          <p>// GRAFICA INTERATTIVA THREE.JS FUORI DAL GIOCO</p>
+        </div>
+
+        <div class="card-showcase-grid">
+          <!-- 3D Holographic Card Demo -->
+          <div class="card-3d-wrapper">
+            <div class="retro-card" id="demo-card">
+              <div class="card-holo-foil"></div>
+              <div class="card-inner">
+                <div class="card-header">
+                  <h4 class="card-name">SPADA DI FULIGGINE</h4>
+                  <span class="comic-badge cyan">RARA</span>
+                </div>
+                <div class="card-art-box">
+                  <div class="card-art-gem"></div>
+                </div>
+                <p style="font-size: 0.8rem; margin: 0 0 10px; color: var(--comic-paper-dim)">
+                  Lama forgiata nella cenere del primo vulcano. Brucia con fiamme di rune pure.
+                </p>
+                <div class="card-stats-box">
+                  <div class="card-stat">Luoghi: <b>14</b></div>
+                  <div class="card-stat">Trame: <b>6</b></div>
+                  <div class="card-stat">Prompt: <b>31</b></div>
+                  <div class="card-stat">Origine: <b>Clone #4</b></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Explanation & Card Collecting Features -->
+          <div>
+            <div class="comic-badge yellow">PROPRIETÀ DIGITALE AUTENTICA</div>
+            <h3 style="font-family: var(--font-display); font-size: 2.2rem; color: var(--neon-yellow); margin: 12px 0;">
+              CARTE VIVE CHE GENERANO VALORE
+            </h3>
+            <p style="color: var(--comic-paper); font-size: 1.05rem; line-height: 1.6;">
+              Ogni elemento forgiato o scoperto nel mondo diventa una carta digitale 3D.
+              Grazie all'architettura dei cloni (ADR-0084), ogni volta che un altro universo include
+              la tua carta, una quota dei proventi in crediti risale la catena dei titolari fino a te.
+            </p>
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+              <button class="comic-btn pink">SFOGLIA COLLEZIONE</button>
+              <button class="comic-btn">REGISTRA CARTA</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- UI Component Demos: Session & Payment Modules -->
+        <div class="demo-strip" id="sessioni">
+          <div class="demo-box" id="sessione-demo">
+            <div class="comic-badge green">SESSIONE ATTIVA</div>
+            <h3>VALMORA MULTIGIOCATORE</h3>
+            <p style="font-size: 0.9rem; color: var(--comic-paper-dim);">
+              Master: <b style="color: var(--neon-cyan)">IO (QUINE_MASTER)</b><br />
+              Modelli: <b style="color: var(--neon-yellow)">gemini-3.1-flash-lite + Flash 3.8</b><br />
+              Spesa stimata: <b>$0.08 / ora</b> · Minimo tetto: <b>$1.00</b>
+            </p>
+            <div style="margin-top: 18px; display: flex; gap: 10px;">
+              <a href="../index.html?universo=valmora" class="comic-btn cyan" style="font-size: 0.9rem; padding: 6px 14px;">ENTRA ORA</a>
+              <button class="comic-btn" style="font-size: 0.9rem; padding: 6px 14px;">DETTAGLI LOBBY</button>
+            </div>
+          </div>
+
+          <div class="demo-box" id="crediti">
+            <div class="comic-badge pink">PORTAFOGLIO STRIPE</div>
+            <h3>RICARICA CREDITI</h3>
+            <p style="font-size: 0.9rem; color: var(--comic-paper-dim);">
+              Saldo disponibile: <b style="color: var(--neon-green); font-size: 1.1rem;">$12.50 USD</b><br />
+              Ricarica rapida certificata con Stripe Checkout e Google Pay.
+            </p>
+            <div style="display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap;">
+              <button class="comic-btn arcade cyan" style="padding: 6px 10px;">+ $5</button>
+              <button class="comic-btn arcade cyan" style="padding: 6px 10px;">+ $10</button>
+              <button class="comic-btn arcade cyan" style="padding: 6px 10px;">+ $20</button>
+            </div>
+          </div>
+
+          <div class="demo-box" id="profilo">
+            <div class="comic-badge yellow">PROFILO VIANDANTE</div>
+            <h3>STATO ACCOUNT</h3>
+            <p style="font-size: 0.9rem; color: var(--comic-paper-dim);">
+              ID Viandante: <b style="color: var(--neon-cyan)">v-9842a</b><br />
+              Stato: <b style="color: var(--neon-green)">Account Google Collegato</b><br />
+              Mantello: <b style="color: var(--neon-pink)">#ff2a85</b> · Seme: <b>42</b>
+            </p>
+            <div style="margin-top: 18px;">
+              <button class="comic-btn arcade pink" style="font-size: 0.75rem; padding: 6px 12px;">MODIFICA AVATAR 3D</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Synthwave Sunset Footer with the Secret of the Jerboa -->
+    <footer class="site-footer">
+      <div class="footer-grid-floor"></div>
+
+      <!-- The Jerboa Secret Easter Egg (ADR-0095) -->
+      <div class="footer-horizon">
+        <div class="jerboa-peek-container" title="Qualcosa osserva dall'orizzonte...">
+          <div class="jerboa-tooltip">// CHI È FUORI DAL TAPPETO CONOSCE LO STUDIO</div>
+          <svg class="jerboa-ears-svg" viewBox="0 0 64 38">
+            <!-- Stylized silhouette of the two long gerboa ears peeking up -->
+            <path d="M 16 38 C 14 20, 4 8, 12 2 C 20 -4, 26 14, 28 38 Z" />
+            <path d="M 48 38 C 50 20, 60 8, 52 2 C 44 -4, 38 14, 36 38 Z" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="footer-brand">QUINE42</div>
+      <p class="footer-quote">
+        "Il tappeto compensa ogni passo e ti tiene al centro.<br />
+        Attorno, invisibile finché dura la simulazione, c'è chi scrive le regole del mondo."
+      </p>
+
+      <div class="footer-links">
+        <a href="../index.html">GIOCO</a>
+        <a href="#mondo">MONDO</a>
+        <a href="#carte">CARTE</a>
+        <a href="#sessioni">LOBBY</a>
+        <a href="#crediti">PAGAMENTI</a>
+      </div>
+
+      <div class="footer-copy">
+        QUINE42 © 2026 · Voxel Engine & Kernel Immutevole · Generato da Google Gemini e MarkovJunior 3D
+      </div>
+    </footer>
+
+    <!-- Interactive script -->
+    <script type="module" src="./preview.ts"></script>
+  </body>
+</html>
