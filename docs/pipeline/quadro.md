@@ -31,8 +31,8 @@ Aggiornato il 31/10/2026 alle 14:00 UTC, epoca 171 su **claude**. T89 integrato.
   2. Proposto **T95** (test explore/partita/subscription rossi anche da soli): aspetta l'approvazione dell'autore.
   2. **Risposte dell'autore per T45f** (`docs/pipeline/domande/T45f.md`).
 - **Intenzioni / prossimi passi**:
-  1. Seguire T51 e T96; integrare T96, poi togliere il fermo a mano (`slotAggiornato` nel futuro in `.pipeline/budget.json`) se `slotMinimi` lo rende inutile; poi `riprendi T89`.
-  2. Seguire poi T51 e T89 in coda. Nota: un «dipende da Txx» verso un task fatto solo nel suo branch blocca il task (T94 era fermo per questo).
+  1. Seguire T51b (Claude) e T96 (Gemini); integrare T96, poi togliere il fermo a mano dello slot di Claude in `.pipeline/budget.json` e usare `sospendi/riattiva`. Poi T97 (il sito): chiedere all'autore dove mettere il template di Claude Design (proposto `docs/design/sito/`).
+  2. Proporre all'autore stime e approvazione di T89a-e (cartone) e T95 (test rossi). Nota: un «dipende da Txx» verso un task fatto solo nel suo branch blocca il task.
   3. Ricevute le risposte su T45f, riprendere il deploy del multigiocatore su GCP.
 
 ## Task attivi e in corso
