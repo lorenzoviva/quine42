@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 31/10/2026 alle 17:10 UTC, epoca 175 su **claude**. **T96 integrato** (mai zero slot, `sospendi`/`riattiva`); tolti i fermi a mano degli slot. **T57a fatto** (rune composte come programma), `integra T57` in conflitto solo su `backlog.md`: **T99** (integrare T57, priorità 5, Claude) poi **T98** su Claude; T57 riparte per T57b dopo T99. **T97** (il sito) su Gemini. Da approvare: T45f (risposte GCP), T88, T95, T89a-e.
+Aggiornato il 31/10/2026 alle 17:10 UTC, epoca 175 su **claude** (fine epoca). **T96 integrato** (mai zero slot, `sospendi`/`riattiva`); tolti i fermi a mano degli slot. **T57a fatto** (rune composte come programma), `integra T57` in conflitto solo su `backlog.md`: **T99** (integrare T57, priorità 5, Claude) poi **T98** su Claude; T57 riparte per T57b dopo T99. **T97** (il sito) su Gemini. Da approvare: T45f (risposte GCP), T88, T95, T89a-e.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -31,7 +31,7 @@ Aggiornato il 31/10/2026 alle 17:10 UTC, epoca 175 su **claude**. **T96 integrat
   2. Proposto **T95** (test explore/partita/subscription rossi anche da soli): aspetta l'approvazione dell'autore.
   2. **Risposte dell'autore per T45f** (`docs/pipeline/domande/T45f.md`).
 - **Intenzioni / prossimi passi**:
-  1. Seguire T57 e T97; per le sospensioni temporanee di un provider usare `sospendi/riattiva` (T96). Se T97 chiede dove mettere il template di Claude Design, proporre `docs/design/sito/`.
+  1. Seguire T99 (poi integrare T57 con `integra T57` se T99 non lo toglie da solo, e T99), T98, T97; T57 riparte per T57b dopo T99 (T57c porterà l'effetto `rilievo`: oggi la terraformazione cambia solo il tipo di casella); per le sospensioni temporanee di un provider usare `sospendi/riattiva` (T96). Se T97 chiede dove mettere il template di Claude Design, proporre `docs/design/sito/`.
   2. Proporre all'autore stime e approvazione di T89a-e (cartone) e T95 (test rossi). Nota: un «dipende da Txx» verso un task fatto solo nel suo branch blocca il task.
   3. Ricevute le risposte su T45f, riprendere il deploy del multigiocatore su GCP.
 
