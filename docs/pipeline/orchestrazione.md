@@ -534,3 +534,5 @@
 - [2026-10-31T00:38:15.778Z] task/T52 integrato in 3d; worktree e branch tolti.
 - [2026-10-31T00:40:37.573Z] orchestratore: epoca 166 su gemini (contesto a 76 % della finestra)
 - [2026-10-31T00:51:36.861Z] nota: T45e: autore ha inserito chiavi Stripe in .env; T45e fatto, creato T93 per verifica browser su Claude
+- [2026-10-31T00:52:24.442Z] orchestratore: epoca 167 su gemini (contesto a 263 % della finestra)
+- [2026-10-31T01:00:47.830Z] nota: T93 approvato (verifica browser Stripe T45e, listener su porta 5173)

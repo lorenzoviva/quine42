@@ -1949,15 +1949,15 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Esito: eseguito `git merge task/T52` e risolti i conflitti; rinominato `docs/adr/0081-i-sotterranei.md` in `docs/adr/0091-i-sotterranei.md`, aggiornato titolo interno e inserito in `docs/adr/README.md` in fondo dopo ADR-0090; in `AGENTS.md` mantenuta la riga dei sotterranei con riferimento ad ADR-0091; in `docs/plans/backlog.md` preservati tutti i blocchi T75-T91 e T92, e aggiornato T52 con T52a fatto e i sotto-task T52b-f riferiti ad ADR-0091; `npm run typecheck` verificato e verde.
 
 ### T93 · Verifica nel browser dei pagamenti Stripe (T45e) — `da fare` (dipende da T45e)
-- Pipeline: claude · stima 3% · priorità 9
-- Contesto: T45e ha completato l'integrazione di Stripe Checkout (ADR-0083) nel base `3d` con test headless. L'autore ha inserito le chiavi di test (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PUBLISHABLE_KEY`) nel `.env`. L'autore segnala anche che il listener locale inoltra a `localhost:4242/webhook`. Leggi `node tools/pipeline/pipeline.mjs dossier T45e` e `traccia T45e`.
+- Pipeline: claude · stima 3% · approvato · priorità 9
+- Contesto: T45e ha completato l'integrazione di Stripe Checkout (ADR-0083) nel base `3d` con test headless. L'autore ha inserito le chiavi di test (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PUBLISHABLE_KEY`) nel `.env`. L'autore conferma che il listener locale è attivo e inoltra gli eventi a `localhost:5173/api/stripe/webhook` (porta standard del dev server). Leggi `node tools/pipeline/pipeline.mjs dossier T45e` e `traccia T45e`.
 - Fare: verificare nel browser con Claude (`--chrome`) la ricarica crediti di prova tramite Stripe Checkout:
-  - Il gioco e le sue API girano sul server Vite (su porta libera assegnata con il turno browser: `node tools/pipeline/pipeline.mjs turno browser -- npx vite preview --port <n> --strictPort` oppure `npm run dev -- --port <n>`);
+  - Il gioco e le sue API girano sul server Vite sulla porta 5173 (se libera, o con preview/dev sotto il turno browser: `node tools/pipeline/pipeline.mjs turno browser -- npm run dev -- --port 5173 --strictPort`);
   - Verificare che il profilo (`P`) mostri il saldo e i pulsanti di ricarica (+5 $, +10 $, +20 $);
   - Cliccando su una ricarica, verificare l'avvio della sessione di checkout Stripe;
   - Verificare il ritorno con successo (`?ricarica=successo`);
-  - Verificare che gli eventi del webhook raggiungano l'endpoint `/api/stripe/webhook` (se il listener locale inoltra a 4242/webhook, verificare se richiede `--forward-to localhost:<porta>/api/stripe/webhook`);
-  - Chiudi scheda e preview alla fine del turno.
+  - Verificare che gli eventi del webhook raggiungano l'endpoint `/api/stripe/webhook` (listener locale su porta 5173);
+  - Chiudi scheda e server alla fine del turno.
 - Fatto quando: una ricarica di prova eseguita nel browser o comportamento e risposte documentati con precisione, commit su branch `task/T93`.
 
 

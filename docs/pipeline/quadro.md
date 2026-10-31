@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 31/10/2026 alle 01:52 UTC, epoca 166 su **gemini**. **T45e completato e integrato nel base `3d`** (l'autore ha inserito le chiavi Stripe in `.env` e risposto a `docs/pipeline/domande/T45e.md`; creato **T93** per la verifica nel browser su Claude). **T92 e T52 integrati nel base `3d`** (ADR-0091). **T54** su Claude ha raggiunto il limite 5h (0%), riprende dopo le 03:01 UTC. **T51** approvato su Claude, in coda. Multigiocatore: T45f aspetta risposte GCP (`docs/pipeline/domande/T45f.md`). T88, T89, T93 in coda da approvare.
+Aggiornato il 31/10/2026 alle 02:00 UTC, epoca 167 su **gemini**. **T45e completato e integrato nel base `3d`**; l'autore ha aggiornato `.env` e configurato il listener locale del webhook su `localhost:5173/api/stripe/webhook` (porta dev standard); approvato **T93** su Claude (priorità 9) per la verifica browser. **T92 e T52 integrati nel base `3d`** (ADR-0091). **T54** su Claude ha raggiunto il limite 5h (0%), riprende dopo le 02:59 UTC. Multigiocatore: T45f aspetta risposte GCP (`docs/pipeline/domande/T45f.md`). T88, T89 in coda da approvare.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -25,21 +25,22 @@ Aggiornato il 31/10/2026 alle 01:52 UTC, epoca 166 su **gemini**. **T45e complet
   - **T54 in corso su Claude**: in attesa reset limite 5h (alle 03:01 UTC) per completare le taglie D&D e la Fucina.
   - **T45d integrato nel base `3d` (ADR-0086)**: requisiti minimi, tetto crediti, modale esaurimento, lobby multigiocatore e collezione carte integrati.
   - **T45f sbloccato e preparato**: dipendeva da T44b e T45d, ora entrambi integrati. Aperte le domande su GCP Project ID, hosting e regione in `docs/pipeline/domande/T45f.md`.
-  - **T45e completato e chiavi Stripe fornite**: l'autore ha risposto in `docs/pipeline/domande/T45e.md` inserendo le credenziali di test in `.env`. Il codice e i test erano già integrati nel base `3d` (T77, ADR-0083). T45e segnato `fatto` e creato **T93** per la verifica nel browser su Claude.
+  - **T45e completato e chiavi Stripe fornite**: l'autore ha risposto in `docs/pipeline/domande/T45e.md` inserendo le credenziali di test in `.env` e impostando il listener locale su `localhost:5173/api/stripe/webhook`. T45e segnato `fatto` e approvato **T93** per la verifica nel browser su Claude (priorità 9).
 - **Cosa si aspetta**:
-  1. **Reset limite 5h di Claude** (02:59/03:01 UTC) per completare T54 e far avanzare T51.
+  1. **Reset limite 5h di Claude** (02:59 UTC) per completare T54 e lanciare la verifica browser T93.
   2. **Risposte dell'autore per T45f** (`docs/pipeline/domande/T45f.md`).
 - **Intenzioni / prossimi passi**:
-  1. Al ripristino di Claude, seguire l'avanzamento di T54 e l'avvio di T51.
-  2. Eseguire la verifica browser di Stripe (T93) nel turno browser su Claude quando sarà possibile.
+  1. Al ripristino di Claude, seguire l'avanzamento di T54 e l'esecuzione di T93 (verifica browser Stripe).
+  2. Seguire poi T52b e T51 in coda.
   3. Ricevute le risposte su T45f, riprendere il deploy del multigiocatore su GCP.
 
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T54** in corso su Claude (limite 5h raggiunto a 0%, riprende dopo le 03:01 UTC).
-  - **T51** approvato su Claude (in coda dopo T54, aspetta pazientemente su Claude come confermato dall'autore).
-  - **T52b** pronto su Claude (in coda dopo T51).
+  - **T54** in corso su Claude (limite 5h raggiunto a 0%, riprende dopo le 02:59 UTC).
+  - **T93** approvato su Claude (verifica browser Stripe, in testa ai pronti con priorità 9).
+  - **T52b** pronto su Claude (in coda dopo T93, priorità 50).
+  - **T51** approvato su Claude (in coda dopo T52b, priorità 100).
 - **Completati e integrati nel base `3d`**:
   - **T92**, **T52**, **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **Da integrare**:
@@ -47,7 +48,6 @@ Aggiornato il 31/10/2026 alle 01:52 UTC, epoca 166 su **gemini**. **T45e complet
 - **In attesa di chiavi/risposte**:
   - **T45f**: sbloccato, in attesa di GCP Project ID e scelte di deploy (`docs/pipeline/domande/T45f.md`).
 - **In coda / Bloccati**:
-  - **T93** (verifica browser Stripe T45e, da approvare su Claude).
   - **T88**, **T89** (in coda da approvare).
   - **T57** (rune come codice, bloccato da T51a).
 - **Crediti**:
