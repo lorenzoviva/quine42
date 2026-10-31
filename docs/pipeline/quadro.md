@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 31/10/2026 alle 17:40 UTC, epoca 176 su **claude**. **T57a, T99, T97 (sito, ADR-0095), T100 integrati.** Task del sito rinumerati **T101-T106** (da approvare). I 5 difetti della pagina demo → **T107** su Gemini (approvato).
+Aggiornato il 31/10/2026 alle 17:45 UTC, epoca 176 su **claude** (fine epoca). **T57a, T99, T97 (sito, ADR-0095), T100 integrati.** Task del sito rinumerati **T101-T106** (da approvare). I 5 difetti della pagina demo → **T107** su Gemini (approvato).
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -31,8 +31,8 @@ Aggiornato il 31/10/2026 alle 17:40 UTC, epoca 176 su **claude**. **T57a, T99, T
   2. Proposto **T95** (test explore/partita/subscription rossi anche da soli): aspetta l'approvazione dell'autore.
   2. **Risposte dell'autore per T45f** (`docs/pipeline/domande/T45f.md`).
 - **Intenzioni / prossimi passi**:
-  1. Seguire T99 (poi integrare T57 con `integra T57` se T99 non lo toglie da solo, e T99), T98, T97; T57 riparte per T57b dopo T99 (T57c porterà l'effetto `rilievo`: oggi la terraformazione cambia solo il tipo di casella); per le sospensioni temporanee di un provider usare `sospendi/riattiva` (T96). Se T97 chiede dove mettere il template di Claude Design, proporre `docs/design/sito/`.
-  2. Proporre all'autore stime e approvazione di T89a-e (cartone) e T95 (test rossi). Nota: un «dipende da Txx» verso un task fatto solo nel suo branch blocca il task.
+  1. Seguire T107 (Gemini) e poi creare il task di verifica nel browser su Claude; T98 e T57b su Claude. Proporre all'autore T101-T106 (sito) da approvare; se T97 riceve risposta sui template di Claude Design (domande/T97.md), proposta . Lezione: non accodare blocchi al backlog accanto a un task che lo sta modificando (conflitti di ): se capita, togliere il blocco, integrare, rimetterlo.
+  2. Proporre all'autore approvazione di T89a-e (cartone), T95 (test rossi), T101-T106 (sito). Nota: un «dipende da Txx» verso un task fatto solo nel suo branch blocca il task.
   3. Ricevute le risposte su T45f, riprendere il deploy del multigiocatore su GCP.
 
 ## Task attivi e in corso
