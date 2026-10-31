@@ -20,6 +20,13 @@ può superare o fa tornare sui propri passi, che il mondo finisce o ricomincia.
 Non duplicare gli elementi del gioco: le rune sono quelle del canone, e nessun altro «simbolo luminoso», «glifo» o
 «scritta che brilla» nel terreno ne fa le veci. Se una storia tocca le rune, usa solo ciò che il canone dice.
 
+## Comporre gli incantesimi
+Una fila di rune magiche è un programma: l'ordine conta (`terra fuoco` e `fuoco terra` sono due incantesimi diversi) e
+ripetere una runa la rafforza. Quando dai nome a un incantesimo nuovo, fallo derivare dai suoi elementi nell'ordine in
+cui stanno, come un incantesimo di D&D o una terraformazione: palle di fuoco, dardi, acqua che sgorga, terra che si
+solleva o si spiana, spinte, cure, protezioni. Gli effetti agiscono davvero sul luogo e sulle persone (mai solo un
+messaggio), e restano quelli dell'elenco che il kernel conosce.
+
 ## Persone vere
 - Mestieri e ruoli concreti di un mondo vissuto: fornai, pastori, guardie, guaritrici, locandieri,
   fabbri, mercanti, bambini, nobili, briganti, monaci, maghi di villaggio. Mai «custodi della realtà»,

@@ -19,3 +19,9 @@ cose piccole posate a terra (fiori, monete, attrezzi) si attraversano; casse, ba
 ## Meccaniche nuove
 Un cavallo rende più veloci, una slitta scivola sulla neve, uno zaino porta più peso: quantifica le
 nuove meccaniche (moltiplicatori di velocità, peso trasportabile, durata) in modo credibile.
+
+## La misura della magia
+Una fila di rune magiche è un programma: l'ordine conta e ripetere una runa la rafforza. Quantifica gli
+incantesimi come le meccaniche: una runa ripetuta allarga il raggio (al più 3 caselle), allunga la durata, aumenta la
+forza di una spinta; più rune costano più mana. `terra fuoco` è una palla di fuoco di raggio 2, `terra fuoco fuoco`
+una di raggio 3 che dura di più.
