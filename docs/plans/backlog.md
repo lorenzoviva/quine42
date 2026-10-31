@@ -2133,7 +2133,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: merge committato, `npm run typecheck` verde, i test toccati da T57 (`traccia T57`) verdi.
   Esito: merge di `task/T57` sul branch `task/T99`; unico conflitto l'intestazione del blocco T57 in `backlog.md`, presa da `task/T57` (T57a fatto; poi T57b) tenendo «approvato» del base. Typecheck verde; `canon`, `showcase`, `focus` verdi; `kernel.test.ts` 57/57 verde con `--hookTimeout=120000` (senza, i `beforeEach` superano 10 s sotto il carico della pipeline, come già notato in T57a). Come previsto.
 
-### T100 · Integrare T97 e verificare il sito nel browser — `in corso`
+### T100 · Integrare T97 e verificare il sito nel browser — `fatto`
 - Pipeline: claude · stima 4% · approvato · priorità 6
 - Contesto: T97 (il sito, ADR-0095) è fatto su `task/T97` (`416ea7d`) ma è partito da `cbe8532`: nel suo `backlog.md` ha
   pianificato i task del sito come T99-T104, numeri che nel base sono già presi (T98 cartone, T99 integrare T57). Chiede anche la
@@ -2146,6 +2146,22 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: merge committato, task del sito rinumerati, typecheck e build verdi, verifica scritta nel blocco; i difetti trovati
   come righe «difetto:» per l'orchestratore.
 - Dipende da T99.
+- Esito: merge di `task/T97`; unico conflitto la coda di `backlog.md` (tenuti T98-T100 del base, poi i task del sito). Task del sito rinumerati
+  T99-T104 → T101-T106 (`prossimo` dava T101) nel backlog, in ADR-0095 (numero libero, resta 0095), `docs/adr/README.md` e
+  `docs/pipeline/domande/T97.md`; `AGENTS.md` non li citava. Le loro righe `- Pipeline:` non dicono ancora «approvato».
+  Typecheck e build verdi (`dist/site/index.html` c'è; in `dist/` solo il nome `GEMINI_API_KEY` nei messaggi, nessuna chiave); T97 non tocca
+  codice con test (CSS, `site/`, una voce di `vite.config.ts`), la suite intera non l'ho rilanciata.
+  Browser (preview 4317): `/site/index.html` mostra navigazione, hero con titolo a fumetti e il canvas three.js (cubi voxel che girano dentro
+  due anelli neon), le schede sessione/crediti/profilo, la carta demo che si gira al clic e il footer con la griglia synthwave e le orecchie dei
+  gerboa al neon; caratteri Bangers/Press Start 2P/VT323 da Google Fonts. `/?skip&offline`: gioco e HUD come prima (bisogni, barra rapida,
+  registro del Concilio, aiuto), le variabili di `theme.css` presenti senza sovrascrivere quelle di `style.css` (nessun nome in comune), carattere
+  del gioco invariato. In console solo errori «message channel closed» delle estensioni del browser, nessuno della pagina.
+  difetto: la carta demo girata mostra il fronte specchiato (manca un retro, `backface-visibility`).
+  difetto: la carta non è three.js (è CSS 3D) come dice l'esito di T97; three.js c'è solo nell'hero.
+  difetto: i testi svelano ciò che ADR-0095 voleva velato: il motto del footer descrive la corona («Attorno, invisibile finché dura la
+  simulazione…»), il tooltip delle orecchie dice «chi è fuori dal tappeto conosce lo studio», l'hero nomina il «Concilio di IA».
+  difetto: testo per il pubblico con riferimenti interni («architettura dei cloni (ADR-0084)» nella sezione delle carte).
+  difetto: i font arrivano da `fonts.googleapis.com` (richiesta a terzi a ogni visita); da valutare se servirli in locale.
 
 ### T101 · Il sito: landing page e hero 3D con three.js — `da fare` (dipende da T97)
 - Pipeline: claude · stima 4% · priorità 62
