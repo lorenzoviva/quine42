@@ -31,31 +31,31 @@ Aggiornato il 31/10/2026 alle 16:20 UTC, epoca 174 su **claude**. **T51b integra
   2. Proposto **T95** (test explore/partita/subscription rossi anche da soli): aspetta l'approvazione dell'autore.
   2. **Risposte dell'autore per T45f** (`docs/pipeline/domande/T45f.md`).
 - **Intenzioni / prossimi passi**:
-  1. Seguire T51b (Claude) e T96 (Gemini); integrare T96, poi togliere il fermo a mano dello slot di Claude in `.pipeline/budget.json` e usare `sospendi/riattiva`. Poi T97 (il sito): chiedere all'autore dove mettere il template di Claude Design (proposto `docs/design/sito/`).
+  1. Seguire T57 (Claude, in corso) e T96 (Gemini, slot dato a mano il 31/10); integrare T96, poi togliere i fermi a mano degli slot di Claude **e di Gemini** in `.pipeline/budget.json` (`slotAggiornato` al 05/11) e usare `sospendi/riattiva`. Dopo T57: T98 (bug contorni del cartone, priorità 40), poi T97 (il sito): chiedere all'autore dove mettere il template di Claude Design (proposto `docs/design/sito/`).
   2. Proporre all'autore stime e approvazione di T89a-e (cartone) e T95 (test rossi). Nota: un «dipende da Txx» verso un task fatto solo nel suo branch blocca il task.
   3. Ricevute le risposte su T45f, riprendere il deploy del multigiocatore su GCP.
 
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T51b** su Claude (50), poi **T97** (60); **T96** su Gemini (5).
+  - **T57** su Claude (in corso dal 16:13 UTC), poi **T98** (40) e **T97** (60); **T96** su Gemini (5, slot 1 a mano).
 - **Completati e integrati nel base `3d`**:
-  - **T89**, **T94**, **T54**, **T52b**, **T93**, **T92**, **T52**, **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
+  - **T51b** (ADR-0094, integrato il 31/10 16:13), **T89**, **T94**, **T54**, **T52b**, **T93**, **T92**, **T52**, **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **Da integrare**:
   - Nessuno.
 - **In attesa di chiavi/risposte**:
   - **T45f**: sbloccato, in attesa di GCP Project ID e scelte di deploy (`docs/pipeline/domande/T45f.md`).
 - **In coda / Bloccati**:
   - **T88** e **T89a-e** (da approvare).
-  - **T57** (rune come codice, bloccato da T51a).
+  - (T57 sbloccato e partito.)
 - **Crediti**:
-  - **Claude**: 5h all' 87 % (reset 08:00 UTC), settimana al 40 %.
-  - **Gemini**: 5h al 94 %, settimana al 27 %.
+  - **Claude**: 5h al 77 % residuo (reset 20:29 UTC), settimana al 28 % residuo (reset 05/11).
+  - **Gemini**: 5h rinnovate, settimana al 25 %.
   - **Argon**: fermo fino al 04/11.
 
 ## Da fare appena possibile
 
-- **Pianificate le risposte dell'autore**: T51b (automa cellulare del kernel), T52a (progetto fatto e integrato), T54 (in corso su Claude).
+- **Nota**: T51b ripartito il 31/10 dopo che il processo era rimasto appeso sul limite 5h di Claude: se un task "in corso" ha il log vuoto e la conversazione finisce con `usage_limit_reached`, `interrompi` + `riprendi`. Attenzione a non committare con `-a`: l'autore ha modifiche locali sue (`src/kernel/corona.ts`, `corona-lampione.xml`, `lab/mjx/models/handmade/lampione*`).
 - **Verifiche nel browser** (un task di verifica alla volta su `claude`, che ha `--chrome`): T45d (lobby multigiocatore), T64 (varianti in cache circuito-3D), T56b (arco salto e ombra), T69 (interfaccia web), T68c (stato provider coda abbonamenti).
 
 ## Da sapere
