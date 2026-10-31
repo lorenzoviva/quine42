@@ -2102,3 +2102,15 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   e intanto proporre il tema con una pagina di prova.
 - Quando è fatto: ADR e task scritti; la pagina di prova del tema vista nel browser (screenshot); typecheck verde.
 
+
+### T98 · Cartone: fuori dalla corona i contorni della simulazione nascosta — `da fare`
+- Pipeline: claude · stima 2% · priorità 40 · approvato
+- Contesto: segnalazione dell'autore del 31/10 (to-do, «Bug grafica cartoon», foto in `docs/userchats/image.png`): con `?cartone`,
+  quando la corona si vede, oltre il cerchio compaiono i contorni a inchiostro delle cose che starebbero lì se si fosse ancora sul
+  tappeto (alberi, case, sentieri). Causa probabile: il passo `Ink` di `src/render/cartoon.ts` ridisegna la scena con
+  `scene.overrideMaterial = MeshNormalMaterial`, che perde il taglio al cerchio dello shader (ADR-0040: nulla della simulazione oltre
+  il cerchio quando la corona si vede), e anche ciò che è nascosto in altro modo.
+- Fare: il disegno di normali e profondità rispetta il taglio al cerchio (lo stesso `discard` dei materiali della simulazione, o le
+  mesh tagliate escluse/rese col loro taglio) e la visibilità di ciò che il frame non mostra; vale anche per il futuro disegno degli id di T89b.
+- Fatto quando: typecheck e test verdi; nel browser con `?cartone`, dalla corona (`?dev&teleport=46,0`) oltre il cerchio niente
+  contorni della simulazione, dentro il cerchio i contorni come prima; niente errori in console.
