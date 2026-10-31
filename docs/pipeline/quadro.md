@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 30/10/2026 alle 23:46 UTC, epoca 163 su **claude**. **Riavviato: ADR-0089 e ADR-0090 attivi, a regime** (un task per provider). Multigiocatore fermo (T45f senza risposte, T45e senza chiavi Stripe): rimessi in coda **T54** (fallito per il limite delle 5 ore a metà lavoro) e **T52**, su Claude, uno alla volta; partono quando la previsione dà uno slot (ora 0 su Claude e Gemini). T51, T88, T89 non approvati.
+Aggiornato il 30/10/2026 alle 23:46 UTC, epoca 163 su **claude**. **Riavviato: ADR-0089 e ADR-0090 attivi, a regime** (un task per provider). Multigiocatore fermo (T45f senza risposte, T45e senza chiavi Stripe): rimessi in coda **T54** (fallito per il limite delle 5 ore a metà lavoro) e **T52**, su Claude, uno alla volta; partono quando la previsione dà uno slot (ora 0 su Claude e Gemini). **T51** (T51b, automa cellulare) approvato dall'autore il 30/10 alle 23:50: resta su Claude (ha già un'esecuzione, non passa alle alternative), aspetta il suo turno. T88, T89 non approvati.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
