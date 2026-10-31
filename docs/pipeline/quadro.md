@@ -36,9 +36,8 @@ Aggiornato il 30/10/2026 alle 23:46 UTC, epoca 163 su **claude**. **Riavviato: A
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - Nessuno al lavoro. Catena T82→T86 e T91 integrate. In attesa che l'autore riavvii; poi a regime: un task per provider, priorità multigiocatore.
-  - **T52** risulta "in corso" nello stato ma è interrotto nel dossier.
-- **Da guardare (non integrare)**: **T54** finito con errore (codice 1), non approvato.
+  - **T52** in corso su Claude (ripreso alle 23:46). In coda su Claude, uno alla volta: **T54** (ripreso, era fallito per il limite), poi **T51** (approvato, non cambiargli provider: l'autore vuole che aspetti Claude).
+  - Crediti di Claude sotto il 10 % (5 ore) alle ~23:55 del 30/10: l'orchestratore passa al provider successivo; i task di Claude aspettano il reset (5 ore alle 03:00 UTC).
 - **Completati e integrati nel base `3d`**:
   - **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **In attesa di chiavi/risposte/verifica browser**:
