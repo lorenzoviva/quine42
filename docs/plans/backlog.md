@@ -2132,7 +2132,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: merge committato, `npm run typecheck` verde, i test toccati da T57 (`traccia T57`) verdi.
   Esito: merge di `task/T57` sul branch `task/T99`; unico conflitto l'intestazione del blocco T57 in `backlog.md`, presa da `task/T57` (T57a fatto; poi T57b) tenendo «approvato» del base. Typecheck verde; `canon`, `showcase`, `focus` verdi; `kernel.test.ts` 57/57 verde con `--hookTimeout=120000` (senza, i `beforeEach` superano 10 s sotto il carico della pipeline, come già notato in T57a). Come previsto.
 
-### T100 · Integrare T97 e verificare il sito nel browser — `da fare`
+### T100 · Integrare T97 e verificare il sito nel browser — `in corso`
 - Pipeline: claude · stima 4% · approvato · priorità 6
 - Contesto: T97 (il sito, ADR-0095) è fatto su `task/T97` (`416ea7d`) ma è partito da `cbe8532`: nel suo `backlog.md` ha
   pianificato i task del sito come T99-T104, numeri che nel base sono già presi (T98 cartone, T99 integrare T57). Chiede anche la
