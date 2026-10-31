@@ -25,6 +25,8 @@ export interface Appearance {
   model?: string;
   /** Asset class (src/mj/classes.ts): persona, animale, albero, mobile, edificio… */
   classe?: string;
+  /** Its size of D&D (ADR-0081: minuscola … gargantuesca), if not its class's own: the model's box scales with it. */
+  taglia?: string;
 }
 
 export interface Physics {

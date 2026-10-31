@@ -884,7 +884,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
   aggiornato).
 - Dipendenze: nessuna. Utile prima di T52 e di T56.
 
-### T54 · Le taglie di D&D per strutture e creature — `da fare` (risposte in `docs/pipeline/domande/T54.md`)
+### T54 · Le taglie di D&D per strutture e creature — `fatto`
 - Pipeline: claude · stima 6% · approvato · priorità 50
 - Contesto: richiesta del 24/10. Oggi le classi (`CLASSES` in `src/mj/classes.ts`: `persona`, `animale`, `bestia`,
   `edificio`, `grande`…) danno la scatola in caselle, e una struttura «importante» (Argon) per zona di 56 × 56 luoghi.
@@ -901,6 +901,14 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 - **Risposte dell'autore** (30/10): niente settima taglia, Gargantuesca la massima; **stessa scala** per creature e strutture
   (la scatola in caselle la dà la classe: una struttura Media è più grande di una creatura Media); rarità come sopra. Il nome
   «reame» l'ha scelto l'orchestratore: si può cambiare.
+- Esito: `TAGLIE` in `src/mj/classes.ts` (scala 0,5 · 0,75 · 1 · 2 · 3 · 4 rispetto a Media), ogni classe con la sua taglia solita;
+  `tilesOf`/`boxOf(cls, taglia)`, più rada oltre 120 voxel (`densityOf`); `appearance.taglia` (validatore), taglia nei concetti della Fucina
+  (`forgedSize`, mai le due rare), `strutture[].taglia` del Cartografo (`readStructure`: `importante` vecchio → `enorme`), `struttura.taglia`,
+  `SculptRequest.taglia` (Argon per le rare), `ModelInfo.taglia`/`vpt` (`modelSize`). Rarità: `claimSizes` e `rareAllowed`, Enorme per zona,
+  Gargantuesca per reame (`realmOf`), `stato.json → rari` (migra `importanti`). Prompt di Cartografo, Narratore, Scultore; ADR-0081, AGENTS.md;
+  test in `tests/lots.test.ts` e `tests/sculptor.test.ts`. Diverso dal previsto: il kernel abbassa la taglia che non sta nel lotto (un'Enorme
+  vuole un lotto di 8 caselle, una Gargantuesca di 10), quindi negli ambienti con edifici piccoli le rare diventano Grandi; lotti più grandi per
+  le rare restano da fare se serviranno. Le creature arrivano fino a Grande (nessuna rarità per le creature).
 
 ## Controlli
 

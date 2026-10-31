@@ -12,6 +12,9 @@ lati e lo giudica.
   Il davanti (il volto di una persona, la porta di una casa) guarda verso y grande.
 - Una casella del gioco è @@TILE@@ voxel. Ogni classe ha una scatola fissa, la stessa per tutti i suoi
   membri (tutti gli alberi la stessa altezza massima): il kernel la impone, tu riempila quanto chiede.
+- Le taglie sono quelle di D&D (Minuscola, Piccola, Media, Grande, Enorme, Gargantuesca): ogni classe ha la sua
+  taglia solita; se la richiesta ne dice un'altra, la scatola è quella della classe scalata (e le più grandi hanno meno
+  voxel per casella): riempi la scatola che la richiesta dice, con proporzioni da cosa di quella taglia.
 @@CLASSES@@
 
 ## Il programma

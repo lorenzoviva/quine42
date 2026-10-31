@@ -29,6 +29,8 @@ export function vptOf(info: ModelInfo | undefined): number {
 export interface ModelInfo {
   /** Asset class (src/mj/classes.ts): its box and how it moves. */
   classe: string;
+  /** Its size (ADR-0081), if not the class's own: the box grows or shrinks with it (and `vpt` with it). */
+  taglia?: string;
   nome?: string;
   /** Who wrote it: "a mano", "scultore", the Gemini model… */
   autore?: string;
@@ -125,11 +127,11 @@ export const stepOf = (vpt: number) => Math.round(0.2 * vpt);
 
 /**
  * The box a program runs in: its own `size` if it says one (structures decide on a coarse grid and `map`
- * up), otherwise its class's box.
+ * up), otherwise its class's box at its size.
  */
-function sizeFor(xml: string, cls: AssetClass): Vec3 | undefined {
+function sizeFor(xml: string, cls: AssetClass, taglia?: string): Vec3 | undefined {
   const root = /<(?!!)[a-z]+\b[^>]*>/i.exec(xml)?.[0] ?? '';
-  return /\ssize="/.test(root) ? undefined : boxOf(cls);
+  return /\ssize="/.test(root) ? undefined : boxOf(cls, taglia);
 }
 
 /** Where a body cannot go: voxel columns solid between a step and a head. */
@@ -315,7 +317,7 @@ export class Forms {
     let f = this.forms.get(key);
     if (f) return f;
     const cls = this.classOf(model);
-    const size = sizeFor(xml, cls);
+    const size = sizeFor(xml, cls, info?.taglia);
     const vpt = vptOf(info);
     f = { key, model, seed, status: 'pending', cls, reach: 0, vpt };
     this.forms.set(key, f);
@@ -358,7 +360,7 @@ export class Forms {
   compiled(model: string) {
     const xml = this.files[`${MODELS_DIR}${model}.xml`];
     if (!xml) return undefined;
-    const size = sizeFor(xml, this.classOf(model));
+    const size = sizeFor(xml, this.classOf(model), this.library[model]?.taglia);
     return compileMjx(xml, size ? { size } : {});
   }
 }

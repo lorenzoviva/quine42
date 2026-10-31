@@ -24,7 +24,7 @@ tre per sessione dipendeva da quante volte si gioca, non da quanto è grande il 
 3. **Le strutture del Cartografo**: il piano ha `strutture` (0-2 per luogo, `{concetto, importante?}`); vanno
    sui lotti più grandi, con il modello `struttura-<concetto>` che finché non esiste lo Scultore scrive (lo
    trova il `ModelDirector`); gli altri lotti hanno case comuni (il generico della classe).
-4. **Una struttura importante per zona**: il mondo è diviso in zone di 56 × 56 luoghi (circa 1000 × 1000
+4. **Una struttura importante per zona** (sostituito da ADR-0081: l'importante è la taglia Enorme, una per zona; sopra c'è la Gargantuesca, una per reame): il mondo è diviso in zone di 56 × 56 luoghi (circa 1000 × 1000
    caselle, centrate sulla partenza, `zoneOf`); il primo luogo di una zona che ne ha una la tiene, negli altri
    il kernel toglie `importante` dal piano (e al Cartografo lo dice già il prompt). Una sola per luogo. Le zone
    prese si salvano con la partita (`stato.json → importanti`) e si azzerano con una nuova Genesi.

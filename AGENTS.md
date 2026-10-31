@@ -459,8 +459,14 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   al centro del lotto, girato verso la porta; le caselle del lotto tornano terreno. Dentro = sul pavimento del modello
   (`placeInside`, `floorAt`, `structureAt`); il renderer taglia la struttura in cui si è. Le scale sono rampe (T53a):
   ogni colonna di voxel ha il suo pavimento, ci si sale se è più alta al più di un gradino (0,2 caselle) di quelle vicine
-  (`bodyGround`, `rampBlocks` in `forms.ts`); un muro resta un muro. Una struttura `importante`
-  (Argon) per zona di 56 × 56 luoghi (`zoneOf`, `stato.json → importanti`).
+  (`bodyGround`, `rampBlocks` in `forms.ts`); un muro resta un muro.
+- **Le taglie** (ADR-0081, T54): le taglie di D&D (`TAGLIE` in `src/mj/classes.ts`: minuscola, piccola, media, grande, enorme,
+  gargantuesca, la massima), la stessa scala per creature e strutture: la classe dà la forma e la scatola della sua taglia solita
+  (`AssetClass.taglia`), la taglia la scala (`tilesOf`, `boxOf(cls, taglia)`, più rada oltre 120 voxel, `densityOf`). `appearance.taglia`,
+  `strutture[].taglia` del Cartografo, `struttura.taglia`, `SculptRequest.taglia`, `ModelInfo.taglia`/`vpt` (`modelSize`). Rare: una
+  **Enorme** (il castello «importante» di prima) per zona di 56 × 56 luoghi (`zoneOf`), una **Gargantuesca** per **reame** di 4 × 4 zone
+  (`realmOf`), una per luogo, con il modello migliore dello Scultore; `claimSizes` le adatta al lotto e alla rarità (`rareAllowed`),
+  `stato.json → rari` (un `importanti` vecchio è `rari.enorme`).
 - **Grafo del mondo** (ADR-0045): `src/kernel/graph.ts` costruisce dai file dell'universo e dai luoghi pianificati un grafo
   di nodi tipizzati (`<tipo>:<slug>`: persone col viandante e gli attesi, tipi, luoghi `luogo:<cx>_<cy>`, regioni, ambienti,
   strutture, trame, oggetti, ricette, rune, incantesimi, regole, fatti) e archi (legami, routine, tappe, contenuti, ingredienti,
@@ -480,7 +486,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 
 ### Manifest (`src/kernel/types.ts`)
 `id`, `name`, `kind` (`system | entity | item | player | generator | data`), `logic`, `order`,
-`appearance` (`glyph`, `color`, `aspetto`, `model`, `classe`), `physics`
+`appearance` (`glyph`, `color`, `aspetto`, `model`, `classe`, `taglia`), `physics`
 (`solid`, `radius`, `pushable`, `mass`, `friction`, `speed`), `components`, `singleton`, `persist`,
 `interaction` (`talk | read | lua`), `actions` (`id`, `label`, `requires`, `effects`), `container` (`size`, `loot`),
 `ui` (pannello: `titolo`, `elementi`), `spawn`, `persona`, `unique`, `inventory` (id di oggetti), `item`, `context`, `lore`, `tags`, `drops`,
@@ -606,7 +612,7 @@ Fatto nello step 9 (3D): MarkovJunior del gioco in `src/mj/` e laboratorio di Ma
 in dollari; kernel senza immagini; renderer three.js (camera 3/4, giorno e notte, corona e studio dalle celle,
 taglio al cerchio anche per istanze e ombre); libreria dei modelli con forme, semi, collisione e pavimenti dai
 voxel, arti, vento, animazioni, `<action>` nel menu; icone come foto dei modelli; Scultore per classe e Artista
-giudice; lotti come strutture girate verso la porta, una struttura importante per zona; azioni come regole
+giudice; lotti come strutture girate verso la porta, una struttura Enorme per zona e una Gargantuesca per reame (le taglie di D&D); azioni come regole
 («Altro…» che cambia la forma scrive un'`<action>`); aiuto senza meta-gioco.
 
 Prossimi passi (il dettaglio è nel backlog):

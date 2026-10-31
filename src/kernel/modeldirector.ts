@@ -5,8 +5,20 @@
 
 import type { Kernel } from './kernel';
 import { sculpt, type SculptRequest } from './agents/sculptor';
-import { guessClass } from '../mj/classes';
+import { classOf, densityOf, guessClass, sizeOf, TILE, tilesOf, type Taglia } from '../mj/classes';
+import type { ModelInfo } from './forms';
 import { BudgetError } from './ai/models';
+
+/**
+ * What a model's index entry says of its size (ADR-0081): the size, if not its class's own, and the coarser density
+ * the large boxes run at (ADR-0049), so that the library runs it in the box it was sculpted in.
+ */
+export function modelSize(req: Pick<SculptRequest, 'classe' | 'taglia'>): Pick<ModelInfo, 'taglia' | 'vpt'> {
+  const cls = classOf(req.classe), t = sizeOf(req.taglia);
+  if (!cls || !t || t.id === cls.taglia) return {};
+  const vpt = densityOf(tilesOf(cls, t.id));
+  return { taglia: t.id, ...(vpt !== TILE ? { vpt } : {}) };
+}
 
 /** Common shapes of items: one program each, tinted with each item's colour. */
 export const FORME = ['sacco', 'bottiglia', 'vaso', 'cesto', 'frutto', 'pane', 'formaggio', 'attrezzo', 'lama', 'arco', 'gemma', 'cristallo', 'libro', 'pergamena', 'abito', 'cappello', 'scarpe', 'anello', 'moneta', 'erba', 'fiore', 'fungo', 'pietra', 'legna', 'carne', 'pesce', 'chiave', 'candela', 'lanterna', 'corda'] as const;
@@ -46,20 +58,21 @@ export class ModelDirector {
       const app = man.appearance;
       if (!app || !lacks(app.model)) continue;
       const classe = app.classe ?? guessClass(`${man.name} ${man.description ?? ''} ${app.aspetto ?? ''}`, man.persona ? 'figura' : undefined).id;
-      out.push({ id: app.model!, nome: man.name, aspetto: app.aspetto ?? man.description ?? man.name, classe, contesto: man.context });
+      const taglia = sizeOf(app.taglia)?.id;
+      out.push({ id: app.model!, nome: man.name, aspetto: app.aspetto ?? man.description ?? man.name, classe, ...(taglia ? { taglia } : {}), contesto: man.context });
     }
     for (const d of k.content.items.values()) {
       if (!lacks(d.model)) continue;
       const forma = d.model!.startsWith('forma-') ? d.model!.slice('forma-'.length) : undefined;
       out.push(forma ? { id: d.model!, nome: `${forma} (forma comune degli oggetti)`, aspetto: `un ${forma} semplice e riconoscibile, come tanti oggetti del mondo (per esempio: ${d.name})`, classe: 'oggetto', tinta: true } : { id: d.model!, nome: d.name, aspetto: d.aspetto ?? d.description, classe: 'oggetto' });
     }
-    // Structures the Cartographer asked for (ADR-0043): the important ones (one per zone of the world, the
-    // kernel sees to it) by the best model.
+    // Structures the Cartographer asked for (ADR-0043), at their size (ADR-0081): the rare ones (Huge per zone,
+    // Gargantuan per realm, the kernel sees to it) by the best model.
     for (const id of k.ecs.query('struttura')) {
-      const s = k.ecs.get(id, 'struttura') as { model?: string; concetto: string; classe: string; importante?: boolean };
+      const s = k.ecs.get(id, 'struttura') as { model?: string; concetto: string; classe: string; taglia?: Taglia };
       if (!lacks(s.model)) continue;
       const place = k.chunkAt(k.ecs.get(id, 'pos').x, k.ecs.get(id, 'pos').y)?.place;
-      out.push({ id: s.model!, nome: s.concetto, aspetto: `${s.concetto}: un edificio in cui si entra, con la porta sul davanti${place ? `, a «${place.name}» (${place.description})` : ''}`, classe: s.classe, importante: !!s.importante, contesto: place?.name });
+      out.push({ id: s.model!, nome: s.concetto, aspetto: `${s.concetto}: un edificio in cui si entra, con la porta sul davanti${place ? `, a «${place.name}» (${place.description})` : ''}`, classe: s.classe, ...(s.taglia ? { taglia: s.taglia } : {}), contesto: place?.name });
     }
     for (const [code, t] of Object.entries(k.palette)) {
       if (code === '?' || !lacks(t.model)) continue;
@@ -85,7 +98,7 @@ export class ModelDirector {
         this.skip.add(req.id);
         return false;
       }
-      this.k.addModel(req.id, r.xml, { classe: req.classe, nome: req.nome, autore: r.model, ...(r.voto !== undefined ? { voto: r.voto } : {}), ...(req.tinta ? { tinta: 'C' } : {}) }, `scultore: ${req.nome}`);
+      this.k.addModel(req.id, r.xml, { classe: req.classe, ...modelSize(req), nome: req.nome, autore: r.model, ...(r.voto !== undefined ? { voto: r.voto } : {}), ...(req.tinta ? { tinta: 'C' } : {}) }, `scultore: ${req.nome}`);
       return true;
     } catch (e) {
       if (e instanceof BudgetError) this.stopped = true;
