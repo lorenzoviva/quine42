@@ -2198,3 +2198,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Contesto: ADR-0095, punto 3 (Variabili CSS unificate). Il tema grafico deve permeare anche l'esperienza di gioco.
 - Fare: aggiornare `src/style.css` e i componenti UI in-game (`src/ui/hud.ts`, `inventory.ts`, `lobby.ts`, `profile.ts`, `chat.ts`, `creditdialog.ts`) per adottare appieno i token di `src/theme.css`: bordi a inchiostro netto fumetto (`--border-ink-thick`), ombre rigide neon offset (`--shadow-hard-cyan`, `--shadow-hard-pink`), pattern mezze tinte sui pannelli modali, pulsanti arcade retrò e font display per intestazioni e notifiche d'avviso.
 - Fatto quando: typecheck e test verdi; screenshot nel browser delle interfacce in-game rinnovate con il tema pop art comics / neon punk.
+
+### T107 · Il sito: correggere i difetti della pagina dimostrativa — `da fare`
+- Pipeline: gemini · stima 2% · approvato · priorità 20
+- Contesto: la verifica di T100 nel browser su `site/index.html` (T97, ADR-0095) ha trovato cinque difetti, scritti nel blocco di T100.
+  Nasce da T97 e T100: `dossier T97`, `dossier T100`.
+- Cosa fare: (1) la carta demo girata mostra il fronte specchiato: un retro vero (`backface-visibility: hidden` sulle due facce);
+  (2) dove testi o ADR-0095 dicono che la carta è three.js, correggi il testo (resta CSS 3D); (3) i testi per il pubblico non svelano ciò che
+  ADR-0095 vuole velato (il motto del footer che descrive la corona: riscrivilo allusivo); (4) niente riferimenti interni nei testi per il
+  pubblico («ADR-0084» e simili); (5) i font serviti in locale (file in `site/` o `public/`, niente `fonts.googleapis.com`), anche per `src/theme.css`.
+- Quando è fatto: `npm run typecheck` e `npm run build` verdi; nessuna richiesta a domini esterni nel `dist/` del sito (grep);
+  `BROWSER: da verificare` per l'orchestratore.
