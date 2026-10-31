@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 31/10/2026 alle 13:05 UTC, fine epoca 170 su **claude**. Integrati T94 e T54 (taglie, ADR-0092). Slot di Claude riaperto a mano (vedi sotto). **T51** pronto su Claude (priorità 50), parte al prossimo lancio; **T89** interrotto dall'orchestratore (lo stato lo mostra «in corso» ma è fermo): `riprendi T89` quando T51 è finito. **T96** (minimo 1 slot per Claude) approvato su Gemini, priorità 5. Da approvare: T45f (risposte GCP), T88, T95. Claude: settimana 33 %, 5h 48 %.
+Aggiornato il 31/10/2026 alle 13:47 UTC, epoca 171 su **claude**. **T89** fatto (ADR-0093 proposto, prova dietro `?cartone`, task T89a-e nel backlog, verificato nel browser) e integrato. **T51** pronto su Claude (priorità 50), parte al prossimo controllo; **T96** approvato su Gemini (slot 0 finché Gemini 5h è al 94 %). Da approvare: T45f (risposte GCP), T88, T95, T89a-e. I 55 test rossi della suite intera di T89 sono in file che non tocca: li copre T95. Claude: settimana 32 %, 5h 30 %.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -40,13 +40,13 @@ Aggiornato il 31/10/2026 alle 13:05 UTC, fine epoca 170 su **claude**. Integrati
 - **Pronti / In corso**:
   - **T51** approvato su Claude (in coda dopo T52b, priorità 100).
 - **Completati e integrati nel base `3d`**:
-  - **T94**, **T54**, **T52b**, **T93**, **T92**, **T52**, **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
+  - **T89**, **T94**, **T54**, **T52b**, **T93**, **T92**, **T52**, **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **Da integrare**:
   - Nessuno.
 - **In attesa di chiavi/risposte**:
   - **T45f**: sbloccato, in attesa di GCP Project ID e scelte di deploy (`docs/pipeline/domande/T45f.md`).
 - **In coda / Bloccati**:
-  - **T88** (in coda da approvare); **T89** approvato, in coda su Claude.
+  - **T88** e **T89a-e** (da approvare).
   - **T57** (rune come codice, bloccato da T51a).
 - **Crediti**:
   - **Claude**: 5h all' 87 % (reset 08:00 UTC), settimana al 40 %.
