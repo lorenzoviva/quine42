@@ -134,14 +134,14 @@ export function weeklyResetOf(b = {}, conf = {}, nowMs = Date.now()) {
 
 /**
  * The dynamic slots of a provider after a check: one more if the week would end after its reset (or it is not being used),
- * one less if before; between 0 and the ceiling, and no more than its schedule needs (`domanda`, at least one).
+ * one less if before (never under 1); between 1 and the ceiling, and no more than its schedule needs (`domanda`, at least one).
  * Without a reset to compare with, they stay.
  */
 export function nextSlot({ slot = 1, tetto = 1, previsione, reset, domanda = Infinity }) {
-  if (!reset) return Math.min(slot, tetto);
+  if (!reset) return tetto < 1 ? 0 : Math.max(1, Math.min(slot, tetto));
   const after = !previsione || Date.parse(previsione) > Date.parse(reset);
   const next = after ? Math.max(slot, Math.min(slot + 1, Math.max(1, domanda))) : slot - 1;
-  return Math.max(0, Math.min(tetto, next));
+  return tetto < 1 ? 0 : Math.max(1, Math.min(tetto, next));
 }
 
 /**
@@ -181,12 +181,12 @@ export function updateSlots(budget, queues, { config = CONFIG, nowMs = Date.now(
     b.previsione = forecastEmpty(b.storia, nowMs, config.giorniPrevisione ?? 3);
     b.resetSettimana = weeklyResetOf(b, conf, nowMs);
     b.domanda = demand[prov] ?? 0;
-    if (b.slot === undefined) b.slot = Math.min(1, b.tetto);
+    if (b.slot === undefined) b.slot = b.tetto < 1 ? 0 : Math.max(1, Math.min(1, b.tetto));
     else if (!b.slotAggiornato || nowMs - Date.parse(b.slotAggiornato) >= step) {
       b.slot = nextSlot({ slot: b.slot, tetto: b.tetto, previsione: b.previsione, reset: b.resetSettimana, domanda: b.domanda });
       b.slotAggiornato = new Date(nowMs).toISOString();
     }
-    b.slot = Math.min(b.slot, b.tetto);
+    b.slot = b.tetto < 1 ? 0 : Math.max(1, Math.min(b.slot, b.tetto));
   }
   return budget;
 }
@@ -340,8 +340,69 @@ export function loadBudget({ read = true } = {}) {
     }
     const reset = lastReset(conf.resetSettimanale);
     if (reset && new Date(b.aggiornato) < reset) Object.assign(b, { residuo: 100, sessione: 100, aggiornato: now(), fermoFino: undefined });
+    if (b.sospeso && !isSuspended(b)) delete b.sospeso;
   }
   return budget;
+}
+
+/**
+ * Whether a provider is currently suspended by the orchestrator (no new tasks): either indefinite (`true`), or until a date.
+ */
+export function isSuspended(b, nowMs = Date.now()) {
+  if (!b || !b.sospeso) return false;
+  if (b.sospeso === true) return true;
+  if (typeof b.sospeso === 'string') {
+    const ms = Date.parse(b.sospeso);
+    return isNaN(ms) ? true : ms > nowMs;
+  }
+  if (typeof b.sospeso === 'object') {
+    if (b.sospeso.fino) {
+      const ms = Date.parse(b.sospeso.fino);
+      return isNaN(ms) ? true : ms > nowMs;
+    }
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Suspends a provider: no new tasks will be dispatched to it until reactivated or until `finoA`.
+ * Writes to budget.json and logs to diary.
+ */
+export function suspendProvider(provider, finoA, opts) {
+  const p = pathsOf(opts);
+  const conf = p.config.providers?.[provider] ?? CONFIG.providers?.[provider];
+  if (!conf) throw new Error(`Provider sconosciuto: ${provider}`);
+  const b = readJson(p.budget, {});
+  const provBudget = (b[provider] ??= { residuo: 100, aggiornato: now() });
+  let finoIso;
+  if (finoA) {
+    const ms = Date.parse(finoA);
+    if (isNaN(ms)) throw new Error(`Data non valida: ${finoA}`);
+    finoIso = new Date(ms).toISOString();
+  }
+  provBudget.sospeso = finoIso ?? true;
+  writeJson(p.budget, b);
+  say(finoIso ? `${provider}: sospeso fino a ${finoIso}` : `${provider}: sospeso`, p.report);
+  return { provider, sospeso: provBudget.sospeso };
+}
+
+/**
+ * Reactivates a suspended provider: allows new tasks to be dispatched to it again.
+ * Writes to budget.json and logs to diary.
+ */
+export function resumeProvider(provider, opts) {
+  const p = pathsOf(opts);
+  const conf = p.config.providers?.[provider] ?? CONFIG.providers?.[provider];
+  if (!conf) throw new Error(`Provider sconosciuto: ${provider}`);
+  const b = readJson(p.budget, {});
+  const provBudget = b[provider];
+  if (provBudget) {
+    delete provBudget.sospeso;
+  }
+  writeJson(p.budget, b);
+  say(`${provider}: riattivato`, p.report);
+  return { provider, sospeso: false };
 }
 
 /** The last weekly reset before now, from «giorno ora» (`gio 09:00`). */
@@ -401,7 +462,7 @@ export function plan(tasks, runs, budget, only) {
   return queues;
 }
 
-const describe = (b) => `settimana ${b.residuo} %, 5 ore ${b.sessione ?? '?'} %${b.fermoFino ? `, fermo fino a ${b.fermoFino}` : ''}` +
+const describe = (b) => `settimana ${b.residuo} %, 5 ore ${b.sessione ?? '?'} %${b.fermoFino ? `, fermo fino a ${b.fermoFino}` : ''}${isSuspended(b) ? (typeof b.sospeso === 'string' && !isNaN(Date.parse(b.sospeso)) ? `, sospeso fino a ${b.sospeso}` : (b.sospeso?.fino ? `, sospeso fino a ${b.sospeso.fino}` : ', sospeso')) : ''}` +
   `; tetto ${b.tetto ?? '?'}, slot ${b.slot ?? '?'}${b.domanda !== undefined ? ` (task in programma ${b.domanda})` : ''}, esaurimento previsto ${b.previsione ?? 'mai a questo ritmo'}, reset ${b.resetSettimana ?? '?'}`;
 
 export function writePlan(queues, budget, opts) {
@@ -588,6 +649,7 @@ export async function execute({ max = CONFIG.maxParalleli, only, task, always = 
     const fits = (prov, t, resuming) => {
       const b = budget[prov];
       if (!b || (b.fermoFino && new Date(b.fermoFino) > new Date())) return false;
+      if (!resuming && isSuspended(b)) return false;
       const live = [...active.keys()].map((id) => runs[id]);
       const mine = live.filter((r) => r.provider === prov);
       const left = b.residuo - mine.reduce((s, r) => s + r.stima, 0);
@@ -600,6 +662,7 @@ export async function execute({ max = CONFIG.maxParalleli, only, task, always = 
       if (active.size >= max) break;
       // A new task goes to its provider or, if that one cannot take it, to its alternatives in order (`alternative`).
       const resuming = Boolean(runs[t.id]);
+      if (!resuming && isSuspended(budget[t.provider])) continue;
       const allowed = t.needsBrowser
         ? [t.provider, ...(CONFIG.alternative?.[t.provider] ?? [])].filter((p) => CONFIG.providers[p]?.browser ?? p === 'claude')
         : [t.provider, ...(CONFIG.alternative?.[t.provider] ?? [])];
@@ -774,7 +837,7 @@ function showSlots(budget, queues) {
   for (const [prov, conf] of Object.entries(CONFIG.providers)) {
     const b = (budget[prov] ??= { residuo: 100 });
     Object.assign(b, { tetto: ceilingOf(prov), previsione: forecastEmpty(b.storia, Date.now(), CONFIG.giorniPrevisione ?? 3), resetSettimana: weeklyResetOf(b, conf), domanda: demand[prov] ?? 0 });
-    b.slot = Math.min(b.slot ?? 1, b.tetto);
+    b.slot = b.tetto < 1 ? 0 : Math.max(1, Math.min(b.slot ?? 1, b.tetto));
   }
 }
 
@@ -1443,6 +1506,30 @@ if (process.argv[1]?.endsWith('pipeline.mjs')) {
     writeJson(BUDGET, b);
     status();
   }
+  else if (cmd === 'sospendi') {
+    const [prov, ...tail] = rest;
+    if (!CONFIG.providers[prov]) console.log(`Uso: sospendi <${Object.keys(CONFIG.providers).join('|')}> [fino a <data>]`);
+    else {
+      let dateStr;
+      if (tail.length) {
+        let raw = tail.join(' ').trim();
+        raw = raw.replace(/^fino\s+a\s+/i, '').replace(/^fino\s+/i, '').trim();
+        if (raw) dateStr = raw;
+      }
+      try {
+        suspendProvider(prov, dateStr);
+        status();
+      } catch (e) { console.error(e.message); }
+    }
+  }
+  else if (cmd === 'riattiva') {
+    const prov = rest[0];
+    if (!CONFIG.providers[prov]) console.log(`Uso: riattiva <${Object.keys(CONFIG.providers).join('|')}>`);
+    else {
+      resumeProvider(prov);
+      status();
+    }
+  }
   else if (cmd === 'worktree') listWorktrees();
   else if (cmd === 'integra') integrateTask(rest[0]);
   else if (cmd === 'traccia') trace(rest[0]);
@@ -1481,6 +1568,7 @@ if (process.argv[1]?.endsWith('pipeline.mjs')) {
   approva <Txx…> | assegna <Txx> <provider> <stima %> [priorità] [--approva]
   interrompi <Txx…|--tutti> | riprendi <Txx…> | integra <Txx>
   ferma --ora | --dopo                                      spegne la pipeline: interrompe i task (riprendono al riavvio) o aspetta che finiscano
-  budget <provider> <residuo %> | orchestratore [provider] | nota <testo>
+  budget <provider> <residuo %> | sospendi <provider> [fino a <data>] | riattiva <provider>
+  orchestratore [provider] | nota <testo>
   turno [browser|test -- <comando>]                         aspetta il turno, esegue, lo lascia (ADR-0088)`);
 }

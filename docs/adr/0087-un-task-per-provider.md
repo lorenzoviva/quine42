@@ -12,11 +12,14 @@ conflitti, i crediti finiscono in modo imprevedibile e la macchina rallenta.
    modello (`limiti.modello`: le voci di `providers`, `claude gemini argon`), all'inizio 1 ciascuno. Il tetto di un provider è il
    più basso tra il suo, quello della sua CLI e `maxParalleli` (`ceilingOf`); i task in corso sulla stessa CLI non superano il suo.
    L'orchestratore non lo alza né fa eccezioni senza un'istruzione esplicita dell'autore (`orchestra.md`).
-2. **Slot dinamici sotto il tetto** (`budget.json → slot`, da 0 al tetto, partendo da 1): a ogni controllo `esegui` aggiunge un
+2. **Slot dinamici sotto il tetto** (`budget.json → slot`, da 1 al tetto): a ogni controllo `esegui` aggiunge un
    campione del residuo settimanale (`storia`, gli ultimi `giorniStoria` giorni, uno ogni `usoSecondi`) e prevede quando la
    settimana arriva al 100 % al ritmo degli ultimi `giorniPrevisione` giorni, dall'ultimo reset (un residuo che risale)
    (`forecastEmpty`). Se la previsione cade **dopo** il reset settimanale (il contatore della settimana di `/usage`, o
-   `resetSettimanale`; `weeklyResetOf`), o il provider non consuma, aggiunge uno slot; se cade **prima** lo toglie (`nextSlot`);
+   `resetSettimanale`; `weeklyResetOf`), o il provider non consuma, aggiunge uno slot; se cade **prima** lo toglie (`nextSlot`),
+   ma **mai sotto 1** (T96: nessun modello con crediti va a zero slot per la previsione); a 0 si va solo con crediti esauriti o
+   provider fermo per quota (429). La decisione di non dare nuovi task a un provider per un po' spetta all'orchestratore con i
+   comandi `sospendi <provider> [fino a <data>]` / `riattiva <provider>` scritti in `budget.json` e mostrati da `stato`;
    al più uno spostamento ogni `usoSecondi`; senza un reset noto restano. Così, se l'abbonamento cresce, gli slot salgono da soli
    fino al tetto. Conta solo la settimana (Argon non ha le 5 ore).
 3. **Vicino a 0 %** (sotto `sogliaUnSolo`, settimana o 5 ore): nessun task nuovo, al più uno in corso (un sospeso può riprendere

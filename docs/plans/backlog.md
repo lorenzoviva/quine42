@@ -2068,7 +2068,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   commit che l'ha rotto e correggi il codice o il test; i timeout solo di carico restano.
 - Quando è fatto: i tre file verdi da soli, typecheck verde, il commit che li aveva rotti scritto nella riga di chiusura.
 
-### T96 · Mai zero slot per nessun provider — `da fare`
+### T96 · Mai zero slot per nessun provider — `fatto`
 - Pipeline: gemini · stima 3% · priorità 5 · approvato
 - Contesto: richieste dell'autore del 31/10: «non chiudere mai tutti gli slot per claude», poi «tutti i modelli abbiano sempre almeno
   uno slot; sta all'orchestratore decidere l'ordine e se sospendere temporaneamente nuovi task a un provider per permettere a un altro di
@@ -2083,6 +2083,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   `docs/pipeline/orchestra.md`.
 - Quando è fatto: con la previsione «prima del reset» ogni modello con crediti resta ad almeno 1 slot; `sospendi`/`riattiva` funzionano;
   test e typecheck verdi.
+- Esito: rimossa la discesa a zero slot da `nextSlot`, `updateSlots` e `showSlots` (lo slot non scende mai sotto 1 se tetto >= 1); introdotti `suspendProvider`, `resumeProvider` e `isSuspended` in `tools/pipeline/pipeline.mjs` con comandi CLI `sospendi <provider> [fino a <data>]` e `riattiva <provider>` che persistono in `budget.json` e vengono mostrati da `stato` e in `web.mjs`; estesi `orchestra.mjs` e `web.mjs` per gestire `/sospendi` e `/riattiva`; in `execute` le nuove assegnazioni a provider sospesi vengono bloccate senza dirottamenti impropri su alternative mentre i task da riprendere continuano; aggiornati ADR-0087, `docs/pipeline/README.md`, `docs/pipeline/orchestra.md`, `AGENTS.md`; test completi (77/77) in `tests/pipeline.test.ts` e typecheck a zero errori.
 
 ## Il sito (to-do del 31/10, testo originale: `docs/userchats/to-do-2026-10-31.md`)
 

@@ -44,6 +44,8 @@ turno e l'altro, anche se non scrivi nulla.
 | un messaggio | va all'orchestratore (se sta rispondendo, al turno dopo) |
 | `/stato` | le code e i contatori |
 | `/agente argon` | l'orchestrazione passa ad Argon (il quadro aggiornato, poi una conversazione nuova) |
+| `/sospendi claude [fino a <data>]` | sospende temporaneamente i nuovi task al provider (senza toccare quelli in corso) |
+| `/riattiva claude` | riattiva l'assegnazione di nuovi task al provider |
 | `/epoca` | una conversazione nuova sullo stesso provider |
 | `/ferma ora` (o Ctrl+C) | interrompe i task in corso tenendo la loro conversazione e spegne; al riavvio riprendono da soli (un secondo Ctrl+C esce subito) |
 | `/ferma dopo` | niente lanci nuovi: aspetta che i task in corso finiscano, fa aggiornare il quadro all'orchestratore e spegne |
@@ -89,6 +91,8 @@ già `approvato`. Per approvare basta aggiungere `· approvato` alla riga.
 ```bash
 node tools/pipeline/pipeline.mjs stato                  # rigenera PIANO.md e stampa le code
 node tools/pipeline/pipeline.mjs budget claude 40       # il residuo attuale (%) del limite settimanale
+node tools/pipeline/pipeline.mjs sospendi claude [fino a <data>] # non dà nuovi task a Claude fino a revoca o scadenza (T96)
+node tools/pipeline/pipeline.mjs riattiva claude         # riattiva l'assegnazione di nuovi task a Claude
 node tools/pipeline/pipeline.mjs esegui [--sempre] [--max 5] [--solo claude|gemini|argon] [--task T43b]
 node tools/pipeline/pipeline.mjs worktree               # i worktree, cosa resta in ciascuno
 node tools/pipeline/pipeline.mjs traccia T43b           # la conversazione dell'agente (id, file, come riprenderla), consumo, ultime azioni, riepilogo
@@ -123,13 +127,15 @@ muore, al riavvio `esegui` segue i task ancora vivi e riprende la conversazione 
   stima sta nel residuo del provider meno ciò che i task in corso hanno già impegnato e la `riserva`;
 - **tetti e slot** (ADR-0087): il tetto lo decide l'autore in `limiti` (`limiti.provider` per CLI, `claude` e `agy`;
   `limiti.modello` per voce di `providers`; oggi 1 ciascuno: un task su Claude e uno su `agy` alla volta); sotto il tetto gli
-  **slot dinamici** (da 0, partendo da 1): a ogni controllo la pipeline campiona il residuo settimanale (`budget.json → storia`,
+  **slot dinamici** (da 1 al tetto, T96): a ogni controllo la pipeline campiona il residuo settimanale (`budget.json → storia`,
   ultimi `giorniStoria` giorni) e prevede dal ritmo degli ultimi `giorniPrevisione` giorni quando la settimana arriva al 100 %;
   se cade dopo il reset settimanale (o il provider non consuma) aggiunge uno slot, se cade prima lo toglie (al più uno spostamento
-  ogni `usoSecondi`), mai oltre i task che il provider ha in programma (in corso, pronti, bloccati solo da altri task: non quelli
-  in attesa dell'autore). Sotto `sogliaUnSolo` (10 %, settimana o 5 ore) nessun task nuovo e al più uno in corso, nessuno su
+  ogni `usoSecondi`), ma **mai sotto 1** (la previsione non chiude mai tutti gli slot di un modello; a 0 si va solo con crediti esauriti o quota 429);
+  non sale oltre i task che il provider ha in programma (in corso, pronti, bloccati solo da altri task: non quelli
+  in attesa dell'autore). La decisione di non dare nuovi task a un provider per un po' è dell'orchestratore (`sospendi <provider> [fino a <data>]` / `riattiva <provider>`).
+  Sotto `sogliaUnSolo` (10 %, settimana o 5 ore) nessun task nuovo e al più uno in corso, nessuno su
   quello dell'orchestratore. Un task a **priorità 0** (le urgenze dell'autore) può usare uno slot in più, mai oltre il tetto.
-  `stato` (e `PIANO.md`, l'interfaccia web) mostra per provider tetto, slot, task in programma, esaurimento previsto e reset;
+  `stato` (e `PIANO.md`, l'interfaccia web) mostra per provider tetto, slot, sospensione, task in programma, esaurimento previsto e reset;
 - **alternative** (`alternative` in `config.json`: oggi `claude → argon → gemini`, `argon → gemini`): se il provider di un task nuovo è fermo per i limiti o la stima non entra nel suo residuo, il task va al primo che può, con la stessa stima; un task sospeso riprende sempre sul suo. Così finiti i crediti di Claude la pipeline continua su Argon e poi su Gemini 3.8. Toglile se un task delicato deve aspettare Claude;
 - **turni delle operazioni pesanti** (ADR-0088): in tutta la pipeline al più **una verifica nel browser** e **una suite intera** di vitest
   alla volta; chi le vuole fare le lancia con `node tools/pipeline/pipeline.mjs turno browser|test -- <comando>`, che aspetta il turno

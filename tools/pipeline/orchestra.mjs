@@ -11,7 +11,7 @@ import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
-import { bus, BUDGET, CONFIG, execute, loadBudget, now, readJson, readOutput, REPO, requestStop, say, setOrchestrator, SHUTDOWN, shutdownRecord, shutdownSummary, STATE_DIR, usageLimit, writeJson } from './pipeline.mjs';
+import { bus, BUDGET, CONFIG, execute, loadBudget, now, readJson, readOutput, REPO, requestStop, resumeProvider, say, setOrchestrator, SHUTDOWN, shutdownRecord, shutdownSummary, STATE_DIR, suspendProvider, usageLimit, writeJson } from './pipeline.mjs';
 
 const DIR = path.join(STATE_DIR, 'orchestra');
 const STATE = path.join(DIR, 'stato.json');
@@ -273,6 +273,22 @@ export async function orchestra({ agente, porta } = {}) {
             if (CONFIG.providers[p]) wanted = p;
             cmdIds.push(item.id);
           }
+          else if (item.testo.startsWith('/sospendi')) {
+            const parts = item.testo.split(/\s+/).slice(1);
+            const p = parts[0];
+            const dateStr = parts.slice(1).join(' ').trim().replace(/^fino\s+a\s+/i, '').replace(/^fino\s+/i, '').trim() || undefined;
+            if (CONFIG.providers[p]) {
+              try { suspendProvider(p, dateStr, { stateDir: STATE_DIR }); } catch (e) { print('!', e.message); }
+            }
+            cmdIds.push(item.id);
+          }
+          else if (item.testo.startsWith('/riattiva')) {
+            const p = item.testo.split(/\s+/)[1];
+            if (CONFIG.providers[p]) {
+              try { resumeProvider(p, { stateDir: STATE_DIR }); } catch (e) { print('!', e.message); }
+            }
+            cmdIds.push(item.id);
+          }
         }
         if (cmdIds.length) dequeueMessages(cmdIds, STATE_DIR);
         const queued = readInbox(STATE_DIR);
@@ -396,7 +412,7 @@ export async function orchestra({ agente, porta } = {}) {
   }
 
   const s = state();
-  console.log(`Orchestratore: ${s.provider ? `${s.provider}, epoca ${s.epoca}` : 'nuovo'} · scrivi un messaggio, oppure /stato /agente <provider> /epoca /ferma ora|dopo /esci (Ctrl+C: /ferma ora)`);
+  console.log(`Orchestratore: ${s.provider ? `${s.provider}, epoca ${s.epoca}` : 'nuovo'} · scrivi un messaggio, oppure /stato /agente <provider> /sospendi <provider> /riattiva <provider> /epoca /ferma ora|dopo /esci (Ctrl+C: /ferma ora)`);
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout, prompt: '> ' });
   rl.prompt();
   // Ctrl+C is `ferma --ora`, clean: the tasks are interrupted with their conversation and resume at the next start.
@@ -432,6 +448,26 @@ export async function orchestra({ agente, porta } = {}) {
       const p = line.split(/\s+/)[1];
       if (!CONFIG.providers[p]) console.log(`provider: ${Object.keys(CONFIG.providers).join(', ')}`);
       else { wanted = p; void pump(); }
+      return rl.prompt();
+    }
+    if (line.startsWith('/sospendi')) {
+      const parts = line.split(/\s+/).slice(1);
+      const p = parts[0];
+      const dateStr = parts.slice(1).join(' ').trim().replace(/^fino\s+a\s+/i, '').replace(/^fino\s+/i, '').trim() || undefined;
+      if (!CONFIG.providers[p]) console.log(`provider: ${Object.keys(CONFIG.providers).join(', ')}`);
+      else {
+        try { suspendProvider(p, dateStr, { stateDir: STATE_DIR }); console.log(`${p}: sospeso${dateStr ? ` fino a ${dateStr}` : ''}`); }
+        catch (e) { console.error(e.message); }
+      }
+      return rl.prompt();
+    }
+    if (line.startsWith('/riattiva')) {
+      const p = line.split(/\s+/)[1];
+      if (!CONFIG.providers[p]) console.log(`provider: ${Object.keys(CONFIG.providers).join(', ')}`);
+      else {
+        try { resumeProvider(p, { stateDir: STATE_DIR }); console.log(`${p}: riattivato`); }
+        catch (e) { console.error(e.message); }
+      }
       return rl.prompt();
     }
     if (line === '/epoca') { rotate = 'chiesto dall\'autore'; void pump(); return rl.prompt(); }
