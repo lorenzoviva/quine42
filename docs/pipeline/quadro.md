@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 31/10/2026 alle 11:52 UTC, epoca 170 su **claude**. Integrati T94 e T54 (taglie di D&D, ADR-0092), dopo T93 e T52b. Pronti: T51, T89 (su Claude, slot 0 per la previsione crediti). Da approvare: T45f (aspetta risposte GCP), T88, **T95** (test explore/partita/subscription rossi anche da soli). Claude: settimana 34 %, 5h 55 %.
+Aggiornato il 31/10/2026 alle 13:05 UTC, fine epoca 170 su **claude**. Integrati T94 e T54 (taglie, ADR-0092). Slot di Claude riaperto a mano (vedi sotto). **T51** pronto su Claude (priorità 50), parte al prossimo lancio; **T89** interrotto dall'orchestratore (lo stato lo mostra «in corso» ma è fermo): `riprendi T89` quando T51 è finito. **T96** (minimo 1 slot per Claude) approvato su Gemini, priorità 5. Da approvare: T45f (risposte GCP), T88, T95. Claude: settimana 33 %, 5h 48 %.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -31,7 +31,7 @@ Aggiornato il 31/10/2026 alle 11:52 UTC, epoca 170 su **claude**. Integrati T94 
   2. Proposto **T95** (test explore/partita/subscription rossi anche da soli): aspetta l'approvazione dell'autore.
   2. **Risposte dell'autore per T45f** (`docs/pipeline/domande/T45f.md`).
 - **Intenzioni / prossimi passi**:
-  1. Al ripristino di Claude, seguire l'avanzamento di T54 e l'esecuzione di T93 (verifica browser Stripe).
+  1. Seguire T51 e T96; integrare T96, poi togliere il fermo a mano (`slotAggiornato` nel futuro in `.pipeline/budget.json`) se `slotMinimi` lo rende inutile; poi `riprendi T89`.
   2. Seguire poi T51 e T89 in coda. Nota: un «dipende da Txx» verso un task fatto solo nel suo branch blocca il task (T94 era fermo per questo).
   3. Ricevute le risposte su T45f, riprendere il deploy del multigiocatore su GCP.
 
