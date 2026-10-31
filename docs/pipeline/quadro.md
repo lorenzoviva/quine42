@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 31/10/2026 alle 16:20 UTC, epoca 174 su **claude**. **T51b integrato** (ADR-0094, automa cellulare dell'acqua; typecheck e `water.test.ts` verdi). **T57** (rune come codice) in corso su Claude; poi **T98** (bug: contorni del cartone oltre il cerchio, dal to-do del 31/10, priorità 40) e T97. T96 su Gemini in coda (Gemini 5h al 94 %). Da approvare: T45f (risposte GCP), T88, T95, T89a-e. Slot di Gemini fissato a 1 a mano (`slotAggiornato` al 05/11) per T96, su richiesta dell'autore.
+Aggiornato il 31/10/2026 alle 16:50 UTC, epoca 175 su **claude**. **T96 integrato** (mai zero slot, comandi `sospendi`/`riattiva`): tolti i fermi a mano degli slot (`slotAggiornato`) in `.pipeline/budget.json`. In corso **T57** su Claude e **T97** (il sito) su Gemini (dirottato dalla pipeline: Claude occupato). Poi **T98** su Claude. Da approvare: T45f (risposte GCP), T88, T95, T89a-e.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -31,16 +31,16 @@ Aggiornato il 31/10/2026 alle 16:20 UTC, epoca 174 su **claude**. **T51b integra
   2. Proposto **T95** (test explore/partita/subscription rossi anche da soli): aspetta l'approvazione dell'autore.
   2. **Risposte dell'autore per T45f** (`docs/pipeline/domande/T45f.md`).
 - **Intenzioni / prossimi passi**:
-  1. Seguire T57 (Claude, in corso) e T96 (Gemini, slot dato a mano il 31/10); integrare T96, poi togliere i fermi a mano degli slot di Claude **e di Gemini** in `.pipeline/budget.json` (`slotAggiornato` al 05/11) e usare `sospendi/riattiva`. Dopo T57: T98 (bug contorni del cartone, priorità 40), poi T97 (il sito): chiedere all'autore dove mettere il template di Claude Design (proposto `docs/design/sito/`).
+  1. Seguire T57 e T97; per le sospensioni temporanee di un provider usare `sospendi/riattiva` (T96). Se T97 chiede dove mettere il template di Claude Design, proporre `docs/design/sito/`.
   2. Proporre all'autore stime e approvazione di T89a-e (cartone) e T95 (test rossi). Nota: un «dipende da Txx» verso un task fatto solo nel suo branch blocca il task.
   3. Ricevute le risposte su T45f, riprendere il deploy del multigiocatore su GCP.
 
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T57** su Claude (in corso dal 16:13 UTC), poi **T98** (40) e **T97** (60); **T96** su Gemini (5, slot 1 a mano).
+  - **T57** su Claude (in corso dal 16:13 UTC), **T97** su Gemini (dal 16:47), poi **T98** (40) su Claude.
 - **Completati e integrati nel base `3d`**:
-  - **T51b** (ADR-0094, integrato il 31/10 16:13), **T89**, **T94**, **T54**, **T52b**, **T93**, **T92**, **T52**, **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
+  - **T96** (31/10 16:48), **T51b** (ADR-0094, integrato il 31/10 16:13), **T89**, **T94**, **T54**, **T52b**, **T93**, **T92**, **T52**, **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **Da integrare**:
   - Nessuno.
 - **In attesa di chiavi/risposte**:
