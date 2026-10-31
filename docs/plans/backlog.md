@@ -1961,3 +1961,13 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fatto quando: una ricarica di prova eseguita nel browser o comportamento e risposte documentati con precisione, commit su branch `task/T93`.
 
 
+
+### T94 · Integrare T54 — `da fare` (dipende da T54)
+- Pipeline: claude · stima 3% · approvato · priorità 8
+- Contesto: `integra T54` va in conflitto con il base `3d` in `AGENTS.md`, `docs/adr/README.md`, `docs/plans/backlog.md`,
+  `src/kernel/kernel.ts`, `src/kernel/validator.ts`. T54 ha scritto l'ADR come ADR-0081, numero già preso
+  (`0081-crediti-e-spese-comuni.md`). Nasce da T54: `dossier T54`.
+- Cosa fare: nel worktree `git merge task/T54`; l'ADR di T54 prende il primo numero libero (oggi ADR-0092) con tutti i
+  riferimenti (AGENTS.md, README degli ADR, backlog, commenti nel codice); nelle sezioni in conflitto restano entrambe le aggiunte;
+  in `backlog.md` tieni il blocco del base e segna T54 `fatto` con il suo commit.
+- Quando è fatto: merge committato, `npm run typecheck` verde, `npm test` (con `turno test`) verde salvo timeout di carico già noti sulla base.
