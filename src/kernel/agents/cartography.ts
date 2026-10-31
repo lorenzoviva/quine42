@@ -7,6 +7,7 @@ import type { Schema } from '../ai/models';
 import type { Carta } from '../cards';
 import type { LayoutDef, Place, TileDef } from '../types';
 import type { MjNode } from '../mj';
+import { sizeOf, TAGLIE, type Taglia } from '../../mj/classes';
 import { STAMP_SHAPES } from '../stamps';
 import { paletteSummary, type CatalogEntry, type Council } from './council';
 
@@ -30,9 +31,10 @@ export interface ChunkPlan {
   runes: string[];
   /**
    * Structures the place has (ADR-0043): each becomes a whole model one enters, set on a lot of the
-   * environment (the largest first); the Sculptor writes the ones that do not exist yet.
+   * environment (the largest first); the Sculptor writes the ones that do not exist yet. Their size (ADR-0092)
+   * is a size of D&D, fitted by the kernel to the lot and to the rarity of the two largest.
    */
-  strutture?: Array<{ concetto: string; importante?: boolean }>;
+  strutture?: Array<{ concetto: string; taglia?: Taglia }>;
   /** Tiles changed after the layout (by effects, spells, Lua): cell index → tile code. */
   edits?: Record<string, string>;
   /** Who planned the place and who paid for it (T36). */
@@ -56,10 +58,10 @@ export interface PlanContext {
   /** The region of the atlas this place belongs to, if any. */
   region?: { nome: string; descrizione: string };
   /**
-   * Whether a structure here may be important (ADR-0043): one per zone of the world (about a million
-   * tiles); the kernel enforces it anyway.
+   * The rare sizes a structure here may still have (ADR-0092): Huge one per zone of the world (about a
+   * million tiles), Gargantuan one per realm (4 × 4 zones); the kernel enforces it anyway.
    */
-  importante?: boolean;
+  rari?: Taglia[];
   /** Who pays for the plan (T40): the wanderer who first came to the place. */
   chi?: string;
 }
@@ -75,10 +77,19 @@ const PLAN_SCHEMA: Schema = {
     a_terra: { type: 'ARRAY', items: { type: 'STRING' } },
     nuovi: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concetto: { type: 'STRING' }, dove: { type: 'STRING', enum: WHERE } }, required: ['concetto', 'dove'] } },
     rune: { type: 'ARRAY', items: { type: 'STRING' } },
-    strutture: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concetto: { type: 'STRING' }, importante: { type: 'BOOLEAN' } }, required: ['concetto'] } },
+    strutture: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concetto: { type: 'STRING' }, taglia: { type: 'STRING', enum: TAGLIE.map((t) => t.id) } }, required: ['concetto'] } },
   },
   required: ['luogo', 'ambiente', 'oggetti', 'rune'],
 };
+
+/**
+ * A structure of a plan, as the Cartographer wrote it or as a saved plan has it: a size of D&D, or `importante`
+ * of the plans before ADR-0092 (the castle of then is Huge).
+ */
+export function readStructure(s: any): { concetto: string; taglia?: Taglia } {
+  const taglia = sizeOf(String(s?.taglia ?? '').trim().toLowerCase())?.id ?? (s?.importante === true ? 'enorme' : undefined);
+  return { concetto: String(s?.concetto ?? '').trim(), ...(taglia ? { taglia } : {}) };
+}
 
 export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan> {
   const prompt = [
@@ -92,9 +103,10 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
     '"nuovi": quasi sempre vuoto; solo un oggetto concreto o un personaggio che il luogo richiede e che non esiste tra i moduli.',
     `"rune": 0-2 frammenti presi esattamente da questo elenco: ${ctx.fragments.map((f) => `«${f}»`).join(', ')}.`,
     '"strutture": 0-2 edifici o costruzioni di questo luogo, se l\'ambiente ne ha (es. «il mulino sul fiume», «la casa del fabbro con la forgia»): ognuno diventa un modello intero in cui si entra, sui lotti dell\'ambiente (gli altri lotti hanno case comuni).',
-    ctx.importante
-      ? '"importante" (al più una struttura): solo per un luogo notevole del mondo (un castello, un tempio, la torre del mago). In questa parte del mondo non ce n\'è ancora uno: mettilo solo se il luogo lo merita davvero.'
-      : 'Nessuna struttura "importante" qui: questa parte del mondo ha già il suo luogo notevole.',
+    `"taglia" (facoltativa, come le taglie di D&D: minuscola, piccola, media, grande, enorme, gargantuesca): media una casa, grande un mulino o una torre; il kernel la adatta al lotto.`,
+    ctx.rari?.length
+      ? `Le taglie più grandi sono rare: in questa parte del mondo può esserci ancora ${ctx.rari.map((t) => (t === 'enorme' ? 'una struttura "enorme" (un castello, un tempio, la torre del mago)' : 'una struttura "gargantuesca" (una cittadella, una cattedrale, una rovina immensa)')).join(' e ')}: al più una per luogo, solo se il luogo lo merita davvero.`
+      : 'Niente strutture "enorme" né "gargantuesca" qui: questa parte del mondo ha già i suoi luoghi notevoli.',
     ctx.feedback ? `IL TENTATIVO PRECEDENTE È STATO SCARTATO: ${ctx.feedback}. Correggi.` : '',
   ]
     .filter(Boolean)
@@ -110,7 +122,7 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
     ground: (raw?.a_terra ?? []).slice(0, 4).map(String),
     fresh: (raw?.nuovi ?? []).slice(0, 1).map((o: any) => ({ concept: String(o?.concetto ?? ''), where: where(o?.dove) })),
     runes: (raw?.rune ?? []).slice(0, 3).map(String),
-    strutture: (raw?.strutture ?? []).slice(0, 3).map((s: any) => ({ concetto: String(s?.concetto ?? '').trim(), ...(s?.importante === true ? { importante: true } : {}) })),
+    strutture: (raw?.strutture ?? []).slice(0, 3).map(readStructure),
   };
 }
 

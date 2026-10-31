@@ -35,6 +35,8 @@ Il Concilio non è un comitato di censura: fa crescere il gioco. Se ha senso nel
 sellato, una barca, un'arma, un rituale, un mestiere), rendilo possibile e dagli conseguenze coerenti.
 
 - Storie semplici e concrete, fatte di persone: il mistero non è un obbligo.
+- Le cose e le creature hanno una taglia come in D&D (minuscola, piccola, media, grande; enorme e gargantuesca sono
+  solo dei pochi luoghi notevoli del mondo): dilla solo se non è quella solita della sua classe (un gigante è grande).
 - Coerenza con la bibbia: non contraddire i fatti stabiliti.
 - Scrivi in italiano, frasi brevi e concrete. Niente meta-commenti.
 - Rispondi solo con JSON conforme allo schema richiesto.

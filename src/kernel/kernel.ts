@@ -36,14 +36,14 @@ import { USAGE_FILE, UsageLedger, type CallRecord } from './ai/usage';
 import { addBudgetFromTetto, costWithFee, splitCost, PAYMENTS_FILE, type PaymentRecord, isPaymentProcessed, recordPayment } from './credits';
 import { MemoryChunks, type ChunkStore } from './chunks';
 import { bodyFoot, bodyGround, Forms, holesOf, InlineRunner, instanceGrid, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground } from './forms';
-import { guessClass } from '../mj/classes';
+import { classOf, guessClass, RARE_SIZES, sizeRank, TAGLIE, tilesOf, type Taglia } from '../mj/classes';
 import { GENERIC, ModelDirector, ownModelId } from './modeldirector';
 import { categoryOf, DEFAULT_SCULPTORS, sculptAction, type SculptorModels } from './agents/sculptor';
 import { MODELS_INDEX, type ModelInfo } from './forms';
 import { Content, normName, specOf } from './content';
 import { layout, type Building, type LayoutResult, articulationPoints } from './layout';
 import { AGENTS, Council, readBible, wordsOf, type AgentId, type CatalogEntry, type FeedEntry } from './agents/council';
-import { designEnvironment, drawAtlas, planChunk, type ChunkPlan, type Where } from './agents/cartography';
+import { designEnvironment, drawAtlas, planChunk, readStructure, type ChunkPlan, type Where } from './agents/cartography';
 import { forge, judgeCombination, repairLogic, slug, type ForgeOrigin } from './agents/forge';
 import { agentReply, examine, narrate, npcDialogue, npcReply, referenteReply, weavePlot, type NpcReply, type Turn } from './agents/minds';
 import { planGenesis } from './agents/genesis';
@@ -209,7 +209,7 @@ interface PlaceLot {
   x: number;
   y: number;
   form: FormComp;
-  struttura: { concetto: string; classe: string; importante: boolean; model?: string };
+  struttura: { concetto: string; classe: string; taglia?: Taglia; model?: string };
 }
 
 /** A planned place in miniature (T26): positions in tiles from the place's top-left corner, levels in `LEVEL`s. */
@@ -326,12 +326,23 @@ const STARTER_RUNES = ['x', 'speed = speed', 'luce'];
 /** Chunks from the origin (in carpet space) before runes that touch the carpet can appear. */
 const CARPET_RUNE_DISTANCE = 3;
 /**
- * Side, in chunks, of a zone of the world that has at most one important structure (ADR-0043): 56 chunks
+ * Side, in chunks, of a zone of the world that has at most one Huge structure (ADR-0043, 0092): 56 chunks
  * of 18 tiles, about 1000 × 1000 tiles (a million). Walking straight (6 tiles/s) one crosses a zone in
  * about three minutes; exploring, much more. Zones are centred on the start.
  */
 export const IMPORTANT_ZONE = 56;
 export const zoneOf = (cx: number, cy: number) => `${Math.floor((cx + IMPORTANT_ZONE / 2) / IMPORTANT_ZONE)},${Math.floor((cy + IMPORTANT_ZONE / 2) / IMPORTANT_ZONE)}`;
+/**
+ * Side, in zones, of a realm (ADR-0092): 4 × 4 zones, 224 × 224 chunks (about 4000 tiles a side), with at most one
+ * Gargantuan structure. Not a region of the atlas (3-4 places).
+ */
+export const REALM = 4;
+export const realmOf = (cx: number, cy: number) => {
+  const [zx, zy] = zoneOf(cx, cy).split(',').map(Number);
+  return `${Math.floor((zx + REALM / 2) / REALM)},${Math.floor((zy + REALM / 2) / REALM)}`;
+};
+/** The area of the world where a rare size is unique (ADR-0092): Huge per zone, Gargantuan per realm. */
+export const rareAreaOf = (t: Taglia, cx: number, cy: number) => (t === 'gargantuesca' ? realmOf(cx, cy) : zoneOf(cx, cy));
 
 const clone = <T>(v: T): T => (v === undefined ? v : JSON.parse(JSON.stringify(v)));
 
@@ -410,7 +421,8 @@ export class Kernel {
   /** What was done to models of things, by stable origin (saved with the game). */
   private savedForms = new Map<string, string[]>();
   /** Zones of the world that already have their important structure: zone → the chunk that has it (saved with the game). */
-  private importanti = new Map<string, string>();
+  /** The places that have the rare structures (ADR-0092): size → area (zone, realm) → chunk key. */
+  private rari = new Map<Taglia, Map<string, string>>(RARE_SIZES.map((t) => [t, new Map()]));
   private runesDirty = true;
   private consumed = new Set<string>();
   private loaded = new Map<string, string>();
@@ -1570,7 +1582,7 @@ export class Kernel {
           cx: ch.cx, cy: ch.cy, terrain: this.terrainSummary(ch.draft), neighbors, layouts, catalog: this.catalog(),
           fragments: this.fragments.map((f) => f.line), wanted: [...this.wanted].map((id) => this.itemInfo(id).name).slice(0, 8), start, attempt, feedback,
           region: region ? { nome: region.nome, descrizione: region.descrizione } : undefined,
-          importante: this.importantAllowed(ch),
+          rari: this.rareAllowed(ch),
           chi: ch.chi,
         });
         const verdict = this.validator.validatePlan(raw, new Set(layouts.map((l) => l.id)), placeable);
@@ -1860,7 +1872,7 @@ export class Kernel {
     ch.version++;
     this.plannedCount++;
     for (const id of this.ecs.query('chunk')) if (this.ecs.get(id, 'chunk').key === ch.key) this.ecs.destroy(id);
-    this.claimImportant(ch, plan);
+    this.claimSizes(ch, plan);
     const structures = this.settleLots(ch, plan, pathCode);
     const place = this.placementsOf(ch, plan, result);
     const at = (cell: number) => ({ x: ch.cx * S + (cell % S) + 0.5, y: ch.cy * S + Math.floor(cell / S) + 0.5 });
@@ -1926,26 +1938,41 @@ export class Kernel {
     return c >= 1 || (c > 0 && hash32(this.config.seed, hashStr(origin), 4545) / 4294967296 < c);
   }
 
-  /** Whether a place may still have an important structure: its zone has none, or this place is the one that has it. */
-  importantAllowed(ch: { cx: number; cy: number; key: string }): boolean {
-    const owner = this.importanti.get(zoneOf(ch.cx, ch.cy));
-    return !owner || owner === ch.key;
+  /** The rare sizes a place may still have (ADR-0092): its area has none of that size, or this place is the one that has it. */
+  rareAllowed(ch: { cx: number; cy: number; key: string }): Taglia[] {
+    return RARE_SIZES.filter((t) => {
+      const owner = this.rari.get(t)!.get(rareAreaOf(t, ch.cx, ch.cy));
+      return !owner || owner === ch.key;
+    });
   }
 
   /**
-   * One important structure per zone (ADR-0043): the first place of a zone that has one keeps it, the
-   * others' become ordinary (the plan is changed, so it is saved as it is applied).
+   * The sizes of a plan's structures (ADR-0092), fitted as the lots will take them (the largest lot first): a
+   * size whose box does not fit its lot goes down to the largest that does; a rare one (Huge per zone,
+   * Gargantuan per realm, one per place) is kept by the first place of its area, the others' go down to the
+   * next size allowed. The plan is changed, so it is saved as it is applied.
    */
-  private claimImportant(ch: Chunk, plan: ChunkPlan): void {
-    let kept = false;
-    for (const s of plan.strutture ?? []) {
-      if (!s.importante) continue;
-      // One per place, too.
-      if (!kept && this.importantAllowed(ch)) {
-        this.importanti.set(zoneOf(ch.cx, ch.cy), ch.key);
-        kept = true;
-      } else delete s.importante;
-    }
+  private claimSizes(ch: Chunk, plan: ChunkPlan): void {
+    if (!plan.strutture?.length) return;
+    plan.strutture = plan.strutture.map(readStructure);
+    const sides = ch.buildings.map((b, i) => ({ i, area: (b.x1 - b.x0 + 1) * (b.y1 - b.y0 + 1), side: Math.max(b.x1 - b.x0 + 1, b.y1 - b.y0 + 1) })).sort((a, b) => b.area - a.area || a.i - b.i).map((b) => b.side);
+    let rare = false;
+    plan.strutture.forEach((s, n) => {
+      if (!s.taglia) return;
+      const side = sides[n];
+      const cls = classOf(side !== undefined && side >= 5 ? 'grande' : 'edificio')!;
+      const fits = (t: Taglia) => side !== undefined && Math.max(...tilesOf(cls, t).slice(0, 2)) <= side;
+      const allowed = this.rareAllowed(ch);
+      const ok = (t: Taglia) => fits(t) && (!RARE_SIZES.includes(t) || (!rare && allowed.includes(t)));
+      let t: Taglia | undefined = s.taglia;
+      while (t && !ok(t)) t = sizeRank(t) > 0 ? TAGLIE[sizeRank(t) - 1].id : undefined;
+      if (!t) delete s.taglia;
+      else s.taglia = t;
+      if (t && RARE_SIZES.includes(t)) {
+        this.rari.get(t)!.set(rareAreaOf(t, ch.cx, ch.cy), ch.key);
+        rare = true;
+      }
+    });
   }
 
   /**
@@ -1957,7 +1984,7 @@ export class Kernel {
   private lotsOf(ch: Pick<Chunk, 'cx' | 'cy' | 'key' | 'draft' | 'tiles' | 'buildings'>, plan: ChunkPlan, pathCode: string): { tiles: string; lots: PlaceLot[] } {
     const S = this.config.chunkSize;
     const tiles = [...ch.tiles];
-    const wanted = [...(plan.strutture ?? [])];
+    const wanted = (plan.strutture ?? []).map(readStructure);
     const lots: PlaceLot[] = [];
     const order = ch.buildings.map((b, i) => ({ b, i, area: (b.x1 - b.x0 + 1) * (b.y1 - b.y0 + 1) })).sort((a, b) => b.area - a.area || a.i - b.i);
     for (const { b, i } of order) {
@@ -1989,7 +2016,7 @@ export class Kernel {
         x: ch.cx * S + (b.x0 + b.x1 + 1) / 2,
         y: ch.cy * S + (b.y0 + b.y1 + 1) / 2,
         form,
-        struttura: { concetto: req?.concetto ?? (classe === 'grande' ? 'una casa' : 'una casetta'), classe, importante: !!req?.importante, ...(own ? { model: own } : {}) },
+        struttura: { concetto: req?.concetto ?? (classe === 'grande' ? 'una casa' : 'una casetta'), classe, ...(req?.taglia ? { taglia: req.taglia } : {}), ...(own ? { model: own } : {}) },
       });
     }
     return { tiles: tiles.join(''), lots };
@@ -6671,7 +6698,7 @@ export class Kernel {
       this.applyFiles({ ...this.repo.working });
       this.consumed.clear();
       this.savedContainers.clear();
-      this.importanti.clear();
+      for (const m of this.rari.values()) m.clear();
       this.repo.write('world/stato.json', null);
       for (const p of Object.keys(this.repo.working)) if (p.startsWith(PLAYERS_DIR)) this.repo.write(p, null);
       this.wanted.clear();
@@ -6738,7 +6765,7 @@ export class Kernel {
       consumati: [...this.consumed].slice(-5000),
       contenitori: containers,
       forme: this.formsToSave(),
-      importanti: Object.fromEntries(this.importanti),
+      rari: Object.fromEntries([...this.rari].map(([t, m]) => [t, Object.fromEntries(m)])),
       ora: Math.round(this.time),
     };
     // Each wanderer in their own file (T34); the world's state no longer carries one.
@@ -6956,7 +6983,9 @@ export class Kernel {
     for (const k of st.consumati ?? []) this.consumed.add(String(k));
     for (const [k, c] of Object.entries(st.contenitori ?? {})) this.savedContainers.set(k, c as { inv: Inventory; filled: boolean });
     for (const [k, d] of Object.entries(st.forme ?? {})) if (Array.isArray(d)) this.savedForms.set(k, d.map(String));
-    for (const [z, c] of Object.entries(st.importanti ?? {})) if (typeof c === 'string') this.importanti.set(z, c);
+    // The important structures of before ADR-0092 are the Huge ones.
+    for (const [z, c] of Object.entries(st.importanti ?? {})) if (typeof c === 'string') this.rari.get('enorme')!.set(z, c);
+    for (const t of RARE_SIZES) for (const [z, c] of Object.entries(st.rari?.[t] ?? {})) if (typeof c === 'string') this.rari.get(t)!.set(z, c);
     if (Number.isFinite(st.ora)) this.time = st.ora;
     this.lastState = JSON.stringify(st);
   }

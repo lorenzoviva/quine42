@@ -926,8 +926,8 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
   aggiornato).
 - Dipendenze: nessuna. Utile prima di T52 e di T56.
 
-### T54 · Le taglie di D&D per strutture e creature — `da fare` (risposte in `docs/pipeline/domande/T54.md`)
-- Pipeline: claude · stima 6% · priorità 50
+### T54 · Le taglie di D&D per strutture e creature — `fatto` (`3c5fe95`)
+- Pipeline: claude · stima 6% · approvato · priorità 50
 - Contesto: richiesta del 24/10. Oggi le classi (`CLASSES` in `src/mj/classes.ts`: `persona`, `animale`, `bestia`,
   `edificio`, `grande`…) danno la scatola in caselle, e una struttura «importante» (Argon) per zona di 56 × 56 luoghi.
   L'autore vuole riferirsi alla taglia di D&D: Minuscola, Piccola, Media, Grande, Enorme, Gargantuesca. **Gargantuesca è la
@@ -943,6 +943,16 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 - **Risposte dell'autore** (30/10): niente settima taglia, Gargantuesca la massima; **stessa scala** per creature e strutture
   (la scatola in caselle la dà la classe: una struttura Media è più grande di una creatura Media); rarità come sopra. Il nome
   «reame» l'ha scelto l'orchestratore: si può cambiare.
+- Esito: `TAGLIE` in `src/mj/classes.ts` (scala 0,5 · 0,75 · 1 · 2 · 3 · 4 rispetto a Media), ogni classe con la sua taglia solita;
+  `tilesOf`/`boxOf(cls, taglia)`, più rada oltre 120 voxel (`densityOf`); `appearance.taglia` (validatore), taglia nei concetti della Fucina
+  (`forgedSize`, mai le due rare), `strutture[].taglia` del Cartografo (`readStructure`: `importante` vecchio → `enorme`), `struttura.taglia`,
+  `SculptRequest.taglia` (Argon per le rare), `ModelInfo.taglia`/`vpt` (`modelSize`). Rarità: `claimSizes` e `rareAllowed`, Enorme per zona,
+  Gargantuesca per reame (`realmOf`), `stato.json → rari` (migra `importanti`). Prompt di Cartografo, Narratore, Scultore; ADR-0092, AGENTS.md;
+  test in `tests/lots.test.ts` e `tests/sculptor.test.ts`. Diverso dal previsto: il kernel abbassa la taglia che non sta nel lotto (un'Enorme
+  vuole un lotto di 8 caselle, una Gargantuesca di 10), quindi negli ambienti con edifici piccoli le rare diventano Grandi; lotti più grandi per
+  le rare restano da fare se serviranno. Le creature arrivano fino a Grande (nessuna rarità per le creature). Test: `typecheck` verde,
+  `tests/lots.test.ts` e `tests/sculptor.test.ts` verdi; nella suite completa 9 file vanno in timeout, in serie ne restano 5 (33 test, boot oltre 10 s), per il carico della
+  macchina: `kernel.test.ts` «boots the bundled universe» va in timeout uguale sulla base (11,5 s contro 11,3 s).
 
 ## Controlli
 
@@ -1973,7 +1983,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 
 
-### T94 · Integrare T54 — `da fare`
+### T94 · Integrare T54 — `fatto` (`0041da5`)
 - Pipeline: claude · stima 3% · approvato · priorità 8
 - Contesto: `integra T54` va in conflitto con il base `3d` in `AGENTS.md`, `docs/adr/README.md`, `docs/plans/backlog.md`,
   `src/kernel/kernel.ts`, `src/kernel/validator.ts`. T54 ha scritto l'ADR come ADR-0081, numero già preso
@@ -1982,6 +1992,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   riferimenti (AGENTS.md, README degli ADR, backlog, commenti nel codice); nelle sezioni in conflitto restano entrambe le aggiunte;
   in `backlog.md` tieni il blocco del base e segna T54 `fatto` con il suo commit.
 - Quando è fatto: merge committato, `npm run typecheck` verde, `npm test` (con `turno test`) verde salvo timeout di carico già noti sulla base.
+- Esito: eseguito `git merge task/T54` e risolti i conflitti in `AGENTS.md`, `docs/adr/README.md`, `docs/plans/backlog.md`, `src/kernel/forms.ts`, `src/kernel/kernel.ts`, `src/kernel/validator.ts` preservando sia i sotterranei (T52b) sia le taglie di D&D (T54); rinominato `docs/adr/0081-le-taglie-di-dnd.md` in `docs/adr/0092-le-taglie-di-dnd.md` (aggiornato titolo interno a ADR-0092); aggiornati tutti i riferimenti ad ADR-0081 relativi alle taglie in ADR-0092 in `AGENTS.md`, `docs/adr/0043-spazio-a-scale-lotti-strutture.md`, `docs/adr/README.md`, `docs/plans/backlog.md` (T54 `fatto` con commit `3c5fe95`), `src/kernel/agents/cartography.ts`, `src/kernel/agents/forge.ts`, `src/kernel/agents/sculptor.ts`, `src/kernel/forms.ts`, `src/kernel/kernel.ts`, `src/kernel/modeldirector.ts`, `src/kernel/types.ts`, `src/kernel/validator.ts`, `src/mj/classes.ts`, `tests/lots.test.ts`, `tests/sculptor.test.ts`, lasciando intatti i riferimenti ad ADR-0081 per i crediti e le spese comuni; `npm run typecheck` verde; `tests/lots.test.ts` e `tests/sculptor.test.ts` passati (11/11); suite completa eseguita sotto `turno test` (581 passati, restanti timeout di carico già noti sulla base e oggetto di T95).
 
 ### T95 · Test rossi da soli: explore, partita, subscription — `da fare`
 - Pipeline: claude · stima 3% · priorità 60

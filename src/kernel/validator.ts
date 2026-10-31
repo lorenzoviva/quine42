@@ -14,7 +14,7 @@ import { layout } from './layout';
 import { analyse } from '../mj/check';
 export { repairCoefficients } from './coefficients';
 export { repairMinimi } from './universe';
-import { boxOf, classOf, CLASSES } from '../mj/classes';
+import { boxOf, classOf, CLASSES, sizeOf, TAGLIE } from '../mj/classes';
 import { Mj3Error } from '../mj/engine';
 import { compileMjx } from '../mj/model';
 import { runMjx } from '../mj/run';
@@ -130,6 +130,7 @@ export class Validator {
       if (typeof m.appearance.color !== 'string') err('appearance.color mancante');
       if (m.appearance.model !== undefined && (typeof m.appearance.model !== 'string' || !MODEL_RE.test(m.appearance.model))) err(`appearance.model deve essere l'id di un modello di models/ (es. "pino"): "${m.appearance.model}"`);
       if (m.appearance.classe !== undefined && !classOf(m.appearance.classe)) err(`appearance.classe sconosciuta "${m.appearance.classe}" (note: ${CLASSES.map((c) => c.id).join(', ')})`);
+      if (m.appearance.taglia !== undefined && !sizeOf(m.appearance.taglia)) err(`appearance.taglia sconosciuta "${m.appearance.taglia}" (taglie: ${TAGLIE.map((t) => t.id).join(', ')})`);
     }
     if (['entity', 'item', 'player'].includes(m.kind) && !m.appearance) err(`un modulo ${m.kind} richiede appearance`);
     if (m.physics) {
@@ -316,6 +317,12 @@ export class Validator {
       const ok = s.concetto.length >= 3 && s.concetto.length <= 120;
       if (!ok) dropped.push(`struttura «${s.concetto}»: non valida`);
       return ok;
+    }).map((s) => {
+      // A size that is not one of D&D's (ADR-0092) is dropped: the structure keeps its lot's.
+      if (s.taglia === undefined || sizeOf(s.taglia)) return s;
+      dropped.push(`struttura «${s.concetto}»: taglia «${s.taglia}» sconosciuta`);
+      const { taglia: _, ...rest } = s;
+      return rest;
     });
     return { errors, dropped, plan: { ...plan, objects, runes, fresh, strutture, ground: plan.ground.filter((g) => g.trim().length >= 2 && g.length <= 60) } };
   }
