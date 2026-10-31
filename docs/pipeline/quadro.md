@@ -38,7 +38,7 @@ Aggiornato il 31/10/2026 alle 17:20 UTC, epoca 176 su **claude**. **T97 fatto** 
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - Su Claude **T99** (integrare T57) → poi integra T57 e T99 → **T100** (integrare T97 + browser) → **T98** (40) → T57b (60). Gemini libero: nulla da approvare per lui adesso.
+  - T57a e T99 integrati (17:31). Su Claude **T100** (integrare T97 + browser) → **T98** (40) → T57b (60). Gemini libero: nulla da approvare per lui adesso.
 - **Completati e integrati nel base `3d`**:
   - **T96** (31/10 16:48), **T51b** (ADR-0094, integrato il 31/10 16:13), **T89**, **T94**, **T54**, **T52b**, **T93**, **T92**, **T52**, **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **Da integrare**:
