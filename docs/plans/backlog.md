@@ -2199,7 +2199,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fare: aggiornare `src/style.css` e i componenti UI in-game (`src/ui/hud.ts`, `inventory.ts`, `lobby.ts`, `profile.ts`, `chat.ts`, `creditdialog.ts`) per adottare appieno i token di `src/theme.css`: bordi a inchiostro netto fumetto (`--border-ink-thick`), ombre rigide neon offset (`--shadow-hard-cyan`, `--shadow-hard-pink`), pattern mezze tinte sui pannelli modali, pulsanti arcade retrò e font display per intestazioni e notifiche d'avviso.
 - Fatto quando: typecheck e test verdi; screenshot nel browser delle interfacce in-game rinnovate con il tema pop art comics / neon punk.
 
-### T107 · Il sito: correggere i difetti della pagina dimostrativa — `da fare`
+### T107 · Il sito: correggere i difetti della pagina dimostrativa — `fatto`
 - Pipeline: gemini · stima 2% · approvato · priorità 20
 - Contesto: la verifica di T100 nel browser su `site/index.html` (T97, ADR-0095) ha trovato cinque difetti, scritti nel blocco di T100.
   Nasce da T97 e T100: `dossier T97`, `dossier T100`.
@@ -2209,3 +2209,17 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   pubblico («ADR-0084» e simili); (5) i font serviti in locale (file in `site/` o `public/`, niente `fonts.googleapis.com`), anche per `src/theme.css`.
 - Quando è fatto: `npm run typecheck` e `npm run build` verdi; nessuna richiesta a domini esterni nel `dist/` del sito (grep);
   `BROWSER: da verificare` per l'orchestratore.
+- Esito: `task/T107` (`e107d92`): retro vero della carta (`backface-visibility`), testi corretti (carta CSS 3D), motto e tooltip velati,
+  niente riferimenti ADR, font in `public/fonts/`. Da integrare dopo la verifica nel browser (T108).
+
+### T108 · Verificare T107 (il sito corretto) nel browser — `da fare`
+- Pipeline: claude · stima 3% · approvato · priorità 30
+- Contesto: T107 ha corretto i cinque difetti trovati da T100 su `site/index.html` ma su Antigravity non c'era il browser
+  (`BROWSER: da verificare`). Nasce da T107 e T100: `dossier T107`, `dossier T100`.
+- Cosa fare: nel worktree `git merge task/T107`; typecheck e build; grep in `dist/` di domini esterni (`googleapis`, `gstatic`) e di
+  `GEMINI_API_KEY` con un valore. Nel turno browser (`pipeline.mjs turno browser -- …`) apri `/site/index.html` della preview: la carta
+  girata mostra un retro vero (non il fronte specchiato), i font Bangers/Press Start 2P/VT323 si caricano da `/fonts/` (nessuna richiesta a
+  terzi), il motto del footer e il tooltip dei gerboa non svelano la corona, niente «ADR-» nei testi, hero three.js e nessun errore in console;
+  poi `/?skip&offline`: HUD del gioco come prima.
+- Quando è fatto: merge committato, verifica scritta nel blocco; ogni difetto come riga «difetto:» per l'orchestratore.
+- Dipende da T107.
