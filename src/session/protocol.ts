@@ -46,6 +46,9 @@ export interface PlaceView {
   lotti?: number[][];
   /** The cells where its draft has the open sea: its water lies at the sea's level (T51a). */
   mare?: number[];
+  /** The ground dug or raised and the water that has flowed (T51b): cell → levels, cell → bed and water. */
+  scavi?: Record<string, number>;
+  acqua?: Record<string, [number, number] | [number, number, string]>;
   version: number;
 }
 

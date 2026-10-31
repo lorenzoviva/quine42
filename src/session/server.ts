@@ -817,6 +817,8 @@ export class SessionServer {
         ...(ch.place?.name ? { nome: ch.place.name, descrizione: ch.place.description } : {}),
         ...(ch.buildings.length ? { lotti: ch.buildings.map((b) => [b.x0, b.y0, b.x1, b.y1]) } : {}),
         ...(ch.draft.includes(SEA_DRAFT) ? { mare: [...ch.draft].flatMap((c, i) => (c === SEA_DRAFT ? [i] : [])) } : {}),
+        ...(ch.plan?.scavi && Object.keys(ch.plan.scavi).length ? { scavi: { ...ch.plan.scavi } } : {}),
+        ...(ch.plan?.acqua && Object.keys(ch.plan.acqua).length ? { acqua: { ...ch.plan.acqua } } : {}),
       });
     }
     if (places.length) out.luoghi = places;
