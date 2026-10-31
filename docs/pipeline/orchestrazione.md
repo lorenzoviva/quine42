@@ -536,3 +536,39 @@
 - [2026-10-31T00:51:36.861Z] nota: T45e: autore ha inserito chiavi Stripe in .env; T45e fatto, creato T93 per verifica browser su Claude
 - [2026-10-31T00:52:24.442Z] orchestratore: epoca 167 su gemini (contesto a 263 % della finestra)
 - [2026-10-31T01:00:47.830Z] nota: T93 approvato (verifica browser Stripe T45e, listener su porta 5173)
+- [2026-10-31T01:01:46.357Z] orchestratore: epoca 168 su gemini (contesto a 155 % della finestra)
+- [2026-10-31T03:01:37.049Z] riprendo T54 su claude (H:\projects\rune\.claude\worktrees\t54)
+- [2026-10-31T03:03:46.700Z] orchestratore: epoca 169 su claude (claude ha di nuovo crediti)
+- [2026-10-31T04:01:08.353Z] T54: ESITO: fatto — taglie di D&D per creature e strutture (scatola dalla classe, scalata dalla taglia); Enorme una per zona, Gargantuesca una per reame, adattate al lotto; ADR-0081; typecheck e test del task verdi; nella suite 33 test in 5 file vanno in timeout, il boot di `kernel.test.ts` va in timeout uguale sulla base, gli altri non sono confrontati. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T54)
+- [2026-10-31T04:01:32.103Z] integra T54: conflitti in AGENTS.md, docs/adr/README.md, docs/plans/backlog.md, src/kernel/kernel.ts, src/kernel/validator.ts; il base è com'era
+- [2026-10-31T04:03:15.456Z] lancio T93 su claude (H:\projects\rune\.claude\worktrees\t93)
+- [2026-10-31T04:40:02.136Z] T93: ESITO: fatto — ricarica Stripe di prova riuscita dall'inizio alla fine; corretti due rifiuti dell'API Stripe (`payment_method_types`, Managed Payments con `STRIPE_TAX_CODE` facoltativo) e il commit dell'accredito su disco; suite intera non verde (timeout, più explore/partita/subscription che falliscono anche da soli, non legati a Stripe) · BROWSER: verificato — checkout sandbox da 5 $ pagato, ritorno con `?ricarica=successo` e messaggio nell'HUD, webhook arrivato e +5 crediti scritti con l'evento registrato; i pulsanti del pannello `P` non sono visibili senza Firebase (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T93)
+- [2026-10-31T10:34:44.047Z] lancio T52b su claude (H:\projects\rune\.claude\worktrees\t52b)
+- [2026-10-31T11:19:09.208Z] T52b: ESITO: fatto — cantine nei modelli (`sotto`, `Form.base`/`Form.hole`), collisione, pavimenti e salto contati dal suolo del modello, buco nel terreno; test in `tests/cellar.test.ts` · BROWSER: verificato — casa con cantina aggiunta con `addModel` accanto al Borgo: la tromba delle scale scende e non è coperta dal terreno, il viandante va a −0,9, si ferma al muro e risale; nessun errore del gioco in console (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T52b)
+- [2026-10-31T11:19:22.512Z] task/T52b integrato in 3d; worktree e branch tolti.
+- [2026-10-31T11:19:57.329Z] orchestratore: epoca 170 su claude (contesto a 56 % della finestra)
+- [2026-10-31T11:20:12.213Z] T94: claude non può, va su gemini
+- [2026-10-31T11:20:12.771Z] lancio T94 su gemini (H:\projects\rune\.claude\worktrees\t94)
+- [2026-10-31T11:49:52.646Z] T94: ESITO: fatto — merge di `task/T54` completato, ADR rinumerato in `docs/adr/0092-le-taglie-di-dnd.md` con riferimenti aggiornati preservando ADR-0081 per i crediti, conflitti risolti mantenendo sotterranei e taglie, typecheck e test di taglie verdi. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T94)
+- [2026-10-31T11:50:07.500Z] task/T94 integrato in 3d; worktree e branch tolti.
+- [2026-10-31T11:50:08.127Z] task/T54 integrato in 3d; worktree e branch tolti.
+- [2026-10-31T12:53:53.233Z] nota: Autore: mai zero slot per Claude. Slot di Claude fissato a 1 in budget.json (slotAggiornato 05/11) per T51; correzione stabile in T96 su Gemini.
+- [2026-10-31T12:53:54.613Z] lancio T89 su claude (H:\projects\rune\.claude\worktrees\t89)
+- [2026-10-31T12:54:03.743Z] T89: interrotto dall'orchestratore (riprende con riprendi T89)
+- [2026-10-31T12:54:03.763Z] T89: interrotto (riprende con riprendi T89)
+- [2026-10-31T12:55:14.248Z] orchestratore: epoca 171 su claude (contesto a 60 % della finestra)
+- [2026-10-31T13:13:07.597Z] T89: rimesso in coda (riprende la sua conversazione)
+- [2026-10-31T13:14:07.476Z] riprendo T89 su claude (H:\projects\rune\.claude\worktrees\t89)
+- [2026-10-31T13:45:47.777Z] T89: ESITO: fatto — ADR-0093 (proposto), prova `?cartone` (fasce e contorni) nel renderer, task T89a-e nel backlog; 55 test rossi nella suite intera, in file che non toccano il renderer, causa non verificata · BROWSER: verificato — `?skip&offline` con e senza `?cartone`: contorni e fasce somiglianti alla foto su case, sentieri e rilievo, rumore nero sugli alberi (da cui i contorni dalle parti, T89b) (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T89)
+- [2026-10-31T13:46:11.976Z] task/T89 integrato in 3d; worktree e branch tolti.
+- [2026-10-31T14:04:31.695Z] orchestratore: epoca 172 su claude (contesto a 60 % della finestra)
+- [2026-10-31T14:04:54.754Z] lancio T51b su claude (H:\projects\rune\.claude\worktrees\t51b)
+- [2026-10-31T14:17:55.455Z] orchestratore: epoca 173 su gemini (claude sotto il 10 %)
+- [2026-10-31T15:32:24.512Z] orchestratore: epoca 174 su claude (claude ha di nuovo crediti)
+- [2026-10-31T15:35:06.302Z] T51b: interrotto dall'orchestratore (riprende con riprendi T51b)
+- [2026-10-31T15:35:06.327Z] T51b: interrotto (riprende con riprendi T51b)
+- [2026-10-31T15:35:06.417Z] T51b: rimesso in coda (riprende la sua conversazione)
+- [2026-10-31T15:35:06.777Z] riprendo T51b su claude (H:\projects\rune\.claude\worktrees\t51b)
+- [2026-10-31T16:13:27.034Z] T51b: ESITO: fatto — automa cellulare dell'acqua (`water.ts`), `kernel.dig`, `scavi`/`acqua` nel piano e nel `PlaceView`, ADR-0094; suite intera non verde (4 test rotti anche sul base, il resto timeout per carico), `water.test.ts` e typecheck verdi · BROWSER: verificato — lago tra (0,0) e (1,0), conca di 8 caselle scavata accanto: si riempie, un solo livello su 36 caselle, volume 56 conservato (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T51b)
+- [2026-10-31T16:13:30.163Z] lancio T57 su claude (H:\projects\rune\.claude\worktrees\t57)
+- [2026-10-31T16:13:39.483Z] integra T51b: non riuscito (error: Your local changes to the following files would be overwritten by merge:); il base è com'era

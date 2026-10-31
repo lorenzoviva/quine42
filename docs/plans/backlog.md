@@ -1006,7 +1006,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 ## Le rune
 
 ### T57 · Le rune come codice: sequenze ordinate, effetti, rune nuove — `da fare` (si comincia da T57a)
-- Pipeline: claude · stima 8% · priorità 60
+- Pipeline: claude · stima 8% · approvato · priorità 60
 - Contesto: richiesta del 24/10 («Le rune»). L'esempio del seme `acqua fuoco` → «Vapore» (si annullano, un messaggio, in
   `universe/modules/magic.runes/manifest.json`) non è l'idea: le rune sono come codice, una **sequenza ordinata** produce
   un effetto specifico, e l'ordine conta (`aria terra` ≠ `terra aria`). Effetti come incantesimi di D&D (`terra fuoco` →
