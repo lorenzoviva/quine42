@@ -9,7 +9,7 @@
 
 import type { Schema } from '../ai/models';
 import { analyse } from '../../mj/check';
-import { boxOf, classOf, CLASSES, TILE, type AssetClass } from '../../mj/classes';
+import { boxOf, classOf, CLASSES, densityOf, RARE_SIZES, sizeOf, TAGLIE, TILE, tilesOf, type AssetClass, type Taglia } from '../../mj/classes';
 import { Mj3Error, type RunResult, type Vec3 } from '../../mj/engine';
 import { compileMjx, type MjxModel } from '../../mj/model';
 import { MJ_PALETTE } from '../../mj/palette';
@@ -28,7 +28,7 @@ export interface SculptorModels {
   semplice: string;
   figura: string;
   struttura: string;
-  /** For the structures that matter, until `importanteFino` (ISO date: then its price doubles). */
+  /** For the structures of the rare sizes (ADR-0092: Huge, Gargantuan), until `importanteFino` (ISO date: then its price doubles). */
   importante: string;
   importanteFino?: string;
   artista: string;
@@ -52,8 +52,8 @@ export interface SculptRequest {
   contesto?: string;
   /** One program for many things: the letter C takes each thing's colour. */
   tinta?: boolean;
-  /** A structure that matters (the best model). */
-  importante?: boolean;
+  /** Its size (ADR-0092), if not the class's own: the box scales with it; the rare structures get the best model. */
+  taglia?: Taglia;
   /** The program it had (a request to sculpt it again) and what is wished. */
   previous?: string;
   desiderio?: string;
@@ -86,15 +86,18 @@ const CRITIQUE_SCHEMA: Schema = {
 
 const classLine = (c: AssetClass) => {
   const b = boxOf(c);
-  return `  - ${c.id} (${c.name}): ${b.join('×')} voxel = ${c.tiles.join('×')} caselle${c.minHeight ? `, alto almeno ${Math.round(c.minHeight * b[2])}` : ''}; ${c.hint}`;
+  return `  - ${c.id} (${c.name}): ${b.join('×')} voxel = ${c.tiles.join('×')} caselle, taglia ${sizeOf(c.taglia)!.name}${c.minHeight ? `, alto almeno ${Math.round(c.minHeight * b[2])}` : ''}; ${c.hint}`;
 };
 
-/** The Sculptor's instructions (prompts/agents/scultore.md) with the scale, the classes and the palette. */
+/** The sizes of D&D (ADR-0092): how a class's box scales when a thing is of another size than its class's. */
+const sizesLine = () => `  Taglie (D&D): ${TAGLIE.map((t) => `${t.name} ×${t.scala}`).join(' · ')} — il lato rispetto a Media; una cosa di un'altra taglia ha la scatola della sua classe scalata (la richiesta la dice)`;
+
+/** The Sculptor's instructions (prompts/agents/scultore.md) with the scale, the classes, the sizes and the palette. */
 export function sculptorRole(files: FileMap): string {
   const palette = Object.entries(MJ_PALETTE).map(([k, v]) => `${k} ${v.color.slice(1)}`).join(' · ');
   return (files['prompts/agents/scultore.md'] ?? 'Sei lo Scultore: scrivi programmi MarkovJunior in XML.')
     .replaceAll('@@TILE@@', String(TILE))
-    .replace('@@CLASSES@@', CLASSES.map(classLine).join('\n'))
+    .replace('@@CLASSES@@', [...CLASSES.map(classLine), sizesLine()].join('\n'))
     .replace('@@PALETTE@@', palette);
 }
 
@@ -144,8 +147,8 @@ interface Checked {
 }
 
 /** The kernel's checks on a program: what makes it unusable goes back to the Sculptor with the reason. */
-export function checkProgram(xml: string, cls: AssetClass): Checked {
-  const box = boxOf(cls);
+export function checkProgram(xml: string, cls: AssetClass, taglia?: string): Checked {
+  const box = boxOf(cls, taglia);
   try {
     // A program that decides on a coarse grid and maps up keeps its own size; the others get the class's box.
     const model = compileMjx(xml, scales(xml) ? {} : { size: box });
@@ -169,12 +172,14 @@ export function views(c: Checked): string {
 }
 
 export function describe(req: SculptRequest, cls: AssetClass): string {
-  const box = boxOf(cls);
+  const box = boxOf(cls, req.taglia);
+  const size = sizeOf(req.taglia);
+  const tiles = tilesOf(cls, req.taglia);
   return [
     `Scolpisci: ${req.nome}`,
     `Com'è: ${req.aspetto}`,
     req.contesto && `Dove si trova: ${req.contesto}`,
-    `Classe: ${cls.id} · scatola ${box.join(' × ')} voxel${cls.minHeight ? ` · alto almeno ${Math.round(cls.minHeight * box[2])}` : ''}`,
+    `Classe: ${cls.id}${size && size.id !== cls.taglia ? ` · taglia ${size.name} (${tiles.join(' × ')} caselle, ${densityOf(tiles)} voxel per casella)` : ''} · scatola ${box.join(' × ')} voxel${cls.minHeight ? ` · alto almeno ${Math.round(cls.minHeight * box[2])}` : ''}`,
     req.tinta && 'Vale per molte cose di questo genere: il colore principale è la lettera C (il gioco la ricolora per ciascuna).',
   ]
     .filter(Boolean)
@@ -183,7 +188,7 @@ export function describe(req: SculptRequest, cls: AssetClass): string {
 
 export function modelFor(req: SculptRequest, cls: AssetClass, m: SculptorModels, today = new Date().toISOString().slice(0, 10)): string {
   const cat = categoryOf(cls);
-  if (cat === 'struttura' && req.importante && (!m.importanteFino || today < m.importanteFino)) return m.importante;
+  if (cat === 'struttura' && req.taglia && RARE_SIZES.includes(req.taglia) && (!m.importanteFino || today < m.importanteFino)) return m.importante;
   return m[cat];
 }
 
@@ -228,7 +233,7 @@ async function write(c: Council, req: SculptRequest, cls: AssetClass, model: str
     const p = i === 0 ? prompt : `${prompt}\n\nIl programma che hai scritto:\n${last!.xml.slice(0, 6000)}\nNon va: ${last!.error}\nCorreggilo e rispondi con il programma completo.`;
     calls++;
     const raw = await c.write('scultore', 'model.sculpt', p, { role, system, images, model, temperature: 0.7, data: { request: req, classe: cls.id, example: examples[0] } });
-    last = checkProgram(extractXml(raw), cls);
+    last = checkProgram(extractXml(raw), cls, req.taglia);
     if (!last.error) return { checked: last, calls };
     c.say('kernel', 'scarta', `«${req.nome}»: ${last.error.slice(0, 160)}`, 'scultore', 'model.sculpt');
   }
@@ -268,7 +273,7 @@ export async function sculpt(c: Council, req: SculptRequest, m: SculptorModels =
   const best = candidates.reduce((a, b) => ((b.critique?.voto ?? -1) > (a.critique?.voto ?? -1) ? b : a));
   const voto = best.critique?.voto;
   if (best.critique) c.say('artista', voto !== undefined && voto >= 7 ? 'approva' : 'obietta', `«${req.nome}»: ${voto}/10${best.critique.problemi.length ? ` — ${best.critique.problemi[0]}` : ''}`, 'scultore', 'model.judge');
-  const xml = `<!-- ${req.nome}: scolpito da ${model} (step 9)${voto !== undefined ? `, voto dell'Artista ${voto}/10` : ''} -->\n${withSize(best.checked.xml.replace(/^\s*<!--[\s\S]*?-->\s*/, ''), boxOf(cls))}\n`;
+  const xml = `<!-- ${req.nome}: scolpito da ${model} (step 9)${voto !== undefined ? `, voto dell'Artista ${voto}/10` : ''} -->\n${withSize(best.checked.xml.replace(/^\s*<!--[\s\S]*?-->\s*/, ''), boxOf(cls, req.taglia))}\n`;
   return { xml, model, voto, calls };
 }
 

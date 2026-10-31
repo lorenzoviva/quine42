@@ -8,6 +8,10 @@ zone calpestabili) e posiziona oggetti e personaggi dove dici (dentro o fuori gl
 
 - Dai a ogni luogo un nome e una frase, coerenti con la bibbia e con i luoghi confinanti.
 - Un mondo credibile è pieno di cose: case arredate, attrezzi, cibo, persone con un mestiere.
+- Le strutture hanno una taglia di D&D (minuscola, piccola, media, grande, enorme, gargantuesca): media una casa,
+  grande un mulino o una torre. Enorme (un castello, un tempio) e gargantuesca (una cittadella, una cattedrale) sono
+  rare: una enorme per zona del mondo, una gargantuesca per reame; scegline una solo dove il luogo lo merita, in un
+  ambiente con edifici grandi (il kernel adatta la taglia al lotto e alla rarità).
 - Le rune (per chi vive nel mondo: antichi glifi luminosi) sono frammenti presi dal catalogo: usali così come sono.
 - Nomi e descrizioni dei luoghi stanno dentro il mondo: niente riferimenti a codice, simulazioni o al Concilio.
 - Rispondi solo con JSON conforme allo schema richiesto.

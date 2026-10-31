@@ -38,6 +38,8 @@ export function sottoOf(info: ModelInfo | undefined): number {
 export interface ModelInfo {
   /** Asset class (src/mj/classes.ts): its box and how it moves. */
   classe: string;
+  /** Its size (ADR-0092), if not the class's own: the box grows or shrinks with it (and `vpt` with it). */
+  taglia?: string;
   nome?: string;
   /** Who wrote it: "a mano", "scultore", the Gemini model… */
   autore?: string;
@@ -143,12 +145,12 @@ export const stepOf = (vpt: number) => Math.round(0.2 * vpt);
 
 /**
  * The box a program runs in: its own `size` if it says one (structures decide on a coarse grid and `map`
- * up), otherwise its class's box.
+ * up), otherwise its class's box at its size.
  */
-function sizeFor(xml: string, cls: AssetClass, under = 0): Vec3 | undefined {
+function sizeFor(xml: string, cls: AssetClass, taglia?: string, under = 0): Vec3 | undefined {
   const root = /<(?!!)[a-z]+\b[^>]*>/i.exec(xml)?.[0] ?? '';
   if (/\ssize="/.test(root)) return undefined;
-  const [X, Y, Z] = boxOf(cls);
+  const [X, Y, Z] = boxOf(cls, taglia);
   // A model with a cellar (T52b): the box goes down by it, the program writes the cellar in its lowest voxels.
   return [X, Y, Z + under];
 }
@@ -464,7 +466,7 @@ export class Forms {
     const cls = this.classOf(model);
     const vpt = vptOf(info);
     const under = sottoOf(info) * vpt;
-    const size = sizeFor(xml, cls, under);
+    const size = sizeFor(xml, cls, info?.taglia, under);
     f = { key, model, seed, status: 'pending', cls, reach: 0, vpt, base: 0 };
     this.forms.set(key, f);
     const form = f;
@@ -510,7 +512,7 @@ export class Forms {
     const xml = this.files[`${MODELS_DIR}${model}.xml`];
     if (!xml) return undefined;
     const info = this.library[model];
-    const size = sizeFor(xml, this.classOf(model), sottoOf(info) * vptOf(info));
+    const size = sizeFor(xml, this.classOf(model), info?.taglia, sottoOf(info) * vptOf(info));
     return compileMjx(xml, size ? { size } : {});
   }
 }

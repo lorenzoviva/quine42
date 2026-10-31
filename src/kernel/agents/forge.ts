@@ -12,7 +12,7 @@ import { hashStr } from '../rng';
 import { metaBreak } from '../fourthwall';
 import { normName } from '../content';
 import type { Manifest } from '../types';
-import { classOf, CLASSES, guessClass } from '../../mj/classes';
+import { classOf, CLASSES, guessClass, RARE_SIZES, sizeOf, TAGLIE } from '../../mj/classes';
 import { ownModelId } from '../modeldirector';
 import { AGENTS, wordsOf, type AgentId, type Council } from './council';
 
@@ -33,6 +33,15 @@ export interface ForgeRequest {
   chi?: string;
 }
 
+/**
+ * The size a forged thing may have (ADR-0092): any but the two rare ones, which are the world's (one per zone, one
+ * per realm) and only for structures.
+ */
+export const forgedSize = (t: string | undefined): { taglia?: string } => {
+  const s = sizeOf(t?.trim().toLowerCase());
+  return s && !RARE_SIZES.includes(s.id) ? { taglia: s.id } : {};
+};
+
 export interface Concept {
   nome: string;
   tipo: 'npc' | 'oggetto' | 'strumento';
@@ -40,6 +49,8 @@ export interface Concept {
   lore: string;
   aspetto: string;
   classe?: string;
+  /** Its size of D&D (ADR-0092), if not its class's own: a wolf is a Medium beast, a dragon a Large one. */
+  taglia?: string;
   contesto: { terreni: string[]; luoghi: string; rarita: number };
   interazione: 'parla' | 'leggi' | 'usa' | 'nessuna';
   comandi: Array<{ azione: string; descrizione: string }>;
@@ -90,6 +101,7 @@ const CONCEPT_SCHEMA: Schema = {
     lore: { type: 'STRING' },
     aspetto: { type: 'STRING', description: "com'è fatto: forma, proporzioni, materiali, colori (lo Scultore ne fa un modello 3D)" },
     classe: { type: 'STRING', enum: CLASSES.map((c) => c.id), description: 'la sua classe di grandezza (persona, animale, mobile, oggetto, edificio…)' },
+    taglia: { type: 'STRING', enum: TAGLIE.filter((t) => !RARE_SIZES.includes(t.id)).map((t) => t.id), description: 'la taglia di D&D, solo se diversa da quella solita della sua classe (un gigante: grande)' },
     contesto: {
       type: 'OBJECT',
       properties: { terreni: { type: 'ARRAY', items: { type: 'STRING' } }, luoghi: { type: 'STRING' }, rarita: { type: 'NUMBER' } },
@@ -216,7 +228,7 @@ export function assembleManifest(id: string, concept: Concept, physics: PhysicsS
     tags: concept.tags ?? [],
     origin,
     logic: 'logic.lua',
-    appearance: { glyph, color: `hsl(${hue} 65% 68%)`, aspetto: concept.aspetto, model: ownModelId(id), classe: classOf(concept.classe)?.id ?? guessClass(`${concept.nome} ${concept.aspetto}`, npc ? 'figura' : undefined).id },
+    appearance: { glyph, color: `hsl(${hue} 65% 68%)`, aspetto: concept.aspetto, model: ownModelId(id), classe: classOf(concept.classe)?.id ?? guessClass(`${concept.nome} ${concept.aspetto}`, npc ? 'figura' : undefined).id, ...forgedSize(concept.taglia) },
     physics: {
       solid: item ? false : !!physics.solido,
       radius: clamp(physics.raggio, 0.2, 0.5, 0.35),

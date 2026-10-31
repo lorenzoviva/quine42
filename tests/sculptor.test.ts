@@ -8,8 +8,10 @@ import { memoryStore } from '../src/kernel/repo';
 import { MockModels } from '../src/kernel/ai/mock';
 import { emptyUsage, type Models, type TextCall } from '../src/kernel/ai/models';
 import { Council } from '../src/kernel/agents/council';
-import { checkProgram, DEFAULT_SCULPTORS, modelFor, sculpt, withSize } from '../src/kernel/agents/sculptor';
-import { classOf } from '../src/mj/classes';
+import { checkProgram, DEFAULT_SCULPTORS, describe as describeRequest, modelFor, sculpt, withSize } from '../src/kernel/agents/sculptor';
+import { forgedSize } from '../src/kernel/agents/forge';
+import { modelSize } from '../src/kernel/modeldirector';
+import { boxOf, classOf, densityOf, MAX_SIDE, TAGLIE, tilesOf } from '../src/mj/classes';
 import { encodePng } from '../src/mj/png';
 import type { FormComp } from '../src/kernel/forms';
 
@@ -59,12 +61,14 @@ describe('the Sculptor', () => {
     expect(r!.xml).toContain('size="20 20 16"');
   });
 
-  it('sends figures and structures to the better model, and the structures that matter to the best one while its price lasts', () => {
-    const req = { id: 'x', nome: 'x', aspetto: 'x', classe: 'grande', importante: true };
+  it('sends figures and structures to the better model, and the rare sizes (Huge, Gargantuan) to the best one while its price lasts', () => {
+    const req = { id: 'x', nome: 'x', aspetto: 'x', classe: 'grande', taglia: 'enorme' as const };
     expect(modelFor({ ...req, classe: 'persona' }, classOf('persona')!, DEFAULT_SCULPTORS)).toBe('gemini-3.8-flash');
     expect(modelFor(req, classOf('grande')!, DEFAULT_SCULPTORS, '2026-11-01')).toBe('gemini-4-argon');
     expect(modelFor(req, classOf('grande')!, DEFAULT_SCULPTORS, '2026-12-02')).toBe('gemini-3.8-flash');
-    expect(modelFor({ ...req, importante: false }, classOf('grande')!, DEFAULT_SCULPTORS, '2026-11-01')).toBe('gemini-3.8-flash');
+    expect(modelFor({ ...req, taglia: 'gargantuesca' }, classOf('grande')!, DEFAULT_SCULPTORS, '2026-11-01')).toBe('gemini-4-argon');
+    expect(modelFor({ ...req, taglia: 'grande' }, classOf('grande')!, DEFAULT_SCULPTORS, '2026-11-01')).toBe('gemini-3.8-flash');
+    expect(modelFor({ ...req, taglia: undefined }, classOf('grande')!, DEFAULT_SCULPTORS, '2026-11-01')).toBe('gemini-3.8-flash');
     expect(modelFor({ ...req, classe: 'albero' }, classOf('albero')!, DEFAULT_SCULPTORS)).toBe('gemini-3.1-flash-lite');
   });
 
@@ -117,4 +121,35 @@ describe('the models the world lacks', () => {
     expect(await k.sculpting.make(req)).toBe(true);
     expect(JSON.parse(k.repo.head().files['models/index.json']!)[req.id].tinta).toBe('C');
   }, 30_000);
+});
+
+describe('the sizes of D&D (ADR-0092)', () => {
+  it('scales a class box by the ratio of the spaces, and writes the large ones coarser', () => {
+    const grande = classOf('grande')!, persona = classOf('persona')!;
+    // The class's box is the box of its usual size.
+    expect(boxOf(grande, 'grande')).toEqual(boxOf(grande));
+    expect(tilesOf(persona, 'media')).toEqual(persona.tiles);
+    // A Large person takes 2 × 2 of a Medium one; a Huge structure 3/2 of a Large one, a Gargantuan one twice.
+    expect(tilesOf(persona, 'grande')).toEqual([2, 1.5, 3]);
+    expect(tilesOf(grande, 'enorme')).toEqual([7.5, 7.5, 6]);
+    expect(tilesOf(grande, 'gargantuesca')).toEqual([10, 10, 8]);
+    // A box past MAX_SIDE voxels runs at a coarser density: a request «Enorme» gives the right box.
+    expect(densityOf(tilesOf(grande, 'enorme'))).toBe(16);
+    expect(boxOf(grande, 'enorme')).toEqual([120, 120, 96]);
+    expect(boxOf(grande, 'gargantuesca')).toEqual([120, 120, 96]);
+    expect(Math.max(...boxOf(grande, 'gargantuesca'))).toBeLessThanOrEqual(MAX_SIDE);
+    // The index entry says it, so the library runs the model in the box it was sculpted in.
+    expect(modelSize({ classe: 'grande', taglia: 'enorme' })).toEqual({ taglia: 'enorme', vpt: 16 });
+    expect(modelSize({ classe: 'grande', taglia: 'grande' })).toEqual({});
+    expect(modelSize({ classe: 'persona', taglia: 'piccola' })).toEqual({ taglia: 'piccola' });
+    // The Sculptor reads the size and the box.
+    const text = describeRequest({ id: 'x', nome: 'la cittadella', aspetto: 'mura', classe: 'grande', taglia: 'enorme' }, grande);
+    expect(text).toContain('taglia Enorme (7.5 × 7.5 × 6 caselle, 16 voxel per casella)');
+    expect(text).toContain('scatola 120 × 120 × 96 voxel');
+    // Six sizes, Gargantuan the largest; a forged thing never takes the two rare ones.
+    expect(TAGLIE.map((t) => t.id)).toEqual(['minuscola', 'piccola', 'media', 'grande', 'enorme', 'gargantuesca']);
+    expect(forgedSize('Grande')).toEqual({ taglia: 'grande' });
+    expect(forgedSize('enorme')).toEqual({});
+    expect(forgedSize('colossale')).toEqual({});
+  });
 });
