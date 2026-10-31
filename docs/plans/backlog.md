@@ -807,8 +807,8 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 
 Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/userchats/to-do-2026-10-24.md), «Generazione della heightmap» e «taglia»).
 
-### T51 · Il livello del mare e un motore dell'acqua — `da fare` (T51a fatto; T51b da fare: l'autore ha scelto l'automa cellulare, `docs/pipeline/domande/T51.md`)
-- Pipeline: claude · stima 6% · approvato · priorità 50
+### T51 · Il livello del mare — `fatto` (T51a; il motore dell'acqua è il task T51b, qui sotto)
+- Pipeline: claude · stima 6% · priorità 50
 - Contesto: ADR-0048. Oggi ogni specchio d'acqua è piano **dentro il suo chunk** (`waterLevels` in `relief.ts`: al livello
   più basso delle sue caselle, contando solo il chunk); lo stesso lago o fiume su due chunk ha due livelli, e laghi vicini
   livelli diversi: a vista l'acqua ha dei dislivelli (si vede anche in `Blocchi.png`).
@@ -823,15 +823,19 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
     invece di scavare il fondo; niente cache per regione, il campo si rifà quando cambia un chunk (pochi ms) e `Chunk.levels`
     fa ridisegnare chi cambia livelli senza cambiare caselle; il client sottile riceve le caselle di mare (`PlaceView.mare`);
     la miniatura usa il luogo da solo. Nel browser: 292 attraversamenti d'acqua tra chunk, tutti allo stesso livello.
-- **T51b · il motore dell'acqua** (ADR): l'acqua che scorre quando il terreno cambia (incantesimi che alzano o abbassano
+
+
+### T51b · Il motore dell'acqua — `da fare` (dipende da T51)
+- Pipeline: claude · stima 5% · approvato · priorità 50
+- Contesto: spezzato da T51 il 31/10 (T51a fatto; `dossier T51`, `docs/pipeline/domande/T51.md`). Si appoggia a `worldLevels` di T51a.
+- Fare (ADR nuovo): l'acqua che scorre quando il terreno cambia (incantesimi che alzano o abbassano
   il terreno, T57; «Altro…» che scava). Proposta: MarkovJunior resta per **generare** (rilievo, fiumi alla Genesi); per la
   fisica un automa cellulare del kernel sui chunk caricati (quantità d'acqua per casella, scorre verso i vicini più bassi,
   pochi passi al secondo, solo dove qualcosa è cambiato, si ferma quando è in equilibrio e salva il risultato nel piano
   del luogo). Un programma MarkovJunior per tick su tutto il mondo caricato costerebbe troppo (ogni passo cerca le regole su
   tutta la griglia e l'acqua non si ferma mai del tutto) ed è difficile da ottimizzare: possibile solo come regola locale
   attorno al punto cambiato. Test: una conca scavata accanto a un lago si riempie e il lago si abbassa del giusto.
-- Fatto quando (per pezzo): test verdi, verifica nel browser su un lago tra due chunk, ADR-0048 aggiornato (T51a) o ADR
-  nuovo (T51b), commit.
+- Fatto quando: test verdi, verifica nel browser su un lago tra due chunk (una conca scavata accanto che si riempie), ADR nuovo, commit.
 - **Risposta dell'autore** (30/10): sì, l'automa cellulare del kernel (opzione 1); MarkovJunior resta per generare. Nasce da T51a:
   `dossier T51`.
 
@@ -2053,13 +2057,37 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   commit che l'ha rotto e correggi il codice o il test; i timeout solo di carico restano.
 - Quando è fatto: i tre file verdi da soli, typecheck verde, il commit che li aveva rotti scritto nella riga di chiusura.
 
-### T96 · Mai zero slot per Claude — `da fare`
+### T96 · Mai zero slot per nessun provider — `da fare`
 - Pipeline: gemini · stima 3% · priorità 5 · approvato
-- Contesto: richiesta dell'autore del 31/10: «non chiudere mai tutti gli slot per claude». `nextSlot`/`updateSlots` in
-  `tools/pipeline/pipeline.mjs` (ADR-0087) scendono fino a 0 quando la previsione dei crediti finisce prima del reset; così T51 era
-  fermo con Claude al 34 % della settimana. L'orchestratore ha fissato a mano `slot: 1` in `.pipeline/budget.json` (con
-  `slotAggiornato` nel futuro) finché questo task non entra.
-- Cosa fare: un minimo di slot per provider in `config.json` (es. `slotMinimi: { "claude": 1 }`), rispettato da `nextSlot`,
-  `updateSlots` e `showSlots` (mai sopra il tetto; il limite dei crediti esauriti e `sogliaUnSolo` restano come sono); test in
-  `tests/pipeline*.test.ts`; ADR-0087 aggiornato con una riga (o ADR nuovo se cambia la regola) e la riga in `docs/pipeline/README.md`.
-- Quando è fatto: con la previsione «prima del reset» Claude resta a 1 slot; test e typecheck verdi.
+- Contesto: richieste dell'autore del 31/10: «non chiudere mai tutti gli slot per claude», poi «tutti i modelli abbiano sempre almeno
+  uno slot; sta all'orchestratore decidere l'ordine e se sospendere temporaneamente nuovi task a un provider per permettere a un altro di
+  completare il proprio». `nextSlot`/`updateSlots` in `tools/pipeline/pipeline.mjs` (ADR-0087) scendono fino a 0 quando la previsione dei
+  crediti finisce prima del reset; così T51 era fermo con Claude al 34 % della settimana. L'orchestratore ha fissato a mano `slot: 1` per
+  Claude in `.pipeline/budget.json` (con `slotAggiornato` nel futuro) finché questo task non entra.
+- Cosa fare: la previsione dei crediti non porta mai uno slot sotto 1 per nessun modello (claude, gemini, argon; mai sopra il tetto di
+  `limiti`); a 0 si va solo con i crediti esauriti o il provider fermo per quota (429), come oggi. Togliere lo «zero slot» da `nextSlot`,
+  `updateSlots` e `showSlots`; la decisione di non dare nuovi task a un provider per un po' è dell'orchestratore, con un comando
+  (es. `sospendi <provider> [fino a <data>]` / `riattiva <provider>`, scritto in `.pipeline/budget.json`, mostrato da `stato`). Test in
+  `tests/pipeline*.test.ts`; ADR-0087 aggiornato (o ADR nuovo se cambia la regola), la riga in `docs/pipeline/README.md` e il comando in
+  `docs/pipeline/orchestra.md`.
+- Quando è fatto: con la previsione «prima del reset» ogni modello con crediti resta ad almeno 1 slot; `sospendi`/`riattiva` funzionano;
+  test e typecheck verdi.
+
+## Il sito (to-do del 31/10, testo originale: `docs/userchats/to-do-2026-10-31.md`)
+
+### T97 · Il sito: progetto, pagine e stile — `da fare`
+- Pipeline: claude · stima 5% · approvato · priorità 60
+- Contesto: richiesta dell'autore del 31/10 (`docs/userchats/to-do-2026-10-31.md`): landing, login, pagina delle sessioni con «Crea nuovo
+  universo», profilo, area delle carte, area pagamenti. Tema per il sito e per le interfacce in gioco: pop art a fumetti e arcade retro, neon punk,
+  retrowave/synthwave; richiama velatamente la corona del Concilio senza svelarla (es. in fondo alla landing la punta delle orecchie dei gerboa,
+  che si capisce solo dopo averli visti in gioco). three.js anche fuori dal gioco (carte animate, sfondi con un'animazione MarkovJunior).
+  Il design lo fa generare l'autore con Claude Design (un template, anche senza componenti React o Angular): se ne copia lo stile.
+  Riusa ciò che c'è: login Firebase (ADR-0082, `src/session/login.ts`), lobby e collezione (ADR-0086, `src/ui/lobby.ts`), Stripe (ADR-0083),
+  carte (ADR-0056), deploy (T45f).
+- Fare: un ADR con le pagine e la loro navigazione, lo stack (pagine di Vite accanto al gioco, three.js e `src/mj/` condivisi, niente framework
+  se non serve), i colori e i caratteri del tema come variabili CSS uniche per sito e gioco, il segreto dei gerboa; i task di codice nel backlog
+  (landing, login e profilo, sessioni e nuovo universo, carte, pagamenti, il tema nelle interfacce in gioco), ciascuno con «dipende da».
+  Se il template di Claude Design non c'è ancora, chiedere all'autore in `docs/pipeline/domande/T97.md` dove metterlo (es. `docs/design/sito/`)
+  e intanto proporre il tema con una pagina di prova.
+- Quando è fatto: ADR e task scritti; la pagina di prova del tema vista nel browser (screenshot); typecheck verde.
+

@@ -3,11 +3,11 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 31/10/2026 alle 13:47 UTC, epoca 171 su **claude**. **T89** fatto (ADR-0093 proposto, prova dietro `?cartone`, task T89a-e nel backlog, verificato nel browser) e integrato. **T51** pronto su Claude (priorità 50), parte al prossimo controllo; **T96** approvato su Gemini (slot 0 finché Gemini 5h è al 94 %). Da approvare: T45f (risposte GCP), T88, T95, T89a-e. I 55 test rossi della suite intera di T89 sono in file che non tocca: li copre T95. Claude: settimana 32 %, 5h 30 %.
+Aggiornato il 31/10/2026 alle 14:00 UTC, epoca 171 su **claude**. T89 integrato. **T51 spezzato**: T51 (T51a) `fatto`, **T51b** (motore dell'acqua, automa cellulare) pronto su Claude, priorità 50. **T96** riscritto: almeno 1 slot per ogni modello con crediti, e `sospendi/riattiva <provider>` per l'orchestratore (decide lui ordine e sospensioni). **T97** (il sito: progetto e stile, dal to-do del 31/10) approvato su Claude, priorità 60, dopo T51b. Da approvare: T45f (risposte GCP), T88, T95, T57, T89a-e.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
-- **31/10: mai zero slot per Claude.** Slot di Claude fissato a 1 a mano in `.pipeline/budget.json` (`slotAggiornato` al 05/11, così la previsione non lo riabbassa) finché **T96** (su Gemini, approvato) non mette `slotMinimi` in `config.json`. T51 ha la precedenza (priorità 50); T89 interrotto, da riprendere (`riprendi T89`) dopo T51.
+- **31/10: mai zero slot per nessun modello** (T96); l'orchestratore decide ordine e sospensioni temporanee di un provider. Slot di Claude fissato a 1 a mano in `.pipeline/budget.json` (`slotAggiornato` al 05/11, così la previsione non lo riabbassa) finché **T96** (su Gemini, approvato) non mette `slotMinimi` in `config.json`. T51 ha la precedenza (priorità 50); T89 interrotto, da riprendere (`riprendi T89`) dopo T51.
 - **Un solo task per provider alla volta** (finché T82 non mette i tetti per provider in `config.json`: approvare a mano al più un task per provider). I tetti li decide l'autore; l'orchestratore non li alza senza sua istruzione.
 - Obiettivi: niente parallelismo che aumenta il lavoro; a 0 % uno o zero task sul provider; finire i crediti entro il reset settimanale (non prima); distribuire i task pesanti nel tempo; tenere un margine per le urgenze dell'autore; i crediti avanzati andranno alla generazione con gli abbonamenti (T88, non ora).
 - Al più **una verifica nel browser** alla volta. Risposte brevi.
@@ -38,7 +38,7 @@ Aggiornato il 31/10/2026 alle 13:47 UTC, epoca 171 su **claude**. **T89** fatto 
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T51** approvato su Claude (in coda dopo T52b, priorità 100).
+  - **T51b** su Claude (50), poi **T97** (60); **T96** su Gemini (5).
 - **Completati e integrati nel base `3d`**:
   - **T89**, **T94**, **T54**, **T52b**, **T93**, **T92**, **T52**, **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **Da integrare**:
