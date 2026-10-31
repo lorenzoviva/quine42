@@ -1960,7 +1960,8 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   profondità o normale saltano; soglie in console in `window.cartone`). Nel browser (preview, `?skip&offline&cartone`, confronto con la vista di prima): fasce e
   contorni sui gradini del rilievo, sui sentieri e sulle case somigliano alla foto; sugli alberi (20 voxel per casella) ogni voxel fa il suo bordo e la chioma è
   rumore nero, e solo la profondità con soglia alta perde anche le sagome. Da qui la scelta che non era prevista: i contorni vengono dagli id di cosa e parte
-  (la lettera della palette), non dalla geometria (T89b). Task T89a-e qui sotto.
+  (la lettera della palette), non dalla geometria (T89b). Task T89a-e qui sotto. Typecheck verde; la suite intera (con `turno test`) ha 55 test
+  rossi, tutti in file che non importano il renderer (kernel, between, explore, credits…: i timeout di carico già noti, T95); nessun test tocca `src/render/`.
 
 ### T89a · Cartone: fasce e interruttore — `da fare` (dipende da T89)
 - Pipeline: da stimare
