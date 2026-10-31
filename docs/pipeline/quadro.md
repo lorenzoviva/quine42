@@ -27,7 +27,8 @@ Aggiornato il 31/10/2026 alle 04:02 UTC, epoca 169 su **claude**. **T54 fatto** 
   - **T45f sbloccato e preparato**: dipendeva da T44b e T45d, ora entrambi integrati. Aperte le domande su GCP Project ID, hosting e regione in `docs/pipeline/domande/T45f.md`.
   - **T45e completato e chiavi Stripe fornite**: l'autore ha risposto in `docs/pipeline/domande/T45e.md` inserendo le credenziali di test in `.env` e impostando il listener locale su `localhost:5173/api/stripe/webhook`. T45e segnato `fatto` e approvato **T93** per la verifica nel browser su Claude (priorità 9).
 - **Cosa si aspetta**:
-  1. **T94** (integrare T54), poi **T93** (verifica browser Stripe).
+  1. **T94** (integrare T54). T93 fatto e integrato (ricarica Stripe di prova verificata nel browser).
+  2. Proposto **T95** (test explore/partita/subscription rossi anche da soli): aspetta l'approvazione dell'autore.
   2. **Risposte dell'autore per T45f** (`docs/pipeline/domande/T45f.md`).
 - **Intenzioni / prossimi passi**:
   1. Al ripristino di Claude, seguire l'avanzamento di T54 e l'esecuzione di T93 (verifica browser Stripe).
@@ -38,11 +39,10 @@ Aggiornato il 31/10/2026 alle 04:02 UTC, epoca 169 su **claude**. **T54 fatto** 
 
 - **Pronti / In corso**:
   - **T94** approvato su Claude (integrare T54, priorità 8).
-  - **T93** approvato su Claude (verifica browser Stripe, in testa ai pronti con priorità 9).
   - **T52b** pronto su Claude (in coda dopo T93, priorità 50).
   - **T51** approvato su Claude (in coda dopo T52b, priorità 100).
 - **Completati e integrati nel base `3d`**:
-  - **T92**, **T52**, **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
+  - **T93**, **T92**, **T52**, **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **Da integrare**:
   - Nessuno.
 - **In attesa di chiavi/risposte**:
@@ -58,7 +58,7 @@ Aggiornato il 31/10/2026 alle 04:02 UTC, epoca 169 su **claude**. **T54 fatto** 
 ## Da fare appena possibile
 
 - **Pianificate le risposte dell'autore**: T51b (automa cellulare del kernel), T52a (progetto fatto e integrato), T54 (in corso su Claude).
-- **Verifiche nel browser** (un task di verifica alla volta su `claude`, che ha `--chrome`): T45d (lobby multigiocatore), T64 (varianti in cache circuito-3D), T56b (arco salto e ombra), T69 (interfaccia web), T68c (stato provider coda abbonamenti), T93 (ricarica Stripe T45e).
+- **Verifiche nel browser** (un task di verifica alla volta su `claude`, che ha `--chrome`): T45d (lobby multigiocatore), T64 (varianti in cache circuito-3D), T56b (arco salto e ombra), T69 (interfaccia web), T68c (stato provider coda abbonamenti).
 
 ## Da sapere
 

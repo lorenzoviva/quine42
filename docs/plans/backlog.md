@@ -1972,3 +1972,11 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   riferimenti (AGENTS.md, README degli ADR, backlog, commenti nel codice); nelle sezioni in conflitto restano entrambe le aggiunte;
   in `backlog.md` tieni il blocco del base e segna T54 `fatto` con il suo commit.
 - Quando è fatto: merge committato, `npm run typecheck` verde, `npm test` (con `turno test`) verde salvo timeout di carico già noti sulla base.
+
+### T95 · Test rossi da soli: explore, partita, subscription — `da fare`
+- Pipeline: claude · stima 3% · priorità 60
+- Contesto: T93 riporta che `tests/explore*`, `tests/partita*` e `tests/subscription*` falliscono anche lanciati da soli,
+  senza legame con Stripe (`traccia T93`); T54 riporta 33 timeout di carico nella suite intera (`traccia T54`).
+- Cosa fare: sul base `3d` lancia ciascuno di quei file da solo; per ciò che fallisce davvero (non per timeout di carico) trova il
+  commit che l'ha rotto e correggi il codice o il test; i timeout solo di carico restano.
+- Quando è fatto: i tre file verdi da soli, typecheck verde, il commit che li aveva rotti scritto nella riga di chiusura.
