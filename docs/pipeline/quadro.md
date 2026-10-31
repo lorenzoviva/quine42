@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 31/10/2026 alle 18:10 UTC, epoca 177 su **claude**. **T107 (difetti del sito) e T108 (verifica nel browser, nessun difetto) integrati.** Prossimi su Claude: T98 → T57b.
+Aggiornato il 31/10/2026 alle 18:10 UTC, epoca 177 su **claude**. **T107 (difetti del sito) e T108 (verifica nel browser, nessun difetto) integrati.** **T98 integrato** (contorni del cartone con le normali delle mesh; suite intera con 48 fallimenti non suoi → vedi T95). Prossimo su Claude: T57b.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
