@@ -835,27 +835,48 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 - **Risposta dell'autore** (30/10): sì, l'automa cellulare del kernel (opzione 1); MarkovJunior resta per generare. Nasce da T51a:
   `dossier T51`.
 
-### T52 · I sotterranei — `da fare` (risposte in `docs/pipeline/domande/T52.md`)
+### T52 · I sotterranei — T52a `fatto` (progetto, ADR-0081), T52b `da fare`
 - Pipeline: claude · stima 3% · approvato · priorità 50
 - Contesto: oggi niente sta sotto il livello del terreno (il rilievo è una colonna piena, i modelli stanno sul suolo,
   `floorAt`). L'autore vuole i sotterranei (anche un edificio seminterrato nella corona, come la Sala sistemi).
-- **T52a · il progetto** (ADR, nessun codice): come esiste uno spazio sotto il terreno (un piano sotto il luogo come zona a
-  parte, tipo gli interni della corona, con scale/rampe che ci portano; oppure strutture che scendono sotto il suolo con il
-  terreno tagliato dal renderer come le strutture oggi); chi lo genera (il Cartografo: «sotterraneo» nel piano; lo Scultore:
-  un modello che scende sotto lo zero); come si vede (taglio sopra il viandante, luce); collisione e connettività (regola 10).
-  Poi spezzare in task di codice.
-- Dipendenze: T53a (le scale come rampe sono il modo di scendere).
 - **Risposte dell'autore** (30/10, `docs/pipeline/domande/T52.md`): **(b)**, parti sotterranee delle strutture (cantine, cripte):
-  il modello scende sotto lo zero e il terreno si taglia; forse poi anche (c), mai (a) da sola (un dungeon a parte rompe la
-  coerenza visiva del mondo simulato). La **profondità del terreno** si genera con lo stesso meccanismo con cui il Cartografo
-  genera su X e Y (bozza → programma → piano), limitata a poche caselle sotto la più profonda visibile. Nella corona la
-  coerenza non serve (luogo mistico, «più grande dentro»): dell'edificio seminterrato cambia **solo l'esterno**.
-- T52a resta il progetto (ADR, poi spezzare in task di codice su queste risposte): come il luogo ha una profondità (strati
-  sotto il rilievo, quante caselle, chi li scrive), come il modello di una struttura scende sotto il suolo (classe, `floorAt`,
-  rampe di T53 verso il basso, cose `dentro` sui piani sotterranei), come si vede (taglio del terreno e della struttura sopra
-  il viandante, luce), collisione e connettività (regola 10), multigiocatore (`PlaceView`). Nasce da T53a: `dossier T53`.
-- **T52c · la Sala sistemi seminterrata, fuori**: solo il modello esterno dell'edificio nella corona (`models/corona-<id>.xml`)
-  scende sotto il viale; l'interno resta com'è. Dopo T52a (si appoggia al taglio del terreno che il progetto decide).
+  il modello scende sotto lo zero e il terreno si taglia; forse poi anche (c), mai (a) da sola. La **profondità del terreno** si
+  genera con lo stesso meccanismo con cui il Cartografo genera su X e Y (bozza → programma → piano), limitata a poche caselle sotto
+  la più profonda visibile. Nella corona dell'edificio seminterrato cambia **solo l'esterno**.
+- **T52a · il progetto** — `fatto`: [ADR-0081](../adr/0081-i-sotterranei.md) e una voce in `AGENTS.md`. In breve: `sotto: N` nella
+  voce del modello (`Form.base`), ogni pavimento sotto il suolo raggiunto dal piano terra o il modello entra senza cantina; il
+  Cartografo chiede `strutture[].sotto` e cose `sotto`; strati del terreno da terreni `strato` + bozza per colonna + programma
+  `sottosuolo` dell'ambiente, salvati nel piano (`strati`, `PlaceView.strati`), `D` = cantina più profonda + 2, al più 6; buco del
+  terreno sotto il modello e taglio a caselle in un disco attorno a chi sta sotto, con le bande degli strati e la luce attenuata.
+  Diverso dal previsto: nessuno; le gallerie tra più strutture (la (c)) restano fuori, da decidere dopo le cantine.
+- **T52b · il modello che scende** (kernel e renderer, ADR-0081 punti 2-3): `sotto` in `ModelInfo` (`models/index.json`), la scatola
+  della classe allungata in basso, `Form.base`; `floorAt`, `structureAt`, `topUnder`, `bodyGround` (suolo a `base`), `rampBlocks`
+  (fuori dal modello pavimento `base`), i piani di T53b (`Form.levels`, `pos.z`, `settleHeights`: se T53b non è ancora nel base,
+  aspetta T70) e il renderer che posa il modello `base` più in basso e accorcia le colonne del terreno dove il modello ha voxel sotto
+  il suolo (il buco, senza strati). Il controllo del modello: ogni pavimento sotto il suolo raggiunto dal piano terra, altrimenti
+  `sotto` tolto. Test: un modello di prova con una cantina e una scala che scende (si scende, si risale, dalla cantina non si esce
+  altrove, il salto non ci entra); i modelli senza `sotto` come prima. Verifica nel browser con `addModel` accanto al borgo.
+  Dipendenze: T53b integrato (T70).
+- **T52d · la profondità del terreno** (ADR-0081 punto 5): terreni `layer: 'strato'` (predefiniti nel seme; alla Genesi il Cartografo
+  ne scrive 2-4 con gli altri terreni, il Fisico li vede), bozza degli strati per colonna (deterministica, dalla casella e dal bioma),
+  programma `sottosuolo` facoltativo dell'ambiente (MarkovJunior 3D, cima congelata, provato su `sampleDrafts`), `strati` nel piano
+  del luogo e in `PlaceView`; i piani vecchi ricalcolano dalla bozza. Schema Gemini, `MockModels`, prompt del Cartografo, validatore.
+  Test: stesso seme stessi strati, programma che non regge rifiutato col motivo, `D` dalla cantina più profonda. Dipendenze: T52b
+  (per `D`; si può fare prima con `D = 2`).
+- **T52e · vedere sotto terra** (ADR-0081 punto 6): `kernel.underground()`; il taglio a caselle in un disco (raggio 6, verso la camera)
+  di terreno, strutture e cose sopra `1,15 + floorAt`; le colonne tagliate con in cima lo strato e i fianchi verso il disco a bande;
+  le facce del buco a bande; sole e cielo attenuati con la profondità. Verifica nel browser in una cantina (screenshot sopra e sotto).
+  Dipendenze: T52b, T52d.
+- **T52f · il Cartografo e lo Scultore chiedono le cantine** (ADR-0081 punto 4): `strutture[].sotto` e lista `sotto` nel piano (schema,
+  normalizzazione, prompt), il `ModelDirector` chiede `struttura-<concetto>` con `sotto` (1, 2 per le `importante`), il compito dello
+  Scultore con la cantina (scala che scende, luci), le cose `sotto` sui pavimenti sotto il suolo raggiunti dalla porta (ADR-0064),
+  senza cantina `dentro`; `MockModels` con un piano e un modello con cantina. Test offline: un luogo con la cantina, cose giù, tutto
+  raggiungibile. Dipendenze: T52b.
+- **T52c · la Sala sistemi seminterrata, fuori** (ADR-0081 punto 7): solo il modello esterno dell'edificio nella corona
+  (`models/corona-<id>.xml`, `sotto` nella sua voce) scende sotto il viale: `placeStructure` lo posa più in basso, il suolo del campus
+  si apre dove il modello ha voxel sotto lo zero, collisione dai voxel (controlla che pavimenti e `pos.z` valgano anche nella corona);
+  l'interno resta com'è. Verifica nel browser davanti alla porta. Dipendenze: T52b.
+- Fatto quando (per pezzo): test verdi, verifica nel browser dove il pezzo cambia ciò che si vede, ADR-0081 aggiornato, commit.
 
 ### T53 · Le scale come rampe e le strutture su più piani — T53a `fatto` (`d7812ae`), T53b `da fare`
 - Pipeline: claude · stima 6% · approvato · priorità 50
