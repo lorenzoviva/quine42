@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 31/10/2026 alle 17:10 UTC, epoca 175 su **claude** (fine epoca). **T96 integrato** (mai zero slot, `sospendi`/`riattiva`); tolti i fermi a mano degli slot. **T57a fatto** (rune composte come programma), `integra T57` in conflitto solo su `backlog.md`: **T99** (integrare T57, priorità 5, Claude) poi **T98** su Claude; T57 riparte per T57b dopo T99. **T97** (il sito) su Gemini. Da approvare: T45f (risposte GCP), T88, T95, T89a-e.
+Aggiornato il 31/10/2026 alle 17:20 UTC, epoca 176 su **claude**. **T97 fatto** (sito, ADR-0095) ma i suoi task del sito si chiamano T99-T104 (numeri già presi): **T100** (integrare T97, rinumerare, verifica nel browser; Claude, prio 6, dopo T99). **T96 integrato** (mai zero slot, `sospendi`/`riattiva`); tolti i fermi a mano degli slot. **T57a fatto** (rune composte come programma), `integra T57` in conflitto solo su `backlog.md`: **T99** (integrare T57, priorità 5, Claude) poi **T98** su Claude; T57 riparte per T57b dopo T99. **T97** (il sito) su Gemini. Da approvare: T45f (risposte GCP), T88, T95, T89a-e.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -38,7 +38,7 @@ Aggiornato il 31/10/2026 alle 17:10 UTC, epoca 175 su **claude** (fine epoca). *
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T97** su Gemini (dal 16:47); su Claude **T99** (integrare T57), poi **T98** (40), poi T57b (T57, 60).
+  - Su Claude **T99** (integrare T57) → poi / → **T100** (integrare T97 + browser) → **T98** (40) → T57b (60). Gemini libero: nulla da approvare per lui adesso.
 - **Completati e integrati nel base `3d`**:
   - **T96** (31/10 16:48), **T51b** (ADR-0094, integrato il 31/10 16:13), **T89**, **T94**, **T54**, **T52b**, **T93**, **T92**, **T52**, **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **Da integrare**:
