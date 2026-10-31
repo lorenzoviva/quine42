@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 31/10/2026 alle 15:36 UTC, epoca 174 su **claude**. T51b fermo sul limite delle 5 ore di Claude (14:50 UTC, processo appeso): interrotto e ripreso (tentativo 2, stessa conversazione). T89 integrato. **T51 spezzato**: T51 (T51a) `fatto`, **T51b** (motore dell'acqua, automa cellulare) pronto su Claude, priorità 50. **T96** riscritto: almeno 1 slot per ogni modello con crediti, e `sospendi/riattiva <provider>` per l'orchestratore (decide lui ordine e sospensioni). **T97** (il sito: progetto e stile, dal to-do del 31/10) approvato su Claude, priorità 60, dopo T51b. Da approvare: T45f (risposte GCP), T88, T95, T57, T89a-e.
+Aggiornato il 31/10/2026 alle 16:20 UTC, epoca 174 su **claude**. **T51b integrato** (ADR-0094, automa cellulare dell'acqua; typecheck e `water.test.ts` verdi). **T57** (rune come codice) in corso su Claude; poi **T98** (bug: contorni del cartone oltre il cerchio, dal to-do del 31/10, priorità 40) e T97. T96 su Gemini in coda (Gemini 5h al 94 %). Da approvare: T45f (risposte GCP), T88, T95, T89a-e.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 

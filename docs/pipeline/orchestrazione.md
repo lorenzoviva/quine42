@@ -572,3 +572,4 @@
 - [2026-10-31T16:13:27.034Z] T51b: ESITO: fatto — automa cellulare dell'acqua (`water.ts`), `kernel.dig`, `scavi`/`acqua` nel piano e nel `PlaceView`, ADR-0094; suite intera non verde (4 test rotti anche sul base, il resto timeout per carico), `water.test.ts` e typecheck verdi · BROWSER: verificato — lago tra (0,0) e (1,0), conca di 8 caselle scavata accanto: si riempie, un solo livello su 36 caselle, volume 56 conservato (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T51b)
 - [2026-10-31T16:13:30.163Z] lancio T57 su claude (H:\projects\rune\.claude\worktrees\t57)
 - [2026-10-31T16:13:39.483Z] integra T51b: non riuscito (error: Your local changes to the following files would be overwritten by merge:); il base è com'era
+- [2026-10-31T16:13:53.648Z] task/T51b integrato in 3d; worktree e branch tolti.
