@@ -2199,7 +2199,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fare: aggiornare `src/style.css` e i componenti UI in-game (`src/ui/hud.ts`, `inventory.ts`, `lobby.ts`, `profile.ts`, `chat.ts`, `creditdialog.ts`) per adottare appieno i token di `src/theme.css`: bordi a inchiostro netto fumetto (`--border-ink-thick`), ombre rigide neon offset (`--shadow-hard-cyan`, `--shadow-hard-pink`), pattern mezze tinte sui pannelli modali, pulsanti arcade retrò e font display per intestazioni e notifiche d'avviso.
 - Fatto quando: typecheck e test verdi; screenshot nel browser delle interfacce in-game rinnovate con il tema pop art comics / neon punk.
 
-### T107 · Il sito: correggere i difetti della pagina dimostrativa — `da fare`
+### T107 · Il sito: correggere i difetti della pagina dimostrativa — `fatto`
 - Pipeline: gemini · stima 2% · approvato · priorità 20
 - Contesto: la verifica di T100 nel browser su `site/index.html` (T97, ADR-0095) ha trovato cinque difetti, scritti nel blocco di T100.
   Nasce da T97 e T100: `dossier T97`, `dossier T100`.
@@ -2209,3 +2209,4 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   pubblico («ADR-0084» e simili); (5) i font serviti in locale (file in `site/` o `public/`, niente `fonts.googleapis.com`), anche per `src/theme.css`.
 - Quando è fatto: `npm run typecheck` e `npm run build` verdi; nessuna richiesta a domini esterni nel `dist/` del sito (grep);
   `BROWSER: da verificare` per l'orchestratore.
+- Esito: corretti i cinque difetti riscontrati da T100 su `site/index.html` e nello stile: (1) carta demo bifacciale in CSS 3D con `.card-front` e `.card-back` autentico con sigillo e grafica retro-arcade, proprietà `backface-visibility: hidden` su entrambe le facce e animazione flip bidirezionale non specchiata; (2) aggiornati testi in `docs/adr/0095-il-sito-progetto-pagine-e-stile.md`, `AGENTS.md` e `site/index.html` specificando che le carte collezionabili adottano CSS 3D mentre three.js anima hero canvas e profilo; (3) testi del sito riscritti per rispettare la regola 0 e mantenere velati studio, Concilio e corona (motto del footer allusivo e poetico, tooltip orecchie misterioso, quarto pilastro e hero privi di spoiler sui ruoli interni); (4) rimossi riferimenti interni nei testi per il pubblico (`(ADR-0084)`, `QUINE_MASTER`, `Kernel Immutevole`); (5) scaricati in `public/fonts/` tutti i font (Bangers, Press Start 2P, VT323) e definite regole `@font-face` locali in `src/theme.css`, eliminando qualsiasi richiesta a `fonts.googleapis.com` o CDN esterne (`dist/site/` verificato senza richieste HTTP esterne); typecheck e build verdi.

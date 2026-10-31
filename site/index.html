@@ -4,13 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>QUINE42 · Il Gioco Fatto del Proprio Codice</title>
-    <!-- Google Fonts for Comic & Arcade Retrowave Typography -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Bangers&family=Press+Start+2P&family=VT323&display=swap"
-      rel="stylesheet"
-    />
     <link rel="stylesheet" href="./site.css" />
   </head>
   <body>
@@ -45,7 +38,7 @@
           </div>
           <h1 class="hero-title">IL MONDO È FATTO DEL SUO STESSO CODICE</h1>
           <p class="hero-desc">
-            Vivi in un universo 3D a voxel generato da un Concilio di IA. Raccogli rune che contengono
+            Vivi in un universo 3D a voxel che si scrive e genera da sé in tempo reale. Raccogli rune che contengono
             codice Lua vivo, evoca incantesimi, colleziona carte animate 3D ed esplora le sessioni multigiocatore.
           </p>
           <div class="hero-cta">
@@ -66,7 +59,7 @@
       <section class="section-wrap">
         <div class="section-head">
           <h2 class="comic-title">I QUATTRO PILASTRI DI QUINE42</h2>
-          <p>// ZERO META-GIOCO DENTRO IL MONDO · REGOLA PURA</p>
+          <p>// UN MONDO VIVO · REGOLE AUTENTICHE · LIBERTÀ PURA</p>
         </div>
 
         <div class="features-grid">
@@ -96,9 +89,9 @@
 
           <div class="feature-box">
             <span class="feature-icon">🏛️</span>
-            <h3 class="feature-title">IL CONCILIO DI IA</h3>
+            <h3 class="feature-title">SOCIETÀ VIVA E GENERATIVA</h3>
             <p class="feature-text">
-              Narratore, Cartografo, Fisico, Scultore e Ingegnere animano una società viva con mestieri, famiglie e trame, protetti dal pavimento inviolabile del kernel.
+              Intelligenze artificiali coordinate animano una società pulsante con mestieri, famiglie, routine quotidiane e trame narrative che evolvono insieme a te.
             </p>
           </div>
         </div>
@@ -108,30 +101,49 @@
       <section class="section-wrap" id="carte">
         <div class="section-head">
           <h2 class="comic-title">AREA CARTE E MULTIGIOCATORE</h2>
-          <p>// GRAFICA INTERATTIVA THREE.JS FUORI DAL GIOCO</p>
+          <p>// GRAFICA INTERATTIVA E CARTE 3D FUORI DAL GIOCO</p>
         </div>
 
         <div class="card-showcase-grid">
-          <!-- 3D Holographic Card Demo -->
+          <!-- CSS 3D Holographic Card Demo (Flip with authentic front & back) -->
           <div class="card-3d-wrapper">
-            <div class="retro-card" id="demo-card">
-              <div class="card-holo-foil"></div>
-              <div class="card-inner">
-                <div class="card-header">
-                  <h4 class="card-name">SPADA DI FULIGGINE</h4>
-                  <span class="comic-badge cyan">RARA</span>
+            <div class="retro-card" id="demo-card" title="Clicca per girare la carta">
+              <!-- Card Front -->
+              <div class="card-face card-front">
+                <div class="card-holo-foil"></div>
+                <div class="card-inner">
+                  <div class="card-header">
+                    <h4 class="card-name">SPADA DI FULIGGINE</h4>
+                    <span class="comic-badge cyan">RARA</span>
+                  </div>
+                  <div class="card-art-box">
+                    <div class="card-art-gem"></div>
+                  </div>
+                  <p style="font-size: 0.8rem; margin: 0 0 10px; color: var(--comic-paper-dim)">
+                    Lama forgiata nella cenere del primo vulcano. Brucia con fiamme di rune pure.
+                  </p>
+                  <div class="card-stats-box">
+                    <div class="card-stat">Luoghi: <b>14</b></div>
+                    <div class="card-stat">Trame: <b>6</b></div>
+                    <div class="card-stat">Prompt: <b>31</b></div>
+                    <div class="card-stat">Origine: <b>Clone #4</b></div>
+                  </div>
                 </div>
-                <div class="card-art-box">
-                  <div class="card-art-gem"></div>
-                </div>
-                <p style="font-size: 0.8rem; margin: 0 0 10px; color: var(--comic-paper-dim)">
-                  Lama forgiata nella cenere del primo vulcano. Brucia con fiamme di rune pure.
-                </p>
-                <div class="card-stats-box">
-                  <div class="card-stat">Luoghi: <b>14</b></div>
-                  <div class="card-stat">Trame: <b>6</b></div>
-                  <div class="card-stat">Prompt: <b>31</b></div>
-                  <div class="card-stat">Origine: <b>Clone #4</b></div>
+              </div>
+
+              <!-- Card Back -->
+              <div class="card-face card-back">
+                <div class="card-holo-foil"></div>
+                <div class="card-inner card-back-inner">
+                  <div class="card-back-frame">
+                    <div class="card-back-brand">QUINE42</div>
+                    <div class="card-back-sigil">
+                      <div class="sigil-core"></div>
+                      <div class="sigil-ring"></div>
+                    </div>
+                    <div class="card-back-tagline">CARTA DEL MONDO</div>
+                    <div class="card-back-subtitle">// PROPRIETÀ DEI VIANDANTI //</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -145,7 +157,7 @@
             </h3>
             <p style="color: var(--comic-paper); font-size: 1.05rem; line-height: 1.6;">
               Ogni elemento forgiato o scoperto nel mondo diventa una carta digitale 3D.
-              Grazie all'architettura dei cloni (ADR-0084), ogni volta che un altro universo include
+              Grazie all'architettura dell'eredità dei cloni, ogni volta che un altro universo include
               la tua carta, una quota dei proventi in crediti risale la catena dei titolari fino a te.
             </p>
             <div style="display: flex; gap: 12px; margin-top: 24px;">
@@ -161,8 +173,8 @@
             <div class="comic-badge green">SESSIONE ATTIVA</div>
             <h3>VALMORA MULTIGIOCATORE</h3>
             <p style="font-size: 0.9rem; color: var(--comic-paper-dim);">
-              Master: <b style="color: var(--neon-cyan)">IO (QUINE_MASTER)</b><br />
-              Modelli: <b style="color: var(--neon-yellow)">gemini-3.1-flash-lite + Flash 3.8</b><br />
+              Master: <b style="color: var(--neon-cyan)">Lorenzo (Master)</b><br />
+              Modelli: <b style="color: var(--neon-yellow)">Gemini Flash-Lite + Flash 3.8</b><br />
               Spesa stimata: <b>$0.08 / ora</b> · Minimo tetto: <b>$1.00</b>
             </p>
             <div style="margin-top: 18px; display: flex; gap: 10px;">
@@ -208,7 +220,7 @@
       <!-- The Jerboa Secret Easter Egg (ADR-0095) -->
       <div class="footer-horizon">
         <div class="jerboa-peek-container" title="Qualcosa osserva dall'orizzonte...">
-          <div class="jerboa-tooltip">// CHI È FUORI DAL TAPPETO CONOSCE LO STUDIO</div>
+          <div class="jerboa-tooltip">// DUE ORECCHIE LUNGHE NELLA NOTTE...</div>
           <svg class="jerboa-ears-svg" viewBox="0 0 64 38">
             <!-- Stylized silhouette of the two long gerboa ears peeking up -->
             <path d="M 16 38 C 14 20, 4 8, 12 2 C 20 -4, 26 14, 28 38 Z" />
@@ -219,8 +231,8 @@
 
       <div class="footer-brand">QUINE42</div>
       <p class="footer-quote">
-        "Il tappeto compensa ogni passo e ti tiene al centro.<br />
-        Attorno, invisibile finché dura la simulazione, c'è chi scrive le regole del mondo."
+        "Il sentiero scorre sotto i tuoi passi e ti guida nel mondo.<br />
+        Oltre l'orizzonte del visibile, c'è chi veglia e continua a scrivere le regole del gioco."
       </p>
 
       <div class="footer-links">
@@ -232,7 +244,7 @@
       </div>
 
       <div class="footer-copy">
-        QUINE42 © 2026 · Voxel Engine & Kernel Immutevole · Generato da Google Gemini e MarkovJunior 3D
+        QUINE42 © 2026 · Voxel Engine & Algoritmi MarkovJunior 3D · Generato da Intelligenza Artificiale
       </div>
     </footer>
 

@@ -13,7 +13,7 @@ Con l'evoluzione del multigiocatore, dell'autenticazione con Firebase Auth, dei 
 
 Richieste dell'autore (to-do del 31/10/2026, `docs/userchats/to-do-2026-10-31.md` e T97):
 - **Stile visivo**: pop art a fumetti e arcade retro, neon punk, retrowave/synthwave, condiviso sia per le pagine web esterne sia per le interfacce in gioco;
-- **three.js fuori dal gioco**: rendering 3D attivo anche nel sito (es. sfondi con animazioni MarkovJunior nella hero, carte 3D animate interattive);
+- **three.js fuori dal gioco**: rendering 3D attivo anche nel sito (es. sfondi con animazioni MarkovJunior nella hero, avatar 3D del profilo); carte collezionabili animate in CSS 3D;
 - **Il segreto dei gerboa**: richiamare velatamente la corona del Concilio senza svelarla (es. in fondo alla landing la punta delle orecchie dei gerboa che spuntano dalla linea d'orizzonte, comprensibili solo dopo averli visti in gioco);
 - **Architettura leggera**: riuso delle funzionalità esistenti (Firebase, sessioni, Stripe, carte, store git), template grafico ispirato a Claude Design ma senza obbligo di framework monolitici (niente React/Angular nel kernel).
 
@@ -27,7 +27,7 @@ Richieste dell'autore (to-do del 31/10/2026, `docs/userchats/to-do-2026-10-31.md
 - **Condivisione diretta di three.js e `src/mj/`**: il motore grafico three.js e gli algoritmi di parsing/mesh voxel di MarkovJunior sono importati direttamente anche nelle pagine del sito per:
   - Lo sfondo / hero canvas animato con voxel e anelli orbitali al neon;
   - Il visualizzatore dell'avatar e del mantello del viandante nella pagina profilo;
-  - Il rendering tridimensionale delle carte con rotazione, riflessi prismatici e flip interattivo.
+  (le carte collezionabili adottano invece animazioni CSS 3D con lamina olografica prismatica e flip bifacciale).
 - **Riuso dei servizi backend**:
   - `server/account.ts` e `src/session/login.ts` per Firebase Auth (`/api/account`);
   - `server/universeStore.ts` per l'elenco degli universi e la creazione di nuovi mondi git (`/api/universe`);
@@ -50,7 +50,7 @@ Richieste dell'autore (to-do del 31/10/2026, `docs/userchats/to-do-2026-10-31.md
 ┌──────────────┐     ┌─────────────────────┐    ┌─────────────────┐    ┌──────────────────┐
 │   Profilo    │     │      Sessioni       │    │     Carte 3D    │    │     Crediti      │
 │  & Account   │     │  & Nuovo Universo   │    │  Collezionabili │    │  & Ricarica      │
-│  (Firebase)  │     │  (Lobby & Git Store)│    │  (three.js Mesh)│    │  (Stripe Checkout│
+│  (Firebase)  │     │  (Lobby & Git Store)│    │  (CSS 3D Holo)  │    │  (Stripe Checkout│
 └──────────────┘     └─────────────────────┘    └─────────────────┘    └──────────────────┘
 ```
 
@@ -73,7 +73,7 @@ Richieste dell'autore (to-do del 31/10/2026, `docs/userchats/to-do-2026-10-31.md
 
 4. **Area Carte Collezionabili (`site/carte.html` — task T104)**:
    - Galleria delle carte possedute dal giocatore (`cards.ts`, `world/carte.json`);
-   - Ogni carta è renderizzata come mesh 3D Three.js con texture olografica prismatica, animazione di galleggiamento e flip interattivo;
+   - Ogni carta è renderizzata con animazioni CSS 3D, lamina olografica prismatica, galleggiamento e flip interattivo bifacciale (fronte e retro con backface-visibility);
    - Mostra gli utilizzi vivi nel mondo (luoghi, trame, prompt, totale), l'impronta MinHash e l'albero genealogico della catena dei titolari (ADR-0084).
 
 5. **Area Pagamenti e Crediti (`site/pagamenti.html` — task T105)**:
@@ -120,7 +120,7 @@ Il lavoro di implementazione è suddiviso nei seguenti task sequenziali atomici:
 1. **T101**: *Landing page completa* — Struttura HTML/CSS/TS, hero con 3D canvas three.js, animazione procedurale, pillole informative e footer con il segreto dei gerboa. (Dipende da: T97)
 2. **T102**: *Login e Profilo* — Interfaccia autenticazione Firebase Auth (Google/Anonimo), editor profilo viandante con visualizzatore 3D mantello e seme MarkovJunior. (Dipende da: T97, T44b)
 3. **T103**: *Sessioni e Nuovo Universo* — Hub sessioni multigiocatore, schede dettagli universi (modelli, minimi, stime orarie) e wizard di creazione nuovo universo tramite API git. (Dipende da: T97, T45d)
-4. **T104**: *Area Carte Collezionabili 3D* — Galleria interattiva three.js delle carte del giocatore, rotazione 3D e animazione flip, statistiche di utilizzo in-world e albero genealogico dell'eredità dei cloni. (Dipende da: T97, T45d, T84)
+4. **T104**: *Area Carte Collezionabili 3D* — Galleria interattiva in CSS 3D delle carte del giocatore, rotazione e animazione flip, statistiche di utilizzo in-world e albero genealogico dell'eredità dei cloni. (Dipende da: T97, T45d, T84)
 5. **T105**: *Area Pagamenti e Crediti* — Cruscotto saldo crediti, ricarica Stripe Checkout e storico transazioni. (Dipende da: T97, T45e, T93)
 6. **T106**: *Il tema pop art / retro arcade in-game* — Applicazione delle variabili CSS di `theme.css` e dello stile a fumetti neon su HUD, inventario, lobby, chat e finestre modali del gioco. (Dipende da: T97)
 
@@ -129,5 +129,5 @@ Il lavoro di implementazione è suddiviso nei seguenti task sequenziali atomici:
 ## Conseguenze
 - QUINE42 dispone di un'architettura web modulare e integrata, servita nativamente da Vite senza sovraccarico di framework esterni.
 - Lo stile grafico pop art comics / retro arcade unifica l'identità visiva dell'esperienza utente dentro e fuori dal gioco.
-- three.js valorizza gli asset procedurali anche nelle pagine web (hero canvas, carte collezionabili e profilo 3D).
+- three.js valorizza gli asset procedurali anche nelle pagine web (hero canvas e profilo 3D), mentre la collezione adotta carte animate in CSS 3D.
 - La divisione dei task garantisce avanzamenti rapidi, collaudabili e indipendenti all'interno della pipeline.
