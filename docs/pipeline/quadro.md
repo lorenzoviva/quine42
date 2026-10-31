@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 31/10/2026 alle 00:40 UTC, epoca 165 su **gemini**. **T92 e T52 integrati nel base `3d`** (ADR-0091, AGENTS.md, backlog aggiornati; rami e worktree rimossi; typecheck e test pipeline 73/73 verdi). **T54** su Claude ha raggiunto il limite 5h (0%), riprende dopo le 03:01 UTC. **T51** approvato su Claude, in coda. Multigiocatore fermo (T45f aspetta risposte GCP, T45e aspetta chiavi test Stripe). T88, T89 non approvati.
+Aggiornato il 31/10/2026 alle 01:52 UTC, epoca 166 su **gemini**. **T45e completato e integrato nel base `3d`** (l'autore ha inserito le chiavi Stripe in `.env` e risposto a `docs/pipeline/domande/T45e.md`; creato **T93** per la verifica nel browser su Claude). **T92 e T52 integrati nel base `3d`** (ADR-0091). **T54** su Claude ha raggiunto il limite 5h (0%), riprende dopo le 03:01 UTC. **T51** approvato su Claude, in coda. Multigiocatore: T45f aspetta risposte GCP (`docs/pipeline/domande/T45f.md`). T88, T89, T93 in coda da approvare.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -25,13 +25,14 @@ Aggiornato il 31/10/2026 alle 00:40 UTC, epoca 165 su **gemini**. **T92 e T52 in
   - **T54 in corso su Claude**: in attesa reset limite 5h (alle 03:01 UTC) per completare le taglie D&D e la Fucina.
   - **T45d integrato nel base `3d` (ADR-0086)**: requisiti minimi, tetto crediti, modale esaurimento, lobby multigiocatore e collezione carte integrati.
   - **T45f sbloccato e preparato**: dipendeva da T44b e T45d, ora entrambi integrati. Aperte le domande su GCP Project ID, hosting e regione in `docs/pipeline/domande/T45f.md`.
-  - **Chiavi Stripe per test nel browser**: T45e resta segnato `in attesa` per la verifica browser (in attesa di `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` in `.env` o in chat, segnalate in `docs/pipeline/domande/T45e.md`).
+  - **T45e completato e chiavi Stripe fornite**: l'autore ha risposto in `docs/pipeline/domande/T45e.md` inserendo le credenziali di test in `.env`. Il codice e i test erano già integrati nel base `3d` (T77, ADR-0083). T45e segnato `fatto` e creato **T93** per la verifica nel browser su Claude.
 - **Cosa si aspetta**:
   1. **Reset limite 5h di Claude** (02:59/03:01 UTC) per completare T54 e far avanzare T51.
-  2. **Risposte dell'autore per T45f** e chiavi di test Stripe per T45e.
+  2. **Risposte dell'autore per T45f** (`docs/pipeline/domande/T45f.md`).
 - **Intenzioni / prossimi passi**:
-  1. Ricevute le risposte su T45f e le chiavi Stripe per T45e, riprendere il multigiocatore.
-  2. Al ripristino di Claude, seguire l'avanzamento di T54 e l'avvio di T51.
+  1. Al ripristino di Claude, seguire l'avanzamento di T54 e l'avvio di T51.
+  2. Eseguire la verifica browser di Stripe (T93) nel turno browser su Claude quando sarà possibile.
+  3. Ricevute le risposte su T45f, riprendere il deploy del multigiocatore su GCP.
 
 ## Task attivi e in corso
 
@@ -43,20 +44,21 @@ Aggiornato il 31/10/2026 alle 00:40 UTC, epoca 165 su **gemini**. **T92 e T52 in
   - **T92**, **T52**, **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **Da integrare**:
   - Nessuno.
-- **In attesa di chiavi/risposte/verifica browser**:
+- **In attesa di chiavi/risposte**:
   - **T45f**: sbloccato, in attesa di GCP Project ID e scelte di deploy (`docs/pipeline/domande/T45f.md`).
-  - **T45e**: codice e test integrati, in attesa credenziali test Stripe per prova interattiva browser.
 - **In coda / Bloccati**:
+  - **T93** (verifica browser Stripe T45e, da approvare su Claude).
+  - **T88**, **T89** (in coda da approvare).
   - **T57** (rune come codice, bloccato da T51a).
 - **Crediti**:
   - **Claude**: 5h al 0 % (reset alle 02:59 UTC / 03:01 UTC), settimana al 41 % (9% per Claude and GPT models).
-  - **Gemini**: 5h al 97 %, settimana al 28 %.
+  - **Gemini**: 5h al 96 %, settimana al 28 %.
   - **Argon**: fermo fino al 04/11.
 
 ## Da fare appena possibile
 
 - **Pianificate le risposte dell'autore**: T51b (automa cellulare del kernel), T52a (progetto fatto e integrato), T54 (in corso su Claude).
-- **Verifiche nel browser** (un task di verifica alla volta su `claude`, che ha `--chrome`): T45d (lobby multigiocatore), T64 (varianti in cache circuito-3D), T56b (arco salto e ombra), T69 (interfaccia web), T68c (stato provider coda abbonamenti), T45e (ricarica Stripe).
+- **Verifiche nel browser** (un task di verifica alla volta su `claude`, che ha `--chrome`): T45d (lobby multigiocatore), T64 (varianti in cache circuito-3D), T56b (arco salto e ombra), T69 (interfaccia web), T68c (stato provider coda abbonamenti), T93 (ricarica Stripe T45e).
 
 ## Da sapere
 

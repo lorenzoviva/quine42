@@ -1495,13 +1495,13 @@ le risposte alle domande del piano.
 - Fatto quando: test del flusso, verifica nel browser con due schede, commit.
 - Esito: ADR-0086; `universe.json → ai.minimi` (tetto minimo, modello testo, modello scultore, luoghi/minuto) riparato da `repairMinimi`; `addBudgetFromTetto` in `credits.ts` aggiunge quote proporzionali a `maxText`, `maxForges`, `maxPacks`, `maxCast`, `maxModels`; `Kernel.setSessionTetto` e `sessionSpentOf` tracciano la spesa del viandante, emettendo `credits:exhausted` (`tetto` o `finiti`); avviso di rete `tipo: 'crediti'` e modale `CreditExhaustedModal` con le 3 scelte (ricarica Stripe, offline con `MockModels`, abbandona sessione); `LobbyScreen` multigiocatore con modelli e coefficienti del master, stima oraria, requisiti minimi, selettore tetto di spesa ($1, $2, $5, tutto) e collezione carte (`collectionOf`) con contatori di utilizzo (luoghi, trame, prompt, totale). Test in `tests/lobby.test.ts` (6/6 passati).
 
-### T45e · I pagamenti con Stripe — `in attesa` (aspetta le chiavi di Stripe di prova dall'autore in `docs/pipeline/domande/T45e.md`; dipende da T45a, T44b)
-- Pipeline: claude · stima 5% · priorità 9
+### T45e · I pagamenti con Stripe — `fatto`
+- Pipeline: gemini · stima 5% · approvato · priorità 9
 - Fare: la ricarica dei crediti con Stripe Checkout (Google Pay compreso) in modalità di prova; il webhook sul server accredita
   (idempotente); chiavi solo sul server; un anonimo non compra.
 - Fatto quando: test con il webhook finto, una ricarica di prova nel browser con le chiavi di test, commit. Le chiavi di Stripe le
   dà l'autore: se mancano, la domanda va in `docs/pipeline/domande/T45e.md`.
-- Esito: implementati gli endpoint server (`/api/stripe/checkout`, `/api/stripe/webhook`) con verifica firma HMAC-SHA256 (`stripe-signature`), accredito crediti idempotente (`Kernel.creditRecharge` e persistenza `world/pagamenti.json`), blocco acquisti per anonimi (403), interfaccia di ricarica rapida e saldo nel profilo (`P`); test headless in `tests/stripe.test.ts` (6/6 passati); ADR-0083 registrato. In attesa delle chiavi di test `STRIPE_SECRET_KEY` e `STRIPE_WEBHOOK_SECRET` dall'autore nel `.env` per la verifica nel browser.
+- Esito: implementati gli endpoint server (`/api/stripe/checkout`, `/api/stripe/webhook`) con verifica firma HMAC-SHA256 (`stripe-signature`), accredito crediti idempotente (`Kernel.creditRecharge` e persistenza `world/pagamenti.json`), blocco acquisti per anonimi (403), interfaccia di ricarica rapida e saldo nel profilo (`P`); test headless in `tests/stripe.test.ts` (6/6 passati); ADR-0083 registrato. Codice e test integrati nel base `3d` con T77. Chiavi di test inserite dall'autore in `.env` (con listener locale indicato su porta 4242); verifica nel browser delegata a T93.
 
 ### T45f · Il server su Google Cloud — `da fare` (dipende da T44b, T45d)
 - Pipeline: claude · stima 6% · priorità 10
@@ -1947,4 +1947,17 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   - Committa sul branch `task/T92`.
 - Fatto quando: typecheck verde, ADR-0091 a posto, commit su branch `task/T92`. Poi l'orchestratore farà `integra T92` e `integra T52`.
 - Esito: eseguito `git merge task/T52` e risolti i conflitti; rinominato `docs/adr/0081-i-sotterranei.md` in `docs/adr/0091-i-sotterranei.md`, aggiornato titolo interno e inserito in `docs/adr/README.md` in fondo dopo ADR-0090; in `AGENTS.md` mantenuta la riga dei sotterranei con riferimento ad ADR-0091; in `docs/plans/backlog.md` preservati tutti i blocchi T75-T91 e T92, e aggiornato T52 con T52a fatto e i sotto-task T52b-f riferiti ad ADR-0091; `npm run typecheck` verificato e verde.
+
+### T93 · Verifica nel browser dei pagamenti Stripe (T45e) — `da fare` (dipende da T45e)
+- Pipeline: claude · stima 3% · priorità 9
+- Contesto: T45e ha completato l'integrazione di Stripe Checkout (ADR-0083) nel base `3d` con test headless. L'autore ha inserito le chiavi di test (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PUBLISHABLE_KEY`) nel `.env`. L'autore segnala anche che il listener locale inoltra a `localhost:4242/webhook`. Leggi `node tools/pipeline/pipeline.mjs dossier T45e` e `traccia T45e`.
+- Fare: verificare nel browser con Claude (`--chrome`) la ricarica crediti di prova tramite Stripe Checkout:
+  - Il gioco e le sue API girano sul server Vite (su porta libera assegnata con il turno browser: `node tools/pipeline/pipeline.mjs turno browser -- npx vite preview --port <n> --strictPort` oppure `npm run dev -- --port <n>`);
+  - Verificare che il profilo (`P`) mostri il saldo e i pulsanti di ricarica (+5 $, +10 $, +20 $);
+  - Cliccando su una ricarica, verificare l'avvio della sessione di checkout Stripe;
+  - Verificare il ritorno con successo (`?ricarica=successo`);
+  - Verificare che gli eventi del webhook raggiungano l'endpoint `/api/stripe/webhook` (se il listener locale inoltra a 4242/webhook, verificare se richiede `--forward-to localhost:<porta>/api/stripe/webhook`);
+  - Chiudi scheda e preview alla fine del turno.
+- Fatto quando: una ricarica di prova eseguita nel browser o comportamento e risposte documentati con precisione, commit su branch `task/T93`.
+
 

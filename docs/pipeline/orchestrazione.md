@@ -526,3 +526,11 @@
 - [2026-10-31T00:27:36.940Z] integra T52: conflitti in AGENTS.md, docs/adr/README.md, docs/plans/backlog.md; il base è com'era
 - [2026-10-31T00:27:46.524Z] riprendo T54 su claude (H:\projects\rune\.claude\worktrees\t54)
 - [2026-10-31T00:31:03.581Z] nota: T52 completato; conflitti di integrazione (ADR-0081 occupato da crediti, ora ADR-0091; backlog e AGENTS): creato T92 su gemini per integrare
+- [2026-10-31T00:31:58.825Z] lancio T92 su gemini (H:\projects\rune\.claude\worktrees\t92)
+- [2026-10-31T00:32:01.683Z] orchestratore: epoca 165 su gemini (contesto a 270 % della finestra)
+- [2026-10-31T00:32:06.594Z] T54: limite di claude, riprendo dopo 2026-10-31T03:01:00.000Z
+- [2026-10-31T00:37:55.365Z] T92: ESITO: fatto — integrato task/T52 in task/T92 con risoluzione conflitti, rinumerazione in ADR-0091, aggiornamento AGENTS.md, docs/adr/README.md e docs/plans/backlog.md; typecheck e test della pipeline verdi (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T92)
+- [2026-10-31T00:38:12.185Z] task/T92 integrato in 3d; worktree e branch tolti.
+- [2026-10-31T00:38:15.778Z] task/T52 integrato in 3d; worktree e branch tolti.
+- [2026-10-31T00:40:37.573Z] orchestratore: epoca 166 su gemini (contesto a 76 % della finestra)
+- [2026-10-31T00:51:36.861Z] nota: T45e: autore ha inserito chiavi Stripe in .env; T45e fatto, creato T93 per verifica browser su Claude
