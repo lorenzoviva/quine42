@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 31/10/2026 alle 11:25 UTC, epoca 169 su **claude** (fine epoca). Integrati T93 (Stripe verificato nel browser) e T52b (cantine). **T54 fatto ma da integrare via T94** (pronto, priorità 8, primo su Claude). Pronti dopo: T51, T89 (approvato dall'autore). Da approvare: T45f (aspetta risposte GCP), T88, **T95** (proposto: test explore/partita/subscription rossi anche da soli). Claude: settimana 35 %, 5h 63 %; slot 0 al momento (previsione crediti).
+Aggiornato il 31/10/2026 alle 11:52 UTC, epoca 170 su **claude**. Integrati T94 e T54 (taglie di D&D, ADR-0092), dopo T93 e T52b. Pronti: T51, T89 (su Claude, slot 0 per la previsione crediti). Da approvare: T45f (aspetta risposte GCP), T88, **T95** (test explore/partita/subscription rossi anche da soli). Claude: settimana 34 %, 5h 55 %.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -27,7 +27,6 @@ Aggiornato il 31/10/2026 alle 11:25 UTC, epoca 169 su **claude** (fine epoca). I
   - **T45f sbloccato e preparato**: dipendeva da T44b e T45d, ora entrambi integrati. Aperte le domande su GCP Project ID, hosting e regione in `docs/pipeline/domande/T45f.md`.
   - **T45e completato e chiavi Stripe fornite**: l'autore ha risposto in `docs/pipeline/domande/T45e.md` inserendo le credenziali di test in `.env` e impostando il listener locale su `localhost:5173/api/stripe/webhook`. T45e segnato `fatto` e approvato **T93** per la verifica nel browser su Claude (priorità 9).
 - **Cosa si aspetta**:
-  1. **T94** (integrare T54). T93 fatto e integrato (ricarica Stripe di prova verificata nel browser).
   2. Proposto **T95** (test explore/partita/subscription rossi anche da soli): aspetta l'approvazione dell'autore.
   2. **Risposte dell'autore per T45f** (`docs/pipeline/domande/T45f.md`).
 - **Intenzioni / prossimi passi**:
@@ -38,10 +37,9 @@ Aggiornato il 31/10/2026 alle 11:25 UTC, epoca 169 su **claude** (fine epoca). I
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - **T94** approvato su Claude (integrare T54, priorità 8).
   - **T51** approvato su Claude (in coda dopo T52b, priorità 100).
 - **Completati e integrati nel base `3d`**:
-  - **T52b**, **T93**, **T92**, **T52**, **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
+  - **T94**, **T54**, **T52b**, **T93**, **T92**, **T52**, **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **Da integrare**:
   - Nessuno.
 - **In attesa di chiavi/risposte**:
