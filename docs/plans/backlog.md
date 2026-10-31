@@ -2123,17 +2123,3 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Cosa fare: nel worktree `git merge task/T57`; in `backlog.md` tieni tutti i blocchi del base e, per il blocco di T57, la versione
   di `task/T57` (T57a fatto con il suo commit, T57b prossimo pezzo, il blocco resta `da fare`); nessun altro file.
 - Quando è fatto: merge committato, `npm run typecheck` verde, i test toccati da T57 (`traccia T57`) verdi.
-
-### T100 · Integrare T97 e verificare il sito nel browser — `da fare`
-- Pipeline: claude · stima 4% · approvato · priorità 6
-- Contesto: T97 (il sito, ADR-0095) è fatto su `task/T97` (`416ea7d`) ma è partito da `cbe8532`: nel suo `backlog.md` ha
-  pianificato i task del sito come T99-T104, numeri che nel base sono già presi (T98 cartone, T99 integrare T57). Chiede anche la
-  verifica nel browser (`BROWSER: da verificare`, su Antigravity non c'era il browser). Nasce da T97: `dossier T97`, `traccia T97`.
-- Cosa fare: nel worktree `git merge task/T97`; in `backlog.md` tieni tutti i blocchi del base e il blocco di T97 fatto da `task/T97`;
-  rinumera i suoi task del sito T99-T104 nei primi numeri liberi (`pipeline.mjs prossimo`, oltre T100), aggiornando i riferimenti
-  incrociati (anche in ADR-0095, `AGENTS.md`, `docs/pipeline/domande/T97.md`); ADR-0095 se già preso prende il primo libero. Poi typecheck,
-  build, i test toccati; nel turno browser apri `/site/index.html` della preview e `/?skip&offline` (il gioco, ora con `src/theme.css`
-  importato in `style.css`): scrivi ciò che vedi (hero three.js, carta che si gira, footer coi gerboa, HUD del gioco non rotto, errori in console).
-- Quando è fatto: merge committato, task del sito rinumerati, typecheck e build verdi, verifica scritta nel blocco; i difetti trovati
-  come righe «difetto:» per l'orchestratore.
-- Dipende da T99.
