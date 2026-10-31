@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 31/10/2026 alle 17:45 UTC, epoca 176 su **claude** (fine epoca). **T57a, T99, T97 (sito, ADR-0095), T100 integrati.** Task del sito rinumerati **T101-T106** (da approvare). I 5 difetti della pagina demo → **T107** su Gemini (approvato).
+Aggiornato il 31/10/2026 alle 18:10 UTC, epoca 177 su **claude**. **T107 fatto** su `task/T107` (Gemini): verifica nel browser in **T108** (Claude, priorità 30, approvato), che fa `git merge task/T107`; poi `integra T108` e `integra T107`. **T57a, T99, T97 (sito, ADR-0095), T100 integrati.** Task del sito rinumerati **T101-T106** (da approvare). I 5 difetti della pagina demo → **T107** su Gemini (approvato).
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
