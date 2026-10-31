@@ -909,7 +909,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
   test in `tests/lots.test.ts` e `tests/sculptor.test.ts`. Diverso dal previsto: il kernel abbassa la taglia che non sta nel lotto (un'Enorme
   vuole un lotto di 8 caselle, una Gargantuesca di 10), quindi negli ambienti con edifici piccoli le rare diventano Grandi; lotti più grandi per
   le rare restano da fare se serviranno. Le creature arrivano fino a Grande (nessuna rarità per le creature). Test: `typecheck` verde,
-  `tests/lots.test.ts` e `tests/sculptor.test.ts` verdi; nella suite completa 9 file vanno in timeout (boot oltre 10 s) per il carico della
+  `tests/lots.test.ts` e `tests/sculptor.test.ts` verdi; nella suite completa 9 file vanno in timeout, in serie ne restano 5 (33 test, boot oltre 10 s), per il carico della
   macchina: `kernel.test.ts` «boots the bundled universe» va in timeout uguale sulla base (11,5 s contro 11,3 s).
 
 ## Controlli
