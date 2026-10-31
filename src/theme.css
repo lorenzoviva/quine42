@@ -1,0 +1,197 @@
+/* QUINE42 Theme (ADR-0095, T97)
+   Pop Art Comics & Retro Arcade, Neon Punk, Retrowave/Synthwave.
+   Shared design tokens and utility rules for in-game UI and out-game website. */
+
+:root {
+  /* --- Palette: Neon Punk & Retro Synthwave --- */
+  --neon-pink: #ff2a85;
+  --neon-magenta: #f026a0;
+  --neon-cyan: #00f0ff;
+  --neon-yellow: #ffe600;
+  --neon-green: #05ffa1;
+  --neon-purple: #9d00ff;
+  --neon-orange: #ff6c00;
+
+  /* --- Inks & Dark Backdrops --- */
+  --comic-ink: #07040d;
+  --comic-ink-light: #150c26;
+  --comic-paper: #fff5ea;
+  --comic-paper-dim: #c5b8a9;
+  --synth-bg: #090514;
+  --synth-panel: #130a24;
+  --synth-grid: rgba(0, 240, 255, 0.18);
+  --synth-horizon: #ff2a85;
+
+  /* --- Typography --- */
+  --font-display: 'Bangers', 'Impact', 'Arial Black', sans-serif;
+  --font-arcade: 'Press Start 2P', 'VT323', monospace;
+  --font-mono: 'Cascadia Mono', 'JetBrains Mono', Consolas, 'DejaVu Sans Mono', monospace;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  /* --- Comic & Arcade Hard Borders & Shadows --- */
+  --border-ink: 2px solid var(--comic-ink);
+  --border-ink-thick: 3px solid var(--comic-ink);
+  --border-neon-cyan: 2px solid var(--neon-cyan);
+  --border-neon-pink: 2px solid var(--neon-pink);
+  --border-neon-yellow: 2px solid var(--neon-yellow);
+  --border-neon-green: 2px solid var(--neon-green);
+
+  --shadow-hard-cyan: 4px 4px 0px var(--neon-cyan);
+  --shadow-hard-pink: 4px 4px 0px var(--neon-pink);
+  --shadow-hard-yellow: 4px 4px 0px var(--neon-yellow);
+  --shadow-hard-green: 4px 4px 0px var(--neon-green);
+  --shadow-hard-ink: 4px 4px 0px var(--comic-ink);
+
+  --glow-cyan: 0 0 12px rgba(0, 240, 255, 0.65);
+  --glow-pink: 0 0 12px rgba(255, 42, 133, 0.65);
+  --glow-yellow: 0 0 12px rgba(255, 230, 0, 0.65);
+  --glow-green: 0 0 12px rgba(5, 255, 161, 0.65);
+
+  /* --- Halftone Dot Pattern (Pop Art Ben-Day dots) --- */
+  --halftone-pink: radial-gradient(circle, rgba(255, 42, 133, 0.22) 1.5px, transparent 1.5px);
+  --halftone-cyan: radial-gradient(circle, rgba(0, 240, 255, 0.20) 1.5px, transparent 1.5px);
+  --halftone-yellow: radial-gradient(circle, rgba(255, 230, 0, 0.20) 1.5px, transparent 1.5px);
+}
+
+/* --- Common Theme Utility Classes --- */
+
+/* Pop Art Comics Display Title */
+.comic-title {
+  font-family: var(--font-display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--neon-yellow);
+  text-shadow:
+    -2px -2px 0 var(--comic-ink),
+    2px -2px 0 var(--comic-ink),
+    -2px 2px 0 var(--comic-ink),
+    2px 2px 0 var(--comic-ink),
+    4px 4px 0 var(--neon-pink);
+}
+
+/* Arcade Neon Button */
+.comic-btn {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 10px 22px;
+  background: var(--neon-yellow);
+  color: var(--comic-ink);
+  border: var(--border-ink-thick);
+  box-shadow: var(--shadow-hard-cyan);
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.comic-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px var(--neon-cyan);
+}
+
+.comic-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px var(--neon-cyan);
+}
+
+.comic-btn.pink {
+  background: var(--neon-pink);
+  color: #fff;
+  box-shadow: var(--shadow-hard-yellow);
+}
+.comic-btn.pink:hover {
+  box-shadow: 6px 6px 0px var(--neon-yellow);
+}
+
+.comic-btn.cyan {
+  background: var(--neon-cyan);
+  color: var(--comic-ink);
+  box-shadow: var(--shadow-hard-pink);
+}
+.comic-btn.cyan:hover {
+  box-shadow: 6px 6px 0px var(--neon-pink);
+}
+
+.comic-btn.arcade {
+  font-family: var(--font-arcade);
+  font-size: 0.85rem;
+}
+
+/* Comic Panel / Box */
+.comic-panel {
+  background: var(--synth-panel);
+  border: var(--border-ink-thick);
+  box-shadow: var(--shadow-hard-pink);
+  position: relative;
+  overflow: hidden;
+}
+
+.comic-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--halftone-cyan);
+  background-size: 12px 12px;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Comic Badge */
+.comic-badge {
+  font-family: var(--font-arcade);
+  font-size: 0.7rem;
+  padding: 4px 8px;
+  background: var(--neon-pink);
+  color: #fff;
+  border: 2px solid var(--comic-ink);
+  box-shadow: 2px 2px 0 var(--comic-ink);
+  text-transform: uppercase;
+  display: inline-block;
+}
+
+.comic-badge.cyan {
+  background: var(--neon-cyan);
+  color: var(--comic-ink);
+}
+
+.comic-badge.yellow {
+  background: var(--neon-yellow);
+  color: var(--comic-ink);
+}
+
+.comic-badge.green {
+  background: var(--neon-green);
+  color: var(--comic-ink);
+}
+
+/* Synthwave Grid Horizon Effect */
+.synth-grid {
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(9, 5, 20, 0.7) 40%, var(--synth-bg) 100%),
+    linear-gradient(to right, var(--synth-grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--synth-grid) 1px, transparent 1px);
+  background-size: 100% 100%, 40px 40px, 40px 40px;
+}
+
+/* The Jerboa Secret Easter Egg (ADR-0095) */
+.jerboa-silhouette {
+  display: inline-block;
+  position: relative;
+  width: 48px;
+  height: 24px;
+  opacity: 0.85;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  filter: drop-shadow(0 0 4px var(--neon-cyan));
+}
+
+.jerboa-silhouette:hover {
+  opacity: 1;
+  transform: translateY(-3px) scale(1.08);
+  filter: drop-shadow(0 0 8px var(--neon-pink));
+}
