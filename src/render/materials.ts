@@ -4,6 +4,7 @@
 // their colour; while the renderer blooms they also mark themselves in the frame's alpha, which the bloom reads.
 
 import * as THREE from 'three';
+import { CARTOON, toon } from './cartoon';
 
 /** Shared uniforms: time (wind, flicker), wind strength, the radius beyond which the simulation is cut. */
 export const U = {
@@ -133,19 +134,24 @@ export function casts<T extends THREE.Mesh>(m: T, receive = false): T {
 /** Inside a structure everything above the head is cut away (the renderer sets where). */
 export const CUT = new THREE.Plane(new THREE.Vector3(0, -1, 0), 1e9);
 
+/** The simulation's lit material: Lambert, or banded in the cartoon trial (`?cartone`, ADR-0093). */
+function lit(opts: THREE.MeshLambertMaterialParameters): THREE.Material {
+  return CARTOON ? toon(opts as THREE.MeshToonMaterialParameters) : new THREE.MeshLambertMaterial(opts);
+}
+
 export const MAT = {
   /** The structure the wanderer is in: cut above the head. */
-  cut: clipped(new THREE.MeshLambertMaterial({ vertexColors: true, clippingPlanes: [CUT] }), 'cut'),
+  cut: clipped(lit({ vertexColors: true, clippingPlanes: [CUT] }), 'cut'),
   /** The simulation: ground, things, people. */
-  world: clipped(new THREE.MeshLambertMaterial({ vertexColors: true }), 'world'),
+  world: clipped(lit({ vertexColors: true }), 'world'),
   /** Vegetation: the wind moves the top (the `sway` attribute). */
-  sway: clipped(new THREE.MeshLambertMaterial({ vertexColors: true }), 'sway', true),
+  sway: clipped(lit({ vertexColors: true }), 'sway', true),
   /** The corona and the studio: never clipped. */
   corona: glowing(new THREE.MeshLambertMaterial({ vertexColors: true }), 'corona'),
   /** Translucent voxels (glass screens, translucent panels) in the simulation. */
-  glass: clipped(new THREE.MeshLambertMaterial({ vertexColors: true, transparent: true, depthWrite: false }), 'glass'),
+  glass: clipped(lit({ vertexColors: true, transparent: true, depthWrite: false }), 'glass'),
   /** Translucent voxels inside a cut structure. */
-  cutGlass: clipped(new THREE.MeshLambertMaterial({ vertexColors: true, clippingPlanes: [CUT], transparent: true, depthWrite: false }), 'cut-glass'),
+  cutGlass: clipped(lit({ vertexColors: true, clippingPlanes: [CUT], transparent: true, depthWrite: false }), 'cut-glass'),
   /** Translucent voxels in the corona. */
   coronaGlass: glowing(new THREE.MeshLambertMaterial({ vertexColors: true, transparent: true, depthWrite: false }), 'corona-glass'),
   /** Neon edges and glowing things (unlit, they bloom). */

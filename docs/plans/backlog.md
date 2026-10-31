@@ -1946,7 +1946,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   su un universo scelto dall'autore, entro i crediti che avanzano, e lo ferma quando servono a un task o all'autore.
 - Dipende da: T82, T85.
 
-### T89 · La grafica a cartone — `da fare`
+### T89 · La grafica a cartone — `fatto` (progetto; codice in T89a-e)
 - Pipeline: claude · stima 5% · approvato · priorità 100
 - Contesto: richiesta del to-do del 29/10 che la pianificazione aveva saltato (`docs/archivio/3-to-do-backlog/userchats/to-do-2026-10-29.md`, «Grafica a cartone»):
   l'autore vuole che l'universo abbia l'aspetto di Stompworks (https://www.reddit.com/r/ClaudeGameDev/comments/1x2ldgg/stompworks_a_small_books_worth_of_prompts_in/),
@@ -1955,6 +1955,57 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   renderer three.js (materiali toon, contorni in post-processing, bloom, ombre) e nella guida di stile dell'Artista e dello Scultore, senza immagini generate (regola 11);
   un ADR e i task di codice nel backlog; una prova nel browser con un materiale toon su un chunk per confrontare.
 - Fatto quando: ADR e task di codice scritti, screenshot della prova confrontato con la foto. Dietro il multigiocatore.
+- Esito: ADR-0093 (`docs/adr/0093-la-grafica-a-cartone.md`, proposto) con l'analisi della foto e la decisione; la prova è nel codice dietro `?cartone`
+  (`src/render/cartoon.ts`: `MeshToonMaterial` a tre fasce per i materiali illuminati della simulazione, passo `Ink` dell'`EffectComposer` che scurisce dove
+  profondità o normale saltano; soglie in console in `window.cartone`). Nel browser (preview, `?skip&offline&cartone`, confronto con la vista di prima): fasce e
+  contorni sui gradini del rilievo, sui sentieri e sulle case somigliano alla foto; sugli alberi (20 voxel per casella) ogni voxel fa il suo bordo e la chioma è
+  rumore nero, e solo la profondità con soglia alta perde anche le sagome. Da qui la scelta che non era prevista: i contorni vengono dagli id di cosa e parte
+  (la lettera della palette), non dalla geometria (T89b). Task T89a-e qui sotto. Typecheck verde; la suite intera (con `turno test`) ha 55 test
+  rossi, tutti in file che non importano il renderer (kernel, between, explore, credits…: i timeout di carico già noti, T95); nessun test tocca `src/render/`.
+
+### T89a · Cartone: fasce e interruttore — `da fare` (dipende da T89)
+- Pipeline: da stimare
+- Contesto: ADR-0093, punti 1, 2 e 6; la prova `?cartone` di T89 (`src/render/cartoon.ts`, `lit()` in `materials.ts`).
+- Fare: la rampa a 3 fasce per tutti i materiali illuminati (simulazione, corona e studio: `MAT.corona`, `coronaGlass`, `solid()`), i voxel luminosi fuori
+  dalle fasce; il lato in ombra saturo (la fascia bassa non sotto ~0,35, il colore dell'emisfero non grigio); ombre portate più nette. Il cartone diventa il
+  predefinito quando T89b e T89c sono fatti: fino ad allora `?cartone`; poi `?classica` per il vecchio aspetto.
+- Fatto quando: typecheck e test verdi; screenshot con e senza nel browser (un luogo con case e alberi, lo studio) e niente errori in console.
+
+### T89b · Cartone: contorni dagli id di cosa e parte — `da fare` (dipende da T89a)
+- Pipeline: da stimare
+- Contesto: ADR-0093, punto 3. Il passo `Ink` di T89 legge normali e profondità: sugli alberi fa rumore.
+- Fare: `src/mj/mesh.ts` scrive per vertice l'attributo `part` (indice della lettera della palette o della `<color part>`); `models.ts` e `terrain.ts` lo
+  passano (il terreno: il codice della casella); ogni mesh/istanza ha un id. Un disegno degli id (MRT se three.js lo permette con il composer, altrimenti un
+  secondo disegno con un materiale che scrive id cosa, id parte e profondità, rispettando il taglio del cerchio e il `CUT` delle strutture) e il passo
+  dell'inchiostro: bordo dove cambia cosa o parte o dove la profondità salta molto; spessore costante per `devicePixelRatio`; niente inchiostro sui voxel
+  luminosi; il colore scurito del pixel. Test sull'attributo `part` di `mesh.ts`.
+- Fatto quando: typecheck e test verdi; nel browser gli alberi hanno la sagoma e i confini tra chioma e tronco senza rumore, le case i bordi di muri, tetto e
+  finestre, il rilievo i gradini; screenshot confrontato con la foto di T89.
+
+### T89c · Cartone: luce tinta e prospettiva aerea — `da fare` (dipende da T89a)
+- Pipeline: da stimare
+- Contesto: ADR-0093, punto 4 (la foto: chiave calda, riempimento freddo, ombre azzurre, lontananza che sbiadisce nel cielo).
+- Fare: in `renderer.ts` la luce chiave calda e l'emisfero freddo, l'ombra portata tinta (un pezzo di shader dopo `lights_fragment_end` o il colore
+  dell'ombra), la nebbia come prospettiva aerea (verso il colore del cielo, più vicina e più forte, con la camera libera del master compresa), per giorno,
+  tramonto e notte; il bloom tarato di nuovo sopra il cartone.
+- Fatto quando: typecheck e test verdi; screenshot di giorno e di notte (`k.time` spostato da console) con e senza cartone.
+
+### T89d · Cartone: lo stile nei dati e le foto dei modelli — `da fare` (dipende da T89b)
+- Pipeline: da stimare
+- Contesto: ADR-0093, punto 5. Il bordo nasce dove cambia la parte: i programmi devono avere parti di colore ben distinto.
+- Fare: nel seme `world/style.md` e nei prompt `prompts/agents/artista.md` e `scultore.md`: un colore pieno per parte, contrasto di valore tra parti vicine,
+  dettagli come lettere scure dedicate (assi, pannelli, crepe) invece di micro-voxel, forme tozze, ambiente smorzato e pochi accenti saturi; il giudizio
+  dell'Artista guarda anche se le parti si leggono a contorni. Le foto (`src/mj/photo.ts`, `src/render/thumbs.ts`) con fasce e inchiostro. Le risposte di
+  `MockModels` se cambiano gli schemi.
+- Fatto quando: typecheck e test verdi; le icone nell'inventario e le foto dell'Artista nel browser hanno l'aspetto del mondo.
+
+### T89e · Cartone: laboratorio, prestazioni, togliere la prova — `da fare` (dipende da T89a-d)
+- Pipeline: da stimare
+- Contesto: ADR-0093, conseguenze e punto 6.
+- Fare: `lab/3d/` e `lab/editor/` con l'interruttore cartone/classica (usano `Bloom`); misurare fps e ms per fotogramma con e senza (un luogo pieno, lo
+  studio, la corona) e scriverli nell'ADR; se il disegno degli id costa troppo, MRT o metà risoluzione per gli id; togliere `?cartone` e `window.cartone`
+  lasciando `?classica`; ADR-0093 `accettato` e AGENTS.md aggiornato.
+- Fatto quando: typecheck e test verdi; misure nell'ADR; verifica nel browser di simulazione, studio, corona e laboratorio.
 
 ### T92 · Integrare T52 (i sotterranei) nel base 3d — `fatto`
 - Pipeline: gemini · stima 1% · approvato · priorità 0
