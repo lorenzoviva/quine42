@@ -884,7 +884,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
   aggiornato).
 - Dipendenze: nessuna. Utile prima di T52 e di T56.
 
-### T54 · Le taglie di D&D per strutture e creature — `fatto`
+### T54 · Le taglie di D&D per strutture e creature — `fatto` (`3c5fe95`)
 - Pipeline: claude · stima 6% · approvato · priorità 50
 - Contesto: richiesta del 24/10. Oggi le classi (`CLASSES` in `src/mj/classes.ts`: `persona`, `animale`, `bestia`,
   `edificio`, `grande`…) danno la scatola in caselle, e una struttura «importante» (Argon) per zona di 56 × 56 luoghi.
@@ -908,7 +908,9 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
   Gargantuesca per reame (`realmOf`), `stato.json → rari` (migra `importanti`). Prompt di Cartografo, Narratore, Scultore; ADR-0081, AGENTS.md;
   test in `tests/lots.test.ts` e `tests/sculptor.test.ts`. Diverso dal previsto: il kernel abbassa la taglia che non sta nel lotto (un'Enorme
   vuole un lotto di 8 caselle, una Gargantuesca di 10), quindi negli ambienti con edifici piccoli le rare diventano Grandi; lotti più grandi per
-  le rare restano da fare se serviranno. Le creature arrivano fino a Grande (nessuna rarità per le creature).
+  le rare restano da fare se serviranno. Le creature arrivano fino a Grande (nessuna rarità per le creature). Test: `typecheck` verde,
+  `tests/lots.test.ts` e `tests/sculptor.test.ts` verdi; nella suite completa 9 file vanno in timeout (boot oltre 10 s) per il carico della
+  macchina: `kernel.test.ts` «boots the bundled universe» va in timeout uguale sulla base (11,5 s contro 11,3 s).
 
 ## Controlli
 
