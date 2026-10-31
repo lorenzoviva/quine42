@@ -1,4 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
@@ -9,6 +13,7 @@ import {
   createFakeStripeSignature,
   createStripeCheckoutSession,
   handleStripeWebhookEvent,
+  applyPaymentToUniverse,
 } from '../server/stripe';
 
 async function bootMultiplayerKernel(): Promise<Kernel> {
@@ -156,6 +161,8 @@ describe('Stripe payments and idempotency (T45e)', () => {
     expect(requestCaptured!.body).toContain('line_items%5B0%5D%5Bprice_data%5D%5Bunit_amount%5D=1500');
     expect(requestCaptured!.body).toContain('metadata%5BwandererId%5D=charlie');
     expect(requestCaptured!.body).toContain('metadata%5Buniverso%5D=universo-alpha');
+    expect(requestCaptured!.body).not.toContain('payment_method_types');
+    expect(requestCaptured!.body).toContain('managed_payments%5Benabled%5D=false');
   });
 
   it('handleStripeWebhookEvent processes checkout.session.completed idempotently', async () => {
@@ -258,5 +265,39 @@ describe('Stripe payments and idempotency (T45e)', () => {
     });
     expect(outcome.status).toBe(403);
     expect(k.creditsOf('anonimo1')).toBe(0);
+  });
+
+  it('a payment to a universe on disk commits only its two files (T93)', async () => {
+    const dir = mkdtempSync(path.join(tmpdir(), 'stripe-'));
+    try {
+      const root = path.join(dir, 'prova');
+      mkdirSync(root);
+      const git = (...args: string[]) =>
+        execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], { cwd: root, encoding: 'utf8' });
+      git('init', '-q');
+      writeFileSync(path.join(root, 'altro.txt'), 'prima\n');
+      git('add', '-A');
+      git('commit', '-q', '-m', 'inizio');
+      writeFileSync(path.join(root, 'altro.txt'), 'una modifica non committata\n');
+      const payment: PaymentRecord = {
+        eventId: 'evt_disco',
+        sessionId: 'cs_disco',
+        wandererId: 'ugo',
+        crediti: 5,
+        cents: 500,
+        timestamp: 1,
+      };
+      const res = await applyPaymentToUniverse({ universesDir: dir, universo: 'prova', payment });
+      expect(res.status).toBe('credited');
+      expect(git('show', '--name-only', '--format=', 'HEAD').trim().split('\n').sort()).toEqual([
+        'world/giocatori/ugo.json',
+        'world/pagamenti.json',
+      ]);
+      expect(git('status', '--short').trim()).toBe('M altro.txt');
+      expect(JSON.parse(readFileSync(path.join(root, 'world/giocatori/ugo.json'), 'utf8')).crediti).toBe(5);
+      expect((await applyPaymentToUniverse({ universesDir: dir, universo: 'prova', payment })).status).toBe('duplicate');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

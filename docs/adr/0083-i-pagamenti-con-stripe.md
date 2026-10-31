@@ -46,3 +46,14 @@ Requisiti del task T45e:
 - Supporto per Google Pay e carte di credito integrato tramite Stripe Checkout.
 - Idempotenza completa a prova di duplicazione webhook.
 - Suite di test automatizzati `tests/stripe.test.ts` con webhook simulato, verifica di firme, idempotenza e blocco anonimi.
+
+## Aggiornamento (T93, 2026-10-31): la verifica con le chiavi di prova
+La verifica nel browser con un account Stripe di prova vero ha trovato due rifiuti dell'API che i test con `fetch` finto non vedevano:
+1. `payment_method_types` non è più accettato nella creazione della sessione: i metodi di pagamento (carte, Google Pay, Apple Pay, Link…)
+   si scelgono nel Dashboard di Stripe. Il server non lo manda più.
+2. Sull'account sono attivi per impostazione i **Managed Payments** (Stripe come venditore registrato, che gestisce le imposte), che
+   chiedono un codice fiscale del prodotto. Il server lo manda se c'è `STRIPE_TAX_CODE` nel `.env` (`line_items[0][price_data][product_data][tax_code]`);
+   senza, disattiva i Managed Payments per la sessione (`managed_payments[enabled]=false`) e il pagamento è un Checkout normale. Quale dei due
+   usare è una scelta fiscale dell'autore (`docs/pipeline/domande/T93.md`).
+3. `applyPaymentToUniverse` committa solo `world/giocatori/<id>.json` e `world/pagamenti.json` (non più `git add -A`): le modifiche non
+   committate dell'universo non finiscono nel commit della ricarica.

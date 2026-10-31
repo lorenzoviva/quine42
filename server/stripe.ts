@@ -25,6 +25,8 @@ export interface StripeSettings {
   secretKey?: string;
   webhookSecret?: string;
   publishableKey?: string;
+  /** Product tax code for Stripe Managed Payments; without it the session turns Managed Payments off (T93). */
+  taxCode?: string;
   fetchFn?: typeof fetch;
 }
 
@@ -33,6 +35,7 @@ export function stripeSettings(env: Record<string, string | undefined>): StripeS
     secretKey: env.STRIPE_SECRET_KEY?.trim() || undefined,
     webhookSecret: env.STRIPE_WEBHOOK_SECRET?.trim() || undefined,
     publishableKey: env.STRIPE_PUBLISHABLE_KEY?.trim() || undefined,
+    taxCode: env.STRIPE_TAX_CODE?.trim() || undefined,
   };
 }
 
@@ -127,6 +130,7 @@ export async function createStripeCheckoutSession(opts: {
   wandererId: string;
   crediti: number;
   returnUrl: string;
+  taxCode?: string;
   fetchFn?: typeof fetch;
 }): Promise<{ url: string; id: string }> {
   if (opts.secretKey === 'mock' || opts.secretKey.startsWith('mock_')) {
@@ -140,12 +144,14 @@ export async function createStripeCheckoutSession(opts: {
   const amountCents = Math.round(opts.crediti * 100);
   const body = new URLSearchParams();
   body.set('mode', 'payment');
-  // Card payment method with Google Pay and Apple Pay automatically enabled
-  body.set('payment_method_types[0]', 'card');
+  // No payment_method_types: Stripe refuses it now; the methods (cards, Google Pay…) come from the Dashboard (T93)
   body.set('line_items[0][price_data][currency]', 'usd');
   body.set('line_items[0][price_data][unit_amount]', String(amountCents));
   body.set('line_items[0][price_data][product_data][name]', `Ricarica crediti QUINE42 (${opts.crediti} crediti)`);
   body.set('line_items[0][quantity]', '1');
+  // Managed Payments (on by default) wants a product tax code: with one it stays on, without it is off for this session
+  if (opts.taxCode) body.set('line_items[0][price_data][product_data][tax_code]', opts.taxCode);
+  else body.set('managed_payments[enabled]', 'false');
   body.set('metadata[universo]', opts.universo);
   body.set('metadata[wandererId]', opts.wandererId);
   body.set('metadata[crediti]', String(opts.crediti));
@@ -258,7 +264,8 @@ export async function applyPaymentToUniverse(opts: {
   await fs.writeFile(paymentsPath, files[PAYMENTS_FILE], 'utf8');
 
   try {
-    await git(root, ['add', '-A']);
+    // Only the payment's two files: other uncommitted changes of the universe stay out of this commit (T93)
+    await git(root, ['add', '--', playerRel, PAYMENTS_FILE]);
     await git(root, [
       'commit',
       '-q',
@@ -443,6 +450,7 @@ export function stripeRoute(opts: StripeRouteOptions): Plugin {
               wandererId,
               crediti: amount,
               returnUrl: effectiveReturnUrl,
+              taxCode: opts.settings.taxCode,
               fetchFn: opts.settings.fetchFn,
             });
 
