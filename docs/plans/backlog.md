@@ -2001,3 +2001,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Cosa fare: sul base `3d` lancia ciascuno di quei file da solo; per ciò che fallisce davvero (non per timeout di carico) trova il
   commit che l'ha rotto e correggi il codice o il test; i timeout solo di carico restano.
 - Quando è fatto: i tre file verdi da soli, typecheck verde, il commit che li aveva rotti scritto nella riga di chiusura.
+
+### T96 · Mai zero slot per Claude — `da fare`
+- Pipeline: gemini · stima 3% · priorità 5 · approvato
+- Contesto: richiesta dell'autore del 31/10: «non chiudere mai tutti gli slot per claude». `nextSlot`/`updateSlots` in
+  `tools/pipeline/pipeline.mjs` (ADR-0087) scendono fino a 0 quando la previsione dei crediti finisce prima del reset; così T51 era
+  fermo con Claude al 34 % della settimana. L'orchestratore ha fissato a mano `slot: 1` in `.pipeline/budget.json` (con
+  `slotAggiornato` nel futuro) finché questo task non entra.
+- Cosa fare: un minimo di slot per provider in `config.json` (es. `slotMinimi: { "claude": 1 }`), rispettato da `nextSlot`,
+  `updateSlots` e `showSlots` (mai sopra il tetto; il limite dei crediti esauriti e `sogliaUnSolo` restano come sono); test in
+  `tests/pipeline*.test.ts`; ADR-0087 aggiornato con una riga (o ADR nuovo se cambia la regola) e la riga in `docs/pipeline/README.md`.
+- Quando è fatto: con la previsione «prima del reset» Claude resta a 1 slot; test e typecheck verdi.
