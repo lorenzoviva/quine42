@@ -35,7 +35,7 @@ import { costOf } from './ai/prices';
 import { USAGE_FILE, UsageLedger, type CallRecord } from './ai/usage';
 import { addBudgetFromTetto, costWithFee, splitCost, PAYMENTS_FILE, type PaymentRecord, isPaymentProcessed, recordPayment } from './credits';
 import { MemoryChunks, type ChunkStore } from './chunks';
-import { bodyFoot, bodyGround, Forms, InlineRunner, instanceGrid, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground } from './forms';
+import { bodyFoot, bodyGround, Forms, holesOf, InlineRunner, instanceGrid, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground } from './forms';
 import { guessClass } from '../mj/classes';
 import { GENERIC, ModelDirector, ownModelId } from './modeldirector';
 import { categoryOf, DEFAULT_SCULPTORS, sculptAction, type SculptorModels } from './agents/sculptor';
@@ -403,6 +403,8 @@ export class Kernel {
   /** The levels of the loaded world before the lots (T51a), while its places, their tiles, the relief and the sea stay the same. */
   private worldField?: { relief: Relief; sea: number; tiles: Map<Chunk, string>; levels: Map<Chunk, Int16Array> };
   private solidForms = new Map<string, Array<SolidForm>>();
+  /** The solid things whose model has a cellar (T52b): where the terrain has a hole. */
+  private cellars: SolidForm[] = [];
   /** Footprints of instances whose model was changed by an action (the door is open). */
   private instanceFeet = new Map<Id, Ground & { key: string; foot: Uint8Array }>();
   /** What was done to models of things, by stable origin (saved with the game). */
@@ -1325,13 +1327,15 @@ export class Kernel {
 
   /** Where a solid thing blocks and what one stands on in it: its model's, or the changed ones of this instance. */
   private groundOf(id: Id, fc: FormComp, f: Form): Ground & { foot: Uint8Array } {
-    if (!fc.done?.length) return { foot: f.foot!, floor: f.floor!, block: f.block!, levels: f.levels! };
+    if (!fc.done?.length) return { foot: f.foot!, floor: f.floor!, block: f.block!, levels: f.levels!, hole: f.hole };
     const key = `${f.key}|${fc.done.join(',')}`;
     const c = this.instanceFeet.get(id);
     if (c?.key === key) return c;
     const r = f.result!;
     const g = instanceGrid(this.forms, f, fc.done);
-    const out = { key, foot: bodyFoot(g, r.palette, f.vpt), ...bodyGround(g, r.palette, f.vpt) };
+    // A cellar that held stays one (T52b); its hole as the actions left it.
+    const ground = f.hole ? bodyGround(g, r.palette, f.vpt, f.base, holesOf(g, r.palette, f.base)) : bodyGround(g, r.palette, f.vpt, f.base);
+    const out = { key, foot: bodyFoot(g, r.palette, f.vpt, f.base), floor: ground.floor, block: ground.block, levels: ground.levels, hole: f.hole ? ground.hole : undefined };
     this.instanceFeet.set(id, out);
     return out;
   }
@@ -2094,13 +2098,15 @@ export class Kernel {
     const p = this.ecs.get(sid, 'pos');
     if (!fc || !f?.floor || !p) return [];
     const g = f.result!.grid;
-    const { foot, floor } = this.groundOf(sid, fc, f);
+    const { foot, floor, block } = this.groundOf(sid, fc, f);
     const step = stepOf(f.vpt);
+    // Over a cellar (T52b) only where the ground floor holds a body (not over the stairwell).
+    const cellar = f.base > 0;
     // The ground floor: a floor no higher than a step (what goes indoors does not go up the stairs).
     const clear = (vx: number, vy: number) => {
       for (let dy = -6; dy <= 6; dy += 2) for (let dx = -6; dx <= 6; dx += 2) {
         const x = vx + dx, y = vy + dy;
-        if (x < 0 || y < 0 || x >= g.X || y >= g.Y || foot[x + y * g.X] || !floor[x + y * g.X] || floor[x + y * g.X] > step) return false;
+        if (x < 0 || y < 0 || x >= g.X || y >= g.Y || foot[x + y * g.X] || !floor[x + y * g.X] || floor[x + y * g.X] > step || (cellar && block[x + y * g.X])) return false;
       }
       return true;
     };
@@ -2197,27 +2203,66 @@ export class Kernel {
     return l.levels[(row - cy * S) * S + (col - cx * S)] * LEVEL;
   }
 
-  /** A height of the world (tiles) as voxels above the base of a solid thing (it stands on the ground under its middle); none is its ground floor. */
+  /**
+   * A height of the world (tiles) as voxels up the grid of a solid thing (it stands on the ground under its middle,
+   * its lowest `base` voxels under it, T52b); none is its ground floor.
+   */
   private levelIn(s: SolidForm, z: number | undefined): number {
-    return z === undefined || !Number.isFinite(z) ? 0 : (z - this.groundAt(s.x, s.y)) * s.form.vpt;
+    return z === undefined || !Number.isFinite(z) ? s.form.base : (z - this.groundAt(s.x, s.y)) * s.form.vpt + s.form.base;
   }
 
   /**
    * The height (tiles) of what one stands on at a point of the simulation (the ground, a structure's floor, a step
    * of a stair): with the height of the feet (`z`), the floor nearest to it (T53b: the floor above, the roof), else
-   * the ground floor.
+   * the ground floor. Over a cellar (T52b) the terrain is not there: its floors may be under the ground.
    */
   floorAt(x: number, y: number, z?: number): number {
-    let h = this.groundAt(x, y);
+    let h = -Infinity, cellar = false;
     for (const s of this.solidForms.get(`${Math.floor(x)},${Math.floor(y)}`) ?? []) {
       const [lx, lz] = toLocal(x - s.x, y - s.y, s.yaw);
       const g = s.form.result!.grid;
       const vx = Math.floor(lx * s.form.vpt + g.X / 2), vy = Math.floor(lz * s.form.vpt + g.Y / 2);
-      const f = vx >= 0 && vy >= 0 && vx < g.X && vy < g.Y ? s.levels.z[levelAt(s.levels, vx + vy * g.X, this.levelIn(s, z))] : 0;
+      if (vx < 0 || vy < 0 || vx >= g.X || vy >= g.Y) continue;
+      const i = vx + vy * g.X;
+      const f = s.levels.z[levelAt(s.levels, i, this.levelIn(s, z))];
+      const hole = !!s.hole?.[i];
+      cellar ||= hole;
       // A model stands on the ground under its middle.
-      if (f) h = Math.max(h, this.groundAt(s.x, s.y) + f / s.form.vpt);
+      if (hole || f > s.form.base) h = Math.max(h, this.groundAt(s.x, s.y) + (f - s.form.base) / s.form.vpt);
     }
-    return h;
+    return cellar ? h : Math.max(h, this.groundAt(x, y));
+  }
+
+  /** How far under the ground (tiles) a thing's model goes (T52b): the renderer lays it this much lower. */
+  sunk(id: Id): number {
+    const fc: FormComp | undefined = this.ecs.get(id, 'form');
+    const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint);
+    return f ? f.base / f.vpt : 0;
+  }
+
+  /**
+   * The tiles of a place over which a model has its cellar (T52b), with how deep the terrain goes down there (tiles
+   * under the ground): the renderer lowers the terrain to the cellar's bottom, the hole. A tile is of the cellar if
+   * the voxel column under its middle is.
+   */
+  holesIn(ch: Chunk): Map<number, number> {
+    const S = this.config.chunkSize;
+    const out = new Map<number, number>();
+    for (const { x, y, yaw, form: f, hole } of this.cellars) {
+      if (!hole || x + f.reach < ch.cx * S || y + f.reach < ch.cy * S || x - f.reach >= (ch.cx + 1) * S || y - f.reach >= (ch.cy + 1) * S) continue;
+      const g = f.result!.grid;
+      const bottom = this.groundAt(x, y) - f.base / f.vpt;
+      for (let row = Math.floor(y - f.reach); row <= Math.floor(y + f.reach); row++)
+        for (let col = Math.floor(x - f.reach); col <= Math.floor(x + f.reach); col++) {
+          const c = col - ch.cx * S, r = row - ch.cy * S;
+          if (c < 0 || r < 0 || c >= S || r >= S) continue;
+          const [lx, lz] = toLocal(col + 0.5 - x, row + 0.5 - y, yaw);
+          const vx = Math.floor(lx * f.vpt + g.X / 2), vy = Math.floor(lz * f.vpt + g.Y / 2);
+          if (vx < 0 || vy < 0 || vx >= g.X || vy >= g.Y || !hole[vx + vy * g.X]) continue;
+          out.set(r * S + c, Math.max(out.get(r * S + c) ?? 0, this.groundAt(col + 0.5, row + 0.5) - bottom));
+        }
+    }
+    return out;
   }
 
   /** The highest floor (tiles) at a point of the simulation no higher than `top`: where a jump that clears it lands (T70). */
@@ -2228,8 +2273,10 @@ export class Kernel {
       const g = s.form.result!.grid;
       const vx = Math.floor(lx * s.form.vpt + g.X / 2), vy = Math.floor(lz * s.form.vpt + g.Y / 2);
       if (vx < 0 || vy < 0 || vx >= g.X || vy >= g.Y) continue;
-      const { start, z } = s.levels, i = vx + vy * g.X, lim = this.levelIn(s, top);
-      for (let l = start[i]; l < start[i + 1]; l++) if (z[l] && z[l] <= lim) h = Math.max(h, this.groundAt(s.x, s.y) + z[l] / s.form.vpt);
+      const { start, z } = s.levels, i = vx + vy * g.X, lim = this.levelIn(s, top), B = s.form.base;
+      // Never into a cellar (T52b): over the hole only floors no lower than a step under the ground.
+      const low = s.hole?.[i] ? B - stepOf(s.form.vpt) : B + 1;
+      for (let l = start[i]; l < start[i + 1]; l++) if (z[l] >= low && z[l] <= lim) h = Math.max(h, this.groundAt(s.x, s.y) + (z[l] - B) / s.form.vpt);
     }
     return h;
   }
@@ -7160,6 +7207,7 @@ export class Kernel {
   private rebuildSolids(): void {
     this.solidCells.clear();
     this.solidForms.clear();
+    this.cellars = [];
     for (const id of this.ecs.query('body', 'pos')) {
       if (id === this.playerId) continue;
       const b = this.ecs.get(id, 'body');
@@ -7173,6 +7221,7 @@ export class Kernel {
       }
       // A thing with a model blocks with its voxels: it is listed in every cell its footprint may reach.
       const s: SolidForm = { id, x: p.x, y: p.y, yaw: fc.yaw, form: f, ...this.groundOf(id, fc, f) };
+      if (s.hole) this.cellars.push(s);
       for (let cy = Math.floor(p.y - f.reach); cy <= Math.floor(p.y + f.reach); cy++)
         for (let cx = Math.floor(p.x - f.reach); cx <= Math.floor(p.x + f.reach); cx++) {
           const key = `${cx},${cy}`;

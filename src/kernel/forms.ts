@@ -9,7 +9,7 @@
 
 import { boxOf, classOf, CLASSES, type AssetClass } from '../mj/classes';
 import type { PaletteEntry, Vec3 } from '../mj/engine';
-import { floors, footprint, surfaces, type Levels, type VoxelGrid } from '../mj/mesh';
+import { colorTable, floors, footprint, surfaces, type Levels, type VoxelGrid } from '../mj/mesh';
 import { compileMjx } from '../mj/model';
 import { act, runMjx } from '../mj/run';
 import { hashStr } from './rng';
@@ -26,6 +26,15 @@ export function vptOf(info: ModelInfo | undefined): number {
   return typeof v === 'number' && Number.isInteger(v) && v >= 4 && v <= 40 ? v : VPT;
 }
 
+/**
+ * How many tiles of a model stand under the ground (ADR-0091, T52b): its index entry's `sotto`, from 1 to 3
+ * (a cellar, a crypt); 0 for anything else.
+ */
+export function sottoOf(info: ModelInfo | undefined): number {
+  const n = info?.sotto;
+  return typeof n === 'number' && Number.isInteger(n) && n >= 1 && n <= 3 ? n : 0;
+}
+
 export interface ModelInfo {
   /** Asset class (src/mj/classes.ts): its box and how it moves. */
   classe: string;
@@ -40,6 +49,8 @@ export interface ModelInfo {
   vpt?: number;
   /** Milliseconds the program may run, if not `MODEL_TIME`: slow programs drawn by hand (circuito-3D). */
   tempo?: number;
+  /** Tiles under the ground (ADR-0091): the box of the class grows down by them, the lowest voxels are the cellar. */
+  sotto?: number;
   /** Artist's critique advice and problems (T48a). */
   consigli?: string[];
   problemi?: string[];
@@ -110,6 +121,13 @@ export interface Form {
   block?: Uint8Array;
   /** Every floor of every column (T53b). */
   levels?: Levels;
+  /** Voxel columns with something under the ground (T52b): the cellar's hole, where the terrain is not. */
+  hole?: Uint8Array;
+  /**
+   * Voxels of the model under the ground (ADR-0091, `sotto · vpt`): it is laid this much lower. Without a cellar that
+   * holds (`hole` undefined) they are as if inside the earth: nothing stands there, the terrain is whole.
+   */
+  base: number;
   cls: AssetClass;
   /** Half the diagonal of the footprint, in tiles: the reach of its collision. */
   reach: number;
@@ -127,13 +145,33 @@ export const stepOf = (vpt: number) => Math.round(0.2 * vpt);
  * The box a program runs in: its own `size` if it says one (structures decide on a coarse grid and `map`
  * up), otherwise its class's box.
  */
-function sizeFor(xml: string, cls: AssetClass): Vec3 | undefined {
+function sizeFor(xml: string, cls: AssetClass, under = 0): Vec3 | undefined {
   const root = /<(?!!)[a-z]+\b[^>]*>/i.exec(xml)?.[0] ?? '';
-  return /\ssize="/.test(root) ? undefined : boxOf(cls);
+  if (/\ssize="/.test(root)) return undefined;
+  const [X, Y, Z] = boxOf(cls);
+  // A model with a cellar (T52b): the box goes down by it, the program writes the cellar in its lowest voxels.
+  return [X, Y, Z + under];
 }
 
-/** Where a body cannot go: voxel columns solid between a step and a head. */
-export const bodyFoot = (g: VoxelGrid, palette: Record<string, PaletteEntry>, vpt = VPT) => footprint(g, palette, stepOf(vpt) + 1, Math.ceil(0.7 * vpt));
+/** Where a body cannot go: voxel columns solid between a step and a head (above the ground, `base` voxels up the grid). */
+export const bodyFoot = (g: VoxelGrid, palette: Record<string, PaletteEntry>, vpt = VPT, base = 0) => footprint(g, palette, base + stepOf(vpt) + 1, base + Math.ceil(0.7 * vpt));
+
+/** The voxel columns of a model with something solid under the ground (its lowest `base` voxels, T52b), if any. */
+export function holesOf(g: VoxelGrid, palette: Record<string, PaletteEntry>, base: number): Uint8Array | undefined {
+  if (base <= 0) return undefined;
+  const colors = colorTable(g.alphabet, palette);
+  const XY = g.X * g.Y;
+  const out = new Uint8Array(XY);
+  let any = false;
+  for (let i = 0; i < XY; i++)
+    for (let z = 0; z < Math.min(base, g.Z); z++)
+      if (colors[g.cells[i + z * XY]]) {
+        out[i] = 1;
+        any = true;
+        break;
+      }
+  return any ? out : undefined;
+}
 
 /** What a body stands on in a model: the ground floor of every column (T53a) and all its floors (T53b). */
 export interface Ground {
@@ -143,6 +181,8 @@ export interface Ground {
   block: Uint8Array;
   /** Every floor of every column, each with whether a body cannot stand there. */
   levels: Levels;
+  /** The columns of the cellar (T52b): there the terrain is not, the floors may be under the ground. */
+  hole?: Uint8Array;
 }
 
 /**
@@ -151,13 +191,25 @@ export interface Ground {
  * no higher than a step is reached from the ground; a higher one only going to a floor of a neighbouring column at
  * most a step higher or lower: a stair is a ramp, a wall is not, and the stair leads to the floor above.
  */
-export function bodyGround(g: VoxelGrid, palette: Record<string, PaletteEntry>, vpt = VPT): Ground {
+export function bodyGround(g: VoxelGrid, palette: Record<string, PaletteEntry>, vpt = VPT, base = 0, hole?: Uint8Array): Ground & { cellar?: boolean } {
+  if (base > 0) return cellarGround(g, palette, vpt, base, hole);
   const step = stepOf(vpt);
   const levels = surfaces(g, palette, step + 1, Math.ceil(0.7 * vpt));
   const { start, z, block } = levels;
   const reached = new Uint8Array(z.length);
   const queue: number[] = [];
   for (let i = 0; i < g.X * g.Y; i++) if (z[start[i]] <= step && !block[start[i]]) (reached[start[i]] = 1), queue.push(start[i], i);
+  reach(g, levels, reached, queue, step);
+  for (let l = 0; l < block.length; l++) if (!reached[l]) block[l] = 1;
+  const floor = floors(g, palette);
+  const ground = new Uint8Array(g.X * g.Y);
+  for (let i = 0; i < ground.length; i++) ground[i] = block[start[i]];
+  return { floor, block: ground, levels };
+}
+
+/** From the floors already reached, every floor of a neighbouring column at most a step higher or lower (a ramp). */
+function reach(g: VoxelGrid, levels: Levels, reached: Uint8Array, queue: number[], step: number): void {
+  const { start, z, block } = levels;
   while (queue.length) {
     const i = queue.pop()!, l = queue.pop()!;
     const x = i % g.X, y = (i - x) / g.X;
@@ -171,11 +223,63 @@ export function bodyGround(g: VoxelGrid, palette: Record<string, PaletteEntry>, 
       }
     }
   }
+}
+
+/**
+ * What a body stands on in a model that goes `base` voxels under the ground (ADR-0091, T52b). Where the model has
+ * nothing under the ground the earth is solid up to it (its floor there is `base`, the ground); the columns of the
+ * cellar (`hole`) have their own floors, under the ground too. Floors are reached from the ground, the floors around
+ * the model; the cellar holds (`cellar`) if a body stands somewhere under the ground and every such floor is reached
+ * from the ground floor: by the stair, the only way, since the earth around is more than a step above the cellar.
+ * `floor` and `block` are of the ground floor (the floor nearest to the ground), `floor` measured from the ground.
+ */
+function cellarGround(g: VoxelGrid, palette: Record<string, PaletteEntry>, vpt: number, base: number, hole?: Uint8Array): Ground & { cellar: boolean } {
+  const step = stepOf(vpt);
+  const XY = g.X * g.Y;
+  const fill = new Uint16Array(XY);
+  for (let i = 0; i < XY; i++) fill[i] = hole?.[i] ? 0 : base;
+  const levels = surfaces(g, palette, step + 1, Math.ceil(0.7 * vpt), fill);
+  const { start, z, block } = levels;
+  const standing = Uint8Array.from(block);
+  const reached = new Uint8Array(z.length);
+  const queue: number[] = [];
+  for (let i = 0; i < XY; i++)
+    for (let l = start[i]; l < start[i + 1]; l++) if (Math.abs(z[l] - base) <= step && !block[l]) (reached[l] = 1), queue.push(l, i);
+  reach(g, levels, reached, queue, step);
   for (let l = 0; l < block.length; l++) if (!reached[l]) block[l] = 1;
-  const floor = floors(g, palette);
-  const ground = new Uint8Array(g.X * g.Y);
-  for (let i = 0; i < ground.length; i++) ground[i] = block[start[i]];
-  return { floor, block: ground, levels };
+  // The cellar: somewhere under the ground a body stands, and every floor there where it could stand is reached.
+  let down = false, lost = false;
+  if (hole)
+    for (let i = 0; i < XY; i++) {
+      if (!hole[i]) continue;
+      for (let l = start[i]; l < start[i + 1]; l++) {
+        if (z[l] >= base - step || standing[l]) continue;
+        if (reached[l]) down = true;
+        else lost = true;
+      }
+    }
+  const floor = new Uint8Array(XY);
+  const ground = new Uint8Array(XY);
+  for (let i = 0; i < XY; i++) {
+    const l = levelAt(levels, i, base);
+    const v = z[l] - base;
+    floor[i] = Math.min(255, Math.max(hole?.[i] ? 1 : 0, v));
+    ground[i] = block[l] || Math.abs(v) > step ? 1 : 0;
+  }
+  return { floor, block: ground, levels, ...(hole ? { hole } : {}), cellar: down && !lost };
+}
+
+/**
+ * What a body stands on in a model laid `base` voxels under the ground (T52b): with its cellar if the cellar holds
+ * (every floor under the ground reached from the ground floor), else as if the earth filled what is under the ground.
+ */
+export function groundOfForm(g: VoxelGrid, palette: Record<string, PaletteEntry>, vpt: number, base: number): Ground {
+  if (base <= 0) return bodyGround(g, palette, vpt);
+  const hole = holesOf(g, palette, base);
+  const withCellar = hole && bodyGround(g, palette, vpt, base, hole);
+  if (withCellar?.cellar) return withCellar;
+  const without = bodyGround(g, palette, vpt, base);
+  return { floor: without.floor, block: without.block, levels: without.levels };
 }
 
 /** The floor of a voxel column nearest to a height (voxels): the one a body at that height stands on (T53b). */
@@ -198,14 +302,18 @@ export function rampBlocks(f: Form, ground: Ground, x0: number, z0: number, x1: 
   const vy0 = Math.max(-1, Math.floor(z0 * f.vpt + g.Y / 2)), vy1 = Math.min(g.Y, Math.floor(z1 * f.vpt + g.Y / 2));
   if (vx1 < 0 || vy1 < 0 || vx0 >= g.X || vy0 >= g.Y) return false;
   const step = stepOf(f.vpt);
-  const { levels } = ground;
+  const { levels, hole } = ground;
   const w = vx1 - vx0 + 1;
-  const h = new Float64Array(w * (vy1 - vy0 + 1));
+  // Outside the model, its ground: `base` voxels up its grid (T52b).
+  const h = new Float64Array(w * (vy1 - vy0 + 1)).fill(f.base);
   for (let y = vy0; y <= vy1; y++)
     for (let x = vx0; x <= vx1; x++) {
       if (x < 0 || y < 0 || x >= g.X || y >= g.Y) continue;
-      const l = levelAt(levels, x + y * g.X, at);
+      const i = x + y * g.X;
+      const l = levelAt(levels, i, at);
       if (levels.block[l]) return true;
+      // Over the cellar, with no floor near the feet, is air (T52b): one does not walk or land over the stairwell.
+      if (hole?.[i] && Math.abs(levels.z[l] - at) > step) return true;
       h[x - vx0 + (y - vy0) * w] = levels.z[l];
     }
   for (let y = 0; y <= vy1 - vy0; y++)
@@ -226,13 +334,14 @@ export function topUnder(f: Form, levels: Levels, x0: number, z0: number, x1: nu
   const vx0 = Math.max(0, Math.floor(x0 * f.vpt + g.X / 2)), vx1 = Math.min(g.X - 1, Math.floor(x1 * f.vpt + g.X / 2));
   const vy0 = Math.max(0, Math.floor(z0 * f.vpt + g.Y / 2)), vy1 = Math.min(g.Y - 1, Math.floor(z1 * f.vpt + g.Y / 2));
   const { start, z, base } = levels;
-  let h = 0;
+  // What is under the ground (a cellar, T52b) is not there for a jump: only what rises above the model's ground.
+  let h = f.base;
   for (let y = vy0; y <= vy1; y++)
     for (let x = vx0; x <= vx1; x++) {
       const i = x + y * g.X;
       for (let l = start[i]; l < start[i + 1]; l++) if (base[l] < at + up) h = Math.max(h, z[l]);
     }
-  return h ? h / f.vpt : undefined;
+  return h > f.base ? (h - f.base) / f.vpt : undefined;
 }
 
 /** Runs programs in this thread (Node, tests): no meshes. */
@@ -353,17 +462,21 @@ export class Forms {
     let f = this.forms.get(key);
     if (f) return f;
     const cls = this.classOf(model);
-    const size = sizeFor(xml, cls);
     const vpt = vptOf(info);
-    f = { key, model, seed, status: 'pending', cls, reach: 0, vpt };
+    const under = sottoOf(info) * vpt;
+    const size = sizeFor(xml, cls, under);
+    f = { key, model, seed, status: 'pending', cls, reach: 0, vpt, base: 0 };
     this.forms.set(key, f);
     const form = f;
     void this.runner
       .run({ xml, seed, size, tint: tinta, rig: cls.animation === 'camminata', sway: cls.animation === 'vento', vpt, model, ...(info?.tempo ? { tempo: info.tempo } : {}) })
       .then((result) => {
         form.result = result;
-        form.foot = bodyFoot(result.grid, result.palette, vpt);
-        Object.assign(form, bodyGround(result.grid, result.palette, vpt));
+        // Under the ground (T52b): its lowest voxels, if the grid has room for them and for something above.
+        const base = under < result.grid.Z ? under : 0;
+        form.base = base;
+        form.foot = bodyFoot(result.grid, result.palette, vpt, base);
+        Object.assign(form, groundOfForm(result.grid, result.palette, vpt, base));
         form.reach = Math.hypot(result.grid.X, result.grid.Y) / 2 / vpt;
         form.status = 'ready';
         this.version++;
@@ -396,7 +509,8 @@ export class Forms {
   compiled(model: string) {
     const xml = this.files[`${MODELS_DIR}${model}.xml`];
     if (!xml) return undefined;
-    const size = sizeFor(xml, this.classOf(model));
+    const info = this.library[model];
+    const size = sizeFor(xml, this.classOf(model), sottoOf(info) * vptOf(info));
     return compileMjx(xml, size ? { size } : {});
   }
 }

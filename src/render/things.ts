@@ -193,8 +193,8 @@ export class Things {
         continue;
       }
       if (v.kind !== 'figure') {
-        // A thing (a structure too) stands on the ground under its middle.
-        v.root.position.set(p.x, k.groundAt(p.x, p.y), p.y);
+        // A thing (a structure too) stands on the ground under its middle; its cellar under it (T52b).
+        v.root.position.set(p.x, k.groundAt(p.x, p.y) - k.sunk(id), p.y);
         const cut = id === inside;
         if (v.cut !== cut) {
           v.cut = cut;

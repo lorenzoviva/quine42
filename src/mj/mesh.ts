@@ -220,10 +220,13 @@ export interface Levels {
 /**
  * Every floor of every column (T53b): the top of each run of solid (the ground floor, the floor above, the roof),
  * and the ground itself where the column starts empty; for each, whether a body standing there hits its head.
+ * With `fill` (T52b, a model that goes under the ground) a column is solid below `fill[i]` voxels too: the earth
+ * around a cellar, where the model has nothing under the ground.
  */
-export function surfaces(g: VoxelGrid, palette: Record<string, PaletteEntry>, from: number, to: number): Levels {
+export function surfaces(g: VoxelGrid, palette: Record<string, PaletteEntry>, from: number, to: number, fill?: Uint16Array): Levels {
   const colors = colorTable(g.alphabet, palette);
   const XY = g.X * g.Y;
+  const solid = (i: number, z: number) => (fill && fill[i] > z) || !!colors[g.cells[i + z * XY]];
   const start = new Uint32Array(XY + 1);
   const zs: number[] = [];
   const bases: number[] = [];
@@ -233,7 +236,7 @@ export function surfaces(g: VoxelGrid, palette: Record<string, PaletteEntry>, fr
     bases.push(b0);
     let b = 0;
     for (let k = Math.max(0, z + from); k < Math.min(g.Z, z + to); k++)
-      if (colors[g.cells[i + k * XY]]) {
+      if (solid(i, k)) {
         b = 1;
         break;
       }
@@ -242,12 +245,12 @@ export function surfaces(g: VoxelGrid, palette: Record<string, PaletteEntry>, fr
   for (let i = 0; i < XY; i++) {
     start[i] = zs.length;
     let z = 0;
-    if (!colors[g.cells[i]]) add(i, 0, 0);
+    if (!solid(i, 0)) add(i, 0, 0);
     while (z < g.Z) {
-      while (z < g.Z && !colors[g.cells[i + z * XY]]) z++;
+      while (z < g.Z && !solid(i, z)) z++;
       if (z >= g.Z) break;
       const b0 = z;
-      while (z < g.Z && colors[g.cells[i + z * XY]]) z++;
+      while (z < g.Z && solid(i, z)) z++;
       add(i, z, b0);
     }
   }
