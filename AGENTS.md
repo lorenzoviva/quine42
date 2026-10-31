@@ -58,7 +58,7 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
 ## Stack
 
 - **Vite 5 + TypeScript 5** (strict), **three.js** per il mondo (ADR-0040) e per le pagine out-game (ADR-0095), DOM per HUD/pannelli, uno strato 2D sopra per i testi.
-- **Il sito e il tema** (ADR-0095, T97): pop art a fumetti, retro arcade, neon punk e retrowave; variabili CSS unificate in `src/theme.css` per sito e gioco; pagine Vite in `site/` senza framework pesanti; three.js fuori dal gioco (hero canvas, carte 3D animate, profilo); il segreto dei gerboa nel footer.
+- **Il sito e il tema** (ADR-0095, T97): pop art a fumetti, retro arcade, neon punk e retrowave; variabili CSS unificate in `src/theme.css` per sito e gioco; pagine Vite in `site/` senza framework pesanti; three.js fuori dal gioco (hero canvas, profilo) e carte collezionabili in CSS 3D; il segreto dei gerboa nel footer.
 - **Lua 5.4 via wasmoon** (WebAssembly), sandbox gestita dal kernel.
 - **Google Gemini**: `gemini-3.1-flash-lite` (testo), in
   `universe/universe.json → ai` con i budget (`maxText`, `maxForges`, `maxPacks`, `maxCast`; in multigiocatore `placesPerMinute`),
