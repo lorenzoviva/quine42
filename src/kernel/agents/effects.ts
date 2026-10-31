@@ -155,6 +155,17 @@ const SPELL_SCHEMA: Schema = {
   required: ['nome', 'descrizione', 'costo', 'effetti'],
 };
 
+/**
+ * How a sequence of runes composes (T57a): a program, where order matters and repetition strengthens.
+ * The examples guide, they are not a list; the effects stay the closed set the kernel validates.
+ */
+export const SPELL_GUIDE = [
+  "Una sequenza di rune è un programma: l'ordine conta (terra fuoco ≠ fuoco terra: due incantesimi diversi) e ripetere una runa la rafforza (raggio, durata, forza più grandi).",
+  'Di solito la prima runa dà la forma (terra: corpo e peso, una palla, un muro; vento: lancia, spinge, sparge; scudo: racchiude, protegge; luce: rivela) e le altre ciò che porta (fuoco, acqua, cura, luce).',
+  'Esempi di come si compone, non un elenco da copiare: terra fuoco → palla di fuoco (fuoco raggio 2); terra fuoco fuoco → palla di fuoco più grande (fuoco raggio 3, più durata); fuoco terra fuoco → dardi infuocati (fuoco raggio 1 e spingi); acqua → crea acqua (terreno acqua); terra vento terra → la terra si solleva (terreno roccioso attorno); vento terra vento → la terra si spiana (terreno di sentiero attorno).',
+  'Come un incantesimo di D&D: un effetto vero sul luogo o sulle persone (fuoco, spingi, terreno, luce, bisogni, scudo, stato), mai solo un messaggio; più rune = più forte e più costoso.',
+].join(' ');
+
 export interface SpellDraft {
   name: string;
   description: string;
@@ -174,12 +185,18 @@ export async function nameSpell(
   focus?: string[],
 ): Promise<SpellDraft> {
   const seq = runes.map((r) => r.token).join(' ');
+  // The same runes in another order are another incantation: the Narrator sees which ones already exist.
+  const sorted = (s: string) => s.split(' ').sort().join(' ');
+  const reordered = known.filter((k) => k.sequence !== seq && sorted(k.sequence) === sorted(seq));
   const prompt = [
     `Il viandante pronuncia, in quest'ordine, le rune: ${runes.map((r) => `«${r.token}» (${r.name}, ${r.element}: ${r.description})`).join(', ')}.`,
     `Incantesimi già noti:\n${known.map((k) => `- ${k.sequence} → ${k.name}: ${k.description}`).join('\n') || '(nessuno)'}`,
-    `Decidi cosa fa questa sequenza (${seq}). L'ordine conta. Deve derivare dagli elementi delle rune, essere coerente con gli incantesimi noti e con il mondo; più rune = più forte e più costoso. Effetti (al massimo 4) SOLO da questo elenco:\n${EFFECTS_GUIDE}`,
+    reordered.length ? `Le stesse rune in un altro ordine sono già un altro incantesimo (${reordered.map((k) => `${k.sequence} → ${k.name}`).join('; ')}): questa sequenza deve fare altro.` : '',
+    `Decidi cosa fa questa sequenza (${seq}), coerente con gli elementi delle rune, con gli incantesimi noti e con il mondo. ${SPELL_GUIDE}\nEffetti (al massimo 4) SOLO da questo elenco:\n${EFFECTS_GUIDE}`,
     `Terreni esistenti: ${terrains.join(', ')}. Gli effetti agiscono su ciò che il viandante ha davanti (o sul viandante stesso per bisogni e scudo).`,
-  ].join('\n\n');
+  ]
+    .filter(Boolean)
+    .join('\n\n');
   const r = await c.ask<{ nome: string; descrizione: string; costo: number; effetti?: unknown[] }>('narratore', 'spell.name', prompt, SPELL_SCHEMA, {
     data: { runes, known, terrains },
     temperature: 0.7,

@@ -1005,7 +1005,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 
 ## Le rune
 
-### T57 · Le rune come codice: sequenze ordinate, effetti, rune nuove — `da fare` (si comincia da T57a)
+### T57 · Le rune come codice: sequenze ordinate, effetti, rune nuove — `da fare` (T57a fatto; poi T57b)
 - Pipeline: claude · stima 8% · priorità 60
 - Contesto: richiesta del 24/10 («Le rune»). L'esempio del seme `acqua fuoco` → «Vapore» (si annullano, un messaggio, in
   `universe/modules/magic.runes/manifest.json`) non è l'idea: le rune sono come codice, una **sequenza ordinata** produce
@@ -1020,6 +1020,10 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
   stati), validati come oggi; il seme perde «Vapore» per un esempio vero. La chiave delle combinazioni rispetta già l'ordine
   (`seq.join(' ')` in `castSpell`, senza ordinare): resta così. Test offline: `terra aria` e `aria terra`
   danno incantesimi diversi; il MockModels risponde con effetti diversi per ordini diversi.
+  **Fatto** (commit su `task/T57`): canone (formula, ordine, ripetizione, esempi), `SPELL_GUIDE` e le permutazioni già
+  note nel prompt di `nameSpell`, prompt di Narratore, Fisico (la misura della magia) e Arbitro; il seme ha `terra fuoco` →
+  «Palla di fuoco» al posto di «Vapore»; il mock: la prima runa dà l'effetto principale, rafforzato da ogni ripetizione.
+  Diverso dal previsto: gli esempi di terraformazione usano per ora `terreno` (roccia, sentiero) finché T57c non dà `rilievo`.
 - **T57b · rune nuove dal Concilio**: una via per inventare una runa magica (nome, glifo, colore, cosa significa nel
   canone) in una sessione del Concilio o quando una combinazione la chiede: modulo `magic.runes` riscritto, validatore
   (glifo unico, nome non simile alle altre, niente meta-gioco), canone aggiornato; la runa compare nel mondo come le altre

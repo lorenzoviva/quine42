@@ -8,6 +8,9 @@ import { memoryStore } from '../src/kernel/repo';
 import { MockModels } from '../src/kernel/ai/mock';
 import { countItem } from '../src/kernel/inventory';
 import type { StudioItem } from '../src/kernel/corona';
+import { Council } from '../src/kernel/agents/council';
+import { nameSpell } from '../src/kernel/agents/effects';
+import type { Models } from '../src/kernel/ai/models';
 
 const DT = 1 / 60;
 
@@ -607,6 +610,47 @@ describe('runes and magic', () => {
     giveRunes(k, ['luce']);
     k.hand().tokens = ['luce'];
     expect(await k.castSpell()).toBe(false);
+  });
+
+  it('a sequence of runes is a program: the order matters, a repeated rune is stronger (T57a)', async () => {
+    const k = await boot();
+    clearArea(k);
+    k.needs()!.mana = 100;
+    k.give('item.cristallo-magico', 2);
+    const cast = async (seq: string[]) => {
+      giveRunes(k, seq);
+      k.hand().tokens = [...seq];
+      k.needs()!.mana = 100;
+      expect(await k.castSpell()).toBe(true);
+      return k.content.spells[seq.join(' ')];
+    };
+    const ab = await cast(['terra', 'vento']);
+    const ba = await cast(['vento', 'terra']);
+    // Two incantations, each under its own key, doing different things.
+    expect(ab).toBeTruthy();
+    expect(ba).toBeTruthy();
+    expect(ba.name).not.toBe(ab.name);
+    expect(JSON.stringify(ba.effects)).not.toBe(JSON.stringify(ab.effects));
+    expect(ab.effects[0]).toMatchObject({ tipo: 'terreno' });
+    expect(ba.effects[0]).toMatchObject({ tipo: 'spingi' });
+    // Repetition strengthens: «vento vento terra» pushes harder than «vento terra».
+    const vvt = await cast(['vento', 'vento', 'terra']);
+    expect((vvt.effects[0] as { forza: number }).forza).toBeGreaterThan((ba.effects[0] as { forza: number }).forza);
+    // The seed's example is a real spell, not a message: «terra fuoco» is a fireball.
+    expect(k.content.spells['terra fuoco'].effects[0]).toMatchObject({ tipo: 'fuoco', raggio: 2 });
+    expect(k.content.spells['acqua fuoco']).toBeUndefined();
+  });
+
+  it('the Narrator learns how runes compose and which reorderings already exist (T57a)', async () => {
+    const asked: string[] = [];
+    const models = { text: async (r: { prompt: string }) => (asked.push(r.prompt), JSON.stringify({ nome: 'Frana', descrizione: 'x', costo: 10, effetti: [] })) } as unknown as Models;
+    const c = new Council(models, () => ({ files: bundledFiles, palette: {}, catalog: [] }));
+    const runes = (seq: string[]) => seq.map((t) => ({ token: t, name: t, element: t, description: t }));
+    await nameSpell(c, runes(['fuoco', 'terra']), [{ sequence: 'terra fuoco', name: 'Palla di fuoco', description: 'boom' }], ['erba']);
+    expect(asked[0]).toContain("l'ordine conta");
+    expect(asked[0]).toMatch(/Le stesse rune in un altro ordine[^\n]*terra fuoco → Palla di fuoco/);
+    await nameSpell(c, runes(['acqua']), [{ sequence: 'terra fuoco', name: 'Palla di fuoco', description: 'boom' }], ['erba']);
+    expect(asked[1]).not.toContain('Le stesse rune in un altro ordine');
   });
 
   it('bags are containers you carry: open them, put things in, take them out; dropped, they keep their contents', async () => {

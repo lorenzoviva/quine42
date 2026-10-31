@@ -23,11 +23,15 @@ Ciò che chi vive nel mondo sa delle rune. È vero sempre e ovunque: nessuna sto
 
 ## La magia
 - Le rune magiche, tenute in mano e pronunciate in fila, diventano un incantesimo: la frase si consuma, le rune
-  pronunciate spariscono. Ogni runa da sola ha il suo incantesimo; alcune combinazioni ne hanno uno proprio.
+  pronunciate spariscono. Ogni runa da sola ha il suo incantesimo.
+- Una fila di rune è una formula: l'ordine conta (terra fuoco non è fuoco terra) e ripetere una runa la rafforza.
+  Ogni formula fa sempre la stessa cosa, e viene dai suoi elementi: terra fuoco è una palla di fuoco, terra fuoco fuoco
+  una più grande, fuoco terra fuoco una pioggia di dardi infuocati, terra vento terra solleva la terra.
 - Pronunciare costa forza interiore (il mana), che torna col tempo o con un cristallo magico; un incantesimo di
-  tre rune o più consuma anche un cristallo.
-- La magia delle rune fa solo ciò che fanno gli incantesimi conosciuti: luce, fuoco, acqua, sentieri nella terra,
-  cura, protezione, vento. Non legge i pensieri, non fa tornare i morti, non apre passaggi verso altri mondi.
+  tre rune o più consuma anche un cristallo. Più rune, più forza e più costo.
+- La magia delle rune agisce sul mondo vicino a chi pronuncia e sulle persone: luce, fuoco, acqua, il terreno che
+  cambia, cura, protezione, spinte, condizioni che durano un poco. Non legge i pensieri, non fa tornare i morti, non
+  apre passaggi verso altri mondi.
 
 ## Ciò che nessuno sa
 - Chi ha inciso le rune, quando, e perché sono così poche.

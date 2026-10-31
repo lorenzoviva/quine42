@@ -3,7 +3,7 @@
   "name": "Rune magiche",
   "kind": "data",
   "version": "0.1.0",
-  "description": "Le rune della magia: ognuna è anche una parola del codice (una variabile che non vale niente, finché qualcuno non le dà un valore), ma tenute in mano e pronunciate (T) diventano incantesimi. Più rune in fila fanno un incantesimo nuovo: il Concilio gli dà un nome la prima volta. I cristalli magici, nascosti nelle case e nelle casse, ridanno mana; le rune si consumano quando le pronunci.",
+  "description": "Le rune della magia: ognuna è anche una parola del codice (una variabile che non vale niente, finché qualcuno non le dà un valore), ma tenute in mano e pronunciate (T) diventano incantesimi. Più rune in fila sono una formula: l’ordine conta (terra fuoco non è fuoco terra) e ripetere una runa la rafforza; il Concilio dà nome e effetti a una formula la prima volta che qualcuno la pronuncia. I cristalli magici, nascosti nelle case e nelle casse, ridanno mana; le rune si consumano quando le pronunci.",
   "runes": {
     "luce": {
       "name": "Sowilo",
@@ -137,14 +137,15 @@
         }
       ]
     },
-    "acqua fuoco": {
-      "name": "Vapore",
-      "description": "Acqua e fuoco si annullano: il fuoco davanti a te si spegne in una nube bianca.",
-      "cost": 6,
+    "terra fuoco": {
+      "name": "Palla di fuoco",
+      "description": "La terra dà corpo alla fiamma: una palla di fuoco scoppia davanti a te e brucia tutto attorno.",
+      "cost": 16,
       "effects": [
         {
-          "tipo": "messaggio",
-          "testo": "Una nube di vapore sale e si dissolve."
+          "tipo": "fuoco",
+          "raggio": 2,
+          "durata": 10
         }
       ]
     }
