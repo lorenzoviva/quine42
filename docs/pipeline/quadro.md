@@ -53,12 +53,12 @@ Aggiornato il 01/11/2026, fine dell'epoca 194 su **claude** (crediti: vedi `stat
 
 - **Vite 7 e Vitest 4 nel base** (01/11, epoca 194): T145, T142, T131 integrati, ADR-0100, `npm ci` nel base fatto, audit a 0, Claude riattivato, i task riapprovati. Suite di T145: 746 passati, 16 attesi, 1 todo, nessun rosso. Le pagine del sito con dati veri (carte, profilo, crediti) non sono state provate con Vite 7: solo stati vuoti, nessun universo su disco nel worktree. `npm run abbonamento` da riavviare se era acceso.
 
-- **In corso** (epoca 194): T143 su Claude.
+- **In corso** (epoca 195): T120 e T124 su Claude.
 - **T144 e T122 integrati** (01/11): V-008, V-017, V-019 chiuse, ADR-0101, suite 782 passati, 12 attesi, nessun rosso. Restano non provati difetti di wasm e Lua e il blocco del servizio (T126, T127): per una garanzia forte serve uno sguardo esperto.
 - **T122 finito** (V-008, V-017, V-019 chiuse; ADR-0099), conflitto in `AGENTS.md`: **T144** lo integra (p1, l'ADR di T122 prende il 0101). Poi `integra T144`, `integra T122`. Restano non provati: difetti di wasm e Lua, blocco del servizio (T126, T127), serve uno sguardo esperto per una garanzia forte. `tests/between.test.ts` ha un limite di 180 s: andrebbe alleggerito.
 - **T140 e T123 integrati** (01/11): V-002 chiusa, kit 4 ok, ma T140 ha riscritto la prova V-002.d (com'era dava FALLA: chiamate piccole sotto il tetto); chi è sulla macchina senza identità può spendere fino a 10 $ al giorno. Detto all'autore: se per lui non è chiusa, si riapre. **ADR-0099 nel base è di T123.** T131 ha il 0100; T122 (T144) prende il 0101.
 - **Aspetto dall'autore** (chiesti nell'epoca 193): se V-002 resta chiusa col residuo (io ho consigliato di sì); se aprire un task per alleggerire `tests/between.test.ts`.
-- **T143** (rune invisibili sul tappeto, regressione di almeno 40 task, chiesto dall'autore il 01/11): approvato, p2, su Claude; parte dopo T142 e prima della sicurezza che resta.
+- **T143 integrato** (01/11, epoca 195): le rune invisibili sul tappeto dipendevano da un attributo (`noGlow`) aggiunto durante il disegno; verificato nel browser, test in `tests/fillers.test.ts`. La causa è dedotta dal codice.
 - **Aspetto dall'autore** (richiesto di nuovo nell'epoca 194): V-002, `between.test.ts`, T45f, T88. Sta provando il logo con il materiale di T141.
 - **T141 integrato** (01/11): materiale per il logo in `docs/design/logo/`. Sostituire il logo sarà un altro task, quando l'autore ne avrà scelto uno.- **Pronti su Claude**: **T120 T124 T126 T128 T132** (sicurezza) → **T106** (p72) → **T89a** (p75); bloccati T121 T125 T127 T129 T130 T133 T134 (dalle correzioni), **T89b-e** (da T89a).
 - **Da integrare**: nessuno. T136, T137, T138, T118, T139 e T105 integrati il 01/11.
