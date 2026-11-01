@@ -2441,14 +2441,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 **Decisione dell'autore, vale per tutti questi task.** Dentro il gioco, a parte i crediti dei giocatori, tutto si può modificare: il codice generato può toccare inventario, bisogni ed entità degli altri viandanti, e ci sono i rollback. Difendersi dai prompt avversari al Concilio è una guerra persa e non si fa. Ciò che conta: **non si esce dalla sandbox del gioco**, **i crediti non si toccano**, **i giocatori non master non riscrivono direttamente il codice Lua sul server**. Le difese di R8 sui permessi per viandante, su `U` in sola lettura e sul `by` delle rune **non si fanno**. Le prove sono test difensivi nel repository, che falliscono prima della correzione e passano dopo; niente payload nel report, mai valori veri dei segreti. **Ogni task di questa sezione segue `docs/sicurezza/README.md` (T136)**: aggiorna la sua voce in `docs/sicurezza/registro.md` e toglie `.fails` dai test che chiude; ciò che una sessione non riesce a provare va nel kit dell’autore (T137).
 
-### T120 · Chi può scrivere: `/api/universe` e il WebSocket — `da fare` (dipende da T136, T137)
+### T120 · Chi può scrivere: `/api/universe` e il WebSocket — `da fare` (dipende da T136, T137, T139)
 - Pipeline: claude · stima 5% · approvato · priorità 3
 - Contesto: richiesta dell'autore: con F12 un giocatore può riscrivere i file Lua sul server. Confermato nel codice: `server/universeStore.ts` accetta `commit`, `create`, `checkout`, `branch`, `merge`, `clone`, `reset` e `PUT map` senza identità (R1). Il WebSocket controlla `isMaster`, ma senza account l'id lo sceglie il client (R6). Nasce da T117: `dossier T117`; vedi ADR-0058, 0061, 0066, 0082.
 - Cosa fare:
   1. Identità verificata sul server e permessi per operazione su ogni route di `/api/universe`: su un universo multigiocatore un non master non scrive nulla; `clone` prende il master dall'identità verificata, non dal corpo. Verificare prima come scrivono `host.ts`, il kernel del server e `site/sessioni.ts` (`create`) e tenere funzionanti i percorsi legittimi.
   2. Letture: un non master non legge file che `playerFiles` gli negherebbe. `site/carte.ts`, `site/sessioni.ts` e `site/landing.ts` leggono `/api/universe`: dare loro ciò che serve senza aprire il resto (logica, prompt, saldi).
   3. Controllo di `Origin` e `Content-Type` sulle route che scrivono e sul WebSocket; in singola, sul server locale, il gioco continua a funzionare come oggi.
-  4. Senza verificatore (niente `FIREBASE_PROJECT_ID`) l'id scelto dal client vale solo da loopback. `anonimo` e `tetto` non li decide il client; `offline` non lo decide il primo client; `GET /api/session` non elenca i viandanti a chiunque. Le stesse regole valgono per `/api/viandante` (`server/wanderer.ts`, T102) e `/api/crediti` (`server/wallet.ts`, T105), entrate dopo la scrittura di questo task: chi chiede viene dall'identità verificata, e `/api/viandante` non tocca i crediti.
+  4. Senza verificatore (niente `FIREBASE_PROJECT_ID`) l'id scelto dal client vale solo da loopback. `anonimo` e `tetto` non li decide il client; `offline` non lo decide il primo client; `GET /api/session` non elenca i viandanti a chiunque. Le stesse regole valgono per `/api/viandante` (`server/wanderer.ts`, T102) e `/api/crediti` (`server/wallet.ts`, T105), entrate dopo la scrittura di questo task: chi chiede viene dall'identità verificata, e `/api/viandante` non tocca i crediti e non dà il saldo di altri (V-006.e, misurata da T137: oggi lo dà a chiunque).
   5. Controllare ogni messaggio del protocollo che un client può mandare a mano: nessuno deve far scrivere codice a un non master.
   6. **ADR nuovo e `AGENTS.md`**: il modello di minaccia di questa sezione, con le regole di accesso.
 - Test: un non master (HTTP e WebSocket) è rifiutato su ogni operazione di scrittura; il master e la singola funzionano; un'origine diversa è rifiutata.
@@ -2463,7 +2463,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: test e typecheck verdi, commit su `task/T121`.
 
 ### T122 · Non si esce dalla sandbox: prove difensive e chiusure — `da fare` (dipende da T136, T137)
-- Pipeline: claude · stima 4% · approvato · priorità 5
+- Pipeline: claude · stima 4% · approvato · priorità 2
 - Contesto: è **la cosa più importante per l'autore**, e l'audit non l'ha dimostrata: una sessione è stata fermata da un filtro di sicurezza mentre preparava le prove. Il lavoro è difensivo, sulla sandbox di questo progetto. Il `Sandbox` gira in wasmoon dentro il processo del server. Nasce da T117 (R8 ridotta, annotazione `string.dump`, «Cosa non è stato fatto»).
 - Cosa fare:
   1. Test in `tests/` che affermano le proprietà: da Lua nessun accesso a `process`, `require`, costruttori o prototipi JS, né attraverso i valori restituiti dall'`Host` né attraverso le metatabelle; `string.dump` non raggiungibile nemmeno con la sintassi a metodo; `pcall` e coroutine non scavalcano il budget; un valore finto in una variabile d'ambiente di prova non arriva mai a Lua.
@@ -2531,7 +2531,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: test e typecheck verdi, commit su `task/T130`.
 
 ### T131 · `npm audit` e Vite — `da fare` (dipende da T136)
-- Pipeline: claude · stima 2% · approvato · priorità 14
+- Pipeline: claude · stima 2% · approvato · priorità 2
 - Contesto: R14: Vite 5.4.10, l'audit non ha lanciato `npm audit`.
 - Cosa fare: lanciarlo, aggiornare ciò che serve (Vite compreso, nei limiti della 5.x se basta), riportare ciò che resta aperto e perché.
 - Test: suite intera, typecheck, build.

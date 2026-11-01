@@ -37,7 +37,7 @@ Aggiornato il 01/11/2026, fine dell'epoca 188 su **claude** (crediti: vedi `stat
 - **Sicurezza, T117 integrato; T120-T134 approvati dall'autore** (priorità 3-17, tutti su Claude, sezione «La sicurezza» del backlog). Decisione dell'autore: nel gioco tutto si può modificare tranne i crediti; contano la sandbox, i crediti e il blocco delle scritture Lua dei non master (T120, confermate senza autenticazione nel codice). Niente permessi per viandante (R8 ridotta). T45f dipende ora da T133 e T134. Se un filtro ferma T122, la domanda torna all'autore (persona esperta).
 - **Riavvio**: spenta alle 13:08 (`ferma --dopo`, T115 finito), riaccesa alle 13:35 con il tetto 2 di Claude; nessun task interrotto da riprendere.
 - **Cosa si aspetta**:
-  0. **T136 integrato** (ADR-0098, registro di 19 voci, `tests/sicurezza/` con `it.fails`; aveva 45-47 rossi nella suite intera, quasi tutti timeout, commit senza codice: T118 ora è dentro) → **T137, in corso** (`npm run sicurezza:prove` e blocchi F12, che l'autore esegue di persona; solo loopback, segreti finti, universi temporanei). Richiesta dell'autore in `domande/T117.md`. Finito T137, **chiedere all'autore di eseguirlo sul base prima di integrare T120**; gli esiti diventano voci del registro e task. Le correzioni pronte dipendono da T136; T120 e T122 anche da T137.
+  0. **T137 integrato**: kit `npm run sicurezza:prove`, prima misura 22 ok, 51 FALLA (`docs/sicurezza/esiti/2026-11-01.json`). **Chiesto all'autore** di lanciare kit e blocchi F12 sul base, blocco 3 compreso (l'agente non l'ha concluso: V-001.n, V-001.o, V-006.g), **prima di integrare T120**: T120 può girare, ma non si integra prima. Gli esiti diventano voci del registro e task. Priorità alzate da me per la misura: **T122 p2** (V-019, prototipi JS raggiungibili da Lua, uscita non provata), **T131 p2** (V-014, `.env` leggibile dal server di sviluppo).
   1. **T120 e seguenti** (sicurezza, p3-17), secondo le dipendenze.
   2. **T118 e T138 integrati** (688/688 senza timeout nel worktree di T138, senza i test di T136, che erano verdi da soli). T137 è partito prima di T118: se nel suo worktree la suite va in timeout, non è un difetto suo; la prima suite intera sul base con tutto dentro è da leggere lì.
   3. **Risposte dell'autore**: T45f (`docs/pipeline/domande/T45f.md`); T88 da approvare.
@@ -47,13 +47,13 @@ Aggiornato il 01/11/2026, fine dell'epoca 188 su **claude** (crediti: vedi `stat
 
 ## Task attivi e in corso
 
-- **In corso** (all'ultimo `stato`): **T137** e **T123** su Claude.
-- **Pronti su Claude**: **T139** (p1) → **T126 T128 T131 T132** (sicurezza) → **T106** (p72) → **T89a** (p75); bloccati **T124** (da T139), **T120 e T122** (da T137), T121 T125 T127 T129 T130 T133 T134 (dalle correzioni), **T89b-e** (da T89a).
-- **Da integrare**: **T105** (tramite T139). T136, T138 e T118 integrati il 01/11.
+- **In corso** (all'ultimo `stato`): **T123** su Claude; **T139** al controllo successivo.
+- **Pronti su Claude**: **T139** (p1) → **T122 T131** (p2) → **T126 T128 T132** (sicurezza) → **T106** (p72) → **T89a** (p75); bloccati **T120** e **T124** (da T139), T121 T125 T127 T129 T130 T133 T134 (dalle correzioni), **T89b-e** (da T89a).
+- **Da integrare**: **T105** (tramite T139). T136, T137, T138 e T118 integrati il 01/11.
 - **Integrati di recente**: **T104** (22 timeout su 675 nella suite, estraneità provata solo in 3 file: se restano dopo T118, ricontrollare `forms.ts` e `cards.ts`), **T115**, **T57b**, **T114**, **T103**, **T57c**, **T113**, **T112**, **T111**, **T101**, **T110**, **T109**.
 - **Crediti** (01/11 dopo le 15:12 UTC): Claude settimana 98 %, 5h 84 % (reset 05/11 16:00; 5h alle 17:30); Gemini settimana 8 %, sotto soglia: nessun task nuovo (reset 05/11 17:37); Argon fermo fino al 04/11.
 
-- **Prossimi passi**: finito T137, chiedere all'autore di lanciare `npm run sicurezza:prove` e i blocchi F12 sul base **prima di integrare T120**; gli esiti diventano voci di `docs/sicurezza/registro.md` e task (regola in `orchestra.md`). Leggere la prima suite intera sul base con T118 e T136 insieme: non è ancora stata fatta; i 45-47 rossi di T136 sono da considerare chiusi solo se lì non tornano.
+- **Prossimi passi**: leggere la suite di T139 (prima con T118, T136 e T105; T137 aveva ancora 45 timeout nel suo worktree, partito prima di T118); ricevere gli esiti dell'autore.
 
 ## Da fare appena possibile
 
