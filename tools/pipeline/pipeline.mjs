@@ -870,7 +870,21 @@ export function lockDir() {
 }
 
 /** The kinds of turn and how long one may hold it before it counts as abandoned (`turni` in config.json). */
-export const TURNS = { browser: 45, test: 60, ...Object.fromEntries(Object.entries(CONFIG.turni ?? {}).map(([k, v]) => [k, v.massimoMinuti ?? v])) };
+export const TURNS = { browser: 45, test: 60, typecheck: 10, build: 10, ...Object.fromEntries(Object.entries(CONFIG.turni ?? {}).map(([k, v]) => [k, v.massimoMinuti ?? v])) };
+
+/** What a turn already covers: a command inside it takes no other turn (the typecheck in `npm run build`, the build before the preview). */
+export const COVERS = { browser: ['browser', 'build', 'typecheck'], test: ['test', 'build', 'typecheck'], build: ['build', 'typecheck'], typecheck: ['typecheck'] };
+
+/**
+ * Whether `me` already holds what `kind` asks for, so it must not wait for itself: a command started inside a turn (`PIPELINE_TURNO`,
+ * the kinds held by its ancestors), or a task whose preview, in the background of another shell, holds the browser's turn: the only
+ * turn that does not end by itself. Any other turn of the same task ends on its own, and waiting for it is right.
+ */
+export function coveredBy(kind, me, { held = process.env.PIPELINE_TURNO, dir = lockDir(), isAlive = alive, nowMs = Date.now() } = {}) {
+  const kinds = String(held ?? '').split(',').filter(Boolean);
+  if (kinds.some((k) => COVERS[k]?.includes(kind))) return true;
+  return COVERS.browser.includes(kind) && holderOf('browser', { dir, isAlive, nowMs })?.chi === me.chi;
+}
 
 /** Who holds a turn now (`{ chi, pid, comando, dal }`), or undefined: a holder whose process is gone or older than its limit does not. */
 export function holderOf(kind, { dir = lockDir(), nowMs = Date.now(), isAlive = alive, minutes = TURNS[kind] ?? 60 } = {}) {
@@ -932,6 +946,16 @@ export function turnsOf({ dir = lockDir() } = {}) {
 export async function runInTurn(kind, command, { dir = lockDir(), every = Number(process.env.PIPELINE_TURNO_OGNI ?? 5000) } = {}) {
   if (!TURNS[kind]) { console.error(`Turno sconosciuto: ${kind} (${Object.keys(TURNS).join(', ')})`); return 2; }
   const me = { chi: process.env.PIPELINE_TASK ?? path.basename(process.cwd()), pid: process.pid, comando: command.join(' '), arrivo: Date.now() };
+  const inherited = process.env.PIPELINE_TURNO;
+  const run = (env) => new Promise((resolve) => {
+    const child = spawn(command.join(' '), { stdio: 'inherit', shell: true, env: { ...process.env, ...env } });
+    child.on('error', (e) => { console.error(e.message); resolve(1); });
+    child.on('close', (c) => resolve(c ?? 1));
+  });
+  if (coveredBy(kind, me, { dir })) {
+    console.error(`[turno ${kind}] già coperto da un turno di ${me.chi}: ${me.comando}`);
+    return run({});
+  }
   const leave = () => leaveTurn(kind, me.pid, { dir });
   process.on('exit', leave);
   for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP']) process.on(sig, () => { leave(); process.exit(130); });
@@ -945,11 +969,7 @@ export async function runInTurn(kind, command, { dir = lockDir(), every = Number
     await new Promise((res) => setTimeout(res, every));
   }
   console.error(`[turno ${kind}] è mio: ${me.comando}`);
-  const code = await new Promise((resolve) => {
-    const child = spawn(command.join(' '), { stdio: 'inherit', shell: true, env: { ...process.env, PIPELINE_TURNO: kind } });
-    child.on('error', (e) => { console.error(e.message); resolve(1); });
-    child.on('close', (c) => resolve(c ?? 1));
-  });
+  const code = await run({ PIPELINE_TURNO: [inherited, kind].filter(Boolean).join(',') });
   leave();
   console.error(`[turno ${kind}] lasciato`);
   return code;
@@ -1563,7 +1583,7 @@ if (process.argv[1]?.endsWith('pipeline.mjs')) {
     const sep = rest.indexOf('--');
     if (!rest[0] || sep < 0 || sep === rest.length - 1) {
       for (const [kind, h] of Object.entries(turnsOf())) console.log(`turno ${kind}: ${h.chi ? `${h.chi} (${h.comando}, dal ${h.dal})` : 'libero'}${h.attesa ? `, ${h.attesa} in attesa` : ''}`);
-      if (rest[0]) console.log('Uso: turno browser|test -- <comando>');
+      if (rest[0]) console.log(`Uso: turno ${Object.keys(TURNS).join('|')} -- <comando>`);
     } else process.exitCode = await runInTurn(rest[0], rest.slice(sep + 1));
   }
   else if (cmd === 'nota') say(`nota: ${rest.join(' ')}`);
@@ -1585,5 +1605,5 @@ if (process.argv[1]?.endsWith('pipeline.mjs')) {
   ferma --ora | --dopo                                      spegne la pipeline: interrompe i task (riprendono al riavvio) o aspetta che finiscano
   budget <provider> <residuo %> | sospendi <provider> [fino a <data>] | riattiva <provider>
   orchestratore [provider] | nota <testo>
-  turno [browser|test -- <comando>]                         aspetta il turno, esegue, lo lascia (ADR-0088)`);
+  turno [browser|test|typecheck|build -- <comando>]         aspetta il turno, esegue, lo lascia (ADR-0088)`);
 }

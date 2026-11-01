@@ -841,6 +841,7 @@ describe('interfaccia web della pipeline (T69)', () => {
 type Turns = {
   tryTurn(kind: string, me: { chi: string; pid: number; comando: string; arrivo?: number }, o: { dir: string; nowMs?: number; isAlive?: (pid: number) => boolean }): { taken: boolean; holder?: { chi: string; pid: number }; queued?: boolean };
   leaveTurn(kind: string, pid: number, o: { dir: string }): void;
+  coveredBy(kind: string, me: { chi: string }, o: { held?: string; dir: string; isAlive?: (pid: number) => boolean }): boolean;
   holderOf(kind: string, o: { dir: string; nowMs?: number; isAlive?: (pid: number) => boolean; minutes?: number }): { chi: string; pid: number; dal: string } | undefined;
   holdBack(t: { needsBrowser?: boolean }, live: { needsBrowser?: boolean }[], o?: { resuming?: boolean; lastLaunch?: number; nowMs?: number; minutes?: number }): string | undefined;
 };
@@ -931,7 +932,7 @@ describe('i turni delle operazioni pesanti (T83)', () => {
     ].join('\n'));
     const job = (name: string, code: number) => new Promise<number>((resolve) => {
       const c = spawn(process.execPath, [script, 'turno', 'test', '--', `"${process.execPath}"`, `"${work}"`, `"${out}"`, name, String(code)], {
-        env: { ...process.env, PIPELINE_LOCK: dir, PIPELINE_TURNO_OGNI: '100', PIPELINE_TASK: name }, stdio: 'ignore',
+        env: { ...process.env, PIPELINE_LOCK: dir, PIPELINE_TURNO_OGNI: '100', PIPELINE_TASK: name, PIPELINE_TURNO: '' }, stdio: 'ignore',
       });
       c.on('close', (k) => resolve(k ?? -1));
     });
@@ -942,6 +943,68 @@ describe('i turni delle operazioni pesanti (T83)', () => {
     expect(lines[0][0]).toBe(lines[1][0]);
     expect(fsMod.existsSync(path.join(dir, 'test.json'))).toBe(false); // lasciato
   }, 20_000);
+
+  it('typecheck e build hanno il loro turno, indipendente dagli altri (T118)', () => {
+    fresh();
+    [1, 2, 3].forEach((p) => living.add(p));
+    expect(T.tryTurn('test', me(1, 100), { dir, isAlive }).taken).toBe(true);
+    expect(T.tryTurn('typecheck', me(2, 200), { dir, isAlive }).taken).toBe(true);
+    expect(T.tryTurn('build', me(3, 300), { dir, isAlive }).taken).toBe(true);
+    expect(T.tryTurn('build', me(1, 400), { dir, isAlive }).taken).toBe(false);
+  });
+
+  it('un comando dentro un turno già tenuto non aspetta se stesso (T118)', () => {
+    fresh();
+    const covered = (kind: string, held: string) => T.coveredBy(kind, { chi: 'T9' }, { held, dir, isAlive });
+    expect(covered('typecheck', 'build')).toBe(true); // il typecheck dentro npm run build
+    expect(covered('build', 'browser')).toBe(true); // la build prima della preview
+    expect(covered('test', 'test')).toBe(true);
+    expect(covered('typecheck', 'browser,build')).toBe(true);
+    expect(covered('build', 'typecheck')).toBe(false); // il typecheck non copre la build
+    expect(covered('test', 'build')).toBe(false); // né una build copre una suite
+    expect(covered('browser', 'test')).toBe(false); // lo strumento del browser resta uno solo
+    expect(covered('build', '')).toBe(false);
+  });
+
+  it('la preview in background di un task copre le sue build, non quelle degli altri, e non le sue suite (T118)', () => {
+    fresh();
+    living.add(1);
+    T.tryTurn('browser', { chi: 'T9', pid: 1, comando: 'npx vite preview' }, { dir, isAlive });
+    const covered = (kind: string, chi: string) => T.coveredBy(kind, { chi }, { held: '', dir, isAlive });
+    expect(covered('build', 'T9')).toBe(true);
+    expect(covered('browser', 'T9')).toBe(true); // riaprire la preview non aspetta quella vecchia
+    expect(covered('test', 'T9')).toBe(false);
+    expect(covered('build', 'T8')).toBe(false);
+    living.delete(1);
+    expect(covered('build', 'T9')).toBe(false);
+  });
+
+  it('turno build -- turno typecheck: due processi veri, il secondo non aspetta il primo né resta in coda (T118)', async () => {
+    fresh();
+    const { spawn } = await import('node:child_process');
+    const script = path.resolve(__dirname, '../tools/pipeline/pipeline.mjs');
+    const work = path.join(dir, 'esci.cjs');
+    fsMod.writeFileSync(work, 'process.exit(5);');
+    const inner = `node "${script}" turno typecheck -- node "${work}"`;
+    const code = await new Promise<number>((resolve) => {
+      const c = spawn(process.execPath, [script, 'turno', 'build', '--', inner], {
+        env: { ...process.env, PIPELINE_LOCK: dir, PIPELINE_TURNO_OGNI: '100', PIPELINE_TASK: 'T9', PIPELINE_TURNO: '' }, stdio: 'ignore',
+      });
+      c.on('close', (k) => resolve(k ?? -1));
+    });
+    expect(code).toBe(5); // il codice del comando più interno arriva fin qui
+    expect(fsMod.existsSync(path.join(dir, 'build.json'))).toBe(false);
+  }, 20_000);
+
+  it('i worker di vitest: limitati sotto la pipeline, quelli di sempre a mano (T118)', async () => {
+    const { testWorkers } = await import('../server/testWorkers');
+    expect(testWorkers({}, 6)).toEqual({});
+    expect(testWorkers({ PIPELINE_TASK: 'T9' }, 6)).toEqual({ maxWorkers: 6, minWorkers: 1 });
+    expect(testWorkers({ PIPELINE_TURNO: 'test' }, 6)).toEqual({ maxWorkers: 6, minWorkers: 1 });
+    expect(testWorkers({ PIPELINE_TASK: 'T9' }, 0)).toEqual({});
+    // Il numero sta in config.json, dove la pipeline tiene i turni.
+    expect(testWorkers({ PIPELINE_TASK: 'T9' }).maxWorkers).toBeGreaterThan(0);
+  });
 });
 
 // Spegnere la pipeline (T85, ADR-0090): `ferma --ora`, `ferma --dopo`, ciò che il riavvio ritrova e dice all'orchestratore.

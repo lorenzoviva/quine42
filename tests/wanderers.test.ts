@@ -80,7 +80,7 @@ describe('the wanderer with an id (T34)', () => {
     expect(countItem(readWandererState(saved, 'io')!.inventory, 'item.pane')).toBe(countItem(first.inventory(), 'item.pane'));
     const { k: again } = await boot(saved);
     expect(countItem(again.inventory(), 'item.pane')).toBe(countItem(first.inventory(), 'item.pane'));
-  }, 30_000);
+  }, 60_000);
 
   it('two wanderers in the same kernel: each is remembered apart, by name, with their own bond and state', async () => {
     const { k, models } = await boot();
@@ -128,7 +128,7 @@ describe('the wanderer with an id (T34)', () => {
     expect(again.wanderers()[1]).toEqual({ id: 'lia', nome: 'Lia' });
     expect(again.as('lia', () => countItem(again.inventory(), 'item.formaggio'))).toBe(countItem(k.as('lia', () => k.inventory()), 'item.formaggio'));
     expect(again.graph().node('persona:viandante-lia')).toBeDefined();
-  }, 30_000);
+  }, 60_000);
 
   it('a quest belongs to who accepted it (io when the plot is older)', () => {
     const quest = (viandante?: string): Plot => ({

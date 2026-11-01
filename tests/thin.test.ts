@@ -326,7 +326,7 @@ describe('what is carried, among many (T39b)', () => {
     const r = await until(server, [anna], anna.session.act({ t: 'oggetto', op: 'sposta', slot: 99, verso: 0 }));
     expect(r.ok).toBe(false);
     expect(JSON.stringify(serverInv())).toBe(was);
-  }, 30_000);
+  }, 60_000);
 
   it('crafting: a known recipe, a free one, two things put together', async () => {
     const { k, server, anna } = await annaAlone();
@@ -349,7 +349,7 @@ describe('what is carried, among many (T39b)', () => {
     const a = slotOf(anna.k, 'item.coltello');
     const b = slotOf(anna.k, 'item.mela-rossa');
     expect(typeof (await until(server, [anna], anna.k.combine(a, b)))).toBe('string');
-  }, 30_000);
+  }, 60_000);
 
   it('a container: opened with what is in it, taken from and put into; out of reach it does not open', async () => {
     const { k, server, anna, start } = await annaAlone();
@@ -391,7 +391,7 @@ describe('what is carried, among many (T39b)', () => {
     const r = await until(server, [anna], anna.session.act({ t: 'contenitore', entita: far, op: 'apri' }));
     expect(r).toMatchObject({ ok: false, motivo: 'è troppo lontano' });
     expect(k.container(far)!.filled).toBeFalsy();
-  }, 30_000);
+  }, 60_000);
 
   it('a panel of a mechanic and the actions on a tile', async () => {
     const { k, server, anna, start, said, dialogs } = await annaAlone(async (k) => {
@@ -429,6 +429,6 @@ describe('what is carried, among many (T39b)', () => {
     expect(said).toContain('è troppo lontano');
     // «Altro…» on the tile: the Council's answer.
     expect(typeof (await until(server, [anna], anna.k.freeTileAction(col, row, 'tocco la terra')))).toBe('string');
-  }, 30_000);
+  }, 60_000);
 });
 

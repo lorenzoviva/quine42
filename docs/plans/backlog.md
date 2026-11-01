@@ -2402,7 +2402,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Scrivere il risultato in `docs/sicurezza/audit-2026-11.md`: in testa la risposta alle due domande in poche righe; poi un rischio per voce con gravità, come si riproduce (provato sì/no), impatto, difesa proposta a valle. Distinguere ciò che è esposto oggi (`npm run dev` in locale) da ciò che lo diventa con il server pubblico (T45f). In coda un elenco di task di correzione proposti, in ordine di gravità: **non** aggiungerli al backlog (li propone l'orchestratore all'autore) e non scrivere `docs/pipeline/domande/` se non serve una decisione.
 - Quando è fatto: il report è committato su `task/T117`; le prove riproducibili sono descritte nel report; nessun segreto vero nel report, nei log o nei commit. Non serve la suite intera di test se cambiano solo documenti.
 
-### T118 · La CPU satura con due task: limitare test, typecheck e build — `da fare`
+### T118 · La CPU satura con due task: limitare test, typecheck e build — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 1
 - Contesto: l'autore (01/11) vede la CPU al 100 % già con due task insieme (6 core, 12 thread); i test vanno in timeout e si ripetono, sprecando crediti. Agent View è scartato: non gestisce il carico della CPU. Ipotesi dell'orchestratore, da verificare: il carico viene da test e build, non dagli agenti; `vite.config.ts` non limita i worker di Vitest e il turno (ADR-0088) copre solo la suite intera e la preview. Nasce dalle regole di ADR-0088: leggi l'ADR e `dossier` dei task che lo hanno attuato.
 - Cosa fare:
@@ -2412,6 +2412,17 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - **Da non fare** (decisione dell'autore): non abbassare la priorità dei processi. Non usare Agent View.
 - Se la decisione è architetturale, aggiornare `AGENTS.md` e l'ADR (nuovo o ADR-0088).
 - Quando è fatto: con due task attivi la suite intera non dà timeout dovuti al carico (i numeri prima e dopo nel blocco del task); `pipeline.mjs turno` mostra i turni nuovi; typecheck e test verdi; commit su `task/T118`.
+- Misure (01/11, 6 core e 12 thread, campioni ogni ~10 s, CPU di tutta la macchina):
+  | Prova | Worker | Durata | CPU media / picco | Campioni ≥ 90 % | Falliti |
+  |---|---|---|---|---|---|
+  | suite, prima | 11 (predefinito) | 907 s | 68 % / 100 % | 58 % | 44: 26 hook, 18 test, tutti timeout |
+  | suite, solo meno worker | 6 | 821 s | 57 % / 81 % | 0 % | 31: 26 hook, 5 test, tutti timeout |
+  | suite, dopo, con accanto un secondo task simulato (typecheck, build, `places.test.ts` in ciclo) | 6 | 890 s | 56 % / 100 % | 6 % | 0 timeout; 2 asserzioni dei test nuovi, corrette |
+  | suite, dopo, finale (fine di T136 senza limite, in coda, esclusa) | 6 | 885 s | 63 % / 84 % | 0 % | 0: 680/680 |
+  | la suite di T136 con il limite vecchio, mentre T118 aspettava il turno | 11 | | 58 % / 100 % | 52 % | |
+  Da soli: typecheck 10 s, build 6,5 s (un solo processo, poco carico). Agenti: claude 0,1 %, agy/gemini 0,2 % in media; Chrome 1-2 %. `kernel.test.ts` da solo a CPU scarica: 945 s e **gli stessi 26 timeout di hook**.
+- Esito: l'ipotesi era giusta a metà. La saturazione viene dai worker di Vitest (11 su 6 core: ~3/4 della macchina), non dagli agenti, e con 6 worker la suite è anche più veloce (la somma dei tempi dei test scende da 6736 a 4625 s). **I timeout però avevano anche un'altra causa**: i 26 di `kernel.test.ts` non dipendono dal carico, perché avviare un kernel supera da solo i 10 s predefiniti di un hook. Fatto: `turni.test.worker` = 6 in `config.json`, applicato da `server/testWorkers.ts` solo con `PIPELINE_TASK` o `PIPELINE_TURNO` (a mano nulla cambia); `hookTimeout` 60 s; i limiti di 20-30 s scritti in `referente`, `wanderers`, `thin`, `places`, `watch` a 60 s; turni `typecheck` e `build` (10 minuti); rientranza con `COVERS` e `coveredBy` (`PIPELINE_TURNO` ora è un elenco; la preview in background di un task copre le sue build); prompt, README, `orchestra.md`, AGENTS.md, ADR-0088. Test: 680/680, typecheck verde.
+  Limiti: il secondo task delle misure è simulato, non un task vero con il suo agente; il limite vale per gli altri worktree solo dopo l'integrazione (fino ad allora le loro suite usano 11 worker, come quella di T136); typecheck e build nel turno restano una regola del prompt. Da guardare a parte, non fatto qui: l'avvio del kernel è lento (mediana ~18 s per test in `kernel.test.ts`, 843 s su 5030 della suite) ed è la leva più grande rimasta sulla durata.
 
 ### T119 · Integrare T116 (T102, la pagina profilo) dopo T104 — `da fare`
 - Pipeline: claude · stima 2% · approvato · priorità 2
