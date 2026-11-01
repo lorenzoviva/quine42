@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="QUINE42: i tuoi crediti. Il saldo, la ricarica con Stripe Checkout e lo storico dei pagamenti." />
+    <title>QUINE42 · Crediti e ricariche</title>
+    <link rel="stylesheet" href="./site.css" />
+  </head>
+  <body class="page-wallet">
+    <!-- La navigazione (dal template docs/design/sito/pagamenti.html) -->
+    <header class="site-nav">
+      <a href="./index.html" class="nav-brand">
+        <span class="nav-logo">QUINE42</span>
+        <span class="nav-tagline">// ARCADE · VOXEL · IA</span>
+      </a>
+      <button class="nav-toggle-btn" id="nav-toggle" aria-controls="nav-links" aria-expanded="false">MENU ▼</button>
+      <nav aria-label="Pagine">
+        <ul class="nav-links" id="nav-links">
+          <li><a href="./index.html" class="nav-link">Mondo</a></li>
+          <li><a href="./carte.html" class="nav-link">Carte 3D</a></li>
+          <li><a href="./index.html#reami" class="nav-link">Reami</a></li>
+          <li><a href="./sessioni.html" class="nav-link">Sessioni</a></li>
+          <li><a href="./profilo.html" class="nav-link">Profilo</a></li>
+          <li><a href="./pagamenti.html" class="nav-link active" aria-current="page">Crediti</a></li>
+        </ul>
+      </nav>
+      <div class="nav-actions">
+        <a href="../index.html" class="comic-btn arcade cyan" id="nav-play">GIOCA SUBITO</a>
+        <button class="comic-btn arcade" id="nav-out" hidden>ESCI</button>
+      </div>
+    </header>
+
+    <main class="section-wrap">
+      <div class="section-head">
+        <span class="comic-badge pink">PORTAFOGLIO</span>
+        <h1 class="comic-title" style="font-size: 2.8rem; margin: 10px 0 0">GESTIONE CREDITI E RICARICHE</h1>
+        <p>// UN CREDITO, UN DOLLARO · STRIPE CHECKOUT</p>
+      </div>
+
+      <!-- Avvisi: ritorno da Stripe, errori -->
+      <div class="comic-alert" id="page-alert" role="status" aria-live="polite" hidden>
+        <span class="comic-badge" id="page-alert-badge">INFO</span>
+        <span class="arcade-text" id="page-alert-text" style="font-size: 0.75rem"></span>
+      </div>
+
+      <!-- L'accesso (dal template docs/design/sito/login.html) -->
+      <section class="login-container" id="login-panel" hidden>
+        <div class="login-box">
+          <div class="login-head">
+            <span class="comic-badge yellow">ACCESSO</span>
+            <h2 class="comic-title" style="font-size: 2.2rem; margin-top: 10px">ENTRA NEL MONDO</h2>
+            <p class="arcade-text text-dim" id="login-sub" style="font-size: 0.72rem">Con un account Google il tuo viandante ti segue ovunque</p>
+          </div>
+
+          <div class="login-accounts" id="login-accounts">
+            <button class="comic-btn full-width pink lg" id="btn-google-login">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12.24 10.285V13.8h6.887C18.2 16.16 15.64 18 12.24 18c-3.315 0-6-2.685-6-6s2.685-6 6-6c1.47 0 2.82.525 3.87 1.395l2.67-2.67C17.16 3.255 14.85 2.4 12.24 2.4 6.96 2.4 2.64 6.72 2.64 12s4.32 9.6 9.6 9.6c5.52 0 9.195-3.885 9.195-9.36 0-.63-.06-1.245-.165-1.955H12.24z" />
+              </svg>
+              ACCEDI CON GOOGLE
+            </button>
+            <button class="comic-btn full-width cyan" id="btn-anon-login" style="margin-top: 16px">⚡ ENTRA COME ANONIMO</button>
+            <p class="login-note">
+              Da anonimo giochi solo con i modelli locali e non puoi recuperare il viandante finché non lo leghi a Google.
+            </p>
+          </div>
+
+          <!-- Senza account sul server (sviluppo, anteprima): il viandante si sceglie per identificativo -->
+          <form class="login-direct" id="login-direct" hidden>
+            <div class="auth-divider">IDENTIFICATIVO DIRETTO</div>
+            <div class="form-group">
+              <label class="comic-label" for="login-id">ID del viandante</label>
+              <input type="text" id="login-id" class="comic-input" value="io" maxlength="40" autocomplete="off" spellcheck="false" />
+              <span class="input-hint">Su questo server non ci sono account: il viandante è quello con questo identificativo.</span>
+              <span class="input-error-msg" id="login-id-error" hidden>Solo lettere minuscole, cifre e trattini.</span>
+            </div>
+            <button type="submit" class="comic-btn full-width" id="btn-direct-login">APRI LA SCHEDA</button>
+          </form>
+        </div>
+      </section>
+
+      <div class="billing-grid" id="wallet-grid" hidden>
+        <!-- A sinistra: il saldo e come funzionano i crediti -->
+        <div>
+          <div class="comic-panel" style="margin-bottom: 24px; box-shadow: var(--shadow-hard-green)">
+            <div class="identity-head">
+              <span class="comic-badge green">SALDO</span>
+              <span class="arcade-text text-dim" style="font-size: 0.65rem; overflow-wrap: anywhere" id="wallet-who"></span>
+            </div>
+            <div class="form-group">
+              <label class="comic-label" for="realm-select">REAME</label>
+              <select id="realm-select" class="comic-select realm-select"></select>
+            </div>
+            <div class="comic-title balance-amount"><span id="wallet-amount">$0.00</span> <small>USD</small></div>
+            <p class="arcade-text text-dim" id="wallet-note" style="font-size: 0.72rem; line-height: 1.6; margin: 0"></p>
+            <button class="comic-btn sm pink" id="btn-link-google" style="margin-top: 14px" hidden>LEGA A GOOGLE</button>
+          </div>
+
+          <div class="comic-panel yellow-shadow">
+            <h3 class="comic-title" style="font-size: 1.3rem; margin-bottom: 12px">COME FUNZIONANO I CREDITI</h3>
+            <ul style="padding-left: 18px; margin: 0; font-size: 0.9rem; line-height: 1.6; color: var(--comic-paper)">
+              <li style="margin-bottom: 8px">Un credito vale un dollaro, e ogni reame ha il suo saldo.</li>
+              <li style="margin-bottom: 8px">I crediti coprono le chiamate alle intelligenze artificiali che generano trame, dialoghi e forme: il loro costo, più l’1% per la piattaforma.</li>
+              <li style="margin-bottom: 8px">Ciò che arricchisce il mondo di tutti si divide in parti uguali tra chi è collegato.</li>
+              <li>A crediti esauriti si continua a giocare, con risposte più semplici.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- A destra: la ricarica -->
+        <div>
+          <div class="comic-panel cyan-shadow">
+            <h2 class="comic-title cyan" style="font-size: 1.6rem; margin-bottom: 18px">RICARICA CON STRIPE</h2>
+
+            <span class="comic-label">SCEGLI UN TAGLIO DI RICARICA</span>
+            <div class="credit-tiers" id="tier-container">
+              <button type="button" class="tier-card" data-val="5" aria-pressed="false">
+                <span class="comic-badge cyan">BASE</span>
+                <div class="tier-price">$5.00</div>
+                <div class="tier-credits">+5 CREDITI</div>
+              </button>
+              <button type="button" class="tier-card" data-val="10" aria-pressed="false">
+                <span class="comic-badge yellow">MEDIO</span>
+                <div class="tier-price">$10.00</div>
+                <div class="tier-credits">+10 CREDITI</div>
+              </button>
+              <button type="button" class="tier-card" data-val="20" aria-pressed="false">
+                <span class="comic-badge pink">GRANDE</span>
+                <div class="tier-price">$20.00</div>
+                <div class="tier-credits">+20 CREDITI</div>
+              </button>
+              <button type="button" class="tier-card" data-val="50" aria-pressed="false">
+                <span class="comic-badge green">MASSIMO</span>
+                <div class="tier-price">$50.00</div>
+                <div class="tier-credits">+50 CREDITI</div>
+              </button>
+            </div>
+
+            <div class="form-group">
+              <label class="comic-label" for="custom-amount">OPPURE IMPORTO A SCELTA ($ USD)</label>
+              <input type="text" inputmode="decimal" id="custom-amount" class="comic-input" placeholder="Da 1 a 1000" value="10" autocomplete="off" />
+              <span class="input-hint">Da $1.00 a $1000.00.</span>
+              <span class="input-error-msg" id="amount-error" hidden>Scrivi un importo da 1 a 1000 dollari.</span>
+            </div>
+
+            <div style="margin-top: 24px">
+              <button class="comic-btn full-width pink lg" id="btn-stripe-pay" disabled>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" />
+                </svg>
+                <span id="pay-label">PAGA CON STRIPE</span>
+              </button>
+              <span class="input-error-msg" id="pay-why" hidden></span>
+              <div style="text-align: center; margin-top: 10px">
+                <span class="arcade-text text-dim" style="font-size: 0.65rem">// CARTE E GOOGLE PAY, SU UNA PAGINA PROTETTA DI STRIPE //</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="wallet-ledgers" hidden>
+        <!-- I pagamenti ricevuti (world/pagamenti.json) -->
+        <div class="comic-panel ledger-panel">
+          <div class="ledger-head">
+            <h2 class="comic-title" style="font-size: 1.6rem; margin: 0">CRONOLOGIA DEI PAGAMENTI</h2>
+            <span class="comic-badge cyan">RICEVUTI</span>
+          </div>
+          <div class="comic-table-wrap">
+            <table class="comic-table">
+              <thead>
+                <tr>
+                  <th>ID TRANSAZIONE</th>
+                  <th>DATA E ORA</th>
+                  <th>IMPORTO</th>
+                  <th>ACCREDITO</th>
+                </tr>
+              </thead>
+              <tbody id="payments-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- I consumi (world/consumi.json → paganti) -->
+        <div class="comic-panel ledger-panel">
+          <div class="ledger-head">
+            <h2 class="comic-title" style="font-size: 1.6rem; margin: 0">STORICO DEI CONSUMI</h2>
+            <span class="comic-badge yellow">IN TUTTO: <span id="spending-total">$0.00</span></span>
+          </div>
+          <div class="comic-table-wrap">
+            <table class="comic-table">
+              <thead>
+                <tr>
+                  <th>GIORNO</th>
+                  <th>RICHIESTE</th>
+                  <th>COSTO</th>
+                </tr>
+              </thead>
+              <tbody id="spending-body"></tbody>
+            </table>
+          </div>
+          <p class="input-hint" style="margin: 12px 0 0">Gli ultimi 30 giorni, per le richieste a tuo carico. La tua parte delle spese comuni è già nel saldo ma non compare qui.</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Il tramonto synthwave e il segreto dei gerboa (allusivo) -->
+    <footer class="site-footer">
+      <div class="footer-grid-floor"></div>
+
+      <div class="footer-horizon">
+        <div class="jerboa-peek-container" title="Due sagome all'orizzonte...">
+          <div class="jerboa-tooltip">// DUE ORECCHIE LUNGHE NELLA NOTTE...</div>
+          <svg class="jerboa-ears-svg" viewBox="0 0 64 38" aria-hidden="true">
+            <path d="M 16 38 C 14 20, 4 8, 12 2 C 20 -4, 26 14, 28 38 Z" />
+            <path d="M 48 38 C 50 20, 60 8, 52 2 C 44 -4, 38 14, 36 38 Z" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="footer-brand">QUINE42</div>
+      <p class="footer-quote">
+        "Il sentiero scorre sotto i tuoi passi e si apre a ogni scelta.<br />
+        Ciò che pronunci diventa cammino, ciò che componi diventa mondo."
+      </p>
+
+      <div class="footer-links">
+        <a href="../index.html">GIOCO</a>
+        <a href="./index.html">MONDO</a>
+        <a href="./carte.html">CARTE</a>
+        <a href="./index.html#reami">REAMI</a>
+        <a href="./sessioni.html">SESSIONI</a>
+        <a href="./profilo.html">PROFILO</a>
+        <a href="./pagamenti.html">CREDITI</a>
+      </div>
+
+      <div class="footer-copy">QUINE42 © 2026 · Voxel e modelli MarkovJunior 3D · Generato con intelligenza artificiale</div>
+    </footer>
+
+    <script type="module" src="./pagamenti.ts"></script>
+  </body>
+</html>

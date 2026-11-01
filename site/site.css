@@ -1566,7 +1566,8 @@ main > section[id] {
 
 /* ── Il profilo del viandante (T102, dal template docs/design/sito/profilo.html e login.html) ── */
 .page-profile .comic-alert[hidden],
-.page-profile [hidden] {
+.page-profile [hidden],
+.page-wallet [hidden] {
   display: none !important;
 }
 .profile-grid {
@@ -1753,5 +1754,80 @@ main > section[id] {
   }
   .avatar-preview-box {
     height: 280px;
+  }
+}
+
+/* ── I crediti (T105, dal template docs/design/sito/pagamenti.html) ── */
+.billing-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  gap: 32px;
+  margin-bottom: 40px;
+}
+.credit-tiers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.tier-card {
+  font: inherit;
+  color: inherit;
+  background: var(--comic-ink);
+  border: 2px solid var(--comic-ink-surface);
+  padding: 16px 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.tier-card:hover {
+  border-color: var(--neon-cyan);
+  transform: translateY(-2px);
+}
+.tier-card:focus-visible {
+  outline: 2px solid var(--neon-cyan);
+  outline-offset: 2px;
+}
+.tier-card.selected {
+  border: 2px solid var(--neon-pink);
+  box-shadow: 3px 3px 0 var(--neon-pink);
+  background: #180927;
+}
+.tier-price {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--neon-yellow);
+  margin: 4px 0;
+}
+.tier-credits {
+  font-family: var(--font-arcade);
+  font-size: 0.65rem;
+  color: var(--neon-cyan);
+}
+.balance-amount {
+  color: var(--neon-green);
+  font-size: 3.5rem;
+  line-height: 1;
+  margin: 8px 0 14px;
+  overflow-wrap: anywhere;
+}
+.balance-amount small {
+  font-size: 1.4rem;
+  color: var(--comic-paper);
+}
+.ledger-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.ledger-panel + .ledger-panel {
+  margin-top: 32px;
+}
+@media (max-width: 900px) {
+  .billing-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

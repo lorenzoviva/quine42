@@ -137,7 +137,7 @@ export async function whoAsks(
   return { id, account: 'locale' };
 }
 
-function send(res: ServerResponse, status: number, body: unknown): void {
+export function send(res: ServerResponse, status: number, body: unknown): void {
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Cache-Control', 'no-store');
@@ -158,7 +158,7 @@ function readBody(req: IncomingMessage): Promise<string> {
   });
 }
 
-function bearer(req: IncomingMessage): string | undefined {
+export function bearer(req: IncomingMessage): string | undefined {
   const h = req.headers.authorization;
   const m = typeof h === 'string' ? /^Bearer\s+(.+)$/i.exec(h.trim()) : null;
   return m?.[1];
