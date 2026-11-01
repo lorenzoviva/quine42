@@ -33,13 +33,14 @@ Modello di una voce:
 
 ### V-002 · Il proxy di Gemini spende la chiave per chiunque
 - Gravità: critica (oggi: alta)
-- Stato: `specificata`
+- Stato: `chiusa`
 - Superficie: `server/geminiProxy.ts`, `/api/gemini`
 - Proprietà violata: la chiave si spende solo per il gioco e nei budget decisi
-- Prova: solo lettura del codice (T117); misurata dal kit (`esiti/2026-11-01.json`): FALLA V-002.a-d, ciò che arriverebbe a Google è stato contato su un Google finto
+- Prova: solo lettura del codice (T117); misurata dal kit prima di T123 (`esiti/2026-11-01.json`, 01/11): FALLA V-002.a-d, ciò che arriverebbe a Google è stato contato su un Google finto. Dopo T123: test con Google finto (`tests/sicurezza/gemini.test.ts`) e kit (`esiti/2026-11-01-dopo-T123.json`, T140): V-002.a-d ok, con V-002.d riscritta perché raggiunga il tetto in dollari (9 chiamate da circa 1 $ su 20, poi 402); come era scritta, 20 chiamate piccole, restava FALLA: costano circa 0,25 $, sotto il tetto. Dopo le altre correzioni la riprova T134
 - Contromisura: elenco dei modelli ammessi, corpo massimo ridotto, tetto di spesa nel proxy, solo da loopback con controllo di `Origin`; in multigiocatore il server chiama Google direttamente, senza route pubblica. La chiave resta fuori dal browser.
 - Task: T123, T133
-- Test: `tests/sicurezza/rotte.test.ts`
+- Test: `tests/sicurezza/gemini.test.ts`, `tests/sicurezza/rotte.test.ts`
+- Esito: chiusa da T123 (ADR-0099), 01/11/2026, branch `task/T123`. Resta, ed è ciò che l'ADR decide: da questa macchina, senza identità, si spende fino al tetto del giorno (10 $, confermato «per ora» dall'autore il 01/11). Per T133: il server di produzione non monta la route e chiede il tetto nel `.env`.
 
 ### V-003 · La cartella di git non è protetta
 - Gravità: critica su file system che ignorano le maiuscole (Windows, l'ambiente dell'autore)
@@ -220,7 +221,7 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | Voce | Kit | F12 | Suite | Non coperto |
 |---|---|---|---|---|
 | V-001 | a b c d e f g h i j k l m | n o | `rotte.test.ts` | — |
-| V-002 | a b c d | — | `rotte.test.ts` | il tetto di spesa si vede solo come 20 chiamate su 20 |
+| V-002 | a b c d | — | `gemini.test.ts`, `rotte.test.ts` | un processo di questa macchina spende fino al tetto del giorno: voluto (ADR-0099), un loop di chiamate piccole non si ferma prima |
 | V-003 | a b c d e f g h | — | `rotte.test.ts` (solo il nome esatto: le varianti valgono su NTFS) | `cleanBranch` della sessione: T121 |
 | V-004 | a b c d e | — | `rotte.test.ts` | — |
 | V-005 | a b c | — | — | la corsa con un commit del mondo in mezzo: T125 |

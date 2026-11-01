@@ -1,0 +1,46 @@
+{
+ "data": "2026-11-01",
+ "commit": "951c92c",
+ "vite": "5.4.10",
+ "node": "v22.19.0",
+ "piattaforma": "win32",
+ "solo": [
+  "V-002"
+ ],
+ "riepilogo": {
+  "ok": 4,
+  "falle": 0,
+  "errori": 0,
+  "saltate": 0
+ },
+ "prove": [
+  {
+   "id": "V-002.a",
+   "voce": "V-002",
+   "proprieta": "un modello fuori dall’elenco non arriva a Google",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-002.b",
+   "voce": "V-002",
+   "proprieta": "un’altra origine non spende la chiave",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-002.c",
+   "voce": "V-002",
+   "proprieta": "un corpo da 5 MB non arriva a Google",
+   "esito": "ok",
+   "dettaglio": "risposta 413"
+  },
+  {
+   "id": "V-002.d",
+   "voce": "V-002",
+   "proprieta": "il tetto di spesa del giorno ferma un loop: 20 chiamate da circa 1 $ non arrivano tutte a Google e l’ultima ha 402",
+   "esito": "ok",
+   "dettaglio": "9 su 20 arrivate a Google, ultima risposta 402"
+  }
+ ]
+}

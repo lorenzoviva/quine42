@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { defineConfig, loadEnv, searchForWorkspaceRoot } from 'vite';
-import { geminiProxy } from './server/geminiProxy';
+import { GeminiGate, geminiProxy } from './server/geminiProxy';
 import { universeStore } from './server/universeStore';
 import { sessionServer, getActiveUniverseKernel } from './server/session';
 import { accountRoute, accountSettings } from './server/account';
@@ -18,12 +18,14 @@ export default defineConfig(({ mode }) => {
   // Accounts (T44b): on only with FIREBASE_PROJECT_ID; the browser asks /api/account how to sign in.
   const accounts = accountSettings(env);
   const universesDir = path.resolve(process.cwd(), 'universes');
+  // The only holder of the key (T123): models on a list, a daily cap; the route for the browser, `direct()` for the worlds of many.
+  const gemini = new GeminiGate({ apiKey: env.GEMINI_API_KEY, dailyCap: env.GEMINI_TETTO_GIORNALIERO, universesDir, ledgerFile: path.join(universesDir, '.spesa-gemini.json') });
   return {
     // Universes live next to the kernel, each a git repository of its own (ignored by the kernel's).
     // The games of many (T38): their worlds run in this process, one per universe, clients over /api/session.
     // The subscriptions' queue (T68): the slow requests on disk until a process using the CLIs serves them.
     plugins: [
-      geminiProxy(env.GEMINI_API_KEY),
+      geminiProxy(gemini),
       universeStore(universesDir),
       accountRoute(accounts),
       stripeRoute({
@@ -36,7 +38,7 @@ export default defineConfig(({ mode }) => {
       wandererRoute({ accounts, universesDir, getActiveKernel: getActiveUniverseKernel }),
       // The site's credits page (T105): the account's balance and their lines of the two ledgers.
       walletRoute({ accounts, universesDir, getActiveKernel: getActiveUniverseKernel }),
-      sessionServer(accounts),
+      sessionServer(accounts, gemini.direct()),
       subscriptionQueue(path.resolve(process.cwd(), 'universes', '.coda')),
     ],
     // Writing a universe must not reload the page (dev server watches the project folder).

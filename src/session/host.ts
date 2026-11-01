@@ -1,6 +1,6 @@
 // A universe of many on the server (T38, ADR-0058): its repository opened through the universe store, the
-// kernel booted headless (as in the tests: no DOM, programs run inline), the Council on Gemini through the
-// proxy (or the local models), and the world ticking at 60 Hz whether or not anyone is connected.
+// kernel booted headless (as in the tests: no DOM, programs run inline), the Council straight on Gemini with no
+// public route (`gemini`, from server/geminiProxy.ts; or the local models), and the world ticking at 60 Hz whether or not anyone is connected.
 // Loaded by server/session.ts through Vite (ssrLoadModule), so the kernel's imports work as in the browser.
 
 import { Kernel } from '../kernel/kernel';
@@ -25,11 +25,11 @@ export interface UniverseHost {
 }
 
 /**
- * Opens a universe of many and starts its world. `base` is the address of this same server (the store and the
- * proxy are its HTTP routes). A universe that does not exist, or is a game alone, is not opened: alone the
+ * Opens a universe of many and starts its world. `base` is the address of this same server (the store is its HTTP
+ * route); `gemini` is the `fetch` that spends the key, which stays in the server: without it, the local models. A universe that does not exist, or is a game alone, is not opened: alone the
  * kernel stays in the browser.
  */
-export async function openUniverse(opts: { name: string; base: string; offline?: boolean; verify?: Verifier; masterUid?: string }): Promise<UniverseHost | { error: string }> {
+export async function openUniverse(opts: { name: string; base: string; offline?: boolean; gemini?: typeof fetch; verify?: Verifier; masterUid?: string }): Promise<UniverseHost | { error: string }> {
   const client = await UniverseClient.connect(opts.name, opts.base);
   if (!client) return { error: 'nessun archivio degli universi' };
   const snap = await client.load();
@@ -38,10 +38,8 @@ export async function openUniverse(opts: { name: string; base: string; offline?:
   const up = upgradeFromSeed(snap.files, bundledFiles);
   if (Object.keys(up.changes).length) await client.commit(up.changes, `aggiornamento dal kernel: ${up.updated.slice(0, 6).join(', ') || 'seme'}${up.updated.length > 6 ? '…' : ''}`, 'kernel');
   const ai = readConfig(up.files).config.ai;
-  const endpoint = `${opts.base}/api/gemini`;
-  const online = !opts.offline && (await GeminiModels.available(endpoint));
-  const models: Models = online
-    ? new GeminiModels({ endpoint, textModel: ai.textModel, limits: { text: ai.maxText }, thinking: ai.thinking, timeout: (ai.timeout ?? 120) * 1000 })
+  const models: Models = !opts.offline && opts.gemini
+    ? new GeminiModels({ fetchImpl: opts.gemini, textModel: ai.textModel, limits: { text: ai.maxText }, thinking: ai.thinking, timeout: (ai.timeout ?? 120) * 1000 })
     : new MockModels();
   const kernel = await Kernel.boot({ files: up.files, store: memoryStore(), models, chunks: new UniverseChunks(client), backend: client, past: snap.log ?? [] });
   const session = new SessionServer(kernel, { verify: opts.verify, masterUid: opts.masterUid });

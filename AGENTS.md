@@ -49,7 +49,7 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
 7. **Il kernel è il pavimento**: sopravvive a NaN, nil, cicli infiniti, binding recisi. Le API del
    `Host` validano gli input e restituiscono `undefined` (mai `null`).
 8. **La corona è nascosta finché il tappeto funziona** (ADR-0009).
-9. **La chiave API non arriva mai al browser**: passa dal proxy di Vite (`server/geminiProxy.ts`).
+9. **La chiave API non arriva mai al browser**: la tiene solo `GeminiGate` (`server/geminiProxy.ts`, ADR-0099): modelli a elenco, corpo limitato, tetto di spesa giornaliero; la route solo da questa macchina e dalla stessa origine, in multigiocatore il server chiama Google senza route.
 10. **Ciò che sembra invalicabile lo è**: il terreno blocca a caselle, i modelli con i loro voxel (ADR-0041);
     ogni luogo è connesso (varchi + sentieri scavati dal kernel, porte delle strutture sul sentiero; niente cose solide su punti di articolazione né davanti alle porte, ADR-0064).
 11. **Solo testo, niente immagini generate** (ADR-0037): contenuti come dati e ogni aspetto come programma
@@ -89,7 +89,7 @@ npm run sicurezza:prove # le prove dell'autore contro un server vero in un proge
 npm run abbonamento  # serve la coda /api/coda con le CLI (Claude, Antigravity, ADR-0077)
 ```
 
-`.env`: `GEMINI_API_KEY=...` (ignorato da git); per gli account in multigiocatore `FIREBASE_PROJECT_ID` (e `FIREBASE_API_KEY`,
+`.env`: `GEMINI_API_KEY=...` (ignorato da git), `GEMINI_TETTO_GIORNALIERO` (dollari al giorno per la chiave, predefinito 10; la spesa in `universes/.spesa-gemini.json`, ADR-0099); per gli account in multigiocatore `FIREBASE_PROJECT_ID` (e `FIREBASE_API_KEY`,
 `FIREBASE_AUTH_DOMAIN`, `QUINE_MASTER`; con l'emulatore `FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099` e un progetto `demo-…`, ADR-0082); per i pagamenti Stripe in prova `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` (e `STRIPE_TAX_CODE` per i Managed Payments, ADR-0083). Senza chiave o con `?offline`: modelli locali, texture e
 ostacoli procedurali. URL: `?skip` salta intro e Genesi; `?dev&teleport=46,0` porta oltre il tappeto (o `teleport=X,Y` dovunque: anche dentro una stanza, vedi «Convalida nel browser»); in sviluppo `?universo=<nome>` apre un altro
 universo di `universes/` e `?viandante=<id>` sceglie il viandante della scheda in multigiocatore (due schede, due viandanti).
@@ -100,7 +100,7 @@ In console del browser: `window.quine` (o `window.rune`) è il kernel (`.feed()`
 ## Struttura
 
 ```
-server/geminiProxy.ts   proxy /api/gemini → Google, chiave da .env
+server/geminiProxy.ts   l'unico varco della chiave (ADR-0099): GeminiGate, la route /api/gemini (solo loopback) e direct() per i mondi di molti
 server/universeStore.ts /api/universe: ogni universo è un repository git in universes/<nome>/ (e il ramo del master, `rami/master`; il clone)
 server/subscriptionQueue.ts /api/coda: la coda su disco degli abbonamenti (`universes/.coda/`), servita da un processo che usa le CLI (ADR-0077)
 server/session.ts       /api/session (WebSocket, solo npm run dev): i client delle partite in multigiocatore (ADR-0058)
