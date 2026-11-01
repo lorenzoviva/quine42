@@ -2288,3 +2288,18 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   le pagine giusti, segreto dei gerboa allusivo (niente corona, Concilio, studio), nessun meta-gioco né «ADR-» nei testi, nessun errore in
   console. Correggi da te i difetti piccoli (CSS, link); scrivi gli altri qui.
 - Quando è fatto: verifica nel browser con screenshot di ogni pagina (desktop e mobile) descritti nell'esito; difetti corretti o elencati; typecheck verde.
+
+### T113 · Corona: il lampione intero e il drone in scala 1:2 dai modelli dell'autore — `da fare`
+- Pipeline: claude · stima 4% · approvato · priorità 20 · browser
+- Contesto: richiesta dell'autore del 01/11. Ha ridisegnato a mano due modelli della corona in `lab/mjx/models/handmade/`:
+  `lampione.xml` (molto alto; già copiato in `universe/models/corona-lampione.xml` e girato di π in `corona.ts`, commit `8ca9053`) e
+  `drone-xl.xml` (voxel raddoppiati per avere più definizione). Il lampione nel gioco esce **tagliato in altezza**: l'autore sospetta la taglia
+  (`corona-lampione` è `classe: mobile`, taglia media, in `universe/models/index.json`; ADR-0092, `boxOf`/`tilesOf`/`densityOf` in
+  `src/mj/classes.ts`, `vpt` 8, ADR-0049). Le copie `lampione copy*.xml` sono prove dell'autore: non toccarle.
+- Cosa fare: (1) trova dove la scatola o la taglia tagliano il lampione (classe/taglia della voce, scatola del programma rispetto a
+  `boxOf`, lettura in `forms.ts`/`src/mj/`) e fa' che si veda **intero** alla sua altezza, senza rimpicciolirlo e senza cambiare gli altri modelli
+  (la via più semplice: classe o taglia della voce adatte, o la scatola dichiarata rispettata per i modelli della corona; se cambi il codice,
+  un test). (2) Riduci `drone-xl.xml` in scala 1:2 (metà voxel per asse: scatola, coordinate e regole del programma; colori e parti uguali) e
+  sostituiscilo a `universe/models/corona-drone.xml`, controllando che i droni in `corona3d.ts` volino come prima.
+- Quando è fatto: verifica nel browser (`?skip&offline`, viale della corona con `?dev&teleport=46,0`): lampioni interi e droni visibili, screenshot
+  descritti nell'esito; nessun errore in console; `npm test` dei modelli/forme e typecheck verdi.
