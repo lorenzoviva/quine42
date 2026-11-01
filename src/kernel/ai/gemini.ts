@@ -1,4 +1,4 @@
-// Google Gemini through the local proxy (/api/gemini, see server/geminiProxy.ts).
+// Google Gemini through server/geminiProxy.ts: its route /api/gemini in the browser, its `direct()` on the server.
 //
 // What a call costs is counted from every answer (prompt, cached prompt, answer and reasoning) and
 // reported to the kernel's usage ledger (onCall). Reasoning is asked `low` unless a call says otherwise.
@@ -130,6 +130,8 @@ export class GeminiModels implements Models {
         report(j.usageMetadata, { retries });
         return j;
       }
+      // The proxy's daily cap (T123): nothing more today, and whoever stops at a budget stops here too.
+      if (r.status === 402) throw new BudgetError('la spesa del giorno');
       last = `${r.status} ${j.error?.message ?? r.statusText}`;
       if (r.status !== 429 && r.status < 500) break;
       if (attempt < RETRIES) {

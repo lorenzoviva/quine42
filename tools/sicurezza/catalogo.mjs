@@ -240,13 +240,16 @@ export const PROBES = [
     id: 'V-002.d',
     voce: 'V-002',
     fase: 'A',
-    proprieta: 'senza identità non si spende la chiave: un loop di 20 chiamate è fermato da un tetto',
+    // The cap is in dollars (ADR-0099, 10 a day unless `.env` says otherwise), so the loop has to cost enough to reach it: calls of about
+    // 1 $ each, as the cap counts them (a long prompt on the dearest model on the list, an answer that does not say what it cost).
+    proprieta: 'il tetto di spesa del giorno ferma un loop: 20 chiamate da circa 1 $ non arrivano tutte a Google e l’ultima ha 402',
     async run(ctx) {
       const n = ctx.network().length;
-      const model = JSON.parse(ctx.seedConfig()).ai?.textModel ?? 'gemini-3.1-flash-lite';
-      for (let i = 0; i < 20; i++) await post(ctx, `/api/gemini/models/${model}:generateContent`, { contents: [] });
+      const body = JSONB({ contents: 'x'.repeat(1900 * 1024) });
+      let last = 0;
+      for (let i = 0; i < 20; i++) last = (await post(ctx, '/api/gemini/models/gemini-4-argon:generateContent', body)).status;
       const through = geminiSince(ctx, n).length;
-      return { ok: through < 20, dettaglio: `${through} su 20 arrivate a Google` };
+      return { ok: through < 20 && last === 402, dettaglio: `${through} su 20 arrivate a Google, ultima risposta ${last}` };
     },
   },
 

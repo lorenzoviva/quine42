@@ -5,7 +5,7 @@ import type { AddressInfo } from 'node:net';
 import os from 'node:os';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
-import { geminiProxy } from '../../server/geminiProxy';
+import { GeminiGate, geminiProxy } from '../../server/geminiProxy';
 import { handleStripeWebhookEvent } from '../../server/stripe';
 import { subscriptionQueue } from '../../server/subscriptionQueue';
 import { universeStore } from '../../server/universeStore';
@@ -101,7 +101,7 @@ describe('il proxy di Gemini', () => {
   };
 
   /** A request by node:http: `fetch` here is the stub above. */
-  const send = (base: string, model: string, headers: Record<string, string> = {}) =>
+  const send = (base: string, model: string, headers: Record<string, string> = { 'Content-Type': 'application/json' }) =>
     new Promise<void>((resolve, reject) => {
       const req = http.request(`${base}/api/gemini/models/${model}:generateContent`, { method: 'POST', headers }, (res) => {
         res.resume();
@@ -111,24 +111,28 @@ describe('il proxy di Gemini', () => {
       req.end('{}');
     });
 
-  // Open: T123.
-  it.fails('V-002 un modello fuori dall\'elenco non arriva a Google', async () => {
-    const proxy = await serve(geminiProxy('finta'));
+  const open = () => serve(geminiProxy(new GeminiGate({ apiKey: 'finta' })));
+
+  it('V-002 un modello fuori dall\'elenco non arriva a Google', async () => {
+    const proxy = await open();
     const calls = asked();
     try {
       await send(proxy.base, 'gemini-sonda-fuori-elenco');
       expect(calls).toEqual([]);
+      // The control: the same request with a model on the list does arrive, so a refusal here means something.
+      await send(proxy.base, 'gemini-3.1-flash-lite');
+      expect(calls).toHaveLength(1);
     } finally {
       proxy.server.close();
       vi.unstubAllGlobals();
     }
   });
 
-  it.fails('V-002 un\'altra origine non spende la chiave', async () => {
-    const proxy = await serve(geminiProxy('finta'));
+  it('V-002 un\'altra origine non spende la chiave', async () => {
+    const proxy = await open();
     const calls = asked();
     try {
-      await send(proxy.base, 'gemini-3.1-flash-lite', { Origin: 'http://altro.example' });
+      await send(proxy.base, 'gemini-3.1-flash-lite', { 'Content-Type': 'application/json', Origin: 'http://altro.example' });
       expect(calls).toEqual([]);
     } finally {
       proxy.server.close();

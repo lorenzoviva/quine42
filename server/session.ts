@@ -58,7 +58,7 @@ function wsLink(ws: WebSocket) {
   };
 }
 
-export function sessionServer(accounts?: AccountSettings): Plugin {
+export function sessionServer(accounts?: AccountSettings, gemini?: typeof fetch): Plugin {
   return {
     name: 'rune-session',
     configureServer(server: ViteDevServer) {
@@ -95,7 +95,7 @@ export function sessionServer(accounts?: AccountSettings): Plugin {
           const port = (server.httpServer?.address() as AddressInfo | null)?.port ?? 5173;
           h = server
             .ssrLoadModule('/src/session/host.ts')
-            .then((mod) => mod.openUniverse({ name, base: `http://localhost:${port}`, offline, verify: accounts?.verify, masterUid: accounts?.masterUid }))
+            .then((mod) => mod.openUniverse({ name, base: `http://localhost:${port}`, offline, gemini, verify: accounts?.verify, masterUid: accounts?.masterUid }))
             .catch((e: Error) => ({ error: e.message }));
           activeHosts.set(name, h);
           // A universe that could not open is tried again by the next client.
