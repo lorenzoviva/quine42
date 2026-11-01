@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 01/11/2026, fine dell'epoca 188 su **claude** (crediti: vedi `stato`).
+Aggiornato il 01/11/2026, fine dell'epoca 189 su **claude** (crediti: vedi `stato`).
 
 - **Tetto di Claude a 2** (richiesta dell'autore, 01/11): attivo dopo il riavvio delle 13:35; `stato` dice tetto 2, slot 2. L'autore dice che con il Pro i limiti di Claude sono 5 volte più alti.
 
@@ -36,6 +36,7 @@ Aggiornato il 01/11/2026, fine dell'epoca 188 su **claude** (crediti: vedi `stat
 - **Sicurezza e CPU (01/11)**: T117 (audit, p0) e T118 (CPU satura con due task, p1) richiesti e approvati dall'autore, senza interrompere i task in corso. Agent View scartato dall'autore; niente abbassamento della priorità dei processi. Le correzioni proposte da T117 vanno portate all'autore.
 - **Sicurezza, T117 integrato; T120-T134 approvati dall'autore** (priorità 3-17, tutti su Claude, sezione «La sicurezza» del backlog). Decisione dell'autore: nel gioco tutto si può modificare tranne i crediti; contano la sandbox, i crediti e il blocco delle scritture Lua dei non master (T120, confermate senza autenticazione nel codice). Niente permessi per viandante (R8 ridotta). T45f dipende ora da T133 e T134. Se un filtro ferma T122, la domanda torna all'autore (persona esperta).
 - **Riavvio**: spenta alle 13:08 (`ferma --dopo`, T115 finito), riaccesa alle 13:35 con il tetto 2 di Claude; nessun task interrotto da riprendere.
+- **Aspetto dall'autore (chiesto in chat, epoca 189)**: 1) `npm run sicurezza:prove` e blocchi F12 sul base, blocco 3 compreso, prima di integrare T120; 2) va bene il tetto Gemini di 10 $ al giorno di T123? 3) T45f, T88.
 - **Cosa si aspetta**:
   0. **T137 integrato**: kit `npm run sicurezza:prove`, prima misura 22 ok, 51 FALLA (`docs/sicurezza/esiti/2026-11-01.json`). **Chiesto all'autore** di lanciare kit e blocchi F12 sul base, blocco 3 compreso (l'agente non l'ha concluso: V-001.n, V-001.o, V-006.g), **prima di integrare T120**: T120 può girare, ma non si integra prima. Gli esiti diventano voci del registro e task. Priorità alzate da me per la misura: **T122 p2** (V-019, prototipi JS raggiungibili da Lua, uscita non provata), **T131 p2** (V-014, `.env` leggibile dal server di sviluppo).
   1. **T120 e seguenti** (sicurezza, p3-17), secondo le dipendenze.
@@ -47,11 +48,11 @@ Aggiornato il 01/11/2026, fine dell'epoca 188 su **claude** (crediti: vedi `stat
 
 ## Task attivi e in corso
 
-- **In corso** (all'ultimo `stato`): **T123** su Claude; **T139** al controllo successivo.
-- **Pronti su Claude**: **T139** (p1) → **T122 T131** (p2) → **T126 T128 T132** (sicurezza) → **T106** (p72) → **T89a** (p75); bloccati **T120** e **T124** (da T139), T121 T125 T127 T129 T130 T133 T134 (dalle correzioni), **T89b-e** (da T89a).
+- **In corso** (all'ultimo `stato`): **T139** su Claude; il secondo slot prende T122 al controllo successivo.
+- **Pronti su Claude**: **T122 T131** (p2) → **T126 T128 T132** (sicurezza) → **T106** (p72) → **T89a** (p75); bloccati **T140** (da T139), **T120** e **T124** (da T139), T121 T125 T127 T129 T130 T133 T134 (dalle correzioni), **T89b-e** (da T89a).
 - **Da integrare**: **T105** (tramite T139), **T123** (tramite T140, che dipende da T139; poi `integra T140`, `integra T123`). T136, T137, T138 e T118 integrati il 01/11.
 - **Integrati di recente**: **T104** (22 timeout su 675 nella suite, estraneità provata solo in 3 file: se restano dopo T118, ricontrollare `forms.ts` e `cards.ts`), **T115**, **T57b**, **T114**, **T103**, **T57c**, **T113**, **T112**, **T111**, **T101**, **T110**, **T109**.
-- **Crediti** (01/11 dopo le 15:12 UTC): Claude settimana 98 %, 5h 84 % (reset 05/11 16:00; 5h alle 17:30); Gemini settimana 8 %, sotto soglia: nessun task nuovo (reset 05/11 17:37); Argon fermo fino al 04/11.
+- **Crediti** (01/11, circa 18:45 UTC): Claude settimana 95 %, 5h 87 % (reset 05/11 16:00; 5h alle 22:29); Gemini settimana 8 %, sotto soglia: nessun task nuovo (reset 05/11 17:37); Argon fermo fino al 04/11.
 
 - **Prossimi passi**: T123 ha dato la prima suite verde con T118 e T136 (715 passati, 1 todo, nel suo worktree): i timeout di T136, T137 e T105 erano senza T118; T139 lo riconferma con T105. Ricevere gli esiti dell'autore. **Da far decidere all'autore**: tetto Gemini di 10 $ al giorno scelto da T123 (`GEMINI_TETTO_GIORNALIERO`).
 
