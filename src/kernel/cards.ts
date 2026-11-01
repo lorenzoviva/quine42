@@ -77,6 +77,8 @@ export interface Card extends Carta {
   utilizzi: Uses;
   /** With `shares`, for a card that came with a clone: who gets what of each of its uses (T45c). */
   quote?: Record<string, number>;
+  /** With `shares`: the fingerprint of the content as it is now (the site's cards show it, T104). */
+  impronta?: number[];
 }
 
 /** world/carte.json */
@@ -114,15 +116,23 @@ export function allCards(files: FileMap, shares = false): Card[] {
   const ledger = readCards(files);
   const cfg = shares ? repairEredita(parse(files['universe.json'])?.eredita) : undefined;
   const out: Card[] = [];
+  // What a data module holds is often measured as the whole module: one fingerprint per text.
+  const prints = new Map<string, number[]>();
+  const printOf = (text: string) => {
+    let p = prints.get(text);
+    if (!p) prints.set(text, (p = fingerprint(text)));
+    return p;
+  };
   // `holder` carries the card (`holder.carta`); a place's card is the ledger's entry itself.
   const push = (id: string, tipo: CardKind, nome: string, file: string, holder: any, content: () => string = () => contentText(holder)) => {
     const c = tipo === 'luogo' ? holder : holder?.carta;
     if (!isCarta(c)) return;
     const card: Card = { id, tipo, nome, file, autore: c.autore, pagante: c.pagante, titolare: c.titolare, utilizzi: { ...emptyUses(), ...ledger.utilizzi[id] } };
     const origini = readOrigins(c.origini);
-    if (origini.length) {
-      card.origini = origini;
-      if (cfg) card.quote = sharesOf(c.titolare, origini, fingerprint(content()), cfg);
+    if (origini.length) card.origini = origini;
+    if (cfg) {
+      card.impronta = printOf(content());
+      if (origini.length) card.quote = sharesOf(c.titolare, origini, card.impronta, cfg);
     }
     out.push(card);
   };
@@ -134,7 +144,8 @@ export function allCards(files: FileMap, shares = false): Card[] {
     if (!/^modules\/[^/]+\/manifest\.json$/.test(file)) continue;
     const m = parse(files[file]) as Manifest & { carta?: Carta } | null;
     if (!m?.id) continue;
-    const whole = () => contentText(m) + (typeof m.logic === 'string' ? files[file.replace(/manifest\.json$/, m.logic)] ?? '' : '');
+    let text: string | undefined;
+    const whole = () => (text ??= contentText(m) + (typeof m.logic === 'string' ? files[file.replace(/manifest\.json$/, m.logic)] ?? '' : ''));
     if (m.kind !== 'data') push(moduleCardId(m), m.kind === 'item' ? 'oggetto' : 'modulo', m.name ?? m.id, file, m, whole);
     // What a data module holds is a card each, of whoever made the module unless it says otherwise.
     const part = (id: string, tipo: CardKind, nome: string, o: unknown) =>

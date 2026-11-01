@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QUINE42 · Le Carte del Mondo</title>
+    <link rel="stylesheet" href="./carte.css" />
+  </head>
+  <body>
+    <!-- Top Navigation Bar -->
+    <header class="site-nav">
+      <a href="./index.html" class="nav-brand">
+        <span class="nav-logo">QUINE42</span>
+        <span class="nav-tagline">// ARCADE · VOXEL · IA</span>
+      </a>
+      <button class="nav-toggle-btn" id="nav-toggle" aria-controls="nav-links" aria-expanded="false">MENU ▼</button>
+      <nav aria-label="Sezioni">
+        <ul class="nav-links" id="nav-links">
+          <li><a href="./index.html" class="nav-link">Mondo</a></li>
+          <li><a href="./carte.html" class="nav-link active">Carte 3D</a></li>
+          <li><a href="./sessioni.html" class="nav-link">Sessioni</a></li>
+        </ul>
+      </nav>
+      <div class="nav-actions">
+        <a href="../index.html" class="comic-btn arcade cyan">GIOCA SUBITO</a>
+      </div>
+    </header>
+
+    <main class="section-wrap cards-page">
+      <div class="section-head">
+        <span class="comic-badge yellow" id="card-owner">IL TUO VIANDANTE</span>
+        <h1 class="comic-title page-title">GALLERIA DELLE CARTE</h1>
+        <p>// CLICCA SU UNA CARTA PER GIRARLA · LAMINA OLOGRAFICA BIFACCIALE</p>
+      </div>
+
+      <div class="cards-hero-stats">
+        <div class="comic-card">
+          <span class="comic-badge cyan">TOTALE</span>
+          <div class="comic-title cyan stat-value" id="stat-total">–</div>
+          <span class="arcade-text text-dim stat-caption">CARTE TUE</span>
+        </div>
+        <div class="comic-card">
+          <span class="comic-badge pink">RARE</span>
+          <div class="comic-title stat-value" id="stat-rare">–</div>
+          <span class="arcade-text text-dim stat-caption">RARE ED EPICHE</span>
+        </div>
+        <div class="comic-card">
+          <span class="comic-badge">LEGGENDARIE</span>
+          <div class="comic-title stat-value" id="stat-legendary">–</div>
+          <span class="arcade-text text-dim stat-caption">OLTRE 100 UTILIZZI</span>
+        </div>
+        <div class="comic-card">
+          <span class="comic-badge green">RENDITA</span>
+          <div class="comic-title stat-value text-green" id="stat-income">–</div>
+          <span class="arcade-text text-dim stat-caption">UTILIZZI EREDITATI</span>
+        </div>
+      </div>
+
+      <div class="cards-toolbar">
+        <label class="arcade-text text-cyan" for="card-realm" style="font-size: 0.7rem">REAME</label>
+        <select class="comic-select" id="card-realm"></select>
+      </div>
+
+      <div class="comic-tabs" id="card-filter-tabs"></div>
+
+      <!-- Le carte le disegna carte.ts -->
+      <div class="card-collection-grid" id="cards-container">
+        <div class="cards-empty">
+          <span class="comic-badge yellow">CARICAMENTO</span>
+          <p class="arcade-text" style="font-size: 0.8rem; margin-top: 12px">SI APRONO I REAMI…</p>
+        </div>
+      </div>
+
+      <div class="cards-more" id="cards-more" hidden>
+        <button type="button" class="comic-btn arcade" id="btn-cards-more">MOSTRA ALTRE</button>
+      </div>
+    </main>
+
+    <!-- Synthwave Sunset Footer with the Secret of the Jerboa -->
+    <footer class="site-footer">
+      <div class="footer-grid-floor"></div>
+
+      <div class="footer-horizon">
+        <div class="jerboa-peek-container" title="Due sagome all'orizzonte...">
+          <div class="jerboa-tooltip">// DUE ORECCHIE LUNGHE NELLA NOTTE...</div>
+          <svg class="jerboa-ears-svg" viewBox="0 0 64 38" aria-hidden="true">
+            <path d="M 16 38 C 14 20, 4 8, 12 2 C 20 -4, 26 14, 28 38 Z" />
+            <path d="M 48 38 C 50 20, 60 8, 52 2 C 44 -4, 38 14, 36 38 Z" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="footer-brand">QUINE42</div>
+      <p class="footer-quote">
+        "Il sentiero scorre sotto i tuoi passi e si apre a ogni scelta.<br />
+        Ciò che pronunci diventa cammino, ciò che componi diventa mondo."
+      </p>
+
+      <div class="footer-links">
+        <a href="../index.html">GIOCO</a>
+        <a href="./index.html">MONDO</a>
+        <a href="./carte.html">CARTE</a>
+        <a href="./sessioni.html">SESSIONI</a>
+      </div>
+
+      <div class="footer-copy">
+        QUINE42 © 2026 · Voxel Engine & Modelli MarkovJunior 3D · Generato con Intelligenza Artificiale
+      </div>
+    </footer>
+
+    <script type="module" src="./carte.ts"></script>
+  </body>
+</html>
