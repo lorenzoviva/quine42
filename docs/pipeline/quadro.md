@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 01/11/2026, fine dell'epoca 192 su **claude** (crediti: vedi `stato`).
+Aggiornato il 01/11/2026, fine dell'epoca 193 su **claude** (crediti: vedi `stato`).
 
 - **Tetto di Claude a 2** (richiesta dell'autore, 01/11): attivo dopo il riavvio delle 13:35; `stato` dice tetto 2, slot 2. L'autore dice che con il Pro i limiti di Claude sono 5 volte più alti.
 
@@ -53,6 +53,7 @@ Aggiornato il 01/11/2026, fine dell'epoca 192 su **claude** (crediti: vedi `stat
 - **T122 finito** (V-008, V-017, V-019 chiuse; ADR-0099), conflitto in `AGENTS.md`: **T144** lo integra (p1, dipende da T142; l'ADR di T122 prende il primo numero libero). Poi `integra T144`, `integra T122`. Restano non provati: difetti di wasm e Lua, blocco del servizio (T126, T127), serve uno sguardo esperto per una garanzia forte. `tests/between.test.ts` ha un limite di 180 s: andrebbe alleggerito.
 - **Claude sospeso da me il 01/11** per la finestra di Vite 7: T142 finisce, niente task nuovi. Poi la procedura di T131 qui sotto (già sospeso); infine `riattiva claude`. **Non dimenticare `riattiva`.**
 - **T140 e T123 integrati** (01/11): V-002 chiusa, kit 4 ok, ma T140 ha riscritto la prova V-002.d (com'era dava FALLA: chiamate piccole sotto il tetto); chi è sulla macchina senza identità può spendere fino a 10 $ al giorno. Detto all'autore: se per lui non è chiusa, si riapre. **ADR-0099 nel base è di T123.** T142 tiene ancora 0099 per Vite 7 (`0099-vite-7-…`): `integra T142` andrà probabilmente in conflitto nell'indice degli ADR; in quel caso un task che fonde `3d` in `task/T142` e dà a T131 il 0100.
+- **Aspetto dall'autore** (chiesti nell'epoca 193): se V-002 resta chiusa col residuo (io ho consigliato di sì); se aprire un task per alleggerire `tests/between.test.ts`.
 - **T143** (rune invisibili sul tappeto, regressione di almeno 40 task, chiesto dall'autore il 01/11): approvato, p2, su Claude; parte dopo T142 e prima della sicurezza che resta.
 - **Aspetto dall'autore**: T45f, T88. Sta provando il logo con il materiale di T141.
 - **T131 finito (Vite 7, Vitest 4), conflitto in `AGENTS.md`: T142 lo integra.** Finito T142, in quest'ordine: `sospendi claude`; aspettare che nessun task giri (il `node_modules` del base è condiviso con una junction; un worktree partito prima con le versioni nuove sotto, o un `npm ci` durante una suite, si romperebbero); `integra T142`, `integra T131`; `npm ci` nel base (il lock è scritto con npm 11, T131 ha provato che `npm ci` con npm 10 passa); `riattiva claude`. Fino a quel momento `npm run abbonamento` resta com'è.
