@@ -6,6 +6,9 @@
 local host = __host
 __host = nil
 
+-- From the real table: the strings' metatable points to it, so a copy without it would not be enough.
+string.dump = nil
+
 local sethook = debug.sethook
 local load, pcall, error, assert, type, tostring, tonumber, next =
   load, pcall, error, assert, type, tostring, tonumber, next
@@ -176,7 +179,6 @@ function K.reset()
     unpack = unpack, print = log, log = log, hash = hash,
     ecs = ecs, input = input, world = world, bus = bus, inventory = inventory, items = items, ui = ui,
   }
-  base.string.dump = nil
   -- Shared seeds (T35): the kernel reseeds before every call into universe code; reseeding from the
   -- universe is allowed, but never from the clock (Lua's randomseed() without arguments reads it).
   base.math.randomseed = function(a, b) randomseed(floor(tonumber(a) or 0), floor(tonumber(b) or 0)) end

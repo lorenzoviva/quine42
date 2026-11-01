@@ -1,0 +1,62 @@
+{
+ "data": "2026-11-01",
+ "commit": "cd82541",
+ "vite": "5.4.10",
+ "node": "v22.19.0",
+ "piattaforma": "win32",
+ "solo": [
+  "V-008",
+  "V-017",
+  "V-019"
+ ],
+ "riepilogo": {
+  "ok": 6,
+  "falle": 0,
+  "errori": 0,
+  "saltate": 0
+ },
+ "prove": [
+  {
+   "id": "V-008.a",
+   "voce": "V-008",
+   "proprieta": "la prova di caricamento non lascia nulla nella sandbox viva",
+   "esito": "ok",
+   "dettaglio": "nulla resta nella sandbox viva"
+  },
+  {
+   "id": "V-008.b",
+   "voce": "V-008",
+   "proprieta": "una funzione Lua in una tabella passata all’Host non arriva a JS come funzione",
+   "esito": "ok",
+   "dettaglio": "lato kernel: undefined"
+  },
+  {
+   "id": "V-017.a",
+   "voce": "V-017",
+   "proprieta": "`dump` non si raggiunge con la sintassi a metodo sulle stringhe",
+   "esito": "ok",
+   "dettaglio": "tipo: nil"
+  },
+  {
+   "id": "V-019.a",
+   "voce": "V-019",
+   "proprieta": "dai valori che l’Host dà a Lua non si raggiungono costruttori né prototipi di JS",
+   "esito": "ok",
+   "dettaglio": "nessun campo di JS raggiunto"
+  },
+  {
+   "id": "V-019.b",
+   "voce": "V-019",
+   "proprieta": "un valore finto dell’ambiente del processo non si trova in ciò che Lua vede",
+   "esito": "ok",
+   "dettaglio": "0 stringhe"
+  },
+  {
+   "id": "V-019.c",
+   "voce": "V-019",
+   "proprieta": "`pcall` non scavalca il budget di istruzioni",
+   "esito": "ok",
+   "dettaglio": "14 ms, un guasto del budget"
+  }
+ ]
+}
