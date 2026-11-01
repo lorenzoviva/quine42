@@ -59,6 +59,7 @@ export interface Host {
 }
 
 interface KernelLua {
+  native_pattern(limit: number): void;
   reset(): void;
   load_module(id: string, src: string, chunkname: string): string | null;
   unload_module(id: string): void;
@@ -71,6 +72,72 @@ interface KernelLua {
   remove_line(key: string): void;
   run_line(key: string, lock?: boolean): string | null;
   eval(src: string): string | null;
+  tick_begin(): void;
+  tick_end(): number;
+  unwind(open: number): void;
+}
+
+// The memory of universe code (ADR-0103), enforced by the allocator, where no way of making a value escapes.
+/** What the VM may hold, the kernel's part included. */
+const MEMORY_MAX = 64 * 1024 * 1024;
+/** The longest string, however it is made (`..`, `rep`, `concat`, what the Host gives). */
+const MAX_STRING = 1024 * 1024;
+/** Bytes one call may allocate in all: copying is work too, and a loop on `s .. 'x'` costs one instruction per copy. */
+const CHURN_MAX = 256 * 1024 * 1024;
+/** Lua's tag for a new string, passed as the old size when a new object is allocated. */
+const LUA_TSTRING = 4;
+/** What a string takes beyond its characters. */
+const STRING_HEADER = 32;
+
+/**
+ * Lua's allocator, measured. Limits hold only while universe code runs, inside its pcall: there a refused allocation is an
+ * ordinary error, outside it (the kernel pushing arguments from JS) Lua would panic and the wasm instance would die.
+ */
+class Meter {
+  on = false;
+  depth = 0;
+  private used = 0;
+  private churn = 0;
+  private pointer = 0;
+
+  install(global: LuaGlobal): void {
+    const module = global.lua.module;
+    this.pointer = module.addFunction((_ud: number, ptr: number, old: number, size: number) => {
+      if (size === 0) {
+        if (ptr) {
+          this.used -= old;
+          module._free(ptr);
+        }
+        return 0;
+      }
+      const grow = ptr ? size - old : size;
+      if (this.on && grow > 0) {
+        if (this.used + grow > MEMORY_MAX || this.churn + grow > CHURN_MAX || (!ptr && old === LUA_TSTRING && size > MAX_STRING + STRING_HEADER)) return 0;
+        this.churn += grow;
+      }
+      const r = module._realloc(ptr, size);
+      if (r) this.used += grow;
+      return r;
+    }, 'iiiii');
+    global.lua.lua_setallocf(global.address, this.pointer, null);
+  }
+
+  /** What Lua calls around universe code; it gives back the bytes allocated when the outermost call ends. */
+  toggle = (on: boolean): number => {
+    if (on) {
+      if (this.depth++ === 0) this.churn = 0;
+      this.on = true;
+      return 0;
+    }
+    this.on = false;
+    return --this.depth === 0 ? this.churn : 0;
+  };
+
+  close(global: LuaGlobal): void {
+    const module = global.lua.module;
+    global.close();
+    if (this.pointer) module.removeFunction(this.pointer);
+  }
 }
 
 /** How deep a Lua table given to the kernel is read: what is deeper does not arrive. */
@@ -231,15 +298,24 @@ function hostFunctions(host: Host): Record<string, unknown> {
   return out;
 }
 
+interface Vm {
+  engine: LuaEngine;
+  K: KernelLua;
+  meter: Meter;
+}
+
 /** A VM of its own: wasm instance, Lua state, the prelude, the crossing. */
-async function openVm(host: Host, wasmUri?: string): Promise<{ engine: LuaEngine; K: KernelLua }> {
+async function openVm(host: Host, wasmUri?: string): Promise<Vm> {
   const factory = new LuaFactory(wasmUri);
   const engine = await factory.createEngine({ openStandardLibs: true, injectObjects: false, enableProxy: false });
+  const meter = new Meter();
+  meter.install(engine.global);
+  engine.global.set('__meter', meter.toggle);
   engine.global.set('__host', hostFunctions(host));
   // K's functions become JS here, before the crossing refuses Lua functions for good.
   const K = engine.doStringSync(prelude) as KernelLua;
   engine.global.registerTypeExtension(10, new Crossing(engine.global));
-  return { engine, K };
+  return { engine, K, meter };
 }
 
 /** The world a module not yet approved loads in: nothing it does reaches anything. */
@@ -290,12 +366,37 @@ export class Sandbox {
   private constructor(
     private engine: LuaEngine,
     private K: KernelLua,
-    private probeVm: { engine: LuaEngine; K: KernelLua },
+    private meter: Meter,
+    private host: Host,
+    private probeVm: Vm,
   ) {}
 
   static async create(host: Host, wasmUri?: string): Promise<Sandbox> {
     const [live, probe] = await Promise.all([openVm(host, wasmUri), openVm(emptyHost(), wasmUri)]);
-    return new Sandbox(live.engine, live.K, probe);
+    return new Sandbox(live.engine, live.K, live.meter, host, probe);
+  }
+
+  /**
+   * From JS into Lua: no limit on what the kernel pushes (see Meter), and the floor under a VM that cannot go on: what comes
+   * out of it as an exception is a fault, never an exception in the tick.
+   */
+  private enter<T>(key: string, fallback: T, call: () => T): T {
+    const { on, depth } = this.meter;
+    this.meter.on = false;
+    try {
+      return call();
+    } catch (e) {
+      this.meter.depth = depth;
+      try {
+        this.K.unwind(depth);
+      } catch {
+        // The VM is gone: each call ends here until a restart.
+      }
+      this.host.fault(key, String((e as Error)?.message ?? e).slice(0, 400));
+      return fallback;
+    } finally {
+      this.meter.on = on;
+    }
   }
 
   /** Dry load of a module not yet approved (V-008): in a VM of its own, wiped before each one, with a Host that does nothing. */
@@ -307,60 +408,70 @@ export class Sandbox {
 
   /** Fresh universe environment: clears modules, rune lines and reassigned bindings. */
   reset(): void {
-    this.K.reset();
+    this.enter('sandbox:reset', undefined, () => this.K.reset());
   }
 
   loadModule(id: string, src: string, chunkname = id): string | null {
-    return this.K.load_module(id, src, chunkname) ?? null;
+    return this.enter(`module:${id}:load`, 'la sandbox non risponde', () => this.K.load_module(id, src, chunkname) ?? null);
   }
 
   /** Reseeds math.random of universe code (T35): the same seed, the same draws, on every machine. */
   seed(n: number): void {
-    this.K.seed(n >>> 0);
+    this.enter('sandbox:seed', undefined, () => this.K.seed(n >>> 0));
   }
 
   unloadModule(id: string): void {
-    this.K.unload_module(id);
+    this.enter('sandbox:unload', undefined, () => this.K.unload_module(id));
   }
 
   has(id: string, fn: string): boolean {
-    return !!this.K.has(id, fn);
+    return this.enter('sandbox:has', false, () => !!this.K.has(id, fn));
   }
 
   run(id: string, fn: string, ...args: unknown[]): unknown {
-    return this.K.run(id, fn, ...args);
+    return this.enter(`module:${id}:${fn}`, undefined, () => this.K.run(id, fn, ...args));
+  }
+
+  /** The tick's budget begins (ADR-0103): universe code from here to tickEnd shares it. */
+  tickBegin(): void {
+    this.enter('sandbox:tick', undefined, () => this.K.tick_begin());
+  }
+
+  /** The tick's budget ends: how many calls did not run because it was gone. */
+  tickEnd(): number {
+    return this.enter('sandbox:tick', 0, () => this.K.tick_end());
   }
 
   /** Syntax check of a Lua chunk without running it. */
   check(src: string, chunkname = 'check'): string | null {
-    return this.K.check(src, chunkname) ?? null;
+    return this.enter('sandbox:check', 'la sandbox non risponde', () => this.K.check(src, chunkname) ?? null);
   }
 
   runeKind(src: string): { kind: 'expr' | 'stmt' } | { error: string } {
-    const r = this.K.rune_kind(src);
+    const r = this.enter('sandbox:rune', 'error: la sandbox non risponde', () => this.K.rune_kind(src));
     if (r === 'expr' || r === 'stmt') return { kind: r };
     return { error: r.replace(/^error: /, '') };
   }
 
   setLine(key: string, src: string): string | null {
-    return this.K.set_line(key, src) ?? null;
+    return this.enter(`rune:${key}`, 'la sandbox non risponde', () => this.K.set_line(key, src) ?? null);
   }
 
   removeLine(key: string): void {
-    this.K.remove_line(key);
+    this.enter(`rune:${key}`, undefined, () => this.K.remove_line(key));
   }
 
   /** Runs a rune line; `lock`: its writes to the bindings (x y speed carpet time) are ignored (T37). */
   runLine(key: string, lock = false): string | null {
-    return this.K.run_line(key, lock) ?? null;
+    return this.enter(`rune:${key}`, null, () => this.K.run_line(key, lock) ?? null);
   }
 
   eval(src: string): string | null {
-    return this.K.eval(src) ?? null;
+    return this.enter('sandbox:eval', null, () => this.K.eval(src) ?? null);
   }
 
   close(): void {
-    this.engine.global.close();
-    this.probeVm.engine.global.close();
+    this.meter.close(this.engine.global);
+    this.probeVm.meter.close(this.probeVm.engine.global);
   }
 }
