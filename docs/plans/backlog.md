@@ -2181,13 +2181,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fare: creare la pagina profilo (`site/profilo.html` e modulo TS associato): accesso Firebase con Google o anonimo riusando `src/session/login.ts` e `/api/account`; visualizzazione dettagli viandante (ID account, stato collegamento, saldo crediti); editor estetico con scelta colore mantello e seme del modello viandante con anteprima tridimensionale interattiva renderizzata tramite Three.js e `src/mj/mesh.ts`; pulsanti per legare l'account anonimo a Google (`linkWithPopup`) o disconnettersi.
 - Fatto quando: typecheck e test verdi; autenticazione e visualizzatore 3D dell'avatar funzionanti nel browser.
 
-### T103 · Il sito: hub sessioni multigiocatore e creazione nuovo universo — `da fare` (dipende da T109, T97, T45d)
+### T103 · Il sito: hub sessioni multigiocatore e creazione nuovo universo — `fatto` (dipende da T109, T97, T45d)
 
 - Stile: copia lo stile grafico del template in `docs/design/sito/` (fatto da T109, leggi il suo `README.md`).
 - Pipeline: claude · stima 4% · approvato · priorità 66
 - Contesto: ADR-0095, punto 2 (Sessioni & Nuovo Universo), ADR-0058 (sessioni) e ADR-0086 (lobby multigiocatore).
 - Fare: implementare l'hub delle sessioni (`site/sessioni.html` e modulo TS associato): interrogare `/api/universe` e lo stato delle sessioni attive su `/api/session`; mostrare la lista dei reami disponibili con dettagli del master, modelli IA impiegati, coefficienti di generazione, stima oraria della spesa e tetto minimo richiesto; pulsante diretto per accedere alla lobby multigiocatore del reame scelto; pannello wizard «Crea nuovo universo» per avviare la Genesi di un nuovo reame git specificando nome, seme e parametri base.
 - Fatto quando: typecheck e test verdi; elenco sessioni e creazione nuovo universo funzionanti via interfaccia web.
+- Esito: implementato l'hub sessioni in `site/sessioni.html` e `site/sessioni.ts` con foglio di stile dedicato `site/sessioni.css` (conforme al template grafico di `docs/design/sito/`); endpoint GET `/api/session` nel server Vite per interrogare le sessioni attive e i client connessi (`clientCount`); visualizzazione dinamica dei reami con badge live/offline, master, modelli IA impiegati, coefficienti, spesa oraria stimata (`hourlyEstimate`) e tetto minimo; pulsante «Entra nella lobby» collegato a `../index.html?universo=<nome>`; wizard modale interattivo «Crea nuovo universo» con validazione slug git, seme casuale, scelta modalità di partita e profilo IA che genera il nuovo repository git tramite `/api/universe/<nome>/create`. Configurato l'entry point `sessioni` in `vite.config.ts`. Test unitari in `tests/sessioni_hub.test.ts` (8/8 verdi). Typecheck e build verdi.
 
 ### T104 · Il sito: area carte collezionabili 3D animate — `da fare` (dipende da T109, T97, T45d, T84)
 

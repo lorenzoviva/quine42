@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QUINE42 · Hub Sessioni & Nuovo Universo</title>
+    <link rel="stylesheet" href="./sessioni.css" />
+  </head>
+  <body>
+    <!-- Top Navigation Bar -->
+    <header class="site-nav">
+      <a href="./index.html" class="nav-brand">
+        <span class="nav-logo">QUINE42</span>
+        <span class="nav-tagline">// ARCADE · VOXEL · IA</span>
+      </a>
+      <button class="nav-toggle-btn" id="nav-toggle" aria-label="Menu navigazione">MENU ▼</button>
+      <nav>
+        <ul class="nav-links" id="nav-links">
+          <li><a href="./index.html" class="nav-link">Mondo</a></li>
+          <li><a href="./carte.html" class="nav-link">Carte 3D</a></li>
+          <li><a href="./sessioni.html" class="nav-link active">Sessioni</a></li>
+          <li><a href="./profilo.html" class="nav-link">Profilo</a></li>
+          <li><a href="./pagamenti.html" class="nav-link">Crediti</a></li>
+        </ul>
+      </nav>
+      <div class="nav-actions">
+        <a href="../index.html" class="comic-btn arcade cyan">GIOCA SUBITO</a>
+        <a href="./profilo.html" class="comic-btn arcade" id="btn-nav-login">ACCEDI</a>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="section-wrap" style="padding-top: 36px; padding-bottom: 60px;">
+      <!-- Hub Header & Creation CTA -->
+      <div class="session-hub-header">
+        <div>
+          <span class="comic-badge yellow">MULTIGIOCATORE LIVE</span>
+          <h1 class="comic-title" style="font-size: 2.8rem; margin: 10px 0 0;">HUB DELLE SESSIONI</h1>
+          <p class="arcade-text text-dim" style="font-size: 0.75rem; margin-top: 6px;">
+            // ESPLORA I REAMI ATTIVI O AVVIA LA GENESI DI UN NUOVO MONDO
+          </p>
+        </div>
+        <button class="comic-btn pink lg" id="btn-open-wizard">
+          + CREA NUOVO UNIVERSO
+        </button>
+      </div>
+
+      <!-- Filters & Search Toolbar -->
+      <div class="comic-tabs" id="realm-filter-tabs">
+        <button class="comic-tab active" data-filter="all">TUTTI I REAMI</button>
+        <button class="comic-tab" data-filter="live">SESSIONI LIVE</button>
+        <button class="comic-tab" data-filter="mine">I MIEI MONDI</button>
+      </div>
+
+      <!-- Realms Grid (Populated dynamically by sessioni.ts) -->
+      <div class="grid-3" id="realms-grid">
+        <div class="realm-loading">
+          <span class="comic-badge yellow">CARICAMENTO</span>
+          <p class="arcade-text" style="font-size: 0.8rem; margin-top: 12px;">INTERROGAZIONE REAMI E SESSIONI ATTIVE…</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Modal Wizard: Create New Universe (Genesi Git) -->
+    <div class="comic-modal-overlay" id="wizard-modal" role="dialog" aria-modal="true" aria-labelledby="wizard-modal-title">
+      <div class="comic-modal">
+        <div class="comic-modal-header">
+          <h3 class="comic-modal-title" id="wizard-modal-title">GENESI NUOVO UNIVERSO</h3>
+          <button class="comic-modal-close" id="btn-close-wizard" aria-label="Chiudi finestra">✕</button>
+        </div>
+
+        <div class="comic-modal-body">
+          <div class="step-indicator">
+            <div class="step-pill active"></div>
+            <div class="step-pill active"></div>
+            <div class="step-pill active"></div>
+          </div>
+
+          <form id="form-create-universe" onsubmit="event.preventDefault();">
+            <!-- Step 1: Identity & Seed -->
+            <div class="form-group">
+              <label class="comic-label" for="new-univ-name">NOME DELL'UNIVERSO (SLUG GIT)</label>
+              <input
+                type="text"
+                id="new-univ-name"
+                class="comic-input"
+                placeholder="es. terre-selvagge"
+                pattern="^[a-z0-9][a-z0-9-]{0,40}$"
+                required
+              />
+              <span class="input-hint">Verrà creato un repository git dedicato in universes/&lt;nome&gt;. Solo lettere minuscole, numeri e trattini.</span>
+            </div>
+
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 6px;">
+                <label class="comic-label" for="new-univ-seed" style="margin: 0;">SEME GENERATIVO MONDO</label>
+                <button type="button" class="comic-btn arcade sm" id="btn-wizard-rand-seed">🎲 CASUALE</button>
+              </div>
+              <input
+                type="number"
+                id="new-univ-seed"
+                class="comic-input"
+                value="42"
+                min="1"
+                max="999999"
+                required
+              />
+              <span class="input-hint">Il seme determina la forma iniziale del rilievo e delle colline.</span>
+            </div>
+
+            <!-- Step 2: Game Mode & Rules -->
+            <div class="form-group">
+              <label class="comic-label" for="new-univ-mode">MODALITÀ DI PARTITA (REGOLE)</label>
+              <select id="new-univ-mode" class="comic-select">
+                <option value="narrativa">Partita Narrativa (Esplorazione libera, respawn al centro)</option>
+                <option value="sopravvivenza" selected>Sopravvivenza (Bisogni attivi, perdita bottino alla sconfitta)</option>
+                <option value="sfida">Sfida del Labirinto (Rune rare ad alto coefficiente e PvP attivo)</option>
+              </select>
+            </div>
+
+            <!-- Step 3: AI Configuration -->
+            <div class="form-group">
+              <label class="comic-label" for="new-univ-ai">PROFILO INTELLIGENZA ARTIFICIALE</label>
+              <select id="new-univ-ai" class="comic-select">
+                <option value="standard" selected>Standard (Gemini Flash-Lite + Flash 3.8 — bilanciato ~$0.08/h)</option>
+                <option value="low">Low Detail (Tutto su Flash-Lite — ultra economico ~$0.02/h)</option>
+                <option value="high">High Detail (Flash 3.8 + Argon per strutture leggendarie ~$0.14/h)</option>
+              </select>
+            </div>
+
+            <div id="wizard-status-msg"></div>
+
+            <div class="comic-alert info" style="margin-top: 16px; margin-bottom: 0;">
+              <span class="comic-badge cyan">INFO</span>
+              <span class="arcade-text" style="font-size: 0.68rem; line-height: 1.4;">
+                Il nuovo universo inizierà con il seme puro e compilerà la bibbia, lo stile e il primo cast durante la Genesi.
+              </span>
+            </div>
+          </form>
+        </div>
+
+        <div class="comic-modal-footer">
+          <button type="button" class="comic-btn sm dark" id="btn-cancel-wizard">ANNULLA</button>
+          <button type="button" class="comic-btn sm pink" id="btn-confirm-wizard">GENERA UNIVERSO GIT</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Synthwave Sunset Footer with the Secret of the Jerboa -->
+    <footer class="site-footer">
+      <div class="footer-grid-floor"></div>
+
+      <div class="footer-horizon">
+        <div class="jerboa-peek-container" title="Due sagome all'orizzonte...">
+          <div class="jerboa-tooltip">// DUE ORECCHIE LUNGHE NELLA NOTTE...</div>
+          <svg class="jerboa-ears-svg" viewBox="0 0 64 38" aria-hidden="true">
+            <path d="M 16 38 C 14 20, 4 8, 12 2 C 20 -4, 26 14, 28 38 Z" />
+            <path d="M 48 38 C 50 20, 60 8, 52 2 C 44 -4, 38 14, 36 38 Z" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="footer-brand">QUINE42</div>
+      <p class="footer-quote">
+        "Il sentiero scorre sotto i tuoi passi e si apre a ogni scelta.<br />
+        Ciò che pronunci diventa cammino, ciò che componi diventa mondo."
+      </p>
+
+      <div class="footer-links">
+        <a href="../index.html">GIOCO</a>
+        <a href="./index.html">MONDO</a>
+        <a href="./carte.html">CARTE</a>
+        <a href="./sessioni.html">SESSIONI</a>
+        <a href="./profilo.html">PROFILO</a>
+        <a href="./pagamenti.html">CREDITI</a>
+      </div>
+
+      <div class="footer-copy">
+        QUINE42 © 2026 · Voxel Engine & Modelli MarkovJunior 3D · Generato con Intelligenza Artificiale
+      </div>
+    </footer>
+
+    <!-- Interactive logic for sessions hub & wizard -->
+    <script type="module" src="./sessioni.ts"></script>
+  </body>
+</html>
