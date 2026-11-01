@@ -2524,12 +2524,13 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Test: rollback, ramo pubblicato e codice generato non cambiano i saldi; due eventi uguali in contemporanea accreditano una volta. La corsa è stata misurata (V-005.a: 8 consegne, 2 accrediti) ma non esce a ogni giro: il test la ripete o la forza, un solo giro verde non basta.
 - Quando è fatto: test e typecheck verdi, commit su `task/T125`.
 
-### T126 · I limiti dentro la sandbox — `da fare` (dipende da T136)
+### T126 · I limiti dentro la sandbox — `fatto` (dipende da T136)
 - Pipeline: claude · stima 4% · approvato · priorità 9
 - Contesto: R7, prima parte. Provato: un solo pattern di `string.find` blocca il processo oltre 60 s; `string.rep` alloca 200 MB senza guasti. Il budget conta le istruzioni VM per chiamata, non il lavoro nelle funzioni C né il tick.
 - Cosa fare: `string.*` con limiti di lunghezza e di pattern; limite di memoria della VM; budget per tick; limiti di scatola e di tempo per i programmi MarkovJunior sul server (l'XML può dire la propria `size`). Attenzione ai moduli esistenti, che devono continuare a girare, e alle prestazioni del tick.
 - Test: i casi della tabella dell'audit finiscono in un guasto entro un tempo breve, senza payload nel report.
 - Quando è fatto: test e typecheck verdi, commit su `task/T126`.
+- Esito: ADR-0102. Oltre al previsto: i pattern costosi non si vietano, girano in un porting di `lstrlib.c` in Lua (`tests/sandbox-patterns.test.ts` lo confronta col C), dove il budget li conta; la memoria e la lunghezza delle stringhe stanno nell'allocatore (`Meter`), che conta anche i byte copiati; una rete di 2 s con l'orologio per ciò che non si misura. Chi viene dopo il budget del tick salta senza guasto suo (`tick:budget`), `core.*` gira comunque. Tick del seme da ~0,95 a ~1,15 ms. Sicurezza: V-007 `in correzione`, resta T127 (blocco di qualche secondo per chiamata, memoria dal lato JS, modelli fino a 30 s); nessuna superficie nuova. Suite intera verde (820 verdi, 11 attesi). Non provato nel browser (il task non lo chiede) e il kit di T137 non ripassato.
 
 ### T127 · Ogni mondo in un worker con un sorvegliante — `da fare` (dipende da T120, T126)
 - Pipeline: claude · stima 8% · approvato · priorità 10

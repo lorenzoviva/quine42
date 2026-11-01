@@ -7,6 +7,16 @@ import type { MjxClip, MjxModel } from './model';
 /** A house of 3×3 tiles at 20 voxels a tile is 60×60×50; a castle a few hundred a side. */
 export const MJX_LIMITS: GridLimits = { side: 512, cells: 24_000_000 };
 
+/**
+ * What a model of the game may be, on the server as in the browser (ADR-0102): its XML can say its own `size` and `map` can
+ * grow it, and everything runs in line. The largest model of the seed is under 2 million cells.
+ */
+export const FORM_LIMITS: GridLimits = { side: 512, cells: 8_000_000 };
+/** The longest `tempo` an index entry may ask for, in milliseconds. */
+export const MAX_FORM_TIME = 30_000;
+/** The longest program, in characters. */
+export const MAX_FORM_XML = 1_000_000;
+
 export interface MjxRunOptions {
   /** Default 5 million: a `one` node rewrites one match per step, so growth takes many steps. */
   maxSteps?: number;
@@ -14,10 +24,12 @@ export interface MjxRunOptions {
   deadline?: number;
   /** Keep about this many states of the run (the model growing). */
   snapshots?: number;
+  /** Default `MJX_LIMITS`, the lab's. */
+  limits?: GridLimits;
 }
 
 export function runMjx(m: MjxModel, seed: number, opts: MjxRunOptions = {}): RunResult & { snapshots?: Snapshot[] } {
-  return run(m.program, seed, opts.maxSteps ?? 5_000_000, MJX_LIMITS, { deadline: opts.deadline ?? 20_000, snapshots: opts.snapshots });
+  return run(m.program, seed, opts.maxSteps ?? 5_000_000, opts.limits ?? MJX_LIMITS, { deadline: opts.deadline ?? 20_000, snapshots: opts.snapshots });
 }
 
 const copy = (g: Grid3): Grid3 => ({ ...g, cells: new Uint8Array(g.cells), alphabet: [...g.alphabet], log: [], epoch: 0 });

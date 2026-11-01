@@ -7399,6 +7399,7 @@ export class Kernel {
     this.rebuildSolids();
     for (const w of this.wanderersById.keys()) this.as(w, () => (this.playerComp().load = totalWeight(this.inventory(), this.itemSpec) / this.carryCapacity()));
     this.syncRunes();
+    this.sandbox.tickBegin();
     this.runRunes();
     // Each system measured (T27a): how long it takes, how many entities it touches.
     this.touching = new Set();
@@ -7413,6 +7414,9 @@ export class Kernel {
     }
     this.touching = undefined;
     this.meter.endTick();
+    // The tick's budget (ADR-0102): a fault of its own, not of the modules that had to wait.
+    if (this.sandbox.tickEnd() > 0) this.faults.raise('tick:budget', 'budget del tick esaurito: alcune chiamate sono saltate');
+    else this.faults.clear('tick:budget');
     for (const w of this.wanderersById.keys()) !this.remote.has(w) && this.as(w, () => this.jumpTick(dt));
     this.keepGods();
     this.syncRunes();
