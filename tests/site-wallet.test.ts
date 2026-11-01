@@ -176,7 +176,7 @@ describe('the checkout from the page (T105)', () => {
       sent = init.body;
       return new Response(JSON.stringify({ url: 'https://checkout.stripe.com/x', id: 'cs_x' }));
     }) as unknown as typeof fetch;
-    const r = await call(stripeHandler({ settings: { secretKey: 'sk_test_x', fetchFn }, universesDir: '.' }), 'POST', '/api/stripe/checkout', { ...body, crediti: 10.555 });
+    const r = await call(stripeHandler({ settings: { secretKey: 'sk_test_x', webhookSecret: 'finto', fetchFn }, universesDir: '.' }), 'POST', '/api/stripe/checkout', { ...body, crediti: 10.555 });
     expect(r.status).toBe(200);
     const q = new URLSearchParams(sent);
     expect(q.get('line_items[0][price_data][unit_amount]')).toBe('1056');

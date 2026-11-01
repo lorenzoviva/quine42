@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { Readable } from 'node:stream';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
@@ -14,6 +15,9 @@ import {
   createStripeCheckoutSession,
   handleStripeWebhookEvent,
   applyPaymentToUniverse,
+  paidCents,
+  stripeHandler,
+  type StripeSettings,
 } from '../server/stripe';
 
 async function bootMultiplayerKernel(): Promise<Kernel> {
@@ -265,6 +269,34 @@ describe('Stripe payments and idempotency (T45e)', () => {
     });
     expect(outcome.status).toBe(403);
     expect(k.creditsOf('anonimo1')).toBe(0);
+  });
+
+  it('paidCents leaves out the taxes added on top and keeps a discount (T124)', () => {
+    expect(paidCents({ amount_total: 1000 })).toBe(1000);
+    expect(paidCents({ amount_total: 1220, amount_subtotal: 1000, currency: 'usd' })).toBe(1000);
+    expect(paidCents({ amount_total: 800, amount_subtotal: 1000, currency: 'usd' })).toBe(800);
+    expect(paidCents({ amount_total: 1000, currency: 'eur' })).toBeUndefined();
+    expect(paidCents({ amount_total: 1000, amount_subtotal: 'molto' })).toBeUndefined();
+    expect(paidCents({})).toBeUndefined();
+  });
+
+  it('a real key without the webhook secret takes no payment: nothing could credit it (T124)', async () => {
+    let called = false;
+    const fetchFn = (async () => ((called = true), new Response('{}'))) as unknown as typeof fetch;
+    const answer = async (settings: StripeSettings, method: string, url: string, body?: unknown) => {
+      let status = 0;
+      let text = '';
+      const req = Object.assign(Readable.from(body ? [Buffer.from(JSON.stringify(body))] : []), { method, url, headers: {} });
+      const res = { statusCode: 0, setHeader() {}, end: (t: string) => ((status = res.statusCode), (text = t)) };
+      await stripeHandler({ settings, universesDir: '.' })(req as never, res as never, () => {});
+      return { status, body: JSON.parse(text) };
+    };
+    const settings = { secretKey: 'sk_test_x', fetchFn };
+    expect((await answer(settings, 'GET', '/api/stripe/config')).body.available).toBe(false);
+    expect((await answer(settings, 'POST', '/api/stripe/checkout', { universo: 'prova', wandererId: 'ugo', crediti: 5 })).status).toBe(503);
+    expect(called).toBe(false);
+    expect((await answer({ ...settings, webhookSecret: 'finto' }, 'GET', '/api/stripe/config')).body.available).toBe(true);
+    expect((await answer({ secretKey: 'mock' }, 'GET', '/api/stripe/config')).body.available).toBe(true);
   });
 
   it('a payment to a universe on disk commits only its two files (T93)', async () => {

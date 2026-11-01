@@ -2509,12 +2509,13 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: test e typecheck verdi, commit su `task/T123`.
 - Esito: `GeminiGate` in `server/geminiProxy.ts`, ADR-0099, V-002 `chiusa`, `tests/sicurezza/gemini.test.ts`. Corpo massimo 2 MB. Scelte non scritte nel task: tetto giornaliero per tutta la chiave (`GEMINI_TETTO_GIORNALIERO`, predefinito 10 $, in `universes/.spesa-gemini.json`); un modello fuori dai prezzi ma nominato da un universo passa e si conta al prezzo del più caro; al tetto la risposta è 402 e `GeminiModels` la traduce in `BudgetError`. Più del previsto: controllo di `Host` e delle intestazioni di inoltro (nomi puntati su 127.0.0.1, tunnel). Nessuna chiamata vera a Gemini: la porta diretta del multigiocatore è provata con `fetch` finto, non con una partita vera. Sicurezza: nessuna superficie nuova.
 
-### T124 · Il webhook di Stripe — `da fare` (dipende da T136, T139)
+### T124 · Il webhook di Stripe — `fatto` (dipende da T136, T139)
 - Pipeline: claude · stima 2% · approvato · priorità 7
 - Contesto: R4: senza `STRIPE_WEBHOOK_SECRET` ogni evento è accettato (crediti gratis); `metadata.universo` e `wandererId` finiscono in `path.join` senza validazione; `crediti` non è confrontato con `amount_total`. T105 ha aggiunto le rotte di Stripe anche alla preview e riscritto parte di `server/stripe.ts`: per questo si parte da T139.
 - Cosa fare: senza segreto la route risponde 503, nel server di sviluppo e nella preview; validare nomi e id come fa il checkout; credito calcolato dall'importo pagato.
 - Test: i tre casi.
 - Quando è fatto: test e typecheck verdi, commit su `task/T124`.
+- Esito: `task/T124`. Senza segreto la route risponde 503 (sviluppo e preview); universo e viandante validati come nel checkout; credito da `paidCents` (il minore tra `amount_total` e `amount_subtotal`, solo dollari), mai dai metadati. In più rispetto al previsto: una chiave vera senza segreto del webhook non apre sessioni e `config` dice `available: false`, altrimenti si incasserebbe senza poter accreditare; la prova V-004.c del kit è riscritta perché dava FALLA sempre. Kit: V-004.a-e ok (`esiti/2026-11-01-dopo-T124.json`). Tasse escluse non provate contro una sessione vera di Stripe: da guardare in T45f. Sicurezza: V-004 chiusa, nessuna superficie nuova.
 
 ### T125 · Saldi e pagamenti fuori dall'universo — `da fare` (dipende da T120, T124)
 - Pipeline: claude · stima 6% · approvato · priorità 8

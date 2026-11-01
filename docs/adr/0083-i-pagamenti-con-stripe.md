@@ -57,3 +57,11 @@ La verifica nel browser con un account Stripe di prova vero ha trovato due rifiu
    usare è una scelta fiscale dell'autore (`docs/pipeline/domande/T93.md`).
 3. `applyPaymentToUniverse` committa solo `world/giocatori/<id>.json` e `world/pagamenti.json` (non più `git add -A`): le modifiche non
    committate dell'universo non finiscono nel commit della ricarica.
+
+## Aggiornamento (T124, 2026-11-01): il webhook non crede a nulla senza prova (V-004)
+Sostituisce il punto 3 dove la verifica era facoltativa e il punto 2 dove il credito veniva dai metadati.
+1. **Senza `STRIPE_WEBHOOK_SECRET` la route risponde 503**, nel server di sviluppo e nella preview: niente firma verificabile, niente accredito.
+2. **Una chiave vera senza quel segreto non incassa**: `POST /api/stripe/checkout` risponde 503 e `GET /api/stripe/config` dice `available: false`, perché il pagamento non potrebbe mai diventare credito. Le chiavi `mock` non muovono denaro e restano senza segreto.
+3. **Nomi e id come nel checkout**: `metadata.universo` e `wandererId` sono validati prima di finire in un percorso; altrimenti 400.
+4. **Il credito è l'importo pagato** (`paidCents`, un credito è un dollaro): il minore tra `amount_total` e `amount_subtotal`, così le tasse aggiunte sopra (Managed Payments) non diventano crediti e uno sconto non ne regala. `metadata.crediti` resta nella sessione per il Dashboard e non si legge più. Un importo non leggibile o in una valuta diversa dal dollaro risponde 400.
+La scelta sulle tasse è un'interpretazione del task, non provata contro una sessione vera di Stripe con le imposte: se T45f accende i Managed Payments, va guardato un evento vero.

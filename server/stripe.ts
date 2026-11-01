@@ -42,6 +42,27 @@ export function stripeSettings(env: Record<string, string | undefined>): StripeS
 const MAX_BODY = 1024 * 1024;
 const NAME_RE = /^[a-z0-9][a-z0-9-]{0,40}$/;
 
+/** A universe's name, the only thing that may end up in a path under the universes' folder. */
+const validUniverse = (name: unknown): name is string => typeof name === 'string' && NAME_RE.test(name);
+
+/** A mock key charges nobody, so it needs no webhook; a real one without the webhook's secret would take money it cannot credit (T124). */
+const canCharge = (s: StripeSettings): boolean =>
+  !!s.secretKey && (!!s.webhookSecret || s.secretKey === 'mock' || s.secretKey.startsWith('mock_'));
+
+/**
+ * The credits a paid session is worth, in cents: one credit is one dollar. What was paid decides, never the metadata (T124).
+ * Taxes added on top are not ours to credit: `amount_subtotal` leaves them out, `amount_total` leaves a discount out, so the
+ * smaller of the two. Undefined for what cannot be read as a payment in dollars.
+ */
+export function paidCents(session: { amount_total?: unknown; amount_subtotal?: unknown; currency?: unknown }): number | undefined {
+  const { amount_total: total, amount_subtotal: subtotal, currency } = session;
+  if (currency !== undefined && currency !== 'usd') return undefined;
+  if (typeof total !== 'number' || !Number.isSafeInteger(total) || total <= 0) return undefined;
+  if (subtotal === undefined) return total;
+  if (typeof subtotal !== 'number' || !Number.isSafeInteger(subtotal) || subtotal <= 0) return undefined;
+  return Math.min(total, subtotal);
+}
+
 function send(res: ServerResponse, status: number, body: unknown): void {
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json');
@@ -294,11 +315,12 @@ export async function handleStripeWebhookEvent(opts: {
   universesDir: string;
   getActiveKernel?: (universe: string) => Promise<Kernel | undefined>;
 }): Promise<{ status: number; body: unknown }> {
-  // If webhookSecret is configured, verify signature
-  if (opts.settings.webhookSecret) {
-    if (!opts.signature || !verifyStripeWebhookSignature(opts.rawBody, opts.signature, opts.settings.webhookSecret)) {
-      return { status: 400, body: { error: 'Firma webhook Stripe non valida' } };
-    }
+  // Without the secret nothing can be verified, so nothing is believed (T124)
+  if (!opts.settings.webhookSecret) {
+    return { status: 503, body: { error: 'Webhook Stripe non configurato (STRIPE_WEBHOOK_SECRET mancante sul server).' } };
+  }
+  if (!opts.signature || !verifyStripeWebhookSignature(opts.rawBody, opts.signature, opts.settings.webhookSecret)) {
+    return { status: 400, body: { error: 'Firma webhook Stripe non valida' } };
   }
 
   let event: {
@@ -309,11 +331,12 @@ export async function handleStripeWebhookEvent(opts: {
         id?: string;
         payment_status?: string;
         amount_total?: number;
+        amount_subtotal?: number;
+        currency?: string;
         client_reference_id?: string;
         metadata?: {
           universo?: string;
           wandererId?: string;
-          crediti?: string;
         };
       };
     };
@@ -338,19 +361,20 @@ export async function handleStripeWebhookEvent(opts: {
   const sessionId = session.id;
   const universo = session.metadata?.universo;
   const wandererId = session.metadata?.wandererId || session.client_reference_id;
-  const crediti = parseFloat(session.metadata?.crediti ?? '0');
-  const cents = session.amount_total;
+  const cents = paidCents(session);
 
-  if (!eventId || !universo || !wandererId || !Number.isFinite(crediti) || crediti <= 0) {
+  // The same names the checkout accepts: these end up in paths and in the commit's message (T124)
+  if (typeof eventId !== 'string' || !eventId || !validUniverse(universo) || !validWandererId(wandererId) || cents === undefined) {
     return { status: 400, body: { error: 'Dati di sessione incompleti o non validi' } };
   }
+  const crediti = cents / 100;
 
   const payment: PaymentRecord = {
     eventId,
     sessionId,
     wandererId,
     crediti,
-    cents,
+    cents: session.amount_total,
     timestamp: Date.now(),
   };
 
@@ -380,7 +404,7 @@ export function stripeHandler(opts: StripeRouteOptions): Connect.NextHandleFunct
     // 1. GET /api/stripe/config
     if (req.method === 'GET' && url === '/api/stripe/config') {
       return send(res, 200, {
-        available: !!opts.settings.secretKey,
+        available: canCharge(opts.settings),
         publishableKey: opts.settings.publishableKey,
         pacchetti: [5, 10, 20, 50],
       });
@@ -393,7 +417,7 @@ export function stripeHandler(opts: StripeRouteOptions): Connect.NextHandleFunct
         const body = JSON.parse(raw);
         const { universo, wandererId, crediti, token, returnUrl } = body;
 
-        if (!universo || !NAME_RE.test(universo)) {
+        if (!validUniverse(universo)) {
           return send(res, 400, { ok: false, motivo: 'universo non valido' });
         }
         if (!wandererId || !validWandererId(wandererId)) {
@@ -432,10 +456,10 @@ export function stripeHandler(opts: StripeRouteOptions): Connect.NextHandleFunct
           }
         }
 
-        if (!opts.settings.secretKey) {
+        if (!opts.settings.secretKey || !canCharge(opts.settings)) {
           return send(res, 503, {
             ok: false,
-            motivo: 'Stripe non configurato (STRIPE_SECRET_KEY mancante sul server).',
+            motivo: 'Stripe non configurato (STRIPE_SECRET_KEY e STRIPE_WEBHOOK_SECRET sul server).',
           });
         }
 
