@@ -3,60 +3,72 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>QUINE42 · Il Gioco Fatto del Proprio Codice</title>
+    <meta name="description" content="QUINE42: un mondo a voxel che si scrive da sé. Raccogli rune, componi incantesimi, colleziona le carte del mondo." />
+    <title>QUINE42 · Il mondo fatto del suo stesso codice</title>
     <link rel="stylesheet" href="./site.css" />
   </head>
   <body>
-    <!-- Top Navigation Bar -->
+    <!-- La navigazione (dal template docs/design/sito/landing.html), con gli indicatori di stato -->
     <header class="site-nav">
       <a href="./index.html" class="nav-brand">
         <span class="nav-logo">QUINE42</span>
         <span class="nav-tagline">// ARCADE · VOXEL · IA</span>
       </a>
-      <nav>
-        <ul class="nav-links">
+      <div class="nav-status" aria-live="polite">
+        <span class="status-pill" id="status-server" data-state="wait" title="Il mondo risponde?">
+          <span class="status-dot"></span><span class="status-text">MONDO…</span>
+        </span>
+        <span class="status-pill" id="status-realms" data-state="wait" title="I reami custoditi su questo server">
+          <span class="status-dot"></span><span class="status-text">REAMI…</span>
+        </span>
+      </div>
+      <button class="nav-toggle-btn" id="nav-toggle" aria-controls="nav-links" aria-expanded="false">MENU ▼</button>
+      <nav aria-label="Sezioni">
+        <ul class="nav-links" id="nav-links">
           <li><a href="#mondo" class="nav-link active">Mondo</a></li>
+          <li><a href="#pilastri" class="nav-link">Pilastri</a></li>
+          <li><a href="#vetrina" class="nav-link">Vetrina</a></li>
           <li><a href="#carte" class="nav-link">Carte 3D</a></li>
-          <li><a href="#sessioni" class="nav-link">Sessioni</a></li>
-          <li><a href="#profilo" class="nav-link">Profilo</a></li>
-          <li><a href="#crediti" class="nav-link">Crediti</a></li>
+          <li><a href="#reami" class="nav-link">Reami</a></li>
         </ul>
       </nav>
       <div class="nav-actions">
         <a href="../index.html" class="comic-btn arcade cyan">GIOCA SUBITO</a>
-        <button id="nav-login-btn" class="comic-btn arcade">ACCEDI</button>
       </div>
     </header>
 
-    <!-- Main Hero Section -->
     <main>
+      <!-- L'hero: il palco three.js fa crescere programmi MarkovJunior veri (site/landing.ts) -->
       <section class="hero" id="mondo">
         <div class="hero-content">
-          <div class="hero-subtitle">
+          <div>
             <span class="comic-badge yellow">ONLINE</span>
-            <span>UN MONDO CHE SI SCRIVE DA SÉ</span>
+            <span class="arcade-text text-cyan" style="margin-left: 8px">UN MONDO CHE SI SCRIVE DA SÉ</span>
           </div>
           <h1 class="hero-title">IL MONDO È FATTO DEL SUO STESSO CODICE</h1>
           <p class="hero-desc">
-            Vivi in un universo 3D a voxel che si scrive e genera da sé in tempo reale. Raccogli rune che contengono
-            codice Lua vivo, evoca incantesimi, colleziona carte animate 3D ed esplora le sessioni multigiocatore.
+            Vivi in un universo tridimensionale a voxel in cui il codice è tangibile e attivo.
+            Raccogli rune sul sentiero, componi incantesimi, colleziona le carte del mondo ed esplora reami condivisi
+            con altri viandanti, generati mentre li attraversi.
           </p>
           <div class="hero-cta">
-            <a href="../index.html" class="comic-btn pink">ENTRA IN GIOCO</a>
-            <a href="#carte" class="comic-btn cyan">SCOPRI LE CARTE</a>
-            <a href="#sessioni" class="comic-btn">CREA UNIVERSO</a>
+            <a href="../index.html" class="comic-btn pink lg">GIOCA SUBITO</a>
+            <a href="#carte" class="comic-btn cyan lg">SCOPRI LE CARTE</a>
+            <a href="#reami" class="comic-btn lg">I REAMI</a>
           </div>
         </div>
 
-        <div class="hero-3d-container">
-          <span class="hero-3d-badge comic-badge green">THREE.JS 3D LIVE</span>
-          <canvas id="hero-canvas"></canvas>
-          <span class="hero-3d-hint">MUOVI IL MOUSE PER ESPLORARE</span>
+        <div class="hero-3d" id="hero-3d">
+          <span class="hero-3d-badge comic-badge green">VOXEL DAL VIVO</span>
+          <div class="hero-3d-meter" id="hero-steps"></div>
+          <canvas id="hero-canvas" aria-label="Un modello a voxel che cresce passo dopo passo; trascina per girarlo, doppio clic per il prossimo"></canvas>
+          <div class="hero-3d-fallback arcade-text text-dim">// IL TUO BROWSER NON MOSTRA IL 3D //</div>
+          <div class="hero-3d-caption arcade-text text-cyan" id="hero-program">// VOXEL PROCEDURALI MARKOVJUNIOR //</div>
         </div>
       </section>
 
-      <!-- Key Pillars Section (Pop Art Comics) -->
-      <section class="section-wrap">
+      <!-- I quattro pilastri -->
+      <section class="section-wrap" id="pilastri">
         <div class="section-head">
           <h2 class="comic-title">I QUATTRO PILASTRI DI QUINE42</h2>
           <p>// UN MONDO VIVO · REGOLE AUTENTICHE · LIBERTÀ PURA</p>
@@ -67,15 +79,17 @@
             <span class="feature-icon">⚡</span>
             <h3 class="feature-title">RUNE E MAGIA</h3>
             <p class="feature-text">
-              Sul terreno brillano token di codice Lua vero. Componi le frasi col tuo passo: ciò che è scritto si esegue nel mondo e le rune magiche scatenano forze reali.
+              Sul terreno brillano rune che sono parole di un codice vero. Componi le frasi col tuo passo: ciò che è scritto si
+              esegue nel mondo, e le rune magiche pronunciate diventano incantesimi.
             </p>
           </div>
 
           <div class="feature-box">
             <span class="feature-icon">🧊</span>
-            <h3 class="feature-title">MARKOV JUNIOR 3D</h3>
+            <h3 class="feature-title">MARKOVJUNIOR 3D</h3>
             <p class="feature-text">
-              Nessuna immagine raster generata: ogni creatura, oggetto o tempio è un algoritmo MarkovJunior tridimensionale scolpito in tempo reale.
+              Nessuna immagine dipinta: ogni creatura, oggetto o tempio è un programma MarkovJunior che riscrive una griglia di
+              voxel finché la cosa prende forma, come il modello qui sopra.
             </p>
           </div>
 
@@ -83,7 +97,8 @@
             <span class="feature-icon">🃏</span>
             <h3 class="feature-title">CARTE COLLEZIONABILI</h3>
             <p class="feature-text">
-              Possiedi pezzi del mondo! Le carte tracciano gli utilizzi (luoghi, trame, prompt) e trasferiscono quote di eredità economica nei cloni multigiocatore.
+              Possiedi pezzi del mondo! Le carte tengono il conto di quanto ciò che hai portato nel mondo viene usato: luoghi,
+              trame, racconti.
             </p>
           </div>
 
@@ -91,24 +106,106 @@
             <span class="feature-icon">🏛️</span>
             <h3 class="feature-title">SOCIETÀ VIVA E GENERATIVA</h3>
             <p class="feature-text">
-              Intelligenze artificiali coordinate animano una società pulsante con mestieri, famiglie, routine quotidiane e trame narrative che evolvono insieme a te.
+              Intelligenze artificiali coordinate animano una società con mestieri, famiglie, routine quotidiane e trame che
+              evolvono insieme a te.
             </p>
           </div>
         </div>
       </section>
 
-      <!-- Showcase Cards & Multiplayer Hub (ADR-0095) -->
-      <section class="section-wrap" id="carte">
+      <!-- La vetrina interattiva delle caratteristiche -->
+      <section class="section-wrap" id="vetrina">
         <div class="section-head">
-          <h2 class="comic-title">AREA CARTE E MULTIGIOCATORE</h2>
-          <p>// GRAFICA INTERATTIVA E CARTE 3D FUORI DAL GIOCO</p>
+          <h2 class="comic-title">LA VETRINA DEL MONDO</h2>
+          <p>// SCEGLI UNA VOCE · USA LE FRECCE PER SCORRERE</p>
         </div>
 
-        <div class="card-showcase-grid">
-          <!-- CSS 3D Holographic Card Demo (Flip with authentic front & back) -->
+        <div class="feature-showcase">
+          <div class="showcase-tabs" role="tablist" aria-label="Caratteristiche del mondo" aria-orientation="vertical">
+            <button class="comic-btn arcade showcase-tab" role="tab" id="tab-rune" aria-controls="panel-rune" aria-selected="true">RUNE</button>
+            <button class="comic-btn arcade showcase-tab" role="tab" id="tab-magia" aria-controls="panel-magia" aria-selected="false" tabindex="-1">MAGIA</button>
+            <button class="comic-btn arcade showcase-tab" role="tab" id="tab-voxel" aria-controls="panel-voxel" aria-selected="false" tabindex="-1">VOXEL</button>
+            <button class="comic-btn arcade showcase-tab" role="tab" id="tab-persone" aria-controls="panel-persone" aria-selected="false" tabindex="-1">PERSONE</button>
+            <button class="comic-btn arcade showcase-tab" role="tab" id="tab-reami" aria-controls="panel-reami" aria-selected="false" tabindex="-1">REAMI</button>
+          </div>
+
+          <div class="showcase-panel" role="tabpanel" id="panel-rune" aria-labelledby="tab-rune">
+            <span class="comic-badge cyan">UNA RUNA PER CASELLA</span>
+            <h3>CIÒ CHE È SCRITTO SI ESEGUE</h3>
+            <p>
+              Ogni runa è una parola sola, incisa in una lastra luminosa sul terreno. Raccoglile, mettile in fila, e la riga che
+              ne esce agisce sul mondo a ogni istante.
+            </p>
+            <div class="rune-line" aria-label="Una riga di rune">
+              <span class="rune-tile">speed</span><span class="rune-tile">=</span><span class="rune-tile">speed</span><span class="rune-tile">*</span><span class="rune-tile">2</span>
+            </div>
+          </div>
+
+          <div class="showcase-panel" role="tabpanel" id="panel-magia" aria-labelledby="tab-magia" hidden>
+            <span class="comic-badge yellow">SETTE RUNE MAGICHE</span>
+            <h3>LE SEQUENZE SONO INCANTESIMI</h3>
+            <p>
+              Alcune rune sono magia: pronunciate in fila diventano un incantesimo e si consumano. L'ordine conta, e ripetere una
+              runa la rafforza.
+            </p>
+            <div class="rune-line">
+              <span class="rune-tile magic">luce</span><span class="rune-tile magic">fuoco</span><span class="rune-tile magic">acqua</span><span class="rune-tile magic">terra</span><span class="rune-tile magic">vita</span><span class="rune-tile magic">scudo</span><span class="rune-tile magic">vento</span>
+            </div>
+          </div>
+
+          <div class="showcase-panel" role="tabpanel" id="panel-voxel" aria-labelledby="tab-voxel" hidden>
+            <span class="comic-badge green">PROGRAMMI, NON IMMAGINI</span>
+            <h3>OGNI COSA È UN PROGRAMMA</h3>
+            <p>
+              Alberi, case, castelli e creature nascono da regole di riscrittura su una griglia di voxel. Lo stesso programma
+              con un seme diverso dà un'altra cosa della stessa specie.
+            </p>
+            <ul>
+              <li>Le cose solide bloccano il passo con i loro voxel.</li>
+              <li>Porte che si aprono, fiamme che danzano: azioni e animazioni sono altre regole.</li>
+              <li>Fuochi, finestre e rune brillano nella notte.</li>
+            </ul>
+          </div>
+
+          <div class="showcase-panel" role="tabpanel" id="panel-persone" aria-labelledby="tab-persone" hidden>
+            <span class="comic-badge pink">UNA SOCIETÀ CHE RICORDA</span>
+            <h3>PERSONE CON UNA VITA</h3>
+            <p>
+              Ognuno ha un mestiere, una famiglia, una routine dal mattino alla notte. Le persone si parlano tra loro, ricordano
+              ciò che hai fatto e intrecciano trame in cui puoi entrare.
+            </p>
+            <ul>
+              <li>Parla con chiunque, nella sua lingua e nel suo carattere.</li>
+              <li>Missioni nate dalle trame, nel tuo diario.</li>
+              <li>Legami che cambiano con le tue scelte.</li>
+            </ul>
+          </div>
+
+          <div class="showcase-panel" role="tabpanel" id="panel-reami" aria-labelledby="tab-reami" hidden>
+            <span class="comic-badge purple">MULTIGIOCATORE</span>
+            <h3>REAMI CONDIVISI</h3>
+            <p>
+              Un reame è un mondo intero con la sua storia. Gioca da solo, oppure entra in un reame condiviso: chi lo ha creato
+              lo guida, gli altri viandanti lo vivono con te.
+            </p>
+            <ul>
+              <li>Parole e doni tra viandanti.</li>
+              <li>Ogni reame ricorda chi sei quando torni.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Le carte: la carta dimostrativa in CSS 3D si gira con un clic -->
+      <section class="section-wrap" id="carte">
+        <div class="section-head">
+          <h2 class="comic-title">LE CARTE DEL MONDO</h2>
+          <p>// CLICCA LA CARTA PER GIRARLA</p>
+        </div>
+
+        <div class="showcase-grid">
           <div class="card-3d-wrapper">
-            <div class="retro-card" id="demo-card" title="Clicca per girare la carta">
-              <!-- Card Front -->
+            <div class="retro-card" id="demo-card" title="Clicca per girare la carta" role="button" tabindex="0" aria-label="Carta dimostrativa: premi per girarla">
               <div class="card-face card-front">
                 <div class="card-holo-foil"></div>
                 <div class="card-inner">
@@ -125,104 +222,94 @@
                   <div class="card-stats-box">
                     <div class="card-stat">Luoghi: <b>14</b></div>
                     <div class="card-stat">Trame: <b>6</b></div>
-                    <div class="card-stat">Prompt: <b>31</b></div>
-                    <div class="card-stat">Origine: <b>Clone #4</b></div>
+                    <div class="card-stat">Racconti: <b>31</b></div>
+                    <div class="card-stat">Origine: <b>Reame #4</b></div>
                   </div>
                 </div>
               </div>
 
-              <!-- Card Back -->
               <div class="card-face card-back">
                 <div class="card-holo-foil"></div>
-                <div class="card-inner card-back-inner">
+                <div class="card-inner">
                   <div class="card-back-frame">
                     <div class="card-back-brand">QUINE42</div>
                     <div class="card-back-sigil">
                       <div class="sigil-core"></div>
-                      <div class="sigil-ring"></div>
                     </div>
                     <div class="card-back-tagline">CARTA DEL MONDO</div>
-                    <div class="card-back-subtitle">// PROPRIETÀ DEI VIANDANTI //</div>
+                    <div class="arcade-text text-dim" style="font-size: 0.55rem; margin-top: 6px">// PROPRIETÀ DEI VIANDANTI //</div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Explanation & Card Collecting Features -->
           <div>
-            <div class="comic-badge yellow">PROPRIETÀ DIGITALE AUTENTICA</div>
-            <h3 style="font-family: var(--font-display); font-size: 2.2rem; color: var(--neon-yellow); margin: 12px 0;">
-              CARTE VIVE CHE GENERANO VALORE
-            </h3>
-            <p style="color: var(--comic-paper); font-size: 1.05rem; line-height: 1.6;">
-              Ogni elemento forgiato o scoperto nel mondo diventa una carta digitale 3D.
-              Grazie all'architettura dell'eredità dei cloni, ogni volta che un altro universo include
-              la tua carta, una quota dei proventi in crediti risale la catena dei titolari fino a te.
+            <span class="comic-badge yellow">CIÒ CHE PORTI NEL MONDO È TUO</span>
+            <h3 class="comic-title" style="font-size: 2.2rem; margin: 12px 0">CARTE VIVE CHE GENERANO VALORE</h3>
+            <p style="color: var(--comic-paper); font-size: 1.05rem; line-height: 1.6; margin-bottom: 24px">
+              Ogni cosa che fai nascere nel mondo diventa una carta. Quando un altro reame nasce dal tuo e continua a usarla,
+              una quota del suo valore risale la catena dei titolari fino a te.
             </p>
-            <div style="display: flex; gap: 12px; margin-top: 24px;">
-              <button class="comic-btn pink">SFOGLIA COLLEZIONE</button>
-              <button class="comic-btn">REGISTRA CARTA</button>
+            <div style="display: flex; gap: 14px; flex-wrap: wrap">
+              <a href="../index.html" class="comic-btn pink">INIZIA LA COLLEZIONE</a>
             </div>
           </div>
         </div>
+      </section>
 
-        <!-- UI Component Demos: Session & Payment Modules -->
-        <div class="demo-strip" id="sessioni">
-          <div class="demo-box" id="sessione-demo">
-            <div class="comic-badge green">SESSIONE ATTIVA</div>
-            <h3>VALMORA MULTIGIOCATORE</h3>
-            <p style="font-size: 0.9rem; color: var(--comic-paper-dim);">
-              Master: <b style="color: var(--neon-cyan)">Lorenzo (Master)</b><br />
-              Modelli: <b style="color: var(--neon-yellow)">Gemini Flash-Lite + Flash 3.8</b><br />
-              Spesa stimata: <b>$0.08 / ora</b> · Minimo tetto: <b>$1.00</b>
+      <!-- I reami e ciò che arriverà: sessioni, crediti, profilo -->
+      <section class="section-wrap" id="reami">
+        <div class="section-head">
+          <h2 class="comic-title">REAMI, CREDITI E PROFILO</h2>
+          <p>// IL TUO POSTO NEI MONDI CONDIVISI</p>
+        </div>
+
+        <div class="grid-3">
+          <div class="comic-card">
+            <span class="comic-badge green" style="align-self: flex-start; margin-bottom: 12px">REAMI CONDIVISI</span>
+            <h4 class="comic-title" style="font-size: 1.3rem">ENTRA IN UN REAME</h4>
+            <p class="arcade-text text-dim" style="font-size: 0.72rem; line-height: 1.6">
+              Scegli un reame, guarda chi lo guida e quanto costa un'ora di gioco, poi entra nella sua sala d'attesa.
             </p>
-            <div style="margin-top: 18px; display: flex; gap: 10px;">
-              <a href="../index.html?universo=valmora" class="comic-btn cyan" style="font-size: 0.9rem; padding: 6px 14px;">ENTRA ORA</a>
-              <button class="comic-btn" style="font-size: 0.9rem; padding: 6px 14px;">DETTAGLI LOBBY</button>
+            <div style="margin-top: auto; padding-top: 16px">
+              <a href="../index.html" class="comic-btn arcade cyan sm full-width">GIOCA ORA</a>
             </div>
           </div>
 
-          <div class="demo-box" id="crediti">
-            <div class="comic-badge pink">PORTAFOGLIO STRIPE</div>
-            <h3>RICARICA CREDITI</h3>
-            <p style="font-size: 0.9rem; color: var(--comic-paper-dim);">
-              Saldo disponibile: <b style="color: var(--neon-green); font-size: 1.1rem;">$12.50 USD</b><br />
-              Ricarica rapida certificata con Stripe Checkout e Google Pay.
+          <div class="comic-card">
+            <span class="comic-badge pink" style="align-self: flex-start; margin-bottom: 12px">CREDITI</span>
+            <h4 class="comic-title" style="font-size: 1.3rem">RICARICA CREDITI</h4>
+            <p class="arcade-text text-dim" style="font-size: 0.72rem; line-height: 1.6">
+              I crediti fanno crescere il mondo mentre lo esplori. Ricarica sicura con Stripe Checkout e Google Pay.
             </p>
-            <div style="display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap;">
-              <button class="comic-btn arcade cyan" style="padding: 6px 10px;">+ $5</button>
-              <button class="comic-btn arcade cyan" style="padding: 6px 10px;">+ $10</button>
-              <button class="comic-btn arcade cyan" style="padding: 6px 10px;">+ $20</button>
+            <div style="margin-top: auto; padding-top: 16px">
+              <button class="comic-btn arcade pink sm full-width" disabled>PRESTO</button>
             </div>
           </div>
 
-          <div class="demo-box" id="profilo">
-            <div class="comic-badge yellow">PROFILO VIANDANTE</div>
-            <h3>STATO ACCOUNT</h3>
-            <p style="font-size: 0.9rem; color: var(--comic-paper-dim);">
-              ID Viandante: <b style="color: var(--neon-cyan)">v-9842a</b><br />
-              Stato: <b style="color: var(--neon-green)">Account Google Collegato</b><br />
-              Mantello: <b style="color: var(--neon-pink)">#ff2a85</b> · Seme: <b>42</b>
+          <div class="comic-card">
+            <span class="comic-badge yellow" style="align-self: flex-start; margin-bottom: 12px">PROFILO VIANDANTE</span>
+            <h4 class="comic-title" style="font-size: 1.3rem">IL TUO VIANDANTE</h4>
+            <p class="arcade-text text-dim" style="font-size: 0.72rem; line-height: 1.6">
+              Accedi con Google o entra anonimo; scegli il colore del mantello e l'aspetto del tuo viandante.
             </p>
-            <div style="margin-top: 18px;">
-              <button class="comic-btn arcade pink" style="font-size: 0.75rem; padding: 6px 12px;">MODIFICA AVATAR 3D</button>
+            <div style="margin-top: auto; padding-top: 16px">
+              <button class="comic-btn arcade sm full-width" disabled>PRESTO</button>
             </div>
           </div>
         </div>
       </section>
     </main>
 
-    <!-- Synthwave Sunset Footer with the Secret of the Jerboa -->
+    <!-- Il tramonto synthwave e il segreto dei gerboa (allusivo) -->
     <footer class="site-footer">
       <div class="footer-grid-floor"></div>
 
-      <!-- The Jerboa Secret Easter Egg (ADR-0095) -->
       <div class="footer-horizon">
-        <div class="jerboa-peek-container" title="Qualcosa osserva dall'orizzonte...">
+        <div class="jerboa-peek-container" title="Due sagome all'orizzonte...">
           <div class="jerboa-tooltip">// DUE ORECCHIE LUNGHE NELLA NOTTE...</div>
-          <svg class="jerboa-ears-svg" viewBox="0 0 64 38">
-            <!-- Stylized silhouette of the two long gerboa ears peeking up -->
+          <svg class="jerboa-ears-svg" viewBox="0 0 64 38" aria-hidden="true">
             <path d="M 16 38 C 14 20, 4 8, 12 2 C 20 -4, 26 14, 28 38 Z" />
             <path d="M 48 38 C 50 20, 60 8, 52 2 C 44 -4, 38 14, 36 38 Z" />
           </svg>
@@ -231,24 +318,21 @@
 
       <div class="footer-brand">QUINE42</div>
       <p class="footer-quote">
-        "Il sentiero scorre sotto i tuoi passi e ti guida nel mondo.<br />
-        Oltre l'orizzonte del visibile, c'è chi veglia e continua a scrivere le regole del gioco."
+        "Il sentiero scorre sotto i tuoi passi e si apre a ogni scelta.<br />
+        Ciò che pronunci diventa cammino, ciò che componi diventa mondo."
       </p>
 
       <div class="footer-links">
         <a href="../index.html">GIOCO</a>
         <a href="#mondo">MONDO</a>
+        <a href="#vetrina">VETRINA</a>
         <a href="#carte">CARTE</a>
-        <a href="#sessioni">LOBBY</a>
-        <a href="#crediti">PAGAMENTI</a>
+        <a href="#reami">REAMI</a>
       </div>
 
-      <div class="footer-copy">
-        QUINE42 © 2026 · Voxel Engine & Algoritmi MarkovJunior 3D · Generato da Intelligenza Artificiale
-      </div>
+      <div class="footer-copy">QUINE42 © 2026 · Voxel e modelli MarkovJunior 3D · Generato con intelligenza artificiale</div>
     </footer>
 
-    <!-- Interactive script -->
-    <script type="module" src="./preview.ts"></script>
+    <script type="module" src="./landing.ts"></script>
   </body>
 </html>
