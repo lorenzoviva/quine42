@@ -304,7 +304,8 @@ export const PROBES = [
     proprieta: 'il nome dell’universo nei metadati non porta fuori da universes/',
     async run(ctx) {
       const r = await hook(ctx, paid('evt_c', '../fuori', 'altro', 1));
-      return { ok: !existsSync(path.join(ctx.work, 'fuori', 'world', 'giocatori', 'altro.json')), dettaglio: `risposta ${r.status}` };
+      // `fuori` is born with the wanderer's file: what a credit would leave there is the payments' file.
+      return { ok: !existsSync(path.join(ctx.work, 'fuori', 'world', 'pagamenti.json')), dettaglio: `risposta ${r.status}` };
     },
   },
   {

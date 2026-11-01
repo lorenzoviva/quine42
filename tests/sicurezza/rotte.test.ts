@@ -6,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { GeminiGate, geminiProxy } from '../../server/geminiProxy';
-import { handleStripeWebhookEvent } from '../../server/stripe';
+import { createFakeStripeSignature, handleStripeWebhookEvent, stripeRoute } from '../../server/stripe';
 import { subscriptionQueue } from '../../server/subscriptionQueue';
 import { universeStore } from '../../server/universeStore';
 import { MockModels } from '../../src/kernel/ai/mock';
@@ -145,22 +145,68 @@ describe('il webhook di Stripe', () => {
   const paid = (id: string, universo: string, wandererId: string, crediti: number) =>
     JSON.stringify({ id, type: 'checkout.session.completed', data: { object: { id: `cs_${id}`, payment_status: 'paid', amount_total: crediti * 100, metadata: { universo, wandererId, crediti: String(crediti) } } } });
 
-  // Open: T124.
-  it.fails('V-004 senza segreto il webhook non accredita nulla', async () => {
+  const settings = { webhookSecret: 'finto' };
+  /** A delivery with the right signature: the refusals below are not the signature's. */
+  const signed = (rawBody: string) => handleStripeWebhookEvent({ rawBody, signature: createFakeStripeSignature(rawBody, settings.webhookSecret), settings, universesDir: dir });
+
+  it('V-004 senza segreto il webhook risponde 503 e non accredita nulla', async () => {
     const before = saldo();
-    await handleStripeWebhookEvent({ rawBody: paid('evt_v004a', 'sonda', 'altro', 100), settings: {}, universesDir: dir });
+    const rawBody = paid('evt_v004a', 'sonda', 'altro', 100);
+    // Not even with a signature made with an empty secret.
+    for (const secret of [undefined, '']) {
+      const r = await handleStripeWebhookEvent({ rawBody, signature: createFakeStripeSignature(rawBody, ''), settings: { webhookSecret: secret }, universesDir: dir });
+      expect(r.status).toBe(503);
+    }
     expect(saldo()).toBe(before);
   });
 
-  it.fails('V-004 il nome dell\'universo nei metadati non porta fuori dalla cartella', async () => {
+  it('V-004 il nome dell\'universo nei metadati non porta fuori dalla cartella', async () => {
     const outside = `${dir}-fuori`;
     mkdirSync(path.join(outside, '.git'), { recursive: true });
     try {
-      await handleStripeWebhookEvent({ rawBody: paid('evt_v004b', `../${path.basename(outside)}`, 'altro', 1), settings: {}, universesDir: dir });
+      const r = await signed(paid('evt_v004b', `../${path.basename(outside)}`, 'altro', 1));
+      expect(r.status).toBe(400);
       expect(existsSync(path.join(outside, 'world', 'giocatori', 'altro.json'))).toBe(false);
     } finally {
       rmSync(outside, { recursive: true, force: true });
     }
+  });
+
+  it('V-004 l\'id del viandante nei metadati non porta fuori dalla cartella dei viandanti', async () => {
+    const r = await signed(paid('evt_v004c', 'sonda', '../../sonda-id-fuori', 1));
+    expect(r.status).toBe(400);
+    expect(existsSync(path.join(root(), 'sonda-id-fuori.json'))).toBe(false);
+  });
+
+  it('V-004 il credito è quello dell\'importo pagato, non quello scritto nei metadati', async () => {
+    const before = saldo();
+    const event = JSON.parse(paid('evt_v004d', 'sonda', 'altro', 1000));
+    event.data.object.amount_total = 150;
+    expect((await signed(JSON.stringify(event))).status).toBe(200);
+    expect(saldo()).toBe(before + 1.5);
+  });
+
+  it('V-004 la route risponde 503 nel server di sviluppo e nella preview', async () => {
+    const plugin = stripeRoute({ settings: {}, universesDir: dir });
+    for (const configureServer of [plugin.configureServer, plugin.configurePreviewServer]) {
+      const route = await serve({ configureServer });
+      try {
+        const r = await fetch(`${route.base}/api/stripe/webhook`, { method: 'POST', body: paid('evt_v004f', 'sonda', 'altro', 100) });
+        expect(r.status).toBe(503);
+      } finally {
+        route.server.close();
+      }
+    }
+  });
+
+  it('V-004 senza un importo in dollari non si accredita nulla', async () => {
+    const before = saldo();
+    for (const change of [{ amount_total: undefined }, { amount_total: 0 }, { amount_total: -100 }, { amount_total: 1.5 }, { amount_total: '100' }, { currency: 'jpy' }]) {
+      const event = JSON.parse(paid(`evt_v004e${JSON.stringify(change)}`, 'sonda', 'altro', 5));
+      Object.assign(event.data.object, change);
+      expect((await signed(JSON.stringify(event))).status, JSON.stringify(change)).toBe(400);
+    }
+    expect(saldo()).toBe(before);
   });
 });
 

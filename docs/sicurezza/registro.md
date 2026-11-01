@@ -54,13 +54,14 @@ Modello di una voce:
 
 ### V-004 · Il webhook di Stripe senza segreto non controlla nulla
 - Gravità: critica
-- Stato: `specificata`
+- Stato: `chiusa`
 - Superficie: `server/stripe.ts`, `POST /api/stripe/webhook`, nel server di sviluppo e, da T105, nella preview
 - Proprietà violata: i crediti non si toccano: nascono solo da un pagamento vero, per il suo importo, dentro l'universo giusto
-- Prova: solo lettura del codice (T117); la verifica della firma ha già i suoi test; misurata dal kit (`esiti/2026-11-01.json`): FALLA V-004.a, c, d, e; la firma falsa è rifiutata (V-004.b, ok)
+- Prova: solo lettura del codice (T117); la verifica della firma ha già i suoi test; misurata dal kit (`esiti/2026-11-01.json`): FALLA V-004.a, c, d, e; la firma falsa è rifiutata (V-004.b, ok). Dopo T124 (`esiti/2026-11-01-dopo-T124.json`): V-004.a-e ok; V-004.c è stata riscritta, cercava un file che la cartella `fuori` ha già dalla nascita e sarebbe rimasta FALLA comunque: ora cerca `world/pagamenti.json`, che solo un accredito scrive
 - Contromisura: senza segreto la route risponde 503; nomi e id validati come nel checkout prima di finire in un percorso; credito calcolato dall'importo pagato.
 - Task: T124
-- Test: `tests/sicurezza/rotte.test.ts`
+- Test: `tests/sicurezza/rotte.test.ts`, `tests/stripe.test.ts`
+- Esito: chiusa da T124 (ADR-0083, aggiornamento), 01/11/2026, branch `task/T124`. Resta da guardare, per T45f: l'esclusione delle tasse dal credito non è provata contro una sessione vera di Stripe con le imposte. L'idempotenza e i saldi nella storia dell'universo sono V-005, T125.
 
 ### V-005 · Pagamenti: idempotenza fragile e registro nella storia dell'universo
 - Gravità: alta

@@ -1,0 +1,53 @@
+{
+ "data": "2026-11-01",
+ "commit": "bcf9203",
+ "vite": "7.3.7",
+ "node": "v22.19.0",
+ "piattaforma": "win32",
+ "solo": [
+  "V-004"
+ ],
+ "riepilogo": {
+  "ok": 5,
+  "falle": 0,
+  "errori": 0,
+  "saltate": 0
+ },
+ "prove": [
+  {
+   "id": "V-004.a",
+   "voce": "V-004",
+   "proprieta": "senza segreto il webhook non accredita nulla",
+   "esito": "ok",
+   "dettaglio": "risposta 503"
+  },
+  {
+   "id": "V-004.b",
+   "voce": "V-004",
+   "proprieta": "con il segreto una firma falsa è rifiutata",
+   "esito": "ok",
+   "dettaglio": "risposta 400"
+  },
+  {
+   "id": "V-004.c",
+   "voce": "V-004",
+   "proprieta": "il nome dell’universo nei metadati non porta fuori da universes/",
+   "esito": "ok",
+   "dettaglio": "risposta 400"
+  },
+  {
+   "id": "V-004.d",
+   "voce": "V-004",
+   "proprieta": "l’id del viandante nei metadati non porta fuori dalla cartella dei viandanti",
+   "esito": "ok",
+   "dettaglio": "risposta 400"
+  },
+  {
+   "id": "V-004.e",
+   "voce": "V-004",
+   "proprieta": "il credito è quello dell’importo pagato, non quello scritto nei metadati",
+   "esito": "ok",
+   "dettaglio": "risposta 200, pagato 1 $, accreditati 1"
+  }
+ ]
+}
