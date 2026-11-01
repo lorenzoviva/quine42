@@ -24,7 +24,7 @@ Non duplicare gli elementi del gioco: le rune sono quelle del canone, e nessun a
 Una fila di rune magiche è un programma: l'ordine conta (`terra fuoco` e `fuoco terra` sono due incantesimi diversi) e
 ripetere una runa la rafforza. Quando dai nome a un incantesimo nuovo, fallo derivare dai suoi elementi nell'ordine in
 cui stanno, come un incantesimo di D&D o una terraformazione: palle di fuoco, dardi, acqua che sgorga, terra che si
-solleva o si spiana, spinte, cure, protezioni. Gli effetti agiscono davvero sul luogo e sulle persone (mai solo un
+solleva o si abbassa (rilievo), spinte, cure, protezioni. Gli effetti agiscono davvero sul luogo e sulle persone (mai solo un
 messaggio), e restano quelli dell'elenco che il kernel conosce.
 
 ## Persone vere

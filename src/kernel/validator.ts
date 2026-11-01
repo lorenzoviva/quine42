@@ -408,6 +408,15 @@ export function validateEffects(raw: unknown, ctx: EffectContext): EffectVerdict
         out.effects.push({ tipo, a, ...(da ? { da } : {}), raggio: Math.round(num(e.raggio, 0, 3, 1)) });
         break;
       }
+      case 'rilievo': {
+        const delta = Math.round(num(e.delta, -8, 8, 1));
+        if (!delta) {
+          out.dropped.push('rilievo senza variazione');
+          break;
+        }
+        out.effects.push({ tipo, delta, raggio: Math.round(num(e.raggio, 0, 3, 1)) });
+        break;
+      }
       case 'fuoco':
       case 'luce':
         out.effects.push({ tipo, raggio: num(e.raggio, 0.5, tipo === 'fuoco' ? 3 : 8, tipo === 'fuoco' ? 1 : 4), durata: num(e.durata, 2, tipo === 'fuoco' ? 30 : 300, tipo === 'fuoco' ? 10 : 60) });
@@ -486,6 +495,8 @@ export function describeEffect(e: Effect, names: EffectNames): string {
       return `ne fa un contenitore${e.capienza ? ` da ${e.capienza} posti` : ''}`;
     case 'terreno':
       return `${e.da ? (names.tile(e.da) ?? e.da) : 'il terreno'} diventa ${names.tile(e.a) ?? e.a}${radius(e.raggio)}`;
+    case 'rilievo':
+      return `${e.delta > 0 ? 'alza' : 'abbassa'} il terreno di ${Math.abs(e.delta)} ${Math.abs(e.delta) === 1 ? 'livello' : 'livelli'}${radius(e.raggio)}`;
     case 'fuoco':
       return `fuoco${lasting(e.durata)}${radius(e.raggio)}`;
     case 'luce':

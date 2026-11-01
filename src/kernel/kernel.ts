@@ -5673,6 +5673,23 @@ export class Kernel {
     const god = target !== undefined && this.wandererOf(target);
     if (god && god !== this.wanderer().id && this.godMode(god)) effects = effects.filter((e) => e.tipo === 'messaggio');
     for (const e of effects) {
+      if (e.tipo === 'rilievo') {
+        const p = target !== undefined ? this.ecs.get(target, 'pos') : undefined;
+        const cx = Math.floor(p?.x ?? at?.x ?? this.playerCarpet().x);
+        const cy = Math.floor(p?.y ?? at?.y ?? this.playerCarpet().y);
+        const r = e.raggio ?? 1;
+        const delta = e.delta ?? 0;
+        if (delta) {
+          for (let dy = -r; dy <= r; dy++) {
+            for (let dx = -r; dx <= r; dx++) {
+              if (dx * dx + dy * dy <= r * r + r) {
+                this.dig(cx + dx, cy + dy, delta);
+              }
+            }
+          }
+        }
+        continue;
+      }
       if (target !== undefined && !this.ecs.alive.has(target)) target = undefined;
       const { value, failed } = this.runModule('core.effects', 'apply', target, this.playerId, clone(e), at?.x, at?.y);
       if (failed) break;

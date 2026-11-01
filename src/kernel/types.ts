@@ -188,6 +188,7 @@ export type Effect =
   | { tipo: 'apri' }
   | { tipo: 'contenitore'; capienza?: number; bottino?: string }
   | { tipo: 'terreno'; a: string; da?: string; raggio?: number }
+  | { tipo: 'rilievo'; delta: number; raggio?: number }
   | { tipo: 'fuoco'; raggio?: number; durata?: number }
   | { tipo: 'luce'; raggio?: number; durata?: number }
   | { tipo: 'scudo'; durata?: number }
@@ -202,7 +203,7 @@ export type Effect =
   | { tipo: 'stato'; nome: string; velocita?: number; peso?: number; luce?: number; durata?: number }
   | { tipo: 'togli_stato'; nome: string };
 
-export const EFFECT_TYPES = ['messaggio', 'bisogni', 'crea_oggetto', 'consuma', 'distruggi', 'apri', 'contenitore', 'terreno', 'fuoco', 'luce', 'scudo', 'spingi', 'evoca', 'legame', 'ricordo', 'nascita', 'stato', 'togli_stato'] as const;
+export const EFFECT_TYPES = ['messaggio', 'bisogni', 'crea_oggetto', 'consuma', 'distruggi', 'apri', 'contenitore', 'terreno', 'rilievo', 'fuoco', 'luce', 'scudo', 'spingi', 'evoca', 'legame', 'ricordo', 'nascita', 'stato', 'togli_stato'] as const;
 
 /**
  * Something you can do to an object (E opens the menu). Either handled by the module's
