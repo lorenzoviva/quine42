@@ -8,6 +8,7 @@ import { sessionServer, getActiveUniverseKernel } from './server/session';
 import { accountRoute, accountSettings } from './server/account';
 import { stripeRoute, stripeSettings } from './server/stripe';
 import { subscriptionQueue } from './server/subscriptionQueue';
+import { wandererRoute } from './server/wanderer';
 
 export default defineConfig(({ mode }) => {
   // '' prefix: read every variable, but only server-side. Nothing without VITE_ reaches the client.
@@ -29,6 +30,8 @@ export default defineConfig(({ mode }) => {
         universesDir,
         getActiveKernel: getActiveUniverseKernel,
       }),
+      // The site's profile page (T102): the account's wanderer, their profile and credits.
+      wandererRoute({ accounts, universesDir, getActiveKernel: getActiveUniverseKernel }),
       sessionServer(accounts),
       subscriptionQueue(path.resolve(process.cwd(), 'universes', '.coda')),
     ],
@@ -48,6 +51,7 @@ export default defineConfig(({ mode }) => {
           site: path.resolve('site/index.html'),
           sessioni: path.resolve('site/sessioni.html'),
           carte: path.resolve('site/carte.html'),
+          siteProfilo: path.resolve('site/profilo.html'),
         },
       },
     },
