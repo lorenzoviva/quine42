@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QUINE42 · Template Profilo Viandante & Avatar 3D</title>
+    <link rel="stylesheet" href="./template.css" />
+    <style>
+      .profile-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+      .avatar-preview-box {
+        height: 320px;
+        background: radial-gradient(circle at center, rgba(0, 240, 255, 0.2) 0%, rgba(7, 4, 13, 0.95) 70%);
+        border: var(--border-ink-thick);
+        box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), 4px 4px 0 var(--neon-cyan);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 20px;
+      }
+      .avatar-voxel-figure {
+        width: 100px;
+        height: 160px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: transform 0.3s ease;
+      }
+      .avatar-head {
+        width: 44px;
+        height: 44px;
+        background: #f7d5b2;
+        border: 3px solid var(--comic-ink);
+        box-shadow: 2px 2px 0 var(--neon-pink);
+        position: relative;
+        z-index: 3;
+      }
+      .avatar-eyes {
+        position: absolute;
+        top: 14px;
+        left: 8px;
+        right: 8px;
+        display: flex;
+        justify-content: space-between;
+      }
+      .avatar-eye {
+        width: 6px;
+        height: 8px;
+        background: var(--comic-ink);
+      }
+      .avatar-body {
+        width: 56px;
+        height: 64px;
+        background: #3a2d54;
+        border: 3px solid var(--comic-ink);
+        margin-top: -2px;
+        position: relative;
+        z-index: 2;
+      }
+      .avatar-cloak {
+        position: absolute;
+        top: 40px;
+        width: 76px;
+        height: 86px;
+        background: var(--neon-pink);
+        border: 3px solid var(--comic-ink);
+        box-shadow: 0 0 16px var(--neon-pink);
+        z-index: 1;
+        transition: background 0.25s ease, box-shadow 0.25s ease;
+      }
+      .color-palette-picker {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin: 12px 0 20px;
+      }
+      .color-swatch {
+        width: 38px;
+        height: 38px;
+        border: 3px solid var(--comic-ink);
+        box-shadow: 2px 2px 0 var(--comic-ink);
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+      .color-swatch:hover {
+        transform: scale(1.15);
+      }
+      .color-swatch.selected {
+        outline: 3px solid #fff;
+        transform: scale(1.15) translateY(-2px);
+        box-shadow: 4px 4px 0 var(--neon-cyan);
+      }
+      @media (max-width: 900px) {
+        .profile-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Top Navigation Bar -->
+    <header class="site-nav">
+      <a href="./index.html" class="nav-brand">
+        <span class="nav-logo">QUINE42</span>
+        <span class="nav-tagline">// ARCADE · VOXEL · IA</span>
+      </a>
+      <button class="nav-toggle-btn" id="nav-toggle">MENU ▼</button>
+      <nav>
+        <ul class="nav-links" id="nav-links">
+          <li><a href="./index.html" class="nav-link">Mondo</a></li>
+          <li><a href="./carte.html" class="nav-link">Carte 3D</a></li>
+          <li><a href="./sessioni.html" class="nav-link">Sessioni</a></li>
+          <li><a href="./profilo.html" class="nav-link active">Profilo</a></li>
+          <li><a href="./pagamenti.html" class="nav-link">Crediti</a></li>
+          <li><a href="./componenti.html" class="nav-link">Componenti</a></li>
+        </ul>
+      </nav>
+      <div class="nav-actions">
+        <a href="../../../index.html" class="comic-btn arcade cyan">GIOCA SUBITO</a>
+        <a href="./login.html" class="comic-btn arcade">ESCI</a>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="section-wrap">
+      <div class="section-head">
+        <span class="comic-badge yellow">SCHEDA PERSONAGGIO</span>
+        <h1 class="comic-title" style="font-size: 2.8rem; margin-top: 10px;">PROFILO DEL VIANDANTE</h1>
+        <p>// IDENTITÀ · PORTAFOGLIO · PERSONALIZZAZIONE 3D</p>
+      </div>
+
+      <!-- Success Notification Toast -->
+      <div class="comic-alert success" id="save-alert" style="display: none;">
+        <span class="comic-badge green">SALVATO!</span>
+        <span class="arcade-text" style="font-size: 0.75rem;">
+          Le modifiche all'aspetto del viandante e al mantello sono state memorizzate con successo!
+        </span>
+      </div>
+
+      <div class="profile-grid">
+        <!-- Left Column: Wanderer Identity & Account Details -->
+        <div>
+          <!-- Identity Panel -->
+          <div class="comic-panel yellow-shadow" style="margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+              <div>
+                <span class="comic-badge cyan">ID ACCOUNT</span>
+                <h2 class="comic-title" style="font-size: 1.8rem; margin: 8px 0 0;">v-9842a</h2>
+              </div>
+              <span class="comic-badge green">ACCOUNT COLLEGATO</span>
+            </div>
+
+            <div class="comic-table-wrap" style="margin-bottom: 20px;">
+              <table class="comic-table">
+                <tbody>
+                  <tr>
+                    <td class="arcade-text text-yellow">Provider:</td>
+                    <td><b>Google Firebase</b> (lorenzo@example.com)</td>
+                  </tr>
+                  <tr>
+                    <td class="arcade-text text-yellow">Grado:</td>
+                    <td><b>Viandante delle Rune</b> (Livello 7)</td>
+                  </tr>
+                  <tr>
+                    <td class="arcade-text text-yellow">Reame d'origine:</td>
+                    <td><b>Valmora</b> (Clone Primario)</td>
+                  </tr>
+                  <tr>
+                    <td class="arcade-text text-yellow">Creato il:</td>
+                    <td>28 Ottobre 2026</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Wallet Quick Summary -->
+            <div style="background: var(--comic-ink); border: 2px solid var(--neon-cyan); padding: 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <span class="arcade-text text-dim" style="font-size: 0.65rem;">SALDO CREDITI DISPONIBILE</span>
+                <div class="comic-title green" style="font-size: 1.8rem; margin: 0; color: var(--neon-green);">
+                  $12.50 USD
+                </div>
+              </div>
+              <a href="./pagamenti.html" class="comic-btn sm cyan">RICARICA CREDITI</a>
+            </div>
+
+            <!-- Account Actions -->
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <button class="comic-btn sm pink" id="btn-link-google">
+                COLLEGA A UN ALTRO ACCOUNT
+              </button>
+              <a href="./login.html" class="comic-btn sm dark">
+                DISCONNETTI
+              </a>
+            </div>
+          </div>
+
+          <!-- Wanderer In-World Achievements / Stats -->
+          <div class="comic-panel">
+            <h3 class="comic-title" style="font-size: 1.3rem; margin-bottom: 16px;">STATISTICHE NEL MONDO</h3>
+            <div class="grid-2">
+              <div class="comic-card" style="padding: 14px;">
+                <span class="comic-badge yellow">SCOPERTE</span>
+                <div class="comic-title" style="font-size: 2rem; margin: 6px 0 0;">38</div>
+                <span class="arcade-text text-dim" style="font-size: 0.65rem;">LUOGHI ESPLORATI</span>
+              </div>
+              <div class="comic-card" style="padding: 14px;">
+                <span class="comic-badge cyan">MAGIA</span>
+                <div class="comic-title cyan" style="font-size: 2rem; margin: 6px 0 0;">124</div>
+                <span class="arcade-text text-dim" style="font-size: 0.65rem;">RUNE PRONUNCIATE</span>
+              </div>
+              <div class="comic-card" style="padding: 14px;">
+                <span class="comic-badge pink">TESORI</span>
+                <div class="comic-title" style="color: var(--neon-pink); font-size: 2rem; margin: 6px 0 0;">18</div>
+                <span class="arcade-text text-dim" style="font-size: 0.65rem;">CARTE POSSEDUTE</span>
+              </div>
+              <div class="comic-card" style="padding: 14px;">
+                <span class="comic-badge green">VIAGGI</span>
+                <div class="comic-title" style="color: var(--neon-green); font-size: 2rem; margin: 6px 0 0;">3</div>
+                <span class="arcade-text text-dim" style="font-size: 0.65rem;">REAMI VISITATI</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: 3D Avatar & Model Customizer -->
+        <div>
+          <div class="comic-panel cyan-shadow">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <h2 class="comic-title" style="font-size: 1.6rem; margin: 0;">PERSONALIZZAZIONE 3D</h2>
+              <span class="comic-badge cyan">THREE.JS LIVE</span>
+            </div>
+
+            <!-- Avatar Preview Canvas Box -->
+            <div class="avatar-preview-box">
+              <div class="avatar-voxel-figure" id="avatar-figure">
+                <div class="avatar-head">
+                  <div class="avatar-eyes">
+                    <div class="avatar-eye"></div>
+                    <div class="avatar-eye"></div>
+                  </div>
+                </div>
+                <div class="avatar-body"></div>
+                <div class="avatar-cloak" id="avatar-cloak"></div>
+              </div>
+              <div style="position: absolute; bottom: 10px; text-align: center;">
+                <span class="arcade-text text-dim" style="font-size: 0.6rem;">// TRASCINA PER RUOTARE L'AVATAR //</span>
+              </div>
+            </div>
+
+            <!-- Cloak Color Picker -->
+            <div class="form-group">
+              <label class="comic-label">COLORE DEL MANTELLO (MARKOVJUNIOR)</label>
+              <div class="color-palette-picker" id="cloak-palette">
+                <div class="color-swatch selected" data-color="#ff2a85" style="background: #ff2a85;" title="Neon Pink"></div>
+                <div class="color-swatch" data-color="#00f0ff" style="background: #00f0ff;" title="Neon Cyan"></div>
+                <div class="color-swatch" data-color="#ffe600" style="background: #ffe600;" title="Neon Yellow"></div>
+                <div class="color-swatch" data-color="#05ffa1" style="background: #05ffa1;" title="Neon Green"></div>
+                <div class="color-swatch" data-color="#9d00ff" style="background: #9d00ff;" title="Neon Purple"></div>
+                <div class="color-swatch" data-color="#ff6c00" style="background: #ff6c00;" title="Neon Orange"></div>
+                <div class="color-swatch" data-color="#07040d" style="background: #07040d;" title="Comic Ink"></div>
+              </div>
+              <span class="arcade-text text-dim" style="font-size: 0.7rem;">Colore attuale: <b id="current-color-label" class="text-pink">#ff2a85</b></span>
+            </div>
+
+            <!-- Procedural Seed Customizer -->
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label class="comic-label" for="seed-range" style="margin: 0;">SEME PROCEDURALE AVATAR</label>
+                <button class="comic-btn arcade sm" id="btn-rand-seed">🎲 CASUALE</button>
+              </div>
+              <input
+                type="range"
+                id="seed-range"
+                class="comic-slider"
+                min="1"
+                max="9999"
+                value="42"
+              />
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                <span class="input-hint">Varia i dettagli voxel generati da MarkovJunior.</span>
+                <span class="comic-badge yellow" id="seed-badge">SEME: 42</span>
+              </div>
+            </div>
+
+            <!-- Save Button -->
+            <div style="margin-top: 28px;">
+              <button class="comic-btn full-width pink lg" id="btn-save-appearance">
+                SALVA ASPETTO
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Synthwave Sunset Footer with the Secret of the Jerboa -->
+    <footer class="site-footer">
+      <div class="footer-grid-floor"></div>
+
+      <div class="footer-horizon">
+        <div class="jerboa-peek-container" title="Due sagome all'orizzonte...">
+          <div class="jerboa-tooltip">// DUE ORECCHIE LUNGHE NELLA NOTTE...</div>
+          <svg class="jerboa-ears-svg" viewBox="0 0 64 38">
+            <path d="M 16 38 C 14 20, 4 8, 12 2 C 20 -4, 26 14, 28 38 Z" />
+            <path d="M 48 38 C 50 20, 60 8, 52 2 C 44 -4, 38 14, 36 38 Z" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="footer-brand">QUINE42</div>
+      <p class="footer-quote">
+        "Il sentiero scorre sotto i tuoi passi e si apre a ogni scelta.<br />
+        Ciò che pronunci diventa cammino, ciò che componi diventa mondo."
+      </p>
+
+      <div class="footer-links">
+        <a href="../../../index.html">GIOCO</a>
+        <a href="./index.html">MONDO</a>
+        <a href="./carte.html">CARTE</a>
+        <a href="./sessioni.html">SESSIONI</a>
+        <a href="./profilo.html">PROFILO</a>
+        <a href="./pagamenti.html">CREDITI</a>
+        <a href="./componenti.html">COMPONENTI</a>
+      </div>
+
+      <div class="footer-copy">
+        QUINE42 © 2026 · Voxel Engine & Modelli MarkovJunior 3D · Generato con Intelligenza Artificiale
+      </div>
+    </footer>
+
+    <!-- Interactive script for Color Picking, Seed and Toast -->
+    <script>
+      const cloak = document.getElementById('avatar-cloak');
+      const swatches = document.querySelectorAll('.color-swatch');
+      const colorLabel = document.getElementById('current-color-label');
+      const seedRange = document.getElementById('seed-range');
+      const seedBadge = document.getElementById('seed-badge');
+      const btnRandSeed = document.getElementById('btn-rand-seed');
+      const btnSave = document.getElementById('btn-save-appearance');
+      const saveAlert = document.getElementById('save-alert');
+      const avatarFigure = document.getElementById('avatar-figure');
+
+      swatches.forEach(swatch => {
+        swatch.addEventListener('click', () => {
+          swatches.forEach(s => s.classList.remove('selected'));
+          swatch.classList.add('selected');
+          const col = swatch.getAttribute('data-color');
+          cloak.style.background = col;
+          cloak.style.boxShadow = `0 0 16px ${col}`;
+          colorLabel.textContent = col;
+          colorLabel.style.color = col;
+        });
+      });
+
+      seedRange.addEventListener('input', (e) => {
+        seedBadge.textContent = `SEME: ${e.target.value}`;
+      });
+
+      btnRandSeed.addEventListener('click', () => {
+        const rand = Math.floor(Math.random() * 9999) + 1;
+        seedRange.value = rand;
+        seedBadge.textContent = `SEME: ${rand}`;
+      });
+
+      btnSave.addEventListener('click', () => {
+        btnSave.classList.add('is-loading');
+        setTimeout(() => {
+          btnSave.classList.remove('is-loading');
+          saveAlert.style.display = 'flex';
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          setTimeout(() => {
+            saveAlert.style.display = 'none';
+          }, 4000);
+        }, 600);
+      });
+
+      // Mobile nav
+      const navToggle = document.getElementById('nav-toggle');
+      const navLinks = document.getElementById('nav-links');
+      const navActions = document.querySelector('.nav-actions');
+      if (navToggle && navLinks) {
+        navToggle.addEventListener('click', () => {
+          navLinks.classList.toggle('is-open');
+          if (navActions) navActions.classList.toggle('is-open');
+        });
+      }
+    </script>
+  </body>
+</html>

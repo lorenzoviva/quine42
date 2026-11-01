@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QUINE42 · Template Pagamenti & Ricarica Crediti</title>
+    <link rel="stylesheet" href="./template.css" />
+    <style>
+      .billing-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.25fr;
+        gap: 32px;
+        margin-bottom: 40px;
+      }
+      .credit-tiers {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+        margin-bottom: 20px;
+      }
+      .tier-card {
+        background: var(--comic-ink);
+        border: 2px solid var(--comic-ink-surface);
+        padding: 16px 14px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+      .tier-card:hover {
+        border-color: var(--neon-cyan);
+        transform: translateY(-2px);
+      }
+      .tier-card.selected {
+        border: 2px solid var(--neon-pink);
+        box-shadow: 3px 3px 0 var(--neon-pink);
+        background: #180927;
+      }
+      .tier-price {
+        font-family: var(--font-display);
+        font-size: 1.8rem;
+        color: var(--neon-yellow);
+        margin: 4px 0;
+      }
+      .tier-credits {
+        font-family: var(--font-arcade);
+        font-size: 0.65rem;
+        color: var(--neon-cyan);
+      }
+      @media (max-width: 900px) {
+        .billing-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Top Navigation Bar -->
+    <header class="site-nav">
+      <a href="./index.html" class="nav-brand">
+        <span class="nav-logo">QUINE42</span>
+        <span class="nav-tagline">// ARCADE · VOXEL · IA</span>
+      </a>
+      <button class="nav-toggle-btn" id="nav-toggle">MENU ▼</button>
+      <nav>
+        <ul class="nav-links" id="nav-links">
+          <li><a href="./index.html" class="nav-link">Mondo</a></li>
+          <li><a href="./carte.html" class="nav-link">Carte 3D</a></li>
+          <li><a href="./sessioni.html" class="nav-link">Sessioni</a></li>
+          <li><a href="./profilo.html" class="nav-link">Profilo</a></li>
+          <li><a href="./pagamenti.html" class="nav-link active">Crediti</a></li>
+          <li><a href="./componenti.html" class="nav-link">Componenti</a></li>
+        </ul>
+      </nav>
+      <div class="nav-actions">
+        <a href="../../../index.html" class="comic-btn arcade cyan">GIOCA SUBITO</a>
+        <a href="./login.html" class="comic-btn arcade">ACCEDI</a>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="section-wrap">
+      <div class="section-head">
+        <span class="comic-badge pink">PORTAFOGLIO STRIPE CHECKOUT</span>
+        <h1 class="comic-title" style="font-size: 2.8rem; margin: 10px 0 0;">GESTIONE CREDITI E RICARICHE</h1>
+        <p>// TARIFFAZIONE TRASPARENTE · CARTE E GOOGLE PAY</p>
+      </div>
+
+      <!-- Success Notification Alert -->
+      <div class="comic-alert success" id="checkout-alert" style="display: none;">
+        <span class="comic-badge green">ACCREDITATO!</span>
+        <span class="arcade-text" style="font-size: 0.75rem;">
+          Sessione di pagamento completata! Il tuo saldo è stato aggiornato.
+        </span>
+      </div>
+
+      <div class="billing-grid">
+        <!-- Left: Current Balance and How It Works -->
+        <div>
+          <!-- Current Balance Box -->
+          <div class="comic-panel green-shadow" style="margin-bottom: 24px; box-shadow: var(--shadow-hard-green);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+              <span class="comic-badge green">SALDO ATTIVO</span>
+              <span class="arcade-text text-dim" style="font-size: 0.65rem;">AGGIORNATO ORA</span>
+            </div>
+            <div class="comic-title" style="color: var(--neon-green); font-size: 3.5rem; line-height: 1; margin: 8px 0 14px;">
+              $12.50 <span style="font-size: 1.4rem; color: var(--comic-paper);">USD</span>
+            </div>
+            <p class="arcade-text text-dim" style="font-size: 0.72rem; line-height: 1.6; margin: 0;">
+              Equivalente a circa <b>156 ore</b> di esplorazione in sessioni standard (Gemini Flash-Lite).
+            </p>
+          </div>
+
+          <!-- Explanatory Comic Panel -->
+          <div class="comic-panel yellow-shadow">
+            <h3 class="comic-title" style="font-size: 1.3rem; margin-bottom: 12px;">COME FUNZIONANO I CREDITI</h3>
+            <ul style="padding-left: 18px; margin: 0; font-size: 0.9rem; line-height: 1.6; color: var(--comic-paper);">
+              <li style="margin-bottom: 8px;">
+                I crediti coprono le chiamate alle intelligenze artificiali che generano trame, dialoghi e forme 3D.
+              </li>
+              <li style="margin-bottom: 8px;">
+                In multigiocatore, il tetto stabilito dal Master garantisce che le sessioni non superino mai il budget prefissato.
+              </li>
+              <li style="margin-bottom: 8px;">
+                Se possiedi carte collezionabili utilizzate in altri reami, ricevi accrediti automatici sul tuo portafoglio.
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Right: Stripe Recharge Selector -->
+        <div>
+          <div class="comic-panel cyan-shadow">
+            <h2 class="comic-title cyan" style="font-size: 1.6rem; margin-bottom: 18px;">RICARICA RAPIDA STRIPE</h2>
+
+            <!-- Predefined Tiers -->
+            <label class="comic-label">SCEGLI UN TAGLIO DI RICARICA</label>
+            <div class="credit-tiers" id="tier-container">
+              <div class="tier-card" data-val="5">
+                <div class="comic-badge cyan">BASE</div>
+                <div class="tier-price">$5.00</div>
+                <div class="tier-credits">500 CREDITI</div>
+              </div>
+
+              <div class="tier-card selected" data-val="10">
+                <div class="comic-badge yellow">POPOLARE</div>
+                <div class="tier-price">$10.00</div>
+                <div class="tier-credits">1.050 CREDITI (+50 BONUS)</div>
+              </div>
+
+              <div class="tier-card" data-val="20">
+                <div class="comic-badge pink">CONVENIENZA</div>
+                <div class="tier-price">$20.00</div>
+                <div class="tier-credits">2.200 CREDITI (+200 BONUS)</div>
+              </div>
+
+              <div class="tier-card" data-val="50">
+                <div class="comic-badge green">VIP PACK</div>
+                <div class="tier-price">$50.00</div>
+                <div class="tier-credits">5.800 CREDITI (+800 BONUS)</div>
+              </div>
+            </div>
+
+            <!-- Custom Amount Option -->
+            <div class="form-group">
+              <label class="comic-label" for="custom-amount">OPPURE IMPORTO PERSONALIZZATO ($ USD)</label>
+              <div style="display: flex; gap: 8px;">
+                <input
+                  type="number"
+                  id="custom-amount"
+                  class="comic-input"
+                  placeholder="Minimo $1.00..."
+                  min="1"
+                  step="1"
+                  value="10"
+                />
+              </div>
+              <span class="input-hint">Minimo $1.00 USD. Nessuna commissione nascosta.</span>
+            </div>
+
+            <!-- Stripe Action CTA -->
+            <div style="margin-top: 24px;">
+              <button class="comic-btn full-width pink lg" id="btn-stripe-pay">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                </svg>
+                PAGA IN SICUREZZA CON STRIPE
+              </button>
+              <div style="text-align: center; margin-top: 10px;">
+                <span class="arcade-text text-dim" style="font-size: 0.65rem;">
+                  // SUPPORTA CARTE DI CREDITO · GOOGLE PAY · APPLE PAY //
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transaction History Table (world/pagamenti.json) -->
+      <div class="comic-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+          <h2 class="comic-title" style="font-size: 1.6rem; margin: 0;">CRONOLOGIA TRANSAZIONI</h2>
+          <span class="comic-badge cyan">ARCHIVIO VIVO</span>
+        </div>
+
+        <div class="comic-table-wrap">
+          <table class="comic-table">
+            <thead>
+              <tr>
+                <th>ID TRANSAZIONE</th>
+                <th>DATA E ORA</th>
+                <th>METODO</th>
+                <th>IMPORTO</th>
+                <th>CREDITI</th>
+                <th>STATO</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code class="mono-text text-cyan">tx_9842a_01</code></td>
+                <td>28 Ottobre 2026, 14:32</td>
+                <td>Google Pay</td>
+                <td><b>$10.00 USD</b></td>
+                <td class="text-green">+1.050</td>
+                <td><span class="comic-badge green">COMPLETATO</span></td>
+              </tr>
+              <tr>
+                <td><code class="mono-text text-cyan">tx_9842a_02</code></td>
+                <td>30 Ottobre 2026, 19:15</td>
+                <td>Carta di Credito **** 4242</td>
+                <td><b>$5.00 USD</b></td>
+                <td class="text-green">+500</td>
+                <td><span class="comic-badge green">COMPLETATO</span></td>
+              </tr>
+              <tr>
+                <td><code class="mono-text text-cyan">tx_9842a_03</code></td>
+                <td>31 Ottobre 2026, 10:02</td>
+                <td>Carta di Credito **** 4242</td>
+                <td><b>$20.00 USD</b></td>
+                <td class="text-yellow">+2.200</td>
+                <td><span class="comic-badge yellow">IN ELABORAZIONE</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <!-- Synthwave Sunset Footer with the Secret of the Jerboa -->
+    <footer class="site-footer">
+      <div class="footer-grid-floor"></div>
+
+      <div class="footer-horizon">
+        <div class="jerboa-peek-container" title="Due sagome all'orizzonte...">
+          <div class="jerboa-tooltip">// DUE ORECCHIE LUNGHE NELLA NOTTE...</div>
+          <svg class="jerboa-ears-svg" viewBox="0 0 64 38">
+            <path d="M 16 38 C 14 20, 4 8, 12 2 C 20 -4, 26 14, 28 38 Z" />
+            <path d="M 48 38 C 50 20, 60 8, 52 2 C 44 -4, 38 14, 36 38 Z" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="footer-brand">QUINE42</div>
+      <p class="footer-quote">
+        "Il sentiero scorre sotto i tuoi passi e si apre a ogni scelta.<br />
+        Ciò che pronunci diventa cammino, ciò che componi diventa mondo."
+      </p>
+
+      <div class="footer-links">
+        <a href="../../../index.html">GIOCO</a>
+        <a href="./index.html">MONDO</a>
+        <a href="./carte.html">CARTE</a>
+        <a href="./sessioni.html">SESSIONI</a>
+        <a href="./profilo.html">PROFILO</a>
+        <a href="./pagamenti.html">CREDITI</a>
+        <a href="./componenti.html">COMPONENTI</a>
+      </div>
+
+      <div class="footer-copy">
+        QUINE42 © 2026 · Voxel Engine & Modelli MarkovJunior 3D · Generato con Intelligenza Artificiale
+      </div>
+    </footer>
+
+    <!-- Interactive script for Tier Selection and Simulated Checkout -->
+    <script>
+      const tiers = document.querySelectorAll('.tier-card');
+      const customInput = document.getElementById('custom-amount');
+      const btnPay = document.getElementById('btn-stripe-pay');
+      const alertBox = document.getElementById('checkout-alert');
+
+      tiers.forEach(tier => {
+        tier.addEventListener('click', () => {
+          tiers.forEach(t => t.classList.remove('selected'));
+          tier.classList.add('selected');
+          const val = tier.getAttribute('data-val');
+          customInput.value = val;
+        });
+      });
+
+      customInput.addEventListener('input', (e) => {
+        const val = e.target.value;
+        tiers.forEach(tier => {
+          if (tier.getAttribute('data-val') === val) {
+            tier.classList.add('selected');
+          } else {
+            tier.classList.remove('selected');
+          }
+        });
+      });
+
+      btnPay.addEventListener('click', () => {
+        btnPay.classList.add('is-loading');
+        setTimeout(() => {
+          btnPay.classList.remove('is-loading');
+          alertBox.style.display = 'flex';
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          setTimeout(() => {
+            alertBox.style.display = 'none';
+          }, 4500);
+        }, 1000);
+      });
+
+      // Mobile nav
+      const navToggle = document.getElementById('nav-toggle');
+      const navLinks = document.getElementById('nav-links');
+      const navActions = document.querySelector('.nav-actions');
+      if (navToggle && navLinks) {
+        navToggle.addEventListener('click', () => {
+          navLinks.classList.toggle('is-open');
+          if (navActions) navActions.classList.toggle('is-open');
+        });
+      }
+    </script>
+  </body>
+</html>
