@@ -49,12 +49,14 @@ Aggiornato il 01/11/2026, fine dell'epoca 192 su **claude** (crediti: vedi `stat
 
 ## Task attivi e in corso
 
-- **In corso** (all'ultimo `stato`, epoca 192): **T122 T140** su Claude.
+- **In corso** (epoca 193): **T140 T142** su Claude.
+- **T122 finito** (V-008, V-017, V-019 chiuse; ADR-0099), conflitto in `AGENTS.md`: **T144** lo integra (p1, dipende da T142; l'ADR di T122 prende il primo numero libero, il 0099 è di T131). Poi `integra T144`, `integra T122`. Restano non provati: difetti di wasm e Lua, blocco del servizio (T126, T127), serve uno sguardo esperto per una garanzia forte. `tests/between.test.ts` ha un limite di 180 s: andrebbe alleggerito.
+- **Claude sospeso da me il 01/11** per la finestra di Vite 7: T140 e T142 finiscono, niente task nuovi. Poi la procedura di T131 qui sotto (già sospeso) e `integra T140`, `integra T123`; infine `riattiva claude`. **Non dimenticare `riattiva`.**
 - **T143** (rune invisibili sul tappeto, regressione di almeno 40 task, chiesto dall'autore il 01/11): approvato, p2, su Claude; parte dopo T142 e prima della sicurezza che resta.
 - **Aspetto dall'autore**: T45f, T88. Sta provando il logo con il materiale di T141.
 - **T131 finito (Vite 7, Vitest 4), conflitto in `AGENTS.md`: T142 lo integra.** Finito T142, in quest'ordine: `sospendi claude`; aspettare che nessun task giri (il `node_modules` del base è condiviso con una junction; un worktree partito prima con le versioni nuove sotto, o un `npm ci` durante una suite, si romperebbero); `integra T142`, `integra T131`; `npm ci` nel base (il lock è scritto con npm 11, T131 ha provato che `npm ci` con npm 10 passa); `riattiva claude`. Fino a quel momento `npm run abbonamento` resta com'è.
-- **T141 integrato** (01/11): materiale per il logo in `docs/design/logo/`. Sostituire il logo sarà un altro task, quando l'autore ne avrà scelto uno.- **Pronti su Claude**: **T142** (p1) → **T143** (p2) → **T120 T124 T126 T128 T132** (sicurezza) → **T106** (p72) → **T89a** (p75); bloccati T121 T125 T127 T129 T130 T133 T134 (dalle correzioni), **T89b-e** (da T89a).
-- **Da integrare**: **T123** (tramite T140; poi `integra T140`, `integra T123`), **T131** (tramite T142, con la procedura qui sopra). T136, T137, T138, T118, T139 e T105 integrati il 01/11.
+- **T141 integrato** (01/11): materiale per il logo in `docs/design/logo/`. Sostituire il logo sarà un altro task, quando l'autore ne avrà scelto uno.- **Pronti su Claude**: **T144** (p1, da T142) → **T143** (p2) → **T120 T124 T126 T128 T132** (sicurezza) → **T106** (p72) → **T89a** (p75); bloccati T121 T125 T127 T129 T130 T133 T134 (dalle correzioni), **T89b-e** (da T89a).
+- **Da integrare**: **T122** (tramite T144), **T123** (tramite T140; poi `integra T140`, `integra T123`), **T131** (tramite T142, con la procedura qui sopra). T136, T137, T138, T118, T139 e T105 integrati il 01/11.
 - **Integrati di recente**: **T104** (22 timeout su 675 nella suite, estraneità provata solo in 3 file: se restano dopo T118, ricontrollare `forms.ts` e `cards.ts`), **T115**, **T57b**, **T114**, **T103**, **T57c**, **T113**, **T112**, **T111**, **T101**, **T110**, **T109**.
 - **Crediti** (01/11, circa 18:45 UTC): Claude settimana 95 %, 5h 87 % (reset 05/11 16:00; 5h alle 22:29); Gemini settimana 8 %, sotto soglia: nessun task nuovo (reset 05/11 17:37); Argon fermo fino al 04/11.
 
