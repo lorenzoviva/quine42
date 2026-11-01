@@ -75,14 +75,14 @@
   <body>
     <!-- Top Navigation Bar -->
     <header class="site-nav">
-      <a href="./landing.html" class="nav-brand">
+      <a href="./index.html" class="nav-brand">
         <span class="nav-logo">QUINE42</span>
         <span class="nav-tagline">// ARCADE · VOXEL · IA</span>
       </a>
       <button class="nav-toggle-btn" id="nav-toggle">MENU ▼</button>
       <nav>
         <ul class="nav-links" id="nav-links">
-          <li><a href="./landing.html" class="nav-link">Mondo</a></li>
+          <li><a href="./index.html" class="nav-link">Mondo</a></li>
           <li><a href="./carte.html" class="nav-link">Carte 3D</a></li>
           <li><a href="./sessioni.html" class="nav-link active">Sessioni</a></li>
           <li><a href="./profilo.html" class="nav-link">Profilo</a></li>
@@ -345,7 +345,7 @@
       <div class="footer-grid-floor"></div>
 
       <div class="footer-horizon">
-        <div class="jerboa-peek-container" title="Qualcosa osserva dall'orizzonte...">
+        <div class="jerboa-peek-container" title="Due sagome all'orizzonte...">
           <div class="jerboa-tooltip">// DUE ORECCHIE LUNGHE NELLA NOTTE...</div>
           <svg class="jerboa-ears-svg" viewBox="0 0 64 38">
             <path d="M 16 38 C 14 20, 4 8, 12 2 C 20 -4, 26 14, 28 38 Z" />
@@ -356,13 +356,13 @@
 
       <div class="footer-brand">QUINE42</div>
       <p class="footer-quote">
-        "Il sentiero scorre sotto i tuoi passi e ti guida nel mondo.<br />
-        Oltre l'orizzonte del visibile, c'è chi veglia e continua a scrivere le regole del gioco."
+        "Il sentiero scorre sotto i tuoi passi e si apre a ogni scelta.<br />
+        Ciò che pronunci diventa cammino, ciò che componi diventa mondo."
       </p>
 
       <div class="footer-links">
         <a href="../../../index.html">GIOCO</a>
-        <a href="./landing.html">MONDO</a>
+        <a href="./index.html">MONDO</a>
         <a href="./carte.html">CARTE</a>
         <a href="./sessioni.html">SESSIONI</a>
         <a href="./profilo.html">PROFILO</a>
@@ -371,7 +371,7 @@
       </div>
 
       <div class="footer-copy">
-        QUINE42 © 2026 · Voxel Engine & Algoritmi MarkovJunior 3D · Generato da Intelligenza Artificiale
+        QUINE42 © 2026 · Voxel Engine & Modelli MarkovJunior 3D · Generato con Intelligenza Artificiale
       </div>
     </footer>
 
@@ -391,6 +391,14 @@
       btnOpenWizard.addEventListener('click', openModal);
       btnCloseWizard.addEventListener('click', closeModal);
       btnCancelWizard.addEventListener('click', closeModal);
+      wizardModal.addEventListener('click', (e) => {
+        if (e.target === wizardModal) closeModal();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && wizardModal.classList.contains('is-open')) {
+          closeModal();
+        }
+      });
 
       btnRandSeed.addEventListener('click', () => {
         inputSeed.value = Math.floor(Math.random() * 9999) + 1;
@@ -428,9 +436,11 @@
       // Mobile nav
       const navToggle = document.getElementById('nav-toggle');
       const navLinks = document.getElementById('nav-links');
+      const navActions = document.querySelector('.nav-actions');
       if (navToggle && navLinks) {
         navToggle.addEventListener('click', () => {
           navLinks.classList.toggle('is-open');
+          if (navActions) navActions.classList.toggle('is-open');
         });
       }
     </script>

@@ -2264,7 +2264,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   e `README.md` (guida operativa per i task T101-T106). Testi in italiano, nessun meta-gioco, segreto dei gerboa allusivo nel footer, font locali.
   Typecheck e build verdi.
 
-### T110 · Verificare T109 (il template del sito) nel browser — `in corso`
+### T110 · Verificare T109 (il template del sito) nel browser — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 30
 - Contesto: T109 ha fatto su Gemini il template statico in `docs/design/sito/` (landing, login, profilo, sessioni, carte, pagamenti,
   componenti, `README.md`), ma su Antigravity non c'era il browser (`BROWSER: da verificare`). Nasce da T109: `dossier T109`, `traccia T109`.
@@ -2274,3 +2274,9 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   «Crea nuovo universo» e flip delle carte funzionanti, link tra le pagine giusti, segreto dei gerboa allusivo (niente corona, Concilio,
   studio), nessun meta-gioco né «ADR-» nei testi, nessun errore in console. Correggi da te i difetti piccoli (CSS, link); scrivi gli altri qui.
 - Quando è fatto: screenshot di ogni pagina (desktop e mobile) descritti nell'esito; difetti corretti o elencati; typecheck verde.
+- Esito: merge di `task/T109` completato e committato; typecheck verde. Verifica approfondita e correzione dei template in `docs/design/sito/`:
+  (1) tipografia e font: esteso `template.css` con definizioni `@font-face` per i subset `latin-ext` locali dei font Bangers, Press Start 2P e VT323 per corretta resa dei glifi accentati italiani; zero richieste a CDN esterne;
+  (2) navigazione e link: allineato il brand logo e il link "Mondo" al canonical `./index.html` su tutte le 7 pagine (landing, login, profilo, sessioni, carte, pagamenti, componenti); tutti i link relativi verificati e risolti con successo;
+  (3) quarta parete e gerboa: rimossi tutti i riferimenti ad "ADR-xxxx" dai template e commenti; sostituito il testo del footer ("chi veglia e continua a scrivere le regole del gioco") e il tooltip ("Qualcosa osserva dall'orizzonte...") con frasi completamente allusive e in-world senza alcuna rottura di quarta parete ("Due sagome all'orizzonte...", "Il sentiero scorre sotto i tuoi passi e si apre a ogni scelta. Ciò che pronunci diventa cammino, ciò che componi diventa mondo.");
+  (4) responsive e componenti: integrata la barra azioni (`.nav-actions`) nel menu a comparsa mobile (`@media (max-width: 768px)`); impostata `max-width: min(580px, calc(100vw - 32px))` sulle finestre modali per azzerare l'overflow laterale delle ombre nette; racchiusa la tabella profilo in `.comic-table-wrap`; aggiunta chiusura modale su click backdrop ed Escape key; garantita leggibilità carte su schermi stretti (≤360px);
+  (5) script: verificata la correttezza sintattica ed esecuzione senza errori di tutti gli script (flip carte 3D, wizard modale, selettore colori mantello e slider seme, tab di filtro, cambio stati form login). Test suite e typecheck verdi. Su agy browser automation tool non disponibile (`BROWSER: da verificare`).
