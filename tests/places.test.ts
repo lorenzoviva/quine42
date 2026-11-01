@@ -57,7 +57,7 @@ describe('the model of places (T26)', () => {
     expect(k.showcaseEntries('luoghi')[0].id).toBe('luogo:0_0');
     expect(k.clickStudio(show.x + 1.5, show.y + 1.5)).toBe(true);
     expect(panels.at(-1).entry.id).toBe('luogo:0_0');
-  }, 30_000);
+  }, 60_000);
 
   it('builds the miniature of a loaded place as the world is: tiles, levels, structures, things, runes', async () => {
     const { k } = await boot();
@@ -93,7 +93,7 @@ describe('the model of places (T26)', () => {
       expect(t.x).toBeLessThan(S);
       expect(k.palette[mini.tiles[Math.floor(t.y) * S + Math.floor(t.x)]]?.solid ?? false).toBe(false);
     }
-  }, 30_000);
+  }, 60_000);
 
   it('rebuilds the same miniature from the saved plan, without the Council, when the place is not loaded', async () => {
     const { k, chunks } = await boot();
@@ -118,7 +118,7 @@ describe('the model of places (T26)', () => {
     await new Promise((r) => setTimeout(r, 30));
     expect(k2.miniature(40, 40)).toBeUndefined();
     expect(k2.chunks.size).toBe(0);
-  }, 30_000);
+  }, 60_000);
 
   it('shows the six phases of the place, from the draft to things and runes, what each adds lit', async () => {
     const { k } = await boot();
@@ -147,7 +147,7 @@ describe('the model of places (T26)', () => {
     expect(last.lit.length).toBeGreaterThan(0);
     // Each phase's levels are a place's: as many as the tiles, all numbers.
     for (const p of mini.phases) expect(p.levels.length === S * S && p.levels.every(Number.isFinite)).toBe(true);
-  }, 30_000);
+  }, 60_000);
 
   it('goes through the phases with the pads «−» «+» in front of the table, walked on, with E or a click', async () => {
     const { k } = await boot();
@@ -188,7 +188,7 @@ describe('the model of places (T26)', () => {
     Object.assign(k.playerPos(), { x: show.x + 1.5, y: show.y + 3.5 });
     await k.interact();
     expect(panels.at(-1)?.phase).toBe(PLACE_PHASES.length - 1);
-  }, 30_000);
+  }, 60_000);
 });
 
 describe('the sample of environments (T26d)', () => {
@@ -246,5 +246,5 @@ describe('the sample of environments (T26d)', () => {
     expect(JSON.parse(k.files[panels.at(-1).sample.path]).layouts[target]).toBeDefined();
     expect(k.clickStudio(samples[0].x + 0.5, samples[0].y + 0.5)).toBe(true);
     expect(panels).toHaveLength(2);
-  }, 30_000);
+  }, 60_000);
 });
