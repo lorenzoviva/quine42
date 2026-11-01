@@ -999,8 +999,8 @@ describe('i turni delle operazioni pesanti (T83)', () => {
   it('i worker di vitest: limitati sotto la pipeline, quelli di sempre a mano (T118)', async () => {
     const { testWorkers } = await import('../server/testWorkers');
     expect(testWorkers({}, 6)).toEqual({});
-    expect(testWorkers({ PIPELINE_TASK: 'T9' }, 6)).toEqual({ maxWorkers: 6, minWorkers: 1 });
-    expect(testWorkers({ PIPELINE_TURNO: 'test' }, 6)).toEqual({ maxWorkers: 6, minWorkers: 1 });
+    expect(testWorkers({ PIPELINE_TASK: 'T9' }, 6)).toEqual({ maxWorkers: 6 });
+    expect(testWorkers({ PIPELINE_TURNO: 'test' }, 6)).toEqual({ maxWorkers: 6 });
     expect(testWorkers({ PIPELINE_TASK: 'T9' }, 0)).toEqual({});
     // Il numero sta in config.json, dove la pipeline tiene i turni.
     expect(testWorkers({ PIPELINE_TASK: 'T9' }).maxWorkers).toBeGreaterThan(0);

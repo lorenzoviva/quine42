@@ -2530,13 +2530,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Test: i campi che non escono; una scrittura di `ai` dal Concilio rifiutata.
 - Quando è fatto: test e typecheck verdi, commit su `task/T130`.
 
-### T131 · `npm audit` e Vite — `da fare` (dipende da T136)
+### T131 · `npm audit` e Vite — `fatto` (dipende da T136)
 - Pipeline: claude · stima 2% · approvato · priorità 2
 - Contesto: R14: Vite 5.4.10, l'audit non ha lanciato `npm audit`.
 - Cosa fare: lanciarlo, aggiornare ciò che serve (Vite compreso, nei limiti della 5.x se basta), riportare ciò che resta aperto e perché.
 - Test: suite intera, typecheck, build.
 - Browser: il gioco parte in `?skip&offline`.
 - Quando è fatto: commit su `task/T131`.
+- Esito: `npm audit` da 15 avvisi (2 critici, 5 alti, 8 moderati) a **0**; non resta aperto nulla. **La 5.x non bastava** (gli avvisi di Vite arrivano alla 6.4.3, quelli di Vitest alla 4.1.11): Vite 7.3.7, Vitest 4.1.12, `vite-node` 5.3.0 diretto (Vitest 4 non lo porta più), `npm audit fix` per il resto, un override di `@grpc/grpc-js` solo sotto `@firebase/firestore` (il progetto non importa Firestore, gRPC non è in `dist/`). ADR-0099. V-014 `in correzione`: la parte delle dipendenze è fatta, la chiude T133. Più del previsto: `tests/sicurezza/dipendenze.test.ts` (il lock non torna indietro; il server di sviluppo non dà `.env` nelle forme del kit: controllate le stesse forme su 5.4.10, c e g falliscono, su 7.3.7 nessuna); `minWorkers` tolto da `server/testWorkers.ts` perché Vitest 4 non lo ha più. Kit `--solo V-014` con il `vite.config.ts` vero: 11 ok, 0 FALLA (l'esito dell'autore in `esiti/2026-11-01.json` è stato ripristinato). Suite intera verde (80 file, 716 verdi, 18 attesi, 1 todo, 868 s), typecheck e build verdi. In un primo giro 4 rossi per timeout (`campus credits referente`) con la macchina carica: stessi file, nello stesso momento, vecchie versioni 540 s e nuove 534 s, tutti verdi. Il gioco parte in `?skip&offline` dalla build e dal server di sviluppo. **Dopo `integra` serve `npm ci` nel base**: il worktree di T131 ha un `node_modules` suo (junction tolta), gli altri condividono quello del base. npm 10 non sa installare Vitest 4 da zero (`edgesOut`), il lock è scritto con npm 11; `npm ci` e `npm install` con npm 10 sul lock passano, provati in una cartella a parte. Il sito (`site/`) è stato solo compilato, non aperto nel browser. Sicurezza: nessuna superficie nuova; `server/` cambia solo in `testWorkers.ts`.
 
 ### T132 · Le correzioni piccole — `da fare` (dipende da T136)
 - Pipeline: claude · stima 2% · approvato · priorità 15
