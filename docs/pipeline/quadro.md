@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 31/10/2026 alle 18:40 UTC, epoca 177 su **claude** (fine epoca). **T107 (difetti del sito) e T108 (verifica nel browser, nessun difetto) integrati.** **T98 integrato** (contorni del cartone con le normali delle mesh; suite intera con 48 fallimenti non suoi → vedi T95). Prossimo su Claude: T57b.
+Aggiornato il 01/11/2026, epoca 179 su **claude** (riavvio dopo lo spegnimento del 01/11 00:51, nessun task interrotto). **T95 in corso su Claude** (lanciato al riavvio). Poi T57b; T101-T106 (sito) approvati e in coda su Claude: richiedono il browser, lo script non li accetta su Gemini. Gemini senza task.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
@@ -38,7 +38,7 @@ Aggiornato il 31/10/2026 alle 18:40 UTC, epoca 177 su **claude** (fine epoca). *
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - Su Claude **T57** (T57b, 60) pronto/in partenza. Gemini libero: nessun task approvato per lui (proporre T95 o uno dei T101-T106).
+  - Su Claude **T95** in corso; poi T57 (p60), T101-T106 (p62-72). Gemini libero: nessun task adatto (i task del sito chiedono il browser).
 - **Completati e integrati nel base `3d`**:
   - **T98**, **T108**, **T107** (31/10 sera), **T96** (31/10 16:48), **T51b** (ADR-0094, integrato il 31/10 16:13), **T89**, **T94**, **T54**, **T52b**, **T93**, **T92**, **T52**, **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **Da integrare**:
