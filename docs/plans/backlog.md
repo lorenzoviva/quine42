@@ -2268,3 +2268,12 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   «Crea nuovo universo» e flip delle carte funzionanti, link tra le pagine giusti, segreto dei gerboa allusivo (niente corona, Concilio,
   studio), nessun meta-gioco né «ADR-» nei testi, nessun errore in console. Correggi da te i difetti piccoli (CSS, link); scrivi gli altri qui.
 - Quando è fatto: screenshot di ogni pagina (desktop e mobile) descritti nell'esito; difetti corretti o elencati; typecheck verde.
+
+### T111 · Pipeline: un task con verifica nel browser non ripiega su un provider senza browser — `da fare`
+- Pipeline: gemini · stima 2% · approvato · priorità 20
+- Contesto: il 01/11 T109 e T110 (verifica nel browser) erano assegnati a `claude`; con lo slot di Claude occupato la pipeline ha scritto
+  «claude non può, va su gemini» e li ha lanciati su Antigravity, che non ha il browser: T110 è stato interrotto a mano. `assegna` rifiuta già
+  questi task su un provider senza browser (`assignTask` in `tools/pipeline/pipeline.mjs`), il ripiego no.
+- Cosa fare: nel ripiego del lancio (dove nasce «non può, va su») non scegliere un provider senza browser per un task che chiede la verifica nel
+  browser (stesso controllo di `assignTask`): il task aspetta il suo provider. Un test della pipeline che lo copre.
+- Quando è fatto: test della pipeline verdi con il caso nuovo; typecheck verde.
