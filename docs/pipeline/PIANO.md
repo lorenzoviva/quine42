@@ -1,51 +1,54 @@
 # Il piano della pipeline
 
-> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-10-31T16:14:47.811Z: non modificarlo a mano,
+> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-11-01T03:09:29.653Z: non modificarlo a mano,
 > la fonte è `docs/plans/backlog.md` (righe `- Pipeline:`).
 
 ## Budget
 
-Orchestratore: **claude** (sotto il 10 % nessun task su di lui; si cambia con `orchestratore <provider>`).
+Orchestratore: **gemini** (sotto il 10 % nessun task su di lui; si cambia con `orchestratore <provider>`).
 
-- **claude**: settimana 28 %, 5 ore 88 %; tetto 1, slot 1 (task in programma 3), esaurimento previsto 2026-11-02T01:43:47.756Z, reset 2026-11-05T16:00:00.000Z (letto da /usage il 2026-10-31T16:13:27.033Z)
-  - session, 5h: 88 % residuo, reset 2026-10-31T20:30:00.000Z
-  - week (all models), settimana: 28 % residuo, reset 2026-11-05T16:00:00.000Z
-- **gemini**: settimana 25 %, 5 ore 94 %; tetto 1, slot 0 (task in programma 1), esaurimento previsto 2026-11-04T19:57:52.471Z, reset 2026-11-05T17:37:53.000Z (letto da /usage il 2026-10-31T16:10:25.586Z)
-  - Gemini Models, settimana: 25 % residuo, reset 2026-11-05T17:37:53.000Z
-  - Gemini Models, 5h: 94 % residuo, reset 2026-10-31T16:20:17.000Z
-- **argon**: settimana 0 %, 5 ore 0 %, fermo fino a 2026-11-04T18:44:35.000Z; tetto 1, slot 1 (task in programma 0), esaurimento previsto mai a questo ritmo, reset 2026-11-04T18:44:35.000Z (letto da /usage il 2026-10-31T16:11:34.705Z)
+- **claude**: settimana 14 %, 5 ore 0 %, fermo fino a 2026-11-01T05:49:00.000Z; tetto 1, slot 1 (task in programma 12), esaurimento previsto 2026-11-01T16:55:03.505Z, reset 2026-11-05T15:59:00.000Z (letto da /usage il 2026-11-01T03:08:26.709Z)
+  - session, 5h: 0 % residuo, reset 2026-11-01T05:49:00.000Z
+  - week (all models), settimana: 14 % residuo, reset 2026-11-05T15:59:00.000Z
+- **gemini**: settimana 13 %, 5 ore 79 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-02T02:43:25.347Z, reset 2026-11-05T17:37:53.000Z (letto da /usage il 2026-11-01T03:08:29.018Z)
+  - Gemini Models, settimana: 13 % residuo, reset 2026-11-05T17:37:53.000Z
+  - Gemini Models, 5h: 79 % residuo, reset 2026-11-01T06:01:59.000Z
+- **argon**: settimana 0 %, 5 ore 0 %, fermo fino a 2026-11-04T18:44:35.000Z; tetto 1, slot 1 (task in programma 0), esaurimento previsto mai a questo ritmo, reset 2026-11-04T18:44:35.000Z (letto da /usage il 2026-11-01T03:06:25.995Z)
   - Gemini 4 Argon, settimana: 0 % residuo, reset 2026-11-04T18:44:35.000Z
 
-## In corso (1)
+## In corso (2)
 
-- **T57** Le rune come codice: sequenze ordinate, effetti, rune nuove — claude, 8 %
+- **T57b** Rune nuove dal Concilio — claude, 5 %
+- **T57c** Il terreno che sale e scende — claude, 3 %
 
-## Finiti, da guardare e integrare (`integra Txx`) (0)
+## Finiti, da guardare e integrare (`integra Txx`) (1)
 
-_nessuno_
+- **T103** Il sito: hub sessioni multigiocatore e creazione nuovo universo — ESITO: fatto — implementato l'hub sessioni multigiocatore con stato live su /api/session e wizard di creazione nuovo universo git — gemini, 4 %
 
-## Pronti, in ordine di priorità (3)
+## Pronti, in ordine di priorità (6)
 
-- **T96** Mai zero slot per nessun provider — gemini, 3 %
-- **T98** Cartone: fuori dalla corona i contorni della simulazione nascosta — claude, 2 %
-- **T97** Il sito: progetto, pagine e stile — claude, 5 %
+- **T114** Verificare T103 (l'hub sessioni multigiocatore) nel browser e integrare — claude, 3 %
+- **T102** Il sito: login e gestione profilo viandante con visualizzatore 3D — claude, 4 %
+- **T104** Il sito: area carte collezionabili 3D animate — claude, 5 %
+- **T105** Il sito: area pagamenti e cruscotto crediti Stripe — claude, 3 %
+- **T106** Tema pop art / retro arcade: applicazione alle interfacce in-game — claude, 4 %
+- **T89a** Cartone: fasce e interruttore — claude, 3 %
 
-## Da approvare (provider e stima proposti) (3)
+## Da approvare (provider e stima proposti) (2)
 
 - **T45f** Il server su Google Cloud — claude, 6 %
 - **T88** Spendere i crediti che avanzano generando l'universo con gli abbonamenti — claude, 4 %
-- **T95** Test rossi da soli: explore, partita, subscription — claude, 3 %
 
-## Da stimare (manca la riga `- Pipeline:`) (1)
+## Da stimare (manca la riga `- Pipeline:`) (0)
 
-- **T89a** Cartone: fasce e interruttore
+_nessuno_
 
 ## Bloccati da dipendenze (4)
 
-- **T89b** Cartone: contorni dagli id di cosa e parte (aspetta T89a)
-- **T89c** Cartone: luce tinta e prospettiva aerea (aspetta T89a)
-- **T89d** Cartone: lo stile nei dati e le foto dei modelli (aspetta T89b)
-- **T89e** Cartone: laboratorio, prestazioni, togliere la prova (aspetta T89a)
+- **T89b** Cartone: contorni dagli id di cosa e parte — claude, 6 % (aspetta T89a)
+- **T89c** Cartone: luce tinta e prospettiva aerea — claude, 3 % (aspetta T89a)
+- **T89d** Cartone: lo stile nei dati e le foto dei modelli — claude, 3 % (aspetta T89b)
+- **T89e** Cartone: laboratorio, prestazioni, togliere la prova — claude, 4 % (aspetta T89a)
 
 ## In attesa dell'autore (0)
 

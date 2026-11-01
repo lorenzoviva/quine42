@@ -573,3 +573,77 @@
 - [2026-10-31T16:13:30.163Z] lancio T57 su claude (H:\projects\rune\.claude\worktrees\t57)
 - [2026-10-31T16:13:39.483Z] integra T51b: non riuscito (error: Your local changes to the following files would be overwritten by merge:); il base è com'era
 - [2026-10-31T16:13:53.648Z] task/T51b integrato in 3d; worktree e branch tolti.
+- [2026-10-31T16:28:20.676Z] orchestratore: epoca 175 su claude (contesto a 60 % della finestra)
+- [2026-10-31T16:29:02.894Z] lancio T96 su gemini (H:\projects\rune\.claude\worktrees\t96)
+- [2026-10-31T16:47:46.192Z] T96: ESITO: fatto — rimossa la discesa a zero slot da nextSlot/updateSlots/showSlots (almeno uno slot garantito), implementati i comandi sospendi/riattiva della pipeline e aggiornato ADR-0087 (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T96)
+- [2026-10-31T16:47:49.831Z] T97: claude non può, va su gemini
+- [2026-10-31T16:47:50.538Z] lancio T97 su gemini (H:\projects\rune\.claude\worktrees\t97)
+- [2026-10-31T16:48:01.155Z] task/T96 integrato in 3d; worktree e branch tolti.
+- [2026-10-31T17:08:01.446Z] T57: ESITO: fatto — T57a: le rune composte come programma (ordine e ripetizione) nel canone, nei prompt di Narratore, Fisico e Arbitro e in `SPELL_GUIDE`; nel seme «Palla di fuoco» al posto di «Vapore»; mock e test sensibili all'ordine; T57b e T57c da fare. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T57)
+- [2026-10-31T17:08:15.679Z] integra T57: conflitti in docs/plans/backlog.md; il base è com'era
+- [2026-10-31T17:08:49.652Z] orchestratore: epoca 176 su claude (contesto a 58 % della finestra)
+- [2026-10-31T17:09:05.599Z] lancio T99 su claude (H:\projects\rune\.claude\worktrees\t99)
+- [2026-10-31T17:14:45.624Z] T97: ESITO: fatto — formalizzato ADR-0095 per architettura e stile del sito, creato src/theme.css per variabili condivise in-game e out-game, implementata pagina dimostrativa in site/index.html con three.js e segreto dei gerboa, configurato Vite e pianificati i task atomici T99-T104 nel backlog · BROWSER: da verificare — su Antigravity CLI non è disponibile il browser integrato (--chrome); la pagina dimostrativa è compilata e servita su /site/index.html, pronta per la verifica visiva (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T97)
+- [2026-10-31T17:31:03.290Z] T99: ESITO: fatto — `task/T57` fuso su `task/T99`; risolto il conflitto nell'intestazione del blocco T57 nel backlog; typecheck e test toccati verdi (`kernel.test.ts` con `--hookTimeout=120000`). (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T99)
+- [2026-10-31T17:31:14.045Z] integra T99: conflitti in docs/plans/backlog.md; il base è com'era
+- [2026-10-31T17:31:15.062Z] integra T57: conflitti in docs/plans/backlog.md; il base è com'era
+- [2026-10-31T17:31:27.284Z] task/T99 integrato in 3d; worktree e branch tolti.
+- [2026-10-31T17:31:27.859Z] task/T57 integrato in 3d; worktree e branch tolti.
+- [2026-10-31T17:32:06.958Z] lancio T100 su claude (H:\projects\rune\.claude\worktrees\t100)
+- [2026-10-31T17:36:05.461Z] T100: ESITO: fatto — merge di T97, task del sito rinumerati T101-T106, typecheck e build verdi, verifica e 5 difetti scritti nel blocco di T100 · BROWSER: verificato — sito: hero three.js, carta che si gira (retro specchiato), footer coi gerboa; gioco con HUD intatto; nessun errore della pagina in console (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T100)
+- [2026-10-31T17:36:26.574Z] task/T100 integrato in 3d; worktree e branch tolti.
+- [2026-10-31T17:36:27.143Z] task/T97 integrato in 3d; worktree e branch tolti.
+- [2026-10-31T17:37:09.984Z] orchestratore: epoca 177 su claude (contesto a 60 % della finestra)
+- [2026-10-31T17:37:13.050Z] lancio T107 su gemini (H:\projects\rune\.claude\worktrees\t107)
+- [2026-10-31T18:07:17.767Z] T107: ESITO: fatto — Corretti i cinque difetti di site/index.html e del tema (carta bifacciale CSS 3D con retro autentico e backface-visibility, testi corretti su CSS 3D per le carte, segreti velati secondo la Regola 0, rimossi riferimenti ADR/env, font locali in public/fonts senza chiamate esterne in dist/) · BROWSER: da verificare — Antigravity CLI non dispone dello strumento di automazione del browser; verifica visiva demandata all'orchestratore su Claude Code (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T107)
+- [2026-10-31T18:08:22.253Z] lancio T108 su claude (H:\projects\rune\.claude\worktrees\t108)
+- [2026-10-31T18:11:19.548Z] T108: ESITO: fatto — merge di task/T107 e verifica del sito e del gioco nel browser, nessun difetto · BROWSER: verificato — retro vero della carta, font da /fonts/, nessuna richiesta a terzi, motto e tooltip velati, niente «ADR-» visibile, scena three.js attiva, HUD del gioco come prima, nessun errore della pagina (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T108)
+- [2026-10-31T18:11:33.527Z] task/T108 integrato in 3d; worktree e branch tolti.
+- [2026-10-31T18:11:34.059Z] task/T107 integrato in 3d; worktree e branch tolti.
+- [2026-10-31T18:12:35.034Z] lancio T98 su claude (H:\projects\rune\.claude\worktrees\t98)
+- [2026-10-31T18:35:09.262Z] T98: ESITO: fatto — il passo dei contorni del cartone disegna con le normali di ogni mesh, con taglio al cerchio, taglio sopra la testa e vento, al posto di `overrideMaterial`; typecheck verde, suite intera con 48 fallimenti non ricondotti al cambio (i 3 file che lo toccano passano) · BROWSER: verificato — con `?cartone` dalla corona (46,0) oltre il cerchio niente contorni, dentro i contorni come prima, nessun errore in console (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T98)
+- [2026-10-31T18:35:19.165Z] task/T98 integrato in 3d; worktree e branch tolti.
+- [2026-10-31T18:35:40.542Z] orchestratore: epoca 178 su claude (contesto a 58 % della finestra)
+- [2026-11-01T00:51:00.110Z] pipeline spenta (ferma --ora, Ctrl+C)
+- [2026-11-01T00:51:16.583Z] lancio T95 su claude (H:\projects\rune\.claude\worktrees\t95)
+- [2026-11-01T01:01:51.356Z] T109: claude non può, va su gemini
+- [2026-11-01T01:01:52.482Z] lancio T109 su gemini (H:\projects\rune\.claude\worktrees\t109)
+- [2026-11-01T01:12:55.199Z] T109: ESITO: fatto — template grafico statico master (HTML+CSS) del sito e dei componenti creato in docs/design/sito/ con README operativo per T101-T106 · BROWSER: da verificare — strumento browser non disponibile in ambiente Antigravity (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T109)
+- [2026-11-01T01:13:58.301Z] T110: claude non può, va su gemini
+- [2026-11-01T01:13:58.971Z] lancio T110 su gemini (H:\projects\rune\.claude\worktrees\t110)
+- [2026-11-01T01:14:22.388Z] T95: ESITO: fatto — explore e partita verdi da soli (i test danno crediti a chi paga; li aveva rotti `38dcd69`, T45a), subscription era già verde, typecheck verde. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T95)
+- [2026-11-01T01:14:34.425Z] T110: interrotto dall'orchestratore (riprende con riprendi T110)
+- [2026-11-01T01:14:34.448Z] T110: interrotto (riprende con riprendi T110)
+- [2026-11-01T01:14:35.462Z] integra T95: conflitti in docs/plans/backlog.md; il base è com'era
+- [2026-11-01T01:14:52.626Z] task/T95 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T01:15:09.552Z] T110: rimesso in coda (riprende la sua conversazione)
+- [2026-11-01T01:15:43.867Z] riprendo T110 su gemini (H:\projects\rune\.claude\worktrees\t110)
+- [2026-11-01T01:43:56.998Z] T110: ESITO: fatto — merge di T109 completato; template del sito verificato, esteso con font latin-ext, corretti difetti responsive su nav/modali e bonificate tutte le rotture di quarta parete · BROWSER: da verificare — su agy lo strumento del browser non è disponibile (richiesto Claude in Chrome) (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T110)
+- [2026-11-01T01:44:01.748Z] lancio T111 su gemini (H:\projects\rune\.claude\worktrees\t111)
+- [2026-11-01T01:46:45.983Z] orchestratore: epoca 180 su claude (contesto a 56 % della finestra)
+- [2026-11-01T01:54:24.129Z] lancio T113 su claude (H:\projects\rune\.claude\worktrees\t113)
+- [2026-11-01T01:55:10.913Z] T111: ESITO: fatto — nel ripiego del lancio i task con verifica nel browser non scelgono provider senza browser (filtrati con providerHasBrowser/allowedProviders) e aspettano Claude; taskNeedsBrowser esteso a «Quando è fatto:» e «Cosa fare:»; test di pipeline e typecheck verdi (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T111)
+- [2026-11-01T01:55:27.232Z] task/T111 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T02:02:42.592Z] T113: ESITO: fatto — il lampione esce intero (`rootTag` salta i commenti, era tagliato alla scatola della classe), il drone ridotto 1:2 da `drone-xl.xml` con gli anelli delle eliche ridisegnati, più un test. · BROWSER: verificato — lampione intero 10×14×74 sul viale della corona, drone 10×10×8 in volo con le luci, nessun errore del gioco in console. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T113)
+- [2026-11-01T02:02:45.721Z] lancio T112 su claude (H:\projects\rune\.claude\worktrees\t112)
+- [2026-11-01T02:02:52.910Z] task/T113 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T02:11:11.995Z] T112: ESITO: fatto — fuso T110, verificate nel browser tutte le pagine del sito; corretti menu mobile, overflow delle griglie, barra stati del login, fumetto del gerboa e la carta che diceva «token Lua» · BROWSER: verificato — 8 pagine a 1400 e 375 px: layout a posto dopo le correzioni, font da /fonts/ senza terzi, link validi, modale e flip funzionanti, gerboa allusivo, nessun errore della pagina in console (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T112)
+- [2026-11-01T02:11:22.916Z] integra T109: conflitti in docs/plans/backlog.md; il base è com'era
+- [2026-11-01T02:11:23.764Z] integra T110: conflitti in docs/plans/backlog.md; il base è com'era
+- [2026-11-01T02:11:24.903Z] task/T112 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T02:11:35.330Z] task/T110 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T02:11:38.374Z] task/T109 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T02:12:16.750Z] lancio T101 su claude (H:\projects\rune\.claude\worktrees\t101)
+- [2026-11-01T02:22:22.695Z] T103: claude non può, va su gemini
+- [2026-11-01T02:22:24.978Z] lancio T103 su gemini (H:\projects\rune\.claude\worktrees\t103)
+- [2026-11-01T02:46:14.746Z] T101: ESITO: fatto — landing del sito copiata dal template, hero three.js con programmi MarkovJunior veri che crescono, indicatori di stato, vetrina a schede, carta che si gira, `site/` nel typecheck, test dell'hero · BROWSER: verificato — preview sulla porta 4931: l'hero alterna labirinto, corallo e pino; indicatori «MONDO ONLINE»; schede, flip della carta e sezione attiva funzionano; nessuna richiesta a terzi. A 390 px, provato in un iframe, nessun overflow e il menu si apre. In console solo errori delle estensioni del browser, nessuno della pagina dopo la correzione. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T101)
+- [2026-11-01T02:46:33.114Z] lancio T57b su claude (H:\projects\rune\.claude\worktrees\t57b)
+- [2026-11-01T02:46:54.007Z] task/T101 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T02:52:04.394Z] orchestratore: epoca 181 su gemini (claude sotto il 10 %)
+- [2026-11-01T03:03:23.280Z] T103: ESITO: fatto — implementato l'hub sessioni multigiocatore con stato live su /api/session e wizard di creazione nuovo universo git · BROWSER: da verificare — strumento browser non disponibile nell'ambiente agy (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T103)
+- [2026-11-01T03:03:43.666Z] T57c: claude non può, va su gemini
+- [2026-11-01T03:03:46.843Z] lancio T57c su gemini (H:\projects\rune\.claude\worktrees\t57c)
+- [2026-11-01T03:08:23.029Z] T57b: interrotto dall'orchestratore (riprende con riprendi T57b)
+- [2026-11-01T03:08:23.062Z] T57b: interrotto (riprende con riprendi T57b)
+- [2026-11-01T03:08:27.192Z] T57b: rimesso in coda (riprende la sua conversazione)
+- [2026-11-01T03:09:57.949Z] nota: T103 finito su gemini (hub sessioni); creato T114 su claude per merge task/T103 (conflitto site/index.html) e verifica browser; T57b interrotto per limite 5h Claude e rimesso in coda, turno test liberato; T57c in corso su gemini

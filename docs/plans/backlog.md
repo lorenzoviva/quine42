@@ -2352,3 +2352,16 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   usato anche dal tornio) salta i commenti: il lampione gira 10 × 14 × 74, gli altri modelli non cambiano (era l'unico colpito). Il drone:
   `drone-xl.xml` ridotto a 10 × 10 × 8 dimezzando ogni box, con gli anelli delle eliche riscritti attorno alle pale (dimezzati coprivano le pale);
   test in `tests/forms.test.ts`. Nel browser: lampioni interi lungo il viale, droni in volo, nessun errore del gioco in console.
+
+### T114 · Verificare T103 (l'hub sessioni multigiocatore) nel browser e integrare — `da fare`
+- Pipeline: claude · stima 3% · approvato · priorità 25 · browser
+- Contesto: T103 è stato completato su Gemini/agy senza browser (`BROWSER: da verificare`). Ha implementato l'hub sessioni (`site/sessioni.html`, `site/sessioni.ts`, `site/sessioni.css`), l'endpoint `GET /api/session`, la visualizzazione dei reami con spesa oraria stimata e il wizard «Crea nuovo universo». Il merge diretto con `3d` presenta conflitti in `site/index.html` (aggiornato nel frattempo da T101 con la nuova landing e hero 3D). Nasce da T103: `dossier T103`, `traccia T103`.
+- Cosa fare: nel worktree fare `git merge task/T103`; risolvere il conflitto in `site/index.html` preservando integralmente la nuova landing page di T101 e integrando nella barra di navigazione e nel footer il link a `./sessioni.html`; typecheck e test. Nel turno browser (`pipeline.mjs turno browser -- npx vite --port <libera> --strictPort`) verificare con Claude in Chrome:
+  - Apertura di `site/sessioni.html` e navigazione corretta a 1400 px e a 375 px (desktop e mobile);
+  - Schede dei reami, badge live/offline, spesa oraria calcolata e tetto minimo visualizzati;
+  - Apertura del wizard modale «Crea nuovo universo», validazione slug, seme casuale, chiusura con Esc, × e backdrop;
+  - Link verso la lobby del gioco (`../index.html?universo=<nome>`);
+  - Nessun errore JavaScript in console né rotture di quarta parete;
+  - Correggere da te i difetti grafici o di navigazione minori (CSS/link).
+- Quando è fatto: verifica nel browser descritta con precisione nell'esito; difetti corretti; commit su `task/T114`; typecheck e test verdi.
+
