@@ -4,11 +4,11 @@
   "maxParalleli": 5,
   "limiti": {
     "provider": {
-      "claude": 1,
+      "claude": 2,
       "agy": 1
     },
     "modello": {
-      "claude": 1,
+      "claude": 2,
       "gemini": 1,
       "argon": 1
     }

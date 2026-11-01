@@ -3,7 +3,9 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 01/11/2026 ~06:45 UTC, epoca 184 su **claude** (Claude 5h 86 %, settimana 13 %, reset 05/11 16:00; Gemini settimana 8 %, 5h 100 %).
+Aggiornato il 01/11/2026 ~12:40 UTC, epoca 184 su **claude** (Claude settimana 100 %, 5h 100 %, reset 05/11 16:00, abbonamento Pro nuovo; Gemini settimana 8 %).
+
+- **Tetto di Claude a 2** (richiesta dell'autore, 01/11): `limiti` in `config.json` (provider e modello). `CONFIG` si legge all'avvio: vale **solo dopo il riavvio** di `orchestra`, che l'autore deve autorizzare. Da allora gli slot salgono a 2 da soli entro 5 minuti, se la previsione non dice che i crediti finiscono prima del reset.
 
 - **Integrati di recente**: T57c (effetto rilievo e terraformazione nel kernel, ADR-0096), T111 (ripiego senza browser corretto), T113 (lampione intero, drone 1:2), T109+T110+T112 (template del sito verificato), T101 (landing con hero MarkovJunior verificata nel browser).
 - **In corso / Sospesi**:
@@ -23,7 +25,7 @@ Aggiornato il 01/11/2026 ~06:45 UTC, epoca 184 su **claude** (Claude 5h 86 %, se
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
 - **31/10: mai zero slot per nessun modello** (T96); l'orchestratore decide ordine e sospensioni temporanee di un provider. Slot di Claude fissato a 1 a mano in `.pipeline/budget.json` (`slotAggiornato` al 05/11, così la previsione non lo riabbassa) finché **T96** (su Gemini, approvato) non mette `slotMinimi` in `config.json`. T51 ha la precedenza (priorità 50); T89 interrotto, da riprendere (`riprendi T89`) dopo T51.
-- **Un solo task per provider alla volta** (finché T82 non mette i tetti per provider in `config.json`: approvare a mano al più un task per provider). I tetti li decide l'autore; l'orchestratore non li alza senza sua istruzione.
+- **Tetti**: 2 task su Claude (dal 01/11), 1 su `agy` (`limiti` in `config.json`). I tetti li decide l'autore; l'orchestratore non li alza senza sua istruzione.
 - Obiettivi: niente parallelismo che aumenta il lavoro; a 0 % uno o zero task sul provider; finire i crediti entro il reset settimanale (non prima); distribuire i task pesanti nel tempo; tenere un margine per le urgenze dell'autore; i crediti avanzati andranno alla generazione con gli abbonamenti (T88, non ora).
 - Al più **una verifica nel browser** alla volta. Risposte brevi.
 - Catena delle correzioni della pipeline su Claude dopo T70: T82 → T83 → T84 → T85 → T86; su Gemini T81 (pagina web rotta) → T87 (browser di agy). T51 e T89 da approvare quando Claude è libero. T45b fermato (era già integrato e ripartiva per errore).

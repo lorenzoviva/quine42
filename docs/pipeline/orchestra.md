@@ -39,7 +39,7 @@ e ciò che rispondi l'autore lo legge nel terminale. Lo stesso processo esegue i
 `esegui` gira già nel processo: un task approvato e pronto parte al controllo successivo (al più un minuto).
 
 **I tetti sono dell'autore** (ADR-0087): quanti task girano insieme per CLI e per modello lo dice `limiti` in `config.json`
-(oggi uno su Claude e uno su `agy`). **Non lo alzi e non fai eccezioni** (niente `--max`, niente lanci a mano in più) senza
+(oggi due su Claude e uno su `agy`). **Non lo alzi e non fai eccezioni** (niente `--max`, niente lanci a mano in più) senza
 un'istruzione esplicita dell'autore; sotto il tetto gli slot li muove la pipeline dalla previsione dei crediti (`stato`),
 ma **mai sotto 1** (T96): la previsione non chiude mai tutti gli slot di un modello. Per fermare temporaneamente l'assegnazione
 di nuovi task a un provider usi `sospendi <provider> [fino a <data>]` (e `riattiva <provider>` per riaprire).
