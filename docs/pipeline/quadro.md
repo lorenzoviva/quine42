@@ -7,7 +7,7 @@ Aggiornato il 01/11/2026 ~01:50 UTC, fine epoca 179 su **claude** (riavvio dopo 
 
 - **T113** fatto e integrato (01/11 02:03): lampione intero (`rootTag` saltava male i commenti), drone 1:2 da `drone-xl.xml`, verificato nel browser. Le `lampione copy*.xml` restano dell'autore, non committate.
 
-- **Coda di Claude**: T112 (p25, verifica nel browser di T109+T110) → T57 (p60) → T101-T106 (dopo T109). Dopo T112: `integra T109`, `integra T110` (se conflitti sul backlog: rendere il blocco del base uguale a quello del branch, poi integra).
+- **Coda di Claude**: T57 (p60) → T101-T106 (sito, ora sbloccati). T109, T110, T112 integrati (01/11 02:11): template del sito in `docs/design/sito/` verificato nel browser e corretto su mobile.
 - **Gemini**: T111 fatto e integrato (01/11 01:55, `46f32e2`): i task col browser non ripiegano più su Gemini, `taskNeedsBrowser` legge anche «Quando è fatto:»/«Cosa fare:». Gemini senza task.
 - **Lezione**: mai `git commit -a` nel base (l'autore ha file suoi; le `lampione copy*.xml` restano non committate).
 
