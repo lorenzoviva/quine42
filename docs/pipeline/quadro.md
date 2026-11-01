@@ -7,7 +7,7 @@ Aggiornato il 01/11/2026 ~06:45 UTC, epoca 184 su **claude** (Claude 5h 86 %, se
 
 - **Integrati di recente**: T57c (effetto rilievo e terraformazione nel kernel, ADR-0096), T111 (ripiego senza browser corretto), T113 (lampione intero, drone 1:2), T109+T110+T112 (template del sito verificato), T101 (landing con hero MarkovJunior verificata nel browser).
 - **In corso / Sospesi**:
-  - **T102** su Claude, in corso. **T114 e T103 integrati** (hub sessioni verificato nel browser; badge live non provato).
+  - **T102** fatto (profilo del sito, verificato nel browser senza Firebase vero): conflitti con T103 in `site/index.html`, `vite.config.ts` → **T116** su Claude (p21). **T114 e T103 integrati** (hub sessioni verificato nel browser; badge live non provato).
   - **T57b** fatto (rune nuove dal Concilio, ADR suo da rinumerare 0097): `integra` in conflitto (AGENTS.md, adr/README.md, agents/effects.ts con T57c). Creato e approvato **T115** su Claude (p20; Gemini sotto il 10 % settimanale non riceve task nuovi) per il merge; poi `integra T115` e `integra T57b`. 5 timeout noti della suite (referente, wanderers, watch) falliscono anche sul base.
 - **Finiti / Da verificare nel browser**:
   - **T103** (hub sessioni multigiocatore e wizard nuovo universo): completato su Gemini (`BROWSER: da verificare`). Merge diretto con `3d` ha conflitto in `site/index.html` (aggiornato da T101). Creato **T114** su Claude (p25, browser) per fondere `task/T103`, risolvere il conflitto e verificare nel browser Chrome.
