@@ -5,7 +5,7 @@
 
 Aggiornato il 01/11/2026 ~12:40 UTC, epoca 184 su **claude** (Claude settimana 100 %, 5h 100 %, reset 05/11 16:00, abbonamento Pro nuovo; Gemini settimana 8 %).
 
-- **Tetto di Claude a 2** (richiesta dell'autore, 01/11): `limiti` in `config.json` (provider e modello). `CONFIG` si legge all'avvio: vale **solo dopo il riavvio** di `orchestra`, che l'autore deve autorizzare. Da allora gli slot salgono a 2 da soli entro 5 minuti, se la previsione non dice che i crediti finiscono prima del reset.
+- **Tetto di Claude a 2** (richiesta dell'autore, 01/11): `limiti` in `config.json` (provider e modello). `CONFIG` si legge all'avvio: vale **solo dopo il riavvio** di `orchestra`, chiesto dall'autore con `ferma --dopo` (l'autore rilancia il processo). L'autore dice che con il Pro i limiti di Claude sono 5 volte più alti. Da allora gli slot salgono a 2 da soli entro 5 minuti, se la previsione non dice che i crediti finiscono prima del reset.
 
 - **Integrati di recente**: T57c (effetto rilievo e terraformazione nel kernel, ADR-0096), T111 (ripiego senza browser corretto), T113 (lampione intero, drone 1:2), T109+T110+T112 (template del sito verificato), T101 (landing con hero MarkovJunior verificata nel browser).
 - **In corso / Sospesi**:
