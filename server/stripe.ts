@@ -4,7 +4,7 @@
 // recording payments in `world/pagamenti.json`. Keys stay strictly server-side.
 // Anonymous accounts cannot purchase credits.
 
-import type { Plugin } from 'vite';
+import type { Connect, Plugin } from 'vite';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import crypto from 'node:crypto';
 import path from 'node:path';
@@ -372,114 +372,124 @@ export async function handleStripeWebhookEvent(opts: {
   return { status: 200, body: { received: true, status: result.status, crediti, wandererId } };
 }
 
-/** Vite plugin route for Stripe Checkout and Webhooks. */
-export function stripeRoute(opts: StripeRouteOptions): Plugin {
-  return {
-    name: 'rune-stripe',
-    configureServer(server) {
-      server.middlewares.use(async (req, res, next) => {
-        const url = req.url?.split('?')[0];
+/** The Stripe routes, in the dev server and in the preview (T105). */
+export function stripeHandler(opts: StripeRouteOptions): Connect.NextHandleFunction {
+  return async (req, res, next) => {
+    const url = req.url?.split('?')[0];
 
-        // 1. GET /api/stripe/config
-        if (req.method === 'GET' && url === '/api/stripe/config') {
-          return send(res, 200, {
-            available: !!opts.settings.secretKey,
-            publishableKey: opts.settings.publishableKey,
-            pacchetti: [5, 10, 20, 50],
+    // 1. GET /api/stripe/config
+    if (req.method === 'GET' && url === '/api/stripe/config') {
+      return send(res, 200, {
+        available: !!opts.settings.secretKey,
+        publishableKey: opts.settings.publishableKey,
+        pacchetti: [5, 10, 20, 50],
+      });
+    }
+
+    // 2. POST /api/stripe/checkout
+    if (req.method === 'POST' && url === '/api/stripe/checkout') {
+      try {
+        const raw = await readRawBody(req);
+        const body = JSON.parse(raw);
+        const { universo, wandererId, crediti, token, returnUrl } = body;
+
+        if (!universo || !NAME_RE.test(universo)) {
+          return send(res, 400, { ok: false, motivo: 'universo non valido' });
+        }
+        if (!wandererId || !validWandererId(wandererId)) {
+          return send(res, 400, { ok: false, motivo: 'viandante non valido' });
+        }
+        // To the cent: what is credited is what Stripe charges (T105, the page has a free amount).
+        const amount = Math.round(Number(crediti) * 100) / 100;
+        if (!Number.isFinite(amount) || amount < 1 || amount > 1000) {
+          return send(res, 400, { ok: false, motivo: 'ammontare crediti non valido (1-1000)' });
+        }
+
+        // Verify account if verifier is configured
+        if (opts.accounts?.verify) {
+          if (!token || typeof token !== 'string') {
+            return send(res, 401, { ok: false, motivo: 'token account richiesto' });
+          }
+          const account = await opts.accounts.verify(token);
+          if (!account) {
+            return send(res, 401, { ok: false, motivo: 'token non valido o scaduto' });
+          }
+          if (account.anonimo) {
+            return send(res, 403, {
+              ok: false,
+              motivo: 'Gli account anonimi non possono acquistare crediti. Lega il tuo account a Google per ricaricare.',
+            });
+          }
+          const expectedId = accountWanderer(account.uid);
+          if (wandererId !== expectedId) {
+            return send(res, 403, { ok: false, motivo: 'il viandante non corrisponde all account' });
+          }
+        } else {
+          // Check if wanderer is marked as anonymous in running kernel or on disk
+          const active = await opts.getActiveKernel?.(universo);
+          if (active?.isAnonymous(wandererId)) {
+            return send(res, 403, { ok: false, motivo: 'Gli anonimi non possono acquistare crediti.' });
+          }
+        }
+
+        if (!opts.settings.secretKey) {
+          return send(res, 503, {
+            ok: false,
+            motivo: 'Stripe non configurato (STRIPE_SECRET_KEY mancante sul server).',
           });
         }
 
-        // 2. POST /api/stripe/checkout
-        if (req.method === 'POST' && url === '/api/stripe/checkout') {
-          try {
-            const raw = await readRawBody(req);
-            const body = JSON.parse(raw);
-            const { universo, wandererId, crediti, token, returnUrl } = body;
+        const origin = req.headers.origin || `http://${req.headers.host || 'localhost:5173'}`;
+        const effectiveReturnUrl = returnUrl || `${origin}/?universo=${universo}`;
 
-            if (!universo || !NAME_RE.test(universo)) {
-              return send(res, 400, { ok: false, motivo: 'universo non valido' });
-            }
-            if (!wandererId || !validWandererId(wandererId)) {
-              return send(res, 400, { ok: false, motivo: 'viandante non valido' });
-            }
-            const amount = Number(crediti);
-            if (!Number.isFinite(amount) || amount <= 0 || amount > 1000) {
-              return send(res, 400, { ok: false, motivo: 'ammontare crediti non valido (1-1000)' });
-            }
+        const session = await createStripeCheckoutSession({
+          secretKey: opts.settings.secretKey,
+          universo,
+          wandererId,
+          crediti: amount,
+          returnUrl: effectiveReturnUrl,
+          taxCode: opts.settings.taxCode,
+          fetchFn: opts.settings.fetchFn,
+        });
 
-            // Verify account if verifier is configured
-            if (opts.accounts?.verify) {
-              if (!token || typeof token !== 'string') {
-                return send(res, 401, { ok: false, motivo: 'token account richiesto' });
-              }
-              const account = await opts.accounts.verify(token);
-              if (!account) {
-                return send(res, 401, { ok: false, motivo: 'token non valido o scaduto' });
-              }
-              if (account.anonimo) {
-                return send(res, 403, {
-                  ok: false,
-                  motivo: 'Gli account anonimi non possono acquistare crediti. Lega il tuo account a Google per ricaricare.',
-                });
-              }
-              const expectedId = accountWanderer(account.uid);
-              if (wandererId !== expectedId) {
-                return send(res, 403, { ok: false, motivo: 'il viandante non corrisponde all account' });
-              }
-            } else {
-              // Check if wanderer is marked as anonymous in running kernel or on disk
-              const active = await opts.getActiveKernel?.(universo);
-              if (active?.isAnonymous(wandererId)) {
-                return send(res, 403, { ok: false, motivo: 'Gli anonimi non possono acquistare crediti.' });
-              }
-            }
+        return send(res, 200, { ok: true, url: session.url, id: session.id });
+      } catch (e) {
+        return send(res, 500, { ok: false, motivo: (e as Error).message });
+      }
+    }
 
-            if (!opts.settings.secretKey) {
-              return send(res, 503, {
-                ok: false,
-                motivo: 'Stripe non configurato (STRIPE_SECRET_KEY mancante sul server).',
-              });
-            }
+    // 3. POST /api/stripe/webhook
+    if (req.method === 'POST' && url === '/api/stripe/webhook') {
+      try {
+        const rawBody = await readRawBody(req);
+        const signature = (req.headers['stripe-signature'] as string) || '';
+        const outcome = await handleStripeWebhookEvent({
+          rawBody,
+          signature,
+          settings: opts.settings,
+          universesDir: opts.universesDir,
+          getActiveKernel: opts.getActiveKernel,
+        });
+        return send(res, outcome.status, outcome.body);
+      } catch (e) {
+        return send(res, 500, { error: (e as Error).message });
+      }
+    }
 
-            const origin = req.headers.origin || `http://${req.headers.host || 'localhost:5173'}`;
-            const effectiveReturnUrl = returnUrl || `${origin}/?universo=${universo}`;
+    next();
+  };
+}
 
-            const session = await createStripeCheckoutSession({
-              secretKey: opts.settings.secretKey,
-              universo,
-              wandererId,
-              crediti: amount,
-              returnUrl: effectiveReturnUrl,
-              taxCode: opts.settings.taxCode,
-              fetchFn: opts.settings.fetchFn,
-            });
-
-            return send(res, 200, { ok: true, url: session.url, id: session.id });
-          } catch (e) {
-            return send(res, 500, { ok: false, motivo: (e as Error).message });
-          }
-        }
-
-        // 3. POST /api/stripe/webhook
-        if (req.method === 'POST' && url === '/api/stripe/webhook') {
-          try {
-            const rawBody = await readRawBody(req);
-            const signature = (req.headers['stripe-signature'] as string) || '';
-            const outcome = await handleStripeWebhookEvent({
-              rawBody,
-              signature,
-              settings: opts.settings,
-              universesDir: opts.universesDir,
-              getActiveKernel: opts.getActiveKernel,
-            });
-            return send(res, outcome.status, outcome.body);
-          } catch (e) {
-            return send(res, 500, { error: (e as Error).message });
-          }
-        }
-
-        next();
-      });
+/** Vite plugin route for Stripe Checkout and Webhooks. */
+export function stripeRoute(opts: StripeRouteOptions): Plugin {
+  const handler = stripeHandler(opts);
+  return {
+    name: 'rune-stripe',
+    configureServer(server) {
+      server.middlewares.use(handler);
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use(handler);
     },
   };
 }

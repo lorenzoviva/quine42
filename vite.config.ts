@@ -10,6 +10,7 @@ import { stripeRoute, stripeSettings } from './server/stripe';
 import { subscriptionQueue } from './server/subscriptionQueue';
 import { wandererRoute } from './server/wanderer';
 import { testWorkers } from './server/testWorkers';
+import { walletRoute } from './server/wallet';
 
 export default defineConfig(({ mode }) => {
   // '' prefix: read every variable, but only server-side. Nothing without VITE_ reaches the client.
@@ -33,6 +34,8 @@ export default defineConfig(({ mode }) => {
       }),
       // The site's profile page (T102): the account's wanderer, their profile and credits.
       wandererRoute({ accounts, universesDir, getActiveKernel: getActiveUniverseKernel }),
+      // The site's credits page (T105): the account's balance and their lines of the two ledgers.
+      walletRoute({ accounts, universesDir, getActiveKernel: getActiveUniverseKernel }),
       sessionServer(accounts),
       subscriptionQueue(path.resolve(process.cwd(), 'universes', '.coda')),
     ],
@@ -53,6 +56,7 @@ export default defineConfig(({ mode }) => {
           sessioni: path.resolve('site/sessioni.html'),
           carte: path.resolve('site/carte.html'),
           siteProfilo: path.resolve('site/profilo.html'),
+          sitePagamenti: path.resolve('site/pagamenti.html'),
         },
       },
     },
