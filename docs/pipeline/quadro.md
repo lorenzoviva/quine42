@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 01/11/2026 dopo le 15:12 UTC, fine dell'epoca 186 su **claude** (Claude settimana 98 %, 5h 84 %, reset 05/11 16:00, abbonamento Pro nuovo; Gemini settimana 8 %).
+Aggiornato il 01/11/2026, fine dell'epoca 187 su **claude** (crediti: vedi `stato`).
 
 - **Tetto di Claude a 2** (richiesta dell'autore, 01/11): attivo dopo il riavvio delle 13:35; `stato` dice tetto 2, slot 2. L'autore dice che con il Pro i limiti di Claude sono 5 volte più alti.
 
@@ -40,6 +40,7 @@ Aggiornato il 01/11/2026 dopo le 15:12 UTC, fine dell'epoca 186 su **claude** (C
   1. **T120 e seguenti** (sicurezza, p3-17), secondo le dipendenze.
   2. **T118**: i numeri prima e dopo; poi `integra T118`. Toccherà anche `vite.config.ts`. Se i timeout restano, ricontrollare `forms.ts` e `cards.ts` di T104.
   3. **Risposte dell'autore**: T45f (`docs/pipeline/domande/T45f.md`); T88 da approvare.
+- **Da controllare su T120**: `server/wanderer.ts` (`/api/viandante`, GET e POST, entrato con T102 dopo la scrittura di T120) deve rientrare nelle regole di accesso e non toccare i crediti; se T120 non l'ha coperto, dirlo e aggiungerlo.
 - **Intenzioni**: T118 e poi la sicurezza prima del resto; se l'autore vuole gli slot di Claude fissi a 2, bloccare `slotAggiornato` in `.pipeline/budget.json` (non l'ha ancora chiesto).
 - **Da sapere**: la pipeline, a ogni fine task, può riprovare da sola `integra`: i conflitti su T102 e T116 sono attesi finché T119 non entra. Sotto `sogliaUnSolo` (10 %) nessun task nuovo parte e non c'è un lancio forzato.
 
