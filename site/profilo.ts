@@ -8,9 +8,11 @@ import * as THREE from 'three';
 import { runForm, VPT } from '../src/kernel/forms';
 import { meshVoxels } from '../src/mj/mesh';
 import { boxOf, classOf } from '../src/mj/classes';
-import { PROFILE_LIMITS, repairProfile, validWandererId, type Profile } from '../src/kernel/wanderers';
-import { accountConfig, signIn, type SignedIn } from '../src/session/login';
+import { PROFILE_LIMITS, repairProfile, type Profile } from '../src/kernel/wanderers';
 import { keepProfile } from '../src/session/socket';
+import { $, alertBox, formatCredits, hideAlert, initNav, pageLogin, pageSignOut, pickRealm, playLink, realms, REALM_KEY, store, stored, type Who } from './shared';
+
+export { formatCredits, pickRealm, playLink };
 
 /** What the server says of a wanderer (server/wanderer.ts, `WandererView`). */
 export interface WandererView {
@@ -29,32 +31,9 @@ export interface WandererView {
 export const CLOAKS = ['#ff2a85', '#00f0ff', '#ffe600', '#05ffa1', '#9d00ff', '#ff6c00', '#c06030'];
 /** The colour the world gives a wanderer who chose none (the profile panel of the game, T44a). */
 export const DEFAULT_CLOAK = '#c06030';
-/** The site remembers the realm and, without accounts, the id the player typed. */
-const REALM_KEY = 'quine:sito:reame';
-const LOCAL_ID_KEY = 'quine:sito:viandante';
-
 /** The colour the world will really paint: a too dark, light or dull one is moved within the limits (`repairProfile`). */
 export function worldCloak(hex: string): string {
   return repairProfile({ tinta: hex }, 'sito', [], 1).profilo.tinta ?? DEFAULT_CLOAK;
-}
-
-/** Credits in dollars, as the game's panel says them. */
-export function formatCredits(n: number): string {
-  return `$${(Number.isFinite(n) ? Math.max(0, n) : 0).toFixed(2)}`;
-}
-
-/** Where the game opens this realm (a server without accounts also needs to know which wanderer). */
-export function playLink(universo: string, view: Pick<WandererView, 'id' | 'account'>): string {
-  const q = new URLSearchParams({ universo });
-  if (view.account === 'locale') q.set('viandante', view.id);
-  return `../index.html?${q}`;
-}
-
-/** The realm to show: the one in the address, the last one seen, or the first. */
-export function pickRealm(realms: string[], asked: string | null, last: string | null): string | undefined {
-  if (asked && realms.includes(asked)) return asked;
-  if (last && realms.includes(last)) return last;
-  return realms[0];
 }
 
 /** The seed of a profile within the program's seeds (1 … n). */
@@ -179,116 +158,6 @@ class AvatarViewer {
 
 // ── The page ────────────────────────────────────────────────────────────────────────────────────────────────────────
 
-const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
-
-/** Who the page asks for: an account (its token) or, without accounts, an id. */
-interface Who {
-  signed?: SignedIn;
-  localId?: string;
-}
-
-function alertBox(kind: 'success' | 'warning' | 'error' | 'info', badge: string, text: string): void {
-  const box = $('profile-alert');
-  box.className = `comic-alert ${kind}`;
-  const b = $('profile-alert-badge');
-  b.className = `comic-badge ${kind === 'success' ? 'green' : kind === 'error' ? 'pink' : kind === 'warning' ? 'yellow' : 'cyan'}`;
-  b.textContent = badge;
-  $('profile-alert-text').textContent = text;
-  box.hidden = false;
-}
-
-function hideAlert(): void {
-  $('profile-alert').hidden = true;
-}
-
-function initNav(): void {
-  const toggle = $('nav-toggle');
-  const links = $('nav-links');
-  const actions = document.querySelector('.nav-actions');
-  toggle.addEventListener('click', () => {
-    const open = !links.classList.contains('is-open');
-    links.classList.toggle('is-open', open);
-    actions?.classList.toggle('is-open', open);
-    toggle.setAttribute('aria-expanded', String(open));
-  });
-}
-
-function stored(key: string): string | null {
-  try {
-    return localStorage.getItem(key);
-  } catch {
-    return null;
-  }
-}
-
-function store(key: string, value: string | undefined): void {
-  try {
-    if (value === undefined) localStorage.removeItem(key);
-    else localStorage.setItem(key, value);
-  } catch {
-    /* a browser that keeps nothing: the page asks again */
-  }
-}
-
-/** The sign-in panel's two buttons, as the way `signIn` asks how the player comes in. */
-let attempts = 0;
-function chooseOnPage(): Promise<'google' | 'anonimo'> {
-  return new Promise((resolve) => {
-    // Asked again: the popup was closed or the account refused.
-    if (attempts++) alertBox('error', 'ZAP!', 'Accesso non riuscito: riprova.');
-    else hideAlert();
-    $('profile-grid').hidden = true;
-    $('login-panel').hidden = false;
-    $('login-accounts').hidden = false;
-    $('login-direct').hidden = true;
-    const done = (how: 'google' | 'anonimo') => {
-      $('btn-google-login').onclick = null;
-      $('btn-anon-login').onclick = null;
-      $('login-panel').hidden = true;
-      alertBox('info', 'UN ATTIMO', how === 'google' ? 'Apertura dell’accesso con Google…' : 'Ingresso come anonimo…');
-      resolve(how);
-    };
-    $('btn-google-login').onclick = () => done('google');
-    $('btn-anon-login').onclick = () => done('anonimo');
-  });
-}
-
-/** Without accounts on the server: the wanderer's id, typed once and remembered. */
-function askLocalId(): Promise<string> {
-  const kept = new URLSearchParams(location.search).get('viandante')?.toLowerCase() ?? stored(LOCAL_ID_KEY);
-  if (validWandererId(kept)) return Promise.resolve(kept);
-  return new Promise((resolve) => {
-    $('profile-grid').hidden = true;
-    $('login-panel').hidden = false;
-    $('login-accounts').hidden = true;
-    $('login-sub').textContent = 'Scegli il viandante di cui aprire la scheda';
-    const form = $<HTMLFormElement>('login-direct');
-    form.hidden = false;
-    const input = $<HTMLInputElement>('login-id');
-    form.onsubmit = (e) => {
-      e.preventDefault();
-      const id = input.value.trim().toLowerCase();
-      const ok = validWandererId(id);
-      $('login-id-error').hidden = ok;
-      input.classList.toggle('is-error', !ok);
-      if (!ok) return;
-      store(LOCAL_ID_KEY, id);
-      $('login-panel').hidden = true;
-      resolve(id);
-    };
-  });
-}
-
-async function realms(): Promise<string[] | undefined> {
-  try {
-    const r = await fetch('/api/universe', { cache: 'no-store' });
-    const body = r.ok ? ((await r.json()) as { available?: boolean; universes?: string[] }) : undefined;
-    return body?.available ? body.universes ?? [] : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
 async function askServer(who: Who, universo: string, profilo?: Partial<Profile>): Promise<{ ok: boolean; viandante?: WandererView; profilo?: Profile; riparato?: string[]; motivo?: string; status: number }> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (who.signed) headers.Authorization = `Bearer ${who.signed.token}`;
@@ -399,8 +268,11 @@ class ProfilePage {
     $('wanderer-name').textContent = p?.nome ?? 'non ancora scelto';
     $('wanderer-where').textContent = v.nelMondo ? 'sì, in cammino adesso' : v.noto ? 'no, il viandante riposa' : 'non è mai entrato in questo reame';
     $('wallet-amount').textContent = formatCredits(v.crediti);
-    $('wallet-note').textContent = v.anonimo ? 'Un viandante anonimo non ha crediti: gioca con i modelli locali.' : 'Le ricariche si fanno dal gioco (pannello P).';
+    $('wallet-note').textContent = v.anonimo ? 'Un viandante anonimo non ha crediti: gioca con i modelli locali.' : 'Si ricarica dalla pagina dei crediti.';
     $('btn-link-google').hidden = v.account !== 'anonimo';
+    const recharge = $<HTMLAnchorElement>('btn-recharge');
+    recharge.hidden = v.anonimo;
+    recharge.href = `./pagamenti.html?${new URLSearchParams({ universo: v.universo, ...(v.account === 'locale' ? { viandante: v.id } : {}) })}`;
     $<HTMLAnchorElement>('btn-play-realm').href = playLink(v.universo, v);
     $<HTMLAnchorElement>('nav-play').href = playLink(v.universo, v);
     const semi = v.modello?.semi ?? 1;
@@ -462,25 +334,15 @@ class ProfilePage {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  private async signOut(): Promise<void> {
-    if (this.who.signed) return this.who.signed.signOut();
-    store(LOCAL_ID_KEY, undefined);
-    location.replace(location.pathname);
+  private signOut(): Promise<void> {
+    return pageSignOut(this.who);
   }
 }
 
 async function start(): Promise<void> {
   initNav();
-  const config = await accountConfig();
-  let who: Who;
-  if (config) {
-    try {
-      who = { signed: await signIn(config, chooseOnPage) };
-    } catch {
-      return alertBox('error', 'ZAP!', 'L’accesso non è riuscito: ricarica la pagina e riprova.');
-    }
-  } else who = { localId: await askLocalId() };
-  await new ProfilePage(who).start();
+  const who = await pageLogin($('profile-grid'));
+  if (who) await new ProfilePage(who).start();
 }
 
 if (typeof document !== 'undefined' && document.getElementById('profile-grid')) {
