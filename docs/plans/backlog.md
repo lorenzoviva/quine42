@@ -2448,7 +2448,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   1. Identità verificata sul server e permessi per operazione su ogni route di `/api/universe`: su un universo multigiocatore un non master non scrive nulla; `clone` prende il master dall'identità verificata, non dal corpo. Verificare prima come scrivono `host.ts`, il kernel del server e `site/sessioni.ts` (`create`) e tenere funzionanti i percorsi legittimi.
   2. Letture: un non master non legge file che `playerFiles` gli negherebbe. `site/carte.ts`, `site/sessioni.ts` e `site/landing.ts` leggono `/api/universe`: dare loro ciò che serve senza aprire il resto (logica, prompt, saldi).
   3. Controllo di `Origin` e `Content-Type` sulle route che scrivono e sul WebSocket; in singola, sul server locale, il gioco continua a funzionare come oggi.
-  4. Senza verificatore (niente `FIREBASE_PROJECT_ID`) l'id scelto dal client vale solo da loopback. `anonimo` e `tetto` non li decide il client; `offline` non lo decide il primo client; `GET /api/session` non elenca i viandanti a chiunque.
+  4. Senza verificatore (niente `FIREBASE_PROJECT_ID`) l'id scelto dal client vale solo da loopback. `anonimo` e `tetto` non li decide il client; `offline` non lo decide il primo client; `GET /api/session` non elenca i viandanti a chiunque. Le stesse regole valgono per `/api/viandante` (`server/wanderer.ts`, T102) e `/api/crediti` (`server/wallet.ts`, T105), entrate dopo la scrittura di questo task: chi chiede viene dall'identità verificata, e `/api/viandante` non tocca i crediti.
   5. Controllare ogni messaggio del protocollo che un client può mandare a mano: nessuno deve far scrivere codice a un non master.
   6. **ADR nuovo e `AGENTS.md`**: il modello di minaccia di questa sezione, con le regole di accesso.
 - Test: un non master (HTTP e WebSocket) è rifiutato su ogni operazione di scrittura; il master e la singola funzionano; un'origine diversa è rifiutata.
@@ -2480,10 +2480,10 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Test: richieste rifiutate per origine, modello e dimensione, con `fetch` finto; nessuna chiamata vera a Gemini.
 - Quando è fatto: test e typecheck verdi, commit su `task/T123`.
 
-### T124 · Il webhook di Stripe — `da fare` (dipende da T136)
+### T124 · Il webhook di Stripe — `da fare` (dipende da T136, T139)
 - Pipeline: claude · stima 2% · approvato · priorità 7
-- Contesto: R4: senza `STRIPE_WEBHOOK_SECRET` ogni evento è accettato (crediti gratis); `metadata.universo` e `wandererId` finiscono in `path.join` senza validazione; `crediti` non è confrontato con `amount_total`.
-- Cosa fare: senza segreto la route risponde 503; validare nomi e id come fa il checkout; credito calcolato dall'importo pagato.
+- Contesto: R4: senza `STRIPE_WEBHOOK_SECRET` ogni evento è accettato (crediti gratis); `metadata.universo` e `wandererId` finiscono in `path.join` senza validazione; `crediti` non è confrontato con `amount_total`. T105 ha aggiunto le rotte di Stripe anche alla preview e riscritto parte di `server/stripe.ts`: per questo si parte da T139.
+- Cosa fare: senza segreto la route risponde 503, nel server di sviluppo e nella preview; validare nomi e id come fa il checkout; credito calcolato dall'importo pagato.
 - Test: i tre casi.
 - Quando è fatto: test e typecheck verdi, commit su `task/T124`.
 
@@ -2597,3 +2597,10 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Test: `npm run typecheck` e la suite intera con il suo turno: deve restare senza timeout (T118 ne ha misurati 680 su 680; il base ha test in più).
 - Quando è fatto: merge risolto, commit su `task/T138`. Poi l'orchestratore fa `integra T138` e `integra T118`.
 - Esito: merge di `task/T118` nel commit 1f0e912. L'unico conflitto era negli import di `vite.config.ts`: restano `wandererRoute` e `testWorkers`. Gli ADR non si scontrano (T118 aggiorna ADR-0088). Typecheck verde; suite intera nel suo turno: 688/688, 797 s, nessun timeout. Niente di diverso dal previsto.
+
+### T139 · Integrare T105 — `da fare`
+- Pipeline: claude · stima 1% · approvato · priorità 1
+- Contesto: `integra T105` va in conflitto in `vite.config.ts`: T105 aggiunge `walletRoute` e la pagina `sitePagamenti`, mentre nel base è entrato T118 con `testWorkers`. T105 è verificato nel browser. Viene prima di T124, che tocca `server/stripe.ts` come T105. Nasce da T105: `dossier T105`.
+- Cosa fare: nel worktree di T139 `git merge task/T105`; in `vite.config.ts` restano le aggiunte di entrambi. Nel backlog restano tutti i blocchi. Se gli ADR si scontrano, quello di T105 prende il primo numero libero.
+- Test: `npm run typecheck` e la suite intera con il suo turno. È la prima suite con T118, T136 e T105 insieme: nell'esito scrivi quanti test passano e, se ce ne sono di rossi, quali. Un rosso che resta rilanciando il file da solo va detto e non va coperto: T136 ne aveva 45-47 e T105 14 (`watch`, `referente`, `wanderers`, `thin`, `between`), tutti senza T118.
+- Quando è fatto: merge risolto, commit su `task/T139`. Poi l'orchestratore fa `integra T139` e `integra T105`.

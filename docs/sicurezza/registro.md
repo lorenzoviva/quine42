@@ -54,7 +54,7 @@ Modello di una voce:
 ### V-004 · Il webhook di Stripe senza segreto non controlla nulla
 - Gravità: critica
 - Stato: `specificata`
-- Superficie: `server/stripe.ts`, `POST /api/stripe/webhook`
+- Superficie: `server/stripe.ts`, `POST /api/stripe/webhook`, nel server di sviluppo e, da T105, nella preview
 - Proprietà violata: i crediti non si toccano: nascono solo da un pagamento vero, per il suo importo, dentro l'universo giusto
 - Prova: solo lettura del codice (T117); la verifica della firma ha già i suoi test
 - Contromisura: senza segreto la route risponde 503; nomi e id validati come nel checkout prima di finire in un percorso; credito calcolato dall'importo pagato.
