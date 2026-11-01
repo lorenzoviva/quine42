@@ -131,3 +131,9 @@ Il lavoro di implementazione è suddiviso nei seguenti task sequenziali atomici:
 - Lo stile grafico pop art comics / retro arcade unifica l'identità visiva dell'esperienza utente dentro e fuori dal gioco.
 - three.js valorizza gli asset procedurali anche nelle pagine web (hero canvas e profilo 3D), mentre la collezione adotta carte animate in CSS 3D.
 - La divisione dei task garantisce avanzamenti rapidi, collaudabili e indipendenti all'interno della pipeline.
+
+## Attuazione: il profilo (T102)
+- `site/profilo.html` + `site/profilo.ts` (input `siteProfilo` di Vite). L'accesso è quello del gioco (`signIn` di `src/session/login.ts`, che ora accetta chi sceglie come entrare: la pagina usa i suoi pulsanti Google / anonimo); senza account sul server (sviluppo, anteprima) si apre la scheda di un viandante per identificativo, come la sessione senza verificatore.
+- Il profilo è **per reame** (vive in `world/giocatori/<id>.json` di ogni universo): la pagina sceglie il reame da `/api/universe`.
+- Nuova rotta `/api/viandante` (`server/wanderer.ts`, nel server di sviluppo e nella preview): `GET ?universo=` dice id, account, profilo, crediti, se è nel mondo e il programma `viandante` dell'universo (semi, lettera della tinta); `POST {universo, profilo}` lo tiene. Chi è viene dal token (`Authorization: Bearer`), mai dalla pagina, quando il server ha gli account. Con il mondo che gira nel processo chiede al kernel (`kernel.keepProfile`: al viandante se c'è, altrimenti nel suo stato salvato, che indossa entrando); altrimenti ripara sui file su disco (`repairProfile` con le persone e gli altri viandanti) e committa solo il file del giocatore.
+- L'anteprima è il modello vero: `runForm` + `meshVoxels` in three.js, il colore che il mondo dipingerebbe davvero (`repairProfile`), trascinare lo gira. Il profilo salvato va anche in `localStorage` (`rune:profilo:<universo>:<id>`), che il client del gioco porta entrando.

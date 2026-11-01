@@ -1563,3 +1563,195 @@ main > section[id] {
     height: 320px;
   }
 }
+
+/* ── Il profilo del viandante (T102, dal template docs/design/sito/profilo.html e login.html) ── */
+.page-profile .comic-alert[hidden],
+.page-profile [hidden] {
+  display: none !important;
+}
+.profile-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 32px;
+}
+.identity-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.identity-id {
+  font-size: 1.8rem;
+  margin: 8px 0 0;
+  overflow-wrap: anywhere;
+}
+.realm-select {
+  padding: 6px 10px;
+  font-size: 0.95rem;
+}
+.wallet-box {
+  background: var(--comic-ink);
+  border: 2px solid var(--neon-cyan);
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.wallet-amount {
+  font-size: 1.8rem;
+  margin: 0;
+  color: var(--neon-green);
+}
+.account-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.avatar-preview-box {
+  height: 340px;
+  background: radial-gradient(circle at center, rgba(0, 240, 255, 0.2) 0%, rgba(7, 4, 13, 0.95) 70%);
+  border: var(--border-ink-thick);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), 4px 4px 0 var(--neon-cyan);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.avatar-preview-box canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  touch-action: none;
+}
+.avatar-preview-box canvas:active {
+  cursor: grabbing;
+}
+.avatar-hint {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.6rem;
+  pointer-events: none;
+}
+.color-palette-picker {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+.color-swatch {
+  width: 38px;
+  height: 38px;
+  border: 3px solid var(--comic-ink);
+  box-shadow: 2px 2px 0 var(--comic-ink);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.color-swatch:hover {
+  transform: scale(1.15);
+}
+.color-swatch:focus-visible {
+  outline: 3px dashed var(--neon-yellow);
+}
+.color-swatch.selected {
+  outline: 3px solid #fff;
+  transform: scale(1.15) translateY(-2px);
+  box-shadow: 4px 4px 0 var(--neon-cyan);
+}
+#cloak-custom {
+  width: 34px;
+  height: 22px;
+  margin-left: 8px;
+  vertical-align: middle;
+  border: 2px solid var(--comic-ink);
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+.seed-head,
+.seed-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.seed-head {
+  margin-bottom: 6px;
+}
+.seed-foot {
+  margin-top: 8px;
+}
+.login-container {
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0 40px;
+}
+.login-box {
+  max-width: 480px;
+  width: 100%;
+  background: var(--synth-panel);
+  border: var(--border-ink-thick);
+  box-shadow: 8px 8px 0 var(--neon-cyan);
+  padding: 36px 32px;
+  position: relative;
+}
+.login-box::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--halftone-pink);
+  background-size: 14px 14px;
+  opacity: 0.3;
+  pointer-events: none;
+}
+.login-box > * {
+  position: relative;
+  z-index: 2;
+}
+.login-head {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.login-note {
+  margin: 20px 0 0;
+  font-size: 0.8rem;
+  color: var(--comic-paper-dim);
+  line-height: 1.5;
+}
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 8px 0 24px;
+  font-family: var(--font-arcade);
+  font-size: 0.7rem;
+  color: var(--neon-cyan);
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 2px solid var(--comic-ink-surface);
+}
+.auth-divider::before {
+  margin-right: 12px;
+}
+.auth-divider::after {
+  margin-left: 12px;
+}
+@media (max-width: 900px) {
+  .profile-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 480px) {
+  .login-box {
+    padding: 28px 18px;
+  }
+  .avatar-preview-box {
+    height: 280px;
+  }
+}
