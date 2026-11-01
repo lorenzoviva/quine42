@@ -75,6 +75,7 @@ Richieste dell'autore (to-do del 31/10/2026, `docs/userchats/to-do-2026-10-31.md
    - Galleria delle carte possedute dal giocatore (`cards.ts`, `world/carte.json`);
    - Ogni carta è renderizzata con animazioni CSS 3D, lamina olografica prismatica, galleggiamento e flip interattivo bifacciale (fronte e retro con backface-visibility);
    - Mostra gli utilizzi vivi nel mondo (luoghi, trame, prompt, totale), l'impronta MinHash e l'albero genealogico della catena dei titolari (ADR-0084).
+   - Attuata da T104. Le carte non hanno una rarità propria: è derivata dagli utilizzi totali (`rarityOf`: comune, rara da 5, epica da 25, leggendaria da 100), così una carta sale mentre il mondo la usa. La rendita è in utilizzi (`receivedBy`, `quota × utilizzi`), non in dollari: i crediti che si muovono davvero sono di ADR-0081. Le miniature sono foto dei modelli (`src/mj/photo.ts`) fatte in un worker: una galleria non può tenere un contesto WebGL per carta. Per i 60 fps si muovono solo `transform` e `opacity`, le carte fuori dallo schermo sono ferme e la pagina ne disegna 24 alla volta. La collezione è del viandante dell'indirizzo (`?viandante=`), altrimenti dell'account, altrimenti `io`.
 
 5. **Area Pagamenti e Crediti (`site/pagamenti.html` — task T105)**:
    - Visualizzazione del saldo crediti in dollari ($);

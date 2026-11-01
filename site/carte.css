@@ -1,0 +1,330 @@
+@import './site.css';
+
+/* ==========================================================================
+   QUINE42 — La galleria delle carte (T104)
+   Da docs/design/sito/carte.html; ciò che si muove è solo transform e opacity,
+   e fermo fuori dallo schermo, per restare a 60 fotogrammi al secondo.
+   ========================================================================== */
+
+.cards-page {
+  padding-top: 36px;
+  padding-bottom: 60px;
+}
+
+.cards-page .comic-title.page-title {
+  font-size: 2.8rem;
+  margin: 10px 0 0;
+}
+
+.cards-hero-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.cards-hero-stats .comic-card {
+  padding: 16px;
+}
+
+.cards-hero-stats .stat-value {
+  font-size: 2.2rem;
+  margin: 6px 0 0;
+}
+
+.cards-hero-stats .stat-caption {
+  font-size: 0.65rem;
+}
+
+.cards-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.cards-toolbar .comic-select {
+  width: auto;
+  min-width: 200px;
+}
+
+.card-collection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(322px, 1fr));
+  gap: 28px 20px;
+  justify-items: center;
+  min-height: 300px;
+}
+
+.cards-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 48px 20px;
+  border: 3px dashed var(--neon-cyan);
+  width: 100%;
+}
+
+.cards-empty .comic-title {
+  font-size: 1.8rem;
+  margin: 12px 0 6px;
+}
+
+.cards-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.cards-more[hidden] {
+  display: none;
+}
+
+/* --- Il galleggiamento: sul contenitore, così non si somma al giro della carta --- */
+.card-3d-wrapper {
+  animation: cardFloat 5s ease-in-out infinite alternate;
+  animation-delay: var(--float-delay, 0s);
+}
+
+@keyframes cardFloat {
+  from { transform: translateY(-5px); }
+  to { transform: translateY(5px); }
+}
+
+/* --- Il giro e l'inclinazione verso il mouse --- */
+.card-collection-grid .retro-card,
+.card-collection-grid .retro-card:hover,
+.card-collection-grid .retro-card.is-flipped,
+.card-collection-grid .retro-card.is-flipped:hover {
+  --flip: 0deg;
+  transform: rotateX(var(--rx, 0deg)) rotateY(calc(var(--flip) + var(--ry, 0deg)));
+  will-change: transform;
+}
+
+.card-collection-grid .retro-card.is-flipped,
+.card-collection-grid .retro-card.is-flipped:hover {
+  --flip: 180deg;
+}
+
+.card-collection-grid .retro-card.is-leaning {
+  transition: transform 0.12s linear;
+}
+
+.card-collection-grid .retro-card:focus-visible {
+  outline: 3px solid var(--neon-yellow);
+  outline-offset: 6px;
+}
+
+/* --- La lamina: uno strato più grande che scorre, mai un disegno da rifare --- */
+.card-collection-grid .card-holo-foil {
+  inset: -50%;
+  background: repeating-linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(255, 42, 133, 0.28) 8%,
+    rgba(255, 230, 0, 0.24) 14%,
+    rgba(5, 255, 161, 0.24) 20%,
+    rgba(0, 240, 255, 0.3) 26%,
+    rgba(157, 0, 255, 0.24) 32%,
+    transparent 40%
+  );
+  background-size: auto;
+  opacity: 0.55;
+  animation: foilDrift 7s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes foilDrift {
+  from { transform: translate(-14%, -8%); }
+  to { transform: translate(14%, 8%); }
+}
+
+.card-collection-grid .retro-card.is-leaning .card-holo-foil {
+  animation: none;
+  transform: translate(var(--foil-x, 0), var(--foil-y, 0));
+  opacity: 0.9;
+}
+
+.card-3d-wrapper[data-rarita='comune'] .card-holo-foil { opacity: 0.25; }
+.card-3d-wrapper[data-rarita='leggendaria'] .card-holo-foil { opacity: 0.8; }
+.card-3d-wrapper[data-rarita='comune'] .card-face { box-shadow: 6px 6px 0 var(--comic-paper-dim); }
+.card-3d-wrapper[data-rarita='epica'] .card-face { box-shadow: 6px 6px 0 var(--neon-yellow); }
+.card-3d-wrapper[data-rarita='leggendaria'] .card-face { box-shadow: 6px 6px 0 var(--neon-pink); }
+
+/* Fuori dallo schermo non si muove niente. */
+.card-3d-wrapper.is-away,
+.card-3d-wrapper.is-away .card-holo-foil {
+  animation-play-state: paused;
+}
+
+/* --- Il fronte --- */
+.card-collection-grid .card-name {
+  font-size: 1.15rem;
+  line-height: 1.05;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  padding-right: 8px;
+}
+
+.card-collection-grid .card-header .comic-badge {
+  flex-shrink: 0;
+}
+
+.card-collection-grid .card-art-box {
+  min-height: 0;
+}
+
+.card-art-voxel {
+  max-width: 88%;
+  max-height: 88%;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.35));
+}
+
+.card-kind {
+  position: absolute;
+  left: 6px;
+  bottom: 5px;
+  font-size: 0.5rem;
+  color: var(--comic-paper-dim);
+}
+
+.card-text {
+  font-size: 0.8rem;
+  line-height: 1.3;
+  margin: 0 0 10px;
+  color: var(--comic-paper-dim);
+  min-height: 3.9em;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+}
+
+/* --- Il retro: impronta e catena dei titolari --- */
+.card-collection-grid .card-back-frame {
+  padding: 12px 10px;
+  gap: 6px;
+  min-height: 0;
+}
+
+.card-collection-grid .card-back-brand {
+  font-size: 1.8rem;
+}
+
+.card-back-label {
+  font-size: 0.55rem;
+}
+
+.card-back-code {
+  font-size: 0.75rem;
+}
+
+.card-genealogy-box {
+  list-style: none;
+  width: 100%;
+  margin: 0;
+  background: rgba(7, 4, 13, 0.9);
+  border: 1px dashed var(--neon-cyan);
+  padding: 8px;
+  text-align: left;
+  font-size: 0.72rem;
+  max-height: 210px;
+  overflow-y: auto;
+}
+
+.card-genealogy-node {
+  padding-bottom: 6px;
+  margin-bottom: 6px;
+  border-bottom: 1px dotted rgba(0, 240, 255, 0.35);
+}
+
+.card-genealogy-node:last-child {
+  border-bottom: 0;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.link-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.link-head .comic-badge {
+  font-size: 0.55rem;
+}
+
+.link-head b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.link-share {
+  margin-left: auto;
+  font-weight: bold;
+}
+
+.link-where {
+  margin-top: 2px;
+  font-size: 0.66rem;
+  overflow-wrap: anywhere;
+}
+
+.card-paid {
+  font-size: 0.68rem;
+  line-height: 1.25;
+}
+
+/* La finestra d'accesso di src/session/login.ts, con gli account. */
+#login {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  margin: auto;
+  width: min(420px, 92vw);
+  height: fit-content;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--synth-bg);
+  border: var(--border-ink-thick);
+  box-shadow: var(--shadow-hard-cyan);
+}
+
+#login .title {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--neon-yellow);
+}
+
+#login button {
+  font-family: var(--font-arcade);
+  font-size: 0.7rem;
+  padding: 12px;
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .cards-hero-stats { grid-template-columns: repeat(2, 1fr); }
+  .cards-page .comic-title.page-title { font-size: 2.2rem; }
+}
+
+@media (max-width: 380px) {
+  .card-collection-grid { grid-template-columns: 1fr; }
+  .card-3d-wrapper { padding: 16px 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-3d-wrapper,
+  .card-collection-grid .card-holo-foil {
+    animation: none;
+  }
+}

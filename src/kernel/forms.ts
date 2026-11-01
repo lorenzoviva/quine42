@@ -454,26 +454,46 @@ export class Forms {
     return 1 + (hashStr(who) % this.seedsOf(model));
   }
 
+  /** What running a program with a seed takes (the site's card pictures run it in a worker of their own). */
+  request(model: string, seed: number, tint?: string): FormRequest | undefined {
+    const xml = this.files[`${MODELS_DIR}${model}.xml`];
+    if (!xml) return undefined;
+    const info = this.library[model];
+    const cls = this.classOf(model);
+    const vpt = vptOf(info);
+    return {
+      xml,
+      seed,
+      size: sizeFor(xml, cls, info?.taglia, sottoOf(info) * vpt),
+      tint: info?.tinta && tint ? { symbol: info.tinta, color: tint } : undefined,
+      rig: cls.animation === 'camminata',
+      sway: cls.animation === 'vento',
+      vpt,
+      model,
+      ...(info?.tempo ? { tempo: info.tempo } : {}),
+    };
+  }
+
   /** The form of a program with a seed, if ready; starts running it otherwise. */
   get(model: string, seed: number, tint?: string): Form | undefined {
     const xml = this.files[`${MODELS_DIR}${model}.xml`];
     if (!xml) return undefined;
     const info = this.library[model];
-    const tinta = info?.tinta && tint ? { symbol: info.tinta, color: tint } : undefined;
     let h = this.hashes.get(model);
     if (h === undefined) this.hashes.set(model, (h = hashStr(xml)));
-    const key = `${model}#${seed}#${tinta?.color ?? ''}#${h}`;
+    const key = `${model}#${seed}#${info?.tinta && tint ? tint : ''}#${h}`;
     let f = this.forms.get(key);
     if (f) return f;
+    // Asked at every frame: only what is not there yet costs a request.
+    const req = this.request(model, seed, tint)!;
     const cls = this.classOf(model);
-    const vpt = vptOf(info);
+    const vpt = req.vpt;
     const under = sottoOf(info) * vpt;
-    const size = sizeFor(xml, cls, info?.taglia, under);
     f = { key, model, seed, status: 'pending', cls, reach: 0, vpt, base: 0 };
     this.forms.set(key, f);
     const form = f;
     void this.runner
-      .run({ xml, seed, size, tint: tinta, rig: cls.animation === 'camminata', sway: cls.animation === 'vento', vpt, model, ...(info?.tempo ? { tempo: info.tempo } : {}) })
+      .run(req)
       .then((result) => {
         form.result = result;
         // Under the ground (T52b): its lowest voxels, if the grid has room for them and for something above.
