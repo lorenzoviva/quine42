@@ -2068,7 +2068,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Esito: eseguito `git merge task/T54` e risolti i conflitti in `AGENTS.md`, `docs/adr/README.md`, `docs/plans/backlog.md`, `src/kernel/forms.ts`, `src/kernel/kernel.ts`, `src/kernel/validator.ts` preservando sia i sotterranei (T52b) sia le taglie di D&D (T54); rinominato `docs/adr/0081-le-taglie-di-dnd.md` in `docs/adr/0092-le-taglie-di-dnd.md` (aggiornato titolo interno a ADR-0092); aggiornati tutti i riferimenti ad ADR-0081 relativi alle taglie in ADR-0092 in `AGENTS.md`, `docs/adr/0043-spazio-a-scale-lotti-strutture.md`, `docs/adr/README.md`, `docs/plans/backlog.md` (T54 `fatto` con commit `3c5fe95`), `src/kernel/agents/cartography.ts`, `src/kernel/agents/forge.ts`, `src/kernel/agents/sculptor.ts`, `src/kernel/forms.ts`, `src/kernel/kernel.ts`, `src/kernel/modeldirector.ts`, `src/kernel/types.ts`, `src/kernel/validator.ts`, `src/mj/classes.ts`, `tests/lots.test.ts`, `tests/sculptor.test.ts`, lasciando intatti i riferimenti ad ADR-0081 per i crediti e le spese comuni; `npm run typecheck` verde; `tests/lots.test.ts` e `tests/sculptor.test.ts` passati (11/11); suite completa eseguita sotto `turno test` (581 passati, restanti timeout di carico già noti sulla base e oggetto di T95).
 
 ### T95 · Test rossi da soli: explore, partita, subscription — `da fare`
-- Pipeline: claude · stima 3% · priorità 60
+- Pipeline: claude · stima 3% · approvato · priorità 60
 - Contesto: T93 riporta che `tests/explore*`, `tests/partita*` e `tests/subscription*` falliscono anche lanciati da soli,
   senza legame con Stripe (`traccia T93`); T54 riporta 33 timeout di carico nella suite intera (`traccia T54`).
 - Cosa fare: sul base `3d` lancia ciascuno di quei file da solo; per ciò che fallisce davvero (non per timeout di carico) trova il
@@ -2165,37 +2165,49 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   difetto: i font arrivano da `fonts.googleapis.com` (richiesta a terzi a ogni visita); da valutare se servirli in locale.
 
 ### T101 · Il sito: landing page e hero 3D con three.js — `da fare` (dipende da T97)
-- Pipeline: claude · stima 4% · priorità 62
+
+- Stile: il template di Claude Design va in `docs/design/sito/` (risposta dell'autore in `docs/pipeline/domande/T97.md`); se c'è, copiane lo stile grafico, altrimenti segui `src/theme.css` e `site/index.html`.
+- Pipeline: claude · stima 4% · approvato · priorità 62
 - Contesto: ADR-0095, punto 2 (Landing Page). La pagina di presentazione di QUINE42.
 - Fare: completare la landing page (`site/index.html`, `site/site.css`, `site/landing.ts`) con layout responsive pop art / synthwave: hero banner con Three.js e animazione voxel procedurale MarkovJunior in tempo reale, navigazione con indicatori di stato, pulsante CTA «Gioca Subito» collegato a `../index.html`, sezione pilastri (Rune, MarkovJunior 3D, Carte, Concilio IA), vetrina interattiva delle caratteristiche e footer con la silhouette delle orecchie dei gerboa (il segreto della Corona).
 - Fatto quando: typecheck e test verdi; navigazione e canvas 3D funzionanti senza errori nel browser.
 
 ### T102 · Il sito: login e gestione profilo viandante con visualizzatore 3D — `da fare` (dipende da T97, T44b)
-- Pipeline: claude · stima 4% · priorità 64
+
+- Stile: il template di Claude Design va in `docs/design/sito/` (risposta dell'autore in `docs/pipeline/domande/T97.md`); se c'è, copiane lo stile grafico, altrimenti segui `src/theme.css` e `site/index.html`.
+- Pipeline: claude · stima 4% · approvato · priorità 64
 - Contesto: ADR-0095, punto 2 (Profilo & Account) e ADR-0082 (Firebase Auth).
 - Fare: creare la pagina profilo (`site/profilo.html` e modulo TS associato): accesso Firebase con Google o anonimo riusando `src/session/login.ts` e `/api/account`; visualizzazione dettagli viandante (ID account, stato collegamento, saldo crediti); editor estetico con scelta colore mantello e seme del modello viandante con anteprima tridimensionale interattiva renderizzata tramite Three.js e `src/mj/mesh.ts`; pulsanti per legare l'account anonimo a Google (`linkWithPopup`) o disconnettersi.
 - Fatto quando: typecheck e test verdi; autenticazione e visualizzatore 3D dell'avatar funzionanti nel browser.
 
 ### T103 · Il sito: hub sessioni multigiocatore e creazione nuovo universo — `da fare` (dipende da T97, T45d)
-- Pipeline: claude · stima 4% · priorità 66
+
+- Stile: il template di Claude Design va in `docs/design/sito/` (risposta dell'autore in `docs/pipeline/domande/T97.md`); se c'è, copiane lo stile grafico, altrimenti segui `src/theme.css` e `site/index.html`.
+- Pipeline: claude · stima 4% · approvato · priorità 66
 - Contesto: ADR-0095, punto 2 (Sessioni & Nuovo Universo), ADR-0058 (sessioni) e ADR-0086 (lobby multigiocatore).
 - Fare: implementare l'hub delle sessioni (`site/sessioni.html` e modulo TS associato): interrogare `/api/universe` e lo stato delle sessioni attive su `/api/session`; mostrare la lista dei reami disponibili con dettagli del master, modelli IA impiegati, coefficienti di generazione, stima oraria della spesa e tetto minimo richiesto; pulsante diretto per accedere alla lobby multigiocatore del reame scelto; pannello wizard «Crea nuovo universo» per avviare la Genesi di un nuovo reame git specificando nome, seme e parametri base.
 - Fatto quando: typecheck e test verdi; elenco sessioni e creazione nuovo universo funzionanti via interfaccia web.
 
 ### T104 · Il sito: area carte collezionabili 3D animate — `da fare` (dipende da T97, T45d, T84)
-- Pipeline: claude · stima 5% · priorità 68
+
+- Stile: il template di Claude Design va in `docs/design/sito/` (risposta dell'autore in `docs/pipeline/domande/T97.md`); se c'è, copiane lo stile grafico, altrimenti segui `src/theme.css` e `site/index.html`.
+- Pipeline: claude · stima 5% · approvato · priorità 68
 - Contesto: ADR-0095, punto 2 (Carte 3D), ADR-0056 (carte) e ADR-0084 (eredità dei cloni).
 - Fare: sviluppare la galleria interattiva delle carte collezionabili (`site/carte.html` e modulo TS associato): leggere la collezione del viandante (`collectionOf` da `src/kernel/cards.ts` e `world/carte.json`); per ogni carta visualizzare una mesh 3D Three.js con texture olografica prismatica, animazione di galleggiamento e rotazione 3D interattiva su hover/click (flip della carta); esporre i contatori di utilizzo nel mondo (luoghi, trame, prompt, totale), la rarità, l'impronta MinHash e l'albero genealogico della catena dei cloni titolari con le relative quote economiche.
 - Fatto quando: typecheck e test verdi; galleria carte 3D interattiva e fluida a 60 fps nel browser.
 
 ### T105 · Il sito: area pagamenti e cruscotto crediti Stripe — `da fare` (dipende da T97, T45e, T93)
-- Pipeline: claude · stima 3% · priorità 70
+
+- Stile: il template di Claude Design va in `docs/design/sito/` (risposta dell'autore in `docs/pipeline/domande/T97.md`); se c'è, copiane lo stile grafico, altrimenti segui `src/theme.css` e `site/index.html`.
+- Pipeline: claude · stima 3% · approvato · priorità 70
 - Contesto: ADR-0095, punto 2 (Crediti & Stripe), ADR-0081 (crediti) e ADR-0083 (Stripe Checkout).
 - Fare: realizzare la pagina di gestione crediti (`site/pagamenti.html` e modulo TS associato): cruscotto con saldo crediti disponibile e storico dei consumi; selettore per ricarica crediti con tagli prefissati ($5, $10, $20, $50) o cifra libera; interazione con l'endpoint `/api/stripe/checkout` per avviare la sessione protetta Stripe Checkout (supporto carte e Google Pay); tabella cronologica dei pagamenti ricevuti letta da `world/pagamenti.json` con id transazione, data e accredito.
 - Fatto quando: typecheck e test verdi; flusso di checkout Stripe avviabile dall'interfaccia e storico consultabile.
 
 ### T106 · Tema pop art / retro arcade: applicazione alle interfacce in-game — `da fare` (dipende da T97)
-- Pipeline: claude · stima 4% · priorità 72
+
+- Stile: il template di Claude Design va in `docs/design/sito/` (risposta dell'autore in `docs/pipeline/domande/T97.md`); se c'è, copiane lo stile grafico, altrimenti segui `src/theme.css` e `site/index.html`.
+- Pipeline: claude · stima 4% · approvato · priorità 72
 - Contesto: ADR-0095, punto 3 (Variabili CSS unificate). Il tema grafico deve permeare anche l'esperienza di gioco.
 - Fare: aggiornare `src/style.css` e i componenti UI in-game (`src/ui/hud.ts`, `inventory.ts`, `lobby.ts`, `profile.ts`, `chat.ts`, `creditdialog.ts`) per adottare appieno i token di `src/theme.css`: bordi a inchiostro netto fumetto (`--border-ink-thick`), ombre rigide neon offset (`--shadow-hard-cyan`, `--shadow-hard-pink`), pattern mezze tinte sui pannelli modali, pulsanti arcade retrò e font display per intestazioni e notifiche d'avviso.
 - Fatto quando: typecheck e test verdi; screenshot nel browser delle interfacce in-game rinnovate con il tema pop art comics / neon punk.
