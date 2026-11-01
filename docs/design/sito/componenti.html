@@ -14,6 +14,10 @@
         margin-bottom: 40px;
         position: relative;
       }
+      .component-section-header > div {
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
       .component-section-header {
         border-bottom: 2px solid var(--comic-ink);
         padding-bottom: 12px;
@@ -21,6 +25,8 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
       }
       .color-palette-showcase {
         display: grid;

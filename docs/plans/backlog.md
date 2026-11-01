@@ -2291,7 +2291,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   browser (stesso controllo di `assignTask`): il task aspetta il suo provider. Un test della pipeline che lo copre.
 - Quando è fatto: test della pipeline verdi con il caso nuovo; typecheck verde.
 
-### T112 · Verificare T110 (il template del sito, con T109) nel browser — `da fare`
+### T112 · Verificare T110 (il template del sito, con T109) nel browser — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 25 · browser
 - Contesto: T109 e T110 sono girati su Antigravity, senza browser (`BROWSER: da verificare`): T110 ha fuso T109, aggiunto i font latin-ext,
   corretto nav e modali su mobile e tolto le rotture della quarta parete, senza vederle. Nasce da T109 e T110: `dossier T110`, `traccia T110`.
@@ -2301,6 +2301,17 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   le pagine giusti, segreto dei gerboa allusivo (niente corona, Concilio, studio), nessun meta-gioco né «ADR-» nei testi, nessun errore in
   console. Correggi da te i difetti piccoli (CSS, link); scrivi gli altri qui.
 - Quando è fatto: verifica nel browser con screenshot di ogni pagina (desktop e mobile) descritti nell'esito; difetti corretti o elencati; typecheck verde.
+- Esito: fuso `task/T110` (conflitto solo nel backlog); typecheck verde. Nel browser (vite dalla radice, Claude in Chrome) le 8 pagine
+  (`index` = `landing`, login, profilo, sessioni, carte, pagamenti, componenti) a 1400 px e in un iframe a 375 px: font da `/fonts/`
+  (Bangers, Press Start 2P; VT323 è solo il ripiego e non si scarica), nessuna richiesta a terzi, tutti i link rispondono, nessun «ADR-», corona,
+  Concilio o studio nei testi, nessun errore della pagina in console; la modale «Crea nuovo universo» si apre, «Casuale» cambia il seme, si chiude
+  con ×, Esc e clic sullo sfondo; il flip delle carte gira e mostra il retro; il gerboa del footer mostra «Due orecchie lunghe nella notte…».
+  Corretti su mobile: il menu (il `<nav>` restava nella riga del logo, ora `order: 3` a tutta larghezza); le griglie a una colonna
+  (`minmax(0, 1fr)` in `.grid-*`, profilo, pagamenti, vetrina della landing) che uscivano a destra per la tabella e le carte; la barra degli
+  stati del login va a capo; le carte dei tagli di ricarica; il fumetto del gerboa va a capo entro il 70 % dello schermo; le intestazioni di
+  `componenti` vanno a capo; spazio tra «Seme» e «Casuale» nella modale. Quarta parete: la carta «Cripta delle rune» diceva «token Lua
+  intatti», ora «rune intatte». Restano (non difetti): la tabella dei pagamenti scorre in orizzontale nel suo riquadro su mobile; a 320 px
+  qualche badge e pulsante di profilo, carte e componenti esce di pochi pixel.
 
 ### T113 · Corona: il lampione intero e il drone in scala 1:2 dai modelli dell'autore — `da fare`
 - Pipeline: claude · stima 4% · approvato · priorità 20 · browser

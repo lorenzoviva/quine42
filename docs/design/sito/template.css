@@ -1235,6 +1235,10 @@ img, svg {
   .nav-toggle-btn {
     display: block;
   }
+  .site-nav > nav {
+    order: 3;
+    width: 100%;
+  }
   .nav-links {
     display: none;
     width: 100%;
@@ -1264,7 +1268,13 @@ img, svg {
   .grid-2,
   .grid-3,
   .grid-4 {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .jerboa-tooltip {
+    white-space: normal;
+    width: max-content;
+    max-width: min(240px, 70vw);
+    text-align: center;
   }
   .section-wrap {
     padding: 40px 16px;

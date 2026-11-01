@@ -14,7 +14,7 @@
       }
       .credit-tiers {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 14px;
         margin-bottom: 20px;
       }
@@ -47,7 +47,7 @@
         color: var(--neon-cyan);
       }
       @media (max-width: 900px) {
-        .billing-grid { grid-template-columns: 1fr; }
+        .billing-grid { grid-template-columns: minmax(0, 1fr); }
       }
     </style>
   </head>
