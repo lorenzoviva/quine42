@@ -33,6 +33,7 @@ Aggiornato il 01/11/2026 dopo le 13:35 UTC, epoca 186 su **claude** (Claude sett
 
 ## Stato e decisioni
 
+- **Sicurezza e CPU (01/11)**: T117 (audit, p0) e T118 (CPU satura con due task, p1) richiesti e approvati dall'autore, senza interrompere i task in corso. Agent View scartato dall'autore; niente abbassamento della priorità dei processi. Le correzioni proposte da T117 vanno portate all'autore.
 - **Riavvio**: spenta alle 13:08 (`ferma --dopo`, T115 finito), riaccesa alle 13:35 con il tetto 2 di Claude; nessun task interrotto da riprendere.
 - **Cosa si aspetta**:
   1. **T116** (merge di T102, p21): poi `integra T116` e `integra T102`.
@@ -42,8 +43,8 @@ Aggiornato il 01/11/2026 dopo le 13:35 UTC, epoca 186 su **claude** (Claude sett
 
 ## Task attivi e in corso
 
-- **In corso**: **T116** (lanciato alle 13:35 su Claude).
-- **Pronti su Claude**: **T104** (p68) → **T105** (p70) → **T106** (p72) → **T89a** (p75); bloccati **T89b-e** (da T89a).
+- **In corso** (all'ultimo `stato`): **T116** e **T104** su Claude.
+- **Pronti su Claude**: **T117** (p0) → **T118** (p1) → **T105** (p70) → **T106** (p72) → **T89a** (p75); bloccati **T89b-e** (da T89a).
 - **Da integrare**: **T102** (via T116).
 - **Integrati di recente**: **T115**, **T57b**, **T114**, **T103**, **T57c**, **T113**, **T112**, **T111**, **T101**, **T110**, **T109**.
 - **Crediti** (01/11 dopo le 13:35 UTC): Claude settimana 100 %, 5h 96 % (reset 05/11 16:00); Gemini settimana 8 %, sotto soglia: nessun task nuovo (reset 05/11 17:37); Argon fermo fino al 04/11.
