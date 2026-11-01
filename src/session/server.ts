@@ -294,6 +294,10 @@ export class SessionServer {
     return [...this.clients.keys()];
   }
 
+  get clientCount(): number {
+    return this.clients.size;
+  }
+
   /** Whether a wanderer plays as an anonymous account (T44b, T45a): what they ask is made with the local models. */
   isAnonymous(id: string | undefined): boolean {
     return !!id && (this.anonymous.has(id) || this.kernel.isAnonymous(id));

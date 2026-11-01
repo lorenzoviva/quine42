@@ -1,0 +1,323 @@
+@import './site.css';
+
+/* ==========================================================================
+   QUINE42 — Session Hub & New Universe Styles
+   Matches docs/design/sito/sessioni.html & docs/design/sito/template.css
+   ========================================================================== */
+
+/* Color utilities */
+.text-cyan { color: var(--neon-cyan); }
+.text-pink { color: var(--neon-pink); }
+.text-yellow { color: var(--neon-yellow); }
+.text-green { color: var(--neon-green); }
+.text-dim { color: var(--comic-paper-dim); }
+
+/* Grid 3 */
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+/* Session Hub Header */
+.session-hub-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+/* Tabs & Filters */
+.comic-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.comic-tab {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+  padding: 8px 18px;
+  background: var(--comic-ink);
+  color: var(--comic-paper);
+  border: 2px solid var(--comic-ink);
+  box-shadow: 3px 3px 0 rgba(0, 240, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.comic-tab:hover {
+  background: var(--synth-panel);
+  color: var(--neon-yellow);
+  box-shadow: 4px 4px 0 var(--neon-pink);
+}
+
+.comic-tab.active {
+  background: var(--neon-cyan);
+  color: var(--comic-ink);
+  border-color: var(--comic-ink);
+  box-shadow: 4px 4px 0 var(--neon-pink);
+}
+
+/* Realm Cards */
+.realm-card {
+  background: var(--synth-panel);
+  border: var(--border-ink-thick);
+  box-shadow: var(--shadow-hard-cyan);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.realm-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 6px 6px 0 var(--neon-pink);
+}
+
+.realm-card-header {
+  padding: 18px 20px 12px;
+  border-bottom: 2px solid var(--comic-ink);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.realm-card-body {
+  padding: 18px 20px;
+  flex: 1;
+}
+
+.realm-spec-table {
+  width: 100%;
+  margin-top: 12px;
+  font-size: 0.85rem;
+  border-collapse: collapse;
+}
+
+.realm-spec-table td {
+  padding: 5px 0;
+  vertical-align: top;
+}
+
+.realm-card-footer {
+  padding: 14px 20px;
+  background: var(--comic-ink);
+  border-top: 2px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.realm-card-footer .comic-btn {
+  white-space: nowrap;
+}
+
+/* Loading & Empty States */
+.realm-loading,
+.realm-empty {
+  grid-column: 1 / -1;
+  background: var(--synth-panel);
+  border: var(--border-ink-thick);
+  box-shadow: var(--shadow-hard-cyan);
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.realm-empty p {
+  color: var(--comic-paper-dim);
+  margin: 12px 0 20px;
+}
+
+/* Modals & Overlays */
+.comic-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(7, 4, 13, 0.85);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.comic-modal-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.comic-modal {
+  background: var(--synth-panel);
+  border: 4px solid var(--comic-ink);
+  box-shadow: 8px 8px 0 var(--neon-cyan);
+  max-width: min(580px, calc(100vw - 32px));
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  transform: translateY(20px) scale(0.96);
+  transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+.comic-modal-overlay.is-open .comic-modal {
+  transform: translateY(0) scale(1);
+}
+
+.comic-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--comic-ink);
+  border-bottom: 3px solid var(--neon-pink);
+}
+
+.comic-modal-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  letter-spacing: 0.05em;
+  color: var(--neon-yellow);
+  margin: 0;
+}
+
+.comic-modal-close {
+  background: var(--neon-pink);
+  color: #fff;
+  border: 2px solid var(--comic-ink);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--comic-ink);
+  transition: background 0.15s ease;
+}
+
+.comic-modal-close:hover {
+  background: #ff0055;
+}
+
+.comic-modal-body {
+  padding: 24px 20px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.comic-modal-footer {
+  padding: 16px 20px;
+  background: rgba(9, 5, 20, 0.7);
+  border-top: var(--border-ink-thick);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Step Indicator */
+.step-indicator {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.step-pill {
+  flex: 1;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--comic-ink);
+}
+
+.step-pill.active {
+  background: var(--neon-cyan);
+  box-shadow: 0 0 6px var(--neon-cyan);
+}
+
+/* Forms & Inputs */
+.form-group {
+  margin-bottom: 18px;
+}
+
+.comic-label {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  color: var(--neon-yellow);
+  margin-bottom: 6px;
+}
+
+.comic-input,
+.comic-select {
+  width: 100%;
+  background: var(--synth-bg);
+  border: var(--border-ink-thick);
+  box-shadow: 3px 3px 0 var(--neon-cyan);
+  color: var(--comic-paper);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  padding: 10px 14px;
+  outline: none;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.comic-input:focus,
+.comic-select:focus {
+  border-color: var(--neon-yellow);
+  box-shadow: 4px 4px 0 var(--neon-pink);
+}
+
+.input-hint {
+  font-size: 0.78rem;
+  color: var(--comic-paper-dim);
+  margin-top: 6px;
+  display: block;
+}
+
+/* Comic Alert */
+.comic-alert {
+  padding: 12px 14px;
+  border: 2px solid var(--comic-ink);
+  background: var(--synth-panel);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.comic-alert.info {
+  border-left: 6px solid var(--neon-cyan);
+  background: rgba(0, 240, 255, 0.08);
+}
+
+.comic-alert.error {
+  border-left: 6px solid var(--neon-pink);
+  background: rgba(255, 42, 133, 0.12);
+}
+
+.comic-alert.success {
+  border-left: 6px solid var(--neon-green);
+  background: rgba(5, 255, 161, 0.1);
+}
+
+/* Button Loading State */
+.comic-btn.is-loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.comic-btn.is-loading::after {
+  content: ' …';
+}
