@@ -2605,3 +2605,10 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Cosa fare: nel worktree di T139 `git merge task/T105`; in `vite.config.ts` restano le aggiunte di entrambi. Nel backlog restano tutti i blocchi. Se gli ADR si scontrano, quello di T105 prende il primo numero libero.
 - Test: `npm run typecheck` e la suite intera con il suo turno. È la prima suite con T118, T136 e T105 insieme: nell'esito scrivi quanti test passano e, se ce ne sono di rossi, quali. Un rosso che resta rilanciando il file da solo va detto e non va coperto: T136 ne aveva 45-47 e T105 14 (`watch`, `referente`, `wanderers`, `thin`, `between`), tutti senza T118.
 - Quando è fatto: merge risolto, commit su `task/T139`. Poi l'orchestratore fa `integra T139` e `integra T105`.
+
+### T140 · Integrare T123 — `da fare` (dipende da T139)
+- Pipeline: claude · stima 1% · approvato · priorità 1
+- Contesto: `integra T123` va in conflitto in `docs/sicurezza/registro.md`: T123 chiude V-002, T137 ha aggiunto a ogni voce la copertura e la misura del kit. Viene dopo T139 perché T105 e T123 toccano entrambi `vite.config.ts`: si risolve tutto insieme. Nasce da T123: `dossier T123`.
+- Cosa fare: nel worktree di T140, partito dal base con T139 e T105 dentro, `git merge task/T123`; nel registro V-002 resta `chiusa` e tiene anche ciò che T137 ha scritto, con la misura del 01/11 detta come precedente a T123. Se le prove V-002 di `tools/sicurezza/catalogo.mjs` o i test di T137 si aspettano ancora la falla, vanno allineati a T123.
+- Test: `npm run typecheck`, `npm run sicurezza:prove -- --solo V-002` (nell'esito le righe `ok` e `FALLA`: una FALLA vuol dire che V-002 non è chiusa e va detto, non coperto) e la suite intera con il suo turno.
+- Quando è fatto: merge risolto, commit su `task/T140`. Poi l'orchestratore fa `integra T140` e `integra T123`.

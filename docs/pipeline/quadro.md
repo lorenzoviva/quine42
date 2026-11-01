@@ -49,11 +49,11 @@ Aggiornato il 01/11/2026, fine dell'epoca 188 su **claude** (crediti: vedi `stat
 
 - **In corso** (all'ultimo `stato`): **T123** su Claude; **T139** al controllo successivo.
 - **Pronti su Claude**: **T139** (p1) → **T122 T131** (p2) → **T126 T128 T132** (sicurezza) → **T106** (p72) → **T89a** (p75); bloccati **T120** e **T124** (da T139), T121 T125 T127 T129 T130 T133 T134 (dalle correzioni), **T89b-e** (da T89a).
-- **Da integrare**: **T105** (tramite T139). T136, T137, T138 e T118 integrati il 01/11.
+- **Da integrare**: **T105** (tramite T139), **T123** (tramite T140, che dipende da T139; poi `integra T140`, `integra T123`). T136, T137, T138 e T118 integrati il 01/11.
 - **Integrati di recente**: **T104** (22 timeout su 675 nella suite, estraneità provata solo in 3 file: se restano dopo T118, ricontrollare `forms.ts` e `cards.ts`), **T115**, **T57b**, **T114**, **T103**, **T57c**, **T113**, **T112**, **T111**, **T101**, **T110**, **T109**.
 - **Crediti** (01/11 dopo le 15:12 UTC): Claude settimana 98 %, 5h 84 % (reset 05/11 16:00; 5h alle 17:30); Gemini settimana 8 %, sotto soglia: nessun task nuovo (reset 05/11 17:37); Argon fermo fino al 04/11.
 
-- **Prossimi passi**: leggere la suite di T139 (prima con T118, T136 e T105; T137 aveva ancora 45 timeout nel suo worktree, partito prima di T118); ricevere gli esiti dell'autore.
+- **Prossimi passi**: T123 ha dato la prima suite verde con T118 e T136 (715 passati, 1 todo, nel suo worktree): i timeout di T136, T137 e T105 erano senza T118; T139 lo riconferma con T105. Ricevere gli esiti dell'autore. **Da far decidere all'autore**: tetto Gemini di 10 $ al giorno scelto da T123 (`GEMINI_TETTO_GIORNALIERO`).
 
 ## Da fare appena possibile
 
