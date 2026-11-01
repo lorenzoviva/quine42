@@ -2269,7 +2269,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   studio), nessun meta-gioco né «ADR-» nei testi, nessun errore in console. Correggi da te i difetti piccoli (CSS, link); scrivi gli altri qui.
 - Quando è fatto: screenshot di ogni pagina (desktop e mobile) descritti nell'esito; difetti corretti o elencati; typecheck verde.
 
-### T111 · Pipeline: un task con verifica nel browser non ripiega su un provider senza browser — `da fare`
+### T111 · Pipeline: un task con verifica nel browser non ripiega su un provider senza browser — `fatto`
 - Pipeline: gemini · stima 2% · approvato · priorità 20
 - Contesto: il 01/11 T109 e T110 (verifica nel browser) erano assegnati a `claude`; con lo slot di Claude occupato la pipeline ha scritto
   «claude non può, va su gemini» e li ha lanciati su Antigravity, che non ha il browser: T110 è stato interrotto a mano. `assegna` rifiuta già

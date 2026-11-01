@@ -26,6 +26,8 @@ type Pipeline = {
   isSuspended(b: unknown, nowMs?: number): boolean;
   suspendProvider(provider: string, finoA?: string, opts?: unknown): { provider: string; sospeso: string | boolean };
   resumeProvider(provider: string, opts?: unknown): { provider: string; sospeso: boolean };
+  providerHasBrowser(provider: string, config?: unknown): boolean;
+  allowedProviders(t: { provider?: string; needsBrowser?: boolean }, config?: unknown): string[];
 };
 
 let P: Pipeline;
@@ -111,6 +113,35 @@ describe('taskNeedsBrowser e gestione browser (T87)', () => {
     expect(P.taskNeedsBrowser('### T3\n- Fare: altro\n- Fatto quando: screenshot della prova confrontato con la foto\n')).toBe(true);
     expect(P.taskNeedsBrowser('### T4\n- Pipeline: claude · stima 2% · browser\n- Fare: niente\n- Fatto quando: commit\n')).toBe(true);
     expect(P.taskNeedsBrowser('### T5\n- Fare: codice puro\n- Fatto quando: test verdi\n')).toBe(false);
+  });
+
+  it('riconosce verifiche browser anche con «Quando è fatto:» e «Cosa fare:» (T111)', () => {
+    // T109 usava «Quando è fatto:» con screenshot e nel browser
+    expect(P.taskNeedsBrowser('### T109 · Sito\n- Quando è fatto: le pagine aperte nel browser (screenshot)\n')).toBe(true);
+    // T110 usava «Cosa fare:» con turno browser e «Quando è fatto:» con screenshot
+    expect(P.taskNeedsBrowser('### T110 · Verificare sito\n- Cosa fare: nel turno browser servi...\n- Quando è fatto: screenshot di ogni pagina\n')).toBe(true);
+    // Un task che cita la regola per altri task (come T111) non richiede il browser
+    expect(P.taskNeedsBrowser('### T111 · Pipeline: un task con verifica nel browser non ripiega\n- Cosa fare: non scegliere un provider senza browser per un task che chiede la verifica nel browser\n- Quando è fatto: test della pipeline verdi con il caso nuovo; typecheck verde.\n')).toBe(false);
+  });
+
+  it('un task con verifica nel browser non ripiega su un provider senza browser (T111)', () => {
+    const taskBrowser: Task = { id: 'T110', title: 'Task browser', status: 'da fare', deps: [], provider: 'claude', estimate: 3, approved: true, priority: 30, needsBrowser: true };
+    const taskNormale: Task = { id: 'T111', title: 'Task normale', status: 'da fare', deps: [], provider: 'claude', estimate: 2, approved: true, priority: 20, needsBrowser: false };
+    const config = {
+      providers: {
+        claude: { browser: true },
+        gemini: { browser: false },
+        argon: { browser: false },
+      },
+      alternative: {
+        claude: ['argon', 'gemini'],
+      },
+    };
+
+    // Il task con browser può andare SOLO su provider con browser (claude)
+    expect(P.allowedProviders(taskBrowser, config)).toEqual(['claude']);
+    // Il task normale può ripiegare sulle sue alternative (argon, gemini)
+    expect(P.allowedProviders(taskNormale, config)).toEqual(['claude', 'argon', 'gemini']);
   });
 
   it('parseBacklog marca needsBrowser per i task pertinenti', () => {
@@ -788,11 +819,20 @@ describe('interfaccia web della pipeline (T69)', () => {
       '- Fare: correggi la vista',
       '- Fatto quando: verificare nel browser con ?dev',
       '',
+      '### T99b · Task con Quando è fatto — `da fare`',
+      '- Cosa fare: nel turno browser servi le pagine',
+      '- Quando è fatto: screenshot di ogni pagina; typecheck verde.',
+      '',
     ].join('\n'));
     const badRes = W.handleApi('POST', '/api/assegna', { id: 'T99', provider: 'gemini', stima: 2, approva: false }, opts);
     expect(badRes.status).toBe(400);
     expect(badRes.data.error).toMatch(/richiede verifica nel browser/);
     expect(W.handleApi('POST', '/api/assegna', { id: 'T99', provider: 'claude', stima: 2, approva: false }, opts).status).toBe(200);
+
+    const badRes2 = W.handleApi('POST', '/api/assegna', { id: 'T99b', provider: 'gemini', stima: 3, approva: false }, opts);
+    expect(badRes2.status).toBe(400);
+    expect(badRes2.data.error).toMatch(/richiede verifica nel browser/);
+    expect(W.handleApi('POST', '/api/assegna', { id: 'T99b', provider: 'claude', stima: 3, approva: false }, opts).status).toBe(200);
   });
 });
 
