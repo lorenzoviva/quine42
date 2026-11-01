@@ -36,6 +36,7 @@ Aggiornato il 01/11/2026 ~03:45 UTC, epoca 182 su **gemini** (Claude sotto sogli
 ## Stato e decisioni
 
 - **Decisioni prese e fatti recenti**:
+  - **T57c integrato nel base `3d` (ADR-0096)**: aggiunto l'effetto `rilievo {delta, raggio}` nel kernel, validazione (-8..8), persistenza in `plan.scavi`, deflusso d'acqua risvegliato; canone e guide di incantesimi aggiornate; test 6/6 e typecheck passati. Branch e worktree rimossi.
   - **T92 e T52 integrati nel base `3d`**: task/T92 ha risolto i conflitti con task/T52, rinumerato l'ADR in ADR-0091, aggiornato `AGENTS.md`, `README.md` e `backlog.md` (T52a fatto, T52b-f definiti). Eseguiti `integra T92` e `integra T52`, worktree e branch rimossi, typecheck e test pipeline verdi.
   - **T54 fatto**, da integrare tramite **T94** (conflitti; ADR da rinumerare in ADR-0092). Suite intera con 33 timeout di carico: T94 la rilancia col turno test.
   - **T45d integrato nel base `3d` (ADR-0086)**: requisiti minimi, tetto crediti, modale esaurimento, lobby multigiocatore e collezione carte integrati.
