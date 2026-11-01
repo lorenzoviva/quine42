@@ -2492,7 +2492,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Pipeline: claude · stima 6% · approvato · priorità 8
 - Contesto: R5 e R10: i crediti sono **l'unica cosa del gioco che non si deve poter modificare**, ma stanno in `world/giocatori/*.json` e `world/pagamenti.json`, nel repository dell'universo: un `checkout`, `R`, un ramo pubblicato o il codice generato possono cambiarli; la risposta del Referente diventa `giveCredits` senza tetto visibile; il controllo di idempotenza non passa dalla coda `serial`. Vedi ADR-0081, 0083.
 - Cosa fare: un archivio del server fuori dalla storia dell'universo per saldi e registro dei pagamenti, con migrazione dai file di oggi; nessuna via da Lua, dal Concilio, dal ramo o dal rollback; accredito atomico e idempotente; chi può ricaricare a mano e con quale tetto (scriverlo nell'ADR). I saldi degli altri non vanno al master nei file. ADR nuovo e `AGENTS.md`.
-- Test: rollback, ramo pubblicato e codice generato non cambiano i saldi; due eventi uguali in contemporanea accreditano una volta.
+- Test: rollback, ramo pubblicato e codice generato non cambiano i saldi; due eventi uguali in contemporanea accreditano una volta. La corsa è stata misurata (V-005.a: 8 consegne, 2 accrediti) ma non esce a ogni giro: il test la ripete o la forza, un solo giro verde non basta.
 - Quando è fatto: test e typecheck verdi, commit su `task/T125`.
 
 ### T126 · I limiti dentro la sandbox — `da fare` (dipende da T136)

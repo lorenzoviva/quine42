@@ -26,7 +26,7 @@ Modello di una voce:
 - Stato: `specificata`
 - Superficie: `server/universeStore.ts`, tutte le route di `/api/universe`
 - Proprietà violata: i non master non riscrivono il Lua sul server e i crediti non si toccano; un non master non legge ciò che `playerFiles` gli nega
-- Prova: solo lettura del codice (T117); misurata dal kit (T137, `esiti/2026-11-01.json`): FALLA tutte le scritture e le letture senza identità, anche da un'altra origine e con un Host estraneo (V-001.a-j, l, m); il CORS non è aperto (V-001.k, ok)
+- Prova: solo lettura del codice (T117); misurata dal kit (T137, `esiti/2026-11-01.json`): FALLA tutte le scritture e le letture senza identità, anche da un'altra origine e con un Host estraneo (V-001.a-j, l, m); il CORS non è aperto (V-001.k, ok). Giro dell'autore (`esiti/2026-11-01-f12.md`): da `https://example.com` una richiesta `no-cors` **scrive** un file nell'universo (V-001.o, FALLA); la lettura non passa (V-001.n, ok)
 - Contromisura: identità verificata sul server e permessi per operazione su ogni route; su un universo multigiocatore un non master non scrive nulla; `clone` prende il master dall'identità; controllo di `Origin` e `Content-Type`; le letture del sito ricevono solo ciò che serve. In produzione solo le route ammesse.
 - Task: T120, T133
 - Test: `tests/sicurezza/rotte.test.ts`
@@ -66,7 +66,7 @@ Modello di una voce:
 - Stato: `specificata`
 - Superficie: `server/stripe.ts`, `world/pagamenti.json`, `world/giocatori/*.json`
 - Proprietà violata: i crediti non si toccano: un evento accredita una volta sola, e `checkout` o `R` non riportano indietro saldi e pagamenti
-- Prova: solo lettura del codice (T117); misurata dal kit (`esiti/2026-11-01.json`): V-005.a ok su 8 consegne in contemporanea (non prova che la corsa non esista), FALLA V-005.b e c: il ritorno a un commit riporta indietro il saldo
+- Prova: solo lettura del codice (T117); misurata dal kit (`esiti/2026-11-01.json`): **la corsa esiste**: V-005.a ok nel giro di T137 (commit `a55e9d2`), FALLA nel giro dell'autore (`544ce7f`): 8 consegne, 2 accrediti; FALLA V-005.b e c: il ritorno a un commit riporta indietro il saldo
 - Contromisura: saldi e registro dei pagamenti in un archivio del server fuori dalla storia dell'universo, con migrazione dai file di oggi; accredito atomico e idempotente.
 - Task: T125
 - Test: —
@@ -76,7 +76,7 @@ Modello di una voce:
 - Stato: `specificata`
 - Superficie: `src/session/server.ts`, `server/session.ts`, `GET /api/session`
 - Proprietà violata: i non master non riscrivono il Lua: nessuno diventa master dicendolo; `anonimo`, `tetto` e `offline` non li decide il client
-- Prova: solo lettura del codice (T117); misurata dal kit (`esiti/2026-11-01.json`): FALLA V-006.a-e, compreso `GET /api/viandante`, che dà il saldo di chiunque senza identità; il protocollo rifiuta ramo, pubblicazione, Concilio e «segui» a un non master (V-006.f, ok)
+- Prova: solo lettura del codice (T117); misurata dal kit (`esiti/2026-11-01.json`): FALLA V-006.a-e, compreso `GET /api/viandante`, che dà il saldo di chiunque senza identità; il protocollo rifiuta ramo, pubblicazione, Concilio e «segui» a un non master (V-006.f, ok); V-006.g (F12, un altro sito entra nel mondo) non è ancora misurata: manca dagli esiti del giro dell'autore
 - Contromisura: senza verificatore l'id scelto dal client vale solo da loopback; `anonimo`, `tetto` e `offline` decisi dal server; controllo di `Origin` sul WebSocket; `GET /api/session` non elenca i viandanti a chiunque; in produzione niente avvio senza verificatore. `GET /api/viandante` dice il saldo solo a chi lo possiede; lo stesso vale per `/api/crediti`, la superficie nuova di T105 (saldo e storici, stessa identità non verificata, coperta da T120).
 - Task: T120, T133
 - Test: `tests/sicurezza/rotte.test.ts`

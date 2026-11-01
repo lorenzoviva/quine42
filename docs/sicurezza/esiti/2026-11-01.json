@@ -1,13 +1,13 @@
 {
  "data": "2026-11-01",
- "commit": "a55e9d2",
+ "commit": "544ce7f",
  "vite": "5.4.10",
  "node": "v22.19.0",
  "piattaforma": "win32",
  "solo": null,
  "riepilogo": {
-  "ok": 22,
-  "falle": 51,
+  "ok": 21,
+  "falle": 52,
   "errori": 0,
   "saltate": 0
  },
@@ -24,7 +24,7 @@
    "voce": "V-007",
    "proprieta": "un’allocazione enorme finisce in un guasto",
    "esito": "FALLA",
-   "dettaglio": "1687 ms, nessun guasto"
+   "dettaglio": "2282 ms, nessun guasto"
   },
   {
    "id": "V-008.a",
@@ -66,7 +66,7 @@
    "voce": "V-019",
    "proprieta": "`pcall` non scavalca il budget di istruzioni",
    "esito": "ok",
-   "dettaglio": "16 ms, un guasto del budget"
+   "dettaglio": "13 ms, un guasto del budget"
   },
   {
    "id": "V-001.a",
@@ -478,8 +478,8 @@
    "id": "V-005.a",
    "voce": "V-005",
    "proprieta": "lo stesso evento in contemporanea accredita una volta sola",
-   "esito": "ok",
-   "dettaglio": "8 consegne, accreditati 1"
+   "esito": "FALLA",
+   "dettaglio": "8 consegne, accreditati 2"
   },
   {
    "id": "V-005.b",
@@ -521,7 +521,7 @@
    "voce": "V-016",
    "proprieta": "nessun valore finto dei segreti in `dist/` dopo una build",
    "esito": "ok",
-   "dettaglio": "56 file, 0 con un valore"
+   "dettaglio": "61 file, 0 con un valore"
   }
  ]
 }
