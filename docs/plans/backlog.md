@@ -2577,3 +2577,10 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   5. Ciò che si può verificare da soli va anche in `tests/sicurezza/` con la convenzione di T136.
 - **Se un filtro ferma la sessione**: non insistere e non riformulare per aggirarlo. Scrivere la proprietà da verificare e cosa resta scoperto in `docs/pipeline/domande/T137.md`, e consegnare il resto.
 - Quando è fatto: lo script gira fino in fondo in locale, il registro dice per ogni voce quale prova la copre, test e typecheck verdi, commit su `task/T137`. Poi l'orchestratore chiede all'autore di eseguirlo sul base, prima che entri T120.
+
+### T138 · Integrare T118 — `da fare`
+- Pipeline: claude · stima 1% · approvato · priorità 1
+- Contesto: `integra T118` va in conflitto in `vite.config.ts`: T118 ha toccato la configurazione dei test (worker e `hookTimeout`), mentre nel base sono entrati altri cambi allo stesso file. Serve presto: senza T118 la suite resta a 11 worker e con i timeout, anche per i task di sicurezza. Nasce da T118: `dossier T118`.
+- Cosa fare: nel worktree di T138 `git merge task/T118`; in `vite.config.ts` restano le aggiunte di entrambi. Nel backlog restano tutti i blocchi. Se gli ADR si scontrano, quello di T118 prende il primo numero libero.
+- Test: `npm run typecheck` e la suite intera con il suo turno: deve restare senza timeout (T118 ne ha misurati 680 su 680; il base ha test in più).
+- Quando è fatto: merge risolto, commit su `task/T138`. Poi l'orchestratore fa `integra T138` e `integra T118`.
