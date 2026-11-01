@@ -6,9 +6,9 @@ import path from 'node:path';
  * `PIPELINE_TURNO`) `turni.test.worker` of its config, one per physical core; by hand nothing is said, and vitest uses its default.
  * `--maxWorkers` on the command line still wins.
  */
-export function testWorkers(env: NodeJS.ProcessEnv, workers = configuredWorkers()): { maxWorkers?: number; minWorkers?: number } {
+export function testWorkers(env: NodeJS.ProcessEnv, workers = configuredWorkers()): { maxWorkers?: number } {
   if (!env.PIPELINE_TASK && !env.PIPELINE_TURNO) return {};
-  return workers > 0 ? { maxWorkers: workers, minWorkers: 1 } : {};
+  return workers > 0 ? { maxWorkers: workers } : {};
 }
 
 function configuredWorkers(): number {
