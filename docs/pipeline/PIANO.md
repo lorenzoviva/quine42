@@ -1,25 +1,24 @@
 # Il piano della pipeline
 
-> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-11-01T03:09:29.653Z: non modificarlo a mano,
+> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-11-01T03:42:44.431Z: non modificarlo a mano,
 > la fonte è `docs/plans/backlog.md` (righe `- Pipeline:`).
 
 ## Budget
 
 Orchestratore: **gemini** (sotto il 10 % nessun task su di lui; si cambia con `orchestratore <provider>`).
 
-- **claude**: settimana 14 %, 5 ore 0 %, fermo fino a 2026-11-01T05:49:00.000Z; tetto 1, slot 1 (task in programma 12), esaurimento previsto 2026-11-01T16:55:03.505Z, reset 2026-11-05T15:59:00.000Z (letto da /usage il 2026-11-01T03:08:26.709Z)
-  - session, 5h: 0 % residuo, reset 2026-11-01T05:49:00.000Z
-  - week (all models), settimana: 14 % residuo, reset 2026-11-05T15:59:00.000Z
-- **gemini**: settimana 13 %, 5 ore 79 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-02T02:43:25.347Z, reset 2026-11-05T17:37:53.000Z (letto da /usage il 2026-11-01T03:08:29.018Z)
-  - Gemini Models, settimana: 13 % residuo, reset 2026-11-05T17:37:53.000Z
-  - Gemini Models, 5h: 79 % residuo, reset 2026-11-01T06:01:59.000Z
-- **argon**: settimana 0 %, 5 ore 0 %, fermo fino a 2026-11-04T18:44:35.000Z; tetto 1, slot 1 (task in programma 0), esaurimento previsto mai a questo ritmo, reset 2026-11-04T18:44:35.000Z (letto da /usage il 2026-11-01T03:06:25.995Z)
+- **claude**: settimana 14 %, 5 ore 0 %, fermo fino a 2026-11-01T05:50:00.000Z; tetto 1, slot 1 (task in programma 11), esaurimento previsto 2026-11-01T17:44:00.475Z, reset 2026-11-05T16:00:00.000Z (letto da /usage il 2026-11-01T03:40:43.119Z)
+  - session, 5h: 0 % residuo, reset 2026-11-01T05:50:00.000Z
+  - week (all models), settimana: 14 % residuo, reset 2026-11-05T16:00:00.000Z
+- **gemini**: settimana 9 %, 5 ore 64 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-01T17:07:31.278Z, reset 2026-11-05T17:37:53.000Z (letto da /usage il 2026-11-01T03:40:37.308Z)
+  - Gemini Models, settimana: 9 % residuo, reset 2026-11-05T17:37:53.000Z
+  - Gemini Models, 5h: 64 % residuo, reset 2026-11-01T06:01:59.000Z
+- **argon**: settimana 0 %, 5 ore 0 %, fermo fino a 2026-11-04T18:44:35.000Z; tetto 1, slot 1 (task in programma 0), esaurimento previsto mai a questo ritmo, reset 2026-11-04T18:44:35.000Z (letto da /usage il 2026-11-01T03:38:45.670Z)
   - Gemini 4 Argon, settimana: 0 % residuo, reset 2026-11-04T18:44:35.000Z
 
-## In corso (2)
+## In corso (1)
 
 - **T57b** Rune nuove dal Concilio — claude, 5 %
-- **T57c** Il terreno che sale e scende — claude, 3 %
 
 ## Finiti, da guardare e integrare (`integra Txx`) (1)
 

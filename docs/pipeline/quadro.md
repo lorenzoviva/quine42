@@ -3,19 +3,19 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 01/11/2026 ~03:10 UTC, epoca 181 su **gemini** (Claude sotto soglia 10 %, 5h al 0 %, reset 05:49 UTC; settimana al 14 %, reset 05/11 16:00).
+Aggiornato il 01/11/2026 ~03:45 UTC, epoca 182 su **gemini** (Claude sotto soglia 10 %, 5h al 0 %, reset 05:50 UTC; settimana al 14 %, reset 05/11 16:00; Gemini settimana al 9 % < 10 % soglia orchestratore).
 
-- **Integrati di recente**: T111 (ripiego senza browser corretto), T113 (lampione intero, drone 1:2), T109+T110+T112 (template del sito verificato), T101 (landing con hero MarkovJunior verificata nel browser).
+- **Integrati di recente**: T57c (effetto rilievo e terraformazione nel kernel, ADR-0096), T111 (ripiego senza browser corretto), T113 (lampione intero, drone 1:2), T109+T110+T112 (template del sito verificato), T101 (landing con hero MarkovJunior verificata nel browser).
 - **In corso / Sospesi**:
-  - **T57c** su Gemini (terreno che sale e scende con effetto `rilievo`, p61).
-  - **T57b** su Claude (rune nuove dal Concilio, p60): ha toccato il limite 5h di Claude (`usage_limit_reached`); interrotto e rimesso in coda (`interrompi` + `riprendi`), turno test liberato, riprenderà la conversazione al reset delle 05:49 UTC.
+  - **T57b** su Claude (rune nuove dal Concilio, p60): ha toccato il limite 5h di Claude (`usage_limit_reached`); interrotto e rimesso in coda (`interrompi` + `riprendi`), turno test liberato, riprenderà la conversazione al reset delle 05:50 UTC.
 - **Finiti / Da verificare nel browser**:
   - **T103** (hub sessioni multigiocatore e wizard nuovo universo): completato su Gemini (`BROWSER: da verificare`). Merge diretto con `3d` ha conflitto in `site/index.html` (aggiornato da T101). Creato **T114** su Claude (p25, browser) per fondere `task/T103`, risolvere il conflitto e verificare nel browser Chrome.
-- **Coda di Claude (dopo reset 05:49 UTC)**: T57b (riprende) → T114 (verifica T103) → T102, T104, T105, T106 (sito) → T89a-e (cartone, p75-79).
+- **Coda di Claude (dopo reset 05:50 UTC)**: T57b (riprende) → T114 (verifica T103) → T102, T104, T105, T106 (sito) → T89a-e (cartone, p75-79).
 - **Decisioni recenti**:
+  - T57c completato su Gemini e integrato nel base `3d` con test e typecheck verdi; branch e worktree rimossi.
   - T89 diviso in T89a-e e approvato; T57 diviso in T57b/T57c e approvato. T57 segnato fatto (T57a).
   - T103 completato con successo headless (test 8/8); delegata la verifica browser e merge a T114 su Claude.
-- **Aspetto**: esito di T57c; reset crediti Claude alle 05:49 UTC per T57b e T114; risposte su T45f (GCP); T88 da approvare.
+- **Aspetto**: reset crediti Claude alle 05:50 UTC per T57b e T114; risposte su T45f (GCP); T88 da approvare.
 
 - **Lezione**: mai `git commit -a` nel base (l'autore ha file suoi; le `lampione copy*.xml` restano non committate).
 
@@ -42,21 +42,19 @@ Aggiornato il 01/11/2026 ~03:10 UTC, epoca 181 su **gemini** (Claude sotto sogli
   - **T45f sbloccato e preparato**: dipendeva da T44b e T45d, ora entrambi integrati. Aperte le domande su GCP Project ID, hosting e regione in `docs/pipeline/domande/T45f.md`.
   - **T45e completato e chiavi Stripe fornite**: l'autore ha risposto in `docs/pipeline/domande/T45e.md` inserendo le credenziali di test in `.env` e impostando il listener locale su `localhost:5173/api/stripe/webhook`. T45e segnato `fatto` e approvato **T93** per la verifica nel browser su Claude (priorità 9).
 - **Cosa si aspetta**:
-  1. Esito di **T57c** in corso su Gemini.
-  2. Reset di Claude alle 05:49 UTC per ripresa di **T57b** e avvio di **T114** (verifica nel browser di T103).
-  3. **Risposte dell'autore per T45f** (`docs/pipeline/domande/T45f.md`).
+  1. Reset di Claude alle 05:50 UTC per ripresa di **T57b** e avvio di **T114** (verifica nel browser di T103 e merge).
+  2. **Risposte dell'autore per T45f** (`docs/pipeline/domande/T45f.md`).
 - **Intenzioni / prossimi passi**:
-  1. Completare T57c su Gemini e verificare che l'effetto `rilievo` funzioni con i test.
-  2. Al reset di Claude, far riprendere T57b e poi lanciare T114 per la verifica nel browser di T103 e merge di `task/T103`.
-  3. Ricevute le risposte su T45f, riprendere il deploy del multigiocatore su GCP.
+  1. Al reset di Claude (05:50 UTC), far riprendere T57b e poi lanciare T114 per la verifica nel browser di T103 e merge di `task/T103`.
+  2. Ricevute le risposte su T45f, riprendere il deploy del multigiocatore su GCP.
 
 ## Task attivi e in corso
 
 - **Pronti / In corso**:
-  - In corso: **T57c** su Gemini. Sospeso: **T57b** su Claude (in attesa reset 5h).
+  - In corso / Sospeso: **T57b** su Claude (in attesa reset 5h alle 05:50 UTC).
   - Pronti su Claude: **T114** (p25, browser) → **T102** (p64) → **T104** (p68) → **T105** (p70) → **T106** (p72) → **T89a** (p75).
 - **Completati e integrati nel base `3d`**:
-  - **T113**, **T112**, **T111**, **T101**, **T110**, **T109**, **T95**, **T98**, **T108**, **T107**, **T96**, **T51b**, **T89**, **T94**, **T54**, **T52b**, **T93**, **T92**, **T52**, **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
+  - **T57c**, **T113**, **T112**, **T111**, **T101**, **T110**, **T109**, **T95**, **T98**, **T108**, **T107**, **T96**, **T51b**, **T89**, **T94**, **T54**, **T52b**, **T93**, **T92**, **T52**, **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
 - **Da integrare / Da verificare**:
   - **T103** (in `task/T103`, integrato e verificato nel browser tramite **T114**).
 - **In attesa di chiavi/risposte**:
@@ -65,8 +63,8 @@ Aggiornato il 01/11/2026 ~03:10 UTC, epoca 181 su **gemini** (Claude sotto sogli
   - **T88** (da approvare).
   - **T89b-e** (dipendono da T89a).
 - **Crediti**:
-  - **Claude**: 5h al 0 % residuo (reset 05:49 UTC), settimana al 14 % residuo (reset 05/11 16:00 UTC).
-  - **Gemini**: 5h al 79 % residuo (reset 06:01 UTC), settimana al 13 % residuo (reset 05/11 17:37 UTC).
+  - **Claude**: 5h al 0 % residuo (reset 05:50 UTC), settimana al 14 % residuo (reset 05/11 16:00 UTC).
+  - **Gemini**: 5h al 64 % residuo (reset 06:01 UTC), settimana al 9 % residuo (riservato per orchestrazione).
   - **Argon**: fermo fino al 04/11.
 
 ## Da fare appena possibile

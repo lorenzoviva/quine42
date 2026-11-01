@@ -647,3 +647,6 @@
 - [2026-11-01T03:08:23.062Z] T57b: interrotto (riprende con riprendi T57b)
 - [2026-11-01T03:08:27.192Z] T57b: rimesso in coda (riprende la sua conversazione)
 - [2026-11-01T03:09:57.949Z] nota: T103 finito su gemini (hub sessioni); creato T114 su claude per merge task/T103 (conflitto site/index.html) e verifica browser; T57b interrotto per limite 5h Claude e rimesso in coda, turno test liberato; T57c in corso su gemini
+- [2026-11-01T03:10:40.621Z] orchestratore: epoca 182 su gemini (contesto a 482 % della finestra)
+- [2026-11-01T03:40:37.309Z] T57c: ESITO: fatto — aggiunto l'effetto rilievo {delta, raggio} nel kernel, terraformazione in canone e SPELL_GUIDE, persistenza in scavi e flusso d'acqua (ADR-0096) · BROWSER: da verificare — su agy lo strumento browser non è disponibile (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T57c)
+- [2026-11-01T03:42:01.236Z] task/T57c integrato in 3d; worktree e branch tolti.
