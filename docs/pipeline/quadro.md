@@ -3,12 +3,15 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 01/11/2026 ~01:50 UTC, fine epoca 179 su **claude** (riavvio dopo lo spegnimento del 01/11 00:51, nessun task interrotto). **T95 integrato** (explore e partita rotti da `38dcd69`, corretti i test). **T111** (Gemini, p20): il ripiego non deve mandare task col browser su Gemini (T109 e T110 ci erano finiti; T110 interrotto e rimesso su Claude: se riparte provando a riprendere la conversazione di agy, interromperlo e rilanciarlo da zero). **T109** e **T110** fatti su Gemini senza browser (template del sito in `docs/design/sito/`): li verifica **T112** su Claude (p25, `· browser` nella riga Pipeline), poi integra T109 e T110. Causa vera del ripiego: `taskNeedsBrowser` legge solo «Fatto quando:»/«Fare:», i blocchi scritti con «Quando è fatto:»/«Cosa fare:» non risultano col browser (se T111 non lo corregge, nuovo task); intanto mettere `· browser` nella riga Pipeline dei task di verifica; poi T57b; T101-T106 (dipendono da T109) (sito) approvati e in coda su Claude: richiedono il browser, lo script non li accetta su Gemini. Gemini senza task.
+Aggiornato il 01/11/2026 ~03:00 UTC, fine epoca 180 su **claude** (5h di Claude al 6 %, reset 05:49 UTC; settimana al 14 %, reset 05/11 16:00; esaurimento previsto oggi ~17:50).
 
-- **T113** fatto e integrato (01/11 02:03): lampione intero (`rootTag` saltava male i commenti), drone 1:2 da `drone-xl.xml`, verificato nel browser. Le `lampione copy*.xml` restano dell'autore, non committate.
+- **Integrati nell'epoca 180**: T111 (ripiego senza browser corretto, `taskNeedsBrowser` legge «Quando è fatto:»/«Cosa fare:»), T113 (lampione intero, drone 1:2), T109+T110+T112 (template del sito verificato), T101 (landing con hero MarkovJunior, verificata nel browser). Le `lampione copy*.xml` restano dell'autore, non committate.
+- **In corso**: **T57b** su Claude (rune nuove dal Concilio, p60); **T103** su Gemini (hub sessioni del sito; è finito lì perché Claude era occupato: il suo «Fatto quando» chiede l'interfaccia web funzionante, quindi a fine task serve una verifica nel browser su Claude prima di integrarlo).
+- **Coda di Claude**: T57c (p61) → T102, T104, T105, T106 (sito, p62-72) → T89a-e (p75-79, ~19 %: probabilmente dopo il reset del 05/11; l'autore può chiedere di anticiparli).
+- **Decisioni dell'autore (01/11)**: T89 diviso in T89a-e e T57 in T57b/T57c, tutti stimati su Claude e approvati su sua richiesta. T57 segnato `fatto` (T57a). Su T57c c'era la domanda «effetto `rilievo` generico nel kernel?»: presa per sì con l'approvazione, detto all'autore; se obietta, interrompere T57c.
+- **Aspetto**: esiti di T57b e T103; risposte su T45f (GCP); T88 da approvare.
+- **Quando Claude finisce i crediti**: l'orchestratore passa al provider successivo di `orchestra.ordine`; Claude non riceve task finché non si rinnovano le 5 ore (05:49 UTC).
 
-- **Coda di Claude**: T57 (p60) → T101-T106 (sito, ora sbloccati). T109, T110, T112 integrati (01/11 02:11): template del sito in `docs/design/sito/` verificato nel browser e corretto su mobile.
-- **Gemini**: T111 fatto e integrato (01/11 01:55, `46f32e2`): i task col browser non ripiegano più su Gemini, `taskNeedsBrowser` legge anche «Quando è fatto:»/«Cosa fare:». Gemini senza task.
 - **Lezione**: mai `git commit -a` nel base (l'autore ha file suoi; le `lampione copy*.xml` restano non committate).
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
