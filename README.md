@@ -116,8 +116,8 @@ partendo dal suo quadro (`docs/pipeline/quadro.md`), senza perdere gli eventi in
 ### Generare con gli abbonamenti
 
 Il Concilio chiama Gemini a consumo con la chiave in `.env`. I compiti lenti (Genesi, Fucina, modelli dello Scultore, sessioni
-del Concilio, meccaniche) possono invece girare sull'abbonamento personale di chi gioca in locale, Claude Code o Antigravity
-([ADR-0077](docs/adr/0077-generare-con-gli-abbonamenti.md)), a costo zero nel registro dei consumi; il resto resta sulle API
+del Concilio, meccaniche) possono invece girare sull'abbonamento personale di chi gioca in locale, con Claude Code
+([ADR-0077](docs/adr/0077-generare-con-gli-abbonamenti.md), [ADR-0102](docs/adr/0102-la-coda-delle-cli-blindata.md): Antigravity non può escludere gli strumenti e non sta sulla coda), a costo zero nel registro dei consumi; il resto resta sulle API
 (o sui modelli locali offline). Solo in singola e in sviluppo, mai sul server del multigiocatore: l'abbonamento è personale.
 
 1. **Impostare la tabella**: in `universe.json` del proprio universo (in `universes/<nome>/universe.json` o nel seme `universe/universe.json`):
@@ -125,22 +125,21 @@ del Concilio, meccaniche) possono invece girare sull'abbonamento personale di ch
 ```json
 "ai": {
   "provider": "claude",
-  "agenti": { "scultore": "claude", "narratore": "antigravity" }
+  "agenti": { "scultore": "claude", "narratore": "api" }
 }
 ```
 
-`provider` stabilisce il provider predefinito (`api`, `claude` o `antigravity`) per ogni agente che `agenti` non nomina; `agenti` definisce le eccezioni per singolo agente.
+`provider` stabilisce il provider predefinito (`api` o `claude`) per ogni agente che `agenti` non nomina; `agenti` definisce le eccezioni per singolo agente.
 
-2. **Lanciare il servitore della coda**: in un terminale separato (richiede la CLI `claude` o `agy` installata e collegata al proprio account):
+2. **Accendere la coda**: `QUINE_CODA=1` nel `.env`. Senza, la route non c'è e il gioco resta sulle API. Risponde solo da questa macchina e alla pagina del gioco.
+
+3. **Lanciare il servitore della coda**: in un terminale separato (richiede la CLI `claude` installata e collegata al proprio account). La CLI gira in una cartella vuota, senza strumenti, MCP, hook né impostazioni della macchina; se non lo conferma, il servitore si ferma:
 
 ```bash
-npm run abbonamento                       # serve le richieste sia di Claude Code che di Antigravity
-# oppure solo per un provider specifico:
-npm run abbonamento -- --provider claude
-npm run abbonamento -- --provider antigravity
+npm run abbonamento
 ```
 
-3. **Avviare il gioco**:
+4. **Avviare il gioco**:
 
 ```bash
 npm run dev                               # http://localhost:5173

@@ -70,9 +70,11 @@ describe('la tabella dei provider (T68)', () => {
   });
 
   it('ripara la tabella e sceglie per agente, col predefinito', () => {
+    // Antigravity is no provider any more (ADR-0102): like an unknown one, its agents go to the default.
     const s = subscriptionsOf({ provider: 'claude', agenti: { narratore: 'api', scultore: 'antigravity', fisico: 'openai' } });
-    expect(s).toEqual({ provider: 'claude', agenti: { narratore: 'api', scultore: 'antigravity' } });
-    expect(providerFor(s, 'scultore', 'model.sculpt')).toBe('antigravity');
+    expect(s).toEqual({ provider: 'claude', agenti: { narratore: 'api' } });
+    expect(providerFor(s, 'scultore', 'model.sculpt')).toBe('claude');
+    expect(usesSubscriptions(subscriptionsOf({ provider: 'antigravity' }))).toBe(false);
     expect(providerFor(s, 'narratore', 'genesis.bible')).toBe('api');
     expect(providerFor(s, 'fisico', 'forge.physics')).toBe('claude');
     expect(providerFor(s, 'scultore', 'npc.reply')).toBe('api');
@@ -90,7 +92,6 @@ describe('la coda su disco (T68)', () => {
     const d = dir();
     const id = await enqueue(d, { provider: 'claude', agent: 'scultore', task: 'model.sculpt', system: 's', prompt: 'p' });
     expect(await look(d, id)).toEqual({ stato: 'in coda' });
-    expect(await take(d, 'antigravity')).toBeUndefined();
     const req = await take(d, 'claude');
     expect(req?.id).toBe(id);
     expect(await take(d, 'claude')).toBeUndefined();
@@ -157,10 +158,10 @@ describe('QueueModels e RoutedModels (T68)', () => {
 
   it('un errore della CLI torna come errore della chiamata', async () => {
     const d = dir();
-    const q = new QueueModels({ provider: 'antigravity', fetchImpl: diskFetch(d), poll: 5 });
+    const q = new QueueModels({ provider: 'claude', fetchImpl: diskFetch(d), poll: 5 });
     const p = q.text(call('genesis.bible', 'narratore'));
     let r;
-    while (!(r = await take(d, 'antigravity'))) await new Promise((res) => setTimeout(res, 5));
+    while (!(r = await take(d, 'claude'))) await new Promise((res) => setTimeout(res, 5));
     await answer(d, r.id, { errore: 'limite raggiunto' });
     await expect(p).rejects.toThrow(/limite raggiunto/);
   });
@@ -174,7 +175,7 @@ describe('QueueModels e RoutedModels (T68)', () => {
     expect(m.route(call('model.judge', 'artista'))).toBe('api');
     expect(m.route(call('genesis.bible', 'narratore'))).toBe('api');
     // A provider of the table without its queue goes to the API.
-    const none = new RoutedModels(api, subscriptionsOf({ provider: 'antigravity' }), { claude: q });
+    const none = new RoutedModels(api, subscriptionsOf({ provider: 'claude' }), {});
     expect(none.route(call('genesis.bible', 'narratore'))).toBe('api');
     m.limits = { text: 7 };
     expect(api.limits.text).toBe(7);
@@ -193,22 +194,22 @@ describe('stato della coda e formattazione abbonamenti (T68c)', () => {
   it('describeSubscriptions formatta provider predefinito ed eccezioni', () => {
     expect(describeSubscriptions(subscriptionsOf({ provider: 'api' }))).toBe('nessun abbonamento');
     expect(describeSubscriptions(subscriptionsOf({ provider: 'claude' }))).toBe('abbonamenti: claude (tutti gli agenti)');
-    expect(describeSubscriptions(subscriptionsOf({ provider: 'claude', agenti: { scultore: 'antigravity' } }))).toBe(
-      'abbonamenti: claude (altri agenti), antigravity (scultore)',
+    expect(describeSubscriptions(subscriptionsOf({ provider: 'claude', agenti: { scultore: 'api' } }))).toBe(
+      'abbonamenti: claude (altri agenti), api (scultore)',
     );
     expect(
       describeSubscriptions(
-        subscriptionsOf({ provider: 'claude', agenti: { scultore: 'antigravity', narratore: 'api' } }),
+        subscriptionsOf({ provider: 'claude', agenti: { scultore: 'api', narratore: 'api' } }),
       ),
-    ).toBe('abbonamenti: claude (altri agenti), antigravity (scultore), api (narratore)');
+    ).toBe('abbonamenti: claude (altri agenti), api (narratore, scultore)');
     expect(describeSubscriptions(subscriptionsOf({ provider: 'api', agenti: { scultore: 'claude' } }))).toBe(
       'abbonamenti: claude (scultore)',
     );
     expect(
       describeSubscriptions(
-        subscriptionsOf({ provider: 'api', agenti: { scultore: 'claude', narratore: 'antigravity' } }),
+        subscriptionsOf({ provider: 'api', agenti: { scultore: 'claude', narratore: 'claude' } }),
       ),
-    ).toBe('abbonamenti: claude (scultore), antigravity (narratore)');
+    ).toBe('abbonamenti: claude (narratore, scultore)');
   });
 
   it('describeQueue e describeQueueDetails formattano le richieste in attesa e in corso', () => {

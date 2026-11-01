@@ -106,13 +106,14 @@ Modello di una voce:
 
 ### V-009 · La coda delle CLI
 - Gravità: alta (oggi: alta se si usano gli abbonamenti)
-- Stato: `specificata`
+- Stato: `chiusa`
 - Superficie: `server/subscriptionQueue.ts`, `tools/abbonamenti/servi.ts`, `POST /api/coda`
 - Proprietà violata: non si esce dalla sandbox: un testo dettato dal giocatore non arriva a un agente con strumenti sulla macchina di chi gioca
-- Prova: solo lettura del codice (T117), nessuna CLI lanciata; misurata dal kit (`esiti/2026-11-01.json`): FALLA V-009.a e b; nessuna CLI lanciata
+- Prova: solo lettura del codice (T117), nessuna CLI lanciata; misurata dal kit (`esiti/2026-11-01.json`): FALLA V-009.a e b; nessuna CLI lanciata. T128, CLI vera (Claude Code 2.1.316), una cartella con hook, server MCP e `CLAUDE.md` propri: con il solo `--tools ""` l'hook parte, il `CLAUDE.md` guida la risposta e restano 8 strumenti MCP; con l'isolamento nulla di tutto questo, `init` con liste vuote, risposta corretta dalla coda. Antigravity 1.4.12: nessuna opzione esclude gli strumenti (letto da `agy --help`). Dopo T128, kit (`esiti/2026-11-01-dopo-T128.json`): V-009.a e b ok, risposta 404 perché la route è spenta; la route accesa la provano i test, con richieste HTTP vere (403 senza segreto) e una verifica nel browser: la pagina del gioco legge il segreto e usa la coda, un’altra origine locale ha 403 anche dove il CORS di Vite le lascia leggere la risposta
 - Contromisura: route montata solo su richiesta esplicita, solo in loopback, con un segreto locale; CLI in una cartella vuota, ambiente ridotto, strumenti esclusi e configurazione MCP e hook isolati, con conferma verificata; se Antigravity non può escludere gli strumenti, niente Antigravity sulla coda. In produzione la coda non c'è.
 - Task: T128, T133
 - Test: `tests/sicurezza/rotte.test.ts`
+- Esito: chiusa da T128 (ADR-0102), 01/11/2026, branch `task/T128`. Antigravity non è più sulla coda. Resta a T133 non montare la route in produzione (qui è già spenta senza `QUINE_CODA=1`); le richieste in `universes/.coda/` restano file che il server di sviluppo serve a chi ne conosce l'id finché V-012 è aperta (T130).
 
 ### V-010 · Il master e i crediti
 - Gravità: media

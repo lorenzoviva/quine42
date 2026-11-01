@@ -41,6 +41,7 @@ export const UNPRICED = Object.keys(ESTIMATED);
 /** The calls served by a subscription's CLI (T68): already paid with the subscription, zero dollars per call. */
 export const SUBSCRIPTION_PRICES: Record<string, Price> = {
   'abbonamento-claude': { input: 0, output: 0, cached: 0, note: 'abbonamento (Claude Code)' },
+  // Only for the calls already in a ledger: Antigravity is no longer on the queue (ADR-0102).
   'abbonamento-antigravity': { input: 0, output: 0, cached: 0, note: 'abbonamento (Antigravity)' },
 };
 

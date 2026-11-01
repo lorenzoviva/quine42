@@ -2540,12 +2540,13 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Browser: due schede in multigiocatore che giocano e si vedono.
 - Quando è fatto: test e typecheck verdi, commit su `task/T127`.
 
-### T128 · La coda delle CLI — `da fare` (dipende da T136)
+### T128 · La coda delle CLI — `fatto` (dipende da T136)
 - Pipeline: claude · stima 3% · approvato · priorità 11
 - Contesto: R9: `POST /api/coda` non ha autenticazione e accetta `system` e `prompt` qualsiasi; un testo dettato dal giocatore può arrivare a un agente con strumenti sulla macchina di chi gioca. Vedi ADR-0077.
 - Cosa fare: route montata solo su richiesta esplicita, solo in loopback, con un segreto locale; CLI in una cartella vuota, ambiente ridotto, strumenti esclusi e configurazione MCP e hook isolati, con conferma verificata; se Antigravity non può escludere gli strumenti, niente Antigravity sulla coda (dirlo all'autore nell'esito).
 - Test: senza segreto o non da loopback è rifiutata; gli argomenti delle CLI, senza lanciarle.
 - Quando è fatto: test e typecheck verdi, commit su `task/T128`.
+- Esito: fatto su `task/T128`, ADR-0102, V-009 chiusa. La route c'è solo con `QUINE_CODA=1`, da loopback e con un segreto in memoria; CLI in una cartella vuota, ambiente ridotto, senza strumenti, MCP, hook e impostazioni. Rispetto al previsto: il testo va su stdin (come argomento poteva diventare un'opzione); la conferma è a ogni esecuzione, dall'`init` della CLI, e una breccia ferma il processo. **Antigravity esce dalla coda**: `agy` 1.4.12 non può escludere gli strumenti. Provato con la CLI vera: il solo `--tools ""` di prima lasciava hook, `CLAUDE.md` e 8 strumenti MCP. Sicurezza: nessuna superficie nuova oltre a `GET /api/coda/segreto`; le richieste in `universes/.coda/` restano leggibili dal server di sviluppo finché V-012 è aperta (T130).
 
 ### T129 · Limiti ai messaggi — `da fare` (dipende da T120)
 - Pipeline: claude · stima 2% · approvato · priorità 12

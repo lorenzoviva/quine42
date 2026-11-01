@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import http from 'node:http';
 import type { AddressInfo } from 'node:net';
 import os from 'node:os';
@@ -7,13 +7,14 @@ import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { GeminiGate, geminiProxy } from '../../server/geminiProxy';
 import { createFakeStripeSignature, handleStripeWebhookEvent, stripeRoute } from '../../server/stripe';
-import { subscriptionQueue } from '../../server/subscriptionQueue';
+import { queueWanted, subscriptionQueue } from '../../server/subscriptionQueue';
 import { universeStore } from '../../server/universeStore';
 import { MockModels } from '../../src/kernel/ai/mock';
 import { bundledFiles } from '../../src/kernel/bundle';
 import { Kernel } from '../../src/kernel/kernel';
 import { memoryStore } from '../../src/kernel/repo';
 import { fakeLink } from '../../src/session/protocol';
+import { buildCliCommand, cliEnv, IsolationCheck, ISOLATION_ARGS, serveOne } from '../../tools/abbonamenti/servi';
 import { playerFiles, SessionServer } from '../../src/session/server';
 
 // The server's routes as `npm run sicurezza:prove` measures them, without a server: see docs/sicurezza/README.md. Each test
@@ -211,15 +212,183 @@ describe('il webhook di Stripe', () => {
 });
 
 describe('la coda delle CLI', () => {
-  // Open: T128. Nobody serves the queue here: the request stays a file in the temporary folder.
-  it.fails('V-009 senza segreto locale non si mette un compito in coda', async () => {
-    const coda = path.join(dir, '.coda');
-    const route = await serve(subscriptionQueue(coda));
+  const request = JSON.stringify({ provider: 'claude', agent: 'sonda', task: 'sonda', system: 'sonda', prompt: 'sonda' });
+  /** A queue on, in a folder of its own; nobody serves it: a request stays a file. */
+  async function queue(fn: (base: string, coda: string) => Promise<void>, enabled = true) {
+    const coda = mkdtempSync(path.join(os.tmpdir(), 'quine-coda-prova-'));
+    rmSync(coda, { recursive: true });
+    const route = await serve(subscriptionQueue(coda, { enabled }));
     try {
-      await fetch(`${route.base}/api/coda`, { method: 'POST', body: JSON.stringify({ provider: 'claude', agent: 'sonda', task: 'sonda', system: 'sonda', prompt: 'sonda' }) });
-      expect(existsSync(coda)).toBe(false);
+      await fn(route.base, coda);
     } finally {
       route.server.close();
+      rmSync(coda, { recursive: true, force: true });
+    }
+  }
+  const secretOf = async (base: string) => (await (await fetch(`${base}/api/coda/segreto`, { headers: { 'sec-fetch-site': 'same-origin' } })).json()).segreto as string;
+
+  it('V-009 senza una richiesta esplicita la route non c\'è', async () => {
+    expect(queueWanted({})).toBe(false);
+    expect(queueWanted({ QUINE_CODA: '0' })).toBe(false);
+    expect(queueWanted({ QUINE_CODA: '1' })).toBe(true);
+    await queue(async (base, coda) => {
+      expect((await fetch(`${base}/api/coda`, { method: 'POST', body: request })).status).toBe(404);
+      for (const p of ['stato', 'segreto']) expect((await fetch(`${base}/api/coda/${p}`, { headers: { 'sec-fetch-site': 'same-origin' } })).status, p).toBe(404);
+      expect(existsSync(coda)).toBe(false);
+    }, false);
+  });
+
+  it('V-009 senza segreto locale non si mette un compito in coda e non si legge nulla', async () => {
+    await queue(async (base, coda) => {
+      const wrong = { 'x-quine-coda': 'f'.repeat(64) };
+      expect((await fetch(`${base}/api/coda`, { method: 'POST', body: request })).status).toBe(403);
+      expect((await fetch(`${base}/api/coda`, { method: 'POST', body: request, headers: wrong })).status).toBe(403);
+      expect((await fetch(`${base}/api/coda/stato`)).status).toBe(403);
+      expect((await fetch(`${base}/api/coda/stato`, { headers: wrong })).status).toBe(403);
+      expect((await fetch(`${base}/api/coda/qualcosa`, { method: 'DELETE' })).status).toBe(403);
+      expect(existsSync(coda)).toBe(false);
+    });
+  });
+
+  it('V-009 il segreto lo legge solo la pagina di questo server', async () => {
+    await queue(async (base) => {
+      for (const site of [undefined, 'cross-site', 'same-site', 'none']) {
+        const r = await fetch(`${base}/api/coda/segreto`, { headers: site ? { 'sec-fetch-site': site } : {} });
+        expect(r.status, String(site)).toBe(403);
+      }
+      expect((await fetch(`${base}/api/coda/segreto`, { headers: { 'sec-fetch-site': 'same-origin', origin: 'https://altro.example' } })).status).toBe(403);
+      const again = await secretOf(base);
+      expect(again).toMatch(/^[0-9a-f]{64}$/);
+      expect(await secretOf(base)).toBe(again);
+    });
+  });
+
+  it('V-009 con il segreto la coda funziona, solo da questa macchina e dalla stessa origine', async () => {
+    await queue(async (base, coda) => {
+      const headers = { 'x-quine-coda': await secretOf(base) };
+      const posted = await fetch(`${base}/api/coda`, { method: 'POST', body: request, headers });
+      expect(posted.status).toBe(200);
+      expect(((await posted.json()) as { id: string }).id).toBeTruthy();
+      expect((await fetch(`${base}/api/coda/stato`, { headers })).status).toBe(200);
+      expect(readdirSync(coda).filter((f) => f.endsWith('.richiesta.json'))).toHaveLength(1);
+      // The right secret does not open it from another site.
+      expect((await fetch(`${base}/api/coda/stato`, { headers: { ...headers, origin: 'https://altro.example' } })).status).toBe(403);
+      expect((await fetch(`${base}/api/coda/stato`, { headers: { ...headers, 'x-forwarded-for': '203.0.113.9' } })).status).toBe(403);
+    });
+  });
+
+  it('V-009 non da loopback o con un altro nome è rifiutata', () => {
+    let handler: Handler | undefined;
+    (subscriptionQueue('non-usata', { enabled: true }).configureServer as unknown as (s: unknown) => void)({ middlewares: { use: (h: Handler) => (handler = h) } });
+    const statusOf = (remoteAddress: string, host: string) => {
+      const res = { statusCode: 0, setHeader() {}, end() {} };
+      handler!({ url: '/api/coda/stato', method: 'GET', headers: { host, 'sec-fetch-site': 'same-origin' }, socket: { remoteAddress } } as never, res as never, () => undefined);
+      return res.statusCode;
+    };
+    expect(statusOf('192.168.1.20', 'localhost:5173')).toBe(403);
+    expect(statusOf('::ffff:10.0.0.2', '127.0.0.1:5173')).toBe(403);
+    expect(statusOf('127.0.0.1', 'altro.example')).toBe(403);
+  });
+
+  const queued = { id: 'x', provider: 'claude' as const, agent: 'sonda', task: 'sonda', system: 'sistema', prompt: '--un-testo-che-comincia-con-un-trattino', creata: '' };
+
+  it('V-009 gli argomenti della CLI escludono strumenti, MCP, hook e impostazioni; il testo non è un argomento', () => {
+    const { cmd, args, stdin } = buildCliCommand('claude', queued);
+    expect(cmd).toBe('claude');
+    const value = (flag: string) => args[args.indexOf(flag) + 1];
+    expect(value('--tools')).toBe('');
+    expect(args).toContain('--strict-mcp-config');
+    expect(JSON.parse(value('--mcp-config'))).toEqual({ mcpServers: {} });
+    expect(value('--setting-sources')).toBe('');
+    expect(JSON.parse(value('--settings'))).toEqual({ disableAllHooks: true });
+    for (const flag of ['--safe-mode', '--restricted', '--disable-slash-commands', '--no-session-persistence']) expect(args, flag).toContain(flag);
+    for (const flag of ['--dangerously-skip-permissions', '--allow-dangerously-skip-permissions', '--add-dir', '--allowedTools', '--bare']) expect(args, flag).not.toContain(flag);
+    expect(stdin).toBe(queued.prompt);
+    expect(args).not.toContain(queued.prompt);
+    expect(args.slice(0, ISOLATION_ARGS.length)).toEqual([...ISOLATION_ARGS]);
+  });
+
+  it('V-009 la CLI non eredita i segreti', () => {
+    const env = cliEnv({ Path: 'p', USERPROFILE: 'u', SystemRoot: 's', GEMINI_API_KEY: 'FINTA', ANTHROPIC_API_KEY: 'FINTA', STRIPE_SECRET_KEY: 'FINTA', GITHUB_TOKEN: 'FINTA', NODE_OPTIONS: 'FINTA', QUINE_MASTER: 'FINTA' });
+    expect(env).toEqual({ Path: 'p', USERPROFILE: 'u', SystemRoot: 's' });
+  });
+
+  const init = { type: 'system', subtype: 'init', tools: [], mcp_servers: [], skills: [], slash_commands: [], plugins: [{ path: 'builtin' }] };
+  const see = (...events: unknown[]) => {
+    const c = new IsolationCheck();
+    for (const e of events) c.see(JSON.stringify(e));
+    return c;
+  };
+
+  it('V-009 senza conferma di non avere nulla in mano la CLI non serve', () => {
+    expect(see(init)).toMatchObject({ confirmed: true, breach: undefined });
+    expect(see(init, { type: 'assistant', message: { content: [{ type: 'text' }] } }).breach).toBeUndefined();
+    for (const change of [{ tools: ['Bash'] }, { mcp_servers: [{ name: 'x' }] }, { skills: ['x'] }, { slash_commands: ['x'] }, { plugins: [{ path: 'C:/plugin' }] }, { tools: undefined }, { plugins: undefined }]) {
+      expect(see({ ...init, ...change }), JSON.stringify(change)).toMatchObject({ confirmed: false, breach: expect.any(String) });
+    }
+    expect(see({ type: 'assistant', message: { content: [] } }).breach).toMatch(/prima della conferma/);
+    expect(see(init, { type: 'system', subtype: 'hook_started' }).breach).toMatch(/hook/);
+    expect(see(init, { type: 'assistant', message: { content: [{ type: 'tool_use' }] } }).breach).toMatch(/strumento/);
+  });
+
+  /** A fake CLI that writes what it sees next to itself, then does what `body` says. Never a real one. */
+  async function fakeCli(body: string) {
+    const place = mkdtempSync(path.join(os.tmpdir(), 'quine-cli-finta-'));
+    const script = path.join(place, 'cli.mjs');
+    const seen = path.join(place, 'visto.json');
+    writeFileSync(
+      script,
+      `import fs from 'node:fs';
+      const stdin = fs.readFileSync(0, 'utf8');
+      fs.writeFileSync(${JSON.stringify(seen)}, JSON.stringify({ cwd: process.cwd(), inCwd: fs.readdirSync(process.cwd()), stdin, argv: process.argv.slice(2), env: process.env }));
+      ${body}`,
+    );
+    return { cmd: `node ${script}`, seen, place };
+  }
+  const INIT_LINE = `console.log(${JSON.stringify(JSON.stringify(init))});`;
+
+  it('V-009 la CLI gira in una cartella vuota, con l\'ambiente ridotto e il testo su stdin', async () => {
+    const coda = mkdtempSync(path.join(os.tmpdir(), 'quine-coda-prova-'));
+    const cli = await fakeCli(`${INIT_LINE} console.log(JSON.stringify({ type: 'result', result: 'fatto' }));`);
+    vi.stubEnv('GEMINI_API_KEY', 'FINTA-gemini');
+    try {
+      const { enqueue } = await import('../../server/subscriptionQueue');
+      await enqueue(coda, queued);
+      const step = await serveOne(coda, 'claude', { cmd: cli.cmd });
+      expect(step).toMatchObject({ status: 'ok', text: 'fatto' });
+      const seen = JSON.parse(readFileSync(cli.seen, 'utf8'));
+      expect(seen.inCwd).toEqual([]);
+      expect(path.resolve(seen.cwd)).not.toBe(path.resolve(process.cwd()));
+      expect(existsSync(seen.cwd)).toBe(false); // gone with the run
+      expect(seen.stdin).toBe(queued.prompt);
+      expect(seen.argv).not.toContain(queued.prompt);
+      expect(JSON.stringify(seen.env)).not.toContain('FINTA-gemini');
+    } finally {
+      vi.unstubAllEnvs();
+      rmSync(coda, { recursive: true, force: true });
+      rmSync(cli.place, { recursive: true, force: true });
+    }
+  });
+
+  it('V-009 una CLI che non conferma viene fermata e la sua risposta non passa', async () => {
+    for (const [name, body] of [
+      ['ha strumenti', `console.log(${JSON.stringify(JSON.stringify({ ...init, tools: ['Bash'] }))}); await new Promise((r) => setTimeout(r, 20000)); console.log(JSON.stringify({ type: 'result', result: 'fatto' }));`],
+      ['non dice nulla', `console.log(JSON.stringify({ type: 'result', result: 'fatto' }));`],
+    ]) {
+      const coda = mkdtempSync(path.join(os.tmpdir(), 'quine-coda-prova-'));
+      const cli = await fakeCli(body);
+      try {
+        const { enqueue, look } = await import('../../server/subscriptionQueue');
+        const id = await enqueue(coda, queued);
+        const started = Date.now();
+        const step = await serveOne(coda, 'claude', { cmd: cli.cmd });
+        expect(step.status, name).toBe('isolation');
+        expect(Date.now() - started, name).toBeLessThan(15000);
+        expect((await look(coda, id)).stato, name).toBe('fallita');
+      } finally {
+        rmSync(coda, { recursive: true, force: true });
+        rmSync(cli.place, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+      }
     }
   });
 });
