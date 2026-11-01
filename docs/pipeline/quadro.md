@@ -34,6 +34,7 @@ Aggiornato il 01/11/2026 dopo le 13:35 UTC, epoca 186 su **claude** (Claude sett
 ## Stato e decisioni
 
 - **Sicurezza e CPU (01/11)**: T117 (audit, p0) e T118 (CPU satura con due task, p1) richiesti e approvati dall'autore, senza interrompere i task in corso. Agent View scartato dall'autore; niente abbassamento della priorità dei processi. Le correzioni proposte da T117 vanno portate all'autore.
+- **T117 in attesa dell'autore** (`docs/pipeline/domande/T117.md`, report su `task/T117`): riprodotti solo 4 casi perché un filtro di sicurezza ha interrotto la sessione; l'uscita dalla sandbox verso JS non è provata. Proposta all'autore: opzione 1, test difensivi. Niente server pubblico (T45f) prima delle correzioni 1-3 del report.
 - **Riavvio**: spenta alle 13:08 (`ferma --dopo`, T115 finito), riaccesa alle 13:35 con il tetto 2 di Claude; nessun task interrotto da riprendere.
 - **Cosa si aspetta**:
   1. **T119** (merge di T116 dopo T104, p2): poi `integra T119`, `integra T116`, `integra T102`.
