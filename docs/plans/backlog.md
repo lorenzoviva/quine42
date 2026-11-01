@@ -2244,7 +2244,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   visibili (resta in due commenti HTML); in console solo errori di estensioni del browser. `/?skip&offline`: HUD come prima, nessun errore.
   Nessun difetto.
 
-### T109 · Il sito: il template grafico in `docs/design/sito/` — `da fare`
+### T109 · Il sito: il template grafico in `docs/design/sito/` — `fatto`
 - Pipeline: claude · stima 4% · approvato · priorità 59
 - Contesto: richiesta dell'autore del 01/11: il template va fatto prima dei task del sito (T101-T106), e lo fa la pipeline al posto suo.
   Posto scelto dall'autore: `docs/design/sito/` (`docs/pipeline/domande/T97.md`, risposta (a)). Nasce da T97: `dossier T97`; tema in ADR-0095,
@@ -2256,3 +2256,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   indice dei componenti; un `README.md` che dice come T101-T106 ne copiano lo stile. Il segreto dei gerboa allusivo come nell'ADR-0095. Testi in
   italiano, niente meta-gioco.
 - Quando è fatto: le pagine aperte nel browser (screenshot di ciascuna, desktop e mobile), nessun errore in console; typecheck verde.
+
+### T110 · Verificare T109 (il template del sito) nel browser — `da fare`
+- Pipeline: claude · stima 3% · approvato · priorità 30
+- Contesto: T109 ha fatto su Gemini il template statico in `docs/design/sito/` (landing, login, profilo, sessioni, carte, pagamenti,
+  componenti, `README.md`), ma su Antigravity non c'era il browser (`BROWSER: da verificare`). Nasce da T109: `dossier T109`, `traccia T109`.
+- Cosa fare: nel worktree `git merge task/T109`; typecheck. Nel turno browser (`pipeline.mjs turno browser -- …`) servi `docs/design/sito/`
+  (es. `npx vite --port <libera> --strictPort` dalla radice e apri `/docs/design/sito/index.html`, così `/fonts/` risolve) e apri ogni pagina
+  a larghezza desktop e mobile: layout non rotto, font caricati da `/fonts/` senza richieste a terzi, stati dei componenti visibili, modale
+  «Crea nuovo universo» e flip delle carte funzionanti, link tra le pagine giusti, segreto dei gerboa allusivo (niente corona, Concilio,
+  studio), nessun meta-gioco né «ADR-» nei testi, nessun errore in console. Correggi da te i difetti piccoli (CSS, link); scrivi gli altri qui.
+- Quando è fatto: screenshot di ogni pagina (desktop e mobile) descritti nell'esito; difetti corretti o elencati; typecheck verde.

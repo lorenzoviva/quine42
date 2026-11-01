@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 01/11/2026, epoca 179 su **claude** (riavvio dopo lo spegnimento del 01/11 00:51, nessun task interrotto). **T95 in corso su Claude** (lanciato al riavvio). Poi **T109** (template del sito in `docs/design/sito/`, chiesto dall'autore il 01/11, p59), T57b; T101-T106 (dipendono da T109) (sito) approvati e in coda su Claude: richiedono il browser, lo script non li accetta su Gemini. Gemini senza task.
+Aggiornato il 01/11/2026, epoca 179 su **claude** (riavvio dopo lo spegnimento del 01/11 00:51, nessun task interrotto). **T95 in corso su Claude** (lanciato al riavvio). **T109** fatto su Gemini (template del sito in `docs/design/sito/`), da integrare dopo la verifica nel browser **T110** (Claude, p30, dopo T95); poi T57b; T101-T106 (dipendono da T109) (sito) approvati e in coda su Claude: richiedono il browser, lo script non li accetta su Gemini. Gemini senza task.
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
 
