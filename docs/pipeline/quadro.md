@@ -50,6 +50,7 @@ Aggiornato il 01/11/2026, fine dell'epoca 191 su **claude** (crediti: vedi `stat
 ## Task attivi e in corso
 
 - **In corso** (all'ultimo `stato`): **T122 T131** su Claude.
+- **T141** (p0, approvato, richiesta dell'autore del 01/11): materiale in `docs/design/logo/` per generare il nuovo logo con Claude Design o Gemini. Finito: `integra T141` subito, l'autore sta già facendo le prove. Sostituire il logo sarà un altro task, quando ne avrà scelto uno.
 - **Pronti su Claude**: **T140** (p1) → **T120 T124 T126 T128 T132** (sicurezza) → **T106** (p72) → **T89a** (p75); bloccati T121 T125 T127 T129 T130 T133 T134 (dalle correzioni), **T89b-e** (da T89a).
 - **Da integrare**: **T123** (tramite T140; poi `integra T140`, `integra T123`). T136, T137, T138, T118, T139 e T105 integrati il 01/11.
 - **Integrati di recente**: **T104** (22 timeout su 675 nella suite, estraneità provata solo in 3 file: se restano dopo T118, ricontrollare `forms.ts` e `cards.ts`), **T115**, **T57b**, **T114**, **T103**, **T57c**, **T113**, **T112**, **T111**, **T101**, **T110**, **T109**.
