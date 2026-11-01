@@ -1064,6 +1064,9 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
   simile; niente quarta parete; al più 16 rune; glifo e colore riparati); `kernel.inventRune` scrive `magic.runes` (rune e bottino `magia`),
   il canone («Le rune trovate dopo», `canonWithRune`) e committa con la carta `runa:<token>`. Test in `tests/magic.test.ts`.
   Diverso dal previsto: anche le carte hanno un tipo nuovo, `runa`; due tentativi al Narratore prima di rinunciare.
+  Test: typecheck verde; `magic` (5) e `coefficients` verdi; la suite intera sotto il carico della pipeline ha solo timeout (`beforeEach`
+  oltre 10 s, test oltre 20-60 s); rilanciati con tempi lunghi passano tutti tranne 5 (`referente` T42e/T42f, `wanderers` T34, `watch` T42c)
+  con un timeout fisso nel test, che falliscono uguali con `src/` della base; `abbonamenti` T68b usa la CLI reale. Commit e69bb5a.
 
 ### T57c · Il terreno che sale e scende — `da fare` (dipende da T57)
 - Pipeline: claude · stima 3% · approvato · priorità 61
