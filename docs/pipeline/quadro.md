@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 01/11/2026, fine dell'epoca 187 su **claude** (crediti: vedi `stato`).
+Aggiornato il 01/11/2026, fine dell'epoca 188 su **claude** (crediti: vedi `stato`).
 
 - **Tetto di Claude a 2** (richiesta dell'autore, 01/11): attivo dopo il riavvio delle 13:35; `stato` dice tetto 2, slot 2. L'autore dice che con il Pro i limiti di Claude sono 5 volte più alti.
 
@@ -47,11 +47,13 @@ Aggiornato il 01/11/2026, fine dell'epoca 187 su **claude** (crediti: vedi `stat
 
 ## Task attivi e in corso
 
-- **In corso** (all'ultimo `stato`): **T118** su Claude; T120 parte nello slot libero.
-- **Pronti su Claude**: **T120-T134** (p3-17, con le loro dipendenze) → **T105** (p70) → **T106** (p72) → **T89a** (p75); bloccati **T89b-e** (da T89a).
-- **Da integrare**: nessuno. T135, T119, T116 e T102 integrati il 01/11 (pagina profilo del sito in `3d`).
+- **In corso** (all'ultimo `stato`): **T137** e **T105** su Claude.
+- **Pronti su Claude**: **T123 T124 T126 T128 T131 T132** (sicurezza) → **T106** (p72) → **T89a** (p75); bloccati **T120 e T122** (da T137), T121 T125 T127 T129 T130 T133 T134 (dalle correzioni), **T89b-e** (da T89a).
+- **Da integrare**: nessuno. T136, T138 e T118 integrati il 01/11.
 - **Integrati di recente**: **T104** (22 timeout su 675 nella suite, estraneità provata solo in 3 file: se restano dopo T118, ricontrollare `forms.ts` e `cards.ts`), **T115**, **T57b**, **T114**, **T103**, **T57c**, **T113**, **T112**, **T111**, **T101**, **T110**, **T109**.
 - **Crediti** (01/11 dopo le 15:12 UTC): Claude settimana 98 %, 5h 84 % (reset 05/11 16:00; 5h alle 17:30); Gemini settimana 8 %, sotto soglia: nessun task nuovo (reset 05/11 17:37); Argon fermo fino al 04/11.
+
+- **Prossimi passi**: finito T137, chiedere all'autore di lanciare `npm run sicurezza:prove` e i blocchi F12 sul base **prima di integrare T120**; gli esiti diventano voci di `docs/sicurezza/registro.md` e task (regola in `orchestra.md`). Leggere la prima suite intera sul base con T118 e T136 insieme: non è ancora stata fatta; i 45-47 rossi di T136 sono da considerare chiusi solo se lì non tornano.
 
 ## Da fare appena possibile
 
