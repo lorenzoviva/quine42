@@ -8,7 +8,7 @@ Aggiornato il 01/11/2026 ~01:50 UTC, fine epoca 179 su **claude** (riavvio dopo 
 - **T113** (Claude, p20, richiesta dell'autore 01/11): lampione della corona intero (tagliato in altezza) e `drone-xl.xml` ridotto 1:2 al posto di `corona-drone`. Committato il lavoro locale dell'autore sul lampione (`8ca9053`); le `lampione copy*.xml` restano sue, non committate.
 
 - **Coda di Claude**: T113 (p20) → T112 (p25, verifica nel browser di T109+T110) → T57 (p60) → T101-T106 (dopo T109). Dopo T112: `integra T109`, `integra T110` (se conflitti sul backlog: rendere il blocco del base uguale a quello del branch, poi integra).
-- **Gemini**: T111 in corso (ripiego senza browser). Controllare che corregga anche `taskNeedsBrowser` («Quando è fatto:»/«Cosa fare:»); altrimenti nuovo task. Un task ripreso torna al provider del primo tentativo.
+- **Gemini**: T111 fatto e integrato (01/11 01:55, `46f32e2`): i task col browser non ripiegano più su Gemini, `taskNeedsBrowser` legge anche «Quando è fatto:»/«Cosa fare:». Gemini senza task.
 - **Lezione**: mai `git commit -a` nel base (l'autore ha file suoi; le `lampione copy*.xml` restano non committate).
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
