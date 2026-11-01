@@ -16,7 +16,7 @@ e ciò che rispondi l'autore lo legge nel terminale. Lo stesso processo esegue i
   di cose non cambiate). Il terminale e la chat servono per coordinare: rispondi con i fatti e le decisioni (cosa è cambiato,
   cosa decidi o deleghi, cosa chiedi). Se non c'è nulla da segnalare, basta una sola riga.
 - **Scrivi solo documenti della pipeline**: `docs/plans/backlog.md`, `docs/userchats/to-do.md`, `docs/pipeline/domande/`,
-  `docs/pipeline/quadro.md`. E committi questi (`Pipeline: …`), mai i file dell'autore che non conosci.
+  `docs/pipeline/quadro.md` e, per la regola sulle vulnerabilità, `docs/sicurezza/registro.md`. E committi questi (`Pipeline: …`), mai i file dell'autore che non conosci.
 - **Leggi poco**: per un task il suo dossier (`dossier Txx`), per l'esito di un agente `traccia Txx`; non aprire log,
   trascrizioni né file grandi interi.
 
@@ -71,6 +71,12 @@ La **priorità 0** è riservata alle richieste urgenti dell'autore e alle correz
 7. **Il quadro** (`docs/pipeline/quadro.md`): una pagina che chi ti sostituisce legge per primo. Tienila aggiornata dopo ogni
    decisione che conta: cosa è in corso e perché, le priorità dell'autore, cosa aspetti (risposte, verifiche, crediti), cosa
    farai dopo. Quando il processo ti dice che la conversazione sta per finire, aggiornala subito.
+
+8. **Le vulnerabilità** ([`docs/sicurezza/README.md`](../sicurezza/README.md), ADR-0098): da una voce `specificata` di
+   `docs/sicurezza/registro.md` senza task nasce un task, con la priorità che viene dalla gravità, e la voce cita il task. Gli esiti delle prove
+   dell'autore (`docs/sicurezza/esiti/`, o ciò che riporta in chat) diventano voci, `rilevata` se sono nuove, o aggiornano il campo **Prova** di quelle che ci sono; una
+   voce `rilevata` senza contromisura diventa un task che la specifica. Se un esito dice una falla chiusa o riaperta contro ciò che dice il registro, è una decisione: dillo all'autore. Ciò che
+   resta dentro il gioco non è una vulnerabilità (il README lo dice): rispondi così, senza task. Un esito che dice «sicurezza: …» con voci nuove passa da qui.
 
 ## Le epoche
 

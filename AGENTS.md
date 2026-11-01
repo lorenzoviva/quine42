@@ -84,6 +84,7 @@ npm run dev          # gioco su http://localhost:5173 (proxy Gemini; hot reload 
 npm test             # test (kernel, Concilio offline, MarkovJunior, layout, validatore, contenuti, sandbox)
 npm run typecheck    # tsc --noEmit
 npm run build        # typecheck + build (npx vite preview la serve, proxy incluso)
+npm run test:sicurezza # solo la suite delle vulnerabilità (tests/sicurezza/, già dentro npm test; ADR-0098)
 npm run abbonamento  # serve la coda /api/coda con le CLI (Claude, Antigravity, ADR-0077)
 ```
 
@@ -597,6 +598,10 @@ browser che il task chiede e non ha fatto (riga `BROWSER:`), integra rinumerando
 (`docs/pipeline/quadro.md`) a metà finestra o quando i crediti finiscono (provider successivo di `orchestra.ordine`), con `avvio.md` compatto (senza indice intero, chat troncata e deduplicata) e interpellando l'orchestratore solo per messaggi dell'autore o decisioni (esiti, limiti, conflitti; ADR-0089). L'orchestratore
 decide e delega (`interrompi`, `approva`, `assegna`, `dossier`, `indice`, `prossimo`, `ferma --ora|--dopo` quando l'autore chiede di spegnere, ADR-0090: Ctrl+C è `ferma --ora`, i task interrotti riprendono al riavvio e `avvio.md` dice cosa era in corso e cosa è finito; `integra` su un conflitto annulla e la risoluzione
 diventa un task); i task sopravvivono al processo (log diretti, `--session-id`, ripresi al riavvio).
+
+**Le vulnerabilità** (ADR-0098, T136, [`docs/sicurezza/README.md`](docs/sicurezza/README.md)): rilevamento → scheda → specifica → task → test → chiusura. Il registro `docs/sicurezza/registro.md` ha una voce `V-NNN` per ognuna;
+la suite `tests/sicurezza/` afferma le proprietà, con `it.fails` per le voci aperte (chi chiude una falla toglie `.fails`). Chi esegue un task che tocca `server/`, `src/session/`, la sandbox, il validatore, i crediti o i pagamenti scrive nell'esito
+«sicurezza: nessuna superficie nuova» o le voci che ha aggiunto. Non è una vulnerabilità ciò che resta dentro il gioco: a parte i crediti, tutto si può modificare.
 
 ### Convalida nel browser (senza tentativi)
 
