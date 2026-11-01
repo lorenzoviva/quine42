@@ -2558,13 +2558,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Test: i campi che non escono; una scrittura di `ai` dal Concilio rifiutata.
 - Quando è fatto: test e typecheck verdi, commit su `task/T130`.
 
-### T131 · `npm audit` e Vite — `da fare` (dipende da T136)
+### T131 · `npm audit` e Vite — `fatto` (dipende da T136)
 - Pipeline: claude · stima 2% · approvato · priorità 2
 - Contesto: R14: Vite 5.4.10, l'audit non ha lanciato `npm audit`.
 - Cosa fare: lanciarlo, aggiornare ciò che serve (Vite compreso, nei limiti della 5.x se basta), riportare ciò che resta aperto e perché.
 - Test: suite intera, typecheck, build.
 - Browser: il gioco parte in `?skip&offline`.
 - Quando è fatto: commit su `task/T131`.
+- Esito: `npm audit` da 15 avvisi (2 critici, 5 alti, 8 moderati) a **0**; non resta aperto nulla. **La 5.x non bastava** (gli avvisi di Vite arrivano alla 6.4.3, quelli di Vitest alla 4.1.11): Vite 7.3.7, Vitest 4.1.12, `vite-node` 5.3.0 diretto (Vitest 4 non lo porta più), `npm audit fix` per il resto, un override di `@grpc/grpc-js` solo sotto `@firebase/firestore` (il progetto non importa Firestore, gRPC non è in `dist/`). ADR-0099. V-014 `in correzione`: la parte delle dipendenze è fatta, la chiude T133. Più del previsto: `tests/sicurezza/dipendenze.test.ts` (il lock non torna indietro; il server di sviluppo non dà `.env` nelle forme del kit: controllate le stesse forme su 5.4.10, c e g falliscono, su 7.3.7 nessuna); `minWorkers` tolto da `server/testWorkers.ts` perché Vitest 4 non lo ha più. Kit `--solo V-014` con il `vite.config.ts` vero: 11 ok, 0 FALLA (l'esito dell'autore in `esiti/2026-11-01.json` è stato ripristinato). Suite intera verde (80 file, 716 verdi, 18 attesi, 1 todo, 868 s), typecheck e build verdi. In un primo giro 4 rossi per timeout (`campus credits referente`) con la macchina carica: stessi file, nello stesso momento, vecchie versioni 540 s e nuove 534 s, tutti verdi. Il gioco parte in `?skip&offline` dalla build e dal server di sviluppo. **Dopo `integra` serve `npm ci` nel base**: il worktree di T131 ha un `node_modules` suo (junction tolta), gli altri condividono quello del base. npm 10 non sa installare Vitest 4 da zero (`edgesOut`), il lock è scritto con npm 11; `npm ci` e `npm install` con npm 10 sul lock passano, provati in una cartella a parte. Il sito (`site/`) è stato solo compilato, non aperto nel browser. Sicurezza: nessuna superficie nuova; `server/` cambia solo in `testWorkers.ts`.
 
 ### T132 · Le correzioni piccole — `da fare` (dipende da T136)
 - Pipeline: claude · stima 2% · priorità 15
@@ -2635,13 +2636,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: merge risolto, commit su `task/T138`. Poi l'orchestratore fa `integra T138` e `integra T118`.
 - Esito: merge di `task/T118` nel commit 1f0e912. L'unico conflitto era negli import di `vite.config.ts`: restano `wandererRoute` e `testWorkers`. Gli ADR non si scontrano (T118 aggiorna ADR-0088). Typecheck verde; suite intera nel suo turno: 688/688, 797 s, nessun timeout. Niente di diverso dal previsto.
 
-### T142 · Integrare T131 — `da fare`
+### T142 · Integrare T131 — `fatto`
 - Pipeline: claude · stima 2% · approvato · priorità 1
 - Contesto: `integra T131` va in conflitto in `AGENTS.md`. T131 porta Vite 7.3.7 e Vitest 4.1.12 (`npm audit` a 0, ADR-0099). Nasce da T131: `dossier T131`.
 - Cosa fare: nel worktree di T142 `git merge task/T131`; in `AGENTS.md` restano le aggiunte di entrambi. Se gli ADR si scontrano, quello di T131 prende il primo numero libero. `node_modules` è una junction verso quello del base, che ha ancora le versioni vecchie e che altri task stanno usando: **non installare attraverso la junction**. Toglila (solo la junction, non il contenuto) e fai un `npm ci` tuo nel worktree, come ha fatto T131.
 - Test: `npm run typecheck`, `npm run build` e la suite intera con i loro turni. Nell'esito scrivi quanti test passano e i rossi che restano rilanciando il file da solo.
 - Browser: T131 ha provato solo il gioco. Apri dalla build con Vite 7 le pagine di `site/` (landing, carte, sessioni, profilo, pagamenti): si aprono senza errori in console e con il loro stile? Il login Firebase non serve.
 - Quando è fatto: merge risolto, commit su `task/T142`. Non toccare il `node_modules` del base: l'`npm ci` lì lo fa l'orchestratore, a pipeline senza task, quando integra.
+- Esito: merge di `task/T131` risolto (in `AGENTS.md` «Vite 7» di T131 e la riga del sito del base, con i crediti di T105); ADR-0099 era libero, nessuna rinumerazione. Junction tolta e `npm ci` nel worktree (Vite 7.3.7, Vitest 4.1.12, `npm audit` a 0); `node_modules` del base non toccato (ancora Vite 5.4.10). Typecheck e build verdi. Suite intera: 728 passati, 18 attesi falliti, 1 todo, 1 rosso (`between.test.ts`, timeout di 60 s su «words to who is near»); rilanciato da solo passa 7 su 7, ma il file richiede 330 s da solo, vicino al limite. Browser: dalla build con Vite 7 landing, carte, sessioni, profilo e pagamenti si aprono con il loro stile, senza errori della pagina in console e con le risorse tutte a 200; senza universi su disco, carte e sessioni mostrano lo stato vuoto e profilo e pagamenti il modulo di accesso, quindi le pagine con dati veri non sono state provate. Sicurezza: nessuna superficie nuova oltre a quanto T131 ha registrato.
 
 ### T139 · Integrare T105 — `fatto`
 - Pipeline: claude · stima 1% · approvato · priorità 1
@@ -2651,13 +2653,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: merge risolto, commit su `task/T139`. Poi l'orchestratore fa `integra T139` e `integra T105`.
 - Esito: `task/T139`, merge di `task/T105`. L'unico conflitto era negli import di `vite.config.ts`: restano `testWorkers` (T118) e `walletRoute` (T105); `sitePagamenti` e `testWorkers(process.env)` si erano fusi da soli. Nessun ADR nuovo in T105, quindi nessuna rinumerazione; 170 blocchi nel backlog prima e dopo. Typecheck verde. Suite intera nel turno, una volta: 80 file, 745 passati, 1 todo, 0 rossi; i 14 di T105 non si ripresentano. Nei 745 ci sono i 18 `it.fails` di `tests/sicurezza/`, le falle ancora aperte. Sicurezza: il merge porta `/api/crediti` (T105), che senza account dà saldo e righe del viandante chiesto, come V-006.e per `/api/viandante`; il registro non la nomina (V-006, superficie), T120 punto 4 la copre.
 
-### T145 · Integrare T142 (con T131) — `da fare`
+### T145 · Integrare T142 (con T131) — `fatto`
 - Pipeline: claude · stima 2% · approvato · priorità 1
 - Contesto: `integra T142` va in conflitto in `docs/adr/README.md`: il 0099 nel base è di T123 (il proxy di Gemini), T131 aveva preso lo stesso numero per Vite 7. T142 porta T131 (Vite 7.3.7, Vitest 4.1.12) ed è verificato nel browser, ma la sua suite è partita senza T140 e T123. Nasce da T142: `dossier T142`.
 - Cosa fare: nel worktree di T145 `git merge task/T142`. L'ADR `0099-vite-7-vitest-4-e-il-primo-npm-audit.md` diventa `0100-…`; correggi le citazioni che parlano di Vite 7 («ADR-0099» di T131 in `AGENTS.md`, `docs/`, codice, indice degli ADR), lasciando stare quelle del proxy. Nel backlog restano tutti i blocchi. `node_modules` è una junction verso il base, che ha ancora le versioni vecchie: **non installare attraverso la junction**; togli solo la junction e fai un `npm ci` tuo nel worktree.
 - Test: `npm run typecheck`, `npm run build` e la suite intera con i loro turni: è la prima con Vite 7, Vitest 4 e il proxy di T123 insieme. Nell'esito quanti passano e i rossi che restano rilanciando il file da solo.
 - Browser: non serve, T142 ha provato le pagine e T131 il gioco.
 - Quando è fatto: merge risolto, commit su `task/T145`. Non toccare il `node_modules` del base. Poi l'orchestratore fa `integra T145`, `integra T142`, `integra T131` e l'`npm ci` nel base, a pipeline senza task.
+- Esito: merge di `task/T142` risolto; l'ADR di Vite 7 è ora `0100-vite-7-vitest-4-e-il-primo-npm-audit.md`, con l'indice, `AGENTS.md` (Stack) e `docs/sicurezza/registro.md` (V-014); quelle del proxy restano 0099. Le citazioni «ADR-0099» di Vite 7 negli esiti di T131 e T142 restano com'erano, perché qui si cambia solo questo blocco: leggile come 0100. Junction tolta e `npm ci` nel worktree (Vite 7.3.7, Vitest 4.1.12, `npm audit` a 0); `node_modules` del base non toccato. Typecheck e build verdi; suite intera con il proxy di T123: 82 file, 746 passati, 16 `it.fails` attesi, 1 todo, nessun rosso. In `dist/` solo il nome di `GEMINI_API_KEY`, nei messaggi. Sicurezza: nessuna superficie nuova.
 
 ### T144 · Integrare T122 — `da fare` (dipende da T142)
 - Pipeline: claude · stima 2% · approvato · priorità 1

@@ -155,13 +155,13 @@ Modello di una voce:
 
 ### V-014 · Vite 5.4.10
 - Gravità: media
-- Stato: `specificata`
+- Stato: `in correzione`
 - Superficie: le dipendenze, `server.fs.deny` che protegge `.env`
 - Proprietà violata: le dipendenze non hanno avvisi noti aperti senza un motivo scritto
-- Prova: nessuna: T117 lo ricorda, `npm audit` non è stato lanciato; misurata dal kit (`esiti/2026-11-01.json`): **il server di sviluppo dà il contenuto di `.env` con due forme della richiesta** (V-014.c, g: valori finti, in un progetto usa e getta), senza identità; le altre nove forme non danno il valore. `npm audit` resta di T131
-- Contromisura: lanciare `npm audit`, aggiornare ciò che serve (Vite compreso), riportare ciò che resta aperto e perché; in produzione niente server di sviluppo.
+- Prova: nessuna: T117 lo ricorda, `npm audit` non è stato lanciato; misurata dal kit (`esiti/2026-11-01.json`): **il server di sviluppo dà il contenuto di `.env` con due forme della richiesta** (V-014.c, g: valori finti, in un progetto usa e getta), senza identità; le altre nove forme non danno il valore. `npm audit` lanciato da T131 (01/11): 15 avvisi (2 critici, 5 alti, 8 moderati), ora 0 con Vite 7.3.7 e Vitest 4.1.12 (ADR-0100). Le forme del kit riprovate con le due versioni, con un server su una cartella temporanea e un valore finto: 5.4.10 dà il valore con le forme c e g, 7.3.7 con nessuna. Il kit con il `vite.config.ts` vero (`--solo V-014`, 7.3.7): 11 ok, 0 FALLA, tutte con risposta 403; `esiti/2026-11-01.json` resta la misura di prima
+- Contromisura: lanciare `npm audit`, aggiornare ciò che serve (Vite compreso), riportare ciò che resta aperto e perché; in produzione niente server di sviluppo. Fatta da T131 la parte delle dipendenze; resta T133, che chiude la voce.
 - Task: T131, T133
-- Test: —
+- Test: `tests/sicurezza/dipendenze.test.ts`
 
 ### V-015 · XSS e reindirizzamento aperto
 - Gravità: bassa
@@ -233,7 +233,7 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-011 | a | — | — | la lunghezza del testo, le code per pagante: T129 |
 | V-012 | a b c d | e f | `rotte.test.ts` | — |
 | V-013 | — | — | — | il Concilio che scrive `ai` si vede solo dentro il kernel: lo prova T130 |
-| V-014 | a b c d e f g h i j k | — | — | `npm audit`: T131, il kit non esce sulla rete |
+| V-014 | a b c d e f g h i j k | — | `dipendenze.test.ts` | `npm audit`: T131 lo ha lanciato, il kit non esce sulla rete |
 | V-015 | a b | c | — | i testi delle altre pagine: T132 |
 | V-016 | a b c | d e | — | — |
 | V-017 | a | — | `sandbox.test.ts` | — |
