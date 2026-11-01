@@ -195,12 +195,30 @@ export function updateSlots(budget, queues, { config = CONFIG, nowMs = Date.now(
 
 /** Recognises whether a task requires browser verification from its text or pipeline line. */
 export function taskNeedsBrowser(block) {
-  const fattoQuando = /-\s*Fatto quando:([^\n]+)/i.exec(block)?.[1] ?? '';
-  const fare = /-\s*Fare:([^\n]+)/i.exec(block)?.[1] ?? '';
+  const fattoQuando = /-\s*(?:Fatto quando|Quando è fatto|Quando è pronto):([\s\S]*?)(?=\n-\s*|\n#|$)/i.exec(block)?.[1] ?? '';
+  const fare = /-\s*(?:Cosa\s+)?fare:([\s\S]*?)(?=\n-\s*|\n#|$)/i.exec(block)?.[1] ?? '';
   const pipe = /^- Pipeline:\s*(.+)$/m.exec(block)?.[1] ?? '';
+  const title = block.split('\n')[0] ?? '';
+  const fareMatches = /\bverifica(?:re)?\s+nel\s+browser\b/i.test(fare) && !/\b(?:un|i|dei|ogni|quel)\s+task\b/i.test(fare);
+  const titleMatches = /\bverifica(?:re)?\s+nel\s+browser\b/i.test(title) && !/\b(?:un|i|dei|ogni|quel)\s+task\b/i.test(title);
   return /\bbrowser\b/i.test(pipe)
     || /\b(?:verifica(?:re)?\s+nel\s+browser|nel\s+browser|screenshot)\b/i.test(fattoQuando)
-    || /\bverifica(?:re)?\s+nel\s+browser\b/i.test(fare);
+    || fareMatches
+    || titleMatches;
+}
+
+/** Whether a provider has a browser available for tasks that require browser verification. */
+export function providerHasBrowser(provider, config = CONFIG) {
+  return Boolean(config.providers?.[provider]?.browser ?? provider === 'claude');
+}
+
+/** The providers that can execute a task: its own provider and its alternatives, filtering out those without a browser if needed. */
+export function allowedProviders(t, config = CONFIG) {
+  const alternatives = [t.provider, ...(config.alternative?.[t.provider] ?? [])];
+  if (t.needsBrowser) {
+    return alternatives.filter((p) => providerHasBrowser(p, config));
+  }
+  return alternatives;
 }
 
 /** Every task of the backlog: id, title, status, dependencies, and the `- Pipeline:` line if the planner wrote one. */
@@ -450,7 +468,7 @@ export function plan(tasks, runs, budget, only) {
     const missing = t.deps.map((d) => (byId.has(d) ? d : d.replace(/[a-z]$/, ''))).filter((d) => byId.has(d) && !isDone(byId.get(d).status));
     if (missing.length) { queues.bloccati.push({ ...t, missing }); continue; }
     if (!t.provider || t.estimate === undefined) { queues.daStimare.push(t); continue; }
-    if (t.needsBrowser && !(CONFIG.providers[t.provider]?.browser ?? t.provider === 'claude')) {
+    if (t.needsBrowser && !providerHasBrowser(t.provider, CONFIG)) {
       queues.bloccati.push({ ...t, missing: ['provider con browser (claude)'] });
       continue;
     }
@@ -663,12 +681,10 @@ export async function execute({ max = CONFIG.maxParalleli, only, task, always = 
       // A new task goes to its provider or, if that one cannot take it, to its alternatives in order (`alternative`).
       const resuming = Boolean(runs[t.id]);
       if (!resuming && isSuspended(budget[t.provider])) continue;
-      const allowed = t.needsBrowser
-        ? [t.provider, ...(CONFIG.alternative?.[t.provider] ?? [])].filter((p) => CONFIG.providers[p]?.browser ?? p === 'claude')
-        : [t.provider, ...(CONFIG.alternative?.[t.provider] ?? [])];
+      const allowed = allowedProviders(t, CONFIG);
       const prov = resuming ? t.provider : allowed.find((p) => (!only || p === only) && fits(p, t, false));
       if (!prov || !fits(prov, t, resuming)) continue;
-      if (t.needsBrowser && !(CONFIG.providers[prov]?.browser ?? prov === 'claude')) continue;
+      if (t.needsBrowser && !providerHasBrowser(prov, CONFIG)) continue;
       if (holdBack(t, [...active.keys()].map((id) => runs[id]), { resuming, lastLaunch })) continue;
       if (prov !== t.provider) say(`${t.id}: ${t.provider} non può, va su ${prov}`);
       const b = budget[prov];
@@ -1350,9 +1366,8 @@ export function assignTask(id, { provider, stima, priorita, approva }, opts) {
   }
   const tasks = parseBacklog(readText(p.backlog));
   const t = tasks.find((x) => x.id === id);
-  const provConf = p.config.providers[provider];
-  if (t?.needsBrowser && !(provConf?.browser ?? provider === 'claude')) {
-    const valid = Object.keys(p.config.providers).filter((k) => p.config.providers[k].browser ?? k === 'claude').join(', ');
+  if (t?.needsBrowser && !providerHasBrowser(provider, p.config)) {
+    const valid = Object.keys(p.config.providers).filter((k) => providerHasBrowser(k, p.config)).join(', ');
     throw new Error(`${id}: richiede verifica nel browser, va solo su un provider con browser (${valid})`);
   }
   editPipeline(id, (i) => ({
