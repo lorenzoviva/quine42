@@ -48,7 +48,8 @@ import { WaterFlow, WET, type WaterChange } from './water';
 import { forge, judgeCombination, repairLogic, slug, type ForgeOrigin } from './agents/forge';
 import { agentReply, examine, narrate, npcDialogue, npcReply, referenteReply, weavePlot, type NpcReply, type Turn } from './agents/minds';
 import { planGenesis } from './agents/genesis';
-import { councilSession, judgeAction, judgeCraft, judgeDeath, nameSpell } from './agents/effects';
+import { councilSession, inventRune, judgeAction, judgeCraft, judgeDeath, nameSpell } from './agents/effects';
+import { canonWithRune, MAX_MAGIC_RUNES, validateNewRune } from './magic';
 import { cleanPanel, designMechanic } from './agents/mechanics';
 import { BENCH, cleanCases, runCase, textKey, type BenchEntry, type BenchRun, type BenchScene, type BenchShown } from './bench';
 import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Identity } from './agents/content';
@@ -2484,6 +2485,7 @@ export class Kernel {
     else if (s.action === 'abitante') await this.forgeModule(s.request ?? 'un nuovo abitante del mondo', 'agente', 'npc', false, COMUNE);
     else if (s.action === 'cosa' && s.request) await this.forgeModule(s.request, 'agente', 'oggetto', false, COMUNE);
     else if (s.action === 'meccanica') await this.forgeMechanic(s.request ?? 'equipaggiamento: slot per indossare e impugnare', COMUNE);
+    else if (s.action === 'runa') await this.inventRune(`la sessione del Concilio la chiede: ${s.request ?? 'un elemento che nessuna runa ha'}`, COMUNE);
     return s.action;
   }
 
@@ -5653,7 +5655,63 @@ export class Kernel {
     this.applyFiles({ ...this.repo.working });
     const c = this.commitContent(`incantesimo: ${seq.join(' ')} → ${spell.name}`, 'spell.name', 'narratore');
     this.council.say('narratore', 'propone', `${seq.join(' ')} → «${spell.name}»: ${spell.description} [${spell.effects.map((e) => e.tipo).join(', ')}] (commit ${c.id})`, undefined, 'spell.name');
+    // The formula called for an element no rune has (T57b): the world gets one more rune to find.
+    if (draft.newRune) void this.inventRune(`la formula ${seq.join(' ')} («${spell.name}») chiama un elemento che nessuna runa ha: ${draft.newRune}`);
     return spell;
+  }
+
+  private inventingRune = false;
+
+  /**
+   * A new magic rune (T57b, ADR-0097): the Narrator invents it (in a session of the Council, or when a formula
+   * calls for it), the validator lets it in or sends it back with the reasons (two attempts), and it enters
+   * magic.runes (with a place in the loot of magic) and the canon. From then on it lies in the world as the
+   * others do: rare, picked up, composed. The token of the new rune, or undefined.
+   */
+  async inventRune(reason: string, chi?: string): Promise<string | undefined> {
+    if (this.inventingRune || this.mirror || Object.keys(this.content.runes).length >= MAX_MAGIC_RUNES) return undefined;
+    this.inventingRune = true;
+    try {
+      const known = Object.entries(this.content.runes).map(([token, r]) => ({ token, name: r.name, glyph: r.glyph, element: r.element, description: r.description }));
+      let errors: string[] = [];
+      for (let attempt = 0; attempt < 2; attempt++) {
+        let draft;
+        try {
+          draft = await inventRune(this.council, known, reason, errors, this.focusOn(known.map((r) => `runa:${nodeSlug(r.token)}`)));
+        } catch (e) {
+          this.council.say('narratore', 'errore', `runa nuova: ${(e as Error).message}`, undefined, 'rune.invent');
+          return undefined;
+        }
+        const v = validateNewRune(draft, this.content.runes, wordsOf(this.files));
+        if (!v.rune) {
+          errors = v.errors;
+          this.council.say('kernel', 'scarta', `runa nuova «${String(draft.token ?? '')}»: ${errors.join('; ')}`, 'narratore', 'rune.invent');
+          continue;
+        }
+        const r = v.rune;
+        const path = 'modules/magic.runes/manifest.json';
+        let man: Manifest;
+        try {
+          man = JSON.parse(this.repo.working[path] ?? 'null') ?? { id: 'magic.runes', name: 'Rune magiche', kind: 'data', version: '0.1.0', runes: {} };
+        } catch {
+          return undefined;
+        }
+        man.runes = { ...(man.runes ?? {}), [r.token]: r.rune };
+        // Found as the others are: in the loot of magic, as rare as each of them.
+        const magia = man.loot?.magia;
+        if (magia && !magia.entries.some((e) => e.item === `rune:${r.token}`)) magia.entries.push({ item: `rune:${r.token}`, weight: 1 });
+        this.repo.write(path, JSON.stringify(man, null, 2) + '\n');
+        const canon = this.repo.working['world/canone.md'];
+        if (canon !== undefined) this.repo.write('world/canone.md', canonWithRune(canon, r));
+        this.applyFiles({ ...this.repo.working });
+        const c = this.commitContent(`runa nuova: ${r.token} (${r.rune.name})`, 'rune.invent', 'narratore', chi);
+        this.council.say('narratore', 'propone', `runa nuova ${r.rune.glyph} ${r.rune.name} («${r.token}», ${r.rune.element}): ${r.rune.description} (commit ${c.id})`, undefined, 'rune.invent');
+        return r.token;
+      }
+      return undefined;
+    } finally {
+      this.inventingRune = false;
+    }
   }
 
   /** Day and night: 0 = deep night, 1 = full day. A day lasts DAY_SECONDS; the world is born in the morning. */
