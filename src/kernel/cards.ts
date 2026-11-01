@@ -54,7 +54,7 @@ export function titolareOf(cardId: string, pagante: string, wanderers: string[],
   return all.length ? all[hash32(seed, hashStr(cardId)) % all.length] : COMUNE;
 }
 
-export type CardKind = 'modulo' | 'oggetto' | 'ambiente' | 'incantesimo' | 'ricetta' | 'modello' | 'luogo' | 'persona' | 'trama' | 'regola';
+export type CardKind = 'modulo' | 'oggetto' | 'ambiente' | 'incantesimo' | 'runa' | 'ricetta' | 'modello' | 'luogo' | 'persona' | 'trama' | 'regola';
 
 export interface Uses {
   /** Places it entered (a thing, an environment, a structure). */
@@ -142,6 +142,7 @@ export function allCards(files: FileMap, shares = false): Card[] {
     for (const it of m.items ?? []) part(`oggetto:${slug(it.id)}`, 'oggetto', it.name ?? it.id, it);
     for (const [lid, l] of Object.entries(m.layouts ?? {})) part(`ambiente:${slug(lid)}`, 'ambiente', l.name ?? lid, l);
     for (const [seq, s] of Object.entries(m.spells ?? {})) part(`incantesimo:${slug(s.name ?? seq)}`, 'incantesimo', s.name ?? seq, s);
+    for (const [token, r] of Object.entries(m.runes ?? {})) part(`runa:${slug(token)}`, 'runa', r.name ?? token, r);
     for (const r of m.recipes ?? []) part(`ricetta:${slug(r.id)}`, 'ricetta', r.name ?? r.id, r);
   }
   for (const [id, info] of Object.entries((parse(files[MODELS_INDEX]) ?? {}) as Record<string, { nome?: string; carta?: Carta }>)) push(`modello:${slug(id)}`, 'modello', info?.nome ?? id, MODELS_INDEX, info);
@@ -274,6 +275,7 @@ function entriesOf(path: string, data: any): Map<string, Stampable> {
     for (const it of m.items ?? []) if (it?.id) add(`oggetto:${slug(it.id)}`, it);
     for (const [lid, l] of Object.entries(m.layouts ?? {})) add(`ambiente:${slug(lid)}`, l);
     for (const [seq, s] of Object.entries(m.spells ?? {})) add(`incantesimo:${slug(s?.name ?? seq)}`, s);
+    for (const [token, r] of Object.entries(m.runes ?? {})) add(`runa:${slug(token)}`, r);
     for (const r of m.recipes ?? []) if (r?.id) add(`ricetta:${slug(r.id)}`, r);
   } else if (path === MODELS_INDEX) {
     for (const [id, info] of Object.entries(data)) add(`modello:${slug(id)}`, info);

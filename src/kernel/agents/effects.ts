@@ -151,6 +151,7 @@ const SPELL_SCHEMA: Schema = {
     descrizione: { type: 'STRING', description: 'cosa fa, una frase' },
     costo: { type: 'INTEGER', description: 'energia del viandante che consuma, da 3 a 40' },
     effetti: { type: 'ARRAY', items: EFFECT_SCHEMA },
+    runa_nuova: { type: 'STRING', description: "quasi sempre vuoto; solo se questa formula chiama un elemento che nessuna runa ha: quell'elemento in una parola (es. sangue, ghiaccio), una runa nuova da trovare" },
   },
   required: ['nome', 'descrizione', 'costo', 'effetti'],
 };
@@ -164,6 +165,7 @@ export const SPELL_GUIDE = [
   'Di solito la prima runa dà la forma (terra: corpo e peso, una palla, un muro; vento: lancia, spinge, sparge; scudo: racchiude, protegge; luce: rivela) e le altre ciò che porta (fuoco, acqua, cura, luce).',
   'Esempi di come si compone, non un elenco da copiare: terra fuoco → palla di fuoco (fuoco raggio 2); terra fuoco fuoco → palla di fuoco più grande (fuoco raggio 3, più durata); fuoco terra fuoco → dardi infuocati (fuoco raggio 1 e spingi); acqua → crea acqua (terreno acqua); terra vento terra → la terra si solleva (terreno roccioso attorno); vento terra vento → la terra si spiana (terreno di sentiero attorno).',
   'Come un incantesimo di D&D: un effetto vero sul luogo o sulle persone (fuoco, spingi, terreno, luce, bisogni, scudo, stato), mai solo un messaggio; più rune = più forte e più costoso.',
+  'Le rune non sono tutte note: se la formula chiama un elemento che nessuna runa ha (sangue, ghiaccio), scrivilo in runa_nuova e il mondo ne avrà una da trovare; di rado, quasi sempre resta vuoto.',
 ].join(' ');
 
 export interface SpellDraft {
@@ -171,6 +173,8 @@ export interface SpellDraft {
   description: string;
   cost: number;
   effects: unknown[];
+  /** The element of a new rune this formula calls for (T57b), if any. */
+  newRune?: string;
 }
 
 /**
@@ -197,7 +201,7 @@ export async function nameSpell(
   ]
     .filter(Boolean)
     .join('\n\n');
-  const r = await c.ask<{ nome: string; descrizione: string; costo: number; effetti?: unknown[] }>('narratore', 'spell.name', prompt, SPELL_SCHEMA, {
+  const r = await c.ask<{ nome: string; descrizione: string; costo: number; effetti?: unknown[]; runa_nuova?: string }>('narratore', 'spell.name', prompt, SPELL_SCHEMA, {
     data: { runes, known, terrains },
     temperature: 0.7,
     focus,
@@ -207,7 +211,44 @@ export async function nameSpell(
     description: String(r.descrizione ?? '').slice(0, 200),
     cost: Math.max(3, Math.min(40, Math.round(Number(r.costo) || 10))),
     effects: Array.isArray(r.effetti) ? r.effetti : [],
+    ...(typeof r.runa_nuova === 'string' && r.runa_nuova.trim() ? { newRune: r.runa_nuova.trim().slice(0, 60) } : {}),
   };
+}
+
+const RUNE_SCHEMA: Schema = {
+  type: 'OBJECT',
+  properties: {
+    token: { type: 'STRING', description: 'la parola della runa, in italiano, minuscola, 3-12 lettere senza accenti (es. sangue): è anche la parola del codice' },
+    nome: { type: 'STRING', description: 'il nome antico della runa, una parola (come Kenaz, Laguz), diverso da tutti gli altri' },
+    glifo: { type: 'STRING', description: 'un solo segno runico (un carattere Unicode del blocco runico), diverso da quelli già usati' },
+    colore: { type: 'STRING', description: 'il colore della sua luce, #rrggbb' },
+    elemento: { type: 'STRING', description: "l'elemento, una parola" },
+    descrizione: { type: 'STRING', description: 'cosa significa, come le altre: «la fiaccola: brucia, scalda»' },
+    canone: { type: 'STRING', description: 'una riga del canone: ciò che chi vive nel mondo sa di questa runa, senza dire chi la incise né perché' },
+  },
+  required: ['token', 'nome', 'glifo', 'colore', 'elemento', 'descrizione', 'canone'],
+};
+
+/**
+ * A new magic rune (T57b): the Narrator invents it, with what it means in the canon, for a reason (a session of
+ * the Council, a formula that called for it). `errors` are the reasons a previous attempt was refused.
+ */
+export async function inventRune(
+  c: Council,
+  known: Array<{ token: string; name: string; glyph: string; element: string; description: string }>,
+  reason: string,
+  errors: string[] = [],
+  focus?: string[],
+): Promise<Record<string, unknown>> {
+  const prompt = [
+    `Il mondo ha una runa magica in più da trovare: ${reason}.`,
+    `Le rune magiche che già ci sono:\n${known.map((r) => `- ${r.glyph} ${r.name} («${r.token}», ${r.element}): ${r.description}`).join('\n')}`,
+    "Inventa la runa nuova: un elemento che nessuna di queste ha, una parola (il suo token) che non somiglia alle altre, un nome antico, un segno e un colore suoi, cosa significa. Deve potersi comporre con le altre in formule (l'ordine conta, ripeterla la rafforza), con effetti veri sul luogo e sulle persone; come tutte le rune è una lastra a terra, rara, che resta finché qualcuno non la raccoglie.",
+    errors.length ? `La proposta di prima è stata rifiutata: ${errors.join('; ')}. Correggi.` : '',
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+  return c.ask<Record<string, unknown>>('narratore', 'rune.invent', prompt, RUNE_SCHEMA, { data: { known, reason, errors }, temperature: 0.8, focus });
 }
 
 const CRAFT_SCHEMA: Schema = {
@@ -266,8 +307,8 @@ const SESSION_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
     valutazione: { type: 'STRING', description: 'in una frase: come sta andando il mondo' },
-    intervento: { type: 'STRING', enum: ['nessuno', 'oggetti', 'abitante', 'cosa', 'meccanica'] },
-    richiesta: { type: 'STRING', description: 'per abitante o cosa: la richiesta alla Fucina in una frase; per oggetti: che genere di oggetti mancano' },
+    intervento: { type: 'STRING', enum: ['nessuno', 'oggetti', 'abitante', 'cosa', 'meccanica', 'runa'] },
+    richiesta: { type: 'STRING', description: "per abitante o cosa: la richiesta alla Fucina in una frase; per oggetti: che genere di oggetti mancano; per runa: l'elemento della runa magica nuova" },
   },
   required: ['valutazione', 'intervento'],
 };
@@ -277,15 +318,15 @@ const SESSION_SCHEMA: Schema = {
  * people met, places seen) and decides whether to intervene — new items, a new kind of inhabitant, a
  * new thing — so the world keeps evolving coherently with what happened.
  */
-export async function councilSession(c: Council, summary: string): Promise<{ assessment: string; action: 'nessuno' | 'oggetti' | 'abitante' | 'cosa' | 'meccanica'; request?: string }> {
+export async function councilSession(c: Council, summary: string): Promise<{ assessment: string; action: 'nessuno' | 'oggetti' | 'abitante' | 'cosa' | 'meccanica' | 'runa'; request?: string }> {
   const r = await c.ask<{ valutazione: string; intervento: string; richiesta?: string }>(
     'arbitro',
     'council.session',
-    `Sessione del Concilio. Ecco come il viandante sta vivendo il mondo:\n${summary}\n\nIl mondo deve evolvere restando coerente. Serve un intervento? Al massimo uno: "oggetti" (un pacchetto di oggetti che manca, dì quali), "abitante" (un nuovo tipo di persona che renda più viva la società), "cosa" (un oggetto o mobile del mondo che le azioni del viandante fanno pensare), "meccanica" (una meccanica con la sua interfaccia: slot per l'equipaggiamento, una faretra, una scheda di reputazione… — soprattutto se il riepilogo dice MANCA), oppure "nessuno". Interveni solo se serve davvero.`,
+    `Sessione del Concilio. Ecco come il viandante sta vivendo il mondo:\n${summary}\n\nIl mondo deve evolvere restando coerente. Serve un intervento? Al massimo uno: "oggetti" (un pacchetto di oggetti che manca, dì quali), "abitante" (un nuovo tipo di persona che renda più viva la società), "cosa" (un oggetto o mobile del mondo che le azioni del viandante fanno pensare), "meccanica" (una meccanica con la sua interfaccia: slot per l'equipaggiamento, una faretra, una scheda di reputazione… — soprattutto se il riepilogo dice MANCA), "runa" (una runa magica nuova, di un elemento che nessuna runa ha e che il mondo vissuto fa pensare: dì quale; solo di rado), oppure "nessuno". Interveni solo se serve davvero.`,
     SESSION_SCHEMA,
     { data: { summary }, temperature: 0.6 },
   );
-  const action = (['nessuno', 'oggetti', 'abitante', 'cosa', 'meccanica'] as const).find((a) => a === r.intervento) ?? 'nessuno';
+  const action = (['nessuno', 'oggetti', 'abitante', 'cosa', 'meccanica', 'runa'] as const).find((a) => a === r.intervento) ?? 'nessuno';
   return { assessment: String(r.valutazione ?? ''), action, request: r.richiesta ? String(r.richiesta).slice(0, 200) : undefined };
 }
 

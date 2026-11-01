@@ -127,6 +127,7 @@ src/
     modeldirector.ts    i modelli che mancano, uno alla volta, entro `ai.maxModels`
     chunks.ts           archivio dei piani dei luoghi
     bench.ts            il banco della Sala sistemi: i casi dei sistemi in un kernel in miniatura (ADR-0052)
+    magic.ts            le rune nuove dal Concilio: validatore, riga del canone (ADR-0096)
     cards.ts            chi paga ogni chiamata, le carte dei contenuti, i loro utilizzi (`world/carte.json`), la collezione (ADR-0056)
     heritage.ts         l'eredità dei cloni: catena dei titolari, impronte, quote (ADR-0084)
     partita.ts          la partita scelta alla Genesi: livelli della morte, principio per il Concilio (ADR-0053)
@@ -222,6 +223,11 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   programma (T57a): la chiave è la sequenza nell'ordine (`terra fuoco` ≠ `fuoco terra`), ripetere una runa la rafforza;
   come si compone lo dicono il canone, `SPELL_GUIDE` (`agents/effects.ts`, con le permutazioni già note) e i prompt di
   Narratore, Fisico e Arbitro, con esempi da D&D e terraformazione; gli effetti restano l'insieme chiuso del kernel.
+  Le **rune nuove** (ADR-0096, T57b): il Narratore ne inventa una (`rune.invent`: token, nome, glifo, colore, elemento, riga del canone)
+  quando una sessione del Concilio lo decide (intervento `runa`) o una formula la chiede (`runa_nuova` di `nameSpell`); `validateNewRune`
+  (`src/kernel/magic.ts`) rifiuta token non parola, già usati, riservati o simili, nomi simili, quarta parete, oltre `MAX_MAGIC_RUNES` (16),
+  e ripara glifo (non `FUTHARK`, non usato) e colore; `kernel.inventRune` la mette in `magic.runes` (e nel bottino `magia`), nel canone
+  («Le rune trovate dopo») e nelle carte (`runa:<token>`); poi sta nel mondo come le altre.
 - **Borse** (ADR-0018): `ItemDef.container {size, accepts}`; lo slot ha `inv`; la borsa delle rune accetta `runa`.
 - **Regole** (ADR-0019): ogni giudizio in `world/rules.json`, mostrato al Concilio; le azioni possibili si
   imparano (modulo o `ItemDef.actions`); «Altro…» anche nell'inventario e nel crafting (ricette in

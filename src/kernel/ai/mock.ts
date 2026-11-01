@@ -352,6 +352,16 @@ export class MockModels implements Models {
         const v = fallbackDeath(Number(d.level), Array.isArray(d.carried) ? d.carried : []);
         return { racconto: v.story, perde_tutto: v.loseAll, ripartenza: v.restart, effetti: v.effects };
       }
+      case 'rune.invent': {
+        // A rune of an element nobody has yet (T57b): the first of a few that is not taken.
+        const known: Array<{ token: string; name: string }> = d.known ?? [];
+        const CANDIDATES = [
+          { token: 'sangue', nome: 'Wunjo', glifo: 'ᚹ', colore: '#c8323c', elemento: 'sangue', descrizione: 'la vena: lega, scambia, chiama', canone: 'segna i patti: chi la pronuncia dà qualcosa di sé per avere qualcosa' },
+          { token: 'ghiaccio', nome: 'Isaz', glifo: 'ᛁ', colore: '#bfe9ff', elemento: 'ghiaccio', descrizione: 'il gelo: ferma, indurisce', canone: "ferma ciò che scorre: l'acqua, il passo, il fuoco" },
+          { token: 'ombra', nome: 'Eihwaz', glifo: 'ᛇ', colore: '#5a4a7a', elemento: 'ombra', descrizione: 'il tasso: nasconde, attenua', canone: 'spegne la luce attorno e nasconde chi la pronuncia' },
+        ];
+        return CANDIDATES.find((c) => !known.some((k) => k.token === c.token || k.name === c.nome)) ?? { ...CANDIDATES[0], token: 'tuono', nome: 'Thurisaz' };
+      }
       case 'spell.name': {
         // A program (T57a): the first rune gives the main effect, stronger for every time it is repeated;
         // the others follow, weaker. Order matters: «terra vento» is not «vento terra».

@@ -1051,13 +1051,19 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 - **Domanda per l'autore** (per T57c): va bene un effetto `rilievo` nel kernel come strumento generico (gli incantesimi
   che lo usano restano del Concilio)?
 
-### T57b · Rune nuove dal Concilio — `da fare` (dipende da T57)
+### T57b · Rune nuove dal Concilio — `fatto` (dipende da T57)
 - Pipeline: claude · stima 5% · approvato · priorità 60
 - Contesto: il pezzo T57b del blocco T57 (T57a fatto e integrato con T99: canone, `SPELL_GUIDE`, prompt di Narratore, Fisico, Arbitro).
 - Fare: una via per inventare una runa magica (nome, glifo, colore, cosa significa nel canone) in una sessione del Concilio o quando una
   combinazione la chiede: modulo `magic.runes` riscritto, validatore (glifo unico, nome non simile alle altre, niente meta-gioco), canone
   aggiornato; la runa compare nel mondo come le altre (rare). Schema Gemini, risposta in `MockModels`, voce nel registro.
 - Fatto quando: test verdi (una runa nuova entra, è valida, si può raccogliere e combinare), typecheck verde, AGENTS.md (Magia) aggiornato, ADR.
+- **Fatto** (commit su `task/T57b`, ADR-0096): compito `rune.invent` del Narratore (schema, mock, `CENSUS`, voce nel registro), chiesto dalla
+  sessione del Concilio (intervento `runa`, paga `comune`) o da una formula (`runa_nuova` di `nameSpell`, spiegato in `SPELL_GUIDE`);
+  validatore puro `src/kernel/magic.ts` (`validateNewRune`: token parola di 3-12 lettere, non già usato, non riservato né simile; nome non
+  simile; niente quarta parete; al più 16 rune; glifo e colore riparati); `kernel.inventRune` scrive `magic.runes` (rune e bottino `magia`),
+  il canone («Le rune trovate dopo», `canonWithRune`) e committa con la carta `runa:<token>`. Test in `tests/magic.test.ts`.
+  Diverso dal previsto: anche le carte hanno un tipo nuovo, `runa`; due tentativi al Narratore prima di rinunciare.
 
 ### T57c · Il terreno che sale e scende — `da fare` (dipende da T57)
 - Pipeline: claude · stima 3% · approvato · priorità 61
