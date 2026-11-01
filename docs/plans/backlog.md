@@ -1574,7 +1574,7 @@ le risposte alle domande del piano.
   dà l'autore: se mancano, la domanda va in `docs/pipeline/domande/T45e.md`.
 - Esito: implementati gli endpoint server (`/api/stripe/checkout`, `/api/stripe/webhook`) con verifica firma HMAC-SHA256 (`stripe-signature`), accredito crediti idempotente (`Kernel.creditRecharge` e persistenza `world/pagamenti.json`), blocco acquisti per anonimi (403), interfaccia di ricarica rapida e saldo nel profilo (`P`); test headless in `tests/stripe.test.ts` (6/6 passati); ADR-0083 registrato. Codice e test integrati nel base `3d` con T77. Chiavi di test inserite dall'autore in `.env` (con listener locale indicato su porta 4242); verifica nel browser delegata a T93.
 
-### T45f · Il server su Google Cloud — `da fare` (dipende da T44b, T45d)
+### T45f · Il server su Google Cloud — `da fare` (dipende da T44b, T45d, T133, T134)
 - Pipeline: claude · stima 6% · priorità 10
 - Fare: il server della sessione e i repository degli universi su Google Cloud, sempre acceso (Cloud Run con istanza minima o una VM,
   disco persistente per `universes/`, repository privati), il deploy da script, i segreti in Secret Manager.
@@ -2392,7 +2392,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Cosa fare: nel worktree `git merge task/T102`; tenere entrambe le aggiunte (in `vite.config.ts` gli ingressi delle pagine e le rotte di tutti e due; in `site/index.html` la landing di T101 con i link sia a `sessioni.html` sia al profilo); typecheck e la suite nel turno test (`pipeline.mjs turno test -- npm test`); i timeout noti (referente, wanderers, watch, kernel sotto carico) non sono difetti. Una prova breve nel turno browser: le pagine landing, sessioni e profilo si aprono e i link tra loro funzionano.
 - Quando è fatto: merge risolto, typecheck e test verdi (salvo i timeout noti), commit su `task/T116`.
 
-### T117 · Audit di sicurezza: il Lua sul server, le chiavi, i rischi a valle del Concilio — `in attesa`
+### T117 · Audit di sicurezza: il Lua sul server, le chiavi, i rischi a valle del Concilio — `fatto`
 - Pipeline: claude · stima 5% · approvato · priorità 0
 - Contesto: domanda dell'autore (01/11): il codice Lua gira sandboxed sul server? Può esporre le chiavi delle API di Gemini? Quali altri rischi solleva? **Modello di minaccia, deciso dall'autore**: gli agenti del Concilio non rilevano né neutralizzano i prompt avversari, quindi il giocatore può dettare al Concilio qualunque contenuto o codice, e può anche scrivere Lua direttamente. La sicurezza deve stare **a valle** della scrittura del codice: difese contro i prompt avversari sul Concilio non contano come difese. Nasce da una richiesta in chat; vedi ADR-0057, 0058, 0059, 0061, 0066, 0069, 0077, 0082, 0083.
 - Cosa fare: **solo analisi, nessuna correzione**. Rispondere alle due domande con prove, non solo leggendo il codice: riprodurre gli attacchi in locale con il kernel vero (`src/kernel/sandbox.ts`, `prelude.lua`, `Host`, `validator.ts`, wasmoon) e file di prova non committati.
@@ -2421,3 +2421,125 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Test: typecheck e build; `tests/site-profile.test.ts` e `tests/site-carte.test.ts` da soli. La suite intera è da poco stata eseguita da T116 e T104 con timeout per il carico: **non ripeterla** se il merge tocca solo i tre file in conflitto (T118 si occupa del carico); dillo nell'esito. Se il merge cambia altro codice, lanciala con il turno.
 - Browser: una controllata veloce che `site/profilo.html` e `site/carte.html` si aprano senza errori in console e con i link tra le pagine; scheda del viandante e anteprima 3D con un universo di prova, che T116 non ha riprovato dopo il merge. Login Firebase non richiesto.
 - Quando è fatto: merge risolto, verifiche sopra fatte, commit su `task/T119`. Poi l'orchestratore fa `integra T119`, `integra T116`, `integra T102`.
+
+## La sicurezza (audit T117, `docs/sicurezza/audit-2026-11.md`; chat dell'autore del 01/11)
+
+**Decisione dell'autore, vale per tutti questi task.** Dentro il gioco, a parte i crediti dei giocatori, tutto si può modificare: il codice generato può toccare inventario, bisogni ed entità degli altri viandanti, e ci sono i rollback. Difendersi dai prompt avversari al Concilio è una guerra persa e non si fa. Ciò che conta: **non si esce dalla sandbox del gioco**, **i crediti non si toccano**, **i giocatori non master non riscrivono direttamente il codice Lua sul server**. Le difese di R8 sui permessi per viandante, su `U` in sola lettura e sul `by` delle rune **non si fanno**. Le prove sono test difensivi nel repository, che falliscono prima della correzione e passano dopo; niente payload nel report, mai valori veri dei segreti.
+
+### T120 · Chi può scrivere: `/api/universe` e il WebSocket — `da fare`
+- Pipeline: claude · stima 5% · approvato · priorità 3
+- Contesto: richiesta dell'autore: con F12 un giocatore può riscrivere i file Lua sul server. Confermato nel codice: `server/universeStore.ts` accetta `commit`, `create`, `checkout`, `branch`, `merge`, `clone`, `reset` e `PUT map` senza identità (R1). Il WebSocket controlla `isMaster`, ma senza account l'id lo sceglie il client (R6). Nasce da T117: `dossier T117`; vedi ADR-0058, 0061, 0066, 0082.
+- Cosa fare:
+  1. Identità verificata sul server e permessi per operazione su ogni route di `/api/universe`: su un universo multigiocatore un non master non scrive nulla; `clone` prende il master dall'identità verificata, non dal corpo. Verificare prima come scrivono `host.ts`, il kernel del server e `site/sessioni.ts` (`create`) e tenere funzionanti i percorsi legittimi.
+  2. Letture: un non master non legge file che `playerFiles` gli negherebbe. `site/carte.ts`, `site/sessioni.ts` e `site/landing.ts` leggono `/api/universe`: dare loro ciò che serve senza aprire il resto (logica, prompt, saldi).
+  3. Controllo di `Origin` e `Content-Type` sulle route che scrivono e sul WebSocket; in singola, sul server locale, il gioco continua a funzionare come oggi.
+  4. Senza verificatore (niente `FIREBASE_PROJECT_ID`) l'id scelto dal client vale solo da loopback. `anonimo` e `tetto` non li decide il client; `offline` non lo decide il primo client; `GET /api/session` non elenca i viandanti a chiunque.
+  5. Controllare ogni messaggio del protocollo che un client può mandare a mano: nessuno deve far scrivere codice a un non master.
+  6. **ADR nuovo e `AGENTS.md`**: il modello di minaccia di questa sezione, con le regole di accesso.
+- Test: un non master (HTTP e WebSocket) è rifiutato su ogni operazione di scrittura; il master e la singola funzionano; un'origine diversa è rifiutata.
+- Browser: controllata veloce del gioco in singola (`?skip&offline`, un salvataggio dall'editor) e delle pagine del sito.
+- Quando è fatto: test e typecheck verdi, commit su `task/T120`.
+
+### T121 · Percorsi ammessi e protezione di git — `da fare` (dipende da T120)
+- Pipeline: claude · stima 3% · approvato · priorità 4
+- Contesto: R3 dell'audit: `safePath` (`universeStore.ts`) e `cleanBranch` (`src/session/server.ts`) confrontano `.git` alla lettera; su NTFS varianti dello stesso nome sono la stessa cartella, e scriverci può diventare esecuzione di codice sulla macchina (il server lancia git lì).
+- Cosa fare: elenco di percorsi ammessi (`modules/ models/ world/ maps/ prompts/ universe.json`, da verificare con ciò che il kernel scrive davvero) invece di un divieto; normalizzare maiuscole, punti e spazi finali, flussi NTFS, nomi riservati di Windows; git lanciato con `core.hooksPath` vuoto e nessuna configurazione del repository scrivibile.
+- Test: tabella di percorsi rifiutati sul validatore dei percorsi, senza scrivere fuori da una cartella temporanea.
+- Quando è fatto: test e typecheck verdi, commit su `task/T121`.
+
+### T122 · Non si esce dalla sandbox: prove difensive e chiusure — `da fare`
+- Pipeline: claude · stima 4% · approvato · priorità 5
+- Contesto: è **la cosa più importante per l'autore**, e l'audit non l'ha dimostrata: una sessione è stata fermata da un filtro di sicurezza mentre preparava le prove. Il lavoro è difensivo, sulla sandbox di questo progetto. Il `Sandbox` gira in wasmoon dentro il processo del server. Nasce da T117 (R8 ridotta, annotazione `string.dump`, «Cosa non è stato fatto»).
+- Cosa fare:
+  1. Test in `tests/` che affermano le proprietà: da Lua nessun accesso a `process`, `require`, costruttori o prototipi JS, né attraverso i valori restituiti dall'`Host` né attraverso le metatabelle; `string.dump` non raggiungibile nemmeno con la sintassi a metodo; `pcall` e coroutine non scavalcano il budget; un valore finto in una variabile d'ambiente di prova non arriva mai a Lua.
+  2. Le funzioni Lua dentro le tabelle passate all'`Host` diventano funzioni JS: verificare che nessuna giri fuori da `guarded`, e ripararlo se succede.
+  3. Togliere `dump` dalla tabella vera nel prelude; la prova di caricamento dei moduli (`validator.ts`) in una VM usa e getta, non nella sandbox viva.
+  4. Aggiornare `docs/sicurezza/audit-2026-11.md`: la risposta alla domanda 1, con ciò che è provato e ciò che no.
+- **Se un filtro interrompe di nuovo la sessione**: non insistere; scrivere cosa resta non provato in `docs/pipeline/domande/T122.md`, così l'autore decide se farlo vedere a una persona esperta.
+- Quando è fatto: test e typecheck verdi, commit su `task/T122`.
+
+### T123 · Il proxy di Gemini — `da fare`
+- Pipeline: claude · stima 3% · approvato · priorità 6
+- Contesto: R2: `/api/gemini` spende la chiave per chiunque raggiunga la porta, con qualunque modello `gemini-*` e fino a 12 MB.
+- Cosa fare: elenco dei modelli ammessi (quelli di `universe.json` e dei prezzi), corpo massimo ridotto, tetto di spesa nel proxy, accesso solo da loopback con controllo di `Origin`; in multigiocatore il server chiama Google direttamente, senza route pubblica. La chiave resta fuori dal browser (regola 9).
+- Test: richieste rifiutate per origine, modello e dimensione, con `fetch` finto; nessuna chiamata vera a Gemini.
+- Quando è fatto: test e typecheck verdi, commit su `task/T123`.
+
+### T124 · Il webhook di Stripe — `da fare`
+- Pipeline: claude · stima 2% · approvato · priorità 7
+- Contesto: R4: senza `STRIPE_WEBHOOK_SECRET` ogni evento è accettato (crediti gratis); `metadata.universo` e `wandererId` finiscono in `path.join` senza validazione; `crediti` non è confrontato con `amount_total`.
+- Cosa fare: senza segreto la route risponde 503; validare nomi e id come fa il checkout; credito calcolato dall'importo pagato.
+- Test: i tre casi.
+- Quando è fatto: test e typecheck verdi, commit su `task/T124`.
+
+### T125 · Saldi e pagamenti fuori dall'universo — `da fare` (dipende da T120, T124)
+- Pipeline: claude · stima 6% · approvato · priorità 8
+- Contesto: R5 e R10: i crediti sono **l'unica cosa del gioco che non si deve poter modificare**, ma stanno in `world/giocatori/*.json` e `world/pagamenti.json`, nel repository dell'universo: un `checkout`, `R`, un ramo pubblicato o il codice generato possono cambiarli; la risposta del Referente diventa `giveCredits` senza tetto visibile; il controllo di idempotenza non passa dalla coda `serial`. Vedi ADR-0081, 0083.
+- Cosa fare: un archivio del server fuori dalla storia dell'universo per saldi e registro dei pagamenti, con migrazione dai file di oggi; nessuna via da Lua, dal Concilio, dal ramo o dal rollback; accredito atomico e idempotente; chi può ricaricare a mano e con quale tetto (scriverlo nell'ADR). I saldi degli altri non vanno al master nei file. ADR nuovo e `AGENTS.md`.
+- Test: rollback, ramo pubblicato e codice generato non cambiano i saldi; due eventi uguali in contemporanea accreditano una volta.
+- Quando è fatto: test e typecheck verdi, commit su `task/T125`.
+
+### T126 · I limiti dentro la sandbox — `da fare`
+- Pipeline: claude · stima 4% · approvato · priorità 9
+- Contesto: R7, prima parte. Provato: un solo pattern di `string.find` blocca il processo oltre 60 s; `string.rep` alloca 200 MB senza guasti. Il budget conta le istruzioni VM per chiamata, non il lavoro nelle funzioni C né il tick.
+- Cosa fare: `string.*` con limiti di lunghezza e di pattern; limite di memoria della VM; budget per tick; limiti di scatola e di tempo per i programmi MarkovJunior sul server (l'XML può dire la propria `size`). Attenzione ai moduli esistenti, che devono continuare a girare, e alle prestazioni del tick.
+- Test: i casi della tabella dell'audit finiscono in un guasto entro un tempo breve, senza payload nel report.
+- Quando è fatto: test e typecheck verdi, commit su `task/T126`.
+
+### T127 · Ogni mondo in un worker con un sorvegliante — `da fare` (dipende da T120, T126)
+- Pipeline: claude · stima 8% · approvato · priorità 10
+- Contesto: R7, seconda parte, la difesa più importante a valle: oggi tick, Lua e HTTP stanno nello stesso event loop del processo che tiene i segreti. Vedi ADR-0058 (`server/session.ts`, `src/session/host.ts`).
+- Cosa fare: ogni mondo in un `worker_thread` o processo, **senza i segreti nell'ambiente**, con limite di memoria e un sorvegliante che lo uccide se il tick si blocca e lo riavvia dall'ultimo stato valido; i MarkovJunior nel worker; i client lo sanno (un avviso, non un errore). ADR nuovo e `AGENTS.md`. Se è troppo grande, spezzarlo.
+- Test: un mondo bloccato non ferma l'HTTP né un altro mondo e riparte; i test del multigiocatore restano verdi.
+- Browser: due schede in multigiocatore che giocano e si vedono.
+- Quando è fatto: test e typecheck verdi, commit su `task/T127`.
+
+### T128 · La coda delle CLI — `da fare`
+- Pipeline: claude · stima 3% · approvato · priorità 11
+- Contesto: R9: `POST /api/coda` non ha autenticazione e accetta `system` e `prompt` qualsiasi; un testo dettato dal giocatore può arrivare a un agente con strumenti sulla macchina di chi gioca. Vedi ADR-0077.
+- Cosa fare: route montata solo su richiesta esplicita, solo in loopback, con un segreto locale; CLI in una cartella vuota, ambiente ridotto, strumenti esclusi e configurazione MCP e hook isolati, con conferma verificata; se Antigravity non può escludere gli strumenti, niente Antigravity sulla coda (dirlo all'autore nell'esito).
+- Test: senza segreto o non da loopback è rifiutata; gli argomenti delle CLI, senza lanciarle.
+- Quando è fatto: test e typecheck verdi, commit su `task/T128`.
+
+### T129 · Limiti ai messaggi — `da fare` (dipende da T120)
+- Pipeline: claude · stima 2% · approvato · priorità 12
+- Contesto: R11: `inbox` non ha tetto per client, ogni messaggio può chiamare il modello, `testo` è tagliato solo per `agente`. Un giocatore esaurisce i budget comuni del mondo.
+- Cosa fare: ritmo per client, lunghezza massima del testo, code per pagante, in `src/session/server.ts`. Il gioco normale non deve accorgersene.
+- Test: un client che inonda è limitato, gli altri no.
+- Quando è fatto: test e typecheck verdi, commit su `task/T129`.
+
+### T130 · Ciò che esce e ciò che il Concilio scrive — `da fare` (dipende da T120)
+- Pipeline: claude · stima 3% · approvato · priorità 13
+- Contesto: R12 e R13. `playerFiles` toglie campi invece di ammetterli; in sviluppo Vite potrebbe servire i file di `universes/` (da verificare). Il Concilio può forse scrivere `ai` in `universe.json`, cioè budget e provider: soldi veri, quindi fuori dal «tutto si può modificare».
+- Cosa fare: `playerFiles` a elenco di campi ammessi; `universes/` non servito da Vite; il Concilio scrive solo in un elenco di percorsi; `ai` solo dal kernel, su comando del master.
+- Test: i campi che non escono; una scrittura di `ai` dal Concilio rifiutata.
+- Quando è fatto: test e typecheck verdi, commit su `task/T130`.
+
+### T131 · `npm audit` e Vite — `da fare`
+- Pipeline: claude · stima 2% · approvato · priorità 14
+- Contesto: R14: Vite 5.4.10, l'audit non ha lanciato `npm audit`.
+- Cosa fare: lanciarlo, aggiornare ciò che serve (Vite compreso, nei limiti della 5.x se basta), riportare ciò che resta aperto e perché.
+- Test: suite intera, typecheck, build.
+- Browser: il gioco parte in `?skip&offline`.
+- Quando è fatto: commit su `task/T131`.
+
+### T132 · Le correzioni piccole — `da fare`
+- Pipeline: claude · stima 2% · approvato · priorità 15
+- Contesto: R15 e R16.
+- Cosa fare: `Number()` su `realm.seed` in `site/sessioni.ts`; `returnUrl` del checkout limitato alla stessa origine; una CSP compatibile con three.js e con i worker; errori generici al client e dettagli nel log (`stripe.ts`); un test che cerca valori finti dei segreti in `dist/` dopo una build con un ambiente di prova.
+- Browser: gioco e sito senza errori di CSP in console.
+- Quando è fatto: test e typecheck verdi, commit su `task/T132`.
+
+### T133 · Il server di produzione — `da fare` (dipende da T120, T123, T127, T131)
+- Pipeline: claude · stima 6% · approvato · priorità 16
+- Contesto: correzione 1 dell'audit: il server di sviluppo non va esposto. Oggi la sessione vive nel plugin di Vite (`ssrLoadModule`). Prerequisito di T45f.
+- Cosa fare: un punto d'ingresso di produzione senza il server di sviluppo di Vite, che serve la build e monta solo le route ammesse; rifiuta di partire senza verificatore di identità, segreto del webhook e origini configurate; la coda delle CLI non c'è. ADR e `AGENTS.md`.
+- Test: non parte senza configurazione; una partita di prova con `fakeLink` o WebSocket vero in locale.
+- Browser: due schede sul server di produzione in locale.
+- Quando è fatto: test e typecheck verdi, commit su `task/T133`.
+
+### T134 · Le prove contro il server vero — `da fare` (dipende da T120, T121, T122, T123, T124, T125, T128, T129, T130, T132, T133)
+- Pipeline: claude · stima 3% · approvato · priorità 17
+- Contesto: chiude «Cosa non è stato fatto» dell'audit, per la parte non coperta dai test di ogni correzione: nessuna prova HTTP o WebSocket è stata fatta contro un server vero.
+- Cosa fare: test di integrazione che avviano il server di produzione in locale con segreti finti e provano le regole di accesso (identità, origine, percorsi, webhook, proxy) e che i valori finti non escano mai (risposte, log, `dist/`). Aggiornare `docs/sicurezza/audit-2026-11.md` voce per voce: chiusa, provata, o aperta con il motivo.
+- Quando è fatto: test e typecheck verdi, report aggiornato, commit su `task/T134`. Poi l'orchestratore porta all'autore cosa resta prima di T45f.
