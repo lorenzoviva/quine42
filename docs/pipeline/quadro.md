@@ -3,14 +3,15 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 01/11/2026 ~03:45 UTC, epoca 182 su **gemini** (Claude sotto soglia 10 %, 5h al 0 %, reset 05:50 UTC; settimana al 14 %, reset 05/11 16:00; Gemini settimana al 9 % < 10 % soglia orchestratore).
+Aggiornato il 01/11/2026 ~06:45 UTC, epoca 184 su **claude** (Claude 5h 86 %, settimana 13 %, reset 05/11 16:00; Gemini settimana 8 %, 5h 100 %).
 
 - **Integrati di recente**: T57c (effetto rilievo e terraformazione nel kernel, ADR-0096), T111 (ripiego senza browser corretto), T113 (lampione intero, drone 1:2), T109+T110+T112 (template del sito verificato), T101 (landing con hero MarkovJunior verificata nel browser).
 - **In corso / Sospesi**:
-  - **T57b** su Claude (rune nuove dal Concilio, p60): ha toccato il limite 5h di Claude (`usage_limit_reached`); interrotto e rimesso in coda (`interrompi` + `riprendi`), turno test liberato, riprenderà la conversazione al reset delle 05:50 UTC.
+  - **T114** su Claude (verifica nel browser di T103 e merge), in corso.
+  - **T57b** fatto (rune nuove dal Concilio, ADR suo da rinumerare 0097): `integra` in conflitto (AGENTS.md, adr/README.md, agents/effects.ts con T57c). Creato e approvato **T115** su Gemini (p20) per il merge; poi `integra T115` e `integra T57b`. 5 timeout noti della suite (referente, wanderers, watch) falliscono anche sul base.
 - **Finiti / Da verificare nel browser**:
   - **T103** (hub sessioni multigiocatore e wizard nuovo universo): completato su Gemini (`BROWSER: da verificare`). Merge diretto con `3d` ha conflitto in `site/index.html` (aggiornato da T101). Creato **T114** su Claude (p25, browser) per fondere `task/T103`, risolvere il conflitto e verificare nel browser Chrome.
-- **Coda di Claude (dopo reset 05:50 UTC)**: T57b (riprende) → T114 (verifica T103) → T102, T104, T105, T106 (sito) → T89a-e (cartone, p75-79).
+- **Coda di Claude**: T114 (verifica T103) → T102, T104, T105, T106 (sito) → T89a-e (cartone, p75-79).
 - **Decisioni recenti**:
   - T57c completato su Gemini e integrato nel base `3d` con test e typecheck verdi; branch e worktree rimossi.
   - T89 diviso in T89a-e e approvato; T57 diviso in T57b/T57c e approvato. T57 segnato fatto (T57a).
