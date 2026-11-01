@@ -2667,6 +2667,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: merge risolto, commit su `task/T145`. Non toccare il `node_modules` del base. Poi l'orchestratore fa `integra T145`, `integra T142`, `integra T131` e l'`npm ci` nel base, a pipeline senza task.
 - Esito: merge di `task/T142` risolto; l'ADR di Vite 7 è ora `0100-vite-7-vitest-4-e-il-primo-npm-audit.md`, con l'indice, `AGENTS.md` (Stack) e `docs/sicurezza/registro.md` (V-014); quelle del proxy restano 0099. Le citazioni «ADR-0099» di Vite 7 negli esiti di T131 e T142 restano com'erano, perché qui si cambia solo questo blocco: leggile come 0100. Junction tolta e `npm ci` nel worktree (Vite 7.3.7, Vitest 4.1.12, `npm audit` a 0); `node_modules` del base non toccato. Typecheck e build verdi; suite intera con il proxy di T123: 82 file, 746 passati, 16 `it.fails` attesi, 1 todo, nessun rosso. In `dist/` solo il nome di `GEMINI_API_KEY`, nei messaggi. Sicurezza: nessuna superficie nuova.
 
+### T149 · Integrare T146 — `da fare`
+- Pipeline: claude · stima 2% · approvato · priorità 1
+- Contesto: `integra T146` va in conflitto in `docs/adr/README.md` e `src/kernel/validator.ts`. T146 (che porta dentro T126, i limiti dentro la sandbox) è partito senza T121 e ha preso il numero 0103, che nel base è di T121 (percorsi ammessi e git del server). Nasce da T146: `dossier T146`.
+- Cosa fare: nel worktree di T149 `git merge task/T146`. L'ADR `0103-i-limiti-dentro-la-sandbox.md` prende il primo numero libero del base (0104, se nessun altro lo ha preso); correggi le citazioni che parlano di quei limiti (`AGENTS.md`, `docs/`, codice, test, indice degli ADR), lasciando stare quelle di T121. In `src/kernel/validator.ts` restano le modifiche di entrambi. Nel backlog restano tutti i blocchi.
+- Test: `npm run typecheck` e la suite intera con i loro turni; nell'esito quanti passano e i rossi che restano rilanciando il file da solo. Poi `npm run sicurezza:prove -- --solo V-007` e `--solo V-003`: il kit si legge, non si riscrive; se sovrascrive un esito di `docs/sicurezza/esiti/`, ripristinalo e metti il tuo in un file a parte.
+- Browser: non serve, T146 ha provato il gioco con T126.
+- Quando è fatto: merge risolto, commit su `task/T149`. Poi l'orchestratore fa `integra T149`, `integra T146` e `integra T126`.
+
 ### T147 · Integrare T128 — `da fare` (dipende da T146)
 - Pipeline: claude · stima 3% · approvato · priorità 1
 - Contesto: `integra T128` va in conflitto in `docs/adr/README.md` e `vite.config.ts`: T128 (la coda delle CLI blindata, V-009) è partito senza T120, che ha messo `gate` sulle route in `vite.config.ts`, e aveva preso il numero 0102, che nel base è di T120. Nasce da T128: `dossier T128`.
