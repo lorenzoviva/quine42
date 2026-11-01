@@ -3,9 +3,9 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 01/11/2026 ~13:10 UTC, epoca 185 su **claude** (Claude settimana 100 %, 5h 97 %, reset 05/11 16:00, abbonamento Pro nuovo; Gemini settimana 8 %).
+Aggiornato il 01/11/2026 dopo le 13:35 UTC, epoca 186 su **claude** (Claude settimana 100 %, 5h 96 %, reset 05/11 16:00, abbonamento Pro nuovo; Gemini settimana 8 %).
 
-- **Tetto di Claude a 2** (richiesta dell'autore, 01/11): `limiti` in `config.json` (provider e modello). `CONFIG` si legge all'avvio: vale **solo dopo il riavvio** di `orchestra`, chiesto dall'autore con `ferma --dopo` (l'autore rilancia il processo). L'autore dice che con il Pro i limiti di Claude sono 5 volte più alti. Da allora gli slot salgono a 2 da soli entro 5 minuti, se la previsione non dice che i crediti finiscono prima del reset.
+- **Tetto di Claude a 2** (richiesta dell'autore, 01/11): attivo dopo il riavvio delle 13:35; `stato` dice tetto 2, slot 2. L'autore dice che con il Pro i limiti di Claude sono 5 volte più alti.
 
 - **Integrati di recente**: T115 e T57b (rune nuove dal Concilio, ADR-0097; restano 5 timeout noti di referente, wanderers e watch, `abbonamenti` T68b non ricontrollato), T57c (effetto rilievo e terraformazione nel kernel, ADR-0096), T111 (ripiego senza browser corretto), T113 (lampione intero, drone 1:2), T109+T110+T112 (template del sito verificato), T101 (landing con hero MarkovJunior verificata nel browser).
 - **In corso, coda, attese**: vedi «Stato e decisioni» e «Task attivi» sotto.
@@ -33,20 +33,20 @@ Aggiornato il 01/11/2026 ~13:10 UTC, epoca 185 su **claude** (Claude settimana 1
 
 ## Stato e decisioni
 
-- **Spegnimento**: `ferma --dopo` dato su richiesta dell'autore; T115 è finito: il processo si spegne, l'autore rilancia `orchestra` e il tetto 2 di Claude entra in vigore.
+- **Riavvio**: spenta alle 13:08 (`ferma --dopo`, T115 finito), riaccesa alle 13:35 con il tetto 2 di Claude; nessun task interrotto da riprendere.
 - **Cosa si aspetta**:
   1. **T116** (merge di T102, p21): poi `integra T116` e `integra T102`.
   2. **Risposte dell'autore per T45f** (`docs/pipeline/domande/T45f.md`); T88 da approvare.
-- **Intenzioni**: dopo il riavvio controllare con `stato` che tetto e slot di Claude siano a 2 (se l'autore li vuole fissi, bloccare `slotAggiornato` in `.pipeline/budget.json`; non l'ha ancora chiesto). T116 prima del resto.
+- **Intenzioni**: T116 prima del resto; se l'autore vuole gli slot di Claude fissi a 2, bloccare `slotAggiornato` in `.pipeline/budget.json` (non l'ha ancora chiesto).
 - **Da sapere**: la pipeline, a ogni fine task, può riprovare da sola `integra`: i conflitti su T102 sono attesi finché T116 non entra. Sotto `sogliaUnSolo` (10 %) nessun task nuovo parte e non c'è un lancio forzato.
 
 ## Task attivi e in corso
 
-- **In corso**: nessuno.
-- **Pronti su Claude**: **T116** (p21) → **T104** (p68) → **T105** (p70) → **T106** (p72) → **T89a** (p75); bloccati **T89b-e** (da T89a).
+- **In corso**: **T116** (lanciato alle 13:35 su Claude).
+- **Pronti su Claude**: **T104** (p68) → **T105** (p70) → **T106** (p72) → **T89a** (p75); bloccati **T89b-e** (da T89a).
 - **Da integrare**: **T102** (via T116).
 - **Integrati di recente**: **T115**, **T57b**, **T114**, **T103**, **T57c**, **T113**, **T112**, **T111**, **T101**, **T110**, **T109**.
-- **Crediti** (01/11 ~12:40 UTC): Claude settimana e 5h al 100 % (reset 05/11 16:00); Gemini settimana 8 %, sotto soglia: nessun task nuovo (reset 05/11 17:37); Argon fermo fino al 04/11.
+- **Crediti** (01/11 dopo le 13:35 UTC): Claude settimana 100 %, 5h 96 % (reset 05/11 16:00); Gemini settimana 8 %, sotto soglia: nessun task nuovo (reset 05/11 17:37); Argon fermo fino al 04/11.
 
 ## Da fare appena possibile
 
