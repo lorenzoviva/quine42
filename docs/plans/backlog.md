@@ -2244,7 +2244,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   visibili (resta in due commenti HTML); in console solo errori di estensioni del browser. `/?skip&offline`: HUD come prima, nessun errore.
   Nessun difetto.
 
-### T109 · Il sito: il template grafico in `docs/design/sito/` — `fatto`
+### T109 · Il sito: il template grafico in `docs/design/sito/` — `da fare`
 - Pipeline: claude · stima 4% · approvato · priorità 59
 - Contesto: richiesta dell'autore del 01/11: il template va fatto prima dei task del sito (T101-T106), e lo fa la pipeline al posto suo.
   Posto scelto dall'autore: `docs/design/sito/` (`docs/pipeline/domande/T97.md`, risposta (a)). Nasce da T97: `dossier T97`; tema in ADR-0095,
