@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:sicurezza": "vitest run tests/sicurezza",
+    "sicurezza:prove": "node tools/sicurezza/prove.mjs",
     "abbonamento": "vite-node --script tools/abbonamenti/servi.ts"
   },
   "author": "lorenzoviva <lorenzo.vaccaro@hotmail.com>",

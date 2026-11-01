@@ -1,5 +1,9 @@
 # Le vulnerabilità di QUINE42: il processo
 
+> **Le prove da eseguire di persona** (T137), prima che entri T120. Lancia `npm run sicurezza:prove`: circa 2-3 minuti, poi una riga per prova (`V-NNN.x`, `ok` o `FALLA`, la proprietà). Oggi **ci si aspettano molte FALLA**: misurano lo stato prima delle correzioni, non sono errori del kit; `ERRORE` invece vuol dire che una prova non ha misurato nulla.
+> **Non può fare danni**: un progetto usa e getta nella cartella temporanea, con un `.env` e degli universi suoi; segreti finti, mai il tuo `.env` né `universes/`; solo loopback; Gemini e Stripe sono finti e nessuna richiesta esce dalla macchina. L'unico file che scrive fuori è `docs/sicurezza/esiti/<data>.json`.
+> **Poi** i blocchi di [`prove-f12.md`](prove-f12.md), con `npm run sicurezza:prove -- --resta 4871`. **Per riportare**: dai all'orchestratore l'esito e le righe di F12. Opzioni: `--solo V-001,V-014`, `--senza-build`.
+
 Dal rilevamento alla chiusura ogni vulnerabilità segue lo stesso percorso e ha **una voce** in [`registro.md`](registro.md): lì si guarda
 a che punto è. Decisione in [ADR-0098](../adr/0098-il-processo-delle-vulnerabilita.md); il primo audit è [`audit-2026-11.md`](audit-2026-11.md).
 

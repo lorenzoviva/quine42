@@ -85,6 +85,7 @@ npm test             # test (kernel, Concilio offline, MarkovJunior, layout, val
 npm run typecheck    # tsc --noEmit
 npm run build        # typecheck + build (npx vite preview la serve, proxy incluso)
 npm run test:sicurezza # solo la suite delle vulnerabilità (tests/sicurezza/, già dentro npm test; ADR-0098)
+npm run sicurezza:prove # le prove dell'autore contro un server vero in un progetto usa e getta (T137, docs/sicurezza/README.md)
 npm run abbonamento  # serve la coda /api/coda con le CLI (Claude, Antigravity, ADR-0077)
 ```
 
@@ -171,6 +172,7 @@ src/session/             il kernel sul server (ADR-0058): protocol.ts (messaggi,
                         il client sottile (ADR-0059): thin.ts (ThinClient: riempie il kernel specchio), socket.ts (WebSocket, id della scheda)
 tools/pipeline/          la pipeline agentica (ADR-0072, 0079): pipeline.mjs (code, budget, esecuzione nei worktree, ripresa dopo i limiti, dossier),
                         orchestra.mjs (il processo dell'orchestratore: chat, eventi, epoche), web.mjs (l'interfaccia web locale, T69), config.json
+tools/sicurezza/        il kit delle prove dell'autore (T137): prove.mjs (esecuzione, esito), catalogo.mjs (le prove), ambiente.mjs (i limiti: loopback, cartella temporanea, segreti finti), server.mjs, sandbox.mjs (processi a parte)
 tools/abbonamenti/      servi.ts (il processo che serve la coda degli abbonamenti con le CLI, ADR-0077)
 lab/                    laboratorio di MarkovJunior (ADR-0038): sandbox 3D /lab/3d/, editor modelli /lab/editor/ (T59a, T59b, T59c, T59d), modelli ufficiali e conformità, script per
                         affettare, fotografare, misurare e provare i programmi con Gemini; non importarlo da src/
