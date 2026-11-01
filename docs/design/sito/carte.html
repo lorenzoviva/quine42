@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QUINE42 · Template Carte 3D Collezionabili</title>
+    <link rel="stylesheet" href="./template.css" />
+    <style>
+      .cards-hero-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+        margin-bottom: 36px;
+      }
+      .card-collection-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+        gap: 36px;
+        justify-items: center;
+      }
+      .card-genealogy-box {
+        background: rgba(7, 4, 13, 0.9);
+        border: 1px dashed var(--neon-cyan);
+        padding: 8px 10px;
+        margin-top: 10px;
+        text-align: left;
+        font-size: 0.7rem;
+      }
+      .card-genealogy-node {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 4px;
+      }
+      @media (max-width: 900px) {
+        .cards-hero-stats { grid-template-columns: repeat(2, 1fr); }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Top Navigation Bar -->
+    <header class="site-nav">
+      <a href="./index.html" class="nav-brand">
+        <span class="nav-logo">QUINE42</span>
+        <span class="nav-tagline">// ARCADE · VOXEL · IA</span>
+      </a>
+      <button class="nav-toggle-btn" id="nav-toggle">MENU ▼</button>
+      <nav>
+        <ul class="nav-links" id="nav-links">
+          <li><a href="./index.html" class="nav-link">Mondo</a></li>
+          <li><a href="./carte.html" class="nav-link active">Carte 3D</a></li>
+          <li><a href="./sessioni.html" class="nav-link">Sessioni</a></li>
+          <li><a href="./profilo.html" class="nav-link">Profilo</a></li>
+          <li><a href="./pagamenti.html" class="nav-link">Crediti</a></li>
+          <li><a href="./componenti.html" class="nav-link">Componenti</a></li>
+        </ul>
+      </nav>
+      <div class="nav-actions">
+        <a href="../../../index.html" class="comic-btn arcade cyan">GIOCA SUBITO</a>
+        <a href="./login.html" class="comic-btn arcade">ACCEDI</a>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="section-wrap">
+      <div class="section-head">
+        <span class="comic-badge yellow">COLLEZIONE DIGITALE ATTIVA</span>
+        <h1 class="comic-title" style="font-size: 2.8rem; margin: 10px 0 0;">GALLERIA DELLE CARTE 3D</h1>
+        <p>// CLICCA SU UNA CARTA PER GIRARLA · LAMINA OLOGRAFICA BIFACCIALE</p>
+      </div>
+
+      <!-- Collection Summary Stats -->
+      <div class="cards-hero-stats">
+        <div class="comic-card" style="padding: 16px;">
+          <span class="comic-badge cyan">TOTALE</span>
+          <div class="comic-title cyan" style="font-size: 2.2rem; margin: 6px 0 0;">18</div>
+          <span class="arcade-text text-dim" style="font-size: 0.65rem;">CARTE SBLOCCATE</span>
+        </div>
+        <div class="comic-card" style="padding: 16px;">
+          <span class="comic-badge pink">RARE</span>
+          <div class="comic-title" style="color: var(--neon-pink); font-size: 2.2rem; margin: 6px 0 0;">6</div>
+          <span class="arcade-text text-dim" style="font-size: 0.65rem;">OGGETTI & CREATURE</span>
+        </div>
+        <div class="comic-card" style="padding: 16px;">
+          <span class="comic-badge yellow">LEGGENDARIE</span>
+          <div class="comic-title" style="font-size: 2.2rem; margin: 6px 0 0;">2</div>
+          <span class="arcade-text text-dim" style="font-size: 0.65rem;">STRUTTURE & MAGIE</span>
+        </div>
+        <div class="comic-card" style="padding: 16px;">
+          <span class="comic-badge green">RENDITA</span>
+          <div class="comic-title" style="color: var(--neon-green); font-size: 2.2rem; margin: 6px 0 0;">$3.40</div>
+          <span class="arcade-text text-dim" style="font-size: 0.65rem;">CREDITI EREDITATI</span>
+        </div>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="comic-tabs" id="card-filter-tabs">
+        <button class="comic-tab active" data-cat="all">TUTTE (4)</button>
+        <button class="comic-tab" data-cat="oggetti">OGGETTI & ARMI</button>
+        <button class="comic-tab" data-cat="strutture">STRUTTURE & LUOGHI</button>
+        <button class="comic-tab" data-cat="creature">CREATURE</button>
+        <button class="comic-tab" data-cat="magie">MAGIE & RUNE</button>
+      </div>
+
+      <!-- Cards Grid in 3D -->
+      <div class="card-collection-grid" id="cards-container">
+        <!-- Card 1: Spada di Fuliggine -->
+        <div class="card-3d-wrapper" data-category="oggetti">
+          <div class="retro-card" title="Clicca per girare">
+            <!-- Front -->
+            <div class="card-face card-front">
+              <div class="card-holo-foil"></div>
+              <div class="card-inner">
+                <div class="card-header">
+                  <h4 class="card-name">SPADA DI FULIGGINE</h4>
+                  <span class="comic-badge cyan">RARA</span>
+                </div>
+                <div class="card-art-box">
+                  <div class="card-art-gem"></div>
+                </div>
+                <p style="font-size: 0.8rem; margin: 0 0 10px; color: var(--comic-paper-dim);">
+                  Lama forgiata nella cenere del primo vulcano. Brucia con fiamme di rune pure.
+                </p>
+                <div class="card-stats-box">
+                  <div class="card-stat">Luoghi: <b>14</b></div>
+                  <div class="card-stat">Trame: <b>6</b></div>
+                  <div class="card-stat">Prompt: <b>31</b></div>
+                  <div class="card-stat">Totale: <b class="text-green">51</b></div>
+                </div>
+              </div>
+            </div>
+            <!-- Back -->
+            <div class="card-face card-back">
+              <div class="card-holo-foil"></div>
+              <div class="card-inner">
+                <div class="card-back-frame">
+                  <div class="card-back-brand" style="font-size: 1.8rem;">QUINE42</div>
+                  <div class="arcade-text text-cyan" style="font-size: 0.65rem;">IMPRONTA MINHASH</div>
+                  <code class="mono-text text-yellow" style="font-size: 0.7rem;">mh:4a7e9b01</code>
+                  <div class="card-genealogy-box">
+                    <div class="card-genealogy-node">
+                      <span class="comic-badge dark" style="font-size: 0.55rem;">ORIGINE</span>
+                      <span>Valmora (Reame #1)</span>
+                    </div>
+                    <div class="card-genealogy-node">
+                      <span class="comic-badge green" style="font-size: 0.55rem;">QUOTA</span>
+                      <span class="text-green">40% sui proventi cloni</span>
+                    </div>
+                  </div>
+                  <div class="arcade-text text-dim" style="font-size: 0.55rem; margin-top: 10px;">
+                    // CARTA DEL MONDO //
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Cripta delle Rune -->
+        <div class="card-3d-wrapper" data-category="strutture">
+          <div class="retro-card" title="Clicca per girare">
+            <!-- Front -->
+            <div class="card-face card-front">
+              <div class="card-holo-foil"></div>
+              <div class="card-inner">
+                <div class="card-header">
+                  <h4 class="card-name">CRIPTA DELLE RUNE</h4>
+                  <span class="comic-badge yellow">EPICA</span>
+                </div>
+                <div class="card-art-box">
+                  <div class="card-art-gem" style="background: linear-gradient(45deg, var(--neon-yellow), var(--neon-green));"></div>
+                </div>
+                <p style="font-size: 0.8rem; margin: 0 0 10px; color: var(--comic-paper-dim);">
+                  Sotterraneo antico lastricato di rune intatte. I suoi muri non cedono al tempo.
+                </p>
+                <div class="card-stats-box">
+                  <div class="card-stat">Luoghi: <b>8</b></div>
+                  <div class="card-stat">Trame: <b>12</b></div>
+                  <div class="card-stat">Prompt: <b>44</b></div>
+                  <div class="card-stat">Totale: <b class="text-green">64</b></div>
+                </div>
+              </div>
+            </div>
+            <!-- Back -->
+            <div class="card-face card-back">
+              <div class="card-holo-foil"></div>
+              <div class="card-inner">
+                <div class="card-back-frame">
+                  <div class="card-back-brand" style="font-size: 1.8rem;">QUINE42</div>
+                  <div class="arcade-text text-cyan" style="font-size: 0.65rem;">IMPRONTA MINHASH</div>
+                  <code class="mono-text text-yellow" style="font-size: 0.7rem;">mh:8f2a1c99</code>
+                  <div class="card-genealogy-box">
+                    <div class="card-genealogy-node">
+                      <span class="comic-badge dark" style="font-size: 0.55rem;">ORIGINE</span>
+                      <span>Valmora (Reame #1)</span>
+                    </div>
+                    <div class="card-genealogy-node">
+                      <span class="comic-badge green" style="font-size: 0.55rem;">QUOTA</span>
+                      <span class="text-green">50% sui proventi cloni</span>
+                    </div>
+                  </div>
+                  <div class="arcade-text text-dim" style="font-size: 0.55rem; margin-top: 10px;">
+                    // CARTA DEL MONDO //
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Gerboa Guardiano -->
+        <div class="card-3d-wrapper" data-category="creature">
+          <div class="retro-card" title="Clicca per girare">
+            <!-- Front -->
+            <div class="card-face card-front">
+              <div class="card-holo-foil"></div>
+              <div class="card-inner">
+                <div class="card-header">
+                  <h4 class="card-name">GERBOA SILENZIOSO</h4>
+                  <span class="comic-badge cyan">RARA</span>
+                </div>
+                <div class="card-art-box">
+                  <div class="card-art-gem" style="background: linear-gradient(45deg, var(--neon-cyan), var(--neon-pink));"></div>
+                </div>
+                <p style="font-size: 0.8rem; margin: 0 0 10px; color: var(--comic-paper-dim);">
+                  Piccola creatura rapida con orecchie attentissime. Scorge presenze oltre ogni colle.
+                </p>
+                <div class="card-stats-box">
+                  <div class="card-stat">Luoghi: <b>5</b></div>
+                  <div class="card-stat">Trame: <b>9</b></div>
+                  <div class="card-stat">Prompt: <b>18</b></div>
+                  <div class="card-stat">Totale: <b class="text-green">32</b></div>
+                </div>
+              </div>
+            </div>
+            <!-- Back -->
+            <div class="card-face card-back">
+              <div class="card-holo-foil"></div>
+              <div class="card-inner">
+                <div class="card-back-frame">
+                  <div class="card-back-brand" style="font-size: 1.8rem;">QUINE42</div>
+                  <div class="arcade-text text-cyan" style="font-size: 0.65rem;">IMPRONTA MINHASH</div>
+                  <code class="mono-text text-yellow" style="font-size: 0.7rem;">mh:3d1e67b4</code>
+                  <div class="card-genealogy-box">
+                    <div class="card-genealogy-node">
+                      <span class="comic-badge dark" style="font-size: 0.55rem;">ORIGINE</span>
+                      <span>Aurora (Reame #2)</span>
+                    </div>
+                    <div class="card-genealogy-node">
+                      <span class="comic-badge green" style="font-size: 0.55rem;">QUOTA</span>
+                      <span class="text-green">30% sui proventi cloni</span>
+                    </div>
+                  </div>
+                  <div class="arcade-text text-dim" style="font-size: 0.55rem; margin-top: 10px;">
+                    // CARTA DEL MONDO //
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4: Sigillo di Fiamma Viva -->
+        <div class="card-3d-wrapper" data-category="magie">
+          <div class="retro-card" title="Clicca per girare">
+            <!-- Front -->
+            <div class="card-face card-front">
+              <div class="card-holo-foil"></div>
+              <div class="card-inner">
+                <div class="card-header">
+                  <h4 class="card-name">FIAMMA VIVA</h4>
+                  <span class="comic-badge pink">LEGGENDARIA</span>
+                </div>
+                <div class="card-art-box">
+                  <div class="card-art-gem" style="background: linear-gradient(45deg, var(--neon-pink), var(--neon-orange));"></div>
+                </div>
+                <p style="font-size: 0.8rem; margin: 0 0 10px; color: var(--comic-paper-dim);">
+                  La sequenza pura di fuoco e vita. Brucia l'aria e restituisce calore al viandante.
+                </p>
+                <div class="card-stats-box">
+                  <div class="card-stat">Luoghi: <b>22</b></div>
+                  <div class="card-stat">Trame: <b>15</b></div>
+                  <div class="card-stat">Prompt: <b>85</b></div>
+                  <div class="card-stat">Totale: <b class="text-green">122</b></div>
+                </div>
+              </div>
+            </div>
+            <!-- Back -->
+            <div class="card-face card-back">
+              <div class="card-holo-foil"></div>
+              <div class="card-inner">
+                <div class="card-back-frame">
+                  <div class="card-back-brand" style="font-size: 1.8rem;">QUINE42</div>
+                  <div class="arcade-text text-cyan" style="font-size: 0.65rem;">IMPRONTA MINHASH</div>
+                  <code class="mono-text text-yellow" style="font-size: 0.7rem;">mh:9b0c22e8</code>
+                  <div class="card-genealogy-box">
+                    <div class="card-genealogy-node">
+                      <span class="comic-badge dark" style="font-size: 0.55rem;">ORIGINE</span>
+                      <span>Valmora (Reame #1)</span>
+                    </div>
+                    <div class="card-genealogy-node">
+                      <span class="comic-badge green" style="font-size: 0.55rem;">QUOTA</span>
+                      <span class="text-green">70% sui proventi cloni</span>
+                    </div>
+                  </div>
+                  <div class="arcade-text text-dim" style="font-size: 0.55rem; margin-top: 10px;">
+                    // CARTA DEL MONDO //
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Synthwave Sunset Footer with the Secret of the Jerboa -->
+    <footer class="site-footer">
+      <div class="footer-grid-floor"></div>
+
+      <div class="footer-horizon">
+        <div class="jerboa-peek-container" title="Due sagome all'orizzonte...">
+          <div class="jerboa-tooltip">// DUE ORECCHIE LUNGHE NELLA NOTTE...</div>
+          <svg class="jerboa-ears-svg" viewBox="0 0 64 38">
+            <path d="M 16 38 C 14 20, 4 8, 12 2 C 20 -4, 26 14, 28 38 Z" />
+            <path d="M 48 38 C 50 20, 60 8, 52 2 C 44 -4, 38 14, 36 38 Z" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="footer-brand">QUINE42</div>
+      <p class="footer-quote">
+        "Il sentiero scorre sotto i tuoi passi e si apre a ogni scelta.<br />
+        Ciò che pronunci diventa cammino, ciò che componi diventa mondo."
+      </p>
+
+      <div class="footer-links">
+        <a href="../../../index.html">GIOCO</a>
+        <a href="./index.html">MONDO</a>
+        <a href="./carte.html">CARTE</a>
+        <a href="./sessioni.html">SESSIONI</a>
+        <a href="./profilo.html">PROFILO</a>
+        <a href="./pagamenti.html">CREDITI</a>
+        <a href="./componenti.html">COMPONENTI</a>
+      </div>
+
+      <div class="footer-copy">
+        QUINE42 © 2026 · Voxel Engine & Modelli MarkovJunior 3D · Generato con Intelligenza Artificiale
+      </div>
+    </footer>
+
+    <!-- Interactive script for Card Flipping and Filtering -->
+    <script>
+      const cards = document.querySelectorAll('.retro-card');
+      cards.forEach(card => {
+        card.addEventListener('click', () => {
+          card.classList.toggle('is-flipped');
+        });
+      });
+
+      const filterTabs = document.querySelectorAll('#card-filter-tabs .comic-tab');
+      const cardWrappers = document.querySelectorAll('.card-3d-wrapper');
+
+      filterTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          filterTabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          const cat = tab.getAttribute('data-cat');
+          cardWrappers.forEach(wrap => {
+            if (cat === 'all') {
+              wrap.style.display = 'flex';
+            } else {
+              const itemCat = wrap.getAttribute('data-category');
+              wrap.style.display = itemCat === cat ? 'flex' : 'none';
+            }
+          });
+        });
+      });
+
+      // Mobile nav
+      const navToggle = document.getElementById('nav-toggle');
+      const navLinks = document.getElementById('nav-links');
+      const navActions = document.querySelector('.nav-actions');
+      if (navToggle && navLinks) {
+        navToggle.addEventListener('click', () => {
+          navLinks.classList.toggle('is-open');
+          if (navActions) navActions.classList.toggle('is-open');
+        });
+      }
+    </script>
+  </body>
+</html>

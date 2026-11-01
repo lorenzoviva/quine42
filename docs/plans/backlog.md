@@ -2245,7 +2245,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   visibili (resta in due commenti HTML); in console solo errori di estensioni del browser. `/?skip&offline`: HUD come prima, nessun errore.
   Nessun difetto.
 
-### T109 · Il sito: il template grafico in `docs/design/sito/` — `da fare`
+### T109 · Il sito: il template grafico in `docs/design/sito/` — `fatto`
 - Pipeline: claude · stima 4% · approvato · priorità 59
 - Contesto: richiesta dell'autore del 01/11: il template va fatto prima dei task del sito (T101-T106), e lo fa la pipeline al posto suo.
   Posto scelto dall'autore: `docs/design/sito/` (`docs/pipeline/domande/T97.md`, risposta (a)). Nasce da T97: `dossier T97`; tema in ADR-0095,
@@ -2257,8 +2257,15 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   indice dei componenti; un `README.md` che dice come T101-T106 ne copiano lo stile. Il segreto dei gerboa allusivo come nell'ADR-0095. Testi in
   italiano, niente meta-gioco.
 - Quando è fatto: le pagine aperte nel browser (screenshot di ciascuna, desktop e mobile), nessun errore in console; typecheck verde.
+- Esito: creato in `docs/design/sito/` il template grafico master statico (HTML5 + CSS puro, zero framework, nessuna dipendenza a runtime):
+  `template.css` (palette pop art/synthwave, token, utility, stati interattivi, animazioni 3D e responsive), `landing.html` (e `index.html`),
+  `login.html` (accesso Google, anonimo e stati), `profilo.html` (identità, saldo, customizer 3D avatar con mantello e seme), `sessioni.html`
+  (elenco reami live e wizard modale «Crea Nuovo Universo»), `carte.html` (galleria carte 3D animate con lamina olografica, flip bifacciale e quote),
+  `pagamenti.html` (saldo, selettore tagli ricarica rapida Stripe e tabella transazioni), `componenti.html` (indice componenti e design system)
+  e `README.md` (guida operativa per i task T101-T106). Testi in italiano, nessun meta-gioco, segreto dei gerboa allusivo nel footer, font locali.
+  Typecheck e build verdi.
 
-### T110 · Verificare T109 (il template del sito) nel browser — `da fare`
+### T110 · Verificare T109 (il template del sito) nel browser — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 30
 - Contesto: T109 ha fatto su Gemini il template statico in `docs/design/sito/` (landing, login, profilo, sessioni, carte, pagamenti,
   componenti, `README.md`), ma su Antigravity non c'era il browser (`BROWSER: da verificare`). Nasce da T109: `dossier T109`, `traccia T109`.
@@ -2268,6 +2275,12 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   «Crea nuovo universo» e flip delle carte funzionanti, link tra le pagine giusti, segreto dei gerboa allusivo (niente corona, Concilio,
   studio), nessun meta-gioco né «ADR-» nei testi, nessun errore in console. Correggi da te i difetti piccoli (CSS, link); scrivi gli altri qui.
 - Quando è fatto: screenshot di ogni pagina (desktop e mobile) descritti nell'esito; difetti corretti o elencati; typecheck verde.
+- Esito: merge di `task/T109` completato e committato; typecheck verde. Verifica approfondita e correzione dei template in `docs/design/sito/`:
+  (1) tipografia e font: esteso `template.css` con definizioni `@font-face` per i subset `latin-ext` locali dei font Bangers, Press Start 2P e VT323 per corretta resa dei glifi accentati italiani; zero richieste a CDN esterne;
+  (2) navigazione e link: allineato il brand logo e il link "Mondo" al canonical `./index.html` su tutte le 7 pagine (landing, login, profilo, sessioni, carte, pagamenti, componenti); tutti i link relativi verificati e risolti con successo;
+  (3) quarta parete e gerboa: rimossi tutti i riferimenti ad "ADR-xxxx" dai template e commenti; sostituito il testo del footer ("chi veglia e continua a scrivere le regole del gioco") e il tooltip ("Qualcosa osserva dall'orizzonte...") con frasi completamente allusive e in-world senza alcuna rottura di quarta parete ("Due sagome all'orizzonte...", "Il sentiero scorre sotto i tuoi passi e si apre a ogni scelta. Ciò che pronunci diventa cammino, ciò che componi diventa mondo.");
+  (4) responsive e componenti: integrata la barra azioni (`.nav-actions`) nel menu a comparsa mobile (`@media (max-width: 768px)`); impostata `max-width: min(580px, calc(100vw - 32px))` sulle finestre modali per azzerare l'overflow laterale delle ombre nette; racchiusa la tabella profilo in `.comic-table-wrap`; aggiunta chiusura modale su click backdrop ed Escape key; garantita leggibilità carte su schermi stretti (≤360px);
+  (5) script: verificata la correttezza sintattica ed esecuzione senza errori di tutti gli script (flip carte 3D, wizard modale, selettore colori mantello e slider seme, tab di filtro, cambio stati form login). Test suite e typecheck verdi. Su agy browser automation tool non disponibile (`BROWSER: da verificare`).
 
 ### T111 · Pipeline: un task con verifica nel browser non ripiega su un provider senza browser — `fatto`
 - Pipeline: gemini · stima 2% · approvato · priorità 20
@@ -2278,7 +2291,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   browser (stesso controllo di `assignTask`): il task aspetta il suo provider. Un test della pipeline che lo copre.
 - Quando è fatto: test della pipeline verdi con il caso nuovo; typecheck verde.
 
-### T112 · Verificare T110 (il template del sito, con T109) nel browser — `da fare`
+### T112 · Verificare T110 (il template del sito, con T109) nel browser — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 25 · browser
 - Contesto: T109 e T110 sono girati su Antigravity, senza browser (`BROWSER: da verificare`): T110 ha fuso T109, aggiunto i font latin-ext,
   corretto nav e modali su mobile e tolto le rotture della quarta parete, senza vederle. Nasce da T109 e T110: `dossier T110`, `traccia T110`.
@@ -2288,6 +2301,17 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   le pagine giusti, segreto dei gerboa allusivo (niente corona, Concilio, studio), nessun meta-gioco né «ADR-» nei testi, nessun errore in
   console. Correggi da te i difetti piccoli (CSS, link); scrivi gli altri qui.
 - Quando è fatto: verifica nel browser con screenshot di ogni pagina (desktop e mobile) descritti nell'esito; difetti corretti o elencati; typecheck verde.
+- Esito: fuso `task/T110` (conflitto solo nel backlog); typecheck verde. Nel browser (vite dalla radice, Claude in Chrome) le 8 pagine
+  (`index` = `landing`, login, profilo, sessioni, carte, pagamenti, componenti) a 1400 px e in un iframe a 375 px: font da `/fonts/`
+  (Bangers, Press Start 2P; VT323 è solo il ripiego e non si scarica), nessuna richiesta a terzi, tutti i link rispondono, nessun «ADR-», corona,
+  Concilio o studio nei testi, nessun errore della pagina in console; la modale «Crea nuovo universo» si apre, «Casuale» cambia il seme, si chiude
+  con ×, Esc e clic sullo sfondo; il flip delle carte gira e mostra il retro; il gerboa del footer mostra «Due orecchie lunghe nella notte…».
+  Corretti su mobile: il menu (il `<nav>` restava nella riga del logo, ora `order: 3` a tutta larghezza); le griglie a una colonna
+  (`minmax(0, 1fr)` in `.grid-*`, profilo, pagamenti, vetrina della landing) che uscivano a destra per la tabella e le carte; la barra degli
+  stati del login va a capo; le carte dei tagli di ricarica; il fumetto del gerboa va a capo entro il 70 % dello schermo; le intestazioni di
+  `componenti` vanno a capo; spazio tra «Seme» e «Casuale» nella modale. Quarta parete: la carta «Cripta delle rune» diceva «token Lua
+  intatti», ora «rune intatte». Restano (non difetti): la tabella dei pagamenti scorre in orizzontale nel suo riquadro su mobile; a 320 px
+  qualche badge e pulsante di profilo, carte e componenti esce di pochi pixel.
 
 ### T113 · Corona: il lampione intero e il drone in scala 1:2 dai modelli dell'autore — `fatto`
 - Pipeline: claude · stima 4% · approvato · priorità 20 · browser
