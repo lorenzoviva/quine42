@@ -49,6 +49,8 @@ Aggiornato il 01/11/2026, fine dell'epoca 193 su **claude** (crediti: vedi `stat
 
 ## Task attivi e in corso
 
+- **Finestra di Vite 7, procedura in corso (epoca 194)**: `integra T142` in conflitto su `docs/adr/README.md` (il 0099): **T145** lo risolve (ADR di T131 → 0100). Per farlo girare da solo ho riattivato Claude e **tolto l'approvazione a T143 T120 T124 T126 T128 T132 T106 T89a**. Finito T145: `sospendi claude`; `integra T145`, `integra T142`, `integra T131`; `npm ci` nel base; `approva T143 T120 T124 T126 T128 T132 T106 T89a`; `riattiva claude`. **Non dimenticare `approva` e `riattiva`.**
+
 - **In corso** (epoca 193): **T142** su Claude.
 - **T122 finito** (V-008, V-017, V-019 chiuse; ADR-0099), conflitto in `AGENTS.md`: **T144** lo integra (p1, dipende da T142; l'ADR di T122 prende il primo numero libero). Poi `integra T144`, `integra T122`. Restano non provati: difetti di wasm e Lua, blocco del servizio (T126, T127), serve uno sguardo esperto per una garanzia forte. `tests/between.test.ts` ha un limite di 180 s: andrebbe alleggerito.
 - **Claude sospeso da me il 01/11** per la finestra di Vite 7: T142 finisce, niente task nuovi. Poi la procedura di T131 qui sotto (già sospeso); infine `riattiva claude`. **Non dimenticare `riattiva`.**
