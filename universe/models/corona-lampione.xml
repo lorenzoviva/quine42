@@ -1,204 +1,499 @@
 <!--
-Lampione futuristico ad arco del viale (corona): arredo urbano per il viale della corona.
-Scritto da Gemini CLI (Gemini 3.8 Flash, abbonamento), task T50a.
-Scatola: 1 × 1 × 2.5 caselle, 8 × 8 × 20 voxel, 8 voxel per casella (vpt: 8).
-Ruolo: prop.
-Stelo slanciato asimmetrico in titanio cybernetico scuro (M, m) con giunzioni e collari cromati (S, s);
-sale dritto fino a z=11 ancorato su un plinto ottagonale in carbonio (D) con indicatori telemetrici (E, e);
-all'altezza di z=11..12 si raccorda a un robusto snodo cilindrico cromato con aletta contrappeso posteriore;
-da quota z=12 a z=15 il braccio si proietta audacemente in avanti a sbalzo verso il viale (+y),
-sostenuto da pistoni idraulici e tiranti in cromo satinato variabili per seme;
-la testa a becco aerodinamico (z=15..18, y=3..6) alloggia alette di raffreddamento e sfiatatoi in vetro scuro (V, T);
-sul lato inferiore incassato (z=15, rivolto verso il suolo), la feritoia emette un potente fascio neon ciano (N, glow="True")
-con nucleo fotonico laser bianco (W, glow="True") e deflettori ottici prismatici (G, T) che irradiano luce sul selciato.
-Animazione telemetria (6 fotogrammi):
-- le spie diagnostiche del plinto pulsano e si alternano tra smeraldo (E) e cobalto (e);
-- il nucleo laser fotonico (W) vibra lungo la feritoia neon (N) simulando il flusso d'energia.
+Lampione futuristico "Cyber-Drago" a gravità con mortaio fotonico (corona):
+Architettura a spirale con testa a becco protesa a sbalzo, mozzi laterali e pinne angolate,
+perfettamente compatibile con le invarianti spaziali del motore logico MarkovJunior:
+- Canale di scorrimento (x=2..5, y=2..5, z=19..62) 100% libero (B);
+- Guida dorsale in vetro (v) a y=1 (x=3..4, z=18..62) intatta per il pattern matching mm/vm;
+- Fasce nere/ardesia (m) a z=31..32 e z=45..46 che si aprono in Bx/xB durante il <markov> di caduta;
+- Canale posteriore (x=3..4, y=0) sgombro con i soli freni di tappa (b) a z=59, 55, 47, 30, 22;
+- Cremagliera dentata spostata sulle colonne laterali del dorso (x=2 e x=5, y=0) per non ostruire *BB*;
+- Innesco sommitale a z=63 conforme al pattern ****/*MM*/****/**** per convertire p -> c;
+- Palette Neon Punk completa (Ciano -> Cobalto -> Viola -> Magenta) sincronizzata sul ciclo a 26 frame.
 -->
-<sequence values="BMmDSsVTGNWEeX" size="8 8 20" symmetry="(x)" name="Lampione">
-  <!-- Materiali strutturali: titanio cybernetico scuro e grafite carbonio -->
-  <color symbol="M" value="1a1b22" name="titanio primario"/>
-  <color symbol="m" value="2e303d" name="titanio secondario biselli"/>
-  <color symbol="D" value="141418" name="piastra base carbonio"/>
+<sequence values="BMmDSsVTGNWEexXpabcvOPC1234567890ZAFYURQLKJIH" size="10 14 74" symmetry="(x)" name="LampioneDrago">
+  <!-- Materiali strutturali: metallo cybernetico abissale e ardesia -->
+  <color symbol="D" value="0c0a12" name="piastra base carbonio abissale"/>
+  <color symbol="M" value="14141a" name="metallo primario nero-viola"/>
+  <color symbol="m" value="242632" name="metallo secondario biselli ardesia"/>
 
-  <!-- Meccanica, snodi, tenditori e finiture cromate -->
-  <color symbol="S" value="83769c" name="cromo satinato giunti"/>
-  <color symbol="s" value="c2c3c7" name="cromo lucido bulloni"/>
+  <!-- Meccanica, gabbia elicoidale, mozzi e finiture cromate -->
+  <color symbol="S" value="767092" name="cromo satinato lavanda gabbia"/>
+  <color symbol="s" value="d0d2d8" name="argento cromo lucido mozzi e artigli"/>
 
-  <!-- Ottiche, guide riflettenti e prismi -->
-  <color symbol="V" value="1c2a3a" name="vano ottico scuro"/>
-  <color symbol="T" value="3d5a78" name="riflettore ardesia"/>
-  <color symbol="G" value="b4f0ff" name="diffusore prismatico prisma"/>
+  <!-- Ottiche, guide interne e riflettori -->
+  <color symbol="V" value="181c28" name="vano ottico muso"/>
+  <color symbol="T" value="403858" name="riflettore prisma lavanda scuro"/>
+  <color symbol="G" value="05d9e8" name="diffusore prismatico ciano"/>
+  <color symbol="x" value="ff0000" hidden="True" name="marker temporaneo per ripristino fascia"/>
 
-  <!-- Fonti luminose attive (glow="True") -->
-  <color symbol="N" value="05d9e8" glow="True" name="fascio neon ciano"/>
+  <!-- Fonti luminose attive (glow="True"): Gradiente Neon Punk a 26 fasi -->
+  <!-- Dal picco laser bianco-ciano (1), attraverso cobalto (7-9), fino a viola/magenta (A-I) e spegnimento (J-Y) -->
+  <color symbol="1" value="ffffff" glow="True" name="fascio neon 1 picco fotonico"/>
+  <color symbol="2" value="d8fcff" glow="True" name="fascio neon 2 ghiaccio"/>
+  <color symbol="3" value="9ef6ff" glow="True" name="fascio neon 3 ciano chiaro"/>
+  <color symbol="4" value="5cecff" glow="True" name="fascio neon 4 ciano vivo"/>
+  <color symbol="5" value="05d9e8" glow="True" name="fascio neon 5 ciano corona"/>
+  <color symbol="6" value="00c2f2" glow="True" name="fascio neon 6 azzurro"/>
+  <color symbol="7" value="29adff" glow="True" name="fascio neon 7 cobalto"/>
+  <color symbol="8" value="4794ff" glow="True" name="fascio neon 8 cobalto profondo"/>
+  <color symbol="9" value="667cff" glow="True" name="fascio neon 9 indaco elettrico"/>
+  <color symbol="0" value="8566ff" glow="True" name="fascio neon 10 ametista"/>
+  <color symbol="A" value="a352ff" glow="True" name="fascio neon 11 viola neon"/>
+  <color symbol="Z" value="c084f8" glow="True" name="fascio neon 12 lavanda magia"/>
+  <color symbol="C" value="d946ef" glow="True" name="fascio neon 13 orchidea"/>
+  <color symbol="F" value="ff2a6d" glow="True" name="fascio neon 14 magenta punk"/>
+  <color symbol="H" value="db2464" glow="True" name="fascio neon 15 cremisi"/>
+  <color symbol="I" value="b81f5b" glow="True" name="fascio neon 16 rubino scuro"/>
+  <color symbol="J" value="961a51" glow="True" name="fascio neon 17 vinaccia"/>
+  <color symbol="K" value="781748" glow="True" name="fascio neon 18 prugna"/>
+  <color symbol="L" value="5c143e" glow="True" name="fascio neon 19 melanzana"/>
+  <color symbol="N" value="441134" glow="True" name="fascio neon 20 viola notturno"/>
+  <color symbol="O" value="300e29" glow="True" name="fascio neon 21 brace viola"/>
+  <color symbol="P" value="220b1f" glow="True" name="fascio neon 22 fumo"/>
+  <color symbol="Q" value="160816" glow="True" name="fascio neon 23 ombra"/>
+  <color symbol="R" value="0e050f" glow="True" name="fascio neon 24 residuo"/>
+  <color symbol="U" value="080309" glow="True" name="fascio neon 25 quasi spento"/>
+  <color symbol="Y" value="040105" glow="True" name="fascio neon 26 innesco dormiente"/>
+
+  <!-- Spie telemetriche alla base (E verde smeraldo, e cobalto) -->
   <color symbol="W" value="ffffff" glow="True" name="nucleo fotonico bianco"/>
-  <color symbol="E" value="00ff88" glow="True" name="led alimentazione verde"/>
+  <color symbol="E" value="00ff88" glow="True" name="led alimentazione smeraldo"/>
   <color symbol="e" value="29adff" glow="True" name="led uplink cobalto"/>
 
-  <!-- Segnaposto invisibile per regole generative -->
+  <!-- Componenti in vetro e cubo gravitazionale (p in salita ciano, c in caduta magenta) -->
+  <color symbol="v" value="29adff" alpha="0.38" name="vetro protettivo e guida dorsale"/>
+  <color symbol="p" value="05d9e8" alpha="0.52" name="peso mortaio in salita ciano"/>
+  <color symbol="c" value="ff2a6d" alpha="0.60" name="peso mortaio in caduta magenta"/>
+
+  <!-- Marcatori per cinematica e regole generative -->
+  <color symbol="a" value="29adff" alpha="0" name="apice mortaio"/>
+  <color symbol="b" hidden="True" alpha="0" name="marker caduta mortaio"/>
   <color symbol="X" hidden="True" name="marker generativo"/>
 
   <!-- ======================================================== -->
-  <!-- 1. PLINTO E FLANGIA DI FONDAZIONE (z = 0..2)             -->
+  <!-- 1. PLINTO E FLANGIA DI FONDAZIONE (z = 0..4)             -->
   <!-- ======================================================== -->
-  <!-- Piastra di fondazione a terra z=0 (x=2..5, y=1..5) in carbonio D -->
-  <box at="3.5 3.0 0" size="4 5 1" color="D"/>
+  <box at="3.5 3 0" size="4 7 1" color="D"/>
+  <box at="3.5 3 0" size="8 5 1" color="D"/>
+  <box at="3.5 3 0" size="6 5 1" color="S"/>
 
-  <!-- 4 bulloni cromati esagonali di ancoraggio ai vertici del plinto -->
-  <box at="2 1 0" size="1 1 1" color="s"/>
-  <box at="5 1 0" size="1 1 1" color="s"/>
-  <box at="2 5 0" size="1 1 1" color="s"/>
-  <box at="5 5 0" size="1 1 1" color="s"/>
+  <!-- Artigli meccanici cromati ai vertici del plinto -->
+  <box at="2 0 0" size="1 1 1" color="s"/>
+  <box at="5 0 0" size="1 1 1" color="s"/>
+  <box at="7 1 0" size="1 1 1" color="s"/>
+  <box at="7 5 0" size="1 1 1" color="s"/>
+  <box at="0 5 0" size="1 1 1" color="s"/>
+  <box at="0 1 0" size="1 1 1" color="s"/>
+  <box at="2 6 0" size="1 1 1" color="s"/>
+  <box at="5 6 0" size="1 1 1" color="s"/>
+  <box at="5 6 17" size="1 1 1" color="s"/>
+  <box at="2 6 17" size="1 1 1" color="s"/>
+  <box at="1 1 30" size="1 1 1" color="s"/>
+  <box at="1 1 33" size="1 1 1" color="s"/>
+  <box at="6 1 30" size="1 1 1" color="s"/>
+  <box at="6 1 33" size="1 1 1" color="s"/>
+  <box at="1 1 44" size="1 1 1" color="s"/>
+  <box at="1 1 47" size="1 1 1" color="s"/>
+  <box at="6 1 44" size="1 1 1" color="s"/>
+  <box at="6 1 47" size="1 1 1" color="s"/>
 
-  <!-- Zoccolo a gradino in titanio scuro a quota z=1 (x=2..5, y=2..4) -->
+  <!-- Zoccolo a gradini sul plinto con cascata neon e spie diagnostiche E/e -->
   <box at="3.5 3.0 1" size="4 3 1" color="M"/>
+  <box at="2 5 1" size="1 1 1" color="E"/>
+  <box at="3.5 4 2" size="2 1 1" color="F"/>
+  <box at="3.5 5 1" size="2 1 1" color="C"/>
+  <box at="3.5 3 3" size="2 1 1" color="H"/>
+  <box at="3.5 3 4" size="2 1 1" color="e"/>
+  <box at="5 5 1" size="1 1 1" color="e"/>
 
-  <!-- Pannello telemetrico frontale sul plinto a z=1 (y=5):    -->
-  <!-- Spie diagnostiche: verde alimentazione (E) e cobalto dati (e) -->
-  <box at="2 5 1" size="1 1 1" color="m"/>
-  <box at="3 5 1" size="1 1 1" color="E"/>
-  <box at="4 5 1" size="1 1 1" color="e"/>
-  <box at="5 5 1" size="1 1 1" color="m"/>
-
-  <!-- Collare rastremato di ancoraggio colonna a quota z=2 -->
   <box at="3.5 2.5 2" size="4 2 1" color="m"/>
   <box at="3.5 2.5 2" size="2 2 1" color="S"/>
 
   <!-- ======================================================== -->
-  <!-- 2. PILONE VERTICALE AERODINAMICO (z = 2..11)             -->
+  <!-- 2. PILONE INFERIORE E CAMERA OTTICA (z = 2..18)          -->
   <!-- ======================================================== -->
-  <!-- Colonna principale a sezione 2x2 (x=3..4, y=2..3, z=2..11) -->
-  <box at="3.5 2.5 2" size="2 2 10" color="M"/>
+  <box at="3.5 2 2" size="2 1 10" color="M"/>
+  <box at="3.5 1 3" size="2 1 1" color="m"/>
+  <box at="3.5 1 5" size="2 1 4" color="m"/>
 
-  <!-- Dorso posteriore sagomato (y=1, z=3..10) in titanio secondario -->
-  <box at="3.5 1.0 3" size="2 1 8" color="m"/>
+  <box at="2 1 5" size="1 1 1" color="S"/>
+  <box at="2 4 7" size="1 1 1" color="S"/>
+  <box at="2 2.5 6" size="1 2 1" color="S"/>
+  <box at="2 0 1" size="1 1 4" color="S"/>
+  <box at="2 5 8" size="1 1 5" color="S"/>
+  <box at="5 1 5" size="1 1 1" color="S"/>
+  <box at="5 4 7" size="1 1 1" color="S"/>
+  <box at="5 2.5 6" size="1 2 1" color="S"/>
+  <box at="5 0 1" size="1 1 4" color="S"/>
+  <box at="5 5 8" size="1 1 5" color="S"/>
 
-  <!-- Canalina di alimentazione centrale sul dorso in cromo satinato -->
-  <box at="3.5 1.0 4" size="2 1 6" color="S"/>
-
-  <!-- Anelli collare intermedi di irrigidimento a z=5 e z=9 -->
-  <box at="3.5 2.5 5" size="4 2 1" color="S"/>
   <box at="3.5 2.5 5" size="2 2 1" color="M"/>
-  <box at="3.5 2.5 9" size="4 2 1" color="S"/>
   <box at="3.5 2.5 9" size="2 2 1" color="M"/>
-
-  <!-- ======================================================== -->
-  <!-- 3. SNODO MECCANICO E GOMITO AD ARCO (z = 11..15)         -->
-  <!-- ======================================================== -->
-  <!-- Mozzo cilindrico dello snodo a quota z=11 (perno cromato passante) -->
-  <box at="3.5 2.5 11" size="4 2 1" color="S"/>
   <box at="3.5 2.5 11" size="2 2 1" color="s"/>
-
-  <!-- Contrafforte dorsale posteriore a becco (z=12..13, y=1) -->
   <box at="3.5 1.0 12" size="2 1 2" color="m"/>
+  <box at="3.5 1 18" size="2 1 1" color="m"/>
+  <box at="3.5 1 14" size="2 1 1" color="m"/>
   <box at="3.5 1.0 13" size="2 1 1" color="s"/>
+  <box at="3.5 1 9" size="2 1 1" color="s"/>
+  <box at="3.5 1 4" size="2 1 1" color="s"/>
 
-  <!-- Raccordo inferiore dello snodo a quota z=12 (y=2..4) -->
   <box at="3.5 2.5 12" size="2 2 1" color="M"/>
   <box at="3.5 3.5 12" size="2 2 1" color="M"/>
-
-  <!-- Sbalzo progressivo in avanti (+y) verso il viale:        -->
-  <!-- z=13: y=3..5 con staffa di rinforzo laterale cromata     -->
-  <box at="3.5 4.0 13" size="2 3 1" color="M"/>
+  <box at="3.5 3.5 13" size="2 2 1" color="M"/>
   <box at="3.5 4.0 13" size="4 1 1" color="S"/>
+  <box at="5 6 12" size="1 1 1" color="S"/>
+  <box at="2 6 12" size="1 1 1" color="S"/>
+  <box at="3.5 3 14" size="4 1 1" color="S"/>
+  <box at="3.5 2 14" size="2 1 1" color="S"/>
+  <box at="3.5 1 15" size="4 1 1" color="S"/>
   <box at="3.5 4.0 13" size="2 1 1" color="M"/>
 
-  <!-- z=14: y=4..6 con pistone/tirante idraulico               -->
-  <box at="3.5 5.0 14" size="2 3 1" color="M"/>
-  <box at="3.5 4.5 14" size="4 2 1" color="m"/>
-  <box at="3.5 4.5 14" size="2 2 1" color="s"/>
+  <box at="3.5 4 14" size="2 1 1" color="M"/>
+  <box at="5 4.5 14" size="1 2 1" color="m"/>
+  <box at="2 4.5 14" size="1 2 1" color="m"/>
+  <box at="3.5 4 14" size="2 1 1" color="s"/>
 
-  <!-- z=15: y=4..6 raccordo avanzato alla base della testa      -->
-  <box at="3.5 5.0 15" size="2 3 1" color="M"/>
+  <box at="3.5 4 15" size="2 1 1" color="M"/>
   <box at="3.5 5.0 15" size="4 1 1" color="S"/>
   <box at="3.5 5.0 15" size="2 1 1" color="M"/>
+  <box at="3.5 2 13" size="2 1 1" color="X"/>
 
-  <!-- Alloggiamenti per dettagli generativi sul braccio (X)    -->
-  <box at="3.5 3.0 14" size="2 1 1" color="X"/>
-
-  <!-- ======================================================== -->
-  <!-- 4. CORPO E CALOTTA DELLA TESTA (z = 15..18, y = 3..6)    -->
-  <!-- ======================================================== -->
-  <!-- Fascia portante mediana a quota z=16 (x=2..5, y=3..6)    -->
+  <!-- Calotta della camera ottica inferiore (z = 16..18) -->
   <box at="3.5 4.5 16" size="4 4 1" color="M"/>
-  <!-- Fasce perimetrali lucide cromate a z=16                  -->
+  <box at="6 3.5 17" size="1 6 1" color="M"/>
+  <box at="1 3.5 17" size="1 6 1" color="M"/>
   <box at="2 4.5 16" size="1 2 1" color="s"/>
   <box at="5 4.5 16" size="1 2 1" color="s"/>
   <box at="3.5 3.0 16" size="2 1 1" color="m"/>
-
-  <!-- Calotta superiore rastremata a quota z=17 (x=2..5, y=3..6)-->
   <box at="3.5 4.5 17" size="4 2 1" color="M"/>
   <box at="3.5 6.0 17" size="2 1 1" color="m"/>
+  <box at="3.5 7 17" size="6 1 1" color="m"/>
   <box at="3.5 3.5 17" size="2 2 1" color="m"/>
-
-  <!-- Cresta aerodinamica e griglie di dissipazione a quota z=18 (max z, z=19 libero) -->
   <box at="3.5 4.5 18" size="2 3 1" color="m"/>
-  <box at="3.5 4.0 18" size="2 1 1" color="V"/>
+  <box at="3.5 3.5 18" size="2 2 1" color="V"/>
   <box at="3.5 5.0 18" size="2 1 1" color="T"/>
+  <box at="3.5 2 18" size="2 1 1" color="T"/>
   <box at="3.5 5.5 18" size="2 1 1" color="s"/>
 
   <!-- ======================================================== -->
-  <!-- 5. FERITOIA OTTICA E FASCIO NEON VERSO IL BASSO (z = 15) -->
+  <!-- 3. GABBIA ELICOIDALE E CORRIDOIO LOGICO (z = 18..62)     -->
   <!-- ======================================================== -->
-  <!-- Involucro riflettente concavo rivolto al terreno (z=15)  -->
-  <box at="3.5 5.0 15" size="4 3 1" color="T"/>
-  <!-- Diffusori ottici prismatici laterali                     -->
+  <!-- Doppia elica esterna su x=1 e x=6 (non invade mai x=2..5, y=2..5) -->
+  <box at="1 1 20" size="1 1 1" color="S"/>
+  <box at="1 4 22" size="1 1 1" color="S"/>
+  <box at="1 6 21" size="1 1 2" color="S"/>
+  <box at="1 7 19" size="1 1 2" color="S"/>
+  <box at="6 6 21" size="1 1 2" color="S"/>
+  <box at="6 7 19" size="1 1 2" color="S"/>
+  <box at="3.5 7 18" size="4 1 1" color="S"/>
+  <box at="1 2.5 21" size="1 2 1" color="S"/>
+  <box at="1 0 16" size="1 1 4" color="S"/>
+  <box at="1 5 23" size="1 1 4" color="S"/>
+  <box at="1 3.5 27" size="1 2 1" color="S"/>
+  <box at="1 2 28" size="1 1 1" color="S"/>
+  <box at="1 1 29" size="1 1 1" color="S"/>
+  <box at="1 1 34" size="1 1 1" color="S"/>
+  <box at="1 4 36" size="1 1 1" color="S"/>
+  <box at="1 2.5 35" size="1 2 1" color="S"/>
+  <box at="1 0 30" size="1 1 4" color="S"/>
+  <box at="1 5 37" size="1 1 4" color="S"/>
+  <box at="1 3.5 41" size="1 2 1" color="S"/>
+  <box at="1 2 42" size="1 1 1" color="S"/>
+  <box at="1 1 43" size="1 1 1" color="S"/>
+  <box at="1 1 48" size="1 1 1" color="S"/>
+  <box at="1 4 50" size="1 1 1" color="S"/>
+  <box at="1 2.5 49" size="1 2 1" color="S"/>
+  <box at="1 0 44" size="1 1 4" color="S"/>
+  <box at="1 0 58" size="1 1 4" color="S"/>
+  <box at="1 5 51" size="1 1 4" color="S"/>
+  <box at="1 3.5 55" size="1 2 1" color="S"/>
+  <box at="1 6 55" size="1 1 1" color="S"/>
+  <box at="1 7 56" size="1 1 1" color="S"/>
+  <box at="6 6 55" size="1 1 1" color="S"/>
+  <box at="6 7 56" size="1 1 1" color="S"/>
+  <box at="1 2 56" size="1 1 1" color="S"/>
+  <box at="3.5 7 57" size="4 1 1" color="S"/>
+  <box at="1 1 57" size="1 1 1" color="S"/>
+  <box at="1 3.5 62" size="1 6 1" color="S"/>
+
+  <box at="6 1 20" size="1 1 1" color="S"/>
+  <box at="6 4 22" size="1 1 1" color="S"/>
+  <box at="6 2.5 21" size="1 2 1" color="S"/>
+  <box at="6 0 16" size="1 1 4" color="S"/>
+  <box at="6 5 23" size="1 1 4" color="S"/>
+  <box at="6 3.5 27" size="1 2 1" color="S"/>
+  <box at="6 2 28" size="1 1 1" color="S"/>
+  <box at="6 1 29" size="1 1 1" color="S"/>
+  <box at="6 1 34" size="1 1 1" color="S"/>
+  <box at="6 4 36" size="1 1 1" color="S"/>
+  <box at="6 2.5 35" size="1 2 1" color="S"/>
+  <box at="6 0 30" size="1 1 4" color="S"/>
+  <box at="6 5 37" size="1 1 4" color="S"/>
+  <box at="6 3.5 41" size="1 2 1" color="S"/>
+  <box at="6 2 42" size="1 1 1" color="S"/>
+  <box at="6 1 43" size="1 1 1" color="S"/>
+  <box at="6 1 48" size="1 1 1" color="S"/>
+  <box at="6 4 50" size="1 1 1" color="S"/>
+  <box at="6 2.5 49" size="1 2 1" color="S"/>
+  <box at="6 0 44" size="1 1 4" color="S"/>
+  <box at="6 0 58" size="1 1 4" color="S"/>
+  <box at="6 5 51" size="1 1 4" color="S"/>
+  <box at="6 3.5 55" size="1 2 1" color="S"/>
+  <box at="6 2 56" size="1 1 1" color="S"/>
+  <box at="6 1 57" size="1 1 1" color="S"/>
+  <box at="6 3.5 62" size="1 6 1" color="S"/>
+
+  <!-- Cremagliera dentata laterale sul dorso (x=2 e x=5, y=0): lascia x=3..4 y=0 libero (B)! -->
+  <box at="2 0 20" size="1 1 1" color="m"/>
+  <box at="5 0 20" size="1 1 1" color="m"/>
+  <box at="2 0 24" size="1 1 1" color="m"/>
+  <box at="5 0 24" size="1 1 1" color="m"/>
+  <box at="2 0 26" size="1 1 1" color="m"/>
+  <box at="5 0 26" size="1 1 1" color="m"/>
+  <box at="2 0 28" size="1 1 1" color="m"/>
+  <box at="5 0 28" size="1 1 1" color="m"/>
+  <box at="2 0 34" size="1 1 1" color="m"/>
+  <box at="5 0 34" size="1 1 1" color="m"/>
+  <box at="2 0 36" size="1 1 1" color="m"/>
+  <box at="5 0 36" size="1 1 1" color="m"/>
+  <box at="2 0 38" size="1 1 1" color="m"/>
+  <box at="5 0 38" size="1 1 1" color="m"/>
+  <box at="2 0 40" size="1 1 1" color="m"/>
+  <box at="5 0 40" size="1 1 1" color="m"/>
+  <box at="2 0 42" size="1 1 1" color="m"/>
+  <box at="5 0 42" size="1 1 1" color="m"/>
+  <box at="2 0 50" size="1 1 1" color="m"/>
+  <box at="5 0 50" size="1 1 1" color="m"/>
+  <box at="2 0 52" size="1 1 1" color="m"/>
+  <box at="5 0 52" size="1 1 1" color="m"/>
+  <box at="2 0 54" size="1 1 1" color="m"/>
+  <box at="5 0 54" size="1 1 1" color="m"/>
+  <box at="2 0 57" size="1 1 1" color="m"/>
+  <box at="5 0 57" size="1 1 1" color="m"/>
+
+  <!-- Fasce orizzontali nere/ardesia (m) a z=31..32 e z=45..46 -->
+  <!-- DEVONO essere in colore 'm' e precedere 'v' per attivare la regola mm/vm -> Bx/vm! -->
+  <box at="3.5 0 45" size="4 1 2" color="m"/>
+  <box at="5.5 1 45" size="2 1 2" color="m"/>
+  <box at="1.5 1 45" size="2 1 2" color="m"/>
+  <box at="1 4.5 57" size="1 6 1" color="m"/>
+  <box at="6 4.5 57" size="1 6 1" color="m"/>
+  <box at="1 5 55" size="1 1 1" color="s"/>
+  <box at="6 5 55" size="1 1 1" color="s"/>
+
+  <box at="3.5 0 31" size="4 1 2" color="m"/>
+  <box at="5.5 1 31" size="2 1 2" color="m"/>
+  <box at="1.5 1 31" size="2 1 2" color="m"/>
+
+  <!-- I 2 nodi luminosi sulla spirale sopra il cubo (collegati al ciclo dinamico) -->
+  <box at="1 2 35" size="1 1 1" color="A"/>
+  <box at="6 3 35" size="1 1 1" color="Z"/>
+
+  <!-- CUBO DI VETRO 4x4x4 E COLONNA DORSALE IN VETRO 'v' (x=3..4, y=1, z=18..62) -->
+  <box at="3.5 3.5 19" size="4 4 4" color="p"/>
+  <box at="3.5 6 13" size="4 1 3" color="v"/>
+  <box at="3.5 7 58" size="4 1 4" color="v"/>
+  <box at="3.5 6 58" size="4 1 4" color="7"/>
+  <!-- CRITICO: questa barra 'v' sovrascrive x=3..4, y=1 a z=31 e z=45 creando il pattern mm/vm! -->
+  <box at="3.5 1 18" size="2 1 45" color="v"/>
+  <box at="6 4 58" size="1 7 4" color="v"/>
+  <box at="1 4 58" size="1 7 4" color="v"/>
+  <box at="3.5 5 8" size="2 1 4" color="v"/>
+  <box at="3.5 6 12" size="2 1 1" color="v"/>
+  <box at="3.5 4 7" size="2 1 1" color="v"/>
+  <box at="5 5 13" size="1 1 1" color="v"/>
+  <box at="2 5 13" size="1 1 1" color="v"/>
+  <box at="2 2.5 13" size="1 2 1" color="v"/>
+  <box at="2 3 15" size="1 1 1" color="v"/>
+  <box at="3.5 1 16" size="4 1 2" color="v"/>
+  <box at="2 2 14" size="1 1 4" color="v"/>
+  <box at="2 2.5 7" size="1 2 1" color="v"/>
+  <box at="2 3 8" size="1 3 5" color="v"/>
+  <box at="5 2.5 13" size="1 2 1" color="v"/>
+  <box at="5 3 15" size="1 1 1" color="v"/>
+  <box at="5 2 14" size="1 1 4" color="v"/>
+  <box at="5 2.5 7" size="1 2 1" color="v"/>
+  <box at="5 3 8" size="1 3 5" color="v"/>
+
+  <!-- ======================================================== -->
+  <!-- 4. INNESCHI DI APICE E TESTA "CYBER-DRAGO" (z = 58..70)  -->
+  <!-- ======================================================== -->
+  <!-- CRITICO: Struttura a z=63 IDENTICA al file originale per garantire il match ****/*MM*/****/**** -->
+  <box at="2 5 63" size="1 1 1" color="5"/>
+  <box at="5 5 63" size="1 1 1" color="5"/>
+  <box at="3.5 6 63" size="4 1 1" color="M"/>
+  <box at="3.5 5 63" size="2 1 1" color="M"/>
+  <box at="3.5 2.5 63" size="4 4 1" color="M"/>
+  <box at="3.5 7 62" size="6 1 1" color="m"/>
+
+  <!-- Marker 'a' e 'b' di controllo caduta nelle coordinate esatte originali -->
+  <box at="3.5 2 63" size="2 1 1" color="a"/>
+  <box at="3.5 0 59" size="2 1 1" color="b"/>
+  <box at="3.5 0 55" size="2 1 1" color="b"/>
+  <box at="3.5 0 47" size="2 1 1" color="b"/>
+  <box at="3.5 0 30" size="2 1 1" color="b"/>
+  <box at="3.5 0 22" size="2 1 1" color="b"/>
+  <box at="3.5 6 61" size="2 1 1" color="b"/>
+  <box at="3.5 6 62" size="2 1 1" color="b"/>
+
+  <!-- Estensione della Testa "Cyber-Drago" (tutta a z >= 64 o y >= 7 o x = 0,7 per non interferire) -->
+  <!-- Mascella inferiore a sbalzo in avanti (y = 8..12, z = 61..62) -->
+  <box at="3.5 9.5 62" size="6 5 1" color="S"/>
+  <box at="3.5 11.5 62" size="4 2 1" color="s"/>
+  <box at="3.5 9.0 61" size="6 4 1" color="M"/>
+
+  <!-- Chele / denti meccanici anteriori sotto la punta del muso (y = 11..12, z = 59..60) -->
+  <box at="2 11 60" size="1 1 2" color="S"/>
+  <box at="5 11 60" size="1 1 2" color="S"/>
+  <box at="2.5 11.5 59" size="2 1 1" color="s"/>
+  <box at="4.5 11.5 59" size="2 1 1" color="s"/>
+
+  <!-- FASCIO LUMINOSO DINAMICO DEL MUSO (incassato a y = 8..11, z = 60..61: usa fasi 1, 3, 5, 9, Z) -->
+  <box at="3.5 9.5 61" size="4 4 1" color="5"/>
+  <box at="3.5 9.5 61" size="2 3 1" color="1"/>
+  <box at="3.5 9.5 60" size="2 3 1" color="3"/>
+  <box at="2 9.5 60" size="1 3 1" color="9"/>
+  <box at="5 9.5 60" size="1 3 1" color="Z"/>
+
+  <!-- Muso aerodinamico superiore a gradini (y = 7..11, z = 63..65) -->
+  <box at="3.5 9.0 63" size="6 5 1" color="M"/>
+  <box at="3.5 8.5 64" size="4 4 1" color="V"/>
+  <box at="3.5 7.5 65" size="4 2 1" color="V"/>
+
+  <!-- Cranio / Calotta superiore (z = 64..67, sopra il piano di arresto z=63) -->
+  <box at="3.5 4.0 64" size="6 5 2" color="M"/>
+  <box at="3.5 4.0 66" size="6 5 1" color="m"/>
+  <box at="3.5 4.0 67" size="4 4 1" color="D"/>
+  <!-- Striscia LED longitudinale sul tetto della testa -->
+  <box at="3.5 4.5 67" size="2 3 1" color="5"/>
+  <box at="3.5 5.5 66" size="2 1 1" color="2"/>
+
+  <!-- Cuscinetti / Mozzi circolari bianchi laterali (all'esterno su x = 0 e x = 7, y = 3..5, z = 62..64) -->
+  <box at="0 4 62" size="1 3 3" color="s"/>
+  <box at="7 4 62" size="1 3 3" color="s"/>
+  <box at="0 4 63" size="1 1 1" color="D"/>
+  <box at="7 4 63" size="1 1 1" color="D"/>
+
+  <!-- Alette / Corna superiori inclinate all'indietro (Swept-Back Upper Fins, z = 66..69) -->
+  <box at="1 3 66" size="1 2 1" color="S"/>
+  <box at="6 3 66" size="1 2 1" color="S"/>
+  <box at="1 2 67" size="1 2 1" color="S"/>
+  <box at="6 2 67" size="1 2 1" color="S"/>
+  <box at="1 1 68" size="1 2 1" color="S"/>
+  <box at="6 1 68" size="1 2 1" color="S"/>
+  <box at="1 0.5 69" size="1 2 1" color="s"/>
+  <box at="6 0.5 69" size="1 2 1" color="s"/>
+
+  <!-- Alette inferiori esterne (x = 0 e x = 7, z = 61..62) -->
+  <box at="0 2 62" size="1 2 1" color="S"/>
+  <box at="7 2 62" size="1 2 1" color="S"/>
+  <box at="0 1 61" size="1 2 1" color="m"/>
+  <box at="7 1 61" size="1 2 1" color="m"/>
+
+  <!-- ======================================================== -->
+  <!-- 5. COLONNA ENERGETICA MULTICOLORE (z = 4..15)            -->
+  <!-- ======================================================== -->
+  <box at="3.5 4.5 15" size="4 2 1" color="T"/>
   <box at="2 5.0 15" size="1 2 1" color="G"/>
   <box at="5 5.0 15" size="1 2 1" color="G"/>
-  <!-- Puntale a becco aerodinamico chiuso sul davanti (y=6)   -->
-  <box at="3.5 6.0 15" size="2 1 1" color="m"/>
 
-  <!-- Fascio luminoso neon ciano incassato verso il basso (y=4..6, x=3..4) -->
-  <box at="3.5 5.0 15" size="2 3 1" color="N"/>
-  <!-- Nucleo fotonico laser bianco centrale incastonato a y=5 -->
-  <box at="3.5 5.0 15" size="2 1 1" color="W"/>
+  <box at="3.5 4.5 15" size="2 2 1" color="1"/>
+  <box at="3.5 4.5 14" size="2 2 1" color="Y"/>
+  <box at="3.5 4.5 13" size="2 2 1" color="U"/>
+  <box at="3.5 5 12" size="2 1 1" color="R"/>
+  <box at="3.5 4 11" size="2 1 1" color="Q"/>
+  <box at="3.5 3 10" size="2 1 1" color="P"/>
+  <box at="3.5 3 8" size="2 1 1" color="N"/>
+  <box at="3.5 3 7" size="2 1 1" color="L"/>
+  <box at="3.5 3 6" size="2 1 1" color="K"/>
+  <box at="3.5 3 4" size="2 1 1" color="I"/>
 
   <!-- ======================================================== -->
   <!-- 6. REGOLE GENERATIVE: VARIANTI NEI SEMI                  -->
   <!-- ======================================================== -->
-  <!-- A) Risoluzione del tirante e del contrafforte superiore -->
   <one steps="1">
-    <!-- Variante 1: tirante in acciaio cromato teso tra snodo e testa -->
     <rule in="X" out="s" p="0.40"/>
-    <!-- Variante 2: nervatura in titanio fessurata -->
     <rule in="X" out="m" p="0.30"/>
-    <!-- Variante 3: fessura aerea alleggerita -->
     <rule in="X" out="B" p="0.30"/>
   </one>
   <all in="X" out="s"/>
 
-  <!-- B) Micro-dettagli stocastici sul pilone verticale -->
   <prl steps="1" optional="True">
-    <!-- Fermagli di ancoraggio cromati sui fianchi del pilone -->
     <rule in="B M M" out="* s *" p="0.25"/>
     <rule in="M M B" out="* s *" p="0.25"/>
-    <!-- Intaglio di alleggerimento su facce del pilone -->
     <rule in="M/M/M" out="*/m/*" p="0.15"/>
   </prl>
 
-  <!-- C) Diffusione ottica prismatica sulla feritoia -->
   <prl steps="1" optional="True">
-    <!-- Cristallizzazione sfaccettata dei riflettori -->
     <rule in="T" out="G" p="0.25"/>
   </prl>
 </sequence>
 
 <!-- ============================================================ -->
-<!-- 7. ANIMAZIONE TELEMETRIA (6 FRAMES): SPIE E PULSAZIONE FOTONI-->
+<!-- 7. ANIMAZIONE TELEMETRIA (26 FRAMES): LOGICA GLOBALE MJ      -->
 <!-- ============================================================ -->
-<animation name="telemetria" frames="6">
+<animation name="telemetria" frames="26">
   <sequence>
-    <!-- Le spie telemetriche sul plinto pulsano e si alternano -->
+    <!-- 1. Risalita di 2 voxel per step del cubo 'p' nel cilindro B -->
+    <one in="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp"
+        out="pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB"
+        steps="1" symmetry="(xy)"/>
+
+    <!-- 2. Contatto con il pattern *MM* a z=63 e mutazione globale p -> c (magenta) -->
+    <all in="****/*MM*/****/**** pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp"
+         out="****/*MM*/****/**** cccc/cccc/cccc/cccc cccc/cccc/cccc/cccc cccc/cccc/cccc/cccc cccc/cccc/cccc/cccc"
+         steps="1" symmetry="(xy)"/>
+    
+    <!-- 3. Rimozione temporanea delle fasce 'm' davanti alla guida 'v' (apre i varchi B a y=0) -->
+    <all in="mm/vm" out="Bx/vm" symmetry="()"/>
+    <all in="mm/mv" out="xB/mv" symmetry="()"/>
+
+    <!-- 4. Caduta gravitazionale nel blocco <markov> fino al primo freno 'b' non vuoto -->
+    <markov>
+      <all in="*BB*/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/BBBB/BBBB/BBBB/BBBB"
+           out="*BB*/****/BBBB/BBBB/BBBB/BBBB ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc"
+           steps="1" symmetry="()"/>
+    </markov>
+    
+    <!-- 5. Ripristino immediato delle fasce orizzontali 'm' e scatto di 1 voxel sul freno 'b' -->
+    <all in="Bx/vm" out="mm/vm" symmetry="()"/>
+    <all in="xB/mv" out="mm/mv" symmetry="()"/>
+    <all in="*bb*/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/BBBB/BBBB/BBBB/BBBB"
+         out="*bb*/****/BBBB/BBBB/BBBB/BBBB ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc"
+         steps="1" symmetry="()"/>
+
+    <!-- 6. Pulsazione diagnostica delle spie alla base -->
     <prl steps="1">
       <rule in="E" out="e" p="0.30"/>
       <rule in="e" out="E" p="0.30"/>
     </prl>
-
-    <!-- Il nucleo fotonico laser (W) vibra lungo la feritoia neon (N) in direzione Y -->
-    <prl steps="1">
-      <rule in="W/N" out="N/W" p="0.35"/>
-      <rule in="N/W" out="W/N" p="0.35"/>
-    </prl>
   </sequence>
+
+  <!-- Catena globale di shift cromatico (26 stadi: Ciano -> Cobalto -> Viola -> Magenta -> Spento) -->
+  <all in="Y" out="1" steps="1" />
+  <all in="U" out="Y" steps="1" />
+  <all in="R" out="U" steps="1" />
+  <all in="Q" out="R" steps="1" />
+  <all in="P" out="Q" steps="1" />
+  <all in="O" out="P" steps="1" />
+  <all in="N" out="O" steps="1" />
+  <all in="L" out="N" steps="1" />
+  <all in="K" out="L" steps="1" />
+  <all in="J" out="K" steps="1" />
+  <all in="I" out="K" steps="1" />
+  <all in="H" out="I" steps="1" />
+  <all in="F" out="H" steps="1" />
+  <all in="C" out="F" steps="1" />
+  <all in="Z" out="C" steps="1" />
+  <all in="A" out="Z" steps="1" />
+  <all in="0" out="A" steps="1" />
+  <all in="9" out="0" steps="1" />
+  <all in="8" out="9" steps="1" />
+  <all in="7" out="8" steps="1" />
+  <all in="6" out="7" steps="1" />
+  <all in="5" out="6" steps="1" />
+  <all in="4" out="5" steps="1" />
+  <all in="3" out="4" steps="1" />
+  <all in="2" out="3" steps="1" />
+  <all in="1" out="2" steps="1" />
 </animation>

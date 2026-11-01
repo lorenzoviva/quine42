@@ -534,7 +534,7 @@ export class Corona {
             let allRules: Rule[] = [];
             try {
               allRules = (JSON.parse(this.files['world/rules.json'] ?? '{}').regole ?? []) as Rule[];
-            } catch {}
+            } catch { }
             this.rulesOffset = Math.max(0, allRules.length - TABLETS_MAX);
             placed.push(...ruleTablets(ox, oy, allRules, this.rulesOffset));
           }
@@ -608,7 +608,7 @@ export class Corona {
       for (const da of [-0.28, 0.28]) {
         const a = mid + da * sector;
         const r = R + CAMPUS.line - 0.8;
-        addProp('lampione', 'corona-lampione', Math.sin(a) * r + 0.5, -Math.cos(a) * r + 0.5, -a, 1, true);
+        addProp('lampione', 'corona-lampione', Math.sin(a) * r + 0.5, -Math.cos(a) * r + 0.5, -a + Math.PI, 1, true);
       }
 
       // Light trees on lawns (3 per sector with varying seeds for generative diversity)
@@ -860,7 +860,7 @@ export class Corona {
     let allRules: Rule[] = [];
     try {
       allRules = (JSON.parse(this.files['world/rules.json'] ?? '{}').regole ?? []) as Rule[];
-    } catch {}
+    } catch { }
     // Remove existing rule tablets and rule arrows
     f.items = f.items.filter((it) => it.kind !== 'lastra' && !(it.target === 'regole' && (it.kind === 'prev' || it.kind === 'next')));
     const tablets = ruleTablets(f.ox, f.oy, allRules, this.rulesOffset);
