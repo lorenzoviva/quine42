@@ -2366,3 +2366,9 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   - Correggere da te i difetti grafici o di navigazione minori (CSS/link).
 - Quando è fatto: verifica nel browser descritta con precisione nell'esito; difetti corretti; commit su `task/T114`; typecheck e test verdi.
 
+
+### T115 · Integrare T57b (rune nuove dal Concilio) — `da fare`
+- Pipeline: gemini · stima 3% · approvato · priorità 20
+- Contesto: T57b è fatto in `task/T57b` (rune nuove dal Concilio, `src/kernel/magic.ts`, compito `rune.invent`), ma `integra T57b` va in conflitto in `AGENTS.md`, `docs/adr/README.md` e `src/kernel/agents/effects.ts` con T57c (già nel base, ADR-0096 effetto rilievo). Anche T57b ha scritto un ADR-0096. Nasce da T57b: `dossier T57b`, `traccia T57b`.
+- Cosa fare: nel worktree `git merge task/T57b`; l'ADR di T57b diventa **ADR-0097** (file rinominato, indice, riferimenti in `AGENTS.md`, backlog e codice); nelle sezioni in conflitto tenere entrambe le aggiunte (in `effects.ts` sia la guida dell'effetto `rilievo` di T57c sia le rune nuove in `SPELL_GUIDE` di T57b); typecheck, `tests/magic.test.ts`, `tests/effects*` e la suite intera nel turno test (`pipeline.mjs turno test -- npm test`). I 5 timeout noti (referente T42e/T42f, wanderers T34, watch T42c) falliscono anche sul base: non sono difetti.
+- Quando è fatto: merge risolto con ADR-0097, typecheck e test verdi (salvo i timeout noti), commit su `task/T115`.
