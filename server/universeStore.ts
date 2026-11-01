@@ -15,6 +15,10 @@
 //   POST /api/universe/<name>/clone           { nome, master, titolari }        → { nome, head }  (T42d: another master)
 //   GET|PUT /api/universe/<name>/map/<key>    JSON
 //   GET  /api/universe/<name>/maps            → [{ file, name, layout }] every place ever planned
+//   GET  /api/universe/<name>/carte           → { exists, carte, files }      the cards measured here, what shows them (T104, T120)
+//
+// Who may do what (T120, ADR-0102, server/access.ts): a game alone is of whoever is on this machine, a game of many of its master and
+// its world. Everyone else reads only `publicFiles` and writes nothing. In a game of many balances are written only by the world.
 
 import type { Connect, Plugin } from 'vite';
 import type { IncomingMessage, ServerResponse } from 'node:http';
@@ -22,6 +26,10 @@ import { execFile } from 'node:child_process';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { cloneChanges, type CloneOptions } from '../src/kernel/clone';
+import { allCards } from '../src/kernel/cards';
+import { publicFiles } from '../src/session/files';
+import type { AccountSettings } from './account';
+import { callerOf, creditFile, gameIn, isJson, newSecret, newUniverse, owns, type Access } from './access';
 
 const MAX_BODY = 32 * 1024 * 1024;
 const NAME_RE = /^[a-z0-9][a-z0-9-]{0,40}$/;
@@ -220,7 +228,7 @@ async function commitAll(root: string, message: string, author: string): Promise
   return head(root);
 }
 
-export function universeStore(baseDir: string): Plugin {
+export function universeStore(baseDir: string, opts: { accounts?: AccountSettings; internal?: string } = {}): Plugin {
   const queues = new Map<string, Promise<unknown>>();
   /** One operation at a time per universe (git is not happy with concurrent writers). */
   const serial = <T>(name: string, fn: () => Promise<T>): Promise<T> => {
@@ -230,55 +238,69 @@ export function universeStore(baseDir: string): Plugin {
     return next;
   };
 
-  const handler: Connect.NextHandleFunction = (req, res, next) => {
-    if (!req.url?.startsWith('/api/universe')) return next();
-    const url = req.url.split('?')[0];
-    const m = /^\/api\/universe\/([^/]+)(?:\/(create|commit|checkout|reset|map|maps|branch|merge|clone)(?:\/([^/]+))?)?$/.exec(url);
+  const access: Access = { accounts: opts.accounts, internal: opts.internal ?? newSecret() };
+  const masterUid = opts.accounts?.masterUid;
+
+  const handle = async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
+    const url = (req.url ?? '').split('?')[0];
+    const who = await callerOf(req, access);
+    if ('refused' in who) return send(res, who.status, { error: who.refused });
+    const m = /^\/api\/universe\/([^/]+)(?:\/(create|commit|checkout|reset|map|maps|branch|merge|clone|carte)(?:\/([^/]+))?)?$/.exec(url);
     if (url === '/api/universe' || url === '/api/universe/') {
-      void fs
-        .readdir(baseDir, { withFileTypes: true })
-        .then((es) => send(res, 200, { available: true, universes: es.filter((e) => e.isDirectory() && !e.name.startsWith('.')).map((e) => e.name) }))
-        .catch(() => send(res, 200, { available: true, universes: [] }));
-      return;
+      const es = await fs.readdir(baseDir, { withFileTypes: true }).catch(() => []);
+      return send(res, 200, { available: true, universes: es.filter((e) => e.isDirectory() && !e.name.startsWith('.')).map((e) => e.name) });
     }
     if (!m || !NAME_RE.test(m[1])) return send(res, 404, { error: 'universo sconosciuto' });
     const name = m[1];
     const op = m[2];
     const arg = m[3] ? decodeURIComponent(m[3]) : undefined;
     const root = path.join(baseDir, name);
-    const fail = (e: Error) => send(res, 500, { error: e.message });
+    const game = gameIn(await fs.readFile(path.join(root, 'universe.json'), 'utf8').catch(() => undefined));
+    const mine = owns(who, game, masterUid);
+    const notYours = () => send(res, 403, { error: game.many ? 'solo il master di questo universo' : 'solo da questa macchina' });
 
+    // --- What anyone may read: cut down to what is public, unless the universe is theirs. ---
     if (!op && req.method === 'GET') {
-      void serial(name, async () => {
+      const r = await serial(name, async () => {
         if (!(await exists(path.join(root, '.git')))) return { exists: false };
-        return { exists: true, head: await head(root), log: await log(root), files: await readTree(root) };
-      }).then((r) => send(res, 200, r), fail);
-      return;
+        const files = await readTree(root);
+        return mine ? { exists: true, head: await head(root), log: await log(root), files } : { exists: true, head: await head(root), files: publicFiles(files) };
+      });
+      return send(res, 200, r);
     }
+    if (op === 'carte' && !arg && req.method === 'GET') {
+      // The gallery of the cards: measured here on the whole universe, since what measures a card (its code) does not leave it.
+      const r = await serial(name, async () => {
+        if (!(await exists(path.join(root, '.git')))) return { exists: false };
+        const files = await readTree(root);
+        return { exists: true, carte: allCards(files, true), files: publicFiles(files) };
+      });
+      return send(res, 200, r);
+    }
+
+    // --- The rest is of who owns the universe. ---
+    if (op !== 'create' && !mine) return notYours();
     if (op === 'maps' && req.method === 'GET') {
       // The atlas of what has been explored: names and environments of every planned place.
-      void (async () => {
-        const dir = path.join(root, 'maps');
-        const files = await fs.readdir(dir).catch(() => [] as string[]);
-        const out: Array<{ file: string; name: string; layout: string }> = [];
-        for (const f of files) {
-          if (!f.endsWith('.json')) continue;
-          try {
-            const rec = JSON.parse(await fs.readFile(path.join(dir, f), 'utf8'));
-            out.push({ file: f.slice(0, -5), name: String(rec?.plan?.place?.name ?? ''), layout: String(rec?.plan?.layout ?? '') });
-          } catch {
-            /* a broken map is skipped */
-          }
+      const dir = path.join(root, 'maps');
+      const files = await fs.readdir(dir).catch(() => [] as string[]);
+      const out: Array<{ file: string; name: string; layout: string }> = [];
+      for (const f of files) {
+        if (!f.endsWith('.json')) continue;
+        try {
+          const rec = JSON.parse(await fs.readFile(path.join(dir, f), 'utf8'));
+          out.push({ file: f.slice(0, -5), name: String(rec?.plan?.place?.name ?? ''), layout: String(rec?.plan?.layout ?? '') });
+        } catch {
+          /* a broken map is skipped */
         }
-        send(res, 200, out);
-      })();
-      return;
+      }
+      return send(res, 200, out);
     }
     if (op === 'map' && arg) {
       if (!/^[\w:.,-]+$/.test(arg)) return send(res, 400, { error: 'nome non valido' });
       const file = path.join(root, 'maps', `${arg.replace(/[:,]/g, '_')}.json`);
       if (req.method === 'GET') {
-        void fs.readFile(file, 'utf8').then(
+        return fs.readFile(file, 'utf8').then(
           (t) => {
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
@@ -286,67 +308,76 @@ export function universeStore(baseDir: string): Plugin {
           },
           () => send(res, 404, { error: 'non trovato' }),
         );
-        return;
       }
       if (req.method === 'PUT') {
-        void readBody(req)
-          .then((body) => serial(name, async () => {
-            await fs.mkdir(path.dirname(file), { recursive: true });
-            await fs.writeFile(file, body, 'utf8');
-          }))
-          .then(() => send(res, 200, { ok: true }), fail);
-        return;
+        if (!isJson(req)) return send(res, 415, { error: 'solo JSON' });
+        const body = await readBody(req);
+        await serial(name, async () => {
+          await fs.mkdir(path.dirname(file), { recursive: true });
+          await fs.writeFile(file, body, 'utf8');
+        });
+        return send(res, 200, { ok: true });
       }
     }
     if (op === 'branch' && arg && req.method === 'GET') {
-      void serial(name, () => readBranch(root, arg)).then((files) => send(res, 200, files ? { exists: true, files } : { exists: false }), fail);
-      return;
+      const files = await serial(name, () => readBranch(root, arg));
+      return send(res, 200, files ? { exists: true, files } : { exists: false });
     }
     if (req.method !== 'POST') return send(res, 405, { error: 'metodo non ammesso' });
-    void readBody(req)
-      .then((raw) => (raw ? JSON.parse(raw) : {}))
-      .then((body) =>
-        serial(name, async () => {
-          switch (op) {
-            case 'create': {
-              if (await exists(path.join(root, '.git'))) throw new Error('esiste già');
-              await fs.mkdir(root, { recursive: true });
-              await git(root, ['init', '-q']);
-              await writeFiles(root, body.files ?? {});
-              await fs.writeFile(path.join(root, '.gitattributes'), '* text=auto eol=lf\n', 'utf8');
-              return { head: await commitAll(root, body.message ?? 'nasce dal seme del kernel', 'genesis') };
-            }
-            case 'commit':
-              await writeFiles(root, body.changes ?? {});
-              return { head: await commitAll(root, String(body.message ?? 'commit'), String(body.author ?? 'kernel')) };
-            case 'checkout': {
-              if (!/^[0-9a-f]{4,40}$/.test(String(body.id))) throw new Error('commit non valido');
-              await git(root, ['restore', `--source=${body.id}`, '--staged', '--worktree', '--', '.']);
-              const h = await commitAll(root, `ritorno a ${body.id}`, 'kernel');
-              return { head: h, files: await readTree(root) };
-            }
-            case 'branch':
-              return { head: await writeBranch(root, String(body.branch), body.files ?? {}, String(body.message ?? 'ramo'), String(body.author ?? 'player')) };
-            case 'merge':
-              await mergeBranch(root, String(body.branch), String(body.message ?? 'pubblicazione'));
-              return { head: await head(root) };
-            case 'clone': {
-              const { nome, head: h } = await cloneUniverse(baseDir, root, { nome: String(body.nome ?? ''), master: String(body.master ?? ''), titolari: body.titolari === 'master' ? 'master' : 'restano' });
-              return { nome, head: h };
-            }
-            case 'reset': {
-              if (!(await exists(root))) return { trashed: null };
-              // Never deleted: moved aside, so a universe can always be recovered by hand.
-              const trash = path.join(baseDir, '.cestino', `${name}-${Date.now()}`);
-              await fs.mkdir(path.dirname(trash), { recursive: true });
-              await fs.rename(root, trash);
-              return { trashed: path.relative(baseDir, trash) };
-            }
-          }
-          throw new Error('operazione sconosciuta');
-        }),
-      )
-      .then((r) => send(res, 200, r), fail);
+    if (!isJson(req)) return send(res, 415, { error: 'solo JSON' });
+    const raw = await readBody(req);
+    const body = raw ? JSON.parse(raw) : {};
+    // In a game of many the balances are the world's: not even its master writes them from outside (ADR-0081, ADR-0102).
+    const touched = op === 'commit' ? body.changes : op === 'branch' ? body.files : undefined;
+    if (!who.server && game.many && Object.keys(touched ?? {}).some(creditFile)) return send(res, 403, { error: 'i crediti non si scrivono da qui' });
+    const made = op === 'create' ? newUniverse(who, body.files ?? {}) : undefined;
+    if (made && 'refused' in made) return send(res, made.status, { error: made.refused });
+    const r = await serial(name, async () => {
+      switch (op) {
+        case 'create': {
+          if (await exists(path.join(root, '.git'))) throw new Error('esiste già');
+          await fs.mkdir(root, { recursive: true });
+          await git(root, ['init', '-q']);
+          await writeFiles(root, made && 'files' in made ? made.files : {});
+          await fs.writeFile(path.join(root, '.gitattributes'), '* text=auto eol=lf\n', 'utf8');
+          return { head: await commitAll(root, body.message ?? 'nasce dal seme del kernel', 'genesis') };
+        }
+        case 'commit':
+          await writeFiles(root, body.changes ?? {});
+          return { head: await commitAll(root, String(body.message ?? 'commit'), String(body.author ?? 'kernel')) };
+        case 'checkout': {
+          if (!/^[0-9a-f]{4,40}$/.test(String(body.id))) throw new Error('commit non valido');
+          await git(root, ['restore', `--source=${body.id}`, '--staged', '--worktree', '--', '.']);
+          const h = await commitAll(root, `ritorno a ${body.id}`, 'kernel');
+          return { head: h, files: await readTree(root) };
+        }
+        case 'branch':
+          return { head: await writeBranch(root, String(body.branch), body.files ?? {}, String(body.message ?? 'ramo'), String(body.author ?? 'player')) };
+        case 'merge':
+          await mergeBranch(root, String(body.branch), String(body.message ?? 'pubblicazione'));
+          return { head: await head(root) };
+        case 'clone': {
+          // Only a game of many's own master gives it to another: `mine`, from who they proved to be. Nobody names themselves master.
+          const { nome, head: h } = await cloneUniverse(baseDir, root, { nome: String(body.nome ?? ''), master: String(body.master ?? ''), titolari: body.titolari === 'master' ? 'master' : 'restano' });
+          return { nome, head: h };
+        }
+        case 'reset': {
+          if (!(await exists(root))) return { trashed: null };
+          // Never deleted: moved aside, so a universe can always be recovered by hand.
+          const trash = path.join(baseDir, '.cestino', `${name}-${Date.now()}`);
+          await fs.mkdir(path.dirname(trash), { recursive: true });
+          await fs.rename(root, trash);
+          return { trashed: path.relative(baseDir, trash) };
+        }
+      }
+      throw new Error('operazione sconosciuta');
+    });
+    return send(res, 200, r);
+  };
+
+  const handler: Connect.NextHandleFunction = (req, res, next) => {
+    if (!req.url?.startsWith('/api/universe')) return next();
+    handle(req, res).catch((e: Error) => send(res, 500, { error: e.message }));
   };
   return {
     name: 'rune-universe-store',

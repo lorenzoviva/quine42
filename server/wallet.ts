@@ -11,7 +11,8 @@ import type { FileMap } from '../src/kernel/types';
 import { costWithFee, PAYMENTS_FILE, readPayments } from '../src/kernel/credits';
 import { USAGE_FILE } from '../src/kernel/ai/usage';
 import { playerFile, readWandererState } from '../src/kernel/wanderers';
-import { bearer, send, whoAsks, type WandererRouteOptions, type WandererView } from './wanderer';
+import { bearer, gate, refuse } from './access';
+import { send, whoAsks, type WandererRouteOptions, type WandererView } from './wanderer';
 
 const NAME_RE = /^[a-z0-9][a-z0-9-]{0,40}$/;
 /** The days of spending a page shows. */
@@ -123,6 +124,9 @@ export function walletHandler(opts: WandererRouteOptions): Connect.NextHandleFun
   return (req, res, next) => {
     const [url, query = ''] = (req.url ?? '').split('?');
     if (url !== '/api/crediti') return next();
+    // Another site never; without accounts, where the id is only said, only this machine (T120, ADR-0102).
+    const no = gate(req, opts.accounts);
+    if (no) return refuse(res, no, (motivo) => ({ ok: false, motivo }));
     void (async () => {
       try {
         if (req.method !== 'GET') return send(res, 405, { ok: false, motivo: 'metodo non ammesso' });

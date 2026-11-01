@@ -36,11 +36,11 @@ async function bootMany(extraCfg: Record<string, unknown> = {}): Promise<Kernel>
 async function thin(
   server: SessionServer,
   id: string,
-  opts: { anonimo?: boolean; tetto?: number } = {},
+  opts: { tetto?: number } = {},
 ): Promise<ThinClient> {
   const { server: s, client: c } = fakeLink();
   server.connect(s);
-  const session = new SessionClient(c, { id, ...(opts.anonimo ? { anonimo: true } : {}), ...(opts.tetto !== undefined ? { tetto: opts.tetto } : {}) });
+  const session = new SessionClient(c, { id, ...(opts.tetto !== undefined ? { tetto: opts.tetto } : {}) });
   await session.ready;
   const k = await Kernel.boot({ files: session.files, store: memoryStore(), models: new MockModels(), mirror: true });
   return new ThinClient(k, session);
@@ -108,6 +108,8 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
 
     const server = new SessionServer(k);
     const master = await thin(server, 'io');
+    // The ceiling stays within the balance (T120).
+    k.giveCredits('carlo', 5);
     const player = await thin(server, 'carlo', { tetto: 1.0 });
     run(server, [master, player], 6);
 

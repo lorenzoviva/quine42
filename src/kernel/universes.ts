@@ -158,6 +158,11 @@ function upgradeModels(mine: string | undefined, seed: string | undefined): stri
   }
 }
 
+/** How the world of this server's own process proves itself to the store (T120, ADR-0102); the secret never leaves the process. */
+export const INTERNAL_HEADER = 'x-quine-interno';
+/** On a server without accounts, the wanderer a page on this machine says it is. */
+export const WANDERER_HEADER = 'x-quine-viandante';
+
 /** Client of the universe store (server/universeStore.ts): the browser's, or the session server's with an absolute `base` (T38). */
 export class UniverseClient implements UniverseBackend {
   private queue: Promise<unknown> = Promise.resolve();
@@ -168,18 +173,24 @@ export class UniverseClient implements UniverseBackend {
   private constructor(
     readonly name: string,
     private base = '',
+    private headers: Record<string, string> = {},
   ) {}
 
   /** null when there is no universe store (static hosting, tests). */
-  static async connect(name: string, base = ''): Promise<UniverseClient | null> {
+  static async connect(name: string, base = '', headers: Record<string, string> = {}): Promise<UniverseClient | null> {
     try {
-      const r = await fetch(`${base}/api/universe`);
+      const r = await fetch(`${base}/api/universe`, { headers });
       if (!r.ok) return null;
       const j = await r.json();
-      return j?.available ? new UniverseClient(name, base) : null;
+      return j?.available ? new UniverseClient(name, base, headers) : null;
     } catch {
       return null;
     }
+  }
+
+  /** Who is asking from now on: an account's token, or on a server without accounts the wanderer's id. */
+  identify(headers: Record<string, string>): void {
+    this.headers = headers;
   }
 
   private url(op = ''): string {
@@ -187,14 +198,14 @@ export class UniverseClient implements UniverseBackend {
   }
 
   private async post(op: string, body: unknown): Promise<any> {
-    const r = await fetch(this.url(op), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const r = await fetch(this.url(op), { method: 'POST', headers: { 'Content-Type': 'application/json', ...this.headers }, body: JSON.stringify(body) });
     const j = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(j.error ?? `HTTP ${r.status}`);
     return j;
   }
 
   async load(): Promise<UniverseSnapshot> {
-    const r = await fetch(this.url());
+    const r = await fetch(this.url(), { headers: this.headers });
     return r.json();
   }
 
@@ -237,7 +248,7 @@ export class UniverseClient implements UniverseBackend {
 
   async readBranch(name: string): Promise<Record<string, string | null> | null> {
     await this.queue;
-    const r = await fetch(this.url(`branch/${encodeURIComponent(name)}`)).catch(() => null);
+    const r = await fetch(this.url(`branch/${encodeURIComponent(name)}`), { headers: this.headers }).catch(() => null);
     const j = r?.ok ? await r.json().catch(() => null) : null;
     return j?.exists ? j.files : null;
   }
@@ -272,17 +283,17 @@ export class UniverseClient implements UniverseBackend {
   // Maps: files of the universe too, outside the text snapshot.
   /** Every place ever planned in this universe (file name, place name, environment). */
   async listMaps(): Promise<Array<{ file: string; name: string; layout: string }>> {
-    const r = await fetch(this.url('maps')).catch(() => null);
+    const r = await fetch(this.url('maps'), { headers: this.headers }).catch(() => null);
     return r?.ok ? r.json() : [];
   }
 
   async getMap(key: string): Promise<unknown | undefined> {
-    const r = await fetch(this.url(`map/${encodeURIComponent(key)}`)).catch(() => null);
+    const r = await fetch(this.url(`map/${encodeURIComponent(key)}`), { headers: this.headers }).catch(() => null);
     return r?.ok ? r.json() : undefined;
   }
 
   async putMap(key: string, data: unknown): Promise<void> {
-    await fetch(this.url(`map/${encodeURIComponent(key)}`), { method: 'PUT', body: JSON.stringify(data) }).catch(() => undefined);
+    await fetch(this.url(`map/${encodeURIComponent(key)}`), { method: 'PUT', headers: { 'Content-Type': 'application/json', ...this.headers }, body: JSON.stringify(data) }).catch(() => undefined);
   }
 }
 

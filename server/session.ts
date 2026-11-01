@@ -11,9 +11,20 @@ import type { AddressInfo } from 'node:net';
 import type { Duplex } from 'node:stream';
 import { WebSocketServer, type WebSocket } from 'ws';
 import type { AccountSettings } from './account';
+import { gate, refuse } from './access';
 import type { Kernel } from '../src/kernel/kernel';
 
 const NAME_RE = /^[a-z0-9][a-z0-9-]{0,40}$/;
+
+/**
+ * Whether a socket may open, and with which models its world starts if it is the first (T120, ADR-0102). Another site's page never;
+ * without a verifier only this machine, and then what it asks is its own to decide; with accounts `?offline` is not heard.
+ */
+export function admitSocket(req: Pick<IncomingMessage, 'headers'> & { socket: { remoteAddress?: string } }, accounts: AccountSettings | undefined, askedOffline: boolean): { refused: string } | { offline: boolean } {
+  const no = gate(req, accounts);
+  if (no) return { refused: no.refused };
+  return { offline: askedOffline && !accounts?.verify };
+}
 /** A message bigger than this is not a client's (the files go the other way). */
 const MAX_MESSAGE = 256 * 1024;
 
@@ -58,14 +69,17 @@ function wsLink(ws: WebSocket) {
   };
 }
 
-export function sessionServer(accounts?: AccountSettings, gemini?: typeof fetch): Plugin {
+export function sessionServer(accounts?: AccountSettings, gemini?: typeof fetch, internal?: string): Plugin {
   return {
     name: 'rune-session',
     configureServer(server: ViteDevServer) {
       server.middlewares.use(async (req, res, next) => {
         const url = req.url?.split('?')[0];
         if (url === '/api/session' && req.method === 'GET') {
-          const sessions: Array<{ name: string; active: boolean; clients: number; wanderers: string[] }> = [];
+          const no = gate(req, accounts);
+          if (no) return refuse(res, no, (error) => ({ error }));
+          // How many, not who: the master has the list of the players through their own session.
+          const sessions: Array<{ name: string; active: boolean; clients: number }> = [];
           for (const [name, hostPromise] of activeHosts.entries()) {
             try {
               const h = await hostPromise;
@@ -74,7 +88,6 @@ export function sessionServer(accounts?: AccountSettings, gemini?: typeof fetch)
                   name,
                   active: true,
                   clients: h.session.clientCount ?? h.session.connected?.().length ?? 0,
-                  wanderers: h.session.connected?.() ?? [],
                 });
               }
             } catch {
@@ -95,7 +108,7 @@ export function sessionServer(accounts?: AccountSettings, gemini?: typeof fetch)
           const port = (server.httpServer?.address() as AddressInfo | null)?.port ?? 5173;
           h = server
             .ssrLoadModule('/src/session/host.ts')
-            .then((mod) => mod.openUniverse({ name, base: `http://localhost:${port}`, offline, gemini, verify: accounts?.verify, masterUid: accounts?.masterUid }))
+            .then((mod) => mod.openUniverse({ name, base: `http://localhost:${port}`, offline, gemini, verify: accounts?.verify, masterUid: accounts?.masterUid, internal }))
             .catch((e: Error) => ({ error: e.message }));
           activeHosts.set(name, h);
           // A universe that could not open is tried again by the next client.
@@ -107,6 +120,12 @@ export function sessionServer(accounts?: AccountSettings, gemini?: typeof fetch)
         const url = new URL(req.url ?? '/', 'http://localhost');
         // Vite's own socket (hot reload) has its own path and protocol: only ours is taken.
         if (url.pathname !== '/api/session') return;
+        const admitted = admitSocket(req, accounts, url.searchParams.has('offline'));
+        if ('refused' in admitted) {
+          socket.write('HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n');
+          socket.destroy();
+          return;
+        }
         wss.handleUpgrade(req, socket, head, (ws) => {
           const link = wsLink(ws);
           const name = url.searchParams.get('universo') ?? '';
@@ -114,7 +133,7 @@ export function sessionServer(accounts?: AccountSettings, gemini?: typeof fetch)
             link.send({ t: 'rifiuto', motivo: 'universo sconosciuto' });
             return ws.close();
           }
-          void open(name, url.searchParams.has('offline')).then((h) => {
+          void open(name, admitted.offline).then((h) => {
             if ('error' in h) {
               link.send({ t: 'rifiuto', motivo: h.error });
               return ws.close();

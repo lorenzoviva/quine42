@@ -4,13 +4,13 @@
 // server checks the step with the kernel's collision and pace and corrects it, and answers every action with
 // what came of it. No DOM, no network here: the links are given (WebSocket in server/session.ts, fake in tests).
 
-import { PER_WANDERER, type Kernel } from '../kernel/kernel';
+import type { Kernel } from '../kernel/kernel';
 import { AGENTS, type AgentId, type FeedEntry } from '../kernel/agents/council';
-import { ATLAS_FILE } from '../kernel/atlas';
-import { RELIEF_PATH, SEA_DRAFT } from '../kernel/relief';
+import { SEA_DRAFT } from '../kernel/relief';
 import type { FileMap } from '../kernel/types';
 import { readWandererState, SOLO, validWandererId, type Profile } from '../kernel/wanderers';
 import { accountWanderer, type Account, type Verifier } from './account';
+import { playerChanges, playerFiles } from './files';
 import { hashStr, hex } from '../kernel/rng';
 import { THING_PARTS, type ClientMsg, type FileChanges, type ItemOp, type Dialog, type FormView, type Me, type MyState, type Notice, type OtherView, type PlaceView, type ServerLink, type ServerMsg, type ThingView } from './protocol';
 
@@ -23,7 +23,7 @@ export interface SessionOptions {
   reach?: number;
   /**
    * Accounts (T44b): with a verifier, who comes in is the account their token proves (`entra.token`), not the id they say.
-   * Without one (development, tests) the id goes as before.
+   * Without one the id goes as they say it, which is why server/session.ts lets in only this machine then (T120, ADR-0102).
    */
   verify?: Verifier;
   /** The account of whoever runs this server: they are the master `io` of the universes made before accounts (T44b). */
@@ -45,52 +45,7 @@ const FAR = 8;
 /** What the Council said that the master has not heard yet: older words are dropped past this. */
 const FEED_KEEP = 400;
 
-/**
- * The files a player's client gets (T41): what it draws and walks with. The universe's settings, the models, the
- * relief and the atlas; the modules' manifests without their code and their cases, but for the systems the client
- * runs itself (`PER_WANDERER`). Prompts, the bible, the rules, the people and their memories, the plots, the graph,
- * the cards, the costs and the other wanderers stay on the server: they are the studio's, the master's.
- */
-export function playerFiles(files: FileMap): FileMap {
-  const out: FileMap = {};
-  for (const [path, text] of Object.entries(files)) {
-    if (path === 'universe.json' || path === ATLAS_FILE || path === RELIEF_PATH || path.startsWith('models/')) out[path] = text;
-    if (!/^modules\/[^/]+\/manifest\.json$/.test(path)) continue;
-    let m: Record<string, unknown>;
-    try {
-      m = JSON.parse(text);
-    } catch {
-      // Unreadable on the server too: the client fails on it the same way.
-      out[path] = text;
-      continue;
-    }
-    const dir = path.slice(0, -'manifest.json'.length);
-    if (typeof m.logic === 'string' && PER_WANDERER.has(String(m.id)) && files[dir + m.logic] !== undefined) out[dir + m.logic] = files[dir + m.logic];
-    else delete m.logic;
-    delete m.casi;
-    out[path] = JSON.stringify(m, null, 2) + '\n';
-  }
-  return out;
-}
-
-/**
- * What a player's client gets of the files that changed (T42b), as `playerFiles` gives them: a module goes again whole (its
- * manifest without code, its code only for `PER_WANDERER`), a file gone goes as null if it is one a client would have.
- */
-export function playerChanges(files: FileMap, changed: string[]): FileChanges {
-  const dirOf = (p: string) => /^modules\/[^/]+\//.exec(p)?.[0];
-  const dirs = new Set<string>();
-  const subset: FileMap = {};
-  for (const p of changed) {
-    const d = dirOf(p);
-    if (d) dirs.add(d);
-    else if (files[p] !== undefined) subset[p] = files[p];
-  }
-  for (const [p, v] of Object.entries(files)) if (dirs.has(dirOf(p) ?? '')) subset[p] = v;
-  const out: FileChanges = { ...playerFiles(subset) };
-  for (const p of changed) if (files[p] === undefined && (dirOf(p) || p in playerFiles({ [p]: '' }))) out[p] = null;
-  return out;
-}
+export { playerChanges, playerFiles };
 
 /** Files with changes on top (null: gone). */
 export function withChanges(files: FileMap, changes: FileChanges): FileMap {
@@ -325,7 +280,7 @@ export class SessionServer {
       if (msg?.t !== 'entra' || entering) return;
       const tetto = typeof (msg as { tetto?: number }).tetto === 'number' && Number.isFinite((msg as { tetto?: number }).tetto) ? (msg as { tetto?: number }).tetto : undefined;
       if (!this.verify) {
-        client = this.join(link, msg.id, msg.nome, msg.profilo, (msg as { anonimo?: boolean }).anonimo, tetto);
+        client = this.join(link, msg.id, msg.nome, msg.profilo, undefined, tetto);
         if (!client) link.close();
         return;
       }
@@ -374,8 +329,9 @@ export class SessionServer {
       return undefined;
     }
     this.kernel.setRemote(id, true);
+    // What they ask to spend is theirs to lower, not to raise: it adds to the world's budgets, so never more than they have (T120).
     if (typeof tetto === 'number' && Number.isFinite(tetto) && tetto >= 0) {
-      this.kernel.setSessionTetto(id, tetto);
+      this.kernel.setSessionTetto(id, this.isAnonymous(id) ? 0 : Math.min(tetto, this.kernel.creditsOf(id)));
     }
     // Who they say they are (T44a): repaired against everyone else in the world. A profile already saved stays (T44c): only
     // `profilo` changes it, what a browser brings on entering may be another wanderer's.

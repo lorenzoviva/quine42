@@ -61,29 +61,30 @@ afterAll(() => {
 });
 
 describe('/api/universe', () => {
-  // Open: T120. Each one restores nothing: the balance and the code are read right after the request.
-  it.fails('V-001 senza identità non si riscrive il Lua sul server', async () => {
+  // Each one restores nothing: the balance and the code are read right after the request. The rest of who may do what: accesso.test.ts.
+  it('V-001 senza identità non si riscrive il Lua sul server', async () => {
     await commit({ 'modules/sonda/logic.lua': '-- V-001\nreturn {}\n' });
     expect(readFileSync(logic(), 'utf8')).not.toContain('V-001');
   });
 
-  it.fails('V-001 senza identità non si cambia un saldo', async () => {
+  it('V-001 senza identità non si cambia un saldo', async () => {
     await commit({ 'world/giocatori/altro.json': JSON.stringify({ nome: 'Altro', crediti: 1000 }) });
     expect(saldo()).toBe(5);
   });
 
-  it.fails('V-001 senza identità non si leggono i file di un universo in multigiocatore', async () => {
+  it('V-001 senza identità non si leggono i file di un universo in multigiocatore', async () => {
     const r = await fetch(`${store.base}/api/universe/sonda`);
     expect(Object.keys(((await r.json()) as { files?: object }).files ?? {})).not.toContain('modules/sonda/logic.lua');
   });
 
-  it.fails('V-001 un\'altra origine con un corpo text/plain non scrive', async () => {
+  it('V-001 un\'altra origine con un corpo text/plain non scrive', async () => {
     await commit({ 'world/da-altro-sito.txt': 'sonda\n' }, { 'Content-Type': 'text/plain', Origin: 'http://altro.example' });
     expect(existsSync(path.join(root(), 'world', 'da-altro-sito.txt'))).toBe(false);
   });
 
   it('V-003 il nome esatto della cartella di git è rifiutato, come ciò che esce dall\'universo', async () => {
-    for (const p of ['.git/sonda-v003', '../sonda-v003', 'world/../../sonda-v003']) await commit({ [p]: 'sonda\n' });
+    // As the master: a stranger stops before the paths are even looked at.
+    for (const p of ['.git/sonda-v003', '../sonda-v003', 'world/../../sonda-v003']) await commit({ [p]: 'sonda\n' }, { 'Content-Type': 'application/json', 'X-Quine-Viandante': 'io' });
     expect(existsSync(path.join(root(), '.git', 'sonda-v003'))).toBe(false);
     expect(existsSync(path.join(dir, 'sonda-v003'))).toBe(false);
   });
@@ -197,12 +198,8 @@ describe('la sessione', () => {
     return ingresso!;
   }
 
-  // Open: T120.
-  it.fails('V-006 nessuno diventa master dicendolo', async () => {
-    expect(enter(await world(), { id: 'io', nome: 'Sonda' }).master).toBeFalsy();
-  });
-
-  it.fails('V-006 essere anonimo non lo decide il client', async () => {
+  // Nobody becomes the master by saying so: accesso.test.ts (with a verifier the id is not heard; without, only this machine gets in).
+  it('V-006 essere anonimo non lo decide il client', async () => {
     expect(enter(await world(), { id: 'sonda', nome: 'Sonda', anonimo: true }).anonimo).toBeFalsy();
   });
 

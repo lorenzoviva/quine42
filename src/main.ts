@@ -2,7 +2,7 @@ import wasmUri from 'wasmoon/dist/glue.wasm?url';
 import { Kernel } from './kernel/kernel';
 import { bundledFiles } from './kernel/bundle';
 import { localStore, memoryStore } from './kernel/repo';
-import { SEED_FILE, seedHashes, UniverseChunks, UniverseClient, upgradeFromSeed, type PastCommit, type UniverseSnapshot } from './kernel/universes';
+import { SEED_FILE, seedHashes, UniverseChunks, UniverseClient, upgradeFromSeed, WANDERER_HEADER, type PastCommit, type UniverseSnapshot } from './kernel/universes';
 import type { FileMap } from './kernel/types';
 import { readConfig } from './kernel/universe';
 import { IdbChunks } from './kernel/chunks';
@@ -22,7 +22,6 @@ import { ThinClient } from './session/thin';
 import { keepProfile, savedProfile, socketLink, tabWanderer } from './session/socket';
 import { accountConfig, signIn, type SignedIn } from './session/login';
 import { accountWanderer } from './session/account';
-import { readWandererState } from './kernel/wanderers';
 import { ProfilePanel } from './ui/profile';
 import { LobbyScreen } from './ui/lobby';
 import { CreditExhaustedModal } from './ui/creditdialog';
@@ -133,14 +132,17 @@ async function main() {
     const config = await accountConfig();
     if (!account) account = config ? await signIn(config) : undefined;
     const id = account ? accountWanderer(account.uid) : tabWanderer(params);
-    const wandererState = readWandererState(snapFiles, id);
-    const credits = wandererState?.crediti ?? 0;
+    // The store gives nobody else's balance, nor anyone's in the universe's snapshot (T120): the wanderer's own view does.
+    const seen = await fetch(`/api/viandante?universo=${encodeURIComponent(name)}${account ? '' : `&viandante=${encodeURIComponent(id)}`}`, { headers: account ? { Authorization: `Bearer ${account.token}` } : {}, cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : undefined))
+      .catch(() => undefined);
+    const credits = Number(seen?.viandante?.crediti) || 0;
     const isAnon = account?.anonimo ?? false;
     const lobby = new LobbyScreen({
       name,
       files: snapFiles,
       wandererId: id,
-      wandererName: wandererState?.nome,
+      wandererName: seen?.viandante?.profilo?.nome,
       credits,
       isAnonymous: isAnon,
       onRecharge: async (amount: number) => {
@@ -387,7 +389,10 @@ async function main() {
   if (!thin) kernel.generationHeld = online && kernel.needsGenesis() && !params.has('skip');
   if (tools) tools.konsole.onGenesis = () => void runGenesis();
   // Another master is another universe (T42d): the store copies this one, from the main line on disk.
-  if (tools && thin && client) tools.konsole.onClone = (nome, master, titolari) => client.clone(nome, master, titolari);
+  if (tools && thin && client) {
+    client.identify(account ? { Authorization: `Bearer ${account.token}` } : { [WANDERER_HEADER]: thin.session.id });
+    tools.konsole.onClone = (nome, master, titolari) => client.clone(nome, master, titolari);
+  }
   kernel.bus.on('genesis:done', ({ title }) => hud.showBanner(title.toUpperCase(), 'Un nuovo universo è stato scritto. Il tappeto ti riporta al centro.', 4000));
 
   kernel.input.attach(window);

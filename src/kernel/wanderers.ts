@@ -9,6 +9,13 @@ import { hashStr } from './rng';
 import { freshName, guessGender, similarNames } from './society';
 
 /** The wanderer of a game alone (and of every universe before T34). */
+/**
+ * Systems that move one wanderer (T38): they run once for each wanderer the kernel moves itself, as that
+ * wanderer, and see no other wanderer. Those a session's client moves (`setRemote`) they skip. The only ones a
+ * thin client runs too (T39).
+ */
+export const PER_WANDERER = new Set(['core.movement', 'core.carpet']);
+
 export const SOLO = 'io';
 /** The name people use for a wanderer they know nothing more of. */
 export const WANDERER_NAME = 'Viandante';

@@ -23,13 +23,14 @@ Modello di una voce:
 
 ### V-001 · `/api/universe` senza autenticazione
 - Gravità: critica (oggi: alta)
-- Stato: `specificata`
+- Stato: `chiusa`
 - Superficie: `server/universeStore.ts`, tutte le route di `/api/universe`
 - Proprietà violata: i non master non riscrivono il Lua sul server e i crediti non si toccano; un non master non legge ciò che `playerFiles` gli nega
-- Prova: solo lettura del codice (T117); misurata dal kit (T137, `esiti/2026-11-01.json`): FALLA tutte le scritture e le letture senza identità, anche da un'altra origine e con un Host estraneo (V-001.a-j, l, m); il CORS non è aperto (V-001.k, ok). Giro dell'autore (`esiti/2026-11-01-f12.md`): da `https://example.com` una richiesta `no-cors` **scrive** un file nell'universo (V-001.o, FALLA); la lettura non passa (V-001.n, ok)
+- Prova: solo lettura del codice (T117); misurata dal kit (T137, `esiti/2026-11-01.json`): FALLA tutte le scritture e le letture senza identità, anche da un'altra origine e con un Host estraneo (V-001.a-j, l, m); il CORS non è aperto (V-001.k, ok). Giro dell'autore (`esiti/2026-11-01-f12.md`): da `https://example.com` una richiesta `no-cors` **scrive** un file nell'universo (V-001.o, FALLA); la lettura non passa (V-001.n, ok). Dopo T120: test (`tests/sicurezza/accesso.test.ts`: ogni scrittura per ogni tipo di chiamante, letture, singola, master) e kit (`esiti/2026-11-01-dopo-T120.json`): V-001.a-m ok, con V-001.m riscritta perché provi un universo di molti con un master a piacere: creare una partita in singola da questa macchina resta ammesso. V-001.n, o (da un altro sito) sono da rifare a mano nel browser dell'autore; lo stesso effetto è nei test (origine diversa, `text/plain`)
 - Contromisura: identità verificata sul server e permessi per operazione su ogni route; su un universo multigiocatore un non master non scrive nulla; `clone` prende il master dall'identità; controllo di `Origin` e `Content-Type`; le letture del sito ricevono solo ciò che serve. In produzione solo le route ammesse.
 - Task: T120, T133
-- Test: `tests/sicurezza/rotte.test.ts`
+- Test: `tests/sicurezza/rotte.test.ts`, `tests/sicurezza/accesso.test.ts`
+- Esito: chiusa da T120 (ADR-0102), 01/11/2026, branch `task/T120`. Il master del clone resta nel corpo, ma lo nomina solo il master provato dell'universo di partenza: il perché è nell'ADR. Per T133: in produzione solo le route ammesse.
 
 ### V-002 · Il proxy di Gemini spende la chiave per chiunque
 - Gravità: critica (oggi: alta)
@@ -74,13 +75,14 @@ Modello di una voce:
 
 ### V-006 · Identità scelta dal client
 - Gravità: alta (critica senza account)
-- Stato: `specificata`
-- Superficie: `src/session/server.ts`, `server/session.ts`, `GET /api/session`
+- Stato: `chiusa`
+- Superficie: `src/session/server.ts`, `server/session.ts`, `GET /api/session`, `/api/viandante`, `/api/crediti`
 - Proprietà violata: i non master non riscrivono il Lua: nessuno diventa master dicendolo; `anonimo`, `tetto` e `offline` non li decide il client
-- Prova: solo lettura del codice (T117); misurata dal kit (`esiti/2026-11-01.json`): FALLA V-006.a-e, compreso `GET /api/viandante`, che dà il saldo di chiunque senza identità; il protocollo rifiuta ramo, pubblicazione, Concilio e «segui» a un non master (V-006.f, ok); giro dell'autore (`esiti/2026-11-01-f12.md`): la pagina di un altro sito apre il WebSocket ed **entra nel mondo** come viandante (V-006.g, FALLA)
+- Prova: solo lettura del codice (T117); misurata dal kit (`esiti/2026-11-01.json`): FALLA V-006.a-e, compreso `GET /api/viandante`, che dà il saldo di chiunque senza identità; il protocollo rifiuta ramo, pubblicazione, Concilio e «segui» a un non master (V-006.f, ok); giro dell'autore (`esiti/2026-11-01-f12.md`): la pagina di un altro sito apre il WebSocket ed **entra nel mondo** come viandante (V-006.g, FALLA). Dopo T120: test (`tests/sicurezza/accesso.test.ts`) e kit (`esiti/2026-11-01-dopo-T120.json`): V-006.a-f ok. **V-006.a ed e sono riscritte**: su loopback senza account l'id detto vale, come vuole la contromisura, quindi si misurano da fuori, con un'intestazione di inoltro (è ciò che aggiunge un tunnel; il kit non esce dalla macchina); da un indirizzo davvero esterno lo prova il test di `admitSocket`. V-006.g è da rifare a mano nel browser dell'autore
 - Contromisura: senza verificatore l'id scelto dal client vale solo da loopback; `anonimo`, `tetto` e `offline` decisi dal server; controllo di `Origin` sul WebSocket; `GET /api/session` non elenca i viandanti a chiunque; in produzione niente avvio senza verificatore. `GET /api/viandante` dice il saldo solo a chi lo possiede; lo stesso vale per `/api/crediti`, la superficie nuova di T105 (saldo e storici, stessa identità non verificata, coperta da T120).
 - Task: T120, T133
-- Test: `tests/sicurezza/rotte.test.ts`
+- Test: `tests/sicurezza/rotte.test.ts`, `tests/sicurezza/accesso.test.ts`
+- Esito: chiusa da T120 (ADR-0102), 01/11/2026, branch `task/T120`. Resta, ed è ciò che l'ADR decide: chi sta sulla macchina di un server senza account è chi dice di essere. Per T133: in produzione niente avvio senza verificatore.
 
 ### V-007 · Il blocco del tick ferma tutti
 - Gravità: alta
