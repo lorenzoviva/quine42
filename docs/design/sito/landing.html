@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QUINE42 · Template Landing Page</title>
+    <link rel="stylesheet" href="./template.css" />
+    <style>
+      /* Page-specific adjustments for Landing layout */
+      .hero {
+        position: relative;
+        min-height: 82vh;
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        align-items: center;
+        gap: 40px;
+        padding: 50px 48px 80px;
+        overflow: hidden;
+      }
+      .hero-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      .hero-title {
+        font-family: var(--font-display);
+        font-size: clamp(2.8rem, 5.5vw, 4.8rem);
+        line-height: 0.95;
+        letter-spacing: 0.04em;
+        margin: 0;
+        color: var(--neon-yellow);
+        text-shadow:
+          -3px -3px 0 var(--comic-ink),
+          3px -3px 0 var(--comic-ink),
+          -3px 3px 0 var(--comic-ink),
+          3px 3px 0 var(--comic-ink),
+          6px 6px 0 var(--neon-pink);
+        transform: skew(-2deg);
+      }
+      .hero-desc {
+        font-size: 1.15rem;
+        line-height: 1.6;
+        color: var(--comic-paper);
+        max-width: 600px;
+        margin: 0;
+      }
+      .hero-cta {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      .hero-mockup-3d {
+        position: relative;
+        height: 480px;
+        background: radial-gradient(circle at center, rgba(157, 0, 255, 0.25) 0%, rgba(9, 5, 20, 0.95) 75%);
+        border: var(--border-ink-thick);
+        box-shadow: var(--shadow-hard-cyan);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+      .hero-mockup-3d::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(to right, var(--synth-grid) 1px, transparent 1px),
+          linear-gradient(to bottom, var(--synth-grid) 1px, transparent 1px);
+        background-size: 32px 32px;
+        opacity: 0.7;
+      }
+      .voxel-cube-mockup {
+        width: 140px;
+        height: 140px;
+        background: linear-gradient(135deg, var(--neon-pink), var(--neon-cyan));
+        border: 4px solid var(--comic-ink);
+        box-shadow: 10px 10px 0 var(--neon-yellow), 0 0 30px rgba(0, 240, 255, 0.6);
+        transform: rotateX(25deg) rotateY(45deg);
+        animation: floatCube 4s ease-in-out infinite alternate;
+        position: relative;
+        z-index: 2;
+      }
+      @keyframes floatCube {
+        0% { transform: translateY(0px) rotateX(20deg) rotateY(35deg); }
+        100% { transform: translateY(-24px) rotateX(30deg) rotateY(55deg); }
+      }
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 24px;
+      }
+      .feature-box {
+        background: var(--synth-panel);
+        border: var(--border-ink-thick);
+        box-shadow: var(--shadow-hard-cyan);
+        padding: 26px 20px;
+        position: relative;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+      .feature-box:hover {
+        transform: translateY(-4px);
+        box-shadow: 6px 6px 0 var(--neon-pink);
+      }
+      .feature-icon {
+        font-size: 2.2rem;
+        display: inline-block;
+        margin-bottom: 12px;
+      }
+      .feature-title {
+        font-family: var(--font-display);
+        font-size: 1.45rem;
+        color: var(--neon-yellow);
+        margin: 0 0 10px 0;
+        letter-spacing: 0.05em;
+      }
+      .showcase-grid {
+        display: grid;
+        grid-template-columns: 340px 1fr;
+        gap: 40px;
+        align-items: center;
+        background: var(--synth-panel);
+        border: var(--border-ink-thick);
+        box-shadow: var(--shadow-hard-pink);
+        padding: 40px;
+        margin-top: 40px;
+      }
+      @media (max-width: 992px) {
+        .hero { grid-template-columns: 1fr; padding: 40px 20px; }
+        .showcase-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Top Navigation Bar -->
+    <header class="site-nav">
+      <a href="./landing.html" class="nav-brand">
+        <span class="nav-logo">QUINE42</span>
+        <span class="nav-tagline">// ARCADE · VOXEL · IA</span>
+      </a>
+      <button class="nav-toggle-btn" id="nav-toggle">MENU ▼</button>
+      <nav>
+        <ul class="nav-links" id="nav-links">
+          <li><a href="./landing.html" class="nav-link active">Mondo</a></li>
+          <li><a href="./carte.html" class="nav-link">Carte 3D</a></li>
+          <li><a href="./sessioni.html" class="nav-link">Sessioni</a></li>
+          <li><a href="./profilo.html" class="nav-link">Profilo</a></li>
+          <li><a href="./pagamenti.html" class="nav-link">Crediti</a></li>
+          <li><a href="./componenti.html" class="nav-link">Componenti</a></li>
+        </ul>
+      </nav>
+      <div class="nav-actions">
+        <a href="../../../index.html" class="comic-btn arcade cyan">GIOCA SUBITO</a>
+        <a href="./login.html" class="comic-btn arcade">ACCEDI</a>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+      <!-- Hero Section -->
+      <section class="hero">
+        <div class="hero-content">
+          <div>
+            <span class="comic-badge yellow">ONLINE</span>
+            <span class="arcade-text text-cyan" style="margin-left: 8px;">UN MONDO CHE SI SCRIVE DA SÉ</span>
+          </div>
+          <h1 class="hero-title">IL MONDO È FATTO DEL SUO STESSO CODICE</h1>
+          <p class="hero-desc">
+            Vivi in un universo tridimensionale a voxel in cui il codice sorgente Lua è tangibile e attivo.
+            Raccogli rune sul sentiero, componi incantesimi col tuo cammino, colleziona carte animate 3D ed esplora i reami multigiocatore generati in tempo reale.
+          </p>
+          <div class="hero-cta">
+            <a href="../../../index.html" class="comic-btn pink lg">ENTRA IN GIOCO</a>
+            <a href="./carte.html" class="comic-btn cyan lg">SCOPRI LE CARTE</a>
+            <a href="./sessioni.html" class="comic-btn lg">CREA UNIVERSO</a>
+          </div>
+        </div>
+
+        <div class="hero-mockup-3d">
+          <div style="position: absolute; top: 16px; left: 16px; z-index: 5;">
+            <span class="comic-badge green">THREE.JS 3D LIVE</span>
+          </div>
+          <div class="voxel-cube-mockup"></div>
+          <div style="position: absolute; bottom: 16px; z-index: 5; text-align: center;">
+            <span class="arcade-text text-cyan" style="font-size: 0.65rem;">// VOXEL PROCEDURALI MARKOVJUNIOR //</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Key Pillars Section -->
+      <section class="section-wrap">
+        <div class="section-head">
+          <h2 class="comic-title">I QUATTRO PILASTRI DI QUINE42</h2>
+          <p>// UN MONDO VIVO · REGOLE AUTENTICHE · LIBERTÀ PURA</p>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-box">
+            <span class="feature-icon">⚡</span>
+            <h3 class="feature-title">RUNE E MAGIA</h3>
+            <p style="color: var(--comic-paper); font-size: 0.95rem; margin: 0;">
+              Sul terreno brillano token di codice Lua vero. Componi le frasi col tuo passo: ciò che è scritto si esegue nel mondo e le rune magiche scatenano forze autentiche.
+            </p>
+          </div>
+
+          <div class="feature-box">
+            <span class="feature-icon">🧊</span>
+            <h3 class="feature-title">MARKOV JUNIOR 3D</h3>
+            <p style="color: var(--comic-paper); font-size: 0.95rem; margin: 0;">
+              Nessuna immagine raster generata: ogni creatura, oggetto o tempio è un algoritmo MarkovJunior tridimensionale scolpito e assemblato in tempo reale.
+            </p>
+          </div>
+
+          <div class="feature-box">
+            <span class="feature-icon">🃏</span>
+            <h3 class="feature-title">CARTE COLLEZIONABILI</h3>
+            <p style="color: var(--comic-paper); font-size: 0.95rem; margin: 0;">
+              Possiedi pezzi del mondo! Le carte tracciano gli utilizzi (luoghi, trame, prompt) e trasferiscono quote di eredità nei reami multigiocatore.
+            </p>
+          </div>
+
+          <div class="feature-box">
+            <span class="feature-icon">🏛️</span>
+            <h3 class="feature-title">SOCIETÀ VIVA E GENERATIVA</h3>
+            <p style="color: var(--comic-paper); font-size: 0.95rem; margin: 0;">
+              Intelligenze artificiali coordinate animano una società vibrante con mestieri, famiglie, routine quotidiane e trame narrative che evolvono insieme a te.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Showcase Section: Interactive 3D Card & Details -->
+      <section class="section-wrap">
+        <div class="section-head">
+          <h2 class="comic-title">AREA CARTE E MULTIGIOCATORE</h2>
+          <p>// GRAFICA INTERATTIVA E CARTE 3D FUORI DAL GIOCO</p>
+        </div>
+
+        <div class="showcase-grid">
+          <!-- 3D Card Demo (Flip on click) -->
+          <div class="card-3d-wrapper">
+            <div class="retro-card" id="demo-card" title="Clicca per girare la carta">
+              <!-- Front -->
+              <div class="card-face card-front">
+                <div class="card-holo-foil"></div>
+                <div class="card-inner">
+                  <div class="card-header">
+                    <h4 class="card-name">SPADA DI FULIGGINE</h4>
+                    <span class="comic-badge cyan">RARA</span>
+                  </div>
+                  <div class="card-art-box">
+                    <div class="card-art-gem"></div>
+                  </div>
+                  <p style="font-size: 0.8rem; margin: 0 0 10px; color: var(--comic-paper-dim);">
+                    Lama forgiata nella cenere del primo vulcano. Brucia con fiamme di rune pure.
+                  </p>
+                  <div class="card-stats-box">
+                    <div class="card-stat">Luoghi: <b>14</b></div>
+                    <div class="card-stat">Trame: <b>6</b></div>
+                    <div class="card-stat">Prompt: <b>31</b></div>
+                    <div class="card-stat">Origine: <b>Reame #4</b></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Back -->
+              <div class="card-face card-back">
+                <div class="card-holo-foil"></div>
+                <div class="card-inner">
+                  <div class="card-back-frame">
+                    <div class="card-back-brand">QUINE42</div>
+                    <div class="card-back-sigil">
+                      <div class="sigil-core"></div>
+                    </div>
+                    <div class="card-back-tagline">CARTA DEL MONDO</div>
+                    <div class="arcade-text text-dim" style="font-size: 0.55rem; margin-top: 6px;">// PROPRIETÀ DEI VIANDANTI //</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Description and Links -->
+          <div>
+            <span class="comic-badge yellow">PROPRIETÀ DIGITALE AUTENTICA</span>
+            <h3 class="comic-title" style="font-size: 2.2rem; margin: 12px 0;">CARTE VIVE CHE GENERANO VALORE</h3>
+            <p style="color: var(--comic-paper); font-size: 1.05rem; line-height: 1.6; margin-bottom: 24px;">
+              Ogni elemento forgiato o scoperto nel mondo diventa una carta digitale 3D.
+              Grazie all'architettura dell'eredità dei reami, ogni volta che un altro universo include la tua carta, una quota dei proventi in crediti risale la catena dei titolari fino a te.
+            </p>
+            <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+              <a href="./carte.html" class="comic-btn pink">SFOGLIA COLLEZIONE</a>
+              <a href="./sessioni.html" class="comic-btn cyan">ESPLORA REAMI</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Modules Bar -->
+        <div class="grid-3" style="margin-top: 36px;">
+          <div class="comic-card">
+            <span class="comic-badge green" style="align-self: flex-start; margin-bottom: 12px;">SESSIONE ATTIVA</span>
+            <h4 class="comic-title" style="font-size: 1.3rem;">VALMORA MULTIGIOCATORE</h4>
+            <p class="arcade-text text-dim" style="font-size: 0.72rem; line-height: 1.6;">
+              Master: <b class="text-cyan">Lorenzo (Master)</b><br />
+              Spesa stimata: <b>$0.08 / ora</b> · Tetto: <b>$1.00</b>
+            </p>
+            <div style="margin-top: auto; padding-top: 16px;">
+              <a href="./sessioni.html" class="comic-btn arcade cyan sm full-width">ENTRA NELLA LOBBY</a>
+            </div>
+          </div>
+
+          <div class="comic-card">
+            <span class="comic-badge pink" style="align-self: flex-start; margin-bottom: 12px;">PORTAFOGLIO STRIPE</span>
+            <h4 class="comic-title" style="font-size: 1.3rem;">RICARICA CREDITI</h4>
+            <p class="arcade-text text-dim" style="font-size: 0.72rem; line-height: 1.6;">
+              Saldo disponibile: <b class="text-green" style="font-size: 0.9rem;">$12.50 USD</b><br />
+              Ricarica sicura con Stripe Checkout e Google Pay.
+            </p>
+            <div style="margin-top: auto; padding-top: 16px;">
+              <a href="./pagamenti.html" class="comic-btn arcade pink sm full-width">GESTISCI CREDITI</a>
+            </div>
+          </div>
+
+          <div class="comic-card">
+            <span class="comic-badge yellow" style="align-self: flex-start; margin-bottom: 12px;">PROFILO VIANDANTE</span>
+            <h4 class="comic-title" style="font-size: 1.3rem;">STATO ACCOUNT</h4>
+            <p class="arcade-text text-dim" style="font-size: 0.72rem; line-height: 1.6;">
+              ID Viandante: <b class="text-cyan">v-9842a</b><br />
+              Stato: <b class="text-green">Google Collegato</b>
+            </p>
+            <div style="margin-top: auto; padding-top: 16px;">
+              <a href="./profilo.html" class="comic-btn arcade sm full-width">MODIFICA AVATAR 3D</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Synthwave Sunset Footer with the Secret of the Jerboa -->
+    <footer class="site-footer">
+      <div class="footer-grid-floor"></div>
+
+      <!-- The Jerboa Secret Easter Egg (ADR-0095) -->
+      <div class="footer-horizon">
+        <div class="jerboa-peek-container" title="Qualcosa osserva dall'orizzonte...">
+          <div class="jerboa-tooltip">// DUE ORECCHIE LUNGHE NELLA NOTTE...</div>
+          <svg class="jerboa-ears-svg" viewBox="0 0 64 38">
+            <path d="M 16 38 C 14 20, 4 8, 12 2 C 20 -4, 26 14, 28 38 Z" />
+            <path d="M 48 38 C 50 20, 60 8, 52 2 C 44 -4, 38 14, 36 38 Z" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="footer-brand">QUINE42</div>
+      <p class="footer-quote">
+        "Il sentiero scorre sotto i tuoi passi e ti guida nel mondo.<br />
+        Oltre l'orizzonte del visibile, c'è chi veglia e continua a scrivere le regole del gioco."
+      </p>
+
+      <div class="footer-links">
+        <a href="../../../index.html">GIOCO</a>
+        <a href="./landing.html">MONDO</a>
+        <a href="./carte.html">CARTE</a>
+        <a href="./sessioni.html">SESSIONI</a>
+        <a href="./profilo.html">PROFILO</a>
+        <a href="./pagamenti.html">CREDITI</a>
+        <a href="./componenti.html">COMPONENTI</a>
+      </div>
+
+      <div class="footer-copy">
+        QUINE42 © 2026 · Voxel Engine & Algoritmi MarkovJunior 3D · Generato da Intelligenza Artificiale
+      </div>
+    </footer>
+
+    <!-- Interactive script for demo card flip and mobile navigation -->
+    <script>
+      const demoCard = document.getElementById('demo-card');
+      if (demoCard) {
+        demoCard.addEventListener('click', () => {
+          demoCard.classList.toggle('is-flipped');
+        });
+      }
+      const navToggle = document.getElementById('nav-toggle');
+      const navLinks = document.getElementById('nav-links');
+      if (navToggle && navLinks) {
+        navToggle.addEventListener('click', () => {
+          navLinks.classList.toggle('is-open');
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -2244,7 +2244,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   visibili (resta in due commenti HTML); in console solo errori di estensioni del browser. `/?skip&offline`: HUD come prima, nessun errore.
   Nessun difetto.
 
-### T109 · Il sito: il template grafico in `docs/design/sito/` — `da fare`
+### T109 · Il sito: il template grafico in `docs/design/sito/` — `fatto`
 - Pipeline: claude · stima 4% · approvato · priorità 59
 - Contesto: richiesta dell'autore del 01/11: il template va fatto prima dei task del sito (T101-T106), e lo fa la pipeline al posto suo.
   Posto scelto dall'autore: `docs/design/sito/` (`docs/pipeline/domande/T97.md`, risposta (a)). Nasce da T97: `dossier T97`; tema in ADR-0095,
@@ -2256,3 +2256,10 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   indice dei componenti; un `README.md` che dice come T101-T106 ne copiano lo stile. Il segreto dei gerboa allusivo come nell'ADR-0095. Testi in
   italiano, niente meta-gioco.
 - Quando è fatto: le pagine aperte nel browser (screenshot di ciascuna, desktop e mobile), nessun errore in console; typecheck verde.
+- Esito: creato in `docs/design/sito/` il template grafico master statico (HTML5 + CSS puro, zero framework, nessuna dipendenza a runtime):
+  `template.css` (palette pop art/synthwave, token, utility, stati interattivi, animazioni 3D e responsive), `landing.html` (e `index.html`),
+  `login.html` (accesso Google, anonimo e stati), `profilo.html` (identità, saldo, customizer 3D avatar con mantello e seme), `sessioni.html`
+  (elenco reami live e wizard modale «Crea Nuovo Universo»), `carte.html` (galleria carte 3D animate con lamina olografica, flip bifacciale e quote),
+  `pagamenti.html` (saldo, selettore tagli ricarica rapida Stripe e tabella transazioni), `componenti.html` (indice componenti e design system)
+  e `README.md` (guida operativa per i task T101-T106). Testi in italiano, nessun meta-gioco, segreto dei gerboa allusivo nel footer, font locali.
+  Typecheck e build verdi.
