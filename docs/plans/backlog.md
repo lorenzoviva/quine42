@@ -1016,7 +1016,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 
 ## Le rune
 
-### T57 · Le rune come codice: sequenze ordinate, effetti, rune nuove — `da fare` (T57a fatto; poi T57b)
+### T57 · Le rune come codice: sequenze ordinate, effetti, rune nuove — `fatto` (T57a; il resto in T57b e T57c)
 - Pipeline: claude · stima 8% · approvato · priorità 60
 - Contesto: richiesta del 24/10 («Le rune»). L'esempio del seme `acqua fuoco` → «Vapore» (si annullano, un messaggio, in
   `universe/modules/magic.runes/manifest.json`) non è l'idea: le rune sono come codice, una **sequenza ordinata** produce
@@ -1050,6 +1050,25 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 - Dipendenze: T57c dopo T51a (livelli dell'acqua coerenti).
 - **Domanda per l'autore** (per T57c): va bene un effetto `rilievo` nel kernel come strumento generico (gli incantesimi
   che lo usano restano del Concilio)?
+
+### T57b · Rune nuove dal Concilio — `da fare` (dipende da T57)
+- Pipeline: claude · stima 5% · approvato · priorità 60
+- Contesto: il pezzo T57b del blocco T57 (T57a fatto e integrato con T99: canone, `SPELL_GUIDE`, prompt di Narratore, Fisico, Arbitro).
+- Fare: una via per inventare una runa magica (nome, glifo, colore, cosa significa nel canone) in una sessione del Concilio o quando una
+  combinazione la chiede: modulo `magic.runes` riscritto, validatore (glifo unico, nome non simile alle altre, niente meta-gioco), canone
+  aggiornato; la runa compare nel mondo come le altre (rare). Schema Gemini, risposta in `MockModels`, voce nel registro.
+- Fatto quando: test verdi (una runa nuova entra, è valida, si può raccogliere e combinare), typecheck verde, AGENTS.md (Magia) aggiornato, ADR.
+
+### T57c · Il terreno che sale e scende — `da fare` (dipende da T57)
+- Pipeline: claude · stima 3% · approvato · priorità 61
+- Contesto: il pezzo T57c del blocco T57. Oggi l'effetto `terreno` cambia il tipo di casella, non l'altezza; T51b ha dato
+  `kernel.dig(col, row, delta)` e l'acqua che scorre (ADR-0094). La domanda del blocco T57 (un effetto `rilievo` generico nel kernel):
+  l'autore ha approvato il task il 01/11.
+- Fare: `rilievo {delta, raggio}` nell'insieme chiuso degli effetti (ADR-0014), validato dal kernel, applicato con `dig` (persistente nel
+  piano, `scavi`), l'acqua scorre dove cambia; gli esempi di terraformazione del canone e di `SPELL_GUIDE` passano da `terreno` a
+  `rilievo` (`terra aria terra` innalza, `aria terra aria` abbassa). È uno strumento, non un incantesimo: quali sequenze lo usano lo
+  decide il Concilio.
+- Fatto quando: test verdi (l'effetto alza e abbassa, persiste al ricaricamento, l'acqua scorre), typecheck verde, AGENTS.md (Effetti, Magia) aggiornato, ADR.
 
 ## Multiplayer
 
