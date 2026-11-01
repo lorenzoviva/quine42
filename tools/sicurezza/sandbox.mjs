@@ -75,12 +75,15 @@ const WALK = (marker) => `
     if depth > 8 then return end
     if type(v) == 'string' then
       if string.find(v, '${marker}', 1, true) then found = found + 1 end
-    elseif type(v) == 'table' and not seen[v] then
+    elseif (type(v) == 'table' or type(v) == 'userdata') and not seen[v] then
       seen[v] = true
       for k, x in pairs(v) do walk(k, depth + 1) walk(x, depth + 1) end
     end
   end
-  walk(_ENV, 0)
+  -- The environment of a module is empty: what it sees comes from __index, so it goes by name.
+  for _, name in ipairs({ 'math', 'string', 'table', 'utf8', 'ecs', 'input', 'world', 'bus', 'inventory', 'items', 'ui', 'carpet' }) do walk(_ENV[name], 0) end
+  local me = world.player()
+  for _, name in ipairs({ 'pos', 'needs', 'inventory' }) do walk(ecs.get(me, name), 0) end
   return tostring(found)
 `;
 

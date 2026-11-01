@@ -2462,7 +2462,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Test: tabella di percorsi rifiutati sul validatore dei percorsi, senza scrivere fuori da una cartella temporanea.
 - Quando è fatto: test e typecheck verdi, commit su `task/T121`.
 
-### T122 · Non si esce dalla sandbox: prove difensive e chiusure — `da fare` (dipende da T136, T137)
+### T122 · Non si esce dalla sandbox: prove difensive e chiusure — `fatto` (dipende da T136, T137)
 - Pipeline: claude · stima 4% · approvato · priorità 2
 - Contesto: è **la cosa più importante per l'autore**, e l'audit non l'ha dimostrata: una sessione è stata fermata da un filtro di sicurezza mentre preparava le prove. Il lavoro è difensivo, sulla sandbox di questo progetto. Il `Sandbox` gira in wasmoon dentro il processo del server. Nasce da T117 (R8 ridotta, annotazione `string.dump`, «Cosa non è stato fatto»).
 - Cosa fare:
@@ -2472,6 +2472,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   4. Aggiornare `docs/sicurezza/audit-2026-11.md`: la risposta alla domanda 1, con ciò che è provato e ciò che no.
 - **Se un filtro interrompe di nuovo la sessione**: non insistere; scrivere cosa resta non provato in `docs/pipeline/domande/T122.md`, così l'autore decide se farlo vedere a una persona esperta.
 - Quando è fatto: test e typecheck verdi, commit su `task/T122`.
+- Esito: `task/T122`. V-008, V-017, V-019 `chiuse`. La proprietà non reggeva (da Lua si raggiungevano prototipi e metodi di JS, misurato dal kit): il proxy di wasmoon è spento e tutto passa da `Crossing` in `sandbox.ts` (ADR-0099), che dà a Lua solo i campi di dati propri e a JS solo dati, quindi nessuna funzione Lua può girare fuori da `guarded`. `string.dump` tolto dalla tabella vera. Test in `tests/sicurezza/uscita.test.ts`; audit aggiornato con ciò che è provato e ciò che no (un difetto di wasm o di Lua, il blocco e la memoria, nessuno sguardo esterno: nessun filtro ha fermato la sessione, nessuna domanda aperta). Costo invariato. Rispetto al previsto: (1) più largo del task, perché riparare solo le funzioni non bastava; (2) la VM di prova non è buttata a ogni prova ma azzerata, perché `validateForged` è sincrona e aprire una VM no; (3) la prova del valore finto di T136/T137 non misurava nulla (l'ambiente di un modulo è vuoto) ed è corretta, anche nel kit (`tools/sicurezza/sandbox.mjs`); (4) fuori dal task, `tests/between.test.ts` ha un limite suo di 180 s: i suoi test stanno sui 60 s anche col codice di prima (misurato) e cadevano sotto carico, due volte su tre suite: andrebbero alleggeriti. Nella build, `?skip&offline`: il gioco gira, nessun guasto, nessun campo di JS dalla console. Le coroutine non sono provate: non sono raggiungibili. Sicurezza: nessuna superficie nuova, voci chiuse sopra.
 
 ### T123 · Il proxy di Gemini — `da fare` (dipende da T136)
 - Pipeline: claude · stima 3% · approvato · priorità 6

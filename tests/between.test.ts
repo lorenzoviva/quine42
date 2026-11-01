@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { GIVE_REACH, Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
@@ -10,6 +10,9 @@ import { SessionClient } from '../src/session/client';
 import { ThinClient } from '../src/session/thin';
 
 // Between wanderers (T43a): words with a bubble, things given, to whoever is near.
+
+// Each test boots whole kernels and takes about 60 s on its own, before and after T122: at the global limit, so it fails under load.
+vi.setConfig({ testTimeout: 180_000 });
 
 const DT = 1 / 60;
 

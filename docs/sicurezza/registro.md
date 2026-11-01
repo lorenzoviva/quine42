@@ -93,14 +93,14 @@ Modello di una voce:
 
 ### V-008 · La prova di caricamento gira nella sandbox viva, e le funzioni Lua passate all'`Host`
 - Gravità: alta
-- Stato: `specificata`
+- Stato: `chiusa`
 - Superficie: `src/kernel/validator.ts`, l'`Host` di `src/kernel/sandbox.ts`
 - Proprietà violata: non si esce dalla sandbox: un modulo non ancora approvato non gira nella VM del mondo, e nessuna funzione Lua diventata JS gira fuori da `guarded`
-- Prova: solo lettura del codice (T117); misurata dal kit e nella suite (`esiti/2026-11-01.json`): ciò che la prova di caricamento esegue resta nella sandbox viva (V-008.a) e una funzione Lua arriva a JS come funzione (V-008.b). Se giri fuori da `guarded` non è stato provato
-- Contromisura: la prova di caricamento dei moduli in una VM usa e getta; verificare e riparare le funzioni Lua dentro le tabelle passate all'`Host`.
+- Prova: solo lettura del codice (T117); misurata dal kit e nella suite prima della correzione (`esiti/2026-11-01.json`): ciò che la prova di caricamento esegue restava nella sandbox viva (V-008.a) e una funzione Lua arrivava a JS come funzione (V-008.b); dopo, test: nessuna funzione arriva a JS per nessuna via (tabelle, valori, campi scritti, ciò che un modulo restituisce), quindi nessuna può girare fuori da `guarded`; la prova non chiama l'`Host` vero e non lascia nulla
+- Contromisura: `Crossing` (ADR-0099): da Lua a JS soli dati. `Sandbox.probe`: una VM a parte con un `Host` vuoto, azzerata prima di ogni prova (non buttata: la prova è sincrona, aprire una VM no).
 - Task: T122
-- Test: `tests/sicurezza/sandbox.test.ts`
-- Esito: R8 ridotta come ha deciso l'autore: qui resta solo ciò che tocca la sandbox; il resto di R8 è V-018.
+- Test: `tests/sicurezza/uscita.test.ts`, `tests/sicurezza/sandbox.test.ts`
+- Esito: `task/T122`, 01/11. R8 ridotta come ha deciso l'autore: qui resta solo ciò che tocca la sandbox; il resto di R8 è V-018.
 
 ### V-009 · La coda delle CLI
 - Gravità: alta (oggi: alta se si usano gli abbonamenti)
@@ -184,13 +184,14 @@ Modello di una voce:
 
 ### V-017 · `string.dump` raggiungibile con la sintassi a metodo
 - Gravità: bassa
-- Stato: `specificata`
+- Stato: `chiusa`
 - Superficie: `src/kernel/prelude.lua`, la metatabella delle stringhe
 - Proprietà violata: non si esce dalla sandbox: ciò che il prelude toglie non resta raggiungibile da un'altra via
-- Prova: solo lettura del codice (T117, annotazione dell'audit); misurata dal kit e nella suite (`esiti/2026-11-01.json`): `dump` raggiunto (V-017.a), non chiamato
-- Contromisura: togliere `dump` dalla tabella vera nel prelude, dopo averne preso le copie.
+- Prova: solo lettura del codice (T117, annotazione dell'audit); misurata dal kit e nella suite prima della correzione (`esiti/2026-11-01.json`): `dump` raggiunto (V-017.a), non chiamato; dopo, test: non c'è né nella tabella né con la sintassi a metodo, anche dopo un reset
+- Contromisura: `dump` tolto dalla tabella vera, in testa al prelude.
 - Task: T122
-- Test: `tests/sicurezza/sandbox.test.ts`
+- Test: `tests/sicurezza/uscita.test.ts`, `tests/sicurezza/sandbox.test.ts`
+- Esito: `task/T122`, 01/11.
 
 ### V-018 · Il codice generato non ha permessi per viandante
 - Gravità: bassa
@@ -205,13 +206,14 @@ Modello di una voce:
 
 ### V-019 · L'uscita dalla sandbox verso JS non è stata provata
 - Gravità: critica
-- Stato: `specificata`
+- Stato: `chiusa`
 - Superficie: `src/kernel/sandbox.ts`, `src/kernel/prelude.lua`, wasmoon nel processo che tiene i segreti
-- Proprietà violata: non si esce dalla sandbox: da Lua nessun accesso a `process`, `require`, costruttori o prototipi JS, e un valore finto nell'ambiente non arriva a Lua. È la proprietà che conta di più; T137 ha misurato che costruttori e prototipi si raggiungono, non che si esca
-- Prova: test per i soli globali nascosti, nella suite; le vie indirette (valori restituiti dall'`Host`, metatabelle, `pcall` e coroutine contro il budget) non provate; misurata dal kit e nella suite (`esiti/2026-11-01.json`): **da Lua si raggiungono `constructor`, `__proto__` e altri campi di JS sui valori che l'Host dà** (V-019.a: `carpet`, `player_pos`, i componenti). Sono stati guardati per tipo, nessuno è stato chiamato: se portino davvero fuori resta da provare a T122, ma la proprietà non regge. Regge che `pcall` non scavalca il budget (V-019.c) e che un valore finto dell'ambiente non è fra ciò che Lua vede (V-019.b)
-- Contromisura: test che affermano la proprietà su ogni via, e chiusure dove non regge; se una sessione non può provarla, l'autore decide se farla vedere a una persona esperta.
+- Proprietà violata: non si esce dalla sandbox: da Lua nessun accesso a `process`, `require`, costruttori o prototipi JS, e un valore finto nell'ambiente non arriva a Lua. È la proprietà che conta di più
+- Prova: misurata prima della correzione dal kit e nella suite (`esiti/2026-11-01.json`): **da Lua si raggiungevano `constructor`, `__proto__` e altri campi di JS sui valori che l'Host dà** (V-019.a), guardati per tipo e mai chiamati: la proprietà non reggeva. La lettura di wasmoon aggiunge che anche l'errore di un indice sbagliato arrivava a `pcall` come oggetto JS. Dopo, test su ogni via (`uscita.test.ts`): oggetti, annidati, liste, istanze di classi, argomenti dei moduli, errori, stringhe, funzioni dell'API; scritture del prototipo; budget contro `pcall`, callback e rientri nel kernel. V-019.b del primo kit era vuota (l'ambiente di un modulo è vuoto, `pairs` non scorre nulla): la prova ora va per nomi. Il kit dopo la correzione: 6 ok su 6 per V-008, V-017, V-019 (`esiti/2026-11-01-t122.json`). Ciò che queste prove non coprono è in `audit-2026-11.md`, domanda 1. Le coroutine non si provano: non sono raggiungibili
+- Contromisura: `Crossing` (ADR-0099): il proxy di wasmoon è spento, a Lua arrivano viste dei soli campi di dati propri. Un difetto di wasm o di Lua stesso non è coperto da qui: T127, il mondo in un worker senza segreti.
 - Task: T122
-- Test: `tests/sicurezza/sandbox.test.ts`
+- Test: `tests/sicurezza/uscita.test.ts`, `tests/sicurezza/sandbox.test.ts`
+- Esito: `task/T122`, 01/11.
 
 ## Le prove dell'autore
 
@@ -226,7 +228,7 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-005 | a b c | — | — | la corsa con un commit del mondo in mezzo: T125 |
 | V-006 | a b c d e f | g | `rotte.test.ts` | `offline` e `tetto` decisi dal client non si vedono da fuori: T120 |
 | V-007 | a b c | — | `sandbox.test.ts` | il budget per tick e i MarkovJunior sul server: T126 |
-| V-008 | a b | — | `sandbox.test.ts` | se una funzione Lua giri fuori da `guarded`: T122 |
+| V-008 | a b | — | `uscita.test.ts`, `sandbox.test.ts` | — |
 | V-009 | a b | — | `rotte.test.ts` | gli argomenti delle CLI, che non si lanciano: T128 |
 | V-010 | a b | — | — | la risposta del Referente con i crediti: T125 |
 | V-011 | a | — | — | la lunghezza del testo, le code per pagante: T129 |
@@ -235,9 +237,9 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-014 | a b c d e f g h i j k | — | — | `npm audit`: T131, il kit non esce sulla rete |
 | V-015 | a b | c | — | i testi delle altre pagine: T132 |
 | V-016 | a b c | d e | — | — |
-| V-017 | a | — | `sandbox.test.ts` | — |
+| V-017 | a | — | `uscita.test.ts`, `sandbox.test.ts` | — |
 | V-018 | — | — | — | accettata: non si prova |
-| V-019 | a b c | — | `sandbox.test.ts` | se ciò che si raggiunge porti davvero fuori: non è stato chiamato nulla, T122 |
+| V-019 | a b c | — | `uscita.test.ts`, `sandbox.test.ts` | un difetto di wasm o di Lua stesso: T127 |
 
 ## Ciò che nessuna voce copre ancora
 
