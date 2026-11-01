@@ -1059,7 +1059,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
   aggiornato; la runa compare nel mondo come le altre (rare). Schema Gemini, risposta in `MockModels`, voce nel registro.
 - Fatto quando: test verdi (una runa nuova entra, è valida, si può raccogliere e combinare), typecheck verde, AGENTS.md (Magia) aggiornato, ADR.
 
-### T57c · Il terreno che sale e scende — `da fare` (dipende da T57)
+### T57c · Il terreno che sale e scende — `fatto` (`c689328`, ADR-0096)
 - Pipeline: claude · stima 3% · approvato · priorità 61
 - Contesto: il pezzo T57c del blocco T57. Oggi l'effetto `terreno` cambia il tipo di casella, non l'altezza; T51b ha dato
   `kernel.dig(col, row, delta)` e l'acqua che scorre (ADR-0094). La domanda del blocco T57 (un effetto `rilievo` generico nel kernel):
@@ -1069,6 +1069,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
   `rilievo` (`terra aria terra` innalza, `aria terra aria` abbassa). È uno strumento, non un incantesimo: quali sequenze lo usano lo
   decide il Concilio.
 - Fatto quando: test verdi (l'effetto alza e abbassa, persiste al ricaricamento, l'acqua scorre), typecheck verde, AGENTS.md (Effetti, Magia) aggiornato, ADR.
+- Esito: `rilievo {delta, raggio}` aggiunto a `Effect` in `src/kernel/types.ts` e validato in `validator.ts` (-8..8 livelli interi clamped, scartato se 0, raggio 0..3 clamped, `describeEffect`); `kernel.ts` intercetta `rilievo` in `applyEffects` e invoca `this.dig` su ogni casella nel cerchio (`dx*dx + dy*dy <= r*r + r`), persistendo in `plan.scavi` e risvegliando il flusso dell'acqua (`WaterFlow.wake`); `EFFECTS_GUIDE` e `SPELL_GUIDE` in `agents/effects.ts`, `canone.md` e prompt del Narratore aggiornati con terraformazione a rilievo (`terra vento terra` solleva, `vento terra vento` abbassa); `MockModels` supporta entrambe le sequenze e i verbi innalza/abbassa/spiana; 6 test in `tests/rilievo.test.ts` (validazione, scarto delta 0, descrizione, sollevamento e scavo persistenti nel piano ricaricato, risveglio e deflusso dell'acqua, lancio incantesimi); ADR-0096 indicizzato in `docs/adr/README.md`.
 
 ## Multiplayer
 

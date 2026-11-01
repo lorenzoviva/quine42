@@ -55,6 +55,7 @@ const EFFECT_SCHEMA: Schema = {
     quantita: { type: 'INTEGER' },
     a: { type: 'STRING', description: 'terreno: nome del terreno risultante' },
     da: { type: 'STRING', description: 'terreno: solo le caselle di questo terreno (facoltativo)' },
+    delta: { type: 'INTEGER', description: 'rilievo: livelli di cui scavare o alzare (positivo = alza, negativo = scava)' },
     raggio: { type: 'NUMBER' },
     durata: { type: 'NUMBER', description: 'secondi' },
     forza: { type: 'NUMBER' },
@@ -92,6 +93,7 @@ export const EFFECTS_GUIDE = [
   'apri: si apre (se è un contenitore)',
   'contenitore {capienza, bottino}: la cosa diventa apribile (ha uno spazio dentro)',
   'terreno {a, da, raggio}: il terreno attorno cambia (raggio 0-3)',
+  'rilievo {delta, raggio}: alza (delta positivo) o scava (delta negativo) il suolo di livelli interi attorno (raggio 0-3)',
   'fuoco {raggio, durata}: fiamme che bruciano ciò che è infiammabile',
   'luce {raggio, durata}: una luce',
   'scudo {durata}: il viandante è protetto',
@@ -162,8 +164,8 @@ const SPELL_SCHEMA: Schema = {
 export const SPELL_GUIDE = [
   "Una sequenza di rune è un programma: l'ordine conta (terra fuoco ≠ fuoco terra: due incantesimi diversi) e ripetere una runa la rafforza (raggio, durata, forza più grandi).",
   'Di solito la prima runa dà la forma (terra: corpo e peso, una palla, un muro; vento: lancia, spinge, sparge; scudo: racchiude, protegge; luce: rivela) e le altre ciò che porta (fuoco, acqua, cura, luce).',
-  'Esempi di come si compone, non un elenco da copiare: terra fuoco → palla di fuoco (fuoco raggio 2); terra fuoco fuoco → palla di fuoco più grande (fuoco raggio 3, più durata); fuoco terra fuoco → dardi infuocati (fuoco raggio 1 e spingi); acqua → crea acqua (terreno acqua); terra vento terra → la terra si solleva (terreno roccioso attorno); vento terra vento → la terra si spiana (terreno di sentiero attorno).',
-  'Come un incantesimo di D&D: un effetto vero sul luogo o sulle persone (fuoco, spingi, terreno, luce, bisogni, scudo, stato), mai solo un messaggio; più rune = più forte e più costoso.',
+  'Esempi di come si compone, non un elenco da copiare: terra fuoco → palla di fuoco (fuoco raggio 2); terra fuoco fuoco → palla di fuoco più grande (fuoco raggio 3, più durata); fuoco terra fuoco → dardi infuocati (fuoco raggio 1 e spingi); acqua → crea acqua (terreno acqua); terra vento terra → la terra si solleva (rilievo delta 2 raggio 1); vento terra vento → la terra si abbassa (rilievo delta -2 raggio 1).',
+  'Come un incantesimo di D&D: un effetto vero sul luogo o sulle persone (fuoco, spingi, terreno, rilievo, luce, bisogni, scudo, stato), mai solo un messaggio; più rune = più forte e più costoso.',
 ].join(' ');
 
 export interface SpellDraft {

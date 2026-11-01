@@ -356,6 +356,13 @@ export class MockModels implements Models {
         // A program (T57a): the first rune gives the main effect, stronger for every time it is repeated;
         // the others follow, weaker. Order matters: «terra vento» is not «vento terra».
         const runes: Array<{ token: string; name: string; element: string }> = d.runes ?? [];
+        const s = runes.map((r) => r.token).join(' ');
+        if (/^(terra vento terra|terra aria terra)$/.test(s)) {
+          return { nome: 'Innalza', descrizione: 'La terra si solleva in una collina.', costo: 24, effetti: [{ tipo: 'rilievo', delta: 2, raggio: 1 }] };
+        }
+        if (/^(vento terra vento|aria terra aria)$/.test(s)) {
+          return { nome: 'Abbassa', descrizione: 'La terra si abbassa in una conca.', costo: 24, effetti: [{ tipo: 'rilievo', delta: -2, raggio: 1 }] };
+        }
         const BASE: Record<string, Record<string, unknown>> = { luce: { tipo: 'luce', raggio: 4, durata: 60 }, fuoco: { tipo: 'fuoco', raggio: 1, durata: 6 }, vita: { tipo: 'bisogni', salute: 15 }, scudo: { tipo: 'scudo', durata: 20 }, vento: { tipo: 'spingi', forza: 4 }, terra: { tipo: 'terreno', a: 'sentiero', raggio: 1 }, acqua: { tipo: 'terreno', a: 'acqua', raggio: 0 } };
         const times = (t: string) => runes.filter((r) => r.token === t).length;
         const scaled = (t: string, k: number) => Object.fromEntries(Object.entries(BASE[t] ?? {}).map(([f, v]) => [f, typeof v === 'number' ? Math.min(f === 'raggio' ? 3 : 40, Math.round(v * k)) : v]));
@@ -385,6 +392,8 @@ export class MockModels implements Models {
     if (has('romp', 'sfond', 'spacc', 'distrugg')) return { possibile: true, racconto: `Colpisci ${name} con tutta la forza: va in pezzi.`, effetti: [{ tipo: 'distruggi' }, { tipo: 'bisogni', energia: -5 }], ripetibile: true, etichetta: label };
     if (has('bruc', 'incend', 'appicc')) return { possibile: true, racconto: `Le fiamme attecchiscono a ${name}.`, effetti: [{ tipo: 'fuoco', raggio: 1, durata: 8 }], ripetibile: true, etichetta: label };
     if (has('scav')) return { possibile: true, racconto: 'Scavi attorno, la terra si smuove.', effetti: [{ tipo: 'terreno', a: (d.terrains ?? []).find((t: string) => /sentier|terra|strada/.test(t)) ?? d.terrains?.[0], raggio: 1 }], ripetibile: true, etichetta: label };
+    if (has('innalz', 'sollev')) return { possibile: true, racconto: 'La terra si solleva.', effetti: [{ tipo: 'rilievo', delta: 2, raggio: 1 }], ripetibile: true, etichetta: label };
+    if (has('abbass', 'spian')) return { possibile: true, racconto: 'La terra si abbassa.', effetti: [{ tipo: 'rilievo', delta: -2, raggio: 1 }], ripetibile: true, etichetta: label };
     if (has('spin', 'calc')) return { possibile: true, racconto: `Dai una spinta a ${name}.`, effetti: [{ tipo: 'spingi', forza: 2 }], ripetibile: true, etichetta: label };
     if (has('mont', 'cavalc', 'sell')) return { possibile: true, racconto: `Sali in sella: ${name} sbuffa e parte al trotto.`, effetti: [{ tipo: 'stato', nome: 'a cavallo', velocita: 1.8, peso: 30, durata: 0 }], ripetibile: true, etichetta: 'Monta in sella' };
     if (has('smont', 'scend')) return { possibile: true, racconto: 'Scendi di sella.', effetti: [{ tipo: 'togli_stato', nome: 'a cavallo' }], ripetibile: true, etichetta: 'Scendi di sella' };

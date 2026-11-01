@@ -221,7 +221,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   (`needs.mana`); da 3 rune consumano un **cristallo magico** (tabella di bottino `magia`). Una sequenza è un
   programma (T57a): la chiave è la sequenza nell'ordine (`terra fuoco` ≠ `fuoco terra`), ripetere una runa la rafforza;
   come si compone lo dicono il canone, `SPELL_GUIDE` (`agents/effects.ts`, con le permutazioni già note) e i prompt di
-  Narratore, Fisico e Arbitro, con esempi da D&D e terraformazione; gli effetti restano l'insieme chiuso del kernel.
+  Narratore, Fisico e Arbitro, con esempi da D&D e terraformazione (effetto `rilievo`, T57c); gli effetti restano l'insieme chiuso del kernel.
 - **Borse** (ADR-0018): `ItemDef.container {size, accepts}`; lo slot ha `inv`; la borsa delle rune accetta `runa`.
 - **Regole** (ADR-0019): ogni giudizio in `world/rules.json`, mostrato al Concilio; le azioni possibili si
   imparano (modulo o `ItemDef.actions`); «Altro…» anche nell'inventario e nel crafting (ricette in
@@ -231,9 +231,11 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   da `sys.wander`). Un legame dice cosa è la persona per l'altro, nel suo genere; il validatore della società
   (`repairSociety` in `society.ts`) lo rende possibile per le due specie e simmetrico, un padrone per animale,
   nomi non simili (rinomina anche nelle trame); ripara a ogni aggiunta e all'avvio (`reviewSociety`).
-- **Effetti** (ADR-0014): insieme chiuso (`messaggio bisogni crea_oggetto consuma distruggi apri contenitore
-  terreno fuoco luce scudo spingi evoca`), validati dal kernel, applicati da `core.effects`. Usati da
-  azioni libere («Altro…»), azioni imparate (`actions[].effects`) e incantesimi. Terreno cambiato persistente.
+- **Effetti** (ADR-0014, 0096): insieme chiuso (`messaggio bisogni crea_oggetto consuma distruggi apri contenitore
+  terreno rilievo fuoco luce scudo spingi evoca legame ricordo nascita stato togli_stato`), validati dal kernel;
+  applicati da `core.effects` (Lua) e, per `rilievo {delta, raggio}`, dal kernel (`kernel.dig`, ADR-0094: persistente
+  in `scavi`, sveglia l'acqua che scorre). Usati da azioni libere («Altro…»), azioni imparate (`actions[].effects`)
+  e incantesimi. Terreno e rilievo cambiati persistenti.
   Ciò che cambia l'**aspetto** di una cosa con una forma sua non è un effetto (ADR-0044): il Narratore lo dice in
   `forma`, lo Scultore scrive un'`<action>` sul programma del tipo (`sculptAction`), il kernel la prova sul modello
   (`checkAction`: finisce, cambia qualcosa, non lo svuota) e la mette nella libreria; gli effetti restano per il resto.
