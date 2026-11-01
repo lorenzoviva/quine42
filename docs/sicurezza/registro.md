@@ -33,13 +33,14 @@ Modello di una voce:
 
 ### V-002 · Il proxy di Gemini spende la chiave per chiunque
 - Gravità: critica (oggi: alta)
-- Stato: `specificata`
+- Stato: `chiusa`
 - Superficie: `server/geminiProxy.ts`, `/api/gemini`
 - Proprietà violata: la chiave si spende solo per il gioco e nei budget decisi
-- Prova: solo lettura del codice (T117)
+- Prova: test con Google finto (`tests/sicurezza/gemini.test.ts`, T123); contro il server vero la riprova T134
 - Contromisura: elenco dei modelli ammessi, corpo massimo ridotto, tetto di spesa nel proxy, solo da loopback con controllo di `Origin`; in multigiocatore il server chiama Google direttamente, senza route pubblica. La chiave resta fuori dal browser.
 - Task: T123, T133
-- Test: —
+- Test: `tests/sicurezza/gemini.test.ts`
+- Esito: chiusa da T123 (ADR-0099), 01/11/2026, branch `task/T123`. Per T133: il server di produzione non monta la route e chiede il tetto nel `.env`.
 
 ### V-003 · La cartella di git non è protetta
 - Gravità: critica su file system che ignorano le maiuscole (Windows, l'ambiente dell'autore)

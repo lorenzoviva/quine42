@@ -2473,12 +2473,13 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - **Se un filtro interrompe di nuovo la sessione**: non insistere; scrivere cosa resta non provato in `docs/pipeline/domande/T122.md`, così l'autore decide se farlo vedere a una persona esperta.
 - Quando è fatto: test e typecheck verdi, commit su `task/T122`.
 
-### T123 · Il proxy di Gemini — `da fare` (dipende da T136)
+### T123 · Il proxy di Gemini — `fatto` (dipende da T136)
 - Pipeline: claude · stima 3% · approvato · priorità 6
 - Contesto: R2: `/api/gemini` spende la chiave per chiunque raggiunga la porta, con qualunque modello `gemini-*` e fino a 12 MB.
 - Cosa fare: elenco dei modelli ammessi (quelli di `universe.json` e dei prezzi), corpo massimo ridotto, tetto di spesa nel proxy, accesso solo da loopback con controllo di `Origin`; in multigiocatore il server chiama Google direttamente, senza route pubblica. La chiave resta fuori dal browser (regola 9).
 - Test: richieste rifiutate per origine, modello e dimensione, con `fetch` finto; nessuna chiamata vera a Gemini.
 - Quando è fatto: test e typecheck verdi, commit su `task/T123`.
+- Esito: `GeminiGate` in `server/geminiProxy.ts`, ADR-0099, V-002 `chiusa`, `tests/sicurezza/gemini.test.ts`. Corpo massimo 2 MB. Scelte non scritte nel task: tetto giornaliero per tutta la chiave (`GEMINI_TETTO_GIORNALIERO`, predefinito 10 $, in `universes/.spesa-gemini.json`); un modello fuori dai prezzi ma nominato da un universo passa e si conta al prezzo del più caro; al tetto la risposta è 402 e `GeminiModels` la traduce in `BudgetError`. Più del previsto: controllo di `Host` e delle intestazioni di inoltro (nomi puntati su 127.0.0.1, tunnel). Nessuna chiamata vera a Gemini: la porta diretta del multigiocatore è provata con `fetch` finto, non con una partita vera. Sicurezza: nessuna superficie nuova.
 
 ### T124 · Il webhook di Stripe — `da fare` (dipende da T136)
 - Pipeline: claude · stima 2% · approvato · priorità 7
