@@ -45,13 +45,14 @@ Modello di una voce:
 
 ### V-003 · La cartella di git non è protetta
 - Gravità: critica su file system che ignorano le maiuscole (Windows, l'ambiente dell'autore)
-- Stato: `specificata`
+- Stato: `chiusa`
 - Superficie: `safePath` in `server/universeStore.ts`, `cleanBranch` in `src/session/server.ts`
 - Proprietà violata: non si esce dalla sandbox: nessuna scrittura arriva alla configurazione di git, perché il server lancia git in quella cartella
-- Prova: solo lettura del codice (T117); misurata dal kit (`esiti/2026-11-01.json`): **su Windows una scrittura arriva nella cartella di git con altre maiuscole, con il nome corto e con un flusso NTFS** (V-003.b, c, f, g: solo un file segnaposto, nessuna configurazione toccata); nome esatto, punto o spazio finale e uscita dall'universo sono rifiutati
-- Contromisura: elenco dei percorsi ammessi invece di un divieto; normalizzare maiuscole, punti e spazi finali, flussi NTFS e nomi riservati di Windows; git lanciato con `core.hooksPath` vuoto e nessuna configurazione del repository scrivibile.
+- Prova: solo lettura del codice (T117); misurata dal kit (`esiti/2026-11-01.json`): **su Windows una scrittura arriva nella cartella di git con altre maiuscole, con il nome corto e con un flusso NTFS** (V-003.b, c, f, g: solo un file segnaposto, nessuna configurazione toccata); nome esatto, punto o spazio finale e uscita dall'universo sono rifiutati. Dopo T121: test (`tests/sicurezza/percorsi.test.ts`: una tabella di percorsi sul validatore, sul ramo del WebSocket e su un magazzino in una cartella temporanea; un hook vero e un `core.hooksPath` nel repository non girano col server, e girano con git lasciato a sé) e kit (`esiti/2026-11-01-dopo-T121.json`): V-003.a-h ok
+- Contromisura: elenco dei percorsi ammessi invece di un divieto, in una forma sola: maiuscole delle cartelle, punti e spazi finali, flussi NTFS, nomi corti e nomi riservati di Windows sono rifiutati, non normalizzati; git lanciato con hook e monitor spenti (`core.hooksPath=/dev/null`: vuoto cercherebbe alla radice del disco), senza risalire al repository di sopra; nessuna configurazione del repository scrivibile.
 - Task: T121
-- Test: `tests/sicurezza/rotte.test.ts`
+- Test: `tests/sicurezza/percorsi.test.ts`, `tests/sicurezza/rotte.test.ts`
+- Esito: chiusa da T121 (ADR-0103), 01/11/2026, branch `task/T121`. Un elenco dei percorsi ammessi al posto del divieto su `.git`, in `safePath` e in `cleanBranch`; git solo da `server/git.ts`. Resta: i link simbolici, che nessuna via del server crea (ADR-0103, «Conseguenze»).
 
 ### V-004 · Il webhook di Stripe senza segreto non controlla nulla
 - Gravità: critica
@@ -227,7 +228,7 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 |---|---|---|---|---|
 | V-001 | a b c d e f g h i j k l m | n o | `rotte.test.ts` | — |
 | V-002 | a b c d | — | `gemini.test.ts`, `rotte.test.ts` | un processo di questa macchina spende fino al tetto del giorno: voluto (ADR-0099), un loop di chiamate piccole non si ferma prima |
-| V-003 | a b c d e f g h | — | `rotte.test.ts` (solo il nome esatto: le varianti valgono su NTFS) | `cleanBranch` della sessione: T121 |
+| V-003 | a b c d e f g h | — | `percorsi.test.ts`, `rotte.test.ts` | — |
 | V-004 | a b c d e | — | `rotte.test.ts` | — |
 | V-005 | a b c | — | — | la corsa con un commit del mondo in mezzo: T125 |
 | V-006 | a b c d e f | g | `rotte.test.ts` | `offline` e `tetto` decisi dal client non si vedono da fuori: T120 |

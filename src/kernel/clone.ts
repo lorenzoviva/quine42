@@ -9,11 +9,9 @@
 // Light on purpose: the store on the dev server imports it, without the validator nor the engines.
 import type { Carta } from './cards';
 import { contentText, fingerprint, readOrigins } from './heritage';
+import { UNIVERSE_NAME_RE } from './paths';
 import { SOLO, validWandererId } from './wanderers';
 import type { FileMap } from './types';
-
-/** A universe's name: a folder of `universes/` (as the store wants it). */
-export const UNIVERSE_NAME_RE = /^[a-z0-9][a-z0-9-]{0,40}$/;
 
 export interface CloneOptions {
   /** The new universe's name. */

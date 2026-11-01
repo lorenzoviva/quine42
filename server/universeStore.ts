@@ -22,17 +22,17 @@
 
 import type { Connect, Plugin } from 'vite';
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { execFile } from 'node:child_process';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { cloneChanges, type CloneOptions } from '../src/kernel/clone';
 import { allCards } from '../src/kernel/cards';
+import { allowedPath, UNIVERSE_NAME_RE } from '../src/kernel/paths';
 import { publicFiles } from '../src/session/files';
 import type { AccountSettings } from './account';
 import { callerOf, creditFile, gameIn, isJson, newSecret, newUniverse, owns, type Access } from './access';
+import { runGit } from './git';
 
 const MAX_BODY = 32 * 1024 * 1024;
-const NAME_RE = /^[a-z0-9][a-z0-9-]{0,40}$/;
 const AUTHORS: Record<string, [string, string]> = {
   agent: ['Concilio', 'concilio@rune.local'],
   player: ['Viandante', 'viandante@rune.local'],
@@ -62,13 +62,7 @@ function readBody(req: IncomingMessage): Promise<string> {
 }
 
 function git(cwd: string, args: string[], author?: [string, string], opts: { env?: NodeJS.ProcessEnv; input?: string } = {}): Promise<string> {
-  // Identity only for this repository and this command: the machine's global config is never touched.
-  const id = author ?? AUTHORS.kernel;
-  const full = ['-c', `user.name=${id[0]}`, '-c', `user.email=${id[1]}`, '-c', 'core.autocrlf=false', '-c', 'core.quotepath=false', ...args];
-  return new Promise((resolve, reject) => {
-    const child = execFile('git', full, { cwd, env: opts.env, maxBuffer: 64 * 1024 * 1024, windowsHide: true }, (err, stdout, stderr) => (err ? reject(new Error(String(stderr || err.message).trim())) : resolve(String(stdout))));
-    if (opts.input !== undefined) child.stdin?.end(opts.input, 'utf8');
-  });
+  return runGit(cwd, args, { ...opts, author: author ?? AUTHORS.kernel });
 }
 
 // --- Branches (T42b) ----------------------------------------------------------------------------
@@ -161,11 +155,10 @@ export async function cloneUniverse(baseDir: string, root: string, opts: CloneOp
   }
 }
 
-/** A universe-relative path that stays inside the universe and out of git's own folder. */
+/** A universe-relative path among those a universe may hold (ADR-0103), as a path on this disk. */
 function safePath(root: string, rel: string): string {
-  const p = rel.replace(/\\/g, '/');
-  if (!p || p.startsWith('/') || p.split('/').some((s) => s === '..' || s === '' || s === '.git')) throw new Error(`percorso non valido: ${rel}`);
-  const abs = path.resolve(root, p);
+  if (!allowedPath(rel)) throw new Error(`percorso non ammesso: ${rel}`);
+  const abs = path.resolve(root, rel);
   if (!abs.startsWith(path.resolve(root) + path.sep)) throw new Error(`percorso fuori dall'universo: ${rel}`);
   return abs;
 }
@@ -211,6 +204,8 @@ async function log(root: string): Promise<Array<{ id: string; author: string; ti
 }
 
 async function writeFiles(root: string, changes: Record<string, string | null>): Promise<void> {
+  // All of them or none: a refused path leaves no half of a commit in the working tree.
+  for (const rel of Object.keys(changes)) safePath(root, rel);
   for (const [rel, content] of Object.entries(changes)) {
     const abs = safePath(root, rel);
     if (content === null) await fs.rm(abs, { force: true });
@@ -250,7 +245,7 @@ export function universeStore(baseDir: string, opts: { accounts?: AccountSetting
       const es = await fs.readdir(baseDir, { withFileTypes: true }).catch(() => []);
       return send(res, 200, { available: true, universes: es.filter((e) => e.isDirectory() && !e.name.startsWith('.')).map((e) => e.name) });
     }
-    if (!m || !NAME_RE.test(m[1])) return send(res, 404, { error: 'universo sconosciuto' });
+    if (!m || !UNIVERSE_NAME_RE.test(m[1])) return send(res, 404, { error: 'universo sconosciuto' });
     const name = m[1];
     const op = m[2];
     const arg = m[3] ? decodeURIComponent(m[3]) : undefined;
@@ -298,7 +293,9 @@ export function universeStore(baseDir: string, opts: { accounts?: AccountSetting
     }
     if (op === 'map' && arg) {
       if (!/^[\w:.,-]+$/.test(arg)) return send(res, 400, { error: 'nome non valido' });
-      const file = path.join(root, 'maps', `${arg.replace(/[:,]/g, '_')}.json`);
+      const rel = `maps/${arg.replace(/[:,]/g, '_')}.json`;
+      if (!allowedPath(rel)) return send(res, 400, { error: 'nome non valido' });
+      const file = safePath(root, rel);
       if (req.method === 'GET') {
         return fs.readFile(file, 'utf8').then(
           (t) => {
@@ -329,6 +326,7 @@ export function universeStore(baseDir: string, opts: { accounts?: AccountSetting
     const body = raw ? JSON.parse(raw) : {};
     // In a game of many the balances are the world's: not even its master writes them from outside (ADR-0081, ADR-0102).
     const touched = op === 'commit' ? body.changes : op === 'branch' ? body.files : undefined;
+    if (Object.keys((op === 'create' ? body.files : touched) ?? {}).some((p) => !allowedPath(p))) return send(res, 400, { error: 'percorso non ammesso' });
     if (!who.server && game.many && Object.keys(touched ?? {}).some(creditFile)) return send(res, 403, { error: 'i crediti non si scrivono da qui' });
     const made = op === 'create' ? newUniverse(who, body.files ?? {}) : undefined;
     if (made && 'refused' in made) return send(res, made.status, { error: made.refused });
@@ -343,6 +341,7 @@ export function universeStore(baseDir: string, opts: { accounts?: AccountSetting
           return { head: await commitAll(root, body.message ?? 'nasce dal seme del kernel', 'genesis') };
         }
         case 'commit':
+          if (!(await exists(path.join(root, '.git')))) throw new Error('universo sconosciuto');
           await writeFiles(root, body.changes ?? {});
           return { head: await commitAll(root, String(body.message ?? 'commit'), String(body.author ?? 'kernel')) };
         case 'checkout': {

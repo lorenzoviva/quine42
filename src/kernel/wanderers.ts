@@ -5,6 +5,7 @@
 // keeps the entities.
 
 import type { FileMap } from './types';
+import { reservedName } from './paths';
 import { hashStr } from './rng';
 import { freshName, guessGender, similarNames } from './society';
 
@@ -172,7 +173,7 @@ export const PLAYERS_DIR = 'world/giocatori/';
 
 /** An id is a short slug (it names a file). */
 export function validWandererId(id: unknown): id is string {
-  return typeof id === 'string' && /^[a-z0-9][a-z0-9_-]{0,39}$/.test(id);
+  return typeof id === 'string' && /^[a-z0-9][a-z0-9_-]{0,39}$/.test(id) && !reservedName(id);
 }
 
 export function playerFile(id: string): string {
