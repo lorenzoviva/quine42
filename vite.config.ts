@@ -9,6 +9,7 @@ import { accountRoute, accountSettings } from './server/account';
 import { stripeRoute, stripeSettings } from './server/stripe';
 import { subscriptionQueue } from './server/subscriptionQueue';
 import { wandererRoute } from './server/wanderer';
+import { testWorkers } from './server/testWorkers';
 
 export default defineConfig(({ mode }) => {
   // '' prefix: read every variable, but only server-side. Nothing without VITE_ reaches the client.
@@ -55,8 +56,10 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
-    // The session's tests boot several kernels each: with the whole suite in parallel they take longer than the default 5 s.
-    test: { environment: 'node', include: ['tests/**/*.test.ts', 'lab/**/*.test.ts'], testTimeout: 60000 },
+    // The session's tests boot several kernels each: with the whole suite in parallel they take longer than the default 5 s,
+    // and a `beforeEach` that boots one takes longer than the default 10 s of a hook even on an idle machine (T118).
+    // Under the pipeline at most one worker per physical core (T118, ADR-0088); by hand vitest's default.
+    test: { environment: 'node', include: ['tests/**/*.test.ts', 'lab/**/*.test.ts'], testTimeout: 60000, hookTimeout: 60000, ...testWorkers(process.env) },
   };
 });
 

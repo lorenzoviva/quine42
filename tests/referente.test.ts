@@ -91,7 +91,7 @@ describe('the Referente and the teams of the corona on the master’s branch (T4
     run(server, [master, anna], 12);
     expect(anna.k.files[ATLAS_FILE]).toMatch(/Elfi/);
     expect(server.branchFiles()).toEqual({});
-  }, 30_000);
+  }, 60_000);
 
   it('the branch keeps the master’s edits beside what the Council made, and a player cannot ask', async () => {
     const k = await bootMany();
@@ -116,7 +116,7 @@ describe('the Referente and the teams of the corona on the master’s branch (T4
     expect(refused.ok).toBe(false);
     expect(rulesOf(server.branchFiles())).not.toMatch(/anna vince/);
     expect(rulesOf(k.files)).not.toMatch(/campane|corvi|anna/);
-  }, 30_000);
+  }, 60_000);
 });
 
 describe('the runes the master asks the Referente for (T42f)', () => {
@@ -148,7 +148,7 @@ describe('the runes the master asks the Referente for (T42f)', () => {
     const refused = await until(server, [master, anna], anna.session.act({ t: 'agente', agente: 'referente', testo: 'dammi la runa speed' }));
     expect(refused.ok).toBe(false);
     expect(has('anna', 'speed')).toBe(0);
-  }, 30_000);
+  }, 60_000);
 
   it('alone, runes are not asked for: they are found in the world', async () => {
     const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });

@@ -62,7 +62,7 @@ La **priorità 0** è riservata alle richieste urgenti dell'autore e alle correz
 5. **Esiti**: per ogni task finito di' all'autore in poche righe cosa è cambiato e cosa manca (da `traccia`). Se il task chiede
    una verifica nel browser e la riga `BROWSER:` dice `da verificare`, crea un task di verifica su `claude` (l'unico con il
    browser, `--chrome`) che prova il commit e scrive ciò che vede; un difetto trovato diventa un task.
-   Le verifiche nel browser e le suite intere di test hanno un turno (ADR-0088, `turno browser|test -- <comando>`): un task che
+   Le verifiche nel browser, le suite intere di test, i typecheck e le build hanno un turno (ADR-0088, `turno browser|test|typecheck|build -- <comando>`): un task che
    aspetta il suo turno non è fermo; non chiedere di aggirarlo. `pipeline.mjs turno` dice chi tiene ogni turno.
 6. **Integrazione**: quando un task è finito e le verifiche che chiede sono fatte, `integra Txx` (prima chi sblocca altri). Se
    ci sono conflitti, crea un task «Integrare Txx» che nel suo worktree fa `git merge task/Txx`, risolve (l'ADR del task che

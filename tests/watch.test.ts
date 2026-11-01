@@ -112,7 +112,7 @@ describe('the players from the corona (T42c)', () => {
     anna.client.leave();
     await run(server);
     expect(mirror.watching).toBeUndefined();
-  }, 20_000);
+  }, 60_000);
 
   it('only the master follows, and only a player connected', async () => {
     const k = await bootMany();
