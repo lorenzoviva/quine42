@@ -1986,7 +1986,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   rossi, tutti in file che non importano il renderer (kernel, between, explore, credits…: i timeout di carico già noti, T95); nessun test tocca `src/render/`.
 
 ### T89a · Cartone: fasce e interruttore — `da fare` (dipende da T89)
-- Pipeline: da stimare
+- Pipeline: claude · stima 3% · approvato · browser · priorità 75
 - Contesto: ADR-0093, punti 1, 2 e 6; la prova `?cartone` di T89 (`src/render/cartoon.ts`, `lit()` in `materials.ts`).
 - Fare: la rampa a 3 fasce per tutti i materiali illuminati (simulazione, corona e studio: `MAT.corona`, `coronaGlass`, `solid()`), i voxel luminosi fuori
   dalle fasce; il lato in ombra saturo (la fascia bassa non sotto ~0,35, il colore dell'emisfero non grigio); ombre portate più nette. Il cartone diventa il
@@ -1994,7 +1994,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fatto quando: typecheck e test verdi; screenshot con e senza nel browser (un luogo con case e alberi, lo studio) e niente errori in console.
 
 ### T89b · Cartone: contorni dagli id di cosa e parte — `da fare` (dipende da T89a)
-- Pipeline: da stimare
+- Pipeline: claude · stima 6% · approvato · browser · priorità 76
 - Contesto: ADR-0093, punto 3. Il passo `Ink` di T89 legge normali e profondità: sugli alberi fa rumore.
 - Fare: `src/mj/mesh.ts` scrive per vertice l'attributo `part` (indice della lettera della palette o della `<color part>`); `models.ts` e `terrain.ts` lo
   passano (il terreno: il codice della casella); ogni mesh/istanza ha un id. Un disegno degli id (MRT se three.js lo permette con il composer, altrimenti un
@@ -2005,7 +2005,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   finestre, il rilievo i gradini; screenshot confrontato con la foto di T89.
 
 ### T89c · Cartone: luce tinta e prospettiva aerea — `da fare` (dipende da T89a)
-- Pipeline: da stimare
+- Pipeline: claude · stima 3% · approvato · browser · priorità 77
 - Contesto: ADR-0093, punto 4 (la foto: chiave calda, riempimento freddo, ombre azzurre, lontananza che sbiadisce nel cielo).
 - Fare: in `renderer.ts` la luce chiave calda e l'emisfero freddo, l'ombra portata tinta (un pezzo di shader dopo `lights_fragment_end` o il colore
   dell'ombra), la nebbia come prospettiva aerea (verso il colore del cielo, più vicina e più forte, con la camera libera del master compresa), per giorno,
@@ -2013,7 +2013,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fatto quando: typecheck e test verdi; screenshot di giorno e di notte (`k.time` spostato da console) con e senza cartone.
 
 ### T89d · Cartone: lo stile nei dati e le foto dei modelli — `da fare` (dipende da T89b)
-- Pipeline: da stimare
+- Pipeline: claude · stima 3% · approvato · browser · priorità 78
 - Contesto: ADR-0093, punto 5. Il bordo nasce dove cambia la parte: i programmi devono avere parti di colore ben distinto.
 - Fare: nel seme `world/style.md` e nei prompt `prompts/agents/artista.md` e `scultore.md`: un colore pieno per parte, contrasto di valore tra parti vicine,
   dettagli come lettere scure dedicate (assi, pannelli, crepe) invece di micro-voxel, forme tozze, ambiente smorzato e pochi accenti saturi; il giudizio
@@ -2022,7 +2022,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fatto quando: typecheck e test verdi; le icone nell'inventario e le foto dell'Artista nel browser hanno l'aspetto del mondo.
 
 ### T89e · Cartone: laboratorio, prestazioni, togliere la prova — `da fare` (dipende da T89a-d)
-- Pipeline: da stimare
+- Pipeline: claude · stima 4% · approvato · browser · priorità 79
 - Contesto: ADR-0093, conseguenze e punto 6.
 - Fare: `lab/3d/` e `lab/editor/` con l'interruttore cartone/classica (usano `Bloom`); misurare fps e ms per fotogramma con e senza (un luogo pieno, lo
   studio, la corona) e scriverli nell'ADR; se il disegno degli id costa troppo, MRT o metà risoluzione per gli id; togliere `?cartone` e `window.cartone`
