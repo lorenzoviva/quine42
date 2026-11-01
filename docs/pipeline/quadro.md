@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 01/11/2026, fine dell'epoca 194 su **claude** (crediti: vedi `stato`).
+Aggiornato il 01/11/2026, epoca 196 su **claude** (crediti: vedi `stato`).
 
 - **Tetto di Claude a 2** (richiesta dell'autore, 01/11): attivo dopo il riavvio delle 13:35; `stato` dice tetto 2, slot 2. L'autore dice che con il Pro i limiti di Claude sono 5 volte più alti.
 
@@ -53,10 +53,11 @@ Aggiornato il 01/11/2026, fine dell'epoca 194 su **claude** (crediti: vedi `stat
 
 - **Vite 7 e Vitest 4 nel base** (01/11, epoca 194): T145, T142, T131 integrati, ADR-0100, `npm ci` nel base fatto, audit a 0, Claude riattivato, i task riapprovati. Suite di T145: 746 passati, 16 attesi, 1 todo, nessun rosso. Le pagine del sito con dati veri (carte, profilo, crediti) non sono state provate con Vite 7: solo stati vuoti, nessun universo su disco nel worktree. `npm run abbonamento` da riavviare se era acceso.
 
+- **T128 finito, non integrato** (epoca 196): conflitti in `docs/adr/README.md` e `vite.config.ts`. **T147** (p1, dipende da T146: parte quando T146 è integrato) fa il merge e rifà la prova nel browser con T120; poi `integra T147`, `integra T128`. Decisioni di T128 dette all'autore: Antigravity fuori dalla coda (`agy` non può escludere gli strumenti; la pipeline lo usa ancora), gli abbonamenti ora vogliono `QUINE_CODA=1` nel `.env`. Per T133: la route non va montata in produzione. Resta V-012 (T130): le richieste in `universes/.coda/` sono leggibili dal server di sviluppo.
 - **In corso** (epoca 195): T121 e T128 su Claude, poi **T146** (p1). Pronti: T125, T129, T130, T132.
 - **T126 finito, non integrato**: conflitto su ADR-0102 (nel base è di T120). **T146** fa il merge, rinumera, ripassa suite e kit (V-007.c) e prova il browser; poi `integra T146`, `integra T126`. V-007 resta `in correzione` per T127. Detto all'autore: il limite di 2 s per chiamata è un orologio nella simulazione, eccezione ad ADR-0055 (determinismo); ho consigliato di tenerlo, aspetto il suo parere.
 - **Aspetto dall'autore** (epoca 195, oltre a V-002, `between.test.ts`, T45f, T88): l'orologio di 2 s di T126; gli esiti a mano di V-001.n, V-001.o, V-006.g (`prove-f12.md`); se il master del clone resta nel corpo della richiesta (T120, ho consigliato di sì); un controllo delle prove del kit riscritte da T124 e T120, se vuole.
-- **Intenzioni**: alla fine di T146, `integra T146` e `integra T126`; T127 dipende da T126. Alla fine di T121 e T128, integrare e riportare: nuove collisioni di numero ADR sono probabili (primo libero nel base), un conflitto diventa un task «Integrare Txx».
+- **Intenzioni**: alla fine di T146, `integra T146` e `integra T126`; T127 dipende da T126. Alla fine di T121 e T128, integrare e riportare: nuove collisioni di numero ADR sono probabili (primo libero nel base; T146 prende il 0103, T147 il successivo), un conflitto diventa un task «Integrare Txx».
 - **T120 integrato** (01/11): V-001 e V-006 chiuse, ADR-0102, `server/access.ts`; suite nel suo worktree 837 passati, 6 attesi. **Da rifare a mano dall'autore**: i blocchi da un altro sito di `prove-f12.md` (V-001.n, V-001.o, V-006.g); quelle misure dicevano FALLA, la chiusura per ora poggia sui test. Non provato: login con un account vero nel browser. T120 ha riscritto V-001.m, V-006.a, V-006.e e fatto girare V-003 e V-005 come master; il master del clone resta nel corpo della richiesta (solo il master provato può clonare). Tutto detto all'autore.
 - **T124 integrato** (01/11): V-004 chiusa, kit V-004.a-e ok; T124 ha riscritto la prova V-004.c (cercava un file che la cartella `fuori` ha già dalla nascita, ora `world/pagamenti.json`). Detto all'autore.
 - **T144 e T122 integrati** (01/11): V-008, V-017, V-019 chiuse, ADR-0101, suite 782 passati, 12 attesi, nessun rosso. Restano non provati difetti di wasm e Lua e il blocco del servizio (T126, T127): per una garanzia forte serve uno sguardo esperto.

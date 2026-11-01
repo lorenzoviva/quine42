@@ -2666,6 +2666,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: merge risolto, commit su `task/T145`. Non toccare il `node_modules` del base. Poi l'orchestratore fa `integra T145`, `integra T142`, `integra T131` e l'`npm ci` nel base, a pipeline senza task.
 - Esito: merge di `task/T142` risolto; l'ADR di Vite 7 è ora `0100-vite-7-vitest-4-e-il-primo-npm-audit.md`, con l'indice, `AGENTS.md` (Stack) e `docs/sicurezza/registro.md` (V-014); quelle del proxy restano 0099. Le citazioni «ADR-0099» di Vite 7 negli esiti di T131 e T142 restano com'erano, perché qui si cambia solo questo blocco: leggile come 0100. Junction tolta e `npm ci` nel worktree (Vite 7.3.7, Vitest 4.1.12, `npm audit` a 0); `node_modules` del base non toccato. Typecheck e build verdi; suite intera con il proxy di T123: 82 file, 746 passati, 16 `it.fails` attesi, 1 todo, nessun rosso. In `dist/` solo il nome di `GEMINI_API_KEY`, nei messaggi. Sicurezza: nessuna superficie nuova.
 
+### T147 · Integrare T128 — `da fare` (dipende da T146)
+- Pipeline: claude · stima 3% · approvato · priorità 1
+- Contesto: `integra T128` va in conflitto in `docs/adr/README.md` e `vite.config.ts`: T128 (la coda delle CLI blindata, V-009) è partito senza T120, che ha messo `gate` sulle route in `vite.config.ts`, e aveva preso il numero 0102, che nel base è di T120. Nasce da T128: `dossier T128`.
+- Cosa fare: nel worktree di T147 `git merge task/T128`. L'ADR di T128 prende il primo numero libero del base; correggi le citazioni della coda blindata (`AGENTS.md`, `docs/`, codice, test, indice degli ADR), lasciando stare quelle di T120. In `vite.config.ts` restano entrambe le cose: la route `/api/coda` montata solo con `QUINE_CODA=1`, loopback, stessa origine e segreto di T128, insieme ai controlli di T120. In `AGENTS.md` e nel backlog restano le aggiunte di entrambi.
+- Test: `npm run typecheck` e la suite intera con i loro turni; nell'esito quanti passano e i rossi che restano rilanciando il file da solo. Poi `npm run sicurezza:prove -- --solo V-009`: il kit si legge, non si riscrive.
+- Browser: col turno `browser`, con `QUINE_CODA=1`: la pagina del gioco legge il segreto e mette e ritira una richiesta; senza segreto e da un'altra origine locale 403 (T128 lo ha provato senza T120). Nell'esito cosa si è visto.
+- Quando è fatto: merge risolto, commit su `task/T147`. Poi l'orchestratore fa `integra T147` e `integra T128`.
+
 ### T144 · Integrare T122 — `fatto` (dipende da T142)
 - Pipeline: claude · stima 2% · approvato · priorità 1
 - Contesto: `integra T122` va in conflitto in `AGENTS.md`, sulle righe vicine dello Stack. T122 (il confine tra JS e Lua, `Crossing`) è finito e verificato. Parte quando Vite 7 e Vitest 4 di T131 sono nel base, per non rifare il merge. Nasce da T122: `dossier T122`.
