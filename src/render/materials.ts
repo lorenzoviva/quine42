@@ -56,18 +56,46 @@ const fillers = new WeakSet<THREE.BufferAttribute>();
  * values (`defaultAttributeValues`): those are global per location and three sets them only when it rebuilds a
  * geometry's bindings, so a geometry without `glow` read whatever another program had left at that location, often
  * the alpha 1 of a translucent model (things glowing at random, the frame turning white in the bloom).
+ *
+ * After the frame, not during the draw (T143): three uploads a geometry's attributes before it draws anything, so an
+ * attribute added from here has no buffer yet. three would skip binding it and still remember it as bound, and that
+ * geometry with that program read the constant value for good: alpha 0, a rune's slab invisible, as long as the first
+ * program the slab was drawn with lived (the one with the fog: inside the circle). Added after the frame, the next
+ * frame uploads it and sees a new attribute; the one frame in between reads the constant, like a geometry never drawn.
  */
 function noGlow(m: THREE.Material): void {
   m.onBeforeRender = (_r, _s, _c, geometry) => {
-    const n = geometry.attributes.position?.count ?? 0;
-    for (const [name, value] of [['glow', 0], ['alpha', 1]] as const) {
-      const a = geometry.getAttribute(name) as THREE.BufferAttribute | undefined;
-      if (a && (!fillers.has(a) || a.count === n)) continue;
-      const filler = new THREE.BufferAttribute(new Float32Array(n).fill(value), 1);
-      fillers.add(filler);
-      geometry.setAttribute(name, filler);
-    }
+    if (!lacksFillers(geometry) || filling.has(geometry)) return;
+    filling.add(geometry);
+    queueMicrotask(() => {
+      filling.delete(geometry);
+      addFillers(geometry);
+    });
   };
+}
+
+/** The geometries waiting for their attributes, until the frame that found them lacking ends. */
+const filling = new WeakSet<THREE.BufferGeometry>();
+
+const FILLERS = [['glow', 0], ['alpha', 1]] as const;
+
+function staleFiller(geometry: THREE.BufferGeometry, name: string): boolean {
+  const a = geometry.getAttribute(name) as THREE.BufferAttribute | undefined;
+  return !a || (fillers.has(a) && a.count !== (geometry.attributes.position?.count ?? 0));
+}
+
+function lacksFillers(geometry: THREE.BufferGeometry): boolean {
+  return FILLERS.some(([name]) => staleFiller(geometry, name));
+}
+
+function addFillers(geometry: THREE.BufferGeometry): void {
+  const n = geometry.attributes.position?.count ?? 0;
+  for (const [name, value] of FILLERS) {
+    if (!staleFiller(geometry, name)) continue;
+    const filler = new THREE.BufferAttribute(new Float32Array(n).fill(value), 1);
+    fillers.add(filler);
+    geometry.setAttribute(name, filler);
+  }
 }
 
 /** A material that shows glowing voxels without the clip (the corona, the icons). `always`: all of it glows. */
