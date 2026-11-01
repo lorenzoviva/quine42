@@ -56,7 +56,7 @@ import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Ident
 import { addItem, CARRY_CAPACITY, countItem, HOTBAR, equippedItem, moveSlot, newInventory, putSlot, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
 import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH, worldLevels } from './relief';
 import { CardLedger, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, receivedBy, type Received, payerOf, placeCardId, stampFiles, titolareOf, type Card, type Carta } from './cards';
-import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState } from './wanderers';
+import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState, PER_WANDERER } from './wanderers';
 import type { ActionDef, AiConfig, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Partita, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
 
 /** A solid thing with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
@@ -355,12 +355,7 @@ export const rareAreaOf = (t: Taglia, cx: number, cy: number) => (t === 'gargant
 
 const clone = <T>(v: T): T => (v === undefined ? v : JSON.parse(JSON.stringify(v)));
 
-/**
- * Systems that move one wanderer (T38): they run once for each wanderer the kernel moves itself, as that
- * wanderer, and see no other wanderer. Those a session's client moves (`setRemote`) they skip.
- */
-/** The systems that run once per wanderer, the only ones a thin client runs too (T39). */
-export const PER_WANDERER = new Set(['core.movement', 'core.carpet']);
+export { PER_WANDERER };
 /** Between wanderers (T43a): how far words are heard, how near one gives something, how long words are. */
 export const HEAR = 8;
 export const GIVE_REACH = 3;
@@ -483,6 +478,8 @@ export class Kernel {
   private wanderersById = new Map<string, Wanderer & { entity: Id; tappeto?: { ox: number; oy: number }; profilo?: Profile; crediti?: number; anonimo?: boolean }>();
   /** Spending ceiling for this session per wanderer (T45d: lobby). */
   private sessionTetto = new Map<string, number>();
+  /** The highest ceiling each wanderer brought: entering again does not add the same budget twice. */
+  private tettoBudgeted = new Map<string, number>();
   /** Credits spent in this session per wanderer (T45d). */
   private sessionSpent = new Map<string, number>();
   /** Every wanderer has a carpet of their own (T38): the carpet entity holds this one's offset, the others keep theirs in `tappeto`. */
@@ -4726,7 +4723,10 @@ export class Kernel {
     }
     this.sessionTetto.set(id, tetto);
     this.sessionSpent.set(id, 0);
-    const added = addBudgetFromTetto(this.config.ai, tetto);
+    const before = this.tettoBudgeted.get(id) ?? 0;
+    if (tetto <= before) return;
+    this.tettoBudgeted.set(id, tetto);
+    const added = addBudgetFromTetto(this.config.ai, tetto - before);
     if (this.models?.limits) {
       this.models.limits.text += added.textCalls;
     }

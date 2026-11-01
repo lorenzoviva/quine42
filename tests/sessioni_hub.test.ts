@@ -43,8 +43,8 @@ describe('Hub Sessioni & Creazione Nuovo Universo (T103)', () => {
 
   it('fetchActiveSessions recupera e mappa correttamente le sessioni attive', async () => {
     const mockSessions: ActiveSessionRecord[] = [
-      { name: 'valmora', active: true, clients: 3, wanderers: ['w1', 'w2', 'w3'] },
-      { name: 'aurora', active: true, clients: 1, wanderers: ['w4'] },
+      { name: 'valmora', active: true, clients: 3 },
+      { name: 'aurora', active: true, clients: 1 },
     ];
 
     const originalFetch = globalThis.fetch;
@@ -116,7 +116,6 @@ describe('Hub Sessioni & Creazione Nuovo Universo (T103)', () => {
       name: 'valmora',
       active: true,
       clients: 2,
-      wanderers: ['a', 'b'],
     };
 
     const parsed = parseRealmSnapshot('valmora', files, activeRecord);

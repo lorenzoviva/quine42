@@ -4,6 +4,7 @@ import path from 'node:path';
 import { defineConfig, loadEnv, searchForWorkspaceRoot } from 'vite';
 import { GeminiGate, geminiProxy } from './server/geminiProxy';
 import { universeStore } from './server/universeStore';
+import { newSecret } from './server/access';
 import { sessionServer, getActiveUniverseKernel } from './server/session';
 import { accountRoute, accountSettings } from './server/account';
 import { stripeRoute, stripeSettings } from './server/stripe';
@@ -20,13 +21,15 @@ export default defineConfig(({ mode }) => {
   const universesDir = path.resolve(process.cwd(), 'universes');
   // The only holder of the key (T123): models on a list, a daily cap; the route for the browser, `direct()` for the worlds of many.
   const gemini = new GeminiGate({ apiKey: env.GEMINI_API_KEY, dailyCap: env.GEMINI_TETTO_GIORNALIERO, universesDir, ledgerFile: path.join(universesDir, '.spesa-gemini.json') });
+  // How the worlds of this process prove themselves to the store (T120, ADR-0102): only in memory, a new one at every start.
+  const internal = newSecret();
   return {
     // Universes live next to the kernel, each a git repository of its own (ignored by the kernel's).
     // The games of many (T38): their worlds run in this process, one per universe, clients over /api/session.
     // The subscriptions' queue (T68): the slow requests on disk until a process using the CLIs serves them.
     plugins: [
       geminiProxy(gemini),
-      universeStore(universesDir),
+      universeStore(universesDir, { accounts, internal }),
       accountRoute(accounts),
       stripeRoute({
         settings: stripeSettings(env),
@@ -38,7 +41,7 @@ export default defineConfig(({ mode }) => {
       wandererRoute({ accounts, universesDir, getActiveKernel: getActiveUniverseKernel }),
       // The site's credits page (T105): the account's balance and their lines of the two ledgers.
       walletRoute({ accounts, universesDir, getActiveKernel: getActiveUniverseKernel }),
-      sessionServer(accounts, gemini.direct()),
+      sessionServer(accounts, gemini.direct(), internal),
       subscriptionQueue(path.resolve(process.cwd(), 'universes', '.coda')),
     ],
     // Writing a universe must not reload the page (dev server watches the project folder).

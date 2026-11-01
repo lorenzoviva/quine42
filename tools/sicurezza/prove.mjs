@@ -39,10 +39,10 @@ function request(base, method, p, { body, headers = {}, timeout = 30000 } = {}) 
 }
 
 /** A client of a world: enters, then can ask (one message, its answer) until it closes. */
-function enter(base, universo, entra, { origin, wait = 90000 } = {}) {
+function enter(base, universo, entra, { origin, headers, wait = 90000 } = {}) {
   const url = `${base.replace(/^http/, 'ws')}/api/session?universo=${universo}&offline`;
   assertLoopback(base);
-  const ws = new WebSocket(url, origin ? { origin } : {});
+  const ws = new WebSocket(url, { ...(origin ? { origin } : {}), ...(headers ? { headers } : {}) });
   const client = {
     answers: new Map(),
     waiting: new Map(),

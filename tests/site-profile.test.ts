@@ -18,7 +18,7 @@ import { clampSeed, CLOAKS, formatCredits, pickRealm, playLink, worldCloak } fro
 /** Calls the route as the server would; resolves with the status and the body. */
 function call(opts: WandererRouteOptions, method: string, url: string, body?: unknown, headers: Record<string, string> = {}) {
   return new Promise<{ status: number; body: any; next?: true }>((resolve) => {
-    const req = Object.assign(Readable.from(body === undefined ? [] : [Buffer.from(JSON.stringify(body))]), { method, url, headers }) as unknown as IncomingMessage;
+    const req = Object.assign(Readable.from(body === undefined ? [] : [Buffer.from(JSON.stringify(body))]), { method, url, headers: { host: 'localhost', 'content-type': 'application/json', ...headers }, socket: { remoteAddress: '127.0.0.1' } }) as unknown as IncomingMessage;
     const res = {
       statusCode: 200,
       setHeader() {},

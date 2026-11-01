@@ -1,6 +1,6 @@
 // The gallery of the cards (T104, ADR-0095, ADR-0056, ADR-0084): a wanderer's collection in a universe, each card in CSS 3D
-// with its foil, its uses, its fingerprint and the chain of the holders it had before. It only reads: the snapshot of the
-// universe from /api/universe, as the sessions' hub does.
+// with its foil, its uses, its fingerprint and the chain of the holders it had before. It only reads: the cards the server
+// measured and what shows them, from /api/universe/<nome>/carte (T120: the code they are measured on does not leave the server).
 
 import { accountConfig, signIn } from '../src/session/login';
 import { accountWanderer } from '../src/session/account';
@@ -210,7 +210,7 @@ export interface Collection {
 }
 
 /** A wanderer's collection in a universe: the cards they hold and those that pay them back as an earlier holder. */
-export function collectionView(files: FileMap, wanderer: string, universo: string): Collection {
+export function collectionView(files: FileMap, wanderer: string, universo: string, cards: Card[] = allCards(files, true)): Collection {
   const forms = new Forms(new InlineRunner());
   forms.load(files);
   const view = (card: Card): CardView => ({
@@ -222,11 +222,11 @@ export function collectionView(files: FileMap, wanderer: string, universo: strin
     art: artOf(card, files, forms),
   });
   const used = (c: Card) => totalUses(c.utilizzi);
-  const mine = allCards(files, true)
+  const mine = cards
     .filter((c) => c.titolare === wanderer)
     .sort((a, b) => used(b) - used(a) || a.id.localeCompare(b.id))
     .map(view);
-  const paid = receivedBy(files, wanderer);
+  const paid = receivedBy(files, wanderer, cards);
   const received = paid.map((r) => ({ ...view(r.card), quota: r.quota, ricevuto: r.ricevuto }));
   return {
     mine,
@@ -464,11 +464,11 @@ function stat(id: string, text: string): void {
 const message = (badge: string, title: string, text: string, ...more: Array<Node | string>) =>
   el('div', { class: 'cards-empty' }, el('span', { class: 'comic-badge yellow' }, badge), el('h3', { class: 'comic-title' }, title), el('p', {}, text), ...more);
 
-async function snapshot(name: string): Promise<FileMap | undefined> {
+async function snapshot(name: string): Promise<{ files: FileMap; carte: Card[] } | undefined> {
   try {
-    const r = await fetch(`/api/universe/${encodeURIComponent(name)}`);
+    const r = await fetch(`/api/universe/${encodeURIComponent(name)}/carte`);
     const snap = r.ok ? await r.json() : undefined;
-    return snap?.exists && snap.files ? (snap.files as FileMap) : undefined;
+    return snap?.exists && snap.files && Array.isArray(snap.carte) ? { files: snap.files as FileMap, carte: snap.carte as Card[] } : undefined;
   } catch {
     return undefined;
   }
@@ -538,8 +538,8 @@ async function start(): Promise<void> {
       }),
     );
   };
-  const show = (name: string, files: FileMap) => {
-    collection = collectionView(files, me, name);
+  const show = (name: string, snap: { files: FileMap; carte: Card[] }) => {
+    collection = collectionView(snap.files, me, name, snap.carte);
     stat('stat-total', String(collection.stats.totale));
     stat('stat-rare', String(collection.stats.rare));
     stat('stat-legendary', String(collection.stats.leggendarie));
@@ -559,18 +559,18 @@ async function start(): Promise<void> {
     return;
   }
   select.addEventListener('change', async () => {
-    const files = await snapshot(select.value);
-    if (files) show(select.value, files);
+    const snap = await snapshot(select.value);
+    if (snap) show(select.value, snap);
   });
 
   // The asked universe, or the first where this wanderer holds something (or the first one).
-  let first: { name: string; files: FileMap } | undefined;
+  let first: { name: string; snap: { files: FileMap; carte: Card[] } } | undefined;
   for (const name of asked ? [asked] : names) {
-    const files = await snapshot(name);
-    if (!files) continue;
-    first ??= { name, files };
-    if (allCards(files).some((c) => c.titolare === me)) {
-      first = { name, files };
+    const snap = await snapshot(name);
+    if (!snap) continue;
+    first ??= { name, snap };
+    if (snap.carte.some((c) => c.titolare === me)) {
+      first = { name, snap };
       break;
     }
   }
@@ -579,7 +579,7 @@ async function start(): Promise<void> {
     return;
   }
   select.value = first.name;
-  show(first.name, first.files);
+  show(first.name, first.snap);
 }
 
 function wireNav(): void {

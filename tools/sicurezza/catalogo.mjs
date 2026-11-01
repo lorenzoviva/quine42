@@ -10,6 +10,10 @@ import { STRIPE_DETAIL } from './ambiente.mjs';
 const ALTRA = 'http://altro.example';
 const JSONB = (v) => JSON.stringify(v);
 const J = { 'Content-Type': 'application/json' };
+/** The master of a universe of many on a server without accounts: for the probes whose subject is not who is asking (T120). */
+const MASTER = { ...J, 'X-Quine-Viandante': 'io' };
+/** From outside this machine, as a tunnel or a reverse proxy says it: the kit itself never leaves the loopback. */
+const OUTSIDE = { 'X-Forwarded-For': '203.0.113.7' };
 
 /** A credit on the disk, wherever it is. */
 const saldo = (ctx, uni, id = 'altro') => {
@@ -40,7 +44,7 @@ const gitFolder = (id, segment, proprieta) => ({
   proprieta,
   async run(ctx) {
     const marker = `sonda-${id.replace(/\W/g, '')}`;
-    const r = await post(ctx, '/api/universe/sonda-git/commit', { changes: { [`${segment}/${marker}`]: 'sonda\n' }, message: 'sonda', author: 'player' });
+    const r = await post(ctx, '/api/universe/sonda-git/commit', { changes: { [`${segment}/${marker}`]: 'sonda\n' }, message: 'sonda', author: 'player' }, MASTER);
     const dir = path.join(ctx.uni('sonda-git'), '.git');
     return { ok: !readdirSync(dir).includes(marker), dettaglio: `risposta ${r.status}` };
   },
@@ -195,7 +199,7 @@ export const PROBES = [
     fase: 'A',
     proprieta: 'senza identità non si crea un universo con un master a piacere',
     async run(ctx) {
-      const r = await post(ctx, '/api/universe/sonda-creato/create', { files: { 'universe.json': '{}' }, message: 'sonda' });
+      const r = await post(ctx, '/api/universe/sonda-creato/create', { files: { 'universe.json': JSONB({ name: 'sonda-creato', partita: { modalita: 'multigiocatore', master: 'intruso' } }) }, message: 'sonda' });
       return { ok: !existsSync(ctx.uni('sonda-creato')), dettaglio: `risposta ${r.status}` };
     },
   },
@@ -268,7 +272,7 @@ export const PROBES = [
     proprieta: 'nessun percorso esce dalla cartella dell’universo',
     async run(ctx) {
       const names = ['../sonda-fuori-a', '..\\sonda-fuori-b', 'world/../../sonda-fuori-c'];
-      for (const p of names) await post(ctx, '/api/universe/sonda-git/commit', { changes: { [p]: 'sonda\n' }, message: 'sonda', author: 'player' });
+      for (const p of names) await post(ctx, '/api/universe/sonda-git/commit', { changes: { [p]: 'sonda\n' }, message: 'sonda', author: 'player' }, MASTER);
       const out = readdirSync(ctx.universes()).filter((f) => f.startsWith('sonda-fuori'));
       return { ok: !out.length, dettaglio: `${out.length} file fuori` };
     },
@@ -365,7 +369,7 @@ export const PROBES = [
       const first = ctx.git(u, ['rev-list', '--max-parents=0', 'HEAD']).trim();
       await hook(ctx, paid('evt_r', 'sonda-rollback', 'altro', 7));
       const paidUp = saldo(ctx, 'sonda-rollback');
-      const r = await post(ctx, '/api/universe/sonda-rollback/checkout', { id: first.slice(0, 12) });
+      const r = await post(ctx, '/api/universe/sonda-rollback/checkout', { id: first.slice(0, 12) }, MASTER);
       const now = saldo(ctx, 'sonda-rollback');
       return { ok: now === paidUp, dettaglio: `risposta ${r.status}, saldo dopo il pagamento ${paidUp}, dopo il ritorno ${now}` };
     },
@@ -376,9 +380,9 @@ export const PROBES = [
     id: 'V-006.a',
     voce: 'V-006',
     fase: 'A',
-    proprieta: 'nessuno diventa master dicendolo',
+    proprieta: 'nessuno diventa master dicendolo: senza account l\u2019id detto vale solo da questa macchina, e da fuori non si entra',
     async run(ctx) {
-      const c = await ctx.enter('sonda-mondo', { id: 'io' });
+      const c = await ctx.enter('sonda-mondo', { id: 'io' }, { headers: OUTSIDE });
       c.close();
       return { ok: !c.ingresso?.master, dettaglio: c.ingresso ? `entrato, master: ${!!c.ingresso.master}` : `rifiutato: ${c.rifiuto ?? 'nessuna risposta'}` };
     },
@@ -421,9 +425,9 @@ export const PROBES = [
     id: 'V-006.e',
     voce: 'V-006',
     fase: 'A',
-    proprieta: 'senza identità non si legge il saldo di un altro viandante',
+    proprieta: 'senza identità non si legge il saldo di un altro viandante: l\u2019id detto vale solo da questa macchina',
     async run(ctx) {
-      const r = await ctx.http('GET', '/api/viandante?universo=sonda-base&viandante=altro');
+      const r = await ctx.http('GET', '/api/viandante?universo=sonda-base&viandante=altro', { headers: OUTSIDE });
       const seen = r.status === 200 ? JSON.parse(r.text).viandante?.crediti : undefined;
       return { ok: seen === undefined, dettaglio: `risposta ${r.status}` };
     },

@@ -12,13 +12,14 @@ import {
 } from '../src/kernel/coefficients';
 import { DEFAULT_SCULPTORS, type SculptorModels } from '../src/kernel/agents/sculptor';
 import { bundledFiles } from '../src/kernel/bundle';
-import { SEED_FILE, seedHashes } from '../src/kernel/universes';
+import { SEED_FILE, seedHashes, WANDERER_HEADER } from '../src/kernel/universes';
+import { SOLO } from '../src/kernel/wanderers';
+import { accountConfig, signIn } from '../src/session/login';
 
 export interface ActiveSessionRecord {
   name: string;
   active: boolean;
   clients: number;
-  wanderers: string[];
 }
 
 export interface RealmView {
@@ -256,9 +257,12 @@ export async function createUniverse(
 
   const files = buildNewUniverseFiles(options);
   try {
+    // Whoever makes a realm is its master, and the server is who says who they are (T120, ADR-0102).
+    const config = await accountConfig();
+    const signed = config ? await signIn(config) : undefined;
     const res = await fetch(`${base}/api/universe/${encodeURIComponent(options.name)}/create`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...(signed ? { Authorization: `Bearer ${signed.token}` } : { [WANDERER_HEADER]: SOLO }) },
       body: JSON.stringify({
         files,
         message: `Genesi nuovo reame git «${options.name}» (seme ${options.seed})`,

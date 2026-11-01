@@ -12,6 +12,7 @@ import path from 'node:path';
 import { promises as fs } from 'node:fs';
 import { execFile } from 'node:child_process';
 import type { AccountSettings } from './account';
+import { bearer, gate, isJson, refuse } from './access';
 import { accountWanderer } from '../src/session/account';
 import type { Kernel } from '../src/kernel/kernel';
 import type { FileMap } from '../src/kernel/types';
@@ -158,12 +159,6 @@ function readBody(req: IncomingMessage): Promise<string> {
   });
 }
 
-export function bearer(req: IncomingMessage): string | undefined {
-  const h = req.headers.authorization;
-  const m = typeof h === 'string' ? /^Bearer\s+(.+)$/i.exec(h.trim()) : null;
-  return m?.[1];
-}
-
 function git(cwd: string, args: string[]): Promise<string> {
   const full = ['-c', 'user.name=Kernel', '-c', 'user.email=kernel@rune.local', '-c', 'core.autocrlf=false', ...args];
   return new Promise((resolve, reject) => {
@@ -202,11 +197,15 @@ export function wandererHandler(opts: WandererRouteOptions): Connect.NextHandleF
   return (req, res, next) => {
     const [url, query = ''] = (req.url ?? '').split('?');
     if (url !== '/api/viandante') return next();
+    // Another site never; without accounts, where the id is only said, only this machine (T120, ADR-0102).
+    const no = gate(req, opts.accounts);
+    if (no) return refuse(res, no, (motivo) => ({ ok: false, motivo }));
     void (async () => {
       try {
         const params = new URLSearchParams(query);
         let body: Record<string, unknown> = {};
         if (req.method === 'POST') {
+          if (!isJson(req)) return send(res, 415, { ok: false, motivo: 'solo JSON' });
           try {
             body = JSON.parse(await readBody(req)) ?? {};
           } catch {

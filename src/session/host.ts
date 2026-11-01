@@ -10,7 +10,7 @@ import { MockModels } from '../kernel/ai/mock';
 import { GeminiModels } from '../kernel/ai/gemini';
 import type { Models } from '../kernel/ai/models';
 import { readConfig } from '../kernel/universe';
-import { UniverseChunks, UniverseClient, upgradeFromSeed } from '../kernel/universes';
+import { INTERNAL_HEADER, UniverseChunks, UniverseClient, upgradeFromSeed } from '../kernel/universes';
 import { BRANCH, SessionServer } from './server';
 import type { Verifier } from './account';
 
@@ -29,8 +29,9 @@ export interface UniverseHost {
  * route); `gemini` is the `fetch` that spends the key, which stays in the server: without it, the local models. A universe that does not exist, or is a game alone, is not opened: alone the
  * kernel stays in the browser.
  */
-export async function openUniverse(opts: { name: string; base: string; offline?: boolean; gemini?: typeof fetch; verify?: Verifier; masterUid?: string }): Promise<UniverseHost | { error: string }> {
-  const client = await UniverseClient.connect(opts.name, opts.base);
+export async function openUniverse(opts: { name: string; base: string; offline?: boolean; gemini?: typeof fetch; verify?: Verifier; masterUid?: string; internal?: string }): Promise<UniverseHost | { error: string }> {
+  // The world reads and writes its universe whole: the store knows it by a secret of this process (T120, ADR-0102).
+  const client = await UniverseClient.connect(opts.name, opts.base, opts.internal ? { [INTERNAL_HEADER]: opts.internal } : {});
   if (!client) return { error: 'nessun archivio degli universi' };
   const snap = await client.load();
   if (!snap.exists || !snap.files) return { error: `l'universo «${opts.name}» non esiste` };

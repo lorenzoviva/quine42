@@ -205,20 +205,23 @@ export class GeminiGate {
 export function accessRefusal(req: Pick<IncomingMessage, 'headers'> & { socket: { remoteAddress?: string } }): string | undefined {
   const address = req.socket.remoteAddress ?? '';
   if (!/^(::ffff:)?127\.\d+\.\d+\.\d+$/.test(address) && address !== '::1') return 'solo da questa macchina';
-  const { host, origin } = req.headers;
+  const { host } = req.headers;
   if (req.headers['x-forwarded-for'] || req.headers['x-forwarded-host'] || req.headers.forwarded) return 'solo da questa macchina';
   if (!host || !LOOPBACK_HOST.test(host)) return 'host non ammesso';
-  if (origin !== undefined) {
-    let same = false;
-    try {
-      const u = new URL(origin);
-      same = (u.protocol === 'http:' || u.protocol === 'https:') && u.host === new URL(`http://${host}`).host;
-    } catch {
-      /* `null` and the like: another origin */
-    }
-    if (!same) return 'origine non ammessa';
+  return originRefusal(req);
+}
+
+/** Why a request comes from another site's page, or undefined: its `Origin`, if it has one, must be the `Host` it asks. */
+export function originRefusal(req: Pick<IncomingMessage, 'headers'>): string | undefined {
+  const { host, origin } = req.headers;
+  if (origin === undefined) return undefined;
+  try {
+    const u = new URL(origin);
+    if ((u.protocol === 'http:' || u.protocol === 'https:') && u.host === new URL(`http://${host}`).host) return undefined;
+  } catch {
+    /* `null` and the like: another origin */
   }
-  return undefined;
+  return 'origine non ammessa';
 }
 
 function send(res: ServerResponse, status: number, body: unknown): void {

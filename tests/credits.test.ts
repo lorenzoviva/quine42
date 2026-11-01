@@ -22,10 +22,10 @@ async function bootMany(): Promise<Kernel> {
   return Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
 }
 
-async function thin(server: SessionServer, id: string, anonimo = false): Promise<ThinClient> {
+async function thin(server: SessionServer, id: string): Promise<ThinClient> {
   const { server: s, client: c } = fakeLink();
   server.connect(s);
-  const session = new SessionClient(c, { id, ...(anonimo ? { anonimo: true } : {}) } as any);
+  const session = new SessionClient(c, { id });
   await session.ready;
   const k = await Kernel.boot({ files: session.files, store: memoryStore(), models: new MockModels(), mirror: true });
   return new ThinClient(k, session);
@@ -221,7 +221,9 @@ describe('credits and common costs (T45a)', () => {
     const k = await bootMany();
     const server = new SessionServer(k);
     const master = await thin(server, 'io');
-    const anon = await thin(server, 'anon1', true);
+    // Being anonymous is the token's to say (T120): here the account's answer is taken as already heard.
+    k.addWanderer('anon1', undefined, true);
+    const anon = await thin(server, 'anon1');
     run(server, [master, anon], 6);
 
     expect(k.isAnonymous('anon1')).toBe(true);

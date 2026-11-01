@@ -184,10 +184,10 @@ export interface Received {
 const totalUses = (u: Partial<Uses> | undefined) => (u?.luoghi ?? 0) + (u?.trame ?? 0) + (u?.prompt ?? 0);
 
 /** What a wanderer receives from this universe as an earlier holder of its cards, the most received first. */
-export function receivedBy(files: FileMap, wanderer: string): Received[] {
+export function receivedBy(files: FileMap, wanderer: string, cards: Card[] = allCards(files, true)): Received[] {
   const born = readCards(files).allaNascita ?? {};
   const out: Received[] = [];
-  for (const card of allCards(files, true)) {
+  for (const card of cards) {
     const quota = card.quote?.[wanderer] ?? 0;
     if (!quota || card.titolare === wanderer) continue;
     const utilizzi = Math.max(0, totalUses(card.utilizzi) - totalUses(born[card.id]));

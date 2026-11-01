@@ -100,9 +100,10 @@ export type ClientMsg =
   /**
    * Coming in, as who (T44a): the profile, if the client has one, is checked and repaired by the server. With accounts
    * (T44b, ADR-0082) `token` is the account's (Firebase) and the server makes the id from it; `id` is then not heard;
-   * anonimo (T44b, T45a, ADR-0081); tetto di spesa in USD per questa sessione (T45d, ADR-0086).
+   * tetto di spesa in USD per questa sessione (T45d, ADR-0086), che il server tiene entro il saldo. Essere anonimi lo dice il
+   * token, non il client (T120, ADR-0102).
    */
-  | { t: 'entra'; id: string; nome?: string; profilo?: Partial<Profile>; token?: string; anonimo?: boolean; tetto?: number }
+  | { t: 'entra'; id: string; nome?: string; profilo?: Partial<Profile>; token?: string; tetto?: number }
   /** The wanderer chooses again who they are (T44a): the answer says the profile as the server repaired it. */
   | { t: 'profilo'; seq: number; profilo: Partial<Profile> }
   /** Where the client's wanderer is now, in the world: the server checks the step and may correct it. */
