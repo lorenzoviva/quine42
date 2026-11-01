@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 01/11/2026, fine dell'epoca 189 su **claude** (crediti: vedi `stato`).
+Aggiornato il 01/11/2026, fine dell'epoca 190 su **claude** (crediti: vedi `stato`).
 
 - **Tetto di Claude a 2** (richiesta dell'autore, 01/11): attivo dopo il riavvio delle 13:35; `stato` dice tetto 2, slot 2. L'autore dice che con il Pro i limiti di Claude sono 5 volte più alti.
 
@@ -15,6 +15,7 @@ Aggiornato il 01/11/2026, fine dell'epoca 189 su **claude** (crediti: vedi `stat
   - T103 completato con successo headless (test 8/8); delegata la verifica browser e merge a T114 su Claude.
 - **Aspetto**: reset crediti Claude alle 05:50 UTC per T57b e T114; risposte su T45f (GCP); T88 da approvare.
 
+- **Lezione**: una dipendenza si legge anche da «dopo Txx» nel testo di un blocco: nei task di integrazione non scrivere «dopo» davanti a task che si integrano solo alla fine (T140 si bloccava da solo). Un conflitto solo nel backlog tra blocchi attaccati si evita spostando il blocco, senza task.
 - **Lezione**: mai `git commit -a` nel base (l'autore ha file suoi; le `lampione copy*.xml` restano non committate).
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
