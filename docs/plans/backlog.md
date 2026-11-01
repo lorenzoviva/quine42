@@ -2621,6 +2621,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: merge risolto, commit su `task/T138`. Poi l'orchestratore fa `integra T138` e `integra T118`.
 - Esito: merge di `task/T118` nel commit 1f0e912. L'unico conflitto era negli import di `vite.config.ts`: restano `wandererRoute` e `testWorkers`. Gli ADR non si scontrano (T118 aggiorna ADR-0088). Typecheck verde; suite intera nel suo turno: 688/688, 797 s, nessun timeout. Niente di diverso dal previsto.
 
+### T142 · Integrare T131 — `da fare`
+- Pipeline: claude · stima 2% · approvato · priorità 1
+- Contesto: `integra T131` va in conflitto in `AGENTS.md`. T131 porta Vite 7.3.7 e Vitest 4.1.12 (`npm audit` a 0, ADR-0099). Nasce da T131: `dossier T131`.
+- Cosa fare: nel worktree di T142 `git merge task/T131`; in `AGENTS.md` restano le aggiunte di entrambi. Se gli ADR si scontrano, quello di T131 prende il primo numero libero. `node_modules` è una junction verso quello del base, che ha ancora le versioni vecchie e che altri task stanno usando: **non installare attraverso la junction**. Toglila (solo la junction, non il contenuto) e fai un `npm ci` tuo nel worktree, come ha fatto T131.
+- Test: `npm run typecheck`, `npm run build` e la suite intera con i loro turni. Nell'esito scrivi quanti test passano e i rossi che restano rilanciando il file da solo.
+- Browser: T131 ha provato solo il gioco. Apri dalla build con Vite 7 le pagine di `site/` (landing, carte, sessioni, profilo, pagamenti): si aprono senza errori in console e con il loro stile? Il login Firebase non serve.
+- Quando è fatto: merge risolto, commit su `task/T142`. Non toccare il `node_modules` del base: l'`npm ci` lì lo fa l'orchestratore, a pipeline senza task, quando integra.
+
 ### T139 · Integrare T105 — `fatto`
 - Pipeline: claude · stima 1% · approvato · priorità 1
 - Contesto: `integra T105` va in conflitto in `vite.config.ts`: T105 aggiunge `walletRoute` e la pagina `sitePagamenti`, mentre nel base è entrato T118 con `testWorkers`. T105 è verificato nel browser. Viene prima di T124, che tocca `server/stripe.ts` come T105. Nasce da T105: `dossier T105`.

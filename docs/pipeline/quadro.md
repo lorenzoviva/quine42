@@ -50,6 +50,7 @@ Aggiornato il 01/11/2026, fine dell'epoca 191 su **claude** (crediti: vedi `stat
 ## Task attivi e in corso
 
 - **In corso** (all'ultimo `stato`): **T122 T131** su Claude.
+- **T131 finito (Vite 7, Vitest 4), conflitto in `AGENTS.md`: T142 lo integra.** Finito T142, in quest'ordine: `sospendi claude`; aspettare che nessun task giri (il `node_modules` del base è condiviso con una junction; un worktree partito prima con le versioni nuove sotto, o un `npm ci` durante una suite, si romperebbero); `integra T142`, `integra T131`; `npm ci` nel base (il lock è scritto con npm 11, T131 ha provato che `npm ci` con npm 10 passa); `riattiva claude`. Fino a quel momento `npm run abbonamento` resta com'è.
 - **T141** (p0, approvato, richiesta dell'autore del 01/11): materiale in `docs/design/logo/` per generare il nuovo logo con Claude Design o Gemini. Finito: `integra T141` subito, l'autore sta già facendo le prove. Sostituire il logo sarà un altro task, quando ne avrà scelto uno.
 - **Pronti su Claude**: **T140** (p1) → **T120 T124 T126 T128 T132** (sicurezza) → **T106** (p72) → **T89a** (p75); bloccati T121 T125 T127 T129 T130 T133 T134 (dalle correzioni), **T89b-e** (da T89a).
 - **Da integrare**: **T123** (tramite T140; poi `integra T140`, `integra T123`). T136, T137, T138, T118, T139 e T105 integrati il 01/11.
