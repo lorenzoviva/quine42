@@ -2277,3 +2277,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Cosa fare: nel ripiego del lancio (dove nasce «non può, va su») non scegliere un provider senza browser per un task che chiede la verifica nel
   browser (stesso controllo di `assignTask`): il task aspetta il suo provider. Un test della pipeline che lo copre.
 - Quando è fatto: test della pipeline verdi con il caso nuovo; typecheck verde.
+
+### T112 · Verificare T110 (il template del sito, con T109) nel browser — `da fare`
+- Pipeline: claude · stima 3% · approvato · priorità 25 · browser
+- Contesto: T109 e T110 sono girati su Antigravity, senza browser (`BROWSER: da verificare`): T110 ha fuso T109, aggiunto i font latin-ext,
+  corretto nav e modali su mobile e tolto le rotture della quarta parete, senza vederle. Nasce da T109 e T110: `dossier T110`, `traccia T110`.
+- Cosa fare: nel worktree `git merge task/T110`; typecheck. Nel turno browser (`pipeline.mjs turno browser -- …`) servi la radice
+  (`npx vite --port <libera> --strictPort`) e apri ogni pagina di `/docs/design/sito/` a larghezza desktop e mobile: layout non rotto, font
+  da `/fonts/` senza richieste a terzi, stati dei componenti visibili, modale «Crea nuovo universo» e flip delle carte funzionanti, link tra
+  le pagine giusti, segreto dei gerboa allusivo (niente corona, Concilio, studio), nessun meta-gioco né «ADR-» nei testi, nessun errore in
+  console. Correggi da te i difetti piccoli (CSS, link); scrivi gli altri qui.
+- Quando è fatto: verifica nel browser con screenshot di ogni pagina (desktop e mobile) descritti nell'esito; difetti corretti o elencati; typecheck verde.
