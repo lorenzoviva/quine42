@@ -2015,7 +2015,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   rossi, tutti in file che non importano il renderer (kernel, between, explore, credits…: i timeout di carico già noti, T95); nessun test tocca `src/render/`.
 
 ### T89a · Cartone: fasce e interruttore — `da fare` (dipende da T89)
-- Pipeline: claude · stima 3% · browser · priorità 75
+- Pipeline: claude · stima 3% · approvato · browser · priorità 75
 - Contesto: ADR-0093, punti 1, 2 e 6; la prova `?cartone` di T89 (`src/render/cartoon.ts`, `lit()` in `materials.ts`).
 - Fare: la rampa a 3 fasce per tutti i materiali illuminati (simulazione, corona e studio: `MAT.corona`, `coronaGlass`, `solid()`), i voxel luminosi fuori
   dalle fasce; il lato in ombra saturo (la fascia bassa non sotto ~0,35, il colore dell'emisfero non grigio); ombre portate più nette. Il cartone diventa il
@@ -2243,7 +2243,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 ### T106 · Tema pop art / retro arcade: applicazione alle interfacce in-game — `da fare` (dipende da T109, T97)
 
 - Stile: copia lo stile grafico del template in `docs/design/sito/` (fatto da T109, leggi il suo `README.md`).
-- Pipeline: claude · stima 4% · priorità 72
+- Pipeline: claude · stima 4% · approvato · priorità 72
 - Contesto: ADR-0095, punto 3 (Variabili CSS unificate). Il tema grafico deve permeare anche l'esperienza di gioco.
 - Fare: aggiornare `src/style.css` e i componenti UI in-game (`src/ui/hud.ts`, `inventory.ts`, `lobby.ts`, `profile.ts`, `chat.ts`, `creditdialog.ts`) per adottare appieno i token di `src/theme.css`: bordi a inchiostro netto fumetto (`--border-ink-thick`), ombre rigide neon offset (`--shadow-hard-cyan`, `--shadow-hard-pink`), pattern mezze tinte sui pannelli modali, pulsanti arcade retrò e font display per intestazioni e notifiche d'avviso.
 - Fatto quando: typecheck e test verdi; screenshot nel browser delle interfacce in-game rinnovate con il tema pop art comics / neon punk.
@@ -2454,7 +2454,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Esito: `docs/design/logo/` con brief, due prompt, README e 9 immagini (la più pesante 173 KB), `proposte/` vuota. Link del README e pesi controllati; i prompt non sono stati provati sui due strumenti. Limiti letti dalle guide il 01/11: Gemini fino a 10 file per prompt; Claude Design non dice i limiti degli allegati e tra le esportazioni non cita l'SVG, quindi il prompt chiede una pagina HTML con gli SVG dentro. Diverso dal previsto: le foto sono JPEG dello strumento del browser, ritagliate; i gerboa di profilo vengono da `src/mj/photo.ts`; la tavola di palette e font è una pagina temporanea, non tenuta. Da guardare, fuori da questo task: con il tappeto fermato dalla console le lastre delle rune si vedevano stando nella corona e non stando dentro il cerchio (`speed = speed` a (12-14, 8) guardata da (13, 11), scorrimento a zero); causa non cercata, e non provato se succede anche giocando normalmente.
 
 ### T143 · Le rune non si vedono sul tappeto — `da fare`
-- Pipeline: claude · stima 5% · priorità 2
+- Pipeline: claude · stima 5% · approvato · priorità 2
 - Contesto: bug riportato dall'autore (chat del 01/11): giocando, le rune non si vedono sul tappeto «da un po', almeno da 40 task». È una regressione: una volta si vedevano. Indizio da T141 (`dossier T141`, ultima riga dell'esito), raccolto con il tappeto fermato dalla console: le lastre si vedevano stando nella corona e non stando dentro il cerchio (`speed = speed` a (12-14, 8) guardata da (13, 11), scorrimento a zero). Causa non cercata: non darla per buona, può essere anche il taglio al cerchio, la disposizione delle rune, l'altezza delle lastre sul rilievo o altro.
 - Cosa fare:
   - Riprodurre giocando normalmente, con il tappeto attivo, in `?skip&offline` e nella build (`AGENTS.md`, «Convalida nel browser»). Il chunk (0,0) ha sempre `x`, `speed = speed` e la runa magica `luce`, quindi si può guardare subito attorno alla partenza. Provare sia le rune a terra sia quelle incise dalla frase, che camminano con il tappeto.
@@ -2469,7 +2469,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 **Decisione dell'autore, vale per tutti questi task.** Dentro il gioco, a parte i crediti dei giocatori, tutto si può modificare: il codice generato può toccare inventario, bisogni ed entità degli altri viandanti, e ci sono i rollback. Difendersi dai prompt avversari al Concilio è una guerra persa e non si fa. Ciò che conta: **non si esce dalla sandbox del gioco**, **i crediti non si toccano**, **i giocatori non master non riscrivono direttamente il codice Lua sul server**. Le difese di R8 sui permessi per viandante, su `U` in sola lettura e sul `by` delle rune **non si fanno**. Le prove sono test difensivi nel repository, che falliscono prima della correzione e passano dopo; niente payload nel report, mai valori veri dei segreti. **Ogni task di questa sezione segue `docs/sicurezza/README.md` (T136)**: aggiorna la sua voce in `docs/sicurezza/registro.md` e toglie `.fails` dai test che chiude; ciò che una sessione non riesce a provare va nel kit dell’autore (T137).
 
 ### T120 · Chi può scrivere: `/api/universe` e il WebSocket — `da fare` (dipende da T136, T137, T139)
-- Pipeline: claude · stima 5% · priorità 3
+- Pipeline: claude · stima 5% · approvato · priorità 3
 - Contesto: richiesta dell'autore: con F12 un giocatore può riscrivere i file Lua sul server. Confermato nel codice: `server/universeStore.ts` accetta `commit`, `create`, `checkout`, `branch`, `merge`, `clone`, `reset` e `PUT map` senza identità (R1). Il WebSocket controlla `isMaster`, ma senza account l'id lo sceglie il client (R6). Nasce da T117: `dossier T117`; vedi ADR-0058, 0061, 0066, 0082.
 - Cosa fare:
   1. Identità verificata sul server e permessi per operazione su ogni route di `/api/universe`: su un universo multigiocatore un non master non scrive nulla; `clone` prende il master dall'identità verificata, non dal corpo. Verificare prima come scrivono `host.ts`, il kernel del server e `site/sessioni.ts` (`create`) e tenere funzionanti i percorsi legittimi.
@@ -2509,7 +2509,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Esito: `GeminiGate` in `server/geminiProxy.ts`, ADR-0099, V-002 `chiusa`, `tests/sicurezza/gemini.test.ts`. Corpo massimo 2 MB. Scelte non scritte nel task: tetto giornaliero per tutta la chiave (`GEMINI_TETTO_GIORNALIERO`, predefinito 10 $, in `universes/.spesa-gemini.json`); un modello fuori dai prezzi ma nominato da un universo passa e si conta al prezzo del più caro; al tetto la risposta è 402 e `GeminiModels` la traduce in `BudgetError`. Più del previsto: controllo di `Host` e delle intestazioni di inoltro (nomi puntati su 127.0.0.1, tunnel). Nessuna chiamata vera a Gemini: la porta diretta del multigiocatore è provata con `fetch` finto, non con una partita vera. Sicurezza: nessuna superficie nuova.
 
 ### T124 · Il webhook di Stripe — `da fare` (dipende da T136, T139)
-- Pipeline: claude · stima 2% · priorità 7
+- Pipeline: claude · stima 2% · approvato · priorità 7
 - Contesto: R4: senza `STRIPE_WEBHOOK_SECRET` ogni evento è accettato (crediti gratis); `metadata.universo` e `wandererId` finiscono in `path.join` senza validazione; `crediti` non è confrontato con `amount_total`. T105 ha aggiunto le rotte di Stripe anche alla preview e riscritto parte di `server/stripe.ts`: per questo si parte da T139.
 - Cosa fare: senza segreto la route risponde 503, nel server di sviluppo e nella preview; validare nomi e id come fa il checkout; credito calcolato dall'importo pagato.
 - Test: i tre casi.
@@ -2523,7 +2523,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: test e typecheck verdi, commit su `task/T125`.
 
 ### T126 · I limiti dentro la sandbox — `da fare` (dipende da T136)
-- Pipeline: claude · stima 4% · priorità 9
+- Pipeline: claude · stima 4% · approvato · priorità 9
 - Contesto: R7, prima parte. Provato: un solo pattern di `string.find` blocca il processo oltre 60 s; `string.rep` alloca 200 MB senza guasti. Il budget conta le istruzioni VM per chiamata, non il lavoro nelle funzioni C né il tick.
 - Cosa fare: `string.*` con limiti di lunghezza e di pattern; limite di memoria della VM; budget per tick; limiti di scatola e di tempo per i programmi MarkovJunior sul server (l'XML può dire la propria `size`). Attenzione ai moduli esistenti, che devono continuare a girare, e alle prestazioni del tick.
 - Test: i casi della tabella dell'audit finiscono in un guasto entro un tempo breve, senza payload nel report.
@@ -2538,7 +2538,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: test e typecheck verdi, commit su `task/T127`.
 
 ### T128 · La coda delle CLI — `da fare` (dipende da T136)
-- Pipeline: claude · stima 3% · priorità 11
+- Pipeline: claude · stima 3% · approvato · priorità 11
 - Contesto: R9: `POST /api/coda` non ha autenticazione e accetta `system` e `prompt` qualsiasi; un testo dettato dal giocatore può arrivare a un agente con strumenti sulla macchina di chi gioca. Vedi ADR-0077.
 - Cosa fare: route montata solo su richiesta esplicita, solo in loopback, con un segreto locale; CLI in una cartella vuota, ambiente ridotto, strumenti esclusi e configurazione MCP e hook isolati, con conferma verificata; se Antigravity non può escludere gli strumenti, niente Antigravity sulla coda (dirlo all'autore nell'esito).
 - Test: senza segreto o non da loopback è rifiutata; gli argomenti delle CLI, senza lanciarle.
@@ -2568,7 +2568,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Esito: `npm audit` da 15 avvisi (2 critici, 5 alti, 8 moderati) a **0**; non resta aperto nulla. **La 5.x non bastava** (gli avvisi di Vite arrivano alla 6.4.3, quelli di Vitest alla 4.1.11): Vite 7.3.7, Vitest 4.1.12, `vite-node` 5.3.0 diretto (Vitest 4 non lo porta più), `npm audit fix` per il resto, un override di `@grpc/grpc-js` solo sotto `@firebase/firestore` (il progetto non importa Firestore, gRPC non è in `dist/`). ADR-0099. V-014 `in correzione`: la parte delle dipendenze è fatta, la chiude T133. Più del previsto: `tests/sicurezza/dipendenze.test.ts` (il lock non torna indietro; il server di sviluppo non dà `.env` nelle forme del kit: controllate le stesse forme su 5.4.10, c e g falliscono, su 7.3.7 nessuna); `minWorkers` tolto da `server/testWorkers.ts` perché Vitest 4 non lo ha più. Kit `--solo V-014` con il `vite.config.ts` vero: 11 ok, 0 FALLA (l'esito dell'autore in `esiti/2026-11-01.json` è stato ripristinato). Suite intera verde (80 file, 716 verdi, 18 attesi, 1 todo, 868 s), typecheck e build verdi. In un primo giro 4 rossi per timeout (`campus credits referente`) con la macchina carica: stessi file, nello stesso momento, vecchie versioni 540 s e nuove 534 s, tutti verdi. Il gioco parte in `?skip&offline` dalla build e dal server di sviluppo. **Dopo `integra` serve `npm ci` nel base**: il worktree di T131 ha un `node_modules` suo (junction tolta), gli altri condividono quello del base. npm 10 non sa installare Vitest 4 da zero (`edgesOut`), il lock è scritto con npm 11; `npm ci` e `npm install` con npm 10 sul lock passano, provati in una cartella a parte. Il sito (`site/`) è stato solo compilato, non aperto nel browser. Sicurezza: nessuna superficie nuova; `server/` cambia solo in `testWorkers.ts`.
 
 ### T132 · Le correzioni piccole — `da fare` (dipende da T136)
-- Pipeline: claude · stima 2% · priorità 15
+- Pipeline: claude · stima 2% · approvato · priorità 15
 - Contesto: R15 e R16.
 - Cosa fare: `Number()` su `realm.seed` in `site/sessioni.ts`; `returnUrl` del checkout limitato alla stessa origine; una CSP compatibile con three.js e con i worker; errori generici al client e dettagli nel log (`stripe.ts`); un test che cerca valori finti dei segreti in `dist/` dopo una build con un ambiente di prova.
 - Browser: gioco e sito senza errori di CSP in console.
