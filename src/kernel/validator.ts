@@ -219,10 +219,8 @@ export class Validator {
     errors.push(...this.checkLua(`modules/${manifest.id}/logic.lua`, logic));
     errors.push(...apiErrors(logic));
     if (!errors.length) {
-      // Dry load: the chunk must run and return a table, without touching the live universe.
-      const probe = `__probe.${manifest.id}`;
-      const err = this.sandbox.loadModule(probe, logic, `modules/${manifest.id}/logic.lua`);
-      this.sandbox.unloadModule(probe);
+      // Dry load: the chunk must run and return a table, in a VM apart from the live universe.
+      const err = this.sandbox.probe(logic, `modules/${manifest.id}/logic.lua`);
       if (err) errors.push(err);
     }
     return errors;
