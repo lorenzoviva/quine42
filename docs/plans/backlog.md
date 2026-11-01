@@ -2675,6 +2675,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Browser: col turno `browser`, con `QUINE_CODA=1`: la pagina del gioco legge il segreto e mette e ritira una richiesta; senza segreto e da un'altra origine locale 403 (T128 lo ha provato senza T120). Nell'esito cosa si è visto.
 - Quando è fatto: merge risolto, commit su `task/T147`. Poi l'orchestratore fa `integra T147` e `integra T128`.
 
+### T148 · Alleggerire `tests/between.test.ts` — `da fare`
+- Pipeline: claude · stima 3% · approvato · priorità 2
+- Contesto: richiesta dell'autore (02/11). In T121 il file ha 1 timeout a 60 s nella suite; da solo col limite normale ne scadono 5, col limite alzato passa 7 su 7 a circa 67 s per test, a macchina carica. Il file mette limiti di 60 s e 180 s test per test (T91 li aveva già alzati): alzarli ancora non è la soluzione. Nasce da T121 e T91: `dossier T121`, `dossier T91`.
+- Cosa fare: misura prima dove va il tempo (avvio del kernel per ogni test, tick simulati, attese) e con che carico; se ne viene un collo di bottiglia del kernel e non del test, dillo nell'esito con la misura. Poi accorcia il file: per esempio un mondo condiviso dove i test non si disturbano, meno tick da simulare, un universo di prova più piccolo. Ogni test continua ad affermare le stesse cose (T43a, T43b, T43c): nessuna asserzione tolta né indebolita, nessun `skip`. Niente limiti alzati. Non cambiare il codice del gioco per far passare i test: se serve, è una domanda.
+- Test: tempi del file prima e dopo, da solo e nella suite, e il carico della macchina quando li misuri. `npm run typecheck` e la suite intera con i loro turni; nell'esito quanti passano e i rossi che restano rilanciando il file da solo.
+- Browser: non serve.
+- Quando è fatto: il file passa da solo entro i limiti normali, ogni test molto sotto i 60 s; commit su `task/T148`.
+
 ### T144 · Integrare T122 — `fatto` (dipende da T142)
 - Pipeline: claude · stima 2% · approvato · priorità 1
 - Contesto: `integra T122` va in conflitto in `AGENTS.md`, sulle righe vicine dello Stack. T122 (il confine tra JS e Lua, `Crossing`) è finito e verificato. Parte quando Vite 7 e Vitest 4 di T131 sono nel base, per non rifare il merge. Nasce da T122: `dossier T122`.
