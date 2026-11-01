@@ -37,6 +37,7 @@ Aggiornato il 01/11/2026, fine dell'epoca 187 su **claude** (crediti: vedi `stat
 - **Sicurezza, T117 integrato; T120-T134 approvati dall'autore** (priorità 3-17, tutti su Claude, sezione «La sicurezza» del backlog). Decisione dell'autore: nel gioco tutto si può modificare tranne i crediti; contano la sandbox, i crediti e il blocco delle scritture Lua dei non master (T120, confermate senza autenticazione nel codice). Niente permessi per viandante (R8 ridotta). T45f dipende ora da T133 e T134. Se un filtro ferma T122, la domanda torna all'autore (persona esperta).
 - **Riavvio**: spenta alle 13:08 (`ferma --dopo`, T115 finito), riaccesa alle 13:35 con il tetto 2 di Claude; nessun task interrotto da riprendere.
 - **Cosa si aspetta**:
+  0. **T136** (processo: registro `V-NNN`, specifiche, `tests/sicurezza/` con `it.fails`) → **T137** (`npm run sicurezza:prove` e blocchi F12, che l'autore esegue di persona; solo loopback, segreti finti, universi temporanei). Richiesta dell'autore in `domande/T117.md`. Finito T137, **chiedere all'autore di eseguirlo sul base prima di integrare T120**; gli esiti diventano voci del registro e task. Le correzioni pronte dipendono da T136; T120 e T122 anche da T137.
   1. **T120 e seguenti** (sicurezza, p3-17), secondo le dipendenze.
   2. **T118**: i numeri prima e dopo; poi `integra T118`. Toccherà anche `vite.config.ts`. Se i timeout restano, ricontrollare `forms.ts` e `cards.ts` di T104.
   3. **Risposte dell'autore**: T45f (`docs/pipeline/domande/T45f.md`); T88 da approvare.
