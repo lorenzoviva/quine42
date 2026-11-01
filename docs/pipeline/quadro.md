@@ -8,12 +8,7 @@ Aggiornato il 01/11/2026 ~12:40 UTC, epoca 184 su **claude** (Claude settimana 1
 - **Tetto di Claude a 2** (richiesta dell'autore, 01/11): `limiti` in `config.json` (provider e modello). `CONFIG` si legge all'avvio: vale **solo dopo il riavvio** di `orchestra`, chiesto dall'autore con `ferma --dopo` (l'autore rilancia il processo). L'autore dice che con il Pro i limiti di Claude sono 5 volte più alti. Da allora gli slot salgono a 2 da soli entro 5 minuti, se la previsione non dice che i crediti finiscono prima del reset.
 
 - **Integrati di recente**: T57c (effetto rilievo e terraformazione nel kernel, ADR-0096), T111 (ripiego senza browser corretto), T113 (lampione intero, drone 1:2), T109+T110+T112 (template del sito verificato), T101 (landing con hero MarkovJunior verificata nel browser).
-- **In corso / Sospesi**:
-  - **T102** fatto (profilo del sito, verificato nel browser senza Firebase vero): conflitti con T103 in `site/index.html`, `vite.config.ts` → **T116** su Claude (p21). **T114 e T103 integrati** (hub sessioni verificato nel browser; badge live non provato).
-  - **T57b** fatto (rune nuove dal Concilio, ADR suo da rinumerare 0097): `integra` in conflitto (AGENTS.md, adr/README.md, agents/effects.ts con T57c). Creato e approvato **T115** su Claude (p20; Gemini sotto il 10 % settimanale non riceve task nuovi) per il merge; poi `integra T115` e `integra T57b`. 5 timeout noti della suite (referente, wanderers, watch) falliscono anche sul base.
-- **Finiti / Da verificare nel browser**:
-  - **T103** (hub sessioni multigiocatore e wizard nuovo universo): completato su Gemini (`BROWSER: da verificare`). Merge diretto con `3d` ha conflitto in `site/index.html` (aggiornato da T101). Creato **T114** su Claude (p25, browser) per fondere `task/T103`, risolvere il conflitto e verificare nel browser Chrome.
-- **Coda di Claude**: T114 (verifica T103) → T102, T104, T105, T106 (sito) → T89a-e (cartone, p75-79).
+- **In corso, coda, attese**: vedi «Stato e decisioni» e «Task attivi» sotto.
 - **Decisioni recenti**:
   - T57c completato su Gemini e integrato nel base `3d` con test e typecheck verdi; branch e worktree rimossi.
   - T89 diviso in T89a-e e approvato; T57 diviso in T57b/T57c e approvato. T57 segnato fatto (T57a).
@@ -38,38 +33,21 @@ Aggiornato il 01/11/2026 ~12:40 UTC, epoca 184 su **claude** (Claude settimana 1
 
 ## Stato e decisioni
 
-- **Decisioni prese e fatti recenti**:
-  - **T57c integrato nel base `3d` (ADR-0096)**: aggiunto l'effetto `rilievo {delta, raggio}` nel kernel, validazione (-8..8), persistenza in `plan.scavi`, deflusso d'acqua risvegliato; canone e guide di incantesimi aggiornate; test 6/6 e typecheck passati. Branch e worktree rimossi.
-  - **T92 e T52 integrati nel base `3d`**: task/T92 ha risolto i conflitti con task/T52, rinumerato l'ADR in ADR-0091, aggiornato `AGENTS.md`, `README.md` e `backlog.md` (T52a fatto, T52b-f definiti). Eseguiti `integra T92` e `integra T52`, worktree e branch rimossi, typecheck e test pipeline verdi.
-  - **T54 fatto**, da integrare tramite **T94** (conflitti; ADR da rinumerare in ADR-0092). Suite intera con 33 timeout di carico: T94 la rilancia col turno test.
-  - **T45d integrato nel base `3d` (ADR-0086)**: requisiti minimi, tetto crediti, modale esaurimento, lobby multigiocatore e collezione carte integrati.
-  - **T45f sbloccato e preparato**: dipendeva da T44b e T45d, ora entrambi integrati. Aperte le domande su GCP Project ID, hosting e regione in `docs/pipeline/domande/T45f.md`.
-  - **T45e completato e chiavi Stripe fornite**: l'autore ha risposto in `docs/pipeline/domande/T45e.md` inserendo le credenziali di test in `.env` e impostando il listener locale su `localhost:5173/api/stripe/webhook`. T45e segnato `fatto` e approvato **T93** per la verifica nel browser su Claude (priorità 9).
+- **Spegnimento in corso**: `ferma --dopo` dato su richiesta dell'autore: si spegne a fine T115; l'autore rilancia `orchestra` e il tetto 2 di Claude entra in vigore.
 - **Cosa si aspetta**:
-  1. Reset di Claude alle 05:50 UTC per ripresa di **T57b** e avvio di **T114** (verifica nel browser di T103 e merge).
-  2. **Risposte dell'autore per T45f** (`docs/pipeline/domande/T45f.md`).
-- **Intenzioni / prossimi passi**:
-  1. Al reset di Claude (05:50 UTC), far riprendere T57b e poi lanciare T114 per la verifica nel browser di T103 e merge di `task/T103`.
-  2. Ricevute le risposte su T45f, riprendere il deploy del multigiocatore su GCP.
+  1. Fine di **T115** (merge di T57b, ADR-0097): poi `integra T115` e `integra T57b`.
+  2. Poi **T116** (merge di T102, p21): poi `integra T116` e `integra T102`.
+  3. **Risposte dell'autore per T45f** (`docs/pipeline/domande/T45f.md`); T88 da approvare.
+- **Intenzioni**: dopo il riavvio controllare con `stato` che tetto e slot di Claude siano a 2 (se l'autore li vuole fissi, bloccare `slotAggiornato` in `.pipeline/budget.json`; non l'ha ancora chiesto). Con due task insieme, i merge T115/T116 prima del resto.
+- **Da sapere**: la pipeline, a ogni fine task, può riprovare da sola `integra`: i conflitti su T57b e T102 sono attesi finché T115/T116 non entrano. Sotto `sogliaUnSolo` (10 %) nessun task nuovo parte e non c'è un lancio forzato.
 
 ## Task attivi e in corso
 
-- **Pronti / In corso**:
-  - In corso / Sospeso: **T57b** su Claude (in attesa reset 5h alle 05:50 UTC).
-  - Pronti su Claude: **T114** (p25, browser) → **T102** (p64) → **T104** (p68) → **T105** (p70) → **T106** (p72) → **T89a** (p75).
-- **Completati e integrati nel base `3d`**:
-  - **T57c**, **T113**, **T112**, **T111**, **T101**, **T110**, **T109**, **T95**, **T98**, **T108**, **T107**, **T96**, **T51b**, **T89**, **T94**, **T54**, **T52b**, **T93**, **T92**, **T52**, **T86**, **T85**, **T91**, **T84**, **T83**, **T90**, **T82**, **T87**, **T81**, **T70**, **T53b**, **T80**, **T45d**, **T79**, **T45b**, **T78**, **T45c**, **T77**, **T45e**, **T76**, **T75**, **T44b**, **T44c**.
-- **Da integrare / Da verificare**:
-  - **T103** (in `task/T103`, integrato e verificato nel browser tramite **T114**).
-- **In attesa di chiavi/risposte**:
-  - **T45f**: sbloccato, in attesa di GCP Project ID e scelte di deploy (`docs/pipeline/domande/T45f.md`).
-- **In coda / Bloccati**:
-  - **T88** (da approvare).
-  - **T89b-e** (dipendono da T89a).
-- **Crediti**:
-  - **Claude**: 5h al 0 % residuo (reset 05:50 UTC), settimana al 14 % residuo (reset 05/11 16:00 UTC).
-  - **Gemini**: 5h al 64 % residuo (reset 06:01 UTC), settimana al 9 % residuo (riservato per orchestrazione).
-  - **Argon**: fermo fino al 04/11.
+- **In corso**: **T115** su Claude.
+- **Pronti su Claude**: **T116** (p21) → **T104** (p68) → **T105** (p70) → **T106** (p72) → **T89a** (p75); bloccati **T89b-e** (da T89a).
+- **Da integrare**: **T57b** (via T115), **T102** (via T116).
+- **Integrati di recente**: **T114**, **T103**, **T57c**, **T113**, **T112**, **T111**, **T101**, **T110**, **T109**.
+- **Crediti** (01/11 ~12:40 UTC): Claude settimana e 5h al 100 % (reset 05/11 16:00); Gemini settimana 8 %, sotto soglia: nessun task nuovo (reset 05/11 17:37); Argon fermo fino al 04/11.
 
 ## Da fare appena possibile
 
