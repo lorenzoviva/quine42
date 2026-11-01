@@ -90,7 +90,7 @@ Modello di una voce:
 - Stato: `in correzione`
 - Superficie: `src/kernel/prelude.lua`, `src/session/host.ts`, le funzioni C di `string.*`, i programmi MarkovJunior sul server (`src/kernel/validator.ts`)
 - Proprietà violata: il codice del mondo non ferma il processo: né gli altri mondi né l'HTTP. Prima di T126 il budget contava istruzioni VM per chiamata, non il lavoro nelle funzioni C, non il tick, non la memoria
-- Prova: test (`string.rep`, ciclo infinito, nella suite); T117 ha provato una volta, in un file poi cancellato, che un solo pattern di `string.find` blocca il processo oltre 60 s; misurata dal kit (`esiti/2026-11-01.json`): V-007.a processo ucciso dopo 25 s, V-007.b nessun guasto, V-007.c un mondo bloccato ferma tutto l'HTTP del server
+- Prova: test (`string.rep`, ciclo infinito, nella suite); T117 ha provato una volta, in un file poi cancellato, che un solo pattern di `string.find` blocca il processo oltre 60 s; misurata dal kit (`esiti/2026-11-01.json`): V-007.a processo ucciso dopo 25 s, V-007.b nessun guasto, V-007.c un mondo bloccato ferma tutto l'HTTP del server. Dopo T126 (`esiti/2026-11-01-dopo-T126.json`, T146, kit invariato): V-007.a finisce in 41 ms con un guasto, V-007.b in 1 ms con un guasto, V-007.c 2 risposte HTTP su 2 con quel mondo acceso. Il kit prova il pattern che bloccava, ora fermato dal budget: non misura i blocchi che restano, che sono di T127
 - Contromisura: `string.*` con limiti di lunghezza e di pattern, limite di memoria della VM, budget per tick, scatole e tempo limitati per i MarkovJunior (T126, fatto, ADR-0103: restano un blocco di qualche secondo per chiamata, la memoria dal lato JS e i modelli fino a `MAX_FORM_TIME`); ogni mondo in un worker o processo senza segreti, con limite di memoria e un sorvegliante che lo riavvia dall'ultimo stato valido (T127).
 - Task: T126, T127
 - Test: `tests/sicurezza/sandbox.test.ts`
@@ -231,7 +231,7 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-004 | a b c d e | — | `rotte.test.ts` | — |
 | V-005 | a b c | — | — | la corsa con un commit del mondo in mezzo: T125 |
 | V-006 | a b c d e f | g | `rotte.test.ts` | `offline` e `tetto` decisi dal client non si vedono da fuori: T120 |
-| V-007 | a b c | — | `sandbox.test.ts` | il mondo isolato e il sorvegliante: T127; il kit è da ripassare dopo T126 |
+| V-007 | a b c | — | `sandbox.test.ts` | il mondo isolato e il sorvegliante: T127 |
 | V-008 | a b | — | `uscita.test.ts`, `sandbox.test.ts` | — |
 | V-009 | a b | — | `rotte.test.ts` | gli argomenti delle CLI, che non si lanciano: T128 |
 | V-010 | a b | — | — | la risposta del Referente con i crediti: T125 |
