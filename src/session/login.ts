@@ -52,7 +52,10 @@ function chooseHow(): Promise<'google' | 'anonimo'> {
   });
 }
 
-export async function signIn(config: AccountConfig): Promise<SignedIn> {
+/** How the player chooses to come in: the game's own box, or the site's buttons (T102). */
+export type ChooseHow = () => Promise<'google' | 'anonimo'>;
+
+export async function signIn(config: AccountConfig, choose: ChooseHow = chooseHow): Promise<SignedIn> {
   const { initializeApp } = await import('firebase/app');
   const fa = await import('firebase/auth');
   const app = initializeApp({ apiKey: config.apiKey, authDomain: config.authDomain, projectId: config.projectId }, 'quine');
@@ -61,7 +64,7 @@ export async function signIn(config: AccountConfig): Promise<SignedIn> {
   await auth.authStateReady();
   let user = auth.currentUser;
   while (!user) {
-    const how = await chooseHow();
+    const how = await choose();
     try {
       user = (how === 'google' ? await fa.signInWithPopup(auth, new fa.GoogleAuthProvider()) : await fa.signInAnonymously(auth)).user;
     } catch {
