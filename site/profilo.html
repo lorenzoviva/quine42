@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="QUINE42: il tuo viandante. Accedi, scegli il nome, il colore del mantello e l'aspetto." />
+    <title>QUINE42 · Profilo del viandante</title>
+    <link rel="stylesheet" href="./site.css" />
+  </head>
+  <body class="page-profile">
+    <!-- La navigazione (dal template docs/design/sito/profilo.html) -->
+    <header class="site-nav">
+      <a href="./index.html" class="nav-brand">
+        <span class="nav-logo">QUINE42</span>
+        <span class="nav-tagline">// ARCADE · VOXEL · IA</span>
+      </a>
+      <button class="nav-toggle-btn" id="nav-toggle" aria-controls="nav-links" aria-expanded="false">MENU ▼</button>
+      <nav aria-label="Pagine">
+        <ul class="nav-links" id="nav-links">
+          <li><a href="./index.html" class="nav-link">Mondo</a></li>
+          <li><a href="./index.html#carte" class="nav-link">Carte 3D</a></li>
+          <li><a href="./index.html#reami" class="nav-link">Reami</a></li>
+          <li><a href="./profilo.html" class="nav-link active" aria-current="page">Profilo</a></li>
+        </ul>
+      </nav>
+      <div class="nav-actions">
+        <a href="../index.html" class="comic-btn arcade cyan" id="nav-play">GIOCA SUBITO</a>
+        <button class="comic-btn arcade" id="nav-out" hidden>ESCI</button>
+      </div>
+    </header>
+
+    <main class="section-wrap">
+      <div class="section-head">
+        <span class="comic-badge yellow">SCHEDA PERSONAGGIO</span>
+        <h1 class="comic-title" style="font-size: 2.8rem; margin-top: 10px">PROFILO DEL VIANDANTE</h1>
+        <p>// IDENTITÀ · PORTAFOGLIO · ASPETTO</p>
+      </div>
+
+      <!-- Avvisi: salvato, riparato, errori -->
+      <div class="comic-alert" id="profile-alert" role="status" aria-live="polite" hidden>
+        <span class="comic-badge" id="profile-alert-badge">INFO</span>
+        <span class="arcade-text" id="profile-alert-text" style="font-size: 0.75rem"></span>
+      </div>
+
+      <!-- L'accesso (dal template docs/design/sito/login.html) -->
+      <section class="login-container" id="login-panel" hidden>
+        <div class="login-box">
+          <div class="login-head">
+            <span class="comic-badge yellow">ACCESSO</span>
+            <h2 class="comic-title" style="font-size: 2.2rem; margin-top: 10px">ENTRA NEL MONDO</h2>
+            <p class="arcade-text text-dim" id="login-sub" style="font-size: 0.72rem">Con un account Google il tuo viandante ti segue ovunque</p>
+          </div>
+
+          <div class="login-accounts" id="login-accounts">
+            <button class="comic-btn full-width pink lg" id="btn-google-login">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12.24 10.285V13.8h6.887C18.2 16.16 15.64 18 12.24 18c-3.315 0-6-2.685-6-6s2.685-6 6-6c1.47 0 2.82.525 3.87 1.395l2.67-2.67C17.16 3.255 14.85 2.4 12.24 2.4 6.96 2.4 2.64 6.72 2.64 12s4.32 9.6 9.6 9.6c5.52 0 9.195-3.885 9.195-9.36 0-.63-.06-1.245-.165-1.955H12.24z" />
+              </svg>
+              ACCEDI CON GOOGLE
+            </button>
+            <button class="comic-btn full-width cyan" id="btn-anon-login" style="margin-top: 16px">⚡ ENTRA COME ANONIMO</button>
+            <p class="login-note">
+              Da anonimo giochi solo con i modelli locali e non puoi recuperare il viandante finché non lo leghi a Google.
+            </p>
+          </div>
+
+          <!-- Senza account sul server (sviluppo, anteprima): il viandante si sceglie per identificativo -->
+          <form class="login-direct" id="login-direct" hidden>
+            <div class="auth-divider">IDENTIFICATIVO DIRETTO</div>
+            <div class="form-group">
+              <label class="comic-label" for="login-id">ID del viandante</label>
+              <input type="text" id="login-id" class="comic-input" value="io" maxlength="40" autocomplete="off" spellcheck="false" />
+              <span class="input-hint">Su questo server non ci sono account: il viandante è quello con questo identificativo.</span>
+              <span class="input-error-msg" id="login-id-error" hidden>Solo lettere minuscole, cifre e trattini.</span>
+            </div>
+            <button type="submit" class="comic-btn full-width" id="btn-direct-login">APRI LA SCHEDA</button>
+          </form>
+        </div>
+      </section>
+
+      <div class="profile-grid" id="profile-grid" hidden>
+        <!-- A sinistra: chi è il viandante, l'account, i crediti -->
+        <div>
+          <div class="comic-panel yellow-shadow" style="margin-bottom: 24px">
+            <div class="identity-head">
+              <div>
+                <span class="comic-badge cyan">ID ACCOUNT</span>
+                <h2 class="comic-title identity-id" id="wanderer-id">—</h2>
+              </div>
+              <span class="comic-badge" id="account-badge">—</span>
+            </div>
+
+            <div class="comic-table-wrap" style="margin-bottom: 20px">
+              <table class="comic-table">
+                <tbody>
+                  <tr>
+                    <td class="arcade-text text-yellow">Accesso:</td>
+                    <td id="account-kind">—</td>
+                  </tr>
+                  <tr>
+                    <td class="arcade-text text-yellow">Nome:</td>
+                    <td id="wanderer-name">—</td>
+                  </tr>
+                  <tr>
+                    <td class="arcade-text text-yellow"><label for="realm-select">Reame:</label></td>
+                    <td><select id="realm-select" class="comic-select realm-select"></select></td>
+                  </tr>
+                  <tr>
+                    <td class="arcade-text text-yellow">Nel mondo:</td>
+                    <td id="wanderer-where">—</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="wallet-box">
+              <div>
+                <span class="arcade-text text-dim" style="font-size: 0.65rem">SALDO CREDITI DISPONIBILE</span>
+                <div class="comic-title wallet-amount" id="wallet-amount">$0.00</div>
+                <span class="input-hint" id="wallet-note"></span>
+              </div>
+            </div>
+
+            <div class="account-actions">
+              <button class="comic-btn sm pink" id="btn-link-google" hidden>LEGA A GOOGLE</button>
+              <a class="comic-btn sm cyan" id="btn-play-realm" href="../index.html">ENTRA IN QUESTO REAME</a>
+              <button class="comic-btn sm dark" id="btn-sign-out">DISCONNETTI</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- A destra: l'aspetto, con l'anteprima tridimensionale del modello vero -->
+        <div>
+          <div class="comic-panel cyan-shadow">
+            <div class="identity-head">
+              <h2 class="comic-title" style="font-size: 1.6rem; margin: 0">ASPETTO</h2>
+              <span class="comic-badge cyan" id="avatar-badge">MARKOVJUNIOR</span>
+            </div>
+
+            <div class="avatar-preview-box" id="avatar-box">
+              <canvas id="avatar-canvas" aria-label="Il tuo viandante in tre dimensioni"></canvas>
+              <span class="avatar-hint arcade-text text-dim">// TRASCINA PER GIRARLO //</span>
+            </div>
+
+            <div class="form-group">
+              <label class="comic-label" for="profile-name">NOME</label>
+              <input type="text" id="profile-name" class="comic-input" maxlength="24" placeholder="Come ti chiamano" autocomplete="off" />
+            </div>
+
+            <div class="form-group">
+              <span class="comic-label" id="cloak-label">COLORE DEL MANTELLO</span>
+              <div class="color-palette-picker" id="cloak-palette" role="radiogroup" aria-labelledby="cloak-label"></div>
+              <span class="arcade-text text-dim" style="font-size: 0.7rem">
+                Colore: <b id="current-color-label">#c06030</b>
+                <input type="color" id="cloak-custom" value="#c06030" aria-label="Un colore a scelta" />
+              </span>
+            </div>
+
+            <div class="form-group">
+              <div class="seed-head">
+                <label class="comic-label" for="seed-range" style="margin: 0">ASPETTO DEL VIANDANTE</label>
+                <button class="comic-btn arcade sm" id="btn-rand-seed" type="button">🎲 CASUALE</button>
+              </div>
+              <input type="range" id="seed-range" class="comic-slider" min="1" max="8" value="1" step="1" />
+              <div class="seed-foot">
+                <span class="input-hint">Ogni seme è un viandante diverso dello stesso programma.</span>
+                <span class="comic-badge yellow" id="seed-badge">SEME 1</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="comic-label" for="profile-intro">PRESENTAZIONE</label>
+              <textarea id="profile-intro" class="comic-textarea" rows="4" maxlength="280" placeholder="Poche righe: chi sei, da dove vieni"></textarea>
+            </div>
+
+            <button class="comic-btn full-width pink lg" id="btn-save" style="margin-top: 8px">SALVA IL VIANDANTE</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Il tramonto synthwave e il segreto dei gerboa (allusivo) -->
+    <footer class="site-footer">
+      <div class="footer-grid-floor"></div>
+
+      <div class="footer-horizon">
+        <div class="jerboa-peek-container" title="Due sagome all'orizzonte...">
+          <div class="jerboa-tooltip">// DUE ORECCHIE LUNGHE NELLA NOTTE...</div>
+          <svg class="jerboa-ears-svg" viewBox="0 0 64 38" aria-hidden="true">
+            <path d="M 16 38 C 14 20, 4 8, 12 2 C 20 -4, 26 14, 28 38 Z" />
+            <path d="M 48 38 C 50 20, 60 8, 52 2 C 44 -4, 38 14, 36 38 Z" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="footer-brand">QUINE42</div>
+      <p class="footer-quote">
+        "Il sentiero scorre sotto i tuoi passi e si apre a ogni scelta.<br />
+        Ciò che pronunci diventa cammino, ciò che componi diventa mondo."
+      </p>
+
+      <div class="footer-links">
+        <a href="../index.html">GIOCO</a>
+        <a href="./index.html">MONDO</a>
+        <a href="./index.html#carte">CARTE</a>
+        <a href="./index.html#reami">REAMI</a>
+        <a href="./profilo.html">PROFILO</a>
+      </div>
+
+      <div class="footer-copy">QUINE42 © 2026 · Voxel e modelli MarkovJunior 3D · Generato con intelligenza artificiale</div>
+    </footer>
+
+    <script type="module" src="./profilo.ts"></script>
+  </body>
+</html>

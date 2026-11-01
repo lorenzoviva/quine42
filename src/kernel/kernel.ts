@@ -985,6 +985,25 @@ export class Kernel {
   }
 
   /**
+   * A profile chosen outside the world (the site, T102): to the wanderer if they are here, otherwise repaired the same way
+   * and written in their saved state, which they wear when they come in (a saved profile wins over the one a client brings).
+   */
+  keepProfile(id: string, raw: unknown): ProfileRepair | undefined {
+    if (!validWandererId(id)) return undefined;
+    if (this.wanderersById.has(id)) return this.setProfile(id, raw);
+    if (this.mirror) return undefined;
+    const r = repairProfile(raw, id, this.namesTaken(id), this.forms.seedsOf('viandante'));
+    const file = playerFile(id);
+    const saved: WandererState = readWandererState(this.files, id) ?? {};
+    saved.profilo = r.profilo;
+    saved.nome = r.profilo.nome;
+    const text = JSON.stringify(saved, null, 1) + '\n';
+    this.files[file] = text;
+    this.repo.write(file, text);
+    return r;
+  }
+
+  /**
    * A wanderer leaves this world (T38: their client went away): what they carry is saved with the state of play,
    * their entity goes. `io` stays, it is the one every universe has.
    */
