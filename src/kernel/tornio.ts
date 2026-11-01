@@ -8,7 +8,7 @@ import type { VoxelGrid } from '../mj/mesh';
 import { compileMjx, type MjxModel } from '../mj/model';
 import { render, type Picture } from '../mj/photo';
 import { runMjx } from '../mj/run';
-import type { Forms, ModelInfo } from './forms';
+import { rootTag, type Forms, type ModelInfo } from './forms';
 import type { FileMap } from './types';
 
 export interface TornioModelEntry {
@@ -102,7 +102,7 @@ export function tornioExecute(
   count = 1,
 ): TornioShown & { model: MjxModel } {
   const cls = forms.classOf(entry.id);
-  const root = /<(?!!)[a-z]+\b[^>]*>/i.exec(entry.xml)?.[0] ?? '';
+  const root = rootTag(entry.xml);
   const size = /\ssize="/.test(root) ? undefined : boxOf(cls);
   const m = compileMjx(entry.xml, size ? { size } : {});
 

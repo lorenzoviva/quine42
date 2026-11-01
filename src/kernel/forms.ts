@@ -143,13 +143,15 @@ const SEEDS: Record<string, number> = { albero: 3, cespuglio: 3, roccia: 3, sass
 /** A step one walks up without noticing (a doorstep, a floor): 0.2 tiles, in voxels of a density. */
 export const stepOf = (vpt: number) => Math.round(0.2 * vpt);
 
+/** The first tag of a program, comments skipped (a comment may name a tag, `<markov>`, T113). */
+export const rootTag = (xml: string) => /<[a-z]+\b[^>]*>/i.exec(xml.replace(/<!--[\s\S]*?-->/g, ''))?.[0] ?? '';
+
 /**
  * The box a program runs in: its own `size` if it says one (structures decide on a coarse grid and `map`
  * up), otherwise its class's box at its size.
  */
 function sizeFor(xml: string, cls: AssetClass, taglia?: string, under = 0): Vec3 | undefined {
-  const root = /<(?!!)[a-z]+\b[^>]*>/i.exec(xml)?.[0] ?? '';
-  if (/\ssize="/.test(root)) return undefined;
+  if (/\ssize="/.test(rootTag(xml))) return undefined;
   const [X, Y, Z] = boxOf(cls, taglia);
   // A model with a cellar (T52b): the box goes down by it, the program writes the cellar in its lowest voxels.
   return [X, Y, Z + under];
