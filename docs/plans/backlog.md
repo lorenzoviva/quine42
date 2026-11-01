@@ -2412,3 +2412,11 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - **Da non fare** (decisione dell'autore): non abbassare la priorità dei processi. Non usare Agent View.
 - Se la decisione è architetturale, aggiornare `AGENTS.md` e l'ADR (nuovo o ADR-0088).
 - Quando è fatto: con due task attivi la suite intera non dà timeout dovuti al carico (i numeri prima e dopo nel blocco del task); `pipeline.mjs turno` mostra i turni nuovi; typecheck e test verdi; commit su `task/T118`.
+
+### T119 · Integrare T116 (T102, la pagina profilo) dopo T104 — `da fare`
+- Pipeline: claude · stima 2% · approvato · priorità 2
+- Contesto: `integra T116` va in conflitto in `AGENTS.md`, `docs/plans/backlog.md` e `vite.config.ts` con T104 (galleria delle carte), appena entrato nel base. `task/T116` contiene già il merge di T102. Nasce da T116, T102 e T104: `dossier T116`, `dossier T104`.
+- Cosa fare: nel worktree di T119 `git merge task/T116`; risolvere tenendo entrambe le aggiunte (pagine del sito in `vite.config.ts`, righe di `AGENTS.md`); nel backlog restano i blocchi di tutti i task. Niente nuove funzioni.
+- Test: typecheck e build; `tests/site-profile.test.ts` e `tests/site-carte.test.ts` da soli. La suite intera è da poco stata eseguita da T116 e T104 con timeout per il carico: **non ripeterla** se il merge tocca solo i tre file in conflitto (T118 si occupa del carico); dillo nell'esito. Se il merge cambia altro codice, lanciala con il turno.
+- Browser: una controllata veloce che `site/profilo.html` e `site/carte.html` si aprano senza errori in console e con i link tra le pagine; scheda del viandante e anteprima 3D con un universo di prova, che T116 non ha riprovato dopo il merge. Login Firebase non richiesto.
+- Quando è fatto: merge risolto, verifiche sopra fatte, commit su `task/T119`. Poi l'orchestratore fa `integra T119`, `integra T116`, `integra T102`.

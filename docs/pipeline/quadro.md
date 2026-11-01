@@ -36,17 +36,17 @@ Aggiornato il 01/11/2026 dopo le 13:35 UTC, epoca 186 su **claude** (Claude sett
 - **Sicurezza e CPU (01/11)**: T117 (audit, p0) e T118 (CPU satura con due task, p1) richiesti e approvati dall'autore, senza interrompere i task in corso. Agent View scartato dall'autore; niente abbassamento della priorità dei processi. Le correzioni proposte da T117 vanno portate all'autore.
 - **Riavvio**: spenta alle 13:08 (`ferma --dopo`, T115 finito), riaccesa alle 13:35 con il tetto 2 di Claude; nessun task interrotto da riprendere.
 - **Cosa si aspetta**:
-  1. **T116** (merge di T102, p21): poi `integra T116` e `integra T102`.
+  1. **T119** (merge di T116 dopo T104, p2): poi `integra T119`, `integra T116`, `integra T102`.
   2. **Risposte dell'autore per T45f** (`docs/pipeline/domande/T45f.md`); T88 da approvare.
 - **Intenzioni**: T116 prima del resto; se l'autore vuole gli slot di Claude fissi a 2, bloccare `slotAggiornato` in `.pipeline/budget.json` (non l'ha ancora chiesto).
 - **Da sapere**: la pipeline, a ogni fine task, può riprovare da sola `integra`: i conflitti su T102 sono attesi finché T116 non entra. Sotto `sogliaUnSolo` (10 %) nessun task nuovo parte e non c'è un lancio forzato.
 
 ## Task attivi e in corso
 
-- **In corso** (all'ultimo `stato`): **T116** e **T104** su Claude.
-- **Pronti su Claude**: **T117** (p0) → **T118** (p1) → **T105** (p70) → **T106** (p72) → **T89a** (p75); bloccati **T89b-e** (da T89a).
-- **Da integrare**: **T102** (via T116).
-- **Integrati di recente**: **T115**, **T57b**, **T114**, **T103**, **T57c**, **T113**, **T112**, **T111**, **T101**, **T110**, **T109**.
+- **In corso** (all'ultimo `stato`): **T117** su Claude.
+- **Pronti su Claude**: **T118** (p1) → **T119** (p2) → **T105** (p70) → **T106** (p72) → **T89a** (p75); bloccati **T89b-e** (da T89a).
+- **Da integrare**: **T102** e **T116** (via T119).
+- **Integrati di recente**: **T104** (22 timeout su 675 nella suite, estraneità provata solo in 3 file: se restano dopo T118, ricontrollare `forms.ts` e `cards.ts`), **T115**, **T57b**, **T114**, **T103**, **T57c**, **T113**, **T112**, **T111**, **T101**, **T110**, **T109**.
 - **Crediti** (01/11 dopo le 13:35 UTC): Claude settimana 100 %, 5h 96 % (reset 05/11 16:00); Gemini settimana 8 %, sotto soglia: nessun task nuovo (reset 05/11 17:37); Argon fermo fino al 04/11.
 
 ## Da fare appena possibile
