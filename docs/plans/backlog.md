@@ -2067,13 +2067,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: merge committato, `npm run typecheck` verde, `npm test` (con `turno test`) verde salvo timeout di carico già noti sulla base.
 - Esito: eseguito `git merge task/T54` e risolti i conflitti in `AGENTS.md`, `docs/adr/README.md`, `docs/plans/backlog.md`, `src/kernel/forms.ts`, `src/kernel/kernel.ts`, `src/kernel/validator.ts` preservando sia i sotterranei (T52b) sia le taglie di D&D (T54); rinominato `docs/adr/0081-le-taglie-di-dnd.md` in `docs/adr/0092-le-taglie-di-dnd.md` (aggiornato titolo interno a ADR-0092); aggiornati tutti i riferimenti ad ADR-0081 relativi alle taglie in ADR-0092 in `AGENTS.md`, `docs/adr/0043-spazio-a-scale-lotti-strutture.md`, `docs/adr/README.md`, `docs/plans/backlog.md` (T54 `fatto` con commit `3c5fe95`), `src/kernel/agents/cartography.ts`, `src/kernel/agents/forge.ts`, `src/kernel/agents/sculptor.ts`, `src/kernel/forms.ts`, `src/kernel/kernel.ts`, `src/kernel/modeldirector.ts`, `src/kernel/types.ts`, `src/kernel/validator.ts`, `src/mj/classes.ts`, `tests/lots.test.ts`, `tests/sculptor.test.ts`, lasciando intatti i riferimenti ad ADR-0081 per i crediti e le spese comuni; `npm run typecheck` verde; `tests/lots.test.ts` e `tests/sculptor.test.ts` passati (11/11); suite completa eseguita sotto `turno test` (581 passati, restanti timeout di carico già noti sulla base e oggetto di T95).
 
-### T95 · Test rossi da soli: explore, partita, subscription — `da fare`
+### T95 · Test rossi da soli: explore, partita, subscription — `fatto`
 - Pipeline: claude · stima 3% · priorità 60
 - Contesto: T93 riporta che `tests/explore*`, `tests/partita*` e `tests/subscription*` falliscono anche lanciati da soli,
   senza legame con Stripe (`traccia T93`); T54 riporta 33 timeout di carico nella suite intera (`traccia T54`).
 - Cosa fare: sul base `3d` lancia ciascuno di quei file da solo; per ciò che fallisce davvero (non per timeout di carico) trova il
   commit che l'ha rotto e correggi il codice o il test; i timeout solo di carico restano.
 - Quando è fatto: i tre file verdi da soli, typecheck verde, il commit che li aveva rotti scritto nella riga di chiusura.
+- Esito: `tests/subscription.test.ts` era già verde da solo (16/16): il suo rosso nella suite intera è di carico. `tests/explore.test.ts` (3/3) e `tests/partita.test.ts` (1 su 5) li aveva rotti `38dcd69` (T45a, crediti per viandante, ADR-0081): in multigiocatore chi ha 0 crediti è servito dai `localModels` del Concilio, non dai modelli passati al kernel, così i `Recording` dei test non vedevano più i piani (`chunk.plan`) né la morte (`player.death`). Il codice è giusto; corretti i test, che danno crediti a chi paga (`giveCredits` a `io` dopo il boot e a ogni viandante che entra in `join`). Ora i tre file verdi da soli, typecheck verde; nella suite intera (sotto `turno test`) 596 passati, 44 rossi in altri file (kernel, between, referente, thin, places, credits) più uno di subscription che da solo passa: timeout di carico, fuori dal task.
 
 ### T96 · Mai zero slot per nessun provider — `fatto`
 - Pipeline: gemini · stima 3% · priorità 5 · approvato

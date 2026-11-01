@@ -33,6 +33,8 @@ async function bootWith(partita: Record<string, unknown>) {
   const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita }, null, 2) };
   const models = new Recording();
   const k = await Kernel.boot({ files, store: memoryStore(), models });
+  // In a universe of many the master pays too (ADR-0081): without credits the calls would go to the kernel's local models.
+  k.giveCredits('io', 100);
   await develop(k);
   return { k, models };
 }
