@@ -2543,3 +2543,10 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Contesto: chiude «Cosa non è stato fatto» dell'audit, per la parte non coperta dai test di ogni correzione: nessuna prova HTTP o WebSocket è stata fatta contro un server vero.
 - Cosa fare: test di integrazione che avviano il server di produzione in locale con segreti finti e provano le regole di accesso (identità, origine, percorsi, webhook, proxy) e che i valori finti non escano mai (risposte, log, `dist/`). Aggiornare `docs/sicurezza/audit-2026-11.md` voce per voce: chiusa, provata, o aperta con il motivo.
 - Quando è fatto: test e typecheck verdi, report aggiornato, commit su `task/T134`. Poi l'orchestratore porta all'autore cosa resta prima di T45f.
+
+### T135 · Integrare T119 dopo i task di sicurezza — `da fare`
+- Pipeline: claude · stima 1% · approvato · priorità 2
+- Contesto: `integra T119` va in conflitto solo in `docs/plans/backlog.md`: la sezione «La sicurezza» (T120-T134) è entrata in fondo al file, accanto al blocco di T119. Nasce da T119: `dossier T119`.
+- Cosa fare: nel worktree di T135 `git merge task/T119`; nel backlog restano tutti i blocchi, con ciò che T119 ha scritto nel proprio e la sezione «La sicurezza» intera. Niente altro.
+- Test: `npm run typecheck`. Niente suite intera né browser: T119 li ha già fatti e il conflitto è solo in un documento. Se il merge cambia altro, fermarsi e scriverlo nell'esito.
+- Quando è fatto: merge risolto, commit su `task/T135`. Poi l'orchestratore fa `integra T135`, `integra T119`, `integra T116`, `integra T102`.
