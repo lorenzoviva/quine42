@@ -6,6 +6,7 @@
 // Here: the browser client of the universe repository, and the merge of kernel updates into it.
 
 import type { FileMap } from './types';
+import { allowedPath } from './paths';
 import type { Author } from './repo';
 import { hashStr, hex } from './rng';
 import type { ChunkRecord, ChunkStore } from './chunks';
@@ -210,11 +211,24 @@ export class UniverseClient implements UniverseBackend {
   }
 
   async create(files: FileMap, message: string): Promise<string | null> {
-    return (await this.post('create', { files, message })).head ?? null;
+    return (await this.post('create', { files: this.admitted(files), message })).head ?? null;
+  }
+
+  /**
+   * What the store takes (ADR-0103). A path it would refuse (a player's: the rule is that they may break the game) stays in
+   * the game and out of the disk, with the rest of its commit written: commits carry only what changed, so a refused one would be lost.
+   */
+  private admitted<T>(files: Record<string, T>): Record<string, T> {
+    const refused = Object.keys(files).filter((p) => !allowedPath(p));
+    if (!refused.length) return files;
+    this.lastError = `percorsi non ammessi: ${refused.slice(0, 5).join(', ')}`;
+    console.warn('[universo]', this.lastError);
+    return Object.fromEntries(Object.entries(files).filter(([p]) => allowedPath(p)));
   }
 
   /** Commits are written in order, one at a time, without blocking the game. */
-  commit(changes: Record<string, string | null>, message: string, author: Author): Promise<string | null> {
+  commit(all: Record<string, string | null>, message: string, author: Author): Promise<string | null> {
+    const changes = this.admitted(all);
     this.pending++;
     const job = this.queue.then(async () => {
       try {

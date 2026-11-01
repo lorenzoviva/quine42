@@ -9,8 +9,9 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import crypto from 'node:crypto';
 import path from 'node:path';
 import { promises as fs } from 'node:fs';
-import { execFile } from 'node:child_process';
 import type { AccountSettings } from './account';
+import { runGit } from './git';
+import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
 import { accountWanderer } from '../src/session/account';
 import type { Kernel } from '../src/kernel/kernel';
 import {
@@ -40,10 +41,9 @@ export function stripeSettings(env: Record<string, string | undefined>): StripeS
 }
 
 const MAX_BODY = 1024 * 1024;
-const NAME_RE = /^[a-z0-9][a-z0-9-]{0,40}$/;
 
 /** A universe's name, the only thing that may end up in a path under the universes' folder. */
-const validUniverse = (name: unknown): name is string => typeof name === 'string' && NAME_RE.test(name);
+const validUniverse = (name: unknown): name is string => typeof name === 'string' && UNIVERSE_NAME_RE.test(name);
 
 /** A mock key charges nobody, so it needs no webhook; a real one without the webhook's secret would take money it cannot credit (T124). */
 const canCharge = (s: StripeSettings): boolean =>
@@ -203,12 +203,7 @@ export async function createStripeCheckoutSession(opts: {
 }
 
 function git(cwd: string, args: string[]): Promise<string> {
-  const full = ['-c', 'user.name=Kernel', '-c', 'user.email=kernel@rune.local', '-c', 'core.autocrlf=false', ...args];
-  return new Promise((resolve, reject) => {
-    execFile('git', full, { cwd, maxBuffer: 16 * 1024 * 1024, windowsHide: true }, (err, stdout, stderr) =>
-      err ? reject(new Error(String(stderr || err.message).trim())) : resolve(String(stdout)),
-    );
-  });
+  return runGit(cwd, args, { author: ['Kernel', 'kernel@rune.local'], maxBuffer: 16 * 1024 * 1024 });
 }
 
 /**

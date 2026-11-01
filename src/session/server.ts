@@ -6,6 +6,7 @@
 
 import type { Kernel } from '../kernel/kernel';
 import { AGENTS, type AgentId, type FeedEntry } from '../kernel/agents/council';
+import { allowedPath } from '../kernel/paths';
 import { SEA_DRAFT } from '../kernel/relief';
 import type { FileMap } from '../kernel/types';
 import { readWandererState, SOLO, validWandererId, type Profile } from '../kernel/wanderers';
@@ -73,16 +74,15 @@ export const BRANCH = 'master';
 /** At most this many files in a branch, each at most this long. */
 const BRANCH_FILES = 2000;
 const BRANCH_TEXT = 4 * 1024 * 1024;
-const PATH_RE = /^[\w.-]+(?:\/[\w.-]+)*$/;
 
-/** A branch from the wire: paths inside the universe, texts or null; undefined if anything is not so. */
-function cleanBranch(files: unknown): FileChanges | undefined {
+/** A branch from the wire: paths a universe may hold (ADR-0103), texts or null; undefined if anything is not so. */
+export function cleanBranch(files: unknown): FileChanges | undefined {
   if (!files || typeof files !== 'object' || Array.isArray(files)) return undefined;
   const entries = Object.entries(files as Record<string, unknown>);
   if (entries.length > BRANCH_FILES) return undefined;
   const out: FileChanges = {};
   for (const [p, v] of entries) {
-    if (!PATH_RE.test(p) || p.split('/').some((s) => s === '.' || s === '..' || s === '.git')) return undefined;
+    if (!allowedPath(p)) return undefined;
     if (v !== null && (typeof v !== 'string' || v.length > BRANCH_TEXT)) return undefined;
     out[p] = v;
   }

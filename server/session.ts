@@ -11,10 +11,10 @@ import type { AddressInfo } from 'node:net';
 import type { Duplex } from 'node:stream';
 import { WebSocketServer, type WebSocket } from 'ws';
 import type { AccountSettings } from './account';
+import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
 import { gate, refuse } from './access';
 import type { Kernel } from '../src/kernel/kernel';
 
-const NAME_RE = /^[a-z0-9][a-z0-9-]{0,40}$/;
 
 /**
  * Whether a socket may open, and with which models its world starts if it is the first (T120, ADR-0102). Another site's page never;
@@ -129,7 +129,7 @@ export function sessionServer(accounts?: AccountSettings, gemini?: typeof fetch,
         wss.handleUpgrade(req, socket, head, (ws) => {
           const link = wsLink(ws);
           const name = url.searchParams.get('universo') ?? '';
-          if (!NAME_RE.test(name)) {
+          if (!UNIVERSE_NAME_RE.test(name)) {
             link.send({ t: 'rifiuto', motivo: 'universo sconosciuto' });
             return ws.close();
           }

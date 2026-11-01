@@ -10,9 +10,10 @@ import type { Connect, Plugin } from 'vite';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import path from 'node:path';
 import { promises as fs } from 'node:fs';
-import { execFile } from 'node:child_process';
 import type { AccountSettings } from './account';
 import { bearer, gate, isJson, refuse } from './access';
+import { runGit } from './git';
+import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
 import { accountWanderer } from '../src/session/account';
 import type { Kernel } from '../src/kernel/kernel';
 import type { FileMap } from '../src/kernel/types';
@@ -31,7 +32,6 @@ import {
   type WandererState,
 } from '../src/kernel/wanderers';
 
-const NAME_RE = /^[a-z0-9][a-z0-9-]{0,40}$/;
 const MAX_BODY = 16 * 1024;
 /** The program of every wanderer's look. */
 export const WANDERER_MODEL = 'viandante';
@@ -160,12 +160,7 @@ function readBody(req: IncomingMessage): Promise<string> {
 }
 
 function git(cwd: string, args: string[]): Promise<string> {
-  const full = ['-c', 'user.name=Kernel', '-c', 'user.email=kernel@rune.local', '-c', 'core.autocrlf=false', ...args];
-  return new Promise((resolve, reject) => {
-    execFile('git', full, { cwd, maxBuffer: 4 * 1024 * 1024, windowsHide: true }, (err, stdout, stderr) =>
-      err ? reject(new Error(String(stderr || err.message).trim())) : resolve(String(stdout)),
-    );
-  });
+  return runGit(cwd, args, { author: ['Kernel', 'kernel@rune.local'], maxBuffer: 4 * 1024 * 1024 });
 }
 
 export interface WandererRouteOptions {
@@ -213,7 +208,7 @@ export function wandererHandler(opts: WandererRouteOptions): Connect.NextHandleF
           }
         } else if (req.method !== 'GET') return send(res, 405, { ok: false, motivo: 'metodo non ammesso' });
         const universo = String(body.universo ?? params.get('universo') ?? '');
-        if (!NAME_RE.test(universo)) return send(res, 400, { ok: false, motivo: 'universo non valido' });
+        if (!UNIVERSE_NAME_RE.test(universo)) return send(res, 400, { ok: false, motivo: 'universo non valido' });
         const who = await whoAsks(opts.accounts, bearer(req), body.viandante ?? params.get('viandante'));
         if ('error' in who) return send(res, who.status, { ok: false, motivo: who.error });
         const root = path.join(opts.universesDir, universo);

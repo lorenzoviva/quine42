@@ -11,10 +11,10 @@ import type { FileMap } from '../src/kernel/types';
 import { costWithFee, PAYMENTS_FILE, readPayments } from '../src/kernel/credits';
 import { USAGE_FILE } from '../src/kernel/ai/usage';
 import { playerFile, readWandererState } from '../src/kernel/wanderers';
+import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
 import { bearer, gate, refuse } from './access';
 import { send, whoAsks, type WandererRouteOptions, type WandererView } from './wanderer';
 
-const NAME_RE = /^[a-z0-9][a-z0-9-]{0,40}$/;
 /** The days of spending a page shows. */
 export const WALLET_DAYS = 30;
 
@@ -132,7 +132,7 @@ export function walletHandler(opts: WandererRouteOptions): Connect.NextHandleFun
         if (req.method !== 'GET') return send(res, 405, { ok: false, motivo: 'metodo non ammesso' });
         const params = new URLSearchParams(query);
         const universo = params.get('universo') ?? '';
-        if (!NAME_RE.test(universo)) return send(res, 400, { ok: false, motivo: 'universo non valido' });
+        if (!UNIVERSE_NAME_RE.test(universo)) return send(res, 400, { ok: false, motivo: 'universo non valido' });
         const who = await whoAsks(opts.accounts, bearer(req), params.get('viandante'));
         if ('error' in who) return send(res, who.status, { ok: false, motivo: who.error });
         const active = await opts.getActiveKernel?.(universo);

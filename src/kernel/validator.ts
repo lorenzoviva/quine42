@@ -18,6 +18,7 @@ import { boxOf, classOf, CLASSES, sizeOf, TAGLIE } from '../mj/classes';
 import { Mj3Error } from '../mj/engine';
 import { compileMjx } from '../mj/model';
 import { runMjx } from '../mj/run';
+import { reservedName } from './paths';
 
 const KINDS: ModuleKind[] = ['system', 'entity', 'item', 'player', 'generator', 'data'];
 const LAYERS = ['ground', 'floor', 'wall', 'door', 'liquid', 'vegetation', 'rock'];
@@ -121,7 +122,7 @@ export class Validator {
     const errors: string[] = [];
     const err = (s: string) => errors.push(`${path}: ${s}`);
     if (typeof m !== 'object' || m === null) return { errors: [`${path}: deve essere un oggetto`] };
-    if (typeof m.id !== 'string' || !ID_RE.test(m.id)) err(`id non valido "${m.id}" (es. "npc.villager")`);
+    if (typeof m.id !== 'string' || !ID_RE.test(m.id) || reservedName(m.id)) err(`id non valido "${m.id}" (es. "npc.villager")`);
     if (typeof m.name !== 'string' || !m.name) err('name mancante');
     if (!KINDS.includes(m.kind)) err(`kind deve essere uno tra ${KINDS.join(', ')}`);
     if (m.logic !== undefined && typeof m.logic !== 'string') err('logic deve essere un percorso relativo');

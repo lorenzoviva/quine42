@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { Kernel } from '../src/kernel/kernel';
@@ -185,33 +185,34 @@ describe('the branch on disk (T42b)', () => {
     const git = (...args: string[]) => execFileSync('git', ['-c', 'user.name=Prova', '-c', 'user.email=prova@rune.local', '-c', 'core.autocrlf=false', ...args], { cwd: root, encoding: 'utf8' });
     try {
       git('init', '-q');
-      writeFileSync(path.join(root, 'a.txt'), 'uno\n');
-      writeFileSync(path.join(root, 'b.txt'), 'due\n');
+      mkdirSync(path.join(root, 'world'));
+      writeFileSync(path.join(root, 'world', 'a.txt'), 'uno\n');
+      writeFileSync(path.join(root, 'world', 'b.txt'), 'due\n');
       git('add', '-A');
       git('commit', '-q', '-m', 'genesi');
       const main = git('rev-parse', 'HEAD').trim();
       expect(await readBranch(root, 'master')).toBeNull();
-      await writeBranch(root, 'master', { 'a.txt': 'uno del master\n', 'b.txt': null, 'c/d.txt': 'nuovo\n' }, 'ramo del master', 'player');
+      await writeBranch(root, 'master', { 'world/a.txt': 'uno del master\n', 'world/b.txt': null, 'world/c/d.txt': 'nuovo\n' }, 'ramo del master', 'player');
       // The main line and its working tree are as they were.
       expect(git('rev-parse', 'HEAD').trim()).toBe(main);
       expect(git('status', '--porcelain').trim()).toBe('');
-      expect(await readBranch(root, 'master')).toEqual({ 'a.txt': 'uno del master\n', 'b.txt': null, 'c/d.txt': 'nuovo\n' });
+      expect(await readBranch(root, 'master')).toEqual({ 'world/a.txt': 'uno del master\n', 'world/b.txt': null, 'world/c/d.txt': 'nuovo\n' });
       // The main line goes on: what the branch changes is still only its own files.
-      writeFileSync(path.join(root, 'e.txt'), 'del concilio\n');
+      writeFileSync(path.join(root, 'world', 'e.txt'), 'del concilio\n');
       git('add', '-A');
       git('commit', '-q', '-m', 'concilio');
-      await writeBranch(root, 'master', { 'a.txt': 'uno del master, ancora\n' }, 'ramo del master', 'player');
-      expect(await readBranch(root, 'master')).toEqual({ 'a.txt': 'uno del master, ancora\n' });
+      await writeBranch(root, 'master', { 'world/a.txt': 'uno del master, ancora\n' }, 'ramo del master', 'player');
+      expect(await readBranch(root, 'master')).toEqual({ 'world/a.txt': 'uno del master, ancora\n' });
       // Published: the main line has its files, the branch is merged and gone.
-      writeFileSync(path.join(root, 'a.txt'), 'uno del master, ancora\n');
+      writeFileSync(path.join(root, 'world', 'a.txt'), 'uno del master, ancora\n');
       git('add', '-A');
-      git('commit', '-q', '-m', 'pubblicazione del master: a.txt');
+      git('commit', '-q', '-m', 'pubblicazione del master: world/a.txt');
       await mergeBranch(root, 'master', 'il ramo master nel mondo');
       expect(git('log', '-1', '--format=%P').trim().split(' ').length).toBe(2);
-      expect(git('show', 'HEAD:a.txt')).toBe('uno del master, ancora\n');
-      expect(git('show', 'HEAD:e.txt')).toBe('del concilio\n');
+      expect(git('show', 'HEAD:world/a.txt')).toBe('uno del master, ancora\n');
+      expect(git('show', 'HEAD:world/e.txt')).toBe('del concilio\n');
       expect(await readBranch(root, 'master')).toBeNull();
-      await expect(writeBranch(root, '../fuori', { 'a.txt': 'x' }, 'm', 'player')).rejects.toThrow();
+      await expect(writeBranch(root, '../fuori', { 'world/a.txt': 'x' }, 'm', 'player')).rejects.toThrow();
       await expect(writeBranch(root, 'master', { '../fuori.txt': 'x' }, 'm', 'player')).rejects.toThrow();
     } finally {
       rmSync(root, { recursive: true, force: true });

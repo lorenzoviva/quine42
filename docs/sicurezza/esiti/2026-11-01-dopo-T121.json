@@ -1,0 +1,74 @@
+{
+ "data": "2026-11-01",
+ "commit": "c65c66f",
+ "vite": "7.3.7",
+ "node": "v22.19.0",
+ "piattaforma": "win32",
+ "solo": [
+  "V-003"
+ ],
+ "riepilogo": {
+  "ok": 8,
+  "falle": 0,
+  "errori": 0,
+  "saltate": 0
+ },
+ "prove": [
+  {
+   "id": "V-003.a",
+   "voce": "V-003",
+   "proprieta": "il nome esatto della cartella di git è rifiutato",
+   "esito": "ok",
+   "dettaglio": "risposta 400"
+  },
+  {
+   "id": "V-003.b",
+   "voce": "V-003",
+   "proprieta": "con altre maiuscole non si scrive nella cartella di git",
+   "esito": "ok",
+   "dettaglio": "risposta 400"
+  },
+  {
+   "id": "V-003.c",
+   "voce": "V-003",
+   "proprieta": "con altre maiuscole non si scrive nella cartella di git",
+   "esito": "ok",
+   "dettaglio": "risposta 400"
+  },
+  {
+   "id": "V-003.d",
+   "voce": "V-003",
+   "proprieta": "con un punto finale non si scrive nella cartella di git",
+   "esito": "ok",
+   "dettaglio": "risposta 400"
+  },
+  {
+   "id": "V-003.e",
+   "voce": "V-003",
+   "proprieta": "con uno spazio finale non si scrive nella cartella di git",
+   "esito": "ok",
+   "dettaglio": "risposta 400"
+  },
+  {
+   "id": "V-003.f",
+   "voce": "V-003",
+   "proprieta": "con il nome corto di NTFS non si scrive nella cartella di git",
+   "esito": "ok",
+   "dettaglio": "risposta 400"
+  },
+  {
+   "id": "V-003.g",
+   "voce": "V-003",
+   "proprieta": "con un flusso NTFS non si scrive nella cartella di git",
+   "esito": "ok",
+   "dettaglio": "risposta 400"
+  },
+  {
+   "id": "V-003.h",
+   "voce": "V-003",
+   "proprieta": "nessun percorso esce dalla cartella dell’universo",
+   "esito": "ok",
+   "dettaglio": "0 file fuori"
+  }
+ ]
+}
