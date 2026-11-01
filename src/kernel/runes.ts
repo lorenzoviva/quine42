@@ -77,7 +77,7 @@ export function cellIndex(runes: Array<{ id: Id; rune: RuneComp }>): Map<string,
   return m;
 }
 
-const FUTHARK = [...'ᚠᚢᚦᚩᚱᚷᚹᚺᚾᛁᛃᛇᛈᛏᛖᛗᛜᛞᚳᚸᛣᛤᛥᛯᛰᛱᛲᛳᛴᛵ'];
+export const FUTHARK = [...'ᚠᚢᚦᚩᚱᚷᚹᚺᚾᛁᛃᛇᛈᛏᛖᛗᛜᛞᚳᚸᛣᛤᛥᛯᛰᛱᛲᛳᛴᛵ'];
 
 /**
  * How a rune looks: magic runes have their own glyph; short tokens (operators, digits, `x`) are their

@@ -63,6 +63,7 @@ export const CENSUS: Array<{ compito: string; agente: string; modo: 'diretta' | 
   { compito: 'action.judge', agente: 'narratore', modo: 'non regolabile', nota: '«Altro…» del viandante' },
   { compito: 'craft.free', agente: 'narratore', modo: 'non regolabile', nota: 'fabbricazione libera' },
   { compito: 'spell.name', agente: 'narratore', modo: 'non regolabile', nota: 'un incantesimo nuovo, una volta' },
+  { compito: 'rune.invent', agente: 'narratore', modo: 'non regolabile', nota: 'una runa nuova: dalle sessioni o da una formula, al più 16 rune' },
   { compito: 'council.session', agente: 'arbitro', modo: 'diretta', coefficiente: 'sessioni' },
   { compito: 'player.death', agente: 'narratore', modo: 'non regolabile', nota: 'a ogni morte' },
   { compito: 'npc.reply', agente: 'narratore', modo: 'non regolabile', nota: 'quando il viandante parla (meno persone, meno occasioni)' },

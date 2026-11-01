@@ -1051,13 +1051,22 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 - **Domanda per l'autore** (per T57c): va bene un effetto `rilievo` nel kernel come strumento generico (gli incantesimi
   che lo usano restano del Concilio)?
 
-### T57b · Rune nuove dal Concilio — `da fare` (dipende da T57)
+### T57b · Rune nuove dal Concilio — `fatto` (dipende da T57)
 - Pipeline: claude · stima 5% · approvato · priorità 60
 - Contesto: il pezzo T57b del blocco T57 (T57a fatto e integrato con T99: canone, `SPELL_GUIDE`, prompt di Narratore, Fisico, Arbitro).
 - Fare: una via per inventare una runa magica (nome, glifo, colore, cosa significa nel canone) in una sessione del Concilio o quando una
   combinazione la chiede: modulo `magic.runes` riscritto, validatore (glifo unico, nome non simile alle altre, niente meta-gioco), canone
   aggiornato; la runa compare nel mondo come le altre (rare). Schema Gemini, risposta in `MockModels`, voce nel registro.
 - Fatto quando: test verdi (una runa nuova entra, è valida, si può raccogliere e combinare), typecheck verde, AGENTS.md (Magia) aggiornato, ADR.
+- **Fatto** (commit su `task/T57b`, ADR-0097): compito `rune.invent` del Narratore (schema, mock, `CENSUS`, voce nel registro), chiesto dalla
+  sessione del Concilio (intervento `runa`, paga `comune`) o da una formula (`runa_nuova` di `nameSpell`, spiegato in `SPELL_GUIDE`);
+  validatore puro `src/kernel/magic.ts` (`validateNewRune`: token parola di 3-12 lettere, non già usato, non riservato né simile; nome non
+  simile; niente quarta parete; al più 16 rune; glifo e colore riparati); `kernel.inventRune` scrive `magic.runes` (rune e bottino `magia`),
+  il canone («Le rune trovate dopo», `canonWithRune`) e committa con la carta `runa:<token>`. Test in `tests/magic.test.ts`.
+  Diverso dal previsto: anche le carte hanno un tipo nuovo, `runa`; due tentativi al Narratore prima di rinunciare.
+  Test: typecheck verde; `magic` (5) e `coefficients` verdi; la suite intera sotto il carico della pipeline ha solo timeout (`beforeEach`
+  oltre 10 s, test oltre 20-60 s); rilanciati con tempi lunghi passano tutti tranne 5 (`referente` T42e/T42f, `wanderers` T34, `watch` T42c)
+  con un timeout fisso nel test, che falliscono uguali con `src/` della base; `abbonamenti` T68b usa la CLI reale. Commit e69bb5a.
 
 ### T57c · Il terreno che sale e scende — `fatto` (`c689328`, ADR-0096)
 - Pipeline: claude · stima 3% · approvato · priorità 61
@@ -2369,11 +2378,12 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Esito: fuso `task/T103`; in `site/index.html` tenuta intera la landing di T101, con «Sessioni» nella barra e nel footer e la carta «Reami condivisi» che porta a `sessioni.html` («SCEGLI UN REAME»). Corretti: i link di `sessioni.html` a pagine che non esistono ancora (`carte.html`, `profilo.html`, `pagamenti.html`) ora vanno alle sezioni della landing (`#carte`, `#reami`); il pulsante «ENTRA NELLA LOBBY» non va più a capo e il piede della carta si avvolge. Verificato nel browser su `npx vite` (porta 5287): reami vuoti → stato «nessun universo»; wizard: apertura, seme casuale, chiusura con Esc, × e sfondo, nome vuoto e slug non valido rifiutati con messaggio; creato `prova-t114` (commit nel repository git, poi rimosso), carta «IN PAUSA» con master, modelli, coefficienti, spesa oraria ~0,77 $ e tetto 1,00 $; filtri tutti/live/miei (1/0/1); il link porta a `../index.html?universo=prova-t114` e apre il gioco; a 375 px (iframe) nessuno scorrimento orizzontale, menu a tendina, wizard e carta dentro lo schermo; nessun errore in console. Il badge live con viandanti collegati non è provato (nessuna sessione multigiocatore aperta). Typecheck verde; la suite intera sotto carico ha dato 618 verdi e 44 rossi, tutti timeout tranne uno di `subscription.test.ts`, verde da solo; rilanciati da soli sono verdi tranne alcuni di `referente`, `wanderers`, `watch`, che vanno in timeout anche senza le modifiche del merge (ogni test di `watch` dura ~20 s su questa macchina, al limite). Anche `kernel.test.ts` da solo va in timeout nell'hook `beforeEach` (10 s), e importa solo `src/kernel/`, che il merge non tocca.
 
 
-### T115 · Integrare T57b (rune nuove dal Concilio) — `da fare`
+### T115 · Integrare T57b (rune nuove dal Concilio) — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 20
 - Contesto: T57b è fatto in `task/T57b` (rune nuove dal Concilio, `src/kernel/magic.ts`, compito `rune.invent`), ma `integra T57b` va in conflitto in `AGENTS.md`, `docs/adr/README.md` e `src/kernel/agents/effects.ts` con T57c (già nel base, ADR-0096 effetto rilievo). Anche T57b ha scritto un ADR-0096. Nasce da T57b: `dossier T57b`, `traccia T57b`.
 - Cosa fare: nel worktree `git merge task/T57b`; l'ADR di T57b diventa **ADR-0097** (file rinominato, indice, riferimenti in `AGENTS.md`, backlog e codice); nelle sezioni in conflitto tenere entrambe le aggiunte (in `effects.ts` sia la guida dell'effetto `rilievo` di T57c sia le rune nuove in `SPELL_GUIDE` di T57b); typecheck, `tests/magic.test.ts`, `tests/effects*` e la suite intera nel turno test (`pipeline.mjs turno test -- npm test`). I 5 timeout noti (referente T42e/T42f, wanderers T34, watch T42c) falliscono anche sul base: non sono difetti.
 - Quando è fatto: merge risolto con ADR-0097, typecheck e test verdi (salvo i timeout noti), commit su `task/T115`.
+- Esito: merge di `task/T57b` risolto (commit di merge su `task/T115`): l'ADR delle rune nuove è ADR-0097 (file, indice, `AGENTS.md`, `kernel.ts`, `magic.ts`, blocco di T57b); ADR-0096 resta a T57c; in `SPELL_GUIDE` gli esempi e l'elenco con `rilievo` di T57c più la riga su `runa_nuova` di T57b; in `AGENTS.md` (Magia) entrambe le aggiunte. Typecheck verde; `magic`, `coefficients`, `rilievo` verdi. Suite intera nel turno test: 48 falliti su 667, solo timeout sotto il carico; i 10 file rilanciati con tempi lunghi danno 100 verdi su 105, restano i 5 noti (referente T42e/T42f, wanderers T34, watch T42c) con timeout fisso nel test; non rilanciato `abbonamenti` T68b, che usa la CLI reale.
 
 ### T116 · Integrare T102 (la pagina profilo del sito) — `da fare`
 - Pipeline: claude · stima 3% · approvato · priorità 21

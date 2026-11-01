@@ -83,8 +83,8 @@ describe('the coefficients of generation (T45b)', () => {
       if (c.modo === 'non regolabile') expect(c.coefficiente).toBeUndefined();
       else expect(COEFFICIENT_KEYS).toContain(c.coefficiente);
     }
-    expect(CENSUS.length).toBe(38);
-    expect(new Set(CENSUS.map((c) => c.compito)).size).toBe(38);
+    expect(CENSUS.length).toBe(39);
+    expect(new Set(CENSUS.map((c) => c.compito)).size).toBe(39);
   });
 
   it('an hour of «Low Detail» costs a fraction of the full one', () => {
