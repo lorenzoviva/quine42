@@ -2594,7 +2594,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T140 · Integrare T123 — `da fare` (dipende da T139)
 - Pipeline: claude · stima 1% · approvato · priorità 1
-- Contesto: `integra T123` va in conflitto in `docs/sicurezza/registro.md`: T123 chiude V-002, T137 ha aggiunto a ogni voce la copertura e la misura del kit. Viene dopo T139 perché T105 e T123 toccano entrambi `vite.config.ts`: si risolve tutto insieme. Nasce da T123: `dossier T123`.
+- Contesto: `integra T123` va in conflitto in `docs/sicurezza/registro.md`: T123 chiude V-002, T137 ha aggiunto a ogni voce la copertura e la misura del kit. Parte da un base che ha già T139 e T105, che con T123 toccano `vite.config.ts`: si risolve tutto insieme. Nasce da T123: `dossier T123`.
 - Cosa fare: nel worktree di T140, partito dal base con T139 e T105 dentro, `git merge task/T123`; nel registro V-002 resta `chiusa` e tiene anche ciò che T137 ha scritto, con la misura del 01/11 detta come precedente a T123. Se le prove V-002 di `tools/sicurezza/catalogo.mjs` o i test di T137 si aspettano ancora la falla, vanno allineati a T123.
 - Test: `npm run typecheck`, `npm run sicurezza:prove -- --solo V-002` (nell'esito le righe `ok` e `FALLA`: una FALLA vuol dire che V-002 non è chiusa e va detto, non coperto) e la suite intera con il suo turno.
 - Quando è fatto: merge risolto, commit su `task/T140`. Poi l'orchestratore fa `integra T140` e `integra T123`.

@@ -42,15 +42,15 @@ Aggiornato il 01/11/2026, fine dell'epoca 189 su **claude** (crediti: vedi `stat
   1. **T120 e seguenti** (sicurezza, p3-17), secondo le dipendenze.
   2. **T118 e T138 integrati** (688/688 senza timeout nel worktree di T138, senza i test di T136, che erano verdi da soli). T137 è partito prima di T118: se nel suo worktree la suite va in timeout, non è un difetto suo; la prima suite intera sul base con tutto dentro è da leggere lì.
   3. **Risposte dell'autore**: T45f (`docs/pipeline/domande/T45f.md`); T88 da approvare.
-- **T105 finito e verificato nel browser, non ancora in `3d`**: `integra T105` va in conflitto in `vite.config.ts` → **T139** (p1, prima di T124, approvato). Finito T139: `integra T139`, `integra T105`. La sua suite è la prima con T118, T136 e T105 insieme: leggerla (sostituisce il controllo del punto «Prossimi passi»). T105 non ha scritto la riga «sicurezza:»; `/api/viandante` e `/api/crediti` aggiunte a T120, la preview a T124 e V-004.
+- **T139 e T105 integrati** (01/11; suite 745 passati, 1 todo, 0 rossi con T118, T136 e T105 insieme). `/api/crediti` nominata in V-006, coperta da T120. T140 non partiva perché la sua riga «dopo T139 perché… T123» faceva di T123 una dipendenza (il parser delle dipendenze legge «dopo» anche nel contesto): riscritta. Finito T140: `integra T140`, `integra T123`.
 - **Intenzioni**: T118 e poi la sicurezza prima del resto; se l'autore vuole gli slot di Claude fissi a 2, bloccare `slotAggiornato` in `.pipeline/budget.json` (non l'ha ancora chiesto).
 - **Da sapere**: la pipeline, a ogni fine task, può riprovare da sola `integra`: i conflitti su T102 e T116 sono attesi finché T119 non entra. Sotto `sogliaUnSolo` (10 %) nessun task nuovo parte e non c'è un lancio forzato.
 
 ## Task attivi e in corso
 
-- **In corso** (all'ultimo `stato`): **T139** su Claude; il secondo slot prende T122 al controllo successivo.
-- **Pronti su Claude**: **T122 T131** (p2) → **T126 T128 T132** (sicurezza) → **T106** (p72) → **T89a** (p75); bloccati **T140** (da T139), **T120** e **T124** (da T139), T121 T125 T127 T129 T130 T133 T134 (dalle correzioni), **T89b-e** (da T89a).
-- **Da integrare**: **T105** (tramite T139), **T123** (tramite T140, che dipende da T139; poi `integra T140`, `integra T123`). T136, T137, T138 e T118 integrati il 01/11.
+- **In corso** (all'ultimo `stato`): **T122 T131** su Claude.
+- **Pronti su Claude**: **T140** (p1) → **T120 T124 T126 T128 T132** (sicurezza; T120 può girare ma non si integra prima degli esiti dell'autore) → **T106** (p72) → **T89a** (p75); bloccati T121 T125 T127 T129 T130 T133 T134 (dalle correzioni), **T89b-e** (da T89a).
+- **Da integrare**: **T123** (tramite T140; poi `integra T140`, `integra T123`). T136, T137, T138, T118, T139 e T105 integrati il 01/11.
 - **Integrati di recente**: **T104** (22 timeout su 675 nella suite, estraneità provata solo in 3 file: se restano dopo T118, ricontrollare `forms.ts` e `cards.ts`), **T115**, **T57b**, **T114**, **T103**, **T57c**, **T113**, **T112**, **T111**, **T101**, **T110**, **T109**.
 - **Crediti** (01/11, circa 18:45 UTC): Claude settimana 95 %, 5h 87 % (reset 05/11 16:00; 5h alle 22:29); Gemini settimana 8 %, sotto soglia: nessun task nuovo (reset 05/11 17:37); Argon fermo fino al 04/11.
 
