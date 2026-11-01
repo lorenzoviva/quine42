@@ -27,7 +27,10 @@ async function bootMany(ai: Record<string, unknown> = {}): Promise<{ k: Kernel; 
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, ai: { ...cfg.ai, ...ai }, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
   const models = new Recording();
-  return { k: await Kernel.boot({ files, store: memoryStore(), models }), models };
+  const k = await Kernel.boot({ files, store: memoryStore(), models });
+  // Who plans pays (ADR-0081): without credits the requests would go to the kernel's own local models.
+  k.giveCredits('io', 100);
+  return { k, models };
 }
 
 async function run(server: SessionServer, rounds: number) {
@@ -49,6 +52,7 @@ async function settle(server: SessionServer, rounds = 80) {
 function join(server: SessionServer, id: string): SessionClient {
   const { server: s, client: c } = fakeLink();
   server.connect(s);
+  server.kernel.giveCredits(id, 100);
   return new SessionClient(c, { id });
 }
 
