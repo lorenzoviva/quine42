@@ -224,7 +224,7 @@
  "corona-lampione": {
   "classe": "mobile",
   "nome": "Lampione (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "autore": "l'autore, a mano (T113)",
   "vpt": 8
  },
  "corona-panchina": {
@@ -242,7 +242,7 @@
  "corona-drone": {
   "classe": "oggetto",
   "nome": "Drone (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "autore": "l'autore, a mano; ridotto in scala 1:2 (T113)",
   "vpt": 8
  },
  "corona-treno": {

@@ -2289,7 +2289,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   console. Correggi da te i difetti piccoli (CSS, link); scrivi gli altri qui.
 - Quando è fatto: verifica nel browser con screenshot di ogni pagina (desktop e mobile) descritti nell'esito; difetti corretti o elencati; typecheck verde.
 
-### T113 · Corona: il lampione intero e il drone in scala 1:2 dai modelli dell'autore — `da fare`
+### T113 · Corona: il lampione intero e il drone in scala 1:2 dai modelli dell'autore — `fatto`
 - Pipeline: claude · stima 4% · approvato · priorità 20 · browser
 - Contesto: richiesta dell'autore del 01/11. Ha ridisegnato a mano due modelli della corona in `lab/mjx/models/handmade/`:
   `lampione.xml` (molto alto; già copiato in `universe/models/corona-lampione.xml` e girato di π in `corona.ts`, commit `8ca9053`) e
@@ -2303,3 +2303,8 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   sostituiscilo a `universe/models/corona-drone.xml`, controllando che i droni in `corona3d.ts` volino come prima.
 - Quando è fatto: verifica nel browser (`?skip&offline`, viale della corona con `?dev&teleport=46,0`): lampioni interi e droni visibili, screenshot
   descritti nell'esito; nessun errore in console; `npm test` dei modelli/forme e typecheck verdi.
+- Fatto (commit su `task/T113`): il taglio non era la taglia. Il commento in testa al lampione nomina `<markov>`, e `sizeFor` in `forms.ts`
+  prendeva quel tag per la radice: non vedeva `size="10 14 74"` e imponeva la scatola della classe `mobile` (20³). Ora `rootTag` (forms.ts,
+  usato anche dal tornio) salta i commenti: il lampione gira 10 × 14 × 74, gli altri modelli non cambiano (era l'unico colpito). Il drone:
+  `drone-xl.xml` ridotto a 10 × 10 × 8 dimezzando ogni box, con gli anelli delle eliche riscritti attorno alle pale (dimezzati coprivano le pale);
+  test in `tests/forms.test.ts`. Nel browser: lampioni interi lungo il viale, droni in volo, nessun errore del gioco in console.

@@ -8,7 +8,7 @@ import { memoryStore } from '../src/kernel/repo';
 import { MockModels } from '../src/kernel/ai/mock';
 import { modelErrors } from '../src/kernel/validator';
 import { classOf } from '../src/mj/classes';
-import { InlineRunner, type FormComp, type FormRequest, type FormResult } from '../src/kernel/forms';
+import { InlineRunner, rootTag, type FormComp, type FormRequest, type FormResult } from '../src/kernel/forms';
 import { formCacheKey, restoreFormResult, MemoryFormStore, WorkerRunner } from '../src/render/forms';
 
 const boot = () => Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
@@ -264,4 +264,21 @@ describe('precalculated variants and form cache (T64)', () => {
     const r2 = await runner.run(req);
     expect(r1).toBe(r2);
   });
+});
+
+// T113: a program says its own box on its first tag; a comment before it may name a tag (`<markov>`) and is not it.
+describe('the box a program says', () => {
+  it('is read on the first tag, comments skipped', () => {
+    expect(rootTag('<!-- durante il <markov> di caduta -->\n<sequence values="BA" size="10 14 74">')).toContain('size="10 14 74"');
+    expect(rootTag('<markov values="BA"><one in="B" out="A"/></markov>')).toBe('<markov values="BA">');
+  });
+
+  it('keeps the whole lampione of the corona and the drone at half scale', async () => {
+    const k = await boot();
+    const lamp = (await k.forms.wait('corona-lampione', 1))!;
+    expect([lamp.result!.grid.X, lamp.result!.grid.Y, lamp.result!.grid.Z]).toEqual([10, 14, 74]);
+    const drone = (await k.forms.wait('corona-drone', 1))!;
+    expect([drone.result!.grid.X, drone.result!.grid.Y, drone.result!.grid.Z]).toEqual([10, 10, 8]);
+    expect(drone.result!.animations).toEqual(['elica']);
+  }, 60_000);
 });

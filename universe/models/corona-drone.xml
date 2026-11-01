@@ -1,23 +1,9 @@
 <!--
 Drone logistico volante porta-dati (corona): corriere aereo autonomo per il trasporto di file e archivi tra gli edifici della corona.
-Scritto da Gemini CLI (Gemini 3.8 Flash, abbonamento), task T50a.
-Scatola: 1 × 1 × 1 casella, 8 × 8 × 8 voxel, 8 voxel per casella (vpt: 8).
-Ruolo: prop.
-Design e concetto scultoreo:
-- Robottino quadricottero futuristico compatto a capsula aerodinamica in cyber-ceramica bianca (W, w) e titanio scuro (M, m);
-- Musetto con visore ottico frontale a doppia lente sensore azzurro ciano vispo ed espressivo (V, I, glow="True");
-- Carrelli di atterraggio a slitta ricurva (P, M, S) che poggiano su z=0 con pinze di presa laterali cromate (s);
-- Pacchetto dati cubico centrale (z=0..1, x=3..4, y=3..4) clippato tra i carrelli: cuore energetico ambra/oro (1, 2, 3, 4, glow="True")
-  con circuiti quantistici e rune binarie stocastiche generate con regole MarkovJunior;
-- Quattro braccetti diagonali a sbalzo in carbonio e cromo satinato (D, S) collegati a 4 gondole propulsive VTOL;
-- Quattro rotori a disco al plasma ciano (a, b, c, d, glow="True") con rotazione accoppiata a coppie diagonali
-  aerodinamiche (coppia FL-RR oraria, coppia FR-RL antioraria);
-- Cuspide sommitale con mast d'antenna cromata, pinna stabilizzatrice e beacon telemetrico di navigazione ciano (e, glow="True").
-Animazione "elica" (4 fotogrammi):
-- I 4 rotori scambiano ciclicamente le celle di plasma ciano (a -> b -> c -> d) simulando una rotazione continua a 360 gradi;
-- Il pacchetto dati pulsa ritmicamente modulando l'energia fotonica dei dati in transito (1 -> 2 -> 3 -> 4).
+Disegnato a mano dall'autore in scala doppia (lab/mjx/models/handmade/drone-xl.xml, 20 × 20 × 16) e ridotto in scala 1:2 (T113):
+scatola 10 × 10 × 8, ogni box con i suoi voxel dimezzati, gli anelli delle eliche riscritti attorno alle pale.
 -->
-<sequence values="BWwMmDSPVsIabcd1234GexyXYZ" size="8 8 8" symmetry="()" name="Drone">
+<sequence values="BWwMmDSPVsIabcd1234GexyXYZfg" size="10 10 8" symmetry="()" name="Drone">
   <!-- Materiali strutturali: ceramica bianca aerodinamica e titanio cybernetico scuro -->
   <color symbol="W" value="fff1e8" name="cyber-ceramica bianca scocca"/>
   <color symbol="w" value="d8d0c8" name="sfumatura e biselli scocca chiara"/>
@@ -32,7 +18,7 @@ Animazione "elica" (4 fotogrammi):
 
   <!-- Vano ottico, visore e lenti sensore espressive -->
   <color symbol="V" value="1c2a3a" name="vano ottico vetro scuro visore"/>
-  <color symbol="I" value="00ffff" glow="True" name="lente sensore occhio ciano"/>
+  <color symbol="I" value="006666" glow="True" name="lente sensore occhio ciano"/>
 
   <!-- Quattro fasi plasma ciano per rotazione rotori (glow="True") -->
   <color symbol="a" value="ffffff" glow="True" name="lama plasma bianco-ciano laser"/>
@@ -48,7 +34,9 @@ Animazione "elica" (4 fotogrammi):
   <color symbol="G" value="d8a878" name="staffa ambra isolante pacchetto"/>
 
   <!-- Telemetria e beacon di navigazione sommitale -->
-  <color symbol="e" value="05d9e8" glow="True" name="beacon navigazione ciano"/>
+  <color symbol="e" value="afe0e4" name="beacon navigazione spento"/>
+  <color symbol="f" value="05e684" glow="True" name="beacon navigazione verde"/>
+  <color symbol="g" value="ec4670" glow="True" name="beacon navigazione rosso"/>
 
   <!-- Buffer di animazione e marcatori stocastici per semi diversi -->
   <color symbol="x" hidden="True" name="buffer animazione rotori"/>
@@ -60,153 +48,174 @@ Animazione "elica" (4 fotogrammi):
   <!-- ======================================================== -->
   <!-- 1. CARRELLI DI ATTERRAGGIO A SLITTA E MONTANTI (z = 0..1) -->
   <!-- ======================================================== -->
-  <!-- Slitta sinistra al suolo (x=1, y=2..5 a z=0)              -->
-  <box at="1 3.5 0" size="1 4 1" color="P"/>
-  <box at="1 1 1" size="1 1 1" color="M"/>
-  <box at="1 6 1" size="1 1 1" color="M"/>
-  <box at="1 2 1" size="1 1 1" color="S"/>
-  <box at="1 5 1" size="1 1 1" color="S"/>
+  <!-- Slitta sinistra al suolo -->
+  <box at="2 4.5 0" size="1 4 1" color="P"/>
+  <box at="2 2 1" size="1 1 1" color="M"/>
+  <box at="2 7 1" size="1 1 1" color="M"/>
+  <box at="2 3 1" size="1 1 1" color="S"/>
+  <box at="2 6 1" size="1 1 1" color="S"/>
+  <box at="2 4.5 1" size="1 2 1" color="S"/>
+  <box at="3 4.5 3" size="1 2 1" color="S"/>
+  <box at="6 4.5 3" size="1 2 1" color="S"/>
+  <box at="7 4.5 1" size="1 2 1" color="S"/>
 
-  <!-- Slitta destra al suolo (x=6, y=2..5 a z=0)                -->
-  <box at="6 3.5 0" size="1 4 1" color="P"/>
-  <box at="6 1 1" size="1 1 1" color="M"/>
-  <box at="6 6 1" size="1 1 1" color="M"/>
-  <box at="6 2 1" size="1 1 1" color="S"/>
-  <box at="6 5 1" size="1 1 1" color="S"/>
+  <!-- Slitta destra al suolo -->
+  <box at="7 4.5 0" size="1 4 1" color="P"/>
+  <box at="7 2 1" size="1 1 1" color="M"/>
+  <box at="7 7 1" size="1 1 1" color="M"/>
+  <box at="7 3 1" size="1 1 1" color="S"/>
+  <box at="7 6 1" size="1 1 1" color="S"/>
 
   <!-- ======================================================== -->
   <!-- 2. PINZE DI PRESA CROMATE DEL CARGO (z = 1..2)           -->
   <!-- ======================================================== -->
-  <!-- Pinze servo laterali che bloccano il pacchetto dati       -->
-  <box at="2 3.5 1" size="1 2 1" color="s"/>
-  <box at="2 3.5 2" size="1 2 1" color="s"/>
-  <box at="5 3.5 1" size="1 2 1" color="s"/>
-  <box at="5 3.5 2" size="1 2 1" color="s"/>
+  <box at="3 4.5 1" size="1 2 1" color="s"/>
+  <box at="3 4.5 2" size="1 2 1" color="s"/>
+  <box at="6 4.5 1" size="1 2 1" color="s"/>
+  <box at="6 4.5 2" size="1 2 1" color="s"/>
 
   <!-- ======================================================== -->
-  <!-- 3. PACCHETTO DATI LUMINOSO CENTRALE (z = 0..1, x=3..4)   -->
+  <!-- 3. PACCHETTO DATI LUMINOSO CENTRALE (z = 0..1, x=4..5)   -->
   <!-- ======================================================== -->
-  <!-- Strato inferiore del pacchetto a contatto suolo (z=0)     -->
-  <box at="3 3 0" size="1 1 1" color="3"/>
-  <box at="4 3 0" size="1 1 1" color="4"/>
-  <box at="3 4 0" size="1 1 1" color="G"/>
-  <box at="4 4 0" size="1 1 1" color="1"/>
+  <!-- Strato inferiore del pacchetto (z=1) -->
+  <box at="4 4 1" size="1 1 1" color="3"/>
+  <box at="5 4 1" size="1 1 1" color="4"/>
+  <box at="4 5 1" size="1 1 1" color="G"/>
+  <box at="5 5 1" size="1 1 1" color="1"/>
 
-  <!-- Strato superiore del pacchetto (z=1)                      -->
-  <box at="3 3 1" size="1 1 1" color="1"/>
-  <box at="4 3 1" size="1 1 1" color="2"/>
-  <box at="3 4 1" size="1 1 1" color="X"/>
-  <box at="4 4 1" size="1 1 1" color="Y"/>
+  <!-- Strato superiore del pacchetto (z=2) -->
+  <box at="4 4 2" size="1 1 1" color="1"/>
+  <box at="5 4 2" size="1 1 1" color="2"/>
+  <box at="4 5 2" size="1 1 1" color="X"/>
+  <box at="5 5 5" size="1 1 1" color="X"/>
+  <box at="5 5 2" size="1 1 1" color="Y"/>
 
   <!-- ======================================================== -->
   <!-- 4. BAIA DI DOCKING VENTRALE E CARENA CENTRALE (z = 2)     -->
   <!-- ======================================================== -->
-  <box at="3.5 3.5 2" size="2 2 1" color="M"/>
 
   <!-- ======================================================== -->
   <!-- 5. FUSOLIERA CENTRALE E VISORE OTTICO (z = 3)             -->
   <!-- ======================================================== -->
-  <!-- Scocca centrale in ceramica bianca                        -->
-  <box at="3.5 3.5 3" size="2 2 1" color="W"/>
+  <!-- Scocca centrale in ceramica bianca -->
+  <box at="4.5 4.5 3" size="2 2 1" color="W"/>
 
-  <!-- Visore ottico frontale (+y, y=5) con occhi sensori ciano  -->
-  <box at="3 5 3" size="1 1 1" color="I"/>
-  <box at="4 5 3" size="1 1 1" color="I"/>
-  <box at="3 4 3" size="1 1 1" color="V"/>
-  <box at="4 4 3" size="1 1 1" color="V"/>
+  <!-- Visore ottico frontale (+y, y=6) con occhi sensori ciano -->
+  <box at="4.5 6 3" size="2 1 1" color="I"/>
 
-  <!-- Sfogo termico e scarico posteriore (-y, y=2)              -->
-  <box at="3 2 3" size="1 1 1" color="m"/>
-  <box at="4 2 3" size="1 1 1" color="m"/>
+  <box at="4 5 3" size="1 1 1" color="V"/>
+  <box at="5 5 3" size="1 1 1" color="V"/>
 
-  <!-- Braccetti diagonali di supporto gondole a quota z=3       -->
+  <!-- Sfogo termico e scarico posteriore (-y, y=3) -->
+  <box at="4 3 3" size="1 1 1" color="m"/>
+  <box at="5 3 3" size="1 1 1" color="m"/>
+
+  <!-- Braccetti diagonali di supporto gondole a quota z=3 -->
   <!-- Anteriore-Sinistro -->
-  <box at="2 5 3" size="1 1 1" color="S"/>
-  <box at="1 6 3" size="1 1 1" color="D"/>
-  <box at="0 6 3" size="1 1 1" color="m"/>
-  <box at="0 7 3" size="1 1 1" color="m"/>
+  <box at="3 6 3" size="1 1 1" color="S"/>
+  <box at="2 7 3" size="1 1 1" color="D"/>
+  <box at="1 7 3" size="1 1 1" color="m"/>
+  <box at="1 8 3" size="1 1 1" color="m"/>
 
   <!-- Anteriore-Destro -->
-  <box at="5 5 3" size="1 1 1" color="S"/>
-  <box at="6 6 3" size="1 1 1" color="D"/>
-  <box at="7 6 3" size="1 1 1" color="m"/>
-  <box at="7 7 3" size="1 1 1" color="m"/>
+  <box at="6 6 3" size="1 1 1" color="S"/>
+  <box at="7 7 3" size="1 1 1" color="D"/>
+  <box at="8 7 3" size="1 1 1" color="m"/>
+  <box at="8 8 3" size="1 1 1" color="m"/>
 
   <!-- Posteriore-Sinistro -->
-  <box at="2 2 3" size="1 1 1" color="S"/>
-  <box at="1 1 3" size="1 1 1" color="D"/>
-  <box at="0 1 3" size="1 1 1" color="m"/>
-  <box at="0 0 3" size="1 1 1" color="m"/>
+  <box at="3 3 3" size="1 1 1" color="S"/>
+  <box at="2 2 3" size="1 1 1" color="D"/>
+  <box at="1 2 3" size="1 1 1" color="m"/>
+  <box at="1 1 3" size="1 1 1" color="m"/>
 
   <!-- Posteriore-Destro -->
-  <box at="5 2 3" size="1 1 1" color="S"/>
-  <box at="6 1 3" size="1 1 1" color="D"/>
-  <box at="7 1 3" size="1 1 1" color="m"/>
-  <box at="7 0 3" size="1 1 1" color="m"/>
+  <box at="6 3 3" size="1 1 1" color="S"/>
+  <box at="7 2 3" size="1 1 1" color="D"/>
+  <box at="8 2 3" size="1 1 1" color="m"/>
+  <box at="8 1 3" size="1 1 1" color="m"/>
 
   <!-- ======================================================== -->
   <!-- 6. PIANO DEI 4 ROTORI VTOL E CANOPY (z = 4)               -->
   <!-- ======================================================== -->
-  <!-- Tetto centrale con visiera sopra gli occhi sensori        -->
-  <box at="3 5 4" size="1 1 1" color="w"/>
-  <box at="4 5 4" size="1 1 1" color="w"/>
-  <box at="3 4 4" size="1 1 1" color="W"/>
-  <box at="4 4 4" size="1 1 1" color="W"/>
-  <box at="3 3 4" size="1 1 1" color="Z"/>
-  <box at="4 3 4" size="1 1 1" color="Z"/>
-  <box at="3 2 4" size="1 1 1" color="m"/>
-  <box at="4 2 4" size="1 1 1" color="m"/>
+  <!-- GONDOLA 1: ANTERIORE-SINISTRA (x in 1..2, y in 7..8) -->
+  <box at="1 8 4" size="1 1 1" color="a"/>
+  <box at="2 8 4" size="1 1 1" color="b"/>
+  <box at="2 7 4" size="1 1 1" color="c"/>
+  <box at="1 7 4" size="1 1 1" color="d"/>
 
-  <!-- GONDOLA 1: ANTERIORE-SINISTRA (x in 0..1, y in 6..7)      -->
-  <!-- Lame plasma ciano (Rotazione oraria: NW->NE->SE->SW)      -->
-  <box at="0 7 4" size="1 1 1" color="a"/>
-  <box at="1 7 4" size="1 1 1" color="b"/>
-  <box at="1 6 4" size="1 1 1" color="c"/>
-  <box at="0 6 4" size="1 1 1" color="d"/>
+  <!-- GONDOLA 2: ANTERIORE-DESTRA (x in 7..8, y in 7..8) -->
+  <box at="7 8 4" size="1 1 1" color="a"/>
+  <box at="7 7 4" size="1 1 1" color="b"/>
+  <box at="8 7 4" size="1 1 1" color="c"/>
+  <box at="8 8 4" size="1 1 1" color="d"/>
 
-  <!-- GONDOLA 2: ANTERIORE-DESTRA (x in 6..7, y in 6..7)        -->
-  <!-- Lame plasma ciano (Rotazione antioraria: NW->SW->SE->NE)  -->
-  <box at="6 7 4" size="1 1 1" color="a"/>
-  <box at="6 6 4" size="1 1 1" color="b"/>
-  <box at="7 6 4" size="1 1 1" color="c"/>
-  <box at="7 7 4" size="1 1 1" color="d"/>
+  <!-- GONDOLA 3: POSTERIORE-SINISTRA (x in 1..2, y in 1..2) -->
+  <box at="1 2 4" size="1 1 1" color="a"/>
+  <box at="1 1 4" size="1 1 1" color="b"/>
+  <box at="2 1 4" size="1 1 1" color="c"/>
+  <box at="2 2 4" size="1 1 1" color="d"/>
 
-  <!-- GONDOLA 3: POSTERIORE-SINISTRA (x in 0..1, y in 0..1)     -->
-  <!-- Lame plasma ciano (Rotazione antioraria: NW->SW->SE->NE)  -->
-  <box at="0 1 4" size="1 1 1" color="a"/>
-  <box at="0 0 4" size="1 1 1" color="b"/>
-  <box at="1 0 4" size="1 1 1" color="c"/>
-  <box at="1 1 4" size="1 1 1" color="d"/>
-
-  <!-- GONDOLA 4: POSTERIORE-DESTRA (x in 6..7, y in 0..1)       -->
-  <!-- Lame plasma ciano (Rotazione oraria: NW->NE->SE->SW)      -->
-  <box at="6 1 4" size="1 1 1" color="a"/>
-  <box at="7 1 4" size="1 1 1" color="b"/>
-  <box at="7 0 4" size="1 1 1" color="c"/>
-  <box at="6 0 4" size="1 1 1" color="d"/>
+  <!-- GONDOLA 4: POSTERIORE-DESTRA (x in 7..8, y in 1..2) -->
+  <box at="7 2 4" size="1 1 1" color="a"/>
+  <box at="8 2 4" size="1 1 1" color="b"/>
+  <box at="8 1 4" size="1 1 1" color="c"/>
+  <box at="7 1 4" size="1 1 1" color="d"/>
 
   <!-- ======================================================== -->
   <!-- 7. TETTO CANOPY SUPERIORE RASTREMATO (z = 5)              -->
   <!-- ======================================================== -->
-  <box at="3.5 3.5 5" size="2 2 1" color="W"/>
-  <box at="3 2 5" size="1 1 1" color="m"/>
-  <box at="4 2 5" size="1 1 1" color="m"/>
+  <box at="3 4.5 4" size="1 4 1" color="m"/>
+  <box at="6 4.5 4" size="1 4 1" color="m"/>
 
+  <!-- Binari della canopy (z = 5) -->
+  <box at="4.5 3 5" size="2 1 1" color="m"/>
+  <box at="4.5 6 5" size="2 1 1" color="m"/>
+  <box at="4 5 5" size="1 1 1" color="m"/>
+  <box at="3 4.5 5" size="1 4 1" color="m"/>
+  <box at="6 4.5 5" size="1 4 1" color="m"/>
+
+  <!-- Protezione posteriore-sinistra: anello attorno alle pale (x 0..3, y 0..3) -->
+  <box at="1.5 0 4" size="4 1 1" color="m"/>
+  <box at="1.5 3 4" size="4 1 1" color="m"/>
+  <box at="0 1.5 4" size="1 4 1" color="m"/>
+  <box at="3 1.5 4" size="1 4 1" color="m"/>
+  <!-- Protezione posteriore-destra: anello attorno alle pale (x 6..9, y 0..3) -->
+  <box at="7.5 0 4" size="4 1 1" color="m"/>
+  <box at="7.5 3 4" size="4 1 1" color="m"/>
+  <box at="6 1.5 4" size="1 4 1" color="m"/>
+  <box at="9 1.5 4" size="1 4 1" color="m"/>
+  <!-- Protezione anteriore-sinistra: anello attorno alle pale (x 0..3, y 6..9) -->
+  <box at="1.5 6 4" size="4 1 1" color="m"/>
+  <box at="1.5 9 4" size="4 1 1" color="m"/>
+  <box at="0 7.5 4" size="1 4 1" color="m"/>
+  <box at="3 7.5 4" size="1 4 1" color="m"/>
+  <!-- Protezione anteriore-destra: anello attorno alle pale (x 6..9, y 6..9) -->
+  <box at="7.5 6 4" size="4 1 1" color="m"/>
+  <box at="7.5 9 4" size="4 1 1" color="m"/>
+  <box at="6 7.5 4" size="1 4 1" color="m"/>
+  <box at="9 7.5 4" size="1 4 1" color="m"/>
+
+  <box at="4.5 3 4" size="10 1 1" color="m"/>
+  <box at="4.5 6 4" size="10 1 1" color="m"/>
   <!-- ======================================================== -->
   <!-- 8. PINNA STABILIZZATRICE, MAST E BEACON (z = 6)           -->
   <!-- ======================================================== -->
-  <!-- Pinna stabilizzatrice posteriore                          -->
-  <box at="3 2 6" size="1 1 1" color="m"/>
-  <box at="4 2 6" size="1 1 1" color="m"/>
-  <!-- Mast antenna cromato                                      -->
-  <box at="3 3 6" size="1 1 1" color="s"/>
-  <!-- Beacon telemetrico di navigazione ciano                   -->
-  <box at="4 3 6" size="1 1 1" color="e"/>
+  <!-- Pinna stabilizzatrice posteriore -->
+  <box at="4 3 4" size="1 1 1" color="m"/>
+  <box at="5 3 4" size="1 1 1" color="m"/>
+  <!-- Mast antenna cromato -->
+  <box at="4 4 4" size="1 1 1" color="s"/>
+  <box at="4.5 5 4" size="2 1 1" color="s"/>
+  <box at="4 5 4" size="1 1 3" color="s"/>
+  <!-- Beacon telemetrico di navigazione ciano -->
+  <box at="4.5 4 4" size="2 1 2" color="e"/>
+  <box at="4 5 6" size="1 1 1" color="e"/>
 
   <!-- ======================================================== -->
   <!-- 9. REGOLE GENERATIVE: VARIANTI STOCASTICHE NEI SEMI       -->
   <!-- ======================================================== -->
-  <!-- A) Risoluzione quantistica del pacchetto dati (X)         -->
+  <!-- A) Risoluzione quantistica del pacchetto dati (X) -->
   <one steps="4">
     <rule in="X" out="1" p="0.40"/>
     <rule in="X" out="2" p="0.30"/>
@@ -215,7 +224,7 @@ Animazione "elica" (4 fotogrammi):
   </one>
   <all in="X" out="2" optional="True"/>
 
-  <!-- B) Risoluzione dei circuiti e involucro pacchetto (Y)     -->
+  <!-- B) Risoluzione dei circuiti e involucro pacchetto (Y) -->
   <one steps="4">
     <rule in="Y" out="2" p="0.40"/>
     <rule in="Y" out="3" p="0.30"/>
@@ -223,7 +232,7 @@ Animazione "elica" (4 fotogrammi):
   </one>
   <all in="Y" out="2" optional="True"/>
 
-  <!-- C) Dettagli dorsali della canopy (Z)                      -->
+  <!-- C) Dettagli dorsali della canopy (Z) -->
   <one steps="2">
     <rule in="Z" out="W" p="0.50"/>
     <rule in="Z" out="w" p="0.30"/>
@@ -237,18 +246,23 @@ Animazione "elica" (4 fotogrammi):
 <!-- ============================================================ -->
 <animation name="elica" frames="4" symmetry="()">
   <sequence>
-    <!-- 1. Rotazione continua a 360° dei rotori al plasma ciano  -->
+    <!-- 1. Rotazione continua a 360° dei rotori al plasma ciano -->
     <all in="a" out="x"/>
     <all in="b" out="a"/>
     <all in="c" out="b"/>
     <all in="d" out="c"/>
     <all in="x" out="d"/>
 
-    <!-- 2. Pulsazione ritmica del flusso dati energetico         -->
+    <!-- 2. Pulsazione ritmica del flusso dati energetico -->
     <all in="1" out="y"/>
     <all in="2" out="1"/>
     <all in="3" out="2"/>
     <all in="4" out="3"/>
     <all in="y" out="4"/>
-  </sequence>
+    
+    <prl in="f" out="e" p="0.8"/>  
+    <prl in="g" out="e" p="0.8"/>
+    <prl in="e" out="f" p="0.2"/>
+    <prl in="e" out="g" p="0.2"/>
+  </sequence>  
 </animation>
