@@ -2202,13 +2202,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fare: creare la pagina profilo (`site/profilo.html` e modulo TS associato): accesso Firebase con Google o anonimo riusando `src/session/login.ts` e `/api/account`; visualizzazione dettagli viandante (ID account, stato collegamento, saldo crediti); editor estetico con scelta colore mantello e seme del modello viandante con anteprima tridimensionale interattiva renderizzata tramite Three.js e `src/mj/mesh.ts`; pulsanti per legare l'account anonimo a Google (`linkWithPopup`) o disconnettersi.
 - Fatto quando: typecheck e test verdi; autenticazione e visualizzatore 3D dell'avatar funzionanti nel browser.
 
-### T103 · Il sito: hub sessioni multigiocatore e creazione nuovo universo — `da fare` (dipende da T109, T97, T45d)
+### T103 · Il sito: hub sessioni multigiocatore e creazione nuovo universo — `fatto` (dipende da T109, T97, T45d)
 
 - Stile: copia lo stile grafico del template in `docs/design/sito/` (fatto da T109, leggi il suo `README.md`).
 - Pipeline: claude · stima 4% · approvato · priorità 66
 - Contesto: ADR-0095, punto 2 (Sessioni & Nuovo Universo), ADR-0058 (sessioni) e ADR-0086 (lobby multigiocatore).
 - Fare: implementare l'hub delle sessioni (`site/sessioni.html` e modulo TS associato): interrogare `/api/universe` e lo stato delle sessioni attive su `/api/session`; mostrare la lista dei reami disponibili con dettagli del master, modelli IA impiegati, coefficienti di generazione, stima oraria della spesa e tetto minimo richiesto; pulsante diretto per accedere alla lobby multigiocatore del reame scelto; pannello wizard «Crea nuovo universo» per avviare la Genesi di un nuovo reame git specificando nome, seme e parametri base.
 - Fatto quando: typecheck e test verdi; elenco sessioni e creazione nuovo universo funzionanti via interfaccia web.
+- Esito: implementato l'hub sessioni in `site/sessioni.html` e `site/sessioni.ts` con foglio di stile dedicato `site/sessioni.css` (conforme al template grafico di `docs/design/sito/`); endpoint GET `/api/session` nel server Vite per interrogare le sessioni attive e i client connessi (`clientCount`); visualizzazione dinamica dei reami con badge live/offline, master, modelli IA impiegati, coefficienti, spesa oraria stimata (`hourlyEstimate`) e tetto minimo; pulsante «Entra nella lobby» collegato a `../index.html?universo=<nome>`; wizard modale interattivo «Crea nuovo universo» con validazione slug git, seme casuale, scelta modalità di partita e profilo IA che genera il nuovo repository git tramite `/api/universe/<nome>/create`. Configurato l'entry point `sessioni` in `vite.config.ts`. Test unitari in `tests/sessioni_hub.test.ts` (8/8 verdi). Typecheck e build verdi.
 
 ### T104 · Il sito: area carte collezionabili 3D animate — `da fare` (dipende da T109, T97, T45d, T84)
 
@@ -2354,7 +2355,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   `drone-xl.xml` ridotto a 10 × 10 × 8 dimezzando ogni box, con gli anelli delle eliche riscritti attorno alle pale (dimezzati coprivano le pale);
   test in `tests/forms.test.ts`. Nel browser: lampioni interi lungo il viale, droni in volo, nessun errore del gioco in console.
 
-### T114 · Verificare T103 (l'hub sessioni multigiocatore) nel browser e integrare — `da fare`
+### T114 · Verificare T103 (l'hub sessioni multigiocatore) nel browser e integrare — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 25 · browser
 - Contesto: T103 è stato completato su Gemini/agy senza browser (`BROWSER: da verificare`). Ha implementato l'hub sessioni (`site/sessioni.html`, `site/sessioni.ts`, `site/sessioni.css`), l'endpoint `GET /api/session`, la visualizzazione dei reami con spesa oraria stimata e il wizard «Crea nuovo universo». Il merge diretto con `3d` presenta conflitti in `site/index.html` (aggiornato nel frattempo da T101 con la nuova landing e hero 3D). Nasce da T103: `dossier T103`, `traccia T103`.
 - Cosa fare: nel worktree fare `git merge task/T103`; risolvere il conflitto in `site/index.html` preservando integralmente la nuova landing page di T101 e integrando nella barra di navigazione e nel footer il link a `./sessioni.html`; typecheck e test. Nel turno browser (`pipeline.mjs turno browser -- npx vite --port <libera> --strictPort`) verificare con Claude in Chrome:
@@ -2365,6 +2366,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   - Nessun errore JavaScript in console né rotture di quarta parete;
   - Correggere da te i difetti grafici o di navigazione minori (CSS/link).
 - Quando è fatto: verifica nel browser descritta con precisione nell'esito; difetti corretti; commit su `task/T114`; typecheck e test verdi.
+- Esito: fuso `task/T103`; in `site/index.html` tenuta intera la landing di T101, con «Sessioni» nella barra e nel footer e la carta «Reami condivisi» che porta a `sessioni.html` («SCEGLI UN REAME»). Corretti: i link di `sessioni.html` a pagine che non esistono ancora (`carte.html`, `profilo.html`, `pagamenti.html`) ora vanno alle sezioni della landing (`#carte`, `#reami`); il pulsante «ENTRA NELLA LOBBY» non va più a capo e il piede della carta si avvolge. Verificato nel browser su `npx vite` (porta 5287): reami vuoti → stato «nessun universo»; wizard: apertura, seme casuale, chiusura con Esc, × e sfondo, nome vuoto e slug non valido rifiutati con messaggio; creato `prova-t114` (commit nel repository git, poi rimosso), carta «IN PAUSA» con master, modelli, coefficienti, spesa oraria ~0,77 $ e tetto 1,00 $; filtri tutti/live/miei (1/0/1); il link porta a `../index.html?universo=prova-t114` e apre il gioco; a 375 px (iframe) nessuno scorrimento orizzontale, menu a tendina, wizard e carta dentro lo schermo; nessun errore in console. Il badge live con viandanti collegati non è provato (nessuna sessione multigiocatore aperta). Typecheck verde; la suite intera sotto carico ha dato 618 verdi e 44 rossi, tutti timeout tranne uno di `subscription.test.ts`, verde da solo; rilanciati da soli sono verdi tranne alcuni di `referente`, `wanderers`, `watch`, che vanno in timeout anche senza le modifiche del merge (ogni test di `watch` dura ~20 s su questa macchina, al limite). Anche `kernel.test.ts` da solo va in timeout nell'hook `beforeEach` (10 s), e importa solo `src/kernel/`, che il merge non tocca.
 
 
 ### T115 · Integrare T57b (rune nuove dal Concilio) — `da fare`

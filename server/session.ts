@@ -17,7 +17,7 @@ const NAME_RE = /^[a-z0-9][a-z0-9-]{0,40}$/;
 /** A message bigger than this is not a client's (the files go the other way). */
 const MAX_MESSAGE = 256 * 1024;
 
-export type ActiveHost = { name: string; session: { connect(link: unknown): void; readonly kernel: Kernel }; stop(): void };
+export type ActiveHost = { name: string; session: { connect(link: unknown): void; readonly kernel: Kernel; readonly clientCount?: number; connected?(): string[] }; stop(): void };
 export const activeHosts = new Map<string, Promise<ActiveHost | { error: string }>>();
 
 /** Returns the running kernel of an active universe session, if open. */
@@ -62,6 +62,32 @@ export function sessionServer(accounts?: AccountSettings): Plugin {
   return {
     name: 'rune-session',
     configureServer(server: ViteDevServer) {
+      server.middlewares.use(async (req, res, next) => {
+        const url = req.url?.split('?')[0];
+        if (url === '/api/session' && req.method === 'GET') {
+          const sessions: Array<{ name: string; active: boolean; clients: number; wanderers: string[] }> = [];
+          for (const [name, hostPromise] of activeHosts.entries()) {
+            try {
+              const h = await hostPromise;
+              if (h && 'session' in h) {
+                sessions.push({
+                  name,
+                  active: true,
+                  clients: h.session.clientCount ?? h.session.connected?.().length ?? 0,
+                  wanderers: h.session.connected?.() ?? [],
+                });
+              }
+            } catch {
+              // ignore
+            }
+          }
+          res.statusCode = 200;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ sessions }));
+          return;
+        }
+        next();
+      });
       const wss = new WebSocketServer({ noServer: true, maxPayload: MAX_MESSAGE });
       const open = (name: string, offline: boolean) => {
         let h = activeHosts.get(name);
@@ -101,6 +127,18 @@ export function sessionServer(accounts?: AccountSettings): Plugin {
         for (const h of activeHosts.values()) void h.then((x) => 'stop' in x && x.stop());
         activeHosts.clear();
         wss.close();
+      });
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const url = req.url?.split('?')[0];
+        if (url === '/api/session' && req.method === 'GET') {
+          res.statusCode = 200;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ sessions: [] }));
+          return;
+        }
+        next();
       });
     },
   };
