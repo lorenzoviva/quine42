@@ -53,7 +53,8 @@ Aggiornato il 01/11/2026, fine dell'epoca 194 su **claude** (crediti: vedi `stat
 
 - **Vite 7 e Vitest 4 nel base** (01/11, epoca 194): T145, T142, T131 integrati, ADR-0100, `npm ci` nel base fatto, audit a 0, Claude riattivato, i task riapprovati. Suite di T145: 746 passati, 16 attesi, 1 todo, nessun rosso. Le pagine del sito con dati veri (carte, profilo, crediti) non sono state provate con Vite 7: solo stati vuoti, nessun universo su disco nel worktree. `npm run abbonamento` da riavviare se era acceso.
 
-- **In corso** (epoca 195): T120 e T124 su Claude.
+- **In corso** (epoca 195): T120 e T126 su Claude.
+- **T124 integrato** (01/11): V-004 chiusa, kit V-004.a-e ok; T124 ha riscritto la prova V-004.c (cercava un file che la cartella `fuori` ha già dalla nascita, ora `world/pagamenti.json`). Detto all'autore.
 - **T144 e T122 integrati** (01/11): V-008, V-017, V-019 chiuse, ADR-0101, suite 782 passati, 12 attesi, nessun rosso. Restano non provati difetti di wasm e Lua e il blocco del servizio (T126, T127): per una garanzia forte serve uno sguardo esperto.
 - **T122 finito** (V-008, V-017, V-019 chiuse; ADR-0099), conflitto in `AGENTS.md`: **T144** lo integra (p1, l'ADR di T122 prende il 0101). Poi `integra T144`, `integra T122`. Restano non provati: difetti di wasm e Lua, blocco del servizio (T126, T127), serve uno sguardo esperto per una garanzia forte. `tests/between.test.ts` ha un limite di 180 s: andrebbe alleggerito.
 - **T140 e T123 integrati** (01/11): V-002 chiusa, kit 4 ok, ma T140 ha riscritto la prova V-002.d (com'era dava FALLA: chiamate piccole sotto il tetto); chi è sulla macchina senza identità può spendere fino a 10 $ al giorno. Detto all'autore: se per lui non è chiusa, si riapre. **ADR-0099 nel base è di T123.** T131 ha il 0100; T122 (T144) prende il 0101.
