@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
+import { InlineRunner } from '../src/kernel/forms';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockModels } from '../src/kernel/ai/mock';
@@ -10,6 +11,14 @@ import { SessionClient } from '../src/session/client';
 import { ThinClient } from '../src/session/thin';
 import { askedRunes, ASKED_RUNES_MAX } from '../src/kernel/runes';
 import { countItem } from '../src/kernel/inventory';
+
+// A kernel's boot runs the programs of the corona again (about 13 s, T91, T151), and here a world has three or four kernels:
+// the server's, one per client and the one of the master's branch, which `branchKernel` boots by itself, out of reach of
+// `KernelOptions.forms`. So the file's every boot gets the same runner, and only the first pays. What is shared is the
+// result of a program with a seed, which instances copy before changing it (`instanceGrid`).
+const forms = new InlineRunner();
+const boot = Kernel.boot.bind(Kernel);
+vi.spyOn(Kernel, 'boot').mockImplementation((opts) => boot({ forms, ...opts }));
 
 const DT = 1 / 60;
 const RULES = 'world/rules.json';
@@ -91,7 +100,7 @@ describe('the Referente and the teams of the corona on the master’s branch (T4
     run(server, [master, anna], 12);
     expect(anna.k.files[ATLAS_FILE]).toMatch(/Elfi/);
     expect(server.branchFiles()).toEqual({});
-  }, 60_000);
+  });
 
   it('the branch keeps the master’s edits beside what the Council made, and a player cannot ask', async () => {
     const k = await bootMany();
@@ -116,7 +125,7 @@ describe('the Referente and the teams of the corona on the master’s branch (T4
     expect(refused.ok).toBe(false);
     expect(rulesOf(server.branchFiles())).not.toMatch(/anna vince/);
     expect(rulesOf(k.files)).not.toMatch(/campane|corvi|anna/);
-  }, 60_000);
+  });
 });
 
 describe('the runes the master asks the Referente for (T42f)', () => {
@@ -148,7 +157,7 @@ describe('the runes the master asks the Referente for (T42f)', () => {
     const refused = await until(server, [master, anna], anna.session.act({ t: 'agente', agente: 'referente', testo: 'dammi la runa speed' }));
     expect(refused.ok).toBe(false);
     expect(has('anna', 'speed')).toBe(0);
-  }, 60_000);
+  });
 
   it('alone, runes are not asked for: they are found in the world', async () => {
     const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
