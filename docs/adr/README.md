@@ -114,5 +114,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0107](0107-limiti-ai-messaggi.md) | I limiti ai messaggi: un ritmo per viandante all'arrivo (non per collegamento), uno più stretto per ciò che può chiamare i modelli, una coda per pagante (al più 2 in corso), lunghezza massima del testo; chi non smette viene chiuso; il gioco normale non se ne accorge | accettato |
 | [0108](0108-la-cache-delle-forme-nel-processo.md) | La cache delle forme è del processo: chiave con il testo intero, solo ciò che ha finito, congelata, LRU con un tetto, non si svuota; su disco solo per i test | accettato |
 | [0109](0109-cio-che-esce-e-cio-che-il-concilio-scrive.md) | Ciò che esce e ciò che il Concilio scrive sono elenchi: i campi di `playerFiles` e `publicFiles`, `universes/` mai servito dal server di sviluppo, un commit del Concilio cambia solo `councilMayWrite`, `ai` si muove solo su comando del master | accettato |
+| [0110](0110-la-csp-delle-pagine.md) | La CSP delle pagine è un'intestazione del server, da un punto solo (`server/csp.ts`): script solo da questa origine, stili inline ammessi, Firebase solo dove ci sono gli account; T133 deve metterla anche in produzione |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

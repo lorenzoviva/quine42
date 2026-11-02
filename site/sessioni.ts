@@ -82,6 +82,12 @@ export async function fetchUniverses(base = ''): Promise<string[]> {
   return [];
 }
 
+/** A number from a universe's files, which may say anything: what is not one counts as nothing, and never reaches the page as text. */
+const toNumber = (value: unknown): number => {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+};
+
 /** Parses a snapshot of files into a RealmView descriptor. */
 export function parseRealmSnapshot(name: string, files: FileMap, active?: ActiveSessionRecord): RealmView {
   const { config } = readConfig(files);
@@ -102,7 +108,7 @@ export function parseRealmSnapshot(name: string, files: FileMap, active?: Active
       ? `${ai.textModel} (Low Detail)`
       : `${ai.textModel} + ${sculpt.figura}`;
 
-  const tettoMinimo = ai.minimi?.tetto ?? 1.0;
+  const tettoMinimo = toNumber(ai.minimi?.tetto ?? 1.0);
 
   let description = 'Reame multigiocatore vivo generato con algoritmi MarkovJunior e intelligenza artificiale.';
   try {
@@ -120,15 +126,15 @@ export function parseRealmSnapshot(name: string, files: FileMap, active?: Active
 
   return {
     name,
-    seed: config.seed,
+    seed: toNumber(config.seed),
     master,
     isMine: master === 'io' || master === 'Master',
     live: !!active?.active,
-    clients: active?.clients ?? 0,
+    clients: toNumber(active?.clients),
     textModel: ai.textModel,
     sculptorSummary,
     coefficientsLabel: presetLabel,
-    hourlyCost: estimate.dollari,
+    hourlyCost: toNumber(estimate.dollari),
     tettoMinimo,
     description,
   };
@@ -341,6 +347,8 @@ if (typeof document !== 'undefined') {
   document.addEventListener('DOMContentLoaded', () => {
     const realmsGrid = document.getElementById('realms-grid');
     const filterTabs = document.querySelectorAll('#realm-filter-tabs .comic-tab');
+    // Here and not in the HTML: the pages' policy (ADR-0110) runs no inline handler.
+    document.getElementById('form-create-universe')?.addEventListener('submit', (e) => e.preventDefault());
     const btnOpenWizard = document.getElementById('btn-open-wizard');
     const btnCloseWizard = document.getElementById('btn-close-wizard');
     const btnCancelWizard = document.getElementById('btn-cancel-wizard');

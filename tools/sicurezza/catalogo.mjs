@@ -678,4 +678,5 @@ export const PROBES = [
 export const UNCOVERED = {
   'V-013': 'il Concilio che scrive `ai` si vede solo dentro il kernel: lo prova tests/sicurezza/uscite.test.ts',
   'V-018': 'accettata: non si prova',
+  'V-020': 'rilevata da T132, senza prove né task',
 };

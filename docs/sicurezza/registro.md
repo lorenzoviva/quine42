@@ -175,23 +175,25 @@ Modello di una voce:
 
 ### V-015 · XSS e reindirizzamento aperto
 - Gravità: bassa
-- Stato: `specificata`
+- Stato: `chiusa`
 - Superficie: `realm.seed` in `site/sessioni.ts`, `returnUrl` del checkout in `server/stripe.ts`; i testi delle pagine fuori dalla ricerca di T117 non sono stati guardati
 - Proprietà violata: un testo o un valore dei file dell'universo non diventa codice nella pagina; il checkout torna solo alla stessa origine
-- Prova: solo lettura del codice (T117); misurata dal kit e da F12 (`esiti/2026-11-01.json`, `esiti/2026-11-01-f12.md`): FALLA V-015.a, b, c: un `seed` non numerico diventa un elemento di `site/sessioni.html`
-- Contromisura: `Number()` sul seme, `returnUrl` limitato alla stessa origine, una CSP compatibile con three.js e con i worker.
+- Prova: solo lettura del codice (T117); misurata dal kit e da F12 (`esiti/2026-11-01.json`, `esiti/2026-11-01-f12.md`): FALLA V-015.a, b, c: un `seed` non numerico diventa un elemento di `site/sessioni.html`; dopo la correzione, kit e blocco F12 (`esiti/2026-11-02-dopo-T132-V-015-016.json`): V-015.a, b, c ok, nel browser nessuna violazione della CSP su gioco, sito e laboratorio. Delle altre pagine: `innerHTML` solo in `site/sessioni.ts` (con `escapeHtml`) e in `lab/`, che è uno strumento locale
+- Contromisura: `Number()` sul seme e sugli altri numeri dei file, `returnUrl` limitato alla stessa origine (`sameOriginReturn`), una CSP compatibile con three.js e con i worker (`server/csp.ts`, ADR-0110).
 - Task: T132
-- Test: —
+- Test: `tests/sicurezza/pagine.test.ts`
+- Esito: `task/T132`, 02/11. Il server di produzione (T133) deve mettere la stessa intestazione.
 
 ### V-016 · Errori e segreti
 - Gravità: bassa
-- Stato: `specificata`
-- Superficie: `server/stripe.ts`, `dist/`
+- Stato: `chiusa`
+- Superficie: `server/stripe.ts`, `dist/`; le altre route che fanno lo stesso sono V-020
 - Proprietà violata: nessun segreto e nessun dettaglio interno arriva al client
-- Prova: solo lettura del codice (T117); `dist/` non controllato; misurata dal kit (`esiti/2026-11-01.json`): FALLA V-016.a; nessun valore finto nelle risposte (salvo V-014), nel log, in `dist/` e nel browser (V-016.b-e, ok)
-- Contromisura: errori generici al client e dettagli nel log; un test che cerca valori finti dei segreti in `dist/` dopo una build con un ambiente di prova.
+- Prova: solo lettura del codice (T117); `dist/` non controllato; misurata dal kit (`esiti/2026-11-01.json`): FALLA V-016.a; nessun valore finto nelle risposte (salvo V-014), nel log, in `dist/` e nel browser (V-016.b-e, ok); dopo la correzione, kit (`esiti/2026-11-02-dopo-T132-V-015-016.json`): V-016.a, b, c ok
+- Contromisura: errori generici al client e dettagli nel log, senza i valori dei segreti (`logFailure`); un test che cerca valori finti dei segreti in `dist/` dopo una build con un ambiente di prova.
 - Task: T132
-- Test: —
+- Test: `tests/sicurezza/pagine.test.ts`
+- Esito: `task/T132`, 02/11.
 
 ### V-017 · `string.dump` raggiungibile con la sintassi a metodo
 - Gravità: bassa
@@ -226,6 +228,16 @@ Modello di una voce:
 - Test: `tests/sicurezza/uscita.test.ts`, `tests/sicurezza/sandbox.test.ts`
 - Esito: `task/T122`, 01/11.
 
+### V-020 · Il testo delle eccezioni arriva al client da altre route
+- Gravità: bassa
+- Stato: `rilevata`
+- Superficie: `server/universeStore.ts` (il `catch` di `handle`), `server/wallet.ts`, `server/wanderer.ts`, il messaggio di `openUniverse` in `server/session.ts`
+- Proprietà violata: nessun dettaglio interno arriva al client (percorsi su disco, testo di git o del file system)
+- Prova: solo lettura del codice (T132); non è stato provato quali testi escano davvero
+- Contromisura: da scrivere, sul modello di `logFailure` in `server/stripe.ts`: frase generica al client e dettagli nel log. Prima va guardato quali messaggi servono al client (`universeStore` ne usa alcuni per dire perché rifiuta).
+- Task: —
+- Test: —
+
 ## Le prove dell'autore
 
 Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm run sicurezza:prove`, `tools/sicurezza/catalogo.mjs`) e di [`prove-f12.md`](prove-f12.md); i test stanno in `tests/sicurezza/`. Le misure in [`esiti/`](esiti/). `tests/sicurezza-kit.test.ts` controlla che la tabella e il catalogo dicano le stesse prove: una voce nuova ha qui la sua riga.
@@ -246,13 +258,14 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-012 | a b c d | e f | `rotte.test.ts`, `uscite.test.ts` | — |
 | V-013 | — | — | `uscite.test.ts` | il Concilio che scrive `ai` si vede solo dentro il kernel: lo prova tests/sicurezza/uscite.test.ts |
 | V-014 | a b c d e f g h i j k | — | `dipendenze.test.ts` | `npm audit`: T131 lo ha lanciato, il kit non esce sulla rete |
-| V-015 | a b | c | — | i testi delle altre pagine: T132 |
-| V-016 | a b c | d e | — | — |
+| V-015 | a b | c | `pagine.test.ts` | l'accesso con Google vero sotto la CSP (ADR-0110) |
+| V-016 | a b c | d e | `pagine.test.ts` | — |
 | V-017 | a | — | `uscita.test.ts`, `sandbox.test.ts` | — |
 | V-018 | — | — | — | accettata: non si prova |
 | V-019 | a b c | — | `uscita.test.ts`, `sandbox.test.ts` | un difetto di wasm o di Lua stesso: T127 |
+| V-020 | — | — | — | rilevata da T132, senza prove né task |
 
 ## Ciò che nessuna voce copre ancora
 
-Da «Cosa non è stato fatto» dell'audit: la lettura completa di `kernel.ts`, delle route di scrittura del Concilio e dei testi del DOM di gioco. Le scritture del Concilio le ha guardate T130 (V-013), T132 guarda i testi del sito;
+Da «Cosa non è stato fatto» dell'audit: la lettura completa di `kernel.ts`, delle route di scrittura del Concilio e dei testi del DOM di gioco. Le scritture del Concilio le ha guardate T130 (V-013), T132 ha guardato i testi del sito (`innerHTML` solo in `site/sessioni.ts`, con l'escape);
 ciò che ne esce diventa una voce. Le prove HTTP e WebSocket contro un server vero: lo stato di oggi nel kit (T137, tabella sopra), dopo le correzioni T134.

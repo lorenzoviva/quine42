@@ -106,6 +106,7 @@ In console del browser: `window.quine` (o `window.rune`) è il kernel (`.feed()`
 
 ```
 server/access.ts        chi chiede e cosa può (ADR-0102): `callerOf`, `gate`, `owns`, `newUniverse`; ogni route che ascolta un client passa da qui
+server/csp.ts           la CSP delle pagine (ADR-0110): `contentSecurityPolicy`, `securityHeaders`; niente script né gestori scritti nell'HTML, una risorsa esterna nuova passa da qui
 server/hidden.ts        ciò che il server di sviluppo non serve (ADR-0109): `universes/`, per qualunque via
 server/ledger.ts        l'archivio di saldi e pagamenti fuori dall'universo (ADR-0104): `FileLedger`, `ledgerOf`, `openLedger`, la migrazione (`sweepBalances`)
 server/git.ts           l'unico modo in cui il server lancia git (ADR-0103): `runGit`, senza hook né monitor, senza risalire al repository di sopra

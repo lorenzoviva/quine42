@@ -1,0 +1,54 @@
+{
+ "data": "2026-11-02",
+ "commit": "3dbbb26",
+ "vite": "7.3.7",
+ "node": "v22.19.0",
+ "piattaforma": "win32",
+ "solo": [
+  "V-015",
+  "V-016"
+ ],
+ "riepilogo": {
+  "ok": 5,
+  "falle": 0,
+  "errori": 0,
+  "saltate": 0
+ },
+ "prove": [
+  {
+   "id": "V-015.b",
+   "voce": "V-015",
+   "proprieta": "le pagine hanno una CSP (sul server di sviluppo: una prova della sua presenza, non della sua forma)",
+   "esito": "ok",
+   "dettaglio": "0 pagine su 2 senza"
+  },
+  {
+   "id": "V-015.a",
+   "voce": "V-015",
+   "proprieta": "il checkout torna solo alla stessa origine",
+   "esito": "ok",
+   "dettaglio": "nessuna sessione aperta"
+  },
+  {
+   "id": "V-016.a",
+   "voce": "V-016",
+   "proprieta": "il testo d’errore di Stripe non arriva al client",
+   "esito": "ok",
+   "dettaglio": "risposta 500"
+  },
+  {
+   "id": "V-016.b",
+   "voce": "V-016",
+   "proprieta": "nessun valore finto dei segreti in ciò che il server ha risposto o scritto nel log",
+   "esito": "ok",
+   "dettaglio": "4 risposte e il log; 0 testi con un valore, 0 già di V-014"
+  },
+  {
+   "id": "V-016.c",
+   "voce": "V-016",
+   "proprieta": "nessun valore finto dei segreti in `dist/` dopo una build",
+   "esito": "ok",
+   "dettaglio": "60 file, 0 con un valore"
+  }
+ ]
+}

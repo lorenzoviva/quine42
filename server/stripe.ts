@@ -78,6 +78,39 @@ function readRawBody(req: IncomingMessage): Promise<string> {
   });
 }
 
+/** A failure's details for this server's log, without the values of its secrets: the client only gets a generic answer (V-016). */
+function logFailure(where: string, detail: unknown, settings: StripeSettings): void {
+  let text = detail instanceof Error ? detail.message : String(detail);
+  for (const secret of [settings.secretKey, settings.webhookSecret]) if (secret) text = text.split(secret).join('<segreto>');
+  console.warn(`[stripe] ${where}: ${text}`);
+}
+
+/** A host as a URL has it: lower case, no default port. */
+function hostOf(header: string | undefined): string | undefined {
+  try {
+    return header ? new URL(`http://${header}`).host : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Where Stripe may send the payer back: only a page of this server, with no name and password in front of it to dress up
+ * another host, and without a fragment, which would swallow the query added to it. Undefined for anything else (V-015).
+ */
+export function sameOriginReturn(url: unknown, hostHeader: string | undefined): string | undefined {
+  const host = hostOf(hostHeader);
+  if (typeof url !== 'string' || !host) return undefined;
+  try {
+    const u = new URL(url);
+    if ((u.protocol !== 'http:' && u.protocol !== 'https:') || u.username || u.password || u.host !== host) return undefined;
+    u.hash = '';
+    return u.href;
+  } catch {
+    return undefined;
+  }
+}
+
 /** Verifies a Stripe webhook signature (HMAC-SHA256 with timestamp tolerance). */
 export function verifyStripeWebhookSignature(
   rawBody: string,
@@ -333,7 +366,8 @@ export async function handleStripeWebhookEvent(opts: {
   }
 
   if (!result.ok) {
-    return { status: 500, body: { error: result.motivo ?? 'Errore durante accredito', status: result.status } };
+    logFailure('accredito', result.motivo ?? result.status, opts.settings);
+    return { status: 500, body: { error: 'Errore durante accredito', status: result.status } };
   }
 
   return { status: 200, body: { received: true, status: result.status, crediti, wandererId } };
@@ -356,9 +390,13 @@ export function stripeHandler(opts: StripeRouteOptions): Connect.NextHandleFunct
     // 2. POST /api/stripe/checkout
     if (req.method === 'POST' && url === '/api/stripe/checkout') {
       try {
-        const raw = await readRawBody(req);
-        const body = JSON.parse(raw);
-        const { universo, wandererId, crediti, token, returnUrl } = body;
+        let body: Record<string, unknown> | null;
+        try {
+          body = JSON.parse(await readRawBody(req));
+        } catch {
+          return send(res, 400, { ok: false, motivo: 'richiesta non valida' });
+        }
+        const { universo, wandererId, crediti, token, returnUrl } = body ?? {};
 
         if (!validUniverse(universo)) {
           return send(res, 400, { ok: false, motivo: 'universo non valido' });
@@ -370,6 +408,14 @@ export function stripeHandler(opts: StripeRouteOptions): Connect.NextHandleFunct
         const amount = Math.round(Number(crediti) * 100) / 100;
         if (!Number.isFinite(amount) || amount < 1 || amount > 1000) {
           return send(res, 400, { ok: false, motivo: 'ammontare crediti non valido (1-1000)' });
+        }
+        // The way back: what the client says, if it is a page of this server; if it says nothing, the game, never by the word of `Origin` alone.
+        const host = req.headers.host;
+        const effectiveReturnUrl = returnUrl
+          ? sameOriginReturn(returnUrl, host)
+          : `${sameOriginReturn(req.headers.origin, host) ?? `http://${hostOf(host) ?? 'localhost:5173'}/`}?universo=${universo}`;
+        if (!effectiveReturnUrl) {
+          return send(res, 400, { ok: false, motivo: 'indirizzo di ritorno non valido' });
         }
 
         // Verify account if verifier is configured
@@ -406,9 +452,6 @@ export function stripeHandler(opts: StripeRouteOptions): Connect.NextHandleFunct
           });
         }
 
-        const origin = req.headers.origin || `http://${req.headers.host || 'localhost:5173'}`;
-        const effectiveReturnUrl = returnUrl || `${origin}/?universo=${universo}`;
-
         const session = await createStripeCheckoutSession({
           secretKey: opts.settings.secretKey,
           universo,
@@ -421,7 +464,8 @@ export function stripeHandler(opts: StripeRouteOptions): Connect.NextHandleFunct
 
         return send(res, 200, { ok: true, url: session.url, id: session.id });
       } catch (e) {
-        return send(res, 500, { ok: false, motivo: (e as Error).message });
+        logFailure('checkout', e, opts.settings);
+        return send(res, 500, { ok: false, motivo: 'La ricarica non è partita: riprova tra poco.' });
       }
     }
 
@@ -439,7 +483,8 @@ export function stripeHandler(opts: StripeRouteOptions): Connect.NextHandleFunct
         });
         return send(res, outcome.status, outcome.body);
       } catch (e) {
-        return send(res, 500, { error: (e as Error).message });
+        logFailure('webhook', e, opts.settings);
+        return send(res, 500, { error: 'Errore durante accredito' });
       }
     }
 
