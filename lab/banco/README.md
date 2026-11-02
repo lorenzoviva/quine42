@@ -7,6 +7,8 @@ Il metodo è dell'autore: si scrive un prompt, lo si prova **senza altro contest
 npx vite-node lab/scripts/banco-strutture.ts -- --bersagli moderna --giro v1           # un bersaglio; consuma l'abbonamento
 npx vite-node lab/scripts/banco-strutture.ts -- --bersagli tutti --giro v2 --tentativi 2 [--modello sonnet] [--prompt altro.md]
 npx vite-node lab/scripts/banco-strutture.ts -- --xml lab/banco/esempi/buono.xml --bersagli moderna  # solo le misure, senza chiamate
+npx vite-node lab/scripts/banco-strutture.ts -- --bersagli tutti --giro conferma --tentativi 2 --dir lab/banco --insieme 3   # al più 3 insieme: la finestra delle 5 ore
+npx vite-node lab/scripts/banco-strutture.ts -- --seconda --giro conferma --dir lab/banco --insieme 3   # la seconda richiesta (T173)
 ```
 
 Ogni tentativo è una cartella che non si sovrascrive, `lab/out/banco/<giro>/<bersaglio>/<n>/` (`--dir` per un'altra radice):
@@ -55,6 +57,18 @@ Passa chi soddisfa **tutte** le misure (`SOGLIA`, `giudica`) **e** i criteri scr
 
 La soglia non si abbassa per far passare un prompt (T155).
 
+### Cosa conta ora: entro due richieste (T173)
+
+Misure e criteri sono gli stessi; cambia quante richieste ha un tentativo. Come nel gioco, dove l'invalido torna con il motivo all'agente (regola 2 di `AGENTS.md`), un tentativo che non passa riceve una seconda richiesta, con lo stesso prompt. Passa il giro se **tutti i 14 tentativi passano misure e foto entro due richieste, nello stesso giro**.
+
+`--seconda` guarda ogni tentativo del giro e scrive in `<n>/seconda/` (`richiesta.txt` è il messaggio intero, `seconda.ts` lo compone):
+
+- misure che non passano: tornano il suo XML, i difetti con il loro significato, i piani raggiunti, dove sta il pavimento non raggiunto, la porta; le foto no;
+- misure che passano, foto no: tornano il suo XML e i problemi scritti da chi giudica, in `<n>/problemi.md`;
+- tutto passa: non torna. Si riprende da dove ci si è fermati: un tentativo con `seconda/misure.json` non si rifà.
+
+Una terza richiesta non c'è.
+
 ## Ciò che non si misura
 
 <!-- criteri -->
@@ -81,4 +95,8 @@ In `bersagli.ts`: `moderna`, `steampunk`, `futuristica`, `locanda` (con la canti
 
 ## Il ciclo (T155)
 
-`diario.md` dice ogni giro; `finale/` tiene i modelli, le foto, le misure e il giudizio dell'ultimo giro completo, anche i tentativi falliti. La soglia non è ancora raggiunta: `docs/pipeline/domande/T155.md`.
+`diario.md` dice ogni giro; `finale/` tiene i modelli, le foto, le misure e il giudizio dell'ultimo giro completo, anche i tentativi falliti. La soglia di T155 non è raggiunta: `docs/pipeline/domande/T155.md`.
+
+## Il giro di conferma (T173)
+
+`conferma/` tiene i 14 tentativi con le seconde richieste e `giudizio.md`. **12 su 14**: la soglia non è raggiunta, `docs/pipeline/domande/T173.md`.

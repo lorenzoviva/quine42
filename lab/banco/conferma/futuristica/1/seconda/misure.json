@@ -1,0 +1,220 @@
+{
+  "bersaglio": "futuristica",
+  "token": {
+    "input": 4,
+    "cacheScritta": 359,
+    "cacheLetta": 15349,
+    "output": 54416,
+    "inputTotale": 15712
+  },
+  "modello": "claude-opus-5-5",
+  "dollari": 1.0942778,
+  "ms": 1007350,
+  "caratteriXml": 12590,
+  "passa": true,
+  "difetti": [],
+  "voci": [
+    {
+      "id": "finisce",
+      "ok": true,
+      "valore": "53 ms",
+      "richiesto": "entro 8000 ms"
+    },
+    {
+      "id": "valido",
+      "ok": true,
+      "valore": "sì",
+      "richiesto": "i controlli di check.ts"
+    },
+    {
+      "id": "piani",
+      "ok": true,
+      "valore": "2",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "testa",
+      "ok": true,
+      "valore": "1.6 1.8",
+      "richiesto": "≥ 1.5 caselle per piano"
+    },
+    {
+      "id": "stanze",
+      "ok": true,
+      "valore": "4",
+      "richiesto": "≥ 3"
+    },
+    {
+      "id": "murato",
+      "ok": true,
+      "valore": "0",
+      "richiesto": "≤ 0.25"
+    },
+    {
+      "id": "porta",
+      "ok": true,
+      "valore": "x 49, scarto 0.01, alta 1.65, libera",
+      "richiesto": "sul davanti, scarto ≤ 0.33, alta ≥ 1.5"
+    },
+    {
+      "id": "salti",
+      "ok": true,
+      "valore": "9",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "materiali",
+      "ok": true,
+      "valore": "10",
+      "richiesto": "≥ 6"
+    },
+    {
+      "id": "dominante",
+      "ok": true,
+      "valore": "0.35",
+      "richiesto": "≤ 0.6"
+    },
+    {
+      "id": "finestre",
+      "ok": true,
+      "valore": "21 su 4 lati",
+      "richiesto": "≥ 6 su ≥ 3 lati"
+    },
+    {
+      "id": "dettagli",
+      "ok": true,
+      "valore": "211, 0 lati vuoti",
+      "richiesto": "≥ 24, ≤ 1 lati vuoti"
+    },
+    {
+      "id": "rumore",
+      "ok": true,
+      "valore": "0",
+      "richiesto": "≤ 0.7"
+    },
+    {
+      "id": "sagoma",
+      "ok": true,
+      "valore": "8",
+      "richiesto": "≥ 4"
+    },
+    {
+      "id": "rilievo",
+      "ok": true,
+      "valore": "0.48",
+      "richiesto": "≥ 0.12"
+    },
+    {
+      "id": "ingombro",
+      "ok": true,
+      "valore": "0.82",
+      "richiesto": "≥ 0.3"
+    }
+  ],
+  "misure": {
+    "voxel": 154017,
+    "ms": 53,
+    "finito": true,
+    "piani": [
+      {
+        "z": 2,
+        "quota": 0.1,
+        "area": 6.795,
+        "testa": 1.6,
+        "stanze": 3
+      },
+      {
+        "z": 36,
+        "quota": 1.8,
+        "area": 2.0825,
+        "testa": 1.8,
+        "stanze": 1
+      }
+    ],
+    "cantina": 0,
+    "terrazze": 1,
+    "stanze": 4,
+    "murato": 0,
+    "persi": [],
+    "porta": {
+      "x": 49,
+      "y": 80,
+      "scarto": 0.025,
+      "alta": 1.65,
+      "libera": true
+    },
+    "salti": [
+      {
+        "x": 18,
+        "y": 96,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 58,
+        "y": 90,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 41,
+        "y": 90,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 81,
+        "y": 99,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 58,
+        "y": 51,
+        "z": 2,
+        "sale": false
+      },
+      {
+        "x": 35,
+        "y": 72,
+        "z": 36,
+        "sale": false
+      },
+      {
+        "x": 52,
+        "y": 15,
+        "z": 22,
+        "sale": true
+      },
+      {
+        "x": 83,
+        "y": 72,
+        "z": 2,
+        "sale": false
+      },
+      {
+        "x": 36,
+        "y": 51,
+        "z": 2,
+        "sale": false
+      }
+    ],
+    "materiali": 10,
+    "dominante": 0.3456047059740159,
+    "finestre": 21,
+    "latiConFinestre": 4,
+    "dettagli": 211,
+    "latiVuoti": 0,
+    "rumore": 0,
+    "rilievo": 0.48239065162703887,
+    "sagoma": 8,
+    "ingombro": 0.8249,
+    "luci": 16720,
+    "inutili": [],
+    "avvisi": [
+      "tocca i bordi laterali della griglia: forse è tagliato",
+      "tocca il soffitto della griglia: forse è tagliato in alto"
+    ],
+    "errori": []
+  }
+}

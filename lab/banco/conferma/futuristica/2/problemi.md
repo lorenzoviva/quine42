@@ -1,0 +1,4 @@
+- Si legge un ammasso di blocchi, non una torre: mancano gli anelli sporgenti chiesti, che devono girare attorno a tutto il volume, a quote regolari.
+- Dentro è quasi tutto nero e grigio: laboratorio, accoglienza e sala di comando non si riconoscono. Pavimenti più chiari e arredi riconoscibili, con luci, per ogni stanza.
+- La rampa attorno al nucleo centrale non si legge.
+- I grandi riquadri neri sulle facciate sembrano buchi: le vetrate hanno bisogno di montanti e di un colore di vetro che si distingua dal vuoto.

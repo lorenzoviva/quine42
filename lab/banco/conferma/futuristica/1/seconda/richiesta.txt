@@ -1,0 +1,171 @@
+Edificio: Torre futuristica
+Stile: futuristico: metallo bianco, vetro scuro, luci al neon
+Com'è: Torre con anelli sporgenti e fasce di neon, ingresso con un portale luminoso, sala d’accoglienza e laboratorio al piano terra, una rampa che gira attorno a un nucleo centrale, una sala di comando in alto con le vetrate, una piattaforma esterna.
+Scatola: 100 × 100 × 80 voxel; una casella è 20 voxel.
+Corpo: gradino 4 voxel, passaggio largo almeno 11, persona alta 30; salto: sale al più 21, va da 20 a 52 voxel di distanza.
+Il suolo è a z=0.
+
+Hai già scritto questo programma:
+```xml
+<sequence values="BWGNPSKRAT">
+  <color symbol="W" value="e8edf0" name="metallo bianco"/>
+  <color symbol="G" value="1c2a3a" alpha="0.55" name="vetro scuro"/>
+  <color symbol="N" value="39e6ff" glow="True" name="neon ciano"/>
+  <color symbol="P" value="ff3fd0" glow="True" name="portale luminoso"/>
+  <color symbol="S" value="8d97a3" name="acciaio"/>
+  <color symbol="K" value="2b3138" name="grafite"/>
+  <color symbol="R" value="c4ccd4" name="copertura"/>
+  <color symbol="A" value="5a6672" name="ponte"/>
+  <color symbol="T" value="6f7a85" name="tubi"/>
+
+  <box at="48.5 43 0" size="96 75 36" color="W"/>
+  <box at="48.5 43 30" size="96 75 2" color="N"/>
+
+  <box at="25.5 27 36" size="50 43 18" color="W"/>
+  <box at="25.5 27 49" size="50 43 2" color="N"/>
+  <box at="25.5 27 36" size="46 39 16" color="K"/>
+
+  <box at="73.5 38.5 36" size="46 66 36" color="W"/>
+  <box at="73.5 38.5 48" size="46 66 2" color="N"/>
+  <box at="73.5 38.5 66" size="46 66 2" color="N"/>
+  <box at="73.5 38.5 50" size="52 72 2" color="W"/>
+  <box at="73.5 38.5 68" size="52 72 2" color="W"/>
+  <box at="49 61.5 50" size="3 26 2" color="B"/>
+
+  <box at="48.5 43 2" size="92 71 32" color="B"/>
+  <box at="73.5 38.5 36" size="42 62 36" color="B"/>
+
+  <box at="48.5 43 0" size="92 71 2" color="S"/>
+  <box at="48.5 43 34" size="92 71 2" color="A"/>
+  <cylinder at="25 64 34" size="26 26 2" color="N"/>
+  <cylinder at="25 64 34" size="20 20 2" color="A"/>
+  <box at="73.5 21 34" size="42 27 2" color="B"/>
+
+  <box at="52 25 2" size="1 35 32" color="W"/>
+  <box at="27.5 42 2" size="50 1 32" color="W"/>
+  <box at="27 42 2" size="15 1 32" color="B"/>
+  <box at="41 60.5 2" size="1 36 32" color="W"/>
+  <box at="41 49.5 2" size="1 14 32" color="B"/>
+  <box at="41 67 2" size="1 15 32" color="B"/>
+
+  <box at="73.5 28.5 2" size="12 12 70" color="K"/>
+  <box at="73.5 28.5 18" size="12 12 2" color="N"/>
+  <box at="73.5 28.5 42" size="12 12 2" color="N"/>
+  <box at="73.5 28.5 60" size="12 12 2" color="N"/>
+
+  <box at="60 32.5 2" size="15 4 3" color="S"/>
+  <box at="60 28.5 2" size="15 4 6" color="S"/>
+  <box at="60 24.5 2" size="15 4 9" color="S"/>
+  <box at="60 15 2" size="15 15 12" color="S"/>
+  <box at="69.5 15 2" size="4 15 15" color="S"/>
+  <box at="73.5 15 2" size="4 15 18" color="S"/>
+  <box at="77.5 15 2" size="4 15 21" color="S"/>
+  <box at="87 15 2" size="15 15 24" color="S"/>
+  <box at="87 24.5 2" size="15 4 27" color="S"/>
+  <box at="87 28.5 2" size="15 4 30" color="S"/>
+  <box at="87 32.5 2" size="15 4 32" color="S"/>
+  <box at="60 35 36" size="15 1 6" color="G"/>
+
+  <box at="46.5 49.5 2" size="12 14 10" color="K"/>
+  <box at="46.5 49.5 10" size="12 14 2" color="N"/>
+  <box at="29.5 90 0" size="12 19 8" color="W"/>
+  <box at="29.5 90 8" size="12 19 2" color="N"/>
+  <box at="69.5 90 0" size="12 19 8" color="W"/>
+  <box at="69.5 90 8" size="12 19 2" color="N"/>
+
+  <box at="73.5 38 2" size="12 7 10" color="K"/>
+  <box at="73.5 38 10" size="12 7 2" color="N"/>
+  <box at="91 51.5 2" size="7 18 6" color="S"/>
+
+  <box at="4.5 50.5 2" size="4 12 10" color="K"/>
+  <box at="4.5 60.5 2" size="4 6 24" color="G"/>
+  <box at="4.5 60.5 4" size="2 2 20" color="N"/>
+  <box at="4.5 68.5 2" size="4 6 24" color="G"/>
+  <box at="4.5 68.5 4" size="2 2 20" color="P"/>
+
+  <box at="10 24.5 2" size="15 34 24" color="K"/>
+  <box at="16.5 16 6" size="2 4 16" color="N"/>
+  <box at="16.5 24.5 6" size="2 4 16" color="N"/>
+  <box at="16.5 33 6" size="2 4 16" color="N"/>
+
+  <box at="56.5 41.5 36" size="8 12 10" color="K"/>
+  <box at="54 41.5 46" size="2 8 14" color="N"/>
+  <box at="56.5 67 36" size="8 5 10" color="K"/>
+  <box at="54 67 46" size="2 4 14" color="N"/>
+
+  <box at="41.5 79.5 0" size="2 2 36" color="P"/>
+  <box at="57.5 79.5 0" size="2 2 36" color="P"/>
+  <box at="49.5 79.5 33" size="18 2 3" color="P"/>
+  <box at="41.5 82.5 0" size="2 4 34" color="P"/>
+  <box at="39.5 82.5 0" size="2 4 34" color="W"/>
+  <box at="57.5 82.5 0" size="2 4 34" color="P"/>
+  <box at="59.5 82.5 0" size="2 4 34" color="W"/>
+  <box at="49.5 79.5 2" size="14 2 31" color="B"/>
+  <box at="14.5 79.5 2" size="14 2 31" color="B"/>
+  <box at="86 79.5 2" size="13 2 31" color="B"/>
+
+  <box at="68.5 79.5 10" size="14 2 18" color="G"/>
+  <box at="32 79.5 10" size="13 2 18" color="G"/>
+  <box at="1.5 60 10" size="2 29 18" color="G"/>
+  <box at="33 6.5 10" size="27 2 18" color="G"/>
+  <box at="95.5 55 10" size="2 23 18" color="G"/>
+
+  <box at="73.5 70.5 38" size="36 2 10" color="G"/>
+  <box at="73.5 70.5 52" size="36 2 14" color="G"/>
+  <box at="67.5 70.5 38" size="2 2 28" color="W"/>
+  <box at="79.5 70.5 38" size="2 2 28" color="W"/>
+  <box at="95.5 52 38" size="2 29 10" color="G"/>
+  <box at="95.5 52 52" size="2 29 14" color="G"/>
+  <box at="73 6.5 52" size="31 2 14" color="G"/>
+  <box at="51.5 28 56" size="2 33 10" color="G"/>
+  <box at="26 47.5 40" size="37 2 8" color="G"/>
+  <box at="1.5 27 40" size="2 31 8" color="G"/>
+
+  <box at="51.5 48.5 36" size="2 2 32" color="N"/>
+  <box at="51.5 64.5 36" size="2 2 32" color="N"/>
+  <box at="51.5 56.5 36" size="2 14 32" color="B"/>
+
+  <box at="1.5 64.5 36" size="2 32 6" color="G"/>
+  <box at="48.5 79.5 36" size="96 2 6" color="G"/>
+  <box at="95.5 75 36" size="2 7 6" color="G"/>
+
+  <box at="56 4 0" size="3 3 72" color="T"/>
+  <box at="91 4 0" size="3 3 72" color="T"/>
+  <box at="12 4 0" size="3 3 54" color="T"/>
+  <box at="48 4 0" size="3 3 54" color="T"/>
+  <box at="98 27.5 0" size="3 4 72" color="N"/>
+  <box at="98 69.5 0" size="3 4 72" color="W"/>
+
+  <box at="25.5 27 54" size="36 29 3" color="R"/>
+  <box at="17.5 27 57" size="12 19 2" color="G"/>
+  <box at="33.5 27 57" size="12 19 2" color="G"/>
+  <box at="25.5 27 57" size="4 8 5" color="K"/>
+
+  <box at="73.5 38.5 72" size="50 70 2" color="R"/>
+  <box at="73.5 38.5 74" size="40 60 2" color="R"/>
+  <box at="73.5 38.5 76" size="28 48 2" color="R"/>
+  <box at="73.5 44 78" size="4 30 1" color="K"/>
+  <box at="66.5 47.5 76" size="8 16 2" color="G"/>
+  <box at="80.5 47.5 76" size="8 16 2" color="G"/>
+  <cylinder at="73.5 28.5 76" size="10 10 4" color="N"/>
+  <box at="58 14 74" size="2 2 6" color="K"/>
+  <box at="58 14 78" size="2 2 2" color="P"/>
+  <ellipsoid at="88 58 74" size="10 10 6" color="W"/>
+
+  <box at="49.5 79.5 2" size="14 2 31" color="B"/>
+  <box at="14.5 79.5 2" size="14 2 31" color="B"/>
+  <box at="86 79.5 2" size="13 2 31" color="B"/>
+  <box at="27 42 2" size="15 1 32" color="B"/>
+  <box at="41 67 2" size="1 15 32" color="B"/>
+  <box at="51.5 56.5 36" size="2 14 32" color="B"/>
+  <box at="49 61.5 50" size="3 26 2" color="B"/>
+</sequence>
+```
+
+Chi ha guardato le foto ha scritto:
+- Si legge una palazzina a due blocchi, non una torre: mancano gli anelli sporgenti chiesti, che devono girare attorno a tutto il volume e vedersi da ogni lato.
+- Dentro non si riconosce nessuna stanza: pavimenti grigi e pochi blocchi uguali. L'accoglienza ha bisogno di un bancone e di sedute, il laboratorio di banchi con strumenti e schermi accesi, la sala di comando di console rivolte alle vetrate.
+- La rampa attorno al nucleo centrale non si legge: nelle sezioni si vede una scala di lato.
+- Il dettaglio è povero: grandi riquadri neri al posto delle vetrate, poca lavorazione sulle facciate.
+
+Correggi questi difetti e lascia com’è tutto ciò che funziona. Rispondi con il programma intero, corretto.

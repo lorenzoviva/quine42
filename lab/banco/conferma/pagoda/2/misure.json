@@ -1,0 +1,216 @@
+{
+  "bersaglio": "pagoda",
+  "token": {
+    "input": 2,
+    "cacheScritta": 357,
+    "cacheLetta": 3429,
+    "output": 56091,
+    "inputTotale": 3788
+  },
+  "modello": "claude-opus-5-5",
+  "dollari": 1.1253698,
+  "ms": 617567,
+  "caratteriXml": 7979,
+  "passa": false,
+  "difetti": [
+    "piani: 1 (serve ≥ 2)",
+    "stanze: 2 (serve ≥ 3)",
+    "murato: 0.68 (serve ≤ 0.25)"
+  ],
+  "voci": [
+    {
+      "id": "finisce",
+      "ok": true,
+      "valore": "97 ms",
+      "richiesto": "entro 8000 ms"
+    },
+    {
+      "id": "valido",
+      "ok": true,
+      "valore": "sì",
+      "richiesto": "i controlli di check.ts"
+    },
+    {
+      "id": "piani",
+      "ok": false,
+      "valore": "1",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "testa",
+      "ok": true,
+      "valore": "1.6",
+      "richiesto": "≥ 1.5 caselle per piano"
+    },
+    {
+      "id": "stanze",
+      "ok": false,
+      "valore": "2",
+      "richiesto": "≥ 3"
+    },
+    {
+      "id": "murato",
+      "ok": false,
+      "valore": "0.68",
+      "richiesto": "≤ 0.25"
+    },
+    {
+      "id": "porta",
+      "ok": true,
+      "valore": "x 49, scarto 0.01, alta 1.6, libera",
+      "richiesto": "sul davanti, scarto ≤ 0.33, alta ≥ 1.5"
+    },
+    {
+      "id": "salti",
+      "ok": true,
+      "valore": "6",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "materiali",
+      "ok": true,
+      "valore": "10",
+      "richiesto": "≥ 6"
+    },
+    {
+      "id": "dominante",
+      "ok": true,
+      "valore": "0.24",
+      "richiesto": "≤ 0.6"
+    },
+    {
+      "id": "finestre",
+      "ok": true,
+      "valore": "39 su 4 lati",
+      "richiesto": "≥ 6 su ≥ 3 lati"
+    },
+    {
+      "id": "dettagli",
+      "ok": true,
+      "valore": "166, 0 lati vuoti",
+      "richiesto": "≥ 24, ≤ 1 lati vuoti"
+    },
+    {
+      "id": "rumore",
+      "ok": true,
+      "valore": "0.01",
+      "richiesto": "≤ 0.7"
+    },
+    {
+      "id": "sagoma",
+      "ok": true,
+      "valore": "11",
+      "richiesto": "≥ 4"
+    },
+    {
+      "id": "rilievo",
+      "ok": true,
+      "valore": "0.39",
+      "richiesto": "≥ 0.12"
+    },
+    {
+      "id": "ingombro",
+      "ok": true,
+      "valore": "0.79",
+      "richiesto": "≥ 0.3"
+    }
+  ],
+  "misure": {
+    "voxel": 136946,
+    "ms": 97,
+    "finito": true,
+    "piani": [
+      {
+        "z": 2,
+        "quota": 0.1,
+        "area": 6.4,
+        "testa": 1.6,
+        "stanze": 2
+      }
+    ],
+    "cantina": 0,
+    "terrazze": 0,
+    "stanze": 2,
+    "murato": 0.6776718856364874,
+    "persi": [
+      {
+        "z": 37,
+        "x0": 22,
+        "x1": 62,
+        "y0": 6,
+        "y1": 35,
+        "area": 2.145
+      },
+      {
+        "z": 37,
+        "x0": 28,
+        "x1": 73,
+        "y0": 24,
+        "y1": 71,
+        "area": 2.8325
+      }
+    ],
+    "porta": {
+      "x": 49,
+      "y": 73,
+      "scarto": 0.025,
+      "alta": 1.6,
+      "libera": true
+    },
+    "salti": [
+      {
+        "x": 18,
+        "y": 99,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 60,
+        "y": 93,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 99,
+        "y": 74,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 84,
+        "y": 91,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 39,
+        "y": 93,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 99,
+        "y": 52,
+        "z": 0,
+        "sale": false
+      }
+    ],
+    "materiali": 10,
+    "dominante": 0.23526061367254247,
+    "finestre": 39,
+    "latiConFinestre": 4,
+    "dettagli": 166,
+    "latiVuoti": 0,
+    "rumore": 0.005988023952095809,
+    "rilievo": 0.39171180465996047,
+    "sagoma": 11,
+    "ingombro": 0.7858,
+    "luci": 7604,
+    "inutili": [],
+    "avvisi": [
+      "tocca i bordi laterali della griglia: forse è tagliato",
+      "tocca il soffitto della griglia: forse è tagliato in alto"
+    ],
+    "errori": []
+  }
+}

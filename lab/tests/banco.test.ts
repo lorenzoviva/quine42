@@ -12,6 +12,7 @@ import { BERSAGLI, testoBersaglio } from '../banco/bersagli';
 import { leggiEventi } from '../banco/claude';
 import { fotoLati, fotoPianta, fotoSezioni } from '../banco/foto';
 import { esegui, giudica, misura, scatolaDi, type Bersaglio } from '../banco/misure';
+import { daCorreggere, SIGNIFICATO, testoSeconda } from '../banco/seconda';
 
 const CASA: Bersaglio = { id: 'prova', nome: 'prova', stile: '', descrizione: '', classe: 'grande' };
 const esempio = (n: string) => fs.readFileSync(`lab/banco/esempi/${n}.xml`, 'utf8');
@@ -178,4 +179,74 @@ describe('i modelli finali (T155)', () => {
     const e = esegui(esempio('buono'), b);
     expect(giudica(misura(e, b), e.scatola).voci.find((v) => v.id === 'cantina')?.ok).toBe(false);
   }, 30_000);
+});
+
+describe('i modelli del giro di conferma (T173)', () => {
+  const radice = 'lab/banco/conferma';
+  const passa = (dir: string) => (JSON.parse(fs.readFileSync(`${dir}/misure.json`, 'utf8')) as { passa: boolean }).passa;
+  /** The last request of each attempt: the second, if it had one. */
+  const finali = BERSAGLI.flatMap((b) => ['1', '2'].map((n) => ({ b, dir: fs.existsSync(`${radice}/${b.id}/${n}/seconda`) ? `${radice}/${b.id}/${n}/seconda` : `${radice}/${b.id}/${n}` })));
+
+  it.each(finali.filter(({ dir }) => passa(dir)).map(({ b, dir }) => [dir, b] as const))('%s gira nel motore e passa i controlli', (dir, b) => {
+    const e = esegui(fs.readFileSync(`${dir}/modello.xml`, 'utf8'), b);
+    const m = misura(e, b);
+    expect(m.analisi.errors).toEqual([]);
+    expect(giudica(m, e.scatola).difetti).toEqual([]);
+  }, 30_000);
+
+  it('dice quanti passano le misure alla fine: uno solo è fuori, quello che il gioco rifiuta', () => {
+    expect(finali.filter(({ dir }) => !passa(dir)).map(({ dir }) => dir)).toEqual([`${radice}/futuristica/2/seconda`]);
+    expect(() => esegui(fs.readFileSync(`${radice}/futuristica/2/seconda/modello.xml`, 'utf8'), BERSAGLI.find((x) => x.id === 'futuristica')!)).toThrow(/tre numeri/);
+  });
+
+  it('il prompt è quello di T155: non è cambiato', () => {
+    expect(fs.readFileSync(`${radice}/prompt.md`, 'utf8').trim()).toBe(fs.readFileSync('lab/banco/finale/prompt.md', 'utf8').trim());
+  });
+});
+
+describe('la seconda richiesta (T173)', () => {
+  it('chi passa misure e foto non torna; chi non passa le misure torna con i difetti; chi passa le misure torna con i problemi delle foto', () => {
+    expect(daCorreggere({ passa: true, difetti: [] })).toBeUndefined();
+    expect(daCorreggere({ passa: true, difetti: [] }, '  \n')).toBeUndefined();
+    expect(daCorreggere({ passa: true, difetti: [] }, 'il tetto non si legge')).toEqual({ difetti: [], problemi: 'il tetto non si legge' });
+    expect(daCorreggere({ passa: false, difetti: ['piani: 1 (serve ≥ 2)'] }, 'non conta')).toEqual({ difetti: ['piani: 1 (serve ≥ 2)'] });
+    // The game refused it: its reason is all there is.
+    expect(daCorreggere({ passa: false, difetti: ['at vuole tre numeri', null] })?.difetti).toEqual(['at vuole tre numeri']);
+  });
+
+  it('una scala stretta torna con il suo XML, il difetto, e dove sta il pavimento non raggiunto', () => {
+    const { m, g, e } = prova(esempio('scala-stretta'));
+    expect(g.passa).toBe(false);
+    expect(m.persi.length).toBeGreaterThan(0);
+    const [p] = m.persi;
+    expect(p!.x1).toBeGreaterThan(p!.x0);
+    expect(p!.z).toBeGreaterThan(e.scatola.base);
+    const xml = esempio('scala-stretta');
+    const testo = testoSeconda('Edificio: prova', xml, daCorreggere({ passa: false, difetti: g.difetti, misure: { piani: m.piani, persi: m.persi } })!);
+    expect(testo).toContain('Edificio: prova');
+    expect(testo).toContain(xml.trim());
+    for (const d of g.difetti) expect(testo).toContain(d);
+    expect(testo).toContain(SIGNIFICATO.piani);
+    expect(testo).toContain(`z=${p!.z}, x ${p!.x0}-${p!.x1}`);
+    expect(testo).not.toContain('Chi ha guardato le foto');
+  }, 60_000);
+
+  it('ogni misura ha il suo significato, e le foto arrivano senza difetti né numeri', () => {
+    const { g } = prova(esempio('buono'));
+    for (const v of g.voci) expect(SIGNIFICATO[v.id], v.id).toBeDefined();
+    const testo = testoSeconda('Edificio: prova', '<sequence values="B"/>', { difetti: [], problemi: 'dentro è buio' });
+    expect(testo).toContain('Chi ha guardato le foto ha scritto:\ndentro è buio');
+    expect(testo).not.toContain('Il gioco lo ha provato');
+  }, 30_000);
+
+  it('le misure dei modelli di T155 non cambiano', () => {
+    for (const dir of ['locanda/1', 'locanda/2', 'moderna/2']) {
+      const scritta = JSON.parse(fs.readFileSync(`lab/banco/finale/${dir}/misure.json`, 'utf8')) as { misure: { murato: number }; passa: boolean };
+      const b = BERSAGLI.find((x) => x.id === dir.split('/')[0])!;
+      const e = esegui(fs.readFileSync(`lab/banco/finale/${dir}/modello.xml`, 'utf8'), b);
+      const m = misura(e, b);
+      expect(m.murato).toBeCloseTo(scritta.misure.murato, 6);
+      expect(giudica(m, e.scatola).passa).toBe(scritta.passa);
+    }
+  }, 60_000);
 });
