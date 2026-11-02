@@ -2551,12 +2551,13 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Test: senza segreto o non da loopback è rifiutata; gli argomenti delle CLI, senza lanciarle.
 - Quando è fatto: test e typecheck verdi, commit su `task/T128`.
 
-### T129 · Limiti ai messaggi — `da fare` (dipende da T120)
+### T129 · Limiti ai messaggi — `fatto` (dipende da T120)
 - Pipeline: claude · stima 2% · approvato · priorità 12
 - Contesto: R11: `inbox` non ha tetto per client, ogni messaggio può chiamare il modello, `testo` è tagliato solo per `agente`. Un giocatore esaurisce i budget comuni del mondo.
 - Cosa fare: ritmo per client, lunghezza massima del testo, code per pagante, in `src/session/server.ts`. Il gioco normale non deve accorgersene.
 - Test: un client che inonda è limitato, gli altri no.
 - Quando è fatto: test e typecheck verdi, commit su `task/T129`.
+- Esito: `task/T129`, ADR-0107. `LIMITS` in `src/session/server.ts`: 60 messaggi al secondo (120 di colpo), ciò che può chiamare i modelli (`heavy`) uno ogni 2 secondi (20 di colpo) e al più 2 in corso con 8 in coda per pagante, testo verso il Concilio a 500 caratteri. **Diverso dal previsto**: (1) il ritmo è per viandante e non per client, perché rientrare non lo riempia; (2) in più: chi supera 600 rifiuti accumulati viene chiuso, `profilo` conta come `heavy` perché scrive lo stato, nome d'ingresso a 64 caratteri, e in `server/session.ts` ciò che arriva mentre il mondo si apre si ferma a 16 messaggi. Non coperti, scritti nell'ADR: molti account, peso in byte. Kit: V-011.a ok contro il server vero (`esiti/2026-11-02-dopo-T129.json`). Sicurezza: V-011 chiusa, nessuna voce nuova. Test: con la macchina carica, 2 giri su 3 della suite intera danno timeout a 60 s in `between`, `branch`, `credits`, `referente` (kernel multipli, nessuna asserzione fallita): da soli passano e con `--testTimeout=240000` la suite intera è verde.
 
 ### T130 · Ciò che esce e ciò che il Concilio scrive — `da fare` (dipende da T120)
 - Pipeline: claude · stima 3% · approvato · priorità 13
