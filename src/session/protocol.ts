@@ -142,7 +142,9 @@ export type ClientMsg =
   /** The master talks to an agent of the Council in the corona (T42e): what it makes goes on their branch. */
   | { t: 'agente'; seq: number; agente: string; testo: string }
   /** The master gives credits by hand (ADR-0104), within the day's cap. */
-  | { t: 'ricarica'; seq: number; viandante: string; quanti: number };
+  | { t: 'ricarica'; seq: number; viandante: string; quanti: number }
+  /** The master turns the Actor on or off, with its model (T157, ADR-0116): the lobby's choice, refused to anyone else. */
+  | { t: 'attore'; seq: number; acceso: boolean; modello?: string };
 
 /** Files changed: their new text, or null when they are gone. */
 export type FileChanges = Record<string, string | null>;

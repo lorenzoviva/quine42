@@ -112,7 +112,7 @@ function drawTimeline(g: CanvasRenderingContext2D, t: Timeline, color: string, W
 function drawLive(g: CanvasRenderingContext2D, f: LiveFeed, color: string, W: number, H: number): void {
   const busy = f.desks.filter((d) => d.working).length;
   title(g, 'REGISTRO DAL VIVO', busy ? `${busy} al lavoro` : 'tutto fermo', color, W);
-  const top = 58, rows = 4, rh = (H - top - 8) / rows, cw = (W - 24) / 2;
+  const top = 58, rows = Math.max(4, Math.ceil(f.desks.length / 2)), rh = (H - top - 8) / rows, cw = (W - 24) / 2;
   f.desks.slice(0, rows * 2).forEach((d, i) => {
     const x = 12 + (i % 2) * cw, y = top + Math.floor(i / 2) * rh;
     g.fillStyle = d.working ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.02)';

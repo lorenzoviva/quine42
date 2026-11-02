@@ -82,6 +82,20 @@ export interface Person {
   ricordi?: Memory[];
   /** Before T34: what they were to the only wanderer (read into `famiglia` with the id `io`). */
   legameViandante?: string;
+  /** The sheet the Narrator wrote for the Actor (T157): the text, and the fingerprint of what it was written from. */
+  scheda?: Scheda;
+}
+
+/** The sheet of a person (T157): written once, rewritten when their bonds or story change (`sheetFingerprint`). */
+export interface Scheda {
+  testo: string;
+  impronta: string;
+}
+
+/** What a sheet depends on: who they are, their trade, their story, their bonds. Memories are not here: they go with every line. */
+export function sheetFingerprint(p: Pick<Person, 'nome' | 'persona' | 'mestiere' | 'storia' | 'famiglia' | 'eta' | 'genere'>): string {
+  const bonds = [...(p.famiglia ?? [])].map((f) => `${f.nome}=${f.legame}`).sort().join(',');
+  return String(hashStr(`${p.nome}|${p.persona ?? ''}|${p.mestiere}|${p.storia ?? ''}|${p.eta ?? ''}|${p.genere ?? ''}|${bonds}`));
 }
 
 /** Keeps memories that matter: the heavy ones and the recent ones (at most 30). */

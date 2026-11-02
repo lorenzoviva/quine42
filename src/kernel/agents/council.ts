@@ -12,7 +12,7 @@ import type { WorldGraph } from '../graph';
 import { partitaSummary } from '../partita';
 import { repairPartita } from '../validator';
 
-export type AgentId = 'narratore' | 'cartografo' | 'artista' | 'scultore' | 'fisico' | 'ingegnere' | 'arbitro' | 'referente';
+export type AgentId = 'narratore' | 'cartografo' | 'artista' | 'scultore' | 'fisico' | 'ingegnere' | 'arbitro' | 'referente' | 'attore';
 
 export const AGENTS: Record<AgentId, { name: string; color: string; sigil: string }> = {
   narratore: { name: 'Narratore', color: '#ffcf5c', sigil: '✒' },
@@ -23,6 +23,8 @@ export const AGENTS: Record<AgentId, { name: string; color: string; sigil: strin
   ingegnere: { name: 'Ingegnere', color: '#b9a6ff', sigil: '⚙' },
   arbitro: { name: 'Arbitro', color: '#ff6b6b', sigil: '⚑' },
   referente: { name: 'Referente', color: '#f2f2f2', sigil: '✉' },
+  /** Plays the people with the Narrator's sheets, when the master turns it on (T157, ADR-0116). */
+  attore: { name: 'Attore', color: '#5ce0c8', sigil: '◐' },
 };
 
 export type FeedKind = 'propone' | 'obietta' | 'approva' | 'corregge' | 'scolpisce' | 'scarta' | 'info' | 'errore';
@@ -249,13 +251,16 @@ export class Council {
     const style = v.files['world/style.md'] ?? '';
     const parts: string[] = [];
     const rules = rulesSummary(v.files);
-    // The rune canon goes with every narrative task (the Narrator's and the Arbiter's).
-    const canon = agent === 'narratore' || agent === 'arbitro' ? canonSummary(v.files) : '';
+    // The rune canon goes with every narrative task (the Narrator's, the Actor's and the Arbiter's).
+    const narrative = agent === 'narratore' || agent === 'attore' || agent === 'arbitro';
+    const canon = narrative ? canonSummary(v.files) : '';
     // So does the lexicon: how people speak and behave, the same in every universe (T65).
-    const lexicon = agent === 'narratore' || agent === 'arbitro' ? lexiconSummary(v.files) : '';
+    const lexicon = narrative ? lexiconSummary(v.files) : '';
     // The game chosen at the Genesis goes to whoever builds on it: stories, coherence, mechanics, requests.
-    if (agent === 'narratore' || agent === 'arbitro' || agent === 'ingegnere' || agent === 'referente') parts.push(gameSummary(v.files));
+    if (narrative || agent === 'ingegnere' || agent === 'referente') parts.push(gameSummary(v.files));
     switch (agent) {
+      // The Actor plays the people (T157): it reads what the Narrator reads for those tasks, never more.
+      case 'attore':
       case 'narratore':
         if (focused) parts.push(`## Il mondo\n${bibleHead(bible)}`);
         else parts.push(`## Bibbia del mondo\n${bibleSummary(bible, true)}`, `## Moduli esistenti\n${catalogSummary(v.catalog)}`);

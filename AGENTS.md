@@ -72,6 +72,10 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
 - **Google Gemini**: `gemini-3.1-flash-lite` (testo), in
   `universe/universe.json → ai` con i budget (`maxText`, `maxForges`, `maxPacks`, `maxCast`; in multigiocatore `placesPerMinute`),
   il ragionamento (`thinking`, `low`) e il tempo massimo (`timeout`). Prezzi in `src/kernel/ai/prices.ts` (con la data).
+  **L'Attore** (`ai.attore`, ADR-0116, T157): spento se non detto, e allora nulla cambia; acceso (un booleano, il nome di un modello o `{acceso, modello}`,
+  `repairAttore`), il Narratore scrive la scheda di ogni individuo alla sua prima battuta (`npc.sheet`, `Person.scheda`, riscritta solo se cambiano legami o
+  storia, `sheetFingerprint`) e l'agente `attore` recita `npc.reply` e `npc.dialogue` con il suo modello (`ACTOR_MODEL`, `gemini-3.8-flash`): stessi compiti,
+  paganti, limiti e modelli locali; si sceglie nella Genesi, nella lobby (solo il master: messaggio `attore`) o nell'editor; `kernel.interpreter()` dice chi recita.
   I **coefficienti di generazione** (`ai.coefficienti`, ADR-0085, T45b, `src/kernel/coefficients.ts`): quanto spesso ogni agente chiama l'IA,
   da 0 a 1, riparati dal validatore; diretti (`sessioni dialoghi trame revisioni modelli`: ritmi allungati) e indiretti (`persone abitanti
   pacchetti cose`: meno di ciò che causa le chiamate); il censimento delle chiamate in `CENSUS`, il preset «Low Detail» (`LOW_DETAIL`, anche
@@ -213,6 +217,7 @@ site/                   il sito web (ADR-0095, T97): landing, carte 3D, sessioni
 | Ingegnere | logic.lua (`on_act`, `on_use`, `on_action`…); meccaniche con pannelli (`mechanic.design`); ripara il codice che fallisce |
 | Arbitro | coerenza tra narrativa, aspetto, fisica e codice; rimanda all'agente responsabile; tiene le sessioni del Concilio |
 | Referente | nella corona accoglie il viandante trasceso e porta le sue richieste alla squadra giusta (Fucina, Cartografo, Scultore, regole, pacchetti; in multigiocatore dà al master le rune che chiede) |
+| Attore | solo se il master lo accende (`ai.attore`, ADR-0116): interpreta le persone (`npc.reply`, `npc.dialogue`) dalle **schede** che il Narratore scrive una volta per individuo; non inventa fatti del mondo |
 
 Registro: `kernel.feed()`, pannello Concilio (`G`) e console. Nella corona ogni agente è una squadra: un
 membro per edificio, che va allo scaffale del file che cambia; si vedono parlare solo quelli che

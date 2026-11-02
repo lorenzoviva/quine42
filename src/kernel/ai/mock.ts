@@ -281,6 +281,20 @@ export class MockModels implements Models {
         if (/spada|oggetto|strumento|crea/i.test(t)) return { risposta: 'Alla Fucina.', incarico: 'oggetto', richiesta: t };
         return { risposta: 'Benvenuto nello studio. Chiedi pure: qui si fa il mondo.', incarico: 'nessuno' };
       }
+      case 'npc.sheet': {
+        const w = d.who ?? {};
+        const legami: string[] = Array.isArray(w.legami) ? w.legami : [];
+        return {
+          scheda: [
+            `Sei ${w.nome ?? 'qualcuno'}, ${w.mestiere ?? 'del posto'}. ${w.persona ?? ''}`.trim(),
+            'Parli a frasi corte, con un «bonombo» a chi arriva, e non ti fidi di chi parla troppo.',
+            legami.length ? `Tieni ai tuoi: ${legami.join(', ')}.` : 'Non hai nessuno, e lo dici come se non pesasse.',
+            w.storia ? `Ciò che ti ha fatto: ${w.storia}` : 'Hai sempre vissuto qui.',
+            'Vuoi una giornata tranquilla; temi il freddo e le cattive notizie.',
+            'Con uno sconosciuto sei cortese e breve; con chi ti è caro ti sciogli.',
+          ].join('\n'),
+        };
+      }
       case 'npc.dialogue':
         return {
           battute: [

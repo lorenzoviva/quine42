@@ -96,7 +96,7 @@ let account: SignedIn | undefined;
  * A game of many (T39, ADR-0059): the world runs on the server, this tab is one of its wanderers. The kernel here
  * is a mirror the thin client fills with what the server tells.
  */
-async function joinMany(name: string, lobbyChoice?: { tetto?: number; offline?: boolean }): Promise<ThinClient> {
+async function joinMany(name: string, lobbyChoice?: { tetto?: number; offline?: boolean; attore?: { acceso: boolean; modello?: string } }): Promise<ThinClient> {
   // With accounts (T44b) the wanderer is the account's: the server makes the id from the token.
   const config = await accountConfig();
   if (!account) account = config ? await signIn(config) : undefined;
@@ -109,6 +109,8 @@ async function joinMany(name: string, lobbyChoice?: { tetto?: number; offline?: 
   });
   await session.ready;
   if (session.refused || !session.me) throw new Error(session.refused ?? 'il mondo non risponde');
+  // The Actor (T157): the lobby's choice is the master's; the server refuses it to anyone else.
+  if (lobbyChoice?.attore && session.master) void session.act({ t: 'attore', ...lobbyChoice.attore });
   const mirror = await Kernel.boot({ files: session.files, store: memoryStore(), models: new MockModels(), forms: new WorkerRunner(), wasmUri, mirror: true });
   return new ThinClient(mirror, session);
 }
@@ -126,7 +128,7 @@ async function main() {
   const snap = client ? await client.load() : undefined;
   const snapFiles = snap?.files;
   const many = !!snapFiles && readConfig(snapFiles).config.partita?.modalita === 'multigiocatore';
-  let lobbyChoice: { tetto?: number; offline?: boolean } | undefined;
+  let lobbyChoice: { tetto?: number; offline?: boolean; attore?: { acceso: boolean; modello?: string } } | undefined;
   if (many && snapFiles && !params.has('skip')) {
     loading.hidden = true;
     const config = await accountConfig();

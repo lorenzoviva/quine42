@@ -2,7 +2,7 @@
 // Modules talk only through components and events; no implicit dependencies.
 
 import type { AiMinimi, FileMap, ModuleEntry, UniverseConfig } from './types';
-import { repairCoefficients, repairPartita, type Validator } from './validator';
+import { repairAttore, repairCoefficients, repairPartita, type Validator } from './validator';
 import { DEFAULT_PARTITA } from './partita';
 
 export const DEFAULT_CONFIG: UniverseConfig = {
@@ -41,6 +41,7 @@ export function readConfig(files: FileMap): { config: UniverseConfig; error?: st
           ...(parsed.ai ?? {}),
           coefficienti: repairCoefficients(parsed.ai?.coefficienti),
           minimi: repairMinimi(parsed.ai?.minimi),
+          attore: repairAttore(parsed.ai?.attore),
         },
         partita: repairPartita(parsed.partita),
       },

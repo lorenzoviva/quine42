@@ -3,7 +3,7 @@
 // credit spending cap (which adds to the universe AI budgets), and their collection of cards with usages.
 
 import { collectionOf } from '../kernel/cards';
-import { COEFFICIENT_INFO, COEFFICIENT_KEYS, hourlyEstimate, isLowDetail, repairCoefficients } from '../kernel/coefficients';
+import { COEFFICIENT_INFO, COEFFICIENT_KEYS, hourlyEstimate, isLowDetail, pricedModels, repairAttore, repairCoefficients } from '../kernel/coefficients';
 import { DEFAULT_SCULPTORS, type SculptorModels } from '../kernel/agents/sculptor';
 import { readConfig } from '../kernel/universe';
 import type { FileMap } from '../kernel/types';
@@ -23,6 +23,8 @@ export interface LobbyOptions {
 export interface LobbyResult {
   tetto: number;
   offline?: boolean;
+  /** The Actor (T157), as the master set it in the lobby; only when they changed it. */
+  attore?: { acceso: boolean; modello: string };
 }
 
 export class LobbyScreen {
@@ -64,7 +66,30 @@ export class LobbyScreen {
     const minimi = ai.minimi;
     const coef = repairCoefficients(ai.coefficienti);
     const sculpt: SculptorModels = { ...DEFAULT_SCULPTORS, ...(ai.scultori ?? {}) };
-    const estimate = hourlyEstimate(ai);
+    const actor = repairAttore(ai.attore);
+    // The Actor (T157): everyone sees it; the master, and only the master, sets it here (the server refuses the others).
+    const isMaster = wandererId === master;
+    const actorOn = el('input', { type: 'checkbox', id: 'lobby-attore' }) as HTMLInputElement;
+    actorOn.checked = actor.acceso;
+    const actorModel = el('select', { id: 'lobby-attore-modello' }, ...[...new Set([actor.modello, ...pricedModels()])].map((m) => el('option', { value: m }, m))) as HTMLSelectElement;
+    actorModel.value = actor.modello;
+    const estimateRow = el('div', { class: 'estimate-row' });
+    const showEstimate = () => {
+      const estimate = hourlyEstimate({ ...ai, attore: { acceso: actorOn.checked, modello: actorModel.value } });
+      estimateRow.textContent = `Stima oraria: circa ${usd(estimate.dollari)} (${estimate.chiamate} chiamate/ora). Budget sessione: ${ai.maxText} chiamate testo.`;
+    };
+    actorOn.onchange = showEstimate;
+    actorModel.onchange = showEstimate;
+    showEstimate();
+    actorOn.disabled = !isMaster;
+    actorModel.disabled = !isMaster;
+    const actorRow = el(
+      'div',
+      { class: 'actor-row' },
+      el('label', { for: 'lobby-attore' }, actorOn, el('strong', {}, ' Attore: '), isMaster ? 'interpreta le persone con le schede del Narratore' : actor.acceso ? `acceso (${actor.modello})` : 'spento: il Narratore interpreta le persone'),
+      isMaster ? el('label', { for: 'lobby-attore-modello' }, ' modello ', actorModel) : '',
+      el('div', { class: 'note' }, isMaster ? "Spento, nulla cambia e nessuna chiamata in più. Acceso, il Narratore scrive una scheda per persona alla sua prima battuta e l'Attore la interpreta con il suo modello." : 'Lo stabilisce il master.'),
+    );
 
     // Cards collection outside of the match (T45d)
     const cards = collectionOf(files, wandererId);
@@ -102,11 +127,8 @@ export class LobbyScreen {
         `semplice (${sculpt.semplice}) · figure (${sculpt.figura}) · strutture (${sculpt.struttura}) · importanti (${sculpt.importante}) · artista (${sculpt.artista})`,
       ),
       el('div', { class: 'coef-list' }, el('strong', {}, 'Coefficienti: '), ...coefItems),
-      el(
-        'div',
-        { class: 'estimate-row' },
-        `Stima oraria: circa ${usd(estimate.dollari)} (${estimate.chiamate} chiamate/ora). Budget sessione: ${ai.maxText} chiamate testo.`,
-      ),
+      actorRow,
+      estimateRow,
     );
 
     // Minimi block (if set)
@@ -231,7 +253,8 @@ export class LobbyScreen {
         statusEl.textContent = `Il master richiede un tetto minimo di ${usd(tettoMin)} per entrare.`;
         return;
       }
-      this.close({ tetto });
+      const changed = isMaster && (actorOn.checked !== actor.acceso || actorModel.value !== actor.modello);
+      this.close({ tetto, ...(changed ? { attore: { acceso: actorOn.checked, modello: actorModel.value } } : {}) });
     };
 
     const btnOffline = el('button', {}, 'Gioca offline (modelli locali)');
