@@ -1,5 +1,6 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { GIVE_REACH, Kernel } from '../src/kernel/kernel';
+import { InlineRunner } from '../src/kernel/forms';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockModels } from '../src/kernel/ai/mock';
@@ -11,15 +12,17 @@ import { ThinClient } from '../src/session/thin';
 
 // Between wanderers (T43a): words with a bubble, things given, to whoever is near.
 
-// Each test boots whole kernels and takes about 60 s on its own, before and after T122: at the global limit, so it fails under load.
-vi.setConfig({ testTimeout: 180_000 });
+// A kernel's boot runs the programs of the corona again (about 10 s, T91, T148), and here each world has four kernels:
+// they all ask the same runner, so only the first boot of the file pays. Forms are kernel-owned; what is shared is the
+// result of a program with a seed, which instances copy before changing it (`instanceGrid`).
+const forms = new InlineRunner();
 
 const DT = 1 / 60;
 
 async function bootMany(game: Record<string, unknown> = {}): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3, ...game } }, null, 2) };
-  return Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+  return Kernel.boot({ files, store: memoryStore(), models: new MockModels(), forms });
 }
 
 async function thin(server: SessionServer, id: string, nome: string): Promise<ThinClient> {
@@ -27,7 +30,7 @@ async function thin(server: SessionServer, id: string, nome: string): Promise<Th
   server.connect(s);
   const session = new SessionClient(c, { id, nome });
   await session.ready;
-  const k = await Kernel.boot({ files: session.files, store: memoryStore(), models: new MockModels(), mirror: true });
+  const k = await Kernel.boot({ files: session.files, store: memoryStore(), models: new MockModels(), mirror: true, forms });
   return new ThinClient(k, session);
 }
 
@@ -116,7 +119,7 @@ describe('words and gifts between wanderers (T43a)', () => {
     expect(carlo.session.notices).toEqual([]);
     // The server's own word on what was said: the bubble is on Anna's body.
     expect(k.bubbles.get(k.wandererAt('anna')!.entity)?.text).toBe(words);
-  }, 60000);
+  });
 
   it('a gift goes to who is beside: part of a stack, a whole bag with its runes (the phrase forgets them); too far or no room, refused', async () => {
     const { k, server, anna, bruno, all } = await three();
@@ -176,7 +179,7 @@ describe('words and gifts between wanderers (T43a)', () => {
     expect(k.as('anna', () => countItem(k.inventory(), item))).toBe(1);
     // A pocket that is not there: refused before the kernel.
     expect((await ask(server, all, anna.session.act({ t: 'dai', viandante: 'bruno', slot: 99 }))).ok).toBe(false);
-  }, 60000);
+  });
 });
 
 describe('«Altro…» and PvP between wanderers (T43b)', () => {
@@ -202,7 +205,7 @@ describe('«Altro…» and PvP between wanderers (T43b)', () => {
     expect(health(k, 'anna')).toBeCloseTo(40, 0);
     run(server, all, 8);
     expect(bruno.session.notices.filter((n) => n.tipo === 'altro').map((n) => n.da)).toEqual(['anna', 'anna', 'anna']);
-  }, 60000);
+  });
 
   it('with PvP: a blow hurts the other, a push moves them on their carpet; the master in god mode takes only words', async () => {
     const { k, server, anna, all } = await three({ pvp: true });
@@ -227,7 +230,7 @@ describe('«Altro…» and PvP between wanderers (T43b)', () => {
     expect(k.ecs.get(m.entity, 'needs').health).toBe(100);
     const still = k.wandererAt(master)!;
     expect(Math.hypot(still.x - m.x, still.y - m.y)).toBeLessThan(1e-6);
-  }, 60000);
+  });
 
   it('without «Altro…» between players: not in the menu, refused by the server, no call to the Council', async () => {
     const { k, server, anna, all } = await three({ pvp: true, altroTraGiocatori: false });
@@ -238,7 +241,7 @@ describe('«Altro…» and PvP between wanderers (T43b)', () => {
     expect(r.messaggi?.join(' ')).toMatch(/non si fa «Altro…»/);
     expect(health(k, 'bruno')).toBeCloseTo(50, 0);
     expect(k.feed().some((e) => e.task === 'action.judge')).toBe(false);
-  }, 60000);
+  });
 });
 
 describe('death and reconnection among many (T43c)', () => {
@@ -310,8 +313,7 @@ describe('death and reconnection among many (T43c)', () => {
     expect(mild.anna.session.notices.find((n) => n.tipo === 'morte')).toMatchObject({ dove: 'qui', perso: [] });
     expect(countItem(mild.anna.k.inventory(), item)).toBe(2);
     expect(mild.anna.k.needs()!.health).toBeGreaterThan(50);
-    // Two worlds of three wanderers: every kernel's boot runs the corona's programs again (T91).
-  }, 180_000);
+  });
 
   it('who leaves and comes back finds their position, inventory, phrase, states, card and bonds as they left them', async () => {
     const { k, server, anna, bruno, carlo, all } = await three();
@@ -347,6 +349,5 @@ describe('death and reconnection among many (T43c)', () => {
     expect(back.k.states().benedizione).toMatchObject({ velocita: 1.2 });
     expect(k.cardsOf('anna').some((c) => c.id === 'regola:azione-canto')).toBe(true);
     expect(k.as('anna', () => k.bondOf(vName))).toBe('amica');
-    // A fourth kernel for who comes back, and every boot runs the corona's programs again (T91).
-  }, 180_000);
+  });
 });
