@@ -348,27 +348,114 @@ export function topUnder(f: Form, levels: Levels, x0: number, z0: number, x1: nu
   return h > f.base ? (h - f.base) / f.vpt : undefined;
 }
 
-/** Runs programs in this thread (Node, tests): no meshes. */
-export class InlineRunner implements FormRunner {
-  private cache = new Map<string, FormResult>();
+/** The most forms the process keeps, and the most memory they may take (ADR-0108): a server lives long, and many universes share it. */
+export const FORM_CACHE_ENTRIES = 4096;
+export const FORM_CACHE_BYTES = 256 * 1024 * 1024;
 
-  async run(q: FormRequest): Promise<FormResult> {
-    const key = `${q.model ?? ''}#${q.seed}#${q.vpt}#${q.tint ? `${q.tint.symbol}:${q.tint.color}` : ''}#${hashStr(q.xml)}`;
-    let hit = this.cache.get(key);
-    if (!hit) {
-      hit = runForm(q);
-      this.cache.set(key, hit);
-    }
-    return hit;
+/**
+ * Everything the result of a program depends on, and nothing else (ADR-0108): the whole text of the program, so two programs
+ * are never taken for one, the seed, the box and the tint. The model's id, its density, `rig` and `sway` do not change the voxels; `tempo`
+ * only says how long to wait for them, and what did not finish in time is not kept. The head is JSON, so where it ends is not in doubt.
+ */
+export function formKey(q: FormRequest): string {
+  return JSON.stringify([String(q.seed), q.size?.map(String) ?? null, q.tint?.symbol ?? null, q.tint?.color ?? null]) + q.xml;
+}
+
+/** Results somewhere slower than memory, under a `formKey`: only the tests have one (`tests/setup/forms-disk.ts`). */
+export interface FormBacking {
+  read(key: string): FormResult | undefined;
+  write(key: string, result: FormResult): void;
+}
+
+/** A result nobody can change: every kernel of the process gets this same object. Typed arrays cannot be frozen, their `cells` nobody writes (`instanceGrid` copies). */
+function sealed(r: FormResult): FormResult {
+  const palette: FormResult['palette'] = {};
+  for (const [k, v] of Object.entries(r.palette)) palette[k] = Object.freeze({ ...v });
+  const { X, Y, Z, cells, alphabet } = r.grid;
+  return Object.freeze({
+    grid: Object.freeze({ X, Y, Z, cells, alphabet: Object.freeze([...alphabet]) as string[] }),
+    palette: Object.freeze(palette),
+    actions: Object.freeze(r.actions.map((a) => Object.freeze({ ...a }))) as FormResult['actions'],
+    animations: Object.freeze([...r.animations]) as string[],
+  });
+}
+
+/**
+ * The results of the programs, least recently used out first (ADR-0108). There is no way to empty it: a program written anew has
+ * another key, and one kernel must not take away the forms of the others.
+ */
+export class FormCache {
+  private entries = new Map<string, { result: FormResult; weight: number }>();
+  /** About how much memory the results and their keys take. */
+  bytes = 0;
+  backing?: FormBacking;
+
+  constructor(
+    readonly maxEntries = FORM_CACHE_ENTRIES,
+    readonly maxBytes = FORM_CACHE_BYTES,
+  ) {}
+
+  get size(): number {
+    return this.entries.size;
   }
 
-  clear(): void {
-    this.cache.clear();
+  get(key: string): FormResult | undefined {
+    const e = this.entries.get(key);
+    if (e) {
+      this.entries.delete(key);
+      this.entries.set(key, e);
+      return e.result;
+    }
+    const stored = this.backing?.read(key);
+    return stored && this.keep(key, stored);
+  }
+
+  /** Keeps a finished result and gives back the sealed one, the one to hand out. */
+  set(key: string, result: FormResult): FormResult {
+    const kept = this.keep(key, result);
+    this.backing?.write(key, kept);
+    return kept;
+  }
+
+  private keep(key: string, result: FormResult): FormResult {
+    const kept = sealed(result);
+    // Characters take at most two bytes; the rest of a result (palette, names) is small, a kilobyte at most for what is seen.
+    const weight = kept.grid.cells.length + 2 * key.length + 1024;
+    const old = this.entries.get(key);
+    if (old) this.bytes -= old.weight;
+    this.entries.delete(key);
+    // Bigger than the whole cache: it goes to who asked, and would only push out everything else.
+    if (weight > this.maxBytes) return kept;
+    this.entries.set(key, { result: kept, weight });
+    this.bytes += weight;
+    for (const [k, e] of this.entries) {
+      if (this.entries.size <= this.maxEntries && this.bytes <= this.maxBytes) break;
+      this.entries.delete(k);
+      this.bytes -= e.weight;
+    }
+    return kept;
+  }
+}
+
+/** The cache of this process: every `InlineRunner` that does not say otherwise, so every kernel in Node (ADR-0108). */
+export const sharedForms = new FormCache();
+
+/** Runs programs in this thread (Node, tests): no meshes. A program with a seed runs once in a process, for all its kernels. */
+export class InlineRunner implements FormRunner {
+  constructor(private cache: FormCache = sharedForms) {}
+
+  async run(q: FormRequest): Promise<FormResult> {
+    const key = formKey(q);
+    const hit = this.cache.get(key);
+    if (hit) return hit;
+    const { model: _compiled, finished, ...result } = runForm(q);
+    // Out of time or of steps it is half a model, and how far it got depends on the machine: it goes to who asked and stops there.
+    return finished ? this.cache.set(key, result) : result;
   }
 }
 
 /** The pure part of running a form (the browser's worker does the same, then makes meshes). */
-export function runForm(q: FormRequest): FormResult & { model: ReturnType<typeof compileMjx> } {
+export function runForm(q: FormRequest): FormResult & { model: ReturnType<typeof compileMjx>; finished: boolean } {
   if (q.xml.length > MAX_FORM_XML) throw new Mj3Error(`programma troppo lungo (max ${MAX_FORM_XML} caratteri)`);
   const m = compileMjx(q.xml, q.size ? { size: q.size } : {});
   if (q.tint && m.program.palette[q.tint.symbol]) m.program.palette[q.tint.symbol] = { ...m.program.palette[q.tint.symbol], color: q.tint.color };
@@ -376,6 +463,7 @@ export function runForm(q: FormRequest): FormResult & { model: ReturnType<typeof
   const g = r.grid;
   return {
     model: m,
+    finished: r.finished,
     grid: { X: g.X, Y: g.Y, Z: g.Z, cells: g.cells, alphabet: g.alphabet },
     palette: m.program.palette,
     actions: m.actions.map((a) => ({ name: a.name, label: a.label })),
