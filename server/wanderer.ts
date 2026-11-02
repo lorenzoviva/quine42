@@ -13,6 +13,7 @@ import { promises as fs } from 'node:fs';
 import type { AccountSettings } from './account';
 import { bearer, gate, isJson, refuse } from './access';
 import { runGit } from './git';
+import { openLedger } from './ledger';
 import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
 import { accountWanderer } from '../src/session/account';
 import type { Kernel } from '../src/kernel/kernel';
@@ -86,7 +87,7 @@ function lookOf(files: FileMap): WandererView['modello'] {
 }
 
 /** A wanderer as the universe's files on disk say. */
-export function viewFromFiles(files: FileMap, universo: string, id: string, account: WandererView['account']): WandererView {
+export function viewFromFiles(files: FileMap, universo: string, id: string, account: WandererView['account'], crediti = 0): WandererView {
   const saved = readWandererState(files, id);
   const anonimo = account === 'anonimo' || !!saved?.anonimo;
   return {
@@ -95,7 +96,7 @@ export function viewFromFiles(files: FileMap, universo: string, id: string, acco
     account,
     anonimo,
     ...(saved?.profilo ? { profilo: saved.profilo } : {}),
-    crediti: anonimo ? 0 : saved?.crediti ?? 0,
+    crediti: anonimo ? 0 : crediti,
     nelMondo: false,
     noto: !!saved,
     modello: lookOf(files),
@@ -222,7 +223,7 @@ export function wandererHandler(opts: WandererRouteOptions): Connect.NextHandleF
         }
 
         if (req.method === 'GET') {
-          const view = active ? viewFromKernel(active, universo, who.id, who.account) : viewFromFiles(await wandererFiles(root), universo, who.id, who.account);
+          const view = active ? viewFromKernel(active, universo, who.id, who.account) : viewFromFiles(await wandererFiles(root), universo, who.id, who.account, (await openLedger(opts.universesDir, universo)).balance(who.id));
           return send(res, 200, { ok: true, viandante: view });
         }
 
@@ -233,6 +234,7 @@ export function wandererHandler(opts: WandererRouteOptions): Connect.NextHandleF
           if (!r) return send(res, 500, { ok: false, motivo: 'non è stato possibile salvarlo' });
           return send(res, 200, { ok: true, profilo: r.profilo, riparato: r.riparato, viandante: viewFromKernel(active, universo, who.id, who.account) });
         }
+        await openLedger(opts.universesDir, universo);
         const files = await wandererFiles(root);
         const kept = keepProfileInFiles(files, who.id, body.profilo);
         await fs.mkdir(path.dirname(path.join(root, kept.file)), { recursive: true });
@@ -244,7 +246,7 @@ export function wandererHandler(opts: WandererRouteOptions): Connect.NextHandleF
         } catch {
           /* nothing changed: nothing to commit */
         }
-        return send(res, 200, { ok: true, profilo: kept.repair.profilo, riparato: kept.repair.riparato, viandante: viewFromFiles(files, universo, who.id, who.account) });
+        return send(res, 200, { ok: true, profilo: kept.repair.profilo, riparato: kept.repair.riparato, viandante: viewFromFiles(files, universo, who.id, who.account, (await openLedger(opts.universesDir, universo)).balance(who.id)) });
       } catch (e) {
         return send(res, 500, { ok: false, motivo: (e as Error).message });
       }

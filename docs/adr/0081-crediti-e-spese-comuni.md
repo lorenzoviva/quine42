@@ -2,6 +2,8 @@
 
 Data: 2026-10-30 · Stato: accettato (task T45a del backlog) · Fase 4 di ADR-0050 (il multiplayer); estende ADR-0054 (il viandante con un id), ADR-0056 (le carte e chi paga), ADR-0058 (il kernel sul server) e ADR-0070 (le rune chieste al Referente).
 
+> **Aggiornamento (T125, ADR-0104):** i saldi non stanno più in `world/giocatori/<id>.json` ma in un archivio del server fuori dall'universo; il Referente non dà più crediti; la ricarica a mano del master ha un tetto al giorno. Sotto, com'era.
+
 ## Contesto
 In multigiocatore (ADR-0050, ADR-0056, punto P#1 del piano multiplayer), ogni chiamata a modelli di intelligenza artificiale comporta un costo reale in dollari secondo il listino prezzi (`src/kernel/ai/prices.ts`). Per sostenere il mondo e la piattaforma:
 1. Ogni chiamata online applica una commissione di piattaforma del +1% (P#1).

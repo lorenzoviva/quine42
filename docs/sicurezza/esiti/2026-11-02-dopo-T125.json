@@ -1,0 +1,527 @@
+{
+ "data": "2026-11-02",
+ "commit": "04e99e0",
+ "vite": "7.3.7",
+ "node": "v22.19.0",
+ "piattaforma": "win32",
+ "solo": null,
+ "riepilogo": {
+  "ok": 60,
+  "falle": 12,
+  "errori": 0,
+  "saltate": 1
+ },
+ "prove": [
+  {
+   "id": "V-007.a",
+   "voce": "V-007",
+   "proprieta": "un pattern patologico di string.find finisce entro un tempo breve",
+   "esito": "FALLA",
+   "dettaglio": "processo ucciso dopo 25 s"
+  },
+  {
+   "id": "V-007.b",
+   "voce": "V-007",
+   "proprieta": "un’allocazione enorme finisce in un guasto",
+   "esito": "FALLA",
+   "dettaglio": "1747 ms, nessun guasto"
+  },
+  {
+   "id": "V-008.a",
+   "voce": "V-008",
+   "proprieta": "la prova di caricamento non lascia nulla nella sandbox viva",
+   "esito": "ok",
+   "dettaglio": "nulla resta nella sandbox viva"
+  },
+  {
+   "id": "V-008.b",
+   "voce": "V-008",
+   "proprieta": "una funzione Lua in una tabella passata all’Host non arriva a JS come funzione",
+   "esito": "ok",
+   "dettaglio": "lato kernel: undefined"
+  },
+  {
+   "id": "V-017.a",
+   "voce": "V-017",
+   "proprieta": "`dump` non si raggiunge con la sintassi a metodo sulle stringhe",
+   "esito": "ok",
+   "dettaglio": "tipo: nil"
+  },
+  {
+   "id": "V-019.a",
+   "voce": "V-019",
+   "proprieta": "dai valori che l’Host dà a Lua non si raggiungono costruttori né prototipi di JS",
+   "esito": "ok",
+   "dettaglio": "nessun campo di JS raggiunto"
+  },
+  {
+   "id": "V-019.b",
+   "voce": "V-019",
+   "proprieta": "un valore finto dell’ambiente del processo non si trova in ciò che Lua vede",
+   "esito": "ok",
+   "dettaglio": "0 stringhe"
+  },
+  {
+   "id": "V-019.c",
+   "voce": "V-019",
+   "proprieta": "`pcall` non scavalca il budget di istruzioni",
+   "esito": "ok",
+   "dettaglio": "12 ms, un guasto del budget"
+  },
+  {
+   "id": "V-001.a",
+   "voce": "V-001",
+   "proprieta": "senza identità non si leggono il Lua e i saldi di un universo in multigiocatore",
+   "esito": "ok",
+   "dettaglio": "risposta 200, 2 file"
+  },
+  {
+   "id": "V-001.b",
+   "voce": "V-001",
+   "proprieta": "senza identità non si riscrive il Lua sul server",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-001.c",
+   "voce": "V-001",
+   "proprieta": "senza identità non si cambia un saldo di crediti",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-001.d",
+   "voce": "V-001",
+   "proprieta": "senza identità non si scrive il piano di un luogo",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-001.e",
+   "voce": "V-001",
+   "proprieta": "senza identità non si torna a un commit vecchio",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-001.f",
+   "voce": "V-001",
+   "proprieta": "senza identità non si scrive il ramo del master",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-001.g",
+   "voce": "V-001",
+   "proprieta": "senza identità non si fonde un ramo",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-001.h",
+   "voce": "V-001",
+   "proprieta": "senza identità non si clona un universo diventandone il master",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-001.i",
+   "voce": "V-001",
+   "proprieta": "senza identità non si cestina un universo",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-001.j",
+   "voce": "V-001",
+   "proprieta": "una pagina di un altro sito non scrive: origine diversa con un corpo text/plain, che il browser manda senza chiedere",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-001.k",
+   "voce": "V-001",
+   "proprieta": "una pagina di un altro sito non legge: niente CORS aperto per un’origine diversa",
+   "esito": "ok",
+   "dettaglio": "risposta 403, Access-Control-Allow-Origin assente"
+  },
+  {
+   "id": "V-001.l",
+   "voce": "V-001",
+   "proprieta": "un nome di host estraneo è rifiutato (DNS rebinding)",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-001.m",
+   "voce": "V-001",
+   "proprieta": "senza identità non si crea un universo con un master a piacere",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-002.a",
+   "voce": "V-002",
+   "proprieta": "un modello fuori dall’elenco non arriva a Google",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-002.b",
+   "voce": "V-002",
+   "proprieta": "un’altra origine non spende la chiave",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-002.c",
+   "voce": "V-002",
+   "proprieta": "un corpo da 5 MB non arriva a Google",
+   "esito": "ok",
+   "dettaglio": "risposta 413"
+  },
+  {
+   "id": "V-002.d",
+   "voce": "V-002",
+   "proprieta": "il tetto di spesa del giorno ferma un loop: 20 chiamate da circa 1 $ non arrivano tutte a Google e l’ultima ha 402",
+   "esito": "ok",
+   "dettaglio": "9 su 20 arrivate a Google, ultima risposta 402"
+  },
+  {
+   "id": "V-003.a",
+   "voce": "V-003",
+   "proprieta": "il nome esatto della cartella di git è rifiutato",
+   "esito": "ok",
+   "dettaglio": "risposta 400"
+  },
+  {
+   "id": "V-003.b",
+   "voce": "V-003",
+   "proprieta": "con altre maiuscole non si scrive nella cartella di git",
+   "esito": "ok",
+   "dettaglio": "risposta 400"
+  },
+  {
+   "id": "V-003.c",
+   "voce": "V-003",
+   "proprieta": "con altre maiuscole non si scrive nella cartella di git",
+   "esito": "ok",
+   "dettaglio": "risposta 400"
+  },
+  {
+   "id": "V-003.d",
+   "voce": "V-003",
+   "proprieta": "con un punto finale non si scrive nella cartella di git",
+   "esito": "ok",
+   "dettaglio": "risposta 400"
+  },
+  {
+   "id": "V-003.e",
+   "voce": "V-003",
+   "proprieta": "con uno spazio finale non si scrive nella cartella di git",
+   "esito": "ok",
+   "dettaglio": "risposta 400"
+  },
+  {
+   "id": "V-003.f",
+   "voce": "V-003",
+   "proprieta": "con il nome corto di NTFS non si scrive nella cartella di git",
+   "esito": "ok",
+   "dettaglio": "risposta 400"
+  },
+  {
+   "id": "V-003.g",
+   "voce": "V-003",
+   "proprieta": "con un flusso NTFS non si scrive nella cartella di git",
+   "esito": "ok",
+   "dettaglio": "risposta 400"
+  },
+  {
+   "id": "V-003.h",
+   "voce": "V-003",
+   "proprieta": "nessun percorso esce dalla cartella dell’universo",
+   "esito": "ok",
+   "dettaglio": "0 file fuori"
+  },
+  {
+   "id": "V-004.a",
+   "voce": "V-004",
+   "proprieta": "senza segreto il webhook non accredita nulla",
+   "esito": "ok",
+   "dettaglio": "risposta 503"
+  },
+  {
+   "id": "V-006.a",
+   "voce": "V-006",
+   "proprieta": "nessuno diventa master dicendolo: senza account l’id detto vale solo da questa macchina, e da fuori non si entra",
+   "esito": "ok",
+   "dettaglio": "rifiutato: nessuna risposta"
+  },
+  {
+   "id": "V-006.b",
+   "voce": "V-006",
+   "proprieta": "essere anonimo non lo decide il client",
+   "esito": "ok",
+   "dettaglio": "anonimo: false"
+  },
+  {
+   "id": "V-006.c",
+   "voce": "V-006",
+   "proprieta": "il WebSocket rifiuta un’altra origine",
+   "esito": "ok",
+   "dettaglio": "rifiutato: connessione chiusa"
+  },
+  {
+   "id": "V-006.d",
+   "voce": "V-006",
+   "proprieta": "`GET /api/session` non elenca i viandanti a chiunque",
+   "esito": "ok",
+   "dettaglio": "risposta 200"
+  },
+  {
+   "id": "V-006.e",
+   "voce": "V-006",
+   "proprieta": "senza identità non si legge il saldo di un altro viandante: l’id detto vale solo da questa macchina",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-006.f",
+   "voce": "V-006",
+   "proprieta": "un non master non ha ramo né pubblica né parla al Concilio né segue altri (nel protocollo)",
+   "esito": "ok",
+   "dettaglio": "0 su 4 accettati"
+  },
+  {
+   "id": "V-009.a",
+   "voce": "V-009",
+   "proprieta": "senza segreto locale non si mette un compito nella coda delle CLI",
+   "esito": "FALLA",
+   "dettaglio": "risposta 200, 1 file in coda (nessuna CLI gira)"
+  },
+  {
+   "id": "V-009.b",
+   "voce": "V-009",
+   "proprieta": "senza segreto locale non si leggono i compiti in coda",
+   "esito": "FALLA",
+   "dettaglio": "risposta 200"
+  },
+  {
+   "id": "V-010.a",
+   "voce": "V-010",
+   "proprieta": "i saldi degli altri non arrivano al master nei file",
+   "esito": "ok",
+   "dettaglio": "file del viandante presente"
+  },
+  {
+   "id": "V-010.b",
+   "voce": "V-010",
+   "proprieta": "un ramo pubblicato non cambia i saldi",
+   "esito": "ok",
+   "dettaglio": "ramo accettato, pubblicazione accettata"
+  },
+  {
+   "id": "V-011.a",
+   "voce": "V-011",
+   "proprieta": "chi inonda il server di messaggi è limitato",
+   "esito": "FALLA",
+   "dettaglio": "600 messaggi su 600 serviti"
+  },
+  {
+   "id": "V-012.a",
+   "voce": "V-012",
+   "proprieta": "a un giocatore non arrivano le impostazioni dell’IA",
+   "esito": "FALLA",
+   "dettaglio": "campo ai presente"
+  },
+  {
+   "id": "V-012.b",
+   "voce": "V-012",
+   "proprieta": "a un giocatore non arrivano le storie dei moduli (persona, lore, context)",
+   "esito": "FALLA",
+   "dettaglio": "11 manifest con quei campi"
+  },
+  {
+   "id": "V-012.c",
+   "voce": "V-012",
+   "proprieta": "a un giocatore non arrivano prompt, bibbia, persone, codice degli altri né viandanti",
+   "esito": "ok",
+   "dettaglio": "0 file di troppo"
+  },
+  {
+   "id": "V-012.d",
+   "voce": "V-012",
+   "proprieta": "il server di sviluppo non serve i file di `universes/`",
+   "esito": "FALLA",
+   "dettaglio": "risposta 200"
+  },
+  {
+   "id": "V-014.a",
+   "voce": "V-014",
+   "proprieta": "il server non dà `.env` a chi lo chiede",
+   "esito": "ok",
+   "dettaglio": "risposta 403 per la forma V-014.a"
+  },
+  {
+   "id": "V-014.b",
+   "voce": "V-014",
+   "proprieta": "il server non dà `.env` a chi lo chiede",
+   "esito": "ok",
+   "dettaglio": "risposta 403 per la forma V-014.b"
+  },
+  {
+   "id": "V-014.c",
+   "voce": "V-014",
+   "proprieta": "il server non dà `.env` a chi lo chiede",
+   "esito": "ok",
+   "dettaglio": "risposta 403 per la forma V-014.c"
+  },
+  {
+   "id": "V-014.d",
+   "voce": "V-014",
+   "proprieta": "il server non dà `.env` a chi lo chiede",
+   "esito": "ok",
+   "dettaglio": "risposta 403 per la forma V-014.d"
+  },
+  {
+   "id": "V-014.e",
+   "voce": "V-014",
+   "proprieta": "il server non dà `.env` a chi lo chiede",
+   "esito": "ok",
+   "dettaglio": "risposta 403 per la forma V-014.e"
+  },
+  {
+   "id": "V-014.f",
+   "voce": "V-014",
+   "proprieta": "il server non dà `.env` a chi lo chiede",
+   "esito": "ok",
+   "dettaglio": "risposta 403 per la forma V-014.f"
+  },
+  {
+   "id": "V-014.g",
+   "voce": "V-014",
+   "proprieta": "il server non dà `.env` a chi lo chiede",
+   "esito": "ok",
+   "dettaglio": "risposta 403 per la forma V-014.g"
+  },
+  {
+   "id": "V-014.h",
+   "voce": "V-014",
+   "proprieta": "il server non dà `.env` a chi lo chiede",
+   "esito": "ok",
+   "dettaglio": "risposta 403 per la forma V-014.h"
+  },
+  {
+   "id": "V-014.i",
+   "voce": "V-014",
+   "proprieta": "il server non dà `.env` a chi lo chiede",
+   "esito": "ok",
+   "dettaglio": "risposta 403 per la forma V-014.i"
+  },
+  {
+   "id": "V-014.j",
+   "voce": "V-014",
+   "proprieta": "il server non dà `.env` a chi lo chiede",
+   "esito": "ok",
+   "dettaglio": "risposta 403 per la forma V-014.j"
+  },
+  {
+   "id": "V-014.k",
+   "voce": "V-014",
+   "proprieta": "il server non dà `.env` a chi lo chiede",
+   "esito": "ok",
+   "dettaglio": "risposta 403 per la forma V-014.k"
+  },
+  {
+   "id": "V-015.b",
+   "voce": "V-015",
+   "proprieta": "le pagine hanno una CSP (sul server di sviluppo: una prova della sua presenza, non della sua forma)",
+   "esito": "FALLA",
+   "dettaglio": "2 pagine su 2 senza"
+  },
+  {
+   "id": "V-007.c",
+   "voce": "V-007",
+   "proprieta": "il codice di un mondo bloccato non ferma l’HTTP né gli altri mondi",
+   "esito": "FALLA",
+   "dettaglio": "0 risposte su 2 in 12 s"
+  },
+  {
+   "id": "V-004.b",
+   "voce": "V-004",
+   "proprieta": "con il segreto una firma falsa è rifiutata",
+   "esito": "ok",
+   "dettaglio": "risposta 400"
+  },
+  {
+   "id": "V-004.c",
+   "voce": "V-004",
+   "proprieta": "il nome dell’universo nei metadati non porta fuori da universes/",
+   "esito": "ok",
+   "dettaglio": "risposta 400"
+  },
+  {
+   "id": "V-004.d",
+   "voce": "V-004",
+   "proprieta": "l’id del viandante nei metadati non porta fuori dalla cartella dei viandanti",
+   "esito": "ok",
+   "dettaglio": "risposta 400"
+  },
+  {
+   "id": "V-004.e",
+   "voce": "V-004",
+   "proprieta": "il credito è quello dell’importo pagato, non quello scritto nei metadati",
+   "esito": "ok",
+   "dettaglio": "risposta 200, pagato 1 $, accreditati 1"
+  },
+  {
+   "id": "V-005.a",
+   "voce": "V-005",
+   "proprieta": "lo stesso evento in contemporanea accredita una volta sola",
+   "esito": "ok",
+   "dettaglio": "8 consegne, accreditati 1"
+  },
+  {
+   "id": "V-005.b",
+   "voce": "V-005",
+   "proprieta": "saldi e pagamenti non stanno nella storia dell’universo",
+   "esito": "ok",
+   "dettaglio": "file dei pagamenti nel repository: 0, saldo nel file del viandante: false"
+  },
+  {
+   "id": "V-005.c",
+   "voce": "V-005",
+   "proprieta": "tornare a un commit vecchio non riporta indietro il saldo",
+   "esito": "ok",
+   "dettaglio": "risposta 200, saldo dopo il pagamento 12, dopo il ritorno 12"
+  },
+  {
+   "id": "V-015.a",
+   "voce": "V-015",
+   "proprieta": "il checkout torna solo alla stessa origine",
+   "esito": "FALLA",
+   "dettaglio": "ritorno su altro.example"
+  },
+  {
+   "id": "V-016.a",
+   "voce": "V-016",
+   "proprieta": "il testo d’errore di Stripe non arriva al client",
+   "esito": "FALLA",
+   "dettaglio": "risposta 500"
+  },
+  {
+   "id": "V-016.b",
+   "voce": "V-016",
+   "proprieta": "nessun valore finto dei segreti in ciò che il server ha risposto o scritto nel log",
+   "esito": "ok",
+   "dettaglio": "81 risposte e il log; 0 testi con un valore, 0 già di V-014"
+  },
+  {
+   "id": "V-016.c",
+   "voce": "V-016",
+   "proprieta": "nessun valore finto dei segreti in `dist/` dopo una build",
+   "esito": "SALTA",
+   "dettaglio": "--senza-build"
+  }
+ ]
+}

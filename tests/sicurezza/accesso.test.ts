@@ -7,6 +7,7 @@ import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { AccountSettings } from '../../server/account';
 import { activeHosts, admitSocket, sessionServer } from '../../server/session';
+import { ledgerOf } from '../../server/ledger';
 import { universeStore } from '../../server/universeStore';
 import { walletRoute } from '../../server/wallet';
 import { wandererRoute } from '../../server/wanderer';
@@ -69,7 +70,7 @@ function universe(name: string, partita: object | undefined, more: Record<string
 }
 
 const logicOf = (n: string) => readFileSync(at(n, 'modules', 'sonda', 'logic.lua'), 'utf8');
-const saldoOf = (n: string) => JSON.parse(readFileSync(at(n, 'world', 'giocatori', 'altro.json'), 'utf8')).crediti;
+const saldoOf = (n: string) => ledgerOf(dir, n).balance('altro');
 
 const accounts: AccountSettings = {
   config: { projectId: 'demo' },
@@ -135,8 +136,9 @@ describe('V-001 chi scrive su un universo in multigiocatore', () => {
     const saldo = { changes: { 'world/giocatori/altro.json': JSON.stringify({ nome: 'Altro', crediti: 999 }) }, message: 'x' };
     expect((await asked(local.base, 'POST', 'fatto/commit', saldo, { [WANDERER_HEADER]: 'io' })).status).toBe(403);
     expect(saldoOf('fatto')).toBe(5);
+    // Not even the world's commit makes a balance: a file is not where they are (ADR-0104).
     expect((await asked(local.base, 'POST', 'fatto/commit', saldo, { [INTERNAL_HEADER]: INTERNAL })).status).toBe(200);
-    expect(saldoOf('fatto')).toBe(999);
+    expect(saldoOf('fatto')).toBe(5);
     expect((await asked(local.base, 'POST', 'fatto/commit', commitLua('falso'), { [INTERNAL_HEADER]: 'un-altro-segreto' })).status).toBe(403);
   });
 

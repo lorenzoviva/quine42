@@ -274,22 +274,7 @@ export class MockModels implements Models {
         if (/distrugg.*universo|cancella tutto/i.test(t)) return { risposta: 'Questo no.', incarico: 'nessuno', rifiuto: "distruggerebbe l'universo" };
         if (/riscolp/i.test(t)) return { risposta: 'Lo dico allo Scultore.', incarico: 'riscolpisci', bersaglio: t.replace(/.*riscolpisci\s+(il |la |lo |l')?/i, '').split(' ')[0], richiesta: t };
         if (/\brun[ae]\b/i.test(t)) return { risposta: 'Eccole.', incarico: 'runa', rune: [t.replace(/.*\brun[ae]\s+/i, '')] };
-        if (/\bcredit[io]\b/i.test(t)) {
-          let quanti = 10;
-          let a: string | undefined;
-          const m1 = /(\d+(?:[.,]\d+)?)\s*credit[io](?:\s+(?:ad?|per)\s+([a-z0-9_-]+))?/i.exec(t);
-          if (m1) {
-            quanti = parseFloat(m1[1].replace(',', '.'));
-            a = m1[2];
-          } else {
-            const m2 = /(?:ad?|per)\s+([a-z0-9_-]+)\s+(\d+(?:[.,]\d+)?)\s*credit[io]/i.exec(t);
-            if (m2) {
-              a = m2[1];
-              quanti = parseFloat(m2[2].replace(',', '.'));
-            }
-          }
-          return { risposta: `Assegno ${quanti} crediti${a ? ` a ${a}` : ''}.`, incarico: 'crediti', richiesta: String(quanti), bersaglio: a };
-        }
+        if (/\bcredit[io]\b/i.test(t)) return { risposta: 'I crediti non passano dal Concilio.', incarico: 'nessuno' };
         if (/regola/i.test(t)) return { risposta: 'Sarà una regola del mondo.', incarico: 'regola', richiesta: t.replace(/.*regola:?\s*/i, '') };
         if (/bosco|luogo|regione|castello|deserto/i.test(t)) return { risposta: 'Il Cartografo ci pensa.', incarico: 'ambiente', richiesta: t };
         if (/personaggio|abitante|persona/i.test(t)) return { risposta: 'La Fucina lo farà nascere.', incarico: 'personaggio', richiesta: t };

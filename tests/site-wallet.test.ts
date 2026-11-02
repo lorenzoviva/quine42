@@ -11,6 +11,7 @@ import { linesOf, WALLET_DAYS, walletHandler } from '../server/wallet';
 import { stripeHandler, type StripeRouteOptions } from '../server/stripe';
 import type { AccountSettings } from '../server/account';
 import { accountWanderer } from '../src/session/account';
+import type { PaymentRecord } from '../src/kernel/credits';
 import { checkoutTarget, cleanSearch, formatDay, formatSpent, parseAmount, returnState, returnUrlFor } from '../site/pagamenti';
 
 function call(handler: Connect.NextHandleFunction, method: string, url: string, body?: unknown, headers: Record<string, string> = {}) {
@@ -139,12 +140,12 @@ describe('the wallet route (T105)', () => {
   });
 
   it('broken or foreign ledgers do not break the page, and the days are bounded', () => {
-    expect(linesOf({ 'world/pagamenti.json': 'non json' }, 'non json', 'ugo', true)).toEqual({ pagamenti: [], consumi: [], totaleConsumi: 0 });
-    const junk = JSON.stringify({ eventi: { a: null, b: { wandererId: 'ugo', crediti: 'tanti', timestamp: 1 } } });
-    expect(linesOf({ 'world/pagamenti.json': junk }, undefined, 'ugo', true).pagamenti).toEqual([]);
+    expect(linesOf([], 'non json', 'ugo', true)).toEqual({ pagamenti: [], consumi: [], totaleConsumi: 0 });
+    const junk = [null, { wandererId: 'ugo', crediti: 'tanti', timestamp: 1 }] as unknown as PaymentRecord[];
+    expect(linesOf(junk, undefined, 'ugo', true).pagamenti).toEqual([]);
     const paganti: Record<string, unknown> = {};
     for (let d = 1; d <= 28; d++) for (const m of ['10', '11']) paganti[`2026-${m}-${String(d).padStart(2, '0')}`] = { ugo: tally(1, 1) };
-    const many = linesOf({}, JSON.stringify({ paganti }), 'ugo', false);
+    const many = linesOf([], JSON.stringify({ paganti }), 'ugo', false);
     expect(many.consumi.length).toBe(WALLET_DAYS);
     expect(many.consumi[0].giorno).toBe('2026-11-28');
     expect(many.totaleConsumi).toBe(56);

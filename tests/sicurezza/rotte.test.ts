@@ -8,6 +8,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { GeminiGate, geminiProxy } from '../../server/geminiProxy';
 import { createFakeStripeSignature, handleStripeWebhookEvent, stripeRoute } from '../../server/stripe';
 import { subscriptionQueue } from '../../server/subscriptionQueue';
+import { ledgerOf } from '../../server/ledger';
 import { universeStore } from '../../server/universeStore';
 import { MockModels } from '../../src/kernel/ai/mock';
 import { bundledFiles } from '../../src/kernel/bundle';
@@ -37,7 +38,7 @@ let dir: string;
 let store: Awaited<ReturnType<typeof serve>>;
 const root = () => path.join(dir, 'sonda');
 const logic = () => path.join(root(), 'modules', 'sonda', 'logic.lua');
-const saldo = () => JSON.parse(readFileSync(path.join(root(), 'world', 'giocatori', 'altro.json'), 'utf8')).crediti;
+const saldo = () => ledgerOf(dir, 'sonda').balance('altro');
 const commit = (changes: Record<string, string>, headers: Record<string, string> = { 'Content-Type': 'application/json' }) =>
   fetch(`${store.base}/api/universe/sonda/commit`, { method: 'POST', headers, body: JSON.stringify({ changes, message: 'sonda', author: 'player' }) });
 

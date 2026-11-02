@@ -29,6 +29,7 @@ import { allCards } from '../src/kernel/cards';
 import { allowedPath, UNIVERSE_NAME_RE } from '../src/kernel/paths';
 import { publicFiles } from '../src/session/files';
 import type { AccountSettings } from './account';
+import { sealLedger, sweepBalances } from './ledger';
 import { callerOf, creditFile, gameIn, isJson, newSecret, newUniverse, owns, type Access } from './access';
 import { runGit } from './git';
 
@@ -137,11 +138,14 @@ export async function mergeBranch(root: string, branch: string, message: string)
 /** Copies the universe at `root` into `<baseDir>/<opts.nome>` with another master; the source is never touched. */
 export async function cloneUniverse(baseDir: string, root: string, opts: CloneOptions): Promise<{ nome: string; head: string | null; from: string }> {
   if (!(await exists(path.join(root, '.git')))) throw new Error('universo sconosciuto');
+  // No balance leaves with a copy: the source's go to its ledger first, the clone's starts empty (ADR-0104).
+  await sweepBalances(baseDir, path.basename(root));
   const files = await readTree(root);
   const { changes, from } = cloneChanges(files, opts);
   const dest = path.join(baseDir, opts.nome);
   if (await exists(dest)) throw new Error(`esiste già: ${opts.nome}`);
   await fs.cp(root, dest, { recursive: true });
+  sealLedger(baseDir, opts.nome);
   try {
     const refs = await git(dest, ['for-each-ref', '--format=%(refname)', 'refs/heads/rami/']);
     for (const ref of refs.split('\n').filter(Boolean)) await git(dest, ['update-ref', '-d', ref]);
@@ -334,6 +338,7 @@ export function universeStore(baseDir: string, opts: { accounts?: AccountSetting
       switch (op) {
         case 'create': {
           if (await exists(path.join(root, '.git'))) throw new Error('esiste già');
+          sealLedger(baseDir, name);
           await fs.mkdir(root, { recursive: true });
           await git(root, ['init', '-q']);
           await writeFiles(root, made && 'files' in made ? made.files : {});
@@ -347,8 +352,10 @@ export function universeStore(baseDir: string, opts: { accounts?: AccountSetting
         case 'checkout': {
           if (!/^[0-9a-f]{4,40}$/.test(String(body.id))) throw new Error('commit non valido');
           await git(root, ['restore', `--source=${body.id}`, '--staged', '--worktree', '--', '.']);
-          const h = await commitAll(root, `ritorno a ${body.id}`, 'kernel');
-          return { head: h, files: await readTree(root) };
+          await commitAll(root, `ritorno a ${body.id}`, 'kernel');
+          // An old commit may bring balances back: they count for nothing, and they do not stay (ADR-0104).
+          await sweepBalances(baseDir, name);
+          return { head: await head(root), files: await readTree(root) };
         }
         case 'branch':
           return { head: await writeBranch(root, String(body.branch), body.files ?? {}, String(body.message ?? 'ramo'), String(body.author ?? 'player')) };

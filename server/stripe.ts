@@ -1,7 +1,7 @@
 // Dev server: Stripe Checkout payments and webhooks (T45e, ADR-0083).
 // Allows wanderers to top up their credits via Stripe Checkout (with Google Pay support).
-// The webhook receives `checkout.session.completed` events and credits the wanderer idempotently,
-// recording payments in `world/pagamenti.json`. Keys stay strictly server-side.
+// The webhook receives `checkout.session.completed` events and credits the wanderer once for each event, in the universe's
+// ledger (server/ledger.ts, ADR-0104), outside its history. Keys stay strictly server-side.
 // Anonymous accounts cannot purchase credits.
 
 import type { Connect, Plugin } from 'vite';
@@ -10,16 +10,11 @@ import crypto from 'node:crypto';
 import path from 'node:path';
 import { promises as fs } from 'node:fs';
 import type { AccountSettings } from './account';
-import { runGit } from './git';
+import { openLedger } from './ledger';
 import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
 import { accountWanderer } from '../src/session/account';
 import type { Kernel } from '../src/kernel/kernel';
-import {
-  PAYMENTS_FILE,
-  type PaymentRecord,
-  isPaymentProcessed,
-  recordPayment,
-} from '../src/kernel/credits';
+import type { PaymentRecord } from '../src/kernel/credits';
 import { playerFile, readWandererState, validWandererId, type WandererState } from '../src/kernel/wanderers';
 
 export interface StripeSettings {
@@ -202,12 +197,8 @@ export async function createStripeCheckoutSession(opts: {
   return { url: data.url, id: data.id };
 }
 
-function git(cwd: string, args: string[]): Promise<string> {
-  return runGit(cwd, args, { author: ['Kernel', 'kernel@rune.local'], maxBuffer: 16 * 1024 * 1024 });
-}
-
 /**
- * Applies a Stripe credit recharge to a universe (either to active in-memory kernel or to git repo on disk).
+ * Applies a Stripe credit recharge to a universe (through its running world, if there is one, or directly to its ledger).
  * Handles idempotency and refuses anonymous wanderers.
  */
 export async function applyPaymentToUniverse(opts: {
@@ -228,71 +219,28 @@ export async function applyPaymentToUniverse(opts: {
     return { ok: true, status: 'credited' };
   }
 
-  // 2. If universe is not active in memory, update on disk in its git repository
+  // 2. No world running: the same ledger, which needs no world (ADR-0104).
   const root = path.join(opts.universesDir, opts.universo);
-  const gitDir = path.join(root, '.git');
   try {
-    await fs.stat(gitDir);
+    await fs.stat(path.join(root, '.git'));
   } catch {
     return { ok: false, status: 'error', motivo: `universo sconosciuto: ${opts.universo}` };
   }
-
-  // Check idempotency in world/pagamenti.json
-  const paymentsPath = path.join(root, PAYMENTS_FILE);
-  let paymentsText = '';
   try {
-    paymentsText = await fs.readFile(paymentsPath, 'utf8');
-  } catch {
-    paymentsText = '';
+    const ledger = await openLedger(opts.universesDir, opts.universo);
+    let saved: WandererState | undefined;
+    try {
+      const rel = playerFile(opts.payment.wandererId);
+      saved = readWandererState({ [rel]: await fs.readFile(path.join(root, rel), 'utf8') }, opts.payment.wandererId);
+    } catch {
+      /* not in the world yet: they find their credits when they come */
+    }
+    if (saved?.anonimo) return { ok: false, status: 'anonymous', motivo: 'un anonimo non compra crediti' };
+    return ledger.pay(opts.payment) ? { ok: true, status: 'credited' } : { ok: true, status: 'duplicate' };
+  } catch (e) {
+    // Not recorded: Stripe delivers again.
+    return { ok: false, status: 'error', motivo: (e as Error).message };
   }
-  const files: Record<string, string> = { [PAYMENTS_FILE]: paymentsText };
-  if (isPaymentProcessed(files, opts.payment.eventId)) {
-    return { ok: true, status: 'duplicate' };
-  }
-
-  // Check wanderer file
-  const playerRel = playerFile(opts.payment.wandererId);
-  const playerAbs = path.join(root, playerRel);
-  let playerText = '';
-  try {
-    playerText = await fs.readFile(playerAbs, 'utf8');
-  } catch {
-    playerText = '';
-  }
-  const playerFiles = { [playerRel]: playerText };
-  const saved = readWandererState(playerFiles, opts.payment.wandererId);
-  if (saved?.anonimo) {
-    return { ok: false, status: 'anonymous', motivo: 'un anonimo non compra crediti' };
-  }
-
-  // Credit wanderer
-  const updatedPlayer: WandererState = saved ?? { nome: opts.payment.wandererId };
-  const curCredits = updatedPlayer.crediti ?? 0;
-  const nextCredits = Math.round((curCredits + opts.payment.crediti) * 1e6) / 1e6;
-  updatedPlayer.crediti = nextCredits;
-
-  recordPayment(files, opts.payment);
-
-  // Write and commit
-  await fs.mkdir(path.dirname(playerAbs), { recursive: true });
-  await fs.writeFile(playerAbs, JSON.stringify(updatedPlayer, null, 1) + '\n', 'utf8');
-  await fs.mkdir(path.dirname(paymentsPath), { recursive: true });
-  await fs.writeFile(paymentsPath, files[PAYMENTS_FILE], 'utf8');
-
-  try {
-    // Only the payment's two files: other uncommitted changes of the universe stay out of this commit (T93)
-    await git(root, ['add', '--', playerRel, PAYMENTS_FILE]);
-    await git(root, [
-      'commit',
-      '-q',
-      '-m',
-      `ricarica crediti Stripe: +${opts.payment.crediti} a ${opts.payment.wandererId} (evento ${opts.payment.eventId})`,
-    ]);
-  } catch {
-    // If commit fails (e.g. no changes), ignore
-  }
-
-  return { ok: true, status: 'credited' };
 }
 
 export interface StripeRouteOptions {

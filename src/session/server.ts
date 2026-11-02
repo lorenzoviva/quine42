@@ -451,6 +451,10 @@ export class SessionServer {
       }
       case 'ramo':
         return this.answer(c, seq, this.takeBranch(c, msg.files, msg.base));
+      case 'ricarica':
+        // The kernel checks that it is the master, the wanderer and the day's cap (ADR-0104).
+        void this.kernel.grantCredits(String(msg.viandante), Number(msg.quanti), c.id).then((r) => this.answer(c, seq, r));
+        return;
       case 'pubblica':
         return this.answer(c, seq, this.publish(c));
       case 'segui':
@@ -534,8 +538,6 @@ export class SessionServer {
     const r = await fork.talkToAgent(agente, testo);
     // Runes are not files (T42f): they go into the master's pouch in the world, now.
     if (r.runes?.length) k.as(c.id, () => k.grantRunes(r.runes!));
-    // Credits are not files (T45a): awarded directly to the wanderer on the world kernel.
-    if (r.credits) k.giveCredits(r.credits.target, r.credits.amount);
     // Only what was committed (valid) goes on the branch.
     const made = changesBetween(before, repo.head().files);
     const paths = Object.keys(made);

@@ -164,7 +164,6 @@ export interface WandererState {
   slots?: Record<string, unknown>;
   trasceso?: boolean;
   /** Credit balance in USD (T45a), written only by the server. */
-  crediti?: number;
   /** Whether the wanderer is anonymous (T44b, T45a): has no credits and plays with local models. */
   anonimo?: boolean;
 }
@@ -191,10 +190,11 @@ function parse(src: string | undefined): any {
 /** A wanderer's saved state: their own file, or (for `io`) the wanderer of the old `world/stato.json`. */
 export function readWandererState(files: FileMap, id: string): WandererState | undefined {
   const own = parse(files[playerFile(id)]);
-  if (own && typeof own === 'object') return own;
-  if (id !== SOLO) return undefined;
-  const old = parse(files['world/stato.json'])?.viandante;
-  return old && typeof old === 'object' ? old : undefined;
+  const found = own && typeof own === 'object' ? own : id === SOLO ? parse(files['world/stato.json'])?.viandante : undefined;
+  if (!found || typeof found !== 'object') return undefined;
+  // A balance in the files is what an old commit left: the balances are in the ledger (ADR-0104), and what is saved next no longer has it.
+  const { crediti: _old, ...state } = found;
+  return state;
 }
 
 /** The wanderers the universe knows: one per player file, and `io` if an old state speaks of them. */

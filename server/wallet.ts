@@ -1,6 +1,6 @@
 // Dev server: the wallet as the site sees it (T105, ADR-0095). GET /api/crediti?universo=<nome> says a wanderer's balance,
-// the top-ups credited to them (`world/pagamenti.json`) and what they spent day by day (`world/consumi.json → paganti`).
-// Only their own lines: those files hold everybody's, so they never go to the page as they are. Who asks comes from the
+// the top-ups credited to them (the ledger, ADR-0104) and what they spent day by day (`world/consumi.json → paganti`).
+// Only their own lines: those records hold everybody's, so they never go to the page as they are. Who asks comes from the
 // account's token, as in /api/viandante (`whoAsks`). The world running in this process is asked first, then the files on disk.
 
 import type { Connect, Plugin } from 'vite';
@@ -8,11 +8,12 @@ import path from 'node:path';
 import { promises as fs } from 'node:fs';
 import type { Kernel } from '../src/kernel/kernel';
 import type { FileMap } from '../src/kernel/types';
-import { costWithFee, PAYMENTS_FILE, readPayments } from '../src/kernel/credits';
+import { costWithFee, type Ledger, type PaymentRecord } from '../src/kernel/credits';
 import { USAGE_FILE } from '../src/kernel/ai/usage';
 import { playerFile, readWandererState } from '../src/kernel/wanderers';
 import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
 import { bearer, gate, refuse } from './access';
+import { openLedger } from './ledger';
 import { send, whoAsks, type WandererRouteOptions, type WandererView } from './wanderer';
 
 /** The days of spending a page shows. */
@@ -52,12 +53,12 @@ export interface Wallet {
   totaleConsumi: number;
 }
 
-/** This wanderer's lines of the two ledgers. Files written by hand or by an older version must not break the page. */
-export function linesOf(files: FileMap, usageText: string | undefined, id: string, many: boolean): Pick<Wallet, 'pagamenti' | 'consumi' | 'totaleConsumi'> {
+/** This wanderer's lines of the two ledgers. A usage file written by hand or by an older version must not break the page. */
+export function linesOf(payments: PaymentRecord[], usageText: string | undefined, id: string, many: boolean): Pick<Wallet, 'pagamenti' | 'consumi' | 'totaleConsumi'> {
   const pagamenti: WalletPayment[] = [];
-  for (const [event, p] of Object.entries(readPayments(files).eventi)) {
+  for (const p of payments) {
     if (p?.wandererId !== id || !Number.isFinite(p.crediti) || !Number.isFinite(p.timestamp)) continue;
-    pagamenti.push({ id: p.sessionId || p.eventId || event, data: p.timestamp, crediti: p.crediti, ...(Number.isFinite(p.cents) ? { cents: p.cents } : {}) });
+    pagamenti.push({ id: p.sessionId || p.eventId, data: p.timestamp, crediti: p.crediti, ...(Number.isFinite(p.cents) ? { cents: p.cents } : {}) });
   }
   pagamenti.sort((a, b) => b.data - a.data);
 
@@ -91,25 +92,25 @@ function manyIn(files: FileMap): boolean {
 }
 
 /** The wallet as the universe's files on disk say. */
-export function walletFromFiles(files: FileMap, universo: string, id: string, account: WandererView['account']): Wallet {
+export function walletFromFiles(files: FileMap, ledger: Ledger, universo: string, id: string, account: WandererView['account']): Wallet {
   const saved = readWandererState(files, id);
   const anonimo = account === 'anonimo' || !!saved?.anonimo;
   const many = manyIn(files);
-  return { id, universo, account, anonimo, crediti: anonimo ? 0 : saved?.crediti ?? 0, multigiocatore: many, ...linesOf(files, files[USAGE_FILE], id, many) };
+  return { id, universo, account, anonimo, crediti: anonimo ? 0 : ledger.balance(id), multigiocatore: many, ...linesOf(ledger.paymentsOf(id), files[USAGE_FILE], id, many) };
 }
 
 /** The wallet from a world running here, whose ledgers are fresher than the disk. */
 export function walletFromKernel(k: Kernel, universo: string, id: string, account: WandererView['account']): Wallet {
   const anonimo = account === 'anonimo' || k.isAnonymous(id);
   const many = k.manyPlayers();
-  return { id, universo, account, anonimo, crediti: anonimo ? 0 : k.creditsOf(id), multigiocatore: many, ...linesOf(k.files, k.usage.toJson(), id, many) };
+  return { id, universo, account, anonimo, crediti: anonimo ? 0 : k.creditsOf(id), multigiocatore: many, ...linesOf(k.ledger.paymentsOf(id), k.usage.toJson(), id, many) };
 }
 
 /** The few files a wallet needs. */
 async function walletFiles(root: string, id: string): Promise<FileMap> {
   const files: FileMap = {};
   await Promise.all(
-    ['universe.json', 'world/stato.json', PAYMENTS_FILE, USAGE_FILE, playerFile(id)].map(async (rel) => {
+    ['universe.json', 'world/stato.json', USAGE_FILE, playerFile(id)].map(async (rel) => {
       try {
         files[rel] = await fs.readFile(path.join(root, rel), 'utf8');
       } catch {
@@ -143,7 +144,7 @@ export function walletHandler(opts: WandererRouteOptions): Connect.NextHandleFun
         } catch {
           return send(res, 404, { ok: false, motivo: `universo sconosciuto: ${universo}` });
         }
-        return send(res, 200, { ok: true, portafoglio: walletFromFiles(await walletFiles(root, who.id), universo, who.id, who.account) });
+        return send(res, 200, { ok: true, portafoglio: walletFromFiles(await walletFiles(root, who.id), await openLedger(opts.universesDir, universo), universo, who.id, who.account) });
       } catch (e) {
         return send(res, 500, { ok: false, motivo: (e as Error).message });
       }

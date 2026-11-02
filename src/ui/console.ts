@@ -219,10 +219,13 @@ export class Console {
         }
         const creditiRows: HTMLElement[] = [];
         if (k.partita().modalita === 'multigiocatore') {
-          const wanderers = k.wanderers();
+          // Others' balances do not reach this client (ADR-0104): only their names, and its own balance.
+          const me = k.wanderer().id;
+          const wanderers = new Map(k.wanderers().map((w) => [w.id, w.nome]));
+          for (const p of k.players()) wanderers.set(p.id, p.nome);
           const target = el('select', {}) as HTMLSelectElement;
-          for (const w of wanderers) {
-            target.append(el('option', { value: w.id }, `${w.nome} (${w.id}) — ${k.creditsOf(w.id).toFixed(3)} crediti${w.anonimo ? ' [anonimo]' : ''}`));
+          for (const [id, nome] of wanderers) {
+            target.append(el('option', { value: id }, `${nome} (${id})${id === me ? ` — ${k.creditsOf(id).toFixed(3)} crediti` : ''}`));
           }
           const amt = el('input', { type: 'number', step: '1', min: '0.1', value: '5', style: 'width: 5rem;' }) as HTMLInputElement;
           const assegna = el('button', {}, 'Assegna crediti');
@@ -231,16 +234,12 @@ export class Console {
             const id = target.value;
             const n = parseFloat(amt.value);
             if (!id || isNaN(n) || n <= 0) return;
-            const ok = k.giveCredits(id, n);
-            if (ok) {
-              msg.textContent = `Assegnati ${n} crediti a ${id} (saldo: ${k.creditsOf(id).toFixed(3)})`;
-              this.render();
-            } else {
-              msg.textContent = `Impossibile assegnare crediti a ${id} (anonimo o inesistente)`;
-            }
+            void k.grantCredits(id, n).then((r) => {
+              msg.textContent = r.ok ? `Assegnati ${n} crediti a ${id}` : `Crediti non assegnati a ${id}: ${r.motivo ?? 'nessuna risposta'}`;
+            });
           };
           creditiRows.push(
-            el('div', { class: 'note' }, 'Crediti dei viandanti (multigiocatore, T45a): spese comuni divise tra i connessi, costo modello + 1% piattaforma. Crediti esauriti o anonimo → modelli locali.'),
+            el('div', { class: 'note' }, 'Crediti dei viandanti (multigiocatore, T45a): spese comuni divise tra i connessi, costo modello + 1% piattaforma. Crediti esauriti o anonimo → modelli locali. Le ricariche a mano hanno un tetto al giorno per universo.'),
             el('div', { class: 'row' }, target, amt, assegna, msg),
           );
         }

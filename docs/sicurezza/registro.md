@@ -67,13 +67,14 @@ Modello di una voce:
 
 ### V-005 · Pagamenti: idempotenza fragile e registro nella storia dell'universo
 - Gravità: alta
-- Stato: `specificata`
+- Stato: `chiusa`
 - Superficie: `server/stripe.ts`, `world/pagamenti.json`, `world/giocatori/*.json`
 - Proprietà violata: i crediti non si toccano: un evento accredita una volta sola, e `checkout` o `R` non riportano indietro saldi e pagamenti
-- Prova: solo lettura del codice (T117); misurata dal kit (`esiti/2026-11-01.json`): **la corsa esiste**: V-005.a ok nel giro di T137 (commit `a55e9d2`), FALLA nel giro dell'autore (`544ce7f`): 8 consegne, 2 accrediti; FALLA V-005.b e c: il ritorno a un commit riporta indietro il saldo
+- Prova: solo lettura del codice (T117); misurata dal kit (`esiti/2026-11-01.json`): **la corsa esiste**: V-005.a ok nel giro di T137 (commit `a55e9d2`), FALLA nel giro dell'autore (`544ce7f`): 8 consegne, 2 accrediti; FALLA V-005.b e c: il ritorno a un commit riporta indietro il saldo. Dopo T125 (`esiti/2026-11-02-dopo-T125.json`): V-005.a-c ok; test: la corsa è forzata con 8 consegne e un commit in mezzo per 12 giri, metà attraverso il mondo acceso per 10 giri, quattro processi veri sullo stesso archivio. **V-005.b è riscritta**: il file del viandante resta nel repository (inventario, bisogni), quindi guarda che non dica un saldo e che i pagamenti non abbiano un file
 - Contromisura: saldi e registro dei pagamenti in un archivio del server fuori dalla storia dell'universo, con migrazione dai file di oggi; accredito atomico e idempotente.
 - Task: T125
-- Test: —
+- Test: `tests/sicurezza/saldi.test.ts`
+- Esito: chiusa da T125 (ADR-0104), 02/11/2026, branch `task/T125`. Resta, accettato: nella storia di un universo di prima della migrazione si leggono i saldi di allora.
 
 ### V-006 · Identità scelta dal client
 - Gravità: alta (critica senza account)
@@ -119,13 +120,14 @@ Modello di una voce:
 
 ### V-010 · Il master e i crediti
 - Gravità: media
-- Stato: `specificata`
+- Stato: `chiusa`
 - Superficie: `src/session/server.ts` (il Referente e `giveCredits`, il ramo pubblicato, i file mandati al master)
 - Proprietà violata: i crediti non si toccano: né da una risposta del Referente senza tetto, né da un ramo pubblicato; i saldi degli altri non vanno al master nei file
-- Prova: solo lettura del codice (T117); misurata dal kit (`esiti/2026-11-01.json`): FALLA V-010.a e b: un ramo pubblicato cambia un saldo. La risposta del Referente non è provata
-- Contromisura: saldi fuori dai file (con V-005); nessuna via da Lua, dal Concilio, dal ramo o dal rollback; chi può ricaricare a mano e con quale tetto, scritto nell'ADR di T125.
+- Prova: solo lettura del codice (T117); misurata dal kit (`esiti/2026-11-01.json`): FALLA V-010.a e b: un ramo pubblicato cambia un saldo. La risposta del Referente non è provata. Dopo T125: V-010.a e b ok (`esiti/2026-11-02-dopo-T125.json`); test: ramo pubblicato, una risposta del modello che dice ancora `crediti`, codice Lua che prova ogni nome, un non master, lo specchio
+- Contromisura: saldi fuori dai file (con V-005); nessuna via da Lua, dal Concilio, dal ramo o dal rollback; chi può ricaricare a mano e con quale tetto, scritto nell'ADR di T125: solo il master, dalla console, entro un tetto al giorno per universo (`QUINE_TETTO_RICARICHE`; con gli account 0 se il `.env` non dice altro), mai il Referente.
 - Task: T125
-- Test: —
+- Test: `tests/sicurezza/saldi.test.ts`
+- Esito: chiusa da T125 (ADR-0104), 02/11/2026, branch `task/T125`.
 
 ### V-011 · Nessun limite ai messaggi
 - Gravità: media
@@ -230,12 +232,12 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-002 | a b c d | — | `gemini.test.ts`, `rotte.test.ts` | un processo di questa macchina spende fino al tetto del giorno: voluto (ADR-0099), un loop di chiamate piccole non si ferma prima |
 | V-003 | a b c d e f g h | — | `percorsi.test.ts`, `rotte.test.ts` | — |
 | V-004 | a b c d e | — | `rotte.test.ts` | — |
-| V-005 | a b c | — | — | la corsa con un commit del mondo in mezzo: T125 |
+| V-005 | a b c | — | `saldi.test.ts` | — |
 | V-006 | a b c d e f | g | `rotte.test.ts` | `offline` e `tetto` decisi dal client non si vedono da fuori: T120 |
 | V-007 | a b c | — | `sandbox.test.ts` | il budget per tick e i MarkovJunior sul server: T126 |
 | V-008 | a b | — | `uscita.test.ts`, `sandbox.test.ts` | — |
 | V-009 | a b | — | `rotte.test.ts` | gli argomenti delle CLI, che non si lanciano: T128 |
-| V-010 | a b | — | — | la risposta del Referente con i crediti: T125 |
+| V-010 | a b | — | `saldi.test.ts` | — |
 | V-011 | a | — | — | la lunghezza del testo, le code per pagante: T129 |
 | V-012 | a b c d | e f | `rotte.test.ts` | — |
 | V-013 | — | — | — | il Concilio che scrive `ai` si vede solo dentro il kernel: lo prova T130 |

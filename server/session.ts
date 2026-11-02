@@ -13,6 +13,7 @@ import { WebSocketServer, type WebSocket } from 'ws';
 import type { AccountSettings } from './account';
 import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
 import { gate, refuse } from './access';
+import { ledgerOf, sweepBalances } from './ledger';
 import type { Kernel } from '../src/kernel/kernel';
 
 
@@ -69,7 +70,7 @@ function wsLink(ws: WebSocket) {
   };
 }
 
-export function sessionServer(accounts?: AccountSettings, gemini?: typeof fetch, internal?: string): Plugin {
+export function sessionServer(accounts?: AccountSettings, gemini?: typeof fetch, internal?: string, credits?: { universesDir: string; grantCap: number }): Plugin {
   return {
     name: 'rune-session',
     configureServer(server: ViteDevServer) {
@@ -106,9 +107,10 @@ export function sessionServer(accounts?: AccountSettings, gemini?: typeof fetch,
         let h = activeHosts.get(name);
         if (!h) {
           const port = (server.httpServer?.address() as AddressInfo | null)?.port ?? 5173;
-          h = server
-            .ssrLoadModule('/src/session/host.ts')
-            .then((mod) => mod.openUniverse({ name, base: `http://localhost:${port}`, offline, gemini, verify: accounts?.verify, masterUid: accounts?.masterUid, internal }))
+          // The balances come out of the universe's files before the world reads them, and go to its ledger (ADR-0104).
+          h = (credits ? sweepBalances(credits.universesDir, name) : Promise.resolve())
+            .then(() => server.ssrLoadModule('/src/session/host.ts'))
+            .then((mod) => mod.openUniverse({ name, base: `http://localhost:${port}`, offline, gemini, verify: accounts?.verify, masterUid: accounts?.masterUid, internal, ...(credits ? { ledger: ledgerOf(credits.universesDir, name), grantCap: credits.grantCap } : {}) }))
             .catch((e: Error) => ({ error: e.message }));
           activeHosts.set(name, h);
           // A universe that could not open is tried again by the next client.
