@@ -9,6 +9,7 @@
     },
     "modello": {
       "claude": 2,
+      "fable": 1,
       "gemini": 1,
       "argon": 1
     }
@@ -43,19 +44,45 @@
         "--output-format",
         "json",
         "--dangerously-skip-permissions",
-        "--chrome"
+        "--chrome",
+        "--model",
+        "claude-opus-5-5"
       ],
       "resume": [
         "--resume",
         "{sessione}"
       ],
       "resetSettimanale": "gio 10:00",
-      "contatori": ".",
+      "contatori": "^(session|week .all models.)$",
       "sessioneNuova": [
         "--session-id",
         "{sessione}"
       ],
       "browser": true
+    },
+    "fable": {
+      "cmd": "claude",
+      "args": [
+        "--output-format",
+        "json",
+        "--dangerously-skip-permissions",
+        "--chrome",
+        "--model",
+        "claude-fable-5-1"
+      ],
+      "resume": [
+        "--resume",
+        "{sessione}"
+      ],
+      "resetSettimanale": "gio 10:00",
+      "contatori": "^(session|week .all models.|week .Fable.)$",
+      "sessioneNuova": [
+        "--session-id",
+        "{sessione}"
+      ],
+      "browser": true,
+      "orchestrabile": false,
+      "stessoContoDi": "claude"
     },
     "gemini": {
       "cmd": "agy",

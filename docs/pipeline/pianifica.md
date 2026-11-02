@@ -13,7 +13,8 @@ Sei l'agente che pianifica, nel worktree del branch base (`3d`). Non esegui task
 2. **Sblocca.** Per ogni task `in attesa`: se la domanda ha una risposta (nel file `domande/`, nel task o nel
    to-do), riscrivi il task con la decisione e portalo a `da fare`; altrimenti lascialo.
 3. **Stima e assegna.** Per ogni task `da fare` senza riga `- Pipeline:` scrivi, sotto il titolo:
-   `- Pipeline: <claude|gemini|argon> · stima <n>% · [approvato ·] priorità <n>`.
+   `- Pipeline: <claude|fable|gemini|argon> · stima <n>% · [approvato ·] priorità <n>`.
+   - `fable` (Claude Fable 5.1, ADR-0115) solo per i task più difficili, che chiedono molto ragionamento: consuma in fretta, ha un contatore suo e pesa anche sul settimanale di Claude; mai come orchestratore.
    - Provider: quello scritto dall'autore («> Provider proposto: …», Antigravity = `gemini`) e allora `approvato`;
      altrimenti `claude` per ciò che è delicato (architettura, kernel, multigiocatore, sicurezza, ciò che tocca
      molti file), `gemini` per ciò che è semplice o meccanico (modelli MarkovJunior, documenti, test, UI isolata),

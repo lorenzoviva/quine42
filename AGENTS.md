@@ -613,6 +613,7 @@ l'esecuzione la fa `node tools/pipeline/pipeline.mjs esegui`: task in parallelo 
 (`task/<Txx>`), entro il budget di ogni provider, ripresi dopo un limite. **Chi esegue un task lanciato dalla pipeline è in un ambiente
 condiviso**: segue le «Regole per chi esegue un task» del README (solo il suo worktree e il suo blocco del backlog, niente merge né
 domande: le scrive in `docs/pipeline/domande/<Txx>.md`) al posto dei punti 1 e 3 sul to-do e sul prompt successivo.
+**Fable** (ADR-0115): il provider `fable` (tetto 1, dentro i 2 della CLI di Claude) solo per i task più difficili, mai orchestratore.
 **L'orchestratore** (ADR-0078, [`docs/pipeline/orchestra.md`](docs/pipeline/orchestra.md), `/pipeline` in Claude Code e in Antigravity)
 è l'agente da cui l'autore lancia sempre la pipeline: pianifica, lancia `esegui`, riporta ogni task, delega a un subagente la verifica nel
 browser che il task chiede e non ha fatto (riga `BROWSER:`), integra rinumerando gli ADR che si scontrano, e tiene

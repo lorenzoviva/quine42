@@ -88,11 +88,20 @@ export function setOrchestrator(provider, opts) {
  * nothing new starts and at most one task goes on (resumed), none on the orchestrator's provider, so the tasks never take
  * the credits the orchestration needs to go on. For weekly-only providers (Argon or finestra5h === false), session is the week.
  */
+/** Whether a provider may run the orchestrator: not one marked `orchestrabile: false` (Fable, by the author's rule). */
+export function canOrchestrate(provider, config = CONFIG) {
+  const conf = config.providers?.[provider];
+  return Boolean(conf) && conf.orchestrabile !== false;
+}
+
+/** The account whose credits a provider spends: Fable spends also those of Claude, so it must leave them to the orchestrator. */
+const accountOf = (provider) => CONFIG.providers?.[provider]?.stessoContoDi ?? provider;
+
 export function capOf({ left, session, provider, orchestrator: orch, slot = 1, tetto = 1, threshold, urgent = false, resuming = false }) {
   const conf = CONFIG.providers?.[provider];
   const isWeeklyOnly = conf?.finestra5h === false || provider === 'argon';
   const sess = isWeeklyOnly ? left : (session ?? left);
-  if (left < threshold || sess < threshold) return resuming && provider !== orch ? 1 : 0;
+  if (left < threshold || sess < threshold) return resuming && accountOf(provider) !== accountOf(orch) ? 1 : 0;
   return Math.min(tetto, resuming ? Math.max(slot, 1) : slot + (urgent ? 1 : 0));
 }
 
@@ -1382,7 +1391,7 @@ export function approveTasks(ids, opts) {
 export function assignTask(id, { provider, stima, priorita, approva }, opts) {
   const p = pathsOf(opts);
   if (!p.config.providers[provider] || !(Number(stima) > 0)) {
-    throw new Error('Uso: assegna <Txx> <claude|gemini|argon> <stima %> [priorità] [--approva]');
+    throw new Error('Uso: assegna <Txx> <claude|fable|gemini|argon> <stima %> [priorità] [--approva]');
   }
   const tasks = parseBacklog(readText(p.backlog));
   const t = tasks.find((x) => x.id === id);
@@ -1576,7 +1585,7 @@ if (process.argv[1]?.endsWith('pipeline.mjs')) {
   else if (cmd === 'approva') { approveTasks(rest); for (const id of rest) console.log(`${id}: approvato`); }
   else if (cmd === 'assegna') {
     const [id, provider, stima, priorita] = rest;
-    if (!CONFIG.providers[provider] || !(Number(stima) > 0)) console.log('Uso: assegna <Txx> <claude|gemini|argon> <stima %> [priorità] [--approva]');
+    if (!CONFIG.providers[provider] || !(Number(stima) > 0)) console.log('Uso: assegna <Txx> <claude|fable|gemini|argon> <stima %> [priorità] [--approva]');
     else { assignTask(id, { provider, stima, priorita, approva: rest.includes('--approva') }); console.log(`${id}: ${provider}, ${stima}%`); }
   }
   else if (cmd === 'turno') {
@@ -1588,7 +1597,7 @@ if (process.argv[1]?.endsWith('pipeline.mjs')) {
   }
   else if (cmd === 'nota') say(`nota: ${rest.join(' ')}`);
   else if (cmd === 'orchestratore') {
-    if (rest[0] && !CONFIG.providers[rest[0]]) console.log(`Provider sconosciuto: ${rest[0]} (${Object.keys(CONFIG.providers).join(', ')})`);
+    if (rest[0] && !canOrchestrate(rest[0])) console.log(`Non può orchestrare: ${rest[0]} (${Object.keys(CONFIG.providers).filter((p) => canOrchestrate(p)).join(', ')})`);
     else if (rest[0]) { writeJson(ORCHESTRATOR, { provider: rest[0], dal: now() }); say(`orchestratore: ${rest[0]}`); }
     else console.log(orchestrator());
   }

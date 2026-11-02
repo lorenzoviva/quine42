@@ -12,6 +12,7 @@ type Pipeline = {
   parsePipelineLine(line: string): { provider?: string; estimate?: number; approved: boolean; priority: number; needsBrowser: boolean };
   taskNeedsBrowser(block: string): boolean;
   parseUsage(provider: string, text: string): Counter[] | undefined;
+  canOrchestrate(provider: string): boolean;
   usageLimit(output: string, from?: Date): Date | undefined;
   readOutput(text: string): { session?: string; cost?: number; error: boolean; result: string; outcome?: string; browser?: string };
   capOf(o: { left: number; session?: number; provider: string; orchestrator?: string; slot?: number; tetto?: number; threshold: number; urgent?: boolean; resuming?: boolean }): number;
@@ -275,6 +276,37 @@ describe('usageLimit', () => {
     const from = new Date(2026, 9, 29, 20, 15);
     expect(P.usageLimit('You\'ve hit your 5-hour limit · resets 10pm (Europe/Rome)', from)).toEqual(new Date(2026, 9, 29, 22, 1));
     expect(P.usageLimit('You\'ve hit your limit · resets 9:30am', from)).toEqual(new Date(2026, 9, 30, 9, 31));
+  });
+});
+
+describe('Fable (ADR-0115)', () => {
+  const config = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../tools/pipeline/config.json'), 'utf8'));
+  const reads = (p: string, name: string) => new RegExp(config.providers[p].contatori).test(name);
+
+  it("non orchestra e non è nell'ordine", () => {
+    expect(P.canOrchestrate('fable')).toBe(false);
+    expect(P.canOrchestrate('claude')).toBe(true);
+    expect(P.canOrchestrate('nessuno')).toBe(false);
+    expect(config.orchestra.ordine).not.toContain('fable');
+  });
+
+  it('il suo contatore ferma lui, non Claude; il comune ferma entrambi', () => {
+    expect(reads('claude', 'week (Fable)')).toBe(false);
+    expect(reads('fable', 'week (Fable)')).toBe(true);
+    for (const p of ['claude', 'fable']) for (const n of ['session', 'week (all models)']) expect(reads(p, n)).toBe(true);
+  });
+
+  it("sotto la soglia non riprende sul conto dell'orchestratore", () => {
+    const low = { threshold: 10, orchestrator: 'claude', left: 5, session: 5, resuming: true };
+    expect(P.capOf({ ...low, provider: 'fable' })).toBe(0);
+    expect(P.capOf({ ...low, provider: 'gemini' })).toBe(1);
+  });
+
+  it('i modelli sono scritti, il tetto è 1', () => {
+    expect(config.providers.fable.args).toContain('claude-fable-5-1');
+    expect(config.providers.claude.args).toContain('claude-opus-5-5');
+    expect(config.limiti.modello.fable).toBe(1);
+    expect(config.limiti.provider.claude).toBe(2);
   });
 });
 

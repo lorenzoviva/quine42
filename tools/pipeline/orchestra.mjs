@@ -11,7 +11,7 @@ import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
-import { bus, BUDGET, CONFIG, execute, loadBudget, now, readJson, readOutput, REPO, requestStop, resumeProvider, say, setOrchestrator, SHUTDOWN, shutdownRecord, shutdownSummary, STATE_DIR, suspendProvider, usageLimit, writeJson } from './pipeline.mjs';
+import { bus, BUDGET, canOrchestrate, CONFIG, execute, loadBudget, now, readJson, readOutput, REPO, requestStop, resumeProvider, say, setOrchestrator, SHUTDOWN, shutdownRecord, shutdownSummary, STATE_DIR, suspendProvider, usageLimit, writeJson } from './pipeline.mjs';
 
 const DIR = path.join(STATE_DIR, 'orchestra');
 const STATE = path.join(DIR, 'stato.json');
@@ -227,7 +227,7 @@ function runTurn(provider, sessione, prompt) {
 export async function orchestra({ agente, porta } = {}) {
   fs.mkdirSync(DIR, { recursive: true });
   const order = agente ? [agente, ...OPTS.ordine.filter((p) => p !== agente)] : OPTS.ordine;
-  if (!CONFIG.providers[order[0]]) throw new Error(`agente sconosciuto: ${order[0]}`);
+  if (!canOrchestrate(order[0])) throw new Error(`non può orchestrare: ${order[0]}`);
   let busy = false;
   let wanted; // a provider the author asked for (`/agente`)
   let rotate; // why the next turn starts a new epoch
@@ -270,7 +270,7 @@ export async function orchestra({ agente, porta } = {}) {
           else if (/^\/ferma\s+(ora|dopo)$/.test(item.testo)) { requestStop(item.testo.split(/\s+/)[1], { chi: 'autore' }); cmdIds.push(item.id); }
           else if (item.testo.startsWith('/agente')) {
             const p = item.testo.split(/\s+/)[1];
-            if (CONFIG.providers[p]) wanted = p;
+            if (canOrchestrate(p)) wanted = p;
             cmdIds.push(item.id);
           }
           else if (item.testo.startsWith('/sospendi')) {
@@ -446,7 +446,7 @@ export async function orchestra({ agente, porta } = {}) {
     }
     if (line.startsWith('/agente')) {
       const p = line.split(/\s+/)[1];
-      if (!CONFIG.providers[p]) console.log(`provider: ${Object.keys(CONFIG.providers).join(', ')}`);
+      if (!canOrchestrate(p)) console.log(`provider: ${Object.keys(CONFIG.providers).filter((x) => canOrchestrate(x)).join(', ')}`);
       else { wanted = p; void pump(); }
       return rl.prompt();
     }

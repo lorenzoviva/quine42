@@ -119,5 +119,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0112](0112-il-server-di-produzione.md) | Il server di produzione: senza Vite, un file costruito (`server/serve.ts`), solo la build e le rotte di un elenco, niente Gemini né coda, non parte senza verificatore, segreto del webhook, origini (`QUINE_ORIGINI`) e tetto; la stessa CSP su ogni risposta | accettato |
 | [0113](0113-il-secondo-audit-chi-paga-e-cosa-si-ascolta.md) | Il secondo audit: fuori da un `as` il pagante è `comune`; con gli account le spese comuni vogliono un pagante; un modello fuori listino costa come il più caro; ciò che arriva dal filo non getta eccezioni; un socket avvia solo una partita di molti che esiste, entro un tetto; niente CORS |
 | [0114](0114-le-risorse-per-account.md) | Le risorse per account: un mondo parte per chi prova chi è e si ferma quando è vuoto; quota di universi; ritmi per account e per indirizzo; l'indirizzo non lo dice il client (V-026) |
+| [0115](0115-fable-nella-pipeline.md) | Fable nella pipeline: un provider a parte con tetto 1, dentro i 2 della CLI di Claude, solo per i task più difficili, mai orchestratore; il modello di Claude e quello di Fable sono scritti nella configurazione; il contatore di Fable non ferma Claude | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

@@ -45,6 +45,8 @@ ma **mai sotto 1** (T96): la previsione non chiude mai tutti gli slot di un mode
 di nuovi task a un provider usi `sospendi <provider> [fino a <data>]` (e `riattiva <provider>` per riaprire).
 La **priorità 0** è riservata alle richieste urgenti dell'autore e alle correzioni che bloccano gli altri: usa uno slot di riserva.
 
+**Fable** (ADR-0115) è un provider a parte (`fable`, tetto 1, dentro i 2 della CLI di Claude): solo per i task più difficili, mai orchestratore. Quanto usarlo lo decidi dai consumi misurati, perché i crediti di Claude non restino non consumati al reset settimanale, senza alzare i tetti.
+
 ## Come lavori
 
 1. **Le richieste** (dall'autore in chat o nel to-do): bug, criticità, domande, modifiche a task fatti, task nuovi. Ognuna
