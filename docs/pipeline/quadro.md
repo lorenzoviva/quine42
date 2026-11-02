@@ -3,15 +3,15 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 02/11/2026, fine dell'epoca 200 su **claude** (crediti: vedi `stato`).
+Aggiornato il 02/11/2026, epoca 201 su **claude** (crediti: vedi `stato`).
 
 - **Tetto di Claude a 2** (richiesta dell'autore, 01/11): attivo dopo il riavvio delle 13:35; `stato` dice tetto 2, slot 2. L'autore dice che con il Pro i limiti di Claude sono 5 volte più alti.
 
-- **Slot di Claude a 1** (richiesta dell'autore, 02/11, epoca 200): tetto ancora 2 in `config.json`, `slot` a 1 in `.pipeline/budget.json` con `slotAggiornato` al 05/11 16:00, così la previsione non lo rialza; si riporta a 2 alla fine di T161.
+- **Slot di Claude a 2** (epoca 201, come chiesto dall'autore alla fine di T161): `slot` 2 in `.pipeline/budget.json`, `slotAggiornato` 02/11 03:27 UTC, quindi la previsione può di nuovo muoverlo sotto il tetto 2.
 
-- **T161 finito (epoca 200), commit `dfd1945`, ADR-0108**: boot successivi ~0,25 s, suite 1097 verdi e 3 attesi; `integra T161` in conflitto sull'indice ADR. **T162** (p0, Claude) fonde e rifà la suite; per lui `riattiva claude` con lo slot ancora a 1, così parte da solo. **Alla fine di T162:** `integra T162`, `integra T161`, `slot` a 2 in `budget.json` con `slotAggiornato` all'ora di allora (lo ha detto l'autore), `riprendi T159`, `riprendi T127`; poi, alla fine di T159, `integra T159`, `integra T129`. **Proposta all'autore, da approvare**: `WorkerRunner` (il browser) tiene ancora i risultati scaduti e la sua chiave usa `hashStr`.
+- **T161 e T162 integrati (epoca 201)**: ADR-0108; suite di T162 1107 passati, 2 attesi, nessun rosso, 112 s, la prima con cache delle forme, T128 e T147. `riprendi T159` e `riprendi T127` dati; T130 era partito da solo appena lo slot si è liberato. **Alla fine di T159:** `integra T159`, `integra T129`. **Proposta all'autore, da approvare**: `WorkerRunner` (il browser) tiene ancora i risultati scaduti e la sua chiave usa `hashStr`. T160 ora è pronto (T161 dentro).
 
-- **Fine epoca 200**: in attesa dell'esito di T162. T127 e T159 sono interrotti e non ripartono da soli (`stato` li elenca «in corso»). **Aspetto dall'autore**: se fare un task per `WorkerRunner` (chiesto); le attese elencate in «Fine epoca 199». ADR: 0107 riservato a T129, 0108 di T161, i nuovi dal 0109.
+- **Aspetto dall'autore** (epoca 201): se fare un task per `WorkerRunner`; le attese elencate in «Fine epoca 199». ADR: 0107 riservato a T129, 0108 di T161, i nuovi dal 0109.
 
 - **Integrati di recente**: T115 e T57b (rune nuove dal Concilio, ADR-0097; restano 5 timeout noti di referente, wanderers e watch, `abbonamenti` T68b non ricontrollato), T57c (effetto rilievo e terraformazione nel kernel, ADR-0096), T111 (ripiego senza browser corretto), T113 (lampione intero, drone 1:2), T109+T110+T112 (template del sito verificato), T101 (landing con hero MarkovJunior verificata nel browser).
 - **In corso, coda, attese**: vedi «Stato e decisioni» e «Task attivi» sotto.
