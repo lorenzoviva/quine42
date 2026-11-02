@@ -68,7 +68,7 @@ export class SessionClient {
 
   constructor(
     private link: ClientLink,
-    who: { id: string; nome?: string; profilo?: Partial<Profile>; token?: string; tetto?: number },
+    private who: { id: string; nome?: string; profilo?: Partial<Profile>; token?: string; tetto?: number; freshToken?: () => Promise<string> },
   ) {
     this.ready = new Promise((r) => (this.entered = r));
     link.onMessage((m) => this.receive(m));
@@ -77,14 +77,27 @@ export class SessionClient {
       this.waiting.clear();
       this.entered?.();
     });
-    link.send({
+    this.enter(who.token);
+  }
+
+  private enter(token: string | undefined): void {
+    const who = this.who;
+    this.link.send({
       t: 'entra',
       id: who.id,
       ...(who.nome ? { nome: who.nome } : {}),
       ...(who.profilo ? { profilo: who.profilo } : {}),
-      ...(who.token ? { token: who.token } : {}),
+      ...(token ? { token } : {}),
       ...(typeof who.tetto === 'number' ? { tetto: who.tetto } : {}),
     });
+  }
+
+  /** The world started again (T127): what was asked of the old one has no answer, and this client comes in again as the wanderer it was. */
+  private reenter(): void {
+    for (const done of this.waiting.values()) done({ ok: false, motivo: 'il mondo è ripartito' });
+    this.waiting.clear();
+    // The first token may have expired by now.
+    void (this.who.freshToken?.() ?? Promise.resolve(this.who.token)).catch(() => this.who.token).then((token) => this.enter(token));
   }
 
   /** The wanderer walked here (world space): it is so here at once, the server may correct it. */
@@ -113,6 +126,9 @@ export class SessionClient {
       case 'rifiuto':
         this.refused = m.motivo;
         this.entered?.();
+        break;
+      case 'mondo':
+        if (m.stato === 'ripartito') this.reenter();
         break;
       case 'ingresso':
         Object.assign(this, { id: m.id, nome: m.nome, profilo: m.profilo, riparato: m.riparato ?? [], anonimo: !!m.anonimo, master: !!m.master, files: m.files, branch: m.ramo ?? {}, me: m.me, forma: m.forma, stato: m.stato });

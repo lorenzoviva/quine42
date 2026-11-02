@@ -1,8 +1,8 @@
 // Who is asking (T120, ADR-0102): the one place where a request to the server of the universes becomes a caller. An account
 // proved by its token; on a server without accounts, whoever is on this machine, with the id they say (nobody else gets in);
-// the server's own world, which proves itself with a secret of this process. What each may do is decided here too.
+// the server's own world, which proves itself with a token made from a secret of this process, good for its universe only. What each may do is decided here too.
 
-import { randomBytes, timingSafeEqual } from 'node:crypto';
+import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { accountWanderer } from '../src/session/account';
 import { INTERNAL_HEADER, WANDERER_HEADER } from '../src/kernel/universes';
@@ -10,7 +10,7 @@ import { SOLO, validWandererId } from '../src/kernel/wanderers';
 import type { AccountSettings } from './account';
 import { accessRefusal, originRefusal } from './geminiProxy';
 
-type Req = Pick<IncomingMessage, 'headers'> & { socket: { remoteAddress?: string } };
+type Req = Pick<IncomingMessage, 'headers'> & { socket: { remoteAddress?: string }; url?: string };
 
 export interface Caller {
   /** The world of this process, through the store. */
@@ -51,11 +51,16 @@ export function gate(req: Req, accounts: AccountSettings | undefined): Refusal |
 /** A form of another site cannot send this type without asking first. */
 export const isJson = (req: Pick<IncomingMessage, 'headers'>) => /^application\/json\b/i.test(req.headers['content-type'] ?? '');
 
+/** The token of the world of a universe: a world that got out of its process would hold this, and nothing about the other universes (ADR-0110). */
+export const worldToken = (secret: string, name: string) => createHmac('sha256', secret).update(`mondo:${name}`).digest('hex');
+
 function isInternal(req: Req, secret: string): boolean {
   const said = req.headers[INTERNAL_HEADER];
   if (typeof said !== 'string') return false;
+  const name = /^\/api\/universe\/([^/?]+)/.exec(req.url ?? '')?.[1];
+  if (!name) return false;
   const a = Buffer.from(said);
-  const b = Buffer.from(secret);
+  const b = Buffer.from(worldToken(secret, name));
   return a.length === b.length && timingSafeEqual(a, b);
 }
 

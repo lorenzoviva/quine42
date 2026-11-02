@@ -10,6 +10,7 @@ import { memoryStore } from '../src/kernel/repo';
 import { MockModels } from '../src/kernel/ai/mock';
 import type { PaymentRecord } from '../src/kernel/credits';
 import { ledgerOf } from '../server/ledger';
+import { worldOf } from '../server/worldCalls';
 import {
   verifyStripeWebhookSignature,
   createFakeStripeSignature,
@@ -205,7 +206,7 @@ describe('Stripe payments and idempotency (T45e)', () => {
       signature: 't=123,v1=wrong',
       settings,
       universesDir: 'universes',
-      getActiveKernel: async () => k,
+      getActiveWorld: async () => worldOf(k),
     });
     expect(failSig.status).toBe(400);
 
@@ -215,7 +216,7 @@ describe('Stripe payments and idempotency (T45e)', () => {
       signature,
       settings,
       universesDir: 'universes',
-      getActiveKernel: async () => k,
+      getActiveWorld: async () => worldOf(k),
     });
     expect(outcome1.status).toBe(200);
     expect((outcome1.body as any).status).toBe('credited');
@@ -227,7 +228,7 @@ describe('Stripe payments and idempotency (T45e)', () => {
       signature,
       settings,
       universesDir: 'universes',
-      getActiveKernel: async () => k,
+      getActiveWorld: async () => worldOf(k),
     });
     expect(outcome2.status).toBe(200);
     expect((outcome2.body as any).status).toBe('duplicate');
@@ -264,7 +265,7 @@ describe('Stripe payments and idempotency (T45e)', () => {
       signature,
       settings: { webhookSecret: secret },
       universesDir: 'universes',
-      getActiveKernel: async () => k,
+      getActiveWorld: async () => worldOf(k),
     });
     expect(outcome.status).toBe(403);
     expect(k.creditsOf('anonimo1')).toBe(0);

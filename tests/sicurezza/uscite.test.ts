@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { leadsToUniverses } from '../../server/hidden';
+import { leadsToPrograms, leadsToUniverses } from '../../server/hidden';
 import { MockModels } from '../../src/kernel/ai/mock';
 import { bundledFiles } from '../../src/kernel/bundle';
 import { hourlyEstimate } from '../../src/kernel/coefficients';
@@ -141,6 +141,25 @@ describe('universes/ sul server di sviluppo', () => {
   it('V-012 tutto il resto passa: il kernel che si chiama universes.ts, le route, il seme', () => {
     for (const url of ['/', '/index.html', '/src/kernel/universes.ts', '/src/kernel/universes.ts?t=1', '/api/universe/sonda', '/api/universe/sonda/commit', '/universe/universe.json', '/universes.html'])
       expect(leadsToUniverses(url, root, dir), url).toBe(false);
+  });
+});
+
+describe('i programmi dei mondi (T169, ADR-0110)', () => {
+  it('V-012 non si arriva a node_modules/.quine-mondo/ per nessuna via, e il resto di node_modules passa', () => {
+    const root = process.cwd();
+    const abs = path.join(root, 'node_modules', '.quine-mondo').replace(/\\/g, '/');
+    for (const url of [
+      '/node_modules/.quine-mondo/123/mondo.mjs',
+      '/node_modules/.quine-mondo/123/mondo.mjs?raw',
+      '/node_modules/.QUINE-MONDO/123/glue.wasm',
+      '/node_modules/%2Equine-mondo/123/mondo.mjs',
+      '/node_modules/.quine-mondo./123/mondo.mjs',
+      '/src/..%2fnode_modules/.quine-mondo/123/mondo.mjs',
+      `/@fs/${abs}/123/mondo.mjs`,
+    ])
+      expect(leadsToPrograms(url, root), url).toBe(true);
+    for (const url of ['/', '/node_modules/wasmoon/dist/glue.wasm', '/node_modules/.vite/deps/three.js', '/src/session/worldProcess.ts'])
+      expect(leadsToPrograms(url, root), url).toBe(false);
   });
 });
 

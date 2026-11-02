@@ -3,7 +3,7 @@
 // program of their look; POST /api/viandante {universo, profilo} keeps the profile they chose. Who they are comes from the
 // account's token (`Authorization: Bearer <token>`, verified as the session does); a server without accounts (development,
 // the preview) takes the id the page says (`viandante`, `io` by default), as the session does without a verifier.
-// The world running in this process (a game of many) has the wanderer's state in memory: it is asked first; otherwise
+// The running world (a game of many, in its own process) has the wanderer's state in memory: it is asked first; otherwise
 // the universe's files on disk are read, and a profile kept there is committed alone.
 
 import type { Connect, Plugin } from 'vite';
@@ -17,6 +17,7 @@ import { openLedger } from './ledger';
 import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
 import { accountWanderer } from '../src/session/account';
 import type { Kernel } from '../src/kernel/kernel';
+import type { WorldCalls } from './worldCalls';
 import type { FileMap } from '../src/kernel/types';
 import { Forms, InlineRunner, MODELS_DIR, MODELS_INDEX } from '../src/kernel/forms';
 import { readPeople } from '../src/kernel/society';
@@ -167,11 +168,11 @@ function git(cwd: string, args: string[]): Promise<string> {
 export interface WandererRouteOptions {
   accounts?: AccountSettings;
   universesDir: string;
-  getActiveKernel?: (universe: string) => Promise<Kernel | undefined>;
+  getActiveWorld?: (universe: string) => Promise<WorldCalls | undefined>;
 }
 
 /** The view from a world running here, if it is. */
-function viewFromKernel(k: Kernel, universo: string, id: string, account: WandererView['account']): WandererView {
+export function viewFromKernel(k: Kernel, universo: string, id: string, account: WandererView['account']): WandererView {
   const inWorld = k.wanderers().some((w) => w.id === id);
   const saved = readWandererState(k.files, id);
   const anonimo = account === 'anonimo' || k.isAnonymous(id);
@@ -213,7 +214,7 @@ export function wandererHandler(opts: WandererRouteOptions): Connect.NextHandleF
         const who = await whoAsks(opts.accounts, bearer(req), body.viandante ?? params.get('viandante'));
         if ('error' in who) return send(res, who.status, { ok: false, motivo: who.error });
         const root = path.join(opts.universesDir, universo);
-        const active = await opts.getActiveKernel?.(universo);
+        const active = await opts.getActiveWorld?.(universo);
         if (!active) {
           try {
             await fs.stat(path.join(root, '.git'));
@@ -223,16 +224,16 @@ export function wandererHandler(opts: WandererRouteOptions): Connect.NextHandleF
         }
 
         if (req.method === 'GET') {
-          const view = active ? viewFromKernel(active, universo, who.id, who.account) : viewFromFiles(await wandererFiles(root), universo, who.id, who.account, (await openLedger(opts.universesDir, universo)).balance(who.id));
+          const view = active ? await active.view(universo, who.id, who.account) : viewFromFiles(await wandererFiles(root), universo, who.id, who.account, (await openLedger(opts.universesDir, universo)).balance(who.id));
           return send(res, 200, { ok: true, viandante: view });
         }
 
         // POST: keep the profile.
         if (!body.profilo || typeof body.profilo !== 'object') return send(res, 400, { ok: false, motivo: 'manca il profilo' });
         if (active) {
-          const r = active.keepProfile(who.id, body.profilo);
+          const r = await active.keepProfile(universo, who.id, who.account, body.profilo);
           if (!r) return send(res, 500, { ok: false, motivo: 'non è stato possibile salvarlo' });
-          return send(res, 200, { ok: true, profilo: r.profilo, riparato: r.riparato, viandante: viewFromKernel(active, universo, who.id, who.account) });
+          return send(res, 200, { ok: true, profilo: r.profilo, riparato: r.riparato, viandante: r.viandante });
         }
         await openLedger(opts.universesDir, universo);
         const files = await wandererFiles(root);

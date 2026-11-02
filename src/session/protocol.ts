@@ -173,6 +173,8 @@ export type ServerMsg =
    */
   | { t: 'esito'; seq: number; ok: boolean; testo?: string; profilo?: Profile; forma?: FormView; fatto?: string; messaggi?: string[]; dialoghi?: Dialog[]; motivo?: string; contenitore?: ContainerView; borsa?: number }
   | { t: 'rifiuto'; motivo: string }
+  /** The world's process has stopped, went on, or started again (T127): the client stays, and after `ripartito` comes in again. */
+  | { t: 'mondo'; stato: 'fermo' | 'ripreso' | 'ripartito'; testo: string }
   /** What the Council said meanwhile (T41): only to the master, never to a player. */
   | { t: 'concilio'; voci: FeedEntry[] }
   /** The world's files changed (the Council, a publication: T42b); a player hears only of those its client has. */
