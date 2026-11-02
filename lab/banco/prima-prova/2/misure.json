@@ -1,0 +1,194 @@
+{
+  "bersaglio": "steampunk",
+  "token": {
+    "input": 2,
+    "cacheScritta": 2748,
+    "cacheLetta": 0,
+    "output": 30502,
+    "inputTotale": 2750
+  },
+  "modello": "claude-opus-5-5",
+  "dollari": 0.632032,
+  "ms": 325092,
+  "caratteriXml": 7976,
+  "passa": true,
+  "difetti": [],
+  "voci": [
+    {
+      "id": "finisce",
+      "ok": true,
+      "valore": "220 ms",
+      "richiesto": "entro 8000 ms"
+    },
+    {
+      "id": "valido",
+      "ok": true,
+      "valore": "sì",
+      "richiesto": "i controlli di check.ts"
+    },
+    {
+      "id": "piani",
+      "ok": true,
+      "valore": "2",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "testa",
+      "ok": true,
+      "valore": "1.55 1.55",
+      "richiesto": "≥ 1.5 caselle per piano"
+    },
+    {
+      "id": "stanze",
+      "ok": true,
+      "valore": "5",
+      "richiesto": "≥ 3"
+    },
+    {
+      "id": "murato",
+      "ok": true,
+      "valore": "0",
+      "richiesto": "≤ 0.25"
+    },
+    {
+      "id": "porta",
+      "ok": true,
+      "valore": "x 49, scarto 0.01, alta 1.8, libera",
+      "richiesto": "sul davanti, scarto ≤ 0.33, alta ≥ 1.5"
+    },
+    {
+      "id": "salti",
+      "ok": true,
+      "valore": "5",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "materiali",
+      "ok": true,
+      "valore": "10",
+      "richiesto": "≥ 6"
+    },
+    {
+      "id": "dominante",
+      "ok": true,
+      "valore": "0.23",
+      "richiesto": "≤ 0.6"
+    },
+    {
+      "id": "finestre",
+      "ok": true,
+      "valore": "45 su 4 lati",
+      "richiesto": "≥ 6 su ≥ 3 lati"
+    },
+    {
+      "id": "dettagli",
+      "ok": true,
+      "valore": "422, 0 lati vuoti",
+      "richiesto": "≥ 24, ≤ 1 lati vuoti"
+    },
+    {
+      "id": "rumore",
+      "ok": true,
+      "valore": "0.65",
+      "richiesto": "≤ 0.7"
+    },
+    {
+      "id": "sagoma",
+      "ok": true,
+      "valore": "6",
+      "richiesto": "≥ 4"
+    },
+    {
+      "id": "rilievo",
+      "ok": true,
+      "valore": "0.41",
+      "richiesto": "≥ 0.12"
+    },
+    {
+      "id": "ingombro",
+      "ok": true,
+      "valore": "0.96",
+      "richiesto": "≥ 0.3"
+    }
+  ],
+  "misure": {
+    "voxel": 206846,
+    "ms": 220,
+    "finito": true,
+    "piani": [
+      {
+        "z": 2,
+        "quota": 0.1,
+        "area": 9.69,
+        "testa": 1.55,
+        "stanze": 2
+      },
+      {
+        "z": 35,
+        "quota": 1.75,
+        "area": 9.915,
+        "testa": 1.55,
+        "stanze": 3
+      }
+    ],
+    "terrazze": 0,
+    "stanze": 5,
+    "murato": 0,
+    "porta": {
+      "x": 49,
+      "y": 95,
+      "scarto": 0.025,
+      "alta": 1.8,
+      "libera": true
+    },
+    "salti": [
+      {
+        "x": 22,
+        "y": 72,
+        "z": 2,
+        "sale": false
+      },
+      {
+        "x": 45,
+        "y": 51,
+        "z": 2,
+        "sale": false
+      },
+      {
+        "x": 77,
+        "y": 9,
+        "z": 2,
+        "sale": false
+      },
+      {
+        "x": 22,
+        "y": 51,
+        "z": 35,
+        "sale": false
+      },
+      {
+        "x": 54,
+        "y": 33,
+        "z": 2,
+        "sale": false
+      }
+    ],
+    "materiali": 10,
+    "dominante": 0.22538506908521316,
+    "finestre": 45,
+    "latiConFinestre": 4,
+    "dettagli": 422,
+    "latiVuoti": 0,
+    "rumore": 0.6546644844517185,
+    "rilievo": 0.4137751108792069,
+    "sagoma": 6,
+    "ingombro": 0.9628,
+    "luci": 86,
+    "inutili": [],
+    "avvisi": [
+      "tocca i bordi laterali della griglia: forse è tagliato",
+      "tocca il soffitto della griglia: forse è tagliato in alto"
+    ],
+    "errori": []
+  }
+}
