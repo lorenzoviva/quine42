@@ -29,8 +29,8 @@ Modello di una voce:
 - Prova: solo lettura del codice (T117); misurata dal kit (T137, `esiti/2026-11-01.json`): FALLA tutte le scritture e le letture senza identità, anche da un'altra origine e con un Host estraneo (V-001.a-j, l, m); il CORS non è aperto (V-001.k, ok). Giro dell'autore (`esiti/2026-11-01-f12.md`): da `https://example.com` una richiesta `no-cors` **scrive** un file nell'universo (V-001.o, FALLA); la lettura non passa (V-001.n, ok). Dopo T120: test (`tests/sicurezza/accesso.test.ts`: ogni scrittura per ogni tipo di chiamante, letture, singola, master) e kit (`esiti/2026-11-01-dopo-T120.json`): V-001.a-m ok, con V-001.m riscritta perché provi un universo di molti con un master a piacere: creare una partita in singola da questa macchina resta ammesso. V-001.n, o (da un altro sito) sono da rifare a mano nel browser dell'autore; lo stesso effetto è nei test (origine diversa, `text/plain`)
 - Contromisura: identità verificata sul server e permessi per operazione su ogni route; su un universo multigiocatore un non master non scrive nulla; `clone` prende il master dall'identità; controllo di `Origin` e `Content-Type`; le letture del sito ricevono solo ciò che serve. In produzione solo le route ammesse.
 - Task: T120, T133
-- Test: `tests/sicurezza/rotte.test.ts`, `tests/sicurezza/accesso.test.ts`
-- Esito: chiusa da T120 (ADR-0102), 01/11/2026, branch `task/T120`. Il master del clone resta nel corpo, ma lo nomina solo il master provato dell'universo di partenza: il perché è nell'ADR. Per T133: in produzione solo le route ammesse.
+- Test: `tests/sicurezza/rotte.test.ts`, `tests/sicurezza/accesso.test.ts`, `tests/sicurezza/produzione.test.ts`
+- Esito: chiusa da T120 (ADR-0102), 01/11/2026, branch `task/T120`. Il master del clone resta nel corpo, ma lo nomina solo il master provato dell'universo di partenza: il perché è nell'ADR. Per T133: in produzione solo le route ammesse. T133 (ADR-0112), 02/11: in produzione solo le route ammesse.
 
 ### V-002 · Il proxy di Gemini spende la chiave per chiunque
 - Gravità: critica (oggi: alta)
@@ -40,8 +40,8 @@ Modello di una voce:
 - Prova: solo lettura del codice (T117); misurata dal kit prima di T123 (`esiti/2026-11-01.json`, 01/11): FALLA V-002.a-d, ciò che arriverebbe a Google è stato contato su un Google finto. Dopo T123: test con Google finto (`tests/sicurezza/gemini.test.ts`) e kit (`esiti/2026-11-01-dopo-T123.json`, T140): V-002.a-d ok, con V-002.d riscritta perché raggiunga il tetto in dollari (9 chiamate da circa 1 $ su 20, poi 402); come era scritta, 20 chiamate piccole, restava FALLA: costano circa 0,25 $, sotto il tetto. Dopo le altre correzioni la riprova T134
 - Contromisura: elenco dei modelli ammessi, corpo massimo ridotto, tetto di spesa nel proxy, solo da loopback con controllo di `Origin`; in multigiocatore il server chiama Google direttamente, senza route pubblica. La chiave resta fuori dal browser.
 - Task: T123, T133
-- Test: `tests/sicurezza/gemini.test.ts`, `tests/sicurezza/rotte.test.ts`
-- Esito: chiusa da T123 (ADR-0099), 01/11/2026, branch `task/T123`. Resta, ed è ciò che l'ADR decide: da questa macchina, senza identità, si spende fino al tetto del giorno (10 $, confermato «per ora» dall'autore il 01/11). Per T133: il server di produzione non monta la route e chiede il tetto nel `.env`.
+- Test: `tests/sicurezza/gemini.test.ts`, `tests/sicurezza/rotte.test.ts`, `tests/sicurezza/produzione.test.ts`
+- Esito: chiusa da T123 (ADR-0099), 01/11/2026, branch `task/T123`. Resta, ed è ciò che l'ADR decide: da questa macchina, senza identità, si spende fino al tetto del giorno (10 $, confermato «per ora» dall'autore il 01/11). Per T133: il server di produzione non monta la route e chiede il tetto nel `.env`. T133 (ADR-0112), 02/11: il server di produzione non monta la route e chiede il tetto.
 
 ### V-003 · La cartella di git non è protetta
 - Gravità: critica su file system che ignorano le maiuscole (Windows, l'ambiente dell'autore)
@@ -84,8 +84,8 @@ Modello di una voce:
 - Prova: solo lettura del codice (T117); misurata dal kit (`esiti/2026-11-01.json`): FALLA V-006.a-e, compreso `GET /api/viandante`, che dà il saldo di chiunque senza identità; il protocollo rifiuta ramo, pubblicazione, Concilio e «segui» a un non master (V-006.f, ok); giro dell'autore (`esiti/2026-11-01-f12.md`): la pagina di un altro sito apre il WebSocket ed **entra nel mondo** come viandante (V-006.g, FALLA). Dopo T120: test (`tests/sicurezza/accesso.test.ts`) e kit (`esiti/2026-11-01-dopo-T120.json`): V-006.a-f ok. **V-006.a ed e sono riscritte**: su loopback senza account l'id detto vale, come vuole la contromisura, quindi si misurano da fuori, con un'intestazione di inoltro (è ciò che aggiunge un tunnel; il kit non esce dalla macchina); da un indirizzo davvero esterno lo prova il test di `admitSocket`. V-006.g è da rifare a mano nel browser dell'autore
 - Contromisura: senza verificatore l'id scelto dal client vale solo da loopback; `anonimo`, `tetto` e `offline` decisi dal server; controllo di `Origin` sul WebSocket; `GET /api/session` non elenca i viandanti a chiunque; in produzione niente avvio senza verificatore. `GET /api/viandante` dice il saldo solo a chi lo possiede; lo stesso vale per `/api/crediti`, la superficie nuova di T105 (saldo e storici, stessa identità non verificata, coperta da T120).
 - Task: T120, T133
-- Test: `tests/sicurezza/rotte.test.ts`, `tests/sicurezza/accesso.test.ts`
-- Esito: chiusa da T120 (ADR-0102), 01/11/2026, branch `task/T120`. Resta, ed è ciò che l'ADR decide: chi sta sulla macchina di un server senza account è chi dice di essere. Per T133: in produzione niente avvio senza verificatore.
+- Test: `tests/sicurezza/rotte.test.ts`, `tests/sicurezza/accesso.test.ts`, `tests/sicurezza/produzione.test.ts`
+- Esito: chiusa da T120 (ADR-0102), 01/11/2026, branch `task/T120`. Resta, ed è ciò che l'ADR decide: chi sta sulla macchina di un server senza account è chi dice di essere. Per T133: in produzione niente avvio senza verificatore. T133 (ADR-0112), 02/11: in produzione niente avvio senza verificatore, né con l’emulatore.
 
 ### V-007 · Il blocco del tick ferma tutti
 - Gravità: alta
@@ -117,8 +117,8 @@ Modello di una voce:
 - Prova: solo lettura del codice (T117), nessuna CLI lanciata; misurata dal kit (`esiti/2026-11-01.json`): FALLA V-009.a e b; nessuna CLI lanciata. T128, CLI vera (Claude Code 2.1.316), una cartella con hook, server MCP e `CLAUDE.md` propri: con il solo `--tools ""` l'hook parte, il `CLAUDE.md` guida la risposta e restano 8 strumenti MCP; con l'isolamento nulla di tutto questo, `init` con liste vuote, risposta corretta dalla coda. Antigravity 1.4.12: nessuna opzione esclude gli strumenti (letto da `agy --help`). Dopo T128, kit (`esiti/2026-11-01-dopo-T128.json`): V-009.a e b ok, risposta 404 perché la route è spenta; la route accesa la provano i test, con richieste HTTP vere (403 senza segreto) e una verifica nel browser: la pagina del gioco legge il segreto e usa la coda, un’altra origine locale ha 403 anche dove il CORS di Vite le lascia leggere la risposta
 - Contromisura: route montata solo su richiesta esplicita, solo in loopback, con un segreto locale; CLI in una cartella vuota, ambiente ridotto, strumenti esclusi e configurazione MCP e hook isolati, con conferma verificata; se Antigravity non può escludere gli strumenti, niente Antigravity sulla coda. In produzione la coda non c'è.
 - Task: T128, T133
-- Test: `tests/sicurezza/rotte.test.ts`
-- Esito: chiusa da T128 (ADR-0106), 01/11/2026, branch `task/T128`. Antigravity non è più sulla coda. Resta a T133 non montare la route in produzione (qui è già spenta senza `QUINE_CODA=1`); le richieste in `universes/.coda/` restavano file che il server di sviluppo serviva a chi ne conosceva l'id: chiuso con V-012 (T130).
+- Test: `tests/sicurezza/rotte.test.ts`, `tests/sicurezza/produzione.test.ts`
+- Esito: chiusa da T128 (ADR-0106), 01/11/2026, branch `task/T128`. Antigravity non è più sulla coda. Resta a T133 non montare la route in produzione (qui è già spenta senza `QUINE_CODA=1`); le richieste in `universes/.coda/` restavano file che il server di sviluppo serviva a chi ne conosceva l'id: chiuso con V-012 (T130). T133 (ADR-0112), 02/11: in produzione la route non c’è, anche con `QUINE_CODA=1`.
 
 ### V-010 · Il master e i crediti
 - Gravità: media
@@ -166,13 +166,14 @@ Modello di una voce:
 
 ### V-014 · Vite 5.4.10
 - Gravità: media
-- Stato: `in correzione`
+- Stato: `chiusa`
 - Superficie: le dipendenze, `server.fs.deny` che protegge `.env`
 - Proprietà violata: le dipendenze non hanno avvisi noti aperti senza un motivo scritto
 - Prova: nessuna: T117 lo ricorda, `npm audit` non è stato lanciato; misurata dal kit (`esiti/2026-11-01.json`): **il server di sviluppo dà il contenuto di `.env` con due forme della richiesta** (V-014.c, g: valori finti, in un progetto usa e getta), senza identità; le altre nove forme non danno il valore. `npm audit` lanciato da T131 (01/11): 15 avvisi (2 critici, 5 alti, 8 moderati), ora 0 con Vite 7.3.7 e Vitest 4.1.12 (ADR-0100). Le forme del kit riprovate con le due versioni, con un server su una cartella temporanea e un valore finto: 5.4.10 dà il valore con le forme c e g, 7.3.7 con nessuna. Il kit con il `vite.config.ts` vero (`--solo V-014`, 7.3.7): 11 ok, 0 FALLA, tutte con risposta 403; `esiti/2026-11-01.json` resta la misura di prima
 - Contromisura: lanciare `npm audit`, aggiornare ciò che serve (Vite compreso), riportare ciò che resta aperto e perché; in produzione niente server di sviluppo. Fatta da T131 la parte delle dipendenze; resta T133, che chiude la voce.
 - Task: T131, T133
-- Test: `tests/sicurezza/dipendenze.test.ts`
+- Test: `tests/sicurezza/dipendenze.test.ts`, `tests/sicurezza/produzione.test.ts`
+- Esito: chiusa da T133 (ADR-0112), 02/11/2026, branch `task/T133`: il server di produzione non contiene Vite e serve da disco solo `dist/`; `npm run dev` non si espone (regola 8h di `AGENTS.md`).
 
 ### V-015 · XSS e reindirizzamento aperto
 - Gravità: bassa
@@ -182,8 +183,8 @@ Modello di una voce:
 - Prova: solo lettura del codice (T117); misurata dal kit e da F12 (`esiti/2026-11-01.json`, `esiti/2026-11-01-f12.md`): FALLA V-015.a, b, c: un `seed` non numerico diventa un elemento di `site/sessioni.html`; dopo la correzione, kit e blocco F12 (`esiti/2026-11-02-dopo-T132-V-015-016.json`): V-015.a, b, c ok, nel browser nessuna violazione della CSP su gioco, sito e laboratorio. Delle altre pagine: `innerHTML` solo in `site/sessioni.ts` (con `escapeHtml`) e in `lab/`, che è uno strumento locale
 - Contromisura: `Number()` sul seme e sugli altri numeri dei file, `returnUrl` limitato alla stessa origine (`sameOriginReturn`), una CSP compatibile con three.js e con i worker (`server/csp.ts`, ADR-0111).
 - Task: T132
-- Test: `tests/sicurezza/pagine.test.ts`
-- Esito: `task/T132`, 02/11. Il server di produzione (T133) deve mettere la stessa intestazione.
+- Test: `tests/sicurezza/pagine.test.ts`, `tests/sicurezza/produzione.test.ts`
+- Esito: `task/T132`, 02/11. Il server di produzione (T133) deve mettere la stessa intestazione. T133 (ADR-0112), 02/11: la stessa intestazione in produzione.
 
 ### V-016 · Errori e segreti
 - Gravità: bassa

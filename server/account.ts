@@ -6,6 +6,7 @@
 // FIREBASE_AUTH_EMULATOR_HOST (the Auth emulator, e.g. localhost:9099), QUINE_MASTER (the uid of the account that is
 // the master `io` of the universes made before accounts). Verifying needs no service account key: only the project.
 
+import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Plugin } from 'vite';
 import type { Account, AccountConfig, Verifier } from '../src/session/account';
 
@@ -57,15 +58,19 @@ export function anonymousToken(f: { sign_in_provider?: string; identities?: Reco
 }
 
 /** GET /api/account: what the browser needs to sign in, or {} when this server has no accounts. */
+export function accountHandler(settings: AccountSettings) {
+  return (req: IncomingMessage, res: ServerResponse): void => {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Cache-Control', 'no-store');
+    res.end(JSON.stringify(req.method === 'GET' ? settings.config : {}));
+  };
+}
+
 export function accountRoute(settings: AccountSettings): Plugin {
   return {
     name: 'rune-account',
     configureServer(server) {
-      server.middlewares.use('/api/account', (req, res) => {
-        res.setHeader('Content-Type', 'application/json');
-        res.setHeader('Cache-Control', 'no-store');
-        res.end(JSON.stringify(req.method === 'GET' ? settings.config : {}));
-      });
+      server.middlewares.use('/api/account', accountHandler(settings));
     },
   };
 }

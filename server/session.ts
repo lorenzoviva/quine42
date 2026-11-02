@@ -1,11 +1,11 @@
-// Dev server: the sessions of the games of many (T38, ADR-0058). A WebSocket at /api/session?universo=<name>
+// The sessions of the games of many (T38, ADR-0058). A WebSocket at /api/session?universo=<name>
 // is a client of that universe; the first one starts its world, in a process of its own (server/worldHost.ts, T127, ADR-0110), which then
 // keeps running watched from here. Each message is one JSON object of src/session/protocol.ts. `?offline` starts a world with the local models.
-// Only `npm run dev`: the preview server does not start worlds. With accounts (server/account.ts, T44b) every world verifies, through
+// `npm run dev` and the production server (server/production.ts, T133): the preview server does not start worlds. With accounts (server/account.ts, T44b) every world verifies, through
 // this process, the token of who comes in.
 
-import type { Plugin, ViteDevServer } from 'vite';
-import type { IncomingMessage } from 'node:http';
+import type { Connect, Plugin, ViteDevServer } from 'vite';
+import type { IncomingMessage, Server as HttpServer } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import type { Duplex } from 'node:stream';
 import fs from 'node:fs';
@@ -77,39 +77,141 @@ function wsLink(ws: WebSocket): HostLink {
   };
 }
 
+/** GET /api/session: how many, not who (the master has the list of the players through their own session). */
+export function sessionList(accounts?: AccountSettings): Connect.NextHandleFunction {
+  return async (req, res, next) => {
+    const url = req.url?.split('?')[0];
+    if (url !== '/api/session' || req.method !== 'GET') return next();
+    const no = gate(req, accounts);
+    if (no) return refuse(res, no, (error) => ({ error }));
+    const sessions: Array<{ name: string; active: boolean; clients: number }> = [];
+    for (const [name, hostPromise] of activeHosts.entries()) {
+      try {
+        const h = await hostPromise;
+        if (h && 'session' in h) {
+          sessions.push({
+            name,
+            active: true,
+            clients: h.session.clientCount ?? h.session.connected?.().length ?? 0,
+          });
+        }
+      } catch {
+        // ignore
+      }
+    }
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ sessions }));
+  };
+}
+
+export interface SessionOptions {
+  accounts?: AccountSettings;
+  gemini?: typeof fetch;
+  internal?: string;
+  credits?: { universesDir: string; grantCap: number };
+  memoryMb?: number;
+  /** The program of the worlds: built when needed by the dev server, already there in production. */
+  program: () => Promise<string>;
+  /** What is refused before the rules of `gate`: the production server's origins (T133). */
+  guard?: (req: IncomingMessage) => string | undefined;
+}
+
+/** The sockets of the games of many on a server, whichever it is. `stop` stops the worlds, saving what they can, and closes the clients. */
+export function attachSessions(httpServer: HttpServer, o: SessionOptions): { stop(): Promise<void> } {
+  const { accounts, gemini, internal, credits, memoryMb, program } = o;
+  const wss = new WebSocketServer({ noServer: true, maxPayload: MAX_MESSAGE });
+  const startWorld = async (name: string, offline: boolean): Promise<ActiveHost | { error: string }> => {
+    const port = (httpServer.address() as AddressInfo | null)?.port ?? 5173;
+    const universes = credits?.universesDir;
+    // The balances come out of the universe's files before the world reads them, and go to its ledger (ADR-0104).
+    if (universes) {
+      await sweepBalances(universes, name);
+      fs.mkdirSync(path.join(universes, LEDGER_DIR), { recursive: true });
+    }
+    const world = new WorldHost({
+      name,
+      base: `http://localhost:${port}`,
+      internal: internal ?? '',
+      offline,
+      gemini,
+      verify: accounts?.verify,
+      masterUid: accounts?.masterUid,
+      ...(universes && credits ? { ledgerFile: path.join(universes, LEDGER_DIR, `${name}.json`), grantCap: credits.grantCap } : {}),
+      entry: await program(),
+      memoryMb,
+      headOf: universes ? () => runGit(path.join(universes, name), ['rev-parse', 'HEAD'], { author: ['kernel', 'kernel@quine'] }).then((out) => out.trim()) : undefined,
+      onGiveUp: () => activeHosts.delete(name),
+    });
+    const opened = await world.start();
+    if ('error' in opened) return opened;
+    return {
+      name,
+      session: {
+        connect: (link) => world.connect(link),
+        get clientCount() {
+          return world.clientCount;
+        },
+      },
+      calls: world.calls,
+      stop: () => world.stop(),
+    };
+  };
+  const open = (name: string, offline: boolean) => {
+    let h = activeHosts.get(name);
+    if (!h) {
+      h = startWorld(name, offline).catch((e: Error) => ({ error: e.message }));
+      activeHosts.set(name, h);
+      // A universe that could not open is tried again by the next client.
+      void h.then((r) => 'error' in r && activeHosts.delete(name));
+    }
+    return h;
+  };
+  httpServer.on('upgrade', (req: IncomingMessage, socket: Duplex, head: Buffer) => {
+    const url = new URL(req.url ?? '/', 'http://localhost');
+    // Vite's own socket (hot reload) has its own path and protocol: only ours is taken.
+    if (url.pathname !== '/api/session') return;
+    const guarded = o.guard?.(req);
+    const admitted = guarded ? { refused: guarded } : admitSocket(req, accounts, url.searchParams.has('offline'));
+    if ('refused' in admitted) {
+      socket.write('HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n');
+      socket.destroy();
+      return;
+    }
+    wss.handleUpgrade(req, socket, head, (ws) => {
+      const link = wsLink(ws);
+      const name = url.searchParams.get('universo') ?? '';
+      if (!UNIVERSE_NAME_RE.test(name)) {
+        link.send({ t: 'rifiuto', motivo: 'universo sconosciuto' });
+        return ws.close();
+      }
+      void open(name, admitted.offline).then((h) => {
+        if ('error' in h) {
+          link.send({ t: 'rifiuto', motivo: h.error });
+          return ws.close();
+        }
+        h.session.connect(link);
+      });
+    });
+  });
+  let stopped: Promise<void> | undefined;
+  const stop = () =>
+    (stopped ??= (async () => {
+      const stopping = [...activeHosts.values()].map((h) => h.then((x) => ('stop' in x ? x.stop() : undefined)));
+      activeHosts.clear();
+      await Promise.allSettled(stopping);
+      for (const ws of wss.clients) ws.terminate();
+      wss.close();
+    })());
+  httpServer.on('close', () => void stop());
+  return { stop };
+}
+
 export function sessionServer(accounts?: AccountSettings, gemini?: typeof fetch, internal?: string, credits?: { universesDir: string; grantCap: number }, memoryMb?: number): Plugin {
   return {
     name: 'rune-session',
     configureServer(server: ViteDevServer) {
-      server.middlewares.use(async (req, res, next) => {
-        const url = req.url?.split('?')[0];
-        if (url === '/api/session' && req.method === 'GET') {
-          const no = gate(req, accounts);
-          if (no) return refuse(res, no, (error) => ({ error }));
-          // How many, not who: the master has the list of the players through their own session.
-          const sessions: Array<{ name: string; active: boolean; clients: number }> = [];
-          for (const [name, hostPromise] of activeHosts.entries()) {
-            try {
-              const h = await hostPromise;
-              if (h && 'session' in h) {
-                sessions.push({
-                  name,
-                  active: true,
-                  clients: h.session.clientCount ?? h.session.connected?.().length ?? 0,
-                });
-              }
-            } catch {
-              // ignore
-            }
-          }
-          res.statusCode = 200;
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify({ sessions }));
-          return;
-        }
-        next();
-      });
-      const wss = new WebSocketServer({ noServer: true, maxPayload: MAX_MESSAGE });
+      server.middlewares.use(sessionList(accounts));
       // The program of the worlds: built once, and again if the sources changed since (a world that is running keeps its own).
       let outDir: string | undefined;
       let built: Promise<string> | undefined;
@@ -123,84 +225,9 @@ export function sessionServer(accounts?: AccountSettings, gemini?: typeof fetch,
         outDir = path.join(folder, String(process.pid));
         return (built ??= buildWorld(root, { outDir, preserveSymlinks: server.config.resolve.preserveSymlinks }));
       };
-      const startWorld = async (name: string, offline: boolean): Promise<ActiveHost | { error: string }> => {
-        const port = (server.httpServer?.address() as AddressInfo | null)?.port ?? 5173;
-        const universes = credits?.universesDir;
-        // The balances come out of the universe's files before the world reads them, and go to its ledger (ADR-0104).
-        if (universes) {
-          await sweepBalances(universes, name);
-          fs.mkdirSync(path.join(universes, LEDGER_DIR), { recursive: true });
-        }
-        const world = new WorldHost({
-          name,
-          base: `http://localhost:${port}`,
-          internal: internal ?? '',
-          offline,
-          gemini,
-          verify: accounts?.verify,
-          masterUid: accounts?.masterUid,
-          ...(universes && credits ? { ledgerFile: path.join(universes, LEDGER_DIR, `${name}.json`), grantCap: credits.grantCap } : {}),
-          entry: await program(),
-          memoryMb,
-          headOf: universes ? () => runGit(path.join(universes, name), ['rev-parse', 'HEAD'], { author: ['kernel', 'kernel@quine'] }).then((o) => o.trim()) : undefined,
-          onGiveUp: () => activeHosts.delete(name),
-        });
-        const opened = await world.start();
-        if ('error' in opened) return opened;
-        return {
-          name,
-          session: {
-            connect: (link) => world.connect(link),
-            get clientCount() {
-              return world.clientCount;
-            },
-          },
-          calls: world.calls,
-          stop: () => world.stop(),
-        };
-      };
-      const open = (name: string, offline: boolean) => {
-        let h = activeHosts.get(name);
-        if (!h) {
-          h = startWorld(name, offline).catch((e: Error) => ({ error: e.message }));
-          activeHosts.set(name, h);
-          // A universe that could not open is tried again by the next client.
-          void h.then((r) => 'error' in r && activeHosts.delete(name));
-        }
-        return h;
-      };
-      server.httpServer?.on('upgrade', (req: IncomingMessage, socket: Duplex, head: Buffer) => {
-        const url = new URL(req.url ?? '/', 'http://localhost');
-        // Vite's own socket (hot reload) has its own path and protocol: only ours is taken.
-        if (url.pathname !== '/api/session') return;
-        const admitted = admitSocket(req, accounts, url.searchParams.has('offline'));
-        if ('refused' in admitted) {
-          socket.write('HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n');
-          socket.destroy();
-          return;
-        }
-        wss.handleUpgrade(req, socket, head, (ws) => {
-          const link = wsLink(ws);
-          const name = url.searchParams.get('universo') ?? '';
-          if (!UNIVERSE_NAME_RE.test(name)) {
-            link.send({ t: 'rifiuto', motivo: 'universo sconosciuto' });
-            return ws.close();
-          }
-          void open(name, admitted.offline).then((h) => {
-            if ('error' in h) {
-              link.send({ t: 'rifiuto', motivo: h.error });
-              return ws.close();
-            }
-            h.session.connect(link);
-          });
-        });
-      });
-      server.httpServer?.on('close', () => {
-        const stopping = [...activeHosts.values()].map((h) => h.then((x) => ('stop' in x ? x.stop() : undefined)));
-        activeHosts.clear();
-        wss.close();
-        void Promise.allSettled(stopping).then(() => outDir && fs.rmSync(outDir, { recursive: true, force: true }));
-      });
+      if (!server.httpServer) return;
+      const { stop } = attachSessions(server.httpServer as HttpServer, { accounts, gemini, internal, credits, memoryMb, program });
+      server.httpServer.on('close', () => void stop().then(() => outDir && fs.rmSync(outDir, { recursive: true, force: true })));
     },
     configurePreviewServer(server) {
       server.middlewares.use((req, res, next) => {

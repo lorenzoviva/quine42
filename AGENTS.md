@@ -55,6 +55,7 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
 8e. **Un giocatore solo non consuma il mondo** (ADR-0107): ritmo per viandante all'arrivo di ogni messaggio (`LIMITS` in `src/session/server.ts`), ciò che può chiamare i modelli (`heavy`) ne ha uno più stretto e una coda per pagante, il testo verso il Concilio è tagliato (`words`). Un messaggio nuovo che chiama i modelli passa da lì.
 8f. **Ciò che esce e ciò che il Concilio scrive sono elenchi** (ADR-0109): a un client solo i campi nominati in `src/session/files.ts` (`playerFiles`, `publicFiles`), un campo nuovo resta a casa finché non lo si nomina; `universes/` non si serve mai (`server/hidden.ts`); un commit del Concilio cambia solo `councilMayWrite` (`paths.ts`), `universe.json → ai` si muove solo dal kernel su comando del master (`setAi`, l'editor).
 8g. **Ogni mondo di molti è un processo senza segreti** (ADR-0110): `server/worldHost.ts` lo avvia con il solo programma leggibile, il token del suo universo e un limite di memoria, e lo uccide se tace; Gemini e la verifica dei token passano dal canale, le rotte da `WorldCalls`. Mai permettere al mondo una cartella sopra il programma: apre anche il `.env`. I programmi MarkovJunior vi girano uno per turno del ciclo (`TurnRunner` in `host.ts`), così tra due passa il battito.
+8h. **In pubblico solo il server di produzione** (ADR-0112): `server/production.ts`, senza Vite, serve `dist/` e le rotte del suo elenco, senza `/api/gemini` né `/api/coda`; non parte senza verificatore, segreto del webhook, `QUINE_ORIGINI` e, con la chiave, il tetto (`productionProblems`); una route nuova si aggiunge lì, un'intestazione nuova anche. `npm run dev` non si espone.
 9. **La chiave API non arriva mai al browser**: la tiene solo `GeminiGate` (`server/geminiProxy.ts`, ADR-0099): modelli a elenco, corpo limitato, tetto di spesa giornaliero; la route solo da questa macchina e dalla stessa origine, in multigiocatore il server chiama Google senza route.
 10. **Ciò che sembra invalicabile lo è**: il terreno blocca a caselle, i modelli con i loro voxel (ADR-0041);
     ogni luogo è connesso (varchi + sentieri scavati dal kernel, porte delle strutture sul sentiero; niente cose solide su punti di articolazione né davanti alle porte, ADR-0064).
@@ -92,13 +93,15 @@ npm run typecheck    # tsc --noEmit
 npm run build        # typecheck + build (npx vite preview la serve, proxy incluso)
 npm run test:sicurezza # solo la suite delle vulnerabilità (tests/sicurezza/, già dentro npm test; ADR-0098)
 npm run sicurezza:prove # le prove dell'autore contro un server vero in un progetto usa e getta (T137, docs/sicurezza/README.md)
+npm run build:server # il server di produzione: dist-server/server.mjs e il programma dei mondi (ADR-0112)
+npm run serve        # lo avvia (dopo build e build:server), legge il .env se c'è; rifiuta di partire senza configurazione
 npm run abbonamento  # serve la coda /api/coda con la CLI di Claude (con QUINE_CODA=1 nel .env, ADR-0077, ADR-0106)
 ```
 
-`.env`: `GEMINI_API_KEY=...` (ignorato da git), `QUINE_MONDO_MEMORIA` (MB di heap di ogni mondo di molti, predefinito 1024, ADR-0110), `GEMINI_TETTO_GIORNALIERO` (dollari al giorno per la chiave, predefinito 10; la spesa in `universes/.spesa-gemini.json`, ADR-0099); `QUINE_CODA=1` accende la coda degli abbonamenti (ADR-0106); per gli account in multigiocatore `FIREBASE_PROJECT_ID` (e `FIREBASE_API_KEY`,
+`.env`: `GEMINI_API_KEY=...` (ignorato da git), per il server di produzione `QUINE_ORIGINI` (i siti per cui risponde, separati da virgole: `https://…`, `http://` solo per questa macchina), `QUINE_PORTA` o `PORT` (8080), `QUINE_HOST` (127.0.0.1 se non detto; `0.0.0.0` per uscire), `QUINE_UNIVERSI` (ADR-0112), `QUINE_MONDO_MEMORIA` (MB di heap di ogni mondo di molti, predefinito 1024, ADR-0110), `GEMINI_TETTO_GIORNALIERO` (dollari al giorno per la chiave, predefinito 10; la spesa in `universes/.spesa-gemini.json`, ADR-0099); `QUINE_CODA=1` accende la coda degli abbonamenti (ADR-0106); per gli account in multigiocatore `FIREBASE_PROJECT_ID` (e `FIREBASE_API_KEY`,
 `FIREBASE_AUTH_DOMAIN`, `QUINE_MASTER`, `QUINE_TETTO_RICARICHE`, dollari al giorno per universo che il master può dare a mano, ADR-0104: 0 con gli account, 20 senza; con l'emulatore `FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099` e un progetto `demo-…`, ADR-0082); per i pagamenti Stripe in prova `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` (e `STRIPE_TAX_CODE` per i Managed Payments, ADR-0083). Senza chiave o con `?offline`: modelli locali, texture e
-ostacoli procedurali. URL: `?skip` salta intro e Genesi; `?dev&teleport=46,0` porta oltre il tappeto (o `teleport=X,Y` dovunque: anche dentro una stanza, vedi «Convalida nel browser»); in sviluppo `?universo=<nome>` apre un altro
-universo di `universes/` e `?viandante=<id>` sceglie il viandante della scheda in multigiocatore (due schede, due viandanti).
+ostacoli procedurali. URL: `?skip` salta intro e Genesi; `?dev&teleport=46,0` porta oltre il tappeto (o `teleport=X,Y` dovunque: anche dentro una stanza, vedi «Convalida nel browser»); `?universo=<nome>` apre un altro
+universo di `universes/` (quello che può leggere e scrivere lo decide il server); in sviluppo `?viandante=<id>` sceglie il viandante della scheda in multigiocatore (due schede, due viandanti).
 Graphify (facoltativo, ADR-0045): `pip install graphifyy` in un ambiente a parte, poi `GRAPHIFY_BACKEND=none graphify update .`
 (solo codice, offline, ~12 s; `graphify-out/` è ignorato da git; niente skill, MCP né hook).
 In console del browser: `window.quine` (o `window.rune`) è il kernel (`.feed()`, `.models.usage`, `.content`).
@@ -114,7 +117,8 @@ server/git.ts           l'unico modo in cui il server lancia git (ADR-0103): `ru
 server/geminiProxy.ts   l'unico varco della chiave (ADR-0099): GeminiGate, la route /api/gemini (solo loopback) e direct() per i mondi di molti
 server/universeStore.ts /api/universe: ogni universo è un repository git in universes/<nome>/ (e il ramo del master, `rami/master`; il clone)
 server/subscriptionQueue.ts /api/coda: la coda su disco degli abbonamenti (`universes/.coda/`), servita da un processo che usa la CLI (ADR-0077); solo su richiesta, da loopback, con un segreto (ADR-0106)
-server/session.ts       /api/session (WebSocket, solo npm run dev): i client delle partite in multigiocatore (ADR-0058)
+server/session.ts       /api/session (WebSocket; `npm run dev` e produzione, `attachSessions`): i client delle partite in multigiocatore (ADR-0058)
+server/production.ts    il server di produzione senza Vite (ADR-0112): `createProductionServer`, `productionProblems`, `frontDoorRefusal`, `buildFile`; serve.ts è il suo avvio, buildServer.ts lo costruisce in `dist-server/`
 server/account.ts       /api/account e la verifica dei token di Firebase Auth (ADR-0082)
 server/stripe.ts        /api/stripe/checkout e /api/stripe/webhook per i pagamenti Stripe Checkout (ADR-0083)
 server/wanderer.ts      /api/viandante: il viandante dell'account in un reame per il sito (profilo, crediti), GET e POST (T102, ADR-0095)
