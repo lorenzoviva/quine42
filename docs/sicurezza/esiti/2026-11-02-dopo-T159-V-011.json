@@ -1,0 +1,25 @@
+{
+ "data": "2026-11-02",
+ "commit": "010c865",
+ "vite": "7.3.7",
+ "node": "v22.19.0",
+ "piattaforma": "win32",
+ "solo": [
+  "V-011"
+ ],
+ "riepilogo": {
+  "ok": 1,
+  "falle": 0,
+  "errori": 0,
+  "saltate": 0
+ },
+ "prove": [
+  {
+   "id": "V-011.a",
+   "voce": "V-011",
+   "proprieta": "chi inonda il server di messaggi è limitato",
+   "esito": "ok",
+   "dettaglio": "600 messaggi su 600 serviti"
+  }
+ ]
+}
