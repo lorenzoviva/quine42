@@ -16,6 +16,7 @@ Aggiornato il 02/11/2026, fine dell'epoca 197 su **claude** (crediti: vedi `stat
 - **Aspetto**: reset crediti Claude alle 05:50 UTC per T57b e T114; risposte su T45f (GCP); T88 da approvare.
 
 - **Lezione**: una dipendenza si legge anche da «dopo Txx» nel testo di un blocco: nei task di integrazione non scrivere «dopo» davanti a task che si integrano solo alla fine (T140 si bloccava da solo). Un conflitto solo nel backlog tra blocchi attaccati si evita spostando il blocco, senza task.
+- **Lezione (epoca 198)**: il parser delle dipendenze legge «dopo» anche dentro un nome di file (`…-dopo-T129.json` bloccava T159): nei blocchi nessun «dopo» vicino a un Txx sulla stessa frase; dopo un blocco nuovo controlla `stato`.
 - **Lezione**: mai `git commit -a` nel base (l'autore ha file suoi; le `lampione copy*.xml` restano non committate).
 
 ## Regole nuove dell'autore (30/10, chat: `docs/userchats/to-do-2026-10-30.md`)
