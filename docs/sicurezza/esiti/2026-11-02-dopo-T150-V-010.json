@@ -1,0 +1,32 @@
+{
+ "data": "2026-11-02",
+ "commit": "6e0439d",
+ "vite": "7.3.7",
+ "node": "v22.19.0",
+ "piattaforma": "win32",
+ "solo": [
+  "V-010"
+ ],
+ "riepilogo": {
+  "ok": 2,
+  "falle": 0,
+  "errori": 0,
+  "saltate": 0
+ },
+ "prove": [
+  {
+   "id": "V-010.a",
+   "voce": "V-010",
+   "proprieta": "i saldi degli altri non arrivano al master nei file",
+   "esito": "ok",
+   "dettaglio": "file del viandante presente"
+  },
+  {
+   "id": "V-010.b",
+   "voce": "V-010",
+   "proprieta": "un ramo pubblicato non cambia i saldi",
+   "esito": "ok",
+   "dettaglio": "ramo accettato, pubblicazione accettata"
+  }
+ ]
+}
