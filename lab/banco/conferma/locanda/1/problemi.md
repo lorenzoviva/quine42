@@ -1,0 +1,3 @@
+- L'ala di pietra a sinistra ha il tetto piano e grigio, vuoto: da sopra sembra un blocco scoperchiato accanto ai coppi. Dagli un tetto a falde come il resto o una terrazza che abbia un uso, con arredi.
+- Dentro, la sala comune è un pavimento grigio vuoto: il bancone e il camino devono riconoscersi, con tavoli e panche contro i muri; anche la cucina deve avere il suo arredo.
+- Il pavimento di pietra uguale ai muri non fa leggere le stanze: nella sala usa un colore di pavimento diverso.

@@ -1,0 +1,4 @@
+- Si legge una palazzina a due blocchi, non una torre: mancano gli anelli sporgenti chiesti, che devono girare attorno a tutto il volume e vedersi da ogni lato.
+- Dentro non si riconosce nessuna stanza: pavimenti grigi e pochi blocchi uguali. L'accoglienza ha bisogno di un bancone e di sedute, il laboratorio di banchi con strumenti e schermi accesi, la sala di comando di console rivolte alle vetrate.
+- La rampa attorno al nucleo centrale non si legge: nelle sezioni si vede una scala di lato.
+- Il dettaglio è povero: grandi riquadri neri al posto delle vetrate, poca lavorazione sulle facciate.

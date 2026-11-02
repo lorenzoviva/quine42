@@ -1,0 +1,4 @@
+- Si legge un solo grande tetto che copre quasi tutto: i tre tetti uno sopra l'altro non si distinguono da sopra. Ogni tetto deve essere più piccolo di quello sotto, con un tratto di piano e di ballatoio visibile fra i due, su tutti i lati.
+- Le punte rialzate non si vedono: gli angoli di ogni tetto devono salire in modo netto.
+- I due lati si somigliano: dai a ciascuno qualcosa di suo.
+- La sala al piano terra e il piano sopra hanno lo stesso aspetto: arredi riconoscibili (tavolini bassi, stuoie, un altare) e pareti scorrevoli che dividano davvero la sala.

@@ -1,0 +1,19 @@
+{
+  "bersaglio": "futuristica",
+  "errore": "riga 120, <box>: \"at\" vuole tre numeri separati da spazi",
+  "token": {
+    "input": 4,
+    "cacheScritta": 359,
+    "cacheLetta": 16147,
+    "output": 53234,
+    "inputTotale": 16510
+  },
+  "modello": "claude-opus-5-5",
+  "dollari": 1.0707974,
+  "ms": 969620,
+  "caratteriXml": 14307,
+  "passa": false,
+  "difetti": [
+    "riga 120, <box>: \"at\" vuole tre numeri separati da spazi"
+  ]
+}

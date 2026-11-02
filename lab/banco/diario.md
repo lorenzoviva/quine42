@@ -27,4 +27,9 @@ Soglia non raggiunta. Il giro 12 non è stato fatto: vedi `docs/pipeline/domande
 - **Cosa è uscito senza danno visibile**: la riga delle regole `prl`/`all`, i numeri di `dettagli`, `rilievo`, `sagoma`, `ingombro`, tre frasi. **Non ha portato nulla**: il controllo a numeri del cammino.
 - **Cosa non è potuto uscire**: il tetto al materiale dominante (senza, una rocca è arrivata al 71 %).
 - **Ciò che resta**: sbagli del singolo tentativo su bersagli che altre volte passano. Giri 5-11: 64 tentativi su 80 passano le misure. A questo ritmo 14 su 14 nello stesso giro è raro: il prompt da solo difficilmente ci arriva.
+- **Il seguito**: il giro di conferma con una seconda richiesta, T173, in fondo.
 - **Il costo**: 102 chiamate; input 3770-3832 token per modello al giro 11 (2750 il prompt di T154), output in media 57 mila, ragionamento compreso; ~114 dollari a listino secondo la CLI, pagati con l'abbonamento. Molto oltre la stima dell'8 % del limite settimanale; il limite delle 5 ore è scattato due volte.
+
+## Il giro di conferma (T173)
+
+Prompt invariato, una seconda richiesta a chi non passa, un solo giro: 14 tentativi, 13 passano le misure alla prima, 9 anche le foto; alla seconda ne passano altri 3. **12 su 14**, soglia non raggiunta: `futuristica/2` (un `at` con due numeri nella seconda richiesta) e `pagoda/2` (la scala corretta, l'aspetto no). Seconda richiesta: input 14 251 e output 43 828 in media, 0,90 dollari contro 1,22 della prima. `conferma/giudizio.md`, `docs/pipeline/domande/T173.md`.

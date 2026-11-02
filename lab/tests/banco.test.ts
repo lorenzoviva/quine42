@@ -181,6 +181,29 @@ describe('i modelli finali (T155)', () => {
   }, 30_000);
 });
 
+describe('i modelli del giro di conferma (T173)', () => {
+  const radice = 'lab/banco/conferma';
+  const passa = (dir: string) => (JSON.parse(fs.readFileSync(`${dir}/misure.json`, 'utf8')) as { passa: boolean }).passa;
+  /** The last request of each attempt: the second, if it had one. */
+  const finali = BERSAGLI.flatMap((b) => ['1', '2'].map((n) => ({ b, dir: fs.existsSync(`${radice}/${b.id}/${n}/seconda`) ? `${radice}/${b.id}/${n}/seconda` : `${radice}/${b.id}/${n}` })));
+
+  it.each(finali.filter(({ dir }) => passa(dir)).map(({ b, dir }) => [dir, b] as const))('%s gira nel motore e passa i controlli', (dir, b) => {
+    const e = esegui(fs.readFileSync(`${dir}/modello.xml`, 'utf8'), b);
+    const m = misura(e, b);
+    expect(m.analisi.errors).toEqual([]);
+    expect(giudica(m, e.scatola).difetti).toEqual([]);
+  }, 30_000);
+
+  it('dice quanti passano le misure alla fine: uno solo è fuori, quello che il gioco rifiuta', () => {
+    expect(finali.filter(({ dir }) => !passa(dir)).map(({ dir }) => dir)).toEqual([`${radice}/futuristica/2/seconda`]);
+    expect(() => esegui(fs.readFileSync(`${radice}/futuristica/2/seconda/modello.xml`, 'utf8'), BERSAGLI.find((x) => x.id === 'futuristica')!)).toThrow(/tre numeri/);
+  });
+
+  it('il prompt è quello di T155: non è cambiato', () => {
+    expect(fs.readFileSync(`${radice}/prompt.md`, 'utf8').trim()).toBe(fs.readFileSync('lab/banco/finale/prompt.md', 'utf8').trim());
+  });
+});
+
 describe('la seconda richiesta (T173)', () => {
   it('chi passa misure e foto non torna; chi non passa le misure torna con i difetti; chi passa le misure torna con i problemi delle foto', () => {
     expect(daCorreggere({ passa: true, difetti: [] })).toBeUndefined();
