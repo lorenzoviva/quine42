@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { defineConfig, loadEnv, searchForWorkspaceRoot } from 'vite';
 import { GeminiGate, geminiProxy } from './server/geminiProxy';
+import { hideUniverses } from './server/hidden';
 import { universeStore } from './server/universeStore';
 import { newSecret } from './server/access';
 import { sessionServer, getActiveUniverseKernel } from './server/session';
@@ -29,6 +30,8 @@ export default defineConfig(({ mode }) => {
     // The games of many (T38): their worlds run in this process, one per universe, clients over /api/session.
     // The subscriptions' queue (T68): the slow requests on disk until a process using the CLIs serves them; off unless asked (ADR-0106).
     plugins: [
+      // First of all: what lives in universes/ reaches a browser only through the routes below (T130, ADR-0109).
+      hideUniverses(process.cwd(), universesDir),
       geminiProxy(gemini),
       universeStore(universesDir, { accounts, internal }),
       accountRoute(accounts),
@@ -48,7 +51,7 @@ export default defineConfig(({ mode }) => {
     // Writing a universe must not reload the page (dev server watches the project folder).
     // In a worktree of the pipeline node_modules is a junction to another folder (T44c): wasmoon's glue.wasm is served
     // from its real path, outside the root, so it must be allowed too.
-    server: { port: 5173, watch: { ignored: ['**/universes/**'] }, fs: { allow: [searchForWorkspaceRoot(process.cwd()), realModules()] } },
+    server: { port: 5173, watch: { ignored: ['**/universes/**'] }, fs: { allow: [searchForWorkspaceRoot(process.cwd()), realModules()], deny: FS_DENY } },
     // wasmoon is UMD: pre-bundled, the browser can import it in dev (its glue.wasm comes by URL, `wasmUri`).
     optimizeDeps: { include: ['wasmoon'] },
     // The MarkovJunior lab has two dedicated pages: the sandbox (/lab/3d/) and the model editor (/lab/editor/).
@@ -73,6 +76,9 @@ export default defineConfig(({ mode }) => {
     test: { environment: 'node', include: ['tests/**/*.test.ts', 'lab/**/*.test.ts'], setupFiles: ['tests/setup/forms-disk.ts'], testTimeout: 60000, hookTimeout: 60000, ...testWorkers(process.env) },
   };
 });
+
+/** Vite's own list (setting it replaces it) and universes/: also for what asks for a file without passing from the middlewares (T130). */
+const FS_DENY = ['.env', '.env.*', '*.{crt,pem}', '**/.git/**', '**/universes/**'];
 
 /** Where node_modules really is (a junction in the pipeline's worktrees). */
 function realModules(): string {

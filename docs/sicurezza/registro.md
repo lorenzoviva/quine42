@@ -117,7 +117,7 @@ Modello di una voce:
 - Contromisura: route montata solo su richiesta esplicita, solo in loopback, con un segreto locale; CLI in una cartella vuota, ambiente ridotto, strumenti esclusi e configurazione MCP e hook isolati, con conferma verificata; se Antigravity non può escludere gli strumenti, niente Antigravity sulla coda. In produzione la coda non c'è.
 - Task: T128, T133
 - Test: `tests/sicurezza/rotte.test.ts`
-- Esito: chiusa da T128 (ADR-0106), 01/11/2026, branch `task/T128`. Antigravity non è più sulla coda. Resta a T133 non montare la route in produzione (qui è già spenta senza `QUINE_CODA=1`); le richieste in `universes/.coda/` restano file che il server di sviluppo serve a chi ne conosce l'id finché V-012 è aperta (T130).
+- Esito: chiusa da T128 (ADR-0106), 01/11/2026, branch `task/T128`. Antigravity non è più sulla coda. Resta a T133 non montare la route in produzione (qui è già spenta senza `QUINE_CODA=1`); le richieste in `universes/.coda/` restavano file che il server di sviluppo serviva a chi ne conosceva l'id: chiuso con V-012 (T130).
 
 ### V-010 · Il master e i crediti
 - Gravità: media
@@ -143,23 +143,25 @@ Modello di una voce:
 
 ### V-012 · Ciò che esce verso il giocatore
 - Gravità: media
-- Stato: `specificata`
+- Stato: `chiusa`
 - Superficie: `playerFiles` in `src/session/server.ts`; i file sotto la radice serviti da Vite in sviluppo (da verificare)
 - Proprietà violata: a un giocatore arriva solo ciò che il suo client disegna (ADR-0061)
-- Prova: solo lettura del codice (T117); misurata dal kit (`esiti/2026-11-01.json`): FALLA V-012.a, b, d: **il server di sviluppo serve i file di `universes/`**; prompt, bibbia, persone e codice non arrivano al giocatore (V-012.c, e, f, ok)
+- Prova: solo lettura del codice (T117); misurata dal kit (`esiti/2026-11-01.json`): FALLA V-012.a, b, d: **il server di sviluppo serve i file di `universes/`**; prompt, bibbia, persone e codice non arrivano al giocatore (V-012.c, e, f, ok). Dopo T130: V-012.a, b, c, d ok (`esiti/2026-11-02-dopo-T130-V-012.json`); test: elenco dei campi, un campo mai visto, uno specchio sul seme, le vie per `universes/`
 - Contromisura: `playerFiles` a elenco di campi ammessi; `universes/` non servito da Vite.
 - Task: T130
-- Test: `tests/sicurezza/rotte.test.ts`
+- Test: `tests/sicurezza/uscite.test.ts`, `tests/sicurezza/rotte.test.ts`
+- Esito: chiusa da T130 (ADR-0109), 02/11/2026, branch `task/T130`. Alla lobby e al sito (`publicFiles`) restano di `ai` modelli, coefficienti, minimi e budget, che mostrano per scelta (ADR-0086); `provider` e `agenti` no.
 
 ### V-013 · Configurazione scrivibile
 - Gravità: media
-- Stato: `specificata`
+- Stato: `chiusa`
 - Superficie: `keepGame` in `src/kernel/kernel.ts`, `universe.json → ai`, i percorsi che il Concilio scrive (non verificati)
 - Proprietà violata: budget e provider sono soldi veri: fuori dal «tutto si può modificare»
-- Prova: solo lettura del codice (T117)
+- Prova: solo lettura del codice (T117). T130 ha letto le scritture del Concilio: percorsi fissi o da id validati, nessuna su `universe.json`; mancava la regola, non c'era una via aperta. I test scrivono dentro il kernel, anche sul ramo del master
 - Contromisura: il Concilio scrive solo in un elenco di percorsi; `ai` solo dal kernel, su comando del master.
 - Task: T130
-- Test: —
+- Test: `tests/sicurezza/uscite.test.ts`
+- Esito: chiusa da T130 (ADR-0109), 02/11/2026, branch `task/T130`. Il controllo è sul commit (`fenceCouncil`): ciò che è fuori elenco torna indietro e il registro lo dice.
 
 ### V-014 · Vite 5.4.10
 - Gravità: media
@@ -241,8 +243,8 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-009 | a b | — | `rotte.test.ts` | gli argomenti delle CLI, che non si lanciano: T128 |
 | V-010 | a b | — | `saldi.test.ts` | — |
 | V-011 | a | — | — | la lunghezza del testo, le code per pagante: T129 |
-| V-012 | a b c d | e f | `rotte.test.ts` | — |
-| V-013 | — | — | — | il Concilio che scrive `ai` si vede solo dentro il kernel: lo prova T130 |
+| V-012 | a b c d | e f | `rotte.test.ts`, `uscite.test.ts` | — |
+| V-013 | — | — | `uscite.test.ts` | il Concilio che scrive `ai` si vede solo dentro il kernel: lo prova tests/sicurezza/uscite.test.ts |
 | V-014 | a b c d e f g h i j k | — | `dipendenze.test.ts` | `npm audit`: T131 lo ha lanciato, il kit non esce sulla rete |
 | V-015 | a b | c | — | i testi delle altre pagine: T132 |
 | V-016 | a b c | d e | — | — |
@@ -252,5 +254,5 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 
 ## Ciò che nessuna voce copre ancora
 
-Da «Cosa non è stato fatto» dell'audit: la lettura completa di `kernel.ts`, delle route di scrittura del Concilio e dei testi del DOM di gioco. T130 guarda le scritture del Concilio, T132 i testi del sito;
+Da «Cosa non è stato fatto» dell'audit: la lettura completa di `kernel.ts`, delle route di scrittura del Concilio e dei testi del DOM di gioco. Le scritture del Concilio le ha guardate T130 (V-013), T132 guarda i testi del sito;
 ciò che ne esce diventa una voce. Le prove HTTP e WebSocket contro un server vero: lo stato di oggi nel kit (T137, tabella sopra), dopo le correzioni T134.

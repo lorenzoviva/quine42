@@ -69,7 +69,7 @@ export class Repo {
   /** Commits of earlier sessions (from the backend): history only, no snapshots. */
   past: PastCommit[] = [];
   /** Runs before every commit: the kernel writes files it keeps in memory (the usage ledger). */
-  beforeCommit?: () => void;
+  beforeCommit?: (author: Author) => void;
   /** Runs after HEAD moved (a commit, a checkout): a master's client sends its branch (T42b). */
   onCommit?: (c: Commit) => void;
 
@@ -156,7 +156,7 @@ export class Repo {
   }
 
   commit(message: string, author: Author): Commit {
-    this.beforeCommit?.();
+    this.beforeCommit?.(author);
     const prev = this.head().files;
     const c = Repo.makeCommit(this.data.head, message, author, this.working);
     if (this.backend) {

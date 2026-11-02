@@ -419,12 +419,11 @@ describe('la sessione', () => {
     expect(enter(await world(), { id: 'sonda', nome: 'Sonda', anonimo: true }).anonimo).toBeFalsy();
   });
 
-  // Open: T130.
-  it.fails('V-012 a un giocatore non arrivano le impostazioni dell\'IA', () => {
+  it('V-012 a un giocatore non arrivano le impostazioni dell\'IA', () => {
     expect(JSON.parse(playerFiles(bundledFiles)['universe.json']).ai).toBeUndefined();
   });
 
-  it.fails('V-012 a un giocatore non arrivano le storie dei moduli', () => {
+  it('V-012 a un giocatore non arrivano le storie dei moduli', () => {
     const shown = Object.entries(playerFiles(bundledFiles)).filter(([p]) => p.endsWith('/manifest.json')).map(([, t]) => JSON.parse(t));
     expect(shown.filter((m) => m.persona !== undefined || m.lore !== undefined || m.context !== undefined)).toEqual([]);
   });
