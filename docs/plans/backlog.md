@@ -2729,3 +2729,61 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Browser: `?skip&offline` sulla build, col turno `browser`: il gioco parte e cammina senza errori in console e il tick non è visibilmente più lento (l'allocatore è stato misurato solo in Node, da 0,95 a 1,15 ms). Nell'esito cosa si è visto e la misura del tick, se si riesce a leggerla.
 - Quando è fatto: merge risolto, commit su `task/T146`. Poi l'orchestratore fa `integra T146` e `integra T126`.
 - Esito: `task/T146`, l'ADR dei limiti è ora ADR-0103 (indice, `AGENTS.md`, registro, backlog, codice, test); le citazioni di T120 restano 0102. Typecheck verde. Suite intera, a macchina condivisa: 872 passati, 3 attesi, 9 rossi, tutti timeout da 60 s (`between` 4, `referente` 3, `branch` 1, `credits` 1); rilanciati da soli i quattro file sono verdi, nessun rosso resta. Da guardare: da solo il test più lento di `credits` sta a 53 s su 60. Stesso file, una misura per lato: 159 s con i sorgenti di prima del merge e 177 s con T126 (+11%), il test più lento da 43 a 53 s. T126 riduce il margine e questi timeout possono tornare. Kit `--solo V-007`, invariato (`esiti/2026-11-01-dopo-T126.json`): a, b, c ok; V-007 resta `in correzione` per T127, perché il kit non misura i blocchi rimasti. Browser su `?skip&offline`: parte e cammina, nessun guasto né errore del gioco; tick 3,8 ms da fermo e 4,4 ms camminando (p95 5-6 ms, massimo 9 ms a mondo assestato). Nessun confronto nel browser col prima di T126. Sicurezza: nessuna superficie nuova rispetto a T126.
+
+## Dalla chat del 02/11/2026 (testo originale: `docs/userchats/to-do-2026-11-02.md`)
+
+### T152 · Le ambientazioni della Genesi: medievale, steampunk, moderna, futuristica — `da fare`
+- Pipeline: claude · stima 5% · approvato · browser · priorità 80
+- Contesto: richiesta 1 dell'autore: un universo medievale (quello che c'è, `aurora`), uno steampunk, uno moderno (grande città, anni 90), uno futuristico (tipo neonpunk). Oggi il tema è testo libero nella schermata della Genesi (`src/ui/genesis.ts`, `planGenesis` in `agents/genesis.ts`) e il seme `universe/prompts/theme.md` è il Regno di Valmora. Il seme può presupporre il medioevo anche altrove: i 20 ambienti, i prompt degli agenti, la guida di stile, il canone delle rune e i modelli generici. Il lessico è già uguale in ogni ambientazione (ADR-0075).
+- Cosa fare: prima un censimento di ciò che nel seme presuppone il medioevo, con file e riga. Poi quattro temi tra cui scegliere nella schermata della Genesi, modificabili come oggi; il medievale resta quello attuale. Ciò che il censimento trova diventa neutro o dipende dal tema, nel modo più piccolo: niente seme separato per ambientazione. Rune, tappeto, corona e quarta parete valgono ovunque; il tema spiega le rune senza magia medievale obbligatoria e senza metagioco. Il censimento dice anche ciò che si è lasciato com'è e perché. Decisione architetturale: ADR e `AGENTS.md`.
+- Test: una Genesi offline (`MockModels`) per ogni tema: i file giusti, `prompts/theme.md` scritto, un universo che parte. Un universo esistente non cambia. Typecheck e suite intera con i loro turni.
+- Browser: col turno `browser`, `?offline`: la schermata della Genesi offre i quattro temi e con ognuno si arriva al mondo senza errori in console. I contenuti veri non si vedono offline: scrivilo nell'esito.
+- Quando è fatto: commit su `task/T152`; nell'esito il censimento e cosa può ancora tradire il tema nei contenuti generati, da leggere in T153.
+
+### T153 · Generare gli universi steampunk, moderno e futuristico — `in attesa` (dipende da T152, T156)
+- Pipeline: claude · stima 2% · priorità 81
+- Contesto: seconda parte della richiesta 1. La Genesi costa (circa 80 chiamate di testo, più lo Scultore). Dipende anche da T156 perché le strutture di questi mondi vengano col prompt nuovo: altrimenti si paga due volte. `universes/` è ignorato da git e non esiste nei worktree: gli universi vanno scritti in quello vero del progetto. Domande per l'autore in `docs/pipeline/domande/T153.md`.
+- Cosa fare: generare un universo alla volta con la Genesi vera; leggere il costo di ognuno da `world/consumi.json` e fermarsi se supera ciò che l'autore ha deciso. Mai toccare `aurora`.
+- Test: per ogni universo, i contenuti letti: la bibbia, gli ambienti e i modelli sono dell'ambientazione? Ciò che tradisce il tema diventa una proposta di task.
+- Browser: col turno `browser`, ogni universo con `?universo=<nome>`: screenshot di un luogo con strutture; si cammina senza errori in console.
+- Quando è fatto: i tre universi su disco, nell'esito il costo di ciascuno e ciò che si è visto.
+
+### T154 · Il banco del prompt delle strutture: una prova senza contesto e il suo giudizio — `da fare`
+- Pipeline: claude · stima 4% · approvato · priorità 82
+- Contesto: richiesta 2 dell'autore. Con piani (T53b), rampe (T53a), salto (ADR-0080) e sotterranei (ADR-0091) i palazzi devono essere più articolati e dettagliati. Il metodo è dell'autore: si scrive un prompt, lo si prova senza altro contesto su Claude Code, si guarda il risultato, si corregge **il prompt e mai il risultato**, si riparte. Si riusa ciò che c'è: `lab/prompts/scultore-mj.md`, `lab/mjx/sculptor.ts`, `lab/scripts/mjx-trial.ts`, `mjx-render.ts`, `mjx-stats.ts`, `src/mj/check.ts`, `src/mj/photo.ts`, `universe/prompts/agents/scultore.md`.
+- Cosa fare: uno script che (1) lancia `claude -p` col solo prompt e il bersaglio, da una cartella vuota, senza strumenti né file di progetto, e ne salva i token di input e di output; (2) passa l'XML al motore vero e dà quattro foto, le misure e un elenco di difetti; (3) tiene ogni tentativo in una cartella con prompt, risposta, foto e misure, così si confrontano. Definisci la soglia di qualità, in misure dove si può: più piani raggiungibili con rampe, stanze collegate, porta sul sentiero, punti da cui si salta, varietà delle parti, finestre e dettagli, il modello che finisce entro `FORM_LIMITS`. Ciò che non si misura lo giudica chi guarda le foto, con criteri scritti. Scrivi anche una prima versione del prompt. Bersagli: almeno 6 edifici diversi, tra cui uno moderno, uno steampunk e uno futuristico.
+- Test: lo script gira su un bersaglio e le misure riconoscono un modello buono e uno brutto (test offline su XML fissi). Typecheck e suite intera con i loro turni.
+- Browser: non serve, le foto vengono dallo script.
+- Quando è fatto: commit su `task/T154`; nell'esito soglia, token del primo prompt e prima foto giudicata.
+
+### T155 · Iterare il prompt delle strutture fino alla soglia — `da fare` (dipende da T154)
+- Pipeline: claude · stima 8% · approvato · priorità 83
+- Contesto: il ciclo della richiesta 2, col banco di T154. Obiettivo: alta qualità col minimo di token in input; il prompt può contenere esempi o altre tecniche, purché ognuna si guadagni i suoi token.
+- Cosa fare: ciclo prova → foto e misure → correzione del prompt → da capo. Mai correggere a mano un XML. A ogni giro una riga in un diario (cosa è cambiato, token, misure, cosa si vede). Prova anche a togliere: ciò che non cambia il risultato esce. La soglia è raggiunta quando tutti i bersagli la passano nello stesso giro e con un secondo tentativo sugli stessi (la casualità conta). **Al più 12 giri**: se la soglia non arriva, fermati e scrivi in `docs/pipeline/domande/T155.md` a che punto sei e cosa manca, senza abbassarla.
+- Test: i modelli finali girano nel motore del gioco e passano i controlli di `src/mj/check.ts`. Typecheck con il suo turno.
+- Browser: non serve; le foto finali restano nel commit per l'autore.
+- Quando è fatto: commit su `task/T155` con prompt, diario e foto finali; nell'esito token per modello e quanti giri.
+
+### T156 · Il prompt nuovo nello Scultore del gioco — `da fare` (dipende da T155)
+- Pipeline: claude · stima 4% · approvato · browser · priorità 84
+- Contesto: T155 ottimizza il prompt su Claude, ma nel gioco le strutture le scrive lo Scultore sui modelli Gemini (ADR-0042, e i provider di ADR-0077): il risultato può cambiare col modello e va misurato. Il prompt del gioco è `universe/prompts/agents/scultore.md`, con `agents/sculptor.ts`.
+- Cosa fare: porta il prompt per le classi di struttura e togli ciò che è superato, senza peggiorare le classi semplici. Prova gli stessi bersagli di T155 sul modello che il gioco usa per le strutture, poche chiamate e col costo nell'esito. Se il risultato è sotto la soglia, dillo con foto e misure e proponi la strada (adattare il prompt o cambiare modello): non cambiare da solo il modello predefinito, ha un costo per chi gioca. Gli universi esistenti ricevono il prompt come ogni aggiornamento dal seme, senza che cambi un modello già scolpito.
+- Test: `MockModels` e i test dello Scultore; typecheck e suite intera con i loro turni.
+- Browser: col turno `browser`: un edificio nuovo nel gioco, si entra, si sale di piano e si salta; screenshot.
+- Quando è fatto: commit su `task/T156`; nell'esito qualità e costo su Gemini contro Claude.
+
+### T157 · L'Attore: chi interpreta gli NPC, un'opzione del master — `da fare`
+- Pipeline: claude · stima 5% · approvato · browser · priorità 85
+- Contesto: richiesta 3 dell'autore. Oggi il Narratore è l'unico interprete: `npc.chat` e `npc.dialogue` in `agents/minds.ts`. Con l'opzione accesa il Narratore crea solo legami, storie e **schede degli NPC** (il prompt di ognuno); un agente nuovo, l'**Attore**, le interpreta. Default spento: senza l'opzione nulla cambia e nessuna chiamata in più.
+- Cosa fare: `universe.json → ai.attore`, riparato dal validatore, che il master sceglie con modelli e coefficienti (Genesi con `kernel.setAi`) e che la lobby mostra e permette di impostare (ADR-0086). La scheda è scritta dal Narratore una volta per individuo, salvata con lui, rivista quando cambiano legami o storia ma non a ogni battuta; alla prima battuta di un NPC senza scheda (universi vecchi) si scrive. L'Attore riceve scheda, ricordi per viandante, vicinato del grafo e tutto ciò che il Narratore riceve per quei compiti: principi della quarta parete, canone, lessico, filtro. Non inventa fatti del mondo: ciò che nasce nel dialogo (ricordi, oggetti citati, azioni) passa come oggi. Convenzione del nuovo compito: schema Gemini, risposta in `MockModels`, voce nel registro, `CENSUS` dei coefficienti, `payerOf`, prompt in `prompts/agents/attore.md`. Decidi il modello predefinito dell'Attore e scrivi perché. Decisione architetturale: ADR e `AGENTS.md`.
+- Test: con l'opzione spenta le chiamate sono le stesse di oggi; accesa, `npc.chat` e `npc.dialogue` vanno all'Attore con la scheda, il Narratore scrive la scheda una volta sola, paga chi pagava; quarta parete e crediti esauriti come oggi; un client che non è il master non cambia l'opzione. Typecheck e suite intera con i loro turni. Esito «sicurezza: …» (lobby, sessione, crediti).
+- Browser: col turno `browser`, `?offline`: l'opzione nella Genesi e nella lobby; una battuta con un NPC accesa e spenta; il registro mostra chi ha parlato.
+- Quando è fatto: commit su `task/T157`; nell'esito il costo in più stimato per un'ora di gioco (`hourlyEstimate`).
+
+### T158 · L'Attore nello studio — `da fare` (dipende da T157)
+- Pipeline: claude · stima 3% · approvato · browser · priorità 86
+- Contesto: ogni agente è una squadra nella corona (`archive.ts`), con un gerboa e un cappello (`corona-gerboa-<agente>.xml`, T50), un posto nella Sala del Concilio e una console nella Direzione; l'Attore di T157 non c'è ancora.
+- Cosa fare: il suo gerboa con un cappello riconoscibile, il posto al tavolo (i membri seduti diventano nove), la console, lo studio dove sta, i colori e i nomi nei pannelli. Con l'opzione spenta scegli se non compare o resta a riposo come gli altri che non lavorano, e scrivilo.
+- Test: quelli di corona e archivio; typecheck e suite intera con i loro turni.
+- Browser: col turno `browser`: Sala del Concilio e Direzione, l'Attore c'è e la sala non si scontra; screenshot.
+- Quando è fatto: commit su `task/T158`.
