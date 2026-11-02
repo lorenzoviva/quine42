@@ -5,6 +5,8 @@
 
 Aggiornato il 02/11/2026, epoca 213 su **claude** (crediti: vedi `stato`).
 
+- **Epoca 213, T174 integrato:** timeout di `produzione.test.ts` spiegato e misurato (socket zitto oltre `ENTRY_MS`, 15 s, chiuso dal server; il test aspettava 30 s su un messaggio mai partito); corretto solo il test; suite 1317 verde due giri. Non spiega i rossi di T163. **Proposta, da approvare dall'autore:** task per V-007 in `mondo.test.ts`, rosso sotto carico (24 thread; 1,5 s fissi: deduzione). Non letto: un errore a livello del blocco `il server vero`, una volta.
+
 - **Epoca 213, `ferma --dopo` REVOCATO (richiesta dell'autore, supera la voce qui sotto):** niente spegnimento e niente riavvio: la pagina web nuova e Fable ci sono già. Non c'è un comando: tolto a mano `.pipeline/arresto.json`, il ciclo di `esegui` lo rilegge a ogni giro e torna a lanciare. `claude` e `fable` restano sospesi: `riattiva fable`, `riattiva claude` quando l'autore dice di partire (chiesto). Alla fine di T173 e T174, «Da fare» di «Fine epoca 211».
 
 - **Epoca 213 (19:08 UTC, supera il «non serve un altro riavvio» qui sotto):** l'autore ha spento il computer per sbaglio e chiede di aspettare T173 e T174, poi chiudere: riavvia lui per avere la pagina web nuova. La vista Markdown c'era già (`d9f4fe5`), non rifatta. `ferma --dopo` dato. **Al riavvio:** esiti di T173 e T174 come in «Fine epoca 211»; `claude` e `fable` restano sospesi, quindi chiedere all'autore se partire (`riattiva fable`, `riattiva claude`) perché ha detto che dovremmo avere Fable. Attese come in «Fine epoca 212».
