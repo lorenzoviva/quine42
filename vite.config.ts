@@ -4,6 +4,7 @@ import path from 'node:path';
 import { defineConfig, loadEnv, searchForWorkspaceRoot } from 'vite';
 import { GeminiGate, geminiProxy } from './server/geminiProxy';
 import { hideUniverses } from './server/hidden';
+import { securityHeaders } from './server/csp';
 import { universeStore } from './server/universeStore';
 import { newSecret } from './server/access';
 import { sessionServer, getActiveWorld } from './server/session';
@@ -30,7 +31,9 @@ export default defineConfig(({ mode }) => {
     // The games of many (T38): each world in a process of its own (T127, ADR-0110), clients over /api/session.
     // The subscriptions' queue (T68): the slow requests on disk until a process using the CLIs serves them; off unless asked (ADR-0106).
     plugins: [
-      // First of all: what lives in universes/ reaches a browser only through the routes below (T130, ADR-0109).
+      // The pages' policy, on every answer (T132, ADR-0111).
+      securityHeaders(accounts.config),
+      // Before the routes: what lives in universes/ reaches a browser only through the routes below (T130, ADR-0109).
       hideUniverses(process.cwd(), universesDir),
       geminiProxy(gemini),
       universeStore(universesDir, { accounts, internal }),
