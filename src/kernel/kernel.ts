@@ -9,6 +9,7 @@ import { Sandbox, type Host } from './sandbox';
 import { apiErrors, describeEffect, repairPartita, validateEffects, Validator } from './validator';
 import { deathLevel, fallbackDeath, type DeathVerdict } from './partita';
 import { Repo, memoryStore, type Commit, type KeyValueStore } from './repo';
+import { councilMayWrite } from './paths';
 import { Corona, campusModel, cellNear, FOCUSED_RULES, folderOf, TABLETS_MAX, type CoronaCell, type Exhibit, type ShowcaseSource, type StudioItem } from './corona';
 import { Archive } from './archive';
 import { bibleBreaks, cleanBible, metaBreak } from './fourthwall';
@@ -548,6 +549,8 @@ export class Kernel {
   private dying = new Map<string, Promise<void>>();
   /** The game chosen at the Genesis (ADR-0053): universe.json follows it, nothing else changes it. */
   private game?: Partita;
+  /** Files the kernel or the master wrote and no commit has brought yet: `fenceCouncil` leaves them be. */
+  private commanded = new Map<string, string>();
   /** Size of the visible area in cells, set by the renderer. */
   view = { w: 32, h: 20 };
   readonly logs: LogEntry[] = [];
@@ -615,8 +618,12 @@ export class Kernel {
     k.council.payer = (task) => payerOf(task, k.wanderer().id);
     k.council.hasCredits = (chi) => k.hasCredits(chi);
     k.council.onFocus = (ids) => k.cards.use(ids, 'prompt', (id) => k.isCard(id));
-    // A mirror saves nothing of its own: its commits hold only the files it was told and the master's edits (T42b).
-    if (!k.mirror) repo.beforeCommit = () => {
+    // A mirror saves nothing of its own: its commits hold only the files it was told and the master's edits (T42b). The Council
+    // is fenced in on a mirror too: a kernel on the master's branch is one (T42e).
+    repo.beforeCommit = (author) => {
+      if (author === 'agent') k.fenceCouncil();
+      k.commanded.clear();
+      if (k.mirror) return;
       k.writeUsage();
       k.writeCards();
       k.writeGraph();
@@ -4983,7 +4990,7 @@ export class Kernel {
       raw = {};
     }
     const ai = { ...(raw.ai ?? {}), ...patch, ...(patch.coefficienti !== undefined ? { coefficienti: repairCoefficients(patch.coefficienti) } : {}) };
-    this.repo.write('universe.json', JSON.stringify({ ...raw, ai }, null, 2) + '\n');
+    this.writeCommanded('universe.json', JSON.stringify({ ...raw, ai }, null, 2) + '\n');
     this.config = { ...this.config, ai: { ...this.config.ai, ...ai } };
     if (this.models.textModel !== undefined && this.config.ai.textModel) this.models.textModel = this.config.ai.textModel;
   }
@@ -4998,7 +5005,7 @@ export class Kernel {
       raw = {};
     }
     this.game = game;
-    this.repo.write('universe.json', JSON.stringify({ ...raw, partita: game }, null, 2) + '\n');
+    this.writeCommanded('universe.json', JSON.stringify({ ...raw, partita: game }, null, 2) + '\n');
   }
 
   /**
@@ -7102,6 +7109,27 @@ export class Kernel {
     this.files = { ...this.files, ...changed };
   }
 
+  /** A write the kernel or the master commands, which may wait for its commit: the next commit of the Council is not what brought it. */
+  private writeCommanded(path: string, content: string): void {
+    this.commanded.set(path, content);
+    this.repo.write(path, content);
+  }
+
+  /**
+   * Before a commit of the Council (T130, ADR-0107): it changes only the world's content (`councilMayWrite`). What else the working
+   * files have against the last commit goes back, whoever in the Council wrote it, unless the kernel or the master commanded it.
+   * So `universe.json → ai`, budgets and providers, moves only on their command (`setAi`, the editor).
+   */
+  private fenceCouncil(): void {
+    const { working } = this.repo;
+    const head = this.repo.head().files;
+    const refused = [...new Set([...Object.keys(working), ...Object.keys(head)])].filter((p) => working[p] !== head[p] && !councilMayWrite(p) && working[p] !== this.commanded.get(p));
+    if (!refused.length) return;
+    for (const p of refused) this.repo.write(p, head[p] ?? null);
+    this.council?.say('kernel', 'scarta', `il Concilio non scrive qui: ${refused.slice(0, 4).join(', ')}${refused.length > 4 ? '…' : ''}`);
+    this.applyFiles({ ...working });
+  }
+
   /** A commit of generated content: what it brings becomes cards of whoever pays for the task. */
   private commitContent(message: string, task: string, autore: string, chi?: string): Commit {
     this.stampContent(task, autore, chi);
@@ -7263,7 +7291,7 @@ export class Kernel {
   saveFile(path: string, content: string, force = false): { errors: string[]; committed: boolean; written: boolean } {
     const errors = this.validator.validateFile(path, content);
     if (errors.length && !force) return { errors, committed: false, written: false };
-    this.repo.write(path, content);
+    this.writeCommanded(path, content);
     this.applyFiles({ ...this.repo.working });
     const broken = this.faults.list().some((f) => f.key.startsWith('manifest:') || f.key.endsWith(':load') || f.key === 'universe:config');
     let committed = false;

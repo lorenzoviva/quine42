@@ -2559,12 +2559,13 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Test: un client che inonda è limitato, gli altri no.
 - Quando è fatto: test e typecheck verdi, commit su `task/T129`.
 
-### T130 · Ciò che esce e ciò che il Concilio scrive — `da fare` (dipende da T120)
+### T130 · Ciò che esce e ciò che il Concilio scrive — `fatto` (dipende da T120)
 - Pipeline: claude · stima 3% · approvato · priorità 13
 - Contesto: R12 e R13. `playerFiles` toglie campi invece di ammetterli; in sviluppo Vite potrebbe servire i file di `universes/` (da verificare). Il Concilio può forse scrivere `ai` in `universe.json`, cioè budget e provider: soldi veri, quindi fuori dal «tutto si può modificare».
 - Cosa fare: `playerFiles` a elenco di campi ammessi; `universes/` non servito da Vite; il Concilio scrive solo in un elenco di percorsi; `ai` solo dal kernel, su comando del master.
 - Test: i campi che non escono; una scrittura di `ai` dal Concilio rifiutata.
 - Quando è fatto: test e typecheck verdi, commit su `task/T130`.
+- Esito: `task/T130`, ADR-0107. `playerFiles` e `publicFiles` a elenco di campi (`src/session/files.ts`), `universes/` non servito (`server/hidden.ts` e `server.fs.deny`), il Concilio fermato sul commit (`fenceCouncil`, `councilMayWrite`). V-012 e V-013 chiuse, `tests/sicurezza/uscite.test.ts` nuovo, tolti gli `it.fails`; kit `--solo V-012,V-014`: 15 ok, 0 FALLA. **Diverso dal previsto**: (1) la lettura delle scritture del Concilio dice che oggi non arriva a `universe.json`: percorsi fissi o da id validati, quindi V-013 era una regola mancante, non una via aperta; (2) `ai` non sparisce del tutto: alla lobby e al sito (`publicFiles`) restano modelli, coefficienti, minimi e budget, perché li mostrano (ADR-0086), mai `provider` e `agenti`; (3) un manifest illeggibile non esce più: lo specchio va avanti senza quel modulo; (4) degli effetti delle azioni esce solo il `tipo`, perché l'inventario mostra il pulsante se ne ha. Niente browser: il task non lo chiede e non cambia ciò che si vede; lo specchio del giocatore è provato sui file del seme. `tests/session.test.ts` non pretendeva più a torto che `universe.json` arrivi uguale al giocatore: ora confronta nome, seme e chunk. Sicurezza: V-012 e V-013 chiuse, nessuna voce nuova.
 
 ### T131 · `npm audit` e Vite — `fatto` (dipende da T136)
 - Pipeline: claude · stima 2% · approvato · priorità 2

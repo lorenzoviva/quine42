@@ -52,6 +52,7 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
 8b. **Chi non è il master non riscrive il mondo** (ADR-0102): identità verificata sul server (`server/access.ts`), un'altra origine mai; senza account l'id detto vale solo da questa macchina; una partita di molti è del suo master e del suo mondo, gli altri leggono `publicFiles` e non scrivono; i saldi li scrive solo il mondo; `anonimo`, `offline` e `tetto` non li decide il client. Una route nuova passa da `gate`.
 8c. **Un universo contiene solo percorsi ammessi** (ADR-0103): un elenco in `src/kernel/paths.ts` (`modules/ models/ world/ maps/ prompts/ universe.json seed.json`, nomi semplici), mai un divieto su `.git`; il server lancia git solo da `server/git.ts`.
 8d. **I saldi stanno fuori dall'universo** (ADR-0104): saldi e pagamenti solo in `universes/.saldi/<nome>.json` (`server/ledger.ts`, `Ledger` in `credits.ts`), mai in un file dell'universo; niente Lua, Concilio, ramo o rollback ci arriva; ogni accredito è un passo atomico; a mano solo il master, entro `QUINE_TETTO_RICARICHE` al giorno.
+8e. **Ciò che esce e ciò che il Concilio scrive sono elenchi** (ADR-0107): a un client solo i campi nominati in `src/session/files.ts` (`playerFiles`, `publicFiles`), un campo nuovo resta a casa finché non lo si nomina; `universes/` non si serve mai (`server/hidden.ts`); un commit del Concilio cambia solo `councilMayWrite` (`paths.ts`), `universe.json → ai` si muove solo dal kernel su comando del master (`setAi`, l'editor).
 9. **La chiave API non arriva mai al browser**: la tiene solo `GeminiGate` (`server/geminiProxy.ts`, ADR-0099): modelli a elenco, corpo limitato, tetto di spesa giornaliero; la route solo da questa macchina e dalla stessa origine, in multigiocatore il server chiama Google senza route.
 10. **Ciò che sembra invalicabile lo è**: il terreno blocca a caselle, i modelli con i loro voxel (ADR-0041);
     ogni luogo è connesso (varchi + sentieri scavati dal kernel, porte delle strutture sul sentiero; niente cose solide su punti di articolazione né davanti alle porte, ADR-0064).
@@ -104,6 +105,7 @@ In console del browser: `window.quine` (o `window.rune`) è il kernel (`.feed()`
 
 ```
 server/access.ts        chi chiede e cosa può (ADR-0102): `callerOf`, `gate`, `owns`, `newUniverse`; ogni route che ascolta un client passa da qui
+server/hidden.ts        ciò che il server di sviluppo non serve (ADR-0107): `universes/`, per qualunque via
 server/ledger.ts        l'archivio di saldi e pagamenti fuori dall'universo (ADR-0104): `FileLedger`, `ledgerOf`, `openLedger`, la migrazione (`sweepBalances`)
 server/git.ts           l'unico modo in cui il server lancia git (ADR-0103): `runGit`, senza hook né monitor, senza risalire al repository di sopra
 server/geminiProxy.ts   l'unico varco della chiave (ADR-0099): GeminiGate, la route /api/gemini (solo loopback) e direct() per i mondi di molti
@@ -137,7 +139,7 @@ src/
     modeldirector.ts    i modelli che mancano, uno alla volta, entro `ai.maxModels`
     chunks.ts           archivio dei piani dei luoghi
     bench.ts            il banco della Sala sistemi: i casi dei sistemi in un kernel in miniatura (ADR-0052)
-    paths.ts            i percorsi che un universo può contenere (`allowedPath`), `UNIVERSE_NAME_RE` (ADR-0103)
+    paths.ts            i percorsi che un universo può contenere (`allowedPath`), `UNIVERSE_NAME_RE` (ADR-0103), ciò che il Concilio può scrivere (`councilMayWrite`, ADR-0107)
     magic.ts            le rune nuove dal Concilio: validatore, riga del canone (ADR-0097)
     cards.ts            chi paga ogni chiamata, le carte dei contenuti, i loro utilizzi (`world/carte.json`), la collezione (ADR-0056; con `shares` anche quote e impronta)
     heritage.ts         l'eredità dei cloni: catena dei titolari, impronte, quote (ADR-0084)
@@ -175,7 +177,7 @@ tests/  docs/
 src/mj/                 MarkovJunior del gioco (ADR-0036, 0038): engine.ts (motore 3D), xml.ts e model.ts (XML alla lettera), palette.ts,
                         run.ts (esecuzione, animazioni, azioni), rig.ts (arti), mesh.ts (voxel → triangoli, impronte, pavimenti),
                         classes.ts (classi e scatole), photo.ts (foto in 3/4 per l'Artista), check.ts (misure di un modello)
-src/session/             il kernel sul server (ADR-0058): protocol.ts (messaggi, fakeLink), files.ts (ciò che esce: `playerFiles`, `publicFiles`), server.ts (SessionServer), client.ts
+src/session/             il kernel sul server (ADR-0058): protocol.ts (messaggi, fakeLink), files.ts (ciò che esce, a elenco: `playerFiles`, `publicFiles`, ADR-0107), server.ts (SessionServer), client.ts
                         (SessionClient: ciò che un client sa del mondo), host.ts (apre un universo e fa girare il suo mondo), account.ts e login.ts (l'account, ADR-0082);
                         il client sottile (ADR-0059): thin.ts (ThinClient: riempie il kernel specchio), socket.ts (WebSocket, id della scheda)
 tools/pipeline/          la pipeline agentica (ADR-0072, 0079): pipeline.mjs (code, budget, esecuzione nei worktree, ripresa dopo i limiti, dossier),
@@ -368,7 +370,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   vicino a qualunque viandante fuori dallo studio (il master nello studio o scollegato non ferma gli altri); in multigiocatore al più
   `ai.placesPerMinute` (20) luoghi nuovi per minuto del mondo, gli altri restano bozze (`Chunk.held`). Il Concilio gira solo sul server.
 - **Il client del giocatore** (ADR-0061, T41): a un giocatore il server manda solo i file che il client disegna (`playerFiles` in
-  `server.ts`: `universe.json`, `models/`, rilievo, atlante, manifest senza `logic` né `casi` tranne `PER_WANDERER`); prompt, bibbia,
+  `files.ts`, a elenco di campi, ADR-0107: `universe.json` senza `ai`, `models/`, rilievo, atlante, manifest senza storie né `logic` tranne `PER_WANDERER`); prompt, bibbia,
   persone, trame, regole, grafo, carte, consumi e viandanti restano sul server. L'`ingresso` dice `master`; il registro del Concilio
   (`concilio`) va solo al master, e `ThinClient` lo versa nello specchio. Corona e strumenti del master (`src/master.ts`: editor,
   console, registro, Genesi, pannelli dello studio, atlante, grafo; `src/render/coronaview.ts`: ciò che il renderer disegna della
