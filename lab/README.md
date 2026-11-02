@@ -20,6 +20,7 @@ nel [report dei costi](../docs/reports/costi-step8.2B.md) e nella storia di git 
 | `mjx/models/` | modelli scritti a mano e portati dagli step 8A-8B (esempi dello Scultore del laboratorio); `gemini/` i programmi delle prove 8.2A e 8.2B |
 | `mjx/sculptor.ts`, `mjx/target.ts`, `mjx/targets.ts` | lo Scultore XML delle prove, i bersagli preimpostati, l'Artista che giudica le quattro foto |
 | `prompts/` | i prompt dello Scultore e dell'Artista delle prove |
+| `banco/` | il banco del prompt delle strutture (T154, [`banco/README.md`](banco/README.md)): prompt, bersagli, misure con il corpo del gioco, soglia e criteri, la prima prova |
 | `scripts/` | strumenti da riga di comando (sotto) |
 | `tests/` | conformità ai modelli ufficiali (`mjx.test.ts`), mesh (`mesh3d.test.ts`) |
 | `out/` | ciò che scrivono gli script (ignorata da git) |
@@ -43,6 +44,7 @@ Il motore, il front-end XML, la palette, le mesh, lo scheletro, le classi e le f
 - Le prove con Gemini (costano: contatori sempre accesi):
   - `mjx-sculpt.ts -- --model gemini-3.1-flash-lite [--judge gemini-3.5-flash]`: lo Scultore sui bersagli
     preimpostati, con un giudice fisso;
+  - `banco-strutture.ts -- --bersagli moderna --giro v1`: il prompt delle strutture provato con `claude -p` senza altro contesto, foto, misure e difetti (`banco/README.md`);
   - `mjx-trial.ts -- --model … --run …`: un modello complesso, una richiesta per chiamata, il costo di ognuna;
   - `trial-report.ts`, `costs-history.ts`: tabelle dei costi delle prove;
   - `mjx-keep.ts`, `trial-keep.ts`: tengono i programmi migliori in `mjx/models/gemini/`.

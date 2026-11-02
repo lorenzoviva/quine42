@@ -1,0 +1,240 @@
+<sequence values="BMDPGROLSVFA">
+  <color symbol="M" value="a4503a" name="mattoni"/>
+  <color symbol="D" value="5f2f24" name="mattoni scuri"/>
+  <color symbol="P" value="a89f8f" name="pietra"/>
+  <color symbol="G" value="33363b" name="ghisa"/>
+  <color symbol="R" value="c87533" name="rame"/>
+  <color symbol="O" value="d4a73c" name="ottone"/>
+  <color symbol="L" value="7a5533" name="legno"/>
+  <color symbol="S" value="3f4a52" name="ardesia"/>
+  <color symbol="V" value="9fc8c0" alpha="0.5" name="vetro"/>
+  <color symbol="F" value="ff9a3c" glow="True" name="fuoco"/>
+  <color symbol="A" value="dfe6e6" alpha="0.35" name="vapore"/>
+
+  <box at="49.5 49.5 0" size="90 90 68" color="M"/>
+  <box at="49.5 49.5 0" size="92 92 6" color="P"/>
+  <box at="49.5 49.5 34" size="92 92 3" color="G"/>
+  <box at="49.5 49.5 64" size="92 92 3" color="D"/>
+
+  <box at="7.5 96 0" size="6 3 68" color="D"/>
+  <box at="36.5 96 0" size="6 3 68" color="D"/>
+  <box at="62.5 96 0" size="6 3 68" color="D"/>
+  <box at="91.5 96 0" size="6 3 68" color="D"/>
+  <box at="7.5 3 0" size="6 3 68" color="D"/>
+  <box at="49.5 3 0" size="12 3 68" color="D"/>
+  <box at="91.5 3 0" size="6 3 68" color="D"/>
+  <box at="3 7.5 0" size="3 6 68" color="D"/>
+  <box at="3 49.5 0" size="3 12 68" color="D"/>
+  <box at="3 91.5 0" size="3 6 68" color="D"/>
+  <box at="96 7.5 0" size="3 6 68" color="D"/>
+  <box at="96 49.5 0" size="3 12 68" color="D"/>
+  <box at="96 91.5 0" size="3 6 68" color="D"/>
+
+  <box at="49.5 49.5 3" size="84 84 65" color="B"/>
+  <box at="49.5 49.5 0" size="84 84 3" color="P"/>
+
+  <box at="49.5 28.5 34" size="84 42 3" color="L"/>
+  <box at="49.5 56.5 34" size="84 14 3" color="G"/>
+  <box at="83 27.5 34" size="17 40 3" color="B"/>
+
+  <box at="49.5 48.5 3" size="84 2 31" color="D"/>
+  <box at="49.5 27.5 3" size="2 40 31" color="D"/>
+  <box at="62.5 48.5 3" size="16 2 31" color="B"/>
+  <box at="49.5 27.5 3" size="2 16 31" color="B"/>
+  <box at="29 48.5 37" size="43 2 31" color="L"/>
+  <box at="49.5 27.5 37" size="2 40 31" color="L"/>
+  <box at="29.5 48.5 37" size="16 2 31" color="B"/>
+  <box at="49.5 27.5 37" size="2 16 31" color="B"/>
+  <box at="43 48.5 42" size="7 2 14" color="V"/>
+
+  <box at="83 17.5 3" size="17 4 4" color="G"/>
+  <box at="83 21.5 3" size="17 4 8" color="G"/>
+  <box at="83 25.5 3" size="17 4 12" color="G"/>
+  <box at="83 29.5 3" size="17 4 16" color="G"/>
+  <box at="83 33.5 3" size="17 4 20" color="G"/>
+  <box at="83 37.5 3" size="17 4 24" color="G"/>
+  <box at="83 41.5 3" size="17 4 28" color="G"/>
+  <box at="83 45.5 3" size="17 4 32" color="G"/>
+  <box at="74 25.5 37" size="1 36 3" color="G"/>
+  <box at="49.5 63 37" size="84 1 3" color="G"/>
+  <box at="38.5 62.5 3" size="2 2 31" color="G"/>
+  <box at="72.5 62.5 3" size="2 2 31" color="G"/>
+
+  <box at="19.5 77.5 3" size="24 24 8" color="L"/>
+  <box at="79.5 77.5 3" size="24 24 11" color="G"/>
+  <box at="79.5 77.5 14" size="24 24 1" color="O"/>
+
+  <box at="15.5 55.5 3" size="4 12 6" color="G"/>
+  <box at="31.5 55.5 3" size="4 12 6" color="G"/>
+  <ellipsoid at="23.5 55.5 5" size="28 12 26" color="R"/>
+  <ellipsoid at="23.5 55.5 26" size="8 8 8" color="O"/>
+  <box at="22.5 60 6" size="12 5 12" color="G"/>
+  <box at="22.5 60.5 8" size="8 4 8" color="F"/>
+  <line at="10 51 28" to="10 51 67" r="1" color="R"/>
+  <line at="8 90 60" to="91 90 60" r="1" color="R"/>
+
+  <box at="12.5 12.5 3" size="8 8 8" color="L"/>
+  <box at="43.5 12.5 3" size="8 8 6" color="L"/>
+  <cylinder at="12 41 3" size="8 8 10" color="R"/>
+  <box at="16 12 37" size="10 6 5" color="L"/>
+  <box at="16 12 42" size="2 2 3" color="F"/>
+
+  <box at="49.5 95.5 0" size="20 2 38" color="O"/>
+  <box at="49.5 97 0" size="16 5 36" color="B"/>
+  <box at="49.5 93 3" size="16 3 33" color="B"/>
+
+  <box at="22 94.5 8" size="17 2 24" color="P"/>
+  <box at="22 93 10" size="13 3 16" color="V"/>
+  <box at="22 93 26" size="9 3 2" color="V"/>
+  <box at="22 93 28" size="5 3 2" color="V"/>
+  <box at="20 94 10" size="1 1 20" color="G"/>
+  <box at="24 94 10" size="1 1 20" color="G"/>
+  <box at="22 94 18" size="13 1 1" color="G"/>
+
+  <box at="77 94.5 8" size="17 2 24" color="P"/>
+  <box at="77 93 10" size="13 3 16" color="V"/>
+  <box at="77 93 26" size="9 3 2" color="V"/>
+  <box at="77 93 28" size="5 3 2" color="V"/>
+  <box at="75 94 10" size="1 1 20" color="G"/>
+  <box at="79 94 10" size="1 1 20" color="G"/>
+  <box at="77 94 18" size="13 1 1" color="G"/>
+
+  <box at="22 94.5 39" size="17 2 24" color="P"/>
+  <box at="22 93 41" size="13 3 16" color="V"/>
+  <box at="22 93 57" size="9 3 2" color="V"/>
+  <box at="22 93 59" size="5 3 2" color="V"/>
+  <box at="20 94 41" size="1 1 20" color="G"/>
+  <box at="24 94 41" size="1 1 20" color="G"/>
+  <box at="22 94 49" size="13 1 1" color="G"/>
+
+  <box at="77 94.5 39" size="17 2 24" color="P"/>
+  <box at="77 93 41" size="13 3 16" color="V"/>
+  <box at="77 93 57" size="9 3 2" color="V"/>
+  <box at="77 93 59" size="5 3 2" color="V"/>
+  <box at="75 94 41" size="1 1 20" color="G"/>
+  <box at="79 94 41" size="1 1 20" color="G"/>
+  <box at="77 94 49" size="13 1 1" color="G"/>
+
+  <box at="28 4.5 8" size="17 2 24" color="P"/>
+  <box at="28 6 10" size="13 3 16" color="V"/>
+  <box at="28 6 26" size="9 3 2" color="V"/>
+  <box at="28 6 28" size="5 3 2" color="V"/>
+  <box at="26 5 10" size="1 1 20" color="G"/>
+  <box at="30 5 10" size="1 1 20" color="G"/>
+  <box at="28 5 18" size="13 1 1" color="G"/>
+
+  <box at="28 4.5 39" size="17 2 24" color="P"/>
+  <box at="28 6 41" size="13 3 16" color="V"/>
+  <box at="28 6 57" size="9 3 2" color="V"/>
+  <box at="28 6 59" size="5 3 2" color="V"/>
+  <box at="26 5 41" size="1 1 20" color="G"/>
+  <box at="30 5 41" size="1 1 20" color="G"/>
+  <box at="28 5 49" size="13 1 1" color="G"/>
+
+  <box at="4.5 70 10" size="2 17 24" color="P"/>
+  <box at="6 70 12" size="3 13 16" color="V"/>
+  <box at="6 70 28" size="3 9 2" color="V"/>
+  <box at="6 70 30" size="3 5 2" color="V"/>
+  <box at="5 68 12" size="1 1 20" color="G"/>
+  <box at="5 72 12" size="1 1 20" color="G"/>
+  <box at="5 70 20" size="1 13 1" color="G"/>
+
+  <box at="4.5 25 39" size="2 17 24" color="P"/>
+  <box at="6 25 41" size="3 13 16" color="V"/>
+  <box at="6 25 57" size="3 9 2" color="V"/>
+  <box at="6 25 59" size="3 5 2" color="V"/>
+  <box at="5 23 41" size="1 1 20" color="G"/>
+  <box at="5 27 41" size="1 1 20" color="G"/>
+  <box at="5 25 49" size="1 13 1" color="G"/>
+
+  <box at="94.5 70 39" size="2 17 24" color="P"/>
+  <box at="93 70 41" size="3 13 16" color="V"/>
+  <box at="93 70 57" size="3 9 2" color="V"/>
+  <box at="93 70 59" size="3 5 2" color="V"/>
+  <box at="94 68 41" size="1 1 20" color="G"/>
+  <box at="94 72 41" size="1 1 20" color="G"/>
+  <box at="94 70 49" size="1 13 1" color="G"/>
+
+  <box at="94.5 25 39" size="2 17 24" color="P"/>
+  <box at="93 25 41" size="3 13 16" color="V"/>
+  <box at="93 25 57" size="3 9 2" color="V"/>
+  <box at="93 25 59" size="3 5 2" color="V"/>
+  <box at="94 23 41" size="1 1 20" color="G"/>
+  <box at="94 27 41" size="1 1 20" color="G"/>
+  <box at="94 25 49" size="1 13 1" color="G"/>
+
+  <prl in="M" out="D" p="0.05" steps="1"/>
+
+  <line at="5 96 38" to="39 96 38" r="1" color="R"/>
+  <line at="60 96 38" to="94 96 38" r="1" color="R"/>
+  <line at="12 96 0" to="12 96 67" r="1" color="R"/>
+  <line at="87 96 0" to="87 96 67" r="1" color="R"/>
+  <line at="3 5 38" to="3 94 38" r="1" color="R"/>
+  <line at="3 12 0" to="3 12 67" r="1" color="R"/>
+  <line at="96 5 38" to="96 94 38" r="1" color="R"/>
+  <line at="96 87 0" to="96 87 67" r="1" color="R"/>
+  <line at="5 3 38" to="94 3 38" r="1" color="R"/>
+  <line at="62 3 0" to="62 3 67" r="1" color="R"/>
+  <box at="12 96 20" size="5 5 3" color="O"/>
+  <box at="87 96 20" size="5 5 3" color="O"/>
+  <box at="3 12 20" size="5 5 3" color="O"/>
+  <box at="96 87 20" size="5 5 3" color="O"/>
+  <box at="62 3 20" size="5 5 3" color="O"/>
+
+  <ellipsoid at="49.5 95.5 41" size="22 4 22" color="O"/>
+  <box at="49.5 95 50" size="26 3 4" color="O"/>
+  <box at="49.5 95 39" size="4 3 26" color="O"/>
+  <box at="40.5 95 41" size="4 3 4" color="O"/>
+  <box at="58.5 95 41" size="4 3 4" color="O"/>
+  <box at="40.5 95 59" size="4 3 4" color="O"/>
+  <box at="58.5 95 59" size="4 3 4" color="O"/>
+  <ellipsoid at="49.5 95.5 48" size="8 5 8" color="G"/>
+
+  <ellipsoid at="36 95.5 16" size="9 4 9" color="O"/>
+  <box at="36 95 19" size="11 3 3" color="O"/>
+  <box at="36 95 14" size="3 3 13" color="O"/>
+  <ellipsoid at="63 95.5 16" size="9 4 9" color="O"/>
+  <box at="63 95 19" size="11 3 3" color="O"/>
+  <box at="63 95 14" size="3 3 13" color="O"/>
+
+  <ellipsoid at="3.5 49.5 44" size="4 12 12" color="O"/>
+  <box at="3 49.5 49" size="3 16 2" color="O"/>
+  <box at="3 49.5 42" size="3 2 16" color="O"/>
+  <ellipsoid at="95.5 49.5 44" size="4 12 12" color="O"/>
+  <box at="96 49.5 49" size="3 16 2" color="O"/>
+  <box at="96 49.5 42" size="3 2 16" color="O"/>
+  <ellipsoid at="49.5 3.5 44" size="12 4 12" color="O"/>
+  <box at="49.5 3 49" size="16 3 2" color="O"/>
+  <box at="49.5 3 42" size="2 3 16" color="O"/>
+
+  <box at="49.5 49.5 68" size="98 98 2" color="S"/>
+  <box at="49.5 49.5 70" size="80 94 2" color="S"/>
+  <box at="49.5 49.5 72" size="56 94 2" color="S"/>
+  <box at="49.5 49.5 74" size="32 94 2" color="S"/>
+  <box at="49.5 96 71" size="80 1 1" color="R"/>
+  <box at="49.5 96 73" size="56 1 1" color="R"/>
+  <box at="49.5 96 75" size="32 1 1" color="R"/>
+  <box at="49.5 3 71" size="80 1 1" color="R"/>
+  <box at="49.5 3 73" size="56 1 1" color="R"/>
+  <box at="49.5 3 75" size="32 1 1" color="R"/>
+
+  <box at="49.5 49.5 76" size="16 76 3" color="R"/>
+  <box at="49.5 49.5 76" size="16 68 2" color="V"/>
+  <box at="49.5 30 76" size="16 2 2" color="O"/>
+  <box at="49.5 50 76" size="16 2 2" color="O"/>
+  <box at="49.5 70 76" size="16 2 2" color="O"/>
+
+  <box at="14.5 3.5 0" size="10 8 76" color="D"/>
+  <box at="14.5 3.5 60" size="12 8 2" color="O"/>
+  <box at="14.5 3.5 72" size="12 8 2" color="O"/>
+  <box at="14.5 3.5 76" size="12 8 3" color="G"/>
+  <box at="14.5 3.5 74" size="6 4 5" color="A"/>
+  <box at="85.5 3.5 0" size="10 8 76" color="D"/>
+  <box at="85.5 3.5 60" size="12 8 2" color="O"/>
+  <box at="85.5 3.5 72" size="12 8 2" color="O"/>
+  <box at="85.5 3.5 76" size="12 8 3" color="G"/>
+  <box at="85.5 3.5 74" size="6 4 5" color="A"/>
+
+  <cylinder at="28 50 72" size="5 5 5" color="O"/>
+  <ellipsoid at="28 50 76" size="8 8 4" color="A"/>
+</sequence>
