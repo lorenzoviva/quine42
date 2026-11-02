@@ -5,6 +5,8 @@
 
 Aggiornato il 02/11/2026, epoca 213 su **claude** (crediti: vedi `stato`).
 
+- **Epoca 213, `ferma --dopo` REVOCATO (richiesta dell'autore, supera la voce qui sotto):** niente spegnimento e niente riavvio: la pagina web nuova e Fable ci sono già. Non c'è un comando: tolto a mano `.pipeline/arresto.json`, il ciclo di `esegui` lo rilegge a ogni giro e torna a lanciare. `claude` e `fable` restano sospesi: `riattiva fable`, `riattiva claude` quando l'autore dice di partire (chiesto). Alla fine di T173 e T174, «Da fare» di «Fine epoca 211».
+
 - **Epoca 213 (19:08 UTC, supera il «non serve un altro riavvio» qui sotto):** l'autore ha spento il computer per sbaglio e chiede di aspettare T173 e T174, poi chiudere: riavvia lui per avere la pagina web nuova. La vista Markdown c'era già (`d9f4fe5`), non rifatta. `ferma --dopo` dato. **Al riavvio:** esiti di T173 e T174 come in «Fine epoca 211»; `claude` e `fable` restano sospesi, quindi chiedere all'autore se partire (`riattiva fable`, `riattiva claude`) perché ha detto che dovremmo avere Fable. Attese come in «Fine epoca 212».
 
 - **Fine epoca 212:** in corso T173 e T174, ripresi alle 19:05 UTC. `claude` e `fable` sospesi: nulla parte finché l'autore non dice di partire con Fable (allora `riattiva fable`, `riattiva claude`) o chiede di spegnere (allora `ferma --dopo`). Glielo ho già chiesto. Dopo T157 confrontare i contatori e correggere la stima di Fable. Alla fine di T173 e T174, «Da fare» di «Fine epoca 211». ADR nuovi dallo **0116**. Attese dell'autore: quelle di «Fine epoca 211», più uno sguardo alla vista Markdown.
