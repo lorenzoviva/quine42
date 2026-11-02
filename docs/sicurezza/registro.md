@@ -131,13 +131,14 @@ Modello di una voce:
 
 ### V-011 · Nessun limite ai messaggi
 - Gravità: media
-- Stato: `specificata`
+- Stato: `chiusa`
 - Superficie: `src/session/server.ts`, `inbox` e i messaggi del protocollo
 - Proprietà violata: un giocatore solo non esaurisce i budget comuni del mondo
-- Prova: solo lettura del codice (T117); misurata dal kit (`esiti/2026-11-01.json`): 600 messaggi su 600 serviti (V-011.a). La lunghezza del testo non è provata
-- Contromisura: ritmo per client, lunghezza massima del testo, code per pagante; il gioco normale non se ne accorge.
+- Prova: solo lettura del codice (T117); misurata dal kit (`esiti/2026-11-01.json`): 600 messaggi su 600 serviti (V-011.a). La lunghezza del testo non è provata. Dopo T129: V-011.a ok (`esiti/2026-11-02-dopo-T129.json`: 600 messaggi hanno risposta, ma quelli oltre il ritmo sono rifiuti); test: chi inonda e un altro insieme, ritmo dei modelli, code per pagante, lunghezza del testo, rientro, gioco normale
+- Contromisura: ritmo per viandante, lunghezza massima del testo, code per pagante; il gioco normale non se ne accorge. Ciò che resta (molti account, peso in byte) in ADR-0105.
 - Task: T129
-- Test: —
+- Test: `tests/sicurezza/messaggi.test.ts`
+- Esito: chiusa da T129 (ADR-0105), 02/11/2026, branch `task/T129`.
 
 ### V-012 · Ciò che esce verso il giocatore
 - Gravità: media

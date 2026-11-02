@@ -28,6 +28,8 @@ export function admitSocket(req: Pick<IncomingMessage, 'headers'> & { socket: { 
 }
 /** A message bigger than this is not a client's (the files go the other way). */
 const MAX_MESSAGE = 256 * 1024;
+/** Messages kept for a world still opening (T129): the rest is not heard. */
+const MAX_EARLY = 16;
 
 export type ActiveHost = { name: string; session: { connect(link: unknown): void; readonly kernel: Kernel; readonly clientCount?: number; connected?(): string[] }; stop(): void };
 export const activeHosts = new Map<string, Promise<ActiveHost | { error: string }>>();
@@ -54,7 +56,8 @@ function wsLink(ws: WebSocket) {
       return;
     }
     if (fns.length) fns.forEach((f) => f(m));
-    else early.push(m);
+    // Only `entra` is owed an answer before the world is open: a few are plenty.
+    else if (early.length < MAX_EARLY) early.push(m);
   });
   ws.on('close', () => closes.forEach((f) => f()));
   return {

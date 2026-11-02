@@ -46,6 +46,63 @@ const FAR = 8;
 /** What the Council said that the master has not heard yet: older words are dropped past this. */
 const FEED_KEEP = 400;
 
+/**
+ * How much a wanderer may ask of the world (T129, ADR-0105), well above what the game sends: 20 steps a second and a few
+ * actions. Credit is per wanderer, not per link: coming back in does not fill it again.
+ */
+export const LIMITS = {
+  /** Messages a second, and how many may come at once. */
+  rate: 60,
+  burst: 120,
+  /** What may call the models (`heavy`): one every two seconds, and how many may come at once. */
+  heavyRate: 0.5,
+  heavyBurst: 20,
+  /** A wanderer's requests running at once; the others wait their turn, up to this many. Nobody else's wait for them. */
+  atOnce: 2,
+  waiting: 8,
+  /** Refusals owed (they fade at `rate`) before the link is closed: nobody playing gets near this. */
+  flood: 600,
+  /** Words sent to the Council: what the game's fields let through (160-300) fits. The name of who comes in, too. */
+  text: 500,
+  agentText: 2000,
+  name: 64,
+} as const;
+
+/** What a wanderer has left to ask with (see `LIMITS`), and their requests to the Council. */
+interface Pace {
+  msgs: number;
+  heavy: number;
+  refused: number;
+  running: number;
+  queue: Array<{ c: Client; msg: ClientMsg }>;
+}
+
+const SLOW_DOWN = 'stai andando troppo in fretta: aspetta un momento';
+
+/** Words from the wire, as long as they may be. */
+const words = (v: unknown) => String(v ?? '').slice(0, LIMITS.text);
+
+/**
+ * The messages that may call the models (or write the wanderer's state, `profilo`). Everything else the kernel does at once
+ * and alone: `azione` only for the actions that ask the Narrator, so picking things up never waits for a chat.
+ */
+function heavy(msg: ClientMsg): boolean {
+  switch (msg.t) {
+    case 'chat':
+    case 'altro':
+    case 'pronuncia':
+    case 'agente':
+    case 'profilo':
+      return true;
+    case 'fabbrica':
+      return typeof msg.ricetta !== 'string';
+    case 'azione':
+      return msg.azione === 'leggi' || msg.azione === 'esamina' || msg.azione === 'parla';
+    default:
+      return false;
+  }
+}
+
 export { playerChanges, playerFiles };
 
 /** Files with changes on top (null: gone). */
@@ -149,11 +206,14 @@ interface Client {
   notices: Notice[];
   /** Spending ceiling for this session in USD (T45d: lobby). */
   tetto?: number;
+  pace: Pace;
 }
 
 export class SessionServer {
   private clients = new Map<string, Client>();
   private inbox: Array<{ c: Client; msg: ClientMsg }> = [];
+  /** By wanderer, outliving their link until it is full again. */
+  private paces = new Map<string, Pace>();
   private since = 0;
   /** The Council's feed since the last update, for the masters connected. */
   private voices: FeedEntry[] = [];
@@ -274,7 +334,7 @@ export class SessionServer {
     let closed = false;
     link.onMessage((msg) => {
       if (client) {
-        if (msg && typeof msg === 'object') this.inbox.push({ c: client, msg });
+        this.hear(client, msg);
         return;
       }
       if (msg?.t !== 'entra' || entering) return;
@@ -324,7 +384,7 @@ export class SessionServer {
       if (anonimo) this.anonymous.add(id);
       else this.anonymous.delete(id);
     }
-    if (this.kernel.addWanderer(id, typeof nome === 'string' ? nome : undefined, anonimo) === undefined) {
+    if (this.kernel.addWanderer(id, typeof nome === 'string' ? nome.slice(0, LIMITS.name) : undefined, anonimo) === undefined) {
       link.send({ t: 'rifiuto', motivo: 'il viandante non può entrare' });
       return undefined;
     }
@@ -336,7 +396,7 @@ export class SessionServer {
     // Who they say they are (T44a): repaired against everyone else in the world. A profile already saved stays (T44c): only
     // `profilo` changes it, what a browser brings on entering may be another wanderer's.
     const fixed = profilo && typeof profilo === 'object' && !this.kernel.profileOf(id) ? this.kernel.setProfile(id, profilo) : undefined;
-    const c: Client = { id, link, budget: this.kernel.paceOf(id) * BURST, places: new Map(), things: new Map(), others: new Map(), notices: [], tetto };
+    const c: Client = { id, link, budget: this.kernel.paceOf(id) * BURST, places: new Map(), things: new Map(), others: new Map(), notices: [], tetto, pace: this.paceOf(id) };
     this.clients.set(id, c);
     const u = this.view(c);
     const w = this.kernel.wanderers().find((x) => x.id === id)!;
@@ -367,9 +427,18 @@ export class SessionServer {
   /** One tick of the world: the clients' messages in the order they came, the kernel, and (at `hz`) the updates. */
   tick(dt: number): void {
     for (const c of this.clients.values()) c.budget = Math.min(c.budget + this.kernel.paceOf(c.id) * dt * TOLERANCE, this.kernel.paceOf(c.id) * BURST + 0.25);
+    this.refill(dt);
     const inbox = this.inbox;
     this.inbox = [];
-    for (const { c, msg } of inbox) if (this.clients.get(c.id) === c) this.handle(c, msg);
+    for (const { c, msg } of inbox) {
+      if (this.clients.get(c.id) !== c) continue;
+      if (!heavy(msg)) void this.handle(c, msg);
+      else if (c.pace.queue.length >= LIMITS.waiting) this.answer(c, Number((msg as { seq?: unknown }).seq) || 0, { ok: false, motivo: 'troppe richieste in attesa: aspetta le risposte' });
+      else {
+        c.pace.queue.push({ c, msg });
+        this.startWaiting(c.pace);
+      }
+    }
     this.kernel.tick(dt);
     this.since += dt;
     if (this.since + 1e-9 < 1 / this.hz) return;
@@ -393,11 +462,63 @@ export class SessionServer {
     }
   }
 
-  private handle(c: Client, msg: ClientMsg): void {
+  private paceOf(id: string): Pace {
+    let p = this.paces.get(id);
+    if (!p) this.paces.set(id, (p = { msgs: LIMITS.burst, heavy: LIMITS.heavyBurst, refused: 0, running: 0, queue: [] }));
+    return p;
+  }
+
+  /** A message as it arrives: what is over the wanderer's pace goes no further than this, whatever it is. */
+  private hear(c: Client, msg: ClientMsg): void {
+    const p = c.pace;
+    const seq = () => Number((msg as { seq?: unknown } | null)?.seq) || 0;
+    if (p.msgs < 1) {
+      if (++p.refused > LIMITS.flood) {
+        c.link.send({ t: 'rifiuto', motivo: 'troppi messaggi: collegamento chiuso' });
+        return c.link.close();
+      }
+      // A step lost is made good by the next one.
+      if (msg && typeof msg === 'object' && msg.t !== 'passo') this.answer(c, seq(), { ok: false, motivo: SLOW_DOWN });
+      return;
+    }
+    p.msgs--;
+    if (!msg || typeof msg !== 'object') return;
+    if (heavy(msg)) {
+      if (p.heavy < 1) return this.answer(c, seq(), { ok: false, motivo: SLOW_DOWN });
+      p.heavy--;
+    }
+    this.inbox.push({ c, msg });
+  }
+
+  /** The seconds that passed give credit back; the requests that were waiting go on; who left and owes nothing is forgotten. */
+  private refill(dt: number): void {
+    for (const [id, p] of this.paces) {
+      p.msgs = Math.min(LIMITS.burst, p.msgs + LIMITS.rate * dt);
+      p.heavy = Math.min(LIMITS.heavyBurst, p.heavy + LIMITS.heavyRate * dt);
+      p.refused = Math.max(0, p.refused - LIMITS.rate * dt);
+      this.startWaiting(p);
+      if (!this.clients.has(id) && !p.running && p.msgs >= LIMITS.burst && p.heavy >= LIMITS.heavyBurst) this.paces.delete(id);
+    }
+  }
+
+  /** The queue of a payer: their next requests, while fewer than `atOnce` are running. One who left pays for nothing more. */
+  private startWaiting(p: Pace): void {
+    while (p.running < LIMITS.atOnce && p.queue.length) {
+      const { c, msg } = p.queue.shift()!;
+      if (this.clients.get(c.id) !== c) continue;
+      p.running++;
+      void (async () => this.handle(c, msg))()
+        .catch((e) => this.kernel.log('sessione', `richiesta fallita: ${(e as Error).message}`))
+        .finally(() => p.running--);
+    }
+  }
+
+  /** What a message does; the promise, for what waits for the Council, ends when it has been answered. */
+  private handle(c: Client, msg: ClientMsg): void | Promise<void> {
     if (msg.t === 'passo') return this.step(c, msg.seq, msg.x, msg.y);
     const seq = Number((msg as { seq?: unknown }).seq) || 0;
     const k = this.kernel;
-    if (msg.t === 'altro' && typeof msg.viandante === 'string') return void this.later(c, seq, () => k.freeOnWanderer(String(msg.viandante), String(msg.testo ?? '')));
+    if (msg.t === 'altro' && typeof msg.viandante === 'string') return this.later(c, seq, () => k.freeOnWanderer(String(msg.viandante), words(msg.testo)));
     if (msg.t === 'altro' && (msg.slot !== undefined || msg.col !== undefined || msg.row !== undefined)) return this.freeOn(c, seq, msg);
     switch (msg.t) {
       case 'frase': {
@@ -413,7 +534,7 @@ export class SessionServer {
       case 'incidi':
         return this.answer(c, seq, this.act(c, () => k.inscribeHand()));
       case 'pronuncia':
-        return void this.later(c, seq, () => k.castSpell());
+        return this.later(c, seq, () => k.castSpell());
       case 'oggetto':
         return this.item(c, seq, msg);
       case 'contenitore': {
@@ -428,16 +549,16 @@ export class SessionServer {
       }
       case 'fabbrica': {
         const recipe = msg.ricetta;
-        const text = msg.testo;
+        const text = typeof msg.testo === 'string' ? words(msg.testo) : undefined;
         if (typeof recipe === 'string') return this.answer(c, seq, this.act(c, () => k.craft(recipe)));
-        if (typeof text === 'string')
-          return void this.later(c, seq, async () => {
+        if (text !== undefined)
+          return this.later(c, seq, async () => {
             const r = await k.freeCraft(text);
             return new Said(r.ok, r.story);
           });
         if (Array.isArray(msg.unisci)) {
           const [a, b] = msg.unisci.map(int);
-          return void this.later(c, seq, () => k.combine(a, b));
+          return this.later(c, seq, () => k.combine(a, b));
         }
         break;
       }
@@ -477,7 +598,7 @@ export class SessionServer {
       case 'casella': {
         const why = this.tileOutOfReach(c, msg.col, msg.row) ?? (typeof msg.azione === 'string' && msg.azione && msg.azione !== 'altro' ? undefined : 'azione sconosciuta');
         if (why) return this.answer(c, seq, { ok: false, motivo: why });
-        return void this.later(c, seq, () => k.performMenu(`t:${msg.azione}`, -1, msg.col, msg.row));
+        return this.later(c, seq, () => k.performMenu(`t:${msg.azione}`, -1, msg.col, msg.row));
       }
       case 'azione':
       case 'altro':
@@ -486,9 +607,9 @@ export class SessionServer {
         if (why) return this.answer(c, seq, { ok: false, motivo: why });
         // A rune on the ground is picked up as with E in front of it.
         if (msg.t === 'azione' && msg.azione === 'raccogli' && k.ecs.has(msg.entita, 'rune')) return this.answer(c, seq, this.act(c, () => k.pickUpRune(msg.entita)));
-        if (msg.t === 'azione') return void this.later(c, seq, () => k.perform(msg.entita, String(msg.azione ?? '')));
-        if (msg.t === 'altro') return void this.later(c, seq, () => k.freeAction(Number(msg.entita), String(msg.testo ?? '')));
-        return void this.later(c, seq, async () => (await k.talk(msg.entita, String(msg.testo ?? ''), c.id)).say);
+        if (msg.t === 'azione') return this.later(c, seq, () => k.perform(msg.entita, String(msg.azione ?? '')));
+        if (msg.t === 'altro') return this.later(c, seq, () => k.freeAction(Number(msg.entita), words(msg.testo)));
+        return this.later(c, seq, async () => (await k.talk(msg.entita, words(msg.testo), c.id)).say);
       }
     }
     this.answer(c, seq, { ok: false, motivo: 'messaggio sconosciuto' });
@@ -511,12 +632,12 @@ export class SessionServer {
    * the server's Council, in a kernel of their branch, one at a time; what it commits there goes on the branch, the world
    * does not have it until they publish. The master hears of the files (`ramo`), then the answer.
    */
-  private askOnBranch(c: Client, seq: number, agente: unknown, testo: unknown): void {
+  private askOnBranch(c: Client, seq: number, agente: unknown, testo: unknown): void | Promise<void> {
     if (!this.kernel.isMaster(c.id)) return this.answer(c, seq, { ok: false, motivo: 'solo il master parla con il Concilio' });
     if (typeof agente !== 'string' || !(agente in AGENTS) || typeof testo !== 'string' || !testo.trim()) return this.answer(c, seq, { ok: false, motivo: 'richiesta non valida' });
-    const ask = this.asking.then(() => this.onBranch(c, agente as AgentId, testo.slice(0, 2000)));
+    const ask = this.asking.then(() => this.onBranch(c, agente as AgentId, testo.slice(0, LIMITS.agentText)));
     this.asking = ask.catch(() => undefined);
-    void ask.then(
+    return ask.then(
       (r) => this.answer(c, seq, r),
       (e) => this.answer(c, seq, { ok: false, motivo: (e as Error).message }),
     );
@@ -632,17 +753,17 @@ export class SessionServer {
   }
 
   /** «Altro…» on something carried, or on a tile. */
-  private freeOn(c: Client, seq: number, msg: Extract<ClientMsg, { t: 'altro' }>): void {
+  private freeOn(c: Client, seq: number, msg: Extract<ClientMsg, { t: 'altro' }>): void | Promise<void> {
     const k = this.kernel;
-    const text = String(msg.testo ?? '');
+    const text = words(msg.testo);
     if (msg.slot !== undefined) {
       const slot = this.pocket(c, msg.slot);
       if (slot < 0) return this.answer(c, seq, { ok: false, motivo: 'non porti niente lì' });
-      return void this.later(c, seq, () => k.freeItemAction(slot, text));
+      return this.later(c, seq, () => k.freeItemAction(slot, text));
     }
     const why = this.tileOutOfReach(c, msg.col, msg.row);
     if (why) return this.answer(c, seq, { ok: false, motivo: why });
-    void this.later(c, seq, () => k.freeTileAction(msg.col!, msg.row!, text));
+    return this.later(c, seq, () => k.freeTileAction(msg.col!, msg.row!, text));
   }
 
   /** A pocket of the wanderer's inventory from the wire, or -1. */
