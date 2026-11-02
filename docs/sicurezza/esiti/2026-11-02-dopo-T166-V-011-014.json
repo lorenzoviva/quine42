@@ -1,0 +1,133 @@
+{
+ "data": "2026-11-02",
+ "commit": "8afba09",
+ "vite": "7.3.7",
+ "node": "v22.19.0",
+ "piattaforma": "win32",
+ "solo": [
+  "V-011",
+  "V-012",
+  "V-013",
+  "V-014"
+ ],
+ "riepilogo": {
+  "ok": 16,
+  "falle": 0,
+  "errori": 0,
+  "saltate": 0
+ },
+ "prove": [
+  {
+   "id": "V-011.a",
+   "voce": "V-011",
+   "proprieta": "chi inonda il server di messaggi è limitato",
+   "esito": "ok",
+   "dettaglio": "600 messaggi su 600 serviti"
+  },
+  {
+   "id": "V-012.a",
+   "voce": "V-012",
+   "proprieta": "a un giocatore non arrivano le impostazioni dell’IA",
+   "esito": "ok",
+   "dettaglio": "campo ai assente"
+  },
+  {
+   "id": "V-012.b",
+   "voce": "V-012",
+   "proprieta": "a un giocatore non arrivano le storie dei moduli (persona, lore, context)",
+   "esito": "ok",
+   "dettaglio": "0 manifest con quei campi"
+  },
+  {
+   "id": "V-012.c",
+   "voce": "V-012",
+   "proprieta": "a un giocatore non arrivano prompt, bibbia, persone, codice degli altri né viandanti",
+   "esito": "ok",
+   "dettaglio": "0 file di troppo"
+  },
+  {
+   "id": "V-012.d",
+   "voce": "V-012",
+   "proprieta": "il server di sviluppo non serve i file di `universes/`",
+   "esito": "ok",
+   "dettaglio": "risposta 404"
+  },
+  {
+   "id": "V-014.a",
+   "voce": "V-014",
+   "proprieta": "il server non dà `.env` a chi lo chiede",
+   "esito": "ok",
+   "dettaglio": "risposta 403 per la forma V-014.a"
+  },
+  {
+   "id": "V-014.b",
+   "voce": "V-014",
+   "proprieta": "il server non dà `.env` a chi lo chiede",
+   "esito": "ok",
+   "dettaglio": "risposta 403 per la forma V-014.b"
+  },
+  {
+   "id": "V-014.c",
+   "voce": "V-014",
+   "proprieta": "il server non dà `.env` a chi lo chiede",
+   "esito": "ok",
+   "dettaglio": "risposta 403 per la forma V-014.c"
+  },
+  {
+   "id": "V-014.d",
+   "voce": "V-014",
+   "proprieta": "il server non dà `.env` a chi lo chiede",
+   "esito": "ok",
+   "dettaglio": "risposta 403 per la forma V-014.d"
+  },
+  {
+   "id": "V-014.e",
+   "voce": "V-014",
+   "proprieta": "il server non dà `.env` a chi lo chiede",
+   "esito": "ok",
+   "dettaglio": "risposta 403 per la forma V-014.e"
+  },
+  {
+   "id": "V-014.f",
+   "voce": "V-014",
+   "proprieta": "il server non dà `.env` a chi lo chiede",
+   "esito": "ok",
+   "dettaglio": "risposta 403 per la forma V-014.f"
+  },
+  {
+   "id": "V-014.g",
+   "voce": "V-014",
+   "proprieta": "il server non dà `.env` a chi lo chiede",
+   "esito": "ok",
+   "dettaglio": "risposta 403 per la forma V-014.g"
+  },
+  {
+   "id": "V-014.h",
+   "voce": "V-014",
+   "proprieta": "il server non dà `.env` a chi lo chiede",
+   "esito": "ok",
+   "dettaglio": "risposta 403 per la forma V-014.h"
+  },
+  {
+   "id": "V-014.i",
+   "voce": "V-014",
+   "proprieta": "il server non dà `.env` a chi lo chiede",
+   "esito": "ok",
+   "dettaglio": "risposta 403 per la forma V-014.i"
+  },
+  {
+   "id": "V-014.j",
+   "voce": "V-014",
+   "proprieta": "il server non dà `.env` a chi lo chiede",
+   "esito": "ok",
+   "dettaglio": "risposta 403 per la forma V-014.j"
+  },
+  {
+   "id": "V-014.k",
+   "voce": "V-014",
+   "proprieta": "il server non dà `.env` a chi lo chiede",
+   "esito": "ok",
+   "dettaglio": "risposta 403 per la forma V-014.k"
+  }
+ ]
+}
