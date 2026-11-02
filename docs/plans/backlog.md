@@ -2730,6 +2730,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: merge risolto, commit su `task/T146`. Poi l'orchestratore fa `integra T146` e `integra T126`.
 - Esito: `task/T146`, l'ADR dei limiti è ora ADR-0103 (indice, `AGENTS.md`, registro, backlog, codice, test); le citazioni di T120 restano 0102. Typecheck verde. Suite intera, a macchina condivisa: 872 passati, 3 attesi, 9 rossi, tutti timeout da 60 s (`between` 4, `referente` 3, `branch` 1, `credits` 1); rilanciati da soli i quattro file sono verdi, nessun rosso resta. Da guardare: da solo il test più lento di `credits` sta a 53 s su 60. Stesso file, una misura per lato: 159 s con i sorgenti di prima del merge e 177 s con T126 (+11%), il test più lento da 43 a 53 s. T126 riduce il margine e questi timeout possono tornare. Kit `--solo V-007`, invariato (`esiti/2026-11-01-dopo-T126.json`): a, b, c ok; V-007 resta `in correzione` per T127, perché il kit non misura i blocchi rimasti. Browser su `?skip&offline`: parte e cammina, nessun guasto né errore del gioco; tick 3,8 ms da fermo e 4,4 ms camminando (p95 5-6 ms, massimo 9 ms a mondo assestato). Nessun confronto nel browser col prima di T126. Sicurezza: nessuna superficie nuova rispetto a T126.
 
+### T159 · Integrare T129 — `da fare`
+- Pipeline: claude · stima 2% · approvato · priorità 1
+- Contesto: `integra T129` va in conflitto in `docs/adr/README.md`: T129 (i limiti ai messaggi, V-011) ha preso il numero 0105, che nel base è di T149 (i limiti dentro la sandbox). T129 è partito da `e1c04a8`, senza T126, T146, T148, T149 e T150. Nasce da T129: `dossier T129`.
+- Cosa fare: nel worktree di T159 `git merge task/T129`. L'ADR di T129 diventa **ADR-0107** (0107-limiti-ai-messaggi.md): lo 0106 è riservato a T147, già in corso. Correggi le citazioni dei limiti ai messaggi (`AGENTS.md`, `docs/`, codice, test, `docs/sicurezza/registro.md`, `docs/sicurezza/esiti/2026-11-02-dopo-T129.json` se la cita, il blocco di T129 nel backlog), lasciando stare quelle dei limiti dentro la sandbox. Nell'indice degli ADR restano tutte le righe, in ordine. Nel backlog restano tutti i blocchi.
+- Test: `npm run typecheck` e la suite intera con i loro turni, col limite normale, senza `--testTimeout`: nell'esito quanti passano, i rossi che restano rilanciando il file da solo, il carico della macchina. Il `between` nuovo di T148 è nel base: i tempi di `between` vanno letti col suo. Poi `npm run sicurezza:prove -- --solo V-011`: il kit si legge, non si riscrive; se sovrascrive un esito, ripristinalo e metti il tuo in un file a parte.
+- Browser: non serve, T129 non cambia ciò che si vede.
+- Quando è fatto: merge risolto, commit su `task/T159`. Poi l'orchestratore fa `integra T159` e `integra T129`.
+
 ## Dalla chat del 02/11/2026 (testo originale: `docs/userchats/to-do-2026-11-02.md`)
 
 ### T152 · Le ambientazioni della Genesi: medievale, steampunk, moderna, futuristica — `da fare`
