@@ -25,4 +25,5 @@ Le pagine del gioco e del sito non avevano una Content Security Policy: un valor
 
 - Una risorsa esterna nuova, o uno script o gestore scritto nell'HTML, viene bloccata finché non passa da qui. Il primo sintomo è un errore nella console della pagina.
 - I testi delle pagine restano da mettere in sicurezza con l'escape: la CSP non impedisce un elemento HTML iniettato, solo che esegua codice.
+- Il mondo in un processo a parte (ADR-0110) non cambia nulla: non serve pagine e parla col server fuori dal browser. Il client che rientra dopo un riavvio tiene il suo WebSocket; una pagina caricata a mondo fermo ne apre uno sulla stessa origine (T170: provato).
 - L'accesso con Google vero non è stato provato con questa politica: l'elenco di Firebase viene dalla sua documentazione, va guardato alla prima prova con un progetto vero.

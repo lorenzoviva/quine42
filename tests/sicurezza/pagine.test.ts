@@ -124,6 +124,16 @@ describe('V-015: ciò che una pagina mostra, e dove torna un pagamento', () => {
     }
   });
 
+  it('V-015 la CSP viene prima di ogni rotta: anche il 404 di ciò che si nasconde e le risposte delle sessioni la portano (T170)', () => {
+    const config = readFileSync('vite.config.ts', 'utf8');
+    const first = config.slice(config.indexOf('plugins: ['));
+    const policy = first.indexOf('securityHeaders(accounts.config)');
+    expect(policy).toBeGreaterThan(-1);
+    for (const later of ['hideUniverses(', 'geminiProxy(', 'universeStore(', 'sessionServer(']) {
+      expect(first.indexOf(later), later).toBeGreaterThan(policy);
+    }
+  });
+
   it('V-015 nessuna pagina ha script o gestori scritti nell’HTML, che la CSP fermerebbe', () => {
     const pages = ['index.html', 'lab/3d/index.html', 'lab/editor/index.html', ...readdirSync('site').filter((f) => f.endsWith('.html')).map((f) => `site/${f}`)];
     expect(pages.length).toBeGreaterThan(5);

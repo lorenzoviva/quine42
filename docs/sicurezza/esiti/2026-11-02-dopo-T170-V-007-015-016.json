@@ -1,0 +1,76 @@
+{
+ "data": "2026-11-02",
+ "commit": "a5a3cc5",
+ "vite": "7.3.7",
+ "node": "v22.19.0",
+ "piattaforma": "win32",
+ "solo": [
+  "V-007",
+  "V-015",
+  "V-016"
+ ],
+ "riepilogo": {
+  "ok": 8,
+  "falle": 0,
+  "errori": 0,
+  "saltate": 0
+ },
+ "prove": [
+  {
+   "id": "V-007.a",
+   "voce": "V-007",
+   "proprieta": "un pattern patologico di string.find finisce entro un tempo breve",
+   "esito": "ok",
+   "dettaglio": "finito in 43 ms, con un guasto"
+  },
+  {
+   "id": "V-007.b",
+   "voce": "V-007",
+   "proprieta": "un’allocazione enorme finisce in un guasto",
+   "esito": "ok",
+   "dettaglio": "1 ms, un guasto"
+  },
+  {
+   "id": "V-015.b",
+   "voce": "V-015",
+   "proprieta": "le pagine hanno una CSP (sul server di sviluppo: una prova della sua presenza, non della sua forma)",
+   "esito": "ok",
+   "dettaglio": "0 pagine su 2 senza"
+  },
+  {
+   "id": "V-007.c",
+   "voce": "V-007",
+   "proprieta": "il codice di un mondo bloccato non ferma l’HTTP né gli altri mondi",
+   "esito": "ok",
+   "dettaglio": "2 risposte su 2 in 12 s"
+  },
+  {
+   "id": "V-015.a",
+   "voce": "V-015",
+   "proprieta": "il checkout torna solo alla stessa origine",
+   "esito": "ok",
+   "dettaglio": "nessuna sessione aperta"
+  },
+  {
+   "id": "V-016.a",
+   "voce": "V-016",
+   "proprieta": "il testo d’errore di Stripe non arriva al client",
+   "esito": "ok",
+   "dettaglio": "risposta 500"
+  },
+  {
+   "id": "V-016.b",
+   "voce": "V-016",
+   "proprieta": "nessun valore finto dei segreti in ciò che il server ha risposto o scritto nel log",
+   "esito": "ok",
+   "dettaglio": "6 risposte e il log; 0 testi con un valore, 0 già di V-014"
+  },
+  {
+   "id": "V-016.c",
+   "voce": "V-016",
+   "proprieta": "nessun valore finto dei segreti in `dist/` dopo una build",
+   "esito": "ok",
+   "dettaglio": "60 file, 0 con un valore"
+  }
+ ]
+}
