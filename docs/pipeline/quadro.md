@@ -3,7 +3,9 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 02/11/2026 (23:30 UTC), epoca 216 su **claude** (crediti: vedi `stato`).
+Aggiornato il 02/11/2026, fine epoca 216 su **claude** (crediti: vedi `stato`).
+
+- **Fine epoca 216:** in corso T177; il reset delle 5 ore è passato, `claude` e `fable` riaperti. Pronti, in ordine: T176, T178, T179, T180, T175, T106, T89a, T152, T186, T158, T183. Vedi le tre voci «Epoca 216» qui sotto. **Chiesto all'autore, senza risposta:** alzare T183 sopra T152 (se sì: `assegna T183 claude 9 <p> --approva`). **Da fare:** all'esito di T177 riportare chi riempie C: e cosa si può cancellare, `integra`; se non spiega lo sbalzo durante i task, task che campiona C: durante un giro del banco. Alla fine di T178 far leggere il glossario all'autore, poi i task delle rinomine. Alla fine di T181 (Fable) leggere il contatore delle 5 ore. Aspetta anche: T153 e T184-T185, T45f, T88, le attese di «Fine epoca 211», la vista Markdown. ADR nuovi dallo **0117**.
 
 - **Epoca 216, T177, dato dell'autore arrivato col task in corso, che non lo sa:** C: oggi è sceso a 1,8 GB liberi durante il task che generava i modelli, risalito a ~5,5 alla sua fine, poi a 12: quindi non solo cresce, **qualcosa occupa spazio durante i task e lo libera dopo**. `pagefile.sys` non è su C:; `%TEMP%/claude` 12 MB. **Da fare all'esito di T177:** se non spiega questo sbalzo, un task che campiona le cartelle su C: durante un giro del banco. **T183 allargato** (almeno 30 scenari, costo vero di una primitiva aggiunta dopo; p88 da rivedere: chiesto all'autore se finirlo prima della prima versione pubblica).
 
