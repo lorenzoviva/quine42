@@ -2015,7 +2015,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   rossi, tutti in file che non importano il renderer (kernel, between, explore, credits…: i timeout di carico già noti, T95); nessun test tocca `src/render/`.
 
 ### T89a · Cartone: fasce e interruttore — `da fare` (dipende da T89)
-- Pipeline: claude · stima 3% · approvato · browser · priorità 75
+- Pipeline: claude · stima 3% · browser · priorità 75
 - Contesto: ADR-0093, punti 1, 2 e 6; la prova `?cartone` di T89 (`src/render/cartoon.ts`, `lit()` in `materials.ts`).
 - Fare: la rampa a 3 fasce per tutti i materiali illuminati (simulazione, corona e studio: `MAT.corona`, `coronaGlass`, `solid()`), i voxel luminosi fuori
   dalle fasce; il lato in ombra saturo (la fascia bassa non sotto ~0,35, il colore dell'emisfero non grigio); ombre portate più nette. Il cartone diventa il
@@ -2243,7 +2243,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 ### T106 · Tema pop art / retro arcade: applicazione alle interfacce in-game — `da fare` (dipende da T109, T97)
 
 - Stile: copia lo stile grafico del template in `docs/design/sito/` (fatto da T109, leggi il suo `README.md`).
-- Pipeline: claude · stima 4% · approvato · priorità 72
+- Pipeline: claude · stima 4% · priorità 72
 - Contesto: ADR-0095, punto 3 (Variabili CSS unificate). Il tema grafico deve permeare anche l'esperienza di gioco.
 - Fare: aggiornare `src/style.css` e i componenti UI in-game (`src/ui/hud.ts`, `inventory.ts`, `lobby.ts`, `profile.ts`, `chat.ts`, `creditdialog.ts`) per adottare appieno i token di `src/theme.css`: bordi a inchiostro netto fumetto (`--border-ink-thick`), ombre rigide neon offset (`--shadow-hard-cyan`, `--shadow-hard-pink`), pattern mezze tinte sui pannelli modali, pulsanti arcade retrò e font display per intestazioni e notifiche d'avviso.
 - Fatto quando: typecheck e test verdi; screenshot nel browser delle interfacce in-game rinnovate con il tema pop art comics / neon punk.
@@ -2808,7 +2808,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 ## Dalla chat del 02/11/2026 (testo originale: `docs/userchats/to-do-2026-11-02.md`)
 
 ### T152 · Le ambientazioni della Genesi: medievale, steampunk, moderna, futuristica — `da fare`
-- Pipeline: claude · stima 5% · approvato · browser · priorità 80
+- Pipeline: claude · stima 5% · browser · priorità 80
 - Contesto: richiesta 1 dell'autore: un universo medievale (quello che c'è, `aurora`), uno steampunk, uno moderno (grande città, anni 90), uno futuristico (tipo neonpunk). Oggi il tema è testo libero nella schermata della Genesi (`src/ui/genesis.ts`, `planGenesis` in `agents/genesis.ts`) e il seme `universe/prompts/theme.md` è il Regno di Valmora. Il seme può presupporre il medioevo anche altrove: i 20 ambienti, i prompt degli agenti, la guida di stile, il canone delle rune e i modelli generici. Il lessico è già uguale in ogni ambientazione (ADR-0075).
 - Cosa fare: prima un censimento di ciò che nel seme presuppone il medioevo, con file e riga. Poi quattro temi tra cui scegliere nella schermata della Genesi, modificabili come oggi; il medievale resta quello attuale. Ciò che il censimento trova diventa neutro o dipende dal tema, nel modo più piccolo: niente seme separato per ambientazione. Rune, tappeto, corona e quarta parete valgono ovunque; il tema spiega le rune senza magia medievale obbligatoria e senza metagioco. Il censimento dice anche ciò che si è lasciato com'è e perché. Decisione architetturale: ADR e `AGENTS.md`.
 - Test: una Genesi offline (`MockModels`) per ogni tema: i file giusti, `prompts/theme.md` scritto, un universo che parte. Un universo esistente non cambia. Typecheck e suite intera con i loro turni.
@@ -2889,7 +2889,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   (~200 MB, un mondo o una sandbox a parte), senza un rosso. Typecheck verde.
 
 ### T158 · L'Attore nello studio — `da fare` (dipende da T157)
-- Pipeline: claude · stima 3% · approvato · browser · priorità 86
+- Pipeline: claude · stima 3% · browser · priorità 86
 - Contesto: ogni agente è una squadra nella corona (`archive.ts`), con un gerboa e un cappello (`corona-gerboa-<agente>.xml`, T50), un posto nella Sala del Concilio e una console nella Direzione; l'Attore di T157 non c'è ancora.
 - Cosa fare: il suo gerboa con un cappello riconoscibile, il posto al tavolo (i membri seduti diventano nove), la console, lo studio dove sta, i colori e i nomi nei pannelli. Con l'opzione spenta scegli se non compare o resta a riposo come gli altri che non lavorano, e scrivilo.
 - Test: quelli di corona e archivio; typecheck e suite intera con i loro turni.
@@ -2976,7 +2976,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Esito: `task/T174`. **Causa misurata: il test, non la macchina né il server.** In V-006 il socket di bruno si apriva insieme a quello di alice e taceva finché alice non era dentro. Da T172 (ADR-0114) un socket ha 15 s (`ENTRY_MS`) per dire `entra`: se il mondo che alice avvia ne impiega di più, il server chiude bruno con `rifiuto` «nessun ingresso» (voluto, V-026). Il `ws.send` del test su un socket chiuso non dice nulla, e i 30 s passavano aspettando una risposta a un messaggio mai partito: nessuno li occupa. **Misure** (`-t "V-006 una partita"`): file da solo, alice dentro a 11,4 s, bruno 263 ms dopo il suo `entra`: margine di 3,6 s sui 15. Con 24 thread che girano a vuoto su 12 processori logici: rifiuto a 15,07 s, alice a 52,7 s, stesso rosso «ingresso di bruno». Il carico fa solo superare i 15 s all'avvio del mondo, e il primo giro della suite è il più lento. Dopo la correzione, stesso carico: alice 54,4 s, bruno 245 ms, verde. Non ho separato cosa compone gli 11,4 s dell'avvio. **Cambiato solo `tests/sicurezza/produzione.test.ts`:** il socket del secondo giocatore si apre dopo l'ingresso del primo, in V-006 e in V-021 (dove carla avvia il mondo se il file gira filtrato); il limite resta 30 s. Per vedere la causa la prossima volta: `say` su un socket chiuso getta l'errore con il rifiuto ricevuto, e `entered` dice subito un rifiuto invece di aspettare la scadenza. **Server e gioco non cambiano:** il client vero manda `entra` appena il socket si apre (`socket.ts`, `client.ts`), dopo il login, quindi non cade qui. **Resta aperto, non toccato:** (1) i rossi di T163 non hanno questa causa: non passano da questa attesa, e `determinism.test.ts` è stato verde sotto carico nell'unico giro in cui l'ho provato. `mondo.test.ts` sotto i 24 thread dà rossi: V-007 «muore due volte» e «un mondo bloccato» al primo giro; il primo dei due aspetta 1,5 s fissi prima che un commit sia «vissuto», dedotto che sia troppo poco, non misurato. Il secondo giro di `mondo.test.ts` (7 rossi) non vale come misura: i mondi uscivano con `0xC000026B`, lo stesso codice dei `fork` di bash, perché Windows non creava più processi con il mio carico addosso. (2) In un giro sotto carico `produzione.test.ts` ha passato tutti i 27 test ma ha dato un errore a livello di `il server vero`, forse un hook di chiusura; l'output era filtrato e non ho l'errore; nel giro dopo, sotto lo stesso carico, non si è ripetuto. **Test:** suite intera verde due giri di fila, 1317 su 1317 (200 s e 173 s), typecheck verde; quei due giri non avevano la cache fredda né il carico: la prova della correzione è il giro sotto carico. Sicurezza: nessuna superficie nuova.
 
 ### T175 · Un tetto alla cache delle forme nel browser — `da fare`
-- Pipeline: claude · stima 4% · approvato · browser · priorità 55
+- Pipeline: claude · stima 4% · browser · priorità 55
 - Contesto: nasce da T164 (`dossier T164`): il solo mondo iniziale pesa 1,86 GB di array e 528 MB su disco, più universi si sommano e nulla toglie voci. La memoria della scheda è dedotta da quei byte, non misurata. In Node la cache ha già un tetto (ADR-0108: LRU, 4096 voci, 256 MB).
 - Cosa fare: misura prima la memoria vera della scheda nel mondo iniziale. Poi un tetto sia in memoria (`WorkerRunner`, `src/render/forms.ts`) sia in IndexedDB, usando l'LRU e togliendo le voci meno usate, con i numeri scelti da quella misura e scritti nell'ADR-0108. Una forma tolta si rifà nei worker: mai un modello che manca. Controlla anche se il `memory` deve tenere gli array quando le mesh sono già fatte.
 - Test: oltre il tetto escono le voci meno usate, una forma tolta torna, la stessa richiesta dà la stessa forma.
@@ -2984,7 +2984,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: commit su `task/T175`; l'esito dice memoria e disco prima e dopo, e quanti lavori ai worker al secondo caricamento. Sicurezza: nessuna superficie nuova, o le voci aggiunte.
 
 ### T176 · `mondo.test.ts` rosso sotto carico: la causa — `da fare`
-- Pipeline: claude · stima 3% · approvato · priorità 21
+- Pipeline: claude · stima 3% · priorità 21
 - Contesto: nasce da T174 e T163 (`dossier T174`, `dossier T163`), approvato dall'autore il 02/11. In `tests/sicurezza/mondo.test.ts`, con 24 thread a vuoto su 12 processori logici, sono rossi al primo giro V-007 «muore due volte» e «un mondo bloccato». Il primo aspetta 1,5 s fissi prima che un commit sia «vissuto»: che siano troppo pochi è una deduzione di T174, non una misura. T163 aveva visto `mondo.test.ts` rosso nella suite intera. Conta per T45f: il sorvegliante dei mondi è ciò che lì deve reggere. Un giro di T174 con 7 rossi non vale come misura: i mondi uscivano con `0xC000026B` perché Windows non creava più processi con quel carico.
 - Cosa fare: riproduci con un carico misurato che lasci creare i processi (se un mondo esce con `0xC000026B` il giro non conta, abbassa il carico), e di' per ciascuno dei due test cosa occupa il tempo. Se è il test, che aspetti ciò che deve invece di un tempo fisso, senza alzare i limiti alla cieca. Se è il sorvegliante (`server/worldHost.ts`), per esempio un mondo sano ucciso perché tace sotto carico, non correggere da solo se cambia il comportamento: scrivilo nell'esito con la misura e la proposta. Guarda anche, senza filtrare l'output, se torna l'errore a livello del blocco `il server vero` di `produzione.test.ts` visto una volta da T174: se non torna, scrivi quanti giri hai fatto.
 - Test: `mondo.test.ts` verde sotto lo stesso carico che lo faceva rosso, e nella suite intera per due giri di fila; se non si riproduce, scrivi quanti giri hai fatto e con quale carico.
