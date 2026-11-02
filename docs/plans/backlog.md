@@ -2799,13 +2799,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Browser: col turno `browser`: Sala del Concilio e Direzione, l'Attore c'è e la sala non si scontra; screenshot.
 - Quando è fatto: commit su `task/T158`.
 
-### T162 · Integrare T161 — `da fare`
+### T162 · Integrare T161 — `fatto` (dab503e)
 - Pipeline: claude · stima 1% · approvato · priorità 0
 - Contesto: `integra T161` va in conflitto solo in `docs/adr/README.md`: T161 aggiunge la riga dello 0108 dove il base ha aggiunto quella dello 0106. Nasce da T161: `dossier T161`.
 - Cosa fare: nel worktree di T162 `git merge task/T161` e tieni tutte e due le righe, in ordine di numero, senza un posto per lo 0107 (lo aggiungerà T159). Nessun numero cambia.
 - Test: `npm run typecheck` e la suite intera con i loro turni, col limite normale; nell'esito quanti passano, i rossi che restano rilanciando il file da solo, il tempo della suite e il carico della macchina. Il base ha T128 e T147, che T161 non aveva: è la prima suite con la cache e con loro.
 - Browser: non serve.
 - Quando è fatto: merge risolto, commit su `task/T162`. L'orchestratore fa `integra T162` e `integra T161`.
+- Esito: conflitto solo in `docs/adr/README.md`, tenute le righe dello 0106 e dello 0108, nessun numero cambiato, come previsto. Typecheck verde. Suite: 89 file, 1107 passati e 2 `expected fail` su 1109, nessun rosso, 111,64 s (tests 568,51 s sommati tra i worker), CPU della macchina tra il 45 e l’87 % nei campioni ogni 30 s. Nessun altro cambio; sicurezza: nessuna superficie nuova oltre a quella di T161 (`src/kernel/forms.ts`).
 
 ### T160 · Ottimizzare i test più lenti della suite — `da fare` (dipende da T151, T161)
 - Pipeline: claude · stima 5% · approvato · priorità 2
