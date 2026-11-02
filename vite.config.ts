@@ -5,7 +5,7 @@ import { defineConfig, loadEnv, searchForWorkspaceRoot } from 'vite';
 import { GeminiGate, geminiProxy } from './server/geminiProxy';
 import { hideUniverses } from './server/hidden';
 import { securityHeaders } from './server/csp';
-import { universeStore } from './server/universeStore';
+import { universeStore, universesPerAccount } from './server/universeStore';
 import { newSecret } from './server/access';
 import { sessionServer, getActiveWorld } from './server/session';
 import { accountRoute, accountSettings } from './server/account';
@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => {
       // Before the routes: what lives in universes/ reaches a browser only through the routes below (T130, ADR-0109).
       hideUniverses(process.cwd(), universesDir),
       geminiProxy(gemini),
-      universeStore(universesDir, { accounts, internal }),
+      universeStore(universesDir, { accounts, internal, quota: universesPerAccount(env.QUINE_UNIVERSI_PER_ACCOUNT) }),
       accountRoute(accounts),
       stripeRoute({
         settings: stripeSettings(env),

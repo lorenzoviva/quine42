@@ -32,8 +32,32 @@ import type { AccountSettings } from './account';
 import { sealLedger, sweepBalances } from './ledger';
 import { callerOf, creditFile, failureText, gameIn, isJson, newSecret, newUniverse, owns, type Access } from './access';
 import { runGit } from './git';
+import { Rates, type Pace } from './rates';
+import { accountWanderer } from '../src/session/account';
 
 const MAX_BODY = 32 * 1024 * 1024;
+/** Universes of which an account is the master, unless the `.env` says otherwise (`QUINE_UNIVERSI_PER_ACCOUNT`, V-026). */
+export const DEFAULT_UNIVERSES_PER_ACCOUNT = 3;
+/** Universes an account may make or clone: what goes to the bin stays on the disk, so a quota alone would not hold (V-026). Twelve, then one every two hours. */
+export const UNIVERSES_MADE: Pace = { burst: 12, perSecond: 12 / 86400 };
+
+/** `QUINE_UNIVERSI_PER_ACCOUNT`: a number, or the default. */
+export function universesPerAccount(text: string | undefined): number {
+  const t = text?.trim();
+  return t && /^\d+$/.test(t) ? Number(t) : DEFAULT_UNIVERSES_PER_ACCOUNT;
+}
+
+/** The universes this wanderer is the master of: what `universe.json` says of each, which only the server writes when one is made (`newUniverse`, `cloneChanges`). */
+export async function universesOf(baseDir: string, id: string): Promise<number> {
+  const es = await fs.readdir(baseDir, { withFileTypes: true }).catch(() => []);
+  let n = 0;
+  for (const e of es) {
+    if (!e.isDirectory() || e.name.startsWith('.')) continue;
+    const game = gameIn(await fs.readFile(path.join(baseDir, e.name, 'universe.json'), 'utf8').catch(() => undefined));
+    if (game.many && game.master === id) n++;
+  }
+  return n;
+}
 const AUTHORS: Record<string, [string, string]> = {
   agent: ['Concilio', 'concilio@rune.local'],
   player: ['Viandante', 'viandante@rune.local'],
@@ -228,7 +252,7 @@ async function commitAll(root: string, message: string, author: string): Promise
 }
 
 /** The route, as a middleware: the dev server, the preview and the production server (T133) mount this same one. */
-export function universeHandler(baseDir: string, opts: { accounts?: AccountSettings; internal?: string } = {}): Connect.NextHandleFunction {
+export function universeHandler(baseDir: string, opts: { accounts?: AccountSettings; internal?: string; quota?: number } = {}): Connect.NextHandleFunction {
   const queues = new Map<string, Promise<unknown>>();
   /** One operation at a time per universe (git is not happy with concurrent writers). */
   const serial = <T>(name: string, fn: () => Promise<T>): Promise<T> => {
@@ -240,6 +264,11 @@ export function universeHandler(baseDir: string, opts: { accounts?: AccountSetti
 
   const access: Access = { accounts: opts.accounts, internal: opts.internal ?? newSecret() };
   const masterUid = opts.accounts?.masterUid;
+  const quota = opts.quota ?? DEFAULT_UNIVERSES_PER_ACCOUNT;
+  const makings = new Rates(UNIVERSES_MADE);
+  /** With accounts, whether this wanderer has no room for one more; the author (`QUINE_MASTER`) is not counted. */
+  const noRoom = async (id: string | undefined) => !!opts.accounts?.verify && !!id && !(masterUid && id === accountWanderer(masterUid)) && (await universesOf(baseDir, id)) >= quota;
+  const full = () => `al più ${quota} universi per account`;
 
   const handle = async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
     const url = (req.url ?? '').split('?')[0];
@@ -330,7 +359,9 @@ export function universeHandler(baseDir: string, opts: { accounts?: AccountSetti
     if (req.method !== 'POST') return send(res, 405, { error: 'metodo non ammesso' });
     if (!isJson(req)) return send(res, 415, { error: 'solo JSON' });
     // Before reading up to MAX_BODY of who could not make anything anyway (V-028): `newUniverse` says the rest from the files.
-    if (op === 'create' && !who.local && (!who.id || who.anonimo)) return send(res, 403, { error: 'per fare un universo serve un account' });
+    if (op === 'create' && (who.anonimo || (!who.local && !who.id))) return send(res, 403, { error: 'per fare un universo serve un account' });
+    if (op === 'create' && (await noRoom(who.id))) return send(res, 403, { error: full() });
+    if ((op === 'create' || op === 'clone') && opts.accounts?.verify && who.id && !makings.take(who.id)) return send(res, 429, { error: 'troppi universi fatti di recente: riprova più tardi' });
     const raw = await readBody(req);
     const body = raw ? JSON.parse(raw) : {};
     // In a game of many the balances are the world's: not even its master writes them from outside (ADR-0081, ADR-0102).
@@ -339,7 +370,7 @@ export function universeHandler(baseDir: string, opts: { accounts?: AccountSetti
     if (!who.server && game.many && Object.keys(touched ?? {}).some(creditFile)) return send(res, 403, { error: 'i crediti non si scrivono da qui' });
     const made = op === 'create' ? newUniverse(who, body.files ?? {}) : undefined;
     if (made && 'refused' in made) return send(res, made.status, { error: made.refused });
-    const r = await serial(name, async () => {
+    const work = () => serial(name, async () => {
       switch (op) {
         case 'create': {
           if (await exists(path.join(root, '.git'))) throw new Error('esiste già');
@@ -383,6 +414,10 @@ export function universeHandler(baseDir: string, opts: { accounts?: AccountSetti
       }
       throw new Error('operazione sconosciuta');
     });
+    // Counted and made one at a time for each master: two requests together do not both find room for one. A clone counts for who it is given to.
+    const owner = op === 'create' ? who.id : op === 'clone' ? String(body.master ?? '') : undefined;
+    const r = owner ? await serial(`quota:${owner}`, async () => ((await noRoom(owner)) ? undefined : work())) : await work();
+    if (!r) return send(res, 403, { error: full() });
     return send(res, 200, r);
   };
 
@@ -392,7 +427,7 @@ export function universeHandler(baseDir: string, opts: { accounts?: AccountSetti
   };
 }
 
-export function universeStore(baseDir: string, opts: { accounts?: AccountSettings; internal?: string } = {}): Plugin {
+export function universeStore(baseDir: string, opts: { accounts?: AccountSettings; internal?: string; quota?: number } = {}): Plugin {
   const handler = universeHandler(baseDir, opts);
   return {
     name: 'rune-universe-store',

@@ -11,9 +11,10 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import path from 'node:path';
 import { promises as fs } from 'node:fs';
 import type { AccountSettings } from './account';
-import { bearer, failureText, gate, isJson, refuse } from './access';
+import { bearer, failureText, gameIn, gate, isJson, refuse } from './access';
 import { runGit } from './git';
 import { openLedger } from './ledger';
+import { Rates, type Pace } from './rates';
 import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
 import { accountWanderer } from '../src/session/account';
 import type { Kernel } from '../src/kernel/kernel';
@@ -35,6 +36,8 @@ import {
 } from '../src/kernel/wanderers';
 
 const MAX_BODY = 16 * 1024;
+/** How often an account may keep a profile: each is a file and a commit (V-026). Six, then one a minute. */
+export const PROFILE_SAVES: Pace = { burst: 6, perSecond: 1 / 60 };
 /** The program of every wanderer's look. */
 export const WANDERER_MODEL = 'viandante';
 
@@ -191,6 +194,7 @@ export function viewFromKernel(k: Kernel, universo: string, id: string, account:
 }
 
 export function wandererHandler(opts: WandererRouteOptions): Connect.NextHandleFunction {
+  const saves = new Rates(PROFILE_SAVES);
   return (req, res, next) => {
     const [url, query = ''] = (req.url ?? '').split('?');
     if (url !== '/api/viandante') return next();
@@ -230,6 +234,20 @@ export function wandererHandler(opts: WandererRouteOptions): Connect.NextHandleF
 
         // POST: keep the profile.
         if (!body.profilo || typeof body.profilo !== 'object') return send(res, 400, { ok: false, motivo: 'manca il profilo' });
+        // With accounts anyone can ask: what they leave on the disk has a rhythm, and who costs nothing to make leaves nothing where the world does not know them (V-026).
+        if (opts.accounts?.verify) {
+          if (!saves.take(who.id)) return send(res, 429, { ok: false, motivo: 'troppi salvataggi: riprova tra poco' });
+          if (!active && !gameIn(await fs.readFile(path.join(root, 'universe.json'), 'utf8').catch(() => undefined)).many) return send(res, 403, { ok: false, motivo: 'solo nei reami di molti' });
+          if (who.account === 'anonimo') {
+            const known = active
+              ? (await active.view(universo, who.id, who.account)).noto
+              : await fs.stat(path.join(root, playerFile(who.id))).then(
+                  () => true,
+                  () => false,
+                );
+            if (!known) return send(res, 403, { ok: false, motivo: 'entra prima in questo reame' });
+          }
+        }
         if (active) {
           const r = await active.keepProfile(universo, who.id, who.account, body.profilo);
           if (!r) return send(res, 500, { ok: false, motivo: 'non è stato possibile salvarlo' });

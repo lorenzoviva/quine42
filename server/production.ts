@@ -8,13 +8,14 @@ import http, { type IncomingMessage, type ServerResponse } from 'node:http';
 import path from 'node:path';
 import type { Duplex } from 'node:stream';
 import { accessRefusal, GeminiGate } from './geminiProxy';
-import { newSecret } from './access';
+import { isInternal, newSecret } from './access';
 import { accountHandler, accountSettings, type AccountSettings } from './account';
 import { contentSecurityPolicy } from './csp';
 import { grantCapOf } from './ledger';
-import { attachSessions, getActiveWorld, sessionList } from './session';
+import { clientAddress, proxyHops, Rates, type Pace } from './rates';
+import { attachSessions, getActiveWorld, sessionList, type SessionOptions } from './session';
 import { stripeHandler, stripeSettings } from './stripe';
-import { universeHandler } from './universeStore';
+import { universeHandler, universesPerAccount } from './universeStore';
 import { walletHandler } from './wallet';
 import { wandererHandler } from './wanderer';
 
@@ -55,6 +56,7 @@ export function productionProblems(env: Record<string, string | undefined>): str
   const { origins, bad } = originsOf(env.QUINE_ORIGINI);
   if (bad.length) problems.push(`QUINE_ORIGINI: la voce ${bad.join(', ')} non è un’origine (https://nome, http solo per questa macchina)`);
   else if (!origins.length) problems.push('QUINE_ORIGINI: senza, non si sa per quali siti questo server risponde');
+  if (proxyHops(env.QUINE_PROXY_FIDATI) === undefined) problems.push('QUINE_PROXY_FIDATI: è quanti proxy nostri stanno davanti a questo server, un numero');
   if (has('GEMINI_API_KEY') && !(Number(env.GEMINI_TETTO_GIORNALIERO) >= 0 && has('GEMINI_TETTO_GIORNALIERO'))) problems.push('GEMINI_TETTO_GIORNALIERO: con la chiave serve un tetto in dollari al giorno, scritto');
   return problems;
 }
@@ -142,6 +144,27 @@ function sendBuild(dist: string, req: IncomingMessage, res: ServerResponse): voi
     .pipe(res);
 }
 
+/** What one address may ask of this server, whoever it says it is (V-026, ADR-0114). Many people can stand behind one address: these leave room for them. The pages of the build have no rhythm: nothing is computed for them. */
+export interface FrontRates {
+  /** Every route. */
+  api: Pace;
+  /** What reads or writes a universe whole. */
+  heavy: Pace;
+  /** New sockets. */
+  sockets: Pace;
+  /** Sockets at once. */
+  socketsAtOnce: number;
+}
+
+export const FRONT_RATES: FrontRates = {
+  api: { burst: 240, perSecond: 4 },
+  heavy: { burst: 60, perSecond: 1 },
+  sockets: { burst: 30, perSecond: 0.5 },
+  socketsAtOnce: 24,
+};
+
+const HEAVY = /^\/api\/universe\/[^/?]/;
+
 export interface ProductionOptions {
   env: Record<string, string | undefined>;
   /** The client's build (`dist/`): all that is served from disk. */
@@ -151,6 +174,10 @@ export interface ProductionOptions {
   universesDir: string;
   /** For the tests and the checks in the browser: only by code, never from the environment. */
   accounts?: AccountSettings;
+  /** For the tests: only by code. */
+  rates?: Partial<FrontRates>;
+  /** For the tests: only by code. */
+  sessions?: Pick<SessionOptions, 'times' | 'entryMs'>;
 }
 
 export interface ProductionServer {
@@ -170,11 +197,29 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
   const accounts = o.accounts ?? accountSettings(o.env);
   const universesDir = o.universesDir;
   const internal = newSecret();
+  const hops = proxyHops(o.env.QUINE_PROXY_FIDATI) ?? 0;
+  const limits = { ...FRONT_RATES, ...o.rates };
+  const [apiRate, heavyRate, socketRate] = [new Rates(limits.api), new Rates(limits.heavy), new Rates(limits.sockets)];
+  let warned = false;
+  const addressOf = (req: IncomingMessage) => {
+    // A client can write this too, so it is only said, once. With a proxy of ours in front and no QUINE_PROXY_FIDATI, everyone is one address, the proxy's, and is refused together: safe, and to be known.
+    if (!hops && !warned && req.headers['x-forwarded-for']) {
+      warned = true;
+      console.warn('una richiesta porta X-Forwarded-For: se davanti a questo server c’è un proxy, senza QUINE_PROXY_FIDATI tutti valgono come un solo indirizzo');
+    }
+    return clientAddress(req, hops);
+  };
+  /** Whether this request is over the rhythm of its address. A world's own requests are not a stranger's: they prove themselves with their token. */
+  const overRate = (req: IncomingMessage) => {
+    if (isInternal(req, internal)) return false;
+    const address = addressOf(req);
+    return !apiRate.take(address) || (HEAVY.test(req.url ?? '') && !heavyRate.take(address));
+  };
   const gemini = new GeminiGate({ apiKey: o.env.GEMINI_API_KEY, dailyCap: o.env.GEMINI_TETTO_GIORNALIERO, universesDir, ledgerFile: path.join(universesDir, '.spesa-gemini.json') });
   if (!gemini.available) console.warn('GEMINI_API_KEY assente: i mondi usano i modelli locali');
   const answerAccount = accountHandler(accounts);
   const routes: Route[] = [
-    universeHandler(universesDir, { accounts, internal }),
+    universeHandler(universesDir, { accounts, internal, quota: universesPerAccount(o.env.QUINE_UNIVERSI_PER_ACCOUNT) }),
     (req, res, next) => (req.url?.split('?')[0] === '/api/account' ? answerAccount(req, res) : next()),
     stripeHandler({ settings: stripeSettings(o.env), accounts, universesDir, getActiveWorld }),
     wandererHandler({ accounts, universesDir, getActiveWorld }),
@@ -201,6 +246,12 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
     }
     try {
       if (!/^\/api(\/|\?|$)/.test(req.url ?? '')) return sendBuild(o.dist, req, res);
+      if (overRate(req)) {
+        res.statusCode = 429;
+        res.setHeader('Retry-After', '30');
+        res.setHeader('Content-Type', 'application/json');
+        return void res.end(JSON.stringify({ error: 'troppe richieste: riprova tra poco' }));
+      }
       // What no route on the list takes: not found, whatever it would be elsewhere.
       const run = (i: number): unknown => {
         if (i < routes.length) return routes[i](req, res, () => run(i + 1));
@@ -222,6 +273,8 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
     maxWorlds: Number(o.env.QUINE_MONDI_MASSIMI) || undefined,
     program: async () => o.worldProgram,
     guard: (req) => frontDoorRefusal(req, origins),
+    crowd: { addressOf, rate: (address) => socketRate.take(address), atOnce: limits.socketsAtOnce },
+    ...o.sessions,
   });
   // Nothing else is a socket here: Vite's own is not there to take it.
   server.on('upgrade', (req: IncomingMessage, socket: Duplex) => {

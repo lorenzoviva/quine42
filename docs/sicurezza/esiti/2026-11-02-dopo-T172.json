@@ -1,0 +1,122 @@
+{
+ "data": "2026-11-02",
+ "commit": "c4a5b08",
+ "vite": "7.3.7",
+ "node": "v22.19.0",
+ "piattaforma": "win32",
+ "solo": [
+  "V-026",
+  "V-025",
+  "V-028",
+  "V-021",
+  "V-006",
+  "V-007",
+  "V-011"
+ ],
+ "riepilogo": {
+  "ok": 14,
+  "falle": 0,
+  "errori": 0,
+  "saltate": 0
+ },
+ "prove": [
+  {
+   "id": "V-007.a",
+   "voce": "V-007",
+   "proprieta": "un pattern patologico di string.find finisce entro un tempo breve",
+   "esito": "ok",
+   "dettaglio": "finito in 50 ms, con un guasto"
+  },
+  {
+   "id": "V-007.b",
+   "voce": "V-007",
+   "proprieta": "un’allocazione enorme finisce in un guasto",
+   "esito": "ok",
+   "dettaglio": "2 ms, un guasto"
+  },
+  {
+   "id": "V-006.a",
+   "voce": "V-006",
+   "proprieta": "nessuno diventa master dicendolo: senza account l’id detto vale solo da questa macchina, e da fuori non si entra",
+   "esito": "ok",
+   "dettaglio": "rifiutato: nessuna risposta"
+  },
+  {
+   "id": "V-006.b",
+   "voce": "V-006",
+   "proprieta": "essere anonimo non lo decide il client",
+   "esito": "ok",
+   "dettaglio": "anonimo: false"
+  },
+  {
+   "id": "V-006.c",
+   "voce": "V-006",
+   "proprieta": "il WebSocket rifiuta un’altra origine",
+   "esito": "ok",
+   "dettaglio": "rifiutato: connessione chiusa"
+  },
+  {
+   "id": "V-006.d",
+   "voce": "V-006",
+   "proprieta": "`GET /api/session` non elenca i viandanti a chiunque",
+   "esito": "ok",
+   "dettaglio": "risposta 200"
+  },
+  {
+   "id": "V-006.e",
+   "voce": "V-006",
+   "proprieta": "senza identità non si legge il saldo di un altro viandante: l’id detto vale solo da questa macchina",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-006.f",
+   "voce": "V-006",
+   "proprieta": "un non master non ha ramo né pubblica né parla al Concilio né segue altri (nel protocollo)",
+   "esito": "ok",
+   "dettaglio": "0 su 4 accettati"
+  },
+  {
+   "id": "V-011.a",
+   "voce": "V-011",
+   "proprieta": "chi inonda il server di messaggi è limitato",
+   "esito": "ok",
+   "dettaglio": "600 messaggi su 600 serviti"
+  },
+  {
+   "id": "V-021.a",
+   "voce": "V-021",
+   "proprieta": "un messaggio che non si capisce non ferma il mondo né il suo processo",
+   "esito": "ok",
+   "dettaglio": "306 tick in più per chi guarda, del mondo ha sentito: niente"
+  },
+  {
+   "id": "V-025.a",
+   "voce": "V-025",
+   "proprieta": "un socket con un nome che non è un universo non avvia un processo",
+   "esito": "ok",
+   "dettaglio": "rifiutato, archivio dei saldi non creato"
+  },
+  {
+   "id": "V-026.a",
+   "voce": "V-026",
+   "proprieta": "un socket che non dice chi è non avvia il mondo di un universo che esiste",
+   "esito": "ok",
+   "dettaglio": "risposta 200, mondo spento"
+  },
+  {
+   "id": "V-028.a",
+   "voce": "V-028",
+   "proprieta": "il checkout non ascolta un’altra origine né chi non è su questa macchina",
+   "esito": "ok",
+   "dettaglio": "risposte 403 e 403"
+  },
+  {
+   "id": "V-007.c",
+   "voce": "V-007",
+   "proprieta": "il codice di un mondo bloccato non ferma l’HTTP né gli altri mondi",
+   "esito": "ok",
+   "dettaglio": "2 risposte su 2 in 12 s"
+  }
+ ]
+}

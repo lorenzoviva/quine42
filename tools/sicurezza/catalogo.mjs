@@ -733,6 +733,18 @@ export const PROBES = [
     },
   },
   {
+    id: 'V-026.a',
+    voce: 'V-026',
+    fase: 'A',
+    proprieta: 'un socket che non dice chi è non avvia il mondo di un universo che esiste',
+    async run(ctx) {
+      await ctx.silent('sonda-silenzio', 1500);
+      const r = await ctx.http('GET', '/api/session');
+      const on = JSON.parse(r.text).sessions?.some((s) => s.name === 'sonda-silenzio');
+      return { ok: r.status === 200 && !on, dettaglio: `risposta ${r.status}, mondo ${on ? 'acceso' : 'spento'}` };
+    },
+  },
+  {
     id: 'V-028.a',
     voce: 'V-028',
     fase: 'A',
@@ -766,6 +778,5 @@ export const UNCOVERED = {
   'V-022': 'chi paga si vede solo dentro il kernel: lo prova tests/sicurezza/secondo-audit.test.ts',
   'V-023': 'chi paga si vede solo dentro il kernel: lo prova tests/sicurezza/secondo-audit.test.ts',
   'V-024': 'il costo di una chiamata si vede solo dentro il kernel: lo prova tests/sicurezza/secondo-audit.test.ts',
-  'V-026': 'specificata, senza prove: le fa il task che la chiude',
   'V-027': 'ciò che Lua scrive si vede solo dentro la sandbox: lo prova tests/sicurezza/secondo-audit.test.ts',
 };

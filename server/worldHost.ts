@@ -29,6 +29,8 @@ export interface WorldTimes {
   call: number;
   /** After this many deaths in a row the world is given up: the next client tries again. */
   deaths: number;
+  /** With nobody connected for this long, it is time to save and stop (ms, V-026). */
+  idle: number;
 }
 
 /**
@@ -37,7 +39,7 @@ export interface WorldTimes {
  */
 export const MAX_BACKLOG = 8 * 1024 * 1024;
 
-export const WORLD_TIMES: WorldTimes = { notice: 5000, kill: 45000, boot: 180000, healthy: 60000, call: 10000, deaths: 4 };
+export const WORLD_TIMES: WorldTimes = { notice: 5000, kill: 45000, boot: 180000, healthy: 60000, call: 10000, deaths: 4, idle: 300000 };
 
 /** A client of the session, as the sockets give it. */
 export interface HostLink {
@@ -80,6 +82,8 @@ export interface WorldOptions {
   headOf?: () => Promise<string | undefined>;
   /** The world was given up. */
   onGiveUp?: (why: string) => void;
+  /** Nobody has been connected for `times.idle`: whoever owns it stops it (V-026). */
+  onIdle?: () => void;
 }
 
 /** Node's flags that limit a world: its heap, and (where Node has it) what it may touch on disk. No child processes, no workers. */
@@ -120,6 +124,7 @@ export class WorldHost {
   private waiting = new Map<number, { done: (v: unknown) => void; fail: (e: Error) => void; timer: ReturnType<typeof setTimeout> }>();
   private readyWaiters: Array<(r: { ok: true } | { error: string }) => void> = [];
   private backlog = 0;
+  private emptySince = Date.now();
   private times: WorldTimes;
   /** How many times it has started again. */
   restarts = 0;
@@ -194,7 +199,7 @@ export class WorldHost {
     switch (m.t) {
       case 'pronto':
         this.up = true;
-        this.lastBeat = Date.now();
+        this.lastBeat = this.emptySince = Date.now();
         for (const [cid, c] of this.clients) this.attach(cid, c);
         this.readyWaiters.splice(0).forEach((done) => done({ ok: true }));
         return;
@@ -329,6 +334,9 @@ export class WorldHost {
       return;
     }
     void this.markGood(now);
+    // Only a world that is turning: one that is opening has who waits for it, one that is silent has the watcher above.
+    if (this.clients.size) this.emptySince = now;
+    else if (now - this.emptySince > this.times.idle) this.o.onIdle?.();
   }
 
   /** A commit seen `healthy` ago, with the world alive ever since, is good; and the deaths before are forgotten. */
