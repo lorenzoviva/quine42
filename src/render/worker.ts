@@ -22,7 +22,8 @@ export interface FormMeshes {
   frames: MeshData[];
 }
 
-export type WorkerAnswer = { id: number; ok: true; result: FormResult } | { id: number; ok: false; error: string };
+/** `finished`: the program ended by itself; out of time or of steps it is half a model, not to be kept (ADR-0108). */
+export type WorkerAnswer = { id: number; ok: true; result: FormResult; finished: boolean } | { id: number; ok: false; error: string };
 
 const buffers = (m: MeshData) => [m.positions.buffer, m.normals.buffer, m.colors.buffer, m.indices.buffer, ...(m.sway ? [m.sway.buffer] : []), ...(m.glow ? [m.glow.buffer] : []), ...(m.alpha ? [m.alpha.buffer] : [])];
 
@@ -53,7 +54,7 @@ self.onmessage = (ev: MessageEvent<{ id: number; req: FormRequest }>) => {
     const meshes: FormMeshes = { body, limbs, frames };
     const result: FormResult = { grid: { X: g.X, Y: g.Y, Z: g.Z, cells: g.cells, alphabet: g.alphabet }, palette: pal, actions: r.actions, animations: r.animations, meshes };
     const transfer = [...buffers(body), ...limbs.flatMap((l) => buffers(l.mesh)), ...frames.flatMap(buffers)];
-    (self as unknown as Worker).postMessage({ id, ok: true, result } satisfies WorkerAnswer, transfer);
+    (self as unknown as Worker).postMessage({ id, ok: true, result, finished: r.finished } satisfies WorkerAnswer, transfer);
   } catch (e) {
     const msg = e instanceof Mj3Error ? e.message : `errore: ${(e as Error).message}`;
     (self as unknown as Worker).postMessage({ id, ok: false, error: msg } satisfies WorkerAnswer);

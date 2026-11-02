@@ -46,7 +46,11 @@ stesso processo e rifacevano lo stesso lavoro. Nel browser le forme le fanno i w
 - Le cartelle delle versioni vecchie restano finché non si cancellano (~24 MB l'una). Nella pipeline `node_modules` è una giunzione, quindi i worktree le condividono: il contenuto dipende solo dalla chiave e dalla versione.
 - Tra universi dello stesso processo si può capire dal tempo se un programma con un seme è già stato eseguito da un altro. Si scopre solo che quel testo esiste, e per provarlo bisogna già averlo: lo accettiamo.
 - Un universo può riempire la cache: gli altri perdono al più i risultati e li ricalcolano. È un rallentamento limitato dal tetto, non una scrittura sul loro mondo.
-- Resta fuori: `WorkerRunner` nel browser tiene ancora in memoria e in IndexedDB anche i risultati scaduti, e la sua chiave usa ancora `hashStr`. È una cache della sola macchina del giocatore, per un solo universo alla volta: non è toccata qui.
+- Resta fuori: la chiave di `WorkerRunner` nel browser usa ancora `hashStr` (T164). È una cache della sola macchina del giocatore, per un solo universo alla volta: non è toccata qui.
+
+## Aggiunta (T163)
+
+Il browser ora fa come Node: il worker dice `finished` e `WorkerRunner`, anche nel ripiego senza worker, tiene in memoria e in IndexedDB solo ciò che ha finito. Le voci già salvate non dicono se erano a metà: la versione del database (`FORMS_DB_VERSION`, 2) le butta una volta. Una scheda con la versione vecchia aperta non blocca: la nuova va avanti senza IndexedDB finché quella non si chiude. Un modello che non finisce non riparte a ogni frame, perché `Forms` tiene il suo `Form` per tutta la partita: riparte a ogni caricamento della pagina.
 
 ## Aggiunta (T160)
 

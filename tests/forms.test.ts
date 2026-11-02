@@ -221,7 +221,7 @@ describe('precalculated variants and form cache (T64)', () => {
     const jobId = allMessages[0].id;
 
     // Worker completes
-    latestWorker.onmessage?.({ data: { id: jobId, ok: true, result: fakeResult } } as MessageEvent);
+    latestWorker.onmessage?.({ data: { id: jobId, ok: true, result: fakeResult, finished: true } } as MessageEvent);
 
     const r1 = await p1;
     const r2 = await p2;
