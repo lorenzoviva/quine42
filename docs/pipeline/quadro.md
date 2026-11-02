@@ -3,7 +3,7 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 02/11/2026, epoca 201 su **claude** (crediti: vedi `stato`).
+Aggiornato il 02/11/2026, fine dell'epoca 201 su **claude** (crediti: vedi `stato`).
 
 - **Tetto di Claude a 2** (richiesta dell'autore, 01/11): attivo dopo il riavvio delle 13:35; `stato` dice tetto 2, slot 2. L'autore dice che con il Pro i limiti di Claude sono 5 volte più alti.
 
@@ -11,6 +11,7 @@ Aggiornato il 02/11/2026, epoca 201 su **claude** (crediti: vedi `stato`).
 
 - **T161 e T162 integrati (epoca 201)**: ADR-0108; suite di T162 1107 passati, 2 attesi, nessun rosso, 112 s, la prima con cache delle forme, T128 e T147. `riprendi T159` e `riprendi T127` dati; T130 era partito da solo appena lo slot si è liberato. **Alla fine di T159:** `integra T159`, `integra T129`. **T163 e T164** (richiesta dell'autore, approvati, p60-61, Claude; T164 dipende da T163): `WorkerRunner` non tiene i modelli incompleti, e la chiave senza `hashStr`. T160 ora è pronto (T161 dentro).
 
+- **Fine epoca 201**: in corso T130 e T159; T127 è stato ripreso e aspetta uno slot (tetto 2; `stato` lo elenca comunque «in corso»: controlla con `traccia T127`). **Da fare:** alla fine di T159 `integra T159`, `integra T129`; alla fine di T130 e T127 il loro esito e `integra`, una sola cosa che tocca l'indice ADR alla volta. Da leggere nell'esito di T164: se la cache del browser, che non ha un tetto, è un problema misurato (l'ho detto all'autore: non è un task).
 - **Aspetto dall'autore** (epoca 201): le attese elencate in «Fine epoca 199». ADR: 0107 riservato a T129, 0108 di T161, i nuovi dal 0109.
 
 - **Integrati di recente**: T115 e T57b (rune nuove dal Concilio, ADR-0097; restano 5 timeout noti di referente, wanderers e watch, `abbonamenti` T68b non ricontrollato), T57c (effetto rilievo e terraformazione nel kernel, ADR-0096), T111 (ripiego senza browser corretto), T113 (lampione intero, drone 1:2), T109+T110+T112 (template del sito verificato), T101 (landing con hero MarkovJunior verificata nel browser).
