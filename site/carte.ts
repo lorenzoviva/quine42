@@ -156,7 +156,8 @@ function entryOf(card: Card, files: FileMap): any {
   }
 }
 
-const SAYS = ['description', 'descrizione', 'mistero', 'lore', 'storia', 'mestiere', 'aspetto'];
+/** What the content says of itself among what `publicFiles` gives (T168): the rest stays on the server, and the card says what it is. */
+const SAYS = ['description', 'mestiere'];
 const MAX_TEXT = 120;
 
 /** A line for the front of the card, from what the content says of itself. */

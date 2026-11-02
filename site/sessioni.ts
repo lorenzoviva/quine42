@@ -333,7 +333,7 @@ export function renderRealmCard(realm: RealmView): HTMLElement {
       </table>
     </div>
     <div class="realm-card-footer">
-      <span class="arcade-text text-dim" style="font-size: 0.65rem;">${realm.live ? 'PORTA 5173' : 'OFFLINE'}</span>
+      <span class="arcade-text text-dim" style="font-size: 0.65rem;">${realm.live ? (globalThis.location?.port ? `PORTA ${location.port}` : '') : 'OFFLINE'}</span>
       <a href="../index.html?universo=${encodeURIComponent(realm.name)}" class="comic-btn arcade cyan sm">
         ENTRA NELLA LOBBY
       </a>

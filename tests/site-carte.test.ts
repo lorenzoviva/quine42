@@ -5,6 +5,7 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { Forms, InlineRunner } from '../src/kernel/forms';
 import { fingerprint } from '../src/kernel/heritage';
 import type { FileMap } from '../src/kernel/types';
+import { publicFiles } from '../src/session/files';
 import { cardPicture } from '../site/carte-art';
 import { artOf, chainOf, collectionView, describeCard, inCategory, mhCode, PAGE, rarityOf, wandererFrom } from '../site/carte';
 
@@ -87,6 +88,35 @@ describe('la galleria delle carte', () => {
     expect(describeCard(by('oggetto:pane'), files).length).toBeLessThanOrEqual(120);
     expect(describeCard(by('persona:mira'), files)).toBe('fornaia');
     expect(describeCard(by('regola:canto'), files)).toBe('Regola del mondo di questo reame.');
+  });
+
+  it('la frase del fronte da ciò che dà publicFiles: description e mestiere; senza, la riga generica (T168)', () => {
+    const whole: FileMap = {
+      ...universe(),
+      'modules/cosa/manifest.json': JSON.stringify({ id: 'cosa', name: 'Cosa', kind: 'entity', lore: 'Segreto del Concilio', appearance: { aspetto: 'Segreto anche lui' }, carta: carta('io') }),
+      'modules/detta/manifest.json': JSON.stringify({ id: 'detta', name: 'Detta', kind: 'entity', description: 'Una cosa che si dice.', lore: 'Segreto', carta: carta('io') }),
+    };
+    const files = publicFiles(whole);
+    const by = (id: string) => allCards(whole, true).find((c) => c.id === id)!;
+    expect(describeCard(by('tipo:cosa'), files)).toBe('Cosa del mondo di questo reame.');
+    expect(describeCard(by('tipo:detta'), files)).toBe('Una cosa che si dice.');
+    expect(describeCard(by('oggetto:spada'), files)).toContain('Lama forgiata');
+    expect(describeCard(by('persona:mira'), files)).toBe('fornaia');
+    expect(describeCard(by('trama:furto'), files)).toBe('Storia di questo reame.');
+    // Even a file that still said it, as an old snapshot could: only what is public is read.
+    expect(describeCard(by('tipo:cosa'), whole)).toBe('Cosa del mondo di questo reame.');
+  });
+
+  it('con ciò che dà publicFiles una carta con un corpo ha la foto; un luogo no, e resta la gemma (T168)', () => {
+    const whole: FileMap = { ...universe(), 'modules/cosa/manifest.json': JSON.stringify({ id: 'cosa', name: 'Cosa', kind: 'entity', appearance: { classe: 'oggetto' }, carta: carta('io') }) };
+    const files = publicFiles(whole);
+    const forms = new Forms(new InlineRunner());
+    forms.load(files);
+    const by = (id: string) => allCards(whole, true).find((c) => c.id === id)!;
+    expect(artOf(by('oggetto:spada'), files, forms)?.model).toBe('oggetto');
+    expect(artOf(by('tipo:cosa'), files, forms)?.xml).toBeTruthy();
+    // A universe played offline has only cards of places: no picture, so no worker starts. It is what they are, not a fault.
+    expect(artOf(by('luogo:0_0'), files, forms)).toBeUndefined();
   });
 
   it('una carta con un corpo ha la sua miniatura a voxel, le altre no', () => {
