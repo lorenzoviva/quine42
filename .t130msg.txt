@@ -1,7 +1,0 @@
-T130: ciò che esce e ciò che il Concilio scrive, a elenco (ADR-0107)
-
-playerFiles e publicFiles escono a elenco di campi, universes/ non è più
-servito dal server di sviluppo, un commit del Concilio cambia solo
-councilMayWrite e ai si muove solo su comando del master. V-012 e V-013 chiuse.
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
