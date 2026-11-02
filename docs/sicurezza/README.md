@@ -91,6 +91,7 @@ La suite gira dentro `npm test`; da sola con `npm run test:sicurezza`. I test so
 - **Non si riesce ancora a scrivere**: `it.todo`, con il motivo in un commento.
 - **Un caso che blocca il processo** (un ciclo sincrono in una funzione C): vitest non può interromperlo. Sta in un processo a parte con un tempo
   massimo, o nel kit dell'autore (T137), finché la correzione non lo fa finire.
+- **Una regola d'accesso nuova** (una route, un messaggio, un segreto): una riga in `serververo.test.ts` (T134), che la prova contro il server di produzione in processi veri, con la build vera e senza uscire dalla macchina, e cerca i valori finti in tutto ciò che esce.
 
 Se un filtro di sicurezza ferma la sessione mentre prepara una prova: non insistere e non riformulare per aggirarlo. La prova va nel kit
 dell'autore (T137), con la proprietà da verificare e ciò che resta scoperto in `docs/pipeline/domande/<Txx>.md`.
