@@ -92,7 +92,9 @@ describe('the wanderer route of the site (T102)', () => {
       expect(r.body.profilo.tinta).not.toBe('#000000');
       expect(r.body.riparato.length).toBeGreaterThan(0);
       const saved = JSON.parse(readFileSync(path.join(root, 'world/giocatori/ugo.json'), 'utf8'));
-      expect(saved.crediti).toBe(3.5);
+      // The balance left the file for the ledger the first time the universe was met (ADR-0104), and is still theirs.
+      expect(saved.crediti).toBeUndefined();
+      expect(r.body.viandante.crediti).toBe(3.5);
       expect(saved.profilo).toEqual(r.body.profilo);
       expect(git('show', '--name-only', '--format=', 'HEAD').trim()).toBe('world/giocatori/ugo.json');
       expect(git('status', '--short').trim()).toBe('?? non-mio.txt');

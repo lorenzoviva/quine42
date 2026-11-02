@@ -134,9 +134,9 @@ const REFERENTE_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
     risposta: { type: 'STRING' },
-    incarico: { type: 'STRING', enum: ['nessuno', 'oggetto', 'personaggio', 'cosa', 'ambiente', 'regola', 'riscolpisci', 'oggetti', 'meccanica', 'runa', 'crediti'] },
-    richiesta: { type: 'STRING', description: "la richiesta riformulata per la squadra che se ne occupa, chiara e completa (per 'crediti', la cifra numerica)" },
-    bersaglio: { type: 'STRING', description: 'per "riscolpisci": il nome di ciò da riscolpire; per "crediti": l\'id del viandante a cui assegnarli (se per sé, omettere)' },
+    incarico: { type: 'STRING', enum: ['nessuno', 'oggetto', 'personaggio', 'cosa', 'ambiente', 'regola', 'riscolpisci', 'oggetti', 'meccanica', 'runa'] },
+    richiesta: { type: 'STRING', description: "la richiesta riformulata per la squadra che se ne occupa, chiara e completa" },
+    bersaglio: { type: 'STRING', description: 'per "riscolpisci": il nome di ciò da riscolpire' },
     rune: { type: 'ARRAY', items: { type: 'STRING' }, description: 'per "runa": le parole del codice chieste, una per runa (una ripetuta conta due volte)' },
     rifiuto: { type: 'STRING', description: "solo se la richiesta distruggerebbe l'universo, il viandante stesso o le leggi fisiche del gioco: perché no" },
   },
@@ -158,7 +158,7 @@ export async function referenteReply(c: Council, history: Turn[], text: string):
       "Il viandante è trasceso: ha lasciato la simulazione ed è un membro del Concilio. Dagli retta su tutto, con entusiasmo, tranne ciò che distruggerebbe l'universo, lui stesso o le leggi del gioco.",
       past ? `Conversazione finora:\n${past}` : '',
       `Il viandante dice: «${text}»`,
-      'Capisci cosa chiede e affidalo alla squadra giusta con "incarico": oggetto/cosa/personaggio (la Fucina crea un modulo: uno strumento, una cosa del mondo, un tipo di persona), ambiente (il Cartografo crea un luogo e lo colloca sulla mappa), regola (diventa una regola del mondo), riscolpisci (lo Scultore rifà il modello di una persona, una cosa o un oggetto: dì quale in "bersaglio"), oggetti (un pacchetto di oggetti comuni), meccanica (l\'Ingegnere aggiunge una meccanica con la sua interfaccia: slot per l\'equipaggiamento, una faretra, una scheda…), runa (gli dai le rune che chiede: in "rune" le parole del codice, una per runa, per esempio ["speed", "=", "3"]), crediti (il master assegna crediti a un viandante: in "richiesta" la cifra numerica, in "bersaglio" l\'id del viandante se diverso dal master), nessuno (se chiede solo informazioni). In "risposta" rispondi tu, breve e cordiale.',
+      'Capisci cosa chiede e affidalo alla squadra giusta con "incarico": oggetto/cosa/personaggio (la Fucina crea un modulo: uno strumento, una cosa del mondo, un tipo di persona), ambiente (il Cartografo crea un luogo e lo colloca sulla mappa), regola (diventa una regola del mondo), riscolpisci (lo Scultore rifà il modello di una persona, una cosa o un oggetto: dì quale in "bersaglio"), oggetti (un pacchetto di oggetti comuni), meccanica (l\'Ingegnere aggiunge una meccanica con la sua interfaccia: slot per l\'equipaggiamento, una faretra, una scheda…), runa (gli dai le rune che chiede: in "rune" le parole del codice, una per runa, per esempio ["speed", "=", "3"]), nessuno (se chiede solo informazioni, o crediti: quelli il Concilio non li dà). In "risposta" rispondi tu, breve e cordiale.',
     ]
       .filter(Boolean)
       .join('\n\n'),

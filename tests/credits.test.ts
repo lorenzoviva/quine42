@@ -68,7 +68,7 @@ describe('credits and common costs (T45a)', () => {
     expect(shares[0]).toBeCloseTo(0.084167, 5);
   });
 
-  it('credits balance stored in world/giocatori/<id>.json only by server', async () => {
+  it('the balance is in the ledger, not in world/giocatori/<id>.json (ADR-0104)', async () => {
     const k = await bootMany();
     k.addWanderer('anna', 'Anna');
     expect(k.creditsOf('anna')).toBe(0);
@@ -77,10 +77,11 @@ describe('credits and common costs (T45a)', () => {
     expect(k.creditsOf('anna')).toBe(15.5);
 
     const file = JSON.parse(k.files['world/giocatori/anna.json'] ?? '{}');
-    expect(file.crediti).toBe(15.5);
+    expect(file.crediti).toBeUndefined();
+    expect(k.ledger.balance('anna')).toBe(15.5);
   });
 
-  it('master can grant credits via console and Referente; players cannot', async () => {
+  it('the master gives credits by hand within the cap; the Referente never; players neither (ADR-0104)', async () => {
     const k = await bootMany();
     const server = new SessionServer(k);
     const master = await thin(server, 'io');
@@ -90,23 +91,31 @@ describe('credits and common costs (T45a)', () => {
     // Initial credits
     expect(k.creditsOf('anna')).toBe(0);
 
-    // Master grants credits directly (console)
-    expect(k.giveCredits('anna', 2.5)).toBe(true);
+    // By hand, from the console: through the server, which writes down who gave them
+    expect(await until(server, [master, anna], master.k.grantCredits('anna', 2.5))).toEqual({ ok: true });
     expect(k.creditsOf('anna')).toBe(2.5);
 
-    // Master grants credits via Referente
-    const r = await until(server, [master, anna], master.k.talkToAgent('referente', 'ricarica 5 crediti ad anna'));
-    expect(r.forged).toMatch(/anna/);
-    expect(k.creditsOf('anna')).toBe(7.5);
+    // What the Referente answers moves no money
+    await until(server, [master, anna], master.k.talkToAgent('referente', 'ricarica 5 crediti ad anna'));
+    expect(k.creditsOf('anna')).toBe(2.5);
 
-    // Player cannot ask Referente
-    const refused = await until(
-      server,
-      [master, anna],
-      anna.session.act({ t: 'agente', agente: 'referente', testo: 'ricarica 10 crediti ad anna' }),
-    );
+    // The day's cap holds, for every wanderer together, and says what is left
+    const over = await until(server, [master, anna], master.k.grantCredits('io', 18));
+    expect(over.ok).toBe(false);
+    expect(over.motivo).toContain('17.5');
+    expect(k.creditsOf('io')).toBe(0);
+
+    // Not an unknown wanderer, not a strange amount
+    for (const [id, n] of [['nessuno', 1], ['anna', -1], ['anna', Number.NaN], ['anna', Number.POSITIVE_INFINITY]] as const) {
+      expect((await until(server, [master, anna], master.k.grantCredits(id, n))).ok).toBe(false);
+    }
+
+    // A player cannot, through the message or through the Referente
+    const refused = await until(server, [master, anna], anna.session.act({ t: 'ricarica', viandante: 'anna', quanti: 1 }));
     expect(refused.ok).toBe(false);
-    expect(k.creditsOf('anna')).toBe(7.5);
+    const talk = await until(server, [master, anna], anna.session.act({ t: 'agente', agente: 'referente', testo: 'ricarica 10 crediti ad anna' }));
+    expect(talk.ok).toBe(false);
+    expect(k.creditsOf('anna')).toBe(2.5);
   });
 
   it('two players and master connected: common expense split in three (+1% fee)', async () => {

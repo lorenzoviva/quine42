@@ -51,6 +51,7 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
 8. **La corona è nascosta finché il tappeto funziona** (ADR-0009).
 8b. **Chi non è il master non riscrive il mondo** (ADR-0102): identità verificata sul server (`server/access.ts`), un'altra origine mai; senza account l'id detto vale solo da questa macchina; una partita di molti è del suo master e del suo mondo, gli altri leggono `publicFiles` e non scrivono; i saldi li scrive solo il mondo; `anonimo`, `offline` e `tetto` non li decide il client. Una route nuova passa da `gate`.
 8c. **Un universo contiene solo percorsi ammessi** (ADR-0103): un elenco in `src/kernel/paths.ts` (`modules/ models/ world/ maps/ prompts/ universe.json seed.json`, nomi semplici), mai un divieto su `.git`; il server lancia git solo da `server/git.ts`.
+8d. **I saldi stanno fuori dall'universo** (ADR-0104): saldi e pagamenti solo in `universes/.saldi/<nome>.json` (`server/ledger.ts`, `Ledger` in `credits.ts`), mai in un file dell'universo; niente Lua, Concilio, ramo o rollback ci arriva; ogni accredito è un passo atomico; a mano solo il master, entro `QUINE_TETTO_RICARICHE` al giorno.
 9. **La chiave API non arriva mai al browser**: la tiene solo `GeminiGate` (`server/geminiProxy.ts`, ADR-0099): modelli a elenco, corpo limitato, tetto di spesa giornaliero; la route solo da questa macchina e dalla stessa origine, in multigiocatore il server chiama Google senza route.
 10. **Ciò che sembra invalicabile lo è**: il terreno blocca a caselle, i modelli con i loro voxel (ADR-0041);
     ogni luogo è connesso (varchi + sentieri scavati dal kernel, porte delle strutture sul sentiero; niente cose solide su punti di articolazione né davanti alle porte, ADR-0064).
@@ -75,7 +76,7 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
   da un processo che usa le CLI dell'abbonamento di chi gioca; il resto resta sulle API. Solo in locale, mai sul server del multigiocatore.
 - **Vitest** in Node con modelli offline (`MockModels`): kernel, Concilio e layout testabili headless.
 - Persistenza: repository git dell'universo su disco tramite il server di Vite (`server/universeStore.ts`):
-  testi, `maps/` (piani dei luoghi), `world/stato.json` (lo stato del mondo), `world/giocatori/` (i viandanti), `world/consumi.json` (i consumi). Senza server:
+  testi, `maps/` (piani dei luoghi), `world/stato.json` (lo stato del mondo), `world/giocatori/` (i viandanti), `world/consumi.json` (i consumi); saldi e pagamenti fuori dal repository, in `universes/.saldi/` (ADR-0104). Senza server:
   `localStorage` + IndexedDB.
 
 ## Comandi
@@ -92,7 +93,7 @@ npm run abbonamento  # serve la coda /api/coda con le CLI (Claude, Antigravity, 
 ```
 
 `.env`: `GEMINI_API_KEY=...` (ignorato da git), `GEMINI_TETTO_GIORNALIERO` (dollari al giorno per la chiave, predefinito 10; la spesa in `universes/.spesa-gemini.json`, ADR-0099); per gli account in multigiocatore `FIREBASE_PROJECT_ID` (e `FIREBASE_API_KEY`,
-`FIREBASE_AUTH_DOMAIN`, `QUINE_MASTER`; con l'emulatore `FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099` e un progetto `demo-…`, ADR-0082); per i pagamenti Stripe in prova `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` (e `STRIPE_TAX_CODE` per i Managed Payments, ADR-0083). Senza chiave o con `?offline`: modelli locali, texture e
+`FIREBASE_AUTH_DOMAIN`, `QUINE_MASTER`, `QUINE_TETTO_RICARICHE`, dollari al giorno per universo che il master può dare a mano, ADR-0104: 0 con gli account, 20 senza; con l'emulatore `FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099` e un progetto `demo-…`, ADR-0082); per i pagamenti Stripe in prova `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` (e `STRIPE_TAX_CODE` per i Managed Payments, ADR-0083). Senza chiave o con `?offline`: modelli locali, texture e
 ostacoli procedurali. URL: `?skip` salta intro e Genesi; `?dev&teleport=46,0` porta oltre il tappeto (o `teleport=X,Y` dovunque: anche dentro una stanza, vedi «Convalida nel browser»); in sviluppo `?universo=<nome>` apre un altro
 universo di `universes/` e `?viandante=<id>` sceglie il viandante della scheda in multigiocatore (due schede, due viandanti).
 Graphify (facoltativo, ADR-0045): `pip install graphifyy` in un ambiente a parte, poi `GRAPHIFY_BACKEND=none graphify update .`
@@ -103,6 +104,7 @@ In console del browser: `window.quine` (o `window.rune`) è il kernel (`.feed()`
 
 ```
 server/access.ts        chi chiede e cosa può (ADR-0102): `callerOf`, `gate`, `owns`, `newUniverse`; ogni route che ascolta un client passa da qui
+server/ledger.ts        l'archivio di saldi e pagamenti fuori dall'universo (ADR-0104): `FileLedger`, `ledgerOf`, `openLedger`, la migrazione (`sweepBalances`)
 server/git.ts           l'unico modo in cui il server lancia git (ADR-0103): `runGit`, senza hook né monitor, senza risalire al repository di sopra
 server/geminiProxy.ts   l'unico varco della chiave (ADR-0099): GeminiGate, la route /api/gemini (solo loopback) e direct() per i mondi di molti
 server/universeStore.ts /api/universe: ogni universo è un repository git in universes/<nome>/ (e il ramo del master, `rami/master`; il clone)
@@ -333,7 +335,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   piani dei luoghi): i punti che creano contenuti committano con `commitContent`, che timbra ciò che il cambio porta (`stampFiles`); il
   titolare delle comuni è un viandante estratto col seme (`titolareOf`). Gli utilizzi (`luoghi trame prompt`) e le carte dei luoghi in
   `world/carte.json` (`CardLedger`, scritto prima di ogni commit); la collezione: `kernel.cardsOf(id)`, `collectionOf`.
-- **Crediti e spese comuni** (ADR-0081, T45a): saldo crediti per viandante in `world/giocatori/<id>.json`, scritto solo dal server (`kernel.creditsOf`, `giveCredits`, `deductCredits`); ricaricato a mano dal master (console o Referente). Ogni chiamata scala dal pagante (`payerOf`) costo modello + 1% piattaforma (`PLATFORM_FEE = 0.01`, `costWithFee`); le spese comuni (`comune`) sono divise in parti uguali tra tutti i giocatori collegati in quel momento (`splitCost`), master compreso, escludendo gli anonimi. A crediti esauriti (`crediti <= 0`) o per viandanti anonimi (`anonimo: true`, 0 crediti non ricaricabili): le richieste personali sono risposte dai modelli locali (`MockModels`) e il giocatore lo sa (`stato.crediti` nell'aggiornamento, avviso nel feed).
+- **Crediti e spese comuni** (ADR-0081, T45a, ADR-0104, T125): saldo crediti per viandante nel `Ledger` del kernel (`kernel.ledger`; sul server `universes/.saldi/<nome>.json`, fuori dalla storia; `kernel.creditsOf`, `deductCredits`); ricaricato a mano solo dal master, dalla console (`grantCredits`, messaggio `ricarica`), entro il tetto al giorno per universo (`QUINE_TETTO_RICARICHE`); il Referente non dà crediti. Ogni chiamata scala dal pagante (`payerOf`) costo modello + 1% piattaforma (`PLATFORM_FEE = 0.01`, `costWithFee`); le spese comuni (`comune`) sono divise in parti uguali tra tutti i giocatori collegati in quel momento (`splitCost`), master compreso, escludendo gli anonimi. A crediti esauriti (`crediti <= 0`) o per viandanti anonimi (`anonimo: true`, 0 crediti non ricaricabili): le richieste personali sono risposte dai modelli locali (`MockModels`) e il giocatore lo sa (`stato.crediti` nell'aggiornamento, avviso nel feed).
 - **Rune per ruolo** (ADR-0057, T37): `partita.master` è chi ha creato l'universo multigiocatore (`io` per ora); in singola chi gioca
   è il master di tutto (`isMaster()`) e nulla cambia. In multigiocatore nessuna riga del tappeto (`carpetLine` in `runes.ts`: token del
   tappeto, la runa `concilio`, un binding scritto) nei luoghi; ogni riga gira come chi l'ha incisa (`RuneComp.by`, `as`) e, se non è il
@@ -413,14 +415,14 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   (pannello `P`, «Lega a Google») smette di essere anonimo (`setAnonymous`), tiene lo stesso uid e viandante e può ricevere crediti.
   `QUINE_MASTER` (uid) è il master `io` degli universi fatti prima degli account. Senza `FIREBASE_PROJECT_ID` (sviluppo, test) vale l'id di
   oggi; in singola nessun account.
-- **I pagamenti con Stripe** (ADR-0083, T45e): ricarica dei crediti in multigiocatore con Stripe Checkout (Google Pay compreso); chiavi solo sul server (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`); creazione sessione via `POST /api/stripe/checkout` verificata dal token account; un anonimo non compra (blocco a monte 403 e a valle sull'accredito); il webhook `POST /api/stripe/webhook` senza `STRIPE_WEBHOOK_SECRET` risponde 503 (e una chiave vera senza quel segreto non apre sessioni, T124), verifica la firma HMAC-SHA256 (`stripe-signature`), valida nomi e id come il checkout, calcola il credito dall'importo pagato (`paidCents`: tasse aggiunte escluse, mai i metadati) e accredita in modo idempotente memorizzando gli eventi in `world/pagamenti.json` (`Kernel.creditRecharge`); pannello `P` con saldo crediti in dollari e pulsanti di ricarica rapida (`+5 $`, `+10 $`, `+20 $`). Niente `payment_method_types` (i metodi li sceglie il Dashboard); i Managed Payments di Stripe restano accesi solo con `STRIPE_TAX_CODE` nel `.env`, altrimenti la sessione li spegne; un accredito su disco committa solo i suoi due file (T93).
+- **I pagamenti con Stripe** (ADR-0083, T45e): ricarica dei crediti in multigiocatore con Stripe Checkout (Google Pay compreso); chiavi solo sul server (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`); creazione sessione via `POST /api/stripe/checkout` verificata dal token account; un anonimo non compra (blocco a monte 403 e a valle sull'accredito); il webhook `POST /api/stripe/webhook` senza `STRIPE_WEBHOOK_SECRET` risponde 503 (e una chiave vera senza quel segreto non apre sessioni, T124), verifica la firma HMAC-SHA256 (`stripe-signature`), valida nomi e id come il checkout, calcola il credito dall'importo pagato (`paidCents`: tasse aggiunte escluse, mai i metadati) e accredita una volta per evento nell'archivio dei saldi (`Ledger.pay`, `Kernel.creditRecharge`, ADR-0104); pannello `P` con saldo crediti in dollari e pulsanti di ricarica rapida (`+5 $`, `+10 $`, `+20 $`). Niente `payment_method_types` (i metodi li sceglie il Dashboard); i Managed Payments di Stripe restano accesi solo con `STRIPE_TAX_CODE` nel `.env`, altrimenti la sessione li spegne; un accredito non fa commit (ADR-0104).
 - **Morte e ricollegamento in multigiocatore** (ADR-0076, T43c): a salute zero un giocatore (mai il master: `mortalDies`) muore sul server con la
   punizione della partita (`continueAfterDeath(id, cause)` concatenata da `die` come lui, senza alzare `dead` né fermare gli altri; `wanderer:died` →
   avviso `morte` con `perso` e `dove`, il client mostra la schermata della morte, `ui:died`, e riparte dove il verdetto dice). `world/giocatori/<id>.json` salva anche `pos {x, y}`: chi esce e rientra ritrova
   posizione, inventario, frase, stati, carte e legami.
 - **Il clone con un altro master** (ADR-0068, T42d): il master non cambia; un altro master è un altro universo. `cloneUniverse`
   (`server/universeStore.ts`, `POST /api/universe/<nome>/clone {nome, master, titolari}`) copia la cartella intera (storia, `maps/`,
-  viandanti, carte, consumi; non i rami `rami/*`) e committa ciò che dà `cloneChanges` (`src/kernel/clone.ts`): `name` e
+  viandanti, carte, consumi; non i rami `rami/*` né i saldi, ADR-0104) e committa ciò che dà `cloneChanges` (`src/kernel/clone.ts`): `name` e
   `partita.master` in `universe.json`; autore e pagante delle carte restano, il titolare resta o, con `titolari: 'master'`, le carte
   del vecchio master passano al nuovo (`passCards`). Nella console del master in multigiocatore, scheda «Universo» (`Console.onClone`).
 - **L'eredità dei cloni** (ADR-0084, T45c): a ogni clone `inheritCards` (`clone.ts`) allunga la catena di ogni carta (`carta.origini`:

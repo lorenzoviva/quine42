@@ -112,7 +112,7 @@ export function owns(who: Caller, game: Game, masterUid?: string): boolean {
   return game.many ? isMasterOf(who, game, masterUid) : who.local;
 }
 
-/** Balances and payments: over HTTP only the world itself writes them in a game of many, and they never travel with a universe that is made. */
+/** A wanderer's state (and where balances and payments were, before their ledger, ADR-0104): over HTTP only the world writes it in a game of many, and it never travels with a universe that is made. */
 export const creditFile = (p: string) => /^world\/(giocatori\/|pagamenti\.json$)/i.test(p.replace(/\\/g, '/'));
 
 /**

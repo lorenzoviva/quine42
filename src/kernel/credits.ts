@@ -1,16 +1,14 @@
-// The credit system (T45a, ADR-0081; P#1 of the multiplayer plan): wanderers have a credit balance in
-// `world/giocatori/<id>.json` written only by the server. The master gives credits by hand (via console
-// or the Referente). Every model call deducts its cost + 1% (P#1) from its payer (`payerOf`). Common expenses
-// (`comune`) are split equally among all currently connected players (master included). When credits are
-// exhausted, what the wanderer asks for is answered by local models (like without an API key).
-// Anonymous wanderers have no credits and always use local models.
-// Stripe Checkout (T45e, ADR-0083): credit top-ups via Stripe Checkout; the server webhook credits
-// the wanderer idempotently, recorded in `world/pagamenti.json`.
+// The credit system (T45a, ADR-0081; P#1 of the multiplayer plan). Every model call deducts its cost + 1% (P#1) from its payer
+// (`payerOf`). Common expenses (`comune`) are split equally among all currently connected players (master included). When credits
+// are exhausted, what the wanderer asks for is answered by local models (like without an API key). Anonymous wanderers have no
+// credits and always use local models. Stripe Checkout (T45e, ADR-0083) tops up.
+// Balances and payments live in a `Ledger` (T125, ADR-0104), outside the universe's files and their history: here its rules; on the
+// server `server/ledger.ts` keeps it on disk, a mirror or a test has it in memory.
 
 /** Platform fee on top of model cost (P#1): 1%. */
 export const PLATFORM_FEE = 0.01;
 
-/** Path of the payments and idempotency store in a universe (T45e). */
+/** Where a universe of before the ledger kept its payments: only the migration reads it (ADR-0104). */
 export const PAYMENTS_FILE = 'world/pagamenti.json';
 
 /** Total cost with the 1% platform fee. */
@@ -41,36 +39,102 @@ export interface PaymentRecord {
   timestamp: number;
 }
 
-/** The structure of `world/pagamenti.json` (T45e). */
-export interface PaymentsStore {
-  eventi: Record<string, PaymentRecord>;
+/** A gift of credits by the master (ADR-0104). */
+export interface GrantRecord {
+  da: string;
+  a: string;
+  crediti: number;
+  giorno: string;
+  quando: number;
 }
 
-/** Reads the payments store from universe files (T45e). */
-export function readPayments(files: Record<string, string>): PaymentsStore {
-  const text = files[PAYMENTS_FILE];
-  if (!text) return { eventi: {} };
-  try {
-    const data = JSON.parse(text);
-    return typeof data === 'object' && data?.eventi ? data : { eventi: {} };
-  } catch {
-    return { eventi: {} };
+/** What a ledger holds. */
+export interface LedgerBook {
+  saldi: Record<string, number>;
+  /** The events already credited: what makes a payment count once. */
+  eventi: Record<string, PaymentRecord>;
+  ricariche: GrantRecord[];
+}
+
+export const emptyBook = (): LedgerBook => ({ saldi: {}, eventi: {}, ricariche: [] });
+
+const money = (v: number) => Math.round(v * 1e6) / 1e6;
+const held = (b: LedgerBook, id: string) => (Object.hasOwn(b.saldi, id) ? b.saldi[id] : 0);
+
+/**
+ * Balances and payments of a universe. Each operation is one step on the book (`update`): nothing else happens between what it
+ * checks and what it writes. There is no way here to set a balance to a number: credits come from a payment or a gift, and go by a charge.
+ */
+export abstract class Ledger {
+  protected abstract read(): LedgerBook;
+  protected abstract update<T>(fn: (book: LedgerBook) => T): T;
+
+  balance(id: string): number {
+    return held(this.read(), id);
+  }
+
+  /** A payment already credited, if it was. */
+  payment(eventId: string): PaymentRecord | undefined {
+    const book = this.read();
+    return Object.hasOwn(book.eventi, eventId) ? book.eventi[eventId] : undefined;
+  }
+
+  /** A wanderer's payments, as they were recorded. */
+  paymentsOf(id: string): PaymentRecord[] {
+    return Object.values(this.read().eventi).filter((p) => p?.wandererId === id);
+  }
+
+  /** Adds credits. */
+  credit(id: string, amount: number): number {
+    return this.update((b) => (b.saldi[id] = money(held(b, id) + amount)));
+  }
+
+  /** Takes credits, down to zero at most. */
+  charge(id: string, amount: number): { before: number; after: number } {
+    return this.update((b) => {
+      const before = held(b, id);
+      const after = Math.max(0, money(before - amount));
+      b.saldi[id] = after;
+      return { before, after };
+    });
+  }
+
+  /** Credits a payment unless its event was credited already: false then. One step: the same event twice, at the same moment, counts once. */
+  pay(p: PaymentRecord): boolean {
+    return this.update((b) => {
+      if (Object.hasOwn(b.eventi, p.eventId)) return false;
+      b.eventi[p.eventId] = { ...p };
+      b.saldi[p.wandererId] = money(held(b, p.wandererId) + p.crediti);
+      return true;
+    });
+  }
+
+  /** A gift by the master, within what `cap` leaves of the day. What was left if it does not fit, undefined if it went through. */
+  grant(da: string, a: string, crediti: number, cap: number, now: number): { left: number } | undefined {
+    const giorno = new Date(now).toISOString().slice(0, 10);
+    return this.update((b) => {
+      const given = b.ricariche.reduce((sum, r) => sum + (r.giorno === giorno ? r.crediti : 0), 0);
+      if (money(given + crediti) > cap) return { left: Math.max(0, money(cap - given)) };
+      b.ricariche.push({ da, a, crediti, giorno, quando: now });
+      b.saldi[a] = money(held(b, a) + crediti);
+      return undefined;
+    });
   }
 }
 
-/** Whether a Stripe event has already been credited (T45e: idempotency). */
-export function isPaymentProcessed(files: Record<string, string>, eventId: string): boolean {
-  if (!eventId) return false;
-  const store = readPayments(files);
-  return !!store.eventi[eventId];
+/** A ledger that lasts as long as its kernel: a mirror's, which only shows what the server says, and the tests'. */
+export class MemoryLedger extends Ledger {
+  private book = emptyBook();
+  protected read(): LedgerBook {
+    return this.book;
+  }
+  protected update<T>(fn: (book: LedgerBook) => T): T {
+    return fn(this.book);
+  }
 }
 
-/** Records a processed Stripe payment in `world/pagamenti.json` (T45e). */
-export function recordPayment(files: Record<string, string>, payment: PaymentRecord): void {
-  const store = readPayments(files);
-  store.eventi[payment.eventId] = { ...payment };
-  files[PAYMENTS_FILE] = JSON.stringify(store, null, 1) + '\n';
-}
+/** What the master may give by hand in a day when nobody said (a server without accounts: ADR-0104). */
+export const DEFAULT_GRANT_CAP = 20;
 
 /**
  * Additional AI budget derived from an entrant's credit cap (T45d: "il tetto di crediti si somma ai budget di ai").

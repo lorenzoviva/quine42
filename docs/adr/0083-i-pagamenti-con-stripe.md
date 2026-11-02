@@ -2,6 +2,8 @@
 
 Data: 2026-10-30 · Stato: accettato (task T45e del backlog) · Fase 4 di ADR-0050 (il multiplayer); estende ADR-0081 (crediti e spese comuni) e ADR-0082 (l'account).
 
+> **Aggiornamento (T125, ADR-0104):** i pagamenti non stanno più in `world/pagamenti.json` ma nell'archivio del server fuori dall'universo, e un accredito non fa più commit. Sotto, com'era.
+
 ## Contesto
 Nelle partite multigiocatore (ADR-0050), ogni chiamata ai modelli comporta un costo in crediti/dollari con commissione di piattaforma (+1%, ADR-0081).
 L'autore ha stabilito (29/10/2026, `docs/pipeline/domande/T45.md`) che dopo la gestione manuale da parte del master, il sistema di pagamento per la ricarica dei crediti è **Stripe Checkout** (con Google Pay compreso).

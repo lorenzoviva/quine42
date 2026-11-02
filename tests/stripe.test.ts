@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { Readable } from 'node:stream';
@@ -8,7 +8,8 @@ import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockModels } from '../src/kernel/ai/mock';
-import { type PaymentRecord, isPaymentProcessed, readPayments } from '../src/kernel/credits';
+import type { PaymentRecord } from '../src/kernel/credits';
+import { ledgerOf } from '../server/ledger';
 import {
   verifyStripeWebhookSignature,
   createFakeStripeSignature,
@@ -57,11 +58,9 @@ describe('Stripe payments and idempotency (T45e)', () => {
     expect(k.creditsOf('alice')).toBe(10);
     expect(busNotified).toBe(true);
 
-    // Verify stored in payments file
-    expect(isPaymentProcessed(k.files, 'evt_test_1')).toBe(true);
-    const store = readPayments(k.files);
-    expect(store.eventi['evt_test_1'].crediti).toBe(10);
-    expect(store.eventi['evt_test_1'].wandererId).toBe('alice');
+    // Recorded in the ledger, and nowhere in the universe's files (ADR-0104)
+    expect(k.ledger.payment('evt_test_1')).toMatchObject({ crediti: 10, wandererId: 'alice' });
+    expect(k.files['world/pagamenti.json']).toBeUndefined();
 
     // 2. Second credit recharge with exact same eventId (idempotency check)
     busNotified = false;
@@ -93,7 +92,7 @@ describe('Stripe payments and idempotency (T45e)', () => {
     expect(res.ok).toBe(false);
     expect(res.motivo).toBe('un anonimo non compra crediti');
     expect(k.creditsOf('anon1')).toBe(0);
-    expect(isPaymentProcessed(k.files, 'evt_anon_1')).toBe(false);
+    expect(k.ledger.payment('evt_anon_1')).toBeUndefined();
   });
 
   it('verifyStripeWebhookSignature validates HMAC-SHA256 signatures with timestamp check', () => {
@@ -299,7 +298,7 @@ describe('Stripe payments and idempotency (T45e)', () => {
     expect((await answer({ secretKey: 'mock' }, 'GET', '/api/stripe/config')).body.available).toBe(true);
   });
 
-  it('a payment to a universe on disk commits only its two files (T93)', async () => {
+  it('a payment to a universe on disk commits nothing: it is in the ledger, the uncommitted changes stay as they are (T93, ADR-0104)', async () => {
     const dir = mkdtempSync(path.join(tmpdir(), 'stripe-'));
     try {
       const root = path.join(dir, 'prova');
@@ -321,12 +320,9 @@ describe('Stripe payments and idempotency (T45e)', () => {
       };
       const res = await applyPaymentToUniverse({ universesDir: dir, universo: 'prova', payment });
       expect(res.status).toBe('credited');
-      expect(git('show', '--name-only', '--format=', 'HEAD').trim().split('\n').sort()).toEqual([
-        'world/giocatori/ugo.json',
-        'world/pagamenti.json',
-      ]);
+      expect(git('log', '--format=%s').trim()).toBe('inizio');
       expect(git('status', '--short').trim()).toBe('M altro.txt');
-      expect(JSON.parse(readFileSync(path.join(root, 'world/giocatori/ugo.json'), 'utf8')).crediti).toBe(5);
+      expect(ledgerOf(dir, 'prova').balance('ugo')).toBe(5);
       expect((await applyPaymentToUniverse({ universesDir: dir, universo: 'prova', payment })).status).toBe('duplicate');
     } finally {
       rmSync(dir, { recursive: true, force: true });

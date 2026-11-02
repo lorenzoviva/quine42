@@ -12,6 +12,7 @@ import { subscriptionQueue } from './server/subscriptionQueue';
 import { wandererRoute } from './server/wanderer';
 import { testWorkers } from './server/testWorkers';
 import { walletRoute } from './server/wallet';
+import { grantCapOf } from './server/ledger';
 
 export default defineConfig(({ mode }) => {
   // '' prefix: read every variable, but only server-side. Nothing without VITE_ reaches the client.
@@ -41,7 +42,7 @@ export default defineConfig(({ mode }) => {
       wandererRoute({ accounts, universesDir, getActiveKernel: getActiveUniverseKernel }),
       // The site's credits page (T105): the account's balance and their lines of the two ledgers.
       walletRoute({ accounts, universesDir, getActiveKernel: getActiveUniverseKernel }),
-      sessionServer(accounts, gemini.direct(), internal),
+      sessionServer(accounts, gemini.direct(), internal, { universesDir, grantCap: grantCapOf(env, !!accounts?.verify) }),
       subscriptionQueue(path.resolve(process.cwd(), 'universes', '.coda')),
     ],
     // Writing a universe must not reload the page (dev server watches the project folder).

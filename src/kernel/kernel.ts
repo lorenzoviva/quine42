@@ -33,7 +33,7 @@ import { onBeat, repairCoefficients, stretch, type Coefficients } from './coeffi
 import { BudgetError, type Models } from './ai/models';
 import { costOf } from './ai/prices';
 import { USAGE_FILE, UsageLedger, type CallRecord } from './ai/usage';
-import { addBudgetFromTetto, costWithFee, splitCost, PAYMENTS_FILE, type PaymentRecord, isPaymentProcessed, recordPayment } from './credits';
+import { addBudgetFromTetto, costWithFee, DEFAULT_GRANT_CAP, MemoryLedger, splitCost, type Ledger, type PaymentRecord } from './credits';
 import { MemoryChunks, type ChunkStore } from './chunks';
 import { bodyFoot, bodyGround, Forms, holesOf, InlineRunner, instanceGrid, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground } from './forms';
 import { classOf, guessClass, RARE_SIZES, sizeRank, TAGLIE, tilesOf, type Taglia } from '../mj/classes';
@@ -289,6 +289,10 @@ export interface Needs {
 
 export interface KernelOptions {
   files: FileMap;
+  /** Balances and payments (ADR-0104): on the server the archive outside the universe; otherwise in memory. */
+  ledger?: Ledger;
+  /** Dollars a day the master may give by hand (ADR-0104). */
+  grantCap?: number;
   store: KeyValueStore;
   models: Models;
   chunks?: ChunkStore;
@@ -475,7 +479,10 @@ export class Kernel {
   /** The entity of the wanderer acting now (the one the input moves, or another one inside `as`). */
   playerId: Id = 0;
   /** The wanderers of this kernel by id (T34): `io` is the one of a game alone; others join with `addWanderer`. */
-  private wanderersById = new Map<string, Wanderer & { entity: Id; tappeto?: { ox: number; oy: number }; profilo?: Profile; crediti?: number; anonimo?: boolean }>();
+  /** Balances and payments, outside the files and their history (ADR-0104). */
+  readonly ledger: Ledger;
+  private readonly grantCap: number;
+  private wanderersById = new Map<string, Wanderer & { entity: Id; tappeto?: { ox: number; oy: number }; profilo?: Profile; anonimo?: boolean }>();
   /** Spending ceiling for this session per wanderer (T45d: lobby). */
   private sessionTetto = new Map<string, number>();
   /** The highest ceiling each wanderer brought: entering again does not add the same budget twice. */
@@ -567,6 +574,8 @@ export class Kernel {
     this.models = opts.models;
     this.bench = opts.bench;
     this.mirror = !!opts.mirror;
+    this.ledger = opts.ledger ?? new MemoryLedger();
+    this.grantCap = opts.grantCap ?? DEFAULT_GRANT_CAP;
     this.wasmUri = opts.wasmUri;
     this.chunkStore = opts.chunks ?? new MemoryChunks();
     this.forms = new Forms(opts.forms ?? new InlineRunner());
@@ -925,9 +934,8 @@ export class Kernel {
     const entity = this.spawnWanderer(p.x + 1, p.y);
     const saved = readWandererState(this.files, id);
     const isAnon = anonimo !== undefined ? !!anonimo : !!saved?.anonimo;
-    const crediti = isAnon ? 0 : (saved?.crediti ?? 0);
     // Their carpet starts where the carpet of the one acting is: they appear beside them.
-    this.wanderersById.set(id, { id, nome: String(nome ?? saved?.nome ?? '').trim().slice(0, 40) || WANDERER_NAME, entity, tappeto: { ...this.offset() }, crediti, anonimo: isAnon });
+    this.wanderersById.set(id, { id, nome: String(nome ?? saved?.nome ?? '').trim().slice(0, 40) || WANDERER_NAME, entity, tappeto: { ...this.offset() }, anonimo: isAnon });
     if (saved?.anonimo && anonimo === false) {
       delete saved.anonimo;
       this.setAnonymous(id, false);
@@ -4597,7 +4605,7 @@ export class Kernel {
   }
 
   /** The player talks to an agent of the Council, in the corona. It may accept to make something. */
-  async talkToAgent(agent: AgentId, text: string): Promise<{ say: string; forged?: string; runes?: string[]; credits?: { target: string; amount: number } }> {
+  async talkToAgent(agent: AgentId, text: string): Promise<{ say: string; forged?: string; runes?: string[] }> {
     const history = this.agentTalks.get(agent) ?? [];
     this.agentTalks.set(agent, history);
     if (agent === 'referente') return this.askReferente(text, history);
@@ -4635,17 +4643,6 @@ export class Kernel {
     const req = r.request ?? text;
     this.council.say('referente', 'info', `il viandante chiede: «${text}» → ${r.task}`, r.task === 'ambiente' ? 'cartografo' : r.task === 'riscolpisci' ? 'artista' : r.task === 'regola' ? 'arbitro' : r.task === 'nessuno' ? undefined : 'narratore', 'referente.coordinate');
     switch (r.task) {
-      case 'crediti': {
-        if (!this.manyPlayers() || !this.isMaster()) return { say: r.say, forged: 'I crediti si gestiscono solo in multigiocatore dal master.' };
-        const targetId = r.target?.trim() || this.wanderer().id;
-        const amount = parseFloat((r.request ?? '').replace(',', '.'));
-        if (!Number.isFinite(amount) || amount <= 0) return { say: r.say, forged: 'Il Referente non capisce quanti crediti vuoi assegnare.' };
-        if (!this.mirror) {
-          const ok = this.giveCredits(targetId, amount);
-          if (!ok) return { say: r.say, forged: `Impossibile dare crediti a «${targetId}» (anonimo o non valido).` };
-        }
-        return { say: r.say, forged: `Assegnati ${amount} crediti a «${targetId}».`, credits: { target: targetId, amount } };
-      }
       case 'oggetto':
         return { say: r.say, forged: (await this.forgeModule(req, 'agente', 'strumento', true)).summary };
       case 'cosa':
@@ -4707,11 +4704,9 @@ export class Kernel {
     return this.manyPlayers() && this.isMaster(id);
   }
 
-  /** A wanderer's credit balance in USD (T45a). */
+  /** A wanderer's credit balance in USD (T45a): what the ledger says (ADR-0104); an anonymous one has none. */
   creditsOf(id: string = this.wanderer().id): number {
-    const entry = this.wanderersById.get(id);
-    if (entry?.crediti !== undefined) return entry.crediti;
-    return readWandererState(this.files, id)?.crediti ?? 0;
+    return this.isAnonymous(id) ? 0 : this.ledger.balance(id);
   }
 
   /** Sets a wanderer's credit spending cap for this session (T45d: lobby). */
@@ -4763,98 +4758,86 @@ export class Kernel {
   /** Sets whether a wanderer is anonymous (T44b, T45a). An anonymous wanderer has 0 credits. */
   setAnonymous(id: string, anonimo: boolean): void {
     const entry = this.wanderersById.get(id);
-    if (entry) {
-      entry.anonimo = anonimo;
-      if (anonimo) entry.crediti = 0;
-    }
+    if (entry) entry.anonimo = anonimo;
     const file = playerFile(id);
     const saved = readWandererState(this.files, id);
     if (!saved && !anonimo) return;
     const updated = saved ?? { nome: entry?.nome ?? id };
     updated.anonimo = anonimo ? true : undefined;
-    if (anonimo) updated.crediti = 0;
     const text = JSON.stringify(updated, null, 1) + '\n';
     this.files[file] = text;
     this.repo.write(file, text);
   }
 
   /**
-   * The master awards credits to a wanderer (T45a): persisted in their player file.
-   * Returns false if the wanderer is anonymous or invalid.
+   * Credits a wanderer (T45a), in the ledger. The kernel's own: Lua, the Council, a branch or a file do not get here (ADR-0104). A
+   * mirror has nothing to give: it only shows what the server says. False if the wanderer is anonymous or invalid, or the ledger failed.
    */
   giveCredits(id: string, amount: number): boolean {
-    if (!validWandererId(id) || !Number.isFinite(amount) || amount <= 0) return false;
-    if (this.isAnonymous(id)) return false;
-    const entry = this.wanderersById.get(id);
-    const cur = entry?.crediti ?? readWandererState(this.files, id)?.crediti ?? 0;
-    const next = Math.round((cur + amount) * 1e6) / 1e6;
-    if (entry) entry.crediti = next;
-    const file = playerFile(id);
-    const saved = readWandererState(this.files, id) ?? { nome: entry?.nome ?? id };
-    saved.crediti = next;
-    const text = JSON.stringify(saved, null, 1) + '\n';
-    this.files[file] = text;
-    this.repo.write(file, text);
-    this.bus.emit('credits:changed', { id, crediti: next, delta: amount });
-    return true;
+    if (this.mirror || !validWandererId(id) || !Number.isFinite(amount) || amount <= 0 || this.isAnonymous(id)) return false;
+    try {
+      const next = this.ledger.credit(id, amount);
+      this.bus.emit('credits:changed', { id, crediti: next, delta: amount });
+      return true;
+    } catch (e) {
+      this.log('crediti', `accredito non riuscito: ${(e as Error).message}`);
+      return false;
+    }
   }
 
   /**
-   * Applies an idempotent credit recharge from Stripe (T45e).
+   * The master gives credits by hand (ADR-0104): to a wanderer the world knows, within the day's cap of this universe, written down
+   * with who gave them. On the master's client this asks the server (`ThinClient`).
+   */
+  async grantCredits(id: string, amount: number, by: string = this.wanderer().id): Promise<{ ok: boolean; motivo?: string }> {
+    if (this.mirror) return { ok: false, motivo: 'i crediti li dà solo il server' };
+    if (!this.manyPlayers() || !this.isMaster(by)) return { ok: false, motivo: 'i crediti li dà solo il master, in multigiocatore' };
+    if (!Number.isFinite(amount) || amount <= 0) return { ok: false, motivo: 'importo non valido' };
+    if (!validWandererId(id) || !(this.wanderersById.has(id) || readWandererState(this.files, id))) return { ok: false, motivo: 'viandante sconosciuto' };
+    if (this.isAnonymous(id)) return { ok: false, motivo: 'un anonimo non riceve crediti' };
+    try {
+      const over = this.ledger.grant(by, id, amount, this.grantCap, Date.now());
+      if (over) return { ok: false, motivo: `oltre il tetto delle ricariche a mano di oggi: restano ${over.left} crediti` };
+    } catch (e) {
+      return { ok: false, motivo: (e as Error).message };
+    }
+    this.bus.emit('credits:changed', { id, crediti: this.creditsOf(id), delta: amount });
+    this.council.say('kernel', 'info', `${by} dà ${amount} crediti a ${id}.`);
+    return { ok: true };
+  }
+
+  /**
+   * Applies a credit recharge from Stripe (T45e), once for each event (`Ledger.pay`).
    * Refuses anonymous wanderers and already processed events.
    */
   creditRecharge(payment: PaymentRecord): { ok: boolean; motivo?: string; duplica?: boolean } {
     if (!payment.eventId) return { ok: false, motivo: 'manca eventId' };
-    if (isPaymentProcessed(this.files, payment.eventId)) {
-      return { ok: true, duplica: true };
-    }
-    if (this.isAnonymous(payment.wandererId)) {
-      return { ok: false, motivo: 'un anonimo non compra crediti' };
-    }
-    const credited = this.giveCredits(payment.wandererId, payment.crediti);
-    if (!credited) return { ok: false, motivo: 'impossibile accreditare' };
-    recordPayment(this.files, payment);
-    this.repo.write(PAYMENTS_FILE, this.files[PAYMENTS_FILE]);
+    if (this.ledger.payment(payment.eventId)) return { ok: true, duplica: true };
+    if (this.isAnonymous(payment.wandererId)) return { ok: false, motivo: 'un anonimo non compra crediti' };
+    if (!validWandererId(payment.wandererId)) return { ok: false, motivo: 'impossibile accreditare' };
+    if (!this.ledger.pay(payment)) return { ok: true, duplica: true };
+    this.bus.emit('credits:changed', { id: payment.wandererId, crediti: this.creditsOf(payment.wandererId), delta: payment.crediti });
     this.bus.emit('payment:received', payment);
     return { ok: true };
   }
 
-  /** Sets a wanderer's credit balance directly (T45a). Returns false for anonymous wanderers. */
+  /** What a mirror shows of its own balance: what the server said (T45a). Elsewhere nothing sets a balance. */
   setCredits(id: string, amount: number): boolean {
-    if (!validWandererId(id) || !Number.isFinite(amount) || amount < 0) return false;
-    if (this.isAnonymous(id)) return false;
-    const next = Math.round(amount * 1e6) / 1e6;
-    const entry = this.wanderersById.get(id);
-    if (entry) entry.crediti = next;
-    // A mirror only shows what the server says: the player file is the server's, never a commit of the master's branch.
-    if (!this.mirror) {
-      const file = playerFile(id);
-      const saved = readWandererState(this.files, id) ?? { nome: entry?.nome ?? id };
-      saved.crediti = next;
-      const text = JSON.stringify(saved, null, 1) + '\n';
-      this.files[file] = text;
-      this.repo.write(file, text);
-    }
-    this.bus.emit('credits:changed', { id, crediti: next });
+    if (!this.mirror || !validWandererId(id) || !Number.isFinite(amount) || amount < 0) return false;
+    const now = this.ledger.balance(id);
+    if (amount > now) this.ledger.credit(id, amount - now);
+    else if (amount < now) this.ledger.charge(id, now - amount);
+    this.bus.emit('credits:changed', { id, crediti: amount });
     return true;
   }
 
   /** Deducts credits from a wanderer (T45a), clamping to 0. Tracks session spending against tetto (T45d). */
   deductCredits(id: string, amount: number): number {
     if (amount <= 0) return this.creditsOf(id);
-    const entry = this.wanderersById.get(id);
-    const cur = entry?.crediti ?? readWandererState(this.files, id)?.crediti ?? 0;
-    const next = Math.max(0, Math.round((cur - amount) * 1e6) / 1e6);
-    if (entry) entry.crediti = next;
+    const { before: cur, after: next } = this.ledger.charge(id, amount);
     const spentBefore = this.sessionSpent.get(id) ?? 0;
     const spentAfter = Math.round((spentBefore + amount) * 1e6) / 1e6;
     this.sessionSpent.set(id, spentAfter);
-    const file = playerFile(id);
-    const saved = readWandererState(this.files, id) ?? { nome: entry?.nome ?? id };
-    saved.crediti = next;
-    const text = JSON.stringify(saved, null, 1) + '\n';
-    this.files[file] = text;
-    this.repo.write(file, text);
     this.bus.emit('credits:changed', { id, crediti: next, delta: -amount });
     const tetto = this.sessionTetto.get(id);
     if (tetto !== undefined && spentBefore < tetto && spentAfter >= tetto) {
@@ -4880,6 +4863,15 @@ export class Kernel {
    */
   billCall(r: CallRecord): void {
     if (!this.manyPlayers() || this.mirror) return;
+    try {
+      this.charge(r);
+    } catch (e) {
+      // The floor (rule 7): an archive that does not answer does not stop the world.
+      this.log('crediti', `addebito non riuscito: ${(e as Error).message}`);
+    }
+  }
+
+  private charge(r: CallRecord): void {
     const usd = costOf(r.model, { prompt: r.prompt, cached: r.cached, output: r.output, thoughts: r.thoughts }, r.day) ?? 0;
     if (usd <= 0) return;
     const total = costWithFee(usd);
@@ -7024,7 +7016,6 @@ export class Kernel {
       stati: this.states(),
       slots: this.slots(),
       ...(w.id === SOLO ? { trasceso: this.exitedOnce } : {}),
-      ...(entry?.crediti !== undefined ? { crediti: entry.crediti } : {}),
       ...(entry?.anonimo ? { anonimo: true } : {}),
     };
   }
@@ -7041,14 +7032,6 @@ export class Kernel {
     if (v.hand?.tokens) Object.assign(this.hand(), v.hand);
     if (v.stati) this.ecs.set(this.playerId, 'stati', Object.fromEntries(Object.entries(v.stati).filter(([, x]) => x && typeof x === 'object')));
     if (v.slots && typeof v.slots === 'object') this.ecs.set(this.playerId, 'slots', v.slots);
-    const entry = this.wanderersById.get(this.wanderer().id);
-    if (entry) {
-      if (entry.anonimo) {
-        entry.crediti = 0;
-      } else if (typeof v.crediti === 'number') {
-        entry.crediti = v.crediti;
-      }
-    }
     // What the mechanics derive from the slots (defence, states) is rebuilt by their own on_slot.
     for (const p of this.uiPanels()) {
       const filled = Object.entries(this.slots()[p.panel.id] ?? {}).find(([, x]) => x);

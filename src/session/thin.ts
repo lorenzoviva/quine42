@@ -547,6 +547,7 @@ export class ThinClient {
     this.relayCarried();
     if (this.session.master) {
       k.rollback = (id?: string) => this.rollbackBranch(id);
+      k.grantCredits = (id, amount) => this.session.act({ t: 'ricarica', viandante: id, quanti: amount }).then((r) => ({ ok: r.ok, ...(r.motivo ? { motivo: r.motivo } : {}) }));
       // The Referente and the teams of the corona work on the server, on the master's branch (T42e).
       k.talkToAgent = async (agent, text) => {
         const r = await this.session.act({ t: 'agente', agente: agent, testo: text });

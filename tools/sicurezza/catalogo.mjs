@@ -15,8 +15,10 @@ const MASTER = { ...J, 'X-Quine-Viandante': 'io' };
 /** From outside this machine, as a tunnel or a reverse proxy says it: the kit itself never leaves the loopback. */
 const OUTSIDE = { 'X-Forwarded-For': '203.0.113.7' };
 
-/** A credit on the disk, wherever it is. */
+/** A balance on the disk: in the universe's ledger (ADR-0104), or, until the server has met the universe, in the file it comes from. */
 const saldo = (ctx, uni, id = 'altro') => {
+  const book = path.join(path.dirname(ctx.uni(uni)), '.saldi', `${uni}.json`);
+  if (existsSync(book)) return Number(JSON.parse(readFileSync(book, 'utf8')).saldi?.[id] ?? 0);
   const f = path.join(ctx.uni(uni), 'world', 'giocatori', `${id}.json`);
   return existsSync(f) ? Number(JSON.parse(readFileSync(f, 'utf8')).crediti ?? 0) : undefined;
 };
@@ -308,8 +310,9 @@ export const PROBES = [
     proprieta: 'il nome dell’universo nei metadati non porta fuori da universes/',
     async run(ctx) {
       const r = await hook(ctx, paid('evt_c', '../fuori', 'altro', 1));
-      // `fuori` is born with the wanderer's file: what a credit would leave there is the payments' file.
-      return { ok: !existsSync(path.join(ctx.work, 'fuori', 'world', 'pagamenti.json')), dettaglio: `risposta ${r.status}` };
+      // What a credit would leave out there: the payments' file of before, or the ledger next to the universes.
+      const left = [path.join(ctx.work, 'fuori', 'world', 'pagamenti.json'), path.join(ctx.work, 'fuori.json'), path.join(ctx.work, 'universes', 'fuori.json')].filter(existsSync);
+      return { ok: !left.length && r.status === 400, dettaglio: `risposta ${r.status}` };
     },
   },
   {
@@ -355,8 +358,10 @@ export const PROBES = [
     proprieta: 'saldi e pagamenti non stanno nella storia dell’universo',
     async run(ctx) {
       const u = ctx.uni('sonda-doppio');
-      const tracked = lines(ctx.git(u, ['ls-files', '--', 'world/pagamenti.json', 'world/giocatori/altro.json']));
-      return { ok: !tracked.length, dettaglio: `${tracked.length} file nel repository dell’universo` };
+      // The wanderer's file stays (inventory, needs): it no longer says a balance, and the payments have no file.
+      const tracked = lines(ctx.git(u, ['ls-files', '--', 'world/pagamenti.json']));
+      const said = ctx.git(u, ['show', 'HEAD:world/giocatori/altro.json']).includes('crediti');
+      return { ok: !tracked.length && !said, dettaglio: `file dei pagamenti nel repository: ${tracked.length}, saldo nel file del viandante: ${said}` };
     },
   },
   {

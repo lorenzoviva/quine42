@@ -9,6 +9,7 @@ import { memoryStore } from '../kernel/repo';
 import { MockModels } from '../kernel/ai/mock';
 import { GeminiModels } from '../kernel/ai/gemini';
 import type { Models } from '../kernel/ai/models';
+import type { Ledger } from '../kernel/credits';
 import { readConfig } from '../kernel/universe';
 import { INTERNAL_HEADER, UniverseChunks, UniverseClient, upgradeFromSeed } from '../kernel/universes';
 import { BRANCH, SessionServer } from './server';
@@ -29,7 +30,7 @@ export interface UniverseHost {
  * route); `gemini` is the `fetch` that spends the key, which stays in the server: without it, the local models. A universe that does not exist, or is a game alone, is not opened: alone the
  * kernel stays in the browser.
  */
-export async function openUniverse(opts: { name: string; base: string; offline?: boolean; gemini?: typeof fetch; verify?: Verifier; masterUid?: string; internal?: string }): Promise<UniverseHost | { error: string }> {
+export async function openUniverse(opts: { name: string; base: string; offline?: boolean; gemini?: typeof fetch; verify?: Verifier; masterUid?: string; internal?: string; ledger?: Ledger; grantCap?: number }): Promise<UniverseHost | { error: string }> {
   // The world reads and writes its universe whole: the store knows it by a secret of this process (T120, ADR-0102).
   const client = await UniverseClient.connect(opts.name, opts.base, opts.internal ? { [INTERNAL_HEADER]: opts.internal } : {});
   if (!client) return { error: 'nessun archivio degli universi' };
@@ -42,7 +43,7 @@ export async function openUniverse(opts: { name: string; base: string; offline?:
   const models: Models = !opts.offline && opts.gemini
     ? new GeminiModels({ fetchImpl: opts.gemini, textModel: ai.textModel, limits: { text: ai.maxText }, thinking: ai.thinking, timeout: (ai.timeout ?? 120) * 1000 })
     : new MockModels();
-  const kernel = await Kernel.boot({ files: up.files, store: memoryStore(), models, chunks: new UniverseChunks(client), backend: client, past: snap.log ?? [] });
+  const kernel = await Kernel.boot({ files: up.files, store: memoryStore(), models, chunks: new UniverseChunks(client), backend: client, past: snap.log ?? [], ledger: opts.ledger, grantCap: opts.grantCap });
   const session = new SessionServer(kernel, { verify: opts.verify, masterUid: opts.masterUid });
   // The master's branch waits on disk while the server is down (T42b).
   const branch = await client.readBranch(BRANCH).catch(() => null);

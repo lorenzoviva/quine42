@@ -140,7 +140,9 @@ export type ClientMsg =
   /** The master follows a player (T42c): what is sent is what is around them; without `id`, around the master again. */
   | { t: 'segui'; seq: number; id?: string }
   /** The master talks to an agent of the Council in the corona (T42e): what it makes goes on their branch. */
-  | { t: 'agente'; seq: number; agente: string; testo: string };
+  | { t: 'agente'; seq: number; agente: string; testo: string }
+  /** The master gives credits by hand (ADR-0104), within the day's cap. */
+  | { t: 'ricarica'; seq: number; viandante: string; quanti: number };
 
 /** Files changed: their new text, or null when they are gone. */
 export type FileChanges = Record<string, string | null>;
