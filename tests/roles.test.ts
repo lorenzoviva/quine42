@@ -24,7 +24,7 @@ const run = (k: Kernel, seconds: number) => {
 
 const giveRunes = (k: Kernel, tokens: string[]) => tokens.forEach((t) => k.give(`rune:${t}`, 1));
 
-/** Moves the acting wanderer next to a run of free cells, facing right (as in kernel.test.ts). */
+/** Moves the acting wanderer next to a run of free cells, facing right (as in world.ts). */
 function clearArea(k: Kernel, width = 24) {
   const { ox, oy } = k.offset();
   const free = (c: number, r: number) => (k as any).freeCell(c, r) && !k.runeCells.has(`${c},${r}`) && k.tileAt(c, r) !== undefined && !k.buildingAt(c + 0.5, r + 0.5);

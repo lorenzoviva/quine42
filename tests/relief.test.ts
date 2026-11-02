@@ -1,12 +1,15 @@
 // The relief of the simulation (ADR-0048): MarkovJunior's `Hills` read as two repeating heightmaps,
 // deterministic, without seams, never a step a body cannot climb; the kernel stands bodies on it.
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockModels } from '../src/kernel/ai/mock';
 import { chunkLevels, LEVEL, mend, Relief, RELIEF_PATH, SEA_SHARE, waterLevels, worldLevels, type WaterChunk } from '../src/kernel/relief';
+
+// The real program every time: this file proves what the memo of the tests (tests/setup/relief-memo.ts) takes for granted.
+vi.unmock('../src/kernel/relief');
 
 describe('relief', () => {
   const r = new Relief(12345);

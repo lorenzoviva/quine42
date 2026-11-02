@@ -47,3 +47,7 @@ stesso processo e rifacevano lo stesso lavoro. Nel browser le forme le fanno i w
 - Tra universi dello stesso processo si può capire dal tempo se un programma con un seme è già stato eseguito da un altro. Si scopre solo che quel testo esiste, e per provarlo bisogna già averlo: lo accettiamo.
 - Un universo può riempire la cache: gli altri perdono al più i risultati e li ricalcolano. È un rallentamento limitato dal tetto, non una scrittura sul loro mondo.
 - Resta fuori: `WorkerRunner` nel browser tiene ancora in memoria e in IndexedDB anche i risultati scaduti, e la sua chiave usa ancora `hashStr`. È una cache della sola macchina del giocatore, per un solo universo alla volta: non è toccata qui.
+
+## Aggiunta (T160)
+
+Stessa regola per il rilievo, che T161 non copriva: `Hills` gira due volte per ogni kernel, circa 400 ms di ogni boot. `tests/setup/relief-memo.ts`, da `setupFiles`, lo tiene in memoria e su disco (`node_modules/.cache/quine-relief/`) per seme e programma, solo nei test e sostituendo il modulo con `vi.mock`, senza toccare il gioco; un giro lento (da 2 s, la scadenza è 4 s) non si tiene, perché può essersi fermato a metà. `tests/relief.test.ts` e `tests/determinism.test.ts` fanno `vi.unmock`: provano ciò che la memoria dà per scontato. Nel gioco e sul server il rilievo si ricalcola per kernel: una cache del processo sarebbe la stessa cosa fatta per loro, ma va decisa a parte.

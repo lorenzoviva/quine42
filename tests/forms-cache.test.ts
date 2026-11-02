@@ -19,15 +19,17 @@ const fresh = () => {
   const cache = new FormCache();
   return { cache, runner: new InlineRunner(cache) };
 };
+// On whole forms and grids `toEqual`, and `not.toBe` too (it looks for a hint), walk millions of cells inside vitest: seconds each.
+const sameCells = (a: Uint8Array, b: Uint8Array) => Buffer.compare(a, b) === 0;
 /** Many steps on a big box: longer than a millisecond on any machine. */
 const SLOW = '<one values="BW" size="60 60 60"><rule in="B" out="W"/></one>';
 
 describe('two kernels of a process', () => {
   it('have forms of their own and the same result, without being told', async () => {
     const [a, b] = [await boot(), await boot()];
-    expect(a.forms).not.toBe(b.forms);
+    expect(a.forms === b.forms).toBe(false);
     const [fa, fb] = [(await a.forms.wait('corona-drone', 1))!, (await b.forms.wait('corona-drone', 1))!];
-    expect(fa).not.toBe(fb);
+    expect(fa === fb).toBe(false);
     expect(fa.result).toBe(fb.result);
     expect(sharedForms.size).toBeGreaterThan(0);
   });
@@ -163,13 +165,13 @@ describe('a shared result', () => {
     (k as any).groundOf(id, fc, f);
     const opened = instanceGrid(k.forms, f, ['apri']);
     expect(opened.cells.some((c, i) => c !== before[i]), 'the action changes the instance').toBe(true);
-    expect(opened.cells.buffer).not.toBe(shared.grid.cells.buffer);
-    expect(shared.grid.cells).toEqual(before);
-    expect(shared.grid.cells).toEqual(runForm(k.forms.request('fattoria', 1)!).grid.cells);
+    expect(opened.cells.buffer === shared.grid.cells.buffer).toBe(false);
+    expect(sameCells(shared.grid.cells, before)).toBe(true);
+    expect(sameCells(shared.grid.cells, runForm(k.forms.request('fattoria', 1)!).grid.cells)).toBe(true);
     // And a kernel that comes after sees the door closed.
     const other = (await (await boot()).forms.wait('fattoria', 1))!;
     expect(other.result).toBe(shared);
-    expect(other.result!.grid.cells).toEqual(before);
+    expect(sameCells(other.result!.grid.cells, before)).toBe(true);
   }, 120_000);
 
   it('gives two Forms their own collision', async () => {
