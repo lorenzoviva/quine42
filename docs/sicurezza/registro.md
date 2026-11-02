@@ -89,13 +89,14 @@ Modello di una voce:
 
 ### V-007 · Il blocco del tick ferma tutti
 - Gravità: alta
-- Stato: `in correzione`
-- Superficie: `src/kernel/prelude.lua`, `src/session/host.ts`, le funzioni C di `string.*`, i programmi MarkovJunior sul server (`src/kernel/validator.ts`)
+- Stato: `chiusa`
+- Superficie: `src/kernel/prelude.lua`, `src/session/host.ts`, `server/worldHost.ts`, le funzioni C di `string.*`, i programmi MarkovJunior sul server (`src/kernel/validator.ts`)
 - Proprietà violata: il codice del mondo non ferma il processo: né gli altri mondi né l'HTTP. Prima di T126 il budget contava istruzioni VM per chiamata, non il lavoro nelle funzioni C, non il tick, non la memoria
-- Prova: test (`string.rep`, ciclo infinito, nella suite); T117 ha provato una volta, in un file poi cancellato, che un solo pattern di `string.find` blocca il processo oltre 60 s; misurata dal kit (`esiti/2026-11-01.json`): V-007.a processo ucciso dopo 25 s, V-007.b nessun guasto, V-007.c un mondo bloccato ferma tutto l'HTTP del server. Dopo T126 (`esiti/2026-11-01-dopo-T126.json`, T146, kit invariato): V-007.a finisce in 41 ms con un guasto, V-007.b in 1 ms con un guasto, V-007.c 2 risposte HTTP su 2 con quel mondo acceso. Il kit prova il pattern che bloccava, ora fermato dal budget: non misura i blocchi che restano, che sono di T127
-- Contromisura: `string.*` con limiti di lunghezza e di pattern, limite di memoria della VM, budget per tick, scatole e tempo limitati per i MarkovJunior (T126, fatto, ADR-0105: restano un blocco di qualche secondo per chiamata, la memoria dal lato JS e i modelli fino a `MAX_FORM_TIME`); ogni mondo in un worker o processo senza segreti, con limite di memoria e un sorvegliante che lo riavvia dall'ultimo stato valido (T127).
+- Prova: test (`string.rep`, ciclo infinito, nella suite); T117 ha provato una volta, in un file poi cancellato, che un solo pattern di `string.find` blocca il processo oltre 60 s; misurata dal kit (`esiti/2026-11-01.json`): V-007.a processo ucciso dopo 25 s, V-007.b nessun guasto, V-007.c un mondo bloccato ferma tutto l'HTTP del server. Dopo T126 (`esiti/2026-11-01-dopo-T126.json`, T146, kit invariato): V-007.a finisce in 41 ms con un guasto, V-007.b in 1 ms con un guasto, V-007.c 2 risposte HTTP su 2 con quel mondo acceso. Il kit prova il pattern che bloccava, ora fermato dal budget: non misura i blocchi che restano, che sono di T127. Dopo T127: test con il programma vero (`mondo.test.ts`): bloccato, l'HTTP e l'altro mondo rispondono, ucciso e ripartito, chi era dentro rientra; oltre il limite di memoria muore lui solo; lettura accanto a `node_modules` e scrittura nell'universo: `ERR_ACCESS_DENIED`. Kit `--solo V-001,V-002,V-005,V-007` (`esiti/2026-11-02-dopo-T127.json`): 23 ok
+- Contromisura: `string.*` con limiti di lunghezza e di pattern, limite di memoria della VM, budget per tick, scatole e tempo limitati per i MarkovJunior (T126, fatto, ADR-0105: restano un blocco di qualche secondo per chiamata, la memoria dal lato JS e i modelli fino a `MAX_FORM_TIME`); ogni mondo in un worker o processo senza segreti, con limite di memoria e un sorvegliante che lo riavvia dall'ultimo stato valido (T127, fatto, ADR-0107, con ciò che resta: la rete del processo su Node 22, la memoria fuori dallo heap, un mondo lento ma vivo).
 - Task: T126, T127
-- Test: `tests/sicurezza/sandbox.test.ts`
+- Test: `tests/sicurezza/sandbox.test.ts`, `tests/sicurezza/mondo.test.ts`
+- Esito: chiusa da T126 e T127 (ADR-0105, ADR-0107), 02/11/2026, branch `task/T127`: un mondo bloccato o oltre la memoria ferma solo sé stesso, viene ucciso e riparte. Restano, accettati nell'ADR: la rete del processo su Node 22, la memoria fuori dallo heap, un mondo lento ma vivo, il volume del canale
 
 ### V-008 · La prova di caricamento gira nella sandbox viva, e le funzioni Lua passate all'`Host`
 - Gravità: alta
@@ -235,7 +236,7 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-004 | a b c d e | — | `rotte.test.ts` | — |
 | V-005 | a b c | — | `saldi.test.ts` | — |
 | V-006 | a b c d e f | g | `rotte.test.ts` | `offline` e `tetto` decisi dal client non si vedono da fuori: T120 |
-| V-007 | a b c | — | `sandbox.test.ts` | il mondo isolato e il sorvegliante: T127 |
+| V-007 | a b c | — | `sandbox.test.ts`, `mondo.test.ts` | il blocco vero di un mondo, il limite di memoria e i permessi: un mondo di prova nei test (il kit misura l'HTTP) |
 | V-008 | a b | — | `uscita.test.ts`, `sandbox.test.ts` | — |
 | V-009 | a b | — | `rotte.test.ts` | gli argomenti delle CLI, che non si lanciano: T128 |
 | V-010 | a b | — | `saldi.test.ts` | — |
@@ -247,7 +248,7 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-016 | a b c | d e | — | — |
 | V-017 | a | — | `uscita.test.ts`, `sandbox.test.ts` | — |
 | V-018 | — | — | — | accettata: non si prova |
-| V-019 | a b c | — | `uscita.test.ts`, `sandbox.test.ts` | un difetto di wasm o di Lua stesso: T127 |
+| V-019 | a b c | — | `uscita.test.ts`, `sandbox.test.ts` | un difetto di wasm o di Lua stesso: non si prova; ciò che raggiungerebbe lo limita il processo del mondo (T127, ADR-0107, `mondo.test.ts`) |
 
 ## Ciò che nessuna voce copre ancora
 

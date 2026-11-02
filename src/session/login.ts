@@ -9,6 +9,8 @@ import { el } from '../ui/dom';
 export interface SignedIn {
   /** The ID token to send with `entra`. */
   token: string;
+  /** A token good now, for coming in again when the world has started again (T127). */
+  freshToken(): Promise<string>;
   uid: string;
   anonimo: boolean;
   /** Links an anonymous account to Google: same uid, so the same wanderer (the page enters again). */
@@ -75,6 +77,7 @@ export async function signIn(config: AccountConfig, choose: ChooseHow = chooseHo
   return {
     // A fresh token: one about to expire would not last the way in, and it says the account as it is now (linked or not).
     token: await u.getIdToken(true),
+    freshToken: () => u.getIdToken(),
     uid: u.uid,
     anonimo: u.isAnonymous,
     async linkGoogle() {

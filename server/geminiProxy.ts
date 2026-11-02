@@ -1,7 +1,7 @@
 // The only place that spends GEMINI_API_KEY (T123, ADR-0099). Everything passes through a GeminiGate: models on a list,
 // a limited body, a daily cap in dollars. Two doors: the route /api/gemini, for the kernel in the browser of whoever
 // plays alone on this machine (loopback only, same origin), and `direct()`, for the worlds of many, which run in
-// this process and need no route at all. The key never reaches the client bundle or the browser.
+// a process of their own and ask this one over their channel (ADR-0107), with no route at all. The key never reaches the client bundle or the browser.
 
 import fs from 'node:fs';
 import path from 'node:path';

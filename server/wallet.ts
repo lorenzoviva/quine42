@@ -1,7 +1,7 @@
 // Dev server: the wallet as the site sees it (T105, ADR-0095). GET /api/crediti?universo=<nome> says a wanderer's balance,
 // the top-ups credited to them (the ledger, ADR-0104) and what they spent day by day (`world/consumi.json → paganti`).
 // Only their own lines: those records hold everybody's, so they never go to the page as they are. Who asks comes from the
-// account's token, as in /api/viandante (`whoAsks`). The world running in this process is asked first, then the files on disk.
+// account's token, as in /api/viandante (`whoAsks`). The running world is asked first, then the files on disk.
 
 import type { Connect, Plugin } from 'vite';
 import path from 'node:path';
@@ -136,8 +136,8 @@ export function walletHandler(opts: WandererRouteOptions): Connect.NextHandleFun
         if (!UNIVERSE_NAME_RE.test(universo)) return send(res, 400, { ok: false, motivo: 'universo non valido' });
         const who = await whoAsks(opts.accounts, bearer(req), params.get('viandante'));
         if ('error' in who) return send(res, who.status, { ok: false, motivo: who.error });
-        const active = await opts.getActiveKernel?.(universo);
-        if (active) return send(res, 200, { ok: true, portafoglio: walletFromKernel(active, universo, who.id, who.account) });
+        const active = await opts.getActiveWorld?.(universo);
+        if (active) return send(res, 200, { ok: true, portafoglio: await active.wallet(universo, who.id, who.account) });
         const root = path.join(opts.universesDir, universo);
         try {
           await fs.stat(path.join(root, '.git'));

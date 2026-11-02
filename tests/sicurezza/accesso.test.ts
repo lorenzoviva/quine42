@@ -7,6 +7,7 @@ import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { AccountSettings } from '../../server/account';
 import { activeHosts, admitSocket, sessionServer } from '../../server/session';
+import { worldToken } from '../../server/access';
 import { ledgerOf } from '../../server/ledger';
 import { universeStore } from '../../server/universeStore';
 import { walletRoute } from '../../server/wallet';
@@ -131,15 +132,20 @@ describe('V-001 chi scrive su un universo in multigiocatore', () => {
   it('V-001 il master scrive il Lua e il mondo del server anche, ma i saldi solo il mondo', async () => {
     expect((await asked(local.base, 'POST', 'fatto/commit', commitLua('master'), { [WANDERER_HEADER]: 'io' })).status).toBe(200);
     expect(logicOf('fatto')).toContain('master');
-    expect((await asked(local.base, 'POST', 'fatto/commit', commitLua('mondo'), { [INTERNAL_HEADER]: INTERNAL })).status).toBe(200);
+    expect((await asked(local.base, 'POST', 'fatto/commit', commitLua('mondo'), { [INTERNAL_HEADER]: worldToken(INTERNAL, 'fatto') })).status).toBe(200);
     expect(logicOf('fatto')).toContain('mondo');
     const saldo = { changes: { 'world/giocatori/altro.json': JSON.stringify({ nome: 'Altro', crediti: 999 }) }, message: 'x' };
     expect((await asked(local.base, 'POST', 'fatto/commit', saldo, { [WANDERER_HEADER]: 'io' })).status).toBe(403);
     expect(saldoOf('fatto')).toBe(5);
     // Not even the world's commit makes a balance: a file is not where they are (ADR-0104).
-    expect((await asked(local.base, 'POST', 'fatto/commit', saldo, { [INTERNAL_HEADER]: INTERNAL })).status).toBe(200);
+    expect((await asked(local.base, 'POST', 'fatto/commit', saldo, { [INTERNAL_HEADER]: worldToken(INTERNAL, 'fatto') })).status).toBe(200);
     expect(saldoOf('fatto')).toBe(5);
     expect((await asked(local.base, 'POST', 'fatto/commit', commitLua('falso'), { [INTERNAL_HEADER]: 'un-altro-segreto' })).status).toBe(403);
+    // A world's token opens its universe, not another's; the secret it is made from is not a token; and a world does not clone (ADR-0107).
+    expect((await asked(local.base, 'POST', 'fatto/commit', commitLua('altrui'), { [INTERNAL_HEADER]: worldToken(INTERNAL, 'molti') })).status).toBe(403);
+    expect((await asked(local.base, 'POST', 'fatto/commit', commitLua('segreto'), { [INTERNAL_HEADER]: INTERNAL })).status).toBe(403);
+    expect((await asked(local.base, 'POST', 'fatto/clone', { nome: 'clone-del-mondo', master: 'io' }, { [INTERNAL_HEADER]: worldToken(INTERNAL, 'fatto') })).status).toBe(403);
+    expect(existsSync(at('clone-del-mondo'))).toBe(false);
   });
 
   it('V-001 con gli account il master è chi lo prova, anche il master `io` di prima degli account', async () => {
@@ -210,7 +216,7 @@ describe('V-001 chi legge', () => {
   });
 
   it('V-001 il master e il mondo leggono tutto', async () => {
-    for (const headers of [{ [WANDERER_HEADER]: 'io' }, { [INTERNAL_HEADER]: INTERNAL }] as Array<Record<string, string>>) {
+    for (const headers of [{ [WANDERER_HEADER]: 'io' }, { [INTERNAL_HEADER]: worldToken(INTERNAL, 'molti') }] as Array<Record<string, string>>) {
       const snap = (await (await asked(local.base, 'GET', 'molti', undefined, headers)).json()) as { files: Record<string, string>; log?: unknown[] };
       for (const p of SECRETS) expect(snap.files[p], p).toBeDefined();
       expect(snap.log?.length).toBeGreaterThan(0);
@@ -331,7 +337,7 @@ describe('V-006 la sessione', () => {
 
   it('V-006 GET /api/session non elenca i viandanti', async () => {
     const route = await serve({ configureServer: (s: object) => (sessionServer().configureServer as unknown as (x: unknown) => void)({ ...s }) });
-    activeHosts.set('elenco', Promise.resolve({ name: 'elenco', stop() {}, session: { connect() {}, kernel: {} as Kernel, clientCount: 1, connected: () => ['sonda-elenco'] } }));
+    activeHosts.set('elenco', Promise.resolve({ name: 'elenco', stop() {}, session: { connect() {}, clientCount: 1, connected: () => ['sonda-elenco'] } }));
     try {
       const r = await fetch(`${route.base}/api/session`);
       const text = await r.text();

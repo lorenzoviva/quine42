@@ -141,6 +141,16 @@ export class ThinClient {
 
   private receive(m: ServerMsg): void {
     switch (m.t) {
+      case 'mondo':
+        // Not an error (T127): the wanderer stays connected and comes back in by themselves.
+        this.k.message(m.testo, m.stato === 'ripreso' ? 'info' : 'warn');
+        break;
+      case 'ingresso':
+        this.again(m.files);
+        break;
+      case 'rifiuto':
+        this.k.message(m.motivo, 'warn');
+        break;
       case 'aggiorna':
         this.places(m.luoghi ?? []);
         this.things(m.cose ?? []);
@@ -178,6 +188,40 @@ export class ThinClient {
         this.lastStep = { x: m.x, y: m.y, t: this.clock };
         break;
     }
+  }
+
+  /**
+   * A second way in: the world started again (T127). Its entities are new and it may have gone back to an older commit, so what the mirror
+   * holds of the old one goes and everything is taken again from what it told, as the first time.
+   */
+  private again(files: FileMap): void {
+    const k = this.k;
+    const s = this.session;
+    for (const e of [...this.local.values(), ...this.others.values()]) k.ecs.destroy(e);
+    this.local.clear();
+    this.server.clear();
+    this.others.clear();
+    this.targets.clear();
+    this.hidden.clear();
+    this.recheck.clear();
+    this.pending = 0;
+    this.adopt = false;
+    this.lastCorrection = 0;
+    const changed: FileChanges = {};
+    for (const [p, v] of Object.entries(files)) if (this.main[p] !== v) changed[p] = v;
+    for (const p of Object.keys(this.main)) if (files[p] === undefined) changed[p] = null;
+    if (Object.keys(changed).length) this.worldFiles(changed);
+    this.places([...s.places.values()]);
+    this.things([...s.things.values()]);
+    for (const o of s.others.values()) this.other(o);
+    if (s.me) {
+      this.putMe(s.me.x, s.me.y);
+      this.lastStep = { x: s.me.x, y: s.me.y, t: this.clock };
+    }
+    this.state();
+    this.told = [...(s.stato.hand?.tokens ?? [])];
+    Object.assign(k.hand(), { tokens: [...this.told], sel: 0 });
+    if (s.master) k.connected = [...s.players];
   }
 
   /** The players connected (the master's, T42c); the one followed has left: the view comes back to the master. */

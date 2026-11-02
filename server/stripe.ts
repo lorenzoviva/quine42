@@ -11,9 +11,9 @@ import path from 'node:path';
 import { promises as fs } from 'node:fs';
 import type { AccountSettings } from './account';
 import { openLedger } from './ledger';
+import type { WorldCalls } from './worldCalls';
 import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
 import { accountWanderer } from '../src/session/account';
-import type { Kernel } from '../src/kernel/kernel';
 import type { PaymentRecord } from '../src/kernel/credits';
 import { playerFile, readWandererState, validWandererId, type WandererState } from '../src/kernel/wanderers';
 
@@ -205,12 +205,12 @@ export async function applyPaymentToUniverse(opts: {
   universesDir: string;
   universo: string;
   payment: PaymentRecord;
-  getActiveKernel?: (universe: string) => Promise<Kernel | undefined>;
+  getActiveWorld?: (universe: string) => Promise<WorldCalls | undefined>;
 }): Promise<{ ok: boolean; status: 'credited' | 'duplicate' | 'anonymous' | 'error'; motivo?: string }> {
   // 1. Try active running kernel in memory first
-  const activeKernel = await opts.getActiveKernel?.(opts.universo);
-  if (activeKernel) {
-    const res = activeKernel.creditRecharge(opts.payment);
+  const active = await opts.getActiveWorld?.(opts.universo);
+  if (active) {
+    const res = await active.creditRecharge(opts.payment);
     if (res.duplica) return { ok: true, status: 'duplicate' };
     if (!res.ok) {
       const isAnon = res.motivo === 'un anonimo non compra crediti';
@@ -247,7 +247,7 @@ export interface StripeRouteOptions {
   settings: StripeSettings;
   accounts?: AccountSettings;
   universesDir: string;
-  getActiveKernel?: (universe: string) => Promise<Kernel | undefined>;
+  getActiveWorld?: (universe: string) => Promise<WorldCalls | undefined>;
 }
 
 /** Handles incoming Stripe webhooks directly (can also be invoked from tests). */
@@ -256,7 +256,7 @@ export async function handleStripeWebhookEvent(opts: {
   signature?: string;
   settings: StripeSettings;
   universesDir: string;
-  getActiveKernel?: (universe: string) => Promise<Kernel | undefined>;
+  getActiveWorld?: (universe: string) => Promise<WorldCalls | undefined>;
 }): Promise<{ status: number; body: unknown }> {
   // Without the secret nothing can be verified, so nothing is believed (T124)
   if (!opts.settings.webhookSecret) {
@@ -325,7 +325,7 @@ export async function handleStripeWebhookEvent(opts: {
     universesDir: opts.universesDir,
     universo,
     payment,
-    getActiveKernel: opts.getActiveKernel,
+    getActiveWorld: opts.getActiveWorld,
   });
 
   if (result.status === 'anonymous') {
@@ -393,8 +393,8 @@ export function stripeHandler(opts: StripeRouteOptions): Connect.NextHandleFunct
           }
         } else {
           // Check if wanderer is marked as anonymous in running kernel or on disk
-          const active = await opts.getActiveKernel?.(universo);
-          if (active?.isAnonymous(wandererId)) {
+          const active = await opts.getActiveWorld?.(universo);
+          if (await active?.isAnonymous(wandererId)) {
             return send(res, 403, { ok: false, motivo: 'Gli anonimi non possono acquistare crediti.' });
           }
         }
@@ -435,7 +435,7 @@ export function stripeHandler(opts: StripeRouteOptions): Connect.NextHandleFunct
           signature,
           settings: opts.settings,
           universesDir: opts.universesDir,
-          getActiveKernel: opts.getActiveKernel,
+          getActiveWorld: opts.getActiveWorld,
         });
         return send(res, outcome.status, outcome.body);
       } catch (e) {

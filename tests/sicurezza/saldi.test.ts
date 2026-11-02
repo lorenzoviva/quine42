@@ -11,6 +11,7 @@ import path from 'node:path';
 import { build } from 'esbuild';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createFakeStripeSignature, handleStripeWebhookEvent } from '../../server/stripe';
+import { worldOf, type WorldCalls } from '../../server/worldCalls';
 import { FileLedger, grantCapOf, LEDGER_DIR, ledgerOf, openLedger, sealLedger, sweepBalances } from '../../server/ledger';
 import { cloneUniverse, universeStore } from '../../server/universeStore';
 import { MockModels } from '../../src/kernel/ai/mock';
@@ -49,7 +50,7 @@ function oldUniverse(name: string): void {
 const paid = (id: string, universo: string, wandererId: string, crediti: number) =>
   JSON.stringify({ id, type: 'checkout.session.completed', data: { object: { id: `cs_${id}`, payment_status: 'paid', amount_total: Math.round(crediti * 100), metadata: { universo, wandererId } } } });
 const settings = { webhookSecret: 'finto' };
-const deliver = (rawBody: string, opts: { getActiveKernel?: () => Promise<Kernel | undefined> } = {}) =>
+const deliver = (rawBody: string, opts: { getActiveWorld?: () => Promise<WorldCalls | undefined> } = {}) =>
   handleStripeWebhookEvent({ rawBody, signature: createFakeStripeSignature(rawBody, settings.webhookSecret), settings, universesDir: dir, ...opts });
 
 async function many(): Promise<Kernel> {
@@ -193,7 +194,7 @@ describe('V-005 la corsa: lo stesso evento in contemporanea', () => {
     for (let round = 0; round < 10; round++) {
       const body = paid(`evt_acceso_${round}`, 'acceso', 'altro', 1);
       // Half see no world (it is not open yet), half see it.
-      await Promise.all(Array.from({ length: 8 }, (_, i) => deliver(body, { getActiveKernel: async () => (i % 2 ? k : undefined) })));
+      await Promise.all(Array.from({ length: 8 }, (_, i) => deliver(body, { getActiveWorld: async () => (i % 2 ? worldOf(k) : undefined) })));
     }
     expect(k.creditsOf('altro')).toBe(15);
     expect(ledger.balance('altro')).toBe(15);

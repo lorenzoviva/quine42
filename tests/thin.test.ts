@@ -432,3 +432,69 @@ describe('what is carried, among many (T39b)', () => {
   }, 60_000);
 });
 
+
+describe('il mondo riparte (T127, ADR-0107)', () => {
+  /** What the sockets do in the server: the client stays on one link, the worlds behind it change. */
+  function rewirable(first: SessionServer) {
+    const fns: Array<(m: never) => void> = [];
+    const closes: Array<() => void> = [];
+    let toWorld: ((m: unknown) => void) | undefined;
+    const wire = (server: SessionServer) => {
+      const { server: s, client: c } = fakeLink();
+      c.onMessage((m) => fns.forEach((f) => f(m as never)));
+      toWorld = (m) => c.send(m as never);
+      server.connect(s);
+    };
+    wire(first);
+    return {
+      link: { send: (m: unknown) => toWorld?.(m), onMessage: (fn: (m: never) => void) => void fns.push(fn), onClose: (fn: () => void) => void closes.push(fn), close: () => undefined } as never,
+      restart(server: SessionServer) {
+        wire(server);
+        fns.forEach((f) => f({ t: 'mondo', stato: 'ripartito', testo: 'Il mondo è ripartito.' } as never));
+      },
+    };
+  }
+
+  it('il client resta collegato, rientra da solo e prende il mondo nuovo senza doppioni', async () => {
+    const before = await bootMany();
+    const old = new SessionServer(before);
+    const wires = rewirable(old);
+    const session = new SessionClient(wires.link, { id: 'alice' });
+    await session.ready;
+    const k = await Kernel.boot({ files: session.files, store: memoryStore(), models: new MockModels(), mirror: true });
+    const thinClient = new ThinClient(k, session);
+    const said: string[] = [];
+    const message = k.message.bind(k);
+    k.message = ((t: string, kind?: never) => {
+      said.push(t);
+      return message(t, kind);
+    }) as typeof k.message;
+    await settle(old, [thinClient]);
+    expect(session.me).toBeDefined();
+    const asking = session.act({ t: 'segui' } as never);
+
+    // The world died: another kernel on the same universe, which has one more file a player gets than the mirror knows of.
+    const after = await bootMany();
+    after.repo.write('models/nuovo.xml', 'dal mondo ripartito');
+    after.repo.commit('nuovo', 'kernel');
+    after.applyFiles({ ...after.repo.working });
+    const next = new SessionServer(after);
+    wires.restart(next);
+    expect(await asking).toMatchObject({ ok: false });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(session.refused).toBeUndefined();
+    expect(next.connected()).toEqual(['alice']);
+    expect(said.join()).toContain('ripartito');
+    await settle(next, [thinClient]);
+    // What the mirror shows is what the new world told, once.
+    expect(k.files['models/nuovo.xml']).toBe('dal mondo ripartito');
+    const mirrored = (thinClient as unknown as { local: Map<number, number> }).local;
+    expect(session.things.size).toBeGreaterThan(0);
+    expect(mirrored.size).toBe(session.things.size);
+    for (const serverId of mirrored.keys()) expect(session.things.has(serverId)).toBe(true);
+    // And it goes on: the new world's clock is what it hears.
+    const tick = session.tick;
+    run(next, [thinClient], 30);
+    expect(session.tick).toBeGreaterThan(tick);
+  });
+});

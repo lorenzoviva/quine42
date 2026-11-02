@@ -5,7 +5,7 @@ import { defineConfig, loadEnv, searchForWorkspaceRoot } from 'vite';
 import { GeminiGate, geminiProxy } from './server/geminiProxy';
 import { universeStore } from './server/universeStore';
 import { newSecret } from './server/access';
-import { sessionServer, getActiveUniverseKernel } from './server/session';
+import { sessionServer, getActiveWorld } from './server/session';
 import { accountRoute, accountSettings } from './server/account';
 import { stripeRoute, stripeSettings } from './server/stripe';
 import { queueWanted, subscriptionQueue } from './server/subscriptionQueue';
@@ -26,7 +26,7 @@ export default defineConfig(({ mode }) => {
   const internal = newSecret();
   return {
     // Universes live next to the kernel, each a git repository of its own (ignored by the kernel's).
-    // The games of many (T38): their worlds run in this process, one per universe, clients over /api/session.
+    // The games of many (T38): each world in a process of its own (T127, ADR-0107), clients over /api/session.
     // The subscriptions' queue (T68): the slow requests on disk until a process using the CLIs serves them; off unless asked (ADR-0106).
     plugins: [
       geminiProxy(gemini),
@@ -36,13 +36,13 @@ export default defineConfig(({ mode }) => {
         settings: stripeSettings(env),
         accounts,
         universesDir,
-        getActiveKernel: getActiveUniverseKernel,
+        getActiveWorld,
       }),
       // The site's profile page (T102): the account's wanderer, their profile and credits.
-      wandererRoute({ accounts, universesDir, getActiveKernel: getActiveUniverseKernel }),
+      wandererRoute({ accounts, universesDir, getActiveWorld }),
       // The site's credits page (T105): the account's balance and their lines of the two ledgers.
-      walletRoute({ accounts, universesDir, getActiveKernel: getActiveUniverseKernel }),
-      sessionServer(accounts, gemini.direct(), internal, { universesDir, grantCap: grantCapOf(env, !!accounts?.verify) }),
+      walletRoute({ accounts, universesDir, getActiveWorld }),
+      sessionServer(accounts, gemini.direct(), internal, { universesDir, grantCap: grantCapOf(env, !!accounts?.verify) }, Number(env.QUINE_MONDO_MEMORIA) || undefined),
       subscriptionQueue(path.resolve(process.cwd(), 'universes', '.coda'), { enabled: queueWanted(env) }),
     ],
     // Writing a universe must not reload the page (dev server watches the project folder).
