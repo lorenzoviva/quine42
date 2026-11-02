@@ -2676,6 +2676,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Browser: non serve, T146 ha provato il gioco con T126.
 - Quando è fatto: merge risolto, commit su `task/T149`. Poi l'orchestratore fa `integra T149`, `integra T146` e `integra T126`.
 
+### T150 · Integrare T149 — `da fare`
+- Pipeline: claude · stima 2% · approvato · priorità 1
+- Contesto: `integra T149` va in conflitto su una riga di `docs/adr/README.md`: nello stesso punto dell'indice entrano la 0104 del base (T125, i saldi) e la 0105 di T149 (i limiti dentro la sandbox). La suite e il kit di T149 non hanno girato con T125 dentro, e T125 e T126 toccano entrambi `src/kernel/kernel.ts` (git li fonde da solo, va provato). Nasce da T149: `dossier T149`.
+- Cosa fare: nel worktree di T150 `git merge task/T149`. Nell'indice restano entrambe le righe, la 0104 prima. Non si rinumera nulla. Nel backlog restano tutti i blocchi.
+- Test: `npm run typecheck` e la suite intera con i loro turni; nell'esito quanti passano e i rossi che restano rilanciando il file da solo. Poi `npm run sicurezza:prove -- --solo V-005`, `--solo V-007`, `--solo V-010`: il kit si legge, non si riscrive; se sovrascrive un esito di `docs/sicurezza/esiti/`, ripristinalo e metti il tuo in un file a parte.
+- Browser: non serve, T146 e T125 hanno provato il gioco ciascuno col suo.
+- Quando è fatto: merge risolto, commit su `task/T150`. Poi l'orchestratore fa `integra T150`, `integra T149`, `integra T146` e `integra T126`.
+
 ### T147 · Integrare T128 — `da fare` (dipende da T146)
 - Pipeline: claude · stima 3% · approvato · priorità 1
 - Contesto: `integra T128` va in conflitto in `docs/adr/README.md` e `vite.config.ts`: T128 (la coda delle CLI blindata, V-009) è partito senza T120, che ha messo `gate` sulle route in `vite.config.ts`, e aveva preso il numero 0102, che nel base è di T120. Nasce da T128: `dossier T128`.
