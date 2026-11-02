@@ -54,7 +54,7 @@ export const isJson = (req: Pick<IncomingMessage, 'headers'>) => /^application\/
 /** The token of the world of a universe: a world that got out of its process would hold this, and nothing about the other universes (ADR-0110). */
 export const worldToken = (secret: string, name: string) => createHmac('sha256', secret).update(`mondo:${name}`).digest('hex');
 
-function isInternal(req: Req, secret: string): boolean {
+export function isInternal(req: Req, secret: string): boolean {
   const said = req.headers[INTERNAL_HEADER];
   if (typeof said !== 'string') return false;
   const name = /^\/api\/universe\/([^/?]+)/.exec(req.url ?? '')?.[1];
@@ -126,8 +126,9 @@ export const creditFile = (p: string) => /^world\/(giocatori\/|pagamenti\.json$)
  */
 export function newUniverse(who: Caller, files: Record<string, string | null>): { files: Record<string, string | null> } | Refusal {
   const game = gameIn(files['universe.json'] ?? undefined);
+  if (who.anonimo) return { status: 403, refused: 'per fare un universo serve un account' };
   if (!game.many && who.local) return { files };
-  if (!who.id || who.anonimo) return { status: 403, refused: 'per fare un universo serve un account' };
+  if (!who.id) return { status: 403, refused: 'per fare un universo serve un account' };
   let cfg: Record<string, unknown> = {};
   try {
     const parsed = JSON.parse(files['universe.json'] ?? '{}');

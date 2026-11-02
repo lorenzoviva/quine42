@@ -118,5 +118,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0111](0111-la-csp-delle-pagine.md) | La CSP delle pagine è un'intestazione del server, da un punto solo (`server/csp.ts`): script solo da questa origine, stili inline ammessi, Firebase solo dove ci sono gli account; T133 deve metterla anche in produzione | accettato |
 | [0112](0112-il-server-di-produzione.md) | Il server di produzione: senza Vite, un file costruito (`server/serve.ts`), solo la build e le rotte di un elenco, niente Gemini né coda, non parte senza verificatore, segreto del webhook, origini (`QUINE_ORIGINI`) e tetto; la stessa CSP su ogni risposta | accettato |
 | [0113](0113-il-secondo-audit-chi-paga-e-cosa-si-ascolta.md) | Il secondo audit: fuori da un `as` il pagante è `comune`; con gli account le spese comuni vogliono un pagante; un modello fuori listino costa come il più caro; ciò che arriva dal filo non getta eccezioni; un socket avvia solo una partita di molti che esiste, entro un tetto; niente CORS |
+| [0114](0114-le-risorse-per-account.md) | Le risorse per account: un mondo parte per chi prova chi è e si ferma quando è vuoto; quota di universi; ritmi per account e per indirizzo; l'indirizzo non lo dice il client (V-026) |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

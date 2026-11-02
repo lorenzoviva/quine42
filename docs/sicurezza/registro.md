@@ -298,13 +298,14 @@ Modello di una voce:
 
 ### V-026 · Le risorse per account: mondi, universi, ritmi
 - Gravità: alta (oggi: bassa, senza account ascolta solo questa macchina)
-- Stato: `specificata`
-- Superficie: `server/session.ts` (`upgrade`, `open`), `create` in `server/universeStore.ts`, `POST /api/viandante`, le route HTTP
-- Proprietà violata: la macchina che ospita regge. Un mondo vero si avvia prima di verificare il token e non si ferma quando resta vuoto, quindi con `QUINE_MONDI_MASSIMI` chiunque occupa tutti i posti; un account fa universi senza quota, fino a 32 MB l'uno; un anonimo scrive un file e un commit di profilo in ogni universo; socket e letture pesanti (`GET /api/universe/<nome>`, `/carte`) non hanno un ritmo
-- Prova: solo lettura del codice (T167), nessuna prova di carico
-- Contromisura: (1) il mondo parte solo dopo un `entra` con un token verificato; (2) un mondo vuoto si salva e si ferma dopo qualche minuto; (3) una quota di universi per account, nel `.env`, e niente `create` da un anonimo; (4) `POST /api/viandante` solo per chi il mondo conosce o con un ritmo per account; (5) un ritmo per indirizzo su socket e route HTTP, da mettere nel server di produzione.
+- Stato: `chiusa`
+- Superficie: `server/session.ts` (`upgrade`, `open`), `create` e `clone` in `server/universeStore.ts`, `POST /api/viandante`, le route HTTP e i socket in `server/production.ts`
+- Proprietà violata: la macchina che ospita regge. Un mondo vero si avviava prima di verificare il token e non si fermava quando restava vuoto, quindi con `QUINE_MONDI_MASSIMI` chiunque occupava tutti i posti; un account faceva universi senza quota, fino a 32 MB l'uno; un anonimo scriveva un file e un commit di profilo in ogni universo; socket e letture pesanti (`GET /api/universe/<nome>`, `/carte`) non avevano un ritmo
+- Prova: test su server veri con un mondo finto; kit (V-026.a); una misura di carico minima (`esiti/2026-11-02-T172-carico.md`)
+- Contromisura: (1) il mondo parte solo dopo un `entra` con un token verificato, un socket muto si chiude dopo 15 s; (2) un mondo vuoto si salva e si ferma dopo 5 minuti, e chi arriva intanto aspetta; (3) `QUINE_UNIVERSI_PER_ACCOUNT` (3), niente `create` da un anonimo, un ritmo su ciò che si fa e si butta; (4) `POST /api/viandante`: un ritmo per account, un anonimo solo dove il mondo lo conosce; (5) un ritmo per indirizzo su rotte e socket, nel server di produzione, con l'indirizzo letto dal socket o da `QUINE_PROXY_FIDATI` proxy dichiarati (ADR-0114). Non coperti: chi ha molti indirizzi e molti account (i posti restano al più `QUINE_MONDI_MASSIMI`, la macchina regge), le connessioni HTTP lente, le pagine della build: spettano al bilanciatore (T45f).
 - Task: T172
-- Test: —
+- Test: `tests/sicurezza/risorse.test.ts`, `tests/sicurezza/produzione.test.ts`, `tests/sicurezza/secondo-audit.test.ts`
+- Esito: chiusa da T172 (ADR-0114), 02/11/2026, branch `task/T172`.
 
 ### V-027 · Ciò che Lua lascia da leggere al kernel
 - Gravità: media
@@ -370,7 +371,7 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-023 | — | — | `secondo-audit.test.ts` | chi paga si vede solo dentro il kernel: lo prova tests/sicurezza/secondo-audit.test.ts |
 | V-024 | — | — | `secondo-audit.test.ts` | il costo di una chiamata si vede solo dentro il kernel: lo prova tests/sicurezza/secondo-audit.test.ts |
 | V-025 | a | — | `secondo-audit.test.ts`, `produzione.test.ts` | — |
-| V-026 | — | — | — | specificata, senza prove: le fa il task che la chiude |
+| V-026 | a | — | `risorse.test.ts` | ritmi, quote e fermata del mondo vuoto: il server del kit non ha account né è quello di produzione; li prova tests/sicurezza/risorse.test.ts |
 | V-027 | — | — | `secondo-audit.test.ts`, `uscita.test.ts` | ciò che Lua scrive si vede solo dentro la sandbox: lo prova tests/sicurezza/secondo-audit.test.ts |
 | V-028 | a | — | `secondo-audit.test.ts`, `produzione.test.ts` | — |
 | V-029 | a | — | `secondo-audit.test.ts`, `produzione.test.ts` | — |

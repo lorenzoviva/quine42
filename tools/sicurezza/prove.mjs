@@ -130,7 +130,7 @@ const world = (name, seed, extra = {}) => ({ ...seed, 'universe.json': many(name
 
 async function makeUniverses(work) {
   const at = (n) => path.join(work, 'universes', n);
-  for (const n of ['sonda-base', 'sonda-git', 'sonda-crediti', 'sonda-doppio', 'sonda-cestino']) await writeUniverse(at(n), small(n));
+  for (const n of ['sonda-base', 'sonda-git', 'sonda-crediti', 'sonda-doppio', 'sonda-cestino', 'sonda-silenzio']) await writeUniverse(at(n), small(n));
   // With a second commit to go back from, on the disk of the probes.
   for (const n of ['sonda-ritorno', 'sonda-rollback']) {
     await writeUniverse(at(n), small(n));
@@ -259,6 +259,18 @@ async function main() {
       seedConfig,
       sign: signing,
       enter: (u, e, o) => enter(base, u, e, o),
+      /** A socket on a universe that says nothing for `ms`, then closes. */
+      silent: (u, ms) =>
+        new Promise((resolve) => {
+          const ws = new WebSocket(`${base.replace(/^http/, 'ws')}/api/session?universo=${u}`);
+          ws.on('error', () => resolve());
+          ws.on('open', () =>
+            setTimeout(() => {
+              ws.close();
+              resolve();
+            }, ms),
+          );
+        }),
       waitFor: async (fn, ms) => {
         const end = Date.now() + ms;
         while (Date.now() < end && !fn()) await sleep(100);

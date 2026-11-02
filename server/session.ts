@@ -17,7 +17,8 @@ import { failureText, gameIn, gate, refuse } from './access';
 import { PROGRAMS_DIR } from './hidden';
 import { runGit } from './git';
 import { LEDGER_DIR, sweepBalances } from './ledger';
-import { buildWorld, sweepPrograms, WorldHost, type HostLink } from './worldHost';
+import { Rates, type Pace } from './rates';
+import { buildWorld, sweepPrograms, WorldHost, type HostLink, type WorldTimes } from './worldHost';
 import type { WorldCalls } from './worldCalls';
 
 
@@ -56,21 +57,39 @@ export function worldRefusal(universesDir: string | undefined, name: string, run
 const MAX_MESSAGE = 256 * 1024;
 /** Messages kept for a world still opening (T129): the rest is not heard. */
 const MAX_EARLY = 16;
+/** How long a socket has to say who it is (ms): until then it holds a place in no world, and costs only itself (V-026). */
+export const ENTRY_MS = 15000;
+/** Sockets of one account at once: tabs, not a place in every world (V-026). */
+export const ACCOUNT_SOCKETS = 4;
+/** How often an account, or an address, may be the one who starts a world that was stopped: six, then one every 100 s (V-026). */
+export const WORLD_STARTS: Pace = { burst: 6, perSecond: 0.01 };
 
 export type ActiveHost = { name: string; session: { connect(link: HostLink): void; readonly clientCount?: number; connected?(): string[] }; calls?: WorldCalls; stop(): void | Promise<void> };
 export const activeHosts = new Map<string, Promise<ActiveHost | { error: string }>>();
+/** The worlds that were left empty, while they save: the next one of that universe starts when they have finished (V-026). */
+const stopping = new Map<string, Promise<void>>();
 
 /** What the routes can ask of the running world of a universe, if there is one. */
 export async function getActiveWorld(name: string): Promise<WorldCalls | undefined> {
+  // What it is saving is on the disk the route would read.
+  await stopping.get(name);
   const h = await activeHosts.get(name);
   return h && 'calls' in h ? h.calls : undefined;
 }
 
-/** A WebSocket as a link of the protocol: what arrives before anyone listens is kept for them. */
-export function wsLink(ws: Pick<WebSocket, 'on' | 'send' | 'close' | 'readyState' | 'OPEN'>): HostLink {
+/** What a socket said to come in. */
+export interface EntrySaid {
+  token?: unknown;
+}
+
+/** A WebSocket as a link of the protocol: what arrives before anyone listens is kept for them, from `entra` on (before it nothing goes to a world). */
+export function wsLink(ws: Pick<WebSocket, 'on' | 'send' | 'close' | 'readyState' | 'OPEN'>): HostLink & { entry(ms: number): Promise<EntrySaid | undefined> } {
   const fns: Array<(m: unknown) => void> = [];
   const closes: Array<() => void> = [];
   const early: unknown[] = [];
+  let said: EntrySaid | undefined;
+  let before = 0;
+  let waiting: ((m: EntrySaid | undefined) => void) | undefined;
   ws.on('message', (data) => {
     let m: unknown;
     try {
@@ -78,12 +97,34 @@ export function wsLink(ws: Pick<WebSocket, 'on' | 'send' | 'close' | 'readyState
     } catch {
       return;
     }
+    if (!said) {
+      if ((m as { t?: unknown } | null)?.t !== 'entra') {
+        // Who only talks without saying who they are has nothing to wait for.
+        if (++before > MAX_EARLY) ws.close();
+        return;
+      }
+      said = m as EntrySaid;
+      waiting?.(said);
+    }
     if (fns.length) fns.forEach((f) => f(m));
     // Only `entra` is owed an answer before the world is open: a few are plenty.
     else if (early.length < MAX_EARLY) early.push(m);
   });
-  ws.on('close', () => closes.forEach((f) => f()));
+  ws.on('close', () => {
+    waiting?.(undefined);
+    closes.forEach((f) => f());
+  });
   return {
+    /** What it said to come in, or undefined if it closed, or said nothing in `ms`. */
+    entry: (ms) =>
+      new Promise((done) => {
+        if (said || ws.readyState !== ws.OPEN) return done(said);
+        const timer = setTimeout(() => done(undefined), ms);
+        waiting = (m) => {
+          clearTimeout(timer);
+          done(m);
+        };
+      }),
     send: (m: unknown) => {
       if (ws.readyState === ws.OPEN) ws.send(JSON.stringify(m));
     },
@@ -139,6 +180,12 @@ export interface SessionOptions {
   memoryMb?: number;
   /** Worlds running at once (`QUINE_MONDI_MASSIMI`, V-025). */
   maxWorlds?: number;
+  /** For the tests: how long a world lasts empty, and the rest of its times. */
+  times?: Partial<WorldTimes>;
+  /** For the tests: how long a socket has to say who it is. */
+  entryMs?: number;
+  /** Who a socket comes from and how many it may have: the production server's, where strangers are (ADR-0114). */
+  crowd?: { addressOf(req: IncomingMessage): string; rate(address: string): boolean; atOnce: number };
   /** The program of the worlds: built when needed by the dev server, already there in production. */
   program: () => Promise<string>;
   /** What is refused before the rules of `gate`: the production server's origins (T133). */
@@ -147,8 +194,29 @@ export interface SessionOptions {
 
 /** The sockets of the games of many on a server, whichever it is. `stop` stops the worlds, saving what they can, and closes the clients. */
 export function attachSessions(httpServer: HttpServer, o: SessionOptions): { stop(): Promise<void> } {
-  const { accounts, gemini, internal, credits, memoryMb, maxWorlds, program } = o;
+  const { accounts, gemini, internal, credits, memoryMb, maxWorlds, program, crowd } = o;
   const wss = new WebSocketServer({ noServer: true, maxPayload: MAX_MESSAGE });
+  /** Sockets now, by account and by address. */
+  const accountSockets = new Map<string, number>();
+  const addressSockets = new Map<string, number>();
+  const starts = new Rates(WORLD_STARTS);
+  const count = (of: Map<string, number>, key: string, by: 1 | -1) => {
+    const n = (of.get(key) ?? 0) + by;
+    if (n > 0) of.set(key, n);
+    else of.delete(key);
+  };
+  /** A world left empty: from now on the universe has none, and the next client waits for this one to have saved. */
+  const retire = (name: string) => {
+    const h = activeHosts.get(name);
+    if (!h) return;
+    activeHosts.delete(name);
+    const done = h
+      .then((x) => ('stop' in x ? x.stop() : undefined))
+      .catch(() => undefined)
+      .finally(() => stopping.delete(name));
+    stopping.set(name, done);
+  };
+  const running = () => activeHosts.size + stopping.size;
   const startWorld = async (name: string, offline: boolean): Promise<ActiveHost | { error: string }> => {
     const port = (httpServer.address() as AddressInfo | null)?.port ?? 5173;
     const universes = credits?.universesDir;
@@ -169,7 +237,9 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
       entry: await program(),
       memoryMb,
       headOf: universes ? () => runGit(path.join(universes, name), ['rev-parse', 'HEAD'], { author: ['kernel', 'kernel@quine'] }).then((out) => out.trim()) : undefined,
+      times: o.times,
       onGiveUp: () => activeHosts.delete(name),
+      onIdle: () => retire(name),
     });
     const opened = await world.start();
     if ('error' in opened) return opened;
@@ -185,17 +255,44 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
       stop: () => world.stop(),
     };
   };
-  const open = (name: string, offline: boolean) => {
+  const open = async (name: string, offline: boolean) => {
+    await stopping.get(name);
     let h = activeHosts.get(name);
     if (!h) {
-      const no = worldRefusal(credits?.universesDir, name, activeHosts.size, maxWorlds);
-      if (no) return Promise.resolve({ error: no });
+      const no = worldRefusal(credits?.universesDir, name, running(), maxWorlds);
+      if (no) return { error: no };
       h = startWorld(name, offline).catch((e: Error) => ({ error: e.message }));
       activeHosts.set(name, h);
       // A universe that could not open is tried again by the next client.
       void h.then((r) => 'error' in r && activeHosts.delete(name));
     }
     return h;
+  };
+  /** A socket comes in: only now, and only for who proves who they are, does it take a place in a world, and start it if it is the first (V-026). */
+  const admit = async (ws: WebSocket, link: ReturnType<typeof wsLink>, name: string, offline: boolean, address: string) => {
+    const no = (motivo: string) => {
+      link.send({ t: 'rifiuto', motivo });
+      ws.close();
+    };
+    const said = await link.entry(o.entryMs ?? ENTRY_MS);
+    if (!said) return no('nessun ingresso: entra di nuovo');
+    if (accounts?.verify) {
+      const token = typeof said.token === 'string' ? said.token : '';
+      const account = token ? await accounts.verify(token).catch(() => undefined) : undefined;
+      // The same words as the world's, which verifies again whoever it lets in.
+      if (typeof account?.uid !== 'string' || !account.uid) return no(token ? 'accesso non valido o scaduto: entra di nuovo' : 'serve un account per entrare');
+      if (ws.readyState !== ws.OPEN) return;
+      const uid = account.uid;
+      if ((accountSockets.get(uid) ?? 0) >= ACCOUNT_SOCKETS) return no('troppe finestre aperte con questo account');
+      count(accountSockets, uid, 1);
+      ws.once('close', () => count(accountSockets, uid, -1));
+      const first = !activeHosts.has(name);
+      if (first && !(starts.take(`account:${uid}`) && starts.take(`indirizzo:${address}`))) return no('troppi mondi avviati di recente: riprova tra poco');
+    }
+    if (ws.readyState !== ws.OPEN) return;
+    const h = await open(name, offline);
+    if ('error' in h) return no(failureText('mondo', h.error));
+    h.session.connect(link);
   };
   httpServer.on('upgrade', (req: IncomingMessage, socket: Duplex, head: Buffer) => {
     const url = new URL(req.url ?? '/', 'http://localhost');
@@ -208,6 +305,16 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
       socket.destroy();
       return;
     }
+    const address = crowd?.addressOf(req) ?? req.socket.remoteAddress ?? '';
+    if (crowd && (!crowd.rate(address) || (addressSockets.get(address) ?? 0) >= crowd.atOnce)) {
+      socket.write('HTTP/1.1 429 Too Many Requests\r\nRetry-After: 30\r\nConnection: close\r\n\r\n');
+      socket.destroy();
+      return;
+    }
+    if (crowd) {
+      count(addressSockets, address, 1);
+      socket.once('close', () => count(addressSockets, address, -1));
+    }
     wss.handleUpgrade(req, socket, head, (ws) => {
       const link = wsLink(ws);
       const name = url.searchParams.get('universo') ?? '';
@@ -215,21 +322,24 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
         link.send({ t: 'rifiuto', motivo: 'universo sconosciuto' });
         return ws.close();
       }
-      void open(name, admitted.offline).then((h) => {
-        if ('error' in h) {
-          link.send({ t: 'rifiuto', motivo: failureText('mondo', h.error) });
-          return ws.close();
-        }
-        h.session.connect(link);
+      // A name that could never start a world is told at once, without waiting to hear who asks (V-025).
+      const never = activeHosts.has(name) || stopping.has(name) ? undefined : worldRefusal(credits?.universesDir, name, running(), maxWorlds);
+      if (never) {
+        link.send({ t: 'rifiuto', motivo: failureText('mondo', never) });
+        return ws.close();
+      }
+      admit(ws, link, name, admitted.offline, address).catch((e) => {
+        link.send({ t: 'rifiuto', motivo: failureText('mondo', e) });
+        ws.close();
       });
     });
   });
   let stopped: Promise<void> | undefined;
   const stop = () =>
     (stopped ??= (async () => {
-      const stopping = [...activeHosts.values()].map((h) => h.then((x) => ('stop' in x ? x.stop() : undefined)));
+      const halting = [...activeHosts.values()].map((h) => h.then((x) => ('stop' in x ? x.stop() : undefined)));
       activeHosts.clear();
-      await Promise.allSettled(stopping);
+      await Promise.allSettled([...halting, ...stopping.values()]);
       for (const ws of wss.clients) ws.terminate();
       wss.close();
     })());
