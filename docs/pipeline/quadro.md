@@ -7,6 +7,8 @@ Aggiornato il 02/11/2026, fine dell'epoca 198 su **claude** (crediti: vedi `stat
 
 - **Tetto di Claude a 2** (richiesta dell'autore, 01/11): attivo dopo il riavvio delle 13:35; `stato` dice tetto 2, slot 2. L'autore dice che con il Pro i limiti di Claude sono 5 volte più alti.
 
+- **Slot di Claude a 1** (richiesta dell'autore, 02/11, epoca 200): tetto ancora 2 in `config.json`, `slot` a 1 in `.pipeline/budget.json` con `slotAggiornato` al 05/11 16:00, così la previsione non lo rialza prima del reset. Solo T161 gira finché non finisce; per riaprire serve la sua parola. Dopo il 05/11 la previsione può rialzarlo: se vale ancora, rifissarlo.
+
 - **Integrati di recente**: T115 e T57b (rune nuove dal Concilio, ADR-0097; restano 5 timeout noti di referente, wanderers e watch, `abbonamenti` T68b non ricontrollato), T57c (effetto rilievo e terraformazione nel kernel, ADR-0096), T111 (ripiego senza browser corretto), T113 (lampione intero, drone 1:2), T109+T110+T112 (template del sito verificato), T101 (landing con hero MarkovJunior verificata nel browser).
 - **In corso, coda, attese**: vedi «Stato e decisioni» e «Task attivi» sotto.
 - **Decisioni recenti**:
