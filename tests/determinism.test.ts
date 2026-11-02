@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { Sandbox } from '../src/kernel/sandbox';
 import { bundledFiles } from '../src/kernel/bundle';
@@ -7,6 +7,9 @@ import { MockModels } from '../src/kernel/ai/mock';
 import type { Action } from '../src/kernel/input';
 import type { FileMap } from '../src/kernel/types';
 import { fakeHost } from './helpers';
+
+// Here the relief runs for every kernel: the memo of the tests would hide a relief that is not deterministic.
+vi.unmock('../src/kernel/relief');
 
 /** A system that throws dice every tick for whoever wanders and for the wanderer: the dice are written on them. */
 const DICE: FileMap = {

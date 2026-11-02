@@ -11,7 +11,7 @@ import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 
-// As in kernel.test.ts (importing it would run its tests here too).
+// As in world.ts.
 const DT = 1 / 60;
 async function boot(models = new MockModels()) {
   const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models });

@@ -9,7 +9,7 @@ import { buildGraph, GRAPH_FILE, readGraph, type GraphPlace } from '../src/kerne
 import { writePlots, PLOTS_FILE, type Plot } from '../src/kernel/plots';
 import type { FileMap } from '../src/kernel/types';
 
-/** Ticks until every loaded chunk has been planned (as in kernel.test.ts). */
+/** Ticks until every loaded chunk has been planned (as in world.ts). */
 async function develop(k: Kernel) {
   for (let i = 0; i < 80; i++) {
     k.tick(1 / 60);

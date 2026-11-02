@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { GIVE_REACH, Kernel } from '../src/kernel/kernel';
-import { InlineRunner } from '../src/kernel/forms';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockModels } from '../src/kernel/ai/mock';
@@ -12,17 +11,12 @@ import { ThinClient } from '../src/session/thin';
 
 // Between wanderers (T43a): words with a bubble, things given, to whoever is near.
 
-// A kernel's boot runs the programs of the corona again (about 10 s, T91, T148), and here each world has four kernels:
-// they all ask the same runner, so only the first boot of the file pays. Forms are kernel-owned; what is shared is the
-// result of a program with a seed, which instances copy before changing it (`instanceGrid`).
-const forms = new InlineRunner();
-
 const DT = 1 / 60;
 
 async function bootMany(game: Record<string, unknown> = {}): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3, ...game } }, null, 2) };
-  return Kernel.boot({ files, store: memoryStore(), models: new MockModels(), forms });
+  return Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
 }
 
 async function thin(server: SessionServer, id: string, nome: string): Promise<ThinClient> {
@@ -30,7 +24,7 @@ async function thin(server: SessionServer, id: string, nome: string): Promise<Th
   server.connect(s);
   const session = new SessionClient(c, { id, nome });
   await session.ready;
-  const k = await Kernel.boot({ files: session.files, store: memoryStore(), models: new MockModels(), mirror: true, forms });
+  const k = await Kernel.boot({ files: session.files, store: memoryStore(), models: new MockModels(), mirror: true });
   return new ThinClient(k, session);
 }
 
