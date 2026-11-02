@@ -15,6 +15,8 @@ export interface Turn {
 }
 
 export interface NpcContext {
+  /** Who pays: their request has passed an await by now, and nobody is acting any more (V-022). */
+  chi?: string;
   name: string;
   persona: string;
   mood: string;
@@ -90,6 +92,7 @@ ${npc.secrets}` : '',
     data: { npc, playerText },
     temperature: 0.9,
     focus,
+    chi: npc.chi,
   });
   const action = (NPC_ACTIONS as readonly string[]).includes(r.azione) ? (r.azione as NpcAction) : 'nessuna';
   return {

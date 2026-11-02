@@ -205,6 +205,19 @@ export const PROBES = [
       return { ok: !existsSync(ctx.uni('sonda-creato')), dettaglio: `risposta ${r.status}` };
     },
   },
+  {
+    id: 'V-001.p',
+    voce: 'V-001',
+    fase: 'A',
+    proprieta: 'una pagina su un’altra porta di questa macchina, che per il CORS di Vite può leggere le risposte, non legge un universo',
+    async run(ctx) {
+      const origin = { Origin: 'http://127.0.0.1:4872' };
+      const r = await ctx.http('GET', '/api/universe/sonda-base', { headers: origin });
+      const file = await ctx.http('GET', '/package.json', { headers: origin });
+      const cors = (x) => x.headers['access-control-allow-origin'] ?? 'nessuno';
+      return { ok: r.status === 403 && !r.text.includes('"files"'), dettaglio: `risposta ${r.status}, CORS ${cors(r)}; un file del progetto: risposta ${file.status}, CORS ${cors(file)}` };
+    },
+  },
 
   // --- V-002: the proxy ---------------------------------------------------------------------------
   {
@@ -670,6 +683,78 @@ export const PROBES = [
       return { ok: !r.text.includes(STRIPE_DETAIL), dettaglio: `risposta ${r.status}` };
     },
   },
+  // --- The second audit (T167) ---------------------------------------------------------------------------------------------
+  {
+    id: 'V-020.a',
+    voce: 'V-020',
+    fase: 'A',
+    proprieta: 'il testo di un’eccezione non arriva al client',
+    async run(ctx) {
+      const bad = await post(ctx, '/api/universe/sonda-base/commit', '{non è json', MASTER);
+      const git = await post(ctx, '/api/universe/sonda-base/checkout', { id: 'abcd' }, MASTER);
+      const inner = /JSON|position|fatal|pathspec|ENOENT|[A-Za-z]:\\/;
+      return { ok: !inner.test(bad.text) && !inner.test(git.text), dettaglio: `risposte ${bad.status} e ${git.status}` };
+    },
+  },
+  {
+    id: 'V-021.a',
+    voce: 'V-021',
+    fase: 'A',
+    proprieta: 'un messaggio che non si capisce non ferma il mondo né il suo processo',
+    async run(ctx) {
+      const altro = await ctx.enter('sonda-mondo', { id: 'sonda-testimone' });
+      const io = await ctx.enter('sonda-mondo', { id: 'sonda-veleno' });
+      if (!altro.ingresso || !io.ingresso) return { ok: true, dettaglio: `rifiutato: ${altro.rifiuto ?? io.rifiuto ?? 'nessuna risposta'}` };
+      // An object JS cannot turn into a primitive, as a field of ordinary messages: at the world's own pace and past it.
+      const odd = { toString: 1, valueOf: 1 };
+      const from = altro.tick;
+      for (let i = 0; i < 60; i++) {
+        io.send({ t: 'frase', seq: odd, tokens: [] });
+        await new Promise((r) => setTimeout(r, 25));
+      }
+      for (let i = 0; i < 200; i++) io.send({ t: 'frase', seq: odd, tokens: [] });
+      await ctx.waitFor(() => altro.mondo.length > 0, 4000);
+      const ticks = altro.tick - from;
+      io.close();
+      altro.close();
+      return { ok: ticks >= 30 && !altro.mondo.length, dettaglio: `${ticks} tick in più per chi guarda, del mondo ha sentito: ${altro.mondo.join(', ') || 'niente'}` };
+    },
+  },
+  {
+    id: 'V-025.a',
+    voce: 'V-025',
+    fase: 'A',
+    proprieta: 'un socket con un nome che non è un universo non avvia un processo',
+    async run(ctx) {
+      const c = await ctx.enter('sonda-non-esiste', { id: 'sonda-nome' });
+      c.close();
+      const left = existsSync(path.join(ctx.universes(), '.saldi', 'sonda-non-esiste.json'));
+      return { ok: !c.ingresso && !left, dettaglio: `${c.rifiuto ? 'rifiutato' : 'entrato o senza risposta'}, archivio dei saldi ${left ? 'creato' : 'non creato'}` };
+    },
+  },
+  {
+    id: 'V-028.a',
+    voce: 'V-028',
+    fase: 'A',
+    proprieta: 'il checkout non ascolta un’altra origine né chi non è su questa macchina',
+    async run(ctx) {
+      const body = { universo: 'sonda-crediti', wandererId: 'altro', crediti: 5 };
+      const other = await post(ctx, '/api/stripe/checkout', body, { ...J, Origin: ALTRA });
+      const outside = await post(ctx, '/api/stripe/checkout', body, { ...J, ...OUTSIDE });
+      return { ok: other.status === 403 && outside.status === 403, dettaglio: `risposte ${other.status} e ${outside.status}` };
+    },
+  },
+  {
+    id: 'V-029.a',
+    voce: 'V-029',
+    fase: 'A',
+    proprieta: 'una pagina su un’altra porta di questa macchina non legge i file del progetto',
+    async run(ctx) {
+      const r = await ctx.http('GET', '/package.json', { headers: { Origin: 'http://127.0.0.1:4872' } });
+      const cors = r.headers['access-control-allow-origin'];
+      return { ok: !cors, dettaglio: `risposta ${r.status}, CORS ${cors ?? 'assente'}` };
+    },
+  },
   { id: 'V-016.b', voce: 'V-016', fase: 'Z', proprieta: 'nessun valore finto dei segreti in ciò che il server ha risposto o scritto nel log', interna: 'scansione' },
   { id: 'V-016.c', voce: 'V-016', fase: 'Z', proprieta: 'nessun valore finto dei segreti in `dist/` dopo una build', interna: 'build' },
 ];
@@ -678,5 +763,9 @@ export const PROBES = [
 export const UNCOVERED = {
   'V-013': 'il Concilio che scrive `ai` si vede solo dentro il kernel: lo prova tests/sicurezza/uscite.test.ts',
   'V-018': 'accettata: non si prova',
-  'V-020': 'rilevata da T132, senza prove: le fa T167',
+  'V-022': 'chi paga si vede solo dentro il kernel: lo prova tests/sicurezza/secondo-audit.test.ts',
+  'V-023': 'chi paga si vede solo dentro il kernel: lo prova tests/sicurezza/secondo-audit.test.ts',
+  'V-024': 'il costo di una chiamata si vede solo dentro il kernel: lo prova tests/sicurezza/secondo-audit.test.ts',
+  'V-026': 'specificata, senza prove: le fa il task che la chiude',
+  'V-027': 'ciò che Lua scrive si vede solo dentro la sandbox: lo prova tests/sicurezza/secondo-audit.test.ts',
 };

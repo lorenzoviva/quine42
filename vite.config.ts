@@ -48,13 +48,15 @@ export default defineConfig(({ mode }) => {
       wandererRoute({ accounts, universesDir, getActiveWorld }),
       // The site's credits page (T105): the account's balance and their lines of the two ledgers.
       walletRoute({ accounts, universesDir, getActiveWorld }),
-      sessionServer(accounts, gemini.direct(), internal, { universesDir, grantCap: grantCapOf(env, !!accounts?.verify) }, Number(env.QUINE_MONDO_MEMORIA) || undefined),
+      sessionServer(accounts, gemini.direct(), internal, { universesDir, grantCap: grantCapOf(env, !!accounts?.verify) }, Number(env.QUINE_MONDO_MEMORIA) || undefined, Number(env.QUINE_MONDI_MASSIMI) || undefined),
       subscriptionQueue(path.resolve(process.cwd(), 'universes', '.coda'), { enabled: queueWanted(env) }),
     ],
     // Writing a universe must not reload the page (dev server watches the project folder).
     // In a worktree of the pipeline node_modules is a junction to another folder (T44c): wasmoon's glue.wasm is served
     // from its real path, outside the root, so it must be allowed too.
-    server: { port: 5173, watch: { ignored: ['**/universes/**'] }, fs: { allow: [searchForWorkspaceRoot(process.cwd()), realModules()], deny: FS_DENY } },
+    // No CORS (V-029): the game and the site are of this origin, and by default Vite lets a page on any other port of this machine read the project's files.
+    preview: { cors: false },
+    server: { cors: false, port: 5173, watch: { ignored: ['**/universes/**'] }, fs: { allow: [searchForWorkspaceRoot(process.cwd()), realModules()], deny: FS_DENY } },
     // wasmoon is UMD: pre-bundled, the browser can import it in dev (its glue.wasm comes by URL, `wasmUri`).
     optimizeDeps: { include: ['wasmoon'] },
     // The MarkovJunior lab has two dedicated pages: the sandbox (/lab/3d/) and the model editor (/lab/editor/).

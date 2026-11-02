@@ -11,6 +11,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { WebSocket } from 'ws';
 import { buildServer } from '../../server/buildServer';
 import { contentSecurityPolicy } from '../../server/csp';
+import { activeHosts } from '../../server/session';
 import { buildFile, createProductionServer, frontDoorRefusal, originsOf, productionProblems, type ProductionServer } from '../../server/production';
 import type { AccountSettings } from '../../server/account';
 import { bundledFiles } from '../../src/kernel/bundle';
@@ -84,6 +85,7 @@ describe('il server vero', () => {
   let dist: string;
   let built: { server: string; world: string };
   let running: ProductionServer;
+  let crowded: ProductionServer | undefined;
   let port: number;
   const universes = () => path.join(work, 'universes');
 
@@ -99,10 +101,10 @@ describe('il server vero', () => {
       r.end(o.body);
     });
 
-  const makeUniverse = (name: string) => {
+  const makeUniverse = (name: string, modalita = 'multigiocatore') => {
     const root = path.join(universes(), name);
     const cfg = JSON.parse(bundledFiles['universe.json']);
-    const files: Record<string, string> = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, name, partita: { modalita: 'multigiocatore', morte: 3, master: 'io' } }) };
+    const files: Record<string, string> = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, name, partita: { modalita, morte: 3, master: 'io' } }) };
     for (const [rel, text] of Object.entries(files)) {
       mkdirSync(path.dirname(path.join(root, rel)), { recursive: true });
       writeFileSync(path.join(root, rel), text);
@@ -136,12 +138,14 @@ describe('il server vero', () => {
     writeFileSync(path.join(work, '.env'), `GEMINI_API_KEY=${FAKE.key}`);
     built = await buildServer(process.cwd(), path.join(work, 'dist-server'));
     makeUniverse('prova');
+    makeUniverse('sola', 'singola');
     running = createProductionServer({ env: { ...ENV, QUINE_CODA: '1' }, dist, worldProgram: built.world, universesDir: universes(), accounts });
     await new Promise<void>((r) => running.server.listen(0, '127.0.0.1', r));
     port = (running.server.address() as AddressInfo).port;
   }, 240000);
 
   afterAll(async () => {
+    await crowded?.stop();
     await running?.stop();
     rmSync(work, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
   });
@@ -240,6 +244,34 @@ describe('il server vero', () => {
     expect((await ask('/api/universe', { headers: { Origin: SITE } })).status).toBe(200);
   });
 
+  it('V-029 un altro sito non ha CORS: nemmeno una risposta al preflight, e nessuna risposta lo concede', async () => {
+    const preflight = await ask('/api/universe/prova/commit', { method: 'OPTIONS', headers: { Origin: 'https://altro.example', 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'authorization' } });
+    expect(preflight.status).toBe(403);
+    // Without `Origin` (a <script> of another site) a file of the build comes, but no page can read it; the same site's own requests get no header either.
+    for (const r of [preflight, await ask('/assets/a-1.js'), await ask('/api/universe', { headers: { Origin: SITE } })]) {
+      expect(Object.keys(r.headers).filter((h) => h.startsWith('access-control-'))).toEqual([]);
+    }
+  });
+
+  it('V-028 il checkout passa dalla stessa porta delle altre rotte: un altro sito no, un corpo che non è JSON no', async () => {
+    expect((await ask('/api/stripe/checkout', { method: 'POST', headers: { Origin: 'https://altro.example', 'Content-Type': 'application/json' }, body: '{}' })).status).toBe(403);
+    expect((await ask('/api/stripe/checkout', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: '{}' })).status).toBe(415);
+  });
+
+  it('V-020 ciò che si rompe dentro una rotta non arriva al client', async () => {
+    const said: string[] = [];
+    const warn = console.warn;
+    console.warn = (...a: unknown[]) => void said.push(a.join(' '));
+    try {
+      const broken = await ask('/api/universe/rotto/create', { method: 'POST', headers: { Authorization: 'Bearer vero-estraneo', 'Content-Type': 'application/json' }, body: '{non è json' });
+      expect(broken.status).toBe(500);
+      expect(JSON.parse(broken.text).error).toBe('il server non è riuscito a farlo: riprova tra poco');
+      expect(said.join('\n')).toContain('[universi]');
+    } finally {
+      console.warn = warn;
+    }
+  });
+
   it('V-001 le regole delle rotte restano: chi non è il master non scrive, un webhook senza firma non accredita', async () => {
     const bearer = { Authorization: 'Bearer vero-estraneo', 'Content-Type': 'application/json' };
     const write = await ask('/api/universe/prova/commit', { method: 'POST', headers: bearer, body: JSON.stringify({ changes: { 'universe.json': '{}' }, message: 'x' }) });
@@ -310,6 +342,54 @@ describe('il server vero', () => {
       const seen = JSON.parse((await ask('/api/session')).text);
       expect(seen.sessions).toContainEqual(expect.objectContaining({ name: 'prova', active: true }));
       for (const ws of [a, b, c]) ws.close();
+    }, 240000);
+
+    /** What a socket is told when it names a universe, before it says who it is. */
+    const refusalFor = async (to: number, name: string) => {
+      const ws = new WebSocket(`ws://127.0.0.1:${to}/api/session?universo=${name}`, { origin: SITE, headers: { Host: 'gioco.example' } });
+      const p = player(ws);
+      await until(() => p.of('rifiuto').length, 15000, `rifiuto di ${name}`);
+      ws.close();
+      return p.of('rifiuto')[0].motivo;
+    };
+
+    it('V-025 un socket non avvia un mondo per un nome che non esiste né per una partita in singola', async () => {
+      expect(await refusalFor(port, 'non-esiste')).toMatch(/non esiste/);
+      expect(await refusalFor(port, 'sola')).toMatch(/singola/);
+      for (const name of ['non-esiste', 'sola']) expect(activeHosts.has(name)).toBe(false);
+    }, 60000);
+
+    it('V-025 al più QUINE_MONDI_MASSIMI mondi accesi', async () => {
+      crowded = createProductionServer({ env: { ...ENV, QUINE_MONDI_MASSIMI: '1' }, dist, worldProgram: built.world, universesDir: universes(), accounts });
+      await new Promise<void>((r) => crowded!.server.listen(0, '127.0.0.1', r));
+      const to = (crowded.server.address() as AddressInfo).port;
+      makeUniverse('terza');
+      // The list of the worlds is the process's: one place taken is the whole of this limit.
+      activeHosts.set('segnaposto', Promise.resolve({ error: 'segnaposto' }));
+      try {
+        expect(await refusalFor(to, 'terza')).toMatch(/troppi mondi/);
+        expect(activeHosts.has('terza')).toBe(false);
+      } finally {
+        activeHosts.delete('segnaposto');
+      }
+    }, 60000);
+
+    it('V-021 un messaggio malformato non ferma il mondo; prima di «entra» non arriva a lui', async () => {
+      const [a, b] = [open('?universo=prova'), open('?universo=prova')];
+      const [pa, pb] = [player(a), player(b)];
+      await Promise.all([closedBefore(a), closedBefore(b)]);
+      // Nobody has said who they are yet.
+      pa.say({ t: 'chat', id: {}, testo: 'prima di entrare' });
+      pa.say({ t: 'entra', id: accountWanderer('uid-carla'), token: 'vero-uid-carla' });
+      await until(() => pa.of('ingresso').length, 120000, 'ingresso di carla');
+      pb.say({ t: 'entra', id: accountWanderer('uid-dario'), token: 'vero-uid-dario' });
+      await until(() => pb.of('ingresso').length, 30000, 'ingresso di dario');
+      for (const m of [null, 7, [], {}, { t: {} }, { t: 'passo', x: {}, y: [] }, { t: 'passo', seq: { toString: 1 } }, { t: 'chat', id: [], testo: {} }, { t: 'entra', id: {} }, { t: 'profilo', profilo: 'x' }, { t: 'azione', x: 'y' }, { t: 'dai', viandante: {}, slot: {}, quanti: {} }]) pa.say(m);
+      // What it sends after those is the same world's: none restarted, no warning that it stopped.
+      const before = pa.heard.length + pb.heard.length;
+      await until(() => pa.heard.length + pb.heard.length > before + 5, 20000, 'il mondo risponde ancora');
+      expect([...pa.of('mondo'), ...pb.of('mondo')]).toEqual([]);
+      for (const ws of [a, b]) ws.close();
     }, 240000);
   });
 

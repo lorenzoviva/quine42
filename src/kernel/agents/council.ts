@@ -332,9 +332,9 @@ export class Council {
     // The focus goes last: what comes before it is the same for every focused task of the agent (the cache).
     const focus = this.focusContext(opts.focus);
     const chi = opts.chi ?? this.payer?.(task) ?? COMUNE;
-    const useLocal = chi !== COMUNE && !!this.hasCredits && !this.hasCredits(chi);
+    const useLocal = !!this.hasCredits && !this.hasCredits(chi);
     if (useLocal) {
-      this.say('kernel', 'info', `I crediti di ${chi} sono esauriti: la richiesta «${task}» viene gestita con i modelli locali.`, undefined, task);
+      this.say('kernel', 'info', chi === COMUNE ? `Nessuno dei collegati ha crediti: la richiesta «${task}» viene gestita con i modelli locali.` : `I crediti di ${chi} sono esauriti: la richiesta «${task}» viene gestita con i modelli locali.`, undefined, task);
     }
     const models = useLocal ? this.localModels : this.models;
     return models.text({

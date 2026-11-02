@@ -44,6 +44,9 @@ function enter(base, universo, entra, { origin, headers, wait = 90000 } = {}) {
   assertLoopback(base);
   const ws = new WebSocket(url, { ...(origin ? { origin } : {}), ...(headers ? { headers } : {}) });
   const client = {
+    /** What the server said of the world (stopped, started again), and the last tick it told. */
+    mondo: [],
+    tick: 0,
     answers: new Map(),
     waiting: new Map(),
     send: (m) => ws.readyState === ws.OPEN && ws.send(JSON.stringify(m)),
@@ -68,6 +71,8 @@ function enter(base, universo, entra, { origin, headers, wait = 90000 } = {}) {
     ws.on('open', () => client.send({ t: 'entra', nome: entra.id, ...entra }));
     ws.on('message', (data) => {
       const m = JSON.parse(String(data));
+      if (m.t === 'mondo') client.mondo.push(m.stato);
+      if (m.t === 'aggiorna') client.tick = m.tick;
       if (m.t === 'ingresso') {
         client.ingresso = m;
         done();

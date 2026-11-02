@@ -286,7 +286,7 @@ describe('Stripe payments and idempotency (T45e)', () => {
     const answer = async (settings: StripeSettings, method: string, url: string, body?: unknown) => {
       let status = 0;
       let text = '';
-      const req = Object.assign(Readable.from(body ? [Buffer.from(JSON.stringify(body))] : []), { method, url, headers: {} });
+      const req = Object.assign(Readable.from(body ? [Buffer.from(JSON.stringify(body))] : []), { method, url, headers: { host: 'localhost', 'content-type': 'application/json' }, socket: { remoteAddress: '127.0.0.1' } });
       const res = { statusCode: 0, setHeader() {}, end: (t: string) => ((status = res.statusCode), (text = t)) };
       await stripeHandler({ settings, universesDir: '.' })(req as never, res as never, () => {});
       return { status, body: JSON.parse(text) };

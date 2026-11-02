@@ -12,7 +12,7 @@ import { costWithFee, type Ledger, type PaymentRecord } from '../src/kernel/cred
 import { USAGE_FILE } from '../src/kernel/ai/usage';
 import { playerFile, readWandererState } from '../src/kernel/wanderers';
 import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
-import { bearer, gate, refuse } from './access';
+import { bearer, failureText, gate, refuse } from './access';
 import { openLedger } from './ledger';
 import { send, whoAsks, type WandererRouteOptions, type WandererView } from './wanderer';
 
@@ -146,7 +146,7 @@ export function walletHandler(opts: WandererRouteOptions): Connect.NextHandleFun
         }
         return send(res, 200, { ok: true, portafoglio: walletFromFiles(await walletFiles(root, who.id), await openLedger(opts.universesDir, universo), universo, who.id, who.account) });
       } catch (e) {
-        return send(res, 500, { ok: false, motivo: (e as Error).message });
+        return send(res, 500, { ok: false, motivo: failureText('crediti', e) });
       }
     })();
   };
