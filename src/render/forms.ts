@@ -5,16 +5,15 @@
 // T64: Form variants and animation frames cache (in-memory Map and persistent IndexedDB) so heavy models
 // (e.g. circuito-3D with 32 animation frames) run once and reload instantly across sessions and seeds.
 
-import { runForm, type FormRequest, type FormResult, type FormRunner } from '../kernel/forms';
+import { formKey, runForm, type FormRequest, type FormResult, type FormRunner } from '../kernel/forms';
 import type { FormMeshes, WorkerAnswer } from './worker';
 import type { MeshData } from '../mj/mesh';
-import { hashStr } from '../kernel/rng';
 
 /**
  * Version of the persistent cache: raising it throws away everything saved before. 2 (T163): the entries of version 1 may be
- * half models, and nothing in them says so.
+ * half models, and nothing in them says so. 3 (T164): the keys changed, the old ones would only take room.
  */
-export const FORMS_DB_VERSION = 2;
+export const FORMS_DB_VERSION = 3;
 
 export interface FormStore {
   get(key: string): Promise<FormResult | undefined>;
@@ -22,15 +21,13 @@ export interface FormStore {
   clear(): Promise<void>;
 }
 
-/** Deterministic cache key for a program's form variant. */
+/**
+ * Everything a form with its meshes depends on, and nothing else (ADR-0108): the kernel's `formKey` (the whole text of the program, so two
+ * programs are never taken for one, the seed, the box, the tint) and what only the meshes look at. Not the model's name: two universes may
+ * give it to different programs, and one program under two names is one result. Not `tempo`: what did not finish is not kept.
+ */
 export function formCacheKey(req: FormRequest): string {
-  const h = hashStr(req.xml);
-  const tint = req.tint ? `${req.tint.symbol}:${req.tint.color}` : '';
-  const rig = req.rig ? 1 : 0;
-  const sway = req.sway ? 1 : 0;
-  const size = req.size ? `${req.size[0]}x${req.size[1]}x${req.size[2]}` : '';
-  const model = req.model ?? '';
-  return `${model}#${req.seed}#${req.vpt}#${h}#${tint}#${rig}#${sway}#${size}#${req.tempo ?? ''}`;
+  return JSON.stringify([req.vpt, !!req.rig, !!req.sway]) + formKey(req);
 }
 
 function restoreMesh(m: MeshData): MeshData {

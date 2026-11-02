@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Forms, type FormRequest, type FormResult } from '../src/kernel/forms';
 import { FORMS_DB_VERSION, formCacheKey, IdbFormStore, MemoryFormStore, WorkerRunner } from '../src/render/forms';
 import type { WorkerAnswer } from '../src/render/worker';
+import { hashStr } from '../src/kernel/rng';
 
 const PROGRAM = '<sequence values="BW"><box at="0 0 0" size="1 1 1" color="W"/></sequence>';
 /** Many steps on a big box: longer than a millisecond on any machine. */
@@ -77,6 +78,78 @@ describe('WorkerRunner', () => {
   });
 });
 
+describe('the key (T164)', () => {
+  /** Two programs that draw different things, with the same 32 bits of hashStr: a comment changes until they meet. */
+  function collision(): [string, string] {
+    const white = '<sequence values="BW"><box at="0 0 0" size="1 1 1" color="W"/></sequence>';
+    const red = '<sequence values="BR"><box at="0 0 0" size="1 1 1" color="R"/></sequence>';
+    const seen = new Map<number, string>();
+    let state = 1;
+    for (let i = 0; i < 2_000_000; i++) {
+      state = Math.imul(state, 1103515245) + 12345;
+      const comment = `<!-- ${(state >>> 0).toString(36)}${i.toString(36)} -->`;
+      const w = comment + white;
+      seen.set(hashStr(w), w);
+      const r = seen.get(hashStr(comment + red));
+      if (r) return [r, comment + red];
+    }
+    throw new Error('no collision found');
+  }
+
+  it('does not give one program the form of another with the same short hash', async () => {
+    const [a, b] = collision();
+    expect(a).not.toBe(b);
+    expect(hashStr(a)).toBe(hashStr(b));
+    const first = req({ xml: a });
+    const second = req({ xml: b });
+    expect(formCacheKey(first)).not.toBe(formCacheKey(second));
+
+    const runner = new WorkerRunner(0, new MemoryFormStore());
+    const [ra, rb] = [await runner.run(first), await runner.run(second)];
+    expect(ra.grid.alphabet).toContain('W');
+    expect(rb.grid.alphabet).toContain('R');
+    expect(runner.cachedCount).toBe(2);
+  });
+
+  it('is the same for the same request, and different for what changes the result', () => {
+    expect(formCacheKey(req())).toBe(formCacheKey(req()));
+    expect(formCacheKey(req({ tint: undefined }))).toBe(formCacheKey(req()));
+    for (const other of [
+      req({ seed: 2 }),
+      req({ size: [2, 2, 3] }),
+      req({ vpt: 8 }),
+      req({ rig: true }),
+      req({ sway: true }),
+      req({ tint: { symbol: 'W', color: '#ff0000' } }),
+      req({ xml: `${PROGRAM} ` }),
+    ])
+      expect(formCacheKey(other)).not.toBe(formCacheKey(req()));
+    expect(formCacheKey(req({ tint: { symbol: 'a', color: 'b","c' } }))).not.toBe(formCacheKey(req({ tint: { symbol: 'a","b', color: 'c' } })));
+  });
+
+  it('does not depend on who asks: two names of one program, or how long they wait, are one result', async () => {
+    expect(formCacheKey(req({ model: 'y' }))).toBe(formCacheKey(req()));
+    expect(formCacheKey(req({ tempo: 5_000 }))).toBe(formCacheKey(req()));
+    const { runner, sent, answer } = pool();
+    const whole = result();
+    const asked = runner.run(req());
+    await tick();
+    answer({ id: sent[0].id, ok: true, result: whole, finished: true });
+    await asked;
+    expect(await runner.run(req({ model: 'y', tempo: 5_000 }))).toBe(whole);
+    expect(sent.length).toBe(1);
+  });
+
+  it('two universes with a model of the same name and different programs do not share an entry', async () => {
+    const store = new MemoryFormStore();
+    const runner = new WorkerRunner(0, store);
+    const one = await runner.run(req({ xml: '<sequence values="BW"><box at="0 0 0" size="1 1 1" color="W"/></sequence>', model: 'casa' }));
+    const two = await new WorkerRunner(0, store).run(req({ xml: '<sequence values="BR"><box at="0 0 0" size="1 1 1" color="R"/></sequence>', model: 'casa' }));
+    expect(one.grid.alphabet).toContain('W');
+    expect(two.grid.alphabet).toContain('R');
+  });
+});
+
 describe('the worker', () => {
   it('says whether the program has finished', async () => {
     const answers: WorkerAnswer[] = [];
@@ -134,7 +207,7 @@ describe('the persistent cache', () => {
   it('does not reuse what was saved before this version, once', async () => {
     const idb = fakeIndexedDB();
     const key = formCacheKey(req());
-    idb.dbs.set('rune-forms', { version: 1, stores: new Map([['forms', new Map<string, unknown>([[key, result()]])]]) });
+    idb.dbs.set('rune-forms', { version: FORMS_DB_VERSION - 1, stores: new Map([['forms', new Map<string, unknown>([[key, result()], ['x#1#20#123456##0#0#2x2x2#', result()]])]]) });
     vi.stubGlobal('indexedDB', idb);
 
     const { runner, sent, answer } = pool(new IdbFormStore() as unknown as MemoryFormStore);
@@ -142,7 +215,8 @@ describe('the persistent cache', () => {
     await new Promise((r) => setTimeout(r, 20));
     expect(sent.length, 'the old entry does not answer').toBe(1);
     expect(idb.dbs.get('rune-forms')!.version).toBe(FORMS_DB_VERSION);
-    expect(FORMS_DB_VERSION).toBeGreaterThan(1);
+    expect(idb.dbs.get('rune-forms')!.stores.get('forms')!.size, 'the old keys take no room').toBe(0);
+    expect(FORMS_DB_VERSION).toBeGreaterThan(2);
     const whole = result();
     answer({ id: sent[0].id, ok: true, result: whole, finished: true });
     await asked;
