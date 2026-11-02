@@ -1,6 +1,6 @@
 // Generating with subscriptions (T68, ADR-0077): the slow tasks of the Council (Genesis, Forge, the Sculptor's models,
-// the Council's sessions) may run on the CLI subscription of whoever plays locally (Claude Code, Antigravity) instead of
-// the paid API. Which provider for which agent is a table in `universe.json → ai` (`provider` is the default,
+// the Council's sessions) may run on the CLI subscription of whoever plays locally (Claude Code; not Antigravity, which
+// cannot exclude its tools: ADR-0106) instead of the paid API. Which provider for which agent is a table in `universe.json → ai` (`provider` is the default,
 // `agenti` the exceptions); every other task stays on the API. Never on the server of many (ADR-0058): the
 // subscription is personal, so only `main.ts` in single play and development builds these models.
 //
@@ -12,12 +12,12 @@ import { emptyUsage, Semaphore, type Limits, type Models, type TextCall } from '
 import type { CallRecord } from './usage';
 
 /** `api`: Gemini, paid per call. The others: a subscription's CLI, through the queue. */
-export type Provider = 'api' | 'claude' | 'antigravity';
-export const PROVIDERS: readonly Provider[] = ['api', 'claude', 'antigravity'];
-export const SUBSCRIPTIONS: readonly Exclude<Provider, 'api'>[] = ['claude', 'antigravity'];
+export type Provider = 'api' | 'claude';
+export const PROVIDERS: readonly Provider[] = ['api', 'claude'];
+export const SUBSCRIPTIONS: readonly Exclude<Provider, 'api'>[] = ['claude'];
 
 /** The name a subscription's calls have in the usage ledger (prices.ts prices them at zero). */
-export const SUBSCRIPTION_MODEL: Record<Exclude<Provider, 'api'>, string> = { claude: 'abbonamento-claude', antigravity: 'abbonamento-antigravity' };
+export const SUBSCRIPTION_MODEL: Record<Exclude<Provider, 'api'>, string> = { claude: 'abbonamento-claude' };
 
 /**
  * The tasks already slow enough that a CLI answering in seconds or minutes changes nothing for whoever plays.
@@ -126,6 +126,36 @@ export interface QueueOptions {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+/** The header that carries the queue's local secret (ADR-0106). Not a simple header: another site's page cannot send it without asking. */
+export const QUEUE_SECRET_HEADER = 'x-quine-coda';
+
+/** The secret of each queue, as the page got it from its own server. */
+const secrets = new Map<string, Promise<string | undefined>>();
+
+function secretOf(endpoint: string, fetchImpl: typeof fetch): Promise<string | undefined> {
+  let s = secrets.get(endpoint);
+  if (!s) {
+    s = fetchImpl(`${endpoint}/segreto`)
+      .then(async (r) => (r.ok ? (await r.json())?.segreto : undefined))
+      .then((v) => (typeof v === 'string' ? v : undefined))
+      .catch(() => undefined);
+    secrets.set(endpoint, s);
+  }
+  return s;
+}
+
+/** A request to the queue with its secret; the secret lives as long as the server: after a restart it is asked again, once. */
+async function askQueue(endpoint: string, fetchImpl: typeof fetch, url: string, init: RequestInit = {}): Promise<Response> {
+  const send = async () => {
+    const secret = await secretOf(endpoint, fetchImpl);
+    return fetchImpl(url, { ...init, headers: { ...(init.headers as Record<string, string>), ...(secret ? { [QUEUE_SECRET_HEADER]: secret } : {}) } });
+  };
+  const first = await send();
+  if (first.status !== 403) return first;
+  secrets.delete(endpoint);
+  return send();
+}
+
 export interface QueueItem {
   id: string;
   provider: Exclude<Provider, 'api'>;
@@ -161,7 +191,7 @@ export class QueueModels implements Models {
   /** Whether a process serves the queue for this provider (its heartbeat is recent). */
   static async available(provider: Exclude<Provider, 'api'>, endpoint = '/api/coda', fetchImpl: typeof fetch = (...a) => fetch(...a)): Promise<boolean> {
     try {
-      const r = await fetchImpl(`${endpoint}/stato`);
+      const r = await askQueue(endpoint, fetchImpl, `${endpoint}/stato`);
       const j = r.ok ? await r.json() : undefined;
       return Array.isArray(j?.serviti) && j.serviti.includes(provider);
     } catch {
@@ -172,7 +202,7 @@ export class QueueModels implements Models {
   /** The state of the queue and the requests waiting or running. */
   static async queryState(endpoint = '/api/coda', fetchImpl: typeof fetch = (...a) => fetch(...a)): Promise<QueueState | undefined> {
     try {
-      const r = await fetchImpl(`${endpoint}/stato`);
+      const r = await askQueue(endpoint, fetchImpl, `${endpoint}/stato`);
       const j = r.ok ? await r.json() : undefined;
       if (!j || typeof j !== 'object') return undefined;
       return {
@@ -229,7 +259,7 @@ export class QueueModels implements Models {
       };
       let id: string;
       try {
-        const r = await this.fetchImpl(this.endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(request) });
+        const r = await askQueue(this.endpoint, this.fetchImpl, this.endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(request) });
         const j = await r.json().catch(() => ({}));
         if (!r.ok || typeof j.id !== 'string') return fail(`la coda non accetta la richiesta (${j.errore ?? r.status})`);
         id = j.id;
@@ -241,7 +271,7 @@ export class QueueModels implements Models {
         await sleep(this.opts.poll ?? 500);
         let a: QueuedAnswer;
         try {
-          const r = await this.fetchImpl(`${this.endpoint}/${encodeURIComponent(id)}`);
+          const r = await askQueue(this.endpoint, this.fetchImpl, `${this.endpoint}/${encodeURIComponent(id)}`);
           a = await r.json();
         } catch {
           continue; // the server restarting: the request is still on disk
@@ -253,7 +283,7 @@ export class QueueModels implements Models {
         if (a.stato === 'fatta' || a.stato === 'fallita') return fail(a.errore ?? 'risposta vuota');
       }
       // Withdrawn, so the process does not serve it after the game stopped waiting.
-      await this.fetchImpl(`${this.endpoint}/${encodeURIComponent(id)}`, { method: 'DELETE' }).catch(() => undefined);
+      await askQueue(this.endpoint, this.fetchImpl, `${this.endpoint}/${encodeURIComponent(id)}`, { method: 'DELETE' }).catch(() => undefined);
       return fail('tempo scaduto', 'timeout');
     });
   }
@@ -264,7 +294,7 @@ export class QueueModels implements Models {
  * Examples:
  *   "abbonamenti: claude (tutti gli agenti)"
  *   "abbonamenti: claude (scultore)"
- *   "abbonamenti: claude (altri agenti), antigravity (scultore)"
+ *   "abbonamenti: claude (altri agenti), api (scultore)"
  */
 export function describeSubscriptions(s: Subscriptions): string {
   if (!usesSubscriptions(s)) return 'nessun abbonamento';
