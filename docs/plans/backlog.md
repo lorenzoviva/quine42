@@ -2816,6 +2816,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Browser: non serve.
 - Quando è fatto: merge risolto, commit su `task/T165`. L'orchestratore integra T165, T159 e T129, in quest'ordine.
 
+### T166 · Integrare T130 — `da fare` (dipende da T165)
+- Pipeline: claude · stima 3% · approvato · browser · priorità 1
+- Contesto: T130 ha preso l'ADR-0107, riservato ai limiti ai messaggi di T129, e non ha la cache delle forme; tocca `AGENTS.md`, l'indice ADR, il backlog e `docs/sicurezza/registro.md` come T159. Ha corretto due test senza rifare la suite e non ha aperto il browser, ma cambia ciò che il client del giocatore riceve. Nasce da T130: `dossier T130`.
+- Cosa fare: nel worktree di T166, con il base aggiornato, `git merge task/T130`. Lo 0107 resta ai limiti ai messaggi; l'ADR di T130 diventa **0109**: file, indice, `AGENTS.md`, `docs/sicurezza/registro.md`, commenti e test che lo citano. Nelle aggiunte nello stesso punto tieni tutte e due. Controlla anche se i file con limiti ai messaggi (`src/session/`) e l'elenco dei campi si toccano: un campo o messaggio nuovo non deve restare fuori dagli elenchi. `.t130msg.txt` non deve stare nel risultato.
+- Test: `npm run typecheck` e la suite intera con i loro turni, col limite normale; nell'esito quanti passano, i rossi rilanciando il file da solo, il tempo. Il kit `npm run sicurezza:prove -- --solo V-011,V-012,V-013,V-014`, con la build, esito in un file a parte.
+- Browser: col turno `browser`, un universo multigiocatore usa e getta e un viandante che **non** è il master: si entra, si cammina, si vedono terreni, modelli e altri viandanti, il menu delle azioni di una cosa e di una persona funziona; niente errori in console. Poi lobby e galleria delle carte del sito, che leggono `publicFiles`. Un difetto dovuto ai campi tolti si corregge qui; il resto diventa una domanda per l'orchestratore.
+- Quando è fatto: commit su `task/T166`. L'orchestratore integra T166 e T130.
+
 ### T160 · Ottimizzare i test più lenti della suite — `da fare` (dipende da T151, T161)
 - Pipeline: claude · stima 5% · approvato · priorità 2
 - Contesto: richiesta dell'autore (02/11): i tempi di esecuzione della suite sono molto lunghi, va cercato ciò che si può accorciare, anche come in T148 e T151. In T148 un boot del kernel costava ~10 s contro 0,2-0,5 s con le forme già pronte: `tests/between.test.ts` è sceso da 386 s a 39 s con un `InlineRunner` condiviso, passato con `KernelOptions.forms`. Ogni minuto di suite pesa su ogni task, perché la suite ha un turno solo. Nasce da T148, T151 e T91: `dossier T148`, `dossier T151`, `dossier T91`.

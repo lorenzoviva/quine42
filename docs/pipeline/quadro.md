@@ -6,7 +6,7 @@
 Aggiornato il 02/11/2026, fine dell'epoca 201 su **claude** (crediti: vedi `stato`).
 
 - **Autonomia dell'autore fino alle 18:00 del 02/11/2026** (ora dell'autore; messaggio delle 04:00 circa): approvo quando mi sembra corretto, segno tutto qui, proattivo. Ciò che nasce da una mia proposta lo approvo da solo e lo scrivo in «Diario dell'autonomia». **Resta all'autore, perché il messaggio non lo copre:** alzare i tetti (ADR-0087 chiede un'istruzione esplicita), T153 (soldi veri, nomi, tetto di costo, singola o multi: `domande/T153.md`), T45f (progetto GCP, deploy, `domande/T45f.md`), T88 (ha detto «non ora», l'universo lo sceglie lui), riaprire o chiudere voci di sicurezza contro il registro, `ferma`. Il resto del lavoro approvato va avanti da solo.
-- **Diario dell'autonomia** (per il riassunto delle 18:00): 02/11, T165 creato e approvato per integrare T159 e T129. Controllo fatto: tutti i task aperti sono già approvati, tranne T88, T45f, T153; `to-do.md` senza richieste nuove.
+- **Diario dell'autonomia** (per il riassunto delle 18:00): 02/11, T165 creato e approvato per integrare T159 e T129. T130 finito (V-012, V-013) con l'ADR-0107 già di T129: **T166** (p1, approvato da me, dipende da T165, browser) rinumera a **0109**, rifà suite e kit e prova il client del giocatore; alla fine `integra T166`, `integra T130`. ADR nuovi dal **0110**; T127 è partito prima: controllare il suo numero. Controllo fatto: tutti i task aperti sono già approvati, tranne T88, T45f, T153; `to-do.md` senza richieste nuove.
 
 - **Tetto di Claude a 2** (richiesta dell'autore, 01/11): attivo dopo il riavvio delle 13:35; `stato` dice tetto 2, slot 2. L'autore dice che con il Pro i limiti di Claude sono 5 volte più alti.
 
@@ -16,7 +16,7 @@ Aggiornato il 02/11/2026, fine dell'epoca 201 su **claude** (crediti: vedi `stat
 
 - **Fine epoca 201**: in corso T130 e T159; T127 è stato ripreso e aspetta uno slot (tetto 2; `stato` lo elenca comunque «in corso»: controlla con `traccia T127`). **Da fare:** alla fine di T159 `integra T159`, `integra T129`; alla fine di T130 e T127 il loro esito e `integra`, una sola cosa che tocca l'indice ADR alla volta. Da leggere nell'esito di T164: se la cache del browser, che non ha un tetto, è un problema misurato (l'ho detto all'autore: non è un task).
 - **Epoca 202**: T159 finito, ma `integra T159` e `integra T129` vanno in conflitto sull'indice ADR (lo 0108 di T161 entrato nel frattempo). **T165** (p1, approvato) fonde e rifà suite e kit V-011 con la cache; alla sua fine `integra T165`, `integra T159`, `integra T129`. Da leggere lì: se il rosso di `referente` è sparito. In corso T127 e T130.
-- **Aspetto dall'autore** (epoca 201): le attese elencate in «Fine epoca 199». ADR: 0107 riservato a T129, 0108 di T161, i nuovi dal 0109.
+- **Aspetto dall'autore** (epoca 201): le attese elencate in «Fine epoca 199». ADR: 0107 riservato a T129, 0108 di T161, i nuovi dal 0110 (0109 a T130).
 
 - **Integrati di recente**: T115 e T57b (rune nuove dal Concilio, ADR-0097; restano 5 timeout noti di referente, wanderers e watch, `abbonamenti` T68b non ricontrollato), T57c (effetto rilievo e terraformazione nel kernel, ADR-0096), T111 (ripiego senza browser corretto), T113 (lampione intero, drone 1:2), T109+T110+T112 (template del sito verificato), T101 (landing con hero MarkovJunior verificata nel browser).
 - **In corso, coda, attese**: vedi «Stato e decisioni» e «Task attivi» sotto.
