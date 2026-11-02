@@ -445,7 +445,7 @@ export function sweepPrograms(folder: string): void {
 }
 
 /** wasmoon is CommonJS at heart: it asks for Node's modules with a `require` and looks at `__filename`. */
-const PROGRAM_HEAD = "import { createRequire as quineRequire } from 'node:module'; import { fileURLToPath as quinePath } from 'node:url'; const require = quineRequire(import.meta.url); const __filename = quinePath(import.meta.url); const __dirname = quinePath(new URL('.', import.meta.url));";
+export const PROGRAM_HEAD = "import { createRequire as quineRequire } from 'node:module'; import { fileURLToPath as quinePath } from 'node:url'; const require = quineRequire(import.meta.url); const __filename = quinePath(import.meta.url); const __dirname = quinePath(new URL('.', import.meta.url));";
 
 /** The world's program, built with Vite into a folder of its own, whole (dependencies and the wasm of Lua too): that folder is all a world reads. */
 export async function buildWorld(root: string, opts: { outDir: string; preserveSymlinks?: boolean }): Promise<string> {
@@ -456,6 +456,7 @@ export async function buildWorld(root: string, opts: { outDir: string; preserveS
     envFile: false,
     root,
     logLevel: 'error',
+    publicDir: false,
     resolve: { preserveSymlinks: !!opts.preserveSymlinks },
     ssr: { noExternal: true },
     build: {

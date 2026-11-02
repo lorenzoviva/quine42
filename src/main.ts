@@ -117,9 +117,9 @@ async function main() {
   const loading = $('#loading');
   loading.textContent = 'avvio del kernel…';
   const ai = readConfig(bundledFiles).config.ai;
-  // Two repositories (ADR-0021): the kernel's seed (bundled) and the universe's, on disk. Dev: ?universo=<name>
-  // opens another universe of universes/ (a game of many to try, T39).
-  const other = dev ? params.get('universo') : null;
+  // Two repositories (ADR-0021): the kernel's seed (bundled) and the universe's, on disk. ?universo=<name> opens another
+  // universe: the site's links say it, the way back from a payment too (T133). What it may read and write the server decides.
+  const other = params.get('universo');
   const name = other && /^[a-z0-9][a-z0-9-]{0,40}$/.test(other) ? other : readConfig(bundledFiles).config.name;
   const client = await UniverseClient.connect(name);
   if (client) loading.textContent = `apertura dell'universo «${name}»…`;

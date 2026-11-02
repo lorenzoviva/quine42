@@ -227,7 +227,8 @@ async function commitAll(root: string, message: string, author: string): Promise
   return head(root);
 }
 
-export function universeStore(baseDir: string, opts: { accounts?: AccountSettings; internal?: string } = {}): Plugin {
+/** The route, as a middleware: the dev server, the preview and the production server (T133) mount this same one. */
+export function universeHandler(baseDir: string, opts: { accounts?: AccountSettings; internal?: string } = {}): Connect.NextHandleFunction {
   const queues = new Map<string, Promise<unknown>>();
   /** One operation at a time per universe (git is not happy with concurrent writers). */
   const serial = <T>(name: string, fn: () => Promise<T>): Promise<T> => {
@@ -383,10 +384,14 @@ export function universeStore(baseDir: string, opts: { accounts?: AccountSetting
     return send(res, 200, r);
   };
 
-  const handler: Connect.NextHandleFunction = (req, res, next) => {
+  return (req, res, next) => {
     if (!req.url?.startsWith('/api/universe')) return next();
     handle(req, res).catch((e: Error) => send(res, 500, { error: e.message }));
   };
+}
+
+export function universeStore(baseDir: string, opts: { accounts?: AccountSettings; internal?: string } = {}): Plugin {
+  const handler = universeHandler(baseDir, opts);
   return {
     name: 'rune-universe-store',
     configureServer(server) {

@@ -1,0 +1,241 @@
+// The production server (T133, ADR-0112): no Vite in it. It serves the build, and only the routes on the list below; it does not start without what
+// makes those routes safe with strangers: who verifies identities, the webhook's secret, the origins it answers for, a cap on the key's spending. The
+// Gemini route and the subscriptions' queue are not here: the first is for who plays alone on their own machine (the worlds call `direct()`),
+// the second runs a CLI on the machine it is served from. Every answer has the same headers.
+
+import { createReadStream, existsSync, realpathSync, statSync } from 'node:fs';
+import http, { type IncomingMessage, type ServerResponse } from 'node:http';
+import path from 'node:path';
+import type { Duplex } from 'node:stream';
+import { accessRefusal, GeminiGate } from './geminiProxy';
+import { newSecret } from './access';
+import { accountHandler, accountSettings, type AccountSettings } from './account';
+import { contentSecurityPolicy } from './csp';
+import { grantCapOf } from './ledger';
+import { attachSessions, getActiveWorld, sessionList } from './session';
+import { stripeHandler, stripeSettings } from './stripe';
+import { universeHandler } from './universeStore';
+import { walletHandler } from './wallet';
+import { wandererHandler } from './wanderer';
+
+type Next = () => void;
+type Route = (req: IncomingMessage, res: ServerResponse, next: Next) => unknown;
+
+const LOOPBACK = /^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/i;
+
+/** The addresses in `QUINE_ORIGINI` (separated by commas), or which of them is no good. By position: what is in that variable is never repeated in a log. */
+export function originsOf(text: string | undefined): { origins: string[]; bad: number[] } {
+  const said = (text ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+  const origins: string[] = [];
+  const bad: number[] = [];
+  said.forEach((s, i) => {
+    try {
+      const u = new URL(s);
+      const plain = u.protocol === 'http:' && LOOPBACK.test(u.host);
+      if ((u.protocol !== 'https:' && !plain) || u.origin !== s.replace(/\/$/, '') || s.includes('*')) bad.push(i + 1);
+      else origins.push(u.origin);
+    } catch {
+      bad.push(i + 1);
+    }
+  });
+  return { origins, bad };
+}
+
+/** Why this environment cannot serve strangers: names of variables, never their values. Empty: it can. */
+export function productionProblems(env: Record<string, string | undefined>): string[] {
+  const has = (k: string) => !!env[k]?.trim();
+  const problems: string[] = [];
+  if (!has('FIREBASE_PROJECT_ID')) problems.push('FIREBASE_PROJECT_ID: senza chi verifica le identità, l’id detto da un client varrebbe per chiunque');
+  if (!has('FIREBASE_API_KEY')) problems.push('FIREBASE_API_KEY: senza, nessun browser può accedere');
+  // firebase-admin would take unsigned tokens.
+  if (has('FIREBASE_AUTH_EMULATOR_HOST')) problems.push('FIREBASE_AUTH_EMULATOR_HOST: con l’emulatore un token senza firma varrebbe');
+  if (!has('STRIPE_WEBHOOK_SECRET')) problems.push('STRIPE_WEBHOOK_SECRET: senza, un pagamento non si può accreditare');
+  // A mock key charges nobody, and needs no webhook: for the tests.
+  if (/^mock(_|$)/.test(env.STRIPE_SECRET_KEY?.trim() ?? '')) problems.push('STRIPE_SECRET_KEY: una chiave finta non incassa nulla');
+  const { origins, bad } = originsOf(env.QUINE_ORIGINI);
+  if (bad.length) problems.push(`QUINE_ORIGINI: la voce ${bad.join(', ')} non è un’origine (https://nome, http solo per questa macchina)`);
+  else if (!origins.length) problems.push('QUINE_ORIGINI: senza, non si sa per quali siti questo server risponde');
+  if (has('GEMINI_API_KEY') && !(Number(env.GEMINI_TETTO_GIORNALIERO) >= 0 && has('GEMINI_TETTO_GIORNALIERO'))) problems.push('GEMINI_TETTO_GIORNALIERO: con la chiave serve un tetto in dollari al giorno, scritto');
+  return problems;
+}
+
+/** Why a request does not reach anything, or undefined: a page of another site, or a name of this server that is not one of its own. This machine (the worlds) is itself. */
+export function frontDoorRefusal(req: Pick<IncomingMessage, 'headers'> & { socket: { remoteAddress?: string } }, origins: string[]): string | undefined {
+  const { origin, host } = req.headers;
+  if (origin !== undefined && !origins.includes(origin)) return 'origine non ammessa';
+  if (origins.some((o) => new URL(o).host === host?.toLowerCase())) return undefined;
+  return accessRefusal(req) ? 'host non ammesso' : undefined;
+}
+
+const TYPES: Record<string, string> = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json',
+  '.wasm': 'application/wasm',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.webp': 'image/webp',
+  '.ico': 'image/x-icon',
+  '.woff2': 'font/woff2',
+  '.woff': 'font/woff',
+  '.txt': 'text/plain; charset=utf-8',
+  '.xml': 'application/xml',
+  '.mp3': 'audio/mpeg',
+  '.ogg': 'audio/ogg',
+  '.wav': 'audio/wav',
+};
+
+/** The tools of the author: in the build, not for strangers. */
+const NOT_SERVED = /^\/lab(\/|$)/i;
+
+/** The file of the build a path asks for, or undefined. Only what is really under the build's folder, with a type on the list, and never a name beginning with a dot. */
+export function buildFile(dist: string, url: string): string | undefined {
+  let pathname: string;
+  try {
+    pathname = decodeURIComponent(url.split(/[?#]/)[0]);
+  } catch {
+    return undefined;
+  }
+  if (!pathname.startsWith('/') || /[\\\0:]/.test(pathname) || NOT_SERVED.test(pathname)) return undefined;
+  const segments = pathname.split('/').filter(Boolean);
+  if (segments.some((s) => s.startsWith('.'))) return undefined;
+  let file = path.join(dist, ...segments);
+  try {
+    if (statSync(file).isDirectory()) file = path.join(file, 'index.html');
+    if (!statSync(file).isFile() || !TYPES[path.extname(file).toLowerCase()]) return undefined;
+    const root = realpathSync(dist);
+    const rel = path.relative(root, realpathSync(file));
+    return rel && !rel.startsWith('..') && !path.isAbsolute(rel) ? file : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function sendBuild(dist: string, req: IncomingMessage, res: ServerResponse): void {
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
+    res.statusCode = 405;
+    res.setHeader('Allow', 'GET, HEAD');
+    return void res.end();
+  }
+  // The address of the site is its landing page. The game without a universe would be a game alone, and here nobody makes one: it starts from the realms.
+  const { pathname, searchParams } = new URL(req.url ?? '/', 'http://localhost');
+  if ((pathname === '/' || pathname === '/index.html') && !searchParams.has('universo')) {
+    res.statusCode = 302;
+    res.setHeader('Location', pathname === '/' ? '/site/' : '/site/sessioni.html');
+    return void res.end();
+  }
+  const file = buildFile(dist, req.url ?? '/');
+  if (!file) {
+    res.statusCode = 404;
+    return void res.end();
+  }
+  res.setHeader('Content-Type', TYPES[path.extname(file).toLowerCase()]);
+  res.setHeader('Content-Length', statSync(file).size);
+  // Names with a hash never change; a page does, at every build.
+  res.setHeader('Cache-Control', /[\\/]assets[\\/]/.test(file) ? 'public, max-age=31536000, immutable' : 'no-cache');
+  if (req.method === 'HEAD') return void res.end();
+  createReadStream(file)
+    .on('error', () => res.destroy())
+    .pipe(res);
+}
+
+export interface ProductionOptions {
+  env: Record<string, string | undefined>;
+  /** The client's build (`dist/`): all that is served from disk. */
+  dist: string;
+  /** The program of the worlds, already built: its folder is all a world reads (ADR-0110). */
+  worldProgram: string;
+  universesDir: string;
+  /** For the tests and the checks in the browser: only by code, never from the environment. */
+  accounts?: AccountSettings;
+}
+
+export interface ProductionServer {
+  server: http.Server;
+  /** The worlds stopped (saving what they can), the clients closed, the port freed. */
+  stop(): Promise<void>;
+}
+
+/** Throws, naming what is missing, if this environment or these folders cannot serve. Starts nothing until `listen`. */
+export function createProductionServer(o: ProductionOptions): ProductionServer {
+  const problems = productionProblems(o.env);
+  if (!existsSync(path.join(o.dist, 'index.html'))) problems.push(`manca la build del client (npm run build)`);
+  if (!existsSync(o.worldProgram)) problems.push(`manca il programma dei mondi (npm run build:server)`);
+  if (problems.length) throw new Error(`il server di produzione non parte:\n- ${problems.join('\n- ')}`);
+
+  const { origins } = originsOf(o.env.QUINE_ORIGINI);
+  const accounts = o.accounts ?? accountSettings(o.env);
+  const universesDir = o.universesDir;
+  const internal = newSecret();
+  const gemini = new GeminiGate({ apiKey: o.env.GEMINI_API_KEY, dailyCap: o.env.GEMINI_TETTO_GIORNALIERO, universesDir, ledgerFile: path.join(universesDir, '.spesa-gemini.json') });
+  if (!gemini.available) console.warn('GEMINI_API_KEY assente: i mondi usano i modelli locali');
+  const answerAccount = accountHandler(accounts);
+  const routes: Route[] = [
+    universeHandler(universesDir, { accounts, internal }),
+    (req, res, next) => (req.url?.split('?')[0] === '/api/account' ? answerAccount(req, res) : next()),
+    stripeHandler({ settings: stripeSettings(o.env), accounts, universesDir, getActiveWorld }),
+    wandererHandler({ accounts, universesDir, getActiveWorld }),
+    walletHandler({ accounts, universesDir, getActiveWorld }),
+    sessionList(accounts),
+  ] as Route[];
+  const policy = contentSecurityPolicy(accounts.config);
+
+  const fail = (res: ServerResponse, e: unknown) => {
+    console.warn(`richiesta non riuscita: ${(e as Error)?.name ?? 'errore'}`);
+    if (res.headersSent) return void res.destroy();
+    res.statusCode = 500;
+    res.end();
+  };
+  const server = http.createServer((req, res) => {
+    res.setHeader('Content-Security-Policy', policy);
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Referrer-Policy', 'same-origin');
+    const refused = frontDoorRefusal(req, origins);
+    if (refused) {
+      res.statusCode = 403;
+      res.setHeader('Content-Type', 'application/json');
+      return void res.end(JSON.stringify({ error: refused }));
+    }
+    try {
+      if (!/^\/api(\/|\?|$)/.test(req.url ?? '')) return sendBuild(o.dist, req, res);
+      // What no route on the list takes: not found, whatever it would be elsewhere.
+      const run = (i: number): unknown => {
+        if (i < routes.length) return routes[i](req, res, () => run(i + 1));
+        res.statusCode = 404;
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({ error: 'non trovato' }));
+      };
+      void Promise.resolve(run(0)).catch((e) => fail(res, e));
+    } catch (e) {
+      fail(res, e);
+    }
+  });
+  const sessions = attachSessions(server, {
+    accounts,
+    gemini: gemini.direct(),
+    internal,
+    credits: { universesDir, grantCap: grantCapOf(o.env, true) },
+    memoryMb: Number(o.env.QUINE_MONDO_MEMORIA) || undefined,
+    program: async () => o.worldProgram,
+    guard: (req) => frontDoorRefusal(req, origins),
+  });
+  // Nothing else is a socket here: Vite's own is not there to take it.
+  server.on('upgrade', (req: IncomingMessage, socket: Duplex) => {
+    if (new URL(req.url ?? '/', 'http://localhost').pathname !== '/api/session') socket.destroy();
+  });
+  let stopped: Promise<void> | undefined;
+  return {
+    server,
+    stop: () =>
+      (stopped ??= (async () => {
+        await sessions.stop();
+        await new Promise<void>((done) => {
+          server.close(() => done());
+          server.closeAllConnections();
+        });
+      })()),
+  };
+}
