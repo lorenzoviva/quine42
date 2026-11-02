@@ -10,6 +10,8 @@ Aggiornato il 02/11/2026, epoca 203 su **claude** (crediti: vedi `stato`).
 
 - **Sicurezza, richiesta dell'autore (02/11, epoca 204):** «cerca di trovare da solo vulnerabilità e correggerle». **T167** (p18, approvato, Claude, dipende da T127, T132, T166): secondo audit con prove, le correzioni piccole dentro, per le grandi un task proposto nell'esito, che creo e approvo io perché nasce da questa richiesta. Fa anche V-001.n, V-001.o, V-006.g, che quindi non aspettano più l'autore. Fuori dall'autonomia resta: una voce chiusa che si riapre, o `accettata`, va all'autore.
 
+- **Epoca 204:** T166 e T130 integrati (V-012, V-013, ADR-0109, regola 8f; suite 1132 passati, 0 rossi, 109 s; kit V-011-014 16 ok). Per il riassunto delle 18:00: **T168** creato e approvato da me (p28, i resti della verifica di T166: «Raccogli» da non master mai visto riuscire, viandante chiuso nel bosco una volta, due piccoli del sito). In corso T127 e T160. ADR nuovi dal 0110. Alla fine di T127: esito, numero del suo ADR, `integra`.
+
 - **T153, risposta dell'autore (02/11):** «niente API, per ora solo agy e Claude Code, concentrati sul MJ delle strutture». Letta così: prima T154-T156, T153 dopo. Resta `in attesa`: `agy` non sta sulla coda (ADR-0106; ho consigliato Genesi solo con Claude Code), tetto di consumo, singola o multi, nomi, `aurora` (`domande/T153.md`). La coda porta agli abbonamenti solo i compiti lenti: i luoghi nuovi di un universo finito andrebbero alle API.
 
 - **Aspetto dall'autore (chiesto nell'epoca 203):** le cinque risposte aperte di T153, soprattutto se `agy` può fare la Genesi; se «concentrati» vuol dire proprio T154-T156 prima di T153.

@@ -2611,6 +2611,13 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Browser: le prove del punto 2; gioco e sito senza errori in console se le correzioni li toccano.
 - Quando è fatto: commit su `task/T167`. L'esito dice le voci trovate per gravità, quali chiuse, quali restano con il task proposto.
 
+### T168 · I resti della verifica di T166: raccogliere da non master, carte, porta nelle sessioni — `da fare`
+- Pipeline: claude · stima 2% · approvato · browser · priorità 28
+- Contesto: note dell'esito di T166 (`dossier T166`), con T130 ormai nel base. La verifica non ha visto un «Raccogli» riuscito da un viandante non master, e una volta `ospite` è rimasto chiuso nel bosco con tutte le caselle attorno bloccate, durante un cammino fatto da script: non si sa se dipende dallo script.
+- Cosa fare: (1) col turno `browser`, in un universo multigiocatore usa e getta, un non master raccoglie una cosa da vicino, con il loop normale: se non riesce, trova la causa e correggi. (2) Prova a riprodurre il viandante chiuso nel bosco, con i tasti veri e il loop normale; se non si ripete, scrivilo e non correggere nulla. (3) `describeCard` (`site/carte.ts`) cerca ancora `lore` e `aspetto`, che `publicFiles` non dà più: togli i rami morti, una carta senza `description` resta con la riga generica; non rimettere campi negli elenchi di `src/session/files.ts`. (4) `site/sessioni.ts:330` scrive «PORTA 5173» fisso: la porta vera o niente.
+- Test: uno per `describeCard`, con una carta come la dà `publicFiles`; `npm run typecheck` e la suite con i loro turni.
+- Quando è fatto: commit su `task/T168`. L'esito dice se il raccolto riesce e se il blocco si ripete, e «sicurezza: nessuna superficie nuova» o le voci aggiunte.
+
 ### T135 · Integrare T119 dopo i task di sicurezza — `fatto`
 - Pipeline: claude · stima 1% · approvato · priorità 2
 - Contesto: `integra T119` va in conflitto solo in `docs/plans/backlog.md`: la sezione «La sicurezza» (T120-T134) è entrata in fondo al file, accanto al blocco di T119. Nasce da T119: `dossier T119`.
