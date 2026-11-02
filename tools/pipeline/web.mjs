@@ -3,6 +3,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import { markdownToHtml } from './markdown.mjs';
 import {
   approveTasks,
   assignTask,
@@ -882,6 +883,29 @@ export function renderHtml() {
       word-break: break-word;
       margin: 0;
     }
+    .md { white-space: normal; line-height: 1.5; overflow-wrap: anywhere; }
+    .md > :first-child { margin-top: 0; }
+    .md > :last-child { margin-bottom: 0; }
+    .md p, .md ul, .md ol, .md blockquote, .md pre, .md table { margin: 0 0 8px; }
+    .md h1, .md h2, .md h3, .md h4, .md h5, .md h6 { margin: 14px 0 6px; line-height: 1.25; }
+    .md h1 { font-size: 19px; }
+    .md h2 { font-size: 16px; }
+    .md h3 { font-size: 14px; }
+    .md h4, .md h5, .md h6 { font-size: 13px; color: var(--muted); }
+    .md ul, .md ol { padding-left: 20px; }
+    .md li { margin: 2px 0; }
+    .md a { color: var(--accent); }
+    .md hr { border: 0; border-top: 1px solid var(--border); margin: 10px 0; }
+    .md blockquote { border-left: 3px solid var(--border); padding-left: 10px; color: var(--muted); }
+    .md code { font-family: var(--mono); font-size: 0.92em; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; }
+    .md pre { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px; overflow-x: auto; white-space: pre; }
+    .md pre code { background: none; border: 0; padding: 0; }
+    .md table { border-collapse: collapse; display: block; overflow-x: auto; }
+    .md th, .md td { border: 1px solid var(--border); padding: 3px 8px; text-align: left; vertical-align: top; }
+    .md-source { white-space: pre-wrap; word-break: break-word; font-family: var(--mono); font-size: 12px; }
+    .md-doc { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 13px; }
+    #btn-md-source.active { color: var(--accent); border-color: var(--accent); }
+    .prov-fable { background: rgba(167, 139, 250, 0.16); color: #c4b5fd; border-color: rgba(167, 139, 250, 0.4); }
     .conv-step {
       padding: 9px 12px;
       border-radius: 8px;
@@ -938,6 +962,7 @@ export function renderHtml() {
       <button class="tab-btn" data-view="domande">Domande &amp; To-Do (<span id="count-domande">0</span>)</button>
       <button class="tab-btn" data-view="consumi">Consumo &amp; Budget</button>
       <button class="tab-btn" data-view="conversazioni">Conversazioni in corso (<span id="count-conv">0</span>)</button>
+      <button id="btn-md-source" aria-pressed="false" title="Mostra il testo Markdown com'è scritto, e permette di modificare to-do e domande">&lt;/&gt; Sorgente</button>
       <button id="btn-refresh" title="Ricarica stato adesso">↻ Aggiorna</button>
     </div>
   </header>
@@ -977,7 +1002,7 @@ export function renderHtml() {
           </div>
 
           <div id="subpanel-quadro" style="display:none; padding:12px;">
-            <pre class="code-block" id="quadro-text" style="max-height:520px; overflow-y:auto;"></pre>
+            <div class="md-doc" id="quadro-text" style="max-height:520px; overflow-y:auto;"></div>
           </div>
         </div>
 
@@ -1003,6 +1028,7 @@ export function renderHtml() {
           <select id="filter-provider">
             <option value="">Tutti</option>
             <option value="claude">claude</option>
+            <option value="fable">fable</option>
             <option value="argon">argon</option>
             <option value="gemini">gemini</option>
           </select>
@@ -1055,6 +1081,7 @@ export function renderHtml() {
           <div style="padding:14px;">
             <div id="domande-structured"></div>
             <label style="display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;">File Markdown (<code>docs/pipeline/domande/<span id="domande-filename">…</span></code>):</label>
+            <div class="md-doc" id="domande-preview" title="Per modificare il file: Sorgente"></div>
             <textarea id="domande-editor" style="width:100%; min-height:240px; font-family:var(--mono);"></textarea>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
               <label style="font-size:12px; color:var(--muted);">
@@ -1087,6 +1114,7 @@ export function renderHtml() {
             </div>
 
             <label style="display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;">Contenuto completo di <code>docs/userchats/to-do.md</code>:</label>
+            <div class="md-doc" id="todo-preview" title="Per modificare il file: Sorgente"></div>
             <textarea id="todo-editor" style="width:100%; min-height:260px; font-family:var(--mono);"></textarea>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
               <label style="font-size:12px; color:var(--muted);">
@@ -1154,6 +1182,7 @@ export function renderHtml() {
           <label>Provider:
             <select id="modal-provider">
               <option value="claude">claude</option>
+              <option value="fable">fable</option>
               <option value="argon">argon</option>
               <option value="gemini">gemini</option>
             </select>
@@ -1184,7 +1213,7 @@ export function renderHtml() {
 
       <div class="modal-body">
         <div id="mtab-conv"></div>
-        <div id="mtab-dossier" style="display:none;"><pre class="code-block" id="modal-dossier-text"></pre></div>
+        <div id="mtab-dossier" style="display:none;"><div class="md-doc" id="modal-dossier-text"></div></div>
         <div id="mtab-log" style="display:none;"><pre class="code-block" id="modal-log-text"></pre></div>
       </div>
     </div>
@@ -1200,6 +1229,23 @@ export function renderHtml() {
     let DOMANDE_DIRTY = false;
 
     const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    ${markdownToHtml.toString()}
+    let MD_SOURCE = localStorage.getItem('pipeline-md-sorgente') === '1';
+    const md = (text, breaks = false) => MD_SOURCE
+      ? \`<div class="md-source">\${esc(text)}</div>\`
+      : \`<div class="md">\${markdownToHtml(text, { breaks })}</div>\`;
+    // Only when something changes: a refresh must not lose a selection in a long document.
+    const setMd = (el, text) => {
+      const html = md(text);
+      if (el.dataset.shown !== html) { el.innerHTML = html; el.dataset.shown = html; }
+    };
+    function syncEditor(name) {
+      const editor = document.getElementById(name + '-editor');
+      const preview = document.getElementById(name + '-preview');
+      editor.style.display = MD_SOURCE ? '' : 'none';
+      preview.style.display = MD_SOURCE ? 'none' : '';
+      if (!MD_SOURCE) setMd(preview, editor.value || '(vuoto)');
+    }
     const provBadge = (p) => p ? \`<span class="badge prov-\${esc(p)}">\${esc(p)}</span>\` : '<span class="badge st-dafare">—</span>';
     const statusBadge = (s) => {
       const v = String(s ?? '');
@@ -1285,13 +1331,13 @@ export function renderHtml() {
         const time = (c.t || '').slice(11, 19);
         items.push(\`<div class="msg \${cls}">
           <div class="msg-meta"><strong>\${esc(c.chi)}\${c.provider ? ' (' + esc(c.provider) + ')' : ''}</strong><span>\${esc(time)}</span></div>
-          <div>\${esc(c.testo)}</div>
+          <div>\${c.chi === 'pipeline' ? esc(c.testo) : md(c.testo, true)}</div>
         </div>\`);
       }
       for (const q of s.orchestratore.inCoda) {
         items.push(\`<div class="msg incoda">
           <div class="msg-meta"><strong>autore · in coda per il prossimo turno</strong><button type="button" onclick="removeQueued('\${esc(q.id)}')">✕</button></div>
-          <div>\${esc(q.testo)}</div>
+          <div>\${md(q.testo, true)}</div>
         </div>\`);
       }
       chatEl.innerHTML = items.join('') || '<div style="color:var(--muted);">Nessun messaggio nella chat.</div>';
@@ -1311,7 +1357,7 @@ export function renderHtml() {
         </div>\`;
       });
       evEl.innerHTML = evHtml.join('') || '<div style="color:var(--muted);">Nessun evento registrato.</div>';
-      document.getElementById('quadro-text').textContent = s.quadro || '(nessun quadro)';
+      setMd(document.getElementById('quadro-text'), s.quadro || '(nessun quadro)');
     }
 
     function cardButtons(t) {
@@ -1425,6 +1471,7 @@ export function renderHtml() {
       }
       if (!TODO_DIRTY) {
         document.getElementById('todo-editor').value = s.todo || '';
+        syncEditor('todo');
       }
     }
 
@@ -1436,12 +1483,14 @@ export function renderHtml() {
       if (!d) {
         document.getElementById('domande-structured').innerHTML = '<div style="color:var(--muted);">Nessun file di domande selezionato.</div>';
         document.getElementById('domande-editor').value = '';
+        syncEditor('domande');
         return;
       }
       document.getElementById('domande-editor').value = d.content;
+      syncEditor('domande');
       document.getElementById('domande-structured').innerHTML = d.items.map((item) => \`
         <div class="q-item">
-          <label><strong>Domanda \${item.numero}:</strong> \${esc(item.domanda)}</label>
+          <label><strong>Domanda \${item.numero}:</strong>\${md(item.domanda)}</label>
           <input type="text" class="q-answer-input" data-qnum="\${item.numero}" value="\${esc(item.risposta)}" placeholder="Scrivi la risposta…" style="width:100%;" />
         </div>
       \`).join('');
@@ -1593,7 +1642,7 @@ export function renderHtml() {
       }
       document.getElementById('modal-exec-actions').innerHTML = actions.join('');
 
-      document.getElementById('modal-dossier-text').textContent = detail.dossier?.markdown || '';
+      setMd(document.getElementById('modal-dossier-text'), detail.dossier?.markdown || '');
       const tr = detail.traccia;
       const conv = tr?.conversazione || [];
       document.getElementById('modal-conv-count').textContent = conv.length;
@@ -1604,7 +1653,7 @@ export function renderHtml() {
       const convEl = document.getElementById('mtab-conv');
       if (!conv.length) {
         convEl.innerHTML = tr?.out?.result
-          ? \`<div class="conv-step agente"><strong>Riepilogo finale:</strong>\\n\${esc(tr.out.result)}</div>\`
+          ? \`<div class="conv-step agente"><strong>Riepilogo finale:</strong>\${md(tr.out.result, true)}</div>\`
           : '<div style="color:var(--muted);">Nessun passo della conversazione disponibile per questo task.</div>';
       } else {
         convEl.innerHTML = conv.map((step) => {
@@ -1614,7 +1663,7 @@ export function renderHtml() {
           }
           return \`<div class="conv-step \${esc(step.ruolo)}">
             <div class="msg-meta"><strong>\${esc(step.ruolo)}</strong><span>\${esc(time)}</span></div>
-            <div>\${esc(step.testo || '')}</div>
+            <div>\${md(step.testo || '', true)}</div>
           </div>\`;
         }).join('');
       }
@@ -1737,6 +1786,22 @@ export function renderHtml() {
       showToast('Nuova epoca richiesta');
       await loadState();
     });
+    function showMdButton() {
+      const button = document.getElementById('btn-md-source');
+      button.classList.toggle('active', MD_SOURCE);
+      button.setAttribute('aria-pressed', String(MD_SOURCE));
+    }
+    document.getElementById('btn-md-source').addEventListener('click', () => {
+      MD_SOURCE = !MD_SOURCE;
+      localStorage.setItem('pipeline-md-sorgente', MD_SOURCE ? '1' : '0');
+      showMdButton();
+      syncEditor('domande');
+      syncEditor('todo');
+      loadState();
+    });
+    showMdButton();
+    syncEditor('domande');
+    syncEditor('todo');
     document.getElementById('btn-refresh').addEventListener('click', () => loadState());
     document.getElementById('btn-refresh-usage').addEventListener('click', async () => {
       showToast('Lettura /usage dalle CLI in corso…');
