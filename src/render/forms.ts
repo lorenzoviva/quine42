@@ -10,6 +10,12 @@ import type { FormMeshes, WorkerAnswer } from './worker';
 import type { MeshData } from '../mj/mesh';
 import { hashStr } from '../kernel/rng';
 
+/**
+ * Version of the persistent cache: raising it throws away everything saved before. 2 (T163): the entries of version 1 may be
+ * half models, and nothing in them says so.
+ */
+export const FORMS_DB_VERSION = 2;
+
 export interface FormStore {
   get(key: string): Promise<FormResult | undefined>;
   set(key: string, res: FormResult): Promise<void>;
@@ -78,13 +84,19 @@ export class IdbFormStore implements FormStore {
     if (typeof indexedDB === 'undefined') return Promise.resolve(undefined);
     return (this.dbPromise = new Promise((resolve) => {
       try {
-        const req = indexedDB.open(this.dbName, 1);
+        const req = indexedDB.open(this.dbName, FORMS_DB_VERSION);
         req.onupgradeneeded = () => {
-          if (!req.result.objectStoreNames.contains(this.storeName)) {
-            req.result.createObjectStore(this.storeName);
-          }
+          const db = req.result;
+          if (db.objectStoreNames.contains(this.storeName)) db.deleteObjectStore(this.storeName);
+          db.createObjectStore(this.storeName);
         };
-        req.onsuccess = () => resolve(req.result);
+        // Another tab holds the old version: this one goes on without the persistent cache rather than waiting for it.
+        req.onblocked = () => resolve(undefined);
+        req.onsuccess = () => {
+          // And it does not hold back the tab of a later version (a closed database reads as a miss).
+          req.result.onversionchange = () => req.result.close();
+          resolve(req.result);
+        };
         req.onerror = () => resolve(undefined);
       } catch {
         resolve(undefined);
@@ -166,8 +178,7 @@ export class WorkerRunner implements FormRunner {
           this.waiting.delete(a.id);
           if (p) {
             if (a.ok) {
-              this.memory.set(p.key, a.result);
-              void this.store.set(p.key, a.result);
+              if (a.finished) this.keep(p.key, a.result);
               p.ok(a.result);
             } else {
               p.fail(new Error(a.error));
@@ -231,9 +242,8 @@ export class WorkerRunner implements FormRunner {
 
       // 4. Headless fallback if no workers were constructed
       if (this.idle.length === 0 && typeof Worker === 'undefined') {
-        const res = runForm(req);
-        this.memory.set(key, res);
-        void this.store.set(key, res);
+        const { model: _compiled, finished, ...res } = runForm(req);
+        if (finished) this.keep(key, res);
         return res;
       }
 
@@ -250,6 +260,12 @@ export class WorkerRunner implements FormRunner {
 
     this.inflight.set(key, promise);
     return promise;
+  }
+
+  /** Only what has finished: a half model goes to who asked and stops there, as in InlineRunner (ADR-0108). */
+  private keep(key: string, result: FormResult): void {
+    this.memory.set(key, result);
+    void this.store.set(key, result);
   }
 
   private pump(): void {
