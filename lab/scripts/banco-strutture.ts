@@ -3,8 +3,10 @@
 //
 //   npx vite-node lab/scripts/banco-strutture.ts -- --bersagli moderna,steampunk|tutti [--giro v1] [--prompt lab/banco/prompt.md] [--modello sonnet] [--tentativi 1]
 //   npx vite-node lab/scripts/banco-strutture.ts -- --xml modello.xml --bersagli moderna [--giro prove]
+//   npx vite-node lab/scripts/banco-strutture.ts -- --seconda --giro conferma --dir lab/banco [--bersagli …] [--insieme 3]   (T173)
 //
 // → lab/out/banco/<giro>/<bersaglio>/<n>/ {prompt.md, bersaglio.txt, risposta.txt, modello.xml, lati.png, sezioni.png, pianta.png, misure.json, giudizio.md}
+//   --seconda: each attempt of the round that does not pass gets its XML back, with its defects or its `problemi.md` → <n>/seconda/{richiesta.txt, …}.
 //   and lab/out/banco/<giro>/riepilogo.md. Costs subscription credit only without `--xml`. The criteria are in lab/banco/README.md.
 
 import fs from 'node:fs';
@@ -15,6 +17,7 @@ import { BERSAGLI, bersaglio, testoBersaglio } from '../banco/bersagli';
 import { chiedi, LimiteAbbonamento, type Risposta } from '../banco/claude';
 import { fotoLati, fotoPianta, fotoSezioni } from '../banco/foto';
 import { esegui, giudica, misura, type Bersaglio, type Giudizio, type Misure } from '../banco/misure';
+import { daCorreggere, testoSeconda, type Scheda } from '../banco/seconda';
 import { png } from './png';
 
 const args = process.argv.slice(2).filter((a) => a !== '--');
@@ -25,7 +28,10 @@ const promptFile = path.resolve(opt('prompt') ?? 'lab/banco/prompt.md');
 const fileXml = opt('xml');
 const modello = opt('modello');
 const quanti = Number(opt('tentativi') ?? 1);
-const scelti = opt('bersagli') ?? (fileXml ? 'moderna' : '');
+const seconda = args.includes('--seconda');
+/** Attempts at the same time: the 5-hour window does not take many (T173). */
+const insieme = Math.max(1, Number(opt('insieme') ?? 1));
+const scelti = opt('bersagli') ?? (fileXml ? 'moderna' : seconda ? 'tutti' : '');
 if (!scelti) throw new Error('--bersagli moderna,steampunk o --bersagli tutti');
 const lista: Bersaglio[] = scelti === 'tutti' ? BERSAGLI : scelti.split(',').map((id) => bersaglio(id) ?? (() => { throw new Error(`bersaglio sconosciuto: ${id}; ci sono ${BERSAGLI.map((b) => b.id).join(' ')}`); })());
 const radice = path.resolve(opt('dir') ?? 'lab/out/banco', giro);
@@ -96,32 +102,72 @@ function valuta(xml: string, b: Bersaglio, dir: string, r?: Risposta): Riga {
 
 const righe: Riga[] = [];
 const system = fileXml ? '' : fs.readFileSync(promptFile, 'utf8').trim();
-fuori: for (const b of lista) {
-  for (let t = 0; t < (fileXml ? 1 : quanti); t++) {
-    const dir = cartella(b);
-    const testo = testoBersaglio(b);
-    let riga: Riga;
-    if (fileXml) riga = valuta(fs.readFileSync(fileXml, 'utf8'), b, dir);
-    else {
-      fs.writeFileSync(path.join(dir, 'prompt.md'), `${system}\n`);
-      fs.writeFileSync(path.join(dir, 'bersaglio.txt'), `${testo}\n`);
+
+/** One thing to ask: where it goes, what the message is. */
+interface Lavoro {
+  b: Bersaglio;
+  dir: () => string;
+  testo: string;
+  file: string;
+}
+
+/** The attempts of the round that have something to correct and have not had their second request. */
+function lavoriSeconda(): Lavoro[] {
+  const out: Lavoro[] = [];
+  for (const b of lista) {
+    const cartellaB = path.join(radice, b.id);
+    if (!fs.existsSync(cartellaB)) continue;
+    for (const n of fs.readdirSync(cartellaB).sort()) {
+      const att = path.join(cartellaB, n);
+      if (!fs.existsSync(path.join(att, 'modello.xml')) || fs.existsSync(path.join(att, 'seconda', 'misure.json'))) continue;
+      const scheda = JSON.parse(fs.readFileSync(path.join(att, 'misure.json'), 'utf8')) as Scheda;
+      const fileProblemi = path.join(att, 'problemi.md');
+      const esame = daCorreggere(scheda, fs.existsSync(fileProblemi) ? fs.readFileSync(fileProblemi, 'utf8') : undefined);
+      if (!esame) continue;
+      const testo = testoSeconda(testoBersaglio(b), fs.readFileSync(path.join(att, 'modello.xml'), 'utf8'), esame);
+      out.push({
+        b,
+        testo,
+        file: 'richiesta.txt',
+        dir: () => {
+          const dir = path.join(att, 'seconda');
+          fs.mkdirSync(dir, { recursive: true });
+          return dir;
+        },
+      });
+    }
+  }
+  return out;
+}
+
+if (fileXml) for (const b of lista) righe.push(valuta(fs.readFileSync(fileXml, 'utf8'), b, cartella(b)));
+else {
+  const lavori: Lavoro[] = seconda ? lavoriSeconda() : lista.flatMap((b) => Array.from({ length: quanti }, () => ({ b, dir: () => cartella(b), testo: testoBersaglio(b), file: 'bersaglio.txt' })));
+  let prossimo = 0;
+  let fermo = false;
+  const operaio = async () => {
+    while (!fermo && prossimo < lavori.length) {
+      const { b, dir: crea, testo, file } = lavori[prossimo++]!;
+      const dir = crea();
+      if (!seconda) fs.writeFileSync(path.join(dir, 'prompt.md'), `${system}\n`);
+      fs.writeFileSync(path.join(dir, file), `${testo}\n`);
       console.log(`${b.id}: chiedo a claude…`);
       try {
         const r = await chiedi(system, testo, { ...(modello ? { modello } : {}) });
         fs.writeFileSync(path.join(dir, 'risposta.txt'), r.testo);
-        riga = valuta(extractXml(r.testo), b, dir, r);
+        const riga = valuta(extractXml(r.testo), b, dir, r);
+        righe.push(riga);
+        console.log(`${b.id} → ${path.relative(process.cwd(), riga.dir)}: ${riga.passa ? 'PASSA le misure' : `${riga.difetti.length} difetti`}${riga.inputTotale !== undefined ? ` · input ${riga.inputTotale} · output ${riga.output}` : ''}`);
+        for (const d of riga.difetti) console.log(`   - ${d}`);
       } catch (e) {
         fs.writeFileSync(path.join(dir, 'errore.txt'), `${(e as Error).message}\n`);
         console.error(`${b.id}: ${(e as Error).message}`);
         // A limit or a CLI that is not isolated stops everything: the next call would meet the same.
-        if (e instanceof LimiteAbbonamento || /isolamento/.test((e as Error).message)) break fuori;
-        continue;
+        if (e instanceof LimiteAbbonamento || /isolamento/.test((e as Error).message)) fermo = true;
       }
     }
-    righe.push(riga);
-    console.log(`${b.id} → ${path.relative(process.cwd(), riga.dir)}: ${riga.passa ? 'PASSA le misure' : `${riga.difetti.length} difetti`}${riga.inputTotale !== undefined ? ` · input ${riga.inputTotale} · output ${riga.output}` : ''}`);
-    for (const d of riga.difetti) console.log(`   - ${d}`);
-  }
+  };
+  await Promise.all(Array.from({ length: insieme }, operaio));
 }
 
 const passano = righe.filter((r) => r.passa).length;

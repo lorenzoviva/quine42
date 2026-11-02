@@ -117,6 +117,17 @@ export interface Porta {
   libera: boolean;
 }
 
+/** A piece of covered floor as large as a storey that no body reaches. */
+export interface Perso {
+  z: number;
+  x0: number;
+  x1: number;
+  y0: number;
+  y1: number;
+  /** Tiles². */
+  area: number;
+}
+
 export interface Misure {
   voxel: number;
   ms: number;
@@ -133,6 +144,8 @@ export interface Misure {
   stanze: number;
   /** Tiles² of covered floor a body could stand on and does not reach, over those it does. */
   murato: number;
+  /** Where that floor is: what the second request tells (T173). The measure above does not depend on it. */
+  persi: Perso[];
   porta?: Porta;
   /** Places one gets to only with a jump, or better with one: separate landings. */
   salti: Array<{ x: number; y: number; z: number; sale: boolean }>;
@@ -247,24 +260,34 @@ function contaStanze(celle: Cella[], X: number, Y: number, stretto: number, mini
 
 /** The sizes of the 4-connected pieces of a mask. */
 function pezzi(mask: Uint8Array, X: number, Y: number): number[] {
+  return riquadri(mask, X, Y).map((r) => r.size);
+}
+
+/** The connected pieces of a mask, with the box each of them takes. */
+function riquadri(mask: Uint8Array, X: number, Y: number): Array<{ size: number; x0: number; x1: number; y0: number; y1: number }> {
   const seen = new Uint8Array(X * Y);
-  const out: number[] = [];
+  const out: Array<{ size: number; x0: number; x1: number; y0: number; y1: number }> = [];
   for (let s = 0; s < X * Y; s++) {
     if (!mask[s] || seen[s]) continue;
     let size = 0;
+    let x0 = X, x1 = 0, y0 = Y, y1 = 0;
     const stack = [s];
     seen[s] = 1;
     while (stack.length) {
       const i = stack.pop()!;
       size++;
-      const x = i % X;
+      const x = i % X, y = Math.floor(i / X);
+      x0 = Math.min(x0, x);
+      x1 = Math.max(x1, x);
+      y0 = Math.min(y0, y);
+      y1 = Math.max(y1, y);
       for (const n of [x > 0 ? i - 1 : -1, x < X - 1 ? i + 1 : -1, i >= X ? i - X : -1, i < X * (Y - 1) ? i + X : -1])
         if (n >= 0 && mask[n] && !seen[n]) {
           seen[n] = 1;
           stack.push(n);
         }
     }
-    out.push(size);
+    out.push({ size, x0, x1, y0, y1 });
   }
   return out;
 }
@@ -557,7 +580,13 @@ export function misura(e: Eseguito, b: Bersaglio): Misure {
       }
     }
   let perso = 0;
-  for (const mask of persi.values()) for (const size of pezzi(mask, g.X, g.Y)) if (size >= minArea) perso += size;
+  const dovePersi: Perso[] = [];
+  for (const [z, mask] of persi)
+    for (const { size, x0, x1, y0, y1 } of riquadri(mask, g.X, g.Y))
+      if (size >= minArea) {
+        perso += size;
+        dovePersi.push({ z, x0, x1, y0, y1, area: size / (vpt * vpt) });
+      }
   const presiCoperti = [...coperte.values()].reduce((s, n) => s + n, 0);
 
   // Materials, roofline, footprint.
@@ -593,6 +622,7 @@ export function misura(e: Eseguito, b: Bersaglio): Misure {
     terrazze,
     stanze: piani.reduce((s, p) => s + p.stanze, 0),
     murato: perso / Math.max(1, presiCoperti),
+    persi: dovePersi,
     porta: trovaPorta(g, cammino, levels, vpt, base, minArea),
     salti: trovaSalti(g, ground, cammino, vpt, base),
     materiali,
