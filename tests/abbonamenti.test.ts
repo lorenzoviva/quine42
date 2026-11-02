@@ -7,10 +7,14 @@ import { QueueModels } from '../src/kernel/ai/subscription';
 import {
   buildCliCommand,
   extractUsage,
+  parseArgs,
   promptWithSchema,
   readCliOutput,
   serveOne,
 } from '../tools/abbonamenti/servi';
+
+/** What the real CLI says first when it has nothing to act with (ADR-0106): a fake one has to say it too. */
+const INIT = "console.log(JSON.stringify({ type: 'system', subtype: 'init', tools: [], mcp_servers: [], skills: [], slash_commands: [], plugins: [{ path: 'builtin' }] }));";
 
 const dir = () => mkdtempSync(path.join(tmpdir(), 'coda-test-'));
 
@@ -29,7 +33,7 @@ function diskFetch(d: string): typeof fetch {
 }
 
 describe('servi (T68b) — comando e argomenti delle CLI', () => {
-  it('Claude: -p, --output-format json, --tools "", e --system-prompt se presente', () => {
+  it('Claude: -p, gli eventi, --tools "", --system-prompt se presente, il testo su stdin', () => {
     const cmd = buildCliCommand('claude', {
       id: '1',
       provider: 'claude',
@@ -42,30 +46,19 @@ describe('servi (T68b) — comando e argomenti delle CLI', () => {
     expect(cmd.cmd).toBe('claude');
     expect(cmd.args).toContain('-p');
     expect(cmd.args).toContain('--output-format');
-    expect(cmd.args).toContain('json');
+    expect(cmd.args).toContain('stream-json');
     expect(cmd.args).toContain('--tools');
     expect(cmd.args).toContain('');
     expect(cmd.args).toContain('--system-prompt');
     expect(cmd.args).toContain('Sei lo Scultore');
-    expect(cmd.args).toContain('Scolpisci una roccia');
+    expect(cmd.stdin).toBe('Scolpisci una roccia');
+    expect(cmd.args).not.toContain('Scolpisci una roccia');
   });
 
-  it('Antigravity: --output-format json prima di -p, system nel prompt', () => {
-    const cmd = buildCliCommand('antigravity', {
-      id: '2',
-      provider: 'antigravity',
-      agent: 'narratore',
-      task: 'genesis.bible',
-      system: 'Sei il Narratore',
-      prompt: 'Scrivi la bibbia',
-      creata: new Date().toISOString(),
-    });
-    expect(cmd.cmd).toBe('agy');
-    expect(cmd.args[0]).toBe('--output-format');
-    expect(cmd.args[1]).toBe('json');
-    expect(cmd.args[2]).toBe('-p');
-    expect(cmd.args[3]).toContain('System:\nSei il Narratore');
-    expect(cmd.args[3]).toContain('User:\nScrivi la bibbia');
+  it('Antigravity non serve la coda: non può escludere gli strumenti (ADR-0106)', () => {
+    expect(() => parseArgs(['--provider', 'antigravity'])).toThrow(/Antigravity non serve la coda/);
+    expect(() => parseArgs(['--provider=antigravity'])).toThrow(/Antigravity non serve la coda/);
+    expect(parseArgs(['--provider', 'claude']).provider).toBe('claude');
   });
 
   it('aggiunge lo schema JSON al prompt se specificato', () => {
@@ -111,6 +104,7 @@ describe('servi (T68b) — esecuzione con una CLI finta', () => {
     await fs.writeFile(
       scriptPath,
       `
+      ${INIT}
       const out = {
         result: "Ecco il JSON richiesto:\\n\`\`\`json\\n{\\"titolo\\":\\"Torre\\",\\"piani\\":3}\\n\`\`\`",
         usage: { input_tokens: 50, output_tokens: 25 }
@@ -148,6 +142,7 @@ describe('servi (T68b) — esecuzione con una CLI finta', () => {
     await fs.writeFile(
       scriptPath,
       `
+      ${INIT}
       console.log(JSON.stringify({
         result: ${JSON.stringify(xml)},
         usage: { input_tokens: 150, output_tokens: 200 }
@@ -229,6 +224,7 @@ describe('servi (T68b) — esecuzione con una CLI finta', () => {
     await fs.writeFile(
       scriptPath,
       `
+      ${INIT}
       console.log(JSON.stringify({
         result: "{\\"creato\\":true}",
         usage: { input_tokens: 10, output_tokens: 5 }

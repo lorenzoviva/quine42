@@ -1,6 +1,6 @@
 # ADR-0077 — Generare l'universo con gli abbonamenti
 
-Data: 2026-10-29 · Stato: accettato (task T68 del backlog; completato con T68a, T68b, T68c) · Estende ADR-0039 (registro dei consumi) e ADR-0072 (pipeline).
+Data: 2026-10-29 · Stato: accettato (task T68 del backlog; completato con T68a, T68b, T68c) · Estende ADR-0039 (registro dei consumi) e ADR-0072 (pipeline). Aggiornato da ADR-0106: la route solo su richiesta e con un segreto, la CLI isolata, niente Antigravity sulla coda.
 
 ## Contesto
 Il Concilio chiama le API di Gemini a consumo. L'autore vuole far girare le stesse richieste sull'abbonamento di chi gioca (Claude Code

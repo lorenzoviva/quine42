@@ -8,7 +8,7 @@ import { newSecret } from './server/access';
 import { sessionServer, getActiveUniverseKernel } from './server/session';
 import { accountRoute, accountSettings } from './server/account';
 import { stripeRoute, stripeSettings } from './server/stripe';
-import { subscriptionQueue } from './server/subscriptionQueue';
+import { queueWanted, subscriptionQueue } from './server/subscriptionQueue';
 import { wandererRoute } from './server/wanderer';
 import { testWorkers } from './server/testWorkers';
 import { walletRoute } from './server/wallet';
@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => {
   return {
     // Universes live next to the kernel, each a git repository of its own (ignored by the kernel's).
     // The games of many (T38): their worlds run in this process, one per universe, clients over /api/session.
-    // The subscriptions' queue (T68): the slow requests on disk until a process using the CLIs serves them.
+    // The subscriptions' queue (T68): the slow requests on disk until a process using the CLIs serves them; off unless asked (ADR-0106).
     plugins: [
       geminiProxy(gemini),
       universeStore(universesDir, { accounts, internal }),
@@ -43,7 +43,7 @@ export default defineConfig(({ mode }) => {
       // The site's credits page (T105): the account's balance and their lines of the two ledgers.
       walletRoute({ accounts, universesDir, getActiveKernel: getActiveUniverseKernel }),
       sessionServer(accounts, gemini.direct(), internal, { universesDir, grantCap: grantCapOf(env, !!accounts?.verify) }),
-      subscriptionQueue(path.resolve(process.cwd(), 'universes', '.coda')),
+      subscriptionQueue(path.resolve(process.cwd(), 'universes', '.coda'), { enabled: queueWanted(env) }),
     ],
     // Writing a universe must not reload the page (dev server watches the project folder).
     // In a worktree of the pipeline node_modules is a junction to another folder (T44c): wasmoon's glue.wasm is served

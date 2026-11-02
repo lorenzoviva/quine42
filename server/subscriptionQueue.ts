@@ -1,6 +1,9 @@
 // The queue of the subscriptions (T68, ADR-0077): /api/coda keeps the Council's slow requests on disk until a process
-// using the CLIs of a subscription (Claude Code, Antigravity) serves them. Local only: the dev server and the preview of
-// whoever plays; the server of many never uses it (src/kernel/ai/subscription.ts).
+// using the CLI of a subscription (Claude Code) serves them. Local only: the dev server and the preview of whoever plays;
+// the server of many never uses it (src/kernel/ai/subscription.ts).
+//
+// The route (ADR-0106): off unless `.env` says QUINE_CODA=1; from this machine and the page this server serves only, with a
+// secret that lives in this process and that only that page can read. The serving process needs none: it works on the disk.
 //
 // One folder (`universes/.coda/`, ignored by git), one file per state of a request:
 //   <id>.richiesta.json   waiting (what QueueModels sent: provider, agent, task, system, prompt, schema…)
@@ -11,9 +14,11 @@
 
 import type { Connect, Plugin } from 'vite';
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import { SUBSCRIPTIONS, type Provider, type QueuedAnswer } from '../src/kernel/ai/subscription';
+import { QUEUE_SECRET_HEADER, SUBSCRIPTIONS, type Provider, type QueuedAnswer } from '../src/kernel/ai/subscription';
+import { accessRefusal } from './geminiProxy';
 
 const MAX_BODY = 24 * 1024 * 1024;
 /** A process whose heartbeat is older than this does not serve any more. */
@@ -217,11 +222,37 @@ function readBody(req: IncomingMessage): Promise<string> {
   });
 }
 
-/** `POST /api/coda` → { id }; `GET /api/coda/<id>` → QueuedAnswer; `DELETE /api/coda/<id>`; `GET /api/coda/stato`. */
-export function subscriptionQueue(dir: string): Plugin {
+/** The explicit request for the route: anything else in `.env` leaves it off. */
+export const queueWanted = (env: Record<string, string | undefined>): boolean => env.QUINE_CODA === '1';
+
+function sameSecret(given: unknown, secret: string): boolean {
+  if (typeof given !== 'string') return false;
+  const a = Buffer.from(given);
+  const b = Buffer.from(secret);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
+/**
+ * `POST /api/coda` → { id }; `GET /api/coda/<id>` → QueuedAnswer; `DELETE /api/coda/<id>`; `GET /api/coda/stato`, all with the
+ * secret; `GET /api/coda/segreto` → { segreto }, only to the page this server serves. Off, it answers 404 and nothing else
+ * (not the page that Vite gives to an unknown path).
+ */
+export function subscriptionQueue(dir: string, opts: { enabled?: boolean } = {}): Plugin {
+  const secret = randomBytes(32).toString('hex');
   const handler: Connect.NextHandleFunction = (req, res, next) => {
-    if (!req.url?.startsWith('/api/coda')) return next();
-    const route = req.url.split('?')[0].slice('/api/coda'.length).replace(/^\//, '');
+    const url = req.url?.split('?')[0] ?? '';
+    if (url !== '/api/coda' && !url.startsWith('/api/coda/')) return next();
+    if (!opts.enabled) return send(res, 404, { errore: 'la coda non è accesa' });
+    const refused = accessRefusal(req);
+    if (refused) return send(res, 403, { errore: refused });
+    const route = url.slice('/api/coda'.length).replace(/^\//, '');
+    if (route === 'segreto') {
+      // A browser says who is asking and a page cannot lie about it; without a browser, only who can already reach the disk.
+      if (req.method !== 'GET' || req.headers['sec-fetch-site'] !== 'same-origin') return send(res, 403, { errore: 'solo la pagina di questo server' });
+      res.setHeader('Cache-Control', 'no-store');
+      return send(res, 200, { segreto: secret });
+    }
+    if (!sameSecret(req.headers[QUEUE_SECRET_HEADER], secret)) return send(res, 403, { errore: 'segreto locale mancante o sbagliato' });
     (async () => {
       if (!route && req.method === 'POST') {
         let raw: unknown;

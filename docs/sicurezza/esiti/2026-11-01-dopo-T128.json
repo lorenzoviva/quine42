@@ -1,0 +1,32 @@
+{
+ "data": "2026-11-01",
+ "commit": "2356a24",
+ "vite": "7.3.7",
+ "node": "v22.19.0",
+ "piattaforma": "win32",
+ "solo": [
+  "V-009"
+ ],
+ "riepilogo": {
+  "ok": 2,
+  "falle": 0,
+  "errori": 0,
+  "saltate": 0
+ },
+ "prove": [
+  {
+   "id": "V-009.a",
+   "voce": "V-009",
+   "proprieta": "senza segreto locale non si mette un compito nella coda delle CLI",
+   "esito": "ok",
+   "dettaglio": "risposta 404, 0 file in coda (nessuna CLI gira)"
+  },
+  {
+   "id": "V-009.b",
+   "voce": "V-009",
+   "proprieta": "senza segreto locale non si leggono i compiti in coda",
+   "esito": "ok",
+   "dettaglio": "risposta 404"
+  }
+ ]
+}
