@@ -20,6 +20,39 @@ export const LOW_DETAIL: { coefficienti: Coefficients; scultori: Partial<Sculpto
   scultori: { figura: 'gemini-3.1-flash-lite', struttura: 'gemini-3.1-flash-lite', importante: 'gemini-3.8-flash', artista: 'gemini-3.1-flash-lite' },
 };
 
+/**
+ * The Actor (T157, ADR-0116): an option of the master. Off (the default) the Narrator plays every person as it always did
+ * and no call is added; on, the Narrator writes a sheet once per individual (`npc.sheet`) and the Actor plays them
+ * (`npc.reply`, `npc.dialogue`) with its own model.
+ */
+export interface AttoreConfig {
+  acceso: boolean;
+  /** The Actor's model; `ACTOR_MODEL` when it says nothing. */
+  modello: string;
+}
+
+/**
+ * The Actor's default model: the lines of the people are what the player reads most, its prompt is short (a sheet, the
+ * memories, the neighbourhood of the graph: no bible, no catalog), so a model a step above Flash-Lite costs little in
+ * absolute terms (about a cent for every ten lines); whoever turns the option on asks for better acting, not for less.
+ */
+export const ACTOR_MODEL = 'gemini-3.8-flash';
+
+/** The Actor's option from what universe.json says: a boolean, a model's name (on, with that model), or an object. */
+export function repairAttore(raw: unknown): AttoreConfig {
+  if (typeof raw === 'boolean') return { acceso: raw, modello: ACTOR_MODEL };
+  if (typeof raw === 'string') {
+    const m = raw.trim();
+    if (!m || /^(no|off|spento|false|0)$/i.test(m)) return { acceso: false, modello: ACTOR_MODEL };
+    if (/^(s[iì]|on|acceso|true|1)$/i.test(m)) return { acceso: true, modello: ACTOR_MODEL };
+    return { acceso: true, modello: m };
+  }
+  const r = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+  const modello = typeof r.modello === 'string' && r.modello.trim() ? r.modello.trim() : ACTOR_MODEL;
+  const acceso = typeof r.acceso === 'boolean' ? r.acceso : typeof r.acceso === 'string' ? /^(s[iì]|on|acceso|true|1)$/i.test(r.acceso.trim()) : r.acceso === 1;
+  return { acceso, modello };
+}
+
 /** What every coefficient regulates, in the words of the Genesis screen. */
 export const COEFFICIENT_INFO: Record<CoefficientKey, { nome: string; agente: string; modo: 'diretta' | 'indiretta'; testo: string }> = {
   sessioni: { nome: 'Sessioni del Concilio', agente: 'arbitro', modo: 'diretta', testo: 'ogni 12 luoghi nuovi; a 0,5 ogni 24' },
@@ -60,14 +93,15 @@ export const CENSUS: Array<{ compito: string; agente: string; modo: 'diretta' | 
   { compito: 'content.recipes', agente: 'narratore', modo: 'indiretta', coefficiente: 'pacchetti' },
   { compito: 'content.define', agente: 'narratore', modo: 'indiretta', coefficiente: 'cose', nota: 'anche ciò che il viandante fabbrica' },
   { compito: 'npc.individuate', agente: 'narratore', modo: 'indiretta', coefficiente: 'persone' },
+  { compito: 'npc.sheet', agente: 'narratore', modo: 'indiretta', coefficiente: 'persone', nota: "solo con l'Attore acceso: una scheda per individuo, alla sua prima battuta" },
   { compito: 'action.judge', agente: 'narratore', modo: 'non regolabile', nota: '«Altro…» del viandante' },
   { compito: 'craft.free', agente: 'narratore', modo: 'non regolabile', nota: 'fabbricazione libera' },
   { compito: 'spell.name', agente: 'narratore', modo: 'non regolabile', nota: 'un incantesimo nuovo, una volta' },
   { compito: 'rune.invent', agente: 'narratore', modo: 'non regolabile', nota: 'una runa nuova: dalle sessioni o da una formula, al più 16 rune' },
   { compito: 'council.session', agente: 'arbitro', modo: 'diretta', coefficiente: 'sessioni' },
   { compito: 'player.death', agente: 'narratore', modo: 'non regolabile', nota: 'a ogni morte' },
-  { compito: 'npc.reply', agente: 'narratore', modo: 'non regolabile', nota: 'quando il viandante parla (meno persone, meno occasioni)' },
-  { compito: 'npc.dialogue', agente: 'narratore', modo: 'diretta', coefficiente: 'dialoghi' },
+  { compito: 'npc.reply', agente: 'narratore', modo: 'non regolabile', nota: "quando il viandante parla (meno persone, meno occasioni); con l'Attore acceso la fa l'Attore" },
+  { compito: 'npc.dialogue', agente: 'narratore', modo: 'diretta', coefficiente: 'dialoghi', nota: "con l'Attore acceso la fa l'Attore" },
   { compito: 'plot.weave', agente: 'narratore', modo: 'diretta', coefficiente: 'trame' },
   { compito: 'text.examine', agente: 'narratore', modo: 'non regolabile', nota: '«Esamina»' },
   { compito: 'text.read', agente: 'narratore', modo: 'non regolabile', nota: '«Leggi»' },
@@ -156,7 +190,10 @@ export interface HourLine {
 export function hourlyEstimate(ai: AiConfig, date?: string): { righe: HourLine[]; chiamate: number; dollari: number } {
   const c = repairCoefficients(ai.coefficienti);
   const sc: SculptorModels = { ...DEFAULT_SCULPTORS, ...(ai.scultori ?? {}) };
+  const actor = repairAttore(ai.attore);
   const text = (n: number) => n * (costOf(ai.textModel, WEIGHT.testo, date) ?? 0);
+  // Who plays the people: the Actor's model when the option is on (T157), else the text model.
+  const played = (n: number) => n * (costOf(actor.acceso ? actor.modello : ai.textModel, WEIGHT.testo, date) ?? 0);
   const H = HOUR;
   const rows: HourLine[] = [];
   const add = (voce: string, modo: HourLine['modo'], chiamate: number, dollari: number) => rows.push({ voce, modo, chiamate: Math.round(chiamate * 10) / 10, dollari });
@@ -175,7 +212,12 @@ export function hourlyEstimate(ai: AiConfig, date?: string): { righe: HourLine[]
   const people = H.luoghi * H.persone * c.persone;
   add(COEFFICIENT_INFO.persone.nome, 'indiretta', people * 1.2, text(people * 1.2));
   const talks = c.dialoghi <= 0 ? 0 : (H.vicini / (40 / c.dialoghi)) * Math.min(1, c.persone * 1.5);
-  add(COEFFICIENT_INFO.dialoghi.nome, 'diretta', talks, text(talks));
+  add(COEFFICIENT_INFO.dialoghi.nome, 'diretta', talks, played(talks));
+  // The Actor's sheets: one per person heard for the first time (a conversation, a dialogue), never more than the people met.
+  if (actor.acceso) {
+    const sheets = Math.min(people, H.parole / 2 + talks);
+    add("Schede dei personaggi (l'Attore acceso)", 'indiretta', sheets, text(sheets));
+  }
   const plots = c.trame <= 0 ? 0 : H.giorni / Math.max(4, stretch(1, c.trame));
   add(COEFFICIENT_INFO.trame.nome, 'diretta', plots * 1.3, text(plots * 1.3));
   // Models: what is missing comes from new kinds, packs and structures; the pause between two of them caps it.
@@ -190,7 +232,7 @@ export function hourlyEstimate(ai: AiConfig, date?: string): { righe: HourLine[]
   add(COEFFICIENT_INFO.modelli.nome, 'diretta', writes, sculptCost);
   add(COEFFICIENT_INFO.revisioni.nome, 'diretta', judges, judges * (costOf(sc.artista, WEIGHT.giudizio, date) ?? 0));
   const asked = H.parole + H.azioni + H.sguardi;
-  add('Ciò che chiede il viandante (parole, «Altro…», «Esamina»)', 'non regolabile', asked, text(asked));
+  add('Ciò che chiede il viandante (parole, «Altro…», «Esamina»)', 'non regolabile', asked, played(H.parole) + text(H.azioni + H.sguardi));
   return { righe: rows, chiamate: Math.round(rows.reduce((s, r) => s + r.chiamate, 0)), dollari: rows.reduce((s, r) => s + r.dollari, 0) };
 }
 

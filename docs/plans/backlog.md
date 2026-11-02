@@ -2857,13 +2857,36 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Browser: col turno `browser`: un edificio nuovo nel gioco, si entra, si sale di piano e si salta; screenshot.
 - Quando è fatto: commit su `task/T156`; nell'esito qualità e costo su Gemini contro Claude.
 
-### T157 · L'Attore: chi interpreta gli NPC, un'opzione del master — `da fare`
+### T157 · L'Attore: chi interpreta gli NPC, un'opzione del master — `fatto` (`HASH157`)
 - Pipeline: fable · stima 15% · approvato · browser · priorità 20
 - Contesto: richiesta 3 dell'autore. Oggi il Narratore è l'unico interprete: `npc.chat` e `npc.dialogue` in `agents/minds.ts`. Con l'opzione accesa il Narratore crea solo legami, storie e **schede degli NPC** (il prompt di ognuno); un agente nuovo, l'**Attore**, le interpreta. Default spento: senza l'opzione nulla cambia e nessuna chiamata in più.
 - Cosa fare: `universe.json → ai.attore`, riparato dal validatore, che il master sceglie con modelli e coefficienti (Genesi con `kernel.setAi`) e che la lobby mostra e permette di impostare (ADR-0086). La scheda è scritta dal Narratore una volta per individuo, salvata con lui, rivista quando cambiano legami o storia ma non a ogni battuta; alla prima battuta di un NPC senza scheda (universi vecchi) si scrive. L'Attore riceve scheda, ricordi per viandante, vicinato del grafo e tutto ciò che il Narratore riceve per quei compiti: principi della quarta parete, canone, lessico, filtro. Non inventa fatti del mondo: ciò che nasce nel dialogo (ricordi, oggetti citati, azioni) passa come oggi. Convenzione del nuovo compito: schema Gemini, risposta in `MockModels`, voce nel registro, `CENSUS` dei coefficienti, `payerOf`, prompt in `prompts/agents/attore.md`. Decidi il modello predefinito dell'Attore e scrivi perché. Decisione architetturale: ADR e `AGENTS.md`.
 - Test: con l'opzione spenta le chiamate sono le stesse di oggi; accesa, `npc.chat` e `npc.dialogue` vanno all'Attore con la scheda, il Narratore scrive la scheda una volta sola, paga chi pagava; quarta parete e crediti esauriti come oggi; un client che non è il master non cambia l'opzione. Typecheck e suite intera con i loro turni. Esito «sicurezza: …» (lobby, sessione, crediti).
 - Browser: col turno `browser`, `?offline`: l'opzione nella Genesi e nella lobby; una battuta con un NPC accesa e spenta; il registro mostra chi ha parlato.
 - Quando è fatto: commit su `task/T157`; nell'esito il costo in più stimato per un'ora di gioco (`hourlyEstimate`).
+- Esito: ADR-0116, `AGENTS.md`. `universe.json → ai.attore` (booleano, nome di un modello o `{acceso, modello}`; `repairAttore` in
+  `coefficients.ts`, riesportata dal validatore, applicata da `readConfig`; `kernel.actor()`, `kernel.interpreter()`, `setAi({attore})`).
+  Agente `attore` in `AGENTS` con `prompts/agents/attore.md`, contesto del Narratore per i compiti narrativi. La scheda: `Person.scheda
+  {testo, impronta}` (`sheetFingerprint` in `society.ts`: persona, mestiere, storia, età, genere, legami), scritta da `kernel.ensureSheet`
+  (compito `npc.sheet`, Narratore) alla prima battuta di un individuo e riscritta solo se l'impronta cambia; scartata se rompe la quarta
+  parete. `npcReply`/`npcDialogue` prendono un `Interpreter` (agente e modello): con l'opzione accesa `attore` con `ACTOR_MODEL`
+  (`gemini-3.8-flash`: le battute sono ciò che il giocatore legge di più, il prompt dell'Attore è corto, il perché nell'ADR). Stessi nomi
+  dei compiti: `payerOf`, limiti e mock invariati; la scheda la paga chi paga la battuta (il viandante; `comune` per un dialogo). Il registro
+  dice chi ha parlato (`npc.reply` dell'Attore o del Narratore, `npc.sheet`). Genesi: casella e modello; lobby: tutti lo vedono, il master lo
+  imposta (nuovo messaggio `attore`, master soltanto, `setActor` in `server.ts`); `attore` in `LOBBY_AI_FIELDS`. `CENSUS` +`npc.sheet` (40 compiti);
+  `hourlyEstimate`: battute sul modello dell'Attore e riga delle schede solo se acceso. `tests/attore.test.ts` (10 test); aggiornati
+  `coefficients`, `screens` (9 scrivanie) e il finto DOM di `lobby.test.ts` (`input[type='number']`). Costo in più per un'ora (seme, pieno
+  dettaglio): da 358 chiamate / 0,96 $ a 413 / 1,17 $ con `gemini-3.8-flash` (+0,21 $: 55 schede 0,07 $, 65 battute da 0,09 $ a 0,23 $);
+  con l'Attore su Flash-Lite 1,03 $. Diverso dal previsto: il task diceva `npc.chat`, il compito si chiama `npc.reply`; la scheda non si
+  scrive alla creazione dell'individuo ma alla prima battuta (chi non parla non costa), così universi vecchi e nuovi fanno lo stesso; la
+  console nella Direzione e la scrivania del registro dal vivo nascono da `AGENTS` (T158 resta per gerboa, posto al tavolo e sala).
+  Sicurezza: una superficie nuova, il messaggio `attore` (solo il master, nessuna chiamata ai modelli, modello filtrato e riparato);
+  `ai.attore` esce nei `publicFiles` come gli altri campi della lobby; i crediti non cambiano.
+  BROWSER: verificato con Claude in Chrome (`?offline`, preview 4737): Genesi con casella e modello dell'Attore e stima che passa da 0,96 $ a
+  1,18 $; battuta con Berta accesa (registro: «Narratore → Attore: la scheda di Berta è scritta», «Attore: Berta a Viandante») e spenta
+  («Narratore: Berta a Viandante»); nessun errore in console. La lobby solo nei test (nessun universo di molti sul disco della preview).
+  Suite intera: 1338 su 1338 (105 file) in 184 s al primo giro; nel log un processo figlio di un test è morto per il suo limite di heap
+  (~200 MB, un mondo o una sandbox a parte), senza un rosso. Typecheck verde.
 
 ### T158 · L'Attore nello studio — `da fare` (dipende da T157)
 - Pipeline: claude · stima 3% · approvato · browser · priorità 86

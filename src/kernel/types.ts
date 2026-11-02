@@ -368,6 +368,8 @@ export interface AiConfig {
   coefficienti?: Partial<import('./coefficients').Coefficients> | string;
   /** Quality and spending minimums set by the master for multiplayer (T45d). */
   minimi?: AiMinimi;
+  /** The Actor (T157, ADR-0116): who plays the people with the Narrator's sheets; off by default. A boolean, a model's name or an object; repaired by the validator. */
+  attore?: Partial<import('./coefficients').AttoreConfig> | boolean | string;
 }
 
 /** Quality and spending minimums of an universe (T45d). */

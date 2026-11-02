@@ -342,10 +342,12 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
       }
 
       querySelector(sel: string): FakeElement | null {
+        // `tag[attr='value']`: the tag with that attribute (the lobby has more than one input, T157).
+        const withAttr = /^(\w+)\[(\w+)='([^']*)'\]$/.exec(sel);
         for (const c of this.children) {
           if (sel.startsWith('.') && c.className.split(' ').includes(sel.slice(1))) return c;
           if (sel.startsWith('#') && c.attributes['id'] === sel.slice(1)) return c;
-          if (c.tagName.toLowerCase() === sel || (sel.startsWith('input') && c.tagName.toLowerCase() === 'input')) return c;
+          if (withAttr ? c.tagName.toLowerCase() === withAttr[1] && c.attributes[withAttr[2]] === withAttr[3] : c.tagName.toLowerCase() === sel) return c;
           const found = c.querySelector(sel);
           if (found) return found;
         }

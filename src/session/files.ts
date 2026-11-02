@@ -13,7 +13,7 @@ import type { FileChanges } from './protocol';
 const UNIVERSE_FIELDS = ['name', 'seed', 'circleRadius', 'chunkSize', 'rilievo'];
 const GAME_FIELDS = ['modalita', 'morte', 'pvp', 'altroTraGiocatori', 'master'];
 /** What the lobby and the site's pages show of `ai`, and what the hourly estimate reads (`publicFiles` only). Not `provider`, `agenti`, `thinking`, `timeout`. */
-const LOBBY_AI_FIELDS = ['textModel', 'scultori', 'coefficienti', 'minimi', 'maxText', 'maxForges', 'maxPacks', 'maxCast', 'maxModels'];
+const LOBBY_AI_FIELDS = ['textModel', 'scultori', 'coefficienti', 'minimi', 'maxText', 'maxForges', 'maxPacks', 'maxCast', 'maxModels', 'attore'];
 
 /**
  * What a client reads of a manifest. A thing in the world reaches it from the server (form, body, menu: `THING_PARTS`), so

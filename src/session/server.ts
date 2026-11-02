@@ -603,6 +603,8 @@ export class SessionServer {
         // The kernel checks that it is the master, the wanderer and the day's cap (ADR-0104).
         void this.kernel.grantCredits(String(msg.viandante), Number(msg.quanti), c.id).then((r) => this.answer(c, seq, r));
         return;
+      case 'attore':
+        return this.answer(c, seq, this.setActor(c, msg.acceso, msg.modello));
       case 'pubblica':
         return this.answer(c, seq, this.publish(c));
       case 'segui':
@@ -640,6 +642,16 @@ export class SessionServer {
       }
     }
     this.answer(c, seq, { ok: false, motivo: 'messaggio sconosciuto' });
+  }
+
+  /** The Actor's option (T157): only the master changes it; `setAi` repairs what the wire says (a boolean, a model's name). */
+  private setActor(c: Client, acceso: unknown, modello: unknown): Answer {
+    if (!this.kernel.isMaster(c.id)) return { ok: false, motivo: "solo il master accende l'Attore" };
+    const on = acceso === true || acceso === 'true' || acceso === 1;
+    const model = typeof modello === 'string' && /^[a-z0-9.-]{1,64}$/i.test(modello.trim()) ? modello.trim() : undefined;
+    this.kernel.setAi({ attore: { acceso: on, ...(model ? { modello: model } : {}) } });
+    const a = this.kernel.actor();
+    return { ok: true, messaggi: [a.acceso ? `l'Attore è acceso (${a.modello})` : "l'Attore è spento: il Narratore interpreta le persone"] };
   }
 
   /** The master's branch, whole, as their client has it now; kept on disk too, on the branch `master`. */

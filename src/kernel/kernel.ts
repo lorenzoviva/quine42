@@ -20,7 +20,7 @@ import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, placeRegion, readA
 import { STAMP_SHAPES } from './stamps';
 import { repairProgram } from './mj';
 import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './universes';
-import { addPerson, applyRenames, dayPhase, defaultRoutine, freshName, greeting, guessGender, inferActivity, memorySummary, readPeople, remember, repairSociety, similarNames, societySummary, type Activity, type DayPhase, type Person, type Species } from './society';
+import { addPerson, applyRenames, dayPhase, defaultRoutine, freshName, greeting, guessGender, inferActivity, memorySummary, readPeople, remember, repairSociety, sheetFingerprint, similarNames, societySummary, type Activity, type DayPhase, type Person, type Species } from './society';
 import { buildGraph, GRAPH_FILE, graphHash, mergePlaces, placesOf, readGraph, slug as nodeSlug, type GraphPlace, type WorldGraph } from './graph';
 import { situation as buildSituation, type PlayerSpot, type Situation } from './situation';
 import { ChainMeter, chainOf, type Chain } from './chain';
@@ -30,7 +30,7 @@ import { Input } from './input';
 import { discoverModules, readConfig } from './universe';
 import { askedRunes, carpetLine, CARPET_TOKENS, cellIndex, COUNCIL_RUNE, extractLines, tokenize, type RuneComp, type RuneLine } from './runes';
 import { hash32, hashStr, hex, Rng } from './rng';
-import { onBeat, repairCoefficients, stretch, type Coefficients } from './coefficients';
+import { onBeat, repairAttore, repairCoefficients, stretch, type AttoreConfig, type Coefficients } from './coefficients';
 import { BudgetError, type Models } from './ai/models';
 import { billedModel, costOf } from './ai/prices';
 import { USAGE_FILE, UsageLedger, type CallRecord } from './ai/usage';
@@ -47,7 +47,7 @@ import { AGENTS, Council, readBible, wordsOf, type AgentId, type CatalogEntry, t
 import { designEnvironment, drawAtlas, planChunk, readStructure, type ChunkPlan, type WaterRecord, type Where } from './agents/cartography';
 import { WaterFlow, WET, type WaterChange } from './water';
 import { forge, judgeCombination, repairLogic, slug, type ForgeOrigin } from './agents/forge';
-import { agentReply, examine, narrate, npcDialogue, npcReply, referenteReply, weavePlot, type NpcReply, type Turn } from './agents/minds';
+import { agentReply, examine, narrate, NARRATOR_PLAYS, npcDialogue, npcReply, npcSheet, referenteReply, weavePlot, type Interpreter, type NpcReply, type Turn } from './agents/minds';
 import { planGenesis } from './agents/genesis';
 import { councilSession, inventRune, judgeAction, judgeCraft, judgeDeath, nameSpell } from './agents/effects';
 import { canonWithRune, MAX_MAGIC_RUNES, validateNewRune } from './magic';
@@ -2003,6 +2003,72 @@ export class Kernel {
   /** How often every agent asks the model (T45b): universe.json → ai.coefficienti, repaired. */
   coefficients(): Coefficients {
     return repairCoefficients(this.config.ai.coefficienti);
+  }
+
+  /** The Actor's option (T157, ADR-0116): universe.json → ai.attore, repaired; off unless the master turned it on. */
+  actor(): AttoreConfig {
+    return repairAttore(this.config.ai.attore);
+  }
+
+  /** Who plays the people now: the Actor with its model when the option is on, else the Narrator as always. */
+  interpreter(): Interpreter {
+    const a = this.actor();
+    return a.acceso ? { agent: 'attore', model: a.modello } : NARRATOR_PLAYS;
+  }
+
+  private sheeting = new Map<string, Promise<string | undefined>>();
+
+  /**
+   * The sheet of a person for the Actor (T157): the Narrator writes it once, at their first line, and again only when what
+   * it was written from changed (their bonds, their story: `sheetFingerprint`), never at every line. Saved with the person in
+   * world/people.json. Paid by whoever pays the line (`chi`). Nothing is written when the Actor is off.
+   */
+  async ensureSheet(name: string, chi?: string): Promise<string | undefined> {
+    if (!this.actor().acceso) return undefined;
+    const p = this.personOf(name);
+    if (!p) return undefined;
+    const stamp = sheetFingerprint(p);
+    if (p.scheda?.testo && p.scheda.impronta === stamp) return p.scheda.testo;
+    const pending = this.sheeting.get(name);
+    if (pending) return pending;
+    const job = (async () => {
+      try {
+        const text = await npcSheet(
+          this.council,
+          {
+            nome: p.nome,
+            persona: p.persona ?? '',
+            mestiere: p.mestiere,
+            genere: p.genere,
+            eta: p.eta,
+            aspetto: p.aspetto,
+            storia: p.storia,
+            legami: (p.famiglia ?? []).map((f) => `${f.legame} ${f.nome}`),
+            routine: (p.routine ?? []).map((r) => `${r.quando}: ${r.fa} (${r.dove})`).join('; '),
+            porta: p.porta ?? [],
+          },
+          this.focusOn([name]),
+          chi,
+        );
+        if (!text || metaBreak(text, wordsOf(this.files))) {
+          this.council.say('kernel', 'scarta', `la scheda di ${name} ${text ? 'rompe la quarta parete' : 'è vuota'}: l'Attore recita dalla persona`, 'narratore', 'npc.sheet');
+          return undefined;
+        }
+        this.updatePerson(name, (x) => (x.scheda = { testo: text, impronta: stamp }));
+        this.commitContent(`scheda: ${name}`, 'npc.sheet', 'narratore', chi);
+        this.council.say('narratore', 'info', `la scheda di ${name} è scritta, per l'Attore`, 'attore', 'npc.sheet');
+        return text;
+      } catch (e) {
+        this.council.say('narratore', 'errore', `scheda di ${name}: ${(e as Error).message}`, undefined, 'npc.sheet');
+        return undefined;
+      }
+    })();
+    this.sheeting.set(name, job);
+    try {
+      return await job;
+    } finally {
+      this.sheeting.delete(name);
+    }
   }
 
   /** Whether a thing of a place stays with a coefficient: a draw of the universe for that origin, the same at every load. */
@@ -5004,14 +5070,14 @@ export class Kernel {
    * The detail of generation and the agents' models (T45b): the Genesis screen (and then the lobby) writes them in
    * universe.json → ai; unlike the game they may change, and they hold from the next call.
    */
-  setAi(patch: Partial<Pick<AiConfig, 'textModel' | 'scultori' | 'coefficienti'>>): void {
+  setAi(patch: Partial<Pick<AiConfig, 'textModel' | 'scultori' | 'coefficienti' | 'attore'>>): void {
     let raw: Record<string, any>;
     try {
       raw = JSON.parse(this.repo.working['universe.json'] ?? '{}');
     } catch {
       raw = {};
     }
-    const ai = { ...(raw.ai ?? {}), ...patch, ...(patch.coefficienti !== undefined ? { coefficienti: repairCoefficients(patch.coefficienti) } : {}) };
+    const ai = { ...(raw.ai ?? {}), ...patch, ...(patch.coefficienti !== undefined ? { coefficienti: repairCoefficients(patch.coefficienti) } : {}), ...(patch.attore !== undefined ? { attore: repairAttore(patch.attore) } : {}) };
     this.writeCommanded('universe.json', JSON.stringify({ ...raw, ai }, null, 2) + '\n');
     this.config = { ...this.config, ai: { ...this.config.ai, ...ai } };
     if (this.models.textModel !== undefined && this.config.ai.textModel) this.models.textModel = this.config.ai.textModel;
@@ -6168,20 +6234,24 @@ export class Kernel {
     this.lastTalk = this.time;
     const plots = readPlots(this.files);
     const day = this.day();
-    const as = (who: Identity, other: Identity, l?: string) => ({
+    const as = (who: Identity, other: Identity, scheda: string | undefined, l?: string) => ({
       nome: who.name,
       mestiere: who.job ?? '',
+      scheda,
       legame: l ?? who.family?.find((f) => f.nome === other.name)?.legame,
       fa: this.routineNow(who)?.fa ?? '',
       ricordi: memorySummary(this.personOf(who.name)?.ricordi?.filter((m) => !m.con || m.con === other.name || m.peso >= 3), 6),
       segreti: secretsOf(plots, who.name, day),
     });
     try {
-      const r = await npcDialogue(this.council, as(ia, ib, legame), as(ib, ia), this.chunkAt(this.ecs.get(a, 'pos')?.x ?? 0, this.ecs.get(a, 'pos')?.y ?? 0)?.place?.name ?? 'qui', this.focusOn([ia.name, ib.name], this.ecs.get(a, 'pos')));
+      // The Actor plays both from their sheets (T157); a dialogue is common, and so are the sheets it needs.
+      const by = this.interpreter();
+      const [sa, sb] = by.agent === 'attore' ? await Promise.all([this.ensureSheet(ia.name, COMUNE), this.ensureSheet(ib.name, COMUNE)]) : [undefined, undefined];
+      const r = await npcDialogue(this.council, as(ia, ib, sa, legame), as(ib, ia, sb), this.chunkAt(this.ecs.get(a, 'pos')?.x ?? 0, this.ecs.get(a, 'pos')?.y ?? 0)?.place?.name ?? 'qui', this.focusOn([ia.name, ib.name], this.ecs.get(a, 'pos')), by);
       r.lines.forEach((l, i) => this.queuedSpeech.push({ id: l.who === 'a' ? a : b, text: l.say, at: this.time + i * 2.6 }));
       if (r.memoryA) this.rememberAbout(ia.name, r.memoryA, ib.name, 1);
       if (r.memoryB) this.rememberAbout(ib.name, r.memoryB, ia.name, 1);
-      this.council.say('narratore', 'info', `${ia.name} e ${ib.name}: ${r.lines.map((l) => `«${l.say}»`).join(' ')}`, undefined, 'npc.dialogue');
+      this.council.say(by.agent, 'info', `${ia.name} e ${ib.name}: ${r.lines.map((l) => `«${l.say}»`).join(' ')}`, undefined, 'npc.dialogue');
     } catch {
       if (legame) {
         const [la, lb] = greeting({ nome: ia.name, mestiere: ia.job ?? '' }, { nome: ib.name }, legame, this.routineNow(ia)?.fa ?? '');
@@ -6539,6 +6609,9 @@ export class Kernel {
       const social = identity
         ? `\nIl tuo mestiere: ${identity.job ?? '—'}. La tua famiglia: ${(identity.family ?? []).map((f) => `${f.legame} ${f.nome}`).join(', ') || 'nessuno'}.${identity.story ? ` La tua storia: ${identity.story}` : ''}${now ? ` Adesso (${now.quando}) stai: ${now.fa}.` : ''}`
         : '';
+      // The Actor plays from the Narrator's sheet (T157): written at the first line, paid by who talks.
+      const by = this.interpreter();
+      const scheda = by.agent === 'attore' ? await this.ensureSheet(name, me.id) : undefined;
       const person = this.personOf(name);
       reply = await npcReply(this.council, {
         chi: me.id,
@@ -6548,7 +6621,9 @@ export class Kernel {
         memories: memorySummary(memoriesFor(person?.ricordi, me.id), 12),
         bond: person ? bondWith(person, me.id) : undefined,
         secrets: secretsOf(readPlots(this.files), name, this.day()),
-        persona: (identity?.persona ?? m.persona) + social, mood: mind.mood, mode: mind.mode, carrying, place: this.placeHere()?.name ?? '', history: mind.history.filter((t) => (t.con ?? SOLO) === me.id), facts: this.worldFacts() }, text, this.focusOn([name], this.ecs.get(id, 'pos')));
+        scheda,
+        persona: (identity?.persona ?? m.persona) + social, mood: mind.mood, mode: mind.mode, carrying, place: this.placeHere()?.name ?? '', history: mind.history.filter((t) => (t.con ?? SOLO) === me.id), facts: this.worldFacts() }, text, this.focusOn([name], this.ecs.get(id, 'pos')), by);
+      this.council.say(by.agent, 'info', `${name} a ${me.nome}: «${reply.say}»`, undefined, 'npc.reply');
     } catch (e) {
       return { say: `(${name} ti guarda in silenzio — ${(e as Error).message})`, action: 'nessuna', mood: mind.mood };
     }
