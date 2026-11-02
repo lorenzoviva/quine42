@@ -32,5 +32,9 @@ export function refusedPath(rel: unknown): string | undefined {
 
 export const allowedPath = (rel: unknown): rel is string => refusedPath(rel) === undefined;
 
+/** What the Council may change in a commit of its own (T130, ADR-0109): the world's content. Not `universe.json` (budgets and providers are real money), not the agents' prompts, not `seed.json`. */
+const COUNCIL_FOLDERS = new Set(['modules', 'models', 'world', 'maps']);
+export const councilMayWrite = (rel: unknown): boolean => allowedPath(rel) && (COUNCIL_FOLDERS.has(rel.split('/')[0]) || rel === 'prompts/theme.md');
+
 /** A universe's name: a folder of `universes/`. No dots here, so a device name can only be the whole of it. */
 export const UNIVERSE_NAME_RE = /^(?!(?:con|prn|aux|nul|clock|com[0-9]|lpt[0-9])$)[a-z0-9][a-z0-9-]{0,40}$/;

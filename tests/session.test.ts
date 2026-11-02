@@ -63,7 +63,9 @@ describe('the kernel on the server (T38)', () => {
     expect(anna.refused).toBeUndefined();
     expect(server.connected()).toEqual(['anna', 'bruno']);
     // They come in with the universe's files: the same world.
-    expect(anna.files['universe.json']).toBe(k.files['universe.json']);
+    const told = JSON.parse(anna.files['universe.json']);
+    expect([told.name, told.seed, told.chunkSize]).toEqual([k.config.name, k.config.seed, k.config.chunkSize]);
+    expect(anna.files['universe.json']).toBe(bruno.files['universe.json']);
     // A player gets what a client draws and walks with (T41): the same models and manifests.
     expect(Object.keys(bruno.files).filter((p) => p.startsWith('models/')).length).toBe(Object.keys(k.files).filter((p) => p.startsWith('models/')).length);
     await settle(server);

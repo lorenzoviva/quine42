@@ -676,6 +676,6 @@ export const PROBES = [
 
 /** The voices no probe of this kit reaches, and why: the register's table says the same. */
 export const UNCOVERED = {
-  'V-013': 'il Concilio che scrive `ai` si vede solo dentro il kernel: lo prova T130',
+  'V-013': 'il Concilio che scrive `ai` si vede solo dentro il kernel: lo prova tests/sicurezza/uscite.test.ts',
   'V-018': 'accettata: non si prova',
 };
