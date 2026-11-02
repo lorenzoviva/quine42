@@ -3,10 +3,12 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 02/11/2026, epoca 207 su **claude** (crediti: vedi `stato`).
+Aggiornato il 02/11/2026, epoca 208 su **claude** (crediti: vedi `stato`).
 
 - **Autonomia dell'autore fino alle 18:00 del 02/11/2026** (ora dell'autore; messaggio delle 04:00 circa): approvo quando mi sembra corretto, segno tutto qui, proattivo. Ciò che nasce da una mia proposta lo approvo da solo e lo scrivo in «Diario dell'autonomia». **Resta all'autore, perché il messaggio non lo copre:** alzare i tetti (ADR-0087 chiede un'istruzione esplicita), T153 (soldi veri, nomi, tetto di costo, singola o multi: `domande/T153.md`), T45f (progetto GCP, deploy, `domande/T45f.md`), T88 (ha detto «non ora», l'universo lo sceglie lui), riaprire o chiudere voci di sicurezza contro il registro, `ferma`. Il resto del lavoro approvato va avanti da solo.
 - **Diario dell'autonomia** (per il riassunto delle 18:00): 02/11, T165 creato e approvato per integrare T159 e T129. T130 finito (V-012, V-013) con l'ADR-0107 già di T129: **T166** (p1, approvato da me, dipende da T165, browser) rinumera a **0109**, rifà suite e kit e prova il client del giocatore; alla fine `integra T166`, `integra T130`. ADR nuovi dal **0110**; T127 è partito prima: controllare il suo numero. Controllo fatto: tutti i task aperti sono già approvati, tranne T88, T45f, T153; `to-do.md` senza richieste nuove. Epoca 203: T165, T159, T129 integrati (V-011, suite di T165 1117 passati, 2 attesi, nessun rosso, 105 s; `referente` verde con la cache: 12 s da solo). T154-T156 portati da p82-84 a p30-32 per la risposta dell'autore qui sotto; T156 riscritto: prova su `agy`, nessuna API.
+
+- **Epoca 208:** T155 fermo dalle 12:56 UTC sul limite di 5 ore di Claude, al giro 9 del banco; riprende da solo dopo le 13:31 UTC. Le 18:00 dell'autore sono le 17:00 UTC. Per il resto vale «Fine epoca 207».
 
 - **Fine epoca 207:** in corso T155; T168 ripreso, in coda; T134 fermo apposta (`stato` lo elenca in corso, `traccia` dice interrotto). Nulla da integrare. Pronti, in ordine: T172, T163, T106, T89a, T152, T157. **Da fare:** alla fine di T155 il suo esito e `integra`; alla fine di T172 `integra T172`, poi `riprendi T134`. ADR nuovi dallo **0114**: controllare il numero di ogni task partito prima. **Alle 18:00 del 02/11:** riassunto all'autore dal diario dell'autonomia e dalle voci delle epoche 204-207. **Aspetto dall'autore:** il salto sulle casse; se gli va bene V-023 con gli account; le attese di «Fine epoca 204» (senza le prove V-001.n, V-001.o, V-006.g, fatte da T167).
 
