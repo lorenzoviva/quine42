@@ -299,7 +299,15 @@ describe('il server vero', () => {
     const player = (ws: WebSocket) => {
       const heard: ServerMsg[] = [];
       ws.on('message', (d) => heard.push(JSON.parse(String(d))));
-      return { heard, say: (m: unknown) => ws.send(JSON.stringify(m)), of: <T extends ServerMsg['t']>(t: T) => heard.filter((m) => m.t === t) as Array<Extract<ServerMsg, { t: T }>> };
+      return {
+        heard,
+        // `send` on a closed socket drops the message without a word: the wait after it would only say that time ran out.
+        say: (m: unknown) => {
+          if (ws.readyState !== ws.OPEN) throw new Error(`il socket è chiuso, non si dice ${JSON.stringify(m)}: ${JSON.stringify(heard.filter((h) => h.t === 'rifiuto'))}`);
+          ws.send(JSON.stringify(m));
+        },
+        of: <T extends ServerMsg['t']>(t: T) => heard.filter((m) => m.t === t) as Array<Extract<ServerMsg, { t: T }>>,
+      };
     };
     const until = async (what: () => unknown, ms: number, label: string) => {
       const end = Date.now() + ms;
@@ -310,6 +318,13 @@ describe('il server vero', () => {
       }
     };
 
+    /** Until they are in; a refusal is said as it is, at once, not as time that ran out. */
+    const entered = async (p: ReturnType<typeof player>, ms: number, label: string) => {
+      await until(() => p.of('ingresso').length || p.of('rifiuto').length, ms, label);
+      const refused = p.of('rifiuto')[0];
+      if (refused) throw new Error(`${label}: rifiuto «${refused.motivo}»`);
+    };
+
     it('V-014 un altro sito e un altro nome no; un altro percorso nemmeno', async () => {
       expect(await closedBefore(open('?universo=prova', { origin: 'https://altro.example' }))).toBe(403);
       expect(await closedBefore(open('?universo=prova', { host: 'altro.example' }))).toBe(403);
@@ -317,15 +332,19 @@ describe('il server vero', () => {
     });
 
     it('V-006 una partita di due, ciascuno col suo account: si vedono; un token falso è un rifiuto; `offline` non si ascolta', async () => {
-      const [a, b] = [open('?universo=prova&offline'), open('?universo=prova')];
-      const [pa, pb] = [player(a), player(b)];
-      await Promise.all([closedBefore(a), closedBefore(b)]);
+      const a = open('?universo=prova&offline');
+      const pa = player(a);
+      await closedBefore(a);
       const [ida, idb] = [accountWanderer('uid-alice'), accountWanderer('uid-bruno')];
       pa.say({ t: 'entra', id: ida, token: 'vero-uid-alice' });
-      await until(() => pa.of('ingresso').length, 120000, 'ingresso di alice');
+      await entered(pa, 120000, 'ingresso di alice');
       expect(pa.of('ingresso')[0].id).toBe(ida);
+      // Only now: a socket has ENTRY_MS to say who it is, and the world alice starts can take longer than that (T174).
+      const b = open('?universo=prova');
+      const pb = player(b);
+      await closedBefore(b);
       pb.say({ t: 'entra', id: 'chiunque', token: 'vero-uid-bruno' });
-      await until(() => pb.of('ingresso').length, 30000, 'ingresso di bruno');
+      await entered(pb, 30000, 'ingresso di bruno');
       // Who you are is the token's, not what you say.
       expect(pb.of('ingresso')[0].id).toBe(idb);
       expect(pb.of('ingresso')[0].viandanti.map((v) => v.id)).toContain(ida);
@@ -375,15 +394,18 @@ describe('il server vero', () => {
     }, 60000);
 
     it('V-021 un messaggio malformato non ferma il mondo; prima di «entra» non arriva a lui', async () => {
-      const [a, b] = [open('?universo=prova'), open('?universo=prova')];
-      const [pa, pb] = [player(a), player(b)];
-      await Promise.all([closedBefore(a), closedBefore(b)]);
+      const a = open('?universo=prova');
+      const pa = player(a);
+      await closedBefore(a);
       // Nobody has said who they are yet.
       pa.say({ t: 'chat', id: {}, testo: 'prima di entrare' });
       pa.say({ t: 'entra', id: accountWanderer('uid-carla'), token: 'vero-uid-carla' });
-      await until(() => pa.of('ingresso').length, 120000, 'ingresso di carla');
+      await entered(pa, 120000, 'ingresso di carla');
+      const b = open('?universo=prova');
+      const pb = player(b);
+      await closedBefore(b);
       pb.say({ t: 'entra', id: accountWanderer('uid-dario'), token: 'vero-uid-dario' });
-      await until(() => pb.of('ingresso').length, 30000, 'ingresso di dario');
+      await entered(pb, 30000, 'ingresso di dario');
       for (const m of [null, 7, [], {}, { t: {} }, { t: 'passo', x: {}, y: [] }, { t: 'passo', seq: { toString: 1 } }, { t: 'chat', id: [], testo: {} }, { t: 'entra', id: {} }, { t: 'profilo', profilo: 'x' }, { t: 'azione', x: 'y' }, { t: 'dai', viandante: {}, slot: {}, quanti: {} }]) pa.say(m);
       // What it sends after those is the same world's: none restarted, no warning that it stopped.
       const before = pa.heard.length + pb.heard.length;
