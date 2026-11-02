@@ -219,6 +219,7 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
     internal,
     credits: { universesDir, grantCap: grantCapOf(o.env, true) },
     memoryMb: Number(o.env.QUINE_MONDO_MEMORIA) || undefined,
+    maxWorlds: Number(o.env.QUINE_MONDI_MASSIMI) || undefined,
     program: async () => o.worldProgram,
     guard: (req) => frontDoorRefusal(req, origins),
   });

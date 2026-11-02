@@ -20,7 +20,7 @@ const DETAIL = 'DETTAGLIO-INTERNO-FINTO';
 function call(handler: Connect.NextHandleFunction, url: string, body: unknown, headers: Record<string, string> = {}) {
   return new Promise<{ status: number; text: string }>((resolve) => {
     const raw = typeof body === 'string' ? body : JSON.stringify(body);
-    const req = Object.assign(Readable.from([Buffer.from(raw)]), { method: 'POST', url, headers: { host: HOST, ...headers }, socket: { remoteAddress: '127.0.0.1' } }) as unknown as IncomingMessage;
+    const req = Object.assign(Readable.from([Buffer.from(raw)]), { method: 'POST', url, headers: { host: HOST, 'content-type': 'application/json', ...headers }, socket: { remoteAddress: '127.0.0.1' } }) as unknown as IncomingMessage;
     const res = {
       statusCode: 200,
       setHeader() {},
@@ -42,8 +42,9 @@ function fakeStripe(answer: () => Response = () => new Response(JSON.stringify({
   return { back, fetchFn };
 }
 
-const checkout = { universo: 'prova', wandererId: 'ugo', crediti: 5 };
-const settings = (fetchFn: typeof fetch) => ({ settings: { secretKey: 'FINTA-chiave', webhookSecret: 'FINTO-segreto', fetchFn }, universesDir: '.' });
+// With accounts, as a server that has a public address like HOST: without, it would answer only this machine (V-028).
+const checkout = { universo: 'prova', wandererId: 'ugo', crediti: 5, token: 'finto' };
+const settings = (fetchFn: typeof fetch) => ({ settings: { secretKey: 'FINTA-chiave', webhookSecret: 'FINTO-segreto', fetchFn }, universesDir: '.', accounts: { config: {}, verify: async () => ({ uid: 'ugo', anonimo: false }) } });
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -86,7 +87,8 @@ describe('V-015: ciò che una pagina mostra, e dove torna un pagamento', () => {
 
   it('V-015 senza ritorno detto, un Origin di un altro sito non decide dove si torna', async () => {
     const { back, fetchFn } = fakeStripe();
-    await call(stripeHandler(settings(fetchFn)), '/api/stripe/checkout', checkout, { origin: 'https://altro.example' });
+    expect((await call(stripeHandler(settings(fetchFn)), '/api/stripe/checkout', checkout, { origin: 'https://altro.example' })).status).toBe(403);
+    await call(stripeHandler(settings(fetchFn)), '/api/stripe/checkout', checkout);
     await call(stripeHandler(settings(fetchFn)), '/api/stripe/checkout', checkout, { origin: `https://${HOST}` });
     expect(new URL(back[0]).host).toBe(HOST);
     expect(new URL(back[0]).pathname).toBe('/');

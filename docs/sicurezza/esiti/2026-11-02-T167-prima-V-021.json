@@ -1,0 +1,25 @@
+{
+ "data": "2026-11-02",
+ "commit": "8f8e101",
+ "vite": "7.3.7",
+ "node": "v22.19.0",
+ "piattaforma": "win32",
+ "solo": [
+  "V-021"
+ ],
+ "riepilogo": {
+  "ok": 0,
+  "falle": 1,
+  "errori": 0,
+  "saltate": 0
+ },
+ "prove": [
+  {
+   "id": "V-021.a",
+   "voce": "V-021",
+   "proprieta": "un messaggio che non si capisce non ferma il mondo né il suo processo",
+   "esito": "FALLA",
+   "dettaglio": "42 tick in più per chi guarda, del mondo ha sentito: fermo"
+  }
+ ]
+}

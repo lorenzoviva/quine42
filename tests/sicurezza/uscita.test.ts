@@ -334,7 +334,8 @@ describe('le funzioni Lua non arrivano a JS', () => {
     let depth = 0;
     for (let d = got[2]; d?.d; d = d.d) depth++;
     expect(depth).toBeLessThan(100);
-    expect(got[3].l).toBe(got[3].r);
+    // Shared at every level: what would be too much written out in full does not arrive (V-027).
+    expect(JSON.stringify(got[3]).length).toBeLessThan(64 * 1024 * 1024);
     expect(run('return 1 + 1').result).toBe(2);
   });
 

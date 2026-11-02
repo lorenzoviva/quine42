@@ -140,6 +140,17 @@ export function newUniverse(who: Caller, files: Record<string, string | null>): 
   return { files: { ...kept, 'universe.json': JSON.stringify({ ...cfg, partita }, null, 2) + '\n' } };
 }
 
+/** The words of a failure a client may read: those the server wrote for it. Everything else (git's, the file system's, a parser's) names what is inside this machine. */
+const SAID_TO_CLIENTS = /^(esiste già|universo sconosciuto|commit non valido|percorso non ammesso|ramo non valido|nome non valido|viandante non valido|«|solo un universo|richiesta troppo grande|operazione sconosciuta|l'universo «|il mondo non r|nessun archivio|troppi mondi)/;
+
+/** What a client is told of a failure; the rest goes to this server's log (V-020). */
+export function failureText(where: string, e: unknown): string {
+  const text = String((e as Error)?.message ?? e);
+  if (SAID_TO_CLIENTS.test(text)) return text;
+  console.warn(`[${where}] ${text}`);
+  return 'il server non è riuscito a farlo: riprova tra poco';
+}
+
 export function refuse(res: ServerResponse, r: Refusal, body: (message: string) => unknown): void {
   res.statusCode = r.status;
   res.setHeader('Content-Type', 'application/json');

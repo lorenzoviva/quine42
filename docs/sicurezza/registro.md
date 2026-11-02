@@ -26,7 +26,7 @@ Modello di una voce:
 - Stato: `chiusa`
 - Superficie: `server/universeStore.ts`, tutte le route di `/api/universe`
 - Proprietà violata: i non master non riscrivono il Lua sul server e i crediti non si toccano; un non master non legge ciò che `playerFiles` gli nega
-- Prova: solo lettura del codice (T117); misurata dal kit (T137, `esiti/2026-11-01.json`): FALLA tutte le scritture e le letture senza identità, anche da un'altra origine e con un Host estraneo (V-001.a-j, l, m); il CORS non è aperto (V-001.k, ok). Giro dell'autore (`esiti/2026-11-01-f12.md`): da `https://example.com` una richiesta `no-cors` **scrive** un file nell'universo (V-001.o, FALLA); la lettura non passa (V-001.n, ok). Dopo T120: test (`tests/sicurezza/accesso.test.ts`: ogni scrittura per ogni tipo di chiamante, letture, singola, master) e kit (`esiti/2026-11-01-dopo-T120.json`): V-001.a-m ok, con V-001.m riscritta perché provi un universo di molti con un master a piacere: creare una partita in singola da questa macchina resta ammesso. V-001.n, o (da un altro sito) sono da rifare a mano nel browser dell'autore; lo stesso effetto è nei test (origine diversa, `text/plain`)
+- Prova: solo lettura del codice (T117); misurata dal kit (T137, `esiti/2026-11-01.json`): FALLA tutte le scritture e le letture senza identità, anche da un'altra origine e con un Host estraneo (V-001.a-j, l, m); il CORS non è aperto (V-001.k, ok). Giro dell'autore (`esiti/2026-11-01-f12.md`): da `https://example.com` una richiesta `no-cors` **scrive** un file nell'universo (V-001.o, FALLA); la lettura non passa (V-001.n, ok). Dopo T120: test (`tests/sicurezza/accesso.test.ts`: ogni scrittura per ogni tipo di chiamante, letture, singola, master) e kit (`esiti/2026-11-01-dopo-T120.json`): V-001.a-m ok, con V-001.m riscritta perché provi un universo di molti con un master a piacere: creare una partita in singola da questa macchina resta ammesso. Da un'altra origine, nel browser (T167, `esiti/2026-11-02-T167-f12.md`, una pagina su un'altra porta di loopback): V-001.o ok, nessun file scritto; V-001.n contava come lettura anche il testo di un rifiuto, che il CORS di Vite lasciava leggere: corretta nel blocco e misurata da V-001.p del kit, risposta 403 e nessun file (e da lì V-029)
 - Contromisura: identità verificata sul server e permessi per operazione su ogni route; su un universo multigiocatore un non master non scrive nulla; `clone` prende il master dall'identità; controllo di `Origin` e `Content-Type`; le letture del sito ricevono solo ciò che serve. In produzione solo le route ammesse.
 - Task: T120, T133
 - Test: `tests/sicurezza/rotte.test.ts`, `tests/sicurezza/accesso.test.ts`, `tests/sicurezza/produzione.test.ts`
@@ -81,7 +81,7 @@ Modello di una voce:
 - Stato: `chiusa`
 - Superficie: `src/session/server.ts`, `server/session.ts`, `GET /api/session`, `/api/viandante`, `/api/crediti`
 - Proprietà violata: i non master non riscrivono il Lua: nessuno diventa master dicendolo; `anonimo`, `tetto` e `offline` non li decide il client
-- Prova: solo lettura del codice (T117); misurata dal kit (`esiti/2026-11-01.json`): FALLA V-006.a-e, compreso `GET /api/viandante`, che dà il saldo di chiunque senza identità; il protocollo rifiuta ramo, pubblicazione, Concilio e «segui» a un non master (V-006.f, ok); giro dell'autore (`esiti/2026-11-01-f12.md`): la pagina di un altro sito apre il WebSocket ed **entra nel mondo** come viandante (V-006.g, FALLA). Dopo T120: test (`tests/sicurezza/accesso.test.ts`) e kit (`esiti/2026-11-01-dopo-T120.json`): V-006.a-f ok. **V-006.a ed e sono riscritte**: su loopback senza account l'id detto vale, come vuole la contromisura, quindi si misurano da fuori, con un'intestazione di inoltro (è ciò che aggiunge un tunnel; il kit non esce dalla macchina); da un indirizzo davvero esterno lo prova il test di `admitSocket`. V-006.g è da rifare a mano nel browser dell'autore
+- Prova: solo lettura del codice (T117); misurata dal kit (`esiti/2026-11-01.json`): FALLA V-006.a-e, compreso `GET /api/viandante`, che dà il saldo di chiunque senza identità; il protocollo rifiuta ramo, pubblicazione, Concilio e «segui» a un non master (V-006.f, ok); giro dell'autore (`esiti/2026-11-01-f12.md`): la pagina di un altro sito apre il WebSocket ed **entra nel mondo** come viandante (V-006.g, FALLA). Dopo T120: test (`tests/sicurezza/accesso.test.ts`) e kit (`esiti/2026-11-01-dopo-T120.json`): V-006.a-f ok. **V-006.a ed e sono riscritte**: su loopback senza account l'id detto vale, come vuole la contromisura, quindi si misurano da fuori, con un'intestazione di inoltro (è ciò che aggiunge un tunnel; il kit non esce dalla macchina); da un indirizzo davvero esterno lo prova il test di `admitSocket`. V-006.g, nel browser da un'altra origine (T167, `esiti/2026-11-02-T167-f12.md`): ok, rifiutato
 - Contromisura: senza verificatore l'id scelto dal client vale solo da loopback; `anonimo`, `tetto` e `offline` decisi dal server; controllo di `Origin` sul WebSocket; `GET /api/session` non elenca i viandanti a chiunque; in produzione niente avvio senza verificatore. `GET /api/viandante` dice il saldo solo a chi lo possiede; lo stesso vale per `/api/crediti`, la superficie nuova di T105 (saldo e storici, stessa identità non verificata, coperta da T120).
 - Task: T120, T133
 - Test: `tests/sicurezza/rotte.test.ts`, `tests/sicurezza/accesso.test.ts`, `tests/sicurezza/produzione.test.ts`
@@ -232,13 +232,112 @@ Modello di una voce:
 
 ### V-020 · Il testo delle eccezioni arriva al client da altre route
 - Gravità: bassa
-- Stato: `rilevata`
+- Stato: `chiusa`
 - Superficie: `server/universeStore.ts` (il `catch` di `handle`), `server/wallet.ts`, `server/wanderer.ts`, il messaggio di `openUniverse` in `server/session.ts`
 - Proprietà violata: nessun dettaglio interno arriva al client (percorsi su disco, testo di git o del file system)
-- Prova: solo lettura del codice (T132); non è stato provato quali testi escano davvero
-- Contromisura: da scrivere, sul modello di `logFailure` in `server/stripe.ts`: frase generica al client e dettagli nel log. Prima va guardato quali messaggi servono al client (`universeStore` ne usa alcuni per dire perché rifiuta).
+- Prova: solo lettura del codice (T132); T167, test e kit (V-020.a): prima al client arrivavano il testo del parser JSON e quello di git; ora una frase sola, e il testo vero nel log
+- Contromisura: `failureText` in `server/access.ts`: passano solo le frasi scritte dal server per il client, a elenco, il resto va nel log (ADR-0113). In `esito` del protocollo resta il testo delle eccezioni del kernel: il mondo non legge il disco, quindi nessun percorso.
 - Task: T167
+- Test: `tests/sicurezza/secondo-audit.test.ts`, `tests/sicurezza/produzione.test.ts`
+- Esito: chiusa da T167 (ADR-0113), 02/11/2026, branch `task/T167`.
+
+### V-021 · Un messaggio malformato ferma il mondo o ne uccide il processo
+- Gravità: alta
+- Stato: `chiusa`
+- Superficie: `src/session/server.ts` (`tick`, `hear`, `connect`), `src/session/worldProcess.ts`
+- Proprietà violata: un giocatore non ferma il mondo per tutti. Un valore che JSON può scrivere e JS non sa convertire faceva gettare i messaggi: nel tick lo saltava intero, quindi uno per tick lo teneva fermo mentre il battito diceva che era vivo; oltre il ritmo, o all'ingresso, usciva dal canale e il processo moriva, e alla quarta volta il mondo si arrendeva
+- Prova: test, su ogni forma di messaggio; kit contro il server vero (V-021.a): sul codice di prima FALLA, chi guardava ha sentito che il mondo si era fermato (`esiti/2026-11-02-T167-prima-V-021.json`), dopo ok
+- Contromisura: `handleSafely`, `seqOf`, un `try` all'ingresso e sul canale, le promesse fallite nel log (ADR-0113).
+- Task: T167
+- Test: `tests/sicurezza/secondo-audit.test.ts`, `tests/sicurezza/produzione.test.ts`
+- Esito: chiusa da T167 (ADR-0113), 02/11/2026, branch `task/T167`.
+
+### V-022 · Il master paga ciò che chiedono gli altri
+- Gravità: critica (oggi: media, senza account ascolta solo questa macchina)
+- Stato: `chiusa`
+- Superficie: `Kernel.talk`, `council.payer` in `src/kernel/kernel.ts`, ogni chiamata fatta dopo un `await`
+- Proprietà violata: i crediti non si toccano. `as` non attraversa un `await`, quindi la risposta di una persona a un giocatore, anche anonimo o senza crediti, usciva dal saldo di `io`, e ciò che il mondo chiedeva da solo pure
+- Prova: test: registrato il `chi` di ogni chiamata di un giocatore, `npc.reply` era di `io`; dopo è di chi parla, e senza crediti risponde il modello locale con il saldo del master intatto
+- Contromisura: `talk` passa `chi`; fuori da un `as`, in una partita di molti, `payerNow()` dà `comune` (ADR-0113).
+- Task: T167
+- Test: `tests/sicurezza/secondo-audit.test.ts`
+- Esito: chiusa da T167 (ADR-0113), 02/11/2026, branch `task/T167`.
+
+### V-023 · Le spese comuni senza nessuno che paga
+- Gravità: alta (oggi: nessuna, senza account la chiave è di chi sta sulla macchina)
+- Stato: `chiusa`
+- Superficie: `Kernel.hasCredits`, `Council.write`
+- Proprietà violata: la chiave si spende solo per chi paga. Le chiamate `comune` andavano sempre a Google, anche con nessun collegato o tutti a zero: un account con zero crediti e un universo suo spendeva la chiave fino al tetto del giorno, e il tetto esaurito fermava i modelli di tutti
+- Prova: test, con e senza account, con e senza un pagante
+- Contromisura: con gli account `commonNeedsPayer`: senza un collegato con crediti, i modelli locali (ADR-0113). Il prezzo è nell'ADR.
+- Task: T167
+- Test: `tests/sicurezza/secondo-audit.test.ts`
+- Esito: chiusa da T167 (ADR-0113), 02/11/2026, branch `task/T167`. Decisione da guardare per l'autore: senza account resta come prima.
+
+### V-024 · Un modello fuori listino non costa nulla
+- Gravità: media
+- Stato: `chiusa`
+- Superficie: `Kernel.charge`, `src/kernel/ai/prices.ts`, `namedByUniverse` in `server/geminiProxy.ts`
+- Proprietà violata: i crediti non si toccano: ogni chiamata scala dal pagante. Un universo può nominare un modello di Google fuori listino: il proxy lo contava come il più caro, l'addebito come zero
+- Prova: test
+- Contromisura: `billedModel`, lo stesso nel proxy e nell'addebito; i modelli locali restano gratis (ADR-0113).
+- Task: T167
+- Test: `tests/sicurezza/secondo-audit.test.ts`
+- Esito: chiusa da T167 (ADR-0113), 02/11/2026, branch `task/T167`.
+
+### V-025 · Un socket avvia un processo per ogni nome
+- Gravità: alta (oggi: bassa)
+- Stato: `chiusa`
+- Superficie: `open` e `startWorld` in `server/session.ts`
+- Proprietà violata: la macchina che ospita regge. Senza identità, ogni nome valido, anche di un universo che non c'è, avviava un processo del mondo e lasciava un archivio dei saldi
+- Prova: lettura del codice; test di `worldRefusal`; kit (V-025.a): rifiutato, nessun archivio creato
+- Contromisura: `worldRefusal`: solo una partita di molti che esiste, al più `QUINE_MONDI_MASSIMI` (16) mondi (ADR-0113). Il resto è V-026.
+- Task: T167
+- Test: `tests/sicurezza/secondo-audit.test.ts`, `tests/sicurezza/produzione.test.ts`
+- Esito: chiusa da T167 (ADR-0113), 02/11/2026, branch `task/T167`.
+
+### V-026 · Le risorse per account: mondi, universi, ritmi
+- Gravità: alta (oggi: bassa, senza account ascolta solo questa macchina)
+- Stato: `specificata`
+- Superficie: `server/session.ts` (`upgrade`, `open`), `create` in `server/universeStore.ts`, `POST /api/viandante`, le route HTTP
+- Proprietà violata: la macchina che ospita regge. Un mondo vero si avvia prima di verificare il token e non si ferma quando resta vuoto, quindi con `QUINE_MONDI_MASSIMI` chiunque occupa tutti i posti; un account fa universi senza quota, fino a 32 MB l'uno; un anonimo scrive un file e un commit di profilo in ogni universo; socket e letture pesanti (`GET /api/universe/<nome>`, `/carte`) non hanno un ritmo
+- Prova: solo lettura del codice (T167), nessuna prova di carico
+- Contromisura: (1) il mondo parte solo dopo un `entra` con un token verificato; (2) un mondo vuoto si salva e si ferma dopo qualche minuto; (3) una quota di universi per account, nel `.env`, e niente `create` da un anonimo; (4) `POST /api/viandante` solo per chi il mondo conosce o con un ritmo per account; (5) un ritmo per indirizzo su socket e route HTTP, da mettere nel server di produzione.
+- Task: T172
 - Test: —
+
+### V-027 · Ciò che Lua lascia da leggere al kernel
+- Gravità: media
+- Stato: `chiusa`
+- Superficie: `Crossing` in `src/kernel/sandbox.ts`
+- Proprietà violata: il codice del mondo non ferma il processo. Da Lua una lista diventava di miliardi di buchi con `length` o un indice lontano; una tabella condivisa a ogni livello arrivava intera e valeva 2^N chiavi al primo `JSON.stringify`. Il processo del mondo la conteneva (V-007): sorvegliante e ritorno all'ultimo commit vissuto, a ogni giro
+- Prova: test: prima la lista era lunga 4 miliardi e la tabella profonda 41 livelli, condivisa; dopo restano com'erano e il JSON è finito
+- Contromisura: una lista cresce di uno alla volta; `MAX_TABLE_SIZE` (ADR-0113). Non coperti: i cicli fatti scrivendo una vista in un'altra, che fanno fallire il `JSON.stringify` del mondo di chi li fa.
+- Task: T167
+- Test: `tests/sicurezza/secondo-audit.test.ts`, `tests/sicurezza/uscita.test.ts`
+- Esito: chiusa da T167 (ADR-0113), 02/11/2026, branch `task/T167`.
+
+### V-028 · Ciò che si ascolta prima di sapere chi è
+- Gravità: bassa
+- Stato: `chiusa`
+- Superficie: `WorldHost.pass`, `wsLink` in `server/session.ts`, `/api/stripe/checkout`, `create` in `server/universeStore.ts`
+- Proprietà violata: chi non ha un'identità non costa al server. I messaggi prima di `entra` arrivavano al processo del mondo fuori da ogni ritmo; un socket chiuso mentre il mondo apriva restava nel mondo per sempre; il checkout non passava da `gate` (regola 8b), né controllava il tipo del corpo; `create` leggeva fino a 32 MB prima di rifiutare
+- Prova: test; kit (V-028.a)
+- Contromisura: ciascuna nel suo punto (ADR-0113).
+- Task: T167
+- Test: `tests/sicurezza/secondo-audit.test.ts`, `tests/sicurezza/pagine.test.ts`, `tests/sicurezza/produzione.test.ts`
+- Esito: chiusa da T167 (ADR-0113), 02/11/2026, branch `task/T167`.
+
+### V-029 · Un'altra porta di questa macchina legge i file del progetto
+- Gravità: bassa
+- Stato: `chiusa`
+- Superficie: `vite.config.ts`, il CORS predefinito di Vite per `localhost` e `127.0.0.1`
+- Proprietà violata: una pagina di un'altra origine non legge nulla. `.env` e `universes/` restavano fuori, ma sorgenti, documenti e `.pipeline/` si leggevano da qualunque altra applicazione locale aperta nel browser
+- Prova: kit (V-001.p, V-029.a): prima risposta 200 con il CORS dell'altra origine; browser: la risposta di un rifiuto si leggeva (`esiti/2026-11-02-T167-f12.md`)
+- Contromisura: `cors: false` nel server e nella preview (ADR-0113).
+- Task: T167
+- Test: `tests/sicurezza/secondo-audit.test.ts`, `tests/sicurezza/produzione.test.ts`
+- Esito: chiusa da T167 (ADR-0113), 02/11/2026, branch `task/T167`.
 
 ## Le prove dell'autore
 
@@ -246,7 +345,7 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 
 | Voce | Kit | F12 | Suite | Non coperto |
 |---|---|---|---|---|
-| V-001 | a b c d e f g h i j k l m | n o | `rotte.test.ts` | — |
+| V-001 | a b c d e f g h i j k l m p | n o | `rotte.test.ts` | — |
 | V-002 | a b c d | — | `gemini.test.ts`, `rotte.test.ts` | un processo di questa macchina spende fino al tetto del giorno: voluto (ADR-0099), un loop di chiamate piccole non si ferma prima |
 | V-003 | a b c d e f g h | — | `percorsi.test.ts`, `rotte.test.ts` | — |
 | V-004 | a b c d e | — | `rotte.test.ts` | — |
@@ -265,9 +364,18 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-017 | a | — | `uscita.test.ts`, `sandbox.test.ts` | — |
 | V-018 | — | — | — | accettata: non si prova |
 | V-019 | a b c | — | `uscita.test.ts`, `sandbox.test.ts` | un difetto di wasm o di Lua stesso: non si prova; ciò che raggiungerebbe lo limita il processo del mondo (T127, ADR-0110, `mondo.test.ts`) |
-| V-020 | — | — | — | rilevata da T132, senza prove: le fa T167 |
+| V-020 | a | — | `secondo-audit.test.ts`, `produzione.test.ts` | — |
+| V-021 | a | — | `secondo-audit.test.ts`, `produzione.test.ts` | — |
+| V-022 | — | — | `secondo-audit.test.ts` | chi paga si vede solo dentro il kernel: lo prova tests/sicurezza/secondo-audit.test.ts |
+| V-023 | — | — | `secondo-audit.test.ts` | chi paga si vede solo dentro il kernel: lo prova tests/sicurezza/secondo-audit.test.ts |
+| V-024 | — | — | `secondo-audit.test.ts` | il costo di una chiamata si vede solo dentro il kernel: lo prova tests/sicurezza/secondo-audit.test.ts |
+| V-025 | a | — | `secondo-audit.test.ts`, `produzione.test.ts` | — |
+| V-026 | — | — | — | specificata, senza prove: le fa il task che la chiude |
+| V-027 | — | — | `secondo-audit.test.ts`, `uscita.test.ts` | ciò che Lua scrive si vede solo dentro la sandbox: lo prova tests/sicurezza/secondo-audit.test.ts |
+| V-028 | a | — | `secondo-audit.test.ts`, `produzione.test.ts` | — |
+| V-029 | a | — | `secondo-audit.test.ts`, `produzione.test.ts` | — |
 
 ## Ciò che nessuna voce copre ancora
 
-Da «Cosa non è stato fatto» dell'audit: la lettura completa di `kernel.ts`, delle route di scrittura del Concilio e dei testi del DOM di gioco. Le scritture del Concilio le ha guardate T130 (V-013), T132 ha guardato i testi del sito (`innerHTML` solo in `site/sessioni.ts`, con l'escape);
+Il secondo audit dice cosa ha guardato e cosa no: [`audit-2026-11-2.md`](audit-2026-11-2.md). Da «Cosa non è stato fatto» del primo: la lettura completa di `kernel.ts`, delle route di scrittura del Concilio e dei testi del DOM di gioco. Le scritture del Concilio le ha guardate T130 (V-013), T132 ha guardato i testi del sito (`innerHTML` solo in `site/sessioni.ts`, con l'escape);
 ciò che ne esce diventa una voce. Le prove HTTP e WebSocket contro un server vero: lo stato di oggi nel kit (T137, tabella sopra), dopo le correzioni T134.

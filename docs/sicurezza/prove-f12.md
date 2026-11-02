@@ -45,7 +45,7 @@ await (async () => {
 
 ## Blocco 3 · Da un altro sito
 
-Apri in una scheda `https://example.com` e incolla qui. Le richieste vanno solo al tuo `localhost`: a `example.com` non arriva nulla.
+Un rifiuto che la pagina può leggere non è una lettura: il CORS di Vite lascia leggere le risposte alle pagine di `localhost` e `127.0.0.1` (T167), quindi conta solo una risposta `ok`. Apri in una scheda `https://example.com` e incolla qui. Le richieste vanno solo al tuo `localhost`: a `example.com` non arriva nulla.
 
 Chrome può chiedere il permesso di accedere alla rete locale, e finché non rispondi la richiesta resta ferma (è ciò che è successo provando il blocco: senza risposta, dopo 40 s, `tempo scaduto`). Falle **due giri**, e riporta entrambi: prima rifiuta il permesso (cosa ottiene un sito qualunque per chi dice no), poi concedilo (cosa ottiene per chi dice sì senza pensarci). Finite le prove, togli il permesso a `example.com` dalle impostazioni del sito.
 
@@ -54,7 +54,7 @@ await (async () => {
   const BASE = 'http://localhost:4871';
   const say = (id, ok, p, d) => console.log(`${id} ${ok ? 'ok' : 'FALLA'} ${p} (${d})`);
   const limit = () => AbortSignal.timeout(40000);
-  const read = await fetch(`${BASE}/api/universe/sonda-base`, { signal: limit() }).then((r) => r.text()).catch((e) => ({ blocked: e.name === 'TimeoutError' ? 'tempo scaduto: il permesso è ancora in attesa?' : e.message }));
+  const read = await fetch(`${BASE}/api/universe/sonda-base`, { signal: limit() }).then(async (r) => (r.ok ? r.text() : { blocked: `risposta ${r.status}` })).catch((e) => ({ blocked: e.name === 'TimeoutError' ? 'tempo scaduto: il permesso è ancora in attesa?' : e.message }));
   say('V-001.n', typeof read !== 'string', 'la pagina di un altro sito non legge un universo', typeof read === 'string' ? 'letto' : `non letto: ${read.blocked}`);
   // Sent without reading the answer: whether it arrived is what Blocco 4 looks at.
   const sent = await fetch(`${BASE}/api/universe/sonda-base/commit`, {

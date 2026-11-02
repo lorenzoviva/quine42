@@ -13,7 +13,7 @@ import path from 'node:path';
 import { WebSocketServer, type WebSocket } from 'ws';
 import type { AccountSettings } from './account';
 import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
-import { gate, refuse } from './access';
+import { failureText, gameIn, gate, refuse } from './access';
 import { PROGRAMS_DIR } from './hidden';
 import { runGit } from './git';
 import { LEDGER_DIR, sweepBalances } from './ledger';
@@ -30,6 +30,28 @@ export function admitSocket(req: Pick<IncomingMessage, 'headers'> & { socket: { 
   if (no) return { refused: no.refused };
   return { offline: askedOffline && !accounts?.verify };
 }
+/** Worlds running at once, unless the `.env` says otherwise (`QUINE_MONDI_MASSIMI`): each is a process with its own heap (V-025). */
+export const DEFAULT_MAX_WORLDS = 16;
+
+/**
+ * Why a socket may not start the world of this universe, or undefined. A socket says a name before it says who it is, so only a game of many that
+ * exists starts anything, and no more than `max` at once: a process for every name asked would stop this machine (V-025).
+ */
+export function worldRefusal(universesDir: string | undefined, name: string, running: number, max = DEFAULT_MAX_WORLDS): string | undefined {
+  if (universesDir) {
+    const root = path.join(universesDir, name);
+    if (!fs.existsSync(path.join(root, '.git'))) return `l'universo «${name}» non esiste`;
+    let config: string | undefined;
+    try {
+      config = fs.readFileSync(path.join(root, 'universe.json'), 'utf8');
+    } catch {
+      /* read as nothing: a game alone */
+    }
+    if (!gameIn(config).many) return `«${name}» è una partita in singola`;
+  }
+  return running >= max ? 'troppi mondi accesi su questo server: riprova tra poco' : undefined;
+}
+
 /** A message bigger than this is not a client's (the files go the other way). */
 const MAX_MESSAGE = 256 * 1024;
 /** Messages kept for a world still opening (T129): the rest is not heard. */
@@ -45,7 +67,7 @@ export async function getActiveWorld(name: string): Promise<WorldCalls | undefin
 }
 
 /** A WebSocket as a link of the protocol: what arrives before anyone listens is kept for them. */
-function wsLink(ws: WebSocket): HostLink {
+export function wsLink(ws: Pick<WebSocket, 'on' | 'send' | 'close' | 'readyState' | 'OPEN'>): HostLink {
   const fns: Array<(m: unknown) => void> = [];
   const closes: Array<() => void> = [];
   const early: unknown[] = [];
@@ -72,7 +94,11 @@ function wsLink(ws: WebSocket): HostLink {
       fns.push(fn);
       early.splice(0).forEach(fn);
     },
-    onClose: (fn: () => void) => void closes.push(fn),
+    // A socket can close while its world opens, before anyone listens: it would stay in that world for ever (V-028).
+    onClose: (fn: () => void) => {
+      if (ws.readyState === ws.OPEN) closes.push(fn);
+      else fn();
+    },
     close: () => ws.close(),
   };
 }
@@ -111,6 +137,8 @@ export interface SessionOptions {
   internal?: string;
   credits?: { universesDir: string; grantCap: number };
   memoryMb?: number;
+  /** Worlds running at once (`QUINE_MONDI_MASSIMI`, V-025). */
+  maxWorlds?: number;
   /** The program of the worlds: built when needed by the dev server, already there in production. */
   program: () => Promise<string>;
   /** What is refused before the rules of `gate`: the production server's origins (T133). */
@@ -119,7 +147,7 @@ export interface SessionOptions {
 
 /** The sockets of the games of many on a server, whichever it is. `stop` stops the worlds, saving what they can, and closes the clients. */
 export function attachSessions(httpServer: HttpServer, o: SessionOptions): { stop(): Promise<void> } {
-  const { accounts, gemini, internal, credits, memoryMb, program } = o;
+  const { accounts, gemini, internal, credits, memoryMb, maxWorlds, program } = o;
   const wss = new WebSocketServer({ noServer: true, maxPayload: MAX_MESSAGE });
   const startWorld = async (name: string, offline: boolean): Promise<ActiveHost | { error: string }> => {
     const port = (httpServer.address() as AddressInfo | null)?.port ?? 5173;
@@ -160,6 +188,8 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
   const open = (name: string, offline: boolean) => {
     let h = activeHosts.get(name);
     if (!h) {
+      const no = worldRefusal(credits?.universesDir, name, activeHosts.size, maxWorlds);
+      if (no) return Promise.resolve({ error: no });
       h = startWorld(name, offline).catch((e: Error) => ({ error: e.message }));
       activeHosts.set(name, h);
       // A universe that could not open is tried again by the next client.
@@ -187,7 +217,7 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
       }
       void open(name, admitted.offline).then((h) => {
         if ('error' in h) {
-          link.send({ t: 'rifiuto', motivo: h.error });
+          link.send({ t: 'rifiuto', motivo: failureText('mondo', h.error) });
           return ws.close();
         }
         h.session.connect(link);
@@ -207,7 +237,7 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
   return { stop };
 }
 
-export function sessionServer(accounts?: AccountSettings, gemini?: typeof fetch, internal?: string, credits?: { universesDir: string; grantCap: number }, memoryMb?: number): Plugin {
+export function sessionServer(accounts?: AccountSettings, gemini?: typeof fetch, internal?: string, credits?: { universesDir: string; grantCap: number }, memoryMb?: number, maxWorlds?: number): Plugin {
   return {
     name: 'rune-session',
     configureServer(server: ViteDevServer) {
@@ -226,7 +256,7 @@ export function sessionServer(accounts?: AccountSettings, gemini?: typeof fetch,
         return (built ??= buildWorld(root, { outDir, preserveSymlinks: server.config.resolve.preserveSymlinks }));
       };
       if (!server.httpServer) return;
-      const { stop } = attachSessions(server.httpServer as HttpServer, { accounts, gemini, internal, credits, memoryMb, program });
+      const { stop } = attachSessions(server.httpServer as HttpServer, { accounts, gemini, internal, credits, memoryMb, maxWorlds, program });
       server.httpServer.on('close', () => void stop().then(() => outDir && fs.rmSync(outDir, { recursive: true, force: true })));
     },
     configurePreviewServer(server) {

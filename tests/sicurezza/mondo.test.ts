@@ -198,8 +198,10 @@ describe('due mondi veri', () => {
     git('commit', '-q', '-m', 'nasce');
   };
 
+  // Slower than the fake ones: a real world that is well can pause longer than FAST.notice (a collection, the first forms), and on a busy machine longer than FAST.kill.
+  const REAL_TIMES = { ...FAST, notice: 2000, kill: 8000 };
   const world = (name: string, more: Partial<WorldOptions> = {}) =>
-    new WorldHost({ name, base, internal: INTERNAL, offline: true, entry: REAL, entryArgs: [program], reads: [outDir], times: FAST, ...more });
+    new WorldHost({ name, base, internal: INTERNAL, offline: true, entry: REAL, entryArgs: [program], reads: [outDir], times: REAL_TIMES, ...more });
 
   beforeAll(async () => {
     dir = mkdtempSync(path.join(os.tmpdir(), 'quine-mondo-'));

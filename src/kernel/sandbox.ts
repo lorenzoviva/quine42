@@ -142,6 +142,11 @@ class Meter {
 
 /** How deep a Lua table given to the kernel is read: what is deeper does not arrive. */
 const MAX_TABLE_DEPTH = 64;
+/**
+ * How many keys one table given to the kernel may hold when written out in full. A table shared at every level is small in Lua and 2^64 when anyone
+ * walks it (every JSON.stringify of the kernel): what is past this does not arrive (V-027).
+ */
+const MAX_TABLE_SIZE = 1 << 20;
 
 /** A JS object as Lua sees it: its own data fields and nothing else (no prototype, no method, no call). */
 function visible(self: object, key: string | number): boolean {
@@ -157,9 +162,11 @@ function fieldOf(self: object, key: unknown): unknown {
 }
 
 interface Reading {
-  done: Map<number, unknown>;
+  done: Map<number, { value: unknown; size: number }>;
   open: Set<number>;
   depth: number;
+  /** The keys read so far, a table met twice counted twice. */
+  size: number;
 }
 
 /**
@@ -193,6 +200,11 @@ class Crossing extends LuaTypeExtension<unknown> {
       field('__newindex', (self: Record<string, unknown>, key: unknown, value: unknown) => {
         const k = typeof key === 'number' ? key - 1 : key;
         if ((typeof k !== 'string' && typeof k !== 'number') || value === undefined) return;
+        // A list grows by one at a time: `length` or an index far ahead is a list of billions of holes for whoever reads it next (V-027).
+        if (Array.isArray(self)) {
+          const at = Number(k);
+          if (!Number.isInteger(at) || at < 0 || at > self.length) return;
+        }
         // What is not its own comes from the prototype chain: never written, or written through (`__proto__`).
         if (k in self && !Object.prototype.hasOwnProperty.call(self, k)) return;
         try {
@@ -233,7 +245,7 @@ class Crossing extends LuaTypeExtension<unknown> {
   getValue(thread: LuaThread, index: number, reading?: unknown): unknown {
     const lua = thread.lua;
     const type = lua.lua_type(thread.address, index);
-    if (type === LuaType.Table) return this.readTable(thread, index, (reading as Reading) ?? { done: new Map(), open: new Set(), depth: 0 });
+    if (type === LuaType.Table) return this.readTable(thread, index, (reading as Reading) ?? { done: new Map(), open: new Set(), depth: 0, size: 0 });
     if (type !== LuaType.Userdata) return undefined;
     if (lua.luaL_testudata(thread.address, index, this.name)) return super.getValue(thread, index);
     // An error wasmoon itself raised: only its text; any other userdata means nothing here.
@@ -253,7 +265,14 @@ class Crossing extends LuaTypeExtension<unknown> {
   private readTable(thread: LuaThread, index: number, reading: Reading): unknown {
     const lua = thread.lua;
     const id = lua.lua_topointer(thread.address, index) as number;
-    if (reading.done.has(id)) return reading.done.get(id);
+    const met = reading.done.get(id);
+    if (met) {
+      if (reading.size + met.size > MAX_TABLE_SIZE) return undefined;
+      reading.size += met.size;
+      return met.value;
+    }
+    if (reading.size > MAX_TABLE_SIZE) return undefined;
+    const from = reading.size;
     // Every level holds a key and a value on the Lua stack, which C code has to ask for.
     if (reading.open.has(id) || reading.depth >= MAX_TABLE_DEPTH || !lua.lua_checkstack(thread.address, 4)) return undefined;
     reading.open.add(id);
@@ -269,6 +288,7 @@ class Crossing extends LuaTypeExtension<unknown> {
     lua.lua_pushnil(thread.address);
     while (lua.lua_next(thread.address, index)) {
       const key = this.keyAt(thread);
+      reading.size++;
       const value = thread.getValue(-1, undefined, reading);
       if (list) (out as unknown[]).push(value);
       else if (key !== undefined && value !== undefined && !(key in Object.prototype)) (out as Record<string, unknown>)[key] = value;
@@ -276,7 +296,7 @@ class Crossing extends LuaTypeExtension<unknown> {
     }
     reading.depth--;
     reading.open.delete(id);
-    reading.done.set(id, out);
+    reading.done.set(id, { value: out, size: reading.size - from });
     return out;
   }
 }
