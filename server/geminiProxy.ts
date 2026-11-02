@@ -7,7 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type { Connect, Plugin } from 'vite';
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { costOf, ESTIMATED, priceOf, PRICES } from '../src/kernel/ai/prices';
+import { billedModel, costOf, ESTIMATED, PRICES } from '../src/kernel/ai/prices';
 
 const UPSTREAM = 'https://generativelanguage.googleapis.com/v1beta/models';
 /** The largest real request is a long prompt with the Artist's sheet of four photographs, well under this. */
@@ -41,10 +41,6 @@ export interface GateAnswer {
 }
 
 const refusal = (status: number, message: string): GateAnswer => ({ status, text: JSON.stringify({ error: { message } }) });
-
-/** The model a price is read from: its own, or for one not on the price list the dearest, so a cost is never shown lower. */
-const DEAREST = Object.keys(PRICES).reduce((a, b) => (PRICES[b].output > PRICES[a].output ? b : a));
-const pricedAs = (model: string, day: string) => (priceOf(model, day) ? model : DEAREST);
 
 /** The models a `universe.json` names: its text model and the Sculptor's. */
 export function modelsOfConfig(json: string): string[] {
@@ -115,7 +111,7 @@ export class GeminiGate {
     if (bytes > MAX_BODY) return refusal(413, 'richiesta troppo grande');
     this.roll();
     const day = this.day;
-    const hold = costOf(pricedAs(model, day), { prompt: bytes / 4, output: HELD_OUTPUT_TOKENS }, day) ?? 0;
+    const hold = costOf(billedModel(model), { prompt: bytes / 4, output: HELD_OUTPUT_TOKENS }, day) ?? 0;
     if (this.spent + this.held + hold > this.cap) return refusal(STATUS_CAP, 'tetto di spesa del giorno raggiunto');
     this.held += hold;
     let cost = hold;
@@ -150,7 +146,7 @@ export class GeminiGate {
     try {
       const u = JSON.parse(text)?.usageMetadata;
       if (!u) return undefined;
-      return costOf(pricedAs(model, day), { prompt: u.promptTokenCount ?? 0, cached: u.cachedContentTokenCount ?? 0, output: u.candidatesTokenCount ?? 0, thoughts: u.thoughtsTokenCount ?? 0 }, day);
+      return costOf(billedModel(model), { prompt: u.promptTokenCount ?? 0, cached: u.cachedContentTokenCount ?? 0, output: u.candidatesTokenCount ?? 0, thoughts: u.thoughtsTokenCount ?? 0 }, day);
     } catch {
       return undefined;
     }

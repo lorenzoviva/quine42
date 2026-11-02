@@ -111,8 +111,14 @@ process.on('message', (m: ToWorld) => {
     case 'msg': {
       const l = linked.get(m.cid);
       if (!l) return;
-      if (l.fns.length) l.fns.forEach((f) => f(m.m));
-      else l.early.push(m.m);
+      if (l.fns.length) {
+        try {
+          l.fns.forEach((f) => f(m.m));
+        } catch (e) {
+          // The floor (rule 7): what a client says does not end the world's process.
+          console.warn(`[mondo] messaggio non capito: ${(e as Error).message}`);
+        }
+      } else l.early.push(m.m);
       return;
     }
     case 'chiuso': {
@@ -135,3 +141,5 @@ process.on('message', (m: ToWorld) => {
   }
 });
 process.on('disconnect', () => process.exit(0));
+// A promise nobody waits for fails: it is logged. By default Node would end the process, and every player in it would lose what was not saved.
+process.on('unhandledRejection', (e) => console.warn(`[mondo] promessa fallita: ${(e as Error)?.message ?? e}`));

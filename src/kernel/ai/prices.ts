@@ -59,6 +59,12 @@ export interface Tokens {
   thoughts?: number;
 }
 
+/** The dearest of the list: a model off it is never shown or billed lower. */
+export const DEAREST_MODEL = Object.keys(PRICES).reduce((a, b) => (PRICES[b].output > PRICES[a].output ? b : a));
+
+/** The model a call of Google's is billed as: its own, or the dearest if it is off the list. The others (local, subscriptions) as they are. */
+export const billedModel = (model: string): string => (/^(models\/)?gemini-/.test(model) && !priceOf(model) ? DEAREST_MODEL : model);
+
 /** USD for some usage: the cached part of the prompt at the cache price, thinking at the output price. */
 export function costOf(model: string, t: Tokens, date?: string): number | undefined {
   const p = priceOf(model, date);

@@ -32,7 +32,7 @@ import { askedRunes, carpetLine, CARPET_TOKENS, cellIndex, COUNCIL_RUNE, extract
 import { hash32, hashStr, hex, Rng } from './rng';
 import { onBeat, repairCoefficients, stretch, type Coefficients } from './coefficients';
 import { BudgetError, type Models } from './ai/models';
-import { costOf } from './ai/prices';
+import { billedModel, costOf } from './ai/prices';
 import { USAGE_FILE, UsageLedger, type CallRecord } from './ai/usage';
 import { addBudgetFromTetto, costWithFee, DEFAULT_GRANT_CAP, MemoryLedger, splitCost, type Ledger, type PaymentRecord } from './credits';
 import { MemoryChunks, type ChunkStore } from './chunks';
@@ -486,6 +486,10 @@ export class Kernel {
   private wanderersById = new Map<string, Wanderer & { entity: Id; tappeto?: { ox: number; oy: number }; profilo?: Profile; anonimo?: boolean }>();
   /** Spending ceiling for this session per wanderer (T45d: lobby). */
   private sessionTetto = new Map<string, number>();
+  /** How deep in `as` this moment is: someone is acting (V-022). */
+  private acting = 0;
+  /** What the whole world asks goes to the local models when none of those connected can pay (V-023): a public server's key is not free. */
+  commonNeedsPayer = false;
   /** The highest ceiling each wanderer brought: entering again does not add the same budget twice. */
   private tettoBudgeted = new Map<string, number>();
   /** Credits spent in this session per wanderer (T45d). */
@@ -615,7 +619,7 @@ export class Kernel {
     k.usage.onChange = () => k.bus.emit('usage', k.usage);
     // The cards (T36): who pays for every call (cards.ts), and how often every card goes into a prompt.
     k.cards.load(repo.working);
-    k.council.payer = (task) => payerOf(task, k.wanderer().id);
+    k.council.payer = (task) => payerOf(task, k.payerNow());
     k.council.hasCredits = (chi) => k.hasCredits(chi);
     k.council.onFocus = (ids) => k.cards.use(ids, 'prompt', (id) => k.isCard(id));
     // A mirror saves nothing of its own: its commits hold only the files it was told and the master's edits (T42b). The Council
@@ -898,13 +902,30 @@ export class Kernel {
    * quests) is theirs. Synchronous on purpose: the swap never spans an await.
    */
   as<T>(id: string, fn: () => T): T {
+    this.acting++;
+    try {
+      return this.asWanderer(id, fn);
+    } finally {
+      this.acting--;
+    }
+  }
+
+  /**
+   * Who pays for what is asked now (V-022). `as` never spans an await, so in a game of many, out of an `as`, nobody is acting: `wanderer()` would say
+   * whoever holds the default body (the master `io`), who asked for nothing. What a wanderer's request asks after an await passes its `chi`; the rest is the world's.
+   */
+  payerNow(): string {
+    return this.manyPlayers() && !this.mirror && !this.acting ? COMUNE : this.wanderer().id;
+  }
+
+  private asWanderer<T>(id: string, fn: () => T): T {
     const w = this.wanderersById.get(id);
     if (!w || w.entity === this.playerId) return fn();
     if (!this.ecs.alive.has(w.entity)) {
       // Never someone else in their place: they come back with what was saved of them.
       this.wanderersById.delete(id);
       this.addWanderer(id, w.nome);
-      return this.as(id, fn);
+      return this.asWanderer(id, fn);
     }
     const was = this.playerId;
     const holder = this.carpetHolder;
@@ -4746,8 +4767,8 @@ export class Kernel {
 
   /** Whether a wanderer has credits to pay for model calls (T45a, T45d: checks balance and session tetto). */
   hasCredits(id: string = this.wanderer().id): boolean {
-    if (id === COMUNE) return true;
     if (!this.manyPlayers()) return true;
+    if (id === COMUNE) return !this.commonNeedsPayer || (this.connectedWanderers?.() ?? []).some((w) => this.hasCredits(w));
     if (this.isAnonymous(id)) return false;
     const tetto = this.sessionTetto.get(id);
     const spent = this.sessionSpent.get(id) ?? 0;
@@ -4879,7 +4900,8 @@ export class Kernel {
   }
 
   private charge(r: CallRecord): void {
-    const usd = costOf(r.model, { prompt: r.prompt, cached: r.cached, output: r.output, thoughts: r.thoughts }, r.day) ?? 0;
+    // A model of Google's off the price list costs what the gate counts it for, the dearest, never nothing (V-024); the local ones are free.
+    const usd = costOf(billedModel(r.model), { prompt: r.prompt, cached: r.cached, output: r.output, thoughts: r.thoughts }, r.day) ?? 0;
     if (usd <= 0) return;
     const total = costWithFee(usd);
     const payer = r.chi || COMUNE;
@@ -6519,6 +6541,7 @@ export class Kernel {
         : '';
       const person = this.personOf(name);
       reply = await npcReply(this.council, {
+        chi: me.id,
         name,
         wanderer: me.nome,
         presentazione: this.profileOf(me.id)?.presentazione,
@@ -7163,7 +7186,7 @@ export class Kernel {
    * what the world pays one of the wanderers, drawn with the seed. `chi` overrides the task's payer.
    */
   sign(cardId: string, task: string, autore: string, chi?: string): Carta {
-    const pagante = chi ?? payerOf(task, this.wanderer().id);
+    const pagante = chi ?? payerOf(task, this.payerNow());
     const all = [...new Set([...this.wanderers().map((w) => w.id), ...wanderersIn(this.files).map((w) => w.id)])];
     return { autore, pagante, titolare: titolareOf(cardId, pagante, all.length ? all : [SOLO], this.config?.seed ?? 0) };
   }

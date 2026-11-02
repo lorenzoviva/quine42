@@ -11,6 +11,7 @@ import path from 'node:path';
 import { promises as fs } from 'node:fs';
 import type { AccountSettings } from './account';
 import { openLedger } from './ledger';
+import { gate, isJson, refuse } from './access';
 import type { WorldCalls } from './worldCalls';
 import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
 import { accountWanderer } from '../src/session/account';
@@ -389,6 +390,10 @@ export function stripeHandler(opts: StripeRouteOptions): Connect.NextHandleFunct
 
     // 2. POST /api/stripe/checkout
     if (req.method === 'POST' && url === '/api/stripe/checkout') {
+      // Rule 8b: another site never; without accounts, where the id is only said, only this machine (V-028).
+      const no = gate(req, opts.accounts);
+      if (no) return refuse(res, no, (motivo) => ({ ok: false, motivo }));
+      if (!isJson(req)) return send(res, 415, { ok: false, motivo: 'solo JSON' });
       try {
         let body: Record<string, unknown> | null;
         try {

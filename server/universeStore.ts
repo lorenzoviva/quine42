@@ -30,7 +30,7 @@ import { allowedPath, UNIVERSE_NAME_RE } from '../src/kernel/paths';
 import { publicFiles } from '../src/session/files';
 import type { AccountSettings } from './account';
 import { sealLedger, sweepBalances } from './ledger';
-import { callerOf, creditFile, gameIn, isJson, newSecret, newUniverse, owns, type Access } from './access';
+import { callerOf, creditFile, failureText, gameIn, isJson, newSecret, newUniverse, owns, type Access } from './access';
 import { runGit } from './git';
 
 const MAX_BODY = 32 * 1024 * 1024;
@@ -328,6 +328,8 @@ export function universeStore(baseDir: string, opts: { accounts?: AccountSetting
     }
     if (req.method !== 'POST') return send(res, 405, { error: 'metodo non ammesso' });
     if (!isJson(req)) return send(res, 415, { error: 'solo JSON' });
+    // Before reading up to MAX_BODY of who could not make anything anyway (V-028): `newUniverse` says the rest from the files.
+    if (op === 'create' && !who.local && (!who.id || who.anonimo)) return send(res, 403, { error: 'per fare un universo serve un account' });
     const raw = await readBody(req);
     const body = raw ? JSON.parse(raw) : {};
     // In a game of many the balances are the world's: not even its master writes them from outside (ADR-0081, ADR-0102).
@@ -385,7 +387,7 @@ export function universeStore(baseDir: string, opts: { accounts?: AccountSetting
 
   const handler: Connect.NextHandleFunction = (req, res, next) => {
     if (!req.url?.startsWith('/api/universe')) return next();
-    handle(req, res).catch((e: Error) => send(res, 500, { error: e.message }));
+    handle(req, res).catch((e: Error) => send(res, 500, { error: failureText('universi', e) }));
   };
   return {
     name: 'rune-universe-store',

@@ -265,6 +265,8 @@ export class WorldHost {
 
   private pass(cid: number, c: Connected, m: ClientMsg): void {
     if (m?.t === 'entra') c.entered = true;
+    // Until they say who they are nothing goes through: no limit holds yet in the world (ADR-0107), and the world would only drop it (V-028).
+    if (!c.entered) return;
     const size = JSON.stringify(m).length;
     const child = this.child;
     if (this.backlog + size > MAX_BACKLOG || !child?.connected) {

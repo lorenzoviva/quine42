@@ -11,7 +11,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import path from 'node:path';
 import { promises as fs } from 'node:fs';
 import type { AccountSettings } from './account';
-import { bearer, gate, isJson, refuse } from './access';
+import { bearer, failureText, gate, isJson, refuse } from './access';
 import { runGit } from './git';
 import { openLedger } from './ledger';
 import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
@@ -249,7 +249,7 @@ export function wandererHandler(opts: WandererRouteOptions): Connect.NextHandleF
         }
         return send(res, 200, { ok: true, profilo: kept.repair.profilo, riparato: kept.repair.riparato, viandante: viewFromFiles(files, universo, who.id, who.account, (await openLedger(opts.universesDir, universo)).balance(who.id)) });
       } catch (e) {
-        return send(res, 500, { ok: false, motivo: (e as Error).message });
+        return send(res, 500, { ok: false, motivo: failureText('viandante', e) });
       }
     })();
   };

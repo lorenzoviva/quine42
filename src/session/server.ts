@@ -146,6 +146,15 @@ export function cleanBranch(files: unknown): FileChanges | undefined {
   return out;
 }
 
+/**
+ * A message's sequence number: only a number. `Number()` on what comes from the wire can throw: an object whose `toString` and `valueOf` are not
+ * functions cannot become a primitive, and JSON can write one (V-021).
+ */
+const seqOf = (msg: unknown): number => {
+  const seq = (msg as { seq?: unknown } | null)?.seq;
+  return typeof seq === 'number' && Number.isFinite(seq) ? seq : 0;
+};
+
 /** The first files of a list, for a commit's message. */
 const listOf = (paths: string[]) => paths.slice(0, 6).join(', ') + (paths.length > 6 ? '…' : '');
 const round = (v: number) => Math.round(v * 1000) / 1000;
@@ -246,6 +255,8 @@ export class SessionServer {
     this.masterUid = opts.masterUid;
     this.told = { ...kernel.files };
     kernel.connectedWanderers = () => this.connected();
+    // With accounts the server is public and its key is its owner's: what the whole world asks needs someone to pay for it (V-023).
+    kernel.commonNeedsPayer = !!opts.verify;
     kernel.bus.on('council', (e: FeedEntry) => {
       this.voices.push(e);
       if (this.voices.length > FEED_KEEP) this.voices.shift();
@@ -332,6 +343,16 @@ export class SessionServer {
     let client: Client | undefined;
     let entering = false;
     let closed = false;
+    // What comes from the wire never throws out of here: in the world's process this is the channel's listener, and nothing is above it (V-021).
+    const admit = (who: () => Client | undefined) => {
+      try {
+        client = who();
+      } catch (e) {
+        this.kernel.log('sessione', `ingresso rifiutato: ${(e as Error).message}`);
+        link.send({ t: 'rifiuto', motivo: 'il viandante non può entrare' });
+      }
+      if (!client) link.close();
+    };
     link.onMessage((msg) => {
       if (client) {
         this.hear(client, msg);
@@ -340,8 +361,7 @@ export class SessionServer {
       if (msg?.t !== 'entra' || entering) return;
       const tetto = typeof (msg as { tetto?: number }).tetto === 'number' && Number.isFinite((msg as { tetto?: number }).tetto) ? (msg as { tetto?: number }).tetto : undefined;
       if (!this.verify) {
-        client = this.join(link, msg.id, msg.nome, msg.profilo, undefined, tetto);
-        if (!client) link.close();
+        admit(() => this.join(link, msg.id, msg.nome, msg.profilo, undefined, tetto));
         return;
       }
       entering = true;
@@ -357,8 +377,7 @@ export class SessionServer {
         const known = !!readWandererState(this.kernel.files, id);
         if (a.anonimo) this.anonymous.add(id);
         else this.anonymous.delete(id);
-        client = this.join(link, id, known ? msg.nome : (a.nome ?? msg.nome), msg.profilo, a.anonimo, tetto);
-        if (!client) link.close();
+        admit(() => this.join(link, id, known ? msg.nome : (a.nome ?? msg.nome), msg.profilo, a.anonimo, tetto));
       });
     });
     link.onClose(() => {
@@ -432,8 +451,8 @@ export class SessionServer {
     this.inbox = [];
     for (const { c, msg } of inbox) {
       if (this.clients.get(c.id) !== c) continue;
-      if (!heavy(msg)) void this.handle(c, msg);
-      else if (c.pace.queue.length >= LIMITS.waiting) this.answer(c, Number((msg as { seq?: unknown }).seq) || 0, { ok: false, motivo: 'troppe richieste in attesa: aspetta le risposte' });
+      if (!heavy(msg)) void this.handleSafely(c, msg);
+      else if (c.pace.queue.length >= LIMITS.waiting) this.answer(c, seqOf(msg), { ok: false, motivo: 'troppe richieste in attesa: aspetta le risposte' });
       else {
         c.pace.queue.push({ c, msg });
         this.startWaiting(c.pace);
@@ -471,20 +490,19 @@ export class SessionServer {
   /** A message as it arrives: what is over the wanderer's pace goes no further than this, whatever it is. */
   private hear(c: Client, msg: ClientMsg): void {
     const p = c.pace;
-    const seq = () => Number((msg as { seq?: unknown } | null)?.seq) || 0;
     if (p.msgs < 1) {
       if (++p.refused > LIMITS.flood) {
         c.link.send({ t: 'rifiuto', motivo: 'troppi messaggi: collegamento chiuso' });
         return c.link.close();
       }
       // A step lost is made good by the next one.
-      if (msg && typeof msg === 'object' && msg.t !== 'passo') this.answer(c, seq(), { ok: false, motivo: SLOW_DOWN });
+      if (msg && typeof msg === 'object' && msg.t !== 'passo') this.answer(c, seqOf(msg), { ok: false, motivo: SLOW_DOWN });
       return;
     }
     p.msgs--;
     if (!msg || typeof msg !== 'object') return;
     if (heavy(msg)) {
-      if (p.heavy < 1) return this.answer(c, seq(), { ok: false, motivo: SLOW_DOWN });
+      if (p.heavy < 1) return this.answer(c, seqOf(msg), { ok: false, motivo: SLOW_DOWN });
       p.heavy--;
     }
     this.inbox.push({ c, msg });
@@ -507,16 +525,25 @@ export class SessionServer {
       const { c, msg } = p.queue.shift()!;
       if (this.clients.get(c.id) !== c) continue;
       p.running++;
-      void (async () => this.handle(c, msg))()
-        .catch((e) => this.kernel.log('sessione', `richiesta fallita: ${(e as Error).message}`))
-        .finally(() => p.running--);
+      void this.handleSafely(c, msg).finally(() => p.running--);
     }
+  }
+
+  /**
+   * A message of a client, whatever it holds: one that cannot be understood costs its answer, never the tick it arrived in, the others' messages or the
+   * world (V-021). Runs at once as far as the message can go without waiting.
+   */
+  private handleSafely(c: Client, msg: ClientMsg): Promise<void> {
+    return (async () => this.handle(c, msg))().catch((e) => {
+      this.kernel.log('sessione', `richiesta fallita: ${(e as Error).message}`);
+      this.answer(c, seqOf(msg), { ok: false, motivo: 'messaggio non valido' });
+    });
   }
 
   /** What a message does; the promise, for what waits for the Council, ends when it has been answered. */
   private handle(c: Client, msg: ClientMsg): void | Promise<void> {
-    if (msg.t === 'passo') return this.step(c, msg.seq, msg.x, msg.y);
-    const seq = Number((msg as { seq?: unknown }).seq) || 0;
+    if (msg.t === 'passo') return this.step(c, msg);
+    const seq = seqOf(msg);
     const k = this.kernel;
     if (msg.t === 'altro' && typeof msg.viandante === 'string') return this.later(c, seq, () => k.freeOnWanderer(String(msg.viandante), words(msg.testo)));
     if (msg.t === 'altro' && (msg.slot !== undefined || msg.col !== undefined || msg.row !== undefined)) return this.freeOn(c, seq, msg);
@@ -634,7 +661,7 @@ export class SessionServer {
    */
   private askOnBranch(c: Client, seq: number, agente: unknown, testo: unknown): void | Promise<void> {
     if (!this.kernel.isMaster(c.id)) return this.answer(c, seq, { ok: false, motivo: 'solo il master parla con il Concilio' });
-    if (typeof agente !== 'string' || !(agente in AGENTS) || typeof testo !== 'string' || !testo.trim()) return this.answer(c, seq, { ok: false, motivo: 'richiesta non valida' });
+    if (typeof agente !== 'string' || !Object.hasOwn(AGENTS, agente) || typeof testo !== 'string' || !testo.trim()) return this.answer(c, seq, { ok: false, motivo: 'richiesta non valida' });
     const ask = this.asking.then(() => this.onBranch(c, agente as AgentId, testo.slice(0, LIMITS.agentText)));
     this.asking = ask.catch(() => undefined);
     return ask.then(
@@ -714,20 +741,22 @@ export class SessionServer {
   }
 
   /** A step claimed by the client: as far as the pace allows and the world lets them, corrected if it differs. */
-  private step(c: Client, seq: unknown, x: unknown, y: unknown): void {
+  private step(c: Client, msg: { seq?: unknown; x?: unknown; y?: unknown }): void {
+    const seq = seqOf(msg);
+    const { x, y } = msg;
     const k = this.kernel;
     const at = k.wandererAt(c.id);
     if (!at) return;
     if (k.isDying(c.id) || c.notices.some((n) => n.tipo === 'morte')) {
       c.budget = 0;
-      return c.link.send({ t: 'correzione', seq: Number(seq) || 0, x: round(at.x), y: round(at.y) });
+      return c.link.send({ t: 'correzione', seq, x: round(at.x), y: round(at.y) });
     }
     // Only numbers: on the wire what is not a number becomes null, and null is not 0.
     const to = { x: typeof x === 'number' ? x : NaN, y: typeof y === 'number' ? y : NaN };
-    if (!Number.isFinite(to.x) || !Number.isFinite(to.y) || Math.hypot(to.x - at.x, to.y - at.y) > FAR) return c.link.send({ t: 'correzione', seq: Number(seq) || 0, x: round(at.x), y: round(at.y) });
+    if (!Number.isFinite(to.x) || !Number.isFinite(to.y) || Math.hypot(to.x - at.x, to.y - at.y) > FAR) return c.link.send({ t: 'correzione', seq, x: round(at.x), y: round(at.y) });
     const got = k.stepWanderer(c.id, to, Math.max(0, c.budget)) ?? at;
     c.budget -= Math.hypot(got.x - at.x, got.y - at.y);
-    if (Math.hypot(got.x - to.x, got.y - to.y) > CORRECT) c.link.send({ t: 'correzione', seq: Number(seq) || 0, x: round(got.x), y: round(got.y) });
+    if (Math.hypot(got.x - to.x, got.y - to.y) > CORRECT) c.link.send({ t: 'correzione', seq, x: round(got.x), y: round(got.y) });
   }
 
   /** Something carried (T39b): what the kernel does with a pocket of the inventory, as the wanderer. */
