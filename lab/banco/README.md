@@ -78,3 +78,7 @@ In `bersagli.ts`: `moderna`, `steampunk`, `futuristica`, `locanda` (con la canti
 
 `esempi/buono.xml` (scritto a mano, passa le misure), `esempi/scala-stretta.xml` (lo stesso con la scala larga 4 voxel), `esempi/brutto.xml` (una scatola): li usa
 `lab/tests/banco.test.ts`, insieme a un giro dentro il kernel vero. Il primo giudizio è in `prima-prova/`.
+
+## Il ciclo (T155)
+
+`diario.md` dice ogni giro; `finale/` tiene i modelli, le foto, le misure e il giudizio dell'ultimo giro completo, anche i tentativi falliti. La soglia non è ancora raggiunta: `docs/pipeline/domande/T155.md`.
