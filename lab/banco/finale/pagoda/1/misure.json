@@ -1,0 +1,231 @@
+{
+  "bersaglio": "pagoda",
+  "token": {
+    "input": 2,
+    "cacheScritta": 786,
+    "cacheLetta": 2999,
+    "output": 56331,
+    "inputTotale": 3787
+  },
+  "modello": "claude-opus-5-5",
+  "dollari": 1.1335158,
+  "ms": 601303,
+  "caratteriXml": 10045,
+  "passa": true,
+  "difetti": [],
+  "voci": [
+    {
+      "id": "finisce",
+      "ok": true,
+      "valore": "54 ms",
+      "richiesto": "entro 8000 ms"
+    },
+    {
+      "id": "valido",
+      "ok": true,
+      "valore": "sì",
+      "richiesto": "i controlli di check.ts"
+    },
+    {
+      "id": "piani",
+      "ok": true,
+      "valore": "2",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "testa",
+      "ok": true,
+      "valore": "1.6 1.6",
+      "richiesto": "≥ 1.5 caselle per piano"
+    },
+    {
+      "id": "stanze",
+      "ok": true,
+      "valore": "4",
+      "richiesto": "≥ 3"
+    },
+    {
+      "id": "murato",
+      "ok": true,
+      "valore": "0",
+      "richiesto": "≤ 0.25"
+    },
+    {
+      "id": "porta",
+      "ok": true,
+      "valore": "x 49, scarto 0.01, alta 3.25, libera",
+      "richiesto": "sul davanti, scarto ≤ 0.33, alta ≥ 1.5"
+    },
+    {
+      "id": "salti",
+      "ok": true,
+      "valore": "11",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "materiali",
+      "ok": true,
+      "valore": "13",
+      "richiesto": "≥ 6"
+    },
+    {
+      "id": "dominante",
+      "ok": true,
+      "valore": "0.28",
+      "richiesto": "≤ 0.6"
+    },
+    {
+      "id": "finestre",
+      "ok": true,
+      "valore": "24 su 4 lati",
+      "richiesto": "≥ 6 su ≥ 3 lati"
+    },
+    {
+      "id": "dettagli",
+      "ok": true,
+      "valore": "175, 0 lati vuoti",
+      "richiesto": "≥ 24, ≤ 1 lati vuoti"
+    },
+    {
+      "id": "rumore",
+      "ok": true,
+      "valore": "0.01",
+      "richiesto": "≤ 0.7"
+    },
+    {
+      "id": "sagoma",
+      "ok": true,
+      "valore": "14",
+      "richiesto": "≥ 4"
+    },
+    {
+      "id": "rilievo",
+      "ok": true,
+      "valore": "0.61",
+      "richiesto": "≥ 0.12"
+    },
+    {
+      "id": "ingombro",
+      "ok": true,
+      "valore": "1",
+      "richiesto": "≥ 0.3"
+    }
+  ],
+  "misure": {
+    "voxel": 146228,
+    "ms": 54,
+    "finito": true,
+    "piani": [
+      {
+        "z": 2,
+        "quota": 0.1,
+        "area": 8.1625,
+        "testa": 1.6,
+        "stanze": 2
+      },
+      {
+        "z": 36,
+        "quota": 1.8,
+        "area": 4.99,
+        "testa": 1.6,
+        "stanze": 2
+      }
+    ],
+    "cantina": 0,
+    "terrazze": 0,
+    "stanze": 4,
+    "murato": 0,
+    "porta": {
+      "x": 49,
+      "y": 91,
+      "scarto": 0.025,
+      "alta": 3.25,
+      "libera": true
+    },
+    "salti": [
+      {
+        "x": 87,
+        "y": 76,
+        "z": 1,
+        "sale": false
+      },
+      {
+        "x": 87,
+        "y": 98,
+        "z": 1,
+        "sale": false
+      },
+      {
+        "x": 76,
+        "y": 75,
+        "z": 2,
+        "sale": false
+      },
+      {
+        "x": 99,
+        "y": 24,
+        "z": 1,
+        "sale": false
+      },
+      {
+        "x": 96,
+        "y": 49,
+        "z": 1,
+        "sale": false
+      },
+      {
+        "x": 92,
+        "y": 75,
+        "z": 1,
+        "sale": false
+      },
+      {
+        "x": 0,
+        "y": 49,
+        "z": 1,
+        "sale": false
+      },
+      {
+        "x": 0,
+        "y": 77,
+        "z": 1,
+        "sale": false
+      },
+      {
+        "x": 0,
+        "y": 24,
+        "z": 1,
+        "sale": false
+      },
+      {
+        "x": 0,
+        "y": 58,
+        "z": 1,
+        "sale": false
+      },
+      {
+        "x": 84,
+        "y": 49,
+        "z": 36,
+        "sale": false
+      }
+    ],
+    "materiali": 13,
+    "dominante": 0.27571326968843174,
+    "finestre": 24,
+    "latiConFinestre": 4,
+    "dettagli": 175,
+    "latiVuoti": 0,
+    "rumore": 0.005681818181818182,
+    "rilievo": 0.6058391076559068,
+    "sagoma": 14,
+    "ingombro": 1,
+    "luci": 10552,
+    "inutili": [],
+    "avvisi": [
+      "tocca i bordi laterali della griglia: forse è tagliato",
+      "tocca il soffitto della griglia: forse è tagliato in alto"
+    ],
+    "errori": []
+  }
+}

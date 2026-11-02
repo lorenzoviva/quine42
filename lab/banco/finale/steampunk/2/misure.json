@@ -1,0 +1,19 @@
+{
+  "bersaglio": "steampunk",
+  "errore": "riga 22, <box>: \"at\" vuole tre numeri separati da spazi",
+  "token": {
+    "input": 2,
+    "cacheScritta": 358,
+    "cacheLetta": 3444,
+    "output": 63216,
+    "inputTotale": 3804
+  },
+  "modello": "claude-opus-5-5",
+  "dollari": 1.2678808,
+  "ms": 670933,
+  "caratteriXml": 12074,
+  "passa": false,
+  "difetti": [
+    "riga 22, <box>: \"at\" vuole tre numeri separati da spazi"
+  ]
+}

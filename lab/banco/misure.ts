@@ -4,7 +4,7 @@
 
 import { JUMP_FAR, JUMP_UP } from '../../src/kernel/kernel';
 import { withSize } from '../../src/kernel/agents/sculptor';
-import { FormCache, Forms, groundOfForm, InlineRunner, levelAt, MODEL_TIME, rampBlocks, stepOf, topUnder, type Form, type Ground } from '../../src/kernel/forms';
+import { FormCache, Forms, groundOfForm, holesOf, InlineRunner, levelAt, MODEL_TIME, rampBlocks, stepOf, topUnder, type Form, type Ground } from '../../src/kernel/forms';
 import { modelSize } from '../../src/kernel/modeldirector';
 import { boxOf, classOf, type Taglia } from '../../src/mj/classes';
 import { analyse, type Analysis } from '../../src/mj/check';
@@ -126,6 +126,8 @@ export interface Misure {
   analisi: Analysis;
   /** Covered floors a body reaches (the ground floor, the floors above, the cellar). */
   piani: Piano[];
+  /** Tiles² of floor under the ground a body's centre stands on: 0 if the kernel takes the model without its cellar. */
+  cantina: number;
   /** Open floors above the ground a body reaches (terraces, a walkable roof). */
   terrazze: number;
   stanze: number;
@@ -533,7 +535,9 @@ export function misura(e: Eseguito, b: Bersaglio): Misure {
   const terrazze = picchi(aperte, minArea / 4, lontano).length;
 
   // What a body could stand on and does not reach, in pieces as large as a floor: rooms walled in, a storey without a stair (not the top of a crate).
-  const raw = surfaces(g, palette, step + 1, Math.ceil(0.7 * vpt));
+  // As the kernel fills it (`cellarGround`): out of the cellar the earth is solid up to the ground, so the air under a ground floor is not a floor.
+  const buche = holesOf(g, palette, base);
+  const raw = surfaces(g, palette, step + 1, Math.ceil(0.7 * vpt), base ? Uint16Array.from({ length: g.X * g.Y }, (_, i) => (buche?.[i] ? 0 : base)) : undefined);
   const presi = new Set<number>();
   for (const c of cammino.celle) presi.add((c.x + c.y * g.X) * 4096 + c.z);
   const rawForm = fakeForm(g, vpt, base);
@@ -585,6 +589,7 @@ export function misura(e: Eseguito, b: Bersaglio): Misure {
     finito: result.finished,
     analisi,
     piani,
+    cantina: ground.hole ? cammino.celle.filter((c) => c.z < base - step).length / (vpt * vpt) : 0,
     terrazze,
     stanze: piani.reduce((s, p) => s + p.stanze, 0),
     murato: perso / Math.max(1, presiCoperti),
@@ -609,6 +614,8 @@ export const SOGLIA = {
   testa: 1.5,
   /** Rooms on all of them, each a body reaches. */
   stanze: 3,
+  /** Tiles² of cellar a body walks on, when the target has one. */
+  cantina: 1.2,
   /** Floor a body could stand on and does not reach, over the floor it reaches. */
   murato: 0.25,
   /** The door faces the front: at most this far from its middle, as a share of the width. */
@@ -660,6 +667,7 @@ export function giudica(m: Misure, s: Scatola): Giudizio {
   const bassi = m.piani.filter((p) => p.testa < S.testa);
   voce_('testa', !bassi.length && m.piani.length > 0, m.piani.map((p) => n2(p.testa)).join(' ') || '—', `≥ ${S.testa} caselle per piano`);
   voce_('stanze', m.stanze >= S.stanze, m.stanze, `≥ ${S.stanze}`);
+  if (s.base) voce_('cantina', m.cantina >= S.cantina, n2(m.cantina), `≥ ${S.cantina} caselle² raggiunte sotto il suolo`);
   voce_('murato', m.murato <= S.murato, n2(m.murato), `≤ ${n2(S.murato)}`);
   const scarto = m.porta ? m.porta.scarto / (s.box[0] / s.vpt) : undefined;
   voce_('porta', !!m.porta && m.porta.libera && scarto! <= S.scartoPorta && m.porta.alta >= S.testa, m.porta ? `x ${m.porta.x}, scarto ${n2(scarto!)}, alta ${n2(m.porta.alta)}, ${m.porta.libera ? 'libera' : 'ostruita'}` : 'nessuna sul davanti', `sul davanti, scarto ≤ ${n2(S.scartoPorta)}, alta ≥ ${S.testa}`);

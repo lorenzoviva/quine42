@@ -152,3 +152,30 @@ describe('i bersagli e la prova', () => {
     expect(leggiEventi('').errore).toBeDefined();
   });
 });
+
+describe('i modelli finali (T155)', () => {
+  const radice = 'lab/banco/finale';
+  const tentativi = BERSAGLI.flatMap((b) => ['1', '2'].map((n) => ({ b, dir: `${radice}/${b.id}/${n}` })));
+  const passa = (dir: string) => (JSON.parse(fs.readFileSync(`${dir}/misure.json`, 'utf8')) as { passa: boolean }).passa;
+
+  it.each(tentativi.filter(({ dir }) => passa(dir)).map(({ b, dir }) => [dir, b] as const))('%s gira nel motore e passa i controlli', (dir, b) => {
+    const e = esegui(fs.readFileSync(`${dir}/modello.xml`, 'utf8'), b);
+    const m = misura(e, b);
+    expect(m.analisi.errors).toEqual([]);
+    expect(giudica(m, e.scatola).difetti).toEqual([]);
+  }, 30_000);
+
+  it("una locanda finale ha la cantina raggiunta, e l'aria sotto il piano terra non è un pavimento perso", () => {
+    const b = BERSAGLI.find((x) => x.id === 'locanda')!;
+    const e = esegui(fs.readFileSync(`${radice}/locanda/2/modello.xml`, 'utf8'), b);
+    const m = misura(e, b);
+    expect(m.cantina).toBeGreaterThan(1.2);
+    expect(m.murato).toBeLessThanOrEqual(0.25);
+  }, 30_000);
+
+  it('chi chiede una cantina e non la raggiunge non passa', () => {
+    const b = { ...CASA, sotto: 1 };
+    const e = esegui(esempio('buono'), b);
+    expect(giudica(misura(e, b), e.scatola).voci.find((v) => v.id === 'cantina')?.ok).toBe(false);
+  }, 30_000);
+});
