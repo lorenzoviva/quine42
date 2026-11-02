@@ -3051,8 +3051,9 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Browser: non serve; ciò che si vede solo a schermo (camera, grafica) scrivilo come non provato.
 - Quando è fatto: commit su `task/T183`; nell'esito quanti scenari riescono senza kernel e le prime tre primitive. Sicurezza: nessuna superficie nuova, o le voci aggiunte.
 
-### T184 · Le ambientazioni spazio, pirati, cowboy — `da fare` (dipende da T152)
-- Pipeline: claude · stima 2% · approvato · browser · priorità 90
+### T184 · Le ambientazioni spazio, pirati, cowboy — `in attesa` (dipende da T152)
+- Pipeline: claude · stima 2% · browser · priorità 90
+- In attesa (autore, 03/11): «per ora mettili in attesa»; riparte quando lo dice lui. Vale solo per spazio, pirati e cowboy: T152 e T153 non cambiano. Sul sito intanto li annuncia T186.
 - Contesto: richiesta 4 dell'autore, l'ultima: altri universi, spazio, pirati, cowboy. T152 fa i temi della Genesi e il censimento di ciò che presuppone il medioevo: questo task ne aggiunge tre. Lo spazio è il caso difficile: terreno, cielo, acqua e clima possono non significare ciò che significano altrove. Pirati e cowboy chiedono barche e fucili: le meccaniche le misura T183.
 - Cosa fare: tre temi in più nella schermata della Genesi, col metodo di T152; ciò che il censimento non aveva considerato diventa neutro o dipende dal tema, nel modo più piccolo. Dello spazio di' cosa funziona e cosa no.
 - Test: una Genesi offline per ogni tema. Typecheck e suite con i loro turni.
@@ -3061,6 +3062,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T185 · Generare gli universi spazio, pirati, cowboy — `in attesa` (dipende da T184, T153)
 - Pipeline: claude · stima 2% · priorità 91
-- Contesto: come T153, con le stesse risposte che l'autore deve ancora dare (`docs/pipeline/domande/T153.md`): costo, abbonamenti, nomi.
+- Contesto: in attesa come T184, per scelta dell'autore (03/11); servono anche le risposte di T153 (`docs/pipeline/domande/T153.md`): costo, abbonamenti, nomi.
 - Cosa fare: come T153, un universo alla volta, nessuna chiamata alle API Gemini.
 - Quando è fatto: i tre universi su disco; nell'esito il costo di ciascuno e ciò che si è visto.
+
+### T186 · Sul sito: spazio, pirati e cowboy «coming soon» — `da fare`
+- Pipeline: claude · stima 1% · approvato · browser · priorità 85
+- Contesto: l'autore (03/11) ha messo in attesa questi tre universi (T184, T185) e propone di scrivere «coming soon» sul sito. Pagine in `site/`, stile del template `docs/design/sito/` (`site/site.css`), landing `site/landing.ts`, reami in `site/sessioni.html`.
+- Cosa fare: guarda dove il sito parla degli universi e metti lì spazio, pirati e cowboy come «coming soon», senza link né pulsanti che portano a un universo che non c'è e senza date. Nel punto più piccolo che si vede: se non c'è un posto naturale, una sezione breve nella landing. Niente generazione né modelli nuovi. Il testo di tema, nessun meta-gioco sui contenuti del mondo.
+- Test: typecheck e, se tocca il codice di una pagina, i test del sito con il loro turno.
+- Browser: col turno `browser`: la pagina con la voce, a larghezza piena e stretta; screenshot; nessun errore né violazione della CSP in console.
+- Quando è fatto: commit su `task/T186`; nell'esito dove sta e la frase scritta. Sicurezza: nessuna superficie nuova.
