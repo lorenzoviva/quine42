@@ -17,7 +17,7 @@ export { repairMinimi } from './universe';
 import { boxOf, classOf, CLASSES, sizeOf, TAGLIE } from '../mj/classes';
 import { Mj3Error } from '../mj/engine';
 import { compileMjx } from '../mj/model';
-import { runMjx } from '../mj/run';
+import { FORM_LIMITS, MAX_FORM_TIME, MAX_FORM_XML, runMjx } from '../mj/run';
 import { reservedName } from './paths';
 
 const KINDS: ModuleKind[] = ['system', 'entity', 'item', 'player', 'generator', 'data'];
@@ -60,10 +60,12 @@ export const MODEL_RE = /^[a-z0-9][a-z0-9-]{0,40}$/i;
  * mend it mends (ADR-0036), the rest goes back with the line of the error.
  */
 export function modelErrors(path: string, xml: string, time = 8_000): string[] {
+  if (xml.length > MAX_FORM_XML) return [`${path}: programma troppo lungo (max ${MAX_FORM_XML} caratteri)`];
+  time = Math.min(time, MAX_FORM_TIME);
   try {
     const size = /<(?!!)[a-z]+\b[^>]*\ssize="/i.test(xml) ? undefined : boxOf(classOf('oggetto')!);
     const m = compileMjx(xml, size ? { size } : {});
-    const r = runMjx(m, 1, { deadline: time });
+    const r = runMjx(m, 1, { deadline: time, limits: FORM_LIMITS });
     if (!r.finished) return [`${path}: il programma non finisce in ${Math.round(time / 1000)} secondi (ogni crescita deve avere steps; un programma lento scritto a mano può avere \`tempo\` in models/index.json)`];
     return analyse(r, m.program.palette, { grounded: true }).errors.map((e) => `${path}: ${e}`);
   } catch (e) {

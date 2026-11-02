@@ -961,7 +961,8 @@ function exec(root: Runner, g: Grid3, seed: number, maxSteps: number, t0: number
         every *= 2;
       }
     }
-    if (opts.deadline && (steps & 255) === 0 && Date.now() - t0 > opts.deadline) {
+    // At every step: on a large grid one step can take long, and 256 of them were seconds past the deadline.
+    if (opts.deadline && Date.now() - t0 > opts.deadline) {
       late = true;
       break;
     }

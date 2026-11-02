@@ -1,0 +1,39 @@
+{
+ "data": "2026-11-02",
+ "commit": "6e0439d",
+ "vite": "7.3.7",
+ "node": "v22.19.0",
+ "piattaforma": "win32",
+ "solo": [
+  "V-007"
+ ],
+ "riepilogo": {
+  "ok": 3,
+  "falle": 0,
+  "errori": 0,
+  "saltate": 0
+ },
+ "prove": [
+  {
+   "id": "V-007.a",
+   "voce": "V-007",
+   "proprieta": "un pattern patologico di string.find finisce entro un tempo breve",
+   "esito": "ok",
+   "dettaglio": "finito in 41 ms, con un guasto"
+  },
+  {
+   "id": "V-007.b",
+   "voce": "V-007",
+   "proprieta": "un’allocazione enorme finisce in un guasto",
+   "esito": "ok",
+   "dettaglio": "1 ms, un guasto"
+  },
+  {
+   "id": "V-007.c",
+   "voce": "V-007",
+   "proprieta": "il codice di un mondo bloccato non ferma l’HTTP né gli altri mondi",
+   "esito": "ok",
+   "dettaglio": "2 risposte su 2 in 12 s"
+  }
+ ]
+}

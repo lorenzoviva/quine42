@@ -1,0 +1,39 @@
+{
+ "data": "2026-11-02",
+ "commit": "6e0439d",
+ "vite": "7.3.7",
+ "node": "v22.19.0",
+ "piattaforma": "win32",
+ "solo": [
+  "V-005"
+ ],
+ "riepilogo": {
+  "ok": 3,
+  "falle": 0,
+  "errori": 0,
+  "saltate": 0
+ },
+ "prove": [
+  {
+   "id": "V-005.a",
+   "voce": "V-005",
+   "proprieta": "lo stesso evento in contemporanea accredita una volta sola",
+   "esito": "ok",
+   "dettaglio": "8 consegne, accreditati 1"
+  },
+  {
+   "id": "V-005.b",
+   "voce": "V-005",
+   "proprieta": "saldi e pagamenti non stanno nella storia dell’universo",
+   "esito": "ok",
+   "dettaglio": "file dei pagamenti nel repository: 0, saldo nel file del viandante: false"
+  },
+  {
+   "id": "V-005.c",
+   "voce": "V-005",
+   "proprieta": "tornare a un commit vecchio non riporta indietro il saldo",
+   "esito": "ok",
+   "dettaglio": "risposta 200, saldo dopo il pagamento 12, dopo il ritorno 12"
+  }
+ ]
+}
