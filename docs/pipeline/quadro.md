@@ -10,6 +10,8 @@ Aggiornato il 02/11/2026, epoca 203 su **claude** (crediti: vedi `stato`).
 
 - **T153, risposta dell'autore (02/11):** «niente API, per ora solo agy e Claude Code, concentrati sul MJ delle strutture». Letta così: prima T154-T156, T153 dopo. Resta `in attesa`: `agy` non sta sulla coda (ADR-0106; ho consigliato Genesi solo con Claude Code), tetto di consumo, singola o multi, nomi, `aurora` (`domande/T153.md`). La coda porta agli abbonamenti solo i compiti lenti: i luoghi nuovi di un universo finito andrebbero alle API.
 
+- **Aspetto dall'autore (chiesto nell'epoca 203):** le cinque risposte aperte di T153, soprattutto se `agy` può fare la Genesi; se «concentrati» vuol dire proprio T154-T156 prima di T153.
+
 - **Epoca 203, da fare:** alla fine di T166 `integra T166`, `integra T130`; alla fine di T127 il suo esito, controllare il numero del suo ADR (nuovi dal 0110) e `integra`. Alle 18:00 del 02/11: riassunto all'autore dal diario dell'autonomia.
 
 - **Tetto di Claude a 2** (richiesta dell'autore, 01/11): attivo dopo il riavvio delle 13:35; `stato` dice tetto 2, slot 2. L'autore dice che con il Pro i limiti di Claude sono 5 volte più alti.
