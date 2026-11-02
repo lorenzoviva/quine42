@@ -2618,6 +2618,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Test: uno per `describeCard`, con una carta come la dà `publicFiles`; `npm run typecheck` e la suite con i loro turni.
 - Quando è fatto: commit su `task/T168`. L'esito dice se il raccolto riesce e se il blocco si ripete, e «sicurezza: nessuna superficie nuova» o le voci aggiunte.
 
+### T169 · Integrare T127 — `da fare`
+- Pipeline: claude · stima 3% · approvato · browser · priorità 1
+- Contesto: T127 (`dossier T127`) ha preso l'ADR-0107, che è dei limiti ai messaggi, ed è partito da un base senza T129, T130 e la cache delle forme: quello che fa non è mai stato provato con loro. `git merge-tree` dà conflitti in `AGENTS.md` e `docs/adr/README.md`; `server/session.ts` e `vite.config.ts` si fondono da soli, ma vanno riletti.
+- Cosa fare: nel worktree di T169, con il base aggiornato, `git merge task/T127`. L'ADR di T127 diventa **0110**: file, indice, `AGENTS.md`, `docs/sicurezza/registro.md`, commenti e test che lo citano; 0107, 0108, 0109 restano dove sono. Nelle aggiunte nello stesso punto tieni tutte e due. Controlla dove le parti si toccano, e correggi qui ciò che non torna: i limiti ai messaggi (`LIMITS`, `heavy`) e gli elenchi di `src/session/files.ts` valgono anche con il mondo in un processo a parte, e i messaggi che il processo manda (l'avviso, il rientro) passano dagli elenchi; `server/hidden.ts` copre anche la cartella `node_modules/.quine-mondo/`, se è servibile; `buildWorld` contiene ciò che serve a `sharedForms` e a `engineVersion`; a ogni riavvio del mondo la cache delle forme riparte da vuota: misura quanto ci mette il primo avvio e confrontalo con i 5 s dell'avviso e i 45 s del sorvegliante, perché un avvio lento non deve far uccidere il mondo.
+- Test: `npm run typecheck` e la suite intera con i loro turni, col limite normale; nell'esito quanti passano, i rossi rilanciando il file da solo, il tempo. Il kit `npm run sicurezza:prove -- --solo V-001,V-002,V-005,V-007,V-011,V-012,V-013`, con la build, esito in un file a parte.
+- Browser: col turno `browser`, su `npm run dev`, un universo multigiocatore usa e getta e `?offline`: due viandanti, di cui uno non master, si vedono e camminano; ucciso a mano il processo del mondo, avviso e rientro automatico su tutte e due le schede.
+- Quando è fatto: commit su `task/T169`. L'orchestratore integra T169 e T127. L'esito dice i tempi del primo avvio, e «sicurezza: nessuna superficie nuova» o le voci aggiunte.
+
 ### T135 · Integrare T119 dopo i task di sicurezza — `fatto`
 - Pipeline: claude · stima 1% · approvato · priorità 2
 - Contesto: `integra T119` va in conflitto solo in `docs/plans/backlog.md`: la sezione «La sicurezza» (T120-T134) è entrata in fondo al file, accanto al blocco di T119. Nasce da T119: `dossier T119`.
