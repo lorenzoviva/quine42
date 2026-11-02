@@ -2015,7 +2015,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   rossi, tutti in file che non importano il renderer (kernel, between, explore, credits…: i timeout di carico già noti, T95); nessun test tocca `src/render/`.
 
 ### T89a · Cartone: fasce e interruttore — `da fare` (dipende da T89)
-- Pipeline: claude · stima 3% · browser · priorità 75
+- Pipeline: claude · stima 3% · approvato · browser · priorità 75
 - Contesto: ADR-0093, punti 1, 2 e 6; la prova `?cartone` di T89 (`src/render/cartoon.ts`, `lit()` in `materials.ts`).
 - Fare: la rampa a 3 fasce per tutti i materiali illuminati (simulazione, corona e studio: `MAT.corona`, `coronaGlass`, `solid()`), i voxel luminosi fuori
   dalle fasce; il lato in ombra saturo (la fascia bassa non sotto ~0,35, il colore dell'emisfero non grigio); ombre portate più nette. Il cartone diventa il
@@ -2243,7 +2243,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 ### T106 · Tema pop art / retro arcade: applicazione alle interfacce in-game — `da fare` (dipende da T109, T97)
 
 - Stile: copia lo stile grafico del template in `docs/design/sito/` (fatto da T109, leggi il suo `README.md`).
-- Pipeline: claude · stima 4% · priorità 72
+- Pipeline: claude · stima 4% · approvato · priorità 72
 - Contesto: ADR-0095, punto 3 (Variabili CSS unificate). Il tema grafico deve permeare anche l'esperienza di gioco.
 - Fare: aggiornare `src/style.css` e i componenti UI in-game (`src/ui/hud.ts`, `inventory.ts`, `lobby.ts`, `profile.ts`, `chat.ts`, `creditdialog.ts`) per adottare appieno i token di `src/theme.css`: bordi a inchiostro netto fumetto (`--border-ink-thick`), ombre rigide neon offset (`--shadow-hard-cyan`, `--shadow-hard-pink`), pattern mezze tinte sui pannelli modali, pulsanti arcade retrò e font display per intestazioni e notifiche d'avviso.
 - Fatto quando: typecheck e test verdi; screenshot nel browser delle interfacce in-game rinnovate con il tema pop art comics / neon punk.
@@ -2808,7 +2808,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 ## Dalla chat del 02/11/2026 (testo originale: `docs/userchats/to-do-2026-11-02.md`)
 
 ### T152 · Le ambientazioni della Genesi: medievale, steampunk, moderna, futuristica — `da fare`
-- Pipeline: claude · stima 5% · browser · priorità 80
+- Pipeline: claude · stima 5% · approvato · browser · priorità 80
 - Contesto: richiesta 1 dell'autore: un universo medievale (quello che c'è, `aurora`), uno steampunk, uno moderno (grande città, anni 90), uno futuristico (tipo neonpunk). Oggi il tema è testo libero nella schermata della Genesi (`src/ui/genesis.ts`, `planGenesis` in `agents/genesis.ts`) e il seme `universe/prompts/theme.md` è il Regno di Valmora. Il seme può presupporre il medioevo anche altrove: i 20 ambienti, i prompt degli agenti, la guida di stile, il canone delle rune e i modelli generici. Il lessico è già uguale in ogni ambientazione (ADR-0075).
 - Cosa fare: prima un censimento di ciò che nel seme presuppone il medioevo, con file e riga. Poi quattro temi tra cui scegliere nella schermata della Genesi, modificabili come oggi; il medievale resta quello attuale. Ciò che il censimento trova diventa neutro o dipende dal tema, nel modo più piccolo: niente seme separato per ambientazione. Rune, tappeto, corona e quarta parete valgono ovunque; il tema spiega le rune senza magia medievale obbligatoria e senza metagioco. Il censimento dice anche ciò che si è lasciato com'è e perché. Decisione architetturale: ADR e `AGENTS.md`.
 - Test: una Genesi offline (`MockModels`) per ogni tema: i file giusti, `prompts/theme.md` scritto, un universo che parte. Un universo esistente non cambia. Typecheck e suite intera con i loro turni.
@@ -2849,8 +2849,9 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Browser: non serve; le foto restano nel commit per l'autore.
 - Quando è fatto: commit su `task/T173`; nell'esito quanti alla prima, quanti alla seconda, quali difetti ha corretto la seconda, token e costo della seconda richiesta (è il dato che serve a T156). Attento alla finestra delle 5 ore: al più 3 tentativi insieme.
 
-### T156 · Il prompt nuovo nello Scultore del gioco — `da fare` (dipende da T155, T173)
-- Pipeline: claude · stima 4% · approvato · browser · priorità 32
+### T156 · Il prompt nuovo nello Scultore del gioco — `da fare` (dipende da T155, T173, T182)
+- Pipeline: claude · stima 5% · approvato · browser · priorità 32
+- Cambiato il 03/11 (autore, `docs/userchats/to-do-2026-11-03.md`, richiesta 1): il prompt da portare è quello procedurale di T182, non quello di T155. In più: il banco di T180 anche su Gemini (varianza e scala, non solo la qualità); nel gioco un programma serve più taglie, un forte enorme e uno gargantuesco lo condividono, e la seconda richiesta dello Scultore porta la traccia di T179; ciò che T180 dice che manca si fa qui.
 - Contesto: T155 ottimizza il prompt su Claude, ma nel gioco le strutture le scrive lo Scultore sui modelli Gemini (ADR-0042, e i provider di ADR-0077): il risultato può cambiare col modello e va misurato. **Niente API (autore, 02/11):** per ora si genera solo con gli abbonamenti, Claude Code e `agy`. Il prompt del gioco è `universe/prompts/agents/scultore.md`, con `agents/sculptor.ts`.
 - Cosa fare: porta il prompt per le classi di struttura e togli ciò che è superato, senza peggiorare le classi semplici. Prova gli stessi bersagli di T155 su Gemini attraverso `agy`, col banco di T154 e il suo prompt fidato (non la coda, ADR-0106), poche chiamate, nessuna alle API, con token e consumo nell'esito. Se il risultato è sotto la soglia, dillo con foto e misure e proponi la strada (adattare il prompt o cambiare modello): non cambiare da solo il modello predefinito, ha un costo per chi gioca. Gli universi esistenti ricevono il prompt come ogni aggiornamento dal seme, senza che cambi un modello già scolpito.
 - Test: `MockModels` e i test dello Scultore; typecheck e suite intera con i loro turni.
@@ -2889,7 +2890,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   (~200 MB, un mondo o una sandbox a parte), senza un rosso. Typecheck verde.
 
 ### T158 · L'Attore nello studio — `da fare` (dipende da T157)
-- Pipeline: claude · stima 3% · browser · priorità 86
+- Pipeline: claude · stima 3% · approvato · browser · priorità 86
 - Contesto: ogni agente è una squadra nella corona (`archive.ts`), con un gerboa e un cappello (`corona-gerboa-<agente>.xml`, T50), un posto nella Sala del Concilio e una console nella Direzione; l'Attore di T157 non c'è ancora.
 - Cosa fare: il suo gerboa con un cappello riconoscibile, il posto al tavolo (i membri seduti diventano nove), la console, lo studio dove sta, i colori e i nomi nei pannelli. Con l'opzione spenta scegli se non compare o resta a riposo come gli altri che non lavorano, e scrivilo.
 - Test: quelli di corona e archivio; typecheck e suite intera con i loro turni.
@@ -2976,7 +2977,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Esito: `task/T174`. **Causa misurata: il test, non la macchina né il server.** In V-006 il socket di bruno si apriva insieme a quello di alice e taceva finché alice non era dentro. Da T172 (ADR-0114) un socket ha 15 s (`ENTRY_MS`) per dire `entra`: se il mondo che alice avvia ne impiega di più, il server chiude bruno con `rifiuto` «nessun ingresso» (voluto, V-026). Il `ws.send` del test su un socket chiuso non dice nulla, e i 30 s passavano aspettando una risposta a un messaggio mai partito: nessuno li occupa. **Misure** (`-t "V-006 una partita"`): file da solo, alice dentro a 11,4 s, bruno 263 ms dopo il suo `entra`: margine di 3,6 s sui 15. Con 24 thread che girano a vuoto su 12 processori logici: rifiuto a 15,07 s, alice a 52,7 s, stesso rosso «ingresso di bruno». Il carico fa solo superare i 15 s all'avvio del mondo, e il primo giro della suite è il più lento. Dopo la correzione, stesso carico: alice 54,4 s, bruno 245 ms, verde. Non ho separato cosa compone gli 11,4 s dell'avvio. **Cambiato solo `tests/sicurezza/produzione.test.ts`:** il socket del secondo giocatore si apre dopo l'ingresso del primo, in V-006 e in V-021 (dove carla avvia il mondo se il file gira filtrato); il limite resta 30 s. Per vedere la causa la prossima volta: `say` su un socket chiuso getta l'errore con il rifiuto ricevuto, e `entered` dice subito un rifiuto invece di aspettare la scadenza. **Server e gioco non cambiano:** il client vero manda `entra` appena il socket si apre (`socket.ts`, `client.ts`), dopo il login, quindi non cade qui. **Resta aperto, non toccato:** (1) i rossi di T163 non hanno questa causa: non passano da questa attesa, e `determinism.test.ts` è stato verde sotto carico nell'unico giro in cui l'ho provato. `mondo.test.ts` sotto i 24 thread dà rossi: V-007 «muore due volte» e «un mondo bloccato» al primo giro; il primo dei due aspetta 1,5 s fissi prima che un commit sia «vissuto», dedotto che sia troppo poco, non misurato. Il secondo giro di `mondo.test.ts` (7 rossi) non vale come misura: i mondi uscivano con `0xC000026B`, lo stesso codice dei `fork` di bash, perché Windows non creava più processi con il mio carico addosso. (2) In un giro sotto carico `produzione.test.ts` ha passato tutti i 27 test ma ha dato un errore a livello di `il server vero`, forse un hook di chiusura; l'output era filtrato e non ho l'errore; nel giro dopo, sotto lo stesso carico, non si è ripetuto. **Test:** suite intera verde due giri di fila, 1317 su 1317 (200 s e 173 s), typecheck verde; quei due giri non avevano la cache fredda né il carico: la prova della correzione è il giro sotto carico. Sicurezza: nessuna superficie nuova.
 
 ### T175 · Un tetto alla cache delle forme nel browser — `da fare`
-- Pipeline: claude · stima 4% · browser · priorità 55
+- Pipeline: claude · stima 4% · approvato · browser · priorità 55
 - Contesto: nasce da T164 (`dossier T164`): il solo mondo iniziale pesa 1,86 GB di array e 528 MB su disco, più universi si sommano e nulla toglie voci. La memoria della scheda è dedotta da quei byte, non misurata. In Node la cache ha già un tetto (ADR-0108: LRU, 4096 voci, 256 MB).
 - Cosa fare: misura prima la memoria vera della scheda nel mondo iniziale. Poi un tetto sia in memoria (`WorkerRunner`, `src/render/forms.ts`) sia in IndexedDB, usando l'LRU e togliendo le voci meno usate, con i numeri scelti da quella misura e scritti nell'ADR-0108. Una forma tolta si rifà nei worker: mai un modello che manca. Controlla anche se il `memory` deve tenere gli array quando le mesh sono già fatte.
 - Test: oltre il tetto escono le voci meno usate, una forma tolta torna, la stessa richiesta dà la stessa forma.
@@ -2984,9 +2985,81 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: commit su `task/T175`; l'esito dice memoria e disco prima e dopo, e quanti lavori ai worker al secondo caricamento. Sicurezza: nessuna superficie nuova, o le voci aggiunte.
 
 ### T176 · `mondo.test.ts` rosso sotto carico: la causa — `da fare`
-- Pipeline: claude · stima 3% · priorità 21
+- Pipeline: claude · stima 3% · approvato · priorità 21
 - Contesto: nasce da T174 e T163 (`dossier T174`, `dossier T163`), approvato dall'autore il 02/11. In `tests/sicurezza/mondo.test.ts`, con 24 thread a vuoto su 12 processori logici, sono rossi al primo giro V-007 «muore due volte» e «un mondo bloccato». Il primo aspetta 1,5 s fissi prima che un commit sia «vissuto»: che siano troppo pochi è una deduzione di T174, non una misura. T163 aveva visto `mondo.test.ts` rosso nella suite intera. Conta per T45f: il sorvegliante dei mondi è ciò che lì deve reggere. Un giro di T174 con 7 rossi non vale come misura: i mondi uscivano con `0xC000026B` perché Windows non creava più processi con quel carico.
 - Cosa fare: riproduci con un carico misurato che lasci creare i processi (se un mondo esce con `0xC000026B` il giro non conta, abbassa il carico), e di' per ciascuno dei due test cosa occupa il tempo. Se è il test, che aspetti ciò che deve invece di un tempo fisso, senza alzare i limiti alla cieca. Se è il sorvegliante (`server/worldHost.ts`), per esempio un mondo sano ucciso perché tace sotto carico, non correggere da solo se cambia il comportamento: scrivilo nell'esito con la misura e la proposta. Guarda anche, senza filtrare l'output, se torna l'errore a livello del blocco `il server vero` di `produzione.test.ts` visto una volta da T174: se non torna, scrivi quanti giri hai fatto.
 - Test: `mondo.test.ts` verde sotto lo stesso carico che lo faceva rosso, e nella suite intera per due giri di fila; se non si riproduce, scrivi quanti giri hai fatto e con quale carico.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T176`; l'esito dice la causa misurata di ciascun test o che non è stata trovata, e: sicurezza: nessuna superficie nuova, o le voci aggiunte.
+
+## Dalla chat del 03/11/2026 (testo originale: `docs/userchats/to-do-2026-11-03.md`)
+
+### T177 · Il disco C: si riempie: chi scrive, e i residui dei test — `da fare`
+- Pipeline: claude · stima 2% · approvato · priorità 19
+- Contesto: richiesta 5 dell'autore: svuotati 30 GB la settimana scorsa, di nuovo pieno; il progetto è su H:. Misurato dall'orchestratore il 02/11 alle 23:20 UTC: C: 196 GB, liberi 12 (95 %). In `%TEMP%` 6038 voci, circa 2400 `coda-*` e 2400 `quine-*` (`quine-turni`, `quine-ferma`, `quine-traccia`), 1147 delle `quine-*` nate il solo 02/11: test e strumenti non le tolgono (da verificare in `tests/pipeline.test.ts`, `tests/subscription.test.ts`, `tests/abbonamenti.test.ts`, `tests/sicurezza/*`). Pesano poco una per una (6-22 KB, ma `quine-t43c-*` 49 MB), quindi **non è detto che spieghino i 30 GB**. `~/.claude` 643 MB, `ms-playwright` 645 MB. Non misurati: il totale di `%TEMP%` (contarlo è lento), i profili di Chrome, le cache di npm e dei browser, ciò che è fuori dal profilo utente.
+- Cosa fare: (1) in sola lettura, le cartelle che pesano di più su C:, con le date; la crescita misurata su un intervallo, se si può; chi le scrive, con le prove: l'autore ha ipotizzato git, va verificato. Il gioco può non c'entrare: se è così, dillo. (2) Correggi ciò che è del progetto: test e strumenti tolgono le cartelle temporanee che creano. (3) **Non cancellare nulla su C: fuori da ciò che crea il tuo giro**: nell'esito l'elenco di ciò che si può togliere, quanto libera e il comando; decide l'autore.
+- Test: la suite non lascia nuove voci in `%TEMP%` (conteggio prima e dopo, un giro col suo turno); typecheck.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T177`; l'esito dice chi riempie il disco, misurato o no, e quanti GB al giorno.
+
+### T178 · Il glossario: un nome per ogni concetto — `da fare`
+- Pipeline: claude · stima 3% · approvato · priorità 22
+- Contesto: richiesta 2 dell'autore: una nomenclatura ufficiale, gli stessi concetti chiamati allo stesso modo, nel codice in inglese. Oggi si mescolano italiano e inglese e nomi diversi per la stessa cosa (esempi da verificare: `struttura`/`structure`/`edificio`, `luogo`/`chunk`/`place`, `viandante`/`wanderer`/`player`, `modello`/`programma`/`forma`, `cose`/`entità`, `master`/`dio`).
+- Cosa fare: `docs/glossario.md`: per ogni concetto il nome ufficiale in italiano (documenti, UI, prompt), quello in inglese (codice), una definizione di una riga, dove vive, i sinonimi da non usare. Il censimento viene da `AGENTS.md`, `docs/adr/`, `src/`, `server/`, `universe/prompts/` e conta le occorrenze dei sinonimi. Attenzione a ciò che non si rinomina senza migrazione: campi JSON degli universi, messaggi del protocollo, API Lua, nomi nel validatore. Una regola in `AGENTS.md` (Convenzioni) e un ADR. **Nessuna rinomina nel codice in questo task**: nell'esito le rinomine proposte, a gruppi, ciascuna con quanti file tocca e se chiede una migrazione. Ne nasceranno task quando l'autore avrà letto il glossario, da eseguire con pochi task in corso, perché vanno in conflitto con tutti.
+- Test: un test che controlla che ogni voce abbia i suoi campi e che i nomi in inglese citati esistano in `src/` o `server/`. Typecheck e suite con i loro turni.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T178`; l'esito dice le scelte dubbie, da far decidere all'autore.
+
+### T179 · La traccia di un programma MarkovJunior, in testo — `da fare`
+- Pipeline: claude · stima 3% · approvato · priorità 23
+- Contesto: richiesta 1 dell'autore, primo pezzo. I modelli di T155 e T173 sono belli ma statici, e chi li scrive vede solo il risultato (foto dai quattro lati). Non può capire cosa fanno `one all prl convolution path` passo per passo, come fa l'autore nell'editor andando avanti e indietro tra i fotogrammi; così non sa usare i pattern dei programmi migliori. Le immagini costano: il debug intermedio va in testo. Il risultato finale resta giudicato con le foto, come oggi. Si riusa: `src/mj/engine.ts`, `lab/scripts/mjx-trial.ts`, `mjx-stats.ts`, `lab/banco/` (leggi `dossier T154`, `dossier T173`), le sezioni del laboratorio, l'editor `/lab/editor/`.
+- Cosa fare: uno strumento che, dati XML e seme, dà una traccia leggibile da un modello: per ogni nodo eseguito il tipo, la regola, quante volte e quante celle ha cambiato, la scatola di ciò che ha cambiato; le sezioni di un fotogramma scelto, coi simboli MJ al posto dei voxel. Confronta tre forme sugli stessi programmi, in token e in ciò che fanno capire: (a) sezioni in simboli, (b) solo le differenze tra nodi, (c) la proposta dell'autore: il fotogramma come modello statico con i voxel raggruppati in scatole. Scegli la predefinita, con un tetto di token e una compressione (fotogrammi vicini, piani uguali), e scrivi i numeri. Lo strumento non cambia il risultato del motore. Il banco deve poterla mettere nella seconda richiesta (`lab/banco/seconda.ts`).
+- Test: su XML fissi la traccia dice i nodi e le celle giuste per ogni tipo di nodo; griglia identica con e senza traccia; tetto rispettato. Typecheck e suite con i loro turni.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T179`; nell'esito la forma scelta e i token su uno dei modelli di `lab/banco/conferma/`. Se tocca `src/mj/`: ADR.
+
+### T180 · Il banco misura varianza e scala — `da fare`
+- Pipeline: claude · stima 3% · approvato · priorità 24
+- Contesto: richiesta 1, secondo pezzo. Il banco di T154 prova un seme in una scatola sola: premia i modelli statici. L'autore vuole lo stesso programma per più semi e più taglie: un forte enorme e uno gargantuesco possono condividere il programma e differire nell'area di generazione; architetture diverse da seme a seme, per gli edifici grandi anche il perimetro esterno. Taglie: ADR-0092, `boxOf`, `sizeFor` in `src/kernel/forms.ts`.
+- Cosa fare: (1) le misure di varianza fra almeno 5 semi: quota di voxel diversi, pianta e perimetro diversi, piani e stanze diversi; il solo rumore di colore non conta come varianza. (2) La prova di scala: lo stesso programma in almeno 2 taglie; tutte le misure di oggi (piani, stanze, rampe, porta, `FORM_LIMITS`) devono passare a ogni seme e a ogni taglia. (3) La misura di partenza sui modelli di `lab/banco/finale` e `lab/banco/conferma`: l'osservazione dell'autore, statici, con il numero. (4) La soglia proposta, scritta nel README del banco, con i criteri delle foto (un foglio di contatto a basso costo: un solo PNG con i semi). (5) Cosa fa oggi il gioco: un programma può già servire due taglie? Come si nomina nella libreria (`struttura-<concetto>`, `ModelInfo.taglia`)? Se manca qualcosa, descrivilo nell'esito: non correggerlo qui, lo farà T156.
+- Test: offline, su XML fissi: un modello statico è riconosciuto come tale, uno che varia no, uno che si rompe a una taglia è bocciato. Typecheck e suite con i loro turni.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T180`; nell'esito la misura di partenza, la soglia, il costo in tempo del banco con più semi.
+
+### T181 · I pattern di MarkovJunior e il metodo del cantiere: programmi di riferimento — `da fare` (dipende da T179, T180)
+- Pipeline: fable · stima 10% · approvato · priorità 25
+- Contesto: richiesta 1, terzo pezzo, il più difficile: **il risultato di oggi è la qualità voluta, ma da un programma che genera architetture diverse.** L'autore chiede di basarsi sui programmi del [repository di MarkovJunior](https://github.com/mxgmn/MarkovJunior) (nel laboratorio ci sono 16 modelli 3D ufficiali; gli altri si scaricano in `lab/`, con la licenza e la fonte) e propone il metodo del **cantiere** per gli edifici grandi, perimetro compreso. Esempio suo, palazzina moderna: lo scheletro di metallo; il cemento armato attorno a colonne e righe; i piani, pavimenti riempiti con una regola `all`; le scale: i pavimenti aperti nello stesso punto a tutti i piani, tolti N incroci dello scheletro, poi scale, raccordi, una rampa; l'ascensore; e così via. Non va imitata l'edilizia troppo alla lettera: si possono usare marcatori temporanei o riempire l'intero edificio di «materiale» per discriminare una regola successiva, come fa l'autore nell'editor. Dell'edilizia si prende ciò che aiuta a generare invece di disegnare.
+- Cosa fare: (1) con la traccia di T179, leggi i programmi ufficiali che fanno crescere strutture e scrivi `lab/banco/pattern.md`: per ogni pattern cosa fa, il frammento minimo, il programma da cui viene, cosa dà per varianza e scala (crescita di corridoi e stanze, divisione dello spazio, `path` per collegare, `convolution`, marcatori, `map` per cambiare scala). (2) Scrivi a mano, con quel metodo, almeno 3 programmi di riferimento di stile diverso (una palazzina moderna, un forte per due taglie, uno a scelta tra i bersagli): passano la soglia di T180 a ogni seme e taglia e tutte le regole del gioco (rampe, piani, porte, `FORM_LIMITS`). La qualità di riferimento sono le foto di `lab/banco/conferma/`. Se un pattern non si può esprimere col motore, dillo. Fogli di contatto nel commit, per l'autore.
+- Test: i programmi girano nel motore del gioco e passano `src/mj/check.ts` e il banco. Typecheck e suite con i loro turni.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T181`; nell'esito token di pattern e programmi, cosa non si riesce a fare, la varianza contro la misura di partenza. Se a un terzo della stima nemmeno un programma arriva alla soglia: fermati e scrivi in `docs/pipeline/domande/T181.md`.
+
+### T182 · Il prompt procedurale delle strutture — `da fare` (dipende da T181)
+- Pipeline: claude · stima 8% · approvato · priorità 26
+- Contesto: richiesta 1, quarto pezzo: portare nel prompt del banco (`lab/banco/prompt.md`) i pattern di T181, senza perdere la qualità raggiunta. Oggi un programma costa 57-60 mila token di output: un giro di 14 tentativi ~20 dollari a listino e un pezzo del limite delle 5 ore (T155: 114 dollari). Metodo come T155: si corregge il prompt, mai il risultato.
+- Cosa fare: ciclo sul banco con la soglia di T180 e con misure e foto di prima; ogni richiesta successiva alla prima porta la traccia di T179 in testo, le foto solo per il risultato finale. Decidi se i programmi di riferimento entrano come esempi: ogni esempio si guadagna i suoi token. **Al più 4 giri**: oltre, `docs/pipeline/domande/T182.md`, senza abbassare la soglia. Diario in `lab/banco/diario.md`.
+- Test: i modelli finali girano nel motore e passano i controlli. Typecheck col suo turno.
+- Browser: non serve; i fogli di contatto restano nel commit.
+- Quando è fatto: commit su `task/T182`; nell'esito token, costo per modello, quanti giri, soglia sì o no.
+
+### T183 · Le interfacce di simulazione complesse: una prova dell'espressività del kernel — `da fare`
+- Pipeline: claude · stima 7% · approvato · priorità 88
+- Contesto: richiesta 3 dell'autore, non prioritaria: il simulatore deve reggere gli scenari più ambiziosi del Concilio, coerente con la storia e la grafica, nel 3D e nelle UI dentro il tappeto; il kernel deve esporre molte primitive per comporre i moduli. **Non serve aggiungere contenuti al gioco:** è una misura. Scenari: navigazione in barca, volo in mongolfiera, sparo di un fucile, interazione con un computer (anni 90: «forse troppo?»), una bisca con scommesse clandestine, una partita 1v1 di uno sport semplice inventato. Primitive di oggi: API Lua, pannelli (`manifest.ui`, ADR-0028), effetti, stati (ADR-0026), `<action>` e `<animation>`, i casi della Sala sistemi (ADR-0052).
+- Cosa fare: per ogni scenario scrivi moduli veri in `tests/espressivita/`, **senza toccare `src/kernel/`**, che girino nel kernel in miniatura (`runCase`) con `MockModels` e che il validatore accetti. Dove non si riesce, fermati al punto preciso: cosa manca, quale primitiva lo risolverebbe, di che genere è (movimento, camera, proiettili, pannelli, turni, tempo, stato condiviso, multigiocatore), e se l'Ingegnere saprebbe scriverlo col suo prompt. Scrivi `docs/design/espressivita.md`: una tabella scenario per primitiva, le primitive proposte in ordine di quanti scenari sbloccano. Nessuna primitiva nuova qui: sono proposte, da approvare. Se uno scenario è davvero interessante da avere nel gioco, proponilo.
+- Test: i moduli girano in `tests/` e ciò che dichiari possibile è provato. Typecheck e suite con i loro turni.
+- Browser: non serve; ciò che si vede solo a schermo (camera, grafica) scrivilo come non provato.
+- Quando è fatto: commit su `task/T183`; nell'esito quanti scenari riescono senza kernel e le prime tre primitive. Sicurezza: nessuna superficie nuova, o le voci aggiunte.
+
+### T184 · Le ambientazioni spazio, pirati, cowboy — `da fare` (dipende da T152)
+- Pipeline: claude · stima 2% · approvato · browser · priorità 90
+- Contesto: richiesta 4 dell'autore, l'ultima: altri universi, spazio, pirati, cowboy. T152 fa i temi della Genesi e il censimento di ciò che presuppone il medioevo: questo task ne aggiunge tre. Lo spazio è il caso difficile: terreno, cielo, acqua e clima possono non significare ciò che significano altrove. Pirati e cowboy chiedono barche e fucili: le meccaniche le misura T183.
+- Cosa fare: tre temi in più nella schermata della Genesi, col metodo di T152; ciò che il censimento non aveva considerato diventa neutro o dipende dal tema, nel modo più piccolo. Dello spazio di' cosa funziona e cosa no.
+- Test: una Genesi offline per ogni tema. Typecheck e suite con i loro turni.
+- Browser: col turno `browser`, `?offline`: i temi nuovi si scelgono e si arriva al mondo senza errori.
+- Quando è fatto: commit su `task/T184`; nell'esito cosa può tradire il tema nei contenuti generati.
+
+### T185 · Generare gli universi spazio, pirati, cowboy — `in attesa` (dipende da T184, T153)
+- Pipeline: claude · stima 2% · priorità 91
+- Contesto: come T153, con le stesse risposte che l'autore deve ancora dare (`docs/pipeline/domande/T153.md`): costo, abbonamenti, nomi.
+- Cosa fare: come T153, un universo alla volta, nessuna chiamata alle API Gemini.
+- Quando è fatto: i tre universi su disco; nell'esito il costo di ciascuno e ciò che si è visto.
