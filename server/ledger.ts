@@ -43,7 +43,11 @@ export class FileLedger extends Ledger {
   private cache?: LedgerBook;
   private stamp = '';
 
-  constructor(readonly file: string) {
+  /** `folderReady`: a world's process may write only this file and those beside it, not make the folder (T127). */
+  constructor(
+    readonly file: string,
+    private opts: { folderReady?: boolean } = {},
+  ) {
     super();
   }
 
@@ -98,7 +102,7 @@ export class FileLedger extends Ledger {
   }
 
   private locked<T>(fn: () => T): T {
-    mkdirSync(path.dirname(this.file), { recursive: true });
+    if (!this.opts.folderReady) mkdirSync(path.dirname(this.file), { recursive: true });
     const lock = `${this.file}.lock`;
     const start = Date.now();
     for (;;) {

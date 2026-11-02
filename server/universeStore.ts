@@ -257,6 +257,8 @@ export function universeStore(baseDir: string, opts: { accounts?: AccountSetting
     const game = gameIn(await fs.readFile(path.join(root, 'universe.json'), 'utf8').catch(() => undefined));
     const mine = owns(who, game, masterUid);
     const notYours = () => send(res, 403, { error: game.many ? 'solo il master di questo universo' : 'solo da questa macchina' });
+    // The world's token is for its own universe: making others is not a world's to do (ADR-0110).
+    if (who.server && op === 'clone') return notYours();
 
     // --- What anyone may read: cut down to what is public, unless the universe is theirs. ---
     if (!op && req.method === 'GET') {

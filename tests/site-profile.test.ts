@@ -12,6 +12,7 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockModels } from '../src/kernel/ai/mock';
 import { readWandererState } from '../src/kernel/wanderers';
+import { worldOf } from '../server/worldCalls';
 import { keepProfileInFiles, viewFromFiles, wandererHandler, whoAsks, type WandererRouteOptions } from '../server/wanderer';
 import { clampSeed, CLOAKS, formatCredits, pickRealm, playLink, worldCloak } from '../site/profilo';
 
@@ -126,7 +127,7 @@ describe('the wanderer route of the site (T102)', () => {
     const k = await Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
     k.addWanderer('alice', 'Alice', false);
     k.giveCredits('alice', 7);
-    const opts: WandererRouteOptions = { universesDir: '/nessuno', getActiveKernel: async (u) => (u === 'vivo' ? k : undefined) };
+    const opts: WandererRouteOptions = { universesDir: '/nessuno', getActiveWorld: async (u) => (u === 'vivo' ? worldOf(k) : undefined) };
     const got = (await call(opts, 'GET', '/api/viandante?universo=vivo&viandante=alice')).body.viandante;
     expect(got).toMatchObject({ id: 'alice', nelMondo: true, crediti: 7 });
     const kept = await call(opts, 'POST', '/api/viandante', { universo: 'vivo', viandante: 'alice', profilo: { nome: 'Alda', seme: 3, tinta: '#ff2a85' } });

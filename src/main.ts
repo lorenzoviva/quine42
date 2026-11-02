@@ -104,7 +104,7 @@ async function joinMany(name: string, lobbyChoice?: { tetto?: number; offline?: 
   const session = new SessionClient(socketLink(name, params.has('offline') || !!lobbyChoice?.offline), {
     id,
     profilo: savedProfile(name, id),
-    ...(account ? { token: account.token } : {}),
+    ...(account ? { token: account.token, freshToken: account.freshToken } : {}),
     ...(typeof lobbyChoice?.tetto === 'number' ? { tetto: lobbyChoice.tetto } : {}),
   });
   await session.ready;

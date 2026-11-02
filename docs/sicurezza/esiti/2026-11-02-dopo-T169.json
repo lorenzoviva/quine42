@@ -1,0 +1,220 @@
+{
+ "data": "2026-11-02",
+ "commit": "40ac349",
+ "vite": "7.3.7",
+ "node": "v22.19.0",
+ "piattaforma": "win32",
+ "solo": [
+  "V-001",
+  "V-002",
+  "V-005",
+  "V-007",
+  "V-011",
+  "V-012",
+  "V-013"
+ ],
+ "riepilogo": {
+  "ok": 28,
+  "falle": 0,
+  "errori": 0,
+  "saltate": 0
+ },
+ "prove": [
+  {
+   "id": "V-007.a",
+   "voce": "V-007",
+   "proprieta": "un pattern patologico di string.find finisce entro un tempo breve",
+   "esito": "ok",
+   "dettaglio": "finito in 39 ms, con un guasto"
+  },
+  {
+   "id": "V-007.b",
+   "voce": "V-007",
+   "proprieta": "un’allocazione enorme finisce in un guasto",
+   "esito": "ok",
+   "dettaglio": "1 ms, un guasto"
+  },
+  {
+   "id": "V-001.a",
+   "voce": "V-001",
+   "proprieta": "senza identità non si leggono il Lua e i saldi di un universo in multigiocatore",
+   "esito": "ok",
+   "dettaglio": "risposta 200, 2 file"
+  },
+  {
+   "id": "V-001.b",
+   "voce": "V-001",
+   "proprieta": "senza identità non si riscrive il Lua sul server",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-001.c",
+   "voce": "V-001",
+   "proprieta": "senza identità non si cambia un saldo di crediti",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-001.d",
+   "voce": "V-001",
+   "proprieta": "senza identità non si scrive il piano di un luogo",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-001.e",
+   "voce": "V-001",
+   "proprieta": "senza identità non si torna a un commit vecchio",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-001.f",
+   "voce": "V-001",
+   "proprieta": "senza identità non si scrive il ramo del master",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-001.g",
+   "voce": "V-001",
+   "proprieta": "senza identità non si fonde un ramo",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-001.h",
+   "voce": "V-001",
+   "proprieta": "senza identità non si clona un universo diventandone il master",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-001.i",
+   "voce": "V-001",
+   "proprieta": "senza identità non si cestina un universo",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-001.j",
+   "voce": "V-001",
+   "proprieta": "una pagina di un altro sito non scrive: origine diversa con un corpo text/plain, che il browser manda senza chiedere",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-001.k",
+   "voce": "V-001",
+   "proprieta": "una pagina di un altro sito non legge: niente CORS aperto per un’origine diversa",
+   "esito": "ok",
+   "dettaglio": "risposta 403, Access-Control-Allow-Origin assente"
+  },
+  {
+   "id": "V-001.l",
+   "voce": "V-001",
+   "proprieta": "un nome di host estraneo è rifiutato (DNS rebinding)",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-001.m",
+   "voce": "V-001",
+   "proprieta": "senza identità non si crea un universo con un master a piacere",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-002.a",
+   "voce": "V-002",
+   "proprieta": "un modello fuori dall’elenco non arriva a Google",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-002.b",
+   "voce": "V-002",
+   "proprieta": "un’altra origine non spende la chiave",
+   "esito": "ok",
+   "dettaglio": "risposta 403"
+  },
+  {
+   "id": "V-002.c",
+   "voce": "V-002",
+   "proprieta": "un corpo da 5 MB non arriva a Google",
+   "esito": "ok",
+   "dettaglio": "risposta 413"
+  },
+  {
+   "id": "V-002.d",
+   "voce": "V-002",
+   "proprieta": "il tetto di spesa del giorno ferma un loop: 20 chiamate da circa 1 $ non arrivano tutte a Google e l’ultima ha 402",
+   "esito": "ok",
+   "dettaglio": "9 su 20 arrivate a Google, ultima risposta 402"
+  },
+  {
+   "id": "V-011.a",
+   "voce": "V-011",
+   "proprieta": "chi inonda il server di messaggi è limitato",
+   "esito": "ok",
+   "dettaglio": "600 messaggi su 600 serviti"
+  },
+  {
+   "id": "V-012.a",
+   "voce": "V-012",
+   "proprieta": "a un giocatore non arrivano le impostazioni dell’IA",
+   "esito": "ok",
+   "dettaglio": "campo ai assente"
+  },
+  {
+   "id": "V-012.b",
+   "voce": "V-012",
+   "proprieta": "a un giocatore non arrivano le storie dei moduli (persona, lore, context)",
+   "esito": "ok",
+   "dettaglio": "0 manifest con quei campi"
+  },
+  {
+   "id": "V-012.c",
+   "voce": "V-012",
+   "proprieta": "a un giocatore non arrivano prompt, bibbia, persone, codice degli altri né viandanti",
+   "esito": "ok",
+   "dettaglio": "0 file di troppo"
+  },
+  {
+   "id": "V-012.d",
+   "voce": "V-012",
+   "proprieta": "il server di sviluppo non serve i file di `universes/`",
+   "esito": "ok",
+   "dettaglio": "risposta 404"
+  },
+  {
+   "id": "V-007.c",
+   "voce": "V-007",
+   "proprieta": "il codice di un mondo bloccato non ferma l’HTTP né gli altri mondi",
+   "esito": "ok",
+   "dettaglio": "2 risposte su 2 in 12 s"
+  },
+  {
+   "id": "V-005.a",
+   "voce": "V-005",
+   "proprieta": "lo stesso evento in contemporanea accredita una volta sola",
+   "esito": "ok",
+   "dettaglio": "8 consegne, accreditati 1"
+  },
+  {
+   "id": "V-005.b",
+   "voce": "V-005",
+   "proprieta": "saldi e pagamenti non stanno nella storia dell’universo",
+   "esito": "ok",
+   "dettaglio": "file dei pagamenti nel repository: 0, saldo nel file del viandante: false"
+  },
+  {
+   "id": "V-005.c",
+   "voce": "V-005",
+   "proprieta": "tornare a un commit vecchio non riporta indietro il saldo",
+   "esito": "ok",
+   "dettaglio": "risposta 200, saldo dopo il pagamento 12, dopo il ritorno 12"
+  }
+ ]
+}
