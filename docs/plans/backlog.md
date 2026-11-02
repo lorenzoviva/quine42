@@ -2755,14 +2755,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T153 · Generare gli universi steampunk, moderno e futuristico — `in attesa` (dipende da T152, T156)
 - Pipeline: claude · stima 2% · priorità 81
-- Contesto: seconda parte della richiesta 1. La Genesi costa (circa 80 chiamate di testo, più lo Scultore). Dipende anche da T156 perché le strutture di questi mondi vengano col prompt nuovo: altrimenti si paga due volte. `universes/` è ignorato da git e non esiste nei worktree: gli universi vanno scritti in quello vero del progetto. Domande per l'autore in `docs/pipeline/domande/T153.md`.
-- Cosa fare: generare un universo alla volta con la Genesi vera; leggere il costo di ognuno da `world/consumi.json` e fermarsi se supera ciò che l'autore ha deciso. Mai toccare `aurora`.
+- Contesto: seconda parte della richiesta 1. La Genesi costa (circa 80 chiamate di testo, più lo Scultore). Dipende anche da T156 perché le strutture di questi mondi vengano col prompt nuovo: altrimenti si paga due volte. `universes/` è ignorato da git e non esiste nei worktree: gli universi vanno scritti in quello vero del progetto. Domande per l'autore in `docs/pipeline/domande/T153.md`. **Niente API (autore, 02/11):** per ora solo gli abbonamenti, Claude Code e `agy`. La coda di ADR-0077 manda agli abbonamenti solo i compiti lenti, il resto va alle API; `agy` non sta sulla coda (ADR-0106).
+- Cosa fare: generare un universo alla volta con la Genesi vera, nessuna chiamata alle API Gemini: se un compito della Genesi ci andrebbe, fermati e scrivilo in `docs/pipeline/domande/T153.md`. Leggere il costo di ognuno da `world/consumi.json` e fermarsi se supera ciò che l'autore ha deciso. Mai toccare `aurora`.
 - Test: per ogni universo, i contenuti letti: la bibbia, gli ambienti e i modelli sono dell'ambientazione? Ciò che tradisce il tema diventa una proposta di task.
-- Browser: col turno `browser`, ogni universo con `?universo=<nome>`: screenshot di un luogo con strutture; si cammina senza errori in console.
+- Browser: col turno `browser`, ogni universo con `?universo=<nome>`, senza chiamate alle API (i luoghi nuovi le farebbero: resta in quelli già generati o usa `?offline`): screenshot di un luogo con strutture; si cammina senza errori in console.
 - Quando è fatto: i tre universi su disco, nell'esito il costo di ciascuno e ciò che si è visto.
 
 ### T154 · Il banco del prompt delle strutture: una prova senza contesto e il suo giudizio — `da fare`
-- Pipeline: claude · stima 4% · approvato · priorità 82
+- Pipeline: claude · stima 4% · approvato · priorità 30
 - Contesto: richiesta 2 dell'autore. Con piani (T53b), rampe (T53a), salto (ADR-0080) e sotterranei (ADR-0091) i palazzi devono essere più articolati e dettagliati. Il metodo è dell'autore: si scrive un prompt, lo si prova senza altro contesto su Claude Code, si guarda il risultato, si corregge **il prompt e mai il risultato**, si riparte. Si riusa ciò che c'è: `lab/prompts/scultore-mj.md`, `lab/mjx/sculptor.ts`, `lab/scripts/mjx-trial.ts`, `mjx-render.ts`, `mjx-stats.ts`, `src/mj/check.ts`, `src/mj/photo.ts`, `universe/prompts/agents/scultore.md`.
 - Cosa fare: uno script che (1) lancia `claude -p` col solo prompt e il bersaglio, da una cartella vuota, senza strumenti né file di progetto, e ne salva i token di input e di output; (2) passa l'XML al motore vero e dà quattro foto, le misure e un elenco di difetti; (3) tiene ogni tentativo in una cartella con prompt, risposta, foto e misure, così si confrontano. Definisci la soglia di qualità, in misure dove si può: più piani raggiungibili con rampe, stanze collegate, porta sul sentiero, punti da cui si salta, varietà delle parti, finestre e dettagli, il modello che finisce entro `FORM_LIMITS`. Ciò che non si misura lo giudica chi guarda le foto, con criteri scritti. Scrivi anche una prima versione del prompt. Bersagli: almeno 6 edifici diversi, tra cui uno moderno, uno steampunk e uno futuristico.
 - Test: lo script gira su un bersaglio e le misure riconoscono un modello buono e uno brutto (test offline su XML fissi). Typecheck e suite intera con i loro turni.
@@ -2770,7 +2770,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: commit su `task/T154`; nell'esito soglia, token del primo prompt e prima foto giudicata.
 
 ### T155 · Iterare il prompt delle strutture fino alla soglia — `da fare` (dipende da T154)
-- Pipeline: claude · stima 8% · approvato · priorità 83
+- Pipeline: claude · stima 8% · approvato · priorità 31
 - Contesto: il ciclo della richiesta 2, col banco di T154. Obiettivo: alta qualità col minimo di token in input; il prompt può contenere esempi o altre tecniche, purché ognuna si guadagni i suoi token.
 - Cosa fare: ciclo prova → foto e misure → correzione del prompt → da capo. Mai correggere a mano un XML. A ogni giro una riga in un diario (cosa è cambiato, token, misure, cosa si vede). Prova anche a togliere: ciò che non cambia il risultato esce. La soglia è raggiunta quando tutti i bersagli la passano nello stesso giro e con un secondo tentativo sugli stessi (la casualità conta). **Al più 12 giri**: se la soglia non arriva, fermati e scrivi in `docs/pipeline/domande/T155.md` a che punto sei e cosa manca, senza abbassarla.
 - Test: i modelli finali girano nel motore del gioco e passano i controlli di `src/mj/check.ts`. Typecheck con il suo turno.
@@ -2778,9 +2778,9 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: commit su `task/T155` con prompt, diario e foto finali; nell'esito token per modello e quanti giri.
 
 ### T156 · Il prompt nuovo nello Scultore del gioco — `da fare` (dipende da T155)
-- Pipeline: claude · stima 4% · approvato · browser · priorità 84
-- Contesto: T155 ottimizza il prompt su Claude, ma nel gioco le strutture le scrive lo Scultore sui modelli Gemini (ADR-0042, e i provider di ADR-0077): il risultato può cambiare col modello e va misurato. Il prompt del gioco è `universe/prompts/agents/scultore.md`, con `agents/sculptor.ts`.
-- Cosa fare: porta il prompt per le classi di struttura e togli ciò che è superato, senza peggiorare le classi semplici. Prova gli stessi bersagli di T155 sul modello che il gioco usa per le strutture, poche chiamate e col costo nell'esito. Se il risultato è sotto la soglia, dillo con foto e misure e proponi la strada (adattare il prompt o cambiare modello): non cambiare da solo il modello predefinito, ha un costo per chi gioca. Gli universi esistenti ricevono il prompt come ogni aggiornamento dal seme, senza che cambi un modello già scolpito.
+- Pipeline: claude · stima 4% · approvato · browser · priorità 32
+- Contesto: T155 ottimizza il prompt su Claude, ma nel gioco le strutture le scrive lo Scultore sui modelli Gemini (ADR-0042, e i provider di ADR-0077): il risultato può cambiare col modello e va misurato. **Niente API (autore, 02/11):** per ora si genera solo con gli abbonamenti, Claude Code e `agy`. Il prompt del gioco è `universe/prompts/agents/scultore.md`, con `agents/sculptor.ts`.
+- Cosa fare: porta il prompt per le classi di struttura e togli ciò che è superato, senza peggiorare le classi semplici. Prova gli stessi bersagli di T155 su Gemini attraverso `agy`, col banco di T154 e il suo prompt fidato (non la coda, ADR-0106), poche chiamate, nessuna alle API, con token e consumo nell'esito. Se il risultato è sotto la soglia, dillo con foto e misure e proponi la strada (adattare il prompt o cambiare modello): non cambiare da solo il modello predefinito, ha un costo per chi gioca. Gli universi esistenti ricevono il prompt come ogni aggiornamento dal seme, senza che cambi un modello già scolpito.
 - Test: `MockModels` e i test dello Scultore; typecheck e suite intera con i loro turni.
 - Browser: col turno `browser`: un edificio nuovo nel gioco, si entra, si sale di piano e si salta; screenshot.
 - Quando è fatto: commit su `task/T156`; nell'esito qualità e costo su Gemini contro Claude.
