@@ -2810,13 +2810,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: merge risolto, commit su `task/T162`. L'orchestratore fa `integra T162` e `integra T161`.
 - Esito: conflitto solo in `docs/adr/README.md`, tenute le righe dello 0106 e dello 0108, nessun numero cambiato, come previsto. Typecheck verde. Suite: 89 file, 1107 passati e 2 `expected fail` su 1109, nessun rosso, 111,64 s (tests 568,51 s sommati tra i worker), CPU della macchina tra il 45 e l’87 % nei campioni ogni 30 s. Nessun altro cambio; sicurezza: nessuna superficie nuova oltre a quella di T161 (`src/kernel/forms.ts`).
 
-### T165 · Integrare T159 — `da fare`
+### T165 · Integrare T159 — `fatto`
 - Pipeline: claude · stima 1% · approvato · priorità 1
 - Contesto: `integra T159` e `integra T129` vanno in conflitto solo in `docs/adr/README.md`: T159 aggiunge la riga dello 0107 e il base, nel frattempo, quella dello 0108 di T161. Nasce da T159: `dossier T159`.
 - Cosa fare: nel worktree di T165 `git merge task/T159` (porta dentro anche T129) e tieni tutte le righe dell'indice, in ordine di numero. Nessun numero cambia.
 - Test: `npm run typecheck` e la suite intera con i loro turni, col limite normale; nell'esito quanti passano, i rossi che restano rilanciando il file da solo, il tempo della suite e il carico della macchina. T159 non aveva la cache delle forme e aveva un rosso per timeout in `tests/referente.test.ts`: di' se con la cache è sparito. Il kit su V-011 (`npm run sicurezza:prove -- --solo V-011`) va rifatto su questo merge; l'esito in un file a parte, senza sovrascriverne altri.
 - Browser: non serve.
 - Quando è fatto: merge risolto, commit su `task/T165`. L'orchestratore integra T165, T159 e T129, in quest'ordine.
+- Esito: `task/T165`, merge in 3f4401a; il solo conflitto era l'indice degli ADR, con tutte le righe in ordine (0106, 0107, 0108); nessun numero cambia. Typecheck verde. Suite intera col limite normale, 105 s (T159 senza cache: 980 s): **90 file, 1117 passati, 2 attesi, 0 rossi**; carico 10% prima e 31% dopo (CPU; RAM libera 18 GB su 32). Il rosso per timeout di `tests/referente.test.ts` è sparito: verde nella suite e da solo in 12 s (8,7 s di test, 5 test), contro i 149 s di T159. Kit: V-011.a ok sul merge (`esiti/2026-11-02-dopo-T165-V-011.json`; il kit scrive `<data>.json`, che non esisteva: niente sovrascritto). Sicurezza: nessuna superficie nuova rispetto a T129.
 
 ### T160 · Ottimizzare i test più lenti della suite — `da fare` (dipende da T151, T161)
 - Pipeline: claude · stima 5% · approvato · priorità 2
