@@ -133,7 +133,7 @@ src/
     mj.ts               motore di riscrittura stile MarkovJunior
     layout.ts           bozza → varchi → programma → sentieri garantiti → edifici
     content.ts          registro di oggetti, ricette, bottino, ambienti
-    forms.ts            libreria dei modelli, forme (programma + seme → griglia, impronta, pavimenti, azioni)
+    forms.ts            libreria dei modelli, forme (programma + seme → griglia, impronta, pavimenti, azioni); la cache delle forme del processo (`sharedForms`, ADR-0108)
     modeldirector.ts    i modelli che mancano, uno alla volta, entro `ai.maxModels`
     chunks.ts           archivio dei piani dei luoghi
     bench.ts            il banco della Sala sistemi: i casi dei sistemi in un kernel in miniatura (ADR-0052)
@@ -522,6 +522,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   `{model, seed, yaw, tint, done, wanted}` (`wanted`: il modello suo, indossato appena lo Scultore lo scrive). Le cose solide bloccano con l'impronta dei loro voxel; le `<action>` del modello
   sono nel menu dell'entità e restano fatte (`stato.json → forme`). Persone e animali camminano con gli arti, la
   vegetazione al vento, le `<animation>` girano; le icone sono foto dei modelli.
+- **La cache delle forme** (ADR-0108, T161): in Node ogni `InlineRunner` usa `sharedForms`, una per processo: un programma con un seme gira una volta per tutti i kernel (il primo boot ~10 s, i successivi ~0,25 s). La chiave (`formKey`) è il testo intero, il seme, la scatola e la tinta; si tiene solo ciò che ha finito, congelato (`cells` lo scrive solo `act`, sulla copia di `instanceGrid`: mai sul risultato); LRU, 4096 voci e 256 MB; non si svuota. Nei test anche su disco (`tests/setup/forms-disk.ts`, `node_modules/.cache/quine-forms/`), mai nel gioco né sul server: chi fa dipendere il motore da un file nuovo lo aggiunge a `engineVersion`. Nel browser restano i worker.
 - **Lotti e strutture** (ADR-0043): ogni edificio del piano è un lotto con una struttura (entità `struttura`, origine
   `<chunk>#s<i>`): il modello `edificio`/`grande` o `struttura-<concetto>` chiesto dal Cartografo sui lotti più grandi,
   al centro del lotto, girato verso la porta; le caselle del lotto tornano terreno. Dentro = sul pavimento del modello
