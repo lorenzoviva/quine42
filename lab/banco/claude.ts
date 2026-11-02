@@ -65,7 +65,7 @@ export async function chiedi(system: string, bersaglio: string, opts: { modello?
   const check = new IsolationCheck();
   const vuota = await fs.mkdtemp(path.join(os.tmpdir(), 'quine-banco-'));
   const t0 = Date.now();
-  const run = await runCli({ cmd: 'claude', args, stdin: bersaglio, cwd: vuota, env: cliEnv(process.env), timeoutMs: opts.timeoutMs ?? 15 * 60_000, onLine: (l) => check.see(l) });
+  const run = await runCli({ cmd: 'claude', args, stdin: bersaglio, cwd: vuota, env: cliEnv(process.env), timeoutMs: opts.timeoutMs ?? 25 * 60_000, onLine: (l) => check.see(l) });
   await fs.rm(vuota, { recursive: true, force: true, maxRetries: 3, retryDelay: 200 }).catch(() => undefined);
   if (check.breach) throw new Error(`isolamento della CLI non confermato: ${check.breach}`);
   const reset = usageLimit(run.combined);

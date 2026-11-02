@@ -41,7 +41,8 @@ Passa chi soddisfa **tutte** le misure (`SOGLIA`, `giudica`) **e** i criteri scr
 | piani | ≥ 2 | altezze con almeno (1,1 caselle)² di pavimento coperto dove il corpo arriva camminando (rampe, non salti), distanti almeno 0,7 caselle |
 | testa | ≥ 1,5 caselle su ogni piano | altezza mediana fino al soffitto: una persona è alta 1,5 caselle |
 | stanze | ≥ 3 | su ogni piano, i pezzi che restano chiudendo i passaggi più stretti di circa 1,2 caselle |
-| murato | ≤ 0,25 | pavimento coperto dove il corpo starebbe e non arriva, a pezzi grandi come un piano, sul pavimento coperto che raggiunge |
+| cantina | ≥ 1,2 caselle², se il bersaglio ne ha una (T155) | pavimento sotto il suolo dove sta il centro del corpo; 0 se il kernel prende il modello senza cantina (`groundOfForm`: un solo pavimento irraggiungibile laggiù la annulla) |
+| murato | ≤ 0,25 | pavimento coperto dove il corpo starebbe e non arriva, a pezzi grandi come un piano, sul pavimento coperto che raggiunge; fuori dalla cantina la terra è piena fino al suolo, come nel kernel (T155) |
 | porta | sul davanti, scarto ≤ ⅓ della larghezza, alta ≥ 1,5, libera | dove un pavimento coperto grande quanto una stanza si apre verso `y` grande, con la strada dritta libera fino al bordo |
 | salti | ≥ 2 | atterraggi separati, da un posto piano a uno piano, che salgono più di un gradino o attraversano un vuoto o un ostacolo; si atterra solo dove si arriva anche a piedi (`bodyGround` segna gli altri pavimenti come `block`): la cima di una cassa non conta, come nel gioco |
 | materiali, dominante | ≥ 6, ≤ 60 % | lettere con almeno lo 0,2 % dei voxel; la più usata |
