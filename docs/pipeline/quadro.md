@@ -5,6 +5,9 @@
 
 Aggiornato il 02/11/2026, fine dell'epoca 201 su **claude** (crediti: vedi `stato`).
 
+- **Autonomia dell'autore fino alle 18:00 del 02/11/2026** (ora dell'autore; messaggio delle 04:00 circa): approvo quando mi sembra corretto, segno tutto qui, proattivo. Ciò che nasce da una mia proposta lo approvo da solo e lo scrivo in «Diario dell'autonomia». **Resta all'autore, perché il messaggio non lo copre:** alzare i tetti (ADR-0087 chiede un'istruzione esplicita), T153 (soldi veri, nomi, tetto di costo, singola o multi: `domande/T153.md`), T45f (progetto GCP, deploy, `domande/T45f.md`), T88 (ha detto «non ora», l'universo lo sceglie lui), riaprire o chiudere voci di sicurezza contro il registro, `ferma`. Il resto del lavoro approvato va avanti da solo.
+- **Diario dell'autonomia** (per il riassunto delle 18:00): 02/11, T165 creato e approvato per integrare T159 e T129. Controllo fatto: tutti i task aperti sono già approvati, tranne T88, T45f, T153; `to-do.md` senza richieste nuove.
+
 - **Tetto di Claude a 2** (richiesta dell'autore, 01/11): attivo dopo il riavvio delle 13:35; `stato` dice tetto 2, slot 2. L'autore dice che con il Pro i limiti di Claude sono 5 volte più alti.
 
 - **Slot di Claude a 2** (epoca 201, come chiesto dall'autore alla fine di T161): `slot` 2 in `.pipeline/budget.json`, `slotAggiornato` 02/11 03:27 UTC, quindi la previsione può di nuovo muoverlo sotto il tetto 2.
