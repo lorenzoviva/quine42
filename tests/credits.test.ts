@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
+import { InlineRunner } from '../src/kernel/forms';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockModels } from '../src/kernel/ai/mock';
@@ -10,6 +11,14 @@ import { SessionServer } from '../src/session/server';
 import { SessionClient } from '../src/session/client';
 import { ThinClient } from '../src/session/thin';
 import type { TextCall } from '../src/kernel/ai/models';
+
+// A kernel's boot runs the programs of the corona again (about 13 s, T91, T151), and here a world has three or four kernels:
+// the server's, one per client and the one of the master's branch, which `branchKernel` boots by itself, out of reach of
+// `KernelOptions.forms`. So the file's every boot gets the same runner, and only the first pays. What is shared is the
+// result of a program with a seed, which instances copy before changing it (`instanceGrid`).
+const forms = new InlineRunner();
+const boot = Kernel.boot.bind(Kernel);
+vi.spyOn(Kernel, 'boot').mockImplementation((opts) => boot({ forms, ...opts }));
 
 const DT = 1 / 60;
 
