@@ -3,7 +3,9 @@
 > La pagina che l'orchestratore tiene aggiornata e che chi lo sostituisce legge per prima (`docs/pipeline/orchestra.md`).
 > Il diario degli eventi è in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 02/11/2026, epoca 213 su **claude** (crediti: vedi `stato`).
+Aggiornato il 02/11/2026, epoca 214 su **claude** (crediti: vedi `stato`).
+
+- **Epoca 214 (19:15 UTC), l'autore ha detto sì a entrambe (supera «Chiesto all'autore» di «Fine epoca 213»):** `riattiva fable`, `riattiva claude` dati; **T176** creato e approvato (p21, Claude): `mondo.test.ts` sotto carico, e l'errore non letto di `produzione.test.ts`. **Da fare:** dopo T157 confrontare i contatori (`week (Fable)`, `week (all models)`) e correggere la stima; alla fine di T173, T176 l'esito e `integra`, come in «Fine epoca 213». ADR nuovi dallo **0116**.
 
 - **Fine epoca 213:** in corso T173. Nulla da integrare. Pronti, in ordine: T175, T106, T89a, T152, T157. `claude` e `fable` sospesi, pipeline accesa (nessuno spegnimento in attesa). **Chiesto all'autore, senza risposta:** se partire con Fable (allora `riattiva fable`, `riattiva claude`; crediti: Fable 100 %, Claude 60 %, reset 05/11 16:00 UTC; dopo T157 confrontare i contatori e correggere la stima) e se aprire il task su `mondo.test.ts` (voce qui sotto). **Da fare:** alla fine di T173 leggere se il giro lanciato prima del limite è stato rilanciato e pagato due volte, poi l'esito; se passa `integra` (sblocca T156; a T156 serve il costo della seconda richiesta), se non passa `domande/T173.md` all'autore, niente altri giri. ADR nuovi dallo **0116**. Vista Markdown ancora mai guardata in un browser. Altre attese dell'autore: «Fine epoca 211».
 
