@@ -1574,7 +1574,7 @@ le risposte alle domande del piano.
   dà l'autore: se mancano, la domanda va in `docs/pipeline/domande/T45e.md`.
 - Esito: implementati gli endpoint server (`/api/stripe/checkout`, `/api/stripe/webhook`) con verifica firma HMAC-SHA256 (`stripe-signature`), accredito crediti idempotente (`Kernel.creditRecharge` e persistenza `world/pagamenti.json`), blocco acquisti per anonimi (403), interfaccia di ricarica rapida e saldo nel profilo (`P`); test headless in `tests/stripe.test.ts` (6/6 passati); ADR-0083 registrato. Codice e test integrati nel base `3d` con T77. Chiavi di test inserite dall'autore in `.env` (con listener locale indicato su porta 4242); verifica nel browser delegata a T93.
 
-### T45f · Il server su Google Cloud — `da fare` (dipende da T44b, T45d, T133, T134)
+### T45f · Il server su Google Cloud — `da fare` (dipende da T44b, T45d, T133, T134, T172)
 - Pipeline: claude · stima 6% · priorità 10
 - Fare: il server della sessione e i repository degli universi su Google Cloud, sempre acceso (Cloud Run con istanza minima o una VM,
   disco persistente per `universes/`, repository privati), il deploy da script, i segreti in Secret Manager.
@@ -2622,6 +2622,21 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Test: `npm run typecheck` e la suite intera con i loro turni; il kit intero, esito in un file a parte in `docs/sicurezza/esiti/`.
 - Browser: le prove del punto 2; gioco e sito senza errori in console se le correzioni li toccano.
 - Quando è fatto: commit su `task/T167`. L'esito dice le voci trovate per gravità, quali chiuse, quali restano con il task proposto.
+
+### T171 · Integrare T167 — `da fare`
+- Pipeline: claude · stima 3% · approvato · browser · priorità 1
+- Contesto: T167 (`dossier T167`) è partito prima che T133 (`dossier T133`) entrasse: ha preso l'ADR-0112, che è di T133, e non ha mai visto il server di produzione. `integra T167` va in conflitto in `AGENTS.md` e `server/session.ts`.
+- Cosa fare: nel worktree di T171, con il base aggiornato, `git merge task/T167`. L'ADR dell'audit diventa **0113**: file, indice, `AGENTS.md`, `docs/sicurezza/registro.md`, report, commenti e test che lo citano. Nelle aggiunte nello stesso punto tieni tutte e due. In `server/session.ts` le correzioni di T167 (`worldRefusal`, V-021, V-025, V-028) devono valere anche per `attachSessions` di T133. Il server di produzione deve avere ciò che T167 ha messo nel server di sviluppo: controlla V-020, V-021, V-025, V-028 e il checkout attraverso `gate`; `cors: false` di V-029 riguarda Vite, ma scrivi cosa fa la produzione con un'altra origine. Se manca qualcosa, mettilo qui con un test. In V-026 il campo Task dice **T172**, anche nella tabella e in `tools/sicurezza/catalogo.mjs` se il test lo chiede.
+- Test: `npm run typecheck` e la suite intera con i loro turni, col limite normale; nell'esito quanti passano, i rossi rilanciando il file da solo, il tempo. Il kit intero, esito in un file a parte.
+- Browser: col turno `browser`, sul server di produzione in locale come ha fatto T133 (identità finte, modelli locali): due schede, chi non è il master entra e cammina; un messaggio malformato sul socket non ferma il mondo.
+- Quando è fatto: commit su `task/T171`. L'orchestratore integra T171 e T167. L'esito dice «sicurezza: nessuna superficie nuova» o le voci aggiunte.
+
+### T172 · Le risorse per account — `da fare` (dipende da T171)
+- Pipeline: claude · stima 4% · approvato · priorità 16
+- Contesto: V-026 (`docs/sicurezza/registro.md`, gravità alta, oggi bassa), trovata dal secondo audit (`dossier T167`). Va chiusa prima di esporre il server (T45f).
+- Cosa fare: la contromisura della voce. (1) Il mondo parte solo con un `entra` dal token verificato. (2) Un mondo vuoto si salva e si ferma dopo qualche minuto. (3) Una quota di universi per account, nel `.env`, e nessun `create` da un anonimo. (4) `POST /api/viandante` solo per chi il mondo conosce o con un ritmo per account. (5) Un ritmo per indirizzo su socket e route HTTP, nel server di produzione (`server/production.ts`); dietro un bilanciatore l'indirizzo vero va letto senza fidarsi di un'intestazione mandata dal client: scrivi la scelta nell'ADR. Il rientro di chi resta collegato mentre il mondo si ferma deve continuare a funzionare (`mondo`, `reenter`).
+- Test: proprietà in `tests/sicurezza/`, prove nel kit (`tools/sicurezza/catalogo.mjs`); typecheck e suite intera con i loro turni. Una misura di carico minima, scritta nell'esito con ciò che resta non misurato.
+- Quando è fatto: commit su `task/T172`, V-026 chiusa con la prova. L'ADR prende il primo numero libero, **dallo 0114**. L'esito dice le voci.
 
 ### T168 · I resti della verifica di T166: raccogliere da non master, carte, porta nelle sessioni — `da fare`
 - Pipeline: claude · stima 2% · approvato · browser · priorità 28
