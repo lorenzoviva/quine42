@@ -8,10 +8,10 @@
 // and for actions. A form that is not ready yet is simply not there: the thing blocks by its radius.
 
 import { boxOf, classOf, CLASSES, type AssetClass } from '../mj/classes';
-import type { PaletteEntry, Vec3 } from '../mj/engine';
+import { Mj3Error, type PaletteEntry, type Vec3 } from '../mj/engine';
 import { colorTable, floors, footprint, surfaces, type Levels, type VoxelGrid } from '../mj/mesh';
 import { compileMjx } from '../mj/model';
-import { act, runMjx } from '../mj/run';
+import { act, FORM_LIMITS, MAX_FORM_TIME, MAX_FORM_XML, runMjx } from '../mj/run';
 import { hashStr } from './rng';
 import type { FileMap } from './types';
 
@@ -369,9 +369,10 @@ export class InlineRunner implements FormRunner {
 
 /** The pure part of running a form (the browser's worker does the same, then makes meshes). */
 export function runForm(q: FormRequest): FormResult & { model: ReturnType<typeof compileMjx> } {
+  if (q.xml.length > MAX_FORM_XML) throw new Mj3Error(`programma troppo lungo (max ${MAX_FORM_XML} caratteri)`);
   const m = compileMjx(q.xml, q.size ? { size: q.size } : {});
   if (q.tint && m.program.palette[q.tint.symbol]) m.program.palette[q.tint.symbol] = { ...m.program.palette[q.tint.symbol], color: q.tint.color };
-  const r = runMjx(m, q.seed, { deadline: q.tempo ?? MODEL_TIME });
+  const r = runMjx(m, q.seed, { deadline: Math.min(q.tempo ?? MODEL_TIME, MAX_FORM_TIME), limits: FORM_LIMITS });
   const g = r.grid;
   return {
     model: m,
