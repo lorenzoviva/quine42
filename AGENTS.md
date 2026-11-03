@@ -301,7 +301,7 @@ La procedura, con gli snippet per spostarsi nelle stanze, è in [`docs/architett
 
 - Documentazione, UI, prompt degli agenti e testi di gioco in **italiano**; identificatori e commenti
   TypeScript in **inglese**; commenti Lua dell'universo in **italiano**.
-- **Un nome per ogni concetto** (ADR-0117): [`docs/glossario.md`](docs/glossario.md) dice per ogni concetto il nome italiano, quello inglese del codice, i sinonimi da non usare e ciò che è fermo. Un concetto nuovo ha una voce lì nello stesso commit. Ciò che è su disco, sul filo o visibile a Lua (campi JSON, messaggi del protocollo, API Lua, effetti) non si rinomina senza una migrazione; gli ADR non si riscrivono.
+- **Un nome per ogni concetto** (ADR-0117): [`docs/glossario.md`](docs/glossario.md) dice per ogni concetto il nome italiano, quello inglese del codice, i sinonimi da non usare e ciò che è fermo. Un identificatore italiano non è un'eccezione: si rinomina (le righe R del glossario; le eccezioni dette da ADR-0117 sono tolte). Un concetto nuovo ha una voce lì nello stesso commit. Ciò che è su disco, sul filo o visibile a Lua (campi JSON, messaggi del protocollo, API Lua, effetti) non si rinomina senza una migrazione; gli ADR non si riscrivono.
 - File in LF (`.gitattributes`). Su Windows niente `Get-Content`/`Set-Content` di PowerShell 5.1 sui sorgenti.
 - Nuova API per Lua: `Host` + `prelude.lua` + `LUA_API` nel validatore + prompt dell'Ingegnere + questo file.
 - Nuovo compito per un agente: schema Gemini + risposta in `MockModels` + voce nel registro.
