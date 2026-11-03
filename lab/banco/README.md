@@ -9,6 +9,8 @@ npx vite-node lab/scripts/banco-strutture.ts -- --bersagli tutti --giro v2 --ten
 npx vite-node lab/scripts/banco-strutture.ts -- --xml lab/banco/esempi/buono.xml --bersagli moderna  # solo le misure, senza chiamate
 npx vite-node lab/scripts/banco-strutture.ts -- --bersagli tutti --giro conferma --tentativi 2 --dir lab/banco --insieme 3   # al più 3 insieme: la finestra delle 5 ore
 npx vite-node lab/scripts/banco-strutture.ts -- --seconda --giro conferma --dir lab/banco --insieme 3   # la seconda richiesta (T173)
+npx vite-node lab/scripts/banco-strutture.ts -- --xml modello.xml --bersagli rocca --varianza   # anche più semi e più taglie (T180)
+npx vite-node lab/scripts/banco-varianza.ts -- --xml modello.xml --bersagli rocca [--taglie enorme,gargantuesca] [--semi 5]   # solo quelli: tabella e foglio di contatto
 ```
 
 Ogni tentativo è una cartella che non si sovrascrive, `lab/out/banco/<giro>/<bersaglio>/<n>/` (`--dir` per un'altra radice):
@@ -22,6 +24,7 @@ Ogni tentativo è una cartella che non si sovrascrive, `lab/out/banco/<giro>/<be
 | `pianta.png` | ogni piano dall'alto, il davanti in basso: verde dove sta il centro del corpo, blu più in alto (le scale), rosso la porta, giallo dove si atterra saltando |
 | `misure.json` | token (`inputTotale` è ciò che il prompt deve abbassare), misure, voci della soglia, difetti |
 | `giudizio.md` | i criteri qui sotto, da compilare da chi guarda le foto |
+| `varianza.json`, `semi.png` | con `--varianza`: ogni seme a ogni taglia, le quote, il foglio di contatto (T180) |
 
 `riepilogo.md` nella cartella del giro dice una riga per tentativo.
 
@@ -73,6 +76,55 @@ Una terza richiesta non c'è.
 
 `--seconda --traccia [--tetto 4000]` mette nella seconda richiesta anche cosa ha fatto il programma, nodo per nodo, in testo: `traccia.md` dice le forme, i numeri e la scelta; da sola con `lab/scripts/mjx-trace.ts`. Le foto restano per il risultato finale. Senza il flag la richiesta è quella di T173.
 
+## Varianza e scala (T180)
+
+Il banco qui sopra prova un seme in una scatola: premia i modelli statici. `varianza.ts` prova lo stesso programma con **almeno 5 semi** in **almeno 2 taglie** (`prova`; se nessuno le dice, `taglieDiProva`: quella del bersaglio e la successiva). Niente modelli, solo il motore. Il giudizio è in due parti, separate:
+
+- **regge**: tutte le misure della soglia qui sopra (`giudica`, quindi piani, stanze, rampe, porta, `FORM_LIMITS`, `MODEL_TIME`) passano **a ogni seme e a ogni taglia**, e il programma usa la scatola di quella taglia (`scatola`: chi scrive una `size` sua con `map` non cresce). Una taglia cambia scatola e corpo insieme: a Enorme un gradino è 3 voxel, a Gargantuesca 2.
+- **varia**: le mediane delle coppie di semi, a ogni taglia, passano la soglia proposta (`SOGLIA_VARIANZA`):
+
+| misura | proposta | come si conta |
+|---|---|---|
+| statico | voxel < 0,01 | sotto, il programma è statico, qualunque cosa facciano i colori e qualche puntino |
+| voxel | ≥ 0,20 | voxel pieni in un seme solo, su quelli pieni in almeno uno: **solo la forma** |
+| colore | non conta | fra i voxel pieni in entrambi, quelli di un'altra lettera: si scrive e non vale |
+| pianta | ≥ 0,15 | colonne occupate sopra i piedi in un seme solo, su quelle occupate in almeno uno |
+| perimetro | ≥ 0,15, classe `grande` | parte del bordo esterno più lontana di mezza casella dal bordo dell'altro seme; lo tocca l'aria che viene da fuori: un cortile non è perimetro |
+| interno | ≥ 0,35 | pavimento coperto raggiunto dal corpo in un seme solo, su quello raggiunto in almeno uno |
+| piani e stanze | ≥ 2 liste diverse | fra i semi, liste diverse di quote dei piani o di stanze per piano |
+| architetture | ≥ 3 su 5 | semi che sono un altro edificio da tutti quelli contati prima: voxel e, insieme, pianta o interno oltre la soglia |
+
+**Da dove vengono i numeri**: dai programmi del seme, oltre che dagli XML di prova: `circuito-3D` cambia il 76 % delle lettere e 0 voxel (statico); `edificio` il 6 % delle lettere e 0 voxel (statico); `fattoria`, voxel 0,32, pianta 0,09, perimetro 0,01, interno 0,25, è la stessa casa ritoccata e nel foglio si vede: la soglia è sopra di lei, e 0,32 di voxel da solo non basta; `grande`, voxel 0,34, pianta 0,10, perimetro 0, idem; `esempi/variabile.xml`, voxel 0,93, pianta 0,86, perimetro 0,47, interno 0,93, è un altro complesso a ogni seme. **È una proposta**: fra 0,09 e 0,86 di pianta non c'è ancora nessun edificio vero, che regga e vari insieme; quando T156 ne avrà uno si guarda il foglio e si corregge il numero, dicendolo qui. Una volta fissata, non si abbassa per far passare un prompt.
+
+**La misura di partenza**, `varianza/riepilogo.md` (tutti i programmi di `finale` e `conferma`, 5 semi, tre taglie): **l'osservazione dell'autore è esatta. 31 programmi su 31 che girano sono statici**: voxel 0, colore 0, pianta 0, perimetro 0, interno 0, una architettura su 5 semi (altri 2 su 33 il gioco li rifiuta). Sono fatti di sole `<box>`: è ciò che il prompt insegna. E non scalano: dei 27 scritti per Grande che girano, alla loro taglia ne reggono 25, a **Enorme** 2, a **Gargantuesca** 1 (`conferma/futuristica/1/seconda`, l'unico che regge alle tre); le 4 rocche, scritte per Enorme, a Gargantuesca 0. Cadono `piani` e `murato`: la scala con gradini da 4 voxel non si sale più con un gradino da 3 o da 2.
+
+**Il costo in tempo**: 368 ms a esecuzione misurata, in media, sulle scatole di sole `<box>` (massimo 670 ms), su un processo solo mentre altri lavoravano. Con 5 semi e 2 taglie sono 10 esecuzioni: **circa 4 s a programma contro 0,4 s di oggi**, un minuto scarso su un giro di 14 tentativi, nessun costo in token. Un programma a regole costa di più: 0,8 s a esecuzione `variabile.xml`, 1,4 s `fattoria`, 7 s `circuito-3D` (`MODEL_TIME` resta il limite di ognuna): una quindicina di s a programma per gli edifici a regole, e oltre per chi sta vicino al limite.
+
+### Il foglio di contatto
+
+`semi.png` (o `<nome>.png` di `banco-varianza.ts`) è **un solo PNG a basso costo** al posto di quattro foto per seme: una riga per taglia, un modello per seme da sinistra, in 3/4 dal davanti; sotto la prima taglia la pianta del piano terra di ogni seme, con i colori di `pianta.png`. Esempi in `varianza/`: `conferma-rocca-1.png` (statica: cinque volte la stessa; tagliata a Grande), `fattoria-moderna.png` (la stessa casa ritoccata), `variabile-moderna.png` (masse diverse, non è un edificio).
+
+<!-- criteri-semi -->
+Ogni criterio vale «sì» solo se si vede nel foglio; per passare servono tutti «sì». I criteri delle foto di ogni seme restano quelli qui sotto: chi passa il foglio si guarda da vicino in un seme solo, poi nel peggiore.
+
+1. **Altri edifici**: coperti i colori, i cinque semi di una riga non sembrano lo stesso edificio ritoccato: masse, tetto e pianta cambiano, non solo gli arredi, la vegetazione o le tinte.
+2. **La stessa cosa**: nomi e stile tengono: sono cinque rocche, non una rocca e quattro cumuli; nessun seme è il brutto della famiglia.
+3. **Il perimetro**: negli edifici grandi il contorno esterno cambia da seme a seme, non solo ciò che sta dentro.
+4. **Le piante**: le stanze e il cammino verde cambiano; nessuna pianta ha pezzi murati, staccati o non raggiunti che le altre non hanno.
+5. **La scala**: da una riga all'altra è lo stesso programma più grande, che riempie la sua scatola; non lo stesso edificio in un angolo, né tagliato dal bordo.
+<!-- /criteri-semi -->
+
+### Cosa fa oggi il gioco con due taglie
+
+Provato sulla libreria vera (`Forms`, `modelSize`, `withSize`). **Oggi un programma non serve due taglie, e i semi di una struttura non si vedono.** Il banco misura ciò che il gioco dovrebbe fare; non lo corregge T180, lo farà T156:
+
+1. **Il seme di una struttura è sempre 1**: `SEEDS` in `forms.ts` dà un seme solo a `grande` ed `edificio`, `seedFor` restituisce sempre 1 (`lotsOf`, `kernel.ts`). Un programma che varia, oggi, nel mondo si vedrebbe in una forma sola.
+2. **L'id non ha la taglia**: `struttura-<concetto>` (`lotsOf`). «Un forte» Enorme e «un forte» Gargantuesco sono lo stesso id; il `ModelDirector` scolpisce il primo (`lacks`) e il secondo veste quello, alla taglia del primo: `struttura.taglia` non arriva a `FormComp` né alla forma.
+3. **`ModelInfo.taglia` è una per voce**: due taglie vogliono due voci, o la taglia sull'istanza e nella chiave delle forme (`model#seed#tinta#hash`).
+4. **Due voci con lo stesso XML scolpito non bastano**: lo Scultore scrive la scatola nella radice (`withSize`, `sculpt`) e `sizeFor` obbedisce alla `size` del programma: cambia `vpt`, non la griglia. Una voce con l'XML senza `size` sì. Il banco riscrive ogni volta la radice con la scatola della taglia: per questo vede ciò che il gioco oggi non fa. Chi usa `map` tiene comunque la sua (`withSize`, `scales`).
+5. **Enorme e Gargantuesca hanno la stessa griglia**: 120 × 120 × 96, per `MAX_SIDE` (`densityOf`); cambia solo la densità, 16 e 12 voxel per casella, cioè 7,5 × 7,5 × 6 e 10 × 10 × 8 caselle. In voxel non c'è **nessuna area di generazione diversa**: l'idea dell'autore del forte enorme e gargantuesco che differiscono nell'area c'è in caselle, non nella griglia; un dettaglio a Gargantuesca è più grosso a vista. Da decidere con T156: si tiene il tetto di 120 per le strutture rare, o si alza?
+6. **Il programma non conosce la scatola**: `<box>` ha coordinate assolute e il linguaggio non ha espressioni; ciò che si adatta sono i nodi a regole (`all`, `prl`, `one`, `markov`), che il prompt di oggi non insegna (le regole `prl`/`all` le ha tolte il giro g05). E `checkProgram` prova una taglia e un seme: T156 deve provarne di più, o il banco promuove ciò che lo Scultore non controlla.
+
 ## Ciò che non si misura
 
 <!-- criteri -->
@@ -94,7 +146,7 @@ In `bersagli.ts`: `moderna`, `steampunk`, `futuristica`, `locanda` (con la canti
 
 ## Gli esempi
 
-`esempi/buono.xml` (scritto a mano, passa le misure), `esempi/scala-stretta.xml` (lo stesso con la scala larga 4 voxel), `esempi/brutto.xml` (una scatola): li usa
+`esempi/buono.xml` (scritto a mano, passa le misure ma è statico), `esempi/scala-stretta.xml` (lo stesso con la scala larga 4 voxel), `esempi/brutto.xml` (una scatola), `esempi/variabile.xml` (varia e non è un edificio, T180): li usa
 `lab/tests/banco.test.ts`, insieme a un giro dentro il kernel vero. Il primo giudizio è in `prima-prova/`.
 
 ## Il ciclo (T155)

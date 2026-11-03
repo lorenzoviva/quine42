@@ -13,6 +13,7 @@ import { leggiEventi } from '../banco/claude';
 import { fotoLati, fotoPianta, fotoSezioni } from '../banco/foto';
 import { esegui, giudica, misura, scatolaDi, type Bersaglio } from '../banco/misure';
 import { daCorreggere, SIGNIFICATO, testoSeconda } from '../banco/seconda';
+import { fotoSemi, prova as provaSemi, SEMI, SOGLIA_VARIANZA, taglieDiProva } from '../banco/varianza';
 
 const CASA: Bersaglio = { id: 'prova', nome: 'prova', stile: '', descrizione: '', classe: 'grande' };
 const esempio = (n: string) => fs.readFileSync(`lab/banco/esempi/${n}.xml`, 'utf8');
@@ -248,5 +249,146 @@ describe('la seconda richiesta (T173)', () => {
       expect(m.murato).toBeCloseTo(scritta.misure.murato, 6);
       expect(giudica(m, e.scatola).passa).toBe(scritta.passa);
     }
+  }, 60_000);
+});
+
+describe('varianza e scala (T180)', () => {
+  const ROCCA = BERSAGLI.find((b) => b.id === 'rocca')!;
+  /** A shell that repaints itself with the seed: every letter changes, no voxel does. */
+  const SOLO_COLORE = `<sequence values="BWS">
+    <color symbol="W" value="c8b89a" name="muro"/>
+    <color symbol="S" value="7d766c" name="pietra"/>
+    <box at="49.5 49.5 0" size="80 80 40" color="W"/>
+    <box at="49.5 49.5 3" size="74 74 34" color="B"/>
+    <prl in="W" out="S" p="0.5" steps="1"/>
+  </sequence>`;
+  /** The same, with a few voxels of the wall dug away at random: speckle is not architecture either. */
+  const PUNTINI = SOLO_COLORE.replace('<prl in="W" out="S" p="0.5" steps="1"/>', '<prl in="W" out="B" p="0.002" steps="1"/>');
+
+  it('un programma di sole scatole è statico, con il numero: niente cambia da un seme all’altro', () => {
+    const p = provaSemi(esempio('buono'), CASA, { taglie: ['grande'] });
+    const [t] = p.taglie;
+    expect(p.statico).toBe(true);
+    expect(p.varia).toBe(false);
+    expect(t!.semi).toHaveLength(SEMI);
+    expect(SEMI).toBeGreaterThanOrEqual(5);
+    expect(t!.varianza).toMatchObject({ voxel: 0, colore: 0, pianta: 0, perimetro: 0, interno: 0, architetture: 1, firmePiani: 1, firmeStanze: 1 });
+    expect(t!.difettiVarianza.join(' ')).toContain('statico');
+    // Today's bench is happy with it: only the seeds tell.
+    expect(t!.regge).toBe(true);
+    expect(p.passa).toBe(false);
+  }, 60_000);
+
+  it('il solo rumore di colore non conta come varianza, né una manciata di puntini', () => {
+    const colore = provaSemi(SOLO_COLORE, CASA, { taglie: ['grande'] }).taglie[0]!.varianza!;
+    expect(colore.colore).toBeGreaterThan(0.3);
+    expect(colore.voxel).toBe(0);
+    expect(colore.statico).toBe(true);
+    const puntini = provaSemi(PUNTINI, CASA, { taglie: ['grande'] }).taglie[0]!.varianza!;
+    expect(puntini.voxel).toBeGreaterThan(0);
+    expect(puntini.statico).toBe(true);
+    expect(puntini.architetture).toBe(1);
+  }, 60_000);
+
+  it('un programma le cui masse cambiano col seme varia: pianta, perimetro, interno, architetture', () => {
+    const p = provaSemi(esempio('variabile'), CASA, { taglie: ['grande'] });
+    const v = p.taglie[0]!.varianza!;
+    expect(p.statico).toBe(false);
+    expect(p.varia).toBe(true);
+    expect(v.voxel).toBeGreaterThanOrEqual(SOGLIA_VARIANZA.voxel);
+    expect(v.pianta).toBeGreaterThanOrEqual(SOGLIA_VARIANZA.pianta);
+    expect(v.perimetro).toBeGreaterThanOrEqual(SOGLIA_VARIANZA.perimetro);
+    expect(v.interno).toBeGreaterThanOrEqual(SOGLIA_VARIANZA.interno);
+    expect(v.architetture).toBeGreaterThanOrEqual(SOGLIA_VARIANZA.architetture);
+    // It varies and it is no building: the two judgements are separate.
+    expect(p.regge).toBe(false);
+    expect(p.passa).toBe(false);
+  }, 60_000);
+
+  it('la stessa casa ritoccata dal seme non è un’altra architettura, anche se molti voxel cambiano', () => {
+    const p = provaSemi(bundledFiles['models/fattoria.xml']!, CASA, { taglie: ['grande'] });
+    const v = p.taglie[0]!.varianza!;
+    expect(v.statico).toBe(false);
+    expect(v.voxel).toBeGreaterThan(SOGLIA_VARIANZA.voxel);
+    expect(v.architetture).toBeLessThan(SOGLIA_VARIANZA.architetture);
+    expect(p.varia).toBe(false);
+  }, 60_000);
+
+  it('un cortile non è perimetro esterno: conta l’aria che viene da fuori', () => {
+    // A ring of walls whose courtyard moves with the seed: the plan changes, its outer perimeter does not.
+    const cortile = `<sequence values="BWI" symmetry="(xy)">
+      <color symbol="W" value="c8b89a" name="muro"/>
+      <color symbol="I" hidden="True" name="cortile"/>
+      <box at="49.5 49.5 0" size="90 90 30" color="W"/>
+      <box at="49.5 49.5 1" size="50 50 28" color="I"/>
+      <one in="I" out="B" steps="1"/>
+      <all in="BI" out="*B" steps="12" symmetry="(x)"/>
+      <all in="B/I" out="*/B" steps="12" symmetry="(y)"/>
+      <all in="B I" out="* B"/>
+      <all in="I B" out="B *"/>
+      <prl in="I" out="W" steps="1"/>
+      <all in="W B" out="B *"/>
+    </sequence>`;
+    const v = provaSemi(cortile, CASA, { taglie: ['grande'] }).taglie[0]!.varianza!;
+    expect(v.pianta).toBeGreaterThan(0.05);
+    expect(v.perimetro).toBe(0);
+  }, 60_000);
+
+  it('Enorme e Gargantuesca hanno la stessa griglia: cambia il corpo, e una scala fatta per uno non regge l’altro', () => {
+    const [enorme, garg] = (['enorme', 'gargantuesca'] as const).map((taglia) => scatolaDi({ ...ROCCA, taglia }));
+    expect(enorme!.box).toEqual(garg!.box);
+    expect([enorme!.vpt, garg!.vpt, enorme!.gradino, garg!.gradino]).toEqual([16, 12, 3, 2]);
+    expect(taglieDiProva(ROCCA)).toEqual(['enorme', 'gargantuesca']);
+    expect(taglieDiProva(CASA)).toEqual(['grande', 'enorme']);
+    expect(taglieDiProva({ classe: 'grande', taglia: 'gargantuesca' })).toEqual(['gargantuesca', 'enorme']);
+    const p = provaSemi(fs.readFileSync('lab/banco/finale/rocca/1/modello.xml', 'utf8'), ROCCA, { semi: 2 });
+    expect(p.taglie.map((t) => t.regge)).toEqual([true, false]);
+    expect(p.taglie[1]!.semi[0]!.difetti.join(' ')).toContain('piani');
+    expect(p.regge).toBe(false);
+  }, 60_000);
+
+  it('chi si rompe a una taglia è bocciato: a ogni seme, con le misure che cadono', () => {
+    const p = provaSemi(esempio('buono'), CASA);
+    expect(p.taglie.map((t) => t.taglia)).toEqual(['grande', 'enorme']);
+    const [grande, enorme] = p.taglie;
+    expect(grande!.regge).toBe(true);
+    expect(enorme!.regge).toBe(false);
+    expect(enorme!.box).toEqual([120, 120, 96]);
+    expect(enorme!.gradino).toBe(3);
+    for (const s of enorme!.semi) expect(s.difetti.map((d) => d.split(':')[0])).toEqual(expect.arrayContaining(['piani', 'murato']));
+    expect(p.regge).toBe(false);
+    expect(p.passa).toBe(false);
+  }, 60_000);
+
+  it('ciò che il gioco rifiuta è un difetto, non un’eccezione, e non è statico', () => {
+    const p = provaSemi('<sequence values="BW"><box at="1 1"/></sequence>', CASA, { semi: 2, taglie: ['grande'] });
+    expect(p.regge).toBe(false);
+    expect(p.statico).toBe(false);
+    expect(p.taglie[0]!.semi[0]!.difetti[0]).toContain('il gioco lo rifiuta');
+    expect(p.taglie[0]!.difettiVarianza).toHaveLength(1);
+    expect(fotoSemi(p)).toBeUndefined();
+  });
+
+  it('un programma con una `size` sua non cresce con la taglia, e si dice', () => {
+    const p = provaSemi(bundledFiles['models/grande.xml']!, CASA, { semi: 2 });
+    expect(p.taglie.map((t) => t.box)).toEqual([[72, 72, 90], [72, 72, 90]]);
+    expect(p.taglie[1]!.semi[0]!.difetti.join(' ')).toContain('scatola: 72 × 72 × 90 (la taglia enorme dà 120 × 120 × 96)');
+  }, 60_000);
+
+  it('la scatola attesa conta la cantina: una locanda non è sbagliata per i suoi voxel sotto il suolo', () => {
+    const b = BERSAGLI.find((x) => x.id === 'locanda')!;
+    const p = provaSemi(fs.readFileSync('lab/banco/finale/locanda/2/modello.xml', 'utf8'), b, { semi: 1, taglie: ['grande'] });
+    expect(p.taglie[0]!.box).toEqual([100, 100, 100]);
+    expect(p.taglie[0]!.semi[0]!.difetti).toEqual([]);
+  }, 60_000);
+
+  it('il foglio di contatto è un solo PNG: una riga per taglia, un modello per seme, e le piante', () => {
+    const p = provaSemi(esempio('variabile'), CASA);
+    const pic = fotoSemi(p)!;
+    expect(pic.data.length).toBe(pic.w * pic.h * 4);
+    // Five models at 100 voxels side by side; three rows.
+    expect(pic.w).toBeGreaterThan(5 * 100);
+    expect(pic.h).toBeGreaterThan(2 * 100);
+    expect(pic.w).toBeLessThan(1000);
   }, 60_000);
 });

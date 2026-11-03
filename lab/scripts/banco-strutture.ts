@@ -3,6 +3,7 @@
 //
 //   npx vite-node lab/scripts/banco-strutture.ts -- --bersagli moderna,steampunk|tutti [--giro v1] [--prompt lab/banco/prompt.md] [--modello sonnet] [--tentativi 1]
 //   npx vite-node lab/scripts/banco-strutture.ts -- --xml modello.xml --bersagli moderna [--giro prove]
+//   npx vite-node lab/scripts/banco-strutture.ts -- --xml modello.xml --bersagli rocca --varianza   (T180: anche varianza.json e semi.png; da sola, lab/scripts/banco-varianza.ts)
 //   npx vite-node lab/scripts/banco-strutture.ts -- --seconda --giro conferma --dir lab/banco [--bersagli …] [--insieme 3] [--traccia] [--tetto 4000]   (T173; la traccia, T179)
 //
 // → lab/out/banco/<giro>/<bersaglio>/<n>/ {prompt.md, bersaglio.txt, risposta.txt, modello.xml, lati.png, sezioni.png, pianta.png, misure.json, giudizio.md}
@@ -19,6 +20,7 @@ import { chiedi, LimiteAbbonamento, type Risposta } from '../banco/claude';
 import { fotoLati, fotoPianta, fotoSezioni } from '../banco/foto';
 import { esegui, giudica, misura, type Bersaglio, type Giudizio, type Misure } from '../banco/misure';
 import { daCorreggere, testoSeconda, type Scheda } from '../banco/seconda';
+import { fotoSemi, prova } from '../banco/varianza';
 import { png } from './png';
 
 const args = process.argv.slice(2).filter((a) => a !== '--');
@@ -32,6 +34,8 @@ const quanti = Number(opt('tentativi') ?? 1);
 const seconda = args.includes('--seconda');
 /** The second request also says what the program did (T179). */
 const conTraccia = args.includes('--traccia');
+/** More seeds and more sizes for each attempt (T180): no call, a few seconds per program. */
+const conVarianza = args.includes('--varianza');
 const tetto = Number(opt('tetto') ?? DEFAULT_CEILING);
 /** Attempts at the same time: the 5-hour window does not take many (T173). */
 const insieme = Math.max(1, Number(opt('insieme') ?? 1));
@@ -100,6 +104,12 @@ function valuta(xml: string, b: Bersaglio, dir: string, r?: Risposta): Riga {
       2,
     ),
   );
+  if (conVarianza && !errore) {
+    const p = prova(xml, b);
+    const { esecuzioni: _esecuzioni, ...resto } = p;
+    fs.writeFileSync(path.join(dir, 'varianza.json'), `${JSON.stringify(resto, null, 2)}\n`);
+    salvaFoto(dir, 'semi.png', fotoSemi(p));
+  }
   fs.writeFileSync(path.join(dir, 'giudizio.md'), `# Giudizio di chi guarda le foto — ${b.nome}\n\nVoto per ogni criterio (sì / in parte / no) e una riga su ciò che si vede.\n\n${CRITERI}\n`);
   return { bersaglio: b.id, dir, passa: g?.passa ?? false, difetti: g?.difetti ?? [`il gioco lo rifiuta: ${errore}`], ...(r ? { inputTotale: r.token.inputTotale, output: r.token.output } : {}) };
 }
