@@ -1,0 +1,3022 @@
+<!DOCTYPE html>
+<html lang="it" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MJ-3D SoundLab — Generatore Musicale & Synth MarkovJunior</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #090b10;
+      --panel-bg: #11151f;
+      --border-col: #22293a;
+      --accent-cyan: #00f2fe;
+      --accent-amber: #ffb703;
+      --accent-magenta: #ff2a85;
+    }
+    body {
+      background-color: var(--bg-dark);
+      color: #e2e8f0;
+      font-family: 'JetBrains Mono', monospace;
+      overflow-x: hidden;
+    }
+    .font-display {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0d111a; }
+    ::-webkit-scrollbar-thumb { background: #2b354f; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
+
+    /* Custom Range Sliders */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background: #1e2536;
+      height: 6px;
+      border-radius: 999px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #38bdf8;
+      cursor: pointer;
+      border: 2px solid #090b10;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.7);
+      transition: transform 0.1s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .cyber-panel {
+      background: linear-gradient(180deg, rgba(20, 25, 38, 0.95) 0%, rgba(13, 17, 26, 0.98) 100%);
+      border: 1px solid #232b3e;
+      box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
+    }
+    .neon-glow-cyan {
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.25);
+    }
+    .neon-glow-amber {
+      box-shadow: 0 0 14px rgba(251, 191, 36, 0.3);
+    }
+    canvas {
+      user-select: none;
+      -webkit-user-select: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-sky-500 selection:text-black">
+
+  <!-- TOP HEADER & TRANSPORT BAR -->
+  <header class="cyber-panel border-b border-slate-800 px-4 py-2.5 sticky top-0 z-30">
+    <div class="max-w-[1920px] mx-auto flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Brand & Axis Mapping Badge -->
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-sky-400 via-indigo-500 to-fuchsia-600 p-0.5 shadow-lg shadow-sky-500/20">
+          <div class="w-full h-full bg-[#090b10] rounded-[7px] flex items-center justify-center font-bold text-sky-400 text-sm tracking-tighter">
+            MJ3
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-display font-bold text-base md:text-lg tracking-tight text-white">MJ-3D SOUNDLAB</h1>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30 font-semibold">ENGINE.TS PORT</span>
+          </div>
+          <p class="text-[11px] text-slate-400 hidden sm:block">
+            <span class="text-sky-400">X:</span> Step Tempo &bull; 
+            <span class="text-fuchsia-400">Y:</span> Layer [0:Lead, 1:Pad, 2:Bass/Drum] &bull; 
+            <span class="text-amber-400">Z:</span> Altezza Scala
+          </p>
+        </div>
+      </div>
+
+      <!-- Preset & Seed Controls -->
+      <div class="flex flex-wrap items-center gap-2">
+        <div class="flex items-center bg-slate-900/90 border border-slate-700/80 rounded-lg px-2.5 py-1">
+          <span class="text-[10px] uppercase tracking-wider text-slate-400 mr-2">Preset:</span>
+          <select id="presetSelect" class="bg-transparent text-xs text-sky-300 font-semibold focus:outline-none cursor-pointer pr-2">
+            <option value="0" class="bg-slate-900 text-white">1. Sentiero Melodico (Path + Conv + Prl)</option>
+            <option value="1" class="bg-slate-900 text-white">2. Fuga Cellular Automata (Conv + Sym X)</option>
+            <option value="2" class="bg-slate-900 text-white">3. Architettura Frattale (Map Scaling 4x→16x)</option>
+            <option value="3" class="bg-slate-900 text-white">4. Boss Fight Cyber-Dungeon (Markov + Shape)</option>
+          </select>
+        </div>
+
+        <div class="flex items-center bg-slate-900/90 border border-slate-700/80 rounded-lg px-2 py-1 gap-1.5">
+          <span class="text-[10px] uppercase text-slate-400">Seed:</span>
+          <input id="seedInput" type="number" value="421337" class="w-20 bg-slate-950 text-amber-300 text-xs px-1.5 py-0.5 rounded border border-slate-800 focus:outline-none focus:border-amber-400 text-center" />
+          <button id="randomSeedBtn" title="Nuovo Seed Casuale & Rigenera" class="px-2 py-0.5 text-xs bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded transition flex items-center gap-1">
+            <span>🎲</span><span class="hidden md:inline">Dado</span>
+          </button>
+        </div>
+
+        <button id="runMjBtn" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-slate-950 shadow-md shadow-sky-500/20 transition flex items-center gap-1.5">
+          <span>⚡</span><span>RIGENERA MJ</span>
+        </button>
+      </div>
+
+      <!-- Audio Transport & Master Oscilloscope -->
+      <div class="flex items-center gap-2.5">
+        <button id="playToggleBtn" class="px-4 py-1.5 rounded-lg text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition shadow-lg shadow-emerald-500/20 flex items-center gap-1.5">
+          <span id="playIcon">▶</span>
+          <span id="playText">PLAY LOOP</span>
+        </button>
+
+        <button id="stepOnceBtn" title="Avanza di 1 Step Musicale" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+          ⏭ +1
+        </button>
+
+        <button id="exportWavBtn" title="Renderizza ed esporta il loop corrente in .WAV" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-fuchsia-500/15 hover:bg-fuchsia-500/25 text-fuchsia-300 border border-fuchsia-500/30 transition flex items-center gap-1">
+          <span>⬇</span><span class="hidden sm:inline">.WAV</span>
+        </button>
+
+        <!-- Real-time Oscilloscope Canvas -->
+        <div class="relative w-28 h-8 bg-slate-950 rounded-lg border border-slate-800 overflow-hidden hidden xl:block" title="Oscilloscopio Master WebAudio">
+          <canvas id="scopeCanvas" class="w-full h-full block"></canvas>
+          <span class="absolute bottom-0.5 right-1 text-[8px] text-slate-500 pointer-events-none">OUT</span>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE GRID -->
+  <main class="flex-1 max-w-[1920px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-12 gap-3">
+
+    <!-- LEFT COLUMN: SYNTH CONTROLS, TRACK MIXER & PALETTE LEGEND (3 cols on lg) -->
+    <section class="lg:col-span-3 flex flex-col gap-3">
+      
+      <!-- Musical Scale & Master Synth Card -->
+      <div class="cyber-panel rounded-xl p-3.5 flex flex-col gap-3">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-sky-400 flex items-center gap-1.5">
+            <span>🎛️</span> Master Synth & Scala
+          </h2>
+          <span id="currentGridDimBadge" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300">16×3×8</span>
+        </div>
+
+        <!-- Scale & Root Note -->
+        <div class="grid grid-cols-3 gap-2">
+          <div class="col-span-2">
+            <label class="text-[10px] text-slate-400 uppercase block mb-1">Scala Musicale (Asse Z)</label>
+            <select id="scaleSelect" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
+              <option value="pentatonic_minor">Pentatonica Minore</option>
+              <option value="dorian">Dorica (Cyber/Prog)</option>
+              <option value="harmonic_minor">Minore Armonica (Dungeon)</option>
+              <option value="phrygian">Frigia (Dark/Boss)</option>
+              <option value="hirajoshi">Giapponese Hirajoshi</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-[10px] text-slate-400 uppercase block mb-1">Nota Root</label>
+            <select id="rootSelect" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-amber-300 font-bold focus:outline-none focus:border-amber-500">
+              <option value="48">C3 (Do)</option>
+              <option value="50">D3 (Re)</option>
+              <option value="51">D#3 (Mib)</option>
+              <option value="52">E3 (Mi)</option>
+              <option value="53">F3 (Fa)</option>
+              <option value="55">G3 (Sol)</option>
+              <option value="57">A3 (La)</option>
+              <option value="58">A#3 (Sib)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Sliders: BPM, Swing, Master Cutoff, Delay -->
+        <div class="grid grid-cols-2 gap-x-3 gap-y-2.5 pt-1">
+          <div>
+            <div class="flex justify-between text-[11px] mb-1">
+              <span class="text-slate-400">Tempo BPM</span>
+              <span id="bpmVal" class="text-sky-300 font-bold">122</span>
+            </div>
+            <input id="bpmSlider" type="range" min="60" max="180" value="122" class="w-full" />
+          </div>
+          <div>
+            <div class="flex justify-between text-[11px] mb-1">
+              <span class="text-slate-400">Groove Swing</span>
+              <span id="swingVal" class="text-sky-300 font-bold">12%</span>
+            </div>
+            <input id="swingSlider" type="range" min="0" max="45" value="12" class="w-full" />
+          </div>
+          <div>
+            <div class="flex justify-between text-[11px] mb-1">
+              <span class="text-slate-400">Filtro Lowpass</span>
+              <span id="cutoffVal" class="text-amber-300 font-bold">4.8 kHz</span>
+            </div>
+            <input id="cutoffSlider" type="range" min="300" max="12000" step="50" value="4800" class="w-full" />
+          </div>
+          <div>
+            <div class="flex justify-between text-[11px] mb-1">
+              <span class="text-slate-400">Space Delay/Rev</span>
+              <span id="spaceVal" class="text-fuchsia-300 font-bold">35%</span>
+            </div>
+            <input id="spaceSlider" type="range" min="0" max="85" value="35" class="w-full" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Y-Axis Track Mixer (3 Layers) -->
+      <div class="cyber-panel rounded-xl p-3.5 flex flex-col gap-2.5">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-fuchsia-400 flex items-center gap-1.5">
+            <span>🎚️</span> Tracce Polifoniche (Asse Y)
+          </h2>
+          <span class="text-[10px] text-slate-400">Mute / Vol</span>
+        </div>
+
+        <!-- Track Y=0: Lead -->
+        <div class="bg-slate-900/90 border border-sky-500/30 rounded-lg p-2.5 flex flex-col gap-1.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-sky-400 shadow-[0_0_8px_#38bdf8]"></span>
+              <div>
+                <div class="text-xs font-bold text-white">Y=0 &bull; LEAD ARPEGGIO</div>
+                <div class="text-[10px] text-slate-400">FM / Pulse + Resonant Delay</div>
+              </div>
+            </div>
+            <button data-track="0" class="mute-btn px-2 py-0.5 rounded text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 transition">
+              ON
+            </button>
+          </div>
+          <input data-track-vol="0" type="range" min="0" max="100" value="82" class="w-full" />
+        </div>
+
+        <!-- Track Y=1: Pad / Harmony -->
+        <div class="bg-slate-900/90 border border-fuchsia-500/30 rounded-lg p-2.5 flex flex-col gap-1.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-fuchsia-400 shadow-[0_0_8px_#e879f9]"></span>
+              <div>
+                <div class="text-xs font-bold text-white">Y=1 &bull; ARMONIA / PAD</div>
+                <div class="text-[10px] text-slate-400">Detuned Dual-Saw + Lush Space</div>
+              </div>
+            </div>
+            <button data-track="1" class="mute-btn px-2 py-0.5 rounded text-[10px] font-bold bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/40 transition">
+              ON
+            </button>
+          </div>
+          <input data-track-vol="1" type="range" min="0" max="100" value="75" class="w-full" />
+        </div>
+
+        <!-- Track Y=2: Bass & Drums -->
+        <div class="bg-slate-900/90 border border-amber-500/30 rounded-lg p-2.5 flex flex-col gap-1.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_#fbbf24]"></span>
+              <div>
+                <div class="text-xs font-bold text-white">Y=2 &bull; SUB-BASS & DRUMS</div>
+                <div class="text-[10px] text-slate-400">FM Sub + Kick(K)/Hat(H)/Clap(C)</div>
+              </div>
+            </div>
+            <button data-track="2" class="mute-btn px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 transition">
+              ON
+            </button>
+          </div>
+          <input data-track-vol="2" type="range" min="0" max="100" value="90" class="w-full" />
+        </div>
+      </div>
+
+      <!-- Palette & Brush Selector for Interactive Cell Editing -->
+      <div class="cyber-panel rounded-xl p-3.5 flex flex-col gap-2.5 flex-1">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+            <span>🎨</span> Palette Codici MJ (Pennello)
+          </h2>
+          <span class="text-[10px] text-slate-400">Clicca Piano Roll</span>
+        </div>
+        <p class="text-[11px] text-slate-400 leading-relaxed">
+          Seleziona un simbolo qui sotto e clicca sulle celle del Piano Roll per dipingere note o inserire un seme prima di eseguire <span class="text-sky-300">Continua su Griglia</span>.
+        </p>
+        <div id="paletteSelectorGrid" class="grid grid-cols-3 gap-1.5 pt-1">
+          <!-- Populated dynamically from active palette -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- CENTER COLUMN: DUAL VISUALIZER (2D PIANO ROLL + 3D ISOMETRIC VOXELS) & SNAPSHOT SCRUBBER (5 cols on lg) -->
+    <section class="lg:col-span-5 flex flex-col gap-3">
+      
+      <!-- Snapshot Growth Timeline Bar -->
+      <div class="cyber-panel rounded-xl p-3 flex flex-col gap-2">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1">
+              <span>⏱️</span> Evoluzione Riscrittura MJ
+            </span>
+            <span id="snapshotLabel" class="text-[11px] px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold">
+              Step Finale
+            </span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button id="morphAnimBtn" class="px-2.5 py-1 rounded text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 transition">
+              🎞️ Anima Crescita
+            </button>
+            <button id="clearGridBtn" title="Svuota la griglia per disegnare a mano e far girare runOn()" class="px-2 py-1 rounded text-[11px] bg-slate-800 hover:bg-rose-950/60 text-slate-300 hover:text-rose-300 border border-slate-700 transition">
+              Svuota
+            </button>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-[10px] text-slate-500">0</span>
+          <input id="snapshotSlider" type="range" min="0" max="10" value="10" class="flex-1" />
+          <span id="snapshotMaxLabel" class="text-[10px] text-slate-400">Max</span>
+        </div>
+      </div>
+
+      <!-- 2D Multi-Layer Matrix / Piano Roll -->
+      <div class="cyber-panel rounded-xl p-3.5 flex flex-col gap-2.5">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
+              <span>🎹</span> Piano Roll 2D <span class="text-[10px] font-normal text-slate-400">(Asse X = Step, Asse Z = Altezza)</span>
+            </h2>
+          </div>
+          <!-- Layer Filter Tabs -->
+          <div class="flex items-center bg-slate-950 p-0.5 rounded-lg border border-slate-800 text-[11px]">
+            <button data-layer-view="all" class="layer-tab px-2.5 py-1 rounded-md font-bold bg-slate-800 text-white transition">Tutti (Y=0..2)</button>
+            <button data-layer-view="0" class="layer-tab px-2.5 py-1 rounded-md text-sky-400 hover:text-white transition">Y0:Lead</button>
+            <button data-layer-view="1" class="layer-tab px-2.5 py-1 rounded-md text-fuchsia-400 hover:text-white transition">Y1:Pad</button>
+            <button data-layer-view="2" class="layer-tab px-2.5 py-1 rounded-md text-amber-400 hover:text-white transition">Y2:Bass/Drum</button>
+          </div>
+        </div>
+
+        <div class="relative w-full h-64 sm:h-72 bg-[#07090e] rounded-lg border border-slate-800/90 overflow-hidden">
+          <canvas id="pianoRollCanvas" class="w-full h-full block cursor-crosshair"></canvas>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-400 px-1">
+          <span id="cellHoverInfo">Passa il mouse o clicca su una cella per ispezionare/modificare (X, Y, Z)</span>
+          <span class="text-slate-500">N:Nota &bull; S:Legato &bull; A:Accento &bull; G:Ghost &bull; K/H/C:Drums</span>
+        </div>
+      </div>
+
+      <!-- 3D Isometric Voxel Box Visualizer -->
+      <div class="cyber-panel rounded-xl p-3.5 flex flex-col gap-2.5 flex-1">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-sky-400 flex items-center gap-2">
+            <span>🧊</span> Voxel Box 3D Isometrico <span class="text-[10px] font-normal text-slate-400">(Trascina per ruotare)</span>
+          </h2>
+          <div class="flex items-center gap-2">
+            <label class="flex items-center gap-1.5 text-[11px] text-slate-300 cursor-pointer">
+              <input id="showHiddenMarkersChk" type="checkbox" checked class="accent-sky-400 rounded" />
+              <span>Mostra Marker Strutturali (R, M, T, P)</span>
+            </label>
+            <button id="resetCamBtn" class="px-2 py-0.5 rounded text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">
+              Reset Vista
+            </button>
+          </div>
+        </div>
+
+        <div class="relative w-full h-64 sm:h-72 flex-1 bg-[#07090e] rounded-lg border border-slate-800/90 overflow-hidden">
+          <canvas id="voxel3dCanvas" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
+          <div class="absolute bottom-2 left-2.5 pointer-events-none flex items-center gap-3 text-[10px] bg-slate-950/80 px-2.5 py-1 rounded border border-slate-800/80">
+            <span class="text-sky-400">● Y=0 Lead (Fronte)</span>
+            <span class="text-fuchsia-400">● Y=1 Pad (Centro)</span>
+            <span class="text-amber-400">● Y=2 Bass/Drum (Retro)</span>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- RIGHT COLUMN: LIVE MJ3 PROGRAM JSON EDITOR & DIAGNOSTIC TELEMETRY (4 cols on lg) -->
+    <section class="lg:col-span-4 flex flex-col gap-3">
+      
+      <!-- Program3 Live Code Editor -->
+      <div class="cyber-panel rounded-xl p-3.5 flex flex-col gap-2.5 flex-1">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2">
+          <div>
+            <h2 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+              <span>📜</span> Programma MarkovJunior 3D (JSON)
+            </h2>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button id="compileRunBtn" class="px-2.5 py-1 rounded text-[11px] font-bold bg-sky-500 hover:bg-sky-400 text-slate-950 transition">
+              ▶ Compila & Run
+            </button>
+            <button id="runOnExistingBtn" title="Esegue le regole del JSON sulla griglia attuale (runOn) senza azzerarla" class="px-2.5 py-1 rounded text-[11px] font-semibold bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 transition">
+              + RunOn Griglia
+            </button>
+            <button id="copyJsonBtn" title="Copia il JSON negli appunti" class="px-2 py-1 rounded text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+              📋
+            </button>
+          </div>
+        </div>
+
+        <p id="presetDescBox" class="text-[11px] text-slate-300 bg-slate-900/90 border-l-2 border-sky-400 px-2.5 py-1.5 rounded-r">
+          Descrizione del preset MarkovJunior attivo...
+        </p>
+
+        <div class="relative flex-1 flex flex-col min-h-[300px]">
+          <textarea id="programJsonEditor" spellcheck="false" class="w-full flex-1 bg-[#07090e] text-emerald-300 font-mono text-[11px] leading-relaxed p-3 rounded-lg border border-slate-800 focus:outline-none focus:border-sky-500 resize-none"></textarea>
+        </div>
+
+        <!-- Compiler & Engine Telemetry Diagnostics -->
+        <div class="bg-slate-950 rounded-lg border border-slate-800 p-2.5 flex flex-col gap-1.5">
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="font-bold text-slate-300 uppercase tracking-wider">Telemetria Engine.ts</span>
+            <div class="flex items-center gap-3">
+              <span id="statSteps" class="text-sky-400 font-semibold">Steps: 0</span>
+              <span id="statTime" class="text-emerald-400 font-semibold">0 ms</span>
+              <span id="statStatus" class="px-1.5 py-0.2 rounded text-[10px] bg-emerald-500/20 text-emerald-300">FINISHED</span>
+            </div>
+          </div>
+          <div id="diagnosticOutput" class="text-[11px] text-slate-400 max-h-28 overflow-y-auto space-y-1 font-mono">
+            Pronto.
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- TOAST NOTIFICATION BANNER -->
+  <div id="toastBanner" class="fixed bottom-4 right-4 z-50 hidden px-4 py-2.5 rounded-xl bg-slate-900/95 border border-sky-500/50 text-xs text-sky-200 shadow-2xl"></div>
+
+  <script>
+    /*************************************************************************
+     * 1. PORTING COMPLETO E FEDELE DI ENGINE.TS (MARKOVJUNIOR 3D KERNEL)
+     *************************************************************************/
+
+    /** Generatore PRNG deterministico (Mulberry32) compatibile con l'interfaccia Rng di engine.ts */
+    class Rng {
+      constructor(seed = 123456789) {
+        this.state = (seed >>> 0) || 1;
+      }
+      next() {
+        let t = (this.state += 0x6D2B79F5);
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      }
+      int(max) {
+        return Math.floor(this.next() * max);
+      }
+    }
+
+    const SHAPES = ['box', 'ellipsoid', 'cylinder', 'cone', 'line'];
+    const AIR = '.';
+    const MAX_SIDE = 64;
+    const MAX_CELLS = 64 * 64 * 64;
+    const MAX_CODES = 256;
+    const MODEL_LIMITS = { side: MAX_SIDE, cells: MAX_CELLS };
+
+    class Mj3Error extends Error {}
+
+    function write(g, idx, v) {
+      if (g.cells[idx] === v) return false;
+      g.cells[idx] = v;
+      g.log.push(idx);
+      if (g.log.length > 2_000_000) {
+        g.log.length = 0;
+        g.epoch++;
+      }
+      return true;
+    }
+
+    class Alphabet {
+      constructor() {
+        this.codes = [AIR];
+        this.sets = [];
+        this.unions = new Map();
+        this.setIds = new Map();
+      }
+      index(ch) {
+        if (this.unions.has(ch)) throw new Mj3Error(`"${ch}" è un'unione: vale solo negli ingressi delle regole`);
+        let i = this.codes.indexOf(ch);
+        if (i < 0) {
+          if (this.codes.length >= MAX_CODES) throw new Mj3Error(`troppi codici (max ${MAX_CODES - 1})`);
+          i = this.codes.push(ch) - 1;
+        }
+        return i;
+      }
+      mask(set) {
+        const key = [...new Set([...set].flatMap((ch) => [...(this.unions.get(ch) ?? ch)]))].sort().join('');
+        let id = this.setIds.get(key);
+        if (id === undefined) {
+          const flags = new Uint8Array(MAX_CODES);
+          for (const ch of key) flags[this.index(ch)] = 1;
+          id = this.sets.push(flags) - 1;
+          this.setIds.set(key, id);
+        }
+        return id;
+      }
+    }
+
+    const cellsOf = (row) => row.match(/\[[^\]]*\]|./g) ?? [];
+    const layersOf = (src) => src.trim().split(/\s+/).map((layer) => layer.split('/').map(cellsOf));
+
+    function parsePattern(rule, alpha) {
+      if (typeof rule?.in !== 'string' || typeof rule?.out !== 'string') throw new Mj3Error('regola senza in/out');
+      const li = layersOf(rule.in);
+      const lo = layersOf(rule.out);
+      const dz = li.length;
+      const dy = li[0].length;
+      const dx = li[0][0].length;
+      const same = (ls) => ls.length === dz && ls.every((l) => l.length === dy && l.every((r) => r.length === dx));
+      if (!same(li) || !same(lo)) throw new Mj3Error(`in e out devono avere la stessa forma: "${rule.in}" → "${rule.out}"`);
+      if (dx * dy * dz > 1728) throw new Mj3Error(`regola troppo grande (max 1728 celle): ${rule.in}`);
+      const input = new Int32Array(dx * dy * dz);
+      const output = new Int16Array(dx * dy * dz);
+      for (let k = 0; k < dz; k++)
+        for (let j = 0; j < dy; j++)
+          for (let i = 0; i < dx; i++) {
+            const n = i + j * dx + k * dx * dy;
+            const a = li[k][j][i];
+            input[n] = a === '*' ? -1 : alpha.mask(a.startsWith('[') ? a.slice(1, -1) : a);
+            const b = lo[k][j][i];
+            if (b.startsWith('[')) throw new Mj3Error(`"[..]" non è ammesso in un'uscita: ${rule.out}`);
+            output[n] = b === '*' ? -1 : alpha.index(b);
+          }
+      return { dx, dy, dz, input, output, p: typeof rule.p === 'number' && rule.p > 0 ? rule.p : 1, rule: 0 };
+    }
+
+    const PERMS = [[0, 1, 2], [1, 0, 2], [0, 2, 1], [2, 1, 0], [1, 2, 0], [2, 0, 1]];
+    const PERM_ODD = [0, 1, 1, 1, 0, 0];
+
+    function symmetries(sym) {
+      const flips = (fx, fy, fz) => fx.flatMap((a) => fy.flatMap((b) => fz.map((c) => [a, b, c])));
+      const cube = () => PERMS.flatMap((perm) => flips([0, 1], [0, 1], [0, 1]).map((flip) => ({ perm, flip })));
+      switch (sym) {
+        case 'none':
+          return [{ perm: [0, 1, 2], flip: [0, 0, 0] }];
+        case 'x':
+          return flips([0, 1], [0], [0]).map((flip) => ({ perm: [0, 1, 2], flip }));
+        case 'y':
+          return flips([0], [0, 1], [0]).map((flip) => ({ perm: [0, 1, 2], flip }));
+        case 'z':
+          return flips([0], [0], [0, 1]).map((flip) => ({ perm: [0, 1, 2], flip }));
+        case 'all':
+          return cube();
+        case 'rot':
+          return cube().filter(({ perm, flip }) => (PERM_ODD[PERMS.findIndex((p) => p.join() === perm.join())] + flip[0] + flip[1] + flip[2]) % 2 === 0);
+        default:
+          return PERMS.slice(0, 2).flatMap((perm) => flips([0, 1], [0, 1], [0]).map((flip) => ({ perm, flip })));
+      }
+    }
+
+    function transform(p, perm, flip) {
+      const d = [p.dx, p.dy, p.dz];
+      const nd = [d[perm[0]], d[perm[1]], d[perm[2]]];
+      const input = new Int32Array(p.input.length);
+      const output = new Int16Array(p.output.length);
+      for (let k = 0; k < p.dz; k++)
+        for (let j = 0; j < p.dy; j++)
+          for (let i = 0; i < p.dx; i++) {
+            const c = [i, j, k];
+            const n = [0, 1, 2].map((a) => (flip[a] ? nd[a] - 1 - c[perm[a]] : c[perm[a]]));
+            const to = n[0] + n[1] * nd[0] + n[2] * nd[0] * nd[1];
+            const from = i + j * p.dx + k * p.dx * p.dy;
+            input[to] = p.input[from];
+            output[to] = p.output[from];
+          }
+      return { dx: nd[0], dy: nd[1], dz: nd[2], input, output, p: p.p, rule: p.rule };
+    }
+
+    function variants(p, sym) {
+      const seen = new Set();
+      const out = [];
+      for (const { perm, flip } of symmetries(sym)) {
+        const v = transform(p, perm, flip);
+        const key = `${v.dx},${v.dy},${v.dz}|${v.input.join(',')}|${v.output.join(',')}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push(v);
+      }
+      return out;
+    }
+
+    class Runner {
+      constructor(limit) {
+        this.limit = limit;
+        this.count = 0;
+        this.total = 0;
+        this.why = undefined;
+        this.fired = [];
+      }
+      reset() {
+        this.count = 0;
+      }
+    }
+
+    class MatchSet {
+      constructor() {
+        this.keys = [];
+        this.where = new Map();
+      }
+      add(k) {
+        if (this.where.has(k)) return;
+        this.where.set(k, this.keys.length);
+        this.keys.push(k);
+      }
+      remove(k) {
+        const i = this.where.get(k);
+        if (i === undefined) return;
+        const last = this.keys.pop();
+        if (i < this.keys.length) {
+          this.keys[i] = last;
+          this.where.set(last, i);
+        }
+        this.where.delete(k);
+      }
+      clear() {
+        this.keys = [];
+        this.where.clear();
+      }
+    }
+
+    class RuleRunner extends Runner {
+      constructor(kind, rules, limit, sym, alpha) {
+        super(limit);
+        this.kind = kind;
+        this.matches = new MatchSet();
+        this.seen = 0;
+        this.epoch = -1;
+        this.stamp = undefined;
+        this.stampN = 0;
+        if (!Array.isArray(rules) || !rules.length) throw new Mj3Error(`nodo ${kind} senza regole`);
+        this.patterns = rules.flatMap((r, i) => variants({ ...parsePattern(r, alpha), rule: i }, r.symmetry ?? sym));
+        this.fired = rules.map(() => 0);
+        this.wanted = [...new Set(rules.flatMap((r) => (r.in.match(/\[[^\]]*\]|[^*/ ]/g) ?? []).map((c) => (c.startsWith('[') ? c.slice(1, -1) : c))))];
+        this.alpha = alpha;
+        this.sets = alpha.sets;
+        this.uniform = this.patterns.every((p) => p.p === this.patterns[0].p);
+      }
+      reset() {
+        super.reset();
+        this.epoch = -1;
+      }
+      check(g, p, ox, oy, oz) {
+        let changes = false;
+        const XY = g.X * g.Y;
+        for (let k = 0, n = 0; k < p.dz; k++)
+          for (let j = 0; j < p.dy; j++) {
+            let idx = ox + (oy + j) * g.X + (oz + k) * XY;
+            for (let i = 0; i < p.dx; i++, n++, idx++) {
+              const c = g.cells[idx];
+              const want = p.input[n];
+              if (want !== -1 && !this.sets[want][c]) return false;
+              const put = p.output[n];
+              if (put !== -1 && put !== c) changes = true;
+            }
+          }
+        return changes;
+      }
+      scan(g) {
+        const N = g.cells.length;
+        this.matches.clear();
+        this.patterns.forEach((p, pi) => {
+          for (let z = 0; z + p.dz <= g.Z; z++)
+            for (let y = 0; y + p.dy <= g.Y; y++)
+              for (let x = 0; x + p.dx <= g.X; x++)
+                if (this.check(g, p, x, y, z)) this.matches.add(pi * N + x + y * g.X + z * g.X * g.Y);
+        });
+      }
+      sync(g) {
+        const fresh = g.log.length - this.seen;
+        if (this.epoch !== g.epoch || fresh > g.cells.length / 4) {
+          this.scan(g);
+        } else if (fresh > 0) {
+          const N = g.cells.length;
+          const XY = g.X * g.Y;
+          if (this.stamp?.length !== N) this.stamp = new Uint32Array(N);
+          const mark = ++this.stampN;
+          for (let l = this.seen; l < g.log.length; l++) {
+            const c = g.log[l];
+            if (this.stamp[c] === mark) continue;
+            this.stamp[c] = mark;
+            const cx = c % g.X;
+            const cy = Math.floor(c / g.X) % g.Y;
+            const cz = Math.floor(c / XY);
+            this.patterns.forEach((p, pi) => {
+              for (let k = 0; k < p.dz; k++) {
+                const oz = cz - k;
+                if (oz < 0 || oz + p.dz > g.Z) continue;
+                for (let j = 0; j < p.dy; j++) {
+                  const oy = cy - j;
+                  if (oy < 0 || oy + p.dy > g.Y) continue;
+                  for (let i = 0; i < p.dx; i++) {
+                    const ox = cx - i;
+                    if (ox < 0 || ox + p.dx > g.X) continue;
+                    const key = pi * N + ox + oy * g.X + oz * XY;
+                    if (this.check(g, p, ox, oy, oz)) this.matches.add(key);
+                    else this.matches.remove(key);
+                  }
+                }
+              }
+            });
+          }
+        }
+        this.epoch = g.epoch;
+        this.seen = g.log.length;
+      }
+      apply(g, key, written) {
+        const N = g.cells.length;
+        const p = this.patterns[Math.floor(key / N)];
+        const o = key % N;
+        const XY = g.X * g.Y;
+        if (written) {
+          for (let k = 0, n = 0; k < p.dz; k++)
+            for (let j = 0; j < p.dy; j++)
+              for (let i = 0; i < p.dx; i++, n++)
+                if (p.output[n] !== -1 && written[o + i + j * g.X + k * XY]) return false;
+        }
+        for (let k = 0, n = 0; k < p.dz; k++)
+          for (let j = 0; j < p.dy; j++)
+            for (let i = 0; i < p.dx; i++, n++) {
+              if (p.output[n] === -1) continue;
+              const idx = o + i + j * g.X + k * XY;
+              if (written) written[idx] = 1;
+              write(g, idx, p.output[n]);
+            }
+        this.fired[p.rule]++;
+        return true;
+      }
+      go(g, rng) {
+        if (this.limit !== undefined && this.count >= this.limit) return false;
+        this.sync(g);
+        const keys = this.matches.keys;
+        if (!keys.length) {
+          if (!this.total && !this.why) {
+            const present = new Set(g.cells);
+            const absent = this.wanted.filter((w) => w !== '.' && ![...present].some((c) => this.sets[this.alpha.mask(w)][c]));
+            this.why = absent.length ? `in quel momento nella griglia non c'erano celle ${absent.map((w) => `"${w}"`).join(', ')}` : "le celle cercate c'erano, ma mai disposte come nel pattern";
+          }
+          return false;
+        }
+        const N = g.cells.length;
+        if (this.kind === 'one') {
+          let pick = keys[rng.int(keys.length)];
+          if (!this.uniform) {
+            const total = keys.reduce((s, k) => s + this.patterns[Math.floor(k / N)].p, 0);
+            let r = rng.next() * total;
+            pick = keys.find((k) => (r -= this.patterns[Math.floor(k / N)].p) < 0) ?? keys[keys.length - 1];
+          }
+          this.apply(g, pick);
+        } else if (this.kind === 'all') {
+          const order = [...keys];
+          for (let i = order.length - 1; i > 0; i--) {
+            const j = rng.int(i + 1);
+            [order[i], order[j]] = [order[j], order[i]];
+          }
+          const written = new Uint8Array(N);
+          for (const k of order) this.apply(g, k, written);
+        } else {
+          const chosen = keys.filter((k) => rng.next() < this.patterns[Math.floor(k / N)].p);
+          if (!chosen.length) return false;
+          for (const k of chosen) this.apply(g, k);
+        }
+        this.count++;
+        this.total++;
+        return true;
+      }
+    }
+
+    const MOORE = [];
+    for (let z = -1; z <= 1; z++)
+      for (let y = -1; y <= 1; y++)
+        for (let x = -1; x <= 1; x++)
+          if (x || y || z) MOORE.push([x, y, z]);
+    const VON_NEUMANN = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
+    const NO_CORNERS = MOORE.filter(([x, y, z]) => Math.abs(x) + Math.abs(y) + Math.abs(z) < 3);
+    const CONV_UNLIMITED = 200;
+
+    class ConvRunner extends Runner {
+      constructor(node, alpha) {
+        super(node.steps === Infinity ? CONV_UNLIMITED : Math.max(1, Math.min(30, node.steps ?? 1)));
+        if (!Array.isArray(node.rules) || !node.rules.length) throw new Mj3Error('nodo conv senza regole');
+        this.offsets = node.neighborhood === 'vonneumann' ? VON_NEUMANN : node.neighborhood === 'nocorners' ? NO_CORNERS : MOORE;
+        this.periodic = node.periodic === true;
+        this.sets = alpha.sets;
+        this.fired = node.rules.map(() => 0);
+        this.rules = node.rules.map((r, i) => {
+          if (typeof r?.in !== 'string' || typeof r?.out !== 'string' || typeof r?.neighbors !== 'string')
+            throw new Mj3Error('conv: ogni regola vuole in, out e neighbors');
+          if (r.out.length !== 1) throw new Mj3Error(`conv: "out" è un solo codice (${r.out})`);
+          const sums = new Uint8Array(27);
+          if (Array.isArray(r.sums)) {
+            for (const n of r.sums) if (Number.isInteger(n) && n >= 0 && n <= 26) sums[n] = 1;
+          } else {
+            const min = Number.isFinite(r.min) ? r.min : 1;
+            const max = Number.isFinite(r.max) ? r.max : 26;
+            for (let n = Math.max(0, min); n <= Math.min(26, max); n++) sums[n] = 1;
+          }
+          return { i, input: alpha.mask(r.in), output: alpha.index(r.out), neighbors: alpha.mask(r.neighbors), sums, p: typeof r.p === 'number' ? r.p : 1 };
+        });
+      }
+      go(g, rng) {
+        if (this.count >= this.limit) return false;
+        const changes = [];
+        const wrap = (v, n) => (v < 0 ? v + n : v >= n ? v - n : v);
+        for (let z = 0; z < g.Z; z++)
+          for (let y = 0; y < g.Y; y++)
+            for (let x = 0; x < g.X; x++) {
+              const idx = x + y * g.X + z * g.X * g.Y;
+              const c = g.cells[idx];
+              for (const rule of this.rules) {
+                if (!this.sets[rule.input][c] || rule.output === c || (rule.p < 1 && rng.next() >= rule.p)) continue;
+                let n = 0;
+                for (const [ox, oy, oz] of this.offsets) {
+                  let nx = x + ox, ny = y + oy, nz = z + oz;
+                  if (this.periodic) {
+                    nx = wrap(nx, g.X);
+                    ny = wrap(ny, g.Y);
+                    nz = wrap(nz, g.Z);
+                  } else if (nx < 0 || ny < 0 || nz < 0 || nx >= g.X || ny >= g.Y || nz >= g.Z) continue;
+                  if (this.sets[rule.neighbors][g.cells[nx + ny * g.X + nz * g.X * g.Y]]) n++;
+                }
+                if (!rule.sums[n]) continue;
+                changes.push(idx, rule.output);
+                this.fired[rule.i]++;
+                break;
+              }
+            }
+        if (!changes.length) return false;
+        for (let i = 0; i < changes.length; i += 2) write(g, changes[i], changes[i + 1]);
+        this.count++;
+        this.total++;
+        return true;
+      }
+    }
+
+    class PathRunner extends Runner {
+      constructor(node, alpha) {
+        super(node.steps ?? 1);
+        for (const k of ['from', 'to', 'on', 'color'])
+          if (typeof node[k] !== 'string' || !node[k]) throw new Mj3Error(`path: manca "${k}"`);
+        if (node.color.length !== 1) throw new Mj3Error('path: "color" è un solo codice');
+        this.from = alpha.mask(node.from);
+        this.to = alpha.mask(node.to);
+        this.on = alpha.mask(node.on);
+        this.color = alpha.index(node.color);
+        this.sets = alpha.sets;
+        this.inertia = node.inertia === true;
+        this.longest = node.longest === true;
+      }
+      go(g, rng) {
+        if (this.limit !== undefined && this.count >= this.limit) return false;
+        const N = g.cells.length;
+        const XY = g.X * g.Y;
+        const has = (set, idx) => this.sets[set][g.cells[idx]] === 1;
+        const dist = new Int32Array(N).fill(-1);
+        const queue = [];
+        for (let i = 0; i < N; i++)
+          if (has(this.to, i)) {
+            dist[i] = 0;
+            queue.push(i);
+          }
+        if (!queue.length) {
+          if (!this.total) this.why ??= 'in quel momento non c\'era nessuna cella di arrivo ("to")';
+          return false;
+        }
+        const near = (c) => {
+          const x = c % g.X, y = Math.floor(c / g.X) % g.Y, z = Math.floor(c / XY);
+          const out = [];
+          for (const [dx, dy, dz] of VON_NEUMANN) {
+            const nx = x + dx, ny = y + dy, nz = z + dz;
+            if (nx >= 0 && ny >= 0 && nz >= 0 && nx < g.X && ny < g.Y && nz < g.Z) out.push(nx + ny * g.X + nz * XY);
+          }
+          return out;
+        };
+        for (let q = 0; q < queue.length; q++) {
+          const c = queue[q];
+          for (const n of near(c))
+            if (dist[n] < 0 && has(this.on, n)) {
+              dist[n] = dist[c] + 1;
+              queue.push(n);
+            }
+        }
+        let best = -1;
+        const starts = [];
+        for (let i = 0; i < N; i++) {
+          if (!has(this.from, i) || dist[i] === 0) continue;
+          let d = -1;
+          for (const n of near(i)) if (dist[n] >= 0 && (d < 0 || dist[n] < d)) d = dist[n];
+          if (d < 0) continue;
+          starts.push([i, d]);
+          best = Math.max(best, d);
+        }
+        if (!starts.length) {
+          if (!this.total)
+            this.why ??= [...g.cells].some((c) => this.sets[this.from][c])
+              ? 'le celle di partenza ("from") c\'erano, ma nessuna toccava una cella "on" collegata all\'arrivo'
+              : 'in quel momento non c\'era nessuna cella di partenza ("from")';
+          return false;
+        }
+        const pool = this.longest ? starts.filter(([, d]) => d === best) : starts;
+        const [start] = pool[rng.int(pool.length)];
+        let cur = start;
+        let dir = 0;
+        let changed = false;
+        for (let guard = 0; guard < N; guard++) {
+          const steps = near(cur).filter((n) => dist[n] >= 0);
+          if (!steps.length) break;
+          const low = Math.min(...steps.map((n) => dist[n]));
+          if (cur !== start && low >= dist[cur]) break;
+          const ok = steps.filter((n) => dist[n] === low);
+          const straight = this.inertia ? ok.find((n) => n - cur === dir) : undefined;
+          const next = straight ?? ok[rng.int(ok.length)];
+          dir = next - cur;
+          if (dist[next] === 0) break;
+          changed = write(g, next, this.color) || changed;
+          cur = next;
+        }
+        if (!changed) return false;
+        this.count++;
+        this.total++;
+        return true;
+      }
+    }
+
+    function turnCells(src, d, perm, flip) {
+      const nd = [d[perm[0]], d[perm[1]], d[perm[2]]];
+      const out = new src.constructor(src.length);
+      for (let k = 0; k < d[2]; k++)
+        for (let j = 0; j < d[1]; j++)
+          for (let i = 0; i < d[0]; i++) {
+            const c = [i, j, k];
+            const n = [0, 1, 2].map((a) => (flip[a] ? nd[a] - 1 - c[perm[a]] : c[perm[a]]));
+            out[n[0] + n[1] * nd[0] + n[2] * nd[0] * nd[1]] = src[i + j * d[0] + k * d[0] * d[1]];
+          }
+      return [out, nd];
+    }
+
+    const isVec = (v) => Array.isArray(v) && v.length === 3 && v.every((n) => typeof n === 'number' && Number.isFinite(n));
+
+    class MapRunner extends Runner {
+      constructor(node, alpha, limits) {
+        super(1);
+        this.limits = limits;
+        if (!isVec(node.scale) || node.scale.some((v) => !Number.isInteger(v) || v < 1 || v > 32))
+          throw new Mj3Error('map: "scale" vuole tre interi tra 1 e 32');
+        this.scale = node.scale;
+        this.sets = alpha.sets;
+        this.clear = node.clear === true;
+        this.rules = (node.rules ?? []).flatMap((r) => {
+          const li = layersOf(String(r?.in ?? ''));
+          const lo = layersOf(String(r?.out ?? ''));
+          const d = [li[0]?.[0]?.length ?? 0, li[0]?.length ?? 0, li.length];
+          const D = this.clear
+            ? [lo[0]?.[0]?.length ?? 0, lo[0]?.length ?? 0, lo.length]
+            : [d[0] * this.scale[0], d[1] * this.scale[1], d[2] * this.scale[2]];
+          const shaped = (ls, s) => ls.length === s[2] && ls.every((l) => l.length === s[1] && l.every((row) => row.length === s[0]));
+          if (!d[0] || !shaped(li, d)) throw new Mj3Error(`map: ingresso irregolare "${r?.in}"`);
+          if (!D[0] || !shaped(lo, D))
+            throw new Mj3Error(this.clear ? `map: uscita irregolare "${r?.out}"` : `map: l'uscita di "${r.in}" deve essere grande ${D.join('×')} (l'ingresso per la scala)`);
+          if (D[0] * D[1] * D[2] > 4096) throw new Mj3Error(`map: uscita troppo grande (max 4096 celle): ${r.in}`);
+          const input = Int32Array.from(li.flat(2), (a) => (a === '*' ? -1 : alpha.mask(a.startsWith('[') ? a.slice(1, -1) : a)));
+          const output = Int16Array.from(lo.flat(2), (b) => {
+            if (b.startsWith('[')) throw new Mj3Error(`"[..]" non è ammesso in un'uscita: ${r.out}`);
+            return b === '*' ? -1 : alpha.index(b);
+          });
+          const seen = new Set();
+          return symmetries(node.symmetry ?? 'xy').flatMap(({ perm, flip }) => {
+            const [ti, nd] = turnCells(input, d, perm, flip);
+            const [to, nD] = turnCells(output, D, perm, flip);
+            const key = `${nd.join(',')}|${nD.join(',')}|${ti.join(',')}|${to.join(',')}`;
+            if (seen.has(key)) return [];
+            seen.add(key);
+            return [{ d: nd, D: nD, input: ti, output: to }];
+          });
+        });
+      }
+      go(g) {
+        if (this.count >= 1) return false;
+        this.count++;
+        this.total++;
+        const [sx, sy, sz] = this.scale;
+        const X = g.X * sx, Y = g.Y * sy, Z = g.Z * sz;
+        if (Math.max(X, Y, Z) > this.limits.side || X * Y * Z > this.limits.cells)
+          throw new Mj3Error(`map: la griglia scalata (${X}×${Y}×${Z}) supera i limiti`);
+        const old = g.cells;
+        const cells = new Uint8Array(X * Y * Z);
+        if (!this.clear)
+          for (let z = 0; z < Z; z++)
+            for (let y = 0; y < Y; y++)
+              for (let x = 0; x < X; x++)
+                cells[x + y * X + z * X * Y] = old[Math.floor(x / sx) + Math.floor(y / sy) * g.X + Math.floor(z / sz) * g.X * g.Y];
+        const wrap = this.clear;
+        for (const r of this.rules) {
+          const [dx, dy, dz] = r.d;
+          const [DX, DY] = r.D;
+          for (let oz = 0; oz + (wrap ? 1 : dz) <= g.Z; oz++)
+            for (let oy = 0; oy + (wrap ? 1 : dy) <= g.Y; oy++)
+              for (let ox = 0; ox + (wrap ? 1 : dx) <= g.X; ox++) {
+                let ok = true;
+                for (let n = 0; n < r.input.length && ok; n++) {
+                  const want = r.input[n];
+                  if (want === -1) continue;
+                  const i = n % dx, j = Math.floor(n / dx) % dy, k = Math.floor(n / (dx * dy));
+                  ok = this.sets[want][old[((ox + i) % g.X) + ((oy + j) % g.Y) * g.X + ((oz + k) % g.Z) * g.X * g.Y]] === 1;
+                }
+                if (!ok) continue;
+                for (let n = 0; n < r.output.length; n++) {
+                  const put = r.output[n];
+                  if (put === -1) continue;
+                  const i = n % DX, j = Math.floor(n / DX) % DY, k = Math.floor(n / (DX * DY));
+                  const x = ox * sx + i, y = oy * sy + j, z = oz * sz + k;
+                  if (!wrap && (x >= X || y >= Y || z >= Z)) continue;
+                  cells[(x % X) + (y % Y) * X + (z % Z) * X * Y] = put;
+                }
+              }
+        }
+        g.X = X;
+        g.Y = Y;
+        g.Z = Z;
+        g.cells = cells;
+        g.log.length = 0;
+        g.epoch++;
+        return true;
+      }
+    }
+
+    class ShapeRunner extends Runner {
+      constructor(node, alpha) {
+        super(1);
+        this.node = node;
+        if (!SHAPES.includes(node.shape)) throw new Mj3Error(`shape: forma sconosciuta "${node.shape}"`);
+        if (!isVec(node.at)) throw new Mj3Error('shape: "at" vuole [x, y, z]');
+        if (node.shape === 'line' ? !isVec(node.to) : !isVec(node.size))
+          throw new Mj3Error(node.shape === 'line' ? 'shape line: "to" vuole [x, y, z]' : `shape ${node.shape}: "size" vuole [larghezza, profondità, altezza]`);
+        if (typeof node.color !== 'string' || node.color.length !== 1) throw new Mj3Error('shape: "color" è un solo codice');
+        this.color = alpha.index(node.color);
+        this.on = typeof node.on === 'string' && node.on ? alpha.mask(node.on) : -1;
+        this.sets = alpha.sets;
+      }
+      go(g) {
+        if (this.count >= 1) return false;
+        this.count++;
+        this.total++;
+        let changed = false;
+        const put = (x, y, z) => {
+          if (x < 0 || y < 0 || z < 0 || x >= g.X || y >= g.Y || z >= g.Z) return;
+          const idx = x + y * g.X + z * g.X * g.Y;
+          if (this.on !== -1 && !this.sets[this.on][g.cells[idx]]) return;
+          changed = write(g, idx, this.color) || changed;
+        };
+        const [cx, cy, bz] = this.node.at;
+        if (this.node.shape === 'line') {
+          const [tx, ty, tz] = this.node.to;
+          const r = Math.max(0, Math.min(8, this.node.r ?? 0));
+          const n = Math.ceil(Math.max(Math.abs(tx - cx), Math.abs(ty - cy), Math.abs(tz - bz)) * 2) + 1;
+          const ri = Math.ceil(r);
+          for (let s = 0; s <= n; s++) {
+            const t = s / n;
+            const px = cx + (tx - cx) * t, py = cy + (ty - cy) * t, pz = bz + (tz - bz) * t;
+            for (let z = Math.round(pz) - ri; z <= Math.round(pz) + ri; z++)
+              for (let y = Math.round(py) - ri; y <= Math.round(py) + ri; y++)
+                for (let x = Math.round(px) - ri; x <= Math.round(px) + ri; x++)
+                  if ((x - px) ** 2 + (y - py) ** 2 + (z - pz) ** 2 <= (r + 0.5) ** 2) put(x, y, z);
+          }
+          return changed;
+        }
+        const [w, d, h] = this.node.size.map((v) => Math.max(1, Math.min(256, v)));
+        const a = w / 2, b = d / 2;
+        for (let z = Math.floor(bz); z < bz + h; z++)
+          for (let y = Math.floor(cy - b); y <= cy + b; y++)
+            for (let x = Math.floor(cx - a); x <= cx + a; x++) {
+              const u = (x - cx) / a, v = (y - cy) / b;
+              let inside;
+              switch (this.node.shape) {
+                case 'box':
+                  inside = Math.abs(x - cx) <= (w - 1) / 2 && Math.abs(y - cy) <= (d - 1) / 2;
+                  break;
+                case 'ellipsoid': {
+                  const c = h / 2;
+                  const s = (z - (bz + (h - 1) / 2)) / c;
+                  inside = u * u + v * v + s * s < 1;
+                  break;
+                }
+                case 'cylinder':
+                  inside = u * u + v * v < 1;
+                  break;
+                default: {
+                  const k = 1 - (z - bz) / h;
+                  inside = u * u + v * v < k * k;
+                }
+              }
+              if (inside) put(x, y, z);
+            }
+        return changed;
+      }
+    }
+
+    class SequenceRunner extends Runner {
+      constructor(children) {
+        super();
+        this.children = children;
+        this.index = 0;
+      }
+      reset() {
+        super.reset();
+        this.index = 0;
+        for (const c of this.children) c.reset();
+      }
+      go(g, rng) {
+        while (this.index < this.children.length) {
+          if (this.children[this.index].go(g, rng)) return true;
+          this.index++;
+          if (this.index < this.children.length) this.children[this.index].reset();
+        }
+        return false;
+      }
+    }
+
+    class MarkovRunner extends Runner {
+      constructor(children) {
+        super();
+        this.children = children;
+      }
+      reset() {
+        super.reset();
+        for (const c of this.children) c.reset();
+      }
+      go(g, rng) {
+        for (let index = 0; index < this.children.length; index++) {
+          const c = this.children[index];
+          if (c.go(g, rng)) {
+            if (index === this.children.length - 1) for (const ch of this.children) ch.reset();
+            return true;
+          }
+        }
+        return false;
+      }
+    }
+
+    function describe(node) {
+      if (node.optional) return undefined;
+      if (node.type === 'one' || node.type === 'all' || node.type === 'prl')
+        return `${node.type} "${node.rules[0]?.in}" → "${node.rules[0]?.out}"${node.rules.length > 1 ? ` (+${node.rules.length - 1} regole)` : ''}`;
+      if (node.type === 'path') return `path da "${node.from}" a "${node.to}" su "${node.on}"`;
+      if (node.type === 'conv') return `conv "${node.rules[0]?.in}" → "${node.rules[0]?.out}"`;
+      return undefined;
+    }
+
+    function compile(node, alpha, limits, depth = 0, trace = []) {
+      const r = compileNode(node, alpha, limits, depth, trace);
+      const what = trace && node && typeof node === 'object' ? describe(node) : undefined;
+      if (what) trace.push({ runner: r, what });
+      return r;
+    }
+
+    function compileNode(node, alpha, limits, depth, trace) {
+      if (depth > 16) throw new Mj3Error('programma troppo annidato');
+      if (!node || typeof node !== 'object') throw new Mj3Error('nodo non valido');
+      switch (node.type) {
+        case 'one':
+        case 'all':
+        case 'prl':
+          return new RuleRunner(node.type, node.rules, node.steps ?? (node.type === 'prl' ? 1 : undefined), node.symmetry ?? 'xy', alpha);
+        case 'conv':
+          return new ConvRunner(node, alpha);
+        case 'path':
+          return new PathRunner(node, alpha);
+        case 'shape':
+          return new ShapeRunner(node, alpha);
+        case 'map':
+          return new MapRunner(node, alpha, limits);
+        case 'sequence':
+        case 'markov': {
+          if (!Array.isArray(node.children) || !node.children.length) throw new Mj3Error(`nodo ${node.type} senza figli`);
+          const children = node.children.map((c) => compile(c, alpha, limits, depth + 1, trace));
+          return node.type === 'sequence' ? new SequenceRunner(children) : new MarkovRunner(children);
+        }
+        default:
+          throw new Mj3Error(`tipo di nodo sconosciuto: ${node.type}`);
+      }
+    }
+
+    function checkSize(size, limits = MODEL_LIMITS) {
+      if (!isVec(size) || size.some((v) => v < 1 || v > limits.side || !Number.isInteger(v)))
+        throw new Mj3Error(`size vuole tre interi tra 1 e ${limits.side}: [x, y, z]`);
+      if (size[0] * size[1] * size[2] > limits.cells) throw new Mj3Error(`griglia troppo grande (max ${limits.cells} celle)`);
+      return size;
+    }
+
+    function alphabetOf(p, codes = [AIR]) {
+      const alpha = new Alphabet();
+      for (const [k, v] of Object.entries(p.unions ?? {}))
+        if (k.length === 1 && k !== AIR && k !== '*' && typeof v === 'string' && v) alpha.unions.set(k, v);
+      for (const c of codes) if (c !== AIR) alpha.codes.push(c);
+      for (const k of Object.keys(p.palette ?? {}))
+        if (k.length === 1 && k !== AIR && !alpha.unions.has(k)) alpha.index(k);
+      return alpha;
+    }
+
+    function exec(root, g, seed, maxSteps, t0, trace = [], opts = {}) {
+      root.reset();
+      const rng = new Rng(seed);
+      let steps = 0;
+      let late = false;
+      const keep = opts.snapshots ?? 0;
+      const shots = [];
+      let every = 1;
+      const shoot = () => shots.push({ X: g.X, Y: g.Y, Z: g.Z, cells: new Uint8Array(g.cells), alphabet: [...g.alphabet], step: steps });
+      if (keep) shoot();
+      while (steps < maxSteps && root.go(g, rng)) {
+        steps++;
+        if (keep && steps % every === 0) {
+          shoot();
+          if (shots.length > 2 * keep) {
+            for (let i = 0; i < shots.length / 2; i++) shots[i] = shots[i * 2];
+            shots.length = Math.ceil(shots.length / 2);
+            every *= 2;
+          }
+        }
+        if (opts.deadline && Date.now() - t0 > opts.deadline) {
+          late = true;
+          break;
+        }
+      }
+      if (keep && shots[shots.length - 1]?.step !== steps) shoot();
+      return {
+        grid: g,
+        steps,
+        finished: steps < maxSteps && !late,
+        ms: Date.now() - t0,
+        trace,
+        unused: trace.filter((t) => t.runner.total === 0).map((t) => (t.runner.why ? `${t.what} — ${t.runner.why}` : t.what)),
+        ...(keep ? { snapshots: shots } : {}),
+      };
+    }
+
+    function runMj3(p, seed, maxSteps = 10000, limits = MODEL_LIMITS, opts = { snapshots: 45 }) {
+      const t0 = Date.now();
+      const [X, Y, Z] = checkSize(p?.size, limits);
+      const alpha = alphabetOf(p);
+      const trace = [];
+      const root = compile(p.program, alpha, limits, 0, trace);
+      const g = { X, Y, Z, cells: new Uint8Array(X * Y * Z), alphabet: alpha.codes, log: [], epoch: 0 };
+      if (typeof p.ground === 'string' && p.ground.length === 1) {
+        const v = alpha.index(p.ground);
+        for (let i = 0; i < X * Y; i++) g.cells[i] = v;
+      }
+      if (typeof p.origin === 'string' && p.origin.length === 1) {
+        g.cells[(X >> 1) + (Y >> 1) * X + (p.originAt === 'centre' ? (Z >> 1) * X * Y : 0)] = alpha.index(p.origin);
+      }
+      return exec(root, g, seed, maxSteps, t0, trace, opts);
+    }
+
+    function runOnMj3(grid, p, seed, maxSteps = 10000, limits = MODEL_LIMITS, opts = { snapshots: 45 }) {
+      const t0 = Date.now();
+      const alpha = alphabetOf(p, grid.alphabet);
+      const trace = [];
+      const root = compile(p.program, alpha, limits, 0, trace);
+      grid.alphabet = alpha.codes;
+      grid.log = [];
+      grid.epoch++;
+      return exec(root, grid, seed, maxSteps, t0, trace, opts);
+    }
+
+    const cellAt = (g, x, y, z) => g.alphabet[g.cells[x + y * g.X + z * g.X * g.Y]] || AIR;
+
+
+    /*************************************************************************
+     * 2. PALETTE MUSICALE STANDARD & 4 PRESET MARKOVJUNIOR 3D
+     *************************************************************************/
+
+    const DEFAULT_MUSICAL_PALETTE = {
+      "N": { name: "Nota Attiva", color: "#38bdf8", glow: true },
+      "S": { name: "Sustain / Legato", color: "#0284c7", alpha: 0.85 },
+      "A": { name: "Accento Forte", color: "#f43f5e", glow: true },
+      "G": { name: "Ghost Note", color: "#818cf8", alpha: 0.7 },
+      "K": { name: "Kick + Sub", color: "#fbbf24", glow: true },
+      "H": { name: "Hi-Hat", color: "#fde047", alpha: 0.85 },
+      "C": { name: "Snare / Clap", color: "#fb923c", glow: true },
+      "R": { name: "Marker Radice", color: "#a855f7", hidden: true },
+      "T": { name: "Marker Target", color: "#ec4899", hidden: true },
+      "M": { name: "Marker Motivo", color: "#10b981", hidden: true },
+      "P": { name: "Marker Passaggio", color: "#64748b", hidden: true }
+    };
+
+    const PRESETS = [
+      {
+        title: "1. Sentiero Melodico (Pathfinding + Armonia Conv)",
+        desc: "Piazza ancore melodiche (R, T) sul Lead (Y=0) e le collega con un nodo 'path' dotato di inerzia per generare frasi scalari fluide. Propaga poi accordi armonici sul Pad (Y=1) tramite automa 'conv' e scolpisce un groove di basso e batteria su Y=2.",
+        scale: "dorian",
+        root: 50,
+        bpm: 120,
+        program: {
+          name: "Sentiero Melodico",
+          size: [16, 3, 8],
+          palette: DEFAULT_MUSICAL_PALETTE,
+          unions: { "?": ".P", "X": "NSA" },
+          program: {
+            type: "sequence",
+            children: [
+              // 1. Inizializza il piano Y=0 (Lead) con marker di passaggio P su cui il path può camminare
+              {
+                type: "all",
+                symmetry: "none",
+                rules: [{ in: "././.", out: "P/./." }]
+              },
+              // 2. Piazza 3 ancore di partenza 'R' e 3 target 'T' sul Lead (Y=0)
+              {
+                type: "one",
+                steps: 3,
+                symmetry: "none",
+                rules: [{ in: "P", out: "R" }]
+              },
+              {
+                type: "one",
+                steps: 3,
+                symmetry: "none",
+                rules: [{ in: "P", out: "T" }]
+              },
+              // 3. Collega R -> T con Pathfinding 3D dotato di inerzia (crea scale e arpeggi coerenti!)
+              {
+                type: "path",
+                from: "R",
+                to: "T",
+                on: "P",
+                color: "N",
+                steps: 4,
+                inertia: true,
+                longest: true
+              },
+              // 4. Converti le ancore R in Accenti (A), i Target T in Note (N) e pulisci i P inutilizzati
+              {
+                type: "all",
+                symmetry: "none",
+                rules: [
+                  { in: "R", out: "A" },
+                  { in: "T", out: "N" },
+                  { in: "P", out: "." }
+                ]
+              },
+              // 5. Aggiungi code di Sustain (S) e Ghost notes (G) lungo l'asse temporale X
+              {
+                type: "one",
+                steps: 10,
+                symmetry: "none",
+                rules: [
+                  { in: "N.", out: "NS", p: 2 },
+                  { in: ".N", out: "GN", p: 1 }
+                ]
+              },
+              // 6. Armonia (Y=1): dove il Lead ha una nota o accento, fiorisce un accordo sul layer Y=1
+              {
+                type: "one",
+                steps: 7,
+                symmetry: "none",
+                rules: [
+                  { in: "X../...", out: "*../NNS" },
+                  { in: "A./..", out: "*./NS" }
+                ]
+              },
+              // 7. Fondamentale Ritmica su Y=2 (Kick sui quarti e Snare/HiHat con regole locali)
+              {
+                type: "shape",
+                shape: "line",
+                at: [0, 2, 0],
+                to: [15, 2, 0],
+                r: 0,
+                color: "M"
+              },
+              {
+                type: "all",
+                symmetry: "none",
+                rules: [
+                  { in: "MMMM", out: "K.H." }
+                ]
+              },
+              {
+                type: "one",
+                steps: 4,
+                symmetry: "none",
+                rules: [
+                  { in: "K.H.", out: "K.HC" },
+                  { in: "H.", out: "HG" }
+                ]
+              },
+              // 8. Aggiunge note di Sub-Bass melodiche (N/A) sui gradi superiori di Y=2
+              {
+                type: "prl",
+                steps: 1,
+                symmetry: "none",
+                rules: [
+                  { in: "././K", out: "././* ././. ././N", p: 0.65 }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        title: "2. Fuga Cellular Automata (Conv + Symmetry X)",
+        desc: "Sfrutta l'automa cellulare 3D ('conv' con intorno di Von Neumann e Moore) combinato con simmetria temporale ('symmetry: x') per generare poliritmie emergenti, canoni speculari e accordi arpeggiati in stile Chiptune / Dungeon Synth.",
+        scale: "harmonic_minor",
+        root: 52,
+        bpm: 128,
+        program: {
+          name: "Fuga Cellular Automata",
+          size: [16, 3, 8],
+          palette: DEFAULT_MUSICAL_PALETTE,
+          origin: "A",
+          originAt: "centre",
+          program: {
+            type: "sequence",
+            children: [
+              // Semina cristalli simmetrici lungo l'asse X
+              {
+                type: "one",
+                steps: 5,
+                symmetry: "x",
+                rules: [
+                  { in: ".", out: "M" }
+                ]
+              },
+              // Automa Cellulare 3D: fa crescere arpeggi e armonie attorno ai semi
+              {
+                type: "conv",
+                neighborhood: "vonneumann",
+                periodic: true,
+                steps: 4,
+                rules: [
+                  { in: ".", out: "N", neighbors: "MA", sums: [1, 2], p: 0.65 },
+                  { in: "M", out: "A", neighbors: "N", sums: [1, 2, 3] },
+                  { in: "N", out: "G", neighbors: "N", sums: [3, 4] }
+                ]
+              },
+              // Sfoltisce la densità eccessiva sul Pad (Y=1) e trasforma in legature S
+              {
+                type: "all",
+                symmetry: "none",
+                rules: [
+                  { in: "NN", out: "NS" },
+                  { in: "M", out: "N" }
+                ]
+              },
+              // Scolpisce pattern percussivo nel layer Y=2
+              {
+                type: "all",
+                symmetry: "x",
+                rules: [
+                  { in: "././N", out: "././K" },
+                  { in: "././G", out: "././H" },
+                  { in: "././A", out: "././C" }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        title: "3. Architettura Frattale (Map Scaling 4×3×4 → 16×3×8)",
+        desc: "Dimostra il nodo 'map' di MarkovJunior: parte da una griglia macroscopica 4×3×4 (4 battute armoniche) e la scala di un fattore [4, 1, 2] fino a 16×3×8, riscrivendo ogni macro-cella in un micro-pattern di sedicesimi con legature, accenti e percussioni.",
+        scale: "hirajoshi",
+        root: 53,
+        bpm: 114,
+        program: {
+          name: "Architettura Frattale Map",
+          size: [4, 3, 4],
+          palette: DEFAULT_MUSICAL_PALETTE,
+          program: {
+            type: "sequence",
+            children: [
+              // Costruisce la macro-struttura su griglia 4x3x4
+              {
+                type: "one",
+                steps: 4,
+                symmetry: "none",
+                rules: [
+                  { in: "././.", out: "R/M/K" },
+                  { in: "././.", out: "T/./C" }
+                ]
+              },
+              {
+                type: "all",
+                symmetry: "none",
+                rules: [
+                  { in: ".", out: "P" }
+                ]
+              },
+              // Espansione Frattale: [4,3,4] * [4,1,2] = [16,3,8]
+              {
+                type: "map",
+                scale: [4, 1, 2],
+                symmetry: "none",
+                rules: [
+                  // R (Radice Lead) diventa un arpeggio ascendente su 2 altezze Z e 4 step X
+                  {
+                    in: "R",
+                    out: "A.N. ..GN"
+                  },
+                  // T (Target Lead) diventa una nota lunga legata con ghost finale
+                  {
+                    in: "T",
+                    out: "NSS. ...G"
+                  },
+                  // M (Motivo Pad) diventa un accordo morbido prolungato
+                  {
+                    in: "M",
+                    out: "NSSS .NSS"
+                  },
+                  // K (Macro Kick) diventa un groove Bass + Kick + Hat
+                  {
+                    in: "K",
+                    out: "K.H. ..N."
+                  },
+                  // C (Macro Snare) diventa un fill sincopato
+                  {
+                    in: "C",
+                    out: "C.H. N.A."
+                  },
+                  // Pulisce P nello spazio espanso
+                  {
+                    in: "P",
+                    out: ".... ...."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        title: "4. Boss Fight Cyber-Dungeon (Markov + Shape Ostinato)",
+        desc: "Usa nodi geometrici 'shape' (linee diagonali e box) per scolpire un ostinato aggressivo e un loop di batteria industriale, poi usa un nodo 'markov' prioritario per iniettare sincopi, accenti (A) e ribattuti ad alta energia.",
+        scale: "phrygian",
+        root: 48,
+        bpm: 138,
+        program: {
+          name: "Boss Fight Cyber-Dungeon",
+          size: [16, 3, 8],
+          palette: DEFAULT_MUSICAL_PALETTE,
+          program: {
+            type: "sequence",
+            children: [
+              // 1. Disegna una rampa melodica diagonale sul Lead (Y=0)
+              {
+                type: "shape",
+                shape: "line",
+                at: [0, 0, 1],
+                to: [15, 0, 6],
+                r: 0,
+                color: "M"
+              },
+              // 2. Disegna una linea di basso ostinata sul layer Y=2
+              {
+                type: "shape",
+                shape: "line",
+                at: [0, 2, 0],
+                to: [15, 2, 0],
+                r: 0,
+                color: "R"
+              },
+              // 3. Disegna due pilastri di accordi drammatici sul Pad (Y=1)
+              {
+                type: "shape",
+                shape: "box",
+                at: [2, 1, 2],
+                size: [3, 1, 4],
+                color: "T"
+              },
+              {
+                type: "shape",
+                shape: "box",
+                at: [10, 1, 3],
+                size: [3, 1, 4],
+                color: "T"
+              },
+              // 4. Riscrittura Markov: trasforma i blocchi grezzi in pattern ritmici articolati
+              {
+                type: "markov",
+                children: [
+                  {
+                    type: "all",
+                    symmetry: "none",
+                    rules: [
+                      { in: "RRRR", out: "KHKC" },
+                      { in: "TTT", out: "ASS" },
+                      { in: "MM", out: "AG" }
+                    ]
+                  },
+                  {
+                    type: "one",
+                    steps: 12,
+                    symmetry: "x",
+                    rules: [
+                      { in: "M.", out: "NS" },
+                      { in: ".K", out: "GK" },
+                      { in: "T", out: "N" }
+                    ]
+                  }
+                ]
+              },
+              // 5. Rifinitura finale: converte eventuali marker residui in note attive
+              {
+                type: "all",
+                symmetry: "none",
+                rules: [
+                  { in: "M", out: "A" },
+                  { in: "R", out: "K" }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    ];
+
+
+    /*************************************************************************
+     * 3. MOTORE DI SINTESI WEBAUDIO POLIFONICO (ZERO DIPENDENZE)
+     *************************************************************************/
+
+    const SCALES = {
+      pentatonic_minor: [0, 3, 5, 7, 10, 12, 15, 17, 19, 22, 24, 27],
+      dorian:           [0, 2, 3, 5, 7, 9, 10, 12, 14, 15, 17, 19],
+      harmonic_minor:   [0, 2, 3, 5, 7, 8, 11, 12, 14, 15, 17, 19],
+      phrygian:         [0, 1, 3, 5, 7, 8, 10, 12, 13, 15, 17, 19],
+      hirajoshi:        [0, 2, 3, 7, 8, 12, 14, 15, 19, 20, 24, 26]
+    };
+
+    const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+    function midiToFreq(midi) {
+      return 440 * Math.pow(2, (midi - 69) / 12);
+    }
+
+    function midiToName(midi) {
+      const name = NOTE_NAMES[midi % 12];
+      const oct = Math.floor(midi / 12) - 1;
+      return `${name}${oct}`;
+    }
+
+    function getPitchForZ(z, scaleName, rootMidi, trackY = 0) {
+      const intervals = SCALES[scaleName] || SCALES.dorian;
+      const deg = intervals[z % intervals.length] + Math.floor(z / intervals.length) * 12;
+      // Offset d'ottava per ciascun layer Y: Lead (+12), Pad (0), Bass (-12)
+      const octaveShift = trackY === 0 ? 12 : trackY === 1 ? 0 : -12;
+      return rootMidi + deg + octaveShift;
+    }
+
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.masterFilter = null;
+        this.analyser = null;
+        this.delayNode = null;
+        this.delayFeedback = null;
+        this.wetGain = null;
+        this.noiseBuffer = null;
+
+        this.bpm = 122;
+        this.swing = 0.12;
+        this.cutoff = 4800;
+        this.spaceMix = 0.35;
+        this.scale = 'dorian';
+        this.rootMidi = 50;
+
+        this.trackMuted = [false, false, false];
+        this.trackVolumes = [0.82, 0.75, 0.90];
+      }
+
+      init() {
+        if (this.ctx) {
+          if (this.ctx.state === 'suspended') this.ctx.resume();
+          return;
+        }
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        this.ctx = new AudioCtx();
+
+        // Master Lowpass Filter
+        this.masterFilter = this.ctx.createBiquadFilter();
+        this.masterFilter.type = 'lowpass';
+        this.masterFilter.frequency.value = this.cutoff;
+        this.masterFilter.Q.value = 2.2;
+
+        // Stereo Ping-Pong / Space Delay
+        this.delayNode = this.ctx.createDelay(2.0);
+        this.delayNode.delayTime.value = (60 / this.bpm) * 0.75; // Dotted 8th
+        this.delayFeedback = this.ctx.createGain();
+        this.delayFeedback.gain.value = 0.42;
+
+        const delayFilter = this.ctx.createBiquadFilter();
+        delayFilter.type = 'bandpass';
+        delayFilter.frequency.value = 1600;
+        delayFilter.Q.value = 0.7;
+
+        this.wetGain = this.ctx.createGain();
+        this.wetGain.gain.value = this.spaceMix;
+
+        // Master Compressor & Analyser
+        const compressor = this.ctx.createDynamicsCompressor();
+        compressor.threshold.value = -14;
+        compressor.ratio.value = 4;
+
+        this.analyser = this.ctx.createAnalyser();
+        this.analyser.fftSize = 512;
+
+        // Routing
+        this.masterFilter.connect(compressor);
+        this.masterFilter.connect(this.delayNode);
+        this.delayNode.connect(delayFilter);
+        delayFilter.connect(this.delayFeedback);
+        this.delayFeedback.connect(this.delayNode);
+        delayFilter.connect(this.wetGain);
+        this.wetGain.connect(compressor);
+
+        compressor.connect(this.analyser);
+        this.analyser.connect(this.ctx.destination);
+
+        // Pre-generate White Noise buffer for Snare / Hi-Hat synthesis
+        const bufSize = this.ctx.sampleRate * 1.0;
+        this.noiseBuffer = this.ctx.createBuffer(1, bufSize, this.ctx.sampleRate);
+        const data = this.noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+      }
+
+      updateParams() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        this.masterFilter.frequency.setTargetAtTime(this.cutoff, now, 0.03);
+        this.wetGain.gain.setTargetAtTime(this.spaceMix, now, 0.03);
+        this.delayNode.delayTime.setTargetAtTime((60 / this.bpm) * 0.75, now, 0.05);
+      }
+
+      /** Calcola quanti step contigui di Sustain ('S') seguono la cella (x, y, z) */
+      countSustainSteps(grid, x, y, z) {
+        let hold = 1;
+        for (let nx = x + 1; nx < grid.X; nx++) {
+          if (cellAt(grid, nx, y, z) === 'S') hold++;
+          else break;
+        }
+        return hold;
+      }
+
+      /** Suona tutte le celle attive nello step X della griglia corrente */
+      triggerStep(grid, stepX) {
+        this.init();
+        const stepDur = (60 / this.bpm) / 4; // 16th note duration in seconds
+        const now = this.ctx.currentTime + 0.005;
+
+        for (let y = 0; y < Math.min(3, grid.Y); y++) {
+          if (this.trackMuted[y] || this.trackVolumes[y] <= 0.01) continue;
+          const vol = this.trackVolumes[y];
+
+          for (let z = 0; z < grid.Z; z++) {
+            const sym = cellAt(grid, stepX, y, z);
+            if (sym === AIR || sym === 'R' || sym === 'T' || sym === 'M' || sym === 'P') continue;
+
+            // Se è 'S' (Sustain) e a stepX-1 c'era già N, A o S, la nota sta già suonando legata
+            if (sym === 'S' && stepX > 0) {
+              const prev = cellAt(grid, stepX - 1, y, z);
+              if (prev === 'N' || prev === 'A' || prev === 'S') continue;
+            }
+
+            const holdSteps = (sym === 'N' || sym === 'A') ? this.countSustainSteps(grid, stepX, y, z) : 1;
+            const duration = Math.max(0.06, holdSteps * stepDur * 0.92);
+
+            if (sym === 'K') {
+              this.playKick(this.ctx, this.masterFilter, now, vol);
+            } else if (sym === 'H') {
+              this.playHiHat(this.ctx, this.masterFilter, now, vol * 0.65, z > 3);
+            } else if (sym === 'C') {
+              this.playSnare(this.ctx, this.masterFilter, now, vol * 0.8);
+            } else {
+              // Sintesi melodica per N, A, G, S
+              const midi = getPitchForZ(z, this.scale, this.rootMidi, y);
+              const freq = midiToFreq(midi);
+              const vel = sym === 'A' ? 1.0 : sym === 'G' ? 0.38 : 0.72;
+              const isAccent = sym === 'A';
+
+              if (y === 0) {
+                this.playLeadVoice(this.ctx, this.masterFilter, now, freq, duration, vol * vel, isAccent);
+              } else if (y === 1) {
+                this.playPadVoice(this.ctx, this.masterFilter, now, freq, duration * 1.15, vol * vel * 0.55, isAccent);
+              } else if (y === 2) {
+                if (z === 0 && sym === 'A') {
+                  this.playKick(this.ctx, this.masterFilter, now, vol);
+                }
+                this.playBassVoice(this.ctx, this.masterFilter, now, freq, duration, vol * vel, isAccent);
+              }
+            }
+          }
+        }
+      }
+
+      /** Voice Y=0: Lead FM / Pulse Synth */
+      playLeadVoice(ctx, dest, time, freq, dur, gainVal, isAccent) {
+        const osc = ctx.createOscillator();
+        const sub = ctx.createOscillator();
+        const vcf = ctx.createBiquadFilter();
+        const vca = ctx.createGain();
+
+        osc.type = isAccent ? 'sawtooth' : 'square';
+        sub.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, time);
+        sub.frequency.setValueAtTime(freq * 0.5, time);
+
+        if (isAccent) {
+          // Lieve pitch glide in ingresso sugli accenti
+          osc.frequency.setValueAtTime(freq * 0.96, time);
+          osc.frequency.exponentialRampToValueAtTime(freq, time + 0.035);
+        }
+
+        vcf.type = 'lowpass';
+        vcf.Q.value = isAccent ? 6.5 : 2.5;
+        const peakCut = isAccent ? freq * 7 : freq * 4;
+        vcf.frequency.setValueAtTime(peakCut, time);
+        vcf.frequency.exponentialRampToValueAtTime(Math.max(300, freq * 1.4), time + dur);
+
+        vca.gain.setValueAtTime(0.0001, time);
+        vca.gain.linearRampToValueAtTime(gainVal * 0.32, time + 0.008);
+        vca.gain.exponentialRampToValueAtTime(0.0001, time + dur + 0.04);
+
+        osc.connect(vcf);
+        sub.connect(vcf);
+        vcf.connect(vca);
+        vca.connect(dest);
+
+        osc.start(time);
+        sub.start(time);
+        osc.stop(time + dur + 0.05);
+        sub.stop(time + dur + 0.05);
+      }
+
+      /** Voice Y=1: Detuned Warm Dual-Saw Pad */
+      playPadVoice(ctx, dest, time, freq, dur, gainVal, isAccent) {
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const vcf = ctx.createBiquadFilter();
+        const vca = ctx.createGain();
+
+        osc1.type = 'sawtooth';
+        osc2.type = 'sawtooth';
+        osc1.frequency.setValueAtTime(freq, time);
+        osc2.frequency.setValueAtTime(freq, time);
+        osc1.detune.value = -9;
+        osc2.detune.value = +9;
+
+        vcf.type = 'lowpass';
+        vcf.frequency.setValueAtTime(isAccent ? 2600 : 1500, time);
+        vcf.Q.value = 1.2;
+
+        const attack = Math.min(0.06, dur * 0.3);
+        vca.gain.setValueAtTime(0.0001, time);
+        vca.gain.linearRampToValueAtTime(gainVal * 0.26, time + attack);
+        vca.gain.exponentialRampToValueAtTime(0.0001, time + dur + 0.18);
+
+        osc1.connect(vcf);
+        osc2.connect(vcf);
+        vcf.connect(vca);
+        vca.connect(dest);
+
+        osc1.start(time);
+        osc2.start(time);
+        osc1.stop(time + dur + 0.2);
+        osc2.stop(time + dur + 0.2);
+      }
+
+      /** Voice Y=2: FM Sub-Bass */
+      playBassVoice(ctx, dest, time, freq, dur, gainVal, isAccent) {
+        const carrier = ctx.createOscillator();
+        const mod = ctx.createOscillator();
+        const modGain = ctx.createGain();
+        const vca = ctx.createGain();
+
+        carrier.type = 'triangle';
+        mod.type = 'sine';
+        carrier.frequency.setValueAtTime(freq, time);
+        mod.frequency.setValueAtTime(freq * 2, time);
+
+        modGain.gain.setValueAtTime(isAccent ? freq * 3.2 : freq * 1.4, time);
+        modGain.gain.exponentialRampToValueAtTime(1, time + Math.min(0.15, dur));
+
+        vca.gain.setValueAtTime(0.0001, time);
+        vca.gain.linearRampToValueAtTime(gainVal * 0.48, time + 0.006);
+        vca.gain.exponentialRampToValueAtTime(0.0001, time + dur + 0.03);
+
+        mod.connect(modGain);
+        modGain.connect(carrier.frequency);
+        carrier.connect(vca);
+        vca.connect(dest);
+
+        carrier.start(time);
+        mod.start(time);
+        carrier.stop(time + dur + 0.04);
+        mod.stop(time + dur + 0.04);
+      }
+
+      /** Drum: Punchy 909/808 Kick */
+      playKick(ctx, dest, time, gainVal) {
+        const osc = ctx.createOscillator();
+        const vca = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(145, time);
+        osc.frequency.exponentialRampToValueAtTime(42, time + 0.08);
+        osc.frequency.exponentialRampToValueAtTime(28, time + 0.24);
+
+        vca.gain.setValueAtTime(gainVal * 0.75, time);
+        vca.gain.exponentialRampToValueAtTime(0.0001, time + 0.26);
+
+        osc.connect(vca);
+        vca.connect(dest);
+        osc.start(time);
+        osc.stop(time + 0.27);
+      }
+
+      /** Drum: Snare / Clap */
+      playSnare(ctx, dest, time, gainVal) {
+        if (this.noiseBuffer) {
+          const noise = ctx.createBufferSource();
+          noise.buffer = this.noiseBuffer;
+          const filter = ctx.createBiquadFilter();
+          filter.type = 'highpass';
+          filter.frequency.value = 900;
+          const nGain = ctx.createGain();
+          nGain.gain.setValueAtTime(gainVal * 0.45, time);
+          nGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.16);
+          noise.connect(filter);
+          filter.connect(nGain);
+          nGain.connect(dest);
+          noise.start(time);
+          noise.stop(time + 0.17);
+        }
+        const body = ctx.createOscillator();
+        const bGain = ctx.createGain();
+        body.type = 'triangle';
+        body.frequency.setValueAtTime(190, time);
+        body.frequency.exponentialRampToValueAtTime(95, time + 0.07);
+        bGain.gain.setValueAtTime(gainVal * 0.35, time);
+        bGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.09);
+        body.connect(bGain);
+        bGain.connect(dest);
+        body.start(time);
+        body.stop(time + 0.1);
+      }
+
+      /** Drum: Metallic Hi-Hat (Closed / Open) */
+      playHiHat(ctx, dest, time, gainVal, isOpen = false) {
+        if (!this.noiseBuffer) return;
+        const src = ctx.createBufferSource();
+        src.buffer = this.noiseBuffer;
+        const hp = ctx.createBiquadFilter();
+        hp.type = 'highpass';
+        hp.frequency.value = 6500;
+        const vca = ctx.createGain();
+        const decay = isOpen ? 0.22 : 0.055;
+        vca.gain.setValueAtTime(gainVal * 0.35, time);
+        vca.gain.exponentialRampToValueAtTime(0.0001, time + decay);
+        src.connect(hp);
+        hp.connect(vca);
+        vca.connect(dest);
+        src.start(time);
+        src.stop(time + decay + 0.01);
+      }
+
+      /** Esporta 2 cicli completi del loop corrente in un file .WAV tramite OfflineAudioContext */
+      async exportWav(grid) {
+        const stepDur = (60 / this.bpm) / 4;
+        const totalSteps = grid.X * 2; // 2 loop completi
+        const totalDuration = totalSteps * stepDur + 1.0;
+        const sampleRate = 44100;
+        const offline = new OfflineAudioContext(2, Math.ceil(totalDuration * sampleRate), sampleRate);
+
+        // Crea noise buffer per l'offline context
+        const savedNoise = this.noiseBuffer;
+        const nBuf = offline.createBuffer(1, sampleRate, sampleRate);
+        const ch = nBuf.getChannelData(0);
+        for (let i = 0; i < sampleRate; i++) ch[i] = Math.random() * 2 - 1;
+        this.noiseBuffer = nBuf;
+
+        const masterFilter = offline.createBiquadFilter();
+        masterFilter.type = 'lowpass';
+        masterFilter.frequency.value = this.cutoff;
+        masterFilter.connect(offline.destination);
+
+        for (let s = 0; s < totalSteps; s++) {
+          const stepX = s % grid.X;
+          const swingOffset = (stepX % 2 === 1) ? stepDur * this.swing : 0;
+          const t = s * stepDur + swingOffset + 0.02;
+
+          for (let y = 0; y < Math.min(3, grid.Y); y++) {
+            if (this.trackMuted[y]) continue;
+            const vol = this.trackVolumes[y];
+            for (let z = 0; z < grid.Z; z++) {
+              const sym = cellAt(grid, stepX, y, z);
+              if (sym === AIR || sym === 'R' || sym === 'T' || sym === 'M' || sym === 'P') continue;
+              if (sym === 'S' && stepX > 0) {
+                const prev = cellAt(grid, stepX - 1, y, z);
+                if (prev === 'N' || prev === 'A' || prev === 'S') continue;
+              }
+              const holdSteps = (sym === 'N' || sym === 'A') ? this.countSustainSteps(grid, stepX, y, z) : 1;
+              const dur = Math.max(0.06, holdSteps * stepDur * 0.92);
+
+              if (sym === 'K') this.playKick(offline, masterFilter, t, vol);
+              else if (sym === 'H') this.playHiHat(offline, masterFilter, t, vol * 0.65, z > 3);
+              else if (sym === 'C') this.playSnare(offline, masterFilter, t, vol * 0.8);
+              else {
+                const midi = getPitchForZ(z, this.scale, this.rootMidi, y);
+                const freq = midiToFreq(midi);
+                const vel = sym === 'A' ? 1.0 : sym === 'G' ? 0.38 : 0.72;
+                if (y === 0) this.playLeadVoice(offline, masterFilter, t, freq, dur, vol * vel, sym === 'A');
+                else if (y === 1) this.playPadVoice(offline, masterFilter, t, freq, dur * 1.15, vol * vel * 0.55, sym === 'A');
+                else if (y === 2) this.playBassVoice(offline, masterFilter, t, freq, dur, vol * vel, sym === 'A');
+              }
+            }
+          }
+        }
+
+        const rendered = await offline.startRendering();
+        this.noiseBuffer = savedNoise;
+        return audioBufferToWavBlob(rendered);
+      }
+    }
+
+    /** Converte un AudioBuffer stereo in un Blob WAV PCM 16-bit */
+    function audioBufferToWavBlob(buffer) {
+      const numOfChan = buffer.numberOfChannels;
+      const length = buffer.length * numOfChan * 2 + 44;
+      const out = new ArrayBuffer(length);
+      const view = new DataView(out);
+      const channels = [];
+      let sample, offset = 0, pos = 0;
+
+      const setUint16 = (data) => { view.setUint16(pos, data, true); pos += 2; };
+      const setUint32 = (data) => { view.setUint32(pos, data, true); pos += 4; };
+
+      setUint32(0x46464952); // "RIFF"
+      setUint32(length - 8);
+      setUint32(0x45564157); // "WAVE"
+      setUint32(0x20746d66); // "fmt "
+      setUint32(16);
+      setUint16(1); // PCM
+      setUint16(numOfChan);
+      setUint32(buffer.sampleRate);
+      setUint32(buffer.sampleRate * 2 * numOfChan);
+      setUint16(numOfChan * 2);
+      setUint16(16);
+      setUint32(0x61746164); // "data"
+      setUint32(length - pos - 4);
+
+      for (let i = 0; i < numOfChan; i++) channels.push(buffer.getChannelData(i));
+      while (pos < length) {
+        for (let i = 0; i < numOfChan; i++) {
+          sample = Math.max(-1, Math.min(1, channels[i][offset]));
+          sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+          view.setInt16(pos, sample, true);
+          pos += 2;
+        }
+        offset++;
+      }
+      return new Blob([out], { type: 'audio/wav' });
+    }
+
+
+    /*************************************************************************
+     * 4. STATO APPLICAZIONE, VISUALIZZATORI 2D/3D E INTERAZIONE UTENTE
+     *************************************************************************/
+
+    const sound = new SoundEngine();
+
+    const appState = {
+      currentProgram: null,
+      runResult: null,
+      activeGrid: null, // Può puntare alla griglia finale o a uno snapshot intermedio
+      snapshots: [],
+      selectedBrush: 'N',
+      layerFilter: 'all', // 'all', '0', '1', '2'
+      showHiddenMarkers: true,
+
+      // Sequencer Transport
+      isPlaying: false,
+      currentStepX: 0,
+      nextStepTimer: null,
+
+      // 3D Isometric Camera
+      camYaw: -0.68,
+      camPitch: 0.55,
+      isDragging3D: false,
+      lastMouseX: 0,
+      lastMouseY: 0,
+
+      // Snapshot growth animation
+      morphTimer: null
+    };
+
+    // Colori distintivi per traccia Y o simbolo della palette
+    function getSymbolVisualStyle(sym, y, palette) {
+      const entry = palette?.[sym] || DEFAULT_MUSICAL_PALETTE[sym] || {};
+      const isMarker = ['R', 'T', 'M', 'P'].includes(sym);
+      if (isMarker) {
+        return {
+          color: entry.color || '#94a3b8',
+          glow: false,
+          hidden: true,
+          alpha: 0.45
+        };
+      }
+      // Se siamo in modalità "Tutti i layer", tinteggia leggermente N/S/G in base al layer Y per chiarezza
+      let col = entry.color || '#38bdf8';
+      if (sym === 'N' || sym === 'S' || sym === 'G') {
+        if (y === 0) col = sym === 'S' ? '#0284c7' : '#38bdf8'; // Cyan (Lead)
+        if (y === 1) col = sym === 'S' ? '#a21caf' : '#e879f9'; // Magenta (Pad)
+        if (y === 2) col = sym === 'S' ? '#d97706' : '#fbbf24'; // Amber (Bass)
+      }
+      return {
+        color: col,
+        glow: Boolean(entry.glow || sym === 'A' || sym === 'N' || sym === 'K'),
+        hidden: false,
+        alpha: entry.alpha ?? 0.95
+      };
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById('toastBanner');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      clearTimeout(el._timer);
+      el._timer = setTimeout(() => el.classList.add('hidden'), 2800);
+    }
+
+    /** Costruisce la pulsantiera della Palette Musicale */
+    function renderPaletteButtons() {
+      const container = document.getElementById('paletteSelectorGrid');
+      const pal = {
+        ".": { name: "Aria (Cancella)", color: "#334155" },
+        ...(appState.currentProgram?.palette || DEFAULT_MUSICAL_PALETTE)
+      };
+
+      container.innerHTML = '';
+      for (const [code, info] of Object.entries(pal)) {
+        const active = appState.selectedBrush === code;
+        const btn = document.createElement('button');
+        btn.className = `px-2 py-1.5 rounded-lg border text-left transition flex items-center gap-2 ${
+          active
+            ? 'bg-sky-500/20 border-sky-400 text-white shadow-[0_0_10px_rgba(56,189,248,0.25)]'
+            : 'bg-slate-900/80 border-slate-800 text-slate-300 hover:border-slate-700'
+        }`;
+        btn.innerHTML = `
+          <span class="w-4 h-4 rounded flex items-center justify-center text-[11px] font-bold text-slate-950 shrink-0" style="background:${info.color || '#64748b'}">${code}</span>
+          <span class="text-[10px] truncate">${info.name || code}</span>
+        `;
+        btn.addEventListener('click', () => {
+          appState.selectedBrush = code;
+          renderPaletteButtons();
+        });
+        container.appendChild(btn);
+      }
+    }
+
+    /** Esegue il programma MarkovJunior 3D dal JSON Editor */
+    function executeMjProgram(useExistingGrid = false) {
+      stopMorphAnimation();
+      const editor = document.getElementById('programJsonEditor');
+      const seed = parseInt(document.getElementById('seedInput').value, 10) || 1;
+      let parsed;
+      try {
+        parsed = JSON.parse(editor.value);
+      } catch (err) {
+        updateDiagnosticsError(`Errore Sintassi JSON: ${err.message}`);
+        return;
+      }
+
+      try {
+        appState.currentProgram = parsed;
+        let res;
+        if (useExistingGrid && appState.activeGrid) {
+          // Clona la griglia attiva per non corrompere gli snapshot precedenti
+          const gClone = {
+            X: appState.activeGrid.X,
+            Y: appState.activeGrid.Y,
+            Z: appState.activeGrid.Z,
+            cells: new Uint8Array(appState.activeGrid.cells),
+            alphabet: [...appState.activeGrid.alphabet],
+            log: [],
+            epoch: 0
+          };
+          res = runOnMj3(gClone, parsed, seed, 10000, MODEL_LIMITS, { snapshots: 50 });
+        } else {
+          res = runMj3(parsed, seed, 10000, MODEL_LIMITS, { snapshots: 50 });
+        }
+
+        appState.runResult = res;
+        appState.snapshots = res.snapshots || [{
+          X: res.grid.X, Y: res.grid.Y, Z: res.grid.Z,
+          cells: new Uint8Array(res.grid.cells),
+          alphabet: [...res.grid.alphabet],
+          step: res.steps
+        }];
+
+        // Imposta lo slider degli snapshot all'ultimo step
+        const slider = document.getElementById('snapshotSlider');
+        slider.max = Math.max(0, appState.snapshots.length - 1);
+        slider.value = slider.max;
+        setSnapshotIndex(appState.snapshots.length - 1);
+
+        renderPaletteButtons();
+        updateDiagnosticsUI(res);
+      } catch (err) {
+        updateDiagnosticsError(`Mj3Error: ${err.message}`);
+      }
+    }
+
+    function setSnapshotIndex(idx) {
+      if (!appState.snapshots.length) return;
+      const clamped = Math.max(0, Math.min(appState.snapshots.length - 1, idx));
+      const shot = appState.snapshots[clamped];
+      appState.activeGrid = {
+        X: shot.X,
+        Y: shot.Y,
+        Z: shot.Z,
+        cells: new Uint8Array(shot.cells),
+        alphabet: [...shot.alphabet],
+        log: [],
+        epoch: 0
+      };
+
+      document.getElementById('currentGridDimBadge').textContent = `${shot.X}×${shot.Y}×${shot.Z}`;
+      document.getElementById('snapshotMaxLabel').textContent = `${appState.snapshots.length - 1}`;
+      const isLast = clamped === appState.snapshots.length - 1;
+      document.getElementById('snapshotLabel').textContent = isLast
+        ? `Finale (Step MJ: ${shot.step})`
+        : `Snapshot ${clamped}/${appState.snapshots.length - 1} (Step MJ: ${shot.step})`;
+
+      if (appState.currentStepX >= shot.X) appState.currentStepX = 0;
+      drawPianoRoll();
+    }
+
+    function updateDiagnosticsUI(res) {
+      document.getElementById('statSteps').textContent = `Steps: ${res.steps}`;
+      document.getElementById('statTime').textContent = `${res.ms} ms`;
+      const st = document.getElementById('statStatus');
+      st.textContent = res.finished ? 'FINISHED' : 'LIMIT REACHED';
+      st.className = res.finished
+        ? 'px-1.5 py-0.2 rounded text-[10px] bg-emerald-500/20 text-emerald-300'
+        : 'px-1.5 py-0.2 rounded text-[10px] bg-amber-500/20 text-amber-300';
+
+      const out = document.getElementById('diagnosticOutput');
+      const lines = [];
+
+      // Statistiche nodi attivati (fired)
+      const activeNodes = (res.trace || []).filter(t => t.runner.total > 0);
+      if (activeNodes.length) {
+        lines.push(`<div class="text-emerald-400">✔ Nodi eseguiti (${activeNodes.length}):</div>`);
+        for (const t of activeNodes) {
+          lines.push(`<div class="pl-2 text-slate-300">&bull; ${escapeHtml(t.what)} <span class="text-sky-400">[×${t.runner.total}]</span></div>`);
+        }
+      }
+
+      if (res.unused && res.unused.length) {
+        lines.push(`<div class="text-amber-400 mt-1">⚠ Nodi inattivi (${res.unused.length}):</div>`);
+        for (const u of res.unused) {
+          lines.push(`<div class="pl-2 text-amber-200/80">&bull; ${escapeHtml(u)}</div>`);
+        }
+      } else {
+        lines.push(`<div class="text-slate-500 mt-1">Tutti i nodi del programma hanno contribuito alla partitura.</div>`);
+      }
+
+      out.innerHTML = lines.join('');
+    }
+
+    function updateDiagnosticsError(msg) {
+      const st = document.getElementById('statStatus');
+      st.textContent = 'ERRORE';
+      st.className = 'px-1.5 py-0.2 rounded text-[10px] bg-rose-500/20 text-rose-300';
+      document.getElementById('diagnosticOutput').innerHTML = `<div class="text-rose-400 font-semibold">${escapeHtml(msg)}</div>`;
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+    }
+
+
+    /*************************************************************************
+     * 5. RENDERING 2D: PIANO ROLL MULTI-LAYER INTERATTIVO
+     *************************************************************************/
+
+    const prCanvas = document.getElementById('pianoRollCanvas');
+    const prCtx = prCanvas.getContext('2d');
+
+    function resizeCanvases() {
+      const dpr = window.devicePixelRatio || 1;
+      for (const c of [prCanvas, document.getElementById('voxel3dCanvas'), document.getElementById('scopeCanvas')]) {
+        if (!c) continue;
+        const rect = c.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          c.width = Math.floor(rect.width * dpr);
+          c.height = Math.floor(rect.height * dpr);
+        }
+      }
+      drawPianoRoll();
+    }
+
+    function drawPianoRoll() {
+      const g = appState.activeGrid;
+      if (!g) return;
+      const dpr = window.devicePixelRatio || 1;
+      const W = prCanvas.width;
+      const H = prCanvas.height;
+      prCtx.save();
+      prCtx.scale(dpr, dpr);
+      const cw = W / dpr;
+      const ch = H / dpr;
+
+      prCtx.fillStyle = '#07090e';
+      prCtx.fillRect(0, 0, cw, ch);
+
+      const leftMargin = 46;
+      const bottomMargin = 20;
+      const gridW = cw - leftMargin - 8;
+      const gridH = ch - bottomMargin - 8;
+      const cellW = gridW / g.X;
+      const cellH = gridH / g.Z;
+
+      // Sfondo righe (Z = Pitch, dal basso z=0 all'alto z=Z-1)
+      for (let z = 0; z < g.Z; z++) {
+        const py = 4 + (g.Z - 1 - z) * cellH;
+        prCtx.fillStyle = z % 2 === 0 ? '#0c101a' : '#090c14';
+        prCtx.fillRect(leftMargin, py, gridW, cellH);
+
+        // Etichetta nota della scala a sinistra
+        const midi = getPitchForZ(z, sound.scale, sound.rootMidi, 0);
+        prCtx.fillStyle = z === 0 ? '#fbbf24' : '#64748b';
+        prCtx.font = '600 10px "JetBrains Mono"';
+        prCtx.textAlign = 'right';
+        prCtx.fillText(`Z${z}:${midiToName(midi)}`, leftMargin - 6, py + cellH * 0.65);
+      }
+
+      // Colonne temporali (X = Step) + evidenziazione Playhead
+      for (let x = 0; x < g.X; x++) {
+        const px = leftMargin + x * cellW;
+        if (x === appState.currentStepX) {
+          prCtx.fillStyle = 'rgba(56, 189, 248, 0.14)';
+          prCtx.fillRect(px, 4, cellW, gridH);
+        }
+        // Linee verticali dei quarti (ogni 4 step)
+        prCtx.strokeStyle = x % 4 === 0 ? '#263147' : '#141b29';
+        prCtx.lineWidth = x % 4 === 0 ? 1.2 : 0.7;
+        prCtx.beginPath();
+        prCtx.moveTo(px, 4);
+        prCtx.lineTo(px, 4 + gridH);
+        prCtx.stroke();
+
+        // Numero step in basso
+        prCtx.fillStyle = x === appState.currentStepX ? '#38bdf8' : (x % 4 === 0 ? '#94a3b8' : '#475569');
+        prCtx.font = '10px "JetBrains Mono"';
+        prCtx.textAlign = 'center';
+        prCtx.fillText(String(x), px + cellW / 2, ch - 5);
+      }
+
+      // Linee orizzontali Z
+      prCtx.strokeStyle = '#141b29';
+      prCtx.lineWidth = 0.7;
+      for (let z = 0; z <= g.Z; z++) {
+        const py = 4 + z * cellH;
+        prCtx.beginPath();
+        prCtx.moveTo(leftMargin, py);
+        prCtx.lineTo(leftMargin + gridW, py);
+        prCtx.stroke();
+      }
+
+      // Disegna le celle attive per i layer Y selezionati
+      const layersToDraw = appState.layerFilter === 'all' ? [2, 1, 0] : [parseInt(appState.layerFilter, 10)];
+
+      for (const y of layersToDraw) {
+        if (y >= g.Y) continue;
+        for (let z = 0; z < g.Z; z++) {
+          for (let x = 0; x < g.X; x++) {
+            const sym = cellAt(g, x, y, z);
+            if (sym === AIR) continue;
+            const style = getSymbolVisualStyle(sym, y, appState.currentProgram?.palette);
+            if (style.hidden && !appState.showHiddenMarkers) continue;
+
+            const px = leftMargin + x * cellW;
+            const py = 4 + (g.Z - 1 - z) * cellH;
+
+            // Se vediamo tutti i layer contemporaneamente, sfalsa leggermente il box per distinguere Y=0,1,2
+            let insetX = 2, insetY = 2, w = cellW - 4, h = cellH - 4;
+            if (appState.layerFilter === 'all' && layersToDraw.length > 1) {
+              const bandH = (cellH - 4) / 3;
+              insetY = 2 + y * bandH;
+              h = Math.max(4, bandH - 1);
+            }
+
+            const isPlayheadHit = x === appState.currentStepX;
+            prCtx.save();
+            prCtx.fillStyle = style.color;
+            prCtx.globalAlpha = isPlayheadHit ? 1.0 : style.alpha;
+            if (style.glow || isPlayheadHit) {
+              prCtx.shadowColor = style.color;
+              prCtx.shadowBlur = isPlayheadHit ? 12 : 5;
+            }
+
+            // Barra continua se la cella è Sustain ('S')
+            const radius = sym === 'S' ? 1 : 3;
+            roundRect(prCtx, px + insetX, py + insetY, Math.max(2, w), Math.max(2, h), radius);
+            prCtx.fill();
+
+            // Testo del simbolo dentro la cella
+            if (appState.layerFilter !== 'all' || cellH > 26) {
+              prCtx.fillStyle = '#090b10';
+              prCtx.font = 'bold 9px "JetBrains Mono"';
+              prCtx.textAlign = 'center';
+              prCtx.fillText(sym, px + insetX + w / 2, py + insetY + h * 0.78);
+            }
+            prCtx.restore();
+          }
+        }
+      }
+
+      // Playhead top marker
+      const phX = leftMargin + appState.currentStepX * cellW + cellW / 2;
+      prCtx.fillStyle = '#38bdf8';
+      prCtx.beginPath();
+      prCtx.arc(phX, 4, 3.5, 0, Math.PI * 2);
+      prCtx.fill();
+
+      prCtx.restore();
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
+    // Interazione Mouse / Touch sul Piano Roll per disegnare celle e ascoltare l'anteprima
+    function getPianoRollCellFromEvent(e) {
+      const g = appState.activeGrid;
+      if (!g) return null;
+      const rect = prCanvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const mx = clientX - rect.left;
+      const my = clientY - rect.top;
+
+      const leftMargin = 46;
+      const bottomMargin = 20;
+      const gridW = rect.width - leftMargin - 8;
+      const gridH = rect.height - bottomMargin - 8;
+      if (mx < leftMargin || mx > leftMargin + gridW || my < 4 || my > 4 + gridH) return null;
+
+      const x = Math.floor(((mx - leftMargin) / gridW) * g.X);
+      const zInv = Math.floor(((my - 4) / gridH) * g.Z);
+      const z = g.Z - 1 - zInv;
+
+      // Determina il layer Y target
+      let y = 0;
+      if (appState.layerFilter !== 'all') {
+        y = Math.min(g.Y - 1, parseInt(appState.layerFilter, 10));
+      } else {
+        const localY = ((my - 4) % (gridH / g.Z)) / (gridH / g.Z);
+        y = Math.min(g.Y - 1, Math.floor(localY * 3));
+      }
+      return { x: Math.max(0, Math.min(g.X - 1, x)), y, z: Math.max(0, Math.min(g.Z - 1, z)) };
+    }
+
+    prCanvas.addEventListener('mousemove', (e) => {
+      const c = getPianoRollCellFromEvent(e);
+      const info = document.getElementById('cellHoverInfo');
+      if (!c || !appState.activeGrid) {
+        info.textContent = 'Passa il mouse o clicca su una cella per ispezionare/modificare (X, Y, Z)';
+        return;
+      }
+      const sym = cellAt(appState.activeGrid, c.x, c.y, c.z);
+      const trackNames = ['Lead', 'Pad', 'Bass/Drum'];
+      const midi = getPitchForZ(c.z, sound.scale, sound.rootMidi, c.y);
+      info.innerHTML = `Cella <span class="text-sky-400">(${c.x}, ${c.y}:${trackNames[c.y] || c.y}, ${c.z}:${midiToName(midi)})</span> = <span class="text-amber-300 font-bold">'${sym}'</span>`;
+    });
+
+    prCanvas.addEventListener('mousedown', (e) => {
+      const c = getPianoRollCellFromEvent(e);
+      if (!c || !appState.activeGrid) return;
+      const g = appState.activeGrid;
+      const brush = appState.selectedBrush;
+
+      let codeIdx = g.alphabet.indexOf(brush);
+      if (codeIdx < 0) {
+        codeIdx = g.alphabet.push(brush) - 1;
+      }
+      const idx = c.x + c.y * g.X + c.z * g.X * g.Y;
+      // Toggle se clicchiamo con lo stesso simbolo già presente
+      g.cells[idx] = g.cells[idx] === codeIdx ? 0 : codeIdx;
+
+      // Fai sentire un feedback sonoro immediato se non è aria
+      if (g.cells[idx] !== 0) {
+        sound.init();
+        const midi = getPitchForZ(c.z, sound.scale, sound.rootMidi, c.y);
+        const freq = midiToFreq(midi);
+        const now = sound.ctx.currentTime + 0.01;
+        if (brush === 'K') sound.playKick(sound.ctx, sound.masterFilter, now, 0.85);
+        else if (brush === 'H') sound.playHiHat(sound.ctx, sound.masterFilter, now, 0.7, false);
+        else if (brush === 'C') sound.playSnare(sound.ctx, sound.masterFilter, now, 0.8);
+        else if (c.y === 0) sound.playLeadVoice(sound.ctx, sound.masterFilter, now, freq, 0.18, 0.7, brush === 'A');
+        else if (c.y === 1) sound.playPadVoice(sound.ctx, sound.masterFilter, now, freq, 0.25, 0.55, brush === 'A');
+        else sound.playBassVoice(sound.ctx, sound.masterFilter, now, freq, 0.2, 0.8, brush === 'A');
+      }
+
+      drawPianoRoll();
+    });
+
+
+    /*************************************************************************
+     * 6. RENDERING 3D: VOXEL BOX ISOMETRICO INTERATTIVO + OSCILLOSCOPIO
+     *************************************************************************/
+
+    const voxCanvas = document.getElementById('voxel3dCanvas');
+    const voxCtx = voxCanvas.getContext('2d');
+    const scopeCanvas = document.getElementById('scopeCanvas');
+    const scopeCtx = scopeCanvas ? scopeCanvas.getContext('2d') : null;
+
+    // Rotazione camera isometrica con mouse / touch
+    voxCanvas.addEventListener('mousedown', (e) => {
+      appState.isDragging3D = true;
+      appState.lastMouseX = e.clientX;
+      appState.lastMouseY = e.clientY;
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (!appState.isDragging3D) return;
+      const dx = e.clientX - appState.lastMouseX;
+      const dy = e.clientY - appState.lastMouseY;
+      appState.lastMouseX = e.clientX;
+      appState.lastMouseY = e.clientY;
+      appState.camYaw += dx * 0.008;
+      appState.camPitch = Math.max(0.15, Math.min(1.25, appState.camPitch + dy * 0.008));
+    });
+    window.addEventListener('mouseup', () => { appState.isDragging3D = false; });
+
+    voxCanvas.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        appState.isDragging3D = true;
+        appState.lastMouseX = e.touches[0].clientX;
+        appState.lastMouseY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+    voxCanvas.addEventListener('touchmove', (e) => {
+      if (!appState.isDragging3D || e.touches.length !== 1) return;
+      const dx = e.touches[0].clientX - appState.lastMouseX;
+      const dy = e.touches[0].clientY - appState.lastMouseY;
+      appState.lastMouseX = e.touches[0].clientX;
+      appState.lastMouseY = e.touches[0].clientY;
+      appState.camYaw += dx * 0.008;
+      appState.camPitch = Math.max(0.15, Math.min(1.25, appState.camPitch + dy * 0.008));
+    }, { passive: true });
+    voxCanvas.addEventListener('touchend', () => { appState.isDragging3D = false; });
+
+    /** Proietta un punto 3D (x, y, z) centrato nell'origine in coordinate 2D isometriche */
+    function projectIso(x, y, z, yaw, pitch, scale, cx, cy) {
+      // In engine.ts: x = left->right, y = back->front, z = bottom->top
+      const cosY = Math.cos(yaw), sinY = Math.sin(yaw);
+      const cosP = Math.cos(pitch), sinP = Math.sin(pitch);
+
+      const rx = x * cosY - y * sinY;
+      const ry = x * sinY + y * cosY;
+
+      const sx = rx * scale + cx;
+      const sy = (ry * sinP - z * cosP) * scale + cy;
+      const depth = ry * cosP + z * sinP;
+      return { x: sx, y: sy, depth };
+    }
+
+    function shadeHexColor(hex, factor) {
+      const c = hex.replace('#', '');
+      const num = parseInt(c, 16);
+      const r = Math.min(255, Math.max(0, Math.floor(((num >> 16) & 255) * factor)));
+      const g = Math.min(255, Math.max(0, Math.floor(((num >> 8) & 255) * factor)));
+      const b = Math.min(255, Math.max(0, Math.floor((num & 255) * factor)));
+      return `rgb(${r},${g},${b})`;
+    }
+
+    function drawVoxelCube(ctx, gx, gy, gz, sizeX, sizeY, sizeZ, yaw, pitch, scale, cx, cy, colorHex, alpha, isGlowing) {
+      const hx = sizeX * 0.44;
+      const hy = sizeY * 0.42;
+      const hz = sizeZ * 0.44;
+
+      const verts = [
+        [-hx, -hy, -hz], [hx, -hy, -hz], [hx, hy, -hz], [-hx, hy, -hz],
+        [-hx, -hy,  hz], [hx, -hy,  hz], [hx, hy,  hz], [-hx, hy,  hz]
+      ].map(([dx, dy, dz]) => projectIso(gx + dx, gy + dy, gz + dz, yaw, pitch, scale, cx, cy));
+
+      const faces = [
+        { indices: [4, 5, 6, 7], shade: 1.18 }, // Top (+Z)
+        { indices: [0, 1, 2, 3], shade: 0.50 }, // Bottom (-Z)
+        { indices: [1, 2, 6, 5], shade: 0.92 }, // Right (+X)
+        { indices: [0, 3, 7, 4], shade: 0.70 }, // Left (-X)
+        { indices: [3, 2, 6, 7], shade: 0.84 }, // Front (+Y)
+        { indices: [0, 1, 5, 4], shade: 0.62 }  // Back (-Y)
+      ];
+
+      // Ordina le 3 facce più vicine alla camera del cubo
+      faces.forEach(f => {
+        f.depth = (verts[f.indices[0]].depth + verts[f.indices[1]].depth + verts[f.indices[2]].depth + verts[f.indices[3]].depth) / 4;
+      });
+      faces.sort((a, b) => a.depth - b.depth);
+
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      if (isGlowing) {
+        ctx.shadowColor = colorHex;
+        ctx.shadowBlur = 14;
+      }
+
+      // Disegna le 3 facce anteriori visibili
+      for (let i = 3; i < 6; i++) {
+        const f = faces[i];
+        ctx.fillStyle = shadeHexColor(colorHex, isGlowing ? f.shade * 1.25 : f.shade);
+        ctx.strokeStyle = isGlowing ? '#ffffff' : 'rgba(9,11,16,0.55)';
+        ctx.lineWidth = isGlowing ? 0.9 : 0.5;
+        ctx.beginPath();
+        ctx.moveTo(verts[f.indices[0]].x, verts[f.indices[0]].y);
+        for (let k = 1; k < 4; k++) ctx.lineTo(verts[f.indices[k]].x, verts[f.indices[k]].y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function render3DScene() {
+      const g = appState.activeGrid;
+      if (!g) return;
+      const dpr = window.devicePixelRatio || 1;
+      const W = voxCanvas.width;
+      const H = voxCanvas.height;
+      voxCtx.save();
+      voxCtx.scale(dpr, dpr);
+      const cw = W / dpr;
+      const ch = H / dpr;
+
+      voxCtx.fillStyle = '#07090e';
+      voxCtx.fillRect(0, 0, cw, ch);
+
+      // Spaziatura allargata sull'asse Y (3 tracce) per rendere ben leggibili i 3 piani musicali
+      const yStretch = Math.max(1.8, g.X / 5.5);
+      const maxSpan = Math.max(g.X, g.Y * yStretch, g.Z);
+      const scale = Math.min(cw, ch) * 0.62 / maxSpan;
+      const cx = cw * 0.5;
+      const cy = ch * 0.54;
+
+      const ox = (g.X - 1) / 2;
+      const oy = ((g.Y - 1) * yStretch) / 2;
+      const oz = (g.Z - 1) / 2;
+
+      // Disegna griglia di base (bounding floor) e fetta luminosa del Playhead X
+      voxCtx.strokeStyle = '#1e293b';
+      voxCtx.lineWidth = 1;
+      for (let x = 0; x < g.X; x++) {
+        const p1 = projectIso(x - ox, -oy - 0.5, -oz - 0.5, appState.camYaw, appState.camPitch, scale, cx, cy);
+        const p2 = projectIso(x - ox, oy + 0.5, -oz - 0.5, appState.camYaw, appState.camPitch, scale, cx, cy);
+        voxCtx.strokeStyle = x === appState.currentStepX ? 'rgba(56, 189, 248, 0.75)' : '#151d2e';
+        voxCtx.lineWidth = x === appState.currentStepX ? 2.2 : 0.8;
+        voxCtx.beginPath();
+        voxCtx.moveTo(p1.x, p1.y);
+        voxCtx.lineTo(p2.x, p2.y);
+        voxCtx.stroke();
+      }
+
+      // Raccogli tutti i voxel non-aria e ordinali per profondità (Painter's Algorithm)
+      const voxels = [];
+      for (let z = 0; z < g.Z; z++) {
+        for (let y = 0; y < g.Y; y++) {
+          if (appState.layerFilter !== 'all' && parseInt(appState.layerFilter, 10) !== y) continue;
+          for (let x = 0; x < g.X; x++) {
+            const sym = cellAt(g, x, y, z);
+            if (sym === AIR) continue;
+            const style = getSymbolVisualStyle(sym, y, appState.currentProgram?.palette);
+            if (style.hidden && !appState.showHiddenMarkers) continue;
+
+            const wx = x - ox;
+            const wy = y * yStretch - oy;
+            const wz = z - oz;
+            const centerProj = projectIso(wx, wy, wz, appState.camYaw, appState.camPitch, scale, cx, cy);
+
+            voxels.push({
+              x, y, z, wx, wy, wz,
+              sym,
+              style,
+              depth: centerProj.depth
+            });
+          }
+        }
+      }
+
+      voxels.sort((a, b) => a.depth - b.depth);
+
+      for (const v of voxels) {
+        const isPlayhead = v.x === appState.currentStepX;
+        const pulseScale = isPlayhead ? 1.18 : 1.0;
+        drawVoxelCube(
+          voxCtx,
+          v.wx, v.wy, v.wz,
+          pulseScale, pulseScale * 1.15, pulseScale,
+          appState.camYaw, appState.camPitch,
+          scale, cx, cy,
+          v.style.color,
+          isPlayhead ? 1.0 : v.style.alpha,
+          isPlayhead || v.style.glow
+        );
+      }
+
+      voxCtx.restore();
+    }
+
+    function renderOscilloscope() {
+      if (!scopeCtx || !scopeCanvas) return;
+      const W = scopeCanvas.width;
+      const H = scopeCanvas.height;
+      scopeCtx.fillStyle = '#05070b';
+      scopeCtx.fillRect(0, 0, W, H);
+
+      if (!sound.analyser) {
+        scopeCtx.strokeStyle = '#1e293b';
+        scopeCtx.beginPath();
+        scopeCtx.moveTo(0, H / 2);
+        scopeCtx.lineTo(W, H / 2);
+        scopeCtx.stroke();
+        return;
+      }
+
+      const bufLen = sound.analyser.frequencyBinCount;
+      const data = new Uint8Array(bufLen);
+      sound.analyser.getByteTimeDomainData(data);
+
+      scopeCtx.lineWidth = 1.6;
+      scopeCtx.strokeStyle = '#38bdf8';
+      scopeCtx.beginPath();
+      const slice = W / bufLen;
+      let x = 0;
+      for (let i = 0; i < bufLen; i++) {
+        const v = data[i] / 128.0;
+        const y = (v * H) / 2;
+        if (i === 0) scopeCtx.moveTo(x, y);
+        else scopeCtx.lineTo(x, y);
+        x += slice;
+      }
+      scopeCtx.stroke();
+    }
+
+
+    /*************************************************************************
+     * 7. SEQUENCER LOOP, SNAPSHOT ANIMATION E BINDING EVENTI UI
+     *************************************************************************/
+
+    function scheduleNextStep() {
+      if (!appState.isPlaying || !appState.activeGrid) return;
+      const g = appState.activeGrid;
+
+      sound.triggerStep(g, appState.currentStepX);
+      drawPianoRoll();
+
+      const baseStepMs = ((60 / sound.bpm) / 4) * 1000;
+      const isOdd = appState.currentStepX % 2 === 1;
+      const swingFactor = isOdd ? (1 - sound.swing) : (1 + sound.swing);
+      const delayMs = Math.max(30, baseStepMs * swingFactor);
+
+      appState.nextStepTimer = setTimeout(() => {
+        appState.currentStepX = (appState.currentStepX + 1) % g.X;
+        scheduleNextStep();
+      }, delayMs);
+    }
+
+    function togglePlay() {
+      appState.isPlaying = !appState.isPlaying;
+      const btn = document.getElementById('playToggleBtn');
+      const icon = document.getElementById('playIcon');
+      const txt = document.getElementById('playText');
+
+      if (appState.isPlaying) {
+        sound.init();
+        icon.textContent = '⏸';
+        txt.textContent = 'STOP LOOP';
+        btn.className = 'px-4 py-1.5 rounded-lg text-xs font-bold bg-amber-400 hover:bg-amber-300 text-slate-950 transition shadow-lg shadow-amber-400/20 flex items-center gap-1.5';
+        scheduleNextStep();
+      } else {
+        clearTimeout(appState.nextStepTimer);
+        icon.textContent = '▶';
+        txt.textContent = 'PLAY LOOP';
+        btn.className = 'px-4 py-1.5 rounded-lg text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition shadow-lg shadow-emerald-500/20 flex items-center gap-1.5';
+      }
+    }
+
+    function stopMorphAnimation() {
+      if (appState.morphTimer) {
+        clearInterval(appState.morphTimer);
+        appState.morphTimer = null;
+        document.getElementById('morphAnimBtn').textContent = '🎞️ Anima Crescita';
+      }
+    }
+
+    function loadPreset(index) {
+      const p = PRESETS[index] || PRESETS[0];
+      document.getElementById('presetDescBox').textContent = p.desc;
+      document.getElementById('programJsonEditor').value = JSON.stringify(p.program, null, 2);
+
+      // Imposta i parametri musicali consigliati dal preset
+      sound.scale = p.scale;
+      sound.rootMidi = p.root;
+      sound.bpm = p.bpm;
+      document.getElementById('scaleSelect').value = p.scale;
+      document.getElementById('rootSelect').value = String(p.root);
+      document.getElementById('bpmSlider').value = String(p.bpm);
+      document.getElementById('bpmVal').textContent = String(p.bpm);
+      sound.updateParams();
+
+      executeMjProgram(false);
+    }
+
+    function bindEvents() {
+      document.getElementById('presetSelect').addEventListener('change', (e) => {
+        loadPreset(parseInt(e.target.value, 10));
+      });
+
+      document.getElementById('randomSeedBtn').addEventListener('click', () => {
+        const newSeed = Math.floor(100000 + Math.random() * 900000);
+        document.getElementById('seedInput').value = newSeed;
+        executeMjProgram(false);
+      });
+
+      document.getElementById('runMjBtn').addEventListener('click', () => executeMjProgram(false));
+      document.getElementById('compileRunBtn').addEventListener('click', () => executeMjProgram(false));
+      document.getElementById('runOnExistingBtn').addEventListener('click', () => {
+        executeMjProgram(true);
+        showToast('Regole eseguite sulla griglia esistente (runOn)!');
+      });
+
+      document.getElementById('playToggleBtn').addEventListener('click', togglePlay);
+
+      document.getElementById('stepOnceBtn').addEventListener('click', () => {
+        if (!appState.activeGrid) return;
+        appState.currentStepX = (appState.currentStepX + 1) % appState.activeGrid.X;
+        sound.triggerStep(appState.activeGrid, appState.currentStepX);
+        drawPianoRoll();
+      });
+
+      // Esportazione WAV
+      document.getElementById('exportWavBtn').addEventListener('click', async () => {
+        if (!appState.activeGrid) return;
+        showToast('Rendering WAV offline in corso...');
+        try {
+          const blob = await sound.exportWav(appState.activeGrid);
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `mj3_soundlab_seed_${document.getElementById('seedInput').value}.wav`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+          showToast('File .WAV esportato con successo!');
+        } catch (err) {
+          showToast(`Errore esportazione WAV: ${err.message}`);
+        }
+      });
+
+      // Copia JSON negli appunti
+      document.getElementById('copyJsonBtn').addEventListener('click', () => {
+        const editor = document.getElementById('programJsonEditor');
+        editor.select();
+        document.execCommand('copy');
+        showToast('Programma JSON copiato negli appunti!');
+      });
+
+      //Controlli Synth Master
+      document.getElementById('scaleSelect').addEventListener('change', (e) => {
+        sound.scale = e.target.value;
+        drawPianoRoll();
+      });
+      document.getElementById('rootSelect').addEventListener('change', (e) => {
+        sound.rootMidi = parseInt(e.target.value, 10);
+        drawPianoRoll();
+      });
+      document.getElementById('bpmSlider').addEventListener('input', (e) => {
+        sound.bpm = parseInt(e.target.value, 10);
+        document.getElementById('bpmVal').textContent = sound.bpm;
+        sound.updateParams();
+      });
+      document.getElementById('swingSlider').addEventListener('input', (e) => {
+        const v = parseInt(e.target.value, 10);
+        sound.swing = v / 100;
+        document.getElementById('swingVal').textContent = `${v}%`;
+      });
+      document.getElementById('cutoffSlider').addEventListener('input', (e) => {
+        sound.cutoff = parseFloat(e.target.value);
+        document.getElementById('cutoffVal').textContent = sound.cutoff >= 1000
+          ? `${(sound.cutoff / 1000).toFixed(1)} kHz`
+          : `${sound.cutoff} Hz`;
+        sound.updateParams();
+      });
+      document.getElementById('spaceSlider').addEventListener('input', (e) => {
+        const v = parseInt(e.target.value, 10);
+        sound.spaceMix = v / 100;
+        document.getElementById('spaceVal').textContent = `${v}%`;
+        sound.updateParams();
+      });
+
+      // Mute e Volumi Tracce Y=0,1,2
+      document.querySelectorAll('.mute-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const t = parseInt(btn.dataset.track, 10);
+          sound.trackMuted[t] = !sound.trackMuted[t];
+          if (sound.trackMuted[t]) {
+            btn.textContent = 'MUTE';
+            btn.className = 'mute-btn px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/40 transition';
+          } else {
+            btn.textContent = 'ON';
+            const cols = ['sky', 'fuchsia', 'amber'];
+            const c = cols[t];
+            btn.className = `mute-btn px-2 py-0.5 rounded text-[10px] font-bold bg-${c}-500/20 text-${c}-300 border border-${c}-500/40 transition`;
+          }
+        });
+      });
+
+      document.querySelectorAll('[data-track-vol]').forEach((sl) => {
+        sl.addEventListener('input', (e) => {
+          const t = parseInt(sl.dataset.trackVol, 10);
+          sound.trackVolumes[t] = parseInt(e.target.value, 10) / 100;
+        });
+      });
+
+      // Timeline degli Snapshot MJ
+      document.getElementById('snapshotSlider').addEventListener('input', (e) => {
+        stopMorphAnimation();
+        setSnapshotIndex(parseInt(e.target.value, 10));
+      });
+
+      document.getElementById('morphAnimBtn').addEventListener('click', () => {
+        if (appState.morphTimer) {
+          stopMorphAnimation();
+          return;
+        }
+        const slider = document.getElementById('snapshotSlider');
+        let idx = 0;
+        slider.value = 0;
+        setSnapshotIndex(0);
+        document.getElementById('morphAnimBtn').textContent = '⏹ Ferma Crescita';
+        appState.morphTimer = setInterval(() => {
+          idx++;
+          if (idx >= appState.snapshots.length) {
+            stopMorphAnimation();
+            return;
+          }
+          slider.value = idx;
+          setSnapshotIndex(idx);
+        }, 120);
+      });
+
+      document.getElementById('clearGridBtn').addEventListener('click', () => {
+        if (!appState.activeGrid) return;
+        appState.activeGrid.cells.fill(0);
+        drawPianoRoll();
+        showToast('Griglia svuotata. Dipingi i tuoi semi e clicca "+ RunOn Griglia"!');
+      });
+
+      // Filtro Layer (Tutti, Y0, Y1, Y2)
+      document.querySelectorAll('.layer-tab').forEach((tab) => {
+        tab.addEventListener('click', () => {
+          appState.layerFilter = tab.dataset.layerView;
+          document.querySelectorAll('.layer-tab').forEach((t) => {
+            t.classList.remove('bg-slate-800', 'text-white', 'font-bold');
+          });
+          tab.classList.add('bg-slate-800', 'text-white', 'font-bold');
+          drawPianoRoll();
+        });
+      });
+
+      document.getElementById('showHiddenMarkersChk').addEventListener('change', (e) => {
+        appState.showHiddenMarkers = e.target.checked;
+        drawPianoRoll();
+      });
+
+      document.getElementById('resetCamBtn').addEventListener('click', () => {
+        appState.camYaw = -0.68;
+        appState.camPitch = 0.55;
+      });
+
+      window.addEventListener('resize', resizeCanvases);
+    }
+
+    function animationLoop() {
+      render3DScene();
+      renderOscilloscope();
+      requestAnimationFrame(animationLoop);
+    }
+
+    window.onload = function () {
+      bindEvents();
+      resizeCanvases();
+      loadPreset(0);
+      animationLoop();
+    };
+  </script>
+</body>
+</html>
