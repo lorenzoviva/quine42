@@ -5,6 +5,8 @@
 
 Aggiornato il 02/11/2026, fine epoca 216 su **claude** (crediti: vedi `stato`).
 
+- **Epoca 217, T177 integrato:** la crescita di C: era la cache delle forme in IndexedDB, una per porta (14,8 GB in 31 origini); ora su disco solo su 5173, 4173, `?formecache` e sito; ogni giro di test ha una cartella temporanea sola. Suite 1362 verdi, browser ok. Comandi per liberare lo spazio dati all'autore (lancia lui, Chrome chiuso: ~14 GB). **Non spiega lo sbalzo** 1,8 → 12 GB durante i task: T177 ne ha misurato uno solo, breve e senza crescita, e l'IndexedDB non si libera da solo. **Chiesto all'autore:** task che campiona C: durante un giro del banco (da creare solo se dice sì; il primo giro utile è T181).
+
 - **Epoca 217:** l'autore ha risposto sì: T183 a p79, prima di T152 (supera il «Chiesto all'autore» qui sotto). Per il resto vale «Fine epoca 216».
 
 - **Fine epoca 216:** in corso T177; il reset delle 5 ore è passato, `claude` e `fable` riaperti. Pronti, in ordine: T176, T178, T179, T180, T175, T106, T89a, T152, T186, T158, T183. Vedi le tre voci «Epoca 216» qui sotto. **Chiesto all'autore, senza risposta:** alzare T183 sopra T152 (se sì: `assegna T183 claude 9 <p> --approva`). **Da fare:** all'esito di T177 riportare chi riempie C: e cosa si può cancellare, `integra`; se non spiega lo sbalzo durante i task, task che campiona C: durante un giro del banco. Alla fine di T178 far leggere il glossario all'autore, poi i task delle rinomine. Alla fine di T181 (Fable) leggere il contatore delle 5 ore. Aspetta anche: T153 e T184-T185, T45f, T88, le attese di «Fine epoca 211», la vista Markdown. ADR nuovi dallo **0117**.
