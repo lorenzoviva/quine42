@@ -168,7 +168,7 @@ export interface LootTable {
 }
 
 /** An environment: a MarkovJunior program that shapes a chunk (written by the Cartographer). */
-export interface LayoutDef {
+export interface EnvironmentDef {
   name: string;
   description: string;
   environment: 'esterno' | 'interno' | 'misto';
@@ -283,7 +283,7 @@ export interface Manifest {
   items?: ItemDef[];
   recipes?: Recipe[];
   loot?: Record<string, LootTable>;
-  layouts?: Record<string, LayoutDef>;
+  layouts?: Record<string, EnvironmentDef>;
   /** An interface panel drawn by the kernel (slots, bars, texts, buttons); the module's Lua reacts. */
   ui?: UiPanel;
   /** Magic (data modules): runes by token, incantations by sequence of tokens. */

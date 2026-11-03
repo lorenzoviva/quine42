@@ -214,9 +214,9 @@ describe('the atlas', () => {
     const atlas = JSON.parse(k.files['world/atlas.json']);
     expect(atlas.regioni.length).toBeGreaterThan(8);
     const r = atlas.regioni.find((x: { ambiente: string }) => x.ambiente === 'castello');
-    expect((k as any).layoutsFor({ cx: r.centro[0], cy: r.centro[1] }).layouts.map((l: { id: string }) => l.id)).toEqual(['castello']);
+    expect((k as any).environmentsFor({ cx: r.centro[0], cy: r.centro[1] }).layouts.map((l: { id: string }) => l.id)).toEqual(['castello']);
     // Elsewhere, regional environments are not used at random.
-    expect((k as any).layoutsFor({ cx: 0, cy: 1 }).layouts.some((l: { id: string }) => l.id === 'castello')).toBe(false);
+    expect((k as any).environmentsFor({ cx: 0, cy: 1 }).layouts.some((l: { id: string }) => l.id === 'castello')).toBe(false);
   });
 
   it('asked for an elves wood, the Cartographer writes it, adds its terrain and places it on the map; locals know the way', async () => {

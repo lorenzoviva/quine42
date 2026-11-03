@@ -9,7 +9,7 @@ import { Rng } from '../src/kernel/rng';
 import { assemblePack, toItemDef } from '../src/kernel/agents/content';
 import { fakeHost } from './helpers';
 import type { ChunkPlan } from '../src/kernel/agents/cartography';
-import type { ItemSpec, LayoutDef, TileDef } from '../src/kernel/types';
+import type { ItemSpec, EnvironmentDef, TileDef } from '../src/kernel/types';
 
 const palette: Record<string, TileDef> = {
   g: { name: 'prato', color: '#4f9a45', solid: false, layer: 'ground' },
@@ -53,13 +53,13 @@ describe('validator', async () => {
   });
 
   it('test-runs layout programs on real drafts before accepting them', () => {
-    const good: LayoutDef = { name: 'Borgo', description: 'case', environment: 'misto', program: { type: 'one', rules: [{ in: 'gggg/gggg/gggg/gggg', out: 'hhhh/hffh/hffh/hdhh' }], steps: 2 } };
+    const good: EnvironmentDef = { name: 'Borgo', description: 'case', environment: 'misto', program: { type: 'one', rules: [{ in: 'gggg/gggg/gggg/gggg', out: 'hhhh/hffh/hffh/hdhh' }], steps: 2 } };
     expect(v.validateLayout('borgo', good, palette, drafts)).toEqual([]);
-    const unknownCode: LayoutDef = { ...good, program: { type: 'all', rules: [{ in: 'g', out: 'Z' }] } };
+    const unknownCode: EnvironmentDef = { ...good, program: { type: 'all', rules: [{ in: 'g', out: 'Z' }] } };
     expect(v.validateLayout('x', unknownCode, palette, drafts).join()).toMatch(/codici inesistenti Z/);
-    const walls: LayoutDef = { ...good, program: { type: 'all', rules: [{ in: 'g', out: 'h' }] } };
+    const walls: EnvironmentDef = { ...good, program: { type: 'all', rules: [{ in: 'g', out: 'h' }] } };
     expect(v.validateLayout('x', walls, palette, drafts).join()).toMatch(/troppo poco spazio/);
-    const broken = { ...good, program: { type: 'one', rules: [{ in: 'gg', out: 'g' }] } } as LayoutDef;
+    const broken = { ...good, program: { type: 'one', rules: [{ in: 'gg', out: 'g' }] } } as EnvironmentDef;
     expect(v.validateLayout('x', broken, palette, drafts).join()).toMatch(/stessa forma/);
   });
 

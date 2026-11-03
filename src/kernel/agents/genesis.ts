@@ -3,7 +3,7 @@
 // Constants never generated: the carpet, movement, physics, needs, runes, the kernel.
 
 import type { Schema } from '../ai/models';
-import type { FileMap, LayoutDef, TileDef, TileLayer } from '../types';
+import type { FileMap, EnvironmentDef, TileDef, TileLayer } from '../types';
 import type { AgentId, Bible, Council } from './council';
 import { wordsOf } from './council';
 import { designLayouts } from './cartography';
@@ -185,7 +185,7 @@ export function toPalette(terrains: RawTerrain[]): Record<string, TileDef> {
   );
 }
 
-export type LayoutCheck = (id: string, def: LayoutDef, palette: Record<string, TileDef>) => string[];
+export type LayoutCheck = (id: string, def: EnvironmentDef, palette: Record<string, TileDef>) => string[];
 
 export async function planGenesis(c: Council, theme: string, base: FileMap, checkLayout: LayoutCheck): Promise<GenesisPlan> {
   const data = { theme };
@@ -281,7 +281,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
   }
 
   // Environments: the Cartographer writes them as rewrite programs; the kernel test-runs each one.
-  const layouts: Record<string, LayoutDef> = {};
+  const layouts: Record<string, EnvironmentDef> = {};
   let feedback = '';
   for (let round = 0; round < 2 && Object.keys(layouts).length < 4; round++) {
     const designed = await designLayouts(c, palette, feedback);
@@ -331,7 +331,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     const lp = 'modules/world.layouts/manifest.json';
     const lm = JSON.parse(base[lp]);
     // Too few environments make a monotonous world: previous ones that still fit the new terrains stay.
-    const keep = Object.keys(layouts).length < 3 ? Object.entries<LayoutDef>(lm.layouts ?? {}).filter(([id, def]) => !layouts[id] && !checkLayout(id, def, palette).length) : [];
+    const keep = Object.keys(layouts).length < 3 ? Object.entries<EnvironmentDef>(lm.layouts ?? {}).filter(([id, def]) => !layouts[id] && !checkLayout(id, def, palette).length) : [];
     lm.layouts = { ...layouts, ...Object.fromEntries(keep) };
     files[lp] = JSON.stringify(lm, null, 2) + '\n';
   }

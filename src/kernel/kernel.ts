@@ -1629,7 +1629,7 @@ export class Kernel {
   }
 
   /** Environments that belong to a region of the atlas are used only there; the rest anywhere. */
-  private layoutsFor(ch: Chunk): { layouts: Array<{ id: string; name: string; description: string; environment: string }>; region?: Region } {
+  private environmentsFor(ch: Chunk): { layouts: Array<{ id: string; name: string; description: string; environment: string }>; region?: Region } {
     const all = Object.entries(this.content.layouts).map(([id, l]) => ({ id, name: l.name, description: l.description, environment: l.environment }));
     const atlas = readAtlas(this.files);
     const region = ch.cx === 0 && ch.cy === 0 ? undefined : regionAt(atlas, ch.cx, ch.cy);
@@ -1641,7 +1641,7 @@ export class Kernel {
 
   private async makePlan(ch: Chunk): Promise<ChunkPlan> {
     const start = ch.cx === 0 && ch.cy === 0;
-    const { layouts, region } = this.layoutsFor(ch);
+    const { layouts, region } = this.environmentsFor(ch);
     const neighbors = [[0, -1], [0, 1], [-1, 0], [1, 0]]
       .map(([dx, dy]) => this.chunks.get(this.chunkKey(ch.cx + dx, ch.cy + dy)))
       .filter((n): n is Chunk => !!n?.place)
