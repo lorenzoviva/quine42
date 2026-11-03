@@ -951,7 +951,7 @@ describe('orchestra', () => {
 
 type WebModule = {
   handleApi(method: string, rawUrl: string, body?: unknown, opts?: { repo?: string; stateDir?: string }): { status: number; data: Record<string, any> };
-  parseQuestionFile(id: string, text: string): { id: string; items: { numero: number; domanda: string; risposta: string }[]; answered: boolean };
+  parseQuestionFile(id: string, text: string): { id: string; items: { numero: number; domanda: string; risposta: string }[]; answered: boolean; stato?: string };
   applyAnswersToMarkdown(text: string, risposte: Record<string, string>): string;
   renderHtml(): string;
   startWebServer(opts?: { port?: number; fallbackPort?: boolean; repo?: string; stateDir?: string }): Promise<{ server: import('node:http').Server; port: number }>;
@@ -1123,6 +1123,80 @@ describe('interfaccia web della pipeline (T69)', () => {
 
     const st = W.handleApi('GET', '/api/stato', {}, opts).data;
     expect(st.orchestratore.inCoda).toHaveLength(2); // chat message + domande notification
+  });
+
+  describe('lo stato delle domande (T208)', () => {
+    const answered = (text: string) => W.parseQuestionFile('T9', text).answered;
+
+    it('la riga in testa decide, anche contro ciò che sembra il file', () => {
+      expect(W.parseQuestionFile('T9', '# T9\n\nStato: aperta\n\n## Domanda\nA o B?\n\n## Risposta\nA\n')).toMatchObject({ answered: false, stato: 'aperta' });
+      expect(W.parseQuestionFile('T9', '# T9\n\nStato: chiusa\n\nDomanda in forma libera, risolta a parole.\n')).toMatchObject({ answered: true, stato: 'chiusa' });
+      expect(W.parseQuestionFile('T9', '# T9\r\n\r\nStato: chiusa\r\n\r\n**Risposta:**\r\n').stato).toBe('chiusa');
+    });
+
+    it('la riga conta solo in testa: citata nel testo o sconosciuta non decide', () => {
+      expect(W.parseQuestionFile('T9', '# T9\n\nUn testo.\n\nStato: chiusa\n')).toMatchObject({ answered: false, stato: undefined });
+      expect(W.parseQuestionFile('T9', '# T9\n\nStato: boh\n')).toMatchObject({ answered: false, stato: undefined });
+    });
+
+    it("senza riga una risposta vuota è vuota: mai oltre l'a capo, e ** non è una risposta", () => {
+      expect(answered('# T9\n\nDomanda?\n\n**Risposta:**\n')).toBe(false);
+      expect(answered('# T9\n\nDomanda?\n\n**Risposta:**\n\nAltro testo sotto.\n')).toBe(false);
+      expect(answered('# T9\n\nDomanda?\n\nRisposta:\nAltro testo sotto.\n')).toBe(false);
+      expect(answered('# T9\n\nUna?\n\n**Risposta:** sì\n\nDue?\n\n**Risposta:**\n')).toBe(false);
+      expect(answered('# T9\n\nUna?\n\n**Risposta:** sì\n\nDue?\n\n**Risposta**: no\n')).toBe(true);
+      expect(answered('# T9\n\nDomanda?\n\nRisposta: sì\n')).toBe(true);
+      expect(answered('# T9\n\nDomanda?\n\n## Risposta\n\n## Note\nniente\n')).toBe(false);
+      expect(answered('# T9\n\nDomanda?\n\n## Risposta\nsì\n')).toBe(true);
+      expect(answered('# T9\n\n## Domanda\nA o B?\n\n## Risposta\n**\n')).toBe(false);
+    });
+
+    it('senza riga le domande numerate leggono anche **Risposta:**, e il salvataggio ci scrive', () => {
+      const text = '# T9\n\n1. **Prima?**\n   Risposta:\n   testo che non è una risposta\n2. **Seconda?**\n**Risposta:**\n';
+      expect(W.parseQuestionFile('T9', text).items.map((i) => i.risposta)).toEqual(['', '']);
+      const saved = W.applyAnswersToMarkdown(text, { 1: 'uno', 2: 'due' });
+      expect(saved).toContain('   Risposta: uno\n');
+      expect(saved).toContain('**Risposta:** due\n');
+      expect(W.parseQuestionFile('T9', saved).items.map((i) => i.risposta)).toEqual(['uno', 'due']);
+    });
+
+    it('la forma libera senza riga resta da rispondere', () => {
+      expect(W.parseQuestionFile('T9', '# T9\n\nDeciso a parole: si fa così.\n')).toMatchObject({ items: [], answered: false, stato: undefined });
+    });
+
+    it('/api/stato conta solo le aperte e le mette per prime, anche se il task è in attesa', () => {
+      const opts = makeSandbox();
+      const dir = path.join(tmpRepo, 'docs', 'pipeline', 'domande');
+      fsMod.writeFileSync(path.join(dir, 'T1.md'), '# T1\n\nStato: chiusa\n\nRisolta a parole.\n');
+      fsMod.writeFileSync(path.join(dir, 'T2.md'), '# T2\n\nStato: aperta\n\n**Risposta:**\n');
+      fsMod.writeFileSync(path.join(dir, 'T5.md'), '# T5\n\nStato: chiusa\n\n**Risposta:**\n'); // T5 is `in attesa` in the backlog
+      fsMod.writeFileSync(path.join(dir, 'T6.md'), '# T6\n\n**Risposta:**\n');
+      const st = W.handleApi('GET', '/api/stato', {}, opts).data;
+      expect(st.domande.map((d: any) => d.id)).toEqual(['T2', 'T6', 'T1', 'T5']);
+      expect(st.domande.map((d: any) => d.stato)).toEqual(['aperta', undefined, 'chiusa', 'chiusa']);
+      expect(st.domandeAperte).toBe(2);
+    });
+
+    it('la pagina scrive il conteggio del server e nomina lo stato della riga', () => {
+      const html = W.renderHtml();
+      expect(html).toContain("getElementById('count-domande').textContent = s.domandeAperte");
+      expect(html).toContain("d.stato ?? (d.answered ? 'risposto' : 'da rispondere')");
+    });
+
+    it('POST /api/domande non toglie la riga e non chiude la domanda', () => {
+      const opts = makeSandbox();
+      const file = path.join(tmpRepo, 'docs', 'pipeline', 'domande', 'T5.md');
+      const numbered = '# T5\n\nStato: aperta\n\n1. **Prima?**\n   Risposta: \n';
+      fsMod.writeFileSync(file, numbered);
+      const res = W.handleApi('POST', '/api/domande/T5', { risposte: { 1: 'sì' } }, opts);
+      expect(res.data.parsed).toMatchObject({ answered: false, stato: 'aperta' });
+      expect(fsMod.readFileSync(file, 'utf8')).toContain('Stato: aperta\n');
+      expect(fsMod.readFileSync(file, 'utf8')).toContain('Risposta: sì\n');
+
+      const section = '# T5\n\nStato: aperta\n\n## Domanda\nA o B?\n\n## Risposta\nvecchia\n';
+      W.handleApi('POST', '/api/domande/T5', { content: section, risposte: { 1: 'nuova' } }, opts);
+      expect(fsMod.readFileSync(file, 'utf8')).toBe('# T5\n\nStato: aperta\n\n## Domanda\nA o B?\n\n## Risposta\nnuova\n');
+    });
   });
 
   it('POST /api/budget e POST /api/orchestratore aggiornano budget.json e orchestratore.json', () => {

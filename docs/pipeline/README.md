@@ -213,8 +213,8 @@ Altri agenti, di altri provider, lavorano nello stesso repository nello stesso m
 2. Il tuo task e i dossier di quelli da cui dipende o nasce sono in `.pipeline-task.md`; per un altro task che cita (un bug di T63): `node tools/pipeline/pipeline.mjs dossier T63`.
 3. Non pianificare il to-do. **Non leggere e non modificare `docs/plans/backlog.md`**: stato ed esito del tuo task li scrive la pipeline quando lo integra, dalla tua riga `ESITO`, che quindi deve dire tutto ciò che serve (cosa è cambiato, cosa manca, cosa non è provato). Un task «Integrare Txx» fonde anche il backlog, se quel branch lo tocca, senza altre modifiche.
 4. Non fare domande e non aspettare risposte: se serve una decisione dell'autore scrivila in
-   `docs/pipeline/domande/<Txx>.md` (contesto, domanda, opzioni con la tua raccomandazione), committa e termina con
-   `ESITO: in attesa`.
+   `docs/pipeline/domande/<Txx>.md` (sotto il titolo la riga `Stato: aperta`, poi contesto, domanda, opzioni con la tua raccomandazione), committa e termina con
+   `ESITO: in attesa`. Chi chiude una domanda porta quella riga a `Stato: chiusa`: la pagina web conta le aperte da lì, e rispondere non basta a chiuderla.
 5. I numeri di ADR possono scontrarsi tra task paralleli: prendi il primo libero nel tuo branch; `integra` rinumera da solo.
 6. Se il task chiede una verifica nel browser, falla (`docs/architettura-dettagli.md#convalida-browser`: porta libera, scheda tua, chiudi
    tutto alla fine) nel suo turno: la preview con `node tools/pipeline/pipeline.mjs turno browser -- npx vite preview --port <n> --strictPort`

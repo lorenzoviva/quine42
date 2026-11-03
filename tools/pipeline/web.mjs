@@ -37,8 +37,26 @@ const readText = (file, fallback = '') => { try { return fs.readFileSync(file, '
 const readJsonl = (file) => readText(file).split('\n').filter(Boolean).map((l) => { try { return JSON.parse(l); } catch { return undefined; } }).filter(Boolean);
 
 /**
- * Parses a question file (`docs/pipeline/domande/Txx.md`) into structured questions and whether all are answered.
- * Supports both numbered questions (`1. **...**\n   Risposta: ...`) and section questions (`## Domanda ... ## Risposta`).
+ * Reads the `Stato: aperta|chiusa` line at the head of a question file: only the title and blank lines may precede it.
+ * Returns undefined when there is none, so a line further down, quoted in the text, decides nothing.
+ */
+function questionState(text) {
+  for (const line of text.split('\n')) {
+    const l = line.trim();
+    if (!l || l.startsWith('# ')) continue;
+    return /^(?:\*\*)?Stato:(?:\*\*)?\s*(aperta|chiusa)\b/i.exec(l)?.[1].toLowerCase();
+  }
+  return undefined;
+}
+
+/** What is left of an answer without the bold markers of `**Risposta:**`: bare `**` is no answer. */
+const answerText = (raw) => raw.trim().replace(/^\*\*\s*|\s*\*\*$/g, '').trim();
+
+/**
+ * Parses a question file (`docs/pipeline/domande/Txx.md`) into structured questions and whether it is settled.
+ * The `Stato:` line, when present, decides `answered`. Without it the answers do: numbered questions
+ * (`1. **...**\n   Risposta: ...`), section questions (`## Domanda ... ## Risposta`) or, in free form,
+ * every `Risposta:` line. An answer stays on its own line.
  */
 export function parseQuestionFile(id, text) {
   const items = [];
@@ -47,22 +65,32 @@ export function parseQuestionFile(id, text) {
     for (const m of numbered) {
       const num = Number(m[1]);
       const body = m[2];
-      const rm = /(?:^|\n)[ \t]*Risposta:\s*(.*)$/im.exec(body);
+      const rm = /(?:^|\n)[ \t]*(?:\*\*)?Risposta:[ \t]*(.*)$/im.exec(body);
       const qText = (rm ? body.slice(0, rm.index) : body).trim().replace(/\s+/g, ' ');
-      const ans = (rm ? rm[1] : '').trim();
+      const ans = answerText(rm ? rm[1] : '');
       items.push({ numero: num, domanda: qText, risposta: ans });
     }
   } else if (/^##\s+Domand[ae]/im.test(text)) {
     const qm = /^##\s+Domand[ae][^\n]*\n([\s\S]*?)(?=^##\s+|(?![\s\S]))/im.exec(text);
     const rm = /^##\s+Rispost[ae][^\n]*\n([\s\S]*?)(?=^##\s+|(?![\s\S]))/im.exec(text);
+    const ans = (rm ? rm[1] : '').trim();
     items.push({
       numero: 1,
       domanda: (qm ? qm[1] : text).trim().replace(/\s+/g, ' '),
-      risposta: (rm ? rm[1] : '').trim(),
+      risposta: answerText(ans) ? ans : '',
     });
   }
-  const answered = items.length > 0 ? items.every((i) => i.risposta.length > 0) : /Risposta:\s*\S|^##\s+Rispost[ae][^\n]*\n\s*\S/im.test(text);
-  return { id, items, answered };
+  const stato = questionState(text);
+  const answered = stato ? stato === 'chiusa' : items.length > 0 ? items.every((i) => i.risposta.length > 0) : freeFormAnswered(text);
+  return { id, items, answered, stato };
+}
+
+/** A file with neither numbered nor section questions: every `Risposta:` line is filled in, or a `## Risposta` section is. */
+function freeFormAnswered(text) {
+  const lines = [...text.matchAll(/Risposta(?:\*\*)?:(.*)$/gim)];
+  if (lines.length && lines.every((m) => answerText(m[1]))) return true;
+  const section = /^##\s+Rispost[ae][^\n]*\n([\s\S]*?)(?=^##\s+|(?![\s\S]))/im.exec(text);
+  return Boolean(section && answerText(section[1]));
 }
 
 /** Applies an object or array of answers (`{ 1: '...', 2: '...' }`) to a `domande/Txx.md` markdown string. */
@@ -82,10 +110,10 @@ export function applyAnswersToMarkdown(text, risposte = {}) {
     const line = lines[i];
     const nm = /^(\d+)\.\s+/.exec(line);
     if (nm) currentNum = Number(nm[1]);
-    if (currentNum && /^[ \t]*Risposta:\s*/i.test(line) && (risposte[currentNum] !== undefined || risposte[String(currentNum)] !== undefined)) {
-      const indent = /^([ \t]*)/.exec(line)?.[1] ?? '   ';
+    const label = /^[ \t]*(?:\*\*)?Risposta:(?:\*\*)?/i.exec(line)?.[0];
+    if (currentNum && label && (risposte[currentNum] !== undefined || risposte[String(currentNum)] !== undefined)) {
       const val = String(risposte[currentNum] ?? risposte[String(currentNum)] ?? '').trim();
-      out.push(`${indent}Risposta: ${val}`);
+      out.push(`${label} ${val}`);
     } else {
       out.push(line);
     }
@@ -150,10 +178,11 @@ export function buildStateSnapshot(opts = {}) {
       content,
       items: parsed.items,
       answered: parsed.answered,
+      stato: parsed.stato,
       taskTitle: task?.title ?? id,
       taskStatus: task?.status ?? '—',
     };
-  });
+  }).sort((a, b) => Number(a.answered) - Number(b.answered)); // open ones first, by file name within each group
 
   const orchState = readJson(path.join(p.stateDir, 'orchestra', 'stato.json'), {
     provider: undefined,
@@ -208,6 +237,7 @@ export function buildStateSnapshot(opts = {}) {
     quadro: readText(p.quadro),
     consumi: readJsonl(p.history),
     domande,
+    domandeAperte: domande.filter((d) => !d.answered).length,
     todo: readText(p.todo),
   };
 }
@@ -1478,12 +1508,11 @@ export function renderHtml() {
     }
 
     function renderDomandeAndTodo(s) {
-      const pendingCount = s.domande.filter((d) => !d.answered || d.taskStatus.startsWith('in attesa')).length;
-      document.getElementById('count-domande').textContent = pendingCount || s.domande.length;
+      document.getElementById('count-domande').textContent = s.domandeAperte;
       const sel = document.getElementById('domande-select');
       const prev = DOMANDE_CURRENT_ID || sel.value || s.domande[0]?.id;
       sel.innerHTML = s.domande.map((d) =>
-        \`<option value="\${esc(d.id)}" \${d.id === prev ? 'selected' : ''}>\${esc(d.id)} · \${esc(d.taskTitle)} (\${d.answered ? 'risposto' : 'da rispondere'})</option>\`
+        \`<option value="\${esc(d.id)}" \${d.id === prev ? 'selected' : ''}>\${esc(d.id)} · \${esc(d.taskTitle)} (\${d.stato ?? (d.answered ? 'risposto' : 'da rispondere')})</option>\`
       ).join('');
       if (!DOMANDE_DIRTY && prev) {
         loadSelectedDomanda(prev, s);
