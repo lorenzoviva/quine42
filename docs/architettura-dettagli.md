@@ -442,6 +442,15 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   (`CARTOON_HEMI`) è freddo a metà strada, così le facce verticali non vanno al grigio. Le ombre hanno il raggio del filtro a 0 (`SHADOW_RADIUS`). Nello studio il
   sole è acceso (`CARTOON_STUDIO`): senza, nessuna faccia cambierebbe fascia. I voxel luminosi escono dalle fasce in `addGlow` (colore × `GLOW_BASE` + `U.glow`,
   uguale su ogni faccia), solo nello shader toon. Restano Lambert le icone e le foto (T89d) e il laboratorio (T89e).
+- **La luce e l'aria** (T89c): `cartoonLight(day)` in `cartoon.ts` mescola tre momenti (`PHASES`: giorno, tramonto, notte, agli stessi gradini del cielo) e dà al renderer colore e
+  intensità della luce chiave, emisfero, tinta delle ombre e forza del bloom; di notte la luce chiave è una luna fredda, altrimenti tutte le facce avrebbero la stessa fascia. L'ombra
+  tinta è `addShade`, un pezzo di shader dopo `lights_fragment_end` (da `toon()` e da `addGlow`): `directLight` lì è ancora il sole con l'ombra già moltiplicata, e confrontato col
+  colore del sole dice quanta ombra c'è, senza rileggere la mappa; le facce girate dal sole contano sempre come in ombra; la tinta (`SHADE`) moltiplica luce diretta e indiretta. La
+  nebbia è `aerial(distanza, day)`: in 3/4 il suolo va da 0,8 a 1,33 distanze della camera, quindi comincia a 0,85 e la cima dello schermo è già sbiadita; è tutta cielo a 2,2 distanze,
+  prima della fine di ciò che il kernel carica (1,1 distanze più un chunk), anche con la camera libera bassa sull'orizzonte; da vicino resta lontana; di notte si accorcia. Nella corona
+  e nello studio niente nebbia, come prima, e la luce è `CARTOON_INDOORS`. L'inchiostro sbiadisce con la nebbia (`uFog` in `Ink`): il passo che lo sostituisce (T89b) deve tenerlo. Il
+  bloom è più stretto (`CARTOON_BLOOM_RADIUS`, 0,3) e più debole di giorno (0,5) che di notte (0,85). Il classico non cambia. Il raggio della camera delle ombre resta ±22: con la camera
+  più lontana della vista predefinita le ombre portate finiscono prima del suolo visibile, come nel classico.
 - **I contorni** sono ancora la prova di T89 (passo `Ink` nel composer di `bloom.ts`, da profondità e normali, soglie in `window.cartone`) finché non arriva T89b.
 
 <a id="mondo3d"></a>

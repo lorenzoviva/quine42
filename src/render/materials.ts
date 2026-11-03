@@ -4,7 +4,7 @@
 // their colour; while the renderer blooms they also mark themselves in the frame's alpha, which the bloom reads.
 
 import * as THREE from 'three';
-import { CARTOON, toon } from './cartoon';
+import { addShade, CARTOON, toon } from './cartoon';
 
 /** Shared uniforms: time (wind, flicker), wind strength, the radius beyond which the simulation is cut. */
 export const U = {
@@ -27,6 +27,7 @@ const GLOW_BASE = 0.6;
 export function addGlow(sh: THREE.WebGLProgramParametersWithUniforms, always = false): void {
   // The toon shader alone reads a gradient: there a glowing voxel leaves the bands, its colour the same on every face.
   const banded = sh.fragmentShader.includes('#include <gradientmap_pars_fragment>');
+  if (banded) addShade(sh);
   const unbanded = banded
     ? `#ifdef USE_COLOR
   outgoingLight = mix(outgoingLight, vColor.rgb * (GLOW_BASE + uGlow), ${always ? '1.0' : 'vGlow'});

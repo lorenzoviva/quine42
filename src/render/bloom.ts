@@ -57,6 +57,11 @@ export class Bloom {
     this.pass.strength = v;
   }
 
+  /** How far the halo spreads. */
+  set radius(v: number) {
+    this.pass.radius = v;
+  }
+
   render(dt: number): void {
     this.ink?.prepare(this.gl);
     U.glowMask.value = 1;

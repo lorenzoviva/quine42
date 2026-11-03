@@ -10,7 +10,7 @@ import * as THREE from 'three';
 import type { Kernel } from '../kernel/kernel';
 import { Bloom } from './bloom';
 import type { CoronaView, StudioRoom } from './coronaview';
-import { CARTOON, CARTOON_HEMI, CARTOON_STUDIO, SHADOW_INTENSITY, SHADOW_RADIUS, SUN_FROM } from './cartoon';
+import { aerial, CARTOON, CARTOON_BLOOM_RADIUS, CARTOON_HEMI, CARTOON_INDOORS, CARTOON_STUDIO, cartoonLight, SHADE, SHADOW_INTENSITY, SHADOW_RADIUS, SUN_FROM } from './cartoon';
 import { CUT, U } from './materials';
 import { Overlay } from './overlay';
 import { buildChunk, chunkSig, disposeChunk, tileForms, type TerrainView } from './terrain';
@@ -92,6 +92,7 @@ export class Renderer {
     if (CARTOON) {
       this.sun.shadow.intensity = SHADOW_INTENSITY;
       this.sun.shadow.radius = SHADOW_RADIUS;
+      this.bloom.radius = CARTOON_BLOOM_RADIUS;
     }
     this.scene.fog = this.fog;
     this.scene.add(this.hemi, this.sun, this.sun.target, this.world, this.flash, this.loader.group);
@@ -290,15 +291,34 @@ export class Renderer {
       this.hemi.intensity = studio ? (CARTOON ? CARTOON_STUDIO.hemi : 0.9) : 1.0;
       this.scene.background = studio ? SKY.studio : SKY.corona;
       this.fog.near = this.fog.far = 1e6;
+      if (CARTOON) {
+        this.sun.color.set(CARTOON_INDOORS.sun);
+        this.hemi.color.set(CARTOON_INDOORS.sky);
+        this.hemi.groundColor.set(CARTOON_INDOORS.ground);
+        SHADE.value.set(...CARTOON_INDOORS.shade);
+        this.bloom.strength = CARTOON_INDOORS.bloom;
+      }
     } else {
-      this.sun.intensity = 2.3 * Math.min(1, day * 1.4);
-      this.sun.color.setHSL(0.09, 0.6, 0.6 + 0.3 * day);
-      this.hemi.intensity = 0.22 + 0.9 * Math.min(1, day * 1.3);
+      if (CARTOON) {
+        const light = cartoonLight(day);
+        this.sun.intensity = light.sunIntensity;
+        this.sun.color.copy(light.sun);
+        this.hemi.intensity = light.hemiIntensity;
+        this.hemi.color.copy(light.sky);
+        this.hemi.groundColor.copy(light.ground);
+        SHADE.value.set(...light.shade);
+        this.bloom.strength = light.bloom;
+      } else {
+        this.sun.intensity = 2.3 * Math.min(1, day * 1.4);
+        this.sun.color.setHSL(0.09, 0.6, 0.6 + 0.3 * day);
+        this.hemi.intensity = 0.22 + 0.9 * Math.min(1, day * 1.3);
+      }
       const bg = day > 0.6 ? SKY.day.clone() : day > 0.3 ? SKY.dusk.clone().lerp(SKY.day, (day - 0.3) / 0.3) : SKY.night.clone().lerp(SKY.dusk, day / 0.3);
       this.scene.background = bg;
       this.fog.color.copy(bg);
-      this.fog.near = this.distance * 2.2;
-      this.fog.far = this.distance * 4.5;
+      const air = CARTOON ? aerial(this.distance, day) : { near: this.distance * 2.2, far: this.distance * 4.5 };
+      this.fog.near = air.near;
+      this.fog.far = air.far;
     }
     this.lights.update(k, studio ? 0 : night, { ox, oy }, this.t, watch ? { x: 0, y: 0 } : p);
     this.flash.intensity = this.flashUntil > this.t ? 6 * ((this.flashUntil - this.t) / 0.6) : 0;
