@@ -693,12 +693,13 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Inglese**: `team`
 - **Definizione**: un agente nello studio, un membro per edificio, che lavora allo scaffale del file che cambia.
 - **Dove vive**: `src/kernel/archive.ts`, `src/kernel/corona.ts`
+- **Da non usare**: nessuno
 
 ### Ospite della stanza
 - **Inglese**: `guest`
 - **Definizione**: l'agente senza una stanza sua che lavora in quella di un'altra squadra, un passo oltre il suo membro (l'Attore nello Studio dei Personaggi).
 - **Dove vive**: `src/kernel/corona.ts`, `src/kernel/archive.ts`
-- **Da non usare**: nessuno
+- **Da non usare**: `ospite` nel codice
 
 ### Compito
 - **Inglese**: `task`
