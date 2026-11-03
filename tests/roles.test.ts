@@ -137,7 +137,7 @@ describe('runes and bindings by role (T37)', () => {
     run(k, 1);
     expect(k.corona.roomAt(k.wandererPos().x, k.wandererPos().y)?.building.id).toBe('concilio');
     expect(countItem(k.inventory(), `rune:${COUNCIL_RUNE}`)).toBe(1);
-    expect(k.hand().tokens).not.toContain(COUNCIL_RUNE);
+    expect(k.phrase().tokens).not.toContain(COUNCIL_RUNE);
   });
 
   it('R: a player takes back their runes, the repository is the master’s', async () => {
@@ -152,15 +152,15 @@ describe('runes and bindings by role (T37)', () => {
     run(k, 2 / 60);
     expect(rolled).toBe(0);
     expect(k.repo.head().id).toBe(head);
-    expect(k.as('bea', () => k.hand().tokens)).toEqual(['x', '=', '1']);
+    expect(k.as('bea', () => k.phrase().tokens)).toEqual(['x', '=', '1']);
     const mine = k.ecs.query('rune').map((id) => k.ecs.get(id, 'rune')).filter((r) => r.source === 'player');
     expect(mine.map((r) => r.by)).toEqual(['io', 'io', 'io']);
     // The master's rollback brings the world back, and every rune to whoever wrote it.
     write(k, 'bea', ['y', '=', '2']);
     k.rollback();
     expect(rolled).toBe(1);
-    expect(k.hand().tokens).toEqual(['speed', '=', 'speed']);
-    expect(k.as('bea', () => k.hand().tokens)).toEqual(['x', '=', '1', 'y', '=', '2']);
+    expect(k.phrase().tokens).toEqual(['speed', '=', 'speed']);
+    expect(k.as('bea', () => k.phrase().tokens)).toEqual(['x', '=', '1', 'y', '=', '2']);
   });
 
   it('alone nothing changes: the wanderer’s x = 9999 still breaks out', async () => {

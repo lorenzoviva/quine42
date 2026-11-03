@@ -34,7 +34,7 @@ export class Hud {
   private lastQuests = '';
   private lastNeeds = '';
   private lastChunk = '';
-  private lastHand = '';
+  private lastPhrase = '';
   private lastHot = '';
   private lastFaults = '';
   private dialogTimer = 0;
@@ -102,10 +102,10 @@ export class Hud {
       this.zone.textContent = cell?.path ? `§ ${cell.path}${cell.line ? ` : riga ${cell.line}` : ''} — E per riscrivere` : 'Corona — cammina sul codice';
     } else this.zone.hidden = true;
 
-    const hand = k.hand();
-    const handKey = `${hand.tokens.join('\u0001')}|${hand.sel}`;
-    if (handKey !== this.lastHand) {
-      this.lastHand = handKey;
+    const hand = k.phrase();
+    const phraseKey = `${hand.tokens.join('\u0001')}|${hand.sel}`;
+    if (phraseKey !== this.lastPhrase) {
+      this.lastPhrase = phraseKey;
       this.hand.replaceChildren(
         ...hand.tokens.map((t, i) => {
           const look = runeGlyph(t, k.content.runes[t]);

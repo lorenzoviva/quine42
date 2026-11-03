@@ -471,7 +471,7 @@ async function main() {
         void kernel.interact();
         break;
       case 'inscribe':
-        kernel.inscribeHand();
+        kernel.inscribePhrase();
         break;
       case 'cast':
         void kernel.castSpell();

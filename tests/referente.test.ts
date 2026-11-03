@@ -139,7 +139,7 @@ describe('the runes the master asks the Referente for (T42f)', () => {
     const r = await until(server, [master, anna], master.k.talkToAgent('referente', 'dammi la runa speed'));
     expect(r.forged).toMatch(/speed/);
     expect(has('io', 'speed')).toBe(1);
-    expect(k.as('io', () => k.hand().tokens)).toContain('speed');
+    expect(k.as('io', () => k.phrase().tokens)).toContain('speed');
     // Not a file: the branch has nothing, and the master's client hears of it in the next update.
     expect(server.branchFiles()).toEqual({});
     run(server, [master, anna], 12);

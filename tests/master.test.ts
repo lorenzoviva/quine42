@@ -76,7 +76,7 @@ describe('the master in god mode (T42a)', () => {
     expect(anna.others.has('io')).toBe(true);
     // The master speaks the Council's rune: off the carpet, to the hall. For Anna the body leaves.
     k.as('io', () => {
-      k.hand().tokens = [COUNCIL_RUNE];
+      k.phrase().tokens = [COUNCIL_RUNE];
       expect(k.councilRune()).toBe(true);
     });
     for (let i = 0; i < 12; i++) server.tick(DT);

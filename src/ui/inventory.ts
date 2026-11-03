@@ -238,7 +238,7 @@ export class InventoryPanel {
     }
     if (this.busy) side.append(el('div', { class: 'busy' }, this.busy));
 
-    const hand = k.hand();
+    const hand = k.phrase();
     const runes = el('div', { class: 'runes' });
     hand.tokens.forEach((t, i) => {
       const look = runeGlyph(t, k.content.runes[t]);
@@ -262,7 +262,7 @@ export class InventoryPanel {
     });
     const inscribe = el('button', { class: 'primary' }, 'Incidi davanti a te (Q)');
     inscribe.onclick = () => {
-      k.inscribeHand();
+      k.inscribePhrase();
       this.render();
     };
     const spell = k.incantation();

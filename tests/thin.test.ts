@@ -193,13 +193,13 @@ describe('the thin client (T39)', () => {
     run(server, [anna], 12);
     expect(anna.k.composeRune('luce')).toBe(true);
     run(server, [anna], 12);
-    expect(k.as('anna', () => k.hand().tokens)).toEqual(['luce']);
-    anna.k.inscribeHand();
-    expect(anna.k.hand().tokens).toEqual([]);
+    expect(k.as('anna', () => k.phrase().tokens)).toEqual(['luce']);
+    anna.k.inscribePhrase();
+    expect(anna.k.phrase().tokens).toEqual([]);
     run(server, [anna], 3);
     await new Promise((r) => setTimeout(r, 0));
     run(server, [anna], 12);
-    expect(anna.k.hand().tokens).toEqual(k.as('anna', () => k.hand().tokens));
+    expect(anna.k.phrase().tokens).toEqual(k.as('anna', () => k.phrase().tokens));
     // What a game of many does not do yet says so, and changes nothing.
     const before = JSON.stringify(anna.k.inventory());
     anna.k.rollback();

@@ -146,13 +146,13 @@ describe('words and gifts between wanderers (T43a)', () => {
     // The pouch of runes, whole: the rune goes with it, and leaves Anna's phrase.
     k.as('anna', () => {
       k.give('rune:luce', 1);
-      Object.assign(k.hand(), { tokens: ['luce'], sel: 0 });
+      Object.assign(k.phrase(), { tokens: ['luce'], sel: 0 });
     });
     const pouch = k.as('anna', () => k.inventory().slots.findIndex((s) => !!s?.inv && countItem(s.inv, 'rune:luce') > 0));
     expect(pouch).toBeGreaterThanOrEqual(0);
     const bags = k.as('bruno', () => k.inventory().slots.filter((s) => s?.inv).length);
     expect((await ask(server, all, anna.session.act({ t: 'dai', viandante: 'bruno', slot: pouch }))).ok).toBe(true);
-    expect(k.as('anna', () => [countItem(k.inventory(), 'rune:luce'), k.hand().tokens.length])).toEqual([0, 0]);
+    expect(k.as('anna', () => [countItem(k.inventory(), 'rune:luce'), k.phrase().tokens.length])).toEqual([0, 0]);
     expect(k.as('bruno', () => [k.inventory().slots.filter((s) => s?.inv).length, countItem(k.inventory(), 'rune:luce')])).toEqual([bags + 1, 1]);
     // Too far: nothing moves.
     k.as('anna', () => k.give(item, 1));
@@ -257,7 +257,7 @@ describe('death and reconnection among many (T43c)', () => {
     k.as('anna', () => {
       k.give(item, 2);
       k.give('rune:luce', 1);
-      Object.assign(k.hand(), { tokens: ['luce'], sel: 0 });
+      Object.assign(k.phrase(), { tokens: ['luce'], sel: 0 });
       k.applyEffects([{ tipo: 'stato', nome: 'febbre', velocita: 0.9 }]);
     });
     k.as('bruno', () => k.give(item, 1));
@@ -286,7 +286,7 @@ describe('death and reconnection among many (T43c)', () => {
     expect(k.wandererAt('anna')).toMatchObject({ x: 0, y: 0 });
     expect(anna.k.wandererCarpet()).toMatchObject({ x: 0, y: 0 });
     expect(countItem(anna.k.inventory(), item)).toBe(0);
-    expect(anna.k.hand().tokens).toEqual([]);
+    expect(anna.k.phrase().tokens).toEqual([]);
     expect(anna.k.states()).toEqual({});
     expect(anna.k.needs()!.health).toBeGreaterThan(50);
     expect(anna.k.needs()!.thirst).toBeGreaterThan(50);
@@ -318,7 +318,7 @@ describe('death and reconnection among many (T43c)', () => {
     k.as('anna', () => {
       k.give(item, 2);
       k.give('rune:luce', 1);
-      Object.assign(k.hand(), { tokens: ['luce'], sel: 0 });
+      Object.assign(k.phrase(), { tokens: ['luce'], sel: 0 });
       k.applyEffects([{ tipo: 'stato', nome: 'benedizione', velocita: 1.2 }]);
       k.setBond(vName, 'amica');
       k.recordRule({ chiave: 'azione|canto', testo: 'cantare', possibile: true, racconto: 'canti' }, true, { task: 'action.judge', autore: 'narratore' });
@@ -339,7 +339,7 @@ describe('death and reconnection among many (T43c)', () => {
     expect(back.k.wandererCarpet()).toMatchObject({ x: 6.5, y: -2.5 });
     expect(countItem(back.k.inventory(), item)).toBe(2);
     expect(countItem(back.k.inventory(), 'rune:luce')).toBe(1);
-    expect(back.k.hand().tokens).toEqual(['luce']);
+    expect(back.k.phrase().tokens).toEqual(['luce']);
     expect(back.k.states().benedizione).toMatchObject({ velocita: 1.2 });
     expect(k.cardsOf('anna').some((c) => c.id === 'regola:azione-canto')).toBe(true);
     expect(k.as('anna', () => k.bondOf(vName))).toBe('amica');
