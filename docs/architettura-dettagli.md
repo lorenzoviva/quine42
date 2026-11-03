@@ -306,7 +306,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   porta `carta {autore, pagante, titolare}` (moduli, oggetti, ambienti, incantesimi, ricette, modelli, persone, trame, regole giudicate,
   piani dei luoghi): i punti che creano contenuti committano con `commitContent`, che timbra ciò che il cambio porta (`stampFiles`); il
   titolare delle comuni è un viandante estratto col seme (`cardHolderOf`). Gli utilizzi (`luoghi trame prompt`) e le carte dei luoghi in
-  `world/carte.json` (`CardLedger`, scritto prima di ogni commit); la collezione: `kernel.cardsOf(id)`, `collectionOf`.
+  `world/carte.json` (`CardUses`, scritto prima di ogni commit); la collezione: `kernel.cardsOf(id)`, `collectionOf`.
 - **Crediti e spese comuni** (ADR-0081, T45a, ADR-0104, T125): saldo crediti per viandante nel `Ledger` del kernel (`kernel.ledger`; sul server `universes/.saldi/<nome>.json`, fuori dalla storia; `kernel.creditsOf`, `deductCredits`); ricaricato a mano solo dal master, dalla console (`grantCredits`, messaggio `ricarica`), entro il tetto al giorno per universo (`QUINE_TETTO_RICARICHE`); il Referente non dà crediti. Ogni chiamata scala dal pagante (`payerOf`) costo modello + 1% piattaforma (`PLATFORM_FEE = 0.01`, `costWithFee`); le spese comuni (`comune`) sono divise in parti uguali tra tutti i giocatori collegati in quel momento (`splitCost`), master compreso, escludendo gli anonimi. A crediti esauriti (`crediti <= 0`) o per viandanti anonimi (`anonimo: true`, 0 crediti non ricaricabili): le richieste personali sono risposte dai modelli locali (`MockAiModels`) e il giocatore lo sa (`stato.crediti` nell'aggiornamento, avviso nel feed).
 
 <a id="multigiocatore"></a>

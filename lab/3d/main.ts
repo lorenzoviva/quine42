@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import { GeminiAiModels } from '../../src/kernel/ai/gemini';
 import type { Grid3 } from '../../src/mj/engine';
-import { tallyLine, UsageLedger } from '../../src/kernel/ai/usage';
+import { tallyLine, UsageLog } from '../../src/kernel/ai/usage';
 import { CLASSES } from '../../src/mj/classes';
 import { classFor, type Target } from '../mjx/target';
 import { sculptMjx } from '../mjx/sculptor';
@@ -813,7 +813,7 @@ $<HTMLInputElement>('wind').oninput = (e) => (uWind.value = Number((e.target as 
 const roleOfClass: Record<string, Entry['role']> = { persona: 'npc', animale: 'animal', bestia: 'animal', albero: 'tree', cespuglio: 'plant', roccia: 'rock', sasso: 'rock', edificio: 'structure', monumento: 'structure' };
 for (const c of CLASSES) $('g-class').append(new Option(`${c.name} (${c.tiles.join('×')})`, c.id));
 $<HTMLSelectElement>('g-class').value = 'edificio';
-const gMeter = new UsageLedger();
+const gMeter = new UsageLog();
 $('g-go').onclick = async () => {
   const out = $('g-out');
   if (!(await GeminiAiModels.available())) {

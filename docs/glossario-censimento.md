@@ -66,7 +66,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Incantesimo | `magia` | 23 (9) | 2 (2) | 34 (13) | 7 (1) |
 | Lessico | `glossario` | 1 (1) | 0 (0) | 30 (6) | 0 (0) |
 | Registro del Concilio | `registro` | 16 (6) | 0 (0) | 110 (45) | 0 (0) |
-| Registro del Concilio | `log` | 146 (31) | 1 (1) | 16 (13) | 1 (1) |
+| Registro del Concilio | `log` | 151 (32) | 1 (1) | 16 (13) | 1 (1) |
 | Sessione del Concilio | `sessione` | 30 (13) | 0 (0) | 83 (34) | 12 (1) |
 | Modello di IA | `modello` | 94 (28) | 5 (2) | 216 (55) | 15 (4) |
 | Modello di IA | `Models` | 346 (66) | 0 (0) | 76 (31) | 4 (3) |

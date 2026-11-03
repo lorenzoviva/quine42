@@ -33,7 +33,7 @@ import { hash32, hashStr, hex, Rng } from './rng';
 import { onBeat, repairActor, repairCoefficients, stretch, type ActorConfig, type Coefficients } from './coefficients';
 import { BudgetError, type AiModels } from './ai/models';
 import { billedModel, costOf } from './ai/prices';
-import { USAGE_FILE, UsageLedger, type CallRecord } from './ai/usage';
+import { USAGE_FILE, UsageLog, type CallRecord } from './ai/usage';
 import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, MemoryLedger, splitCost, type Ledger, type PaymentRecord } from './credits';
 import { MemoryChunks, type ChunkStore } from './chunks';
 import { bodyFoot, bodyGround, Forms, holesOf, InlineRunner, instanceGrid, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground } from './forms';
@@ -56,7 +56,7 @@ import { BENCH, cleanCases, runCase, textKey, type BenchEntry, type BenchRun, ty
 import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Identity } from './agents/content';
 import { addItem, CARRY_CAPACITY, countItem, HOTBAR, equippedItem, moveSlot, newInventory, putSlot, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
 import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH, worldLevels } from './relief';
-import { CardLedger, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, receivedBy, type Received, payerOf, chunkCardId, stampFiles, cardHolderOf, type Card, type CardStamp } from './cards';
+import { CardUses, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, receivedBy, type Received, payerOf, chunkCardId, stampFiles, cardHolderOf, type Card, type CardStamp } from './cards';
 import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState, PER_WANDERER } from './wanderers';
 import type { ActionDef, AiConfig, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Partita, ChunkInfo, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
 
@@ -374,10 +374,10 @@ export class Kernel {
   readonly content = new Content();
   readonly ai: AiModels;
   /** What the models cost, per day, model and task (world/consumi.json). */
-  readonly usage = new UsageLedger();
+  readonly usage = new UsageLog();
   private usageWritten = -1;
   /** The cards' uses and the places' cards (T36): world/carte.json, written before every commit. */
-  readonly cards = new CardLedger();
+  readonly cards = new CardUses();
   private cardsWritten = -1;
   private cardIdsOf?: { files: FileMap; ids: Set<string> };
   /** The places the graph of the world knows (ADR-0045): planned chunks, by key. */

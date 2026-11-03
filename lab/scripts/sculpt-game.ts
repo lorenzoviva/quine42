@@ -13,13 +13,13 @@ import { tallyLine } from '../../src/kernel/ai/usage';
 import { checkProgram, views, type SculptRequest } from '../../src/kernel/agents/sculptor';
 import { classOf } from '../../src/mj/classes';
 import { direct, readKey } from './gemini';
-import { UsageLedger } from '../../src/kernel/ai/usage';
+import { UsageLog } from '../../src/kernel/ai/usage';
 
 const argv = process.argv.slice(2);
 const opt = (n: string) => (argv.includes(`--${n}`) ? argv[argv.indexOf(`--${n}`) + 1] : undefined);
 const root = path.resolve(opt('root') ?? (fs.existsSync('.env') ? '.' : '../../..'));
 const key = readKey(root);
-const models = direct('gemini-3.1-flash-lite', key, new UsageLedger(), { max: Number(opt('max') ?? 16) });
+const models = direct('gemini-3.1-flash-lite', key, new UsageLog(), { max: Number(opt('max') ?? 16) });
 const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: models });
 k.council.onFeed = (e) => console.log(`  [${e.from}${e.to ? ` → ${e.to}` : ''}] ${e.kind}: ${e.text.slice(0, 160)}`);
 const out = path.resolve('lab/out/sculpt-game');

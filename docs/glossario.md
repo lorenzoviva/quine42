@@ -718,10 +718,10 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Fermo**: `ai.coefficienti`.
 
 ### Consumi
-- **Inglese**: `usage`, `UsageLedger`
+- **Inglese**: `usage`, `UsageLog`
 - **Definizione**: quanto si è speso per giorno, modello e compito, in token e dollari.
 - **Dove vive**: `src/kernel/ai/usage.ts`, `world/consumi.json`
-- **Da non usare**: nessuno
+- **Da non usare**: `UsageLedger`
 
 ## Client, soldi e carte
 
@@ -758,10 +758,10 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Fermo**: `eredita`, `origini`, `quote`, `allaNascita`.
 
 ### Carta
-- **Inglese**: `Card`, `CardStamp`, `isCardStamp`, `cards`, `CardLedger` (→ CardUses, R8)
+- **Inglese**: `Card`, `CardStamp`, `isCardStamp`, `cards`, `CardUses`
 - **Definizione**: il timbro su un contenuto generato: autore, pagante, titolare, utilizzi.
 - **Dove vive**: `src/kernel/cards.ts`, `world/carte.json`
-- **Da non usare**: `Carta`, `isCarta` (nel codice)
+- **Da non usare**: `Carta`, `isCarta` (nel codice), `CardLedger`
 - **Fermo**: `carta`, `autore`, `utilizzi`, `world/carte.json`.
 
 ### Titolare
@@ -848,7 +848,7 @@ Stessa parola, concetti diversi: il problema che confonde di più, più dei sino
 | `slot` | tasca dell'inventario; posto del pannello di una meccanica (`posto` nel protocollo); `DEVICE_SLOTS` | «Tasca» è il primo; il secondo è «posto» |
 | `cell` | cella di un programma; casella di un luogo (`gateCells`, `freeCells`, indici dei piani) | rinomina R10 |
 | registro | del Concilio (`feed`); dei consumi (`usage`); dei viandanti (`wanderers`); delle vulnerabilità | il nome lungo |
-| `Ledger` | saldi (`Ledger`); consumi (`UsageLedger`); utilizzi delle carte (`CardLedger`) | rinomina R8 |
+| `Ledger` | saldi (`Ledger`); consumi e utilizzi delle carte si chiamavano così fino alla rinomina R8, ora sono `UsageLog` e `CardUses` | «Saldi» |
 | `gate` | varco di un luogo (`layout.ts`); chi può passare (`gate` in `server/access.ts`, `GeminiGate`) | il file |
 | zona | area di 56 × 56 luoghi (`zoneOf`); `kernel.zone` (`sim`, `corona`, `studio`) | «Zona» è la prima |
 | `path` | sentiero (`carvePath`); percorso di un file | «Sentiero» |
@@ -883,7 +883,7 @@ Le fanno i task T188-T204, una per task e nell'ordine: vanno in conflitto con tu
 | R5 | Di `Kernel`: `hand()` → `phrase()`, `syncHand` → `syncPhrase`, `inscribeHand` → `inscribePhrase`; `lastHand` di `hud.ts` → `lastPhrase`, `handKey` → `phraseKey` | `ThinClient.phrase` e `ThinClient.syncPhrase`, su un'altra classe; i locali `hand` che tengono il componente, `Hud.hand` (`#hand`), i commenti; **fermi** il componente `hand`, `hand.tokens`, il campo `hand` dello stato sul filo (`hand: k.hand()` diventa `hand: k.phrase()`), i locali `hand` che ne fanno la chiave | 15 | no se resta il componente: con il componente, dallo stato di ogni viandante e dal Lua, ed è **sconsigliato** | fatto |
 | R6 | `ThingView` → `EntityView`, `THING_PARTS` → `ENTITY_PARTS`, `Things` → `Entities`, `Thing` del laboratorio → `Entity`, `thingStandIn` → `entityStandIn`, `thingCards` → `entityCards`; i campi `things` di `Renderer`, `SessionClient`, `BenchScene` e della miniatura → `entities`; `src/render/things.ts` → `src/render/entities.ts`; nei commenti `thing` → `entity` dove è il termine tecnico | `something`, `anything` e la parola comune nei commenti (anche «things» accanto a «people» o per ciò che si porta, che non sono termini tecnici); la riga non li nomina: il campo `things` di `Client` in `server.ts`, il metodo privato `ThinClient.things`, i locali `things` e `thing` (`kernel`, `bench`, `graph`, `coefficients`, test), `things` e `userData.thing` del laboratorio, `things` di `lab/3d/world.ts`, il valore `'thing'` di `EntityView.kind`, i titoli dei test, `tests/kernel-things.test.ts`; `class Thing` di `tests/sicurezza/uscita.test.ts` non è un'entità; **fermi** `cose` ed `entita` del protocollo, `cose` dei casi del banco e dei prompt | 54 | no | fatto |
 | R7 | `AttoreConfig` → `ActorConfig`, `repairAttore` → `repairActor`; `AiMinimi` → `AiMinimums`, `repairMinimi` → `repairMinimums`, `minimiBlock` → `minimumsBlock`; `Eredita` → `HeritageConfig`, `EREDITA` → `DEFAULT_HERITAGE`, `repairEredita` → `repairHeritage`, `Origine` → `CardOrigin`; `Carta` → `CardStamp` (il timbro; `Card` è la carta in una collezione e lo estende), `isCarta` → `isCardStamp`; `titolareOf` → `cardHolderOf` (`holderOf` è occupato in `tools/pipeline/`); `sottoOf` → `cellarOf`; `sessionTetto` → `sessionCap`, `setSessionTetto` → `setSessionCap`, `sessionTettoOf` → `sessionCapOf`, `tettoBudgeted` → `capBudgeted`, `addBudgetFromTetto` → `addBudgetFromCap`, in `lobby.ts` `tettoMin` → `minCap`, `defaultTetto` → `defaultCap`, `tettoInput` → `capInput`, `setTetto` → `setCap`, in `creditdialog.ts` `isTetto` → `isCap`, in `site/sessioni.ts` `tettoMinimo` → `minCap`; `Scheda` di `society.ts` → `IndividualSheet`; `Forma` → `ItemShape`, `FORME` → `ITEM_SHAPES`, `formaModel` → `itemShapeModel`; `PlintoSculpture` → `PlinthSculpture`, `plintoSculpture` → `plinthSculpture`, `plintoSymbols` → `plinthSymbols`; `TornioModelEntry` → `LatheModelEntry`, `TornioShown` → `LatheShown`, `TornioView` → `LatheView`, `tornioCache` → `latheCache`, `tornioExecute` → `latheExecute`, `tornioIndex` → `latheIndex`, `tornioModels` → `latheModels`, `tornioOf` → `latheOf`, `tornioOpen` → `latheOpen`, con i file `src/kernel/tornio.ts`, `src/render/tornio.ts` e `tests/tornio.test.ts` → `lathe` | l'italiano del laboratorio, che non è il TypeScript del gioco (`Scheda` di `lab/banco/seconda.ts`, `Piano`, `daCorreggere`); il locale `tetto`, che è la chiave del messaggio; la riga non li nomina: `stepTornio`, `openTornio`, `TORNIO_AT`, il campo `tornio` di `CoronaView`, il metodo `tornio` di `Studio`, i locali `tornio`, `Kernel.plinto()`, `updatePlinto`, il campo `plinto` della struttura; **fermi** i campi omonimi nei file (`attore`, `minimi`, `eredita`, `origini`, `carta`, `titolare`, `sotto`, `tetto`, `scheda`), gli id `forma-…`, i valori `tornio` e `plinto` di `ItemKind` e simili | 32 | no | fatto |
-| R8 | `CardLedger` → `CardUses`, `UsageLedger` → `UsageLog` | `Ledger`, `FileLedger`, `MemoryLedger`, `LedgerBook`, `openLedger`: sono dei saldi | 12 | no | da fare |
+| R8 | `CardLedger` → `CardUses`, `UsageLedger` → `UsageLog` | `Ledger`, `FileLedger`, `MemoryLedger`, `LedgerBook`, `openLedger`: sono dei saldi; la riga non li nomina: i locali e parametri `ledger` che tengono un `UsageLog` (`lab/scripts/`, `tests/subscription.test.ts`), `ledger` di `allCards` in `cards.ts`, «ledger» nei commenti e nei titoli dei test; `docs/conversazioni.md`, che è storia; **fermi** `world/consumi.json`, `world/carte.json` | 12 | no | fatto |
 | R9 | Di `corona.ts`: `Floor` → `Storey`, `Building.floors` → `storeys`, `perFloor` → `perStorey`, `nFloors` → `nStoreys`, `FLOOR_STRIDE` → `STOREY_STRIDE`; il campo `floor` di `roomAt` e il parametro `floor: Floor` → `storey` | i pavimenti: `floors` di `src/mj/mesh.ts`, `floorAt`, `floorBelow`, `floorOf`, `Math.floor`; le misure di `lab/banco/misure.ts`; **fermo** lo strato `floor` di `TileLayer` | 21 | no | da fare |
 | R10 | Le caselle: `gateCells` → `gateTiles`, `freeCell` → `freeTile`, `freeCells` → `freeTiles`, `runeCells` → `runeTiles`, `solidCells` → `solidTiles`, `cellNear` → `tileNear`, `propCells` → `propTiles`, `pickCell` → `pickTile`, `doorCells` → `doorTiles`, `nicheCell` → `nicheTile`, `cellOf` → `tileOf`, `cellIndex` → `tileIndex`, `polarCell` → `polarTile`, `CoronaCell` → `CoronaTile`; i locali `cell` solo dove indicano una casella | le celle: `turnCells`, `cellAt` e `nCell` di `mesh.ts`, `sameCells`; `visibleCells` del sito e `sleepCell` di `ledger.ts`, che non sono né l'una né l'altra. `playerCell` sta in R3 | 9 | no | da fare |
 | R11 | `LayoutDef` → `EnvironmentDef`, `layoutsFor` → `environmentsFor` | **fermi** `layouts` nei manifest (25 file la leggono), `layout` nei piani | 8 | no | da fare |

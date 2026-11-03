@@ -10,7 +10,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { tallyLine, UsageLedger } from '../../src/kernel/ai/usage';
+import { tallyLine, UsageLog } from '../../src/kernel/ai/usage';
 import { direct, readKey } from './gemini';
 import { DEFAULT_RENDER, render, sheet, type Picture } from '../../src/mj/photo';
 import { contactSheet, review, type Critique, type Target } from '../mjx/target';
@@ -28,12 +28,12 @@ const root = path.resolve(opt('root') ?? (fs.existsSync('.env') ? '.' : '../../.
 const key = readKey(root);
 
 const thinking = (opt('thinking') ?? 'low') as 'low' | 'medium' | 'high';
-const gemini = (model: string, ledger: UsageLedger) => direct(model, key, ledger, { thinking, max: Number(opt('max') ?? 200) });
+const gemini = (model: string, ledger: UsageLog) => direct(model, key, ledger, { thinking, max: Number(opt('max') ?? 200) });
 
 const model = opt('model') ?? 'gemini-3.1-flash-lite';
 const judgeModel = opt('judge') ?? 'gemini-3.5-flash';
-const sculptMeter = new UsageLedger();
-const judgeMeter = new UsageLedger();
+const sculptMeter = new UsageLog();
+const judgeMeter = new UsageLog();
 const sculptor = gemini(model, sculptMeter);
 const judge = gemini(judgeModel, judgeMeter);
 

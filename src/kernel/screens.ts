@@ -7,7 +7,7 @@
 
 import type { Author, Commit } from './repo';
 import { AGENTS, type AgentId, type FeedEntry, type FeedKind } from './agents/council';
-import { emptyTally, type Tally, type UsageLedger } from './ai/usage';
+import { emptyTally, type Tally, type UsageLog } from './ai/usage';
 
 export type ScreenField = 'tempo' | 'registro' | 'costi';
 
@@ -164,7 +164,7 @@ export interface CostBoard {
   budgets: Budget[];
 }
 
-export function costBoard(usage: UsageLedger, budgets: Budget[]): CostBoard {
+export function costBoard(usage: UsageLog, budgets: Budget[]): CostBoard {
   const day = usage.day();
   const byAgent = Object.entries(usage.sessionByAgent)
     .map(([agent, tally]) => ({ agent, name: AGENTS[agent as AgentId]?.name ?? agent, color: AGENTS[agent as AgentId]?.color ?? '#9fb2a8', tally }))

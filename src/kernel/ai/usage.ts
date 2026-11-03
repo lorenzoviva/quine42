@@ -77,7 +77,7 @@ function sum(into: Tally, t: Tally): Tally {
   return into;
 }
 
-export class UsageLedger {
+export class UsageLog {
   private file: UsageFile & { paganti: Record<string, Record<string, Tally>> } = { prezzi: PRICES_READ_ON, giorni: {}, paganti: {} };
   /** This session only (since the page opened). */
   readonly session = emptyTally();
