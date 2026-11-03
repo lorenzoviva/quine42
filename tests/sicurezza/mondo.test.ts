@@ -14,11 +14,12 @@ import { LEDGER_DIR, ledgerOf } from '../../server/ledger';
 import { universeStore } from '../../server/universeStore';
 import { INTERNAL_HEADER } from '../../src/kernel/universes';
 import type { PaymentRecord } from '../../src/kernel/credits';
-import { buildWorld, MAX_BACKLOG, WorldHost, worldEnv, type HostLink, type WorldOptions } from '../../server/worldHost';
+import { buildWorld, MAX_BACKLOG, WORLD_TIMES, WorldHost, worldEnv, type HostLink, type WorldOptions } from '../../server/worldHost';
 import { TurnRunner } from '../../src/session/host';
 import type { FormRequest, FormResult } from '../../src/kernel/forms';
 import { LIMITS } from '../../src/session/server';
 import type { ServerMsg } from '../../src/session/protocol';
+import { removeWhenFree } from './fixtures/removeWhenFree';
 
 type Handler = (req: http.IncomingMessage, res: http.ServerResponse, next: () => void) => void;
 
@@ -83,16 +84,17 @@ describe('il sorvegliante, con un mondo finto', () => {
     let gaveUp = '';
     let n = 0;
     const h = fake('pronto', { times: { ...FAST, healthy: 150, deaths: 3 }, headOf: async () => `commit-${++n}`, onGiveUp: (w) => (gaveUp = w) });
+    const inner = h as unknown as { good?: string; up: boolean; times: { healthy: number } };
     await h.start();
     const c = client();
     h.connect(c.link);
-    // Long enough for a commit to have been seen and to have lived.
-    await new Promise((r) => setTimeout(r, 1500));
+    await until(() => inner.good, 5000, 'un commit vissuto');
+    // From here the deaths are in a row. `healthy` counts from the spawn, opening included: at 150 ms a world that takes 1 s to open (24 busy threads, T176)
+    // would have its deaths forgotten at the first look. In production `healthy` is a minute, against an opening of 12 s on an idle machine and 90 s under that load (T176).
+    inner.times.healthy = 3600000;
     childOf(h).send({ t: 'sonda-muori' });
     await until(() => h.restarts === 1, 5000, 'primo riavvio');
-    const second: Array<{ t: string; open?: { restore?: string } }> = [];
-    childOf(h).on('message', (m: never) => void second.push(m));
-    await until(() => (h as unknown as { up: boolean }).up, 5000, 'di nuovo su');
+    await until(() => inner.up, 5000, 'di nuovo su');
     childOf(h).send({ t: 'sonda-muori' });
     await until(() => h.restarts === 2, 5000, 'secondo riavvio');
     const third: Array<{ t: string; open?: { restore?: string } }> = [];
@@ -198,8 +200,12 @@ describe('due mondi veri', () => {
     git('commit', '-q', '-m', 'nasce');
   };
 
-  // Slower than the fake ones: a real world that is well can pause longer than FAST.notice (a collection, the first forms), and on a busy machine longer than FAST.kill.
-  const REAL_TIMES = { ...FAST, notice: 2000, kill: 8000 };
+  // Measured with 24 busy threads on 12 logical processors (T176). Opening: 90 s against 12 s on an idle machine, 84 of them the programs of the campus with the cache
+  // of the forms empty, so a real world has the time production gives it. Silence once open: up to 5.5 s, so the notice and the routes' wait are production's too, and
+  // the kill, which here a test waits for and production has at 45 s, is well above it.
+  const REAL_TIMES = { ...FAST, notice: WORLD_TIMES.notice, kill: 20000, boot: WORLD_TIMES.boot, call: WORLD_TIMES.call };
+  /** The longest a test that opens a world `n` times can take. A wait, not a pace: a well test ends long before. */
+  const opening = (n: number) => n * WORLD_TIMES.boot + 60000;
   const world = (name: string, more: Partial<WorldOptions> = {}) =>
     new WorldHost({ name, base, internal: INTERNAL, offline: true, entry: REAL, entryArgs: [program], reads: [outDir], times: REAL_TIMES, ...more });
 
@@ -220,11 +226,11 @@ describe('due mondi veri', () => {
     base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
   }, 180000);
 
-  afterAll(() => {
+  afterAll(async () => {
     server?.close();
     rmSync(outDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
-    rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
-  });
+    await removeWhenFree(dir);
+  }, 120000);
 
   it('V-007 un mondo bloccato non ferma l’HTTP né l’altro mondo, e riparte; chi era dentro rientra', async () => {
     const [uno, due] = [world('uno'), world('due')];
@@ -241,15 +247,15 @@ describe('due mondi veri', () => {
       expect(a.of('mondo')).toHaveLength(0);
       expect(uno.restarts).toBe(0);
       childOf(uno).send({ t: 'sonda-blocca' });
-      await until(() => a.of('mondo').length, 10000, 'avviso');
+      await until(() => a.of('mondo').length, 20000, 'avviso');
       // The server answers while that world is stuck, and the other one goes on hearing its client.
       const r = await fetch(`${base}/api/universe`);
       expect(r.status).toBe(200);
       const seen = b.heard.length;
       b.say({ t: 'passo', seq: 1, x: 0.1, y: 0.1 });
-      await until(() => b.heard.length > seen, 5000, 'l’altro mondo risponde');
+      await until(() => b.heard.length > seen, 20000, 'l’altro mondo risponde');
       expect(due.restarts).toBe(0);
-      await until(() => a.of('mondo').some((m) => m.t === 'mondo' && m.stato === 'ripartito'), 60000, 'ripartito');
+      await until(() => a.of('mondo').some((m) => m.t === 'mondo' && m.stato === 'ripartito'), REAL_TIMES.kill + WORLD_TIMES.boot, 'ripartito');
       a.say({ t: 'entra', id: 'alice' });
       await until(() => a.of('ingresso').length === 2, 30000, 'di nuovo dentro');
       expect(uno.restarts).toBe(1);
@@ -258,7 +264,7 @@ describe('due mondi veri', () => {
       await uno.stop();
       await due.stop();
     }
-  }, 180000);
+  }, opening(3));
 
   it('V-007 il programma ha la cache delle forme senza il disco dei test', () => {
     const text = readFileSync(program, 'utf8');
@@ -268,7 +274,7 @@ describe('due mondi veri', () => {
   });
 
   it('V-011 V-012 attraverso il processo valgono i limiti e gli elenchi, anche dopo un riavvio', async () => {
-    const uno = world('uno', { times: { ...FAST, kill: 60000, notice: 60000 } });
+    const uno = world('uno', { times: { ...REAL_TIMES, kill: 60000, notice: 60000 } });
     const isolated = (m: ServerMsg | undefined) => {
       if (m?.t !== 'ingresso') throw new Error('nessun ingresso');
       expect(m.master).toBeFalsy();
@@ -294,10 +300,10 @@ describe('due mondi veri', () => {
       expect(q.closed()).toBe(false);
       const seen = q.heard.length;
       q.say({ t: 'passo', seq: 1, x: 0.2, y: 0.2 });
-      await until(() => q.heard.length > seen, 5000, 'l’altro ascolta');
+      await until(() => q.heard.length > seen, 20000, 'l’altro ascolta');
       // After a restart the warnings say nothing of the world, and what comes in again is on the list again.
       (uno as unknown as { child: { kill(s: string): void } }).child.kill('SIGKILL');
-      await until(() => q.of('mondo').some((m) => m.t === 'mondo' && m.stato === 'ripartito'), 60000, 'ripartito');
+      await until(() => q.of('mondo').some((m) => m.t === 'mondo' && m.stato === 'ripartito'), WORLD_TIMES.boot, 'ripartito');
       for (const m of q.of('mondo')) expect(Object.keys(m).sort()).toEqual(['stato', 't', 'testo']);
       q.say({ t: 'entra', id: 'quirino' });
       await until(() => q.of('ingresso').length === 2, 30000, 'di nuovo dentro');
@@ -305,20 +311,20 @@ describe('due mondi veri', () => {
     } finally {
       await uno.stop();
     }
-  }, 180000);
+  }, opening(2));
 
   it('V-007 oltre il limite di memoria muore lui solo, e riparte', async () => {
-    const uno = world('uno', { memoryMb: 200, times: { ...FAST, kill: 60000, notice: 60000 } });
+    const uno = world('uno', { memoryMb: 200, times: { ...REAL_TIMES, kill: 60000, notice: 60000 } });
     try {
       expect(await uno.start()).toEqual({ ok: true });
       childOf(uno).send({ t: 'sonda-gonfia' });
       await until(() => uno.restarts === 1, 60000, 'riavvio');
-      await until(() => (uno as unknown as { up: boolean }).up, 60000, 'di nuovo su');
+      await until(() => (uno as unknown as { up: boolean }).up, WORLD_TIMES.boot, 'di nuovo su');
       expect((await fetch(`${base}/api/universe`)).status).toBe(200);
     } finally {
       await uno.stop();
     }
-  }, 180000);
+  }, opening(2));
 
   it('V-007 sotto i permessi il mondo scrive il suo archivio dei saldi e risponde alle rotte; il token vale per il suo universo', async () => {
     const saldi = path.join(dir, LEDGER_DIR);
@@ -337,7 +343,7 @@ describe('due mondi veri', () => {
     } finally {
       await uno.stop();
     }
-  }, 120000);
+  }, opening(1));
 
   it('V-007 ripartendo da un commit vissuto, il mondo ci torna con un commit che lo dice', async () => {
     const root = path.join(dir, 'due');
@@ -356,7 +362,7 @@ describe('due mondi veri', () => {
     } finally {
       await due.stop();
     }
-  }, 120000);
+  }, opening(1));
 
   it('V-007 il mondo non ha i segreti: né nell’ambiente né su disco, e non scrive dove non deve', async () => {
     // Beside the node_modules a world may read: where the real `.env` is.
@@ -378,5 +384,5 @@ describe('due mondi veri', () => {
       rmSync(secret, { force: true });
       await uno.stop();
     }
-  }, 120000);
+  }, opening(1));
 });

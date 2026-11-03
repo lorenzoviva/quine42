@@ -2,13 +2,14 @@
 // only the routes on its list, every answer has the policy, and a game of two is played over real WebSockets, each world in its process.
 
 import { execFileSync, spawn, type ChildProcess } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import http from 'node:http';
 import type { AddressInfo } from 'node:net';
 import os from 'node:os';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { WebSocket } from 'ws';
+import { removeWhenFree } from './fixtures/removeWhenFree';
 import { buildServer } from '../../server/buildServer';
 import { contentSecurityPolicy } from '../../server/csp';
 import { activeHosts } from '../../server/session';
@@ -147,8 +148,8 @@ describe('il server vero', () => {
   afterAll(async () => {
     await crowded?.stop();
     await running?.stop();
-    rmSync(work, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
-  });
+    await removeWhenFree(work);
+  }, 120000);
 
   it('V-014 serve la build, con i tipi giusti, e la radice porta al sito', async () => {
     const page = await ask('/index.html?universo=prova');
