@@ -55,7 +55,7 @@ export function clearArea(k: Kernel, width = 24) {
 /** Runes are things the player carries: tests put them in the pouch first. */
 export const giveRunes = (k: Kernel, tokens: string[]) => tokens.forEach((t) => k.give(`rune:${t}`, 1));
 
-/** Stacks carried, in the pockets and inside bags (bags themselves not counted). */
+/** Stacks carried, in the slots and inside bags (bags themselves not counted). */
 export const carried = (k: Kernel) =>
   k.inventory().slots.reduce((n, s) => n + (!s ? 0 : k.content.get(s.item)?.container ? (s.inv?.slots.filter(Boolean).length ?? 0) : 1), 0);
 

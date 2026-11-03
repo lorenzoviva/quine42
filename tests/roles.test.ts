@@ -74,7 +74,7 @@ describe('runes and bindings by role (T37)', () => {
     for (const l of ['x', 'speed * 2', 'x == 3', 'luce', 'p . x = 3', 'log ( time )']) expect(carpetLine(l), l).toBe(false);
   });
 
-  it('the master is who created the game of many; alone, everyone is', async () => {
+  it('the master is who created the multiplayer game; alone, everyone is', async () => {
     expect(repairPartita({ modalita: 'multigiocatore' }).master).toBe('io');
     expect(repairPartita({ modalita: 'multigiocatore', master: 'Bea!' }).master).toBe('io');
     expect(repairPartita({ modalita: 'multigiocatore', master: 'bea' }).master).toBe('bea');
@@ -86,7 +86,7 @@ describe('runes and bindings by role (T37)', () => {
     expect(k.as('bea', () => k.isMaster())).toBe(false);
   });
 
-  it('in a game of many no place has runes of the carpet; alone the start still has speed = speed', async () => {
+  it('in a multiplayer game no place has runes of the carpet; alone the start still has speed = speed', async () => {
     const lines = (k: Kernel) => extractLines(k.ecs.query('rune').map((id) => ({ id, rune: k.ecs.get(id, 'rune') }))).map((l) => l.src);
     const solo = await bootWith({ modalita: 'singola' });
     const runes = (k: Kernel) => k.ecs.query('rune').map((id) => k.ecs.get(id, 'rune').token as string);

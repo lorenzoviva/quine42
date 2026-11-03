@@ -1,4 +1,4 @@
-// Accounts (T44b, ADR-0081): in a game of many, who a wanderer is comes from their account (Firebase Auth: Google or
+// Accounts (T44b, ADR-0081): in a multiplayer game, who a wanderer is comes from their account (Firebase Auth: Google or
 // anonymous), not from what the tab says. The server verifies the token the client sends with `entra` and the wanderer's
 // id is the account's uid. No network and no Firebase here: the verifier is given (firebase-admin in server/account.ts,
 // a fake one in the tests). Without a verifier (development, tests) the id the client says goes, as before.

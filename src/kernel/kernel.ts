@@ -563,12 +563,12 @@ export class Kernel {
   readonly bench?: { terreno?: string[] };
   readonly mirror: boolean;
   /**
-   * In a game of many, the master's mirror (T42b): the files of their branch that the world does not have yet, and the
+   * In a multiplayer game, the master's mirror (T42b): the files of their branch that the world does not have yet, and the
    * gesture that publishes them. The editor and the console show it; alone there is none (every save is the world).
    */
   publisher?: { branch(): string[]; publish(): Promise<{ ok: boolean; motivo?: string; testo?: string }> };
   /**
-   * In a game of many, the master's mirror (T42c): the players connected as the server tells them, and the view that
+   * In a multiplayer game, the master's mirror (T42c): the players connected as the server tells them, and the view that
    * follows one of them (their id; the camera goes above them, the master stays where they are). Alone there is none.
    */
   connected?: PlayerSpot[];
@@ -911,7 +911,7 @@ export class Kernel {
   }
 
   /**
-   * Who pays for what is asked now (V-022). `as` never spans an await, so in a game of many, out of an `as`, nobody is acting: `wanderer()` would say
+   * Who pays for what is asked now (V-022). `as` never spans an await, so in a multiplayer game, out of an `as`, nobody is acting: `wanderer()` would say
    * whoever holds the default body (the master `io`), who asked for nothing. What a wanderer's request asks after an await passes its `chi`; the rest is the world's.
    */
   payerNow(): string {
@@ -1895,7 +1895,7 @@ export class Kernel {
     // touch the carpet only far from the start (you learn the logic before you can leave); sometimes a magic rune.
     const far = Math.max(Math.abs(ch.cx), Math.abs(ch.cy)) >= CARPET_RUNE_DISTANCE;
     const start = ch.cx === 0 && ch.cy === 0;
-    // In a game of many none of the runes that touch the carpet or write a binding are generated (T37).
+    // In a multiplayer game none of the runes that touch the carpet or write a binding are generated (T37).
     const many = this.manyPlayers();
     const lines = start ? STARTER_RUNES.filter((l) => !many || !carpetLine(l)) : plan.runes.filter((l) => (many ? !carpetLine(l) : !tokenize(l).some((t) => CARPET_TOKENS.has(t)) || (far && rng.chance(0.5)))).slice(0, far ? 2 : 1);
     const magic = Object.keys(this.content.runes);
@@ -3040,7 +3040,7 @@ export class Kernel {
     for (const st of this.lines.values()) {
       if (!st.compiled || (st.pure && !refresh && st.result !== null)) continue;
       const key = `rune:${st.line.key}`;
-      // A line runs as who wrote it (T37); in a game of many, only the master's may write the bindings.
+      // A line runs as who wrote it (T37); in a multiplayer game, only the master's may write the bindings.
       const by = st.line.ids.map((id) => (this.ecs.get(id, 'rune') as RuneComp | undefined)?.by).find(Boolean);
       this.faultFlag = null;
       this.seedLua(key, 0);
@@ -3092,7 +3092,7 @@ export class Kernel {
     const id = which !== undefined ? (this.ecs.has(which, 'rune') ? which : undefined) : (this.runeTiles.get(`${col},${row}`) ?? this.runeTiles.get(`${col + dx},${row + dy}`));
     if (id === undefined) return false;
     const rune: RuneComp = this.ecs.get(id, 'rune');
-    // A rune is a thing: it goes into the rune pouch (or the pockets), and onto the phrase being composed.
+    // A rune is a thing: it goes into the rune pouch (or the slots), and onto the phrase being composed.
     if (!this.give(`rune:${rune.token}`, 1)) {
       this.message("Non hai più posto per altre rune.", 'warn');
       return true;
@@ -3183,7 +3183,7 @@ export class Kernel {
     return given;
   }
 
-  /** In a game of many the master always carries the Council's rune, and nobody else does (T37). */
+  /** In a multiplayer game the master always carries the Council's rune, and nobody else does (T37). */
   private councilStock(): void {
     if (!this.manyPlayers()) return;
     const item = `rune:${COUNCIL_RUNE}`;
@@ -3453,7 +3453,7 @@ export class Kernel {
 
   /**
    * Gives the player something: first into a bag made for it (runes into the rune pouch), then the
-   * pockets, then any bag with room. Returns how many fit.
+   * slots, then any bag with room. Returns how many fit.
    */
   give(item: string, n: number): number {
     const inv = this.inventory();
@@ -3643,8 +3643,8 @@ export class Kernel {
   }
 
   /**
-   * Something carried, to another wanderer beside them (T43a): `count` of the pocket (all of it by default), where it would
-   * go if they picked it up; a bag goes whole, with what is in it, into an empty pocket. A trade is two gifts.
+   * Something carried, to another wanderer beside them (T43a): `count` of the slot (all of it by default), where it would
+   * go if they picked it up; a bag goes whole, with what is in it, into an empty slot. A trade is two gifts.
    */
   giveTo(to: string, slot: number, count?: number): string | false {
     const inv = this.inventory();
@@ -4095,7 +4095,7 @@ export class Kernel {
       say(msg);
       return msg;
     }
-    // What it needs must really be in the pockets.
+    // What it needs must really be in the slots.
     const need = j.requires ? this.content.byName(j.requires) : undefined;
     if (j.possible && need && countItem(inv, need.id) <= 0) {
       say(`${j.story} Ma ti serve ${need.name}.`.trim());
@@ -4754,7 +4754,7 @@ export class Kernel {
         return { say: r.say, forged: `Nuova regola del mondo: ${req}` };
       }
       case 'runa': {
-        // The master's runes (T42f): in a game of many the Council gives them, alone they are found in the world.
+        // The master's runes (T42f): in a multiplayer game the Council gives them, alone they are found in the world.
         if (!this.manyPlayers() || !this.isMaster()) return { say: r.say, forged: 'Le rune non si chiedono: si trovano nel mondo.' };
         const runes = askedRunes(r.runes);
         if (!runes.length) return { say: r.say, forged: 'Il Referente non capisce quali rune vuoi.' };
@@ -4783,7 +4783,7 @@ export class Kernel {
     return this.config.partita;
   }
 
-  /** A game of many (ADR-0050): the carpet, the rollback and the Council are the master's. */
+  /** A multiplayer game (ADR-0050): the carpet, the rollback and the Council are the master's. */
   manyPlayers(): boolean {
     return this.partita()?.modalita === 'multigiocatore';
   }
@@ -4793,7 +4793,7 @@ export class Kernel {
     return !this.manyPlayers() || (!!id && id === (this.partita().master ?? SOLO));
   }
 
-  /** God mode (T42a): in a game of many the master does not die, has no needs, takes no harm from the others. */
+  /** God mode (T42a): in a multiplayer game the master does not die, has no needs, takes no harm from the others. */
   godMode(id: string | undefined = this.wanderer().id): boolean {
     return this.manyPlayers() && this.isMaster(id);
   }
@@ -7327,7 +7327,7 @@ export class Kernel {
   }
 
   /**
-   * A player's rollback in a game of many (T37): the runes they wrote come back to their phrase, and with them
+   * A player's rollback in a multiplayer game (T37): the runes they wrote come back to their phrase, and with them
    * goes whatever those lines were doing; the repository, and everyone else's world, stay as they are.
    */
   private takeBackRunes(): void {
@@ -7361,7 +7361,7 @@ export class Kernel {
   }
 
   rollback(commitId?: string): void {
-    // In a game of many the repository goes back only for the master (T37); a player takes back what they wrote.
+    // In a multiplayer game the repository goes back only for the master (T37); a player takes back what they wrote.
     if (!this.isMaster()) return this.takeBackRunes();
     if (commitId && !this.repo.find(commitId)) {
       void this.rollbackPast(commitId);

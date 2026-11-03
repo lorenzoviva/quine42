@@ -1,7 +1,7 @@
 // The master's tools (T41): what a client needs only beyond the simulation, or to make the world. The corona and
 // the studio drawn in 3D, the studio's panels, the atlas, the world's graph, the Council's feed, the console, the
 // editor and the Genesis. main.ts loads this module on demand (a chunk of its own in the build) only for the
-// master: alone, always; in a game of many, the wanderer who made the universe. A player's client never fetches it.
+// master: alone, always; in a multiplayer game, the wanderer who made the universe. A player's client never fetches it.
 
 import type { Kernel } from './kernel/kernel';
 import type { Renderer } from './render/renderer';

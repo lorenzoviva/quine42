@@ -873,7 +873,7 @@ function K.reset()
     __newindex = function(t, k, v)
       local b = bindings[k]
       if b then
-        -- In a game of many only the master moves the carpet: the others' writes go nowhere (T37).
+        -- In a multiplayer game only the master moves the carpet: the others' writes go nowhere (T37).
         if locked then return end
         if b.set then b.set(v) else overrides[k] = { v } end
         return

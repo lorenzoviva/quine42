@@ -117,11 +117,11 @@ export function owns(who: Caller, game: Game, masterUid?: string): boolean {
   return game.many ? isMasterOf(who, game, masterUid) : who.local;
 }
 
-/** A wanderer's state (and where balances and payments were, before their ledger, ADR-0104): over HTTP only the world writes it in a game of many, and it never travels with a universe that is made. */
+/** A wanderer's state (and where balances and payments were, before their ledger, ADR-0104): over HTTP only the world writes it in a multiplayer game, and it never travels with a universe that is made. */
 export const creditFile = (p: string) => /^world\/(giocatori\/|pagamenti\.json$)/i.test(p.replace(/\\/g, '/'));
 
 /**
- * The files of a universe being made, or why not. A game alone only from this machine, as ever. A game of many has a master,
+ * The files of a universe being made, or why not. A game alone only from this machine, as ever. A multiplayer game has a master,
  * who is whoever makes it (not what the files say), and nobody's balances.
  */
 export function newUniverse(who: Caller, files: Record<string, string | null>): { files: Record<string, string | null> } | Refusal {

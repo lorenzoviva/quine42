@@ -1,4 +1,4 @@
-// The session protocol (T38, ADR-0058): in a game of many the kernel runs on the server and every client
+// The session protocol (T38, ADR-0058): in a multiplayer game the kernel runs on the server and every client
 // speaks to it over one link (a WebSocket at /api/session, or the fake one of the tests). Messages are plain
 // JSON; positions are in the world's space (the carpet's, ADR-0004): every wanderer has a carpet of their
 // own, so a client draws itself where it likes on its circle and tells the server only where it is in the world.
@@ -120,7 +120,7 @@ export type ClientMsg =
   | { t: 'dici'; seq: number; viandante: string; testo: string }
   /** Something carried (`slot`, `quanti` of it: all by default) to another wanderer beside them (T43a). */
   | { t: 'dai'; seq: number; viandante: string; slot: number; quanti?: number }
-  /** Something they carry (T39b): `slot` is a pocket; `verso` where it goes, `borsa` the pocket of the bag, `quanti` how many. */
+  /** Something they carry (T39b): `slot` is a slot; `verso` where it goes, `borsa` the slot of the bag, `quanti` how many. */
   | { t: 'oggetto'; seq: number; op: ItemOp; slot: number; verso?: number; borsa?: number; quanti?: number; azione?: string }
   /** A container in the world: opened (its content comes in the answer), something taken from it or put into it. */
   | { t: 'contenitore'; seq: number; entita: number; op: 'apri' | 'prendi' | 'metti'; slot?: number }
@@ -171,7 +171,7 @@ export type ServerMsg =
   | { t: 'correzione'; seq: number; x: number; y: number }
   /**
    * What came of a message: what the world said back meanwhile, and the answer if there is one; the container it
-   * opened or changed, with what is in it, and the pocket of a bag it opened.
+   * opened or changed, with what is in it, and the slot of a bag it opened.
    */
   | { t: 'esito'; seq: number; ok: boolean; testo?: string; profilo?: Profile; forma?: FormView; fatto?: string; messaggi?: string[]; dialoghi?: Dialog[]; motivo?: string; contenitore?: ContainerView; borsa?: number }
   | { t: 'rifiuto'; motivo: string }

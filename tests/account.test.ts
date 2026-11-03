@@ -76,7 +76,7 @@ describe('accounts (T44b)', () => {
     expect(s.id).toBe('ila');
   });
 
-  it('an anonymous account plays offline (0 credits); linked to Google it keeps its wanderer, profile and pockets', async () => {
+  it('an anonymous account plays offline (0 credits); linked to Google it keeps its wanderer, profile and slots', async () => {
     class TrackingOnlineAiModels extends MockAiModels {
       calls: string[] = [];
       async text(call: TextCall): Promise<string> {

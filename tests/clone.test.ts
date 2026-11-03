@@ -14,7 +14,7 @@ import type { FileMap } from '../src/kernel/types';
 
 const CARPET = 'modules/core.carpet/manifest.json';
 
-/** A game of many whose master is `io`, with cards of `io`, of `anna` and a common one drawn to `io`. */
+/** A multiplayer game whose master is `io`, with cards of `io`, of `anna` and a common one drawn to `io`. */
 function many(): FileMap {
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const carpet = JSON.parse(bundledFiles[CARPET]);

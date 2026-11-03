@@ -1,7 +1,7 @@
 // The situation table of the Direction (T46a): the world seen from above, not as geography (that is the atlas) but
 // as operations — the wanderer, the places the Council is generating now, the open plots at the beat they are at, the
 // quests of the diary, the faults where they happened. Everything comes from what the kernel already has; looking
-// changes nothing. Positions are chunks (carpet space), as in the atlas. In a game of many the master sees the
+// changes nothing. Positions are chunks (carpet space), as in the atlas. In a multiplayer game the master sees the
 // players connected too, each on their chunk (T42c).
 
 import { normName } from './content';
@@ -47,7 +47,7 @@ export interface SituationInput {
   plots: Plot[];
   faults: Fault[];
   wanderer: { cx: number; cy: number };
-  /** The other wanderers connected (a game of many). */
+  /** The other wanderers connected (a multiplayer game). */
   players?: PlayerSpot[];
   chunks: Array<{ cx: number; cy: number; stage: 'draft' | 'planned'; developing?: boolean; name?: string }>;
   /** Where a person is (their chunk), if anyone knows. */

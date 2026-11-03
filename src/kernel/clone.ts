@@ -1,4 +1,4 @@
-// Cloning a universe with another master (T42d, ADR-0068): the master of a game of many never changes
+// Cloning a universe with another master (T42d, ADR-0068): the master of a multiplayer game never changes
 // (ADR-0065); who wants another one copies the universe — the same world, the same history, the same cards —
 // into a new one whose `partita.master` is someone else. The cards stay with who wrote and paid for them
 // (`autore`, `pagante`); whose they are (`titolare`) stays too, unless the clone hands the old master's cards to

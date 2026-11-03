@@ -25,7 +25,7 @@ const run = (k: Kernel, seconds: number) => {
 const starve = (k: Kernel, id: string) => k.as(id, () => Object.assign(k.needs()!, { hunger: 0, thirst: 0, health: 0.5 }));
 
 describe('the master in god mode (T42a)', () => {
-  it('in a game of many the master does not die nor need anything; alone, nobody is a god', async () => {
+  it('in a multiplayer game the master does not die nor need anything; alone, nobody is a god', async () => {
     const k = await many();
     k.addWanderer('anna', 'Anna');
     expect(k.godMode('io')).toBe(true);

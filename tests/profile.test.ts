@@ -82,7 +82,7 @@ describe('the profile repaired (T44a)', () => {
   });
 });
 
-describe('the profile in a game of many (T44a)', () => {
+describe('the profile in a multiplayer game (T44a)', () => {
   it('a valid profile reaches the others: name, seed, cloak and presentation', async () => {
     const k = await bootMany();
     const server = new SessionServer(k);

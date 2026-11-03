@@ -1,4 +1,4 @@
-// Signing in to a game of many (T44b, ADR-0081): Firebase Auth in the browser, with Google or anonymously. The server
+// Signing in to a multiplayer game (T44b, ADR-0081): Firebase Auth in the browser, with Google or anonymously. The server
 // says how (GET /api/account, server/account.ts); without settings there are no accounts and the tab's id goes as before.
 // Firebase is loaded only when it is needed: a game alone never fetches it. Its web settings are public; the token is
 // what proves the account, and the server verifies it.

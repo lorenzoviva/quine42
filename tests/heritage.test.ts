@@ -12,7 +12,7 @@ const CARPET = 'modules/core.carpet/manifest.json';
 const LOGIC = 'modules/core.carpet/logic.lua';
 const CARPET_ID = moduleCardId({ id: 'core.carpet', kind: 'system' });
 
-/** A game of many whose master is `io`: the carpet is `io`'s card, the square a common one drawn to `io`. */
+/** A multiplayer game whose master is `io`: the carpet is `io`'s card, the square a common one drawn to `io`. */
 function prima(): FileMap {
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const carpet = JSON.parse(bundledFiles[CARPET]);

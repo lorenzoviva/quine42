@@ -89,11 +89,11 @@ async function bootAlone(client: UniverseClient | null, snap: UniverseSnapshot |
   return { kernel, online };
 }
 
-/** The account this tab signed in with, in a game of many on a server with accounts (T44b). */
+/** The account this tab signed in with, in a multiplayer game on a server with accounts (T44b). */
 let account: SignedIn | undefined;
 
 /**
- * A game of many (T39, ADR-0059): the world runs on the server, this tab is one of its wanderers. The kernel here
+ * A multiplayer game (T39, ADR-0059): the world runs on the server, this tab is one of its wanderers. The kernel here
  * is a mirror the thin client fills with what the server tells.
  */
 async function joinMany(name: string, lobbyChoice?: { tetto?: number; offline?: boolean; attore?: { acceso: boolean; modello?: string } }): Promise<ThinClient> {
@@ -169,11 +169,11 @@ async function main() {
   if (many) loading.textContent = `ingresso nel mondo di «${name}»…`;
   const thin = many ? await joinMany(name, lobbyChoice) : undefined;
   // The corona, the studio, the Council's feed, the console and the editor are the master's (T41): alone always, in a
-  // game of many only the wanderer who made the universe. A player's client never fetches them.
+  // multiplayer game only the wanderer who made the universe. A player's client never fetches them.
   const master = !thin || thin.session.master;
   const tooling = master ? import('./master') : undefined;
   const { kernel, online } = thin ? { kernel: thin.k, online: false } : await bootAlone(client, snap, name);
-  // Leaving: the state of play goes into the universe (if it is valid); in a game of many the server keeps it.
+  // Leaving: the state of play goes into the universe (if it is valid); in a multiplayer game the server keeps it.
   window.addEventListener('pagehide', () => {
     if (thin) return thin.session.leave();
     kernel.saveState();
@@ -190,7 +190,7 @@ async function main() {
   const inventory = new InventoryPanel(kernel);
   const chat = new Chat(kernel);
   const actions = new ActionMenu(kernel);
-  // Who the wanderer is (T44a): in a game of many the server repairs it and tells the others; alone the kernel keeps it.
+  // Who the wanderer is (T44a): in a multiplayer game the server repairs it and tells the others; alone the kernel keeps it.
   const profile = new ProfilePanel(
     kernel,
     async (p) => {
@@ -330,7 +330,7 @@ async function main() {
     deathEl.hidden = false;
     syncFocus();
   });
-  // Death in a game of many (T44c): the server has already decided; the screen says what was lost and where one wakes up.
+  // Death in a multiplayer game (T44c): the server has already decided; the screen says what was lost and where one wakes up.
   kernel.bus.on('ui:died', ({ cause, testo, perso, dove }: { cause: string; testo: string; perso: string[]; dove: 'qui' | 'piazza' }) => {
     const on = document.createElement('button');
     on.className = 'primary';
@@ -366,7 +366,7 @@ async function main() {
   (window as any).rune = master ? kernel : thin;
   (window as any).quine = (window as any).rune;
   (window as any).quine42 = (window as any).rune;
-  // The session of a game of many (T39): what this tab knows of the server's world.
+  // The session of a multiplayer game (T39): what this tab knows of the server's world.
   if (thin && master) (window as any).session = thin;
   // The 3D view, for the console (camera distance, scene).
   (window as any).view = renderer;
