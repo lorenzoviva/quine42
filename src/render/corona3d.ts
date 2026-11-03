@@ -41,29 +41,29 @@ export function buildCoronaRing(k: Kernel): THREE.Group {
   const glow = new Builder();
   for (let y = -max; y < max; y++)
     for (let x = -max; x < max; x++) {
-      const cell = c.at(x, y);
-      if (!cell) continue;
+      const tile = c.at(x, y);
+      if (!tile) continue;
       const d = Math.hypot(x + 0.5, y + 0.5);
-      const b = cell.building ? c.building(cell.building) : undefined;
+      const b = tile.building ? c.building(tile.building) : undefined;
       // A building that is a model (T20): its cells are ground, the model stands on them.
-      if (cell.kind === 'floor' || (b?.structure && cell.kind !== 'door')) {
-        const [a, b2] = GROUND[cell.ground ?? 'prato'];
+      if (tile.kind === 'floor' || (b?.structure && tile.kind !== 'door')) {
+        const [a, b2] = GROUND[tile.ground ?? 'prato'];
         lit.quad([x, 0, y], [x, 0, y + 1], [x + 1, 0, y + 1], [x + 1, 0, y], [0, 1, 0], rgbOf((x + y) & 1 ? a : b2));
-        if (cell.ground === 'viale' && Math.abs(d - (R + CAMPUS.line)) < 0.5) glow.box(x, 0.005, y + 0.45, x + 1, 0.02, y + 0.55, rgbOf('#05d9e8', 0.7));
-        if (cell.ground === 'vicolo' && (x * 7 + y * 3) % 5 === 0) glow.box(x + 0.45, 0.005, y + 0.45, x + 0.55, 0.02, y + 0.55, rgbOf('#ff2a6d', 0.6));
-        if (cell.ground === 'bordo') glow.box(x + 0.2, 0, y + 0.2, x + 0.8, 0.5, y + 0.8, rgbOf('#05d9e8', 0.5));
-      } else if (cell.kind === 'building' && b) {
+        if (tile.ground === 'viale' && Math.abs(d - (R + CAMPUS.line)) < 0.5) glow.box(x, 0.005, y + 0.45, x + 1, 0.02, y + 0.55, rgbOf('#05d9e8', 0.7));
+        if (tile.ground === 'vicolo' && (x * 7 + y * 3) % 5 === 0) glow.box(x + 0.45, 0.005, y + 0.45, x + 0.55, 0.02, y + 0.55, rgbOf('#ff2a6d', 0.6));
+        if (tile.ground === 'bordo') glow.box(x + 0.2, 0, y + 0.2, x + 0.8, 0.5, y + 0.8, rgbOf('#05d9e8', 0.5));
+      } else if (tile.kind === 'building' && b) {
         lit.box(x, 0, y, x + 1, TOWER_H, y + 1, rgbOf((x + y) & 1 ? '#1a1a26' : '#16161f'));
         const out = (dx: number, dy: number) => c.at(x + dx, y + dy)?.kind !== 'building';
         const open = { n: out(0, -1), s: out(0, 1), w: out(-1, 0), e: out(1, 0) };
         edgeStrip(glow, x, y, TOWER_H, open, rgbOf(b.color));
         edgeStrip(glow, x, y, 0.06, open, rgbOf(b.color, 0.6));
         if ((x * 13 + y * 7) % 9 === 0 && (open.s || open.n || open.w || open.e)) glow.box(x + 0.35, 1.2 + (x % 3) * 0.5, y + 0.35, x + 0.65, 1.5 + (x % 3) * 0.5, y + 0.65, rgbOf(b.color, 0.8));
-      } else if (cell.kind === 'door' && b?.structure) {
+      } else if (tile.kind === 'door' && b?.structure) {
         // Where one goes in: a glowing threshold in front of the model's door.
         lit.quad([x, 0, y], [x, 0, y + 1], [x + 1, 0, y + 1], [x + 1, 0, y], [0, 1, 0], rgbOf('#1a0a14'));
         glow.box(x + 0.15, 0.005, y + 0.15, x + 0.85, 0.02, y + 0.85, rgbOf(b.color, 0.5));
-      } else if (cell.kind === 'door' && b) {
+      } else if (tile.kind === 'door' && b) {
         lit.quad([x, 0, y], [x, 0, y + 1], [x + 1, 0, y + 1], [x + 1, 0, y], [0, 1, 0], rgbOf('#1a0a14'));
         glow.box(x + 0.1, 0, y + 0.45, x + 0.18, 1.5, y + 0.55, rgbOf('#ff2a6d'));
         glow.box(x + 0.82, 0, y + 0.45, x + 0.9, 1.5, y + 0.55, rgbOf('#ff2a6d'));

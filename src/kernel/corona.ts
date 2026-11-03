@@ -186,7 +186,7 @@ export function ruleTablets(ox: number, oy: number, allRules: Rule[], offset = 0
 export const ofThe = (name: string) => (/^[aeiou]/i.test(name) ? `dell'${name}` : /^(s[^aeiou]|z|gn|ps|x)/i.test(name) ? `dello ${name}` : `del ${name}`);
 
 /** The cell of a (wide or deep) studio item nearest to a point: distances are measured from it. */
-export function cellNear(it: StudioItem, x: number, y: number): { x: number; y: number } {
+export function tileNear(it: StudioItem, x: number, y: number): { x: number; y: number } {
   return { x: Math.max(it.x, Math.min(it.x + (it.w ?? 1) - 1, Math.floor(x))), y: Math.max(it.y, Math.min(it.y + (it.h ?? 1) - 1, Math.floor(y))) };
 }
 
@@ -292,7 +292,7 @@ export interface CampusProp {
 /** The model of a building of the campus, if the library has one. */
 export const campusModel = (id: string) => `corona-${id}`;
 
-export interface CoronaCell {
+export interface CoronaTile {
   kind: 'floor' | 'building' | 'door' | 'room' | 'wall' | 'item';
   /** Outside, what kind of ground a floor cell is: the avenue, an alley between sectors, a lawn, the edge. */
   ground?: 'viale' | 'vicolo' | 'prato' | 'bordo';
@@ -396,7 +396,7 @@ export function fileSeedOf(path: string): number {
 const ORDER = Object.keys(ROOMS);
 
 /** Real-space cell at radius r and angle t (clockwise from the top). */
-export function polarCell(r: number, t: number): { x: number; y: number } {
+export function polarTile(r: number, t: number): { x: number; y: number } {
   return { x: Math.floor(Math.sin(t) * r), y: Math.floor(-Math.cos(t) * r) };
 }
 
@@ -407,7 +407,7 @@ function angleOf(x: number, y: number): number {
 }
 
 /** The ground of an outside cell at distance d from the centre and angle t, with n sectors around a circle of radius R. */
-function groundAt(d: number, R: number, t: number, n: number): CoronaCell['ground'] {
+function groundAt(d: number, R: number, t: number, n: number): CoronaTile['ground'] {
   if (d - R < CAMPUS.avenue) return 'viale';
   if (d - R >= CAMPUS.ring - 1) return 'bordo';
   const sector = (Math.PI * 2) / Math.max(1, n);
@@ -431,9 +431,9 @@ export class Corona {
   outer: number;
   buildings: Building[] = [];
   props: CampusProp[] = [];
-  private propCells = new Map<string, CampusProp>();
+  private propTiles = new Map<string, CampusProp>();
   private slots = new Map<string, { x: number; y: number }>();
-  private exterior = new Map<string, CoronaCell>();
+  private exterior = new Map<string, CoronaTile>();
   private files: FileMap = {};
 
   constructor(readonly radius: number) {
@@ -450,7 +450,7 @@ export class Corona {
     this.slots.clear();
     this.exterior.clear();
     this.props = [];
-    this.propCells.clear();
+    this.propTiles.clear();
     const R = this.radius;
     this.outer = R + CAMPUS.ring;
     const groups = new Map<string, Array<Omit<StudioItem, 'x' | 'y'>>>();
@@ -567,10 +567,10 @@ export class Corona {
       const cells = new Set<string>();
       for (let r = R + CAMPUS.front; r < R + CAMPUS.back; r += 0.5)
         for (let a = mid - span; a <= mid + span; a += 0.35 / r) {
-          const c = polarCell(r, a);
+          const c = polarTile(r, a);
           cells.add(`${c.x},${c.y}`);
         }
-      const door = polarCell(R + CAMPUS.door, mid);
+      const door = polarTile(R + CAMPUS.door, mid);
       cells.delete(`${door.x},${door.y}`);
       return { index, id, name: def.name, color: def.color, team: def.team, from, to, door, cells, storeys };
     });
@@ -592,12 +592,12 @@ export class Corona {
     const addProp = (kind: CampusProp['kind'], model: string, x: number, y: number, yaw: number, seed: number, solid: boolean) => {
       const cx = Math.floor(x), cy = Math.floor(y);
       const key = `${cx},${cy}`;
-      const cell = this.exterior.get(key);
-      if (!cell || cell.kind !== 'floor') return;
+      const tile = this.exterior.get(key);
+      if (!tile || tile.kind !== 'floor') return;
       if (this.buildings.some((b) => Math.hypot(b.door.x - cx, b.door.y - cy) < 2.0)) return;
       const prop: CampusProp = { id: `${kind}_${cx}_${cy}`, kind, model, x, y, yaw, seed, solid };
       this.props.push(prop);
-      if (solid) this.propCells.set(key, prop);
+      if (solid) this.propTiles.set(key, prop);
     };
 
     for (const b of this.buildings) {
@@ -647,7 +647,7 @@ export class Corona {
   }
 
   /** Cell at integer real-space coordinates, or null outside the ring and the rooms. */
-  at(cx: number, cy: number): CoronaCell | null {
+  at(cx: number, cy: number): CoronaTile | null {
     const room = this.roomAt(cx, cy);
     if (room) {
       const lx = cx - room.storey.ox;
@@ -668,7 +668,7 @@ export class Corona {
 
   /** Returns the campus prop on cell (cx, cy), if any. */
   propAt(cx: number, cy: number): CampusProp | undefined {
-    return this.propCells.get(`${cx},${cy}`);
+    return this.propTiles.get(`${cx},${cy}`);
   }
 
   /** Can one stand there? Walls, shelves, the Council's seats and the buildings' outside walls block. */
@@ -677,7 +677,7 @@ export class Corona {
     const c = this.at(cx, cy);
     if (!c) return false;
     // Outside, solid campus props (lamp posts, tree trunks, benches, totems) block
-    const prop = this.propCells.get(`${cx},${cy}`);
+    const prop = this.propTiles.get(`${cx},${cy}`);
     if (prop?.solid) return false;
     // Outside, a building that is a model blocks with its voxels (and only with them).
     if (c.kind === 'floor' || c.kind === 'building' || c.kind === 'door') {
@@ -769,8 +769,8 @@ export class Corona {
     for (let y = Math.floor(s.y) - reach; y <= Math.floor(s.y) + reach; y++)
       for (let x = Math.floor(s.x) - reach; x <= Math.floor(s.x) + reach; x++) {
         const key = `${x},${y}`;
-        const cell = this.exterior.get(key);
-        if (!cell || cell.kind !== 'floor' || cell.building !== b.id || !this.structureBlocks(s, x + 0.5, y + 0.5)) continue;
+        const tile = this.exterior.get(key);
+        if (!tile || tile.kind !== 'floor' || tile.building !== b.id || !this.structureBlocks(s, x + 0.5, y + 0.5)) continue;
         b.cells.add(key);
         this.exterior.set(key, { kind: 'building', building: b.id });
       }
@@ -793,7 +793,7 @@ export class Corona {
       if (it.kind === 'desk' || (kinds && !kinds.includes(it.kind))) continue;
       // Wide or deep things (screens, the atlas, the printer) are near from any of their cells; the table from its rim; the
       // Direction's wall of screens (T46b) and the chain's stations (T27a) from the foot of their screens, at the front of their cells.
-      const c = cellNear(it, x, y);
+      const c = tileNear(it, x, y);
       const d = it.kind === 'table' ? Math.hypot((x - TABLE.cx - this.roomAt(x, y)!.storey.ox) / TABLE.rx, (y - TABLE.cy - this.roomAt(x, y)!.storey.oy) / TABLE.ry) * 1.2 - 0.2 : Math.hypot(c.x + 0.5 - x, c.y + (it.kind === 'parete' || it.kind === 'stazione' ? 1 : 0.5) - y);
       if (d < bd) [best, bd] = [it, d];
     }

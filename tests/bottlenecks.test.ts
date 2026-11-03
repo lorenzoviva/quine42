@@ -103,8 +103,8 @@ describe('T56a: niente cose solide sui passaggi obbligati', () => {
     for (let r = 0; r < S; r++) {
       let row = '';
       for (let c = 0; c < S; c++) {
-        const cell = r * S + c;
-        if (cell === westGate || cell === eastGate) row += 'p';
+        const tile = r * S + c;
+        if (tile === westGate || tile === eastGate) row += 'p';
         else if (r === westRow && c < S / 2) row += 'p';
         else if (c === Math.floor(S / 2) && ((r >= westRow && r <= eastRow) || (r >= eastRow && r <= westRow))) row += 'p';
         else if (r === eastRow && c >= S / 2) row += 'p';
@@ -162,9 +162,9 @@ describe('T56a: niente cose solide sui passaggi obbligati', () => {
     expect(solidInChunk).toHaveLength(0);
 
     // E tutte le celle del sentiero devono essere perfettamente libere e attraversabili
-    for (const cell of res.reachable) {
-      const col = cx * S + (cell % S);
-      const row = cy * S + Math.floor(cell / S);
+    for (const tile of res.reachable) {
+      const col = cx * S + (tile % S);
+      const row = cy * S + Math.floor(tile / S);
       expect(k.free(col + 0.5, row + 0.5, 0.2)).toBe(true);
     }
   });
@@ -189,8 +189,8 @@ describe('T56a: niente cose solide sui passaggi obbligati', () => {
     }
 
     const res = layout(draftRows, palette, { cx, cy, seed: 456, pathCode: 'p' });
-    const nicheCell = (westRow + 1) * S + 5;
-    expect(res.reachable.has(nicheCell)).toBe(true);
+    const nicheTile = (westRow + 1) * S + 5;
+    expect(res.reachable.has(nicheTile)).toBe(true);
 
     const plan: ChunkPlan = {
       place: { name: 'Molo con Nicchia', description: 'Un sentiero con una banchina laterale.' },
@@ -206,7 +206,7 @@ describe('T56a: niente cose solide sui passaggi obbligati', () => {
     const place = (k as any).placementsOf({ cx, cy, key: `${cx},${cy}` }, plan, res);
 
     // La cassa solida viene piazzata, e precisamente nella nicchia cieca (che non è punto di articolazione)!
-    expect(place.objects[0].cell).toBe(nicheCell);
+    expect(place.objects[0].cell).toBe(nicheTile);
 
     // Il sentiero principale sulla riga westRow rimane completamente libero
     for (let c = 0; c < S; c++) {

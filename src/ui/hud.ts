@@ -97,9 +97,9 @@ export class Hud {
 
     if (k.zone === 'corona') {
       const p = k.wandererPos();
-      const cell = k.corona.at(Math.floor(p.x), Math.floor(p.y));
+      const tile = k.corona.at(Math.floor(p.x), Math.floor(p.y));
       this.zone.hidden = false;
-      this.zone.textContent = cell?.path ? `§ ${cell.path}${cell.line ? ` : riga ${cell.line}` : ''} — E per riscrivere` : 'Corona — cammina sul codice';
+      this.zone.textContent = tile?.path ? `§ ${tile.path}${tile.line ? ` : riga ${tile.line}` : ''} — E per riscrivere` : 'Corona — cammina sul codice';
     } else this.zone.hidden = true;
 
     const hand = k.phrase();

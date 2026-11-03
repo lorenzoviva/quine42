@@ -10,7 +10,7 @@ import { apiErrors, describeEffect, repairPartita, validateEffects, Validator } 
 import { deathLevel, fallbackDeath, type DeathVerdict } from './partita';
 import { Repo, memoryStore, type Commit, type KeyValueStore } from './repo';
 import { councilMayWrite } from './paths';
-import { Corona, campusModel, cellNear, FOCUSED_RULES, folderOf, TABLETS_MAX, type CoronaCell, type Exhibit, type ShowcaseSource, type StudioItem } from './corona';
+import { Corona, campusModel, tileNear, FOCUSED_RULES, folderOf, TABLETS_MAX, type CoronaTile, type Exhibit, type ShowcaseSource, type StudioItem } from './corona';
 import { Archive } from './archive';
 import { bibleBreaks, cleanBible, metaBreak } from './fourthwall';
 import { biblePages, touchingNodes, type BibleShown } from './bible';
@@ -28,7 +28,7 @@ import { alertOf, clampFrame, costBoard, liveFeed, SCREEN_NAME, timeline, type B
 import { activeQuests, plotFromRaw, plotText, PLOTS_FILE, readPlots, reviewPlot, secretsOf, writePlots, type Plot } from './plots';
 import { Input } from './input';
 import { discoverModules, readConfig } from './universe';
-import { askedRunes, carpetLine, CARPET_TOKENS, cellIndex, COUNCIL_RUNE, extractLines, tokenize, type RuneComp, type RuneLine } from './runes';
+import { askedRunes, carpetLine, CARPET_TOKENS, tileIndex, COUNCIL_RUNE, extractLines, tokenize, type RuneComp, type RuneLine } from './runes';
 import { hash32, hashStr, hex, Rng } from './rng';
 import { onBeat, repairActor, repairCoefficients, stretch, type ActorConfig, type Coefficients } from './coefficients';
 import { BudgetError, type AiModels } from './ai/models';
@@ -135,7 +135,7 @@ export type HoverInfo =
   | { kind: 'rune'; token: string; doc?: string; symbol: string | null; line: LineState | undefined; source: 'gen' | 'player' }
   | { kind: 'entity'; name: string; description: string; extra?: string }
   | { kind: 'tile'; name: string }
-  | { kind: 'code'; cell: CoronaCell; folder?: string }
+  | { kind: 'code'; cell: CoronaTile; folder?: string }
   | { kind: 'studio'; item: StudioItem; building: string; recent?: string }
   | { kind: 'door'; building: string; team: string }
   | { kind: 'agent'; agent: AgentId; name: string; doing?: string }
@@ -409,13 +409,13 @@ export class Kernel {
 
   readonly chunks = new Map<string, Chunk>();
   readonly lines = new Map<string, LineState>();
-  runeCells = new Map<string, Id>();
+  runeTiles = new Map<string, Id>();
   /** Speech bubbles shown above entities. */
   readonly bubbles = new Map<Id, { text: string; until: number }>();
   /** Items people talked about: they turn up more often, where coherent. */
   readonly wanted = new Set<string>();
   /** Entity cells blocked by solid bodies, rebuilt every tick. */
-  private solidCells = new Set<string>();
+  private solidTiles = new Set<string>();
   /** Solid entities with a model, by the cells their footprint reaches (they block by their voxels). */
   private reliefCache?: { key: string; relief: Relief };
   /** The level of every tile, per chunk (flat water, flat lots), while its tiles, lots and the world's levels stay the same. */
@@ -1849,8 +1849,8 @@ export class Kernel {
       result = layout(this.rows(ch.draft), this.palette, opts);
     }
     let tiles = result.grid.join('');
-    for (const [cell, code] of Object.entries(plan.edits ?? {})) {
-      const i = Number(cell);
+    for (const [tile, code] of Object.entries(plan.edits ?? {})) {
+      const i = Number(tile);
       if (Number.isInteger(i) && i >= 0 && i < S * S && this.palette[code]) tiles = tiles.slice(0, i) + code + tiles.slice(i + 1);
     }
     return { result, tiles };
@@ -1876,19 +1876,19 @@ export class Kernel {
     const reach = [...result.reachable];
     const indoor = reach.filter((i) => indoorSet.has(i));
     const outdoor = reach.filter((i) => !indoorSet.has(i) && this.palette[result.grid[Math.floor(i / S)][i % S]]?.layer !== 'door');
-    const freeCells = new Set<number>(result.reachable);
-    let arts = articulationPoints(freeCells, S);
+    const freeTiles = new Set<number>(result.reachable);
+    let arts = articulationPoints(freeTiles, S);
     const pick = (where: Where, solid = false): number | undefined => {
       let pool = (where === 'dentro' && indoor.length ? indoor : where === 'fuori' && outdoor.length ? outdoor : reach).filter((i) => !occupied.has(i));
       if (solid) pool = pool.filter((i) => !arts.has(i));
       if (!pool.length) return undefined;
-      const cell = pool[rng.int(pool.length)];
-      occupied.add(cell);
+      const tile = pool[rng.int(pool.length)];
+      occupied.add(tile);
       if (solid) {
-        freeCells.delete(cell);
-        arts = articulationPoints(freeCells, S);
+        freeTiles.delete(tile);
+        arts = articulationPoints(freeTiles, S);
       }
-      return cell;
+      return tile;
     };
 
     // Runes: rare and precious, on a free reachable stretch of a row, anywhere in the chunk. Those that
@@ -1947,10 +1947,10 @@ export class Kernel {
     this.claimSizes(ch, plan);
     const structures = this.settleLots(ch, plan, pathCode);
     const place = this.placementsOf(ch, plan, result);
-    const at = (cell: number) => ({ x: ch.cx * S + (cell % S) + 0.5, y: ch.cy * S + Math.floor(cell / S) + 0.5 });
+    const at = (tile: number) => ({ x: ch.cx * S + (tile % S) + 0.5, y: ch.cy * S + Math.floor(tile / S) + 0.5 });
     // On a lot: on the floor of its structure (once its form is ready), not inside its walls.
-    const inLot = (cell: number) => {
-      const lot = ch.lots.findIndex((b) => b.floor.includes(cell));
+    const inLot = (tile: number) => {
+      const lot = ch.lots.findIndex((b) => b.floor.includes(tile));
       return lot >= 0 ? structures[lot] : undefined;
     };
 
@@ -1987,8 +1987,8 @@ export class Kernel {
     if (unknown.length) void this.introduceItems(unknown, `trovati a terra in «${plan.place.name}»`).then((defs) => {
       if (!this.alive(ch)) return;
       defs.forEach((d, i) => {
-        const cell = place.pick('fuori');
-        if (cell !== undefined) this.spawnItem(d.id, at(cell).x, at(cell).y, 1, ch.key, `${ch.key}#n${i}`);
+        const tile = place.pick('fuori');
+        if (tile !== undefined) this.spawnItem(d.id, at(tile).x, at(tile).y, 1, ch.key, `${ch.key}#n${i}`);
       });
     });
     for (const f of plan.fresh ?? []) if (this.kept(`${ch.key}:${f.concept}`, coef.cose)) void this.forgeForChunk(ch, f, place.pick, at);
@@ -2214,7 +2214,7 @@ export class Kernel {
     const field = worldLevels([{ ...ch, tiles }], S, liquid, (c, r) => this.relief.level(c, r), this.seaLevel)[0];
     const height = (c: number, r: number) => field[r * S + c];
     const levels = chunkLevels(tiles, S, liquid, height, result.lots);
-    const local = (cell: number) => ({ x: (cell % S) + 0.5, y: Math.floor(cell / S) + 0.5 });
+    const local = (tile: number) => ({ x: (tile % S) + 0.5, y: Math.floor(tile / S) + 0.5 });
     const entities: ChunkMiniature['entities'] = [];
     for (const { index, cell } of place.objects) {
       const m = this.modules.get(plan.objects[index].module);
@@ -2234,14 +2234,14 @@ export class Kernel {
     const changed = (a: string, b: string) => [...b].flatMap((c, i) => (c !== a[i] ? [i] : []));
     const phase = (t: string, lit: number[], lv?: Int16Array) => ({ tiles: t, levels: [...(lv ?? chunkLevels(t, S, liquid, height, []))], lit: [...new Set(lit)].sort((a, b) => a - b) });
     const gated = result.stages!.gated.join(''), programmed = result.stages!.programmed.join('');
-    const cellOf = (p: { x: number; y: number }) => Math.floor(p.y) * S + Math.floor(p.x);
+    const tileOf = (p: { x: number; y: number }) => Math.floor(p.y) * S + Math.floor(p.x);
     const phases = [
       phase(ch.draft, []),
       phase(gated, result.gates),
       phase(programmed, changed(gated, programmed)),
       phase(laid, changed(programmed, laid)),
       phase(tiles, [...result.lots.flatMap((b) => [...b.walls, ...b.floor, ...b.doors]), ...changed(laid, tiles)], levels),
-      phase(tiles, [...entities, ...runes].map(cellOf), levels),
+      phase(tiles, [...entities, ...runes].map(tileOf), levels),
     ];
     return {
       cx: ch.cx,
@@ -2362,27 +2362,27 @@ export class Kernel {
   private waterOf(ch: Chunk): Record<string, WaterRecord> | undefined {
     return ch.plan?.acqua ?? ch.acqua;
   }
-  private cellOf(col: number, row: number): { ch: Chunk; cell: number } | undefined {
+  private tileOf(col: number, row: number): { ch: Chunk; tile: number } | undefined {
     const ch = this.chunkAt(col, row);
     if (!ch) return undefined;
     const S = this.config.chunkSize;
-    return { ch, cell: (Math.floor(row) - ch.cy * S) * S + (Math.floor(col) - ch.cx * S) };
+    return { ch, tile: (Math.floor(row) - ch.cy * S) * S + (Math.floor(col) - ch.cx * S) };
   }
   /** Levels the ground of a tile was dug (negative) or raised (T51b). */
   private digAt(col: number, row: number): number {
-    const at = this.cellOf(col, row);
-    const d = at && this.digsOf(at.ch)?.[at.cell];
+    const at = this.tileOf(col, row);
+    const d = at && this.digsOf(at.ch)?.[at.tile];
     return typeof d === 'number' && Number.isFinite(d) ? d : 0;
   }
   private waterAt(col: number, row: number): WaterRecord | undefined {
-    const at = this.cellOf(col, row);
-    return at && this.waterOf(at.ch)?.[at.cell];
+    const at = this.tileOf(col, row);
+    return at && this.waterOf(at.ch)?.[at.tile];
   }
   /** The level of a tile in the world's field before the lots (T51a): the water's surface for water. */
   private fieldAt(col: number, row: number): number {
-    const at = this.cellOf(col, row);
+    const at = this.tileOf(col, row);
     if (!at) return Math.max(this.seaLevel, this.relief.level(Math.floor(col), Math.floor(row)));
-    return this.levelsOf(at.ch)[at.cell];
+    return this.levelsOf(at.ch)[at.tile];
   }
 
   /**
@@ -2393,23 +2393,23 @@ export class Kernel {
   dig(col: number, row: number, delta: number): boolean {
     if (this.mirror || !Number.isFinite(col) || !Number.isFinite(row) || !Number.isFinite(delta)) return false;
     const d = Math.max(-MAX_DIG, Math.min(MAX_DIG, Math.round(delta)));
-    const at = this.cellOf(col, row);
+    const at = this.tileOf(col, row);
     if (!d || !at || at.ch.stage !== 'planned' || !at.ch.plan) return false;
-    const { ch, cell } = at;
+    const { ch, tile } = at;
     const plan = ch.plan!;
     const c = Math.floor(col), r = Math.floor(row);
     // The flow takes the tile as it is before the dig: its bed moves by what the ground moves.
     this.water.wake(c, r);
     const before = this.relief.level(c, r) + this.digAt(c, r);
     const scavi = (plan.scavi ??= {});
-    const next = Math.max(-2 * MAX_DIG, Math.min(2 * MAX_DIG, (scavi[cell] ?? 0) + d));
-    if (next) scavi[cell] = next;
-    else delete scavi[cell];
+    const next = Math.max(-2 * MAX_DIG, Math.min(2 * MAX_DIG, (scavi[tile] ?? 0) + d));
+    if (next) scavi[tile] = next;
+    else delete scavi[tile];
     const moved = this.relief.level(c, r) + next - before;
-    const rec = plan.acqua?.[cell];
+    const rec = plan.acqua?.[tile];
     if (rec) rec[0] += moved;
     // Under water the bed moves as it is dug; land never goes below the sea.
-    const wet = !!rec || this.palette[ch.tiles[cell]]?.layer === 'liquid';
+    const wet = !!rec || this.palette[ch.tiles[tile]]?.layer === 'liquid';
     this.water.dig(c, r, wet ? moved : Math.max(this.seaLevel, before + moved) - Math.max(this.seaLevel, before));
     this.groundVersion++;
     ch.version++;
@@ -2431,12 +2431,12 @@ export class Kernel {
     const touched = new Set<Chunk>();
     const isWet = (code?: string) => this.palette[code ?? '']?.layer === 'liquid';
     for (const x of list) {
-      const at = this.cellOf(x.col, x.row);
+      const at = this.tileOf(x.col, x.row);
       if (!at?.ch.plan || at.ch.stage !== 'planned') continue;
-      const { ch, cell } = at;
+      const { ch, tile } = at;
       const acqua = (at.ch.plan.acqua ??= {});
-      const old = acqua[cell];
-      const code = ch.tiles[cell];
+      const old = acqua[tile];
+      const code = ch.tiles[tile];
       const round = (v: number) => Math.round(v * 1000) / 1000;
       let prima = old?.[2];
       if (x.wet && !isWet(code)) {
@@ -2453,8 +2453,8 @@ export class Kernel {
         this.setTile(x.col, x.row, land);
         prima = undefined;
       }
-      if (x.water < 0.001 && !isWet(ch.tiles[cell])) delete acqua[cell];
-      else acqua[cell] = prima ? [round(x.bed), round(x.water), prima] : [round(x.bed), round(x.water)];
+      if (x.water < 0.001 && !isWet(ch.tiles[tile])) delete acqua[tile];
+      else acqua[tile] = prima ? [round(x.bed), round(x.water), prima] : [round(x.bed), round(x.water)];
       touched.add(ch);
     }
     for (const ch of touched) {
@@ -2632,8 +2632,8 @@ export class Kernel {
     ch.plan.fresh = ch.plan.fresh.filter((x) => x !== f);
     await this.chunkStore.save(this.recordKey(ch), { plan: ch.plan });
     const m = this.modules.get(r.id);
-    const cell = pick(f.where, this.isSolidModule(m));
-    if (m && this.alive(ch) && cell !== undefined) this.spawnModuleEntity(m, at(cell).x, at(cell).y, ch.key, `${ch.key}#o${ch.plan.objects.length - 1}`);
+    const tile = pick(f.where, this.isSolidModule(m));
+    if (m && this.alive(ch) && tile !== undefined) this.spawnModuleEntity(m, at(tile).x, at(tile).y, ch.key, `${ch.key}#o${ch.plan.objects.length - 1}`);
   }
 
   private unloadChunk(ch: Chunk): void {
@@ -2817,11 +2817,11 @@ export class Kernel {
       const pc = this.wandererCarpet();
       if (Math.abs(pc.x - (col + 0.5)) < 1 && Math.abs(pc.y - (row + 0.5)) < 1) return false;
     }
-    const cell = (row - ch.cy * S) * S + (col - ch.cx * S);
-    if (ch.tiles[cell] === code) return true;
-    ch.tiles = ch.tiles.slice(0, cell) + code + ch.tiles.slice(cell + 1);
+    const tile = (row - ch.cy * S) * S + (col - ch.cx * S);
+    if (ch.tiles[tile] === code) return true;
+    ch.tiles = ch.tiles.slice(0, tile) + code + ch.tiles.slice(tile + 1);
     ch.version++;
-    (ch.plan.edits ??= {})[String(cell)] = code;
+    (ch.plan.edits ??= {})[String(tile)] = code;
     this.saveChunkSoon(ch);
     return true;
   }
@@ -2846,21 +2846,21 @@ export class Kernel {
     const S = this.config.chunkSize;
     const ch = this.chunkAt(x, y);
     if (!ch) return undefined;
-    const cell = (Math.floor(y) - ch.cy * S) * S + (Math.floor(x) - ch.cx * S);
-    const lot = ch.lots.find((b) => b.floor.includes(cell) || b.doors.includes(cell));
+    const tile = (Math.floor(y) - ch.cy * S) * S + (Math.floor(x) - ch.cx * S);
+    const lot = ch.lots.find((b) => b.floor.includes(tile) || b.doors.includes(tile));
     return lot ? { chunk: ch, lot } : undefined;
   }
 
-  private freeCell(col: number, row: number): boolean {
+  private freeTile(col: number, row: number): boolean {
     const t = this.tileAt(col, row);
     if (t && this.palette[t]?.solid) return false;
-    return !this.solidCells.has(`${col},${row}`);
+    return !this.solidTiles.has(`${col},${row}`);
   }
 
   /** Carpet-space collision test of a box of half-size r, whose feet are at height z (tiles; none: the ground floor). */
   free(x: number, y: number, r: number, z?: number): boolean {
     if (![x, y, r].every(Number.isFinite)) return false;
-    for (const [dx, dy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) if (!this.freeCell(Math.floor(x + dx), Math.floor(y + dy))) return false;
+    for (const [dx, dy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) if (!this.freeTile(Math.floor(x + dx), Math.floor(y + dy))) return false;
     return !this.formBlocks(x, y, r, z);
   }
 
@@ -2882,7 +2882,7 @@ export class Kernel {
         continue;
       }
       sim = true;
-      if (!this.freeCell(Math.floor(px + ox), Math.floor(py + oy))) return false;
+      if (!this.freeTile(Math.floor(px + ox), Math.floor(py + oy))) return false;
     }
     return !sim || !this.formBlocks(x + ox, y + oy, r, z);
   }
@@ -3009,7 +3009,7 @@ export class Kernel {
     if (!this.runesDirty) return;
     this.runesDirty = false;
     const runes = this.runeList();
-    this.runeCells = cellIndex(runes);
+    this.runeTiles = tileIndex(runes);
     const next = new Map<string, LineState>();
     for (const line of extractLines(runes)) {
       const prev = this.lines.get(line.key);
@@ -3089,7 +3089,7 @@ export class Kernel {
   pickUpRune(which?: Id): boolean {
     const { col, row } = this.wandererTile();
     const [dx, dy] = this.facingDelta();
-    const id = which !== undefined ? (this.ecs.has(which, 'rune') ? which : undefined) : (this.runeCells.get(`${col},${row}`) ?? this.runeCells.get(`${col + dx},${row + dy}`));
+    const id = which !== undefined ? (this.ecs.has(which, 'rune') ? which : undefined) : (this.runeTiles.get(`${col},${row}`) ?? this.runeTiles.get(`${col + dx},${row + dy}`));
     if (id === undefined) return false;
     const rune: RuneComp = this.ecs.get(id, 'rune');
     // A rune is a thing: it goes into the rune pouch (or the pockets), and onto the phrase being composed.
@@ -3130,7 +3130,7 @@ export class Kernel {
     const start = facing === 'left' ? { col: col - width, row } : facing === 'right' ? { col: col + 1, row } : { col, row: row + (facing === 'up' ? -1 : 1) };
     for (let i = 0; i < width; i++) {
       const c = start.col + i;
-      if (this.runeCells.has(`${c},${start.row}`) || !this.freeCell(c, start.row) || !this.inCircle(c, start.row)) {
+      if (this.runeTiles.has(`${c},${start.row}`) || !this.freeTile(c, start.row) || !this.inCircle(c, start.row)) {
         this.message("Non c'è spazio per scrivere qui.", 'warn');
         return false;
       }
@@ -4368,7 +4368,7 @@ export class Kernel {
     const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'situazione', 'parete', 'console', 'stazione', 'banco', 'leggio', 'layout', 'lastra', 'tornio']);
     if (!it) return false;
     const p = this.wandererPos();
-    const c = cellNear(it, p.x, p.y);
+    const c = tileNear(it, p.x, p.y);
     if (Math.hypot(c.x + 0.5 - p.x, c.y + 0.5 - p.y) > 4) {
       this.message('Troppo lontano: avvicinati.');
       return false;
@@ -6528,13 +6528,13 @@ export class Kernel {
     const ch = (key ? this.chunks.get(key) : undefined) ?? this.chunkAt(p.x, p.y);
     if (!ch || ch.stage !== 'planned') return undefined;
     const h = hashStr(identity.name);
-    const cell = (i: number) => ({ x: ch.cx * S + (i % S) + 0.5, y: ch.cy * S + Math.floor(i / S) + 0.5 });
+    const tile = (i: number) => ({ x: ch.cx * S + (i % S) + 0.5, y: ch.cy * S + Math.floor(i / S) + 0.5 });
     const free = (i: number) => !this.palette[ch.tiles[i]]?.solid;
     const around = (i: number, pred: (t: TileDef | undefined) => boolean) => [i - 1, i + 1, i - S, i + S].some((n) => n >= 0 && n < S * S && pred(this.palette[ch.tiles[n]]));
-    const pickCell = (pred: (i: number) => boolean) => {
+    const pickTile = (pred: (i: number) => boolean) => {
       const list: number[] = [];
       for (let i = 0; i < S * S; i++) if (free(i) && pred(i)) list.push(i);
-      return list.length ? cell(list[h % list.length]) : undefined;
+      return list.length ? tile(list[h % list.length]) : undefined;
     };
     if (activity === 'dorme') {
       // A bed of their place, always the same one.
@@ -6549,15 +6549,15 @@ export class Kernel {
       }
     }
     if (activity === 'zappa') {
-      const field = pickCell((i) => /campo|orto|arato|solchi/i.test(this.palette[ch.tiles[i]]?.name ?? ''));
+      const field = pickTile((i) => /campo|orto|arato|solchi/i.test(this.palette[ch.tiles[i]]?.name ?? ''));
       if (field) return field;
     }
     if (activity === 'pesca') {
-      const bank = pickCell((i) => around(i, (t) => t?.layer === 'liquid'));
+      const bank = pickTile((i) => around(i, (t) => t?.layer === 'liquid'));
       if (bank) return bank;
     }
     if (activity === 'taglia_legna') {
-      const edge = pickCell((i) => around(i, (t) => t?.layer === 'vegetation'));
+      const edge = pickTile((i) => around(i, (t) => t?.layer === 'vegetation'));
       if (edge) return edge;
     }
     if (where === 'in giro') return undefined;
@@ -6570,7 +6570,7 @@ export class Kernel {
         const inside = sid !== undefined ? this.interiorPoints(sid) : [];
         if (inside.length) return inside[h % inside.length];
         const floor = b.floor.filter(free);
-        return cell(floor[h % floor.length]);
+        return tile(floor[h % floor.length]);
       }
     }
     if (where === 'piazza') {
@@ -6578,12 +6578,12 @@ export class Kernel {
       const centre = (S * S) / 2 + S / 2;
       let best = -1;
       for (let i = 0; i < S * S; i++) if ((pathCode ? ch.tiles[i] === pathCode : free(i)) && (best < 0 || Math.abs(i - centre) < Math.abs(best - centre))) best = i;
-      if (best >= 0) return cell(best);
+      if (best >= 0) return tile(best);
     }
     // Work outdoors (fields, woods, flock): a free spot of their place, always the same.
     for (let k = 0; k < 40; k++) {
       const i = (h + k * 7919) % (S * S);
-      if (free(i)) return cell(i);
+      if (free(i)) return tile(i);
     }
     return undefined;
   }
@@ -6764,13 +6764,13 @@ export class Kernel {
     if (this.corona.isInterior(rx) || (Math.hypot(rx, ry) >= R && this.coronaRevealed())) {
       const a = this.archive.nearest(rx, ry, 0.7);
       if (a) return { kind: 'agent', agent: a.agent, name: a.name, doing: a.say ?? (a.path ? `lavora su ${a.path}` : undefined) };
-      const cell = this.corona.at(Math.floor(rx), Math.floor(ry));
-      if (cell?.kind === 'item' && cell.item && cell.item.kind !== 'desk') {
-        const recent = cell.item.path ? this.recentChanges().get(cell.item.path) : undefined;
-        return { kind: 'studio', item: cell.item, building: this.corona.building(cell.building)?.name ?? '', recent: recent ? `${recent.author}: ${recent.message}` : undefined };
+      const tile = this.corona.at(Math.floor(rx), Math.floor(ry));
+      if (tile?.kind === 'item' && tile.item && tile.item.kind !== 'desk') {
+        const recent = tile.item.path ? this.recentChanges().get(tile.item.path) : undefined;
+        return { kind: 'studio', item: tile.item, building: this.corona.building(tile.building)?.name ?? '', recent: recent ? `${recent.author}: ${recent.message}` : undefined };
       }
-      if (cell?.kind === 'door' || cell?.kind === 'building') {
-        const b = this.corona.building(cell.building);
+      if (tile?.kind === 'door' || tile?.kind === 'building') {
+        const b = this.corona.building(tile.building);
         return b ? { kind: 'door', building: b.name, team: AGENTS[b.team as AgentId]?.name ?? b.team } : null;
       }
       return null;
@@ -6778,7 +6778,7 @@ export class Kernel {
     const { ox, oy } = this.offset();
     const cx = rx + ox;
     const cy = ry + oy;
-    const id = this.runeCells.get(`${Math.floor(cx)},${Math.floor(cy)}`);
+    const id = this.runeTiles.get(`${Math.floor(cx)},${Math.floor(cy)}`);
     if (id !== undefined && this.ecs.alive.has(id)) {
       const rune: RuneComp = this.ecs.get(id, 'rune');
       const symbol = /^[A-Za-z_]\w*$/.test(rune.token) && !['true', 'false', 'nil', 'not', 'and', 'or'].includes(rune.token) ? this.sandbox.eval(rune.token) : null;
@@ -7575,7 +7575,7 @@ export class Kernel {
   }
 
   private rebuildSolids(): void {
-    this.solidCells.clear();
+    this.solidTiles.clear();
     this.solidForms.clear();
     this.cellars = [];
     for (const id of this.ecs.query('body', 'pos')) {
@@ -7586,7 +7586,7 @@ export class Kernel {
       const fc: FormComp | undefined = this.ecs.get(id, 'form');
       const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint);
       if (!fc || !f?.foot) {
-        this.solidCells.add(`${Math.floor(p.x)},${Math.floor(p.y)}`);
+        this.solidTiles.add(`${Math.floor(p.x)},${Math.floor(p.y)}`);
         continue;
       }
       // An entity with a model blocks with its voxels: it is listed in every cell its footprint may reach.
