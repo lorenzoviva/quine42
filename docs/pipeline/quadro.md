@@ -23,11 +23,12 @@ Aggiornato il 03/11/2026, epoca 236. Crediti: vedi `stato`.
 - **T181 integrato** (solo `lab/`): `lab/banco/pattern.md` e tre programmi di riferimento reggono tutte le misure a 5 semi e 2 taglie. Palazzina e forte passano la soglia di varianza di T180, il tempio no nel perimetro (0,00: il lotto da 100 non lascia spazio). Non provati nel gioco (T156) né giudicati sulle foto dall'autore. Costo: stima 10, misurati 16 punti di settimana, 30 del contatore Fable (da 93 a 63), ~131 di sessione, 80 dollari, con altri task in parallelo: rapporto ~8, come in config. Resta la cartella vuota `worktrees/t181`, occupata da un processo: `integra` è uscito con errore dopo il merge, branch tolto a mano.
 - **T220 integrato:** griglia esagonale nelle stanze dello studio (+309 triangoli a stanza). Non accertato: un blocco scuro nello Studio dei Personaggi, in codice non toccato.
 - **T217, T218 e T219 integrati:** vetro della corona trasparente; alberi di luce visibili (26 su 26, prima `MAT.sway` li scartava oltre il raggio 42; vento a vista non provato); viale tra due cerchi perfetti, e le caselle del cerchio interno non sono più un muro invisibile. T219 non ha provato: `?cartone` di notte alla porta, le porte degli edifici a blocco; restano a gradini il bordo della simulazione su terreno rialzato, vicoli e blocchi; trenino forse nella corsia interna, non controllato.
-- ADR nuovi dallo **0123**.
+- **T221 integrato** (ADR-0123): suoni come programmi MJ (`<sound>`, `src/mj/sound.ts`, `src/mj/synth.ts`), 4 preset, motore invariato. Nessun ascolto umano, `playSamples` solo typecheck. Scostamenti: preset 1 del mockup non compilava, corretto; preset 3 con pad garantito; picco scalato a 0,98.
+- ADR nuovi dallo **0124**.
 
 ## Pronti e priorità
 
-1. **In coda, approvati e pronti, partono da soli:** T221 T226 T182 T89b T89c T89e T183 T152 T186 T158.
+1. **In coda, approvati e pronti, partono da soli:** T226 (in corso) T222 T223 T224 T182 T89b T89c T89e T183 T152 T186 T158.
 1a. **T226** (corona disegnata solo fuori dal tappeto, 3/4 di base; richiesta dell'autore, 03/11): la soglia oggi è 0,45 del raggio; la causa dell'orbita entrando in una struttura è dedotta, non accertata.
 1b. **Suono da MJ (richiesta dell'autore, 03/11):** T221 (lingua XML, sintetizzatore puro, preset) → T222 (SoundLab in `/lab/suono/`) e T223 (analisi per gli agenti); T221 → T224 (nel gioco); T223 + T224 → T225 (Musicista nella `galleria`, nessun edificio nuovo). Mockup: `docs/userchats/mj_3d_soundlab_sintetizzatore_musicale_markovjunior.html`, committato perché i worktree lo vedano. Scelte mie da correggere se l'autore vuole: musica per ambiente e ora, un solo sintetizzatore puro al posto del grafo Web Audio del mockup.
 4. **T182 → T156** (strutture procedurali). T182 su Claude, stima 8 %, al più 4 giri; è pronto.
@@ -60,5 +61,5 @@ Aggiornato il 03/11/2026, epoca 236. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **236:** T219, T218 e T220 integrati.
+- **236:** T219, T218, T220, T221 integrati.
 - **234-235:** riavvio dopo lo spegnimento del 03/11; T221-T226 creati su richiesta dell'autore; T217 integrato.
