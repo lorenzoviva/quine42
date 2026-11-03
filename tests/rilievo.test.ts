@@ -6,7 +6,7 @@ import { describeEffect, validateEffects } from '../src/kernel/validator';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { LEVEL } from '../src/kernel/relief';
 
 const dummyNames = {
@@ -55,7 +55,7 @@ describe('the kernel’s rilievo effect (T57c)', () => {
       ...bundledFiles,
       'universe.json': JSON.stringify({ ...JSON.parse(bundledFiles['universe.json']), rilievo: { mare: 0 } }),
     };
-    const k = await Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+    const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
     for (let i = 0; i < 400 && (k.chunks.get('0,0')?.stage !== 'planned' || k.chunks.get('1,0')?.stage !== 'planned'); i++) {
       k.tick(1 / 60);
       await new Promise((r) => setTimeout(r, 5));

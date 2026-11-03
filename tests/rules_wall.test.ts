@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { FOCUSED_RULES, ruleTablets, TABLETS_MAX, TABLETS_WALL } from '../src/kernel/corona';
 import type { Rule } from '../src/kernel/types';
 
@@ -26,7 +26,7 @@ const bootWithRules = (rules: Rule[]) => {
     ...bundledFiles,
     'world/rules.json': JSON.stringify({ regole: rules }, null, 2),
   };
-  return Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+  return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 };
 
 function stand(k: Kernel, x: number, y: number): void {

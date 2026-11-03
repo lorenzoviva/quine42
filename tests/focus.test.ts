@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import type { TextCall } from '../src/kernel/ai/models';
 import { UsageLedger } from '../src/kernel/ai/usage';
 import { Council, lexiconSummary, type CatalogEntry } from '../src/kernel/agents/council';
@@ -15,7 +15,7 @@ import { readPlots } from '../src/kernel/plots';
 import type { FileMap, Manifest } from '../src/kernel/types';
 
 /** Offline models that keep every call, to look at what the agents were sent. */
-class Recording extends MockModels {
+class Recording extends MockAiModels {
   calls: TextCall[] = [];
   async text(call: TextCall): Promise<string> {
     this.calls.push(call);
@@ -123,7 +123,7 @@ describe('the context of the agents from the graph (T13)', () => {
 
   it('the kernel gives the Narrator the person, the place and the wanderer when the wanderer talks to someone', async () => {
     const models = new Recording();
-    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models });
+    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: models });
     for (let i = 0; i < 80; i++) {
       k.tick(1 / 60);
       await new Promise((r) => setTimeout(r, 25));

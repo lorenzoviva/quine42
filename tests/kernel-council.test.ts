@@ -3,7 +3,7 @@ import { Kernel } from '../src/kernel/kernel';
 import { readPeople } from '../src/kernel/society';
 import { bondWith } from '../src/kernel/wanderers';
 import { readPlots } from '../src/kernel/plots';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { countItem } from '../src/kernel/inventory';
 import { boot, develop, settle, clearArea } from './world';
 
@@ -29,10 +29,10 @@ describe('the Council', () => {
   });
 
   it('the Arbiter sends incoherent work back to the responsible agent', async () => {
-    class Picky extends MockModels {
+    class Picky extends MockAiModels {
       reviews = 0;
       physicsCalls = 0;
-      async text(call: Parameters<MockModels['text']>[0]) {
+      async text(call: Parameters<MockAiModels['text']>[0]) {
         if (call.task === 'forge.review' && this.reviews++ === 0) return JSON.stringify({ approvato: false, problemi: [{ agente: 'fisico', problema: 'una mela non pesa 40 kg' }] });
         if (call.task === 'forge.physics') this.physicsCalls++;
         return super.text(call);
@@ -46,9 +46,9 @@ describe('the Council', () => {
   });
 
   it('code that does not load, or calls functions that do not exist, goes back to the Engineer', async () => {
-    class Sloppy extends MockModels {
+    class Sloppy extends MockAiModels {
       n = 0;
-      async text(call: Parameters<MockModels['text']>[0]) {
+      async text(call: Parameters<MockAiModels['text']>[0]) {
         if (call.task === 'forge.code' && this.n++ < 2) return JSON.stringify({ logic: this.n === 1 ? 'local M = {} function M.on_use( return M' : 'local M = {}\nfunction M.on_use(u, i) world.teleport(u) end\nreturn M' });
         return super.text(call);
       }
@@ -105,9 +105,9 @@ describe('the Council', () => {
   });
 
   it('invalid plans are discarded and regenerated, invalid runes dropped one by one', async () => {
-    class Careless extends MockModels {
+    class Careless extends MockAiModels {
       plans = 0;
-      async text(call: Parameters<MockModels['text']>[0]) {
+      async text(call: Parameters<MockAiModels['text']>[0]) {
         if (call.task === 'chunk.plan' && this.plans++ === 0) return JSON.stringify({ luogo: { nome: 'X', descrizione: '' }, ambiente: 'luna', oggetti: [], rune: [] });
         return super.text(call);
       }

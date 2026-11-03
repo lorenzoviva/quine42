@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import type { TextCall } from '../src/kernel/ai/models';
 import { INTERIOR_X } from '../src/kernel/corona';
 import { fakeLink } from '../src/session/protocol';
@@ -12,7 +12,7 @@ import { SessionClient } from '../src/session/client';
 const DT = 1 / 60;
 
 /** The local models, writing down every plan of a place they are asked for: where, and who pays. */
-class Recording extends MockModels {
+class Recording extends MockAiModels {
   plans: Array<{ key: string; chi?: string }> = [];
   async text(call: TextCall): Promise<string> {
     if (call.task === 'chunk.plan') {
@@ -27,7 +27,7 @@ async function bootMany(ai: Record<string, unknown> = {}): Promise<{ k: Kernel; 
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, ai: { ...cfg.ai, ...ai }, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
   const models = new Recording();
-  const k = await Kernel.boot({ files, store: memoryStore(), models });
+  const k = await Kernel.boot({ files, store: memoryStore(), ai: models });
   // Who plans pays (ADR-0081): without credits the requests would go to the kernel's own local models.
   k.giveCredits('io', 100);
   return { k, models };

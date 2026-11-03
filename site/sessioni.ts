@@ -10,7 +10,7 @@ import {
   LOW_DETAIL,
   repairCoefficients,
 } from '../src/kernel/coefficients';
-import { DEFAULT_SCULPTORS, type SculptorModels } from '../src/kernel/agents/sculptor';
+import { DEFAULT_SCULPTORS, type SculptorAiModels } from '../src/kernel/agents/sculptor';
 import { bundledFiles } from '../src/kernel/bundle';
 import { SEED_FILE, seedHashes, WANDERER_HEADER } from '../src/kernel/universes';
 import { SOLO } from '../src/kernel/wanderers';
@@ -94,7 +94,7 @@ export function parseRealmSnapshot(name: string, files: FileMap, active?: Active
   const ai = config.ai;
   const master = config.partita?.master ?? 'io';
   const coef = repairCoefficients(ai.coefficienti);
-  const sculpt: SculptorModels = { ...DEFAULT_SCULPTORS, ...(ai.scultori ?? {}) };
+  const sculpt: SculptorAiModels = { ...DEFAULT_SCULPTORS, ...(ai.scultori ?? {}) };
   const estimate = hourlyEstimate(ai);
 
   const presetLabel = isLowDetail(coef)

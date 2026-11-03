@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { GIVE_REACH, Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { countItem } from '../src/kernel/inventory';
 import { fakeLink } from '../src/session/protocol';
 import { SessionServer } from '../src/session/server';
@@ -16,7 +16,7 @@ const DT = 1 / 60;
 async function bootMany(game: Record<string, unknown> = {}): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3, ...game } }, null, 2) };
-  return Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+  return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
 async function thin(server: SessionServer, id: string, nome: string): Promise<ThinClient> {
@@ -24,7 +24,7 @@ async function thin(server: SessionServer, id: string, nome: string): Promise<Th
   server.connect(s);
   const session = new SessionClient(c, { id, nome });
   await session.ready;
-  const k = await Kernel.boot({ files: session.files, store: memoryStore(), models: new MockModels(), mirror: true });
+  const k = await Kernel.boot({ files: session.files, store: memoryStore(), ai: new MockAiModels(), mirror: true });
   return new ThinClient(k, session);
 }
 
@@ -267,8 +267,8 @@ describe('death and reconnection among many (T43c)', () => {
     const said: string[] = [];
     anna.k.bus.on('ui:message', (m) => said.push(m.text));
     const calls: Array<{ task: string; chi?: string; data?: unknown }> = [];
-    const origText = k.models.text.bind(k.models);
-    k.models.text = (c) => {
+    const origText = k.ai.text.bind(k.ai);
+    k.ai.text = (c) => {
       calls.push({ task: c.task, chi: c.chi, data: c.data });
       return origText(c);
     };

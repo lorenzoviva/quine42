@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { COMUNE } from '../src/kernel/cards';
 import { costWithFee, splitCost } from '../src/kernel/credits';
 import { fakeLink } from '../src/session/protocol';
@@ -19,7 +19,7 @@ async function bootMany(): Promise<Kernel> {
     ...bundledFiles,
     'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2),
   };
-  return Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+  return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
 async function thin(server: SessionServer, id: string): Promise<ThinClient> {
@@ -27,7 +27,7 @@ async function thin(server: SessionServer, id: string): Promise<ThinClient> {
   server.connect(s);
   const session = new SessionClient(c, { id });
   await session.ready;
-  const k = await Kernel.boot({ files: session.files, store: memoryStore(), models: new MockModels(), mirror: true });
+  const k = await Kernel.boot({ files: session.files, store: memoryStore(), ai: new MockAiModels(), mirror: true });
   return new ThinClient(k, session);
 }
 
@@ -136,7 +136,7 @@ describe('credits and common costs (T45a)', () => {
     // Trigger a common model call: gemini-3.1-flash-lite prompt: 1_000_000 tokens
     // Base cost: $0.25. Total cost (+1%): 0.25 * 1.01 = 0.2525.
     // Split in three: each ~0.084167.
-    k.models.onCall!({
+    k.ai.onCall!({
       model: 'gemini-3.1-flash-lite',
       agent: 'narratore',
       task: 'council.session',
@@ -161,7 +161,7 @@ describe('credits and common costs (T45a)', () => {
     const ioBefore = k.creditsOf('io');
     const brunoBefore = k.creditsOf('bruno');
 
-    k.models.onCall!({
+    k.ai.onCall!({
       model: 'gemini-3.1-flash-lite',
       agent: 'narratore',
       task: 'npc.reply',
@@ -178,7 +178,7 @@ describe('credits and common costs (T45a)', () => {
   });
 
   it('credits exhausted (crediti <= 0): wanderer requests served by local models and wanderer knows', async () => {
-    class TrackingOnlineModels extends MockModels {
+    class TrackingOnlineAiModels extends MockAiModels {
       onlineCalls: string[] = [];
       async text(call: TextCall): Promise<string> {
         this.onlineCalls.push(call.task);
@@ -186,13 +186,13 @@ describe('credits and common costs (T45a)', () => {
       }
     }
 
-    const online = new TrackingOnlineModels();
+    const online = new TrackingOnlineAiModels();
     const cfg = JSON.parse(bundledFiles['universe.json']);
     const files = {
       ...bundledFiles,
       'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2),
     };
-    const k = await Kernel.boot({ files, store: memoryStore(), models: online });
+    const k = await Kernel.boot({ files, store: memoryStore(), ai: online });
     const server = new SessionServer(k);
     const master = await thin(server, 'io');
     const anna = await thin(server, 'anna');
@@ -245,7 +245,7 @@ describe('credits and common costs (T45a)', () => {
 
     // Common expenses are split among eligible non-anonymous wanderers only
     k.giveCredits('io', 10);
-    k.models.onCall!({
+    k.ai.onCall!({
       model: 'gemini-3.1-flash-lite',
       agent: 'narratore',
       task: 'council.session',

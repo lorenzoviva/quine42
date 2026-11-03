@@ -2,7 +2,7 @@
 // that describes it, the four photographs and the review. Kept from the JSON sculptor of steps 8A-8E,
 // which is gone; the XML sculptor (sculptor.ts) and the trial scripts use it.
 
-import { parseJson, type Models, type Schema } from '../../src/kernel/ai/models';
+import { parseJson, type AiModels, type Schema } from '../../src/kernel/ai/models';
 import { boxOf, classOf, guessClass, type AssetClass } from '../../src/mj/classes';
 import type { PaletteEntry, RunResult, Vec3 } from '../../src/mj/engine';
 import { DEFAULT_RENDER, render, sheet, type Picture } from '../../src/mj/photo';
@@ -71,7 +71,7 @@ const CRITIQUE_SCHEMA: Schema = {
   required: ['voto', 'riconoscibile', 'problemi', 'consigli', 'verdetto'],
 };
 
-export async function review(models: Models, t: Target, views: string, reference?: string, style?: string): Promise<Critique> {
+export async function review(models: AiModels, t: Target, views: string, reference?: string, style?: string): Promise<Critique> {
   const raw = await models.text({
     agent: 'Artista',
     task: 'lab.review',

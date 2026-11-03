@@ -81,10 +81,10 @@ describe('the kernel’s water (T51b)', () => {
     const { Kernel } = await import('../src/kernel/kernel');
     const { bundledFiles } = await import('../src/kernel/bundle');
     const { memoryStore } = await import('../src/kernel/repo');
-    const { MockModels } = await import('../src/kernel/ai/mock');
+    const { MockAiModels } = await import('../src/kernel/ai/mock');
     const { LEVEL } = await import('../src/kernel/relief');
     const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...JSON.parse(bundledFiles['universe.json']), rilievo: { mare: 0 } }) };
-    const k = await Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+    const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
     const S = k.config.chunkSize;
     for (let i = 0; i < 400 && (k.chunks.get('0,0')?.stage !== 'planned' || k.chunks.get('1,0')?.stage !== 'planned'); i++) {
       k.tick(1 / 60);

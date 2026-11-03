@@ -1,9 +1,9 @@
-// Gemini for the lab's scripts: the kernel's GeminiModels sent straight to Google (scripts have no proxy),
+// Gemini for the lab's scripts: the kernel's GeminiAiModels sent straight to Google (scripts have no proxy),
 // with the key from .env (never printed) and the kernel's usage ledger counting every call.
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { GeminiModels } from '../../src/kernel/ai/gemini';
+import { GeminiAiModels } from '../../src/kernel/ai/gemini';
 import type { Thinking } from '../../src/kernel/ai/models';
 import { UsageLedger } from '../../src/kernel/ai/usage';
 
@@ -19,8 +19,8 @@ export function readKey(root: string): string {
   return key;
 }
 
-export function direct(model: string, key: string, ledger: UsageLedger, opts: { thinking?: Thinking; timeout?: number; max?: number } = {}): GeminiModels {
-  const g = new GeminiModels({
+export function direct(model: string, key: string, ledger: UsageLedger, opts: { thinking?: Thinking; timeout?: number; max?: number } = {}): GeminiAiModels {
+  const g = new GeminiAiModels({
     endpoint: 'https://generativelanguage.googleapis.com/v1beta',
     textModel: model,
     limits: { text: opts.max ?? 200 },

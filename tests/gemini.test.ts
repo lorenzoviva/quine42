@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { GeminiModels } from '../src/kernel/ai/gemini';
+import { GeminiAiModels } from '../src/kernel/ai/gemini';
 import { BudgetError, parseJson } from '../src/kernel/ai/models';
 import { costOf, priceOf } from '../src/kernel/ai/prices';
 import { UsageLedger, type CallRecord } from '../src/kernel/ai/usage';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 
 type Call = { url: string; body: any };
 
@@ -22,10 +22,10 @@ function fakeFetch(responses: Array<{ status: number; body: unknown }>) {
 
 const textOk = (text: string) => ({ status: 200, body: { candidates: [{ content: { parts: [{ text }] } }], usageMetadata: { promptTokenCount: 10, candidatesTokenCount: 5 } } });
 
-describe('GeminiModels', () => {
+describe('GeminiAiModels', () => {
   it('sends system prompt, images and JSON schema through the proxy, and counts usage', async () => {
     const { calls, impl } = fakeFetch([textOk('{"a":1}')]);
-    const g = new GeminiModels({ textModel: 'gemini-3.1-flash-lite', limits: { text: 5 }, fetchImpl: impl });
+    const g = new GeminiAiModels({ textModel: 'gemini-3.1-flash-lite', limits: { text: 5 }, fetchImpl: impl });
     const out = await g.text({ agent: 'fisico', task: 't', system: 'sei il fisico', prompt: 'ciao', schema: { type: 'OBJECT', properties: { a: { type: 'NUMBER' } } }, images: ['data:image/png;base64,QUJD'] });
     expect(out).toBe('{"a":1}');
     expect(calls[0].url).toBe('/api/gemini/models/gemini-3.1-flash-lite:generateContent');
@@ -39,7 +39,7 @@ describe('GeminiModels', () => {
 
   it('uses the model a call asks for, counts reasoning and cache, and reports every call', async () => {
     const { calls, impl } = fakeFetch([{ status: 200, body: { candidates: [{ content: { parts: [{ text: 'ok' }] } }], usageMetadata: { promptTokenCount: 1000, cachedContentTokenCount: 600, candidatesTokenCount: 200, thoughtsTokenCount: 300 } } }]);
-    const g = new GeminiModels({ textModel: 'gemini-3.1-flash-lite', limits: { text: 5 }, fetchImpl: impl, thinking: 'medium' });
+    const g = new GeminiAiModels({ textModel: 'gemini-3.1-flash-lite', limits: { text: 5 }, fetchImpl: impl, thinking: 'medium' });
     const seen: CallRecord[] = [];
     g.onCall = (r) => seen.push(r);
     await g.text({ agent: 'scultore', task: 'sculpt', system: 's', prompt: 'p', model: 'gemini-3.8-flash', thinking: 'off' });
@@ -55,7 +55,7 @@ describe('GeminiModels', () => {
       n++;
       throw Object.assign(new Error('The operation was aborted due to timeout'), { name: 'TimeoutError' });
     }) as unknown as typeof fetch;
-    const g = new GeminiModels({ textModel: 'gemini-3.1-flash-lite', limits: { text: 5 }, fetchImpl: impl });
+    const g = new GeminiAiModels({ textModel: 'gemini-3.1-flash-lite', limits: { text: 5 }, fetchImpl: impl });
     const seen: CallRecord[] = [];
     g.onCall = (r) => seen.push(r);
     await expect(g.text({ agent: 'a', task: 't', system: '', prompt: '' })).rejects.toThrow(/tempo scaduto/);
@@ -66,7 +66,7 @@ describe('GeminiModels', () => {
 
   it('retries on 429 and counts the retries', async () => {
     const { calls, impl } = fakeFetch([{ status: 429, body: { error: { message: 'slow down' } } }, textOk('ok')]);
-    const g = new GeminiModels({ textModel: 't', limits: { text: 5 }, fetchImpl: impl });
+    const g = new GeminiAiModels({ textModel: 't', limits: { text: 5 }, fetchImpl: impl });
     const seen: CallRecord[] = [];
     g.onCall = (r) => seen.push(r);
     expect(await g.text({ agent: 'a', task: 'p', system: '', prompt: 'x' })).toBe('ok');
@@ -77,7 +77,7 @@ describe('GeminiModels', () => {
 
   it('enforces the session budget', async () => {
     const { impl } = fakeFetch([textOk('{}')]);
-    const g = new GeminiModels({ textModel: 't', limits: { text: 1 }, fetchImpl: impl });
+    const g = new GeminiAiModels({ textModel: 't', limits: { text: 1 }, fetchImpl: impl });
     await g.text({ agent: 'a', task: 't', system: '', prompt: '' });
     await expect(g.text({ agent: 'a', task: 't', system: '', prompt: '' })).rejects.toBeInstanceOf(BudgetError);
   });
@@ -104,11 +104,11 @@ describe('usage ledger', () => {
   });
 
   it('goes into the universe with every commit and survives a rollback', async () => {
-    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
-    k.models.onCall!({ model: 'gemini-3.1-flash-lite', agent: 'narratore', task: 'npc.reply', prompt: 100, cached: 0, output: 50, thoughts: 0 });
+    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
+    k.ai.onCall!({ model: 'gemini-3.1-flash-lite', agent: 'narratore', task: 'npc.reply', prompt: 100, cached: 0, output: 50, thoughts: 0 });
     expect(k.saveUsage()).toBe(true);
     expect(JSON.parse(k.repo.head().files['world/consumi.json']!).prezzi).toBe('2026-10-22');
-    k.models.onCall!({ model: 'gemini-3.1-flash-lite', agent: 'narratore', task: 'npc.reply', prompt: 100, cached: 0, output: 50, thoughts: 0 });
+    k.ai.onCall!({ model: 'gemini-3.1-flash-lite', agent: 'narratore', task: 'npc.reply', prompt: 100, cached: 0, output: 50, thoughts: 0 });
     k.rollback();
     expect(k.usage.session.calls).toBe(2);
     expect(k.saveUsage()).toBe(true);

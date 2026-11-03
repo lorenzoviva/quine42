@@ -130,9 +130,9 @@ export class Console {
           return row;
         });
       case 'ai': {
-        const u = k.models.usage;
+        const u = k.ai.usage;
         return [
-          el('div', { class: 'note' }, `Modelli: ${k.models.name} (${k.config.ai.textModel}). Chiamate ${u.text}/${k.models.limits.text}, errori ${u.failures} (scadute ${u.timeouts}), token ${u.inputTokens} (cache ${u.cachedTokens}) → ${u.outputTokens} + ragionamento ${u.thoughtTokens}. Costo: ${tallyLine(k.usage.session)}. Ogni proposta passa dall'Arbitro e dal validatore.`),
+          el('div', { class: 'note' }, `Modelli: ${k.ai.name} (${k.config.ai.textModel}). Chiamate ${u.text}/${k.ai.limits.text}, errori ${u.failures} (scadute ${u.timeouts}), token ${u.inputTokens} (cache ${u.cachedTokens}) → ${u.outputTokens} + ragionamento ${u.thoughtTokens}. Costo: ${tallyLine(k.usage.session)}. Ogni proposta passa dall'Arbitro e dal validatore.`),
           ...k.feed().slice(-150).reverse().map((e) => feedLine(e)),
         ];
       }

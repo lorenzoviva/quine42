@@ -6,7 +6,7 @@
 // secret that lives in this process and that only that page can read. The serving process needs none: it works on the disk.
 //
 // One folder (`universes/.coda/`, ignored by git), one file per state of a request:
-//   <id>.richiesta.json   waiting (what QueueModels sent: provider, agent, task, system, prompt, schema…)
+//   <id>.richiesta.json   waiting (what QueueAiModels sent: provider, agent, task, system, prompt, schema…)
 //   <id>.presa.json       taken by the process (renamed, so two processes never take the same)
 //   <id>.risposta.json    answered: { text } or { errore }, with `usage` when the CLI says it
 //   servitore-<provider>.json   the heartbeat of the process that serves that provider ({ tempo, pid })

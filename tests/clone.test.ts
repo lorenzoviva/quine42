@@ -6,7 +6,7 @@ import path from 'node:path';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { allCards, CARDS_FILE, moduleCardId } from '../src/kernel/cards';
 import { cloneChanges } from '../src/kernel/clone';
 import { cloneUniverse, writeBranch } from '../server/universeStore';
@@ -71,7 +71,7 @@ describe('cloning a universe with another master (T42d)', () => {
 
   it('the kernel of the clone has the new master in god mode, and the old one is a player', async () => {
     const files = many();
-    const k = await Kernel.boot({ files: { ...files, ...cloneChanges(files, { nome: 'seconda', master: 'anna' }).changes }, store: memoryStore(), models: new MockModels() });
+    const k = await Kernel.boot({ files: { ...files, ...cloneChanges(files, { nome: 'seconda', master: 'anna' }).changes }, store: memoryStore(), ai: new MockAiModels() });
     expect(k.partita().master).toBe('anna');
     expect(k.isMaster('anna')).toBe(true);
     expect(k.isMaster('io')).toBe(false);

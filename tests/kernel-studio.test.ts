@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { countItem } from '../src/kernel/inventory';
 import type { StudioItem } from '../src/kernel/corona';
 import { DT, boot, run, clearArea } from './world';
@@ -147,13 +147,13 @@ describe('tile context menus', () => {
     await k.freeTileAction(col + 1, row, 'scavo qui una buca');
     const learned = k.palette[code].actions?.find((a) => a.effects?.length);
     expect(learned).toBeTruthy();
-    const calls = k.models.usage.text;
+    const calls = k.ai.usage.text;
     const again = k.tileMenu(col + 2, row);
     const opt = again.options.find((o) => o.id === `t:${learned!.id}`);
     if (k.tileAt(col + 2, row) === code) {
       expect(opt).toBeTruthy();
       await k.performMenu(opt!.id, -1, col + 2, row);
-      expect(k.models.usage.text).toBe(calls);
+      expect(k.ai.usage.text).toBe(calls);
     }
   });
 });
@@ -180,7 +180,7 @@ describe('mechanics with interfaces', () => {
     expect(countItem(k.inventory(), 'item.elmo')).toBe(0);
     // The game is saved and resumed: the helmet is still on, the defence rebuilt.
     expect(k.saveState()).toBe(true);
-    const k2 = await Kernel.boot({ files: { ...bundledFiles, ...k.files }, store: memoryStore(), models: new MockModels() });
+    const k2 = await Kernel.boot({ files: { ...bundledFiles, ...k.files }, store: memoryStore(), ai: new MockAiModels() });
     expect(k2.slots()[p.panel.id].testa?.item).toBe('item.elmo');
     expect(k2.uiValue('difesa.valore')).toBe(3);
     expect(k.unequip(p.panel.id, 'testa')).toBe(true);

@@ -2,7 +2,7 @@
 // its structured `data`, so the whole Council works in tests and without an API key. They sometimes
 // answer badly on purpose, so the discard-and-regenerate path is always exercised.
 
-import { emptyUsage, type Limits, type Models, type TextCall } from './models';
+import { emptyUsage, type Limits, type AiModels, type TextCall } from './models';
 import { hashStr, Rng } from '../rng';
 import { tokenize } from '../runes';
 import type { PlanContext } from '../agents/cartography';
@@ -63,7 +63,7 @@ const STOCK: Array<[string, string, string, number, number, string[], Record<str
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const words = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').match(/[a-z]+/g) ?? [];
 
-export class MockModels implements Models {
+export class MockAiModels implements AiModels {
   readonly name = 'offline';
   readonly usage = emptyUsage();
   limits: Limits = { text: Infinity };

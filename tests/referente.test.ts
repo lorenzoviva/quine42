@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { ATLAS_FILE } from '../src/kernel/atlas';
 import { fakeLink } from '../src/session/protocol';
 import { SessionServer } from '../src/session/server';
@@ -17,7 +17,7 @@ const RULES = 'world/rules.json';
 async function bootMany(): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
-  return Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+  return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
 async function thin(server: SessionServer, id: string): Promise<ThinClient> {
@@ -25,7 +25,7 @@ async function thin(server: SessionServer, id: string): Promise<ThinClient> {
   server.connect(s);
   const session = new SessionClient(c, { id });
   await session.ready;
-  const k = await Kernel.boot({ files: session.files, store: memoryStore(), models: new MockModels(), mirror: true });
+  const k = await Kernel.boot({ files: session.files, store: memoryStore(), ai: new MockAiModels(), mirror: true });
   return new ThinClient(k, session);
 }
 
@@ -75,7 +75,7 @@ describe('the Referente and the teams of the corona on the master’s branch (T4
     expect(rulesOf(master.k.files)).toMatch(/lupi/);
     expect(master.k.publisher!.branch()).toEqual(expect.arrayContaining([RULES, ATLAS_FILE]));
     // The calls are the server's Council's: the shared models still report to the world's ledger (the mock reports none).
-    k.models.onCall!({ model: 'prova', agent: 'referente', task: 'referente.coordinate', prompt: 1, cached: 0, output: 1, thoughts: 0, chi: 'io' });
+    k.ai.onCall!({ model: 'prova', agent: 'referente', task: 'referente.coordinate', prompt: 1, cached: 0, output: 1, thoughts: 0, chi: 'io' });
     expect(k.usage.session.calls).toBe(calls + 1);
     expect(k.feed().some((e) => e.task === 'referente.coordinate')).toBe(true);
     // The world and the players do not have it.
@@ -151,7 +151,7 @@ describe('the runes the master asks the Referente for (T42f)', () => {
   });
 
   it('alone, runes are not asked for: they are found in the world', async () => {
-    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
+    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
     const r = await k.talkToAgent('referente', 'dammi la runa speed');
     expect(r.runes).toBeUndefined();
     expect(countItem(k.inventory(), 'rune:speed')).toBe(0);

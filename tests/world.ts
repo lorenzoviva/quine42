@@ -3,12 +3,12 @@
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 
 export const DT = 1 / 60;
 
-export async function boot(models = new MockModels()) {
-  const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models });
+export async function boot(models = new MockAiModels()) {
+  const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: models });
   await develop(k);
   return k;
 }

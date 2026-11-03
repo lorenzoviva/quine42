@@ -2,7 +2,7 @@
 // JSON programs of steps 8A-8E. Same targets, classes and artist as lab/mj3d/sculptor.ts; the lab runs the
 // program, measures it and sends it back with the reason while it does not work.
 
-import type { Models } from '../../src/kernel/ai/models';
+import type { AiModels } from '../../src/kernel/ai/models';
 import { analyse, type Analysis } from '../../src/mj/check';
 import { Mj3Error, type RunResult } from '../../src/mj/engine';
 import { classFor, describe, type Critique, type Target } from './target';
@@ -100,7 +100,7 @@ export interface MjxPrevious {
  * Asks for a program and sends it back with the reason while it is invalid (compile error, empty,
  * floating, too low, never ending). Nodes that never did anything go back too, as a hint.
  */
-export async function sculptMjx(models: Models, t: Target, opts: { retries: number; style?: string; examples?: boolean }, previous?: MjxPrevious): Promise<MjxSculpture> {
+export async function sculptMjx(models: AiModels, t: Target, opts: { retries: number; style?: string; examples?: boolean }, previous?: MjxPrevious): Promise<MjxSculpture> {
   const kind = classFor(t).cls.id;
   const system = mjxSystem(kind, opts.examples !== false);
   let prompt = describe(t, opts.style).replace(/scatola \(size\)/, 'scatola');

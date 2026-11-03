@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { buildGraph, GRAPH_FILE, readGraph, type GraphPlace } from '../src/kernel/graph';
 import { writePlots, PLOTS_FILE, type Plot } from '../src/kernel/plots';
 import type { FileMap } from '../src/kernel/types';
@@ -226,7 +226,7 @@ describe('the graph of the world (ADR-0045)', () => {
 
   it('the kernel keeps world/grafo.json with every commit, with the places planned', async () => {
     const files: FileMap = { ...bundledFiles, [PLOTS_FILE]: writePlots([]) };
-    const k = await Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+    const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
     await develop(k);
     const planned = [...k.chunks.values()].filter((c) => c.stage === 'planned' && c.place);
     expect(planned.length).toBeGreaterThan(0);

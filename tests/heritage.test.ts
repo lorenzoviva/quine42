@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { allCards, CARDS_FILE, moduleCardId, readCards, receivedBy } from '../src/kernel/cards';
 import { cloneChanges } from '../src/kernel/clone';
 import { changeOf, contentText, fingerprint, repairEredita, sharesOf } from '../src/kernel/heritage';
@@ -116,7 +116,7 @@ describe('the heritage of clones (T45c)', () => {
 
   it('the kernel of the clone keeps the chain and the uses at birth, and tells what goes back', async () => {
     const files = terza();
-    const k = await Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+    const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
     const ledger = JSON.parse(k.cards.toJson());
     expect(ledger.allaNascita['luogo:0_0']).toEqual({ luoghi: 1, trame: 0, prompt: 3 });
     expect(ledger.luoghi['0_0'].origini).toHaveLength(2);

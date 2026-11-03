@@ -46,7 +46,7 @@
 ## Stack e persistenza
 
 - **Vite 7 + TypeScript 5** (strict; Vitest 4, ADR-0100), **three.js** per il mondo (ADR-0040) e per le pagine out-game (ADR-0095), DOM per HUD/pannelli, uno strato 2D sopra per i testi.
-- **Vitest** in Node con modelli offline (`MockModels`): kernel, Concilio e layout testabili headless.
+- **Vitest** in Node con modelli offline (`MockAiModels`): kernel, Concilio e layout testabili headless.
 - Persistenza: repository git dell'universo su disco tramite il server di Vite (`server/universeStore.ts`):
   testi, `maps/` (piani dei luoghi), `world/stato.json` (lo stato del mondo), `world/giocatori/` (i viandanti), `world/consumi.json` (i consumi); saldi e pagamenti fuori dal repository, in `universes/.saldi/` (ADR-0104). Senza server:
   `localStorage` + IndexedDB.
@@ -307,7 +307,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   piani dei luoghi): i punti che creano contenuti committano con `commitContent`, che timbra ciò che il cambio porta (`stampFiles`); il
   titolare delle comuni è un viandante estratto col seme (`titolareOf`). Gli utilizzi (`luoghi trame prompt`) e le carte dei luoghi in
   `world/carte.json` (`CardLedger`, scritto prima di ogni commit); la collezione: `kernel.cardsOf(id)`, `collectionOf`.
-- **Crediti e spese comuni** (ADR-0081, T45a, ADR-0104, T125): saldo crediti per viandante nel `Ledger` del kernel (`kernel.ledger`; sul server `universes/.saldi/<nome>.json`, fuori dalla storia; `kernel.creditsOf`, `deductCredits`); ricaricato a mano solo dal master, dalla console (`grantCredits`, messaggio `ricarica`), entro il tetto al giorno per universo (`QUINE_TETTO_RICARICHE`); il Referente non dà crediti. Ogni chiamata scala dal pagante (`payerOf`) costo modello + 1% piattaforma (`PLATFORM_FEE = 0.01`, `costWithFee`); le spese comuni (`comune`) sono divise in parti uguali tra tutti i giocatori collegati in quel momento (`splitCost`), master compreso, escludendo gli anonimi. A crediti esauriti (`crediti <= 0`) o per viandanti anonimi (`anonimo: true`, 0 crediti non ricaricabili): le richieste personali sono risposte dai modelli locali (`MockModels`) e il giocatore lo sa (`stato.crediti` nell'aggiornamento, avviso nel feed).
+- **Crediti e spese comuni** (ADR-0081, T45a, ADR-0104, T125): saldo crediti per viandante nel `Ledger` del kernel (`kernel.ledger`; sul server `universes/.saldi/<nome>.json`, fuori dalla storia; `kernel.creditsOf`, `deductCredits`); ricaricato a mano solo dal master, dalla console (`grantCredits`, messaggio `ricarica`), entro il tetto al giorno per universo (`QUINE_TETTO_RICARICHE`); il Referente non dà crediti. Ogni chiamata scala dal pagante (`payerOf`) costo modello + 1% piattaforma (`PLATFORM_FEE = 0.01`, `costWithFee`); le spese comuni (`comune`) sono divise in parti uguali tra tutti i giocatori collegati in quel momento (`splitCost`), master compreso, escludendo gli anonimi. A crediti esauriti (`crediti <= 0`) o per viandanti anonimi (`anonimo: true`, 0 crediti non ricaricabili): le richieste personali sono risposte dai modelli locali (`MockAiModels`) e il giocatore lo sa (`stato.crediti` nell'aggiornamento, avviso nel feed).
 
 <a id="multigiocatore"></a>
 ## Il multigiocatore: server, client, ramo del master, tra viandanti
@@ -397,7 +397,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   nell'`entra`, il server lo verifica (`firebase-admin` in `server/account.ts`, `SessionOptions.verify`) e il viandante è l'uid
   (`accountWanderer` in `src/session/account.ts`); token falso o scaduto → `rifiuto`. L'anonimo (`ingresso.anonimo`,
   `SessionServer.isAnonymous`, `kernel.isAnonymous`) usa il meccanismo unico dei crediti di ADR-0081: 0 crediti non ricaricabili,
-  escluso dalle spese comuni, richieste personali gestite con i modelli locali (`MockModels` a crediti esauriti); legandosi a Google
+  escluso dalle spese comuni, richieste personali gestite con i modelli locali (`MockAiModels` a crediti esauriti); legandosi a Google
   (pannello `P`, «Lega a Google») smette di essere anonimo (`setAnonymous`), tiene lo stesso uid e viandante e può ricevere crediti.
   `QUINE_MASTER` (uid) è il master `io` degli universi fatti prima degli account. Senza `FIREBASE_PROJECT_ID` (sviluppo, test) vale l'id di
   oggi; in singola nessun account.
@@ -567,7 +567,7 @@ Il kernel è in console come `window.quine` (o `window.rune`) in singola e per i
 
 - **Registro dei consumi** (ADR-0039): ogni chiamata passa da `kernel.usage` (per giorno, modello e compito, in token e
   dollari, cache e ragionamento compresi) e va in `world/consumi.json` con ogni commit; il costo è nel pannello del
-  Concilio (`G`). `GeminiModels` non ripete mai una richiesta scaduta (può essere stata pagata); ripete solo 429/5xx.
+  Concilio (`G`). `GeminiAiModels` non ripete mai una richiesta scaduta (può essere stata pagata); ripete solo 429/5xx.
 
 - Testo per mondo: Genesi ~60 chiamate; poi 1 per luogo, 1-2 per individuo, ~4 per pacchetto di oggetti.
 - Niente immagini (step 9): il costo dell'aspetto è testo, un programma per tipo (vedi il report 8.2B, sezione 4).

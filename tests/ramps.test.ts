@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { bodyFoot, bodyGround, InlineRunner, Forms, stepOf, type FormComp } from '../src/kernel/forms';
 import { floors } from '../src/mj/mesh';
 
@@ -24,7 +24,7 @@ const files = () => {
 
 describe('stairs as ramps', () => {
   it('a stair of small steps is climbed to the top and walked down again; its side is a wall', async () => {
-    const k = await Kernel.boot({ files: files(), store: memoryStore(), models: new MockModels() });
+    const k = await Kernel.boot({ files: files(), store: memoryStore(), ai: new MockAiModels() });
     k.tick(1 / 60);
     // A clear patch of ground for the stair (7 × 3 tiles) and around it.
     let spot: [number, number] | undefined;

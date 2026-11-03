@@ -3,12 +3,12 @@ import { bibleBreaks, cleanBible, COUNCIL_PRINCIPLES, metaBreak } from '../src/k
 import { Council, readBible, type Bible } from '../src/kernel/agents/council';
 import { bundledFiles } from '../src/kernel/bundle';
 import { readPlots, PLOTS_FILE, writePlots, type Plot } from '../src/kernel/plots';
-import type { Models, TextCall } from '../src/kernel/ai/models';
+import type { AiModels, TextCall } from '../src/kernel/ai/models';
 import { Kernel } from '../src/kernel/kernel';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 
-const boot = () => Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
+const boot = () => Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
 
 // The author's analysis (docs/userchats/to-do-2026-10-22.md, «Incoerenze personaggi e trame»).
 const ANALYSIS = [
@@ -48,7 +48,7 @@ describe('the fourth wall', () => {
   it('the principles name the hints and forbid doubles of the runes; they go with every request', async () => {
     for (const s of ['torna sempre in piazza', 'osserva ogni viandante', 'non si può superare', 'simbolo luminoso', 'Niente doppioni']) expect(COUNCIL_PRINCIPLES).toContain(s);
     const systems: string[] = [];
-    const models = { text: async (r: TextCall) => (systems.push(r.system ?? ''), '{}') } as unknown as Models;
+    const models = { text: async (r: TextCall) => (systems.push(r.system ?? ''), '{}') } as unknown as AiModels;
     const c = new Council(models, () => ({ files: bundledFiles, palette: {}, catalog: [] }));
     for (const agent of ['narratore', 'arbitro', 'cartografo', 'referente'] as const) await c.ask(agent, 'prova', 'una prova', { type: 'OBJECT' });
     for (const system of systems) expect(system).toContain('Niente doppioni degli elementi del gioco');

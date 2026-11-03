@@ -4,14 +4,14 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { upgradeFromSeed } from '../src/kernel/universes';
 import { OWN_CUSTOMS, bibleBreaks, cleanBible, glossaryBreak, metaBreak } from '../src/kernel/fourthwall';
 import { reviewPlot, type Plot } from '../src/kernel/plots';
-import { MockModels } from '../src/kernel/ai/mock';
-import type { Models, TextCall } from '../src/kernel/ai/models';
+import { MockAiModels } from '../src/kernel/ai/mock';
+import type { AiModels, TextCall } from '../src/kernel/ai/models';
 import type { FileMap } from '../src/kernel/types';
 
 /** A Council whose model only records what it is asked. */
 function council(files: FileMap) {
   const asked: TextCall[] = [];
-  const models = { text: async (r: TextCall) => (asked.push(r), '{}') } as unknown as Models;
+  const models = { text: async (r: TextCall) => (asked.push(r), '{}') } as unknown as AiModels;
   return { c: new Council(models, () => ({ files, palette: {}, catalog: [] })), asked };
 }
 
@@ -86,7 +86,7 @@ describe('the lexicon (T65)', () => {
   });
 
   it('the offline Narrator writes a bible with a custom of its own', async () => {
-    const models = new MockModels();
+    const models = new MockAiModels();
     const text = await models.text({ agent: 'narratore', task: 'genesis.bible', system: '', prompt: '', data: { theme: 'x' } } as TextCall);
     const b = JSON.parse(text) as Bible;
     expect(cleanBible(b, words).usanze?.length).toBe(1);

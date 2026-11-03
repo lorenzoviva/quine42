@@ -1,6 +1,6 @@
 // The camera turns freely or by quarter turns and the keys turn with it (ADR-0047, T55): W always goes up the screen.
 import { describe, expect, it } from 'vitest';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { bundledFiles } from '../src/kernel/bundle';
 import { Input } from '../src/kernel/input';
 import { Kernel } from '../src/kernel/kernel';
@@ -39,7 +39,7 @@ describe('camera turns', () => {
   });
 
   it('the wanderer walks where the screen says, whatever the turn', async () => {
-    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
+    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
     k.input.setTurn(1); // the camera is east of the wanderer: right on the screen is north
     const before = { ...k.playerPos() };
     k.input.setHeld('right', true);
@@ -88,7 +88,7 @@ describe('camera turns', () => {
   });
 
   it('the wanderer walks diagonally when angle is 45 degrees', async () => {
-    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
+    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
     k.input.setAngle(Math.PI / 4);
     const before = { ...k.playerPos() };
     k.input.setHeld('up', true);

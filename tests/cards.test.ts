@@ -2,13 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import type { TextCall } from '../src/kernel/ai/models';
 import { CARDS_FILE, COMUNE, isCommonTask, payerOf, stampFiles, titolareOf } from '../src/kernel/cards';
 import { USAGE_FILE } from '../src/kernel/ai/usage';
 
 /** Offline models that report every call to the ledger as if it had cost a few tokens. */
-class Billed extends MockModels {
+class Billed extends MockAiModels {
   async text(call: TextCall): Promise<string> {
     const out = await super.text(call);
     (this as { onCall?: (r: object) => void }).onCall?.({ model: 'gemini-3.1-flash-lite', agent: call.agent, task: call.task, prompt: 100, cached: 0, output: 20, thoughts: 0, chi: call.chi });
@@ -32,7 +32,7 @@ describe('the cards (T36)', () => {
   });
 
   it('a Genesis and two places: cards with author, payer and uses; the ledger knows who paid', async () => {
-    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new Billed() });
+    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new Billed() });
     expect(await k.runGenesis('un regno di pastori sulle colline')).toBe(true);
     await develop(k);
     const cards = k.cardsOf();
@@ -79,8 +79,8 @@ describe('the cards (T36)', () => {
     expect(draw(7)).not.toEqual(draw(8));
     expect(titolareOf('luogo:1_0', 'anna', ['io', 'anna'], 7)).toBe('anna');
     // In the kernel: the wanderers it has (the order they joined in does not matter).
-    const a = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
-    const b = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
+    const a = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
+    const b = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
     a.addWanderer('anna');
     b.addWanderer('anna');
     const signs = (k: Kernel) => ids.map((id) => k.sign(id, 'plot.weave', 'narratore').titolare);

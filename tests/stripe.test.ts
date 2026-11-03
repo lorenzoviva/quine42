@@ -7,7 +7,7 @@ import { Readable } from 'node:stream';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import type { PaymentRecord } from '../src/kernel/credits';
 import { ledgerOf } from '../server/ledger';
 import { worldOf } from '../server/worldCalls';
@@ -28,7 +28,7 @@ async function bootMultiplayerKernel(): Promise<Kernel> {
     ...bundledFiles,
     'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2),
   };
-  return Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+  return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
 describe('Stripe payments and idempotency (T45e)', () => {

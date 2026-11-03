@@ -5,7 +5,7 @@
 // A request that times out, or whose connection fails, is NOT repeated: Gemini may have generated (and
 // billed) it anyway. Only an answer that says "try again" (429, 5xx) is repeated, a few times.
 
-import { BudgetError, emptyUsage, Semaphore, type Limits, type Models, type TextCall, type Thinking } from './models';
+import { BudgetError, emptyUsage, Semaphore, type Limits, type AiModels, type TextCall, type Thinking } from './models';
 import type { CallRecord } from './usage';
 
 export interface GeminiOptions {
@@ -33,7 +33,7 @@ function inline(dataUrl: string): GeminiPart {
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const RETRIES = 3;
 
-export class GeminiModels implements Models {
+export class GeminiAiModels implements AiModels {
   readonly name = 'gemini';
   readonly usage = emptyUsage();
   limits: Limits;

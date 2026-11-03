@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel, PLACE_PHASES } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { MemoryChunks } from '../src/kernel/chunks';
 import { chunkLevels, LEVEL, worldLevels } from '../src/kernel/relief';
 import type { FormComp } from '../src/kernel/forms';
@@ -15,7 +15,7 @@ import { gates, layout } from '../src/kernel/layout';
 
 /** A kernel whose loaded chunks have all been planned by the Cartographer. */
 async function boot(chunks = new MemoryChunks()) {
-  const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels(), chunks });
+  const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels(), chunks });
   for (let i = 0; i < 80; i++) {
     k.tick(1 / 60);
     await new Promise((r) => setTimeout(r, 25));
@@ -101,7 +101,7 @@ describe('the model of places (T26)', () => {
     const other = [...k.chunks.values()].find((c) => c.stage === 'planned' && c.key !== '0,0')!;
     const otherMini = k.miniature(other.cx, other.cy)!;
     // A new session on the same universe: nothing loaded yet.
-    const k2 = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels(), chunks });
+    const k2 = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels(), chunks });
     expect(k2.chunks.size).toBe(0);
     const calls = k2.usage.version;
     expect(k2.miniature(0, 0)).toBeUndefined();
@@ -193,7 +193,7 @@ describe('the model of places (T26)', () => {
 
 describe('the sample of environments (T26d)', () => {
   it('shows every environment after the terrains, from a shelf of its own, each run on a trial draft', async () => {
-    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels(), chunks: new MemoryChunks() });
+    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels(), chunks: new MemoryChunks() });
     const office = k.corona.building('luoghi')!;
     const items = office.floors.flatMap((f) => f.items);
     const samples = items.filter((i) => i.kind === 'layout');
@@ -232,7 +232,7 @@ describe('the sample of environments (T26d)', () => {
     }
     // Every environment of the seed runs and changes its draft; another kernel shows the same.
     for (const l of ids) expect(k.layoutSample(l)!.changed, l).toBeGreaterThan(0);
-    const k2 = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels(), chunks: new MemoryChunks() });
+    const k2 = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels(), chunks: new MemoryChunks() });
     expect(k2.layoutSample(id)!.mini.tiles).toBe(sample.mini.tiles);
     // E beside it (or a click) opens its panel: name, the module's file.
     const panels: any[] = [];

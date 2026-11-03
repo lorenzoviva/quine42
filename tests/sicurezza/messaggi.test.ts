@@ -1,7 +1,7 @@
 // V-011 (T129, ADR-0107): a client that floods is limited, the others are not, and the game as it is played never notices.
 
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-import { MockModels } from '../../src/kernel/ai/mock';
+import { MockAiModels } from '../../src/kernel/ai/mock';
 import { bundledFiles } from '../../src/kernel/bundle';
 import { Kernel } from '../../src/kernel/kernel';
 import { memoryStore } from '../../src/kernel/repo';
@@ -13,7 +13,7 @@ let kernel: Kernel;
 beforeAll(async () => {
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
-  kernel = await Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+  kernel = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }, 120_000);
 afterEach(() => void vi.restoreAllMocks());
 

@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { articulationPoints, gates, layout } from '../src/kernel/layout';
 import type { ChunkPlan } from '../src/kernel/agents/cartography';
 import type { TileDef } from '../src/kernel/types';
@@ -89,7 +89,7 @@ describe('T56a: niente cose solide sui passaggi obbligati', () => {
   };
 
   it('un luogo con un unico sentiero largo uno non ha cose solide sul sentiero', async () => {
-    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
+    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
     const cx = 10, cy = 10;
     const g = gates(cx, cy, S, k.config.seed);
     const westGate = g[0];
@@ -170,7 +170,7 @@ describe('T56a: niente cose solide sui passaggi obbligati', () => {
   });
 
   it('gli oggetti solidi vengono piazzati negli slarghi o nicchie fuori dal sentiero obbligato', async () => {
-    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
+    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
     const cx = 11, cy = 11;
     const g = gates(cx, cy, S, 456);
     const westGate = g[0];
@@ -215,7 +215,7 @@ describe('T56a: niente cose solide sui passaggi obbligati', () => {
   });
 
   it('placeInside non piazza oggetti solidi a ridosso della porta della struttura', async () => {
-    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
+    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
     for (let i = 0; i < 80; i++) {
       k.tick(1 / 60);
       await new Promise((r) => setTimeout(r, 25));

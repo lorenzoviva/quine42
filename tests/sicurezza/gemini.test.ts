@@ -7,7 +7,7 @@ import { PassThrough } from 'node:stream';
 import { afterEach, describe, expect, it } from 'vitest';
 import { accessRefusal, GeminiGate, geminiRoute, MAX_BODY, modelsOfConfig, type GateOptions } from '../../server/geminiProxy';
 import { BudgetError } from '../../src/kernel/ai/models';
-import { GeminiModels } from '../../src/kernel/ai/gemini';
+import { GeminiAiModels } from '../../src/kernel/ai/gemini';
 
 // V-002: the key is spent only for the game and within the decided budgets. Fake upstream: no call ever reaches Gemini.
 
@@ -200,7 +200,7 @@ describe('Gemini in multigiocatore', () => {
   it('V-002 il server chiama Google senza passare da una rotta, con gli stessi limiti', async () => {
     const { calls, impl } = upstream();
     const g = gate(impl);
-    const models = new GeminiModels({ fetchImpl: g.direct()!, textModel: MODEL, limits: { text: 5 } });
+    const models = new GeminiAiModels({ fetchImpl: g.direct()!, textModel: MODEL, limits: { text: 5 } });
     expect(await models.text({ agent: 'narratore', task: 't', system: 's', prompt: 'p' })).toBe('ok');
     expect(calls[0].url).toMatch(/^https:\/\/generativelanguage\.googleapis\.com\/.*gemini-3\.1-flash-lite:generateContent$/);
     expect(g.spentToday()).toBeGreaterThan(0);
@@ -215,7 +215,7 @@ describe('Gemini in multigiocatore', () => {
   it('V-002 al tetto il kernel si ferma come a un budget, senza ripetere la chiamata', async () => {
     const { calls, impl } = upstream();
     const g = gate(impl, { dailyCap: 0 });
-    const models = new GeminiModels({ fetchImpl: g.direct()!, textModel: MODEL, limits: { text: 5 } });
+    const models = new GeminiAiModels({ fetchImpl: g.direct()!, textModel: MODEL, limits: { text: 5 } });
     await expect(models.text({ agent: 'narratore', task: 't', system: 's', prompt: 'p' })).rejects.toBeInstanceOf(BudgetError);
     expect(calls).toHaveLength(0);
   });
@@ -226,7 +226,7 @@ describe('Gemini in multigiocatore', () => {
       n++;
       throw new Error('connessione caduta');
     }) as unknown as typeof fetch);
-    const models = new GeminiModels({ fetchImpl: g.direct()!, textModel: MODEL, limits: { text: 5 } });
+    const models = new GeminiAiModels({ fetchImpl: g.direct()!, textModel: MODEL, limits: { text: 5 } });
     await expect(models.text({ agent: 'narratore', task: 't', system: 's', prompt: 'p' })).rejects.toThrow(/non ripetuta/);
     expect(n).toBe(1);
   });

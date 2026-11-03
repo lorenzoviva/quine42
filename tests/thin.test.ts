@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { fakeLink } from '../src/session/protocol';
 import { SessionServer } from '../src/session/server';
 import { SessionClient } from '../src/session/client';
@@ -14,7 +14,7 @@ const DT = 1 / 60;
 async function bootMany(): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
-  return Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+  return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
 /** A browser of a game of many, without the browser: a session, and a mirror kernel filled by the thin client. */
@@ -23,7 +23,7 @@ async function thin(server: SessionServer, id: string, nome?: string): Promise<T
   server.connect(s);
   const session = new SessionClient(c, { id, nome });
   await session.ready;
-  const k = await Kernel.boot({ files: session.files, store: memoryStore(), models: new MockModels(), mirror: true });
+  const k = await Kernel.boot({ files: session.files, store: memoryStore(), ai: new MockAiModels(), mirror: true });
   return new ThinClient(k, session);
 }
 
@@ -461,7 +461,7 @@ describe('il mondo riparte (T127, ADR-0110)', () => {
     const wires = rewirable(old);
     const session = new SessionClient(wires.link, { id: 'alice' });
     await session.ready;
-    const k = await Kernel.boot({ files: session.files, store: memoryStore(), models: new MockModels(), mirror: true });
+    const k = await Kernel.boot({ files: session.files, store: memoryStore(), ai: new MockAiModels(), mirror: true });
     const thinClient = new ThinClient(k, session);
     const said: string[] = [];
     const message = k.message.bind(k);

@@ -6,10 +6,10 @@ import { SEED_FILE, seedHashes, UniverseChunks, UniverseClient, upgradeFromSeed,
 import type { FileMap } from './kernel/types';
 import { readConfig } from './kernel/universe';
 import { IdbChunks } from './kernel/chunks';
-import { GeminiModels } from './kernel/ai/gemini';
-import { MockModels } from './kernel/ai/mock';
-import type { Models } from './kernel/ai/models';
-import { describeQueue, describeSubscriptions, QueueModels, RoutedModels, SUBSCRIPTIONS, subscriptionsOf, usesSubscriptions, type Provider } from './kernel/ai/subscription';
+import { GeminiAiModels } from './kernel/ai/gemini';
+import { MockAiModels } from './kernel/ai/mock';
+import type { AiModels } from './kernel/ai/models';
+import { describeQueue, describeSubscriptions, QueueAiModels, RoutedAiModels, SUBSCRIPTIONS, subscriptionsOf, usesSubscriptions, type Provider } from './kernel/ai/subscription';
 import { Renderer } from './render/renderer';
 import { WorkerRunner } from './render/forms';
 import { Thumbs } from './render/thumbs';
@@ -67,25 +67,25 @@ async function bootAlone(client: UniverseClient | null, snap: UniverseSnapshot |
     past = snap.log ?? [];
   }
   const ai = readConfig(files).config.ai;
-  const online = !params.has('offline') && (await GeminiModels.available());
-  const baseModels: Models = online ? new GeminiModels({ textModel: ai.textModel, limits: { text: ai.maxText }, thinking: ai.thinking, timeout: (ai.timeout ?? 120) * 1000 }) : new MockModels();
+  const online = !params.has('offline') && (await GeminiAiModels.available());
+  const baseAiModels: AiModels = online ? new GeminiAiModels({ textModel: ai.textModel, limits: { text: ai.maxText }, thinking: ai.thinking, timeout: (ai.timeout ?? 120) * 1000 }) : new MockAiModels();
   const table = subscriptionsOf(ai);
-  let models: Models = baseModels;
+  let models: AiModels = baseAiModels;
   if (usesSubscriptions(table)) {
-    const queues: Partial<Record<Exclude<Provider, 'api'>, Models>> = {};
+    const queues: Partial<Record<Exclude<Provider, 'api'>, AiModels>> = {};
     for (const p of SUBSCRIPTIONS) {
       if (table.provider === p || Object.values(table.agenti).includes(p)) {
-        if (await QueueModels.available(p)) {
-          queues[p] = new QueueModels({ provider: p });
+        if (await QueueAiModels.available(p)) {
+          queues[p] = new QueueAiModels({ provider: p });
         }
       }
     }
     if (Object.keys(queues).length > 0) {
-      models = new RoutedModels(baseModels, table, queues);
+      models = new RoutedAiModels(baseAiModels, table, queues);
     }
   }
   const chunks = client ? new UniverseChunks(client, new IdbChunks()) : new IdbChunks();
-  const kernel = await Kernel.boot({ files, store: client ? memoryStore() : localStore, models, chunks, forms: new WorkerRunner(), wasmUri, backend: client ?? undefined, past });
+  const kernel = await Kernel.boot({ files, store: client ? memoryStore() : localStore, ai: models, chunks, forms: new WorkerRunner(), wasmUri, backend: client ?? undefined, past });
   return { kernel, online };
 }
 
@@ -111,7 +111,7 @@ async function joinMany(name: string, lobbyChoice?: { tetto?: number; offline?: 
   if (session.refused || !session.me) throw new Error(session.refused ?? 'il mondo non risponde');
   // The Actor (T157): the lobby's choice is the master's; the server refuses it to anyone else.
   if (lobbyChoice?.attore && session.master) void session.act({ t: 'attore', ...lobbyChoice.attore });
-  const mirror = await Kernel.boot({ files: session.files, store: memoryStore(), models: new MockModels(), forms: new WorkerRunner(), wasmUri, mirror: true });
+  const mirror = await Kernel.boot({ files: session.files, store: memoryStore(), ai: new MockAiModels(), forms: new WorkerRunner(), wasmUri, mirror: true });
   return new ThinClient(mirror, session);
 }
 
@@ -412,22 +412,22 @@ async function main() {
   };
   window.addEventListener('keydown', startGame);
   intro.addEventListener('click', startGame);
-  const updateModelsHud = async () => {
+  const updateAiModelsHud = async () => {
     if (thin) {
       $('#models').textContent = `partita di molti · ${thin.session.nome} (${thin.session.id})${thin.session.anonimo ? ' · anonimo: modelli locali' : ''}`;
       return;
     }
     const base = online ? `Gemini · ${ai.textModel}` : 'offline: luoghi abbozzati, agenti locali';
-    if (kernel.models instanceof RoutedModels) {
-      const firstQueue = Object.values(kernel.models.queues)[0] as QueueModels | undefined;
-      const qState = await QueueModels.queryState(firstQueue?.endpoint, firstQueue?.fetchImpl);
-      $('#models').textContent = `${base} · ${describeSubscriptions(kernel.models.table)} · ${describeQueue(qState)}`;
+    if (kernel.ai instanceof RoutedAiModels) {
+      const firstQueue = Object.values(kernel.ai.queues)[0] as QueueAiModels | undefined;
+      const qState = await QueueAiModels.queryState(firstQueue?.endpoint, firstQueue?.fetchImpl);
+      $('#models').textContent = `${base} · ${describeSubscriptions(kernel.ai.table)} · ${describeQueue(qState)}`;
     } else {
       $('#models').textContent = base;
     }
   };
-  void updateModelsHud();
-  kernel.bus.on('usage', () => void updateModelsHud());
+  void updateAiModelsHud();
+  kernel.bus.on('usage', () => void updateAiModelsHud());
   if (params.has('skip')) intro.hidden = true;
   if (params.has('ricarica')) {
     const outcome = params.get('ricarica');

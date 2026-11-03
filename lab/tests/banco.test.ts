@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { bundledFiles } from '../../src/kernel/bundle';
 import { Kernel } from '../../src/kernel/kernel';
-import { MockModels } from '../../src/kernel/ai/mock';
+import { MockAiModels } from '../../src/kernel/ai/mock';
 import type { FormComp } from '../../src/kernel/forms';
 import { memoryStore } from '../../src/kernel/repo';
 import { BERSAGLI, testoBersaglio } from '../banco/bersagli';
@@ -74,7 +74,7 @@ describe('il corpo del banco è quello del kernel', () => {
     index.buono = { classe: 'grande' };
     index.stretta = { classe: 'grande' };
     const files = { ...bundledFiles, 'models/buono.xml': esempio('buono'), 'models/stretta.xml': esempio('scala-stretta'), 'models/index.json': JSON.stringify(index) };
-    const k = await Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+    const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
     k.tick(1 / 60);
     // A nearly flat patch, clear for the 5 × 5 tiles of the model and around it.
     let spot: [number, number] | undefined;

@@ -5,8 +5,8 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
-import { emptyUsage, type Models, type TextCall } from '../src/kernel/ai/models';
+import { MockAiModels } from '../src/kernel/ai/mock';
+import { emptyUsage, type AiModels, type TextCall } from '../src/kernel/ai/models';
 import { Council } from '../src/kernel/agents/council';
 import { checkProgram, DEFAULT_SCULPTORS, describe as describeRequest, modelFor, sculpt, withSize } from '../src/kernel/agents/sculptor';
 import { forgedSize } from '../src/kernel/agents/forge';
@@ -19,7 +19,7 @@ const FLOATING = '<sequence values="BW" size="20 20 16"><box at="10 10 8" size="
 const ROCK = (h: number) => `<sequence values="BRD" size="20 20 16"><ellipsoid at="10 10 0" size="16 16 ${h}" color="R"/><prl in="B R" out="* D" p="0.3" steps="1"/></sequence>`;
 
 /** A model layer that answers from a script and records what it was asked. */
-class Scripted implements Models {
+class Scripted implements AiModels {
   readonly name = 'scripted';
   readonly usage = emptyUsage();
   limits = { text: 100 };
@@ -91,7 +91,7 @@ describe('the Sculptor', () => {
 
 describe('the models the world lacks', () => {
   it('a forged thing names a model of its own; the Sculptor writes it and the thing wears it', async () => {
-    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
+    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
     const r = await k.forgeModule('un mugnaio che macina il grano', 'agente', 'npc');
     expect(r.ok).toBe(true);
     const man = k.modules.get(r.id!)!.manifest;
@@ -112,7 +112,7 @@ describe('the models the world lacks', () => {
   }, 30_000);
 
   it('items get a common shape: one program per shape, tinted for each item', async () => {
-    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
+    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
     expect(await k.growContent('prova', 8, true)).toBe(true);
     const shaped = [...k.content.items.values()].filter((d) => d.model?.startsWith('forma-'));
     expect(shaped.length).toBeGreaterThan(0);

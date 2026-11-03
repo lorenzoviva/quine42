@@ -10,7 +10,7 @@ import { createFakeStripeSignature, handleStripeWebhookEvent, stripeRoute } from
 import { queueWanted, subscriptionQueue } from '../../server/subscriptionQueue';
 import { ledgerOf } from '../../server/ledger';
 import { universeStore } from '../../server/universeStore';
-import { MockModels } from '../../src/kernel/ai/mock';
+import { MockAiModels } from '../../src/kernel/ai/mock';
 import { bundledFiles } from '../../src/kernel/bundle';
 import { Kernel } from '../../src/kernel/kernel';
 import { memoryStore } from '../../src/kernel/repo';
@@ -399,7 +399,7 @@ describe('la sessione', () => {
   async function world() {
     const cfg = JSON.parse(bundledFiles['universe.json']);
     const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
-    return new SessionServer(await Kernel.boot({ files, store: memoryStore(), models: new MockModels() }));
+    return new SessionServer(await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() }));
   }
 
   /** The `ingresso` the client gets, entering as it says. */

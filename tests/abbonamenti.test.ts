@@ -3,7 +3,7 @@ import { mkdtempSync, promises as fs } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { enqueue, look, served } from '../server/subscriptionQueue';
-import { QueueModels } from '../src/kernel/ai/subscription';
+import { QueueAiModels } from '../src/kernel/ai/subscription';
 import {
   buildCliCommand,
   extractUsage,
@@ -218,7 +218,7 @@ describe('servi (T68b) — esecuzione con una CLI finta', () => {
     expect(looked.errore).toMatch(/limite abbonamento claude raggiunto/);
   });
 
-  it('funziona end-to-end con QueueModels', async () => {
+  it('funziona end-to-end con QueueAiModels', async () => {
     const d = dir();
     const scriptPath = path.join(d, 'mock-server.mjs');
     await fs.writeFile(
@@ -233,7 +233,7 @@ describe('servi (T68b) — esecuzione con una CLI finta', () => {
       'utf8',
     );
 
-    const q = new QueueModels({ provider: 'claude', fetchImpl: diskFetch(d), poll: 5 });
+    const q = new QueueAiModels({ provider: 'claude', fetchImpl: diskFetch(d), poll: 5 });
     const callPromise = q.text({
       agent: 'scultore',
       task: 'model.sculpt',

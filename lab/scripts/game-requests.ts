@@ -1,5 +1,5 @@
 // How big the game's requests to Gemini are. The kernel never kept its usage, so this measures what it
-// sends: a Genesis and the first places, offline (MockModels, as in the tests), every request recorded,
+// sends: a Genesis and the first places, offline (MockAiModels, as in the tests), every request recorded,
 // then a sample of each kind counted with Gemini's countTokens (free, no generation). Images in a
 // request (the Artist's photos) are counted too. Output is not measured here (the report uses the lab's measured answers).
 // npx vite-node lab/scripts/game-requests.ts -- [--root H:/projects/rune] [--per-task 3]
@@ -9,7 +9,7 @@ import path from 'node:path';
 import { Kernel } from '../../src/kernel/kernel';
 import { bundledFiles } from '../../src/kernel/bundle';
 import { memoryStore } from '../../src/kernel/repo';
-import { MockModels } from '../../src/kernel/ai/mock';
+import { MockAiModels } from '../../src/kernel/ai/mock';
 import type { TextCall } from '../../src/kernel/ai/models';
 
 const argv = process.argv.slice(2);
@@ -25,7 +25,7 @@ const inline = (u: string) => {
   return m ? { inlineData: { mimeType: m[1], data: m[2] } } : { text: u };
 };
 
-class Recording extends MockModels {
+class Recording extends MockAiModels {
   async text(call: TextCall): Promise<string> {
     recorded.push({
       kind: 'text',
@@ -40,7 +40,7 @@ class Recording extends MockModels {
   }
 }
 
-const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new Recording() });
+const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new Recording() });
 await k.runGenesis('un regno di pastori sulle colline');
 const settle = (ms: number) => new Promise((r) => setTimeout(r, ms));
 for (let i = 0; i < 200; i++) {

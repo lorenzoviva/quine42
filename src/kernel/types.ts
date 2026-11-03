@@ -351,7 +351,7 @@ export interface AiConfig {
   /** New kinds of inhabitants the world forges by itself per session, so the same face is not everywhere. */
   maxCast?: number;
   /** The Sculptor's model per class and the Artist's (agents/sculptor.ts → DEFAULT_SCULPTORS). */
-  scultori?: Partial<import('./agents/sculptor').SculptorModels>;
+  scultori?: Partial<import('./agents/sculptor').SculptorAiModels>;
   /** New models the Sculptor writes by itself per session. */
   maxModels?: number;
   /** Reasoning effort of every call (default `low`: see docs/reports/costi-step8.2B.md). */
@@ -377,7 +377,7 @@ export interface AiMinimi {
   /** Minimum text model (e.g. 'gemini-3.1-flash-lite'). */
   textModel?: string;
   /** Minimum sculptor models per class (e.g. { struttura: 'gemini-3.8-flash' }). */
-  scultori?: Partial<import('./agents/sculptor').SculptorModels>;
+  scultori?: Partial<import('./agents/sculptor').SculptorAiModels>;
   /** Minimum credit spending ceiling (USD) to enter the world. */
   tetto?: number;
   /** Minimum coefficient values. */

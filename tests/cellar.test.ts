@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { Forms, InlineRunner, sottoOf, type FormComp } from '../src/kernel/forms';
 
 // A box from voxel x0..x1, y0..y1, z0..z1 (inclusive): `at` is the middle in x and y, the bottom in z.
@@ -37,7 +37,7 @@ const files = () => {
 };
 
 async function scene(model: string) {
-  const k = await Kernel.boot({ files: files(), store: memoryStore(), models: new MockModels() });
+  const k = await Kernel.boot({ files: files(), store: memoryStore(), ai: new MockAiModels() });
   for (let i = 0; i < 120 && k.chunks.get('0,0')?.stage !== 'planned'; i++) {
     k.tick(1 / 60);
     await new Promise((r) => setTimeout(r, 25));

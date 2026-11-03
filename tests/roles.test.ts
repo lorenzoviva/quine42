@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { countItem } from '../src/kernel/inventory';
 import { carpetLine, COUNCIL_RUNE, extractLines } from '../src/kernel/runes';
 import { repairPartita } from '../src/kernel/validator';
@@ -46,7 +46,7 @@ function clearArea(k: Kernel, width = 24) {
 async function bootWith(partita: Record<string, unknown>) {
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita }, null, 2) };
-  const k = await Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+  const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
   await develop(k);
   return k;
 }

@@ -24,7 +24,7 @@ export type ModelCategory = 'semplice' | 'figura' | 'struttura';
 export const categoryOf = (cls: AssetClass): ModelCategory =>
   ['persona', 'animale', 'bestia'].includes(cls.id) ? 'figura' : ['edificio', 'monumento', 'grande'].includes(cls.id) ? 'struttura' : 'semplice';
 
-export interface SculptorModels {
+export interface SculptorAiModels {
   semplice: string;
   figura: string;
   struttura: string;
@@ -34,7 +34,7 @@ export interface SculptorModels {
   artista: string;
 }
 
-export const DEFAULT_SCULPTORS: SculptorModels = {
+export const DEFAULT_SCULPTORS: SculptorAiModels = {
   semplice: 'gemini-3.1-flash-lite',
   figura: 'gemini-3.8-flash',
   struttura: 'gemini-3.8-flash',
@@ -186,7 +186,7 @@ export function describe(req: SculptRequest, cls: AssetClass): string {
     .join('\n');
 }
 
-export function modelFor(req: SculptRequest, cls: AssetClass, m: SculptorModels, today = new Date().toISOString().slice(0, 10)): string {
+export function modelFor(req: SculptRequest, cls: AssetClass, m: SculptorAiModels, today = new Date().toISOString().slice(0, 10)): string {
   const cat = categoryOf(cls);
   if (cat === 'struttura' && req.taglia && RARE_SIZES.includes(req.taglia) && (!m.importanteFino || today < m.importanteFino)) return m.importante;
   return m[cat];
@@ -248,7 +248,7 @@ async function write(c: Council, req: SculptRequest, cls: AssetClass, model: str
  * `plan` (T45b, `sculptPlan` of the coefficient of revisions): how many programs for the simple things, whether a
  * figure is revised, whether the Artist judges at all (without, the first program that passes is the model).
  */
-export async function sculpt(c: Council, req: SculptRequest, m: SculptorModels = DEFAULT_SCULPTORS, plan = { semplici: 2, revisione: true, giudizio: true }): Promise<SculptResult | undefined> {
+export async function sculpt(c: Council, req: SculptRequest, m: SculptorAiModels = DEFAULT_SCULPTORS, plan = { semplici: 2, revisione: true, giudizio: true }): Promise<SculptResult | undefined> {
   const cls = classOf(req.classe) ?? classOf('oggetto')!;
   const model = modelFor(req, cls, m);
   const cat = categoryOf(cls);

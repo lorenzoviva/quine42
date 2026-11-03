@@ -4,10 +4,10 @@ import { Council } from '../src/kernel/agents/council';
 import { individuate } from '../src/kernel/agents/content';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { readPlots, writePlots, PLOTS_FILE, type Plot } from '../src/kernel/plots';
 import { addPerson, applyRenames, checkSociety, readPeople, repairSociety, reverseRelation, similarNames, type People, type Person } from '../src/kernel/society';
-import type { Models, TextCall } from '../src/kernel/ai/models';
+import type { AiModels, TextCall } from '../src/kernel/ai/models';
 import type { FileMap } from '../src/kernel/types';
 
 const cats = (t: string) => (t === 'npc.cat' ? 'animale' : 'persona') as 'animale' | 'persona';
@@ -126,7 +126,7 @@ describe('a coherent society', () => {
 
   it('the Narrator is told the species, the gender and what relations are possible', async () => {
     const asked: TextCall[] = [];
-    const models = { text: async (r: TextCall) => (asked.push(r), JSON.stringify({ nome: 'Briciola', persona: 'Sei Briciola', aspetto: 'pelo grigio', porta: [], mestiere: 'caccia topi', genere: 'femmina', famiglia: [], routine: [] })) } as unknown as Models;
+    const models = { text: async (r: TextCall) => (asked.push(r), JSON.stringify({ nome: 'Briciola', persona: 'Sei Briciola', aspetto: 'pelo grigio', porta: [], mestiere: 'caccia topi', genere: 'femmina', famiglia: [], routine: [] })) } as unknown as AiModels;
     const c = new Council(models, () => ({ files: bundledFiles, palette: {}, catalog: [] }));
     const id = await individuate(c, { name: 'Gatto', description: 'un gatto', persona: 'Sei un gatto', specie: 'animale' }, { place: 'piazza', common: [], avoid: ['Ombra'] });
     expect(id.gender).toBe('femmina');
@@ -141,7 +141,7 @@ describe('a coherent society', () => {
     const files: FileMap = { ...bundledFiles, 'world/people.json': JSON.stringify(valmora()) };
     const plots: Plot[] = [{ id: 'trama-x', titolo: 'Cartografi', mistero: 'Elias la Rossa nasconde una mappa', coinvolti: ['Elias la Rossa'], tappe: [{ giorno: 0, momento: 'giorno', chi: 'Elias la Rossa', dove: 'piazza', cosa: 'disegna' }], inizio: 0, stato: 'attiva' }];
     files[PLOTS_FILE] = writePlots(plots);
-    const k = await Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+    const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
     expect(k.repo.log().some((c) => c.message.startsWith('società:'))).toBe(true);
     const people = readPeople(k.files);
     expect(rel(people, 'Fiocco', 'Bastiano')).toBe('animale');

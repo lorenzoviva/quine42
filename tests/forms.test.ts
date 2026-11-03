@@ -5,13 +5,13 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { modelErrors } from '../src/kernel/validator';
 import { classOf } from '../src/mj/classes';
 import { InlineRunner, rootTag, type FormComp, type FormRequest, type FormResult } from '../src/kernel/forms';
 import { formCacheKey, restoreFormResult, MemoryFormStore, WorkerRunner } from '../src/render/forms';
 
-const boot = () => Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
+const boot = () => Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
 
 describe('the library of models', () => {
   it('has a program for every class, all valid, all described in the index', () => {

@@ -137,9 +137,9 @@ describe('characters', () => {
     k.bus.on('ui:dialog', ({ text }: { text: string }) => (said = text));
     await k.perform(box, 'esamina');
     expect(said).toMatch(/Cassapanca/);
-    const calls = k.models.usage.text;
+    const calls = k.ai.usage.text;
     await k.perform(box, 'esamina');
-    expect(k.models.usage.text).toBe(calls);
+    expect(k.ai.usage.text).toBe(calls);
   });
 });
 
@@ -164,10 +164,10 @@ describe('free actions and effects', () => {
     // The learned action is in the menu of every bramble, and runs without asking the Council again.
     const other = spawnInFront(k, 'object.bush');
     expect(k.actionsFor(other).some((a) => a.id === `act:${learned!.id}`)).toBe(true);
-    const calls = k.models.usage.text;
+    const calls = k.ai.usage.text;
     await k.perform(other, `act:${learned!.id}`);
     expect(k.ecs.alive.has(other)).toBe(false);
-    expect(k.models.usage.text).toBe(calls);
+    expect(k.ai.usage.text).toBe(calls);
   });
 
   it('what is not possible does not happen; a closed thing can be forced open', async () => {
@@ -190,7 +190,7 @@ describe('free actions and effects', () => {
     const learned = k.content.get('item.secchio')!.actions!.find((a) => a.effects?.length)!;
     expect(learned.label).toMatch(/Bevo dal secchio/);
     expect(k.rules().some((r) => r.possibile && /bevo dal secchio/.test(r.testo))).toBe(true);
-    const calls = k.models.usage.text;
+    const calls = k.ai.usage.text;
     k.itemAct(8, learned.id);
     expect(k.needs()!.thirst).toBe(50);
     // A careless judgement that "spends" the thing you act on does not take it from you.
@@ -203,9 +203,9 @@ describe('free actions and effects', () => {
     expect(k.actionsFor(dropped).some((a) => a.label === learned.label)).toBe(true);
     // What is impossible stays impossible, without asking again.
     await k.freeItemAction(8, 'lo faccio volare sulla luna');
-    const after = k.models.usage.text;
+    const after = k.ai.usage.text;
     await k.freeItemAction(8, 'lo faccio volare sulla luna');
-    expect(k.models.usage.text).toBe(after);
+    expect(k.ai.usage.text).toBe(after);
     expect(after).toBe(calls + 2);
     // The Council sees the rules in every later judgement.
     expect(k.council.context('narratore')).toMatch(/Regole già stabilite[\s\S]*bevo dal secchio/);
@@ -223,9 +223,9 @@ describe('free actions and effects', () => {
     expect(k.repo.head().message).toMatch(/ricetta scoperta/);
     const no = await k.freeCraft("un drago d'oro");
     expect(no.ok).toBe(false);
-    const calls = k.models.usage.text;
+    const calls = k.ai.usage.text;
     await k.freeCraft("un drago d'oro");
-    expect(k.models.usage.text).toBe(calls);
+    expect(k.ai.usage.text).toBe(calls);
   });
 
   it('fire burns what is flammable and goes out; digging changes the terrain, and the change persists', async () => {

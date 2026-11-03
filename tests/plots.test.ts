@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { canonBreak, readPlots, reviewPlot, writePlots, PLOTS_FILE, type Plot } from '../src/kernel/plots';
 import { repairSociety, type People, type Person } from '../src/kernel/society';
 import type { TextCall } from '../src/kernel/ai/models';
@@ -98,7 +98,7 @@ describe('plots coherent with the people', () => {
 /** Mock models whose Narrator answers the plots given, in order, and records the prompts. */
 function narrator(answers: unknown[]) {
   const asked: TextCall[] = [];
-  const models = new MockModels();
+  const models = new MockAiModels();
   const text = models.text.bind(models);
   models.text = async (call: TextCall) => {
     if (call.task !== 'plot.weave') return text(call);
@@ -108,9 +108,9 @@ function narrator(answers: unknown[]) {
   return { models, asked };
 }
 
-async function bootWith(models: MockModels, extra: FileMap = {}) {
+async function bootWith(models: MockAiModels, extra: FileMap = {}) {
   const files: FileMap = { ...bundledFiles, 'world/people.json': JSON.stringify(society()), ...extra };
-  return Kernel.boot({ files, store: memoryStore(), models });
+  return Kernel.boot({ files, store: memoryStore(), ai: models });
 }
 
 const incoherent = { titolo: 'Il gatto che parla', mistero: 'Bastiano, fratello di Fiocco, mente.', coinvolti: ['Fiocco'], tappe: [beat('Fiocco', 'guarda il pozzo', 'Miao.'), beat('Ada', 'cuce')] };
@@ -144,7 +144,7 @@ describe('the Narrator weaves coherent plots', () => {
       plot({ id: 'c', titolo: 'Il debito di Ada', tappe: coherent.tappe }),
       plot({ id: 'd', titolo: 'Chiusa', stato: 'chiusa', tappe: [beat('Nessuno', 'niente')] }),
     ];
-    const k = await bootWith(new MockModels(), { [PLOTS_FILE]: writePlots(plots) });
+    const k = await bootWith(new MockAiModels(), { [PLOTS_FILE]: writePlots(plots) });
     const after = readPlots(k.files);
     expect(after.map((p) => p.id)).toEqual(['a', 'c', 'd']);
     expect(after[0].tappe[0].battuta).toBeUndefined();

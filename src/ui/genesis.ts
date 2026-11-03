@@ -7,8 +7,8 @@ import type { FeedEntry } from '../kernel/agents/council';
 import type { Kernel } from '../kernel/kernel';
 import { DEATH_LEVELS } from '../kernel/partita';
 import type { AiConfig, Partita } from '../kernel/types';
-import { COEFFICIENT_INFO, COEFFICIENT_KEYS, CENSUS, FULL_DETAIL, hourlyEstimate, isLowDetail, LOW_DETAIL, pricedModels, type Coefficients } from '../kernel/coefficients';
-import { DEFAULT_SCULPTORS, type SculptorModels } from '../kernel/agents/sculptor';
+import { COEFFICIENT_INFO, COEFFICIENT_KEYS, CENSUS, FULL_DETAIL, hourlyEstimate, isLowDetail, LOW_DETAIL, pricedAiModels, type Coefficients } from '../kernel/coefficients';
+import { DEFAULT_SCULPTORS, type SculptorAiModels } from '../kernel/agents/sculptor';
 import { usd } from '../kernel/ai/prices';
 import { feedLine } from './feed';
 import { $, el } from './dom';
@@ -75,9 +75,9 @@ export class GenesisScreen {
   private aiForm(): { form: HTMLElement; read: () => Pick<AiConfig, 'textModel' | 'scultori' | 'coefficienti' | 'attore'>; lock: (on: boolean) => void } {
     const ai = this.k.config.ai;
     const coef: Coefficients = this.k.coefficients();
-    const sculptors: SculptorModels = this.k.sculptors();
+    const sculptors: SculptorAiModels = this.k.sculptors();
     const actor = this.k.actor();
-    const models = pricedModels();
+    const models = pricedAiModels();
     const pick = (value: string) => {
       const s = el('select', {}, ...[...new Set([value, ...models])].map((m) => el('option', { value: m }, m))) as HTMLSelectElement;
       s.value = value;
@@ -89,7 +89,7 @@ export class GenesisScreen {
     actorOn.checked = actor.acceso;
     const actorModel = pick(actor.modello);
     actorModel.id = 'genesi-attore-modello';
-    const classes: Array<[keyof SculptorModels, string]> = [['semplice', 'cose semplici'], ['figura', 'figure'], ['struttura', 'strutture'], ['importante', 'strutture importanti'], ['artista', 'Artista (giudizio)']];
+    const classes: Array<[keyof SculptorAiModels, string]> = [['semplice', 'cose semplici'], ['figura', 'figure'], ['struttura', 'strutture'], ['importante', 'strutture importanti'], ['artista', 'Artista (giudizio)']];
     const sculpt = new Map(classes.map(([k]) => [k, pick(String(sculptors[k]))]));
     const sliders = new Map<keyof Coefficients, HTMLInputElement>();
     const preset = el('select', {}, el('option', { value: 'pieno' }, 'Pieno dettaglio'), el('option', { value: 'low' }, 'Low Detail (a risparmio)'), el('option', { value: 'misura' }, 'Su misura')) as HTMLSelectElement;
@@ -97,7 +97,7 @@ export class GenesisScreen {
     const read = (): Pick<AiConfig, 'textModel' | 'scultori' | 'coefficienti' | 'attore'> => ({
       textModel: text.value,
       attore: { acceso: actorOn.checked, modello: actorModel.value },
-      scultori: { ...Object.fromEntries([...sculpt].map(([k, s]) => [k, s.value])), importanteFino: sculptors.importanteFino } as Partial<SculptorModels>,
+      scultori: { ...Object.fromEntries([...sculpt].map(([k, s]) => [k, s.value])), importanteFino: sculptors.importanteFino } as Partial<SculptorAiModels>,
       coefficienti: Object.fromEntries([...sliders].map(([k, s]) => [k, Number(s.value)])) as Coefficients,
     });
     const show = () => {
@@ -125,7 +125,7 @@ export class GenesisScreen {
       const c = preset.value === 'low' ? LOW_DETAIL.coefficienti : preset.value === 'pieno' ? FULL_DETAIL : undefined;
       if (!c) return;
       for (const [k, s] of sliders) s.value = String(c[k]);
-      const models: Partial<SculptorModels> = preset.value === 'low' ? LOW_DETAIL.scultori : DEFAULT_SCULPTORS;
+      const models: Partial<SculptorAiModels> = preset.value === 'low' ? LOW_DETAIL.scultori : DEFAULT_SCULPTORS;
       for (const [k, s] of sculpt) if (models[k]) s.value = String(models[k]);
       show();
     };

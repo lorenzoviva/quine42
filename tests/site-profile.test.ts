@@ -10,7 +10,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { readWandererState } from '../src/kernel/wanderers';
 import { worldOf } from '../server/worldCalls';
 import { keepProfileInFiles, viewFromFiles, wandererHandler, whoAsks, type WandererRouteOptions } from '../server/wanderer';
@@ -124,7 +124,7 @@ describe('the wanderer route of the site (T102)', () => {
   it('with the world running, asks the kernel: the wanderer in the world wears it, the one away finds it saved', async () => {
     const cfg = JSON.parse(bundledFiles['universe.json']);
     const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }) };
-    const k = await Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+    const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
     k.addWanderer('alice', 'Alice', false);
     k.giveCredits('alice', 7);
     const opts: WandererRouteOptions = { universesDir: '/nessuno', getActiveWorld: async (u) => (u === 'vivo' ? worldOf(k) : undefined) };

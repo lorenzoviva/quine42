@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { fakeLink, type ServerMsg } from '../src/session/protocol';
 import { playerFiles, SessionServer } from '../src/session/server';
 import { SessionClient } from '../src/session/client';
@@ -13,7 +13,7 @@ const DT = 1 / 60;
 async function bootMany(): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
-  return Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+  return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
 /** A client of the session, with everything the server ever sent it. */
@@ -42,7 +42,7 @@ describe('the player’s client, without corona nor Council (T41)', () => {
     }
     expect(paths.filter((p) => p.startsWith('models/')).length).toBe(Object.keys(k.files).filter((p) => p.startsWith('models/')).length);
     // A mirror booted on them is whole: no fault, every module, the same content.
-    const mirror = await Kernel.boot({ files, store: memoryStore(), models: new MockModels(), mirror: true });
+    const mirror = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels(), mirror: true });
     expect(mirror.faults.size).toBe(0);
     expect([...mirror.modules.keys()].sort()).toEqual([...k.modules.keys()].sort());
     expect(Object.keys(mirror.content.items).length).toBe(Object.keys(k.content.items).length);
@@ -79,7 +79,7 @@ describe('the player’s client, without corona nor Council (T41)', () => {
     const server = new SessionServer(k);
     const { client } = join(server, 'io');
     await client.ready;
-    const mirror = await Kernel.boot({ files: client.files, store: memoryStore(), models: new MockModels(), mirror: true });
+    const mirror = await Kernel.boot({ files: client.files, store: memoryStore(), ai: new MockAiModels(), mirror: true });
     const thin = new ThinClient(mirror, client);
     const seen: string[] = [];
     mirror.bus.on('council', (e: { text: string }) => seen.push(e.text));

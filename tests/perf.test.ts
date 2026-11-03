@@ -3,10 +3,10 @@ import { it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 
 it('perf', async () => {
-  const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
+  const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
   for (let i = 0; i < 40; i++) {
     k.tick(1 / 60);
     await new Promise((r) => setTimeout(r, 25));

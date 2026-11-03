@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import type { TextCall } from '../src/kernel/ai/models';
 import { countItem } from '../src/kernel/inventory';
 import { readPeople } from '../src/kernel/society';
@@ -21,7 +21,7 @@ async function develop(k: Kernel) {
 }
 
 /** Offline models that remember every call. */
-class Recording extends MockModels {
+class Recording extends MockAiModels {
   calls: TextCall[] = [];
   async text(call: TextCall): Promise<string> {
     this.calls.push(call);
@@ -30,7 +30,7 @@ class Recording extends MockModels {
 }
 
 async function boot(files: FileMap = bundledFiles, models = new Recording()) {
-  const k = await Kernel.boot({ files, store: memoryStore(), models });
+  const k = await Kernel.boot({ files, store: memoryStore(), ai: models });
   await develop(k);
   return { k, models };
 }

@@ -6,12 +6,12 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { BENCH, benchFiles, cleanCases, fieldLabel, trialId, valueText, type BenchShown } from '../src/kernel/bench';
 import { BENCH_AT } from '../src/kernel/corona';
 import type { BenchCase, Manifest } from '../src/kernel/types';
 
-const boot = () => Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
+const boot = () => Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
 const seed = (k: Kernel, id: string) => ({ manifest: JSON.parse(k.files[`modules/${id}/manifest.json`]) as Manifest, logic: k.files[`modules/${id}/logic.lua`] });
 
 describe('the bench of the Sala sistemi', () => {
@@ -124,8 +124,8 @@ describe('the bench of the Sala sistemi', () => {
   });
 
   it('a mechanic whose cases show nothing goes back to the Engineer once', async () => {
-    const models = new MockModels();
-    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models });
+    const models = new MockAiModels();
+    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: models });
     const asked: string[] = [];
     const real = models.text.bind(models);
     models.text = async (call) => {

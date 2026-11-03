@@ -145,7 +145,7 @@ npm run abbonamento
 npm run dev                               # http://localhost:5173
 ```
 
-All'avvio in singola o sviluppo, se il servitore è attivo il gioco costruisce automaticamente i modelli instradati (`RoutedModels`): la schermata introduttiva (`#models`) e il pannello del Concilio (`G`) mostrano quali agenti vanno su quale abbonamento e quante richieste sono in coda o in corso. Se il servitore non è avviato o si interrompe, le richieste ricadono in modo trasparente sulle API (o sui modelli locali se offline).
+All'avvio in singola o sviluppo, se il servitore è attivo il gioco costruisce automaticamente i modelli instradati (`RoutedAiModels`): la schermata introduttiva (`#models`) e il pannello del Concilio (`G`) mostrano quali agenti vanno su quale abbonamento e quante richieste sono in coda o in corso. Se il servitore non è avviato o si interrompe, le richieste ricadono in modo trasparente sulle API (o sui modelli locali se offline).
 
 ## Riferimenti e ispirazioni
 

@@ -16,7 +16,7 @@ export const MAX_BODY = 2 * 1024 * 1024;
 export const DEFAULT_DAILY_CAP = 10;
 /** What a call in flight holds of the cap, besides its prompt: many at once cannot all slip under it. */
 const HELD_OUTPUT_TOKENS = 8192;
-/** Not «try again»: GeminiModels repeats 429 and 5xx, and this one lasts until tomorrow. */
+/** Not «try again»: GeminiAiModels repeats 429 and 5xx, and this one lasts until tomorrow. */
 export const STATUS_CAP = 402;
 
 const MODEL_IN_PATH = /\/models\/(gemini-[\w.-]+):generateContent$/;
@@ -132,7 +132,7 @@ export class GeminiGate {
     }
   }
 
-  /** The door of the worlds of many: a `fetch` for GeminiModels that goes to Google with no route. Undefined without a key. */
+  /** The door of the worlds of many: a `fetch` for GeminiAiModels that goes to Google with no route. Undefined without a key. */
   direct(): typeof fetch | undefined {
     if (!this.available) return undefined;
     return (async (input: RequestInfo | URL, init?: RequestInit) => {

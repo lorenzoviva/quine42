@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { leadsToPrograms, leadsToUniverses } from '../../server/hidden';
-import { MockModels } from '../../src/kernel/ai/mock';
+import { MockAiModels } from '../../src/kernel/ai/mock';
 import { bundledFiles } from '../../src/kernel/bundle';
 import { hourlyEstimate } from '../../src/kernel/coefficients';
 import { Kernel } from '../../src/kernel/kernel';
@@ -88,7 +88,7 @@ describe('ciò che esce verso il giocatore', () => {
   it('V-012 il seme, nello specchio di un giocatore: nessuna storia, nessun guasto', async () => {
     const cfg = JSON.parse(bundledFiles['universe.json']);
     const files = playerFiles({ ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }) });
-    const mirror = await Kernel.boot({ files, store: memoryStore(), models: new MockModels(), mirror: true });
+    const mirror = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels(), mirror: true });
     expect(mirror.faults.size).toBe(0);
     expect(Object.keys(mirror.palette).length).toBeGreaterThan(0);
     expect(mirror.recipes().all.length).toBeGreaterThan(0);
@@ -164,7 +164,7 @@ describe('i programmi dei mondi (T169, ADR-0110)', () => {
 });
 
 describe('ciò che il Concilio scrive', () => {
-  const boot = () => Kernel.boot({ files: { ...bundledFiles }, store: memoryStore(), models: new MockModels() });
+  const boot = () => Kernel.boot({ files: { ...bundledFiles }, store: memoryStore(), ai: new MockAiModels() });
   const budget = (files: Record<string, string>) => JSON.parse(files['universe.json']).ai.maxText;
 
   it('V-013 l\'elenco: il contenuto del mondo, non le impostazioni, i prompt degli agenti o percorsi strani', () => {

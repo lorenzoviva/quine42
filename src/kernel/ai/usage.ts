@@ -1,5 +1,5 @@
 // The usage ledger: what every call to a model cost, per day, model and task, in tokens and dollars.
-// GeminiModels reports each call (onCall); the kernel keeps the ledger and saves it in the universe
+// GeminiAiModels reports each call (onCall); the kernel keeps the ledger and saves it in the universe
 // (world/consumi.json) with every commit, so the spending of every session stays with the world it made.
 // Google's own usage page lags hours behind: this one is right after every call. Every call also has a payer
 // (`chi`, T36): the wanderer it was made for, or `comune` when the whole world asked for it.

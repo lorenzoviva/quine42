@@ -2,15 +2,15 @@ import { describe, expect, it } from 'vitest';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { costOf } from '../src/kernel/ai/prices';
 import {
   describeQueue,
   describeQueueDetails,
   describeSubscriptions,
   providerFor,
-  QueueModels,
-  RoutedModels,
+  QueueAiModels,
+  RoutedAiModels,
   slowTask,
   subscriptionsOf,
   usesSubscriptions,
@@ -29,7 +29,7 @@ import {
   waiting,
   withdraw,
 } from '../server/subscriptionQueue';
-import type { Models, TextCall } from '../src/kernel/ai/models';
+import type { AiModels, TextCall } from '../src/kernel/ai/models';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
@@ -121,11 +121,11 @@ describe('la coda su disco (T68)', () => {
   });
 });
 
-describe('QueueModels e RoutedModels (T68)', () => {
+describe('QueueAiModels e RoutedAiModels (T68)', () => {
   it('manda la richiesta, aspetta la risposta e la conta nel registro', async () => {
     const d = dir();
     const records: CallRecord[] = [];
-    const q = new QueueModels({ provider: 'claude', endpoint: '/api/coda', fetchImpl: diskFetch(d), poll: 5 });
+    const q = new QueueAiModels({ provider: 'claude', endpoint: '/api/coda', fetchImpl: diskFetch(d), poll: 5 });
     q.onCall = (r) => records.push(r);
     // The serving process (T68b), here by hand.
     const serve = (async () => {
@@ -150,7 +150,7 @@ describe('QueueModels e RoutedModels (T68)', () => {
 
   it('una risposta che non arriva in tempo non si ripete e viene ritirata', async () => {
     const d = dir();
-    const q = new QueueModels({ provider: 'claude', fetchImpl: diskFetch(d), poll: 5, timeout: 30 });
+    const q = new QueueAiModels({ provider: 'claude', fetchImpl: diskFetch(d), poll: 5, timeout: 30 });
     await expect(q.text(call('model.sculpt'))).rejects.toThrow(/tempo scaduto/);
     expect(q.usage.timeouts).toBe(1);
     expect(await take(d, 'claude')).toBeUndefined();
@@ -158,7 +158,7 @@ describe('QueueModels e RoutedModels (T68)', () => {
 
   it('un errore della CLI torna come errore della chiamata', async () => {
     const d = dir();
-    const q = new QueueModels({ provider: 'claude', fetchImpl: diskFetch(d), poll: 5 });
+    const q = new QueueAiModels({ provider: 'claude', fetchImpl: diskFetch(d), poll: 5 });
     const p = q.text(call('genesis.bible', 'narratore'));
     let r;
     while (!(r = await take(d, 'claude'))) await new Promise((res) => setTimeout(res, 5));
@@ -168,24 +168,24 @@ describe('QueueModels e RoutedModels (T68)', () => {
 
   it('instrada i compiti lenti alla coda e il resto alle API; usage e limiti sono delle API', async () => {
     const d = dir();
-    const api = new MockModels();
-    const q = new QueueModels({ provider: 'claude', fetchImpl: diskFetch(d), poll: 5 });
-    const m = new RoutedModels(api, subscriptionsOf({ provider: 'api', agenti: { scultore: 'claude' } }), { claude: q });
+    const api = new MockAiModels();
+    const q = new QueueAiModels({ provider: 'claude', fetchImpl: diskFetch(d), poll: 5 });
+    const m = new RoutedAiModels(api, subscriptionsOf({ provider: 'api', agenti: { scultore: 'claude' } }), { claude: q });
     expect(m.route(call('model.sculpt'))).toBe('claude');
     expect(m.route(call('model.judge', 'artista'))).toBe('api');
     expect(m.route(call('genesis.bible', 'narratore'))).toBe('api');
     // A provider of the table without its queue goes to the API.
-    const none = new RoutedModels(api, subscriptionsOf({ provider: 'claude' }), {});
+    const none = new RoutedAiModels(api, subscriptionsOf({ provider: 'claude' }), {});
     expect(none.route(call('genesis.bible', 'narratore'))).toBe('api');
     m.limits = { text: 7 };
     expect(api.limits.text).toBe(7);
     expect(m.usage).toBe(api.usage);
     const seen: string[] = [];
     m.onCall = (r) => seen.push(r.model);
-    expect(q.onCall).toBe((api as Models).onCall);
-    expect(await QueueModels.available('claude', '/api/coda', diskFetch(d))).toBe(false);
+    expect(q.onCall).toBe((api as AiModels).onCall);
+    expect(await QueueAiModels.available('claude', '/api/coda', diskFetch(d))).toBe(false);
     await beat(d, 'claude');
-    expect(await QueueModels.available('claude', '/api/coda', diskFetch(d))).toBe(true);
+    expect(await QueueAiModels.available('claude', '/api/coda', diskFetch(d))).toBe(true);
     expect(seen).toEqual([]);
   });
 });
@@ -243,7 +243,7 @@ describe('stato della coda e formattazione abbonamenti (T68c)', () => {
 
   it('listWaiting e listInProgress tracciano lo stato della coda su disco e via queryState', async () => {
     const d = dir();
-    const qStateInit = await QueueModels.queryState('/api/coda', diskFetch(d));
+    const qStateInit = await QueueAiModels.queryState('/api/coda', diskFetch(d));
     expect(qStateInit?.inCoda).toBe(0);
     expect(qStateInit?.serviti).toEqual([]);
 
@@ -260,7 +260,7 @@ describe('stato della coda e formattazione abbonamenti (T68c)', () => {
     ]);
     expect(await listInProgress(d)).toEqual([]);
 
-    const qStateWaiting = await QueueModels.queryState('/api/coda', diskFetch(d));
+    const qStateWaiting = await QueueAiModels.queryState('/api/coda', diskFetch(d));
     expect(qStateWaiting?.inCoda).toBe(1);
     expect(qStateWaiting?.richieste).toHaveLength(1);
 
@@ -305,14 +305,14 @@ describe('il pannello del Concilio e gli abbonamenti (T68c)', () => {
     };
   }
 
-  it('mostra abbonamenti e stato della coda nel pannello del Concilio con RoutedModels', async () => {
+  it('mostra abbonamenti e stato della coda nel pannello del Concilio con RoutedAiModels', async () => {
     const d = dir();
     await beat(d, 'claude');
-    const q = new QueueModels({ provider: 'claude', fetchImpl: diskFetch(d), poll: 5 });
-    const api = new MockModels();
+    const q = new QueueAiModels({ provider: 'claude', fetchImpl: diskFetch(d), poll: 5 });
+    const api = new MockAiModels();
     const table = subscriptionsOf({ provider: 'api', agenti: { scultore: 'claude' } });
-    const models = new RoutedModels(api, table, { claude: q });
-    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models });
+    const models = new RoutedAiModels(api, table, { claude: q });
+    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: models });
 
     const prevDoc = (globalThis as any).document;
     (globalThis as any).document = { createElement: makeMockElement };
@@ -336,8 +336,8 @@ describe('il pannello del Concilio e gli abbonamenti (T68c)', () => {
     }
   });
 
-  it('nasconde le indicazioni di abbonamento quando non si usano RoutedModels', async () => {
-    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
+  it('nasconde le indicazioni di abbonamento quando non si usano RoutedAiModels', async () => {
+    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
 
     const prevDoc = (globalThis as any).document;
     (globalThis as any).document = { createElement: makeMockElement };
@@ -363,10 +363,10 @@ describe('Genesi offline con la coda servita da una CLI finta (T68c)', () => {
   it('esegue la Genesi instradando tutti i compiti lenti alla coda con esito positivo', async () => {
     const d = dir();
     await beat(d, 'claude');
-    const q = new QueueModels({ provider: 'claude', fetchImpl: diskFetch(d), poll: 5, timeout: 10000 });
-    const mock = new MockModels();
+    const q = new QueueAiModels({ provider: 'claude', fetchImpl: diskFetch(d), poll: 5, timeout: 10000 });
+    const mock = new MockAiModels();
     const table = subscriptionsOf({ provider: 'claude', agenti: {} });
-    const routed = new RoutedModels(mock, table, { claude: q });
+    const routed = new RoutedAiModels(mock, table, { claude: q });
 
     // CLI fake in background: serves requests from the queue
     let serving = true;
@@ -392,7 +392,7 @@ describe('Genesi offline con la coda servita da una CLI finta (T68c)', () => {
       }
     })();
 
-    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: routed });
+    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: routed });
     expect(k.needsGenesis()).toBe(true);
 
     const ok = await k.runGenesis('un regno di pastori sulle colline');
@@ -410,7 +410,7 @@ describe('Genesi offline con la coda servita da una CLI finta (T68c)', () => {
     // Token usage recorded for the subscription
     expect(q.usage.text).toBeGreaterThanOrEqual(3);
     expect(q.usage.inputTokens).toBeGreaterThan(0);
-    expect(k.models.usage.text).toBeGreaterThanOrEqual(3);
+    expect(k.ai.usage.text).toBeGreaterThanOrEqual(3);
 
     // The subscription calls cost zero USD in the session ledger
     expect(k.usage.session.usd).toBe(0);

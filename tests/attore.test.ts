@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import type { TextCall } from '../src/kernel/ai/models';
 import { ACTOR_MODEL, CENSUS, hourlyEstimate, repairAttore } from '../src/kernel/coefficients';
 import { COUNCIL_PRINCIPLES } from '../src/kernel/fourthwall';
@@ -21,7 +21,7 @@ import { clearArea, develop } from './world';
 const DT = 1 / 60;
 
 /** The local models, keeping every call: its task, its agent, its model, who pays, and what it was told. */
-class Recording extends MockModels {
+class Recording extends MockAiModels {
   calls: TextCall[] = [];
   async text(call: TextCall): Promise<string> {
     this.calls.push(call);
@@ -35,7 +35,7 @@ class Recording extends MockModels {
 async function bootWith(ai: Record<string, unknown>, game: Record<string, unknown> = {}, models = new Recording()): Promise<{ k: Kernel; models: Recording }> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, ai: { ...cfg.ai, ...ai }, partita: { ...cfg.partita, ...game } }, null, 2) };
-  const k = await Kernel.boot({ files, store: memoryStore(), models });
+  const k = await Kernel.boot({ files, store: memoryStore(), ai: models });
   await develop(k);
   return { k, models };
 }
@@ -218,14 +218,14 @@ describe('the Actor in a game of many', () => {
   async function bootMany(ai: Record<string, unknown> = {}): Promise<Kernel> {
     const cfg = JSON.parse(bundledFiles['universe.json']);
     const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, ai: { ...cfg.ai, ...ai }, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
-    return Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+    return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
   }
   async function thin(server: SessionServer, id: string): Promise<ThinClient> {
     const { server: s, client: c } = fakeLink();
     server.connect(s);
     const session = new SessionClient(c, { id, nome: id });
     await session.ready;
-    const k = await Kernel.boot({ files: session.files, store: memoryStore(), models: new MockModels(), mirror: true });
+    const k = await Kernel.boot({ files: session.files, store: memoryStore(), ai: new MockAiModels(), mirror: true });
     return new ThinClient(k, session);
   }
   function run(server: SessionServer, clients: ThinClient[], frames: number) {

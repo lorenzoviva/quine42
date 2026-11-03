@@ -66,6 +66,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Registro del Concilio | `log` | 146 (31) | 1 (1) | 16 (13) | 1 (1) |
 | Sessione del Concilio | `sessione` | 30 (13) | 0 (0) | 83 (34) | 12 (1) |
 | Modello di IA | `modello` | 94 (28) | 5 (2) | 216 (55) | 15 (4) |
+| Modello di IA | `Models` | 346 (66) | 0 (0) | 76 (31) | 4 (3) |
 | Titolare | `owner` | 22 (5) | 0 (0) | 0 (0) | 2 (2) |
 | Tetto | `cap` | 83 (20) | 0 (0) | 3 (3) | 0 (0) |
 | Guasto | `fault` | 168 (18) | 0 (0) | 12 (7) | 0 (0) |

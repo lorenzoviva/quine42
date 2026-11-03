@@ -6,7 +6,7 @@ import type { Kernel, KernelOptions } from './kernel';
 import type { BenchCase, BenchItem, BenchStep, BenchWay, FileMap, ItemDef, Manifest, UiPanel } from './types';
 import { ITEM_CATEGORIES } from './types';
 import { memoryStore } from './repo';
-import { MockModels } from './ai/mock';
+import { MockAiModels } from './ai/mock';
 
 /** Side of the scene of a case, in tiles (the wanderer in the middle). */
 export const BENCH = 5;
@@ -245,7 +245,7 @@ export async function runCase(
   c: BenchCase,
   opts: { wasmUri?: string; boot: (o: KernelOptions) => Promise<Kernel>; known: (name: string) => string | undefined },
 ): Promise<BenchRun> {
-  const k = await opts.boot({ files: benchFiles(files, manifest, logic, c, opts.known), store: memoryStore(), models: new MockModels(), wasmUri: opts.wasmUri, bench: { terreno: c.terreno } });
+  const k = await opts.boot({ files: benchFiles(files, manifest, logic, c, opts.known), store: memoryStore(), ai: new MockAiModels(), wasmUri: opts.wasmUri, bench: { terreno: c.terreno } });
   const errori: string[] = [];
   const messaggi: string[] = [];
   const faults = new Map<string, string>();

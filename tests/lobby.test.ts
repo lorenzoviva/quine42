@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { collectionOf } from '../src/kernel/cards';
 import { addBudgetFromTetto } from '../src/kernel/credits';
 import { repairMinimi } from '../src/kernel/universe';
@@ -30,7 +30,7 @@ async function bootMany(extraCfg: Record<string, unknown> = {}): Promise<Kernel>
       2,
     ),
   };
-  return Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+  return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
 async function thin(
@@ -42,7 +42,7 @@ async function thin(
   server.connect(s);
   const session = new SessionClient(c, { id, ...(opts.tetto !== undefined ? { tetto: opts.tetto } : {}) });
   await session.ready;
-  const k = await Kernel.boot({ files: session.files, store: memoryStore(), models: new MockModels(), mirror: true });
+  const k = await Kernel.boot({ files: session.files, store: memoryStore(), ai: new MockAiModels(), mirror: true });
   return new ThinClient(k, session);
 }
 
@@ -103,7 +103,7 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
 
   it('entrant credit spending cap (tetto) adds to universe AI budgets upon joining', async () => {
     const k = await bootMany();
-    const initialTextLimit = k.models.limits.text;
+    const initialTextLimit = k.ai.limits.text;
     const initialMaxText = k.config.ai.maxText;
 
     const server = new SessionServer(k);
@@ -117,12 +117,12 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
     expect(k.sessionSpentOf('carlo')).toBe(0);
 
     // AI budget increased by 750 calls from $1.00 tetto
-    expect(k.models.limits.text).toBe(initialTextLimit + 750);
+    expect(k.ai.limits.text).toBe(initialTextLimit + 750);
     expect(k.config.ai.maxText).toBe(initialMaxText + 750);
   });
 
   it('spending cap (tetto) reached: requests fallback to local models and notice sent to client', async () => {
-    class TrackingModels extends MockModels {
+    class TrackingAiModels extends MockAiModels {
       onlineCalls: string[] = [];
       async text(call: TextCall): Promise<string> {
         this.onlineCalls.push(call.task);
@@ -130,13 +130,13 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
       }
     }
 
-    const online = new TrackingModels();
+    const online = new TrackingAiModels();
     const cfg = JSON.parse(bundledFiles['universe.json']);
     const files = {
       ...bundledFiles,
       'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2),
     };
-    const k = await Kernel.boot({ files, store: memoryStore(), models: online });
+    const k = await Kernel.boot({ files, store: memoryStore(), ai: online });
     k.giveCredits('carlo', 10.0); // Has plenty of credits
 
     const server = new SessionServer(k);
@@ -148,7 +148,7 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
     expect(k.hasCredits('carlo')).toBe(true);
 
     // Call 1: prompt costing $0.025 (+1% fee = $0.02525)
-    k.models.onCall!({
+    k.ai.onCall!({
       model: 'gemini-3.1-flash-lite',
       agent: 'narratore',
       task: 'npc.reply',
@@ -163,7 +163,7 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
     expect(k.hasCredits('carlo')).toBe(true);
 
     // Call 2: another $0.02525 -> total spent $0.0505 > tetto ($0.05)
-    k.models.onCall!({
+    k.ai.onCall!({
       model: 'gemini-3.1-flash-lite',
       agent: 'narratore',
       task: 'npc.reply',

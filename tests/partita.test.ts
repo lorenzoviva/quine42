@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import type { TextCall } from '../src/kernel/ai/models';
 import { countItem } from '../src/kernel/inventory';
 import { repairPartita } from '../src/kernel/validator';
@@ -19,7 +19,7 @@ async function develop(k: Kernel) {
 }
 
 /** Offline models that remember every call. */
-class Recording extends MockModels {
+class Recording extends MockAiModels {
   calls: TextCall[] = [];
   async text(call: TextCall): Promise<string> {
     this.calls.push(call);
@@ -32,7 +32,7 @@ async function bootWith(partita: Record<string, unknown>) {
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita }, null, 2) };
   const models = new Recording();
-  const k = await Kernel.boot({ files, store: memoryStore(), models });
+  const k = await Kernel.boot({ files, store: memoryStore(), ai: models });
   // In a universe of many the master pays too (ADR-0081): without credits the calls would go to the kernel's local models.
   k.giveCredits('io', 100);
   await develop(k);
