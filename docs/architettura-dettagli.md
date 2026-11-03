@@ -193,7 +193,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   il bordo luminoso; sopra ogni porta un'insegna al neon con il nome. Lungo il campus arredi futuristici (`CampusProp` in `corona.ts`, T50: lampioni
   neon lungo il viale, alberi di luce sui prati, panchine e totem olografici nei vicoli, porte e viali sempre liberi) e logistica operosa
   animata (droni volanti tra gli edifici e trenini magnetici di file sul binario ad anello, `corona3d.ts`). Negli interni e nella Direzione
-  gli avatar del Concilio sono gerboa giganti pacioccosi (`corona-gerboa-<agente>.xml`, T50), ciascuno con cappello distintivo per ruolo.
+  gli avatar del Concilio sono gerboa giganti pacioccosi (`corona-gerboa-<agente>.xml`, T50), ciascuno con cappello distintivo per ruolo; l'Attore (T158) ha il cappello da moschettiere piumato, la mezza maschera e la gorgiera, siede al tavolo accanto al Narratore e il suo posto di lavoro è lo Studio dei Personaggi (`guest` della stanza `persone`, un passo oltre il Narratore). Con l'opzione spenta (`ai.attore`) resta a riposo come chi non lavora: posto, console e avatar non dipendono dalla configurazione, così la sala non cambia quando il master la cambia; alla console siede solo se lavora, e da spento non lavora.
   Un edificio con un programma suo (`models/corona-<id>.xml`, 8 voxel per casella, ADR-0049) è quel modello: davanti al viale, la porta
   sulla lettera `porta`, collisione dai voxel (`placeStructure`, `kernel.placeCampus`); senza, il blocco. Davanti alla Galleria dell'Artista, sulla lettera `plinto` (T48b), il kernel posa un'istanza di un modello della libreria scelto a ogni visita della corona (seme dal tick d'arrivo), ridotto a stare sul plinto, senza collisione nuova oltre al plinto. Dentro, le **vetrine** (T21, `SHOWCASES` in
   `corona.ts`): uno schermo (Torre della Magia: ogni runa magica e ogni combinazione nota, nei loro colori; il pannello dice l'effetto in parole, `describeEffect` in `validator.ts`), un silos (Studio dei personaggi: ogni tipo e dopo di lui i suoi individui, ciascuno col seme che ha nel mondo, che fluttuano in un liquido viscoso; il pannello dice l'individuo e il modulo), una stampante
@@ -231,7 +231,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   esaurito, ambra per rifiuti del validatore nell'ultima ora o un budget oltre l'80 %, verde altrimenti; i motivi nel pannello. Davanti alla
   parete le **console** (`CONSOLES_AT`, voci `console`), una per agente: chi lavora nel registro siede alla sua (`Archive.consoles`,
   `kernel.working()`); E sulla console apre il registro.
-- **Sala del Concilio e studi** (ADR-0027): tavolo rotondo con l'universo che gira, gli otto membri seduti (con lo Scultore),
+- **Sala del Concilio e studi** (ADR-0027): tavolo rotondo con l'universo che gira, i nove membri seduti (con lo Scultore e l'Attore),
   teletrasporti verso le sale e ritorno, schermi della storia, stile neon punk; atlante navigabile.
 
 <a id="sala-sistemi"></a>

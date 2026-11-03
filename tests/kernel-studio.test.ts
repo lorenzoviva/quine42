@@ -4,7 +4,8 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import { countItem } from '../src/kernel/inventory';
-import type { StudioItem } from '../src/kernel/corona';
+import { AGENTS } from '../src/kernel/agents/council';
+import { ROOM_H, ROOM_W, type StudioItem } from '../src/kernel/corona';
 import { DT, boot, run, clearArea } from './world';
 
 describe('new mechanics', () => {
@@ -69,16 +70,72 @@ describe('the neon studio', () => {
     }
   });
 
+  it('the Actor has its place in the studio, on or off (T158): gerboa, seat, console and a post in the Studio of the Characters', async () => {
+    const k = await boot();
+    expect(k.actor().acceso).toBe(false);
+    const hall = k.corona.building('concilio')!.storeys[0].items;
+    const seats = hall.filter((i) => i.kind === 'desk').map((s) => s.target);
+    expect(seats.indexOf('attore')).toBe(seats.indexOf('narratore') + 1);
+    expect(hall.find((i) => i.kind === 'desk' && i.target === 'attore')?.label).toBe("il posto dell'Attore");
+    expect(hall.filter((i) => i.kind === 'portal' && i.target === 'persone').length).toBe(2);
+    expect(k.corona.building('universo')!.storeys[0].items.find((i) => i.kind === 'console' && i.target === 'attore')?.label).toBe("la console dell'Attore");
+    expect(k.forms.info('corona-gerboa-attore')).toBeTruthy();
+
+    // Its post: a step along from the Narrator's, on a free cell, in the room of the people.
+    const studio = k.corona.building('persone')!;
+    const post = k.archive.avatars.get('attore@persone')!;
+    const narrator = k.archive.avatars.get('narratore@persone')!;
+    expect(post).toMatchObject({ agent: 'attore', name: 'Attore', color: AGENTS.attore.color, sigil: AGENTS.attore.sigil, building: studio.id });
+    expect(post.x).toBeGreaterThan(narrator.x);
+    expect(k.corona.free(post.x, post.y)).toBe(true);
+
+    // Off, nobody calls it: at rest at the table and at its post, the console empty; the hall does not move when the option does.
+    const before = JSON.stringify(hall);
+    k.archive.consoles(k.working());
+    expect(k.archive.avatars.has('attore@universo#console')).toBe(false);
+    k.setAi({ attore: true });
+    expect(JSON.stringify(k.corona.building('concilio')!.storeys[0].items)).toBe(before);
+
+    // On, it works: speaks from its post when no file is at stake, and sits at its console.
+    const x = post.x;
+    k.council.say('attore', 'info', 'una battuta di Lena', undefined, 'npc.reply');
+    expect(k.working()).toContain('attore');
+    const speaking = k.archive.avatars.get('attore@persone')!;
+    expect(speaking.say).toContain('una battuta');
+    expect(speaking.tx).toBe(x);
+    k.archive.consoles(k.working());
+    expect(k.archive.avatars.has('attore@universo#console')).toBe(true);
+
+    // A file of the people's room: it goes to the shelf, then back to its own post, not the Narrator's.
+    const [id, file] = [...k.modules.entries()].find(([, m]) => m.manifestPath.startsWith('modules/npc.'))!;
+    k.council.say('attore', 'info', `recita ${id}`, undefined, 'npc.reply');
+    expect(speaking.path).toBe(file.manifestPath);
+    k.archive.tick(25);
+    k.archive.tick(25);
+    expect([speaking.x, speaking.y]).toEqual([x, post.y]);
+  });
+
   it('the Council sits at the round table; behind each seat a teleport to its room; every room leads back', async () => {
     const k = await boot();
     const hall = k.corona.building('concilio')!;
     const f0 = hall.storeys[0].items;
     expect(f0.some((i) => i.kind === 'table')).toBe(true);
     const seats = f0.filter((i) => i.kind === 'desk' && i.target);
-    expect(seats.map((s) => s.target).sort()).toEqual(['arbitro', 'artista', 'cartografo', 'fisico', 'ingegnere', 'narratore', 'referente', 'scultore']);
+    expect(seats.map((s) => s.target).sort()).toEqual(['arbitro', 'artista', 'attore', 'cartografo', 'fisico', 'ingegnere', 'narratore', 'referente', 'scultore']);
     for (const s of seats) expect([...k.archive.avatars.values()].some((a) => a.agent === s.target && a.building === 'concilio')).toBe(true);
     const portals = f0.filter((i) => i.kind === 'portal');
-    expect(portals.length).toBe(8);
+    expect(portals.length).toBe(9);
+    // Nine at the table and nothing collides: every item on its own cell, in the room, off the table, the teleports walkable.
+    const footprints = f0.map((i) => `${i.x},${i.y}`);
+    expect(new Set(footprints).size).toBe(footprints.length);
+    const f = hall.storeys[0];
+    for (const i of [...seats, ...portals]) {
+      expect(i.x - f.ox).toBeGreaterThan(0);
+      expect(i.x - f.ox).toBeLessThan(ROOM_W - 1);
+      expect(i.y - f.oy).toBeGreaterThan(0);
+      expect(i.y - f.oy).toBeLessThan(ROOM_H - 1);
+    }
+    for (const p of portals) expect(f0.some((i) => i.kind === 'desk' && i.x === p.x && i.y === p.y)).toBe(false);
     for (const b of k.corona.buildings) if (b.id !== 'concilio') expect(b.storeys[0].items.some((i) => i.kind === 'portal' && i.target === 'concilio'), b.id).toBe(true);
     for (const b of k.corona.buildings) if (b.id !== 'concilio') expect(b.storeys[0].items.some((i) => i.kind === 'screen'), b.id).toBe(true);
     // Through the cartographer's teleport, into the Office of places, where the atlas is, by the model of places.

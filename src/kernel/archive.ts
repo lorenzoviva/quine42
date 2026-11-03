@@ -3,6 +3,7 @@
 // of the file it is changing; members appear (teleport) where they are needed instead of walking
 // round the ring. Only those actually talking to each other in the Council's feed are seen talking.
 // The Referente waits for the wanderer on the ring and takes requests to the right team.
+// The Actor (T158) sits at the table and has its post in the Studio of the Characters, on or off: an agent nobody calls just rests.
 // Real space, kernel-driven, no Lua and no model calls.
 
 import { AGENTS, type AgentId, type FeedEntry } from './agents/council';
@@ -58,6 +59,11 @@ export class Archive {
       const key = `${b.team}@${b.id}`;
       keep.add(key);
       if (!this.avatars.has(key) || this.avatars.get(key)!.building !== b.id) this.avatars.set(key, this.member(b.team as AgentId, b));
+      if (b.guest) {
+        const guest = `${b.guest}@${b.id}`;
+        keep.add(guest);
+        if (!this.avatars.has(guest)) this.avatars.set(guest, this.member(b.guest as AgentId, b));
+      }
     }
     keep.add('referente@');
     if (!this.avatars.has('referente@')) {
@@ -68,7 +74,9 @@ export class Archive {
   }
 
   /** Where a member stands when idle: in front of the room's history screen, the n-th a little further along. */
-  private post(b: Building, n = 0): { x: number; y: number } {
+  private post(b: Building, n = 0, agent?: AgentId): { x: number; y: number } {
+    // A guest stands a step along, not on the team's own member.
+    if (agent && b.guest === agent) n++;
     const f = b.storeys[0];
     const screen = f.items.find((i) => i.kind === 'screen');
     if (!screen) return { x: f.ox + 3.5, y: f.oy + ROOM_H - 3.5 };
@@ -76,7 +84,7 @@ export class Archive {
   }
 
   private member(agent: AgentId, b: Building, n = 0): Avatar {
-    const p = this.post(b, n);
+    const p = this.post(b, n, agent);
     const def = AGENTS[agent];
     return { agent, name: def.name, color: def.color, sigil: def.sigil, building: b.id, x: p.x, y: p.y, tx: p.x, ty: p.y, sayUntil: 0, idleUntil: 0, speed: SPEED };
   }
@@ -100,7 +108,7 @@ export class Archive {
     const b = path ? c.buildingOf(path) : undefined;
     if (!b) {
       // No file: the member of its own building speaks from its post.
-      const home = c.buildings.find((x) => x.team === agent) ?? c.buildings[0];
+      const home = c.buildings.find((x) => x.team === agent || x.guest === agent) ?? c.buildings[0];
       if (!home) return undefined;
       const m = this.memberIn(agent, home);
       if (say) this.speak(m, say);
@@ -188,7 +196,7 @@ export class Archive {
           a.ty = seat.y + 0.4;
         } else if (b) {
           const n = Number(/#(\d+)$/.exec([...this.avatars.entries()].find(([, v]) => v === a)?.[0] ?? '')?.[1] ?? 0);
-          const d = this.post(b, n);
+          const d = this.post(b, n, a.agent);
           a.tx = d.x;
           a.ty = d.y;
         }

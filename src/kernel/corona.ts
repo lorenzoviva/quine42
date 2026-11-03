@@ -193,6 +193,7 @@ export function tileNear(it: StudioItem, x: number, y: number): { x: number; y: 
 /** The Council at its round table: who sits where, and the room behind each seat's teleport. */
 export const SEATS: Array<{ agent: string; room: string }> = [
   { agent: 'narratore', room: 'persone' },
+  { agent: 'attore', room: 'persone' },
   { agent: 'cartografo', room: 'luoghi' },
   { agent: 'artista', room: 'galleria' },
   { agent: 'scultore', room: 'galleria' },
@@ -247,6 +248,8 @@ export interface Building {
   color: string;
   /** Council agent whose team works here. */
   team: string;
+  /** An agent with no room of its own who works here too, beside the team (T158: the Actor, with the Narrator's people). */
+  guest?: string;
   /** Angles (radians, clockwise from the top) of its sector of the ring. */
   from: number;
   to: number;
@@ -357,7 +360,7 @@ const SHELF_W = SHELF_X1 - SHELF_X0 + 1;
 /** The ground floor of a room with a device: short shelves left and right of it (T49b), mirrored about the exit's column. */
 const SIDE_W = 4;
 
-const ROOMS: Record<string, { name: string; color: string; team: string }> = {
+const ROOMS: Record<string, { name: string; color: string; team: string; guest?: string }> = {
   universo: { name: 'Direzione', color: '#ffcf5c', team: 'arbitro' },
   mondo: { name: 'Biblioteca del Mondo', color: '#7dd87d', team: 'narratore' },
   concilio: { name: 'Sala del Concilio', color: '#ff8ad8', team: 'arbitro' },
@@ -366,7 +369,7 @@ const ROOMS: Record<string, { name: string; color: string; team: string }> = {
   luoghi: { name: 'Ufficio dei Luoghi', color: '#9ad27a', team: 'cartografo' },
   oggetti: { name: 'Magazzino degli Oggetti', color: '#e0b070', team: 'fisico' },
   cose: { name: 'Laboratorio delle Cose', color: '#d89a6a', team: 'fisico' },
-  persone: { name: 'Studio dei Personaggi', color: '#ffb38a', team: 'narratore' },
+  persone: { name: 'Studio dei Personaggi', color: '#ffb38a', team: 'narratore', guest: 'attore' },
   magia: { name: 'Torre della Magia', color: '#c48aff', team: 'narratore' },
   altro: { name: 'Archivio', color: '#9fb2a8', team: 'ingegnere' },
   galleria: { name: "Galleria dell'Artista", color: '#ff8ad8', team: 'artista' },
@@ -522,7 +525,7 @@ export class Corona {
           placed.push({ kind: 'table', label: "il tavolo del Concilio: al centro, l'universo", x: ox + Math.floor(TABLE.cx), y: oy + Math.floor(TABLE.cy) });
           SEATS.forEach((s, i) => {
             const a = -Math.PI / 2 + (i / SEATS.length) * Math.PI * 2;
-            placed.push({ kind: 'desk', label: `il posto del ${s.agent}`, target: s.agent, x: ox + Math.round(TABLE.cx + Math.cos(a) * 5), y: oy + Math.round(TABLE.cy + Math.sin(a) * 3.4) });
+            placed.push({ kind: 'desk', label: `il posto ${ofThe(AGENTS[s.agent as keyof typeof AGENTS].name)}`, target: s.agent, x: ox + Math.round(TABLE.cx + Math.cos(a) * 5), y: oy + Math.round(TABLE.cy + Math.sin(a) * 3.4) });
             placed.push({ kind: 'portal', label: s.room ? `teletrasporto: ${ROOMS[s.room]?.name ?? s.room}` : 'teletrasporto: fuori, sul viale', target: s.room, x: ox + Math.round(TABLE.cx + Math.cos(a) * 7.6), y: oy + Math.max(1, Math.min(ROOM_H - 2, Math.round(TABLE.cy + Math.sin(a) * 4.9))) });
           });
         } else if (f === 0) {
@@ -592,7 +595,7 @@ export class Corona {
         }
       const door = polarTile(R + CAMPUS.door, mid);
       cells.delete(`${door.x},${door.y}`);
-      return { index, id, name: def.name, color: def.color, team: def.team, from, to, door, cells, storeys };
+      return { index, id, name: def.name, color: def.color, team: def.team, guest: def.guest, from, to, door, cells, storeys };
     });
     // The avenue, the alleys between the sectors, the lawns and the edge of the campus.
     const max = Math.ceil(this.outer) + 1;
