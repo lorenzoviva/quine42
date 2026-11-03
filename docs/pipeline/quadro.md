@@ -3,23 +3,26 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 03/11/2026, all'inizio dell'epoca 221, con la pipeline riaccesa e il codice di ADR-0119. Crediti: vedi `stato`.
+Aggiornato il 03/11/2026, epoca 222. Crediti: vedi `stato`.
 
 ## Stato attuale
 
-- T206 e T179 integrati: la traccia in testo è nel base con l'ADR-0118. `banco-strutture --seconda --traccia` non provato con una chiamata vera.
+- T187 integrato (glossario, R1-R17 con i nomi esatti). T206 e T179 integrati: traccia nel base con l'ADR-0118, `banco-strutture --seconda --traccia` non provato con una chiamata vera.
+- **T180 in corso fuori ordine:** partito alle 03:43 con i nomi vecchi. Otto `· approvato` (T180 T175 T106 T89a T183 T152 T186 T158) erano nel backlog non committato, senza un comando nei miei registri né un messaggio in chat (forse dalla pagina web, l'autore ci lavorava alle 03:28); `integra T187` li ha committati. T180 non interrotto: finito, va integrato prima di T188, o guardato per i nomi se T188 è già integrato.
 - ADR nuovi dallo **0121**.
 
 ## Pronti e priorità
 
-1. **T187** parte al prossimo controllo.
-2. **Catena delle rinomine** (l'autore: «i nomi vanno bene e fai tutte le rinomine»): T187 (glossario) → T188-T203 → T204 (`AGENTS.md`) → T205 (prova nel browser), p2-20, approvati, ognuno dipende dal precedente. A ogni fine `traccia` e `integra`, una alla volta.
-3. **T180 T175 T106 T89a T183 T152 T186 T158**: senza `· approvato` dall'epoca 219, perché partiti con i nomi vecchi si fonderebbero senza conflitti e romperebbero il typecheck. Non sono proposte nuove. Alla fine di T205: `approva` nell'ordine di prima. Se l'autore vuole T180-T182 prima, si ferma la catena tra due task. D'ora in poi un vincolo così si scrive con le dipendenze.
-4. **T181 → T182 → T156** (strutture procedurali; T181 su Fable, aspetta T180): alla fine di T181 leggere il contatore delle 5 ore e confrontarlo con `ratioSessioneSettimana`.
+1. **T188** parte appena c'è uno slot (ora 1, occupato da T180).
+2. **Catena delle rinomine** (l'autore: «i nomi vanno bene e fai tutte le rinomine»): T188-T203 → T204 (`AGENTS.md`) → T205 (prova nel browser), p2-20, ognuno dipende dal precedente. A ogni fine `traccia` e `integra`, una alla volta.
+3. **T175 T106 T89a T183 T152 T186 T158, e T181**: approvati, con «dipende da T205» nel titolo (epoca 222), perché partiti con i nomi vecchi si fonderebbero senza conflitti e romperebbero il typecheck. Se l'autore li vuole prima si toglie la dipendenza.
+4. **T181 → T182 → T156** (strutture procedurali; T181 su Fable, stima 10 %, contatore Fable al 93 % fino al 05/11): alla fine di T181 leggere il contatore delle 5 ore e confrontarlo con `ratioSessioneSettimana`.
 5. Bloccati da T89a: T89b-e.
 
 ## Attese dall'autore
 
+- **Chi ha approvato i sette task e T180?** Chiesto all'autore nell'epoca 222: se li vuole prima delle rinomine si tolgono le dipendenze da T205.
+- **T187, scelte da guardare:** `playerId`→`wandererEntity`, `Lot`→`LotBox` in `relief.ts`, `playerCell` da R10 a R3, i tipi italiani aggiunti a R7.
 - **T176, due proposte sul sorvegliante, senza risposta** (se sì, task Claude prima di T45f, con voce V-NNN se è il caso): (1) `healthy` conti da `pronto`; (2) `stop()` aspetti i git in corso.
 - **T153** (`domande/T153.md`): `agy` sulla Genesi, tetto di consumo, singola o multi, nomi, `aurora`. T184-T185: `in attesa`, ripartono solo se lo dice lui.
 - **T45f** (`domande/T45f.md`, progetto GCP e deploy). Prima di T45f restano non provabili qui: token vero di Firebase, TLS e bilanciatore, `QUINE_PROXY_FIDATI` e controllo di salute, Stripe vero con le imposte, `npm ci --omit=dev`, tetto Gemini sul server di produzione; silenzio massimo del mondo 5,5 s contro i 5 di `notice`.
@@ -44,5 +47,5 @@ Aggiornato il 03/11/2026, all'inizio dell'epoca 221, con la pipeline riaccesa e 
 
 ## Ultime 2 epoche
 
-- **220:** solo lo stato a fine epoca, nessuna decisione. **221:** riavvio dopo lo spegnimento, T206 lanciato.
-- **219:** l'autore accetta nomi e rinomine: catena T187-T205. T179 finito, in conflitto sull'indice degli ADR: T206. Pipeline spenta dall'autore alle 02:58 UTC.
+- **222:** T187 integrato; dipendenze da T205 sui task ri-approvati.
+- **221:** riavvio dopo lo spegnimento, T206 e T179 integrati, tetto di Claude a 3 su istruzione dell'autore (vale dal prossimo riavvio).
