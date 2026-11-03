@@ -164,7 +164,7 @@ const MAX_TEXT = 120;
 export function describeCard(card: Card, files: FileMap): string {
   const entry = entryOf(card, files);
   const text = SAYS.map((k) => entry?.[k]).find((v) => typeof v === 'string' && v.trim()) as string | undefined;
-  const line = (text ?? `${KIND_NAME[card.tipo]} di questo reame.`).trim().replace(/\s+/g, ' ');
+  const line = (text ?? `${KIND_NAME[card.tipo]} di questo universo.`).trim().replace(/\s+/g, ' ');
   return line.length > MAX_TEXT ? `${line.slice(0, MAX_TEXT - 1).trimEnd()}…` : line;
 }
 
@@ -488,7 +488,7 @@ async function universeNames(): Promise<string[]> {
 async function start(): Promise<void> {
   const grid = document.getElementById('cards-container')!;
   const tabs = document.getElementById('card-filter-tabs')!;
-  const select = document.getElementById('card-realm') as HTMLSelectElement;
+  const select = document.getElementById('card-universe') as HTMLSelectElement;
   const moreBox = document.getElementById('cards-more')!;
   const moreBtn = document.getElementById('btn-cards-more')!;
   const away = wireGrid(grid);
@@ -520,7 +520,7 @@ async function start(): Promise<void> {
     shown = 0;
     if (!inCategory(collection, category).length) {
       moreBox.hidden = true;
-      const none = category === 'eredita' ? 'Nessuna carta di questo reame ti riconosce come titolare di prima.' : 'Niente in questa famiglia, per ora.';
+      const none = category === 'eredita' ? 'Nessuna carta di questo universo ti riconosce come titolare di prima.' : 'Niente in questa famiglia, per ora.';
       grid.append(collection.mine.length || category === 'eredita' ? message('VUOTO', 'NESSUNA CARTA QUI', none) : message('COLLEZIONE VUOTA', 'ANCORA NESSUNA CARTA', 'Ciò che porti nel mondo diventa una tua carta: esplora, parla, fabbrica, e torna a vedere quanto viene usato.', el('a', { class: 'comic-btn arcade cyan', href: '../index.html' }, 'GIOCA SUBITO')));
       return;
     }
@@ -556,7 +556,7 @@ async function start(): Promise<void> {
   select.replaceChildren(...names.map((n) => el('option', { value: n }, n.toUpperCase())));
   if (!names.length) {
     select.disabled = true;
-    grid.replaceChildren(message('NESSUN REAME', 'NESSUN REAME RAGGIUNGIBILE', 'Quando un reame sarà aperto su questo server, qui troverai le sue carte.', el('a', { class: 'comic-btn arcade cyan', href: './sessioni.html' }, 'VAI ALLE SESSIONI')));
+    grid.replaceChildren(message('NESSUN UNIVERSO', 'NESSUN UNIVERSO RAGGIUNGIBILE', 'Quando un universo sarà aperto su questo server, qui troverai le sue carte.', el('a', { class: 'comic-btn arcade cyan', href: './sessioni.html' }, 'VAI ALLE SESSIONI')));
     return;
   }
   select.addEventListener('change', async () => {
@@ -576,7 +576,7 @@ async function start(): Promise<void> {
     }
   }
   if (!first) {
-    grid.replaceChildren(message('NESSUN REAME', 'REAME NON RAGGIUNGIBILE', 'Il reame scelto non risponde: riprova tra poco.'));
+    grid.replaceChildren(message('NESSUN UNIVERSO', 'UNIVERSO NON RAGGIUNGIBILE', 'L’universo scelto non risponde: riprova tra poco.'));
     return;
   }
   select.value = first.name;

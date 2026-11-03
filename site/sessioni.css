@@ -63,8 +63,8 @@
   box-shadow: 4px 4px 0 var(--neon-pink);
 }
 
-/* Realm Cards */
-.realm-card {
+/* Universe Cards */
+.universe-card {
   background: var(--synth-panel);
   border: var(--border-ink-thick);
   box-shadow: var(--shadow-hard-cyan);
@@ -75,12 +75,12 @@
   overflow: hidden;
 }
 
-.realm-card:hover {
+.universe-card:hover {
   transform: translateY(-4px);
   box-shadow: 6px 6px 0 var(--neon-pink);
 }
 
-.realm-card-header {
+.universe-card-header {
   padding: 18px 20px 12px;
   border-bottom: 2px solid var(--comic-ink);
   display: flex;
@@ -88,24 +88,24 @@
   align-items: flex-start;
 }
 
-.realm-card-body {
+.universe-card-body {
   padding: 18px 20px;
   flex: 1;
 }
 
-.realm-spec-table {
+.universe-spec-table {
   width: 100%;
   margin-top: 12px;
   font-size: 0.85rem;
   border-collapse: collapse;
 }
 
-.realm-spec-table td {
+.universe-spec-table td {
   padding: 5px 0;
   vertical-align: top;
 }
 
-.realm-card-footer {
+.universe-card-footer {
   padding: 14px 20px;
   background: var(--comic-ink);
   border-top: 2px solid rgba(255, 255, 255, 0.08);
@@ -116,13 +116,13 @@
   gap: 12px;
 }
 
-.realm-card-footer .comic-btn {
+.universe-card-footer .comic-btn {
   white-space: nowrap;
 }
 
 /* Loading & Empty States */
-.realm-loading,
-.realm-empty {
+.universe-loading,
+.universe-empty {
   grid-column: 1 / -1;
   background: var(--synth-panel);
   border: var(--border-ink-thick);
@@ -131,7 +131,7 @@
   text-align: center;
 }
 
-.realm-empty p {
+.universe-empty p {
   color: var(--comic-paper-dim);
   margin: 12px 0 20px;
 }

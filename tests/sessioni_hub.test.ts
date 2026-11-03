@@ -14,8 +14,8 @@ import {
   escapeHtml,
   fetchActiveSessions,
   fetchUniverses,
-  parseRealmSnapshot,
-  renderRealmCard,
+  parseUniverseSnapshot,
+  renderUniverseCard,
   type ActiveSessionRecord,
 } from '../site/sessioni';
 
@@ -89,7 +89,7 @@ describe('Hub Sessioni & Creazione Nuovo Universo (T103)', () => {
     }
   });
 
-  it('parseRealmSnapshot calcola spesa oraria, modelli e stato del reame', () => {
+  it('parseUniverseSnapshot calcola spesa oraria, modelli e stato dell’universo', () => {
     const files = {
       ...bundledFiles,
       'universe.json': JSON.stringify(
@@ -118,7 +118,7 @@ describe('Hub Sessioni & Creazione Nuovo Universo (T103)', () => {
       clients: 2,
     };
 
-    const parsed = parseRealmSnapshot('valmora', files, activeRecord);
+    const parsed = parseUniverseSnapshot('valmora', files, activeRecord);
     expect(parsed.name).toBe('valmora');
     expect(parsed.seed).toBe(42);
     expect(parsed.master).toBe('lorenzo');
@@ -184,10 +184,10 @@ describe('Hub Sessioni & Creazione Nuovo Universo (T103)', () => {
     expect(escapeHtml('<script>alert("xss")</script>')).toBe('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;');
   });
 
-  it('renderRealmCard costruisce correttamente la scheda HTML con pulsante lobby', () => {
+  it('renderUniverseCard costruisce correttamente la scheda HTML con pulsante lobby', () => {
     // In node environment without DOM createElement fallback:
     if (typeof document !== 'undefined') {
-      const card = renderRealmCard({
+      const card = renderUniverseCard({
         name: 'valmora',
         seed: 42,
         master: 'Lorenzo',
@@ -202,7 +202,7 @@ describe('Hub Sessioni & Creazione Nuovo Universo (T103)', () => {
         description: 'Terre di prova',
       });
 
-      expect(card.className).toContain('realm-card');
+      expect(card.className).toContain('universe-card');
       expect(card.innerHTML).toContain('VALMORA');
       expect(card.innerHTML).toContain('LIVE · 3 VIANDANTI');
       expect(card.innerHTML).toContain('ENTRA NELLA LOBBY');

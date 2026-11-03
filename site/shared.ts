@@ -1,5 +1,5 @@
 // What the site's pages with an account share (T102, T105): the navigation, the alert, the sign-in panel (Firebase Auth with
-// Google or anonymously, `src/session/login.ts`; a server without accounts takes a wanderer's id), the list of realms.
+// Google or anonymously, `src/session/login.ts`; a server without accounts takes a wanderer's id), the list of universes.
 // No three.js here: a page that draws nothing in 3D must not carry it.
 
 import { validWandererId } from '../src/kernel/wanderers';
@@ -11,8 +11,8 @@ export interface Who {
   localId?: string;
 }
 
-/** The site remembers the realm and, without accounts, the id the player typed. */
-export const REALM_KEY = 'quine:sito:reame';
+/** The site remembers the universe and, without accounts, the id the player typed. */
+export const UNIVERSE_KEY = 'quine:sito:reame';
 const LOCAL_ID_KEY = 'quine:sito:viandante';
 
 /** Credits in dollars, as the game's panel says them. */
@@ -20,14 +20,14 @@ export function formatCredits(n: number): string {
   return `$${(Number.isFinite(n) ? Math.max(0, n) : 0).toFixed(2)}`;
 }
 
-/** The realm to show: the one in the address, the last one seen, or the first. */
-export function pickRealm(realms: string[], asked: string | null, last: string | null): string | undefined {
-  if (asked && realms.includes(asked)) return asked;
-  if (last && realms.includes(last)) return last;
-  return realms[0];
+/** The universe to show: the one in the address, the last one seen, or the first. */
+export function pickUniverse(universes: string[], asked: string | null, last: string | null): string | undefined {
+  if (asked && universes.includes(asked)) return asked;
+  if (last && universes.includes(last)) return last;
+  return universes[0];
 }
 
-/** Where the game opens this realm (a server without accounts also needs to know which wanderer). */
+/** Where the game opens this universe (a server without accounts also needs to know which wanderer). */
 export function playLink(universo: string, view: { id: string; account: string }): string {
   const q = new URLSearchParams({ universo });
   if (view.account === 'locale') q.set('viandante', view.id);
@@ -148,8 +148,8 @@ export async function pageSignOut(who: Who): Promise<void> {
   location.replace(location.pathname);
 }
 
-/** The realms on this server, undefined if it does not answer. */
-export async function realms(): Promise<string[] | undefined> {
+/** The universes on this server, undefined if it does not answer. */
+export async function universes(): Promise<string[] | undefined> {
   try {
     const r = await fetch('/api/universe', { cache: 'no-store' });
     const body = r.ok ? ((await r.json()) as { available?: boolean; universes?: string[] }) : undefined;

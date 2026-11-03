@@ -110,7 +110,7 @@ server/session.ts       /api/session (WebSocket; `npm run dev` e produzione, `at
 server/production.ts    il server di produzione senza Vite (ADR-0112): `createProductionServer`, `productionProblems`, `frontDoorRefusal`, `buildFile`; serve.ts è il suo avvio, buildServer.ts lo costruisce in `dist-server/`
 server/account.ts       /api/account e la verifica dei token di Firebase Auth (ADR-0082)
 server/stripe.ts        /api/stripe/checkout e /api/stripe/webhook per i pagamenti Stripe Checkout (ADR-0083)
-server/wanderer.ts      /api/viandante: il viandante dell'account in un reame per il sito (profilo, crediti), GET e POST (T102, ADR-0095)
+server/wanderer.ts      /api/viandante: il viandante dell'account in un universo per il sito (profilo, crediti), GET e POST (T102, ADR-0095)
 server/wallet.ts        /api/crediti: saldo e righe del viandante nei registri di pagamenti e consumi, per il sito (T105, ADR-0095)
 server/worldHost.ts     ogni mondo di molti nel suo processo e il sorvegliante (ADR-0110): `WorldHost`, `buildWorld`, `worldFlags`, `worldEnv`
 server/rates.ts         quanto spesso si può chiedere e chi chiede (ADR-0114): `Rates`, `clientAddress`, `proxyHops`

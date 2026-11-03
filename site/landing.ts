@@ -321,10 +321,10 @@ async function checkStatus(): Promise<void> {
     if (!body?.available) throw new Error('no store');
     setStatus('status-server', 'on', 'MONDO ONLINE');
     const n = body.universes?.length ?? 0;
-    setStatus('status-realms', n ? 'on' : 'wait', `${n} ${n === 1 ? 'REAME' : 'REAMI'}`);
+    setStatus('status-universes', n ? 'on' : 'wait', `${n} ${n === 1 ? 'UNIVERSO' : 'UNIVERSI'}`);
   } catch {
     setStatus('status-server', 'off', 'MONDO NON RAGGIUNGIBILE');
-    setStatus('status-realms', 'off', 'REAMI —');
+    setStatus('status-universes', 'off', 'UNIVERSI —');
   }
 }
 

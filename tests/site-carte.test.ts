@@ -87,7 +87,7 @@ describe('la galleria delle carte', () => {
     expect(describeCard(by('oggetto:spada'), files)).toContain('Lama forgiata');
     expect(describeCard(by('oggetto:pane'), files).length).toBeLessThanOrEqual(120);
     expect(describeCard(by('persona:mira'), files)).toBe('fornaia');
-    expect(describeCard(by('regola:canto'), files)).toBe('Regola del mondo di questo reame.');
+    expect(describeCard(by('regola:canto'), files)).toBe('Regola del mondo di questo universo.');
   });
 
   it('la frase del fronte da ciò che dà publicFiles: description e mestiere; senza, la riga generica (T168)', () => {
@@ -98,13 +98,13 @@ describe('la galleria delle carte', () => {
     };
     const files = publicFiles(whole);
     const by = (id: string) => allCards(whole, true).find((c) => c.id === id)!;
-    expect(describeCard(by('tipo:cosa'), files)).toBe('Cosa del mondo di questo reame.');
+    expect(describeCard(by('tipo:cosa'), files)).toBe('Cosa del mondo di questo universo.');
     expect(describeCard(by('tipo:detta'), files)).toBe('Una cosa che si dice.');
     expect(describeCard(by('oggetto:spada'), files)).toContain('Lama forgiata');
     expect(describeCard(by('persona:mira'), files)).toBe('fornaia');
-    expect(describeCard(by('trama:furto'), files)).toBe('Storia di questo reame.');
+    expect(describeCard(by('trama:furto'), files)).toBe('Storia di questo universo.');
     // Even a file that still said it, as an old snapshot could: only what is public is read.
-    expect(describeCard(by('tipo:cosa'), whole)).toBe('Cosa del mondo di questo reame.');
+    expect(describeCard(by('tipo:cosa'), whole)).toBe('Cosa del mondo di questo universo.');
   });
 
   it('con ciò che dà publicFiles una carta con un corpo ha la foto; un luogo no, e resta la gemma (T168)', () => {

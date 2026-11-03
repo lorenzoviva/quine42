@@ -418,7 +418,7 @@ describe('V-026 sul disco', () => {
 
   const commits = (name: string) => execFileSync('git', ['rev-list', '--count', 'HEAD'], { cwd: path.join(dir, name), encoding: 'utf8', windowsHide: true }).trim();
 
-  it('V-026 un anonimo non scrive un profilo in un reame che non lo conosce', async () => {
+  it('V-026 un anonimo non scrive un profilo in un universo che non lo conosce', async () => {
     universe('reame', { modalita: 'multigiocatore', master: 'io' });
     const before = commits('reame');
     const r = await call('/api/viandante', 'anon-sconosciuto', { universo: 'reame', profilo: { nome: 'Ospite' } });
@@ -427,7 +427,7 @@ describe('V-026 sul disco', () => {
     expect(existsSync(path.join(dir, 'reame', 'world', 'giocatori', `${accountWanderer('sconosciuto')}.json`))).toBe(false);
   });
 
-  it('V-026 un anonimo che il reame conosce sì; un account anche se nuovo, col suo ritmo', async () => {
+  it('V-026 un anonimo che l’universo conosce sì; un account anche se nuovo, col suo ritmo', async () => {
     const known = accountWanderer('conosciuto');
     universe('reame2', { modalita: 'multigiocatore', master: 'io' }, [known]);
     expect((await call('/api/viandante', 'anon-conosciuto', { universo: 'reame2', profilo: { nome: 'Ospite' } })).status).toBe(200);

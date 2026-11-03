@@ -237,7 +237,7 @@ export function wandererHandler(opts: WandererRouteOptions): Connect.NextHandleF
         // With accounts anyone can ask: what they leave on the disk has a rhythm, and who costs nothing to make leaves nothing where the world does not know them (V-026).
         if (opts.accounts?.verify) {
           if (!saves.take(who.id)) return send(res, 429, { ok: false, motivo: 'troppi salvataggi: riprova tra poco' });
-          if (!active && !gameIn(await fs.readFile(path.join(root, 'universe.json'), 'utf8').catch(() => undefined)).many) return send(res, 403, { ok: false, motivo: 'solo nei reami di molti' });
+          if (!active && !gameIn(await fs.readFile(path.join(root, 'universe.json'), 'utf8').catch(() => undefined)).many) return send(res, 403, { ok: false, motivo: 'solo negli universi di molti' });
           if (who.account === 'anonimo') {
             const known = active
               ? (await active.view(universo, who.id, who.account)).noto
@@ -245,7 +245,7 @@ export function wandererHandler(opts: WandererRouteOptions): Connect.NextHandleF
                   () => true,
                   () => false,
                 );
-            if (!known) return send(res, 403, { ok: false, motivo: 'entra prima in questo reame' });
+            if (!known) return send(res, 403, { ok: false, motivo: 'entra prima in questo universo' });
           }
         }
         if (active) {

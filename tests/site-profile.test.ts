@@ -14,7 +14,7 @@ import { MockAiModels } from '../src/kernel/ai/mock';
 import { readWandererState } from '../src/kernel/wanderers';
 import { worldOf } from '../server/worldCalls';
 import { keepProfileInFiles, viewFromFiles, wandererHandler, whoAsks, type WandererRouteOptions } from '../server/wanderer';
-import { clampSeed, CLOAKS, formatCredits, pickRealm, playLink, worldCloak } from '../site/profilo';
+import { clampSeed, CLOAKS, formatCredits, pickUniverse, playLink, worldCloak } from '../site/profilo';
 
 /** Calls the route as the server would; resolves with the status and the body. */
 function call(opts: WandererRouteOptions, method: string, url: string, body?: unknown, headers: Record<string, string> = {}) {
@@ -157,13 +157,13 @@ describe('the profile page (T102)', () => {
     expect(worldCloak('#ffffff')).not.toBe('#ffffff');
   });
 
-  it('formats credits, picks the realm, clamps the seed, links the game', () => {
+  it('formats credits, picks the universe, clamps the seed, links the game', () => {
     expect(formatCredits(3.456)).toBe('$3.46');
     expect(formatCredits(NaN)).toBe('$0.00');
-    expect(pickRealm(['a', 'b'], 'b', 'a')).toBe('b');
-    expect(pickRealm(['a', 'b'], 'z', 'b')).toBe('b');
-    expect(pickRealm(['a', 'b'], null, null)).toBe('a');
-    expect(pickRealm([], null, null)).toBeUndefined();
+    expect(pickUniverse(['a', 'b'], 'b', 'a')).toBe('b');
+    expect(pickUniverse(['a', 'b'], 'z', 'b')).toBe('b');
+    expect(pickUniverse(['a', 'b'], null, null)).toBe('a');
+    expect(pickUniverse([], null, null)).toBeUndefined();
     expect(clampSeed(99, 8)).toBe(8);
     expect(clampSeed('x', 8)).toBe(1);
     expect(clampSeed(3, 8)).toBe(3);

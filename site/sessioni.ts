@@ -22,7 +22,7 @@ export interface ActiveSessionRecord {
   clients: number;
 }
 
-export interface RealmView {
+export interface UniverseView {
   name: string;
   seed: number;
   master: string;
@@ -88,8 +88,8 @@ const toNumber = (value: unknown): number => {
   return Number.isFinite(n) ? n : 0;
 };
 
-/** Parses a snapshot of files into a RealmView descriptor. */
-export function parseRealmSnapshot(name: string, files: FileMap, active?: ActiveSessionRecord): RealmView {
+/** Parses a snapshot of files into a UniverseView descriptor. */
+export function parseUniverseSnapshot(name: string, files: FileMap, active?: ActiveSessionRecord): UniverseView {
   const { config } = readConfig(files);
   const ai = config.ai;
   const master = config.partita?.master ?? 'io';
@@ -110,7 +110,7 @@ export function parseRealmSnapshot(name: string, files: FileMap, active?: Active
 
   const minCap = toNumber(ai.minimi?.tetto ?? 1.0);
 
-  let description = 'Reame multigiocatore vivo generato con algoritmi MarkovJunior e intelligenza artificiale.';
+  let description = 'Universo multigiocatore vivo generato con algoritmi MarkovJunior e intelligenza artificiale.';
   try {
     if (files['world/bible.json']) {
       const bible = JSON.parse(files['world/bible.json']);
@@ -141,17 +141,17 @@ export function parseRealmSnapshot(name: string, files: FileMap, active?: Active
 }
 
 /** Fetches snapshot of a specific universe and parses it. */
-export async function fetchRealmDetails(
+export async function fetchUniverseDetails(
   name: string,
   activeSessions: Map<string, ActiveSessionRecord>,
   base = '',
-): Promise<RealmView | null> {
+): Promise<UniverseView | null> {
   try {
     const res = await fetch(`${base}/api/universe/${encodeURIComponent(name)}`);
     if (!res.ok) return null;
     const snap = await res.json();
     if (!snap.exists || !snap.files) return null;
-    return parseRealmSnapshot(name, snap.files, activeSessions.get(name));
+    return parseUniverseSnapshot(name, snap.files, activeSessions.get(name));
   } catch {
     return null;
   }
@@ -263,7 +263,7 @@ export async function createUniverse(
 
   const files = buildNewUniverseFiles(options);
   try {
-    // Whoever makes a realm is its master, and the server is who says who they are (T120, ADR-0102).
+    // Whoever makes a universe is its master, and the server is who says who they are (T120, ADR-0102).
     const config = await accountConfig();
     const signed = config ? await signIn(config) : undefined;
     const res = await fetch(`${base}/api/universe/${encodeURIComponent(options.name)}/create`, {
@@ -271,7 +271,7 @@ export async function createUniverse(
       headers: { 'Content-Type': 'application/json', ...(signed ? { Authorization: `Bearer ${signed.token}` } : { [WANDERER_HEADER]: SOLO }) },
       body: JSON.stringify({
         files,
-        message: `Genesi nuovo reame git «${options.name}» (seme ${options.seed})`,
+        message: `Genesi nuovo universo git «${options.name}» (seme ${options.seed})`,
       }),
     });
 
@@ -285,56 +285,56 @@ export async function createUniverse(
   }
 }
 
-/** Renders a single realm card HTMLElement. */
-export function renderRealmCard(realm: RealmView): HTMLElement {
+/** Renders a single universe card HTMLElement. */
+export function renderUniverseCard(universe: UniverseView): HTMLElement {
   const card = document.createElement('div');
-  card.className = 'realm-card';
-  card.dataset.category = `${realm.live ? 'live ' : ''}${realm.isMine ? 'mine ' : ''}`.trim();
+  card.className = 'universe-card';
+  card.dataset.category = `${universe.live ? 'live ' : ''}${universe.isMine ? 'mine ' : ''}`.trim();
 
-  const liveBadge = realm.live
-    ? `<span class="comic-badge green">LIVE · ${realm.clients} ${realm.clients === 1 ? 'VIANDANTE' : 'VIANDANTI'}</span>`
+  const liveBadge = universe.live
+    ? `<span class="comic-badge green">LIVE · ${universe.clients} ${universe.clients === 1 ? 'VIANDANTE' : 'VIANDANTI'}</span>`
     : `<span class="comic-badge yellow">IN PAUSA</span>`;
 
   card.innerHTML = `
-    <div class="realm-card-header">
+    <div class="universe-card-header">
       <div>
         ${liveBadge}
-        <h3 class="comic-title" style="font-size: 1.6rem; margin: 8px 0 0;">${escapeHtml(realm.name.toUpperCase())}</h3>
+        <h3 class="comic-title" style="font-size: 1.6rem; margin: 8px 0 0;">${escapeHtml(universe.name.toUpperCase())}</h3>
       </div>
-      <span class="arcade-text text-cyan" style="font-size: 0.65rem;">SEME #${realm.seed}</span>
+      <span class="arcade-text text-cyan" style="font-size: 0.65rem;">SEME #${universe.seed}</span>
     </div>
-    <div class="realm-card-body">
+    <div class="universe-card-body">
       <p style="font-size: 0.88rem; color: var(--comic-paper); margin: 0 0 12px; line-height: 1.4;">
-        ${escapeHtml(realm.description)}
+        ${escapeHtml(universe.description)}
       </p>
-      <table class="realm-spec-table">
+      <table class="universe-spec-table">
         <tbody>
           <tr>
             <td class="text-dim">Master titolare:</td>
-            <td><b class="text-cyan">${escapeHtml(realm.master)}</b></td>
+            <td><b class="text-cyan">${escapeHtml(universe.master)}</b></td>
           </tr>
           <tr>
             <td class="text-dim">Modelli IA:</td>
-            <td><b class="text-yellow">${escapeHtml(realm.sculptorSummary)}</b></td>
+            <td><b class="text-yellow">${escapeHtml(universe.sculptorSummary)}</b></td>
           </tr>
           <tr>
             <td class="text-dim">Coefficienti:</td>
-            <td><b>${escapeHtml(realm.coefficientsLabel)}</b></td>
+            <td><b>${escapeHtml(universe.coefficientsLabel)}</b></td>
           </tr>
           <tr>
             <td class="text-dim">Spesa oraria:</td>
-            <td><b class="text-green">~$${realm.hourlyCost.toFixed(2)} / ora</b></td>
+            <td><b class="text-green">~$${universe.hourlyCost.toFixed(2)} / ora</b></td>
           </tr>
           <tr>
             <td class="text-dim">Tetto minimo:</td>
-            <td><b>$${realm.minCap.toFixed(2)} USD</b></td>
+            <td><b>$${universe.minCap.toFixed(2)} USD</b></td>
           </tr>
         </tbody>
       </table>
     </div>
-    <div class="realm-card-footer">
-      <span class="arcade-text text-dim" style="font-size: 0.65rem;">${realm.live ? (globalThis.location?.port ? `PORTA ${location.port}` : '') : 'OFFLINE'}</span>
-      <a href="../index.html?universo=${encodeURIComponent(realm.name)}" class="comic-btn arcade cyan sm">
+    <div class="universe-card-footer">
+      <span class="arcade-text text-dim" style="font-size: 0.65rem;">${universe.live ? (globalThis.location?.port ? `PORTA ${location.port}` : '') : 'OFFLINE'}</span>
+      <a href="../index.html?universo=${encodeURIComponent(universe.name)}" class="comic-btn arcade cyan sm">
         ENTRA NELLA LOBBY
       </a>
     </div>
@@ -345,8 +345,8 @@ export function renderRealmCard(realm: RealmView): HTMLElement {
 // --- DOM Wiring & Interactive Application ---
 if (typeof document !== 'undefined') {
   document.addEventListener('DOMContentLoaded', () => {
-    const realmsGrid = document.getElementById('realms-grid');
-    const filterTabs = document.querySelectorAll('#realm-filter-tabs .comic-tab');
+    const universesGrid = document.getElementById('universes-grid');
+    const filterTabs = document.querySelectorAll('#universe-filter-tabs .comic-tab');
     // Here and not in the HTML: the pages' policy (ADR-0111) runs no inline handler.
     document.getElementById('form-create-universe')?.addEventListener('submit', (e) => e.preventDefault());
     const btnOpenWizard = document.getElementById('btn-open-wizard');
@@ -361,7 +361,7 @@ if (typeof document !== 'undefined') {
     const selectAi = document.getElementById('new-univ-ai') as HTMLSelectElement | null;
     const statusMsg = document.getElementById('wizard-status-msg');
 
-    let allRealms: RealmView[] = [];
+    let allUniverses: UniverseView[] = [];
 
     function openModal() {
       if (wizardModal) {
@@ -397,7 +397,7 @@ if (typeof document !== 'undefined') {
 
     // Filtering logic
     function applyFilter(filter: string) {
-      const cards = realmsGrid?.querySelectorAll<HTMLElement>('.realm-card');
+      const cards = universesGrid?.querySelectorAll<HTMLElement>('.universe-card');
       cards?.forEach((card) => {
         if (filter === 'all') {
           card.style.display = 'flex';
@@ -417,13 +417,13 @@ if (typeof document !== 'undefined') {
       });
     });
 
-    // Load and render all available realms
-    async function loadRealms() {
-      if (!realmsGrid) return;
-      realmsGrid.innerHTML = `
-        <div class="realm-loading">
+    // Load and render all available universes
+    async function loadUniverses() {
+      if (!universesGrid) return;
+      universesGrid.innerHTML = `
+        <div class="universe-loading">
           <span class="comic-badge yellow">CARICAMENTO</span>
-          <p class="arcade-text" style="font-size: 0.8rem; margin-top: 12px;">INTERROGAZIONE REAMI E SESSIONI ATTIVE…</p>
+          <p class="arcade-text" style="font-size: 0.8rem; margin-top: 12px;">INTERROGAZIONE UNIVERSI E SESSIONI ATTIVE…</p>
         </div>
       `;
 
@@ -443,21 +443,21 @@ if (typeof document !== 'undefined') {
         namesToLoad.add('aurora');
       }
 
-      const realmPromises = Array.from(namesToLoad).map((name) =>
-        fetchRealmDetails(name, activeSessions),
+      const universePromises = Array.from(namesToLoad).map((name) =>
+        fetchUniverseDetails(name, activeSessions),
       );
 
-      const results = await Promise.all(realmPromises);
-      allRealms = results.filter((r): r is RealmView => r !== null);
+      const results = await Promise.all(universePromises);
+      allUniverses = results.filter((r): r is UniverseView => r !== null);
 
-      realmsGrid.innerHTML = '';
+      universesGrid.innerHTML = '';
 
-      if (allRealms.length === 0) {
-        realmsGrid.innerHTML = `
-          <div class="realm-empty">
-            <span class="comic-badge yellow">NESSUN REAME TROVATO</span>
+      if (allUniverses.length === 0) {
+        universesGrid.innerHTML = `
+          <div class="universe-empty">
+            <span class="comic-badge yellow">NESSUN UNIVERSO TROVATO</span>
             <h3 class="comic-title" style="font-size: 1.8rem; margin: 12px 0 6px;">NESSUN UNIVERSO DISPONIBILE</h3>
-            <p>Non è ancora stato creato alcun reame su questo server.<br />Avvia subito la Genesi del tuo primo mondo git!</p>
+            <p>Non è ancora stato creato alcun universo su questo server.<br />Avvia subito la Genesi del tuo primo mondo git!</p>
             <button class="comic-btn pink" id="btn-empty-create">+ CREA IL PRIMO UNIVERSO</button>
           </div>
         `;
@@ -465,12 +465,12 @@ if (typeof document !== 'undefined') {
         return;
       }
 
-      for (const realm of allRealms) {
-        realmsGrid.appendChild(renderRealmCard(realm));
+      for (const universe of allUniverses) {
+        universesGrid.appendChild(renderUniverseCard(universe));
       }
 
       // Update count on active tab
-      const currentTab = document.querySelector('#realm-filter-tabs .comic-tab.active');
+      const currentTab = document.querySelector('#universe-filter-tabs .comic-tab.active');
       const currentFilter = currentTab?.getAttribute('data-filter') || 'all';
       applyFilter(currentFilter);
     }
@@ -487,7 +487,7 @@ if (typeof document !== 'undefined') {
           statusMsg.innerHTML = `
             <div class="comic-alert error">
               <span class="comic-badge pink">ERRORE</span>
-              <span>Inserisci un nome slug per il nuovo reame.</span>
+              <span>Inserisci un nome slug per il nuovo universo.</span>
             </div>
           `;
         }
@@ -530,7 +530,7 @@ if (typeof document !== 'undefined') {
 
       setTimeout(() => {
         closeModal();
-        void loadRealms();
+        void loadUniverses();
       }, 700);
     });
 
@@ -541,6 +541,6 @@ if (typeof document !== 'undefined') {
       navLinks?.classList.toggle('is-open');
     });
 
-    void loadRealms();
+    void loadUniverses();
   });
 }
