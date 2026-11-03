@@ -78,7 +78,8 @@ export default defineConfig(({ mode }) => {
     // and a `beforeEach` that boots one takes longer than the default 10 s of a hook even on an idle machine (T118).
     // Under the pipeline at most one worker per physical core (T118, ADR-0088); by hand vitest's default.
     // The forms on disk (ADR-0108): each test file has its own modules, and would pay its first boot; only here, never in the game or on the server.
-    test: { environment: 'node', include: ['tests/**/*.test.ts', 'lab/**/*.test.ts'], setupFiles: ['tests/setup/forms-disk.ts', 'tests/setup/relief-memo.ts'], testTimeout: 60000, hookTimeout: 60000, ...testWorkers(process.env) },
+    // Every temporary folder of a run lives in one that goes away with it (T177).
+    test: { environment: 'node', include: ['tests/**/*.test.ts', 'lab/**/*.test.ts'], globalSetup: ['tests/setup/suite-temp.ts'], setupFiles:['tests/setup/forms-disk.ts', 'tests/setup/relief-memo.ts'], testTimeout: 60000, hookTimeout: 60000, ...testWorkers(process.env) },
   };
 });
 

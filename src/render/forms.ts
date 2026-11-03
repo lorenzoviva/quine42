@@ -15,6 +15,19 @@ import type { MeshData } from '../mj/mesh';
  */
 export const FORMS_DB_VERSION = 3;
 
+/** The ports of this machine that stay the same from one day to the next: `npm run dev` and `vite preview` when not told otherwise. */
+const LASTING_PORTS = ['5173', '4173'];
+
+/**
+ * Whether the forms of this page may stay on disk (T177, ADR-0108). IndexedDB belongs to an origin, and an origin has its port: every
+ * browser check on a free port left about 0.5 GB in the Chrome profile, on C:, for good (15 GB in four days), and no page can clean up
+ * another origin. So on this machine only the lasting ports keep them; elsewhere the site's origin is one. `?formecache` is for who is checking the cache itself.
+ */
+export function keepsFormsOnDisk(place: { hostname: string; port: string; search: string }): boolean {
+  if (!['localhost', '127.0.0.1', '[::1]'].includes(place.hostname)) return true;
+  return LASTING_PORTS.includes(place.port) || new URLSearchParams(place.search).has('formecache');
+}
+
 export interface FormStore {
   get(key: string): Promise<FormResult | undefined>;
   set(key: string, res: FormResult): Promise<void>;
@@ -164,7 +177,8 @@ export class WorkerRunner implements FormRunner {
     store?: FormStore,
     workerFactory?: () => Worker
   ) {
-    this.store = store ?? (typeof indexedDB !== 'undefined' ? new IdbFormStore() : new MemoryFormStore());
+    const onDisk = typeof indexedDB !== 'undefined' && (typeof location === 'undefined' || keepsFormsOnDisk(location));
+    this.store = store ?? (onDisk ? new IdbFormStore() : new MemoryFormStore());
     if (typeof Worker !== 'undefined' || workerFactory) {
       const makeWorker = workerFactory ?? (() => new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' }));
       for (let i = 0; i < n; i++) {
