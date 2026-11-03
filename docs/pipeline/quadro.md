@@ -30,12 +30,12 @@ Aggiornato il 04/11/2026, epoca 241. Crediti: vedi `stato`.
 - **T224 e T228 integrati** (`0ed7895`, ADR-0126): musica ed effetti nel gioco, 7 brani e 9 effetti del seme, `src/audio/`, volume e muto nel pannello d'aiuto. 15 programmi su 16 passano T223. `suono-effetto-soglia` corretto da T228: **l'autore lo deve riascoltare**. `suono-effetto-morte` non passa (`ripetitivo`, distanza 0 tra i semi), lasciato intatto: il gioco lo suona, il validatore ne rifiuta una nuova pubblicazione (`keptByTheAuthor`), decide l'autore. L'autore ha ascoltato (03/11): entusiasta, preferiti «morte» e «profondo», dissolvenze convincenti. Limiti: in multigiocatore niente suono per `item:crafted`, `forge:done` e salto; multigiocatore dal vivo non provato; tra brani di BPM diversi il ritmo non si allinea (dissolvenza di 3 s), detto all'autore; l'analisi riconosce un effetto solo sotto i 16 passi, non da `uso`; il validatore costa 1-1,9 s su un brano.
 - **T89c integrato** (`aced083`): luce tinta, ombre azzurre, prospettiva aerea, bloom tarato; dietro `?cartone`, `CARTOON_BY_DEFAULT` resta `false` fino a T89b, che deve tenere `uFog` in `Ink`. Verificato nel browser. Non provati: prestazioni (T89e), camera delle ombre da lontano. Rosso una volta `tests/subscription.test.ts`, verde da solo, causa non cercata.
 - **T186 integrato** (`cf88084`): landing, striscia «coming soon» con spazio, pirati, cowboy, senza link. Verificata a 1920 e 390 px; non provata sotto `npm run serve`.
-- ADR nuovi dallo **0127**.
+- **T225 integrato** (`c0c7868`, ADR-0127): Musicista (`sound.compose`) nella casa dell'Artista, `ScoreDirector` entro `ai.maxBrani` (8) e coefficiente `brani`, incarico `musica` del Referente. Non provati: ascolto umano, multigiocatore dal vivo, `ScoreDirector` con un modello vero; suite intera non rilanciata dopo una correzione ai soli documenti. Limiti: validazione sincrona ~0,8 s a tentativo sulla pagina; i brani di Gemini seguono da vicino l'esempio; un «Low Detail» salvato senza `brani` non è più riconosciuto finché non lo si riapplica.
+- ADR nuovi dallo **0128**.
 
 ## Pronti e priorità
 
-1. **In coda, approvati e pronti, partono da soli:** T182 T89b T89e T183 T152 T158; T225 in corso.
-1b. **Suono da MJ (richiesta dell'autore, 03/11):** T221 (lingua XML, sintetizzatore puro, preset) → T222 (SoundLab in `/lab/suono/`) e T223 (analisi per gli agenti); T221 → T224 (nel gioco); T223 + T224 → T225 (Musicista nella `galleria`, nessun edificio nuovo). Mockup: `docs/userchats/mj_3d_soundlab_sintetizzatore_musicale_markovjunior.html`, committato perché i worktree lo vedano. Scelte mie da correggere se l'autore vuole: musica per ambiente e ora, un solo sintetizzatore puro al posto del grafo Web Audio del mockup.
+1. **In coda, approvati e pronti, partono da soli:** T182 T89b T89e T183 T152; T158 in corso.
 4. **T182 → T156** (strutture procedurali). T182 su Claude, stima 8 %, al più 4 giri; è pronto.
 4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla.
 5. T89d resta bloccato.
@@ -66,5 +66,5 @@ Aggiornato il 04/11/2026, epoca 241. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **241:** T186 integrato.
+- **241:** T186 e T225 integrati; catena del suono finita.
 - **240:** T89c, T228 e T224 integrati; suono nel gioco nel base.
