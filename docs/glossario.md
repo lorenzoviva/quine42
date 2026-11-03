@@ -57,10 +57,10 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Fermo**: la cartella `world/` dell'universo e il namespace Lua `world`.
 
 ### Partita
-- **Inglese**: `Partita`, `repairPartita`, `game` (→ GameSetup, repairGameSetup, R17)
+- **Inglese**: `GameSetup`, `repairGameSetup`, `game`
 - **Definizione**: come si gioca in un universo, scelto alla Genesi e fisso: modalità, morte, PvP, master.
-- **Dove vive**: `src/kernel/partita.ts`, `universe.json → partita`
-- **Da non usare**: `game of many` (si dice «multigiocatore»)
+- **Dove vive**: `src/kernel/gameSetup.ts`, `universe.json → partita`
+- **Da non usare**: `game of many` (si dice «multigiocatore»), `Partita`, `repairPartita`, `partitaSummary`, `DEFAULT_PARTITA`
 - **Fermo**: `partita`, `modalita`, `altroTraGiocatori`.
 
 ### Multigiocatore
@@ -342,10 +342,10 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Fermo**: `classe` nel manifest, nell'indice e nel piano.
 
 ### Taglia
-- **Inglese**: `Taglia`, `TAGLIE`, `tilesOf`, `boxOf` (→ SizeTier, SIZE_TIERS, R17)
+- **Inglese**: `SizeTier`, `SIZE_TIERS`, `tilesOf`, `boxOf`
 - **Definizione**: la scala di D&D, da minuscola a gargantuesca, per creature e strutture.
 - **Dove vive**: `src/mj/classes.ts`
-- **Da non usare**: `size` (da solo, per la taglia)
+- **Da non usare**: `size` (da solo, per la taglia), `Taglia`, `TAGLIE`
 - **Fermo**: `taglia` nei file e i suoi valori.
 
 ## Viandanti e individui
@@ -367,7 +367,7 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 ### Master
 - **Inglese**: `master`, `isMaster`
 - **Definizione**: chi ha creato un universo multigiocatore: lo guida, fisso; in singola chi gioca.
-- **Dove vive**: `src/kernel/partita.ts`, `src/master.ts`, `universe.json → partita.master`
+- **Dove vive**: `src/kernel/gameSetup.ts`, `src/master.ts`, `universe.json → partita.master`
 - **Da non usare**: `dio`, `admin`, `DM` (salvo il paragone con D&D)
 
 ### God mode
@@ -635,10 +635,10 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Da non usare**: nessuno
 
 ### Referente
-- **Inglese**: `referente`, `referenteReply`, `askReferente` (→ liaisonReply, askLiaison, R17)
+- **Inglese**: `referente`, `liaisonReply`, `askLiaison`
 - **Definizione**: l'agente che nella corona accoglie il viandante e porta le sue richieste alla squadra giusta.
 - **Dove vive**: `src/kernel/archive.ts`, `src/kernel/agents/council.ts`
-- **Da non usare**: nessuno
+- **Da non usare**: `referenteReply`, `askReferente`
 - **Fermo**: il valore `referente` di `AgentId`, come gli altri agenti.
 
 ### Attore
@@ -892,6 +892,6 @@ Le fanno i task T188-T204, una per task e nell'ordine: vanno in conflitto con tu
 | R14 | `AGENTS.md`: `chunk` → «luogo» (righe di `relief.ts`, `terrain.ts`, `universe.json`), `layout` → «ambiente» dove è l'ambiente | gli ADR, che non si toccano | 1 | no | da fare |
 | R15 | Sito: «reame», «reami», `Reame`, `REAME` → «universo», «universi» e maiuscole, anche il messaggio di `server/wanderer.ts`; `realm`, `realms` → `universe`, `universes`; `RealmView` → `UniverseView`, `REALM_KEY` → `UNIVERSE_KEY`, `pickRealm` → `pickUniverse`, `parseRealmSnapshot` → `parseUniverseSnapshot`, `fetchRealmDetails` → `fetchUniverseDetails`, `renderRealmCard` → `renderUniverseCard`, `loadRealms` → `loadUniverses`, `allRealms` → `allUniverses`, `realmPromises` → `universePromises`, `realmsGrid` → `universesGrid`; le classi e gli id: `realm-card`, `realm-card-header`, `realm-card-body`, `realm-card-footer`, `realm-spec-table`, `realm-loading`, `realm-empty`, `realm-filter-tabs`, `realm-select`, `realms-grid`, `card-realm`, `btn-play-realm`, `status-realms` → con `universe` e `universes` | il reame del kernel: `REALM`, `realmOf`, i commenti di `src/`, `tests/lots.test.ts`; le prove di `reame-low`, `reame-high`, `reame2`, che sono nomi d'universo qualunque; `universes` dei dati della risposta, già così; **fermi** il valore `quine:sito:reame` della chiave di `localStorage` e l'ancora `#reami` (`id="reami"`, i suoi `href`), che sta negli indirizzi | 22 (13 del sito, 7 test) | no | fatto |
 | R16 | `Person` → `Individual`, `DialoguePerson` → `DialogueIndividual`, `addPerson` → `addIndividual`, `updatePerson` → `updateIndividual`, `personOf` → `individualOf`, `personFacts` → `individualFacts`, `personByName` → `individualByName`, `personNode` → `individualNode`, `noPerson` → `noIndividual`; il campo `person` di `BenchScene` e di `figure` → `individual`, il locale `person` → `individual`, gli id `person:<nome>` delle vetrine → `individual:<nome>`; nei commenti `person` → `individual` dove è il concetto. Nei documenti, nella UI e in `AGENTS.md`, «persona» → «individuo» dove è il concetto | `Identity`, il componente; `People` e `readPeople`, che dicono il file; `Species`; `nPersone`, `personaggi` e i testi in italiano comune, nel mondo e nei prompt; **fermi** `world/people.json` e il suo `persone`, `persona` nel manifest e nel prompt, il valore `persona` di `specie` e il tipo `persona` dei nodi del grafo (con `senza_persona`), `npc.*` | 9 per i nomi, ~20 con `person` nel codice, 90 con i commenti | no | fatto |
-| R17 | `Taglia` → `SizeTier`, `TAGLIE` → `SIZE_TIERS`; `Partita` → `GameSetup`, `repairPartita` → `repairGameSetup`, `partitaSummary` → `gameSetupSummary`, `DEFAULT_PARTITA` → `DEFAULT_GAME_SETUP`, il metodo `Kernel.partita()` → `gameSetup()`, `src/kernel/partita.ts` → `src/kernel/gameSetup.ts`; `referenteReply` → `liaisonReply`, `askReferente` → `askLiaison` | `SizeDef`, `RARE_SIZES`, `sizeOf`, `sizeRank`; `game`, `chooseGame`, il `Game` di `server/access.ts`; **fermi** `taglia` e i suoi valori, `partita`, `modalita`, `altroTraGiocatori` nei file, il valore `referente` di `AgentId` | 27 | no | da fare |
+| R17 | `Taglia` → `SizeTier`, `TAGLIE` → `SIZE_TIERS`; `Partita` → `GameSetup`, `repairPartita` → `repairGameSetup`, `partitaSummary` → `gameSetupSummary`, `DEFAULT_PARTITA` → `DEFAULT_GAME_SETUP`, il metodo `Kernel.partita()` → `gameSetup()`, `src/kernel/gameSetup.ts` → `src/kernel/gameSetup.ts`; `referenteReply` → `liaisonReply`, `askReferente` → `askLiaison` | `SizeDef`, `RARE_SIZES`, `sizeOf`, `sizeRank`; `game`, `chooseGame`, il `Game` di `server/access.ts`; **fermi** `taglia` e i suoi valori, `partita`, `modalita`, `altroTraGiocatori` nei file, il valore `referente` di `AgentId` | 27 | no | fatto |
 | — | API Lua: `world.player` → `world.wanderer` | 6 moduli del seme, ogni universo generato, prompt, validatore | — | **sì, e un alias per sempre: non lo propongo** | — |
 | — | Valori di `AgentId`, nomi degli effetti, componenti in italiano | ovunque, compresi i dati | — | **sì: non lo propongo**, sono dati | — |

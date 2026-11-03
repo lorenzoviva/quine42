@@ -3,8 +3,8 @@
 // validated against: the player is allowed to break the game.
 
 import type { Sandbox } from './sandbox';
-import type { Effect, FileMap, ItemDef, EnvironmentDef, Manifest, ModuleKind, Partita, TerrainDef } from './types';
-import { DEATH_LEVELS, DEFAULT_PARTITA } from './partita';
+import type { Effect, FileMap, ItemDef, EnvironmentDef, Manifest, ModuleKind, GameSetup, TerrainDef } from './types';
+import { DEATH_LEVELS, DEFAULT_GAME_SETUP } from './gameSetup';
 import { SOLO, validWandererId } from './wanderers';
 import { ITEM_CATEGORIES } from './types';
 import type { ChunkPlan } from './agents/cartography';
@@ -14,7 +14,7 @@ import { layout } from './layout';
 import { analyse } from '../mj/check';
 export { repairCoefficients, repairActor } from './coefficients';
 export { repairMinimums } from './universe';
-import { boxOf, classOf, CLASSES, sizeOf, TAGLIE } from '../mj/classes';
+import { boxOf, classOf, CLASSES, sizeOf, SIZE_TIERS } from '../mj/classes';
 import { Mj3Error } from '../mj/engine';
 import { compileMjx } from '../mj/model';
 import { FORM_LIMITS, MAX_FORM_TIME, MAX_FORM_XML, runMjx } from '../mj/run';
@@ -28,10 +28,10 @@ const ID_RE = /^[a-z][a-z0-9-]*(\.[a-z0-9-]+)+$/;
  * from 0 to 4 (the words of the plan, «molto» / «poco punitiva», or a level name, become one), the rest
  * booleans; what is missing is the game of today.
  */
-export function repairPartita(raw: unknown): Partita {
+export function repairGameSetup(raw: unknown): GameSetup {
   const r = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
   const flag = (v: unknown, d: boolean) => (typeof v === 'boolean' ? v : v === 'sì' || v === 'si' || v === 'true' ? true : v === 'no' || v === 'false' ? false : d);
-  let morte = DEFAULT_PARTITA.morte;
+  let morte = DEFAULT_GAME_SETUP.morte;
   if (typeof r.morte === 'number' && Number.isFinite(r.morte)) morte = Math.max(0, Math.min(DEATH_LEVELS.length - 1, Math.round(r.morte)));
   else if (typeof r.morte === 'string') {
     const t = r.morte.trim().toLowerCase();
@@ -45,8 +45,8 @@ export function repairPartita(raw: unknown): Partita {
   return {
     modalita,
     morte,
-    pvp: flag(r.pvp, DEFAULT_PARTITA.pvp),
-    altroTraGiocatori: flag(r.altroTraGiocatori, DEFAULT_PARTITA.altroTraGiocatori),
+    pvp: flag(r.pvp, DEFAULT_GAME_SETUP.pvp),
+    altroTraGiocatori: flag(r.altroTraGiocatori, DEFAULT_GAME_SETUP.altroTraGiocatori),
     // Alone, the one who plays is the master of everything; in a multiplayer game, who created it (T37).
     ...(modalita === 'multigiocatore' ? { master: validWandererId(r.master) ? r.master : SOLO } : {}),
   };
@@ -133,7 +133,7 @@ export class Validator {
       if (typeof m.appearance.color !== 'string') err('appearance.color mancante');
       if (m.appearance.model !== undefined && (typeof m.appearance.model !== 'string' || !MODEL_RE.test(m.appearance.model))) err(`appearance.model deve essere l'id di un modello di models/ (es. "pino"): "${m.appearance.model}"`);
       if (m.appearance.classe !== undefined && !classOf(m.appearance.classe)) err(`appearance.classe sconosciuta "${m.appearance.classe}" (note: ${CLASSES.map((c) => c.id).join(', ')})`);
-      if (m.appearance.taglia !== undefined && !sizeOf(m.appearance.taglia)) err(`appearance.taglia sconosciuta "${m.appearance.taglia}" (taglie: ${TAGLIE.map((t) => t.id).join(', ')})`);
+      if (m.appearance.taglia !== undefined && !sizeOf(m.appearance.taglia)) err(`appearance.taglia sconosciuta "${m.appearance.taglia}" (taglie: ${SIZE_TIERS.map((t) => t.id).join(', ')})`);
     }
     if (['entity', 'item', 'player'].includes(m.kind) && !m.appearance) err(`un modulo ${m.kind} richiede appearance`);
     if (m.physics) {

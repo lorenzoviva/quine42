@@ -392,7 +392,7 @@ export interface UniverseConfig {
   chunkSize: number;
   ai: AiConfig;
   /** Chosen before the Genesis, never changed after (ADR-0053). */
-  partita: Partita;
+  partita: GameSetup;
   /** The relief (ADR-0048): `mare` is the sea's level (T51a); without it, the one the relief gives. */
   rilievo?: { mare?: number };
   /** The heritage of clones (T45c, ADR-0084): what of every use of a cloned card goes back to who held it before. */
@@ -400,7 +400,7 @@ export interface UniverseConfig {
 }
 
 /** How the game is played in this universe: chosen before the Genesis, then fixed (ADR-0053). */
-export interface Partita {
+export interface GameSetup {
   modalita: 'singola' | 'multigiocatore';
   /** How punishing death is: 0 (nothing is lost) to 4 (merciless). */
   morte: number;

@@ -2,7 +2,7 @@
 // program of fixed boxes passes: here it is seen for what it is. Only shape counts: a seed that repaints the same building has changed nothing.
 
 import { stepOf } from '../../src/kernel/forms';
-import { classOf, sizeOf, sizeRank, TAGLIE, type Taglia } from '../../src/mj/classes';
+import { classOf, sizeOf, sizeRank, SIZE_TIERS, type SizeTier } from '../../src/mj/classes';
 import { Mj3Error, type Grid3, type PaletteEntry } from '../../src/mj/engine';
 import { colorTable, footprint } from '../../src/mj/mesh';
 import { DEFAULT_RENDER, render, sheet, type Picture } from '../../src/mj/photo';
@@ -233,9 +233,9 @@ export function giudicaVarianza(v: Varianza, b: Pick<Bersaglio, 'classe'>): stri
 }
 
 /** The sizes a program is tried at if nobody says: its own and the next, the one below for the largest. */
-export function taglieDiProva(b: Pick<Bersaglio, 'classe' | 'taglia'>): Taglia[] {
+export function taglieDiProva(b: Pick<Bersaglio, 'classe' | 'taglia'>): SizeTier[] {
   const own = sizeOf(b.taglia)?.id ?? classOf(b.classe)!.taglia;
-  const next = TAGLIE[sizeRank(own) + 1]?.id ?? TAGLIE[sizeRank(own) - 1]!.id;
+  const next = SIZE_TIERS[sizeRank(own) + 1]?.id ?? SIZE_TIERS[sizeRank(own) - 1]!.id;
   return [own, next];
 }
 
@@ -247,7 +247,7 @@ export interface ProvaSeme {
 }
 
 export interface ProvaTaglia {
-  taglia: Taglia;
+  taglia: SizeTier;
   box: [number, number, number];
   vpt: number;
   gradino: number;
@@ -269,12 +269,12 @@ export interface Prova {
   passa: boolean;
   ms: number;
   /** What the contact sheet is made of. */
-  esecuzioni: Array<{ taglia: Taglia; seme: number; e: Eseguito; m: Misure }>;
+  esecuzioni: Array<{ taglia: SizeTier; seme: number; e: Eseguito; m: Misure }>;
 }
 
 export interface OpzioniProva {
   semi?: number;
-  taglie?: Taglia[];
+  taglie?: SizeTier[];
 }
 
 /** The program at every size and every seed: all today's measures, and how much the seeds differ. Nothing here throws: what the game refuses is a defect. */

@@ -8,7 +8,7 @@ import { tokenize } from '../runes';
 import type { PlanContext } from '../agents/cartography';
 import type { Concept, ForgeRequest, PhysicsSpec } from '../agents/forge';
 import type { NpcContext } from '../agents/minds';
-import { fallbackDeath } from '../partita';
+import { fallbackDeath } from '../gameSetup';
 
 const PLACES: Record<string, { nouns: string[]; descr: string[] }> = {
   forest: {

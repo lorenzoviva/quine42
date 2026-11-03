@@ -5,8 +5,8 @@
 
 import type { FeedEntry } from '../kernel/agents/council';
 import type { Kernel } from '../kernel/kernel';
-import { DEATH_LEVELS } from '../kernel/partita';
-import type { AiConfig, Partita } from '../kernel/types';
+import { DEATH_LEVELS } from '../kernel/gameSetup';
+import type { AiConfig, GameSetup } from '../kernel/types';
 import { COEFFICIENT_INFO, COEFFICIENT_KEYS, CENSUS, FULL_DETAIL, hourlyEstimate, isLowDetail, LOW_DETAIL, pricedAiModels, type Coefficients } from '../kernel/coefficients';
 import { DEFAULT_SCULPTORS, type SculptorAiModels } from '../kernel/agents/sculptor';
 import { usd } from '../kernel/ai/prices';
@@ -26,8 +26,8 @@ export class GenesisScreen {
    * The choices of the game: free before the first Genesis, shown and locked after. `read` gives what
    * is chosen.
    */
-  private gameForm(): { form: HTMLElement; read: () => Partita; lock: (on: boolean) => void } {
-    const now = this.k.partita();
+  private gameForm(): { form: HTMLElement; read: () => GameSetup; lock: (on: boolean) => void } {
+    const now = this.k.gameSetup();
     const free = this.k.needsGenesis();
     const death = el('input', { type: 'range', min: '0', max: String(DEATH_LEVELS.length - 1), step: '1' }) as HTMLInputElement;
     death.value = String(now.morte);

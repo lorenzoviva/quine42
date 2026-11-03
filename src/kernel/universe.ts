@@ -2,8 +2,8 @@
 // Modules talk only through components and events; no implicit dependencies.
 
 import type { AiMinimums, FileMap, ModuleEntry, UniverseConfig } from './types';
-import { repairActor, repairCoefficients, repairPartita, type Validator } from './validator';
-import { DEFAULT_PARTITA } from './partita';
+import { repairActor, repairCoefficients, repairGameSetup, type Validator } from './validator';
+import { DEFAULT_GAME_SETUP } from './gameSetup';
 
 export const DEFAULT_CONFIG: UniverseConfig = {
   name: 'universo',
@@ -12,7 +12,7 @@ export const DEFAULT_CONFIG: UniverseConfig = {
   circleRadius: 42,
   chunkSize: 18,
   ai: { textModel: 'gemini-3.1-flash-lite', maxText: 800, maxForges: 3, maxPacks: 4, maxCast: 3, thinking: 'low', timeout: 120 },
-  partita: DEFAULT_PARTITA,
+  partita: DEFAULT_GAME_SETUP,
 };
 
 /** Repairs quality and spending minimums of an universe (T45d). */
@@ -43,7 +43,7 @@ export function readConfig(files: FileMap): { config: UniverseConfig; error?: st
           minimi: repairMinimums(parsed.ai?.minimi),
           attore: repairActor(parsed.ai?.attore),
         },
-        partita: repairPartita(parsed.partita),
+        partita: repairGameSetup(parsed.partita),
       },
     };
   } catch (e) {

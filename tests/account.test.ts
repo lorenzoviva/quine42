@@ -127,7 +127,7 @@ describe('accounts (T44b)', () => {
 
   it("the server's own account is the master `io` of a universe made before accounts", async () => {
     const k = await bootMany();
-    expect(k.partita().master ?? SOLO).toBe(SOLO);
+    expect(k.gameSetup().master ?? SOLO).toBe(SOLO);
     const server = new SessionServer(k, { verify, masterUid: 'AuThOr0000000000000000000001' });
     const author = await enter(server, '', 'autore');
     expect(author.id).toBe(SOLO);

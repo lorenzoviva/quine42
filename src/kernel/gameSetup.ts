@@ -3,7 +3,7 @@
 // ability the death can take away, a treasure worth the risk), so it goes with its requests as a
 // principle; on death the Narrator turns the level into what is lost and where one wakes up.
 
-import type { Partita } from './types';
+import type { GameSetup } from './types';
 
 /** The levels of the death, from 0 to 4: what the Council reads, what the Genesis screen shows. */
 export const DEATH_LEVELS: ReadonlyArray<{ nome: string; testo: string }> = [
@@ -15,12 +15,12 @@ export const DEATH_LEVELS: ReadonlyArray<{ nome: string; testo: string }> = [
 ];
 
 /** The game of today: one player, death as hard as it was before the choice existed. */
-export const DEFAULT_PARTITA: Partita = { modalita: 'singola', morte: 3, pvp: false, altroTraGiocatori: true };
+export const DEFAULT_GAME_SETUP: GameSetup = { modalita: 'singola', morte: 3, pvp: false, altroTraGiocatori: true };
 
-export const deathLevel = (p: Partita) => DEATH_LEVELS[p.morte] ?? DEATH_LEVELS[DEFAULT_PARTITA.morte];
+export const deathLevel = (p: GameSetup) => DEATH_LEVELS[p.morte] ?? DEATH_LEVELS[DEFAULT_GAME_SETUP.morte];
 
 /** The game as a principle of the Council: with every task of who builds on it. */
-export function partitaSummary(p: Partita): string {
+export function gameSetupSummary(p: GameSetup): string {
   const d = deathLevel(p);
   return [
     '## La partita (scelta prima della Genesi, non cambia più)',

@@ -209,7 +209,7 @@ const REFERENTE_SCHEMA: Schema = {
  * the universe, themselves, or the game's physics). The Referente understands what is asked and
  * hands it to the right team: the Forge, the Cartographer, the Artist, the rules, the Narrator.
  */
-export async function referenteReply(c: Council, history: Turn[], text: string): Promise<{ say: string; task: string; request?: string; target?: string; refusal?: string; runes?: unknown }> {
+export async function liaisonReply(c: Council, history: Turn[], text: string): Promise<{ say: string; task: string; request?: string; target?: string; refusal?: string; runes?: unknown }> {
   const past = history.slice(-8).map((t) => `${t.who === 'giocatore' ? 'Viandante' : 'Tu'}: ${t.text}`).join('\n');
   const r = await c.ask<{ risposta: string; incarico: string; richiesta?: string; bersaglio?: string; rifiuto?: string; rune?: unknown }>(
     'referente',

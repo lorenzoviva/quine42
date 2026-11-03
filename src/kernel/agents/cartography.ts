@@ -7,7 +7,7 @@ import type { Schema } from '../ai/models';
 import type { CardStamp } from '../cards';
 import type { EnvironmentDef, ChunkInfo, TerrainDef } from '../types';
 import type { MjNode } from '../mj';
-import { sizeOf, TAGLIE, type Taglia } from '../../mj/classes';
+import { sizeOf, SIZE_TIERS, type SizeTier } from '../../mj/classes';
 import { STAMP_SHAPES } from '../stamps';
 import { paletteSummary, type CatalogEntry, type Council } from './council';
 
@@ -37,7 +37,7 @@ export interface ChunkPlan {
    * environment (the largest first); the Sculptor writes the ones that do not exist yet. Their size (ADR-0092)
    * is a size of D&D, fitted by the kernel to the lot and to the rarity of the two largest.
    */
-  strutture?: Array<{ concetto: string; taglia?: Taglia }>;
+  strutture?: Array<{ concetto: string; taglia?: SizeTier }>;
   /** Tiles changed after the layout (by effects, spells, Lua): cell index → tile code. */
   edits?: Record<string, string>;
   /** The ground dug (negative) or raised after the layout (T51b): cell index → levels. */
@@ -68,7 +68,7 @@ export interface PlanContext {
    * The rare sizes a structure here may still have (ADR-0092): Huge one per zone of the world (about a
    * million tiles), Gargantuan one per realm (4 × 4 zones); the kernel enforces it anyway.
    */
-  rari?: Taglia[];
+  rari?: SizeTier[];
   /** Who pays for the plan (T40): the wanderer who first came to the place. */
   chi?: string;
 }
@@ -84,7 +84,7 @@ const PLAN_SCHEMA: Schema = {
     a_terra: { type: 'ARRAY', items: { type: 'STRING' } },
     nuovi: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concetto: { type: 'STRING' }, dove: { type: 'STRING', enum: WHERE } }, required: ['concetto', 'dove'] } },
     rune: { type: 'ARRAY', items: { type: 'STRING' } },
-    strutture: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concetto: { type: 'STRING' }, taglia: { type: 'STRING', enum: TAGLIE.map((t) => t.id) } }, required: ['concetto'] } },
+    strutture: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concetto: { type: 'STRING' }, taglia: { type: 'STRING', enum: SIZE_TIERS.map((t) => t.id) } }, required: ['concetto'] } },
   },
   required: ['luogo', 'ambiente', 'oggetti', 'rune'],
 };
@@ -93,7 +93,7 @@ const PLAN_SCHEMA: Schema = {
  * A structure of a plan, as the Cartographer wrote it or as a saved plan has it: a size of D&D, or `importante`
  * of the plans before ADR-0092 (the castle of then is Huge).
  */
-export function readStructure(s: any): { concetto: string; taglia?: Taglia } {
+export function readStructure(s: any): { concetto: string; taglia?: SizeTier } {
   const taglia = sizeOf(String(s?.taglia ?? '').trim().toLowerCase())?.id ?? (s?.importante === true ? 'enorme' : undefined);
   return { concetto: String(s?.concetto ?? '').trim(), ...(taglia ? { taglia } : {}) };
 }

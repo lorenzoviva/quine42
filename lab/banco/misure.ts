@@ -6,7 +6,7 @@ import { JUMP_FAR, JUMP_UP } from '../../src/kernel/kernel';
 import { withSize } from '../../src/kernel/agents/sculptor';
 import { FormCache, Forms, groundOfForm, holesOf, InlineRunner, levelAt, MODEL_TIME, rampBlocks, stepOf, topUnder, type Form, type Ground } from '../../src/kernel/forms';
 import { modelSize } from '../../src/kernel/modeldirector';
-import { boxOf, classOf, type Taglia } from '../../src/mj/classes';
+import { boxOf, classOf, type SizeTier } from '../../src/mj/classes';
 import { analyse, type Analysis } from '../../src/mj/check';
 import { Mj3Error, type Grid3, type PaletteEntry, type RunResult, type Vec3 } from '../../src/mj/engine';
 import { colorTable, surfaces, type Levels } from '../../src/mj/mesh';
@@ -23,7 +23,7 @@ export interface Bersaglio {
   stile: string;
   descrizione: string;
   classe: 'grande' | 'edificio';
-  taglia?: Taglia;
+  taglia?: SizeTier;
   /** Tiles under the ground (ADR-0091). */
   sotto?: number;
 }

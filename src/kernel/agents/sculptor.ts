@@ -9,7 +9,7 @@
 
 import type { Schema } from '../ai/models';
 import { analyse } from '../../mj/check';
-import { boxOf, classOf, CLASSES, densityOf, RARE_SIZES, sizeOf, TAGLIE, TILE, tilesOf, type AssetClass, type Taglia } from '../../mj/classes';
+import { boxOf, classOf, CLASSES, densityOf, RARE_SIZES, sizeOf, SIZE_TIERS, TILE, tilesOf, type AssetClass, type SizeTier } from '../../mj/classes';
 import { Mj3Error, type RunResult, type Vec3 } from '../../mj/engine';
 import { compileMjx, type MjxModel } from '../../mj/model';
 import { MJ_PALETTE } from '../../mj/palette';
@@ -53,7 +53,7 @@ export interface SculptRequest {
   /** One program for many entities: the letter C takes each entity's colour. */
   tinta?: boolean;
   /** Its size (ADR-0092), if not the class's own: the box scales with it; the rare structures get the best model. */
-  taglia?: Taglia;
+  taglia?: SizeTier;
   /** The program it had (a request to sculpt it again) and what is wished. */
   previous?: string;
   desiderio?: string;
@@ -90,7 +90,7 @@ const classLine = (c: AssetClass) => {
 };
 
 /** The sizes of D&D (ADR-0092): how a class's box scales when an entity is of another size than its class's. */
-const sizesLine = () => `  Taglie (D&D): ${TAGLIE.map((t) => `${t.name} ×${t.scala}`).join(' · ')} — il lato rispetto a Media; una cosa di un'altra taglia ha la scatola della sua classe scalata (la richiesta la dice)`;
+const sizesLine = () => `  Taglie (D&D): ${SIZE_TIERS.map((t) => `${t.name} ×${t.scala}`).join(' · ')} — il lato rispetto a Media; una cosa di un'altra taglia ha la scatola della sua classe scalata (la richiesta la dice)`;
 
 /** The Sculptor's instructions (prompts/agents/scultore.md) with the scale, the classes, the sizes and the palette. */
 export function sculptorRole(files: FileMap): string {
