@@ -2015,7 +2015,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   rossi, tutti in file che non importano il renderer (kernel, between, explore, credits…: i timeout di carico già noti, T95); nessun test tocca `src/render/`.
 
 ### T89a · Cartone: fasce e interruttore — `da fare` (dipende da T89)
-- Pipeline: claude · stima 3% · approvato · browser · priorità 75
+- Pipeline: claude · stima 3% · browser · priorità 75
 - Contesto: ADR-0093, punti 1, 2 e 6; la prova `?cartone` di T89 (`src/render/cartoon.ts`, `lit()` in `materials.ts`).
 - Fare: la rampa a 3 fasce per tutti i materiali illuminati (simulazione, corona e studio: `MAT.corona`, `coronaGlass`, `solid()`), i voxel luminosi fuori
   dalle fasce; il lato in ombra saturo (la fascia bassa non sotto ~0,35, il colore dell'emisfero non grigio); ombre portate più nette. Il cartone diventa il
@@ -2243,7 +2243,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 ### T106 · Tema pop art / retro arcade: applicazione alle interfacce in-game — `da fare` (dipende da T109, T97)
 
 - Stile: copia lo stile grafico del template in `docs/design/sito/` (fatto da T109, leggi il suo `README.md`).
-- Pipeline: claude · stima 4% · approvato · priorità 72
+- Pipeline: claude · stima 4% · priorità 72
 - Contesto: ADR-0095, punto 3 (Variabili CSS unificate). Il tema grafico deve permeare anche l'esperienza di gioco.
 - Fare: aggiornare `src/style.css` e i componenti UI in-game (`src/ui/hud.ts`, `inventory.ts`, `lobby.ts`, `profile.ts`, `chat.ts`, `creditdialog.ts`) per adottare appieno i token di `src/theme.css`: bordi a inchiostro netto fumetto (`--border-ink-thick`), ombre rigide neon offset (`--shadow-hard-cyan`, `--shadow-hard-pink`), pattern mezze tinte sui pannelli modali, pulsanti arcade retrò e font display per intestazioni e notifiche d'avviso.
 - Fatto quando: typecheck e test verdi; screenshot nel browser delle interfacce in-game rinnovate con il tema pop art comics / neon punk.
@@ -2808,7 +2808,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 ## Dalla chat del 02/11/2026 (testo originale: `docs/userchats/to-do-2026-11-02.md`)
 
 ### T152 · Le ambientazioni della Genesi: medievale, steampunk, moderna, futuristica — `da fare`
-- Pipeline: claude · stima 5% · approvato · browser · priorità 80
+- Pipeline: claude · stima 5% · browser · priorità 80
 - Contesto: richiesta 1 dell'autore: un universo medievale (quello che c'è, `aurora`), uno steampunk, uno moderno (grande città, anni 90), uno futuristico (tipo neonpunk). Oggi il tema è testo libero nella schermata della Genesi (`src/ui/genesis.ts`, `planGenesis` in `agents/genesis.ts`) e il seme `universe/prompts/theme.md` è il Regno di Valmora. Il seme può presupporre il medioevo anche altrove: i 20 ambienti, i prompt degli agenti, la guida di stile, il canone delle rune e i modelli generici. Il lessico è già uguale in ogni ambientazione (ADR-0075).
 - Cosa fare: prima un censimento di ciò che nel seme presuppone il medioevo, con file e riga. Poi quattro temi tra cui scegliere nella schermata della Genesi, modificabili come oggi; il medievale resta quello attuale. Ciò che il censimento trova diventa neutro o dipende dal tema, nel modo più piccolo: niente seme separato per ambientazione. Rune, tappeto, corona e quarta parete valgono ovunque; il tema spiega le rune senza magia medievale obbligatoria e senza metagioco. Il censimento dice anche ciò che si è lasciato com'è e perché. Decisione architetturale: ADR e `AGENTS.md`.
 - Test: una Genesi offline (`MockModels`) per ogni tema: i file giusti, `prompts/theme.md` scritto, un universo che parte. Un universo esistente non cambia. Typecheck e suite intera con i loro turni.
@@ -2891,7 +2891,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   (~200 MB, un mondo o una sandbox a parte), senza un rosso. Typecheck verde.
 
 ### T158 · L'Attore nello studio — `da fare` (dipende da T157)
-- Pipeline: claude · stima 3% · approvato · browser · priorità 86
+- Pipeline: claude · stima 3% · browser · priorità 86
 - Contesto: ogni agente è una squadra nella corona (`archive.ts`), con un gerboa e un cappello (`corona-gerboa-<agente>.xml`, T50), un posto nella Sala del Concilio e una console nella Direzione; l'Attore di T157 non c'è ancora.
 - Cosa fare: il suo gerboa con un cappello riconoscibile, il posto al tavolo (i membri seduti diventano nove), la console, lo studio dove sta, i colori e i nomi nei pannelli. Con l'opzione spenta scegli se non compare o resta a riposo come gli altri che non lavorano, e scrivilo.
 - Test: quelli di corona e archivio; typecheck e suite intera con i loro turni.
@@ -2978,7 +2978,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Esito: `task/T174`. **Causa misurata: il test, non la macchina né il server.** In V-006 il socket di bruno si apriva insieme a quello di alice e taceva finché alice non era dentro. Da T172 (ADR-0114) un socket ha 15 s (`ENTRY_MS`) per dire `entra`: se il mondo che alice avvia ne impiega di più, il server chiude bruno con `rifiuto` «nessun ingresso» (voluto, V-026). Il `ws.send` del test su un socket chiuso non dice nulla, e i 30 s passavano aspettando una risposta a un messaggio mai partito: nessuno li occupa. **Misure** (`-t "V-006 una partita"`): file da solo, alice dentro a 11,4 s, bruno 263 ms dopo il suo `entra`: margine di 3,6 s sui 15. Con 24 thread che girano a vuoto su 12 processori logici: rifiuto a 15,07 s, alice a 52,7 s, stesso rosso «ingresso di bruno». Il carico fa solo superare i 15 s all'avvio del mondo, e il primo giro della suite è il più lento. Dopo la correzione, stesso carico: alice 54,4 s, bruno 245 ms, verde. Non ho separato cosa compone gli 11,4 s dell'avvio. **Cambiato solo `tests/sicurezza/produzione.test.ts`:** il socket del secondo giocatore si apre dopo l'ingresso del primo, in V-006 e in V-021 (dove carla avvia il mondo se il file gira filtrato); il limite resta 30 s. Per vedere la causa la prossima volta: `say` su un socket chiuso getta l'errore con il rifiuto ricevuto, e `entered` dice subito un rifiuto invece di aspettare la scadenza. **Server e gioco non cambiano:** il client vero manda `entra` appena il socket si apre (`socket.ts`, `client.ts`), dopo il login, quindi non cade qui. **Resta aperto, non toccato:** (1) i rossi di T163 non hanno questa causa: non passano da questa attesa, e `determinism.test.ts` è stato verde sotto carico nell'unico giro in cui l'ho provato. `mondo.test.ts` sotto i 24 thread dà rossi: V-007 «muore due volte» e «un mondo bloccato» al primo giro; il primo dei due aspetta 1,5 s fissi prima che un commit sia «vissuto», dedotto che sia troppo poco, non misurato. Il secondo giro di `mondo.test.ts` (7 rossi) non vale come misura: i mondi uscivano con `0xC000026B`, lo stesso codice dei `fork` di bash, perché Windows non creava più processi con il mio carico addosso. (2) In un giro sotto carico `produzione.test.ts` ha passato tutti i 27 test ma ha dato un errore a livello di `il server vero`, forse un hook di chiusura; l'output era filtrato e non ho l'errore; nel giro dopo, sotto lo stesso carico, non si è ripetuto. **Test:** suite intera verde due giri di fila, 1317 su 1317 (200 s e 173 s), typecheck verde; quei due giri non avevano la cache fredda né il carico: la prova della correzione è il giro sotto carico. Sicurezza: nessuna superficie nuova.
 
 ### T175 · Un tetto alla cache delle forme nel browser — `da fare`
-- Pipeline: claude · stima 4% · approvato · browser · priorità 55
+- Pipeline: claude · stima 4% · browser · priorità 55
 - Contesto: nasce da T164 (`dossier T164`): il solo mondo iniziale pesa 1,86 GB di array e 528 MB su disco, più universi si sommano e nulla toglie voci. La memoria della scheda è dedotta da quei byte, non misurata. In Node la cache ha già un tetto (ADR-0108: LRU, 4096 voci, 256 MB).
 - Cosa fare: misura prima la memoria vera della scheda nel mondo iniziale. Poi un tetto sia in memoria (`WorkerRunner`, `src/render/forms.ts`) sia in IndexedDB, usando l'LRU e togliendo le voci meno usate, con i numeri scelti da quella misura e scritti nell'ADR-0108. Una forma tolta si rifà nei worker: mai un modello che manca. Controlla anche se il `memory` deve tenere gli array quando le mesh sono già fatte.
 - Test: oltre il tetto escono le voci meno usate, una forma tolta torna, la stessa richiesta dà la stessa forma.
@@ -3023,7 +3023,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: commit su `task/T179`; nell'esito la forma scelta e i token su uno dei modelli di `lab/banco/conferma/`. Se tocca `src/mj/`: ADR.
 
 ### T180 · Il banco misura varianza e scala — `da fare`
-- Pipeline: claude · stima 3% · approvato · priorità 24
+- Pipeline: claude · stima 3% · priorità 24
 - Contesto: richiesta 1, secondo pezzo. Il banco di T154 prova un seme in una scatola sola: premia i modelli statici. L'autore vuole lo stesso programma per più semi e più taglie: un forte enorme e uno gargantuesco possono condividere il programma e differire nell'area di generazione; architetture diverse da seme a seme, per gli edifici grandi anche il perimetro esterno. Taglie: ADR-0092, `boxOf`, `sizeFor` in `src/kernel/forms.ts`.
 - Cosa fare: (1) le misure di varianza fra almeno 5 semi: quota di voxel diversi, pianta e perimetro diversi, piani e stanze diversi; il solo rumore di colore non conta come varianza. (2) La prova di scala: lo stesso programma in almeno 2 taglie; tutte le misure di oggi (piani, stanze, rampe, porta, `FORM_LIMITS`) devono passare a ogni seme e a ogni taglia. (3) La misura di partenza sui modelli di `lab/banco/finale` e `lab/banco/conferma`: l'osservazione dell'autore, statici, con il numero. (4) La soglia proposta, scritta nel README del banco, con i criteri delle foto (un foglio di contatto a basso costo: un solo PNG con i semi). (5) Cosa fa oggi il gioco: un programma può già servire due taglie? Come si nomina nella libreria (`struttura-<concetto>`, `ModelInfo.taglia`)? Se manca qualcosa, descrivilo nell'esito: non correggerlo qui, lo farà T156.
 - Test: offline, su XML fissi: un modello statico è riconosciuto come tale, uno che varia no, uno che si rompe a una taglia è bocciato. Typecheck e suite con i loro turni.
@@ -3047,7 +3047,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: commit su `task/T182`; nell'esito token, costo per modello, quanti giri, soglia sì o no.
 
 ### T183 · Le interfacce di simulazione complesse: una prova dell'espressività del kernel — `da fare`
-- Pipeline: claude · stima 9% · approvato · priorità 79
+- Pipeline: claude · stima 9% · priorità 79
 - Precisazione dell'autore (03/11, in `docs/userchats/to-do-2026-11-03.md`), vale più del resto del blocco: **i sei scenari non sono il limite, usa l'immaginazione.** Un universo parte con una versione del kernel e deve reggere anche ciò che servirà dopo mesi di vita: chi ha speso sul suo universo non vorrà rinunciarci per un kernel nuovo, e un wipe degli universi ufficiali costa molto. Quindi **le versioni «finali» del kernel vanno ridotte al minimo**, e ognuna deve prevedere le esigenze future. Allarga di conseguenza: (1) un catalogo di almeno 30 scenari inventati da te, scelti per coprire generi di primitive diversi, non per quantità, compresi quelli che nascono solo col tempo in un universo vivo (a titolo di esempio: economia e mercati, leggi e fazioni, costruzioni fatte dai giocatori, stagioni, veicoli con più persone, tornei, mondi che crescono per mesi) e ciò che il Concilio potrebbe chiedere di più ambizioso; per ognuno il genere di primitive che chiede. In codice bastano quelli che provano un genere non ancora provato. (2) **Il costo di una primitiva aggiunta dopo, misurato:** cosa succede davvero a un universo esistente quando il kernel cambia (API Lua in più, un campo nuovo, un effetto nuovo, un nodo MJ nuovo, un formato di file che cambia; `universes.ts`, gli aggiornamenti dal seme): cosa entra senza rompere nulla e cosa chiede davvero un wipe. La premessa «non si può introdurre a posteriori» va verificata caso per caso: se il grosso è aggiuntivo, dillo, con la prova su un universo fatto col kernel di prima. (3) In `docs/design/espressivita.md`, oltre alla tabella, le primitive divise in: da avere prima della prima versione pubblica, aggiungibili dopo senza danno, e le regole perché un kernel cambi senza wipe.
 - Contesto: richiesta 3 dell'autore, non prioritaria: il simulatore deve reggere gli scenari più ambiziosi del Concilio, coerente con la storia e la grafica, nel 3D e nelle UI dentro il tappeto; il kernel deve esporre molte primitive per comporre i moduli. **Non serve aggiungere contenuti al gioco:** è una misura. Scenari: navigazione in barca, volo in mongolfiera, sparo di un fucile, interazione con un computer (anni 90: «forse troppo?»), una bisca con scommesse clandestine, una partita 1v1 di uno sport semplice inventato. Primitive di oggi: API Lua, pannelli (`manifest.ui`, ADR-0028), effetti, stati (ADR-0026), `<action>` e `<animation>`, i casi della Sala sistemi (ADR-0052).
 - Cosa fare: per ogni scenario scrivi moduli veri in `tests/espressivita/`, **senza toccare `src/kernel/`**, che girino nel kernel in miniatura (`runCase`) con `MockModels` e che il validatore accetti. Dove non si riesce, fermati al punto preciso: cosa manca, quale primitiva lo risolverebbe, di che genere è (movimento, camera, proiettili, pannelli, turni, tempo, stato condiviso, multigiocatore), e se l'Ingegnere saprebbe scriverlo col suo prompt. Scrivi `docs/design/espressivita.md`: una tabella scenario per primitiva, le primitive proposte in ordine di quanti scenari sbloccano. Nessuna primitiva nuova qui: sono proposte, da approvare. Se uno scenario è davvero interessante da avere nel gioco, proponilo.
@@ -3071,9 +3071,166 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: i tre universi su disco; nell'esito il costo di ciascuno e ciò che si è visto.
 
 ### T186 · Sul sito: spazio, pirati e cowboy «coming soon» — `da fare`
-- Pipeline: claude · stima 1% · approvato · browser · priorità 85
+- Pipeline: claude · stima 1% · browser · priorità 85
 - Contesto: l'autore (03/11) ha messo in attesa questi tre universi (T184, T185) e propone di scrivere «coming soon» sul sito. Pagine in `site/`, stile del template `docs/design/sito/` (`site/site.css`), landing `site/landing.ts`, reami in `site/sessioni.html`.
 - Cosa fare: guarda dove il sito parla degli universi e metti lì spazio, pirati e cowboy come «coming soon», senza link né pulsanti che portano a un universo che non c'è e senza date. Nel punto più piccolo che si vede: se non c'è un posto naturale, una sezione breve nella landing. Niente generazione né modelli nuovi. Il testo di tema, nessun meta-gioco sui contenuti del mondo.
 - Test: typecheck e, se tocca il codice di una pagina, i test del sito con il loro turno.
 - Browser: col turno `browser`: la pagina con la voce, a larghezza piena e stretta; screenshot; nessun errore né violazione della CSP in console.
 - Quando è fatto: commit su `task/T186`; nell'esito dove sta e la frase scritta. Sicurezza: nessuna superficie nuova.
+
+## Le rinomine del glossario (chat del 03/11/2026: «i nomi vanno bene e fai tutte le rinomine»)
+
+Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira nel frattempo (l'orchestratore ha tolto l'approvazione ai pronti e la ridà alla fine), perché una rinomina si scontra con tutti e un task partito prima userebbe i nomi vecchi senza un conflitto che lo dica.
+
+### T187 · Il glossario con le scelte dell'autore — `da fare` (dipende da T179)
+- Pipeline: claude · stima 1% · approvato · priorità 2
+- Contesto: l'autore ha letto il glossario di T178 (`dossier T178`) e ha deciso. Scelte 1, 2, 3, 5, 7, 8 come raccomandate: «universo» anche nel sito, `chunk`, «sessione del Concilio» resta, «entità» ed `entity`, `Storey`, `phrase`. **Scelta 4:** «individuo», `Individual` per uomini e animali; «persona» resta solo il valore di `specie` (`persona | animale`) e nei campi fermi (`people.json`, `persona` nel manifest, `npc.*`). **Scelta 6, nessuna eccezione alla convenzione:** `Taglia` → `SizeTier`, `TAGLIE` → `SIZE_TIERS`, `Partita` → `GameSetup`, `referenteReply` → `liaisonReply`, `askReferente` → `askLiaison`; in italiano restano «taglia», «partita», «Referente» e il valore `referente` di `AgentId`, come gli altri agenti.
+- Cosa fare: correggi `docs/glossario.md`: le voci delle scelte 4 e 6; la sezione «Le scelte dubbie» diventa «Le scelte fatte» (una riga per scelta, senza alternative); nella tabella delle rinomine aggiungi **R16** (`Person` e i nomi derivati → `Individual…`: censisci tu quali; `Identity` resta, unirli è un'altra cosa) e **R17** (la scelta 6); dai a **R7** i nomi inglesi d'arrivo, che oggi non dice, senza collisioni in `src server tests site`, e aggiungi `Carta` se è un tipo da rinominare. Per ogni R, nomi di partenza e d'arrivo esatti, così il task che la esegue non deve scegliere. Riconta i file. Nessuna rinomina nel codice in questo task. Gli ADR non si riscrivono: se ADR-0117 dice le eccezioni ora tolte, la correzione sta nel glossario e, se serve, in `AGENTS.md`.
+- **Regole comuni a T188-T204:** (1) esegui solo la tua R, con i nomi d'arrivo del glossario, in `src server tests site tools lab`, e in `AGENTS.md`, `CLAUDE.md` e `docs/glossario.md` dove citano quei nomi; ADR, backlog e diari sono storia, non si toccano. (2) **Ciò che è su disco, sul filo o visibile a Lua non cambia** (campi JSON, messaggi del protocollo, API Lua, effetti, componenti, chiavi di `localStorage`): attento alle abbreviazioni che fanno da chiave di ciò che si serializza (`{ hand }`), al `Host`, ai nomi in stringhe (`bus`, `window.quine`, `lab/`, script, prompt). Se un nome si rivela fermo, lascialo e scrivilo nell'esito. (3) Niente modifiche di logica, formattazione o pulizia di passaggio: il diff deve leggersi come una rinomina; un'incongruenza trovata va nell'esito. (4) Un nome già occupato o una R che tocca molto più del previsto: non inventare, scrivilo in `docs/pipeline/domande/<Txx>.md`. (5) Il glossario si aggiorna nello stesso commit: la riga R segnata fatta, i nomi nuovi nelle voci, quelli vecchi tra i «da non usare».
+- Test: `tests/glossario.test.ts` e typecheck con il turno. Suite intera non serve se tocchi solo documenti.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T187`; nell'esito i nomi scelti per R7 e R16. Sicurezza: nessuna superficie nuova.
+
+### T188 · R1: `Building` → `Lot` — `da fare` (dipende da T187)
+- Pipeline: claude · stima 1% · approvato · priorità 3
+- Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
+- Cosa fare: R1 del glossario: il `Building` di `layout.ts`, `Chunk.buildings`, `findBuildings`, `buildingAt`.
+- Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
+- Browser: non serve (la prova finale è in T205).
+- Quando è fatto: commit su `task/T188`, solo la rinomina; nell'esito quanti file e ciò che è rimasto fermo, con il motivo. Sicurezza: nessuna superficie nuova.
+
+### T189 · R2: `Models` → `AiModels`, `kernel.ai` — `da fare` (dipende da T188)
+- Pipeline: claude · stima 2% · approvato · priorità 4
+- Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
+- Cosa fare: R2: `Models` e le sue classi, `kernel.models` → `kernel.ai`. Tocca ~100 file, soprattutto test: una sostituzione meccanica verificata dal typecheck. Cambia `window.quine.models`: aggiorna ciò che lo cita (`AGENTS.md`, `lab/`).
+- Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
+- Browser: non serve (la prova finale è in T205).
+- Quando è fatto: commit su `task/T189`, solo la rinomina; nell'esito quanti file e ciò che è rimasto fermo, con il motivo. Sicurezza: nessuna superficie nuova.
+
+### T190 · R3: `player…` → `wanderer…` — `da fare` (dipende da T189)
+- Pipeline: claude · stima 2% · approvato · priorità 5
+- Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
+- Cosa fare: R3. **Fermi** `world.player`, `world.player_pos`, `player_id`, `player_get`, `player_set` e il binding: Lua li vede. `playerPos` è nella procedura di «Convalida nel browser» di `AGENTS.md`: aggiornala.
+- Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
+- Browser: non serve (la prova finale è in T205).
+- Quando è fatto: commit su `task/T190`, solo la rinomina; nell'esito quanti file e ciò che è rimasto fermo, con il motivo. Sicurezza: nessuna superficie nuova.
+
+### T191 · R4: `Place` → `ChunkInfo`, `PlaceView` → `ChunkView` — `da fare` (dipende da T190)
+- Pipeline: claude · stima 2% · approvato · priorità 6
+- Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
+- Cosa fare: R4; il `ChunkView` del renderer diventa prima `TerrainView`. I `place` locali a mano, dove sono il luogo. **Fermi** `plan.place` in `maps/`, `placesPerMinute`, `luoghi` del protocollo.
+- Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
+- Browser: non serve (la prova finale è in T205).
+- Quando è fatto: commit su `task/T191`, solo la rinomina; nell'esito quanti file e ciò che è rimasto fermo, con il motivo. Sicurezza: nessuna superficie nuova.
+
+### T192 · R5: `hand` → `phrase` nel TypeScript — `da fare` (dipende da T191)
+- Pipeline: claude · stima 1% · approvato · priorità 7
+- Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
+- Cosa fare: R5, senza il componente: **fermo** il componente `hand`, salvato nello stato dei viandanti e visto da Lua.
+- Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
+- Browser: non serve (la prova finale è in T205).
+- Quando è fatto: commit su `task/T192`, solo la rinomina; nell'esito quanti file e ciò che è rimasto fermo, con il motivo. Sicurezza: nessuna superficie nuova.
+
+### T193 · R6: `Thing…` → `Entity…` — `da fare` (dipende da T192)
+- Pipeline: claude · stima 2% · approvato · priorità 8
+- Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
+- Cosa fare: R6, con `src/render/things.ts` → `entities.ts` (`git mv`). **Fermi** `cose` ed `entita` del protocollo; nei prompt del Cartografo «cose» resta.
+- Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
+- Browser: non serve (la prova finale è in T205).
+- Quando è fatto: commit su `task/T193`, solo la rinomina; nell'esito quanti file e ciò che è rimasto fermo, con il motivo. Sicurezza: nessuna superficie nuova.
+
+### T194 · R7: l'italiano nel TypeScript — `da fare` (dipende da T193)
+- Pipeline: claude · stima 1% · approvato · priorità 9
+- Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
+- Cosa fare: R7, con i nomi che T187 ha scritto nel glossario. **Fermi** i campi omonimi nei file (`attore`, `minimi`, `eredita`, `sotto`, `titolare`, `tetto`).
+- Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
+- Browser: non serve (la prova finale è in T205).
+- Quando è fatto: commit su `task/T194`, solo la rinomina; nell'esito quanti file e ciò che è rimasto fermo, con il motivo. Sicurezza: nessuna superficie nuova.
+
+### T195 · R8: `CardUses`, `UsageLog` — `da fare` (dipende da T194)
+- Pipeline: claude · stima 1% · approvato · priorità 10
+- Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
+- Cosa fare: R8: `CardLedger` → `CardUses`, `UsageLedger` → `UsageLog`; `Ledger` resta dei saldi.
+- Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
+- Browser: non serve (la prova finale è in T205).
+- Quando è fatto: commit su `task/T195`, solo la rinomina; nell'esito quanti file e ciò che è rimasto fermo, con il motivo. Sicurezza: nessuna superficie nuova.
+
+### T196 · R9: `Floor` → `Storey` — `da fare` (dipende da T195)
+- Pipeline: claude · stima 2% · approvato · priorità 11
+- Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
+- Cosa fare: R9, solo il piano di un edificio: il pavimento resta `floor` (`floorAt`, `floorBelow`), controlla ogni uso. `k.corona.building(id).floors` è nella «Convalida nel browser» di `AGENTS.md`: aggiornala.
+- Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
+- Browser: non serve (la prova finale è in T205).
+- Quando è fatto: commit su `task/T196`, solo la rinomina; nell'esito quanti file e ciò che è rimasto fermo, con il motivo. Sicurezza: nessuna superficie nuova.
+
+### T197 · R10: le caselle → `…Tiles` — `da fare` (dipende da T196)
+- Pipeline: claude · stima 1% · approvato · priorità 12
+- Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
+- Cosa fare: R10: gli identificatori elencati (`playerCell` si chiama ormai `wandererCell`, per R3); le variabili locali `cell` a mano solo dove sono una casella e non una cella di voxel o di griglia.
+- Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
+- Browser: non serve (la prova finale è in T205).
+- Quando è fatto: commit su `task/T197`, solo la rinomina; nell'esito quanti file e ciò che è rimasto fermo, con il motivo. Sicurezza: nessuna superficie nuova.
+
+### T198 · R11: `LayoutDef` → `EnvironmentDef` — `da fare` (dipende da T197)
+- Pipeline: claude · stima 1% · approvato · priorità 13
+- Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
+- Cosa fare: R11. **Fermi** `layouts` nei manifest, `layout` nei piani.
+- Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
+- Browser: non serve (la prova finale è in T205).
+- Quando è fatto: commit su `task/T198`, solo la rinomina; nell'esito quanti file e ciò che è rimasto fermo, con il motivo. Sicurezza: nessuna superficie nuova.
+
+### T199 · R12: `TileDef` → `TerrainDef` — `da fare` (dipende da T198)
+- Pipeline: claude · stima 1% · approvato · priorità 14
+- Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
+- Cosa fare: R12. **Fermo** `tiles`.
+- Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
+- Browser: non serve (la prova finale è in T205).
+- Quando è fatto: commit su `task/T199`, solo la rinomina; nell'esito quanti file e ciò che è rimasto fermo, con il motivo. Sicurezza: nessuna superficie nuova.
+
+### T200 · R13: i commenti, «multiplayer» e `slot` — `da fare` (dipende da T199)
+- Pipeline: claude · stima 1% · approvato · priorità 15
+- Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
+- Cosa fare: R13: «game of many» → «multiplayer», `pocket` → `slot`, nei commenti e nelle poche variabili.
+- Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
+- Browser: non serve (la prova finale è in T205).
+- Quando è fatto: commit su `task/T200`, solo la rinomina; nell'esito quanti file e ciò che è rimasto fermo, con il motivo. Sicurezza: nessuna superficie nuova.
+
+### T201 · R15: nel sito «universo», non «reame» — `da fare` (dipende da T200)
+- Pipeline: claude · stima 1% · approvato · priorità 16
+- Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
+- Cosa fare: R15: testi di `site/` e, nel suo codice e CSS, `realm` → `universe`, con i 6 test. **Fermi** ciò che un URL o una rotta espone e il «reame» del kernel, che è l'area di 4 × 4 zone (`realmOf`).
+- Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
+- Browser: non serve (la prova finale è in T205).
+- Quando è fatto: commit su `task/T201`, solo la rinomina; nell'esito quanti file e ciò che è rimasto fermo, con il motivo. Sicurezza: nessuna superficie nuova.
+
+### T202 · R16: `Person` → `Individual` — `da fare` (dipende da T201)
+- Pipeline: claude · stima 2% · approvato · priorità 17
+- Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
+- Cosa fare: R16, con i nomi di T187. **Fermi** `people.json`, `persona` nel manifest, il valore `persona` di `specie`, `npc.*`, i nodi `persona:…` del grafo, salvati in `world/grafo.json`. `Identity` resta.
+- Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
+- Browser: non serve (la prova finale è in T205).
+- Quando è fatto: commit su `task/T202`, solo la rinomina; nell'esito quanti file e ciò che è rimasto fermo, con il motivo. Sicurezza: nessuna superficie nuova.
+
+### T203 · R17: `SizeTier`, `GameSetup`, `liaison` — `da fare` (dipende da T202)
+- Pipeline: claude · stima 2% · approvato · priorità 18
+- Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
+- Cosa fare: R17: `Taglia` → `SizeTier`, `TAGLIE` → `SIZE_TIERS`, `Partita` → `GameSetup`, `referenteReply` → `liaisonReply`, `askReferente` → `askLiaison`. **Fermi** `universe.json → partita`, `appearance.taglia`, `strutture[].taglia`, il valore `referente` di `AgentId`. Il file `partita.ts` resta dov'è, salvo che il glossario dica altro.
+- Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
+- Browser: non serve (la prova finale è in T205).
+- Quando è fatto: commit su `task/T203`, solo la rinomina; nell'esito quanti file e ciò che è rimasto fermo, con il motivo. Sicurezza: nessuna superficie nuova.
+
+### T204 · R14: `AGENTS.md` con i nomi del glossario — `da fare` (dipende da T203)
+- Pipeline: claude · stima 1% · approvato · priorità 19
+- Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
+- Cosa fare: R14: in `AGENTS.md`, `chunk` → «luogo» e `layout` → «ambiente» dove sono il concetto e non un identificatore; ricontrolla che ogni identificatore citato esista ancora. Gli ADR non si toccano. Solo documenti: la suite intera non serve se il codice non cambia.
+- Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
+- Browser: non serve (la prova finale è in T205).
+- Quando è fatto: commit su `task/T204`, solo la rinomina; nell'esito quanti file e ciò che è rimasto fermo, con il motivo. Sicurezza: nessuna superficie nuova.
+
+### T205 · La prova delle rinomine nel gioco — `da fare` (dipende da T204)
+- Pipeline: claude · stima 2% · approvato · browser · priorità 20
+- Contesto: T188-T204 hanno rinominato con i soli test e il typecheck. Ciò che sfugge a entrambi sono i nomi in stringhe e ciò che si serializza.
+- Cosa fare: un universo salvato **prima** delle rinomine deve aprirsi uguale: prova il seme e, se c'è, un universo già esistente in `universes/`, su una copia di lavoro, senza modificarlo. Correggi solo ciò che le rinomine hanno rotto; altro va nell'esito.
+- Test: suite intera con il turno, `npm run build`, `npm run build:server`.
+- Browser: col turno `browser`, la procedura di «Convalida nel browser» di `AGENTS.md` (è anche la prova che sia ancora giusta con i nomi nuovi): `?skip&offline`, un luogo, «E» su un individuo, la corona con un dispositivo; due schede in multigiocatore (master e giocatore, un oggetto dato all'altro); le pagine del sito con «universo»; nessun errore in console.
+- Quando è fatto: commit su `task/T205`; nell'esito cosa è stato provato davvero e cosa no. Sicurezza: nessuna superficie nuova.
