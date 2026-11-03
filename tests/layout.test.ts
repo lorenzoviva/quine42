@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { run, compile, writtenCodes, type MjNode } from '../src/kernel/mj';
 import { gates, layout } from '../src/kernel/layout';
-import type { TileDef } from '../src/kernel/types';
+import type { TerrainDef } from '../src/kernel/types';
 
-const palette: Record<string, TileDef> = {
+const palette: Record<string, TerrainDef> = {
   g: { name: 'prato', color: '#4f9a45', solid: false, layer: 'ground' },
   p: { name: 'sentiero', color: '#c8a868', solid: false, layer: 'ground' },
   t: { name: 'bosco', color: '#1f5a2a', solid: true, layer: 'vegetation' },

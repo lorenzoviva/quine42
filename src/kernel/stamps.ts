@@ -4,7 +4,7 @@
 // ({type: "stamp", shape: "castello"}) and the kernel draws it with the world's own tile codes.
 
 import type { Rng } from './rng';
-import type { TileDef } from './types';
+import type { TerrainDef } from './types';
 
 export const STAMP_SHAPES = ['casa', 'castello', 'fortezza', 'torre', 'tempio', 'piramide', 'capanne', 'recinto', 'caserma', 'dungeon', 'tana', 'pozzo'] as const;
 export type StampShape = (typeof STAMP_SHAPES)[number];
@@ -25,9 +25,9 @@ export interface StampCodes {
 export const STAMP_ROLES: Array<keyof StampCodes> = ['muro', 'pavimento', 'porta', 'acqua', 'ponte', 'terreno', 'strada', 'roccia', 'recinto'];
 
 /** The codes of this world that play each role (by layer and by name). */
-export function defaultCodes(palette: Record<string, TileDef>, pathCode = 'p'): StampCodes {
+export function defaultCodes(palette: Record<string, TerrainDef>, pathCode = 'p'): StampCodes {
   const codes = Object.entries(palette).filter(([c]) => c !== '?');
-  const by = (pred: (t: TileDef) => boolean, fallback: string) => codes.find(([, t]) => pred(t))?.[0] ?? fallback;
+  const by = (pred: (t: TerrainDef) => boolean, fallback: string) => codes.find(([, t]) => pred(t))?.[0] ?? fallback;
   const named = (re: RegExp, fallback: string) => codes.find(([, t]) => re.test(t.name))?.[0] ?? fallback;
   const muro = by((t) => t.layer === 'wall', 'h');
   return {

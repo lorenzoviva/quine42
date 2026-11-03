@@ -16,7 +16,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Piano del luogo | `piano` | 7 (4) | 2 (2) | 144 (38) | 0 (0) |
 | Casella | `cell` | 505 (39) | 0 (0) | 7 (4) | 25 (2) |
 | Casella | `cella` | 9 (4) | 6 (2) | 8 (6) | 0 (0) |
-| Terreno | `tile` | 732 (43) | 3 (2) | 31 (17) | 14 (2) |
+| Terreno | `tile` | 691 (43) | 3 (2) | 28 (17) | 14 (2) |
 | Ambiente | `layout` | 250 (28) | 1 (1) | 33 (13) | 2 (2) |
 | Ambiente | `bioma` | 0 (0) | 0 (0) | 1 (1) | 0 (0) |
 | Lotto | `building` | 261 (14) | 0 (0) | 5 (4) | 0 (0) |

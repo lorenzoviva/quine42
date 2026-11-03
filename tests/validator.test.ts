@@ -9,9 +9,9 @@ import { Rng } from '../src/kernel/rng';
 import { assemblePack, toItemDef } from '../src/kernel/agents/content';
 import { fakeHost } from './helpers';
 import type { ChunkPlan } from '../src/kernel/agents/cartography';
-import type { ItemSpec, EnvironmentDef, TileDef } from '../src/kernel/types';
+import type { ItemSpec, EnvironmentDef, TerrainDef } from '../src/kernel/types';
 
-const palette: Record<string, TileDef> = {
+const palette: Record<string, TerrainDef> = {
   g: { name: 'prato', color: '#4f9a45', solid: false, layer: 'ground' },
   p: { name: 'sentiero', color: '#c8a868', solid: false, layer: 'ground' },
   t: { name: 'bosco', color: '#1f5a2a', solid: true, layer: 'vegetation' },

@@ -65,9 +65,9 @@ export interface ItemSpec {
   controls?: Record<string, string>;
 }
 
-export type TileLayer = 'ground' | 'floor' | 'wall' | 'door' | 'liquid' | 'vegetation' | 'rock';
+export type TerrainLayer = 'ground' | 'floor' | 'wall' | 'door' | 'liquid' | 'vegetation' | 'rock';
 
-export interface TileDef {
+export interface TerrainDef {
   name: string;
   /** Colour of the ground. */
   color: string;
@@ -76,7 +76,7 @@ export interface TileDef {
   speed?: number;
   description?: string;
   /** How it is drawn and how paths are carved through it. Default ground (walkable) / rock (solid). */
-  layer?: TileLayer;
+  layer?: TerrainLayer;
   /** Indoor floor: lots are indoor floor enclosed by walls; their roof hides them from outside. */
   indoor?: boolean;
   /** What stands on tiles of this terrain (trees on woods, boulders on rock): a program of `models/`. */
@@ -275,7 +275,7 @@ export interface Manifest {
   /** Who generated it: genesi | agente | cartografo | combinazione | disco. */
   origin?: string;
   prompts?: Record<string, string>;
-  tiles?: Record<string, TileDef>;
+  tiles?: Record<string, TerrainDef>;
   /** Roof of buildings (generator modules). */
   roof?: { color: string };
   fragments?: RuneFragment[];

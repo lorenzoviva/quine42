@@ -9,7 +9,7 @@ import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import { articulationPoints, gates, layout } from '../src/kernel/layout';
 import type { ChunkPlan } from '../src/kernel/agents/cartography';
-import type { TileDef } from '../src/kernel/types';
+import type { TerrainDef } from '../src/kernel/types';
 
 describe('articulationPoints (algoritmo di Tarjan per caselle libere)', () => {
   const S = 18;
@@ -83,7 +83,7 @@ describe('articulationPoints (algoritmo di Tarjan per caselle libere)', () => {
 describe('T56a: niente cose solide sui passaggi obbligati', () => {
   const S = 18;
 
-  const palette: Record<string, TileDef> = {
+  const palette: Record<string, TerrainDef> = {
     p: { name: 'sentiero', color: '#c8a868', solid: false, layer: 'ground' },
     w: { name: 'acqua', color: '#3a78c8', solid: true, layer: 'liquid' },
   };

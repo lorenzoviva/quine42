@@ -3,7 +3,7 @@
 // validated against: the player is allowed to break the game.
 
 import type { Sandbox } from './sandbox';
-import type { Effect, FileMap, ItemDef, EnvironmentDef, Manifest, ModuleKind, Partita, TileDef } from './types';
+import type { Effect, FileMap, ItemDef, EnvironmentDef, Manifest, ModuleKind, Partita, TerrainDef } from './types';
 import { DEATH_LEVELS, DEFAULT_PARTITA } from './partita';
 import { SOLO, validWandererId } from './wanderers';
 import { ITEM_CATEGORIES } from './types';
@@ -259,7 +259,7 @@ export class Validator {
    * A layout program must compile, write only known terrain, terminate, and leave a playable chunk on
    * real drafts (enough walkable ground once the kernel has carved its paths).
    */
-  validateLayout(id: string, def: EnvironmentDef, palette: Record<string, TileDef>, drafts: string[][]): string[] {
+  validateLayout(id: string, def: EnvironmentDef, palette: Record<string, TerrainDef>, drafts: string[][]): string[] {
     const errors: string[] = [];
     if (!def || typeof def.name !== 'string' || typeof def.description !== 'string') return [`${id}: name e description obbligatori`];
     try {
@@ -330,7 +330,7 @@ export class Validator {
 }
 
 export interface EffectContext {
-  palette: Record<string, TileDef>;
+  palette: Record<string, TerrainDef>;
   /** Item id by (fuzzy) name. */
   item: (name: string) => string | undefined;
   /** Summonable entity module id by id or name. */

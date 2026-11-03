@@ -10,7 +10,7 @@
 import { hash32 } from './rng';
 import { resolveStamps, run, type MjNode } from './mj';
 import { defaultCodes } from './stamps';
-import type { TileDef } from './types';
+import type { TerrainDef } from './types';
 
 export interface Lot {
   /** Cell indices (row * size + col) of indoor floor. */
@@ -62,7 +62,7 @@ export function gates(cx: number, cy: number, size: number, seed: number): numbe
   return out;
 }
 
-function solidCost(t: TileDef | undefined): number {
+function solidCost(t: TerrainDef | undefined): number {
   if (!t) return 50;
   if (!t.solid) return 1;
   switch (t.layer) {
@@ -80,7 +80,7 @@ function solidCost(t: TileDef | undefined): number {
 }
 
 /** Indices of walkable cells connected to `from` (4-neighbourhood). */
-function flood(grid: string[], size: number, palette: Record<string, TileDef>, from: number[]): Set<number> {
+function flood(grid: string[], size: number, palette: Record<string, TerrainDef>, from: number[]): Set<number> {
   const seen = new Set<number>();
   const queue = from.filter((i) => palette[grid[Math.floor(i / size)][i % size]]?.solid === false);
   for (const q of queue) seen.add(q);
@@ -102,7 +102,7 @@ function flood(grid: string[], size: number, palette: Record<string, TileDef>, f
 }
 
 /** Cheapest path (Dijkstra) from `start` to any cell of `targets`, through solid cells if needed. */
-function carvePath(cells: string[][], size: number, palette: Record<string, TileDef>, start: number, targets: Set<number>, frozen: Set<number>): number[] | null {
+function carvePath(cells: string[][], size: number, palette: Record<string, TerrainDef>, start: number, targets: Set<number>, frozen: Set<number>): number[] | null {
   const dist = new Map<number, number>([[start, 0]]);
   const prev = new Map<number, number>();
   const open: Array<[number, number]> = [[0, start]];
@@ -135,7 +135,7 @@ function carvePath(cells: string[][], size: number, palette: Record<string, Tile
   return null;
 }
 
-export function findLots(grid: string[], size: number, palette: Record<string, TileDef>): Lot[] {
+export function findLots(grid: string[], size: number, palette: Record<string, TerrainDef>): Lot[] {
   const seen = new Set<number>();
   const out: Lot[] = [];
   for (let i = 0; i < size * size; i++) {
@@ -180,7 +180,7 @@ export function findLots(grid: string[], size: number, palette: Record<string, T
   return out;
 }
 
-export function layout(draft: string[], palette: Record<string, TileDef>, opts: LayoutOptions): LayoutResult {
+export function layout(draft: string[], palette: Record<string, TerrainDef>, opts: LayoutOptions): LayoutResult {
   const size = draft.length;
   const cells = draft.map((r) => [...r]);
   const border = new Set<number>();
