@@ -141,8 +141,8 @@ export class GenesisScreen {
       ...rows,
       el('label', {}, 'Modello del Concilio', text),
       el('div', { class: 'row' }, ...classes.map(([k, name]) => el('label', {}, `Scultore, ${name}`, sculpt.get(k)!))),
-      el('div', { class: 'row' }, el('label', { for: 'genesi-attore' }, actorOn, "L'Attore interpreta le persone (con le schede del Narratore)"), el('label', { for: 'genesi-attore-modello' }, "Modello dell'Attore", actorModel)),
-      el('div', { class: 'note' }, "Spento, il Narratore interpreta le persone come sempre e nessuna chiamata si aggiunge. Acceso, il Narratore scrive una scheda per persona alla sua prima battuta e l'Attore la recita con il suo modello."),
+      el('div', { class: 'row' }, el('label', { for: 'genesi-attore' }, actorOn, "L'Attore interpreta gli individui (con le schede del Narratore)"), el('label', { for: 'genesi-attore-modello' }, "Modello dell'Attore", actorModel)),
+      el('div', { class: 'note' }, "Spento, il Narratore interpreta gli individui come sempre e nessuna chiamata si aggiunge. Acceso, il Narratore scrive una scheda per individuo alla sua prima battuta e l'Attore la recita con il suo modello."),
       estimate,
     );
     return { form, read, lock: (on) => [preset, text, actorOn, actorModel, ...sculpt.values(), ...sliders.values()].forEach((c) => (c.disabled = on)) };

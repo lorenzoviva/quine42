@@ -47,8 +47,9 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Master | `DM` | 0 (0) | 0 (0) | 1 (1) | 0 (0) |
 | God mode | `dio` | 1 (1) | 1 (1) | 3 (2) | 0 (0) |
 | Individuo | `npc` | 169 (15) | 0 (0) | 72 (22) | 0 (0) |
-| Individuo | `persona` | 190 (22) | 5 (3) | 53 (21) | 8 (2) |
-| Individuo | `person` | 129 (19) | 0 (0) | 3 (3) | 1 (1) |
+| Individuo | `persona` | 188 (20) | 5 (3) | 50 (21) | 8 (2) |
+| Individuo | `person` | 13 (7) | 0 (0) | 2 (2) | 0 (0) |
+| Individuo | `Person` | 13 (7) | 0 (0) | 2 (2) | 0 (0) |
 | Scheda | `Scheda` | 40 (11) | 5 (2) | 41 (18) | 4 (3) |
 | Trama | `storia` | 43 (15) | 3 (1) | 33 (19) | 2 (2) |
 | Missione | `quest` | 67 (10) | 0 (0) | 3 (2) | 0 (0) |

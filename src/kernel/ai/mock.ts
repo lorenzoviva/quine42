@@ -70,7 +70,7 @@ export class MockAiModels implements AiModels {
   /** Probability that a first chunk plan is broken on purpose. */
   corruptRate = 0.15;
   latency = 15;
-  /** Individuals drawn so far: each a different person, the same ones in every run (T35). */
+  /** Individuals drawn so far: each a different individual, the same ones in every run (T35). */
   private drawn = 0;
 
   async text(call: TextCall): Promise<string> {
@@ -533,7 +533,7 @@ export class MockAiModels implements AiModels {
     if (/ferm|aspett|resta/.test(t)) return { dice: 'Resto qui. Il mondo verrà da me.', azione: 'resta', umore: 'calmo' };
     if (/vai|lascia|addio/.test(t)) return { dice: 'Torno ai miei giri.', azione: 'vaga', umore: 'tranquillo' };
     if (/dammi|hai qualcosa|regal|scambi/.test(t) && npc?.carrying?.length) return { dice: `Tieni, prendi questo: ${npc.carrying[0]}.`, azione: 'dai', oggetto: npc.carrying[0], umore: 'generoso' };
-    // Feelings, promises, requests: what a person will remember.
+    // Feelings, promises, requests: what an individual will remember.
     if (/sposami|ti amo|vuoi essere mia|vuoi essere mio/.test(t)) return { dice: 'Sì… sì, lo voglio.', azione: 'resta', umore: 'felice', ricordo: 'il viandante mi ha chiesto di sposarlo, e ho detto sì', importanza: 3, legame: 'moglie' };
     if (/prometto|giuro/.test(t)) return { dice: 'Lo terrò a mente. Non deludermi.', azione: 'nessuna', umore: 'speranzoso', ricordo: `il viandante ha promesso: ${text.slice(0, 80)}`, importanza: 3 };
     if (/aiut|posso fare|serve qualcosa|richiesta/.test(t) && npc?.secrets?.includes('richiesta per il viandante')) return { dice: 'Sì. Ho bisogno di te. Ti spiego tutto.', azione: 'missione', umore: 'sollevato', ricordo: 'ho affidato una richiesta al viandante', importanza: 2 };

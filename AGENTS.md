@@ -13,14 +13,14 @@ vive in un cerchio di simulazione; un **tappeto** compensa ogni suo passo e lo r
 ferma e **invisibile finché il tappeto lo tiene**, c'è la **corona**: il codice sorgente dell'universo,
 lo studio di una software house di giochi (un edificio per cartella, interni su più piani, gallerie di
 modelli e terreni) dove si vedono lavorare le squadre del Concilio. Chi ci arriva è trasceso: ne fa parte.
-Un **Concilio di agenti** su Google Gemini scrive storia, ambienti, oggetti, persone e il loro codice,
+Un **Concilio di agenti** su Google Gemini scrive storia, ambienti, oggetti, individui e il loro codice,
 e scolpisce l'aspetto di ogni cosa come programma MarkovJunior. Nel terreno brillano **rune**: token Lua
 veri, una per casella. Ciò che è scritto sul tappeto **si esegue**: componendo frasi il giocatore può rompere
 la simulazione, o uscirne e riscriverla. Le rune raccolte sono oggetti (nella borsa delle rune); alcune sono anche **magia**:
 pronunciate (T) diventano incantesimi e si consumano. Ciò che il Concilio decide diventa **regola** del mondo.
 
 **Due tavoli** (ADR-0025), come in Dungeons & Dragons: il Concilio (o il giocatore che fa il Dungeon
-Master, nella corona) crea e fa evolvere il mondo; dentro il mondo il viandante e le persone vivono un
+Master, nella corona) crea e fa evolvere il mondo; dentro il mondo il viandante e gli individui vivono un
 mondo reale. Nei contenuti mai meta-gioco: niente codice, simulazione, Concilio, «crepe», bordi misurati.
 
 Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/`](docs/adr/README.md).
@@ -122,7 +122,7 @@ src/
     kernel.ts           orchestratore: tick, luoghi, oggetti, contenitori, azioni (anche libere), effetti, magia, chat, Fucina, Genesi, rollback
     corona.ts           la corona come studio: edifici, interni su più piani, scaffali, gallerie
     archive.ts          le squadre del Concilio e il Referente nello studio
-    society.ts          la società: persone, legami, routine, attività, ricordi
+    society.ts          la società: individui, legami, routine, attività, ricordi
     plots.ts            trame orizzontali e missioni
     graph.ts            il grafo del mondo: nodi e archi dai file dell'universo, interrogazioni, controlli
     atlas.ts            l'atlante: regioni geolocalizzate, direzioni
@@ -170,7 +170,7 @@ universe/
                         carte.json (gli utilizzi delle carte e le carte dei luoghi)
   prompts/              theme.md, agents/<agente>.md
   models/               index.json + <id>.xml: i programmi MarkovJunior di ogni cosa (ADR-0041), uno per tipo
-  modules/<id>/         manifest.json (+ logic.lua): sistemi, terreni, ambienti, pacchetti di oggetti, mobili, persone,
+  modules/<id>/         manifest.json (+ logic.lua): sistemi, terreni, ambienti, pacchetti di oggetti, mobili, individui,
                         effetti (core.effects), fuoco (sys.fire), rune magiche e incantesimi (magic.runes, magic.spells)
 tests/  docs/
 src/mj/                 MarkovJunior del gioco (ADR-0036, 0038): engine.ts (motore 3D), xml.ts e model.ts (XML alla lettera), palette.ts,
@@ -201,7 +201,7 @@ site/                   il sito web (ADR-0095, T97): landing, carte 3D, sessioni
 | Ingegnere | logic.lua (`on_act`, `on_use`, `on_action`…); meccaniche con pannelli (`mechanic.design`); ripara il codice che fallisce |
 | Arbitro | coerenza tra narrativa, aspetto, fisica e codice; rimanda all'agente responsabile; tiene le sessioni del Concilio |
 | Referente | nella corona accoglie il viandante trasceso e porta le sue richieste alla squadra giusta (Fucina, Cartografo, Scultore, regole, pacchetti; in multigiocatore dà al master le rune che chiede) |
-| Attore | solo se il master lo accende (`ai.attore`, ADR-0116): interpreta le persone (`npc.reply`, `npc.dialogue`) dalle **schede** che il Narratore scrive una volta per individuo; non inventa fatti del mondo |
+| Attore | solo se il master lo accende (`ai.attore`, ADR-0116): interpreta gli individui (`npc.reply`, `npc.dialogue`) dalle **schede** che il Narratore scrive una volta per individuo; non inventa fatti del mondo |
 
 Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 

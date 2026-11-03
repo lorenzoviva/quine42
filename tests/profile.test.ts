@@ -62,7 +62,7 @@ describe('the profile repaired (T44a)', () => {
     expect(long.profilo.nome).not.toMatch(/[<>]/);
     expect(long.riparato.length).toBeGreaterThan(0);
 
-    // Like a person of the world or another wanderer: a fresh name, the same for the same id.
+    // Like an individual of the world or another wanderer: a fresh name, the same for the same id.
     const twin = repairProfile({ nome: 'Matteo' }, 'mat', ['Matteo Rossi', 'Anna'], 8);
     expect(twin.profilo.nome).not.toBe('Matteo');
     expect(twin.riparato.join(' ')).toMatch(/somiglia/);

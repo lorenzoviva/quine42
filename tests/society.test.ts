@@ -6,33 +6,33 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import { readPlots, writePlots, PLOTS_FILE, type Plot } from '../src/kernel/plots';
-import { addPerson, applyRenames, checkSociety, readPeople, repairSociety, reverseRelation, similarNames, type People, type Person } from '../src/kernel/society';
+import { addIndividual, applyRenames, checkSociety, readPeople, repairSociety, reverseRelation, similarNames, type People, type Individual } from '../src/kernel/society';
 import type { AiModels, TextCall } from '../src/kernel/ai/models';
 import type { FileMap } from '../src/kernel/types';
 
 const cats = (t: string) => (t === 'npc.cat' ? 'animale' : 'persona') as 'animale' | 'persona';
 
-function person(nome: string, tipo: string, famiglia: Array<[string, string]>, mestiere = 'contadino'): Person {
+function individual(nome: string, tipo: string, famiglia: Array<[string, string]>, mestiere = 'contadino'): Individual {
   return { nome, tipo, mestiere, famiglia: famiglia.map(([n, legame]) => ({ nome: n, legame })), routine: [] };
 }
 
-/** What a person is to another, after the repair. */
+/** What an individual is to another, after the repair. */
 const rel = (p: People, a: string, b: string) => p.persone.find((x) => x.nome === a)?.famiglia.find((r) => r.nome === b)?.legame;
 
 // The cases of valmora (the analysis of 22/10/2026 and the measures of T07).
 const valmora = (): People => ({
   persone: [
-    person('Micetto', 'npc.cat', [['Ombra', 'padrone'], ['Fiocco', 'figlio'], ['Elara', 'padrone'], ['Bruna', 'apprendista']], 'Cacciatore di topi'),
-    person('Ombra', 'npc.cat', [['Micetto', 'apprendista']], 'Cacciatore di topi'),
-    person('Fiocco', 'npc.cat', [['Bastiano', 'fratello'], ['Micetto', 'madre']], 'Cacciatore di topi'),
-    person('Bastiano', 'npc.villager', [['Fiocco', 'fratello']], 'fornaio'),
-    person('Elara', 'npc.villager', [['Micetto', 'apprendista'], ['Aldo', 'padre']], 'erborista'),
-    person('Bruna', 'npc.villager', [['Micetto', 'maestro']], 'erborista'),
-    person('Aldo', 'npc.villager', [['Marta', 'moglie'], ['Nessuno Mai', 'fratello']], 'bottaio'),
-    person('Marta', 'npc.villager', [], 'ortolana'),
-    person('Elias il Cercatore', 'npc.villager', [['Pino', 'fratello']], 'cartografo'),
-    person('Elias la Rossa', 'npc.villager', [['Pino', 'fratello']], 'cartografo'),
-    person('Ottone', 'npc.cat', [], 'tessitrice'),
+    individual('Micetto', 'npc.cat', [['Ombra', 'padrone'], ['Fiocco', 'figlio'], ['Elara', 'padrone'], ['Bruna', 'apprendista']], 'Cacciatore di topi'),
+    individual('Ombra', 'npc.cat', [['Micetto', 'apprendista']], 'Cacciatore di topi'),
+    individual('Fiocco', 'npc.cat', [['Bastiano', 'fratello'], ['Micetto', 'madre']], 'Cacciatore di topi'),
+    individual('Bastiano', 'npc.villager', [['Fiocco', 'fratello']], 'fornaio'),
+    individual('Elara', 'npc.villager', [['Micetto', 'apprendista'], ['Aldo', 'padre']], 'erborista'),
+    individual('Bruna', 'npc.villager', [['Micetto', 'maestro']], 'erborista'),
+    individual('Aldo', 'npc.villager', [['Marta', 'moglie'], ['Nessuno Mai', 'fratello']], 'bottaio'),
+    individual('Marta', 'npc.villager', [], 'ortolana'),
+    individual('Elias il Cercatore', 'npc.villager', [['Pino', 'fratello']], 'cartografo'),
+    individual('Elias la Rossa', 'npc.villager', [['Pino', 'fratello']], 'cartografo'),
+    individual('Ottone', 'npc.cat', [], 'tessitrice'),
   ],
   attesi: [],
 });
@@ -81,10 +81,10 @@ describe('a coherent society', () => {
   it('one father, one mother, one spouse; spouses are not children of the same parent', () => {
     const { people, fixes } = repairSociety({
       persone: [
-        person('Aldo', 'npc.villager', [['Marta', 'marito'], ['Pino', 'figlio'], ['Cosimo', 'figlio']]),
-        person('Marta', 'npc.villager', [['Pino', 'figlia']]),
-        person('Pino', 'npc.villager', []),
-        person('Cosimo', 'npc.villager', []),
+        individual('Aldo', 'npc.villager', [['Marta', 'marito'], ['Pino', 'figlio'], ['Cosimo', 'figlio']]),
+        individual('Marta', 'npc.villager', [['Pino', 'figlia']]),
+        individual('Pino', 'npc.villager', []),
+        individual('Cosimo', 'npc.villager', []),
       ],
       attesi: [],
     });
@@ -119,7 +119,7 @@ describe('a coherent society', () => {
     expect(first.fixes.length).toBeGreaterThan(10);
     expect(checkSociety(first.people, cats)).toEqual([]);
     // Adding someone keeps it coherent: the other side is written, in the right gender.
-    const next = addPerson(first.people, { ...person('Gemma', 'npc.villager', [['Marta', 'sorella']]), genere: 'femmina' }, cats);
+    const next = addIndividual(first.people, { ...individual('Gemma', 'npc.villager', [['Marta', 'sorella']]), genere: 'femmina' }, cats);
     expect(rel(next, 'Marta', 'Gemma')).toBe('sorella');
     expect(checkSociety(next, cats)).toEqual([]);
   });

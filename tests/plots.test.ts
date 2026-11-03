@@ -4,13 +4,13 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import { canonBreak, readPlots, reviewPlot, writePlots, PLOTS_FILE, type Plot } from '../src/kernel/plots';
-import { repairSociety, type People, type Person } from '../src/kernel/society';
+import { repairSociety, type People, type Individual } from '../src/kernel/society';
 import type { TextCall } from '../src/kernel/ai/models';
 import type { FileMap } from '../src/kernel/types';
 
 const cats = (t: string) => (t === 'npc.cat' ? 'animale' : 'persona') as 'animale' | 'persona';
 
-function person(nome: string, tipo: string, genere: 'maschio' | 'femmina', famiglia: Array<[string, string]>, mestiere = 'contadino'): Person {
+function individual(nome: string, tipo: string, genere: 'maschio' | 'femmina', famiglia: Array<[string, string]>, mestiere = 'contadino'): Individual {
   return { nome, tipo, genere, mestiere, famiglia: famiglia.map(([n, legame]) => ({ nome: n, legame })), routine: [] };
 }
 
@@ -20,11 +20,11 @@ const society = (): People =>
   repairSociety(
     {
       persone: [
-        person('Fiocco', 'npc.cat', 'maschio', [['Bastiano', 'animale']], 'Cacciatore di topi'),
-        person('Bastiano', 'npc.villager', 'maschio', [], 'fornaio'),
-        person('Tazio il Mugnaio', 'npc.villager', 'maschio', [], 'mugnaio'),
-        person('Ada', 'npc.villager', 'femmina', [['Berta', 'sorella']], 'tessitrice'),
-        person('Berta', 'npc.villager', 'femmina', [], 'ortolana'),
+        individual('Fiocco', 'npc.cat', 'maschio', [['Bastiano', 'animale']], 'Cacciatore di topi'),
+        individual('Bastiano', 'npc.villager', 'maschio', [], 'fornaio'),
+        individual('Tazio il Mugnaio', 'npc.villager', 'maschio', [], 'mugnaio'),
+        individual('Ada', 'npc.villager', 'femmina', [['Berta', 'sorella']], 'tessitrice'),
+        individual('Berta', 'npc.villager', 'femmina', [], 'ortolana'),
       ],
       attesi: [],
     },

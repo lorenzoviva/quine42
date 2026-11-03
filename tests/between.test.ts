@@ -180,7 +180,7 @@ describe('«Altro…» and PvP between wanderers (T43b)', () => {
   const health = (k: Kernel, id: string) => k.ecs.get(k.wandererAt(id)!.entity, 'needs').health as number;
   const hurt = (k: Kernel, id: string, to: number) => (k.ecs.get(k.wandererAt(id)!.entity, 'needs').health = to);
 
-  it('without PvP: judged as on a person, what helps arrives on the other, what harms the kernel takes away', async () => {
+  it('without PvP: judged as on an individual, what helps arrives on the other, what harms the kernel takes away', async () => {
     const { k, server, anna, bruno, all } = await three({ pvp: false });
     const b = avatarOf(anna, 'bruno')!;
     expect(anna.k.actionsFor(b).map((o) => o.id)).toContain('altro');

@@ -40,7 +40,7 @@ async function bootWith(ai: Record<string, unknown>, game: Record<string, unknow
   return { k, models };
 }
 
-async function person(k: Kernel, origin: string, dx: number) {
+async function individual(k: Kernel, origin: string, dx: number) {
   const pc = k.wandererCarpet();
   const id = k.spawnModuleEntity(k.modules.get('npc.villager')!, pc.x + dx, pc.y, undefined, origin);
   const identity = (await k.ensureIdentity(id))!;
@@ -81,7 +81,7 @@ describe("the Actor's option", () => {
   it('off (the default), nothing changes: the Narrator plays, no sheet is written, no call is added', async () => {
     const { k, models } = await bootWith({});
     clearArea(k);
-    const a = await person(k, 'attore#off', 1);
+    const a = await individual(k, 'attore#off', 1);
     const before = models.calls.length;
     await k.talk(a.id, 'Buongiorno, chi sei?');
     expect(models.calls.length - before).toBe(1);
@@ -89,14 +89,14 @@ describe("the Actor's option", () => {
     expect(reply.agent).toBe('narratore');
     expect(reply.model).toBeUndefined();
     expect(models.of('npc.sheet')).toHaveLength(0);
-    expect(k.personOf(a.name)?.scheda).toBeUndefined();
+    expect(k.individualOf(a.name)?.scheda).toBeUndefined();
     expect(k.feed().some((e) => e.from === 'narratore' && e.task === 'npc.reply' && e.text.startsWith(a.name))).toBe(true);
   });
 
   it('on, the Narrator writes the sheet once and the Actor plays from it, with its model and the same payer', async () => {
     const { k, models } = await bootWith({ attore: true });
     clearArea(k);
-    const a = await person(k, 'attore#on', 1);
+    const a = await individual(k, 'attore#on', 1);
     const before = models.calls.length;
     await k.talk(a.id, 'Buongiorno, chi sei?');
     // Two calls: the sheet (the Narrator) and the line (the Actor).
@@ -109,9 +109,9 @@ describe("the Actor's option", () => {
     expect(reply.model).toBe(ACTOR_MODEL);
     expect(reply.chi).toBe(payerOf('npc.reply', 'io'));
     // The Actor gets the sheet, the fourth wall, the canon, the lexicon and the neighbourhood of the graph, like the Narrator.
-    const saved = k.personOf(a.name)!.scheda!;
+    const saved = k.individualOf(a.name)!.scheda!;
     expect(saved.testo).toContain(`Sei ${a.name}`);
-    expect(saved.impronta).toBe(sheetFingerprint(k.personOf(a.name)!));
+    expect(saved.impronta).toBe(sheetFingerprint(k.individualOf(a.name)!));
     expect(reply.prompt).toContain('scritta dal Narratore');
     expect(reply.prompt).toContain(saved.testo);
     expect(reply.system).toContain(COUNCIL_PRINCIPLES);
@@ -132,17 +132,17 @@ describe("the Actor's option", () => {
     // The bond changed: the sheet is written again at the next line, once.
     await k.talk(a.id, 'Come stai, amore mio?');
     expect(models.of('npc.sheet')).toHaveLength(2);
-    expect(k.personOf(a.name)!.scheda!.impronta).toBe(sheetFingerprint(k.personOf(a.name)!));
+    expect(k.individualOf(a.name)!.scheda!.impronta).toBe(sheetFingerprint(k.individualOf(a.name)!));
     await k.talk(a.id, 'Andiamo a casa?');
     expect(models.of('npc.sheet')).toHaveLength(2);
-    // The sheet is saved with the person, in the universe's history.
-    expect(readPeople(k.repo.head().files).persone.find((p) => p.nome === a.name)?.scheda?.testo).toBe(k.personOf(a.name)!.scheda!.testo);
+    // The sheet is saved with the individual, in the universe's history.
+    expect(readPeople(k.repo.head().files).persone.find((p) => p.nome === a.name)?.scheda?.testo).toBe(k.individualOf(a.name)!.scheda!.testo);
   });
 
-  it('turned on later, an old person gets their sheet at their first line', async () => {
+  it('turned on later, an old individual gets their sheet at their first line', async () => {
     const { k, models } = await bootWith({});
     clearArea(k);
-    const a = await person(k, 'attore#later', 1);
+    const a = await individual(k, 'attore#later', 1);
     await k.talk(a.id, 'Salve.');
     expect(models.of('npc.sheet')).toHaveLength(0);
     k.setAi({ attore: 'gemini-3.1-flash-lite' });
@@ -161,8 +161,8 @@ describe("the Actor's option", () => {
   it('a dialogue between two people goes to the Actor with both sheets, paid as it was (common)', async () => {
     const { k, models } = await bootWith({ attore: true });
     clearArea(k);
-    const a = await person(k, 'attore#da', 1);
-    const b = await person(k, 'attore#db', 2);
+    const a = await individual(k, 'attore#da', 1);
+    const b = await individual(k, 'attore#db', 2);
     (k as unknown as { lastTalk: number }).lastTalk = -1e9;
     for (let i = 0; i < 240 && !models.of('npc.dialogue').length; i++) {
       k.tick(DT);
@@ -177,8 +177,8 @@ describe("the Actor's option", () => {
     expect(talk.chi).toBe(payerOf('npc.dialogue', 'io'));
     expect(talk.prompt).toContain('scheda:');
     expect(models.of('npc.sheet').map((c) => c.chi)).toEqual(['comune', 'comune']);
-    expect(k.personOf(a.name)?.scheda?.testo).toBeTruthy();
-    expect(k.personOf(b.name)?.scheda?.testo).toBeTruthy();
+    expect(k.individualOf(a.name)?.scheda?.testo).toBeTruthy();
+    expect(k.individualOf(b.name)?.scheda?.testo).toBeTruthy();
     expect(k.feed().some((e) => e.from === 'attore' && e.task === 'npc.dialogue')).toBe(true);
   });
 
@@ -192,9 +192,9 @@ describe("the Actor's option", () => {
     }
     const { k, models } = await bootWith({ attore: true }, {}, new Leaky());
     clearArea(k);
-    const a = await person(k, 'attore#leak', 1);
+    const a = await individual(k, 'attore#leak', 1);
     await k.talk(a.id, 'Chi sei?');
-    expect(k.personOf(a.name)?.scheda).toBeUndefined();
+    expect(k.individualOf(a.name)?.scheda).toBeUndefined();
     const reply = models.of('npc.reply')[0];
     expect(reply.agent).toBe('attore');
     expect(reply.prompt).not.toContain('scritta dal Narratore');
@@ -204,7 +204,7 @@ describe("the Actor's option", () => {
   it('with the credits gone the local models answer, the sheet too, as for every call', async () => {
     const { k, models } = await bootWith({ attore: true });
     clearArea(k);
-    const a = await person(k, 'attore#broke', 1);
+    const a = await individual(k, 'attore#broke', 1);
     const before = models.calls.length;
     k.council.hasCredits = () => false;
     const r = await k.talk(a.id, 'Buongiorno.');

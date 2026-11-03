@@ -57,7 +57,7 @@ export function writePlots(plots: Plot[]): string {
   return JSON.stringify({ trame: plots.slice(-30) }, null, 2) + '\n';
 }
 
-/** What a person knows of the plots they are in: for their chat (hints, never confessions). */
+/** What an individual knows of the plots they are in: for their chat (hints, never confessions). */
 export function secretsOf(plots: Plot[], name: string, day: number): string {
   const out: string[] = [];
   for (const p of plots) {

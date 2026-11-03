@@ -65,9 +65,9 @@ describe('the bible pages', () => {
     expect(misteriPages[0].testo).toBe('Le rune mandano una luce tenue nella notte.');
   });
 
-  it('a page that names a person finds their node in the graph', async () => {
+  it('a page that names an individual finds their node in the graph', async () => {
     const k = await boot();
-    // Add a person to people.json and rebuild graph to test direct node discovery
+    // Add an individual to people.json and rebuild graph to test direct node discovery
     const people = JSON.parse(k.repo.working['world/people.json'] ?? '{"persone":[]}');
     people.persone.push({
       nome: 'Mastro Elio',
@@ -82,8 +82,8 @@ describe('the bible pages', () => {
     const g = k.graph();
 
     // Verify the node exists in the graph
-    const personNode = g.find('Mastro Elio', 'persona')[0];
-    expect(personNode).toBeDefined();
+    const individualNode = g.find('Mastro Elio', 'persona')[0];
+    expect(individualNode).toBeDefined();
 
     // Create a bible page mentioning Mastro Elio
     const page: BiblePage = {
@@ -95,7 +95,7 @@ describe('the bible pages', () => {
     };
 
     const nodes = touchingNodes(page, g, sampleBible);
-    expect(nodes.some((n) => n.id === personNode.id)).toBe(true);
+    expect(nodes.some((n) => n.id === individualNode.id)).toBe(true);
   });
 });
 

@@ -119,7 +119,7 @@ describe('the Council', () => {
 });
 
 describe('the life of people', () => {
-  const person = async (k: Kernel, origin: string, dx: number) => {
+  const individual = async (k: Kernel, origin: string, dx: number) => {
     const pc = k.wandererCarpet();
     const id = k.spawnModuleEntity(k.modules.get('npc.villager')!, pc.x + dx, pc.y, undefined, origin);
     const identity = (await k.ensureIdentity(id))!;
@@ -129,15 +129,15 @@ describe('the life of people', () => {
   it('they remember what you promised and what you are to them; a spouse can give you a child', async () => {
     const k = await boot();
     clearArea(k);
-    const a = await person(k, 'vita#a', 1);
+    const a = await individual(k, 'vita#a', 1);
     await k.talk(a.id, 'Ti prometto che tornerò con una lanterna');
-    expect(k.personOf(a.name)!.ricordi!.some((m) => m.peso === 3 && /promesso/.test(m.testo))).toBe(true);
+    expect(k.individualOf(a.name)!.ricordi!.some((m) => m.peso === 3 && /promesso/.test(m.testo))).toBe(true);
     const r = await k.talk(a.id, 'Ti ricordi cosa ti ho detto?');
     expect(r.say).toMatch(/lanterna/);
     await k.talk(a.id, 'Ti amo. Sposami!');
     expect(k.bondOf(a.name)).toBe('moglie');
     expect(k.rules().some((x) => x.chiave === `legame|${a.name}`)).toBe(true);
-    // "Altro…" on a person: judged by the Council, with social effects.
+    // "Altro…" on an individual: judged by the Council, with social effects.
     await k.freeAction(a.id, 'vorrei avere un figlio con te');
     const child = readPeople(k.files).persone.find((p) => /^figli[oa]$/.test(bondWith(p, 'io') ?? ''))!;
     expect(child.famiglia.map((f) => f.nome)).toEqual(expect.arrayContaining([a.name, 'Viandante']));
@@ -147,7 +147,7 @@ describe('the life of people', () => {
   it('they live their routine visibly: at night they go to bed and sleep there', async () => {
     const k = await boot();
     clearArea(k);
-    const a = await person(k, 'vita#b', 1);
+    const a = await individual(k, 'vita#b', 1);
     const pc = k.wandererCarpet();
     // Only the bed next to them: the places' own beds may be anywhere around.
     for (const id of k.ecs.query('module')) if (k.ecs.get(id, 'module').id === 'obj.letto') k.ecs.destroy(id);
@@ -163,22 +163,22 @@ describe('the life of people', () => {
   it('people who meet talk to each other and remember it', async () => {
     const k = await boot();
     clearArea(k);
-    const a = await person(k, 'vita#c', 1);
-    const b = await person(k, 'vita#d', 1.6);
+    const a = await individual(k, 'vita#c', 1);
+    const b = await individual(k, 'vita#d', 1.6);
     for (const id of [a.id, b.id]) k.ecs.get(id, 'mind').mode = 'resta';
     for (let i = 0; i < 70; i++) k.tick(1 / 60);
     await settle(100);
     for (let i = 0; i < 60 * 6; i++) k.tick(1 / 60);
     expect(k.feed().some((e) => e.task === 'npc.dialogue')).toBe(true);
-    expect(k.personOf(a.name)!.ricordi?.length).toBeGreaterThan(0);
+    expect(k.individualOf(a.name)!.ricordi?.length).toBeGreaterThan(0);
   });
 
   it('the Narrator weaves a plot among them; beats happen; a quest is given, done and rewarded', async () => {
     const k = await boot();
     clearArea(k);
-    const x = await person(k, 'trama#x', 1);
-    const y = await person(k, 'trama#y', 2);
-    const z = await person(k, 'trama#z', 3);
+    const x = await individual(k, 'trama#x', 1);
+    const y = await individual(k, 'trama#y', 2);
+    const z = await individual(k, 'trama#z', 3);
     void y;
     const plot = (await k.weaveStory(true))!;
     expect(plot.coinvolti.length).toBeGreaterThan(1);
@@ -187,7 +187,7 @@ describe('the life of people', () => {
     const giverId = [x, y, z].find((p) => p.name === giver)!.id;
     await k.talk(giverId, 'Posso aiutarti in qualche modo?');
     expect(k.quests().length).toBe(1);
-    // The night comes: the first beat happens, and its person remembers it.
+    // The night comes: the first beat happens, and its individual remembers it.
     k.time = Kernel.DAY_SECONDS * (k.day() + 0.7);
     for (let i = 0; i < 61; i++) k.tick(1 / 60);
     const first = readPlots(k.files)[0].tappe[0];

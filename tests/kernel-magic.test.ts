@@ -18,7 +18,7 @@ describe('a society', () => {
     expect(ia.routine?.map((r) => r.quando)).toEqual(['mattina', 'giorno', 'sera', 'notte']);
     const b = k.spawnModuleEntity(k.modules.get('npc.villager')!, pc.x + 1.5, pc.y, undefined, 'test#b');
     const ib = (await k.ensureIdentity(b))!;
-    // The second is related to someone already known, and that person knows it too.
+    // The second is related to someone already known, and that individual knows it too.
     const people = JSON.parse(k.files['world/people.json']);
     const relName = ib.family?.[0].nome;
     const relative = people.persone.find((p: { nome: string }) => p.nome === relName);
@@ -27,7 +27,7 @@ describe('a society', () => {
     else expect(people.attesi.some((x: { nome: string }) => x.nome === relName)).toBe(true);
     expect(people.persone.map((p: { nome: string }) => p.nome)).toEqual(expect.arrayContaining([ia.name, ib.name]));
     expect(k.council.context('narratore')).toBeTruthy();
-    // Met again (same origin), no new call: the same person.
+    // Met again (same origin), no new call: the same individual.
     k.ecs.destroy(a);
     const calls = k.ai.usage.text;
     const again = k.spawnModuleEntity(k.modules.get('npc.villager')!, pc.x + 1, pc.y, undefined, 'test#a');

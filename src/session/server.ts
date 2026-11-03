@@ -651,7 +651,7 @@ export class SessionServer {
     const model = typeof modello === 'string' && /^[a-z0-9.-]{1,64}$/i.test(modello.trim()) ? modello.trim() : undefined;
     this.kernel.setAi({ attore: { acceso: on, ...(model ? { modello: model } : {}) } });
     const a = this.kernel.actor();
-    return { ok: true, messaggi: [a.acceso ? `l'Attore è acceso (${a.modello})` : "l'Attore è spento: il Narratore interpreta le persone"] };
+    return { ok: true, messaggi: [a.acceso ? `l'Attore è acceso (${a.modello})` : "l'Attore è spento: il Narratore interpreta gli individui"] };
   }
 
   /** The master's branch, whole, as their client has it now; kept on disk too, on the branch `master`. */

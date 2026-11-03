@@ -20,7 +20,7 @@ import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, placeRegion, readA
 import { STAMP_SHAPES } from './stamps';
 import { repairProgram } from './mj';
 import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './universes';
-import { addPerson, applyRenames, dayPhase, defaultRoutine, freshName, greeting, guessGender, inferActivity, memorySummary, readPeople, remember, repairSociety, sheetFingerprint, similarNames, societySummary, type Activity, type DayPhase, type Person, type Species } from './society';
+import { addIndividual, applyRenames, dayPhase, defaultRoutine, freshName, greeting, guessGender, inferActivity, memorySummary, readPeople, remember, repairSociety, sheetFingerprint, similarNames, societySummary, type Activity, type DayPhase, type Individual, type Species } from './society';
 import { buildGraph, GRAPH_FILE, graphHash, mergeChunks, chunksOf, readGraph, slug as nodeSlug, type GraphChunk, type WorldGraph } from './graph';
 import { situation as buildSituation, type PlayerSpot, type Situation } from './situation';
 import { ChainMeter, chainOf, type Chain } from './chain';
@@ -248,7 +248,7 @@ export const PLACE_PHASES: ReadonlyArray<{ name: string; what: string }> = [
   { name: 'ambiente', what: "Il programma dell'ambiente riscrive l'interno con le sue regole; il bordo resta com'era." },
   { name: 'sentieri', what: 'Ciò che resterebbe isolato viene collegato dal sentiero più breve: ogni angolo si raggiunge.' },
   { name: 'lotti e strutture', what: 'Ogni edificio diventa un lotto in piano con la sua struttura, girata verso la porta.' },
-  { name: 'cose e rune', what: 'Le persone, le cose e le rune, ciascuna su una casella che si raggiunge.' },
+  { name: 'cose e rune', what: 'Gli individui, le cose e le rune, ciascuna su una casella che si raggiunge.' },
 ];
 
 /**
@@ -1962,7 +1962,7 @@ export class Kernel {
       const m = this.modules.get(plan.objects[index].module);
       const origin = `${ch.key}#o${index}`;
       if (!m || cell === undefined || this.consumed.has(origin) || this.uniqueTaken(m)) continue;
-      // Variety: not the same kind of person in every place.
+      // Variety: not the same kind of individual in every place.
       if (m.manifest.persona && loadedOf(m.manifest.id) >= Kernel.NPC_CAP) continue;
       // Fewer people per place (T45b): fewer individuals, words and dialogues.
       if (m.manifest.persona && !this.kept(origin, coef.persone)) continue;
@@ -2019,13 +2019,13 @@ export class Kernel {
   private sheeting = new Map<string, Promise<string | undefined>>();
 
   /**
-   * The sheet of a person for the Actor (T157): the Narrator writes it once, at their first line, and again only when what
-   * it was written from changed (their bonds, their story: `sheetFingerprint`), never at every line. Saved with the person in
+   * The sheet of an individual for the Actor (T157): the Narrator writes it once, at their first line, and again only when what
+   * it was written from changed (their bonds, their story: `sheetFingerprint`), never at every line. Saved with the individual in
    * world/people.json. Paid by whoever pays the line (`chi`). Nothing is written when the Actor is off.
    */
   async ensureSheet(name: string, chi?: string): Promise<string | undefined> {
     if (!this.actor().acceso) return undefined;
-    const p = this.personOf(name);
+    const p = this.individualOf(name);
     if (!p) return undefined;
     const stamp = sheetFingerprint(p);
     if (p.scheda?.testo && p.scheda.impronta === stamp) return p.scheda.testo;
@@ -2054,7 +2054,7 @@ export class Kernel {
           this.council.say('kernel', 'scarta', `la scheda di ${name} ${text ? 'rompe la quarta parete' : 'è vuota'}: l'Attore recita dalla persona`, 'narratore', 'npc.sheet');
           return undefined;
         }
-        this.updatePerson(name, (x) => (x.scheda = { testo: text, impronta: stamp }));
+        this.updateIndividual(name, (x) => (x.scheda = { testo: text, impronta: stamp }));
         this.commitContent(`scheda: ${name}`, 'npc.sheet', 'narratore', chi);
         this.council.say('narratore', 'info', `la scheda di ${name} è scritta, per l'Attore`, 'attore', 'npc.sheet');
         return text;
@@ -3696,7 +3696,7 @@ export class Kernel {
   }
 
   /**
-   * Every tile has a context menu: what stands on it (an object, a person) with its actions, then the
+   * Every tile has a context menu: what stands on it (an object, an individual) with its actions, then the
    * actions learned on this kind of terrain, then "Altro…" for the tile itself.
    */
   tileMenu(col: number, row: number, entity?: Id): { title: string; options: ActionOption[]; entity?: Id } {
@@ -3879,7 +3879,7 @@ export class Kernel {
 
   /**
    * «Altro…» on another wanderer beside them (T43b), only if the game allows it (`partita.altroTraGiocatori`): judged as on
-   * a person; the server applies the effects to the other's body (`touchWanderer`). Nothing is learned: they are not a thing.
+   * an individual; the server applies the effects to the other's body (`touchWanderer`). Nothing is learned: they are not a thing.
    */
   async freeOnWanderer(to: string, text: string): Promise<string> {
     if (this.partita()?.altroTraGiocatori === false) {
@@ -3909,7 +3909,7 @@ export class Kernel {
   }
 
   /**
-   * A child is born to someone and the wanderer (the Council allowed it): a new person of the same
+   * A child is born to someone and the wanderer (the Council allowed it): a new individual of the same
    * kind, with the family already written, who will grow up in the same place.
    */
   async birth(parentId: Id, name?: string): Promise<Id | undefined> {
@@ -3946,7 +3946,7 @@ export class Kernel {
     this.ecs.set(child, 'identity', identity);
     const glyph = this.ecs.get(child, 'glyph');
     if (glyph) glyph.scale = (glyph.scale ?? 1.1) * 0.6;
-    const next = addPerson(readPeople(this.files), { nome, tipo: entry.manifest.id, specie: this.speciesOf(entry.manifest.id) ?? 'persona', genere: gender, mestiere: 'bambino', eta: 'neonato', famiglia: identity.family!, routine: identity.routine!, origine: origin, persona: identity.persona, aspetto: identity.look }, (t) => this.speciesOf(t));
+    const next = addIndividual(readPeople(this.files), { nome, tipo: entry.manifest.id, specie: this.speciesOf(entry.manifest.id) ?? 'persona', genere: gender, mestiere: 'bambino', eta: 'neonato', famiglia: identity.family!, routine: identity.routine!, origine: origin, persona: identity.persona, aspetto: identity.look }, (t) => this.speciesOf(t));
     this.repo.write('world/people.json', JSON.stringify(next, null, 2) + '\n');
     this.applyFiles({ ...this.repo.working });
     this.commitContent(`nascita: ${nome}, ${child_} di ${parent.name} e ${ofOther}`, 'npc.birth', 'narratore');
@@ -4514,7 +4514,7 @@ export class Kernel {
       out.push({ id: `module:${man.id}`, label: man.name, model, color: man.appearance.color, path, facts });
       // T23: after its type, each individual, with the look it has in the world (its seed) and the module under it.
       for (const p of who)
-        out.push({ id: `person:${p.nome}`, label: `${p.nome} · ${p.mestiere}`, model, seed: this.forms.seedFor(model, p.origine ?? p.nome), color: man.appearance.color, path, facts: [...personFacts(p, man.name), ...facts.filter(([w]) => w !== 'Individui').map(([w, t]): [string, string] => [w === 'Aspetto' || w === 'Carattere' ? `${w} del tipo` : w, t])] });
+        out.push({ id: `individual:${p.nome}`, label: `${p.nome} · ${p.mestiere}`, model, seed: this.forms.seedFor(model, p.origine ?? p.nome), color: man.appearance.color, path, facts: [...individualFacts(p, man.name), ...facts.filter(([w]) => w !== 'Individui').map(([w, t]): [string, string] => [w === 'Aspetto' || w === 'Carattere' ? `${w} del tipo` : w, t])] });
     }
     return out;
   }
@@ -5359,7 +5359,7 @@ export class Kernel {
     const entities = (c.cose ?? []).map((t) => {
       const m = this.modules.get(t.modulo)?.manifest;
       const fire = !!t.componenti?.fuoco;
-      return { name: fire ? 'Fiamma' : (m?.name ?? t.modulo), color: fire ? '#ff8a2a' : (m?.appearance?.color ?? '#cccccc'), radius: m?.physics?.radius ?? 0.4, person: !!(m?.components?.wander || m?.persona || m?.interaction?.type === 'talk'), fire };
+      return { name: fire ? 'Fiamma' : (m?.name ?? t.modulo), color: fire ? '#ff8a2a' : (m?.appearance?.color ?? '#cccccc'), radius: m?.physics?.radius ?? 0.4, individual: !!(m?.components?.wander || m?.persona || m?.interaction?.type === 'talk'), fire };
     });
     return { tiles, entities };
   }
@@ -5932,7 +5932,7 @@ export class Kernel {
   /**
    * Behind every character there is an individual: name, story, own pockets, a job, a family among the
    * people already known, a daily routine (written once, cheap text, kept in world/people.json: met
-   * again, they are the same person).
+   * again, they are the same individual).
    */
   async ensureIdentity(id: Id): Promise<Identity | undefined> {
     const existing: Identity | undefined = this.ecs.get(id, 'identity');
@@ -5970,7 +5970,7 @@ export class Kernel {
       try {
         const ask = (avoid?: string[]) => individuate(this.council, { name: m.name, description: m.description ?? '', persona: m.persona!, specie }, { place: this.chunkHere()?.name ?? '', common: [...this.content.items.values()].map((d) => d.name), society: societySummary(readPeople(this.files)), avoid, focus: this.focusOn([`tipo:${nodeSlug(modId!)}`], this.ecs.get(id, 'pos')) });
         identity = await ask();
-        // A person of the world, not of the Council's table: once more if the fourth wall breaks,
+        // An individual of the world, not of the Council's table: once more if the fourth wall breaks,
         // or if the name is like someone else's.
         if (metaBreak(`${identity.persona} ${identity.story ?? ''} ${identity.job ?? ''}`, wordsOf(this.files))) identity = await ask();
         else if (alike(identity.name).length) {
@@ -5997,15 +5997,15 @@ export class Kernel {
     if (!inv) inv = this.ecs.set(id, 'inventory', newInventory(10));
     if (!inv.slots.some(Boolean)) for (const d of defs) addItem(inv, d.id, 1, this.itemSpec(d.id));
     if (!known && identity.name !== m.name) {
-      const person: Person = {
+      const individual: Individual = {
         nome: identity.name, tipo: modId!, specie: this.speciesOf(modId!) ?? 'persona', genere: identity.gender, mestiere: identity.job || m.name, eta: identity.age, famiglia: identity.family ?? [], routine: identity.routine ?? defaultRoutine(identity.job ?? ''),
         storia: identity.story, luogo: this.chunkAt(this.ecs.get(id, 'pos')?.x ?? 0, this.ecs.get(id, 'pos')?.y ?? 0)?.place?.name, origine: origin, persona: identity.persona, aspetto: identity.look, porta: identity.carrying,
       };
       // The kernel makes the society coherent: the other side of each relation, what this species can be.
-      const next = addPerson(readPeople(this.files), person, (t) => this.speciesOf(t));
+      const next = addIndividual(readPeople(this.files), individual, (t) => this.speciesOf(t));
       this.repo.write('world/people.json', JSON.stringify(next, null, 2) + '\n');
       this.applyFiles({ ...this.repo.working });
-      this.commitContent(`persone: ${identity.name}, ${person.mestiere}`, 'npc.individuate', 'narratore');
+      this.commitContent(`persone: ${identity.name}, ${individual.mestiere}`, 'npc.individuate', 'narratore');
       // Relatives already met learn about the newcomer too (and the newcomer's relations may be corrected).
       for (const other of this.ecs.query('identity')) {
         const oi: Identity = this.ecs.get(other, 'identity');
@@ -6013,12 +6013,12 @@ export class Kernel {
         if (back) oi.family = back.famiglia;
       }
       const fam = (identity.family ?? []).map((f) => `${f.legame} di ${f.nome}`).join(', ');
-      this.council.say('narratore', 'propone', `${m.name} → ${identity.name}, ${person.mestiere}${fam ? `; ${fam}` : ''}: ${identity.look} (porta ${defs.map((d) => d.name).join(', ') || 'niente'})`, undefined, 'npc.individuate');
+      this.council.say('narratore', 'propone', `${m.name} → ${identity.name}, ${individual.mestiere}${fam ? `; ${fam}` : ''}: ${identity.look} (porta ${defs.map((d) => d.name).join(', ') || 'niente'})`, undefined, 'npc.individuate');
     }
     return identity;
   }
 
-  /** What the routine says this person does now. */
+  /** What the routine says this individual does now. */
   routineNow(identity: Identity | undefined): { quando: DayPhase; fa: string; dove: string } | undefined {
     if (!identity?.routine?.length) return undefined;
     const q = dayPhase(this.time, Kernel.DAY_SECONDS);
@@ -6100,12 +6100,12 @@ export class Kernel {
     return fixes;
   }
 
-  /** The registry entry of a person, by name. */
-  personOf(name: string): Person | undefined {
+  /** The registry entry of an individual, by name. */
+  individualOf(name: string): Individual | undefined {
     return readPeople(this.files).persone.find((p) => p.nome === name);
   }
 
-  private updatePerson(name: string, fn: (p: Person) => void): void {
+  private updateIndividual(name: string, fn: (p: Individual) => void): void {
     const people = readPeople(this.files);
     const p = people.persone.find((x) => x.nome === name);
     if (!p) return;
@@ -6120,7 +6120,7 @@ export class Kernel {
    */
   rememberAbout(name: string, testo: string, con?: string, peso = 1, viandante?: string): void {
     if (!testo.trim()) return;
-    this.updatePerson(name, (p) => (p.ricordi = remember(p.ricordi, { quando: this.when(), testo: testo.slice(0, 200), ...(con ? { con } : {}), ...(viandante ? { viandante } : {}), peso: Math.max(1, Math.min(3, peso)) })));
+    this.updateIndividual(name, (p) => (p.ricordi = remember(p.ricordi, { quando: this.when(), testo: testo.slice(0, 200), ...(con ? { con } : {}), ...(viandante ? { viandante } : {}), peso: Math.max(1, Math.min(3, peso)) })));
   }
 
   /** A memory of the wanderer acting now: only they hear of it again (T34). */
@@ -6137,8 +6137,8 @@ export class Kernel {
   /** What someone becomes to the wanderer acting now (friend, sweetheart, spouse, child…): a fact of the world. */
   setBond(name: string, legame: string): void {
     const w = this.wanderer();
-    this.updatePerson(name, (p) => {
-      // As everywhere in the registry: what this person is to the other one.
+    this.updateIndividual(name, (p) => {
+      // As everywhere in the registry: what this individual is to the other one.
       p.famiglia = [...p.famiglia.filter((f) => wandererOf(f) !== w.id), { nome: w.nome, legame, viandante: w.id }];
     });
     const who = this.wandererWord(w);
@@ -6146,9 +6146,9 @@ export class Kernel {
     this.message(`${name} ora è: ${legame}.`, 'good');
   }
 
-  /** What a person is to the wanderer acting now, if anything. */
+  /** What an individual is to the wanderer acting now, if anything. */
   bondOf(name: string): string | undefined {
-    const p = this.personOf(name);
+    const p = this.individualOf(name);
     return p ? bondWith(p, this.wanderer().id) : undefined;
   }
 
@@ -6240,7 +6240,7 @@ export class Kernel {
       scheda,
       legame: l ?? who.family?.find((f) => f.nome === other.name)?.legame,
       fa: this.routineNow(who)?.fa ?? '',
-      ricordi: memorySummary(this.personOf(who.name)?.ricordi?.filter((m) => !m.con || m.con === other.name || m.peso >= 3), 6),
+      ricordi: memorySummary(this.individualOf(who.name)?.ricordi?.filter((m) => !m.con || m.con === other.name || m.peso >= 3), 6),
       segreti: secretsOf(plots, who.name, day),
     });
     try {
@@ -6263,13 +6263,13 @@ export class Kernel {
     }
   }
 
-  /** The entity of a person, if they walk the loaded world. */
+  /** The entity of an individual, if they walk the loaded world. */
   private entityOf(name: string): Id | undefined {
     return this.ecs.query('identity').find((id) => this.ecs.get(id, 'identity').name === name);
   }
 
   /**
-   * Plots unfold: at each change of the moment of the day, the beats due happen — the person goes
+   * Plots unfold: at each change of the moment of the day, the beats due happen — the individual goes
    * there, does it, says the line (and remembers it). Seen or not, it happened.
    */
   private plotTick(): void {
@@ -6590,7 +6590,7 @@ export class Kernel {
 
   /**
    * Talks to an NPC: the Narrator plays the individual; the chosen action is validated and applied. `wanderer`
-   * is who talks (T34; the one acting now by default): the person knows their name, their bond, what they did together.
+   * is who talks (T34; the one acting now by default): the individual knows their name, their bond, what they did together.
    */
   async talk(id: Id, text: string, wanderer?: string): Promise<NpcReply> {
     const me = wanderer && this.wanderersById.has(wanderer) ? this.wanderersById.get(wanderer)! : this.wanderer();
@@ -6612,14 +6612,14 @@ export class Kernel {
       // The Actor plays from the Narrator's sheet (T157): written at the first line, paid by who talks.
       const by = this.interpreter();
       const scheda = by.agent === 'attore' ? await this.ensureSheet(name, me.id) : undefined;
-      const person = this.personOf(name);
+      const individual = this.individualOf(name);
       reply = await npcReply(this.council, {
         chi: me.id,
         name,
         wanderer: me.nome,
         presentazione: this.profileOf(me.id)?.presentazione,
-        memories: memorySummary(memoriesFor(person?.ricordi, me.id), 12),
-        bond: person ? bondWith(person, me.id) : undefined,
+        memories: memorySummary(memoriesFor(individual?.ricordi, me.id), 12),
+        bond: individual ? bondWith(individual, me.id) : undefined,
         secrets: secretsOf(readPlots(this.files), name, this.day()),
         scheda,
         persona: (identity?.persona ?? m.persona) + social, mood: mind.mood, mode: mind.mode, carrying, place: this.chunkHere()?.name ?? '', history: mind.history.filter((t) => (t.con ?? SOLO) === me.id), facts: this.worldFacts() }, text, this.focusOn([name], this.ecs.get(id, 'pos')), by);
@@ -7674,7 +7674,7 @@ export class Kernel {
 }
 
 /** What the Studio of characters says of an individual (T23), in the order a visitor reads it. */
-function personFacts(p: Person, type: string): Array<[string, string]> {
+function individualFacts(p: Individual, type: string): Array<[string, string]> {
   const out: Array<[string, string]> = [['Individuo', p.nome]];
   const who = [p.specie === 'animale' ? 'animale' : 'persona', p.genere, p.eta].filter(Boolean).join(', ');
   out.push(['Chi è', `${type} (${who})`], ['Mestiere', p.mestiere]);

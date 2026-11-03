@@ -25,7 +25,7 @@ class Recording extends MockAiModels {
 
 const cats = (t: string) => (t === 'npc.cat' ? 'animale' : t ? 'persona' : undefined) as 'animale' | 'persona' | undefined;
 const manifest = (m: Record<string, unknown>) => JSON.stringify({ version: '0.1.0', ...m });
-const person = (nome: string, tipo: string, famiglia: Array<[string, string]>, extra: Record<string, unknown> = {}) => ({
+const individual = (nome: string, tipo: string, famiglia: Array<[string, string]>, extra: Record<string, unknown> = {}) => ({
   nome,
   tipo,
   mestiere: 'contadino',
@@ -42,10 +42,10 @@ function universe(): { files: FileMap; chunks: GraphChunk[] } {
     'world/canone.md': '# Canone\n\nLe rune restano ferme dove sono finché qualcuno non le raccoglie.',
     'world/people.json': JSON.stringify({
       persone: [
-        person('Fiocco', 'npc.cat', [['Bastiano', 'animale']], { luogo: 'Piazza del Borgo', genere: 'femmina', specie: 'animale' }),
-        person('Bastiano', 'npc.villager', [['Fiocco', 'padrone'], ['Nereo', 'fratello']], { luogo: 'Piazza del Borgo', genere: 'maschio' }),
-        person('Nereo', 'npc.villager', [['Bastiano', 'fratello']], { luogo: 'Riva del Lago', genere: 'maschio' }),
-        person('Ottavia', 'npc.villager', [], { luogo: 'Riva del Lago', genere: 'femmina' }),
+        individual('Fiocco', 'npc.cat', [['Bastiano', 'animale']], { luogo: 'Piazza del Borgo', genere: 'femmina', specie: 'animale' }),
+        individual('Bastiano', 'npc.villager', [['Fiocco', 'padrone'], ['Nereo', 'fratello']], { luogo: 'Piazza del Borgo', genere: 'maschio' }),
+        individual('Nereo', 'npc.villager', [['Bastiano', 'fratello']], { luogo: 'Riva del Lago', genere: 'maschio' }),
+        individual('Ottavia', 'npc.villager', [], { luogo: 'Riva del Lago', genere: 'femmina' }),
       ],
       attesi: [],
     }),
@@ -121,7 +121,7 @@ describe('the context of the agents from the graph (T13)', () => {
     }
   });
 
-  it('the kernel gives the Narrator the person, the place and the wanderer when the wanderer talks to someone', async () => {
+  it('the kernel gives the Narrator the individual, the place and the wanderer when the wanderer talks to someone', async () => {
     const models = new Recording();
     const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: models });
     for (let i = 0; i < 80; i++) {

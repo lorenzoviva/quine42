@@ -8,7 +8,7 @@ export const NPC_ACTIONS = ['nessuna', 'segui', 'resta', 'vaga', 'dai', 'mission
 export type NpcAction = (typeof NPC_ACTIONS)[number];
 
 /**
- * Who plays a person (T157, ADR-0116): the Narrator, as always, or the Actor with its own model when the master turned
+ * Who plays an individual (T157, ADR-0116): the Narrator, as always, or the Actor with its own model when the master turned
  * it on. The task names stay (`npc.reply`, `npc.dialogue`): who pays, the limits and the local models do not change.
  */
 export interface Interpreter {
@@ -264,7 +264,7 @@ const DIALOGUE_SCHEMA: Schema = {
   required: ['battute'],
 };
 
-export interface DialoguePerson {
+export interface DialogueIndividual {
   nome: string;
   mestiere: string;
   /** The Narrator's sheet, when the Actor plays (T157). */
@@ -280,9 +280,9 @@ export interface DialoguePerson {
  * Two people meet and talk, as they are: their relation, what they remember, what they are doing,
  * the plots they are in (they may let a clue slip if the wanderer is near). 2-4 short lines.
  */
-export async function npcDialogue(c: Council, a: DialoguePerson, b: DialoguePerson, place: string, focus?: string[], by: Interpreter = NARRATOR_PLAYS): Promise<{ lines: Array<{ who: 'a' | 'b'; say: string }>; memoryA?: string; memoryB?: string }> {
-  const sheet = (p: DialoguePerson) => (by.agent === 'attore' && p.scheda ? `\nscheda:\n${p.scheda}` : '');
-  const who = (p: DialoguePerson) => `${p.nome}, ${p.mestiere}; ora: ${p.fa}${sheet(p)}${p.ricordi ? `\nricordi:\n${p.ricordi}` : ''}${p.segreti ? `\nsegreti:\n${p.segreti}` : ''}`;
+export async function npcDialogue(c: Council, a: DialogueIndividual, b: DialogueIndividual, place: string, focus?: string[], by: Interpreter = NARRATOR_PLAYS): Promise<{ lines: Array<{ who: 'a' | 'b'; say: string }>; memoryA?: string; memoryB?: string }> {
+  const sheet = (p: DialogueIndividual) => (by.agent === 'attore' && p.scheda ? `\nscheda:\n${p.scheda}` : '');
+  const who = (p: DialogueIndividual) => `${p.nome}, ${p.mestiere}; ora: ${p.fa}${sheet(p)}${p.ricordi ? `\nricordi:\n${p.ricordi}` : ''}${p.segreti ? `\nsegreti:\n${p.segreti}` : ''}`;
   const r = await c.ask<{ battute: Array<{ chi: string; dice: string }>; ricordo_a?: string; ricordo_b?: string }>(
     by.agent,
     'npc.dialogue',

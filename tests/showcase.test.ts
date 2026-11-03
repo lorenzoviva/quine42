@@ -138,7 +138,7 @@ describe('the screen of the Tower of Magic (T22)', () => {
     const k = await Kernel.boot({ files: { ...bundledFiles, 'world/people.json': JSON.stringify({ persone, attesi: [] }) }, store: memoryStore(), ai: new MockAiModels() });
     const all = k.showcaseEntries('persone');
     const at = all.findIndex((e) => e.id === 'module:npc.villager');
-    expect(all.slice(at + 1, at + 3).map((e) => e.id)).toEqual(['person:Mara', 'person:Teo']);
+    expect(all.slice(at + 1, at + 3).map((e) => e.id)).toEqual(['individual:Mara', 'individual:Teo']);
     const type = all[at], mara = all[at + 1], teo = all[at + 2];
     expect(type.facts.find(([w]) => w === 'Individui')?.[1]).toBe('Mara (fornaia), Teo (garzone)');
     // The seed of the entity met in the world (its origin), or of the name if it has none.
