@@ -1,6 +1,6 @@
 // Chunks. The Cartographer no longer draws grids (models cannot count cells): it chooses the
 // environment (a MarkovJunior layout program), names the place and says what lives there, inside or
-// outside buildings. The kernel runs the program, guarantees paths and places things.
+// outside lots. The kernel runs the program, guarantees paths and places things.
 // At genesis the Cartographer writes the layout programs themselves.
 
 import type { Schema } from '../ai/models';

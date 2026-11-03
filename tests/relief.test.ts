@@ -288,7 +288,7 @@ describe('the kernel on the relief', () => {
     let lots = 0;
     for (const ch of k.chunks.values()) {
       if (ch.stage !== 'planned') continue;
-      for (const b of ch.buildings) {
+      for (const b of ch.lots) {
         lots++;
         const h = k.groundAt(ch.cx * S + b.x0, ch.cy * S + b.y0);
         for (let row = b.y0 - 1; row <= b.y1 + 1; row++)

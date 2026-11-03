@@ -4,15 +4,15 @@
 //   3. the chosen layout program (MarkovJunior rules, written by the Cartographer) transforms the
 //      interior; the 1-tile border ring is frozen, so chunks always join seamlessly;
 //   4. connectivity is guaranteed: every gate, door and sizeable walkable area is joined to the rest
-//      by carving the cheapest path (vegetation before rock, never through buildings);
-//   5. buildings (indoor floor enclosed by walls) are recognised for roofs and interiors.
+//      by carving the cheapest path (vegetation before rock, never through lots);
+//   5. lots (indoor floor enclosed by walls) are recognised for roofs and interiors.
 
 import { hash32 } from './rng';
 import { resolveStamps, run, type MjNode } from './mj';
 import { defaultCodes } from './stamps';
 import type { TileDef } from './types';
 
-export interface Building {
+export interface Lot {
   /** Cell indices (row * size + col) of indoor floor. */
   floor: number[];
   walls: number[];
@@ -26,7 +26,7 @@ export interface Building {
 
 export interface LayoutResult {
   grid: string[];
-  buildings: Building[];
+  lots: Lot[];
   gates: number[];
   /** Cells reachable from the gates: where things may be placed. */
   reachable: Set<number>;
@@ -135,9 +135,9 @@ function carvePath(cells: string[][], size: number, palette: Record<string, Tile
   return null;
 }
 
-export function findBuildings(grid: string[], size: number, palette: Record<string, TileDef>): Building[] {
+export function findLots(grid: string[], size: number, palette: Record<string, TileDef>): Lot[] {
   const seen = new Set<number>();
-  const out: Building[] = [];
+  const out: Lot[] = [];
   for (let i = 0; i < size * size; i++) {
     const t = palette[grid[Math.floor(i / size)][i % size]];
     if (seen.has(i) || !t?.indoor) continue;
@@ -231,7 +231,7 @@ export function layout(draft: string[], palette: Record<string, TileDef>, opts: 
   }
 
   const grid = rows();
-  return { grid, buildings: findBuildings(grid, size, palette), gates: gateCells, reachable: reach, carved, steps, ...(stages ? { stages } : {}) };
+  return { grid, lots: findLots(grid, size, palette), gates: gateCells, reachable: reach, carved, steps, ...(stages ? { stages } : {}) };
 }
 
 /**

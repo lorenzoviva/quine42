@@ -18,15 +18,15 @@ describe('kernel', () => {
     expect(k.needsGenesis()).toBe(true);
   });
 
-  it('every chunk gets an environment from the Cartographer; the start is a village with buildings', () => {
+  it('every chunk gets an environment from the Cartographer; the start is a village with lots', () => {
     const chunks = [...k.chunks.values()];
     expect(chunks.every((c) => c.stage === 'planned' && c.place?.name && k.content.layouts[c.plan!.layout])).toBe(true);
     const start = k.chunks.get('0,0')!;
     expect(start.plan!.layout).toBe('borgo');
-    expect(start.buildings.length).toBeGreaterThan(0);
-    const b = start.buildings[0];
+    expect(start.lots.length).toBeGreaterThan(0);
+    const b = start.lots[0];
     const S = k.config.chunkSize;
-    expect(k.buildingAt((b.floor[0] % S) + 0.5, Math.floor(b.floor[0] / S) + 0.5)?.building).toBe(b);
+    expect(k.lotAt((b.floor[0] % S) + 0.5, Math.floor(b.floor[0] / S) + 0.5)?.lot).toBe(b);
     for (const st of k.lines.values()) expect(st.compiled).toBe(true);
     expect(k.feed().some((e) => e.from === 'cartografo' && e.kind === 'propone')).toBe(true);
   });

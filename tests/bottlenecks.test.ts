@@ -148,7 +148,7 @@ describe('T56a: niente cose solide sui passaggi obbligati', () => {
       key: `${cx},${cy}`,
       draft: draftRows.join(''),
       tiles: draftRows.join(''),
-      buildings: [],
+      lots: [],
       stage: 'draft' as const,
       version: 0,
     };
@@ -228,7 +228,7 @@ describe('T56a: niente cose solide sui passaggi obbligati', () => {
       if (m) structures[Number(m[1])] = id;
     }
     const sid = structures.find((id) => id !== undefined)!;
-    const b = ch.buildings[0];
+    const b = ch.lots[0];
     const door = b.doors[0];
     const doorX = ch.cx * S + (door % S) + 0.5;
     const doorY = ch.cy * S + Math.floor(door / S) + 0.5;

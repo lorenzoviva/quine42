@@ -32,7 +32,7 @@ export const settle = (ms = 250) => new Promise((r) => setTimeout(r, ms));
 /** Moves the player next to a run of free cells and faces right, so inscriptions always fit. */
 export function clearArea(k: Kernel, width = 24) {
   const { ox, oy } = k.offset();
-  const free = (c: number, r: number) => (k as any).freeCell(c, r) && !k.runeCells.has(`${c},${r}`) && k.tileAt(c, r) !== undefined && !k.buildingAt(c + 0.5, r + 0.5);
+  const free = (c: number, r: number) => (k as any).freeCell(c, r) && !k.runeCells.has(`${c},${r}`) && k.tileAt(c, r) !== undefined && !k.lotAt(c + 0.5, r + 0.5);
   for (let d = 0; d < 30; d++)
     for (const row of [d, -d]) {
       for (let col = -30; col < 0; col++) {

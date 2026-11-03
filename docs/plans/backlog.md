@@ -3110,13 +3110,14 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 - Quando è fatto: commit su `task/T187`; nell'esito i nomi scelti per R7 e R16. Sicurezza: nessuna superficie nuova.
 - Esito: glossario con le scelte dell'autore, voci delle scelte 4 e 6 corrette, R1-R17 con nomi esatti, ciò che resta e file ricontati (R7: `ActorConfig`, `AiMinimums`, `HeritageConfig`, `CardOrigin`, `CardStamp`, `cardHolderOf`, `cellarOf`, `sessionCap`…; R16: `Individual`, `DialogueIndividual`, `addIndividual`, `updateIndividual`, `individualOf`, `individualFacts`, `individualByName`, `individualNode`, `noIndividual`; `Identity`, `People`, `readPeople` restano); aggiunte oltre il previsto: `Origine`, `Scheda`, `Forma`, `Plinto…`, `Tornio…` in R7, `Lot`→`LotBox` in R1, `playerId`→`wandererEntity` e `playerCell` spostato da R10 a R3, la frase in `AGENTS.md`, il censimento rigenerato; nessuna rinomina nel codice; verdi `tests/glossario.test.ts` e typecheck, suite intera non lanciata (non serve per i documenti); non provato: funzioni e locali italiani fuori dalle famiglie non censiti, conteggio `person` in R16 approssimato. Sicurezza: nessuna superficie nuova.
 
-### T188 · R1: `Building` → `Lot` — `da fare` (dipende da T187)
+### T188 · R1: `Building` → `Lot` — `fatto` (`a47dd57`) (dipende da T187)
 - Pipeline: claude · stima 1% · approvato · priorità 3
 - Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
 - Cosa fare: R1 del glossario: il `Building` di `layout.ts`, `Chunk.buildings`, `findBuildings`, `buildingAt`.
 - Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
 - Browser: non serve (la prova finale è in T205).
 - Quando è fatto: commit su `task/T188`, solo la rinomina; nell'esito quanti file e ciò che è rimasto fermo, con il motivo. Sicurezza: nessuna superficie nuova.
+- Esito: R1 eseguita in 18 file (7 sorgenti, 9 test, 2 documenti; stima 13): `Building` di `layout.ts` → `Lot`, `LayoutResult.buildings` e `Chunk.buildings` → `lots`, `findBuildings` → `findLots`, `buildingAt` → `lotAt` (campo `lot`), `Lot` di `relief.ts` → `LotBox`; glossario (riga R1, voce Lotto, omonimi) e censimento aggiornati; fermi il `Building` di `corona.ts` (è l'edificio), `lotti` del protocollo (sul filo), `lotsOf` e il suo `lots` locale (non si scontrano), la stringa in `tests/pipeline.test.ts` (dato di prova) e i commenti con «buildings» generico (`types.ts:279`, `terrain.ts:6`, `lab/banco/`); nessuna migrazione, su disco va solo `plan`; suite 1429 verde, typecheck verde, `tests/glossario.test.ts` verde; nell'output dei test un `heap out of memory`, forse di un processo figlio con limite di memoria, non individuato e senza test falliti; `lotAt` in `src/` non ha chiamanti, solo i test (incongruenza già presente); browser non richiesto (prova finale in T205). Sicurezza: nessuna superficie nuova.
 
 ### T189 · R2: `Models` → `AiModels`, `kernel.ai` — `da fare` (dipende da T188)
 - Pipeline: claude · stima 2% · approvato · priorità 4

@@ -290,7 +290,7 @@ export class ThinClient {
         version: v.version,
         stage: v.stage,
         ...(v.nome ? { place: { name: v.nome, description: v.descrizione ?? '' } } : {}),
-        buildings: (v.lotti ?? []).map(([x0, y0, x1, y1]) => ({ x0, y0, x1, y1, floor: [], walls: [], doors: [] })),
+        lots: (v.lotti ?? []).map(([x0, y0, x1, y1]) => ({ x0, y0, x1, y1, floor: [], walls: [], doors: [] })),
         ...(v.scavi ? { scavi: v.scavi } : {}),
         ...(v.acqua ? { acqua: v.acqua } : {}),
       });

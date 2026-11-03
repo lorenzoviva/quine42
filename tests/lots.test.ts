@@ -1,4 +1,4 @@
-// Space in scales (ADR-0043): the plan's buildings become structures — whole models set on their lots,
+// Space in scales (ADR-0043): the plan's lots become structures — whole models set on their lots,
 // facing their doors — what goes indoors stands on their floors, and the world has one Huge structure per
 // zone and one Gargantuan per realm (ADR-0092).
 
@@ -22,7 +22,7 @@ async function boot() {
   return k;
 }
 
-/** The structures of a planned chunk, by building index. */
+/** The structures of a planned chunk, by lot index. */
 const structuresOf = (k: Kernel, key: string) => {
   const out: number[] = [];
   for (const id of k.ecs.query('struttura', 'origin')) {
@@ -33,13 +33,13 @@ const structuresOf = (k: Kernel, key: string) => {
 };
 
 describe('lots and structures', () => {
-  it('turns every building of the village into a structure on its lot, facing its door', async () => {
+  it('turns every lot of the village into a structure on its lot, facing its door', async () => {
     const k = await boot();
     const ch = k.chunks.get('0,0')!;
     const S = k.config.chunkSize;
-    expect(ch.buildings.length).toBeGreaterThan(0);
+    expect(ch.lots.length).toBeGreaterThan(0);
     const structures = structuresOf(k, ch.key);
-    for (const [i, b] of ch.buildings.entries()) {
+    for (const [i, b] of ch.lots.entries()) {
       const sid = structures[i];
       expect(sid, `edificio ${i}`).toBeDefined();
       // In the middle of its lot.
@@ -59,8 +59,8 @@ describe('lots and structures', () => {
       }
     }
     // The Cartographer's structure goes on the largest lot and waits for its model; the others are houses.
-    const area = (i: number) => (ch.buildings[i].x1 - ch.buildings[i].x0 + 1) * (ch.buildings[i].y1 - ch.buildings[i].y0 + 1);
-    const largest = ch.buildings.map((_, i) => i).sort((a, b) => area(b) - area(a) || a - b)[0];
+    const area = (i: number) => (ch.lots[i].x1 - ch.lots[i].x0 + 1) * (ch.lots[i].y1 - ch.lots[i].y0 + 1);
+    const largest = ch.lots.map((_, i) => i).sort((a, b) => area(b) - area(a) || a - b)[0];
     const s = k.ecs.get(structures[largest], 'struttura');
     expect(s.concetto).toBe('il forno del borgo');
     expect(s.model).toBe('struttura-il-forno-del-borgo');
@@ -100,7 +100,7 @@ describe('lots and structures', () => {
     const k = await boot();
     // Lots of 12 × 12 tiles (they hold a Gargantuan box) and of 6 × 6 (a Large one: 5 × 5).
     const lot = (n: number) => ({ x0: 0, y0: 0, x1: n - 1, y1: n - 1, walls: [], floor: [], doors: [] });
-    const claim = (key: string, cx: number, cy: number, plan: Partial<ChunkPlan>, sides = [12, 6]) => (k as any).claimSizes({ key, cx, cy, buildings: sides.map(lot) }, plan);
+    const claim = (key: string, cx: number, cy: number, plan: Partial<ChunkPlan>, sides = [12, 6]) => (k as any).claimSizes({ key, cx, cy, lots: sides.map(lot) }, plan);
     // Zones are about a thousand tiles wide, centred on the start; realms are 4 × 4 zones.
     expect(IMPORTANT_ZONE * k.config.chunkSize).toBeGreaterThanOrEqual(1000);
     expect(zoneOf(0, 0)).toBe(zoneOf(IMPORTANT_ZONE / 2 - 1, -IMPORTANT_ZONE / 2));
@@ -131,7 +131,7 @@ describe('lots and structures', () => {
     expect(d.strutture![0].taglia).toBe('grande');
     expect(k.rareAllowed({ key: '0,0', cx: 2 * IMPORTANT_ZONE, cy: 0 })).toContain('enorme');
     // The structure carries its size.
-    const ch = { ...k.chunks.get('0,0')!, buildings: [lot(12)] };
+    const ch = { ...k.chunks.get('0,0')!, lots: [lot(12)] };
     const lots = (k as any).lotsOf(ch, { ...k.chunks.get('0,0')!.plan!, strutture: [{ concetto: 'la cittadella', taglia: 'gargantuesca' }] }, '.').lots;
     expect(lots[0].struttura).toMatchObject({ concetto: 'la cittadella', classe: 'grande', taglia: 'gargantuesca' });
     // Saved with the game, and read back; the important ones of an old state are the Huge ones.

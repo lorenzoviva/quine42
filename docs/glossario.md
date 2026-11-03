@@ -136,10 +136,10 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Fermo**: `layouts` nei manifest, `layout` in `maps/`, `usa_ambiente`.
 
 ### Lotto
-- **Inglese**: `lot`, `Lot`, `lots`
+- **Inglese**: `lot`, `Lot`, `lots`, `findLots`, `lotAt`, `LotBox` (la sola scatola)
 - **Definizione**: il rettangolo piano di un luogo su cui sta una struttura.
 - **Dove vive**: `src/kernel/relief.ts`, `src/kernel/layout.ts`
-- **Da non usare**: `building` (per il lotto: `Chunk.buildings`)
+- **Da non usare**: `building`, `Building`, `buildings`, `findBuildings`, `buildingAt` (per il lotto: sono l'edificio dello studio)
 - **Fermo**: `lotti` del protocollo.
 
 ### Varco
@@ -837,7 +837,7 @@ Stessa parola, concetti diversi: il problema che confonde di più, più dei sino
 | Parola | Significati | Come si distinguono |
 |---|---|---|
 | modello / `model` | voce della libreria; IA che risponde (`kernel.models`, `Models`) | «Modello» e «Modello di IA»; rinomina R2 |
-| `Building` | due tipi: edificio dello studio (`corona.ts`); stanza del piano che diventa un lotto (`layout.ts`) | «Edificio» e «Lotto»; rinomina R1 |
+| `Building` | edificio dello studio (`corona.ts`); il lotto si chiamava così fino alla rinomina R1, ora è `Lot` (`layout.ts`) | «Edificio» e «Lotto» |
 | piano | piano di un luogo (`plan`); piano di un edificio (`Floor`) | «Piano del luogo» e «Piano» |
 | `floor` | piano (`Floor`); pavimento (`floorAt`); strato del terreno (`TileLayer`); `Math.floor` | rinomina R9 |
 | `levels` | altezza del suolo (`Chunk.levels`); pavimenti di una colonna (`Form.levels`) | «Livello» è il primo; il secondo si dice «i pavimenti» |
@@ -876,7 +876,7 @@ Le fanno i task T188-T204, una per task e nell'ordine: vanno in conflitto con tu
 
 | # | Rinomina (da → a) | Restano | File | Migrazione | Stato |
 |---|---|---|---|---|---|
-| R1 | Di `layout.ts`: `Building` → `Lot`, `LayoutResult.buildings` e `Chunk.buildings` → `lots`, `findBuildings` → `findLots`, `buildingAt` → `lotAt` (con il campo `building` di ciò che rende → `lot`). Di `relief.ts`, per non fare un omonimo: `Lot` → `LotBox` | il `Building` di `corona.ts`, con `buildings`, `building()`, `buildingOf`, `buildingId`. `lotsOf` e il suo `lots` locale di `kernel.ts` non si scontrano; **fermo** `lotti` del protocollo | 13 | no: il layout li ricava dalla bozza a ogni caricamento | da fare |
+| R1 | Di `layout.ts`: `Building` → `Lot`, `LayoutResult.buildings` e `Chunk.buildings` → `lots`, `findBuildings` → `findLots`, `buildingAt` → `lotAt` (con il campo `building` di ciò che rende → `lot`). Di `relief.ts`, per non fare un omonimo: `Lot` → `LotBox` | il `Building` di `corona.ts`, con `buildings`, `building()`, `buildingOf`, `buildingId`. `lotsOf` e il suo `lots` locale di `kernel.ts` non si scontrano; **fermo** `lotti` del protocollo | 13 | no: il layout li ricava dalla bozza a ogni caricamento | fatto |
 | R2 | `Models` → `AiModels`, `MockModels` → `MockAiModels`, `GeminiModels` → `GeminiAiModels`, `RoutedModels` → `RoutedAiModels`, `QueueModels` → `QueueAiModels`, `TrackingModels` → `TrackingAiModels`, `TrackingOnlineModels` → `TrackingOnlineAiModels`, `SculptorModels` → `SculptorAiModels`, `pricedModels` → `pricedAiModels`, `localModels` → `localAiModels`, `baseModels` → `baseAiModels`, `updateModelsHud` → `updateAiModelsHud`; il campo `models` di `Kernel` e di `Council` → `ai`; `window.quine.models` → `window.quine.ai`, anche in `AGENTS.md` | la libreria: `maxModels`, `tornioModels`, `upgradeModels`, `MODELS_INDEX`, `models/`, `listModels` del laboratorio; **fermi** `textModel`, `ai` di `universe.json` | 114 (76 sono test) | no | da fare |
 | R3 | `playerPos` → `wandererPos`, `playerCarpet` → `wandererCarpet`, `playerId` → `wandererEntity` (è l'id dell'entità: `wandererId` c'è già ed è l'id stabile del viandante), `playerComp` → `wandererComp`, `playerMod` → `wandererModule`, `playerCell` → `wandererTile`, `playerText` → `wandererText`, `playerPrompt` → `wandererPrompt`; anche negli snippet di `docs/architettura-dettagli.md#convalida-browser` | il giocatore: `players`, `PlayerSpot`, `playerFiles`, `playerFile`, `playerFilesIn`, `playerChanges`, `PLAYERS_DIR`, `manyPlayers`; **fermi** `world.player`, `world.player_pos`, `player_id`, `player_get`, `player_set` e il binding, che Lua vede | 53 (39 sono test) | no | da fare |
 | R4 | Prima `ChunkView` di `terrain.ts` → `TerrainView`; poi `Place` → `ChunkInfo`, `PlaceView` → `ChunkView`, `PlaceLot` → `ChunkLot`, `PlaceMiniature` → `ChunkMiniature`, `GraphPlace` → `GraphChunk`, `placeHere` → `chunkHere`, `placeByName` → `chunkByName`, `placesOf` → `chunksOf`, `placeList` → `chunkList`, `mergePlaces` → `mergeChunks`, `graphPlaces` → `graphChunks`, `graphPlacesVersion` → `graphChunksVersion`, `seedGraphPlaces` → `seedGraphChunks`, `addPlace` → `addChunk`, `hasPlace` → `hasChunk`, `cardPlace` → `cardChunk`, `placeCard` → `chunkCard`, `placeCardId` → `chunkCardId`, `placeIn` → `chunkIn`, `placeQuota` → `chunkQuota`, `placesMade` → `chunksMade`, `noPlace` → `noChunk`, `lastPlace` → `lastChunk`, `listPlaces` → `listChunks` | «place» verbo: `placeStructure`, `placeCampus`, `placeRegion`, `placeInside`, `placeProp`, `placeFor`, `placed`, `Placement`, `placementsOf`, `Placeable`, `PlacedObject`; i locali `place` e `places`; **fermi** `plan.place` in `maps/`, `Chunk.place`, `placesPerMinute`, `luoghi` del protocollo, `senza_luogo` | 24 | no | da fare |
