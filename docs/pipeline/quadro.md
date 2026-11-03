@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 03/11/2026, epoca 232. Crediti: vedi `stato`.
+Aggiornato il 03/11/2026, epoca 234. Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -48,7 +48,7 @@ Aggiornato il 03/11/2026, epoca 232. Crediti: vedi `stato`.
 - **Argon:** quota esaurita fino al 04/11. **Fable:** solo i task più difficili, mai orchestratore; una sola misura (T157: 7 % sul suo contatore, ~55 punti di sessione).
 - Al più una verifica nel browser alla volta, solo su Claude. Risposte brevi all'autore.
 - Obiettivi: nessun parallelismo che aumenta il lavoro; finire i crediti entro il reset settimanale, non prima; margine per le urgenze.
-- **Autonomia fino al 03/11 alle 18:00** (l'autore, che non può rispondere: «sii proattivo»; scritto «domani», ma la data è questa): approvo da solo le mie proposte; ciò che spetta solo a lui (nomi, regime fiscale, hosting, tetti) resta in attesa. Dopo quell'ora le proposte nuove aspettano di nuovo l'approvazione. Priorità 0 solo per le urgenze dell'autore e ciò che blocca gli altri.
+- **Autonomia scaduta il 03/11 alle 18:00:** le mie proposte nuove aspettano di nuovo l'approvazione dell'autore. Priorità 0 solo per le urgenze dell'autore e ciò che blocca gli altri.
 - **Mai `git commit -a` nel base:** l'autore ha file suoi (`lab/mjx/models/handmade/lampione copy*.xml`, `docs/design/logo/proposte/`).
 - **Il parser delle dipendenze legge «dopo» e «dipende da» in tutto il blocco**, anche in un nome di file: niente «dopo» vicino a un Txx che non è una dipendenza. Dopo un blocco nuovo controlla `stato`.
 - Un test rosso nella suite intera e verde da solo non è per forza un difetto del task: guarda il carico. Un task «in corso» col log vuoto e la conversazione finita su `usage_limit_reached`: `interrompi` + `riprendi`.
@@ -56,5 +56,5 @@ Aggiornato il 03/11/2026, epoca 232. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **232:** T89a, T215, T181, T216 integrati; T214 chiuso.
-- **231:** T106, T212, T213 chiusi; T214 e T215 nuovi.
+- **234:** riavvio dopo lo spegnimento del 03/11 alle 17:16 UTC (nessun task in corso, nulla da integrare); riparte la coda.
+- **232-233:** T89a, T215, T181, T216 integrati; T214 chiuso.
