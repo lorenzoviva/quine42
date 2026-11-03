@@ -102,6 +102,8 @@ export interface FormResult {
   animations: string[];
   /** Whatever the runner adds for the renderer (meshes): the kernel does not look at it. */
   meshes?: unknown;
+  /** The runner let go of the meshes, to stay within its limit (ADR-0108): the rest is all here, and asked again they come back. */
+  meshesGone?: boolean;
 }
 
 export interface FormRunner {
@@ -135,6 +137,8 @@ export interface Form {
   reach: number;
   /** Voxels per tile of this model (ADR-0049). */
   vpt: number;
+  /** Asks the runner again for the meshes it let go of (`FormResult.meshesGone`); whoever draws calls it, as often as it likes. */
+  remake?: () => void;
 }
 
 /** How many different seeds a kind of entity has in the world (instances share them: fewer meshes). */
@@ -477,6 +481,8 @@ export class Forms {
   private files: FileMap = {};
   /** Hash of each program's text: a form is of a program as it is written now. */
   private hashes = new Map<string, number>();
+  /** Forms whose meshes were asked for again and have not arrived. */
+  private remaking = new Set<Form>();
   /** Bumped whenever a form becomes ready (renderers rebuild what used stand-ins). */
   version = 0;
   onReady?: (f: Form) => void;
@@ -581,6 +587,7 @@ export class Forms {
     f = { key, model, seed, status: 'pending', cls, reach: 0, vpt, base: 0 };
     this.forms.set(key, f);
     const form = f;
+    form.remake = () => this.remake(form, req);
     void this.runner
       .run(req)
       .then((result) => {
@@ -600,6 +607,23 @@ export class Forms {
         form.error = e.message;
       });
     return f;
+  }
+
+  /** One request at a time: the same program and seed give the same grid, so nothing but the drawing changes and the form stays ready. */
+  private remake(form: Form, req: FormRequest): void {
+    if (this.remaking.has(form)) return;
+    this.remaking.add(form);
+    void this.runner
+      .run(req)
+      .then((result) => {
+        form.result = result;
+        this.version++;
+      })
+      .catch((e: Error) => {
+        form.status = 'failed';
+        form.error = e.message;
+      })
+      .finally(() => this.remaking.delete(form));
   }
 
   ready(model: string, seed: number, tint?: string): Form | undefined {

@@ -11,9 +11,18 @@ import type { MeshData } from '../mj/mesh';
 
 /**
  * Version of the persistent cache: raising it throws away everything saved before. 2 (T163): the entries of version 1 may be
- * half models, and nothing in them says so. 3 (T164): the keys changed, the old ones would only take room.
+ * half models, and nothing in them says so. 3 (T164): the keys changed, the old ones would only take room. 4 (T175): every entry says when it
+ * was last used and how much it weighs, and those saved before do not.
  */
-export const FORMS_DB_VERSION = 3;
+export const FORMS_DB_VERSION = 4;
+
+/**
+ * The most the page keeps ready beyond what it has drawn, and the most the persistent cache keeps, in bytes of arrays (ADR-0108, measures there).
+ * The second one must hold a whole world: least recently used out first, a world bigger than the cache would push out at every load what the next load asks for.
+ */
+export const FORM_MEMORY_BYTES = 128 * 1024 * 1024;
+export const FORM_DISK_BYTES = 4 * 1024 * 1024 * 1024;
+export const FORM_ENTRIES = 4096;
 
 /** The ports of this machine that stay the same from one day to the next: `npm run dev` and `vite preview` when not told otherwise. */
 const LASTING_PORTS = ['5173', '4173'];
@@ -26,6 +35,16 @@ const LASTING_PORTS = ['5173', '4173'];
 export function keepsFormsOnDisk(place: { hostname: string; port: string; search: string }): boolean {
   if (!['localhost', '127.0.0.1', '[::1]'].includes(place.hostname)) return true;
   return LASTING_PORTS.includes(place.port) || new URLSearchParams(place.search).has('formecache');
+}
+
+/** The bytes of the arrays of a mesh. */
+const meshBytes = (m: MeshData): number => [m.positions, m.normals, m.colors, m.indices, m.sway, m.glow, m.alpha].reduce((n, a) => n + (a?.byteLength ?? 0), 0);
+
+/** About how much a form takes: its arrays. Everything else in it is small, and the key is the program's text, already in memory. */
+export function formBytes(res: FormResult): number {
+  const m = res.meshes as FormMeshes | undefined;
+  const meshes = m ? meshBytes(m.body) + m.limbs.reduce((n, l) => n + meshBytes(l.mesh), 0) + m.frames.reduce((n, f) => n + meshBytes(f), 0) : 0;
+  return res.grid.cells.length + meshes;
 }
 
 export interface FormStore {
@@ -84,10 +103,23 @@ export class MemoryFormStore implements FormStore {
   }
 }
 
+/** When an entry of the persistent cache was last used and how much it weighs: apart from the entry, so that neither means reading a form. */
+const USES = 'uses';
+interface FormUse {
+  at: number;
+  bytes: number;
+}
+
 export class IdbFormStore implements FormStore {
   private dbPromise?: Promise<IDBDatabase | undefined>;
+  private clock = 0;
 
-  constructor(private dbName = 'rune-forms', private storeName = 'forms') {}
+  constructor(
+    private dbName = 'rune-forms',
+    private storeName = 'forms',
+    private maxBytes = FORM_DISK_BYTES,
+    private maxEntries = FORM_ENTRIES,
+  ) {}
 
   private db(): Promise<IDBDatabase | undefined> {
     if (this.dbPromise) return this.dbPromise;
@@ -97,8 +129,10 @@ export class IdbFormStore implements FormStore {
         const req = indexedDB.open(this.dbName, FORMS_DB_VERSION);
         req.onupgradeneeded = () => {
           const db = req.result;
-          if (db.objectStoreNames.contains(this.storeName)) db.deleteObjectStore(this.storeName);
-          db.createObjectStore(this.storeName);
+          for (const name of [this.storeName, USES]) {
+            if (db.objectStoreNames.contains(name)) db.deleteObjectStore(name);
+            db.createObjectStore(name);
+          }
         };
         // Another tab holds the old version: this one goes on without the persistent cache rather than waiting for it.
         req.onblocked = () => resolve(undefined);
@@ -114,15 +148,21 @@ export class IdbFormStore implements FormStore {
     }));
   }
 
+  /** Later than every use so far, also within a millisecond: the order is what the limit goes by. */
+  private now(): number {
+    return (this.clock = Math.max(Date.now(), this.clock + 1));
+  }
+
   async get(key: string): Promise<FormResult | undefined> {
     const db = await this.db();
     if (!db) return undefined;
     return new Promise((resolve) => {
       try {
-        const tx = db.transaction(this.storeName, 'readonly');
+        const tx = db.transaction([this.storeName, USES], 'readwrite');
         const req = tx.objectStore(this.storeName).get(key);
         req.onsuccess = () => {
           const res = req.result as FormResult | undefined;
+          if (res) tx.objectStore(USES).put({ at: this.now(), bytes: formBytes(res) } satisfies FormUse, key);
           resolve(res ? restoreFormResult(res) : undefined);
         };
         req.onerror = () => resolve(undefined);
@@ -133,14 +173,37 @@ export class IdbFormStore implements FormStore {
   }
 
   async set(key: string, res: FormResult): Promise<void> {
+    // Now, not after the wait for the database: by then the page may have let go of the meshes.
+    const whole = { ...res };
+    const bytes = formBytes(whole);
+    // Bigger than the whole cache: it would only push out everything else.
+    if (bytes > this.maxBytes) return;
     const db = await this.db();
     if (!db) return;
     return new Promise((resolve) => {
       try {
-        const tx = db.transaction(this.storeName, 'readwrite');
-        const req = tx.objectStore(this.storeName).put(res, key);
-        req.onsuccess = () => resolve();
-        req.onerror = () => resolve();
+        const tx = db.transaction([this.storeName, USES], 'readwrite');
+        tx.oncomplete = tx.onabort = tx.onerror = () => resolve();
+        const forms = tx.objectStore(this.storeName);
+        const uses = tx.objectStore(USES);
+        forms.put(whole, key);
+        uses.put({ at: this.now(), bytes } satisfies FormUse, key);
+        // In this transaction: another tab may be writing, and what it wrote counts.
+        const keys = uses.getAllKeys();
+        const all = uses.getAll();
+        all.onsuccess = () => {
+          const entries = (all.result as FormUse[]).map((use, i) => ({ key: keys.result[i] as string, ...use })).sort((a, b) => a.at - b.at);
+          let total = entries.reduce((n, e) => n + e.bytes, 0);
+          let left = entries.length;
+          for (const e of entries) {
+            if (total <= this.maxBytes && left <= this.maxEntries) break;
+            if (e.key === key) continue;
+            forms.delete(e.key);
+            uses.delete(e.key);
+            total -= e.bytes;
+            left--;
+          }
+        };
       } catch {
         resolve();
       }
@@ -152,10 +215,10 @@ export class IdbFormStore implements FormStore {
     if (!db) return;
     return new Promise((resolve) => {
       try {
-        const tx = db.transaction(this.storeName, 'readwrite');
-        const req = tx.objectStore(this.storeName).clear();
-        req.onsuccess = () => resolve();
-        req.onerror = () => resolve();
+        const tx = db.transaction([this.storeName, USES], 'readwrite');
+        tx.oncomplete = tx.onabort = tx.onerror = () => resolve();
+        tx.objectStore(this.storeName).clear();
+        tx.objectStore(USES).clear();
       } catch {
         resolve();
       }
@@ -168,14 +231,19 @@ export class WorkerRunner implements FormRunner {
   private queue: Array<{ id: number; req: FormRequest; key: string }> = [];
   private waiting = new Map<number, { ok: (r: FormResult) => void; fail: (e: Error) => void; key: string }>();
   private next = 1;
-  private memory = new Map<string, FormResult>();
+  /** Least recently used first. */
+  private memory = new Map<string, { result: FormResult; bytes: number }>();
+  /** How much `memory` holds. */
+  bytes = 0;
   private inflight = new Map<string, Promise<FormResult>>();
   readonly store: FormStore;
 
   constructor(
     n = Math.max(1, Math.min(4, (typeof navigator !== 'undefined' ? navigator.hardwareConcurrency || 4 : 4) - 1)),
     store?: FormStore,
-    workerFactory?: () => Worker
+    workerFactory?: () => Worker,
+    private maxBytes = FORM_MEMORY_BYTES,
+    private maxEntries = FORM_ENTRIES,
   ) {
     const onDisk = typeof indexedDB !== 'undefined' && (typeof location === 'undefined' || keepsFormsOnDisk(location));
     this.store = store ?? (onDisk ? new IdbFormStore() : new MemoryFormStore());
@@ -224,11 +292,12 @@ export class WorkerRunner implements FormRunner {
   }
 
   getCached(key: string): FormResult | undefined {
-    return this.memory.get(key);
+    return this.memory.get(key)?.result;
   }
 
   async clear(): Promise<void> {
     this.memory.clear();
+    this.bytes = 0;
     await this.store.clear();
   }
 
@@ -237,7 +306,11 @@ export class WorkerRunner implements FormRunner {
 
     // 1. In-memory cache hit (synchronously resolved)
     const memHit = this.memory.get(key);
-    if (memHit) return Promise.resolve(memHit);
+    if (memHit) {
+      this.memory.delete(key);
+      this.memory.set(key, memHit);
+      return Promise.resolve(memHit.result);
+    }
 
     // 2. In-flight deduplication: return existing job if already calculating
     const existing = this.inflight.get(key);
@@ -246,8 +319,9 @@ export class WorkerRunner implements FormRunner {
     const promise = (async () => {
       // 3. Persistent store (IndexedDB) hit
       const dbHit = await this.store.get(key);
-      if (dbHit) {
-        this.memory.set(key, dbHit);
+      // A store that holds the very objects of this page (MemoryFormStore) may have one whose meshes are gone: that is a miss.
+      if (dbHit && !dbHit.meshesGone) {
+        this.remember(key, dbHit);
         return dbHit;
       }
 
@@ -275,8 +349,31 @@ export class WorkerRunner implements FormRunner {
 
   /** Only what has finished: a half model goes to who asked and stops there, as in InlineRunner (ADR-0108). */
   private keep(key: string, result: FormResult): void {
-    this.memory.set(key, result);
+    this.remember(key, result);
     void this.store.set(key, result);
+  }
+
+  /**
+   * Within the limit, least recently used out first, the last one always in: who asked is about to draw it. What goes out must really go, and a `Form`
+   * of the kernel holds this same object: so it loses its meshes here, and the grid, which the kernel needs and which weighs little, stays
+   * (`geoOf` asks for them again). The geometries already made have their own hold on the arrays.
+   */
+  private remember(key: string, result: FormResult): void {
+    const old = this.memory.get(key);
+    if (old) this.bytes -= old.bytes;
+    this.memory.delete(key);
+    const bytes = formBytes(result);
+    this.memory.set(key, { result, bytes });
+    this.bytes += bytes;
+    for (const [k, e] of this.memory) {
+      if (this.memory.size <= 1 || (this.bytes <= this.maxBytes && this.memory.size <= this.maxEntries)) break;
+      this.memory.delete(k);
+      this.bytes -= e.bytes;
+      if (e.result.meshes) {
+        e.result.meshes = undefined;
+        e.result.meshesGone = true;
+      }
+    }
   }
 
   private pump(): void {

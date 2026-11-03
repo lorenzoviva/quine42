@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import type { Kernel } from '../kernel/kernel';
 import { tileNear } from '../kernel/corona';
 import { animateRing, Avatars, buildCoronaRing, buildRoom, buildShowcase, buildSituation, campusKey } from './corona3d';
-import { showFrame } from './models';
+import { isSharedGeometry, showFrame } from './models';
 import { ScreenWall } from './screens';
 import { ChainView } from './chain';
 import { BenchView } from './bench';
@@ -15,6 +15,14 @@ import type { Overlay } from './overlay';
 
 export type StudioRoom = ReturnType<Kernel['corona']['roomAt']>;
 
+/**
+ * The ring holds the geometries of the whole campus, the heaviest in the game (ADR-0108): out of sight for this long (seconds) it goes, and they with it.
+ * Long enough for who walks back and forth across the edge of the circle.
+ */
+const RING_IDLE = 60;
+/** The models of the campus arrive one at a time: the ring is built again at most this often (seconds), not once for each. */
+const RING_REBUILD = 1;
+
 export class CoronaView {
   /** Everything of the corona hangs from here, in real space. */
   readonly root = new THREE.Group();
@@ -22,6 +30,9 @@ export class CoronaView {
   private ring?: THREE.Group;
   /** What the campus wore when the ring was built (its buildings' models). */
   private ringKey = '';
+  /** When the ring was built, and when it was last revealed. */
+  private ringBuilt = 0;
+  private ringSeen = 0;
   private rooms = new Map<string, { group: THREE.Group; globe?: THREE.Object3D; version: number }>();
   /** The marks on the Direction's situation table (T46a): what they show, when it was last read, what pulses. */
   private sit?: { key: string; at: number; group: THREE.Group; pulse: THREE.Object3D[] };
@@ -49,8 +60,7 @@ export class CoronaView {
 
   /** The universe's files changed: the ring and the rooms are built again. */
   reset(): void {
-    if (this.ring) this.root.remove(this.ring);
-    this.ring = undefined;
+    this.dropRing();
     for (const r of this.rooms.values()) this.root.remove(r.group);
     this.rooms.clear();
     for (const v of this.shows.values()) this.root.remove(v.group);
@@ -62,16 +72,29 @@ export class CoronaView {
     }
   }
 
+  /** Frees what is the ring's own (its pavement, its neon signs); the models' geometries are shared, and `trimGeometries` sees to them. */
+  private dropRing(): void {
+    this.ring?.traverse((o) => {
+      const mesh = o as THREE.Mesh;
+      if (!mesh.geometry) return;
+      if (!isSharedGeometry(mesh.geometry)) mesh.geometry.dispose();
+      for (const m of [mesh.material].flat()) (m as THREE.MeshBasicMaterial).map?.dispose();
+    });
+    if (this.ring) this.root.remove(this.ring);
+    this.ring = undefined;
+  }
+
   update(t: number, studio: StudioRoom, revealed: boolean, interior: boolean): void {
     const k = this.kernel;
     const campus = revealed ? campusKey(k) : this.ringKey;
-    if (this.ring && campus !== this.ringKey) {
-      this.root.remove(this.ring);
-      this.ring = undefined;
-    }
+    // By the clock on the wall: `t` goes slowly where frames are few, and those are the machines that most need the memory back.
+    const now = performance.now() / 1000;
+    if (revealed) this.ringSeen = now;
+    if (this.ring && ((campus !== this.ringKey && now - this.ringBuilt >= RING_REBUILD) || now - this.ringSeen > RING_IDLE)) this.dropRing();
     if (revealed && !this.ring) {
       this.root.add((this.ring = buildCoronaRing(k)));
       this.ringKey = campus;
+      this.ringBuilt = now;
     }
     if (this.ring) {
       this.ring.visible = revealed && !interior;

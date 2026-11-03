@@ -10,7 +10,7 @@ import { runeGlyph, type RuneComp } from '../kernel/runes';
 import { hash32, hashStr } from '../kernel/rng';
 import { Builder } from './terrain';
 import { casts, clipped, MAT, rgbOf, solid } from './materials';
-import { modelObject, showFrame } from './models';
+import { geoOf, modelObject, showFrame } from './models';
 import type { FormComp } from '../kernel/forms';
 
 export interface Limb {
@@ -135,7 +135,7 @@ export class Entities {
     const k = this.k;
     const fc: FormComp | undefined = k.ecs.get(id, 'form');
     const f = fc && k.forms.ready(fc.model, fc.seed, fc.tint);
-    return `${k.ecs.get(id, 'glyph')?.color}|${f?.result?.meshes ? f.key : 'stand-in'}|${fc?.done?.join(',') ?? ''}`;
+    return `${k.ecs.get(id, 'glyph')?.color}|${f && geoOf(f) ? f.key : 'stand-in'}|${fc?.done?.join(',') ?? ''}`;
   }
 
   private build(id: Id, sig: string): EntityView {
@@ -272,7 +272,7 @@ export class Wanderer {
   update(k: Kernel, dt: number, t: number): void {
     const fc: FormComp | undefined = k.ecs.get(k.wandererEntity, 'form');
     const f = fc && k.forms.ready(fc.model, fc.seed, fc.tint);
-    const sig = f?.result?.meshes ? f.key : 'stand-in';
+    const sig = f && geoOf(f) ? f.key : 'stand-in';
     if (sig !== this.sig) {
       this.sig = sig;
       this.scene.remove(this.view.root);
