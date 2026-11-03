@@ -1574,7 +1574,7 @@ le risposte alle domande del piano.
   dà l'autore: se mancano, la domanda va in `docs/pipeline/domande/T45e.md`.
 - Esito: implementati gli endpoint server (`/api/stripe/checkout`, `/api/stripe/webhook`) con verifica firma HMAC-SHA256 (`stripe-signature`), accredito crediti idempotente (`Kernel.creditRecharge` e persistenza `world/pagamenti.json`), blocco acquisti per anonimi (403), interfaccia di ricarica rapida e saldo nel profilo (`P`); test headless in `tests/stripe.test.ts` (6/6 passati); ADR-0083 registrato. Codice e test integrati nel base `3d` con T77. Chiavi di test inserite dall'autore in `.env` (con listener locale indicato su porta 4242); verifica nel browser delegata a T93.
 
-### T45f · Il server su Google Cloud — `da fare` (dipende da T44b, T45d, T133, T134, T172)
+### T45f · Il server su Google Cloud — `da fare` (dipende da T44b, T45d, T133, T134, T172, T209)
 - Pipeline: claude · stima 6% · priorità 10
 - Fare: il server della sessione e i repository degli universi su Google Cloud, sempre acceso (Cloud Run con istanza minima o una VM,
   disco persistente per `universes/`, repository privati), il deploy da script, i segreti in Secret Manager.
@@ -3269,3 +3269,17 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 - Browser: non serve; la pagina si legge dopo il prossimo riavvio del processo.
 - Quando è fatto: commit su `task/T208`, solo questo. Sicurezza: nessuna superficie nuova.
 - Esito: `parseQuestionFile` legge la riga `Stato:` in testa e, senza riga, non prende più per risposta l'a capo o `**`; badge (`domandeAperte`, anche 0) solo sulle aperte, elenco con le aperte per prime e stato giusto; `POST /api/domande` conserva la riga e scrive anche su `**Risposta:**`; regola nel README; test in `tests/pipeline.test.ts`, suite e typecheck verdi. Sui file veri: 3 aperte (T45f, T93, T153), 12 chiuse. Non provato nel browser (il task non lo chiede): si vedrà dopo il riavvio del processo. Sicurezza: nessuna superficie nuova.
+### T209 · Il sorvegliante: `healthy` da `pronto`, e `stop()` che aspetta i git — `da fare` (dipende da T205)
+- Pipeline: claude · stima 2% · approvato · priorità 9
+- Contesto: le due proposte di T176 (`dossier T176`, l'esito), rimaste senza risposta; le approva l'orchestratore nell'autonomia data dall'autore il 03/11. Da chiudere prima di T45f, perché in produzione i mondi si aprono lenti. (1) `healthy` si conta dal `fork`: con i tempi di produzione (60 s) un mondo che impiega 90 s ad aprirsi ha le morti azzerate al primo sguardo; se muore appena aperto per un commit cattivo non torna all'ultimo vissuto e non si arrende, riparte per sempre, 90 s di processore ogni volta. (2) `stop()` non aspetta il `git commit` già partito: se il processo viene interrotto i lock restano nel repository dell'universo.
+- Cosa fare: in `server/worldHost.ts` contare `healthy` da `pronto` (`heard`/`markGood`); `stop()` aspetta i git in corso, entro un limite di tempo, e non lascia lock. Solo questo: tempi e soglie di produzione non cambiano.
+- Test: un mondo che muore appena aperto, dopo un'apertura più lunga di `healthy`, torna al commit vissuto e alla fine si arrende; `stop()` con un commit in corso non lascia `*.lock`. Suite intera e typecheck con i loro turni.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T209`; nell'esito se una voce V-NNN è da aggiungere o aggiornare (`docs/sicurezza/registro.md`) e la riga «sicurezza:».
+### T210 · Il `heap out of memory` nel log della suite — `da fare` (dipende da T205)
+- Pipeline: claude · stima 2% · approvato · priorità 12
+- Contesto: le rinomine T188-T194 riportano un `heap out of memory` nel log di `npm test`, con tutti i test verdi. Non si sa di chi è né se un errore di quel tipo può nascondere un file di test non eseguito o un rosso. Proposta dell'orchestratore, approvata nell'autonomia del 03/11. (`dossier T194`)
+- Cosa fare: trova quale processo finisce la memoria (worker di Vitest, un mondo avviato da un test, un figlio) e con quale test. Se è un mondo di prova col suo limite voluto (`QUINE_MONDO_MEMORIA`, ADR-0110) e il test se lo aspetta, scrivilo e chiudi. Se è altro, correggilo; se la correzione è grande, descrivila nell'esito e fermati.
+- Test: suite intera col suo turno, due giri, senza quell'errore o con la spiegazione del perché resta.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T210` se c'è da cambiare qualcosa; nell'esito la causa, con il numero dei file di test eseguiti rispetto a quelli attesi.

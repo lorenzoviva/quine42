@@ -25,7 +25,7 @@ Aggiornato il 03/11/2026, epoca 224. Crediti: vedi `stato`.
 ## Attese dall'autore
 
 - **Domande nei file (03/11): aperte solo T45f (progetto, hosting, regione), T93 (regime fiscale, non blocca); le altre hanno `Stato: chiusa` in testa. T208 integrato: il conteggio giusto della pagina web si vede dopo il riavvio del processo, non provato nel browser.**
-- **T176, due proposte sul sorvegliante, senza risposta** (se sì, task Claude prima di T45f, con voce V-NNN se è il caso): (1) `healthy` conti da `pronto`; (2) `stop()` aspetti i git in corso.
+- **T176, le due proposte sul sorvegliante:** approvate da me nell'autonomia, sono T209; T45f ora dipende da T209. T210 indaga il `heap out of memory`. Da dirgli al ritorno.
 - **T153**: domande chiuse. Nomi scelti (03/11): `orichalcum`, `neapolis`, `sidera`, già in `generazione` di `config.json`. Il resto è deciso: niente API, Claude Code, 25 % per universo modificabile in corsa, tutti multigiocatore, `aurora` intatto. T184-T185: `in attesa`, ripartono solo se lo dice lui.
 - **T45f** (`domande/T45f.md`, progetto GCP e deploy). Prima di T45f restano non provabili qui: token vero di Firebase, TLS e bilanciatore, `QUINE_PROXY_FIDATI` e controllo di salute, Stripe vero con le imposte, `npm ci --omit=dev`, tetto Gemini sul server di produzione; silenzio massimo del mondo 5,5 s contro i 5 di `notice`.
 - **Decisioni di gioco e sicurezza chieste:** il salto sulle casse; V-023 con gli account; V-002 chiusa col residuo; l'orologio di 2 s di T126; anonimo che avvia un mondo fermo (consigliato tenerlo); il master del clone nel corpo della richiesta (consigliato tenerlo); Referente senza crediti e `QUINE_TETTO_RICARICHE`; immagine per le carte dei luoghi (consigliato no).
@@ -40,7 +40,7 @@ Aggiornato il 03/11/2026, epoca 224. Crediti: vedi `stato`.
 - **Argon:** quota esaurita fino al 04/11. **Fable:** solo i task più difficili, mai orchestratore; una sola misura (T157: 7 % sul suo contatore, ~55 punti di sessione).
 - Al più una verifica nel browser alla volta, solo su Claude. Risposte brevi all'autore.
 - Obiettivi: nessun parallelismo che aumenta il lavoro; finire i crediti entro il reset settimanale, non prima; margine per le urgenze.
-- **Autonomia scaduta il 02/11 alle 18:00:** le mie proposte nuove aspettano l'approvazione; i task già approvati vanno avanti. Priorità 0 solo per le urgenze dell'autore e ciò che blocca gli altri.
+- **Autonomia fino al 03/11 alle 18:00** (l'autore, che non può rispondere: «sii proattivo»; scritto «domani», ma la data è questa): approvo da solo le mie proposte; ciò che spetta solo a lui (nomi, regime fiscale, hosting, tetti) resta in attesa. Dopo quell'ora le proposte nuove aspettano di nuovo l'approvazione. Priorità 0 solo per le urgenze dell'autore e ciò che blocca gli altri.
 - **Mai `git commit -a` nel base:** l'autore ha file suoi (`lab/mjx/models/handmade/lampione copy*.xml`, `docs/design/logo/proposte/`).
 - **Il parser delle dipendenze legge «dopo» e «dipende da» in tutto il blocco**, anche in un nome di file: niente «dopo» vicino a un Txx che non è una dipendenza. Dopo un blocco nuovo controlla `stato`.
 - Un test rosso nella suite intera e verde da solo non è per forza un difetto del task: guarda il carico. Un task «in corso» col log vuoto e la conversazione finita su `usage_limit_reached`: `interrompi` + `riprendi`.
