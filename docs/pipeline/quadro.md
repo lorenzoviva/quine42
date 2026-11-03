@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 03/11/2026, epoca 234. Crediti: vedi `stato`.
+Aggiornato il 03/11/2026, epoca 236. Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -21,11 +21,12 @@ Aggiornato il 03/11/2026, epoca 234. Crediti: vedi `stato`.
 - **T214 chiuso senza commit:** il terreno grigio non è una regressione della cache. `pagehide` salva lo scostamento del tappeto, che sposta `?dev&teleport=46,0` di 46 caselle a ogni caricamento chiuso bene, su neve che alla luce della corona pare grigia. Causa nelle catture di T213 dedotta (i file non ci sono più). Non provati finestra vera e multigiocatore. Avviso: T216, integrato. **Chiesto all'autore:** chi chiude nella corona deve ripartire spostato? Nessun task finché non risponde.
 - **T215 integrato** (ADR-0108): arrivo alla corona da 3,2 a 0,9-1,9 s in headless, blocchi del thread da 2,1 a 0,3-0,5 s, memoria invariata; mesh lette in un worker. Non provati finestra vera, multigiocatore, tetto su disco superato. Cambio tardivo di `forms.version` non ripresentato, causa non accertata. Scoperti, nessun task: 1-3 lavori ai worker al caricamento (T212 ne contava 0); il plinto scolpito con un seme nuovo a ogni arrivo, di solito una voce in più su disco.
 - **T181 integrato** (solo `lab/`): `lab/banco/pattern.md` e tre programmi di riferimento reggono tutte le misure a 5 semi e 2 taglie. Palazzina e forte passano la soglia di varianza di T180, il tempio no nel perimetro (0,00: il lotto da 100 non lascia spazio). Non provati nel gioco (T156) né giudicati sulle foto dall'autore. Costo: stima 10, misurati 16 punti di settimana, 30 del contatore Fable (da 93 a 63), ~131 di sessione, 80 dollari, con altri task in parallelo: rapporto ~8, come in config. Resta la cartella vuota `worktrees/t181`, occupata da un processo: `integra` è uscito con errore dopo il merge, branch tolto a mano.
+- **T217 e T219 integrati:** vetro della corona trasparente; viale tra due cerchi perfetti, e le caselle del cerchio interno non sono più un muro invisibile. T219 non ha provato: `?cartone` di notte alla porta, le porte degli edifici a blocco; restano a gradini il bordo della simulazione su terreno rialzato, vicoli e blocchi; trenino forse nella corsia interna, non controllato.
 - ADR nuovi dallo **0123**.
 
 ## Pronti e priorità
 
-1. **In coda, approvati e pronti, partono da soli:** T217 T219 T220 T182 T89b T89c T89e T183 T152 T186 T158. T218 aspetta T217.
+1. **In corso T218. In coda, approvati e pronti, partono da soli:** T220 T221 T226 T182 T89b T89c T89e T183 T152 T186 T158.
 1a. **T226** (corona disegnata solo fuori dal tappeto, 3/4 di base; richiesta dell'autore, 03/11): la soglia oggi è 0,45 del raggio; la causa dell'orbita entrando in una struttura è dedotta, non accertata.
 1b. **Suono da MJ (richiesta dell'autore, 03/11):** T221 (lingua XML, sintetizzatore puro, preset) → T222 (SoundLab in `/lab/suono/`) e T223 (analisi per gli agenti); T221 → T224 (nel gioco); T223 + T224 → T225 (Musicista nella `galleria`, nessun edificio nuovo). Mockup: `docs/userchats/mj_3d_soundlab_sintetizzatore_musicale_markovjunior.html`, committato perché i worktree lo vedano. Scelte mie da correggere se l'autore vuole: musica per ambiente e ora, un solo sintetizzatore puro al posto del grafo Web Audio del mockup.
 4. **T182 → T156** (strutture procedurali). T182 su Claude, stima 8 %, al più 4 giri; è pronto.
@@ -58,5 +59,5 @@ Aggiornato il 03/11/2026, epoca 234. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **234:** riavvio dopo lo spegnimento del 03/11 alle 17:16 UTC (nessun task in corso, nulla da integrare); riparte la coda.
-- **232-233:** T89a, T215, T181, T216 integrati; T214 chiuso.
+- **236:** T219 integrato; T218 in corso.
+- **234-235:** riavvio dopo lo spegnimento del 03/11; T221-T226 creati su richiesta dell'autore; T217 integrato.
