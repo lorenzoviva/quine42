@@ -1,4 +1,4 @@
-// The action menu: what you can do to the thing in front of you (E). Number keys or click.
+// The action menu: what you can do to the entity in front of you (E). Number keys or click.
 // "Altro…" turns it into a line where you write the action yourself; the Council judges it.
 
 import type { ActionOption, Kernel } from '../kernel/kernel';

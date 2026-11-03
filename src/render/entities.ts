@@ -1,6 +1,6 @@
 // What moves and lies on the ground: people, animals, things, items to pick up, the wanderer, and the
 // runes carved in the ground. Each entity has a view (an Object3D) kept in step with the ECS. Until a
-// thing's model is ready (src/render/models.ts) its view is a stand-in by kind: a figure with legs and
+// entity's model is ready (src/render/models.ts) its view is a stand-in by kind: a figure with legs and
 // arms that swing, a block, a floating gem.
 
 import * as THREE from 'three';
@@ -19,7 +19,7 @@ export interface Limb {
   phase: number;
 }
 
-export interface ThingView {
+export interface EntityView {
   root: THREE.Group;
   body: THREE.Object3D;
   limbs: Limb[];
@@ -85,7 +85,7 @@ export function figureStandIn(color: string, scale = 1, skin = '#e8b88a', materi
   return { root, body, limbs };
 }
 
-function thingStandIn(color: string, r: number): THREE.Mesh {
+function entityStandIn(color: string, r: number): THREE.Mesh {
   return casts(new THREE.Mesh(box(r * 1.8, Math.max(0.3, r * 2), r * 1.8, rgbOf(color)), MAT.world), true);
 }
 
@@ -114,8 +114,8 @@ export function turnTowards(v: { yaw: number; root: THREE.Object3D }, goal: numb
   v.root.rotation.y = v.yaw;
 }
 
-export class Things {
-  readonly views = new Map<Id, ThingView>();
+export class Entities {
+  readonly views = new Map<Id, EntityView>();
   constructor(
     private k: Kernel,
     private world: THREE.Group,
@@ -138,7 +138,7 @@ export class Things {
     return `${k.ecs.get(id, 'glyph')?.color}|${f?.result?.meshes ? f.key : 'stand-in'}|${fc?.done?.join(',') ?? ''}`;
   }
 
-  private build(id: Id, sig: string): ThingView {
+  private build(id: Id, sig: string): EntityView {
     const k = this.k;
     const gl = k.ecs.get(id, 'glyph') ?? { color: '#aaa' };
     const p = k.ecs.get(id, 'pos');
@@ -157,7 +157,7 @@ export class Things {
       ({ root, body, limbs } = figureStandIn(v.color ?? gl.color, (persona ? 1.1 : 0.55) * v.scale));
     } else {
       root = new THREE.Group();
-      body = item ? itemStandIn(gl.color) : thingStandIn(gl.color, k.ecs.get(id, 'body')?.r ?? 0.35);
+      body = item ? itemStandIn(gl.color) : entityStandIn(gl.color, k.ecs.get(id, 'body')?.r ?? 0.35);
       root.add(body);
     }
     root.traverse((o) => (o.userData.entity = id));
@@ -193,7 +193,7 @@ export class Things {
         continue;
       }
       if (v.kind !== 'figure') {
-        // A thing (a structure too) stands on the ground under its middle; its cellar under it (T52b).
+        // An entity (a structure too) stands on the ground under its middle; its cellar under it (T52b).
         v.root.position.set(p.x, k.groundAt(p.x, p.y) - k.sunk(id), p.y);
         const cut = id === inside;
         if (v.cut !== cut) {

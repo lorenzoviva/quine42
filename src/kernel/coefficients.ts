@@ -1,7 +1,7 @@
 // The coefficients of generation (T45b, ADR-0085): how often every agent asks the model, from 0 (never) to 1 (as
 // the game always did). Where a call has a rhythm the coefficient stretches it (sessions every N places, dialogues
 // between people, the Sculptor's revisions, plots, models); where it has none it thins what causes it (fewer people
-// per place, rarer item packs and new kinds, fewer new things per place); what the wanderer asks for themselves
+// per place, rarer item packs and new kinds, fewer new entities per place); what the wanderer asks for themselves
 // cannot be thinned, and the Genesis screen says what it costs. «Low Detail» is the game played to save.
 
 import { priceOf, costOf } from './ai/prices';
@@ -161,7 +161,7 @@ export const HOUR = {
   persone: 1.5,
   /** Seconds out of the hour spent near two people who could talk. */
   vicini: 1800,
-  /** New things the Cartographer asks for, unknown items on the ground, per place. */
+  /** New entities the Cartographer asks for, unknown items on the ground, per place. */
   nuovi: 0.3,
   ignoti: 0.3,
   /** What the wanderer asks: words to people, «Altro…» and fabrications, «Esamina» and «Leggi». */

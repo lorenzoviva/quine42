@@ -392,7 +392,7 @@ export class MockAiModels implements AiModels {
     const has = (...xs: string[]) => ws.some((w) => xs.some((x) => w.startsWith(x)));
     const name = d.target?.name ?? 'la cosa';
     const label = String(d.text ?? '').trim().replace(/^./, (c: string) => c.toUpperCase()).slice(0, 30);
-    // A thing with a shape of its own changes it: the Sculptor will write the rule.
+    // An entity with a shape of its own changes it: the Sculptor will write the rule.
     if (d.shape && has('scheggi', 'ammacc', 'incid', 'accend', 'spegn', 'dipin')) return { possibile: true, racconto: `${name} cambia sotto le tue mani.`, effetti: [{ tipo: 'bisogni', energia: -2 }], ripetibile: true, etichetta: label, forma: `${name} ${ws.find((w) => /scheggi|ammacc|incid/.test(w)) ? 'si scheggia in parte' : 'cambia colore in parte'}` };
     // Another wanderer (T43b): a blow hurts, care heals (the kernel takes away what the game does not allow).
     if (d.target?.kind === 'altro viandante' && has('colp', 'pugn', 'ferisc', 'picchi')) return { possibile: true, racconto: `Colpisci ${name}.`, effetti: [{ tipo: 'bisogni', salute: -20, energia: -5 }, { tipo: 'messaggio', testo: 'Ahi!' }], ripetibile: true, etichetta: label };

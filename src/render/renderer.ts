@@ -1,7 +1,7 @@
 // The 3D renderer (step 9, ADR-0040): three.js, a camera in 3/4 from the south that turns by quarter turns
 // (ADR-0047: the input turns the keys with it), HUD and panels above it in the DOM, text on a 2D overlay.
 //
-// Spaces (ADR-0004): the simulation — chunks, things, runes — lives in carpet coordinates and is drawn
+// Spaces (ADR-0004): the simulation — chunks, entities, runes — lives in carpet coordinates and is drawn
 // shifted by the carpet's offset; the wanderer, the corona and the studio are in real space. Kernel
 // (x, y) is three.js (x, z), one tile is one unit, y is up. Once the corona shows, nothing of the
 // simulation is drawn beyond the circle.
@@ -13,7 +13,7 @@ import type { CoronaView, StudioRoom } from './coronaview';
 import { CUT, U } from './materials';
 import { Overlay } from './overlay';
 import { buildChunk, chunkSig, disposeChunk, tileForms, type TerrainView } from './terrain';
-import { Lights, Runes, Things, Wanderer } from './things';
+import { Lights, Runes, Entities, Wanderer } from './entities';
 
 const SKY = { day: new THREE.Color('#9cc8e8'), dusk: new THREE.Color('#e8a070'), night: new THREE.Color('#0e1424'), studio: new THREE.Color('#07070f'), corona: new THREE.Color('#05060a') };
 const PITCH = 0.95;
@@ -42,7 +42,7 @@ export class Renderer {
   /** The simulation, in carpet coordinates. */
   private world = new THREE.Group();
   private chunks = new Map<string, TerrainView>();
-  private things: Things;
+  private entities: Entities;
   private runes: Runes;
   private wanderer: Wanderer;
   private lights: Lights;
@@ -79,7 +79,7 @@ export class Renderer {
     this.sun.shadow.bias = -0.0004;
     this.sun.shadow.normalBias = 0.02;
     this.scene.add(this.hemi, this.sun, this.sun.target, this.world, this.flash);
-    this.things = new Things(kernel, this.world);
+    this.entities = new Entities(kernel, this.world);
     this.runes = new Runes(kernel, this.world);
     this.wanderer = new Wanderer(this.scene);
     this.lights = new Lights(this.scene);
@@ -110,7 +110,7 @@ export class Renderer {
     }
     this.chunks.clear();
     this.corona?.reset();
-    this.things.clear();
+    this.entities.clear();
   }
 
   /** The master's client draws the corona too. */
@@ -250,7 +250,7 @@ export class Renderer {
       const pc = watch ?? { ...k.wandererCarpet(), z: k.wandererPos().z };
       const inside = k.structureAt(pc.x, pc.y);
       CUT.constant = inside !== undefined ? 1.15 + k.floorAt(pc.x, pc.y, pc.z) : 1e9;
-      this.things.update(dt, this.t, inside);
+      this.entities.update(dt, this.t, inside);
       this.runes.update(this.t);
     }
     this.wanderer.update(k, dt, this.t);

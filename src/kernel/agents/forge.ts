@@ -1,4 +1,4 @@
-// The Forge: how a new thing enters the universe as a module.
+// The Forge: how a new entity enters the universe as a module.
 //   Narrator  → concept (what it is, where it belongs, how it looks, how it is used, who it is)
 //   Physicist → physics (solid, pushable, mass, friction, weight, stacking…)
 //   Engineer  → Lua logic and extra components
@@ -34,7 +34,7 @@ export interface ForgeRequest {
 }
 
 /**
- * The size a forged thing may have (ADR-0092): any but the two rare ones, which are the world's (one per zone, one
+ * The size a forged entity may have (ADR-0092): any but the two rare ones, which are the world's (one per zone, one
  * per realm) and only for structures.
  */
 export const forgedSize = (t: string | undefined): { taglia?: string } => {

@@ -80,7 +80,7 @@ describe('the thin client (T39)', () => {
     // The mirror has the server's places, and nothing it made itself.
     expect(anna.k.chunks.size).toBeGreaterThan(0);
     for (const [key, ch] of anna.k.chunks) expect(ch.tiles).toBe(anna.session.places.get(key)!.tiles);
-    expect(anna.k.ecs.query('pickup').length).toBe([...anna.session.things.values()].filter((t) => t.c?.pickup).length);
+    expect(anna.k.ecs.query('pickup').length).toBe([...anna.session.entities.values()].filter((t) => t.c?.pickup).length);
     // Each sees the other as a wanderer of their own colour.
     const b = avatarOf(anna, 'bruno');
     expect(b).toBeDefined();
@@ -164,7 +164,7 @@ describe('the thin client (T39)', () => {
     run(server, [anna], 12);
     const mirrorOf = (sid: number) => anna.k.ecs.query('pickup').find((e) => {
       const p = anna.k.ecs.get(e, 'pos');
-      const t = anna.session.things.get(sid);
+      const t = anna.session.entities.get(sid);
       return t && Math.abs(p.x - t.x) < 0.01 && Math.abs(p.y - t.y) < 0.01;
     });
     const near = mirrorOf(close)!;
@@ -179,7 +179,7 @@ describe('the thin client (T39)', () => {
     run(server, [anna], 12);
     expect(k.ecs.alive.has(close)).toBe(false);
     expect(anna.k.inventory().slots.some((s) => s?.item === item)).toBe(true);
-    expect(anna.k.ecs.query('pickup').some((e) => anna.k.ecs.get(e, 'pos').x === anna.session.things.get(close)?.x)).toBe(false);
+    expect(anna.k.ecs.query('pickup').some((e) => anna.k.ecs.get(e, 'pos').x === anna.session.entities.get(close)?.x)).toBe(false);
     // Out of reach: it vanishes, the server says no, it is back.
     void anna.k.perform(away, 'raccogli');
     expect(anna.k.ecs.alive.has(away)).toBe(false);
@@ -489,9 +489,9 @@ describe('il mondo riparte (T127, ADR-0110)', () => {
     // What the mirror shows is what the new world told, once.
     expect(k.files['models/nuovo.xml']).toBe('dal mondo ripartito');
     const mirrored = (thinClient as unknown as { local: Map<number, number> }).local;
-    expect(session.things.size).toBeGreaterThan(0);
-    expect(mirrored.size).toBe(session.things.size);
-    for (const serverId of mirrored.keys()) expect(session.things.has(serverId)).toBe(true);
+    expect(session.entities.size).toBeGreaterThan(0);
+    expect(mirrored.size).toBe(session.entities.size);
+    for (const serverId of mirrored.keys()) expect(session.entities.has(serverId)).toBe(true);
     // And it goes on: the new world's clock is what it hears.
     const tick = session.tick;
     run(next, [thinClient], 30);

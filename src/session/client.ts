@@ -1,5 +1,5 @@
 // The client side of a session (T38, ADR-0058): what a client knows of the world, as the server tells it. It
-// keeps the files, its wanderer, the places, the things and the other wanderers in sight, sends its steps and
+// keeps the files, its wanderer, the places, the entities and the other wanderers in sight, sends its steps and
 // actions, and takes back the server's corrections. No kernel and no drawing here: the thin client of T39
 // gives this to the renderer.
 
@@ -7,7 +7,7 @@ import type { FileMap } from '../kernel/types';
 import type { FeedEntry } from '../kernel/agents/council';
 import type { PlayerSpot } from '../kernel/situation';
 import type { Profile } from '../kernel/wanderers';
-import type { ClientLink, ClientMsg, ContainerView, Dialog, FileChanges, FormView, Me, MyState, Notice, OtherView, ChunkView, ServerMsg, ThingView } from './protocol';
+import type { ClientLink, ClientMsg, ContainerView, Dialog, FileChanges, FormView, Me, MyState, Notice, OtherView, ChunkView, ServerMsg, EntityView } from './protocol';
 
 export interface Outcome {
   ok: boolean;
@@ -50,7 +50,7 @@ export class SessionClient {
   forma?: FormView;
   stato: MyState = {};
   readonly places = new Map<string, ChunkView>();
-  readonly things = new Map<number, ThingView>();
+  readonly entities = new Map<number, EntityView>();
   readonly others = new Map<string, OtherView>();
   /** The master's (T42c): every player connected and where they are, as the server last said. */
   players: PlayerSpot[] = [];
@@ -134,7 +134,7 @@ export class SessionClient {
         Object.assign(this, { id: m.id, nome: m.nome, profilo: m.profilo, riparato: m.riparato ?? [], anonimo: !!m.anonimo, master: !!m.master, files: m.files, branch: m.ramo ?? {}, me: m.me, forma: m.forma, stato: m.stato });
         this.feed.splice(0, this.feed.length, ...(m.concilio ?? []));
         this.places.clear();
-        this.things.clear();
+        this.entities.clear();
         this.others.clear();
         this.apply(m);
         this.entered?.();
@@ -176,14 +176,14 @@ export class SessionClient {
     this.onMessage?.(m);
   }
 
-  private apply(m: { tick: number; ora: number; luoghi?: ChunkView[]; cose?: ThingView[]; via?: number[]; viandanti?: OtherView[]; partiti?: string[]; giocatori?: PlayerSpot[] }): void {
+  private apply(m: { tick: number; ora: number; luoghi?: ChunkView[]; cose?: EntityView[]; via?: number[]; viandanti?: OtherView[]; partiti?: string[]; giocatori?: PlayerSpot[] }): void {
     this.tick = m.tick;
     this.ora = m.ora;
     if (m.giocatori) this.players = m.giocatori;
     for (const p of m.luoghi ?? []) this.places.set(p.key, p);
-    // A thing that only moved keeps what it is.
-    for (const t of m.cose ?? []) this.things.set(t.id, Object.keys(t).length > 3 ? t : { ...(this.things.get(t.id) ?? t), x: t.x, y: t.y });
-    for (const id of m.via ?? []) this.things.delete(id);
+    // An entity that only moved keeps what it is.
+    for (const t of m.cose ?? []) this.entities.set(t.id, Object.keys(t).length > 3 ? t : { ...(this.entities.get(t.id) ?? t), x: t.x, y: t.y });
+    for (const id of m.via ?? []) this.entities.delete(id);
     for (const o of m.viandanti ?? []) this.others.set(o.id, o);
     for (const id of m.partiti ?? []) this.others.delete(id);
   }

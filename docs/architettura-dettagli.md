@@ -324,7 +324,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 - **Il client sottile** (ADR-0059, T39): se l'universo è in multigiocatore `main.ts` entra nella sessione (`socket.ts`, il
   viandante della scheda: `?viandante=<id>` o uno per scheda) e avvia un **kernel specchio** (`KernelOptions.mirror`: niente
   generazione, salvataggi né Concilio; `mirrorTick` muove solo il suo viandante) che `ThinClient` (`thin.ts`) riempie: luoghi →
-  chunk (con i lotti), cose → entità con `THING_PARTS`, altri viandanti → entità `remote` interpolate (`FOLLOW`), con arti e
+  chunk (con i lotti), cose → entità con `ENTITY_PARTS`, altri viandanti → entità `remote` interpolate (`FOLLOW`), con arti e
   fumetti. Il passo è predetto e mandato ogni 50 ms, la `correzione` lo rimette a posto, oltre 8 caselle il client segue il server
   (`FAR` sul server). Le azioni (`interact perform freeAction talk inscribePhrase dropSelected castSpell action`) vanno al server
   con esito ottimistico (la cosa raccolta sparisce, la porta si apre, la frase incisa lascia la mano), annullato se rifiutato o

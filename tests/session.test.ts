@@ -76,13 +76,13 @@ describe('the kernel on the server (T38)', () => {
       expect(anna.places.get(key)!.tiles).toBe(k.chunks.get(key)!.tiles);
       expect(bruno.places.get(key)!.tiles).toBe(anna.places.get(key)!.tiles);
     }
-    // The things both see are where the server has them (to the last update: one more tick period).
+    // The entities both see are where the server has them (to the last update: one more tick period).
     for (let i = 0; i < 6; i++) server.tick(DT);
-    const things = [...anna.things.keys()].filter((id) => bruno.things.has(id));
+    const things = [...anna.entities.keys()].filter((id) => bruno.entities.has(id));
     expect(things.length).toBeGreaterThan(0);
     for (const id of things) {
-      const a = anna.things.get(id)!;
-      const b = bruno.things.get(id)!;
+      const a = anna.entities.get(id)!;
+      const b = bruno.entities.get(id)!;
       expect([a.x, a.y, a.m]).toEqual([b.x, b.y, b.m]);
     }
     // Each sees the other where the server has them.
@@ -170,7 +170,7 @@ describe('the kernel on the server (T38)', () => {
     expect(anna.stato.hand?.tokens).toEqual([]);
     expect(bruno.stato.hand?.tokens ?? []).toEqual([]);
     // What is far is out of reach; what does not exist is not there.
-    const far = [...anna.things.values()].find((t) => Math.hypot(t.x - anna.me!.x, t.y - anna.me!.y) > 6);
+    const far = [...anna.entities.values()].find((t) => Math.hypot(t.x - anna.me!.x, t.y - anna.me!.y) > 6);
     if (far) {
       const r = anna.act({ t: 'chat', entita: far.id, testo: 'ciao' });
       server.tick(DT);

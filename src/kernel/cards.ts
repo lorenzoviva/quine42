@@ -57,7 +57,7 @@ export function titolareOf(cardId: string, pagante: string, wanderers: string[],
 export type CardKind = 'modulo' | 'oggetto' | 'ambiente' | 'incantesimo' | 'runa' | 'ricetta' | 'modello' | 'luogo' | 'persona' | 'trama' | 'regola';
 
 export interface Uses {
-  /** Places it entered (a thing, an environment, a structure). */
+  /** Places it entered (an entity, an environment, a structure). */
   luoghi: number;
   /** Plots it is part of. */
   trame: number;

@@ -16,7 +16,7 @@ const GAME_FIELDS = ['modalita', 'morte', 'pvp', 'altroTraGiocatori', 'master'];
 const LOBBY_AI_FIELDS = ['textModel', 'scultori', 'coefficienti', 'minimi', 'maxText', 'maxForges', 'maxPacks', 'maxCast', 'maxModels', 'attore'];
 
 /**
- * What a client reads of a manifest. A thing in the world reaches it from the server (form, body, menu: `THING_PARTS`), so
+ * What a client reads of a manifest. An entity in the world reaches it from the server (form, body, menu: `ENTITY_PARTS`), so
  * what spawns it is not here: `spawn`, `interaction`, `container`, `inventory`, `loot`, `layouts`, `fragments`, `drops`; nor what only the
  * Council reads: `persona`, `lore`, `context`, `prompts`, `origin`; nor `casi`. A field added to `Manifest` stays home until it is
  * named here. `carta` is on the list because anyone may read it (`publicFiles`, ADR-0102). `ui` is whole: it is the panel drawn.

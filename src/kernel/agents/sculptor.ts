@@ -50,7 +50,7 @@ export interface SculptRequest {
   aspetto: string;
   classe: string;
   contesto?: string;
-  /** One program for many things: the letter C takes each thing's colour. */
+  /** One program for many entities: the letter C takes each entity's colour. */
   tinta?: boolean;
   /** Its size (ADR-0092), if not the class's own: the box scales with it; the rare structures get the best model. */
   taglia?: Taglia;
@@ -89,7 +89,7 @@ const classLine = (c: AssetClass) => {
   return `  - ${c.id} (${c.name}): ${b.join('×')} voxel = ${c.tiles.join('×')} caselle, taglia ${sizeOf(c.taglia)!.name}${c.minHeight ? `, alto almeno ${Math.round(c.minHeight * b[2])}` : ''}; ${c.hint}`;
 };
 
-/** The sizes of D&D (ADR-0092): how a class's box scales when a thing is of another size than its class's. */
+/** The sizes of D&D (ADR-0092): how a class's box scales when an entity is of another size than its class's. */
 const sizesLine = () => `  Taglie (D&D): ${TAGLIE.map((t) => `${t.name} ×${t.scala}`).join(' · ')} — il lato rispetto a Media; una cosa di un'altra taglia ha la scatola della sua classe scalata (la richiesta la dice)`;
 
 /** The Sculptor's instructions (prompts/agents/scultore.md) with the scale, the classes, the sizes and the palette. */
@@ -242,7 +242,7 @@ async function write(c: Council, req: SculptRequest, cls: AssetClass, model: str
 
 /**
  * Sculpts a model: the program (with its box written in), who wrote it, the Artist's vote. Undefined
- * if no program passed the checks (the thing keeps the generic model of its class).
+ * if no program passed the checks (the entity keeps the generic model of its class).
  */
 /**
  * `plan` (T45b, `sculptPlan` of the coefficient of revisions): how many programs for the simple things, whether a
@@ -277,12 +277,12 @@ export async function sculpt(c: Council, req: SculptRequest, m: SculptorAiModels
   return { xml, model, voto, calls };
 }
 
-// Actions as rules (ADR-0044): what the wanderer does to a thing that changes its shape (it opens, cracks,
-// lights up) becomes an `<action>` of the thing's program, written by the Sculptor and tried by the kernel
+// Actions as rules (ADR-0044): what the wanderer does to an entity that changes its shape (it opens, cracks,
+// lights up) becomes an `<action>` of the entity's program, written by the Sculptor and tried by the kernel
 // on the finished model; the whole kind learns it.
 
 export interface ActionRequest {
-  /** The thing and its program (`models/<id>.xml`). */
+  /** The entity and its program (`models/<id>.xml`). */
   nome: string;
   xml: string;
   classe: string;

@@ -120,7 +120,7 @@ export interface GraphChunk {
   nome: string;
   descrizione?: string;
   ambiente?: string;
-  /** Module ids of the things placed there. */
+  /** Module ids of the entities placed there. */
   cose?: string[];
   /** Names of the items lying around. */
   a_terra?: string[];
@@ -487,7 +487,7 @@ export function buildGraph(files: FileMap, chunks: GraphChunk[] = [], speciesOf:
   const nome = json(files, 'universe.json')?.name ?? '';
   const g = new WorldGraph(nome, hash);
 
-  // Modules: kinds of things, items, recipes, runes, spells, environments.
+  // Modules: kinds of entities, items, recipes, runes, spells, environments.
   const manifests = sources
     .filter((p) => p.startsWith('modules/'))
     .map((p) => [p, json(files, p)] as [string, Manifest | null])

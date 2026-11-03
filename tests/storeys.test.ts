@@ -85,7 +85,7 @@ describe('structures with more storeys', () => {
     Object.assign(k.ecs.get(id, 'form') as FormComp, { model: 'torre', seed: 1, yaw: 0 });
     expect((await k.forms.wait('torre', 1))?.status).toBe('ready');
     k.tick(1 / 60);
-    // Local voxel → world point (the grid centred on the thing); heights in voxels above its base.
+    // Local voxel → world point (the grid centred on the entity); heights in voxels above its base.
     const at = (vx: number, vy: number) => [cx + (vx - 60) / 20, cy + (vy - 60) / 20] as const;
     const base = k.groundAt(cx, cy);
     const level = (z: number) => Math.round((z - base) * 20);
@@ -153,7 +153,7 @@ describe('structures with more storeys', () => {
     k.tick(1 / 60);
     const base = k.groundAt(cx, cy);
     const [px, py] = [cx + (40 - 60) / 20, cy + (45 - 60) / 20];
-    // A thing with a body put in the room: the ground floor; lifted to the floor above, it stays there.
+    // An entity with a body put in the room: the ground floor; lifted to the floor above, it stays there.
     const thing = k.ecs.spawn();
     k.ecs.set(thing, 'pos', { x: px, y: py });
     k.ecs.set(thing, 'body', { r: 0.2, solid: false });

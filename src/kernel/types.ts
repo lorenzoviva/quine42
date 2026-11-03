@@ -308,13 +308,13 @@ export interface BenchCase {
   terreno?: string[];
   /** The wanderer: components set before the case (e.g. {"needs": {"health": 50}}), what they carry. */
   viandante?: { componenti?: Record<string, Record<string, unknown>>; oggetti?: BenchItem[] };
-  /** Things of the scene, by module, in tiles from the wanderer. */
+  /** Entities of the scene, by module, in tiles from the wanderer. */
   cose?: Array<{ modulo: string; x: number; y: number; componenti?: Record<string, Record<string, unknown>> }>;
   /** What happens, in order: an object into a slot of the panel, out of it, a button, some time, a walk. */
   passi?: BenchStep[];
   /** Seconds the case lasts after its steps (at most 30). */
   durata: number;
-  /** What changes: "component.field" of the wanderer, or "<n>:component.field" of the n-th thing (from 0). */
+  /** What changes: "component.field" of the wanderer, or "<n>:component.field" of the n-th entity (from 0). */
   guarda: string[];
   /** The lines of logic.lua that matter (from 1), lit on the screen above the bench. */
   righe?: number[];

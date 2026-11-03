@@ -171,7 +171,7 @@ function asset(e: Entry, seed: number, xml = e.xml): Promise<Asset | string> {
 }
 const hashText = (s: string) => [...s].reduce((h, c) => (Math.imul(h, 31) + c.charCodeAt(0)) | 0, 7);
 
-// ------------------------------------------------------------------ things in the world
+// ------------------------------------------------------------------ entities in the world
 
 interface Mover {
   speed: number;
@@ -185,7 +185,7 @@ interface Mover {
   face: number;
 }
 
-interface Thing {
+interface Entity {
   entry: Entry;
   asset: Asset;
   root: THREE.Group;
@@ -195,7 +195,7 @@ interface Thing {
   x: number;
   z: number;
   yaw: number;
-  /** For structures and solid things: the voxel grid (actions change it) and where it blocks. */
+  /** For structures and solid entities: the voxel grid (actions change it) and where it blocks. */
   grid?: Grid3;
   foot?: Uint8Array;
   /** Per voxel column, the height of what one stands on (floors, steps). */
@@ -212,13 +212,13 @@ interface Thing {
 
 const world = new THREE.Group();
 scene.add(world);
-let things: Thing[] = [];
-let player: Thing | undefined;
-let showcase: Thing | undefined;
+let things: Entity[] = [];
+let player: Entity | undefined;
+let showcase: Entity | undefined;
 let land: Land;
-const buckets = new Map<number, Thing[]>();
+const buckets = new Map<number, Entity[]>();
 
-function place(a: Asset, x: number, z: number, yaw: number): Thing {
+function place(a: Asset, x: number, z: number, yaw: number): Entity {
   const e = a.entry;
   const root = new THREE.Group();
   root.position.set(x, 0, z);
@@ -247,7 +247,7 @@ function place(a: Asset, x: number, z: number, yaw: number): Thing {
     return m;
   });
   if (frames.length) body.visible = false;
-  const t: Thing = { entry: e, asset: a, root, body, frames, limbs, x, z, yaw };
+  const t: Entity = { entry: e, asset: a, root, body, frames, limbs, x, z, yaw };
   if (!isFigure(e)) {
     const g = a.built.grid;
     t.grid = { X: g.X, Y: g.Y, Z: g.Z, cells: new Uint8Array(g.cells), alphabet: [...g.alphabet], log: [], epoch: 0 };
@@ -269,7 +269,7 @@ function place(a: Asset, x: number, z: number, yaw: number): Thing {
   return t;
 }
 
-function bucketAdd(t: Thing) {
+function bucketAdd(t: Entity) {
   if (!t.foot || !t.grid) return;
   const r = (Math.hypot(t.grid.X, t.grid.Y) / 2) / t.entry.vpt;
   for (let z = Math.floor(t.z - r); z <= Math.floor(t.z + r); z++)
@@ -279,8 +279,8 @@ function bucketAdd(t: Thing) {
     }
 }
 
-/** A point in a thing's voxel columns (or undefined if outside its box). */
-function local(t: Thing, wx: number, wz: number): [number, number] | undefined {
+/** A point in an entity's voxel columns (or undefined if outside its box). */
+function local(t: Entity, wx: number, wz: number): [number, number] | undefined {
   const g = t.grid!;
   const dx = wx - t.x, dz = wz - t.z;
   const c = Math.cos(t.yaw), s = Math.sin(t.yaw);
@@ -317,7 +317,7 @@ const R = 0.2;
 const free = (x: number, z: number) => !blocked(x, z) && !blocked(x + R, z) && !blocked(x - R, z) && !blocked(x, z + R) && !blocked(x, z - R);
 
 /** Moves a figure towards (dx, dz) per second; slides along walls. Returns how far it went. */
-function step(t: Thing, dx: number, dz: number, dt: number): number {
+function step(t: Entity, dx: number, dz: number, dt: number): number {
   const nx = t.x + dx * dt, nz = t.z + dz * dt;
   let x = t.x, z = t.z;
   if (free(nx, nz)) [x, z] = [nx, nz];
@@ -330,7 +330,7 @@ function step(t: Thing, dx: number, dz: number, dt: number): number {
   return d;
 }
 
-function animateFigure(t: Thing, moved: number, dt: number) {
+function animateFigure(t: Entity, moved: number, dt: number) {
   const m = t.mover!;
   m.moving = moved > 0.0005;
   if (m.moving) m.phase += moved * 7;
@@ -350,7 +350,7 @@ function animateFigure(t: Thing, moved: number, dt: number) {
   t.root.rotation.y = t.yaw;
 }
 
-function wander(t: Thing, dt: number) {
+function wander(t: Entity, dt: number) {
   const m = t.mover!;
   if (m.wait > 0) {
     m.wait -= dt;
@@ -470,7 +470,7 @@ async function buildWorld(seed: number) {
   buildGround(land, seed);
   const official = CATALOG.filter((e) => e.role === 'official');
   let gallery = 0;
-  // Several things share a model run with the same seed: trees, plants and stones have three each.
+  // Several entities share a model run with the same seed: trees, plants and stones have three each.
   const jobs = p.things.map((pl) => {
     const e = pl.role === 'official' ? official[gallery++ % official.length] : byId(pl.id)!;
     if (pl.role === 'official') plinth(pl.x, pl.z);
@@ -507,8 +507,8 @@ function modelOf(e: Entry): MjxModel {
   return m;
 }
 
-/** The first action of a thing that would change it (open when closed, close when open). */
-function actionFor(t: Thing): { name: string; label: string } | undefined {
+/** The first action of an entity that would change it (open when closed, close when open). */
+function actionFor(t: Entity): { name: string; label: string } | undefined {
   if (!t.grid || !t.asset.built.actions.length) return undefined;
   const m = modelOf(t.entry);
   for (const a of m.actions) {
@@ -519,7 +519,7 @@ function actionFor(t: Thing): { name: string; label: string } | undefined {
   return undefined;
 }
 
-function doAction(t: Thing, name: string) {
+function doAction(t: Entity, name: string) {
   const m = modelOf(t.entry);
   const clip = m.actions.find((a) => a.name === name)!;
   act(t.grid!, clip, 1);
@@ -604,7 +604,7 @@ function light() {
 
 // ------------------------------------------------------------------ the loop
 
-let near: { t: Thing; a: { name: string; label: string } } | undefined;
+let near: { t: Entity; a: { name: string; label: string } } | undefined;
 const prompt = $('prompt');
 let last = performance.now();
 let frameClock = 0;
@@ -695,7 +695,7 @@ function tick(now: number) {
   requestAnimationFrame(tick);
 }
 
-function startGrowth(t: Thing) {
+function startGrowth(t: Entity) {
   t.grown = true;
   if (!t.asset.growth.length) return;
   const mat = t.body.material as THREE.Material;

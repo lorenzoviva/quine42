@@ -1,11 +1,11 @@
-// Every thing's look is a MarkovJunior program (ADR-0041): the universe keeps a library of programs
-// (`models/<id>.xml`, described in `models/index.json`: class, name, who wrote it), one per kind of thing;
+// Every entity's look is a MarkovJunior program (ADR-0041): the universe keeps a library of programs
+// (`models/<id>.xml`, described in `models/index.json`: class, name, who wrote it), one per kind of entity;
 // an instance is the same program with another seed. Running a program gives a *form*: the voxel grid,
 // where it blocks a body (its footprint), what one stands on (its floors), its actions and animations.
 //
 // The kernel never draws: it asks a FormRunner for forms (in Node it runs them itself, in the browser a
 // pool of workers runs them and also makes the meshes the renderer draws) and uses them for collision
-// and for actions. A form that is not ready yet is simply not there: the thing blocks by its radius.
+// and for actions. A form that is not ready yet is simply not there: the entity blocks by its radius.
 
 import { boxOf, classOf, CLASSES, type AssetClass } from '../mj/classes';
 import { Mj3Error, type PaletteEntry, type Vec3 } from '../mj/engine';
@@ -45,7 +45,7 @@ export interface ModelInfo {
   autore?: string;
   /** The Artist's vote (0-10), if it was judged. */
   voto?: number;
-  /** A letter of the program that takes the colour of the thing (generic models: one program, many colours). */
+  /** A letter of the program that takes the colour of the entity (generic models: one program, many colours). */
   tinta?: string;
   /** Voxels per tile, if not the usual 20 (ADR-0049): big models are written coarser. */
   vpt?: number;
@@ -58,7 +58,7 @@ export interface ModelInfo {
   problemi?: string[];
 }
 
-/** What a thing's look is: which program, which seed, which way it faces, what has been done to it. */
+/** What an entity's look is: which program, which seed, which way it faces, what has been done to it. */
 export interface FormComp {
   model: string;
   seed: number;
@@ -137,7 +137,7 @@ export interface Form {
   vpt: number;
 }
 
-/** How many different seeds a kind of thing has in the world (instances share them: fewer meshes). */
+/** How many different seeds a kind of entity has in the world (instances share them: fewer meshes). */
 const SEEDS: Record<string, number> = { albero: 3, cespuglio: 3, roccia: 3, sasso: 3, persona: 8, animale: 4, bestia: 4, edificio: 1, grande: 1, monumento: 2 };
 
 /** A step one walks up without noticing (a doorstep, a floor): 0.2 tiles, in voxels of a density. */
@@ -509,8 +509,8 @@ export class Forms {
   }
 
   /**
-   * The program a thing uses: its own model if the library has it, otherwise the generic model of its
-   * class (the seed has one per class), otherwise the generic thing.
+   * The program an entity uses: its own model if the library has it, otherwise the generic model of its
+   * class (the seed has one per class), otherwise the generic entity.
    */
   resolve(model: string | undefined, classe?: string): string {
     if (model && this.info(model)) return model;

@@ -52,7 +52,7 @@ export interface ChunkView {
   version: number;
 }
 
-/** The form of a thing: its program, its seed, how it is turned and coloured, the actions done on it. */
+/** The form of an entity: its program, its seed, how it is turned and coloured, the actions done on it. */
 export interface FormView {
   model: string;
   seed: number | string;
@@ -61,8 +61,8 @@ export interface FormView {
   done?: string[];
 }
 
-/** A thing of the world near the wanderer; after the first time only what moved (`x`, `y`) or changed. */
-export interface ThingView {
+/** An entity of the world near the wanderer; after the first time only what moved (`x`, `y`) or changed. */
+export interface EntityView {
   id: number;
   x: number;
   y: number;
@@ -70,17 +70,17 @@ export interface ThingView {
   m?: string;
   form?: FormView;
   glyph?: unknown;
-  /** The other components a client draws it and makes its menu with (`THING_PARTS`): to pick up, a rune, a body, a light… */
+  /** The other components a client draws it and makes its menu with (`ENTITY_PARTS`): to pick up, a rune, a body, a light… */
   c?: Record<string, unknown>;
   /** What it is saying, while it says it. */
   testo?: string;
 }
 
 /**
- * The components of a thing a client gets (T39): what the renderer and the menus read. Its mind, its memories and
+ * The components of an entity a client gets (T39): what the renderer and the menus read. Its mind, its memories and
  * what it carries stay on the server; of `identity` only the name, of `mind` only that it has one.
  */
-export const THING_PARTS = ['pickup', 'rune', 'body', 'interact', 'luce', 'fuoco', 'attivita', 'wander', 'container', 'identity', 'mind'] as const;
+export const ENTITY_PARTS = ['pickup', 'rune', 'body', 'interact', 'luce', 'fuoco', 'attivita', 'wander', 'container', 'identity', 'mind'] as const;
 
 /** Another wanderer in sight. */
 export interface OtherView {
@@ -111,9 +111,9 @@ export type ClientMsg =
   | { t: 'frase'; seq: number; tokens: string[] }
   | { t: 'incidi'; seq: number }
   | { t: 'pronuncia'; seq: number }
-  /** An action of a thing's menu (`raccogli`, `apri`, `usa`, `leggi`, `modello:<nome>`…). */
+  /** An action of an entity's menu (`raccogli`, `apri`, `usa`, `leggi`, `modello:<nome>`…). */
   | { t: 'azione'; seq: number; entita: number; azione: string }
-  /** «Altro…»: what the wanderer tries on a thing, on something they carry (`slot`) or on a tile (`col`, `row`), judged by the Council. */
+  /** «Altro…»: what the wanderer tries on an entity, on something they carry (`slot`) or on a tile (`col`, `row`), judged by the Council. */
   | { t: 'altro'; seq: number; entita?: number; slot?: number; col?: number; row?: number; viandante?: string; testo: string }
   | { t: 'chat'; seq: number; entita: number; testo: string }
   /** Words to another wanderer nearby (T43a): a bubble above who speaks, and who is spoken to hears them. */
@@ -165,8 +165,8 @@ export type ServerMsg =
    * wanderer is the master (T41) and, only for the master, the Council's feed so far and their branch (T42b); the
    * master's updates say (`giocatori`) every player connected and where they are, when it changes (T42c).
    */
-  | ({ t: 'ingresso'; id: string; nome: string; profilo?: Profile; riparato?: string[]; anonimo?: true; master?: true; concilio?: FeedEntry[]; ramo?: FileChanges; files: FileMap; me: Me; forma?: FormView; stato: MyState; luoghi: ChunkView[]; cose: ThingView[]; viandanti: OtherView[]; giocatori?: PlayerSpot[] } & Clock)
-  | ({ t: 'aggiorna'; me?: Me; stato?: MyState; luoghi?: ChunkView[]; cose?: ThingView[]; via?: number[]; viandanti?: OtherView[]; partiti?: string[]; giocatori?: PlayerSpot[]; avvisi?: Notice[] } & Clock)
+  | ({ t: 'ingresso'; id: string; nome: string; profilo?: Profile; riparato?: string[]; anonimo?: true; master?: true; concilio?: FeedEntry[]; ramo?: FileChanges; files: FileMap; me: Me; forma?: FormView; stato: MyState; luoghi: ChunkView[]; cose: EntityView[]; viandanti: OtherView[]; giocatori?: PlayerSpot[] } & Clock)
+  | ({ t: 'aggiorna'; me?: Me; stato?: MyState; luoghi?: ChunkView[]; cose?: EntityView[]; via?: number[]; viandanti?: OtherView[]; partiti?: string[]; giocatori?: PlayerSpot[]; avvisi?: Notice[] } & Clock)
   /** The step was not possible (too fast, through a wall): the wanderer is here. */
   | { t: 'correzione'; seq: number; x: number; y: number }
   /**

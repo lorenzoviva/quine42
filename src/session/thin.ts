@@ -1,10 +1,10 @@
 // The thin client (T39, ADR-0059): in a game of many the browser does not run the world, the server does. The
 // client still boots a kernel, a mirror one (`KernelOptions.mirror`): the same files, so the renderer, the menus
 // and the HUD read it as they read the world alone, but nothing is generated, judged or saved in it. This class
-// fills it with what the session tells (places, things, the other wanderers, what this wanderer carries), walks
+// fills it with what the session tells (places, entities, the other wanderers, what this wanderer carries), walks
 // this wanderer at once (prediction: the carpet carries them as alone) and sends where they are; the server's
 // corrections put them back. What the wanderer does goes to the server; what can be shown at once is shown at
-// once (a thing picked up vanishes, a door opens, the inscribed phrase leaves the hand, a slot moves) and undone if
+// once (an entity picked up vanishes, a door opens, the inscribed phrase leaves the hand, a slot moves) and undone if
 // the server refuses it, or if its next update says that nothing changed. What the wanderer carries (T39b) goes the
 // same way: pockets, bags, containers, crafting, the mechanics' panels, the actions on tiles. The world's files that
 // change come into the mirror; the master's edits stay in theirs, on their branch, until they publish it (T42b).
@@ -14,24 +14,24 @@ import type { Id } from '../kernel/ecs';
 import type { NpcReply } from '../kernel/agents/minds';
 import type { FeedEntry } from '../kernel/agents/council';
 import type { SessionClient, Outcome } from './client';
-import type { ContainerView, FileChanges, Notice, OtherView, ChunkView, ServerMsg, ThingView } from './protocol';
+import type { ContainerView, FileChanges, Notice, OtherView, ChunkView, ServerMsg, EntityView } from './protocol';
 import type { FileMap } from '../kernel/types';
 import type { Profile } from '../kernel/wanderers';
 import { hashStr, hex } from '../kernel/rng';
 import { takeFromSlot } from '../kernel/inventory';
-import { THING_PARTS } from './protocol';
+import { ENTITY_PARTS } from './protocol';
 import { SEA_DRAFT } from '../kernel/relief';
 
 /** Seconds between two steps sent (the server checks the walk at its pace; 20 a second are plenty). */
 const STEP_EVERY = 0.05;
 /** How fast what moves on the server catches up with where it is (per second): about one update period. */
 const FOLLOW = 12;
-/** Farther than this (tiles) a thing jumps where it is instead of gliding there. */
+/** Farther than this (tiles) an entity jumps where it is instead of gliding there. */
 const JUMP = 4;
 /** Farther than this (tiles) from where the client thinks it is, the server carried its wanderer there (a rune, a door). */
 const CARRIED = 8;
-/** The components a thing of the server may have here (besides its place). */
-const MIRRORED = ['module', 'form', 'glyph', ...THING_PARTS];
+/** The components an entity of the server may have here (besides its place). */
+const MIRRORED = ['module', 'form', 'glyph', ...ENTITY_PARTS];
 
 /** What the kernel does that a game of many does not do from a player's client yet (the master's R is their branch's). */
 const LATER = ['rollback'] as const;
@@ -43,11 +43,11 @@ export class ThinClient {
   private local = new Map<number, Id>();
   private server = new Map<Id, number>();
   private others = new Map<string, Id>();
-  /** Where each mirrored thing is going (the server's last word). */
+  /** Where each mirrored entity is going (the server's last word). */
   private targets = new Map<Id, { x: number; y: number }>();
-  /** Things picked up here and not yet confirmed: the server's updates do not bring them back meanwhile. */
+  /** Entities picked up here and not yet confirmed: the server's updates do not bring them back meanwhile. */
   private hidden = new Set<number>();
-  /** Things to set again as the server has them, once its next update has come (an optimistic change that may not hold). */
+  /** Entities to set again as the server has them, once its next update has come (an optimistic change that may not hold). */
   private recheck = new Set<number>();
   /** The phrase as the server has it (or will, once what was sent arrives). */
   private told: string[] = [];
@@ -76,7 +76,7 @@ export class ThinClient {
     this.relay();
     const s = session;
     this.places([...s.places.values()]);
-    this.things([...s.things.values()]);
+    this.things([...s.entities.values()]);
     for (const o of s.others.values()) this.other(o);
     if (s.me) {
       this.putMe(s.me.x, s.me.y);
@@ -212,7 +212,7 @@ export class ThinClient {
     for (const p of Object.keys(this.main)) if (files[p] === undefined) changed[p] = null;
     if (Object.keys(changed).length) this.worldFiles(changed);
     this.places([...s.places.values()]);
-    this.things([...s.things.values()]);
+    this.things([...s.entities.values()]);
     for (const o of s.others.values()) this.other(o);
     if (s.me) {
       this.putMe(s.me.x, s.me.y);
@@ -297,7 +297,7 @@ export class ThinClient {
     }
   }
 
-  private things(list: ThingView[]): void {
+  private things(list: EntityView[]): void {
     for (const t of list) {
       if (this.hidden.has(t.id)) continue;
       const known = this.local.get(t.id);
@@ -310,8 +310,8 @@ export class ThinClient {
     }
   }
 
-  /** A thing as the server sees it: made here if new, its components set to what they are. */
-  private look(t: ThingView): Id {
+  /** An entity as the server sees it: made here if new, its components set to what they are. */
+  private look(t: EntityView): Id {
     const k = this.k;
     let id = this.local.get(t.id);
     if (id === undefined || !k.ecs.alive.has(id)) {
@@ -325,7 +325,7 @@ export class ThinClient {
     if (t.form) parts.form = { ...t.form };
     if (t.glyph) parts.glyph = t.glyph;
     for (const name of MIRRORED) {
-      // An opened container keeps what it was seen to hold (the server sends only its size with the thing).
+      // An opened container keeps what it was seen to hold (the server sends only its size with the entity).
       if (name === 'container' && name in parts) k.ecs.set(id, name, { ...k.ecs.get(id, name), ...(parts[name] as object) });
       else if (name in parts) k.ecs.set(id, name, parts[name]);
       else k.ecs.remove(id, name);
@@ -424,10 +424,10 @@ export class ThinClient {
     }
   }
 
-  /** Sets a thing again as the server's last update has it (or takes it away, if it is not there any more). */
+  /** Sets an entity again as the server's last update has it (or takes it away, if it is not there any more). */
   private resync(sid: number): void {
     this.hidden.delete(sid);
-    const t = this.session.things.get(sid);
+    const t = this.session.entities.get(sid);
     if (t) this.look(t);
     else this.drop(sid);
   }
@@ -633,7 +633,7 @@ export class ThinClient {
     k.moveSlot = (a, b) => void this.carry({ t: 'oggetto', op: 'sposta', slot: a, verso: b }, () => here.moveSlot(a, b));
     k.dropSlot = (i, n) => {
       if (k.zone !== 'sim' || !k.inventory().slots[i]) return;
-      // Gone from the pocket at once; the thing on the ground comes with the next update.
+      // Gone from the pocket at once; the entity on the ground comes with the next update.
       void this.carry({ t: 'oggetto', op: 'posa', slot: i, ...(n !== undefined ? { quanti: n } : {}) }, () => void takeFromSlot(k.inventory(), i, n));
     };
     k.putIntoBag = (bag, i) => void this.carry({ t: 'oggetto', op: 'in_borsa', slot: i, borsa: bag }, () => here.putIntoBag(bag, i));
@@ -716,7 +716,7 @@ export class ThinClient {
     return undefined;
   }
 
-  /** E in the world: a rune under or in front of the wanderer, a thing to pick up in front, or the menu of the tile. */
+  /** E in the world: a rune under or in front of the wanderer, an entity to pick up in front, or the menu of the tile. */
   private async interact(): Promise<void> {
     const k = this.k;
     const pc = k.wandererCarpet();
@@ -778,7 +778,7 @@ export class ThinClient {
     else this.recheck.add(sid);
   }
 
-  /** «Altro…» or words to someone: the thing's id on the server, and the answer shown. */
+  /** «Altro…» or words to someone: the entity's id on the server, and the answer shown. */
   private async send(id: Id, msg: { t: 'altro' | 'chat'; testo: string }): Promise<Outcome | undefined> {
     const sid = this.server.get(id);
     if (sid === undefined) return undefined;

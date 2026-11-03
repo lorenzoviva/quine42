@@ -1,4 +1,4 @@
-// Actions as rules (ADR-0044): what the wanderer does to a thing that changes its shape becomes an
+// Actions as rules (ADR-0044): what the wanderer does to an entity that changes its shape becomes an
 // `<action>` of its model, tried by the kernel and learned by the whole kind; effects stay for the rest.
 
 import { describe, expect, it } from 'vitest';
@@ -19,7 +19,7 @@ async function boot() {
   return k;
 }
 
-/** A thing of a module next to the wanderer, with its form ready. */
+/** An entity of a module next to the wanderer, with its form ready. */
 async function spawn(k: Kernel, mod: string, who: string) {
   const pc = k.wandererCarpet();
   const id = k.spawnModuleEntity(k.modules.get(mod)!, pc.x + 2, pc.y, undefined, who);

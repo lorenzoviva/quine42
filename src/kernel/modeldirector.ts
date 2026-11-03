@@ -1,7 +1,7 @@
 // The models the world still lacks, sculpted one at a time (ADR-0042). A module, an item or a terrain
-// names a model the library does not have (the Forge names one for every new thing, the Narrator gives
-// items a common shape, the Genesis a model to each terrain that has things standing on it): until the
-// Sculptor writes it, the thing shows the generic model of its class. Within a budget per session.
+// names a model the library does not have (the Forge names one for every new entity, the Narrator gives
+// items a common shape, the Genesis a model to each terrain that has entities standing on it): until the
+// Sculptor writes it, the entity shows the generic model of its class. Within a budget per session.
 
 import type { Kernel } from './kernel';
 import { sculpt, type SculptRequest } from './agents/sculptor';
@@ -26,7 +26,7 @@ export const FORME = ['sacco', 'bottiglia', 'vaso', 'cesto', 'frutto', 'pane', '
 export type Forma = (typeof FORME)[number];
 export const formaModel = (f: string) => `forma-${f}`;
 
-/** The generic programs of the classes: shared by every kind of thing without a model of its own. */
+/** The generic programs of the classes: shared by every kind of entity without a model of its own. */
 export const GENERIC = new Set(['persona', 'animale', 'bestia', 'albero', 'cespuglio', 'roccia', 'sasso', 'oggetto', 'mobile', 'edificio', 'monumento', 'grande']);
 
 /** A model id for a module or an item of its own ("npc.mugnaio" → "npc-mugnaio"). */
@@ -115,7 +115,7 @@ export class ModelDirector {
     }
   }
 
-  /** A model of its own for a thing that showed a generic one, or a new version of its own. */
+  /** A model of its own for an entity that showed a generic one, or a new version of its own. */
   isGeneric(id: string): boolean {
     return GENERIC.has(id);
   }
