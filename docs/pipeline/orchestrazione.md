@@ -650,3 +650,322 @@
 - [2026-11-01T03:10:40.621Z] orchestratore: epoca 182 su gemini (contesto a 482 % della finestra)
 - [2026-11-01T03:40:37.309Z] T57c: ESITO: fatto — aggiunto l'effetto rilievo {delta, raggio} nel kernel, terraformazione in canone e SPELL_GUIDE, persistenza in scavi e flusso d'acqua (ADR-0096) · BROWSER: da verificare — su agy lo strumento browser non è disponibile (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T57c)
 - [2026-11-01T03:42:01.236Z] task/T57c integrato in 3d; worktree e branch tolti.
+- [2026-11-01T03:44:17.315Z] orchestratore: epoca 183 su gemini (contesto a 187 % della finestra)
+- [2026-11-01T05:49:58.853Z] riprendo T57b su claude (H:\projects\rune\.claude\worktrees\t57b)
+- [2026-11-01T05:54:07.554Z] orchestratore: epoca 184 su claude (gemini sotto il 10 %)
+- [2026-11-01T06:42:38.333Z] T57b: ESITO: fatto — rune nuove dal Concilio (sessioni e formule), validate da `magic.ts`, nel canone, nel bottino e nelle carte; ADR-0096 (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T57b)
+- [2026-11-01T06:42:42.467Z] lancio T114 su claude (H:\projects\rune\.claude\worktrees\t114)
+- [2026-11-01T06:42:59.776Z] integra T57b: conflitti in AGENTS.md, docs/adr/README.md, src/kernel/agents/effects.ts; il base è com'era
+- [2026-11-01T07:44:03.862Z] T114: ESITO: fatto — T103 integrato in `task/T114`, link e CSS sistemati, verifica descritta nel backlog; typecheck verde; test non tutti verdi: timeout in `kernel`, `referente`, `wanderers`, `watch` (per `watch` uguali anche senza il merge; `kernel` non importa il codice toccato). · BROWSER: verificato — hub vuoto e con un reame, wizard (validazione, seme, chiusure Esc/×/sfondo, creazione), filtri, link alla lobby, 375 px in iframe, nessun errore in console; badge live non provato. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T114)
+- [2026-11-01T07:44:06.907Z] lancio T102 su claude (H:\projects\rune\.claude\worktrees\t102)
+- [2026-11-01T07:44:15.208Z] task/T114 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T07:44:15.919Z] task/T103 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T08:15:04.605Z] T102: ESITO: fatto — pagina profilo del sito (accesso, dati del viandante per reame, editor con anteprima 3D del modello vero) e nuova rotta `/api/viandante` per leggere e salvare il profilo · BROWSER: verificato — su server senza account la scheda, il modello 3D che gira e il salvataggio funzionano e il commit tocca solo il file del giocatore; l'accesso Firebase vero non è provato (manca un progetto o l'emulatore) (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T102)
+- [2026-11-01T08:15:14.761Z] integra T102: conflitti in site/index.html, vite.config.ts; il base è com'era
+- [2026-11-01T08:19:41.396Z] integra T57b: conflitti in AGENTS.md, docs/adr/README.md, src/kernel/agents/effects.ts; il base è com'era
+- [2026-11-01T12:38:14.055Z] lancio T115 su claude (H:\projects\rune\.claude\worktrees\t115)
+- [2026-11-01T12:40:24.399Z] ferma --dopo: niente lanci nuovi, aspetto T115
+- [2026-11-01T12:40:46.966Z] orchestratore: epoca 185 su claude (contesto a 52 % della finestra)
+- [2026-11-01T13:08:16.771Z] T115: ESITO: fatto — T57b integrato in `task/T115` con l'ADR rinumerato a 0097 e i conflitti risolti tenendo entrambe le aggiunte; typecheck verde, restano i 5 timeout noti e `abbonamenti` T68b (CLI reale) non ricontrollato. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T115)
+- [2026-11-01T13:08:19.237Z] pipeline spenta (ferma --dopo)
+- [2026-11-01T13:08:35.046Z] task/T115 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T13:08:35.612Z] task/T57b integrato in 3d; worktree e branch tolti.
+- [2026-11-01T13:35:00.167Z] lancio T116 su claude (H:\projects\rune\.claude\worktrees\t116)
+- [2026-11-01T13:45:33.043Z] lancio T104 su claude (H:\projects\rune\.claude\worktrees\t104)
+- [2026-11-01T15:03:47.852Z] T104: ESITO: fatto — galleria delle carte in `site/carte.html` (CSS 3D, miniature voxel, rarità dagli utilizzi, impronta e catena dei titolari), collegata da landing e sessioni; suite intera 653/675, i 22 falliti tutti timeout, confrontati con la base solo in 3 file. · BROWSER: verificato — preview 4977, universo di prova con 62 carte poi cancellato: 60 fps con flip e inclinazione, 59,5 scorrendo tutte le carte; giro con clic e Invio, miniature vere, HTML nei nomi mostrato come testo, a 390 px (in iframe) niente overflow, collezione vuota, nessun errore in console; login Firebase non provato. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T104)
+- [2026-11-01T15:03:51.060Z] lancio T117 su claude (H:\projects\rune\.claude\worktrees\t117)
+- [2026-11-01T15:04:02.097Z] task/T104 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T15:06:49.734Z] T116: ESITO: fatto — T102 fuso su `task/T116` con entrambe le aggiunte e i link tra sessioni e profilo; typecheck e build verdi; suite intera con 45 falliti sotto carico, nessun difetto trovato: 3 file verdi da soli, 6 verdi solo con i timeout alzati. · BROWSER: verificato — landing, sessioni e profilo si aprono e i link tra loro funzionano senza errori in console; scheda del viandante, anteprima 3D e Firebase non riprovati dopo il merge. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T116)
+- [2026-11-01T15:06:58.237Z] integra T116: conflitti in AGENTS.md, docs/plans/backlog.md, vite.config.ts; il base è com'era
+- [2026-11-01T15:12:19.500Z] T117: ESITO: in attesa — report con 16 rischi committato su `task/T117`; riprodotti solo 4 casi della sandbox, il resto è analisi del codice segnata «provato: no»; domanda in `docs/pipeline/domande/T117.md`. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T117)
+- [2026-11-01T15:12:22.645Z] lancio T118 su claude (H:\projects\rune\.claude\worktrees\t118)
+- [2026-11-01T15:13:13.784Z] orchestratore: epoca 187 su claude (contesto a 51 % della finestra)
+- [2026-11-01T15:22:48.663Z] lancio T119 su claude (H:\projects\rune\.claude\worktrees\t119)
+- [2026-11-01T15:26:18.295Z] T119: ESITO: fatto — fuso `task/T116` dopo T104 tenendo le aggiunte di entrambi, profilo e carte collegati a vicenda; typecheck, build, `site-profile` e `site-carte` verdi; suite intera non ripetuta, come da task. · BROWSER: verificato — `site/profilo.html` e `site/carte.html` senza errori in console, link tra le due pagine provati, scheda del viandante e anteprima 3D (colore e rotazione) e galleria con 8 carte su un universo di prova; login Firebase non provato, non richiesto. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T119)
+- [2026-11-01T15:27:11.802Z] task/T117 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T15:29:39.683Z] integra T119: conflitti in docs/plans/backlog.md; il base è com'era
+- [2026-11-01T15:29:40.636Z] integra T116: conflitti in AGENTS.md, docs/plans/backlog.md, vite.config.ts; il base è com'era
+- [2026-11-01T15:29:41.740Z] integra T102: conflitti in AGENTS.md, site/index.html, vite.config.ts; il base è com'era
+- [2026-11-01T15:33:28.627Z] lancio T135 su claude (H:\projects\rune\.claude\worktrees\t135)
+- [2026-11-01T15:34:20.094Z] T135: ESITO: fatto — fuso `task/T119` in `task/T135`; unico conflitto nel backlog, risolto tenendo l'esito di T119 e l'intera sezione «La sicurezza»; typecheck verde, suite intera e browser non ripetuti come da task. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T135)
+- [2026-11-01T15:34:35.495Z] task/T135 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T15:34:36.195Z] task/T119 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T15:34:36.761Z] task/T116 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T15:34:37.383Z] task/T102 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T15:34:58.417Z] orchestratore: epoca 188 su claude (contesto a 61 % della finestra)
+- [2026-11-01T15:43:45.866Z] lancio T136 su claude (H:\projects\rune\.claude\worktrees\t136)
+- [2026-11-01T16:49:15.353Z] T118: ESITO: fatto — 6 worker di Vitest sotto la pipeline, `hookTimeout` e limiti dei test a 60 s, turni `typecheck` e `build` con rientranza (ADR-0088); suite da 44 timeout a 680/680, CPU da picchi al 100 % a 84 % al massimo. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T118)
+- [2026-11-01T16:49:18.451Z] lancio T105 su claude (H:\projects\rune\.claude\worktrees\t105)
+- [2026-11-01T16:49:24.107Z] integra T118: conflitti in vite.config.ts; il base è com'era
+- [2026-11-01T17:11:44.485Z] T136: ESITO: fatto — processo, registro di 19 voci, suite `tests/sicurezza/`, regola per l'orchestratore e ADR-0098; suite intera non verde (45-47 rossi, quasi tutti timeout, commit senza codice, carico non dimostrato: da ricontrollare con T118). (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T136)
+- [2026-11-01T17:11:48.122Z] lancio T138 su claude (H:\projects\rune\.claude\worktrees\t138)
+- [2026-11-01T17:11:55.186Z] task/T136 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T17:28:55.042Z] T138: ESITO: fatto — `task/T118` unito in `task/T138`, conflitto di `vite.config.ts` risolto tenendo le aggiunte di entrambi; typecheck verde e suite 688/688 senza timeout. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T138)
+- [2026-11-01T17:29:01.846Z] lancio T137 su claude (H:\projects\rune\.claude\worktrees\t137)
+- [2026-11-01T17:29:14.283Z] task/T138 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T17:29:15.532Z] task/T118 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T17:29:43.444Z] orchestratore: epoca 189 su claude (contesto a 69 % della finestra)
+- [2026-11-01T18:22:24.779Z] T105: ESITO: fatto — pagina dei crediti del sito (saldo, Stripe Checkout, storici di pagamenti e consumi) con la rotta `/api/crediti`; typecheck verde, suite intera con 14 timeout residui in file che non importano ciò che T105 cambia (non provato sul base) · BROWSER: verificato — con chiave Stripe finta su un universo di prova poi rimosso: saldo, tagli e importo libero, reindirizzamento a `checkout.stripe.com`, ritorno con webhook in ritardo fino ad «ACCREDITATO!» (saldo da 12,50 a 17,50, commit dei soli due file), annullamento, anonimo senza ricarica, link dal profilo; scheda e preview chiuse. Non verificati: un pagamento su Stripe vero (nessuna chiave in questo worktree) e l'accesso Firebase. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T105)
+- [2026-11-01T18:22:27.943Z] lancio T123 su claude (H:\projects\rune\.claude\worktrees\t123)
+- [2026-11-01T18:22:48.224Z] integra T105: conflitti in vite.config.ts; il base è com'era
+- [2026-11-01T18:28:13.077Z] T137: ESITO: fatto — kit `npm run sicurezza:prove` (73 prove), blocchi F12, registro con la copertura di ogni voce, test nuovi; prima misura 22 ok e 51 FALLA, con V-019.a e V-014 da valutare subito; suite intera con 45 timeout nei file già lenti di T136 più `branch`, commit senza codice del gioco. · BROWSER: verificato — blocchi 1, 2 e 5 eseguiti in Chrome contro il server di prova (V-015.c FALLA, gli altri ok); da verificare il blocco 3, fermo nel browser dell'agente, e il blocco 4 che ne dipende. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T137)
+- [2026-11-01T18:28:37.458Z] task/T137 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T18:33:30.571Z] lancio T139 su claude (H:\projects\rune\.claude\worktrees\t139)
+- [2026-11-01T18:42:27.637Z] T123: ESITO: fatto — il proxy di Gemini ha modelli a elenco, corpo massimo di 2 MB, tetto di spesa giornaliero e accesso solo da loopback e stessa origine; in multigiocatore il server chiama Google senza route; V-002 chiusa, ADR-0099. Sicurezza: nessuna superficie nuova. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T123)
+- [2026-11-01T18:42:37.376Z] integra T123: conflitti in docs/sicurezza/registro.md; il base è com'era
+- [2026-11-01T18:43:18.757Z] orchestratore: epoca 190 su claude (contesto a 72 % della finestra)
+- [2026-11-01T18:43:31.573Z] lancio T122 su claude (H:\projects\rune\.claude\worktrees\t122)
+- [2026-11-01T18:56:30.211Z] T139: ESITO: fatto — merge di `task/T105` su `task/T139` con conflitto risolto in `vite.config.ts`; typecheck verde, suite 745 passati, 1 todo, 0 rossi; sicurezza: `/api/crediti` è superficie nuova portata da T105, senza identità verificata come V-006.e, coperta da T120 ma non ancora nominata nel registro. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T139)
+- [2026-11-01T18:56:33.680Z] lancio T131 su claude (H:\projects\rune\.claude\worktrees\t131)
+- [2026-11-01T18:56:42.827Z] integra T139: conflitti in docs/plans/backlog.md; il base è com'era
+- [2026-11-01T18:56:43.770Z] integra T105: conflitti in vite.config.ts; il base è com'era
+- [2026-11-01T18:57:18.319Z] task/T139 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T18:57:18.876Z] task/T105 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T19:10:11.530Z] orchestratore: epoca 191 su claude (contesto a 63 % della finestra)
+- [2026-11-01T19:41:41.359Z] orchestratore: epoca 192 su claude (contesto a 50 % della finestra)
+- [2026-11-01T19:54:08.657Z] T131: ESITO: fatto — `npm audit` da 15 avvisi a 0 con Vite 7.3.7 e Vitest 4.1.12, ADR-0099, test V-014 in `tests/sicurezza/dipendenze.test.ts`; dopo `integra` serve `npm ci` nel base. · BROWSER: verificato — il gioco parte in `?skip&offline` sia dalla build (preview) sia dal server di sviluppo Vite 7: mondo disegnato, kernel e corona presenti, 0 guasti, nessun overlay di Vite, nessun errore della pagina in console (solo un messaggio del canale delle estensioni di Chrome quando si lascia la pagina). (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T131)
+- [2026-11-01T19:54:13.290Z] lancio T141 su claude (H:\projects\rune\.claude\worktrees\t141)
+- [2026-11-01T20:05:32.018Z] T141: ESITO: fatto — aggiunta `docs/design/logo/` con brief, due prompt, README e 9 immagini; le 8 direzioni sono nel brief; codice invariato, prompt non provati sugli strumenti. · BROWSER: verificato — foto nuove da `?skip&offline` e dalle pagine del sito, ognuna guardata prima di tenerla; scheda chiusa e preview fermata. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T141)
+- [2026-11-01T20:05:35.975Z] lancio T140 su claude (H:\projects\rune\.claude\worktrees\t140)
+- [2026-11-01T20:05:44.695Z] task/T141 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T20:06:10.556Z] orchestratore: epoca 193 su claude (contesto a 50 % della finestra)
+- [2026-11-01T20:24:45.033Z] T122: ESITO: fatto — Lua e JS si scambiano solo dati attraverso `Crossing` (ADR-0099), `string.dump` è tolto dalla tabella vera, la prova di caricamento gira in una VM a parte; V-008, V-017, V-019 chiuse, audit aggiornato con ciò che è provato e ciò che no; sicurezza: nessuna superficie nuova. · BROWSER: verificato — non richiesto dal task; build con `?skip&offline`: il mondo si disegna, 123 tick in 2 s, 26 moduli, nessun guasto, nessun errore in console (letta solo dopo il caricamento), e dalla console nessun campo JS raggiungibile da Lua. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T122)
+- [2026-11-01T20:24:48.868Z] lancio T142 su claude (H:\projects\rune\.claude\worktrees\t142)
+- [2026-11-01T20:24:57.237Z] integra T122: conflitti in AGENTS.md; il base è com'era
+- [2026-11-01T20:25:40.939Z] claude: sospeso
+- [2026-11-01T20:54:41.075Z] T140: ESITO: fatto — merge di T123 risolto in `63124f0`, V-002 chiusa con kit 4 ok dopo aver riscritto V-002.d (come era scritta dava FALLA) e residuo nel registro; typecheck verde, suite con 2 rossi per timeout in `tests/between.test.ts` (7 su 7 con timeout lungo, nessuna asserzione rotta, confronto col base non fatto). (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T140)
+- [2026-11-01T20:54:51.964Z] task/T140 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T20:54:52.538Z] task/T123 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T20:55:32.844Z] orchestratore: epoca 194 su claude (contesto a 50 % della finestra)
+- [2026-11-01T20:59:30.611Z] T142: ESITO: fatto — merge di T131 risolto su `task/T142` (Vite 7.3.7, Vitest 4.1.12, audit a 0); typecheck e build verdi; suite 728 passati, 18 attesi falliti, 1 todo, 1 rosso per timeout (`between.test.ts`) che da solo passa 7 su 7. · BROWSER: verificato — dalla build con Vite 7 landing, carte, sessioni, profilo e pagamenti si aprono con il loro stile e senza errori della pagina in console, ma senza universi su disco si vedono solo stati vuoti e moduli di accesso. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T142)
+- [2026-11-01T20:59:48.584Z] integra T142: conflitti in docs/adr/README.md; il base è com'era
+- [2026-11-01T21:00:56.545Z] claude: riattivato
+- [2026-11-01T21:01:40.147Z] lancio T145 su claude (H:\projects\rune\.claude\worktrees\t145)
+- [2026-11-01T21:17:01.083Z] T145: ESITO: fatto — merge di T142 risolto, ADR di Vite 7 rinumerato a 0100 con le citazioni corrette, `npm ci` nel worktree; typecheck e build verdi, suite 746 passati, 16 attesi, 1 todo, nessun rosso. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T145)
+- [2026-11-01T21:17:08.953Z] claude: sospeso
+- [2026-11-01T21:17:17.410Z] task/T145 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T21:17:26.735Z] task/T142 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T21:17:37.329Z] task/T131 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T21:18:43.709Z] claude: riattivato
+- [2026-11-01T21:19:05.878Z] lancio T144 su claude (H:\projects\rune\.claude\worktrees\t144)
+- [2026-11-01T21:29:24.250Z] lancio T143 su claude (H:\projects\rune\.claude\worktrees\t143)
+- [2026-11-01T21:33:51.712Z] T144: ESITO: fatto — merge di T122 su `task/T144`, ADR del confine rinumerato a 0101 con le sue citazioni, typecheck e suite verdi (782 passati, 12 attesi, nessun rosso) (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T144)
+- [2026-11-01T21:34:04.807Z] task/T144 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T21:34:05.455Z] task/T122 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T21:34:20.487Z] orchestratore: epoca 195 su claude (contesto a 71 % della finestra)
+- [2026-11-01T21:40:05.126Z] lancio T120 su claude (H:\projects\rune\.claude\worktrees\t120)
+- [2026-11-01T21:52:10.142Z] T143: ESITO: fatto — le lastre delle rune leggevano alfa 0 per un attributo aggiunto durante il disegno (`noGlow`, da `379636a`/`aaacca6`, dedotto dal codice); i riempitivi ora arrivano dopo il fotogramma; aggiunto `tests/fillers.test.ts`; sicurezza: nessuna superficie nuova. · BROWSER: verificato — con `?skip&offline` sulla build, rune a terra e incise (`y = y`) visibili col tappeto attivo mentre si cammina, di giorno e di notte; rune a terra visibili col tappeto fermo dentro il cerchio e dalla corona, e fuori dal chunk (0,0) (`vita`, `terra`, `speed = speed` a (-4..-2, 1)); dalla corona la simulazione resta tagliata oltre il cerchio. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T143)
+- [2026-11-01T21:52:13.523Z] lancio T124 su claude (H:\projects\rune\.claude\worktrees\t124)
+- [2026-11-01T21:52:22.735Z] task/T143 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T22:10:43.405Z] T124: ESITO: fatto — webhook Stripe: 503 senza segreto (sviluppo e preview), universo e viandante validati, credito dall'importo pagato; una chiave vera senza segreto non apre sessioni; V-004 chiusa, kit V-004.a-e ok, test e typecheck verdi. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T124)
+- [2026-11-01T22:10:47.317Z] lancio T126 su claude (H:\projects\rune\.claude\worktrees\t126)
+- [2026-11-01T22:10:52.805Z] task/T124 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T22:34:27.428Z] T120: ESITO: fatto — V-001 e V-006 chiuse con ADR-0102: identità verificata sul server, un non master non scrive e legge solo `publicFiles`, altre origini rifiutate; sicurezza: nessuna voce nuova. · BROWSER: verificato — in singola un salvataggio arriva sul disco e il gioco non dà errori in console. Landing, sessioni (creazione di un reame), carte, profilo e crediti funzionano. Sul server di sviluppo il master `io` passa dalla lobby al mondo e il clone riesce, mentre un non master è rifiutato (403). (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T120)
+- [2026-11-01T22:34:31.357Z] lancio T128 su claude (H:\projects\rune\.claude\worktrees\t128)
+- [2026-11-01T22:34:37.462Z] task/T120 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T22:49:06.697Z] T126: ESITO: fatto — limiti dentro la sandbox (pattern costosi in un matcher Lua contato dal budget, lavoro C addebitato, memoria e stringhe nell'allocatore, budget per tick, limiti ai modelli MarkovJunior), ADR-0102; sicurezza: V-007 resta `in correzione` per T127, nessuna superficie nuova. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T126)
+- [2026-11-01T22:49:10.595Z] lancio T121 su claude (H:\projects\rune\.claude\worktrees\t121)
+- [2026-11-01T22:49:16.986Z] integra T126: conflitti in docs/adr/README.md; il base è com'era
+- [2026-11-01T22:49:59.816Z] orchestratore: epoca 196 su claude (contesto a 53 % della finestra)
+- [2026-11-01T23:03:22.149Z] T128: ESITO: fatto — coda delle CLI blindata (route su richiesta, loopback e segreto; CLI isolata con conferma a ogni esecuzione), V-009 chiusa, ADR-0102, Antigravity tolto dalla coda perché non può escludere gli strumenti · BROWSER: verificato — la pagina del gioco legge il segreto e mette e ritira una richiesta; senza segreto e da un'altra origine locale la risposta è 403; nessun errore in console (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T128)
+- [2026-11-01T23:03:26.091Z] lancio T146 su claude (H:\projects\rune\.claude\worktrees\t146)
+- [2026-11-01T23:03:32.690Z] integra --help: non riuscito (merge: task/--help - not something we can merge); il base è com'era
+- [2026-11-01T23:03:37.588Z] integra T128: conflitti in docs/adr/README.md, vite.config.ts; il base è com'era
+- [2026-11-01T23:34:52.039Z] T121: ESITO: fatto — elenco dei percorsi ammessi (`src/kernel/paths.ts`) al posto del divieto su `.git`, git del server solo da `server/git.ts` senza hook né risalita, V-003 chiusa (ADR-0103); typecheck verde, suite 1033 verdi e 1 timeout da carico in `tests/between.test.ts`, che tocca solo il limite di 60 s (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T121)
+- [2026-11-01T23:35:01.845Z] task/T121 integrato in 3d; worktree e branch tolti.
+- [2026-11-01T23:37:02.214Z] lancio T125 su claude (H:\projects\rune\.claude\worktrees\t125)
+- [2026-11-01T23:37:38.130Z] orchestratore: epoca 197 su claude (contesto a 68 % della finestra)
+- [2026-11-01T23:53:43.277Z] T146: ESITO: fatto — T126 fuso in `task/T146` con l'ADR rinumerato a 0103; typecheck verde, suite 872 passati e 9 timeout tutti verdi da soli (margine ridotto: un test a 53 s su 60); kit V-007 a, b, c ok e V-007 ancora `in correzione` per T127. · BROWSER: verificato — `?skip&offline` parte e cammina senza errori del gioco, tick 3,8 ms da fermo e 4,4 ms camminando; nessun confronto nel browser col prima di T126. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T146)
+- [2026-11-01T23:53:46.576Z] lancio T148 su claude (H:\projects\rune\.claude\worktrees\t148)
+- [2026-11-01T23:53:55.228Z] integra T146: conflitti in docs/adr/README.md, src/kernel/validator.ts; il base è com'era
+- [2026-11-02T00:13:58.693Z] T125: ESITO: fatto — saldi, pagamenti e ricariche in un archivio del server fuori dalla storia (`server/ledger.ts`, ADR-0104), accredito atomico tra processi, migrazione automatica, Referente senza crediti, ricarica a mano del master con tetto giornaliero; V-005 e V-010 chiuse; superficie nuova: il messaggio `ricarica`, solo master, nessuna voce nuova. · BROWSER: verificato — con `npm run dev` e un universo di prova usa e getta, come master: saldi migrati (`io` 2, `anna` 4), ricarica di 3 ad `anna` (saldo 7), rifiuto oltre il tetto con il messaggio nella riga «Crediti» della console, file del viandante senza `crediti`, nessun errore in console. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T125)
+- [2026-11-02T00:14:02.103Z] lancio T149 su claude (H:\projects\rune\.claude\worktrees\t149)
+- [2026-11-02T00:14:08.200Z] task/T125 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T00:32:27.145Z] T149: ESITO: fatto — merge di `task/T146` risolto, ADR dei limiti rinumerato 0105 (lo 0104 è di T125), suite e kit verdi senza T125; `integra T149` ha ancora un conflitto di una riga in `docs/adr/README.md` (tenere 0104 e 0105). (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T149)
+- [2026-11-02T00:32:38.498Z] integra T149: conflitti in docs/adr/README.md; il base è com'era
+- [2026-11-02T00:33:12.813Z] orchestratore: epoca 198 su claude (contesto a 50 % della finestra)
+- [2026-11-02T00:35:38.831Z] lancio T150 su claude (H:\projects\rune\.claude\worktrees\t150)
+- [2026-11-02T00:50:07.401Z] T148: ESITO: fatto — `tests/between.test.ts` da 386 s a 39 s da solo (test da 1,7-16,6 s) con un `InlineRunner` condiviso e senza limiti alzati né asserzioni toccate; typecheck verde, suite 1032 verdi e 2 rossi per timeout in `credits.test.ts` e `referente.test.ts`, non toccati da T148, che da soli restano rossi (5 timeout su 11). (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T148)
+- [2026-11-02T00:50:12.020Z] lancio T129 su claude (H:\projects\rune\.claude\worktrees\t129)
+- [2026-11-02T00:50:24.266Z] task/T148 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T01:47:19.612Z] T150: ESITO: fatto — merge di T149 risolto con T125 dentro (ADR 0104 e 0105 nell'indice); typecheck verde, suite 1073 passati e 7 timeout non verdi (`between` non è mai verde col suo limite, `referente` dipende dal carico, `credits` è verde da solo); kit V-005, V-007 e V-010 tutto ok. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T150)
+- [2026-11-02T01:47:23.134Z] lancio T151 su claude (H:\projects\rune\.claude\worktrees\t151)
+- [2026-11-02T01:47:30.434Z] task/T150 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T01:47:31.065Z] task/T149 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T01:47:31.884Z] task/T146 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T01:47:32.514Z] task/T126 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T02:06:05.772Z] T129: ESITO: fatto — limiti ai messaggi in `src/session/server.ts` (ritmo per viandante, ritmo e coda per pagante per ciò che può chiamare i modelli, testo tagliato, chiusura di chi non smette), ADR-0105, V-011 chiusa; suite intera verde solo con timeout allargato a 240 s, con 60 s timeout sotto carico in quattro file che da soli passano. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T129)
+- [2026-11-02T02:06:06.591Z] lancio T147 su claude (H:\projects\rune\.claude\worktrees\t147)
+- [2026-11-02T02:10:08.051Z] orchestratore: epoca 199 su claude (contesto a 59 % della finestra)
+- [2026-11-02T02:24:26.026Z] T151: ESITO: fatto — `credits` e `referente` condividono un runner delle forme, compreso il kernel del ramo tramite una spia su `Kernel.boot`: da 365 s a 27 + 29 s, test fino a 21 s nella suite, senza toccare asserzioni né gioco; la suite resta con 1 rosso per timeout in `tests/branch.test.ts`, verde da solo, che T151 non tocca. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T151)
+- [2026-11-02T02:24:30.423Z] lancio T159 su claude (H:\projects\rune\.claude\worktrees\t159)
+- [2026-11-02T02:24:36.569Z] task/T151 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T02:36:51.163Z] T147: ESITO: fatto — T128 fuso con i controlli di T120, ADR della coda rinumerato a 0106, suite 1090 passati e 2 attesi, kit V-009 2 ok a route spenta. · BROWSER: verificato — sulla build con `QUINE_CODA=1`, la pagina su `localhost` legge il segreto, mette una richiesta (`in coda`, 1) e la ritira (0); senza segreto o con uno sbagliato 403; da `http://[::1]:4741` 403 «origine non ammessa» su segreto, stato e POST, e nessun file in coda anche con `no-cors`. In console solo due errori di canale di messaggi, che attribuisco all'estensione del browser e non al gioco. Non ho provato il cammino: il task chiedeva la coda. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T147)
+- [2026-11-02T02:36:56.297Z] lancio T161 su claude (H:\projects\rune\.claude\worktrees\t161)
+- [2026-11-02T02:37:02.339Z] task/T147 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T02:37:03.166Z] task/T128 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T02:44:22.741Z] T159: interrotto dall'orchestratore (riprende con riprendi T159)
+- [2026-11-02T02:44:22.773Z] T159: interrotto (riprende con riprendi T159)
+- [2026-11-02T02:44:59.341Z] orchestratore: epoca 200 su claude (contesto a 75 % della finestra)
+- [2026-11-02T03:01:48.614Z] T161: ESITO: fallito — nessun commit e nessun cambiamento di questa sessione: T161 resta `da fare` perché `t161-51` lo sta eseguendo nello stesso worktree; misurata solo la base (1083 verdi, 862 s). (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T161)
+- [2026-11-02T03:01:53.368Z] lancio T127 su claude (H:\projects\rune\.claude\worktrees\t127)
+- [2026-11-02T03:02:42.969Z] claude: sospeso
+- [2026-11-02T03:02:43.294Z] T127: interrotto dall'orchestratore (riprende con riprendi T127)
+- [2026-11-02T03:02:43.321Z] T127: interrotto (riprende con riprendi T127)
+- [2026-11-02T03:06:05.782Z] T161: rimesso in coda (riprende la sua conversazione)
+- [2026-11-02T03:07:03.225Z] riprendo T161 su claude (H:\projects\rune\.claude\worktrees\t161)
+- [2026-11-02T03:22:18.450Z] T161: ESITO: fatto — cache delle forme condivisa nel processo (chiave con testo intero, solo run finiti, congelata, LRU 4096 voci/256 MB), su disco solo per i test; boot successivi ~0,25 s, suite da 862 s (base, carico non confrontabile) a 254 s con la memoria e 115 s col disco; 1097 verdi e 3 `expected fail` su 1100, typecheck verde; sicurezza: superficie nuova valutata, nessuna voce aggiunta (ADR-0108). (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T161)
+- [2026-11-02T03:22:37.296Z] integra T161: conflitti in docs/adr/README.md; il base è com'era
+- [2026-11-02T03:23:11.885Z] claude: riattivato
+- [2026-11-02T03:23:27.889Z] orchestratore: epoca 201 su claude (contesto a 52 % della finestra)
+- [2026-11-02T03:23:40.805Z] lancio T162 su claude (H:\projects\rune\.claude\worktrees\t162)
+- [2026-11-02T03:26:40.762Z] T162: ESITO: fatto — T161 fuso in `task/T162`, conflitto in `docs/adr/README.md` risolto tenendo le righe 0106 e 0108; typecheck verde, suite 1107 passati e 2 expected fail su 1109, nessun rosso, 111,64 s con CPU 45-87 %. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T162)
+- [2026-11-02T03:26:44.307Z] lancio T130 su claude (H:\projects\rune\.claude\worktrees\t130)
+- [2026-11-02T03:26:55.859Z] task/T162 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T03:26:56.440Z] task/T161 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T03:27:04.719Z] T159: rimesso in coda (riprende la sua conversazione)
+- [2026-11-02T03:27:04.840Z] T127: rimesso in coda (riprende la sua conversazione)
+- [2026-11-02T03:27:50.406Z] riprendo T159 su claude (H:\projects\rune\.claude\worktrees\t159)
+- [2026-11-02T03:31:34.399Z] orchestratore: epoca 202 su claude (contesto a 69 % della finestra)
+- [2026-11-02T03:59:08.078Z] T159: ESITO: fatto — T129 integrato in `task/T159` e limiti ai messaggi rinumerati ADR-0107; typecheck verde, suite 1089 passati, 3 attesi, 1 rosso (`referente`, timeout a 60 s che dipende dal carico e c'è anche col `server.ts` del base); kit V-011 ok. Ora l'orchestratore può fare `integra T159` e `integra T129`. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T159)
+- [2026-11-02T03:59:11.449Z] riprendo T127 su claude (H:\projects\rune\.claude\worktrees\t127)
+- [2026-11-02T03:59:24.680Z] integra T159: conflitti in docs/adr/README.md; il base è com'era
+- [2026-11-02T03:59:26.136Z] integra T129: conflitti in docs/adr/README.md; il base è com'era
+- [2026-11-02T03:59:54.407Z] nota: T165 creato: integra T159 in conflitto sull'indice ADR
+- [2026-11-02T04:06:22.392Z] T130: ESITO: fatto — `playerFiles` e `publicFiles` a elenco di campi, `universes/` non servito da Vite, commit del Concilio limitati a `councilMayWrite`, `ai` solo su comando del master; V-012 e V-013 chiuse, ADR-0107. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T130)
+- [2026-11-02T04:06:25.803Z] lancio T165 su claude (H:\projects\rune\.claude\worktrees\t165)
+- [2026-11-02T04:07:12.521Z] orchestratore: epoca 203 su claude (contesto a 53 % della finestra)
+- [2026-11-02T04:10:08.002Z] T165: ESITO: fatto — merge di `task/T159` (con T129) su `task/T165`, indice degli ADR in ordine; typecheck verde, suite con 1117 passati, 2 attesi e 0 rossi in 105 s; il timeout di `referente` è sparito; V-011.a ok. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T165)
+- [2026-11-02T04:10:31.557Z] task/T165 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T04:10:32.137Z] task/T159 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T04:10:32.756Z] task/T129 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T04:11:36.064Z] orchestratore: epoca 204 su claude (contesto a 73 % della finestra)
+- [2026-11-02T04:17:21.662Z] lancio T166 su claude (H:\projects\rune\.claude\worktrees\t166)
+- [2026-11-02T04:33:17.410Z] T166: ESITO: fatto — T130 fuso con ADR-0109 e regola 8f; suite 1132 passati e 0 rossi, kit 16 ok e 0 FALLA, nessuna correzione al codice. · BROWSER: verificato — con viandanti non master, terreni, modelli, altri viandanti, menu e dialogo funzionano; lobby, carte e sessioni senza errori della pagina; cammini lunghi fatti via script a ~2 fps e «Raccogli» non visto riuscire. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T166)
+- [2026-11-02T04:33:21.524Z] lancio T160 su claude (H:\projects\rune\.claude\worktrees\t160)
+- [2026-11-02T04:33:27.971Z] task/T166 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T04:33:28.699Z] task/T130 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T05:05:53.933Z] T127: ESITO: fatto — ogni mondo in multigiocatore gira in un processo senza segreti, con limite di memoria e un sorvegliante che lo uccide e lo riavvia; i client restano collegati e rientrano da soli (ADR-0107, V-007 chiusa). · BROWSER: verificato — su `npm run dev`, universo usa e getta, `?offline`: due schede camminano e si vedono; ucciso a mano il processo del mondo, l'HTTP risponde subito, l'avviso arriva e il rientro è automatico (riscontrati via console su una scheda ciascuno); negli errori della console, letti su una scheda, solo messaggi del canale di un'estensione del browser. La prova è precedente a un piccolo ritocco di `session.ts`, ricoperto da suite e kit. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T127)
+- [2026-11-02T05:05:58.804Z] lancio T132 su claude (H:\projects\rune\.claude\worktrees\t132)
+- [2026-11-02T05:20:43.319Z] T160: ESITO: fatto — suite da 108,9 a 90,8 s (carichi non uguali), 1119 test come prima, nessun rosso; `kernel.test.ts` diviso in 5 file, rilievo memorizzato solo nei test, confronti economici in `forms-cache`, tolti i runner manuali dopo T161 (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T160)
+- [2026-11-02T05:20:47.559Z] lancio T169 su claude (H:\projects\rune\.claude\worktrees\t169)
+- [2026-11-02T05:20:54.608Z] task/T160 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T05:21:16.212Z] orchestratore: epoca 205 su claude (contesto a 60 % della finestra)
+- [2026-11-02T05:23:01.048Z] T132: ESITO: fatto — seme numerico, `returnUrl` solo sulla stessa origine, errori generici di Stripe, CSP su ogni risposta (ADR-0110), test su `dist/`; V-015 e V-016 chiuse, V-020 rilevata · BROWSER: verificato — nessuna violazione della CSP su gioco, sito e `lab/` dalla preview, né su `sessioni.html` e su una partita in multigiocatore dal server di sviluppo (misurato con `report-uri`, perché la console dello strumento non le mostra); `SEME #0` per un seme non numerico; non provato l'accesso con Google vero (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T132)
+- [2026-11-02T05:37:30.437Z] lancio T154 su claude (H:\projects\rune\.claude\worktrees\t154)
+- [2026-11-02T05:44:06.484Z] T169: ESITO: fatto — T127 integrato con l'ADR 0110, programmi uno per turno con apertura che li aspetta, `.quine-mondo` non servita, tetto verso un mondo fermo; primo avvio 11 s contro 180 s di apertura, silenzio massimo 1 s; 1149 test verdi, kit 28 ok; sicurezza: nessuna superficie nuova. · BROWSER: verificato — `npm run dev` sulla 4869, universo usa e getta offline, `io` master e `ospite` no si vedono e camminano; ucciso a mano il processo del mondo, avviso e rientro automatico su tutte e due le schede, poi di nuovo si camminano e si vedono; cammino con eventi di tastiera mandati alla pagina, non con tasti veri; in console solo errori del canale di un'estensione del browser. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T169)
+- [2026-11-02T05:44:16.996Z] task/T169 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T05:44:17.566Z] task/T127 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T05:44:41.331Z] orchestratore: epoca 206 su claude (contesto a 53 % della finestra)
+- [2026-11-02T05:48:16.982Z] lancio T170 su claude (H:\projects\rune\.claude\worktrees\t170)
+- [2026-11-02T05:57:49.266Z] T170: ESITO: fatto — `task/T132` fuso in `task/T170`, ADR della CSP rinumerato 0111, V-020 assegnata a T167, nuovo test sull'ordine della CSP; suite 1163 verdi, kit 8 ok e 0 FALLA; sicurezza: nessuna superficie nuova. · BROWSER: verificato — su `npm run dev`, partita usa e getta con `?offline`, giocatore e master: 0 violazioni della CSP misurate con `report-uri`, anche uccidendo due volte il processo del mondo e ricaricando a mondo fermo; gli unici report sono i 4 `eval` di controllo. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T170)
+- [2026-11-02T05:58:02.153Z] task/T170 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T05:58:02.878Z] task/T132 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T06:07:43.090Z] T154: ESITO: fatto — banco in `lab/banco/` e `lab/scripts/banco-strutture.ts`, soglia e criteri scritti, sette bersagli, prima versione del prompt (input 2750 token); sullo steampunk le misure passano al secondo tentativo, la foto giudicata no; sicurezza: nessuna superficie nuova. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T154)
+- [2026-11-02T06:07:46.492Z] lancio T133 su claude (H:\projects\rune\.claude\worktrees\t133)
+- [2026-11-02T06:07:53.137Z] task/T154 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T06:08:22.608Z] orchestratore: epoca 207 su claude (contesto a 69 % della finestra)
+- [2026-11-02T06:27:26.777Z] T133: ESITO: fatto — server di produzione senza Vite (`server/production.ts`, `npm run build:server`, `npm run serve`): solo `dist/` e le rotte di un elenco, niente Gemini né coda, non parte senza configurazione, CSP su ogni risposta, `?universo=` valido in ogni build; ADR-0112, V-014 chiusa; sicurezza: superficie nuova la porta (`frontDoorRefusal`) e il servizio dei file (`buildFile`), coperti da `tests/sicurezza/produzione.test.ts`. · BROWSER: verificato — due schede sul server di produzione in locale, con la build vera e il programma dei mondi di `dist-server/`, servizio delle identità finto e modelli locali: due account entrano e si vedono, chi cammina si muove nell'altra scheda, lobby e landing si aprono; Firebase vero non provato. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T133)
+- [2026-11-02T06:27:30.406Z] lancio T167 su claude (H:\projects\rune\.claude\worktrees\t167)
+- [2026-11-02T06:27:40.687Z] task/T133 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T06:56:27.515Z] T167: ESITO: fatto — secondo audit: 9 falle nuove più V-020, tutte chiuse con test tranne V-026 (specificata, task proposto); ADR-0112, report `docs/sicurezza/audit-2026-11-2.md`, nessuna voce chiusa riaperta. · BROWSER: verificato — da una pagina su un'altra porta di loopback V-001.o e V-006.g reggono; gioco (con `cors: false`), mondo di molti da non master e `site/pagamenti.html` (questi due prima di `cors: false`) senza errori della pagina; V-001.n corretta non rifatta nel browser, misurata nel kit con V-001.p. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T167)
+- [2026-11-02T06:56:31.103Z] lancio T134 su claude (H:\projects\rune\.claude\worktrees\t134)
+- [2026-11-02T06:56:36.598Z] integra T167: conflitti in AGENTS.md, server/session.ts; il base è com'era
+- [2026-11-02T06:57:03.557Z] T134: interrotto dall'orchestratore (riprende con riprendi T134)
+- [2026-11-02T06:57:03.577Z] T134: interrotto (riprende con riprendi T134)
+- [2026-11-02T06:57:05.118Z] lancio T168 su claude (H:\projects\rune\.claude\worktrees\t168)
+- [2026-11-02T06:57:37.409Z] T168: interrotto dall'orchestratore (riprende con riprendi T168)
+- [2026-11-02T06:57:37.429Z] T168: interrotto (riprende con riprendi T168)
+- [2026-11-02T06:57:39.609Z] lancio T171 su claude (H:\projects\rune\.claude\worktrees\t171)
+- [2026-11-02T07:38:31.011Z] T171: ESITO: fatto — T167 integrato con l'ADR 0113, `QUINE_MONDI_MASSIMI` in produzione, test sul server vero, flake di V-007 corretto; suite 1227/1227, kit 79 ok; sicurezza: nessuna superficie nuova. · BROWSER: verificato — server di produzione in locale con identità finte e modelli locali: il non master entra e cammina (il master lo vede da x 1 a x 2,2); messaggi malformati su un terzo socket prima e dopo `entra` non fermano il mondo, nessun avviso «si è fermato» e il cammino continua; in console solo errori del canale dell'estensione del browser. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T171)
+- [2026-11-02T07:38:34.573Z] lancio T155 su claude (H:\projects\rune\.claude\worktrees\t155)
+- [2026-11-02T07:38:40.792Z] task/T171 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T07:38:41.502Z] task/T167 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T07:38:41.588Z] T168: rimesso in coda (riprende la sua conversazione)
+- [2026-11-02T07:39:08.064Z] orchestratore: epoca 208 su claude (contesto a 59 % della finestra)
+- [2026-11-02T12:56:18.749Z] T155: limite di claude, riprendo dopo 2026-11-02T13:31:00.000Z
+- [2026-11-02T13:29:32.426Z] orchestratore: limite di claude fino a 2026-11-02T13:31:00.000Z
+- [2026-11-02T13:29:34.516Z] orchestratore: limite di claude fino a 2026-11-02T13:31:00.000Z
+- [2026-11-02T13:29:36.702Z] orchestratore: limite di claude fino a 2026-11-02T13:31:00.000Z
+- [2026-11-02T13:29:38.877Z] orchestratore: limite di claude fino a 2026-11-02T13:31:00.000Z
+- [2026-11-02T13:29:41.081Z] orchestratore: limite di claude fino a 2026-11-02T13:31:00.000Z
+- [2026-11-02T13:29:43.363Z] orchestratore: limite di claude fino a 2026-11-02T13:31:00.000Z
+- [2026-11-02T13:29:45.707Z] orchestratore: limite di claude fino a 2026-11-02T13:31:00.000Z
+- [2026-11-02T13:29:47.966Z] orchestratore: limite di claude fino a 2026-11-02T13:31:00.000Z
+- [2026-11-02T13:29:50.073Z] orchestratore: limite di claude fino a 2026-11-02T13:31:00.000Z
+- [2026-11-02T13:29:52.131Z] orchestratore: limite di claude fino a 2026-11-02T13:31:00.000Z
+- [2026-11-02T13:29:54.213Z] orchestratore: limite di claude fino a 2026-11-02T13:31:00.000Z
+- [2026-11-02T13:29:56.442Z] orchestratore: limite di claude fino a 2026-11-02T13:31:00.000Z
+- [2026-11-02T13:29:58.568Z] orchestratore: limite di claude fino a 2026-11-02T13:31:00.000Z
+- [2026-11-02T13:32:31.987Z] riprendo T168 su claude (H:\projects\rune\.claude\worktrees\t168)
+- [2026-11-02T13:32:32.014Z] riprendo T155 su claude (H:\projects\rune\.claude\worktrees\t155)
+- [2026-11-02T13:47:42.040Z] T168: ESITO: fatto — `describeCard` legge solo ciò che `publicFiles` dà, porta vera nelle sessioni; il raccolto riesce, il blocco non si ripete, foto senza difetto (i luoghi non hanno un corpo); sicurezza: nessuna superficie nuova · BROWSER: verificato — non master in universo usa e getta: raccolto riuscito e rifiuto da lontano; nessun blocco reale nel bosco (cammini via script, ~1,3 fps); galleria con 11 foto su 11 in sviluppo e nella build, con soli luoghi 16 gemme e 0 worker; sessioni «PORTA 4868» (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T168)
+- [2026-11-02T13:47:45.762Z] lancio T172 su claude (H:\projects\rune\.claude\worktrees\t172)
+- [2026-11-02T13:47:51.493Z] task/T168 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T14:11:07.726Z] T172: ESITO: fatto — V-026 chiusa: mondo solo dopo un `entra` con token verificato, mondo vuoto che si salva e si ferma, quota di universi, ritmi per account e per indirizzo con `QUINE_PROXY_FIDATI` (ADR-0114); suite 1261 passati nel secondo giro, un rosso non ripetuto nel primo. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T172)
+- [2026-11-02T14:11:11.450Z] lancio T163 su claude (H:\projects\rune\.claude\worktrees\t163)
+- [2026-11-02T14:11:22.410Z] task/T172 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T14:11:22.541Z] T134: rimesso in coda (riprende la sua conversazione)
+- [2026-11-02T14:12:20.454Z] orchestratore: epoca 209 su claude (contesto a 53 % della finestra)
+- [2026-11-02T14:24:19.728Z] T163: ESITO: fatto — la cache delle forme nel browser tiene solo ciò che ha finito e la versione 2 del database scarta le voci vecchie; aggiunta in ADR-0108, `AGENTS.md` aggiornato. Sicurezza: nessuna superficie nuova. · BROWSER: verificato — build di produzione con `?skip&offline`: database v1 con una voce finta → versione 2, voce sparita, 147 forme calcolate e salvate, mondo disegnato; al secondo caricamento 0 lavori ai worker e 147 dalla cache, senza errori in console (letta dopo la pagina caricata, gli errori del caricamento potrebbero sfuggire); un programma scaduto in un worker vero non lascia voci, lo stesso con tempo largo ne lascia una. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T163)
+- [2026-11-02T14:24:22.693Z] riprendo T134 su claude (H:\projects\rune\.claude\worktrees\t134)
+- [2026-11-02T14:24:34.205Z] task/T163 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T14:39:20.689Z] T134: ESITO: fatto — prove di integrazione contro il server di produzione vero (31 test, nessuna falla), kit intero 80 ok, audit aggiornato voce per voce con ciò che resta prima di T45f; sicurezza: nessuna superficie nuova. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T134)
+- [2026-11-02T14:39:35.073Z] task/T134 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T14:40:10.813Z] orchestratore: epoca 210 su claude (contesto a 58 % della finestra)
+- [2026-11-02T15:08:27.866Z] T155: ESITO: in attesa — prompt, diario e foto finali su `task/T155`; 11 giri, soglia non raggiunta (g11: 11/14 misure, 7 anche foto); decisione in `docs/pipeline/domande/T155.md` (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T155)
+- [2026-11-02T15:08:31.734Z] lancio T164 su claude (H:\projects\rune\.claude\worktrees\t164)
+- [2026-11-02T15:20:41.300Z] T164: ESITO: fatto — `formCacheKey` usa il testo intero del programma (`formKey` più `vpt`, `rig`, `sway`), le voci vecchie le butta `FORMS_DB_VERSION` = 3; misurata una cache senza tetto da 1,86 GB di array e 528 MB su disco per il solo mondo iniziale, da decidere a parte. · BROWSER: verificato — database v2 portato alla versione 3 senza chiavi vecchie, il mondo si disegna; al secondo caricamento 145 forme dalla cache, 0 lavori ai worker, nessun errore in console. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T164)
+- [2026-11-02T15:20:45.202Z] lancio T173 su claude (H:\projects\rune\.claude\worktrees\t173)
+- [2026-11-02T15:20:51.730Z] task/T164 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T15:21:34.598Z] orchestratore: epoca 211 su claude (contesto a 62 % della finestra)
+- [2026-11-02T16:01:23.345Z] T173: limite di claude, riprendo dopo 2026-11-02T18:31:00.000Z
+- [2026-11-02T18:30:00.385Z] orchestratore: limite di claude fino a 2026-11-03T18:31:00.000Z
+- [2026-11-02T18:31:48.281Z] riprendo T173 su claude (H:\projects\rune\.claude\worktrees\t173)
+- [2026-11-02T18:31:49.725Z] lancio T174 su claude (H:\projects\rune\.claude\worktrees\t174)
+- [2026-11-02T18:32:12.619Z] orchestratore: epoca 212 su claude (contesto a 55 % della finestra)
+- [2026-11-02T18:32:31.770Z] claude: sospeso
+- [2026-11-02T18:39:12.877Z] ferma --dopo: niente lanci nuovi, aspetto T173, T174
+- [2026-11-02T19:04:50.255Z] T173: il suo processo non c'è più, riprende la sua conversazione
+- [2026-11-02T19:04:50.468Z] T174: il suo processo non c'è più, riprende la sua conversazione
+- [2026-11-02T19:05:14.098Z] riprendo T173 su claude (H:\projects\rune\.claude\worktrees\t173)
+- [2026-11-02T19:05:14.128Z] riprendo T174 su claude (H:\projects\rune\.claude\worktrees\t174)
+- [2026-11-02T19:05:53.343Z] fable: sospeso
+- [2026-11-02T19:08:09.284Z] orchestratore: epoca 213 su claude (contesto a 83 % della finestra)
+- [2026-11-02T19:08:30.272Z] ferma --dopo: niente lanci nuovi, aspetto T173, T174
+- [2026-11-02T19:13:35.044Z] T174: ESITO: fatto — causa misurata: un socket zitto oltre `ENTRY_MS` (15 s) veniva chiuso e il test aspettava 30 s su un messaggio mai partito; corretto solo `produzione.test.ts`, suite verde due giri di fila; sicurezza: nessuna superficie nuova. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T174)
+- [2026-11-02T19:13:50.129Z] task/T174 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T19:14:07.298Z] orchestratore: epoca 214 su claude (contesto a 58 % della finestra)
+- [2026-11-02T19:14:42.941Z] fable: riattivato
+- [2026-11-02T19:14:43.082Z] claude: riattivato
+- [2026-11-02T19:15:44.050Z] lancio T157 su fable (H:\projects\rune\.claude\worktrees\t157)
+- [2026-11-02T19:39:10.087Z] T157: ESITO: fatto — l'Attore come opzione del master (`ai.attore`, ADR-0116): schede del Narratore una volta per individuo, `npc.reply` e `npc.dialogue` all'Attore con `gemini-3.8-flash` quando è acceso; Genesi, lobby e messaggio `attore` master-only; +0,21 $ l'ora stimati; commit `a63d8e2`. · BROWSER: verificato — Genesi con l'opzione e la stima, battuta con un NPC accesa e spenta, il registro mostra Attore e Narratore; nessun errore in console; la lobby solo nei test. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T157)
+- [2026-11-02T19:39:33.036Z] task/T157 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T19:50:29.349Z] fable: sospeso fino a 2026-11-02T23:30:00.000Z
+- [2026-11-02T19:50:29.500Z] claude: sospeso fino a 2026-11-02T23:30:00.000Z
+- [2026-11-02T19:50:52.278Z] orchestratore: epoca 215 su claude (contesto a 62 % della finestra)
+- [2026-11-02T19:53:27.847Z] claude: riattivato
+- [2026-11-02T19:54:25.838Z] T173: ESITO: in attesa — 12 su 14 entro due richieste (9 alla prima, 3 alla seconda; falliscono `futuristica/2` e `pagoda/2`), soglia non raggiunta; il banco ha la seconda richiesta, costo medio 14 251 token di input, 43 828 di output, 0,90 dollari; domanda in `docs/pipeline/domande/T173.md`. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T173)
+- [2026-11-02T19:54:44.738Z] nota: T173 in attesa: 12 su 14, domanda all'autore; T176 trattenuto, sessione a 14 % rimasto
+- [2026-11-02T19:55:30.174Z] orchestratore: epoca 216 su claude (contesto a 60 % della finestra)
+- [2026-11-02T23:25:42.207Z] claude: sospeso fino a 2026-11-02T23:31:00.000Z
+- [2026-11-02T23:25:42.355Z] fable: sospeso fino a 2026-11-02T23:31:00.000Z
+- [2026-11-02T23:25:56.442Z] task/T173 integrato in 3d; worktree e branch tolti.
+- [2026-11-02T23:31:13.674Z] lancio T177 su claude (H:\projects\rune\.claude\worktrees\t177)
+- [2026-11-02T23:39:40.690Z] orchestratore: epoca 217 su claude (contesto a 59 % della finestra)
+- [2026-11-03T00:06:46.105Z] T177: ESITO: fatto — a riempire C: era la cache delle forme in IndexedDB, circa 0,5 GB per ogni porta di verifica (misurato: 14,8 GB in 4 giorni, da 1,5 a 7,5 GB al giorno; git no, residui dei test trascurabili); ora resta su disco solo su 5173, 4173 e sul sito, e i test tolgono la loro cartella temporanea; lo spazio già occupato lo libera l'autore con il comando qui sopra. · BROWSER: verificato — su `localhost:4977` con `?skip&offline` il mondo si disegna e non nasce `rune-forms` (0 MB); con `?formecache` il database c'è e pesa 410 MB, poi cancellato; in console solo errori dell'estensione del browser. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T177)
+- [2026-11-03T00:06:50.542Z] lancio T176 su claude (H:\projects\rune\.claude\worktrees\t176)
+- [2026-11-03T00:07:03.827Z] task/T177 integrato in 3d; worktree e branch tolti.
+- [2026-11-03T00:16:53.924Z] orchestratore: epoca 218 su claude (contesto a 52 % della finestra)
+- [2026-11-03T02:09:05.124Z] T176: ESITO: fatto — causa misurata dei rossi di `mondo.test.ts` (tempi del test: `healthy` contato dal `fork`, 60 s di apertura contro i 90 reali) e dell'`EBUSY` di `produzione.test.ts` (`git commit` ancora in corso); corretti solo i test, due proposte su `server/worldHost.ts` e `stop()` nell'esito; commit `2919d18` e `c7c9dba` su `task/T176`. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T176)
+- [2026-11-03T02:09:12.088Z] lancio T178 su claude (H:\projects\rune\.claude\worktrees\t178)
+- [2026-11-03T02:09:24.127Z] task/T176 integrato in 3d; worktree e branch tolti.
+- [2026-11-03T02:23:11.036Z] T178: ESITO: fatto — glossario di 121 voci con omonimi, 8 scelte dubbie e rinomine R1-R15, censimento rigenerabile, test, regola in `AGENTS.md`, ADR-0117; nessuna rinomina nel codice (commit 6009d6f su `task/T178`). (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T178)
+- [2026-11-03T02:23:15.103Z] lancio T179 su claude (H:\projects\rune\.claude\worktrees\t179)
+- [2026-11-03T02:23:21.718Z] task/T178 integrato in 3d; worktree e branch tolti.
+- [2026-11-03T02:38:22.595Z] orchestratore: epoca 219 su claude (contesto a 54 % della finestra)
+- [2026-11-03T02:49:53.709Z] ferma --dopo: niente lanci nuovi, aspetto T179
+- [2026-11-03T02:58:15.669Z] T179: ESITO: fatto — traccia in testo di un programma MarkovJunior (`src/mj/trace.ts`, ADR-0117), predefinita (b) differenze fra nodi con tetto 4000: su `conferma/moderna/1` 3799 token stimati, 3405 reali; griglia identica con e senza traccia; `banco-strutture --seconda --traccia` disponibile, non provato con una chiamata vera. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T179)
+- [2026-11-03T02:58:18.929Z] pipeline spenta (ferma --dopo, autore)
+- [2026-11-03T02:58:31.616Z] integra T179: conflitti in docs/adr/README.md; il base è com'era
+- [2026-11-03T02:58:59.850Z] orchestratore: epoca 220 su claude (contesto a 57 % della finestra)
