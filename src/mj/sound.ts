@@ -177,9 +177,41 @@ export function scoreOf(grid: Grid3, settings: SoundSettings): Score {
   return { steps: grid.X, settings, events, truncated };
 }
 
+/** What a program is for in the game (ADR-0125), in `models/index.json → suono`. Without it the program is for the SoundLab only. */
+export interface SoundPurpose {
+  uso: 'musica' | 'effetto';
+  /** Music: the environments it belongs to (whose id contains one of these); none: any. */
+  ambienti?: string[];
+  /** Music: the moments of the day it plays in; none: any. */
+  momenti?: string[];
+  /** Music: it plays beyond the carpet, and only there. */
+  oltre?: boolean;
+  /** Effect: the names it answers to. */
+  effetti?: string[];
+}
+
+export interface SoundProgram {
+  id: string;
+  nome?: string;
+  xml: string;
+  suono?: SoundPurpose;
+}
+
+const strings = (v: unknown): string[] | undefined => (Array.isArray(v) ? v.filter((s): s is string => typeof s === 'string') : undefined);
+
+/** The index is a file of the universe: what does not read as a purpose is no purpose. */
+function soundPurpose(raw: unknown): SoundPurpose | undefined {
+  const r = raw as Record<string, unknown> | null | undefined;
+  if (!r || typeof r !== 'object' || (r.uso !== 'musica' && r.uso !== 'effetto')) return undefined;
+  const ambienti = strings(r.ambienti);
+  const momenti = strings(r.momenti);
+  const effetti = strings(r.effetti);
+  return { uso: r.uso, ...(ambienti ? { ambienti } : {}), ...(momenti ? { momenti } : {}), ...(r.oltre === true ? { oltre: true } : {}), ...(effetti ? { effetti } : {}) };
+}
+
 /** The sound programs among a universe's files: their ids and index entries, in the index's order. */
-export function soundPrograms(files: Record<string, string>): Array<{ id: string; nome?: string; xml: string }> {
-  let index: Record<string, { classe?: string; nome?: string }>;
+export function soundPrograms(files: Record<string, string>): SoundProgram[] {
+  let index: Record<string, { classe?: string; nome?: string; suono?: unknown }>;
   try {
     index = JSON.parse(files['models/index.json'] ?? '{}');
   } catch {
@@ -187,6 +219,8 @@ export function soundPrograms(files: Record<string, string>): Array<{ id: string
   }
   return Object.entries(index).flatMap(([id, info]) => {
     const xml = files[`models/${id}.xml`];
-    return info?.classe === SOUND_CLASS && xml !== undefined ? [{ id, nome: info.nome, xml }] : [];
+    if (info?.classe !== SOUND_CLASS || xml === undefined) return [];
+    const suono = soundPurpose(info.suono);
+    return [{ id, nome: info.nome, xml, ...(suono ? { suono } : {}) }];
   });
 }

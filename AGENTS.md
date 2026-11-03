@@ -159,6 +159,7 @@ src/
                         rune, luci), models.ts (geometrie dei modelli), forms.ts + worker.ts (i programmi nei worker, e la lettura delle mesh dalla cache),
                         thumbs.ts (icone: foto dei modelli), bloom.ts (bagliore dei voxel luminosi), corona3d.ts (corona, studio, avatar), coronaview.ts (la corona nel renderer, solo del master), screens.ts (la parete della Direzione), chain.ts (la catena della Sala sistemi), bench.ts (il banco di prova), overlay.ts (testi, E, mouse),
                         materials.ts, glitch.ts
+  audio/                il suono nel gioco (ADR-0125): director.ts (la scelta del brano, gli effetti), renders.ts + worker.ts (il rendering fuori dalla pagina, la cache), prepare.ts (programma → ciò che si suona), sfx.ts (l'uscita: dissolvenze, volume, muto)
   ui/                   hud.ts (anche il diario delle missioni), profile.ts (il profilo del viandante), inventory.ts, actions.ts, chat.ts, feed.ts, genesis.ts, editor.ts, console.ts, studio.ts, atlas.ts,
                         graph.ts + graphlayout.ts (il grafo del mondo nel Nucleo), dom.ts, lobby.ts (la lobby multigiocatore, minimi, tetto e carte, ADR-0086), creditdialog.ts (la modale crediti esauriti, ADR-0086)
 universe/
@@ -224,7 +225,7 @@ Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 - **Clone con un altro master, eredità delle carte** → `#clone-eredita`
 - **Mondo in 3D, bozze di prova, mappa, voxel luminosi**: un'unità = una casella, kernel (x, y) = three.js (x, z) → `#mondo3d`
 - **MarkovJunior, modelli, cache delle forme**: ogni aspetto è un programma, un'istanza è un seme → `#markovjunior-modelli`
-- **Il suono**: programmi MarkovJunior con `<sound>` in `models/suono-*.xml` (classe `suono`), griglia → partitura → campioni con una funzione pura; il browser suona quei campioni (ADR-0123); il SoundLab e i ritocchi del piano roll → `#suono`
+- **Il suono**: programmi MarkovJunior con `<sound>` in `models/suono-*.xml` (classe `suono`), griglia → partitura → campioni con una funzione pura; il browser suona quei campioni (ADR-0123); nel gioco il suono è del client, senza messaggi: il direttore sceglie il brano con una funzione pura, il rendering sta in un worker con la cache, ciò che fallisce tace (ADR-0125); il SoundLab e i ritocchi del piano roll → `#suono`
 - **Lotti e strutture, scale, piani** → `#lotti`; **taglie di D&D** → `#taglie`; **sotterranei** → `#sotterranei`
 - **Rilievo** (`Relief`, altezze, mare) → `#rilievo`; **acqua che scorre** (automa del kernel, `kernel.dig`) → `#acqua`; **grafica a cartone** → `#cartone`
 - **Grafo del mondo**: nodi e archi dai file, `focus` come contesto del Narratore → `#grafo`

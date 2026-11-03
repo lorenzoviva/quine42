@@ -129,5 +129,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0122](0122-un-commit-non-si-perde-per-la-rete.md) | Un commit non si perde per la rete: resta in fila, in ordine; un rifiuto del server non si ritenta |
 | [0123](0123-il-suono-e-un-programma-markovjunior.md) | Il suono è un programma MarkovJunior: XML sul motore vero, una partitura, una sola fonte dei campioni, in `models/` con la classe `suono` |
 | [0124](0124-la-corona-si-disegna-solo-fuori-dal-cerchio.md) | La corona si disegna solo fuori dal cerchio o nello studio, per chiunque e con qualunque camera; l'anello si prepara già caricato e invisibile |
+| [0125](0125-il-suono-nel-gioco-e-del-client.md) | Il suono nel gioco è del client: un direttore puro, un worker con la cache, nessun messaggio; ciò che fallisce tace |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

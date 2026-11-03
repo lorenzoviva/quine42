@@ -339,6 +339,18 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Dove vive**: `src/mj/synth.ts`
 - **Da non usare**: `SoundEngine` (il motore Web Audio del mockup)
 
+### Direttore del suono
+- **Inglese**: `SoundDirector`, `chooseMusic`, `SoundState`, `SOUND_CUES`
+- **Definizione**: ciò che nel client decide quale brano suona dallo stato del mondo e quale effetto risponde a un momento del gioco; non produce suono.
+- **Dove vive**: `src/audio/director.ts`
+- **Da non usare**: `jukebox`, `mixer`
+
+### Uscita del suono
+- **Inglese**: `Sfx`, `SoundOut`, `SoundPrefs`
+- **Definizione**: il tratto fra i campioni già fatti e gli altoparlanti: dissolvenze, volume, muto, l'analizzatore; niente voci.
+- **Dove vive**: `src/audio/sfx.ts`
+- **Da non usare**: `AudioManager`
+
 ### Ritocco
 - **Inglese**: `retouch`, `retouchBoxes`, `withoutRetouches`, `retouchCount`
 - **Definizione**: ciò che il piano roll del SoundLab cambia rispetto alle regole, scritto nel programma sonoro come `<box>` in fondo alla `<sequence>` radice.
