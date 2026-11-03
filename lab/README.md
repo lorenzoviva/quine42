@@ -16,11 +16,11 @@ nel [report dei costi](../docs/reports/costi-step8.2B.md) e nella storia di git 
 |---|---|
 | `editor/` | l'editor di modelli MarkovJunior (`/lab/editor/`): split screen codice e rendering 3D Three.js in tempo reale, syntax highlighting, validazione immediata, controlli orbita |
 | `3d/` | la sandbox 3D (`/lab/3d/`): terreno dal modello `River`, i modelli posati, collisioni, case in cui si entra, azioni, pannello per ispezionare e modificare l'XML, «Scolpisci con Gemini» |
-| `mjx/official/` | 16 modelli 3D del repository di MarkovJunior, invariati (MIT): la prova che il front-end legge MarkovJunior alla lettera |
+| `mjx/official/` | 16 modelli 3D del repository di MarkovJunior, invariati (MIT): la prova che il front-end legge MarkovJunior alla lettera; in `riferimento/` altri 22 del repository, da leggere (T181): i grandi usano `wfc`, `field` e regole da file, che il motore non ha |
 | `mjx/models/` | modelli scritti a mano e portati dagli step 8A-8B (esempi dello Scultore del laboratorio); `gemini/` i programmi delle prove 8.2A e 8.2B |
 | `mjx/sculptor.ts`, `mjx/target.ts`, `mjx/targets.ts` | lo Scultore XML delle prove, i bersagli preimpostati, l'Artista che giudica le quattro foto |
 | `prompts/` | i prompt dello Scultore e dell'Artista delle prove |
-| `banco/` | il banco del prompt delle strutture (T154, [`banco/README.md`](banco/README.md)): prompt, bersagli, misure con il corpo del gioco, soglia e criteri, la prima prova |
+| `banco/` | il banco del prompt delle strutture (T154, [`banco/README.md`](banco/README.md)): prompt, bersagli, misure con il corpo del gioco, soglia e criteri, la prima prova; `banco/pattern.md` e `banco/riferimento/` (T181): i pattern con cui crescono le strutture e tre programmi scritti a mano con il metodo del cantiere, che variano e reggono due taglie |
 | `scripts/` | strumenti da riga di comando (sotto) |
 | `tests/` | conformità ai modelli ufficiali (`mjx.test.ts`), mesh (`mesh3d.test.ts`) |
 | `out/` | ciò che scrivono gli script (ignorata da git) |

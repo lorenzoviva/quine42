@@ -1,0 +1,94 @@
+<!-- Tempio a gradoni: programma di riferimento di T181, scritto con il metodo del cantiere (lab/banco/pattern.md). Dal centro del lotto
+     crescono tre terrazze una dentro l'altra (la cella in cima, 41 o 49 per lato; la sala attorno, 8 oltre; la platea, 4 oltre), con ali a caso
+     sulla platea; i muri della sala sono le celle della seconda terrazza vicine alla prima, la porta è in mezzo al muro davanti, la via dalla
+     porta scende la scalinata; una parete divide il vestibolo dalla sala; la scala alla cella sale dentro la sala, sotto la cella; nicchie sui
+     muri, colonne sul bordo della platea, bracieri sulla via. Nessuna coordinata assoluta: la stessa scatola di qualunque taglia. -->
+<sequence values="BNEzmad321ewfnhoipPXQDZkqxvsctgjJCSGFTYORU" symmetry="(xy)" ground="E" origin="bottom">
+  <color symbol="N" hidden="True" name="origine"/><color symbol="E" hidden="True" name="orlo"/><color symbol="z" hidden="True" name="lotto"/><color symbol="m" hidden="True" name="margine"/>
+  <color symbol="a" hidden="True"/><color symbol="d" hidden="True"/><color symbol="3" hidden="True"/><color symbol="2" hidden="True"/><color symbol="1" hidden="True"/>
+  <color symbol="e" hidden="True"/><color symbol="w" hidden="True"/><color symbol="f" hidden="True"/><color symbol="n" hidden="True"/><color symbol="h" hidden="True"/>
+  <color symbol="o" hidden="True"/><color symbol="i" hidden="True"/><color symbol="p" hidden="True"/><color symbol="P" hidden="True"/><color symbol="D" hidden="True"/><color symbol="U" hidden="True"/>
+  <color symbol="k" hidden="True"/><color symbol="q" hidden="True"/><color symbol="x" hidden="True"/><color symbol="v" hidden="True"/><color symbol="s" hidden="True"/>
+  <color symbol="c" hidden="True"/><color symbol="X" hidden="True"/><color symbol="Q" hidden="True"/><color symbol="t" hidden="True"/><color symbol="Z" hidden="True"/><color symbol="g" hidden="True"/><color symbol="j" hidden="True"/>
+  <color symbol="J" value="8f8779" name="pietra di riempimento"/>
+  <color symbol="C" value="c9bfa6" name="pietra chiara"/>
+  <color symbol="S" value="e3dcc6" name="lastre bianche"/>
+  <color symbol="G" value="d4a638" name="oro"/>
+  <color symbol="F" value="a67c52" name="legno"/>
+  <color symbol="T" value="efe8d3" name="gradino"/>
+  <color symbol="Y" value="ffb347" glow="True" name="fiamma"/>
+  <color symbol="O" value="7d5a2e" name="bronzo"/>
+  <color symbol="R" value="8e2f2f" name="tappeto rosso"/>
+
+  <!-- 1. Il lotto: l'orlo, il margine di 6, il centro -->
+  <prl in="***/*E*/***" out="***/*z*/***"/>
+  <all in="Ez" out="*m"/>
+  <all in="mz" out="*m" steps="5"/>
+  <prl in="E" out="z"/>
+
+  <!-- 2. Le terrazze dal centro: la cella (41 o 49 per lato, a caso per asse), la sala 8 oltre, la platea 4 oltre, ali a caso -->
+  <one steps="1" symmetry="()"><rule in="zzzzzzzzzzzzzzzzzzzzNzzzzzzzzzzzzzzzzzzzz" out="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"/><rule in="zzzzzzzzzzzzzzzzzzzzzzzzNzzzzzzzzzzzzzzzzzzzzzzzz" out="ddddddddddddddddddddddddddddddddddddddddddddddddd"/></one>
+  <all symmetry="(y)"><rule in="a/z/z/z/z/z/z/z/z/z/z/z/z/z/z/z/z/z/z/z/z" out="*/3/3/3/3/3/3/3/3/3/3/3/3/3/3/3/3/3/3/3/3"/><rule in="d/z/z/z/z/z/z/z/z/z/z/z/z/z/z/z/z/z/z/z/z/z/z/z/z" out="*/3/3/3/3/3/3/3/3/3/3/3/3/3/3/3/3/3/3/3/3/3/3/3/3"/></all>
+  <prl><rule in="a" out="3"/><rule in="d" out="3"/><rule in="N" out="3"/></prl>
+  <all steps="13"><rule in="3z" out="*2"/><rule in="3*/*z" out="**/*2"/><rule in="2z" out="*2"/><rule in="2*/*z" out="**/*2"/></all>
+  <all steps="4"><rule in="2z" out="*1"/><rule in="2*/*z" out="**/*1"/><rule in="1z" out="*1"/><rule in="1*/*z" out="**/*1"/></all>
+  <one in="111111111111111111111111/zzzzzzzzzzzzzzzzzzzzzzzz/zzzzzzzzzzzzzzzzzzzzzzzz/zzzzzzzzzzzzzzzzzzzzzzzz/zzzzzzzzzzzzzzzzzzzzzzzz/zzzzzzzzzzzzzzzzzzzzzzzz/zzzzzzzzzzzzzzzzzzzzzzzz/zzzzzzzzzzzzzzzzzzzzzzzz/zzzzzzzzzzzzzzzzzzzzzzzz" out="************************/111111111111111111111111/111111111111111111111111/111111111111111111111111/111111111111111111111111/111111111111111111111111/111111111111111111111111/111111111111111111111111/111111111111111111111111" steps="3"/>
+
+  <!-- 3. I muri della sala e della cella, la porta in mezzo al muro davanti, la via e la scalinata, la parete del vestibolo con la sua porta -->
+  <all steps="3"><rule in="[1w]2" out="*w"/></all>
+  <prl in="2" out="h"/>
+  <all steps="3"><rule in="[hwx]3" out="*x"/></all>
+  <all steps="10"><rule in="[xi]3" out="*i"/></all>
+  <prl><rule in="3" out="t"/></prl>
+  <prl><rule in="i" out="3"/></prl>
+  <all symmetry="(x)"><rule in="1wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww1" out="**********************oooooooooooooooooooooooo***********************"/><rule in="1wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww1" out="**************************oooooooooooooooooooooooo***************************"/></all>
+  <all in="o/w" out="*/o" symmetry="(y)" steps="2"/>
+  <all in="o/1" out="*/v" symmetry="()"/>
+  <all in="v/[1z]" out="*/v" symmetry="()"/>
+  <all symmetry="()"><rule in="h/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[wo]" out="p/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*"/><rule in="3/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[wo]" out="P/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*"/><rule in="x/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[wo]" out="X/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*"/><rule in="t/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[h3xt]/[wo]" out="Q/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*"/></all>
+  <one steps="1"><rule in="*QQQQQQQQQQQQQQQ*" out="***ZZZZZZZZZZZ***"/><rule in="*PPPPPPPPPPPPPPPPPPPPPPP*" out="*******DDDDDDDDDDD*******"/><rule in="*ppppppppppppppppppppppp*" out="*******UUUUUUUUUUU*******"/></one>
+  <one in="hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh/hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh/hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh/hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh/hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh/hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh/hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh/hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh/hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh/hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" out="kkkkkkkkkssssssssssssssss********/kkkkkkkkkssssssssssssssss********/kkkkkkkkkssssssssssssssss********/kkkkkkkkkssssssssssssssss********/kkkkkkkkkssssssssssssssss********/kkkkkkkkkssssssssssssssss********/kkkkkkkkkssssssssssssssss********/kkkkkkkkkssssssssssssssss********/kkkkkkkkkssssssssssssssss********/kkkkkkkkkssssssssssssssss********/*********************************" steps="1" symmetry="()"/>
+  <one in="hhhhhhhhhhhh/hhhhhhhhhhhh/hhhhhhhhhhhh/hhhhhhhhhhhh/hhhhhhhhhhhh/hhhhhhhhhhhh/xxxxxxxxxxxx/xxxxxxxxxxxx/xxxxxxxxxxxx/[3t][3t][3t][3t][3t][3t][3t][3t][3t][3t][3t][3t]" out="************/************/************/************/************/************/iiiiiiiiiiii/iiiiiiiiiiii/iiiiiiiiiiii/************" steps="1"/>
+
+  <!-- 4. Nicchie sulla faccia esterna dei muri, colonne sul bordo della platea, bracieri sulla via -->
+  <all><rule in="[1v]w" out="*f"/></all>
+  <all in="ffffffff" out="gggnnggg"/>
+  <all in="[1v]nw" out="**n"/>
+  <all in="[1v]nnw" out="***n"/>
+  <all><rule in="[zm]1" out="*e"/></all>
+  <all in="eeeeeeeee" out="jjjccjjjj"/>
+  <all steps="1"><rule in="c1" out="*c"/></all>
+  <one in="vvvvvvvvvvvvvvvvvvvvvvvv/vvvvvvvvvvvvvvvvvvvvvvvv/vvvvvvvvvvvvvvvvvvvvvvvv/vvvvvvvvvvvvvvvvvvvvvvvv" out="************************/**********qqqq**********/**********qqqq**********/************************" steps="2" symmetry="()"/>
+
+  <!-- 5. Le colonne, in un colpo; il profilo della scala -->
+  <all symmetry="()">
+    <rule in="B 1" out="S J"/>
+    <rule in="B e" out="S J"/>
+    <rule in="B j" out="S J"/>
+    <rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B g" out="G G G S S G G O O C C C C C C C C C C C C C C C C C C C C C C C C G G C J"/>
+    <rule in="B v" out="R J"/>
+    <rule in="B B B B B B B B B B B B B B B B B B B B B B B B B c" out="O O G G G G G G G G G G G G G G G G G G G G G G S J"/>
+    <rule in="B B B B B B B B B q" out="Y Y O O O O O O S J"/>
+    <rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B w" out="G G G S S G G O O C C C C C C C C C C C C C C C C C C C C C C C C G G C J"/>
+    <rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B f" out="G G G S S G G O O C C C C C C C C C C C C C C C C C C C C C C C C G G C J"/>
+    <rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B n" out="G G G S S G G O O C C C C C C C C C C C C B B B B B B B B C C C C G G C J"/>
+    <rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B o" out="G G G S S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B S J"/>
+    <rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B h" out="S S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B S J"/>
+    <rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B 3" out="S S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B F S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B S J"/>
+    <rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B x" out="G G G S S G G O O C C C C C C C C C C C C C C C C C C C C C C C C G G S S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B S J"/>
+    <rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B i" out="G G G S S C C B B B B B B B B B B B B B B B B B B B B B B B B B B B B S S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B S J"/>
+    <rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B p" out="S S C C C C C C C C C C C C C C C C C C C C C C C C C C C C C C C J"/>
+    <rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B P" out="S S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B F S C C C C C C C C C C C C C C C C C C C C C C C C C C C C C C C J"/>
+    <rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B X" out="G G G S S G G O O C C C C C C C C C C C C C C C C C C C C C C C C G G S S C C C C C C C C C C C C C C C C C C C C C C C C C C C C C C C J"/>
+    <rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B Q" out="G G C C C C C C S S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B F S C C C C C C C C C C C C C C C C C C C C C C C C C C C C C C C J"/>
+    <rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B t" out="G G C C C C C C S S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B F S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B S J"/>
+    <rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B Z" out="G G C C C C C C S S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B F S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B S J"/>
+    <rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B U" out="S S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B S J"/>
+    <rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B D" out="S S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B F S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B S J"/>
+    <rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B k" out="S S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B S *"/>
+  </all>
+  <all in="*BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB *BBBBBBBBBBBBBBBB kssssssssssssssss" out="*BBBBBBBBBBBBBBBT *BBBBBBBBBBBBBBBC *BBBBBBBBBBBBBBTC *BBBBBBBBBBBBBBCC *BBBBBBBBBBBBBTCC *BBBBBBBBBBBBBCCC *BBBBBBBBBBBBTCCC *BBBBBBBBBBBBCCCC *BBBBBBBBBBBTCCCC *BBBBBBBBBBBCCCCC *BBBBBBBBBBTCCCCC *BBBBBBBBBBCCCCCC *BBBBBBBBBTCCCCCC *BBBBBBBBBCCCCCCC *BBBBBBBBTCCCCCCC *BBBBBBBBCCCCCCCC *BBBBBBBTCCCCCCCC *BBBBBBBCCCCCCCCC *BBBBBBTCCCCCCCCC *BBBBBBCCCCCCCCCC *BBBBBTCCCCCCCCCC *BBBBBCCCCCCCCCCC *BBBBTCCCCCCCCCCC *BBBBCCCCCCCCCCCC *BBBTCCCCCCCCCCCC *BBBCCCCCCCCCCCCC *BBTCCCCCCCCCCCCC *BBCCCCCCCCCCCCCC *BTCCCCCCCCCCCCCC *BCCCCCCCCCCCCCCC *TCCCCCCCCCCCCCCC *CCCCCCCCCCCCCCCC *CCCCCCCCCCCCCCCC *JJJJJJJJJJJJJJJJ"/>
+
+  <!-- 6. Pulizia -->
+  <prl><rule in="z" out="B"/><rule in="m" out="B"/><rule in="k" out="J"/></prl>
+</sequence>
