@@ -1,7 +1,7 @@
 // The corona in 3D: the studio's campus on the ring beyond the circle (a dark avenue between two perfect circles, with a glowing
 // circle along it, alleys between the sectors, lawns, one block per folder with neon edges in its colour, a door
 // under a neon sign with the building's name, a glowing edge), and inside each tower its rooms
-// (24 × 15 cells, several storeys): neon grid on the floor, walls with a strip of light, racks of files,
+// (24 × 15 cells, several storeys): a faint hexagonal grid on the floor, walls with a strip of light, racks of files,
 // the gallery's models on show, screens, teleports, stairs, the Council's round table with the universe
 // turning above it, the showcases with their arrows (T21). Built from the kernel's cells
 // (src/kernel/corona.ts): logic stays in the kernel.
@@ -22,6 +22,10 @@ const LOOK_COLOR: Record<string, string> = { libro: '#a0683a', cristallo: '#5fe0
 
 /** How bright the studio's floor grid is, over the building's colour (T49a: faint, and it does not bloom). */
 const GRID = 0.12;
+
+/** The side of a hexagon of the studio's floor, about one cell; half the width of its lines. Only a drawing: the kernel's cells stay square. */
+const HEX_SIDE = 1;
+const HEX_LINE = 0.01;
 
 /** How many straight segments make a circle of the avenue: at its outer edge each departs from the true circle by 2 thousandths of a cell. */
 export const AVENUE_SEGMENTS = 360;
@@ -71,6 +75,48 @@ export function outsideCircle(x: number, z: number, r: number): number[][][] {
     // A corner exactly on a wedge's side leaves a piece with no area: nothing to draw.
     const area = piece.reduce((s, p, i) => s + p[0] * piece[(i + 1) % piece.length][1] - piece[(i + 1) % piece.length][0] * p[1], 0);
     if (Math.abs(area) > 1e-9) pieces.push(piece);
+  }
+  return pieces;
+}
+
+/**
+ * The edges of a lattice of flat-topped hexagons, one of them centred on the area: those that touch the area, each once, as [x0, z0, x1, z1].
+ * A hexagon owns three consecutive edges of its six: the other three belong to its neighbours.
+ */
+export function hexEdges(x0: number, z0: number, x1: number, z1: number, side: number): number[][] {
+  const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+  const across = side * Math.sqrt(3);
+  const columns = Math.ceil((x1 - x0) / 2 / (side * 1.5)) + 1;
+  const rows = Math.ceil((z1 - z0) / 2 / across) + 1;
+  const edges: number[][] = [];
+  for (let i = -columns; i <= columns; i++)
+    for (let j = -rows; j <= rows; j++) {
+      const hx = cx + i * side * 1.5;
+      const hz = cz + (j + (i & 1 ? 0.5 : 0)) * across;
+      for (let k = 0; k < 3; k++) {
+        const [a, b] = [(k * Math.PI) / 3, ((k + 1) * Math.PI) / 3];
+        const e = [hx + Math.cos(a) * side, hz + Math.sin(a) * side, hx + Math.cos(b) * side, hz + Math.sin(b) * side];
+        if (Math.max(e[0], e[2]) > x0 && Math.min(e[0], e[2]) < x1 && Math.max(e[1], e[3]) > z0 && Math.min(e[1], e[3]) < z1) edges.push(e);
+      }
+    }
+  return edges;
+}
+
+/** The edges of `hexEdges` as thin flat polygons cut clean at the area's sides, for `Builder.flat`. The ends run on just enough for three lines to close a corner. */
+export function hexLines(x0: number, z0: number, x1: number, z1: number, side: number, half: number): number[][][] {
+  const pieces: number[][][] = [];
+  for (const [ax, az, bx, bz] of hexEdges(x0, z0, x1, z1, side)) {
+    const len = Math.hypot(bx - ax, bz - az);
+    const [dx, dz] = [(bx - ax) / len, (bz - az) / len];
+    const [wx, wz] = [-dz * half, dx * half];
+    const run = half / Math.sqrt(3);
+    const [px, pz, qx, qz] = [ax - dx * run, az - dz * run, bx + dx * run, bz + dz * run];
+    let piece = [[px - wx, pz - wz], [px + wx, pz + wz], [qx + wx, qz + wz], [qx - wx, qz - wz]];
+    piece = keepSide(piece, 1, 0, x0);
+    piece = keepSide(piece, -1, 0, -x1);
+    piece = keepSide(piece, 0, 1, z0);
+    piece = keepSide(piece, 0, -1, -z1);
+    if (piece.length >= 3) pieces.push(piece);
   }
   return pieces;
 }
@@ -431,12 +477,11 @@ export function buildRoom(k: Kernel, building: Building, storey: Storey): { grou
   const lit = new Builder();
   const glow = new Builder();
   const X = storey.ox, Z = storey.oy;
-  // Floor and its grid: faint lines that do not bloom (T49a: a glowing grid was a haze over the whole floor).
+  // Floor and its hexagonal grid: faint lines that do not bloom (T49a: a glowing grid was a haze over the whole floor).
   lit.quad([X, 0, Z], [X, 0, Z + ROOM_H], [X + ROOM_W, 0, Z + ROOM_H], [X + ROOM_W, 0, Z], [0, 1, 0], rgbOf('#08080f'));
   const lines = new Builder();
   const grid = rgbOf(col, GRID);
-  for (let x = 1; x < ROOM_W; x++) lines.box(X + x - 0.01, 0.003, Z + 1, X + x + 0.01, 0.006, Z + ROOM_H - 1, grid);
-  for (let y = 1; y < ROOM_H; y++) lines.box(X + 1, 0.003, Z + y - 0.01, X + ROOM_W - 1, 0.006, Z + y + 0.01, grid);
+  for (const piece of hexLines(X + 1, Z + 1, X + ROOM_W - 1, Z + ROOM_H - 1, HEX_SIDE, HEX_LINE)) lines.flat(piece, 0.006, grid);
   // Walls: dark metal with a strip of light on all four, the low front wall's at its top, open at the exit.
   const wall = rgbOf('#13131d');
   const H = 1.4, low = H * 0.35;
