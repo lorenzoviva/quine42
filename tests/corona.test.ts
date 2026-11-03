@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import * as THREE from 'three';
 import { CAMPUS, Corona, DEVICE_MARGIN, ROOM_H, ROOM_W, fileModelOf, fileSeedOf } from '../src/kernel/corona';
-import { animateRing, AVENUE_SEGMENTS, Avatars, buildCoronaRing, buildRoom, outsideCircle } from '../src/render/corona3d';
+import { animateRing, AVENUE_SEGMENTS, Avatars, buildCoronaRing, buildRoom, hexEdges, hexLines, outsideCircle } from '../src/render/corona3d';
 import { bundledFiles } from '../src/kernel/bundle';
 
 // T18: the campus on the ring is four times the 2D one (the circle stays): avenue, doors, buildings
@@ -425,3 +425,41 @@ describe('the devices of the rooms', () => {
   });
 });
 
+describe('the hexagonal floor of the studio (T220)', () => {
+  const [x0, z0, x1, z1] = [1, 1, ROOM_W - 1, ROOM_H - 1];
+
+  it('is a lattice of hexagons: edges of one side, each once, three to a corner', () => {
+    const key = (x: number, z: number) => `${x.toFixed(4)},${z.toFixed(4)}`;
+    const edges = hexEdges(x0, z0, x1, z1, 1);
+    const corners = new Map<string, number>();
+    const seen = new Set<string>();
+    for (const [ax, az, bx, bz] of edges) {
+      expect(Math.hypot(bx - ax, bz - az)).toBeCloseTo(1, 9);
+      const [a, b] = [key(ax, az), key(bx, bz)].sort();
+      expect(seen.has(a + b)).toBe(false);
+      seen.add(a + b);
+      for (const [x, z] of [[ax, az], [bx, bz]]) if (x > x0 + 1 && x < x1 - 1 && z > z0 + 1 && z < z1 - 1) corners.set(key(x, z), (corners.get(key(x, z)) ?? 0) + 1);
+    }
+    expect(corners.size).toBeGreaterThan(50);
+    for (const n of corners.values()) expect(n).toBe(3);
+  });
+
+  it('is cut clean at the sides of the floor', () => {
+    const pieces = hexLines(x0, z0, x1, z1, 1, 0.01);
+    expect(pieces.length).toBeGreaterThan(300);
+    for (const piece of pieces)
+      for (const [x, z] of piece) {
+        expect(x).toBeGreaterThanOrEqual(x0 - 1e-9);
+        expect(x).toBeLessThanOrEqual(x1 + 1e-9);
+        expect(z).toBeGreaterThanOrEqual(z0 - 1e-9);
+        expect(z).toBeLessThanOrEqual(z1 + 1e-9);
+      }
+    // Each line faces up: its corners turn the way of the floor quad, (x, z) -> (x, z + 1) -> (x + 1, z + 1).
+    for (const p of pieces) {
+      const signed = p.reduce((s, c, i) => s + c[0] * p[(i + 1) % p.length][1] - p[(i + 1) % p.length][0] * c[1], 0);
+      expect(signed).toBeLessThan(0);
+    }
+    // The cost of a room: 679 triangles today, against the 370 of the square grid.
+    expect(pieces.reduce((s, p) => s + p.length - 2, 0)).toBeLessThan(700);
+  });
+});

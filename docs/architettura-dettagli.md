@@ -183,7 +183,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 ## La corona e gli interni dello studio
 
 - **Corona** (ADR-0009, 0016, 0022): studio; edifici per cartella con porte che teletrasportano in interni
-  più grandi (stanze 24×15 su più piani, zona `studio`), scaffali di file, Galleria dell'Artista (i modelli,
+  più grandi (stanze 24×15 su più piani, zona `studio`; sul pavimento una griglia tenue a esagoni di lato una casella, solo disegno: `hexLines`, T220), scaffali di file, Galleria dell'Artista (i modelli,
   «riscolpisci»), Ufficio dei luoghi che è anche lo studio del Cartografo (ADR-0051: i terreni nel campionario, da un piano
   loro dopo i file, e dopo di loro un riquadro per ambiente, il suo programma provato su una bozza in miniatura, T26d, `layoutSample`; l'atlante contro la parete di fondo; il posto del Cartografo al tavolo porta lì), bacheche con le modifiche recenti (che brillano).
   Fuori, il campus è un anello profondo 36 caselle oltre il cerchio (`CAMPUS` in `corona.ts`): il viale con il cerchio al
