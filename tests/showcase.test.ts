@@ -22,7 +22,7 @@ describe('the showcases of the studio', () => {
     const ids = k.corona.buildings.map((b) => b.id).filter((id) => SHOWCASES[id]);
     expect(ids.sort()).toEqual(['cose', 'luoghi', 'magia', 'oggetti', 'persone']);
     for (const id of ids) {
-      const f = k.corona.building(id)!.floors[0];
+      const f = k.corona.building(id)!.storeys[0];
       const show = f.items.find((i) => i.kind === 'showcase')!;
       const prev = f.items.find((i) => i.kind === 'prev')!;
       const next = f.items.find((i) => i.kind === 'next')!;
@@ -65,7 +65,7 @@ describe('the showcases of the studio', () => {
 
   it('changes what it shows with the arrows (round the list) and opens the panel on what it shows', async () => {
     const k = await boot();
-    const f = k.corona.building('persone')!.floors[0];
+    const f = k.corona.building('persone')!.storeys[0];
     const at = (kind: StudioItem['kind']) => f.items.find((i) => i.kind === kind)!;
     const shown: string[] = [];
     const panels: any[] = [];
@@ -162,7 +162,7 @@ describe('the printers of the things and of the objects (T24)', () => {
   it('are 3 × 3, near and clickable from any side, and open what they print', async () => {
     const k = await boot();
     for (const id of ['cose', 'oggetti']) {
-      const f = k.corona.building(id)!.floors[0];
+      const f = k.corona.building(id)!.storeys[0];
       const show = f.items.find((i) => i.kind === 'showcase')!;
       expect([show.device, show.w, show.h], id).toEqual(['stampante', 3, 3]);
       // The middle cell is the printer, from the kernel's point of view.

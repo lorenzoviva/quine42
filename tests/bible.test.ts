@@ -103,7 +103,7 @@ describe('the Library lectern device', () => {
   it('stands on the ground floor of the Library with dark basin and navigation arrows', async () => {
     const k = await boot();
     const b = k.corona.building('mondo')!;
-    const f = b.floors[0];
+    const f = b.storeys[0];
 
     const lectern = f.items.find((i) => i.kind === 'leggio')!;
     expect(lectern).toBeDefined();
@@ -176,7 +176,7 @@ describe('the Library lectern device', () => {
   it('opens the panel on E in front of the lectern or a click within reach', async () => {
     const k = await boot();
     const b = k.corona.building('mondo')!;
-    const f = b.floors[0];
+    const f = b.storeys[0];
     const lectern = f.items.find((i) => i.kind === 'leggio')!;
 
     const opened: unknown[] = [];
@@ -200,7 +200,7 @@ describe('the Library lectern device', () => {
   it('clicking arrows flips pages via clickStudio', async () => {
     const k = await boot();
     const b = k.corona.building('mondo')!;
-    const f = b.floors[0];
+    const f = b.storeys[0];
     const nextArrow = f.items.find((i) => i.kind === 'next' && i.target === 'leggio')!;
 
     stand(k, nextArrow.x + 0.5, nextArrow.y + 1.0);

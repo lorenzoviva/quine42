@@ -82,10 +82,10 @@ const DEVICE_KINDS = ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'situ
 describe('the devices of the rooms', () => {
   it('stand in the middle, the cells around them free and reachable from the door', () => {
     const c = campus();
-    const rooms = c.buildings.filter((b) => b.floors[0].items.some((i) => ['showcase', 'grafo', 'situazione', 'banco', 'leggio'].includes(i.kind)));
+    const rooms = c.buildings.filter((b) => b.storeys[0].items.some((i) => ['showcase', 'grafo', 'situazione', 'banco', 'leggio'].includes(i.kind)));
     expect(rooms.map((b) => b.id).sort()).toEqual(['cose', 'luoghi', 'magia', 'mondo', 'nucleo', 'oggetti', 'persone', 'sistemi', 'universo']);
     for (const b of rooms) {
-      const f = b.floors[0];
+      const f = b.storeys[0];
       const device = f.items.filter((i) => DEVICE_KINDS.includes(i.kind) && (i.kind !== 'prev' && i.kind !== 'next' || i.target !== 'tempo'));
       const x0 = Math.min(...device.map((i) => i.x)) - f.ox, x1 = Math.max(...device.map((i) => i.x + (i.w ?? 1) - 1)) - f.ox;
       const y0 = Math.min(...device.map((i) => i.y)) - f.oy, y1 = Math.max(...device.map((i) => i.y + (i.h ?? 1) - 1)) - f.oy;
@@ -122,21 +122,21 @@ describe('the devices of the rooms', () => {
     const c = new Corona(R);
     c.build(many);
     const b = c.building('persone')!;
-    const ground = b.floors[0].items.filter((i) => i.kind === 'file');
-    const show = b.floors[0].items.find((i) => i.kind === 'showcase')!;
+    const ground = b.storeys[0].items.filter((i) => i.kind === 'file');
+    const show = b.storeys[0].items.find((i) => i.kind === 'showcase')!;
     expect(ground.length).toBe(24);
     expect(ground.every((i) => i.x < show.x - 1 - DEVICE_MARGIN || i.x > show.x + show.w! + DEVICE_MARGIN)).toBe(true);
-    // Upstairs the whole floor holds files; none is lost.
-    expect(b.floors.length).toBe(3);
-    expect(b.floors.flatMap((f) => f.items.filter((i) => i.kind === 'file')).length).toBe(129);
+    // Upstairs the whole storey holds files; none is lost.
+    expect(b.storeys.length).toBe(3);
+    expect(b.storeys.flatMap((f) => f.items.filter((i) => i.kind === 'file')).length).toBe(129);
     // The rooms without a device keep their full shelves on the ground floor.
-    expect(c.building('galleria')!.floors[0].items.filter((i) => i.kind === 'file').length).toBe(1);
+    expect(c.building('galleria')!.storeys[0].items.filter((i) => i.kind === 'file').length).toBe(1);
   });
 
   it('builds the graph pedestal in Il Nucleo with light rims around both steps on all four faces (T58a)', () => {
     const c = campus();
     const b = c.building('nucleo')!;
-    const f = b.floors[0];
+    const f = b.storeys[0];
     const mockKernel: any = {
       corona: c,
       forms: { version: 0, ready: () => undefined },
@@ -192,7 +192,7 @@ describe('the devices of the rooms', () => {
   it('builds the character silo in Studio dei Personaggi with circular rims and cylindrical lid and base (T58b)', () => {
     const c = campus();
     const b = c.building('persone')!;
-    const f = b.floors[0];
+    const f = b.storeys[0];
     const mockKernel: any = {
       corona: c,
       forms: { version: 0, ready: () => undefined },
@@ -315,7 +315,7 @@ describe('the devices of the rooms', () => {
 
     // 4. Corona building populates items with models and seeds
     const c = campus();
-    const allFiles = c.buildings.flatMap((b) => b.floors.flatMap((f) => f.items.filter((i) => i.kind === 'file')));
+    const allFiles = c.buildings.flatMap((b) => b.storeys.flatMap((f) => f.items.filter((i) => i.kind === 'file')));
     expect(allFiles.length).toBeGreaterThan(0);
     for (const f of allFiles) {
       expect(f.model).toBe(fileModelOf(f.path!));
@@ -325,7 +325,7 @@ describe('the devices of the rooms', () => {
     // 5. buildRoom requests models and renders them on shelves
     const requested: Array<{ model: string; seed: number }> = [];
     const b = c.buildings.find((x) => x.id === 'nucleo')!;
-    const fl = b.floors[0];
+    const fl = b.storeys[0];
     const mockKernel: any = {
       corona: c,
       forms: {

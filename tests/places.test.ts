@@ -28,7 +28,7 @@ async function boot(chunks = new MemoryChunks()) {
 describe('the model of places (T26)', () => {
   it('stands in the Office of places, 3 × 3, and shows every planned place, the last one visited first', async () => {
     const { k } = await boot();
-    const f = k.corona.building('luoghi')!.floors[0];
+    const f = k.corona.building('luoghi')!.storeys[0];
     const show = f.items.find((i) => i.kind === 'showcase')!;
     expect([show.source, show.device, show.w, show.h]).toEqual(['luoghi', 'plastico', 3, 3]);
     const planned = [...k.chunks.values()].filter((c) => c.stage === 'planned');
@@ -151,7 +151,7 @@ describe('the model of places (T26)', () => {
 
   it('goes through the phases with the pads «−» «+» in front of the table, walked on, with E or a click', async () => {
     const { k } = await boot();
-    const f = k.corona.building('luoghi')!.floors[0];
+    const f = k.corona.building('luoghi')!.storeys[0];
     const at = (kind: string) => f.items.find((i) => i.kind === kind)!;
     const show = at('showcase');
     const less = at('less'), more = at('more');
@@ -195,17 +195,17 @@ describe('the sample of environments (T26d)', () => {
   it('shows every environment after the terrains, from a shelf of its own, each run on a trial draft', async () => {
     const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels(), chunks: new MemoryChunks() });
     const office = k.corona.building('luoghi')!;
-    const items = office.floors.flatMap((f) => f.items);
+    const items = office.storeys.flatMap((f) => f.items);
     const samples = items.filter((i) => i.kind === 'layout');
     const ids = Object.keys(k.content.layouts);
     expect(ids.length).toBeGreaterThan(5);
     expect(samples.map((i) => i.target).sort()).toEqual(ids.map((id) => `layout:${id}`).sort());
-    // After the terrains, the first at the start of a shelf; never on a floor of files.
+    // After the terrains, the first at the start of a shelf; never on a storey of files.
     const order = items.filter((i) => i.kind === 'tile' || i.kind === 'layout');
     expect(order.findIndex((i) => i.kind === 'layout')).toBe(order.filter((i) => i.kind === 'tile').length);
-    const floorOf = (it: { y: number }) => office.floors.find((f) => it.y >= f.oy && it.y < f.oy + 15)!;
-    expect(samples[0].x - floorOf(samples[0]).ox).toBe(3);
-    for (const s of samples) expect(floorOf(s).items.some((i) => i.kind === 'file')).toBe(false);
+    const storeyOf = (it: { y: number }) => office.storeys.find((f) => it.y >= f.oy && it.y < f.oy + 15)!;
+    expect(samples[0].x - storeyOf(samples[0]).ox).toBe(3);
+    for (const s of samples) expect(storeyOf(s).items.some((i) => i.kind === 'file')).toBe(false);
     expect(k.corona.free(samples[0].x + 0.5, samples[0].y + 0.5)).toBe(false);
     // The trial drafts, the validator's too: forest-ish, open, with water on land (never all sea).
     const share = (d: string[], test: (c: string) => boolean) => [...d.join('')].filter(test).length / (d.length * d.length);

@@ -23,7 +23,7 @@ function addProbe(k: Kernel, logic = 'local M = {}\nfunction M.update(dt)\n  ecs
 describe('the chain of the Systems Room', () => {
   it('a station per system against the back wall, in the order of the tick, side by side and centred', async () => {
     const k = await boot();
-    const f = k.corona.building('sistemi')!.floors[0];
+    const f = k.corona.building('sistemi')!.storeys[0];
     const stations = f.items.filter((i) => i.kind === 'stazione');
     expect(stations.map((s) => s.target)).toEqual(k.systems.map((m) => m.manifest.id));
     expect(stations.map((s) => s.target)).toEqual(['core.movement', 'core.carpet', 'sys.physics', 'sys.wander', 'sys.follow', 'sys.needs', 'sys.fire']);
@@ -43,7 +43,7 @@ describe('the chain of the Systems Room', () => {
         expect(k.corona.free(x + 0.5, s.y + 1.5), `${x}`).toBe(true);
       }
     }
-    expect(k.corona.buildings.filter((b) => b.floors.some((fl) => fl.items.some((i) => i.kind === 'stazione'))).map((b) => b.id)).toEqual(['sistemi']);
+    expect(k.corona.buildings.filter((b) => b.storeys.some((fl) => fl.items.some((i) => i.kind === 'stazione'))).map((b) => b.id)).toEqual(['sistemi']);
   });
 
   it('as wide as they fit: three cells at most, one at least, the first twenty', () => {
@@ -59,7 +59,7 @@ describe('the chain of the Systems Room', () => {
   it('a system that joins the universe joins the chain, at its place in the tick', async () => {
     const k = await boot();
     addProbe(k);
-    const ids = k.corona.building('sistemi')!.floors[0].items.filter((i) => i.kind === 'stazione').map((s) => s.target);
+    const ids = k.corona.building('sistemi')!.storeys[0].items.filter((i) => i.kind === 'stazione').map((s) => s.target);
     expect(ids.indexOf('sys.prova')).toBe(ids.indexOf('sys.follow') + 1);
     expect(k.chain().stations.find((s) => s.id === 'sys.prova')).toMatchObject({ step: ids.indexOf('sys.prova') + 1, order: 35, kind: 'sistema', path: 'modules/sys.prova/logic.lua', description: 'Legge le cose di prova.' });
   });
@@ -103,7 +103,7 @@ describe('the chain of the Systems Room', () => {
     const k = await boot();
     const opened: any[] = [];
     k.bus.on('ui:station', (e) => opened.push(e));
-    const st = k.corona.building('sistemi')!.floors[0].items.find((i) => i.kind === 'stazione' && i.target === 'sys.needs')!;
+    const st = k.corona.building('sistemi')!.storeys[0].items.find((i) => i.kind === 'stazione' && i.target === 'sys.needs')!;
     Object.assign(k.wandererPos(), { x: st.x + 0.5, y: st.y + 1.5 });
     k.zone = 'studio';
     await k.interact();

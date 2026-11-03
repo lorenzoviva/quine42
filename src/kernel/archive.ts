@@ -44,7 +44,7 @@ export class Archive {
     for (const b of c.buildings) {
       if (b.id === 'concilio') {
         // The whole Council sits at the round table, each at its place.
-        for (const seat of b.floors[0].items.filter((i) => i.kind === 'desk' && i.target)) {
+        for (const seat of b.storeys[0].items.filter((i) => i.kind === 'desk' && i.target)) {
           const key = `${seat.target}@concilio`;
           keep.add(key);
           if (!this.avatars.has(key)) {
@@ -69,7 +69,7 @@ export class Archive {
 
   /** Where a member stands when idle: in front of the room's history screen, the n-th a little further along. */
   private post(b: Building, n = 0): { x: number; y: number } {
-    const f = b.floors[0];
+    const f = b.storeys[0];
     const screen = f.items.find((i) => i.kind === 'screen');
     if (!screen) return { x: f.ox + 3.5, y: f.oy + ROOM_H - 3.5 };
     return { x: screen.x + 1.5 + (n % 3) * 1.5, y: screen.y - 0.5 };
@@ -144,7 +144,7 @@ export class Archive {
    * stops working gets up and goes. Called once a second by the kernel.
    */
   consoles(working: AgentId[]): void {
-    const desks = this.corona().building('universo')?.floors[0]?.items.filter((i) => i.kind === 'console') ?? [];
+    const desks = this.corona().building('universo')?.storeys[0]?.items.filter((i) => i.kind === 'console') ?? [];
     const keep = new Set<string>();
     for (const d of desks) {
       const agent = d.target as AgentId;
@@ -182,7 +182,7 @@ export class Archive {
       if (a.building && this.time > a.idleUntil && a.path) {
         // Done: back to its post (at the round table, back to its seat).
         const b = c.building(a.building);
-        const seat = b?.id === 'concilio' ? b.floors[0].items.find((i) => i.kind === 'desk' && i.target === a.agent) : undefined;
+        const seat = b?.id === 'concilio' ? b.storeys[0].items.find((i) => i.kind === 'desk' && i.target === a.agent) : undefined;
         if (seat) {
           a.tx = seat.x + 0.5;
           a.ty = seat.y + 0.4;

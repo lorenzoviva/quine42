@@ -1,14 +1,14 @@
 // The corona in 3D: the studio's campus on the ring beyond the circle (a dark avenue with a glowing
 // line, alleys between the sectors, lawns, one block per folder with neon edges in its colour, a door
 // under a neon sign with the building's name, a glowing edge), and inside each tower its rooms
-// (24 × 15 cells, several floors): neon grid on the floor, walls with a strip of light, racks of files,
+// (24 × 15 cells, several storeys): neon grid on the floor, walls with a strip of light, racks of files,
 // the gallery's models on show, screens, teleports, stairs, the Council's round table with the universe
 // turning above it, the showcases with their arrows (T21). Built from the kernel's cells
 // (src/kernel/corona.ts): logic stays in the kernel.
 
 import * as THREE from 'three';
 import { PLACE_PHASES, type Kernel, type ChunkMiniature, type ShowcaseEntry } from '../kernel/kernel';
-import { CAMPUS, ROOM_H, ROOM_W, type Building, type Floor, type StudioItem } from '../kernel/corona';
+import { CAMPUS, ROOM_H, ROOM_W, type Building, type Storey, type StudioItem } from '../kernel/corona';
 import { Builder } from './terrain';
 import { MAT, rgbOf } from './materials';
 import { NODE_COLOR } from '../kernel/graph';
@@ -329,12 +329,12 @@ function neonSign(b: Building, R: number): THREE.Group {
   return g;
 }
 
-/** One room of the studio (a floor of a building), in real space. */
-export function buildRoom(k: Kernel, building: Building, floor: Floor): { group: THREE.Group; globe?: THREE.Object3D } {
+/** One room of the studio (a storey of a building), in real space. */
+export function buildRoom(k: Kernel, building: Building, storey: Storey): { group: THREE.Group; globe?: THREE.Object3D } {
   const col = building.color;
   const lit = new Builder();
   const glow = new Builder();
-  const X = floor.ox, Z = floor.oy;
+  const X = storey.ox, Z = storey.oy;
   // Floor and its grid: faint lines that do not bloom (T49a: a glowing grid was a haze over the whole floor).
   lit.quad([X, 0, Z], [X, 0, Z + ROOM_H], [X + ROOM_W, 0, Z + ROOM_H], [X + ROOM_W, 0, Z], [0, 1, 0], rgbOf('#08080f'));
   const lines = new Builder();
@@ -351,11 +351,11 @@ export function buildRoom(k: Kernel, building: Building, floor: Floor): { group:
   glow.box(X + 1, H * 0.7, Z + 0.98, X + ROOM_W - 1, H * 0.75, Z + 1.02, rgbOf(col));
   glow.box(X + 0.98, H * 0.7, Z + 1, X + 1.02, H * 0.75, Z + ROOM_H - 1, rgbOf(col));
   glow.box(X + ROOM_W - 1.02, H * 0.7, Z + 1, X + ROOM_W - 0.98, H * 0.75, Z + ROOM_H - 1, rgbOf(col));
-  const exit = floor.items.find((i) => i.kind === 'exit');
+  const exit = storey.items.find((i) => i.kind === 'exit');
   const gaps = exit ? [[X + 1, exit.x], [exit.x + 1, X + ROOM_W - 1]] : [[X + 1, X + ROOM_W - 1]];
   for (const [a, b] of gaps) if (b > a) glow.box(a, low - 0.05, Z + ROOM_H - 1.02, b, low, Z + ROOM_H - 0.98, rgbOf(col));
   // Racks under the rows of files and exhibits, a neon rim all round their top.
-  const shelf = floor.items.filter((i) => i.kind === 'file' || i.kind === 'sprite' || i.kind === 'tile' || i.kind === 'layout');
+  const shelf = storey.items.filter((i) => i.kind === 'file' || i.kind === 'sprite' || i.kind === 'tile' || i.kind === 'layout');
   for (const y of new Set(shelf.map((i) => i.y))) {
     const xs = shelf.filter((i) => i.y === y).map((i) => i.x).sort((a, b) => a - b);
     // One rack per run of neighbouring slots: around a room's device the shelves stop at its sides (T49b).
@@ -367,13 +367,13 @@ export function buildRoom(k: Kernel, building: Building, floor: Floor): { group:
     }
   }
   let globe: THREE.Object3D | undefined;
-  for (const it of floor.items) itemMesh(lit, glow, it, col, k);
+  for (const it of storey.items) itemMesh(lit, glow, it, col, k);
   const group = new THREE.Group();
   const m = new THREE.Mesh(lit.geometry(), MAT.corona);
   m.receiveShadow = m.castShadow = true;
   group.add(m, new THREE.Mesh(glow.geometry(), MAT.glow), new THREE.Mesh(lines.geometry(), MAT.line));
   // The gallery's things on their plinths: the models themselves, made to fit.
-  for (const it of floor.items) {
+  for (const it of storey.items) {
     if (it.kind !== 'sprite' || !it.model) continue;
     const f = k.forms.ready(it.model, 1, it.tint);
     const geo = f && geoOf(f);
@@ -390,7 +390,7 @@ export function buildRoom(k: Kernel, building: Building, floor: Floor): { group:
   }
   // The files on their shelves (T63): handmade models, scaled to fit the shelf.
   const animatedFiles: Array<{ frames: THREE.Mesh[]; offset: number }> = [];
-  for (const it of floor.items) {
+  for (const it of storey.items) {
     if (it.kind !== 'file' || !it.model) continue;
     const seed = it.seed ?? 1;
     const f = k.forms?.ready?.(it.model, seed);
@@ -417,7 +417,7 @@ export function buildRoom(k: Kernel, building: Building, floor: Floor): { group:
     group.userData.animatedFiles = animatedFiles;
   }
   // The environments of the sample room (T26d): each one's trial draft in miniature on its plinth, like a place.
-  for (const it of floor.items) {
+  for (const it of storey.items) {
     const sample = it.kind === 'layout' && it.target ? k.layoutSample(it.target.replace(/^layout:/, '')) : undefined;
     if (!sample) continue;
     const m = buildMiniature(k, sample.mini, SAMPLE_SIDE);
@@ -425,21 +425,21 @@ export function buildRoom(k: Kernel, building: Building, floor: Floor): { group:
     group.add(m);
   }
   // The Nucleus's graph of the world (T28), turning above its pedestal.
-  const graph = floor.items.find((i) => i.kind === 'grafo');
+  const graph = storey.items.find((i) => i.kind === 'grafo');
   if (graph) {
     globe = graphHologram(k);
     globe.position.set(graph.x + (graph.w ?? 1) / 2, 1.9, graph.y + (graph.h ?? 1) / 2);
     group.add(globe);
   }
   // The Library's lectern: the open holographic book above the dark pool (T47a).
-  const lectern = floor.items.find((i) => i.kind === 'leggio');
+  const lectern = storey.items.find((i) => i.kind === 'leggio');
   if (lectern) {
     const book = bookHologram(col);
     book.position.set(lectern.x + (lectern.w ?? 3) / 2, 1.05, lectern.y + (lectern.h ?? 3) / 2);
     group.add(book);
   }
   // The universe turning above the Council's table.
-  const table = floor.items.find((i) => i.kind === 'table');
+  const table = storey.items.find((i) => i.kind === 'table');
   if (table) {
     globe = new THREE.Mesh(new THREE.IcosahedronGeometry(0.9, 1), new THREE.MeshBasicMaterial({ color: '#05d9e8', wireframe: true }));
     globe.position.set(X + 12, 1.6, Z + 8.5);
@@ -1247,7 +1247,7 @@ export class Avatars {
         v.group.rotation.y = Math.atan2(a.tx - a.x, a.ty - a.y);
       } else if (a.building === 'concilio') {
         // Face the round table center in the Council's hall
-        const room = k.corona.building('concilio')?.floors[0];
+        const room = k.corona.building('concilio')?.storeys[0];
         const cx = (room?.ox ?? 0) + 12;
         const cy = (room?.oy ?? 0) + 8.5;
         v.group.rotation.y = Math.atan2(cx - a.x, cy - a.y);

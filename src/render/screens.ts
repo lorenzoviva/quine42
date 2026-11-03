@@ -4,7 +4,7 @@
 // Under the ceiling, the band of the alert (T46c): green, amber or red, built again only when the level changes; red blinks.
 
 import * as THREE from 'three';
-import { ROOM_H, ROOM_W, type Floor, type StudioItem } from '../kernel/corona';
+import { ROOM_H, ROOM_W, type Storey, type StudioItem } from '../kernel/corona';
 import { ALERT_COLOR, fill, FILM, type AlertLevel, type CostBoard, type LiveFeed, type ScreenField, type Screens, type Timeline } from '../kernel/screens';
 import { usd } from '../kernel/ai/usage';
 import { arrowSign } from './corona3d';
@@ -185,7 +185,7 @@ export class ScreenWall {
   constructor(
     items: StudioItem[],
     private color: string,
-    private room?: Pick<Floor, 'ox' | 'oy'>,
+    private room?: Pick<Storey, 'ox' | 'oy'>,
   ) {
     for (const it of items) {
       const w = it.w ?? 1, h = LONG;
