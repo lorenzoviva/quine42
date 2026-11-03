@@ -1,7 +1,7 @@
 // The browser's cache of forms keeps only what has finished, like the kernel's (T163, ADR-0108), and throws away once what it saved before.
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Forms, type FormRequest, type FormResult } from '../src/kernel/forms';
-import { FORMS_DB_VERSION, formCacheKey, IdbFormStore, MemoryFormStore, WorkerRunner } from '../src/render/forms';
+import { FORMS_DB_VERSION, formCacheKey, IdbFormStore, keepsFormsOnDisk, MemoryFormStore, WorkerRunner } from '../src/render/forms';
 import type { WorkerAnswer } from '../src/render/worker';
 import { hashStr } from '../src/kernel/rng';
 
@@ -204,6 +204,28 @@ function fakeIndexedDB(blocked = false) {
 }
 
 describe('the persistent cache', () => {
+  const at = (hostname: string, port: string, search = '') => ({ hostname, port, search });
+
+  it('stays on disk on the site and on the lasting ports of this machine, not on a port of a check (T177)', () => {
+    expect(keepsFormsOnDisk(at('quine42.example', ''))).toBe(true);
+    expect(keepsFormsOnDisk(at('quine42.example', '8443'))).toBe(true);
+    expect(keepsFormsOnDisk(at('localhost', '5173'))).toBe(true);
+    expect(keepsFormsOnDisk(at('127.0.0.1', '4173'))).toBe(true);
+    for (const host of ['localhost', '127.0.0.1', '[::1]']) expect(keepsFormsOnDisk(at(host, '4877')), host).toBe(false);
+    expect(keepsFormsOnDisk(at('localhost', '4877', '?skip&offline&formecache'))).toBe(true);
+  });
+
+  it('a page on a port of a check opens no database, and its forms stay in memory (T177)', async () => {
+    const idb = fakeIndexedDB();
+    vi.stubGlobal('indexedDB', idb);
+    vi.stubGlobal('location', at('localhost', '4877', '?skip&offline'));
+    const runner = new WorkerRunner(0);
+    expect(runner.store).toBeInstanceOf(MemoryFormStore);
+    expect(idb.dbs.size).toBe(0);
+    vi.stubGlobal('location', at('localhost', '5173'));
+    expect(new WorkerRunner(0).store).toBeInstanceOf(IdbFormStore);
+  });
+
   it('does not reuse what was saved before this version, once', async () => {
     const idb = fakeIndexedDB();
     const key = formCacheKey(req());
