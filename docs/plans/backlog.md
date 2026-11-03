@@ -3294,3 +3294,11 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 - Test: suite intera col suo turno, due giri, senza quell'errore o con la spiegazione del perché resta.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T210` se c'è da cambiare qualcosa; nell'esito la causa, con il numero dei file di test eseguiti rispetto a quelli attesi.
+### T211 · Il commit dell'universo che fallisce e si perde — `da fare`
+- Pipeline: claude · stima 2% · approvato · priorità 12
+- Contesto: nasce da T205 (`dossier T205`): alla prima partenza si è visto una volta «fetch failed» su `UniverseClient.commit` (`src/kernel/universes.ts`), il commit dell'Arbitro è andato perso e mondo e disco sono rimasti diversi. Causa non accertata, non ripetuto in tre partenze. La regola 6 di `AGENTS.md` dice che si committano gli stati validi: uno perso in silenzio non torna con `R`. Proposta dell'orchestratore, approvata nell'autonomia del 03/11.
+- Cosa fare: leggi cosa succede oggi a un commit fallito (chi lo chiama, se lo stato resta da scrivere, se il commit seguente lo recupera). Se il commit seguente porta già tutto, scrivilo con un test e chiudi. Altrimenti fai in modo che un fallimento di rete non perda il commit (ritenta, o resta in attesa del prossimo) senza bloccare il gioco e senza riordinare i commit; un rifiuto del server (percorso non ammesso, permesso) non si ritenta. Cerca anche perché il server non rispondeva alla prima partenza, senza fermarti su questo se non si riproduce.
+- Test: un test offline con un `fetch` che fallisce una volta: niente di perso su disco alla fine; uno con un rifiuto del server: nessun ritento. Suite intera col suo turno, typecheck.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T211`; nell'esito cosa succedeva prima, cosa succede ora e se la causa del «fetch failed» è stata trovata. Sicurezza: nessuna superficie nuova, o le voci aggiunte.
+
