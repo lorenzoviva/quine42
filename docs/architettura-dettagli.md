@@ -554,7 +554,12 @@ Il kernel è in console come `window.quine` (o `window.rune`) in singola e per i
   La zona (`studio`, `corona`, `sim`) e la stanza disegnata seguono da sole al tick dopo; nessuna porta né `E`. Le caselle dei
   dispositivi sono le costanti di `corona.ts` (`SHOWCASE_AT`, `GRAPH_AT`, `SITUATION_AT`, `WALL_AT`, `CONSOLES_AT`, `BENCH_AT`…,
   relative a `f.ox`, `f.oy`); il dispositivo sta sulla colonna 12, l'uscita in basso (y 14): stare a y 10.5 lo inquadra con la
-  parete di fondo. Per gli esterni: `k.corona.building(id).door` (il viale davanti alla porta) o `?dev&teleport=46,0`.
+  parete di fondo, ma `E` lo raggiunge da y 7.5. Per gli esterni: `k.corona.building(id).door` (il viale davanti alla porta) o `?dev&teleport=46,0`.
+- **Multigiocatore**: `vite preview` non aggancia il WebSocket di `/api/session` (il client dà «il mondo non risponde»): serve il server
+  di sviluppo, `npx vite --port <n> --strictPort`, sempre nel turno `browser`. Un universo con `partita.modalita: 'multigiocatore'`, due
+  schede con `?skip&offline&universo=<nome>&viandante=io` (il master, se `partita.master` non dice altro) e `&viandante=<altro>`; la prima
+  partenza del mondo richiede una ventina di secondi. Nel master `window.quine` è il kernel specchio e `window.session` il `ThinClient`; nel
+  giocatore `window.rune` è il `ThinClient`. Un dono: `await session.session.act({ t: 'dai', viandante: '<altro>', slot, quanti })`.
 - **Agire**: `await k.interact()` è `E` (sul dispositivo o sullo scaffale più vicino), `k.clickStudio(x, y)` il clic sinistro su un punto;
   i pannelli arrivano come eventi (`k.bus.on('ui:showcase', …)`, `ui:screens`, `ui:graph`…). Per far vedere uno stato senza Gemini:
   `k.council.say(agente, tipo, testo, a, compito)` scrive nel registro, `k.faults.raise(chiave, messaggio)` apre un guasto.
