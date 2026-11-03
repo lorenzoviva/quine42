@@ -10,7 +10,7 @@ import { apiErrors, describeEffect, repairGameSetup, validateEffects, Validator 
 import { deathLevel, fallbackDeath, type DeathVerdict } from './gameSetup';
 import { Repo, memoryStore, type Commit, type KeyValueStore } from './repo';
 import { councilMayWrite } from './paths';
-import { Corona, campusModel, tileNear, FOCUSED_RULES, folderOf, TABLETS_MAX, type CoronaTile, type Exhibit, type ShowcaseSource, type StudioItem } from './corona';
+import { Corona, campusModel, coronaNearby, coronaShown, tileNear, FOCUSED_RULES, folderOf, TABLETS_MAX, type CoronaTile, type Exhibit, type ShowcaseSource, type StudioItem } from './corona';
 import { Archive } from './archive';
 import { bibleBreaks, cleanBible, metaBreak } from './fourthwall';
 import { biblePages, touchingNodes, type BibleShown } from './bible';
@@ -464,6 +464,8 @@ export class Kernel {
   generationHeld = false;
   /** Terrain generation is Lua and costs a few ms: at most this many new chunks per tick. */
   static CHUNKS_PER_TICK = 1;
+  /** How far beyond the circle (tiles) the world stays loaded as it is inside: a second's walk, for who comes back (T226). */
+  static WORLD_BEYOND_EDGE = 6;
   /** New places a universe of many plans per minute of the world, at most (T40; `ai.placesPerMinute`). */
   static PLACES_PER_MINUTE = 20;
   /** When (world time) the last new places were planned: the quota of a universe of many. */
@@ -1156,12 +1158,19 @@ export class Kernel {
   }
 
   /**
-   * The corona exists only for whoever escaped the carpet. While the carpet holds the player near the
-   * centre nothing of it is drawn, hovered or reachable: the simulation simply continues.
+   * The one place that decides whether the corona is drawn (T226, ADR-0124): only for whoever stands out of the circle
+   * or in the studio, and never while following a player. Inside the circle nothing of it is drawn or hovered for anybody,
+   * with any camera: the simulation simply continues.
    */
   coronaRevealed(): boolean {
     const p = this.wandererPos();
-    return !!p && Math.hypot(p.x, p.y) > this.config.circleRadius * 0.45;
+    return !!p && !this.watched() && coronaShown(p.x, p.y, this.config.circleRadius);
+  }
+
+  /** Whether the ring should be ready, still out of sight (T226): the wanderer is getting near the edge. */
+  coronaNear(): boolean {
+    const p = this.wandererPos();
+    return !!p && !this.watched() && coronaNearby(p.x, p.y, this.config.circleRadius);
   }
 
   log(source: string, message: string): void {
@@ -2669,8 +2678,9 @@ export class Kernel {
     const R = this.config.circleRadius;
     const p = this.wandererPos();
     const { ox, oy } = this.offset();
-    // While the corona is hidden the simulation has no visible edge: the carpet fills the view.
-    const clamp = this.coronaRevealed() ? R : Infinity;
+    // Inside the circle the simulation has no visible edge: the carpet fills the view. A little beyond the circle it
+    // still does, though cut away, so that who walks back in finds it there (T226).
+    const clamp = Math.hypot(p.x, p.y) >= R + Kernel.WORLD_BEYOND_EDGE ? R : Infinity;
     const x0 = Math.max(p.x - this.view.w / 2, -clamp) + ox;
     const x1 = Math.min(p.x + this.view.w / 2, clamp) + ox;
     const y0 = Math.max(p.y - this.view.h / 2, -clamp) + oy;
@@ -6761,7 +6771,7 @@ export class Kernel {
     const p = this.wandererPos();
     if (Math.hypot(rx - p.x, ry - p.y) < 0.5) return { kind: 'player' };
     const R = this.config.circleRadius;
-    if (this.corona.isInterior(rx) || (Math.hypot(rx, ry) >= R && this.coronaRevealed())) {
+    if (this.coronaRevealed() && (this.corona.isInterior(rx) || Math.hypot(rx, ry) >= R)) {
       const a = this.archive.nearest(rx, ry, 0.7);
       if (a) return { kind: 'agent', agent: a.agent, name: a.name, doing: a.say ?? (a.path ? `lavora su ${a.path}` : undefined) };
       const tile = this.corona.at(Math.floor(rx), Math.floor(ry));

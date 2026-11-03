@@ -22,6 +22,23 @@ export type StudioRoom = ReturnType<Kernel['corona']['roomAt']>;
 const RING_IDLE = 60;
 /** The models of the campus arrive one at a time: the ring is built again at most this often (seconds), not once for each. */
 const RING_REBUILD = 1;
+/** How long a frame may spend loading the ring on the GPU (milliseconds): what is left waits for the next one. */
+const RING_LOAD_MS = 6;
+
+/** The meshes that hold what a group has to load on the GPU: one for each pair of geometry and material. */
+export function ringMeshes(group: THREE.Object3D): THREE.Mesh[] {
+  const seen = new Set<string>();
+  const out: THREE.Mesh[] = [];
+  group.traverse((o) => {
+    const mesh = o as THREE.Mesh;
+    if (!mesh.isMesh) return;
+    const key = `${mesh.geometry.uuid}|${[mesh.material].flat().map((m) => m.uuid).join()}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push(mesh);
+  });
+  return out;
+}
 
 export class CoronaView {
   /** Everything of the corona hangs from here, in real space. */
@@ -33,6 +50,8 @@ export class CoronaView {
   /** When the ring was built, and when it was last revealed. */
   private ringBuilt = 0;
   private ringSeen = 0;
+  /** What the ring has yet to load on the GPU (T226): one mesh for each geometry and material, drawn once out of sight. */
+  private ringToLoad: THREE.Mesh[] = [];
   private rooms = new Map<string, { group: THREE.Group; globe?: THREE.Object3D; version: number }>();
   /** The marks on the Direction's situation table (T46a): what they show, when it was last read, what pulses. */
   private sit?: { key: string; at: number; group: THREE.Group; pulse: THREE.Object3D[] };
@@ -82,22 +101,33 @@ export class CoronaView {
     });
     if (this.ring) this.root.remove(this.ring);
     this.ring = undefined;
+    this.ringToLoad = [];
   }
 
-  update(t: number, studio: StudioRoom, revealed: boolean, interior: boolean): void {
+  /** The meshes the ring has yet to load, and how long a frame may spend on them; none once it is all on the GPU. */
+  nextToLoad(): { meshes: THREE.Mesh[]; ms: number } {
+    return { meshes: this.ringToLoad, ms: RING_LOAD_MS };
+  }
+
+  /**
+   * `near`: the wanderer is getting close to the edge, or past it. The ring is then built and kept, out of sight until
+   * `revealed` (T226): out of sight it casts no shadow, lights nothing and has no labels.
+   */
+  update(t: number, studio: StudioRoom, revealed: boolean, near: boolean, interior: boolean): void {
     const k = this.kernel;
-    const campus = revealed ? campusKey(k) : this.ringKey;
+    const campus = near ? campusKey(k) : this.ringKey;
     // By the clock on the wall: `t` goes slowly where frames are few, and those are the machines that most need the memory back.
     const now = performance.now() / 1000;
-    if (revealed) {
+    if (near) {
       this.ringSeen = now;
       askCampusModels(k);
     }
     if (this.ring && ((campus !== this.ringKey && now - this.ringBuilt >= RING_REBUILD) || now - this.ringSeen > RING_IDLE)) this.dropRing();
-    if (revealed && !this.ring) {
+    if (near && !this.ring) {
       this.root.add((this.ring = buildCoronaRing(k)));
       this.ringKey = campus;
       this.ringBuilt = now;
+      this.ringToLoad = ringMeshes(this.ring);
     }
     if (this.ring) {
       this.ring.visible = revealed && !interior;
@@ -256,8 +286,9 @@ export class CoronaView {
 
   /** The names over the doors, the Council at work, and in a room what is near and what changed lately. */
   overlay(o: Overlay, t: number, studio: StudioRoom, revealed: boolean, interior: boolean, distance: number): void {
+    if (!revealed) return;
     const k = this.kernel;
-    if (revealed && !interior) for (const b of k.corona.buildings) o.label(b.door.x + 0.5, 2.1, b.door.y + 0.5, b.storeys.length > 1 ? `${b.name} (${b.storeys.length} piani)` : b.name, b.color, 12, true);
+    if (!interior) for (const b of k.corona.buildings) o.label(b.door.x + 0.5, 2.1, b.door.y + 0.5, b.storeys.length > 1 ? `${b.name} (${b.storeys.length} piani)` : b.name, b.color, 12, true);
     for (const a of k.archive.avatars.values()) {
       if (Math.hypot(a.x - k.wandererPos().x, a.y - k.wandererPos().y) > distance * 2) continue;
       o.label(a.x, 1.45, a.y, `${a.sigil} ${a.name}`, a.color, 11);

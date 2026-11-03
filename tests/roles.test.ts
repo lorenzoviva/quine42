@@ -116,6 +116,13 @@ describe('runes and bindings by role (T37)', () => {
     write(k, 'io', ['x', '=', '9999']);
     run(k, 0.5);
     expect(away(k, 'io')).toBeGreaterThan(R);
+    // The master has the god mode and, out of the circle, the corona; back inside, not even they see it (T226).
+    expect(k.as('io', () => k.coronaRevealed())).toBe(true);
+    k.as('io', () => {
+      Object.assign(k.wandererPos(), { x: R - 1, y: 0 });
+      expect(k.godMode()).toBe(true);
+      expect(k.coronaRevealed()).toBe(false);
+    });
   });
 
   it('the master carries the Council’s rune, never spent, and it takes them to the Council’s hall', async () => {
