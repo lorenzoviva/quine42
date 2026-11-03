@@ -117,6 +117,30 @@ export function glowing<M extends THREE.Material>(m: M, key: string, always = fa
   return m;
 }
 
+/** The vertex shader's wind: the `sway` weight of a vertex bends it. */
+const WIND_VERTEX = `#include <begin_vertex>
+    vec3 swp = (modelMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+    #ifdef USE_INSTANCING
+    swp += (modelMatrix * vec4(instanceMatrix[3].xyz, 0.0)).xyz;
+    #endif
+    float ph = uTime * 1.7 + swp.x * 0.37 + swp.z * 0.61;
+    transformed.x += sway * uWind * (sin(ph) + 0.35 * sin(ph * 2.3 + 1.0));
+    transformed.z += sway * uWind * 0.45 * cos(ph * 0.8);`;
+
+/** The wind without the circle clip, for what stands beyond the circle (T218): the corona's trees. */
+export function windy<M extends THREE.Material>(m: M, key: string): M {
+  m.onBeforeCompile = (sh) => {
+    sh.uniforms.uTime = U.time;
+    sh.uniforms.uWind = U.wind;
+    sh.vertexShader = `attribute float sway;\nuniform float uTime;\nuniform float uWind;\n${sh.vertexShader}`.replace('#include <begin_vertex>', WIND_VERTEX);
+    addGlow(sh);
+  };
+  m.customProgramCacheKey = () => key;
+  noGlow(m);
+  m.userData.sway = true;
+  return m;
+}
+
 /** Adds the circle clip (in world xz) to a material. */
 export function clipped<M extends THREE.Material>(m: M, key: string, sway = false): M {
   m.onBeforeCompile = (sh) => {
@@ -124,19 +148,7 @@ export function clipped<M extends THREE.Material>(m: M, key: string, sway = fals
     sh.uniforms.uWind = U.wind;
     sh.uniforms.uClipR = U.clipR;
     sh.vertexShader = `${sway ? 'attribute float sway;\n' : ''}uniform float uTime;\nuniform float uWind;\nvarying vec2 vClipXZ;\n${sh.vertexShader}`
-      .replace(
-        '#include <begin_vertex>',
-        sway
-          ? `#include <begin_vertex>
-    vec3 swp = (modelMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-    #ifdef USE_INSTANCING
-    swp += (modelMatrix * vec4(instanceMatrix[3].xyz, 0.0)).xyz;
-    #endif
-    float ph = uTime * 1.7 + swp.x * 0.37 + swp.z * 0.61;
-    transformed.x += sway * uWind * (sin(ph) + 0.35 * sin(ph * 2.3 + 1.0));
-    transformed.z += sway * uWind * 0.45 * cos(ph * 0.8);`
-          : '#include <begin_vertex>',
-      )
+      .replace('#include <begin_vertex>', sway ? WIND_VERTEX : '#include <begin_vertex>')
       // The clip follows project_vertex: instances (terrain models) are cut where they stand, not at the mesh origin.
       .replace(
         '#include <project_vertex>',
@@ -172,11 +184,12 @@ const PLAIN_NORMALS = new THREE.MeshNormalMaterial();
  */
 export function normalsOf(m: THREE.Material): THREE.Material | undefined {
   if (!m.visible || (!m.colorWrite && !m.depthWrite)) return undefined;
-  if (!m.userData?.clipped && !m.clippingPlanes?.length && m.side === THREE.FrontSide) return PLAIN_NORMALS;
+  if (!m.userData?.clipped && !m.userData?.sway && !m.clippingPlanes?.length && m.side === THREE.FrontSide) return PLAIN_NORMALS;
   let n = normalsCache.get(m);
   if (!n) {
     n = new THREE.MeshNormalMaterial({ side: m.side, clippingPlanes: m.clippingPlanes ?? null });
     if (m.userData?.clipped) clipped(n, `normal-${m.userData.clipKey}`, !!m.userData.sway);
+    else if (m.userData?.sway) windy(n, `normal-${m.customProgramCacheKey()}`);
     normalsCache.set(m, n);
   }
   return n;
@@ -212,6 +225,8 @@ export const MAT = {
   sway: clipped(lit({ vertexColors: true }), 'sway', true),
   /** The corona and the studio: never clipped. */
   corona: glowing(lit({ vertexColors: true }), 'corona'),
+  /** The corona's vegetation: the wind of `sway`, never clipped (`MAT.sway` beyond the circle draws only its shadow, T218). */
+  coronaSway: windy(lit({ vertexColors: true }), 'corona-sway'),
   /** Translucent voxels (glass screens, translucent panels) in the simulation. */
   glass: clipped(lit({ vertexColors: true, transparent: true, depthWrite: false }), 'glass'),
   /** Translucent voxels inside a cut structure. */
