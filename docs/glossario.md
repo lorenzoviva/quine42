@@ -611,10 +611,10 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Da non usare**: nessuno
 
 ### Scultore
-- **Inglese**: `Sculptor`, `scultore`, `SculptorModels`
+- **Inglese**: `Sculptor`, `scultore`, `SculptorAiModels`
 - **Definizione**: l'agente che scrive i programmi dei modelli e le loro azioni.
 - **Dove vive**: `src/kernel/agents/sculptor.ts`
-- **Da non usare**: nessuno
+- **Da non usare**: `SculptorModels`
 
 ### Fisico
 - **Inglese**: `Physicist`, `fisico`
@@ -704,11 +704,11 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Da non usare**: nessuno
 
 ### Modello di IA
-- **Inglese**: `Models`, `MockModels`, `GeminiModels`, `textModel`
+- **Inglese**: `AiModels`, `MockAiModels`, `GeminiAiModels`, `kernel.ai`, `textModel`
 - **Definizione**: ciò che risponde al Concilio: Gemini, una CLI di abbonamento o i modelli locali.
 - **Dove vive**: `src/kernel/ai/models.ts`, `src/kernel/ai/gemini.ts`, `src/kernel/ai/mock.ts`
-- **Da non usare**: `modello` (da solo: è una voce della libreria)
-- **Fermo**: `textModel` in `universe.json`, `.models.usage` come abitudine in console.
+- **Da non usare**: `modello` (da solo: è una voce della libreria), `Models`, `MockModels`, `GeminiModels`, `kernel.models`
+- **Fermo**: `textModel` in `universe.json`.
 
 ### Coefficienti
 - **Inglese**: `Coefficients`, `LOW_DETAIL`, `CENSUS`, `hourlyEstimate`
@@ -836,7 +836,7 @@ Stessa parola, concetti diversi: il problema che confonde di più, più dei sino
 
 | Parola | Significati | Come si distinguono |
 |---|---|---|
-| modello / `model` | voce della libreria; IA che risponde (`kernel.models`, `Models`) | «Modello» e «Modello di IA»; rinomina R2 |
+| modello / `model` | voce della libreria; IA che risponde: si chiamava `kernel.models`, `Models` fino alla rinomina R2, ora è `kernel.ai`, `AiModels` | «Modello» e «Modello di IA» |
 | `Building` | edificio dello studio (`corona.ts`); il lotto si chiamava così fino alla rinomina R1, ora è `Lot` (`layout.ts`) | «Edificio» e «Lotto» |
 | piano | piano di un luogo (`plan`); piano di un edificio (`Floor`) | «Piano del luogo» e «Piano» |
 | `floor` | piano (`Floor`); pavimento (`floorAt`); strato del terreno (`TileLayer`); `Math.floor` | rinomina R9 |
@@ -877,7 +877,7 @@ Le fanno i task T188-T204, una per task e nell'ordine: vanno in conflitto con tu
 | # | Rinomina (da → a) | Restano | File | Migrazione | Stato |
 |---|---|---|---|---|---|
 | R1 | Di `layout.ts`: `Building` → `Lot`, `LayoutResult.buildings` e `Chunk.buildings` → `lots`, `findBuildings` → `findLots`, `buildingAt` → `lotAt` (con il campo `building` di ciò che rende → `lot`). Di `relief.ts`, per non fare un omonimo: `Lot` → `LotBox` | il `Building` di `corona.ts`, con `buildings`, `building()`, `buildingOf`, `buildingId`. `lotsOf` e il suo `lots` locale di `kernel.ts` non si scontrano; **fermo** `lotti` del protocollo | 13 | no: il layout li ricava dalla bozza a ogni caricamento | fatto |
-| R2 | `Models` → `AiModels`, `MockModels` → `MockAiModels`, `GeminiModels` → `GeminiAiModels`, `RoutedModels` → `RoutedAiModels`, `QueueModels` → `QueueAiModels`, `TrackingModels` → `TrackingAiModels`, `TrackingOnlineModels` → `TrackingOnlineAiModels`, `SculptorModels` → `SculptorAiModels`, `pricedModels` → `pricedAiModels`, `localModels` → `localAiModels`, `baseModels` → `baseAiModels`, `updateModelsHud` → `updateAiModelsHud`; il campo `models` di `Kernel` e di `Council` → `ai`; `window.quine.models` → `window.quine.ai`, anche in `AGENTS.md` | la libreria: `maxModels`, `tornioModels`, `upgradeModels`, `MODELS_INDEX`, `models/`, `listModels` del laboratorio; **fermi** `textModel`, `ai` di `universe.json` | 114 (76 sono test) | no | da fare |
+| R2 | `Models` → `AiModels`, `MockModels` → `MockAiModels`, `GeminiModels` → `GeminiAiModels`, `RoutedModels` → `RoutedAiModels`, `QueueModels` → `QueueAiModels`, `TrackingModels` → `TrackingAiModels`, `TrackingOnlineModels` → `TrackingOnlineAiModels`, `SculptorModels` → `SculptorAiModels`, `pricedModels` → `pricedAiModels`, `localModels` → `localAiModels`, `baseModels` → `baseAiModels`, `updateModelsHud` → `updateAiModelsHud`; il campo `models` di `Kernel` e di `Council` e l'opzione `models` di `Kernel.boot` → `ai`; `window.quine.models` → `window.quine.ai`, anche in `AGENTS.md` | la libreria: `maxModels`, `tornioModels`, `upgradeModels`, `MODELS_INDEX`, `models/`, `listModels` del laboratorio; **fermi** `textModel`, `ai` di `universe.json` | 114 (76 sono test) | no | fatto |
 | R3 | `playerPos` → `wandererPos`, `playerCarpet` → `wandererCarpet`, `playerId` → `wandererEntity` (è l'id dell'entità: `wandererId` c'è già ed è l'id stabile del viandante), `playerComp` → `wandererComp`, `playerMod` → `wandererModule`, `playerCell` → `wandererTile`, `playerText` → `wandererText`, `playerPrompt` → `wandererPrompt`; anche negli snippet di `docs/architettura-dettagli.md#convalida-browser` | il giocatore: `players`, `PlayerSpot`, `playerFiles`, `playerFile`, `playerFilesIn`, `playerChanges`, `PLAYERS_DIR`, `manyPlayers`; **fermi** `world.player`, `world.player_pos`, `player_id`, `player_get`, `player_set` e il binding, che Lua vede | 53 (39 sono test) | no | da fare |
 | R4 | Prima `ChunkView` di `terrain.ts` → `TerrainView`; poi `Place` → `ChunkInfo`, `PlaceView` → `ChunkView`, `PlaceLot` → `ChunkLot`, `PlaceMiniature` → `ChunkMiniature`, `GraphPlace` → `GraphChunk`, `placeHere` → `chunkHere`, `placeByName` → `chunkByName`, `placesOf` → `chunksOf`, `placeList` → `chunkList`, `mergePlaces` → `mergeChunks`, `graphPlaces` → `graphChunks`, `graphPlacesVersion` → `graphChunksVersion`, `seedGraphPlaces` → `seedGraphChunks`, `addPlace` → `addChunk`, `hasPlace` → `hasChunk`, `cardPlace` → `cardChunk`, `placeCard` → `chunkCard`, `placeCardId` → `chunkCardId`, `placeIn` → `chunkIn`, `placeQuota` → `chunkQuota`, `placesMade` → `chunksMade`, `noPlace` → `noChunk`, `lastPlace` → `lastChunk`, `listPlaces` → `listChunks` | «place» verbo: `placeStructure`, `placeCampus`, `placeRegion`, `placeInside`, `placeProp`, `placeFor`, `placed`, `Placement`, `placementsOf`, `Placeable`, `PlacedObject`; i locali `place` e `places`; **fermi** `plan.place` in `maps/`, `Chunk.place`, `placesPerMinute`, `luoghi` del protocollo, `senza_luogo` | 24 | no | da fare |
 | R5 | Di `Kernel`: `hand()` → `phrase()`, `syncHand` → `syncPhrase`, `inscribeHand` → `inscribePhrase`; `lastHand` di `hud.ts` → `lastPhrase`, `handKey` → `phraseKey` | `ThinClient.phrase` e `ThinClient.syncPhrase`, su un'altra classe; **fermi** il componente `hand`, `hand.tokens`, il campo `hand` dello stato sul filo (`hand: k.hand()` diventa `hand: k.phrase()`), i locali `hand` che ne fanno la chiave | 15 | no se resta il componente: con il componente, dallo stato di ogni viandante e dal Lua, ed è **sconsigliato** | da fare |

@@ -3,8 +3,8 @@
 // credit spending cap (which adds to the universe AI budgets), and their collection of cards with usages.
 
 import { collectionOf } from '../kernel/cards';
-import { COEFFICIENT_INFO, COEFFICIENT_KEYS, hourlyEstimate, isLowDetail, pricedModels, repairAttore, repairCoefficients } from '../kernel/coefficients';
-import { DEFAULT_SCULPTORS, type SculptorModels } from '../kernel/agents/sculptor';
+import { COEFFICIENT_INFO, COEFFICIENT_KEYS, hourlyEstimate, isLowDetail, pricedAiModels, repairAttore, repairCoefficients } from '../kernel/coefficients';
+import { DEFAULT_SCULPTORS, type SculptorAiModels } from '../kernel/agents/sculptor';
 import { readConfig } from '../kernel/universe';
 import type { FileMap } from '../kernel/types';
 import { usd } from '../kernel/ai/prices';
@@ -65,13 +65,13 @@ export class LobbyScreen {
     const master = config.partita?.master ?? 'io';
     const minimi = ai.minimi;
     const coef = repairCoefficients(ai.coefficienti);
-    const sculpt: SculptorModels = { ...DEFAULT_SCULPTORS, ...(ai.scultori ?? {}) };
+    const sculpt: SculptorAiModels = { ...DEFAULT_SCULPTORS, ...(ai.scultori ?? {}) };
     const actor = repairAttore(ai.attore);
     // The Actor (T157): everyone sees it; the master, and only the master, sets it here (the server refuses the others).
     const isMaster = wandererId === master;
     const actorOn = el('input', { type: 'checkbox', id: 'lobby-attore' }) as HTMLInputElement;
     actorOn.checked = actor.acceso;
-    const actorModel = el('select', { id: 'lobby-attore-modello' }, ...[...new Set([actor.modello, ...pricedModels()])].map((m) => el('option', { value: m }, m))) as HTMLSelectElement;
+    const actorModel = el('select', { id: 'lobby-attore-modello' }, ...[...new Set([actor.modello, ...pricedAiModels()])].map((m) => el('option', { value: m }, m))) as HTMLSelectElement;
     actorModel.value = actor.modello;
     const estimateRow = el('div', { class: 'estimate-row' });
     const showEstimate = () => {

@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { fakeLink } from '../src/session/protocol';
 import { SessionServer } from '../src/session/server';
 import { SessionClient } from '../src/session/client';
@@ -26,7 +26,7 @@ describe('Hub Sessioni & Creazione Nuovo Universo (T103)', () => {
       ...bundledFiles,
       'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2),
     };
-    const kernel = await Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+    const kernel = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
     const server = new SessionServer(kernel);
 
     expect(server.clientCount).toBe(0);

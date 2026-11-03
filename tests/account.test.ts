@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import type { TextCall } from '../src/kernel/ai/models';
 import { fakeLink } from '../src/session/protocol';
 import { SessionServer } from '../src/session/server';
@@ -17,7 +17,7 @@ import { anonymousToken } from '../server/account';
 async function bootMany(): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
-  return Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+  return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
 /** Tokens as a fake Firebase would sign them: `<uid>:<provider>`, and `scaduto` for one past its hour. */
@@ -77,17 +77,17 @@ describe('accounts (T44b)', () => {
   });
 
   it('an anonymous account plays offline (0 credits); linked to Google it keeps its wanderer, profile and pockets', async () => {
-    class TrackingOnlineModels extends MockModels {
+    class TrackingOnlineAiModels extends MockAiModels {
       calls: string[] = [];
       async text(call: TextCall): Promise<string> {
         this.calls.push(call.task);
         return super.text(call);
       }
     }
-    const online = new TrackingOnlineModels();
+    const online = new TrackingOnlineAiModels();
     const cfg = JSON.parse(bundledFiles['universe.json']);
     const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
-    const k = await Kernel.boot({ files, store: memoryStore(), models: online });
+    const k = await Kernel.boot({ files, store: memoryStore(), ai: online });
     const server = new SessionServer(k, { verify });
     const anon = await enter(server, '', 'anonimo');
     const id = anon.id;

@@ -3,7 +3,7 @@
 // whether it should not. Nothing here touches the game or the universe.
 
 import * as THREE from 'three';
-import { GeminiModels } from '../../src/kernel/ai/gemini';
+import { GeminiAiModels } from '../../src/kernel/ai/gemini';
 import type { Grid3 } from '../../src/mj/engine';
 import { tallyLine, UsageLedger } from '../../src/kernel/ai/usage';
 import { CLASSES } from '../../src/mj/classes';
@@ -816,7 +816,7 @@ $<HTMLSelectElement>('g-class').value = 'edificio';
 const gMeter = new UsageLedger();
 $('g-go').onclick = async () => {
   const out = $('g-out');
-  if (!(await GeminiModels.available())) {
+  if (!(await GeminiAiModels.available())) {
     out.textContent = 'Gemini non raggiungibile: serve il server di Vite con GEMINI_API_KEY in .env';
     return;
   }
@@ -829,7 +829,7 @@ $('g-go').onclick = async () => {
     kind,
     category: ['persona', 'animale', 'bestia'].includes(kind) ? 'figura' : ['edificio', 'monumento'].includes(kind) ? 'struttura' : 'semplice',
   };
-  const models = new GeminiModels({ textModel: $<HTMLSelectElement>('g-model').value, limits: { text: 50 }, thinking: 'low', timeout: 240_000 });
+  const models = new GeminiAiModels({ textModel: $<HTMLSelectElement>('g-model').value, limits: { text: 50 }, thinking: 'low', timeout: 240_000 });
   models.onCall = (r) => gMeter.record(r);
   $<HTMLButtonElement>('g-go').disabled = true;
   out.textContent = 'lo Scultore scrive…';

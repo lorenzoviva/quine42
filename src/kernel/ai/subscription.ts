@@ -4,11 +4,11 @@
 // `agenti` the exceptions); every other task stays on the API. Never on the server of many (ADR-0058): the
 // subscription is personal, so only `main.ts` in single play and development builds these models.
 //
-// The request does not go to the CLI from here: `QueueModels` puts it in a queue on disk (`/api/coda`, see
+// The request does not go to the CLI from here: `QueueAiModels` puts it in a queue on disk (`/api/coda`, see
 // server/subscriptionQueue.ts) that a process using the CLIs serves (T68b); the answer comes back with the same
 // schema, and its tokens go to the same usage ledger (at the price of a subscription, zero dollars).
 
-import { emptyUsage, Semaphore, type Limits, type Models, type TextCall } from './models';
+import { emptyUsage, Semaphore, type Limits, type AiModels, type TextCall } from './models';
 import type { CallRecord } from './usage';
 
 /** `api`: Gemini, paid per call. The others: a subscription's CLI, through the queue. */
@@ -57,14 +57,14 @@ export function providerFor(s: Subscriptions, agent: string, task: string): Prov
  * The models of the kernel when some agents run on subscriptions: each call to the provider of the table. `usage` and
  * `limits` are the API's (the session budget is for what is paid); the queues count their calls in the same ledger.
  */
-export class RoutedModels implements Models {
+export class RoutedAiModels implements AiModels {
   readonly name: string;
-  readonly routes: Partial<Record<Provider, Models>>;
+  readonly routes: Partial<Record<Provider, AiModels>>;
 
   constructor(
-    readonly api: Models,
+    readonly api: AiModels,
     readonly table: Subscriptions,
-    readonly queues: Partial<Record<Exclude<Provider, 'api'>, Models>>,
+    readonly queues: Partial<Record<Exclude<Provider, 'api'>, AiModels>>,
   ) {
     this.name = api.name;
     this.routes = { ...queues, api };
@@ -171,7 +171,7 @@ export interface QueueState {
 }
 
 /** A subscription's CLI, through the queue on disk. A request that is not answered in time is not repeated. */
-export class QueueModels implements Models {
+export class QueueAiModels implements AiModels {
   readonly name: string;
   readonly usage = emptyUsage();
   /** The queue has no budget of its own: the CLI's limits are the subscription's. */

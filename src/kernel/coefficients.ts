@@ -5,7 +5,7 @@
 // cannot be thinned, and the Genesis screen says what it costs. «Low Detail» is the game played to save.
 
 import { priceOf, costOf } from './ai/prices';
-import { DEFAULT_SCULPTORS, type SculptorModels } from './agents/sculptor';
+import { DEFAULT_SCULPTORS, type SculptorAiModels } from './agents/sculptor';
 import type { AiConfig } from './types';
 
 export const COEFFICIENT_KEYS = ['sessioni', 'dialoghi', 'trame', 'revisioni', 'modelli', 'persone', 'abitanti', 'pacchetti', 'cose'] as const;
@@ -15,7 +15,7 @@ export type Coefficients = Record<CoefficientKey, number>;
 export const FULL_DETAIL: Coefficients = { sessioni: 1, dialoghi: 1, trame: 1, revisioni: 1, modelli: 1, persone: 1, abitanti: 1, pacchetti: 1, cose: 1 };
 
 /** «Low Detail»: about a fifth of the calls the world makes by itself, and the cheap model for every figure. */
-export const LOW_DETAIL: { coefficienti: Coefficients; scultori: Partial<SculptorModels> } = {
+export const LOW_DETAIL: { coefficienti: Coefficients; scultori: Partial<SculptorAiModels> } = {
   coefficienti: { sessioni: 0.25, dialoghi: 0.2, trame: 0.34, revisioni: 0.25, modelli: 0.34, persone: 0.5, abitanti: 0.25, pacchetti: 0.25, cose: 0.34 },
   scultori: { figura: 'gemini-3.1-flash-lite', struttura: 'gemini-3.1-flash-lite', importante: 'gemini-3.8-flash', artista: 'gemini-3.1-flash-lite' },
 };
@@ -189,7 +189,7 @@ export interface HourLine {
  */
 export function hourlyEstimate(ai: AiConfig, date?: string): { righe: HourLine[]; chiamate: number; dollari: number } {
   const c = repairCoefficients(ai.coefficienti);
-  const sc: SculptorModels = { ...DEFAULT_SCULPTORS, ...(ai.scultori ?? {}) };
+  const sc: SculptorAiModels = { ...DEFAULT_SCULPTORS, ...(ai.scultori ?? {}) };
   const actor = repairAttore(ai.attore);
   const text = (n: number) => n * (costOf(ai.textModel, WEIGHT.testo, date) ?? 0);
   // Who plays the people: the Actor's model when the option is on (T157), else the text model.
@@ -237,4 +237,4 @@ export function hourlyEstimate(ai: AiConfig, date?: string): { righe: HourLine[]
 }
 
 /** The models the Genesis screen offers: every priced one. */
-export const pricedModels = (): string[] => ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-3.8-flash', 'gemini-4-argon', 'gemini-3.1-pro-preview'].filter((m) => priceOf(m));
+export const pricedAiModels = (): string[] => ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-3.8-flash', 'gemini-4-argon', 'gemini-3.1-pro-preview'].filter((m) => priceOf(m));

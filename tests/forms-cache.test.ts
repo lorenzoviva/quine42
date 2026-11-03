@@ -7,11 +7,11 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { Forms, FormCache, formKey, InlineRunner, instanceGrid, runForm, sharedForms, type FormComp, type FormRequest, type FormResult } from '../src/kernel/forms';
 import { Kernel } from '../src/kernel/kernel';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { hashStr } from '../src/kernel/rng';
 import { diskForms, engineVersion } from './setup/forms-disk';
 
-const boot = () => Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
+const boot = () => Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
 
 const PROGRAM = '<sequence values="BW"><box at="0 0 0" size="1 1 1" color="W"/></sequence>';
 const req = (over: Partial<FormRequest> = {}): FormRequest => ({ xml: PROGRAM, seed: 1, size: [2, 2, 2], vpt: 20, ...over });

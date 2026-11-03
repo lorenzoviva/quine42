@@ -31,7 +31,7 @@ import { discoverModules, readConfig } from './universe';
 import { askedRunes, carpetLine, CARPET_TOKENS, cellIndex, COUNCIL_RUNE, extractLines, tokenize, type RuneComp, type RuneLine } from './runes';
 import { hash32, hashStr, hex, Rng } from './rng';
 import { onBeat, repairAttore, repairCoefficients, stretch, type AttoreConfig, type Coefficients } from './coefficients';
-import { BudgetError, type Models } from './ai/models';
+import { BudgetError, type AiModels } from './ai/models';
 import { billedModel, costOf } from './ai/prices';
 import { USAGE_FILE, UsageLedger, type CallRecord } from './ai/usage';
 import { addBudgetFromTetto, costWithFee, DEFAULT_GRANT_CAP, MemoryLedger, splitCost, type Ledger, type PaymentRecord } from './credits';
@@ -39,7 +39,7 @@ import { MemoryChunks, type ChunkStore } from './chunks';
 import { bodyFoot, bodyGround, Forms, holesOf, InlineRunner, instanceGrid, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground } from './forms';
 import { classOf, guessClass, RARE_SIZES, sizeRank, TAGLIE, tilesOf, type Taglia } from '../mj/classes';
 import { GENERIC, ModelDirector, ownModelId } from './modeldirector';
-import { categoryOf, DEFAULT_SCULPTORS, sculptAction, type SculptorModels } from './agents/sculptor';
+import { categoryOf, DEFAULT_SCULPTORS, sculptAction, type SculptorAiModels } from './agents/sculptor';
 import { MODELS_INDEX, type ModelInfo } from './forms';
 import { Content, normName, specOf } from './content';
 import { layout, type Lot, type LayoutResult, articulationPoints } from './layout';
@@ -295,7 +295,7 @@ export interface KernelOptions {
   /** Dollars a day the master may give by hand (ADR-0104). */
   grantCap?: number;
   store: KeyValueStore;
-  models: Models;
+  ai: AiModels;
   chunks?: ChunkStore;
   /** Who runs the MarkovJunior programs of the models (default: this thread; the browser uses workers). */
   forms?: FormRunner;
@@ -372,7 +372,7 @@ export class Kernel {
   readonly faults = new Faults();
   readonly input = new Input();
   readonly content = new Content();
-  readonly models: Models;
+  readonly ai: AiModels;
   /** What the models cost, per day, model and task (world/consumi.json). */
   readonly usage = new UsageLedger();
   private usageWritten = -1;
@@ -578,7 +578,7 @@ export class Kernel {
   private wasmUri?: string;
 
   private constructor(opts: KernelOptions) {
-    this.models = opts.models;
+    this.ai = opts.ai;
     this.bench = opts.bench;
     this.mirror = !!opts.mirror;
     this.ledger = opts.ledger ?? new MemoryLedger();
@@ -593,7 +593,7 @@ export class Kernel {
     k.sandbox = await Sandbox.create(k.makeHost(), opts.wasmUri);
     k.validator = new Validator(k.sandbox);
     k.validator.modelTime = (id) => k.forms.info(id)?.tempo;
-    k.council = new Council(opts.models, () => ({ files: k.files, palette: k.palette, catalog: k.catalog(), graph: () => k.graph() }));
+    k.council = new Council(opts.ai, () => ({ files: k.files, palette: k.palette, catalog: k.catalog(), graph: () => k.graph() }));
     k.council.onFeed = (e) => {
       k.archive.onFeed(e, (x) => k.pathForFeed(x));
       k.bus.emit('council', e);
@@ -612,7 +612,7 @@ export class Kernel {
     };
     // The usage ledger: every call is counted; the file is written before every commit (it survives rollbacks).
     k.usage.load(repo.working[USAGE_FILE]);
-    k.models.onCall = (r) => {
+    k.ai.onCall = (r) => {
       k.usage.record(r);
       k.billCall(r);
     };
@@ -643,8 +643,8 @@ export class Kernel {
     k.reviewPlots();
     void k.seedGraphPlaces();
     void k.reviewFourthWall();
-    k.models.limits = { text: k.config.ai.maxText };
-    k.log('kernel', `universo «${name}» avviato su commit ${repo.head().id} (${repo.head().message}) — modelli: ${opts.models.name}${synced ? ' — sincronizzato dal disco' : ''}`);
+    k.ai.limits = { text: k.config.ai.maxText };
+    k.log('kernel', `universo «${name}» avviato su commit ${repo.head().id} (${repo.head().message}) — modelli: ${opts.ai.name}${synced ? ' — sincronizzato dal disco' : ''}`);
     return k;
   }
 
@@ -1236,7 +1236,7 @@ export class Kernel {
     const radiusChanged = !this.config || this.config.circleRadius !== config.circleRadius;
     const sizeChanged = !this.config || this.config.chunkSize !== config.chunkSize || this.config.seed !== config.seed;
     this.config = config;
-    if (this.models?.textModel !== undefined && config.ai.textModel) this.models.textModel = config.ai.textModel;
+    if (this.ai?.textModel !== undefined && config.ai.textModel) this.ai.textModel = config.ai.textModel;
     this.forms.load(files);
     if (radiusChanged) this.corona = new Corona(config.circleRadius);
 
@@ -2582,7 +2582,7 @@ export class Kernel {
    * intervene (items, a new inhabitant, a new thing). The base logic is theirs; so are its changes.
    */
   async holdSession(force = false): Promise<string> {
-    if (!force && (this.sessions >= 4 || this.generationHeld || this.models.name === 'offline')) return 'nessuno';
+    if (!force && (this.sessions >= 4 || this.generationHeld || this.ai.name === 'offline')) return 'nessuno';
     this.sessions++;
     const rules = this.rules().slice(-12).map((r) => `- ${r.testo}: ${r.possibile ? 'si può' : 'non si può'}`).join('\n');
     const people = readPeople(this.files).persone.slice(-10).map((p) => `- ${p.nome}, ${p.mestiere}`).join('\n');
@@ -2609,7 +2609,7 @@ export class Kernel {
 
   async growCast(place?: Place, force = false): Promise<boolean> {
     const max = this.config.ai.maxCast ?? 3;
-    if (!force && (this.castUsed >= max || this.generationHeld || this.models.name === 'offline')) return false;
+    if (!force && (this.castUsed >= max || this.generationHeld || this.ai.name === 'offline')) return false;
     const people = [...this.modules.values()].filter((m) => m.manifest.persona);
     if (people.length >= 14) return false;
     this.castUsed++;
@@ -4657,7 +4657,7 @@ export class Kernel {
   }
 
   /** The Sculptor's models per class (universe.json → ai.scultori over the defaults). */
-  sculptors(): SculptorModels {
+  sculptors(): SculptorAiModels {
     return { ...DEFAULT_SCULPTORS, ...(this.config.ai.scultori ?? {}) };
   }
 
@@ -4816,8 +4816,8 @@ export class Kernel {
     if (tetto <= before) return;
     this.tettoBudgeted.set(id, tetto);
     const added = addBudgetFromTetto(this.config.ai, tetto - before);
-    if (this.models?.limits) {
-      this.models.limits.text += added.textCalls;
+    if (this.ai?.limits) {
+      this.ai.limits.text += added.textCalls;
     }
   }
 
@@ -5080,7 +5080,7 @@ export class Kernel {
     const ai = { ...(raw.ai ?? {}), ...patch, ...(patch.coefficienti !== undefined ? { coefficienti: repairCoefficients(patch.coefficienti) } : {}), ...(patch.attore !== undefined ? { attore: repairAttore(patch.attore) } : {}) };
     this.writeCommanded('universe.json', JSON.stringify({ ...raw, ai }, null, 2) + '\n');
     this.config = { ...this.config, ai: { ...this.config.ai, ...ai } };
-    if (this.models.textModel !== undefined && this.config.ai.textModel) this.models.textModel = this.config.ai.textModel;
+    if (this.ai.textModel !== undefined && this.config.ai.textModel) this.ai.textModel = this.config.ai.textModel;
   }
 
   /** Chooses the game of a universe that was never generated (the Genesis screen); after, it is fixed. */
@@ -6317,7 +6317,7 @@ export class Kernel {
   /** The Narrator weaves a horizontal plot among existing people and places (westworld-like). */
   async weaveStory(force = false): Promise<Plot | undefined> {
     const society = readPeople(this.files);
-    if (!force && (this.plotsWoven >= 3 || society.persone.length < 3 || this.models.name === 'offline' || this.generationHeld)) return undefined;
+    if (!force && (this.plotsWoven >= 3 || society.persone.length < 3 || this.ai.name === 'offline' || this.generationHeld)) return undefined;
     this.plotsWoven++;
     const pc = this.playerCarpet();
     const places = this.directionsAt(pc.x, pc.y).join('\n');
@@ -6412,7 +6412,7 @@ export class Kernel {
     const i = this.filmAt ? log.findIndex((c) => c.id === this.filmAt) : 0;
     const ai = this.config.ai;
     const budgets: Budget[] = [
-      { nome: 'testo', usati: this.models.usage.text, max: ai.maxText },
+      { nome: 'testo', usati: this.ai.usage.text, max: ai.maxText },
       { nome: 'Fucina', usati: this.forgesUsed, max: ai.maxForges },
       { nome: 'pacchetti', usati: this.packsUsed, max: ai.maxPacks ?? 4 },
       { nome: 'tipi nuovi', usati: this.castUsed, max: ai.maxCast ?? 3 },
@@ -6420,7 +6420,7 @@ export class Kernel {
     ];
     return {
       tempo: timeline(log, Math.max(0, i), (c) => (c.parent ? this.repo.find(c.parent) : undefined)),
-      registro: liveFeed(this.feed(), this.usage.lastCall, now, this.models.name === 'offline' ? 'offline' : ai.textModel),
+      registro: liveFeed(this.feed(), this.usage.lastCall, now, this.ai.name === 'offline' ? 'offline' : ai.textModel),
       costi: costBoard(this.usage, budgets),
       allerta: alertOf(this.faults.list(), this.feed(), budgets, now),
     };
@@ -6712,7 +6712,7 @@ export class Kernel {
 
   /** The world grows as it is explored: a new pack of items, recipes and loot (text only, cheap). */
   async growContent(reason: string, count = 16, force = false): Promise<boolean> {
-    if (this.growing || (!force && (this.packsUsed >= (this.config.ai.maxPacks ?? 4) || this.models.name === 'offline'))) return false;
+    if (this.growing || (!force && (this.packsUsed >= (this.config.ai.maxPacks ?? 4) || this.ai.name === 'offline'))) return false;
     this.growing = true;
     this.packsUsed++;
     try {
@@ -6925,7 +6925,7 @@ export class Kernel {
       else seen.set(key, man.id);
     }
     // The Arbiter sees subtler breaks the words miss (offline models answer nothing).
-    if (generated.length && this.models.name !== 'offline') {
+    if (generated.length && this.ai.name !== 'offline') {
       try {
         const r = await this.council.ask<{ ritira?: string[]; motivo?: string }>(
           'arbitro',
@@ -7435,8 +7435,8 @@ export class Kernel {
    * its own (a mirror), the one acting is `wanderer`. What a request to the Council commits there is the branch's.
    */
   async branchKernel(files: FileMap, wanderer: string): Promise<Kernel> {
-    const k = await Kernel.boot({ files, store: memoryStore(), models: this.models, wasmUri: this.wasmUri, mirror: true });
-    this.models.onCall = (r) => {
+    const k = await Kernel.boot({ files, store: memoryStore(), ai: this.ai, wasmUri: this.wasmUri, mirror: true });
+    this.ai.onCall = (r) => {
       this.usage.record(r);
       this.billCall(r);
     };

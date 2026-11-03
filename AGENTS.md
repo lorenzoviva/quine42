@@ -67,7 +67,7 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
 
 ## Stack
 
-- **Vite 7 + TypeScript 5** (strict), **Vitest 4** in Node con modelli offline (`MockModels`), **three.js** per il mondo e per le pagine out-game, DOM per HUD e pannelli; il sito in `site/`, senza framework, con `src/theme.css` (→ `#sito`).
+- **Vite 7 + TypeScript 5** (strict), **Vitest 4** in Node con modelli offline (`MockAiModels`), **three.js** per il mondo e per le pagine out-game, DOM per HUD e pannelli; il sito in `site/`, senza framework, con `src/theme.css` (→ `#sito`).
 - **Lua 5.4 via wasmoon**, sandbox del kernel: il confine è `Crossing` (`sandbox.ts`, ADR-0101), con limiti di istruzioni, memoria, stringhe e rete (ADR-0105; → `#lua-sandbox`).
 - **Google Gemini**: modelli, budget e opzioni in `universe/universe.json → ai`, prezzi in `src/kernel/ai/prices.ts`; l'Attore e i coefficienti di generazione (→ `#gemini`), la lobby (→ `#lobby`), la coda degli abbonamenti, solo in locale (→ `#abbonamenti`).
 - **Persistenza**: repository git dell'universo su disco tramite il server; saldi e pagamenti fuori, in `universes/.saldi/`; senza server `localStorage` + IndexedDB (→ `#stack`).
@@ -93,7 +93,7 @@ ostacoli procedurali. URL: `?skip` salta intro e Genesi; `?dev&teleport=46,0` po
 universo di `universes/` (quello che può leggere e scrivere lo decide il server); in sviluppo `?viandante=<id>` sceglie il viandante della scheda in multigiocatore (due schede, due viandanti).
 Graphify (facoltativo, ADR-0045): `pip install graphifyy` in un ambiente a parte, poi `GRAPHIFY_BACKEND=none graphify update .`
 (solo codice, offline, ~12 s; `graphify-out/` è ignorato da git; niente skill, MCP né hook).
-In console del browser: `window.quine` (o `window.rune`) è il kernel (`.feed()`, `.models.usage`, `.content`).
+In console del browser: `window.quine` (o `window.rune`) è il kernel (`.feed()`, `.ai.usage`, `.content`).
 
 ## Struttura
 
@@ -151,7 +151,7 @@ src/
                         (bench.ts: anche il banco di prova, T27b: casi, scena, nomi dei campi)
     credits.ts          la commissione di piattaforma (+1%, P#1) e la divisione delle spese comuni (ADR-0081)
     ai/                 models.ts, gemini.ts, mock.ts, prices.ts (prezzi, con la data), usage.ts (registro dei consumi),
-                        subscription.ts (la tabella dei provider, RoutedModels, QueueModels: i compiti lenti sugli abbonamenti, ADR-0077)
+                        subscription.ts (la tabella dei provider, RoutedAiModels, QueueAiModels: i compiti lenti sugli abbonamenti, ADR-0077)
     agents/             council.ts, cartography.ts, forge.ts, genesis.ts, minds.ts, content.ts, sculptor.ts, effects.ts, mechanics.ts
     ecs.ts, sandbox.ts, prelude.lua, validator.ts, runes.ts, repo.ts, universe.ts,
     inventory.ts, bundle.ts, faults.ts, events.ts, input.ts, rng.ts, types.ts
@@ -304,6 +304,6 @@ La procedura, con gli snippet per spostarsi nelle stanze, è in [`docs/architett
 - **Un nome per ogni concetto** (ADR-0117): [`docs/glossario.md`](docs/glossario.md) dice per ogni concetto il nome italiano, quello inglese del codice, i sinonimi da non usare e ciò che è fermo. Un identificatore italiano non è un'eccezione: si rinomina (le righe R del glossario; le eccezioni dette da ADR-0117 sono tolte). Un concetto nuovo ha una voce lì nello stesso commit. Ciò che è su disco, sul filo o visibile a Lua (campi JSON, messaggi del protocollo, API Lua, effetti) non si rinomina senza una migrazione; gli ADR non si riscrivono.
 - File in LF (`.gitattributes`). Su Windows niente `Get-Content`/`Set-Content` di PowerShell 5.1 sui sorgenti.
 - Nuova API per Lua: `Host` + `prelude.lua` + `LUA_API` nel validatore + prompt dell'Ingegnere + questo file.
-- Nuovo compito per un agente: schema Gemini + risposta in `MockModels` + voce nel registro.
+- Nuovo compito per un agente: schema Gemini + risposta in `MockAiModels` + voce nel registro.
 - Prima di consegnare: `npm test` e `npm run typecheck` verdi.
 - Un sottosistema nuovo o cambiato si descrive in `docs/architettura-dettagli.md`; qui una riga nell'indice (ADR-0120).

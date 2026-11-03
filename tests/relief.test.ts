@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { chunkLevels, LEVEL, mend, Relief, RELIEF_PATH, SEA_SHARE, waterLevels, worldLevels, type WaterChunk } from '../src/kernel/relief';
 
 // The real program every time: this file proves what the memo of the tests (tests/setup/relief-memo.ts) takes for granted.
@@ -207,7 +207,7 @@ describe('flat lots', () => {
 
 describe('the kernel on the relief', () => {
   it('stands on the ground of the universe’s relief, and falls back to Hills if the program is broken', async () => {
-    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
+    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
     const r = new Relief(k.config.seed);
     // Far from the loaded chunks there is no water: the ground is the relief, never below the sea.
     const ground = (x: number, y: number) => Math.max(r.sea, r.level(x, y)) * LEVEL;
@@ -233,7 +233,7 @@ describe('the kernel on the relief', () => {
 
   it('takes the sea from universe.json, and keeps a body of water at one level across the loaded places', async () => {
     const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...JSON.parse(bundledFiles['universe.json']), rilievo: { mare: 3 } }) };
-    const k = await Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+    const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
     expect(k.seaLevel).toBe(3);
     expect(k.groundAt(1000.5, 0.5)).toBeGreaterThanOrEqual(3 * LEVEL);
     const S = k.config.chunkSize;
@@ -277,7 +277,7 @@ describe('the kernel on the relief', () => {
   }, 30_000);
 
   it('lays the lots of the planned places flat, their structures on them, the land around still climbable', async () => {
-    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
+    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
     for (let i = 0; i < 80; i++) {
       k.tick(1 / 60);
       await new Promise((r) => setTimeout(r, 25));

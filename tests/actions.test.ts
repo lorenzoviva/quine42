@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { checkAction } from '../src/kernel/agents/sculptor';
 import { classOf } from '../src/mj/classes';
 import type { FormComp } from '../src/kernel/forms';
@@ -14,7 +14,7 @@ const BARREL = bundledFiles['models/barile.xml'];
 const mobile = classOf('mobile')!;
 
 async function boot() {
-  const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
+  const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
   k.tick(1 / 60);
   return k;
 }
@@ -61,10 +61,10 @@ describe('actions as rules on the model', () => {
     // Every sideboard has it in its menu, and it runs without asking anyone.
     const b = await spawn(k, 'obj.credenza', 'test#credenza-b');
     expect(k.actionsFor(b).some((o) => o.id === 'modello:scheggio-la-credenza')).toBe(true);
-    const calls = k.models.usage.text;
+    const calls = k.ai.usage.text;
     await k.freeAction(b, 'Scheggio la credenza');
     expect((k.ecs.get(b, 'form') as FormComp).done).toEqual(['scheggio-la-credenza']);
-    expect(k.models.usage.text).toBe(calls);
+    expect(k.ai.usage.text).toBe(calls);
   });
 
   it('a thing wearing the generic model of its class is not reshaped: many kinds share that program', async () => {

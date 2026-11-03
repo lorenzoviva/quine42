@@ -12,7 +12,7 @@ import { ledgerOf } from '../../server/ledger';
 import { universeStore } from '../../server/universeStore';
 import { walletRoute } from '../../server/wallet';
 import { wandererRoute } from '../../server/wanderer';
-import { MockModels } from '../../src/kernel/ai/mock';
+import { MockAiModels } from '../../src/kernel/ai/mock';
 import { bundledFiles } from '../../src/kernel/bundle';
 import { Kernel } from '../../src/kernel/kernel';
 import { memoryStore } from '../../src/kernel/repo';
@@ -353,7 +353,7 @@ describe('V-006 la sessione', () => {
   async function world(opts: ConstructorParameters<typeof SessionServer>[1] = {}) {
     const cfg = JSON.parse(bundledFiles['universe.json']);
     const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
-    const kernel = await Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+    const kernel = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
     return { kernel, server: new SessionServer(kernel, opts) };
   }
 
@@ -386,20 +386,20 @@ describe('V-006 la sessione', () => {
 
   it('V-006 il tetto resta entro il saldo: nessuno alza i budget del mondo dicendolo', async () => {
     const { kernel, server } = await world();
-    const before = kernel.models.limits!.text;
+    const before = kernel.ai.limits!.text;
     client(server, { id: 'carlo', tetto: 1e9 });
     expect(kernel.sessionTettoOf('carlo')).toBe(0);
-    expect(kernel.models.limits!.text).toBe(before);
+    expect(kernel.ai.limits!.text).toBe(before);
   });
 
   it('V-006 rientrare non aggiunge di nuovo lo stesso budget', async () => {
     const { kernel } = await world();
-    const before = kernel.models.limits!.text;
+    const before = kernel.ai.limits!.text;
     kernel.setSessionTetto('carlo', 1);
-    const once = kernel.models.limits!.text;
+    const once = kernel.ai.limits!.text;
     expect(once).toBeGreaterThan(before);
     kernel.setSessionTetto('carlo', 1);
-    expect(kernel.models.limits!.text).toBe(once);
+    expect(kernel.ai.limits!.text).toBe(once);
   });
 
   it('V-001 nessun messaggio del protocollo fa scrivere codice a un non master', async () => {

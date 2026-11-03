@@ -10,7 +10,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import type { Models, TextCall } from '../../src/kernel/ai/models';
+import type { AiModels, TextCall } from '../../src/kernel/ai/models';
 import { emptyUsage } from '../../src/kernel/ai/models';
 import { costOf, usd } from '../../src/kernel/ai/prices';
 import { DEFAULT_RENDER, render, sheet, type Picture } from '../../src/mj/photo';
@@ -49,7 +49,7 @@ interface Call {
 }
 
 /** One request per call; the usage of each answer goes into `log`. */
-class Direct implements Models {
+class Direct implements AiModels {
   readonly name = 'gemini';
   readonly usage = emptyUsage();
   limits = { text: 1e9 };

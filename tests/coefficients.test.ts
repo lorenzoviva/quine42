@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import type { TextCall } from '../src/kernel/ai/models';
 import { readConfig } from '../src/kernel/universe';
 import { CENSUS, COEFFICIENT_KEYS, FULL_DETAIL, hourlyEstimate, LOW_DETAIL, modelGap, onBeat, repairCoefficients, sculptPlan, stretch } from '../src/kernel/coefficients';
@@ -13,7 +13,7 @@ const DT = 1 / 60;
 const settle = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** The local models, counting the calls of every task; named as if they were online, so the world grows by itself. */
-class Counting extends MockModels {
+class Counting extends MockAiModels {
   calls = new Map<string, number>();
   constructor() {
     super();
@@ -32,7 +32,7 @@ async function bootWith(ai: Record<string, unknown>): Promise<{ k: Kernel; model
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, ai: { ...cfg.ai, maxPacks: 99, maxCast: 99, maxForges: 99, ...ai } }, null, 2) };
   const models = new Counting();
-  return { k: await Kernel.boot({ files, store: memoryStore(), models }), models };
+  return { k: await Kernel.boot({ files, store: memoryStore(), ai: models }), models };
 }
 
 async function develop(k: Kernel) {

@@ -48,7 +48,7 @@ export class ModelDirector {
   }
 
   get active(): boolean {
-    return this.k.models.name !== 'offline' && !this.stopped;
+    return this.k.ai.name !== 'offline' && !this.stopped;
   }
 
   /** What is missing, in the order it matters: people and things first, then items' shapes, then terrains. */

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { fakeLink } from '../src/session/protocol';
 import { SessionServer } from '../src/session/server';
 import { SessionClient } from '../src/session/client';
@@ -17,7 +17,7 @@ const DT = 1 / 60;
 async function bootMany(): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
-  return Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+  return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
 async function thin(server: SessionServer, id: string, profilo?: Partial<Profile>): Promise<ThinClient> {
@@ -25,7 +25,7 @@ async function thin(server: SessionServer, id: string, profilo?: Partial<Profile
   server.connect(s);
   const session = new SessionClient(c, { id, profilo });
   await session.ready;
-  const k = await Kernel.boot({ files: session.files, store: memoryStore(), models: new MockModels(), mirror: true });
+  const k = await Kernel.boot({ files: session.files, store: memoryStore(), ai: new MockAiModels(), mirror: true });
   return new ThinClient(k, session);
 }
 
@@ -142,12 +142,12 @@ describe('the profile in a game of many (T44a)', () => {
   });
 
   it('alone, the kernel keeps the profile of `io` with the state of play', async () => {
-    const k = await Kernel.boot({ files: { ...bundledFiles }, store: memoryStore(), models: new MockModels() });
+    const k = await Kernel.boot({ files: { ...bundledFiles }, store: memoryStore(), ai: new MockAiModels() });
     const r = k.setProfile('io', { nome: 'Ilaria', seme: 2, tinta: '#3060c0' })!;
     expect(r.profilo.nome).toBe('Ilaria');
     expect(k.ecs.get(k.playerId, 'form')).toMatchObject({ seed: 2, tint: '#3060c0' });
     k.saveState();
-    const again = await Kernel.boot({ files: { ...k.files }, store: memoryStore(), models: new MockModels() });
+    const again = await Kernel.boot({ files: { ...k.files }, store: memoryStore(), ai: new MockAiModels() });
     expect(again.wanderer().nome).toBe('Ilaria');
     expect(again.ecs.get(again.playerId, 'form')).toMatchObject({ seed: 2, tint: '#3060c0' });
   });

@@ -20,7 +20,7 @@ const opt = (n: string) => (argv.includes(`--${n}`) ? argv[argv.indexOf(`--${n}`
 const root = path.resolve(opt('root') ?? (fs.existsSync('.env') ? '.' : '../../..'));
 const key = readKey(root);
 const models = direct('gemini-3.1-flash-lite', key, new UsageLedger(), { max: Number(opt('max') ?? 16) });
-const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models });
+const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: models });
 k.council.onFeed = (e) => console.log(`  [${e.from}${e.to ? ` → ${e.to}` : ''}] ${e.kind}: ${e.text.slice(0, 160)}`);
 const out = path.resolve('lab/out/sculpt-game');
 fs.mkdirSync(out, { recursive: true });

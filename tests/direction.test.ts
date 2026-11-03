@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { writePlots, PLOTS_FILE, type Plot } from '../src/kernel/plots';
 import type { FileMap } from '../src/kernel/types';
 
@@ -51,7 +51,7 @@ function files(): FileMap {
   };
 }
 
-const boot = (f: FileMap = bundledFiles) => Kernel.boot({ files: f, store: memoryStore(), models: new MockModels() });
+const boot = (f: FileMap = bundledFiles) => Kernel.boot({ files: f, store: memoryStore(), ai: new MockAiModels() });
 
 function stand(k: Kernel, x: number, y: number): void {
   Object.assign(k.playerPos(), { x, y });

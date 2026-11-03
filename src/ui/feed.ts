@@ -3,7 +3,7 @@
 import { AGENTS, type FeedEntry } from '../kernel/agents/council';
 import type { Kernel } from '../kernel/kernel';
 import { tallyLine, usd } from '../kernel/ai/usage';
-import { describeQueue, describeQueueDetails, describeSubscriptions, QueueModels, RoutedModels } from '../kernel/ai/subscription';
+import { describeQueue, describeQueueDetails, describeSubscriptions, QueueAiModels, RoutedAiModels } from '../kernel/ai/subscription';
 import { el } from './dom';
 
 const VERBS: Record<string, string> = {
@@ -51,13 +51,13 @@ export class FeedPanel {
       this.cost.title = [`Sessione: ${tallyLine(k.usage.session)}`, ...Object.entries(day.byModel).map(([m, t]) => `${m} (oggi): ${tallyLine(t)}`)].join('\n');
     };
     const showSubs = async () => {
-      if (k.models instanceof RoutedModels) {
+      if (k.ai instanceof RoutedAiModels) {
         this.subs.hidden = false;
-        const firstQueue = Object.values(k.models.queues)[0] as QueueModels | undefined;
-        const state = await QueueModels.queryState(firstQueue?.endpoint, firstQueue?.fetchImpl);
-        this.subs.textContent = `${describeSubscriptions(k.models.table)} · ${describeQueue(state)}`;
+        const firstQueue = Object.values(k.ai.queues)[0] as QueueAiModels | undefined;
+        const state = await QueueAiModels.queryState(firstQueue?.endpoint, firstQueue?.fetchImpl);
+        this.subs.textContent = `${describeSubscriptions(k.ai.table)} · ${describeQueue(state)}`;
         const details = describeQueueDetails(state);
-        this.subs.title = [describeSubscriptions(k.models.table), details].filter(Boolean).join('\n');
+        this.subs.title = [describeSubscriptions(k.ai.table), details].filter(Boolean).join('\n');
       } else {
         this.subs.hidden = true;
       }
@@ -68,7 +68,7 @@ export class FeedPanel {
     });
     showCost();
     void showSubs();
-    if (k.models instanceof RoutedModels) {
+    if (k.ai instanceof RoutedAiModels) {
       this.pollTimer = setInterval(() => void showSubs(), 3000);
     }
     k.bus.on('council', (e: FeedEntry) => {

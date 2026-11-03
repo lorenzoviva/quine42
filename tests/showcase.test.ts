@@ -5,10 +5,10 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { PRINTER, SHOWCASES, type StudioItem } from '../src/kernel/corona';
 
-const boot = () => Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
+const boot = () => Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
 
 /** Puts the wanderer in the studio at a real-space point. */
 function stand(k: Kernel, x: number, y: number): void {
@@ -135,7 +135,7 @@ describe('the screen of the Tower of Magic (T22)', () => {
       { nome: 'Mara', specie: 'persona', genere: 'femmina', tipo: 'npc.villager', mestiere: 'fornaia', famiglia: [{ nome: 'Teo', legame: 'madre' }], routine, storia: 'Ha aperto il forno del borgo.', origine: '0,0#3', aspetto: 'grembiule infarinato' },
       { nome: 'Teo', specie: 'persona', genere: 'maschio', tipo: 'npc.villager', mestiere: 'garzone', famiglia: [{ nome: 'Mara', legame: 'figlio' }], routine },
     ];
-    const k = await Kernel.boot({ files: { ...bundledFiles, 'world/people.json': JSON.stringify({ persone, attesi: [] }) }, store: memoryStore(), models: new MockModels() });
+    const k = await Kernel.boot({ files: { ...bundledFiles, 'world/people.json': JSON.stringify({ persone, attesi: [] }) }, store: memoryStore(), ai: new MockAiModels() });
     const all = k.showcaseEntries('persone');
     const at = all.findIndex((e) => e.id === 'module:npc.villager');
     expect(all.slice(at + 1, at + 3).map((e) => e.id)).toEqual(['person:Mara', 'person:Teo']);

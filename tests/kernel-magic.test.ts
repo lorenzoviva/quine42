@@ -4,7 +4,7 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { countItem } from '../src/kernel/inventory';
 import { Council } from '../src/kernel/agents/council';
 import { nameSpell } from '../src/kernel/agents/effects';
-import type { Models } from '../src/kernel/ai/models';
+import type { AiModels } from '../src/kernel/ai/models';
 import { boot, clearArea, giveRunes } from './world';
 
 describe('a society', () => {
@@ -29,10 +29,10 @@ describe('a society', () => {
     expect(k.council.context('narratore')).toBeTruthy();
     // Met again (same origin), no new call: the same person.
     k.ecs.destroy(a);
-    const calls = k.models.usage.text;
+    const calls = k.ai.usage.text;
     const again = k.spawnModuleEntity(k.modules.get('npc.villager')!, pc.x + 1, pc.y, undefined, 'test#a');
     expect((await k.ensureIdentity(again))!.name).toBe(ia.name);
-    expect(k.models.usage.text).toBe(calls);
+    expect(k.ai.usage.text).toBe(calls);
     // Routines give them somewhere to go; relatives who meet greet each other.
     for (let i = 0; i < 70; i++) k.tick(1 / 60);
     expect(k.ecs.get(again, 'meta') ?? k.ecs.get(b, 'meta')).toBeTruthy();
@@ -106,15 +106,15 @@ describe('runes and magic', () => {
     // A new sequence: named once by the Council, then known.
     giveRunes(k, ['vita', 'scudo', 'vita', 'scudo']);
     k.hand().tokens = ['vita', 'scudo'];
-    const calls = k.models.usage.text;
+    const calls = k.ai.usage.text;
     expect(await k.castSpell()).toBe(true);
-    expect(k.models.usage.text).toBe(calls + 1);
+    expect(k.ai.usage.text).toBe(calls + 1);
     expect(k.content.spells['vita scudo']).toBeTruthy();
     expect(k.repo.head().message).toMatch(/incantesimo: vita scudo/);
     expect(k.ecs.get(k.playerId, 'scudo')?.fino).toBeGreaterThan(k.time);
     k.hand().tokens = ['vita', 'scudo'];
     await k.castSpell();
-    expect(k.models.usage.text).toBe(calls + 1);
+    expect(k.ai.usage.text).toBe(calls + 1);
     // Spent: no runes left, nothing to cast.
     k.hand().tokens = ['vita', 'scudo'];
     expect(await k.castSpell()).toBe(false);
@@ -163,7 +163,7 @@ describe('runes and magic', () => {
 
   it('the Narrator learns how runes compose and which reorderings already exist (T57a)', async () => {
     const asked: string[] = [];
-    const models = { text: async (r: { prompt: string }) => (asked.push(r.prompt), JSON.stringify({ nome: 'Frana', descrizione: 'x', costo: 10, effetti: [] })) } as unknown as Models;
+    const models = { text: async (r: { prompt: string }) => (asked.push(r.prompt), JSON.stringify({ nome: 'Frana', descrizione: 'x', costo: 10, effetti: [] })) } as unknown as AiModels;
     const c = new Council(models, () => ({ files: bundledFiles, palette: {}, catalog: [] }));
     const runes = (seq: string[]) => seq.map((t) => ({ token: t, name: t, element: t, description: t }));
     await nameSpell(c, runes(['fuoco', 'terra']), [{ sequence: 'terra fuoco', name: 'Palla di fuoco', description: 'boom' }], ['erba']);

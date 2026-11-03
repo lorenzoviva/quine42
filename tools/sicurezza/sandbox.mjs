@@ -30,8 +30,8 @@ async function bootKernel() {
   const { Kernel } = await load('/src/kernel/kernel.ts');
   const { bundledFiles } = await load('/src/kernel/bundle.ts');
   const { memoryStore } = await load('/src/kernel/repo.ts');
-  const { MockModels } = await load('/src/kernel/ai/mock.ts');
-  return Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
+  const { MockAiModels } = await load('/src/kernel/ai/mock.ts');
+  return Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
 }
 
 const faultOf = (kernel) => kernel.faults.list().find((f) => String(f.key).includes('prova'));

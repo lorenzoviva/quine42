@@ -6,12 +6,12 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { CHAIN, chainSlots, ROOM_W, WALL_Y } from '../src/kernel/corona';
 import { ChainMeter, chainOf, msText, WINDOW } from '../src/kernel/chain';
 import type { ModuleEntry } from '../src/kernel/types';
 
-const boot = () => Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
+const boot = () => Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
 
 /** A system that reads the entities with `prova` (or breaks, if asked). */
 function addProbe(k: Kernel, logic = 'local M = {}\nfunction M.update(dt)\n  ecs.each("prova", function(id, p) end)\nend\nreturn M\n'): void {

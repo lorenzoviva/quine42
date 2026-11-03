@@ -7,9 +7,9 @@ import { Kernel } from '../kernel/kernel';
 import { InlineRunner, type FormRequest, type FormResult, type FormRunner } from '../kernel/forms';
 import { bundledFiles } from '../kernel/bundle';
 import { memoryStore } from '../kernel/repo';
-import { MockModels } from '../kernel/ai/mock';
-import { GeminiModels } from '../kernel/ai/gemini';
-import type { Models } from '../kernel/ai/models';
+import { MockAiModels } from '../kernel/ai/mock';
+import { GeminiAiModels } from '../kernel/ai/gemini';
+import type { AiModels } from '../kernel/ai/models';
 import type { Ledger } from '../kernel/credits';
 import { readConfig } from '../kernel/universe';
 import { INTERNAL_HEADER, UniverseChunks, UniverseClient, upgradeFromSeed } from '../kernel/universes';
@@ -73,11 +73,11 @@ export async function openUniverse(opts: { name: string; base: string; offline?:
   const up = upgradeFromSeed(snap.files, bundledFiles);
   if (Object.keys(up.changes).length) await client.commit(up.changes, `aggiornamento dal kernel: ${up.updated.slice(0, 6).join(', ') || 'seme'}${up.updated.length > 6 ? '…' : ''}`, 'kernel');
   const ai = readConfig(up.files).config.ai;
-  const models: Models = !opts.offline && opts.gemini
-    ? new GeminiModels({ fetchImpl: opts.gemini, textModel: ai.textModel, limits: { text: ai.maxText }, thinking: ai.thinking, timeout: (ai.timeout ?? 120) * 1000 })
-    : new MockModels();
+  const models: AiModels = !opts.offline && opts.gemini
+    ? new GeminiAiModels({ fetchImpl: opts.gemini, textModel: ai.textModel, limits: { text: ai.maxText }, thinking: ai.thinking, timeout: (ai.timeout ?? 120) * 1000 })
+    : new MockAiModels();
   const runner = new TurnRunner();
-  const kernel = await Kernel.boot({ files: up.files, store: memoryStore(), models, forms: runner, chunks: new UniverseChunks(client), backend: client, past: snap.log ?? [], wasmUri: opts.wasmUri, ledger: opts.ledger, grantCap: opts.grantCap });
+  const kernel = await Kernel.boot({ files: up.files, store: memoryStore(), ai: models, forms: runner, chunks: new UniverseChunks(client), backend: client, past: snap.log ?? [], wasmUri: opts.wasmUri, ledger: opts.ledger, grantCap: opts.grantCap });
   const session = new SessionServer(kernel, { verify: opts.verify, masterUid: opts.masterUid });
   // The master's branch waits on disk while the server is down (T42b).
   const branch = await client.readBranch(BRANCH).catch(() => null);

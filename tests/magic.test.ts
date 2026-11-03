@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { canonWithRune, MAX_MAGIC_RUNES, NEW_RUNES_HEADING, validateNewRune } from '../src/kernel/magic';
 import { FUTHARK } from '../src/kernel/runes';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { countItem } from '../src/kernel/inventory';
 import { allCards } from '../src/kernel/cards';
 import { canonSummary } from '../src/kernel/agents/council';
@@ -13,8 +13,8 @@ import { memoryStore } from '../src/kernel/repo';
 
 // As in world.ts.
 const DT = 1 / 60;
-async function boot(models = new MockModels()) {
-  const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models });
+async function boot(models = new MockAiModels()) {
+  const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: models });
   for (let i = 0; i < 80; i++) {
     k.tick(DT);
     await new Promise((r) => setTimeout(r, 25));
@@ -134,7 +134,7 @@ describe('new magic runes (T57b)', () => {
   });
 
   it('a session of the Council and a formula can ask for one', async () => {
-    const models = new MockModels();
+    const models = new MockAiModels();
     const text = models.text.bind(models);
     models.text = async (call: TextCall) => {
       if (call.task === 'council.session') return JSON.stringify({ valutazione: 'manca il gelo', intervento: 'runa', richiesta: 'ghiaccio' });

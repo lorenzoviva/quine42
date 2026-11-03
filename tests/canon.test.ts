@@ -2,13 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { Council, canonSummary } from '../src/kernel/agents/council';
 import { bundledFiles } from '../src/kernel/bundle';
 import { upgradeFromSeed } from '../src/kernel/universes';
-import type { Models, TextCall } from '../src/kernel/ai/models';
+import type { AiModels, TextCall } from '../src/kernel/ai/models';
 import type { FileMap } from '../src/kernel/types';
 
 /** A Council whose model only records what it is asked. */
 function council(files: FileMap) {
   const asked: TextCall[] = [];
-  const models = { text: async (r: TextCall) => (asked.push(r), '{}') } as unknown as Models;
+  const models = { text: async (r: TextCall) => (asked.push(r), '{}') } as unknown as AiModels;
   return { c: new Council(models, () => ({ files, palette: {}, catalog: [] })), asked };
 }
 

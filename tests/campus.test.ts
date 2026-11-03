@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { footBlocks } from '../src/kernel/forms';
 import { compileMjx } from '../src/mj/model';
 import { clipFrames } from '../src/mj/run';
@@ -28,7 +28,7 @@ function withModel(id: string, vpt?: number) {
   return { ...files, 'models/index.json': JSON.stringify(index), [`models/${id}.xml`]: BUILDING };
 }
 
-const boot = (files: Record<string, string>) => Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+const boot = (files: Record<string, string>) => Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 
 describe('the density of a model', () => {
   it('is 20 voxels per tile unless the index says another one: collision, reach and floors follow it', async () => {

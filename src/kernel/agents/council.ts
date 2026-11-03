@@ -3,8 +3,8 @@
 // shared world knowledge it needs. They see each other's work and the Arbiter sends it back when
 // narrative, graphics, engine and physics disagree.
 
-import { parseJson, type Models, type Schema, type Thinking } from '../ai/models';
-import { MockModels } from '../ai/mock';
+import { parseJson, type AiModels, type Schema, type Thinking } from '../ai/models';
+import { MockAiModels } from '../ai/mock';
 import { COMUNE } from '../cards';
 import { COUNCIL_PRINCIPLES, lexiconWords } from '../fourthwall';
 import type { FileMap, MagicRune, Spell, TileDef } from '../types';
@@ -217,12 +217,12 @@ export class Council {
   payer?: (task: string) => string;
   /** Whether a wanderer has credits for online calls (T45a); when false, local models are used. */
   hasCredits?: (chi: string) => boolean;
-  localModels: Models = new MockModels();
+  localAiModels: AiModels = new MockAiModels();
   /** The nodes of the graph a prompt carried as its focus (the kernel counts the cards' uses, T36). */
   onFocus?: (ids: string[]) => void;
 
   constructor(
-    public models: Models,
+    public ai: AiModels,
     private view: () => WorldView,
   ) {}
 
@@ -341,7 +341,7 @@ export class Council {
     if (useLocal) {
       this.say('kernel', 'info', chi === COMUNE ? `Nessuno dei collegati ha crediti: la richiesta «${task}» viene gestita con i modelli locali.` : `I crediti di ${chi} sono esauriti: la richiesta «${task}» viene gestita con i modelli locali.`, undefined, task);
     }
-    const models = useLocal ? this.localModels : this.models;
+    const models = useLocal ? this.localAiModels : this.ai;
     return models.text({
       agent,
       task,

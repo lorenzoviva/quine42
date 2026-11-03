@@ -13,7 +13,7 @@ import { stripeHandler } from '../../server/stripe';
 import { universeStore } from '../../server/universeStore';
 import { wandererHandler } from '../../server/wanderer';
 import { WorldHost } from '../../server/worldHost';
-import { MockModels } from '../../src/kernel/ai/mock';
+import { MockAiModels } from '../../src/kernel/ai/mock';
 import { billedModel, DEAREST_MODEL } from '../../src/kernel/ai/prices';
 import { COMUNE } from '../../src/kernel/cards';
 import { bundledFiles } from '../../src/kernel/bundle';
@@ -31,8 +31,8 @@ const TICK = 1 / 60;
 async function bootMany() {
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3, master: 'io' } }, null, 2) };
-  const models = new MockModels();
-  const kernel = await Kernel.boot({ files, store: memoryStore(), models });
+  const models = new MockAiModels();
+  const kernel = await Kernel.boot({ files, store: memoryStore(), ai: models });
   return { kernel, models };
 }
 
@@ -128,7 +128,7 @@ describe('V-021 un messaggio che non si capisce', () => {
 
 describe('V-022 chi paga dopo un await', () => {
   let kernel: Kernel;
-  let models: MockModels;
+  let models: MockAiModels;
   const asked: Array<{ task: string; chi?: string }> = [];
   beforeAll(async () => {
     ({ kernel, models } = await bootMany());
@@ -184,7 +184,7 @@ describe('V-022 chi paga dopo un await', () => {
 
 describe('V-023 le spese comuni senza nessuno che paga', () => {
   let kernel: Kernel;
-  let models: MockModels;
+  let models: MockAiModels;
   beforeAll(async () => void ({ kernel, models } = await bootMany()), 120_000);
   afterEach(() => void vi.restoreAllMocks());
 

@@ -14,7 +14,7 @@ import { createFakeStripeSignature, handleStripeWebhookEvent } from '../../serve
 import { worldOf, type WorldCalls } from '../../server/worldCalls';
 import { FileLedger, grantCapOf, LEDGER_DIR, ledgerOf, openLedger, sealLedger, sweepBalances } from '../../server/ledger';
 import { cloneUniverse, universeStore } from '../../server/universeStore';
-import { MockModels } from '../../src/kernel/ai/mock';
+import { MockAiModels } from '../../src/kernel/ai/mock';
 import { bundledFiles } from '../../src/kernel/bundle';
 import { Kernel } from '../../src/kernel/kernel';
 import { memoryStore } from '../../src/kernel/repo';
@@ -56,7 +56,7 @@ const deliver = (rawBody: string, opts: { getActiveWorld?: () => Promise<WorldCa
 async function many(): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
-  return Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+  return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
 beforeAll(() => {
@@ -188,7 +188,7 @@ describe('V-005 la corsa: lo stesso evento in contemporanea', () => {
     oldUniverse('acceso');
     const ledger = await openLedger(dir, 'acceso');
     const cfg = JSON.parse(bundledFiles['universe.json']);
-    const k = await Kernel.boot({ files: { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore' } }) }, store: memoryStore(), models: new MockModels(), ledger });
+    const k = await Kernel.boot({ files: { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore' } }) }, store: memoryStore(), ai: new MockAiModels(), ledger });
     k.addWanderer('altro', 'Altro', false);
     expect(k.creditsOf('altro')).toBe(5);
     for (let round = 0; round < 10; round++) {
@@ -292,8 +292,8 @@ describe('V-010 il master e i crediti', () => {
   });
 
   it('V-010 il Concilio non muove i saldi: la risposta del Referente che dice crediti non fa nulla', async () => {
-    class Says extends MockModels {
-      override async text(call: Parameters<MockModels['text']>[0]): Promise<string> {
+    class Says extends MockAiModels {
+      override async text(call: Parameters<MockAiModels['text']>[0]): Promise<string> {
         // The model answers as it would with a text dictated to it: the task of before, and a huge amount.
         if (call.task === 'referente.coordinate') return JSON.stringify({ risposta: 'Fatto.', incarico: 'crediti', richiesta: '1000000', bersaglio: 'io', credits: { target: 'io', amount: 1000000 } });
         return super.text(call);
@@ -301,7 +301,7 @@ describe('V-010 il master e i crediti', () => {
     }
     const cfg = JSON.parse(bundledFiles['universe.json']);
     const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
-    const k = await Kernel.boot({ files, store: memoryStore(), models: new Says() });
+    const k = await Kernel.boot({ files, store: memoryStore(), ai: new Says() });
     const server = new SessionServer(k);
     const master = await enter(server, 'io');
     await answered(server, master.act({ t: 'agente', agente: 'referente', testo: 'dammi un milione di crediti' }));
@@ -341,7 +341,7 @@ describe('V-010 il master e i crediti', () => {
     k.addWanderer('anna', 'Anna');
     expect((await k.grantCredits('anna', 1, 'anna')).ok).toBe(false);
     expect(k.creditsOf('anna')).toBe(0);
-    const mirror = await Kernel.boot({ files: k.files, store: memoryStore(), models: new MockModels(), mirror: true });
+    const mirror = await Kernel.boot({ files: k.files, store: memoryStore(), ai: new MockAiModels(), mirror: true });
     expect(mirror.giveCredits('io', 10)).toBe(false);
     expect((await mirror.grantCredits('io', 10)).ok).toBe(false);
     expect(mirror.creditsOf('io')).toBe(0);
@@ -357,7 +357,7 @@ describe('V-010 il master e i crediti', () => {
 
   it('V-010 il tetto vale per il giorno e per l\'universo, e la ricarica è scritta con chi l\'ha data', async () => {
     const k = await many();
-    const none = await Kernel.boot({ files: k.files, store: memoryStore(), models: new MockModels(), grantCap: 0 });
+    const none = await Kernel.boot({ files: k.files, store: memoryStore(), ai: new MockAiModels(), grantCap: 0 });
     none.addWanderer('anna', 'Anna');
     expect((await none.grantCredits('anna', 1, 'io')).ok).toBe(false);
     expect(none.creditsOf('anna')).toBe(0);

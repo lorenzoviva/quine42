@@ -7,12 +7,12 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { DEVICE_MARGIN, LEGGIO_AT, SHOWCASE_AT } from '../src/kernel/corona';
 import { biblePages, touchingNodes, type BiblePage } from '../src/kernel/bible';
 import type { Bible } from '../src/kernel/agents/council';
 
-const boot = () => Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
+const boot = () => Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
 
 function stand(k: Kernel, x: number, y: number): void {
   Object.assign(k.playerPos(), { x, y });

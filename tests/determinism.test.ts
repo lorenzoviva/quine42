@@ -3,7 +3,7 @@ import { Kernel } from '../src/kernel/kernel';
 import { Sandbox } from '../src/kernel/sandbox';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import type { Action } from '../src/kernel/input';
 import type { FileMap } from '../src/kernel/types';
 import { fakeHost } from './helpers';
@@ -77,8 +77,8 @@ describe('shared seeds and determinism (T35)', () => {
 
   it('two kernels with the same universe and the same input reach the same state after N ticks', async () => {
     const files = { ...bundledFiles, ...DICE };
-    const a = await Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
-    const b = await Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+    const a = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
+    const b = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
     // The generation is asynchronous: both worlds are planned before they start to live.
     await develop(a);
     await develop(b);
@@ -98,8 +98,8 @@ describe('shared seeds and determinism (T35)', () => {
   it('the dice of a tick depend on the seed of the universe', async () => {
     const files = { ...bundledFiles, ...DICE };
     const other = { ...files, 'universe.json': JSON.stringify({ ...JSON.parse(files['universe.json']), seed: 12345 }) };
-    const a = await Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
-    const b = await Kernel.boot({ files: other, store: memoryStore(), models: new MockModels() });
+    const a = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
+    const b = await Kernel.boot({ files: other, store: memoryStore(), ai: new MockAiModels() });
     a.tick(1 / 60);
     b.tick(1 / 60);
     expect(a.ecs.get(a.playerId, 'dado')?.v).not.toBe(b.ecs.get(b.playerId, 'dado')?.v);

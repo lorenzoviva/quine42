@@ -6,7 +6,7 @@ import path from 'node:path';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { fakeLink } from '../src/session/protocol';
 import { playerChanges, SessionServer } from '../src/session/server';
 import { SessionClient } from '../src/session/client';
@@ -18,7 +18,7 @@ const DT = 1 / 60;
 async function bootMany(): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
-  return Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+  return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
 async function thin(server: SessionServer, id: string): Promise<ThinClient> {
@@ -26,7 +26,7 @@ async function thin(server: SessionServer, id: string): Promise<ThinClient> {
   server.connect(s);
   const session = new SessionClient(c, { id });
   await session.ready;
-  const k = await Kernel.boot({ files: session.files, store: memoryStore(), models: new MockModels(), mirror: true });
+  const k = await Kernel.boot({ files: session.files, store: memoryStore(), ai: new MockAiModels(), mirror: true });
   return new ThinClient(k, session);
 }
 

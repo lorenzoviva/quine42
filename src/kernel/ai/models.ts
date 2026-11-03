@@ -56,7 +56,7 @@ export interface Limits {
   text: number;
 }
 
-export interface Models {
+export interface AiModels {
   readonly name: string;
   readonly usage: Usage;
   limits: Limits;

@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel, JUMP_UP } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { bodyGround, InlineRunner, Forms, stepOf, type FormComp } from '../src/kernel/forms';
 
 // A box of voxels, bounds included.
@@ -76,7 +76,7 @@ describe('structures with more storeys', () => {
   }, 30_000);
 
   it('a tower of two storeys is walked from the door up to the roof, and under the floor above', async () => {
-    const k = await Kernel.boot({ files: files(), store: memoryStore(), models: new MockModels() });
+    const k = await Kernel.boot({ files: files(), store: memoryStore(), ai: new MockAiModels() });
     k.tick(1 / 60);
     const spot = flatSpot(k);
     expect(spot).toBeDefined();
@@ -143,7 +143,7 @@ describe('structures with more storeys', () => {
   }, 60_000);
 
   it('the kernel keeps every body on its floor (pos.z), and the floor above under whoever went up', async () => {
-    const k = await Kernel.boot({ files: files(), store: memoryStore(), models: new MockModels() });
+    const k = await Kernel.boot({ files: files(), store: memoryStore(), ai: new MockAiModels() });
     k.tick(1 / 60);
     const spot = flatSpot(k);
     const [cx, cy] = spot!;
@@ -165,7 +165,7 @@ describe('structures with more storeys', () => {
   }, 60_000);
 
   it('a jump inside the tower goes over a crate and lands on the floor it started from, below and above', async () => {
-    const k = await Kernel.boot({ files: files(), store: memoryStore(), models: new MockModels() });
+    const k = await Kernel.boot({ files: files(), store: memoryStore(), ai: new MockAiModels() });
     for (let i = 0; i < 120 && k.chunks.get('0,0')?.stage !== 'planned'; i++) {
       k.tick(1 / 60);
       await new Promise((r) => setTimeout(r, 25));

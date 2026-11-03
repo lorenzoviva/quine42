@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
-import { MockModels } from '../src/kernel/ai/mock';
+import { MockAiModels } from '../src/kernel/ai/mock';
 import { fakeLink, type ServerMsg } from '../src/session/protocol';
 import { SessionServer } from '../src/session/server';
 import { SessionClient } from '../src/session/client';
@@ -16,7 +16,7 @@ const DT = 1 / 60;
 async function bootMany(): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
-  return Kernel.boot({ files, store: memoryStore(), models: new MockModels() });
+  return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
 function join(server: SessionServer, id: string, nome?: string): { client: SessionClient; heard: ServerMsg[] } {
@@ -49,7 +49,7 @@ describe('the players from the corona (T42c)', () => {
     const anna = join(server, 'anna', 'Anna');
     const ben = join(server, 'ben', 'Ben');
     await Promise.all([master.client.ready, anna.client.ready, ben.client.ready]);
-    const mirror = await Kernel.boot({ files: master.client.files, store: memoryStore(), models: new MockModels(), mirror: true });
+    const mirror = await Kernel.boot({ files: master.client.files, store: memoryStore(), ai: new MockAiModels(), mirror: true });
     new ThinClient(mirror, master.client);
     const S = k.config.chunkSize;
     carry(k, 'anna', 5 * S + 3, -2 * S + 4);
@@ -81,7 +81,7 @@ describe('the players from the corona (T42c)', () => {
     const master = join(server, 'io');
     const anna = join(server, 'anna', 'Anna');
     await Promise.all([master.client.ready, anna.client.ready]);
-    const mirror = await Kernel.boot({ files: master.client.files, store: memoryStore(), models: new MockModels(), mirror: true });
+    const mirror = await Kernel.boot({ files: master.client.files, store: memoryStore(), ai: new MockAiModels(), mirror: true });
     const thin = new ThinClient(mirror, master.client);
     const S = k.config.chunkSize;
     carry(k, 'anna', 9 * S + 5, 4 * S + 5);
@@ -130,7 +130,7 @@ describe('the players from the corona (T42c)', () => {
     expect(await ask(master.client.act({ t: 'segui', id: 'io' }))).toMatchObject({ ok: false });
     expect(await ask(master.client.act({ t: 'segui', id: 'anna' }))).toMatchObject({ ok: true });
     // Alone, nobody: no list, no follow.
-    const alone = await Kernel.boot({ files: bundledFiles, store: memoryStore(), models: new MockModels() });
+    const alone = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
     expect(alone.players()).toEqual([]);
     expect(alone.follow).toBeUndefined();
     expect(alone.situation().ops.some((o) => o.kind === 'giocatore')).toBe(false);
