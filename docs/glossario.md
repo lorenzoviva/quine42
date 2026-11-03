@@ -321,6 +321,24 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Dove vive**: `src/mj/`, `src/kernel/mj.ts`
 - **Da non usare**: `codice` (è il Lua), `xml` (nei documenti)
 
+### Programma sonoro
+- **Inglese**: `SOUND_CLASS`, `soundPrograms`, `SoundSettings`, `soundSettings`
+- **Definizione**: un programma con `<sound>` sulla radice: la sua griglia si ascolta invece di guardarla; sta in `models/` con la classe `suono`.
+- **Dove vive**: `src/mj/sound.ts`, `universe/models/`
+- **Da non usare**: `preset` (per il programma nell'universo: i preset sono solo i quattro venuti dal SoundLab)
+
+### Partitura
+- **Inglese**: `Score`, `ScoreEvent`, `scoreOf`, `scoreOfProgram`
+- **Definizione**: gli eventi che una griglia sonora dice: X il tempo, Y la traccia, Z l'altezza, la lettera il tipo.
+- **Dove vive**: `src/mj/sound.ts`
+- **Da non usare**: `spartito`, `piano roll`
+
+### Sintetizzatore
+- **Inglese**: `renderScore`, `RenderedSound`, `renderSoundProgram`
+- **Definizione**: la funzione pura partitura + seme → campioni, l'unica fonte del suono del gioco.
+- **Dove vive**: `src/mj/synth.ts`
+- **Da non usare**: `SoundEngine` (il motore Web Audio del mockup)
+
 ### Forma
 - **Inglese**: `Form`, `FormResult`, `FormComp`, `FormView`, `FormRunner`
 - **Definizione**: ciò che esce da programma più seme più scatola: griglia, impronta, pavimenti, azioni.

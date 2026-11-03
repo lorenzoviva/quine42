@@ -18,11 +18,14 @@
 //   <animation name="fiamma" frames="6">…</animation>  nodes run once per frame on the finished model,
 //                                           each frame on the one before (flames, water, blinking)
 //   <action name="apri" label="Apri la porta">…</action>  nodes run on the model when someone acts on it
+//   <sound bpm scale root swing cutoff space><track y instrument volume/></sound>  the grid is a score (src/mj/sound.ts)
+//   <map … clear="False">                   the grid is scaled and kept (every cell a block of itself) before the rules write on it
 // Not supported (they need files, search or tiles): wfc, convchain, observe and field (inference),
 // rule files (fin, fout, file).
 
 import { Mj3Error, PARTS, SHAPES, type ConvRule, type Node3, type PaletteEntry, type Part, type Program3, type Rule3, type ShapeKind, type Sym, type Vec3 } from './engine';
 import { MJ_PALETTE } from './palette';
+import { soundSettings, type SoundSettings } from './sound';
 import { parseXml, XmlError, type XmlElement } from './xml';
 
 export interface MjxClip {
@@ -40,11 +43,15 @@ export interface MjxModel {
   actions: MjxClip[];
   /** The letter of the empty cell. */
   background: string;
+  /** What `<sound>` says: the program is a score. */
+  sound?: SoundSettings;
   warnings: string[];
 }
 
 const SYMMETRY: Record<string, Sym> = { '()': 'none', '(x)': 'x', '(y)': 'y', '(z)': 'z', '(xy)': 'xy', '(xyz+)': 'rot', '(xyz)': 'all' };
 const RULE_NODES = new Set(['one', 'all', 'prl']);
+/** Every node a program can use, as the XML names it. */
+export const MJX_NODES: readonly string[] = ['one', 'all', 'prl', 'sequence', 'markov', 'convolution', 'path', 'map', ...SHAPES];
 const UNSUPPORTED: Record<string, string> = {
   wfc: 'il WFC a tessere non serve più: il modello si genera intero',
   convchain: 'convchain non è supportato',
@@ -68,6 +75,7 @@ class Compiler {
   warnings: string[] = [];
   animations: MjxClip[] = [];
   actions: MjxClip[] = [];
+  sound?: SoundSettings;
   /**
    * Strict: MarkovJunior's own checks. Otherwise the shapes models get wrong and whose meaning is clear
    * are mended, with a warning (spaces or repeats in values, a letter used but not declared, an unknown
@@ -193,6 +201,10 @@ class Compiler {
         ...(/^true$/i.test(el.attrs.glow ?? '') ? { glow: true } : {}),
         ...(alpha !== undefined ? { alpha } : {}),
       };
+    } else if (el.name === 'sound') {
+      if (this.sound) this.fail(el, 'un solo <sound> per programma');
+      this.sound = soundSettings(el);
+      return;
     }
     for (const c of el.children) this.collect(c);
   }
@@ -251,14 +263,14 @@ class Compiler {
     for (const c of el.children) {
       if (c.name === 'rule') add(c, false);
       else if (UNSUPPORTED[c.name]) this.fail(c, UNSUPPORTED[c.name]);
-      else if (c.name !== 'union' && c.name !== 'color') this.fail(c, `dentro <${el.name}> vanno solo <rule>`);
+      else if (c.name !== 'union' && c.name !== 'color' && c.name !== 'sound') this.fail(c, `dentro <${el.name}> vanno solo <rule>`);
     }
     if (!out.length) this.fail(el, 'nessuna regola (in e out sul nodo, o figli <rule>)');
     return out;
   }
 
   node(el: XmlElement, ctx: Ctx): Node3 | null {
-    if (el.name === 'union' || el.name === 'color') return null;
+    if (el.name === 'union' || el.name === 'color' || el.name === 'sound') return null;
     if (UNSUPPORTED[el.name]) this.fail(el, UNSUPPORTED[el.name]);
     // A node meant only for 2D grids (MarkovJunior's d="2").
     if (el.attrs.d === '2') return null;
@@ -294,7 +306,7 @@ class Compiler {
     if (el.name === 'map') return this.map(el, ctx, sym);
     if ((SHAPES as readonly string[]).includes(el.name)) return this.shape(el, ctx);
     if (el.name === 'rule') this.fail(el, '<rule> va dentro one, all, prl, convolution o map');
-    this.fail(el, `nodo sconosciuto (noti: one all prl sequence markov convolution path map union color ${SHAPES.join(' ')} animation action)`);
+    this.fail(el, `nodo sconosciuto (noti: ${MJX_NODES.join(' ')} union color sound animation action)`);
   }
 
   convolution(el: XmlElement, ctx: Ctx): Node3 {
@@ -334,14 +346,16 @@ class Compiler {
     const scale = (el.attrs.scale ?? '').trim().split(/\s+/);
     if (scale.length !== 3 || scale.some((s) => !/^\d+$/.test(s))) this.fail(el, `scale vuole tre interi separati da spazi (le frazioni non sono supportate), non "${el.attrs.scale}"`);
     const values = this.values(el, el.attrs.values);
-    const inner: Ctx = { bg: values[0], sym, values: new Set(values) };
+    // Kept, the old letters are still in the grid.
+    const clear = !/^false$/i.test(el.attrs.clear ?? '');
+    const inner: Ctx = { bg: values[0], sym, values: new Set(clear ? values : [...ctx.values, ...values]) };
     const rules: Rule3[] = el.children
       .filter((c) => c.name === 'rule')
       .map((r) => {
         const p = this.num(r, r.attrs.p, 'p');
         return { in: this.pattern(r, r.attrs.in, ctx, 'in'), out: this.pattern(r, r.attrs.out, inner, 'out'), ...(p !== undefined ? { p } : {}) };
       });
-    const step: Node3 = { type: 'map', scale: scale.map(Number) as Vec3, rules, symmetry: sym, clear: true };
+    const step: Node3 = { type: 'map', scale: scale.map(Number) as Vec3, rules, symmetry: sym, clear };
     this.final = inner;
     const rest = this.children({ ...el, children: el.children.filter((c) => c.name !== 'rule') }, inner);
     return rest.length ? { type: 'sequence', children: [step, ...rest] } : step;
@@ -455,6 +469,7 @@ export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean } 
   const ground = root.attrs.ground;
   return {
     name: root.attrs.name,
+    ...(c.sound ? { sound: c.sound } : {}),
     background: values[0],
     warnings: c.warnings,
     animations: c.animations,

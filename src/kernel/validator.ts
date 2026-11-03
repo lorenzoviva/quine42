@@ -16,8 +16,10 @@ export { repairCoefficients, repairActor } from './coefficients';
 export { repairMinimums } from './universe';
 import { boxOf, classOf, CLASSES, sizeOf, SIZE_TIERS } from '../mj/classes';
 import { Mj3Error } from '../mj/engine';
-import { compileMjx } from '../mj/model';
+import { compileMjx, type MjxModel } from '../mj/model';
 import { FORM_LIMITS, MAX_FORM_TIME, MAX_FORM_XML, runMjx } from '../mj/run';
+import { scoreOf } from '../mj/sound';
+import { SOUND_LIMITS, SOUND_MAX_STEPS } from '../mj/synth';
 import { reservedName } from './paths';
 
 const KINDS: ModuleKind[] = ['system', 'entity', 'item', 'player', 'generator', 'data'];
@@ -65,6 +67,7 @@ export function modelErrors(path: string, xml: string, time = 8_000): string[] {
   try {
     const size = /<(?!!)[a-z]+\b[^>]*\ssize="/i.test(xml) ? undefined : boxOf(classOf('oggetto')!);
     const m = compileMjx(xml, size ? { size } : {});
+    if (m.sound) return soundErrors(path, m, time);
     const r = runMjx(m, 1, { deadline: time, limits: FORM_LIMITS });
     if (!r.finished) return [`${path}: il programma non finisce in ${Math.round(time / 1000)} secondi (ogni crescita deve avere steps; un programma lento scritto a mano può avere \`tempo\` in models/index.json)`];
     return analyse(r, m.program.palette, { grounded: true }).errors.map((e) => `${path}: ${e}`);
@@ -72,6 +75,14 @@ export function modelErrors(path: string, xml: string, time = 8_000): string[] {
     return [`${path}: ${e instanceof Mj3Error ? e.message : (e as Error).message}`];
   }
 }
+
+/** A sound program stands in no world: it must finish and leave something to hear (ADR-0123). */
+function soundErrors(path: string, m: MjxModel, time: number): string[] {
+  const r = runMjx(m, 1, { deadline: time, limits: SOUND_LIMITS, maxSteps: SOUND_MAX_STEPS });
+  if (!r.finished) return [`${path}: il programma non finisce (ogni crescita deve avere steps)`];
+  return scoreOf(r.grid, m.sound!).events.length ? [] : [`${path}: la partitura è vuota: nessuna lettera che suona (N S A G K H C) su una traccia di <sound>`];
+}
+
 const HEX_RE = /^#[0-9a-f]{6}$/i;
 
 /** The Lua API (prelude.lua): generated code may only call these. */
