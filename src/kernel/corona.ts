@@ -328,6 +328,26 @@ export const ROOM_W = 24;
 export const ROOM_H = 15;
 /** Interiors start here (real space); each building has its column, each storey its row. */
 export const INTERIOR_X = 30000;
+
+/**
+ * Whether the corona is drawn for a wanderer standing here (T226, ADR-0123): out of the carpet's circle or inside a
+ * room of the studio, and nowhere else. It asks where they stand and nothing more: no role, no camera, no past.
+ */
+export function coronaShown(x: number, y: number, radius: number): boolean {
+  return x >= INTERIOR_X - 10 || Math.hypot(x, y) >= radius;
+}
+
+/**
+ * From this fraction of the radius the ring is built and loaded, still out of sight (T226): at the wanderer's pace
+ * (6 tiles a second) what is left to the edge is about 4.9 s; the ring measured takes 3.3-4.5 s to be ready, models included.
+ * The carpet keeps whoever it holds within a tile of the centre, so they never pay for it.
+ */
+export const CORONA_READY_AT = 0.3;
+
+/** Whether the ring should be ready for a wanderer standing here: they are near the edge of the circle, or past it. */
+export function coronaNearby(x: number, y: number, radius: number): boolean {
+  return coronaShown(x, y, radius) || Math.hypot(x, y) >= radius * CORONA_READY_AT;
+}
 const BUILDING_STRIDE = 80;
 const STOREY_STRIDE = 40;
 const SHELF_ROWS = [3, 6, 9];

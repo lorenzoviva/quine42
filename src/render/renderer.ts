@@ -3,8 +3,8 @@
 //
 // Spaces (ADR-0004): the simulation — chunks, entities, runes — lives in carpet coordinates and is drawn
 // shifted by the carpet's offset; the wanderer, the corona and the studio are in real space. Kernel
-// (x, y) is three.js (x, z), one tile is one unit, y is up. Once the corona shows, nothing of the
-// simulation is drawn beyond the circle.
+// (x, y) is three.js (x, z), one tile is one unit, y is up. Once the corona shows (`kernel.coronaRevealed`: only out of
+// the circle or in the studio, ADR-0123), nothing of the simulation is drawn beyond the circle.
 
 import * as THREE from 'three';
 import type { Kernel } from '../kernel/kernel';
@@ -55,6 +55,13 @@ export class Renderer {
   private corona?: CoronaView;
   /** When to see again whether the geometries that nothing draws are too many. */
   private trimAt = 0;
+  /**
+   * One fog, always on (T226): in the corona and the studio it is only so far away that it does not show. Taking it off would
+   * change the program of every material, and the frame the edge is crossed would wait for them (5-7 programs, 170-290 ms).
+   */
+  private fog = new THREE.Fog(0, 1, 2);
+  /** Where the ring's meshes are drawn once before they are seen, so that they are on the GPU when the edge is crossed (T226). */
+  private loader = { target: new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType }), group: new THREE.Group() };
   private overlay: Overlay;
   private flash = new THREE.PointLight(0xfff2c0, 0, 8, 1.4);
   private flashUntil = 0;
@@ -86,7 +93,8 @@ export class Renderer {
       this.sun.shadow.intensity = SHADOW_INTENSITY;
       this.sun.shadow.radius = SHADOW_RADIUS;
     }
-    this.scene.add(this.hemi, this.sun, this.sun.target, this.world, this.flash);
+    this.scene.fog = this.fog;
+    this.scene.add(this.hemi, this.sun, this.sun.target, this.world, this.flash, this.loader.group);
     this.entities = new Entities(kernel, this.world);
     this.runes = new Runes(kernel, this.world);
     this.wanderer = new Wanderer(this.scene);
@@ -140,13 +148,16 @@ export class Renderer {
     this.fitView();
   }
 
-  /** Whether the camera has full orbit in all directions and far zoom (god mode or outside the simulation / in corona/studio). */
+  /**
+   * Whether the camera has full orbit and far zoom: god mode (the master has it), following a player, the corona, the
+   * studio. Inside the circle the base is the 3/4 view. This says nothing about what is drawn (ADR-0123): the corona
+   * depends on `kernel.coronaRevealed` alone, so an activity that one day asks for the orbit only needs a line here.
+   */
   canFreeOrbit(): boolean {
     if (this.godMode) return true;
     const k = this.kernel;
     if (k.watching) return true;
     if (k.zone === 'corona' || k.zone === 'studio') return true;
-    if (k.coronaRevealed()) return true;
     const p = k.wandererPos();
     if (p && Math.hypot(p.x, p.y) >= k.config.circleRadius) return true;
     return false;
@@ -208,7 +219,7 @@ export class Renderer {
   /** The height of the ground at a real-space point: the relief in the simulation, flat in the corona. */
   groundReal(x: number, y: number): number {
     const k = this.kernel;
-    if (!k.watching && (k.corona.isInterior(x) || (k.coronaRevealed() && Math.hypot(x, y) >= k.config.circleRadius))) return 0;
+    if (k.coronaRevealed() && (k.corona.isInterior(x) || Math.hypot(x, y) >= k.config.circleRadius)) return 0;
     const { ox, oy } = this.offset();
     return k.groundAt(x + ox, y + oy);
   }
@@ -237,7 +248,7 @@ export class Renderer {
     const watch = k.watched();
     const studio = !watch && k.zone === 'studio' ? k.corona.roomAt(p.x, p.y) : undefined;
     const interior = !watch && k.corona.isInterior(p.x);
-    const revealed = !watch && k.coronaRevealed();
+    const revealed = k.coronaRevealed();
     const { ox, oy } = this.offset();
 
     // The broken universe trembles; a faint crack right at the edge of the world, sometimes.
@@ -266,25 +277,28 @@ export class Renderer {
     if (watch) this.wanderer.hideShadow();
 
     // The corona and the studio.
-    if (this.corona) this.corona.root.visible = !watch;
-    if (!watch) this.corona?.update(this.t, studio, revealed, interior);
+    // Everything of it hangs from one group, shown by one decision: nothing of it is drawn inside the circle (ADR-0123).
+    if (this.corona) this.corona.root.visible = revealed;
+    if (!watch) this.corona?.update(this.t, studio, revealed, k.coronaNear(), interior);
 
     // Light: the day outside, a dim neon light in the studio.
     const day = k.daylight();
     const night = 1 - day;
-    if (!watch && (studio || k.zone === 'corona')) {
+    if (revealed) {
       // The studio and its campus have their own light, day and night: neon and screens.
       this.sun.intensity = studio ? (CARTOON ? CARTOON_STUDIO.sun : 0) : 0.8;
       this.hemi.intensity = studio ? (CARTOON ? CARTOON_STUDIO.hemi : 0.9) : 1.0;
       this.scene.background = studio ? SKY.studio : SKY.corona;
-      this.scene.fog = null;
+      this.fog.near = this.fog.far = 1e6;
     } else {
       this.sun.intensity = 2.3 * Math.min(1, day * 1.4);
       this.sun.color.setHSL(0.09, 0.6, 0.6 + 0.3 * day);
       this.hemi.intensity = 0.22 + 0.9 * Math.min(1, day * 1.3);
-      const bg = revealed && edge < 6 ? SKY.corona.clone() : day > 0.6 ? SKY.day.clone() : day > 0.3 ? SKY.dusk.clone().lerp(SKY.day, (day - 0.3) / 0.3) : SKY.night.clone().lerp(SKY.dusk, day / 0.3);
+      const bg = day > 0.6 ? SKY.day.clone() : day > 0.3 ? SKY.dusk.clone().lerp(SKY.day, (day - 0.3) / 0.3) : SKY.night.clone().lerp(SKY.dusk, day / 0.3);
       this.scene.background = bg;
-      this.scene.fog = new THREE.Fog(bg, this.distance * 2.2, this.distance * 4.5);
+      this.fog.color.copy(bg);
+      this.fog.near = this.distance * 2.2;
+      this.fog.far = this.distance * 4.5;
     }
     this.lights.update(k, studio ? 0 : night, { ox, oy }, this.t, watch ? { x: 0, y: 0 } : p);
     this.flash.intensity = this.flashUntil > this.t ? 6 * ((this.flashUntil - this.t) / 0.6) : 0;
@@ -323,12 +337,41 @@ export class Renderer {
     this.sun.position.copy(this.target).add(new THREE.Vector3(...SUN_FROM));
     this.sun.target.position.copy(this.target);
     this.bloom.render(dt);
+    if (!revealed) this.loadRing();
     this.drawOverlay(studio, revealed, interior, g);
     const clock = performance.now();
     if (clock >= this.trimAt) {
       this.trimAt = clock + 5_000;
       trimGeometries(this.scene, clock);
     }
+  }
+
+  /**
+   * What is still to load of the ring, a little each frame (T226). three.js loads geometries, textures and programs when
+   * it first draws them, and `visible = false` would leave all that to the frame the edge is crossed: so copies of its
+   * meshes are drawn here into a target of one pixel, with the scene's lights and fog, so the programs are the same.
+   */
+  private loadRing(): void {
+    const next = this.corona?.nextToLoad();
+    if (!next?.meshes.length) return;
+    const { target, group } = this.loader;
+    const worldShown = this.world.visible;
+    const updateShadows = this.gl.shadowMap.autoUpdate;
+    this.world.visible = false;
+    this.gl.shadowMap.autoUpdate = false;
+    this.gl.setRenderTarget(target);
+    const from = performance.now();
+    while (next.meshes.length && performance.now() - from < next.ms) {
+      const m = next.meshes.pop()!;
+      const copy = new THREE.Mesh(m.geometry, m.material);
+      copy.frustumCulled = false;
+      group.add(copy);
+      this.gl.render(this.scene, this.camera);
+      group.remove(copy);
+    }
+    this.gl.setRenderTarget(null);
+    this.gl.shadowMap.autoUpdate = updateShadows;
+    this.world.visible = worldShown;
   }
 
   /** Builds the chunks that are new or changed (a few per frame), drops the unloaded ones. */

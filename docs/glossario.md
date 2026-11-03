@@ -205,7 +205,7 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Fermo**: il binding `carpet` delle rune, `core.carpet`.
 
 ### Corona
-- **Inglese**: `corona`, `Corona`, `coronaRevealed`
+- **Inglese**: `corona`, `Corona`, `coronaRevealed`, `coronaShown`, `coronaNear`, `coronaNearby`
 - **Definizione**: ciò che sta attorno al cerchio, invisibile finché il tappeto tiene: il codice dell'universo come studio.
 - **Dove vive**: `src/kernel/corona.ts`, `src/render/corona3d.ts`
 - **Da non usare**: `crown`, `anello`
