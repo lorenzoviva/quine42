@@ -9,14 +9,14 @@ Aggiornato il 03/11/2026, epoca 224. Crediti: vedi `stato`.
 
 - T187 integrato (glossario, R1-R17 con i nomi esatti). T206 e T179 integrati: traccia nel base con l'ADR-0118, `banco-strutture --seconda --traccia` non provato con una chiamata vera.
 - **T180 integrato** (banco della varianza, solo `lab/`): 31 programmi su 31 statici; i sei vuoti del gioco per T156 sono nel suo esito; da decidere con T156 il tetto di 120 per Enorme e Gargantuesca. Soglia non provata su un edificio vero.
-- **Rinomine: R1-R7 integrate (T188-T194), T195 (R8) parte da solo.** `heap out of memory` nel log dei test a ogni rinomina (T188-T194), senza test falliti: da guardare a T205. Le dipendenze da T205 sui task approvati dall'autore restano.
-- Rimasti dopo R4, perché la riga non li nomina (a T205 vedere se proporre una riga nuova): `SessionClient.places`, `Client.places`, `ThinClient.places()`, `ShowcaseEntry.place`, `graphCache.places`, `PLACE_PHASES`, `PLACES_PER_MINUTE`, `Kernel.miniature`, `tests/places.test.ts`. Dopo R7 restano `tornio` e `plinto` (`stepTornio`, `openTornio`, `TORNIO_AT`, `CoronaView.tornio`, `Studio.tornio`, `Kernel.plinto()`, `updatePlinto`), aggiunti alla riga nel glossario: convivono con `lathe`.
+- **Rinomine: R1-R8 integrate (T188-T195), T196 (R9) parte da solo.** `heap out of memory` nel log dei test a ogni rinomina (T188-T194), senza test falliti: da guardare a T205. Le dipendenze da T205 sui task approvati dall'autore restano.
+- Rimasti dopo R4, perché la riga non li nomina (a T205 vedere se proporre una riga nuova): `SessionClient.places`, `Client.places`, `ThinClient.places()`, `ShowcaseEntry.place`, `graphCache.places`, `PLACE_PHASES`, `PLACES_PER_MINUTE`, `Kernel.miniature`, `tests/places.test.ts`. Dopo R7 restano `tornio` e `plinto` (`stepTornio`, `openTornio`, `TORNIO_AT`, `CoronaView.tornio`, `Studio.tornio`, `Kernel.plinto()`, `updatePlinto`), aggiunti alla riga nel glossario: convivono con `lathe`. Dopo R8 «ledger» resta in locali e commenti di consumi e carte, omonimo dei saldi.
 - ADR nuovi dallo **0121**.
 
 ## Pronti e priorità
 
-1. **T195** (R8), il prossimo della catena.
-2. **Catena delle rinomine** (l'autore: «i nomi vanno bene e fai tutte le rinomine»): T195-T203 → T204 (`AGENTS.md`) → T205 (prova nel browser), p2-20, ognuno dipende dal precedente. A ogni fine `traccia` e `integra`, una alla volta.
+1. **T196** (R9), il prossimo della catena.
+2. **Catena delle rinomine** (l'autore: «i nomi vanno bene e fai tutte le rinomine»): T196-T203 → T204 (`AGENTS.md`) → T205 (prova nel browser), p2-20, ognuno dipende dal precedente. A ogni fine `traccia` e `integra`, una alla volta.
 3. **T175 T106 T89a T183 T152 T186 T158, e T181**: approvati, con «dipende da T205» (l'autore: non c'è bisogno di toglierla). Partono da soli alla fine di T205.
 4. **T181 → T182 → T156** (strutture procedurali; T181 su Fable, stima 10 %, contatore Fable al 93 % fino al 05/11): alla fine di T181 leggere il contatore delle 5 ore e confrontarlo con `ratioSessioneSettimana`.
 4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T205 e T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla.
