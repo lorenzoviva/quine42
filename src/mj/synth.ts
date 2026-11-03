@@ -37,6 +37,8 @@ export interface RenderedSound {
   loopEnd: number;
   /** Something was left out to stay within the limits. */
   truncated: boolean;
+  /** The peak before scaling down to the ceiling: how far over it the program went. */
+  rawPeak: number;
 }
 
 export interface RenderOptions {
@@ -366,7 +368,7 @@ export function renderScore(score: Score, seed: number, opts: RenderOptions = {}
   const scale = peak > CEILING ? CEILING / peak : 1;
   const samples = new Float32Array(out.length);
   for (let i = 0; i < out.length; i++) samples[i] = out[i] * scale;
-  return { samples, sampleRate: rate, loopStart: passSamples * (passes - 1), loopEnd: passSamples * passes, truncated };
+  return { samples, sampleRate: rate, loopStart: passSamples * (passes - 1), loopEnd: passSamples * passes, truncated, rawPeak: peak };
 }
 
 /** XML + seed → the score. No clock here: a run that is too long stops at a number of steps, always the same one. Throws Mj3Error if the program is not valid. */
