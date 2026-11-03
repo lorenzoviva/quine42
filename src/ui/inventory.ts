@@ -289,7 +289,7 @@ export class InventoryPanel {
       el(
         'div',
         { class: 'window' },
-        el('div', { class: 'head' }, el('span', { class: 'title' }, 'Inventario'), tabs, el('span', { class: `weight${over ? ' over' : ''}` }, `peso ${Math.round(weight * 10) / 10} / ${Math.round(cap)}${over ? ' — appesantito' : ''}`), el('span', { class: 'hint' }, 'I / Tab per chiudere')),
+        el('div', { class: 'head' }, el('span', { class: 'title' }, 'Inventario'), tabs, el('span', { class: `weight${over ? ' over comic-badge' : ''}` }, `peso ${Math.round(weight * 10) / 10} / ${Math.round(cap)}${over ? ' — appesantito' : ''}`), el('span', { class: 'hint' }, 'I / Tab per chiudere')),
         el('div', { class: 'body' }, mine, side),
         el(
           'div',
