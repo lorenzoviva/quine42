@@ -25,7 +25,7 @@ Aggiornato il 03/11/2026, epoca 232. Crediti: vedi `stato`.
 ## Pronti e priorità
 
 1. **In coda, approvati e pronti, partono da soli:** T181 (in corso) T216 T89b T89c T89e T183 T152 T186 T158.
-4. **T181 → T182 → T156** (strutture procedurali; T181 su Fable, stima 10 %, contatore Fable al 93 % fino al 05/11): alla fine di T181 leggere il contatore delle 5 ore e confrontarlo con `ratioSessioneSettimana`.
+4. **T181 → T182 → T156** (strutture procedurali; T181 su Fable, stima 10 %, fermato dal limite delle 5 ore alle 11:15 UTC e ripreso da solo dopo le 14:31 UTC; contatore Fable al 73 % secondo `stato`, fino al 05/11): alla fine di T181 leggere il contatore delle 5 ore e confrontarlo con `ratioSessioneSettimana`.
 4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla.
 5. T89d resta bloccato.
 
