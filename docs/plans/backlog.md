@@ -3258,3 +3258,11 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 - Test: suite intera con il turno, `npm run build`, `npm run build:server`.
 - Browser: col turno `browser`, la procedura di «Convalida nel browser» di `AGENTS.md` (è anche la prova che sia ancora giusta con i nomi nuovi): `?skip&offline`, un luogo, «E» su un individuo, la corona con un dispositivo; due schede in multigiocatore (master e giocatore, un oggetto dato all'altro); le pagine del sito con «universo»; nessun errore in console.
 - Quando è fatto: commit su `task/T205`; nell'esito cosa è stato provato davvero e cosa no. Sicurezza: nessuna superficie nuova.
+
+### T208 · La pagina web conta male le domande aperte — `da fare`
+- Pipeline: claude · stima 1% · approvato · priorità 5
+- Contesto: richiesta dell'autore del 03/11 («un sacco di domande aperte che probabilmente non dovrebbero esserle»). `parseQuestionFile` (`tools/pipeline/web.mjs`) sbaglia in entrambi i versi. Dà «da rispondere» a file risolti, scritti in forma libera (T117, T155, T173, T45e, T97), e «risposto» a file con la risposta vuota (T45f, T93), perché in `Risposta:\s*\S` il `\s*` scavalca l'a capo e `\S` prende il `**` di `**Risposta:**` o il testo seguente. Il badge (riga ~1481) somma quei falsi.
+- Cosa fare: i file ora hanno in testa una riga `Stato: aperta` o `Stato: chiusa`, scritta dall'orchestratore: se c'è, decide lei. Senza quella riga vale il parser di oggi, corretto perché una risposta vuota sia vuota (mai oltre l'a capo, `**` non è una risposta). Il badge conta solo le aperte; l'elenco le mette per prime e nomina lo stato giusto. Di' in `docs/pipeline/README.md`, nelle regole sulle domande, che chi chiude una domanda aggiorna la riga. `POST /api/domande` non deve togliere la riga.
+- Test: casi in `tests/pipeline.test.ts` (riga aperta, riga chiusa, `**Risposta:**` vuoto, forma libera senza riga), poi la suite intera e il typecheck con i loro turni.
+- Browser: non serve; la pagina si legge dopo il prossimo riavvio del processo.
+- Quando è fatto: commit su `task/T208`, solo questo. Sicurezza: nessuna superficie nuova.
