@@ -12,9 +12,10 @@ import type { MeshData } from '../mj/mesh';
 /**
  * Version of the persistent cache: raising it throws away everything saved before. 2 (T163): the entries of version 1 may be
  * half models, and nothing in them says so. 3 (T164): the keys changed, the old ones would only take room. 4 (T175): every entry says when it
- * was last used and how much it weighs, and those saved before do not.
+ * was last used and how much it weighs, and those saved before do not. 5 (T212): grids and meshes in two stores; moving 1.8 GB across while the page
+ * waits would cost more than making them again, once.
  */
-export const FORMS_DB_VERSION = 4;
+export const FORMS_DB_VERSION = 5;
 
 /**
  * The most the page keeps ready beyond what it has drawn, and the most the persistent cache keeps, in bytes of arrays (ADR-0108, measures there).
@@ -51,6 +52,8 @@ export interface FormStore {
   get(key: string): Promise<FormResult | undefined>;
   set(key: string, res: FormResult): Promise<void>;
   clear(): Promise<void>;
+  /** The form without reading its meshes, for a store that keeps them apart: it says `meshesGone`, and `get` gives them. */
+  withoutMeshes?(key: string): Promise<FormResult | undefined>;
 }
 
 /**
@@ -103,6 +106,11 @@ export class MemoryFormStore implements FormStore {
   }
 }
 
+/**
+ * The meshes of a form, apart from the rest: the kernel wants the grid of every form it knows (1 % of the bytes) as soon as it loads, and the meshes
+ * are only of what is drawn (ADR-0108, T212).
+ */
+const MESHES = 'meshes';
 /** When an entry of the persistent cache was last used and how much it weighs: apart from the entry, so that neither means reading a form. */
 const USES = 'uses';
 interface FormUse {
@@ -113,6 +121,8 @@ interface FormUse {
 export class IdbFormStore implements FormStore {
   private dbPromise?: Promise<IDBDatabase | undefined>;
   private clock = 0;
+  /** The bytes of arrays read so far: what a load costs, for who measures it. */
+  bytesRead = 0;
 
   constructor(
     private dbName = 'rune-forms',
@@ -129,7 +139,7 @@ export class IdbFormStore implements FormStore {
         const req = indexedDB.open(this.dbName, FORMS_DB_VERSION);
         req.onupgradeneeded = () => {
           const db = req.result;
-          for (const name of [this.storeName, USES]) {
+          for (const name of [this.storeName, MESHES, USES]) {
             if (db.objectStoreNames.contains(name)) db.deleteObjectStore(name);
             db.createObjectStore(name);
           }
@@ -153,40 +163,64 @@ export class IdbFormStore implements FormStore {
     return (this.clock = Math.max(Date.now(), this.clock + 1));
   }
 
-  async get(key: string): Promise<FormResult | undefined> {
+  /** Either way it counts as a use: an entry whose grid every load asks for is not one to push out, whether or not its meshes are drawn. */
+  private async read(key: string, withMeshes: boolean): Promise<FormResult | undefined> {
     const db = await this.db();
     if (!db) return undefined;
     return new Promise((resolve) => {
       try {
-        const tx = db.transaction([this.storeName, USES], 'readwrite');
-        const req = tx.objectStore(this.storeName).get(key);
-        req.onsuccess = () => {
-          const res = req.result as FormResult | undefined;
-          if (res) tx.objectStore(USES).put({ at: this.now(), bytes: formBytes(res) } satisfies FormUse, key);
-          resolve(res ? restoreFormResult(res) : undefined);
+        const tx = db.transaction(withMeshes ? [this.storeName, MESHES, USES] : [this.storeName, USES], 'readwrite');
+        tx.onabort = () => resolve(undefined);
+        const entry = tx.objectStore(this.storeName).get(key);
+        const meshes = withMeshes ? tx.objectStore(MESHES).get(key) : undefined;
+        const use = tx.objectStore(USES).get(key);
+        // Requests answer in the order they were made: this is the last.
+        use.onsuccess = () => {
+          const res = entry.result as FormResult | undefined;
+          if (!res) return resolve(undefined);
+          const { meshesGone, ...rest } = res;
+          // An entry that says it has meshes and has none is a miss: the workers make them again.
+          if (meshes && meshesGone && !meshes.result) return resolve(undefined);
+          const whole: FormResult = meshes && meshesGone ? { ...rest, meshes: meshes.result as unknown } : res;
+          const bytes = (use.result as FormUse | undefined)?.bytes ?? formBytes(whole);
+          tx.objectStore(USES).put({ at: this.now(), bytes } satisfies FormUse, key);
+          this.bytesRead += formBytes(whole);
+          resolve(restoreFormResult(whole));
         };
-        req.onerror = () => resolve(undefined);
+        entry.onerror = use.onerror = () => resolve(undefined);
+        if (meshes) meshes.onerror = () => resolve(undefined);
       } catch {
         resolve(undefined);
       }
     });
   }
 
+  get(key: string): Promise<FormResult | undefined> {
+    return this.read(key, true);
+  }
+
+  withoutMeshes(key: string): Promise<FormResult | undefined> {
+    return this.read(key, false);
+  }
+
   async set(key: string, res: FormResult): Promise<void> {
     // Now, not after the wait for the database: by then the page may have let go of the meshes.
-    const whole = { ...res };
-    const bytes = formBytes(whole);
+    const { meshes: drawn, meshesGone: _gone, ...rest } = res;
+    const bytes = formBytes(res);
     // Bigger than the whole cache: it would only push out everything else.
     if (bytes > this.maxBytes) return;
     const db = await this.db();
     if (!db) return;
     return new Promise((resolve) => {
       try {
-        const tx = db.transaction([this.storeName, USES], 'readwrite');
+        const tx = db.transaction([this.storeName, MESHES, USES], 'readwrite');
         tx.oncomplete = tx.onabort = tx.onerror = () => resolve();
         const forms = tx.objectStore(this.storeName);
+        const meshes = tx.objectStore(MESHES);
         const uses = tx.objectStore(USES);
-        forms.put(whole, key);
+        forms.put(drawn ? { ...rest, meshesGone: true } : rest, key);
+        if (drawn) meshes.put(drawn, key);
+        else meshes.delete(key);
         uses.put({ at: this.now(), bytes } satisfies FormUse, key);
         // In this transaction: another tab may be writing, and what it wrote counts.
         const keys = uses.getAllKeys();
@@ -199,6 +233,7 @@ export class IdbFormStore implements FormStore {
             if (total <= this.maxBytes && left <= this.maxEntries) break;
             if (e.key === key) continue;
             forms.delete(e.key);
+            meshes.delete(e.key);
             uses.delete(e.key);
             total -= e.bytes;
             left--;
@@ -215,9 +250,10 @@ export class IdbFormStore implements FormStore {
     if (!db) return;
     return new Promise((resolve) => {
       try {
-        const tx = db.transaction([this.storeName, USES], 'readwrite');
+        const tx = db.transaction([this.storeName, MESHES, USES], 'readwrite');
         tx.oncomplete = tx.onabort = tx.onerror = () => resolve();
         tx.objectStore(this.storeName).clear();
+        tx.objectStore(MESHES).clear();
         tx.objectStore(USES).clear();
       } catch {
         resolve();
@@ -345,6 +381,16 @@ export class WorkerRunner implements FormRunner {
 
     this.inflight.set(key, promise);
     return promise;
+  }
+
+  /**
+   * What the kernel wants of a form, and the meshes only if they are here already: `Form.remake` asks for them when something draws it (ADR-0108, T212).
+   * Not kept in `memory`, which is the limit on meshes: the `Form` holds it.
+   */
+  withoutMeshes(req: FormRequest): Promise<FormResult> {
+    const key = formCacheKey(req);
+    if (!this.store.withoutMeshes || this.memory.has(key) || this.inflight.has(key)) return this.run(req);
+    return this.store.withoutMeshes(key).then((hit) => hit ?? this.run(req));
   }
 
   /** Only what has finished: a half model goes to who asked and stops there, as in InlineRunner (ADR-0108). */

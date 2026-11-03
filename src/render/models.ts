@@ -63,13 +63,24 @@ export function geoOf(f: Form): ModelGeo | undefined {
   }
   const m = f.result?.meshes as FormMeshes | undefined;
   if (!m) {
-    if (f.result?.meshesGone) f.remake?.();
+    // The geometry at once, on arrival: it has its own hold on the arrays, and the next form to arrive may push these out of the runner before anyone looks.
+    if (f.result?.meshesGone) f.remake?.(() => void geoOf(f));
     return undefined;
   }
   const g: ModelGeo = { body: geometry(m.body), limbs: m.limbs.map((l) => ({ part: l.part, joint: l.joint, phase: l.phase, geo: geometry(l.mesh) })), frames: m.frames.map(geometry), sway: !!m.body.sway };
   for (const b of geometries(g)) shared.add(b);
   cache.set(f.key, { geo: g, bytes: geometries(g).reduce((n, b) => n + geometryBytes(b), 0), used: clock() });
   return g;
+}
+
+/** For who asks once and does not come back at the next frame (an icon): waits while the meshes are on their way. */
+export async function geoWhenReady(f: Form): Promise<ModelGeo | undefined> {
+  for (let i = 0; i < 400; i++) {
+    const g = geoOf(f);
+    if (g || !f.result?.meshesGone || f.status !== 'ready') return g;
+    await new Promise((r) => setTimeout(r, 25));
+  }
+  return undefined;
 }
 
 /**

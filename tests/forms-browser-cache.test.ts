@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as THREE from 'three';
 import { Forms, type Form, type FormRequest, type FormResult } from '../src/kernel/forms';
 import { FORM_DISK_BYTES, FORMS_DB_VERSION, formBytes, formCacheKey, IdbFormStore, keepsFormsOnDisk, MemoryFormStore, WorkerRunner } from '../src/render/forms';
-import { geoOf, geometryCount, trimGeometries } from '../src/render/models';
+import { geoOf, geoWhenReady, geometryCount, trimGeometries } from '../src/render/models';
 import type { MeshData } from '../src/mj/mesh';
 import type { FormMeshes, WorkerAnswer } from '../src/render/worker';
 import { hashStr } from '../src/kernel/rng';
@@ -323,7 +323,9 @@ describe('the worker', () => {
 /** Just what IdbFormStore touches of IndexedDB: databases with a version, thrown away by nobody but the upgrade. */
 function fakeIndexedDB(blocked = false) {
   const dbs = new Map<string, { version: number; stores: Map<string, Map<string, unknown>> }>();
-  const open = (name: string, version: number) => {
+  /** Every read of an entry, as `store:key`. */
+  const reads: string[] = [];
+  const open =(name: string, version: number) => {
     const req: Record<string, any> = {};
     setTimeout(() => {
       if (blocked) return req.onblocked?.();
@@ -343,7 +345,7 @@ function fakeIndexedDB(blocked = false) {
                 return r;
               };
               return {
-                get: (k: string) => answer(d.stores.get(s)!.get(k)),
+                get: (k: string) => (reads.push(`${s}:${k}`), answer(d.stores.get(s)!.get(k))),
                 // What goes in is a copy made now, as structured clone does: later changes to the object do not reach it.
                 put: (v: unknown, k: string) => (d.stores.get(s)!.set(k, typeof v === 'object' ? { ...(v as object) } : v), answer()),
                 clear: () => (d.stores.get(s)!.clear(), answer()),
@@ -365,7 +367,7 @@ function fakeIndexedDB(blocked = false) {
     });
     return req;
   };
-  return { open, dbs };
+  return { open, dbs, reads };
 }
 
 describe('the persistent cache', () => {
@@ -414,9 +416,169 @@ describe('the persistent cache', () => {
     expect(reloaded?.grid.X).toBe(whole.grid.X);
   });
 
+  describe('grids and meshes apart (T212)', () => {
+    const settle = () => new Promise((r) => setTimeout(r, 15));
+    const open = () => {
+      const idb = fakeIndexedDB();
+      vi.stubGlobal('indexedDB', idb);
+      return { idb, store: new IdbFormStore('t212', 'forms', FORM_DISK_BYTES, 100) };
+    };
+    const meshReads = (reads: string[]) => reads.filter((r) => r.startsWith('meshes:'));
+
+    it('without the meshes reads no mesh, and says they are elsewhere', async () => {
+      const { idb, store } = open();
+      await store.set('a', drawn(100, 7));
+      const light = (await store.withoutMeshes('a'))!;
+      expect(light.grid.cells[0]).toBe(7);
+      expect(light.meshes).toBeUndefined();
+      expect(light.meshesGone).toBe(true);
+      expect(meshReads(idb.reads)).toEqual([]);
+      expect(store.bytesRead).toBe(1);
+
+      const whole = (await store.get('a'))!;
+      expect(whole.meshesGone).toBeUndefined();
+      expect(whole.meshes).toBeDefined();
+      expect(meshReads(idb.reads)).toEqual(['meshes:a']);
+      expect(store.bytesRead).toBe(1 + formBytes(whole));
+    });
+
+    it('a form that never had meshes does not ask for them', async () => {
+      const { store } = open();
+      await store.set('a', result());
+      const light = (await store.withoutMeshes('a'))!;
+      expect(light.meshesGone).toBeUndefined();
+      expect(await store.get('a')).toBeDefined();
+      expect(await store.withoutMeshes('nothing')).toBeUndefined();
+    });
+
+    it('a load reads only the meshes of what is drawn, 0 jobs, and a mesh arrives when asked for', async () => {
+      const { idb, store } = open();
+      const firstLoad = limited(1024 * 1024, 100, store);
+      const forms = new Forms(firstLoad.runner);
+      forms.load({ 'models/index.json': '{}', 'models/x.xml': PROGRAM });
+      // One at a time: in Node, with its only worker busy, the runner would run the second in this thread.
+      await forms.wait('x', 1);
+      await forms.wait('x', 2);
+      expect(firstLoad.jobs).toEqual([1, 2]);
+      await settle();
+      idb.reads.length = 0;
+
+      const again = limited(1024 * 1024, 100, new IdbFormStore('t212', 'forms', FORM_DISK_BYTES, 100));
+      const reload = new Forms(again.runner);
+      reload.load({ 'models/index.json': '{}', 'models/x.xml': PROGRAM });
+      const [drawnOne, leftAlone] = await Promise.all([reload.wait('x', 1), reload.wait('x', 2)]);
+      expect(drawnOne!.status).toBe('ready');
+      expect(leftAlone!.foot, 'the kernel has what it needs').toBeDefined();
+      expect(meshReads(idb.reads)).toEqual([]);
+
+      const version = reload.version;
+      expect(geoOf(drawnOne!), 'on its way, like one not ready').toBeUndefined();
+      await vi.waitFor(() => expect(drawnOne!.result!.meshes).toBeDefined());
+      expect(reload.version).toBe(version + 1);
+      expect(geoOf(drawnOne!)).toBeDefined();
+      expect(meshReads(idb.reads), 'the other stays on disk').toHaveLength(1);
+      expect(leftAlone!.result!.meshes).toBeUndefined();
+      expect(again.jobs).toEqual([]);
+    });
+
+    it('forms heavier together than the limit are each read once, however late who draws comes back', async () => {
+      const { idb, store } = open();
+      const firstLoad = limited(1024 * 1024, 100, store);
+      const before = new Forms(firstLoad.runner);
+      before.load({ 'models/index.json': '{}', 'models/x.xml': PROGRAM });
+      for (const seed of [11, 12, 13]) await before.wait('x', seed);
+      await settle();
+      idb.reads.length = 0;
+
+      // Room for one in the runner: each that arrives pushes out the one before.
+      const reload = new Forms(limited(150 * 1024, 100, store).runner);
+      reload.load({ 'models/index.json': '{}', 'models/x.xml': PROGRAM });
+      const all = await Promise.all([11, 12, 13].map((seed) => reload.wait('x', seed)));
+      for (const f of all) expect(geoOf(f!)).toBeUndefined();
+      await vi.waitFor(() => expect(meshReads(idb.reads)).toHaveLength(3));
+      await settle();
+      for (const f of all) expect(geoOf(f!), f!.key).toBeDefined();
+      await settle();
+      expect(meshReads(idb.reads), 'no second reading').toHaveLength(3);
+    });
+
+    it('whoever asks once waits for the meshes (the icons)', async () => {
+      const { store } = open();
+      const firstLoad = limited(1024 * 1024, 100, store);
+      const before = new Forms(firstLoad.runner);
+      before.load({ 'models/index.json': '{}', 'models/x.xml': PROGRAM });
+      await before.wait('x', 7);
+      await vi.waitFor(() => expect(firstLoad.jobs.length).toBe(1));
+      await settle();
+
+      const reload = new Forms(limited(1024 * 1024, 100, store).runner);
+      reload.load({ 'models/index.json': '{}', 'models/x.xml': PROGRAM });
+      const f = await reload.wait('x', 7);
+      expect(f!.result!.meshesGone).toBe(true);
+      expect(await geoWhenReady(f!)).toBeDefined();
+    });
+
+    it('a cache of version 4 is thrown away, with no error, and the form is made again', async () => {
+      const idb = fakeIndexedDB();
+      const key = formCacheKey(other(1));
+      const old = drawn(100, 9);
+      idb.dbs.set('rune-forms', { version: 4, stores: new Map([['forms', new Map<string, unknown>([[key, old]])], ['uses', new Map<string, unknown>([[key, { at: 1, bytes: formBytes(old) }]])]]) });
+      vi.stubGlobal('indexedDB', idb);
+      expect(FORMS_DB_VERSION).toBe(5);
+
+      const { runner, jobs } = limited(1024 * 1024, 100, new IdbFormStore());
+      const back = await runner.withoutMeshes(other(1));
+      expect(jobs, 'the old entry does not answer').toEqual([1]);
+      expect(back.grid.cells[0]).toBe(1);
+      expect(back.meshes).toBeDefined();
+      await settle();
+      const d = idb.dbs.get('rune-forms')!;
+      expect(d.version).toBe(5);
+      expect([...d.stores.keys()].sort()).toEqual(['forms', 'meshes', 'uses']);
+      expect(d.stores.get('forms')!.get(key)).not.toHaveProperty('meshes');
+      expect(d.stores.get('meshes')!.has(key)).toBe(true);
+    });
+
+    it('the limit is on the total: an entry goes with its meshes, and so does what was only read without them', async () => {
+      const KB = 1024;
+      const idb = fakeIndexedDB();
+      vi.stubGlobal('indexedDB', idb);
+      const store = new IdbFormStore('t212', 'forms', 350 * KB, 100);
+      for (const k of ['a', 'b', 'c']) await store.set(k, drawn(100));
+      expect(await store.withoutMeshes('a'), 'a read of the grid is a use').toBeDefined();
+      await store.set('d', drawn(100));
+      await settle();
+      const d = idb.dbs.get('t212')!;
+      for (const s of ['forms', 'meshes', 'uses']) expect([...d.stores.get(s)!.keys()].sort(), s).toEqual(['a', 'c', 'd']);
+      expect([...d.stores.get('uses')!.values()].reduce((n: number, u) => n + (u as { bytes: number }).bytes, 0)).toBeLessThanOrEqual(350 * KB);
+    });
+
+    it('an entry that lost its meshes is a miss for who wants them, and the workers make them', async () => {
+      const idb = fakeIndexedDB();
+      vi.stubGlobal('indexedDB', idb);
+      const store = new IdbFormStore();
+      const key = formCacheKey(other(1));
+      await store.set(key, drawn(100, 1));
+      await settle();
+      idb.dbs.get('rune-forms')!.stores.get('meshes')!.delete(key);
+      expect(await store.get(key)).toBeUndefined();
+      const { runner, jobs } = limited(1024 * 1024, 100, store);
+      expect((await runner.run(other(1))).meshes).toBeDefined();
+      expect(jobs).toEqual([1]);
+    });
+
+    it('clear takes the meshes away too', async () => {
+      const { idb, store } = open();
+      await store.set('a', drawn(100));
+      await store.clear();
+      await settle();
+      expect(idb.dbs.get('t212')!.stores.get('meshes')!.size).toBe(0);
+    });
+  });
+
   describe('the limit (T175)', () => {
     const KB = 1024;
-    const settle = () => new Promise((r) => setTimeout(r, 15));
+    const settle =() => new Promise((r) => setTimeout(r, 15));
     const open = (limit: number, entries = 100) => {
       vi.stubGlobal('indexedDB', fakeIndexedDB());
       return new IdbFormStore('t175', 'forms', limit, entries);

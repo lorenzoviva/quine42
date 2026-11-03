@@ -108,6 +108,8 @@ export interface FormResult {
 
 export interface FormRunner {
   run(req: FormRequest): Promise<FormResult>;
+  /** The same for who only needs the grid: the meshes may be left where they are (`meshesGone`); a runner without it gives everything. */
+  withoutMeshes?(req: FormRequest): Promise<FormResult>;
 }
 
 export interface Form {
@@ -137,8 +139,11 @@ export interface Form {
   reach: number;
   /** Voxels per tile of this model (ADR-0049). */
   vpt: number;
-  /** Asks the runner again for the meshes it let go of (`FormResult.meshesGone`); whoever draws calls it, as often as it likes. */
-  remake?: () => void;
+  /**
+   * Asks the runner again for the meshes it let go of (`FormResult.meshesGone`); whoever draws calls it, as often as it likes. `arrived` runs as soon as they
+   * are here: the runner may let go of them at the next arrival, before whoever draws comes back.
+   */
+  remake?: (arrived?: () => void) => void;
 }
 
 /** How many different seeds a kind of entity has in the world (instances share them: fewer meshes). */
@@ -587,9 +592,8 @@ export class Forms {
     f = { key, model, seed, status: 'pending', cls, reach: 0, vpt, base: 0 };
     this.forms.set(key, f);
     const form = f;
-    form.remake = () => this.remake(form, req);
-    void this.runner
-      .run(req)
+    form.remake = (arrived) => this.remake(form, req, arrived);
+    void (this.runner.withoutMeshes?.(req) ?? this.runner.run(req))
       .then((result) => {
         form.result = result;
         // Under the ground (T52b): its lowest voxels, if the grid has room for them and for something above.
@@ -610,13 +614,14 @@ export class Forms {
   }
 
   /** One request at a time: the same program and seed give the same grid, so nothing but the drawing changes and the form stays ready. */
-  private remake(form: Form, req: FormRequest): void {
+  private remake(form: Form, req: FormRequest, arrived?: () => void): void {
     if (this.remaking.has(form)) return;
     this.remaking.add(form);
     void this.runner
       .run(req)
       .then((result) => {
         form.result = result;
+        arrived?.();
         this.version++;
       })
       .catch((e: Error) => {
