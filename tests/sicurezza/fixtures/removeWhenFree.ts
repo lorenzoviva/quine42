@@ -1,5 +1,5 @@
-// A universe's folder at the end of a test. A world's last save may still be running in it after `stop()`: `stop()` does not wait for a `git commit` that the store has
-// started, and on Windows a folder that a process has as its working directory cannot be removed (EBUSY, T176: under load it outlasts the 3 s of `rmSync`'s own retries).
+// A universe's folder at the end of a test. On Windows a folder that a process has as its working directory cannot be removed (EBUSY, T176: under load it outlasted the
+// 3 s of `rmSync`'s own retries). `stop()` waits for the git it knows of (T209), up to its limit; what is still going out, or a host stopped without `gits`, is waited for here.
 
 import { rmSync } from 'node:fs';
 

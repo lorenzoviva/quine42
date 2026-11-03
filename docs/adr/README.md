@@ -125,5 +125,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0118](0118-la-traccia-di-un-programma.md) | La traccia di un programma MarkovJunior, in testo: il motore si lascia guardare senza cambiare (`RunOptions.watch`), `src/mj/trace.ts` dice per nodo volte, celle, scatola e regole; forma predefinita le differenze fra nodi, tetto di 4000 token stimati, sempre rispettato | accettato |
 | [0119](0119-piani-finestra-e-contesto-dei-task.md) | La pipeline: piani di abbonamento, la finestra delle 5 ore protetta dallo script, nessun ripiego su altri provider, `.pipeline-task.md` al posto del backlog, ADR rinumerati da `integra`, quadro come fotografia | accettato |
 | [0120](0120-agents-nucleo-e-dettagli.md) | `AGENTS.md` è il nucleo, con le regole inviolabili e un indice; i sottosistemi stanno, alla lettera, in `docs/architettura-dettagli.md` |
+| [0121](0121-il-sorvegliante-conta-da-pronto-e-aspetta-i-git.md) | Il sorvegliante conta `healthy` da `pronto`; `stop()` aspetta i git del suo universo, entro 5 s, e non lascia lock |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

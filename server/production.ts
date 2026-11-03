@@ -11,6 +11,7 @@ import { accessRefusal, GeminiGate } from './geminiProxy';
 import { isInternal, newSecret } from './access';
 import { accountHandler, accountSettings, type AccountSettings } from './account';
 import { contentSecurityPolicy } from './csp';
+import { settleAllGit } from './git';
 import { grantCapOf } from './ledger';
 import { clientAddress, proxyHops, Rates, type Pace } from './rates';
 import { attachSessions, getActiveWorld, sessionList, type SessionOptions } from './session';
@@ -290,6 +291,8 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
           server.close(() => done());
           server.closeAllConnections();
         });
+        // serve.ts exits right after this: what the routes started ends first, with a world or not.
+        await settleAllGit();
       })()),
   };
 }

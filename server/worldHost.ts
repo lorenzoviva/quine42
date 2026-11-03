@@ -23,7 +23,7 @@ export interface WorldTimes {
   kill: number;
   /** How long a world has to open (ms). */
   boot: number;
-  /** Alive this long, a world's commit is taken as good and its past deaths forgotten (ms). */
+  /** Open and alive this long, a world's commit is taken as good and its past deaths forgotten (ms). The time it takes to open does not count. */
   healthy: number;
   /** How long a route waits for an answer (ms). */
   call: number;
@@ -80,6 +80,8 @@ export interface WorldOptions {
   times?: Partial<WorldTimes>;
   /** The commit the universe is at now, to know the last good one. */
   headOf?: () => Promise<string | undefined>;
+  /** Returns when git has finished in the universe (`settleGit`): the last save of a world may still be running after the world has gone. */
+  gits?: () => Promise<void>;
   /** The world was given up. */
   onGiveUp?: (why: string) => void;
   /** Nobody has been connected for `times.idle`: whoever owns it stops it (V-026). */
@@ -113,6 +115,8 @@ export class WorldHost {
   private stopped = false;
   private lastBeat = 0;
   private startedAt = 0;
+  /** When it said `pronto`; 0 until then. */
+  private openedAt = 0;
   private told = false;
   private deaths = 0;
   private good?: string;
@@ -165,6 +169,7 @@ export class WorldHost {
     this.backlog = 0;
     this.up = false;
     this.startedAt = this.lastBeat = Date.now();
+    this.openedAt = 0;
     this.told = false;
     child.on('message', (m) => {
       if (this.child === child) this.heard(m as FromWorld);
@@ -199,7 +204,7 @@ export class WorldHost {
     switch (m.t) {
       case 'pronto':
         this.up = true;
-        this.lastBeat = this.emptySince = Date.now();
+        this.openedAt = this.lastBeat = this.emptySince = Date.now();
         for (const [cid, c] of this.clients) this.attach(cid, c);
         this.readyWaiters.splice(0).forEach((done) => done({ ok: true }));
         return;
@@ -341,15 +346,15 @@ export class WorldHost {
 
   /** A commit seen `healthy` ago, with the world alive ever since, is good; and the deaths before are forgotten. */
   private async markGood(now: number): Promise<void> {
-    if (now - this.startedAt > this.times.healthy) this.deaths = 0;
+    if (now - this.openedAt > this.times.healthy) this.deaths = 0;
     if (!this.o.headOf || now - this.candidateAt < this.times.healthy) return;
     this.candidateAt = now;
     const seen = this.candidate;
     this.candidate = undefined;
-    const born = this.startedAt;
+    const born = this.openedAt;
     const head = await this.o.headOf().catch(() => undefined);
-    if (seen && born === this.startedAt && now - born >= this.times.healthy) this.good = seen;
-    if (born === this.startedAt) this.candidate = head;
+    if (seen && born === this.openedAt && now - born >= this.times.healthy) this.good = seen;
+    if (born === this.openedAt) this.candidate = head;
   }
 
   private clear(): void {
@@ -423,10 +428,15 @@ export class WorldHost {
     keepProfile: (universo, id, account, profilo) => this.call('keepProfile', [universo, id, account, profilo]),
   };
 
-  /** Stops the world, letting it save if it can. */
-  stop(): Promise<void> {
+  /** Stops the world, letting it save if it can, and waits for what git is still doing with that save. */
+  async stop(): Promise<void> {
     this.stopped = true;
     this.clear();
+    await this.halted();
+    await this.o.gits?.();
+  }
+
+  private halted(): Promise<void> {
     const c = this.child;
     if (!c || c.exitCode !== null) return Promise.resolve();
     return new Promise((done) => {

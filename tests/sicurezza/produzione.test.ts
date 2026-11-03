@@ -9,6 +9,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { WebSocket } from 'ws';
+import { gitLocks } from '../../server/git';
 import { removeWhenFree } from './fixtures/removeWhenFree';
 import { buildServer } from '../../server/buildServer';
 import { contentSecurityPolicy } from '../../server/csp';
@@ -148,6 +149,8 @@ describe('il server vero', () => {
   afterAll(async () => {
     await crowded?.stop();
     await running?.stop();
+    // The last saves of the worlds have ended with the server (T209).
+    expect(gitLocks(path.join(universes(), 'prova'))).toEqual([]);
     await removeWhenFree(work);
   }, 120000);
 
