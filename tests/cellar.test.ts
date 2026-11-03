@@ -63,7 +63,7 @@ async function scene(model: string) {
   const form = await k.forms.wait(model, 1);
   expect(form?.status).toBe('ready');
   k.tick(1 / 60);
-  // Local voxel → world point (the grid centred on the thing).
+  // Local voxel → world point (the grid centred on the entity).
   const at = (vx: number, vy: number) => [cx + (vx + 0.5 - 50) / 20, cy + (vy + 0.5 - 50) / 20] as const;
   return { k, id, cx, cy, at, ground: k.groundAt(cx, cy), form: form! };
 }

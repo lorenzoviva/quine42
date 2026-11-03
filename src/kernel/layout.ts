@@ -28,7 +28,7 @@ export interface LayoutResult {
   grid: string[];
   lots: Lot[];
   gates: number[];
-  /** Cells reachable from the gates: where things may be placed. */
+  /** Cells reachable from the gates: where entities may be placed. */
   reachable: Set<number>;
   carved: number;
   steps: number;

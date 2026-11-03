@@ -60,7 +60,7 @@ import { CardLedger, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, r
 import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState, PER_WANDERER } from './wanderers';
 import type { ActionDef, AiConfig, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Partita, ChunkInfo, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
 
-/** A solid thing with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
+/** A solid entity with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
 interface SolidForm extends Ground {
   id: Id;
   x: number;
@@ -203,7 +203,7 @@ export interface ShowcaseEntry {
   facts: Array<[string, string]>;
 }
 
-/** Where a plan puts its runes and things (cells of the chunk; runes in world columns and rows). */
+/** Where a plan puts its runes and entities (cells of the chunk; runes in world columns and rows). */
 interface Placements {
   runes: Array<{ token: string; line: number; col: number; row: number; origin: string }>;
   objects: Array<{ index: number; cell?: number }>;
@@ -231,12 +231,12 @@ export interface ChunkMiniature {
   levels: number[];
   /** The structures in the middle of their lots (w × h tiles). */
   structures: Array<{ x: number; y: number; w: number; h: number; model: string; seed: number; yaw: number; done?: string[] }>;
-  things: Array<{ x: number; y: number; model: string; seed: number; yaw: number; tint?: string; color?: string }>;
+  entities: Array<{ x: number; y: number; model: string; seed: number; yaw: number; tint?: string; color?: string }>;
   /** Each rune with the line (of the plan) it belongs to. */
   runes: Array<{ x: number; y: number; token: string; line: number; color?: string }>;
   /**
    * The Cartographer's work in phases (`PLACE_PHASES`), each the place as it is then: its tiles, their levels, the cells
-   * that phase adds (`lit`). The last is the place as above; structures from the fifth on, things and runes in the sixth.
+   * that phase adds (`lit`). The last is the place as above; structures from the fifth on, entities and runes in the sixth.
    */
   phases: Array<{ tiles: string; levels: number[]; lit: number[] }>;
 }
@@ -307,7 +307,7 @@ export interface KernelOptions {
   bench?: { terreno?: string[] };
   /**
    * The world of a thin client (T39, ADR-0059): the server's world as it tells it. Nothing is generated, saved or
-   * judged here, no system runs but those that walk this client's wanderer: places and things are put in by the client.
+   * judged here, no system runs but those that walk this client's wanderer: places and entities are put in by the client.
    */
   mirror?: boolean;
 }
@@ -385,7 +385,7 @@ export class Kernel {
   private graphCache?: { files: FileMap; places: number; graph: WorldGraph };
   private graphChunksVersion = 0;
   readonly chunkStore: ChunkStore;
-  /** The models of things (ADR-0041): the library of programs and the forms they make. */
+  /** The models of entities (ADR-0041): the library of programs and the forms they make. */
   readonly forms: Forms;
   /** The Sculptor at work on the models the world lacks. */
   readonly sculpting = new ModelDirector(this);
@@ -416,7 +416,7 @@ export class Kernel {
   readonly wanted = new Set<string>();
   /** Entity cells blocked by solid bodies, rebuilt every tick. */
   private solidCells = new Set<string>();
-  /** Solid things with a model, by the cells their footprint reaches (they block by their voxels). */
+  /** Solid entities with a model, by the cells their footprint reaches (they block by their voxels). */
   private reliefCache?: { key: string; relief: Relief };
   /** The level of every tile, per chunk (flat water, flat lots), while its tiles, lots and the world's levels stay the same. */
   private levelCache = new WeakMap<Chunk, { tiles: string; lots: Lot[]; field: Int16Array; levels: Int16Array }>();
@@ -434,11 +434,11 @@ export class Kernel {
     sea: () => this.seaLevel,
   });
   private solidForms = new Map<string, Array<SolidForm>>();
-  /** The solid things whose model has a cellar (T52b): where the terrain has a hole. */
+  /** The solid entities whose model has a cellar (T52b): where the terrain has a hole. */
   private cellars: SolidForm[] = [];
   /** Footprints of instances whose model was changed by an action (the door is open). */
   private instanceFeet = new Map<Id, Ground & { key: string; foot: Uint8Array }>();
-  /** What was done to models of things, by stable origin (saved with the game). */
+  /** What was done to models of entities, by stable origin (saved with the game). */
   private savedForms = new Map<string, string[]>();
   /** Zones of the world that already have their important structure: zone → the chunk that has it (saved with the game). */
   /** The places that have the rare structures (ADR-0092): size → area (zone, realm) → chunk key. */
@@ -1300,7 +1300,7 @@ export class Kernel {
     this.corona.build(files, this.exhibits(files), this.terrainExhibits(), this.layoutExhibits(), this.systems.map((m) => ({ id: m.manifest.id, name: m.manifest.name || m.manifest.id })));
     this.rulesOffset = this.corona.rulesOffset;
     this.placeCampus();
-    // Things that wait for a model of their own wear it as soon as the library has it.
+    // Entities that wait for a model of their own wear it as soon as the library has it.
     for (const id of this.ecs.query('form')) {
       const fc: FormComp = this.ecs.get(id, 'form');
       if (!fc.wanted || !this.forms.info(fc.wanted)) continue;
@@ -1324,14 +1324,14 @@ export class Kernel {
     return { model, seed: this.forms.seedFor(model, who), yaw: man?.persona || man?.kind === 'player' ? 0 : (hashStr(who) % 628) / 100, ...(app?.model && app.model !== model ? { wanted: app.model, classe } : {}) };
   }
 
-  /** The look of an item: its own model, or the generic thing in its colour. */
+  /** The look of an item: its own model, or the generic entity in its colour. */
   itemLook(item: string): FormComp {
     const d = this.content.get(item);
     const model = this.forms.resolve(d?.model, 'oggetto');
     return { model, seed: 1, yaw: 0, tint: d?.color, ...(d?.model && d.model !== model ? { wanted: d.model, classe: 'oggetto' } : {}) };
   }
 
-  /** The actions of a thing's model that would change it now (open when closed, close when open). */
+  /** The actions of an entity's model that would change it now (open when closed, close when open). */
   modelActions(id: Id): Array<{ name: string; label: string }> {
     const fc: FormComp | undefined = this.ecs.get(id, 'form');
     const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint);
@@ -1346,7 +1346,7 @@ export class Kernel {
     return out;
   }
 
-  /** Does an action of a thing's model: the rule runs on its voxels (the door opens), and it is remembered. */
+  /** Does an action of an entity's model: the rule runs on its voxels (the door opens), and it is remembered. */
   doModelAction(id: Id, name: string): boolean {
     const fc: FormComp | undefined = this.ecs.get(id, 'form');
     if (!fc || !this.modelActions(id).some((a) => a.name === name)) return false;
@@ -1364,7 +1364,7 @@ export class Kernel {
   }
 
   /**
-   * The model whose shape an action may change: a thing's own program in the library (not the generic one
+   * The model whose shape an action may change: an entity's own program in the library (not the generic one
    * of a class, which many kinds share), and not a figure (people and animals change by other means).
    */
   shapeModel(id: Id): string | undefined {
@@ -1374,9 +1374,9 @@ export class Kernel {
   }
 
   /**
-   * An action that changes a thing's shape becomes a rule of its model (ADR-0044): the Sculptor writes an
+   * An action that changes an entity's shape becomes a rule of its model (ADR-0044): the Sculptor writes an
    * `<action>`, the kernel tries it on the model (it finishes, changes something, does not empty it), the
-   * program enters the library with it (commit) and every thing of the kind has it in its menu. This one
+   * program enters the library with it (commit) and every entity of the kind has it in its menu. This one
    * does it now. Returns the action's name, or undefined (then only the effects happen).
    */
   async learnShape(id: Id, label: string, text: string, change: string): Promise<string | undefined> {
@@ -1409,7 +1409,7 @@ export class Kernel {
     return name;
   }
 
-  /** Where a solid thing blocks and what one stands on in it: its model's, or the changed ones of this instance. */
+  /** Where a solid entity blocks and what one stands on in it: its model's, or the changed ones of this instance. */
   private groundOf(id: Id, fc: FormComp, f: Form): Ground & { foot: Uint8Array } {
     if (!fc.done?.length) return { foot: f.foot!, floor: f.floor!, block: f.block!, levels: f.levels!, hole: f.hole };
     const key = `${f.key}|${fc.done.join(',')}`;
@@ -1425,7 +1425,7 @@ export class Kernel {
   }
 
   /**
-   * Carpet-space box (half-size r) blocked by the voxels of a solid thing (T53a): something at body height over
+   * Carpet-space box (half-size r) blocked by the voxels of a solid entity (T53a): something at body height over
    * a column under it, or a rise of more than a step between two columns under it. A stair is a ramp. With the
    * height of the feet (`z`, tiles) the floors are those nearest to it (T53b): one walks under the floor above,
    * and on it; without, the ground floor.
@@ -1491,7 +1491,7 @@ export class Kernel {
     }
   }
 
-  // --- Chunks: draft → plan (Cartographer) → layout (rules + guaranteed paths) → things ----------
+  // --- Chunks: draft → plan (Cartographer) → layout (rules + guaranteed paths) → entities ----------
 
   private chunkKey(cx: number, cy: number): string {
     return `${cx},${cy}`;
@@ -1863,9 +1863,9 @@ export class Kernel {
   }
 
   /**
-   * Where a plan puts its runes and things: reachable cells, inside or outside lots, never on gates or doors.
+   * Where a plan puts its runes and entities: reachable cells, inside or outside lots, never on gates or doors.
    * Deterministic, the same for the world and for the model of places (T26): what was already taken keeps its cell,
-   * so the rest does not move. `pick` goes on for what comes later (things forged for the place, items introduced).
+   * so the rest does not move. `pick` goes on for what comes later (entities forged for the place, items introduced).
    */
   private placementsOf(ch: Pick<Chunk, 'cx' | 'cy' | 'key'>, plan: ChunkPlan, result: LayoutResult): Placements {
     const S = this.config.chunkSize;
@@ -1929,7 +1929,7 @@ export class Kernel {
     return { runes, objects, ground, loot, pick };
   }
 
-  /** Runs the layout and puts things in the world: deterministic, so a cached plan rebuilds the same place. */
+  /** Runs the layout and puts entities in the world: deterministic, so a cached plan rebuilds the same place. */
   private applyPlan(ch: Chunk, plan: ChunkPlan): void {
     const S = this.config.chunkSize;
     const pathCode = this.pathCode();
@@ -2071,7 +2071,7 @@ export class Kernel {
     }
   }
 
-  /** Whether a thing of a place stays with a coefficient: a draw of the universe for that origin, the same at every load. */
+  /** Whether an entity of a place stays with a coefficient: a draw of the universe for that origin, the same at every load. */
   private kept(origin: string, c: number): boolean {
     return c >= 1 || (c > 0 && hash32(this.config.seed, hashStr(origin), 4545) / 4294967296 < c);
   }
@@ -2180,7 +2180,7 @@ export class Kernel {
 
   /**
    * A planned place in miniature (T26), for the model of places in the Office of places: its tiles with their levels,
-   * the structures on its lots, its things and runes where the plan puts them (what was taken is not there). From the
+   * the structures on its lots, its entities and runes where the plan puts them (what was taken is not there). From the
    * chunk if it is loaded, else from its saved plan: then `undefined` the first time, and `miniatureVersion` grows when
    * it is ready. Looking does not generate anything: a place never planned has no miniature.
    */
@@ -2215,19 +2215,19 @@ export class Kernel {
     const height = (c: number, r: number) => field[r * S + c];
     const levels = chunkLevels(tiles, S, liquid, height, result.lots);
     const local = (cell: number) => ({ x: (cell % S) + 0.5, y: Math.floor(cell / S) + 0.5 });
-    const things: ChunkMiniature['things'] = [];
+    const entities: ChunkMiniature['entities'] = [];
     for (const { index, cell } of place.objects) {
       const m = this.modules.get(plan.objects[index].module);
       const origin = `${ch.key}#o${index}`;
       if (!m || cell === undefined || this.consumed.has(origin)) continue;
       const f = this.formFor(m.manifest, origin);
-      things.push({ ...local(cell), model: f.model, seed: f.seed, yaw: f.yaw, color: m.manifest.appearance?.color });
+      entities.push({ ...local(cell), model: f.model, seed: f.seed, yaw: f.yaw, color: m.manifest.appearance?.color });
     }
     const items = [...place.ground.map((g) => ({ ...g, origin: `${ch.key}#g${g.index}` })), ...place.loot.map((l) => ({ ...l, origin: `${ch.key}#l${l.index}` }))];
     for (const it of items) {
       if (!it.item || it.cell === undefined || this.consumed.has(it.origin)) continue;
       const f = this.itemLook(it.item);
-      things.push({ ...local(it.cell), model: f.model, seed: f.seed, tint: f.tint, yaw: 0, color: f.tint });
+      entities.push({ ...local(it.cell), model: f.model, seed: f.seed, tint: f.tint, yaw: 0, color: f.tint });
     }
     const runes = place.runes.filter((r) => !this.consumed.has(r.origin)).map((r) => ({ x: r.col - ch.cx * S + 0.5, y: r.row - ch.cy * S + 0.5, token: r.token, line: r.line, color: this.content.runes[r.token]?.color }));
     // The phases (T26): what changes from one to the next is lit; before the lots, the ground is not levelled for them.
@@ -2241,7 +2241,7 @@ export class Kernel {
       phase(programmed, changed(gated, programmed)),
       phase(laid, changed(programmed, laid)),
       phase(tiles, [...result.lots.flatMap((b) => [...b.walls, ...b.floor, ...b.doors]), ...changed(laid, tiles)], levels),
-      phase(tiles, [...things, ...runes].map(cellOf), levels),
+      phase(tiles, [...entities, ...runes].map(cellOf), levels),
     ];
     return {
       cx: ch.cx,
@@ -2250,7 +2250,7 @@ export class Kernel {
       tiles,
       levels: [...levels],
       structures: lots.map((l) => ({ x: l.x - ch.cx * S, y: l.y - ch.cy * S, w: result.lots[l.index].x1 - result.lots[l.index].x0 + 1, h: result.lots[l.index].y1 - result.lots[l.index].y0 + 1, model: l.form.model, seed: l.form.seed, yaw: l.form.yaw, done: l.form.done })),
-      things,
+      entities,
       runes,
       phases,
     };
@@ -2482,7 +2482,7 @@ export class Kernel {
   }
 
   /**
-   * A height of the world (tiles) as voxels up the grid of a solid thing (it stands on the ground under its middle,
+   * A height of the world (tiles) as voxels up the grid of a solid entity (it stands on the ground under its middle,
    * its lowest `base` voxels under it, T52b); none is its ground floor.
    */
   private levelIn(s: SolidForm, z: number | undefined): number {
@@ -2511,7 +2511,7 @@ export class Kernel {
     return cellar ? h : Math.max(h, this.groundAt(x, y));
   }
 
-  /** How far under the ground (tiles) a thing's model goes (T52b): the renderer lays it this much lower. */
+  /** How far under the ground (tiles) an entity's model goes (T52b): the renderer lays it this much lower. */
   sunk(id: Id): number {
     const fc: FormComp | undefined = this.ecs.get(id, 'form');
     const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint);
@@ -2579,7 +2579,7 @@ export class Kernel {
 
   /**
    * The Council meets: it reads the rules born from play, the people met, the places seen, and may
-   * intervene (items, a new inhabitant, a new thing). The base logic is theirs; so are its changes.
+   * intervene (items, a new inhabitant, a new entity). The base logic is theirs; so are its changes.
    */
   async holdSession(force = false): Promise<string> {
     if (!force && (this.sessions >= 4 || this.generationHeld || this.ai.name === 'offline')) return 'nessuno';
@@ -2907,7 +2907,7 @@ export class Kernel {
   }
 
   /**
-   * How high the tallest thing under a box goes (carpet space, tiles) for a jump from a floor `base` high: what
+   * How high the tallest entity under a box goes (carpet space, tiles) for a jump from a floor `base` high: what
    * starts below base + JUMP_UP (on a floor above, the ceiling over it does not count, T70); the ground if nothing is there.
    */
   private heightOver(x: number, y: number, r: number, base: number): number {
@@ -2921,7 +2921,7 @@ export class Kernel {
 
   /**
    * Whether a box (carpet space, half-size r) can be flown over by a jump that starts on a floor `base` high (T56b):
-   * water and things no higher than JUMP_UP above it can, walls and rocks of the terrain and taller models cannot.
+   * water and entities no higher than JUMP_UP above it can, walls and rocks of the terrain and taller models cannot.
    */
   private airFree(x: number, y: number, r: number, base: number): boolean {
     for (const [dx, dy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
@@ -3678,7 +3678,7 @@ export class Kernel {
     return what;
   }
 
-  /** E: corona → edit code; rune → pick; otherwise the menu of the nearest thing (or a pickup directly). */
+  /** E: corona → edit code; rune → pick; otherwise the menu of the nearest entity (or a pickup directly). */
   async interact(): Promise<void> {
     if (this.zone === 'corona' || this.zone === 'studio') return this.interactStudio();
     if (this.pickUpRune()) return;
@@ -3757,7 +3757,7 @@ export class Kernel {
     return this.judgeFree({ tile: { col, row }, key: `tile:${code}`, name: t.name, description: t.description ?? t.name, tags: [t.layer ?? 'ground'], container: false, kind: 'terreno (una casella del mondo)', learnTile: code }, text);
   }
 
-  /** The thing you are facing (or standing next to). */
+  /** The entity you are facing (or standing next to). */
   targetInFront(): Id | undefined {
     const pc = this.wandererCarpet();
     const [dx, dy] = this.facingDelta();
@@ -3847,9 +3847,9 @@ export class Kernel {
   }
 
   /**
-   * "Altro…": the player writes what they do to a thing in the world. Actions the thing already learned
+   * "Altro…": the player writes what they do to an entity in the world. Actions the entity already learned
    * run directly, judgements already given are remembered (rules); otherwise the Narrator judges, the
-   * validator keeps only known effects, core.effects applies them, and the thing learns the action.
+   * validator keeps only known effects, core.effects applies them, and the entity learns the action.
    */
   async freeAction(id: Id, text: string): Promise<string> {
     if (!this.ecs.alive.has(id)) return '';
@@ -3903,7 +3903,7 @@ export class Kernel {
     );
   }
 
-  /** Actions a thing has learned (its module's, or its item definition's). */
+  /** Actions an entity has learned (its module's, or its item definition's). */
   learnedActions(sub: { learnModule?: ModuleEntry; learnItem?: string; learnTile?: string }): ActionDef[] {
     return [...(sub.learnModule?.manifest.actions ?? []), ...(sub.learnItem ? (this.content.get(sub.learnItem)?.actions ?? []) : []), ...(sub.learnTile ? (this.palette[sub.learnTile]?.actions ?? []) : [])].filter((a) => a.effects?.length);
   }
@@ -4005,7 +4005,7 @@ export class Kernel {
     return out;
   }
 
-  /** Applies effects to the subject of an action: a thing in the world, or something carried. */
+  /** Applies effects to the subject of an action: an entity in the world, or something carried. */
   private applyOn(sub: { entity?: Id; slot?: number; tile?: { col: number; row: number }; key: string }, all: Effect[]): string[] {
     // Acting on something never spends it by accident: only "distruggi" breaks or uses it up.
     let effects = all.filter((e) => !(e.tipo === 'consuma' && e.oggetto === sub.key));
@@ -4113,7 +4113,7 @@ export class Kernel {
       v = validateEffects(j.possible ? j.effects : [], ectx);
     }
     v.effects = v.effects.filter((e) => !(e.tipo === 'consuma' && e.oggetto === sub.key));
-    // What changes the thing's look becomes a rule of its model (ADR-0044): the thing stays, changed.
+    // What changes the entity's look becomes a rule of its model (ADR-0044): the entity stays, changed.
     const shaped = j.possible && j.shape && sub.entity !== undefined ? await this.learnShape(sub.entity, j.label || text, text, j.shape) : undefined;
     if (shaped) v.effects = v.effects.filter((e) => e.tipo !== 'distruggi');
     if (v.dropped.length) this.council.say('kernel', 'scarta', `azione «${text}»: ${v.dropped.join('; ')}`, 'narratore', 'action.judge');
@@ -4121,7 +4121,7 @@ export class Kernel {
     const out = j.possible ? this.as(me, () => (sub.wanderer ? this.touchWanderer(sub.wanderer, v.effects, text) : this.applyOn(sub, v.effects))) : [];
     if (sub.wanderer && j.possible) this.bus.emit('wanderer:acted', { da: me, a: sub.wanderer, testo: [j.story, ...out].filter(Boolean).join(' ') });
     say([j.story, ...out].filter(Boolean).join(' ') || 'Non succede niente.');
-    // The decision becomes a rule of the world; a possible action stays in the thing's menu.
+    // The decision becomes a rule of the world; a possible action stays in the entity's menu.
     const lasting = v.effects.some((e) => e.tipo !== 'messaggio');
     const creates = v.effects.some((e) => e.tipo === 'crea_oggetto' || e.tipo === 'evoca');
     const pays = v.effects.some((e) => e.tipo === 'consuma') || !!need;
@@ -4232,7 +4232,7 @@ export class Kernel {
       }
     });
     const tiles = best?.tiles ?? drafts[0].join('');
-    const mini: ChunkMiniature = { cx: 0, cy: 0, size: S, tiles, levels: Array<number>(S * S).fill(0), structures: [], things: [], runes: [], phases: [] };
+    const mini: ChunkMiniature = { cx: 0, cy: 0, size: S, tiles, levels: Array<number>(S * S).fill(0), structures: [], entities: [], runes: [], phases: [] };
     return (entry.sample = { id, name: def.name, description: def.description, environment: def.environment, path, draft: best?.draft ?? 0, changed: best?.changed ?? 0, mini, ...(best ? {} : { error }) });
   }
 
@@ -5348,7 +5348,7 @@ export class Kernel {
     );
   }
 
-  /** What the case sets out: its 5 × 5 tiles in the colours of the palette, its things with their colour and size. */
+  /** What the case sets out: its 5 × 5 tiles in the colours of the palette, its entities with their colour and size. */
   benchScene(c: BenchCase): BenchScene {
     const base = this.benchBase();
     const tiles = Array.from({ length: BENCH * BENCH }, (_, i) => {
@@ -5356,12 +5356,12 @@ export class Kernel {
       const t = this.palette[code && this.palette[code] ? code : base];
       return { color: t?.color ?? '#555555', ...(t?.layer ? { layer: t.layer } : {}), solid: !!t?.solid };
     });
-    const things = (c.cose ?? []).map((t) => {
+    const entities = (c.cose ?? []).map((t) => {
       const m = this.modules.get(t.modulo)?.manifest;
       const fire = !!t.componenti?.fuoco;
       return { name: fire ? 'Fiamma' : (m?.name ?? t.modulo), color: fire ? '#ff8a2a' : (m?.appearance?.color ?? '#cccccc'), radius: m?.physics?.radius ?? 0.4, person: !!(m?.components?.wander || m?.persona || m?.interaction?.type === 'talk'), fire };
     });
-    return { tiles, things };
+    return { tiles, entities };
   }
 
   /**
@@ -7239,17 +7239,17 @@ export class Kernel {
     plan.carta ??= this.sign(chunkCardId(ch.cx, ch.cy), 'chunk.plan', 'cartografo', chi);
     this.cards.addChunk(`${ch.cx}_${ch.cy}`, plan.place.name, plan.carta);
     const ids = [`ambiente:${nodeSlug(plan.layout)}`];
-    for (const o of plan.objects) ids.push(...this.thingCards(o.module));
+    for (const o of plan.objects) ids.push(...this.entityCards(o.module));
     for (const n of plan.ground) {
       const d = this.content.byName(n);
-      if (d) ids.push(...this.thingCards(d.id));
+      if (d) ids.push(...this.entityCards(d.id));
     }
     for (const s of plan.strutture ?? []) ids.push(`modello:${nodeSlug(`struttura-${ownModelId(s.concetto).slice(0, 30)}`)}`);
     this.cards.use(ids, 'luoghi', (id) => this.isCard(id));
   }
 
-  /** The cards a thing in a place stands for: its module or item, and its model. */
-  private thingCards(id: string): string[] {
+  /** The cards an entity in a place stands for: its module or item, and its model. */
+  private entityCards(id: string): string[] {
     const m = this.modules.get(id)?.manifest;
     if (m) return [moduleCardId(m), ...(m.appearance?.model ? [`modello:${nodeSlug(m.appearance.model)}`] : [])];
     const d = this.content.get(id);
@@ -7293,7 +7293,7 @@ export class Kernel {
     return true;
   }
 
-  /** What was done to the models of things in the world, by origin. */
+  /** What was done to the models of entities in the world, by origin. */
   private formsToSave(): Record<string, string[]> {
     return Object.fromEntries([...this.savedForms].filter(([, d]) => d.length));
   }
@@ -7537,7 +7537,7 @@ export class Kernel {
 
   /**
    * A thin client's tick (T39): its wanderer walks and the carpet carries them, as in a game alone, against the
-   * things the server sent; the rest of the world moves on the server and arrives with its updates.
+   * entities the server sent; the rest of the world moves on the server and arrives with its updates.
    */
   private mirrorTick(dt: number): void {
     this.time += dt;
@@ -7589,7 +7589,7 @@ export class Kernel {
         this.solidCells.add(`${Math.floor(p.x)},${Math.floor(p.y)}`);
         continue;
       }
-      // A thing with a model blocks with its voxels: it is listed in every cell its footprint may reach.
+      // An entity with a model blocks with its voxels: it is listed in every cell its footprint may reach.
       const s: SolidForm = { id, x: p.x, y: p.y, yaw: fc.yaw, form: f, ...this.groundOf(id, fc, f) };
       if (s.hole) this.cellars.push(s);
       for (let cy = Math.floor(p.y - f.reach); cy <= Math.floor(p.y + f.reach); cy++)
@@ -7626,7 +7626,7 @@ export class Kernel {
   /**
    * Where every body stands (T53b): the floor under it nearest to where its feet were, in `pos.z` (tiles). Who
    * went up the stairs stays on the floor above, who walks under it on the ground floor. The wanderers by their
-   * carpet; out of the circle (corona, studio) they have no floor of the simulation. Away from things with a model
+   * carpet; out of the circle (corona, studio) they have no floor of the simulation. Away from entities with a model
    * there is only the ground: no height is kept (the tick stays cheap).
    */
   private settleHeights(): void {

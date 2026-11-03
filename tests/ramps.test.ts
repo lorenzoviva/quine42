@@ -42,7 +42,7 @@ describe('stairs as ramps', () => {
     const form = await k.forms.wait('scala', 1);
     expect(form?.status).toBe('ready');
     k.tick(1 / 60);
-    // Local voxel → world point (20 voxels per tile, the grid centred on the thing).
+    // Local voxel → world point (20 voxels per tile, the grid centred on the entity).
     const at = (vx: number, vy: number) => [cx + (vx - 70) / 20, cy + (vy - 30) / 20] as const;
     const r = 0.22;
     const base = k.floorAt(...at(5, 30));

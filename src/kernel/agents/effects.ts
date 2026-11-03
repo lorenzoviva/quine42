@@ -1,4 +1,4 @@
-// Free actions ("Altro…"): the player writes what they do to a thing; the Narrator judges whether it
+// Free actions ("Altro…"): the player writes what they do to an entity; the Narrator judges whether it
 // can happen and what follows, choosing effects from a closed set (types.ts → Effect). The kernel
 // validates them (validator.ts → validateEffects) and core.effects (Lua) applies them. An action that
 // makes sense and can be repeated is learned by the object: it enters its menu, no further calls.
@@ -23,7 +23,7 @@ export interface ActionContext {
   place: string;
   /** The wanderer transcended: the Council goes along with almost anything. */
   transcended?: boolean;
-  /** The thing has a model of its own: what changes its look can become a rule of the model (ADR-0044). */
+  /** The entity has a model of its own: what changes its look can become a rule of the model (ADR-0044). */
   shape?: boolean;
   /** The target is another wanderer (T43b): whether they may be harmed (`partita.pvp`), whether they are the master (a god). */
   between?: { pvp: boolean; god: boolean };
@@ -37,7 +37,7 @@ export interface ActionJudgement {
   label: string;
   /** Item (name) the action needs, if any. */
   requires?: string;
-  /** How the thing's look changes, if it does: the Sculptor writes it as an action of its model. */
+  /** How the entity's look changes, if it does: the Sculptor writes it as an action of its model. */
   shape?: string;
 }
 
@@ -318,7 +318,7 @@ const SESSION_SCHEMA: Schema = {
 /**
  * A session of the Council: from time to time it looks at how the world is being played (rules made,
  * people met, places seen) and decides whether to intervene — new items, a new kind of inhabitant, a
- * new thing — so the world keeps evolving coherently with what happened.
+ * new entity — so the world keeps evolving coherently with what happened.
  */
 export async function councilSession(c: Council, summary: string): Promise<{ assessment: string; action: 'nessuno' | 'oggetti' | 'abitante' | 'cosa' | 'meccanica' | 'runa'; request?: string }> {
   const r = await c.ask<{ valutazione: string; intervento: string; richiesta?: string }>(

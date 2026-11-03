@@ -17,7 +17,7 @@ const MAX_CASES = 3;
 /** The keys a walk of a case holds. */
 const WAYS: Record<BenchWay, 'up' | 'down' | 'left' | 'right'> = { su: 'up', giu: 'down', sinistra: 'left', destra: 'right' };
 
-/** One moment of a case: the watched values and where the wanderer and the things are (carpet tiles). */
+/** One moment of a case: the watched values and where the wanderer and the entities are (carpet tiles). */
 export interface BenchFrame {
   t: number;
   /** The step just done (index in `passi`), if this frame follows one. */
@@ -52,11 +52,11 @@ export interface BenchEntry {
   case: BenchCase;
 }
 
-/** What the glass case sets out: the 5 × 5 tiles (row by row, from the top) and the things of the case, in its order. */
+/** What the glass case sets out: the 5 × 5 tiles (row by row, from the top) and the entities of the case, in its order. */
 export interface BenchScene {
   tiles: Array<{ color: string; layer?: string; solid: boolean }>;
   /** `fire`: it burns (a `fuoco` component in the case): drawn as a flame. */
-  things: Array<{ name: string; color: string; radius: number; person: boolean; fire: boolean }>;
+  entities: Array<{ name: string; color: string; radius: number; person: boolean; fire: boolean }>;
 }
 
 /** The bench now: the case, its place among all, its scene and code, and its run once the kernel in miniature has done it. */
@@ -193,7 +193,7 @@ function parseFlat(src: string): Record<string, number> | undefined {
 export const trialId = (nome: string) => `item.prova-${slugOf(nome)}`;
 
 /**
- * The files of the kernel in miniature: the configuration, `core.*`, the content (data, items, things, the
+ * The files of the kernel in miniature: the configuration, `core.*`, the content (data, items, entities, the
  * player, the terrain's palette) and the system of the case; no other system, no models, no world files.
  * Objects of the case the universe lacks become trial objects of a pack of the bench.
  */
@@ -363,16 +363,16 @@ const FIELD_NAME: Record<string, string> = {
   'vel.y': 'velocità y',
 };
 
-/** «salute», «Rovo: c’è», «Abitante: x»: what a watched field is, with the name of its thing. */
+/** «salute», «Rovo: c’è», «Abitante: x»: what a watched field is, with the name of its entity. */
 export function fieldLabel(path: string, scene?: BenchScene): string {
   const m = PATH_RE.exec(path);
   if (!m) return path;
   const name = FIELD_NAME[`${m[2]}.${m[3]}`] ?? `${m[2]}.${m[3]}`;
   if (m[1] === undefined) return name;
-  return `${scene?.things[Number(m[1])]?.name ?? `cosa ${m[1]}`}: ${name}`;
+  return `${scene?.entities[Number(m[1])]?.name ?? `cosa ${m[1]}`}: ${name}`;
 }
 
-/** A watched value as the screen says it: a number to one decimal, yes/no, «sparita» for a thing that is gone. */
+/** A watched value as the screen says it: a number to one decimal, yes/no, «sparita» for an entity that is gone. */
 export function valueText(v: unknown): string {
   if (v === 'assente') return 'sparita';
   if (v === null || v === undefined) return '—';

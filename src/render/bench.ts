@@ -1,5 +1,5 @@
 // The bench of the Systems Room in 3D (T27b): in the glass case on its plinth (itemMesh) the scene of a case, 5 × 5 tiles
-// in the colours of the palette, with the wanderer and the things where the kernel in miniature put them; above it a
+// in the colours of the palette, with the wanderer and the entities where the kernel in miniature put them; above it a
 // screen with the case, the lines of the code that make it and the values it watches. It plays in a loop: before (the
 // first frame, still), the rule (the frames as they ran, the lines lit), after (the last frame, what changed lit).
 
@@ -46,7 +46,7 @@ function framesAt(frames: BenchFrame[], at: number): { a: number; b: number; f: 
 
 export class BenchView {
   readonly group = new THREE.Group();
-  /** The wanderer and the things, in the order of the frames' positions. */
+  /** The wanderer and the entities, in the order of the frames' positions. */
   private actors: THREE.Object3D[] = [];
   private cv = document.createElement('canvas');
   private tex: THREE.CanvasTexture;
@@ -82,9 +82,9 @@ export class BenchView {
     const box = new THREE.Mesh(new THREE.BoxGeometry(w - 0.14, BENCH_GLASS, d - 0.14), glass);
     box.position.set(it.x + w / 2, BENCH_TOP + BENCH_GLASS / 2, it.y + d / 2);
     this.group.add(box);
-    // The wanderer, then the things of the case.
+    // The wanderer, then the entities of the case.
     this.actors.push(this.figure(WANDERER, 0.3, true, false));
-    for (const t of shown.scene.things) this.actors.push(this.figure(t.color, t.radius, t.person, t.fire));
+    for (const t of shown.scene.entities) this.actors.push(this.figure(t.color, t.radius, t.person, t.fire));
     for (const a of this.actors) this.group.add(a);
     // The screen above the back of the case, leaning towards the camera.
     this.cv.width = Math.round(SCREEN.w * PX * 1.5);
@@ -109,7 +109,7 @@ export class BenchView {
     if (next) this.group.add(arrowSign(next.x, next.y, '>', color));
   }
 
-  /** A person (a body and a head), a flame (glowing, two tongues) or a thing (a block as wide as its body). */
+  /** A person (a body and a head), a flame (glowing, two tongues) or an entity (a block as wide as its body). */
   private figure(color: string, radius: number, person: boolean, fire: boolean): THREE.Object3D {
     const s = this.s;
     const b = new Builder();

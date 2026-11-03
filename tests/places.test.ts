@@ -1,5 +1,5 @@
 // T26: the model of places in the Office of places. A holographic table, 3 × 3 cells, shows a place already planned in
-// miniature (its tiles with their levels, the structures on its lots, its things and runes), built by the same code that
+// miniature (its tiles with their levels, the structures on its lots, its entities and runes), built by the same code that
 // builds the world; «<» «>» pick the place, the one where the wanderer last stood first; looking does not generate anything.
 // T26b: «−» «+» go through the six phases of the Cartographer's work on the same place, what each adds lit.
 
@@ -87,8 +87,8 @@ describe('the model of places (T26)', () => {
     expect(runes.length).toBeGreaterThan(0);
     expect(mini.runes.map((r) => `${r.token}@${r.x - 0.5},${r.y - 0.5}`).sort()).toEqual(runes.map((r) => `${r.token}@${r.col},${r.row}`).sort());
     // What the plan put outside, where the world put it (people may have walked away since: the plan's cells).
-    expect(mini.things.length).toBeGreaterThan(0);
-    for (const t of mini.things) {
+    expect(mini.entities.length).toBeGreaterThan(0);
+    for (const t of mini.entities) {
       expect(t.x).toBeGreaterThan(0);
       expect(t.x).toBeLessThan(S);
       expect(k.palette[mini.tiles[Math.floor(t.y) * S + Math.floor(t.x)]]?.solid ?? false).toBe(false);
@@ -142,8 +142,8 @@ describe('the model of places (T26)', () => {
     expect(lots.tiles).toBe(mini.tiles);
     for (const s of mini.structures) expect(lots.lit).toContain(Math.floor(s.y) * S + Math.floor(s.x));
     expect(mini.structures.length ? lots.lit.length : 1).toBeGreaterThan(0);
-    // Things and runes, each on its cell.
-    for (const p of [...mini.things, ...mini.runes]) expect(last.lit).toContain(Math.floor(p.y) * S + Math.floor(p.x));
+    // Entities and runes, each on its cell.
+    for (const p of [...mini.entities, ...mini.runes]) expect(last.lit).toContain(Math.floor(p.y) * S + Math.floor(p.x));
     expect(last.lit.length).toBeGreaterThan(0);
     // Each phase's levels are a place's: as many as the tiles, all numbers.
     for (const p of mini.phases) expect(p.levels.length === S * S && p.levels.every(Number.isFinite)).toBe(true);

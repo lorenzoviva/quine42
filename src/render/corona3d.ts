@@ -896,10 +896,10 @@ const PHASE_LIT = '#39ff88';
 
 /**
  * A planned place in miniature on the model of places (T26), `side` wide: each tile a column in its colour up to its
- * level (water a little lower, walls and rocks higher), the structures and things as their models made small, the runes
+ * level (water a little lower, walls and rocks higher), the structures and entities as their models made small, the runes
  * as glowing tiles. What is not ready yet (a model still running) is simply missing: the key changes when it is.
  * `phase` (of `PLACE_PHASES`): the place as it is then, what that phase adds glowing green on its columns; the
- * structures come in the fifth, things and runes in the sixth.
+ * structures come in the fifth, entities and runes in the sixth.
  */
 function buildMiniature(k: Kernel, mini: ChunkMiniature, side: number, phase = PLACE_PHASES.length - 1): THREE.Group {
   const g = new THREE.Group();
@@ -949,7 +949,7 @@ function buildMiniature(k: Kernel, mini: ChunkMiniature, side: number, phase = P
     g.add(m.root);
   };
   if (phase >= 4) for (const s of mini.structures) place(s);
-  if (finished) for (const th of mini.things) place(th);
+  if (finished) for (const th of mini.entities) place(th);
   return g;
 }
 

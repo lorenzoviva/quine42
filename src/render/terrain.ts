@@ -4,7 +4,7 @@
 // earthen banks, walls extruded, doors as an opening under a lintel. What stands on a tile
 // (trees on woods, boulders on rock) is the terrain's model (`TileDef.model`), a few seeds of it as
 // instances, turned and shifted; a stand-in until the model is ready. Buildings are no longer tiles: each
-// is a structure, a model on its lot (ADR-0043), drawn with the things.
+// is a structure, a model on its lot (ADR-0043), drawn with the entities.
 
 import * as THREE from 'three';
 import type { Chunk, Kernel } from '../kernel/kernel';

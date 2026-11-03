@@ -1,4 +1,4 @@
-// Things look like their MarkovJunior programs (ADR-0041): the seed's library, forms in the kernel,
+// Entities look like their MarkovJunior programs (ADR-0041): the seed's library, forms in the kernel,
 // collision from the voxels, actions as rules on the model.
 
 import { describe, expect, it } from 'vitest';
@@ -24,7 +24,7 @@ describe('the library of models', () => {
       expect(classOf(index[id].classe), id).toBeDefined();
       expect(modelErrors(p, bundledFiles[p], index[id].tempo), id).toEqual([]);
     }
-    // Every class has its generic model, used when a thing has none of its own.
+    // Every class has its generic model, used when an entity has none of its own.
     for (const c of ['persona', 'animale', 'bestia', 'albero', 'cespuglio', 'roccia', 'sasso', 'oggetto', 'mobile', 'edificio', 'monumento', 'grande']) expect(bundledFiles[`models/${c}.xml`], c).toBeDefined();
   }, 60_000);
 
@@ -45,7 +45,7 @@ describe('forms in the kernel', () => {
     const bread = k.spawnItem([...k.content.items.keys()].find((id) => !k.content.get(id)!.model)!, 2.5, 1.5);
     expect((k.ecs.get(cat, 'form') as FormComp).model).toBe('animale');
     expect((k.ecs.get(well, 'form') as FormComp).model).toBe('pozzo');
-    // An item defined by a module has the module's model; the others the generic thing.
+    // An item defined by a module has the module's model; the others the generic entity.
     expect((k.ecs.get(item, 'form') as FormComp).model).toBe('forbici');
     const f = k.ecs.get(bread, 'form') as FormComp;
     expect(f.model).toBe('oggetto');
@@ -55,7 +55,7 @@ describe('forms in the kernel', () => {
     const seeds = new Set(Array.from({ length: 30 }, (_, i) => k.forms.seedFor('persona', `p${i}`)));
     expect(seeds.size).toBeGreaterThan(1);
     expect(Math.max(...seeds)).toBeLessThanOrEqual(8);
-    // A thing whose model is missing falls back to its class's.
+    // An entity whose model is missing falls back to its class's.
     expect(k.forms.resolve('non-esiste', 'albero')).toBe('albero');
     expect(k.forms.resolve(undefined, undefined)).toBe('oggetto');
   });

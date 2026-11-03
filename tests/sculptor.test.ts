@@ -100,7 +100,7 @@ describe('the models the world lacks', () => {
     const missing = k.sculpting.missing();
     const req = missing.find((m) => m.id === man.appearance!.model)!;
     expect(req.classe).toBe('persona');
-    // Until it is sculpted the thing shows the generic model of its class.
+    // Until it is sculpted the entity shows the generic model of its class.
     const id = k.spawnModuleEntity(k.modules.get(r.id!)!, 2.5, 2.5, undefined, 'test#mugnaio');
     expect((k.ecs.get(id, 'form') as FormComp).model).toBe('persona');
     expect(await k.sculpting.make(req)).toBe(true);
@@ -146,7 +146,7 @@ describe('the sizes of D&D (ADR-0092)', () => {
     const text = describeRequest({ id: 'x', nome: 'la cittadella', aspetto: 'mura', classe: 'grande', taglia: 'enorme' }, grande);
     expect(text).toContain('taglia Enorme (7.5 × 7.5 × 6 caselle, 16 voxel per casella)');
     expect(text).toContain('scatola 120 × 120 × 96 voxel');
-    // Six sizes, Gargantuan the largest; a forged thing never takes the two rare ones.
+    // Six sizes, Gargantuan the largest; a forged entity never takes the two rare ones.
     expect(TAGLIE.map((t) => t.id)).toEqual(['minuscola', 'piccola', 'media', 'grande', 'enorme', 'gargantuesca']);
     expect(forgedSize('Grande')).toEqual({ taglia: 'grande' });
     expect(forgedSize('enorme')).toEqual({});

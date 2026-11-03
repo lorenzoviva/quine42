@@ -162,7 +162,7 @@ export class StudioPanel {
   }
 
   /**
-   * The plan of a place seen from above (T26): its tiles in their colours, the structures, the things and the runes; in a
+   * The plan of a place seen from above (T26): its tiles in their colours, the structures, the entities and the runes; in a
    * phase (`PLACE_PHASES`), the place as it is then, what the phase adds outlined in green.
    */
   private planOf(cx: number, cy: number, phase = PLACE_PHASES.length - 1): HTMLCanvasElement | undefined {
@@ -188,7 +188,7 @@ export class StudioPanel {
     ctx.lineWidth = 2;
     for (const s of phase >= 4 ? mini.structures : []) ctx.strokeRect((s.x - s.w / 2) * px + 1, (s.y - s.h / 2) * px + 1, s.w * px - 2, s.h * px - 2);
     if (!finished) return cv;
-    for (const t of mini.things) {
+    for (const t of mini.entities) {
       ctx.fillStyle = t.color ?? '#ffffff';
       ctx.beginPath();
       ctx.arc(t.x * px, t.y * px, px * 0.35, 0, Math.PI * 2);

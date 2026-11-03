@@ -1,6 +1,6 @@
 // Chunks. The Cartographer no longer draws grids (models cannot count cells): it chooses the
 // environment (a MarkovJunior layout program), names the place and says what lives there, inside or
-// outside lots. The kernel runs the program, guarantees paths and places things.
+// outside lots. The kernel runs the program, guarantees paths and places entities.
 // At genesis the Cartographer writes the layout programs themselves.
 
 import type { Schema } from '../ai/models';
@@ -28,7 +28,7 @@ export interface ChunkPlan {
   objects: PlacedObject[];
   /** Names of items lying around. */
   ground: string[];
-  /** Things that do not exist yet: the Forge will create them. */
+  /** Entities that do not exist yet: the Forge will create them. */
   fresh: Array<{ concept: string; where: Where }>;
   /** Rune fragments (lines from the catalogue) to scatter. */
   runes: string[];

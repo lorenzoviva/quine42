@@ -13,14 +13,14 @@ import { readWandererState, SOLO, validWandererId, type Profile } from '../kerne
 import { accountWanderer, type Account, type Verifier } from './account';
 import { playerChanges, playerFiles } from './files';
 import { hashStr, hex } from '../kernel/rng';
-import { THING_PARTS, type ClientMsg, type FileChanges, type ItemOp, type Dialog, type FormView, type Me, type MyState, type Notice, type OtherView, type ChunkView, type ServerLink, type ServerMsg, type ThingView } from './protocol';
+import { ENTITY_PARTS, type ClientMsg, type FileChanges, type ItemOp, type Dialog, type FormView, type Me, type MyState, type Notice, type OtherView, type ChunkView, type ServerLink, type ServerMsg, type EntityView } from './protocol';
 
 export interface SessionOptions {
   /** Updates per second to every client. */
   hz?: number;
-  /** How far (tiles) a client sees things and other wanderers. */
+  /** How far (tiles) a client sees entities and other wanderers. */
   near?: number;
-  /** How far (tiles) a wanderer reaches the things they act on. */
+  /** How far (tiles) a wanderer reaches the entities they act on. */
   reach?: number;
   /**
    * Accounts (T44b): with a verifier, who comes in is the account their token proves (`entra.token`), not the id they say.
@@ -204,7 +204,7 @@ interface Client {
   me?: string;
   stato?: string;
   places: Map<string, number>;
-  /** What the client knows of each thing in sight: what it is, and where it last was. */
+  /** What the client knows of each entity in sight: what it is, and where it last was. */
   things: Map<number, { look: string; x: number; y: number }>;
   others: Map<string, string>;
   /** The master follows this player (T42c): what they get is what is around them. */
@@ -738,7 +738,7 @@ export class SessionServer {
   }
 
   /**
-   * The master follows a player (T42c), without leaving where they are: the places, things and wanderers sent are those
+   * The master follows a player (T42c), without leaving where they are: the places, entities and wanderers sent are those
    * around the player, until they stop (no id) or the player leaves.
    */
   private watch(c: Client, id: unknown): Answer {
@@ -946,7 +946,7 @@ export class SessionServer {
       });
     }
     if (chunks.length) out.luoghi = chunks;
-    const things: ThingView[] = [];
+    const things: EntityView[] = [];
     const inSight = new Set<number>();
     for (const id of k.ecs.query('pos')) {
       if (k.ecs.has(id, 'player')) continue;
@@ -988,14 +988,14 @@ export class SessionServer {
     return out;
   }
 
-  /** What a thing is, for a client that draws it: everything but where it is. */
-  private lookOf(id: number): Omit<ThingView, 'id' | 'x' | 'y'> {
+  /** What an entity is, for a client that draws it: everything but where it is. */
+  private lookOf(id: number): Omit<EntityView, 'id' | 'x' | 'y'> {
     const k = this.kernel;
     const m = k.ecs.get(id, 'module')?.id ?? k.ecs.get(id, 'pickup')?.item;
     const form = this.formOf(id);
     const b = k.bubbles.get(id);
     const parts: Record<string, unknown> = {};
-    for (const name of THING_PARTS) {
+    for (const name of ENTITY_PARTS) {
       if (!k.ecs.has(id, name)) continue;
       const v = k.ecs.get(id, name);
       parts[name] = name === 'mind' ? {} : name === 'identity' ? { name: v?.name } : name === 'container' ? { size: v?.size } : v;

@@ -7,7 +7,7 @@ import type { Kernel } from '../kernel/kernel';
 import { instanceGrid, type Form, type FormComp } from '../kernel/forms';
 import { meshVoxels, type MeshData } from '../mj/mesh';
 import { casts, MAT } from './materials';
-import type { Limb } from './things';
+import type { Limb } from './entities';
 import type { FormMeshes } from './worker';
 
 export function geometry(m: MeshData): THREE.BufferGeometry {
