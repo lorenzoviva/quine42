@@ -10,6 +10,7 @@ import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { bundledFiles } from '../../src/kernel/bundle';
 import { worldToken } from '../../server/access';
+import { gitLocks, runGit, settleGit } from '../../server/git';
 import { LEDGER_DIR, ledgerOf } from '../../server/ledger';
 import { universeStore } from '../../server/universeStore';
 import { INTERNAL_HEADER } from '../../src/kernel/universes';
@@ -89,8 +90,7 @@ describe('il sorvegliante, con un mondo finto', () => {
     const c = client();
     h.connect(c.link);
     await until(() => inner.good, 5000, 'un commit vissuto');
-    // From here the deaths are in a row. `healthy` counts from the spawn, opening included: at 150 ms a world that takes 1 s to open (24 busy threads, T176)
-    // would have its deaths forgotten at the first look. In production `healthy` is a minute, against an opening of 12 s on an idle machine and 90 s under that load (T176).
+    // From here the deaths are in a row: under load, 150 ms could pass between the world opening and the next probe reaching it.
     inner.times.healthy = 3600000;
     childOf(h).send({ t: 'sonda-muori' });
     await until(() => h.restarts === 1, 5000, 'primo riavvio');
@@ -107,6 +107,40 @@ describe('il sorvegliante, con un mondo finto', () => {
     expect(c.closed()).toBe(true);
     await h.stop();
   });
+
+  it('V-007 l’apertura non conta come vita: chi muore appena aperto, dopo un’apertura più lunga di `healthy`, torna al commit vissuto e si arrende', async () => {
+    let gaveUp = '';
+    let n = 0;
+    const h = fake('pronto', { times: { ...FAST, healthy: 150, deaths: 3 }, headOf: async () => `commit-${++n}`, onGiveUp: (w) => (gaveUp = w) });
+    const inner = h as unknown as { good?: string; times: { healthy: number }; o: { entryArgs: string[] } };
+    await h.start();
+    const c = client();
+    h.connect(c.link);
+    await until(() => inner.good, 5000, 'un commit vissuto');
+    // From here it opens in 2 s and lives 400 ms: `healthy` is between the two. In production: an opening of 90 s against 60 s (T176). The 400 ms are more than a look of the watcher.
+    inner.times.healthy = 1500;
+    inner.o.entryArgs = ['apre-e-muore', '2000', '400'];
+    childOf(h).send({ t: 'sonda-muori' });
+    await until(() => h.restarts === 2, 15000, 'secondo riavvio');
+    const third: Array<{ t: string; open?: { restore?: string } }> = [];
+    childOf(h).on('message', (m: never) => void third.push(m));
+    await until(() => third.some((m) => m.t === 'pronto'), 15000, 'terza apertura');
+    expect(third.find((m) => m.t === 'visto')?.open?.restore).toMatch(/^commit-\d+$/);
+    await until(() => gaveUp, 15000, 'resa');
+    expect(c.of('rifiuto')).toHaveLength(1);
+    await h.stop();
+  }, 60000);
+
+  it('V-007 aperto e vivo per `healthy`, le morti di prima si dimenticano', async () => {
+    const h = fake('pronto', { times: { ...FAST, healthy: 1000 } });
+    const inner = h as unknown as { deaths: number; up: boolean };
+    await h.start();
+    childOf(h).send({ t: 'sonda-muori' });
+    await until(() => h.restarts === 1 && inner.up, 15000, 'di nuovo su');
+    expect(inner.deaths).toBe(1);
+    await until(() => inner.deaths === 0, 15000, 'morti dimenticate');
+    await h.stop();
+  }, 60000);
 
   it('V-007 i segreti restano qui: nel comando e nell’ambiente del mondo non ci sono', async () => {
     process.env.GEMINI_API_KEY = 'chiave-finta';
@@ -265,6 +299,39 @@ describe('due mondi veri', () => {
       await due.stop();
     }
   }, opening(3));
+
+  it('V-007 stop() aspetta il commit già partito: niente lock, e il commit c’è (T209)', async () => {
+    universe('salva');
+    const root = path.join(dir, 'salva');
+    const h = fake('pronto', { name: 'salva', gits: () => settleGit(root, 60000) });
+    await h.start();
+    const changes: Record<string, string> = {};
+    for (let i = 0; i < 3000; i++) changes[`modules/massa/f${i}.json`] = `{"n":${i}}`;
+    const commit = fetch(`${base}/api/universe/salva/commit`, { method: 'POST', headers: { 'Content-Type': 'application/json', [INTERNAL_HEADER]: worldToken(INTERNAL, 'salva') }, body: JSON.stringify({ changes, message: 'l’ultimo salvataggio', author: 'kernel' }) });
+    // The world goes while git is at work: as when it is killed at the end of its last save.
+    await until(() => gitLocks(root).length, 60000, 'il commit è partito');
+    await h.stop();
+    expect(gitLocks(root)).toEqual([]);
+    expect((await commit).status).toBe(200);
+    expect(execFileSync('git', ['log', '-1', '--format=%s'], { cwd: root, windowsHide: true, encoding: 'utf8' }).trim()).toBe('l’ultimo salvataggio');
+  }, 120000);
+
+  it('V-007 stop() entro il suo limite: un git che non finisce è ucciso e i lock tolti (T209)', async () => {
+    universe('ferma');
+    const root = path.join(dir, 'ferma');
+    const h = fake('pronto', { name: 'ferma', gits: () => settleGit(root, 300) });
+    await h.start();
+    // Reads what nobody writes: it never ends. The lock is what a commit cut short would leave.
+    const stuck = runGit(root, ['hash-object', '--stdin'], { author: ['Prove', 'prove@rune.local'] }).catch((e: Error) => e);
+    writeFileSync(path.join(root, '.git', 'index.lock'), '');
+    mkdirSync(path.join(root, '.git', 'refs', 'heads', 'rami'), { recursive: true });
+    writeFileSync(path.join(root, '.git', 'refs', 'heads', 'rami', 'x.lock'), '');
+    const t = Date.now();
+    await h.stop();
+    expect(Date.now() - t).toBeLessThan(20000);
+    expect(gitLocks(root)).toEqual([]);
+    expect(await stuck).toBeInstanceOf(Error);
+  }, 60000);
 
   it('V-007 il programma ha la cache delle forme senza il disco dei test', () => {
     const text = readFileSync(program, 'utf8');

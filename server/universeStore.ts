@@ -31,7 +31,7 @@ import { publicFiles } from '../src/session/files';
 import type { AccountSettings } from './account';
 import { sealLedger, sweepBalances } from './ledger';
 import { callerOf, creditFile, failureText, gameIn, isJson, newSecret, newUniverse, owns, type Access } from './access';
-import { runGit } from './git';
+import { holdGit, runGit } from './git';
 import { Rates, type Pace } from './rates';
 import { accountWanderer } from '../src/session/account';
 
@@ -257,7 +257,8 @@ export function universeHandler(baseDir: string, opts: { accounts?: AccountSetti
   /** One operation at a time per universe (git is not happy with concurrent writers). */
   const serial = <T>(name: string, fn: () => Promise<T>): Promise<T> => {
     const prev = queues.get(name) ?? Promise.resolve();
-    const next = prev.then(fn, fn);
+    // Held from now, the wait in the queue too: a world that stops waits for the last save it sent.
+    const next = holdGit(path.join(baseDir, name), () => prev.then(fn, fn));
     queues.set(name, next.catch(() => undefined));
     return next;
   };

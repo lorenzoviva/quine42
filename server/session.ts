@@ -15,7 +15,7 @@ import type { AccountSettings } from './account';
 import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
 import { failureText, gameIn, gate, refuse } from './access';
 import { PROGRAMS_DIR } from './hidden';
-import { runGit } from './git';
+import { runGit, settleGit } from './git';
 import { LEDGER_DIR, sweepBalances } from './ledger';
 import { Rates, type Pace } from './rates';
 import { buildWorld, sweepPrograms, WorldHost, type HostLink, type WorldTimes } from './worldHost';
@@ -237,6 +237,7 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
       entry: await program(),
       memoryMb,
       headOf: universes ? () => runGit(path.join(universes, name), ['rev-parse', 'HEAD'], { author: ['kernel', 'kernel@quine'] }).then((out) => out.trim()) : undefined,
+      gits: universes ? () => settleGit(path.join(universes, name)) : undefined,
       times: o.times,
       onGiveUp: () => activeHosts.delete(name),
       onIdle: () => retire(name),
