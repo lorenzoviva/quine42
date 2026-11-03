@@ -276,6 +276,7 @@ l'esecuzione la fa `node tools/pipeline/pipeline.mjs esegui`: task in parallelo 
 condiviso**: segue le «Regole per chi esegue un task» del README (solo il suo worktree, mai il backlog, niente merge né
 domande: le scrive in `docs/pipeline/domande/<Txx>.md`) al posto dei punti 1 e 3 sul to-do e sul prompt successivo.
 **Fable** (ADR-0115): il provider `fable` (tetto 1, dentro i 2 della CLI di Claude) solo per i task più difficili, mai orchestratore.
+**I piani e il contesto dei task** (ADR-0119): `abbonamenti` e `piani` in `config.json` scalano le stime e dicono i provider attivi; un task nuovo parte solo se la finestra delle 5 ore lo regge (`windowAdmits`), e solo sul suo provider, senza ripiego; gli agenti leggono `.pipeline-task.md` e non toccano il backlog: stato ed esito li scrive `integra`, che rinumera anche gli ADR in conflitto; `quadro.md` è una fotografia sotto le 75 righe.
 **L'orchestratore** (ADR-0078, [`docs/pipeline/orchestra.md`](docs/pipeline/orchestra.md), `/pipeline` in Claude Code e in Antigravity)
 è l'agente da cui l'autore lancia sempre la pipeline: pianifica, lancia `esegui`, riporta ogni task, delega a un subagente la verifica nel
 browser che il task chiede e non ha fatto (riga `BROWSER:`), integra rinumerando gli ADR che si scontrano, e tiene
@@ -284,7 +285,7 @@ browser che il task chiede e non ha fatto (riga `BROWSER:`), integra rinumerando
 **L'ambiente dell'orchestratore** (ADR-0079): la pipeline si lancia con `node tools/pipeline/pipeline.mjs orchestra [--agente claude|argon|gemini] [--porta 4242]`
 (`tools/pipeline/orchestra.mjs`): un processo con `esegui` sempre acceso, l'interfaccia web locale (`tools/pipeline/web.mjs`, T69; anche da sola con `node tools/pipeline/pipeline.mjs web`) e la conversazione con l'orchestratore a turni (`claude -p --resume`,
 `agy -p --conversation`), la chat nel terminale e sul web (stessa coda `.pipeline/orchestra/coda.json`), eventi e chat su disco (`.pipeline/orchestra/`), epoche che ripartono dal **quadro**
-(`docs/pipeline/quadro.md`) a metà finestra o quando i crediti finiscono (provider successivo di `orchestra.ordine`), con `avvio.md` compatto (senza indice intero, chat troncata e deduplicata) e interpellando l'orchestratore solo per messaggi dell'autore o decisioni (esiti, limiti, conflitti; ADR-0089). L'orchestratore
+(`docs/pipeline/quadro.md`) al 35 % della finestra o quando i crediti finiscono (provider successivo di `orchestra.ordine`), con `avvio.md` compatto (senza indice intero, chat troncata e deduplicata) e interpellando l'orchestratore solo per messaggi dell'autore o decisioni (esiti, limiti, conflitti; ADR-0089). L'orchestratore
 decide e delega (`interrompi`, `approva`, `assegna`, `dossier`, `indice`, `prossimo`, `ferma --ora|--dopo` quando l'autore chiede di spegnere, ADR-0090: Ctrl+C è `ferma --ora`, i task interrotti riprendono al riavvio e `avvio.md` dice cosa era in corso e cosa è finito; `integra` su un conflitto annulla e la risoluzione
 diventa un task); i task sopravvivono al processo (log diretti, `--session-id`, ripresi al riavvio).
 

@@ -216,7 +216,7 @@ Altri agenti, di altri provider, lavorano nello stesso repository nello stesso m
    `docs/pipeline/domande/<Txx>.md` (contesto, domanda, opzioni con la tua raccomandazione), committa e termina con
    `ESITO: in attesa`.
 5. I numeri di ADR possono scontrarsi tra task paralleli: prendi il primo libero nel tuo branch; `integra` rinumera da solo.
-6. Se il task chiede una verifica nel browser, falla (`AGENTS.md`, «Convalida nel browser»: porta libera, scheda tua, chiudi
+6. Se il task chiede una verifica nel browser, falla (`docs/architettura-dettagli.md#convalida-browser`: porta libera, scheda tua, chiudi
    tutto alla fine) nel suo turno: la preview con `node tools/pipeline/pipeline.mjs turno browser -- npx vite preview --port <n> --strictPort`
    in background; il browser è tuo finché la preview vive, fermarla lo lascia.
 7. La suite intera dei test nel suo turno: `node tools/pipeline/pipeline.mjs turno test -- npm test` (un solo file di test, `npx vitest run
