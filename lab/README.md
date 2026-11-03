@@ -49,6 +49,7 @@ Il motore, il front-end XML, la palette, le mesh, lo scheletro, le classi e le f
   - `trial-report.ts`, `costs-history.ts`: tabelle dei costi delle prove;
   - `mjx-keep.ts`, `trial-keep.ts`: tengono i programmi migliori in `mjx/models/gemini/`.
 - `mjx-official.ts [-- Growth River]`: i modelli ufficiali eseguiti e fotografati.
+- `mjx-trace.ts -- modello.xml [--bersaglio moderna | --size "X Y Z"] [--forma differenze] [--tetto 4000] [--passo N]`: cosa ha fatto un programma, nodo per nodo, in testo (`banco/traccia.md`).
 - `game-requests.ts`: quanto sono grandi le richieste del gioco (offline, conta i token con `countTokens`).
 
 ## Che cosa ho imparato scrivendo modelli (vale per chi corregge)
