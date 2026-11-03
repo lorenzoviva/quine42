@@ -22,7 +22,7 @@
 | [La corona e gli interni dello studio](#corona) | `src/kernel/corona.ts`, `src/kernel/archive.ts`, `src/kernel/bible.ts`, `src/kernel/situation.ts`, `src/kernel/screens.ts`, `src/render/corona3d.ts`, `src/render/screens.ts`, `src/ui/studio.ts`, `src/ui/graph.ts` |
 | [Meccaniche, casi dei sistemi, catena e banco di prova](#sala-sistemi) | `src/kernel/agents/mechanics.ts`, `src/kernel/bench.ts`, `src/kernel/chain.ts`, `src/render/chain.ts`, `src/render/bench.ts` |
 | [Geografia](#geografia) | `src/kernel/atlas.ts`, `src/kernel/stamps.ts`, `world/atlas.json` |
-| [La partita, i viandanti, le rune per ruolo](#partita-viandanti) | `src/kernel/partita.ts`, `src/kernel/wanderers.ts`, `src/kernel/runes.ts` |
+| [La partita, i viandanti, le rune per ruolo](#partita-viandanti) | `src/kernel/gameSetup.ts`, `src/kernel/wanderers.ts`, `src/kernel/runes.ts` |
 | [Semi condivisi](#semi) | `src/kernel/rng.ts`, `tests/determinism.test.ts` |
 | [Chi paga, le carte, i crediti](#carte-crediti) | `src/kernel/cards.ts`, `src/kernel/credits.ts`, `server/ledger.ts` |
 | [Il multigiocatore: server, client, ramo del master, tra viandanti](#multigiocatore) | `src/session/`, `server/session.ts`, `server/universeStore.ts`, `server/access.ts`, `src/master.ts` |
@@ -269,7 +269,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 ## La partita, i viandanti, le rune per ruolo
 
 - **La partita** (ADR-0053, T33): `universe.json → partita` (`modalita`, `morte` 0-4, `pvp`, `altroTraGiocatori`; predefiniti:
-  singola, 3, no, sì) si sceglie nella schermata della Genesi di un universo mai generato e poi non cambia: `repairPartita` (validatore)
+  singola, 3, no, sì) si sceglie nella schermata della Genesi di un universo mai generato e poi non cambia: `repairGameSetup` (validatore)
   la ripara, `keepGame` riscrive un `universe.json` che dice altro. Va come principio (`gameSummary`) a Narratore, Arbitro, Ingegnere
   e Referente. Alla morte il Narratore (`player.death`) traduce il livello (`DEATH_LEVELS`) in cosa si perde (`perde_tutto` o effetti
   che tolgono) e dove si riparte (`qui | piazza`); `continueAfterDeath` è asincrona; senza risposta vale `fallbackDeath`.
@@ -511,7 +511,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 <a id="taglie"></a>
 ## Le taglie
 
-- **Le taglie** (ADR-0092, T54): le taglie di D&D (`TAGLIE` in `src/mj/classes.ts`: minuscola, piccola, media, grande, enorme,
+- **Le taglie** (ADR-0092, T54): le taglie di D&D (`SIZE_TIERS` in `src/mj/classes.ts`: minuscola, piccola, media, grande, enorme,
   gargantuesca, la massima), la stessa scala per creature e strutture: la classe dà la forma e la scatola della sua taglia solita
   (`AssetClass.taglia`), la taglia la scala (`tilesOf`, `boxOf(cls, taglia)`, più rada oltre 120 voxel, `densityOf`). `appearance.taglia`,
   `strutture[].taglia` del Cartografo, `struttura.taglia`, `SculptRequest.taglia`, `ModelInfo.taglia`/`vpt` (`modelSize`). Rare: una

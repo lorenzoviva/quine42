@@ -11,7 +11,7 @@ import { Council } from '../src/kernel/agents/council';
 import { checkProgram, DEFAULT_SCULPTORS, describe as describeRequest, modelFor, sculpt, withSize } from '../src/kernel/agents/sculptor';
 import { forgedSize } from '../src/kernel/agents/forge';
 import { modelSize } from '../src/kernel/modeldirector';
-import { boxOf, classOf, densityOf, MAX_SIDE, TAGLIE, tilesOf } from '../src/mj/classes';
+import { boxOf, classOf, densityOf, MAX_SIDE, SIZE_TIERS, tilesOf } from '../src/mj/classes';
 import { encodePng } from '../src/mj/png';
 import type { FormComp } from '../src/kernel/forms';
 
@@ -147,7 +147,7 @@ describe('the sizes of D&D (ADR-0092)', () => {
     expect(text).toContain('taglia Enorme (7.5 × 7.5 × 6 caselle, 16 voxel per casella)');
     expect(text).toContain('scatola 120 × 120 × 96 voxel');
     // Six sizes, Gargantuan the largest; a forged entity never takes the two rare ones.
-    expect(TAGLIE.map((t) => t.id)).toEqual(['minuscola', 'piccola', 'media', 'grande', 'enorme', 'gargantuesca']);
+    expect(SIZE_TIERS.map((t) => t.id)).toEqual(['minuscola', 'piccola', 'media', 'grande', 'enorme', 'gargantuesca']);
     expect(forgedSize('Grande')).toEqual({ taglia: 'grande' });
     expect(forgedSize('enorme')).toEqual({});
     expect(forgedSize('colossale')).toEqual({});

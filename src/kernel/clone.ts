@@ -107,7 +107,7 @@ export function cloneChanges(files: FileMap, opts: CloneOptions): { changes: Fil
   const raw = parse(files['universe.json']) ?? {};
   const game = raw.partita && typeof raw.partita === 'object' ? raw.partita : {};
   if (game.modalita !== 'multigiocatore') throw new Error('solo un universo in multigiocatore ha un master da cambiare');
-  // As repairPartita reads it: a master that is not a wanderer id is the one who plays alone.
+  // As repairGameSetup reads it: a master that is not a wanderer id is the one who plays alone.
   const from: string = validWandererId(game.master) ? game.master : SOLO;
   if (from === opts.master) throw new Error(`«${opts.master}» è già il master di questo universo`);
   const changes: FileMap = inheritCards(files, typeof raw.name === 'string' ? raw.name : '', from, opts.titolari === 'master' ? opts.master : undefined);

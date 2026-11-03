@@ -12,7 +12,7 @@ import { hashStr } from '../rng';
 import { metaBreak } from '../fourthwall';
 import { normName } from '../content';
 import type { Manifest } from '../types';
-import { classOf, CLASSES, guessClass, RARE_SIZES, sizeOf, TAGLIE } from '../../mj/classes';
+import { classOf, CLASSES, guessClass, RARE_SIZES, sizeOf, SIZE_TIERS } from '../../mj/classes';
 import { ownModelId } from '../modeldirector';
 import { AGENTS, wordsOf, type AgentId, type Council } from './council';
 
@@ -101,7 +101,7 @@ const CONCEPT_SCHEMA: Schema = {
     lore: { type: 'STRING' },
     aspetto: { type: 'STRING', description: "com'è fatto: forma, proporzioni, materiali, colori (lo Scultore ne fa un modello 3D)" },
     classe: { type: 'STRING', enum: CLASSES.map((c) => c.id), description: 'la sua classe di grandezza (persona, animale, mobile, oggetto, edificio…)' },
-    taglia: { type: 'STRING', enum: TAGLIE.filter((t) => !RARE_SIZES.includes(t.id)).map((t) => t.id), description: 'la taglia di D&D, solo se diversa da quella solita della sua classe (un gigante: grande)' },
+    taglia: { type: 'STRING', enum: SIZE_TIERS.filter((t) => !RARE_SIZES.includes(t.id)).map((t) => t.id), description: 'la taglia di D&D, solo se diversa da quella solita della sua classe (un gigante: grande)' },
     contesto: {
       type: 'OBJECT',
       properties: { terreni: { type: 'ARRAY', items: { type: 'STRING' } }, luoghi: { type: 'STRING' }, rarita: { type: 'NUMBER' } },

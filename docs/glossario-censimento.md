@@ -9,6 +9,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 |---|---|---|---|---|---|
 | Universo | `reame` | 0 (0) | 1 (1) | 17 (8) | 1 (1) |
 | Universo | `realm` | 15 (5) | 0 (0) | 2 (2) | 0 (0) |
+| Partita | `Partita` | 46 (18) | 0 (0) | 105 (35) | 6 (3) |
 | Luogo | `place` | 437 (57) | 0 (0) | 25 (13) | 2 (2) |
 | Luogo | `chunk` | 577 (41) | 0 (0) | 109 (26) | 0 (0) |
 | Luogo | `Place` | 437 (57) | 0 (0) | 25 (13) | 2 (2) |
@@ -36,7 +37,9 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Modello | `modello` | 94 (28) | 5 (2) | 216 (55) | 15 (4) |
 | Programma | `codice` | 72 (16) | 17 (7) | 110 (49) | 4 (1) |
 | Programma | `xml` | 198 (18) | 2 (1) | 34 (14) | 6 (2) |
-| Taglia | `size` | 632 (68) | 1 (1) | 19 (11) | 138 (11) |
+| Taglia | `size` | 666 (68) | 1 (1) | 20 (11) | 138 (11) |
+| Taglia | `Taglia` | 90 (11) | 5 (3) | 46 (12) | 0 (0) |
+| Taglia | `TAGLIE` | 4 (3) | 1 (1) | 19 (6) | 0 (0) |
 | Viandante | `player` | 325 (49) | 2 (1) | 36 (17) | 5 (2) |
 | Viandante | `giocatore` | 32 (13) | 3 (3) | 134 (45) | 0 (0) |
 | Viandante | `hero` | 0 (0) | 0 (0) | 9 (3) | 62 (5) |

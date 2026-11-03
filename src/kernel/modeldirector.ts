@@ -5,7 +5,7 @@
 
 import type { Kernel } from './kernel';
 import { sculpt, type SculptRequest } from './agents/sculptor';
-import { classOf, densityOf, guessClass, sizeOf, TILE, tilesOf, type Taglia } from '../mj/classes';
+import { classOf, densityOf, guessClass, sizeOf, TILE, tilesOf, type SizeTier } from '../mj/classes';
 import type { ModelInfo } from './forms';
 import { BudgetError } from './ai/models';
 import { modelGap, sculptPlan } from './coefficients';
@@ -72,7 +72,7 @@ export class ModelDirector {
     // Structures the Cartographer asked for (ADR-0043), at their size (ADR-0092): the rare ones (Huge per zone,
     // Gargantuan per realm, the kernel sees to it) by the best model.
     for (const id of k.ecs.query('struttura')) {
-      const s = k.ecs.get(id, 'struttura') as { model?: string; concetto: string; classe: string; taglia?: Taglia };
+      const s = k.ecs.get(id, 'struttura') as { model?: string; concetto: string; classe: string; taglia?: SizeTier };
       if (!lacks(s.model)) continue;
       const place = k.chunkAt(k.ecs.get(id, 'pos').x, k.ecs.get(id, 'pos').y)?.place;
       out.push({ id: s.model!, nome: s.concetto, aspetto: `${s.concetto}: un edificio in cui si entra, con la porta sul davanti${place ? `, a «${place.name}» (${place.description})` : ''}`, classe: s.classe, ...(s.taglia ? { taglia: s.taglia } : {}), contesto: place?.name });

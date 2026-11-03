@@ -7,7 +7,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import type { Taglia } from '../../src/mj/classes';
+import type { SizeTier } from '../../src/mj/classes';
 import { BERSAGLI, bersaglio } from '../banco/bersagli';
 import type { Bersaglio } from '../banco/misure';
 import { fotoSemi, prova, SEMI, type Prova, type ProvaTaglia } from '../banco/varianza';
@@ -18,7 +18,7 @@ const opt = (k: string) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`
 
 const out = path.resolve(opt('out') ?? 'lab/out/banco/varianza');
 const semi = Number(opt('semi') ?? SEMI);
-const taglie = opt('taglie')?.split(',') as Taglia[] | undefined;
+const taglie = opt('taglie')?.split(',') as SizeTier[] | undefined;
 const foto = (opt('foto') ?? '').split(',').filter(Boolean);
 const fileXml = opt('xml');
 

@@ -9,8 +9,8 @@ import { COMUNE } from '../cards';
 import { COUNCIL_PRINCIPLES, lexiconWords } from '../fourthwall';
 import type { FileMap, MagicRune, Spell, TerrainDef } from '../types';
 import type { WorldGraph } from '../graph';
-import { partitaSummary } from '../partita';
-import { repairPartita } from '../validator';
+import { gameSetupSummary } from '../gameSetup';
+import { repairGameSetup } from '../validator';
 
 export type AgentId = 'narratore' | 'cartografo' | 'artista' | 'scultore' | 'fisico' | 'ingegnere' | 'arbitro' | 'referente' | 'attore';
 
@@ -203,7 +203,7 @@ export function gameSummary(files: FileMap): string {
   } catch {
     raw = undefined;
   }
-  return partitaSummary(repairPartita(raw));
+  return gameSetupSummary(repairGameSetup(raw));
 }
 
 export function catalogSummary(catalog: CatalogEntry[]): string {

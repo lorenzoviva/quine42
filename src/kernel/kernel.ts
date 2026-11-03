@@ -6,8 +6,8 @@ import { World, type Id } from './ecs';
 import { EventBus } from './events';
 import { Faults } from './faults';
 import { Sandbox, type Host } from './sandbox';
-import { apiErrors, describeEffect, repairPartita, validateEffects, Validator } from './validator';
-import { deathLevel, fallbackDeath, type DeathVerdict } from './partita';
+import { apiErrors, describeEffect, repairGameSetup, validateEffects, Validator } from './validator';
+import { deathLevel, fallbackDeath, type DeathVerdict } from './gameSetup';
 import { Repo, memoryStore, type Commit, type KeyValueStore } from './repo';
 import { councilMayWrite } from './paths';
 import { Corona, campusModel, tileNear, FOCUSED_RULES, folderOf, TABLETS_MAX, type CoronaTile, type Exhibit, type ShowcaseSource, type StudioItem } from './corona';
@@ -37,7 +37,7 @@ import { USAGE_FILE, UsageLog, type CallRecord } from './ai/usage';
 import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, MemoryLedger, splitCost, type Ledger, type PaymentRecord } from './credits';
 import { MemoryChunks, type ChunkStore } from './chunks';
 import { bodyFoot, bodyGround, Forms, holesOf, InlineRunner, instanceGrid, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground } from './forms';
-import { classOf, guessClass, RARE_SIZES, sizeRank, TAGLIE, tilesOf, type Taglia } from '../mj/classes';
+import { classOf, guessClass, RARE_SIZES, sizeRank, SIZE_TIERS, tilesOf, type SizeTier } from '../mj/classes';
 import { GENERIC, ModelDirector, ownModelId } from './modeldirector';
 import { categoryOf, DEFAULT_SCULPTORS, sculptAction, type SculptorAiModels } from './agents/sculptor';
 import { MODELS_INDEX, type ModelInfo } from './forms';
@@ -47,7 +47,7 @@ import { AGENTS, Council, readBible, wordsOf, type AgentId, type CatalogEntry, t
 import { designEnvironment, drawAtlas, planChunk, readStructure, type ChunkPlan, type WaterRecord, type Where } from './agents/cartography';
 import { WaterFlow, WET, type WaterChange } from './water';
 import { forge, judgeCombination, repairLogic, slug, type ForgeOrigin } from './agents/forge';
-import { agentReply, examine, narrate, NARRATOR_PLAYS, npcDialogue, npcReply, npcSheet, referenteReply, weavePlot, type Interpreter, type NpcReply, type Turn } from './agents/minds';
+import { agentReply, examine, narrate, NARRATOR_PLAYS, npcDialogue, npcReply, npcSheet, liaisonReply, weavePlot, type Interpreter, type NpcReply, type Turn } from './agents/minds';
 import { planGenesis } from './agents/genesis';
 import { councilSession, inventRune, judgeAction, judgeCraft, judgeDeath, nameSpell } from './agents/effects';
 import { canonWithRune, MAX_MAGIC_RUNES, validateNewRune } from './magic';
@@ -58,7 +58,7 @@ import { addItem, CARRY_CAPACITY, countItem, HOTBAR, equippedItem, moveSlot, new
 import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH, worldLevels } from './relief';
 import { CardUses, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, receivedBy, type Received, payerOf, chunkCardId, stampFiles, cardHolderOf, type Card, type CardStamp } from './cards';
 import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState, PER_WANDERER } from './wanderers';
-import type { ActionDef, AiConfig, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Partita, ChunkInfo, Recipe, RuneFragment, TerrainDef, UniverseConfig } from './types';
+import type { ActionDef, AiConfig, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, GameSetup, ChunkInfo, Recipe, RuneFragment, TerrainDef, UniverseConfig } from './types';
 
 /** A solid entity with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
 interface SolidForm extends Ground {
@@ -219,7 +219,7 @@ interface ChunkLot {
   x: number;
   y: number;
   form: FormComp;
-  struttura: { concetto: string; classe: string; taglia?: Taglia; model?: string };
+  struttura: { concetto: string; classe: string; taglia?: SizeTier; model?: string };
 }
 
 /** A planned place in miniature (T26): positions in tiles from the place's top-left corner, levels in `LEVEL`s. */
@@ -356,7 +356,7 @@ export const realmOf = (cx: number, cy: number) => {
   return `${Math.floor((zx + REALM / 2) / REALM)},${Math.floor((zy + REALM / 2) / REALM)}`;
 };
 /** The area of the world where a rare size is unique (ADR-0092): Huge per zone, Gargantuan per realm. */
-export const rareAreaOf = (t: Taglia, cx: number, cy: number) => (t === 'gargantuesca' ? realmOf(cx, cy) : zoneOf(cx, cy));
+export const rareAreaOf = (t: SizeTier, cx: number, cy: number) => (t === 'gargantuesca' ? realmOf(cx, cy) : zoneOf(cx, cy));
 
 const clone = <T>(v: T): T => (v === undefined ? v : JSON.parse(JSON.stringify(v)));
 
@@ -442,7 +442,7 @@ export class Kernel {
   private savedForms = new Map<string, string[]>();
   /** Zones of the world that already have their important structure: zone → the chunk that has it (saved with the game). */
   /** The places that have the rare structures (ADR-0092): size → area (zone, realm) → chunk key. */
-  private rari = new Map<Taglia, Map<string, string>>(RARE_SIZES.map((t) => [t, new Map()]));
+  private rari = new Map<SizeTier, Map<string, string>>(RARE_SIZES.map((t) => [t, new Map()]));
   private runesDirty = true;
   private consumed = new Set<string>();
   private loaded = new Map<string, string>();
@@ -552,7 +552,7 @@ export class Kernel {
   /** The wanderers of a session whose death verdict is under way on the server (T43c). */
   private dying = new Map<string, Promise<void>>();
   /** The game chosen at the Genesis (ADR-0053): universe.json follows it, nothing else changes it. */
-  private game?: Partita;
+  private game?: GameSetup;
   /** Files the kernel or the master wrote and no commit has brought yet: `fenceCouncil` leaves them be. */
   private commanded = new Map<string, string>();
   /** Size of the visible area in cells, set by the renderer. */
@@ -2077,7 +2077,7 @@ export class Kernel {
   }
 
   /** The rare sizes a place may still have (ADR-0092): its area has none of that size, or this place is the one that has it. */
-  rareAllowed(ch: { cx: number; cy: number; key: string }): Taglia[] {
+  rareAllowed(ch: { cx: number; cy: number; key: string }): SizeTier[] {
     return RARE_SIZES.filter((t) => {
       const owner = this.rari.get(t)!.get(rareAreaOf(t, ch.cx, ch.cy));
       return !owner || owner === ch.key;
@@ -2099,11 +2099,11 @@ export class Kernel {
       if (!s.taglia) return;
       const side = sides[n];
       const cls = classOf(side !== undefined && side >= 5 ? 'grande' : 'edificio')!;
-      const fits = (t: Taglia) => side !== undefined && Math.max(...tilesOf(cls, t).slice(0, 2)) <= side;
+      const fits = (t: SizeTier) => side !== undefined && Math.max(...tilesOf(cls, t).slice(0, 2)) <= side;
       const allowed = this.rareAllowed(ch);
-      const ok = (t: Taglia) => fits(t) && (!RARE_SIZES.includes(t) || (!rare && allowed.includes(t)));
-      let t: Taglia | undefined = s.taglia;
-      while (t && !ok(t)) t = sizeRank(t) > 0 ? TAGLIE[sizeRank(t) - 1].id : undefined;
+      const ok = (t: SizeTier) => fits(t) && (!RARE_SIZES.includes(t) || (!rare && allowed.includes(t)));
+      let t: SizeTier | undefined = s.taglia;
+      while (t && !ok(t)) t = sizeRank(t) > 0 ? SIZE_TIERS[sizeRank(t) - 1].id : undefined;
       if (!t) delete s.taglia;
       else s.taglia = t;
       if (t && RARE_SIZES.includes(t)) {
@@ -3594,7 +3594,7 @@ export class Kernel {
       out.push({ id: 'parla', label: 'Parla', enabled: true });
       if (this.introOf(id)) out.push({ id: 'chi', label: 'Chi è', enabled: true });
       this.inventory().slots.slice(0, HOTBAR).forEach((s, i) => s && out.push({ id: `dai:${i}`, label: `Dai ${this.itemInfo(s.item).name}${s.count > 1 ? ` ×${s.count}` : ''}`, enabled: true }));
-      if (this.partita()?.altroTraGiocatori !== false) out.push({ id: 'altro', label: 'Altro…', enabled: true });
+      if (this.gameSetup()?.altroTraGiocatori !== false) out.push({ id: 'altro', label: 'Altro…', enabled: true });
       return out;
     }
     const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
@@ -3771,7 +3771,7 @@ export class Kernel {
       if (action === 'parla') this.bus.emit('ui:chat', { id, name: this.nameOf(id) });
       if (action === 'chi') this.bus.emit('ui:dialog', { speaker: this.nameOf(id), text: this.introOf(id) ?? '' });
       if (action.startsWith('dai:')) this.giveTo(other, Number(action.slice(4)));
-      if (action === 'altro' && this.partita()?.altroTraGiocatori !== false) this.bus.emit('ui:freeaction', { id, name: this.nameOf(id) });
+      if (action === 'altro' && this.gameSetup()?.altroTraGiocatori !== false) this.bus.emit('ui:freeaction', { id, name: this.nameOf(id) });
       return;
     }
     const modId: string | undefined = this.ecs.get(id, 'module')?.id;
@@ -3882,7 +3882,7 @@ export class Kernel {
    * an individual; the server applies the effects to the other's body (`touchWanderer`). Nothing is learned: they are not a thing.
    */
   async freeOnWanderer(to: string, text: string): Promise<string> {
-    if (this.partita()?.altroTraGiocatori === false) {
+    if (this.gameSetup()?.altroTraGiocatori === false) {
       this.message('In questo mondo non si fa «Altro…» su un altro viandante.', 'warn');
       return '';
     }
@@ -3980,7 +3980,7 @@ export class Kernel {
     if (this.godMode(to)) {
       dropped.push(...effects.filter((e) => e.tipo !== 'messaggio').map((e) => e.tipo));
       effects = effects.filter((e) => e.tipo === 'messaggio');
-    } else if (!this.partita()?.pvp) {
+    } else if (!this.gameSetup()?.pvp) {
       effects = effects.flatMap((e) => {
         const kept = unharmed(e);
         if (!kept) dropped.push(e.tipo);
@@ -4088,7 +4088,7 @@ export class Kernel {
         place: this.chunkHere()?.name ?? '',
         transcended: this.exitedOnce,
         shape: sub.entity !== undefined && !sub.wanderer && !!this.shapeModel(sub.entity),
-        between: sub.wanderer ? { pvp: !!this.partita()?.pvp, god: this.godMode(sub.wanderer) } : undefined,
+        between: sub.wanderer ? { pvp: !!this.gameSetup()?.pvp, god: this.godMode(sub.wanderer) } : undefined,
       }, this.focusOn([sub.name, sub.learnModule && `tipo:${nodeSlug(sub.learnModule.manifest.id)}`, sub.learnItem && `oggetto:${nodeSlug(sub.learnItem)}`], p));
     } catch (e) {
       const msg = `(il Concilio tace: ${(e as Error).message})`;
@@ -4702,7 +4702,7 @@ export class Kernel {
   async talkToAgent(agent: AgentId, text: string): Promise<{ say: string; forged?: string; runes?: string[] }> {
     const history = this.agentTalks.get(agent) ?? [];
     this.agentTalks.set(agent, history);
-    if (agent === 'referente') return this.askReferente(text, history);
+    if (agent === 'referente') return this.askLiaison(text, history);
     let r;
     try {
       r = await agentReply(this.council, agent, history, text);
@@ -4724,10 +4724,10 @@ export class Kernel {
    * The Referente takes the transcended wanderer's request to the right team: the Forge, the
    * Cartographer, the Artist, the rules, the Narrator's packs. The Council says yes to almost anything.
    */
-  private async askReferente(text: string, history: Turn[]): Promise<{ say: string; forged?: string; runes?: string[]; credits?: { target: string; amount: number } }> {
+  private async askLiaison(text: string, history: Turn[]): Promise<{ say: string; forged?: string; runes?: string[]; credits?: { target: string; amount: number } }> {
     let r;
     try {
-      r = await referenteReply(this.council, history, text);
+      r = await liaisonReply(this.council, history, text);
     } catch (e) {
       return { say: `(il Referente non risponde: ${(e as Error).message})` };
     }
@@ -4779,18 +4779,18 @@ export class Kernel {
   }
 
   /** The game of this universe (universe.json → partita), chosen at the Genesis. */
-  partita(): Partita {
+  gameSetup(): GameSetup {
     return this.config.partita;
   }
 
   /** A multiplayer game (ADR-0050): the carpet, the rollback and the Council are the master's. */
   manyPlayers(): boolean {
-    return this.partita()?.modalita === 'multigiocatore';
+    return this.gameSetup()?.modalita === 'multigiocatore';
   }
 
   /** Whether a wanderer (the one acting, by default) is the master (T37): alone, always. */
   isMaster(id: string | undefined = this.wanderer().id): boolean {
-    return !this.manyPlayers() || (!!id && id === (this.partita().master ?? SOLO));
+    return !this.manyPlayers() || (!!id && id === (this.gameSetup().master ?? SOLO));
   }
 
   /** God mode (T42a): in a multiplayer game the master does not die, has no needs, takes no harm from the others. */
@@ -5084,8 +5084,8 @@ export class Kernel {
   }
 
   /** Chooses the game of a universe that was never generated (the Genesis screen); after, it is fixed. */
-  private chooseGame(choice: Partial<Partita>): void {
-    const game = repairPartita({ ...this.partita(), ...choice });
+  private chooseGame(choice: Partial<GameSetup>): void {
+    const game = repairGameSetup({ ...this.gameSetup(), ...choice });
     let raw: Record<string, unknown>;
     try {
       raw = JSON.parse(this.repo.working['universe.json'] ?? '{}');
@@ -5115,7 +5115,7 @@ export class Kernel {
       return;
     }
     this.dead = true;
-    this.bus.emit('ui:death', { cause, punizione: deathLevel(this.partita()) });
+    this.bus.emit('ui:death', { cause, punizione: deathLevel(this.gameSetup()) });
   }
 
   /** What is carried, by item (the top level: what death can take). */
@@ -5126,9 +5126,9 @@ export class Kernel {
   }
 
   private async judgeDeath(cause: string): Promise<DeathVerdict> {
-    const level = this.partita().morte;
+    const level = this.gameSetup().morte;
     const carried = this.carriedCounts();
-    const d = deathLevel(this.partita());
+    const d = deathLevel(this.gameSetup());
     try {
       return await judgeDeath(this.council, { cause, level, punishment: `${d.nome} (${level} su 4): ${d.testo}`, carried, states: Object.keys(this.states()), place: this.chunkHere()?.name ?? '' });
     } catch (e) {
@@ -5145,7 +5145,7 @@ export class Kernel {
     if (cause === undefined && this.dying.has(id)) return this.dying.get(id)!;
     const carried = this.as(id, () => this.carriedCounts());
     const verdict = this.deathVerdicts.get(id);
-    const v = (await verdict) ?? fallbackDeath(this.partita().morte, carried);
+    const v = (await verdict) ?? fallbackDeath(this.gameSetup().morte, carried);
     this.deathVerdicts.delete(id);
     if (!this.wanderersById.has(id)) return;
     this.as(id, () => {
@@ -7003,7 +7003,7 @@ export class Kernel {
   }
 
   /** The Council generates a whole new universe from a theme. Constants (carpet, movement, physics, needs, runes) stay. */
-  async runGenesis(theme: string, onProgress?: (step: string) => void, game?: Partial<Partita>): Promise<boolean> {
+  async runGenesis(theme: string, onProgress?: (step: string) => void, game?: Partial<GameSetup>): Promise<boolean> {
     this.generationHeld = true;
     const backup = { ...this.repo.working };
     const keptGame = this.game;

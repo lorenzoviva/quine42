@@ -192,7 +192,7 @@ export class Console {
           void k.chunkStore.clear().then(() => location.reload());
         };
         const clone: HTMLElement[] = [];
-        if (this.onClone && k.partita().modalita === 'multigiocatore') {
+        if (this.onClone && k.gameSetup().modalita === 'multigiocatore') {
           const nome = el('input', { type: 'text', placeholder: 'nome del clone' }) as HTMLInputElement;
           const master = el('input', { type: 'text', placeholder: 'id del nuovo master' }) as HTMLInputElement;
           const pass = el('input', { type: 'checkbox' }) as HTMLInputElement;
@@ -218,7 +218,7 @@ export class Console {
           );
         }
         const creditiRows: HTMLElement[] = [];
-        if (k.partita().modalita === 'multigiocatore') {
+        if (k.gameSetup().modalita === 'multigiocatore') {
           // Others' balances do not reach this client (ADR-0104): only their names, and its own balance.
           const me = k.wanderer().id;
           const wanderers = new Map(k.wanderers().map((w) => [w.id, w.nome]));

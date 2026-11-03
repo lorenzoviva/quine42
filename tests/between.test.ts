@@ -214,7 +214,7 @@ describe('«Altro…» and PvP between wanderers (T43b)', () => {
     const after = k.wandererAt('bruno')!;
     expect(after.x - before.x).toBeGreaterThan(0.5);
     // The master: nothing but words reach them, PvP or not.
-    const master = k.partita().master ?? 'io';
+    const master = k.gameSetup().master ?? 'io';
     const at = k.wandererAt('anna')!;
     put(k, master, { x: at.x, y: at.y + 1 });
     const m = k.wandererAt(master)!;

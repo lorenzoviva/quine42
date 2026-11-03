@@ -98,7 +98,7 @@ export interface Game {
 export function gameIn(universeJson: string | undefined): Game {
   try {
     const partita = JSON.parse(universeJson ?? '{}')?.partita;
-    // As repairPartita reads it: a master that is not a wanderer's id is the one who plays alone.
+    // As repairGameSetup reads it: a master that is not a wanderer's id is the one who plays alone.
     return { many: partita?.modalita === 'multigiocatore', master: validWandererId(partita?.master) ? partita.master : SOLO };
   } catch {
     return { many: false, master: SOLO };

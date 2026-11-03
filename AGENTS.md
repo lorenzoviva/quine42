@@ -142,7 +142,7 @@ src/
     magic.ts            le rune nuove dal Concilio: validatore, riga del canone (ADR-0097)
     cards.ts            chi paga ogni chiamata, le carte dei contenuti, i loro utilizzi (`world/carte.json`), la collezione (ADR-0056; con `shares` anche quote e impronta)
     heritage.ts         l'eredità dei cloni: catena dei titolari, impronte, quote (ADR-0084)
-    partita.ts          la partita scelta alla Genesi: livelli della morte, principio per il Concilio (ADR-0053)
+    gameSetup.ts        la partita scelta alla Genesi: livelli della morte, principio per il Concilio (ADR-0053)
     coefficients.ts     i coefficienti di generazione: quanto spesso ogni agente chiama l'IA, «Low Detail», censimento, stima oraria (ADR-0085)
     wanderers.ts        i viandanti con un id (`io` in singola), il loro stato in `world/giocatori/`, legami e ricordi per id (ADR-0054)
     situation.ts, screens.ts  la Direzione: il tavolo della situazione e la parete di schermi (T46), funzioni pure

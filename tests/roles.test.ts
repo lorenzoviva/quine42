@@ -5,7 +5,7 @@ import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import { countItem } from '../src/kernel/inventory';
 import { carpetLine, COUNCIL_RUNE, extractLines } from '../src/kernel/runes';
-import { repairPartita } from '../src/kernel/validator';
+import { repairGameSetup } from '../src/kernel/validator';
 
 const DT = 1 / 60;
 
@@ -75,10 +75,10 @@ describe('runes and bindings by role (T37)', () => {
   });
 
   it('the master is who created the multiplayer game; alone, everyone is', async () => {
-    expect(repairPartita({ modalita: 'multigiocatore' }).master).toBe('io');
-    expect(repairPartita({ modalita: 'multigiocatore', master: 'Bea!' }).master).toBe('io');
-    expect(repairPartita({ modalita: 'multigiocatore', master: 'bea' }).master).toBe('bea');
-    expect(repairPartita({ master: 'bea' }).master).toBeUndefined();
+    expect(repairGameSetup({ modalita: 'multigiocatore' }).master).toBe('io');
+    expect(repairGameSetup({ modalita: 'multigiocatore', master: 'Bea!' }).master).toBe('io');
+    expect(repairGameSetup({ modalita: 'multigiocatore', master: 'bea' }).master).toBe('bea');
+    expect(repairGameSetup({ master: 'bea' }).master).toBeUndefined();
     const k = await many();
     k.addWanderer('bea', 'Bea');
     expect(k.isMaster('io')).toBe(true);

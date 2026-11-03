@@ -18,7 +18,7 @@ export interface AssetClass {
   /** The model must reach at least this share of the box height (all members look the same size). */
   minHeight?: number;
   /** The size a member of the class has if nobody says (ADR-0092): the class's box is the box of this size. */
-  taglia: Taglia;
+  taglia: SizeTier;
   /** Animation the kernel makes from the model. */
   animation?: 'camminata' | 'vento';
   hint: string;
@@ -44,16 +44,16 @@ export const CLASSES: AssetClass[] = [
 // Gargantuan one 4 × 4: the box of a class grows by the ratio of those spaces (a Medium structure is a house, larger
 // than a Medium person, because its class is). Gargantuan is the largest; the two largest are rare in the world.
 
-export type Taglia = 'minuscola' | 'piccola' | 'media' | 'grande' | 'enorme' | 'gargantuesca';
+export type SizeTier = 'minuscola' | 'piccola' | 'media' | 'grande' | 'enorme' | 'gargantuesca';
 
 export interface SizeDef {
-  id: Taglia;
+  id: SizeTier;
   name: string;
   /** Linear scale against Medium: the side of the space a creature of this size takes in D&D, in tiles. */
   scala: number;
 }
 
-export const TAGLIE: SizeDef[] = [
+export const SIZE_TIERS: SizeDef[] = [
   { id: 'minuscola', name: 'Minuscola', scala: 0.5 },
   { id: 'piccola', name: 'Piccola', scala: 0.75 },
   { id: 'media', name: 'Media', scala: 1 },
@@ -62,13 +62,13 @@ export const TAGLIE: SizeDef[] = [
   { id: 'gargantuesca', name: 'Gargantuesca', scala: 4 },
 ];
 
-export const sizeOf = (id: string | undefined): SizeDef | undefined => TAGLIE.find((t) => t.id === id);
+export const sizeOf = (id: string | undefined): SizeDef | undefined => SIZE_TIERS.find((t) => t.id === id);
 
 /** The rare sizes (ADR-0092): one Huge thing per zone of the world, one Gargantuan per realm (4 × 4 zones). */
-export const RARE_SIZES: Taglia[] = ['enorme', 'gargantuesca'];
+export const RARE_SIZES: SizeTier[] = ['enorme', 'gargantuesca'];
 
 /** A size's place in the scale (0 Tiny … 5 Gargantuan). */
-export const sizeRank = (t: Taglia) => TAGLIE.findIndex((x) => x.id === t);
+export const sizeRank = (t: SizeTier) => SIZE_TIERS.findIndex((x) => x.id === t);
 
 /** The box in tiles of a class at a size (its own if none): the class's box scaled by the ratio of the spaces. */
 export function tilesOf(c: AssetClass, taglia?: string): [number, number, number] {
