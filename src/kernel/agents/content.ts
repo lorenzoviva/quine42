@@ -8,7 +8,7 @@ import { CATEGORY_GLYPHS, normName } from '../content';
 import { ITEM_CATEGORIES, type ItemDef, type LootTable, type Recipe } from '../types';
 import { slug } from './forge';
 import type { AgentId, Council } from './council';
-import { FORME, formaModel } from '../modeldirector';
+import { ITEM_SHAPES, itemShapeModel } from '../modeldirector';
 import { ACTIVITIES, DAY_PHASES, defaultRoutine, inferActivity, RELATION_WORDS, WHERES, type Activity, type DayPhase, type Gender, type Relation, type RoutineStep, type Species, type Where } from '../society';
 
 const ITEM_SCHEMA: Schema = {
@@ -26,7 +26,7 @@ const ITEM_SCHEMA: Schema = {
     posto: { type: 'STRING', description: 'solo per ciò che si indossa o si impugna: testa, corpo, gambe, piedi, mani, arma, scudo, anello, collo, schiena' },
     bonus: { type: 'OBJECT', description: 'solo per ciò che si indossa o si impugna: cosa dà', properties: { difesa: { type: 'NUMBER' }, attacco: { type: 'NUMBER' }, velocita: { type: 'NUMBER', description: 'moltiplicatore, es. 0.95 per un\'armatura pesante, 1.1 per stivali leggeri' }, peso: { type: 'NUMBER', description: 'peso trasportabile in più (zaini)' }, luce: { type: 'NUMBER' }, calore: { type: 'NUMBER' } } },
     aspetto: { type: 'STRING' },
-    forma: { type: 'STRING', enum: [...FORME], description: 'la forma comune a cui somiglia (un modello per forma, colorato come l\'oggetto)' },
+    forma: { type: 'STRING', enum: [...ITEM_SHAPES], description: 'la forma comune a cui somiglia (un modello per forma, colorato come l\'oggetto)' },
   },
   required: ['nome', 'descrizione', 'categoria', 'peso', 'pila', 'tag', 'aspetto', 'forma'],
 };
@@ -76,7 +76,7 @@ export function toItemDef(r: RawItem, taken: Set<string>): ItemDef | null {
     glyph: CATEGORY_GLYPHS[category] ?? '•',
     color: `hsl(${hashStr(id) % 360} 60% 66%)`,
     aspetto: String(r.aspetto ?? r.nome).slice(0, 200),
-    ...((FORME as readonly string[]).includes(r.forma ?? '') ? { model: formaModel(r.forma!) } : {}),
+    ...((ITEM_SHAPES as readonly string[]).includes(r.forma ?? '') ? { model: itemShapeModel(r.forma!) } : {}),
     equippable: !!r.impugnabile,
     ...(hasEffects ? { effects } : {}),
     ...(bag ? { container: bag } : {}),

@@ -5,7 +5,7 @@ import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import { allCards, CARDS_FILE, moduleCardId, readCards, receivedBy } from '../src/kernel/cards';
 import { cloneChanges } from '../src/kernel/clone';
-import { changeOf, contentText, fingerprint, repairEredita, sharesOf } from '../src/kernel/heritage';
+import { changeOf, contentText, fingerprint, repairHeritage, sharesOf } from '../src/kernel/heritage';
 import type { FileMap } from '../src/kernel/types';
 
 const CARPET = 'modules/core.carpet/manifest.json';
@@ -97,9 +97,9 @@ describe('the heritage of clones (T45c)', () => {
   });
 
   it('the base and the copy share come from universe.json, repaired', () => {
-    expect(repairEredita(undefined)).toEqual({ base: 0.1, copia: 0.4 });
-    expect(repairEredita({ base: 2, copia: 'x' })).toEqual({ base: 1, copia: 0 });
-    expect(repairEredita({ base: 0.3, copia: 0.9 })).toEqual({ base: 0.3, copia: 0.7 });
+    expect(repairHeritage(undefined)).toEqual({ base: 0.1, copia: 0.4 });
+    expect(repairHeritage({ base: 2, copia: 'x' })).toEqual({ base: 1, copia: 0 });
+    expect(repairHeritage({ base: 0.3, copia: 0.9 })).toEqual({ base: 0.3, copia: 0.7 });
     const files = terza();
     const cfg = JSON.parse(files['universe.json']);
     const all = { ...files, 'universe.json': JSON.stringify({ ...cfg, eredita: { base: 0.2, copia: 0.8 } }) };

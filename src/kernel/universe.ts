@@ -1,8 +1,8 @@
 // Module discovery: every directory under modules/ with a manifest.json is a self-contained module.
 // Modules talk only through components and events; no implicit dependencies.
 
-import type { AiMinimi, FileMap, ModuleEntry, UniverseConfig } from './types';
-import { repairAttore, repairCoefficients, repairPartita, type Validator } from './validator';
+import type { AiMinimums, FileMap, ModuleEntry, UniverseConfig } from './types';
+import { repairActor, repairCoefficients, repairPartita, type Validator } from './validator';
 import { DEFAULT_PARTITA } from './partita';
 
 export const DEFAULT_CONFIG: UniverseConfig = {
@@ -16,10 +16,10 @@ export const DEFAULT_CONFIG: UniverseConfig = {
 };
 
 /** Repairs quality and spending minimums of an universe (T45d). */
-export function repairMinimi(raw: unknown): AiMinimi | undefined {
+export function repairMinimums(raw: unknown): AiMinimums | undefined {
   if (!raw || typeof raw !== 'object') return undefined;
   const r = raw as Record<string, unknown>;
-  const out: AiMinimi = {};
+  const out: AiMinimums = {};
   if (typeof r.textModel === 'string' && r.textModel.trim()) out.textModel = r.textModel.trim();
   if (r.scultori && typeof r.scultori === 'object') out.scultori = { ...(r.scultori as any) };
   if (typeof r.tetto === 'number' && Number.isFinite(r.tetto) && r.tetto >= 0) out.tetto = Math.round(r.tetto * 100) / 100;
@@ -40,8 +40,8 @@ export function readConfig(files: FileMap): { config: UniverseConfig; error?: st
           ...DEFAULT_CONFIG.ai,
           ...(parsed.ai ?? {}),
           coefficienti: repairCoefficients(parsed.ai?.coefficienti),
-          minimi: repairMinimi(parsed.ai?.minimi),
-          attore: repairAttore(parsed.ai?.attore),
+          minimi: repairMinimums(parsed.ai?.minimi),
+          attore: repairActor(parsed.ai?.attore),
         },
         partita: repairPartita(parsed.partita),
       },

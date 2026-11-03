@@ -725,12 +725,12 @@ export class Corona {
     b.structure = s;
     b.door = { x: Math.floor(px), y: Math.floor(py) };
     // Letter named `plinto` (T48b): location and surface bounds of the plinto in the building's forecourt
-    const plintoSymbols = new Set(g.alphabet.map((sym, i) => (r.palette[sym]?.name === 'plinto' ? i : -1)).filter((i) => i >= 0));
-    if (plintoSymbols.size > 0) {
+    const plinthSymbols = new Set(g.alphabet.map((sym, i) => (r.palette[sym]?.name === 'plinto' ? i : -1)).filter((i) => i >= 0));
+    if (plinthSymbols.size > 0) {
       let px_sum = 0, py_sum = 0, pz_max = 0, pn = 0;
       let min_x = Infinity, max_x = -Infinity, min_y = Infinity, max_y = -Infinity;
       for (let i = 0; i < g.cells.length; i++) {
-        if (!plintoSymbols.has(g.cells[i])) continue;
+        if (!plinthSymbols.has(g.cells[i])) continue;
         const vx = i % g.X;
         const vy = Math.floor((i % XY) / g.X);
         const vz = Math.floor(i / XY);

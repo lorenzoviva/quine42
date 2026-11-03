@@ -388,17 +388,17 @@ describe('V-006 la sessione', () => {
     const { kernel, server } = await world();
     const before = kernel.ai.limits!.text;
     client(server, { id: 'carlo', tetto: 1e9 });
-    expect(kernel.sessionTettoOf('carlo')).toBe(0);
+    expect(kernel.sessionCapOf('carlo')).toBe(0);
     expect(kernel.ai.limits!.text).toBe(before);
   });
 
   it('V-006 rientrare non aggiunge di nuovo lo stesso budget', async () => {
     const { kernel } = await world();
     const before = kernel.ai.limits!.text;
-    kernel.setSessionTetto('carlo', 1);
+    kernel.setSessionCap('carlo', 1);
     const once = kernel.ai.limits!.text;
     expect(once).toBeGreaterThan(before);
-    kernel.setSessionTetto('carlo', 1);
+    kernel.setSessionCap('carlo', 1);
     expect(kernel.ai.limits!.text).toBe(once);
   });
 

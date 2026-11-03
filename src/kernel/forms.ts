@@ -30,7 +30,7 @@ export function vptOf(info: ModelInfo | undefined): number {
  * How many tiles of a model stand under the ground (ADR-0091, T52b): its index entry's `sotto`, from 1 to 3
  * (a cellar, a crypt); 0 for anything else.
  */
-export function sottoOf(info: ModelInfo | undefined): number {
+export function cellarOf(info: ModelInfo | undefined): number {
   const n = info?.sotto;
   return typeof n === 'number' && Number.isInteger(n) && n >= 1 && n <= 3 ? n : 0;
 }
@@ -553,7 +553,7 @@ export class Forms {
     return {
       xml,
       seed,
-      size: sizeFor(xml, cls, info?.taglia, sottoOf(info) * vpt),
+      size: sizeFor(xml, cls, info?.taglia, cellarOf(info) * vpt),
       tint: info?.tinta && tint ? { symbol: info.tinta, color: tint } : undefined,
       rig: cls.animation === 'camminata',
       sway: cls.animation === 'vento',
@@ -577,7 +577,7 @@ export class Forms {
     const req = this.request(model, seed, tint)!;
     const cls = this.classOf(model);
     const vpt = req.vpt;
-    const under = sottoOf(info) * vpt;
+    const under = cellarOf(info) * vpt;
     f = { key, model, seed, status: 'pending', cls, reach: 0, vpt, base: 0 };
     this.forms.set(key, f);
     const form = f;
@@ -623,7 +623,7 @@ export class Forms {
     const xml = this.files[`${MODELS_DIR}${model}.xml`];
     if (!xml) return undefined;
     const info = this.library[model];
-    const size = sizeFor(xml, this.classOf(model), info?.taglia, sottoOf(info) * vptOf(info));
+    const size = sizeFor(xml, this.classOf(model), info?.taglia, cellarOf(info) * vptOf(info));
     return compileMjx(xml, size ? { size } : {});
   }
 }

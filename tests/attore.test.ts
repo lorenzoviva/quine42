@@ -5,7 +5,7 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import type { TextCall } from '../src/kernel/ai/models';
-import { ACTOR_MODEL, CENSUS, hourlyEstimate, repairAttore } from '../src/kernel/coefficients';
+import { ACTOR_MODEL, CENSUS, hourlyEstimate, repairActor } from '../src/kernel/coefficients';
 import { COUNCIL_PRINCIPLES } from '../src/kernel/fourthwall';
 import { readPeople, sheetFingerprint } from '../src/kernel/society';
 import { readConfig } from '../src/kernel/universe';
@@ -49,13 +49,13 @@ async function person(k: Kernel, origin: string, dx: number) {
 
 describe("the Actor's option", () => {
   it('is repaired from whatever universe.json says, and is off unless said', () => {
-    expect(repairAttore(undefined)).toEqual({ acceso: false, modello: ACTOR_MODEL });
-    expect(repairAttore(true)).toEqual({ acceso: true, modello: ACTOR_MODEL });
-    expect(repairAttore('gemini-3.1-flash-lite')).toEqual({ acceso: true, modello: 'gemini-3.1-flash-lite' });
-    expect(repairAttore('spento')).toEqual({ acceso: false, modello: ACTOR_MODEL });
-    expect(repairAttore({ acceso: 'sì', modello: ' gemini-3.8-flash ' })).toEqual({ acceso: true, modello: 'gemini-3.8-flash' });
-    expect(repairAttore({ acceso: true, modello: 42 })).toEqual({ acceso: true, modello: ACTOR_MODEL });
-    expect(repairAttore({ modello: 'x' })).toEqual({ acceso: false, modello: 'x' });
+    expect(repairActor(undefined)).toEqual({ acceso: false, modello: ACTOR_MODEL });
+    expect(repairActor(true)).toEqual({ acceso: true, modello: ACTOR_MODEL });
+    expect(repairActor('gemini-3.1-flash-lite')).toEqual({ acceso: true, modello: 'gemini-3.1-flash-lite' });
+    expect(repairActor('spento')).toEqual({ acceso: false, modello: ACTOR_MODEL });
+    expect(repairActor({ acceso: 'sì', modello: ' gemini-3.8-flash ' })).toEqual({ acceso: true, modello: 'gemini-3.8-flash' });
+    expect(repairActor({ acceso: true, modello: 42 })).toEqual({ acceso: true, modello: ACTOR_MODEL });
+    expect(repairActor({ modello: 'x' })).toEqual({ acceso: false, modello: 'x' });
     expect(readConfig(bundledFiles).config.ai.attore).toEqual({ acceso: false, modello: ACTOR_MODEL });
     expect(AGENTS.attore.name).toBe('Attore');
     expect(CENSUS.some((c) => c.compito === 'npc.sheet' && c.agente === 'narratore')).toBe(true);
@@ -250,7 +250,7 @@ describe('the Actor in a game of many', () => {
   it('the lobby reads it from the public files; a player never reads ai', async () => {
     const k = await bootMany({ attore: 'gemini-3.1-flash-lite' });
     const pub = JSON.parse(publicFiles(k.files)['universe.json']);
-    expect(repairAttore(pub.ai.attore)).toEqual({ acceso: true, modello: 'gemini-3.1-flash-lite' });
+    expect(repairActor(pub.ai.attore)).toEqual({ acceso: true, modello: 'gemini-3.1-flash-lite' });
     const player = JSON.parse(playerFiles(k.files)['universe.json']);
     expect(player.ai).toBeUndefined();
   });

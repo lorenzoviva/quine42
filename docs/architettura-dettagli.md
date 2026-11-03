@@ -68,7 +68,7 @@
   `universe/universe.json → ai` con i budget (`maxText`, `maxForges`, `maxPacks`, `maxCast`; in multigiocatore `placesPerMinute`),
   il ragionamento (`thinking`, `low`) e il tempo massimo (`timeout`). Prezzi in `src/kernel/ai/prices.ts` (con la data).
   **L'Attore** (`ai.attore`, ADR-0116, T157): spento se non detto, e allora nulla cambia; acceso (un booleano, il nome di un modello o `{acceso, modello}`,
-  `repairAttore`), il Narratore scrive la scheda di ogni individuo alla sua prima battuta (`npc.sheet`, `Person.scheda`, riscritta solo se cambiano legami o
+  `repairActor`), il Narratore scrive la scheda di ogni individuo alla sua prima battuta (`npc.sheet`, `Person.scheda`, riscritta solo se cambiano legami o
   storia, `sheetFingerprint`) e l'agente `attore` recita `npc.reply` e `npc.dialogue` con il suo modello (`ACTOR_MODEL`, `gemini-3.8-flash`): stessi compiti,
   paganti, limiti e modelli locali; si sceglie nella Genesi, nella lobby (solo il master: messaggio `attore`) o nell'editor; `kernel.interpreter()` dice chi recita.
   I **coefficienti di generazione** (`ai.coefficienti`, ADR-0085, T45b, `src/kernel/coefficients.ts`): quanto spesso ogni agente chiama l'IA,
@@ -79,7 +79,7 @@
 <a id="lobby"></a>
 ## La lobby multigiocatore
 
-  La **lobby multigiocatore** (ADR-0086, T45d): mostra modelli, coefficienti del master, minimi (`ai.minimi`), tetto crediti che incrementa i budget (`addBudgetFromTetto`); a crediti esauriti o al tetto, tre scelte (ricarica, offline, abbandona); la collezione carte fuori dalla partita con utilizzi.
+  La **lobby multigiocatore** (ADR-0086, T45d): mostra modelli, coefficienti del master, minimi (`ai.minimi`), tetto crediti che incrementa i budget (`addBudgetFromCap`); a crediti esauriti o al tetto, tre scelte (ricarica, offline, abbandona); la collezione carte fuori dalla partita con utilizzi.
 
 <a id="abbonamenti"></a>
 ## La coda della CLI degli abbonamenti
@@ -305,7 +305,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   pacchetti; il resto è del viandante che agisce), un `chi` esplicito vince; `world/consumi.json → paganti`. Ogni contenuto generato
   porta `carta {autore, pagante, titolare}` (moduli, oggetti, ambienti, incantesimi, ricette, modelli, persone, trame, regole giudicate,
   piani dei luoghi): i punti che creano contenuti committano con `commitContent`, che timbra ciò che il cambio porta (`stampFiles`); il
-  titolare delle comuni è un viandante estratto col seme (`titolareOf`). Gli utilizzi (`luoghi trame prompt`) e le carte dei luoghi in
+  titolare delle comuni è un viandante estratto col seme (`cardHolderOf`). Gli utilizzi (`luoghi trame prompt`) e le carte dei luoghi in
   `world/carte.json` (`CardLedger`, scritto prima di ogni commit); la collezione: `kernel.cardsOf(id)`, `collectionOf`.
 - **Crediti e spese comuni** (ADR-0081, T45a, ADR-0104, T125): saldo crediti per viandante nel `Ledger` del kernel (`kernel.ledger`; sul server `universes/.saldi/<nome>.json`, fuori dalla storia; `kernel.creditsOf`, `deductCredits`); ricaricato a mano solo dal master, dalla console (`grantCredits`, messaggio `ricarica`), entro il tetto al giorno per universo (`QUINE_TETTO_RICARICHE`); il Referente non dà crediti. Ogni chiamata scala dal pagante (`payerOf`) costo modello + 1% piattaforma (`PLATFORM_FEE = 0.01`, `costWithFee`); le spese comuni (`comune`) sono divise in parti uguali tra tutti i giocatori collegati in quel momento (`splitCost`), master compreso, escludendo gli anonimi. A crediti esauriti (`crediti <= 0`) o per viandanti anonimi (`anonimo: true`, 0 crediti non ricaricabili): le richieste personali sono risposte dai modelli locali (`MockAiModels`) e il giocatore lo sa (`stato.crediti` nell'aggiornamento, avviso nel feed).
 
@@ -424,7 +424,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 <a id="sotterranei"></a>
 ## I sotterranei
 
-- **I sotterranei** (ADR-0091, progetto di T52a; T52b fatto, da attuare T52c-f): parti delle strutture sotto il suolo, mai un mondo a parte. La voce del modello dice `sotto: N` (1-3, `sottoOf`; la scatola della classe si allunga in basso, `Form.base` = `N · vpt` voxel sotto il suolo): pavimenti, collisione e taglio contano da lì (`levelIn` aggiunge `base`; fuori dal modello e dove non ha voxel sotto il suolo la terra è piena fino a `base`, `surfaces(…, fill)`), dalla cantina si esce solo per la scala, e ogni pavimento sotto il suolo si raggiunge dal piano terra (`groundOfForm`; altrimenti il modello entra senza cantina: `Form.hole` assente, posato comunque più in basso). Sulle colonne della cantina (`Form.hole`) `floorAt` ignora il terreno, sopra la tromba delle scale è aria (`rampBlocks`) e il salto non ci atterra (`floorBelow`, `topUnder`); il renderer posa il modello `kernel.sunk(id)` più in basso e abbassa il terreno delle caselle della cantina al suo fondo (`kernel.holesIn(chunk)`, il buco). Il Cartografo la chiede (`strutture[].sotto`, cose `sotto`); la profondità del terreno si genera come su X e Y (terreni `strato`, bozza per colonna, programma `sottosuolo` dell’ambiente, `strati` nel piano e in `ChunkView`, fino a 2 caselle sotto la cantina più profonda, al più 6). Si vede con il buco del terreno sotto il modello e, per chi sta sotto, un taglio a caselle in un disco attorno a lui con le bande degli strati e la luce attenuata. Nella corona scende solo l’esterno dell’edificio (T52c).
+- **I sotterranei** (ADR-0091, progetto di T52a; T52b fatto, da attuare T52c-f): parti delle strutture sotto il suolo, mai un mondo a parte. La voce del modello dice `sotto: N` (1-3, `cellarOf`; la scatola della classe si allunga in basso, `Form.base` = `N · vpt` voxel sotto il suolo): pavimenti, collisione e taglio contano da lì (`levelIn` aggiunge `base`; fuori dal modello e dove non ha voxel sotto il suolo la terra è piena fino a `base`, `surfaces(…, fill)`), dalla cantina si esce solo per la scala, e ogni pavimento sotto il suolo si raggiunge dal piano terra (`groundOfForm`; altrimenti il modello entra senza cantina: `Form.hole` assente, posato comunque più in basso). Sulle colonne della cantina (`Form.hole`) `floorAt` ignora il terreno, sopra la tromba delle scale è aria (`rampBlocks`) e il salto non ci atterra (`floorBelow`, `topUnder`); il renderer posa il modello `kernel.sunk(id)` più in basso e abbassa il terreno delle caselle della cantina al suo fondo (`kernel.holesIn(chunk)`, il buco). Il Cartografo la chiede (`strutture[].sotto`, cose `sotto`); la profondità del terreno si genera come su X e Y (terreni `strato`, bozza per colonna, programma `sottosuolo` dell’ambiente, `strati` nel piano e in `ChunkView`, fino a 2 caselle sotto la cantina più profonda, al più 6). Si vede con il buco del terreno sotto il modello e, per chi sta sotto, un taglio a caselle in un disco attorno a lui con le bande degli strati e la luce attenuata. Nella corona scende solo l’esterno dell’edificio (T52c).
 
 <a id="cartone"></a>
 ## La grafica a cartone

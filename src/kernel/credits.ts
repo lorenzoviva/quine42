@@ -140,7 +140,7 @@ export const DEFAULT_GRANT_CAP = 20;
  * Additional AI budget derived from an entrant's credit cap (T45d: "il tetto di crediti si somma ai budget di ai").
  * When a player sets a spending ceiling in the lobby, it expands the session limits for calls and content.
  */
-export function addBudgetFromTetto(
+export function addBudgetFromCap(
   ai: { textModel?: string; maxText: number; maxForges: number; maxPacks?: number; maxCast?: number; maxModels?: number },
   tetto: number,
 ): { textCalls: number; forges: number; packs: number; cast: number; models: number } {

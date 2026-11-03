@@ -7,7 +7,7 @@ import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
-import { Forms, InlineRunner, sottoOf, type FormComp } from '../src/kernel/forms';
+import { Forms, InlineRunner, cellarOf, type FormComp } from '../src/kernel/forms';
 
 // A box from voxel x0..x1, y0..y1, z0..z1 (inclusive): `at` is the middle in x and y, the bottom in z.
 const box = (x0: number, x1: number, y0: number, y1: number, z0: number, z1: number) =>
@@ -70,8 +70,8 @@ async function scene(model: string) {
 
 describe('the model that goes down (T52b)', () => {
   it('reads `sotto` from the index entry, from 1 to 3', () => {
-    expect(sottoOf({ classe: 'grande', sotto: 2 })).toBe(2);
-    for (const sotto of [0, 4, 1.5, -1, '1' as unknown as number, undefined]) expect(sottoOf({ classe: 'grande', sotto })).toBe(0);
+    expect(cellarOf({ classe: 'grande', sotto: 2 })).toBe(2);
+    for (const sotto of [0, 4, 1.5, -1, '1' as unknown as number, undefined]) expect(cellarOf({ classe: 'grande', sotto })).toBe(0);
   });
 
   it('grows the box down and lays the model lower; models without `sotto` stand on the ground as before', async () => {

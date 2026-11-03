@@ -4,8 +4,8 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import { collectionOf } from '../src/kernel/cards';
-import { addBudgetFromTetto } from '../src/kernel/credits';
-import { repairMinimi } from '../src/kernel/universe';
+import { addBudgetFromCap } from '../src/kernel/credits';
+import { repairMinimums } from '../src/kernel/universe';
 import { fakeLink } from '../src/session/protocol';
 import { SessionServer } from '../src/session/server';
 import { SessionClient } from '../src/session/client';
@@ -57,11 +57,11 @@ function run(server: SessionServer, clients: ThinClient[], frames: number) {
 }
 
 describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
-  it('repairMinimi cleans universe quality and budget minimums', () => {
-    expect(repairMinimi(null)).toBeUndefined();
-    expect(repairMinimi({})).toBeUndefined();
+  it('repairMinimums cleans universe quality and budget minimums', () => {
+    expect(repairMinimums(null)).toBeUndefined();
+    expect(repairMinimums({})).toBeUndefined();
 
-    const clean = repairMinimi({
+    const clean = repairMinimums({
       textModel: ' gemini-3.8-flash ',
       scultori: { struttura: 'gemini-3.8-flash' },
       tetto: 1.5,
@@ -74,7 +74,7 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
     expect(clean!.coefficienti?.sessioni).toBe(0.5);
   });
 
-  it('addBudgetFromTetto expands the session AI limits proportionally', () => {
+  it('addBudgetFromCap expands the session AI limits proportionally', () => {
     const ai = {
       textModel: 'gemini-3.1-flash-lite',
       maxText: 800,
@@ -84,10 +84,10 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
       maxModels: 40,
     };
 
-    expect(addBudgetFromTetto(ai, 0)).toEqual({ textCalls: 0, forges: 0, packs: 0, cast: 0, models: 0 });
+    expect(addBudgetFromCap(ai, 0)).toEqual({ textCalls: 0, forges: 0, packs: 0, cast: 0, models: 0 });
     expect(ai.maxText).toBe(800);
 
-    const added = addBudgetFromTetto(ai, 2.0);
+    const added = addBudgetFromCap(ai, 2.0);
     expect(added.textCalls).toBe(1500); // 2.0 * 750
     expect(added.forges).toBe(4);
     expect(added.packs).toBe(4);
@@ -113,7 +113,7 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
     const player = await thin(server, 'carlo', { tetto: 1.0 });
     run(server, [master, player], 6);
 
-    expect(k.sessionTettoOf('carlo')).toBe(1.0);
+    expect(k.sessionCapOf('carlo')).toBe(1.0);
     expect(k.sessionSpentOf('carlo')).toBe(0);
 
     // AI budget increased by 750 calls from $1.00 tetto

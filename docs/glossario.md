@@ -242,10 +242,10 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Fermo**: lo strato `floor` di `TileLayer`.
 
 ### Cantina
-- **Inglese**: `cellar`, `sottoOf`, `sunk`
+- **Inglese**: `cellar`, `cellarOf`, `sunk`
 - **Definizione**: la parte di una struttura sotto il suolo, con il buco nel terreno (`Form.hole`).
 - **Dove vive**: `src/kernel/forms.ts`, `src/kernel/kernel.ts`
-- **Da non usare**: nessuno
+- **Da non usare**: `sottoOf`
 - **Fermo**: `sotto` nelle voci dei modelli e nel piano.
 
 ### Dispositivo
@@ -404,10 +404,10 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Fermo**: `maxCast`, il compito `genesis.cast`.
 
 ### Scheda
-- **Inglese**: `sheet`, `ensureSheet`, `sheetFingerprint`
+- **Inglese**: `sheet`, `IndividualSheet`, `ensureSheet`, `sheetFingerprint`
 - **Definizione**: il foglio che il Narratore scrive di un individuo perché l'Attore la reciti.
 - **Dove vive**: `src/kernel/society.ts`
-- **Da non usare**: nessuno
+- **Da non usare**: `Scheda` (nel codice)
 - **Fermo**: `scheda` in `world/people.json`.
 
 ### Legame
@@ -642,10 +642,10 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Fermo**: il valore `referente` di `AgentId`, come gli altri agenti.
 
 ### Attore
-- **Inglese**: `Actor`, `attore`, `ACTOR_MODEL`
+- **Inglese**: `Actor`, `ActorConfig`, `repairActor`, `attore`, `ACTOR_MODEL`
 - **Definizione**: l'agente, se il master lo accende, che recita gli individui dalle loro schede.
 - **Dove vive**: `src/kernel/agents/minds.ts`, `src/kernel/coefficients.ts`
-- **Da non usare**: nessuno
+- **Da non usare**: `AttoreConfig`, `repairAttore`
 
 ### Squadra
 - **Inglese**: `team`
@@ -751,24 +751,24 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Da non usare**: nessuno
 
 ### Eredità
-- **Inglese**: `heritage`, `sharesOf`, `inheritCards`
+- **Inglese**: `heritage`, `HeritageConfig`, `DEFAULT_HERITAGE`, `repairHeritage`, `CardOrigin`, `sharesOf`, `inheritCards`
 - **Definizione**: ciò che di ogni utilizzo di una carta clonata torna a chi la teneva prima.
 - **Dove vive**: `src/kernel/heritage.ts`, `src/kernel/clone.ts`
-- **Da non usare**: nessuno
+- **Da non usare**: `Eredita`, `EREDITA`, `repairEredita`, `Origine` (nel codice)
 - **Fermo**: `eredita`, `origini`, `quote`, `allaNascita`.
 
 ### Carta
-- **Inglese**: `Card`, `Carta`, `cards`, `CardLedger` (→ CardStamp, R7; CardUses, R8)
+- **Inglese**: `Card`, `CardStamp`, `isCardStamp`, `cards`, `CardLedger` (→ CardUses, R8)
 - **Definizione**: il timbro su un contenuto generato: autore, pagante, titolare, utilizzi.
 - **Dove vive**: `src/kernel/cards.ts`, `world/carte.json`
-- **Da non usare**: nessuno
+- **Da non usare**: `Carta`, `isCarta` (nel codice)
 - **Fermo**: `carta`, `autore`, `utilizzi`, `world/carte.json`.
 
 ### Titolare
-- **Inglese**: `holder`, `titolareOf`
+- **Inglese**: `holder`, `cardHolderOf`
 - **Definizione**: di chi è una carta: chi l'ha pagata o, per le comuni, un viandante estratto col seme.
 - **Dove vive**: `src/kernel/cards.ts`
-- **Da non usare**: `owner` (per le carte; `owns` è chi può leggere e scrivere)
+- **Da non usare**: `owner` (per le carte; `owns` è chi può leggere e scrivere), `titolareOf`
 - **Fermo**: `titolare`, `titolari`.
 
 ### Pagante
@@ -792,14 +792,14 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Da non usare**: nessuno
 
 ### Tetto
-- **Inglese**: `tetto`, `sessionTetto` (→ sessionCap, R7)
+- **Inglese**: `tetto`, `sessionCap`, `setSessionCap`, `sessionCapOf`, `capBudgeted`, `addBudgetFromCap`
 - **Definizione**: quanto si può spendere al più, per sessione, per giorno o per universo.
 - **Dove vive**: `src/kernel/credits.ts`, `src/session/server.ts`, `server/geminiProxy.ts`
-- **Da non usare**: `cap` (nei documenti e nella UI)
+- **Da non usare**: `cap` (nei documenti e nella UI), `sessionTetto`, `addBudgetFromTetto`
 - **Fermo**: `tetto` del protocollo e di `ai.minimi`, `GEMINI_TETTO_GIORNALIERO`, `QUINE_TETTO_RICARICHE`.
 
 ### Lobby
-- **Inglese**: `lobby`
+- **Inglese**: `lobby`, `AiMinimums`, `repairMinimums`
 - **Definizione**: la sala d'attesa prima di entrare in un mondo multigiocatore: modelli, coefficienti, tetto, carte.
 - **Dove vive**: `src/ui/lobby.ts`
 - **Da non usare**: `sala d'attesa` (nei documenti)
@@ -852,7 +852,7 @@ Stessa parola, concetti diversi: il problema che confonde di più, più dei sino
 | `gate` | varco di un luogo (`layout.ts`); chi può passare (`gate` in `server/access.ts`, `GeminiGate`) | il file |
 | zona | area di 56 × 56 luoghi (`zoneOf`); `kernel.zone` (`sim`, `corona`, `studio`) | «Zona» è la prima |
 | `path` | sentiero (`carvePath`); percorso di un file | «Sentiero» |
-| forma | ciò che esce da un programma (`Form`); gli id `forma-…` dei modelli degli oggetti | «Forma» è la prima |
+| forma | ciò che esce da un programma (`Form`); gli id `forma-…` dei modelli degli oggetti (`ItemShape`) | «Forma» è la prima |
 | pannello | scheda di una meccanica (`UiPanel`); pannello dello studio (`ui:showcase`) | il contesto |
 
 ## Le scelte fatte
@@ -877,12 +877,12 @@ Le fanno i task T188-T204, una per task e nell'ordine: vanno in conflitto con tu
 | # | Rinomina (da → a) | Restano | File | Migrazione | Stato |
 |---|---|---|---|---|---|
 | R1 | Di `layout.ts`: `Building` → `Lot`, `LayoutResult.buildings` e `Chunk.buildings` → `lots`, `findBuildings` → `findLots`, `buildingAt` → `lotAt` (con il campo `building` di ciò che rende → `lot`). Di `relief.ts`, per non fare un omonimo: `Lot` → `LotBox` | il `Building` di `corona.ts`, con `buildings`, `building()`, `buildingOf`, `buildingId`. `lotsOf` e il suo `lots` locale di `kernel.ts` non si scontrano; **fermo** `lotti` del protocollo | 13 | no: il layout li ricava dalla bozza a ogni caricamento | fatto |
-| R2 | `Models` → `AiModels`, `MockModels` → `MockAiModels`, `GeminiModels` → `GeminiAiModels`, `RoutedModels` → `RoutedAiModels`, `QueueModels` → `QueueAiModels`, `TrackingModels` → `TrackingAiModels`, `TrackingOnlineModels` → `TrackingOnlineAiModels`, `SculptorModels` → `SculptorAiModels`, `pricedModels` → `pricedAiModels`, `localModels` → `localAiModels`, `baseModels` → `baseAiModels`, `updateModelsHud` → `updateAiModelsHud`; il campo `models` di `Kernel` e di `Council` e l'opzione `models` di `Kernel.boot` → `ai`; `window.quine.models` → `window.quine.ai`, anche in `AGENTS.md` | la libreria: `maxModels`, `tornioModels`, `upgradeModels`, `MODELS_INDEX`, `models/`, `listModels` del laboratorio; **fermi** `textModel`, `ai` di `universe.json` | 114 (76 sono test) | no | fatto |
+| R2 | `Models` → `AiModels`, `MockModels` → `MockAiModels`, `GeminiModels` → `GeminiAiModels`, `RoutedModels` → `RoutedAiModels`, `QueueModels` → `QueueAiModels`, `TrackingModels` → `TrackingAiModels`, `TrackingOnlineModels` → `TrackingOnlineAiModels`, `SculptorModels` → `SculptorAiModels`, `pricedModels` → `pricedAiModels`, `localModels` → `localAiModels`, `baseModels` → `baseAiModels`, `updateModelsHud` → `updateAiModelsHud`; il campo `models` di `Kernel` e di `Council` e l'opzione `models` di `Kernel.boot` → `ai`; `window.quine.models` → `window.quine.ai`, anche in `AGENTS.md` | la libreria: `maxModels`, `latheModels`, `upgradeModels`, `MODELS_INDEX`, `models/`, `listModels` del laboratorio; **fermi** `textModel`, `ai` di `universe.json` | 114 (76 sono test) | no | fatto |
 | R3 | `playerPos` → `wandererPos`, `playerCarpet` → `wandererCarpet`, `playerId` → `wandererEntity` (è l'id dell'entità: `wandererId` c'è già ed è l'id stabile del viandante), `playerComp` → `wandererComp`, `playerMod` → `wandererModule`, `playerCell` → `wandererTile`, `playerText` → `wandererText`, `playerPrompt` → `wandererPrompt`; anche negli snippet di `docs/architettura-dettagli.md#convalida-browser` | il giocatore: `players`, `PlayerSpot`, `playerFiles`, `playerFile`, `playerFilesIn`, `playerChanges`, `PLAYERS_DIR`, `manyPlayers`; **fermi** `world.player`, `world.player_pos`, `player_id`, `player_get`, `player_set` e il binding, che Lua vede | 53 (39 sono test) | no | fatto |
 | R4 | Prima `ChunkView` di `terrain.ts` → `TerrainView`; poi `Place` → `ChunkInfo`, `PlaceView` → `ChunkView`, `PlaceLot` → `ChunkLot`, `PlaceMiniature` → `ChunkMiniature`, `GraphPlace` → `GraphChunk`, `placeHere` → `chunkHere`, `placeByName` → `chunkByName`, `placesOf` → `chunksOf`, `placeList` → `chunkList`, `mergePlaces` → `mergeChunks`, `graphPlaces` → `graphChunks`, `graphPlacesVersion` → `graphChunksVersion`, `seedGraphPlaces` → `seedGraphChunks`, `addPlace` → `addChunk`, `hasPlace` → `hasChunk`, `cardPlace` → `cardChunk`, `placeCard` → `chunkCard`, `placeCardId` → `chunkCardId`, `placeIn` → `chunkIn`, `placeQuota` → `chunkQuota`, `placesMade` → `chunksMade`, `noPlace` → `noChunk`, `lastPlace` → `lastChunk`, `listPlaces` → `listChunks` | «place» verbo: `placeStructure`, `placeCampus`, `placeRegion`, `placeInside`, `placeProp`, `placeFor`, `placed`, `Placement`, `placementsOf`, `Placeable`, `PlacedObject`; i locali `place` e `places` che non sono il luogo (i locali che lo sono, passati a mano: `chunk`, `chunks`); i campi `SessionClient.places`, `Client.places`, `ShowcaseEntry.place`, i contesti degli agenti (`ctx.place`, `npc.place`, i `data` di `npcDialogue` e `weavePlot`), il metodo `ThinClient.places`, `Hud.place` (`#place`), `PLACE_PHASES`, `PLACES_PER_MINUTE`, i commenti; **fermi** `plan.place` in `maps/`, `Chunk.place`, `placesPerMinute`, `luoghi` del protocollo, `senza_luogo` | 20 (di cui 5 test) | no | fatto |
 | R5 | Di `Kernel`: `hand()` → `phrase()`, `syncHand` → `syncPhrase`, `inscribeHand` → `inscribePhrase`; `lastHand` di `hud.ts` → `lastPhrase`, `handKey` → `phraseKey` | `ThinClient.phrase` e `ThinClient.syncPhrase`, su un'altra classe; i locali `hand` che tengono il componente, `Hud.hand` (`#hand`), i commenti; **fermi** il componente `hand`, `hand.tokens`, il campo `hand` dello stato sul filo (`hand: k.hand()` diventa `hand: k.phrase()`), i locali `hand` che ne fanno la chiave | 15 | no se resta il componente: con il componente, dallo stato di ogni viandante e dal Lua, ed è **sconsigliato** | fatto |
 | R6 | `ThingView` → `EntityView`, `THING_PARTS` → `ENTITY_PARTS`, `Things` → `Entities`, `Thing` del laboratorio → `Entity`, `thingStandIn` → `entityStandIn`, `thingCards` → `entityCards`; i campi `things` di `Renderer`, `SessionClient`, `BenchScene` e della miniatura → `entities`; `src/render/things.ts` → `src/render/entities.ts`; nei commenti `thing` → `entity` dove è il termine tecnico | `something`, `anything` e la parola comune nei commenti (anche «things» accanto a «people» o per ciò che si porta, che non sono termini tecnici); la riga non li nomina: il campo `things` di `Client` in `server.ts`, il metodo privato `ThinClient.things`, i locali `things` e `thing` (`kernel`, `bench`, `graph`, `coefficients`, test), `things` e `userData.thing` del laboratorio, `things` di `lab/3d/world.ts`, il valore `'thing'` di `EntityView.kind`, i titoli dei test, `tests/kernel-things.test.ts`; `class Thing` di `tests/sicurezza/uscita.test.ts` non è un'entità; **fermi** `cose` ed `entita` del protocollo, `cose` dei casi del banco e dei prompt | 54 | no | fatto |
-| R7 | `AttoreConfig` → `ActorConfig`, `repairAttore` → `repairActor`; `AiMinimi` → `AiMinimums`, `repairMinimi` → `repairMinimums`, `minimiBlock` → `minimumsBlock`; `Eredita` → `HeritageConfig`, `EREDITA` → `DEFAULT_HERITAGE`, `repairEredita` → `repairHeritage`, `Origine` → `CardOrigin`; `Carta` → `CardStamp` (il timbro; `Card` è la carta in una collezione e lo estende), `isCarta` → `isCardStamp`; `titolareOf` → `cardHolderOf` (`holderOf` è occupato in `tools/pipeline/`); `sottoOf` → `cellarOf`; `sessionTetto` → `sessionCap`, `setSessionTetto` → `setSessionCap`, `sessionTettoOf` → `sessionCapOf`, `tettoBudgeted` → `capBudgeted`, `addBudgetFromTetto` → `addBudgetFromCap`, in `lobby.ts` `tettoMin` → `minCap`, `defaultTetto` → `defaultCap`, `tettoInput` → `capInput`, `setTetto` → `setCap`, in `creditdialog.ts` `isTetto` → `isCap`, in `site/sessioni.ts` `tettoMinimo` → `minCap`; `Scheda` di `society.ts` → `IndividualSheet`; `Forma` → `ItemShape`, `FORME` → `ITEM_SHAPES`, `formaModel` → `itemShapeModel`; `PlintoSculpture` → `PlinthSculpture`, `plintoSculpture` → `plinthSculpture`, `plintoSymbols` → `plinthSymbols`; `TornioModelEntry` → `LatheModelEntry`, `TornioShown` → `LatheShown`, `TornioView` → `LatheView`, `tornioCache` → `latheCache`, `tornioExecute` → `latheExecute`, `tornioIndex` → `latheIndex`, `tornioModels` → `latheModels`, `tornioOf` → `latheOf`, `tornioOpen` → `latheOpen`, con i file `src/kernel/tornio.ts`, `src/render/tornio.ts` e `tests/tornio.test.ts` → `lathe` | l'italiano del laboratorio, che non è il TypeScript del gioco (`Scheda` di `lab/banco/seconda.ts`, `Piano`, `daCorreggere`); il locale `tetto`, che è la chiave del messaggio; **fermi** i campi omonimi nei file (`attore`, `minimi`, `eredita`, `origini`, `carta`, `titolare`, `sotto`, `tetto`, `scheda`), gli id `forma-…`, i valori `tornio` e `plinto` di `ItemKind` e simili | 34 | no | da fare |
+| R7 | `AttoreConfig` → `ActorConfig`, `repairAttore` → `repairActor`; `AiMinimi` → `AiMinimums`, `repairMinimi` → `repairMinimums`, `minimiBlock` → `minimumsBlock`; `Eredita` → `HeritageConfig`, `EREDITA` → `DEFAULT_HERITAGE`, `repairEredita` → `repairHeritage`, `Origine` → `CardOrigin`; `Carta` → `CardStamp` (il timbro; `Card` è la carta in una collezione e lo estende), `isCarta` → `isCardStamp`; `titolareOf` → `cardHolderOf` (`holderOf` è occupato in `tools/pipeline/`); `sottoOf` → `cellarOf`; `sessionTetto` → `sessionCap`, `setSessionTetto` → `setSessionCap`, `sessionTettoOf` → `sessionCapOf`, `tettoBudgeted` → `capBudgeted`, `addBudgetFromTetto` → `addBudgetFromCap`, in `lobby.ts` `tettoMin` → `minCap`, `defaultTetto` → `defaultCap`, `tettoInput` → `capInput`, `setTetto` → `setCap`, in `creditdialog.ts` `isTetto` → `isCap`, in `site/sessioni.ts` `tettoMinimo` → `minCap`; `Scheda` di `society.ts` → `IndividualSheet`; `Forma` → `ItemShape`, `FORME` → `ITEM_SHAPES`, `formaModel` → `itemShapeModel`; `PlintoSculpture` → `PlinthSculpture`, `plintoSculpture` → `plinthSculpture`, `plintoSymbols` → `plinthSymbols`; `TornioModelEntry` → `LatheModelEntry`, `TornioShown` → `LatheShown`, `TornioView` → `LatheView`, `tornioCache` → `latheCache`, `tornioExecute` → `latheExecute`, `tornioIndex` → `latheIndex`, `tornioModels` → `latheModels`, `tornioOf` → `latheOf`, `tornioOpen` → `latheOpen`, con i file `src/kernel/tornio.ts`, `src/render/tornio.ts` e `tests/tornio.test.ts` → `lathe` | l'italiano del laboratorio, che non è il TypeScript del gioco (`Scheda` di `lab/banco/seconda.ts`, `Piano`, `daCorreggere`); il locale `tetto`, che è la chiave del messaggio; la riga non li nomina: `stepTornio`, `openTornio`, `TORNIO_AT`, il campo `tornio` di `CoronaView`, il metodo `tornio` di `Studio`, i locali `tornio`, `Kernel.plinto()`, `updatePlinto`, il campo `plinto` della struttura; **fermi** i campi omonimi nei file (`attore`, `minimi`, `eredita`, `origini`, `carta`, `titolare`, `sotto`, `tetto`, `scheda`), gli id `forma-…`, i valori `tornio` e `plinto` di `ItemKind` e simili | 32 | no | fatto |
 | R8 | `CardLedger` → `CardUses`, `UsageLedger` → `UsageLog` | `Ledger`, `FileLedger`, `MemoryLedger`, `LedgerBook`, `openLedger`: sono dei saldi | 12 | no | da fare |
 | R9 | Di `corona.ts`: `Floor` → `Storey`, `Building.floors` → `storeys`, `perFloor` → `perStorey`, `nFloors` → `nStoreys`, `FLOOR_STRIDE` → `STOREY_STRIDE`; il campo `floor` di `roomAt` e il parametro `floor: Floor` → `storey` | i pavimenti: `floors` di `src/mj/mesh.ts`, `floorAt`, `floorBelow`, `floorOf`, `Math.floor`; le misure di `lab/banco/misure.ts`; **fermo** lo strato `floor` di `TileLayer` | 21 | no | da fare |
 | R10 | Le caselle: `gateCells` → `gateTiles`, `freeCell` → `freeTile`, `freeCells` → `freeTiles`, `runeCells` → `runeTiles`, `solidCells` → `solidTiles`, `cellNear` → `tileNear`, `propCells` → `propTiles`, `pickCell` → `pickTile`, `doorCells` → `doorTiles`, `nicheCell` → `nicheTile`, `cellOf` → `tileOf`, `cellIndex` → `tileIndex`, `polarCell` → `polarTile`, `CoronaCell` → `CoronaTile`; i locali `cell` solo dove indicano una casella | le celle: `turnCells`, `cellAt` e `nCell` di `mesh.ts`, `sameCells`; `visibleCells` del sito e `sleepCell` di `ledger.ts`, che non sono né l'una né l'altra. `playerCell` sta in R3 | 9 | no | da fare |

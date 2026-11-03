@@ -7,7 +7,7 @@
 // from there. Pure functions: the store copies the repository on disk and commits what they return.
 
 // Light on purpose: the store on the dev server imports it, without the validator nor the engines.
-import type { Carta } from './cards';
+import type { CardStamp } from './cards';
 import { contentText, fingerprint, readOrigins } from './heritage';
 import { UNIVERSE_NAME_RE } from './paths';
 import { SOLO, validWandererId } from './wanderers';
@@ -32,7 +32,7 @@ const parse = (src: string | undefined): any => {
 
 const indentOf = (src: string) => /\n( +)"/.exec(src)?.[1].length ?? 2;
 
-const isCarta = (c: any): c is Carta => !!c && typeof c === 'object' && typeof c.autore === 'string' && typeof c.pagante === 'string' && typeof c.titolare === 'string';
+const isCardStamp = (c: any): c is CardStamp => !!c && typeof c === 'object' && typeof c.autore === 'string' && typeof c.pagante === 'string' && typeof c.titolare === 'string';
 
 /** The files where cards live: manifests, the library's index, people, plots, rules, the places' cards. */
 const cardFile = (path: string) => /^modules\/[^/]+\/manifest\.json$/.test(path) || ['models/index.json', 'world/people.json', 'world/plots.json', 'world/rules.json', 'world/carte.json'].includes(path);
@@ -46,7 +46,7 @@ export function passCards(files: FileMap, from: string, to: string): FileMap {
     let changed = false;
     const walk = (o: unknown) => {
       if (!o || typeof o !== 'object') return;
-      if (isCarta(o) && o.titolare === from) {
+      if (isCardStamp(o) && o.titolare === from) {
         o.titolare = to;
         changed = true;
       }
@@ -70,13 +70,13 @@ export function inheritCards(files: FileMap, universo: string, from?: string, to
     const data = parse(files[path]);
     if (!data || typeof data !== 'object') continue;
     let changed = false;
-    const link = (c: Carta, content: string) => {
-      (c as Carta & { origini?: unknown }).origini = [...readOrigins((c as { origini?: unknown }).origini), { titolare: c.titolare, universo, impronta: fingerprint(content) }];
+    const link = (c: CardStamp, content: string) => {
+      (c as CardStamp & { origini?: unknown }).origini = [...readOrigins((c as { origini?: unknown }).origini), { titolare: c.titolare, universo, impronta: fingerprint(content) }];
       if (from !== undefined && to !== undefined && c.titolare === from) c.titolare = to;
       changed = true;
     };
     if (path === 'world/carte.json') {
-      for (const c of Object.values((data.luoghi ?? {}) as Record<string, Carta & { nome?: string }>)) if (isCarta(c)) link(c, String(c.nome ?? ''));
+      for (const c of Object.values((data.luoghi ?? {}) as Record<string, CardStamp & { nome?: string }>)) if (isCardStamp(c)) link(c, String(c.nome ?? ''));
       const born: Record<string, Record<string, number>> = {};
       for (const [id, u] of Object.entries((data.utilizzi ?? {}) as Record<string, Record<string, number>>)) born[id] = { ...u };
       data.allaNascita = born;
@@ -86,7 +86,7 @@ export function inheritCards(files: FileMap, universo: string, from?: string, to
       const walk = (o: unknown, root: boolean) => {
         if (!o || typeof o !== 'object') return;
         const c = (o as { carta?: unknown }).carta;
-        if (isCarta(c)) link(c, contentText(o) + (root ? logic : ''));
+        if (isCardStamp(c)) link(c, contentText(o) + (root ? logic : ''));
         for (const [k, v] of Object.entries(o)) if (k !== 'carta') walk(v, false);
       };
       walk(data, true);

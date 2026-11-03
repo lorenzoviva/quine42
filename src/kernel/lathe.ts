@@ -11,7 +11,7 @@ import { runMjx } from '../mj/run';
 import { rootTag, type Forms, type ModelInfo } from './forms';
 import type { FileMap } from './types';
 
-export interface TornioModelEntry {
+export interface LatheModelEntry {
   id: string;
   name: string;
   classe: string;
@@ -24,8 +24,8 @@ export interface TornioModelEntry {
   info: ModelInfo;
 }
 
-export interface TornioShown {
-  entry: TornioModelEntry;
+export interface LatheShown {
+  entry: LatheModelEntry;
   index: number;
   count: number;
   grid: VoxelGrid;
@@ -37,7 +37,7 @@ export interface TornioShown {
 /**
  * Collects and sorts all models available in the universe library (models/*.xml).
  */
-export function tornioModels(files: FileMap, forms: Forms): TornioModelEntry[] {
+export function latheModels(files: FileMap, forms: Forms): LatheModelEntry[] {
   const ids: string[] = [];
   for (const path of Object.keys(files)) {
     const m = /^models\/([a-z0-9-]+)\.xml$/.exec(path);
@@ -93,14 +93,14 @@ export function tornioModels(files: FileMap, forms: Forms): TornioModelEntry[] {
 /**
  * Runs a model step by step with snapshots and produces the 4 views.
  */
-export function tornioExecute(
-  entry: TornioModelEntry,
+export function latheExecute(
+  entry: LatheModelEntry,
   forms: Forms,
   snapshotsCount = 20,
   seed = 1,
   index = 0,
   count = 1,
-): TornioShown & { model: MjxModel } {
+): LatheShown & { model: MjxModel } {
   const cls = forms.classOf(entry.id);
   const root = rootTag(entry.xml);
   const size = /\ssize="/.test(root) ? undefined : boxOf(cls);

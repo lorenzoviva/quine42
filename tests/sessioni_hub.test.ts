@@ -125,7 +125,7 @@ describe('Hub Sessioni & Creazione Nuovo Universo (T103)', () => {
     expect(parsed.live).toBe(true);
     expect(parsed.clients).toBe(2);
     expect(parsed.sculptorSummary).toContain('gemini-3.1-flash-lite + gemini-3.8-flash');
-    expect(parsed.tettoMinimo).toBe(1.5);
+    expect(parsed.minCap).toBe(1.5);
     expect(parsed.hourlyCost).toBeGreaterThan(0);
     expect(parsed.description).toBe('Un antico borgo tra le colline con cripte runiche.');
   });
@@ -198,7 +198,7 @@ describe('Hub Sessioni & Creazione Nuovo Universo (T103)', () => {
         sculptorSummary: 'Flash-Lite + Flash 3.8',
         coefficientsLabel: 'Standard',
         hourlyCost: 0.08,
-        tettoMinimo: 1.0,
+        minCap: 1.0,
         description: 'Terre di prova',
       });
 
