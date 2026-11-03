@@ -15,6 +15,7 @@ nel [report dei costi](../docs/reports/costi-step8.2B.md) e nella storia di git 
 | percorso | cosa |
 |---|---|
 | `editor/` | l'editor di modelli MarkovJunior (`/lab/editor/`): split screen codice e rendering 3D Three.js in tempo reale, syntax highlighting, validazione immediata, controlli orbita |
+| `suono/` | il SoundLab (`/lab/suono/`): preset, editor XML con errori e diagnostica, piano roll che scrive nel programma, voxel 3D, passi avanti e indietro, morph del ciclo, oscilloscopio, manopole, muto, apri e salva XML, export WAV; il suono è solo quello di `src/mj/synth.ts` |
 | `3d/` | la sandbox 3D (`/lab/3d/`): terreno dal modello `River`, i modelli posati, collisioni, case in cui si entra, azioni, pannello per ispezionare e modificare l'XML, «Scolpisci con Gemini» |
 | `mjx/official/` | 16 modelli 3D del repository di MarkovJunior, invariati (MIT): la prova che il front-end legge MarkovJunior alla lettera; in `riferimento/` altri 22 del repository, da leggere (T181): i grandi usano `wfc`, `field` e regole da file, che il motore non ha |
 | `mjx/models/` | modelli scritti a mano e portati dagli step 8A-8B (esempi dello Scultore del laboratorio); `gemini/` i programmi delle prove 8.2A e 8.2B |
@@ -31,6 +32,7 @@ Il motore, il front-end XML, la palette, le mesh, lo scheletro, le classi e le f
 ## Come si usa
 
 - Editor modelli MarkovJunior: `npm run dev` → <http://localhost:5173/lab/editor/>. Split screen con editor codice/XML a sinistra (syntax highlighting, numeri di riga con segnalazione errori immediata, formattazione, copia/esporta) e viewport 3D Three.js a destra (orbita libera con tasto destro o sinistro, zoom, pan con Shift, viste isometrica/alto/fronte/fianco, griglia, wireframe e bloom per voxel luminosi).
+- SoundLab: `npm run dev` → <http://localhost:5173/lab/suono/>. Spazio suona e ferma, Ctrl+Invio riesegue, Ctrl+S salva. In console `window.soundlab`. La bozza resta nel browser (`localStorage`) tra un caricamento e l'altro.
 - Sandbox: `npm run dev` → <http://localhost:5173/lab/3d/>. WASD (Shift corre), Q/R ruota la camera, rotella
   zoom, tasto destro trascina per orbitare, E agisce (la porta della casa si apre), clic su un modello per
   ispezionarlo: XML modificabile («Esegui»), «Nuovo seme», «Cresci», «Mettilo davanti a me». In console

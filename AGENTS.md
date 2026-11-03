@@ -184,7 +184,7 @@ tools/pipeline/          la pipeline agentica (ADR-0072, 0079): pipeline.mjs (co
 tools/sicurezza/        il kit delle prove dell'autore (T137): prove.mjs (esecuzione, esito), catalogo.mjs (le prove), ambiente.mjs (i limiti: loopback, cartella temporanea, segreti finti), server.mjs, sandbox.mjs (processi a parte)
 tools/glossario/        glossario.mjs: legge docs/glossario.md e riscrive il censimento dei sinonimi, docs/glossario-censimento.md (ADR-0117)
 tools/abbonamenti/      servi.ts (il processo che serve la coda degli abbonamenti con la CLI isolata, ADR-0077, ADR-0106)
-lab/                    laboratorio di MarkovJunior (ADR-0038): sandbox 3D /lab/3d/, editor modelli /lab/editor/ (T59a, T59b, T59c, T59d), modelli ufficiali e conformità, i pattern con cui crescono le strutture e tre programmi di riferimento del cantiere (lab/banco/pattern.md, lab/banco/riferimento/, T181), script per
+lab/                    laboratorio di MarkovJunior (ADR-0038): sandbox 3D /lab/3d/, editor modelli /lab/editor/ (T59a, T59b, T59c, T59d), SoundLab /lab/suono/ (T222), modelli ufficiali e conformità, i pattern con cui crescono le strutture e tre programmi di riferimento del cantiere (lab/banco/pattern.md, lab/banco/riferimento/, T181), script per
                         affettare, fotografare, misurare e provare i programmi con Gemini; non importarlo da src/
 site/                   il sito web (ADR-0095, T97): landing, carte 3D, sessioni, profilo e crediti; theme.css condiviso con il gioco
 ```
@@ -224,7 +224,7 @@ Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 - **Clone con un altro master, eredità delle carte** → `#clone-eredita`
 - **Mondo in 3D, bozze di prova, mappa, voxel luminosi**: un'unità = una casella, kernel (x, y) = three.js (x, z) → `#mondo3d`
 - **MarkovJunior, modelli, cache delle forme**: ogni aspetto è un programma, un'istanza è un seme → `#markovjunior-modelli`
-- **Il suono**: programmi MarkovJunior con `<sound>` in `models/suono-*.xml` (classe `suono`), griglia → partitura → campioni con una funzione pura; il browser suona quei campioni (ADR-0123) → `#suono`
+- **Il suono**: programmi MarkovJunior con `<sound>` in `models/suono-*.xml` (classe `suono`), griglia → partitura → campioni con una funzione pura; il browser suona quei campioni (ADR-0123); il SoundLab e i ritocchi del piano roll → `#suono`
 - **Lotti e strutture, scale, piani** → `#lotti`; **taglie di D&D** → `#taglie`; **sotterranei** → `#sotterranei`
 - **Rilievo** (`Relief`, altezze, mare) → `#rilievo`; **acqua che scorre** (automa del kernel, `kernel.dig`) → `#acqua`; **grafica a cartone** → `#cartone`
 - **Grafo del mondo**: nodi e archi dai file, `focus` come contesto del Narratore → `#grafo`

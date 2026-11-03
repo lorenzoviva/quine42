@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QUINE42 · SoundLab</title>
+    <link rel="stylesheet" href="./soundlab.css" />
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <b>SoundLab</b>
+        <small><i class="x">X</i> tempo · <i class="y">Y</i> traccia · <i class="z">Z</i> altezza</small>
+      </div>
+      <label class="field">preset <select id="preset"></select></label>
+      <label class="field">seme <input id="seed" type="number" min="0" step="1" /></label>
+      <button id="dice" title="Un seme nuovo a caso, poi rigenera">🎲</button>
+      <button id="rerun" class="main" title="Esegue il programma dall'inizio (Ctrl+Invio)">⚡ Rigenera</button>
+      <span class="sep"></span>
+      <button id="play" class="go" title="Suona il ciclo (Spazio)">▶ Suona</button>
+      <button id="once" title="Il prossimo sedicesimo, una volta">⏭ +1</button>
+      <canvas id="scope" title="Oscilloscopio: ciò che esce davvero"></canvas>
+      <span class="sep"></span>
+      <button id="open" title="Apri un programma XML dal disco">Apri…</button>
+      <input id="file" type="file" accept=".xml,text/xml,application/xml" hidden />
+      <button id="save" title="Salva il programma XML, col seme in testa (Ctrl+S)">Salva XML</button>
+      <span id="dirty" class="dirty" title="Ci sono modifiche non ancora salvate su disco" hidden>● non salvato</span>
+      <button id="copy" title="Copia il programma negli appunti">Copia</button>
+      <button id="undo" title="Torna al programma di prima">↶ Annulla</button>
+      <span class="sep"></span>
+      <button id="wav" title="Scarica come WAV ciò che si sente, mute compresi">⬇ WAV</button>
+      <label class="check" title="Solo l'ultima passata, senza coda: si ripete senza stacchi. Senza spunta: due passate e la coda."><input id="wav-loop" type="checkbox" /> solo il ciclo</label>
+    </header>
+
+    <main>
+      <section class="col left">
+        <div class="panel">
+          <h2>Il suono <small>scritto in &lt;sound&gt;</small><span id="dims" class="badge"></span></h2>
+          <div class="pair">
+            <label class="field wide">scala <select id="scale"></select></label>
+            <label class="field">tonica <select id="root"></select></label>
+          </div>
+          <label class="knob">bpm <output id="bpm-v"></output><input id="bpm" type="range" min="40" max="240" step="1" /></label>
+          <label class="knob">swing <output id="swing-v"></output><input id="swing" type="range" min="0" max="45" step="1" /></label>
+          <label class="knob">filtro <output id="cutoff-v"></output><input id="cutoff" type="range" min="100" max="18000" step="50" /></label>
+          <label class="knob">spazio <output id="space-v"></output><input id="space" type="range" min="0" max="85" step="1" /></label>
+        </div>
+        <div class="panel">
+          <h2>Tracce <small>il volume si salva, il muto è solo ascolto</small></h2>
+          <div id="tracks"></div>
+        </div>
+        <div class="panel grow">
+          <h2>Pennello <small>clic e trascina sul piano roll</small></h2>
+          <div id="brushes"></div>
+        </div>
+      </section>
+
+      <section class="col middle">
+        <div class="panel">
+          <h2>I passi del programma <span id="shot-label" class="badge"></span></h2>
+          <div class="row">
+            <button id="back" title="Un passo indietro">◀</button>
+            <input id="shot" type="range" min="0" max="0" value="0" />
+            <button id="forward" title="Un passo avanti">▶</button>
+            <button id="morph" title="Il ciclo cresce passo dopo passo, mentre suona">🎞 Morph</button>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Piano roll
+            <span id="layers" class="tabs"></span>
+          </h2>
+          <canvas id="roll"></canvas>
+          <div class="row foot">
+            <span id="hover">X il passo, Z l'altezza. Ogni riga ha una fascia per traccia.</span>
+            <span class="tools">
+              <button id="run-on" title="Le regole del programma ancora una volta, su questa griglia">+ Regole sulla griglia</button>
+              <button id="clear" title="Svuota la griglia, per dipingere i semi a mano">Svuota</button>
+            </span>
+          </div>
+          <div id="retouch" class="note"></div>
+        </div>
+        <div class="panel grow">
+          <h2>Voxel 3D <small>trascina per ruotare, rotella per lo zoom</small>
+            <label class="check right"><input id="markers" type="checkbox" checked /> lettere mute</label>
+            <button id="cam">Rimetti la vista</button>
+          </h2>
+          <div class="view"><canvas id="voxels"></canvas><span id="voxel-note"></span></div>
+        </div>
+      </section>
+
+      <section class="col right-col">
+        <div class="panel grow">
+          <h2>Programma <small id="file-name"></small></h2>
+          <p id="desc" class="note"></p>
+          <div class="code">
+            <div id="gutter" aria-hidden="true"></div>
+            <div class="code-text">
+              <pre id="highlight" aria-hidden="true"><code id="highlight-code"></code></pre>
+              <textarea id="xml" spellcheck="false" wrap="off" aria-label="Il programma sonoro in XML"></textarea>
+            </div>
+          </div>
+          <h2 class="sub">Diagnostica <span id="status" class="badge"></span></h2>
+          <div id="diag"></div>
+        </div>
+      </section>
+    </main>
+    <div id="toast" hidden></div>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

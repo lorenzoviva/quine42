@@ -71,6 +71,8 @@ export const MJ_NODES = new Set([
   'path',
   'map',
   'union',
+  'sound',
+  'track',
   'wfc',
   'overlapping',
   'tileset',
@@ -108,6 +110,15 @@ export const MJ_ATTRS = new Set([
   'n',
   'weight',
   'comment',
+  'bpm',
+  'scale',
+  'root',
+  'swing',
+  'cutoff',
+  'space',
+  'y',
+  'instrument',
+  'volume',
 ]);
 
 export function escapeHtml(str: string): string {
