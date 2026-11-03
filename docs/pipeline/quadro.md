@@ -3,20 +3,21 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 03/11/2026, epoca 229. Crediti: vedi `stato`.
+Aggiornato il 03/11/2026, epoca 230. Crediti: vedi `stato`.
 
 ## Stato attuale
 
 - T187 integrato (glossario, R1-R17 con i nomi esatti). T206 e T179 integrati: traccia nel base con l'ADR-0118, `banco-strutture --seconda --traccia` non provato con una chiamata vera.
 - **T180 integrato** (banco della varianza, solo `lab/`): 31 programmi su 31 statici; i sei vuoti del gioco per T156 sono nel suo esito; da decidere con T156 il tetto di 120 per Enorme e Gargantuesca. Soglia non provata su un edificio vero.
-- **Rinomine finite: R1-R17 integrate, T205 integrato:** un universo salvato prima si apre uguale (unica differenza `buildings`→`lots`, stessi valori), nessuna correzione al codice. Non provati `npm run serve` avviato, Firebase, Stripe, Gemini vero, un salvataggio nato in multigiocatore. All'apertura di `valmora` l'Arbitro ritira 16 moduli, uguale col codice di prima: detto all'autore. T211 indaga il commit perso (visto una volta da T205).
+- **Rinomine finite: R1-R17 integrate, T205 integrato:** un universo salvato prima si apre uguale (unica differenza `buildings`→`lots`, stessi valori), nessuna correzione al codice. Non provati `npm run serve` avviato, Firebase, Stripe, Gemini vero, un salvataggio nato in multigiocatore. All'apertura di `valmora` l'Arbitro ritira 16 moduli, uguale col codice di prima: detto all'autore.
 - **Nomi rimasti, chiesto all'autore se vuole righe nuove (i nomi sono suoi; nessun task finché non risponde).** Dopo R4: `SessionClient.places`, `Client.places`, `ThinClient.places()`, `ShowcaseEntry.place`, `graphCache.places`, `PLACE_PHASES`, `PLACES_PER_MINUTE`, `Kernel.miniature`, `tests/places.test.ts`. Dopo R7 restano `tornio` e `plinto` (`stepTornio`, `openTornio`, `TORNIO_AT`, `CoronaView.tornio`, `Studio.tornio`, `Kernel.plinto()`, `updatePlinto`), aggiunti alla riga nel glossario: convivono con `lathe`. Dopo R8 «ledger» resta in locali e commenti di consumi e carte, omonimo dei saldi. Dopo R9 resta «ground floor» nei commenti (piano terra, inglese comune): a T205 dirlo all'autore, serve un passaggio solo se lo vuole. Dopo R10 restano come caselle: i campi `cell` di `Placements` e `HoverInfo`, `Building.cells`, `Cell`/`cells`/`cell()` di `water.ts`, `Overlay.cell`, i locali `cells`, i commenti (a T205 vedere se proporre una riga nuova). Dopo R11 restano il campo `layouts` di `environmentsFor` e `designLayouts`, `validateLayout`, `checkLayout`, `LayoutCheck`. Dopo R12 restano `tiles` e `tile` del risultato di `cartography.ts`, `VOID_TILE`. Dopo R13 restano «universe/world/server/session of many» nei commenti. Dopo R15 restano, per scelta, l'ancora `#reami`, il valore `quine:sito:reame` in `localStorage`, `realm-card` in `docs/design/sito/`; `realmOf` è il reame del kernel, un altro concetto. Dopo R16 restano da valutare a T205: il locale `person` di `src/ui/chat.ts` (vuol dire «altro viandante»), `persona` di `src/render/entities.ts:156`, testi e `tab-persone` di `site/index.html`, il testo di `tools/sicurezza/catalogo.mjs:614`. Dopo R17 restano da valutare a T205: i locali `partita` di `server/access.ts:100,140`, `tests/partita.test.ts`, `ProvaTaglia` e `taglieDiProva` di `lab/banco/varianza.ts`. Dopo R14 resta «qualche chunk» in `CLAUDE.md:19`.
 - **T209 integrato** (ADR-0121): `healthy` da `pronto`, `stop()` aspetta i git al più 5 s e toglie i lock. Non provati i 60 s veri, un segnale reale su `npm run serve`, il carico da 24 thread. Un server ucciso di colpo lascia i lock fino alla fermata seguente; i 5 s da rivedere a T45f.
-- ADR nuovi dallo **0122**.
+- **T211 integrato** (ADR-0122): i commit di `UniverseClient` stanno in fila, ritentano e non si perdono più per un errore di rete. Causa del «fetch failed» di T205 non trovata; ora `lastError` riporta il codice. Scoperti: fila solo in memoria e senza tetto; `putMap`, `branch`, `merge` non ritentano; un 401 da token scaduto perde il commit. Non provato un mondo vero col server che cade. Da dire all'autore; nessun task finché non lo chiede o non si ripresenta.
+- ADR nuovi dallo **0123**.
 
 ## Pronti e priorità
 
-1. **In coda, approvati e pronti, partono da soli:** T211 T181 T175 T106 T89a T183 T152 T186 T158.
+1. **In coda, approvati e pronti, partono da soli:** T175 (in corso) T181 T106 T89a T183 T152 T186 T158.
 4. **T181 → T182 → T156** (strutture procedurali; T181 su Fable, stima 10 %, contatore Fable al 93 % fino al 05/11): alla fine di T181 leggere il contatore delle 5 ore e confrontarlo con `ratioSessioneSettimana`.
 4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla.
 5. Bloccati da T89a: T89b-e.
@@ -47,5 +48,5 @@ Aggiornato il 03/11/2026, epoca 229. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **230:** T211 integrato.
 - **229:** T209 e T210 integrati.
-- **228:** T203-T205 integrati, rinomine finite; T211 nuovo.
