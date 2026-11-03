@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 03/11/2026, epoca 239. Crediti: vedi `stato`.
+Aggiornato il 03/11/2026, epoca 240. Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -28,11 +28,12 @@ Aggiornato il 03/11/2026, epoca 239. Crediti: vedi `stato`.
 - **T222 integrato** (`a3ff6df`): SoundLab in `/lab/suono/`, suono solo da `src/mj/synth.ts`. Suite intera prima degli ultimi ritocchi di testo e CSS, poi typecheck, build e 4 file. Non provati: dialogo «Apri», scrittura reale su disco, `npm run dev`. **L'autore deve ascoltare:** i 4 preset contro il mockup, manopole in movimento, punto di ripetizione, morph, clic sul piano roll, WAV in un lettore.
 - **T223 integrato** (via T227, ADR-0125): analisi del suono (`src/mj/soundanalysis.ts`, `lab/scripts/mjx-sound.ts`, guida `lab/banco/suono.md`), validatore con le stesse soglie. Nessun ascolto umano; `giuntura` e dinamica minima solo su campioni costruiti; 4 terne di semi su 598 danno un falso difetto su Architettura Frattale; cutoff molto basso non segnalato; il rendering in più del validatore può costare qualche secondo in un caso limite.
 - **T224 finito, NON integrato** (`task/T224`, `05ae697`, ADR-0126, verifica nel browser fatta): conflitti in `AGENTS.md`, `docs/architettura-dettagli.md`; li risolve **T228**, che prova anche i suoi programmi con le soglie di T223, poi `integra T228` e `integra T224`. Musica ed effetti nel gioco, 7 brani e 9 effetti del seme, `src/audio/`, volume e muto nel pannello d'aiuto. Limiti: in multigiocatore niente suono per `item:crafted`, `forge:done` e salto (il client non li riceve); multigiocatore dal vivo non provato. **L'autore ha ascoltato (03/11) e ne è entusiasta**, preferiti l'effetto «morte» e il brano «profondo» (si dice non musicista). Non detto: equilibrio musica/effetti nel gioco, dissolvenze.
+- **T89c integrato** (`aced083`): luce tinta, ombre azzurre, prospettiva aerea, bloom tarato; dietro `?cartone`, `CARTOON_BY_DEFAULT` resta `false` fino a T89b, che deve tenere `uFog` in `Ink`. Verificato nel browser. Non provati: prestazioni (T89e), camera delle ombre da lontano. Rosso una volta `tests/subscription.test.ts`, verde da solo, causa non cercata.
 - ADR nuovi dallo **0127**.
 
 ## Pronti e priorità
 
-1. **In coda, approvati e pronti, partono da soli:** T228 (integra T224) T182 T89b T89e T183 T152 T186 T158; T89c in corso.
+1. **In coda, approvati e pronti, partono da soli:** T182 T89b T89e T183 T152 T186 T158; T228 (integra T224) in corso.
 1b. **Suono da MJ (richiesta dell'autore, 03/11):** T221 (lingua XML, sintetizzatore puro, preset) → T222 (SoundLab in `/lab/suono/`) e T223 (analisi per gli agenti); T221 → T224 (nel gioco); T223 + T224 → T225 (Musicista nella `galleria`, nessun edificio nuovo). Mockup: `docs/userchats/mj_3d_soundlab_sintetizzatore_musicale_markovjunior.html`, committato perché i worktree lo vedano. Scelte mie da correggere se l'autore vuole: musica per ambiente e ora, un solo sintetizzatore puro al posto del grafo Web Audio del mockup.
 4. **T182 → T156** (strutture procedurali). T182 su Claude, stima 8 %, al più 4 giri; è pronto.
 4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla.
@@ -64,5 +65,5 @@ Aggiornato il 03/11/2026, epoca 239. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **240:** T89c integrato; T228 in corso.
 - **239:** T227 e T223 integrati; T224 in conflitto, T228 creato.
-- **238:** T224 finito, aspetta T227 per essere integrato.
