@@ -46,7 +46,7 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
    generati lo assembla il kernel (forma garantita). Gli oggetti stanno in pacchetti di dati.
 6. **Due repository** (ADR-0021): il kernel (questo progetto; `universe/` è il seme, immutabile) e
    l'universo (repository git su disco, `universes/<nome>/`). Si committano solo stati validi; `R` torna
-   all'ultimo valido; ripartire dal seme mette l'universo in `universes/.cestino/`.
+   all'ultimo valido; ripartire dal seme mette l'universo in `universes/.cestino/`. Un commit che la rete non porta resta in fila, in ordine; un rifiuto del server non si ritenta (ADR-0122).
 7. **Il kernel è il pavimento**: sopravvive a NaN, nil, cicli infiniti, binding recisi. Le API del
    `Host` validano gli input e restituiscono `undefined` (mai `null`).
 8. **La corona è nascosta finché il tappeto funziona** (ADR-0009).

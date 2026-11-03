@@ -164,12 +164,59 @@ export const INTERNAL_HEADER = 'x-quine-interno';
 /** On a server without accounts, the wanderer a page on this machine says it is. */
 export const WANDERER_HEADER = 'x-quine-viandante';
 
+/** The waits between the tries of a commit that failed (ms), one after the other: a socket that dropped comes back at once, a lock in a moment. */
+const COMMIT_TRIES_MS = [200, 1000, 4000];
+/** How often a commit in waiting tries again by itself, when no new commit comes to carry it (ms). */
+const COMMIT_WAITING_MS = 30_000;
+
+/** A commit the store has not taken yet. */
+interface OwedCommit {
+  changes: Record<string, string | null>;
+  message: string;
+  author: Author;
+  head?: string | null;
+}
+
+/** The store answered, and not with what was asked. */
+class StoreAnswer extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+  }
+}
+
+/**
+ * What a failure means for a commit. `waits`: nobody took it and it stays in line (no answer at all, a gateway with no store behind it, a "later").
+ * `tries`: the store failed on it, maybe not by its fault: a few tries, then it gives way, since a commit that always fails must not stop those after it.
+ * `refused`: the store said no (a path, a permission) and would say no again.
+ */
+function failureKind(e: unknown): 'waits' | 'tries' | 'refused' {
+  if (!(e instanceof StoreAnswer)) return 'waits';
+  if ([408, 429, 502, 503, 504].includes(e.status)) return 'waits';
+  return e.status >= 500 ? 'tries' : 'refused';
+}
+
+/** A failure in words, with what Node keeps under its bare «fetch failed». */
+function failureWords(e: unknown): string {
+  const cause = (e as { cause?: { code?: string; message?: string } }).cause;
+  const under = cause?.code ?? cause?.message;
+  return under ? `${(e as Error).message} (${under})` : (e as Error).message;
+}
+
 /** Client of the universe store (server/universeStore.ts): the browser's, or the session server's with an absolute `base` (T38). */
 export class UniverseClient implements UniverseBackend {
   private queue: Promise<unknown> = Promise.resolve();
-  /** Commits not yet written to disk (shown by the console). */
+  /** Commits not yet written to disk (shown by the console), those in waiting too. */
   pending = 0;
   lastError = '';
+  /** In order, the first is the next to write. Commits carry only what changed: one skipped would never reach the disk, and the next must not pass it. */
+  private owed: OwedCommit[] = [];
+  /** The first in line has used its tries: until it passes, one try each time, not to make the queue wait at every commit. */
+  private waiting = false;
+  private retry?: ReturnType<typeof setTimeout>;
+  private closed = false;
 
   private constructor(
     readonly name: string,
@@ -201,7 +248,7 @@ export class UniverseClient implements UniverseBackend {
   private async post(op: string, body: unknown): Promise<any> {
     const r = await fetch(this.url(op), { method: 'POST', headers: { 'Content-Type': 'application/json', ...this.headers }, body: JSON.stringify(body) });
     const j = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(j.error ?? `HTTP ${r.status}`);
+    if (!r.ok) throw new StoreAnswer(j.error ?? `HTTP ${r.status}`, r.status);
     return j;
   }
 
@@ -226,33 +273,95 @@ export class UniverseClient implements UniverseBackend {
     return Object.fromEntries(Object.entries(files).filter(([p]) => allowedPath(p)));
   }
 
-  /** Commits are written in order, one at a time, without blocking the game. */
+  /**
+   * Commits are written in order, one at a time, without blocking the game. One the store did not take stays first in line (ADR-0122): tried again
+   * now and then and by every commit after it, never passed. Resolves with its head, or null if it was refused or has not been written yet.
+   */
   commit(all: Record<string, string | null>, message: string, author: Author): Promise<string | null> {
-    const changes = this.admitted(all);
+    const commit: OwedCommit = { changes: this.admitted(all), message, author };
+    this.owed.push(commit);
     this.pending++;
-    const job = this.queue.then(async () => {
-      try {
-        return (await this.post('commit', { changes, message, author })).head ?? null;
-      } catch (e) {
-        this.lastError = (e as Error).message;
-        console.warn('[universo] commit non scritto su disco:', this.lastError);
-        return null;
-      } finally {
-        this.pending--;
-      }
-    });
+    return this.inLine(() => this.writeOwed()).then(() => commit.head ?? null);
+  }
+
+  private inLine<T>(fn: () => Promise<T>): Promise<T> {
+    const job = this.queue.then(fn);
     this.queue = job;
     return job;
   }
 
+  /** Only from the queue: the commits in line, as far as they go. Never throws. */
+  private async writeOwed(): Promise<void> {
+    while (this.owed.length) {
+      if (!(await this.written(this.owed[0]))) {
+        this.waitForStore();
+        return;
+      }
+      this.owed.shift();
+      this.pending--;
+    }
+    if (this.waiting) console.warn('[universo] la coda dei commit in attesa è finita');
+    this.waiting = false;
+  }
+
+  /** False if the commit stays in line; true if it is done with, on disk or given up. */
+  private async written(c: OwedCommit): Promise<boolean> {
+    for (let i = 0; ; i++) {
+      try {
+        c.head = (await this.post('commit', { changes: c.changes, message: c.message, author: c.author })).head ?? null;
+        return true;
+      } catch (e) {
+        const kind = failureKind(e);
+        this.lastError = failureWords(e);
+        const spent = i >= COMMIT_TRIES_MS.length || (kind === 'waits' && this.waiting);
+        if (kind === 'refused' || (kind === 'tries' && spent)) {
+          console.warn('[universo] commit non scritto su disco:', this.lastError);
+          return true;
+        }
+        if (spent) return false;
+        await new Promise((r) => setTimeout(r, COMMIT_TRIES_MS[i]));
+      }
+    }
+  }
+
+  private waitForStore(): void {
+    if (!this.waiting) console.warn(`[universo] commit in attesa (${this.lastError}): si ritenta`);
+    this.waiting = true;
+    if (this.retry !== undefined || this.closed) return;
+    this.retry = setTimeout(() => {
+      this.retry = undefined;
+      void this.inLine(() => this.writeOwed());
+    }, COMMIT_WAITING_MS);
+    // A world that stops does not stay up for this.
+    (this.retry as { unref?: () => void }).unref?.();
+  }
+
+  /** What comes after the commits must find them on disk: it does not go on past one in waiting. */
+  private async afterCommits(): Promise<void> {
+    await this.inLine(() => this.writeOwed());
+    if (this.owed.length) throw new Error(`${this.owed.length} commit in attesa: ${this.lastError}`);
+  }
+
+  /** No more tries by itself: who stops has waited as long as it could. Says what stays behind. */
+  close(): void {
+    this.closed = true;
+    if (this.retry !== undefined) clearTimeout(this.retry);
+    this.retry = undefined;
+    if (this.owed.length) console.warn(`[universo] ${this.owed.length} commit non scritti su disco alla chiusura: ${this.lastError}`);
+  }
+
   async checkout(id: string): Promise<FileMap | null> {
-    await this.queue;
+    await this.afterCommits();
     return (await this.post('checkout', { id })).files ?? null;
   }
 
   async reset(): Promise<void> {
-    await this.queue;
+    await this.inLine(() => this.writeOwed());
     await this.post('reset', {});
+    // The universe went to the bin: what was still owed to it has nowhere to go.
+    this.pending -= this.owed.length;
+    this.owed = [];
+    this.waiting = false;
   }
 
   /** Branches are written in the same queue as the commits: a merge comes after the commit that publishes it. */
@@ -273,14 +382,17 @@ export class UniverseClient implements UniverseBackend {
 
   /** After the commits in flight, so the clone has them. Throws with the store's reason (a name taken, a master already). */
   async clone(nome: string, master: string, titolari: 'restano' | 'master' = 'restano'): Promise<string | null> {
-    await this.queue;
+    await this.afterCommits();
     return (await this.post('clone', { nome, master, titolari })).head ?? null;
   }
 
   private queued<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
     this.pending++;
-    const job = this.queue.then(async () => {
+    return this.inLine(async () => {
       try {
+        // A merge comes after the commit that publishes it, even one that had to wait.
+        await this.writeOwed();
+        if (this.owed.length) throw new Error(`${this.owed.length} commit in attesa: ${this.lastError}`);
         return await fn();
       } catch (e) {
         this.lastError = (e as Error).message;
@@ -290,8 +402,6 @@ export class UniverseClient implements UniverseBackend {
         this.pending--;
       }
     });
-    this.queue = job;
-    return job;
   }
 
   // Maps: files of the universe too, outside the text snapshot.
