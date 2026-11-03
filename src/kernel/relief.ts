@@ -258,7 +258,7 @@ export function worldLevels(chunks: WaterChunk[], size: number, liquid: (code: s
 }
 
 /** A lot of a chunk, in its cells (inclusive): a structure stands on it (ADR-0043). */
-export interface Lot {
+export interface LotBox {
   x0: number;
   y0: number;
   x1: number;
@@ -272,7 +272,7 @@ export interface Lot {
  * them, so that neighbours on land still differ by at most two levels, while the chunk's border keeps the
  * relief and meets the next chunk as before. Only the chunk's own tiles count, as for water.
  */
-export function chunkLevels(tiles: string, size: number, liquid: (code: string) => boolean, level: (c: number, r: number) => number, lots: Lot[]): Int16Array {
+export function chunkLevels(tiles: string, size: number, liquid: (code: string) => boolean, level: (c: number, r: number) => number, lots: LotBox[]): Int16Array {
   const S = size;
   const out = waterLevels(tiles, S, liquid, level);
   const wet = (i: number) => liquid(tiles[i]);
@@ -299,7 +299,7 @@ export function chunkLevels(tiles: string, size: number, liquid: (code: string) 
     return [lo, hi];
   };
   // The lots first, then their rings (inside the border, which stays the relief), which yield where they must.
-  const flats = new Map<Lot, number>();
+  const flats = new Map<LotBox, number>();
   for (const { l } of order) {
     const own: number[] = [];
     for (let r = Math.max(0, l.y0); r <= Math.min(S - 1, l.y1); r++) for (let c = Math.max(0, l.x0); c <= Math.min(S - 1, l.x1); c++) if (!wet(r * S + c)) own.push(level(c, r));

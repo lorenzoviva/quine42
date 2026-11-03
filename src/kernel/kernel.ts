@@ -42,7 +42,7 @@ import { GENERIC, ModelDirector, ownModelId } from './modeldirector';
 import { categoryOf, DEFAULT_SCULPTORS, sculptAction, type SculptorModels } from './agents/sculptor';
 import { MODELS_INDEX, type ModelInfo } from './forms';
 import { Content, normName, specOf } from './content';
-import { layout, type Building, type LayoutResult, articulationPoints } from './layout';
+import { layout, type Lot, type LayoutResult, articulationPoints } from './layout';
 import { AGENTS, Council, readBible, wordsOf, type AgentId, type CatalogEntry, type FeedEntry } from './agents/council';
 import { designEnvironment, drawAtlas, planChunk, readStructure, type ChunkPlan, type WaterRecord, type Where } from './agents/cartography';
 import { WaterFlow, WET, type WaterChange } from './water';
@@ -104,7 +104,7 @@ export interface Chunk {
   stage: 'draft' | 'planned';
   place?: Place;
   plan?: ChunkPlan;
-  buildings: Building[];
+  lots: Lot[];
   developing?: boolean;
   /** The wanderer who first wanted it (T40): a place new to the universe is planned at their expense. */
   chi?: string;
@@ -419,7 +419,7 @@ export class Kernel {
   /** Solid things with a model, by the cells their footprint reaches (they block by their voxels). */
   private reliefCache?: { key: string; relief: Relief };
   /** The level of every tile, per chunk (flat water, flat lots), while its tiles, lots and the world's levels stay the same. */
-  private levelCache = new WeakMap<Chunk, { tiles: string; lots: Building[]; field: Int16Array; levels: Int16Array }>();
+  private levelCache = new WeakMap<Chunk, { tiles: string; lots: Lot[]; field: Int16Array; levels: Int16Array }>();
   /** The levels of the loaded world before the lots (T51a), while its places, their tiles, the relief and the sea stay the same. */
   private worldField?: { relief: Relief; sea: number; ground: number; tiles: Map<Chunk, string>; levels: Map<Chunk, Int16Array> };
   /** Bumped when the ground is dug or the water flows (T51b): the world's levels are made again. */
@@ -1555,7 +1555,7 @@ export class Kernel {
     if (this.genBudget <= 0 || this.mirror) return undefined;
     this.genBudget--;
     const draft = this.genDraft(cx, cy);
-    const ch: Chunk = { cx, cy, key, draft, tiles: draft, version: 0, stage: 'draft', buildings: [], chi: this.wanderer().id };
+    const ch: Chunk = { cx, cy, key, draft, tiles: draft, version: 0, stage: 'draft', lots: [], chi: this.wanderer().id };
     this.chunks.set(key, ch);
     return ch;
   }
@@ -1834,7 +1834,7 @@ export class Kernel {
   }
 
   /**
-   * A plan laid out on its draft (deterministic): the environment's program, the guaranteed paths, the buildings,
+   * A plan laid out on its draft (deterministic): the environment's program, the guaranteed paths, the lots,
    * the Cartographer's edits. `quiet` for the model of places (T26): a program that fails there is not news.
    */
   private layoutOf(ch: Pick<Chunk, 'cx' | 'cy' | 'draft'>, plan: ChunkPlan, pathCode: string, quiet = false): { result: LayoutResult; tiles: string } {
@@ -1863,7 +1863,7 @@ export class Kernel {
   }
 
   /**
-   * Where a plan puts its runes and things: reachable cells, inside or outside buildings, never on gates or doors.
+   * Where a plan puts its runes and things: reachable cells, inside or outside lots, never on gates or doors.
    * Deterministic, the same for the world and for the model of places (T26): what was already taken keeps its cell,
    * so the rest does not move. `pick` goes on for what comes later (things forged for the place, items introduced).
    */
@@ -1871,8 +1871,8 @@ export class Kernel {
     const S = this.config.chunkSize;
     const rng = new Rng(hash32(this.config.seed, ch.cx, ch.cy, 991));
     const occupied = new Set<number>(result.gates);
-    for (const b of result.buildings) for (const d of b.doors) occupied.add(d);
-    const indoorSet = new Set(result.buildings.flatMap((b) => b.floor));
+    for (const b of result.lots) for (const d of b.doors) occupied.add(d);
+    const indoorSet = new Set(result.lots.flatMap((b) => b.floor));
     const reach = [...result.reachable];
     const indoor = reach.filter((i) => indoorSet.has(i));
     const outdoor = reach.filter((i) => !indoorSet.has(i) && this.palette[result.grid[Math.floor(i / S)][i % S]]?.layer !== 'door');
@@ -1939,7 +1939,7 @@ export class Kernel {
     this.graphPlaces.set(ch.key, { cx: ch.cx, cy: ch.cy, nome: plan.place.name, descrizione: plan.place.description, ambiente: plan.layout, cose: plan.objects.map((o) => o.module), a_terra: plan.ground, strutture: plan.strutture?.map((x) => x.concetto) });
     this.graphPlacesVersion++;
     ch.tiles = tiles;
-    ch.buildings = result.buildings;
+    ch.lots = result.lots;
     ch.stage = 'planned';
     ch.version++;
     this.plannedCount++;
@@ -1950,7 +1950,7 @@ export class Kernel {
     const at = (cell: number) => ({ x: ch.cx * S + (cell % S) + 0.5, y: ch.cy * S + Math.floor(cell / S) + 0.5 });
     // On a lot: on the floor of its structure (once its form is ready), not inside its walls.
     const inLot = (cell: number) => {
-      const lot = ch.buildings.findIndex((b) => b.floor.includes(cell));
+      const lot = ch.lots.findIndex((b) => b.floor.includes(cell));
       return lot >= 0 ? structures[lot] : undefined;
     };
 
@@ -2093,7 +2093,7 @@ export class Kernel {
   private claimSizes(ch: Chunk, plan: ChunkPlan): void {
     if (!plan.strutture?.length) return;
     plan.strutture = plan.strutture.map(readStructure);
-    const sides = ch.buildings.map((b, i) => ({ i, area: (b.x1 - b.x0 + 1) * (b.y1 - b.y0 + 1), side: Math.max(b.x1 - b.x0 + 1, b.y1 - b.y0 + 1) })).sort((a, b) => b.area - a.area || a.i - b.i).map((b) => b.side);
+    const sides = ch.lots.map((b, i) => ({ i, area: (b.x1 - b.x0 + 1) * (b.y1 - b.y0 + 1), side: Math.max(b.x1 - b.x0 + 1, b.y1 - b.y0 + 1) })).sort((a, b) => b.area - a.area || a.i - b.i).map((b) => b.side);
     let rare = false;
     plan.strutture.forEach((s, n) => {
       if (!s.taglia) return;
@@ -2114,17 +2114,17 @@ export class Kernel {
   }
 
   /**
-   * Lots (ADR-0043): every building of the plan becomes a structure — a whole model one enters, set on its
+   * Lots (ADR-0043): every lot of the plan becomes a structure — a whole model one enters, set on its
    * lot and turned towards its door. The Cartographer's structures go to the largest lots (the Sculptor
    * writes the ones that do not exist yet); the others are common houses. The lot's tiles become ground,
    * the path goes on from its door towards the house. Pure: the world and the model of places (T26) build the same.
    */
-  private lotsOf(ch: Pick<Chunk, 'cx' | 'cy' | 'key' | 'draft' | 'tiles' | 'buildings'>, plan: ChunkPlan, pathCode: string): { tiles: string; lots: PlaceLot[] } {
+  private lotsOf(ch: Pick<Chunk, 'cx' | 'cy' | 'key' | 'draft' | 'tiles' | 'lots'>, plan: ChunkPlan, pathCode: string): { tiles: string; lots: PlaceLot[] } {
     const S = this.config.chunkSize;
     const tiles = [...ch.tiles];
     const wanted = (plan.strutture ?? []).map(readStructure);
     const lots: PlaceLot[] = [];
-    const order = ch.buildings.map((b, i) => ({ b, i, area: (b.x1 - b.x0 + 1) * (b.y1 - b.y0 + 1) })).sort((a, b) => b.area - a.area || a.i - b.i);
+    const order = ch.lots.map((b, i) => ({ b, i, area: (b.x1 - b.x0 + 1) * (b.y1 - b.y0 + 1) })).sort((a, b) => b.area - a.area || a.i - b.i);
     for (const { b, i } of order) {
       const w = b.x1 - b.x0 + 1, h = b.y1 - b.y0 + 1;
       const classe = Math.max(w, h) >= 5 ? 'grande' : 'edificio';
@@ -2160,7 +2160,7 @@ export class Kernel {
     return { tiles: tiles.join(''), lots };
   }
 
-  /** The lots of a planned chunk become structures in the world. Returns them, by building index. */
+  /** The lots of a planned chunk become structures in the world. Returns them, by lot index. */
   private settleLots(ch: Chunk, plan: ChunkPlan, pathCode: string): Id[] {
     const { tiles, lots } = this.lotsOf(ch, plan, pathCode);
     const out: Id[] = [];
@@ -2207,13 +2207,13 @@ export class Kernel {
     const S = this.config.chunkSize;
     const pathCode = this.pathCode();
     const { result, tiles: laid } = this.layoutOf(ch, plan, pathCode, true);
-    const { tiles, lots } = this.lotsOf({ ...ch, tiles: laid, buildings: result.buildings }, plan, pathCode);
+    const { tiles, lots } = this.lotsOf({ ...ch, tiles: laid, lots: result.lots }, plan, pathCode);
     const place = this.placementsOf(ch, plan, result);
     const liquid = (code: string) => this.palette[code]?.layer === 'liquid';
     // Its own levels, as if alone (T51a): the same miniature whether or not the places around are loaded.
     const field = worldLevels([{ ...ch, tiles }], S, liquid, (c, r) => this.relief.level(c, r), this.seaLevel)[0];
     const height = (c: number, r: number) => field[r * S + c];
-    const levels = chunkLevels(tiles, S, liquid, height, result.buildings);
+    const levels = chunkLevels(tiles, S, liquid, height, result.lots);
     const local = (cell: number) => ({ x: (cell % S) + 0.5, y: Math.floor(cell / S) + 0.5 });
     const things: PlaceMiniature['things'] = [];
     for (const { index, cell } of place.objects) {
@@ -2240,7 +2240,7 @@ export class Kernel {
       phase(gated, result.gates),
       phase(programmed, changed(gated, programmed)),
       phase(laid, changed(programmed, laid)),
-      phase(tiles, [...result.buildings.flatMap((b) => [...b.walls, ...b.floor, ...b.doors]), ...changed(laid, tiles)], levels),
+      phase(tiles, [...result.lots.flatMap((b) => [...b.walls, ...b.floor, ...b.doors]), ...changed(laid, tiles)], levels),
       phase(tiles, [...things, ...runes].map(cellOf), levels),
     ];
     return {
@@ -2249,7 +2249,7 @@ export class Kernel {
       size: S,
       tiles,
       levels: [...levels],
-      structures: lots.map((l) => ({ x: l.x - ch.cx * S, y: l.y - ch.cy * S, w: result.buildings[l.index].x1 - result.buildings[l.index].x0 + 1, h: result.buildings[l.index].y1 - result.buildings[l.index].y0 + 1, model: l.form.model, seed: l.form.seed, yaw: l.form.yaw, done: l.form.done })),
+      structures: lots.map((l) => ({ x: l.x - ch.cx * S, y: l.y - ch.cy * S, w: result.lots[l.index].x1 - result.lots[l.index].x0 + 1, h: result.lots[l.index].y1 - result.lots[l.index].y0 + 1, model: l.form.model, seed: l.form.seed, yaw: l.form.yaw, done: l.form.done })),
       things,
       runes,
       phases,
@@ -2296,7 +2296,7 @@ export class Kernel {
     // a crowded floor is still better than the lot, which may be inside the walls.
     const taken = this.ecs.query('pos').filter((id) => id !== sid).map((id) => this.ecs.get(id, 'pos'));
     const S = this.config.chunkSize;
-    const doorPositions = solid ? ch.buildings.flatMap((b) => b.doors).map((d) => ({ x: ch.cx * S + (d % S) + 0.5, y: ch.cy * S + Math.floor(d / S) + 0.5 })) : [];
+    const doorPositions = solid ? ch.lots.flatMap((b) => b.doors).map((d) => ({ x: ch.cx * S + (d % S) + 0.5, y: ch.cy * S + Math.floor(d / S) + 0.5 })) : [];
     const inside = this.interiorPoints(sid);
     const free = inside.filter((q) => taken.every((t) => Math.hypot(t.x - q.x, t.y - q.y) > 0.9) && (!solid || doorPositions.every((dp) => Math.hypot(dp.x - q.x, dp.y - q.y) > 1.2)));
     const pool = free.length ? free : (solid ? [] : inside);
@@ -2473,9 +2473,9 @@ export class Kernel {
     if (!ch) return Math.max(this.seaLevel, this.relief.level(col, row)) * LEVEL;
     const field = this.levelsOf(ch);
     let l = this.levelCache.get(ch);
-    if (l?.tiles !== ch.tiles || l.lots !== ch.buildings || l.field !== field) {
-      const levels = chunkLevels(ch.tiles, S, (code) => this.palette[code]?.layer === 'liquid', (c, r) => field[r * S + c], ch.buildings);
-      l = { tiles: ch.tiles, lots: ch.buildings, field, levels };
+    if (l?.tiles !== ch.tiles || l.lots !== ch.lots || l.field !== field) {
+      const levels = chunkLevels(ch.tiles, S, (code) => this.palette[code]?.layer === 'liquid', (c, r) => field[r * S + c], ch.lots);
+      l = { tiles: ch.tiles, lots: ch.lots, field, levels };
       this.levelCache.set(ch, l);
     }
     return l.levels[(row - cy * S) * S + (col - cx * S)] * LEVEL;
@@ -2841,14 +2841,14 @@ export class Kernel {
     return this.chunks.get(this.chunkKey(Math.floor(x / S), Math.floor(y / S)));
   }
 
-  /** The building whose floor contains this carpet point (for roofs and interiors). */
-  buildingAt(x: number, y: number): { chunk: Chunk; building: Building } | undefined {
+  /** The lot whose floor contains this carpet point (for roofs and interiors). */
+  lotAt(x: number, y: number): { chunk: Chunk; lot: Lot } | undefined {
     const S = this.config.chunkSize;
     const ch = this.chunkAt(x, y);
     if (!ch) return undefined;
     const cell = (Math.floor(y) - ch.cy * S) * S + (Math.floor(x) - ch.cx * S);
-    const building = ch.buildings.find((b) => b.floor.includes(cell) || b.doors.includes(cell));
-    return building ? { chunk: ch, building } : undefined;
+    const lot = ch.lots.find((b) => b.floor.includes(cell) || b.doors.includes(cell));
+    return lot ? { chunk: ch, lot } : undefined;
   }
 
   private freeCell(col: number, row: number): boolean {
@@ -6517,7 +6517,7 @@ export class Kernel {
   }
 
   /**
-   * Where a routine step happens: home (a building of their place), work, the square — and for what
+   * Where a routine step happens: home (a lot of their place), work, the square — and for what
    * they do, the right spot: a bed to sleep, a field to hoe, a bank to fish, a wood to cut.
    */
   private placeFor(id: Id, identity: Identity, where: string, activity?: Activity): { x: number; y: number } | undefined {
@@ -6562,11 +6562,11 @@ export class Kernel {
     }
     if (where === 'in giro') return undefined;
     if (where === 'casa' || activity === 'dorme' || activity === 'prega' || (where === 'lavoro' && /fabbr|forn|oste|locand|bottega|mercant|sart|panett|cuoc|tessit|speziale|scriv|mago|monac/i.test(identity.job ?? ''))) {
-      const bs = ch.buildings.filter((b) => b.floor.some(free));
+      const bs = ch.lots.filter((b) => b.floor.some(free));
       if (bs.length) {
         const b = bs[(h + (where === 'lavoro' ? 1 : 0)) % bs.length];
         // Home is the floor of the house's model, inside its walls (its lot, until the model is ready).
-        const sid = this.ecs.query('struttura', 'origin').find((e) => this.ecs.get(e, 'origin').key === `${ch.key}#s${ch.buildings.indexOf(b)}`);
+        const sid = this.ecs.query('struttura', 'origin').find((e) => this.ecs.get(e, 'origin').key === `${ch.key}#s${ch.lots.indexOf(b)}`);
         const inside = sid !== undefined ? this.interiorPoints(sid) : [];
         if (inside.length) return inside[h % inside.length];
         const floor = b.floor.filter(free);

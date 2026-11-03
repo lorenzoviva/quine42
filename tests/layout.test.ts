@@ -87,10 +87,10 @@ describe('layout', () => {
     for (let i = 1; i < S - 1; i++) if (!r.gates.includes(i)) expect(r.grid[0][i]).toBe('t');
   });
 
-  it('runs the program, keeps the border, finds buildings and makes their doors reachable', () => {
+  it('runs the program, keeps the border, finds lots and makes their doors reachable', () => {
     const r = layout(forest, palette, { cx: 0, cy: 0, seed: 5, program: village, pathCode: 'p' });
-    expect(r.buildings.length).toBe(2);
-    for (const b of r.buildings) {
+    expect(r.lots.length).toBe(2);
+    for (const b of r.lots) {
       expect(b.floor.length).toBe(9);
       expect(b.doors.length).toBe(1);
       expect(r.reachable.has(b.doors[0])).toBe(true);
@@ -130,9 +130,9 @@ describe('structure stamps', () => {
     expect(all).toMatch(/w/);
     expect(all).toMatch(/z/);
     expect((all.match(/b/g) ?? []).length).toBeGreaterThan(30);
-    expect(r.buildings.length).toBeGreaterThan(0);
+    expect(r.lots.length).toBeGreaterThan(0);
     // The keep's door is reachable: the gate crosses the moat on the drawbridge.
-    expect(r.buildings.every((b) => b.doors.some((d) => r.reachable.has(d)))).toBe(true);
+    expect(r.lots.every((b) => b.doors.some((d) => r.reachable.has(d)))).toBe(true);
   });
 
   it('every stamp fits an 18×18 place', () => {

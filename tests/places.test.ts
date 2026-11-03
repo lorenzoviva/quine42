@@ -70,7 +70,7 @@ describe('the model of places (T26)', () => {
     // Its levels are the place's own, as if alone (T51a): the world's may follow its water beyond it.
     const liquid = (c: string) => k.palette[c]?.layer === 'liquid';
     const own = worldLevels([ch], S, liquid, (c, r) => k.relief.level(c, r), k.seaLevel)[0];
-    expect(mini.levels).toEqual([...chunkLevels(ch.tiles, S, liquid, (c, r) => own[r * S + c], ch.buildings)]);
+    expect(mini.levels).toEqual([...chunkLevels(ch.tiles, S, liquid, (c, r) => own[r * S + c], ch.lots)]);
     let same = 0;
     for (let i = 0; i < S * S; i++) if (mini.levels[i] * LEVEL === k.groundAt((i % S) + 0.5, Math.floor(i / S) + 0.5)) same++;
     expect(same).toBeGreaterThan((S * S) / 2);
@@ -138,7 +138,7 @@ describe('the model of places (T26)', () => {
     // The environment and the paths light what they changed; the border stays the draft's (save the gates).
     for (const [before, now] of [[gated, env], [env, paths]]) for (const c of now.lit) expect(now.tiles[c]).not.toBe(before.tiles[c]);
     for (let i = 0; i < S; i++) for (const c of [i, i * S, i * S + S - 1, (S - 1) * S + i]) if (!g.includes(c)) expect(env.tiles[c]).toBe(draft.tiles[c]);
-    // The lots: the cells of each building, its structure in the middle of them.
+    // The lots: the cells of each lot, its structure in the middle of them.
     expect(lots.tiles).toBe(mini.tiles);
     for (const s of mini.structures) expect(lots.lit).toContain(Math.floor(s.y) * S + Math.floor(s.x));
     expect(mini.structures.length ? lots.lit.length : 1).toBeGreaterThan(0);

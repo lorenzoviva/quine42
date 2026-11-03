@@ -18,7 +18,9 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Terreno | `tile` | 573 (42) | 3 (2) | 31 (17) | 14 (2) |
 | Ambiente | `layout` | 266 (28) | 1 (1) | 33 (13) | 2 (2) |
 | Ambiente | `bioma` | 0 (0) | 0 (0) | 1 (1) | 0 (0) |
-| Lotto | `building` | 316 (18) | 0 (0) | 5 (4) | 0 (0) |
+| Lotto | `building` | 261 (14) | 0 (0) | 5 (4) | 0 (0) |
+| Lotto | `Building` | 261 (14) | 0 (0) | 5 (4) | 0 (0) |
+| Lotto | `buildings` | 43 (10) | 0 (0) | 1 (1) | 0 (0) |
 | Corona | `crown` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Corona | `anello` | 4 (4) | 1 (1) | 20 (11) | 0 (0) |
 | Edificio | `edificio` | 21 (8) | 1 (1) | 33 (16) | 0 (0) |
@@ -26,7 +28,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Entità | `cosa` | 119 (21) | 17 (6) | 106 (51) | 5 (2) |
 | Modulo | `mod` | 47 (3) | 0 (0) | 0 (0) | 0 (0) |
 | Struttura | `edificio` | 21 (8) | 1 (1) | 33 (16) | 0 (0) |
-| Struttura | `building` | 316 (18) | 0 (0) | 5 (4) | 0 (0) |
+| Struttura | `building` | 261 (14) | 0 (0) | 5 (4) | 0 (0) |
 | Modello | `modello` | 94 (28) | 5 (2) | 216 (55) | 15 (4) |
 | Programma | `codice` | 72 (16) | 17 (7) | 110 (49) | 4 (1) |
 | Programma | `xml` | 198 (18) | 2 (1) | 34 (14) | 6 (2) |

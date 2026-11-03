@@ -77,7 +77,7 @@ export interface TileDef {
   description?: string;
   /** How it is drawn and how paths are carved through it. Default ground (walkable) / rock (solid). */
   layer?: TileLayer;
-  /** Indoor floor: buildings are indoor floor enclosed by walls; their roof hides them from outside. */
+  /** Indoor floor: lots are indoor floor enclosed by walls; their roof hides them from outside. */
   indoor?: boolean;
   /** What stands on tiles of this terrain (trees on woods, boulders on rock): a program of `models/`. */
   model?: string;
