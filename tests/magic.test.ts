@@ -113,16 +113,16 @@ describe('new magic runes (T57b)', () => {
     giveRunes(k, ['sangue']);
     expect(k.inscribe(['sangue'])).toBe(true);
     expect(countItem(k.inventory(), 'rune:sangue')).toBe(0);
-    k.hand().tokens = [];
+    k.phrase().tokens = [];
     k.carpet()!.active = false;
     k.tick(DT);
     expect(k.pickUpRune()).toBe(true);
     expect(countItem(k.inventory(), 'rune:sangue')).toBe(1);
-    expect(k.hand().tokens).toEqual(['sangue']);
+    expect(k.phrase().tokens).toEqual(['sangue']);
 
     // Composed with the others: a formula the Narrator names once.
     giveRunes(k, ['fuoco']);
-    k.hand().tokens = ['sangue', 'fuoco'];
+    k.phrase().tokens = ['sangue', 'fuoco'];
     k.needs()!.mana = 100;
     expect(k.incantation()).toEqual(['sangue', 'fuoco']);
     expect(await k.castSpell()).toBe(true);
@@ -151,7 +151,7 @@ describe('new magic runes (T57b)', () => {
     // The formula that calls for an element no rune has: one more rune, after the spell.
     clearArea(k);
     giveRunes(k, ['vita', 'acqua']);
-    k.hand().tokens = ['vita', 'acqua'];
+    k.phrase().tokens = ['vita', 'acqua'];
     k.needs()!.mana = 100;
     expect(await k.castSpell()).toBe(true);
     for (let i = 0; i < 40 && !k.content.runes.ghiaccio; i++) await new Promise((r) => setTimeout(r, 25));

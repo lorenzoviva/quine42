@@ -149,7 +149,7 @@ describe('the kernel’s rilievo effect (T57c)', () => {
 
     // Cast «terra vento terra» -> raises
     giveRunes(['terra', 'vento', 'terra']);
-    k.hand().tokens = ['terra', 'vento', 'terra'];
+    k.phrase().tokens = ['terra', 'vento', 'terra'];
     expect(await k.castSpell()).toBe(true);
     expect(k.content.spells['terra vento terra']?.effects[0]).toMatchObject({ tipo: 'rilievo', delta: 2 });
     const afterRaise = k.groundAt(targetCol, targetRow) / LEVEL;
@@ -157,7 +157,7 @@ describe('the kernel’s rilievo effect (T57c)', () => {
 
     // Cast «vento terra vento» -> lowers
     giveRunes(['vento', 'terra', 'vento']);
-    k.hand().tokens = ['vento', 'terra', 'vento'];
+    k.phrase().tokens = ['vento', 'terra', 'vento'];
     expect(await k.castSpell()).toBe(true);
     expect(k.content.spells['vento terra vento']?.effects[0]).toMatchObject({ tipo: 'rilievo', delta: -2 });
     const afterLower = k.groundAt(targetCol, targetRow) / LEVEL;

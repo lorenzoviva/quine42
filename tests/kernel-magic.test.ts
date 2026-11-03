@@ -101,34 +101,34 @@ describe('runes and magic', () => {
     expect(k.ecs.query('luce', 'effimero').length).toBe(1);
     expect(n.mana).toBe(96);
     expect(countItem(k.inventory(), 'rune:luce')).toBe(1);
-    expect(k.hand().tokens).toEqual(['x']);
+    expect(k.phrase().tokens).toEqual(['x']);
 
     // A new sequence: named once by the Council, then known.
     giveRunes(k, ['vita', 'scudo', 'vita', 'scudo']);
-    k.hand().tokens = ['vita', 'scudo'];
+    k.phrase().tokens = ['vita', 'scudo'];
     const calls = k.ai.usage.text;
     expect(await k.castSpell()).toBe(true);
     expect(k.ai.usage.text).toBe(calls + 1);
     expect(k.content.spells['vita scudo']).toBeTruthy();
     expect(k.repo.head().message).toMatch(/incantesimo: vita scudo/);
     expect(k.ecs.get(k.wandererEntity, 'scudo')?.fino).toBeGreaterThan(k.time);
-    k.hand().tokens = ['vita', 'scudo'];
+    k.phrase().tokens = ['vita', 'scudo'];
     await k.castSpell();
     expect(k.ai.usage.text).toBe(calls + 1);
     // Spent: no runes left, nothing to cast.
-    k.hand().tokens = ['vita', 'scudo'];
+    k.phrase().tokens = ['vita', 'scudo'];
     expect(await k.castSpell()).toBe(false);
 
     // Long incantations burn a magic crystal; without mana nothing happens.
     giveRunes(k, ['fuoco', 'fuoco', 'vento']);
-    k.hand().tokens = ['fuoco', 'fuoco', 'vento'];
+    k.phrase().tokens = ['fuoco', 'fuoco', 'vento'];
     expect(await k.castSpell()).toBe(false);
     k.give('item.cristallo-magico', 1);
     expect(await k.castSpell()).toBe(true);
     expect(countItem(k.inventory(), 'item.cristallo-magico')).toBe(0);
     n.mana = 1;
     giveRunes(k, ['luce']);
-    k.hand().tokens = ['luce'];
+    k.phrase().tokens = ['luce'];
     expect(await k.castSpell()).toBe(false);
   });
 
@@ -139,7 +139,7 @@ describe('runes and magic', () => {
     k.give('item.cristallo-magico', 2);
     const cast = async (seq: string[]) => {
       giveRunes(k, seq);
-      k.hand().tokens = [...seq];
+      k.phrase().tokens = [...seq];
       k.needs()!.mana = 100;
       expect(await k.castSpell()).toBe(true);
       return k.content.spells[seq.join(' ')];

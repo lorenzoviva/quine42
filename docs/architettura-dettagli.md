@@ -326,7 +326,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   generazione, salvataggi né Concilio; `mirrorTick` muove solo il suo viandante) che `ThinClient` (`thin.ts`) riempie: luoghi →
   chunk (con i lotti), cose → entità con `THING_PARTS`, altri viandanti → entità `remote` interpolate (`FOLLOW`), con arti e
   fumetti. Il passo è predetto e mandato ogni 50 ms, la `correzione` lo rimette a posto, oltre 8 caselle il client segue il server
-  (`FAR` sul server). Le azioni (`interact perform freeAction talk inscribeHand dropSelected castSpell action`) vanno al server
+  (`FAR` sul server). Le azioni (`interact perform freeAction talk inscribePhrase dropSelected castSpell action`) vanno al server
   con esito ottimistico (la cosa raccolta sparisce, la porta si apre, la frase incisa lascia la mano), annullato se rifiutato o
   se il prossimo aggiornamento dice altro. Ciò che si porta (T39b): tasche, borse, contenitori (il contenuto arriva nell'`esito`),
   fabbricazione, pannelli delle meccaniche, azioni e «Altro…» sulle caselle vanno al server, che li fa con `as`; gli spostamenti di

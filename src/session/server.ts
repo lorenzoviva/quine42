@@ -550,16 +550,16 @@ export class SessionServer {
     switch (msg.t) {
       case 'frase': {
         const tokens = Array.isArray(msg.tokens) ? msg.tokens.filter((t) => typeof t === 'string').slice(0, 24) : [];
-        // Only what they carry stays in the hand (`syncHand`).
+        // Only what they carry stays in the hand (`syncPhrase`).
         const hand = this.act(c, () => {
-          Object.assign(k.hand(), { tokens, sel: Math.max(0, tokens.length - 1) });
-          k.syncHand();
-          return k.hand().tokens.join(' ');
+          Object.assign(k.phrase(), { tokens, sel: Math.max(0, tokens.length - 1) });
+          k.syncPhrase();
+          return k.phrase().tokens.join(' ');
         });
         return this.answer(c, seq, { ...hand, ok: hand.value === tokens.join(' ') });
       }
       case 'incidi':
-        return this.answer(c, seq, this.act(c, () => k.inscribeHand()));
+        return this.answer(c, seq, this.act(c, () => k.inscribePhrase()));
       case 'pronuncia':
         return this.later(c, seq, () => k.castSpell());
       case 'oggetto':
@@ -916,7 +916,7 @@ export class SessionServer {
     }
     const stato: MyState = k.as(c.id, () => ({
       needs: k.needs() as unknown as Record<string, number>,
-      hand: k.hand(),
+      hand: k.phrase(),
       inventory: k.inventory(),
       stati: k.states(),
       slots: k.slots(),

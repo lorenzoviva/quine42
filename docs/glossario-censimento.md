@@ -55,7 +55,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Stato | `buff` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Runa | `simbolo` | 1 (1) | 3 (3) | 4 (4) | 0 (0) |
 | Runa | `glifo` | 9 (4) | 1 (1) | 13 (10) | 0 (0) |
-| Frase | `hand` | 223 (24) | 0 (0) | 8 (6) | 0 (0) |
+| Frase | `hand` | 167 (23) | 0 (0) | 7 (6) | 0 (0) |
 | Frase | `sentence` | 1 (1) | 0 (0) | 0 (0) | 0 (0) |
 | Frase | `mano` | 20 (9) | 1 (1) | 47 (30) | 0 (0) |
 | Incidere | `engrave` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |

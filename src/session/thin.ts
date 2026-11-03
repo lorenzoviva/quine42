@@ -133,7 +133,7 @@ export class ThinClient {
       this.session.move(at.x, at.y);
     }
     // The phrase is the wanderer's own: what they compose here goes to the server when nothing else is under way.
-    const hand = k.hand();
+    const hand = k.phrase();
     if (hand && !this.pending && hand.tokens.join(' ') !== this.told.join(' ')) this.phrase(hand.tokens);
   }
 
@@ -220,7 +220,7 @@ export class ThinClient {
     }
     this.state();
     this.told = [...(s.stato.hand?.tokens ?? [])];
-    Object.assign(k.hand(), { tokens: [...this.told], sel: 0 });
+    Object.assign(k.phrase(), { tokens: [...this.told], sel: 0 });
     if (s.master) k.connected = [...s.players];
   }
 
@@ -368,7 +368,7 @@ export class ThinClient {
       }
       this.pending = 0;
       this.told = [...(this.session.stato.hand?.tokens ?? [])];
-      Object.assign(k.hand(), { tokens: [...this.told], sel: 0 });
+      Object.assign(k.phrase(), { tokens: [...this.told], sel: 0 });
       this.state();
       // The screen of death (T44c), as alone, but the world goes on: what was lost and where one wakes up.
       k.bus.emit('ui:died', { cause: n.nome, testo: n.testo, perso: n.perso ?? [], dove: n.dove ?? 'qui' });
@@ -418,7 +418,7 @@ export class ThinClient {
     if (tokens && !this.pending && tokens.join(' ') !== this.told.join(' ')) {
       // A rune picked up, the phrase spoken or inscribed: the server's phrase becomes the hand's.
       this.told = [...tokens];
-      const hand = k.hand();
+      const hand = k.phrase();
       hand.tokens = [...tokens];
       hand.sel = Math.max(0, Math.min(s.hand?.sel ?? 0, tokens.length - 1));
     }
@@ -565,16 +565,16 @@ export class ThinClient {
       const r = await this.send(id, { t: 'chat', testo: text });
       return { say: r?.testo ?? (r?.motivo ? `(${r.motivo})` : '…'), action: 'nessuna', mood: 'tranquillo' };
     };
-    k.inscribeHand = () => void this.inscribe(k.hand().tokens.length);
+    k.inscribePhrase = () => void this.inscribe(k.phrase().tokens.length);
     k.dropSelected = () => {
-      const hand = k.hand();
+      const hand = k.phrase();
       const token = hand.tokens[hand.sel];
       if (token === undefined) return k.message('Non hai rune in mano.', 'warn');
       // One rune: the phrase is that rune, inscribed, then what is left of it.
       void this.inscribe(1, hand.sel);
     };
     k.castSpell = async () => {
-      if (!k.hand().tokens.length) {
+      if (!k.phrase().tokens.length) {
         k.message('Non hai rune in mano.', 'warn');
         return false;
       }
@@ -791,7 +791,7 @@ export class ThinClient {
    */
   private async inscribe(count: number, from = 0): Promise<void> {
     const k = this.k;
-    const hand = k.hand();
+    const hand = k.phrase();
     if (!hand.tokens.length) return k.message('Non hai rune in mano.', 'warn');
     const before = { tokens: [...hand.tokens], sel: hand.sel };
     const written = hand.tokens.slice(from, from + count);
@@ -802,12 +802,12 @@ export class ThinClient {
     hand.sel = Math.max(0, Math.min(hand.sel, hand.tokens.length - 1));
     const r = await this.show(answer);
     if (r.ok) k.bus.emit('rune:inscribed', { tokens: written });
-    else Object.assign(k.hand(), before);
+    else Object.assign(k.phrase(), before);
   }
 
   /** Tells the server the phrase, if it does not have it. */
   private syncPhrase(): void {
-    const tokens = this.k.hand().tokens;
+    const tokens = this.k.phrase().tokens;
     if (tokens.join(' ') !== this.told.join(' ')) this.phrase(tokens);
   }
 

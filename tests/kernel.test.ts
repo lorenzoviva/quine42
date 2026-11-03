@@ -138,7 +138,7 @@ describe('kernel', () => {
     k.rollback();
     run(k, DT * 2);
     expect(k.faults.size).toBe(0);
-    expect(k.hand().tokens).toEqual(['carpet', '.', 'strength', '=']);
+    expect(k.phrase().tokens).toEqual(['carpet', '.', 'strength', '=']);
   });
 
   it('severing a binding breaks the system that depends on it; the kernel survives absurd values', () => {

@@ -1136,7 +1136,7 @@ export class Kernel {
   }
 
   /** The rune hand (ordered tokens to inscribe). */
-  hand(): { tokens: string[]; sel: number } {
+  phrase(): { tokens: string[]; sel: number } {
     return this.ecs.get(this.wandererEntity, 'hand');
   }
 
@@ -3099,7 +3099,7 @@ export class Kernel {
     }
     if (rune.origin) this.consumed.add(rune.origin);
     this.ecs.destroy(id);
-    const hand = this.hand();
+    const hand = this.phrase();
     hand.tokens.push(rune.token);
     hand.sel = hand.tokens.length - 1;
     this.runesDirty = true;
@@ -3152,7 +3152,7 @@ export class Kernel {
    * The carpet lets them go until they walk back into the world. For anyone else it does not exist.
    */
   councilRune(): boolean {
-    const hand = this.hand();
+    const hand = this.phrase();
     hand.tokens = hand.tokens.filter((t) => t !== COUNCIL_RUNE);
     hand.sel = Math.max(0, Math.min(hand.sel, hand.tokens.length - 1));
     const hall = this.corona.building('concilio');
@@ -3176,7 +3176,7 @@ export class Kernel {
     const given: string[] = [];
     for (const t of askedRunes(tokens)) if (this.give(`rune:${t}`, 1)) given.push(t);
     if (!given.length) return given;
-    const hand = this.hand();
+    const hand = this.phrase();
     hand.tokens.push(...given);
     hand.sel = hand.tokens.length - 1;
     this.message(`Il Concilio ti dà: ${given.map((t) => `«${t}»`).join(' ')}`, 'good');
@@ -3206,7 +3206,7 @@ export class Kernel {
 
   /** Adds a carried rune to the phrase being composed (if there is one left that is not already in it). */
   composeRune(token: string): boolean {
-    const hand = this.hand();
+    const hand = this.phrase();
     if (this.missingRunes([...hand.tokens, token])) {
       this.message(`Non hai altre rune «${token}».`, 'warn');
       return false;
@@ -3218,15 +3218,15 @@ export class Kernel {
 
   /** Takes a rune out of the phrase (it stays in the pouch). */
   uncompose(index: number): void {
-    const hand = this.hand();
+    const hand = this.phrase();
     if (index < 0 || index >= hand.tokens.length) return;
     hand.tokens.splice(index, 1);
     hand.sel = Math.max(0, Math.min(hand.sel, hand.tokens.length - 1));
   }
 
   /** The phrase never uses runes the player no longer has (dropped, stored away, spent). */
-  syncHand(): void {
-    const hand = this.hand();
+  syncPhrase(): void {
+    const hand = this.phrase();
     if (!hand?.tokens?.length) return;
     const left = new Map<string, number>();
     const keep: string[] = [];
@@ -3243,8 +3243,8 @@ export class Kernel {
     }
   }
 
-  inscribeHand(): void {
-    const hand = this.hand();
+  inscribePhrase(): void {
+    const hand = this.phrase();
     if (this.inscribe(hand.tokens)) {
       hand.tokens = [];
       hand.sel = 0;
@@ -3252,7 +3252,7 @@ export class Kernel {
   }
 
   dropSelected(): void {
-    const hand = this.hand();
+    const hand = this.phrase();
     const token = hand.tokens[hand.sel];
     if (token === undefined) {
       this.message('Non hai rune in mano.', 'warn');
@@ -3265,7 +3265,7 @@ export class Kernel {
   }
 
   select(delta: number, move = false): void {
-    const hand = this.hand();
+    const hand = this.phrase();
     const n = hand.tokens.length;
     if (!n) return;
     const to = (hand.sel + delta + n) % n;
@@ -3275,11 +3275,11 @@ export class Kernel {
 
   /** Reorders the rune hand (drag and drop in the inventory). */
   moveRune(from: number, to: number): void {
-    const t = this.hand().tokens;
+    const t = this.phrase().tokens;
     if (from < 0 || from >= t.length || to < 0 || to >= t.length) return;
     const [tok] = t.splice(from, 1);
     t.splice(to, 0, tok);
-    this.hand().sel = to;
+    this.phrase().sel = to;
   }
 
   // --- Inventory, containers, crafting ---------------------------------------------------------
@@ -3370,7 +3370,7 @@ export class Kernel {
     const [dx, dy] = this.facingDelta();
     const id = this.spawnItem(taken.item, pc.x + dx * 0.8, pc.y + dy * 0.8, taken.count);
     if (taken.inv && this.ecs.alive.has(id)) this.ecs.get(id, 'pickup').inv = taken.inv;
-    this.syncHand();
+    this.syncPhrase();
     this.message(`Posi: ${this.itemInfo(taken.item).name}${taken.count > 1 ? ` ×${taken.count}` : ''}`);
   }
 
@@ -3412,7 +3412,7 @@ export class Kernel {
     if (!box || !s) return;
     const moved = putSlot(box.inv, s, this.itemSpec(s.item));
     if (moved) takeFromSlot(this.inventory(), slot, moved);
-    this.syncHand();
+    this.syncPhrase();
   }
 
   /** The inventory inside a bag the player carries (created the first time it is opened). */
@@ -3670,7 +3670,7 @@ export class Kernel {
       if (inv.equipped === slot) inv.equipped = null;
     }
     // A rune given is no longer in the phrase.
-    this.syncHand();
+    this.syncPhrase();
     const what = `${name}${moved > 1 ? ` ×${moved}` : ''}`;
     this.bus.emit('inventory:changed', {});
     this.bus.emit('wanderer:gave', { da: this.wanderer().id, a: to, oggetto: s.item, quanti: moved, testo: what });
@@ -4033,7 +4033,7 @@ export class Kernel {
     const pc = this.wandererCarpet();
     const [dx, dy] = this.facingDelta();
     out.push(...this.applyEffects(rest, undefined, { x: pc.x + dx, y: pc.y + dy }));
-    this.syncHand();
+    this.syncPhrase();
     return out;
   }
 
@@ -5155,7 +5155,7 @@ export class Kernel {
       if (v.loseAll) {
         this.ecs.set(this.wandererEntity, 'inventory', newInventory());
         this.ecs.set(this.wandererEntity, 'stati', {});
-        Object.assign(this.hand(), { tokens: [], sel: 0 });
+        Object.assign(this.phrase(), { tokens: [], sel: 0 });
         for (const it of wandererModule?.manifest.inventory ?? []) if (this.content.get(it)) this.give(it, 1);
       }
       if (v.restart === 'piazza') {
@@ -5167,7 +5167,7 @@ export class Kernel {
       const effects = v.loseAll ? [] : validateEffects(v.effects, ectx).effects;
       const said = effects.flatMap((e) => (e.tipo === 'messaggio' ? [e.testo] : []));
       const out = this.applyEffects(effects.filter((e) => e.tipo !== 'messaggio'));
-      this.syncHand();
+      this.syncPhrase();
       // Death takes, it never heals; but nobody wakes up dying.
       const n = this.needs();
       if (n && !(n.health > 10)) n.health = 10;
@@ -5653,7 +5653,7 @@ export class Kernel {
 
   /** Magic runes in the phrase, in their order: the incantation T would cast. */
   incantation(): string[] {
-    return this.hand().tokens.filter((t) => this.content.runes[t]);
+    return this.phrase().tokens.filter((t) => this.content.runes[t]);
   }
 
   /** Incantations of this many runes or more also burn a magic crystal. */
@@ -5671,10 +5671,10 @@ export class Kernel {
    */
   async castSpell(): Promise<boolean> {
     if (this.castingNow) return false;
-    if (this.manyPlayers() && this.hand().tokens.includes(COUNCIL_RUNE)) return this.councilRune();
+    if (this.manyPlayers() && this.phrase().tokens.includes(COUNCIL_RUNE)) return this.councilRune();
     const seq = this.incantation();
     if (!seq.length) {
-      this.message(this.hand().tokens.length ? 'Nessuna delle rune che hai in mano è magica.' : 'Non hai rune in mano.', 'warn');
+      this.message(this.phrase().tokens.length ? 'Nessuna delle rune che hai in mano è magica.' : 'Non hai rune in mano.', 'warn');
       return false;
     }
     if (this.zone !== 'sim') {
@@ -5719,7 +5719,7 @@ export class Kernel {
       // Spoken runes are spent: worth collecting and keeping.
       for (const t of seq) removeItem(this.inventory(), `rune:${t}`, 1);
       if (crystal) removeItem(this.inventory(), crystal, 1);
-      const hand = this.hand();
+      const hand = this.phrase();
       hand.tokens = hand.tokens.filter((t) => !this.content.runes[t]);
       hand.sel = Math.max(0, Math.min(hand.sel, hand.tokens.length - 1));
       const pc = this.wandererCarpet();
@@ -7117,7 +7117,7 @@ export class Kernel {
       pos: { x: Math.round(at.x * 1000) / 1000, y: Math.round(at.y * 1000) / 1000 },
       inventory: this.inventory(),
       needs: this.needs() as unknown as Record<string, number>,
-      hand: this.hand(),
+      hand: this.phrase(),
       stati: this.states(),
       slots: this.slots(),
       ...(w.id === SOLO ? { trasceso: this.exitedOnce } : {}),
@@ -7134,7 +7134,7 @@ export class Kernel {
     }
     if (v.inventory?.slots) this.ecs.set(this.wandererEntity, 'inventory', v.inventory);
     if (v.needs) Object.assign(this.needs() ?? {}, v.needs, { morto: false });
-    if (v.hand?.tokens) Object.assign(this.hand(), v.hand);
+    if (v.hand?.tokens) Object.assign(this.phrase(), v.hand);
     if (v.stati) this.ecs.set(this.wandererEntity, 'stati', Object.fromEntries(Object.entries(v.stati).filter(([, x]) => x && typeof x === 'object')));
     if (v.slots && typeof v.slots === 'object') this.ecs.set(this.wandererEntity, 'slots', v.slots);
     // What the mechanics derive from the slots (defence, states) is rebuilt by their own on_slot.
@@ -7332,7 +7332,7 @@ export class Kernel {
    */
   private takeBackRunes(): void {
     const me = this.wanderer().id;
-    const hand = this.hand();
+    const hand = this.phrase();
     let n = 0;
     for (const { id, rune } of this.runeList()) {
       if (rune.source !== 'player' || rune.by !== me) continue;
@@ -7372,7 +7372,7 @@ export class Kernel {
       if (rune.source !== 'player') continue;
       // Every rune goes back to whoever wrote it.
       this.as(rune.by ?? me, () => {
-        if (this.give(`rune:${rune.token}`, 1)) this.hand().tokens.push(rune.token);
+        if (this.give(`rune:${rune.token}`, 1)) this.phrase().tokens.push(rune.token);
       });
       this.ecs.destroy(id);
     }
@@ -7492,7 +7492,7 @@ export class Kernel {
       this.councilStock();
       for (const w of this.wanderersById.keys())
         this.as(w, () => {
-          this.syncHand();
+          this.syncPhrase();
           this.statesTick();
           const n = this.needs();
           if (n && !Number.isFinite(n.mana)) n.mana = 60;
