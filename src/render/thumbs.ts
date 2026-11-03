@@ -14,6 +14,7 @@ export class Thumbs {
   private camera = new THREE.PerspectiveCamera(30, 1, 0.01, 50);
   private cache = new Map<string, Promise<string | undefined>>();
   private material = glowing(new THREE.MeshLambertMaterial({ vertexColors: true }), 'thumb');
+  private glass = glowing(new THREE.MeshLambertMaterial({ vertexColors: true, transparent: true, depthWrite: false }), 'thumb-glass');
 
   constructor(private k: Kernel) {
     this.scene.add(new THREE.HemisphereLight(0xffffff, 0x6a5a4a, 1.6));
@@ -57,7 +58,7 @@ export class Thumbs {
   }
 
   private shoot(geo: THREE.BufferGeometry): string {
-    const mesh = new THREE.Mesh(geo, this.material);
+    const mesh = new THREE.Mesh(geo, geo.groups.length > 0 ? [this.material, this.glass] : this.material);
     this.scene.add(mesh);
     geo.computeBoundingSphere();
     const s = geo.boundingSphere!;

@@ -11,7 +11,7 @@ import type { Chunk, Kernel } from '../kernel/kernel';
 import { hash32 } from '../kernel/rng';
 import type { TerrainDef } from '../kernel/types';
 import { casts, MAT, rgbOf } from './materials';
-import { geoOf, type ModelGeo } from './models';
+import { geoOf, modelMaterials, type ModelGeo } from './models';
 import type { Form } from '../kernel/forms';
 
 export const WALL_H = 1.6;
@@ -242,7 +242,7 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): TerrainView {
     group.add(casts(new THREE.Mesh(solid.geometry(), MAT.world), true));
   }
   for (const { geo, mats } of instances.values()) {
-    const im = new THREE.InstancedMesh(geo.body, geo.sway ? MAT.sway : MAT.world, mats.length);
+    const im = new THREE.InstancedMesh(geo.body, modelMaterials(geo.body, geo.sway ? MAT.sway : MAT.world), mats.length);
     mats.forEach((m, i) => im.setMatrixAt(i, m));
     casts(im, true);
     im.computeBoundingSphere();
