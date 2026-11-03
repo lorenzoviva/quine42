@@ -26,6 +26,7 @@ Aggiornato il 03/11/2026, epoca 234. Crediti: vedi `stato`.
 ## Pronti e priorità
 
 1. **In coda, approvati e pronti, partono da soli:** T217 T219 T220 T182 T89b T89c T89e T183 T152 T186 T158. T218 aspetta T217.
+1a. **T226** (corona disegnata solo fuori dal tappeto, 3/4 di base; richiesta dell'autore, 03/11): la soglia oggi è 0,45 del raggio; la causa dell'orbita entrando in una struttura è dedotta, non accertata.
 1b. **Suono da MJ (richiesta dell'autore, 03/11):** T221 (lingua XML, sintetizzatore puro, preset) → T222 (SoundLab in `/lab/suono/`) e T223 (analisi per gli agenti); T221 → T224 (nel gioco); T223 + T224 → T225 (Musicista nella `galleria`, nessun edificio nuovo). Mockup: `docs/userchats/mj_3d_soundlab_sintetizzatore_musicale_markovjunior.html`, committato perché i worktree lo vedano. Scelte mie da correggere se l'autore vuole: musica per ambiente e ora, un solo sintetizzatore puro al posto del grafo Web Audio del mockup.
 4. **T182 → T156** (strutture procedurali). T182 su Claude, stima 8 %, al più 4 giri; è pronto.
 4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla.
