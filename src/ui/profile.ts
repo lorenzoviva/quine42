@@ -121,7 +121,7 @@ export class ProfilePanel {
 
   open(): void {
     const p = this.current();
-    const form = this.k.ecs.get(this.k.playerId, 'form');
+    const form = this.k.ecs.get(this.k.wandererEntity, 'form');
     this.nome.value = p?.nome && p.nome !== 'Viandante' ? p.nome : '';
     this.seme = p?.seme ?? (Number(form?.seed) || 1);
     this.tinta.value = p?.tinta ?? form?.tint ?? '#c06030';
@@ -139,7 +139,7 @@ export class ProfilePanel {
 
   /** One photograph per seed of the program, in the cloak's colour: the chosen one framed. */
   private paint(): void {
-    const model = String(this.k.ecs.get(this.k.playerId, 'form')?.model ?? 'viandante');
+    const model = String(this.k.ecs.get(this.k.wandererEntity, 'form')?.model ?? 'viandante');
     const n = this.k.forms.seedsOf(model);
     const tint = this.tinta.value;
     this.seeds.replaceChildren(

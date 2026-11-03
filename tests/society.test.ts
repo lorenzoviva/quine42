@@ -152,7 +152,7 @@ describe('a coherent society', () => {
     // Nothing more to repair at the next boot.
     expect(k.reviewSociety()).toEqual([]);
     // Two newcomers of the same kind: their names are unlike each other and everyone's.
-    const pc = k.playerCarpet();
+    const pc = k.wandererCarpet();
     for (const i of [1, 2, 3]) {
       const e = k.spawnModuleEntity(k.modules.get('npc.villager')!, pc.x + i, pc.y, undefined, `test#n${i}`);
       await k.ensureIdentity(e);

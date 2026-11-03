@@ -15,7 +15,7 @@ import type { Bible } from '../src/kernel/agents/council';
 const boot = () => Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
 
 function stand(k: Kernel, x: number, y: number): void {
-  Object.assign(k.playerPos(), { x, y });
+  Object.assign(k.wandererPos(), { x, y });
   k.zone = 'studio';
 }
 

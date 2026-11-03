@@ -259,8 +259,8 @@ export async function runCase(
   const load = [...k.faults.list()].find((f) => f.key.startsWith(prefix) || f.key.startsWith(`manifest:modules/${manifest.id}/`));
   if (load) return { prima: {}, dopo: {}, cambiati: [], frames: [], messaggi, errori: [`il modulo non si carica: ${load.message}`] };
 
-  const player = k.playerId;
-  Object.assign(k.playerPos(), { x: 0.5, y: 0.5 });
+  const player = k.wandererEntity;
+  Object.assign(k.wandererPos(), { x: 0.5, y: 0.5 });
   for (const [name, data] of Object.entries(c.viandante?.componenti ?? {})) {
     if (['pos', 'module', 'player', 'inventory', 'hand', 'slots'].includes(name)) continue;
     const cur = k.ecs.get(player, name);
@@ -292,7 +292,7 @@ export async function runCase(
   };
   const where = (id: number): [number, number] | null => {
     if (!id || !k.ecs.alive.has(id)) return null;
-    const p = id === player ? k.playerCarpet() : k.ecs.get(id, 'pos');
+    const p = id === player ? k.wandererCarpet() : k.ecs.get(id, 'pos');
     return [Math.round(p.x * 100) / 100, Math.round(p.y * 100) / 100];
   };
   const frames: BenchFrame[] = [];

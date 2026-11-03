@@ -52,7 +52,7 @@ describe('the model of places (T26)', () => {
     // From the studio, the place last visited still comes first; a click on the table opens it.
     const panels: any[] = [];
     k.bus.on('ui:showcase', (e: any) => panels.push(e));
-    Object.assign(k.playerPos(), { x: show.x + 1.5, y: show.y + 3.5 });
+    Object.assign(k.wandererPos(), { x: show.x + 1.5, y: show.y + 3.5 });
     k.zone = 'studio';
     expect(k.showcaseEntries('luoghi')[0].id).toBe('luogo:0_0');
     expect(k.clickStudio(show.x + 1.5, show.y + 1.5)).toBe(true);
@@ -167,7 +167,7 @@ describe('the model of places (T26)', () => {
     k.bus.on('studio:showcase', (e: any) => seen.push(e));
     k.bus.on('ui:message', (e: any) => said.push(e.text));
     // E standing on «−», twice; then a click on «+».
-    Object.assign(k.playerPos(), { x: less.x + 0.5, y: less.y + 0.5 });
+    Object.assign(k.wandererPos(), { x: less.x + 0.5, y: less.y + 0.5 });
     k.zone = 'studio';
     await k.interact();
     await k.interact();
@@ -185,7 +185,7 @@ describe('the model of places (T26)', () => {
     // Standing in front of the table, E opens the panel, with the phase.
     const panels: any[] = [];
     k.bus.on('ui:showcase', (e: any) => panels.push(e));
-    Object.assign(k.playerPos(), { x: show.x + 1.5, y: show.y + 3.5 });
+    Object.assign(k.wandererPos(), { x: show.x + 1.5, y: show.y + 3.5 });
     await k.interact();
     expect(panels.at(-1)?.phase).toBe(PLACE_PHASES.length - 1);
   }, 60_000);
@@ -238,7 +238,7 @@ describe('the sample of environments (T26d)', () => {
     const panels: any[] = [];
     k.bus.on('ui:layout', (e: any) => panels.push(e));
     k.zone = 'studio';
-    Object.assign(k.playerPos(), { x: samples[0].x + 0.5, y: samples[0].y + 1.5 });
+    Object.assign(k.wandererPos(), { x: samples[0].x + 0.5, y: samples[0].y + 1.5 });
     await k.interact();
     const target = samples[0].target!.replace('layout:', '');
     expect(panels.at(-1).sample.id).toBe(target);

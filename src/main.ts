@@ -445,7 +445,7 @@ async function main() {
   const tp = dev && params.get('teleport')?.split(',').map(Number);
   if (tp && tp.length === 2 && tp.every(Number.isFinite)) {
     kernel.carpet()!.active = false;
-    Object.assign(kernel.playerPos(), { x: tp[0], y: tp[1] });
+    Object.assign(kernel.wandererPos(), { x: tp[0], y: tp[1] });
   }
 
   kernel.bus.on('rune:picked', () => sfx.blip(660, 0.07));

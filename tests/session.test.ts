@@ -48,7 +48,7 @@ function freeRun(k: Kernel, id: string, length: number): { x: number; y: number 
 /** Puts a wanderer of the session somewhere in the world (their carpet under them), as a test does by hand. */
 function put(k: Kernel, id: string, to: { x: number; y: number }) {
   k.as(id, () => {
-    const p = k.playerPos();
+    const p = k.wandererPos();
     Object.assign(k.carpet()!, { ox: to.x - p.x, oy: to.y - p.y });
   });
 }

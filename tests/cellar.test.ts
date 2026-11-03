@@ -163,13 +163,13 @@ describe('the model that goes down (T52b)', () => {
     const { k, at, ground } = await scene('cantina-prova');
     const { ox, oy } = k.offset();
     const [x, y] = at(25, 50);
-    Object.assign(k.playerPos(), { x: x - ox, y: y - oy, z: ground });
-    k.playerComp().facing = 'right';
+    Object.assign(k.wandererPos(), { x: x - ox, y: y - oy, z: ground });
+    k.wandererComp().facing = 'right';
     k.tick(1 / 60);
     expect(k.jump()).toBe(true);
     for (let i = 0; i < 90; i++) k.tick(1 / 60);
     expect(k.jumping()).toBeUndefined();
-    const p = k.playerPos();
+    const p = k.wandererPos();
     expect(p.z ?? k.groundAt(p.x + ox, p.y + oy)).toBeGreaterThan(ground - 0.05);
   }, 30_000);
 

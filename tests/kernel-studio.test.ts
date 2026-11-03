@@ -11,7 +11,7 @@ describe('new mechanics', () => {
   it('a saddled horse can be ridden: a state that makes you faster and carry more, learned as an action', async () => {
     const k = await boot();
     clearArea(k);
-    const pc = k.playerCarpet();
+    const pc = k.wandererCarpet();
     const horse = k.spawnModuleEntity(k.modules.get('object.crate')!, pc.x + 0.9, pc.y);
     const cap = k.carryCapacity();
     await k.freeAction(horse, 'monto in sella al cavallo');
@@ -86,10 +86,10 @@ describe('the neon studio', () => {
     k.carpet()!.active = false;
     const pad = portals.find((p) => p.target === 'luoghi')!;
     expect(portals.some((p) => p.target === 'cartografia')).toBe(false);
-    Object.assign(k.playerPos(), { x: pad.x + 0.5, y: pad.y + 0.5 });
+    Object.assign(k.wandererPos(), { x: pad.x + 0.5, y: pad.y + 0.5 });
     run(k, DT);
     await k.interact();
-    expect(k.corona.roomAt(k.playerPos().x, k.playerPos().y)?.building.id).toBe('luoghi');
+    expect(k.corona.roomAt(k.wandererPos().x, k.wandererPos().y)?.building.id).toBe('luoghi');
     const f0items = k.corona.building('luoghi')!.floors[0].items;
     const atlasItem = f0items.find((i) => i.kind === 'atlas')!;
     expect(f0items.some((i) => i.kind === 'showcase' && i.device === 'plastico')).toBe(true);
@@ -100,7 +100,7 @@ describe('the neon studio', () => {
     expect(k.corona.free(atlasItem.x + 1.5, atlasItem.y + 1.5)).toBe(true);
     let opened = false;
     k.bus.on('ui:atlas', () => (opened = true));
-    Object.assign(k.playerPos(), { x: atlasItem.x + 1.5, y: atlasItem.y + 1.5 });
+    Object.assign(k.wandererPos(), { x: atlasItem.x + 1.5, y: atlasItem.y + 1.5 });
     await k.interact();
     expect(opened).toBe(true);
     const view = await k.atlasView();
@@ -115,13 +115,13 @@ describe('regression: walking with states', () => {
     for (const st of [undefined, {}, { 'a cavallo': { velocita: 1.8, peso: 0, luce: 0, fino: 0 } }]) {
       const k = await boot();
       clearArea(k);
-      if (st) k.ecs.set(k.playerId, 'stati', JSON.parse(JSON.stringify(st)));
+      if (st) k.ecs.set(k.wandererEntity, 'stati', JSON.parse(JSON.stringify(st)));
       k.carpet()!.active = false;
       (k.input as any).held.add('right');
-      const x = k.playerPos().x;
+      const x = k.wandererPos().x;
       run(k, 0.3);
       expect(k.faults.size).toBe(0);
-      moved.push(k.playerPos().x - x);
+      moved.push(k.wandererPos().x - x);
     }
     expect(moved[1]).toBeGreaterThan(1);
     expect(moved[2]).toBeGreaterThan(moved[1] * 1.5);
@@ -132,7 +132,7 @@ describe('tile context menus', () => {
   it('every tile has a menu with "Altro…"; what stands on it adds its actions; a terrain learns', async () => {
     const k = await boot();
     clearArea(k);
-    const pc = k.playerCarpet();
+    const pc = k.wandererCarpet();
     const col = Math.floor(pc.x) + 1;
     const row = Math.floor(pc.y);
     const plain = k.tileMenu(col, row);

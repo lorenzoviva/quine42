@@ -184,19 +184,19 @@ describe('structures with more storeys', () => {
     const level = (z: number) => Math.round((z - base) * 20);
     // On a floor (voxels): the relief may poke a level or so through the ground floor.
     const on = (z: number | undefined, floor: number) => expect(Math.abs(level(z!) - floor)).toBeLessThanOrEqual(5);
-    const r = Number(k.ecs.get(k.playerId, 'body')?.r) || 0.3;
+    const r = Number(k.ecs.get(k.wandererEntity, 'body')?.r) || 0.3;
     // The wanderer at a point of the tower (carpet space, the carpet is stopped), on the floor nearest to z (voxels).
     const stand = (vx: number, vy: number, z: number) => {
       const [x, y] = at(vx, vy);
       const { ox, oy } = k.offset();
-      Object.assign(k.playerPos(), { x: x - ox, y: y - oy, z: base + z / 20 });
-      k.playerComp().facing = 'right';
+      Object.assign(k.wandererPos(), { x: x - ox, y: y - oy, z: base + z / 20 });
+      k.wandererComp().facing = 'right';
       k.tick(1 / 60);
     };
     expect(0.8).toBeLessThan(JUMP_UP);
     for (const floor of [3, 54]) {
       stand(30, 95, floor);
-      on(k.playerPos().z, floor);
+      on(k.wandererPos().z, floor);
       const [x0, y0] = at(30, 95);
       // Walking right, the crate stops the body.
       expect(k.free(...at(50, 95), r, base + floor / 20)).toBe(false);
@@ -207,15 +207,15 @@ describe('structures with more storeys', () => {
         highest = Math.max(highest, (k.jumping()?.y ?? -Infinity) - base - floor / 20);
       }
       expect(k.jumping()).toBeUndefined();
-      const c = k.playerCarpet();
+      const c = k.wandererCarpet();
       // Over the crate (the ceiling above does not count), beyond it, on the same floor.
       expect(highest).toBeGreaterThan(0.8);
       expect(c.x).toBeGreaterThan(cx + (70 - 60) / 20);
       expect(c.y).toBeCloseTo(y0, 5);
       expect(c.x - x0).toBeLessThanOrEqual(2.6 + 1e-6);
-      on(k.playerPos().z, floor);
-      on(k.floorAt(c.x, c.y, k.playerPos().z), floor);
-      expect(k.free(c.x, c.y, r, k.playerPos().z)).toBe(true);
+      on(k.wandererPos().z, floor);
+      on(k.floorAt(c.x, c.y, k.wandererPos().z), floor);
+      expect(k.free(c.x, c.y, r, k.wandererPos().z)).toBe(true);
     }
     // A sign on the ground floor stops who walks there, not who walks on the floor above it.
     const sign = k.spawnModuleEntity(k.modules.get('object.sign')!, ...at(85, 45), undefined, 'test#cartello');
@@ -226,11 +226,11 @@ describe('structures with more storeys', () => {
     // Against the outer wall (up to the roof): a jump on the spot, on either floor.
     for (const floor of [3, 54]) {
       stand(100, 95, floor);
-      const before = k.playerCarpet().x;
+      const before = k.wandererCarpet().x;
       k.jump();
       for (let i = 0; i < 60; i++) k.tick(1 / 60);
-      expect(k.playerCarpet().x).toBeCloseTo(before, 5);
-      on(k.playerPos().z, floor);
+      expect(k.wandererCarpet().x).toBeCloseTo(before, 5);
+      on(k.wandererPos().z, floor);
     }
   }, 60_000);
 });

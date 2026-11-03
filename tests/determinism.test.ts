@@ -37,7 +37,7 @@ function snapshot(k: Kernel) {
       return [k.ecs.get(id, 'module')?.id ?? '', k.ecs.get(id, 'origin')?.key ?? '', p.x.toFixed(5), p.y.toFixed(5), k.ecs.get(id, 'identity')?.name ?? '', k.ecs.get(id, 'dado')?.v ?? ''].join('|');
     })
     .sort();
-  return { things, player: k.playerPos(), carpet: k.offset(), time: k.time };
+  return { things, player: k.wandererPos(), carpet: k.offset(), time: k.time };
 }
 
 /** The same input, tick by tick: walking, stopping, turning. */
@@ -89,7 +89,7 @@ describe('shared seeds and determinism (T35)', () => {
     const sa = snapshot(a);
     expect(snapshot(b)).toEqual(sa);
     // The dice were thrown, the wanderer moved, people lived.
-    expect(a.ecs.get(a.playerId, 'dado')?.v).toBeGreaterThan(0);
+    expect(a.ecs.get(a.wandererEntity, 'dado')?.v).toBeGreaterThan(0);
     expect(sa.things.filter((t) => t.split('|')[5] !== '').length).toBeGreaterThan(1);
     expect(sa.carpet).not.toEqual(before.carpet);
     expect(sa.things.filter((t) => !before.things.includes(t)).length).toBeGreaterThan(1);
@@ -102,6 +102,6 @@ describe('shared seeds and determinism (T35)', () => {
     const b = await Kernel.boot({ files: other, store: memoryStore(), ai: new MockAiModels() });
     a.tick(1 / 60);
     b.tick(1 / 60);
-    expect(a.ecs.get(a.playerId, 'dado')?.v).not.toBe(b.ecs.get(b.playerId, 'dado')?.v);
+    expect(a.ecs.get(a.wandererEntity, 'dado')?.v).not.toBe(b.ecs.get(b.wandererEntity, 'dado')?.v);
   });
 });

@@ -54,7 +54,7 @@ function files(): FileMap {
 const boot = (f: FileMap = bundledFiles) => Kernel.boot({ files: f, store: memoryStore(), ai: new MockAiModels() });
 
 function stand(k: Kernel, x: number, y: number): void {
-  Object.assign(k.playerPos(), { x, y });
+  Object.assign(k.wandererPos(), { x, y });
   k.zone = 'studio';
 }
 
@@ -97,7 +97,7 @@ describe('the Direction', () => {
     const k = await boot(files());
     const S = k.config.chunkSize;
     // A fault of code running in the world, while the wanderer is in the hills.
-    Object.assign(k.playerPos(), { x: 2 * S + 5 - (k.playerCarpet().x - k.playerPos().x), y: 5 - (k.playerCarpet().y - k.playerPos().y) });
+    Object.assign(k.wandererPos(), { x: 2 * S + 5 - (k.wandererCarpet().x - k.wandererPos().x), y: 5 - (k.wandererCarpet().y - k.wandererPos().y) });
     k.zone = 'sim';
     // The first tick loads the drafts around; the Cartographer has not planned any yet.
     k.tick(1 / 60);

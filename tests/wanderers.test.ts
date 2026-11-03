@@ -37,7 +37,7 @@ async function boot(files: FileMap = bundledFiles, models = new Recording()) {
 
 /** Someone to talk to, next to the wanderer. */
 async function villager(k: Kernel, origin: string) {
-  const pc = k.playerCarpet();
+  const pc = k.wandererCarpet();
   const id = k.spawnModuleEntity(k.modules.get('npc.villager')!, pc.x + 1, pc.y, undefined, origin);
   return { id, name: (await k.ensureIdentity(id))!.name };
 }

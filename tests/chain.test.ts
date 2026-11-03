@@ -104,7 +104,7 @@ describe('the chain of the Systems Room', () => {
     const opened: any[] = [];
     k.bus.on('ui:station', (e) => opened.push(e));
     const st = k.corona.building('sistemi')!.floors[0].items.find((i) => i.kind === 'stazione' && i.target === 'sys.needs')!;
-    Object.assign(k.playerPos(), { x: st.x + 0.5, y: st.y + 1.5 });
+    Object.assign(k.wandererPos(), { x: st.x + 0.5, y: st.y + 1.5 });
     k.zone = 'studio';
     await k.interact();
     expect(opened.map((o) => o.station.id)).toEqual(['sys.needs']);

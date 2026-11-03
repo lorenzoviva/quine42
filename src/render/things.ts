@@ -172,7 +172,7 @@ export class Things {
     const k = this.k;
     const seen = new Set<Id>();
     for (const id of k.ecs.query('glyph', 'pos')) {
-      if (id === k.playerId) continue;
+      if (id === k.wandererEntity) continue;
       seen.add(id);
       let v = this.views.get(id);
       const sig = this.sigOf(id);
@@ -256,7 +256,7 @@ export class Wanderer {
   }
 
   private make(k?: Kernel): Wanderer['view'] {
-    const fc: FormComp | undefined = k?.ecs.get(k.playerId, 'form');
+    const fc: FormComp | undefined = k?.ecs.get(k.wandererEntity, 'form');
     const f = k && fc && k.forms.ready(fc.model, fc.seed, fc.tint);
     // The wanderer is never clipped: beyond the circle is where it goes when it leaves the simulation.
     const m = (f && modelObject(k, f, fc, MAT.corona)) ?? figureStandIn('#4a6680', 1.15, '#e8c39a', MAT.corona);
@@ -270,7 +270,7 @@ export class Wanderer {
   }
 
   update(k: Kernel, dt: number, t: number): void {
-    const fc: FormComp | undefined = k.ecs.get(k.playerId, 'form');
+    const fc: FormComp | undefined = k.ecs.get(k.wandererEntity, 'form');
     const f = fc && k.forms.ready(fc.model, fc.seed, fc.tint);
     const sig = f?.result?.meshes ? f.key : 'stand-in';
     if (sig !== this.sig) {
@@ -278,11 +278,11 @@ export class Wanderer {
       this.scene.remove(this.view.root);
       this.view = this.make(k);
     }
-    const p = k.playerPos();
+    const p = k.wandererPos();
     const dx = p.x - this.last.x, dy = p.y - this.last.y;
     const moved = Math.hypot(dx, dy);
     this.last = { x: p.x, y: p.y };
-    const pcf = k.playerCarpet();
+    const pcf = k.wandererCarpet();
     const floor = climb(this.view.root, k.zone === 'sim' ? k.floorAt(pcf.x, pcf.y, p.z) : 0, dt);
     // A jump (T56b): an arc over what it clears, and its shadow on what is under it, smaller the higher it goes.
     const jump = k.zone === 'sim' ? k.jumping() : undefined;
@@ -294,10 +294,10 @@ export class Wanderer {
       this.shadow.position.set(p.x, floor + 0.03, p.y);
       this.shadow.scale.setScalar(1 / (1 + this.lift * 0.6));
     }
-    const facing = k.playerComp()?.facing;
+    const facing = k.wandererComp()?.facing;
     const goal = facing === 'left' ? -Math.PI / 2 : facing === 'right' ? Math.PI / 2 : facing === 'up' ? Math.PI : 0;
     // The carpet pulls the wanderer back: what counts for the legs is the walking, not the real motion.
-    const pc = k.playerCarpet();
+    const pc = k.wandererCarpet();
     const walking = moved > 0.0005 || Math.hypot(pc.x - (this.view.root.userData.cx ?? pc.x), pc.y - (this.view.root.userData.cy ?? pc.y)) > 0.0005;
     this.view.root.userData.cx = pc.x;
     this.view.root.userData.cy = pc.y;
@@ -408,12 +408,12 @@ export class Lights {
   }
 
   /** `p`: where the camera looks (the wanderer, or the player the master follows), for the nearest lights. */
-  update(k: Kernel, night: number, offset: { ox: number; oy: number }, t: number, p = k.playerPos()): void {
+  update(k: Kernel, night: number, offset: { ox: number; oy: number }, t: number, p = k.wandererPos()): void {
     const found: Array<{ x: number; z: number; r: number; color: string; d: number; id: number }> = [];
     for (const id of k.ecs.query('luce')) {
       const l = k.ecs.get(id, 'luce');
       if (!l?.accesa) continue;
-      const pos = id === k.playerId ? k.playerCarpet() : k.ecs.get(id, 'pos');
+      const pos = id === k.wandererEntity ? k.wandererCarpet() : k.ecs.get(id, 'pos');
       if (!pos) continue;
       const x = pos.x - offset.ox, z = pos.y - offset.oy;
       found.push({ x, z, r: Number(l.raggio) || 4, color: l.colore ?? '#ffb060', d: Math.hypot(x - p.x, z - p.y), id });

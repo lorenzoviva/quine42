@@ -48,7 +48,7 @@ export function parseGlossary(text) {
   return entries;
 }
 
-/** Words of a text, split at capitals and underscores: `playerPos` counts as `player` and as `pos`. */
+/** Words of a text, split at capitals and underscores: `playerFiles` counts as `player` and as `files`. */
 function wordsOf(text) {
   const out = [];
   for (const [token] of text.matchAll(/[\p{L}\p{N}_]+/gu)) {
@@ -101,7 +101,7 @@ export function censusOf(entries) {
     '# Il censimento dei sinonimi',
     '',
     'Generato da `node tools/glossario/glossario.mjs` da [`glossario.md`](glossario.md): non si scrive a mano. Per ogni sinonimo',
-    'da non usare, le occorrenze e tra parentesi i file. Conta le **parole**: `playerPos` conta come `player`, il plurale inglese è compreso.',
+    'da non usare, le occorrenze e tra parentesi i file. Conta le **parole**: `playerFiles` conta come `player`, il plurale inglese è compreso.',
     'Non distingue i significati: `player` è sinonimo di «Viandante» solo quando indica il personaggio, e il conto comprende il giocatore;',
     'gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero vale la tabella «Le rinomine» del glossario.',
     '',

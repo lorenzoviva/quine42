@@ -11,7 +11,7 @@ describe('a society', () => {
   it('people have jobs, families among those already known, routines; met again they are the same', async () => {
     const k = await boot();
     clearArea(k);
-    const pc = k.playerCarpet();
+    const pc = k.wandererCarpet();
     const a = k.spawnModuleEntity(k.modules.get('npc.villager')!, pc.x + 1, pc.y, undefined, 'test#a');
     const ia = (await k.ensureIdentity(a))!;
     expect(ia.job).toBeTruthy();
@@ -111,7 +111,7 @@ describe('runes and magic', () => {
     expect(k.ai.usage.text).toBe(calls + 1);
     expect(k.content.spells['vita scudo']).toBeTruthy();
     expect(k.repo.head().message).toMatch(/incantesimo: vita scudo/);
-    expect(k.ecs.get(k.playerId, 'scudo')?.fino).toBeGreaterThan(k.time);
+    expect(k.ecs.get(k.wandererEntity, 'scudo')?.fino).toBeGreaterThan(k.time);
     k.hand().tokens = ['vita', 'scudo'];
     await k.castSpell();
     expect(k.ai.usage.text).toBe(calls + 1);
@@ -228,7 +228,7 @@ describe('the atlas', () => {
     expect(Object.values(k.palette).some((t) => t.name === 'albero argenteo')).toBe(true);
     const region = JSON.parse(k.files['world/atlas.json']).regioni.find((x: { nome: string }) => x.nome === 'Bosco degli Elfi');
     expect(region.ambiente).toBe('bosco_elfi');
-    const pc = k.playerCarpet();
+    const pc = k.wandererCarpet();
     expect(k.directionsAt(pc.x, pc.y).join(' ')).toMatch(/Bosco degli Elfi.*nord-est/);
     // The cartographer in the corona routes requests to environments, not objects.
     const chat = await k.talkToAgent('cartografo', 'crea un bosco incantato degli elfi');

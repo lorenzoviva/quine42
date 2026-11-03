@@ -56,9 +56,9 @@ describe('the game chosen at the Genesis (T33)', () => {
     const hard = await bootWith({ morte: 3 });
     for (const { k } of [mild, hard]) {
       k.give('item.coltello', 1);
-      k.playerPos().x += 2;
+      k.wandererPos().x += 2;
     }
-    const where = [mild, hard].map(({ k }) => ({ ...k.playerPos() }));
+    const where = [mild, hard].map(({ k }) => ({ ...k.wandererPos() }));
     for (const { k } of [mild, hard]) k.die('ferite');
     expect(mild.k.dead && hard.k.dead).toBe(true);
     await Promise.all([mild.k.continueAfterDeath(), hard.k.continueAfterDeath()]);
@@ -70,9 +70,9 @@ describe('the game chosen at the Genesis (T33)', () => {
     expect(asked[0].prompt).not.toBe(asked[1].prompt);
     // Nothing lost, up where they fell; everything lost, back at the square.
     expect(countItem(mild.k.inventory(), 'item.coltello')).toBe(1);
-    expect(mild.k.playerPos()).toMatchObject({ x: where[0].x, y: where[0].y });
+    expect(mild.k.wandererPos()).toMatchObject({ x: where[0].x, y: where[0].y });
     expect(countItem(hard.k.inventory(), 'item.coltello')).toBe(0);
-    expect(hard.k.playerPos()).toMatchObject({ x: 0, y: 0 });
+    expect(hard.k.wandererPos()).toMatchObject({ x: 0, y: 0 });
     for (const { k } of [mild, hard]) {
       expect(k.dead).toBe(false);
       expect(k.needs()!.health).toBeGreaterThan(50);

@@ -36,7 +36,7 @@ export interface CastEntry {
 export interface GenesisPlan {
   files: FileMap;
   cast: CastEntry[];
-  playerPrompt: string;
+  wandererPrompt: string;
   palette: Record<string, TileDef>;
 }
 
@@ -335,5 +335,5 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     lm.layouts = { ...layouts, ...Object.fromEntries(keep) };
     files[lp] = JSON.stringify(lm, null, 2) + '\n';
   }
-  return { files, cast: moduli.slice(0, 14), playerPrompt: style.protagonista, palette };
+  return { files, cast: moduli.slice(0, 14), wandererPrompt: style.protagonista, palette };
 }

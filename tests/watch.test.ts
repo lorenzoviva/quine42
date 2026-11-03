@@ -36,7 +36,7 @@ async function run(server: SessionServer, ticks = 12): Promise<void> {
 /** A wanderer of the server carried far in the world: their carpet, as a rune would. */
 function carry(k: Kernel, id: string, x: number, y: number): void {
   k.as(id, () => {
-    const p = k.playerPos();
+    const p = k.wandererPos();
     Object.assign(k.carpet()!, { ox: x - p.x, oy: y - p.y });
   });
 }
@@ -87,7 +87,7 @@ describe('the players from the corona (T42c)', () => {
     carry(k, 'anna', 9 * S + 5, 4 * S + 5);
     for (let i = 0; i < 4; i++) await run(server, 6);
     expect(mirror.chunks.has('9,4')).toBe(false);
-    const before = { ...mirror.playerCarpet() };
+    const before = { ...mirror.wandererCarpet() };
     mirror.follow!('anna');
     expect(mirror.watching).toBe('anna');
     for (let i = 0; i < 10; i++) await run(server, 6);
@@ -95,7 +95,7 @@ describe('the players from the corona (T42c)', () => {
     expect(mirror.chunks.has('9,4')).toBe(true);
     const w = mirror.watched()!;
     expect(Math.hypot(w.x - (9 * S + 5), w.y - (4 * S + 5))).toBeLessThan(0.5);
-    expect(mirror.playerCarpet()).toEqual(before);
+    expect(mirror.wandererCarpet()).toEqual(before);
     // She walks on: the view follows.
     carry(k, 'anna', 9 * S + 9, 4 * S + 5);
     for (let i = 0; i < 10; i++) await run(server, 6);

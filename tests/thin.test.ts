@@ -62,7 +62,7 @@ function freeRunAway(k: Kernel, id: string, length: number): { x: number; y: num
 
 function put(k: Kernel, id: string, to: { x: number; y: number }) {
   k.as(id, () => {
-    const p = k.playerPos();
+    const p = k.wandererPos();
     Object.assign(k.carpet()!, { ox: to.x - p.x, oy: to.y - p.y });
   });
 }
@@ -86,8 +86,8 @@ describe('the thin client (T39)', () => {
     expect(b).toBeDefined();
     expect(anna.k.ecs.get(b!, 'identity').name).toBe('Bruno');
     expect(anna.k.ecs.get(b!, 'form')).toMatchObject({ model: 'viandante', tint: k.ecs.get(k.wandererAt('bruno')!.entity, 'form').tint });
-    expect(anna.k.ecs.get(b!, 'form').tint).not.toBe(anna.k.ecs.get(anna.k.playerId, 'form').tint);
-    expect(anna.k.ecs.get(anna.k.playerId, 'form').tint).toBe(k.ecs.get(k.wandererAt('anna')!.entity, 'form').tint);
+    expect(anna.k.ecs.get(b!, 'form').tint).not.toBe(anna.k.ecs.get(anna.k.wandererEntity, 'form').tint);
+    expect(anna.k.ecs.get(anna.k.wandererEntity, 'form').tint).toBe(k.ecs.get(k.wandererAt('anna')!.entity, 'form').tint);
     // Her first steps from where she came in reach the server (walked, or corrected where she cannot go).
     const entered = k.wandererAt('anna')!;
     anna.k.input.setHeld('left', true);
@@ -96,12 +96,12 @@ describe('the thin client (T39)', () => {
     run(server, [anna, bruno], 6);
     const moved = k.wandererAt('anna')!;
     expect(Math.hypot(moved.x - entered.x, moved.y - entered.y) > 0.05 || anna.session.corrections > 0).toBe(true);
-    expect(anna.k.playerCarpet().x).toBeCloseTo(moved.x, 1);
+    expect(anna.k.wandererCarpet().x).toBeCloseTo(moved.x, 1);
     // The server carries Anna to a stretch of open ground: her client follows.
     const start = freeRunAway(k, 'anna', 6);
     put(k, 'anna', start);
     run(server, [anna, bruno], 12);
-    expect(anna.k.playerCarpet().x).toBeCloseTo(start.x, 1);
+    expect(anna.k.wandererCarpet().x).toBeCloseTo(start.x, 1);
     // Anna walks east, the keys held in her browser: she moves at once, the server lets every step through.
     const was = anna.session.corrections;
     anna.k.input.setHeld('right', true);
@@ -111,7 +111,7 @@ describe('the thin client (T39)', () => {
     const there = k.wandererAt('anna')!;
     expect(there.x - start.x).toBeGreaterThan(2);
     expect(anna.session.corrections).toBe(was);
-    expect(anna.k.playerCarpet().x).toBeCloseTo(there.x, 1);
+    expect(anna.k.wandererCarpet().x).toBeCloseTo(there.x, 1);
     // Bruno sees her where she is, if she is near enough to be seen.
     const near = Math.hypot(there.x - k.wandererAt('bruno')!.x, there.y - k.wandererAt('bruno')!.y) <= server.near;
     const a = avatarOf(bruno, 'anna');
@@ -145,7 +145,7 @@ describe('the thin client (T39)', () => {
     run(server, [anna], 20);
     expect(anna.session.corrections).toBeGreaterThan(0);
     const server_ = k.wandererAt('anna')!;
-    expect(anna.k.playerCarpet().x).toBeCloseTo(server_.x, 1);
+    expect(anna.k.wandererCarpet().x).toBeCloseTo(server_.x, 1);
     expect(server_.x - start.x).toBeLessThan(5);
   });
 

@@ -40,7 +40,7 @@ describe('kernel', () => {
     k.input.setHeld('right', true);
     run(k, 6);
     k.input.setHeld('right', false);
-    expect(Math.abs(k.playerPos().x)).toBeLessThan(2);
+    expect(Math.abs(k.wandererPos().x)).toBeLessThan(2);
     expect(k.coronaRevealed()).toBe(false);
     expect(k.hoverAt(k.config.circleRadius + 2, 0)?.kind).not.toBe('code');
   });
@@ -55,19 +55,19 @@ describe('kernel', () => {
     run(k, DT * 2);
     expect(k.carpet()!.active).toBe(false);
     // At 41 steps from (0,0) the wanderer is still inside the simulation; at 42 steps they cross the circle into the corona.
-    k.playerPos().x = 41;
+    k.wandererPos().x = 41;
     run(k, DT * 2);
     expect(k.zone).toBe('sim');
-    k.playerPos().x = 42;
+    k.wandererPos().x = 42;
     run(k, DT * 2);
     expect(k.zone).toBe('corona');
     expect(k.coronaRevealed()).toBe(true);
-    k.playerPos().x = k.config.circleRadius + 0.5;
+    k.wandererPos().x = k.config.circleRadius + 0.5;
     run(k, DT * 2);
     expect(k.zone).toBe('corona');
     // Outside: the studio's campus. A door leads into a building, bigger inside than outside.
     const b = k.corona.buildingOf('modules/sys.physics/logic.lua')!;
-    Object.assign(k.playerPos(), { x: b.door.x + 0.5, y: b.door.y + 0.5 });
+    Object.assign(k.wandererPos(), { x: b.door.x + 0.5, y: b.door.y + 0.5 });
     run(k, DT);
     void k.interact();
     run(k, DT);

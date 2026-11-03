@@ -478,7 +478,7 @@ export class Kernel {
   private luaCalls = new Map<number, number>();
 
   /** The entity of the wanderer acting now (the one the input moves, or another one inside `as`). */
-  playerId: Id = 0;
+  wandererEntity: Id = 0;
   /** The wanderers of this kernel by id (T34): `io` is the one of a game alone; others join with `addWanderer`. */
   /** Balances and payments, outside the files and their history (ADR-0104). */
   readonly ledger: Ledger;
@@ -606,7 +606,7 @@ export class Kernel {
     k.faults.onRaise = (f, isNew) => {
       if (isNew) k.log('fault', `${f.key}: ${f.message}`);
       // Where it happened (T46a): the code that runs in the world, where the wanderer was; not loading nor manifests.
-      if (isNew && !f.at && k.zone === 'sim' && /^(module|rune):/.test(f.key) && !/:load$/.test(f.key)) f.at = { ...k.playerCarpet() };
+      if (isNew && !f.at && k.zone === 'sim' && /^(module|rune):/.test(f.key) && !/:load$/.test(f.key)) f.at = { ...k.wandererCarpet() };
       k.bus.emit('fault', { fault: f, isNew });
       if (isNew && !k.bench && !k.mirror) void k.repairGenerated(f.key, f.message);
     };
@@ -661,7 +661,7 @@ export class Kernel {
       query: (names) => {
         let ids = this.ecs.query(...names.split(',').map((s) => s.trim()).filter(Boolean));
         // A system that moves one wanderer sees only the one acting (T38); the carpet lets go of whoever is off it.
-        if (this.runningSystem && PER_WANDERER.has(this.runningSystem)) ids = ids.filter((id) => id === this.playerId || !this.ecs.has(id, 'player'));
+        if (this.runningSystem && PER_WANDERER.has(this.runningSystem)) ids = ids.filter((id) => id === this.wandererEntity || !this.ecs.has(id, 'player'));
         return (this.runningSystem === 'core.carpet' && this.offCarpet.size ? ids.filter((id) => !this.offCarpet.has(id)) : ids).join(',');
       },
       get: (id, name) => {
@@ -673,7 +673,7 @@ export class Kernel {
       set: (id, name, data) => {
         this.touching?.add(id);
         // The floor protects what keeps the universe navigable: position, the player, the carpet.
-        if (!this.ecs.alive.has(id) || ['pos', 'module', 'chunk', 'carpet', 'container'].includes(name) || (id === this.playerId && ['player', 'hand', 'inventory', 'needs', 'slots'].includes(name))) return false;
+        if (!this.ecs.alive.has(id) || ['pos', 'module', 'chunk', 'carpet', 'container'].includes(name) || (id === this.wandererEntity && ['player', 'hand', 'inventory', 'needs', 'slots'].includes(name))) return false;
         if (data === null || typeof data !== 'object') return false;
         this.ecs.set(id, name, data);
         return true;
@@ -685,7 +685,7 @@ export class Kernel {
       },
       destroy: (id) => {
         this.touching?.add(id);
-        if (id === this.playerId || [...this.singletons.values()].includes(id)) return;
+        if (id === this.wandererEntity || [...this.singletons.values()].includes(id)) return;
         this.ecs.destroy(id);
         this.runesDirty = true;
       },
@@ -698,11 +698,11 @@ export class Kernel {
         const t = this.tileAt(Math.floor(x), Math.floor(y));
         return (t && this.palette[t]?.speed) || 1;
       },
-      player_get: (key) => (key === 'x' || key === 'y' ? this.playerPos()[key] : (this.playerComp() as any)[key]),
+      player_get: (key) => (key === 'x' || key === 'y' ? this.wandererPos()[key] : (this.wandererComp() as any)[key]),
       player_set: (key, v) => {
         if (typeof v !== 'number' || !Number.isFinite(v)) return `${key} deve essere un numero finito (ricevuto ${v === null ? 'nil' : typeof v})`;
-        if (key === 'x' || key === 'y') this.playerPos()[key] = v;
-        else (this.playerComp() as any)[key] = v;
+        if (key === 'x' || key === 'y') this.wandererPos()[key] = v;
+        else (this.wandererComp() as any)[key] = v;
         return undefined;
       },
       carpet: () => (this.lockedLine && this.carpet() ? clone(this.carpet()) : this.carpet()),
@@ -721,8 +721,8 @@ export class Kernel {
         if (!m || (m.manifest.kind !== 'entity' && m.manifest.kind !== 'item')) return undefined;
         return this.spawnModuleEntity(m, x, y);
       },
-      player_id: () => this.playerId,
-      player_pos: () => this.playerCarpet(),
+      player_id: () => this.wandererEntity,
+      player_pos: () => this.wandererCarpet(),
       nearest: (x, y, r, tag) => this.nearest(x, y, r, tag ?? undefined) ?? undefined,
       has_tag: (id, tag) => this.hasTag(id, tag),
       break_entity: (id) => this.breakEntity(id),
@@ -754,7 +754,7 @@ export class Kernel {
       set_tile: (x, y, code) => this.setTile(Math.floor(x), Math.floor(y), code),
       open: (id) => !!this.openContainer(id),
       make_container: (id, size, loot) => {
-        if (!this.ecs.alive.has(id) || id === this.playerId || this.ecs.has(id, 'container') || this.ecs.has(id, 'pickup') || !this.content.loot[loot]) return false;
+        if (!this.ecs.alive.has(id) || id === this.wandererEntity || this.ecs.has(id, 'container') || this.ecs.has(id, 'pickup') || !this.content.loot[loot]) return false;
         this.ecs.set(id, 'container', { inv: newInventory(Math.max(1, Math.min(16, Math.floor(size) || 6))), loot, filled: false } satisfies Container);
         return true;
       },
@@ -836,32 +836,32 @@ export class Kernel {
     return { ox: Number.isFinite(ox) ? ox : this.lastGood.ox, oy: Number.isFinite(oy) ? oy : this.lastGood.oy };
   }
 
-  playerPos(): { x: number; y: number; z?: number } {
-    return this.ecs.get(this.playerId, 'pos');
+  wandererPos(): { x: number; y: number; z?: number } {
+    return this.ecs.get(this.wandererEntity, 'pos');
   }
 
   /** A wanderer's entity, with what they start with (e.g. a rune pouch). */
   private spawnWanderer(x: number, y: number): Id {
-    const playerMod = [...this.modules.values()].find((m) => m.manifest.kind === 'player');
-    const defaults: Record<string, any> = clone(playerMod?.manifest.components ?? FALLBACK_PLAYER);
+    const wandererModule = [...this.modules.values()].find((m) => m.manifest.kind === 'player');
+    const defaults: Record<string, any> = clone(wandererModule?.manifest.components ?? FALLBACK_PLAYER);
     for (const [k, v] of Object.entries(FALLBACK_PLAYER)) if (!defaults[k]) defaults[k] = clone(v);
     if (!defaults.inventory) defaults.inventory = newInventory();
-    const glyph = this.glyphOf(playerMod?.manifest.appearance ?? { glyph: '@', color: '#ffffff' });
-    const body = { r: playerMod?.manifest.physics?.radius ?? 0.3, solid: false };
-    const id = this.ecs.spawn({ ...defaults, pos: { x, y }, glyph, body, form: this.formFor(playerMod?.manifest, 'viandante'), module: { id: playerMod?.manifest.id ?? 'kernel.player' } });
-    const was = this.playerId;
-    this.playerId = id;
+    const glyph = this.glyphOf(wandererModule?.manifest.appearance ?? { glyph: '@', color: '#ffffff' });
+    const body = { r: wandererModule?.manifest.physics?.radius ?? 0.3, solid: false };
+    const id = this.ecs.spawn({ ...defaults, pos: { x, y }, glyph, body, form: this.formFor(wandererModule?.manifest, 'viandante'), module: { id: wandererModule?.manifest.id ?? 'kernel.player' } });
+    const was = this.wandererEntity;
+    this.wandererEntity = id;
     try {
-      for (const it of playerMod?.manifest.inventory ?? []) if (this.content.get(it)) this.give(it, 1);
+      for (const it of wandererModule?.manifest.inventory ?? []) if (this.content.get(it)) this.give(it, 1);
     } finally {
-      this.playerId = was || id;
+      this.wandererEntity = was || id;
     }
     return id;
   }
 
-  /** The wanderer acting now: the one whose entity is `playerId`. */
+  /** The wanderer acting now: the one whose entity is `wandererEntity`. */
   wanderer(): Wanderer {
-    for (const w of this.wanderersById.values()) if (w.entity === this.playerId) return { id: w.id, nome: w.nome };
+    for (const w of this.wanderersById.values()) if (w.entity === this.wandererEntity) return { id: w.id, nome: w.nome };
     return { id: SOLO, nome: WANDERER_NAME };
   }
 
@@ -920,22 +920,22 @@ export class Kernel {
 
   private asWanderer<T>(id: string, fn: () => T): T {
     const w = this.wanderersById.get(id);
-    if (!w || w.entity === this.playerId) return fn();
+    if (!w || w.entity === this.wandererEntity) return fn();
     if (!this.ecs.alive.has(w.entity)) {
       // Never someone else in their place: they come back with what was saved of them.
       this.wanderersById.delete(id);
       this.addWanderer(id, w.nome);
       return this.asWanderer(id, fn);
     }
-    const was = this.playerId;
+    const was = this.wandererEntity;
     const holder = this.carpetHolder;
-    this.playerId = w.entity;
+    this.wandererEntity = w.entity;
     this.holdCarpet(id);
     try {
       return fn();
     } finally {
       this.holdCarpet(holder);
-      this.playerId = was;
+      this.wandererEntity = was;
     }
   }
 
@@ -958,7 +958,7 @@ export class Kernel {
     if (!validWandererId(id)) return undefined;
     const known = this.wanderersById.get(id);
     if (known && this.ecs.alive.has(known.entity)) return known.entity;
-    const p = this.playerPos() ?? { x: 0, y: 0 };
+    const p = this.wandererPos() ?? { x: 0, y: 0 };
     const entity = this.spawnWanderer(p.x + 1, p.y);
     const saved = readWandererState(this.files, id);
     const isAnon = anonimo !== undefined ? !!anonimo : !!saved?.anonimo;
@@ -1072,14 +1072,14 @@ export class Kernel {
   wandererAt(id: string): { entity: Id; x: number; y: number; facing: string } | undefined {
     const w = this.wanderersById.get(id);
     if (!w || !this.ecs.alive.has(w.entity)) return undefined;
-    return this.as(id, () => ({ entity: w.entity, ...this.playerCarpet(), facing: String(this.playerComp()?.facing ?? 'down') }));
+    return this.as(id, () => ({ entity: w.entity, ...this.wandererCarpet(), facing: String(this.wandererComp()?.facing ?? 'down') }));
   }
 
   /** How far a wanderer may walk in a second: their speed and states, on the fastest terrain around them. */
   paceOf(id: string): number {
     return this.as(id, () => {
-      const pl: any = this.playerComp();
-      const { x, y } = this.playerCarpet();
+      const pl: any = this.wandererComp();
+      const { x, y } = this.wandererCarpet();
       let terrain = 1;
       for (let dy = -1; dy <= 1; dy++)
         for (let dx = -1; dx <= 1; dx++) {
@@ -1101,7 +1101,7 @@ export class Kernel {
   stepWanderer(id: string, to: { x: number; y: number }, max: number): { x: number; y: number } | undefined {
     if (!this.wanderersById.has(id) || this.dying.has(id)) return undefined;
     return this.as(id, () => {
-      const here = this.playerCarpet();
+      const here = this.wandererCarpet();
       let { x, y } = here;
       let dx = Number(to?.x) - x;
       let dy = Number(to?.y) - y;
@@ -1110,47 +1110,47 @@ export class Kernel {
       const k = d > max ? Math.max(0, max) / d : 1;
       dx *= k;
       dy *= k;
-      const r = Number(this.ecs.get(this.playerId, 'body')?.r) || 0.3;
+      const r = Number(this.ecs.get(this.wandererEntity, 'body')?.r) || 0.3;
       const n = Math.max(1, Math.ceil(Math.hypot(dx, dy) / 0.1));
       // The floor they walk on goes with them (T53b): up a stair, on the floor above.
-      let z = this.playerPos().z;
+      let z = this.wandererPos().z;
       for (let i = 0; i < n; i++) {
         const stuck = !this.free(x, y, r, z);
         if (stuck || this.free(x + dx / n, y, r, z)) x += dx / n;
         if (stuck || this.free(x, y + dy / n, r, z)) y += dy / n;
         z = this.floorAt(x, y, z);
       }
-      const pl = this.playerComp();
+      const pl = this.wandererComp();
       if (pl && (Math.abs(dx) > 1e-6 || Math.abs(dy) > 1e-6)) pl.facing = Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : dy > 0 ? 'down' : 'up';
       // The wanderer stays where they are on their circle: the carpet under them moves.
       const c = this.carpet();
-      const p = this.playerPos();
+      const p = this.wandererPos();
       if (c) Object.assign(c, { ox: x - p.x, oy: y - p.y });
       p.z = z;
       return { x, y };
     });
   }
 
-  playerComp(): { speed: number; facing: string; load: number } {
-    return this.ecs.get(this.playerId, 'player');
+  wandererComp(): { speed: number; facing: string; load: number } {
+    return this.ecs.get(this.wandererEntity, 'player');
   }
 
   /** The rune hand (ordered tokens to inscribe). */
   hand(): { tokens: string[]; sel: number } {
-    return this.ecs.get(this.playerId, 'hand');
+    return this.ecs.get(this.wandererEntity, 'hand');
   }
 
   inventory(): Inventory {
-    return this.ecs.get(this.playerId, 'inventory');
+    return this.ecs.get(this.wandererEntity, 'inventory');
   }
 
   needs(): Needs | undefined {
-    return this.ecs.get(this.playerId, 'needs');
+    return this.ecs.get(this.wandererEntity, 'needs');
   }
 
   /** Player position on the carpet (where the simulation thinks you are). */
-  playerCarpet(): { x: number; y: number } {
-    const p = this.playerPos();
+  wandererCarpet(): { x: number; y: number } {
+    const p = this.wandererPos();
     const { ox, oy } = this.offset();
     return { x: p.x + ox, y: p.y + oy };
   }
@@ -1160,7 +1160,7 @@ export class Kernel {
    * centre nothing of it is drawn, hovered or reachable: the simulation simply continues.
    */
   coronaRevealed(): boolean {
-    const p = this.playerPos();
+    const p = this.wandererPos();
     return !!p && Math.hypot(p.x, p.y) > this.config.circleRadius * 0.45;
   }
 
@@ -1444,23 +1444,23 @@ export class Kernel {
   }
 
   private ensureCoreEntities(reset: boolean): void {
-    const playerMod = [...this.modules.values()].find((m) => m.manifest.kind === 'player');
-    const defaults: Record<string, any> = clone(playerMod?.manifest.components ?? FALLBACK_PLAYER);
+    const wandererModule = [...this.modules.values()].find((m) => m.manifest.kind === 'player');
+    const defaults: Record<string, any> = clone(wandererModule?.manifest.components ?? FALLBACK_PLAYER);
     for (const [k, v] of Object.entries(FALLBACK_PLAYER)) if (!defaults[k]) defaults[k] = clone(v);
     if (!defaults.inventory) defaults.inventory = newInventory();
-    const app = playerMod?.manifest.appearance ?? { glyph: '@', color: '#ffffff' };
+    const app = wandererModule?.manifest.appearance ?? { glyph: '@', color: '#ffffff' };
     const glyph = this.glyphOf(app);
 
-    if (!this.playerId || !this.ecs.alive.has(this.playerId)) {
-      this.playerId = this.spawnWanderer(0, 0);
-      this.wanderersById.set(SOLO, { id: SOLO, nome: this.wanderersById.get(SOLO)?.nome ?? WANDERER_NAME, entity: this.playerId });
+    if (!this.wandererEntity || !this.ecs.alive.has(this.wandererEntity)) {
+      this.wandererEntity = this.spawnWanderer(0, 0);
+      this.wanderersById.set(SOLO, { id: SOLO, nome: this.wanderersById.get(SOLO)?.nome ?? WANDERER_NAME, entity: this.wandererEntity });
     } else {
-      this.ecs.set(this.playerId, 'glyph', glyph);
-      this.ecs.set(this.playerId, 'form', this.formFor(playerMod?.manifest, 'viandante'));
+      this.ecs.set(this.wandererEntity, 'glyph', glyph);
+      this.ecs.set(this.wandererEntity, 'form', this.formFor(wandererModule?.manifest, 'viandante'));
       // The look a profile chose stays (T44a).
-      const me = [...this.wanderersById.values()].find((w) => w.entity === this.playerId);
+      const me = [...this.wanderersById.values()].find((w) => w.entity === this.wandererEntity);
       if (me?.profilo) this.dressWanderer(me.id);
-      if (reset) this.resetComponents(this.playerId, defaults, [...(playerMod?.manifest.persist ?? []), 'inventory.slots', 'inventory.equipped']);
+      if (reset) this.resetComponents(this.wandererEntity, defaults, [...(wandererModule?.manifest.persist ?? []), 'inventory.slots', 'inventory.equipped']);
     }
 
     for (const m of this.modules.values()) {
@@ -1571,8 +1571,8 @@ export class Kernel {
     const at: Array<{ x: number; y: number }> = [];
     for (const w of this.wanderersById.keys())
       this.as(w, () => {
-        if (this.corona.isInterior(this.playerPos().x)) return;
-        const pc = this.playerCarpet();
+        if (this.corona.isInterior(this.wandererPos().x)) return;
+        const pc = this.wandererCarpet();
         at.push({ x: pc.x / S - 0.5, y: pc.y / S - 0.5 });
       });
     if (!at.length) return;
@@ -1719,7 +1719,7 @@ export class Kernel {
    * needed), the validator test-runs it, and it is placed on the atlas in an unexplored direction.
    */
   async createEnvironment(request: string): Promise<{ ok: boolean; summary: string }> {
-    const pc = this.playerCarpet();
+    const pc = this.wandererCarpet();
     const S = this.config.chunkSize;
     const here: [number, number] = [Math.floor(pc.x / S), Math.floor(pc.y / S)];
     const layouts = Object.entries(this.content.layouts).map(([id, l]) => ({ id, name: l.name, description: l.description }));
@@ -1800,7 +1800,7 @@ export class Kernel {
     for (const ch of this.chunks.values()) if (ch.stage === 'planned' && ch.place) planned.set(ch.key, { cx: ch.cx, cy: ch.cy, name: ch.place.name, layout: ch.plan?.layout ?? '' });
     const drafts = [...this.chunks.values()].filter((c) => c.stage === 'draft' && !planned.has(c.key)).map((c) => ({ cx: c.cx, cy: c.cy }));
     // Seen from the studio, "here" is where the wanderer last stood in the world.
-    const pc = this.corona.isInterior(this.playerPos().x) ? this.lastWorld : this.playerCarpet();
+    const pc = this.corona.isInterior(this.wandererPos().x) ? this.lastWorld : this.wandererCarpet();
     // The players connected (T42c), each on their chunk.
     const players = this.players().map((p) => ({ ...p, cx: Math.floor(p.x / S), cy: Math.floor(p.y / S) }));
     return { planned: [...planned.values()], drafts, regions: readAtlas(this.files).regioni, here: { cx: Math.floor(pc.x / S), cy: Math.floor(pc.y / S) }, players };
@@ -2664,10 +2664,10 @@ export class Kernel {
   /** The chunks the wanderer acting sees, loaded and added to `want`; false inside the studio (nothing to load). */
   private wantChunks(want: Set<string>): boolean {
     // Inside the studio there is no world to load (interiors are far away in real space on purpose).
-    if (this.corona.isInterior(this.playerPos().x)) return false;
+    if (this.corona.isInterior(this.wandererPos().x)) return false;
     const S = this.config.chunkSize;
     const R = this.config.circleRadius;
-    const p = this.playerPos();
+    const p = this.wandererPos();
     const { ox, oy } = this.offset();
     // While the corona is hidden the simulation has no visible edge: the carpet fills the view.
     const clamp = this.coronaRevealed() ? R : Infinity;
@@ -2675,7 +2675,7 @@ export class Kernel {
     const x1 = Math.min(p.x + this.view.w / 2, clamp) + ox;
     const y0 = Math.max(p.y - this.view.h / 2, -clamp) + oy;
     const y1 = Math.min(p.y + this.view.h / 2, clamp) + oy;
-    const pc = this.playerCarpet();
+    const pc = this.wandererCarpet();
     const pcx = Math.floor(pc.x / S);
     const pcy = Math.floor(pc.y / S);
     this.genBudget = Math.max(this.genBudget, 1);
@@ -2748,7 +2748,7 @@ export class Kernel {
     let best: Id | undefined;
     let bestD = r;
     for (const id of this.ecs.query('pos')) {
-      if (id === this.playerId || exclude.includes(id) || (!this.ecs.has(id, 'module') && !this.ecs.has(id, 'pickup') && !this.ecs.has(id, 'remote'))) continue;
+      if (id === this.wandererEntity || exclude.includes(id) || (!this.ecs.has(id, 'module') && !this.ecs.has(id, 'pickup') && !this.ecs.has(id, 'remote'))) continue;
       if (tag && !this.hasTag(id, tag)) continue;
       const p = this.ecs.get(id, 'pos');
       const d = Math.hypot(p.x - x, p.y - y);
@@ -2766,7 +2766,7 @@ export class Kernel {
 
   /** Destroys an entity (never the player) and leaves its drops (and its container's contents) on the ground. */
   private breakEntity(id: Id): void {
-    if (id === this.playerId || !this.ecs.alive.has(id) || this.ecs.has(id, 'carpet')) return;
+    if (id === this.wandererEntity || !this.ecs.alive.has(id) || this.ecs.has(id, 'carpet')) return;
     const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
     const p = this.ecs.get(id, 'pos');
     const origin = this.ecs.get(id, 'origin')?.key;
@@ -2814,7 +2814,7 @@ export class Kernel {
     const def = this.palette[code];
     if (!ch || ch.stage !== 'planned' || !ch.plan || !def || code === '?') return false;
     if (def.solid) {
-      const pc = this.playerCarpet();
+      const pc = this.wandererCarpet();
       if (Math.abs(pc.x - (col + 0.5)) < 1 && Math.abs(pc.y - (row + 0.5)) < 1) return false;
     }
     const cell = (row - ch.cy * S) * S + (col - ch.cx * S);
@@ -2939,9 +2939,9 @@ export class Kernel {
    * changes there), in a thin client (the server would put the wanderer back) or while already in the air.
    */
   jump(): boolean {
-    if (this.mirror || this.zone !== 'sim' || this.ecs.has(this.playerId, 'salto')) return false;
-    const pl = this.playerComp();
-    const r = Number(this.ecs.get(this.playerId, 'body')?.r) || 0.3;
+    if (this.mirror || this.zone !== 'sim' || this.ecs.has(this.wandererEntity, 'salto')) return false;
+    const pl = this.wandererComp();
+    const r = Number(this.ecs.get(this.wandererEntity, 'body')?.r) || 0.3;
     let dx = 0, dy = 0;
     if (this.wanderer().id === this.inputFor) {
       dx = (this.input.isHeld('right') ? 1 : 0) - (this.input.isHeld('left') ? 1 : 0);
@@ -2951,8 +2951,8 @@ export class Kernel {
     const n = Math.hypot(dx, dy);
     dx /= n;
     dy /= n;
-    const from = this.playerCarpet();
-    const real = this.playerPos();
+    const from = this.wandererCarpet();
+    const real = this.wandererPos();
     // From the floor one stands on (T70): the ground floor, the floor above, the roof.
     const h0 = this.floorAt(from.x, from.y, real.z);
     let land: { d: number; h: number } | undefined;
@@ -2970,7 +2970,7 @@ export class Kernel {
     }
     const to = land ? { x: from.x + dx * land.d, y: from.y + dy * land.d } : from;
     const jc: JumpComp = { da: from, a: to, h0, h1: land?.h ?? h0, alto: Math.min(JUMP_UP + 0.25, Math.max(0.45, clear + 0.25)), t: 0, dur: 0.32 + 0.08 * (land?.d ?? 0) };
-    this.ecs.set(this.playerId, 'salto', jc);
+    this.ecs.set(this.wandererEntity, 'salto', jc);
     if (pl && land) pl.facing = Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : dy > 0 ? 'down' : 'up';
     this.bus.emit('wanderer:jumped', { id: this.wanderer().id, far: land?.d ?? 0 });
     return true;
@@ -2978,7 +2978,7 @@ export class Kernel {
 
   /** The jump under way, if any: how far along it is (0-1) and the height of the feet (tiles), for the renderer. */
   jumping(): { s: number; y: number } | undefined {
-    const j: JumpComp | undefined = this.ecs.get(this.playerId, 'salto');
+    const j: JumpComp | undefined = this.ecs.get(this.wandererEntity, 'salto');
     if (!j) return undefined;
     const s = Math.max(0, Math.min(1, j.t / j.dur));
     return { s, y: j.h0 + (j.h1 - j.h0) * s + 4 * j.alto * s * (1 - s) };
@@ -2986,16 +2986,16 @@ export class Kernel {
 
   /** The jump carries the wanderer along its line, whatever the walking did this tick; landed, it ends. */
   private jumpTick(dt: number): void {
-    const j: JumpComp | undefined = this.ecs.get(this.playerId, 'salto');
+    const j: JumpComp | undefined = this.ecs.get(this.wandererEntity, 'salto');
     if (!j) return;
     const ok = [j.da?.x, j.da?.y, j.a?.x, j.a?.y, j.t, j.dur, j.h0, j.h1, j.alto].every(Number.isFinite) && j.dur > 0;
-    if (!ok || this.zone !== 'sim') return void this.ecs.remove(this.playerId, 'salto');
+    if (!ok || this.zone !== 'sim') return void this.ecs.remove(this.wandererEntity, 'salto');
     j.t += dt;
     const s = Math.min(1, j.t / j.dur);
     const { ox, oy } = this.offset();
     // The feet go from one floor to the other (T70): landed, they stand on the floor of the landing.
-    Object.assign(this.playerPos(), { x: j.da.x + (j.a.x - j.da.x) * s - ox, y: j.da.y + (j.a.y - j.da.y) * s - oy, z: j.h0 + (j.h1 - j.h0) * s });
-    if (s >= 1) this.ecs.remove(this.playerId, 'salto');
+    Object.assign(this.wandererPos(), { x: j.da.x + (j.a.x - j.da.x) * s - ox, y: j.da.y + (j.a.y - j.da.y) * s - oy, z: j.h0 + (j.h1 - j.h0) * s });
+    if (s >= 1) this.ecs.remove(this.wandererEntity, 'salto');
   }
 
   // --- Runes ---------------------------------------------------------------------------------
@@ -3066,13 +3066,13 @@ export class Kernel {
     return undefined;
   }
 
-  private playerCell(): { col: number; row: number } {
-    const pc = this.playerCarpet();
+  private wandererTile(): { col: number; row: number } {
+    const pc = this.wandererCarpet();
     return { col: Math.floor(pc.x), row: Math.floor(pc.y) };
   }
 
   private facingDelta(): [number, number] {
-    switch (this.playerComp()?.facing) {
+    switch (this.wandererComp()?.facing) {
       case 'left': return [-1, 0];
       case 'right': return [1, 0];
       case 'up': return [0, -1];
@@ -3087,7 +3087,7 @@ export class Kernel {
 
   /** E on a rune: the one under the wanderer or in front of them, or the rune `which` (a client of a session names it). */
   pickUpRune(which?: Id): boolean {
-    const { col, row } = this.playerCell();
+    const { col, row } = this.wandererTile();
     const [dx, dy] = this.facingDelta();
     const id = which !== undefined ? (this.ecs.has(which, 'rune') ? which : undefined) : (this.runeCells.get(`${col},${row}`) ?? this.runeCells.get(`${col + dx},${row + dy}`));
     if (id === undefined) return false;
@@ -3125,8 +3125,8 @@ export class Kernel {
       return false;
     }
     const width = tokens.length;
-    const { col, row } = this.playerCell();
-    const facing = this.playerComp()?.facing;
+    const { col, row } = this.wandererTile();
+    const facing = this.wandererComp()?.facing;
     const start = facing === 'left' ? { col: col - width, row } : facing === 'right' ? { col: col + 1, row } : { col, row: row + (facing === 'up' ? -1 : 1) };
     for (let i = 0; i < width; i++) {
       const c = start.col + i;
@@ -3160,8 +3160,8 @@ export class Kernel {
       this.message('La runa resta muta.', 'warn');
       return false;
     }
-    this.offCarpet.add(this.playerId);
-    Object.assign(this.playerPos(), this.corona.entrance(hall));
+    this.offCarpet.add(this.wandererEntity);
+    Object.assign(this.wandererPos(), this.corona.entrance(hall));
     this.updateZone();
     this.bus.emit('studio:teleport', {});
     this.message(hall.name, 'good');
@@ -3312,7 +3312,7 @@ export class Kernel {
     if (slot.item.startsWith('rune:')) return void this.composeRune(slot.item.slice(5));
     const custom = def?.module && this.sandbox.has(def.module, 'on_use') ? def.module : null;
     if (!custom && def?.equippable && !def.effects && !['luce', 'vestiario'].includes(def.category)) return this.equipSlot(index);
-    const { value, failed } = this.runModule(custom ?? 'core.items', custom ? 'on_use' : 'use', this.playerId, slot.item);
+    const { value, failed } = this.runModule(custom ?? 'core.items', custom ? 'on_use' : 'use', this.wandererEntity, slot.item);
     if (!failed && typeof value === 'string' && value) this.message(value);
     this.bus.emit('item:used', { item: slot.item });
   }
@@ -3348,12 +3348,12 @@ export class Kernel {
       this.message('Non impugni nulla (1–6 o inventario).', 'warn');
       return;
     }
-    const pc = this.playerCarpet();
+    const pc = this.wandererCarpet();
     const [dx, dy] = this.facingDelta();
     const t = target ?? this.nearest(pc.x + dx * 0.9, pc.y + dy * 0.9, 1.1) ?? null;
     const def = this.content.get(item);
     if (def?.module && this.sandbox.has(def.module, 'on_action')) {
-      const { value, failed } = this.runModule(def.module, 'on_action', this.playerId, t, item);
+      const { value, failed } = this.runModule(def.module, 'on_action', this.wandererEntity, t, item);
       if (!failed && typeof value === 'string' && value) this.message(value);
     } else if (t !== null && def?.tags.includes('taglio') && this.hasTag(t, 'tagliabile')) {
       this.breakEntity(t);
@@ -3366,7 +3366,7 @@ export class Kernel {
     if (this.zone !== 'sim') return;
     const taken = takeFromSlot(this.inventory(), index, count);
     if (!taken) return;
-    const pc = this.playerCarpet();
+    const pc = this.wandererCarpet();
     const [dx, dy] = this.facingDelta();
     const id = this.spawnItem(taken.item, pc.x + dx * 0.8, pc.y + dy * 0.8, taken.count);
     if (taken.inv && this.ecs.alive.has(id)) this.ecs.get(id, 'pickup').inv = taken.inv;
@@ -3483,7 +3483,7 @@ export class Kernel {
     for (const i of r.inputs) removeItem(inv, i.item, i.count);
     const added = this.give(r.output.item, r.output.count);
     if (added < r.output.count) {
-      const pc = this.playerCarpet();
+      const pc = this.wandererCarpet();
       this.spawnItem(r.output.item, pc.x, pc.y, r.output.count - added);
     }
     this.message(`Hai fatto: ${this.itemInfo(r.output.item).name}${r.output.count > 1 ? ` ×${r.output.count}` : ''}`, 'good');
@@ -3637,7 +3637,7 @@ export class Kernel {
   sayTo(to: string, text: string): string | false {
     const said = String(text ?? '').replace(/\s+/g, ' ').trim().slice(0, SAY_MAX);
     if (!said || !this.besideWanderer(to, HEAR, 'È troppo lontano per sentirti.')) return false;
-    this.speak(this.playerId, said);
+    this.speak(this.wandererEntity, said);
     this.bus.emit('wanderer:said', { da: this.wanderer().id, a: to, testo: said });
     return said;
   }
@@ -3688,7 +3688,7 @@ export class Kernel {
       return;
     }
     // The menu of the tile in front, with what stands on it.
-    const pc = this.playerCarpet();
+    const pc = this.wandererCarpet();
     const [dx, dy] = this.facingDelta();
     const col = target !== undefined ? Math.floor(this.ecs.get(target, 'pos').x) : Math.floor(pc.x + dx);
     const row = target !== undefined ? Math.floor(this.ecs.get(target, 'pos').y) : Math.floor(pc.y + dy);
@@ -3725,7 +3725,7 @@ export class Kernel {
     const { ox, oy } = this.offset();
     const col = Math.floor(rx + ox);
     const row = Math.floor(ry + oy);
-    const pc = this.playerCarpet();
+    const pc = this.wandererCarpet();
     if (Math.hypot(col + 0.5 - pc.x, row + 0.5 - pc.y) > 2.6) {
       this.message('Troppo lontano: avvicinati.');
       return false;
@@ -3759,7 +3759,7 @@ export class Kernel {
 
   /** The thing you are facing (or standing next to). */
   targetInFront(): Id | undefined {
-    const pc = this.playerCarpet();
+    const pc = this.wandererCarpet();
     const [dx, dy] = this.facingDelta();
     return this.nearest(pc.x + dx * 0.6, pc.y + dy * 0.6, 1.4) ?? this.nearest(pc.x, pc.y, 1.2);
   }
@@ -3796,7 +3796,7 @@ export class Kernel {
         this.bus.emit('ui:freeaction', { id, name: speaker });
         return;
       case 'usa': {
-        const { value, failed } = this.runModule(modId!, 'on_interact', id, this.playerId);
+        const { value, failed } = this.runModule(modId!, 'on_interact', id, this.wandererEntity);
         if (!failed && typeof value === 'string') say(value);
         return;
       }
@@ -3840,7 +3840,7 @@ export class Kernel {
             return say(out.join(' ') || `${a.label}: fatto.`);
           }
           if (!modId) return;
-          const { value, failed } = this.runModule(modId, 'on_act', id, this.playerId, a.id);
+          const { value, failed } = this.runModule(modId, 'on_act', id, this.wandererEntity, a.id);
           if (!failed) say(typeof value === 'string' && value ? value : `${a.label}: fatto.`);
         }
     }
@@ -4030,7 +4030,7 @@ export class Kernel {
       else if (e.tipo === 'apri' && sub.slot !== undefined && this.content.get(sub.key)?.container) this.bus.emit('ui:bag', { slot: sub.slot });
       else if (e.tipo !== 'contenitore' && e.tipo !== 'spingi') rest.push(e);
     }
-    const pc = this.playerCarpet();
+    const pc = this.wandererCarpet();
     const [dx, dy] = this.facingDelta();
     out.push(...this.applyEffects(rest, undefined, { x: pc.x + dx, y: pc.y + dy }));
     this.syncHand();
@@ -4068,7 +4068,7 @@ export class Kernel {
       say(ruled.racconto);
       return ruled.racconto;
     }
-    const p = sub.wanderer ? this.wandererAt(sub.wanderer) : sub.entity !== undefined ? this.ecs.get(sub.entity, 'pos') : sub.tile ? { x: sub.tile.col + 0.5, y: sub.tile.row + 0.5 } : this.playerCarpet();
+    const p = sub.wanderer ? this.wandererAt(sub.wanderer) : sub.entity !== undefined ? this.ecs.get(sub.entity, 'pos') : sub.tile ? { x: sub.tile.col + 0.5, y: sub.tile.row + 0.5 } : this.wandererCarpet();
     const tile = p ? (this.palette[this.tileAt(Math.floor(p.x), Math.floor(p.y)) ?? '']?.name ?? '?') : '?';
     const inv = this.inventory();
     const held = equippedItem(inv);
@@ -4243,7 +4243,7 @@ export class Kernel {
 
   /** E in the corona and in the studio: doors, stairs, shelves, frames, the notice board, people. */
   private interactStudio(): void {
-    const p = this.playerPos();
+    const p = this.wandererPos();
     // Standing on a teleport, the stairs or the exit: that, before whoever stands near.
     const under = this.zone === 'studio' ? this.corona.itemNear(p.x, p.y) : undefined;
     const onPad = under && ['portal', 'up', 'down', 'exit', 'less', 'more'].includes(under.kind) && Math.hypot(under.x + 0.5 - p.x, under.y + 0.5 - p.y) < 0.75;
@@ -4367,7 +4367,7 @@ export class Kernel {
     if (this.zone !== 'studio') return false;
     const it = this.corona.itemNear(rx, ry, 1.6, ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'situazione', 'parete', 'console', 'stazione', 'banco', 'leggio', 'layout', 'lastra', 'tornio']);
     if (!it) return false;
-    const p = this.playerPos();
+    const p = this.wandererPos();
     const c = cellNear(it, p.x, p.y);
     if (Math.hypot(c.x + 0.5 - p.x, c.y + 0.5 - p.y) > 4) {
       this.message('Troppo lontano: avvicinati.');
@@ -4436,7 +4436,7 @@ export class Kernel {
   /** The place where the wanderer stands, or (from the studio) last stood in the world. */
   private lastPlace(): { cx: number; cy: number } {
     const S = this.config.chunkSize;
-    const p = this.corona.isInterior(this.playerPos().x) ? this.lastWorld : this.playerCarpet();
+    const p = this.corona.isInterior(this.wandererPos().x) ? this.lastWorld : this.wandererCarpet();
     return { cx: Math.floor(p.x / S), cy: Math.floor(p.y / S) };
   }
 
@@ -4993,7 +4993,7 @@ export class Kernel {
 
   /** Another wanderer than the one acting (T43a), if the entity is one: in a kernel that holds them, or in a mirror (`remote`). */
   otherWanderer(entity: Id): string | undefined {
-    if (entity === this.playerId) return undefined;
+    if (entity === this.wandererEntity) return undefined;
     const remote = this.ecs.get(entity, 'remote')?.id;
     return typeof remote === 'string' ? remote : this.wandererOf(entity);
   }
@@ -5149,17 +5149,17 @@ export class Kernel {
     this.deathVerdicts.delete(id);
     if (!this.wanderersById.has(id)) return;
     this.as(id, () => {
-      const playerMod = [...this.modules.values()].find((m) => m.manifest.kind === 'player');
-      const defaults: Record<string, any> = clone(playerMod?.manifest.components ?? FALLBACK_PLAYER);
+      const wandererModule = [...this.modules.values()].find((m) => m.manifest.kind === 'player');
+      const defaults: Record<string, any> = clone(wandererModule?.manifest.components ?? FALLBACK_PLAYER);
       Object.assign(this.needs() ?? {}, { ...FALLBACK_PLAYER.needs, ...(defaults.needs ?? {}), morto: false });
       if (v.loseAll) {
-        this.ecs.set(this.playerId, 'inventory', newInventory());
-        this.ecs.set(this.playerId, 'stati', {});
+        this.ecs.set(this.wandererEntity, 'inventory', newInventory());
+        this.ecs.set(this.wandererEntity, 'stati', {});
         Object.assign(this.hand(), { tokens: [], sel: 0 });
-        for (const it of playerMod?.manifest.inventory ?? []) if (this.content.get(it)) this.give(it, 1);
+        for (const it of wandererModule?.manifest.inventory ?? []) if (this.content.get(it)) this.give(it, 1);
       }
       if (v.restart === 'piazza') {
-        Object.assign(this.playerPos(), { x: 0, y: 0 });
+        Object.assign(this.wandererPos(), { x: 0, y: 0 });
         const c = this.carpet();
         if (c) Object.assign(c, { ox: 0, oy: 0 });
       }
@@ -5201,8 +5201,8 @@ export class Kernel {
 
   /** What sits in the slots of every panel: player component `slots` (kernel-owned). */
   slots(): Record<string, Record<string, { item: string; count: number } | null>> {
-    let s = this.ecs.get(this.playerId, 'slots');
-    if (!s) s = this.ecs.set(this.playerId, 'slots', {});
+    let s = this.ecs.get(this.wandererEntity, 'slots');
+    if (!s) s = this.ecs.set(this.wandererEntity, 'slots', {});
     return s;
   }
 
@@ -5249,7 +5249,7 @@ export class Kernel {
 
   private slotChanged(module: string, panel: string, slot: string, item: string | undefined): void {
     if (!this.sandbox.has(module, 'on_slot')) return;
-    const { value, failed } = this.runModule(module, 'on_slot', this.playerId, slot, item, panel);
+    const { value, failed } = this.runModule(module, 'on_slot', this.wandererEntity, slot, item, panel);
     if (!failed && typeof value === 'string' && value) this.message(value);
   }
 
@@ -5257,7 +5257,7 @@ export class Kernel {
   uiAction(panelId: string, action: string): void {
     const p = this.uiPanels().find((x) => x.panel.id === panelId);
     if (!p || !this.sandbox.has(p.module, 'on_ui')) return;
-    const { value, failed } = this.runModule(p.module, 'on_ui', this.playerId, action);
+    const { value, failed } = this.runModule(p.module, 'on_ui', this.wandererEntity, action);
     if (!failed && typeof value === 'string' && value) this.message(value);
   }
 
@@ -5265,7 +5265,7 @@ export class Kernel {
   uiValue(campo: string | undefined): unknown {
     if (!campo) return undefined;
     const [c, f] = campo.split('.');
-    return this.ecs.get(this.playerId, c)?.[f];
+    return this.ecs.get(this.wandererEntity, c)?.[f];
   }
 
   /**
@@ -5314,7 +5314,7 @@ export class Kernel {
       this.repo.write(`${dir}manifest.json`, JSON.stringify(manifest, null, 2) + '\n');
       this.repo.write(`${dir}logic.lua`, logic);
       // Starting components for the wanderer (e.g. a reputation at 0).
-      for (const [name, data] of Object.entries(d.components ?? {})) if (data && typeof data === 'object' && !this.ecs.has(this.playerId, name) && !['player', 'hand', 'inventory', 'needs', 'pos', 'slots'].includes(name)) this.ecs.set(this.playerId, name, clone(data));
+      for (const [name, data] of Object.entries(d.components ?? {})) if (data && typeof data === 'object' && !this.ecs.has(this.wandererEntity, name) && !['player', 'hand', 'inventory', 'needs', 'pos', 'slots'].includes(name)) this.ecs.set(this.wandererEntity, name, clone(data));
       this.applyFiles({ ...this.repo.working });
       const c = this.commitContent(`meccanica: ${d.name}`, 'mechanic.design', 'ingegnere', chi);
       this.council.say('ingegnere', 'approva', `nuova meccanica «${d.name}»: ${d.description} (pannello «${panel!.titolo}», commit ${c.id})`, undefined, 'mechanic.design');
@@ -5628,7 +5628,7 @@ export class Kernel {
   /** States of the wanderer (on horseback, with a backpack…): what they change, until when. */
   states(): Record<string, { velocita: number; peso: number; luce: number; fino: number }> {
     // Lua removes a state by setting it to nil (null on the JS side): those are gone.
-    const st = this.ecs.get(this.playerId, 'stati') ?? {};
+    const st = this.ecs.get(this.wandererEntity, 'stati') ?? {};
     for (const k of Object.keys(st)) if (!st[k]) delete st[k];
     return st;
   }
@@ -5646,9 +5646,9 @@ export class Kernel {
       if (s.fino && s.fino < this.time) delete st[k];
       else light = Math.max(light, Number(s.luce) || 0);
     }
-    const l = this.ecs.get(this.playerId, 'luce');
-    if (light > 0) this.ecs.set(this.playerId, 'luce', { ...(l ?? {}), accesa: true, raggio: light, daStato: true });
-    else if (l?.daStato) this.ecs.set(this.playerId, 'luce', { accesa: false });
+    const l = this.ecs.get(this.wandererEntity, 'luce');
+    if (light > 0) this.ecs.set(this.wandererEntity, 'luce', { ...(l ?? {}), accesa: true, raggio: light, daStato: true });
+    else if (l?.daStato) this.ecs.set(this.wandererEntity, 'luce', { accesa: false });
   }
 
   /** Magic runes in the phrase, in their order: the incantation T would cast. */
@@ -5722,7 +5722,7 @@ export class Kernel {
       const hand = this.hand();
       hand.tokens = hand.tokens.filter((t) => !this.content.runes[t]);
       hand.sel = Math.max(0, Math.min(hand.sel, hand.tokens.length - 1));
-      const pc = this.playerCarpet();
+      const pc = this.wandererCarpet();
       const [dx, dy] = this.facingDelta();
       const at = { x: pc.x + dx * 1.5, y: pc.y + dy * 1.5 };
       const target = this.nearest(at.x, at.y, 1.2);
@@ -5839,8 +5839,8 @@ export class Kernel {
     for (const e of effects) {
       if (e.tipo === 'rilievo') {
         const p = target !== undefined ? this.ecs.get(target, 'pos') : undefined;
-        const cx = Math.floor(p?.x ?? at?.x ?? this.playerCarpet().x);
-        const cy = Math.floor(p?.y ?? at?.y ?? this.playerCarpet().y);
+        const cx = Math.floor(p?.x ?? at?.x ?? this.wandererCarpet().x);
+        const cy = Math.floor(p?.y ?? at?.y ?? this.wandererCarpet().y);
         const r = e.raggio ?? 1;
         const delta = e.delta ?? 0;
         if (delta) {
@@ -5855,7 +5855,7 @@ export class Kernel {
         continue;
       }
       if (target !== undefined && !this.ecs.alive.has(target)) target = undefined;
-      const { value, failed } = this.runModule('core.effects', 'apply', target, this.playerId, clone(e), at?.x, at?.y);
+      const { value, failed } = this.runModule('core.effects', 'apply', target, this.wandererEntity, clone(e), at?.x, at?.y);
       if (failed) break;
       if (typeof value === 'string' && value) out.push(value);
     }
@@ -5923,7 +5923,7 @@ export class Kernel {
       ora: Math.floor(this.time),
       momento: this.daylight() > 0.6 ? 'giorno' : this.daylight() > 0.15 ? 'crepuscolo' : 'notte',
       // Locals know their surroundings: which places and regions are where.
-      dintorni: this.directionsAt(this.playerCarpet().x, this.playerCarpet().y),
+      dintorni: this.directionsAt(this.wandererCarpet().x, this.wandererCarpet().y),
       viandanteImpugna: held ? this.itemInfo(held).name : 'niente',
       viandante: n ? { fame: Math.round(100 - n.hunger), sete: Math.round(100 - n.thirst), stanchezza: Math.round(100 - n.energy) } : undefined,
     };
@@ -6160,7 +6160,7 @@ export class Kernel {
     for (const q of this.queuedSpeech.filter((x) => x.at <= this.time)) this.speak(q.id, q.text);
     this.queuedSpeech = this.queuedSpeech.filter((x) => x.at > this.time);
     if (this.tickCount % 60 !== 0) return;
-    const pc = this.playerCarpet();
+    const pc = this.wandererCarpet();
     const people = this.ecs.query('mind', 'pos');
     let started = 0;
     for (const id of people) {
@@ -6281,7 +6281,7 @@ export class Kernel {
     const day = this.day();
     const q = dayPhase(this.time, Kernel.DAY_SECONDS);
     let changed = false;
-    const pc = this.playerCarpet();
+    const pc = this.wandererCarpet();
     for (const plot of plots) {
       if (plot.stato !== 'attiva') continue;
       for (const beat of plot.tappe) {
@@ -6319,7 +6319,7 @@ export class Kernel {
     const society = readPeople(this.files);
     if (!force && (this.plotsWoven >= 3 || society.persone.length < 3 || this.ai.name === 'offline' || this.generationHeld)) return undefined;
     this.plotsWoven++;
-    const pc = this.playerCarpet();
+    const pc = this.wandererCarpet();
     const places = this.directionsAt(pc.x, pc.y).join('\n');
     const recent = society.persone.flatMap((p) => (p.ricordi ?? []).filter((m) => m.peso >= 2).slice(-2).map((m) => `${p.nome}: ${m.testo}`)).slice(-10).join('\n');
     // The plot is checked against the people and the canon; what does not hold goes back to the
@@ -6389,7 +6389,7 @@ export class Kernel {
       return ch ? { cx: ch.cx, cy: ch.cy } : undefined;
     };
     // Seen from the studio, the wanderer is where they last stood in the world.
-    const pc = this.corona.isInterior(this.playerPos().x) || this.zone !== 'sim' ? this.lastWorld : this.playerCarpet();
+    const pc = this.corona.isInterior(this.wandererPos().x) || this.zone !== 'sim' ? this.lastWorld : this.wandererCarpet();
     return buildSituation({
       atlas: readAtlas(this.files),
       plots: readPlots(this.files),
@@ -6471,7 +6471,7 @@ export class Kernel {
 
   /** "Vai" quests are done by arriving: the place or the region you stand in. */
   private questTick(): void {
-    const here = [this.placeHere()?.name ?? '', ...this.directionsAt(this.playerCarpet().x, this.playerCarpet().y).filter((d) => d.startsWith('qui siamo'))].join(' ').toLowerCase();
+    const here = [this.placeHere()?.name ?? '', ...this.directionsAt(this.wandererCarpet().x, this.wandererCarpet().y).filter((d) => d.startsWith('qui siamo'))].join(' ').toLowerCase();
     for (const { plot, quest } of activeQuests(readPlots(this.files), this.wanderer().id)) {
       if (quest.obiettivo.tipo === 'vai' && quest.obiettivo.luogo && here.includes(normName(quest.obiettivo.luogo).split(' ')[0] ?? '~')) void this.completeQuest(plot.id);
     }
@@ -6746,19 +6746,19 @@ export class Kernel {
    * they carry is in the prompts, and who is bound to them says it in their own line.
    */
   focusOn(refs: Array<string | false | undefined>, at?: { x: number; y: number }): string[] {
-    const p = at ?? this.playerCarpet();
+    const p = at ?? this.wandererCarpet();
     const ch = this.chunkAt(p.x, p.y);
     return [...refs.filter((r): r is string => !!r), ...(ch ? [`luogo:${nodeSlug(`${ch.cx}_${ch.cy}`)}`] : [])];
   }
 
   placeHere(): Place | undefined {
-    const pc = this.playerCarpet();
+    const pc = this.wandererCarpet();
     return this.chunkAt(pc.x, pc.y)?.place;
   }
 
   /** Tooltip contents for a real-space point. */
   hoverAt(rx: number, ry: number): HoverInfo | null {
-    const p = this.playerPos();
+    const p = this.wandererPos();
     if (Math.hypot(rx - p.x, ry - p.y) < 0.5) return { kind: 'player' };
     const R = this.config.circleRadius;
     if (this.corona.isInterior(rx) || (Math.hypot(rx, ry) >= R && this.coronaRevealed())) {
@@ -6787,7 +6787,7 @@ export class Kernel {
       return { kind: 'rune', token: rune.token, doc, symbol, line: this.lineOfRune(id), source: rune.source };
     }
     for (const eid of this.ecs.query('pos', 'glyph')) {
-      if (eid === this.playerId) continue;
+      if (eid === this.wandererEntity) continue;
       const ep = this.ecs.get(eid, 'pos');
       if (Math.hypot(ep.x - cx, ep.y - cy) >= 0.6) continue;
       // Another wanderer (T44c): their name and the first line of what they say of themselves.
@@ -7047,7 +7047,7 @@ export class Kernel {
       await Promise.all([worker(), worker()]);
       const path = 'modules/core.player/manifest.json';
       const man = JSON.parse(this.repo.working[path]);
-      man.appearance = { glyph: '@', color: '#ffffff', aspetto: plan.playerPrompt };
+      man.appearance = { glyph: '@', color: '#ffffff', aspetto: plan.wandererPrompt };
       this.repo.write(path, JSON.stringify(man, null, 2) + '\n');
       this.applyFiles({ ...this.repo.working });
       this.clearChunks();
@@ -7109,7 +7109,7 @@ export class Kernel {
 
   /** What is saved of the wanderer acting now. */
   private wandererState(w: Wanderer): WandererState {
-    const at = this.corona.isInterior(this.playerPos().x) ? this.lastWorld : this.playerCarpet();
+    const at = this.corona.isInterior(this.wandererPos().x) ? this.lastWorld : this.wandererCarpet();
     const entry = this.wanderersById.get(w.id);
     return {
       ...(w.nome !== WANDERER_NAME ? { nome: w.nome } : {}),
@@ -7129,14 +7129,14 @@ export class Kernel {
   private applyWandererState(v: WandererState): void {
     if (Number.isFinite(v.pos?.x) && Number.isFinite(v.pos?.y)) {
       const c = this.carpet();
-      const p = this.playerPos();
+      const p = this.wandererPos();
       if (c && p) Object.assign(c, { ox: v.pos!.x - p.x, oy: v.pos!.y - p.y });
     }
-    if (v.inventory?.slots) this.ecs.set(this.playerId, 'inventory', v.inventory);
+    if (v.inventory?.slots) this.ecs.set(this.wandererEntity, 'inventory', v.inventory);
     if (v.needs) Object.assign(this.needs() ?? {}, v.needs, { morto: false });
     if (v.hand?.tokens) Object.assign(this.hand(), v.hand);
-    if (v.stati) this.ecs.set(this.playerId, 'stati', Object.fromEntries(Object.entries(v.stati).filter(([, x]) => x && typeof x === 'object')));
-    if (v.slots && typeof v.slots === 'object') this.ecs.set(this.playerId, 'slots', v.slots);
+    if (v.stati) this.ecs.set(this.wandererEntity, 'stati', Object.fromEntries(Object.entries(v.stati).filter(([, x]) => x && typeof x === 'object')));
+    if (v.slots && typeof v.slots === 'object') this.ecs.set(this.wandererEntity, 'slots', v.slots);
     // What the mechanics derive from the slots (defence, states) is rebuilt by their own on_slot.
     for (const p of this.uiPanels()) {
       const filled = Object.entries(this.slots()[p.panel.id] ?? {}).find(([, x]) => x);
@@ -7442,7 +7442,7 @@ export class Kernel {
     };
     k.bus.on('council', (e: FeedEntry) => this.council.say(e.from, e.kind, e.text, e.to, e.task));
     const body = k.addWanderer(wanderer);
-    if (body !== undefined) k.playerId = body;
+    if (body !== undefined) k.wandererEntity = body;
     k.council.payer = (task) => payerOf(task, wanderer);
     k.council.hasCredits = (chi) => this.hasCredits(chi);
     return k;
@@ -7479,8 +7479,8 @@ export class Kernel {
     this.archive.tick(dt);
     // Who works in the Council's log sits at their console in the Direction (T46c); looked at once a second.
     if (this.tickCount % 60 === 0) this.archive.consoles(this.working());
-    if (!this.corona.isInterior(this.playerPos().x)) this.lastWorld = { ...this.playerCarpet() };
-    if (this.zone === 'corona') this.archive.meet(this.playerPos().x, this.playerPos().y);
+    if (!this.corona.isInterior(this.wandererPos().x)) this.lastWorld = { ...this.wandererCarpet() };
+    if (this.zone === 'corona') this.archive.meet(this.wandererPos().x, this.wandererPos().y);
     this.societyTick();
     if (this.repo.backend && this.tickCount % (60 * 120) === 0) this.saveState();
     // Transcended: nothing is lost any more (needs stay full, no death).
@@ -7506,7 +7506,7 @@ export class Kernel {
       this.sculpting.pump();
     }
     this.rebuildSolids();
-    for (const w of this.wanderersById.keys()) this.as(w, () => (this.playerComp().load = totalWeight(this.inventory(), this.itemSpec) / this.carryCapacity()));
+    for (const w of this.wanderersById.keys()) this.as(w, () => (this.wandererComp().load = totalWeight(this.inventory(), this.itemSpec) / this.carryCapacity()));
     this.syncRunes();
     this.sandbox.tickBegin();
     this.runRunes();
@@ -7563,14 +7563,14 @@ export class Kernel {
    * number on the player (Lua must not iterate tables that live on the JS side: wasmoon cannot).
    */
   private paceTick(): void {
-    const stati = this.ecs.get(this.playerId, 'stati');
+    const stati = this.ecs.get(this.wandererEntity, 'stati');
     let passo = 1;
     if (stati)
       for (const k of Object.keys(stati)) {
         if (!stati[k] || typeof stati[k] !== 'object') delete stati[k];
         else passo *= Number(stati[k].velocita) || 1;
       }
-    const pl = this.ecs.get(this.playerId, 'player');
+    const pl = this.ecs.get(this.wandererEntity, 'player');
     if (pl) pl.passo = Math.max(0.2, Math.min(4, passo));
   }
 
@@ -7579,7 +7579,7 @@ export class Kernel {
     this.solidForms.clear();
     this.cellars = [];
     for (const id of this.ecs.query('body', 'pos')) {
-      if (id === this.playerId) continue;
+      if (id === this.wandererEntity) continue;
       const b = this.ecs.get(id, 'body');
       if (!b.solid) continue;
       const p = this.ecs.get(id, 'pos');
@@ -7602,7 +7602,7 @@ export class Kernel {
 
   /** The kernel never lets the core state become meaningless (NaN, missing, absurd). */
   private sanitize(): void {
-    const p = this.ecs.get(this.playerId, 'pos');
+    const p = this.ecs.get(this.wandererEntity, 'pos');
     const c = this.carpet();
     const okPos = p && Number.isFinite(p.x) && Number.isFinite(p.y);
     const okCarpet = !c || (Number.isFinite(c.ox) && Number.isFinite(c.oy));
@@ -7617,7 +7617,7 @@ export class Kernel {
       this.faults.clear('kernel:sanitize');
       return;
     }
-    if (!p) this.ecs.set(this.playerId, 'pos', { x: this.lastGood.px, y: this.lastGood.py });
+    if (!p) this.ecs.set(this.wandererEntity, 'pos', { x: this.lastGood.px, y: this.lastGood.py });
     else if (!okPos) Object.assign(p, { x: this.lastGood.px, y: this.lastGood.py });
     if (c && !okCarpet) Object.assign(c, { ox: this.lastGood.ox, oy: this.lastGood.oy });
     this.faults.raise('kernel:sanitize', 'stato del mondo non valido: il kernel ha ripristinato posizione e tappeto');
@@ -7637,12 +7637,12 @@ export class Kernel {
     const wanderers = new Set<Id>();
     for (const w of this.wanderersById.keys())
       this.as(w, () => {
-        wanderers.add(this.playerId);
-        const p = this.playerPos();
+        wanderers.add(this.wandererEntity);
+        const p = this.wandererPos();
         if (!p) return;
         if (this.corona.isInterior(p.x) || Math.hypot(p.x, p.y) >= this.config.circleRadius) delete p.z;
         else {
-          const c = this.playerCarpet();
+          const c = this.wandererCarpet();
           settle(p, c.x, c.y);
         }
       });
@@ -7654,9 +7654,9 @@ export class Kernel {
   }
 
   private updateZone(): void {
-    const p = this.playerPos();
+    const p = this.wandererPos();
     const zone = this.corona.isInterior(p.x) ? 'studio' : Math.hypot(p.x, p.y) >= this.config.circleRadius ? 'corona' : 'sim';
-    if (zone === 'sim') this.offCarpet.delete(this.playerId);
+    if (zone === 'sim') this.offCarpet.delete(this.wandererEntity);
     if (zone === this.zone) return;
     this.zone = zone;
     this.bus.emit('zone', { zone, first: zone === 'corona' && !this.exitedOnce });

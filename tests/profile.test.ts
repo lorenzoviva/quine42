@@ -119,7 +119,7 @@ describe('the profile in a game of many (T44a)', () => {
     expect(o.ok).toBe(true);
     expect(o.profilo?.nome).not.toBe('Ilaria');
     expect(o.testo).toMatch(/somiglia/);
-    expect(bruno.k.ecs.get(bruno.k.playerId, 'form')).toMatchObject({ seed: 2, tint: '#20a040' });
+    expect(bruno.k.ecs.get(bruno.k.wandererEntity, 'form')).toMatchObject({ seed: 2, tint: '#20a040' });
     run(server, [anna, bruno], 12);
     const b = avatarOf(anna, 'bruno')!;
     expect(anna.k.ecs.get(b, 'identity').name).toBe(o.profilo!.nome);
@@ -145,11 +145,11 @@ describe('the profile in a game of many (T44a)', () => {
     const k = await Kernel.boot({ files: { ...bundledFiles }, store: memoryStore(), ai: new MockAiModels() });
     const r = k.setProfile('io', { nome: 'Ilaria', seme: 2, tinta: '#3060c0' })!;
     expect(r.profilo.nome).toBe('Ilaria');
-    expect(k.ecs.get(k.playerId, 'form')).toMatchObject({ seed: 2, tint: '#3060c0' });
+    expect(k.ecs.get(k.wandererEntity, 'form')).toMatchObject({ seed: 2, tint: '#3060c0' });
     k.saveState();
     const again = await Kernel.boot({ files: { ...k.files }, store: memoryStore(), ai: new MockAiModels() });
     expect(again.wanderer().nome).toBe('Ilaria');
-    expect(again.ecs.get(again.playerId, 'form')).toMatchObject({ seed: 2, tint: '#3060c0' });
+    expect(again.ecs.get(again.wandererEntity, 'form')).toMatchObject({ seed: 2, tint: '#3060c0' });
   });
 });
 
@@ -163,7 +163,7 @@ describe('the other wanderer in the thin client (T44c)', () => {
     const all = [anna, bruno, carlo];
     run(server, all, 6);
     // Anna and Carlo side by side, a step from Bruno.
-    const at = bruno.k.playerPos();
+    const at = bruno.k.wandererPos();
     const put = (id: string, x: number, y: number) => {
       const w = k.wandererAt(id)!;
       Object.assign(k.ecs.get(w.entity, 'pos'), { x, y });

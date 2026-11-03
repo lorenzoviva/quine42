@@ -21,7 +21,7 @@ async function boot() {
 
 /** A thing of a module next to the wanderer, with its form ready. */
 async function spawn(k: Kernel, mod: string, who: string) {
-  const pc = k.playerCarpet();
+  const pc = k.wandererCarpet();
   const id = k.spawnModuleEntity(k.modules.get(mod)!, pc.x + 2, pc.y, undefined, who);
   const fc = k.ecs.get(id, 'form') as FormComp;
   await k.forms.wait(fc.model, fc.seed, fc.tint);

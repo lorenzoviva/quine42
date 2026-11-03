@@ -67,7 +67,7 @@ describe('the Council', () => {
     k.repo.write(path, 'local M = {}\nfunction M.on_spawn(id) local t = nil; return t.x end\nreturn M\n');
     k.applyFiles({ ...k.repo.working });
     k.repo.commit('agente: versione difettosa', 'agent');
-    const pc = k.playerCarpet();
+    const pc = k.wandererCarpet();
     k.spawnModuleEntity(k.modules.get('npc.fabbro')!, pc.x + 2, pc.y);
     await settle(100);
     expect(k.repo.head().message).toBe('riparazione: npc.fabbro');
@@ -120,7 +120,7 @@ describe('the Council', () => {
 
 describe('the life of people', () => {
   const person = async (k: Kernel, origin: string, dx: number) => {
-    const pc = k.playerCarpet();
+    const pc = k.wandererCarpet();
     const id = k.spawnModuleEntity(k.modules.get('npc.villager')!, pc.x + dx, pc.y, undefined, origin);
     const identity = (await k.ensureIdentity(id))!;
     return { id, name: identity.name };
@@ -148,7 +148,7 @@ describe('the life of people', () => {
     const k = await boot();
     clearArea(k);
     const a = await person(k, 'vita#b', 1);
-    const pc = k.playerCarpet();
+    const pc = k.wandererCarpet();
     // Only the bed next to them: the places' own beds may be anywhere around.
     for (const id of k.ecs.query('module')) if (k.ecs.get(id, 'module').id === 'obj.letto') k.ecs.destroy(id);
     k.spawnModuleEntity(k.modules.get('obj.letto')!, pc.x + 2.5, pc.y);

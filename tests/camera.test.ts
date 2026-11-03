@@ -41,12 +41,12 @@ describe('camera turns', () => {
   it('the wanderer walks where the screen says, whatever the turn', async () => {
     const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
     k.input.setTurn(1); // the camera is east of the wanderer: right on the screen is north
-    const before = { ...k.playerPos() };
+    const before = { ...k.wandererPos() };
     k.input.setHeld('right', true);
     for (let i = 0; i < 6; i++) k.tick(1 / 60);
     k.input.setHeld('right', false);
-    expect(k.playerComp().facing).toBe('up');
-    expect(Math.abs(k.playerPos().x - before.x)).toBeLessThan(0.01); // nothing sideways
+    expect(k.wandererComp().facing).toBe('up');
+    expect(Math.abs(k.wandererPos().x - before.x)).toBeLessThan(0.01); // nothing sideways
     k.input.setTurn(0);
   });
 
@@ -90,20 +90,20 @@ describe('camera turns', () => {
   it('the wanderer walks diagonally when angle is 45 degrees', async () => {
     const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
     k.input.setAngle(Math.PI / 4);
-    const before = { ...k.playerPos() };
+    const before = { ...k.wandererPos() };
     k.input.setHeld('up', true);
     for (let i = 0; i < 6; i++) k.tick(1 / 60);
     k.input.setHeld('up', false);
     // Walks North-West (both -x and -y)
-    expect(k.playerPos().x).toBeLessThan(before.x);
-    expect(k.playerPos().y).toBeLessThan(before.y);
+    expect(k.wandererPos().x).toBeLessThan(before.x);
+    expect(k.wandererPos().y).toBeLessThan(before.y);
   });
 
   it('zoom constraints in simulation vs god mode/corona', () => {
     const view: any = {
       distance: 15,
       godMode: false,
-      kernel: { zone: 'sim', coronaRevealed: () => false, playerPos: () => ({ x: 0, y: 0 }), config: { circleRadius: 42 } },
+      kernel: { zone: 'sim', coronaRevealed: () => false, wandererPos: () => ({ x: 0, y: 0 }), config: { circleRadius: 42 } },
       fitView: () => {},
       canFreeOrbit: Renderer.prototype.canFreeOrbit,
       zoom: Renderer.prototype.zoom,

@@ -12,7 +12,7 @@ const boot = () => Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: 
 
 /** Puts the wanderer in the studio at a real-space point. */
 function stand(k: Kernel, x: number, y: number): void {
-  Object.assign(k.playerPos(), { x, y });
+  Object.assign(k.wandererPos(), { x, y });
   k.zone = 'studio';
 }
 

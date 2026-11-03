@@ -1,7 +1,7 @@
 # Il censimento dei sinonimi
 
 Generato da `node tools/glossario/glossario.mjs` da [`glossario.md`](glossario.md): non si scrive a mano. Per ogni sinonimo
-da non usare, le occorrenze e tra parentesi i file. Conta le **parole**: `playerPos` conta come `player`, il plurale inglese è compreso.
+da non usare, le occorrenze e tra parentesi i file. Conta le **parole**: `playerFiles` conta come `player`, il plurale inglese è compreso.
 Non distingue i significati: `player` è sinonimo di «Viandante» solo quando indica il personaggio, e il conto comprende il giocatore;
 gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero vale la tabella «Le rinomine» del glossario.
 
@@ -13,9 +13,9 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Luogo | `chunk` | 428 (37) | 0 (0) | 106 (26) | 0 (0) |
 | Piano del luogo | `mappa` | 2 (2) | 0 (0) | 13 (11) | 0 (0) |
 | Piano del luogo | `piano` | 7 (4) | 2 (2) | 144 (38) | 0 (0) |
-| Casella | `cell` | 664 (39) | 0 (0) | 7 (4) | 25 (2) |
+| Casella | `cell` | 661 (39) | 0 (0) | 7 (4) | 25 (2) |
 | Casella | `cella` | 9 (4) | 6 (2) | 8 (6) | 0 (0) |
-| Terreno | `tile` | 573 (42) | 3 (2) | 31 (17) | 14 (2) |
+| Terreno | `tile` | 576 (42) | 3 (2) | 31 (17) | 14 (2) |
 | Ambiente | `layout` | 266 (28) | 1 (1) | 33 (13) | 2 (2) |
 | Ambiente | `bioma` | 0 (0) | 0 (0) | 1 (1) | 0 (0) |
 | Lotto | `building` | 261 (14) | 0 (0) | 5 (4) | 0 (0) |
@@ -26,17 +26,17 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Edificio | `edificio` | 21 (8) | 1 (1) | 33 (16) | 0 (0) |
 | Entità | `thing` | 282 (44) | 0 (0) | 5 (5) | 0 (0) |
 | Entità | `cosa` | 119 (21) | 17 (6) | 106 (51) | 5 (2) |
-| Modulo | `mod` | 47 (3) | 0 (0) | 0 (0) | 0 (0) |
+| Modulo | `mod` | 32 (3) | 0 (0) | 0 (0) | 0 (0) |
 | Struttura | `edificio` | 21 (8) | 1 (1) | 33 (16) | 0 (0) |
 | Struttura | `building` | 261 (14) | 0 (0) | 5 (4) | 0 (0) |
 | Modello | `modello` | 94 (28) | 5 (2) | 216 (55) | 15 (4) |
 | Programma | `codice` | 72 (16) | 17 (7) | 110 (49) | 4 (1) |
 | Programma | `xml` | 198 (18) | 2 (1) | 34 (14) | 6 (2) |
 | Taglia | `size` | 632 (68) | 1 (1) | 19 (11) | 138 (11) |
-| Viandante | `player` | 542 (52) | 2 (1) | 37 (17) | 5 (2) |
+| Viandante | `player` | 325 (49) | 2 (1) | 36 (17) | 5 (2) |
 | Viandante | `giocatore` | 32 (13) | 3 (3) | 134 (45) | 0 (0) |
 | Viandante | `hero` | 0 (0) | 0 (0) | 9 (3) | 62 (5) |
-| Giocatore | `player` | 542 (52) | 2 (1) | 37 (17) | 5 (2) |
+| Giocatore | `player` | 325 (49) | 2 (1) | 36 (17) | 5 (2) |
 | Giocatore | `utente` | 0 (0) | 0 (0) | 8 (6) | 0 (0) |
 | Master | `dio` | 1 (1) | 1 (1) | 3 (2) | 0 (0) |
 | Master | `admin` | 8 (4) | 0 (0) | 6 (4) | 0 (0) |

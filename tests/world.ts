@@ -39,10 +39,10 @@ export function clearArea(k: Kernel, width = 24) {
         let ok = true;
         for (let i = 0; i <= width && ok; i++) ok = free(col + i, row);
         if (!ok) continue;
-        const p = k.playerPos();
+        const p = k.wandererPos();
         p.x = col + 0.5 - ox;
         p.y = row + 0.5 - oy;
-        k.playerComp().facing = 'right';
+        k.wandererComp().facing = 'right';
         k.carpet()!.active = false;
         k.tick(DT);
         k.carpet()!.active = true;
@@ -60,7 +60,7 @@ export const carried = (k: Kernel) =>
   k.inventory().slots.reduce((n, s) => n + (!s ? 0 : k.content.get(s.item)?.container ? (s.inv?.slots.filter(Boolean).length ?? 0) : 1), 0);
 
 export const spawnInFront = (k: Kernel, id: string, dist = 0.9) => {
-  const pc = k.playerCarpet();
-  k.playerComp().facing = 'right';
+  const pc = k.wandererCarpet();
+  k.wandererComp().facing = 'right';
   return k.spawnModuleEntity(k.modules.get(id)!, pc.x + dist, pc.y);
 };

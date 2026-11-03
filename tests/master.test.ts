@@ -50,10 +50,10 @@ describe('the master in god mode (T42a)', () => {
   it('nothing a player does touches the master’s body; words arrive, and the master acts freely', async () => {
     const k = await many();
     const anna = k.addWanderer('anna', 'Anna')!;
-    const io = k.as('io', () => k.playerId);
+    const io = k.as('io', () => k.wandererEntity);
     const pos = { ...k.ecs.get(io, 'pos')! };
     // Anna right under the master (in world coordinates, the same as the master's: their carpets are both at rest).
-    k.as('anna', () => Object.assign(k.playerPos(), { x: pos.x, y: pos.y + 1 }));
+    k.as('anna', () => Object.assign(k.wandererPos(), { x: pos.x, y: pos.y + 1 }));
     const said = k.as('anna', () => k.applyEffects([{ tipo: 'spingi', forza: 3 } as any, { tipo: 'distruggi' } as any, { tipo: 'messaggio', testo: 'ehi' } as any], io));
     expect(said).toEqual(['ehi']);
     expect(k.ecs.alive.has(io)).toBe(true);
@@ -83,10 +83,10 @@ describe('the master in god mode (T42a)', () => {
     expect(k.inWorld('io')).toBe(false);
     expect(anna.others.has('io')).toBe(false);
     // Out on the campus, with Anna standing where the master's carpet would put them: still not seen.
-    k.as('io', () => Object.assign(k.playerPos(), k.corona.building('concilio')!.door));
+    k.as('io', () => Object.assign(k.wandererPos(), k.corona.building('concilio')!.door));
     const there = k.wandererAt('io')!;
     k.as('anna', () => {
-      const p = k.playerPos();
+      const p = k.wandererPos();
       Object.assign(k.carpet()!, { ox: there.x + 1 - p.x, oy: there.y - p.y });
     });
     for (let i = 0; i < 12; i++) server.tick(DT);
@@ -94,10 +94,10 @@ describe('the master in god mode (T42a)', () => {
     expect(Math.hypot(k.wandererAt('anna')!.x - k.wandererAt('io')!.x, k.wandererAt('anna')!.y - k.wandererAt('io')!.y)).toBeLessThan(8);
     expect(anna.others.has('io')).toBe(false);
     // Back in the circle, on the carpet: seen again.
-    k.as('io', () => Object.assign(k.playerPos(), { x: 0, y: 0 }));
+    k.as('io', () => Object.assign(k.wandererPos(), { x: 0, y: 0 }));
     const home = k.wandererAt('io')!;
     k.as('anna', () => {
-      const p = k.playerPos();
+      const p = k.wandererPos();
       Object.assign(k.carpet()!, { ox: home.x + 1 - p.x, oy: home.y - p.y });
     });
     for (let i = 0; i < 12; i++) server.tick(DT);

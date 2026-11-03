@@ -48,8 +48,8 @@ async function scene() {
   // Where the wanderer stands, in carpet space (the carpet is stopped: its offset stays).
   const stand = (x: number, y: number) => {
     const { ox, oy } = k.offset();
-    Object.assign(k.playerPos(), { x: x - ox, y: y - oy });
-    k.playerComp().facing = 'right';
+    Object.assign(k.wandererPos(), { x: x - ox, y: y - oy });
+    k.wandererComp().facing = 'right';
   };
   const run = (s: number) => {
     for (let i = 0; i < s * 60; i++) k.tick(1 / 60);
@@ -78,14 +78,14 @@ describe('the jump', () => {
       highest = Math.max(highest, (k.jumping()?.y ?? 0) - k.groundAt(x0, y0));
     }
     expect(k.jumping()).toBeUndefined();
-    const at = k.playerCarpet();
+    const at = k.wandererCarpet();
     expect(at.x).toBeGreaterThan(x0 + 2.5);
     expect(at.y).toBeCloseTo(y0, 5);
     expect(k.free(at.x, at.y, r)).toBe(true);
     // The arc goes over the crate (0.8 tiles).
     expect(highest).toBeGreaterThan(0.8);
     run(0.2);
-    expect(k.playerCarpet().x).toBeCloseTo(at.x, 5);
+    expect(k.wandererCarpet().x).toBeCloseTo(at.x, 5);
   }, 30_000);
 
   it('does not go over a wall: a jump on the spot', async () => {
@@ -97,7 +97,7 @@ describe('the jump', () => {
     stand(x0 + 0.5, y0);
     expect(k.jump()).toBe(true);
     for (let i = 0; i < 60; i++) k.tick(1 / 60);
-    expect(k.playerCarpet().x).toBeCloseTo(x0 + 0.5, 5);
+    expect(k.wandererCarpet().x).toBeCloseTo(x0 + 0.5, 5);
   }, 30_000);
 
   it('jumps a narrow stream, not into deep water', async () => {
@@ -109,13 +109,13 @@ describe('the jump', () => {
     stand(x0 + 0.5, y0);
     k.jump();
     for (let i = 0; i < 60; i++) k.tick(1 / 60);
-    expect(k.playerCarpet().x).toBeGreaterThan(x0 + 2.5);
+    expect(k.wandererCarpet().x).toBeGreaterThan(x0 + 2.5);
     // A wide water: nowhere to land within reach.
     stand(x0 + 0.5, y0);
     for (let c = 2; c <= 5; c++) expect(k.setTile(col + c, row, water)).toBe(true);
     k.jump();
     for (let i = 0; i < 60; i++) k.tick(1 / 60);
-    expect(k.playerCarpet().x).toBeCloseTo(x0 + 0.5, 5);
+    expect(k.wandererCarpet().x).toBeCloseTo(x0 + 0.5, 5);
   }, 30_000);
 
   it('still walks up a rise of a level, and does nothing in the corona', async () => {
@@ -131,7 +131,7 @@ describe('the jump', () => {
       }
     expect(found).toBe(true);
     // In the corona Space is what E is: no jump.
-    Object.assign(k.playerPos(), { x: k.config.circleRadius + 6, y: 0 });
+    Object.assign(k.wandererPos(), { x: k.config.circleRadius + 6, y: 0 });
     k.tick(1 / 60);
     expect(k.zone).not.toBe('sim');
     expect(k.jump()).toBe(false);
