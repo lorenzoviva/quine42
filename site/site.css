@@ -495,6 +495,42 @@ img, svg {
   gap: 20px;
 }
 
+/* --- Universes still to come, under the landing's grid --- */
+.coming-soon {
+  margin-top: 32px;
+}
+
+.coming-soon-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.coming-soon-head h3 {
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.coming-soon-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px 24px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-arcade);
+  font-size: 0.72rem;
+  line-height: 1.6;
+  color: var(--comic-paper-dim);
+}
+
+.coming-soon-list b {
+  display: block;
+  color: var(--neon-yellow);
+}
+
 /* --- Forms & Inputs --- */
 .form-group {
   margin-bottom: 20px;
