@@ -11,7 +11,7 @@ describe('items, containers, actions, needs', () => {
   });
 
   it('items on the ground are picked up, stacked and eaten', async () => {
-    const pc = k.playerCarpet();
+    const pc = k.wandererCarpet();
     k.spawnItem('item.mela-rossa', pc.x + 0.5, pc.y);
     k.spawnItem('item.mela-rossa', pc.x + 0.6, pc.y);
     await k.interact();
@@ -198,7 +198,7 @@ describe('free actions and effects', () => {
     expect(countItem(inv, 'item.secchio')).toBe(1);
     expect(k.needs()!.thirst).toBe(60);
     // On the ground, the same item offers the learned action in its menu.
-    const pc = k.playerCarpet();
+    const pc = k.wandererCarpet();
     const dropped = k.spawnItem('item.secchio', pc.x + 0.9, pc.y);
     expect(k.actionsFor(dropped).some((a) => a.label === learned.label)).toBe(true);
     // What is impossible stays impossible, without asking again.
@@ -239,7 +239,7 @@ describe('free actions and effects', () => {
     run(k, 9);
     expect(fires().length).toBe(0);
 
-    const pc = k.playerCarpet();
+    const pc = k.wandererCarpet();
     const col = Math.floor(pc.x);
     const row = Math.floor(pc.y);
     const target = spawnInFront(k, 'object.crate', 1);

@@ -102,7 +102,7 @@ export class MockAiModels implements AiModels {
       case 'craft.judge':
         return { possibile: false, spiegazione: 'Le provi in ogni modo, ma non succede nulla.' };
       case 'npc.reply':
-        return this.reply(d.npc as NpcContext, String(d.playerText ?? ''));
+        return this.reply(d.npc as NpcContext, String(d.wandererText ?? ''));
       case 'text.read':
         return { testo: this.sign(d.facts ?? {}, d.what?.name ?? '') };
       case 'genesis.bible':

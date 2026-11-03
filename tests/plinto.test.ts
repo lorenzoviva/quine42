@@ -120,7 +120,7 @@ describe('the plinto in the piazza of the Galleria (T48b)', () => {
 
     // Deactivate carpet so wanderer is not pulled back to center
     k.carpet()!.active = false;
-    Object.assign(k.playerPos(), { x: 46, y: 0 });
+    Object.assign(k.wandererPos(), { x: 46, y: 0 });
     k.tick(0.016);
 
     expect(k.zone).toBe('corona');

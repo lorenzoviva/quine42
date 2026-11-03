@@ -200,7 +200,7 @@ export class Overlay {
 
   /** For the walkability map: which cells near the wanderer block. */
   walkability(k: Kernel, r = 12): void {
-    const pc = k.playerCarpet();
+    const pc = k.wandererCarpet();
     const { ox, oy } = k.offset();
     for (let row = Math.floor(pc.y) - r; row <= pc.y + r; row++)
       for (let col = Math.floor(pc.x) - r; col <= pc.x + r; col++) {

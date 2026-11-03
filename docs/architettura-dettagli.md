@@ -549,7 +549,7 @@ Il kernel è in console come `window.quine` (o `window.rune`) in singola e per i
   const k = window.quine;
   k.carpet().active = false;
   const f = k.corona.building('persone').floors[0];        // id dell'edificio (vedi ROOMS in corona.ts), piano
-  Object.assign(k.playerPos(), { x: f.ox + 12.5, y: f.oy + 10.5 }); // casella locale nella stanza 24 × 15
+  Object.assign(k.wandererPos(), { x: f.ox + 12.5, y: f.oy + 10.5 }); // casella locale nella stanza 24 × 15
   ```
   La zona (`studio`, `corona`, `sim`) e la stanza disegnata seguono da sole al tick dopo; nessuna porta né `E`. Le caselle dei
   dispositivi sono le costanti di `corona.ts` (`SHOWCASE_AT`, `GRAPH_AT`, `SITUATION_AT`, `WALL_AT`, `CONSOLES_AT`, `BENCH_AT`…,

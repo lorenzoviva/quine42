@@ -41,7 +41,7 @@ async function bootWith(ai: Record<string, unknown>, game: Record<string, unknow
 }
 
 async function person(k: Kernel, origin: string, dx: number) {
-  const pc = k.playerCarpet();
+  const pc = k.wandererCarpet();
   const id = k.spawnModuleEntity(k.modules.get('npc.villager')!, pc.x + dx, pc.y, undefined, origin);
   const identity = (await k.ensureIdentity(id))!;
   return { id, name: identity.name };

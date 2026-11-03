@@ -96,7 +96,7 @@ export class Hud {
     }
 
     if (k.zone === 'corona') {
-      const p = k.playerPos();
+      const p = k.wandererPos();
       const cell = k.corona.at(Math.floor(p.x), Math.floor(p.y));
       this.zone.hidden = false;
       this.zone.textContent = cell?.path ? `§ ${cell.path}${cell.line ? ` : riga ${cell.line}` : ''} — E per riscrivere` : 'Corona — cammina sul codice';

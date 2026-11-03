@@ -314,7 +314,7 @@ describe('V-010 il master e i crediti', () => {
     const k = await many();
     k.addWanderer('anna', 'Anna');
     k.giveCredits('anna', 3);
-    const entity = k.wanderers().find((w) => w.id === 'anna') && k.as('anna', () => k.playerId);
+    const entity = k.wanderers().find((w) => w.id === 'anna') && k.as('anna', () => k.wandererEntity);
     // Everything a module can name from Lua, tried: the only ways it has of writing are the components and the Host's.
     const logic = `
       local tried = {}

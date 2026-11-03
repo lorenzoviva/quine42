@@ -34,10 +34,10 @@ function clearArea(k: Kernel, width = 24) {
         let ok = true;
         for (let i = 0; i <= width && ok; i++) ok = free(col + i, row);
         if (!ok) continue;
-        const p = k.playerPos();
+        const p = k.wandererPos();
         p.x = col + 0.5 - ox;
         p.y = row + 0.5 - oy;
-        k.playerComp().facing = 'right';
+        k.wandererComp().facing = 'right';
         return;
       }
   throw new Error('nessuno spazio libero trovato');
@@ -54,7 +54,7 @@ async function bootWith(partita: Record<string, unknown>) {
 const many = () => bootWith({ modalita: 'multigiocatore', morte: 3 });
 
 /** How far a wanderer is from the centre of their circle. */
-const away = (k: Kernel, id: string) => k.as(id, () => Math.hypot(k.playerPos().x, k.playerPos().y));
+const away = (k: Kernel, id: string) => k.as(id, () => Math.hypot(k.wandererPos().x, k.wandererPos().y));
 
 /** A wanderer writes a phrase on the carpet in front of them. */
 function write(k: Kernel, id: string, tokens: string[]) {
@@ -126,16 +126,16 @@ describe('runes and bindings by role (T37)', () => {
     expect(countItem(k.inventory(), `rune:${COUNCIL_RUNE}`)).toBe(1);
     expect(k.as('bea', () => countItem(k.inventory(), `rune:${COUNCIL_RUNE}`))).toBe(0);
     expect(k.as('bea', () => k.councilRune())).toBe(false);
-    expect(k.as('bea', () => k.corona.isInterior(k.playerPos().x))).toBe(false);
+    expect(k.as('bea', () => k.corona.isInterior(k.wandererPos().x))).toBe(false);
 
     expect(k.composeRune(COUNCIL_RUNE)).toBe(true);
     expect(await k.castSpell()).toBe(true);
-    const p = k.playerPos();
+    const p = k.wandererPos();
     expect(k.zone).toBe('studio');
     expect(k.corona.roomAt(p.x, p.y)?.building.id).toBe('concilio');
     // The carpet lets them go: a second later they are still in the hall, with the rune.
     run(k, 1);
-    expect(k.corona.roomAt(k.playerPos().x, k.playerPos().y)?.building.id).toBe('concilio');
+    expect(k.corona.roomAt(k.wandererPos().x, k.wandererPos().y)?.building.id).toBe('concilio');
     expect(countItem(k.inventory(), `rune:${COUNCIL_RUNE}`)).toBe(1);
     expect(k.hand().tokens).not.toContain(COUNCIL_RUNE);
   });

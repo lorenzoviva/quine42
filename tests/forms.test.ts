@@ -50,7 +50,7 @@ describe('forms in the kernel', () => {
     const f = k.ecs.get(bread, 'form') as FormComp;
     expect(f.model).toBe('oggetto');
     expect(f.tint).toBe(k.itemInfo(k.ecs.get(bread, 'pickup').item).color);
-    expect((k.ecs.get(k.playerId, 'form') as FormComp).model).toBe('viandante');
+    expect((k.ecs.get(k.wandererEntity, 'form') as FormComp).model).toBe('viandante');
     // The same person in another place is another seed of the same program; a few seeds per kind.
     const seeds = new Set(Array.from({ length: 30 }, (_, i) => k.forms.seedFor('persona', `p${i}`)));
     expect(seeds.size).toBeGreaterThan(1);

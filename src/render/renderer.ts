@@ -139,7 +139,7 @@ export class Renderer {
     if (k.watching) return true;
     if (k.zone === 'corona' || k.zone === 'studio') return true;
     if (k.coronaRevealed()) return true;
-    const p = k.playerPos();
+    const p = k.wandererPos();
     if (p && Math.hypot(p.x, p.y) >= k.config.circleRadius) return true;
     return false;
   }
@@ -209,7 +209,7 @@ export class Renderer {
   toReal(sx: number, sy: number): { x: number; y: number } {
     this.ray.setFromCamera(new THREE.Vector2((sx / this.w) * 2 - 1, -(sy / this.h) * 2 + 1), this.camera);
     const hit = new THREE.Vector3();
-    const p = this.kernel.watched() ? { x: 0, y: 0 } : this.kernel.playerPos();
+    const p = this.kernel.watched() ? { x: 0, y: 0 } : this.kernel.wandererPos();
     this.ground.constant = -this.groundReal(p.x, p.y);
     for (let i = 0; i < 4; i++) {
       if (!this.ray.ray.intersectPlane(this.ground, hit)) return { ...p };
@@ -224,7 +224,7 @@ export class Renderer {
     const k = this.kernel;
     this.t += dt;
     U.time.value = this.t;
-    const p = k.playerPos();
+    const p = k.wandererPos();
     // The master following a player (T42c): the simulation around them, the corona and the master's wanderer hidden.
     const watch = k.watched();
     const studio = !watch && k.zone === 'studio' ? k.corona.roomAt(p.x, p.y) : undefined;
@@ -247,7 +247,7 @@ export class Renderer {
     if (!interior) {
       this.syncChunks();
       // Inside a structure what is above the floor one is on is cut away, so the wanderer is seen (T53b).
-      const pc = watch ?? { ...k.playerCarpet(), z: k.playerPos().z };
+      const pc = watch ?? { ...k.wandererCarpet(), z: k.wandererPos().z };
       const inside = k.structureAt(pc.x, pc.y);
       CUT.constant = inside !== undefined ? 1.15 + k.floorAt(pc.x, pc.y, pc.z) : 1e9;
       this.things.update(dt, this.t, inside);
@@ -353,7 +353,7 @@ export class Renderer {
       if (this.showWalk) o.walkability(k);
       for (const [id, b] of k.bubbles) {
         // The wanderer is in real space, the rest on the carpet.
-        const p = id === k.playerId ? { ...k.playerCarpet(), z: k.playerPos().z } : k.ecs.get(id, 'pos');
+        const p = id === k.wandererEntity ? { ...k.wandererCarpet(), z: k.wandererPos().z } : k.ecs.get(id, 'pos');
         if (p) o.bubble(p.x - ox, k.floorAt(p.x, p.y, p.z) + 1.9, p.y - oy, b.text);
       }
       for (const id of k.ecs.query('attivita', 'pos')) {

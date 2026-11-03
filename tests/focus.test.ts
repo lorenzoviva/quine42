@@ -129,7 +129,7 @@ describe('the context of the agents from the graph (T13)', () => {
       await new Promise((r) => setTimeout(r, 25));
       if ([...k.chunks.values()].every((ch) => ch.stage !== 'draft')) break;
     }
-    const p = k.playerCarpet();
+    const p = k.wandererCarpet();
     const id = k.spawnModuleEntity(k.modules.get('npc.villager')!, p.x + 1, p.y);
     await k.talk(id, 'Buongiorno!');
     const name = k.ecs.get(id, 'identity')?.name as string;

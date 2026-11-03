@@ -79,7 +79,7 @@ const REPLY_SCHEMA: Schema = {
   required: ['dice', 'azione', 'umore'],
 };
 
-export async function npcReply(c: Council, npc: NpcContext, playerText: string, focus?: string[], by: Interpreter = NARRATOR_PLAYS): Promise<NpcReply> {
+export async function npcReply(c: Council, npc: NpcContext, wandererText: string, focus?: string[], by: Interpreter = NARRATOR_PLAYS): Promise<NpcReply> {
   const named = npc.wanderer && npc.wanderer !== 'Viandante' ? npc.wanderer : '';
   const history = npc.history.slice(-10).map((t) => `${t.who === 'giocatore' ? named || 'Viandante' : npc.name}: ${t.text}`).join('\n');
   const prompt = [
@@ -97,13 +97,13 @@ ${npc.memories}` : '',
 ${npc.secrets}` : '',
     `Fatti che percepisci: ${JSON.stringify(npc.facts)}`,
     history ? `Conversazione finora:\n${history}` : 'Il viandante ti si avvicina per la prima volta.',
-    `Il viandante dice: «${playerText}»`,
+    `Il viandante dice: «${wandererText}»`,
     `Rispondi in "dice" (1-3 frasi, italiano, stile del personaggio). Scegli "azione": segui (lo accompagni), resta (ti fermi), vaga (riprendi a girovagare), dai (gli cedi una cosa che porti: metti il nome esatto in "oggetto"), missione (gli affidi la richiesta che hai per lui, se ne hai una), nessuna. Non inventare oggetti che non porti. In "ricordo" ciò che ricorderai. I sentimenti crescono piano: "legame" solo se il rapporto cambia davvero. Sei una persona del tuo mondo: non sai nulla di giochi, codice, computer o simulazioni (se il viandante ne parla, non capisci o pensi a stranezze del tuo mondo).`,
   ]
     .filter(Boolean)
     .join('\n\n');
   const r = await c.ask<{ dice: string; azione: string; oggetto?: string; umore?: string; oggetti_citati?: string[]; ricordo?: string; importanza?: number; legame?: string }>(by.agent, 'npc.reply', prompt, REPLY_SCHEMA, {
-    data: { npc, playerText },
+    data: { npc, wandererText },
     temperature: 0.9,
     focus,
     chi: npc.chi,

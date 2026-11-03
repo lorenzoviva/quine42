@@ -32,10 +32,10 @@ function clearArea(k: Kernel) {
         let ok = true;
         for (let i = 0; i <= 8 && ok; i++) ok = free(col + i, row);
         if (!ok) continue;
-        const p = k.playerPos();
+        const p = k.wandererPos();
         p.x = col + 0.5 - ox;
         p.y = row + 0.5 - oy;
-        k.playerComp().facing = 'right';
+        k.wandererComp().facing = 'right';
         k.carpet()!.active = false;
         k.tick(DT);
         k.carpet()!.active = true;

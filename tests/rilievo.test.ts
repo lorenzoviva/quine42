@@ -139,8 +139,8 @@ describe('the kernel’s rilievo effect (T57c)', () => {
     // Position player facing east on a known flat area
     const { ox, oy } = k.offset();
     const px = 5, py = 5;
-    Object.assign(k.playerPos(), { x: px - ox, y: py - oy });
-    k.playerComp().facing = 'right';
+    Object.assign(k.wandererPos(), { x: px - ox, y: py - oy });
+    k.wandererComp().facing = 'right';
     const [dx, dy] = (k as any).facingDelta();
     const targetCol = Math.floor(px + dx * 1.5);
     const targetRow = Math.floor(py + dy * 1.5);

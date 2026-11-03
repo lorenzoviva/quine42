@@ -30,7 +30,7 @@ const bootWithRules = (rules: Rule[]) => {
 };
 
 function stand(k: Kernel, x: number, y: number): void {
-  Object.assign(k.playerPos(), { x, y });
+  Object.assign(k.wandererPos(), { x, y });
   k.zone = 'studio';
 }
 

@@ -233,17 +233,17 @@ export class CoronaView {
     const k = this.kernel;
     if (revealed && !interior) for (const b of k.corona.buildings) o.label(b.door.x + 0.5, 2.1, b.door.y + 0.5, b.floors.length > 1 ? `${b.name} (${b.floors.length} piani)` : b.name, b.color, 12, true);
     for (const a of k.archive.avatars.values()) {
-      if (Math.hypot(a.x - k.playerPos().x, a.y - k.playerPos().y) > distance * 2) continue;
+      if (Math.hypot(a.x - k.wandererPos().x, a.y - k.wandererPos().y) > distance * 2) continue;
       o.label(a.x, 1.45, a.y, `${a.sigil} ${a.name}`, a.color, 11);
       if (a.say) o.bubble(a.x, 1.75, a.y, a.say, true);
     }
     if (!studio) return;
-    const near = k.corona.itemNear(k.playerPos().x, k.playerPos().y);
+    const near = k.corona.itemNear(k.wandererPos().x, k.wandererPos().y);
     const recent = k.recentChanges();
     const pulse = 0.5 + 0.5 * Math.sin(t * 4);
     for (const it of studio.floor.items) if (it.path && recent.has(it.path)) o.cell(it.x, it.y, `rgba(255, 220, 120, ${0.4 + 0.4 * pulse})`, `rgba(255, 220, 120, ${0.1 + 0.15 * pulse})`, 0.4);
     if (near) {
-      const c = cellNear(near, k.playerPos().x, k.playerPos().y);
+      const c = cellNear(near, k.wandererPos().x, k.wandererPos().y);
       o.cell(c.x, c.y, '#ffcf5c', undefined, 0.42);
     }
     const fl = studio.floor;

@@ -18,6 +18,6 @@ Segui il «Protocollo delle sessioni» di `AGENTS.md`: all'inizio pianifica nel 
 ciò che è rimasto in `docs/userchats/to-do.md` e toglilo da lì; fai un solo task; alla fine dai il prompt per la
 sessione successiva.
 
-- **Convalida nel browser**: segui `docs/architettura-dettagli.md#convalida-browser`. In breve: non serve camminare né passare dalle porte; dalla console della pagina (lo strumento che esegue JavaScript nella scheda) `window.quine.carpet().active = false` e poi `Object.assign(window.quine.playerPos(), { x, y })` porta il viandante in qualunque punto, anche dentro una stanza della corona (`corona.building(id).floors[0]`: `ox`, `oy`); `await window.quine.interact()` vale `E`. Le posizioni non tornano indietro: era il tappeto a riportarle al centro, non `sanitize()`.
+- **Convalida nel browser**: segui `docs/architettura-dettagli.md#convalida-browser`. In breve: non serve camminare né passare dalle porte; dalla console della pagina (lo strumento che esegue JavaScript nella scheda) `window.quine.carpet().active = false` e poi `Object.assign(window.quine.wandererPos(), { x, y })` porta il viandante in qualunque punto, anche dentro una stanza della corona (`corona.building(id).floors[0]`: `ox`, `oy`); `await window.quine.interact()` vale `E`. Le posizioni non tornano indietro: era il tappeto a riportarle al centro, non `sanitize()`.
 
 Se il tuo client non risolve l'import `@./AGENTS.md`, apri e leggi `AGENTS.md` manualmente.

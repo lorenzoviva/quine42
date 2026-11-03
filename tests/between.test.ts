@@ -41,7 +41,7 @@ function run(server: SessionServer, clients: ThinClient[], frames: number) {
 /** Puts a wanderer of the session somewhere in the world (their carpet under them). */
 function put(k: Kernel, id: string, to: { x: number; y: number }) {
   k.as(id, () => {
-    const p = k.playerPos();
+    const p = k.wandererPos();
     Object.assign(k.carpet()!, { ox: to.x - p.x, oy: to.y - p.y });
   });
 }
@@ -99,7 +99,7 @@ describe('words and gifts between wanderers (T43a)', () => {
     expect(heard).toEqual([{ id: avatarOf(bruno, 'anna'), name: 'Anna', text: words }]);
     // The bubble: above Anna for Bruno, above herself for Anna; Carlo is too far to see her.
     expect(bruno.k.bubbles.get(avatarOf(bruno, 'anna')!)?.text).toBe(words);
-    expect(anna.k.bubbles.get(anna.k.playerId)?.text).toBe(words);
+    expect(anna.k.bubbles.get(anna.k.wandererEntity)?.text).toBe(words);
     expect(carlo.session.others.has('anna')).toBe(false);
     expect(carlo.session.notices).toEqual([]);
     // Words to someone too far do not reach them.
@@ -284,7 +284,7 @@ describe('death and reconnection among many (T43c)', () => {
     expect(calls.find((c) => c.task === 'player.death')).toMatchObject({ chi: 'anna' });
     // Punishment 3 (dura): back at the square (0, 0), nothing left of what she carried or her states, fresh needs.
     expect(k.wandererAt('anna')).toMatchObject({ x: 0, y: 0 });
-    expect(anna.k.playerCarpet()).toMatchObject({ x: 0, y: 0 });
+    expect(anna.k.wandererCarpet()).toMatchObject({ x: 0, y: 0 });
     expect(countItem(anna.k.inventory(), item)).toBe(0);
     expect(anna.k.hand().tokens).toEqual([]);
     expect(anna.k.states()).toEqual({});
@@ -303,7 +303,7 @@ describe('death and reconnection among many (T43c)', () => {
     run(mild.server, mild.all, 8);
     thirst(mild.k, 'anna');
     await tickUntil(mild.server, mild.all, () => mild.anna.session.notices.some((n) => n.tipo === 'morte'));
-    expect(mild.anna.k.playerCarpet()).toMatchObject({ x: 6.5, y: -3.5 });
+    expect(mild.anna.k.wandererCarpet()).toMatchObject({ x: 6.5, y: -3.5 });
     expect(mild.anna.session.notices.find((n) => n.tipo === 'morte')).toMatchObject({ dove: 'qui', perso: [] });
     expect(countItem(mild.anna.k.inventory(), item)).toBe(2);
     expect(mild.anna.k.needs()!.health).toBeGreaterThan(50);
@@ -336,7 +336,7 @@ describe('death and reconnection among many (T43c)', () => {
     const back = await thin(server, 'anna', 'Anna');
     run(server, [back, bruno, carlo], 8);
     expect(k.wandererAt('anna')).toMatchObject({ x: 6.5, y: -2.5 });
-    expect(back.k.playerCarpet()).toMatchObject({ x: 6.5, y: -2.5 });
+    expect(back.k.wandererCarpet()).toMatchObject({ x: 6.5, y: -2.5 });
     expect(countItem(back.k.inventory(), item)).toBe(2);
     expect(countItem(back.k.inventory(), 'rune:luce')).toBe(1);
     expect(back.k.hand().tokens).toEqual(['luce']);

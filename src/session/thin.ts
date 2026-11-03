@@ -82,9 +82,9 @@ export class ThinClient {
       this.putMe(s.me.x, s.me.y);
       this.lastStep = { x: s.me.x, y: s.me.y, t: 0 };
     }
-    const pl = k.playerComp();
+    const pl = k.wandererComp();
     if (pl && s.me) pl.facing = s.me.facing;
-    if (s.forma) k.ecs.set(k.playerId, 'form', { ...k.ecs.get(k.playerId, 'form'), ...s.forma });
+    if (s.forma) k.ecs.set(k.wandererEntity, 'form', { ...k.ecs.get(k.wandererEntity, 'form'), ...s.forma });
     this.state();
     this.told = [...(s.stato.hand?.tokens ?? [])];
     this.heard(s.feed);
@@ -102,7 +102,7 @@ export class ThinClient {
    */
   async setProfile(p: Partial<Profile>): Promise<Outcome> {
     const o = await this.session.act({ t: 'profilo', profilo: p });
-    if (o.forma) this.k.ecs.set(this.k.playerId, 'form', { ...this.k.ecs.get(this.k.playerId, 'form'), ...o.forma });
+    if (o.forma) this.k.ecs.set(this.k.wandererEntity, 'form', { ...this.k.ecs.get(this.k.wandererEntity, 'form'), ...o.forma });
     return o;
   }
 
@@ -127,7 +127,7 @@ export class ThinClient {
         p.y += (to.y - p.y) * f;
       }
     }
-    const at = k.playerCarpet();
+    const at = k.wandererCarpet();
     if (this.clock - this.lastStep.t >= STEP_EVERY && !(Math.hypot(at.x - this.lastStep.x, at.y - this.lastStep.y) <= 0.005)) {
       this.lastStep = { ...at, t: this.clock };
       this.session.move(at.x, at.y);
@@ -265,13 +265,13 @@ export class ThinClient {
   /** The wanderer is here in the world: on their circle where they are, their carpet under them. */
   private putMe(x: number, y: number): void {
     const c = this.k.carpet();
-    const p = this.k.playerPos();
+    const p = this.k.wandererPos();
     if (c && p) Object.assign(c, { ox: x - p.x, oy: y - p.y });
   }
 
   /** Where the server has the wanderer: lag is a step or two behind, farther means they were carried. */
   private carried(x: number, y: number): void {
-    const at = this.k.playerCarpet();
+    const at = this.k.wandererCarpet();
     if (Math.hypot(x - at.x, y - at.y) <= CARRIED) return;
     this.putMe(x, y);
     this.lastStep = { x, y, t: this.clock };
@@ -348,7 +348,7 @@ export class ThinClient {
     const k = this.k;
     let id = this.others.get(o.id);
     if (id === undefined || !k.ecs.alive.has(id)) {
-      const me = k.ecs.get(k.playerId, 'glyph');
+      const me = k.ecs.get(k.wandererEntity, 'glyph');
       id = k.ecs.spawn({ pos: { x: o.x, y: o.y }, glyph: { ...(me ?? { glyph: '@', color: '#ffffff' }) }, body: { r: 0.3, solid: false }, wander: {} });
       this.others.set(o.id, id);
     } else this.targets.set(id, { x: o.x, y: o.y });
@@ -397,7 +397,7 @@ export class ThinClient {
   private state(): void {
     const k = this.k;
     const s = this.session.stato;
-    const pid = k.playerId;
+    const pid = k.wandererEntity;
     if (s.needs) k.ecs.set(pid, 'needs', { ...(k.needs() ?? {}), ...s.needs });
     if (s.stati) k.ecs.set(pid, 'stati', structuredClone(s.stati));
     if (typeof s.crediti === 'number') {
@@ -719,8 +719,8 @@ export class ThinClient {
   /** E in the world: a rune under or in front of the wanderer, a thing to pick up in front, or the menu of the tile. */
   private async interact(): Promise<void> {
     const k = this.k;
-    const pc = k.playerCarpet();
-    const facing = k.playerComp()?.facing;
+    const pc = k.wandererCarpet();
+    const facing = k.wandererComp()?.facing;
     const [dx, dy] = facing === 'left' ? [-1, 0] : facing === 'right' ? [1, 0] : facing === 'up' ? [0, -1] : [0, 1];
     const col = Math.floor(pc.x);
     const row = Math.floor(pc.y);
@@ -740,7 +740,7 @@ export class ThinClient {
   private async sayTo(other: string, text: string): Promise<NpcReply> {
     const k = this.k;
     const r = await this.show(this.session.act({ t: 'dici', viandante: other, testo: text }));
-    if (r.ok && r.testo) k.speak(k.playerId, r.testo);
+    if (r.ok && r.testo) k.speak(k.wandererEntity, r.testo);
     return { say: r.ok ? '' : `(${r.motivo ?? 'non ti sente'})`, action: 'nessuna', mood: 'tranquillo' };
   }
 

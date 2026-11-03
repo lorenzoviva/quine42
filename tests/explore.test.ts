@@ -59,7 +59,7 @@ function join(server: SessionServer, id: string): SessionClient {
 /** Puts a wanderer of the session somewhere in the world (their carpet under them). */
 function put(k: Kernel, id: string, to: { x: number; y: number }) {
   k.as(id, () => {
-    const p = k.playerPos();
+    const p = k.wandererPos();
     Object.assign(k.carpet()!, { ox: to.x - p.x, oy: to.y - p.y });
   });
 }
@@ -125,7 +125,7 @@ describe('new places with the lock, at the expense of who explores (T40)', () =>
     // The master (`io`, no client) goes to the Council's hall with their rune: inside the studio, nothing to load.
     expect(k.as('io', () => k.councilRune())).toBe(true);
     await run(server, 5);
-    expect(k.as('io', () => k.playerPos().x)).toBeGreaterThanOrEqual(INTERIOR_X - 10);
+    expect(k.as('io', () => k.wandererPos().x)).toBeGreaterThanOrEqual(INTERIOR_X - 10);
     const before = models.plans.length;
     put(k, 'anna', middleOf(-8, -10));
     await settle(server);
