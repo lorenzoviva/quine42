@@ -32,6 +32,8 @@ export interface SculptorAiModels {
   importante: string;
   importanteFino?: string;
   artista: string;
+  /** Not a sculptor, as the Artist is not: the Musician's model (T225). */
+  musicista: string;
 }
 
 export const DEFAULT_SCULPTORS: SculptorAiModels = {
@@ -41,6 +43,7 @@ export const DEFAULT_SCULPTORS: SculptorAiModels = {
   importante: 'gemini-4-argon',
   importanteFino: '2026-12-01',
   artista: 'gemini-3.5-flash',
+  musicista: 'gemini-3.8-flash',
 };
 
 export interface SculptRequest {

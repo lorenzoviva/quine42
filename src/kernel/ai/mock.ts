@@ -112,6 +112,13 @@ export class MockAiModels implements AiModels {
       case 'model.sculpt':
         // Offline the Sculptor answers with the library's hand-written program of the class.
         return d.example ?? '<sequence values="BC" size="12 12 12"><box at="6 6 0" size="8 8 8" color="C"/></sequence>';
+      case 'sound.compose': {
+        // Offline the Musician plays the library's hand-written program a little faster or slower: it passes every check, and it is not the same text.
+        const r = d.request ?? {};
+        const n = hashStr(String(r.richiesta));
+        const programma = String(d.example ?? '').replace(/bpm="(\d+)"/, (_, b) => `bpm="${Number(b) + (n % 13) - 6}"`);
+        return { nome: r.nome ?? `Aria ${SUFFIX[n % SUFFIX.length]}`, programma, uso: r.uso ?? 'musica', ambienti: r.ambienti ?? (d.world?.ambienti ?? []).filter((a: string) => String(r.richiesta).includes(a)), momenti: r.momenti ?? [] };
+      }
       case 'model.action': {
         // Offline the Sculptor recolours part of the most used letter (or chips it away, if it cracks).
         const ls: Array<{ lettera: string }> = d.letters ?? [];
@@ -274,6 +281,7 @@ export class MockAiModels implements AiModels {
         if (/distrugg.*universo|cancella tutto/i.test(t)) return { risposta: 'Questo no.', incarico: 'nessuno', rifiuto: "distruggerebbe l'universo" };
         if (/riscolp/i.test(t)) return { risposta: 'Lo dico allo Scultore.', incarico: 'riscolpisci', bersaglio: t.replace(/.*riscolpisci\s+(il |la |lo |l')?/i, '').split(' ')[0], richiesta: t };
         if (/\brun[ae]\b/i.test(t)) return { risposta: 'Eccole.', incarico: 'runa', rune: [t.replace(/.*\brun[ae]\s+/i, '')] };
+        if (/musica|brano|canzone|melodia/i.test(t)) return { risposta: 'Lo porto al Musicista.', incarico: 'musica', richiesta: t };
         if (/\bcredit[io]\b/i.test(t)) return { risposta: 'I crediti non passano dal Concilio.', incarico: 'nessuno' };
         if (/regola/i.test(t)) return { risposta: 'Sarà una regola del mondo.', incarico: 'regola', richiesta: t.replace(/.*regola:?\s*/i, '') };
         if (/bosco|luogo|regione|castello|deserto/i.test(t)) return { risposta: 'Il Cartografo ci pensa.', incarico: 'ambiente', richiesta: t };

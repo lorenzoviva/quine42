@@ -47,6 +47,7 @@ const WANTED: Array<[RegExp, string]> = [
   [/^genesi:/, 'il Concilio, alla Genesi'],
   [/^(cartografo|atlante):/, 'il Cartografo'],
   [/^scultore:/, 'lo Scultore'],
+  [/^musicista:/, 'il Musicista'],
   [/^(meccanica|riparazione):/, "l'Ingegnere"],
   [/^(l'Arbitro|revisione)/, "l'Arbitro"],
   [/^(trama|trame|persone|società|contenuti|nascita|incantesimo|ricetta scoperta|azione imparata|regola):/, 'il Narratore'],

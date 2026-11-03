@@ -124,7 +124,7 @@ export class LobbyScreen {
         'div',
         { class: 'sculpt-row' },
         el('strong', {}, 'Modelli Scultore: '),
-        `semplice (${sculpt.semplice}) · figure (${sculpt.figura}) · strutture (${sculpt.struttura}) · importanti (${sculpt.importante}) · artista (${sculpt.artista})`,
+        `semplice (${sculpt.semplice}) · figure (${sculpt.figura}) · strutture (${sculpt.struttura}) · importanti (${sculpt.importante}) · artista (${sculpt.artista}) · musicista (${sculpt.musicista})`,
       ),
       el('div', { class: 'coef-list' }, el('strong', {}, 'Coefficienti: '), ...coefItems),
       actorRow,

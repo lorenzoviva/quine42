@@ -39,6 +39,7 @@ import { MemoryChunks, type ChunkStore } from './chunks';
 import { bodyFoot, bodyGround, Forms, holesOf, InlineRunner, instanceGrid, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground } from './forms';
 import { classOf, guessClass, RARE_SIZES, sizeRank, SIZE_TIERS, tilesOf, type SizeTier } from '../mj/classes';
 import { GENERIC, ModelDirector, ownModelId } from './modeldirector';
+import { ScoreDirector } from './scoredirector';
 import { categoryOf, DEFAULT_SCULPTORS, sculptAction, type SculptorAiModels } from './agents/sculptor';
 import { MODELS_INDEX, type ModelInfo } from './forms';
 import { Content, normName, specOf } from './content';
@@ -137,7 +138,7 @@ export type HoverInfo =
   | { kind: 'tile'; name: string }
   | { kind: 'code'; cell: CoronaTile; folder?: string }
   | { kind: 'studio'; item: StudioItem; building: string; recent?: string }
-  | { kind: 'door'; building: string; team: string }
+  | { kind: 'door'; building: string; teams: string[] }
   | { kind: 'agent'; agent: AgentId; name: string; doing?: string }
   | { kind: 'player' };
 
@@ -389,6 +390,8 @@ export class Kernel {
   readonly forms: Forms;
   /** The Sculptor at work on the models the world lacks. */
   readonly sculpting = new ModelDirector(this);
+  /** The Musician at work on the music the world lacks. */
+  readonly composing = new ScoreDirector(this);
   private lastSculptPump = 0;
   council!: Council;
   sandbox!: Sandbox;
@@ -4421,7 +4424,7 @@ export class Kernel {
       'corona-drone', 'corona-treno',
       'corona-gerboa', 'corona-gerboa-narratore', 'corona-gerboa-cartografo',
       'corona-gerboa-artista', 'corona-gerboa-scultore', 'corona-gerboa-fisico',
-      'corona-gerboa-ingegnere', 'corona-gerboa-arbitro', 'corona-gerboa-referente',
+      'corona-gerboa-ingegnere', 'corona-gerboa-arbitro', 'corona-gerboa-referente', 'corona-gerboa-musicista',
       'schermo-scritte', 'schermo-struttura', 'circuito-3D'
     ];
     for (const m of extra) {
@@ -4672,11 +4675,11 @@ export class Kernel {
   }
 
   /** A program enters the library (or replaces one): validated, written with its index entry, committed. */
-  addModel(id: string, xml: string, info: ModelInfo, message: string): boolean {
+  addModel(id: string, xml: string, info: ModelInfo, message: string, card?: { task: string; autore: string; chi?: string }): boolean {
     const path = `models/${id}.xml`;
     const errors = this.validator.validateFile(path, xml);
     if (errors.length) {
-      this.council.say('kernel', 'scarta', errors.join('; '), 'scultore', 'model.sculpt');
+      this.council.say('kernel', 'scarta', errors.join('; '), card?.autore === 'musicista' ? 'musicista' : 'scultore', card?.task ?? 'model.sculpt');
       return false;
     }
     let index: Record<string, ModelInfo> = {};
@@ -4689,14 +4692,16 @@ export class Kernel {
     this.repo.write(path, xml);
     this.repo.write(MODELS_INDEX, JSON.stringify(index, null, 1) + '\n');
     this.applyFiles({ ...this.repo.working });
-    const c = this.repo.commit(message, 'agent');
-    this.council.say('kernel', 'approva', `modello «${info.nome ?? id}» (${id}) → validato, commit ${c.id}`, undefined, 'model.sculpt');
+    const c = card ? this.commitContent(message, card.task, card.autore, card.chi) : this.repo.commit(message, 'agent');
+    this.council.say('kernel', 'approva', `modello «${info.nome ?? id}» (${id}) → validato, commit ${c.id}`, undefined, card?.task ?? 'model.sculpt');
     this.bus.emit('model:added', { id });
     return true;
   }
 
   /** Which file a piece of the Council's work is about (the avatars walk there). */
   pathForFeed(e: FeedEntry): string | undefined {
+    // The Musician works before the screen of the Artist's house: its programs stand on shelves upstairs, out of sight.
+    if (e.task?.startsWith('sound.')) return undefined;
     for (const id of this.modules.keys()) if (e.text.includes(id)) return this.modules.get(id)!.manifestPath;
     const t = e.task ?? '';
     if (t.startsWith('chunk.')) return 'modules/world.layouts/manifest.json';
@@ -4712,7 +4717,9 @@ export class Kernel {
   async talkToAgent(agent: AgentId, text: string): Promise<{ say: string; forged?: string; runes?: string[] }> {
     const history = this.agentTalks.get(agent) ?? [];
     this.agentTalks.set(agent, history);
-    if (agent === 'referente') return this.askLiaison(text, history);
+    const chi = this.payerNow();
+    const here = this.chunkAt(this.wandererCarpet().x, this.wandererCarpet().y)?.plan?.layout;
+    if (agent === 'referente') return this.askLiaison(text, history, chi, here);
     let r;
     try {
       r = await agentReply(this.council, agent, history, text);
@@ -4726,6 +4733,7 @@ export class Kernel {
       const env = await this.createEnvironment(r.forge);
       return { say: r.say, forged: env.summary };
     }
+    if (agent === 'musicista') return { say: r.say, forged: (await this.composing.make({ richiesta: r.forge }, chi, here)).summary };
     const f = await this.forgeModule(r.forge, 'agente', undefined, true);
     return { say: r.say, forged: f.summary };
   }
@@ -4734,7 +4742,7 @@ export class Kernel {
    * The Referente takes the transcended wanderer's request to the right team: the Forge, the
    * Cartographer, the Artist, the rules, the Narrator's packs. The Council says yes to almost anything.
    */
-  private async askLiaison(text: string, history: Turn[]): Promise<{ say: string; forged?: string; runes?: string[]; credits?: { target: string; amount: number } }> {
+  private async askLiaison(text: string, history: Turn[], chi: string, here: string | undefined): Promise<{ say: string; forged?: string; runes?: string[]; credits?: { target: string; amount: number } }> {
     let r;
     try {
       r = await liaisonReply(this.council, history, text);
@@ -4745,7 +4753,7 @@ export class Kernel {
     this.archive.go('referente', undefined, r.say);
     if (r.refusal) return { say: r.say, forged: `Il Concilio rifiuta: ${r.refusal}` };
     const req = r.request ?? text;
-    this.council.say('referente', 'info', `il viandante chiede: «${text}» → ${r.task}`, r.task === 'ambiente' ? 'cartografo' : r.task === 'riscolpisci' ? 'artista' : r.task === 'regola' ? 'arbitro' : r.task === 'nessuno' ? undefined : 'narratore', 'referente.coordinate');
+    this.council.say('referente', 'info', `il viandante chiede: «${text}» → ${r.task}`, r.task === 'ambiente' ? 'cartografo' : r.task === 'riscolpisci' ? 'artista' : r.task === 'musica' ? 'musicista' : r.task === 'regola' ? 'arbitro' : r.task === 'nessuno' ? undefined : 'narratore', 'referente.coordinate');
     switch (r.task) {
       case 'oggetto':
         return { say: r.say, forged: (await this.forgeModule(req, 'agente', 'strumento', true)).summary };
@@ -4772,6 +4780,8 @@ export class Kernel {
         if (!this.mirror) this.grantRunes(runes);
         return { say: r.say, forged: `Il Concilio ti dà ${runes.length === 1 ? 'la runa' : 'le rune'} ${runes.map((t) => `«${t}»`).join(' ')}.`, runes };
       }
+      case 'musica':
+        return { say: r.say, forged: (await this.composing.make({ richiesta: req }, chi, here)).summary };
       case 'riscolpisci': {
         const target = this.findExhibit(r.target ?? req);
         if (!target) return { say: r.say, forged: `Lo Scultore non trova «${r.target ?? req}».` };
@@ -6427,6 +6437,7 @@ export class Kernel {
       { nome: 'pacchetti', usati: this.packsUsed, max: ai.maxPacks ?? 4 },
       { nome: 'tipi nuovi', usati: this.castUsed, max: ai.maxCast ?? 3 },
       { nome: 'modelli', usati: this.sculpting.count, max: ai.maxModels ?? 40 },
+      { nome: 'brani', usati: this.composing.count, max: ai.maxBrani ?? 8 },
     ];
     return {
       tempo: timeline(log, Math.max(0, i), (c) => (c.parent ? this.repo.find(c.parent) : undefined)),
@@ -6781,7 +6792,7 @@ export class Kernel {
       }
       if (tile?.kind === 'door' || tile?.kind === 'building') {
         const b = this.corona.building(tile.building);
-        return b ? { kind: 'door', building: b.name, team: AGENTS[b.team as AgentId]?.name ?? b.team } : null;
+        return b ? { kind: 'door', building: b.name, teams: b.teams.map((t) => AGENTS[t as AgentId]?.name ?? t) } : null;
       }
       return null;
     }
@@ -7514,6 +7525,7 @@ export class Kernel {
     if (this.time - this.lastSculptPump > 2) {
       this.lastSculptPump = this.time;
       this.sculpting.pump();
+      this.composing.pump();
     }
     this.rebuildSolids();
     for (const w of this.wanderersById.keys()) this.as(w, () => (this.wandererComp().load = totalWeight(this.inventory(), this.itemSpec) / this.carryCapacity()));

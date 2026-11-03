@@ -7,6 +7,7 @@
 // pool of workers runs them and also makes the meshes the renderer draws) and uses them for collision
 // and for actions. A form that is not ready yet is simply not there: the entity blocks by its radius.
 
+import type { SoundPurpose } from '../mj/sound';
 import { boxOf, classOf, CLASSES, type AssetClass } from '../mj/classes';
 import { Mj3Error, type PaletteEntry, type Vec3 } from '../mj/engine';
 import { colorTable, floors, footprint, surfaces, type Levels, type VoxelGrid } from '../mj/mesh';
@@ -56,6 +57,8 @@ export interface ModelInfo {
   /** Artist's critique advice and problems (T48a). */
   consigli?: string[];
   problemi?: string[];
+  /** What a sound program is for in the game (ADR-0126). */
+  suono?: SoundPurpose;
 }
 
 /** What an entity's look is: which program, which seed, which way it faces, what has been done to it. */

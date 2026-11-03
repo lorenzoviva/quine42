@@ -275,6 +275,12 @@
   "autore": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
+ "corona-gerboa-musicista": {
+  "classe": "persona",
+  "nome": "Gerboa Musicista (corona)",
+  "autore": "dal Gerboa Artista, a mano (T225)",
+  "vpt": 20
+ },
  "corona-gerboa-scultore": {
   "classe": "persona",
   "nome": "Gerboa Scultore (corona)",

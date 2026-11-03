@@ -52,6 +52,10 @@ I 7 brani e i 9 effetti del seme (`suono-musica-*`, `suono-effetto-*`) non hanno
 
 **Il validatore costa di più sui brani veri**: da 1 a 1,9 s su un brano del gioco, contro i 150-300 ms di un preset; sugli effetti al più 250 ms.
 
+## Chi li scrive nel gioco (T225)
+
+Il Musicista (`src/kernel/agents/composer.ts`) passa dagli stessi controlli, con il motivo che torna a lui. Prima prova del prompt con `gemini-3.8-flash` (`lab/scripts/musicista-prova.ts`, 3 chiamate): tre programmi su tre validi al primo colpo, due brani da 128 passi e un effetto da 8. I brani cambiano scala, bpm, ritmo e melodia e seguono da vicino la struttura dell'esempio (circa 6 righe su 10 uguali, in gran parte i colori); l'effetto è uguale su ogni seme, cosa che sotto una battuta le soglie ammettono. Nessuno li ha ascoltati.
+
 ## Cosa le misure non possono dire
 
 - **Se è bello.** Nessuna soglia riconosce una melodia che resta in testa. Quattro preset calibrano il «non è rotto», non il gusto: un programma senza difetti può essere noioso, e uno buono e strano può essere segnalato. Sopra le soglie, decide chi ascolta.

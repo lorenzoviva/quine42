@@ -196,6 +196,7 @@ export const SEATS: Array<{ agent: string; room: string }> = [
   { agent: 'cartografo', room: 'luoghi' },
   { agent: 'artista', room: 'galleria' },
   { agent: 'scultore', room: 'galleria' },
+  { agent: 'musicista', room: 'galleria' },
   { agent: 'fisico', room: 'oggetti' },
   { agent: 'ingegnere', room: 'sistemi' },
   { agent: 'arbitro', room: 'universo' },
@@ -245,8 +246,8 @@ export interface Building {
   id: string;
   name: string;
   color: string;
-  /** Council agent whose team works here. */
-  team: string;
+  /** The Council's teams working here, each at its place before the room's screen: the first is the house's. */
+  teams: string[];
   /** Angles (radians, clockwise from the top) of its sector of the ring. */
   from: number;
   to: number;
@@ -357,19 +358,19 @@ const SHELF_W = SHELF_X1 - SHELF_X0 + 1;
 /** The ground floor of a room with a device: short shelves left and right of it (T49b), mirrored about the exit's column. */
 const SIDE_W = 4;
 
-const ROOMS: Record<string, { name: string; color: string; team: string }> = {
-  universo: { name: 'Direzione', color: '#ffcf5c', team: 'arbitro' },
-  mondo: { name: 'Biblioteca del Mondo', color: '#7dd87d', team: 'narratore' },
-  concilio: { name: 'Sala del Concilio', color: '#ff8ad8', team: 'arbitro' },
-  nucleo: { name: 'Il Nucleo', color: '#6fc3ff', team: 'ingegnere' },
-  sistemi: { name: 'Sala Sistemi', color: '#b9a6ff', team: 'ingegnere' },
-  luoghi: { name: 'Ufficio dei Luoghi', color: '#9ad27a', team: 'cartografo' },
-  oggetti: { name: 'Magazzino degli Oggetti', color: '#e0b070', team: 'fisico' },
-  cose: { name: 'Laboratorio delle Cose', color: '#d89a6a', team: 'fisico' },
-  persone: { name: 'Studio dei Personaggi', color: '#ffb38a', team: 'narratore' },
-  magia: { name: 'Torre della Magia', color: '#c48aff', team: 'narratore' },
-  altro: { name: 'Archivio', color: '#9fb2a8', team: 'ingegnere' },
-  galleria: { name: "Galleria dell'Artista", color: '#ff8ad8', team: 'artista' },
+const ROOMS: Record<string, { name: string; color: string; teams: string[] }> = {
+  universo: { name: 'Direzione', color: '#ffcf5c', teams: ['arbitro'] },
+  mondo: { name: 'Biblioteca del Mondo', color: '#7dd87d', teams: ['narratore'] },
+  concilio: { name: 'Sala del Concilio', color: '#ff8ad8', teams: ['arbitro'] },
+  nucleo: { name: 'Il Nucleo', color: '#6fc3ff', teams: ['ingegnere'] },
+  sistemi: { name: 'Sala Sistemi', color: '#b9a6ff', teams: ['ingegnere'] },
+  luoghi: { name: 'Ufficio dei Luoghi', color: '#9ad27a', teams: ['cartografo'] },
+  oggetti: { name: 'Magazzino degli Oggetti', color: '#e0b070', teams: ['fisico'] },
+  cose: { name: 'Laboratorio delle Cose', color: '#d89a6a', teams: ['fisico'] },
+  persone: { name: 'Studio dei Personaggi', color: '#ffb38a', teams: ['narratore'] },
+  magia: { name: 'Torre della Magia', color: '#c48aff', teams: ['narratore'] },
+  altro: { name: 'Archivio', color: '#9fb2a8', teams: ['ingegnere'] },
+  galleria: { name: "Galleria dell'Artista", color: '#ff8ad8', teams: ['artista', 'musicista'] },
 };
 
 /** Which building a file lives in. */
@@ -592,7 +593,7 @@ export class Corona {
         }
       const door = polarTile(R + CAMPUS.door, mid);
       cells.delete(`${door.x},${door.y}`);
-      return { index, id, name: def.name, color: def.color, team: def.team, from, to, door, cells, storeys };
+      return { index, id, name: def.name, color: def.color, teams: def.teams, from, to, door, cells, storeys };
     });
     // The avenue, the alleys between the sectors, the lawns and the edge of the campus.
     const max = Math.ceil(this.outer) + 1;
