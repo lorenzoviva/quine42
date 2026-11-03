@@ -82,7 +82,7 @@ export class ProfilePanel {
     // If not anonymous and recharge is available, show credit balance and Stripe top-up presets (T45e)
     if (!a.anonimo && a.crediti && a.recharge) {
       const creditsRow = el('div', { class: 'row ricarica' });
-      const balanceEl = el('div', { class: 'saldo' }, `Saldo crediti: $${a.crediti().toFixed(2)}`);
+      const balanceEl = el('div', { class: 'saldo comic-badge yellow' }, `Saldo crediti: $${a.crediti().toFixed(2)}`);
       const ricaricaTitle = el('div', { class: 'label' }, 'Ricarica crediti (Stripe / Google Pay):');
       const buttons = el('div', { class: 'presets' });
 

@@ -24,7 +24,7 @@ export class CreditExhaustedModal {
     this.root = root;
     this.root.hidden = true;
 
-    this.titleEl = el('h2', { class: 'modal-title' }, 'Crediti esauriti');
+    this.titleEl = el('h2', { class: 'modal-title comic-title' }, 'Crediti esauriti');
     this.descEl = el(
       'p',
       { class: 'modal-desc' },
@@ -32,7 +32,7 @@ export class CreditExhaustedModal {
     );
     this.statusEl = el('div', { class: 'modal-status' });
 
-    const btnRecharge = el('button', { class: 'primary' }, 'Ricarica crediti');
+    const btnRecharge = el('button', { class: 'primary comic-btn arcade' }, 'Ricarica crediti');
     btnRecharge.onclick = async () => {
       this.statusEl.textContent = 'Apertura pagamento in corso…';
       try {
@@ -42,13 +42,13 @@ export class CreditExhaustedModal {
       }
     };
 
-    const btnOffline = el('button', {}, 'Gioca offline (modelli locali)');
+    const btnOffline = el('button', { class: 'comic-btn cyan' }, 'Gioca offline (modelli locali)');
     btnOffline.onclick = () => {
       this.hide();
       this.opts.onOffline();
     };
 
-    const btnAbandon = el('button', { class: 'danger' }, 'Abbandona partita');
+    const btnAbandon = el('button', { class: 'danger comic-btn pink' }, 'Abbandona partita');
     btnAbandon.onclick = () => {
       this.hide();
       this.opts.onAbandon();

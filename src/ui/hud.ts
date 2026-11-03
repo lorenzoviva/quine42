@@ -71,7 +71,7 @@ export class Hud {
   }
 
   showBanner(title: string, sub: string, ms = 4500): void {
-    this.banner.replaceChildren(el('div', { class: 'title' }, title), el('div', { class: 'sub' }, sub));
+    this.banner.replaceChildren(el('div', { class: 'title comic-title' }, title), el('div', { class: 'sub' }, sub));
     this.banner.hidden = false;
     this.banner.classList.remove('out');
     setTimeout(() => this.banner.classList.add('out'), ms);
@@ -87,7 +87,7 @@ export class Hud {
     if (chunkKey !== this.lastChunk) {
       this.lastChunk = chunkKey;
       this.place.replaceChildren(
-        el('div', { class: 'name' }, chunk?.name ?? (k.zone === 'corona' ? 'Corona' : '…')),
+        el('div', { class: 'name comic-title' }, chunk?.name ?? (k.zone === 'corona' ? 'Corona' : '…')),
         el('div', { class: 'descr' }, chunk?.description ?? (k.zone === 'corona' ? "Il codice sorgente dell'universo." : 'Il Cartografo sta disegnando…')),
       );
       this.place.classList.remove('fresh');
@@ -146,7 +146,7 @@ export class Hud {
 
     const n = k.needs();
     if (n) {
-      const bars: Array<[string, number, string]> = [['fame', n.hunger, '#e0a040'], ['sete', n.thirst, '#4aa8e8'], ['energia', n.energy, '#c0d860'], ['salute', n.health, '#e85060'], ['mana', n.mana ?? 0, '#a070ff']];
+      const bars: Array<[string, number, string]> = [['fame', n.hunger, 'var(--neon-orange)'], ['sete', n.thirst, 'var(--neon-cyan)'], ['energia', n.energy, 'var(--neon-green)'], ['salute', n.health, 'var(--neon-pink)'], ['mana', n.mana ?? 0, 'var(--neon-purple)']];
       const key = bars.map((b) => Math.round(b[1])).join(',') + Object.keys(k.states()).join('|');
       if (key !== this.lastNeeds) {
         this.lastNeeds = key;

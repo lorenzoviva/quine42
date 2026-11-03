@@ -105,7 +105,7 @@ export class LobbyScreen {
     const coefItems = COEFFICIENT_KEYS.map((k) =>
       el(
         'span',
-        { class: 'badge' },
+        { class: 'comic-badge cyan' },
         `${COEFFICIENT_INFO[k].nome}: ${coef[k].toFixed(2)}`,
       ),
     );
@@ -246,7 +246,7 @@ export class LobbyScreen {
     );
 
     // Action buttons
-    const btnEnter = el('button', { class: 'primary' }, 'Entra nel mondo');
+    const btnEnter = el('button', { class: 'primary comic-btn arcade' }, 'Entra nel mondo');
     btnEnter.onclick = () => {
       const tetto = isAnonymous ? 0 : Number(capInput.value) || 0;
       if (tetto < minCap) {
@@ -257,12 +257,12 @@ export class LobbyScreen {
       this.close({ tetto, ...(changed ? { attore: { acceso: actorOn.checked, modello: actorModel.value } } : {}) });
     };
 
-    const btnOffline = el('button', {}, 'Gioca offline (modelli locali)');
+    const btnOffline = el('button', { class: 'comic-btn cyan' }, 'Gioca offline (modelli locali)');
     btnOffline.onclick = () => {
       this.close({ tetto: 0, offline: true });
     };
 
-    const btnRecharge = el('button', {}, 'Ricarica crediti');
+    const btnRecharge = el('button', { class: 'comic-btn pink' }, 'Ricarica crediti');
     if (isAnonymous || !this.opts.onRecharge) {
       btnRecharge.hidden = true;
     } else {
@@ -287,7 +287,7 @@ export class LobbyScreen {
       'div',
       { class: 'lobby-window' },
       el('div', { class: 'lobby-logo' }, 'ᚱ ᚢ ᚾ ᛖ'),
-      el('h1', {}, 'LOBBY MULTIGIOCATORE'),
+      el('h1', { class: 'comic-title' }, 'LOBBY MULTIGIOCATORE'),
       el('div', { class: 'lobby-sub' }, `Universo «${name}» · Master: ${master}`),
       masterBlock,
       ...(minimumsBlock ? [minimumsBlock] : []),

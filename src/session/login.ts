@@ -33,7 +33,7 @@ export async function accountConfig(): Promise<AccountConfig | undefined> {
 /** Asks the player how they come in, unless they are already signed in. */
 function chooseHow(): Promise<'google' | 'anonimo'> {
   return new Promise((resolve) => {
-    const google = el('button', { class: 'primary' }, 'Entra con Google');
+    const google = el('button', { class: 'primary comic-btn arcade' }, 'Entra con Google');
     const anon = el('button', {}, 'Entra come anonimo');
     const box = el(
       'div',
