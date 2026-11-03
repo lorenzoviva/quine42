@@ -1,6 +1,6 @@
 // The wanderer's profile (T44a): the name the world calls them by, the seed of the program `viandante` and the colour
 // of its cloak, a few lines they say of themselves. The preview is a photograph of the model, as the icons are. What is
-// chosen goes to whoever keeps it (the server in a game of many, the kernel alone), which repairs it and says what.
+// chosen goes to whoever keeps it (the server in a multiplayer game, the kernel alone), which repairs it and says what.
 
 import type { Kernel } from '../kernel/kernel';
 import { PROFILE_LIMITS, type Profile } from '../kernel/wanderers';

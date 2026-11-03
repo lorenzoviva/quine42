@@ -92,7 +92,7 @@ describe('runes and magic', () => {
     const pouch = k.inventory().slots.findIndex((s) => s?.item === 'item.borsa-rune');
     expect(pouch).toBeGreaterThanOrEqual(0);
     giveRunes(k, ['luce', 'luce', 'x']);
-    // Runes go into the rune pouch, not the pockets.
+    // Runes go into the rune pouch, not the slots.
     expect(countItem(k.bag(pouch)!, 'rune:luce')).toBe(2);
     expect(k.composeRune('luce')).toBe(true);
     expect(k.composeRune('x')).toBe(true);

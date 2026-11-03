@@ -214,7 +214,7 @@ describe("the Actor's option", () => {
   });
 });
 
-describe('the Actor in a game of many', () => {
+describe('the Actor in a multiplayer game', () => {
   async function bootMany(ai: Record<string, unknown> = {}): Promise<Kernel> {
     const cfg = JSON.parse(bundledFiles['universe.json']);
     const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, ai: { ...cfg.ai, ...ai }, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };

@@ -1,6 +1,6 @@
 // The corona's editor: rewriting the universe from outside the simulation.
 // Valid code is hot reloaded and committed. Invalid code can still be written: it is the
-// player's right to break the world (rollback always brings it back). In a game of many the master's saves go on
+// player's right to break the world (rollback always brings it back). In a multiplayer game the master's saves go on
 // their branch (T42b): they try them alone, and «Pubblica» gives them to the world.
 
 import type { Kernel } from '../kernel/kernel';

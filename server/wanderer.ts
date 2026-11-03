@@ -3,7 +3,7 @@
 // program of their look; POST /api/viandante {universo, profilo} keeps the profile they chose. Who they are comes from the
 // account's token (`Authorization: Bearer <token>`, verified as the session does); a server without accounts (development,
 // the preview) takes the id the page says (`viandante`, `io` by default), as the session does without a verifier.
-// The running world (a game of many, in its own process) has the wanderer's state in memory: it is asked first; otherwise
+// The running world (a multiplayer game, in its own process) has the wanderer's state in memory: it is asked first; otherwise
 // the universe's files on disk are read, and a profile kept there is committed alone.
 
 import type { Connect, Plugin } from 'vite';
@@ -50,7 +50,7 @@ export interface WandererView {
   anonimo: boolean;
   profilo?: Profile;
   crediti: number;
-  /** In the world right now (the game of many running here has them). */
+  /** In the world right now (the multiplayer game running here has them). */
   nelMondo: boolean;
   /** Whether the universe knows them already (a saved state, or in the world). */
   noto: boolean;

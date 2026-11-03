@@ -28,7 +28,7 @@ export default defineConfig(({ mode }) => {
   const internal = newSecret();
   return {
     // Universes live next to the kernel, each a git repository of its own (ignored by the kernel's).
-    // The games of many (T38): each world in a process of its own (T127, ADR-0110), clients over /api/session.
+    // The multiplayer games (T38): each world in a process of its own (T127, ADR-0110), clients over /api/session.
     // The subscriptions' queue (T68): the slow requests on disk until a process using the CLIs serves them; off unless asked (ADR-0106).
     plugins: [
       // The pages' policy, on every answer (T132, ADR-0111).

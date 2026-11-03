@@ -17,7 +17,7 @@ async function bootMany(): Promise<Kernel> {
   return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
-/** A browser of a game of many, without the browser: a session, and a mirror kernel filled by the thin client. */
+/** A browser of a multiplayer game, without the browser: a session, and a mirror kernel filled by the thin client. */
 async function thin(server: SessionServer, id: string, nome?: string): Promise<ThinClient> {
   const { server: s, client: c } = fakeLink();
   server.connect(s);
@@ -200,7 +200,7 @@ describe('the thin client (T39)', () => {
     await new Promise((r) => setTimeout(r, 0));
     run(server, [anna], 12);
     expect(anna.k.phrase().tokens).toEqual(k.as('anna', () => k.phrase().tokens));
-    // What a game of many does not do yet says so, and changes nothing.
+    // What a multiplayer game does not do yet says so, and changes nothing.
     const before = JSON.stringify(anna.k.inventory());
     anna.k.rollback();
     expect(JSON.stringify(anna.k.inventory())).toBe(before);
@@ -233,7 +233,7 @@ async function flush(server: SessionServer, clients: ThinClient[]) {
   run(server, clients, 8);
 }
 
-/** Anna in a game of many, on open ground, with what the test gives her. */
+/** Anna in a multiplayer game, on open ground, with what the test gives her. */
 async function annaAlone(prepare?: (k: Kernel) => Promise<void>) {
   const k = await bootMany();
   await prepare?.(k);
@@ -253,7 +253,7 @@ async function annaAlone(prepare?: (k: Kernel) => Promise<void>) {
 const slotOf = (k: Kernel, item: string) => k.inventory().slots.findIndex((s) => s?.item === item);
 
 describe('what is carried, among many (T39b)', () => {
-  it('pockets: a slot moves at once, held, used, dropped, put into and taken from a bag, a learned action', async () => {
+  it('slots: a slot moves at once, held, used, dropped, put into and taken from a bag, a learned action', async () => {
     const { k, server, anna, start, said } = await annaAlone();
     const serverInv = () => k.as('anna', () => k.inventory());
     k.as('anna', () => {
@@ -267,7 +267,7 @@ describe('what is carried, among many (T39b)', () => {
     run(server, [anna], 12);
     expect(changed.length).toBeGreaterThan(0);
     expect(countItem(anna.k.inventory(), 'item.mela-rossa')).toBe(3);
-    // Moved: in the new pocket at once here, then on the server too; the updates meanwhile do not move it back.
+    // Moved: in the new slot at once here, then on the server too; the updates meanwhile do not move it back.
     const apple = slotOf(anna.k, 'item.mela-rossa');
     const free = anna.k.inventory().slots.findIndex((x, i) => !x && i > 6);
     anna.k.moveSlot(apple, free);
@@ -289,7 +289,7 @@ describe('what is carried, among many (T39b)', () => {
     await flush(server, [anna]);
     expect(countItem(serverInv(), 'item.mela-rossa')).toBe(2);
     expect(countItem(anna.k.inventory(), 'item.mela-rossa')).toBe(2);
-    // Dropped: gone from the pocket at once, on the ground in front of her for the server and for her.
+    // Dropped: gone from the slot at once, on the ground in front of her for the server and for her.
     const before = anna.k.ecs.query('pickup').length;
     anna.k.dropSlot(free, 1);
     expect(countItem(anna.k.inventory(), 'item.mela-rossa')).toBe(1);
@@ -321,7 +321,7 @@ describe('what is carried, among many (T39b)', () => {
     expect(said.some((m) => m.includes('Lo spezzi a metà.'))).toBe(true);
     // «Altro…» on it: the Council's answer.
     expect(typeof (await until(server, [anna], anna.k.freeItemAction(slotOf(anna.k, 'item.pane'), 'lo annuso')))).toBe('string');
-    // A pocket that does not exist is refused, and nothing changes.
+    // A slot that does not exist is refused, and nothing changes.
     const was = JSON.stringify(serverInv());
     const r = await until(server, [anna], anna.session.act({ t: 'oggetto', op: 'sposta', slot: 99, verso: 0 }));
     expect(r.ok).toBe(false);

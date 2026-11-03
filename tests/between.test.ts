@@ -163,7 +163,7 @@ describe('words and gifts between wanderers (T43a)', () => {
     const far = await ask(server, all, anna.session.act({ t: 'dai', viandante: 'bruno', slot: one }));
     expect(far.ok).toBe(false);
     expect(far.messaggi?.join(' ')).toMatch(/Avvicinati/);
-    // No room: Bruno's pockets are all full of something else.
+    // No room: Bruno's slots are all full of something else.
     put(k, 'bruno', { x: at.x + 1, y: at.y });
     run(server, all, 4);
     k.as('bruno', () => k.inventory().slots.fill({ item: 'rune:x', count: 1 }));
@@ -171,7 +171,7 @@ describe('words and gifts between wanderers (T43a)', () => {
     expect(full.ok).toBe(false);
     expect(full.messaggi?.join(' ')).toMatch(/non ha posto/);
     expect(k.as('anna', () => countItem(k.inventory(), item))).toBe(1);
-    // A pocket that is not there: refused before the kernel.
+    // A slot that is not there: refused before the kernel.
     expect((await ask(server, all, anna.session.act({ t: 'dai', viandante: 'bruno', slot: 99 }))).ok).toBe(false);
   });
 });

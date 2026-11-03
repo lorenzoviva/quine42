@@ -1,4 +1,4 @@
-// Dev server: the accounts of the games of many (T44b, ADR-0081). Firebase Auth (Google Cloud Identity Platform): the
+// Dev server: the accounts of the multiplayer games (T44b, ADR-0081). Firebase Auth (Google Cloud Identity Platform): the
 // browser signs in with Google or anonymously and sends its ID token with `entra`; here firebase-admin verifies it
 // (signature, project, expiry) and the session makes the wanderer from the uid.
 // From .env, all server-side: FIREBASE_PROJECT_ID (accounts are on only with it), FIREBASE_API_KEY and

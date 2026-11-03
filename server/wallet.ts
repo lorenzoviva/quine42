@@ -43,7 +43,7 @@ export interface Wallet {
   account: WandererView['account'];
   anonimo: boolean;
   crediti: number;
-  /** Credits are charged only in a game of many (`Kernel.billCall`). */
+  /** Credits are charged only in a multiplayer game (`Kernel.billCall`). */
   multigiocatore: boolean;
   /** Newest first. */
   pagamenti: WalletPayment[];
@@ -74,7 +74,7 @@ export function linesOf(payments: PaymentRecord[], usageText: string | undefined
     const t = payers?.[id];
     if (!t) continue;
     const base = Number(t.usd) || 0;
-    // What the balance really lost: the fee is charged with the call, and only in a game of many.
+    // What the balance really lost: the fee is charged with the call, and only in a multiplayer game.
     const usd = many ? costWithFee(base) : base;
     total += usd;
     days.push({ giorno, chiamate: Number(t.calls) || 0, usd });

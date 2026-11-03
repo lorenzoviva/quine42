@@ -79,7 +79,7 @@ export class Content {
   }
 
   /**
-   * Runes are items too (`rune:<token>`): small, light, stackable, kept in pockets or in a rune pouch.
+   * Runes are items too (`rune:<token>`): small, light, stackable, kept in slots or in a rune pouch.
    * They are not written in any pack: every token is a rune.
    */
   get(id: string): ItemDef | undefined {

@@ -47,7 +47,7 @@ export function repairPartita(raw: unknown): Partita {
     morte,
     pvp: flag(r.pvp, DEFAULT_PARTITA.pvp),
     altroTraGiocatori: flag(r.altroTraGiocatori, DEFAULT_PARTITA.altroTraGiocatori),
-    // Alone, the one who plays is the master of everything; in a game of many, who created it (T37).
+    // Alone, the one who plays is the master of everything; in a multiplayer game, who created it (T37).
     ...(modalita === 'multigiocatore' ? { master: validWandererId(r.master) ? r.master : SOLO } : {}),
   };
 }

@@ -1,4 +1,4 @@
-// The thin client (T39, ADR-0059): in a game of many the browser does not run the world, the server does. The
+// The thin client (T39, ADR-0059): in a multiplayer game the browser does not run the world, the server does. The
 // client still boots a kernel, a mirror one (`KernelOptions.mirror`): the same files, so the renderer, the menus
 // and the HUD read it as they read the world alone, but nothing is generated, judged or saved in it. This class
 // fills it with what the session tells (places, entities, the other wanderers, what this wanderer carries), walks
@@ -6,7 +6,7 @@
 // corrections put them back. What the wanderer does goes to the server; what can be shown at once is shown at
 // once (an entity picked up vanishes, a door opens, the inscribed phrase leaves the hand, a slot moves) and undone if
 // the server refuses it, or if its next update says that nothing changed. What the wanderer carries (T39b) goes the
-// same way: pockets, bags, containers, crafting, the mechanics' panels, the actions on tiles. The world's files that
+// same way: slots, bags, containers, crafting, the mechanics' panels, the actions on tiles. The world's files that
 // change come into the mirror; the master's edits stay in theirs, on their branch, until they publish it (T42b).
 
 import type { Kernel } from '../kernel/kernel';
@@ -33,7 +33,7 @@ const CARRIED = 8;
 /** The components an entity of the server may have here (besides its place). */
 const MIRRORED = ['module', 'form', 'glyph', ...ENTITY_PARTS];
 
-/** What the kernel does that a game of many does not do from a player's client yet (the master's R is their branch's). */
+/** What the kernel does that a multiplayer game does not do from a player's client yet (the master's R is their branch's). */
 const LATER = ['rollback'] as const;
 
 type Act = Parameters<SessionClient['act']>[0];
@@ -529,7 +529,7 @@ export class ThinClient {
   }
 
   /**
-   * R of the master in a game of many: their branch back to its last valid state (or to a commit of it). The world, its
+   * R of the master in a multiplayer game: their branch back to its last valid state (or to a commit of it). The world, its
    * runes and the server's repository stay as they are; what the branch is now goes to the server.
    */
   private rollbackBranch(id?: string): void {
@@ -603,7 +603,7 @@ export class ThinClient {
 
   /**
    * What the wanderer carries (T39b): every change goes to the server, which does it as them. What only moves
-   * things between pockets, bags and an open container is done here at once too, without its words (the answer
+   * things between slots, bags and an open container is done here at once too, without its words (the answer
    * brings the server's); the rest shows when the answer and the next update come.
    */
   private relayCarried(): void {
@@ -633,7 +633,7 @@ export class ThinClient {
     k.moveSlot = (a, b) => void this.carry({ t: 'oggetto', op: 'sposta', slot: a, verso: b }, () => here.moveSlot(a, b));
     k.dropSlot = (i, n) => {
       if (k.zone !== 'sim' || !k.inventory().slots[i]) return;
-      // Gone from the pocket at once; the entity on the ground comes with the next update.
+      // Gone from the slot at once; the entity on the ground comes with the next update.
       void this.carry({ t: 'oggetto', op: 'posa', slot: i, ...(n !== undefined ? { quanti: n } : {}) }, () => void takeFromSlot(k.inventory(), i, n));
     };
     k.putIntoBag = (bag, i) => void this.carry({ t: 'oggetto', op: 'in_borsa', slot: i, borsa: bag }, () => here.putIntoBag(bag, i));
@@ -750,7 +750,7 @@ export class ThinClient {
     if (other !== undefined) {
       if (action === 'parla') return void k.bus.emit('ui:chat', { id, name: k.nameOf(id) });
       if (action === 'chi') return void k.bus.emit('ui:dialog', { speaker: k.nameOf(id), text: k.introOf(id) ?? '' });
-      // What is given leaves the pocket when the update says so: the inventory is the server's.
+      // What is given leaves the slot when the update says so: the inventory is the server's.
       if (action.startsWith('dai:')) await this.show(this.session.act({ t: 'dai', viandante: other, slot: Number(action.slice(4)) }));
       if (action === 'altro' && k.partita()?.altroTraGiocatori !== false) k.bus.emit('ui:freeaction', { id, name: k.nameOf(id) });
       return;

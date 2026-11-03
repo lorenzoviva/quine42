@@ -1,4 +1,4 @@
-// The server of a game of many (T38, ADR-0058): the only source of truth. It holds the kernel (headless, as
+// The server of a multiplayer game (T38, ADR-0058): the only source of truth. It holds the kernel (headless, as
 // in the tests), takes a link per client, gives each one the world as it is when it comes in, then about ten
 // times a second what changed near its wanderer. A client says where its wanderer went and what they do; the
 // server checks the step with the kernel's collision and pace and corrects it, and answers every action with
@@ -158,7 +158,7 @@ const seqOf = (msg: unknown): number => {
 /** The first files of a list, for a commit's message. */
 const listOf = (paths: string[]) => paths.slice(0, 6).join(', ') + (paths.length > 6 ? '…' : '');
 const round = (v: number) => Math.round(v * 1000) / 1000;
-/** An index from the wire: an integer, or -1 (which no pocket is). */
+/** An index from the wire: an integer, or -1 (which no slot is). */
 const int = (v: unknown) => (typeof v === 'number' && Number.isInteger(v) ? v : -1);
 
 /** An answer that is both a verdict and words (a free craft that did not come off still tells why). */
@@ -620,7 +620,7 @@ export class SessionServer {
       case 'dici':
         return this.answer(c, seq, this.act(c, () => k.sayTo(String(msg.viandante ?? ''), String(msg.testo ?? ''))));
       case 'dai': {
-        const slot = this.pocket(c, msg.slot);
+        const slot = this.slot(c, msg.slot);
         if (slot < 0) return this.answer(c, seq, { ok: false, motivo: 'non porti niente lì' });
         return this.answer(c, seq, this.act(c, () => k.giveTo(String(msg.viandante ?? ''), slot, msg.quanti === undefined ? undefined : int(msg.quanti))));
       }
@@ -771,12 +771,12 @@ export class SessionServer {
     if (Math.hypot(got.x - to.x, got.y - to.y) > CORRECT) c.link.send({ t: 'correzione', seq, x: round(got.x), y: round(got.y) });
   }
 
-  /** Something carried (T39b): what the kernel does with a pocket of the inventory, as the wanderer. */
+  /** Something carried (T39b): what the kernel does with a slot of the inventory, as the wanderer. */
   private item(c: Client, seq: number, msg: Extract<ClientMsg, { t: 'oggetto' }>): void {
     const k = this.kernel;
-    const slot = this.pocket(c, msg.slot);
-    const to = this.pocket(c, msg.verso);
-    const bag = this.pocket(c, msg.borsa);
+    const slot = this.slot(c, msg.slot);
+    const to = this.slot(c, msg.verso);
+    const bag = this.slot(c, msg.borsa);
     const count = msg.quanti === undefined ? undefined : int(msg.quanti);
     const ops: Record<ItemOp, () => unknown> = {
       usa: () => k.useSlot(slot),
@@ -784,7 +784,7 @@ export class SessionServer {
       posa: () => (count === undefined || count > 0) && k.dropSlot(slot, count),
       sposta: () => to >= 0 && k.moveSlot(slot, to),
       in_borsa: () => k.putIntoBag(bag, slot),
-      // In a bag the index is of the bag's own pockets (the kernel checks it).
+      // In a bag the index is of the bag's own slots (the kernel checks it).
       da_borsa: () => bag >= 0 && k.takeFromBag(bag, int(msg.slot)),
       azione: () => k.itemAct(slot, String(msg.azione ?? '')),
     };
@@ -798,7 +798,7 @@ export class SessionServer {
     const k = this.kernel;
     const text = words(msg.testo);
     if (msg.slot !== undefined) {
-      const slot = this.pocket(c, msg.slot);
+      const slot = this.slot(c, msg.slot);
       if (slot < 0) return this.answer(c, seq, { ok: false, motivo: 'non porti niente lì' });
       return this.later(c, seq, () => k.freeItemAction(slot, text));
     }
@@ -807,8 +807,8 @@ export class SessionServer {
     return this.later(c, seq, () => k.freeTileAction(msg.col!, msg.row!, text));
   }
 
-  /** A pocket of the wanderer's inventory from the wire, or -1. */
-  private pocket(c: Client, v: unknown): number {
+  /** A slot of the wanderer's inventory from the wire, or -1. */
+  private slot(c: Client, v: unknown): number {
     const i = int(v);
     return i >= 0 && i < this.kernel.as(c.id, () => this.kernel.inventory().slots.length) ? i : -1;
   }

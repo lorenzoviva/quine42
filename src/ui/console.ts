@@ -27,7 +27,7 @@ export class Console {
   onEdit?: (path: string) => void;
   onClose?: () => void;
   onGenesis?: () => void;
-  /** The master of a game of many (T42d): a copy of the universe with another master, under a new name. */
+  /** The master of a multiplayer game (T42d): a copy of the universe with another master, under a new name. */
   onClone?: (nome: string, master: string, titolari: 'restano' | 'master') => Promise<string | null>;
   dev = false;
 
@@ -107,7 +107,7 @@ export class Console {
         const branch = k.publisher?.branch() ?? [];
         const publish = el('button', { class: 'primary' }, `Pubblica il ramo (${branch.length} file)`);
         publish.onclick = () => void k.publisher?.publish().then(() => this.render());
-        // In a game of many these are the master's branch (T42b): R and checkout move it, «Pubblica» gives it to the world.
+        // In a multiplayer game these are the master's branch (T42b): R and checkout move it, «Pubblica» gives it to the world.
         const note = k.publisher ? `Il tuo ramo: ${branch.length ? branch.join(', ') : 'uguale al mondo'}.` : '';
         return [el('div', { class: 'note' }, `Ogni universo è un repository. ${k.repo.isDirty() ? '⚠ modifiche non committate (universo rotto)' : 'Nessuna modifica in sospeso.'} ${note}`), ...(branch.length ? [el('div', { class: 'row' }, publish)] : []), ...rows];
       }

@@ -1,4 +1,4 @@
-// The sessions of the games of many (T38, ADR-0058). A WebSocket at /api/session?universo=<name>
+// The sessions of the multiplayer games (T38, ADR-0058). A WebSocket at /api/session?universo=<name>
 // is a client of that universe; the first one starts its world, in a process of its own (server/worldHost.ts, T127, ADR-0110), which then
 // keeps running watched from here. Each message is one JSON object of src/session/protocol.ts. `?offline` starts a world with the local models.
 // `npm run dev` and the production server (server/production.ts, T133): the preview server does not start worlds. With accounts (server/account.ts, T44b) every world verifies, through
@@ -35,7 +35,7 @@ export function admitSocket(req: Pick<IncomingMessage, 'headers'> & { socket: { 
 export const DEFAULT_MAX_WORLDS = 16;
 
 /**
- * Why a socket may not start the world of this universe, or undefined. A socket says a name before it says who it is, so only a game of many that
+ * Why a socket may not start the world of this universe, or undefined. A socket says a name before it says who it is, so only a multiplayer game that
  * exists starts anything, and no more than `max` at once: a process for every name asked would stop this machine (V-025).
  */
 export function worldRefusal(universesDir: string | undefined, name: string, running: number, max = DEFAULT_MAX_WORLDS): string | undefined {
@@ -192,7 +192,7 @@ export interface SessionOptions {
   guard?: (req: IncomingMessage) => string | undefined;
 }
 
-/** The sockets of the games of many on a server, whichever it is. `stop` stops the worlds, saving what they can, and closes the clients. */
+/** The sockets of the multiplayer games on a server, whichever it is. `stop` stops the worlds, saving what they can, and closes the clients. */
 export function attachSessions(httpServer: HttpServer, o: SessionOptions): { stop(): Promise<void> } {
   const { accounts, gemini, internal, credits, memoryMb, maxWorlds, program, crowd } = o;
   const wss = new WebSocketServer({ noServer: true, maxPayload: MAX_MESSAGE });

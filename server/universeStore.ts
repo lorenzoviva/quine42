@@ -17,8 +17,8 @@
 //   GET  /api/universe/<name>/maps            → [{ file, name, layout }] every place ever planned
 //   GET  /api/universe/<name>/carte           → { exists, carte, files }      the cards measured here, what shows them (T104, T120)
 //
-// Who may do what (T120, ADR-0102, server/access.ts): a game alone is of whoever is on this machine, a game of many of its master and
-// its world. Everyone else reads only `publicFiles` and writes nothing. In a game of many balances are written only by the world.
+// Who may do what (T120, ADR-0102, server/access.ts): a game alone is of whoever is on this machine, a multiplayer game of its master and
+// its world. Everyone else reads only `publicFiles` and writes nothing. In a multiplayer game balances are written only by the world.
 
 import type { Connect, Plugin } from 'vite';
 import type { IncomingMessage, ServerResponse } from 'node:http';
@@ -155,7 +155,7 @@ export async function mergeBranch(root: string, branch: string, message: string)
 }
 
 // --- Clones (T42d) ------------------------------------------------------------------------------
-// The master of a game of many never changes: another master means another universe, copied whole — history, maps,
+// The master of a multiplayer game never changes: another master means another universe, copied whole — history, maps,
 // the state of every wanderer — with its name and master changed (and the old master's cards, if they pass) in one
 // more commit. What the old master was trying on their branch is theirs, unpublished: the clone has no branches.
 
@@ -364,7 +364,7 @@ export function universeHandler(baseDir: string, opts: { accounts?: AccountSetti
     if ((op === 'create' || op === 'clone') && opts.accounts?.verify && who.id && !makings.take(who.id)) return send(res, 429, { error: 'troppi universi fatti di recente: riprova più tardi' });
     const raw = await readBody(req);
     const body = raw ? JSON.parse(raw) : {};
-    // In a game of many the balances are the world's: not even its master writes them from outside (ADR-0081, ADR-0102).
+    // In a multiplayer game the balances are the world's: not even its master writes them from outside (ADR-0081, ADR-0102).
     const touched = op === 'commit' ? body.changes : op === 'branch' ? body.files : undefined;
     if (Object.keys((op === 'create' ? body.files : touched) ?? {}).some((p) => !allowedPath(p))) return send(res, 400, { error: 'percorso non ammesso' });
     if (!who.server && game.many && Object.keys(touched ?? {}).some(creditFile)) return send(res, 403, { error: 'i crediti non si scrivono da qui' });
@@ -399,7 +399,7 @@ export function universeHandler(baseDir: string, opts: { accounts?: AccountSetti
           await mergeBranch(root, String(body.branch), String(body.message ?? 'pubblicazione'));
           return { head: await head(root) };
         case 'clone': {
-          // Only a game of many's own master gives it to another: `mine`, from who they proved to be. Nobody names themselves master.
+          // Only a multiplayer game's own master gives it to another: `mine`, from who they proved to be. Nobody names themselves master.
           const { nome, head: h } = await cloneUniverse(baseDir, root, { nome: String(body.nome ?? ''), master: String(body.master ?? ''), titolari: body.titolari === 'master' ? 'master' : 'restano' });
           return { nome, head: h };
         }

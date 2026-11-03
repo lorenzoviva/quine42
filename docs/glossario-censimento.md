@@ -53,7 +53,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Trama | `storia` | 43 (15) | 3 (1) | 33 (19) | 2 (2) |
 | Missione | `quest` | 67 (10) | 0 (0) | 3 (2) | 0 (0) |
 | Oggetto | `cosa` | 119 (21) | 17 (6) | 106 (51) | 5 (2) |
-| Tasca | `pocket` | 30 (7) | 0 (0) | 0 (0) | 0 (0) |
+| Tasca | `pocket` | 7 (3) | 0 (0) | 0 (0) | 0 (0) |
 | Ricetta | `crafting` | 4 (3) | 0 (0) | 3 (2) | 0 (0) |
 | Stato | `status` | 168 (25) | 0 (0) | 1 (1) | 69 (9) |
 | Stato | `buff` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |

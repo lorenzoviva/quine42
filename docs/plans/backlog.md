@@ -3218,13 +3218,14 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 - Quando è fatto: commit su `task/T199`, solo la rinomina; nell'esito quanti file e ciò che è rimasto fermo, con il motivo. Sicurezza: nessuna superficie nuova.
 - Esito: R12 eseguita in 15 file (12 di codice: 10 `src`, 2 `tests`; 3 documenti: `docs/glossario.md`, censimento rigenerato, `docs/architettura-dettagli.md`, fuori dall'elenco delle regole comuni ma con 3 citazioni e già toccato dalle rinomine precedenti); `TileDef` → `TerrainDef`, `TileLayer` → `TerrainLayer`; nessuna collisione, nessuna migrazione, nessun cambio di logica. Glossario: riga R12 fatta, voce «Terreno» con i nomi nuovi e i vecchi tra i «da non usare». Restano fermi perché su disco: `tiles` nei manifest e in `ChunkInfo`; per il glossario: `TerrainDef.layer`. Restano fermi perché la riga non li nomina: `tiles` e `tile` del risultato di `cartography.ts`, `VOID_TILE`; se l'autore vuole togliere anche questi serve un altro passaggio. Verdi typecheck, suite intera (108 file, 1448 test) e `tests/glossario.test.ts`; nel log resta 1 `heap out of memory`, senza test falliti. Non provati il browser (prova finale in T205) e `sicurezza:prove`. Sicurezza: nessuna superficie nuova.
 
-### T200 · R13: i commenti, «multiplayer» e `slot` — `da fare` (dipende da T199)
+### T200 · R13: i commenti, «multiplayer» e `slot` — `fatto` (`aa1cadd`) (dipende da T199)
 - Pipeline: claude · stima 1% · approvato · priorità 15
 - Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
 - Cosa fare: R13: «game of many» → «multiplayer», `pocket` → `slot`, nei commenti e nelle poche variabili.
 - Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
 - Browser: non serve (la prova finale è in T205).
 - Quando è fatto: commit su `task/T200`, solo la rinomina; nell'esito quanti file e ciò che è rimasto fermo, con il motivo. Sicurezza: nessuna superficie nuova.
+- Esito: R13 eseguita in 40 file (38 di codice, più glossario e censimento rigenerato): «game of many» → «multiplayer game», `pocket` → `slot`, compreso il metodo privato `SessionServer.pocket`; solo commenti e titoli dei test oltre a quel metodo, nessuna migrazione. Fermi: le tasche di un individuo (`src/kernel/agents/content.ts`, `src/kernel/kernel.ts`, `tests/kernel-things.test.ts`), perché la riga le esclude; il `pocket` di `src/kernel/layout.ts`, che è una zona calpestabile; «universe/world/server/session of many», che la riga non nomina: per toglierli serve un altro passaggio. Verdi typecheck, suite intera (108 file, 1448 test) e `tests/glossario.test.ts`; nel log resta 1 `heap out of memory`, senza test falliti. Non provati il browser (prova finale in T205) e `sicurezza:prove`. Sicurezza: nessuna superficie nuova.
 
 ### T201 · R15: nel sito «universo», non «reame» — `da fare` (dipende da T200)
 - Pipeline: claude · stima 1% · approvato · priorità 16
