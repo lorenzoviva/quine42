@@ -18,11 +18,12 @@ Aggiornato il 03/11/2026, epoca 232. Crediti: vedi `stato`.
 - **T106 integrato:** tema pop art/arcade nelle interfacce in gioco, verificato nel browser con `?skip&offline`. Non provati: login, riga crediti del profilo con account, lobby in una vera partita di molti, mobile, strumenti del master a vista. Da guardare per l'autore.
 - **T213 chiuso senza commit:** gli 1,3-1,5 fps non vengono dal codice ma dalla scheda di Claude in Chrome, a circa 1 Hz anche con pagina vuota (meccanismo non accertato); in headless con la stessa GPU 60 fps con ~5 ms di JS. **I tempi legati ai frame presi nella scheda non valgono.** La sua misura «dopo» (`5c899cd`) non comprende T212. Seguiti approvati da me nell'autonomia: T214 (terreno grigio a ovest della corona), T215 (arrivo alla corona rimisurato, avviso in `#convalida-browser`).
 - **T89a integrato:** cartone a tre fasce per simulazione, corona e studio, dietro `cartoonOn` con `CARTOON_BY_DEFAULT=false` (`?cartone` lo accende, `?classica` vince): diventa `true` dopo T89b e T89c. Non provati la notte nel cartone, le prestazioni (T89e), i voxel luminosi da vicino su facce diverse.
+- **T214 chiuso senza commit:** il terreno grigio non è una regressione della cache. `pagehide` salva lo scostamento del tappeto, che sposta `?dev&teleport=46,0` di 46 caselle a ogni caricamento chiuso bene, su neve che alla luce della corona pare grigia. Causa nelle catture di T213 dedotta (i file non ci sono più). Non provati finestra vera e multigiocatore. Avviso: T216. **Chiesto all'autore:** chi chiude nella corona deve ripartire spostato? Nessun task finché non risponde.
 - ADR nuovi dallo **0123**.
 
 ## Pronti e priorità
 
-1. **In coda, approvati e pronti, partono da soli:** T214 (in corso) T215 T181 T89b T89c T89e T183 T152 T186 T158.
+1. **In coda, approvati e pronti, partono da soli:** T215 e T181 (in corso) T216 T89b T89c T89e T183 T152 T186 T158.
 4. **T181 → T182 → T156** (strutture procedurali; T181 su Fable, stima 10 %, contatore Fable al 93 % fino al 05/11): alla fine di T181 leggere il contatore delle 5 ore e confrontarlo con `ratioSessioneSettimana`.
 4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla.
 5. T89d resta bloccato.
@@ -53,5 +54,5 @@ Aggiornato il 03/11/2026, epoca 232. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **232:** T89a integrato.
+- **232:** T89a integrato; T214 chiuso; T216 nuovo.
 - **231:** T106, T212, T213 chiusi; T214 e T215 nuovi.

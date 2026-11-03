@@ -3343,3 +3343,11 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 - Test: se correggi, un test sul comportamento; nessun test nuovo per la sola misura.
 - Browser: serve, in headless per i tempi.
 - Quando è fatto: l'avviso è nel documento; esito con la tabella prima/ora e la memoria della scheda nei due casi.
+
+### T216 · L'avviso sullo scostamento del tappeto salvato nelle prove con teleport — `da fare`
+- Pipeline: claude · stima 1% · approvato · priorità 17
+- Contesto: nasce da T214 (`dossier T214`): il terreno grigio a ovest della corona non è una regressione della cache. `pagehide` salva lo scostamento del tappeto (`saveState`, `applyWandererState`), che sposta `?dev&teleport=46,0` di 46 caselle a ogni caricamento chiuso in modo ordinato: scostamenti 0, 46, 92, 138 e terreno che cambia con loro. Chi confronta due caricamenti sullo stesso profilo guarda posti diversi.
+- Cosa fare: in `docs/architettura-dettagli.md#convalida-browser`, vicino a `?dev&teleport`, aggiungi l'avviso in poche righe: la posizione del teleport si somma allo scostamento salvato, quindi per confrontare due caricamenti si riparte da un profilo pulito o si controlla la posizione prima di guardare o misurare. Solo documentazione, nessun cambio al codice.
+- Test: nessuno.
+- Dipende da T215 (tocca la stessa sezione).
+- Quando è fatto: l'avviso è nel documento.
