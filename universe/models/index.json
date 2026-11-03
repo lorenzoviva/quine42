@@ -343,5 +343,206 @@
   "classe": "suono",
   "nome": "Boss Fight Cyber-Dungeon",
   "autore": "Argon (SoundLab), in XML a mano (T221)"
+ },
+ "suono-musica-pastorale": {
+  "classe": "suono",
+  "nome": "Prati",
+  "autore": "a mano (T224)",
+  "suono": {
+   "uso": "musica",
+   "ambienti": [
+    "borgo",
+    "campi",
+    "capanne",
+    "maneggio",
+    "locanda",
+    "lago"
+   ],
+   "momenti": [
+    "mattina",
+    "giorno"
+   ]
+  }
+ },
+ "suono-musica-selva": {
+  "classe": "suono",
+  "nome": "Selva",
+  "autore": "a mano (T224)",
+  "suono": {
+   "uso": "musica",
+   "ambienti": [
+    "bosco",
+    "giungla",
+    "montagne",
+    "deserto",
+    "torre_mago"
+   ],
+   "momenti": [
+    "mattina",
+    "giorno"
+   ]
+  }
+ },
+ "suono-musica-pietra": {
+  "classe": "suono",
+  "nome": "Pietra",
+  "autore": "a mano (T224)",
+  "suono": {
+   "uso": "musica",
+   "ambienti": [
+    "castello",
+    "fortezza",
+    "caserma",
+    "tempio",
+    "piramide"
+   ],
+   "momenti": [
+    "mattina",
+    "giorno"
+   ]
+  }
+ },
+ "suono-musica-profondo": {
+  "classe": "suono",
+  "nome": "Profondo",
+  "autore": "a mano (T224)",
+  "suono": {
+   "uso": "musica",
+   "ambienti": [
+    "dungeon",
+    "tana_drago",
+    "rovine"
+   ]
+  }
+ },
+ "suono-musica-tramonto": {
+  "classe": "suono",
+  "nome": "Tramonto",
+  "autore": "a mano (T224)",
+  "suono": {
+   "uso": "musica",
+   "momenti": [
+    "sera"
+   ]
+  }
+ },
+ "suono-musica-notte": {
+  "classe": "suono",
+  "nome": "Notte",
+  "autore": "a mano (T224)",
+  "suono": {
+   "uso": "musica",
+   "momenti": [
+    "notte"
+   ]
+  }
+ },
+ "suono-musica-oltre": {
+  "classe": "suono",
+  "nome": "Oltre",
+  "autore": "a mano (T224)",
+  "suono": {
+   "uso": "musica",
+   "oltre": true
+  }
+ },
+ "suono-effetto-runa": {
+  "classe": "suono",
+  "nome": "Runa",
+  "autore": "a mano (T224)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "runa"
+   ]
+  }
+ },
+ "suono-effetto-oggetto": {
+  "classe": "suono",
+  "nome": "Oggetto",
+  "autore": "a mano (T224)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "oggetto"
+   ]
+  }
+ },
+ "suono-effetto-arpeggio": {
+  "classe": "suono",
+  "nome": "Arpeggio",
+  "autore": "a mano (T224)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "arpeggio"
+   ]
+  }
+ },
+ "suono-effetto-incantesimo": {
+  "classe": "suono",
+  "nome": "Incantesimo",
+  "autore": "a mano (T224)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "incantesimo"
+   ]
+  }
+ },
+ "suono-effetto-guasto": {
+  "classe": "suono",
+  "nome": "Guasto",
+  "autore": "a mano (T224)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "guasto"
+   ]
+  }
+ },
+ "suono-effetto-ritorno": {
+  "classe": "suono",
+  "nome": "Ritorno",
+  "autore": "a mano (T224)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "ritorno"
+   ]
+  }
+ },
+ "suono-effetto-soglia": {
+  "classe": "suono",
+  "nome": "Soglia",
+  "autore": "a mano (T224)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "soglia"
+   ]
+  }
+ },
+ "suono-effetto-salto": {
+  "classe": "suono",
+  "nome": "Salto",
+  "autore": "a mano (T224)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "salto"
+   ]
+  }
+ },
+ "suono-effetto-morte": {
+  "classe": "suono",
+  "nome": "Morte",
+  "autore": "a mano (T224)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "morte"
+   ]
+  }
  }
 }

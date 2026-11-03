@@ -44,6 +44,14 @@ Un limite parla quando **lo passa più di metà dei semi**: anche un buon progra
 
 Il validatore (`soundErrors`) rimanda indietro gli stessi difetti: tre semi per la partitura, il segnale solo sul primo, e nessun rendering se la partitura basta già a rifiutare. Su un preset costa 150-300 ms.
 
+## I programmi del gioco (T228)
+
+I 7 brani e i 9 effetti del seme (`suono-musica-*`, `suono-effetto-*`) non hanno calibrato niente: sono la prima prova delle soglie su programmi scritti dopo. Sui semi 1-5, sui semi 100-139 e su altri cinque sparsi passano tutti, tranne `suono-effetto-morte`: distanza 0 tra i semi, `ripetitivo`, tenuto così dall'autore (lo preferisce all'ascolto). Stanno ben dentro i limiti: RMS da -27,4 a -19,1 dBFS, picco grezzo da 0,29 a 1,06, silenzio fino al 48 %, giuntura al più 0,04, coppie aspre al più il 27 %.
+
+**L'analisi non sa che un programma è un effetto**: lo deduce dalla lunghezza, e sotto i 16 passi è un effetto. Un effetto di una battuta o più si misura come un brano: chiede 4 eventi a battuta e semi diversi. `suono-effetto-soglia` (24 passi) è stata corretta per questo: la nota d'arrivo la sceglie il seme tra due, e l'ottava in più nel pad porta 8 eventi; il seme 1, quello del gioco, resta com'era con quell'ottava in più.
+
+**Il validatore costa di più sui brani veri**: da 1 a 1,9 s su un brano del gioco, contro i 150-300 ms di un preset; sugli effetti al più 250 ms.
+
 ## Cosa le misure non possono dire
 
 - **Se è bello.** Nessuna soglia riconosce una melodia che resta in testa. Quattro preset calibrano il «non è rotto», non il gusto: un programma senza difetti può essere noioso, e uno buono e strano può essere segnalato. Sopra le soglie, decide chi ascolta.

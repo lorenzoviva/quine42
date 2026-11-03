@@ -25,7 +25,12 @@ import { accountWanderer } from './session/account';
 import { ProfilePanel } from './ui/profile';
 import { LobbyScreen } from './ui/lobby';
 import { CreditExhaustedModal } from './ui/creditdialog';
-import { Sfx } from './audio';
+import { Sfx } from './audio/sfx';
+import { readPrograms, SoundDirector, type SoundCue } from './audio/director';
+import { SoundRenders } from './audio/renders';
+import { bindSoundMenu } from './ui/soundmenu';
+import { dayPhase } from './kernel/society';
+import { keepsFormsOnDisk } from './render/forms';
 import { $ } from './ui/dom';
 import type { MasterTools } from './master';
 import './style.css';
@@ -362,6 +367,14 @@ async function main() {
     syncFocus();
   });
   const sfx = new Sfx();
+  const renders = new SoundRenders(undefined, keepsFormsOnDisk(location));
+  const sound = new SoundDirector(sfx, renders);
+  (window as any).suono = { sfx, director: sound, renders };
+  bindSoundMenu(sfx, $<HTMLInputElement>('#sound-volume'), $<HTMLInputElement>('#sound-mute'));
+  const unlockSound = () => {
+    sfx.unlock();
+    sound.unlock();
+  };
   // A player's console sees only the client (T41): what the server told this tab. The master's sees the kernel too.
   (window as any).rune = master ? kernel : thin;
   (window as any).quine = (window as any).rune;
@@ -398,7 +411,8 @@ async function main() {
   kernel.bus.on('genesis:done', ({ title }) => hud.showBanner(title.toUpperCase(), 'Un nuovo universo è stato scritto. Il tappeto ti riporta al centro.', 4000));
 
   kernel.input.attach(window);
-  kernel.input.onAny = () => sfx.unlock();
+  kernel.input.onAny = unlockSound;
+  window.addEventListener('pointerdown', unlockSound);
   const intro = $('#intro');
   const help = $('#help');
   const helpBeyond = $('#help-beyond');
@@ -406,8 +420,8 @@ async function main() {
     if (intro.hidden) return;
     intro.classList.add('out');
     setTimeout(() => (intro.hidden = true), 700);
-    sfx.unlock();
-    sfx.chord([220, 330, 440]);
+    unlockSound();
+    sound.cue('start');
     if (!thin && kernel.needsGenesis() && !params.has('skip')) void runGenesis();
   };
   window.addEventListener('keydown', startGame);
@@ -448,15 +462,32 @@ async function main() {
     Object.assign(kernel.wandererPos(), { x: tp[0], y: tp[1] });
   }
 
-  kernel.bus.on('rune:picked', () => sfx.blip(660, 0.07));
-  kernel.bus.on('item:picked', () => sfx.blip(520, 0.09, 'triangle'));
-  kernel.bus.on('item:crafted', () => sfx.chord([523, 659], 0.2));
-  kernel.bus.on('rune:inscribed', () => sfx.chord([440, 554, 659], 0.25));
-  kernel.bus.on('spell:cast', () => sfx.chord([330, 494, 740, 988], 0.5));
-  kernel.bus.on('fault', ({ isNew }) => isNew && sfx.noise(0.3));
-  kernel.bus.on('rollback', () => sfx.chord([660, 440, 330], 0.3));
-  kernel.bus.on('forge:done', () => sfx.chord([392, 494, 587], 0.4));
-  kernel.bus.on('zone', ({ zone }) => zone === 'corona' && sfx.chord([196, 294, 392, 587], 1.2));
+  for (const cue of ['rune:picked', 'item:picked', 'item:used', 'item:action', 'ui:container', 'item:crafted', 'rune:inscribed', 'spell:cast', 'rollback', 'forge:done'] as SoundCue[]) kernel.bus.on(cue, () => sound.cue(cue));
+  kernel.bus.on('fault', ({ isNew }) => isNew && sound.cue('fault'));
+  kernel.bus.on('zone', ({ zone }) => zone === 'corona' && kernel.coronaRevealed() && sound.cue('beyond'));
+  kernel.bus.on('wanderer:jumped', () => sound.cue('jump'));
+  kernel.bus.on('ui:death', () => sound.cue('death'));
+  kernel.bus.on('ui:died', () => sound.cue('death'));
+
+  // What the music looks at, twice a second. The sound must not be able to stop the frame, whatever the world's state.
+  let soundFiles: unknown;
+  let soundIndex: unknown;
+  let soundAt = 0;
+  const updateSound = (now: number) => {
+    if (now - soundAt < 500) return;
+    soundAt = now;
+    try {
+      if (kernel.files !== soundFiles || kernel.files['models/index.json'] !== soundIndex) {
+        soundFiles = kernel.files;
+        soundIndex = kernel.files['models/index.json'];
+        sound.setPrograms(readPrograms(kernel.files));
+      }
+      const here = kernel.wandererCarpet();
+      sound.update({ beyond: kernel.coronaRevealed(), environment: kernel.chunkAt(here.x, here.y)?.plan?.layout, phase: dayPhase(kernel.time, Kernel.DAY_SECONDS), seed: kernel.config.seed });
+    } catch {
+      /* silence, and the game goes on */
+    }
+  };
 
   const handle = (a: string) => {
     switch (a) {
@@ -569,6 +600,7 @@ async function main() {
     thin?.frame(elapsed);
     renderer.render(elapsed);
     hud.update(elapsed);
+    updateSound(now);
     requestAnimationFrame(frame);
   };
   requestAnimationFrame(frame);
