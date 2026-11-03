@@ -129,10 +129,10 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Fermo**: `tiles` nei manifest, `TileDef.layer`.
 
 ### Ambiente
-- **Inglese**: `environment`, `EnvironmentDraft`, `LayoutDef`
+- **Inglese**: `environment`, `EnvironmentDraft`, `EnvironmentDef`, `environmentsFor`
 - **Definizione**: un programma di riscrittura che dà forma a un luogo (bosco, villaggio…), scritto dal Cartografo.
 - **Dove vive**: `src/kernel/types.ts`, `src/kernel/agents/cartography.ts`, `manifest → layouts`
-- **Da non usare**: `layout` (per l'ambiente), `bioma` (è un'altra cosa: le lettere del generatore)
+- **Da non usare**: `layout`, `LayoutDef`, `layoutsFor` (per l'ambiente), `bioma` (è un'altra cosa: le lettere del generatore)
 - **Fermo**: `layouts` nei manifest, `layout` in `maps/`, `usa_ambiente`.
 
 ### Lotto
@@ -886,7 +886,7 @@ Le fanno i task T188-T204, una per task e nell'ordine: vanno in conflitto con tu
 | R8 | `CardLedger` → `CardUses`, `UsageLedger` → `UsageLog` | `Ledger`, `FileLedger`, `MemoryLedger`, `LedgerBook`, `openLedger`: sono dei saldi; la riga non li nomina: i locali e parametri `ledger` che tengono un `UsageLog` (`lab/scripts/`, `tests/subscription.test.ts`), `ledger` di `allCards` in `cards.ts`, «ledger» nei commenti e nei titoli dei test; `docs/conversazioni.md`, che è storia; **fermi** `world/consumi.json`, `world/carte.json` | 12 | no | fatto |
 | R9 | Di `corona.ts`: `Floor` → `Storey`, `Building.floors` → `storeys`, `perFloor` → `perStorey`, `nFloors` → `nStoreys`, `FLOOR_STRIDE` → `STOREY_STRIDE`; il campo `floor` di `roomAt`, il parametro `floor: Floor` e l'indice `floor` di `entrance` → `storey`; nei test `sampleFloor` → `sampleStorey`, `floorOf` → `storeyOf` (è il piano di un oggetto) | i pavimenti: `floors` di `src/mj/mesh.ts`, `floorAt`, `floorBelow`, `Math.floor`; le misure di `lab/banco/misure.ts`; `Lot.floor`, `Form.floor`; il genere `'floor'` di `CoronaTile` e la parola inglese «ground floor» nei commenti; **fermo** lo strato `floor` di `TileLayer` | 21 | no | fatto |
 | R10 | Le caselle: `gateCells` → `gateTiles`, `freeCell` → `freeTile`, `freeCells` → `freeTiles`, `runeCells` → `runeTiles`, `solidCells` → `solidTiles`, `cellNear` → `tileNear`, `propCells` → `propTiles`, `pickCell` → `pickTile`, `doorCells` → `doorTiles`, `nicheCell` → `nicheTile`, `cellOf` → `tileOf`, `cellIndex` → `tileIndex`, `polarCell` → `polarTile`, `CoronaCell` → `CoronaTile`; i locali `cell` dove indicano una casella (anche il campo del risultato di `tileOf`, che non esce da `kernel.ts`) | le celle: `turnCells`, `cellAt` e `nCell` di `mesh.ts`, `sameCells`, i `cell` di griglie, tabelle e tele; `visibleCells` del sito e `sleepCell` di `ledger.ts`, che non sono né l'una né l'altra. `playerCell` sta in R3; la riga non li nomina: i campi `cell` di `Placements` e di `HoverInfo`, `Building.cells`, `Cell`, `cells` e `cell()` di `water.ts`, `Overlay.cell`, i locali `cells` al plurale, i commenti | 9 | no | fatto |
-| R11 | `LayoutDef` → `EnvironmentDef`, `layoutsFor` → `environmentsFor` | **fermi** `layouts` nei manifest (25 file la leggono), `layout` nei piani | 8 | no | da fare |
+| R11 | `LayoutDef` → `EnvironmentDef`, `layoutsFor` → `environmentsFor` | **fermi** `layouts` nei manifest (25 file la leggono), `layout` nei piani; il campo `layouts` del risultato di `environmentsFor` e i locali `layouts`; la riga non li nomina: `designLayouts`, `validateLayout`, `checkLayout`, `LayoutCheck` | 8 | no | fatto |
 | R12 | `TileDef` → `TerrainDef`, `TileLayer` → `TerrainLayer` | **fermi** `tiles` | 12 | no | da fare |
 | R13 | Commenti: «game of many» e «games of many» → «multiplayer»; `pocket` e `pockets` → `slot` e `slots`, anche le poche variabili | le tasche nei testi di gioco («own pockets» delle storie, se dice le tasche di un individuo) | 32 + 13 | no: solo commenti, tranne le variabili | da fare |
 | R14 | `AGENTS.md`: `chunk` → «luogo» (righe di `relief.ts`, `terrain.ts`, `universe.json`), `layout` → «ambiente» dove è l'ambiente | gli ADR, che non si toccano | 1 | no | da fare |

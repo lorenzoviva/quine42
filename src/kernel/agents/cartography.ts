@@ -5,7 +5,7 @@
 
 import type { Schema } from '../ai/models';
 import type { CardStamp } from '../cards';
-import type { LayoutDef, ChunkInfo, TileDef } from '../types';
+import type { EnvironmentDef, ChunkInfo, TileDef } from '../types';
 import type { MjNode } from '../mj';
 import { sizeOf, TAGLIE, type Taglia } from '../../mj/classes';
 import { STAMP_SHAPES } from '../stamps';
@@ -155,8 +155,8 @@ const LAYOUTS_SCHEMA: Schema = {
 };
 
 /** Genesis: the Cartographer writes the environments of this world as rewrite programs. */
-export async function designLayouts(c: Council, palette: Record<string, TileDef>, feedback = ''): Promise<Array<{ id: string; def: LayoutDef } | { id: string; error: string }>> {
-  const raw = await c.ask<{ ambienti: Array<{ id: string; nome: string; descrizione: string; tipo: LayoutDef['environment']; programma_json: string }> }>(
+export async function designLayouts(c: Council, palette: Record<string, TileDef>, feedback = ''): Promise<Array<{ id: string; def: EnvironmentDef } | { id: string; error: string }>> {
+  const raw = await c.ask<{ ambienti: Array<{ id: string; nome: string; descrizione: string; tipo: EnvironmentDef['environment']; programma_json: string }> }>(
     'cartografo',
     'genesis.layouts',
     [
@@ -256,7 +256,7 @@ export interface EnvironmentDraft {
   id: string;
   name: string;
   description: string;
-  environment: LayoutDef['environment'];
+  environment: EnvironmentDef['environment'];
   program?: unknown;
   tiles: Array<{ code: string; tile: TileDef }>;
   region: RegionDraft;

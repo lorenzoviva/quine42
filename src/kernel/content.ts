@@ -4,7 +4,7 @@
 
 import { Rng } from './rng';
 import { runeGlyph } from './runes';
-import type { ItemDef, ItemSpec, LayoutDef, LootTable, MagicRune, ModuleEntry, Recipe, Spell } from './types';
+import type { ItemDef, ItemSpec, EnvironmentDef, LootTable, MagicRune, ModuleEntry, Recipe, Spell } from './types';
 
 export const CATEGORY_GLYPHS: Record<string, string> = {
   cibo: 'ò', bevanda: 'Ů', medicina: '+', attrezzo: '⚒', arma: '†', materiale: '▪', luce: '☼', vestiario: 'Ʌ', contenitore: '◘', magia: '✦', varie: '•',
@@ -29,7 +29,7 @@ export class Content {
   readonly items = new Map<string, ItemDef>();
   recipes: Recipe[] = [];
   loot: Record<string, LootTable> = {};
-  layouts: Record<string, LayoutDef> = {};
+  layouts: Record<string, EnvironmentDef> = {};
   /** Magic runes by token, incantations by sequence of tokens ("fuoco luce"). */
   runes: Record<string, MagicRune> = {};
   spells: Record<string, Spell> = {};
