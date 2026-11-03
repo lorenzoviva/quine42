@@ -313,6 +313,8 @@ describe('due mondi veri', () => {
     }
   }, opening(2));
 
+  // The one `FATAL ERROR: Reached heap limit ... JavaScript heap out of memory` in the log of the suite comes from here, with its native stack (T210): the child
+  // inherits stderr (`stdio` in `WorldHost.spawn`) and dies on purpose at the 200 MB asked for below. It is the property under test, not a fault of the suite.
   it('V-007 oltre il limite di memoria muore lui solo, e riparte', async () => {
     const uno = world('uno', { memoryMb: 200, times: { ...REAL_TIMES, kill: 60000, notice: 60000 } });
     try {
