@@ -1996,9 +1996,9 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Test: offline, sulla previsione e sull'avvio e l'arresto con un generatore finto: crediti avanzati → parte; un task pronto che ha bisogno dello slot → si ferma e riprende; tetto raggiunto → passa al prossimo. Typecheck e suite con i loro turni.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T88`; nell'esito come si accende e si spegne.
-- Dipende da: T82, T85, T207.
+- Dipende da: T82, T85, T207, T156 (autore, 03/11: niente strutture dei mondi nuovi prima del prompt nuovo dello Scultore).
 
-### T207 · La generazione differita: un universo generato senza browser, solo dagli abbonamenti — `da fare` (dipende da T205)
+### T207 · La generazione differita: un universo generato senza browser, solo dagli abbonamenti — `da fare` (dipende da T205, T156)
 - Pipeline: claude · stima 6% · approvato · priorità 59
 - Contesto: richiesta dell'autore (03/11), l'idea di T88 e T153: generare gli universi non in tempo reale, in alta qualità, solo con gli abbonamenti. Oggi la coda (ADR-0077, ADR-0106, `src/kernel/ai/subscription.ts`) prende solo i compiti lenti, il resto va alle API, e non c'è sul server dei mondi di molti: una partita multigiocatore senza API non genererebbe i luoghi nuovi. Se il mondo si genera prima, il problema non si pone per ciò che è già pronto.
 - Cosa fare: un comando locale, senza browser, che apre un universo in un kernel e genera Genesi, luoghi in anticipo a partire dal centro, persone e modelli, un passo alla volta. In questa modalità **ogni** compito va alla coda; se una chiamata andrebbe alle API, il comando si ferma con un errore, non spende. Ogni passo passa dal validatore e dal filtro della quarta parete come sempre, e si committa solo uno stato valido; fermato e riavviato, riprende da lì. Un tetto di consumo per universo in percentuale della settimana, riletto a ogni passo. Mai su un universo con un mondo acceso. La partita (singola o multigiocatore) si sceglie all'avvio. Decidi tu, e scrivilo: quale modello per l'alta qualità (con revisioni in più?), quanti luoghi, chi risulta pagante e titolare delle carte. L'isolamento della CLI (ADR-0106) non cambia. Mai sul server di produzione. Un ADR e la voce nel glossario.

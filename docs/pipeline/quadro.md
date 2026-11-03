@@ -18,7 +18,7 @@ Aggiornato il 03/11/2026, epoca 223. Crediti: vedi `stato`.
 2. **Catena delle rinomine** (l'autore: «i nomi vanno bene e fai tutte le rinomine»): T188-T203 → T204 (`AGENTS.md`) → T205 (prova nel browser), p2-20, ognuno dipende dal precedente. A ogni fine `traccia` e `integra`, una alla volta.
 3. **T175 T106 T89a T183 T152 T186 T158, e T181**: approvati, con «dipende da T205» (l'autore: non c'è bisogno di toglierla). Partono da soli alla fine di T205.
 4. **T181 → T182 → T156** (strutture procedurali; T181 su Fable, stima 10 %, contatore Fable al 93 % fino al 05/11): alla fine di T181 leggere il contatore delle 5 ore e confrontarlo con `ratioSessioneSettimana`.
-4b. **Generazione differita** (richiesta dell'autore, 03/11): T207 (generatore senza browser, solo abbonamenti, aspetta T205) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). Scelti i nomi, metterli nell'elenco `generazione` di `config.json`.
+4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T205 e T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). Scelti i nomi, metterli nell'elenco `generazione` di `config.json`.
 5. Bloccati da T89a: T89b-e.
 
 ## Attese dall'autore
