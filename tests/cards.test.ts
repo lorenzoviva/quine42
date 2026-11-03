@@ -4,7 +4,7 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import type { TextCall } from '../src/kernel/ai/models';
-import { CARDS_FILE, COMUNE, isCommonTask, payerOf, stampFiles, titolareOf } from '../src/kernel/cards';
+import { CARDS_FILE, COMUNE, isCommonTask, payerOf, stampFiles, cardHolderOf } from '../src/kernel/cards';
 import { USAGE_FILE } from '../src/kernel/ai/usage';
 
 /** Offline models that report every call to the ledger as if it had cost a few tokens. */
@@ -73,11 +73,11 @@ describe('the cards (T36)', () => {
 
   it('common cards go to one of the wanderers, drawn with the seed; the same in every kernel', async () => {
     const ids = Array.from({ length: 40 }, (_, i) => `oggetto:cosa-${i}`);
-    const draw = (seed: number) => ids.map((id) => titolareOf(id, COMUNE, ['io', 'anna'], seed));
+    const draw = (seed: number) => ids.map((id) => cardHolderOf(id, COMUNE, ['io', 'anna'], seed));
     expect(draw(7)).toEqual(draw(7));
     expect(new Set(draw(7))).toEqual(new Set(['io', 'anna']));
     expect(draw(7)).not.toEqual(draw(8));
-    expect(titolareOf('luogo:1_0', 'anna', ['io', 'anna'], 7)).toBe('anna');
+    expect(cardHolderOf('luogo:1_0', 'anna', ['io', 'anna'], 7)).toBe('anna');
     // In the kernel: the wanderers it has (the order they joined in does not matter).
     const a = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
     const b = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });

@@ -97,8 +97,8 @@ export function buildCoronaRing(k: Kernel): THREE.Group {
   }
 
   // The Artist's gallery plinto sculpture (T48b): an instance of a library model on the plinto in the piazza
-  if (k.plintoSculpture) {
-    const ps = k.plintoSculpture;
+  if (k.plinthSculpture) {
+    const ps = k.plinthSculpture;
     const pf = k.forms.ready(ps.model, ps.seed);
     const pgeo = pf && geoOf(pf);
     if (!pgeo) {
@@ -283,7 +283,7 @@ export function animateRing(ring: THREE.Group, t: number, k?: Kernel): void {
 /** What the campus wears (T20, T50e): the ring is built again when a building or prop becomes ready. */
 export const campusKey = (k: Kernel) =>
   `${k.forms.version}|` +
-  (k.plintoSculpture ? `${k.plintoSculpture.model}#${k.plintoSculpture.seed}|` : '') +
+  (k.plinthSculpture ? `${k.plinthSculpture.model}#${k.plinthSculpture.seed}|` : '') +
   k.corona.buildings.map((b) => (b.structure && geoOf(b.structure.form) ? b.structure.form.key : '')).join('|');
 
 /** The building's name in neon above its door, facing the avenue (and, on its back, the lawns). */

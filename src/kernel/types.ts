@@ -1,4 +1,4 @@
-import type { Carta } from './cards';
+import type { CardStamp } from './cards';
 
 export type FileMap = Record<string, string>;
 
@@ -9,7 +9,7 @@ export interface Rule {
   racconto: string;
   effetti?: string[];
   /** Who judged it and who paid (T36): only the Council's judgements are cards. */
-  carta?: Carta;
+  carta?: CardStamp;
 }
 
 /** entity = NPCs and objects in the world; item = things that go in the inventory. */
@@ -367,13 +367,13 @@ export interface AiConfig {
   /** How often every agent asks the model, 0-1 (T45b, ADR-0085): an object or a preset's name (`low detail`); repaired by the validator. */
   coefficienti?: Partial<import('./coefficients').Coefficients> | string;
   /** Quality and spending minimums set by the master for multiplayer (T45d). */
-  minimi?: AiMinimi;
+  minimi?: AiMinimums;
   /** The Actor (T157, ADR-0116): who plays the people with the Narrator's sheets; off by default. A boolean, a model's name or an object; repaired by the validator. */
-  attore?: Partial<import('./coefficients').AttoreConfig> | boolean | string;
+  attore?: Partial<import('./coefficients').ActorConfig> | boolean | string;
 }
 
 /** Quality and spending minimums of an universe (T45d). */
-export interface AiMinimi {
+export interface AiMinimums {
   /** Minimum text model (e.g. 'gemini-3.1-flash-lite'). */
   textModel?: string;
   /** Minimum sculptor models per class (e.g. { struttura: 'gemini-3.8-flash' }). */
@@ -396,7 +396,7 @@ export interface UniverseConfig {
   /** The relief (ADR-0048): `mare` is the sea's level (T51a); without it, the one the relief gives. */
   rilievo?: { mare?: number };
   /** The heritage of clones (T45c, ADR-0084): what of every use of a cloned card goes back to who held it before. */
-  eredita?: import('./heritage').Eredita;
+  eredita?: import('./heritage').HeritageConfig;
 }
 
 /** How the game is played in this universe: chosen before the Genesis, then fixed (ADR-0053). */

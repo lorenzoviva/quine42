@@ -22,9 +22,9 @@ export function modelSize(req: Pick<SculptRequest, 'classe' | 'taglia'>): Pick<M
 }
 
 /** Common shapes of items: one program each, tinted with each item's colour. */
-export const FORME = ['sacco', 'bottiglia', 'vaso', 'cesto', 'frutto', 'pane', 'formaggio', 'attrezzo', 'lama', 'arco', 'gemma', 'cristallo', 'libro', 'pergamena', 'abito', 'cappello', 'scarpe', 'anello', 'moneta', 'erba', 'fiore', 'fungo', 'pietra', 'legna', 'carne', 'pesce', 'chiave', 'candela', 'lanterna', 'corda'] as const;
-export type Forma = (typeof FORME)[number];
-export const formaModel = (f: string) => `forma-${f}`;
+export const ITEM_SHAPES = ['sacco', 'bottiglia', 'vaso', 'cesto', 'frutto', 'pane', 'formaggio', 'attrezzo', 'lama', 'arco', 'gemma', 'cristallo', 'libro', 'pergamena', 'abito', 'cappello', 'scarpe', 'anello', 'moneta', 'erba', 'fiore', 'fungo', 'pietra', 'legna', 'carne', 'pesce', 'chiave', 'candela', 'lanterna', 'corda'] as const;
+export type ItemShape = (typeof ITEM_SHAPES)[number];
+export const itemShapeModel = (f: string) => `forma-${f}`;
 
 /** The generic programs of the classes: shared by every kind of entity without a model of its own. */
 export const GENERIC = new Set(['persona', 'animale', 'bestia', 'albero', 'cespuglio', 'roccia', 'sasso', 'oggetto', 'mobile', 'edificio', 'monumento', 'grande']);

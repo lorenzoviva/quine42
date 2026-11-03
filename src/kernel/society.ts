@@ -83,11 +83,11 @@ export interface Person {
   /** Before T34: what they were to the only wanderer (read into `famiglia` with the id `io`). */
   legameViandante?: string;
   /** The sheet the Narrator wrote for the Actor (T157): the text, and the fingerprint of what it was written from. */
-  scheda?: Scheda;
+  scheda?: IndividualSheet;
 }
 
 /** The sheet of a person (T157): written once, rewritten when their bonds or story change (`sheetFingerprint`). */
-export interface Scheda {
+export interface IndividualSheet {
   testo: string;
   impronta: string;
 }

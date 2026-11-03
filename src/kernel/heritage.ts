@@ -8,7 +8,7 @@
 import { hash32, hashStr } from './rng';
 
 /** A holder a card had before a clone. */
-export interface Origine {
+export interface CardOrigin {
   /** Whose card it was in the universe it came from. */
   titolare: string;
   /** That universe's name. */
@@ -18,21 +18,21 @@ export interface Origine {
 }
 
 /** universe.json → eredita: the share that goes back along the chain at every use. */
-export interface Eredita {
+export interface HeritageConfig {
   /** Always, however much the content was changed (0-1). */
   base: number;
   /** On top, for content cloned and never changed; less the more it was (0-1). */
   copia: number;
 }
 
-export const EREDITA: Eredita = { base: 0.1, copia: 0.4 };
+export const DEFAULT_HERITAGE: HeritageConfig = { base: 0.1, copia: 0.4 };
 
 /** Repairs universe.json → eredita: two numbers between 0 and 1 whose sum is at most 1. */
-export function repairEredita(raw: unknown): Eredita {
+export function repairHeritage(raw: unknown): HeritageConfig {
   const r = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
   const num = (v: unknown, d: number) => (typeof v === 'number' && Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : d);
-  const base = num(r.base, EREDITA.base);
-  return { base, copia: Math.min(num(r.copia, EREDITA.copia), 1 - base) };
+  const base = num(r.base, DEFAULT_HERITAGE.base);
+  return { base, copia: Math.min(num(r.copia, DEFAULT_HERITAGE.copia), 1 - base) };
 }
 
 /** The content of what holds a card, as text: keys sorted, every `carta` left out (who holds it is not what it is). */
@@ -77,7 +77,7 @@ export function changeOf(before: number[], after: number[]): number {
 }
 
 /** A valid chain of origins (what is not one is left out). */
-export function readOrigins(raw: unknown): Origine[] {
+export function readOrigins(raw: unknown): CardOrigin[] {
   if (!Array.isArray(raw)) return [];
   return raw
     .filter((o) => o && typeof o.titolare === 'string' && typeof o.universo === 'string' && Array.isArray(o.impronta))
@@ -89,7 +89,7 @@ export function readOrigins(raw: unknown): Origine[] {
  * link keeps what the content owes to the ones before — `base + copia × (1 − change)` — and passes it on; the
  * first holder keeps what reaches them. `now` is the fingerprint of the content as it is.
  */
-export function sharesOf(titolare: string, origini: Origine[], now: number[], cfg: Eredita = EREDITA): Record<string, number> {
+export function sharesOf(titolare: string, origini: CardOrigin[], now: number[], cfg: HeritageConfig = DEFAULT_HERITAGE): Record<string, number> {
   const out: Record<string, number> = {};
   const add = (who: string, q: number) => {
     if (q > 0) out[who] = (out[who] ?? 0) + q;

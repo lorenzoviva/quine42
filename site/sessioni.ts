@@ -33,7 +33,7 @@ export interface RealmView {
   sculptorSummary: string;
   coefficientsLabel: string;
   hourlyCost: number;
-  tettoMinimo: number;
+  minCap: number;
   description: string;
 }
 
@@ -108,7 +108,7 @@ export function parseRealmSnapshot(name: string, files: FileMap, active?: Active
       ? `${ai.textModel} (Low Detail)`
       : `${ai.textModel} + ${sculpt.figura}`;
 
-  const tettoMinimo = toNumber(ai.minimi?.tetto ?? 1.0);
+  const minCap = toNumber(ai.minimi?.tetto ?? 1.0);
 
   let description = 'Reame multigiocatore vivo generato con algoritmi MarkovJunior e intelligenza artificiale.';
   try {
@@ -135,7 +135,7 @@ export function parseRealmSnapshot(name: string, files: FileMap, active?: Active
     sculptorSummary,
     coefficientsLabel: presetLabel,
     hourlyCost: toNumber(estimate.dollari),
-    tettoMinimo,
+    minCap,
     description,
   };
 }
@@ -327,7 +327,7 @@ export function renderRealmCard(realm: RealmView): HTMLElement {
           </tr>
           <tr>
             <td class="text-dim">Tetto minimo:</td>
-            <td><b>$${realm.tettoMinimo.toFixed(2)} USD</b></td>
+            <td><b>$${realm.minCap.toFixed(2)} USD</b></td>
           </tr>
         </tbody>
       </table>

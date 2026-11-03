@@ -25,7 +25,7 @@ export const LOW_DETAIL: { coefficienti: Coefficients; scultori: Partial<Sculpto
  * and no call is added; on, the Narrator writes a sheet once per individual (`npc.sheet`) and the Actor plays them
  * (`npc.reply`, `npc.dialogue`) with its own model.
  */
-export interface AttoreConfig {
+export interface ActorConfig {
   acceso: boolean;
   /** The Actor's model; `ACTOR_MODEL` when it says nothing. */
   modello: string;
@@ -39,7 +39,7 @@ export interface AttoreConfig {
 export const ACTOR_MODEL = 'gemini-3.8-flash';
 
 /** The Actor's option from what universe.json says: a boolean, a model's name (on, with that model), or an object. */
-export function repairAttore(raw: unknown): AttoreConfig {
+export function repairActor(raw: unknown): ActorConfig {
   if (typeof raw === 'boolean') return { acceso: raw, modello: ACTOR_MODEL };
   if (typeof raw === 'string') {
     const m = raw.trim();
@@ -190,7 +190,7 @@ export interface HourLine {
 export function hourlyEstimate(ai: AiConfig, date?: string): { righe: HourLine[]; chiamate: number; dollari: number } {
   const c = repairCoefficients(ai.coefficienti);
   const sc: SculptorAiModels = { ...DEFAULT_SCULPTORS, ...(ai.scultori ?? {}) };
-  const actor = repairAttore(ai.attore);
+  const actor = repairActor(ai.attore);
   const text = (n: number) => n * (costOf(ai.textModel, WEIGHT.testo, date) ?? 0);
   // Who plays the people: the Actor's model when the option is on (T157), else the text model.
   const played = (n: number) => n * (costOf(actor.acceso ? actor.modello : ai.textModel, WEIGHT.testo, date) ?? 0);

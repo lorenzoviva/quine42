@@ -7,7 +7,7 @@ import * as THREE from 'three';
 import { vptOf } from '../kernel/forms';
 import type { VoxelGrid } from '../mj/mesh';
 import type { StudioItem } from '../kernel/corona';
-import type { TornioShown } from '../kernel/tornio';
+import type { LatheShown } from '../kernel/lathe';
 import { arrowSign, textPlane } from './corona3d';
 import { geometry } from './models';
 import { meshVoxels } from '../mj/mesh';
@@ -18,7 +18,7 @@ const CYCLE_DURATION = 5.0;
 /** Portion of the cycle spent building up through snapshots before holding the final model. */
 const BUILD_DURATION = 3.6;
 
-export class TornioView {
+export class LatheView {
   readonly group = new THREE.Group();
   private turntable: THREE.Group;
   private meshes: THREE.Mesh[] = [];
@@ -28,7 +28,7 @@ export class TornioView {
 
   constructor(
     it: StudioItem,
-    readonly shown: TornioShown,
+    readonly shown: LatheShown,
     private color: string,
     prev?: StudioItem,
     next?: StudioItem,

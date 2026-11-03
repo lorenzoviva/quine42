@@ -14,7 +14,7 @@ import { Corona, campusModel, cellNear, FOCUSED_RULES, folderOf, TABLETS_MAX, ty
 import { Archive } from './archive';
 import { bibleBreaks, cleanBible, metaBreak } from './fourthwall';
 import { biblePages, touchingNodes, type BibleShown } from './bible';
-import { tornioExecute, tornioModels, type TornioModelEntry, type TornioShown } from './tornio';
+import { latheExecute, latheModels, type LatheModelEntry, type LatheShown } from './lathe';
 import type { Rule } from './types';
 import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, placeRegion, readAtlas, regionAt, writeAtlas, type Region } from './atlas';
 import { STAMP_SHAPES } from './stamps';
@@ -30,11 +30,11 @@ import { Input } from './input';
 import { discoverModules, readConfig } from './universe';
 import { askedRunes, carpetLine, CARPET_TOKENS, cellIndex, COUNCIL_RUNE, extractLines, tokenize, type RuneComp, type RuneLine } from './runes';
 import { hash32, hashStr, hex, Rng } from './rng';
-import { onBeat, repairAttore, repairCoefficients, stretch, type AttoreConfig, type Coefficients } from './coefficients';
+import { onBeat, repairActor, repairCoefficients, stretch, type ActorConfig, type Coefficients } from './coefficients';
 import { BudgetError, type AiModels } from './ai/models';
 import { billedModel, costOf } from './ai/prices';
 import { USAGE_FILE, UsageLedger, type CallRecord } from './ai/usage';
-import { addBudgetFromTetto, costWithFee, DEFAULT_GRANT_CAP, MemoryLedger, splitCost, type Ledger, type PaymentRecord } from './credits';
+import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, MemoryLedger, splitCost, type Ledger, type PaymentRecord } from './credits';
 import { MemoryChunks, type ChunkStore } from './chunks';
 import { bodyFoot, bodyGround, Forms, holesOf, InlineRunner, instanceGrid, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground } from './forms';
 import { classOf, guessClass, RARE_SIZES, sizeRank, TAGLIE, tilesOf, type Taglia } from '../mj/classes';
@@ -56,7 +56,7 @@ import { BENCH, cleanCases, runCase, textKey, type BenchEntry, type BenchRun, ty
 import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Identity } from './agents/content';
 import { addItem, CARRY_CAPACITY, countItem, HOTBAR, equippedItem, moveSlot, newInventory, putSlot, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
 import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH, worldLevels } from './relief';
-import { CardLedger, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, receivedBy, type Received, payerOf, chunkCardId, stampFiles, titolareOf, type Card, type Carta } from './cards';
+import { CardLedger, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, receivedBy, type Received, payerOf, chunkCardId, stampFiles, cardHolderOf, type Card, type CardStamp } from './cards';
 import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState, PER_WANDERER } from './wanderers';
 import type { ActionDef, AiConfig, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Partita, ChunkInfo, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
 
@@ -141,7 +141,7 @@ export type HoverInfo =
   | { kind: 'agent'; agent: AgentId; name: string; doing?: string }
   | { kind: 'player' };
 
-export interface PlintoSculpture {
+export interface PlinthSculpture {
   model: string;
   seed: number;
   x: number;
@@ -277,7 +277,7 @@ export interface RuleShown {
   marked: boolean;
 }
 
-export type { TornioModelEntry, TornioShown };
+export type { LatheModelEntry, LatheShown };
 
 export interface Needs {
   hunger: number;
@@ -485,13 +485,13 @@ export class Kernel {
   private readonly grantCap: number;
   private wanderersById = new Map<string, Wanderer & { entity: Id; tappeto?: { ox: number; oy: number }; profilo?: Profile; anonimo?: boolean }>();
   /** Spending ceiling for this session per wanderer (T45d: lobby). */
-  private sessionTetto = new Map<string, number>();
+  private sessionCap = new Map<string, number>();
   /** How deep in `as` this moment is: someone is acting (V-022). */
   private acting = 0;
   /** What the whole world asks goes to the local models when none of those connected can pay (V-023): a public server's key is not free. */
   commonNeedsPayer = false;
   /** The highest ceiling each wanderer brought: entering again does not add the same budget twice. */
-  private tettoBudgeted = new Map<string, number>();
+  private capBudgeted = new Map<string, number>();
   /** Credits spent in this session per wanderer (T45d). */
   private sessionSpent = new Map<string, number>();
   /** Every wanderer has a carpet of their own (T38): the carpet entity holds this one's offset, the others keep theirs in `tappeto`. */
@@ -517,10 +517,10 @@ export class Kernel {
   /** The Library's rules wall (T47b): which window of rules it shows. */
   private rulesOffset = 0;
   /** The Sculptor's lathe (T48a): which model of the library it shows. */
-  private tornioIndex = 0;
-  private tornioCache = new Map<string, TornioShown>();
+  private latheIndex = 0;
+  private latheCache = new Map<string, LatheShown>();
   /** The model on the plinto in the piazza of the Galleria (T48b). */
-  plintoSculpture?: PlintoSculpture;
+  plinthSculpture?: PlinthSculpture;
   /** The commit the Direction's timeline shows (T46b); none: the newest. */
   private filmAt?: string;
   /** What each system costs in the tick (T27a): the chain of the Systems Room shows it. */
@@ -2006,8 +2006,8 @@ export class Kernel {
   }
 
   /** The Actor's option (T157, ADR-0116): universe.json → ai.attore, repaired; off unless the master turned it on. */
-  actor(): AttoreConfig {
-    return repairAttore(this.config.ai.attore);
+  actor(): ActorConfig {
+    return repairActor(this.config.ai.attore);
   }
 
   /** Who plays the people now: the Actor with its model when the option is on, else the Narrator as always. */
@@ -4417,7 +4417,7 @@ export class Kernel {
     for (const m of extra) {
       if (this.forms.info(m)) this.forms.preload(m);
     }
-    if (this.plintoSculpture) this.updatePlinto();
+    if (this.plinthSculpture) this.updatePlinto();
     else if (this.zone === 'corona') this.visitCorona(this.tickCount);
   }
 
@@ -4804,26 +4804,26 @@ export class Kernel {
   }
 
   /** Sets a wanderer's credit spending cap for this session (T45d: lobby). */
-  setSessionTetto(id: string, tetto: number): void {
+  setSessionCap(id: string, tetto: number): void {
     if (tetto <= 0) {
-      this.sessionTetto.set(id, 0);
+      this.sessionCap.set(id, 0);
       this.sessionSpent.set(id, 0);
       return;
     }
-    this.sessionTetto.set(id, tetto);
+    this.sessionCap.set(id, tetto);
     this.sessionSpent.set(id, 0);
-    const before = this.tettoBudgeted.get(id) ?? 0;
+    const before = this.capBudgeted.get(id) ?? 0;
     if (tetto <= before) return;
-    this.tettoBudgeted.set(id, tetto);
-    const added = addBudgetFromTetto(this.config.ai, tetto - before);
+    this.capBudgeted.set(id, tetto);
+    const added = addBudgetFromCap(this.config.ai, tetto - before);
     if (this.ai?.limits) {
       this.ai.limits.text += added.textCalls;
     }
   }
 
   /** Credit spending cap set for this session, if any (T45d). */
-  sessionTettoOf(id: string = this.wanderer().id): number | undefined {
-    return this.sessionTetto.get(id);
+  sessionCapOf(id: string = this.wanderer().id): number | undefined {
+    return this.sessionCap.get(id);
   }
 
   /** Amount of credits spent in this session (T45d). */
@@ -4836,7 +4836,7 @@ export class Kernel {
     if (!this.manyPlayers()) return true;
     if (id === COMUNE) return !this.commonNeedsPayer || (this.connectedWanderers?.() ?? []).some((w) => this.hasCredits(w));
     if (this.isAnonymous(id)) return false;
-    const tetto = this.sessionTetto.get(id);
+    const tetto = this.sessionCap.get(id);
     const spent = this.sessionSpent.get(id) ?? 0;
     if (tetto !== undefined && spent >= tetto) return false;
     return this.creditsOf(id) > 0;
@@ -4933,7 +4933,7 @@ export class Kernel {
     const spentAfter = Math.round((spentBefore + amount) * 1e6) / 1e6;
     this.sessionSpent.set(id, spentAfter);
     this.bus.emit('credits:changed', { id, crediti: next, delta: -amount });
-    const tetto = this.sessionTetto.get(id);
+    const tetto = this.sessionCap.get(id);
     if (tetto !== undefined && spentBefore < tetto && spentAfter >= tetto) {
       this.council.say('kernel', 'info', `${id} ha raggiunto il tetto di crediti fissato (${tetto} USD): le sue richieste useranno i modelli locali.`);
       this.bus.emit('credits:exhausted', { id, motivo: 'tetto' });
@@ -5077,7 +5077,7 @@ export class Kernel {
     } catch {
       raw = {};
     }
-    const ai = { ...(raw.ai ?? {}), ...patch, ...(patch.coefficienti !== undefined ? { coefficienti: repairCoefficients(patch.coefficienti) } : {}), ...(patch.attore !== undefined ? { attore: repairAttore(patch.attore) } : {}) };
+    const ai = { ...(raw.ai ?? {}), ...patch, ...(patch.coefficienti !== undefined ? { coefficienti: repairCoefficients(patch.coefficienti) } : {}), ...(patch.attore !== undefined ? { attore: repairActor(patch.attore) } : {}) };
     this.writeCommanded('universe.json', JSON.stringify({ ...raw, ai }, null, 2) + '\n');
     this.config = { ...this.config, ai: { ...this.config.ai, ...ai } };
     if (this.ai.textModel !== undefined && this.config.ai.textModel) this.ai.textModel = this.config.ai.textModel;
@@ -5511,26 +5511,26 @@ export class Kernel {
   /**
    * The Sculptor's lathe in the Artist's gallery (T48a): all models in the library.
    */
-  tornioModels(): TornioModelEntry[] {
-    return tornioModels(this.files, this.forms);
+  latheModels(): LatheModelEntry[] {
+    return latheModels(this.files, this.forms);
   }
 
   /**
    * The model currently on the Sculptor's lathe (T48a): executed step by step with snapshots and 4 views.
    */
-  tornioOf(): TornioShown | undefined {
-    const list = this.tornioModels();
+  latheOf(): LatheShown | undefined {
+    const list = this.latheModels();
     if (!list.length) return undefined;
-    this.tornioIndex = (((this.tornioIndex % list.length) + list.length) % list.length);
-    const entry = list[this.tornioIndex];
+    this.latheIndex = (((this.latheIndex % list.length) + list.length) % list.length);
+    const entry = list[this.latheIndex];
     const key = `${entry.id}@${entry.xml.length}@${entry.info.voto ?? ''}`;
-    const hit = this.tornioCache.get(key);
+    const hit = this.latheCache.get(key);
     if (hit) {
-      return { ...hit, index: this.tornioIndex, count: list.length };
+      return { ...hit, index: this.latheIndex, count: list.length };
     }
-    const shown = tornioExecute(entry, this.forms, 20, 1, this.tornioIndex, list.length);
-    if (this.tornioCache.size > 50) this.tornioCache.clear();
-    this.tornioCache.set(key, shown);
+    const shown = latheExecute(entry, this.forms, 20, 1, this.latheIndex, list.length);
+    if (this.latheCache.size > 50) this.latheCache.clear();
+    this.latheCache.set(key, shown);
     return shown;
   }
 
@@ -5538,10 +5538,10 @@ export class Kernel {
    * «<» «>» of the Sculptor's lathe: step to the previous or next model in the library.
    */
   stepTornio(d: number): void {
-    const list = this.tornioModels();
+    const list = this.latheModels();
     if (!list.length) return this.message('Nessun modello nella libreria.');
-    this.tornioIndex = (((this.tornioIndex + d) % list.length) + list.length) % list.length;
-    const now = this.tornioOf()!;
+    this.latheIndex = (((this.latheIndex + d) % list.length) + list.length) % list.length;
+    const now = this.latheOf()!;
     this.message(`Il tornio dello Scultore: «${now.entry.name}» (${now.index + 1}/${now.count})`);
     this.bus.emit('studio:tornio', now);
   }
@@ -5550,7 +5550,7 @@ export class Kernel {
    * The Sculptor's lathe seen up close: opens the lathe panel (T48a).
    */
   openTornio(): void {
-    const now = this.tornioOf();
+    const now = this.latheOf();
     if (!now) return this.message('Nessun modello nella libreria.');
     this.bus.emit('ui:tornio', now);
   }
@@ -5560,15 +5560,15 @@ export class Kernel {
    * reduced to fit on the plinto in front of the Artist's gallery, without generating or adding new collision.
    */
   visitCorona(tick = this.tickCount): void {
-    const pool = this.tornioModels()
+    const pool = this.latheModels()
       .map((e) => e.id)
       .filter((id) => !id.startsWith('corona-'));
-    const candidates = pool.length > 0 ? pool : this.tornioModels().map((e) => e.id);
+    const candidates = pool.length > 0 ? pool : this.latheModels().map((e) => e.id);
     if (!candidates.length) return;
     const rng = new Rng(tick);
     let model = rng.pick(candidates);
-    if (candidates.length > 1 && model === this.plintoSculpture?.model) {
-      const others = candidates.filter((m) => m !== this.plintoSculpture?.model);
+    if (candidates.length > 1 && model === this.plinthSculpture?.model) {
+      const others = candidates.filter((m) => m !== this.plinthSculpture?.model);
       model = rng.pick(others);
     }
     const seed = (tick % 10000) + 1;
@@ -5578,15 +5578,15 @@ export class Kernel {
 
   updatePlinto(model?: string, seed?: number, tick?: number): void {
     if (!model) {
-      if (!this.plintoSculpture) return;
-      model = this.plintoSculpture.model;
-      seed = this.plintoSculpture.seed;
-      tick = this.plintoSculpture.arrivalTick;
+      if (!this.plinthSculpture) return;
+      model = this.plinthSculpture.model;
+      seed = this.plinthSculpture.seed;
+      tick = this.plinthSculpture.arrivalTick;
     }
     const b = this.corona.building('galleria');
     const s = b?.structure;
     if (!s?.plinto) {
-      this.plintoSculpture = {
+      this.plinthSculpture = {
         model,
         seed: seed ?? 1,
         x: 0,
@@ -5609,7 +5609,7 @@ export class Kernel {
       const maxHeight = 2.4;
       scale = Math.min(maxHoriz / Math.max(sizeX, sizeY, 0.01), maxHeight / Math.max(sizeZ, 0.01), 1.0);
     }
-    this.plintoSculpture = {
+    this.plinthSculpture = {
       model,
       seed: seed ?? 1,
       x: s.plinto.x,
@@ -5621,8 +5621,8 @@ export class Kernel {
     };
   }
 
-  plinto(): PlintoSculpture | undefined {
-    return this.plintoSculpture;
+  plinto(): PlinthSculpture | undefined {
+    return this.plinthSculpture;
   }
 
   /** States of the wanderer (on horseback, with a backpack…): what they change, until when. */
@@ -7260,10 +7260,10 @@ export class Kernel {
    * Who wrote and who pays for a piece of content made now by a task, and whose card it is: the payer, or for
    * what the world pays one of the wanderers, drawn with the seed. `chi` overrides the task's payer.
    */
-  sign(cardId: string, task: string, autore: string, chi?: string): Carta {
+  sign(cardId: string, task: string, autore: string, chi?: string): CardStamp {
     const pagante = chi ?? payerOf(task, this.payerNow());
     const all = [...new Set([...this.wanderers().map((w) => w.id), ...wanderersIn(this.files).map((w) => w.id)])];
-    return { autore, pagante, titolare: titolareOf(cardId, pagante, all.length ? all : [SOLO], this.config?.seed ?? 0) };
+    return { autore, pagante, titolare: cardHolderOf(cardId, pagante, all.length ? all : [SOLO], this.config?.seed ?? 0) };
   }
 
   /** Whether an id (of the graph's kind) is a card of this universe. */

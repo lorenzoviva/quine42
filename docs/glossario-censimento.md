@@ -47,6 +47,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Individuo | `npc` | 169 (15) | 0 (0) | 72 (22) | 0 (0) |
 | Individuo | `persona` | 190 (22) | 5 (3) | 53 (21) | 8 (2) |
 | Individuo | `person` | 129 (19) | 0 (0) | 3 (3) | 1 (1) |
+| Scheda | `Scheda` | 40 (11) | 5 (2) | 41 (18) | 4 (3) |
 | Trama | `storia` | 43 (15) | 3 (1) | 33 (19) | 2 (2) |
 | Missione | `quest` | 67 (10) | 0 (0) | 3 (2) | 0 (0) |
 | Oggetto | `cosa` | 119 (21) | 17 (6) | 106 (51) | 5 (2) |
@@ -69,7 +70,11 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Sessione del Concilio | `sessione` | 30 (13) | 0 (0) | 83 (34) | 12 (1) |
 | Modello di IA | `modello` | 94 (28) | 5 (2) | 216 (55) | 15 (4) |
 | Modello di IA | `Models` | 346 (66) | 0 (0) | 76 (31) | 4 (3) |
+| Eredità | `Eredita` | 7 (4) | 0 (0) | 11 (5) | 5 (1) |
+| Eredità | `EREDITA` | 7 (4) | 0 (0) | 11 (5) | 5 (1) |
+| Eredità | `Origine` | 11 (5) | 0 (0) | 34 (17) | 3 (2) |
+| Carta | `Carta` | 41 (9) | 0 (0) | 35 (10) | 13 (4) |
 | Titolare | `owner` | 22 (5) | 0 (0) | 0 (0) | 2 (2) |
-| Tetto | `cap` | 83 (20) | 0 (0) | 3 (3) | 0 (0) |
+| Tetto | `cap` | 119 (20) | 0 (0) | 4 (4) | 4 (1) |
 | Guasto | `fault` | 168 (18) | 0 (0) | 12 (7) | 0 (0) |
 | Guasto | `errore` | 61 (20) | 1 (1) | 20 (15) | 3 (1) |

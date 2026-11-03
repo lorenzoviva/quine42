@@ -11,7 +11,7 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import { DEVICE_MARGIN, TORNIO_AT } from '../src/kernel/corona';
-import { tornioExecute, tornioModels } from '../src/kernel/tornio';
+import { latheExecute, latheModels } from '../src/kernel/lathe';
 
 const boot = () => Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
 
@@ -23,7 +23,7 @@ function stand(k: Kernel, x: number, y: number): void {
 describe("the Sculptor's lathe (tornio)", () => {
   it('collects all models from the universe library in alphabetical order', async () => {
     const k = await boot();
-    const models = tornioModels(k.repo.working, k.forms);
+    const models = latheModels(k.repo.working, k.forms);
 
     expect(models.length).toBeGreaterThan(0);
     // Verified alphabetical sort
@@ -42,11 +42,11 @@ describe("the Sculptor's lathe (tornio)", () => {
 
   it('executes a model step-by-step from seed, ending in the final grid', async () => {
     const k = await boot();
-    const models = tornioModels(k.repo.working, k.forms);
+    const models = latheModels(k.repo.working, k.forms);
     // Find a lightweight model such as sasso or lampione
     const candidate = models.find((m) => m.id === 'sasso' || m.id === 'lampione') ?? models[0];
 
-    const shown = tornioExecute(candidate, k.forms, 8, 42, 0, models.length);
+    const shown = latheExecute(candidate, k.forms, 8, 42, 0, models.length);
 
     expect(shown.entry.id).toBe(candidate.id);
     expect(shown.count).toBe(models.length);
@@ -111,24 +111,24 @@ describe("the Sculptor's lathe (tornio)", () => {
 
   it('cycles through the library with stepTornio wrapping modulo count', async () => {
     const k = await boot();
-    const count = k.tornioModels().length;
+    const count = k.latheModels().length;
     expect(count).toBeGreaterThan(1);
 
-    expect(k.tornioOf()!.index).toBe(0);
+    expect(k.latheOf()!.index).toBe(0);
 
     // Step forward advances index
     k.stepTornio(1);
-    expect(k.tornioOf()!.index).toBe(1);
+    expect(k.latheOf()!.index).toBe(1);
 
     // Step backward wraps around to count - 1
     k.stepTornio(-1);
-    expect(k.tornioOf()!.index).toBe(0);
+    expect(k.latheOf()!.index).toBe(0);
     k.stepTornio(-1);
-    expect(k.tornioOf()!.index).toBe(count - 1);
+    expect(k.latheOf()!.index).toBe(count - 1);
 
     // Step forward from count - 1 wraps to 0
     k.stepTornio(1);
-    expect(k.tornioOf()!.index).toBe(0);
+    expect(k.latheOf()!.index).toBe(0);
   });
 
   it('opens ui:tornio upon E interaction or click within reach', async () => {
@@ -160,19 +160,19 @@ describe("the Sculptor's lathe (tornio)", () => {
     const nextArrow = b.floors[0].items.find((i) => i.kind === 'next' && i.target === 'tornio')!;
 
     stand(k, nextArrow.x + 0.5, nextArrow.y + 1.0);
-    expect(k.tornioOf()!.index).toBe(0);
+    expect(k.latheOf()!.index).toBe(0);
 
     const stepped: unknown[] = [];
     k.bus.on('studio:tornio', (e) => stepped.push(e));
 
     expect(k.clickStudio(nextArrow.x + 0.5, nextArrow.y + 0.5)).toBe(true);
-    expect(k.tornioOf()!.index).toBe(1);
+    expect(k.latheOf()!.index).toBe(1);
     expect(stepped.length).toBe(1);
   });
 
   it('supports requesting resculpt for models on the lathe', async () => {
     const k = await boot();
-    const shown = k.tornioOf()!;
+    const shown = k.latheOf()!;
 
     // Request resculpt directly with model target
     const ok = k.requestResculpt(`model:${shown.entry.id}`, 'piu slanciato');

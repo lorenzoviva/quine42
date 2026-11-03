@@ -4,7 +4,7 @@
 // At genesis the Cartographer writes the layout programs themselves.
 
 import type { Schema } from '../ai/models';
-import type { Carta } from '../cards';
+import type { CardStamp } from '../cards';
 import type { LayoutDef, ChunkInfo, TileDef } from '../types';
 import type { MjNode } from '../mj';
 import { sizeOf, TAGLIE, type Taglia } from '../../mj/classes';
@@ -45,7 +45,7 @@ export interface ChunkPlan {
   /** The water that has flowed (T51b, `water.ts`): cell index → its bed and its water (levels), and the tile it was before it became water. */
   acqua?: Record<string, WaterRecord>;
   /** Who planned the place and who paid for it (T36). */
-  carta?: Carta;
+  carta?: CardStamp;
 }
 
 export interface PlanContext {

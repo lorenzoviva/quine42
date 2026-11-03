@@ -410,7 +410,7 @@ export class SessionServer {
     this.kernel.setRemote(id, true);
     // What they ask to spend is theirs to lower, not to raise: it adds to the world's budgets, so never more than they have (T120).
     if (typeof tetto === 'number' && Number.isFinite(tetto) && tetto >= 0) {
-      this.kernel.setSessionTetto(id, this.isAnonymous(id) ? 0 : Math.min(tetto, this.kernel.creditsOf(id)));
+      this.kernel.setSessionCap(id, this.isAnonymous(id) ? 0 : Math.min(tetto, this.kernel.creditsOf(id)));
     }
     // Who they say they are (T44a): repaired against everyone else in the world. A profile already saved stays (T44c): only
     // `profilo` changes it, what a browser brings on entering may be another wanderer's.

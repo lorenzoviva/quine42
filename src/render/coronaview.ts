@@ -10,7 +10,7 @@ import { showFrame } from './models';
 import { ScreenWall } from './screens';
 import { ChainView } from './chain';
 import { BenchView } from './bench';
-import { TornioView } from './tornio';
+import { LatheView } from './lathe';
 import type { Overlay } from './overlay';
 
 export type StudioRoom = ReturnType<Kernel['corona']['roomAt']>;
@@ -32,7 +32,7 @@ export class CoronaView {
   /** The Systems Room's bench (T27b): built again when the case, its code or its run change. */
   private bench?: { key: string; at: number; view: BenchView };
   /** The Sculptor's lathe in the Artist's gallery (T48a): turntable rotating with the selected model. */
-  private tornio?: { key: string; at: number; view: TornioView };
+  private tornio?: { key: string; at: number; view: LatheView };
   /** What the showcases of the studio show (T21), by building: rebuilt when the choice or the models change. */
   private shows = new Map<string, { key: string; group: THREE.Group; spin?: THREE.Object3D; bubbles?: THREE.Object3D[]; silo: boolean }>();
 
@@ -209,7 +209,7 @@ export class CoronaView {
       this.tornio = undefined;
     }
     if (studio && tornio && (!this.tornio || t - this.tornio.at > 0.3)) {
-      const now = k.tornioOf();
+      const now = k.latheOf();
       const key = now ? `${here}|${now.entry.id}|${now.index}` : '';
       if (this.tornio?.key !== key) {
         if (this.tornio) {
@@ -219,7 +219,7 @@ export class CoronaView {
         }
         if (now) {
           const arrow = (kind: string) => studio.floor.items.find((i) => i.kind === kind && i.target === 'tornio');
-          this.tornio = { key, at: t, view: new TornioView(tornio, now, studio.building.color, arrow('prev'), arrow('next')) };
+          this.tornio = { key, at: t, view: new LatheView(tornio, now, studio.building.color, arrow('prev'), arrow('next')) };
           this.root.add(this.tornio.view.group);
         }
       } else if (this.tornio) this.tornio.at = t;
@@ -251,7 +251,7 @@ export class CoronaView {
     const shown = near?.kind === 'showcase' ? k.showcaseOf(near.target!) : undefined;
     const tried = near?.kind === 'banco' ? k.benchOf() : undefined;
     const read = near?.kind === 'leggio' ? k.bibleOf() : undefined;
-    const sculpted = near?.kind === 'tornio' ? k.tornioOf() : undefined;
+    const sculpted = near?.kind === 'tornio' ? k.latheOf() : undefined;
     if (shown) o.caption(`E: guarda «${shown.entry.label}» (${shown.index + 1}/${shown.count})`);
     else if (tried) o.caption(`E: il banco di prova, ${tried.entry.name}: «${tried.entry.case.titolo}» (${tried.index + 1}/${tried.count})`);
     else if (read) o.caption(`E: sfoglia la bibbia, «${read.page.titolo}» (${read.index + 1}/${read.count})`);

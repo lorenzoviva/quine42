@@ -2,7 +2,7 @@
 // shows it, with «Riscolpisci» — a building's notice board, with the latest changes to its files, and what a
 // showcase shows (T21), with its arrows, and an environment of the sample room on its trial draft (T26d).
 
-import { PLACE_PHASES, type Kernel, type LayoutSample, type ChunkMiniature, type RuleShown, type ShowcaseEntry, type TornioShown } from '../kernel/kernel';
+import { PLACE_PHASES, type Kernel, type LayoutSample, type ChunkMiniature, type RuleShown, type ShowcaseEntry, type LatheShown } from '../kernel/kernel';
 import type { StudioItem } from '../kernel/corona';
 import { OPERATION_COLOR, OPERATION_NAME, type Operation, type OperationKind, type Situation } from '../kernel/situation';
 import { ALERT_COLOR, ALERT_NAME, LIVE_LINES, SCREEN_NAME, fill, type Screens, type ScreenField } from '../kernel/screens';
@@ -30,7 +30,7 @@ export class StudioPanel {
   /** Whether the panel shows the Library's lectern (T47a), while it is open. */
   private bibleOpen = false;
   /** Whether the panel shows the Sculptor's lathe (T48a), while it is open. */
-  private tornioOpen = false;
+  private latheOpen = false;
   onClose?: () => void;
   onEdit?: (path: string) => void;
 
@@ -59,10 +59,10 @@ export class StudioPanel {
       if (this.isOpen && this.bibleOpen) this.bible(b);
     });
     k.bus.on('ui:rule', (r: RuleShown) => this.rule(r));
-    k.bus.on('ui:tornio', (t: TornioShown) => this.tornio(t));
+    k.bus.on('ui:tornio', (t: LatheShown) => this.tornio(t));
     // Another model chosen on the lathe with the panel open: it follows.
-    k.bus.on('studio:tornio', (t: TornioShown) => {
-      if (this.isOpen && this.tornioOpen) this.tornio(t);
+    k.bus.on('studio:tornio', (t: LatheShown) => {
+      if (this.isOpen && this.latheOpen) this.tornio(t);
     });
     // The arrows pressed with the panel open: it follows.
     k.bus.on('studio:showcase', (e: Shown) => {
@@ -93,7 +93,7 @@ export class StudioPanel {
     this.screen = undefined;
     this.benchOpen = false;
     this.bibleOpen = false;
-    this.tornioOpen = false;
+    this.latheOpen = false;
     this.root.replaceChildren(el('div', { class: 'window' }, close, ...children));
     this.root.hidden = false;
     this.onClose?.();
@@ -105,7 +105,7 @@ export class StudioPanel {
     this.screen = undefined;
     this.benchOpen = false;
     this.bibleOpen = false;
-    this.tornioOpen = false;
+    this.latheOpen = false;
     this.onClose?.();
   }
 
@@ -652,7 +652,7 @@ export class StudioPanel {
    * The Sculptor's lathe in the Artist's Gallery (T48a): four 3/4 photos of the model,
    * Artist's critique (vote & advice), the MarkovJunior XML program, and «riscolpisci».
    */
-  tornio(t: TornioShown): void {
+  tornio(t: LatheShown): void {
     const { entry } = t;
 
     const step = (d: number, text: string) => {
@@ -738,7 +738,7 @@ export class StudioPanel {
       out,
       el('div', { class: 'row', style: 'justify-content: flex-end; margin-top: 8px;' }, open),
     );
-    this.tornioOpen = true;
+    this.latheOpen = true;
   }
 }
 

@@ -3,7 +3,7 @@
 // credit spending cap (which adds to the universe AI budgets), and their collection of cards with usages.
 
 import { collectionOf } from '../kernel/cards';
-import { COEFFICIENT_INFO, COEFFICIENT_KEYS, hourlyEstimate, isLowDetail, pricedAiModels, repairAttore, repairCoefficients } from '../kernel/coefficients';
+import { COEFFICIENT_INFO, COEFFICIENT_KEYS, hourlyEstimate, isLowDetail, pricedAiModels, repairActor, repairCoefficients } from '../kernel/coefficients';
 import { DEFAULT_SCULPTORS, type SculptorAiModels } from '../kernel/agents/sculptor';
 import { readConfig } from '../kernel/universe';
 import type { FileMap } from '../kernel/types';
@@ -66,7 +66,7 @@ export class LobbyScreen {
     const minimi = ai.minimi;
     const coef = repairCoefficients(ai.coefficienti);
     const sculpt: SculptorAiModels = { ...DEFAULT_SCULPTORS, ...(ai.scultori ?? {}) };
-    const actor = repairAttore(ai.attore);
+    const actor = repairActor(ai.attore);
     // The Actor (T157): everyone sees it; the master, and only the master, sets it here (the server refuses the others).
     const isMaster = wandererId === master;
     const actorOn = el('input', { type: 'checkbox', id: 'lobby-attore' }) as HTMLInputElement;
@@ -132,7 +132,7 @@ export class LobbyScreen {
     );
 
     // Minimi block (if set)
-    let minimiBlock: HTMLElement | null = null;
+    let minimumsBlock: HTMLElement | null = null;
     if (minimi) {
       const items: HTMLElement[] = [];
       if (minimi.textModel) items.push(el('div', {}, `Modello testo minimo: ${minimi.textModel}`));
@@ -142,7 +142,7 @@ export class LobbyScreen {
         items.push(el('div', {}, 'Coefficienti minimi imposti dal master'));
       }
       if (items.length) {
-        minimiBlock = el(
+        minimumsBlock = el(
           'div',
           { class: 'lobby-section minimi-settings' },
           el('div', { class: 'section-title' }, 'Requisiti minimi fissati dal master'),
@@ -152,28 +152,28 @@ export class LobbyScreen {
     }
 
     // Wanderer & Tetto block
-    const tettoMin = minimi?.tetto ?? 0;
-    const defaultTetto = isAnonymous ? 0 : Math.max(tettoMin, Math.min(1.0, credits > 0 ? credits : 1.0));
-    const tettoInput = el('input', {
+    const minCap = minimi?.tetto ?? 0;
+    const defaultCap = isAnonymous ? 0 : Math.max(minCap, Math.min(1.0, credits > 0 ? credits : 1.0));
+    const capInput = el('input', {
       type: 'number',
-      min: String(tettoMin),
+      min: String(minCap),
       step: '0.5',
-      value: defaultTetto.toFixed(2),
+      value: defaultCap.toFixed(2),
     }) as HTMLInputElement;
-    if (isAnonymous) tettoInput.disabled = true;
+    if (isAnonymous) capInput.disabled = true;
 
-    const setTetto = (v: number) => {
-      tettoInput.value = Math.max(tettoMin, v).toFixed(2);
+    const setCap = (v: number) => {
+      capInput.value = Math.max(minCap, v).toFixed(2);
     };
 
     const preset1 = el('button', { type: 'button' }, '$1.00');
-    preset1.onclick = () => setTetto(1.0);
+    preset1.onclick = () => setCap(1.0);
     const preset2 = el('button', { type: 'button' }, '$2.00');
-    preset2.onclick = () => setTetto(2.0);
+    preset2.onclick = () => setCap(2.0);
     const preset5 = el('button', { type: 'button' }, '$5.00');
-    preset5.onclick = () => setTetto(5.0);
+    preset5.onclick = () => setCap(5.0);
     const presetAll = el('button', { type: 'button' }, 'Tutto il saldo');
-    presetAll.onclick = () => setTetto(credits);
+    presetAll.onclick = () => setCap(credits);
 
     const statusEl = el('div', { class: 'lobby-status' });
 
@@ -196,7 +196,7 @@ export class LobbyScreen {
         'div',
         { class: 'tetto-form' },
         el('label', {}, el('strong', {}, 'Tetto di spesa per questa sessione: ')),
-        el('div', { class: 'tetto-controls' }, tettoInput, preset1, preset2, preset5, presetAll),
+        el('div', { class: 'tetto-controls' }, capInput, preset1, preset2, preset5, presetAll),
         el(
           'div',
           { class: 'note' },
@@ -248,9 +248,9 @@ export class LobbyScreen {
     // Action buttons
     const btnEnter = el('button', { class: 'primary' }, 'Entra nel mondo');
     btnEnter.onclick = () => {
-      const tetto = isAnonymous ? 0 : Number(tettoInput.value) || 0;
-      if (tetto < tettoMin) {
-        statusEl.textContent = `Il master richiede un tetto minimo di ${usd(tettoMin)} per entrare.`;
+      const tetto = isAnonymous ? 0 : Number(capInput.value) || 0;
+      if (tetto < minCap) {
+        statusEl.textContent = `Il master richiede un tetto minimo di ${usd(minCap)} per entrare.`;
         return;
       }
       const changed = isMaster && (actorOn.checked !== actor.acceso || actorModel.value !== actor.modello);
@@ -290,7 +290,7 @@ export class LobbyScreen {
       el('h1', {}, 'LOBBY MULTIGIOCATORE'),
       el('div', { class: 'lobby-sub' }, `Universo «${name}» · Master: ${master}`),
       masterBlock,
-      ...(minimiBlock ? [minimiBlock] : []),
+      ...(minimumsBlock ? [minimumsBlock] : []),
       wandererBlock,
       cardsBlock,
       statusEl,
