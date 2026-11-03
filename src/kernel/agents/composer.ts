@@ -144,7 +144,9 @@ const describe = (req: ComposeRequest, world: ComposeWorld): string =>
  */
 export async function compose(c: Council, req: ComposeRequest, world: ComposeWorld, model: string, opts: { chi?: string; retries?: number } = {}): Promise<Composed | undefined> {
   const example = soundExample(c.files, req.uso ?? 'musica');
-  const system = example ? `## Un esempio della libreria\n${example}` : undefined;
+  // Who decides the use sees both: an effect is not a short piece.
+  const shown = req.uso ? [example] : [example, soundExample(c.files, 'effetto')];
+  const system = shown.some(Boolean) ? `## Esempi della libreria\n${shown.filter(Boolean).join('\n\n')}` : undefined;
   const prompt = describe(req, world);
   const words = wordsOf(c.files);
   let last: { xml?: string; error: string } | undefined;

@@ -137,6 +137,7 @@ src/
     content.ts          registro di oggetti, ricette, bottino, ambienti
     forms.ts            libreria dei modelli, forme (programma + seme → griglia, impronta, pavimenti, azioni); la cache delle forme del processo (`sharedForms`, ADR-0108)
     modeldirector.ts    i modelli che mancano, uno alla volta, entro `ai.maxModels`
+    scoredirector.ts    i brani che mancano e quelli chiesti, uno alla volta, entro `ai.maxBrani` e il coefficiente `brani` (ADR-0127)
     chunks.ts           archivio dei piani dei luoghi
     bench.ts            il banco della Sala sistemi: i casi dei sistemi in un kernel in miniatura (ADR-0052)
     paths.ts            i percorsi che un universo può contenere (`allowedPath`), `UNIVERSE_NAME_RE` (ADR-0103), ciò che il Concilio può scrivere (`councilMayWrite`, ADR-0109)
@@ -153,7 +154,7 @@ src/
     credits.ts          la commissione di piattaforma (+1%, P#1) e la divisione delle spese comuni (ADR-0081)
     ai/                 models.ts, gemini.ts, mock.ts, prices.ts (prezzi, con la data), usage.ts (registro dei consumi),
                         subscription.ts (la tabella dei provider, RoutedAiModels, QueueAiModels: i compiti lenti sugli abbonamenti, ADR-0077)
-    agents/             council.ts, cartography.ts, forge.ts, genesis.ts, minds.ts, content.ts, sculptor.ts, effects.ts, mechanics.ts
+    agents/             council.ts, cartography.ts, forge.ts, genesis.ts, minds.ts, content.ts, sculptor.ts, composer.ts (il Musicista), effects.ts, mechanics.ts
     ecs.ts, sandbox.ts, prelude.lua, validator.ts, runes.ts, repo.ts, universe.ts,
     inventory.ts, bundle.ts, faults.ts, events.ts, input.ts, rng.ts, types.ts
   render/               renderer.ts (three.js: camera 3/4, luce, spazi), terrain.ts (luoghi, muri, tetti), entities.ts (entità, viandante,
@@ -203,6 +204,7 @@ site/                   il sito web (ADR-0095, T97): landing, carte 3D, sessioni
 | Ingegnere | logic.lua (`on_act`, `on_use`, `on_action`…); meccaniche con pannelli (`mechanic.design`); ripara il codice che fallisce |
 | Arbitro | coerenza tra narrativa, aspetto, fisica e codice; rimanda all'agente responsabile; tiene le sessioni del Concilio |
 | Referente | nella corona accoglie il viandante trasceso e porta le sue richieste alla squadra giusta (Fucina, Cartografo, Scultore, regole, pacchetti; in multigiocatore dà al master le rune che chiede) |
+| Musicista | nella casa dell'Artista (ADR-0127): scrive i programmi sonori di ciò che il mondo chiede (un ambiente che non ha un brano) e di ciò che il viandante chiede al Referente; il validatore applica le soglie dell'analisi e l'invalido torna a lui col motivo |
 | Attore | solo se il master lo accende (`ai.attore`, ADR-0116): interpreta gli individui (`npc.reply`, `npc.dialogue`) dalle **schede** che il Narratore scrive una volta per individuo; non inventa fatti del mondo |
 
 Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
@@ -226,7 +228,7 @@ Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 - **Clone con un altro master, eredità delle carte** → `#clone-eredita`
 - **Mondo in 3D, bozze di prova, mappa, voxel luminosi**: un'unità = una casella, kernel (x, y) = three.js (x, z) → `#mondo3d`
 - **MarkovJunior, modelli, cache delle forme**: ogni aspetto è un programma, un'istanza è un seme → `#markovjunior-modelli`
-- **Il suono**: programmi MarkovJunior con `<sound>` in `models/suono-*.xml` (classe `suono`), griglia → partitura → campioni con una funzione pura; il browser suona quei campioni (ADR-0123); nel gioco il suono è del client, senza messaggi: il direttore sceglie il brano con una funzione pura, il rendering sta in un worker con la cache, ciò che fallisce tace (ADR-0126); il SoundLab e i ritocchi del piano roll; un agente lo legge con `lab/scripts/mjx-sound.ts` (ADR-0125) → `#suono`
+- **Il suono**: programmi MarkovJunior con `<sound>` in `models/suono-*.xml` (classe `suono`), griglia → partitura → campioni con una funzione pura; il browser suona quei campioni (ADR-0123); nel gioco il suono è del client, senza messaggi: il direttore sceglie il brano con una funzione pura, il rendering sta in un worker con la cache, ciò che fallisce tace (ADR-0126); il SoundLab e i ritocchi del piano roll; un agente lo legge con `lab/scripts/mjx-sound.ts` (ADR-0125); li scrive il Musicista, che abita nella casa dell'Artista perché una stanza ha un elenco di squadre (`Building.teams`, ADR-0127) → `#suono`
 - **Lotti e strutture, scale, piani** → `#lotti`; **taglie di D&D** → `#taglie`; **sotterranei** → `#sotterranei`
 - **Rilievo** (`Relief`, altezze, mare) → `#rilievo`; **acqua che scorre** (automa del kernel, `kernel.dig`) → `#acqua`; **grafica a cartone** → `#cartone`
 - **Grafo del mondo**: nodi e archi dai file, `focus` come contesto del Narratore → `#grafo`

@@ -131,5 +131,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0124](0124-la-corona-si-disegna-solo-fuori-dal-cerchio.md) | La corona si disegna solo fuori dal cerchio o nello studio, per chiunque e con qualunque camera; l'anello si prepara già caricato e invisibile |
 | [0125](0125-il-suono-si-misura-con-soglie-calibrate-sui-preset.md) | Il suono si misura in testo con soglie calibrate sui preset, a maggioranza dei semi; il validatore usa le stesse |
 | [0126](0126-il-suono-nel-gioco-e-del-client.md) | Il suono nel gioco è del client: un direttore puro, un worker con la cache, nessun messaggio; ciò che fallisce tace |
+| [0127](0127-il-musicista-e-una-stanza-con-piu-squadre.md) | Il Musicista sta nella casa dell'Artista: una stanza ha un elenco di squadre, e il mondo chiede la musica che gli manca |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

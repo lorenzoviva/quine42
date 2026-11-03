@@ -683,6 +683,13 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Da non usare**: `referenteReply`, `askReferente`
 - **Fermo**: il valore `referente` di `AgentId`, come gli altri agenti.
 
+### Musicista
+- **Inglese**: `Musician`, `musicista`, `compose`, `ComposeRequest`, `composerRole`, `ScoreDirector`, `composing`
+- **Definizione**: l'agente che scrive i programmi sonori di ciò che il mondo e il viandante chiedono; abita nella casa dell'Artista.
+- **Dove vive**: `src/kernel/agents/composer.ts`, `src/kernel/scoredirector.ts`
+- **Da non usare**: `Compositore`, `MusicDirector`
+- **Fermo**: il valore `musicista` di `AgentId`, `scultori.musicista`, il coefficiente `brani`, `ai.maxBrani`.
+
 ### Attore
 - **Inglese**: `Actor`, `ActorConfig`, `repairActor`, `attore`, `ACTOR_MODEL`
 - **Definizione**: l'agente, se il master lo accende, che recita gli individui dalle loro schede.
