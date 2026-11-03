@@ -2022,13 +2022,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   (la lettera della palette), non dalla geometria (T89b). Task T89a-e qui sotto. Typecheck verde; la suite intera (con `turno test`) ha 55 test
   rossi, tutti in file che non importano il renderer (kernel, between, explore, credits…: i timeout di carico già noti, T95); nessun test tocca `src/render/`.
 
-### T89a · Cartone: fasce e interruttore — `da fare` (dipende da T89, T205)
+### T89a · Cartone: fasce e interruttore — `fatto` (`9ae9a23`) (dipende da T89, T205)
 - Pipeline: claude · stima 3% · approvato · browser · priorità 75
 - Contesto: ADR-0093, punti 1, 2 e 6; la prova `?cartone` di T89 (`src/render/cartoon.ts`, `lit()` in `materials.ts`).
 - Fare: la rampa a 3 fasce per tutti i materiali illuminati (simulazione, corona e studio: `MAT.corona`, `coronaGlass`, `solid()`), i voxel luminosi fuori
   dalle fasce; il lato in ombra saturo (la fascia bassa non sotto ~0,35, il colore dell'emisfero non grigio); ombre portate più nette. Il cartone diventa il
   predefinito quando T89b e T89c sono fatti: fino ad allora `?cartone`; poi `?classica` per il vecchio aspetto.
 - Fatto quando: typecheck e test verdi; screenshot con e senza nel browser (un luogo con case e alberi, lo studio) e niente errori in console.
+- Esito: rampa a 3 fasce con soglie scelte sulle sei normali dei voxel per tutti i materiali illuminati di simulazione, corona e studio (`lit()`), voxel luminosi fuori dalle fasce, emisfero freddo, ombra portata che lascia la fascia bassa a 0,35, ombre nette (raggio 0), sole tenue nello studio solo nel cartone, interruttore `cartoonOn` con `CARTOON_BY_DEFAULT=false` e `?classica` che vince (da mettere a `true` dopo T89b e T89c), `PCFSoftShadowMap` rimosso da three sostituito con `PCFShadowMap` senza cambi nel classico; test nuovi in `tests/cartoon.test.ts`, suite 111 file/1502 test, typecheck e build verdi; non provati la notte nel cartone, le prestazioni (T89e) e i voxel luminosi visti da vicino su facce diverse (solo test e compilazione dello shader); icone e laboratorio restano Lambert (T89d, T89e). Sicurezza: nessuna superficie nuova.
 
 ### T89b · Cartone: contorni dagli id di cosa e parte — `da fare` (dipende da T89a)
 - Pipeline: claude · stima 6% · approvato · browser · priorità 76

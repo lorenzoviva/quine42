@@ -10,6 +10,7 @@ import * as THREE from 'three';
 import type { Kernel } from '../kernel/kernel';
 import { Bloom } from './bloom';
 import type { CoronaView, StudioRoom } from './coronaview';
+import { CARTOON, CARTOON_HEMI, CARTOON_STUDIO, SHADOW_INTENSITY, SHADOW_RADIUS, SUN_FROM } from './cartoon';
 import { CUT, U } from './materials';
 import { Overlay } from './overlay';
 import { buildChunk, chunkSig, disposeChunk, tileForms, type TerrainView } from './terrain';
@@ -38,7 +39,7 @@ export class Renderer {
   private bloom: Bloom;
   private scene = new THREE.Scene();
   readonly camera = new THREE.PerspectiveCamera(38, 1, 0.1, 400);
-  private hemi = new THREE.HemisphereLight(0xdcecff, 0x5a4a3a, 1.1);
+  private hemi = CARTOON ? new THREE.HemisphereLight(CARTOON_HEMI.sky, CARTOON_HEMI.ground, 1.1) : new THREE.HemisphereLight(0xdcecff, 0x5a4a3a, 1.1);
   private sun = new THREE.DirectionalLight(0xfff0d8, 2.2);
   /** The simulation, in carpet coordinates. */
   private world = new THREE.Group();
@@ -74,13 +75,17 @@ export class Renderer {
     this.gl = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.gl.shadowMap.enabled = true;
     this.gl.localClippingEnabled = true;
-    this.gl.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.gl.shadowMap.type = THREE.PCFShadowMap;
     this.bloom = new Bloom(this.gl, this.scene, this.camera);
     this.sun.castShadow = true;
     this.sun.shadow.mapSize.set(2048, 2048);
     Object.assign(this.sun.shadow.camera, { left: -22, right: 22, top: 22, bottom: -22, near: 1, far: 90 });
     this.sun.shadow.bias = -0.0004;
     this.sun.shadow.normalBias = 0.02;
+    if (CARTOON) {
+      this.sun.shadow.intensity = SHADOW_INTENSITY;
+      this.sun.shadow.radius = SHADOW_RADIUS;
+    }
     this.scene.add(this.hemi, this.sun, this.sun.target, this.world, this.flash);
     this.entities = new Entities(kernel, this.world);
     this.runes = new Runes(kernel, this.world);
@@ -269,8 +274,8 @@ export class Renderer {
     const night = 1 - day;
     if (!watch && (studio || k.zone === 'corona')) {
       // The studio and its campus have their own light, day and night: neon and screens.
-      this.sun.intensity = studio ? 0 : 0.8;
-      this.hemi.intensity = studio ? 0.9 : 1.0;
+      this.sun.intensity = studio ? (CARTOON ? CARTOON_STUDIO.sun : 0) : 0.8;
+      this.hemi.intensity = studio ? (CARTOON ? CARTOON_STUDIO.hemi : 0.9) : 1.0;
       this.scene.background = studio ? SKY.studio : SKY.corona;
       this.scene.fog = null;
     } else {
@@ -315,7 +320,7 @@ export class Renderer {
     this.camera.position.set(this.target.x + Math.sin(this.yaw) * flat, this.target.y + Math.sin(this.pitch) * this.distance, this.target.z + Math.cos(this.yaw) * flat);
     if (g > 0.2) this.camera.position.x += (Math.random() - 0.5) * 0.15 * g;
     this.camera.lookAt(this.target);
-    this.sun.position.copy(this.target).add(new THREE.Vector3(-14, 24, 10));
+    this.sun.position.copy(this.target).add(new THREE.Vector3(...SUN_FROM));
     this.sun.target.position.copy(this.target);
     this.bloom.render(dt);
     this.drawOverlay(studio, revealed, interior, g);

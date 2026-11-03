@@ -10,7 +10,7 @@ import * as THREE from 'three';
 import { PLACE_PHASES, type Kernel, type ChunkMiniature, type ShowcaseEntry } from '../kernel/kernel';
 import { CAMPUS, ROOM_H, ROOM_W, type Building, type Storey, type StudioItem } from '../kernel/corona';
 import { Builder } from './terrain';
-import { MAT, rgbOf } from './materials';
+import { lit, MAT, rgbOf } from './materials';
 import { NODE_COLOR } from '../kernel/graph';
 import { geoOf, modelObject, showFrame, type ModelObject } from './models';
 import { LEVEL } from '../kernel/relief';
@@ -1200,9 +1200,9 @@ export class Avatars {
       if (!v) {
         const group = new THREE.Group();
         const standIn = new THREE.Group();
-        const robe = new THREE.Mesh(new THREE.ConeGeometry(0.32, 1.0, 8), new THREE.MeshLambertMaterial({ color: a.color }));
+        const robe = new THREE.Mesh(new THREE.ConeGeometry(0.32, 1.0, 8), lit({ color: a.color }));
         robe.position.y = 0.5;
-        const head = new THREE.Mesh(new THREE.SphereGeometry(0.15, 10, 8), new THREE.MeshLambertMaterial({ color: '#14100c' }));
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.15, 10, 8), lit({ color: '#14100c' }));
         head.position.y = 1.08;
         robe.castShadow = head.castShadow = true;
         standIn.add(robe, head);

@@ -9,6 +9,7 @@ import { ALERT_COLOR, fill, FILM, type AlertLevel, type CostBoard, type LiveFeed
 import { usd } from '../kernel/ai/usage';
 import { arrowSign } from './corona3d';
 import { Builder } from './terrain';
+import { CARTOON, toon } from './cartoon';
 import { MAT, rgbOf } from './materials';
 
 /**
@@ -20,7 +21,7 @@ export const FOOT = { y: 0.4, z: 1.15 };
 const LONG = 1.75;
 /** The band of the alert: above the screens along the back wall, on top of the side walls (they are 1.4 high). */
 const BAND = { back: 2.05, side: 1.4, t: 0.05, w: 0.08, light: 0.55 };
-export const BEZEL = new THREE.MeshStandardMaterial({ color: '#0c0c16', roughness: 0.6 });
+export const BEZEL = CARTOON ? toon({ color: '#0c0c16' }) : new THREE.MeshStandardMaterial({ color: '#0c0c16', roughness: 0.6 });
 /** Texture pixels per cell. */
 export const PX = 150;
 

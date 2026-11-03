@@ -1,4 +1,4 @@
-// Materials of the 3D world. Everything is vertex-coloured Lambert (like the voxel models), and the
+// Materials of the 3D world. Everything is vertex-coloured, Lambert or banded (`lit`, the cartoon of ADR-0093), and the
 // simulation's materials share a clip: once the corona is revealed, nothing of the simulation is drawn
 // beyond the circle (the corona is the world beyond it). Glowing voxels (`<color glow="True">`, ADR-0046) emit
 // their colour; while the renderer blooms they also mark themselves in the frame's alpha, which the bloom reads.
@@ -17,11 +17,22 @@ export const U = {
   glowMask: { value: 0 },
 };
 
+/** In the cartoon a glowing voxel is this much of its colour, plus `U.glow`: about what it is in the classic look by day. */
+const GLOW_BASE = 0.6;
+
 /**
  * Glowing voxels in a shader: the `glow` attribute (0 where a geometry has none) adds the vertex colour to
  * the emitted light and marks the pixel for the bloom. `always`: the whole material glows (neon edges).
  */
 export function addGlow(sh: THREE.WebGLProgramParametersWithUniforms, always = false): void {
+  // The toon shader alone reads a gradient: there a glowing voxel leaves the bands, its colour the same on every face.
+  const banded = sh.fragmentShader.includes('#include <gradientmap_pars_fragment>');
+  const unbanded = banded
+    ? `#ifdef USE_COLOR
+  outgoingLight = mix(outgoingLight, vColor.rgb * (GLOW_BASE + uGlow), ${always ? '1.0' : 'vGlow'});
+  #endif
+  `
+    : '';
   sh.uniforms.uGlow = U.glow;
   sh.uniforms.uGlowMask = U.glowMask;
   const g = always ? '1.0' : 'vGlow';
@@ -29,7 +40,7 @@ export function addGlow(sh: THREE.WebGLProgramParametersWithUniforms, always = f
     sh.vertexShader = `attribute float glow;\nvarying float vGlow;\nattribute float alpha;\nvarying float vAlpha;\n${sh.vertexShader}`.replace('#include <begin_vertex>', '#include <begin_vertex>\n  vGlow = glow;\n  vAlpha = alpha;');
     sh.fragmentShader = `varying float vGlow;\nvarying float vAlpha;\n${sh.fragmentShader}`;
   }
-  sh.fragmentShader = `uniform float uGlow;\nuniform float uGlowMask;\n${sh.fragmentShader}`
+  sh.fragmentShader = `#define GLOW_BASE ${GLOW_BASE.toFixed(2)}\nuniform float uGlow;\nuniform float uGlowMask;\n${sh.fragmentShader}`
     .replace(
       '#include <emissivemap_fragment>',
       `#include <emissivemap_fragment>
@@ -39,7 +50,7 @@ export function addGlow(sh: THREE.WebGLProgramParametersWithUniforms, always = f
     )
     .replace(
       '#include <opaque_fragment>',
-      `#include <opaque_fragment>
+      `${unbanded}#include <opaque_fragment>
 #ifdef OPAQUE
   gl_FragColor.a = 1.0 - uGlowMask * ${g};
 #else
@@ -185,8 +196,8 @@ export function casts<T extends THREE.Mesh>(m: T, receive = false): T {
 /** Inside a structure everything above the head is cut away (the renderer sets where). */
 export const CUT = new THREE.Plane(new THREE.Vector3(0, -1, 0), 1e9);
 
-/** The simulation's lit material: Lambert, or banded in the cartoon trial (`?cartone`, ADR-0093). */
-function lit(opts: THREE.MeshLambertMaterialParameters): THREE.Material {
+/** A lit material: Lambert, or banded in the cartoon (ADR-0093). */
+export function lit(opts: THREE.MeshLambertMaterialParameters): THREE.Material {
   return CARTOON ? toon(opts as THREE.MeshToonMaterialParameters) : new THREE.MeshLambertMaterial(opts);
 }
 
@@ -198,13 +209,13 @@ export const MAT = {
   /** Vegetation: the wind moves the top (the `sway` attribute). */
   sway: clipped(lit({ vertexColors: true }), 'sway', true),
   /** The corona and the studio: never clipped. */
-  corona: glowing(new THREE.MeshLambertMaterial({ vertexColors: true }), 'corona'),
+  corona: glowing(lit({ vertexColors: true }), 'corona'),
   /** Translucent voxels (glass screens, translucent panels) in the simulation. */
   glass: clipped(lit({ vertexColors: true, transparent: true, depthWrite: false }), 'glass'),
   /** Translucent voxels inside a cut structure. */
   cutGlass: clipped(lit({ vertexColors: true, clippingPlanes: [CUT], transparent: true, depthWrite: false }), 'cut-glass'),
   /** Translucent voxels in the corona. */
-  coronaGlass: glowing(new THREE.MeshLambertMaterial({ vertexColors: true, transparent: true, depthWrite: false }), 'corona-glass'),
+  coronaGlass: glowing(lit({ vertexColors: true, transparent: true, depthWrite: false }), 'corona-glass'),
   /** Neon edges and glowing things (unlit, they bloom). */
   glow: glowing(new THREE.MeshBasicMaterial({ vertexColors: true }), 'neon', true),
   /** Faint lines (the studio's floor grid): unlit, but outside the bloom, so they cast no halo (T49a). */
@@ -218,7 +229,7 @@ export function solid(color: string, opts: { emissive?: number; transparent?: nu
   let m = solids.get(key);
   if (!m) {
     const c = new THREE.Color(safeColor(color));
-    const mat = new THREE.MeshLambertMaterial({ color: c, emissive: c.clone().multiplyScalar(opts.emissive ?? 0), transparent: (opts.transparent ?? 1) < 1, opacity: opts.transparent ?? 1 });
+    const mat = lit({ color: c, emissive: c.clone().multiplyScalar(opts.emissive ?? 0), transparent: (opts.transparent ?? 1) < 1, opacity: opts.transparent ?? 1 });
     solids.set(key, (m = clipped(mat, 'solid')));
   }
   return m;
