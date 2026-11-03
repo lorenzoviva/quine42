@@ -7,16 +7,15 @@ Aggiornato il 03/11/2026, all'inizio dell'epoca 221, con la pipeline riaccesa e 
 
 ## Stato attuale
 
-- Pipeline riaccesa dall'autore: T206 in corso su Claude, unico lanciato (la catena T187-T205 aspetta T179 integrato).
-- T179 finito (traccia in testo, suite 1403 verdi), non integrato: il suo ADR ha lo 0117, che è di T178. `banco-strutture --seconda --traccia` non provato con una chiamata vera.
-- ADR nuovi dallo **0121**: lo 0118 è riservato a T179, lo 0119 è di questo cambio, lo 0120 dello split di `AGENTS.md`.
+- T206 e T179 integrati: la traccia in testo è nel base con l'ADR-0118. `banco-strutture --seconda --traccia` non provato con una chiamata vera.
+- ADR nuovi dallo **0121**.
 
 ## Pronti e priorità
 
-1. **T206** (p1, approvato): fonde T179 con lo 0118. Alla fine `integra T206`, `integra T179`: sblocca T187. Con ADR-0119 anche un `integra T179` diretto rinumererebbe da solo, ma salterebbe la suite con entrambi dentro.
+1. **T187** parte al prossimo controllo.
 2. **Catena delle rinomine** (l'autore: «i nomi vanno bene e fai tutte le rinomine»): T187 (glossario) → T188-T203 → T204 (`AGENTS.md`) → T205 (prova nel browser), p2-20, approvati, ognuno dipende dal precedente. A ogni fine `traccia` e `integra`, una alla volta.
 3. **T180 T175 T106 T89a T183 T152 T186 T158**: senza `· approvato` dall'epoca 219, perché partiti con i nomi vecchi si fonderebbero senza conflitti e romperebbero il typecheck. Non sono proposte nuove. Alla fine di T205: `approva` nell'ordine di prima. Se l'autore vuole T180-T182 prima, si ferma la catena tra due task. D'ora in poi un vincolo così si scrive con le dipendenze.
-4. **T181 → T182 → T156** (strutture procedurali; T181 su Fable, aspetta T179 e T180): alla fine di T181 leggere il contatore delle 5 ore e confrontarlo con `ratioSessioneSettimana`.
+4. **T181 → T182 → T156** (strutture procedurali; T181 su Fable, aspetta T180): alla fine di T181 leggere il contatore delle 5 ore e confrontarlo con `ratioSessioneSettimana`.
 5. Bloccati da T89a: T89b-e.
 
 ## Attese dall'autore
