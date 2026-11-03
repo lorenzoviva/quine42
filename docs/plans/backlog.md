@@ -3084,13 +3084,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Cosa fare: come T153, un universo alla volta, nessuna chiamata alle API Gemini.
 - Quando è fatto: i tre universi su disco; nell'esito il costo di ciascuno e ciò che si è visto.
 
-### T186 · Sul sito: spazio, pirati e cowboy «coming soon» — `da fare` (dipende da T205)
+### T186 · Sul sito: spazio, pirati e cowboy «coming soon» — `fatto` (`f776e79`) (dipende da T205)
 - Pipeline: claude · stima 1% · approvato · browser · priorità 85
 - Contesto: l'autore (03/11) ha messo in attesa questi tre universi (T184, T185) e propone di scrivere «coming soon» sul sito. Pagine in `site/`, stile del template `docs/design/sito/` (`site/site.css`), landing `site/landing.ts`, reami in `site/sessioni.html`.
 - Cosa fare: guarda dove il sito parla degli universi e metti lì spazio, pirati e cowboy come «coming soon», senza link né pulsanti che portano a un universo che non c'è e senza date. Nel punto più piccolo che si vede: se non c'è un posto naturale, una sezione breve nella landing. Niente generazione né modelli nuovi. Il testo di tema, nessun meta-gioco sui contenuti del mondo.
 - Test: typecheck e, se tocca il codice di una pagina, i test del sito con il loro turno.
 - Browser: col turno `browser`: la pagina con la voce, a larghezza piena e stretta; screenshot; nessun errore né violazione della CSP in console.
 - Quando è fatto: commit su `task/T186`; nell'esito dove sta e la frase scritta. Sicurezza: nessuna superficie nuova.
+- Esito: in `site/index.html` (sezione `#reami`, sotto le tre schede) una striscia «COMING SOON · ALTRI UNIVERSI ALL'ORIZZONTE» con «SPAZIO Rotte tra le stelle e stazioni alla deriva.», «PIRATI Isole senza mappa e velieri da abbordare.», «COWBOY Polvere, mandrie e città di frontiera.», senza link, pulsanti né date; stile in `site/site.css`; niente test nuovi, perché cambiano solo HTML e CSS; suite 119 file/1705 test, typecheck e build verdi; `sessioni.html` non toccata; non provato: la pagina sotto `npm run serve`, solo `vite preview`. Sicurezza: nessuna superficie nuova.
 
 ## Le rinomine del glossario (chat del 03/11/2026: «i nomi vanno bene e fai tutte le rinomine»)
 
