@@ -36,7 +36,7 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
    dell'universo gira in ambienti Lua che non vedono `_G`, `debug`, `load`, `os`, `io`, `package`.
    Tutto ciò che Lua può toccare passa da `Host` (`src/kernel/sandbox.ts`).
 2. **Tutto il generato passa dal validatore** (`src/kernel/validator.ts`): piani dei luoghi,
-   programmi di layout (eseguiti di prova su bozze reali), oggetti, manifest, codice (compilazione, API
+   programmi degli ambienti (eseguiti di prova su bozze reali), oggetti, manifest, codice (compilazione, API
    esistente, caricamento di prova). L'invalido torna, con il motivo, all'agente responsabile.
    **L'IA non rompe mai il gioco**; se un modulo generato fallisce a runtime, l'Ingegnere lo ripara.
 3. **Il giocatore può rompere il gioco.** Il suo input non si blocca: si isola (fault), si mostra
@@ -126,7 +126,7 @@ src/
     plots.ts            trame orizzontali e missioni
     graph.ts            il grafo del mondo: nodi e archi dai file dell'universo, interrogazioni, controlli
     atlas.ts            l'atlante: regioni geolocalizzate, direzioni
-    relief.ts           il rilievo: Hills di MarkovJunior → livello di ogni casella, mare, acqua piana tra i chunk (ADR-0048)
+    relief.ts           il rilievo: Hills di MarkovJunior → livello di ogni casella, mare, acqua piana tra i luoghi (ADR-0048)
     water.ts            l'acqua che scorre: l'automa cellulare del kernel sui luoghi caricati (ADR-0094)
     stamps.ts           timbri di strutture (castelli, torri, templi, piramidi, sotterranei…)
     universes.ts        client del repository dell'universo, aggiornamenti dal seme
@@ -155,14 +155,14 @@ src/
     agents/             council.ts, cartography.ts, forge.ts, genesis.ts, minds.ts, content.ts, sculptor.ts, effects.ts, mechanics.ts
     ecs.ts, sandbox.ts, prelude.lua, validator.ts, runes.ts, repo.ts, universe.ts,
     inventory.ts, bundle.ts, faults.ts, events.ts, input.ts, rng.ts, types.ts
-  render/               renderer.ts (three.js: camera 3/4, luce, spazi), terrain.ts (chunk, muri, tetti), entities.ts (entità, viandante,
+  render/               renderer.ts (three.js: camera 3/4, luce, spazi), terrain.ts (luoghi, muri, tetti), entities.ts (entità, viandante,
                         rune, luci), models.ts (geometrie dei modelli), forms.ts + worker.ts (i programmi nei worker),
                         thumbs.ts (icone: foto dei modelli), bloom.ts (bagliore dei voxel luminosi), corona3d.ts (corona, studio, avatar), coronaview.ts (la corona nel renderer, solo del master), screens.ts (la parete della Direzione), chain.ts (la catena della Sala sistemi), bench.ts (il banco di prova), overlay.ts (testi, E, mouse),
                         materials.ts, glitch.ts
   ui/                   hud.ts (anche il diario delle missioni), profile.ts (il profilo del viandante), inventory.ts, actions.ts, chat.ts, feed.ts, genesis.ts, editor.ts, console.ts, studio.ts, atlas.ts,
                         graph.ts + graphlayout.ts (il grafo del mondo nel Nucleo), dom.ts, lobby.ts (la lobby multigiocatore, minimi, tetto e carte, ADR-0086), creditdialog.ts (la modale crediti esauriti, ADR-0086)
 universe/
-  universe.json         nome, seme, raggio, chunk (18), modelli e budget, `partita` (scelta alla Genesi, ADR-0053), `ai.minimi` (ADR-0086), `rilievo.mare` (facoltativo), `eredita` (le quote dei cloni, ADR-0084)
+  universe.json         nome, seme, raggio, lato del luogo (18), modelli e budget, `partita` (scelta alla Genesi, ADR-0053), `ai.minimi` (ADR-0086), `rilievo.mare` (facoltativo), `eredita` (le quote dei cloni, ADR-0084)
   world/                bible.json (memoria del Narratore), style.md (guida di stile dei modelli), canone.md (le rune), lessico.md (come parla la gente), consumi.json,
                         rules.json (regole), people.json (la società, con i ricordi), plots.json (trame),
                         atlas.json (geografia), stato.json (lo stato del mondo), grafo.json (il grafo del mondo, derivato),
