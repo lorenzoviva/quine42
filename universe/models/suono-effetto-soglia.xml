@@ -1,0 +1,26 @@
+<!-- Oltre il bordo, la prima volta e ogni volta: un accordo largo che sale e resta; il seme sceglie dove arriva. -->
+<sequence name="Soglia" values="BNSAT" size="24 2 12" symmetry="()">
+  <sound bpm="96" scale="phrygian" root="43" swing="0" cutoff="6000" space="0.6">
+    <track y="0" instrument="lead" volume="0.6"/>
+    <track y="1" instrument="pad" volume="0.95"/>
+  </sound>
+  <color symbol="N" value="38bdf8" name="Nota" glow="True"/>
+  <color symbol="S" value="0284c7" name="Sustain" alpha="0.85"/>
+  <color symbol="A" value="f43f5e" name="Accento" glow="True"/>
+  <color symbol="T" value="ec4899" name="Arrivo" hidden="True"/>
+
+  <line at="0 1 0" to="0 1 0" r="0" color="N"/>
+  <line at="0 1 2" to="0 1 2" r="0" color="N"/>
+  <line at="0 1 4" to="0 1 4" r="0" color="N"/>
+  <line at="0 1 7" to="0 1 7" r="0" color="N"/>
+  <all in="NBBBBBBBBBBBBBBBBBBBB" out="NSSSSSSSSSSSSSSSSSSSS"/>
+  <line at="2 0 2" to="2 0 2" r="0" color="N"/>
+  <line at="4 0 4" to="4 0 4" r="0" color="N"/>
+  <line at="6 0 6" to="6 0 6" r="0" color="N"/>
+  <line at="8 0 7" to="8 0 7" r="0" color="T"/>
+  <line at="8 0 9" to="8 0 9" r="0" color="T"/>
+  <one in="T" out="A" steps="1"/>
+  <all in="T" out="B"/>
+  <all in="NBB" out="NSS"/>
+  <all in="ABBBBBBBB" out="ASSSSSSSS"/>
+</sequence>

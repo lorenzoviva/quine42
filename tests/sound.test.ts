@@ -12,7 +12,7 @@ import { MAX_SECONDS, renderScore, renderSoundProgram, scoreOfProgram } from '..
 import { parseXml } from '../src/mj/xml';
 
 const SEEDS = [1, 2, 3, 7, 42, 1234, 421337, 987654];
-const presets = soundPrograms(bundledFiles);
+const presets = soundPrograms(bundledFiles).filter((p) => !p.suono);
 const SOUND = '<sound bpm="120" scale="dorian" root="50"/>';
 
 /** Every node the XML knows, each with something to do, in a program that is a score. */

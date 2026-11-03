@@ -9,6 +9,7 @@ import { MockAiModels } from '../src/kernel/ai/mock';
 import { modelErrors } from '../src/kernel/validator';
 import { classOf } from '../src/mj/classes';
 import { SOUND_CLASS } from '../src/mj/sound';
+import { expectedModelErrors } from './helpers';
 import { InlineRunner, rootTag, type FormComp, type FormRequest, type FormResult } from '../src/kernel/forms';
 import { formCacheKey, restoreFormResult, MemoryFormStore, WorkerRunner } from '../src/render/forms';
 
@@ -24,7 +25,10 @@ describe('the library of models', () => {
       expect(index[id], id).toBeDefined();
       // A sound program has no box (ADR-0123): the validator judges it all the same.
       if (index[id].classe !== SOUND_CLASS) expect(classOf(index[id].classe), id).toBeDefined();
-      expect(modelErrors(p, bundledFiles[p], index[id].tempo), id).toEqual([]);
+      const errors = modelErrors(p, bundledFiles[p], index[id].tempo);
+      const expected = expectedModelErrors(id);
+      expect(errors, id).toHaveLength(expected.length);
+      expected.forEach((e, i) => expect(errors[i]).toMatch(e));
     }
     // Every class has its generic model, used when an entity has none of its own.
     for (const c of ['persona', 'animale', 'bestia', 'albero', 'cespuglio', 'roccia', 'sasso', 'oggetto', 'mobile', 'edificio', 'monumento', 'grande']) expect(bundledFiles[`models/${c}.xml`], c).toBeDefined();

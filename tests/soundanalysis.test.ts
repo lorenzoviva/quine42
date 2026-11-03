@@ -7,9 +7,11 @@ import { compileMjx } from '../src/mj/model';
 import { soundPrograms, soundSettings, type Score, type ScoreEvent } from '../src/mj/sound';
 import { analyzeSound, measureScore, measureSignal, noteName, SOUND_THRESHOLDS, soundIssues, soundReportText, type SoundDefect } from '../src/mj/soundanalysis';
 import { renderSoundProgram, SAMPLE_RATE } from '../src/mj/synth';
+import { keptByTheAuthor } from './helpers';
 import { parseXml } from '../src/mj/xml';
 
-const presets = soundPrograms(bundledFiles);
+const presets = soundPrograms(bundledFiles).filter((p) => !p.suono);
+const inGame = soundPrograms(bundledFiles).filter((p) => p.suono);
 const BOX = 'size="16 3 8" symmetry="()"';
 const hits = (at: number[], y: number, z: number, color: string) => at.map((x) => `<box at="${x} ${y} ${z}" size="1 1 1" color="${color}"/>`).join('');
 
@@ -38,6 +40,19 @@ describe('the thresholds, on the presets', () => {
 
   it('the validator lets them through, in the time of a request', () => {
     for (const p of presets) expect(modelErrors(`models/${p.id}.xml`, p.xml), p.id).toEqual([]);
+  });
+});
+
+describe('the thresholds, on the programs of the game (T228)', () => {
+  it('are the seven pieces and the nine effects of the seed', () => {
+    expect(inGame.map((p) => p.suono!.uso).sort()).toEqual([...new Array(9).fill('effetto'), ...new Array(7).fill('musica')]);
+  });
+
+  it.each(inGame.map((p) => [p.id, p.xml] as const))('%s passes, on the default seeds and on others, unless the author keeps it as it is', (id, xml) => {
+    const defects = keptByTheAuthor(id);
+    expect(analyzed(xml).issues.map((i) => i.defect)).toEqual(defects);
+    // The other seeds on the score and one render: the pieces take a second each.
+    expect(analyzeSound(compileMjx(xml), { seeds: [7, 42, 1234, 421337, 987654], frugal: true }).issues.map((i) => i.defect)).toEqual(defects);
   });
 });
 

@@ -1,0 +1,27 @@
+<!-- Una runa pronunciata: una scala che sale in fretta, con un luccichio in cima. -->
+<sequence name="Incantesimo" values="BNSAHMT" size="20 2 12" symmetry="()">
+  <sound bpm="240" scale="harmonic_minor" root="57" swing="0" cutoff="10000" space="0.5">
+    <track y="0" instrument="lead" volume="0.9"/>
+    <track y="1" instrument="pad" volume="0.8"/>
+  </sound>
+  <color symbol="N" value="38bdf8" name="Nota" glow="True"/>
+  <color symbol="S" value="0284c7" name="Sustain" alpha="0.85"/>
+  <color symbol="A" value="f43f5e" name="Accento" glow="True"/>
+  <color symbol="H" value="fde047" name="Hi-hat" alpha="0.85"/>
+  <color symbol="M" value="10b981" name="Testa" hidden="True"/>
+  <color symbol="T" value="ec4899" name="Partenza" hidden="True"/>
+
+  <line at="0 0 0" to="0 0 2" r="0" color="T"/>
+  <one in="T" out="M" steps="1"/>
+  <all in="T" out="B"/>
+  <one steps="4">
+    <rule in="BBB BBB MBB" out="BBM BBB NBB" p="2"/>
+    <rule in="BBB MBB" out="BBM NBB"/>
+  </one>
+  <all in="M" out="A"/>
+  <all in="ABBBBBB" out="ASSSSSS"/>
+  <line at="9 1 5" to="9 1 5" r="0" color="H"/>
+  <line at="13 1 5" to="13 1 5" r="0" color="H"/>
+  <line at="0 1 2" to="0 1 2" r="0" color="N"/>
+  <all in="NBBBBBBBB" out="NSSSSSSSS"/>
+</sequence>
