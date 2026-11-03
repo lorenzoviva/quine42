@@ -1,5 +1,7 @@
 // Tiny synthesized sound: blips for runes, crackle for faults. No assets.
 
+import type { RenderedSound } from './mj/synth';
+
 export class Sfx {
   private ctx?: AudioContext;
   private master?: GainNode;
@@ -48,6 +50,21 @@ export class Sfx {
     src.buffer = buf;
     src.connect(g).connect(this.master);
     src.start();
+  }
+
+  /** Plays what `renderScore` gave (src/mj/synth.ts), the samples as they are: the sound is made there, never here. Stop it through what it returns. */
+  playSamples(sound: Pick<RenderedSound, 'samples' | 'sampleRate' | 'loopStart' | 'loopEnd'>, loop = false): AudioBufferSourceNode | undefined {
+    if (!this.ctx || this.muted) return undefined;
+    const buf = this.ctx.createBuffer(1, sound.samples.length, sound.sampleRate);
+    buf.getChannelData(0).set(sound.samples);
+    const src = this.ctx.createBufferSource();
+    src.buffer = buf;
+    src.loop = loop;
+    src.loopStart = sound.loopStart / sound.sampleRate;
+    src.loopEnd = sound.loopEnd / sound.sampleRate;
+    src.connect(this.ctx.destination);
+    src.start();
+    return src;
   }
 
   chord(freqs: number[], dur = 0.6): void {

@@ -323,5 +323,25 @@
   "autore": "a mano (editor MJ, T59)",
   "vpt": 20,
   "tempo": 30000
+ },
+ "suono-sentiero-melodico": {
+  "classe": "suono",
+  "nome": "Sentiero Melodico",
+  "autore": "Argon (SoundLab), in XML a mano (T221)"
+ },
+ "suono-fuga-cellulare": {
+  "classe": "suono",
+  "nome": "Fuga Cellular Automata",
+  "autore": "Argon (SoundLab), in XML a mano (T221)"
+ },
+ "suono-architettura-frattale": {
+  "classe": "suono",
+  "nome": "Architettura Frattale",
+  "autore": "Argon (SoundLab), in XML a mano (T221)"
+ },
+ "suono-scontro-finale": {
+  "classe": "suono",
+  "nome": "Boss Fight Cyber-Dungeon",
+  "autore": "Argon (SoundLab), in XML a mano (T221)"
  }
 }
