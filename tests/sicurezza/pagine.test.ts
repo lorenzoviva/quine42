@@ -7,7 +7,7 @@ import type { Connect } from 'vite';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { contentSecurityPolicy, securityHeaders } from '../../server/csp';
 import { createFakeStripeSignature, handleStripeWebhookEvent, sameOriginReturn, stripeHandler } from '../../server/stripe';
-import { parseRealmSnapshot, renderRealmCard } from '../../site/sessioni';
+import { parseUniverseSnapshot, renderUniverseCard } from '../../site/sessioni';
 // @ts-expect-error a plain .mjs of the kit, without types
 import { cleanEnv, fakeSecrets, makeProject, removeProject, REPO } from '../../tools/sicurezza/ambiente.mjs';
 
@@ -52,19 +52,19 @@ afterEach(() => {
 });
 
 describe('V-015: ciò che una pagina mostra, e dove torna un pagamento', () => {
-  it('V-015 un seme che non è un numero non diventa HTML nella pagina dei reami', () => {
+  it('V-015 un seme che non è un numero non diventa HTML nella pagina degli universi', () => {
     const html = '<img id="sonda" src=x>';
     const files = { 'universe.json': JSON.stringify({ name: 'sonda', seed: html, ai: { textModel: 'x', minimi: { tetto: html } } }) };
-    const realm = parseRealmSnapshot('sonda', files, { name: 'sonda', active: true, clients: html as unknown as number });
-    expect(realm.seed).toBe(0);
+    const universe = parseUniverseSnapshot('sonda', files, { name: 'sonda', active: true, clients: html as unknown as number });
+    expect(universe.seed).toBe(0);
     vi.stubGlobal('document', { createElement: () => ({ dataset: {} }) });
-    const card = renderRealmCard({ ...realm, master: html, description: html, name: html });
+    const card = renderUniverseCard({ ...universe, master: html, description: html, name: html });
     expect(card.innerHTML).toContain('SEME #0');
     expect(card.innerHTML).not.toContain('<img');
   });
 
   it('V-015 il seme numerico si vede come è', () => {
-    expect(parseRealmSnapshot('sonda', { 'universe.json': JSON.stringify({ name: 'sonda', seed: 42 }) }).seed).toBe(42);
+    expect(parseUniverseSnapshot('sonda', { 'universe.json': JSON.stringify({ name: 'sonda', seed: 42 }) }).seed).toBe(42);
   });
 
   it('V-015 il checkout rifiuta un ritorno su un altro sito, in ogni forma', async () => {

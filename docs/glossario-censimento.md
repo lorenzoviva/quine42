@@ -7,8 +7,8 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 
 | Voce | Sinonimo | codice | prompt | documenti | sito |
 |---|---|---|---|---|---|
-| Universo | `reame` | 1 (1) | 1 (1) | 20 (9) | 37 (10) |
-| Universo | `realm` | 16 (6) | 0 (0) | 2 (2) | 139 (13) |
+| Universo | `reame` | 0 (0) | 1 (1) | 17 (8) | 1 (1) |
+| Universo | `realm` | 15 (5) | 0 (0) | 2 (2) | 0 (0) |
 | Luogo | `place` | 437 (57) | 0 (0) | 25 (13) | 2 (2) |
 | Luogo | `chunk` | 577 (41) | 0 (0) | 109 (26) | 0 (0) |
 | Luogo | `Place` | 437 (57) | 0 (0) | 25 (13) | 2 (2) |

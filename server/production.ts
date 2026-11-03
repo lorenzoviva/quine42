@@ -122,7 +122,7 @@ function sendBuild(dist: string, req: IncomingMessage, res: ServerResponse): voi
     res.setHeader('Allow', 'GET, HEAD');
     return void res.end();
   }
-  // The address of the site is its landing page. The game without a universe would be a game alone, and here nobody makes one: it starts from the realms.
+  // The address of the site is its landing page. The game without a universe would be a game alone, and here nobody makes one: it starts from the universes.
   const { pathname, searchParams } = new URL(req.url ?? '/', 'http://localhost');
   if ((pathname === '/' || pathname === '/index.html') && !searchParams.has('universo')) {
     res.statusCode = 302;

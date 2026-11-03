@@ -1,9 +1,9 @@
-// The credits page of the site (T105, ADR-0095): a wanderer's balance in a realm, a top-up through Stripe Checkout (the
+// The credits page of the site (T105, ADR-0095): a wanderer's balance in a universe, a top-up through Stripe Checkout (the
 // protected session of /api/stripe/checkout, ADR-0083) and the two ledgers, top-ups and spending (/api/crediti, server/wallet.ts).
 // One credit is one dollar. Credits arrive only through Stripe's webhook, never from the return to this page: coming back,
 // the page waits to see the payment in the ledger before it says it was credited.
 
-import { $, alertBox, formatCredits, hideAlert, initNav, pageLogin, pageSignOut, pickRealm, playLink, realms, REALM_KEY, store, stored, type Who } from './shared';
+import { $, alertBox, formatCredits, hideAlert, initNav, pageLogin, pageSignOut, pickUniverse, playLink, universes, UNIVERSE_KEY, store, stored, type Who } from './shared';
 import type { Wallet } from '../server/wallet';
 
 /** What the checkout accepts (`/api/stripe/checkout`). */
@@ -21,7 +21,7 @@ export function parseAmount(raw: string): number | undefined {
   return n >= MIN_TOPUP && n <= MAX_TOPUP ? n : undefined;
 }
 
-/** Where Stripe brings the player back: this page, this realm, and without accounts this wanderer. */
+/** Where Stripe brings the player back: this page, this universe, and without accounts this wanderer. */
 export function returnUrlFor(origin: string, pathname: string, universo: string, localId?: string): string {
   const q = new URLSearchParams({ universo });
   if (localId) q.set('viandante', localId);
@@ -93,7 +93,7 @@ class WalletPage {
   private stripeOn = false;
   private amount = $<HTMLInputElement>('custom-amount');
   private pay = $<HTMLButtonElement>('btn-stripe-pay');
-  private realm = $<HTMLSelectElement>('realm-select');
+  private universe = $<HTMLSelectElement>('universe-select');
   private loads = 0;
 
   constructor(private who: Who) {
@@ -105,7 +105,7 @@ class WalletPage {
     }
     this.amount.addEventListener('input', () => this.syncAmount());
     this.pay.onclick = () => void this.checkout();
-    this.realm.onchange = () => void this.load(this.realm.value);
+    this.universe.onchange = () => void this.load(this.universe.value);
     $('btn-link-google').onclick = () => {
       this.who.signed?.linkGoogle().catch((e: Error) => alertBox('error', 'ZAP!', e.message));
     };
@@ -115,10 +115,10 @@ class WalletPage {
   }
 
   async start(): Promise<void> {
-    const list = await realms();
+    const list = await universes();
     if (!list) return alertBox('error', 'ZAP!', 'Il mondo non risponde: riprova tra poco.');
-    if (!list.length) return alertBox('warning', 'NESSUN REAME', 'Su questo server non c’è ancora nessun reame: entra nel gioco per crearne uno.');
-    this.realm.replaceChildren(
+    if (!list.length) return alertBox('warning', 'NESSUN UNIVERSO', 'Su questo server non c’è ancora nessun universo: entra nel gioco per crearne uno.');
+    this.universe.replaceChildren(
       ...list.map((name) => {
         const o = document.createElement('option');
         o.value = name;
@@ -127,8 +127,8 @@ class WalletPage {
       }),
     );
     $('wallet-grid').hidden = false;
-    const chosen = pickRealm(list, new URLSearchParams(location.search).get('universo'), stored(REALM_KEY))!;
-    this.realm.value = chosen;
+    const chosen = pickUniverse(list, new URLSearchParams(location.search).get('universo'), stored(UNIVERSE_KEY))!;
+    this.universe.value = chosen;
     this.stripeOn = await stripeAvailable();
     const back = returnState(location.search);
     history.replaceState(null, '', `${location.pathname}${cleanSearch(location.search)}`);
@@ -152,12 +152,12 @@ class WalletPage {
   }
 
   private async load(universo: string): Promise<void> {
-    store(REALM_KEY, universo);
+    store(UNIVERSE_KEY, universo);
     const turn = ++this.loads;
     const r = await this.fetchWallet(universo);
-    if (turn !== this.loads) return; // Another realm was chosen in the meantime.
+    if (turn !== this.loads) return; // Another universe was chosen in the meantime.
     if (!r.wallet) {
-      // The realm's selector lives in the grid: it stays, to choose another one.
+      // The universe's selector lives in the grid: it stays, to choose another one.
       $('wallet-ledgers').hidden = true;
       this.wallet = undefined;
       this.syncPay();
@@ -177,7 +177,7 @@ class WalletPage {
       ? 'Un viandante anonimo non ha crediti: gioca con i modelli locali.'
       : w.multigiocatore
         ? 'Si scala a ogni richiesta che fai al mondo.'
-        : 'In questo reame giochi da solo: il saldo non si scala, serve quando il reame è condiviso.';
+        : 'In questo universo giochi da solo: il saldo non si scala, serve quando l’universo è condiviso.';
     $<HTMLAnchorElement>('nav-play').href = playLink(w.universo, w);
     $('btn-link-google').hidden = w.account !== 'anonimo';
     this.fillPayments(w);
@@ -196,7 +196,7 @@ class WalletPage {
       tr.append(id, cell(formatDate(p.data)), cell(p.cents === undefined ? '—' : `${formatCredits(p.cents / 100)} USD`), cell(`+${formatCredits(p.crediti)}`, 'text-green'));
       return tr;
     });
-    $('payments-body').replaceChildren(...(rows.length ? rows : [emptyRow(4, 'Nessuna ricarica in questo reame.')]));
+    $('payments-body').replaceChildren(...(rows.length ? rows : [emptyRow(4, 'Nessuna ricarica in questo universo.')]));
   }
 
   private fillSpending(w: Wallet): void {
@@ -205,7 +205,7 @@ class WalletPage {
       tr.append(cell(formatDay(d.giorno)), cell(String(d.chiamate)), cell(formatSpent(d.usd), 'text-yellow'));
       return tr;
     });
-    $('spending-body').replaceChildren(...(rows.length ? rows : [emptyRow(3, 'Nessuna richiesta a tuo carico in questo reame.')]));
+    $('spending-body').replaceChildren(...(rows.length ? rows : [emptyRow(3, 'Nessuna richiesta a tuo carico in questo universo.')]));
     $('spending-total').textContent = formatSpent(w.totaleConsumi);
   }
 
@@ -268,14 +268,14 @@ class WalletPage {
 
   /** Back from Stripe: the webhook is what credits, and it may come a moment after the player. */
   private async watch(sessione: string | undefined): Promise<void> {
-    const universo = this.realm.value;
+    const universo = this.universe.value;
     const before = this.wallet?.pagamenti.length ?? 0;
     const seen = (w: Wallet) => (sessione ? w.pagamenti.some((p) => p.id === sessione) : w.pagamenti.length > before);
     if (this.wallet && seen(this.wallet)) return this.credited(this.wallet, sessione);
     alertBox('info', 'IN ARRIVO', 'Pagamento completato: aspettiamo la conferma per accreditarlo.');
     for (let i = 0; i < WATCH_TRIES; i++) {
       await new Promise((r) => setTimeout(r, WATCH_MS));
-      if (this.realm.value !== universo) return; // Another realm: this one will show the payment when it comes back.
+      if (this.universe.value !== universo) return; // Another universe: this one will show the payment when it comes back.
       const r = await this.fetchWallet(universo);
       if (r.wallet && seen(r.wallet)) {
         this.fill(r.wallet);

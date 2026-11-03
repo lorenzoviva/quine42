@@ -125,7 +125,7 @@ describe('the wallet route (T105)', () => {
     }
   });
 
-  it('refuses a bad realm, an unknown one, another method, and lets other addresses pass', async () => {
+  it('refuses a bad universe, an unknown one, another method, and lets other addresses pass', async () => {
     const dir = diskUniverse();
     try {
       const h = walletHandler({ universesDir: dir });

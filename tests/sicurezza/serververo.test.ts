@@ -276,7 +276,7 @@ describe('con gli account', () => {
         expect(r.exists).toBe(true);
         expect(r.log).toBeUndefined();
         expect(Object.keys(r.files).filter((p) => /^(prompts\/|world\/(giocatori|consumi|stato))/.test(p))).toEqual([]);
-        // Of the code only the two modules every client runs for its own wanderer (ADR-0061); of the bible what the realm's card says of it.
+        // Of the code only the two modules every client runs for its own wanderer (ADR-0061); of the bible what the universe's card says of it.
         expect(Object.keys(r.files).filter((p) => p.endsWith('logic.lua')).sort()).toEqual(['modules/core.carpet/logic.lua', 'modules/core.movement/logic.lua']);
         expect(Object.keys(JSON.parse(r.files['world/bible.json'])).filter((k) => !['concetto', 'tema'].includes(k))).toEqual([]);
         expect(JSON.parse(r.files['universe.json']).ai?.provider).toBeUndefined();

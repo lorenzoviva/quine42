@@ -1,5 +1,5 @@
 // The profile page of the site (T102, ADR-0095): signing in (Firebase Auth with Google or anonymously, the game's own
-// `src/session/login.ts`; a server without accounts takes a wanderer's id), who the wanderer is in a realm (account,
+// `src/session/login.ts`; a server without accounts takes a wanderer's id), who the wanderer is in a universe (account,
 // whether they are in the world now, credits) and their look: name, cloak, seed of the program `viandante` and a few
 // lines, with a three.js preview of the real model (the universe's program run by src/mj/, meshed by `meshVoxels`).
 // What is chosen goes to the server (/api/viandante, server/wanderer.ts), which repairs it as the world does.
@@ -10,9 +10,9 @@ import { meshVoxels } from '../src/mj/mesh';
 import { boxOf, classOf } from '../src/mj/classes';
 import { PROFILE_LIMITS, repairProfile, type Profile } from '../src/kernel/wanderers';
 import { keepProfile } from '../src/session/socket';
-import { $, alertBox, formatCredits, hideAlert, initNav, pageLogin, pageSignOut, pickRealm, playLink, realms, REALM_KEY, store, stored, type Who } from './shared';
+import { $, alertBox, formatCredits, hideAlert, initNav, pageLogin, pageSignOut, pickUniverse, playLink, universes, UNIVERSE_KEY, store, stored, type Who } from './shared';
 
-export { formatCredits, pickRealm, playLink };
+export { formatCredits, pickUniverse, playLink };
 
 /** What the server says of a wanderer (server/wanderer.ts, `WandererView`). */
 export interface WandererView {
@@ -183,7 +183,7 @@ class ProfilePage {
   private intro = $<HTMLTextAreaElement>('profile-intro');
   private range = $<HTMLInputElement>('seed-range');
   private custom = $<HTMLInputElement>('cloak-custom');
-  private realm = $<HTMLSelectElement>('realm-select');
+  private universe = $<HTMLSelectElement>('universe-select');
 
   constructor(private who: Who) {
     this.name.maxLength = PROFILE_LIMITS.nome[1];
@@ -216,7 +216,7 @@ class ProfilePage {
       this.setSeed(s);
     };
     $('btn-save').onclick = () => void this.save();
-    this.realm.onchange = () => void this.load(this.realm.value);
+    this.universe.onchange = () => void this.load(this.universe.value);
     $('btn-sign-out').onclick = () => void this.signOut();
     $('nav-out').onclick = () => void this.signOut();
     $('nav-out').hidden = false;
@@ -227,10 +227,10 @@ class ProfilePage {
   }
 
   async start(): Promise<void> {
-    const list = await realms();
+    const list = await universes();
     if (!list) return alertBox('error', 'ZAP!', 'Il mondo non risponde: riprova tra poco.');
-    if (!list.length) return alertBox('warning', 'NESSUN REAME', 'Su questo server non c’è ancora nessun reame: entra nel gioco per crearne uno.');
-    this.realm.replaceChildren(
+    if (!list.length) return alertBox('warning', 'NESSUN UNIVERSO', 'Su questo server non c’è ancora nessun universo: entra nel gioco per crearne uno.');
+    this.universe.replaceChildren(
       ...list.map((name) => {
         const o = document.createElement('option');
         o.value = name;
@@ -238,13 +238,13 @@ class ProfilePage {
         return o;
       }),
     );
-    const chosen = pickRealm(list, new URLSearchParams(location.search).get('universo'), stored(REALM_KEY))!;
-    this.realm.value = chosen;
+    const chosen = pickUniverse(list, new URLSearchParams(location.search).get('universo'), stored(UNIVERSE_KEY))!;
+    this.universe.value = chosen;
     await this.load(chosen);
   }
 
   private async load(universo: string): Promise<void> {
-    store(REALM_KEY, universo);
+    store(UNIVERSE_KEY, universo);
     const r = await askServer(this.who, universo);
     if (!r.ok || !r.viandante) {
       $('profile-grid').hidden = true;
@@ -266,14 +266,14 @@ class ProfilePage {
     $('account-kind').textContent =
       v.account === 'google' ? 'Google: il viandante ti segue ovunque' : v.account === 'anonimo' ? 'Anonimo: legalo a Google per non perderlo' : 'Identificativo diretto (server senza account)';
     $('wanderer-name').textContent = p?.nome ?? 'non ancora scelto';
-    $('wanderer-where').textContent = v.nelMondo ? 'sì, in cammino adesso' : v.noto ? 'no, il viandante riposa' : 'non è mai entrato in questo reame';
+    $('wanderer-where').textContent = v.nelMondo ? 'sì, in cammino adesso' : v.noto ? 'no, il viandante riposa' : 'non è mai entrato in questo universo';
     $('wallet-amount').textContent = formatCredits(v.crediti);
     $('wallet-note').textContent = v.anonimo ? 'Un viandante anonimo non ha crediti: gioca con i modelli locali.' : 'Si ricarica dalla pagina dei crediti.';
     $('btn-link-google').hidden = v.account !== 'anonimo';
     const recharge = $<HTMLAnchorElement>('btn-recharge');
     recharge.hidden = v.anonimo;
     recharge.href = `./pagamenti.html?${new URLSearchParams({ universo: v.universo, ...(v.account === 'locale' ? { viandante: v.id } : {}) })}`;
-    $<HTMLAnchorElement>('btn-play-realm').href = playLink(v.universo, v);
+    $<HTMLAnchorElement>('btn-play-universe').href = playLink(v.universo, v);
     $<HTMLAnchorElement>('nav-play').href = playLink(v.universo, v);
     const semi = v.modello?.semi ?? 1;
     this.range.max = String(semi);
