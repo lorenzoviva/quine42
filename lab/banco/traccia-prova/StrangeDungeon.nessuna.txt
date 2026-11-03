@@ -1,0 +1,9 @@
+
+
+--- risposta
+1. Non si può: manca la traccia e la scelta delle regole dipende dal caso.
+2. Non si può: senza traccia non so quante volte il nodo #7 ha agito.
+3. Non si può: mancano i passi del nodo #5 e le celle cambiate in ciascuno.
+4. Non si può: la dimensione della griglia e l'esito casuale del nodo #4 non sono noti.
+5. Non si può: non conosco la dimensione della griglia, quindi non so se la cella esista, né cosa contenga.
+6. Non si può: il numero di W dipende da griglia, seme e passi eseguiti, e non li ho.

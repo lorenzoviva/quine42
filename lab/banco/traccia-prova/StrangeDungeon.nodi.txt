@@ -1,0 +1,19 @@
+Traccia, seme 1: griglia 29×29×29, 7 nodi, 146 passi, finito in 222 ms.
+x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
+Lettere: W=White, E=Emerald.
+Alla fine: W 12905.
+ #2 prl . → E: ×1, 24389 celle x0-28 y0-28 z0-28, passi 1, .→E 24389
+ #3 prl ***/***/*** ***/*E*/*** ***/***/*** → ***/***/*** ***/*.*/*** ***/***/***: ×1, 19683 celle x1-27 y1-27 z1-27, passi 2, E→. 19683
+ #4 one . → W passi=100: ×100, 100 celle x1-27 y1-27 z1-27, passi 3-102, .→W 100
+ #5 all .../.W. → .W./.W. (+2): ×34, 14048 celle x1-27 y1-27 z1-27, passi 103-136, .→W 14048
+   r1 .../.W. → .W./.W. ×8066; r2 W./.W → WW/.W ×1399; r3 W.W → WWW ×4583
+ #6 all E → .: ×1, 4706 celle x0-28 y0-28 z0-28, passi 137, E→. 4706
+ #7 all .../.W. → ***/*.*: ×9, 1243 celle x1-27 y1-27 z1-27, passi 138-146, W→. 1243
+
+--- risposta
+1. La regola r1 (`.../.W. → .W./.W.`), applicata 8066 volte.
+2. 9 volte.
+3. Non si può: la traccia dà solo il totale delle celle cambiate dal nodo #5, non il dettaglio per passo.
+4. Non si può: la traccia contiene solo conteggi, non le posizioni delle celle.
+5. Non si può: la traccia contiene solo conteggi, non le posizioni delle celle.
+6. 12905.

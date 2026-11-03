@@ -3014,13 +3014,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: commit su `task/T178`; l'esito dice le scelte dubbie, da far decidere all'autore.
 - Esito: `docs/glossario.md` (121 voci), censimento rigenerabile (`tools/glossario/glossario.mjs`, `docs/glossario-censimento.md`), `tests/glossario.test.ts`, regola in `AGENTS.md`, ADR-0117. Rispetto al previsto: oltre ai sinonimi un elenco degli **omonimi**, il problema più grosso (due `Building`, `model` anche per Gemini, «reame» per due cose). Nessuna rinomina. Le 8 scelte dubbie e le rinomine R1-R15 sono in fondo al glossario; ne nasceranno task quando l'autore le avrà lette.
 
-### T179 · La traccia di un programma MarkovJunior, in testo — `da fare`
+### T179 · La traccia di un programma MarkovJunior, in testo — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 23
 - Contesto: richiesta 1 dell'autore, primo pezzo. I modelli di T155 e T173 sono belli ma statici, e chi li scrive vede solo il risultato (foto dai quattro lati). Non può capire cosa fanno `one all prl convolution path` passo per passo, come fa l'autore nell'editor andando avanti e indietro tra i fotogrammi; così non sa usare i pattern dei programmi migliori. Le immagini costano: il debug intermedio va in testo. Il risultato finale resta giudicato con le foto, come oggi. Si riusa: `src/mj/engine.ts`, `lab/scripts/mjx-trial.ts`, `mjx-stats.ts`, `lab/banco/` (leggi `dossier T154`, `dossier T173`), le sezioni del laboratorio, l'editor `/lab/editor/`.
 - Cosa fare: uno strumento che, dati XML e seme, dà una traccia leggibile da un modello: per ogni nodo eseguito il tipo, la regola, quante volte e quante celle ha cambiato, la scatola di ciò che ha cambiato; le sezioni di un fotogramma scelto, coi simboli MJ al posto dei voxel. Confronta tre forme sugli stessi programmi, in token e in ciò che fanno capire: (a) sezioni in simboli, (b) solo le differenze tra nodi, (c) la proposta dell'autore: il fotogramma come modello statico con i voxel raggruppati in scatole. Scegli la predefinita, con un tetto di token e una compressione (fotogrammi vicini, piani uguali), e scrivi i numeri. Lo strumento non cambia il risultato del motore. Il banco deve poterla mettere nella seconda richiesta (`lab/banco/seconda.ts`).
 - Test: su XML fissi la traccia dice i nodi e le celle giuste per ogni tipo di nodo; griglia identica con e senza traccia; tetto rispettato. Typecheck e suite con i loro turni.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T179`; nell'esito la forma scelta e i token su uno dei modelli di `lab/banco/conferma/`. Se tocca `src/mj/`: ADR.
+- Esito: `task/T179`, ADR-0117, numeri in `lab/banco/traccia.md`. `src/mj/trace.ts` sul motore vero, osservato (`RunOptions.watch`), `lab/scripts/mjx-trace.ts`, `banco-strutture --seconda --traccia`. **Forma predefinita: (b) le differenze fra nodi, tetto 4000 token stimati.** Su `conferma/moderna/1`: 3799 stimati, 3405 reali, 5114 caratteri; rocca 2893 stimati. Senza tetto, su moderna: (a) sezioni 421889 grezze e 18139 piegate, (c) scatole 3892, (b) la traccia intera 9831. (c), la proposta dell'autore, è la più corta sui programmi di `box` e la più lunga su quelli di regole (OddScale3D 62702, contro 1549 di (b)): resta per guardare un fotogramma. **Prova cieca** con Sonnet, due programmi, un seme, 12 domande: nodi 9, (a) 8, (b) 10, (c) 10, senza traccia 0; solo (b) dice «quando» cambia una crescita. Campione piccolo, giudice uno, e la riga dei conteggi finali è stata aggiunta dopo aver visto la domanda. **Rispetto al previsto:** la prima stima dei token stava sotto il reale (il reale il 20-36 % in più): scalata con `TOKEN_SCALE`, ora sopra del 5-25 % sulle 8 misure. Tutti i modelli di `conferma/` sono centinaia di `box`: lì la traccia dice poco più dell'XML, servirà a T181 e T182. **Non provato:** `--seconda --traccia` con una chiamata vera (provati il testo e la traccia di un modello del banco); se la traccia fa scrivere programmi migliori. Sicurezza: nessuna superficie nuova (il motore non cambia risultato, il gioco non importa `trace.ts`).
 
 ### T180 · Il banco misura varianza e scala — `da fare`
 - Pipeline: claude · stima 3% · priorità 24
@@ -3082,13 +3083,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira nel frattempo (l'orchestratore ha tolto l'approvazione ai pronti e la ridà alla fine), perché una rinomina si scontra con tutti e un task partito prima userebbe i nomi vecchi senza un conflitto che lo dica.
 
-### T206 · Integrare T179 — `da fare`
+### T206 · Integrare T179 — `fatto` (`2f5cb96`)
 - Pipeline: claude · stima 1% · approvato · priorità 1
 - Contesto: T179 (`dossier T179`) è finito, ma `integra T179` va in conflitto in `docs/adr/README.md`: ha preso lo 0117, che nel base è il glossario di T178.
 - Cosa fare: nel tuo worktree `git merge task/T179`; il suo ADR diventa **0118** (file, indice, citazioni in `AGENTS.md` e nel codice che porta); le due righe dell'indice restano entrambe. Nessun'altra modifica. Il blocco di T179 nel backlog dice ADR-0117: si legge 0118, non riscriverlo.
 - Test: typecheck e suite intera con i loro turni.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T206`. Sicurezza: nessuna superficie nuova.
+- Esito: T179 fuso in `task/T206` (2f5cb96), l'ADR della traccia diventa 0118 (file, indice con entrambe le righe, `AGENTS.md`, `lab/banco/traccia.md`, `src/mj/engine.ts`, `src/mj/trace.ts`), nessun'altra modifica; il blocco di T179 nel backlog dice ADR-0117 e si legge 0118; typecheck e suite verdi (1429 test); non provato: `banco-strutture --seconda --traccia` con una chiamata vera, come già nell'esito di T179; sicurezza: nessuna superficie nuova.
 
 ### T187 · Il glossario con le scelte dell'autore — `da fare` (dipende da T179)
 - Pipeline: claude · stima 1% · approvato · priorità 2
