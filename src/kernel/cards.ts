@@ -1,5 +1,5 @@
 // The cards (T36, ADR-0056; P#2 of the multiplayer plan): every generated piece of content — a module, an
-// item, an environment, a model, a place, a person, a plot, a rule, a spell, a recipe — carries who wrote it
+// item, an environment, a model, a place, an individual, a plot, a rule, a spell, a recipe — carries who wrote it
 // and who paid for it (`carta`), and is a card of one wanderer. What every wanderer pays for is theirs; what
 // the world pays for (the Genesis, the sessions of the Council, the horizontal plots, the reviews) is common,
 // and goes to one wanderer drawn with the seed of the universe. `world/carte.json` keeps how often each card is
@@ -302,7 +302,7 @@ const indentOf = (src: string) => /\n( +)"/.exec(src)?.[1].length ?? 2;
 
 /**
  * Stamps the content a change brings (T36): every entry of the working files that the last commit did not have
- * gets a card from `sign`; an entry that had one and lost it when rewritten (a model sculpted again, a person
+ * gets a card from `sign`; an entry that had one and lost it when rewritten (a model sculpted again, an individual
  * repaired) gets it back. What was there before without a card (the seed, universes older than T36) stays so.
  * Returns the files it rewrote.
  */

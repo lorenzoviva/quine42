@@ -10,7 +10,7 @@ import { MockAiModels } from '../src/kernel/ai/mock';
 import { writePlots, PLOTS_FILE, type Plot } from '../src/kernel/plots';
 import type { FileMap } from '../src/kernel/types';
 
-const person = (nome: string, extra: Record<string, unknown> = {}) => ({
+const individual = (nome: string, extra: Record<string, unknown> = {}) => ({
   nome,
   tipo: 'npc.villager',
   specie: 'persona',
@@ -46,7 +46,7 @@ function files(): FileMap {
         { id: 'paludi', nome: 'Paludi del Nord', descrizione: 'acqua ferma', ambiente: 'borgo', centro: [0, -6], raggio: 1 },
       ],
     }),
-    'world/people.json': JSON.stringify({ persone: [person('Nereo', { origine: '2,1#o0' }), person('Ilde', { origine: '1,0#o3' })] }),
+    'world/people.json': JSON.stringify({ persone: [individual('Nereo', { origine: '2,1#o0' }), individual('Ilde', { origine: '1,0#o3' })] }),
     [PLOTS_FILE]: writePlots(plots),
   };
 }

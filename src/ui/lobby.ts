@@ -86,9 +86,9 @@ export class LobbyScreen {
     const actorRow = el(
       'div',
       { class: 'actor-row' },
-      el('label', { for: 'lobby-attore' }, actorOn, el('strong', {}, ' Attore: '), isMaster ? 'interpreta le persone con le schede del Narratore' : actor.acceso ? `acceso (${actor.modello})` : 'spento: il Narratore interpreta le persone'),
+      el('label', { for: 'lobby-attore' }, actorOn, el('strong', {}, ' Attore: '), isMaster ? 'interpreta gli individui con le schede del Narratore' : actor.acceso ? `acceso (${actor.modello})` : 'spento: il Narratore interpreta le persone'),
       isMaster ? el('label', { for: 'lobby-attore-modello' }, ' modello ', actorModel) : '',
-      el('div', { class: 'note' }, isMaster ? "Spento, nulla cambia e nessuna chiamata in più. Acceso, il Narratore scrive una scheda per persona alla sua prima battuta e l'Attore la interpreta con il suo modello." : 'Lo stabilisce il master.'),
+      el('div', { class: 'note' }, isMaster ? "Spento, nulla cambia e nessuna chiamata in più. Acceso, il Narratore scrive una scheda per individuo alla sua prima battuta e l'Attore la interpreta con il suo modello." : 'Lo stabilisce il master.'),
     );
 
     // Cards collection outside of the match (T45d)

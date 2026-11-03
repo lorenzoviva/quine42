@@ -147,7 +147,7 @@ function cutDown(text: string | undefined, list: string, keys: string[]): string
 
 /**
  * What anyone who is not the master may read of a universe over HTTP: what a player's client gets, and what the site's pages
- * and the lobby show of it. The cards with who holds them and what they are called, a person's trade but not their story or
+ * and the lobby show of it. The cards with who holds them and what they are called, an individual's trade but not their story or
  * memories, a plot's title but not its steps, the world's one-line concept, an environment's name but not its program, of `ai`
  * what the lobby shows. No code, no prompts, no balances, no ledgers.
  */

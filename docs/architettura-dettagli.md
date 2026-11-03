@@ -68,7 +68,7 @@
   `universe/universe.json → ai` con i budget (`maxText`, `maxForges`, `maxPacks`, `maxCast`; in multigiocatore `placesPerMinute`),
   il ragionamento (`thinking`, `low`) e il tempo massimo (`timeout`). Prezzi in `src/kernel/ai/prices.ts` (con la data).
   **L'Attore** (`ai.attore`, ADR-0116, T157): spento se non detto, e allora nulla cambia; acceso (un booleano, il nome di un modello o `{acceso, modello}`,
-  `repairActor`), il Narratore scrive la scheda di ogni individuo alla sua prima battuta (`npc.sheet`, `Person.scheda`, riscritta solo se cambiano legami o
+  `repairActor`), il Narratore scrive la scheda di ogni individuo alla sua prima battuta (`npc.sheet`, `Individual.scheda`, riscritta solo se cambiano legami o
   storia, `sheetFingerprint`) e l'agente `attore` recita `npc.reply` e `npc.dialogue` con il suo modello (`ACTOR_MODEL`, `gemini-3.8-flash`): stessi compiti,
   paganti, limiti e modelli locali; si sceglie nella Genesi, nella lobby (solo il master: messaggio `attore`) o nell'editor; `kernel.interpreter()` dice chi recita.
   I **coefficienti di generazione** (`ai.coefficienti`, ADR-0085, T45b, `src/kernel/coefficients.ts`): quanto spesso ogni agente chiama l'IA,
@@ -94,7 +94,7 @@
 Registro: `kernel.feed()`, pannello Concilio (`G`) e console. Nella corona ogni agente è una squadra: un
 membro per edificio, che va allo scaffale del file che cambia; si vedono parlare solo quelli che
 interagiscono nel registro; con `E` ci si parla. Il Cartografo crea ambienti e li colloca sull'atlante.
-Il Narratore intreccia trame tra le persone e scrive i loro dialoghi.
+Il Narratore intreccia trame tra gli individui e scrive i loro dialoghi.
 **Luogo** (18×18): bozza Lua continua (`g p t w r`) → piano del Cartografo (ambiente, cose `dentro`/
 `fuori`/`ovunque`, oggetti `a_terra`, rune, `strutture`) → layout (varchi deterministici, programma con bordo
 congelato, sentieri garantiti, edifici) → lotti: ogni edificio diventa una struttura, un modello intero girato
@@ -167,12 +167,12 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 
 - **Società** (ADR-0020): `world/people.json`; individui con specie (`persona | animale`, dal tipo) e genere,
   mestiere, famiglia, routine (mattina/giorno/sera/notte → casa/lavoro/piazza/in giro, componente `meta` seguito
-  da `sys.wander`). Un legame dice cosa è la persona per l'altro, nel suo genere; il validatore della società
+  da `sys.wander`). Un legame dice cosa è l'individuo per l'altro, nel suo genere; il validatore della società
   (`repairSociety` in `society.ts`) lo rende possibile per le due specie e simmetrico, un padrone per animale,
   nomi non simili (rinomina anche nelle trame); ripara a ogni aggiunta e all'avvio (`reviewSociety`).
-- **Vita degli NPC** (ADR-0024): attività visibili (`attivita {tipo, ferma}`), dialoghi tra persone,
+- **Vita degli NPC** (ADR-0024): attività visibili (`attivita {tipo, ferma}`), dialoghi tra individui,
   ricordi pesati, legami col viandante e figli (effetti `legame ricordo nascita`), trame e missioni
-  (`world/plots.json`, diario nell'HUD). Ogni trama passa dal validatore (`reviewPlot` in `plots.ts`): persone che
+  (`world/plots.json`, diario nell'HUD). Ogni trama passa dal validatore (`reviewPlot` in `plots.ts`): individui che
   esistono, animali da animali, legami del registro, rune del canone, niente quarta parete; ciò che non torna va al
   Narratore con il motivo, all'avvio `reviewPlots` ripara o ritira le trame aperte.
 - **Personaggi** (ADR-0010, 0013, 0017, 0020): tipo + individuo (`identity`: anche `job family routine story`), `mind` (memoria, umore, modo), azioni
@@ -277,7 +277,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   in `world/giocatori/<id>.json` (da uno `stato.json` vecchio per `io`); `world/stato.json` è lo stato del mondo. Il kernel ha un
   registro (`wanderers()`, `addWanderer`); ciò che agisce su «il giocatore» agisce sul viandante che agisce (`wanderer()`), e
   `as(id, fn)`, sincrono (mai attraverso un `await`), fa agire un altro. Legami e ricordi portano `viandante: <id>` (`readPeople`
-  migra «Viandante» e `legameViandante` a `io`; `bondWith`, `bondOf`, `memoriesFor`: una persona non racconta a un viandante ciò che ha
+  migra «Viandante» e `legameViandante` a `io`; `bondWith`, `bondOf`, `memoriesFor`: un individuo non racconta a un viandante ciò che ha
   vissuto con un altro), le missioni `Quest.viandante`; `talk(id, testo, viandante?)` dà al Narratore il nome di chi parla; nel grafo
   `persona:viandante` è `io`, `persona:viandante-<id>` gli altri.
 - **Rune per ruolo** (ADR-0057, T37): `partita.master` è chi ha creato l'universo multigiocatore (`io` per ora); in singola chi gioca
@@ -301,9 +301,9 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 ## Chi paga, le carte, i crediti
 
 - **Chi paga e le carte** (ADR-0056, T36): ogni chiamata ha un `chi` (un viandante o `comune`): lo mette il Concilio con la
-  politica di `payerOf` (`src/kernel/cards.ts`: comuni Genesi, sessioni, trame, revisioni, dialoghi tra persone, modelli che mancano,
+  politica di `payerOf` (`src/kernel/cards.ts`: comuni Genesi, sessioni, trame, revisioni, dialoghi tra individui, modelli che mancano,
   pacchetti; il resto è del viandante che agisce), un `chi` esplicito vince; `world/consumi.json → paganti`. Ogni contenuto generato
-  porta `carta {autore, pagante, titolare}` (moduli, oggetti, ambienti, incantesimi, ricette, modelli, persone, trame, regole giudicate,
+  porta `carta {autore, pagante, titolare}` (moduli, oggetti, ambienti, incantesimi, ricette, modelli, individui, trame, regole giudicate,
   piani dei luoghi): i punti che creano contenuti committano con `commitContent`, che timbra ciò che il cambio porta (`stampFiles`); il
   titolare delle comuni è un viandante estratto col seme (`cardHolderOf`). Gli utilizzi (`luoghi trame prompt`) e le carte dei luoghi in
   `world/carte.json` (`CardUses`, scritto prima di ogni commit); la collezione: `kernel.cardsOf(id)`, `collectionOf`.
@@ -338,7 +338,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   `ai.placesPerMinute` (20) luoghi nuovi per minuto del mondo, gli altri restano bozze (`Chunk.held`). Il Concilio gira solo sul server.
 - **Il client del giocatore** (ADR-0061, T41): a un giocatore il server manda solo i file che il client disegna (`playerFiles` in
   `files.ts`, a elenco di campi, ADR-0109: `universe.json` senza `ai`, `models/`, rilievo, atlante, manifest senza storie né `logic` tranne `PER_WANDERER`); prompt, bibbia,
-  persone, trame, regole, grafo, carte, consumi e viandanti restano sul server. L'`ingresso` dice `master`; il registro del Concilio
+  individui, trame, regole, grafo, carte, consumi e viandanti restano sul server. L'`ingresso` dice `master`; il registro del Concilio
   (`concilio`) va solo al master, e `ThinClient` lo versa nello specchio. Corona e strumenti del master (`src/master.ts`: editor,
   console, registro, Genesi, pannelli dello studio, atlante, grafo; `src/render/coronaview.ts`: ciò che il renderer disegna della
   corona) si caricano con `import()` solo dal master (in singola sempre); `window.rune` (e `window.quine`) del giocatore è il `ThinClient`.
@@ -364,12 +364,12 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   (3) caselle, dove andrebbe raccogliendolo, una borsa intera in una tasca vuota, la frase dimentica le rune date. Chi riceve lo sa
   (`wanderer:said`/`wanderer:gave` → `avvisi` nell'`aggiorna`; la chat aperta con chi parla, `ui:heard`). Uno scambio sono due doni.
 - **«Altro…» e PvP tra viandanti** (ADR-0073, T43b): «Altro…» su un altro viandante solo se `partita.altroTraGiocatori` (`freeOnWanderer`,
-  messaggio `altro {viandante, testo}`, entro `GIVE_REACH`), giudicato come su una persona (`ActionContext.between`); il server applica gli effetti
+  messaggio `altro {viandante, testo}`, entro `GIVE_REACH`), giudicato come su un individuo (`ActionContext.between`); il server applica gli effetti
   sul suo corpo (`touchWanderer`: bisogni, scudo, stati come lui; `spingi` sul suo tappeto, `wanderer:pushed` azzera il suo credito di passo); ciò che
   ferisce (`unharmed`: bisogni che scendono, `spingi`, `fuoco`, `togli_stato`, stati che rallentano) solo con `partita.pvp`; sul master solo `messaggio`.
   Chi lo subisce lo sa (`wanderer:acted` → avviso `altro`).
 - **Il profilo del viandante** (ADR-0074, T44a): `Profile {nome, seme, tinta, presentazione}` in `world/giocatori/<id>.json`; `repairProfile`
-  (`wanderers.ts`) lo ripara (nome di 2-24 caratteri e non simile a persone o viandanti, altrimenti `freshName`; seme tra quelli della classe;
+  (`wanderers.ts`) lo ripara (nome di 2-24 caratteri e non simile a individui o viandanti, altrimenti `freshName`; seme tra quelli della classe;
   mantello né scuro né chiaro né grigio; 4 righe) e `kernel.setProfile` lo fa nome e aspetto (`dressWanderer`). `entra {profilo}` e `profilo`
   nel protocollo, l'`ingresso`/`esito` dicono il profilo riparato e `riparato`; agli altri con `OtherView` (+ `presentazione`, «Chi è» nel
   menu). Il Narratore riceve la presentazione come affermazione del viandante. Il client lo tiene in `localStorage` sotto `rune:profilo:<universo>:<id>` (T44c); un profilo già salvato sul server non lo
@@ -523,10 +523,10 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 ## Il grafo del mondo
 
 - **Grafo del mondo** (ADR-0045): `src/kernel/graph.ts` costruisce dai file dell'universo e dai luoghi pianificati un grafo
-  di nodi tipizzati (`<tipo>:<slug>`: persone col viandante e gli attesi, tipi, luoghi `luogo:<cx>_<cy>`, regioni, ambienti,
+  di nodi tipizzati (`<tipo>:<slug>`: individui col viandante e gli attesi, tipi, luoghi `luogo:<cx>_<cy>`, regioni, ambienti,
   strutture, trame, oggetti, ricette, rune, incantesimi, regole, fatti) e archi (legami, routine, tappe, contenuti, ingredienti,
   ciò che il viandante porta); `kernel.graph()` (in cache) con `find`, `neighbors`, `context`, `check()` (riferimenti verso
-  nulla, legami da un lato solo o impossibili, nomi simili, trame senza persone o luoghi). Va in `world/grafo.json` prima di
+  nulla, legami da un lato solo o impossibili, nomi simili, trame senza individui o luoghi). Va in `world/grafo.json` prima di
   ogni commit se è cambiato ciò di cui è fatto (formato di Graphify, una riga per nodo e arco; tiene i luoghi del file
   precedente; `GRAPH_BUILD` da alzare quando si costruisce in modo diverso). I compiti narrativi (risposte e dialoghi degli NPC, «Esamina», «Leggi», azioni libere, fabbricazione, combinazioni,
   incantesimi nuovi, individui, trame) passano un `focus` (`kernel.focusOn`: le cose nominate e il luogo, id o nomi): il
@@ -589,7 +589,7 @@ Fatto: kernel, sandbox, rune (una per casella, rare), tappeto, corona nascosta e
 con il Concilio che vi lavora, versionamento, Concilio su Gemini, piani dei luoghi a caselle senza cuciture con
 layout a regole e connettività garantita, contenuti come dati (pacchetti, bottino, contenitori, ricette, bisogni),
 menu delle azioni con azioni libere giudicate dal Concilio e imparate dagli oggetti, effetti, magia e
-incantesimi, fuoco, giorno e notte, varietà di persone, oggetti citati, riparazione automatica, rune come oggetti
+incantesimi, fuoco, giorno e notte, varietà di individui, oggetti citati, riparazione automatica, rune come oggetti
 con borsa e frase, mana e cristalli, borse nell'inventario, regole nate dal gioco, fabbricazione libera,
 società degli NPC con famiglie e routine, sessioni del Concilio, test.
 

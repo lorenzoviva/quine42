@@ -21,7 +21,7 @@ export const LOW_DETAIL: { coefficienti: Coefficients; scultori: Partial<Sculpto
 };
 
 /**
- * The Actor (T157, ADR-0116): an option of the master. Off (the default) the Narrator plays every person as it always did
+ * The Actor (T157, ADR-0116): an option of the master. Off (the default) the Narrator plays every individual as it always did
  * and no call is added; on, the Narrator writes a sheet once per individual (`npc.sheet`) and the Actor plays them
  * (`npc.reply`, `npc.dialogue`) with its own model.
  */
@@ -56,11 +56,11 @@ export function repairActor(raw: unknown): ActorConfig {
 /** What every coefficient regulates, in the words of the Genesis screen. */
 export const COEFFICIENT_INFO: Record<CoefficientKey, { nome: string; agente: string; modo: 'diretta' | 'indiretta'; testo: string }> = {
   sessioni: { nome: 'Sessioni del Concilio', agente: 'arbitro', modo: 'diretta', testo: 'ogni 12 luoghi nuovi; a 0,5 ogni 24' },
-  dialoghi: { nome: 'Dialoghi tra persone', agente: 'narratore', modo: 'diretta', testo: 'al più uno ogni 40 secondi; a 0,5 ogni 80, a 0 solo saluti' },
+  dialoghi: { nome: 'Dialoghi tra individui', agente: 'narratore', modo: 'diretta', testo: 'al più uno ogni 40 secondi; a 0,5 ogni 80, a 0 solo saluti' },
   trame: { nome: 'Trame', agente: 'narratore', modo: 'diretta', testo: 'una nuova quando nessuna è aperta; a 0,5 un giorno sì e uno no' },
   revisioni: { nome: 'Revisioni dei modelli', agente: 'scultore', modo: 'diretta', testo: "sotto 0,75 un programma per le cose semplici, sotto 0,5 niente revisione, sotto 0,25 niente giudizio dell'Artista" },
   modelli: { nome: 'Modelli nuovi', agente: 'scultore', modo: 'diretta', testo: 'una pausa tra un modello e il successivo: nessuna a 1, un minuto a 0,5' },
-  persone: { nome: 'Persone per luogo', agente: 'narratore', modo: 'indiretta', testo: 'meno persone: meno individui, risposte e dialoghi' },
+  persone: { nome: 'Individui per luogo', agente: 'narratore', modo: 'indiretta', testo: 'meno individui: meno risposte e dialoghi' },
   abitanti: { nome: 'Tipi di abitanti', agente: 'narratore', modo: 'indiretta', testo: 'un tipo nuovo ogni 7 luoghi; a 0,5 ogni 14' },
   pacchetti: { nome: 'Pacchetti di oggetti', agente: 'narratore', modo: 'indiretta', testo: 'un pacchetto ogni 10 luoghi; a 0,5 ogni 20' },
   cose: { nome: 'Cose nuove nei luoghi', agente: 'cartografo', modo: 'indiretta', testo: 'meno cose che la Fucina crea per un luogo e meno oggetti sconosciuti a terra' },
@@ -100,7 +100,7 @@ export const CENSUS: Array<{ compito: string; agente: string; modo: 'diretta' | 
   { compito: 'rune.invent', agente: 'narratore', modo: 'non regolabile', nota: 'una runa nuova: dalle sessioni o da una formula, al più 16 rune' },
   { compito: 'council.session', agente: 'arbitro', modo: 'diretta', coefficiente: 'sessioni' },
   { compito: 'player.death', agente: 'narratore', modo: 'non regolabile', nota: 'a ogni morte' },
-  { compito: 'npc.reply', agente: 'narratore', modo: 'non regolabile', nota: "quando il viandante parla (meno persone, meno occasioni); con l'Attore acceso la fa l'Attore" },
+  { compito: 'npc.reply', agente: 'narratore', modo: 'non regolabile', nota: "quando il viandante parla (meno individui, meno occasioni); con l'Attore acceso la fa l'Attore" },
   { compito: 'npc.dialogue', agente: 'narratore', modo: 'diretta', coefficiente: 'dialoghi', nota: "con l'Attore acceso la fa l'Attore" },
   { compito: 'plot.weave', agente: 'narratore', modo: 'diretta', coefficiente: 'trame' },
   { compito: 'text.examine', agente: 'narratore', modo: 'non regolabile', nota: '«Esamina»' },
@@ -213,7 +213,7 @@ export function hourlyEstimate(ai: AiConfig, date?: string): { righe: HourLine[]
   add(COEFFICIENT_INFO.persone.nome, 'indiretta', people * 1.2, text(people * 1.2));
   const talks = c.dialoghi <= 0 ? 0 : (H.vicini / (40 / c.dialoghi)) * Math.min(1, c.persone * 1.5);
   add(COEFFICIENT_INFO.dialoghi.nome, 'diretta', talks, played(talks));
-  // The Actor's sheets: one per person heard for the first time (a conversation, a dialogue), never more than the people met.
+  // The Actor's sheets: one per individual heard for the first time (a conversation, a dialogue), never more than the people met.
   if (actor.acceso) {
     const sheets = Math.min(people, H.parole / 2 + talks);
     add("Schede dei personaggi (l'Attore acceso)", 'indiretta', sheets, text(sheets));

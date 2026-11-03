@@ -7,7 +7,7 @@
 // live outside the text snapshot, so a rebuild keeps the places of the previous graph).
 
 import type { FileMap, Manifest } from './types';
-import { readPeople, relationProblem, relationsAgree, similarNames, type Person, type Species } from './society';
+import { readPeople, relationProblem, relationsAgree, similarNames, type Individual, type Species } from './society';
 import { readPlots } from './plots';
 import { readAtlas, regionAt } from './atlas';
 import { normName } from './content';
@@ -410,7 +410,7 @@ export class WorldGraph {
       const a = this.nodes.get(l.source)!;
       const b = this.nodes.get(l.target)!;
       if (a.viandante || b.viandante) continue;
-      const why = relationProblem(String(l.legame), a as Pick<Person, 'specie' | 'genere'>, b as Pick<Person, 'specie'>);
+      const why = relationProblem(String(l.legame), a as Pick<Individual, 'specie' | 'genere'>, b as Pick<Individual, 'specie'>);
       if (why) issues.push({ tipo: 'impossibile', testo: `${a.label} è ${l.legame} di ${b.label}: ${why}`, nodi: [a.id, b.id] });
       if (a.atteso || b.atteso) continue;
       const back = rel(b.id, a.id);
@@ -584,27 +584,27 @@ export function buildGraph(files: FileMap, chunks: GraphChunk[] = [], speciesOf:
 
   // People: the registry, the awaited ones, the wanderer.
   const people = readPeople(files);
-  const personByName = new Map<string, string>();
+  const individualByName = new Map<string, string>();
   const PF = 'world/people.json';
   for (const p of people.persone) {
     const id = g.add('persona', p.nome, p.nome, PF, { specie: p.specie ?? speciesOf(p.tipo), genere: p.genere, tipo_modulo: p.tipo, mestiere: p.mestiere, eta: p.eta, luogo: p.luogo, legame_viandante: bondWith(p, SOLO) });
-    personByName.set(p.nome, id);
+    individualByName.set(p.nome, id);
   }
   // Someone named and not met is of the species of who named them (as the repair of the society assumes).
-  for (const a of people.attesi) if (!personByName.has(a.nome)) personByName.set(a.nome, g.add('persona', a.nome, a.nome, PF, { atteso: true, specie: personByName.has(a.di) ? g.node(personByName.get(a.di)!)!.specie : undefined }));
+  for (const a of people.attesi) if (!individualByName.has(a.nome)) individualByName.set(a.nome, g.add('persona', a.nome, a.nome, PF, { atteso: true, specie: individualByName.has(a.di) ? g.node(individualByName.get(a.di)!)!.specie : undefined }));
   // One node per wanderer, by id; a relation with a wanderer the files do not know yet makes theirs.
   const wandererAt = (id: string, nome?: string) =>
     g.node(wandererNode(id)) ? wandererNode(id) : g.add('persona', wandererKey(id), id === SOLO ? 'il viandante' : nome ?? id, files[playerFile(id)] !== undefined || id !== SOLO ? playerFile(id) : 'world/stato.json', { viandante: true, giocatore: id, specie: 'persona' }, true);
   for (const w of wanderersOf(files)) wandererAt(w.id, w.nome);
   for (const p of people.persone) {
-    const id = personByName.get(p.nome)!;
+    const id = individualByName.get(p.nome)!;
     if (p.tipo) {
       if (g.node(`tipo:${slug(p.tipo)}`)) g.link(id, `tipo:${slug(p.tipo)}`, 'e_un', PF);
       else g.missing(`${p.nome} è un ${p.tipo}, che non esiste`, [id]);
     }
     for (const r of p.famiglia ?? []) {
       const w = wandererOf(r);
-      const t = w ? wandererAt(w, r.nome) : personByName.get(r.nome);
+      const t = w ? wandererAt(w, r.nome) : individualByName.get(r.nome);
       if (t) g.link(id, t, 'legame', PF, { legame: r.legame });
       else g.missing(`${p.nome} è ${r.legame} di ${r.nome}, che non esiste`, [id]);
     }
@@ -616,8 +616,8 @@ export function buildGraph(files: FileMap, chunks: GraphChunk[] = [], speciesOf:
     }
   }
   for (const a of people.attesi) {
-    const id = personByName.get(a.nome)!;
-    const t = personByName.get(a.di);
+    const id = individualByName.get(a.nome)!;
+    const t = individualByName.get(a.di);
     if (t) g.link(id, t, 'legame', PF, { legame: a.legame });
   }
   for (const w of wanderersOf(files)) {
@@ -627,21 +627,21 @@ export function buildGraph(files: FileMap, chunks: GraphChunk[] = [], speciesOf:
 
   // Plots.
   for (const t of readPlots(files)) {
-    const noPerson = new Set<string>();
+    const noIndividual = new Set<string>();
     const noChunk = new Set<string>();
     const id = g.add('trama', t.id, t.titolo, 'world/plots.json', { mistero: t.mistero, stato: t.stato, inizio: t.inizio });
     for (const n of new Set([...(t.coinvolti ?? []), ...(t.tappe ?? []).map((b) => b.chi), ...(t.missione ? [t.missione.da] : [])])) {
-      const p = personByName.get(n);
+      const p = individualByName.get(n);
       if (p) g.link(id, p, 'coinvolge', 'world/plots.json');
-      else noPerson.add(n);
+      else noIndividual.add(n);
     }
     for (const b of t.tappe ?? []) {
       const where = b.dove ? chunkIn(b.dove) : undefined;
-      if (where) g.link(id, where, 'tappa', 'world/plots.json', { giorno: b.giorno, momento: b.momento, chi: personByName.get(b.chi) ?? b.chi, dove: b.dove });
+      if (where) g.link(id, where, 'tappa', 'world/plots.json', { giorno: b.giorno, momento: b.momento, chi: individualByName.get(b.chi) ?? b.chi, dove: b.dove });
       else if (b.dove) noChunk.add(b.dove);
     }
     const node = g.node(id)!;
-    if (noPerson.size) node.senza_persona = [...noPerson];
+    if (noIndividual.size) node.senza_persona = [...noIndividual];
     if (noChunk.size) node.senza_luogo = [...noChunk];
   }
 

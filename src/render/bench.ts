@@ -84,7 +84,7 @@ export class BenchView {
     this.group.add(box);
     // The wanderer, then the entities of the case.
     this.actors.push(this.figure(WANDERER, 0.3, true, false));
-    for (const t of shown.scene.entities) this.actors.push(this.figure(t.color, t.radius, t.person, t.fire));
+    for (const t of shown.scene.entities) this.actors.push(this.figure(t.color, t.radius, t.individual, t.fire));
     for (const a of this.actors) this.group.add(a);
     // The screen above the back of the case, leaning towards the camera.
     this.cv.width = Math.round(SCREEN.w * PX * 1.5);
@@ -109,8 +109,8 @@ export class BenchView {
     if (next) this.group.add(arrowSign(next.x, next.y, '>', color));
   }
 
-  /** A person (a body and a head), a flame (glowing, two tongues) or an entity (a block as wide as its body). */
-  private figure(color: string, radius: number, person: boolean, fire: boolean): THREE.Object3D {
+  /** An individual (a body and a head), a flame (glowing, two tongues) or an entity (a block as wide as its body). */
+  private figure(color: string, radius: number, individual: boolean, fire: boolean): THREE.Object3D {
     const s = this.s;
     const b = new Builder();
     const c = rgbOf(color);
@@ -119,7 +119,7 @@ export class BenchView {
       b.box(-0.18 * s, 0, -0.18 * s, 0.18 * s, 0.45 * s, 0.18 * s, c);
       b.box(-0.1 * s, 0.45 * s, -0.1 * s, 0.1 * s, 0.75 * s, 0.1 * s, rgbOf('#ffe08a'));
       mesh = new THREE.Mesh(b.geometry(), MAT.glow);
-    } else if (person) {
+    } else if (individual) {
       b.box(-0.18 * s, 0, -0.14 * s, 0.18 * s, 0.6 * s, 0.14 * s, c);
       b.box(-0.13 * s, 0.6 * s, -0.13 * s, 0.13 * s, 0.86 * s, 0.13 * s, rgbOf('#f2d2b0'));
       mesh = new THREE.Mesh(b.geometry(), MAT.corona);

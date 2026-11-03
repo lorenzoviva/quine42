@@ -134,7 +134,7 @@ export class Overlay {
     ctx.fillText(key, p.x, p.y + 1);
   }
 
-  /** What a person is doing, as a sign over the head. */
+  /** What an individual is doing, as a sign over the head. */
   activity(x: number, y: number, z: number, tipo: Activity, t: number): void {
     const icon = ACTIVITY_ICON[tipo];
     if (!icon) return;

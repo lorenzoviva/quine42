@@ -203,7 +203,7 @@ describe('the bench with the cases of the seed', () => {
     const first = k.benchOf()!;
     expect(first.run).toBeUndefined();
     expect(first.scene.tiles.length).toBe(25);
-    expect(first.scene.entities).toEqual([expect.objectContaining({ name: expect.any(String), radius: 0.42, person: false, fire: false })]);
+    expect(first.scene.entities).toEqual([expect.objectContaining({ name: expect.any(String), radius: 0.42, individual: false, fire: false })]);
     const ran = await done;
     expect(ran.key).toBe(first.key);
     expect(ran.run!.errori).toEqual([]);
@@ -235,7 +235,7 @@ describe('the bench with the cases of the seed', () => {
   });
 
   it('says the watched fields in words', () => {
-    const scene = { tiles: [], entities: [{ name: 'Rovo', color: '#0f0', radius: 0.45, person: false, fire: false }] };
+    const scene = { tiles: [], entities: [{ name: 'Rovo', color: '#0f0', radius: 0.45, individual: false, fire: false }] };
     expect(fieldLabel('needs.health')).toBe('salute');
     expect(fieldLabel('0:body.solid', scene)).toBe('Rovo: c’è');
     expect(fieldLabel('2:difesa.valore', scene)).toBe('cosa 2: difesa.valore');

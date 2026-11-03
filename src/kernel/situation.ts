@@ -50,7 +50,7 @@ export interface SituationInput {
   /** The other wanderers connected (a multiplayer game). */
   players?: PlayerSpot[];
   chunks: Array<{ cx: number; cy: number; stage: 'draft' | 'planned'; developing?: boolean; name?: string }>;
-  /** Where a person is (their chunk), if anyone knows. */
+  /** Where an individual is (their chunk), if anyone knows. */
   locate: (name: string) => { cx: number; cy: number } | undefined;
   chunkSize: number;
 }

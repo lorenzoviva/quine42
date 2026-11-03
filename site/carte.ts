@@ -124,7 +124,7 @@ const parse = (src: string | undefined): any => {
   }
 };
 
-/** What holds the card in its file: an item, a spell, a person… (the module itself when it has nothing of its own). */
+/** What holds the card in its file: an item, a spell, an individual… (the module itself when it has nothing of its own). */
 function entryOf(card: Card, files: FileMap): any {
   const key = card.id.slice(card.id.indexOf(':') + 1);
   const data = parse(files[card.file]);

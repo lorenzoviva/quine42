@@ -21,7 +21,7 @@ async function develop(k: Kernel) {
 
 const cats = (t: string) => (t === 'npc.cat' ? 'animale' : t ? 'persona' : undefined) as 'animale' | 'persona' | undefined;
 
-const person = (nome: string, tipo: string, famiglia: Array<[string, string]>, extra: Record<string, unknown> = {}) => ({
+const individual = (nome: string, tipo: string, famiglia: Array<[string, string]>, extra: Record<string, unknown> = {}) => ({
   nome,
   tipo,
   mestiere: 'contadino',
@@ -73,12 +73,12 @@ function universe(): { files: FileMap; chunks: GraphChunk[] } {
     'world/atlas.json': JSON.stringify({ regioni: [{ id: 'lago-muto', nome: 'Lago Muto', descrizione: 'un lago fermo', ambiente: 'lago', centro: [3, 0], raggio: 1 }] }),
     'world/people.json': JSON.stringify({
       persone: [
-        person('Fiocco', 'npc.cat', [['Bastiano', 'fratello'], ['Micetto', 'madre']], { luogo: 'Piazza del Borgo', genere: 'femmina' }),
-        person('Micetto', 'npc.cat', [['Fiocco', 'figlio'], ['Nessuno Mai', 'padrone']], { genere: 'maschio' }),
-        person('Bastiano', 'npc.villager', [['Fiocco', 'fratello'], ['Bastiano del Mulino', 'cugino']], { luogo: 'Piazza del Borgo', genere: 'maschio', specie: 'persona' }),
-        person('Bastiano del Mulino', 'npc.villager', [], { luogo: 'Sulle rive del Lago Muto' }),
-        person('Nereo', 'npc.villager', [['Gaspare', 'padre'], ['Viandante', 'rivale']], { genere: 'femmina', luogo: 'Riva del Lago' }),
-        person('Gaspare', 'npc.villager', [['Nereo', 'padre']], { genere: 'maschio' }),
+        individual('Fiocco', 'npc.cat', [['Bastiano', 'fratello'], ['Micetto', 'madre']], { luogo: 'Piazza del Borgo', genere: 'femmina' }),
+        individual('Micetto', 'npc.cat', [['Fiocco', 'figlio'], ['Nessuno Mai', 'padrone']], { genere: 'maschio' }),
+        individual('Bastiano', 'npc.villager', [['Fiocco', 'fratello'], ['Bastiano del Mulino', 'cugino']], { luogo: 'Piazza del Borgo', genere: 'maschio', specie: 'persona' }),
+        individual('Bastiano del Mulino', 'npc.villager', [], { luogo: 'Sulle rive del Lago Muto' }),
+        individual('Nereo', 'npc.villager', [['Gaspare', 'padre'], ['Viandante', 'rivale']], { genere: 'femmina', luogo: 'Riva del Lago' }),
+        individual('Gaspare', 'npc.villager', [['Nereo', 'padre']], { genere: 'maschio' }),
       ],
       attesi: [{ nome: 'Ilaria', legame: 'sorella', di: 'Gaspare' }, { nome: 'Batuffolo', legame: 'figlio', di: 'Micetto' }],
     }),

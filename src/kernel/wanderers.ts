@@ -97,7 +97,7 @@ function cleanName(raw: unknown): string {
 }
 
 /**
- * A profile from a client, made possible (T44a): a short name, unlike every person of the world and every other
+ * A profile from a client, made possible (T44a): a short name, unlike every individual of the world and every other
  * wanderer (`taken`; otherwise a fresh one, stable for the id), a seed among those of the class, a cloak neither too
  * dark nor too pale nor grey, a presentation of a few lines. What is not there stays out; the name defaults to
  * «Viandante», the name of whoever is not known.
@@ -218,13 +218,13 @@ export function wandererOf(x: { nome?: string; con?: string; viandante?: string 
   return name === 'viandante' ? SOLO : undefined;
 }
 
-/** What a person is to a wanderer, if anything. */
+/** What an individual is to a wanderer, if anything. */
 export function bondWith(p: { famiglia?: Array<{ nome: string; legame: string; viandante?: string }>; legameViandante?: string }, id: string): string | undefined {
   const r = (p.famiglia ?? []).find((f) => wandererOf(f) === id);
   return r?.legame ?? (id === SOLO ? p.legameViandante : undefined);
 }
 
-/** The memories a person brings to a talk with a wanderer: theirs together and those of the others in the world, not of other wanderers. */
+/** The memories an individual brings to a talk with a wanderer: theirs together and those of the others in the world, not of other wanderers. */
 export function memoriesFor<T extends { con?: string; viandante?: string }>(list: T[] | undefined, id: string): T[] {
   return (list ?? []).filter((m) => {
     const w = wandererOf(m);

@@ -56,7 +56,7 @@ export interface BenchEntry {
 export interface BenchScene {
   tiles: Array<{ color: string; layer?: string; solid: boolean }>;
   /** `fire`: it burns (a `fuoco` component in the case): drawn as a flame. */
-  entities: Array<{ name: string; color: string; radius: number; person: boolean; fire: boolean }>;
+  entities: Array<{ name: string; color: string; radius: number; individual: boolean; fire: boolean }>;
 }
 
 /** The bench now: the case, its place among all, its scene and code, and its run once the kernel in miniature has done it. */

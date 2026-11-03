@@ -261,7 +261,7 @@ export interface Manifest {
   spawn?: SpawnRule;
   /** An individual: at most one in the loaded world (a named character, a unique relic). */
   unique?: boolean;
-  /** Character sheet for NPCs: the LLM plays this person. */
+  /** Character sheet for NPCs: the LLM plays this individual. */
   persona?: string;
   /** Module ids an NPC carries (can give them away). */
   inventory?: string[];

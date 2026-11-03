@@ -143,9 +143,9 @@ describe('V-022 chi paga dopo un await', () => {
     const server = new SessionServer(kernel, { reach: 1e6 });
     const a = enter(server, 'parla');
     kernel.ledger.credit('parla', 5);
-    const person = [...kernel.modules.values()].find((m) => m.manifest.persona)!;
+    const individual = [...kernel.modules.values()].find((m) => m.manifest.persona)!;
     const at = kernel.wandererAt('parla')!;
-    const npc = kernel.spawnModuleEntity(person, at.x + 1, at.y);
+    const npc = kernel.spawnModuleEntity(individual, at.x + 1, at.y);
     asked.length = 0;
     a.send({ t: 'chat', seq: 1, entita: npc, testo: 'ciao' });
     for (let i = 0; i < 200 && !a.got.some((m) => m.t === 'esito' && m.seq === 1); i++) {
@@ -161,9 +161,9 @@ describe('V-022 chi paga dopo un await', () => {
     kernel.ledger.credit('io', 5);
     const server = new SessionServer(kernel, { reach: 1e6 });
     const a = enter(server, 'senza');
-    const person = [...kernel.modules.values()].find((m) => m.manifest.persona)!;
+    const individual = [...kernel.modules.values()].find((m) => m.manifest.persona)!;
     const at = kernel.wandererAt('senza')!;
-    const npc = kernel.spawnModuleEntity(person, at.x + 1, at.y);
+    const npc = kernel.spawnModuleEntity(individual, at.x + 1, at.y);
     const master = kernel.creditsOf('io');
     asked.length = 0;
     a.send({ t: 'chat', seq: 1, entita: npc, testo: 'ciao' });

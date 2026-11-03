@@ -12,7 +12,7 @@ import { artOf, chainOf, collectionView, describeCard, inCategory, mhCode, PAGE,
 const carta = (titolare: string, origini?: unknown) => ({ autore: 'narratore', pagante: titolare, titolare, ...(origini ? { origini } : {}) });
 const print = (t: string) => fingerprint(t);
 
-/** A small universe of cards: an item pack, a person, a plot, a place that came with a clone, a rule. */
+/** A small universe of cards: an item pack, an individual, a plot, a place that came with a clone, a rule. */
 function universe(): FileMap {
   const models = JSON.parse(bundledFiles['models/index.json'] ?? '{}');
   return {
