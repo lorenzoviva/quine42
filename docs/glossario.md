@@ -345,6 +345,12 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Dove vive**: `lab/suono/logic.ts`
 - **Da non usare**: `patch`, `correzione` (per questo blocco)
 
+### Analisi del suono
+- **Inglese**: `analyzeSound`, `SoundReport`, `SoundIssue`, `SoundDefect`, `SOUND_THRESHOLDS`, `soundReportText`
+- **Definizione**: ciò che un programma sonoro suona e cosa non va, misurato dalla partitura e dai campioni, con le soglie che dicono i difetti (`vuoto`, `piatto`, `ripetitivo`, `stonato`, `fuori volume`, `giuntura`).
+- **Dove vive**: `src/mj/soundanalysis.ts`, `lab/scripts/mjx-sound.ts`
+- **Da non usare**: `check audio`, `QA del suono`
+
 ### Forma
 - **Inglese**: `Form`, `FormResult`, `FormComp`, `FormView`, `FormRunner`
 - **Definizione**: ciò che esce da programma più seme più scatola: griglia, impronta, pavimenti, azioni.

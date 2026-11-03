@@ -18,8 +18,7 @@ import { boxOf, classOf, CLASSES, sizeOf, SIZE_TIERS } from '../mj/classes';
 import { Mj3Error } from '../mj/engine';
 import { compileMjx, type MjxModel } from '../mj/model';
 import { FORM_LIMITS, MAX_FORM_TIME, MAX_FORM_XML, runMjx } from '../mj/run';
-import { scoreOf } from '../mj/sound';
-import { SOUND_LIMITS, SOUND_MAX_STEPS } from '../mj/synth';
+import { analyzeSound } from '../mj/soundanalysis';
 import { reservedName } from './paths';
 
 const KINDS: ModuleKind[] = ['system', 'entity', 'item', 'player', 'generator', 'data'];
@@ -76,11 +75,13 @@ export function modelErrors(path: string, xml: string, time = 8_000): string[] {
   }
 }
 
-/** A sound program stands in no world: it must finish and leave something to hear (ADR-0123). */
+/** Three seeds: a program whose seeds do not differ goes back too. */
+const SOUND_CHECK_SEEDS = [1, 2, 3];
+
+/** A sound program stands in no world: it must finish and pass the thresholds of the analysis (ADR-0123, ADR-0125). */
 function soundErrors(path: string, m: MjxModel, time: number): string[] {
-  const r = runMjx(m, 1, { deadline: time, limits: SOUND_LIMITS, maxSteps: SOUND_MAX_STEPS });
-  if (!r.finished) return [`${path}: il programma non finisce (ogni crescita deve avere steps)`];
-  return scoreOf(r.grid, m.sound!).events.length ? [] : [`${path}: la partitura è vuota: nessuna lettera che suona (N S A G K H C) su una traccia di <sound>`];
+  const { issues } = analyzeSound(m, { seeds: SOUND_CHECK_SEEDS, frugal: true, deadline: time / SOUND_CHECK_SEEDS.length });
+  return issues.map((i) => `${path}: suono ${i.defect}: ${i.message}`);
 }
 
 const HEX_RE = /^#[0-9a-f]{6}$/i;

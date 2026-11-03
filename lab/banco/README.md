@@ -72,6 +72,10 @@ Misure e criteri sono gli stessi; cambia quante richieste ha un tentativo. Come 
 
 Una terza richiesta non c'è.
 
+## Il suono (T223)
+
+`suono.md` dice come leggere un programma sonoro senza orecchie: `lab/scripts/mjx-sound.ts` ne dà WAV, traccia e rapporto.
+
 ## La traccia (T179)
 
 `--seconda --traccia [--tetto 4000]` mette nella seconda richiesta anche cosa ha fatto il programma, nodo per nodo, in testo: `traccia.md` dice le forme, i numeri e la scelta; da sola con `lab/scripts/mjx-trace.ts`. Le foto restano per il risultato finale. Senza il flag la richiesta è quella di T173.
