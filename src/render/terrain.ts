@@ -2,14 +2,14 @@
 // tile = one unit). The plan's tiles are still the ground: colour per terrain, each tile a column as high
 // as the relief (ADR-0048) with its sides where a neighbour is lower, water lower than the land with
 // earthen banks, walls extruded, doors as an opening under a lintel. What stands on a tile
-// (trees on woods, boulders on rock) is the terrain's model (`TileDef.model`), a few seeds of it as
+// (trees on woods, boulders on rock) is the terrain's model (`TerrainDef.model`), a few seeds of it as
 // instances, turned and shifted; a stand-in until the model is ready. Buildings are no longer tiles: each
 // is a structure, a model on its lot (ADR-0043), drawn with the entities.
 
 import * as THREE from 'three';
 import type { Chunk, Kernel } from '../kernel/kernel';
 import { hash32 } from '../kernel/rng';
-import type { TileDef } from '../kernel/types';
+import type { TerrainDef } from '../kernel/types';
 import { casts, MAT, rgbOf } from './materials';
 import { geoOf, type ModelGeo } from './models';
 import type { Form } from '../kernel/forms';
@@ -102,7 +102,7 @@ export class Builder {
   }
 }
 
-const groundY = (t: TileDef | undefined) => (t?.layer === 'liquid' ? WATER_Y : t?.layer === 'floor' ? 0.02 : 0);
+const groundY = (t: TerrainDef | undefined) => (t?.layer === 'liquid' ? WATER_Y : t?.layer === 'floor' ? 0.02 : 0);
 
 /** A tree in voxel style on ground at height y: trunk and three shrinking layers of foliage, size and colour varied per tile. */
 function standInTree(b: Builder, x: number, y: number, z: number, h: number, rgb: number[]): void {

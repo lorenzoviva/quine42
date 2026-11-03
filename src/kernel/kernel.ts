@@ -58,7 +58,7 @@ import { addItem, CARRY_CAPACITY, countItem, HOTBAR, equippedItem, moveSlot, new
 import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH, worldLevels } from './relief';
 import { CardUses, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, receivedBy, type Received, payerOf, chunkCardId, stampFiles, cardHolderOf, type Card, type CardStamp } from './cards';
 import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState, PER_WANDERER } from './wanderers';
-import type { ActionDef, AiConfig, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Partita, ChunkInfo, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
+import type { ActionDef, AiConfig, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Partita, ChunkInfo, Recipe, RuneFragment, TerrainDef, UniverseConfig } from './types';
 
 /** A solid entity with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
 interface SolidForm extends Ground {
@@ -329,7 +329,7 @@ export const SYMBOL_DOCS: Record<string, string> = {
 /** Draft codes of the biomes and the base terrain each falls back to, if a world lacks them. */
 const DRAFT_FALLBACK: Record<string, string> = { s: 'g', n: 'g', j: 't', o: 'w', k: 'r' };
 
-const VOID_TILE: TileDef = { name: 'vuoto', color: '#2a0612', solid: false, layer: 'ground' };
+const VOID_TILE: TerrainDef = { name: 'vuoto', color: '#2a0612', solid: false, layer: 'ground' };
 const DEFAULT_ITEM: ItemSpec = { stackable: false, maxStack: 1, weight: 1, equippable: false };
 const FALLBACK_PLAYER = {
   player: { speed: 6, facing: 'down', load: 0 },
@@ -404,7 +404,7 @@ export class Kernel {
   modules = new Map<string, ModuleEntry>();
   systems: ModuleEntry[] = [];
   terrain?: ModuleEntry;
-  palette: Record<string, TileDef> = {};
+  palette: Record<string, TerrainDef> = {};
   fragments: RuneFragment[] = [];
 
   readonly chunks = new Map<string, Chunk>();
@@ -1733,7 +1733,7 @@ export class Kernel {
       }
       // New terrains: one free character each, a known layer.
       const palette = { ...this.palette };
-      const added: Record<string, TileDef> = {};
+      const added: Record<string, TerrainDef> = {};
       const free = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'].filter((c) => !palette[c]);
       for (const t of d.tiles) {
         if (!['ground', 'floor', 'wall', 'door', 'liquid', 'vegetation', 'rock'].includes(t.tile.layer ?? '')) continue;
@@ -6530,7 +6530,7 @@ export class Kernel {
     const h = hashStr(identity.name);
     const tile = (i: number) => ({ x: ch.cx * S + (i % S) + 0.5, y: ch.cy * S + Math.floor(i / S) + 0.5 });
     const free = (i: number) => !this.palette[ch.tiles[i]]?.solid;
-    const around = (i: number, pred: (t: TileDef | undefined) => boolean) => [i - 1, i + 1, i - S, i + S].some((n) => n >= 0 && n < S * S && pred(this.palette[ch.tiles[n]]));
+    const around = (i: number, pred: (t: TerrainDef | undefined) => boolean) => [i - 1, i + 1, i - S, i + S].some((n) => n >= 0 && n < S * S && pred(this.palette[ch.tiles[n]]));
     const pickTile = (pred: (i: number) => boolean) => {
       const list: number[] = [];
       for (let i = 0; i < S * S; i++) if (free(i) && pred(i)) list.push(i);
@@ -6981,7 +6981,7 @@ export class Kernel {
     const near: Array<[number, number]> = [];
     for (let cy = -8; cy <= 8; cy += 2) for (let cx = -8; cx <= 8; cx += 2) near.push([cx, cy]);
     near.sort((a, b) => Math.hypot(...a) - Math.hypot(...b) || a[1] - b[1] || a[0] - b[0]);
-    const share = (d: string, test: (t: TileDef | undefined) => boolean) => [...d].filter((c) => test(this.palette[c])).length / d.length;
+    const share = (d: string, test: (t: TerrainDef | undefined) => boolean) => [...d].filter((c) => test(this.palette[c])).length / d.length;
     const roles: Array<(d: string) => boolean> = [
       (d) => share(d, (t) => t?.layer === 'vegetation') >= 0.25 && share(d, (t) => t?.layer === 'liquid') <= 0.2,
       (d) => share(d, (t) => !!t && !t.solid) >= 0.8,

@@ -5,7 +5,7 @@
 
 import type { Schema } from '../ai/models';
 import type { CardStamp } from '../cards';
-import type { EnvironmentDef, ChunkInfo, TileDef } from '../types';
+import type { EnvironmentDef, ChunkInfo, TerrainDef } from '../types';
 import type { MjNode } from '../mj';
 import { sizeOf, TAGLIE, type Taglia } from '../../mj/classes';
 import { STAMP_SHAPES } from '../stamps';
@@ -155,7 +155,7 @@ const LAYOUTS_SCHEMA: Schema = {
 };
 
 /** Genesis: the Cartographer writes the environments of this world as rewrite programs. */
-export async function designLayouts(c: Council, palette: Record<string, TileDef>, feedback = ''): Promise<Array<{ id: string; def: EnvironmentDef } | { id: string; error: string }>> {
+export async function designLayouts(c: Council, palette: Record<string, TerrainDef>, feedback = ''): Promise<Array<{ id: string; def: EnvironmentDef } | { id: string; error: string }>> {
   const raw = await c.ask<{ ambienti: Array<{ id: string; nome: string; descrizione: string; tipo: EnvironmentDef['environment']; programma_json: string }> }>(
     'cartografo',
     'genesis.layouts',
@@ -258,7 +258,7 @@ export interface EnvironmentDraft {
   description: string;
   environment: EnvironmentDef['environment'];
   program?: unknown;
-  tiles: Array<{ code: string; tile: TileDef }>;
+  tiles: Array<{ code: string; tile: TerrainDef }>;
   region: RegionDraft;
 }
 
@@ -266,7 +266,7 @@ export interface EnvironmentDraft {
 export async function designEnvironment(
   c: Council,
   request: string,
-  ctx: { palette: Record<string, TileDef>; layouts: Array<{ id: string; name: string; description: string }>; here: string; stamps: readonly string[]; feedback?: string },
+  ctx: { palette: Record<string, TerrainDef>; layouts: Array<{ id: string; name: string; description: string }>; here: string; stamps: readonly string[]; feedback?: string },
 ): Promise<EnvironmentDraft> {
   const raw = await c.ask<any>(
     'cartografo',
@@ -291,7 +291,7 @@ export async function designEnvironment(
   }
   const tiles = (Array.isArray(raw.nuovi_terreni) ? raw.nuovi_terreni : []).slice(0, 4).map((t: any) => ({
     code: String(t?.codice ?? '').slice(0, 1),
-    tile: { name: String(t?.nome ?? 'terreno').slice(0, 30), color: /^#[0-9a-f]{6}$/i.test(t?.colore) ? t.colore : '#888888', solid: !!t?.solido, layer: t?.strato, indoor: !!t?.interno, description: t?.descrizione ? String(t.descrizione).slice(0, 120) : undefined } as TileDef,
+    tile: { name: String(t?.nome ?? 'terreno').slice(0, 30), color: /^#[0-9a-f]{6}$/i.test(t?.colore) ? t.colore : '#888888', solid: !!t?.solido, layer: t?.strato, indoor: !!t?.interno, description: t?.descrizione ? String(t.descrizione).slice(0, 120) : undefined } as TerrainDef,
   }));
   const r = raw.regione ?? {};
   return {

@@ -3,7 +3,7 @@
 // Constants never generated: the carpet, movement, physics, needs, runes, the kernel.
 
 import type { Schema } from '../ai/models';
-import type { FileMap, EnvironmentDef, TileDef, TileLayer } from '../types';
+import type { FileMap, EnvironmentDef, TerrainDef, TerrainLayer } from '../types';
 import type { AgentId, Bible, Council } from './council';
 import { wordsOf } from './council';
 import { designLayouts } from './cartography';
@@ -11,7 +11,7 @@ import { repairProgram } from '../mj';
 import { bibleBreaks, cleanBible } from '../fourthwall';
 
 /** Codes the procedural draft and the kernel rely on: every palette must define them. */
-export const BASE_CODES: Record<string, { meaning: string; layer: TileLayer; solid: boolean; indoor?: boolean }> = {
+export const BASE_CODES: Record<string, { meaning: string; layer: TerrainLayer; solid: boolean; indoor?: boolean }> = {
   g: { meaning: 'terreno base calpestabile (prato, sabbia, terra…)', layer: 'ground', solid: false },
   p: { meaning: 'sentiero o strada (anche i sentieri scavati dal kernel)', layer: 'ground', solid: false },
   t: { meaning: 'vegetazione che blocca il passo (alberi, rovi…)', layer: 'vegetation', solid: true },
@@ -37,7 +37,7 @@ export interface GenesisPlan {
   files: FileMap;
   cast: CastEntry[];
   wandererPrompt: string;
-  palette: Record<string, TileDef>;
+  palette: Record<string, TerrainDef>;
 }
 
 const BIBLE_SCHEMA: Schema = {
@@ -141,7 +141,7 @@ interface RawTerrain {
   nome: string;
   descrizione: string;
   colore: string;
-  strato: TileLayer;
+  strato: TerrainLayer;
   solido: boolean;
   velocita: number;
 }
@@ -172,7 +172,7 @@ export function terrainErrors(terrains: RawTerrain[]): string[] {
 }
 
 /** The base codes keep their meaning whatever the models say: the engine depends on them. */
-export function toPalette(terrains: RawTerrain[]): Record<string, TileDef> {
+export function toPalette(terrains: RawTerrain[]): Record<string, TerrainDef> {
   return Object.fromEntries(
     terrains.map((t) => {
       const base = BASE_CODES[t.codice];
@@ -185,7 +185,7 @@ export function toPalette(terrains: RawTerrain[]): Record<string, TileDef> {
   );
 }
 
-export type LayoutCheck = (id: string, def: EnvironmentDef, palette: Record<string, TileDef>) => string[];
+export type LayoutCheck = (id: string, def: EnvironmentDef, palette: Record<string, TerrainDef>) => string[];
 
 export async function planGenesis(c: Council, theme: string, base: FileMap, checkLayout: LayoutCheck): Promise<GenesisPlan> {
   const data = { theme };
@@ -256,7 +256,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
       t.velocita = p.velocita;
     }
   }
-  const palette = errs.length ? (JSON.parse(base['modules/world.terrain/manifest.json']).tiles as Record<string, TileDef>) : toPalette(terrain.terreni);
+  const palette = errs.length ? (JSON.parse(base['modules/world.terrain/manifest.json']).tiles as Record<string, TerrainDef>) : toPalette(terrain.terreni);
 
   // The Arbiter checks that the story, the look and the land agree.
   const review = await c.ask<{ approvato: boolean; problemi: Array<{ agente: AgentId; problema: string }> }>(

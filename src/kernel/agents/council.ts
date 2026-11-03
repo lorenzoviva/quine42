@@ -7,7 +7,7 @@ import { parseJson, type AiModels, type Schema, type Thinking } from '../ai/mode
 import { MockAiModels } from '../ai/mock';
 import { COMUNE } from '../cards';
 import { COUNCIL_PRINCIPLES, lexiconWords } from '../fourthwall';
-import type { FileMap, MagicRune, Spell, TileDef } from '../types';
+import type { FileMap, MagicRune, Spell, TerrainDef } from '../types';
 import type { WorldGraph } from '../graph';
 import { partitaSummary } from '../partita';
 import { repairPartita } from '../validator';
@@ -65,7 +65,7 @@ export interface CatalogEntry {
 /** What the agents can know about the universe right now. */
 export interface WorldView {
   files: FileMap;
-  palette: Record<string, TileDef>;
+  palette: Record<string, TerrainDef>;
   catalog: CatalogEntry[];
   /** The graph of the world (ADR-0045), for the tasks with a focus. */
   graph?: () => WorldGraph;
@@ -122,7 +122,7 @@ export function bibleHead(b: Bible | null): string {
 export const FOCUS_BUDGET = 2800;
 const FOCUSED_RULES = 12;
 
-export function paletteSummary(palette: Record<string, TileDef>): string {
+export function paletteSummary(palette: Record<string, TerrainDef>): string {
   return Object.entries(palette)
     .filter(([code]) => code !== '?')
     .map(([code, t]) => `- ${code} = ${t.name} (${t.color}${t.solid ? ', solido' : ''}${t.speed && t.speed !== 1 ? `, velocità ×${t.speed}` : ''})${t.description ? `: ${t.description}` : ''}`)
