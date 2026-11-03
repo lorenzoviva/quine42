@@ -3,11 +3,11 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 03/11/2026, dopo l'epoca 219 e il cambio della pipeline (ADR-0119). Crediti: vedi `stato`.
+Aggiornato il 03/11/2026, all'inizio dell'epoca 221, con la pipeline riaccesa e il codice di ADR-0119. Crediti: vedi `stato`.
 
 ## Stato attuale
 
-- Pipeline spenta dall'autore (`ferma --dopo`), nessun task in corso: la riavvia lui. Il processo va riavviato per avere il codice di ADR-0119.
+- Pipeline riaccesa dall'autore: T206 in corso su Claude, unico lanciato (la catena T187-T205 aspetta T179 integrato).
 - T179 finito (traccia in testo, suite 1403 verdi), non integrato: il suo ADR ha lo 0117, che è di T178. `banco-strutture --seconda --traccia` non provato con una chiamata vera.
 - ADR nuovi dallo **0121**: lo 0118 è riservato a T179, lo 0119 è di questo cambio, lo 0120 dello split di `AGENTS.md`.
 
@@ -45,5 +45,5 @@ Aggiornato il 03/11/2026, dopo l'epoca 219 e il cambio della pipeline (ADR-0119)
 
 ## Ultime 2 epoche
 
-- **218:** T176 integrato (i rossi di `mondo.test.ts` erano i tempi del test), T178 integrato (`docs/glossario.md`, ADR-0117, nessuna rinomina). Scelte del glossario: 6 su 8 come raccomandate; per la 4 e la 6 proposte «individuo» e `SizeTier`, `GameSetup`, `liaison`.
+- **220:** solo lo stato a fine epoca, nessuna decisione. **221:** riavvio dopo lo spegnimento, T206 lanciato.
 - **219:** l'autore accetta nomi e rinomine: catena T187-T205. T179 finito, in conflitto sull'indice degli ADR: T206. Pipeline spenta dall'autore alle 02:58 UTC.
