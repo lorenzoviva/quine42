@@ -137,7 +137,7 @@ describe('V-015: ciò che una pagina mostra, e dove torna un pagamento', () => {
   });
 
   it('V-015 nessuna pagina ha script o gestori scritti nell’HTML, che la CSP fermerebbe', () => {
-    const pages = ['index.html', 'lab/3d/index.html', 'lab/editor/index.html', ...readdirSync('site').filter((f) => f.endsWith('.html')).map((f) => `site/${f}`)];
+    const pages = ['index.html', 'lab/3d/index.html', 'lab/editor/index.html', 'lab/suono/index.html', ...readdirSync('site').filter((f) => f.endsWith('.html')).map((f) => `site/${f}`)];
     expect(pages.length).toBeGreaterThan(5);
     for (const page of pages) {
       const html = readFileSync(page, 'utf8').replace(/<!--[\s\S]*?-->/g, '');

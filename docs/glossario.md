@@ -339,6 +339,12 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Dove vive**: `src/mj/synth.ts`
 - **Da non usare**: `SoundEngine` (il motore Web Audio del mockup)
 
+### Ritocco
+- **Inglese**: `retouch`, `retouchBoxes`, `withoutRetouches`, `retouchCount`
+- **Definizione**: ciò che il piano roll del SoundLab cambia rispetto alle regole, scritto nel programma sonoro come `<box>` in fondo alla `<sequence>` radice.
+- **Dove vive**: `lab/suono/logic.ts`
+- **Da non usare**: `patch`, `correzione` (per questo blocco)
+
 ### Forma
 - **Inglese**: `Form`, `FormResult`, `FormComp`, `FormView`, `FormRunner`
 - **Definizione**: ciò che esce da programma più seme più scatola: griglia, impronta, pavimenti, azioni.
