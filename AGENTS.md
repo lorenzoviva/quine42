@@ -199,6 +199,7 @@ src/session/             il kernel sul server (ADR-0058): worldProcess.ts e worl
 tools/pipeline/          la pipeline agentica (ADR-0072, 0079): pipeline.mjs (code, budget, esecuzione nei worktree, ripresa dopo i limiti, dossier),
                         orchestra.mjs (il processo dell'orchestratore: chat, eventi, epoche), web.mjs (l'interfaccia web locale, T69), config.json
 tools/sicurezza/        il kit delle prove dell'autore (T137): prove.mjs (esecuzione, esito), catalogo.mjs (le prove), ambiente.mjs (i limiti: loopback, cartella temporanea, segreti finti), server.mjs, sandbox.mjs (processi a parte)
+tools/glossario/        glossario.mjs: legge docs/glossario.md e riscrive il censimento dei sinonimi, docs/glossario-censimento.md (ADR-0117)
 tools/abbonamenti/      servi.ts (il processo che serve la coda degli abbonamenti con la CLI isolata, ADR-0077, ADR-0106)
 lab/                    laboratorio di MarkovJunior (ADR-0038): sandbox 3D /lab/3d/, editor modelli /lab/editor/ (T59a, T59b, T59c, T59d), modelli ufficiali e conformità, script per
                         affettare, fotografare, misurare e provare i programmi con Gemini; non importarlo da src/
@@ -666,6 +667,7 @@ Il kernel è in console come `window.quine` (o `window.rune`) in singola e per i
 
 - Documentazione, UI, prompt degli agenti e testi di gioco in **italiano**; identificatori e commenti
   TypeScript in **inglese**; commenti Lua dell'universo in **italiano**.
+- **Un nome per ogni concetto** (ADR-0117): [`docs/glossario.md`](docs/glossario.md) dice per ogni concetto il nome italiano, quello inglese del codice, i sinonimi da non usare e ciò che è fermo. Un concetto nuovo ha una voce lì nello stesso commit. Ciò che è su disco, sul filo o visibile a Lua (campi JSON, messaggi del protocollo, API Lua, effetti) non si rinomina senza una migrazione; gli ADR non si riscrivono.
 - File in LF (`.gitattributes`). Su Windows niente `Get-Content`/`Set-Content` di PowerShell 5.1 sui sorgenti.
 - Nuova API per Lua: `Host` + `prelude.lua` + `LUA_API` nel validatore + prompt dell'Ingegnere + questo file.
 - Nuovo compito per un agente: schema Gemini + risposta in `MockModels` + voce nel registro.
