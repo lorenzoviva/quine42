@@ -1,6 +1,11 @@
 {
   "base": "3d",
   "orchestratore": "claude",
+  "generazione": [
+    { "universo": "orichalcum", "ambientazione": "steampunk", "tettoSettimana": 25 },
+    { "universo": "neapolis", "ambientazione": "moderno", "tettoSettimana": 25 },
+    { "universo": "sidera", "ambientazione": "futuristico", "tettoSettimana": 25 }
+  ],
   "abbonamenti": {
     "claude": "max5x",
     "google": "ultra"

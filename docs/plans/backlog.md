@@ -2825,7 +2825,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T153 · Gli universi steampunk, moderno e futuristico: leggerli e provarli — `in attesa` (dipende da T152, T156, T88)
 - Pipeline: claude · stima 2% · priorità 81
-- In attesa: i nomi, che sceglie l'autore (`docs/pipeline/domande/T153.md`), e la generazione stessa. Quando l'autore ha scelto, l'orchestratore li mette nell'elenco `generazione` di `tools/pipeline/config.json`; questo task si approva quando gli universi sono pronti.
+- In attesa: la generazione stessa. I nomi scelti dall'autore (03/11, `docs/pipeline/domande/T153.md`) sono nell'elenco `generazione` di `tools/pipeline/config.json`: `orichalcum` (steampunk), `neapolis` (moderno), `sidera` (futuristico). Questo task si approva quando gli universi sono pronti.
 - Contesto: integrato con T88 su richiesta dell'autore (03/11): gli universi li genera il generatore differito (T207) con i crediti che avanzano (T88), non questo task. Decisioni dell'autore: niente API a consumo; solo Claude Code (`agy` soltanto nelle prove del prompt, ADR-0106 non si riapre); tetto per universo 25 % della settimana, modificabile in corsa; tutti in multigiocatore; `aurora` non si tocca. Le strutture vengono col prompt nuovo: T156.
 - Cosa fare: per ogni universo leggi i contenuti e il costo da ciò che il generatore registra. La bibbia, gli ambienti e i modelli sono dell'ambientazione? Ciò che tradisce il tema diventa una proposta di task.
 - Browser: col turno `browser`, ogni universo con `?universo=<nome>`, senza chiamate alle API (resta nei luoghi già generati o usa `?offline`): screenshot di un luogo con strutture; si cammina senza errori in console.
