@@ -177,7 +177,7 @@ export function scoreOf(grid: Grid3, settings: SoundSettings): Score {
   return { steps: grid.X, settings, events, truncated };
 }
 
-/** What a program is for in the game (ADR-0125), in `models/index.json → suono`. Without it the program is for the SoundLab only. */
+/** What a program is for in the game (ADR-0126), in `models/index.json → suono`. Without it the program is for the SoundLab only. */
 export interface SoundPurpose {
   uso: 'musica' | 'effetto';
   /** Music: the environments it belongs to (whose id contains one of these); none: any. */

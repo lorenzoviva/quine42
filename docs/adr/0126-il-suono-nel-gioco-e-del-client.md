@@ -1,4 +1,4 @@
-# ADR-0125 — Il suono nel gioco è del client: un direttore puro, un worker con la cache, nessun messaggio
+# ADR-0126 — Il suono nel gioco è del client: un direttore puro, un worker con la cache, nessun messaggio
 
 Data: 2026-11-03 · Stato: accettato · Riferimenti: ADR-0123 (il suono è un programma), ADR-0108 (la cache delle forme), ADR-0124 (la corona), T224
 

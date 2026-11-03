@@ -1,4 +1,4 @@
-// From a sound program to what the game plays, off the page (ADR-0125): pure, in Node as in a worker. The samples come only from the synthesizer (ADR-0123);
+// From a sound program to what the game plays, off the page (ADR-0126): pure, in Node as in a worker. The samples come only from the synthesizer (ADR-0123);
 // here a piece of music keeps the one pass that loops and an effect loses the silence after it.
 
 import { renderSoundProgram } from '../mj/synth';

@@ -1,4 +1,4 @@
-// Renders sound programs off the page's thread (ADR-0125), and keeps them on disk: reading a value from IndexedDB is decoding it, and that too stays out of the page.
+// Renders sound programs off the page's thread (ADR-0126), and keeps them on disk: reading a value from IndexedDB is decoding it, and that too stays out of the page.
 
 import { soundKey, tryPrepareSound, type PreparedSound, type SoundRequest } from './prepare';
 

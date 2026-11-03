@@ -1,4 +1,4 @@
-// The sounds ready to play (ADR-0125): one worker, a queue where music goes first, a memory that keeps what was asked for last. What goes wrong answers `undefined`: silence.
+// The sounds ready to play (ADR-0126): one worker, a queue where music goes first, a memory that keeps what was asked for last. What goes wrong answers `undefined`: silence.
 
 import { soundKey, type PreparedSound, type SoundRequest } from './prepare';
 import type { SoundAnswer, SoundJob } from './worker';

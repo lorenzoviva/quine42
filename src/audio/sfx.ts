@@ -1,4 +1,4 @@
-// The way out of the game's sound (ADR-0125): it plays the samples as they are, with gains only. No voices here: the sound is made in src/mj/synth.ts.
+// The way out of the game's sound (ADR-0126): it plays the samples as they are, with gains only. No voices here: the sound is made in src/mj/synth.ts.
 //
 //   music (crossfades) ─→ music level ─┐
 //   effects ───────────→ effect level ─┴→ volume and mute → analyser → speakers

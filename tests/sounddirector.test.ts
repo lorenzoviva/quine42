@@ -1,4 +1,4 @@
-// The sound in the game (T224, ADR-0125): the choice is pure, a broken program stays silent, the seed's programs are all there and all sound.
+// The sound in the game (T224, ADR-0126): the choice is pure, a broken program stays silent, the seed's programs are all there and all sound.
 
 import { describe, expect, it, vi } from 'vitest';
 import { chooseMusic, effectProgram, readPrograms, SOUND_CUES, SoundDirector, type SoundCue, type SoundState } from '../src/audio/director';

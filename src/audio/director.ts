@@ -1,4 +1,4 @@
-// The sound director (T224, ADR-0125): what plays, from what the client already knows of the world. The choice is a pure function; the rest is timing of the page's own,
+// The sound director (T224, ADR-0126): what plays, from what the client already knows of the world. The choice is a pure function; the rest is timing of the page's own,
 // which touches no simulation: the sound is of the client and asks the server nothing.
 
 import { hash32, hashStr } from '../kernel/rng';
