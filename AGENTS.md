@@ -192,7 +192,7 @@ universe/
 tests/  docs/
 src/mj/                 MarkovJunior del gioco (ADR-0036, 0038): engine.ts (motore 3D), xml.ts e model.ts (XML alla lettera), palette.ts,
                         run.ts (esecuzione, animazioni, azioni), rig.ts (arti), mesh.ts (voxel → triangoli, impronte, pavimenti),
-                        classes.ts (classi e scatole), photo.ts (foto in 3/4 per l'Artista), check.ts (misure di un modello)
+                        classes.ts (classi e scatole), photo.ts (foto in 3/4 per l'Artista), check.ts (misure di un modello), trace.ts (la traccia in testo di un programma: per nodo volte, celle, scatola, regole; ADR-0117, `lab/banco/traccia.md`)
 src/session/             il kernel sul server (ADR-0058): worldProcess.ts e worldwire.ts (il processo di un mondo e il suo canale, ADR-0110), protocol.ts (messaggi, fakeLink), files.ts (ciò che esce, a elenco: `playerFiles`, `publicFiles`, ADR-0109), server.ts (SessionServer), client.ts
                         (SessionClient: ciò che un client sa del mondo), host.ts (apre un universo e fa girare il suo mondo), account.ts e login.ts (l'account, ADR-0082);
                         il client sottile (ADR-0059): thin.ts (ThinClient: riempie il kernel specchio), socket.ts (WebSocket, id della scheda)

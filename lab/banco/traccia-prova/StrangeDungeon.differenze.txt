@@ -1,0 +1,39 @@
+Traccia, seme 1: griglia 29×29×29, 7 nodi, 146 passi, finito in 222 ms.
+x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
+Lettere: W=White, E=Emerald.
+Alla fine: W 12905.
+ #2 prl . → E: ×1, 24389 celle x0-28 y0-28 z0-28, passi 1
+  .→E 24389: x0-28 y0-28 z0-28
+ #3 prl ***/***/*** ***/*E*/*** ***/***/*** → ***/***/*** ***/*.*/*** ***/***/***: ×1, 19683 celle x1-27 y1-27 z1-27, passi 2
+  E→. 19683: x1-27 y1-27 z1-27
+ #4 one . → W passi=100: ×100, 100 celle x1-27 y1-27 z1-27, passi 3-102
+ parte 1/4, passi 3-27:
+  .→W 25: x11 y3 z2; x16 y15 z2; x14 y5 z4; x17 y7 z5; +21 scatole, 21 celle
+ parte 2/4, passi 28-52:
+  .→W 25: x16 y7 z3; x16 y17 z3; x17 y15 z5; x1 y22 z5; +21 scatole, 21 celle
+ parte 3/4, passi 53-77:
+  .→W 25: x26 y6 z4; x19 y9 z4; x24 y21 z4; x1 y20 z7; +21 scatole, 21 celle
+ parte 4/4, passi 78-102:
+  .→W 25: x24 y9 z1; x19 y23 z2; x9 y21 z7; x3 y1 z8; +21 scatole, 21 celle
+ #5 all .../.W. → .W./.W. (+2): ×34, 14048 celle x1-27 y1-27 z1-27, passi 103-136
+   r1 .../.W. → .W./.W. ×8066; r2 W./.W → WW/.W ×1399; r3 W.W → WWW ×4583
+ parte 1/4, passi 103-110:
+  .→W 4397: x2-4 y4 z9-19; x2-4 y23 z19-26; x18-20 y12-18 z12; x11-15 y17 z1-4; +1083 scatole, 4299 celle
+ parte 2/4, passi 111-119:
+  .→W 8094: x14-15 y4-6 z17-22; x26 y14-17 z20-27; x2-4 y8-10 z14-16; x14-16 y8-10 z21-23; +1773 scatole, 7972 celle
+ parte 3/4, passi 120-127:
+  .→W 1405: x23 y1-3 z9-14; x24-27 y1-4 z14; x2-6 y16-18 z2; x23-25 y24 z23-27; +463 scatole, 1341 celle
+ parte 4/4, passi 128-136:
+  .→W 152: x2 y23-27 z4-8; x24-27 y1-3 z12-13; x23 y1-5 z17; x3 y26-27 z1-2; +42 scatole, 94 celle
+ #6 all E → .: ×1, 4706 celle x0-28 y0-28 z0-28, passi 137
+  E→. 4706: x0-28 y0-28 z0; x0-28 y0 z1-28; x0 y1-28 z1-28; x28 y1-28 z1-28; +2 scatole, 1485 celle
+ #7 all .../.W. → ***/*.*: ×9, 1243 celle x1-27 y1-27 z1-27, passi 138-146
+  W→. 1243: x4 y1-3 z9-17; x1-2 y4 z9-19; x19 y1-7 z1-3; x2 y23-27 z4-7; +266 scatole, 1153 celle
+
+--- risposta
+1. La regola r1 (`.../.W. → .W./.W.`), applicata 8066 volte.
+2. 9 volte.
+3. Nella prima metà: i passi 103-119 hanno cambiato 4299+7972 = 12271 celle, contro 1341+94 = 1435 nella seconda.
+4. Non si può: la traccia elenca solo alcune scatole di celle, e x=2 y=1 z=1 non è tra quelle riportate.
+5. Non si può: la traccia non basta a stabilire lo stato finale di x=16 y=16 z=8.
+6. 12905.

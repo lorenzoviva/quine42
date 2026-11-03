@@ -178,6 +178,8 @@ interface Pattern {
   /** Per cell: code to write, -1 = keep. */
   output: Int16Array;
   p: number;
+  /** Which rule of its node it comes from: symmetry variants share the number. */
+  rule: number;
 }
 
 const cellsOf = (row: string) => row.match(/\[[^\]]*\]|./g) ?? [];
@@ -205,7 +207,7 @@ function parsePattern(rule: Rule3, alpha: Alphabet): Pattern {
         if (b.startsWith('[')) throw new Mj3Error(`"[..]" non è ammesso in un'uscita: ${rule.out}`);
         output[n] = b === '*' ? -1 : alpha.index(b);
       }
-  return { dx, dy, dz, input, output, p: typeof rule.p === 'number' && rule.p > 0 ? rule.p : 1 };
+  return { dx, dy, dz, input, output, p: typeof rule.p === 'number' && rule.p > 0 ? rule.p : 1, rule: 0 };
 }
 
 const PERMS: Vec3[] = [[0, 1, 2], [1, 0, 2], [0, 2, 1], [2, 1, 0], [1, 2, 0], [2, 0, 1]];
@@ -249,7 +251,7 @@ function transform(p: Pattern, perm: Vec3, flip: Vec3): Pattern {
         input[to] = p.input[from];
         output[to] = p.output[from];
       }
-  return { dx: nd[0], dy: nd[1], dz: nd[2], input, output, p: p.p };
+  return { dx: nd[0], dy: nd[1], dz: nd[2], input, output, p: p.p, rule: p.rule };
 }
 
 function variants(p: Pattern, sym: Sym): Pattern[] {
@@ -273,6 +275,8 @@ abstract class Runner {
   total = 0;
   /** Why it did nothing the first time it was asked (for a node that never did anything). */
   why?: string;
+  /** Times each rule of the node was applied over the whole run (never reset). */
+  fired: number[] = [];
   constructor(protected limit?: number) { }
   reset(): void {
     this.count = 0;
@@ -328,7 +332,8 @@ class RuleRunner extends Runner {
   ) {
     super(limit);
     if (!Array.isArray(rules) || !rules.length) throw new Mj3Error(`nodo ${kind} senza regole`);
-    this.patterns = rules.flatMap((r) => variants(parsePattern(r, alpha), r.symmetry ?? sym));
+    this.patterns = rules.flatMap((r, i) => variants({ ...parsePattern(r, alpha), rule: i }, r.symmetry ?? sym));
+    this.fired = rules.map(() => 0);
     this.wanted = [...new Set(rules.flatMap((r) => (r.in.match(/\[[^\]]*\]|[^*/ ]/g) ?? []).map((c) => (c.startsWith('[') ? c.slice(1, -1) : c))))];
     this.alpha = alpha;
     this.sets = alpha.sets;
@@ -427,6 +432,7 @@ class RuleRunner extends Runner {
           if (written) written[idx] = 1;
           write(g, idx, p.output[n]);
         }
+    this.fired[p.rule]++;
     return true;
   }
 
@@ -480,7 +486,7 @@ const NO_CORNERS: Vec3[] = MOORE.filter(([x, y, z]) => Math.abs(x) + Math.abs(y)
 const CONV_UNLIMITED = 200;
 
 class ConvRunner extends Runner {
-  private rules: Array<{ input: number; output: number; neighbors: number; sums: Uint8Array; p: number }>;
+  private rules: Array<{ i: number; input: number; output: number; neighbors: number; sums: Uint8Array; p: number }>;
   private offsets: Vec3[];
   private sets: Uint8Array[];
   private periodic: boolean;
@@ -490,7 +496,8 @@ class ConvRunner extends Runner {
     this.offsets = node.neighborhood === 'vonneumann' ? VON_NEUMANN : node.neighborhood === 'nocorners' ? NO_CORNERS : MOORE;
     this.periodic = node.periodic === true;
     this.sets = alpha.sets;
-    this.rules = node.rules.map((r) => {
+    this.fired = node.rules.map(() => 0);
+    this.rules = node.rules.map((r, i) => {
       if (typeof r?.in !== 'string' || typeof r?.out !== 'string' || typeof r?.neighbors !== 'string') throw new Mj3Error('conv: ogni regola vuole in, out e neighbors');
       if (r.out.length !== 1) throw new Mj3Error(`conv: "out" è un solo codice (${r.out})`);
       const sums = new Uint8Array(27);
@@ -501,7 +508,7 @@ class ConvRunner extends Runner {
         const max = Number.isFinite(r.max) ? r.max! : 26;
         for (let n = Math.max(0, min); n <= Math.min(26, max); n++) sums[n] = 1;
       }
-      return { input: alpha.mask(r.in), output: alpha.index(r.out), neighbors: alpha.mask(r.neighbors), sums, p: typeof r.p === 'number' ? r.p : 1 };
+      return { i, input: alpha.mask(r.in), output: alpha.index(r.out), neighbors: alpha.mask(r.neighbors), sums, p: typeof r.p === 'number' ? r.p : 1 };
     });
   }
   go(g: Grid3, rng: Rng): boolean {
@@ -528,6 +535,7 @@ class ConvRunner extends Runner {
             }
             if (!rule.sums[n]) continue;
             changes.push(idx, rule.output);
+            this.fired[rule.i]++;
             break;
           }
         }
@@ -853,10 +861,27 @@ class MarkovRunner extends Runner {
   }
 }
 
+/** A leaf node, seen from outside: it asks nothing of the run (no random numbers, no writes), so a watched run is the same run. */
+class WatchedRunner extends Runner {
+  constructor(private inner: Runner, private node: Node3, private watch: RunWatch) {
+    super();
+  }
+  reset(): void {
+    this.inner.reset();
+  }
+  go(g: Grid3, rng: Rng): boolean {
+    const from = g.log.length;
+    const epoch = g.epoch;
+    if (!this.inner.go(g, rng)) return false;
+    this.watch.step({ node: this.node, grid: g, from, epoch, fired: this.inner.fired });
+    return true;
+  }
+}
+
 const isVec = (v: unknown): v is Vec3 => Array.isArray(v) && v.length === 3 && v.every((n) => typeof n === 'number' && Number.isFinite(n));
 
 /** What a node is, in a few words, for the list of nodes that never did anything. */
-function describe(node: Node3): string | undefined {
+export function describe(node: Node3): string | undefined {
   // A node meant for rare cases says so: it is not reported when it does nothing.
   if ((node as { optional?: boolean }).optional) return undefined;
   if (node.type === 'one' || node.type === 'all' || node.type === 'prl') return `${node.type} "${node.rules[0]?.in}" → "${node.rules[0]?.out}"${node.rules.length > 1 ? ` (e altre ${node.rules.length - 1} regole)` : ''}`;
@@ -867,14 +892,14 @@ function describe(node: Node3): string | undefined {
 
 type Trace = Array<{ runner: Runner; what: string }>;
 
-function compile(node: Node3, alpha: Alphabet, limits: GridLimits, depth = 0, trace?: Trace): Runner {
-  const r = compileNode(node, alpha, limits, depth, trace);
+function compile(node: Node3, alpha: Alphabet, limits: GridLimits, depth = 0, trace?: Trace, watch?: RunWatch): Runner {
+  const r = compileNode(node, alpha, limits, depth, trace, watch);
   const what = trace && node && typeof node === 'object' ? describe(node) : undefined;
   if (what) trace!.push({ runner: r, what });
-  return r;
+  return watch && node.type !== 'sequence' && node.type !== 'markov' ? new WatchedRunner(r, node, watch) : r;
 }
 
-function compileNode(node: Node3, alpha: Alphabet, limits: GridLimits, depth: number, trace?: Trace): Runner {
+function compileNode(node: Node3, alpha: Alphabet, limits: GridLimits, depth: number, trace?: Trace, watch?: RunWatch): Runner {
   if (depth > 16) throw new Mj3Error('programma troppo annidato');
   if (!node || typeof node !== 'object') throw new Mj3Error('nodo non valido');
   switch (node.type) {
@@ -893,7 +918,7 @@ function compileNode(node: Node3, alpha: Alphabet, limits: GridLimits, depth: nu
     case 'sequence':
     case 'markov': {
       if (!Array.isArray(node.children) || !node.children.length) throw new Mj3Error(`nodo ${node.type} senza figli`);
-      const children = node.children.map((c) => compile(c, alpha, limits, depth + 1, trace));
+      const children = node.children.map((c) => compile(c, alpha, limits, depth + 1, trace, watch));
       return node.type === 'sequence' ? new SequenceRunner(children) : new MarkovRunner(children);
     }
     default:
@@ -930,6 +955,25 @@ export interface RunOptions {
   deadline?: number;
   /** Keep about this many states along the run, evenly spaced: the model growing, frame by frame. */
   snapshots?: number;
+  /** Who wants to see every step of the run (src/mj/trace.ts, ADR-0117): the run does not change. */
+  watch?: RunWatch;
+}
+
+/** One step of a run: the leaf node that did something. */
+export interface NodeStep {
+  node: Node3;
+  grid: Grid3;
+  /** Where the writes of this step begin in `grid.log`, if `grid.epoch` is still `epoch` (else the log was emptied). */
+  from: number;
+  epoch: number;
+  /** Times each rule of the node has been applied so far. */
+  fired: readonly number[];
+}
+
+export interface RunWatch {
+  /** The grid before the first step. */
+  start(g: Grid3): void;
+  step(s: NodeStep): void;
 }
 
 export interface Snapshot {
@@ -950,6 +994,7 @@ function exec(root: Runner, g: Grid3, seed: number, maxSteps: number, t0: number
   let every = 1;
   const shoot = () => shots.push({ X: g.X, Y: g.Y, Z: g.Z, cells: new Uint8Array(g.cells), step: steps });
   if (keep) shoot();
+  opts.watch?.start(g);
   while (steps < maxSteps && root.go(g, rng)) {
     steps++;
     if (keep && steps % every === 0) {
@@ -984,7 +1029,7 @@ export function run(p: Program3, seed: number, maxSteps = 20000, limits: GridLim
   const [X, Y, Z] = checkSize(p?.size, limits);
   const alpha = alphabetOf(p);
   const trace: Trace = [];
-  const root = compile(p.program, alpha, limits, 0, trace);
+  const root = compile(p.program, alpha, limits, 0, trace, opts.watch);
   const g: Grid3 = { X, Y, Z, cells: new Uint8Array(X * Y * Z), alphabet: alpha.codes, log: [], epoch: 0 };
   if (typeof p.ground === 'string' && p.ground.length === 1) {
     const v = alpha.index(p.ground);
@@ -1002,7 +1047,7 @@ export function runOn(grid: Grid3, p: Pick<Program3, 'palette' | 'unions' | 'pro
   const t0 = Date.now();
   const alpha = alphabetOf(p, grid.alphabet);
   const trace: Trace = [];
-  const root = compile(p.program, alpha, limits, 0, trace);
+  const root = compile(p.program, alpha, limits, 0, trace, opts.watch);
   grid.alphabet = alpha.codes;
   grid.log = [];
   grid.epoch++;

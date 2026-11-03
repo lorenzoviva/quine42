@@ -33,6 +33,8 @@ export interface Esame {
   porta?: Porta;
   /** The problems written by who looked at the photos. */
   problemi?: string;
+  /** What the program did, node by node (`traceText`, T179), if the bench was asked for it. */
+  traccia?: string;
 }
 
 function rigaDifetto(d: string): string {
@@ -57,6 +59,7 @@ export function testoSeconda(bersaglio: string, xml: string, e: Esame): string {
     ...(e.difetti.length ? ['Il gioco lo ha provato, e non va:', ...e.difetti.map(rigaDifetto)] : []),
     ...(fatti.length && e.difetti.length ? ['', ...fatti] : []),
     ...(e.problemi?.trim() ? [...(e.difetti.length ? [''] : []), 'Chi ha guardato le foto ha scritto:', e.problemi.trim()] : []),
+    ...(e.traccia?.trim() ? ['', 'Ecco cosa ha fatto il programma quando il gioco lo ha eseguito, nodo per nodo:', '```', e.traccia.trim(), '```'] : []),
     '',
     'Correggi questi difetti e lascia com’è tutto ciò che funziona. Rispondi con il programma intero, corretto.',
   ].join('\n');

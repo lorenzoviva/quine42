@@ -3,7 +3,7 @@
 //
 //   npx vite-node lab/scripts/banco-strutture.ts -- --bersagli moderna,steampunk|tutti [--giro v1] [--prompt lab/banco/prompt.md] [--modello sonnet] [--tentativi 1]
 //   npx vite-node lab/scripts/banco-strutture.ts -- --xml modello.xml --bersagli moderna [--giro prove]
-//   npx vite-node lab/scripts/banco-strutture.ts -- --seconda --giro conferma --dir lab/banco [--bersagli …] [--insieme 3]   (T173)
+//   npx vite-node lab/scripts/banco-strutture.ts -- --seconda --giro conferma --dir lab/banco [--bersagli …] [--insieme 3] [--traccia] [--tetto 4000]   (T173; la traccia, T179)
 //
 // → lab/out/banco/<giro>/<bersaglio>/<n>/ {prompt.md, bersaglio.txt, risposta.txt, modello.xml, lati.png, sezioni.png, pianta.png, misure.json, giudizio.md}
 //   --seconda: each attempt of the round that does not pass gets its XML back, with its defects or its `problemi.md` → <n>/seconda/{richiesta.txt, …}.
@@ -13,6 +13,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { extractXml } from '../../src/kernel/agents/sculptor';
 import type { Picture } from '../../src/mj/photo';
+import { DEFAULT_CEILING, traceText } from '../../src/mj/trace';
 import { BERSAGLI, bersaglio, testoBersaglio } from '../banco/bersagli';
 import { chiedi, LimiteAbbonamento, type Risposta } from '../banco/claude';
 import { fotoLati, fotoPianta, fotoSezioni } from '../banco/foto';
@@ -29,6 +30,9 @@ const fileXml = opt('xml');
 const modello = opt('modello');
 const quanti = Number(opt('tentativi') ?? 1);
 const seconda = args.includes('--seconda');
+/** The second request also says what the program did (T179). */
+const conTraccia = args.includes('--traccia');
+const tetto = Number(opt('tetto') ?? DEFAULT_CEILING);
 /** Attempts at the same time: the 5-hour window does not take many (T173). */
 const insieme = Math.max(1, Number(opt('insieme') ?? 1));
 const scelti = opt('bersagli') ?? (fileXml ? 'moderna' : seconda ? 'tutti' : '');
@@ -111,6 +115,15 @@ interface Lavoro {
   file: string;
 }
 
+/** The trace of a program, if the game can run it at all: what it refuses comes back with its reason, and there is nothing to trace. */
+function tracciaDi(xml: string, b: Bersaglio): string | undefined {
+  try {
+    return traceText(esegui(xml, b).model, 1, { tetto });
+  } catch {
+    return undefined;
+  }
+}
+
 /** The attempts of the round that have something to correct and have not had their second request. */
 function lavoriSeconda(): Lavoro[] {
   const out: Lavoro[] = [];
@@ -124,7 +137,9 @@ function lavoriSeconda(): Lavoro[] {
       const fileProblemi = path.join(att, 'problemi.md');
       const esame = daCorreggere(scheda, fs.existsSync(fileProblemi) ? fs.readFileSync(fileProblemi, 'utf8') : undefined);
       if (!esame) continue;
-      const testo = testoSeconda(testoBersaglio(b), fs.readFileSync(path.join(att, 'modello.xml'), 'utf8'), esame);
+      const xml = fs.readFileSync(path.join(att, 'modello.xml'), 'utf8');
+      const traccia = conTraccia ? tracciaDi(xml, b) : undefined;
+      const testo = testoSeconda(testoBersaglio(b), xml, { ...esame, ...(traccia ? { traccia } : {}) });
       out.push({
         b,
         testo,

@@ -1,0 +1,74 @@
+Traccia, seme 1: griglia 100×100×80, 120 nodi, 114 passi, finito in 263 ms.
+x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
+Lettere: C=cemento chiaro, L=legno, O=rovere scuro, V=vetro, W=intonaco bianco, D=antracite, R=ghiaia del tetto, E=verde, F=luce, A=terracotta, S=acciaio.
+Alla fine: L 32100, C 29386, O 23264, V 14540, R 11282, D 10102, W 9672, S 3366, A 2706, E 1424, F 144.
+ #2 box at 14.5 33.5 0 size 22 68 36 C: ×1, 53856 celle x4-25 y0-67 z0-35, passi 1, .→C 53856
+ #3 box at 62.5 47.5 0 size 74 80 36 C: ×1, 213120 celle x26-99 y8-87 z0-35, passi 2, .→C 213120
+ #4 box at 62.5 47.5 36 size 74 80 34 L: ×1, 201280 celle x26-99 y8-87 z36-69, passi 3, .→L 201280
+ #5 box at 59.5 17.5 36 size 80 20 42 C: ×1, 67200 celle x20-99 y8-27 z36-77, passi 4, L→C 50320, .→C 16880
+ #6 box at 62.5 47.5 2 size 70 76 32 .: ×1, 170240 celle x28-97 y10-85 z2-33, passi 5, C→. 170240
+ #7 box at 14.5 5.5 2 size 18 8 32 .: ×1, 4608 celle x6-23 y2-9 z2-33, passi 6, C→. 4608
+ #8 box at 16.5 37.5 2 size 22 56 32 .: ×1, 39424 celle x6-27 y10-65 z2-33, passi 7, C→. 39424
+ #9 box at 62.5 55.5 36 size 70 60 32 .: ×1, 134400 celle x28-97 y26-85 z36-67, passi 8, L→. 129920, C→. 4480
+ #10 box at 59.5 17.5 36 size 76 16 40 .: ×1, 48640 celle x22-97 y10-25 z36-75, passi 9, C→. 48640
+ #11 box at 62.5 47.5 0 size 70 76 2 O: ×1, 10640 celle x28-97 y10-85 z0-1, passi 10, C→O 10640
+ #12 box at 16.5 37.5 0 size 22 56 2 O: ×1, 2464 celle x6-27 y10-65 z0-1, passi 11, C→O 2464
+ #13 box at 14.5 5.5 0 size 18 8 2 O: ×1, 288 celle x6-23 y2-9 z0-1, passi 12, C→O 288
+ #14 box at 15.5 33.5 34 size 20 64 2 L: ×1, 2560 celle x6-25 y2-65 z34-35, passi 13, C→L 2560
+ #15 box at 62.5 47.5 34 size 70 76 2 O: ×1, 10640 celle x28-97 y10-85 z34-35, passi 14, C→O 10640
+#16-17 box×2: 1152 celle x22-75 y10-25 z34-35, passi 15-16
+ #18 box at 62.5 55 2 size 2 61 32 W: ×1, 3904 celle x62-63 y25-85 z2-33, passi 17, .→W 3904
+ #19 box at 62.5 38.5 36 size 70 2 32 W: ×1, 4480 celle x28-97 y38-39 z36-67, passi 18, .→W 4480
+ #20 box at 62.5 62.5 36 size 2 46 32 W: ×1, 2944 celle x62-63 y40-85 z36-67, passi 19, .→W 2944
+#21-23 box×3: 1440 celle x44-55 y10-24 z2-13, passi 20-22
+#24-25 box×2: 2160 celle x56-63 y10-24 z2-21, passi 23-24
+ #26 box at 65.5 17 2 size 4 15 24 L: ×1, 1440 celle x64-67 y10-24 z2-25, passi 25, .→L 1440
+ #27 box at 69.5 17 2 size 4 15 28 L: ×1, 1680 celle x68-71 y10-24 z2-29, passi 26, .→L 1680
+ #28 box at 73.5 17 2 size 4 15 32 L: ×1, 1920 celle x72-75 y10-24 z2-33, passi 27, .→L 1920
+#29-33 box×5: 1620 celle x6-75 y2-25 z2-40, passi 28-32
+ #34 box at 29.5 76.5 2 size 4 18 28 L: ×1, 2016 celle x28-31 y68-85 z2-29, passi 33, .→L 2016
+ #35 box at 58.5 30.5 2 size 6 12 30 C: ×1, 2160 celle x56-61 y25-36 z2-31, passi 34, .→C 2160
+#36-39 box×4: 1696 celle x57-75 y25-36 z2-33, passi 35-38
+ #40 box at 94.5 26.5 2 size 6 26 10 S: ×1, 1560 celle x92-97 y14-39 z2-11, passi 39, .→S 1560
+#41-43 box×3: 2736 celle x64-97 y10-85 z2-31, passi 40-42
+ #44 box at 44 79.5 36 size 21 12 6 W: ×1, 1512 celle x34-54 y74-85 z36-41, passi 43, .→W 1512
+#45-47 box×3: 2046 celle x28-54 y74-85 z36-49, passi 44-46
+ #48 box at 58 79.5 36 size 7 12 30 D: ×1, 2520 celle x55-61 y74-85 z36-65, passi 47, .→D 2520
+ #49 box at 86.5 79.5 36 size 22 12 6 W: ×1, 1584 celle x76-97 y74-85 z36-41, passi 48, .→W 1584
+#50-52 box×3: 2116 celle x70-97 y74-85 z36-49, passi 49-51
+ #53 box at 66.5 79.5 36 size 6 12 30 D: ×1, 2160 celle x64-69 y74-85 z36-65, passi 52, .→D 2160
+ #54 box at 12.5 25.5 36 size 14 4 12 L: ×1, 672 celle x6-19 y24-27 z36-47, passi 53, .→L 672
+ #55 box at 15.5 35.5 36 size 20 16 12 L: ×1, 3840 celle x6-25 y28-43 z36-47, passi 54, .→L 3840
+#56-57 box×2: 752 celle x6-25 y24-43 z48-49, passi 55-56
+#58-59 box×2: 2352 celle x22-35 y88-99 z0-13, passi 57-58
+ #60 box at 70.5 93.5 0 size 14 12 12 C: ×1, 2016 celle x64-77 y88-99 z0-11, passi 59, .→C 2016
+#61-67 box×7: 984 celle x38-77 y86-99 z0-37, passi 60-66
+ #68 box at 4.5 33 2 size 2 55 32 V: ×1, 3520 celle x4-5 y6-60 z2-33, passi 67, C→V 3520
+#69-78 box×10: 2284 celle x4-78 y18-87 z2-63, passi 68-77
+#79-82 box×4: 2624 celle x24-95 y8-87 z44-73, passi 78-81
+#83-85 box×3: 1788 celle x8-96 y0-9 z12-67, passi 82-84
+#86-88 box×3: 1780 celle x98-99 y44-72 z10-61, passi 85-87
+#89-92 box×4: 1538 celle x40-99 y12-72 z44-74, passi 88-91
+ #93 box at 74.5 5.5 0 size 6 4 80 D: ×1, 1920 celle x72-77 y4-7 z0-79, passi 92, .→D 1920
+#94-97 box×4: 1368 celle x4-25 y0-67 z36-41, passi 93-96
+ #98 box at 62.5 57.5 68 size 74 60 2 R: ×1, 8880 celle x26-99 y28-87 z68-69, passi 97, L→R 8880
+ #99 box at 59.5 17.5 76 size 80 20 2 R: ×1, 3200 celle x20-99 y8-27 z76-77, passi 98, C→R 3200
+#100-105 box×6: 2602 celle x26-99 y28-87 z68-71, passi 99-104
+#106-108 box×3: 2432 celle x30-80 y12-87 z2-79, passi 105-107
+#110-112 box×3: 2688 celle x10-96 y50-87 z2-33, passi 108-110
+#113-114 box×2: 1664 celle x38-86 y38-39 z36-67, passi 111-112
+#115-116 box×2: 1664 celle x20-27 y10-58 z36-67, passi 113-114
+Senza effetto (non hanno mai cambiato una cella):
+#109 box at 49.5 93.5 0 size 16 12 80 .
+#117 box at 59.5 17 36 size 32 15 40 .
+#118 box at 86.5 17 36 size 22 15 40 .
+#119 box at 32.5 17 36 size 22 15 40 .
+#120 box at 32.5 17 2 size 22 15 32 .
+
+--- risposta
+1. Il nodo #3 (box 62.5 47.5 0, size 74 80 36, C), con 213120 celle.
+2. Il nodo #98 (L→R, 8880 celle).
+3. 5 nodi: #109, #117, #118, #119, #120.
+4. O
+5. L (il pilastro di legno a y30-31 sovrascrive il vetro del nodo #68).
+6. 14540
