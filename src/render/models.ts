@@ -121,6 +121,16 @@ export function changedBody(k: Kernel, f: Form, done: string[]): THREE.BufferGeo
   return g;
 }
 
+/**
+ * What a mesh of `geo` draws with. A geometry with translucent voxels has one group for the opaque and one for the glass
+ * (`opaqueCount` of mesh.ts): given one material alone, three draws both with it, and the glass comes out solid (T217).
+ * Every mesh of a model's geometry goes through here.
+ */
+export function modelMaterials(geo: THREE.BufferGeometry, mat: THREE.Material): THREE.Material | THREE.Material[] {
+  if (geo.groups.length === 0) return mat;
+  return [mat, mat === MAT.cut ? MAT.cutGlass : mat === MAT.corona ? MAT.coronaGlass : MAT.glass];
+}
+
 export interface ModelObject {
   root: THREE.Group;
   body: THREE.Object3D;
@@ -133,10 +143,7 @@ export function modelObject(k: Kernel, f: Form, fc: FormComp | undefined, materi
   const g = geoOf(f);
   if (!g) return undefined;
   const mat = material ?? (g.sway ? MAT.sway : MAT.world);
-  const glassMat = material === MAT.cut ? MAT.cutGlass : material === MAT.corona ? MAT.coronaGlass : MAT.glass;
-  const mesh = (geo: THREE.BufferGeometry) => {
-    return casts(new THREE.Mesh(geo, geo.groups.length > 0 ? [mat, glassMat] : mat), true);
-  };
+  const mesh = (geo: THREE.BufferGeometry) => casts(new THREE.Mesh(geo, modelMaterials(geo, mat)), true);
   const root = new THREE.Group();
   const bodyMesh = mesh(fc?.done?.length ? changedBody(k, f, fc.done) : g.body);
   const body = new THREE.Group();

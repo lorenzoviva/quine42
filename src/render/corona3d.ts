@@ -12,7 +12,7 @@ import { CAMPUS, ROOM_H, ROOM_W, type Building, type Storey, type StudioItem } f
 import { Builder } from './terrain';
 import { lit, MAT, rgbOf } from './materials';
 import { NODE_COLOR } from '../kernel/graph';
-import { geoOf, modelObject, showFrame, type ModelObject } from './models';
+import { geoOf, modelMaterials, modelObject, showFrame, type ModelObject } from './models';
 import { LEVEL } from '../kernel/relief';
 import { OPERATION_COLOR, type Situation } from '../kernel/situation';
 
@@ -85,7 +85,7 @@ export function buildCoronaRing(k: Kernel): THREE.Group {
     }
     // An animated model shows one frame at a time instead of its body (the tower's energy pulses).
     const place = (geo: THREE.BufferGeometry) => {
-      const mesh = new THREE.Mesh(geo, MAT.corona);
+      const mesh = new THREE.Mesh(geo, modelMaterials(geo, MAT.corona));
       mesh.castShadow = mesh.receiveShadow = true;
       mesh.position.set(s.x, 0, s.y);
       mesh.rotation.y = s.yaw;
@@ -137,7 +137,7 @@ export function buildCoronaRing(k: Kernel): THREE.Group {
     }
     const mat = p.kind === 'albero' ? MAT.sway : MAT.corona;
     const placeProp = (bg: THREE.BufferGeometry) => {
-      const mesh = new THREE.Mesh(bg, mat);
+      const mesh = new THREE.Mesh(bg, modelMaterials(bg, mat));
       mesh.castShadow = mesh.receiveShadow = true;
       mesh.position.set(p.x, 0, p.y);
       mesh.rotation.y = p.yaw;
@@ -162,7 +162,7 @@ export function buildCoronaRing(k: Kernel): THREE.Group {
     for (let i = 0; i < 4; i++) {
       const dg = new THREE.Group();
       const placeD = (bg: THREE.BufferGeometry) => {
-        const mesh = new THREE.Mesh(bg, MAT.corona);
+        const mesh = new THREE.Mesh(bg, modelMaterials(bg, MAT.corona));
         mesh.castShadow = true;
         dg.add(mesh);
         return mesh;
@@ -185,7 +185,7 @@ export function buildCoronaRing(k: Kernel): THREE.Group {
     for (let i = 0; i < 2; i++) {
       const tg = new THREE.Group();
       const placeT = (bg: THREE.BufferGeometry) => {
-        const mesh = new THREE.Mesh(bg, MAT.corona);
+        const mesh = new THREE.Mesh(bg, modelMaterials(bg, MAT.corona));
         mesh.castShadow = true;
         tg.add(mesh);
         return mesh;
@@ -395,7 +395,7 @@ export function buildRoom(k: Kernel, building: Building, storey: Storey): { grou
     const size = new THREE.Vector3();
     geo.body.boundingBox!.getSize(size);
     const s = Math.min(0.7 / Math.max(size.x, size.z, 0.01), 0.9 / Math.max(size.y, 0.01), 1);
-    const m = new THREE.Mesh(geo.body, MAT.corona);
+    const m = new THREE.Mesh(geo.body, modelMaterials(geo.body, MAT.corona));
     m.scale.setScalar(s);
     m.position.set(it.x + 0.5, 0.46, it.y + 0.52);
     m.castShadow = true;
@@ -1181,7 +1181,7 @@ export function buildShowcase(k: Kernel, it: StudioItem, entry: ShowcaseEntry, c
   // Things too big are brought down to the device: on the printer, to its middle cell (structures to one cell).
   const room = it.device === 'schermo' ? [w - 0.6, 1.6] : it.device === 'silos' ? [1.4, 1.8] : [0.9, 1.8];
   const s = Math.min(room[0] / Math.max(size.x, size.z, 0.01), room[1] / Math.max(size.y, 0.01), 1.5);
-  const m = new THREE.Mesh(geo.body, MAT.corona);
+  const m = new THREE.Mesh(geo.body, modelMaterials(geo.body, MAT.corona));
   m.castShadow = true;
   m.scale.setScalar(s);
   const centre = box.getCenter(new THREE.Vector3());

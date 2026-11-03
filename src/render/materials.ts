@@ -189,7 +189,9 @@ const CLIPPED_DEPTH = clipped(new THREE.MeshDepthMaterial(), 'depth');
 export function casts<T extends THREE.Mesh>(m: T, receive = false): T {
   m.castShadow = true;
   if (receive) m.receiveShadow = true;
-  if ((m.material as THREE.Material).userData?.clipped) m.customDepthMaterial = CLIPPED_DEPTH;
+  // A model with glass has two materials, both of the same kind: the first says for the mesh.
+  const first = Array.isArray(m.material) ? m.material[0] : m.material;
+  if (first?.userData?.clipped) m.customDepthMaterial = CLIPPED_DEPTH;
   return m;
 }
 
