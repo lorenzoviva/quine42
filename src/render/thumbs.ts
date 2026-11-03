@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import type { Kernel } from '../kernel/kernel';
 import { glowing } from './materials';
-import { geoOf } from './models';
+import { geoWhenReady } from './models';
 
 const PX = 96;
 
@@ -43,8 +43,8 @@ export class Thumbs {
     const key = `${look.model}#${look.seed}#${look.tint ?? ''}`;
     let p = this.cache.get(key);
     if (!p) {
-      p = this.k.forms.wait(look.model, look.seed, look.tint).then((f) => {
-        const geo = f?.status === 'ready' ? geoOf(f) : undefined;
+      p = this.k.forms.wait(look.model, look.seed, look.tint).then(async (f) => {
+        const geo = f?.status === 'ready' ? await geoWhenReady(f) : undefined;
         if (!geo) {
           this.cache.delete(key);
           return undefined;

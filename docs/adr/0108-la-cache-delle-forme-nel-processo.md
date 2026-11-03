@@ -84,4 +84,30 @@ La cache del browser ha un tetto, e un tetto a tre piani, perché gli stessi arr
 
 **Il prezzo.** Arrivare alla corona non è più istantaneo: gli edifici arrivano dalla cache in pochi secondi, e nel frattempo si vedono i blocchi con l'insegna al neon, come quando un modello non è pronto. Accettiamo: è un passaggio raro. Restano fuori dal tetto: le stanze dello studio già visitate (`CoronaView.rooms`) e i corpi cambiati da un'azione (`changed`), che sono piccoli; una forma che non ha finito, che non sta in `memory` e resta nel suo `Form`.
 
-**Dopo** (stessa misura, secondo caricamento, scheda nuova): 345 MB privati nella scheda contro 2445, heap 157 MB, 0 lavori ai worker, 147 forme pronte; IndexedDB 512 MB contro 504 (il mondo sta sotto il tetto: il disco non cambia finché non lo supera). Con la corona in scena 1,6 GB, e 60 s dopo esserne usciti lo heap torna a 220 MB. Attenzione a chi misura: `usedJSHeapSize` conta anche la pagina precedente se si ricarica nella stessa scheda (1,7 GB lì, 156 MB nella scheda nuova con lo stesso stato; `WeakRef` sulle 107 mesh tolte, 1682 MB: tutte raccolte). Si misura da una scheda nuova. **Da fare a parte:** ogni caricamento legge da IndexedDB tutti gli 1,77 GB per poi usarne 49 MB; griglie e mesh in due archivi lo eviterebbero.
+**Dopo** (stessa misura, secondo caricamento, scheda nuova): 345 MB privati nella scheda contro 2445, heap 157 MB, 0 lavori ai worker, 147 forme pronte; IndexedDB 512 MB contro 504 (il mondo sta sotto il tetto: il disco non cambia finché non lo supera). Con la corona in scena 1,6 GB, e 60 s dopo esserne usciti lo heap torna a 220 MB. Attenzione a chi misura: `usedJSHeapSize` conta anche la pagina precedente se si ricarica nella stessa scheda (1,7 GB lì, 156 MB nella scheda nuova con lo stesso stato; `WeakRef` sulle 107 mesh tolte, 1682 MB: tutte raccolte). Si misura da una scheda nuova. **Da fare a parte:** ogni caricamento legge da IndexedDB tutti gli 1,77 GB per poi usarne 49 MB; griglie e mesh in due archivi lo eviterebbero (fatto, T212: vedi sotto).
+
+## Aggiunta (T212)
+
+Griglie e mesh stanno in due archivi di IndexedDB: `forms` (griglia, palette, azioni, animazioni, e `meshesGone` se le mesh ci sono) e `meshes`; `uses` resta. `FORMS_DB_VERSION` = 5.
+
+**Si separa al contrario di come era stato scritto il task.** Il task chiedeva di leggere la griglia solo quando un `Form.remake` la chiede. Non si può: appena una forma è pronta il kernel ne ricava subito `foot`, i pavimenti e il raggio, e `placeCampus` cerca le porte in tutte le griglie. La misura dice anche che non servirebbe: le griglie delle 147 forme sono **16,4 MB** su 1861 MB, meno dell'1 %. Quindi un caricamento legge tutte le griglie e nessuna mesh (`Forms.get` → `FormRunner.withoutMeshes`, facoltativo: `InlineRunner` e `MemoryFormStore` non lo hanno e danno tutto); la forma nasce con `meshesGone` e le mesh arrivano per la stessa via di T175, `geoOf` → `Form.remake`, solo per ciò che qualcuno disegna. `remake` legge la voce intera, griglia compresa: un metodo a parte per risparmiare meno dell'1 % non vale il codice in più.
+
+**Le mesh diventano geometria appena arrivano** (`remake(arrived)`). Con il tetto di 128 MB in memoria, l'edificio appena letto usciva da `memory` all'arrivo del successivo, prima che l'anello, ricostruito al più una volta al secondo, ne facesse la geometria: si rileggeva, e arrivare alla corona leggeva 7,3 GB in circa 16 s. La geometria tiene gli array per conto suo, sotto `trimGeometries`, e ogni forma si legge una volta. `Thumbs`, che chiede una volta sola e non torna al frame dopo, aspetta con `geoWhenReady`.
+
+**Una cache vecchia si scarta, non si migra.** Migrare vorrebbe dire leggere 1,8 GB dentro la transazione di aggiornamento, con la pagina ferma; rifare le forme costa un primo caricamento di circa 20 s, una volta sola, come per le versioni 2, 3 e 4. Abbiamo scartato anche di leggere la griglia dalla versione 4 voce per voce in sottofondo: codice che serve una volta sola.
+
+**Il tetto** resta sul totale: `uses.bytes` conta griglia più mesh, una voce esce con tutti e due i pezzi, e leggere la sola griglia conta come uso: una forma che ogni caricamento chiede non è da buttare, anche se non è disegnata.
+
+**Le misure** (build di produzione, `?skip&offline&formecache`, stessa origine, scheda nuova, secondo caricamento, 147 forme; `IdbFormStore.bytesRead` dopo, la somma di `uses` prima):
+
+| | prima | dopo |
+|---|---|---|
+| byte letti al caricamento | 1861 MB | 70 MB |
+| forme pronte durante il caricamento | 10 su 131 a 3,4 s | 129 su 129 a 2,0 s |
+| tutte le 147 pronte | 9,4 s | 9,2-9,8 s |
+| heap a fine caricamento | 155 MB | 115-118 MB |
+| lavori ai worker, forme fallite | 0, 0 | 0, 0 |
+| IndexedDB su disco | 540 MB | 541 MB |
+| arrivare alla corona: byte letti, ultima lettura | non misurato | 1,25 GB, 5,2 s (7,3 GB e circa 16 s senza la geometria all'arrivo) |
+
+L'ultima forma pronta non arriva prima: quei 9 s non sono più di lettura, le ultime forme vengono chieste tardi. Il guadagno è nei byte e nei primi 3 s. Il prezzo è un passaggio in più: un modello del mondo iniziale prima è una forma pronta senza mesh, e per un istante si vede il sostituto, come quando un modello non è pronto.
