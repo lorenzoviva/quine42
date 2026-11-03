@@ -3,17 +3,18 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 03/11/2026, epoca 222. Crediti: vedi `stato`.
+Aggiornato il 03/11/2026, epoca 223. Crediti: vedi `stato`.
 
 ## Stato attuale
 
 - T187 integrato (glossario, R1-R17 con i nomi esatti). T206 e T179 integrati: traccia nel base con l'ADR-0118, `banco-strutture --seconda --traccia` non provato con una chiamata vera.
-- **T180 in corso prima delle rinomine:** gli otto `approvato` erano dell'autore, che li credeva bloccati; le dipendenze da T205 vanno bene anche a lui. T180 finito va integrato prima di T188, o guardato per i nomi se T188 è già integrato.
+- **T180 integrato** (banco della varianza, solo `lab/`): 31 programmi su 31 statici; i sei vuoti del gioco per T156 sono nel suo esito; da decidere con T156 il tetto di 120 per Enorme e Gargantuesca. Soglia non provata su un edificio vero.
+- **T188 in corso**, prima delle rinomine. Le dipendenze da T205 sui task approvati dall'autore restano.
 - ADR nuovi dallo **0121**.
 
 ## Pronti e priorità
 
-1. **T188** parte appena c'è uno slot (ora 1, occupato da T180).
+1. **T188** in corso.
 2. **Catena delle rinomine** (l'autore: «i nomi vanno bene e fai tutte le rinomine»): T188-T203 → T204 (`AGENTS.md`) → T205 (prova nel browser), p2-20, ognuno dipende dal precedente. A ogni fine `traccia` e `integra`, una alla volta.
 3. **T175 T106 T89a T183 T152 T186 T158, e T181**: approvati, con «dipende da T205» (l'autore: non c'è bisogno di toglierla). Partono da soli alla fine di T205.
 4. **T181 → T182 → T156** (strutture procedurali; T181 su Fable, stima 10 %, contatore Fable al 93 % fino al 05/11): alla fine di T181 leggere il contatore delle 5 ore e confrontarlo con `ratioSessioneSettimana`.
