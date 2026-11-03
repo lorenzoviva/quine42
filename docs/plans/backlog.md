@@ -2042,13 +2042,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fatto quando: typecheck e test verdi; nel browser gli alberi hanno la sagoma e i confini tra chioma e tronco senza rumore, le case i bordi di muri, tetto e
   finestre, il rilievo i gradini; screenshot confrontato con la foto di T89.
 
-### T89c · Cartone: luce tinta e prospettiva aerea — `da fare` (dipende da T89a)
+### T89c · Cartone: luce tinta e prospettiva aerea — `fatto` (`8914f6f`) (dipende da T89a)
 - Pipeline: claude · stima 3% · approvato · browser · priorità 77
 - Contesto: ADR-0093, punto 4 (la foto: chiave calda, riempimento freddo, ombre azzurre, lontananza che sbiadisce nel cielo).
 - Fare: in `renderer.ts` la luce chiave calda e l'emisfero freddo, l'ombra portata tinta (un pezzo di shader dopo `lights_fragment_end` o il colore
   dell'ombra), la nebbia come prospettiva aerea (verso il colore del cielo, più vicina e più forte, con la camera libera del master compresa), per giorno,
   tramonto e notte; il bloom tarato di nuovo sopra il cartone.
 - Fatto quando: typecheck e test verdi; screenshot di giorno e di notte (`k.time` spostato da console) con e senza cartone.
+- Esito: luce chiave calda ed emisfero freddo con luna di notte (`cartoonLight`, `PHASES`, `CARTOON_INDOORS`), ombre tinte senza seconda lettura della mappa (`addShade`, da `toon()` e `addGlow`), nebbia come prospettiva aerea anche con la camera libera (`aerial`: 0,85-2,2 distanze), inchiostro che sbiadisce con la nebbia (`uFog` in `Ink`: T89b deve tenerlo), bloom tarato (raggio 0,3; forza 0,5 di giorno, 0,85 di notte, 0,7 al chiuso); test nuovi in `tests/cartoon.test.ts`, ADR-0093 e `#cartone` aggiornati; typecheck e build verdi, suite verde al secondo giro (117 file, 1607 test): al primo giro è fallito `tests/subscription.test.ts` (T68c), che non tocca il renderer e passa da solo, causa non cercata; `CARTOON_BY_DEFAULT` resta `false` finché non è fatto T89b; non provati le prestazioni (T89e) e l'effetto della camera delle ombre ±22 da lontano (dedotto, come nel classico); dopo l'ultima taratura della nebbia ricontrollati solo giorno e notte; icone e laboratorio restano Lambert (T89d, T89e). Sicurezza: nessuna superficie nuova.
 
 ### T89d · Cartone: lo stile nei dati e le foto dei modelli — `da fare` (dipende da T89b)
 - Pipeline: claude · stima 3% · approvato · browser · priorità 78

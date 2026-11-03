@@ -73,3 +73,8 @@ T89e (corona, studio, laboratorio e misura delle prestazioni). Dettagli nel back
 T89a (punti 1, 2 e 6, ancora dietro `?cartone`): la rampa non ha soglie uguali, perché con sei normali e questo sole tre terzi darebbero due fasce sole; l'ombra
 portata lascia passare la fascia bassa, perché le facce lontane dal sole sono anche in ombra; nello studio c'è un sole tenue, perché senza luce diretta le fasce non
 esistono. Numeri e nomi in `docs/architettura-dettagli.md#cartone`. Le ombre tinte restano a T89c, come la luce calda e la prospettiva aerea.
+
+T89c (punto 4, ancora dietro `?cartone`): la notte ha una luna al posto del sole, perché senza luce diretta le fasce sparirebbero; l'ombra si tinge moltiplicando la luce
+raccolta, senza leggere due volte la mappa delle ombre (il sole è l'ultima luce che three.js attraversa); non è proprio il colore del cielo, perché al tramonto darebbe ombre
+arancioni e la foto le vuole fredde: è un azzurro, viola al tramonto. La nebbia si misura sulla distanza della camera e diventa tutto cielo prima della fine di ciò che è
+caricato, così anche la camera libera bassa sull'orizzonte non vede il bordo del mondo. Anche l'inchiostro sbiadisce con la nebbia. Numeri in `docs/architettura-dettagli.md#cartone`.

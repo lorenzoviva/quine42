@@ -1,6 +1,7 @@
 // The cartoon look (ADR-0093): banded (toon) shading in place of Lambert for every lit material (T89a), saturated on the
-// side away from the sun, with sharper cast shadows; ink outlines in post-processing, still the trial of T89 from the
-// depth and the normals of the frame (T89b draws them from ids).
+// side away from the sun, with sharper cast shadows; a warm key light, a cold fill, tinted shadows and the fog as aerial
+// perspective (T89c); ink outlines in post-processing, still the trial of T89 from the depth and the normals of the frame
+// (T89b draws them from ids).
 
 import * as THREE from 'three';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
@@ -61,6 +62,97 @@ export const CARTOON_HEMI = { sky: 0xc4dcff, ground: 0x5f5cb4 } as const;
 /** The light in the studio: without any sun no face would ever change band there. */
 export const CARTOON_STUDIO = { sun: 1.1, hemi: 0.7 } as const;
 
+/** Linear RGB multiplying the light of what lies in shadow: the blue of the photo, not a darker grey. */
+export type Tint = readonly [number, number, number];
+
+/** The light of a moment of the day, what `cartoonLight` blends. */
+interface Phase {
+  sun: number;
+  sunIntensity: number;
+  sky: number;
+  ground: number;
+  hemiIntensity: number;
+  shade: Tint;
+  bloom: number;
+}
+
+/**
+ * The three moments of the day. The night keeps a moon where the sun was: with no direct light every face would have the
+ * same band. The bloom is lower than the classic look's by day (a halo over flat colours reads as a smear) and comes
+ * back up in the dark, where the glowing voxels are what one sees.
+ */
+export const PHASES: Readonly<Record<'day' | 'dusk' | 'night', Phase>> = {
+  day: { sun: 0xffdca6, sunIntensity: 2.4, sky: CARTOON_HEMI.sky, ground: CARTOON_HEMI.ground, hemiIntensity: 1.1, shade: [0.74, 0.86, 1.18], bloom: 0.5 },
+  dusk: { sun: 0xff9458, sunIntensity: 2.0, sky: 0xc0a8e0, ground: 0x5c4490, hemiIntensity: 0.8, shade: [0.72, 0.72, 1.2], bloom: 0.65 },
+  night: { sun: 0x9db4f0, sunIntensity: 0.9, sky: 0x5070c0, ground: 0x28306c, hemiIntensity: 0.55, shade: [0.68, 0.78, 1.22], bloom: 0.85 },
+};
+
+/** The light in the corona and the studio, neither of which has a time of day: a white-warm lamp, the same cold fill. */
+export const CARTOON_INDOORS = { ...PHASES.day, sun: 0xffeeda, bloom: 0.7 } as const;
+
+/** How the light of the moment `day` (0 deep night, 1 full day) mixes: the same steps as the sky behind it. */
+function phasesAt(day: number): { from: Phase; to: Phase; t: number } {
+  if (day > 0.6) return { from: PHASES.day, to: PHASES.day, t: 0 };
+  if (day > 0.3) return { from: PHASES.dusk, to: PHASES.day, t: (day - 0.3) / 0.3 };
+  return { from: PHASES.night, to: PHASES.dusk, t: Math.max(0, day) / 0.3 };
+}
+
+const mix = (a: number, b: number, t: number) => a + (b - a) * t;
+
+/** The light at the moment `day` as it goes to the scene. */
+export function cartoonLight(day: number): { sun: THREE.Color; sunIntensity: number; sky: THREE.Color; ground: THREE.Color; hemiIntensity: number; shade: Tint; bloom: number } {
+  const { from, to, t } = phasesAt(day);
+  return {
+    sun: new THREE.Color(from.sun).lerp(new THREE.Color(to.sun), t),
+    sunIntensity: mix(from.sunIntensity, to.sunIntensity, t),
+    sky: new THREE.Color(from.sky).lerp(new THREE.Color(to.sky), t),
+    ground: new THREE.Color(from.ground).lerp(new THREE.Color(to.ground), t),
+    hemiIntensity: mix(from.hemiIntensity, to.hemiIntensity, t),
+    shade: [mix(from.shade[0], to.shade[0], t), mix(from.shade[1], to.shade[1], t), mix(from.shade[2], to.shade[2], t)],
+    bloom: mix(from.bloom, to.bloom, t),
+  };
+}
+
+/**
+ * The fog as aerial perspective, in view depth (what the fog and the ink measure). Seen in 3/4 the ground goes from 0.8
+ * to 1.33 camera distances: the classic fog began beyond that and never showed, this one has the top of the screen
+ * already fading. It is all sky within 2.2 distances, before the end of what is loaded even with the free camera low on
+ * the horizon (the kernel loads 1.1 distances past the wanderer, plus one chunk). Closing in, it stays near where it is at
+ * the default distance, as far as that one chunk allows: a close-up has no air in between. At night one sees less far.
+ */
+export function aerial(distance: number, day: number): { near: number; far: number } {
+  const span = Math.max(distance, Math.min(15, distance + 7)) * (0.85 + 0.15 * Math.max(0, Math.min(1, day)));
+  return { near: span * 0.85, far: span * 2.2 };
+}
+
+/** How much the bloom spreads over the cartoon: tighter than the classic look's, the bands stay clean around a lamp. */
+export const CARTOON_BLOOM_RADIUS = 0.3;
+
+/** What the shadows' tint is now (the renderer sets it). */
+export const SHADE = { value: new THREE.Vector3(1, 1, 1) };
+
+/**
+ * Tints what lies in shadow, in the toon shader, without reading the shadow map a second time. The directional lights are
+ * the last ones lights_fragment_begin goes through, so `directLight` is still the sun there, its colour multiplied by the
+ * shadow: against the sun's own colour, that says how much shadow fell here. A face turned away from the sun counts as in
+ * shadow in any case, also where the shadow map does not reach.
+ */
+export function addShade(sh: THREE.WebGLProgramParametersWithUniforms): void {
+  sh.uniforms.uShade = SHADE;
+  sh.fragmentShader = `uniform vec3 uShade;\n${sh.fragmentShader}`.replace(
+    '#include <lights_fragment_end>',
+    `#include <lights_fragment_end>
+  #if NUM_DIR_LIGHTS > 0
+  float sunFull = dot(directionalLights[0].color, vec3(1.0));
+  float shaded = sunFull > 0.0 ? (1.0 - dot(directLight.color, vec3(1.0)) / sunFull) / ${SHADOW_INTENSITY.toFixed(3)} : 0.0;
+  if (dot(geometryNormal, directLight.direction) < 0.0) shaded = 1.0;
+  vec3 shade = mix(vec3(1.0), uShade, clamp(shaded, 0.0, 1.0));
+  reflectedLight.directDiffuse *= shade;
+  reflectedLight.indirectDiffuse *= shade;
+  #endif`,
+  );
+}
+
 function bands(): THREE.DataTexture {
   const t = new THREE.DataTexture(bandRamp(), RAMP_TEXELS, 1, THREE.RGBAFormat);
   t.minFilter = t.magFilter = THREE.NearestFilter;
@@ -72,7 +164,10 @@ const BANDS = bands();
 
 /** A toon material in place of a Lambert one, with the same options. */
 export function toon(opts: THREE.MeshToonMaterialParameters): THREE.MeshToonMaterial {
-  return new THREE.MeshToonMaterial({ ...opts, gradientMap: BANDS });
+  const m = new THREE.MeshToonMaterial({ ...opts, gradientMap: BANDS });
+  // The wrappers of materials.ts put their own in place of this one, and that calls addShade from addGlow.
+  m.onBeforeCompile = addShade;
+  return m;
 }
 
 const INK = `uniform sampler2D tDiffuse;
@@ -83,6 +178,7 @@ uniform float uNear;
 uniform float uFar;
 uniform vec2 uDepthEdge;
 uniform vec2 uNormalEdge;
+uniform vec2 uFog;
 varying vec2 vUv;
 float lin(vec2 uv) {
   float z = texture2D(tDepth, uv).x * 2.0 - 1.0;
@@ -101,6 +197,8 @@ void main() {
     ne = max(ne, 1.0 - dot(n, texture2D(tNormal, uv).xyz * 2.0 - 1.0));
   }
   float edge = max(smoothstep(uDepthEdge.x, uDepthEdge.y, de), smoothstep(uNormalEdge.x, uNormalEdge.y, ne));
+  // What the air has taken has no ink either: a dark line over a shape that fades would stand out of the distance.
+  edge *= 1.0 - smoothstep(uFog.x, uFog.y, d);
   // Ink: the colour itself, much darker (dark blue-brown, not black), as in hand-inked cartoons.
   vec3 ink = c.rgb * 0.18 + vec3(0.03, 0.03, 0.05);
   gl_FragColor = vec4(mix(c.rgb, ink, edge * 0.9), c.a);
@@ -134,6 +232,7 @@ export class Ink {
         uFar: { value: 1000 },
         uDepthEdge: { value: new THREE.Vector2(0.03, 0.08) },
         uNormalEdge: { value: new THREE.Vector2(0.25, 0.6) },
+        uFog: { value: new THREE.Vector2(1e6, 1e6 + 1) },
       },
       vertexShader: 'varying vec2 vUv;\nvoid main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
       fragmentShader: INK,
@@ -156,6 +255,7 @@ export class Ink {
     this.pass.uniforms.uFar.value = this.camera.far;
     const bg = this.scene.background;
     const fog = this.scene.fog;
+    if (fog instanceof THREE.Fog) (this.pass.uniforms.uFog.value as THREE.Vector2).set(fog.near, Math.max(fog.far, fog.near + 1));
     this.scene.background = null;
     this.scene.fog = null;
     this.swap();
