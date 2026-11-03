@@ -1,5 +1,5 @@
-// The corona in 3D: the studio's campus on the ring beyond the circle (a dark avenue with a glowing
-// line, alleys between the sectors, lawns, one block per folder with neon edges in its colour, a door
+// The corona in 3D: the studio's campus on the ring beyond the circle (a dark avenue between two perfect circles, with a glowing
+// circle along it, alleys between the sectors, lawns, one block per folder with neon edges in its colour, a door
 // under a neon sign with the building's name, a glowing edge), and inside each tower its rooms
 // (24 × 15 cells, several storeys): neon grid on the floor, walls with a strip of light, racks of files,
 // the gallery's models on show, screens, teleports, stairs, the Council's round table with the universe
@@ -23,6 +23,79 @@ const LOOK_COLOR: Record<string, string> = { libro: '#a0683a', cristallo: '#5fe0
 /** How bright the studio's floor grid is, over the building's colour (T49a: faint, and it does not bloom). */
 const GRID = 0.12;
 
+/** How many straight segments make a circle of the avenue: at its outer edge each departs from the true circle by 2 thousandths of a cell. */
+export const AVENUE_SEGMENTS = 360;
+/** How many segments a paving stone of the avenue is long. */
+const STONE = 2;
+/** The circles of light on the avenue's two edges: how wide, how bright. */
+const EDGE_WIDTH = 0.07;
+const EDGE_LIGHT = 0.3;
+
+/** The part of a convex polygon where nx·x + nz·z >= c (Sutherland-Hodgman, one plane). */
+function keepSide(poly: number[][], nx: number, nz: number, c: number): number[][] {
+  const out: number[][] = [];
+  poly.forEach((p, i) => {
+    const q = poly[(i + 1) % poly.length];
+    const dp = nx * p[0] + nz * p[1] - c;
+    const dq = nx * q[0] + nz * q[1] - c;
+    if (dp >= 0) out.push(p);
+    if (dp >= 0 !== dq >= 0) {
+      const s = dp / (dp - dq);
+      out.push([p[0] + (q[0] - p[0]) * s, p[1] + (q[1] - p[1]) * s]);
+    }
+  });
+  return out;
+}
+
+/**
+ * What of a unit cell lies outside the circle of radius r, as drawn with `AVENUE_SEGMENTS` segments: convex pieces that
+ * meet the circle's segments exactly, so that the ground and the avenue neither overlap nor leave a gap.
+ */
+export function outsideCircle(x: number, z: number, r: number): number[][][] {
+  const square = [[x, z], [x, z + 1], [x + 1, z + 1], [x + 1, z]];
+  const near = Math.hypot(Math.max(0, x, -x - 1), Math.max(0, z, -z - 1));
+  const far = Math.hypot(Math.max(Math.abs(x), Math.abs(x + 1)), Math.max(Math.abs(z), Math.abs(z + 1)));
+  if (near >= r) return [square];
+  const step = (Math.PI * 2) / AVENUE_SEGMENTS;
+  if (far <= r * Math.cos(step / 2)) return [];
+  // One wedge of the circle at a time: inside a wedge, what is outside is what lies beyond its one segment.
+  const centre = Math.atan2(z + 0.5, x + 0.5);
+  const spread = Math.asin(Math.min(1, Math.SQRT1_2 / Math.max(1e-9, Math.hypot(x + 0.5, z + 0.5))));
+  const pieces: number[][][] = [];
+  for (let k = Math.floor((centre - spread) / step); k <= Math.floor((centre + spread) / step); k++) {
+    const a0 = k * step;
+    const a1 = (k + 1) * step;
+    let piece = keepSide(square, -Math.sin(a0), Math.cos(a0), 0);
+    piece = keepSide(piece, Math.sin(a1), -Math.cos(a1), 0);
+    piece = keepSide(piece, Math.cos(a0 + step / 2), Math.sin(a0 + step / 2), r * Math.cos(step / 2));
+    // A corner exactly on a wedge's side leaves a piece with no area: nothing to draw.
+    const area = piece.reduce((s, p, i) => s + p[0] * piece[(i + 1) % piece.length][1] - piece[(i + 1) % piece.length][0] * p[1], 0);
+    if (Math.abs(area) > 1e-9) pieces.push(piece);
+  }
+  return pieces;
+}
+
+/** The avenue: a ring between two concentric circles around the centre of the world, two lanes of stones and a circle of light between them. */
+function buildAvenue(lit: Builder, glow: Builder, R: number): void {
+  const [light, dark] = GROUND.viale;
+  const radii = [R, R + CAMPUS.line, R + CAMPUS.avenue];
+  const step = (Math.PI * 2) / AVENUE_SEGMENTS;
+  for (let lane = 0; lane < radii.length - 1; lane++)
+    for (let k = 0; k < AVENUE_SEGMENTS; k++) {
+      const [c0, s0, c1, s1] = [Math.cos(k * step), Math.sin(k * step), Math.cos((k + 1) * step), Math.sin((k + 1) * step)];
+      const [r0, r1] = [radii[lane], radii[lane + 1]];
+      // The stones of one lane meet the middle of those of the other.
+      const rgb = rgbOf(Math.floor((k + lane) / STONE) & 1 ? light : dark);
+      lit.quad([c0 * r0, 0, s0 * r0], [c1 * r0, 0, s1 * r0], [c1 * r1, 0, s1 * r1], [c0 * r1, 0, s0 * r1], [0, 1, 0], rgb);
+    }
+  const line = R + CAMPUS.line;
+  glow.ring(0, 0.02, 0, line - 0.05, line + 0.05, rgbOf('#05d9e8', 0.7), AVENUE_SEGMENTS);
+  // The stones and the lawn are both near black: a faint circle on each edge is what shows the road's shape.
+  const edge = rgbOf('#05d9e8', EDGE_LIGHT);
+  glow.ring(0, 0.02, 0, R, R + EDGE_WIDTH, edge, AVENUE_SEGMENTS);
+  glow.ring(0, 0.02, 0, R + CAMPUS.avenue - EDGE_WIDTH, R + CAMPUS.avenue, edge, AVENUE_SEGMENTS);
+}
+
 /** A thin glowing frame along the top edges of a cell block where it meets the outside. */
 function edgeStrip(b: Builder, x: number, z: number, y: number, open: { n: boolean; s: boolean; w: boolean; e: boolean }, rgb: number[]): void {
   const t = 0.05;
@@ -39,17 +112,26 @@ export function buildCoronaRing(k: Kernel): THREE.Group {
   const max = Math.ceil(c.outer) + 1;
   const lit = new Builder();
   const glow = new Builder();
+  buildAvenue(lit, glow, R);
+  const beyond = R + CAMPUS.avenue;
+  // The ground around the avenue stops at its outer circle; a cell of the avenue that sticks out of it has the ground it runs into.
+  const groundCell = (x: number, y: number, rgb: number[]) => {
+    for (const piece of outsideCircle(x, y, beyond)) lit.flat(piece, 0, rgb);
+  };
+  const groundBeyond = (x: number, y: number): string => {
+    const d = Math.hypot(x + 0.5, y + 0.5);
+    const g = c.at(Math.floor(x + 0.5 + (x + 0.5) / d), Math.floor(y + 0.5 + (y + 0.5) / d))?.ground;
+    return g && g !== 'viale' ? g : 'prato';
+  };
   for (let y = -max; y < max; y++)
     for (let x = -max; x < max; x++) {
       const tile = c.at(x, y);
       if (!tile) continue;
-      const d = Math.hypot(x + 0.5, y + 0.5);
       const b = tile.building ? c.building(tile.building) : undefined;
       // A building that is a model (T20): its cells are ground, the model stands on them.
       if (tile.kind === 'floor' || (b?.structure && tile.kind !== 'door')) {
-        const [a, b2] = GROUND[tile.ground ?? 'prato'];
-        lit.quad([x, 0, y], [x, 0, y + 1], [x + 1, 0, y + 1], [x + 1, 0, y], [0, 1, 0], rgbOf((x + y) & 1 ? a : b2));
-        if (tile.ground === 'viale' && Math.abs(d - (R + CAMPUS.line)) < 0.5) glow.box(x, 0.005, y + 0.45, x + 1, 0.02, y + 0.55, rgbOf('#05d9e8', 0.7));
+        const [a, b2] = GROUND[tile.ground === 'viale' ? groundBeyond(x, y) : (tile.ground ?? 'prato')];
+        groundCell(x, y, rgbOf((x + y) & 1 ? a : b2));
         if (tile.ground === 'vicolo' && (x * 7 + y * 3) % 5 === 0) glow.box(x + 0.45, 0.005, y + 0.45, x + 0.55, 0.02, y + 0.55, rgbOf('#ff2a6d', 0.6));
         if (tile.ground === 'bordo') glow.box(x + 0.2, 0, y + 0.2, x + 0.8, 0.5, y + 0.8, rgbOf('#05d9e8', 0.5));
       } else if (tile.kind === 'building' && b) {
@@ -61,10 +143,10 @@ export function buildCoronaRing(k: Kernel): THREE.Group {
         if ((x * 13 + y * 7) % 9 === 0 && (open.s || open.n || open.w || open.e)) glow.box(x + 0.35, 1.2 + (x % 3) * 0.5, y + 0.35, x + 0.65, 1.5 + (x % 3) * 0.5, y + 0.65, rgbOf(b.color, 0.8));
       } else if (tile.kind === 'door' && b?.structure) {
         // Where one goes in: a glowing threshold in front of the model's door.
-        lit.quad([x, 0, y], [x, 0, y + 1], [x + 1, 0, y + 1], [x + 1, 0, y], [0, 1, 0], rgbOf('#1a0a14'));
+        groundCell(x, y, rgbOf('#1a0a14'));
         glow.box(x + 0.15, 0.005, y + 0.15, x + 0.85, 0.02, y + 0.85, rgbOf(b.color, 0.5));
       } else if (tile.kind === 'door' && b) {
-        lit.quad([x, 0, y], [x, 0, y + 1], [x + 1, 0, y + 1], [x + 1, 0, y], [0, 1, 0], rgbOf('#1a0a14'));
+        groundCell(x, y, rgbOf('#1a0a14'));
         glow.box(x + 0.1, 0, y + 0.45, x + 0.18, 1.5, y + 0.55, rgbOf('#ff2a6d'));
         glow.box(x + 0.82, 0, y + 0.45, x + 0.9, 1.5, y + 0.55, rgbOf('#ff2a6d'));
         glow.box(x + 0.1, 1.42, y + 0.45, x + 0.9, 1.5, y + 0.55, rgbOf('#ff2a6d'));

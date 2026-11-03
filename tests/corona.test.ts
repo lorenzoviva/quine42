@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import * as THREE from 'three';
 import { CAMPUS, Corona, DEVICE_MARGIN, ROOM_H, ROOM_W, fileModelOf, fileSeedOf } from '../src/kernel/corona';
-import { animateRing, Avatars, buildCoronaRing, buildRoom } from '../src/render/corona3d';
+import { animateRing, AVENUE_SEGMENTS, Avatars, buildCoronaRing, buildRoom, outsideCircle } from '../src/render/corona3d';
 import { bundledFiles } from '../src/kernel/bundle';
 
 // T18: the campus on the ring is four times the 2D one (the circle stays): avenue, doors, buildings
@@ -72,6 +72,89 @@ describe('the corona campus', () => {
     const mid = (back.from + back.to) / 2;
     const behind = { x: Math.floor(Math.sin(mid) * (R + CAMPUS.back + 4)), y: Math.floor(-Math.cos(mid) * (R + CAMPUS.back + 4)) };
     expect(seen.has(`${behind.x},${behind.y}`)).toBe(true);
+  });
+});
+
+// T219: the avenue is a ring between two concentric circles, and the ground meets it without gaps or overlaps.
+describe('the avenue', () => {
+  const kernel = (c: Corona): any => ({ corona: c, forms: { version: 1, ready: () => undefined, get: () => undefined } });
+  const vertices = (m: THREE.Object3D): number[][] => {
+    const a = (m as THREE.Mesh).geometry.getAttribute('position');
+    return Array.from({ length: a.count }, (_, i) => [a.getX(i), a.getY(i), a.getZ(i)]);
+  };
+  /** The triangles of a mesh that lie flat on the ground. */
+  const flatTriangles = (m: THREE.Object3D): number[][][] => {
+    const v = vertices(m);
+    const out: number[][][] = [];
+    for (let i = 0; i < v.length; i += 3) if (v[i][1] === 0 && v[i + 1][1] === 0 && v[i + 2][1] === 0) out.push([v[i], v[i + 1], v[i + 2]]);
+    return out;
+  };
+  const inside = (t: number[][], x: number, z: number): boolean => {
+    const s = (a: number[], b: number[]) => (b[0] - a[0]) * (z - a[2]) - (b[2] - a[2]) * (x - a[0]);
+    const [d0, d1, d2] = [s(t[0], t[1]), s(t[1], t[2]), s(t[2], t[0])];
+    return (d0 >= 0 && d1 >= 0 && d2 >= 0) || (d0 <= 0 && d1 <= 0 && d2 <= 0);
+  };
+
+  it('has both edges on circles around the centre of the world, and no line of cells', () => {
+    const c = campus();
+    const ring = buildCoronaRing(kernel(c));
+    const paving = flatTriangles(ring.children[0]).flat().filter((v) => Math.hypot(v[0], v[2]) < R + CAMPUS.avenue - 0.01);
+    const onCircle = (r: number) => paving.filter((v) => Math.abs(Math.hypot(v[0], v[2]) - r) < 1e-4);
+    // Every vertex that is not beyond the avenue stands on one of its circles.
+    expect(paving.length).toBeGreaterThan(AVENUE_SEGMENTS);
+    for (const v of paving) expect([R, R + CAMPUS.line].some((r) => Math.abs(Math.hypot(v[0], v[2]) - r) < 1e-4), v.join()).toBe(true);
+    for (const r of [R, R + CAMPUS.line]) {
+      const on = onCircle(r);
+      expect(on.reduce((s, v) => s + v[0], 0) / on.length).toBeCloseTo(0, 3);
+      expect(on.reduce((s, v) => s + v[2], 0) / on.length).toBeCloseTo(0, 3);
+    }
+    const outer = flatTriangles(ring.children[0]).flat().filter((v) => Math.abs(Math.hypot(v[0], v[2]) - (R + CAMPUS.avenue)) < 1e-4);
+    expect(outer.length).toBeGreaterThanOrEqual(AVENUE_SEGMENTS);
+    // What glows low over the avenue is its circles of light alone: the one along the middle and the one on the inner edge.
+    for (const v of vertices(ring.children[1])) {
+      const d = Math.hypot(v[0], v[2]);
+      if (v[1] <= 0.02 && d < R + CAMPUS.avenue - 1) expect(Math.abs(d - (R + CAMPUS.line)) < 0.051 || d < R + 0.071, v.join()).toBe(true);
+    }
+  });
+
+  it('meets the ground exactly: every point has one and only one floor', () => {
+    const c = campus();
+    const flat = flatTriangles(buildCoronaRing(kernel(c)).children[0]);
+    for (let i = 0; i < 1500; i++) {
+      const a = i * 2.399963;
+      const r = R + 0.002 + ((i * 0.618034) % 1) * 9;
+      const [x, z] = [Math.cos(a) * r, Math.sin(a) * r];
+      const tile = c.at(Math.floor(x), Math.floor(z));
+      // A plain block has no floor under it: it stands on the ground.
+      if (r >= R + CAMPUS.avenue && tile?.kind === 'building') continue;
+      const near = flat.filter((t) => Math.abs(t[0][0] - x) < 3 && Math.abs(t[0][2] - z) < 3);
+      expect(near.filter((t) => inside(t, x, z)).length, `${x},${z} r ${r}`).toBe(1);
+    }
+  });
+
+  it('cuts a cell along the circle, and leaves whole what the circle does not touch', () => {
+    const area = (p: number[][]) => Math.abs(p.reduce((s, q, i) => s + q[0] * p[(i + 1) % p.length][1] - p[(i + 1) % p.length][0] * q[1], 0)) / 2;
+    expect(outsideCircle(60, 0, 48).map(area)).toEqual([1]);
+    expect(outsideCircle(10, 10, 48)).toEqual([]);
+    // In every quadrant, the cell on the circle is split as the disc splits it.
+    for (const [x, z] of [[33, 33], [-34, 33], [33, -34], [-34, -34]]) {
+      let hits = 0;
+      const n = 400;
+      for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) if (Math.hypot(x + (i + 0.5) / n, z + (j + 0.5) / n) >= 48) hits++;
+      expect(outsideCircle(x, z, 48).reduce((s, p) => s + area(p), 0)).toBeCloseTo(hits / (n * n), 2);
+    }
+  });
+
+  it('lets one walk everywhere on it: no cell the circle crosses is a hidden wall (rule 10)', () => {
+    const c = campus();
+    for (let i = 0; i < 3600; i++) {
+      const a = (i / 3600) * Math.PI * 2;
+      for (const r of [R + 0.001, R + 0.1, R + 0.3, R + 0.6, R + CAMPUS.avenue - 0.8]) {
+        const [x, y] = [Math.cos(a) * r, Math.sin(a) * r];
+        // A lamp post blocks its cell, and shows there.
+        if (!c.propAt(Math.floor(x), Math.floor(y))) expect(c.free(x, y), `angle ${a} r ${r}`).toBe(true);
+      }
+    }
   });
 });
 

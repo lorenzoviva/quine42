@@ -88,6 +88,16 @@ export class Builder {
     }
   }
 
+  /** A flat convex polygon facing up at height y, its corners [x, z] in the order of `quad`. */
+  flat(corners: number[][], y: number, rgb: number[]): void {
+    for (let i = 1; i < corners.length - 1; i++)
+      for (const [x, z] of [corners[0], corners[i], corners[i + 1]]) {
+        this.pos.push(x, y, z);
+        this.nor.push(0, 1, 0);
+        this.col.push(rgb[0], rgb[1], rgb[2]);
+      }
+  }
+
   geometry(): THREE.BufferGeometry {
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(this.pos, 3));
