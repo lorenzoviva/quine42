@@ -3082,6 +3082,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira nel frattempo (l'orchestratore ha tolto l'approvazione ai pronti e la ridà alla fine), perché una rinomina si scontra con tutti e un task partito prima userebbe i nomi vecchi senza un conflitto che lo dica.
 
+### T206 · Integrare T179 — `da fare`
+- Pipeline: claude · stima 1% · approvato · priorità 1
+- Contesto: T179 (`dossier T179`) è finito, ma `integra T179` va in conflitto in `docs/adr/README.md`: ha preso lo 0117, che nel base è il glossario di T178.
+- Cosa fare: nel tuo worktree `git merge task/T179`; il suo ADR diventa **0118** (file, indice, citazioni in `AGENTS.md` e nel codice che porta); le due righe dell'indice restano entrambe. Nessun'altra modifica. Il blocco di T179 nel backlog dice ADR-0117: si legge 0118, non riscriverlo.
+- Test: typecheck e suite intera con i loro turni.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T206`. Sicurezza: nessuna superficie nuova.
+
 ### T187 · Il glossario con le scelte dell'autore — `da fare` (dipende da T179)
 - Pipeline: claude · stima 1% · approvato · priorità 2
 - Contesto: l'autore ha letto il glossario di T178 (`dossier T178`) e ha deciso. Scelte 1, 2, 3, 5, 7, 8 come raccomandate: «universo» anche nel sito, `chunk`, «sessione del Concilio» resta, «entità» ed `entity`, `Storey`, `phrase`. **Scelta 4:** «individuo», `Individual` per uomini e animali; «persona» resta solo il valore di `specie` (`persona | animale`) e nei campi fermi (`people.json`, `persona` nel manifest, `npc.*`). **Scelta 6, nessuna eccezione alla convenzione:** `Taglia` → `SizeTier`, `TAGLIE` → `SIZE_TIERS`, `Partita` → `GameSetup`, `referenteReply` → `liaisonReply`, `askReferente` → `askLiaison`; in italiano restano «taglia», «partita», «Referente» e il valore `referente` di `AgentId`, come gli altri agenti.
