@@ -3455,3 +3455,11 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 - Browser: non serve.
 - Quando è fatto: commit su `task/T227`, con SoundLab e analisi del suono entrambi descritti. Sicurezza: nessuna superficie nuova.
 - Esito: `git merge task/T223` su `task/T227` (`e3c9839`): conflitti risolti in `AGENTS.md`, `docs/architettura-dettagli.md` e `docs/glossario.md`, SoundLab e analisi del suono entrambi descritti, ADR-0125 invariato, nessun'altra modifica; typecheck e suite intera verdi (118 file, 1625 test). Non provato: ciò che T222 e T223 già dichiaravano non provato (nessun ascolto umano, dialogo «Apri» e scrittura reale su disco del SoundLab, falsi difetti rari su Architettura Frattale); browser non richiesto. Sicurezza: nessuna superficie nuova.
+
+### T228 · Integrare T224 — `da fare`
+- Pipeline: claude · stima 2% · approvato · priorità 1
+- Contesto: T224 (`dossier T224`) è finito, ma `integra T224` va in conflitto in `AGENTS.md` e `docs/architettura-dettagli.md`: T222 e T223 (`dossier T223`), già nel base, hanno scritto negli stessi punti. I programmi sonori di T224 non sono mai stati provati insieme alle soglie di T223.
+- Cosa fare: nel tuo worktree `git merge task/T224`; le aggiunte restano tutte, in un testo unico dove stanno sulla stessa riga. L'ADR-0126 resta 0126. Fai passare i 7 brani e i 9 effetti del seme dall'analisi di T223 (`src/mj/soundanalysis.ts`, validatore). Se un programma non passa e il difetto è vero, correggi il programma; le soglie non si toccano; se pensi sia un falso difetto, lascialo com'è e scrivilo nell'esito con le misure.
+- Test: typecheck e suite intera con i loro turni.
+- Browser: non serve, T224 l'ha già fatto; se correggi un programma dillo nell'esito, l'ascolto resta dell'autore.
+- Quando è fatto: commit su `task/T228`, con musica nel gioco, SoundLab e analisi descritti tutti e tre. Sicurezza: nessuna superficie nuova.
