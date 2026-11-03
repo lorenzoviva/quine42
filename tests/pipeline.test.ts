@@ -321,7 +321,7 @@ describe('Fable (ADR-0115)', () => {
     expect(config.providers.fable.args).toContain('claude-fable-5-1');
     expect(config.providers.claude.args).toContain('claude-opus-5-5');
     expect(config.limiti.modello.fable).toBe(1);
-    expect(config.limiti.provider.claude).toBe(2);
+    expect(config.limiti.provider.claude).toBe(3);
   });
 });
 

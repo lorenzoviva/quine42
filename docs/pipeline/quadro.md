@@ -31,7 +31,7 @@ Aggiornato il 03/11/2026, all'inizio dell'epoca 221, con la pipeline riaccesa e 
 
 ## Regole attive
 
-- **I tetti sono dell'autore** (`limiti`: 2 su Claude, di cui Fable al più 1, e 1 su `agy`): non si alzano senza una sua istruzione. Mai zero slot per la previsione (T96).
+- **I tetti sono dell'autore** (`limiti`: 3 su Claude dal 03/11 per sua istruzione, di cui Fable al più 1, e 1 su `agy`; il processo legge i limiti solo all'avvio): non si alzano senza una sua istruzione. Mai zero slot per la previsione (T96).
 - **Abbonamenti** (ADR-0119): Claude Max 5x dal 01-02/11, Google Ultra. Le stime si scrivono sul piano di riferimento; lo script le scala.
 - **La finestra delle 5 ore la protegge lo script.** Mai più togliere `· approvato` per dosare i lanci. Nessun ripiego: un task aspetta il suo provider, si sposta solo con `assegna`.
 - **Argon:** quota esaurita fino al 04/11. **Fable:** solo i task più difficili, mai orchestratore; una sola misura (T157: 7 % sul suo contatore, ~55 punti di sessione).
