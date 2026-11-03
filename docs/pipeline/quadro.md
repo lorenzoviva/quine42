@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 03/11/2026, epoca 231. Crediti: vedi `stato`.
+Aggiornato il 03/11/2026, epoca 232. Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -17,14 +17,15 @@ Aggiornato il 03/11/2026, epoca 231. Crediti: vedi `stato`.
 - **T212 integrato** (ADR-0108): griglie e mesh in due archivi, `FORMS_DB_VERSION` 5 (la cache vecchia si scarta una volta). Secondo caricamento: byte letti da 1861 a 70 MB; arrivo alla corona da 7,3 GB e 16 s a 1,25 GB e 5,2 s. Non provati: tetto superato in un browser vero, multigiocatore, universo diverso dal seme. Dedotto dal codice, non osservato: un sostituto per un istante sui modelli al caricamento. Restano aperte alcune schede di prova nel browser e ~18 MB del database `rune` sull'origine di prova: dirlo all'autore.
 - **T106 integrato:** tema pop art/arcade nelle interfacce in gioco, verificato nel browser con `?skip&offline`. Non provati: login, riga crediti del profilo con account, lobby in una vera partita di molti, mobile, strumenti del master a vista. Da guardare per l'autore.
 - **T213 chiuso senza commit:** gli 1,3-1,5 fps non vengono dal codice ma dalla scheda di Claude in Chrome, a circa 1 Hz anche con pagina vuota (meccanismo non accertato); in headless con la stessa GPU 60 fps con ~5 ms di JS. **I tempi legati ai frame presi nella scheda non valgono.** La sua misura «dopo» (`5c899cd`) non comprende T212. Seguiti approvati da me nell'autonomia: T214 (terreno grigio a ovest della corona), T215 (arrivo alla corona rimisurato, avviso in `#convalida-browser`).
+- **T89a integrato:** cartone a tre fasce per simulazione, corona e studio, dietro `cartoonOn` con `CARTOON_BY_DEFAULT=false` (`?cartone` lo accende, `?classica` vince): diventa `true` dopo T89b e T89c. Non provati la notte nel cartone, le prestazioni (T89e), i voxel luminosi da vicino su facce diverse.
 - ADR nuovi dallo **0123**.
 
 ## Pronti e priorità
 
-1. **In coda, approvati e pronti, partono da soli:** T214 T215 T181 T89a T183 T152 T186 T158.
+1. **In coda, approvati e pronti, partono da soli:** T214 (in corso) T215 T181 T89b T89c T89e T183 T152 T186 T158.
 4. **T181 → T182 → T156** (strutture procedurali; T181 su Fable, stima 10 %, contatore Fable al 93 % fino al 05/11): alla fine di T181 leggere il contatore delle 5 ore e confrontarlo con `ratioSessioneSettimana`.
 4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla.
-5. Bloccati da T89a: T89b-e.
+5. T89d resta bloccato.
 
 ## Attese dall'autore
 
@@ -52,5 +53,5 @@ Aggiornato il 03/11/2026, epoca 231. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **232:** T89a integrato.
 - **231:** T106, T212, T213 chiusi; T214 e T215 nuovi.
-- **230:** T211 e T175 integrati; T212 e T213 nuovi.
