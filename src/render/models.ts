@@ -24,7 +24,7 @@ export function geometry(m: MeshData): THREE.BufferGeometry {
     const transCount = m.indices.length - m.opaqueCount;
     if (transCount > 0) g.addGroup(m.opaqueCount, transCount, 1);
   }
-  g.computeBoundingSphere();
+  // Not here: three does it for what it is about to draw, and of the frames of an animated building one shows at a time (T215).
   return g;
 }
 

@@ -6,7 +6,7 @@
 // (e.g. circuito-3D with 32 animation frames) run once and reload instantly across sessions and seeds.
 
 import { formKey, runForm, type FormRequest, type FormResult, type FormRunner } from '../kernel/forms';
-import type { FormMeshes, WorkerAnswer } from './worker';
+import type { FormMeshes, MeshAnswer, MeshRead, WorkerAnswer } from './worker';
 import type { MeshData } from '../mj/mesh';
 
 /**
@@ -123,6 +123,8 @@ export class IdbFormStore implements FormStore {
   private clock = 0;
   /** The bytes of arrays read so far: what a load costs, for who measures it. */
   bytesRead = 0;
+  /** Reads the meshes off the page's thread (T215); without it, or when it finds nothing, the store reads them itself. */
+  meshReader?: (read: MeshRead) => Promise<FormMeshes | undefined>;
 
   constructor(
     private dbName = 'rune-forms',
@@ -195,8 +197,16 @@ export class IdbFormStore implements FormStore {
     });
   }
 
-  get(key: string): Promise<FormResult | undefined> {
-    return this.read(key, true);
+  async get(key: string): Promise<FormResult | undefined> {
+    if (!this.meshReader) return this.read(key, true);
+    const light = await this.read(key, false);
+    if (!light?.meshesGone) return light;
+    const meshes = await this.meshReader({ db: this.dbName, version: FORMS_DB_VERSION, store: MESHES, key });
+    if (!meshes) return this.read(key, true);
+    const { meshesGone: _gone, ...rest } = light;
+    const whole: FormResult = { ...rest, meshes };
+    this.bytesRead += formBytes(whole) - rest.grid.cells.length;
+    return whole;
   }
 
   withoutMeshes(key: string): Promise<FormResult | undefined> {
@@ -272,6 +282,9 @@ export class WorkerRunner implements FormRunner {
   /** How much `memory` holds. */
   bytes = 0;
   private inflight = new Map<string, Promise<FormResult>>();
+  /** Reads of meshes: they go before any program, which may take seconds while someone is looking at a stand-in. */
+  private reads: Array<{ id: number; read: MeshRead }> = [];
+  private reading = new Map<number, (meshes: FormMeshes | undefined) => void>();
   readonly store: FormStore;
 
   constructor(
@@ -284,14 +297,18 @@ export class WorkerRunner implements FormRunner {
     const onDisk = typeof indexedDB !== 'undefined' && (typeof location === 'undefined' || keepsFormsOnDisk(location));
     this.store = store ?? (onDisk ? new IdbFormStore() : new MemoryFormStore());
     if (typeof Worker !== 'undefined' || workerFactory) {
+      if (n > 0 && this.store instanceof IdbFormStore) this.store.meshReader = (read) => this.readInWorker(read);
       const makeWorker = workerFactory ?? (() => new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' }));
       for (let i = 0; i < n; i++) {
         const w = makeWorker();
-        w.onmessage = (ev: MessageEvent<WorkerAnswer>) => {
+        w.onmessage = (ev: MessageEvent<WorkerAnswer | MeshAnswer>) => {
           const a = ev.data;
           const p = this.waiting.get(a.id);
           this.waiting.delete(a.id);
-          if (p) {
+          if ('read' in a) {
+            this.reading.get(a.id)?.(a.meshes);
+            this.reading.delete(a.id);
+          } else if (p) {
             if (a.ok) {
               if (a.finished) this.keep(p.key, a.result);
               p.ok(a.result);
@@ -307,6 +324,8 @@ export class WorkerRunner implements FormRunner {
             p.fail(new Error(`Worker error: ${err.message}`));
             this.waiting.delete(id);
           }
+          for (const done of this.reading.values()) done(undefined);
+          this.reading.clear();
         };
         this.idle.push(w);
       }
@@ -315,7 +334,16 @@ export class WorkerRunner implements FormRunner {
 
   /** Jobs waiting or running (the HUD may show it). */
   get busy(): number {
-    return this.queue.length + this.waiting.size;
+    return this.queue.length + this.waiting.size + this.reading.size;
+  }
+
+  private readInWorker(read: MeshRead): Promise<FormMeshes | undefined> {
+    return new Promise((done) => {
+      const id = this.next++;
+      this.reading.set(id, done);
+      this.reads.push({ id, read });
+      this.pump();
+    });
   }
 
   /** Number of forms in the in-memory cache. */
@@ -423,6 +451,7 @@ export class WorkerRunner implements FormRunner {
   }
 
   private pump(): void {
+    while (this.idle.length && this.reads.length) this.idle.pop()!.postMessage(this.reads.shift()!);
     while (this.idle.length && this.queue.length) {
       const job = this.queue.shift()!;
       this.idle.pop()!.postMessage({ id: job.id, req: job.req });

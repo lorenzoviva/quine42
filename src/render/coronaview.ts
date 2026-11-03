@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import type { Kernel } from '../kernel/kernel';
 import { tileNear } from '../kernel/corona';
-import { animateRing, Avatars, buildCoronaRing, buildRoom, buildShowcase, buildSituation, campusKey } from './corona3d';
+import { animateRing, askCampusModels, Avatars, buildCoronaRing, buildRoom, buildShowcase, buildSituation, campusKey } from './corona3d';
 import { isSharedGeometry, showFrame } from './models';
 import { ScreenWall } from './screens';
 import { ChainView } from './chain';
@@ -89,7 +89,10 @@ export class CoronaView {
     const campus = revealed ? campusKey(k) : this.ringKey;
     // By the clock on the wall: `t` goes slowly where frames are few, and those are the machines that most need the memory back.
     const now = performance.now() / 1000;
-    if (revealed) this.ringSeen = now;
+    if (revealed) {
+      this.ringSeen = now;
+      askCampusModels(k);
+    }
     if (this.ring && ((campus !== this.ringKey && now - this.ringBuilt >= RING_REBUILD) || now - this.ringSeen > RING_IDLE)) this.dropRing();
     if (revealed && !this.ring) {
       this.root.add((this.ring = buildCoronaRing(k)));

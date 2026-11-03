@@ -286,6 +286,19 @@ export const campusKey = (k: Kernel) =>
   (k.plinthSculpture ? `${k.plinthSculpture.model}#${k.plinthSculpture.seed}|` : '') +
   k.corona.buildings.map((b) => (b.structure && geoOf(b.structure.form) ? b.structure.form.key : '')).join('|');
 
+/**
+ * Asks for the meshes of what the ring wears beyond its buildings, which `campusKey` asks for already. The ring asks only when it is built, once a second:
+ * a model ready just after that would wait a whole second before its meshes even set out (T215).
+ */
+export function askCampusModels(k: Pick<Kernel, 'corona' | 'forms' | 'plinthSculpture'>): void {
+  const wanted: Array<[string, number]> = [...k.corona.props.map((p): [string, number] => [p.model, p.seed]), ['corona-drone', 1], ['corona-treno', 1]];
+  if (k.plinthSculpture) wanted.push([k.plinthSculpture.model, k.plinthSculpture.seed]);
+  for (const [model, seed] of wanted) {
+    const f = k.forms.ready(model, seed);
+    if (f) geoOf(f);
+  }
+}
+
 /** The building's name in neon above its door, facing the avenue (and, on its back, the lawns). */
 function neonSign(b: Building, R: number): THREE.Group {
   if (typeof document === 'undefined') return new THREE.Group();

@@ -111,3 +111,27 @@ Griglie e mesh stanno in due archivi di IndexedDB: `forms` (griglia, palette, az
 | arrivare alla corona: byte letti, ultima lettura | non misurato | 1,25 GB, 5,2 s (7,3 GB e circa 16 s senza la geometria all'arrivo) |
 
 L'ultima forma pronta non arriva prima: quei 9 s non sono più di lettura, le ultime forme vengono chieste tardi. Il guadagno è nei byte e nei primi 3 s. Il prezzo è un passaggio in più: un modello del mondo iniziale prima è una forma pronta senza mesh, e per un istante si vede il sostituto, come quando un modello non è pronto.
+
+## Aggiunta (T215)
+
+**Le mesh le legge un worker.** Il profilo dell'arrivo alla corona, 3,2 s, diceva: 1,55 s nella decodifica dei valori di IndexedDB sul thread della pagina (il valore si decodifica dove si legge), 0,39 s nelle sfere di ingombro di tutti i fotogrammi, più la ricostruzione dell'anello che chiedeva i modelli al più una volta al secondo. Il tempo era del thread della pagina, non della memoria: non c'era da scegliere tra le due, e i tetti di T175 non cambiano.
+
+- `IdbFormStore.get`, se ha un `meshReader`, legge griglia e `uses` sulla pagina e chiede le mesh a un worker di `WorkerRunner`, che le decodifica e ne cede i buffer. Una lettura passa davanti ai programmi in coda. Se il worker non trova nulla, o si guasta, legge la pagina: la lettura vecchia resta il ripiego e decide lei cosa è una mancanza. Il worker non crea né aggiorna il database: lo apre con la versione detta dalla pagina, che l'ha già aperto, e lo chiude a una versione nuova. Abbiamo scartato di tenere la decodifica sulla pagina a piccole dosi: i byte sono gli stessi e il tempo non scende.
+- `geometry()` non calcola più la sfera di ingombro: three la calcola da sé per ciò che sta per disegnare, e dei fotogrammi di un edificio se ne vede uno alla volta. Il primo disegno di ogni fotogramma la paga allora, una volta.
+- `askCampusModels` chiede a ogni frame le mesh di ciò che l'anello porta oltre agli edifici; l'anello resta ricostruito al più una volta al secondo (`RING_REBUILD`), quindi ciò che si vede può arrivare fino a un secondo dopo l'ultimo `forms.version`.
+
+**Le misure** (Chrome headless, RTX 2070 D3D11, build di produzione, `?skip&offline&formecache`, scheda nuova, seme e file uguali, arrivo = ultimo cambio di `forms.version` dallo spostamento a (46, 0); memoria = byte privati del processo in Windows):
+
+| | prima | dopo |
+|---|---|---|
+| arrivo alla corona, secondo caricamento | 3,25 · 3,16 · 3,32 s | 1,30 · 1,22 · 1,00 · 1,90 · 0,88 s |
+| arrivo con la cache vuota, stesso caricamento | non misurato | 4,18 s |
+| blocchi sopra i 50 ms in 45-60 s | 13-14, 2,1-2,2 s | 2-6, 0,28-0,54 s |
+| fps medi in quei secondi | 57,8 | 59,2-59,6 |
+| byte letti | 1,2 GB | 1,2 GB |
+| scheda prima di arrivare | 286-352 MB | 259-290 MB |
+| scheda alla corona | 1493-1562 MB | 1468-1515 MB |
+| GPU alla corona | 1023-1070 MB | 1025-1039 MB |
+| heap alla corona | 1309-1322 MB | 1277-1330 MB |
+
+Per confronto, dalle misure di T213 (senza T212): 0,7-1,0 s prima di T175, circa 6 s dopo. Il cambio tardivo di `forms.version` visto da T213 a 48,8 s non si è ripresentato: in 15 prove l'ultimo è a 7,05 s con la cache vuota e a 3,32 s con quella piena. Solo 7 di queste sono osservate oltre i 48,8 s (60 s, una 120 s), e tutte prima di `askCampusModels`; le 5 del «dopo» durano 45 s. La causa di quel cambio resta non accertata. Il lavoro nuovo a ogni arrivo è la scultura del plinto, che `visitCorona` sceglie con il tick e quindi con un seme ogni volta diverso: di solito un programma nei worker per arrivo, e una voce in più nella cache su disco. Al caricamento, prima di arrivare, i worker fanno 1-3 lavori (T212 ne contava 0): non indagati. L'universo su disco parte dagli stessi file del seme ma cresce da una prova all'altra: il «prima» e il «dopo» non hanno lo stesso stato salvato, solo le stesse forme.
