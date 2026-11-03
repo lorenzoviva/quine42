@@ -9,13 +9,13 @@ Aggiornato il 03/11/2026, epoca 224. Crediti: vedi `stato`.
 
 - T187 integrato (glossario, R1-R17 con i nomi esatti). T206 e T179 integrati: traccia nel base con l'ADR-0118, `banco-strutture --seconda --traccia` non provato con una chiamata vera.
 - **T180 integrato** (banco della varianza, solo `lab/`): 31 programmi su 31 statici; i sei vuoti del gioco per T156 sono nel suo esito; da decidere con T156 il tetto di 120 per Enorme e Gargantuesca. Soglia non provata su un edificio vero.
-- **Rinomine: R1-R6 integrate (T188-T193), T194 (R7) parte da sola.** Le dipendenze da T205 sui task approvati dall'autore restano.
+- **Rinomine: R1-R6 integrate (T188-T193), T194 (R7) in corso.** Le dipendenze da T205 sui task approvati dall'autore restano.
 - Rimasti dopo R4, perché la riga non li nomina (a T205 vedere se proporre una riga nuova): `SessionClient.places`, `Client.places`, `ThinClient.places()`, `ShowcaseEntry.place`, `graphCache.places`, `PLACE_PHASES`, `PLACES_PER_MINUTE`, `Kernel.miniature`, `tests/places.test.ts`.
 - ADR nuovi dallo **0121**.
 
 ## Pronti e priorità
 
-1. **T194** (R7), il prossimo della catena; T208 appena c'è posto.
+1. **T194** (R7) in corso.
 2. **Catena delle rinomine** (l'autore: «i nomi vanno bene e fai tutte le rinomine»): T194-T203 → T204 (`AGENTS.md`) → T205 (prova nel browser), p2-20, ognuno dipende dal precedente. A ogni fine `traccia` e `integra`, una alla volta.
 3. **T175 T106 T89a T183 T152 T186 T158, e T181**: approvati, con «dipende da T205» (l'autore: non c'è bisogno di toglierla). Partono da soli alla fine di T205.
 4. **T181 → T182 → T156** (strutture procedurali; T181 su Fable, stima 10 %, contatore Fable al 93 % fino al 05/11): alla fine di T181 leggere il contatore delle 5 ore e confrontarlo con `ratioSessioneSettimana`.
@@ -24,7 +24,7 @@ Aggiornato il 03/11/2026, epoca 224. Crediti: vedi `stato`.
 
 ## Attese dall'autore
 
-- **Domande nei file (03/11): aperte solo T153 (nomi), T45f (progetto, hosting, regione), T93 (regime fiscale, non blocca); le altre hanno `Stato: chiusa` in testa. T208 corregge il conteggio della pagina web.**
+- **Domande nei file (03/11): aperte solo T153 (nomi), T45f (progetto, hosting, regione), T93 (regime fiscale, non blocca); le altre hanno `Stato: chiusa` in testa. T208 integrato: il conteggio giusto della pagina web si vede dopo il riavvio del processo, non provato nel browser.**
 - **T176, due proposte sul sorvegliante, senza risposta** (se sì, task Claude prima di T45f, con voce V-NNN se è il caso): (1) `healthy` conti da `pronto`; (2) `stop()` aspetti i git in corso.
 - **T153** (`domande/T153.md`): **manca la scelta dei nomi**: l'autore ha scartato la prima lista, la seconda (latino e greco) è nel file (03/11). Il resto è deciso: niente API, Claude Code, 25 % per universo modificabile in corsa, tutti multigiocatore, `aurora` intatto. T184-T185: `in attesa`, ripartono solo se lo dice lui.
 - **T45f** (`domande/T45f.md`, progetto GCP e deploy). Prima di T45f restano non provabili qui: token vero di Firebase, TLS e bilanciatore, `QUINE_PROXY_FIDATI` e controllo di salute, Stripe vero con le imposte, `npm ci --omit=dev`, tetto Gemini sul server di produzione; silenzio massimo del mondo 5,5 s contro i 5 di `notice`.
