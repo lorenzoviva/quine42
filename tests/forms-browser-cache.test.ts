@@ -1,8 +1,11 @@
 // The browser's cache of forms keeps only what has finished, like the kernel's (T163, ADR-0108), and throws away once what it saved before.
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { Forms, type FormRequest, type FormResult } from '../src/kernel/forms';
-import { FORMS_DB_VERSION, formCacheKey, IdbFormStore, keepsFormsOnDisk, MemoryFormStore, WorkerRunner } from '../src/render/forms';
-import type { WorkerAnswer } from '../src/render/worker';
+import * as THREE from 'three';
+import { Forms, type Form, type FormRequest, type FormResult } from '../src/kernel/forms';
+import { FORM_DISK_BYTES, FORMS_DB_VERSION, formBytes, formCacheKey, IdbFormStore, keepsFormsOnDisk, MemoryFormStore, WorkerRunner } from '../src/render/forms';
+import { geoOf, geometryCount, trimGeometries } from '../src/render/models';
+import type { MeshData } from '../src/mj/mesh';
+import type { FormMeshes, WorkerAnswer } from '../src/render/worker';
 import { hashStr } from '../src/kernel/rng';
 
 const PROGRAM = '<sequence values="BW"><box at="0 0 0" size="1 1 1" color="W"/></sequence>';
@@ -150,6 +153,160 @@ describe('the key (T164)', () => {
   });
 });
 
+const mesh = (vertices: number): MeshData => ({ positions: new Float32Array(vertices * 3), normals: new Float32Array(vertices * 3), colors: new Float32Array(vertices * 3), indices: new Uint32Array(vertices) }) as MeshData;
+/** A form whose arrays weigh about `kb` kilobytes, all in its mesh, and whose only cell says which it is. */
+const drawn = (kb: number, which = 1): FormResult => ({ ...result(), grid: { X: 1, Y: 1, Z: 1, cells: new Uint8Array([which]), alphabet: ['B', 'W'] }, meshes: { body: mesh(Math.ceil((kb * 1024) / 40)), limbs: [], frames: [] } satisfies FormMeshes });
+const other = (seed: number) => req({ seed });
+
+/** A pool with a limit, whose worker makes a form of `kb` at once and counts its jobs. */
+function limited(limit: number, kb: number, store: MemoryFormStore | IdbFormStore = new MemoryFormStore()) {
+  const jobs: number[] = [];
+  let worker: Worker;
+  const runner = new WorkerRunner(
+    1,
+    store,
+    () =>
+      (worker = {
+        postMessage: (m: { id: number; req: FormRequest }) => {
+          jobs.push(m.req.seed);
+          setTimeout(() => worker.onmessage!({ data: { id: m.id, ok: true, result: drawn(kb, m.req.seed), finished: true } satisfies WorkerAnswer } as MessageEvent));
+        },
+        terminate() {},
+      } as unknown as Worker),
+    limit,
+  );
+  return { runner, jobs };
+}
+
+describe('the limit in memory (T175)', () => {
+  const KB = 1024;
+
+  it('sends out the least recently used, and what is used stays', async () => {
+    const { runner } = limited(350 * KB, 100);
+    for (const s of [1, 2, 3]) await runner.run(other(s));
+    expect(runner.cachedCount).toBe(3);
+    await runner.run(other(1));
+    await runner.run(other(4));
+    expect(runner.has(formCacheKey(other(1))), 'just used').toBe(true);
+    expect(runner.has(formCacheKey(other(2))), 'the oldest').toBe(false);
+    expect(runner.bytes).toBeLessThanOrEqual(350 * KB);
+  });
+
+  it('what goes out lets go of its meshes for whoever holds it, and keeps its grid', async () => {
+    const { runner } = limited(150 * KB, 100);
+    const first = await runner.run(other(1));
+    expect(first.meshes).toBeDefined();
+    await runner.run(other(2));
+    expect(first.meshes).toBeUndefined();
+    expect(first.meshesGone).toBe(true);
+    expect(first.grid.cells[0]).toBe(1);
+    expect(runner.cachedCount).toBe(1);
+  });
+
+  it('a form bigger than the limit is still kept, alone, so that the next one frees it', async () => {
+    const { runner } = limited(50 * KB, 100);
+    const first = await runner.run(other(1));
+    expect(runner.has(formCacheKey(other(1)))).toBe(true);
+    expect(first.meshes).toBeDefined();
+    await runner.run(other(2));
+    expect(first.meshes).toBeUndefined();
+    expect(runner.cachedCount).toBe(1);
+  });
+
+  it('a form taken away comes back from the workers, the same, asked once however many frames ask', async () => {
+    const { runner, jobs } = limited(150 * KB, 100);
+    const forms = new Forms(runner);
+    forms.load({ 'models/index.json': '{}', 'models/x.xml': PROGRAM });
+    const f = forms.get('x', 1)!;
+    await vi.waitFor(() => expect(f.status).toBe('ready'));
+    const grid = f.result!.grid;
+    await forms.wait('x', 2);
+    expect(f.result!.meshesGone, 'pushed out by the second').toBe(true);
+    const version = forms.version;
+
+    for (let frame = 0; frame < 5; frame++) expect(geoOf(f)).toBeUndefined();
+    expect(f.status, 'it stays ready: the kernel has its grid').toBe('ready');
+    await vi.waitFor(() => expect(f.result!.meshes).toBeDefined());
+    expect(jobs.filter((s) => s === 1).length, 'first run and one more').toBe(2);
+    expect(forms.version, 'whoever draws sees it arrive').toBe(version + 1);
+    expect(f.result!.grid).toEqual(grid);
+    expect(geoOf(f)).toBeDefined();
+  });
+
+  it('a form taken away comes back from the store, without the workers, when the store has it', async () => {
+    vi.stubGlobal('indexedDB', fakeIndexedDB());
+    const { runner, jobs } = limited(150 * KB, 100, new IdbFormStore());
+    const first = await runner.run(other(1));
+    const bytes = formBytes(first);
+    await runner.run(other(2));
+    await new Promise((r) => setTimeout(r, 20));
+    expect(first.meshesGone).toBe(true);
+
+    const back = await runner.run(other(1));
+    expect(jobs).toEqual([1, 2]);
+    expect(formBytes(back)).toBe(bytes);
+    expect(back.meshesGone).toBeUndefined();
+    expect(back.grid.cells[0]).toBe(1);
+  });
+
+  it('a page without a persistent cache does not mistake a form without meshes for a hit', async () => {
+    const { runner, jobs } = limited(150 * KB, 100);
+    await runner.run(other(1));
+    await runner.run(other(2));
+    const back = await runner.run(other(1));
+    expect(back.meshes).toBeDefined();
+    expect(jobs).toEqual([1, 2, 1]);
+  });
+});
+
+describe('the limit on the geometries (T175)', () => {
+  const formOf = (key: string, kb: number): Form => ({ key, model: key, seed: 1, status: 'ready', result: drawn(kb), base: 0, reach: 1, vpt: 20, cls: {} as Form['cls'] });
+  const NOW = 1e12;
+
+  it('lets go of what nothing draws, the oldest first, and never of what hangs from the scene', () => {
+    const scene = new THREE.Scene();
+    const inScene = formOf('t175-a', 100), idle = formOf('t175-b', 100), lately = formOf('t175-c', 100);
+    const a = geoOf(inScene)!, b = geoOf(idle)!, c = geoOf(lately)!;
+    scene.add(new THREE.Mesh(a.body));
+    const freed: string[] = [];
+    b.body.addEventListener('dispose', () => freed.push('b'));
+    c.body.addEventListener('dispose', () => freed.push('c'));
+    a.body.addEventListener('dispose', () => freed.push('a'));
+
+    trimGeometries(scene, NOW, 0);
+    expect(freed.sort()).toEqual(['b', 'c']);
+    expect(geometryCount().count, 'what hangs from the scene').toBe(1);
+    expect(geoOf(inScene)).toBe(a);
+    // Made again, if its meshes are still there, when someone asks.
+    expect(geoOf(idle)).not.toBe(b);
+    expect(geoOf(lately)).not.toBe(c);
+  });
+
+  it('does not touch what was asked for a moment ago, or what stays within the limit', () => {
+    const scene = new THREE.Scene();
+    const f = formOf('t175-d', 100);
+    const g = geoOf(f)!;
+    trimGeometries(scene, performance.now(), 0);
+    expect(geoOf(f), 'asked for just now').toBe(g);
+    trimGeometries(scene, NOW, Number.MAX_SAFE_INTEGER);
+    expect(geoOf(f), 'within the limit').toBe(g);
+    trimGeometries(scene, NOW, 0);
+    expect(geoOf(f)).not.toBe(g);
+    trimGeometries(scene, NOW, 0);
+  });
+
+  it('asks for the meshes only when the runner let go of them, not when there never were any', () => {
+    const remake = vi.fn();
+    const without = { ...formOf('t175-e', 1), remake };
+    without.result = result();
+    expect(geoOf(without)).toBeUndefined();
+    expect(remake).not.toHaveBeenCalled();
+    without.result = { ...result(), meshesGone: true };
+    expect(geoOf(without)).toBeUndefined();
+    expect(remake).toHaveBeenCalledOnce();
+  });
+});
+
 describe('the worker', () => {
   it('says whether the program has finished', async () => {
     const answers: WorkerAnswer[] = [];
@@ -177,20 +334,28 @@ function fakeIndexedDB(blocked = false) {
         createObjectStore: (s: string) => d.stores.set(s, new Map()),
         deleteObjectStore: (s: string) => d.stores.delete(s),
         close() {},
-        transaction: (s: string) => ({
-          objectStore: () => {
-            const answer = (result?: unknown) => {
-              const r: Record<string, any> = { result };
-              setTimeout(() => r.onsuccess?.());
-              return r;
-            };
-            return {
-              get: (k: string) => answer(d.stores.get(s)!.get(k)),
-              put: (v: unknown, k: string) => (d.stores.get(s)!.set(k, v), answer()),
-              clear: () => (d.stores.get(s)!.clear(), answer()),
-            };
-          },
-        }),
+        transaction: () => {
+          const tx: Record<string, any> = {
+            objectStore: (s: string) => {
+              const answer = (result?: unknown) => {
+                const r: Record<string, any> = { result };
+                setTimeout(() => r.onsuccess?.());
+                return r;
+              };
+              return {
+                get: (k: string) => answer(d.stores.get(s)!.get(k)),
+                // What goes in is a copy made now, as structured clone does: later changes to the object do not reach it.
+                put: (v: unknown, k: string) => (d.stores.get(s)!.set(k, typeof v === 'object' ? { ...(v as object) } : v), answer()),
+                clear: () => (d.stores.get(s)!.clear(), answer()),
+                delete: (k: string) => (d.stores.get(s)!.delete(k), answer()),
+                getAll: () => answer([...d.stores.get(s)!.values()]),
+                getAllKeys: () => answer([...d.stores.get(s)!.keys()]),
+              };
+            },
+          };
+          setTimeout(() => tx.oncomplete?.(), 5);
+          return tx;
+        },
       };
       if (d.version < version) {
         d.version = version;
@@ -247,6 +412,78 @@ describe('the persistent cache', () => {
     // What is saved from now on stays across a reload.
     const reloaded = await new IdbFormStore().get(key);
     expect(reloaded?.grid.X).toBe(whole.grid.X);
+  });
+
+  describe('the limit (T175)', () => {
+    const KB = 1024;
+    const settle = () => new Promise((r) => setTimeout(r, 15));
+    const open = (limit: number, entries = 100) => {
+      vi.stubGlobal('indexedDB', fakeIndexedDB());
+      return new IdbFormStore('t175', 'forms', limit, entries);
+    };
+
+    it('sends out the least recently used: a read counts as a use', async () => {
+      const store = open(350 * KB);
+      for (const k of ['a', 'b', 'c']) await store.set(k, drawn(100));
+      expect(await store.get('a')).toBeDefined();
+      await store.set('d', drawn(100));
+      await settle();
+      expect(await store.get('a'), 'just read').toBeDefined();
+      expect(await store.get('b'), 'the oldest').toBeUndefined();
+      expect(await store.get('c')).toBeDefined();
+      expect(await store.get('d')).toBeDefined();
+    });
+
+    it('holds to the number of entries too', async () => {
+      const store = open(FORM_DISK_BYTES, 2);
+      for (const k of ['a', 'b', 'c']) await store.set(k, drawn(1));
+      await settle();
+      expect(await store.get('a')).toBeUndefined();
+      expect(await store.get('b')).toBeDefined();
+      expect(await store.get('c')).toBeDefined();
+    });
+
+    it('does not keep what is bigger than the whole cache, and it pushes out nothing', async () => {
+      const store = open(100 * KB);
+      await store.set('small', drawn(50));
+      await store.set('huge', drawn(500));
+      await settle();
+      expect(await store.get('huge')).toBeUndefined();
+      expect(await store.get('small')).toBeDefined();
+    });
+
+    it('what comes back is the same form, whole', async () => {
+      const store = open(350 * KB);
+      const saved = drawn(100, 7);
+      const bytes = formBytes(saved);
+      await store.set('a', saved);
+      const back = (await store.get('a'))!;
+      expect(formBytes(back)).toBe(bytes);
+      expect(back.grid.cells[0]).toBe(7);
+    });
+
+    it('saves the meshes even if the page lets go of them while the database opens', async () => {
+      const store = open(350 * KB);
+      const saved = drawn(100);
+      const bytes = formBytes(saved);
+      const writing = store.set('a', saved);
+      saved.meshes = undefined;
+      saved.meshesGone = true;
+      await writing;
+      const back = (await store.get('a'))!;
+      expect(back.meshesGone).toBeUndefined();
+      expect(formBytes(back)).toBe(bytes);
+    });
+
+    it('clear takes everything away', async () => {
+      const store = open(350 * KB);
+      await store.set('a', drawn(100));
+      await store.clear();
+      expect(await store.get('a')).toBeUndefined();
+      for (const k of ['b', 'c', 'd']) await store.set(k, drawn(100));
+      await settle();
+      expect(await store.get('b'), 'what was cleared does not count against the limit').toBeDefined();
+    });
   });
 
   it('goes on without it when an old tab holds the database', async () => {

@@ -35,17 +35,66 @@ export interface ModelGeo {
   sway: boolean;
 }
 
-const cache = new Map<string, ModelGeo>();
+/**
+ * The most the geometries that nothing draws may take, in bytes of arrays, and how long one must have gone unasked before it may go (ADR-0108). Whoever
+ * looks at a model at every frame (the terrains' models, the campus) keeps it: taking it away would only have it asked for again.
+ */
+export const GEOMETRY_BYTES = 128 * 1024 * 1024;
+const GEOMETRY_IDLE_MS = 30_000;
 
-/** The shared geometries of a ready form (undefined if the runner made no meshes, as in tests). */
+const cache = new Map<string, { geo: ModelGeo; bytes: number; used: number }>();
+/** Every geometry made here: shared by instances, and only `trimGeometries` frees it. */
+const shared = new WeakSet<THREE.BufferGeometry>();
+export const isSharedGeometry = (g: THREE.BufferGeometry): boolean => shared.has(g);
+const clock = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
+
+const geometries = (g: ModelGeo) => [g.body, ...g.limbs.map((l) => l.geo), ...g.frames];
+const geometryBytes = (g: THREE.BufferGeometry) => Object.values(g.attributes).reduce((n, a) => n + ((a as THREE.BufferAttribute).array?.byteLength ?? 0), g.index?.array.byteLength ?? 0);
+
+/**
+ * The shared geometries of a ready form (undefined if the runner made no meshes, as in tests, or if it let go of them: then they are
+ * asked for again and the model arrives like one that was not ready, ADR-0108).
+ */
 export function geoOf(f: Form): ModelGeo | undefined {
-  let g = cache.get(f.key);
-  if (g) return g;
+  const hit = cache.get(f.key);
+  if (hit) {
+    hit.used = clock();
+    return hit.geo;
+  }
   const m = f.result?.meshes as FormMeshes | undefined;
-  if (!m) return undefined;
-  g = { body: geometry(m.body), limbs: m.limbs.map((l) => ({ part: l.part, joint: l.joint, phase: l.phase, geo: geometry(l.mesh) })), frames: m.frames.map(geometry), sway: !!m.body.sway };
-  cache.set(f.key, g);
+  if (!m) {
+    if (f.result?.meshesGone) f.remake?.();
+    return undefined;
+  }
+  const g: ModelGeo = { body: geometry(m.body), limbs: m.limbs.map((l) => ({ part: l.part, joint: l.joint, phase: l.phase, geo: geometry(l.mesh) })), frames: m.frames.map(geometry), sway: !!m.body.sway };
+  for (const b of geometries(g)) shared.add(b);
+  cache.set(f.key, { geo: g, bytes: geometries(g).reduce((n, b) => n + geometryBytes(b), 0), used: clock() });
   return g;
+}
+
+/**
+ * Lets go of the geometries that nothing has drawn or asked for lately, the oldest first, down to the limit. What hangs from `scene` stays: a world on
+ * screen cannot weigh less than it weighs, so the limit is on what is left over. Freeing a geometry someone still holds does no harm: three uploads it again.
+ */
+export function trimGeometries(scene: THREE.Object3D, now = clock(), limit = GEOMETRY_BYTES): void {
+  const drawn = new Set<unknown>();
+  scene.traverse((o) => drawn.add((o as THREE.Mesh).geometry));
+  const spare = [...cache].filter(([, e]) => !geometries(e.geo).some((g) => drawn.has(g)));
+  let bytes = spare.reduce((n, [, e]) => n + e.bytes, 0);
+  for (const [key, e] of spare.sort((a, b) => a[1].used - b[1].used)) {
+    if (bytes <= limit) break;
+    if (now - e.used < GEOMETRY_IDLE_MS) continue;
+    cache.delete(key);
+    for (const g of geometries(e.geo)) g.dispose();
+    bytes -= e.bytes;
+  }
+}
+
+/** Geometries kept, and what they take. */
+export function geometryCount(): { count: number; bytes: number } {
+  let bytes = 0;
+  for (const e of cache.values()) bytes += e.bytes;
+  return { count: cache.size, bytes };
 }
 
 /** Instances whose model was changed by an action (an open door) have a body of their own. */
@@ -56,6 +105,7 @@ export function changedBody(k: Kernel, f: Form, done: string[]): THREE.BufferGeo
   if (!g) {
     const grid = instanceGrid(k.forms, f, done);
     changed.set(key, (g = geometry(meshVoxels(grid, f.result!.palette, { vpt: f.vpt }))));
+    shared.add(g);
   }
   return g;
 }

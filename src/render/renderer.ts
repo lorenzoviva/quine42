@@ -13,6 +13,7 @@ import type { CoronaView, StudioRoom } from './coronaview';
 import { CUT, U } from './materials';
 import { Overlay } from './overlay';
 import { buildChunk, chunkSig, disposeChunk, tileForms, type TerrainView } from './terrain';
+import { trimGeometries } from './models';
 import { Lights, Runes, Entities, Wanderer } from './entities';
 
 const SKY = { day: new THREE.Color('#9cc8e8'), dusk: new THREE.Color('#e8a070'), night: new THREE.Color('#0e1424'), studio: new THREE.Color('#07070f'), corona: new THREE.Color('#05060a') };
@@ -51,6 +52,8 @@ export class Renderer {
    * player's never leaves the simulation.
    */
   private corona?: CoronaView;
+  /** When to see again whether the geometries that nothing draws are too many. */
+  private trimAt = 0;
   private overlay: Overlay;
   private flash = new THREE.PointLight(0xfff2c0, 0, 8, 1.4);
   private flashUntil = 0;
@@ -316,6 +319,11 @@ export class Renderer {
     this.sun.target.position.copy(this.target);
     this.bloom.render(dt);
     this.drawOverlay(studio, revealed, interior, g);
+    const clock = performance.now();
+    if (clock >= this.trimAt) {
+      this.trimAt = clock + 5_000;
+      trimGeometries(this.scene, clock);
+    }
   }
 
   /** Builds the chunks that are new or changed (a few per frame), drops the unloaded ones. */
