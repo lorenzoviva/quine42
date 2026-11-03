@@ -1,16 +1,68 @@
-// The cartoon look (ADR-0093, T89): a trial behind `?cartone`. Banded (toon) shading in place of Lambert for the
-// simulation's materials, and ink outlines drawn in post-processing from the depth and the normals of the frame.
-// Only a trial: the real work is in the T89 tasks of the backlog (T89a-e).
+// The cartoon look (ADR-0093): banded (toon) shading in place of Lambert for every lit material (T89a), saturated on the
+// side away from the sun, with sharper cast shadows; ink outlines in post-processing, still the trial of T89 from the
+// depth and the normals of the frame (T89b draws them from ids).
 
 import * as THREE from 'three';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 
-/** Whether the trial is on (`?cartone` in the URL; never in Node). */
-export const CARTOON = typeof location !== 'undefined' && new URLSearchParams(location.search).has('cartone');
+/** Whether the game draws as a cartoon unless the URL says otherwise: `true` once T89b and T89c are done. */
+export const CARTOON_BY_DEFAULT = false;
 
-/** Three bands of light: shadow, half-light, full light (the toon material reads it as a step function). */
+/** The switch: `?classica` is always the old look, `?cartone` the cartoon, otherwise the default. */
+export function cartoonOn(search: string, byDefault = CARTOON_BY_DEFAULT): boolean {
+  const url = new URLSearchParams(search);
+  return !url.has('classica') && (byDefault || url.has('cartone'));
+}
+
+/** Whether the world draws as a cartoon (never in Node). */
+export const CARTOON = typeof location !== 'undefined' && cartoonOn(location.search);
+
+/** Where the sun stands, from what the camera looks at. */
+export const SUN_FROM: readonly [number, number, number] = [-14, 24, 10];
+
+/** How much of the sun each band lets through: away from it, half-light, full light. */
+export const BAND_LEVELS: readonly [number, number, number] = [0.35, 0.6, 0.85];
+
+/**
+ * Where the bands change, in the cosine between a face and the sun. Not three equal thirds: voxels only have six
+ * normals, and with `SUN_FROM` thirds would put them all in the first or the last band, the middle one never seen. These
+ * give the top the full light, the faces towards south and west the half-light, the other two the low band.
+ */
+export const BAND_EDGES: readonly [number, number] = [0, 0.6];
+
+/** The band (0, 1, 2) of a face at this cosine with the sun. */
+export const bandOf = (cosine: number): 0 | 1 | 2 => (cosine < BAND_EDGES[0] ? 0 : cosine < BAND_EDGES[1] ? 1 : 2);
+
+/** Texels of the ramp: enough for the edges to fall where they should (three reads it at `cosine * 0.5 + 0.5`). */
+const RAMP_TEXELS = 40;
+
+/** The ramp as a one-row RGBA image, read as a step function. */
+export function bandRamp(): Uint8Array {
+  const data = new Uint8Array(RAMP_TEXELS * 4);
+  for (let i = 0; i < RAMP_TEXELS; i++) {
+    const level = Math.round(BAND_LEVELS[bandOf(((i + 0.5) / RAMP_TEXELS) * 2 - 1)] * 255);
+    data.set([level, level, level, 255], i * 4);
+  }
+  return data;
+}
+
+/**
+ * How much the sun still reaches inside a cast shadow, as the low band: the shadow's intensity is the rest. Faces
+ * away from the sun are in shadow too, so at full intensity the low band would never be seen.
+ */
+export const SHADOW_INTENSITY = 1 - BAND_LEVELS[0];
+
+/** The radius of the shadows' filter, in texels of the shadow map: sharp edges, without the filter's grain. */
+export const SHADOW_RADIUS = 0;
+
+/** The hemisphere: faces standing upright get the middle of the two, so that middle has to be cold, not grey. */
+export const CARTOON_HEMI = { sky: 0xc4dcff, ground: 0x5f5cb4 } as const;
+
+/** The light in the studio: without any sun no face would ever change band there. */
+export const CARTOON_STUDIO = { sun: 1.1, hemi: 0.7 } as const;
+
 function bands(): THREE.DataTexture {
-  const t = new THREE.DataTexture(new Uint8Array([90, 90, 90, 255, 175, 175, 175, 255, 255, 255, 255, 255]), 3, 1, THREE.RGBAFormat);
+  const t = new THREE.DataTexture(bandRamp(), RAMP_TEXELS, 1, THREE.RGBAFormat);
   t.minFilter = t.magFilter = THREE.NearestFilter;
   t.generateMipmaps = false;
   t.needsUpdate = true;

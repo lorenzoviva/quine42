@@ -68,3 +68,8 @@ profondità da un secondo disegno della scena (`overrideMaterial` normali, targe
 ## Task
 T89a (fasce e interruttore), T89b (contorni dagli id), T89c (luce e prospettiva aerea), T89d (stile nei dati e foto dei modelli),
 T89e (corona, studio, laboratorio e misura delle prestazioni). Dettagli nel backlog.
+
+## Attuazione
+T89a (punti 1, 2 e 6, ancora dietro `?cartone`): la rampa non ha soglie uguali, perché con sei normali e questo sole tre terzi darebbero due fasce sole; l'ombra
+portata lascia passare la fascia bassa, perché le facce lontane dal sole sono anche in ombra; nello studio c'è un sole tenue, perché senza luce diretta le fasce non
+esistono. Numeri e nomi in `docs/architettura-dettagli.md#cartone`. Le ombre tinte restano a T89c, come la luce calda e la prospettiva aerea.

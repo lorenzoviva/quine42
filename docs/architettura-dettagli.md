@@ -431,8 +431,16 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 
 - **La grafica a cartone** (ADR-0093, progetto T89, da attuare T89a-e): fasce toon, contorni a inchiostro dove cambiano cosa o parte (la lettera della
   palette, attributo `part`), mai dalla geometria dei voxel (sugli alberi fa rumore), luce calda con ombre tinte e prospettiva aerea, e la guida di stile che
-  chiede parti di colore distinto. Per ora una prova dietro `?cartone` (`src/render/cartoon.ts`: `MeshToonMaterial` a tre fasce in `lit()` di `materials.ts`,
-  passo `Ink` nel composer di `bloom.ts`, soglie in `window.cartone`).
+  chiede parti di colore distinto. Oggi dietro `?cartone`; `?classica` vince sempre e mostra il vecchio aspetto. Il predefinito è una costante,
+  `CARTOON_BY_DEFAULT` in `src/render/cartoon.ts`: diventa `true` quando T89b e T89c sono fatti.
+- **Le fasce** (T89a): `lit()` di `materials.ts` dà il `MeshToonMaterial` a tutti i materiali illuminati di simulazione, corona e studio (`MAT`, `solid()`, le
+  figure del Concilio, le cornici degli schermi, il disco del tornio). Le soglie non sono tre terzi uguali: i voxel hanno sei normali e con il sole di `SUN_FROM`
+  i terzi darebbero solo due fasce; `BAND_EDGES` dà la luce piena al tetto, la mezza luce alle facce verso sud e ovest, la fascia bassa (`BAND_LEVELS`, 0,35) alle
+  altre. Le facce lontane dal sole sono anche in ombra portata: `SHADOW_INTENSITY` lascia passare 0,35 di sole, o la fascia bassa non si vedrebbe mai. L'emisfero
+  (`CARTOON_HEMI`) è freddo a metà strada, così le facce verticali non vanno al grigio. Le ombre hanno il raggio del filtro a 0 (`SHADOW_RADIUS`). Nello studio il
+  sole è acceso (`CARTOON_STUDIO`): senza, nessuna faccia cambierebbe fascia. I voxel luminosi escono dalle fasce in `addGlow` (colore × `GLOW_BASE` + `U.glow`,
+  uguale su ogni faccia), solo nello shader toon. Restano Lambert le icone e le foto (T89d) e il laboratorio (T89e).
+- **I contorni** sono ancora la prova di T89 (passo `Ink` nel composer di `bloom.ts`, da profondità e normali, soglie in `window.cartone`) finché non arriva T89b.
 
 <a id="mondo3d"></a>
 ## Il mondo in 3D, bozze di prova, mappa, voxel luminosi

@@ -11,6 +11,7 @@ import type { LatheShown } from '../kernel/lathe';
 import { arrowSign, textPlane } from './corona3d';
 import { geometry } from './models';
 import { meshVoxels } from '../mj/mesh';
+import { CARTOON, toon } from './cartoon';
 import { MAT } from './materials';
 
 /** Total duration of one building animation cycle in seconds. */
@@ -45,11 +46,7 @@ export class LatheView {
 
     // Dark metallic turntable disc with glowing neon rim in Artist's magenta/pink
     const discGeo = new THREE.CylinderGeometry(0.9, 0.95, 0.04, 32);
-    const discMat = new THREE.MeshStandardMaterial({
-      color: '#151722',
-      roughness: 0.35,
-      metalness: 0.65,
-    });
+    const discMat = CARTOON ? toon({ color: '#151722' }) : new THREE.MeshStandardMaterial({ color: '#151722', roughness: 0.35, metalness: 0.65 });
     this.discMesh = new THREE.Mesh(discGeo, discMat);
     this.discMesh.position.set(0, 0.02, 0);
 
