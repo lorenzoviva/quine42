@@ -11,7 +11,7 @@
   mai `Get-Content`/`Set-Content` di PowerShell 5.1 (corrompe UTF-8 senza BOM).
 - Identità git di questo repository: `lorenzoviva <lorenzo.vaccaro@hotmail.com>`, impostata in locale.
   La configurazione globale della macchina è un account di lavoro: non usarla e non modificarla.
-- Verifica visiva: la procedura è in `AGENTS.md`, «Convalida nel browser» (build, preview su una porta libera, spostarsi
+- Verifica visiva: la procedura è in `docs/architettura-dettagli.md#convalida-browser` (build, preview su una porta libera, spostarsi
   ovunque dalla console fermando il tappeto, `interact()` per `E`). Con Claude in Chrome: carica in una sola ToolSearch
   `tabs_context_mcp`, `navigate`, `javascript_tool` (la console: `window.quine`), `computer` (screenshot e tasti `,` `.`),
   `read_console_messages`, `tabs_close_mcp`; lavora in una scheda nuova e chiudila alla fine. La preview in background si ferma

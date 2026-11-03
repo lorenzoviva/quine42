@@ -14,7 +14,7 @@ const CENSUS = path.join(ROOT, 'docs/glossario-censimento.md');
 export const AREAS = {
   codice: ['src', 'server'],
   prompt: ['universe/prompts'],
-  documenti: ['AGENTS.md', 'docs/adr'],
+  documenti: ['AGENTS.md', 'docs/architettura-dettagli.md', 'docs/adr'],
   sito: ['site'],
 };
 

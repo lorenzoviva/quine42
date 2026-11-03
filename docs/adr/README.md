@@ -122,5 +122,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0115](0115-fable-nella-pipeline.md) | Fable nella pipeline: un provider a parte con tetto 1, dentro i 2 della CLI di Claude, solo per i task più difficili, mai orchestratore; il modello di Claude e quello di Fable sono scritti nella configurazione; il contatore di Fable non ferma Claude | accettato |
 | [0116](0116-l-attore.md) | L'Attore: un'opzione del master (`ai.attore`, spenta: nulla cambia); accesa, il Narratore scrive una scheda per individuo alla sua prima battuta e l'Attore recita `npc.reply` e `npc.dialogue` con il suo modello (`gemini-3.8-flash`); stessi compiti, paganti e limiti; solo il master la cambia (messaggio `attore`) | accettato |
 | [0117](0117-il-glossario.md) | Il glossario: un nome per ogni concetto in `docs/glossario.md`; i nomi su disco, sul filo e visibili a Lua non si cambiano senza una migrazione; nessuna rinomina finché l'autore non ha deciso | accettato |
+| [0120](0120-agents-nucleo-e-dettagli.md) | `AGENTS.md` è il nucleo, con le regole inviolabili e un indice; i sottosistemi stanno, alla lettera, in `docs/architettura-dettagli.md` |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.
