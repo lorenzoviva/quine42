@@ -3,7 +3,7 @@
 
 import { hash32, hashStr } from '../kernel/rng';
 import type { DayPhase } from '../kernel/society';
-import { soundPrograms, type SoundProgram } from '../mj/sound';
+import { namesEnvironment, soundPrograms, type SoundProgram } from '../mj/sound';
 import type { SoundRenders } from './renders';
 import type { SoundOut } from './sfx';
 
@@ -27,21 +27,20 @@ export interface MusicChoice {
 /** How a universe's program says what it is for, in `models/index.json → suono`. */
 const eligible = (p: SoundProgram, s: SoundState) => p.suono?.uso === 'musica' && !!p.suono.oltre === s.beyond && (!p.suono.momenti || s.beyond || p.suono.momenti.includes(s.phase));
 
-/** An environment of the seed by its id, and one the Cartographer wrote by what its id contains («castello_nero» is a castle). */
-const fits = (p: SoundProgram, environment: string | undefined) => !!environment && !!p.suono?.ambienti?.some((a) => environment === a || environment.includes(a));
-
 /**
  * The piece for a state, or nothing if the universe has none. The program is one per type: the one that names this environment, then one that names no environment
- * (a moment of the day), then any of those left, by the environment's name. The instance is the seed (rule 11): same state, same music, for everyone in that place.
+ * (a moment of the day), then any of those left, by the environment's name. Who names the environment exactly beats who names part of its id, and of those the last in the
+ * index plays: what the Musician wrote for a place comes after what was there (T225). The instance is the seed (rule 11): same state, same music, for everyone in that place.
  */
 export function chooseMusic(state: SoundState, programs: readonly SoundProgram[], variant = 0): MusicChoice | undefined {
   const open = programs.filter((p) => eligible(p, state));
   if (!open.length) return undefined;
   const where = state.beyond ? '' : (state.environment ?? '');
   const when = state.beyond ? '' : state.phase;
-  const named = open.filter((p) => fits(p, where));
+  const named = open.filter((p) => namesEnvironment(p, where));
+  const exact = named.filter((p) => p.suono?.ambienti?.includes(where));
   const general = open.filter((p) => !p.suono?.ambienti?.length);
-  const pool = named.length ? named : general.length ? general : open;
+  const pool = exact.length ? exact.slice(-1) : named.length ? named : general.length ? general : open;
   const pick = pool[hashStr(where) % pool.length];
   return { id: pick.id, xml: pick.xml, seed: hash32(state.seed | 0, hashStr(where), hashStr(when), variant) };
 }

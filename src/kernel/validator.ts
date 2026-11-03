@@ -61,12 +61,18 @@ export const MODEL_RE = /^[a-z0-9][a-z0-9-]{0,40}$/i;
  * mend it mends (ADR-0036), the rest goes back with the line of the error.
  */
 export function modelErrors(path: string, xml: string, time = 8_000): string[] {
+  // The Musician's program was measured a moment ago: a piece costs up to two seconds on the page, and the answer would be the same.
+  if (xml === lastCleanSound) return [];
   if (xml.length > MAX_FORM_XML) return [`${path}: programma troppo lungo (max ${MAX_FORM_XML} caratteri)`];
   time = Math.min(time, MAX_FORM_TIME);
   try {
     const size = /<(?!!)[a-z]+\b[^>]*\ssize="/i.test(xml) ? undefined : boxOf(classOf('oggetto')!);
     const m = compileMjx(xml, size ? { size } : {});
-    if (m.sound) return soundErrors(path, m, time);
+    if (m.sound) {
+      const errors = soundErrors(path, m, time);
+      if (!errors.length) lastCleanSound = xml;
+      return errors;
+    }
     const r = runMjx(m, 1, { deadline: time, limits: FORM_LIMITS });
     if (!r.finished) return [`${path}: il programma non finisce in ${Math.round(time / 1000)} secondi (ogni crescita deve avere steps; un programma lento scritto a mano può avere \`tempo\` in models/index.json)`];
     return analyse(r, m.program.palette, { grounded: true }).errors.map((e) => `${path}: ${e}`);
@@ -74,6 +80,9 @@ export function modelErrors(path: string, xml: string, time = 8_000): string[] {
     return [`${path}: ${e instanceof Mj3Error ? e.message : (e as Error).message}`];
   }
 }
+
+/** The last sound program that passed: the measures are a pure function of the text. */
+let lastCleanSound: string | undefined;
 
 /** Three seeds: a program whose seeds do not differ goes back too. */
 const SOUND_CHECK_SEEDS = [1, 2, 3];

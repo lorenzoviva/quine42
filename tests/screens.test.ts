@@ -104,7 +104,7 @@ describe('the wall of screens', () => {
       { time: now - 5_000, from: 'cartografo' as const, kind: 'propone' as const, text: 'un borgo sul fiume', task: 'chunk.plan' },
     ];
     const live = liveFeed(feed, { scultore: { model: 'gemini-3.8-flash', task: 'model.sculpt', time: now - 20_000 } }, now, 'gemini-3.1-flash-lite');
-    expect(live.desks.length).toBe(9);
+    expect(live.desks.length).toBe(10);
     expect(live.desks.filter((d) => d.working).map((d) => d.agent)).toEqual(['cartografo', 'scultore']);
     expect(live.desks[0]).toMatchObject({ agent: 'cartografo', task: 'chunk.plan', model: 'gemini-3.1-flash-lite', ago: 5, text: 'un borgo sul fiume' });
     expect(live.desks[1]).toMatchObject({ agent: 'scultore', task: 'model.sculpt', model: 'gemini-3.8-flash' });
@@ -153,7 +153,7 @@ describe('the wall of screens', () => {
     stand(k, mid.x + 2.5, mid.y + 1.5);
     await k.interact();
     expect(opened.map((o) => o.field)).toEqual(['registro']);
-    expect(opened[0].screens.registro.desks.length).toBe(9);
+    expect(opened[0].screens.registro.desks.length).toBe(10);
     stand(k, wall[2].x + 2.5, wall[2].y + 1.5);
     expect(k.clickStudio(wall[2].x + 1.5, wall[2].y + 0.5)).toBe(true);
     expect(opened.at(-1).field).toBe('costi');

@@ -89,7 +89,7 @@ export class GenesisScreen {
     actorOn.checked = actor.acceso;
     const actorModel = pick(actor.modello);
     actorModel.id = 'genesi-attore-modello';
-    const classes: Array<[keyof SculptorAiModels, string]> = [['semplice', 'cose semplici'], ['figura', 'figure'], ['struttura', 'strutture'], ['importante', 'strutture importanti'], ['artista', 'Artista (giudizio)']];
+    const classes: Array<[keyof SculptorAiModels, string]> = [['semplice', 'cose semplici'], ['figura', 'figure'], ['struttura', 'strutture'], ['importante', 'strutture importanti'], ['artista', 'Artista (giudizio)'], ['musicista', 'Musicista']];
     const sculpt = new Map(classes.map(([k]) => [k, pick(String(sculptors[k]))]));
     const sliders = new Map<keyof Coefficients, HTMLInputElement>();
     const preset = el('select', {}, el('option', { value: 'pieno' }, 'Pieno dettaglio'), el('option', { value: 'low' }, 'Low Detail (a risparmio)'), el('option', { value: 'misura' }, 'Su misura')) as HTMLSelectElement;
@@ -140,7 +140,7 @@ export class GenesisScreen {
       el('label', {}, 'Dettaglio', preset),
       ...rows,
       el('label', {}, 'Modello del Concilio', text),
-      el('div', { class: 'row' }, ...classes.map(([k, name]) => el('label', {}, `Scultore, ${name}`, sculpt.get(k)!))),
+      el('div', { class: 'row' }, ...classes.map(([k, name]) => el('label', {}, k === 'musicista' ? name : `Scultore, ${name}`, sculpt.get(k)!))),
       el('div', { class: 'row' }, el('label', { for: 'genesi-attore' }, actorOn, "L'Attore interpreta gli individui (con le schede del Narratore)"), el('label', { for: 'genesi-attore-modello' }, "Modello dell'Attore", actorModel)),
       el('div', { class: 'note' }, "Spento, il Narratore interpreta gli individui come sempre e nessuna chiamata si aggiunge. Acceso, il Narratore scrive una scheda per individuo alla sua prima battuta e l'Attore la recita con il suo modello."),
       estimate,

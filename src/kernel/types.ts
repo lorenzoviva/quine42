@@ -354,6 +354,8 @@ export interface AiConfig {
   scultori?: Partial<import('./agents/sculptor').SculptorAiModels>;
   /** New models the Sculptor writes by itself per session. */
   maxModels?: number;
+  /** Pieces the Musician writes by themselves in a session (T225; default 8). */
+  maxBrani?: number;
   /** Reasoning effort of every call (default `low`: see docs/reports/costi-step8.2B.md). */
   thinking?: 'low' | 'medium' | 'high' | 'off';
   /** Seconds before a request is given up (and not repeated). */

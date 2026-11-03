@@ -12,7 +12,7 @@ import type { WorldGraph } from '../graph';
 import { gameSetupSummary } from '../gameSetup';
 import { repairGameSetup } from '../validator';
 
-export type AgentId = 'narratore' | 'cartografo' | 'artista' | 'scultore' | 'fisico' | 'ingegnere' | 'arbitro' | 'referente' | 'attore';
+export type AgentId = 'narratore' | 'cartografo' | 'artista' | 'scultore' | 'fisico' | 'ingegnere' | 'arbitro' | 'referente' | 'attore' | 'musicista';
 
 export const AGENTS: Record<AgentId, { name: string; color: string; sigil: string }> = {
   narratore: { name: 'Narratore', color: '#ffcf5c', sigil: '✒' },
@@ -25,6 +25,8 @@ export const AGENTS: Record<AgentId, { name: string; color: string; sigil: strin
   referente: { name: 'Referente', color: '#f2f2f2', sigil: '✉' },
   /** Plays the people with the Narrator's sheets, when the master turns it on (T157, ADR-0116). */
   attore: { name: 'Attore', color: '#5ce0c8', sigil: '◐' },
+  /** Writes the sound programs of what the world asks for (T225): in the Artist's house. */
+  musicista: { name: 'Musicista', color: '#8fb8ff', sigil: '♪' },
 };
 
 export type FeedKind = 'propone' | 'obietta' | 'approva' | 'corregge' | 'scolpisce' | 'scarta' | 'info' | 'errore';
@@ -285,6 +287,9 @@ export class Council {
       case 'artista':
         parts.push(`## Guida di stile\n${style}`, `## Tono\n${bible?.tono ?? ''}`);
         break;
+      case 'musicista':
+        parts.push(`## Il mondo\n${bibleHead(bible)}`);
+        break;
       case 'fisico':
         parts.push(`## Terreni\n${paletteSummary(v.palette)}`, `## Tono\n${bible?.tono ?? ''}`);
         if (rules) parts.push(rules);
@@ -324,7 +329,7 @@ export class Council {
     return `## Ciò che il mondo sa di questo compito (usa questi nomi e questi legami, non inventarne altri)\n${graph.context(ids, FOCUS_BUDGET)}`;
   }
 
-  async ask<T>(agent: AgentId, task: string, prompt: string, schema: Schema, opts: CallOptions = {}): Promise<T> {
+  async ask<T>(agent: AgentId, task: string, prompt: string, schema: Schema, opts: CallOptions & { system?: string; role?: string } = {}): Promise<T> {
     return parseJson<T>(await this.write(agent, task, prompt, { ...opts, schema }));
   }
 

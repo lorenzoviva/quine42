@@ -209,6 +209,9 @@ function soundPurpose(raw: unknown): SoundPurpose | undefined {
   return { uso: r.uso, ...(ambienti ? { ambienti } : {}), ...(momenti ? { momenti } : {}), ...(r.oltre === true ? { oltre: true } : {}), ...(effetti ? { effetti } : {}) };
 }
 
+/** Whether a program names an environment: its id, or one of the Cartographer's whose id contains it («castello_nero» is a castle). */
+export const namesEnvironment = (p: SoundProgram, environment: string | undefined): boolean => !!environment && !!p.suono?.ambienti?.some((a) => environment === a || environment.includes(a));
+
 /** The sound programs among a universe's files: their ids and index entries, in the index's order. */
 export function soundPrograms(files: Record<string, string>): SoundProgram[] {
   let index: Record<string, { classe?: string; nome?: string; suono?: unknown }>;

@@ -8,16 +8,16 @@ import { priceOf, costOf } from './ai/prices';
 import { DEFAULT_SCULPTORS, type SculptorAiModels } from './agents/sculptor';
 import type { AiConfig } from './types';
 
-export const COEFFICIENT_KEYS = ['sessioni', 'dialoghi', 'trame', 'revisioni', 'modelli', 'persone', 'abitanti', 'pacchetti', 'cose'] as const;
+export const COEFFICIENT_KEYS = ['sessioni', 'dialoghi', 'trame', 'revisioni', 'modelli', 'persone', 'abitanti', 'pacchetti', 'cose', 'brani'] as const;
 export type CoefficientKey = (typeof COEFFICIENT_KEYS)[number];
 export type Coefficients = Record<CoefficientKey, number>;
 
-export const FULL_DETAIL: Coefficients = { sessioni: 1, dialoghi: 1, trame: 1, revisioni: 1, modelli: 1, persone: 1, abitanti: 1, pacchetti: 1, cose: 1 };
+export const FULL_DETAIL: Coefficients = { sessioni: 1, dialoghi: 1, trame: 1, revisioni: 1, modelli: 1, persone: 1, abitanti: 1, pacchetti: 1, cose: 1, brani: 1 };
 
 /** «Low Detail»: about a fifth of the calls the world makes by itself, and the cheap model for every figure. */
 export const LOW_DETAIL: { coefficienti: Coefficients; scultori: Partial<SculptorAiModels> } = {
-  coefficienti: { sessioni: 0.25, dialoghi: 0.2, trame: 0.34, revisioni: 0.25, modelli: 0.34, persone: 0.5, abitanti: 0.25, pacchetti: 0.25, cose: 0.34 },
-  scultori: { figura: 'gemini-3.1-flash-lite', struttura: 'gemini-3.1-flash-lite', importante: 'gemini-3.8-flash', artista: 'gemini-3.1-flash-lite' },
+  coefficienti: { sessioni: 0.25, dialoghi: 0.2, trame: 0.34, revisioni: 0.25, modelli: 0.34, persone: 0.5, abitanti: 0.25, pacchetti: 0.25, cose: 0.34, brani: 0.34 },
+  scultori: { figura: 'gemini-3.1-flash-lite', struttura: 'gemini-3.1-flash-lite', importante: 'gemini-3.8-flash', artista: 'gemini-3.1-flash-lite', musicista: 'gemini-3.1-flash-lite' },
 };
 
 /**
@@ -64,6 +64,7 @@ export const COEFFICIENT_INFO: Record<CoefficientKey, { nome: string; agente: st
   abitanti: { nome: 'Tipi di abitanti', agente: 'narratore', modo: 'indiretta', testo: 'un tipo nuovo ogni 7 luoghi; a 0,5 ogni 14' },
   pacchetti: { nome: 'Pacchetti di oggetti', agente: 'narratore', modo: 'indiretta', testo: 'un pacchetto ogni 10 luoghi; a 0,5 ogni 20' },
   cose: { nome: 'Cose nuove nei luoghi', agente: 'cartografo', modo: 'indiretta', testo: 'meno cose che la Fucina crea per un luogo e meno oggetti sconosciuti a terra' },
+  brani: { nome: 'Brani nuovi', agente: 'musicista', modo: 'diretta', testo: 'un brano per ogni ambiente che non ne ha: due minuti tra uno e il successivo, quattro a 0,5, a 0 nessuno' },
 };
 
 /**
@@ -111,6 +112,7 @@ export const CENSUS: Array<{ compito: string; agente: string; modo: 'diretta' | 
   { compito: 'model.judge', agente: 'artista', modo: 'diretta', coefficiente: 'revisioni' },
   { compito: 'model.action', agente: 'scultore', modo: 'non regolabile', nota: '«Altro…» che cambia la forma' },
   { compito: 'mechanic.design', agente: 'ingegnere', modo: 'non regolabile', nota: 'su richiesta (sessioni e Referente)' },
+  { compito: 'sound.compose', agente: 'musicista', modo: 'diretta', coefficiente: 'brani', nota: 'per gli ambienti senza musica; ciò che chiede il viandante non si dirada' },
 ];
 
 const PRESETS: Record<string, Coefficients> = { 'low detail': LOW_DETAIL.coefficienti, low: LOW_DETAIL.coefficienti, pieno: FULL_DETAIL, full: FULL_DETAIL };
@@ -147,6 +149,9 @@ export function sculptPlan(c: number): { semplici: number; revisione: boolean; g
   return { semplici: c >= 0.75 ? 2 : 1, revisione: c >= 0.5, giudizio: c >= 0.25 };
 }
 
+/** Seconds of pause after a piece of music, for the coefficient of pieces (Infinity at 0: the music there is). */
+export const pieceGap = (c: number): number => (c <= 0 ? Infinity : Math.round(120 / c));
+
 /** Seconds of pause after a model, for the coefficient of models (Infinity at 0: generic models only). */
 export const modelGap = (c: number): number => (c <= 0 ? Infinity : Math.round(60 * (1 / c - 1)));
 
@@ -161,6 +166,8 @@ export const HOUR = {
   persone: 1.5,
   /** Seconds out of the hour spent near two people who could talk. */
   vicini: 1800,
+  /** Environments walked in that no program names yet. */
+  ambientiSenzaBrano: 4,
   /** New entities the Cartographer asks for, unknown items on the ground, per place. */
   nuovi: 0.3,
   ignoti: 0.3,
@@ -231,6 +238,10 @@ export function hourlyEstimate(ai: AiConfig, date?: string): { righe: HourLine[]
   const sculptCost = models * (0.5 * plan.semplici * (costOf(sc.semplice, WEIGHT.scultura, date) ?? 0) + 0.5 * (1 + (plan.revisione ? 0.5 : 0)) * (costOf(sc.figura, WEIGHT.scultura, date) ?? 0));
   add(COEFFICIENT_INFO.modelli.nome, 'diretta', writes, sculptCost);
   add(COEFFICIENT_INFO.revisioni.nome, 'diretta', judges, judges * (costOf(sc.artista, WEIGHT.giudizio, date) ?? 0));
+  // The Musician: a program for each environment that has none, a third of them sent back once.
+  const pause = pieceGap(c.brani);
+  const pieces = Number.isFinite(pause) ? Math.min(H.ambientiSenzaBrano, 3600 / pause, ai.maxBrani ?? 8) * 1.34 : 0;
+  add(COEFFICIENT_INFO.brani.nome, 'diretta', pieces, pieces * (costOf(sc.musicista, WEIGHT.scultura, date) ?? 0));
   const asked = H.parole + H.azioni + H.sguardi;
   add('Ciò che chiede il viandante (parole, «Altro…», «Esamina»)', 'non regolabile', asked, played(H.parole) + text(H.azioni + H.sguardi));
   return { righe: rows, chiamate: Math.round(rows.reduce((s, r) => s + r.chiamate, 0)), dollari: rows.reduce((s, r) => s + r.dollari, 0) };

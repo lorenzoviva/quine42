@@ -63,7 +63,7 @@ describe('the neon studio', () => {
       if (b.id === 'concilio') continue;
       const screen = b.storeys[0].items.find((i) => i.kind === 'screen')!;
       for (let x = screen.x; x < screen.x + (screen.w ?? 1); x++) expect(k.corona.free(x + 0.5, screen.y - 0.5), `${b.id} ${x}`).toBe(true);
-      const m = k.archive.avatars.get(`${b.team}@${b.id}`)!;
+      const m = k.archive.avatars.get(`${b.teams[0]}@${b.id}`)!;
       expect([m.x, m.y], b.id).toEqual([screen.x + 1.5, screen.y - 0.5]);
       expect(k.corona.free(m.x, m.y), b.id).toBe(true);
     }
@@ -75,10 +75,10 @@ describe('the neon studio', () => {
     const f0 = hall.storeys[0].items;
     expect(f0.some((i) => i.kind === 'table')).toBe(true);
     const seats = f0.filter((i) => i.kind === 'desk' && i.target);
-    expect(seats.map((s) => s.target).sort()).toEqual(['arbitro', 'artista', 'cartografo', 'fisico', 'ingegnere', 'narratore', 'referente', 'scultore']);
+    expect(seats.map((s) => s.target).sort()).toEqual(['arbitro', 'artista', 'cartografo', 'fisico', 'ingegnere', 'musicista', 'narratore', 'referente', 'scultore']);
     for (const s of seats) expect([...k.archive.avatars.values()].some((a) => a.agent === s.target && a.building === 'concilio')).toBe(true);
     const portals = f0.filter((i) => i.kind === 'portal');
-    expect(portals.length).toBe(8);
+    expect(portals.length).toBe(9);
     for (const b of k.corona.buildings) if (b.id !== 'concilio') expect(b.storeys[0].items.some((i) => i.kind === 'portal' && i.target === 'concilio'), b.id).toBe(true);
     for (const b of k.corona.buildings) if (b.id !== 'concilio') expect(b.storeys[0].items.some((i) => i.kind === 'screen'), b.id).toBe(true);
     // Through the cartographer's teleport, into the Office of places, where the atlas is, by the model of places.

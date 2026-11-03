@@ -55,9 +55,11 @@ export class Archive {
         }
         continue;
       }
-      const key = `${b.team}@${b.id}`;
-      keep.add(key);
-      if (!this.avatars.has(key) || this.avatars.get(key)!.building !== b.id) this.avatars.set(key, this.member(b.team as AgentId, b));
+      for (const team of b.teams as AgentId[]) {
+        const key = `${team}@${b.id}`;
+        keep.add(key);
+        if (!this.avatars.has(key) || this.avatars.get(key)!.building !== b.id) this.avatars.set(key, this.member(team, b));
+      }
     }
     keep.add('referente@');
     if (!this.avatars.has('referente@')) {
@@ -67,8 +69,10 @@ export class Archive {
     for (const k of [...this.avatars.keys()]) if (!keep.has(k) && !k.includes('#')) this.avatars.delete(k);
   }
 
-  /** Where a member stands when idle: in front of the room's history screen, the n-th a little further along. */
-  private post(b: Building, n = 0): { x: number; y: number } {
+  /** Where a member stands when idle: in front of the room's history screen, a place for each team of the room, then whoever comes from another; the n-th of a team a little further along. */
+  private post(agent: AgentId, b: Building, member = 0): { x: number; y: number } {
+    const own = b.teams.indexOf(agent);
+    const n = (own < 0 ? b.teams.length : own) + member;
     const f = b.storeys[0];
     const screen = f.items.find((i) => i.kind === 'screen');
     if (!screen) return { x: f.ox + 3.5, y: f.oy + ROOM_H - 3.5 };
@@ -76,7 +80,7 @@ export class Archive {
   }
 
   private member(agent: AgentId, b: Building, n = 0): Avatar {
-    const p = this.post(b, n);
+    const p = this.post(agent, b, n);
     const def = AGENTS[agent];
     return { agent, name: def.name, color: def.color, sigil: def.sigil, building: b.id, x: p.x, y: p.y, tx: p.x, ty: p.y, sayUntil: 0, idleUntil: 0, speed: SPEED };
   }
@@ -100,7 +104,7 @@ export class Archive {
     const b = path ? c.buildingOf(path) : undefined;
     if (!b) {
       // No file: the member of its own building speaks from its post.
-      const home = c.buildings.find((x) => x.team === agent) ?? c.buildings[0];
+      const home = c.buildings.find((x) => x.teams.includes(agent)) ?? c.buildings[0];
       if (!home) return undefined;
       const m = this.memberIn(agent, home);
       if (say) this.speak(m, say);
@@ -127,13 +131,14 @@ export class Archive {
     const from = e.from !== 'kernel' ? this.go(e.from, path, e.text) : undefined;
     if (e.to) {
       const c = this.corona();
-      const b = (path ? c.buildingOf(path) : undefined) ?? c.building(from?.building) ?? c.buildings.find((x) => x.team === e.to);
+      const b = (path ? c.buildingOf(path) : undefined) ?? c.building(from?.building) ?? c.buildings.find((x) => x.teams.includes(e.to!));
       if (!b) return;
       const to = this.memberIn(e.to, b, e.to === from?.agent ? 1 : 0);
-      // Called in: appears beside whoever called (the studio is big, the Council is quick).
-      const near = from ?? to;
-      to.x = to.tx = near.tx + 0.9;
-      to.y = to.ty = near.ty;
+      // Called in: appears beside whoever called (the studio is big, the Council is quick). Sent back by the kernel, nobody called: it stays where it is.
+      if (from) {
+        to.x = to.tx = from.tx + 0.9;
+        to.y = to.ty = from.ty;
+      }
       to.idleUntil = this.time + 20;
       this.speak(to, e.from === 'kernel' ? `(il kernel mi rimanda: ${e.text})` : `${from?.name ?? ''}, ci penso io.`);
     }
@@ -188,7 +193,7 @@ export class Archive {
           a.ty = seat.y + 0.4;
         } else if (b) {
           const n = Number(/#(\d+)$/.exec([...this.avatars.entries()].find(([, v]) => v === a)?.[0] ?? '')?.[1] ?? 0);
-          const d = this.post(b, n);
+          const d = this.post(a.agent, b, n);
           a.tx = d.x;
           a.ty = d.y;
         }
