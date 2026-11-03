@@ -4,8 +4,9 @@ import * as THREE from 'three';
 import { Forms, type Form, type FormRequest, type FormResult } from '../src/kernel/forms';
 import { FORM_DISK_BYTES, FORMS_DB_VERSION, formBytes, formCacheKey, IdbFormStore, keepsFormsOnDisk, MemoryFormStore, WorkerRunner } from '../src/render/forms';
 import { geoOf, geoWhenReady, geometryCount, trimGeometries } from '../src/render/models';
+import { askCampusModels } from '../src/render/corona3d';
 import type { MeshData } from '../src/mj/mesh';
-import type { FormMeshes, WorkerAnswer } from '../src/render/worker';
+import type { FormMeshes, MeshAnswer, MeshRead, WorkerAnswer } from '../src/render/worker';
 import { hashStr } from '../src/kernel/rng';
 
 const PROGRAM = '<sequence values="BW"><box at="0 0 0" size="1 1 1" color="W"/></sequence>';
@@ -168,6 +169,8 @@ function limited(limit: number, kb: number, store: MemoryFormStore | IdbFormStor
     () =>
       (worker = {
         postMessage: (m: { id: number; req: FormRequest }) => {
+          // A worker with no IndexedDB: the store reads the meshes itself.
+          if ('read' in m) return void setTimeout(() => worker.onmessage!({ data: { id: m.id, read: true } satisfies MeshAnswer } as MessageEvent));
           jobs.push(m.req.seed);
           setTimeout(() => worker.onmessage!({ data: { id: m.id, ok: true, result: drawn(kb, m.req.seed), finished: true } satisfies WorkerAnswer } as MessageEvent));
         },
@@ -293,6 +296,17 @@ describe('the limit on the geometries (T175)', () => {
     trimGeometries(scene, NOW, 0);
     expect(geoOf(f)).not.toBe(g);
     trimGeometries(scene, NOW, 0);
+  });
+
+  it('what the ring wears asks for its meshes as soon as it is ready, without waiting for the ring (T215)', () => {
+    const remake = vi.fn();
+    const gone = (key: string) => ({ ...formOf(key, 1), remake, result: { ...result(), meshesGone: true } });
+    const forms: Record<string, Form> = { 'albero#4': gone('t215-a'), 'corona-drone#1': gone('t215-b'), 'corona-treno#1': gone('t215-c'), 'statua#320': gone('t215-d') };
+    const k = { corona: { props: [{ model: 'albero', seed: 4 }, { model: 'non-ancora', seed: 1 }] }, forms: { ready: (m: string, s: number) => forms[`${m}#${s}`] }, plinthSculpture: { model: 'statua', seed: 320 } };
+    askCampusModels(k as unknown as Parameters<typeof askCampusModels>[0]);
+    expect(remake, 'one for each that is ready').toHaveBeenCalledTimes(4);
+    askCampusModels({ ...k, plinthSculpture: undefined } as unknown as Parameters<typeof askCampusModels>[0]);
+    expect(remake).toHaveBeenCalledTimes(7);
   });
 
   it('asks for the meshes only when the runner let go of them, not when there never were any', () => {
@@ -565,6 +579,109 @@ describe('the persistent cache', () => {
       const { runner, jobs } = limited(1024 * 1024, 100, store);
       expect((await runner.run(other(1))).meshes).toBeDefined();
       expect(jobs).toEqual([1]);
+    });
+
+    describe('read off the page (T215)', () => {
+      const KEY = formCacheKey(other(1));
+      /** A saved form, and a runner whose worker answers reads with `reader`. */
+      const saved = async (reader: (read: MeshRead) => FormMeshes | undefined, respond = true) => {
+        const idb = fakeIndexedDB();
+        vi.stubGlobal('indexedDB', idb);
+        const form = drawn(100, 3);
+        await new IdbFormStore().set(KEY, form);
+        await settle();
+        idb.reads.length = 0;
+        const sent: Array<{ id: number; read?: MeshRead; req?: FormRequest }> = [];
+        let worker: Worker;
+        const store = new IdbFormStore();
+        const runner = new WorkerRunner(
+          1,
+          store,
+          () =>
+            (worker = {
+              postMessage: (m: { id: number; read?: MeshRead; req?: FormRequest }) => {
+                sent.push(m);
+                if (m.read && respond) setTimeout(() => worker.onmessage!({ data: { id: m.id, read: true, meshes: reader(m.read!) } satisfies MeshAnswer } as MessageEvent));
+              },
+              terminate() {},
+            } as unknown as Worker),
+        );
+        return { idb, form, store, runner, sent, fail: () => worker.onerror!({ message: 'guasto' } as ErrorEvent), answer: (a: WorkerAnswer | MeshAnswer) => worker.onmessage!({ data: a } as MessageEvent) };
+      };
+
+      it('the meshes come from the worker, whole, with no read on the page and no program run', async () => {
+        const held = drawn(100, 3).meshes as FormMeshes;
+        const { idb, store, runner, sent } = await saved(() => held);
+        const back = await runner.run(other(1));
+        expect(back.meshes).toBe(held);
+        expect(back.meshesGone).toBeUndefined();
+        expect(back.grid.cells[0]).toBe(3);
+        expect(sent).toHaveLength(1);
+        expect(sent[0].read).toEqual({ db: 'rune-forms', version: FORMS_DB_VERSION, store: 'meshes', key: KEY });
+        expect(meshReads(idb.reads), 'nothing decoded on the page').toEqual([]);
+        expect(store.bytesRead).toBe(formBytes(back));
+        expect(runner.busy).toBe(0);
+      });
+
+      it('a worker that finds nothing leaves the reading to the page, and it is the same form', async () => {
+        const { idb, form, runner, sent } = await saved(() => undefined);
+        const back = await runner.run(other(1));
+        expect(formBytes(back)).toBe(formBytes(form));
+        expect(meshReads(idb.reads)).toEqual([`meshes:${KEY}`]);
+        expect(sent.filter((m) => m.req), 'no program').toEqual([]);
+      });
+
+      it('a worker that breaks down does not leave who asked waiting', async () => {
+        const { form, runner, fail } = await saved(() => undefined, false);
+        const back = runner.run(other(1));
+        await vi.waitFor(() => expect(runner.busy).toBe(1));
+        fail();
+        expect(formBytes(await back)).toBe(formBytes(form));
+        expect(runner.busy).toBe(0);
+      });
+
+      it('a read goes before the programs that wait', async () => {
+        // In Node, with no `Worker`, a program that finds its only worker busy would run on this thread.
+        vi.stubGlobal('Worker', class {});
+        const { runner, sent, answer } = await saved(() => undefined, false);
+        const made = runner.run(other(2));
+        await vi.waitFor(() => expect(sent).toHaveLength(1));
+        const waiting = runner.run(other(3));
+        await settle();
+        const read = runner.run(other(1));
+        await settle();
+        answer({ id: sent[0].id, ok: true, result: drawn(1, 2), finished: true });
+        await made;
+        await vi.waitFor(() => expect(sent).toHaveLength(2));
+        expect(sent[1].read?.key).toBe(KEY);
+        answer({ id: sent[1].id, read: true });
+        await read;
+        await vi.waitFor(() => expect(sent).toHaveLength(3));
+        expect(sent[2].req?.seed).toBe(3);
+        answer({ id: sent[2].id, ok: true, result: drawn(1, 3), finished: true });
+        await waiting;
+      });
+
+      it('the worker reads them from the database and hands over their buffers', async () => {
+        const idb = fakeIndexedDB();
+        vi.stubGlobal('indexedDB', idb);
+        await new IdbFormStore().set(KEY, drawn(100, 3));
+        await settle();
+        const answers: Array<{ a: MeshAnswer; transfer: unknown[] }> = [];
+        const self = { postMessage: (a: MeshAnswer, transfer: unknown[]) => answers.push({ a, transfer }), onmessage: undefined as undefined | ((ev: unknown) => void) };
+        vi.stubGlobal('self', self);
+        vi.resetModules();
+        await import('../src/render/worker');
+        const read = (id: number, key: string) => self.onmessage!({ data: { id, read: { db: 'rune-forms', version: FORMS_DB_VERSION, store: 'meshes', key } } });
+        read(1, KEY);
+        read(2, 'nothing');
+        await vi.waitFor(() => expect(answers).toHaveLength(2));
+        const byId = (id: number) => answers.find((x) => x.a.id === id)!;
+        const meshes = byId(1).a.meshes!;
+        expect(byId(1).transfer).toEqual([meshes.body.positions.buffer, meshes.body.normals.buffer, meshes.body.colors.buffer, meshes.body.indices.buffer]);
+        expect(byId(2).a.meshes).toBeUndefined();
+        expect(byId(2).transfer).toEqual([]);
+      });
     });
 
     it('clear takes the meshes away too', async () => {
