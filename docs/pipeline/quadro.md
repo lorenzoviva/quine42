@@ -5,7 +5,7 @@
 
 Aggiornato il 02/11/2026, fine epoca 216 su **claude** (crediti: vedi `stato`).
 
-- **Epoca 217, T177 integrato:** la crescita di C: era la cache delle forme in IndexedDB, una per porta (14,8 GB in 31 origini); ora su disco solo su 5173, 4173, `?formecache` e sito; ogni giro di test ha una cartella temporanea sola. Suite 1362 verdi, browser ok. Comandi per liberare lo spazio dati all'autore (lancia lui, Chrome chiuso: ~14 GB). **Non spiega lo sbalzo** 1,8 → 12 GB durante i task: T177 ne ha misurato uno solo, breve e senza crescita, e l'IndexedDB non si libera da solo. **Chiesto all'autore:** task che campiona C: durante un giro del banco (da creare solo se dice sì; il primo giro utile è T181).
+- **Epoca 217, T177 integrato:** la crescita di C: era la cache delle forme in IndexedDB, una per porta (14,8 GB in 31 origini); ora su disco solo su 5173, 4173, `?formecache` e sito; ogni giro di test ha una cartella temporanea sola. Suite 1362 verdi, browser ok. Comandi per liberare lo spazio dati all'autore (lancia lui, Chrome chiuso: ~14 GB). **Non spiega lo sbalzo** 1,8 → 12 GB durante i task: T177 ne ha misurato uno solo, breve e senza crescita, e l'IndexedDB non si libera da solo. **L'autore ha detto no al task che campiona C: durante un giro del banco:** lo sbalzo lo verifica lui, a parte. Nessun task.
 
 - **Epoca 217:** l'autore ha risposto sì: T183 a p79, prima di T152 (supera il «Chiesto all'autore» qui sotto). Per il resto vale «Fine epoca 216».
 
