@@ -9,7 +9,7 @@ import type { TextCall } from '../src/kernel/ai/models';
 import { UsageLedger } from '../src/kernel/ai/usage';
 import { Council, lexiconSummary, type CatalogEntry } from '../src/kernel/agents/council';
 import { npcReply, weavePlot } from '../src/kernel/agents/minds';
-import { buildGraph, type GraphPlace } from '../src/kernel/graph';
+import { buildGraph, type GraphChunk } from '../src/kernel/graph';
 import { readPeople } from '../src/kernel/society';
 import { readPlots } from '../src/kernel/plots';
 import type { FileMap, Manifest } from '../src/kernel/types';
@@ -34,7 +34,7 @@ const person = (nome: string, tipo: string, famiglia: Array<[string, string]>, e
   ...extra,
 });
 
-function universe(): { files: FileMap; places: GraphPlace[] } {
+function universe(): { files: FileMap; chunks: GraphChunk[] } {
   const files: FileMap = {
     'universe.json': JSON.stringify({ name: 'prova' }),
     'modules/npc.cat/manifest.json': manifest({ id: 'npc.cat', name: 'Gatto', kind: 'entity', persona: 'Sei un gatto.' }),
@@ -60,11 +60,11 @@ function universe(): { files: FileMap; places: GraphPlace[] } {
       fatti: ['Bastiano ripara le reti in Piazza del Borgo.', ...Array.from({ length: 29 }, (_, i) => `Un fatto lontano numero ${i} che nessuno di qui conosce.`)],
     }),
   };
-  const places: GraphPlace[] = [
+  const chunks: GraphChunk[] = [
     { cx: 0, cy: 0, nome: 'Piazza del Borgo', cose: ['npc.villager', 'npc.cat'] },
     { cx: 1, cy: 0, nome: 'Riva del Lago', cose: ['npc.villager'] },
   ];
-  return { files, places };
+  return { files, chunks };
 }
 
 const catalogOf = (files: FileMap): CatalogEntry[] =>
@@ -74,8 +74,8 @@ const catalogOf = (files: FileMap): CatalogEntry[] =>
     .filter((m) => m.kind === 'entity')
     .map((m) => ({ id: m.id, name: m.name, kind: m.persona ? 'npc' : 'oggetto', tiles: m.spawn?.tiles ?? [], context: m.context ?? m.description ?? '' }));
 
-function council(files: FileMap, places: GraphPlace[], models = new Recording()) {
-  const graph = buildGraph(files, places, cats);
+function council(files: FileMap, chunks: GraphChunk[], models = new Recording()) {
+  const graph = buildGraph(files, chunks, cats);
   return { models, c: new Council(models, () => ({ files, palette: {}, catalog: catalogOf(files), graph: () => graph })) };
 }
 
@@ -83,8 +83,8 @@ const npc = (name: string) => ({ name, persona: 'Sei tu.', mood: 'tranquillo', m
 
 describe('the context of the agents from the graph (T13)', () => {
   it('a task with a focus gets the neighbourhood of what it is about instead of the whole bible and catalog', async () => {
-    const { files, places } = universe();
-    const { c, models } = council(files, places);
+    const { files, chunks } = universe();
+    const { c, models } = council(files, chunks);
     await npcReply(c, npc('Bastiano'), 'ciao');
     await npcReply(c, npc('Bastiano'), 'ciao', ['Bastiano', 'luogo:0_0']);
     const [plain, focused] = models.calls.map((x) => x.system);
@@ -110,8 +110,8 @@ describe('the context of the agents from the graph (T13)', () => {
   });
 
   it('a focus the graph does not know, or no graph at all, falls back to the summaries', async () => {
-    const { files, places } = universe();
-    const { c, models } = council(files, places);
+    const { files, chunks } = universe();
+    const { c, models } = council(files, chunks);
     await npcReply(c, npc('Nessuno'), 'ciao', ['Qualcuno che non esiste', 'luogo:9_9']);
     const bare = new Council(models, () => ({ files, palette: {}, catalog: [] }));
     await npcReply(bare, npc('Bastiano'), 'ciao', ['Bastiano']);
@@ -158,16 +158,16 @@ describe('the context of the agents from the graph (T13)', () => {
     };
     walk(resolve(__dirname, '../universe'), '');
     walk(valmora!, '');
-    const places: GraphPlace[] = readdirSync(join(valmora!, 'maps')).map((f) => {
+    const chunks: GraphChunk[] = readdirSync(join(valmora!, 'maps')).map((f) => {
       const [, cx, cy] = /_(-?\d+)_(-?\d+)\.json$/.exec(f)!;
       const { plan } = JSON.parse(readFileSync(join(valmora!, 'maps', f), 'utf8'));
       return { cx: +cx, cy: +cy, nome: plan.place.name, ambiente: plan.layout, cose: plan.objects.map((o: { module: string }) => o.module), a_terra: plan.ground };
     });
-    const { c, models } = council(files, places);
+    const { c, models } = council(files, chunks);
     const people = readPeople(files).persone;
     const plot = readPlots(files)[0];
     const who = people.find((p) => p.nome === plot.coinvolti[0]) ?? people[0];
-    const home = places.find((p) => p.nome === who.luogo) ?? places[0];
+    const home = chunks.find((p) => p.nome === who.luogo) ?? chunks[0];
     const focus = [who.nome, `luogo:${home.cx}_${home.cy}`];
     const society = people.slice(-20).map((p) => `- ${p.nome}, ${p.mestiere}`).join('\n');
     for (const f of [undefined, focus]) {

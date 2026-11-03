@@ -101,10 +101,10 @@ export function defaultAtlas(layouts: Record<string, { name: string; description
 }
 
 /** What someone standing in chunk (cx, cy) knows about where things are. */
-export function directionsFrom(atlas: Atlas, places: Array<{ name: string; cx: number; cy: number }>, cx: number, cy: number, max = 16): string[] {
+export function directionsFrom(atlas: Atlas, chunks: Array<{ name: string; cx: number; cy: number }>, cx: number, cy: number, max = 16): string[] {
   const out: Array<{ d: number; text: string }> = [];
   const seen = new Set<string>();
-  for (const p of places) {
+  for (const p of chunks) {
     const d = Math.max(Math.abs(p.cx - cx), Math.abs(p.cy - cy));
     if (!d || d > 6 || seen.has(p.name)) continue;
     seen.add(p.name);

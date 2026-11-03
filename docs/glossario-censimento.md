@@ -9,8 +9,9 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 |---|---|---|---|---|---|
 | Universo | `reame` | 1 (1) | 1 (1) | 20 (9) | 37 (10) |
 | Universo | `realm` | 16 (6) | 0 (0) | 2 (2) | 139 (13) |
-| Luogo | `place` | 591 (57) | 0 (0) | 28 (13) | 2 (2) |
-| Luogo | `chunk` | 428 (37) | 0 (0) | 106 (26) | 0 (0) |
+| Luogo | `place` | 437 (57) | 0 (0) | 25 (13) | 2 (2) |
+| Luogo | `chunk` | 577 (41) | 0 (0) | 109 (26) | 0 (0) |
+| Luogo | `Place` | 437 (57) | 0 (0) | 25 (13) | 2 (2) |
 | Piano del luogo | `mappa` | 2 (2) | 0 (0) | 13 (11) | 0 (0) |
 | Piano del luogo | `piano` | 7 (4) | 2 (2) | 144 (38) | 0 (0) |
 | Casella | `cell` | 661 (39) | 0 (0) | 7 (4) | 25 (2) |

@@ -13,7 +13,7 @@ import { readWandererState, SOLO, validWandererId, type Profile } from '../kerne
 import { accountWanderer, type Account, type Verifier } from './account';
 import { playerChanges, playerFiles } from './files';
 import { hashStr, hex } from '../kernel/rng';
-import { THING_PARTS, type ClientMsg, type FileChanges, type ItemOp, type Dialog, type FormView, type Me, type MyState, type Notice, type OtherView, type PlaceView, type ServerLink, type ServerMsg, type ThingView } from './protocol';
+import { THING_PARTS, type ClientMsg, type FileChanges, type ItemOp, type Dialog, type FormView, type Me, type MyState, type Notice, type OtherView, type ChunkView, type ServerLink, type ServerMsg, type ThingView } from './protocol';
 
 export interface SessionOptions {
   /** Updates per second to every client. */
@@ -926,12 +926,12 @@ export class SessionServer {
     if (sKey !== c.stato) out.stato = JSON.parse(sKey);
     c.stato = sKey;
     const S = k.config.chunkSize;
-    const places: PlaceView[] = [];
+    const chunks: ChunkView[] = [];
     for (const ch of k.chunks.values()) {
       const far = Math.max(Math.abs(ch.cx * S + S / 2 - centre.x), Math.abs(ch.cy * S + S / 2 - centre.y)) - S / 2;
       if (far > this.near || c.places.get(ch.key) === ch.version) continue;
       c.places.set(ch.key, ch.version);
-      places.push({
+      chunks.push({
         key: ch.key,
         cx: ch.cx,
         cy: ch.cy,
@@ -945,7 +945,7 @@ export class SessionServer {
         ...(ch.plan?.acqua && Object.keys(ch.plan.acqua).length ? { acqua: { ...ch.plan.acqua } } : {}),
       });
     }
-    if (places.length) out.luoghi = places;
+    if (chunks.length) out.luoghi = chunks;
     const things: ThingView[] = [];
     const inSight = new Set<number>();
     for (const id of k.ecs.query('pos')) {

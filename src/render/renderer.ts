@@ -12,7 +12,7 @@ import { Bloom } from './bloom';
 import type { CoronaView, StudioRoom } from './coronaview';
 import { CUT, U } from './materials';
 import { Overlay } from './overlay';
-import { buildChunk, chunkSig, disposeChunk, tileForms, type ChunkView } from './terrain';
+import { buildChunk, chunkSig, disposeChunk, tileForms, type TerrainView } from './terrain';
 import { Lights, Runes, Things, Wanderer } from './things';
 
 const SKY = { day: new THREE.Color('#9cc8e8'), dusk: new THREE.Color('#e8a070'), night: new THREE.Color('#0e1424'), studio: new THREE.Color('#07070f'), corona: new THREE.Color('#05060a') };
@@ -41,7 +41,7 @@ export class Renderer {
   private sun = new THREE.DirectionalLight(0xfff0d8, 2.2);
   /** The simulation, in carpet coordinates. */
   private world = new THREE.Group();
-  private chunks = new Map<string, ChunkView>();
+  private chunks = new Map<string, TerrainView>();
   private things: Things;
   private runes: Runes;
   private wanderer: Wanderer;

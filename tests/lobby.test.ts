@@ -267,10 +267,10 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
     expect(swordCard?.nome).toBe('Spada Runica');
     expect(swordCard?.utilizzi).toEqual({ luoghi: 3, trame: 1, prompt: 4 });
 
-    const placeCard = cards.find((c) => c.id === 'luogo:0_0');
-    expect(placeCard).toBeDefined();
-    expect(placeCard?.tipo).toBe('luogo');
-    expect(placeCard?.titolare).toBe('carlo');
+    const chunkCard = cards.find((c) => c.id === 'luogo:0_0');
+    expect(chunkCard).toBeDefined();
+    expect(chunkCard?.tipo).toBe('luogo');
+    expect(chunkCard?.titolare).toBe('carlo');
 
     // Wanderer with no cards gets an empty list
     expect(collectionOf(files, 'unknown_wanderer')).toEqual([]);

@@ -45,9 +45,9 @@ describe('the cards (T36)', () => {
     expect(envs.length).toBeGreaterThan(0);
     expect(envs.every((c) => c.autore === 'cartografo' && c.pagante === COMUNE)).toBe(true);
     // The places are the explorer's.
-    const places = cards.filter((c) => c.tipo === 'luogo');
-    expect(places.length).toBeGreaterThanOrEqual(2);
-    expect(places.every((c) => c.autore === 'cartografo' && c.pagante === 'io' && c.titolare === 'io' && c.nome)).toBe(true);
+    const chunks = cards.filter((c) => c.tipo === 'luogo');
+    expect(chunks.length).toBeGreaterThanOrEqual(2);
+    expect(chunks.every((c) => c.autore === 'cartografo' && c.pagante === 'io' && c.titolare === 'io' && c.nome)).toBe(true);
     // The content of the seed is nobody's card.
     expect(cards.some((c) => c.id === 'tipo:core.carpet')).toBe(false);
     // Uses: the environments of the places, what stands in them.
@@ -62,7 +62,7 @@ describe('the cards (T36)', () => {
     // Everything goes into the universe with the next commit.
     k.saveUsage();
     const file = JSON.parse(k.repo.head().files[CARDS_FILE]);
-    expect(Object.keys(file.luoghi).length).toBe(places.length);
+    expect(Object.keys(file.luoghi).length).toBe(chunks.length);
     expect(file.utilizzi[item.id].prompt).toBe(1);
     const usage = JSON.parse(k.repo.head().files[USAGE_FILE]);
     const payers = Object.values(usage.paganti)[0] as Record<string, { calls: number }>;

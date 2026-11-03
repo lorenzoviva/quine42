@@ -7,7 +7,7 @@
 // (src/kernel/corona.ts): logic stays in the kernel.
 
 import * as THREE from 'three';
-import { PLACE_PHASES, type Kernel, type PlaceMiniature, type ShowcaseEntry } from '../kernel/kernel';
+import { PLACE_PHASES, type Kernel, type ChunkMiniature, type ShowcaseEntry } from '../kernel/kernel';
 import { CAMPUS, ROOM_H, ROOM_W, type Building, type Floor, type StudioItem } from '../kernel/corona';
 import { Builder } from './terrain';
 import { MAT, rgbOf } from './materials';
@@ -901,7 +901,7 @@ const PHASE_LIT = '#39ff88';
  * `phase` (of `PLACE_PHASES`): the place as it is then, what that phase adds glowing green on its columns; the
  * structures come in the fifth, things and runes in the sixth.
  */
-function buildMiniature(k: Kernel, mini: PlaceMiniature, side: number, phase = PLACE_PHASES.length - 1): THREE.Group {
+function buildMiniature(k: Kernel, mini: ChunkMiniature, side: number, phase = PLACE_PHASES.length - 1): THREE.Group {
   const g = new THREE.Group();
   const S = mini.size, t = side / S;
   const lit = new Builder();

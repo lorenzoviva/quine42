@@ -198,7 +198,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   3 × 3 (T24, `PRINTER`: Laboratorio delle cose, Magazzino degli oggetti; la cosa sulla casella centrale, ridotta a una casella se è
   più grande), un plastico (T26a, Ufficio dei luoghi: un luogo già pianificato in miniatura, `kernel.miniature(cx, cy)` con lo stesso
   codice del mondo, `layoutOf` / `lotsOf` / `placementsOf`, dal chunk o dal piano salvato, senza generare nulla; T26b: le sei fasi del Cartografo,
-  `PLACE_PHASES` e `PlaceMiniature.phases` con le griglie intermedie di `layout()` (`stages`) e ciò che ogni fase aggiunge acceso in
+  `PLACE_PHASES` e `ChunkMiniature.phases` con le griglie intermedie di `layout()` (`stages`) e ciò che ogni fase aggiunge acceso in
   verde, scorse dalle pedane «−» «+» davanti al tavolo, `stepPhase`) con «<» «>» ai lati; E o un clic (`kernel.clickStudio`) cambiano ciò
   che mostrano (`showcaseOf`, `stepShowcase`) o aprono il pannello (`ui:showcase`: modello, modulo, individui).
   Ogni dispositivo (vetrina, grafo, tavolo della situazione) sta al centro del piano terra, sulla colonna dell'uscita, con
@@ -424,7 +424,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 <a id="sotterranei"></a>
 ## I sotterranei
 
-- **I sotterranei** (ADR-0091, progetto di T52a; T52b fatto, da attuare T52c-f): parti delle strutture sotto il suolo, mai un mondo a parte. La voce del modello dice `sotto: N` (1-3, `sottoOf`; la scatola della classe si allunga in basso, `Form.base` = `N · vpt` voxel sotto il suolo): pavimenti, collisione e taglio contano da lì (`levelIn` aggiunge `base`; fuori dal modello e dove non ha voxel sotto il suolo la terra è piena fino a `base`, `surfaces(…, fill)`), dalla cantina si esce solo per la scala, e ogni pavimento sotto il suolo si raggiunge dal piano terra (`groundOfForm`; altrimenti il modello entra senza cantina: `Form.hole` assente, posato comunque più in basso). Sulle colonne della cantina (`Form.hole`) `floorAt` ignora il terreno, sopra la tromba delle scale è aria (`rampBlocks`) e il salto non ci atterra (`floorBelow`, `topUnder`); il renderer posa il modello `kernel.sunk(id)` più in basso e abbassa il terreno delle caselle della cantina al suo fondo (`kernel.holesIn(chunk)`, il buco). Il Cartografo la chiede (`strutture[].sotto`, cose `sotto`); la profondità del terreno si genera come su X e Y (terreni `strato`, bozza per colonna, programma `sottosuolo` dell’ambiente, `strati` nel piano e in `PlaceView`, fino a 2 caselle sotto la cantina più profonda, al più 6). Si vede con il buco del terreno sotto il modello e, per chi sta sotto, un taglio a caselle in un disco attorno a lui con le bande degli strati e la luce attenuata. Nella corona scende solo l’esterno dell’edificio (T52c).
+- **I sotterranei** (ADR-0091, progetto di T52a; T52b fatto, da attuare T52c-f): parti delle strutture sotto il suolo, mai un mondo a parte. La voce del modello dice `sotto: N` (1-3, `sottoOf`; la scatola della classe si allunga in basso, `Form.base` = `N · vpt` voxel sotto il suolo): pavimenti, collisione e taglio contano da lì (`levelIn` aggiunge `base`; fuori dal modello e dove non ha voxel sotto il suolo la terra è piena fino a `base`, `surfaces(…, fill)`), dalla cantina si esce solo per la scala, e ogni pavimento sotto il suolo si raggiunge dal piano terra (`groundOfForm`; altrimenti il modello entra senza cantina: `Form.hole` assente, posato comunque più in basso). Sulle colonne della cantina (`Form.hole`) `floorAt` ignora il terreno, sopra la tromba delle scale è aria (`rampBlocks`) e il salto non ci atterra (`floorBelow`, `topUnder`); il renderer posa il modello `kernel.sunk(id)` più in basso e abbassa il terreno delle caselle della cantina al suo fondo (`kernel.holesIn(chunk)`, il buco). Il Cartografo la chiede (`strutture[].sotto`, cose `sotto`); la profondità del terreno si genera come su X e Y (terreni `strato`, bozza per colonna, programma `sottosuolo` dell’ambiente, `strati` nel piano e in `ChunkView`, fino a 2 caselle sotto la cantina più profonda, al più 6). Si vede con il buco del terreno sotto il modello e, per chi sta sotto, un taglio a caselle in un disco attorno a lui con le bande degli strati e la luce attenuata. Nella corona scende solo l’esterno dell’edificio (T52c).
 
 <a id="cartone"></a>
 ## La grafica a cartone
@@ -492,7 +492,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   d'acqua per casella, scorre verso i vicini più bassi solo dove qualcosa è cambiato (100 passi al secondo, `waterTick`), si ferma in
   equilibrio, conserva la quantità, il mare è una sorgente. `kernel.dig(col, row, delta)` scava o alza il suolo (lo strumento di T57c e
   di «Altro…» che scava); il piano tiene `scavi` e `acqua` (il campo di `worldLevels` li prende: la superficie dell'acqua che ha scorso
-  è fissata), le caselle che si riempiono o si asciugano cambiano tipo con `setTile`; il client sottile li riceve nel `PlaceView`.
+  è fissata), le caselle che si riempiono o si asciugano cambiano tipo con `setTile`; il client sottile li riceve nel `ChunkView`.
   MarkovJunior resta per generare.
 
 <a id="lotti"></a>

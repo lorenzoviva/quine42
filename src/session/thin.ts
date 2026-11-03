@@ -14,7 +14,7 @@ import type { Id } from '../kernel/ecs';
 import type { NpcReply } from '../kernel/agents/minds';
 import type { FeedEntry } from '../kernel/agents/council';
 import type { SessionClient, Outcome } from './client';
-import type { ContainerView, FileChanges, Notice, OtherView, PlaceView, ServerMsg, ThingView } from './protocol';
+import type { ContainerView, FileChanges, Notice, OtherView, ChunkView, ServerMsg, ThingView } from './protocol';
 import type { FileMap } from '../kernel/types';
 import type { Profile } from '../kernel/wanderers';
 import { hashStr, hex } from '../kernel/rng';
@@ -277,7 +277,7 @@ export class ThinClient {
     this.lastStep = { x, y, t: this.clock };
   }
 
-  private places(list: PlaceView[]): void {
+  private places(list: ChunkView[]): void {
     for (const v of list) {
       const sea = new Set(v.mare);
       this.k.chunks.set(v.key, {

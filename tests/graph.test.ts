@@ -5,7 +5,7 @@ import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
-import { buildGraph, GRAPH_FILE, readGraph, type GraphPlace } from '../src/kernel/graph';
+import { buildGraph, GRAPH_FILE, readGraph, type GraphChunk } from '../src/kernel/graph';
 import { writePlots, PLOTS_FILE, type Plot } from '../src/kernel/plots';
 import type { FileMap } from '../src/kernel/types';
 
@@ -33,7 +33,7 @@ const person = (nome: string, tipo: string, famiglia: Array<[string, string]>, e
 const manifest = (m: Record<string, unknown>) => JSON.stringify({ version: '0.1.0', ...m });
 
 /** A small universe with the cases of valmora (the measures of T07): a cat brother of a man, one-sided bonds, a bond to nobody, names alike. */
-function universe(): { files: FileMap; places: GraphPlace[] } {
+function universe(): { files: FileMap; chunks: GraphChunk[] } {
   const plots: Plot[] = [
     {
       id: 'trama-lago',
@@ -87,17 +87,17 @@ function universe(): { files: FileMap; places: GraphPlace[] } {
     'world/bible.json': JSON.stringify({ titolo: 'Prova', luoghi: ['Piazza del Borgo', 'Collina dei Venti'], fatti: ['Nereo pesca nel Lago Muto da quando era bambina.', 'Il pane di Piazza del Borgo è il più buono.'], misteri: ['Nessuno sa chi abbia costruito la Collina dei Venti.'] }),
     'world/stato.json': JSON.stringify({ viandante: { inventory: { slots: [{ item: 'item.pane', count: 2 }, null, { item: 'item.forbici', count: 1, inv: { slots: [{ item: 'item.farina', count: 1 }] } }] } } }),
   };
-  const places: GraphPlace[] = [
+  const chunks: GraphChunk[] = [
     { cx: 0, cy: 0, nome: 'Piazza del Borgo', ambiente: 'borgo', cose: ['npc.villager', 'obj.banco', 'obj.forno'], a_terra: ['Pane'], strutture: ['mulino'] },
     { cx: 3, cy: 0, nome: 'Riva del Lago', ambiente: 'lago', cose: ['npc.cat'] },
   ];
-  return { files, places };
+  return { files, chunks };
 }
 
 describe('the graph of the world (ADR-0045)', () => {
   it('turns the files of a universe into typed nodes and edges', () => {
-    const { files, places } = universe();
-    const g = buildGraph(files, places, cats);
+    const { files, chunks } = universe();
+    const g = buildGraph(files, chunks, cats);
     const n = (id: string) => g.node(id);
     expect(n('persona:fiocco')).toMatchObject({ label: 'Fiocco', tipo: 'persona', specie: 'animale', genere: 'femmina', source_file: 'world/people.json' });
     expect(n('persona:bastiano-del-mulino')?.tipo).toBe('persona');
@@ -147,8 +147,8 @@ describe('the graph of the world (ADR-0045)', () => {
   });
 
   it('answers by name, by neighbourhood and with a compact context for the Council', () => {
-    const { files, places } = universe();
-    const g = buildGraph(files, places, cats);
+    const { files, chunks } = universe();
+    const g = buildGraph(files, chunks, cats);
     // The same name first, then names alike.
     expect(g.find('bastiano').map((x) => x.id)).toEqual(['persona:bastiano', 'persona:bastiano-del-mulino']);
     expect(g.find('Piazza del Borgo', 'luogo').map((x) => x.id)).toEqual(['luogo:0_0']);
@@ -166,9 +166,9 @@ describe('the graph of the world (ADR-0045)', () => {
     expect(g.context(['persona:fiocco'], 50).split('\n')).toHaveLength(1);
   });
 
-  it('finds what does not hold: references to nothing, one-sided or impossible bonds, names alike, plots without people or places', () => {
-    const { files, places } = universe();
-    const issues = buildGraph(files, places, cats).check();
+  it('finds what does not hold: references to nothing, one-sided or impossible bonds, names alike, plots without people or chunks', () => {
+    const { files, chunks } = universe();
+    const issues = buildGraph(files, chunks, cats).check();
     const texts = (tipo: string) => issues.filter((i) => i.tipo === tipo).map((i) => i.testo);
     expect(texts('riferimento')).toEqual(
       expect.arrayContaining([
@@ -201,9 +201,9 @@ describe('the graph of the world (ADR-0045)', () => {
     expect(texts('trama')).toEqual(["la trama «Il Ritmo del Lago» ha una tappa a «Prato dell'Eco», che non è un luogo noto"]);
   });
 
-  it('is written in the node-link format of Graphify, one row per node or edge, and keeps its places', () => {
-    const { files, places } = universe();
-    const g = buildGraph(files, places, cats);
+  it('is written in the node-link format of Graphify, one row per node or edge, and keeps its chunks', () => {
+    const { files, chunks } = universe();
+    const g = buildGraph(files, chunks, cats);
     const text = g.toJson();
     const data = JSON.parse(text);
     expect(data).toMatchObject({ directed: true, multigraph: true, graph: { schema_version: 1, nome: 'prova', hash: g.hash } });
@@ -216,7 +216,7 @@ describe('the graph of the world (ADR-0045)', () => {
       expect(l).toEqual(expect.objectContaining({ relation: expect.any(String), confidence: 'EXTRACTED', source_file: expect.any(String) }));
     }
     // Deterministic: the same files, the same file.
-    expect(buildGraph(files, places, cats).toJson()).toBe(text);
+    expect(buildGraph(files, chunks, cats).toJson()).toBe(text);
     // Rebuilt from the files alone (no chunk plan known), the places of the previous graph are kept.
     const again = buildGraph({ ...files, [GRAPH_FILE]: text }, [], cats);
     expect(again.node('luogo:3_0')).toMatchObject({ label: 'Riva del Lago', cose: ['npc.cat'] });
@@ -224,7 +224,7 @@ describe('the graph of the world (ADR-0045)', () => {
     expect(readGraph({ [GRAPH_FILE]: text })?.nodes.length).toBe(data.nodes.length);
   });
 
-  it('the kernel keeps world/grafo.json with every commit, with the places planned', async () => {
+  it('the kernel keeps world/grafo.json with every commit, with the chunks planned', async () => {
     const files: FileMap = { ...bundledFiles, [PLOTS_FILE]: writePlots([]) };
     const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
     await develop(k);
@@ -259,12 +259,12 @@ describe('the graph of the world (ADR-0045)', () => {
     };
     walk(resolve(__dirname, '../universe'), '');
     walk(valmora!, '');
-    const places: GraphPlace[] = readdirSync(join(valmora!, 'maps')).map((f) => {
+    const chunks: GraphChunk[] = readdirSync(join(valmora!, 'maps')).map((f) => {
       const [, cx, cy] = /_(-?\d+)_(-?\d+)\.json$/.exec(f)!;
       const { plan } = JSON.parse(readFileSync(join(valmora!, 'maps', f), 'utf8'));
       return { cx: +cx, cy: +cy, nome: plan.place.name, ambiente: plan.layout, cose: plan.objects.map((o: { module: string }) => o.module), a_terra: plan.ground };
     });
-    const g = buildGraph(files, places, cats);
+    const g = buildGraph(files, chunks, cats);
     const { nodi } = g.counts();
     expect([...g.nodes.values()].filter((x) => x.tipo === 'persona' && !x.viandante && !x.atteso)).toHaveLength(57);
     // The registry's own bonds (not those of the awaited ones; Thalric's «nemico» of the wanderer is said twice, counted once).

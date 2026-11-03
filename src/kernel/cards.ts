@@ -105,7 +105,7 @@ export function moduleCardId(m: Pick<Manifest, 'id' | 'kind'>): string {
   return `${m.kind === 'item' ? 'oggetto' : 'tipo'}:${slug(m.id)}`;
 }
 
-export const placeCardId = (cx: number, cy: number) => `luogo:${cx}_${cy}`;
+export const chunkCardId = (cx: number, cy: number) => `luogo:${cx}_${cy}`;
 
 /**
  * Every card the universe has: the stamped content of its files and the places of world/carte.json. With `shares`,
@@ -246,13 +246,13 @@ export class CardLedger {
   }
 
   /** A place planned for the first time becomes a card. */
-  addPlace(key: string, nome: string, carta: Carta): void {
+  addChunk(key: string, nome: string, carta: Carta): void {
     if (this.file.luoghi[key]) return;
     this.file.luoghi[key] = { ...carta, nome };
     this.version++;
   }
 
-  hasPlace(key: string): boolean {
+  hasChunk(key: string): boolean {
     return !!this.file.luoghi[key];
   }
 

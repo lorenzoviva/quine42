@@ -120,7 +120,7 @@ function standInRock(b: Builder, x: number, y: number, z: number, h: number, rgb
   b.box(x + 0.5 - w * 0.6, y + hh, z + 0.5 - w * 0.5, x + 0.5 + w * 0.5, y + hh + 0.15, z + 0.5 + w * 0.4, rgb.map((v) => v * 1.06));
 }
 
-export interface ChunkView {
+export interface TerrainView {
   key: string;
   sig: string;
   group: THREE.Group;
@@ -159,7 +159,7 @@ export function chunkSig(k: Kernel, ch: Chunk, models = ''): string {
   return `${ch.version}.${ch.levels ?? 0}|${v(1, 0)}|${v(-1, 0)}|${v(0, 1)}|${v(0, -1)}|${models}|${holesKey(k, ch)}|${n(1, 0)}|${n(-1, 0)}|${n(0, 1)}|${n(0, -1)}`;
 }
 
-export function buildChunk(k: Kernel, ch: Chunk, models = ''): ChunkView {
+export function buildChunk(k: Kernel, ch: Chunk, models = ''): TerrainView {
   const S = k.config.chunkSize;
   const pal = k.palette;
   const ground = new Builder();
@@ -252,7 +252,7 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): ChunkView {
   return { key: ch.key, sig: chunkSig(k, ch, models), group };
 }
 
-export function disposeChunk(v: ChunkView): void {
+export function disposeChunk(v: TerrainView): void {
   v.group.traverse((o) => {
     // Instanced models share their geometry with every chunk (models.ts keeps it).
     if (o instanceof THREE.Mesh && !o.userData.shared) o.geometry.dispose();
