@@ -412,7 +412,7 @@ export interface Partita {
   master?: string;
 }
 
-export interface Place {
+export interface ChunkInfo {
   name: string;
   description: string;
 }

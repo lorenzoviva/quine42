@@ -41,8 +41,8 @@ describe('the heritage of clones (T45c)', () => {
     const c = card(terza(), CARPET_ID);
     expect(c).toMatchObject({ autore: 'ingegnere', pagante: 'io', titolare: 'bruno' });
     expect(c.origini!.map((o) => `${o.titolare}@${o.universo}`)).toEqual(['io@prima', 'anna@seconda']);
-    const place = card(terza(), 'luogo:0_0');
-    expect(place.origini!.map((o) => `${o.titolare}@${o.universo}`)).toEqual(['io@prima', 'anna@seconda']);
+    const chunk = card(terza(), 'luogo:0_0');
+    expect(chunk.origini!.map((o) => `${o.titolare}@${o.universo}`)).toEqual(['io@prima', 'anna@seconda']);
     // The uses so far are kept apart: the clone owes only what comes after.
     expect(readCards(terza()).allaNascita).toEqual({ 'luogo:0_0': { luoghi: 1, trame: 0, prompt: 3 } });
   });

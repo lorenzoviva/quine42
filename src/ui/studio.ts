@@ -2,7 +2,7 @@
 // shows it, with «Riscolpisci» — a building's notice board, with the latest changes to its files, and what a
 // showcase shows (T21), with its arrows, and an environment of the sample room on its trial draft (T26d).
 
-import { PLACE_PHASES, type Kernel, type LayoutSample, type PlaceMiniature, type RuleShown, type ShowcaseEntry, type TornioShown } from '../kernel/kernel';
+import { PLACE_PHASES, type Kernel, type LayoutSample, type ChunkMiniature, type RuleShown, type ShowcaseEntry, type TornioShown } from '../kernel/kernel';
 import type { StudioItem } from '../kernel/corona';
 import { OPERATION_COLOR, OPERATION_NAME, type Operation, type OperationKind, type Situation } from '../kernel/situation';
 import { ALERT_COLOR, ALERT_NAME, LIVE_LINES, SCREEN_NAME, fill, type Screens, type ScreenField } from '../kernel/screens';
@@ -170,7 +170,7 @@ export class StudioPanel {
     return mini && this.drawPlan(mini, phase);
   }
 
-  private drawPlan(mini: PlaceMiniature, phase = PLACE_PHASES.length - 1): HTMLCanvasElement {
+  private drawPlan(mini: ChunkMiniature, phase = PLACE_PHASES.length - 1): HTMLCanvasElement {
     const now = mini.phases[phase] ?? { tiles: mini.tiles, lit: [] };
     const finished = phase >= PLACE_PHASES.length - 1;
     const S = mini.size, px = 8;

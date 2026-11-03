@@ -7,7 +7,7 @@ import type { FileMap } from '../kernel/types';
 import type { FeedEntry } from '../kernel/agents/council';
 import type { PlayerSpot } from '../kernel/situation';
 import type { Profile } from '../kernel/wanderers';
-import type { ClientLink, ClientMsg, ContainerView, Dialog, FileChanges, FormView, Me, MyState, Notice, OtherView, PlaceView, ServerMsg, ThingView } from './protocol';
+import type { ClientLink, ClientMsg, ContainerView, Dialog, FileChanges, FormView, Me, MyState, Notice, OtherView, ChunkView, ServerMsg, ThingView } from './protocol';
 
 export interface Outcome {
   ok: boolean;
@@ -49,7 +49,7 @@ export class SessionClient {
   /** The look of this client's wanderer. */
   forma?: FormView;
   stato: MyState = {};
-  readonly places = new Map<string, PlaceView>();
+  readonly places = new Map<string, ChunkView>();
   readonly things = new Map<number, ThingView>();
   readonly others = new Map<string, OtherView>();
   /** The master's (T42c): every player connected and where they are, as the server last said. */
@@ -176,7 +176,7 @@ export class SessionClient {
     this.onMessage?.(m);
   }
 
-  private apply(m: { tick: number; ora: number; luoghi?: PlaceView[]; cose?: ThingView[]; via?: number[]; viandanti?: OtherView[]; partiti?: string[]; giocatori?: PlayerSpot[] }): void {
+  private apply(m: { tick: number; ora: number; luoghi?: ChunkView[]; cose?: ThingView[]; via?: number[]; viandanti?: OtherView[]; partiti?: string[]; giocatori?: PlayerSpot[] }): void {
     this.tick = m.tick;
     this.ora = m.ora;
     if (m.giocatori) this.players = m.giocatori;

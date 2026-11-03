@@ -114,7 +114,7 @@ export interface GraphData {
 }
 
 /** A place as the graph knows it: a planned chunk. */
-export interface GraphPlace {
+export interface GraphChunk {
   cx: number;
   cy: number;
   nome: string;
@@ -163,16 +163,16 @@ export function graphSources(files: FileMap): string[] {
 }
 
 /** The places of a graph file, to carry them into the next build. */
-export function placesOf(data: GraphData | null | undefined): GraphPlace[] {
+export function chunksOf(data: GraphData | null | undefined): GraphChunk[] {
   return (data?.nodes ?? [])
     .filter((n) => n.tipo === 'luogo' && typeof n.cx === 'number' && typeof n.cy === 'number')
     .map((n) => ({ cx: n.cx as number, cy: n.cy as number, nome: n.label, descrizione: n.descrizione as string | undefined, ambiente: n.ambiente as string | undefined, cose: n.cose as string[] | undefined, a_terra: n.a_terra as string[] | undefined, strutture: n.strutture as string[] | undefined }));
 }
 
 /** The places of the previous graph file, then those given (which win), in a stable order. */
-export function mergePlaces(files: FileMap, places: GraphPlace[]): GraphPlace[] {
-  const known = new Map<string, GraphPlace>();
-  for (const p of [...placesOf(readGraph(files)), ...places]) known.set(`${p.cx},${p.cy}`, p);
+export function mergeChunks(files: FileMap, chunks: GraphChunk[]): GraphChunk[] {
+  const known = new Map<string, GraphChunk>();
+  for (const p of [...chunksOf(readGraph(files)), ...chunks]) known.set(`${p.cx},${p.cy}`, p);
   return [...known.values()].sort((a, b) => a.cx - b.cx || a.cy - b.cy);
 }
 
@@ -199,8 +199,8 @@ export function carriedOf(files: FileMap, wanderer: string = SOLO): string[] {
 }
 
 /** What the graph is made of, as a hash: the same hash, the same graph (the file is not rewritten). */
-export function graphHash(files: FileMap, places: GraphPlace[]): string {
-  return hex(hashStr(`${GRAPH_BUILD}|` + graphSources(files).map((p) => `${p}\0${files[p]}`).join('\u0001') + JSON.stringify(places) + wanderersOf(files).map((w) => `${w.id}:${w.nome}:${carriedOf(files, w.id).join(',')}`).join(';')));
+export function graphHash(files: FileMap, chunks: GraphChunk[]): string {
+  return hex(hashStr(`${GRAPH_BUILD}|` + graphSources(files).map((p) => `${p}\0${files[p]}`).join('\u0001') + JSON.stringify(chunks) + wanderersOf(files).map((w) => `${w.id}:${w.nome}:${carriedOf(files, w.id).join(',')}`).join(';')));
 }
 
 /** The wanderers of the graph: `io` always, then one per player file. */
@@ -477,13 +477,13 @@ const DESCRIBE: Partial<Record<NodeType, (n: GraphNode) => string>> = {
 
 /**
  * Builds the graph of a universe from its files and the places known (planned chunks). The places
- * of the previous graph file are kept when `places` does not say otherwise; `speciesOf` gives the
+ * of the previous graph file are kept when `chunks` does not say otherwise; `speciesOf` gives the
  * species of a kind when the registry does not say it (old registries).
  */
-export function buildGraph(files: FileMap, places: GraphPlace[] = [], speciesOf: (tipo: string) => Species | undefined = () => undefined): WorldGraph {
+export function buildGraph(files: FileMap, chunks: GraphChunk[] = [], speciesOf: (tipo: string) => Species | undefined = () => undefined): WorldGraph {
   const sources = graphSources(files);
-  const placeList = mergePlaces(files, places);
-  const hash = graphHash(files, placeList);
+  const chunkList = mergeChunks(files, chunks);
+  const hash = graphHash(files, chunkList);
   const nome = json(files, 'universe.json')?.name ?? '';
   const g = new WorldGraph(nome, hash);
 
@@ -548,10 +548,10 @@ export function buildGraph(files: FileMap, places: GraphPlace[] = [], speciesOf:
   }
 
   // Places: the planned chunks, then the places the bible names that no chunk has.
-  const placeByName = new Map<string, string>();
-  for (const p of placeList) {
+  const chunkByName = new Map<string, string>();
+  for (const p of chunkList) {
     const id = g.add('luogo', `${p.cx}_${p.cy}`, p.nome, 'maps/', { cx: p.cx, cy: p.cy, descrizione: p.descrizione, ambiente: p.ambiente, cose: p.cose, a_terra: p.a_terra, strutture: p.strutture }, true);
-    if (!placeByName.has(normName(p.nome))) placeByName.set(normName(p.nome), id);
+    if (!chunkByName.has(normName(p.nome))) chunkByName.set(normName(p.nome), id);
     const reg = regionAt(atlas, p.cx, p.cy);
     if (reg) g.link(id, `regione:${slug(reg.id)}`, 'in_regione', 'world/atlas.json');
     if (p.ambiente && g.node(`ambiente:${slug(p.ambiente)}`)) g.link(id, `ambiente:${slug(p.ambiente)}`, 'ambiente', 'maps/');
@@ -569,16 +569,16 @@ export function buildGraph(files: FileMap, places: GraphPlace[] = [], speciesOf:
   }
   const bible = json(files, 'world/bible.json');
   for (const nome of (Array.isArray(bible?.luoghi) ? bible.luoghi : []) as string[]) {
-    if (typeof nome !== 'string' || placeByName.has(normName(nome))) continue;
-    placeByName.set(normName(nome), g.add('luogo', nome, nome, 'world/bible.json', { dalla_bibbia: true }, true));
+    if (typeof nome !== 'string' || chunkByName.has(normName(nome))) continue;
+    chunkByName.set(normName(nome), g.add('luogo', nome, nome, 'world/bible.json', { dalla_bibbia: true }, true));
   }
-  for (const r of atlas.regioni) if (!placeByName.has(normName(r.nome))) placeByName.set(normName(r.nome), `regione:${slug(r.id)}`);
+  for (const r of atlas.regioni) if (!chunkByName.has(normName(r.nome))) chunkByName.set(normName(r.nome), `regione:${slug(r.id)}`);
   /** A place a text names: the same name, or a known name inside it («sulle rive del Lago del Re Muto»). */
-  const placeIn = (text: string): string | undefined => {
+  const chunkIn = (text: string): string | undefined => {
     const k = normName(text);
-    if (placeByName.has(k)) return placeByName.get(k);
+    if (chunkByName.has(k)) return chunkByName.get(k);
     let best: [string, string] | undefined;
-    for (const [n, id] of placeByName) if (n.length >= 4 && hasWords(k, n) && (!best || n.length > best[0].length)) best = [n, id];
+    for (const [n, id] of chunkByName) if (n.length >= 4 && hasWords(k, n) && (!best || n.length > best[0].length)) best = [n, id];
     return best?.[1];
   };
 
@@ -608,7 +608,7 @@ export function buildGraph(files: FileMap, places: GraphPlace[] = [], speciesOf:
       if (t) g.link(id, t, 'legame', PF, { legame: r.legame });
       else g.missing(`${p.nome} è ${r.legame} di ${r.nome}, che non esiste`, [id]);
     }
-    const home = p.luogo ? placeIn(p.luogo) : undefined;
+    const home = p.luogo ? chunkIn(p.luogo) : undefined;
     if (home?.startsWith('luogo:')) {
       const where = new Set((p.routine ?? []).map((s) => s.dove));
       if (where.has('casa') || !where.size) g.link(id, home, 'abita', PF);
@@ -628,7 +628,7 @@ export function buildGraph(files: FileMap, places: GraphPlace[] = [], speciesOf:
   // Plots.
   for (const t of readPlots(files)) {
     const noPerson = new Set<string>();
-    const noPlace = new Set<string>();
+    const noChunk = new Set<string>();
     const id = g.add('trama', t.id, t.titolo, 'world/plots.json', { mistero: t.mistero, stato: t.stato, inizio: t.inizio });
     for (const n of new Set([...(t.coinvolti ?? []), ...(t.tappe ?? []).map((b) => b.chi), ...(t.missione ? [t.missione.da] : [])])) {
       const p = personByName.get(n);
@@ -636,13 +636,13 @@ export function buildGraph(files: FileMap, places: GraphPlace[] = [], speciesOf:
       else noPerson.add(n);
     }
     for (const b of t.tappe ?? []) {
-      const where = b.dove ? placeIn(b.dove) : undefined;
+      const where = b.dove ? chunkIn(b.dove) : undefined;
       if (where) g.link(id, where, 'tappa', 'world/plots.json', { giorno: b.giorno, momento: b.momento, chi: personByName.get(b.chi) ?? b.chi, dove: b.dove });
-      else if (b.dove) noPlace.add(b.dove);
+      else if (b.dove) noChunk.add(b.dove);
     }
     const node = g.node(id)!;
     if (noPerson.size) node.senza_persona = [...noPerson];
-    if (noPlace.size) node.senza_luogo = [...noPlace];
+    if (noChunk.size) node.senza_luogo = [...noChunk];
   }
 
   // Rules: what they are about («item.secchio|…», «object.crate|apri»).

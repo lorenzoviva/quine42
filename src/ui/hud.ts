@@ -33,7 +33,7 @@ export class Hud {
   private questsEl = $('#quests');
   private lastQuests = '';
   private lastNeeds = '';
-  private lastPlace = '';
+  private lastChunk = '';
   private lastHand = '';
   private lastHot = '';
   private lastFaults = '';
@@ -82,13 +82,13 @@ export class Hud {
     const k = this.kernel;
     if (this.dialogTimer > 0 && (this.dialogTimer -= dt) <= 0) this.hideDialog();
 
-    const place = k.zone === 'corona' ? null : k.placeHere();
-    const placeKey = place ? place.name + place.description : k.zone;
-    if (placeKey !== this.lastPlace) {
-      this.lastPlace = placeKey;
+    const chunk = k.zone === 'corona' ? null : k.chunkHere();
+    const chunkKey = chunk ? chunk.name + chunk.description : k.zone;
+    if (chunkKey !== this.lastChunk) {
+      this.lastChunk = chunkKey;
       this.place.replaceChildren(
-        el('div', { class: 'name' }, place?.name ?? (k.zone === 'corona' ? 'Corona' : '…')),
-        el('div', { class: 'descr' }, place?.description ?? (k.zone === 'corona' ? "Il codice sorgente dell'universo." : 'Il Cartografo sta disegnando…')),
+        el('div', { class: 'name' }, chunk?.name ?? (k.zone === 'corona' ? 'Corona' : '…')),
+        el('div', { class: 'descr' }, chunk?.description ?? (k.zone === 'corona' ? "Il codice sorgente dell'universo." : 'Il Cartografo sta disegnando…')),
       );
       this.place.classList.remove('fresh');
       void this.place.offsetWidth;

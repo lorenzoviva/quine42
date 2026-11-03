@@ -5,7 +5,7 @@
 
 import type { Schema } from '../ai/models';
 import type { Carta } from '../cards';
-import type { LayoutDef, Place, TileDef } from '../types';
+import type { LayoutDef, ChunkInfo, TileDef } from '../types';
 import type { MjNode } from '../mj';
 import { sizeOf, TAGLIE, type Taglia } from '../../mj/classes';
 import { STAMP_SHAPES } from '../stamps';
@@ -22,7 +22,7 @@ export interface PlacedObject {
 export type WaterRecord = [number, number] | [number, number, string];
 
 export interface ChunkPlan {
-  place: Place;
+  place: ChunkInfo;
   /** Layout (environment) id. */
   layout: string;
   objects: PlacedObject[];

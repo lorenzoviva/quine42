@@ -21,7 +21,7 @@ import { STAMP_SHAPES } from './stamps';
 import { repairProgram } from './mj';
 import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './universes';
 import { addPerson, applyRenames, dayPhase, defaultRoutine, freshName, greeting, guessGender, inferActivity, memorySummary, readPeople, remember, repairSociety, sheetFingerprint, similarNames, societySummary, type Activity, type DayPhase, type Person, type Species } from './society';
-import { buildGraph, GRAPH_FILE, graphHash, mergePlaces, placesOf, readGraph, slug as nodeSlug, type GraphPlace, type WorldGraph } from './graph';
+import { buildGraph, GRAPH_FILE, graphHash, mergeChunks, chunksOf, readGraph, slug as nodeSlug, type GraphChunk, type WorldGraph } from './graph';
 import { situation as buildSituation, type PlayerSpot, type Situation } from './situation';
 import { ChainMeter, chainOf, type Chain } from './chain';
 import { alertOf, clampFrame, costBoard, liveFeed, SCREEN_NAME, timeline, type Budget, type ScreenField, type Screens } from './screens';
@@ -56,9 +56,9 @@ import { BENCH, cleanCases, runCase, textKey, type BenchEntry, type BenchRun, ty
 import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Identity } from './agents/content';
 import { addItem, CARRY_CAPACITY, countItem, HOTBAR, equippedItem, moveSlot, newInventory, putSlot, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
 import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH, worldLevels } from './relief';
-import { CardLedger, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, receivedBy, type Received, payerOf, placeCardId, stampFiles, titolareOf, type Card, type Carta } from './cards';
+import { CardLedger, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, receivedBy, type Received, payerOf, chunkCardId, stampFiles, titolareOf, type Card, type Carta } from './cards';
 import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState, PER_WANDERER } from './wanderers';
-import type { ActionDef, AiConfig, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Partita, Place, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
+import type { ActionDef, AiConfig, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, Partita, ChunkInfo, Recipe, RuneFragment, TileDef, UniverseConfig } from './types';
 
 /** A solid thing with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
 interface SolidForm extends Ground {
@@ -102,7 +102,7 @@ export interface Chunk {
   /** Bumped when its levels change and its tiles do not (T51a: water found beyond it); renderer cache key too. */
   levels?: number;
   stage: 'draft' | 'planned';
-  place?: Place;
+  place?: ChunkInfo;
   plan?: ChunkPlan;
   lots: Lot[];
   developing?: boolean;
@@ -213,7 +213,7 @@ interface Placements {
 }
 
 /** A lot of a planned place and the structure that stands on it (ADR-0043). */
-interface PlaceLot {
+interface ChunkLot {
   index: number;
   origin: string;
   x: number;
@@ -223,7 +223,7 @@ interface PlaceLot {
 }
 
 /** A planned place in miniature (T26): positions in tiles from the place's top-left corner, levels in `LEVEL`s. */
-export interface PlaceMiniature {
+export interface ChunkMiniature {
   cx: number;
   cy: number;
   size: number;
@@ -264,7 +264,7 @@ export interface LayoutSample {
   /** Which of the trial drafts, and how many of its tiles the environment changed. */
   draft: number;
   changed: number;
-  mini: PlaceMiniature;
+  mini: ChunkMiniature;
   error?: string;
 }
 
@@ -381,9 +381,9 @@ export class Kernel {
   private cardsWritten = -1;
   private cardIdsOf?: { files: FileMap; ids: Set<string> };
   /** The places the graph of the world knows (ADR-0045): planned chunks, by key. */
-  private graphPlaces = new Map<string, GraphPlace>();
+  private graphChunks = new Map<string, GraphChunk>();
   private graphCache?: { files: FileMap; places: number; graph: WorldGraph };
-  private graphPlacesVersion = 0;
+  private graphChunksVersion = 0;
   readonly chunkStore: ChunkStore;
   /** The models of things (ADR-0041): the library of programs and the forms they make. */
   readonly forms: Forms;
@@ -467,7 +467,7 @@ export class Kernel {
   /** New places a universe of many plans per minute of the world, at most (T40; `ai.placesPerMinute`). */
   static PLACES_PER_MINUTE = 20;
   /** When (world time) the last new places were planned: the quota of a universe of many. */
-  private placesMade: number[] = [];
+  private chunksMade: number[] = [];
   private genBudget = 64;
   private tickCount = 0;
   /** Ticks since this kernel started (the clock of a session, T38). */
@@ -537,7 +537,7 @@ export class Kernel {
   private campusVersion = -1;
   private showcaseCache = new Map<ShowcaseSource, { files: FileMap; stamp: string; entries: ShowcaseEntry[] }>();
   /** The places in miniature (T26), by chunk key, made once per state of the files. */
-  private miniatures = new Map<string, { files: FileMap; mini?: PlaceMiniature }>();
+  private miniatures = new Map<string, { files: FileMap; mini?: ChunkMiniature }>();
   /** The environments of the sample room on their trial drafts (T26d), made once per state of the files. */
   private layoutSamples = new Map<string, { files: FileMap; sample?: LayoutSample }>();
   /** The drafts layout programs are tried on (`sampleDrafts`), per state of the files. */
@@ -641,7 +641,7 @@ export class Kernel {
     k.ensureAtlas();
     k.reviewSociety();
     k.reviewPlots();
-    void k.seedGraphPlaces();
+    void k.seedGraphChunks();
     void k.reviewFourthWall();
     k.ai.limits = { text: k.config.ai.maxText };
     k.log('kernel', `universo «${name}» avviato su commit ${repo.head().id} (${repo.head().message}) — modelli: ${opts.ai.name}${synced ? ' — sincronizzato dal disco' : ''}`);
@@ -1576,7 +1576,7 @@ export class Kernel {
         at.push({ x: pc.x / S - 0.5, y: pc.y / S - 0.5 });
       });
     if (!at.length) return;
-    const quota = this.placeQuota();
+    const quota = this.chunkQuota();
     const drafts = [...this.chunks.values()].filter((c) => c.stage === 'draft' && !c.developing && (quota || !c.held));
     const dist = (c: Chunk) => Math.min(...at.map((p) => Math.hypot(c.cx - p.x, c.cy - p.y)));
     drafts.sort((a, b) => dist(a) - dist(b));
@@ -1596,15 +1596,15 @@ export class Kernel {
     if (!this.alive(ch)) return;
     if (rec) return this.applyPlan(ch, rec.plan);
     // New to the universe: planned once, here, at the expense of who wanted it first (T40), within the quota.
-    if (!this.placeQuota()) {
+    if (!this.chunkQuota()) {
       if (!ch.held) this.council.say('kernel', 'info', `luogo ${ch.key}: troppi luoghi nuovi in un minuto, aspetta`, 'cartografo', 'chunk.plan');
       ch.held = true;
       return;
     }
     ch.held = false;
-    this.placesMade.push(this.time);
+    this.chunksMade.push(this.time);
     const plan = await this.makePlan(ch);
-    this.cardPlace(ch, plan, ch.chi);
+    this.cardChunk(ch, plan, ch.chi);
     await this.chunkStore.save(this.recordKey(ch), { plan });
     if (this.alive(ch)) this.applyPlan(ch, plan);
   }
@@ -1613,10 +1613,10 @@ export class Kernel {
    * Whether one more new place may be planned now: alone always; in a universe of many at most
    * `ai.placesPerMinute` in a minute of the world, for everyone together (T40, costs).
    */
-  private placeQuota(): boolean {
+  private chunkQuota(): boolean {
     if (!this.manyPlayers()) return true;
-    this.placesMade = this.placesMade.filter((t) => this.time - t < 60);
-    return this.placesMade.length < (this.config.ai.placesPerMinute ?? Kernel.PLACES_PER_MINUTE);
+    this.chunksMade = this.chunksMade.filter((t) => this.time - t < 60);
+    return this.chunksMade.length < (this.config.ai.placesPerMinute ?? Kernel.PLACES_PER_MINUTE);
   }
 
   private terrainSummary(draft: string): string {
@@ -1727,7 +1727,7 @@ export class Kernel {
     for (let attempt = 0; attempt < 2; attempt++) {
       let d;
       try {
-        d = await designEnvironment(this.council, request, { palette: this.palette, layouts, here: this.placeHere()?.name ?? 'qui', stamps: STAMP_SHAPES, feedback });
+        d = await designEnvironment(this.council, request, { palette: this.palette, layouts, here: this.chunkHere()?.name ?? 'qui', stamps: STAMP_SHAPES, feedback });
       } catch (e) {
         return { ok: false, summary: `Il Cartografo non riesce: ${(e as Error).message}` };
       }
@@ -1811,8 +1811,8 @@ export class Kernel {
     const S = this.config.chunkSize;
     const cx = Math.floor(x / S);
     const cy = Math.floor(y / S);
-    const places = [...this.chunks.values()].filter((c) => c.place).map((c) => ({ name: c.place!.name, cx: c.cx, cy: c.cy }));
-    return directionsFrom(readAtlas(this.files), places, cx, cy);
+    const chunks = [...this.chunks.values()].filter((c) => c.place).map((c) => ({ name: c.place!.name, cx: c.cx, cy: c.cy }));
+    return directionsFrom(readAtlas(this.files), chunks, cx, cy);
   }
 
   private fallbackPlan(ch: Chunk, layouts: string[], start: boolean): ChunkPlan {
@@ -1936,8 +1936,8 @@ export class Kernel {
     const { result, tiles } = this.layoutOf(ch, plan, pathCode);
     ch.plan = plan;
     ch.place = plan.place;
-    this.graphPlaces.set(ch.key, { cx: ch.cx, cy: ch.cy, nome: plan.place.name, descrizione: plan.place.description, ambiente: plan.layout, cose: plan.objects.map((o) => o.module), a_terra: plan.ground, strutture: plan.strutture?.map((x) => x.concetto) });
-    this.graphPlacesVersion++;
+    this.graphChunks.set(ch.key, { cx: ch.cx, cy: ch.cy, nome: plan.place.name, descrizione: plan.place.description, ambiente: plan.layout, cose: plan.objects.map((o) => o.module), a_terra: plan.ground, strutture: plan.strutture?.map((x) => x.concetto) });
+    this.graphChunksVersion++;
     ch.tiles = tiles;
     ch.lots = result.lots;
     ch.stage = 'planned';
@@ -2119,11 +2119,11 @@ export class Kernel {
    * writes the ones that do not exist yet); the others are common houses. The lot's tiles become ground,
    * the path goes on from its door towards the house. Pure: the world and the model of places (T26) build the same.
    */
-  private lotsOf(ch: Pick<Chunk, 'cx' | 'cy' | 'key' | 'draft' | 'tiles' | 'lots'>, plan: ChunkPlan, pathCode: string): { tiles: string; lots: PlaceLot[] } {
+  private lotsOf(ch: Pick<Chunk, 'cx' | 'cy' | 'key' | 'draft' | 'tiles' | 'lots'>, plan: ChunkPlan, pathCode: string): { tiles: string; lots: ChunkLot[] } {
     const S = this.config.chunkSize;
     const tiles = [...ch.tiles];
     const wanted = (plan.strutture ?? []).map(readStructure);
-    const lots: PlaceLot[] = [];
+    const lots: ChunkLot[] = [];
     const order = ch.lots.map((b, i) => ({ b, i, area: (b.x1 - b.x0 + 1) * (b.y1 - b.y0 + 1) })).sort((a, b) => b.area - a.area || a.i - b.i);
     for (const { b, i } of order) {
       const w = b.x1 - b.x0 + 1, h = b.y1 - b.y0 + 1;
@@ -2184,11 +2184,11 @@ export class Kernel {
    * chunk if it is loaded, else from its saved plan: then `undefined` the first time, and `miniatureVersion` grows when
    * it is ready. Looking does not generate anything: a place never planned has no miniature.
    */
-  miniature(cx: number, cy: number): PlaceMiniature | undefined {
+  miniature(cx: number, cy: number): ChunkMiniature | undefined {
     const key = this.chunkKey(cx, cy);
     const hit = this.miniatures.get(key);
     if (hit?.files === this.files) return hit.mini;
-    const entry: { files: FileMap; mini?: PlaceMiniature } = { files: this.files };
+    const entry: { files: FileMap; mini?: ChunkMiniature } = { files: this.files };
     this.miniatures.set(key, entry);
     const ch = this.chunks.get(key);
     if (ch?.stage === 'planned' && ch.plan) return (entry.mini = this.miniatureOf(ch, ch.plan));
@@ -2203,7 +2203,7 @@ export class Kernel {
     return undefined;
   }
 
-  private miniatureOf(ch: Pick<Chunk, 'cx' | 'cy' | 'key' | 'draft'>, plan: ChunkPlan): PlaceMiniature {
+  private miniatureOf(ch: Pick<Chunk, 'cx' | 'cy' | 'key' | 'draft'>, plan: ChunkPlan): ChunkMiniature {
     const S = this.config.chunkSize;
     const pathCode = this.pathCode();
     const { result, tiles: laid } = this.layoutOf(ch, plan, pathCode, true);
@@ -2215,7 +2215,7 @@ export class Kernel {
     const height = (c: number, r: number) => field[r * S + c];
     const levels = chunkLevels(tiles, S, liquid, height, result.lots);
     const local = (cell: number) => ({ x: (cell % S) + 0.5, y: Math.floor(cell / S) + 0.5 });
-    const things: PlaceMiniature['things'] = [];
+    const things: ChunkMiniature['things'] = [];
     for (const { index, cell } of place.objects) {
       const m = this.modules.get(plan.objects[index].module);
       const origin = `${ch.key}#o${index}`;
@@ -2586,11 +2586,11 @@ export class Kernel {
     this.sessions++;
     const rules = this.rules().slice(-12).map((r) => `- ${r.testo}: ${r.possibile ? 'si può' : 'non si può'}`).join('\n');
     const people = readPeople(this.files).persone.slice(-10).map((p) => `- ${p.nome}, ${p.mestiere}`).join('\n');
-    const places = [...this.chunks.values()].filter((c) => c.place).slice(-8).map((c) => `- ${c.place!.name}`).join('\n');
+    const chunks = [...this.chunks.values()].filter((c) => c.place).slice(-8).map((c) => `- ${c.place!.name}`).join('\n');
     const wearable = [...this.content.items.values()].filter((d) => d.equippable || d.slot || ['arma', 'vestiario'].includes(d.category)).length;
     const panels = this.uiPanels().map((p) => p.panel.titolo);
     const mech = `Meccaniche con interfaccia: ${panels.join(', ') || 'nessuna'}.${wearable && !this.uiPanels().some((p) => p.panel.elementi.some((e) => e.tipo === 'slot')) ? ` MANCA: ci sono ${wearable} oggetti da indossare o impugnare ma nessuno slot per farlo.` : ''}`;
-    const summary = `${mech}\nRegole nate dal gioco:\n${rules || '(nessuna)'}\nPersone incontrate:\n${people || '(nessuna)'}\nLuoghi visti:\n${places || '(nessuno)'}\nOggetti esistenti: ${this.content.items.size}; tipi di abitanti: ${[...this.modules.values()].filter((m) => m.manifest.persona).length}.`;
+    const summary = `${mech}\nRegole nate dal gioco:\n${rules || '(nessuna)'}\nPersone incontrate:\n${people || '(nessuna)'}\nLuoghi visti:\n${chunks || '(nessuno)'}\nOggetti esistenti: ${this.content.items.size}; tipi di abitanti: ${[...this.modules.values()].filter((m) => m.manifest.persona).length}.`;
     let s;
     try {
       s = await councilSession(this.council, summary);
@@ -2607,7 +2607,7 @@ export class Kernel {
     return s.action;
   }
 
-  async growCast(place?: Place, force = false): Promise<boolean> {
+  async growCast(chunk?: ChunkInfo, force = false): Promise<boolean> {
     const max = this.config.ai.maxCast ?? 3;
     if (!force && (this.castUsed >= max || this.generationHeld || this.ai.name === 'offline')) return false;
     const people = [...this.modules.values()].filter((m) => m.manifest.persona);
@@ -2615,7 +2615,7 @@ export class Kernel {
     this.castUsed++;
     const known = people.map((m) => m.manifest.name).join(', ') || 'nessuno';
     this.council.say('narratore', 'propone', `il mondo ha bisogno di volti nuovi (finora: ${known})`, undefined, 'forge.concept');
-    const r = await this.forgeModule(`un nuovo abitante del mondo${place ? ` che si incontra in posti come «${place.name}» (${place.description})` : ''}: un mestiere, un'età e un carattere diversi da tutti quelli già noti (${known})`, 'cartografo', 'npc');
+    const r = await this.forgeModule(`un nuovo abitante del mondo${chunk ? ` che si incontra in posti come «${chunk.name}» (${chunk.description})` : ''}: un mestiere, un'età e un carattere diversi da tutti quelli già noti (${known})`, 'cartografo', 'npc');
     return r.ok;
   }
 
@@ -4085,7 +4085,7 @@ export class Kernel {
         terrains: Object.entries(this.palette).filter(([c]) => c !== '?').map(([, t]) => t.name),
         summonable: summonable.map((e) => e.manifest.name),
         loot: Object.keys(this.content.loot),
-        place: this.placeHere()?.name ?? '',
+        place: this.chunkHere()?.name ?? '',
         transcended: this.exitedOnce,
         shape: sub.entity !== undefined && !sub.wanderer && !!this.shapeModel(sub.entity),
         between: sub.wanderer ? { pvp: !!this.partita()?.pvp, god: this.godMode(sub.wanderer) } : undefined,
@@ -4232,7 +4232,7 @@ export class Kernel {
       }
     });
     const tiles = best?.tiles ?? drafts[0].join('');
-    const mini: PlaceMiniature = { cx: 0, cy: 0, size: S, tiles, levels: Array<number>(S * S).fill(0), structures: [], things: [], runes: [], phases: [] };
+    const mini: ChunkMiniature = { cx: 0, cy: 0, size: S, tiles, levels: Array<number>(S * S).fill(0), structures: [], things: [], runes: [], phases: [] };
     return (entry.sample = { id, name: def.name, description: def.description, environment: def.environment, path, draft: best?.draft ?? 0, changed: best?.changed ?? 0, mini, ...(best ? {} : { error }) });
   }
 
@@ -4424,8 +4424,8 @@ export class Kernel {
   /** What a source of showcases has to show, in a stable order. */
   showcaseEntries(source: ShowcaseSource): ShowcaseEntry[] {
     // The places change as they are planned, loaded (what is known of them) and visited (their order).
-    const here = this.lastPlace();
-    const stamp = source === 'luoghi' ? `${this.graphPlacesVersion}|${this.plannedCount}|${this.chunks.size}|${here.cx},${here.cy}` : '';
+    const here = this.lastChunk();
+    const stamp = source === 'luoghi' ? `${this.graphChunksVersion}|${this.plannedCount}|${this.chunks.size}|${here.cx},${here.cy}` : '';
     const hit = this.showcaseCache.get(source);
     if (hit?.files === this.files && hit.stamp === stamp) return hit.entries;
     const entries = this.listShowcase(source);
@@ -4434,7 +4434,7 @@ export class Kernel {
   }
 
   /** The place where the wanderer stands, or (from the studio) last stood in the world. */
-  private lastPlace(): { cx: number; cy: number } {
+  private lastChunk(): { cx: number; cy: number } {
     const S = this.config.chunkSize;
     const p = this.corona.isInterior(this.wandererPos().x) ? this.lastWorld : this.wandererCarpet();
     return { cx: Math.floor(p.x / S), cy: Math.floor(p.y / S) };
@@ -4483,7 +4483,7 @@ export class Kernel {
       }
       return out;
     }
-    if (source === 'luoghi') return this.listPlaces();
+    if (source === 'luoghi') return this.listChunks();
     if (source === 'oggetti') {
       for (const d of [...this.content.items.values()].sort((a, b) => a.id.localeCompare(b.id))) {
         const path = `modules/${this.content.itemSource.get(d.id) ?? d.module ?? ''}/manifest.json`;
@@ -4524,14 +4524,14 @@ export class Kernel {
    * what is known of each: where, the region, the environment (its module: «Apri il file»), what is inside and outside,
    * the structures, the runes, the file of its plan.
    */
-  private listPlaces(): ShowcaseEntry[] {
-    const here = this.lastPlace();
+  private listChunks(): ShowcaseEntry[] {
+    const here = this.lastChunk();
     const far = (p: { cx: number; cy: number }) => Math.hypot(p.cx - here.cx, p.cy - here.cy);
-    const places = mergePlaces(this.files, [...this.graphPlaces.values()]).sort((a, b) => far(a) - far(b) || a.cx - b.cx || a.cy - b.cy);
+    const chunks = mergeChunks(this.files, [...this.graphChunks.values()]).sort((a, b) => far(a) - far(b) || a.cx - b.cx || a.cy - b.cy);
     const atlas = readAtlas(this.files);
     const nameOf = (id: string) => this.modules.get(id)?.manifest.name ?? id;
     const list = (xs: string[]) => [...new Set(xs)].join(', ');
-    return places.map((p): ShowcaseEntry => {
+    return chunks.map((p): ShowcaseEntry => {
       const key = this.chunkKey(p.cx, p.cy);
       const plan = this.chunks.get(key)?.plan;
       const region = p.cx === 0 && p.cy === 0 ? undefined : regionAt(atlas, p.cx, p.cy);
@@ -5130,7 +5130,7 @@ export class Kernel {
     const carried = this.carriedCounts();
     const d = deathLevel(this.partita());
     try {
-      return await judgeDeath(this.council, { cause, level, punishment: `${d.nome} (${level} su 4): ${d.testo}`, carried, states: Object.keys(this.states()), place: this.placeHere()?.name ?? '' });
+      return await judgeDeath(this.council, { cause, level, punishment: `${d.nome} (${level} su 4): ${d.testo}`, carried, states: Object.keys(this.states()), place: this.chunkHere()?.name ?? '' });
     } catch (e) {
       this.council.say('kernel', 'errore', `il Narratore tace sulla morte (${(e as Error).message}): vale la punizione alla lettera`, 'narratore', 'player.death');
       return fallbackDeath(level, carried);
@@ -5919,7 +5919,7 @@ export class Kernel {
     const held = equippedItem(this.inventory());
     const n = this.needs();
     return {
-      luogo: this.placeHere()?.name,
+      luogo: this.chunkHere()?.name,
       ora: Math.floor(this.time),
       momento: this.daylight() > 0.6 ? 'giorno' : this.daylight() > 0.15 ? 'crepuscolo' : 'notte',
       // Locals know their surroundings: which places and regions are where.
@@ -5968,7 +5968,7 @@ export class Kernel {
       const awaited = (n: string) => readPeople(this.files).attesi.some((a) => a.nome.toLowerCase() === n.toLowerCase());
       const alike = (n: string) => (awaited(n) && !taken().includes(n) ? [] : taken().filter((t) => similarNames(t, n)));
       try {
-        const ask = (avoid?: string[]) => individuate(this.council, { name: m.name, description: m.description ?? '', persona: m.persona!, specie }, { place: this.placeHere()?.name ?? '', common: [...this.content.items.values()].map((d) => d.name), society: societySummary(readPeople(this.files)), avoid, focus: this.focusOn([`tipo:${nodeSlug(modId!)}`], this.ecs.get(id, 'pos')) });
+        const ask = (avoid?: string[]) => individuate(this.council, { name: m.name, description: m.description ?? '', persona: m.persona!, specie }, { place: this.chunkHere()?.name ?? '', common: [...this.content.items.values()].map((d) => d.name), society: societySummary(readPeople(this.files)), avoid, focus: this.focusOn([`tipo:${nodeSlug(modId!)}`], this.ecs.get(id, 'pos')) });
         identity = await ask();
         // A person of the world, not of the Council's table: once more if the fourth wall breaks,
         // or if the name is like someone else's.
@@ -6471,7 +6471,7 @@ export class Kernel {
 
   /** "Vai" quests are done by arriving: the place or the region you stand in. */
   private questTick(): void {
-    const here = [this.placeHere()?.name ?? '', ...this.directionsAt(this.wandererCarpet().x, this.wandererCarpet().y).filter((d) => d.startsWith('qui siamo'))].join(' ').toLowerCase();
+    const here = [this.chunkHere()?.name ?? '', ...this.directionsAt(this.wandererCarpet().x, this.wandererCarpet().y).filter((d) => d.startsWith('qui siamo'))].join(' ').toLowerCase();
     for (const { plot, quest } of activeQuests(readPlots(this.files), this.wanderer().id)) {
       if (quest.obiettivo.tipo === 'vai' && quest.obiettivo.luogo && here.includes(normName(quest.obiettivo.luogo).split(' ')[0] ?? '~')) void this.completeQuest(plot.id);
     }
@@ -6622,7 +6622,7 @@ export class Kernel {
         bond: person ? bondWith(person, me.id) : undefined,
         secrets: secretsOf(readPlots(this.files), name, this.day()),
         scheda,
-        persona: (identity?.persona ?? m.persona) + social, mood: mind.mood, mode: mind.mode, carrying, place: this.placeHere()?.name ?? '', history: mind.history.filter((t) => (t.con ?? SOLO) === me.id), facts: this.worldFacts() }, text, this.focusOn([name], this.ecs.get(id, 'pos')), by);
+        persona: (identity?.persona ?? m.persona) + social, mood: mind.mood, mode: mind.mode, carrying, place: this.chunkHere()?.name ?? '', history: mind.history.filter((t) => (t.con ?? SOLO) === me.id), facts: this.worldFacts() }, text, this.focusOn([name], this.ecs.get(id, 'pos')), by);
       this.council.say(by.agent, 'info', `${name} a ${me.nome}: «${reply.say}»`, undefined, 'npc.reply');
     } catch (e) {
       return { say: `(${name} ti guarda in silenzio — ${(e as Error).message})`, action: 'nessuna', mood: mind.mood };
@@ -6751,7 +6751,7 @@ export class Kernel {
     return [...refs.filter((r): r is string => !!r), ...(ch ? [`luogo:${nodeSlug(`${ch.cx}_${ch.cy}`)}`] : [])];
   }
 
-  placeHere(): Place | undefined {
+  chunkHere(): ChunkInfo | undefined {
     const pc = this.wandererCarpet();
     return this.chunkAt(pc.x, pc.y)?.place;
   }
@@ -7149,9 +7149,9 @@ export class Kernel {
   /** The graph of the universe as it is now: built from the files and the places known, rebuilt when they change. */
   graph(): WorldGraph {
     const c = this.graphCache;
-    if (c && c.files === this.files && c.places === this.graphPlacesVersion) return c.graph;
-    const graph = buildGraph(this.files, [...this.graphPlaces.values()], (t) => this.speciesOf(t));
-    this.graphCache = { files: this.files, places: this.graphPlacesVersion, graph };
+    if (c && c.files === this.files && c.places === this.graphChunksVersion) return c.graph;
+    const graph = buildGraph(this.files, [...this.graphChunks.values()], (t) => this.speciesOf(t));
+    this.graphCache = { files: this.files, places: this.graphChunksVersion, graph };
     return graph;
   }
 
@@ -7159,25 +7159,25 @@ export class Kernel {
   private writeGraph(): void {
     if (!this.repo) return;
     const files = this.repo.working;
-    const places = [...this.graphPlaces.values()];
-    if (readGraph(files)?.graph.hash === graphHash(files, mergePlaces(files, places))) return;
-    this.repo.write(GRAPH_FILE, buildGraph(files, places, (t) => this.speciesOf(t)).toJson());
+    const chunks = [...this.graphChunks.values()];
+    if (readGraph(files)?.graph.hash === graphHash(files, mergeChunks(files, chunks))) return;
+    this.repo.write(GRAPH_FILE, buildGraph(files, chunks, (t) => this.speciesOf(t)).toJson());
     this.files = { ...this.files, [GRAPH_FILE]: this.repo.working[GRAPH_FILE]! };
   }
 
   /** The places planned in earlier sessions that the graph does not have yet (from the universe's maps). */
-  private async seedGraphPlaces(): Promise<void> {
+  private async seedGraphChunks(): Promise<void> {
     const maps = (await this.repo.backend?.listMaps?.().catch(() => [])) ?? [];
     if (!maps.length) return;
     const prefix = this.recordKey({ cx: 0, cy: 0, key: '' } as Chunk).replace(/[:,]/g, '_');
-    const known = new Set(placesOf(readGraph(this.files)).map((p) => `${p.cx},${p.cy}`));
+    const known = new Set(chunksOf(readGraph(this.files)).map((p) => `${p.cx},${p.cy}`));
     for (const m of maps) {
       if (!m.file.startsWith(prefix)) continue;
       const [cx, cy] = m.file.slice(prefix.length).split('_').map(Number);
       const key = `${cx},${cy}`;
-      if (!Number.isFinite(cx) || !Number.isFinite(cy) || known.has(key) || this.graphPlaces.has(key)) continue;
-      this.graphPlaces.set(key, { cx, cy, nome: m.name, ambiente: m.layout || undefined });
-      this.graphPlacesVersion++;
+      if (!Number.isFinite(cx) || !Number.isFinite(cy) || known.has(key) || this.graphChunks.has(key)) continue;
+      this.graphChunks.set(key, { cx, cy, nome: m.name, ambiente: m.layout || undefined });
+      this.graphChunksVersion++;
     }
   }
 
@@ -7235,9 +7235,9 @@ export class Kernel {
   }
 
   /** A place planned for the first time: its card, and one use of every card it holds (T36). */
-  private cardPlace(ch: Chunk, plan: ChunkPlan, chi?: string): void {
-    plan.carta ??= this.sign(placeCardId(ch.cx, ch.cy), 'chunk.plan', 'cartografo', chi);
-    this.cards.addPlace(`${ch.cx}_${ch.cy}`, plan.place.name, plan.carta);
+  private cardChunk(ch: Chunk, plan: ChunkPlan, chi?: string): void {
+    plan.carta ??= this.sign(chunkCardId(ch.cx, ch.cy), 'chunk.plan', 'cartografo', chi);
+    this.cards.addChunk(`${ch.cx}_${ch.cy}`, plan.place.name, plan.carta);
     const ids = [`ambiente:${nodeSlug(plan.layout)}`];
     for (const o of plan.objects) ids.push(...this.thingCards(o.module));
     for (const n of plan.ground) {
@@ -7268,7 +7268,7 @@ export class Kernel {
 
   /** Whether an id (of the graph's kind) is a card of this universe. */
   isCard(id: string): boolean {
-    if (id.startsWith('luogo:')) return this.cards.hasPlace(id.slice(6));
+    if (id.startsWith('luogo:')) return this.cards.hasChunk(id.slice(6));
     if (this.cardIdsOf?.files !== this.files) this.cardIdsOf = { files: this.files, ids: new Set(allCards(this.files).map((c) => c.id)) };
     return this.cardIdsOf.ids.has(id);
   }
