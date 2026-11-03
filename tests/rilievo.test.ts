@@ -79,20 +79,20 @@ describe('the kernel’s rilievo effect (T57c)', () => {
 
     // Check plan.scavi
     expect(ch.plan!.scavi).toBeDefined();
-    const cell = row * k.config.chunkSize + col;
-    expect(ch.plan!.scavi![cell]).toBe(2);
+    const tile = row * k.config.chunkSize + col;
+    expect(ch.plan!.scavi![tile]).toBe(2);
 
     // Apply lowering effect
     k.applyEffects([{ tipo: 'rilievo', delta: -3, raggio: 0 }], undefined, { x: col + 0.5, y: row + 0.5 });
     const loweredCenter = k.groundAt(col, row) / LEVEL;
     expect(loweredCenter).toBe(initial - 1);
-    expect(ch.plan!.scavi![cell]).toBe(-1);
+    expect(ch.plan!.scavi![tile]).toBe(-1);
 
     // Persists upon reload: save plan to chunkStore and reload place
     const rKey = (k as any).recordKey(ch);
     await k.chunkStore.save(rKey, { plan: ch.plan! });
     const reloaded = await k.chunkStore.load(rKey);
-    expect(reloaded?.plan.scavi?.[cell]).toBe(-1);
+    expect(reloaded?.plan.scavi?.[tile]).toBe(-1);
   }, 30_000);
 
   it('wakes the water flow when a hollow is dug beside a pond', async () => {

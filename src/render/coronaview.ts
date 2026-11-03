@@ -4,7 +4,7 @@
 
 import * as THREE from 'three';
 import type { Kernel } from '../kernel/kernel';
-import { cellNear } from '../kernel/corona';
+import { tileNear } from '../kernel/corona';
 import { animateRing, Avatars, buildCoronaRing, buildRoom, buildShowcase, buildSituation, campusKey } from './corona3d';
 import { showFrame } from './models';
 import { ScreenWall } from './screens';
@@ -243,7 +243,7 @@ export class CoronaView {
     const pulse = 0.5 + 0.5 * Math.sin(t * 4);
     for (const it of studio.storey.items) if (it.path && recent.has(it.path)) o.cell(it.x, it.y, `rgba(255, 220, 120, ${0.4 + 0.4 * pulse})`, `rgba(255, 220, 120, ${0.1 + 0.15 * pulse})`, 0.4);
     if (near) {
-      const c = cellNear(near, k.wandererPos().x, k.wandererPos().y);
+      const c = tileNear(near, k.wandererPos().x, k.wandererPos().y);
       o.cell(c.x, c.y, '#ffcf5c', undefined, 0.42);
     }
     const fl = studio.storey;

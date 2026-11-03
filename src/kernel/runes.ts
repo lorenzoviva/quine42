@@ -71,7 +71,7 @@ export function extractLines(runes: Array<{ id: Id; rune: RuneComp }>): RuneLine
 }
 
 /** Map "col,row" → rune id for every cell covered by a rune. */
-export function cellIndex(runes: Array<{ id: Id; rune: RuneComp }>): Map<string, Id> {
+export function tileIndex(runes: Array<{ id: Id; rune: RuneComp }>): Map<string, Id> {
   const m = new Map<string, Id>();
   for (const { id, rune } of runes) m.set(`${rune.col},${rune.row}`, id);
   return m;

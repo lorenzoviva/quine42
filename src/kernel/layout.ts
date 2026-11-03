@@ -185,9 +185,9 @@ export function layout(draft: string[], palette: Record<string, TileDef>, opts: 
   const cells = draft.map((r) => [...r]);
   const border = new Set<number>();
   for (let i = 0; i < size; i++) for (const c of [i, (size - 1) * size + i, i * size, i * size + size - 1]) border.add(c);
-  const gateCells = gates(opts.cx, opts.cy, size, opts.seed);
+  const gateTiles = gates(opts.cx, opts.cy, size, opts.seed);
   const walkable = (i: number) => palette[cells[Math.floor(i / size)][i % size]]?.solid === false;
-  for (const g of gateCells) if (!walkable(g)) cells[Math.floor(g / size)][g % size] = opts.pathCode;
+  for (const g of gateTiles) if (!walkable(g)) cells[Math.floor(g / size)][g % size] = opts.pathCode;
   const gated = opts.stages ? cells.map((r) => r.join('')) : undefined;
 
   // The layout program shapes the interior; the border ring stays exactly as the draft.
@@ -202,12 +202,12 @@ export function layout(draft: string[], palette: Record<string, TileDef>, opts: 
   let carved = 0;
   const rows = () => cells.map((r) => r.join(''));
   const stages = gated && { gated, programmed: rows() };
-  const doorCells: number[] = [];
-  for (let i = 0; i < size * size; i++) if (palette[cells[Math.floor(i / size)][i % size]]?.layer === 'door') doorCells.push(i);
-  const mustReach = [...gateCells.slice(1), ...doorCells];
-  let reach = flood(rows(), size, palette, [gateCells[0]]);
+  const doorTiles: number[] = [];
+  for (let i = 0; i < size * size; i++) if (palette[cells[Math.floor(i / size)][i % size]]?.layer === 'door') doorTiles.push(i);
+  const mustReach = [...gateTiles.slice(1), ...doorTiles];
+  let reach = flood(rows(), size, palette, [gateTiles[0]]);
   const join = (from: number) => {
-    const path = carvePath(cells, size, palette, from, reach, new Set([...border].filter((b) => !gateCells.includes(b))));
+    const path = carvePath(cells, size, palette, from, reach, new Set([...border].filter((b) => !gateTiles.includes(b))));
     if (!path) return;
     for (const c of path) {
       const x = c % size;
@@ -218,7 +218,7 @@ export function layout(draft: string[], palette: Record<string, TileDef>, opts: 
         carved++;
       }
     }
-    reach = flood(rows(), size, palette, [gateCells[0]]);
+    reach = flood(rows(), size, palette, [gateTiles[0]]);
   };
   for (const target of mustReach) if (!reach.has(target)) join(target);
   // Sizeable walkable pockets are joined too; tiny ones are left as scenery.
@@ -227,11 +227,11 @@ export function layout(draft: string[], palette: Record<string, TileDef>, opts: 
     if (visited.has(i) || !walkable(i)) continue;
     const pocket = flood(rows(), size, palette, [i]);
     for (const p of pocket) visited.add(p);
-    if (pocket.size >= 4 && !pocket.has(gateCells[0])) join(i);
+    if (pocket.size >= 4 && !pocket.has(gateTiles[0])) join(i);
   }
 
   const grid = rows();
-  return { grid, lots: findLots(grid, size, palette), gates: gateCells, reachable: reach, carved, steps, ...(stages ? { stages } : {}) };
+  return { grid, lots: findLots(grid, size, palette), gates: gateTiles, reachable: reach, carved, steps, ...(stages ? { stages } : {}) };
 }
 
 /**
@@ -239,9 +239,9 @@ export function layout(draft: string[], palette: Record<string, TileDef>, opts: 
  * Removing an articulation point increases the number of connected components of the free cells
  * (rule 10: solid obstacles must not be placed on them, otherwise the place is separated).
  */
-export function articulationPoints(freeCells: Set<number>, size: number): Set<number> {
+export function articulationPoints(freeTiles: Set<number>, size: number): Set<number> {
   const result = new Set<number>();
-  if (freeCells.size <= 2) return result;
+  if (freeTiles.size <= 2) return result;
 
   const visited = new Set<number>();
   const tin = new Map<number, number>();
@@ -257,7 +257,7 @@ export function articulationPoints(freeCells: Set<number>, size: number): Set<nu
       const ny = y + dy;
       if (nx >= 0 && nx < size && ny >= 0 && ny < size) {
         const v = ny * size + nx;
-        if (freeCells.has(v)) nbrs.push(v);
+        if (freeTiles.has(v)) nbrs.push(v);
       }
     }
     return nbrs;
@@ -288,7 +288,7 @@ export function articulationPoints(freeCells: Set<number>, size: number): Set<nu
     }
   };
 
-  for (const u of freeCells) {
+  for (const u of freeTiles) {
     if (!visited.has(u)) {
       dfs(u);
     }

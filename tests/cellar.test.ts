@@ -151,8 +151,8 @@ describe('the model that goes down (T52b)', () => {
     const ch = k.chunkAt(Math.floor(x), Math.floor(y))!;
     const S = k.config.chunkSize;
     const holes = k.holesIn(ch);
-    const cell = (Math.floor(y) - ch.cy * S) * S + (Math.floor(x) - ch.cx * S);
-    expect(holes.get(cell)).toBeCloseTo(1, 9);
+    const tile = (Math.floor(y) - ch.cy * S) * S + (Math.floor(x) - ch.cx * S);
+    expect(holes.get(tile)).toBeCloseTo(1, 9);
     // Outside the house the terrain is whole.
     const [ox, oy] = at(5, 5);
     const och = k.chunkAt(Math.floor(ox), Math.floor(oy))!;
