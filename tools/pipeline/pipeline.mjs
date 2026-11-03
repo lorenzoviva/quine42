@@ -6,13 +6,15 @@ import { spawn, execFileSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { EventEmitter } from 'node:events';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 
 const HERE = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'));
 export const REPO = path.resolve(HERE, '..', '..');
 // PIPELINE_CONFIG and PIPELINE_STATE: another configuration and another state (with its own diary), for trying the
 // pipeline with fake CLIs without touching the real runs.
-export const CONFIG = JSON.parse(fs.readFileSync(process.env.PIPELINE_CONFIG ?? path.join(HERE, 'config.json'), 'utf8'));
+const CONFIG_FILE = process.env.PIPELINE_CONFIG ?? path.join(HERE, 'config.json');
+export const CONFIG = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
 export const STATE_DIR = process.env.PIPELINE_STATE ?? path.join(REPO, '.pipeline');
 const LOGS = path.join(STATE_DIR, 'log');
 const RUNS = path.join(STATE_DIR, 'esecuzioni.json');
@@ -54,6 +56,7 @@ export function pathsOf(opts = {}) {
     repo,
     stateDir,
     config,
+    configFile: opts.configFile ?? (opts.repo ? path.join(repo, 'tools', 'pipeline', 'config.json') : CONFIG_FILE),
     logs: path.join(stateDir, 'log'),
     runs: path.join(stateDir, 'esecuzioni.json'),
     budget: path.join(stateDir, 'budget.json'),
@@ -88,28 +91,94 @@ export function setOrchestrator(provider, opts) {
  * nothing new starts and at most one task goes on (resumed), none on the orchestrator's provider, so the tasks never take
  * the credits the orchestration needs to go on. For weekly-only providers (Argon or finestra5h === false), session is the week.
  */
-/** Whether a provider may run the orchestrator: not one marked `orchestrabile: false` (Fable, by the author's rule). */
+/** Whether a provider may run the orchestrator: its plan has it and it is not marked `orchestrabile: false`. */
 export function canOrchestrate(provider, config = CONFIG) {
   const conf = config.providers?.[provider];
-  return Boolean(conf) && conf.orchestrabile !== false;
+  return Boolean(conf) && conf.orchestrabile !== false && providerEnabled(provider, config);
+}
+
+/**
+ * The active plan of a provider (ADR-0119): `abbonamenti` says which plan each subscription has, `piani` what that plan is
+ * (`moltiplicatoreStima`, `disponibili`). Undefined for a configuration without plans: then nothing is scaled or disabled.
+ */
+export function planOf(provider, config = CONFIG) {
+  const sub = config.providers?.[provider]?.abbonamento;
+  const nome = sub && config.abbonamenti?.[sub];
+  const piano = nome ? config.piani?.[sub]?.[nome] : undefined;
+  return piano ? { abbonamento: sub, nome, ...piano } : undefined;
+}
+
+/** Whether the active plan includes a provider (`nessuno` includes none of its subscription). */
+export function providerEnabled(provider, config = CONFIG) {
+  const piano = planOf(provider, config);
+  return !piano || (piano.disponibili ?? []).includes(provider);
+}
+
+/** A task's estimate in % of the week on the active plan: the backlog's estimates are written on the base plan. */
+export function scaledEstimate(provider, estimate, config = CONFIG) {
+  return (estimate ?? 0) * (planOf(provider, config)?.moltiplicatoreStima ?? 1);
+}
+
+/** What a task should cost of the 5-hour window of its provider, in %. */
+export function sessionCost(provider, estimate, config = CONFIG) {
+  return scaledEstimate(provider, estimate, config) * (config.providers?.[provider]?.ratioSessioneSettimana ?? 10);
 }
 
 /** The account whose credits a provider spends: Fable spends also those of Claude, so it must leave them to the orchestrator. */
-const accountOf = (provider) => CONFIG.providers?.[provider]?.stessoContoDi ?? provider;
+const accountOf = (provider, config = CONFIG) => config.providers?.[provider]?.stessoContoDi ?? provider;
 
-export function capOf({ left, session, provider, orchestrator: orch, slot = 1, tetto = 1, threshold, urgent = false, resuming = false }) {
-  const conf = CONFIG.providers?.[provider];
+const RESET_NEAR_MS = 20 * 60_000;
+const MAX_SESSION_NEEDED = 85;
+
+/**
+ * Whether a new task can start without dying on the 5-hour limit, which would lose its prompt cache (ADR-0119): the window,
+ * minus what the running tasks of the same account should still take, holds its cost (at most `MAX_SESSION_NEEDED`, or an
+ * estimate over it would never start); or the window resets within 20 minutes and the task crosses the reset; or it is
+ * an urgency of the author (priority 0). Weekly-only providers have no window to protect.
+ */
+export function windowAdmits(prov, t, { b, live = [], config = CONFIG, nowMs = Date.now() } = {}) {
+  if (config.providers?.[prov]?.finestra5h === false) return true;
+  if (t.priority === 0) return true;
+  const binding = (b?.contatori ?? []).filter((c) => c.finestra === '5h').sort((x, y) => x.residuo - y.residuo)[0];
+  const untilReset = binding?.reset ? Date.parse(binding.reset) - nowMs : NaN;
+  if (untilReset > 0 && untilReset <= RESET_NEAR_MS) return true;
+  const committed = live.filter((r) => accountOf(r.provider, config) === accountOf(prov, config)).reduce((sum, r) => sum + sessionCost(r.provider, r.stima, config), 0);
+  return (b?.sessione ?? b?.residuo ?? 100) - committed >= Math.min(MAX_SESSION_NEEDED, sessionCost(prov, t.estimate, config));
+}
+
+export function capOf({ left, session, provider, orchestrator: orch, slot = 1, tetto = 1, threshold, urgent = false, resuming = false, config = CONFIG }) {
+  const conf = config.providers?.[provider];
   const isWeeklyOnly = conf?.finestra5h === false || provider === 'argon';
   const sess = isWeeklyOnly ? left : (session ?? left);
-  if (left < threshold || sess < threshold) return resuming && accountOf(provider) !== accountOf(orch) ? 1 : 0;
+  if (left < threshold || sess < threshold) return resuming && accountOf(provider, config) !== accountOf(orch, config) ? 1 : 0;
   return Math.min(tetto, resuming ? Math.max(slot, 1) : slot + (urgent ? 1 : 0));
+}
+
+/**
+ * Whether a provider can take one more task now: under its slots and ceiling, its CLI under its own (`limiti.provider`);
+ * a new task also needs its scaled estimate to fit the week and its cost to fit the 5-hour window. A resumed run only needs
+ * the provider not to be stopped.
+ */
+export function fitsOn(prov, t, { budget, live = [], orch, resuming = false, config = CONFIG, nowMs = Date.now() }) {
+  const b = budget[prov];
+  if (!b || (b.fermoFino && Date.parse(b.fermoFino) > nowMs)) return false;
+  if (!resuming && isSuspended(b, nowMs)) return false;
+  const mine = live.filter((r) => r.provider === prov);
+  const left = b.residuo - mine.reduce((sum, r) => sum + scaledEstimate(r.provider, r.stima, config), 0);
+  const cap = capOf({ left, session: b.sessione, provider: prov, orchestrator: orch, slot: b.slot, tetto: b.tetto ?? ceilingOf(prov, config), threshold: config.sogliaUnSolo, urgent: t.priority === 0, resuming, config });
+  const cmd = config.providers[prov].cmd;
+  const cli = live.filter((r) => config.providers[r.provider]?.cmd === cmd).length;
+  if (mine.length >= cap || cli >= (config.limiti?.provider?.[cmd] ?? Infinity)) return false;
+  return resuming || (scaledEstimate(prov, t.estimate, config) <= left - config.riserva && windowAdmits(prov, t, { b, live, config, nowMs }));
 }
 
 /**
  * The ceiling of a provider, decided by the author (`limiti` in config.json): the one of its model (`modello`: the entries
  * of `providers`) and the one of its CLI (`provider`: `claude`, `agy`), the lower; without `limiti`, `maxParalleli`.
+ * A provider its plan does not include has ceiling 0.
  */
 export function ceilingOf(provider, config = CONFIG) {
+  if (!providerEnabled(provider, config)) return 0;
   const l = config.limiti ?? {};
   const cmd = config.providers?.[provider]?.cmd;
   return Math.min(config.maxParalleli ?? Infinity, l.modello?.[provider] ?? Infinity, l.provider?.[cmd] ?? Infinity);
@@ -221,13 +290,45 @@ export function providerHasBrowser(provider, config = CONFIG) {
   return Boolean(config.providers?.[provider]?.browser ?? provider === 'claude');
 }
 
-/** The providers that can execute a task: its own provider and its alternatives, filtering out those without a browser if needed. */
+/**
+ * The providers that can execute a task: only its own (ADR-0119), if its plan includes it and it has the browser the task
+ * needs. There is no fallback: a task waits for its provider, and only the orchestrator or the author move it (`assegna`).
+ */
 export function allowedProviders(t, config = CONFIG) {
-  const alternatives = [t.provider, ...(config.alternative?.[t.provider] ?? [])];
-  if (t.needsBrowser) {
-    return alternatives.filter((p) => providerHasBrowser(p, config));
+  if (!t.provider || !providerEnabled(t.provider, config)) return [];
+  return t.needsBrowser && !providerHasBrowser(t.provider, config) ? [] : [t.provider];
+}
+
+/**
+ * Changes what the author can change while the pipeline runs (ADR-0119): the plans (`abbonamenti`) and who may orchestrate
+ * (`orchestrabile`, by provider). Validated, written to config.json and applied to the configuration in memory.
+ */
+export function updateConfig({ abbonamenti, orchestrabile } = {}, opts) {
+  const p = pathsOf(opts);
+  const disk = readJson(p.configFile, undefined) ?? structuredClone(p.config);
+  for (const [sub, nome] of Object.entries(abbonamenti ?? {})) {
+    if (!p.config.piani?.[sub]?.[nome]) throw new Error(`Piano sconosciuto: ${sub} ${nome}`);
   }
-  return alternatives;
+  for (const [prov, value] of Object.entries(orchestrabile ?? {})) {
+    if (!p.config.providers?.[prov] || typeof value !== 'boolean') throw new Error(`Valore non valido per ${prov}: ${value}`);
+  }
+  for (const target of [disk, p.config]) {
+    target.abbonamenti = { ...target.abbonamenti, ...abbonamenti };
+    for (const [prov, value] of Object.entries(orchestrabile ?? {})) target.providers[prov].orchestrabile = value;
+  }
+  writeJson(p.configFile, disk);
+  return { abbonamenti: p.config.abbonamenti, orchestrabili: Object.keys(p.config.providers).filter((k) => canOrchestrate(k, p.config)) };
+}
+
+/** Rereads from config.json what `updateConfig` changes: the page of the web interface may be another process. */
+export function refreshConfig() {
+  const disk = readJson(CONFIG_FILE, undefined);
+  if (!disk) return;
+  if (disk.abbonamenti) CONFIG.abbonamenti = disk.abbonamenti;
+  for (const [prov, conf] of Object.entries(CONFIG.providers)) {
+    const value = disk.providers?.[prov]?.orchestrabile;
+    if (value !== undefined) conf.orchestrabile = value;
+  }
 }
 
 /** Every task of the backlog: id, title, status, dependencies, and the `- Pipeline:` line if the planner wrote one. */
@@ -481,6 +582,10 @@ export function plan(tasks, runs, budget, only) {
       queues.bloccati.push({ ...t, missing: ['provider con browser (claude)'] });
       continue;
     }
+    if (!providerEnabled(t.provider, CONFIG)) {
+      queues.bloccati.push({ ...t, missing: [`${t.provider} non è nel piano attivo (assegna o cambia piano)`] });
+      continue;
+    }
     if (!t.approved && CONFIG.approvazione === 'manuale') { queues.daApprovare.push(t); continue; }
     if (only && t.provider !== only) continue;
     queues.pronti.push(t);
@@ -508,8 +613,8 @@ export function writePlan(queues, budget, opts) {
 
 // --- Worktrees -------------------------------------------------------------------------------------------------
 
-function worktrees() {
-  const out = git(['worktree', 'list', '--porcelain']);
+function worktrees(cwd = REPO) {
+  const out = git(['worktree', 'list', '--porcelain'], cwd);
   return out.split(/\n\n/).map((b) => ({ path: /^worktree (.+)$/m.exec(b)?.[1], branch: /^branch refs\/heads\/(.+)$/m.exec(b)?.[1] })).filter((w) => w.path);
 }
 
@@ -537,6 +642,45 @@ function taskPrompt(t, wt) {
 
 const readText = (file) => { try { return fs.readFileSync(file, 'utf8'); } catch { return ''; } };
 
+export const TASK_CONTEXT = '.pipeline-task.md';
+const CONTEXT_DOSSIERS = 5;
+const CONTEXT_DOSSIER_CHARS = 4000;
+
+/**
+ * What an agent needs of the backlog, without the backlog (ADR-0119): the block of its task, the dossiers of the tasks it
+ * depends on or comes from (each cut, the others named), the rules of the shared environment from the README.
+ */
+export function taskContext(t, opts) {
+  const p = pathsOf(opts);
+  const text = readText(p.backlog);
+  const block = taskBlock(text, t.id) ?? taskBlock(text, t.id.replace(/[a-z]$/, '')) ?? '(non c\'è nel backlog)';
+  const named = [...block.matchAll(/(?:nasce da|dossier)\s+(T\d+[a-z]?)/gi)].map((m) => m[1]);
+  const related = [...new Set([...(t.deps ?? []), ...(t.parent ? [t.parent] : []), ...named])].filter((id) => id !== t.id);
+  const dossiers = related.slice(0, CONTEXT_DOSSIERS).map((id) => {
+    let md;
+    try { md = dossierOf(id, opts).markdown; } catch { return `(dossier di ${id} non disponibile)`; }
+    return md.length > CONTEXT_DOSSIER_CHARS ? `${md.slice(0, CONTEXT_DOSSIER_CHARS)}\n\n… tagliato: \`node tools/pipeline/pipeline.mjs dossier ${id}\`` : md;
+  });
+  const others = related.slice(CONTEXT_DOSSIERS);
+  const rules = /^## Regole per chi esegue un task[^\n]*\n([\s\S]*?)(?=^## |(?![\s\S]))/m.exec(readText(path.join(p.repo, 'docs', 'pipeline', 'README.md')))?.[1]?.trim();
+  return [
+    `# Il tuo task: ${t.id}`,
+    '',
+    'Generato dalla pipeline al lancio. Non committarlo. Qui c\'è ciò che ti serve del backlog: `docs/plans/backlog.md` non si legge e non si modifica.',
+    '',
+    block.trim(),
+    '',
+    '# I task collegati',
+    '',
+    ...(dossiers.length ? dossiers.flatMap((d) => [d, '']) : ['Nessuno.', '']),
+    ...(others.length ? [`Altri, con \`node tools/pipeline/pipeline.mjs dossier <Txx>\`: ${others.join(', ')}.`, ''] : []),
+    '# Le regole dell\'ambiente condiviso',
+    '',
+    rules ?? 'Vedi `docs/pipeline/README.md`, «Regole per chi esegue un task».',
+    '',
+  ].join('\n');
+}
+
 /**
  * Starts (or resumes) the CLI of a task's provider; resolves with the run when the process ends. The process writes
  * straight into its log and is detached: it outlives the pipeline's process, which finds it again when it restarts
@@ -547,6 +691,8 @@ export function launch(t, run, saveRuns = () => {}) {
   const conf = CONFIG.providers[t.provider];
   const resume = Boolean(run.sessione);
   if (!resume && conf.sessioneNuova) run.sessione = randomUUID();
+  // A resumed conversation has already read it.
+  if (!resume) fs.writeFileSync(path.join(run.dir, TASK_CONTEXT), taskContext(t));
   const args = resume
     ? [...conf.args, ...conf.resume.map((a) => a.replace('{sessione}', run.sessione)), '-p', RESUME]
     : [...conf.args, ...(conf.sessioneNuova ?? []).map((a) => a.replace('{sessione}', run.sessione)), '-p', taskPrompt(t, run)];
@@ -658,6 +804,7 @@ export async function execute({ max = CONFIG.maxParalleli, only, task, always = 
     const disk = readJson(RUNS, {});
     for (const id of Object.keys(runs)) if (!active.has(id) && !disk[id]) delete runs[id];
     for (const [id, r] of Object.entries(disk)) if (!active.has(id)) runs[id] = r;
+    refreshConfig();
     const orch = orchestrator();
     const budget = loadBudget();
     const tasks = loadTasks();
@@ -671,33 +818,16 @@ export async function execute({ max = CONFIG.maxParalleli, only, task, always = 
         .map((r) => ({ ...tasks.find((t) => t.id === r.id), id: r.id, provider: r.provider, estimate: r.stima })),
       ...queues.pronti.filter((t) => !runs[t.id] && (!task || t.id === task)),
     ];
-    // Whether a provider can take one more task now: under its slots and its ceiling, and its CLI under its own
-    // (`limiti.provider`); a new task also needs its estimate to fit (a suspended run only that the provider is not stopped).
-    const fits = (prov, t, resuming) => {
-      const b = budget[prov];
-      if (!b || (b.fermoFino && new Date(b.fermoFino) > new Date())) return false;
-      if (!resuming && isSuspended(b)) return false;
-      const live = [...active.keys()].map((id) => runs[id]);
-      const mine = live.filter((r) => r.provider === prov);
-      const left = b.residuo - mine.reduce((s, r) => s + r.stima, 0);
-      const cap = capOf({ left, session: b.sessione, provider: prov, orchestrator: orch, slot: b.slot, tetto: b.tetto ?? ceilingOf(prov), threshold: CONFIG.sogliaUnSolo, urgent: t.priority === 0, resuming });
-      const cmd = CONFIG.providers[prov].cmd;
-      const cli = live.filter((r) => CONFIG.providers[r.provider]?.cmd === cmd).length;
-      return mine.length < cap && cli < (CONFIG.limiti?.provider?.[cmd] ?? Infinity) && (resuming || t.estimate <= left - CONFIG.riserva);
-    };
     for (const t of stop ? [] : candidates) {
       if (active.size >= max) break;
-      // A new task goes to its provider or, if that one cannot take it, to its alternatives in order (`alternative`).
+      // A task runs only on its provider: if that one cannot take it, it waits (ADR-0119).
       const resuming = Boolean(runs[t.id]);
-      if (!resuming && isSuspended(budget[t.provider])) continue;
-      const allowed = allowedProviders(t, CONFIG);
-      const prov = resuming ? t.provider : allowed.find((p) => (!only || p === only) && fits(p, t, false));
-      if (!prov || !fits(prov, t, resuming)) continue;
-      if (t.needsBrowser && !providerHasBrowser(prov, CONFIG)) continue;
-      if (holdBack(t, [...active.keys()].map((id) => runs[id]), { resuming, lastLaunch })) continue;
-      if (prov !== t.provider) say(`${t.id}: ${t.provider} non può, va su ${prov}`);
+      const prov = t.provider;
+      if (!allowedProviders(t, CONFIG).includes(prov)) continue;
+      const live = [...active.keys()].map((id) => runs[id]);
+      if (!fitsOn(prov, t, { budget, live, orch, resuming })) continue;
+      if (holdBack(t, live, { resuming, lastLaunch })) continue;
       const b = budget[prov];
-      t.provider = prov;
       const run = runs[t.id] ?? { id: t.id, provider: prov, stima: t.estimate, tentativi: 0, inizio: now(), ...(() => { const w = taskWorktree(t.id); return { dir: w.dir, branch: w.branch }; })() };
       run.tentativi += 1;
       run.needsBrowser = Boolean(t.needsBrowser);
@@ -846,10 +976,10 @@ function finish(run, { code, text, log }, runs, saveRuns) {
     // The counters just read (loadBudget above) say what the task really cost, other work on the same account included.
     const b = budget[run.provider];
     const dopo = b.letto && Date.now() - Date.parse(b.letto) < 60_000 ? { settimana: b.residuo, sessione: b.sessione } : undefined;
-    if (!dopo) b.residuo = Math.max(0, b.residuo - run.stima);
+    if (!dopo) b.residuo = Math.max(0, b.residuo - scaledEstimate(run.provider, run.stima));
     b.aggiornato = now();
     fs.mkdirSync(path.dirname(HISTORY), { recursive: true });
-    fs.appendFileSync(HISTORY, JSON.stringify({ task: run.id, provider: run.provider, stima: run.stima, prima: run.prima, dopo, costoUsd: out.cost, minuti: Math.round((Date.parse(run.fine) - Date.parse(run.inizio)) / 60000), tentativi: run.tentativi, esito: run.esito, data: run.fine }) + '\n');
+    fs.appendFileSync(HISTORY, JSON.stringify({ task: run.id, provider: run.provider, piano: planOf(run.provider)?.nome, stima: run.stima, prima: run.prima, dopo, costoUsd: out.cost, minuti: Math.round((Date.parse(run.fine) - Date.parse(run.inizio)) / 60000), tentativi: run.tentativi, esito: run.esito, data: run.fine }) + '\n');
     say(`${run.id}: ${run.esito}${run.browser ? ` · ${run.browser}` : ''} (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia ${run.id})`);
   }
   writeJson(BUDGET, budget);
@@ -948,19 +1078,49 @@ export function turnsOf({ dir = lockDir() } = {}) {
   }));
 }
 
+/** The kinds of turn whose output goes to a log, with only a summary to the agent: the browser's preview stays attached. */
+const LOGGED_TURNS = new Set(['test', 'typecheck', 'build']);
+const TAIL_LINES = 20;
+const ERROR_LINES = 120;
+const ERROR_CONTEXT = 6;
+const ERROR_LINE = /\bFAIL\b|\bfailed\b|\berror\b|AssertionError|Unhandled|\bTimeout\b|^\s*[×✗❯]/i;
+
+/** What an agent reads of a turn's output: the last lines if it passed, the blocks of errors if not; the log has the rest. */
+export function summarizeTurn(kind, output, code, logFile) {
+  // eslint-disable-next-line no-control-regex
+  const lines = String(output).replace(/\u001b\[[0-9;]*m/g, '').split(/\r?\n/);
+  while (lines.length && !lines.at(-1).trim()) lines.pop();
+  if (code === 0) return [...lines.slice(-TAIL_LINES), `[turno ${kind}] riuscito (codice 0); output intero: ${logFile}`].join('\n');
+  const keep = new Set();
+  lines.forEach((line, i) => { if (ERROR_LINE.test(line)) for (let j = i; j <= i + ERROR_CONTEXT && j < lines.length; j++) keep.add(j); });
+  const picked = keep.size ? [...keep].sort((a, b) => a - b).map((i) => lines[i]) : lines.slice(-ERROR_LINES);
+  return [...picked.slice(0, ERROR_LINES), `[turno ${kind}] FALLITO (codice ${code}); output intero: ${logFile}`].join('\n');
+}
+
 /**
- * `turno <kind> -- <command>`: waits for the turn, runs the command (its output is ours, its exit code too) and leaves the turn
- * when it ends, however it ends. A preview started this way holds the browser's turn until it is stopped.
+ * `turno <kind> -- <command>`: waits for the turn, runs the command (its exit code is ours) and leaves the turn when it ends,
+ * however it ends. Tests, typecheck and build write to `.pipeline/turno-<kind>.log` of the worktree and print a summary; a
+ * preview started this way keeps its output and holds the browser's turn until it is stopped.
  */
-export async function runInTurn(kind, command, { dir = lockDir(), every = Number(process.env.PIPELINE_TURNO_OGNI ?? 5000) } = {}) {
+export async function runInTurn(kind, command, { dir = lockDir(), every = Number(process.env.PIPELINE_TURNO_OGNI ?? 5000), logDir = path.join(process.cwd(), '.pipeline') } = {}) {
   if (!TURNS[kind]) { console.error(`Turno sconosciuto: ${kind} (${Object.keys(TURNS).join(', ')})`); return 2; }
   const me = { chi: process.env.PIPELINE_TASK ?? path.basename(process.cwd()), pid: process.pid, comando: command.join(' '), arrivo: Date.now() };
   const inherited = process.env.PIPELINE_TURNO;
-  const run = (env) => new Promise((resolve) => {
-    const child = spawn(command.join(' '), { stdio: 'inherit', shell: true, env: { ...process.env, ...env } });
+  const spawnIt = (stdio, env) => new Promise((resolve) => {
+    const child = spawn(command.join(' '), { stdio, shell: true, env: { ...process.env, ...env } });
     child.on('error', (e) => { console.error(e.message); resolve(1); });
     child.on('close', (c) => resolve(c ?? 1));
   });
+  const run = async (env) => {
+    if (!LOGGED_TURNS.has(kind)) return spawnIt('inherit', env);
+    fs.mkdirSync(logDir, { recursive: true });
+    const logFile = path.join(logDir, `turno-${kind}.log`);
+    const fd = fs.openSync(logFile, 'w');
+    const code = await spawnIt(['inherit', fd, fd], env);
+    fs.closeSync(fd);
+    console.log(summarizeTurn(kind, readText(logFile), code, logFile));
+    return code;
+  };
   if (coveredBy(kind, me, { dir })) {
     console.error(`[turno ${kind}] già coperto da un turno di ${me.chi}: ${me.comando}`);
     return run({});
@@ -1315,15 +1475,116 @@ export function interruptTasks(ids, opts) {
   return interrupted;
 }
 
+const ADR_FILE = /^docs\/adr\/(\d{4})-.+\.md$/;
+
+/** The text of a file with its ADR numbers changed; a line the base has too speaks of the base's ADR and stays. */
+export function renameAdrRefs(text, renames, baseText = '') {
+  const inBase = new Set(baseText.split('\n'));
+  return text.split('\n').map((line) => {
+    if (inBase.has(line)) return line;
+    let out = line;
+    for (const r of renames) {
+      out = out.replaceAll(`[${r.from}](${r.fromFile}`, `[${r.to}](${r.toFile}`).replaceAll(r.fromFile, r.toFile);
+      out = out.replace(new RegExp(`\\bADR-${r.from}\\b`, 'g'), `ADR-${r.to}`);
+    }
+    return out;
+  }).join('\n');
+}
+
 /**
- * Merges a finished task into the base. A conflict leaves the base as it was: the merge is aborted and the files are
- * named, so whoever orchestrates delegates the merge to an agent (a task that merges `task/<Txx>` in its own worktree).
+ * The ADRs a task's branch adds whose number the base has meanwhile given to another (ADR-0119) get the first number after
+ * the highest in use: file, references in what the branch changed and the index, in a commit on the task's branch.
+ * Nothing happens if the task's worktree has uncommitted changes: then the merge says what is wrong.
+ */
+function renumberAdrs(id, baseDir, p) {
+  const branch = `task/${id}`;
+  const fork = git(['merge-base', p.config.base, branch], baseDir);
+  const names = (args) => git(args, baseDir).split('\n').filter(Boolean);
+  const inBase = names(['ls-tree', '--name-only', p.config.base, 'docs/adr/']).filter((f) => ADR_FILE.test(f));
+  const added = names(['diff', '--name-only', '--diff-filter=A', fork, branch, '--', 'docs/adr/']).filter((f) => ADR_FILE.test(f));
+  const taken = new Set(inBase.map((f) => ADR_FILE.exec(f)[1]));
+  const clashing = added.filter((f) => taken.has(ADR_FILE.exec(f)[1]) && !inBase.includes(f));
+  if (!clashing.length) return [];
+  let next = Math.max(...[...inBase, ...added].map((f) => Number(ADR_FILE.exec(f)[1])));
+  const renames = clashing.map((file) => {
+    const to = String(++next).padStart(4, '0');
+    const fromFile = path.posix.basename(file);
+    return { from: ADR_FILE.exec(file)[1], to, file, fromFile, toFile: fromFile.replace(/^\d{4}/, to) };
+  });
+  const existing = worktrees(baseDir).find((w) => w.branch === branch)?.path;
+  const dir = existing ?? fs.mkdtempSync(path.join(os.tmpdir(), `quine-adr-${id}-`));
+  if (!existing) git(['worktree', 'add', dir, branch], baseDir);
+  try {
+    if (git(['status', '--porcelain', '--untracked-files=no'], dir)) return [];
+    const changed = names(['diff', '--name-only', '--diff-filter=d', fork, branch]);
+    for (const r of renames) git(['mv', r.file, `docs/adr/${r.toFile}`], dir);
+    const moved = new Map(renames.map((r) => [r.file, `docs/adr/${r.toFile}`]));
+    const files = new Set([...changed.map((f) => moved.get(f) ?? f), 'docs/adr/README.md']);
+    for (const f of files) {
+      const full = path.join(dir, f);
+      if (!fs.existsSync(full)) continue;
+      const bytes = fs.readFileSync(full);
+      if (bytes.includes(0)) continue;
+      let baseText = '';
+      try { baseText = execFileSync('git', ['show', `${p.config.base}:${f}`], { cwd: baseDir, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }); } catch { /* the base does not have it */ }
+      const text = bytes.toString('utf8');
+      const updated = renameAdrRefs(text, renames, baseText);
+      if (updated !== text) { fs.writeFileSync(full, updated); git(['add', '--', f], dir); }
+    }
+    git(['commit', '-m', `Pipeline: ${id}, ${renames.map((r) => `ADR-${r.from} → ADR-${r.to}`).join(', ')} (il numero è già preso in ${p.config.base})`], dir);
+    return renames;
+  } finally {
+    if (!existing) git(['worktree', 'remove', '--force', dir], baseDir);
+  }
+}
+
+/**
+ * The block of a task after its integration (ADR-0119): the state follows its outcome, `fatto` with the commit unless the
+ * outcome says otherwise, and the outcome goes in `- Esito:`. A block that already says it stays as it is.
+ */
+export function recordOutcome(text, id, hash, esito) {
+  const outcome = /^ESITO:\s*(fatto|in attesa|fallito|\?)/i.exec(esito ?? '')?.[1]?.toLowerCase() ?? 'fatto';
+  const state = outcome === 'fatto' ? `\`fatto\` (\`${hash}\`)` : outcome === 'in attesa' ? '`in attesa`' : undefined;
+  const detail = String(esito ?? '').replace(/^ESITO:\s*/i, '').replace(/^(fatto|in attesa|fallito)\s*[—-]?\s*/i, '').trim();
+  const own = taskBlock(text, id);
+  if (!own) {
+    // A sub-task listed in its parent's heading («T56a `fatto`, T56b `da fare`»).
+    const subRe = new RegExp(`^(### .*\\b${id}\\s+)(\`[^\`]+\`(?:\\s*\\(\`[^\`]+\`\\))?)`, 'm');
+    return state ? text.replace(subRe, (m, head, old) => (old.startsWith('`fatto`') ? m : `${head}${state}`)) : text;
+  }
+  const [header, ...rest] = own.split('\n');
+  // The state is in what follows the title (as in parseBacklog): titles have backticks of their own.
+  const [, title, stateTail] = /^(### \S+ · .+?)(?: — (.*))?$/.exec(header);
+  let nextHeader = header;
+  if (state && !stateTail) nextHeader = `${title} — ${state}`;
+  else if (state && !stateTail.startsWith('`fatto`') && /`[^`]+`/.test(stateTail)) nextHeader = `${title} — ${stateTail.replace(/`[^`]+`(\s*\(`[^`]+`\))?/, () => state)}`;
+  const body = rest.join('\n');
+  const end = /\s*$/.exec(body)[0];
+  const kept = body.slice(0, body.length - end.length);
+  const nextBody = detail && !/^- Esito:/m.test(body) ? `${kept ? `${kept}\n` : ''}- Esito: ${detail}${end || '\n'}` : body;
+  return text.replace(own, () => `${nextHeader}\n${nextBody}`);
+}
+
+/**
+ * Merges a finished task into the base, with its state and outcome in the backlog in the same commit, and first gives a new
+ * number to the ADRs whose number the base has taken. A conflict leaves the base as it was: the merge is aborted and the
+ * files are named, so whoever orchestrates delegates the merge to an agent (a task that merges `task/<Txx>` in its worktree).
  */
 export function integrateTask(id, opts) {
   const p = pathsOf(opts);
-  const base = worktrees().find((w) => w.branch === p.config.base);
+  const base = worktrees(p.repo).find((w) => w.branch === p.config.base);
+  let renames = [];
   try {
-    git(['merge', '--no-ff', '-m', `Pipeline: integra ${id}`, `task/${id}`], base.path);
+    try { renames = renumberAdrs(id, base.path, p); } catch (e) { say(`integra ${id}: rinumerazione degli ADR non riuscita (${String(e.message).split('\n')[0]})`, p.report); }
+    const hash = git(['rev-parse', '--short', `task/${id}`], base.path);
+    git(['merge', '--no-ff', '--no-commit', `task/${id}`], base.path);
+    const backlog = path.join(base.path, 'docs', 'plans', 'backlog.md');
+    const before = readText(backlog);
+    const after = recordOutcome(before, id, hash, readJson(p.runs, {})[id]?.esito);
+    if (after !== before) { fs.writeFileSync(backlog, after); git(['add', '--', 'docs/plans/backlog.md'], base.path); }
+    let merging = true;
+    try { git(['rev-parse', '-q', '--verify', 'MERGE_HEAD'], base.path); } catch { merging = false; }
+    if (merging || after !== before) git(['commit', '-m', `Pipeline: integra ${id}`], base.path);
   } catch (e) {
     const conflicts = (() => { try { return git(['diff', '--name-only', '--diff-filter=U'], base.path).split('\n').filter(Boolean); } catch { return []; } })();
     try { git(['merge', '--abort'], base.path); } catch { /* nothing to abort: the merge did not start */ }
@@ -1335,14 +1596,14 @@ export function integrateTask(id, opts) {
   const runs = readJson(p.runs, {});
   if (runs[id]) { runs[id].integrato = now(); writeJson(p.runs, runs); }
   // The worktree goes: first the junction alone (removing it as a folder would empty the base's node_modules).
-  const wt = worktrees().find((w) => w.branch === `task/${id}`);
+  const wt = worktrees(p.repo).find((w) => w.branch === `task/${id}`);
   if (wt) {
     const nm = path.join(wt.path, 'node_modules');
     if (fs.existsSync(nm) && fs.lstatSync(nm).isSymbolicLink()) fs.unlinkSync(nm);
     git(['worktree', 'remove', wt.path], base.path);
   }
   git(['branch', '-d', `task/${id}`], base.path);
-  const msg = `task/${id} integrato in ${p.config.base}; worktree e branch tolti.`;
+  const msg = `task/${id} integrato in ${p.config.base}; worktree e branch tolti.${renames.length ? ` ${renames.map((r) => `ADR-${r.from} → ADR-${r.to}`).join(', ')}.` : ''}`;
   say(msg, p.report);
   return { ok: true, message: msg };
 }
@@ -1369,7 +1630,7 @@ export function setPipelineLine(text, id, change) {
   const browserTag = info.needsBrowser ? ' · browser' : '';
   const line = `- Pipeline: ${info.provider} · stima ${info.estimate}%${info.approved ? ' · approvato' : ''}${browserTag} · priorità ${info.priority}`;
   const next = old ? block.replace(old[0], line) : block.replace(/\n/, `\n${line}\n`);
-  return text.replace(block, next);
+  return text.replace(block, () => next);
 }
 
 function editPipeline(id, change, opts) {
@@ -1393,6 +1654,7 @@ export function assignTask(id, { provider, stima, priorita, approva }, opts) {
   if (!p.config.providers[provider] || !(Number(stima) > 0)) {
     throw new Error('Uso: assegna <Txx> <claude|fable|gemini|argon> <stima %> [priorità] [--approva]');
   }
+  if (!providerEnabled(provider, p.config)) throw new Error(`${provider} non è nel piano attivo (${planOf(provider, p.config)?.nome})`);
   const tasks = parseBacklog(readText(p.backlog));
   const t = tasks.find((x) => x.id === id);
   if (t?.needsBrowser && !providerHasBrowser(provider, p.config)) {

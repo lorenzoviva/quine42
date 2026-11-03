@@ -19,8 +19,12 @@ Sei l'agente che pianifica, nel worktree del branch base (`3d`). Non esegui task
      altrimenti `claude` per ciò che è delicato (architettura, kernel, multigiocatore, sicurezza, ciò che tocca
      molti file), `gemini` per ciò che è semplice o meccanico (modelli MarkovJunior, documenti, test, UI isolata),
      senza `approvato`; `argon` (Gemini 4 Argon in Antigravity: molto più forte, limiti settimanali più stretti e suoi) per ciò che è difficile ma Claude non deve fare (strutture complesse, programmi MarkovJunior importanti). La stima è sempre la quota del limite del provider scelto. I task che richiedono una verifica nel browser (o screenshot) vanno **sempre e solo su `claude`** (T87: l'unico con `--chrome`; `agy -p` non ha il browser).
-   - Stima: % del limite settimanale del provider. Parti da `docs/pipeline/consumi.jsonl` (task simili, stima e
-     tentativi) e, se è vuoto: piccolo 1-2 %, medio 3-5 %, grande 6-10 %; oltre 10 % il task va spezzato.
+   - Stima: % del limite settimanale del provider, **sempre sul piano di riferimento** (Claude Max 5x, Google Ultra): lo script la
+     scala da solo per il piano attivo (`abbonamenti` e `piani` in `config.json`, ADR-0119). Parti da `docs/pipeline/consumi.jsonl` (task
+     simili; il campo `piano` dice su quale piano è misurato, e la colonna delle 5 ore pesa quanto la settimana) e dalla scala:
+     - `claude`: piccolo 0,5-1 % (~6-12 % della sessione di 5 ore), medio 1,5-2,5 % (~18-30 %), grande 3-4 % (~36-48 %);
+     - `fable`: complesso 6-8 % sul suo contatore (~50-65 % della sessione di 5 ore).
+     Oltre il grande il task va spezzato: non sta in una finestra.
    - Priorità: quella della richiesta («> Priorità: n»), altrimenti prima ciò che sblocca altri task; «> Dipende da:»
      diventa «dipende da Txx» nel task.
    - I contatori attuali (5 ore e settimana, per provider) sono in `docs/pipeline/PIANO.md` dopo `pipeline.mjs uso`.

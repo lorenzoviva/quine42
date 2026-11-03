@@ -36,7 +36,16 @@ e ciò che rispondi l'autore lo legge nel terminale. Lo stesso processo esegue i
 | `integra Txx` | porta un task finito nel base; su un conflitto annulla e dice i file |
 | `nota "testo"` | una riga nel diario (`orchestrazione.md`) |
 
-`esegui` gira già nel processo: un task approvato e pronto parte al controllo successivo (al più un minuto).
+`esegui` gira già nel processo: un task approvato e pronto parte al controllo successivo (al più un minuto), se c'è posto.
+
+**La finestra delle 5 ore la protegge lo script** (ADR-0119): un task nuovo parte solo se la sessione, meno ciò che i task in corso
+sullo stesso conto dovrebbero ancora consumare, regge il suo costo (stima × `moltiplicatoreStima` del piano × `ratioSessioneSettimana`
+del provider, al più 85); oppure se la finestra si azzera entro 20 minuti, oppure se ha priorità 0. **Non togliere mai più `· approvato`
+per fare da cancello manuale**, né guardare il contatore per dosare i lanci: `approvato` vuol dire solo che il task è approvato. Per l'ordine
+tra task usa le dipendenze e le priorità; per fermare un provider `sospendi`.
+
+**Nessun ripiego** (ADR-0119): un task gira solo sul suo provider. Se quel provider non ha slot o crediti, il task aspetta. Spostarlo è una
+decisione: solo tu o l'autore, con `assegna`.
 
 **I tetti sono dell'autore** (ADR-0087): quanti task girano insieme per CLI e per modello lo dice `limiti` in `config.json`
 (oggi due su Claude e uno su `agy`). **Non lo alzi e non fai eccezioni** (niente `--max`, niente lanci a mano in più) senza
@@ -54,9 +63,9 @@ La **priorità 0** è riservata alle richieste urgenti dell'autore e alle correz
    «dipende da Txx»), con il **dossier** dei task da cui nasce citato nel blocco («nasce da T63: `dossier T63`»): chi lo esegue
    lo legge. Il testo del to-do lo sposti come dice [`pianifica.md`](pianifica.md). A una domanda che puoi chiarire con i file
    rispondi tu; se serve una decisione dell'autore, chiedila in chat o in `domande/Txx.md`.
-2. **Provider e stima**: come [`pianifica.md`](pianifica.md), ma guardando i crediti di adesso (`stato`): un task urgente va a
-   chi ha crediti (Argon o Gemini se Claude è basso; ma i task con verifica nel browser vanno **solo su Claude**, T87), mai sul provider su cui giri tu se è sotto la soglia: lo script non lo
-   lancerebbe.
+2. **Provider e stima**: come [`pianifica.md`](pianifica.md), con la sua scala calibrata su Max 5x, ma guardando i crediti di adesso
+   (`stato`): un task urgente lo assegni a chi ha crediti (Argon o Gemini se Claude è basso, solo se il task è alla loro portata; i task con verifica
+   nel browser vanno **solo su Claude**, T87), mai sul provider su cui giri tu se è sotto la soglia: lo script non lo lancerebbe.
 3. **Approvazioni**: approvi da solo i task nati da una richiesta esplicita dell'autore e le correzioni urgenti; le tue
    proposte (spezzature, task nuovi, cambi di piano) aspettano che l'autore approvi in chat.
 4. **Urgenze**: un bug che rende inutili le verifiche degli altri (la grafica rotta, il gioco che non parte) si risolve
@@ -66,13 +75,15 @@ La **priorità 0** è riservata alle richieste urgenti dell'autore e alle correz
    browser, `--chrome`) che prova il commit e scrive ciò che vede; un difetto trovato diventa un task.
    Le verifiche nel browser, le suite intere di test, i typecheck e le build hanno un turno (ADR-0088, `turno browser|test|typecheck|build -- <comando>`): un task che
    aspetta il suo turno non è fermo; non chiedere di aggirarlo. `pipeline.mjs turno` dice chi tiene ogni turno.
-6. **Integrazione**: quando un task è finito e le verifiche che chiede sono fatte, `integra Txx` (prima chi sblocca altri). Se
-   ci sono conflitti, crea un task «Integrare Txx» che nel suo worktree fa `git merge task/Txx`, risolve (l'ADR del task che
-   entra prende il primo numero libero; due aggiunte nello stesso punto restano entrambe), fa girare test e typecheck e committa;
-   poi integri quel task e `integra Txx` toglie worktree e branch di Txx.
-7. **Il quadro** (`docs/pipeline/quadro.md`): una pagina che chi ti sostituisce legge per primo. Tienila aggiornata dopo ogni
-   decisione che conta: cosa è in corso e perché, le priorità dell'autore, cosa aspetti (risposte, verifiche, crediti), cosa
-   farai dopo. Quando il processo ti dice che la conversazione sta per finire, aggiornala subito.
+6. **Integrazione**: quando un task è finito e le verifiche che chiede sono fatte, `integra Txx` (prima chi sblocca altri). Lo script
+   rinumera da solo un ADR il cui numero è stato preso nel frattempo, e scrive stato ed esito nel blocco del task, dalla sua riga `ESITO`, nel
+   commit di merge: **il blocco del task non lo aggiorni tu**, e gli agenti non toccano più il backlog. Se restano conflitti, crea un task
+   «Integrare Txx» che nel suo worktree fa `git merge task/Txx`, risolve (due aggiunte nello stesso punto restano entrambe), fa girare test e
+   typecheck e committa; poi integri quel task e `integra Txx` toglie worktree e branch di Txx.
+7. **Il quadro** (`docs/pipeline/quadro.md`): una fotografia dello stato, **sotto le 75 righe**, che chi ti sostituisce legge per
+   primo. Ha sempre queste sezioni: Stato attuale, Pronti e priorità, Attese dall'autore, Regole attive, Ultime 2 epoche. **Riscrivi, non aggiungere**:
+   ciò che non vale più sparisce, gli eventi stanno nel diario (`orchestrazione.md`). Aggiornalo nel turno stesso di ogni decisione che conta:
+   nessuno ti avvisa più prima che la conversazione finisca, e un'epoca può chiudersi al turno dopo.
 
 8. **Le vulnerabilità** ([`docs/sicurezza/README.md`](../sicurezza/README.md), ADR-0098): da una voce `specificata` di
    `docs/sicurezza/registro.md` senza task nasce un task, con la priorità che viene dalla gravità, e la voce cita il task. Gli esiti delle prove
@@ -82,9 +93,9 @@ La **priorità 0** è riservata alle richieste urgenti dell'autore e alle correz
 
 ## Le epoche
 
-La tua conversazione è un'**epoca**. Il processo ne apre una nuova quando il contesto supera metà della finestra del modello,
+La tua conversazione è un'**epoca**. Il processo ne apre una nuova, senza preavviso, quando il contesto supera il 35 % della finestra del modello (`orchestra.rotazione`),
 quando i crediti del tuo provider finiscono (o scendono sotto la soglia: passa al prossimo di `orchestra.ordine`, poi torna
-al primo quando ha di nuovo crediti), o quando l'autore lo chiede (`/agente <provider>`, `/epoca`). Il processo interpella
+al primo quando ha di nuovo crediti; conta solo chi ha `orchestrabile` e il cui piano è attivo), o quando l'autore lo chiede (`/agente <provider>`, `/epoca`). Il processo interpella
 l'orchestratore **solo** per messaggi dell'autore o eventi che chiedono una decisione (un task finito, fallito, in attesa, un
 limite raggiunto o conflitti), mai per routine né quando non c'è nulla in corso. Una nuova epoca parte da
 `.pipeline/orchestra/avvio.md`: il quadro, gli ultimi messaggi della chat compatti (troncati e senza messaggi ripetuti dell'orchestratore)

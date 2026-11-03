@@ -1,7 +1,7 @@
 // The orchestrator's environment (ADR-0079): one process runs the pipeline (`esegui`, always on) and the conversation
 // with the orchestrating agent, a turn at a time through its CLI (`claude -p --resume`, `agy -p --conversation`). The
 // author chats from the terminal; the pipeline's events go into a queue on disk and reach the orchestrator between
-// turns. A conversation is an epoch: the process starts a new one at half the context window, when the orchestrator's
+// turns. A conversation is an epoch: the process starts a new one at `rotazione` of the context window, when the orchestrator's
 // provider runs out of credits (on the next provider of `orchestra.ordine`), or when the author asks (`/agente`). A new
 // epoch starts from what is on disk: the «quadro» the orchestrator keeps (docs/pipeline/quadro.md), the index of the
 // tasks, the events not yet delivered, the last messages of the chat. Nothing the orchestrator had only in its head
@@ -11,7 +11,7 @@ import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
-import { bus, BUDGET, canOrchestrate, CONFIG, execute, loadBudget, now, readJson, readOutput, REPO, requestStop, resumeProvider, say, setOrchestrator, SHUTDOWN, shutdownRecord, shutdownSummary, STATE_DIR, suspendProvider, usageLimit, writeJson } from './pipeline.mjs';
+import { bus, BUDGET, canOrchestrate, CONFIG, execute, loadBudget, now, readJson, readOutput, refreshConfig, REPO, requestStop, resumeProvider, say, setOrchestrator, SHUTDOWN, shutdownRecord, shutdownSummary, STATE_DIR, suspendProvider, usageLimit, writeJson } from './pipeline.mjs';
 
 const DIR = path.join(STATE_DIR, 'orchestra');
 const STATE = path.join(DIR, 'stato.json');
@@ -22,7 +22,7 @@ const START = path.join(DIR, 'avvio.md');
 const LONG = path.join(DIR, 'messaggio.md');
 const QUADRO = path.join(REPO, 'docs', 'pipeline', 'quadro.md');
 const RUNS = path.join(STATE_DIR, 'esecuzioni.json');
-const OPTS = { ordine: ['claude', 'argon', 'gemini'], finestra: { claude: 200_000, argon: 1_000_000, gemini: 1_000_000 }, rotazione: 0.5, soglia: CONFIG.sogliaUnSolo, chat: 20, porta: 4242, ...CONFIG.orchestra };
+const OPTS = { ordine: ['claude', 'argon', 'gemini'], finestra: { claude: 200_000, argon: 1_000_000, gemini: 1_000_000 }, rotazione: 0.35, soglia: CONFIG.sogliaUnSolo, chat: 20, porta: 4242, ...CONFIG.orchestra };
 
 const inboxFile = (stateDir = STATE_DIR) => path.join(stateDir, 'orchestra', 'coda.json');
 
@@ -121,11 +121,11 @@ export function shouldRunTurn(messages = [], events = []) {
   return messages.length > 0 || events.some((e) => Boolean(e.sveglia));
 }
 
-/** The provider the orchestrator should run on: the first of `order` that is not stopped and above the threshold. */
+/** The provider the orchestrator should run on: the first of `order` that may orchestrate, is not stopped and is above the threshold. */
 export function pickOrchestrator(order, budget, threshold, at = new Date()) {
   const usable = (p) => {
     const b = budget[p];
-    if (!b) return false;
+    if (!b || !canOrchestrate(p)) return false;
     if (b.fermoFino && new Date(b.fermoFino) > at) return false;
     const conf = CONFIG.providers?.[p];
     const isWeeklyOnly = conf?.finestra5h === false || p === 'argon' || (b.contatori && !b.contatori.some((c) => c.finestra === '5h'));
@@ -227,7 +227,7 @@ function runTurn(provider, sessione, prompt) {
 export async function orchestra({ agente, porta } = {}) {
   fs.mkdirSync(DIR, { recursive: true });
   const order = agente ? [agente, ...OPTS.ordine.filter((p) => p !== agente)] : OPTS.ordine;
-  if (!canOrchestrate(order[0])) throw new Error(`non può orchestrare: ${order[0]}`);
+  if (agente && !canOrchestrate(agente)) throw new Error(`non può orchestrare: ${agente}`);
   let busy = false;
   let wanted; // a provider the author asked for (`/agente`)
   let rotate; // why the next turn starts a new epoch
@@ -250,18 +250,12 @@ export async function orchestra({ agente, porta } = {}) {
     say(`orchestratore: epoca ${s.epoca} su ${provider} (${reason})`);
   };
 
-  /** Asks the orchestrator to bring the quadro up to date before its conversation ends (when it still can). */
-  const closeEpoch = async (s, why) => {
-    const r = await runTurn(s.provider, s.sessione, `[pipeline] ${why}: questa conversazione sta per finire. Aggiorna ora docs/pipeline/quadro.md (stato, decisioni, intenzioni, cosa aspetti) e rispondi solo «quadro aggiornato».`);
-    const out = readOutput(r.text);
-    if (out.result) log('orchestratore', out.result, s.provider);
-  };
-
   async function pump() {
     if (busy) return;
     busy = true;
     try {
       for (;;) {
+        refreshConfig(); // the plans and `orchestrabile` can change from the web interface
         // Commands (`/epoca`, `/agente <provider>`) written to the shared queue from the web UI or terminal.
         const rawInbox = readInbox(STATE_DIR);
         const cmdIds = [];
@@ -301,25 +295,19 @@ export async function orchestra({ agente, porta } = {}) {
         const stopped = s.provider && !pickOrchestrator([s.provider], budget, 0);
         const low = s.provider && !pickOrchestrator([s.provider], budget, OPTS.soglia);
         if (wanted) {
-          if (wanted !== s.provider) {
-            if (s.sessione) await closeEpoch(s, `l'autore passa l'orchestrazione a ${wanted}`);
-            newEpoch(s, wanted, 'scelto dall\'autore');
-          }
+          if (wanted !== s.provider) newEpoch(s, wanted, 'scelto dall\'autore');
           wanted = undefined;
         } else if (!s.provider || stopped) {
           if (!best) { print('·', 'nessun provider ha crediti per orchestrare: riprovo tra un minuto'); break; }
           newEpoch(s, best, s.provider ? `${s.provider} senza crediti` : 'avvio');
         } else if (low && best && best !== s.provider) {
-          if (s.sessione) await closeEpoch(s, `i crediti di ${s.provider} sono sotto il ${OPTS.soglia} %`);
           newEpoch(s, best, `${s.provider} sotto il ${OPTS.soglia} %`);
         } else if (!s.sessione && best && order.indexOf(best) < order.indexOf(s.provider)) {
           newEpoch(s, best, `${best} ha di nuovo crediti`);
         } else if (s.sessione && !queued.length && s.provider !== order[0] && pickOrchestrator([order[0]], budget, 3 * OPTS.soglia)) {
           // Back to the preferred provider, at a quiet moment, once its credits are well back.
-          await closeEpoch(s, `${order[0]} ha di nuovo crediti`);
           newEpoch(s, order[0], `${order[0]} ha di nuovo crediti`);
         } else if (rotate && s.sessione) {
-          await closeEpoch(s, rotate);
           newEpoch(s, s.provider, rotate);
           rotate = undefined;
         }
@@ -378,14 +366,12 @@ export async function orchestra({ agente, porta } = {}) {
   }
 
   // The pipeline runs in this process; its diary lines become events. When it has shut down (`ferma`, `/ferma`, Ctrl+C:
-  // ADR-0090) the process ends, after the orchestrator's turn (it may be the one that asked) and, for `dopo`, its quadro.
+  // ADR-0090) the process ends, after the orchestrator's turn (it may be the one that asked).
   let stopping; // why: Ctrl+C does not wait for the turn
   const idle = async (ms) => { for (const end = Date.now() + ms; busy && Date.now() < end;) await new Promise((r) => setTimeout(r, 500)); };
   void execute({ always: true }).then(async (res) => {
     if (!res?.fermata) return;
     await idle(stopping === 'Ctrl+C' ? 0 : 120_000);
-    const s = state();
-    if (res.fermata === 'dopo' && s.sessione && !busy) { busy = true; await closeEpoch(s, 'la pipeline si spegne'); }
     print('·', `pipeline spenta (${res.fermata}): al prossimo avvio l'orchestratore saprà cosa è stato interrotto e cosa è finito`);
     process.exit(0);
   });

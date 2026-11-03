@@ -10,3 +10,4 @@ universes/
 lab/out/
 graphify-out/
 .pipeline/
+.pipeline-task.md

@@ -37,24 +37,24 @@ turno e l'altro, anche se non scrivi nulla.
 3. **Dettaglio di un task**: dossier completo (`dossier`), log dell'esecuzione (`log/<Txx>.<tentativo>.log`) e **conversazione in diretta** dell'agente che sta lavorando (letta dal `.jsonl` di Claude o da `transcript.jsonl` di Antigravity).
 4. **Azioni dirette**: approvare (`approva`), assegnare provider/stima/priorità (`assegna`), interrompere (`interrompi`), riprendere (`riprendi`) e integrare (`integra`).
 5. **Domande & To-Do**: rispondere alle domande in `docs/pipeline/domande/*.md` e aggiungere o modificare richieste in `docs/userchats/to-do.md`.
-6. **Budget & Consumi**: i contatori a 5 ore e settimanali di ogni provider (`.pipeline/budget.json`, rilettura `/usage` o impostazione manuale `budget`) e lo storico di `docs/pipeline/consumi.jsonl`.
+6. **Budget & Consumi**: i contatori a 5 ore e settimanali di ogni provider (`.pipeline/budget.json`, rilettura `/usage` o impostazione manuale `budget`) e lo storico di `docs/pipeline/consumi.jsonl`; i piani di abbonamento e «Può orchestrare» per provider (`POST /api/config`, salvati in `config.json`, valgono subito).
 
 | Nel terminale | |
 |---|---|
 | un messaggio | va all'orchestratore (se sta rispondendo, al turno dopo) |
 | `/stato` | le code e i contatori |
-| `/agente argon` | l'orchestrazione passa ad Argon (il quadro aggiornato, poi una conversazione nuova) |
+| `/agente argon` | l'orchestrazione passa ad Argon (una conversazione nuova, dal quadro) |
 | `/sospendi claude [fino a <data>]` | sospende temporaneamente i nuovi task al provider (senza toccare quelli in corso) |
 | `/riattiva claude` | riattiva l'assegnazione di nuovi task al provider |
 | `/epoca` | una conversazione nuova sullo stesso provider |
 | `/ferma ora` (o Ctrl+C) | interrompe i task in corso tenendo la loro conversazione e spegne; al riavvio riprendono da soli (un secondo Ctrl+C esce subito) |
-| `/ferma dopo` | niente lanci nuovi: aspetta che i task in corso finiscano, fa aggiornare il quadro all'orchestratore e spegne |
+| `/ferma dopo` | niente lanci nuovi: aspetta che i task in corso finiscano e spegne |
 | `/esci` | chiude il processo; i task in corso continuano e al prossimo avvio li ritrova |
 
-**Epoche e crediti.** La conversazione dell'orchestratore è un'epoca: ne parte una nuova quando il contesto supera metà della
-finestra del modello, quando i crediti del suo provider finiscono o scendono sotto `sogliaUnSolo` (passa al prossimo di
-`orchestra.ordine` in `config.json`, e torna al primo quando ha di nuovo crediti), o quando lo chiedi. Prima di chiuderla il
-processo gli fa aggiornare il quadro; la nuova parte da quadro, indice dei task, ultimi messaggi ed eventi non consegnati. Se i
+**Epoche e crediti.** La conversazione dell'orchestratore è un'epoca: ne parte una nuova quando il contesto supera il 35 % della
+finestra del modello (`orchestra.rotazione`), quando i crediti del suo provider finiscono o scendono sotto `sogliaUnSolo` (passa al prossimo di
+`orchestra.ordine` in `config.json` che abbia `orchestrabile` e un piano attivo, e torna al primo quando ha di nuovo crediti), o quando lo chiedi. Nessun turno
+di chiusura: l'orchestratore tiene il quadro aggiornato nei turni normali, e la nuova epoca parte da quadro, ultimi messaggi ed eventi non consegnati. Se i
 crediti finiscono a metà turno, il turno passa intero al provider successivo. Sul provider dell'orchestratore, sotto la soglia,
 non parte nessun task.
 
@@ -110,7 +110,9 @@ node tools/pipeline/pipeline.mjs orchestratore argon    # su quale provider gira
 node tools/pipeline/pipeline.mjs nota "testo"           # una riga nel diario di orchestrazione.md
 ```
 
-`integra` su un conflitto annulla il merge e lascia il base com'era (dice i file): la risoluzione la fa un agente, in un task.
+`integra` prima dà un numero nuovo agli ADR del task il cui numero è stato preso nel base (file, riferimenti in ciò che il branch ha cambiato, indice: un commit sul branch del task), poi fa il merge e, nello stesso commit, scrive nel blocco del backlog stato ed esito dalla riga `ESITO` del task (`fatto` con l'hash; `in attesa` resta tale; `fallito` non cambia lo stato). L'indice `docs/adr/README.md` si fonde con `merge=union` (`.gitattributes`): le righe di due task restano entrambe. Su un conflitto che resta annulla il merge e lascia il base com'era (dice i file): la risoluzione la fa un agente, in un task.
+
+**Abbonamenti** (ADR-0119). `abbonamenti` in `config.json` dice il piano attivo (`claude`: `pro`, `max5x`, `max20x`, `nessuno`; `google`: `pro`, `ultra`, `nessuno`); `piani` dice per ciascuno `moltiplicatoreStima` (quanto pesano le stime del backlog, scritte sul piano di riferimento Max 5x / Ultra) e `disponibili` (i provider che comprende: uno fuori ha tetto 0, i suoi task sono bloccati e `assegna` lo rifiuta). Ogni provider dice il suo `abbonamento`, `orchestrabile` e `ratioSessioneSettimana` (quanti punti della sessione di 5 ore vale un punto della settimana, misurato da `consumi.jsonl`: Claude 12, Fable 8 sul suo contatore, Gemini 3,3, Argon senza finestra). Si cambiano al volo dalla pagina web.
 
 **I task sopravvivono al processo.** La CLI di un task scrive direttamente nel suo log in `.pipeline/log/` ed è staccata dal
 processo che la lancia; Claude ha l'id della sessione fissato prima di partire (`sessioneNuova`). Se il processo della pipeline
@@ -124,7 +126,8 @@ muore, al riavvio `esegui` segue i task ancora vivi e riprende la conversazione 
 `esegui` gira finché c'è qualcosa da fare; con `--sempre` non si ferma mai: rilegge backlog e contatori a ogni controllo, e i task che pianifichi intanto partono da soli (lascialo in un terminale a parte):
 
 - lancia i task **pronti** (dipendenze `fatto` nel base, approvati, con stima) entro gli **slot** del provider, se la
-  stima sta nel residuo del provider meno ciò che i task in corso hanno già impegnato e la `riserva`;
+  stima scalata per il piano sta nel residuo del provider meno ciò che i task in corso hanno già impegnato e la `riserva`;
+- **la finestra delle 5 ore** (ADR-0119): un task nuovo parte solo se la sessione, meno ciò che i task in corso sullo stesso conto dovrebbero consumare (tutta la loro stima, anche se sono a metà: è una stima prudente), regge il suo costo (stima scalata × `ratioSessioneSettimana`, al più 85), oppure se il contatore delle 5 ore si azzera entro 20 minuti, oppure se ha priorità 0. Morire a metà sul limite costa la cache del prompt. Queste eccezioni non superano `sogliaUnSolo`, che resta in vigore. Nessuno toglie `· approvato` per dosare i lanci;
 - **tetti e slot** (ADR-0087): il tetto lo decide l'autore in `limiti` (`limiti.provider` per CLI, `claude` e `agy`;
   `limiti.modello` per voce di `providers`; oggi 1 ciascuno: un task su Claude e uno su `agy` alla volta); sotto il tetto gli
   **slot dinamici** (da 1 al tetto, T96): a ogni controllo la pipeline campiona il residuo settimanale (`budget.json → storia`,
@@ -136,10 +139,10 @@ muore, al riavvio `esegui` segue i task ancora vivi e riprende la conversazione 
   Sotto `sogliaUnSolo` (10 %, settimana o 5 ore) nessun task nuovo e al più uno in corso, nessuno su
   quello dell'orchestratore. Un task a **priorità 0** (le urgenze dell'autore) può usare uno slot in più, mai oltre il tetto.
   `stato` (e `PIANO.md`, l'interfaccia web) mostra per provider tetto, slot, sospensione, task in programma, esaurimento previsto e reset;
-- **alternative** (`alternative` in `config.json`: oggi `claude → argon → gemini`, `argon → gemini`): se il provider di un task nuovo è fermo per i limiti o la stima non entra nel suo residuo, il task va al primo che può, con la stessa stima; un task sospeso riprende sempre sul suo. Così finiti i crediti di Claude la pipeline continua su Argon e poi su Gemini 3.8. Toglile se un task delicato deve aspettare Claude;
+- **nessun ripiego** (ADR-0119): un task gira solo sul suo provider; se quello non ha slot o crediti, aspetta. Il ripiego automatico mandava task complessi su modelli meno capaci. Solo l'orchestratore o l'autore lo spostano, con `assegna`;
 - **turni delle operazioni pesanti** (ADR-0088): in tutta la pipeline al più **una verifica nel browser**, **una suite intera** di vitest,
   **un typecheck** e **una build** alla volta; chi le vuole fare le lancia con `node tools/pipeline/pipeline.mjs turno browser|test|typecheck|build -- <comando>`, che aspetta il turno
-  (in coda, nell'ordine d'arrivo), esegue il comando (uscita e codice sono i suoi) e lo lascia quando finisce. Il semaforo è su disco,
+  (in coda, nell'ordine d'arrivo), esegue il comando (il codice d'uscita è il suo) e lo lascia quando finisce. Test, typecheck e build scrivono tutto in `.pipeline/turno-<tipo>.log` del worktree e stampano solo le ultime 20 righe se passano, i blocchi di errore (al più 120 righe) se no, più il percorso del log; il browser tiene la sua uscita. Il semaforo è su disco,
   `.pipeline/lock/` della cartella principale (lo stesso per tutti i worktree): `<tipo>.json` dice chi lo tiene (task, comando, da
   quando), `<tipo>.attesa/` chi aspetta; un processo morto o un turno tenuto oltre `turni.<tipo>.massimoMinuti` (45 il browser, 60 i
   test, 10 typecheck e build) non blocca più. Un comando dentro un turno già tenuto non aspetta se stesso (`COVERS`, `coveredBy`): il browser copre
@@ -149,7 +152,7 @@ muore, al riavvio `esegui` segue i task ancora vivi e riprende la conversazione 
   loro suite finali non arrivano tutte insieme;
 - i provider girano **in parallelo** tra loro (ognuno con i suoi contatori e i suoi slot), al più `maxParalleli` in tutto;
 - ogni task ha un worktree `.claude/worktrees/<txx>` sul branch `task/<Txx>` nato dal base, con il
-  `node_modules` del base collegato (junction); il prompt è quello di `config.json`;
+  `node_modules` del base collegato (junction); il prompt è quello di `config.json`, e prima di avviare la CLI la pipeline scrive nel worktree `.pipeline-task.md` (ignorato da git): il blocco del task, i dossier dei task da cui dipende o nasce, le regole qui sotto;
 - `claude -p … --output-format json` / `agy -p … --output-format json`; ogni `controlloSecondi` guarda chi ha finito
   e lancia il prossimo;
 - se l'uscita dice che il limite è finito, il task è `sospeso` con la sua sessione; quando il limite si resetta
@@ -177,7 +180,7 @@ integrato presto. Il diario di `orchestrazione.md` lo scrive lo script (lanci, e
 `BROWSER: verificato|da verificare — …`, che `esegui` riporta nel diario.
 - **Solo su Claude Code**: Claude gira con `--chrome` (`"browser": true` in `config.json`), che avvia un'istanza Chromium isolata ed espone gli strumenti del browser all'agente.
 - **Perché agy non supporta la verifica nel browser (T87)**: in modalità non interattiva (`agy -p`), Antigravity CLI non ha il flag `--chrome` e non fornisce strumenti di navigazione/ispezione browser all'agente primario. Il subagente `/browser` si appoggia su Chrome DevTools cercando una porta attiva (`DevToolsActivePort`) sul profilo Chrome utente predefinito, ma da istruzioni non avvia Chrome direttamente; se Chrome non è già stato lanciato manualmente con `--remote-debugging-port`, la connessione fallisce. Pertanto da `agy -p` le verifiche nel browser non sono possibili.
-- **Regola della pipeline**: la pipeline riconosce i task che richiedono una verifica nel browser (o screenshot): non li invia mai ad agy (`gemini` o `argon`), non li fa ripiegare sulle alternative non-browser e li assegna esclusivamente a `claude`. Se un task con browser è configurato su un provider senza browser, la pipeline lo blocca.
+- **Regola della pipeline**: la pipeline riconosce i task che richiedono una verifica nel browser (o screenshot): non li invia mai ad agy (`gemini` o `argon`). Se un task con browser è configurato su un provider senza browser, la pipeline lo blocca e `assegna` lo rifiuta.
 
 **Permessi.** In `config.json` le CLI girano con `--dangerously-skip-permissions`: niente prompt, perché nessuno
 risponde. Ogni task è nel suo worktree, ma l'agente ha la shell: toglilo (e dai un allowlist in
@@ -206,14 +209,13 @@ Altri agenti, di altri provider, lavorano nello stesso repository nello stesso m
 
 1. Lavora solo nel tuo worktree e sul tuo branch (`task/<Txx>`); niente merge, push, `git stash` né `checkout` di
    altri branch; non toccare gli altri worktree né la cartella principale. Unica eccezione: un task «Integrare Txx» fa
-   `git merge task/Txx` nel suo branch, risolve i conflitti (l'ADR che entra prende il primo numero libero) e committa.
-2. Se il tuo task nasce da un altro o lo cita (un bug di T63), leggi prima il suo dossier: `node tools/pipeline/pipeline.mjs dossier T63`.
-3. Non pianificare il to-do e non toccare altri task del backlog: cambia solo il blocco del tuo (stato, esito).
+   `git merge task/Txx` nel suo branch, risolve i conflitti e committa.
+2. Il tuo task e i dossier di quelli da cui dipende o nasce sono in `.pipeline-task.md`; per un altro task che cita (un bug di T63): `node tools/pipeline/pipeline.mjs dossier T63`.
+3. Non pianificare il to-do. **Non leggere e non modificare `docs/plans/backlog.md`**: stato ed esito del tuo task li scrive la pipeline quando lo integra, dalla tua riga `ESITO`, che quindi deve dire tutto ciò che serve (cosa è cambiato, cosa manca, cosa non è provato). Un task «Integrare Txx» fonde anche il backlog, se quel branch lo tocca, senza altre modifiche.
 4. Non fare domande e non aspettare risposte: se serve una decisione dell'autore scrivila in
-   `docs/pipeline/domande/<Txx>.md` (contesto, domanda, opzioni con la tua raccomandazione), segna il task
-   `in attesa`, committa e termina.
-5. I numeri di ADR possono scontrarsi tra task paralleli: prendi il primo libero nel tuo branch; chi integra
-   rinumera se serve.
+   `docs/pipeline/domande/<Txx>.md` (contesto, domanda, opzioni con la tua raccomandazione), committa e termina con
+   `ESITO: in attesa`.
+5. I numeri di ADR possono scontrarsi tra task paralleli: prendi il primo libero nel tuo branch; `integra` rinumera da solo.
 6. Se il task chiede una verifica nel browser, falla (`AGENTS.md`, «Convalida nel browser»: porta libera, scheda tua, chiudi
    tutto alla fine) nel suo turno: la preview con `node tools/pipeline/pipeline.mjs turno browser -- npx vite preview --port <n> --strictPort`
    in background; il browser è tuo finché la preview vive, fermarla lo lascia.

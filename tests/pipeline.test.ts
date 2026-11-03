@@ -1,4 +1,5 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -29,6 +30,18 @@ type Pipeline = {
   resumeProvider(provider: string, opts?: unknown): { provider: string; sospeso: boolean };
   providerHasBrowser(provider: string, config?: unknown): boolean;
   allowedProviders(t: { provider?: string; needsBrowser?: boolean }, config?: unknown): string[];
+  planOf(provider: string, config?: unknown): { nome: string; moltiplicatoreStima: number; disponibili: string[] } | undefined;
+  providerEnabled(provider: string, config?: unknown): boolean;
+  scaledEstimate(provider: string, estimate: number, config?: unknown): number;
+  sessionCost(provider: string, estimate: number, config?: unknown): number;
+  windowAdmits(prov: string, t: { estimate?: number; priority?: number }, o: { b: unknown; live?: unknown[]; config?: unknown; nowMs?: number }): boolean;
+  fitsOn(prov: string, t: { estimate?: number; priority?: number }, o: { budget: Record<string, unknown>; live?: unknown[]; orch?: string; resuming?: boolean; config?: unknown; nowMs?: number }): boolean;
+  taskContext(t: { id: string; deps?: string[]; parent?: string }, opts?: unknown): string;
+  recordOutcome(text: string, id: string, hash: string, esito?: string): string;
+  renameAdrRefs(text: string, renames: { from: string; to: string; fromFile: string; toFile: string }[], baseText?: string): string;
+  integrateTask(id: string, opts?: unknown): { ok: boolean; message: string; conflicts?: string[] };
+  summarizeTurn(kind: string, output: string, code: number, logFile: string): string;
+  runInTurn(kind: string, command: string[], o: { dir: string; logDir: string; every?: number }): Promise<number>;
 };
 
 let P: Pipeline;
@@ -125,7 +138,7 @@ describe('taskNeedsBrowser e gestione browser (T87)', () => {
     expect(P.taskNeedsBrowser('### T111 · Pipeline: un task con verifica nel browser non ripiega\n- Cosa fare: non scegliere un provider senza browser per un task che chiede la verifica nel browser\n- Quando è fatto: test della pipeline verdi con il caso nuovo; typecheck verde.\n')).toBe(false);
   });
 
-  it('un task con verifica nel browser non ripiega su un provider senza browser (T111)', () => {
+  it('un task gira solo sul suo provider: nessun ripiego, nemmeno con una voce `alternative` rimasta (ADR-0119)', () => {
     const taskBrowser: Task = { id: 'T110', title: 'Task browser', status: 'da fare', deps: [], provider: 'claude', estimate: 3, approved: true, priority: 30, needsBrowser: true };
     const taskNormale: Task = { id: 'T111', title: 'Task normale', status: 'da fare', deps: [], provider: 'claude', estimate: 2, approved: true, priority: 20, needsBrowser: false };
     const config = {
@@ -139,10 +152,12 @@ describe('taskNeedsBrowser e gestione browser (T87)', () => {
       },
     };
 
-    // Il task con browser può andare SOLO su provider con browser (claude)
     expect(P.allowedProviders(taskBrowser, config)).toEqual(['claude']);
-    // Il task normale può ripiegare sulle sue alternative (argon, gemini)
-    expect(P.allowedProviders(taskNormale, config)).toEqual(['claude', 'argon', 'gemini']);
+    expect(P.allowedProviders(taskNormale, config)).toEqual(['claude']);
+    // Un task col browser su un provider che non ce l'ha aspetta: non va su un altro.
+    expect(P.allowedProviders({ ...taskBrowser, provider: 'gemini' }, config)).toEqual([]);
+    const real = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../tools/pipeline/config.json'), 'utf8'));
+    expect(real.alternative).toBeUndefined();
   });
 
   it('parseBacklog marca needsBrowser per i task pertinenti', () => {
@@ -307,6 +322,321 @@ describe('Fable (ADR-0115)', () => {
     expect(config.providers.claude.args).toContain('claude-opus-5-5');
     expect(config.limiti.modello.fable).toBe(1);
     expect(config.limiti.provider.claude).toBe(2);
+  });
+});
+
+describe('piani e finestra delle 5 ore (ADR-0119)', () => {
+  const real = () => JSON.parse(fs.readFileSync(path.resolve(__dirname, '../tools/pipeline/config.json'), 'utf8'));
+  const withPlans = (claude: string, google = 'ultra') => ({ ...real(), abbonamenti: { claude, google } });
+  const NOW = Date.parse('2026-11-03T12:00:00Z');
+  const counters = (residuo: number, reset: string) => [{ nome: 'session', finestra: '5h', residuo, reset }];
+  const FAR = '2026-11-03T15:00:00Z';
+
+  it('ogni provider dice se può orchestrare e il suo rapporto sessione/settimana', () => {
+    const c = real();
+    expect(c.providers.claude).toMatchObject({ orchestrabile: true, ratioSessioneSettimana: 12 });
+    expect(c.providers.fable).toMatchObject({ orchestrabile: false, ratioSessioneSettimana: 8 });
+    expect(c.providers.gemini).toMatchObject({ orchestrabile: true, ratioSessioneSettimana: 3.3 });
+    expect(c.providers.argon).toMatchObject({ orchestrabile: true, ratioSessioneSettimana: 1, finestra5h: false });
+    expect(c.orchestra.rotazione).toBe(0.35);
+  });
+
+  it('il piano scala le stime e dice chi è disponibile', () => {
+    expect(P.scaledEstimate('claude', 2, withPlans('pro'))).toBe(10);
+    expect(P.scaledEstimate('claude', 2, withPlans('max5x'))).toBe(2);
+    expect(P.scaledEstimate('claude', 2, withPlans('max20x'))).toBe(0.5);
+    expect(P.scaledEstimate('gemini', 2, withPlans('max5x', 'pro'))).toBe(5);
+    expect(P.providerEnabled('fable', withPlans('pro'))).toBe(false);
+    expect(P.providerEnabled('fable', withPlans('max20x'))).toBe(true);
+    expect(P.providerEnabled('argon', withPlans('max5x', 'pro'))).toBe(false);
+    expect(P.providerEnabled('gemini', withPlans('max5x', 'pro'))).toBe(true);
+    // Una configurazione senza piani non scala e non disabilita nulla.
+    expect(P.scaledEstimate('claude', 2, { providers: { claude: {} } })).toBe(2);
+    expect(P.providerEnabled('claude', { providers: { claude: {} } })).toBe(true);
+  });
+
+  it('il piano «nessuno» dà tetto 0 ai suoi provider e nessuno orchestra da lì', () => {
+    const c = withPlans('nessuno');
+    expect(P.ceilingOf('claude', c)).toBe(0);
+    expect(P.ceilingOf('fable', c)).toBe(0);
+    expect(P.ceilingOf('gemini', c)).toBe(1);
+    expect(P.canOrchestrate('claude')).toBe(true);
+    expect(P.allowedProviders({ provider: 'claude' }, c)).toEqual([]);
+  });
+
+  it('un task nuovo parte solo se la sessione regge il suo costo', () => {
+    const c = withPlans('max5x');
+    expect(P.sessionCost('claude', 2, c)).toBe(24);
+    const t = { estimate: 2, priority: 10 };
+    expect(P.windowAdmits('claude', t, { b: { sessione: 24, contatori: counters(24, FAR) }, config: c, nowMs: NOW })).toBe(true);
+    expect(P.windowAdmits('claude', t, { b: { sessione: 23, contatori: counters(23, FAR) }, config: c, nowMs: NOW })).toBe(false);
+    // Lo stesso task su Pro pesa cinque volte tanto.
+    expect(P.windowAdmits('claude', t, { b: { sessione: 90, contatori: counters(90, FAR) }, config: withPlans('pro'), nowMs: NOW })).toBe(true); // al più 85
+    expect(P.windowAdmits('claude', { estimate: 1, priority: 10 }, { b: { sessione: 50, contatori: counters(50, FAR) }, config: withPlans('pro'), nowMs: NOW })).toBe(false);
+  });
+
+  it('una stima enorme chiede al più 85 punti, altrimenti non partirebbe mai', () => {
+    const c = withPlans('max5x');
+    const t = { estimate: 20, priority: 10 };
+    expect(P.windowAdmits('claude', t, { b: { sessione: 85 }, config: c, nowMs: NOW })).toBe(true);
+    expect(P.windowAdmits('claude', t, { b: { sessione: 84 }, config: c, nowMs: NOW })).toBe(false);
+  });
+
+  it('la sessione impegnata conta i task in corso dello stesso conto, Fable con Claude, non Gemini', () => {
+    const c = withPlans('max5x');
+    const t = { estimate: 2, priority: 10 };
+    const b = { sessione: 60, contatori: counters(60, FAR) };
+    expect(P.windowAdmits('claude', t, { b, live: [{ provider: 'gemini', stima: 5 }], config: c, nowMs: NOW })).toBe(true);
+    expect(P.windowAdmits('claude', t, { b, live: [{ provider: 'claude', stima: 3 }], config: c, nowMs: NOW })).toBe(true); // 60 - 36 = 24
+    expect(P.windowAdmits('claude', t, { b, live: [{ provider: 'claude', stima: 4 }], config: c, nowMs: NOW })).toBe(false); // 60 - 48
+    expect(P.windowAdmits('claude', t, { b, live: [{ provider: 'fable', stima: 6 }], config: c, nowMs: NOW })).toBe(false); // 60 - 48
+    expect(P.windowAdmits('fable', { estimate: 1, priority: 10 }, { b, live: [{ provider: 'claude', stima: 5 }], config: c, nowMs: NOW })).toBe(false); // 60 - 60 < 8
+  });
+
+  it('le eccezioni: il reset entro 20 minuti, la priorità 0, chi non ha la finestra', () => {
+    const c = withPlans('max5x');
+    const t = { estimate: 4, priority: 10 };
+    const low = (reset: string) => ({ sessione: 15, contatori: counters(15, reset) });
+    expect(P.windowAdmits('claude', t, { b: low('2026-11-03T12:20:00Z'), config: c, nowMs: NOW })).toBe(true);
+    expect(P.windowAdmits('claude', t, { b: low('2026-11-03T12:21:00Z'), config: c, nowMs: NOW })).toBe(false);
+    expect(P.windowAdmits('claude', t, { b: low('2026-11-03T11:59:00Z'), config: c, nowMs: NOW })).toBe(false); // un reset già passato non conta
+    expect(P.windowAdmits('claude', { estimate: 4, priority: 0 }, { b: low(FAR), config: c, nowMs: NOW })).toBe(true);
+    expect(P.windowAdmits('argon', t, { b: { sessione: 1 }, config: c, nowMs: NOW })).toBe(true);
+  });
+
+  it('fitsOn: la settimana è scalata, la finestra conta solo per i task nuovi, nessuna eccezione sotto la soglia', () => {
+    const c = withPlans('pro');
+    const budget = (residuo: number, sessione: number) => ({ claude: { residuo, sessione, slot: 2, tetto: 2, contatori: counters(sessione, FAR) } });
+    const t = { estimate: 1, priority: 10 };
+    expect(P.fitsOn('claude', t, { budget: budget(50, 70), config: c, nowMs: NOW })).toBe(true);
+    // 1 % su Pro è 5 % della settimana: con la riserva di 3 non ci sta.
+    expect(P.fitsOn('claude', t, { budget: budget(13, 70), config: c, nowMs: NOW })).toBe(true);
+    expect(P.fitsOn('claude', t, { budget: budget(7, 70), config: c, nowMs: NOW })).toBe(false);
+    expect(P.fitsOn('claude', t, { budget: budget(50, 40), config: c, nowMs: NOW })).toBe(false);
+    expect(P.fitsOn('claude', t, { budget: budget(50, 40), resuming: true, orch: 'gemini', config: c, nowMs: NOW })).toBe(true);
+    expect(P.fitsOn('claude', { estimate: 1, priority: 0 }, { budget: budget(50, 5), orch: 'gemini', config: c, nowMs: NOW })).toBe(false);
+    // Su un provider fermo o senza piano non parte nulla.
+    const off = { ...withPlans('nessuno') };
+    expect(P.fitsOn('claude', t, { budget: { claude: { residuo: 90, sessione: 90, slot: 1 } }, config: off, nowMs: NOW })).toBe(false);
+  });
+});
+
+describe('il contesto dei task e il backlog (ADR-0119)', () => {
+  it('il prompt manda a .pipeline-task.md e tiene gli agenti fuori dal backlog', () => {
+    const c = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../tools/pipeline/config.json'), 'utf8'));
+    expect(c.prompt).toContain('.pipeline-task.md');
+    expect(c.prompt).toMatch(/non leggere e non modificare `docs\/plans\/backlog\.md`/i);
+    for (const k of ['{id}', '{dir}', '{branch}', '{base}']) expect(c.prompt).toContain(k);
+    expect(fs.readFileSync(path.resolve(__dirname, '../.gitignore'), 'utf8')).toMatch(/^\.pipeline-task\.md$/m);
+  });
+
+  it('taskContext: il blocco, i dossier di chi dipende e da chi nasce, le regole; non il resto del backlog', () => {
+    const repo = fs.mkdtempSync(path.join(os.tmpdir(), 'quine-contesto-'));
+    fs.mkdirSync(path.join(repo, 'docs', 'plans'), { recursive: true });
+    fs.mkdirSync(path.join(repo, 'docs', 'pipeline'), { recursive: true });
+    fs.writeFileSync(path.join(repo, 'docs', 'plans', 'backlog.md'), [
+      '### T1 · La base — `fatto` (`aaa`)', '- Fare: BLOCCO-T1.', '',
+      '### T2 · Il bug — `fatto` (`bbb`)', '- Fare: BLOCCO-T2.', '',
+      '### T3 · Il mio — `da fare` (dipende da T1)', '- Pipeline: claude · stima 1% · approvato · priorità 1', '- Contesto: nasce da T2.', '',
+      '### T4 · Estraneo — `da fare`', '- Fare: BLOCCO-T4.', '',
+    ].join('\n'));
+    fs.writeFileSync(path.join(repo, 'docs', 'pipeline', 'README.md'), '# X\n\n## Regole per chi esegue un task (ambiente condiviso)\n\nREGOLA-UNO\n\n## Altro\n\nNON-QUESTA\n');
+    const text = P.taskContext({ id: 'T3', deps: ['T1'] }, { repo, config: { providers: {} } });
+    expect(text).toContain('# Il tuo task: T3');
+    expect(text).toContain('nasce da T2');
+    expect(text).toContain('BLOCCO-T1');
+    expect(text).toContain('BLOCCO-T2');
+    expect(text).toContain('REGOLA-UNO');
+    expect(text).not.toContain('NON-QUESTA');
+    expect(text).not.toContain('BLOCCO-T4');
+    fs.rmSync(repo, { recursive: true, force: true });
+  });
+
+  it('recordOutcome: lo stato segue l\'esito, i backtick del titolo restano', () => {
+    const text = '### T8 · R1: `Building` → `Lot` — `da fare` (dipende da T7)\n- Fare: x.\n\n### T9 · Dopo — `da fare`\n- Fare: y.\n';
+    const done = P.recordOutcome(text, 'T8', 'abc1234', 'ESITO: fatto — rinominato tutto');
+    expect(done).toContain('### T8 · R1: `Building` → `Lot` — `fatto` (`abc1234`) (dipende da T7)');
+    expect(done).toContain('- Fare: x.\n- Esito: rinominato tutto\n\n### T9 · Dopo — `da fare`');
+    expect(P.parseBacklog(done).find((t) => t.id === 'T8')?.status).toBe('fatto');
+    const waiting = P.recordOutcome(text, 'T8', 'abc1234', 'ESITO: in attesa — domanda scritta');
+    expect(P.parseBacklog(waiting).find((t) => t.id === 'T8')?.status).toBe('in attesa');
+    const failed = P.recordOutcome(text, 'T8', 'abc1234', 'ESITO: fallito (codice 1)');
+    expect(P.parseBacklog(failed).find((t) => t.id === 'T8')?.status).toBe('da fare');
+    expect(failed).toContain('- Esito: (codice 1)');
+    // Senza esito (integrato tramite un altro task) è fatto; un blocco che lo dice già non cambia.
+    expect(P.parseBacklog(P.recordOutcome(text, 'T8', 'abc1234')).find((t) => t.id === 'T8')?.status).toBe('fatto');
+    expect(P.recordOutcome(done, 'T8', 'fff', 'ESITO: fatto — di nuovo')).toBe(done);
+    // Un sotto-task nel titolo del padre.
+    const sub = P.recordOutcome('### T56 · Il salto — T56a `fatto` (`e5f`), T56b `da fare` (dopo T53a)\n', 'T56b', 'abc', 'ESITO: fatto — ok');
+    expect(sub).toContain('T56a `fatto` (`e5f`), T56b `fatto` (`abc`) (dopo T53a)');
+    // `$` nell'esito resta com'è.
+    expect(P.recordOutcome(text, 'T8', 'abc', 'ESITO: fatto — costa 5 $& basta')).toContain('costa 5 $& basta');
+  });
+
+  it('renameAdrRefs: i riferimenti del task cambiano, le righe uguali al base no', () => {
+    const r = [{ from: '0002', to: '0003', fromFile: '0002-b.md', toFile: '0003-b.md' }];
+    const base = 'Vedi ADR-0002 del base.\n';
+    const text = 'Vedi ADR-0002 del base.\nIl task: ADR-0002, non ADR-00021.\n| [0002](0002-b.md) | x |\n';
+    expect(P.renameAdrRefs(text, r, base)).toBe('Vedi ADR-0002 del base.\nIl task: ADR-0003, non ADR-00021.\n| [0003](0003-b.md) | x |\n');
+  });
+});
+
+describe('integrateTask in un repository vero (ADR-0119)', () => {
+  const run = (cwd: string, ...args: string[]) => execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+  const write = (root: string, f: string, text: string) => { fs.mkdirSync(path.dirname(path.join(root, f)), { recursive: true }); fs.writeFileSync(path.join(root, f), text); };
+  const INDEX = '# ADR\n\n| N | D |\n|---|---|\n| [0001](0001-a.md) | a |\n\nModello: copia.\n';
+  const BACKLOG_TEXT = '# Backlog\n\n### T7 · Il task `con` backtick — `da fare`\n- Fare: x.\n\n### T8 · Un altro — `da fare`\n- Fare: y.\n';
+
+  /** A repository with a base branch and `task/T7` in its own worktree, which adds ADR 0002; the base then takes 0002 too. */
+  const sandbox = (esito = 'ESITO: fatto — ha funzionato') => {
+    const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'quine-integra-')));
+    const repo = path.join(root, 'repo');
+    fs.mkdirSync(repo);
+    run(repo, 'init', '-q', '-b', 'base3d');
+    run(repo, 'config', 'user.email', 'prova@example.com');
+    run(repo, 'config', 'user.name', 'Prova');
+    run(repo, 'config', 'commit.gpgsign', 'false');
+    fs.copyFileSync(path.resolve(__dirname, '../.gitattributes'), path.join(repo, '.gitattributes'));
+    write(repo, '.gitignore', '.pipeline/\n.pipeline-task.md\ndocs/pipeline/orchestrazione.md\n'); // il diario lo scrive `say`
+    write(repo, 'docs/adr/README.md', INDEX);
+    write(repo, 'docs/adr/0001-a.md', '# ADR-0001 — A\n');
+    write(repo, 'docs/plans/backlog.md', BACKLOG_TEXT);
+    write(repo, 'note.md', 'Comune.\n');
+    run(repo, 'add', '-A');
+    run(repo, 'commit', '-qm', 'inizio');
+    const wt = path.join(root, 't7');
+    run(repo, 'worktree', 'add', '-q', '-b', 'task/T7', wt);
+    write(wt, '.pipeline-task.md', 'generato, ignorato da git\n');
+    write(wt, 'docs/adr/0002-b.md', '# ADR-0002 — B\n');
+    write(wt, 'docs/adr/README.md', INDEX.replace('\n\nModello', '\n| [0002](0002-b.md) | Vedi ADR-0002 |\n\nModello'));
+    write(wt, 'note.md', 'Comune.\nSecondo ADR-0002.\n');
+    run(wt, 'add', '-A');
+    run(wt, 'commit', '-qm', 'il task');
+    write(repo, 'docs/adr/0002-c.md', '# ADR-0002 — C\n');
+    write(repo, 'docs/adr/README.md', INDEX.replace('\n\nModello', '\n| [0002](0002-c.md) | Il base |\n\nModello'));
+    run(repo, 'add', '-A');
+    run(repo, 'commit', '-qm', 'il base prende lo 0002');
+    const stateDir = path.join(repo, '.pipeline');
+    fs.mkdirSync(stateDir, { recursive: true });
+    fs.writeFileSync(path.join(stateDir, 'esecuzioni.json'), JSON.stringify({ T7: { id: 'T7', stato: 'finito', esito } }));
+    return { root, repo, wt, opts: { repo, stateDir, config: { base: 'base3d', providers: { claude: {} } } } };
+  };
+
+  it('rinumera l\'ADR, tiene le due righe dell\'indice, scrive stato ed esito nel commit di merge', () => {
+    const { root, repo, wt, opts } = sandbox();
+    const tip = run(repo, 'rev-parse', '--short', 'task/T7');
+    const res = P.integrateTask('T7', opts);
+    expect(res.message).toContain('ADR-0002 → ADR-0003');
+    expect(res.ok).toBe(true);
+    expect(fs.existsSync(path.join(repo, 'docs/adr/0003-b.md'))).toBe(true);
+    expect(fs.existsSync(path.join(repo, 'docs/adr/0002-b.md'))).toBe(false);
+    expect(fs.readFileSync(path.join(repo, 'docs/adr/0002-c.md'), 'utf8')).toContain('ADR-0002');
+    expect(fs.readFileSync(path.join(repo, 'docs/adr/0003-b.md'), 'utf8')).toContain('# ADR-0003');
+    expect(fs.readFileSync(path.join(repo, 'note.md'), 'utf8')).toContain('Secondo ADR-0003.');
+    const index = fs.readFileSync(path.join(repo, 'docs/adr/README.md'), 'utf8');
+    expect(index).toContain('| [0002](0002-c.md) | Il base |');
+    expect(index).toContain('| [0003](0003-b.md) | Vedi ADR-0003 |');
+    expect(index).not.toContain('<<<<');
+    // Il backlog è nel commit di merge stesso, non in uno dopo, e il base è pulito.
+    const merge = run(repo, 'log', '-1', '--format=%s %P');
+    expect(merge.split(' ').length).toBeGreaterThan(4);
+    expect(merge).toContain('Pipeline: integra T7');
+    expect(run(repo, 'show', '--format=', '--name-only', '--first-parent', 'HEAD')).toContain('docs/plans/backlog.md');
+    expect(run(repo, 'status', '--porcelain')).toBe('');
+    const backlog = fs.readFileSync(path.join(repo, 'docs/plans/backlog.md'), 'utf8');
+    expect(backlog).toContain('### T7 · Il task `con` backtick — `fatto`');
+    expect(backlog).toContain('- Esito: ha funzionato');
+    expect(backlog).toContain('### T8 · Un altro — `da fare`');
+    expect(tip).toMatch(/^[0-9a-f]+$/);
+    // Worktree e branch tolti, anche con .pipeline-task.md dentro.
+    expect(fs.existsSync(wt)).toBe(false);
+    expect(run(repo, 'branch', '--list', 'task/T7')).toBe('');
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+
+  it('un ADR con un numero libero non si tocca; un task in attesa non diventa fatto', () => {
+    const { root, repo, wt, opts } = sandbox('ESITO: in attesa — chiedo');
+    run(wt, 'mv', 'docs/adr/0002-b.md', 'docs/adr/0009-b.md');
+    run(wt, 'commit', '-qm', 'un numero libero');
+    const res = P.integrateTask('T7', opts);
+    expect(res.ok).toBe(true);
+    expect(res.message).not.toContain('→');
+    expect(fs.existsSync(path.join(repo, 'docs/adr/0009-b.md'))).toBe(true);
+    const tasks = P.parseBacklog(fs.readFileSync(path.join(repo, 'docs/plans/backlog.md'), 'utf8'));
+    expect(tasks.find((t) => t.id === 'T7')?.status).toBe('in attesa');
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+
+  it('un conflitto vero lascia il base com\'era', () => {
+    const { root, repo, wt, opts } = sandbox();
+    write(wt, 'note.md', 'Del task.\n');
+    run(wt, 'add', '-A');
+    run(wt, 'commit', '-qm', 'conflitto');
+    write(repo, 'note.md', 'Del base.\n');
+    run(repo, 'add', '-A');
+    run(repo, 'commit', '-qm', 'conflitto');
+    const head = run(repo, 'rev-parse', 'HEAD');
+    const exit = process.exitCode;
+    const res = P.integrateTask('T7', opts);
+    process.exitCode = exit;
+    expect(res.ok).toBe(false);
+    expect(res.conflicts).toContain('note.md');
+    expect(run(repo, 'rev-parse', 'HEAD')).toBe(head);
+    expect(run(repo, 'status', '--porcelain')).toBe('');
+    expect(fs.readFileSync(path.join(repo, 'docs/plans/backlog.md'), 'utf8')).toBe(BACKLOG_TEXT);
+    run(repo, 'worktree', 'remove', '--force', wt);
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+});
+
+describe("l'uscita dei turni (ADR-0119)", () => {
+  it('riuscito: le ultime 20 righe e il log', () => {
+    const output = Array.from({ length: 50 }, (_, i) => `riga ${i}`).join('\n') + '\n';
+    const s = P.summarizeTurn('test', output, 0, 'x/turno-test.log').split('\n');
+    expect(s).toHaveLength(21);
+    expect(s[0]).toBe('riga 30');
+    expect(s.at(-1)).toContain('x/turno-test.log');
+    expect(s.at(-1)).toContain('riuscito');
+  });
+
+  it('fallito: solo i blocchi di errore, al più 120 righe, e il log', () => {
+    const noise = Array.from({ length: 500 }, (_, i) => `rumore ${i}`);
+    noise[100] = '\u001b[31m FAIL  tests/a.test.ts > cade\u001b[0m';
+    noise[101] = 'dettaglio del guasto';
+    noise[300] = "src/a.ts(1,1): error TS2322: Type 'x'";
+    const s = P.summarizeTurn('typecheck', noise.join('\n'), 2, 'l.log');
+    expect(s).toContain(' FAIL  tests/a.test.ts > cade');
+    expect(s).not.toContain('\u001b');
+    expect(s).toContain('dettaglio del guasto');
+    expect(s).toContain('error TS2322');
+    expect(s).not.toContain('rumore 200');
+    expect(s).toContain('FALLITO (codice 2)');
+    const flood = P.summarizeTurn('test', Array.from({ length: 900 }, () => 'FAIL x').join('\n'), 1, 'l.log').split('\n');
+    expect(flood).toHaveLength(121);
+    // Nessun errore riconosciuto: la coda, non il vuoto.
+    expect(P.summarizeTurn('build', 'qualcosa è andato storto\n', 1, 'l.log')).toContain('qualcosa è andato storto');
+  });
+
+  it('runInTurn scrive tutto nel log, stampa il riassunto e passa il codice', async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'quine-turno-log-'));
+    const script = path.join(dir, 'parla.cjs');
+    fs.writeFileSync(script, 'for (let i = 0; i < 40; i++) console.log("riga " + i); process.exit(3);');
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const err = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const before = process.listeners('exit').length;
+    try {
+      const code = await P.runInTurn('test', [`"${process.execPath}"`, `"${script}"`], { dir: path.join(dir, 'lock'), logDir: path.join(dir, 'log') });
+      expect(code).toBe(3);
+      const whole = fs.readFileSync(path.join(dir, 'log', 'turno-test.log'), 'utf8');
+      expect(whole).toContain('riga 0');
+      expect(whole).toContain('riga 39');
+      expect(String(log.mock.calls.at(-1)?.[0])).toContain('FALLITO (codice 3)');
+    } finally {
+      log.mockRestore();
+      err.mockRestore();
+      for (const l of process.listeners('exit').slice(before)) process.off('exit', l);
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
   });
 });
 
@@ -833,6 +1163,51 @@ describe('interfaccia web della pipeline (T69)', () => {
     } finally {
       await new Promise<void>((resolve) => server.close(() => resolve()));
     }
+  });
+
+  it('POST /api/config cambia piani e «Può orchestrare» sul file e in memoria (ADR-0119)', () => {
+    const sandbox = makeSandbox();
+    const real = JSON.parse(fsMod.readFileSync(path.resolve(__dirname, '../tools/pipeline/config.json'), 'utf8'));
+    const configFile = path.join(tmpRepo, 'config.json');
+    fsMod.writeFileSync(configFile, JSON.stringify(real));
+    const config = structuredClone(real);
+    const opts = { ...sandbox, config, configFile };
+
+    const start = W.handleApi('GET', '/api/stato', {}, opts).data;
+    expect(start.config.abbonamenti).toEqual({ claude: 'max5x', google: 'ultra' });
+    expect(start.config.piani.claude).toEqual(['pro', 'max5x', 'max20x', 'nessuno']);
+    expect(start.config.orchestrabili).toEqual(['claude', 'gemini', 'argon']);
+    expect(start.config.alternative).toBeUndefined();
+
+    const plan = W.handleApi('POST', '/api/config', { abbonamenti: { google: 'pro' } }, opts);
+    expect(plan.status).toBe(200);
+    expect(JSON.parse(fsMod.readFileSync(configFile, 'utf8')).abbonamenti).toEqual({ claude: 'max5x', google: 'pro' });
+    // Argon esce dal piano: non è più disponibile, né per orchestrare.
+    const after = W.handleApi('GET', '/api/stato', {}, opts).data;
+    expect(after.config.abilitati).not.toContain('argon');
+    expect(after.config.orchestrabili).toEqual(['claude', 'gemini']);
+    expect(W.handleApi('POST', '/api/orchestratore', { provider: 'argon' }, opts).status).toBe(400);
+
+    const off = W.handleApi('POST', '/api/config', { orchestrabile: { gemini: false, fable: true } }, opts);
+    expect(off.data.orchestrabili).toEqual(['claude', 'fable']);
+    const saved = JSON.parse(fsMod.readFileSync(configFile, 'utf8'));
+    expect(saved.providers.gemini.orchestrabile).toBe(false);
+    expect(saved.providers.fable.orchestrabile).toBe(true);
+
+    // Ciò che non esiste viene rifiutato e non scrive nulla.
+    expect(W.handleApi('POST', '/api/config', { abbonamenti: { claude: 'gratis' } }, opts).status).toBe(400);
+    expect(W.handleApi('POST', '/api/config', { abbonamenti: { altro: 'pro' } }, opts).status).toBe(400);
+    expect(W.handleApi('POST', '/api/config', { orchestrabile: { gemini: 'sì' } }, opts).status).toBe(400);
+    expect(JSON.parse(fsMod.readFileSync(configFile, 'utf8'))).toEqual(saved);
+  });
+
+  it('la pagina ha i selettori dei piani, la casella e il menu dinamico (ADR-0119)', () => {
+    const html = W.renderHtml();
+    expect(html).toContain('plan-selectors');
+    expect(html).toContain('Può orchestrare');
+    expect(html).toContain('/api/config');
+    expect(html).toContain('s.config.orchestrabili.map');
+    expect(/<select id="orch-switch"[^>]*>\s*<option value="">Passa a…<\/option>\s*<\/select>/.test(html)).toBe(true);
   });
 
   it('renderHtml serve uno script inline sintatticamente valido senza errori di regex (T81)', () => {

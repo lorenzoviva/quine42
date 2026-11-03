@@ -7,6 +7,7 @@ import { markdownToHtml } from './markdown.mjs';
 import {
   approveTasks,
   assignTask,
+  canOrchestrate,
   dossierOf,
   integrateTask,
   interruptTasks,
@@ -16,6 +17,7 @@ import {
   parseBacklog,
   pathsOf,
   plan,
+  providerEnabled,
   readJson,
   refreshUsage,
   resumeProvider,
@@ -25,6 +27,7 @@ import {
   setOrchestrator,
   suspendProvider,
   traceOf,
+  updateConfig,
   writeJson,
   writePlan,
 } from './pipeline.mjs';
@@ -189,7 +192,11 @@ export function buildStateSnapshot(opts = {}) {
       limiti: p.config.limiti ?? {},
       approvazione: p.config.approvazione,
       ordine: p.config.orchestra?.ordine ?? ['claude', 'argon', 'gemini'],
-      alternative: p.config.alternative ?? {},
+      abbonamenti: p.config.abbonamenti ?? {},
+      piani: Object.fromEntries(Object.entries(p.config.piani ?? {}).map(([sub, list]) => [sub, Object.keys(list)])),
+      abilitati: Object.keys(p.config.providers).filter((k) => providerEnabled(k, p.config)),
+      permessoOrchestrare: Object.fromEntries(Object.entries(p.config.providers).map(([k, c]) => [k, c.orchestrabile !== false])),
+      orchestrabili: Object.keys(p.config.providers).filter((k) => canOrchestrate(k, p.config)),
     },
     budget,
     contatoriNonUsati: [...others.values()],
@@ -390,6 +397,13 @@ export function handleApi(method, rawUrl, body = {}, opts = {}) {
       return { status: 200, data: { ok: true, budget: b } };
     }
 
+    if (method === 'POST' && pathname === '/api/config') {
+      const res = updateConfig({ abbonamenti: body?.abbonamenti, orchestrabile: body?.orchestrabile }, opts);
+      say(`configurazione: ${JSON.stringify({ abbonamenti: body?.abbonamenti, orchestrabile: body?.orchestrabile })}`, p.report);
+      syncPlanFile(opts);
+      return { status: 200, data: { ok: true, ...res } };
+    }
+
     if (method === 'POST' && pathname === '/api/orchestratore') {
       if (body?.epoca) {
         enqueueMessage('/epoca', p.stateDir);
@@ -406,6 +420,9 @@ export function handleApi(method, rawUrl, body = {}, opts = {}) {
       const provider = String(body?.provider ?? '').trim();
       if (!p.config.providers[provider]) {
         return { status: 400, data: { error: `Provider sconosciuto: ${provider}` } };
+      }
+      if (!canOrchestrate(provider, p.config)) {
+        return { status: 400, data: { error: `${provider} non può orchestrare` } };
       }
       setOrchestrator(provider, opts);
       say(`orchestratore: ${provider}`, p.report);
@@ -949,9 +966,6 @@ export function renderHtml() {
       <span id="orch-status" class="badge st-fatto">In ascolto</span>
       <select id="orch-switch" title="Cambia provider dell'orchestratore (/agente)">
         <option value="">Passa a…</option>
-        <option value="claude">claude</option>
-        <option value="argon">argon</option>
-        <option value="gemini">gemini</option>
       </select>
       <button id="btn-new-epoch" title="Ruota epoca (/epoca)">Nuova epoca</button>
     </div>
@@ -1133,6 +1147,7 @@ export function renderHtml() {
         <h3 style="margin:0;">Contatori dei Provider (5 ore &amp; Settimana)</h3>
         <button class="primary" id="btn-refresh-usage">↻ Rileggi /usage dalle CLI (<code>uso</code>)</button>
       </div>
+      <div id="plan-selectors" style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:12px;"></div>
       <div class="budget-grid" id="budget-grid"></div>
 
       <h3 style="margin:18px 0 10px;">Storico dei Consumi (<code>docs/pipeline/consumi.jsonl</code>)</h3>
@@ -1306,6 +1321,10 @@ export function renderHtml() {
 
     function renderOrchestratorBar(s) {
       const o = s.orchestratore;
+      const orchSwitch = document.getElementById('orch-switch');
+      if (document.activeElement !== orchSwitch) {
+        orchSwitch.innerHTML = '<option value="">Passa a…</option>' + s.config.orchestrabili.map((p) => \`<option value="\${esc(p)}">\${esc(p)}</option>\`).join('');
+      }
       document.getElementById('orch-prov').innerHTML = provBadge(o.provider);
       document.getElementById('orch-epoca').textContent = \`epoca \${o.stato.epoca ?? 0}\`;
       document.getElementById('orch-ctx').textContent = \`contesto \${o.percentualeContesto ?? 0}%\`;
@@ -1500,6 +1519,12 @@ export function renderHtml() {
     }
 
     function renderConsumiAndBudget(s) {
+      const plans = document.getElementById('plan-selectors');
+      if (!plans.contains(document.activeElement)) {
+        plans.innerHTML = Object.entries(s.config.piani).map(([sub, list]) => \`<label>Piano \${esc(sub)}
+          <select onchange="setPlan('\${esc(sub)}', this.value)">\${list.map((n) => \`<option value="\${esc(n)}"\${s.config.abbonamenti[sub] === n ? ' selected' : ''}>\${esc(n)}</option>\`).join('')}</select>
+        </label>\`).join('');
+      }
       const grid = document.getElementById('budget-grid');
       grid.innerHTML = Object.entries(s.budget).map(([prov, b]) => {
         const w = b.residuo ?? 100;
@@ -1518,6 +1543,8 @@ export function renderHtml() {
             <div>\${provBadge(prov)} \${isOrch ? '<span class="badge st-incorso">Orchestratore</span>' : ''}</div>
             <small style="color:var(--muted);">\${b.letto ? 'letto ' + esc(b.letto.slice(11, 19)) : 'manuale'}</small>
           </div>
+          \${s.config.abilitati.includes(prov) ? '' : '<div class="badge st-errore" style="margin-bottom:8px;">Non nel piano attivo</div>'}
+          <label style="display:block; font-size:12px; margin-bottom:8px;"><input type="checkbox" \${s.config.permessoOrchestrare[prov] ? 'checked' : ''} onchange="setOrchestrable('\${esc(prov)}', this.checked)" /> Può orchestrare</label>
           \${b.fermoFino ? \`<div class="badge st-errore" style="margin-bottom:8px;">Fermo fino a \${esc(b.fermoFino)}</div>\` : ''}
           \${b.sospeso ? \`<div class="badge st-in-attesa" style="margin-bottom:8px;">Sospeso\${typeof b.sospeso === 'string' && b.sospeso !== 'true' ? ' fino a ' + esc(b.sospeso) : ''}</div>\` : ''}
           <div style="display:flex; justify-content:space-between; font-size:12px;"><span>Settimana</span><strong>\${w}% residuo</strong></div>
@@ -1732,6 +1759,17 @@ export function renderHtml() {
       const val = Number(document.getElementById('manual-budget-' + prov).value);
       await api('POST', '/api/budget', { provider: prov, residuo: val });
       showToast(\`Budget di \${prov} impostato a \${val}%\`);
+      await loadState();
+    };
+    window.setPlan = async function(sub, nome) {
+      await api('POST', '/api/config', { abbonamenti: { [sub]: nome } });
+      showToast(\`Piano \${sub}: \${nome}\`);
+      document.activeElement?.blur?.();
+      await loadState();
+    };
+    window.setOrchestrable = async function(prov, value) {
+      await api('POST', '/api/config', { orchestrabile: { [prov]: value } });
+      showToast(\`\${prov} \${value ? 'può' : 'non può'} orchestrare\`);
       await loadState();
     };
 
