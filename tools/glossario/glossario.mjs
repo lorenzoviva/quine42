@@ -103,7 +103,7 @@ export function censusOf(entries) {
     'Generato da `node tools/glossario/glossario.mjs` da [`glossario.md`](glossario.md): non si scrive a mano. Per ogni sinonimo',
     'da non usare, le occorrenze e tra parentesi i file. Conta le **parole**: `playerPos` conta come `player`, il plurale inglese è compreso.',
     'Non distingue i significati: `player` è sinonimo di «Viandante» solo quando indica il personaggio, e il conto comprende il giocatore;',
-    'gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero vale la tabella «Le rinomine proposte» del glossario.',
+    'gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero vale la tabella «Le rinomine» del glossario.',
     '',
     `| Voce | Sinonimo | ${tallies.map(([area]) => area).join(' | ')} |`,
     `|---|---|${tallies.map(() => '---').join('|')}|`,

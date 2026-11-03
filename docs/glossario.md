@@ -3,7 +3,8 @@
 Un nome per ogni concetto (ADR-0117). Il titolo di ogni voce è il **nome ufficiale in italiano**: quello di documenti, UI e prompt.
 **Inglese** è il nome nel codice: il primo della lista è la forma base, gli altri sono i tipi e le funzioni che lo portano. **Da non usare**
 sono i sinonimi da non scrivere più nel lavoro nuovo: ciò che c'è già resta finché un task di rinomina non lo cambia (qui sotto, «Le
-rinomine proposte»). **Fermo** sono i nomi che non si cambiano senza una migrazione: vanno scritti così anche se non sono ufficiali.
+rinomine»). **Fermo** sono i nomi che non si cambiano senza una migrazione: vanno scritti così anche se non sono ufficiali.
+Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra parentesi e senza apici, quello d'arrivo con la sua R: un nome entra tra gli apici con la rinomina che lo crea.
 
 `tests/glossario.test.ts` controlla che ogni voce abbia i suoi campi e che i nomi e i file citati esistano. Il conteggio dei sinonimi è in
 [`glossario-censimento.md`](glossario-censimento.md), rifatto da `node tools/glossario/glossario.mjs`.
@@ -11,7 +12,7 @@ rinomine proposte»). **Fermo** sono i nomi che non si cambiano senza una migraz
 ## La regola
 
 - **Un concetto nuovo ha una voce qui nello stesso commit**; prima di coniare un nome si cerca se la voce c'è.
-- **Codice**: identificatori e commenti TypeScript in inglese, con il nome di questo file. Pochi nomi propri restano uguali nelle due lingue (`corona`, `master`, `lobby`, `kernel`).
+- **Codice**: identificatori e commenti TypeScript in inglese, con il nome di questo file. Pochi nomi propri restano uguali nelle due lingue (`corona`, `master`, `lobby`, `kernel`). **Nessun'altra eccezione**: quelle che ADR-0117 dice (`Taglia`, `Partita`) l'autore le ha tolte (scelta 6).
 - **Dati**: ciò che finisce su disco, sul filo o nei prompt resta com'è (spesso in italiano): è un formato, non uno stile.
 - **Italiano**: nei documenti, nella UI e nei prompt il nome ufficiale; dentro il mondo (bibbia, dialoghi) i termini tecnici non esistono comunque (ADR-0025).
 - **Gli ADR sono storia**: non si riscrivono per cambiare un nome.
@@ -56,7 +57,7 @@ rinomine proposte»). **Fermo** sono i nomi che non si cambiano senza una migraz
 - **Fermo**: la cartella `world/` dell'universo e il namespace Lua `world`.
 
 ### Partita
-- **Inglese**: `Partita`, `repairPartita`, `game`
+- **Inglese**: `Partita`, `repairPartita`, `game` (→ GameSetup, repairGameSetup, R17)
 - **Definizione**: come si gioca in un universo, scelto alla Genesi e fisso: modalità, morte, PvP, master.
 - **Dove vive**: `src/kernel/partita.ts`, `universe.json → partita`
 - **Da non usare**: `game of many` (si dice «multigiocatore»)
@@ -176,11 +177,11 @@ rinomine proposte»). **Fermo** sono i nomi che non si cambiano senza una migraz
 - **Inglese**: `realm`, `realmOf`
 - **Definizione**: 4 × 4 zone, con al più una struttura Gargantuesca.
 - **Dove vive**: `src/kernel/kernel.ts`
-- **Da non usare**: nessuno (il sito lo usa per dire «universo»: è la prima delle scelte dubbie)
+- **Da non usare**: nessuno (il sito lo usa ancora per dire «universo»: scelta 1, R15)
 
 ### Regione
 - **Inglese**: `Region`, `region`, `placeRegion`
-- **Definizione**: una zona con un nome sull'atlante; la geografia che persone e Cartografo conoscono.
+- **Definizione**: una zona con un nome sull'atlante; la geografia che individui e Cartografo conoscono.
 - **Dove vive**: `src/kernel/atlas.ts`, `world/atlas.json`
 - **Da non usare**: nessuno
 
@@ -341,13 +342,13 @@ rinomine proposte»). **Fermo** sono i nomi che non si cambiano senza una migraz
 - **Fermo**: `classe` nel manifest, nell'indice e nel piano.
 
 ### Taglia
-- **Inglese**: `Taglia`, `TAGLIE`, `tilesOf`, `boxOf`
+- **Inglese**: `Taglia`, `TAGLIE`, `tilesOf`, `boxOf` (→ SizeTier, SIZE_TIERS, R17)
 - **Definizione**: la scala di D&D, da minuscola a gargantuesca, per creature e strutture.
 - **Dove vive**: `src/mj/classes.ts`
-- **Da non usare**: `size` (per la taglia)
+- **Da non usare**: `size` (da solo, per la taglia)
 - **Fermo**: `taglia` nei file e i suoi valori.
 
-## Viandanti e persone
+## Viandanti e individui
 
 ### Viandante
 - **Inglese**: `wanderer`, `Wanderer`, `wanderers`, `wandererId`
@@ -358,7 +359,7 @@ rinomine proposte»). **Fermo** sono i nomi che non si cambiano senza una migraz
 
 ### Giocatore
 - **Inglese**: `player`, `players`, `PlayerSpot`, `playerFiles`
-- **Definizione**: la persona al client: chi è collegato; in multigiocatore, chi non è il master.
+- **Definizione**: chi sta al client: chi è collegato; in multigiocatore, chi non è il master.
 - **Dove vive**: `src/session/server.ts`, `src/session/files.ts`, `src/kernel/situation.ts`
 - **Da non usare**: `player` (per il personaggio), `utente`
 - **Fermo**: `giocatori` del protocollo, `altroTraGiocatori`.
@@ -382,16 +383,16 @@ rinomine proposte»). **Fermo** sono i nomi che non si cambiano senza una migraz
 - **Da non usare**: nessuno
 - **Fermo**: `profilo` del protocollo, `rune:profilo:`.
 
-### Persona
-- **Inglese**: `Person`, `people`, `readPeople`
-- **Definizione**: un individuo della società: umano o animale, con mestiere, famiglia, routine, legami.
+### Individuo
+- **Inglese**: `Person`, `people`, `readPeople` (→ Individual, R16; `people` e `readPeople` restano: dicono il file)
+- **Definizione**: un membro della società: uomo o animale, con mestiere, famiglia, routine, legami.
 - **Dove vive**: `src/kernel/society.ts`, `world/people.json`
-- **Da non usare**: `npc` (per l'individuo), `individuo` (idem; vedi le scelte dubbie)
-- **Fermo**: `npc.reply`, `npc.dialogue`, `npc.sheet`, `persona` nel manifest, `identity` e `mind` dei componenti.
+- **Da non usare**: `npc` (per l'individuo), `persona` (idem: è il valore di `specie`), `person`
+- **Fermo**: `world/people.json`, `persone`, il valore `persona` di `specie`, `npc.reply`, `npc.dialogue`, `npc.sheet`, `persona` nel manifest, `identity` e `mind` dei componenti.
 
-### Tipo di persona
+### Tipo di individuo
 - **Inglese**: `persona`
-- **Definizione**: il modulo `entity` con la `persona`, il modello e l'aspetto comuni, di cui ogni persona è un'istanza.
+- **Definizione**: il modulo `entity` con la `persona`, il modello e l'aspetto comuni, di cui ogni individuo è un'istanza.
 - **Dove vive**: `src/kernel/types.ts`, `universe/modules/`
 - **Da non usare**: nessuno
 
@@ -404,30 +405,30 @@ rinomine proposte»). **Fermo** sono i nomi che non si cambiano senza una migraz
 
 ### Scheda
 - **Inglese**: `sheet`, `ensureSheet`, `sheetFingerprint`
-- **Definizione**: il foglio che il Narratore scrive di una persona perché l'Attore la reciti.
+- **Definizione**: il foglio che il Narratore scrive di un individuo perché l'Attore la reciti.
 - **Dove vive**: `src/kernel/society.ts`
 - **Da non usare**: nessuno
 - **Fermo**: `scheda` in `world/people.json`.
 
 ### Legame
 - **Inglese**: `bond`, `bonds`, `bondWith`, `bondOf`
-- **Definizione**: ciò che una persona è per un'altra o per un viandante, simmetrico e possibile per le specie.
+- **Definizione**: ciò che un individuo è per un altro o per un viandante, simmetrico e possibile per le specie.
 - **Dove vive**: `src/kernel/society.ts`, `src/kernel/wanderers.ts`
 - **Da non usare**: nessuno
 - **Fermo**: `legami`, l'effetto `legame`.
 
 ### Ricordo
 - **Inglese**: `memory`, `memories`, `memoriesFor`
-- **Definizione**: ciò che una persona ha vissuto, pesato e legato a un viandante.
+- **Definizione**: ciò che un individuo ha vissuto, pesato e legato a un viandante.
 - **Dove vive**: `src/kernel/society.ts`, `src/kernel/wanderers.ts`
 - **Da non usare**: nessuno
 - **Fermo**: `ricordi`, l'effetto `ricordo`.
 
 ### Trama
 - **Inglese**: `Plot`, `plot`, `reviewPlot`
-- **Definizione**: una storia orizzontale tra persone, a tappe, validata.
+- **Definizione**: una storia orizzontale tra individui, a tappe, validata.
 - **Dove vive**: `src/kernel/plots.ts`, `world/plots.json`
-- **Da non usare**: `storia` (è di una persona)
+- **Da non usare**: `storia` (è di un individuo)
 
 ### Missione
 - **Inglese**: `Quest`, `quest`, `quests`
@@ -593,7 +594,7 @@ rinomine proposte»). **Fermo** sono i nomi che non si cambiano senza una migraz
 
 ### Narratore
 - **Inglese**: `Narrator`, `narratore`
-- **Definizione**: l'agente della bibbia, delle persone, dei pacchetti di oggetti e dei giudizi.
+- **Definizione**: l'agente della bibbia, degli individui, dei pacchetti di oggetti e dei giudizi.
 - **Dove vive**: `src/kernel/agents/minds.ts`, `src/kernel/agents/content.ts`
 - **Da non usare**: nessuno
 
@@ -634,14 +635,15 @@ rinomine proposte»). **Fermo** sono i nomi che non si cambiano senza una migraz
 - **Da non usare**: nessuno
 
 ### Referente
-- **Inglese**: `referente`
+- **Inglese**: `referente`, `referenteReply`, `askReferente` (→ liaisonReply, askLiaison, R17)
 - **Definizione**: l'agente che nella corona accoglie il viandante e porta le sue richieste alla squadra giusta.
 - **Dove vive**: `src/kernel/archive.ts`, `src/kernel/agents/council.ts`
 - **Da non usare**: nessuno
+- **Fermo**: il valore `referente` di `AgentId`, come gli altri agenti.
 
 ### Attore
 - **Inglese**: `Actor`, `attore`, `ACTOR_MODEL`
-- **Definizione**: l'agente, se il master lo accende, che recita le persone dalle loro schede.
+- **Definizione**: l'agente, se il master lo accende, che recita gli individui dalle loro schede.
 - **Dove vive**: `src/kernel/agents/minds.ts`, `src/kernel/coefficients.ts`
 - **Da non usare**: nessuno
 
@@ -756,7 +758,7 @@ rinomine proposte»). **Fermo** sono i nomi che non si cambiano senza una migraz
 - **Fermo**: `eredita`, `origini`, `quote`, `allaNascita`.
 
 ### Carta
-- **Inglese**: `Card`, `Carta`, `cards`, `CardLedger`
+- **Inglese**: `Card`, `Carta`, `cards`, `CardLedger` (→ CardStamp, R7; CardUses, R8)
 - **Definizione**: il timbro su un contenuto generato: autore, pagante, titolare, utilizzi.
 - **Dove vive**: `src/kernel/cards.ts`, `world/carte.json`
 - **Da non usare**: nessuno
@@ -790,7 +792,7 @@ rinomine proposte»). **Fermo** sono i nomi che non si cambiano senza una migraz
 - **Da non usare**: nessuno
 
 ### Tetto
-- **Inglese**: `tetto`, `sessionTetto`
+- **Inglese**: `tetto`, `sessionTetto` (→ sessionCap, R7)
 - **Definizione**: quanto si può spendere al più, per sessione, per giorno o per universo.
 - **Dove vive**: `src/kernel/credits.ts`, `src/session/server.ts`, `server/geminiProxy.ts`
 - **Da non usare**: `cap` (nei documenti e nella UI)
@@ -839,9 +841,9 @@ Stessa parola, concetti diversi: il problema che confonde di più, più dei sino
 | piano | piano di un luogo (`plan`); piano di un edificio (`Floor`) | «Piano del luogo» e «Piano» |
 | `floor` | piano (`Floor`); pavimento (`floorAt`); strato del terreno (`TileLayer`); `Math.floor` | rinomina R9 |
 | `levels` | altezza del suolo (`Chunk.levels`); pavimenti di una colonna (`Form.levels`) | «Livello» è il primo; il secondo si dice «i pavimenti» |
-| reame / `realm` | 4 × 4 zone (`realmOf`); nel sito, un universo | scelta dubbia 1 |
+| reame / `realm` | 4 × 4 zone (`realmOf`); nel sito, un universo | scelta 1, rinomina R15 |
 | seme | numero (`seed`); la cartella `universe/` | «Seme» e «Universo seme» |
-| sessione | connessione (`session`); riunione del Concilio; pagina del sito `sessioni.html` (è l'elenco degli universi); la sessione di gioco che finisce con la morte; sessione di lavoro di un agente (il «Protocollo delle sessioni») | «Sessione» è la prima; scelta dubbia 3 |
+| sessione | connessione (`session`); riunione del Concilio; pagina del sito `sessioni.html` (è l'elenco degli universi); la sessione di gioco che finisce con la morte; sessione di lavoro di un agente (il «Protocollo delle sessioni») | «Sessione» è la prima; scelta 3 |
 | cast | ciò che la Genesi chiede alla Fucina (`maxCast`, `growCast`); pronunciare (`castSpell`) | «Cast» e «Pronunciare» |
 | `slot` | tasca dell'inventario; posto del pannello di una meccanica (`posto` nel protocollo); `DEVICE_SLOTS` | «Tasca» è il primo; il secondo è «posto» |
 | `cell` | cella di un programma; casella di un luogo (`gateCells`, `freeCells`, indici dei piani) | rinomina R10 |
@@ -853,39 +855,43 @@ Stessa parola, concetti diversi: il problema che confonde di più, più dei sino
 | forma | ciò che esce da un programma (`Form`); gli id `forma-…` dei modelli degli oggetti | «Forma» è la prima |
 | pannello | scheda di una meccanica (`UiPanel`); pannello dello studio (`ui:showcase`) | il contesto |
 
-## Le scelte dubbie (da far decidere all'autore)
+## Le scelte fatte
 
-Ho scelto una raccomandazione per ognuna, ed è ciò che le voci qui sopra dicono oggi; basta dirne un'altra.
+L'autore ha deciso il 03/11/2026 (T187).
 
-1. **Reame**: il sito dice «reame» per «universo» (55 righe in 11 file di `site/`, e `realm` nel suo codice in 13), il kernel per 4 × 4 zone (ADR-0092). Raccomando: **«universo» anche nel sito**, «reame» solo per l'area. L'alternativa è tenere «reame» sul sito, parola più bella per chi legge, e rinominare l'area del kernel.
-2. **`chunk` o `place` nel codice per «luogo»**: raccomando **`chunk`**: è fermo in `chunkSize` e `generate_chunk` e `place` è anche un verbo (`placeStructure`). L'alternativa `place` è più vicina all'italiano, ma tocca Lua e `universe.json`.
-3. **«Sessione del Concilio»**: raccomando di tenerlo. L'alternativa è «**seduta** del Concilio», che toglie un omonimo a «sessione»; costa il testo di UI e documenti, il compito `council.session` resterebbe.
-4. **«Persona», «individuo» o «NPC»**: raccomando **«persona»**, che comprende anche gli animali in `specie`, anche se suona strano per un cane. `Identity` (il componente) e `Person` (il registro) oggi sono due viste dello stesso individuo; unirle è un'altra cosa, da progettare.
-5. **«Cosa» o «entità»**: raccomando **«entità»** come termine tecnico e `entity` nel codice, togliendo `thing`. Ma «cose» è nel protocollo (`cose`), nei prompt del Cartografo (`dentro`, `fuori`, cose) e nell'italiano di tutti: nei prompt lo terrei, sono testi per un modello e dicono ciò che intendono.
-6. **Nomi italiani nel TypeScript senza un inglese buono**: `Taglia`/`TAGLIE` (`size` è già di tutto), `tetto` (`cap`), `Partita` (`game` è ovunque in altri sensi), `referente`, `Carta` accanto a `Card`. Raccomando: **tenere `Taglia`, `Partita` e `referente`**, rinominare il resto (R7). È un'eccezione alla convenzione, va detta.
-7. **`Floor` del piano di un edificio**: `Storey` toglie l'omonimo con il pavimento, ma è una parola che pochi usano nel codice; raccomando di farlo lo stesso (R9), però è il meno urgente.
-8. **«Frase» come `phrase` contro `hand`**: `hand` è 8 volte più frequente, ma è un'immagine («la mano») che in italiano non dice nessuno. Raccomando `phrase` nel TypeScript (R5), il componente `hand` resta com'è perché è salvato.
+1. **Reame**: «universo» anche nel sito; «reame» solo per le 4 × 4 zone del kernel (R15).
+2. **«Luogo» nel codice**: `chunk` (R4).
+3. **«Sessione del Concilio»**: resta.
+4. **«Individuo»**, `Individual`, per uomini e animali; «persona» resta il valore di `specie` e nei campi fermi (R16). `Identity` resta: unirli è un altro lavoro.
+5. **«Entità»** ed `entity` come termine tecnico, senza `thing` (R6); `cose` resta nel protocollo e nei prompt del Cartografo.
+6. **Nessuna eccezione alla convenzione**: `Taglia`, `Partita` e `referente` nel TypeScript diventano inglesi (R17), come il resto dell'italiano (R7); in italiano restano «taglia», «partita», «Referente» e il valore `referente` di `AgentId`.
+7. **Il piano di un edificio**: `Storey` (R9).
+8. **«Frase»**: `phrase` nel TypeScript (R5); il componente `hand` resta perché è salvato.
 
-## Le rinomine proposte
+## Le rinomine
 
-Nessuna è fatta (T178 non tocca il codice). Conteggi del 03/11/2026 su `src server tests site tools lab`, per identificatori esatti: **file toccati**. Vanno in conflitto con tutti: da eseguire con pochi task in corso, una per task, nell'ordine.
+Le fanno i task T188-T204, una per task e nell'ordine: vanno in conflitto con tutti, si eseguono con pochi task in corso. Chi ne esegue una segna qui la riga, mette i nomi nuovi nelle voci e quelli vecchi tra i «da non usare», nello stesso commit. I nomi d'arrivo sono controllati: nessuno è già occupato in `src server tests site tools lab`, salvo dove la riga dice che cosa ne è di quello che c'è.
 
-| # | Rinomina | File | Migrazione |
-|---|---|---|---|
-| R1 | Il `Building` di `layout.ts` → `Lot` (c'è già in `relief.ts`), `Chunk.buildings` → `lots`, `findBuildings`, `buildingAt` | 13 | no: sul filo è già `lotti`, e il layout li ricava dalla bozza a ogni caricamento |
-| R2 | `Models` → `AiModels` (con `MockModels`, `GeminiModels`…), `kernel.models` → `kernel.ai` | 103 (70 sono test che costruiscono `MockModels`) | no; cambia `window.quine.models`, le note e AGENTS.md |
-| R3 | `playerPos`, `playerCarpet`, `playerId`, `playerComp`, `playerMod`, `playerCell`, `playerText`, `playerPrompt` → `wanderer…` | 52 | no; **fermi** `world.player`, `world.player_pos`, `player_id`, `player_get`, `player_set` e il binding, che Lua vede |
-| R4 | `Place` → `ChunkInfo`, `PlaceView` → `ChunkView` (il renderer ha già un `ChunkView`: va chiamato `TerrainView`), `GraphPlace`, `placeHere`, `placeByName`, `placesOf` | 15 (più i `place` locali, a mano) | no; **fermi** `plan.place` in `maps/`, `placesPerMinute`, `luoghi` del protocollo |
-| R5 | `hand()`, `syncHand`, `inscribeHand`, `lastHand` → `phrase…` | ~20 | no se resta il componente `hand`; con il componente sì, dallo stato di ogni viandante e dal Lua: sconsigliato |
-| R6 | `ThingView`, `THING_PARTS`, `things` → `EntityView`, `ENTITY_PARTS`, `entities`; `src/render/things.ts` → `entities.ts` | 72 (compresa la parola `thing` nei commenti) | no; **fermi** `cose` ed `entita` del protocollo |
-| R7 | Italiano nel TypeScript: `AttoreConfig`, `AiMinimi`, `Eredita`, `sottoOf`, `titolareOf`, `sessionTetto`, `setSessionTetto` | 11 | no; **fermi** i campi omonimi nei file (`attore`, `minimi`, `eredita`, `sotto`, `titolare`, `tetto`) |
-| R8 | `CardLedger` → `CardUses`, `UsageLedger` → `UsageLog` (`Ledger` resta dei saldi) | 12 | no |
-| R9 | `Floor`, `floors`, `perFloor`, `nFloors` → `Storey…` | 26 | no |
-| R10 | `gateCells`, `freeCells`, `runeCells`, `cellNear`, `propCells`, `playerCell`: le caselle → `…Tiles` (ogni variabile locale `cell`, a mano e dove serve) | 7 (più i locali) | no |
-| R11 | `LayoutDef` → `EnvironmentDef`, `layoutsFor` → `environmentsFor` | 8 | no; **fermi** `layouts` nei manifest (25 file la leggono), `layout` nei piani |
-| R12 | `TileDef` → `TerrainDef`, `TileLayer` → `TerrainLayer` | 12 | no; **fermi** `tiles` |
-| R13 | Commenti: «game of many» → «multiplayer», `pocket` → `slot` | 25 + 13 | no: solo commenti, tranne poche variabili `pocket` |
-| R14 | `AGENTS.md`: `chunk` → «luogo», `layout` → «ambiente» dove è l'ambiente | 1 | no: gli ADR non si toccano (scelta: sono storia) |
-| R15 | Sito: «reame» → «universo» e `realm` → `universe` nel suo codice e CSS | 13, più 6 test | no; solo se la scelta dubbia 1 va così |
-| — | API Lua: `world.player` → `world.wanderer` | 6 moduli del seme, ogni universo generato, prompt, validatore | **sì, e un alias per sempre: non lo propongo** |
-| — | Valori di `AgentId`, nomi degli effetti, componenti in italiano | ovunque, compresi i dati | **sì: non lo propongo**, sono dati |
+**File** è il conteggio del 03/11/2026 su `src server tests site tools lab`, per identificatori esatti (`.ts .mjs .js .html .css .lua`). **Fermo** non si tocca, qualunque R: ciò che è su disco, sul filo o visibile a Lua. Le variabili locali con lo stesso nome si cambiano solo dove la riga lo dice, e mai se fanno da chiave di ciò che si serializza (`{ hand }`).
+
+| # | Rinomina (da → a) | Restano | File | Migrazione | Stato |
+|---|---|---|---|---|---|
+| R1 | Di `layout.ts`: `Building` → `Lot`, `LayoutResult.buildings` e `Chunk.buildings` → `lots`, `findBuildings` → `findLots`, `buildingAt` → `lotAt` (con il campo `building` di ciò che rende → `lot`). Di `relief.ts`, per non fare un omonimo: `Lot` → `LotBox` | il `Building` di `corona.ts`, con `buildings`, `building()`, `buildingOf`, `buildingId`. `lotsOf` e il suo `lots` locale di `kernel.ts` non si scontrano; **fermo** `lotti` del protocollo | 13 | no: il layout li ricava dalla bozza a ogni caricamento | da fare |
+| R2 | `Models` → `AiModels`, `MockModels` → `MockAiModels`, `GeminiModels` → `GeminiAiModels`, `RoutedModels` → `RoutedAiModels`, `QueueModels` → `QueueAiModels`, `TrackingModels` → `TrackingAiModels`, `TrackingOnlineModels` → `TrackingOnlineAiModels`, `SculptorModels` → `SculptorAiModels`, `pricedModels` → `pricedAiModels`, `localModels` → `localAiModels`, `baseModels` → `baseAiModels`, `updateModelsHud` → `updateAiModelsHud`; il campo `models` di `Kernel` e di `Council` → `ai`; `window.quine.models` → `window.quine.ai`, anche in `AGENTS.md` | la libreria: `maxModels`, `tornioModels`, `upgradeModels`, `MODELS_INDEX`, `models/`, `listModels` del laboratorio; **fermi** `textModel`, `ai` di `universe.json` | 114 (76 sono test) | no | da fare |
+| R3 | `playerPos` → `wandererPos`, `playerCarpet` → `wandererCarpet`, `playerId` → `wandererEntity` (è l'id dell'entità: `wandererId` c'è già ed è l'id stabile del viandante), `playerComp` → `wandererComp`, `playerMod` → `wandererModule`, `playerCell` → `wandererTile`, `playerText` → `wandererText`, `playerPrompt` → `wandererPrompt`; anche negli snippet di `docs/architettura-dettagli.md#convalida-browser` | il giocatore: `players`, `PlayerSpot`, `playerFiles`, `playerFile`, `playerFilesIn`, `playerChanges`, `PLAYERS_DIR`, `manyPlayers`; **fermi** `world.player`, `world.player_pos`, `player_id`, `player_get`, `player_set` e il binding, che Lua vede | 53 (39 sono test) | no | da fare |
+| R4 | Prima `ChunkView` di `terrain.ts` → `TerrainView`; poi `Place` → `ChunkInfo`, `PlaceView` → `ChunkView`, `PlaceLot` → `ChunkLot`, `PlaceMiniature` → `ChunkMiniature`, `GraphPlace` → `GraphChunk`, `placeHere` → `chunkHere`, `placeByName` → `chunkByName`, `placesOf` → `chunksOf`, `placeList` → `chunkList`, `mergePlaces` → `mergeChunks`, `graphPlaces` → `graphChunks`, `graphPlacesVersion` → `graphChunksVersion`, `seedGraphPlaces` → `seedGraphChunks`, `addPlace` → `addChunk`, `hasPlace` → `hasChunk`, `cardPlace` → `cardChunk`, `placeCard` → `chunkCard`, `placeCardId` → `chunkCardId`, `placeIn` → `chunkIn`, `placeQuota` → `chunkQuota`, `placesMade` → `chunksMade`, `noPlace` → `noChunk`, `lastPlace` → `lastChunk`, `listPlaces` → `listChunks` | «place» verbo: `placeStructure`, `placeCampus`, `placeRegion`, `placeInside`, `placeProp`, `placeFor`, `placed`, `Placement`, `placementsOf`, `Placeable`, `PlacedObject`; i locali `place` e `places`; **fermi** `plan.place` in `maps/`, `Chunk.place`, `placesPerMinute`, `luoghi` del protocollo, `senza_luogo` | 24 | no | da fare |
+| R5 | Di `Kernel`: `hand()` → `phrase()`, `syncHand` → `syncPhrase`, `inscribeHand` → `inscribePhrase`; `lastHand` di `hud.ts` → `lastPhrase`, `handKey` → `phraseKey` | `ThinClient.phrase` e `ThinClient.syncPhrase`, su un'altra classe; **fermi** il componente `hand`, `hand.tokens`, il campo `hand` dello stato sul filo (`hand: k.hand()` diventa `hand: k.phrase()`), i locali `hand` che ne fanno la chiave | 15 | no se resta il componente: con il componente, dallo stato di ogni viandante e dal Lua, ed è **sconsigliato** | da fare |
+| R6 | `ThingView` → `EntityView`, `THING_PARTS` → `ENTITY_PARTS`, `Things` → `Entities`, `Thing` del laboratorio → `Entity`, `thingStandIn` → `entityStandIn`, `thingCards` → `entityCards`; i campi `things` di `Renderer`, `SessionClient`, `BenchScene` e della miniatura → `entities`; `src/render/things.ts` → `src/render/entities.ts`; nei commenti `thing` → `entity` dove è il termine tecnico | `something`, `anything` e la parola comune nei commenti; **fermi** `cose` ed `entita` del protocollo, `cose` dei casi del banco e dei prompt | 54 | no | da fare |
+| R7 | `AttoreConfig` → `ActorConfig`, `repairAttore` → `repairActor`; `AiMinimi` → `AiMinimums`, `repairMinimi` → `repairMinimums`, `minimiBlock` → `minimumsBlock`; `Eredita` → `HeritageConfig`, `EREDITA` → `DEFAULT_HERITAGE`, `repairEredita` → `repairHeritage`, `Origine` → `CardOrigin`; `Carta` → `CardStamp` (il timbro; `Card` è la carta in una collezione e lo estende), `isCarta` → `isCardStamp`; `titolareOf` → `cardHolderOf` (`holderOf` è occupato in `tools/pipeline/`); `sottoOf` → `cellarOf`; `sessionTetto` → `sessionCap`, `setSessionTetto` → `setSessionCap`, `sessionTettoOf` → `sessionCapOf`, `tettoBudgeted` → `capBudgeted`, `addBudgetFromTetto` → `addBudgetFromCap`, in `lobby.ts` `tettoMin` → `minCap`, `defaultTetto` → `defaultCap`, `tettoInput` → `capInput`, `setTetto` → `setCap`, in `creditdialog.ts` `isTetto` → `isCap`, in `site/sessioni.ts` `tettoMinimo` → `minCap`; `Scheda` di `society.ts` → `IndividualSheet`; `Forma` → `ItemShape`, `FORME` → `ITEM_SHAPES`, `formaModel` → `itemShapeModel`; `PlintoSculpture` → `PlinthSculpture`, `plintoSculpture` → `plinthSculpture`, `plintoSymbols` → `plinthSymbols`; `TornioModelEntry` → `LatheModelEntry`, `TornioShown` → `LatheShown`, `TornioView` → `LatheView`, `tornioCache` → `latheCache`, `tornioExecute` → `latheExecute`, `tornioIndex` → `latheIndex`, `tornioModels` → `latheModels`, `tornioOf` → `latheOf`, `tornioOpen` → `latheOpen`, con i file `src/kernel/tornio.ts`, `src/render/tornio.ts` e `tests/tornio.test.ts` → `lathe` | l'italiano del laboratorio, che non è il TypeScript del gioco (`Scheda` di `lab/banco/seconda.ts`, `Piano`, `daCorreggere`); il locale `tetto`, che è la chiave del messaggio; **fermi** i campi omonimi nei file (`attore`, `minimi`, `eredita`, `origini`, `carta`, `titolare`, `sotto`, `tetto`, `scheda`), gli id `forma-…`, i valori `tornio` e `plinto` di `ItemKind` e simili | 34 | no | da fare |
+| R8 | `CardLedger` → `CardUses`, `UsageLedger` → `UsageLog` | `Ledger`, `FileLedger`, `MemoryLedger`, `LedgerBook`, `openLedger`: sono dei saldi | 12 | no | da fare |
+| R9 | Di `corona.ts`: `Floor` → `Storey`, `Building.floors` → `storeys`, `perFloor` → `perStorey`, `nFloors` → `nStoreys`, `FLOOR_STRIDE` → `STOREY_STRIDE`; il campo `floor` di `roomAt` e il parametro `floor: Floor` → `storey` | i pavimenti: `floors` di `src/mj/mesh.ts`, `floorAt`, `floorBelow`, `floorOf`, `Math.floor`; le misure di `lab/banco/misure.ts`; **fermo** lo strato `floor` di `TileLayer` | 21 | no | da fare |
+| R10 | Le caselle: `gateCells` → `gateTiles`, `freeCell` → `freeTile`, `freeCells` → `freeTiles`, `runeCells` → `runeTiles`, `solidCells` → `solidTiles`, `cellNear` → `tileNear`, `propCells` → `propTiles`, `pickCell` → `pickTile`, `doorCells` → `doorTiles`, `nicheCell` → `nicheTile`, `cellOf` → `tileOf`, `cellIndex` → `tileIndex`, `polarCell` → `polarTile`, `CoronaCell` → `CoronaTile`; i locali `cell` solo dove indicano una casella | le celle: `turnCells`, `cellAt` e `nCell` di `mesh.ts`, `sameCells`; `visibleCells` del sito e `sleepCell` di `ledger.ts`, che non sono né l'una né l'altra. `playerCell` sta in R3 | 9 | no | da fare |
+| R11 | `LayoutDef` → `EnvironmentDef`, `layoutsFor` → `environmentsFor` | **fermi** `layouts` nei manifest (25 file la leggono), `layout` nei piani | 8 | no | da fare |
+| R12 | `TileDef` → `TerrainDef`, `TileLayer` → `TerrainLayer` | **fermi** `tiles` | 12 | no | da fare |
+| R13 | Commenti: «game of many» e «games of many» → «multiplayer»; `pocket` e `pockets` → `slot` e `slots`, anche le poche variabili | le tasche nei testi di gioco («own pockets» delle storie, se dice le tasche di un individuo) | 32 + 13 | no: solo commenti, tranne le variabili | da fare |
+| R14 | `AGENTS.md`: `chunk` → «luogo» (righe di `relief.ts`, `terrain.ts`, `universe.json`), `layout` → «ambiente» dove è l'ambiente | gli ADR, che non si toccano | 1 | no | da fare |
+| R15 | Sito: «reame», «reami», `Reame`, `REAME` → «universo», «universi» e maiuscole, anche il messaggio di `server/wanderer.ts`; `realm`, `realms` → `universe`, `universes`; `RealmView` → `UniverseView`, `REALM_KEY` → `UNIVERSE_KEY`, `pickRealm` → `pickUniverse`, `parseRealmSnapshot` → `parseUniverseSnapshot`, `fetchRealmDetails` → `fetchUniverseDetails`, `renderRealmCard` → `renderUniverseCard`, `loadRealms` → `loadUniverses`, `allRealms` → `allUniverses`, `realmPromises` → `universePromises`, `realmsGrid` → `universesGrid`; le classi e gli id: `realm-card`, `realm-card-header`, `realm-card-body`, `realm-card-footer`, `realm-spec-table`, `realm-loading`, `realm-empty`, `realm-filter-tabs`, `realm-select`, `realms-grid`, `card-realm`, `btn-play-realm`, `status-realms` → con `universe` e `universes` | il reame del kernel: `REALM`, `realmOf`, i commenti di `src/`, `tests/lots.test.ts`; le prove di `reame-low`, `reame-high`, `reame2`, che sono nomi d'universo qualunque; `universes` dei dati della risposta, già così; **fermo** il valore `quine:sito:reame` della chiave di `localStorage` | 22 (13 del sito, 7 test) | no | da fare |
+| R16 | `Person` → `Individual`, `DialoguePerson` → `DialogueIndividual`, `addPerson` → `addIndividual`, `updatePerson` → `updateIndividual`, `personOf` → `individualOf`, `personFacts` → `individualFacts`, `personByName` → `individualByName`, `personNode` → `individualNode`, `noPerson` → `noIndividual`; il campo `person` di `BenchScene` e di `figure` → `individual`, il locale `person` → `individual`, gli id `person:<nome>` delle vetrine → `individual:<nome>`; nei commenti `person` → `individual` dove è il concetto. Nei documenti, nella UI e in `AGENTS.md`, «persona» → «individuo» dove è il concetto | `Identity`, il componente; `People` e `readPeople`, che dicono il file; `Species`; `nPersone`, `personaggi` e i testi in italiano comune, nel mondo e nei prompt; **fermi** `world/people.json` e il suo `persone`, `persona` nel manifest e nel prompt, il valore `persona` di `specie` e il tipo `persona` dei nodi del grafo (con `senza_persona`), `npc.*` | 9 per i nomi, ~20 con `person` nel codice, 90 con i commenti | no | da fare |
+| R17 | `Taglia` → `SizeTier`, `TAGLIE` → `SIZE_TIERS`; `Partita` → `GameSetup`, `repairPartita` → `repairGameSetup`, `partitaSummary` → `gameSetupSummary`, `DEFAULT_PARTITA` → `DEFAULT_GAME_SETUP`, il metodo `Kernel.partita()` → `gameSetup()`, `src/kernel/partita.ts` → `src/kernel/gameSetup.ts`; `referenteReply` → `liaisonReply`, `askReferente` → `askLiaison` | `SizeDef`, `RARE_SIZES`, `sizeOf`, `sizeRank`; `game`, `chooseGame`, il `Game` di `server/access.ts`; **fermi** `taglia` e i suoi valori, `partita`, `modalita`, `altroTraGiocatori` nei file, il valore `referente` di `AgentId` | 27 | no | da fare |
+| — | API Lua: `world.player` → `world.wanderer` | 6 moduli del seme, ogni universo generato, prompt, validatore | — | **sì, e un alias per sempre: non lo propongo** | — |
+| — | Valori di `AgentId`, nomi degli effetti, componenti in italiano | ovunque, compresi i dati | — | **sì: non lo propongo**, sono dati | — |
