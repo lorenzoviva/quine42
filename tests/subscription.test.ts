@@ -15,7 +15,7 @@ import {
   subscriptionsOf,
   usesSubscriptions,
 } from '../src/kernel/ai/subscription';
-import { UsageLedger, type CallRecord } from '../src/kernel/ai/usage';
+import { UsageLog, type CallRecord } from '../src/kernel/ai/usage';
 import {
   answer,
   beat,
@@ -142,7 +142,7 @@ describe('QueueAiModels e RoutedAiModels (T68)', () => {
     expect(await q.text(call('model.sculpt'))).toBe('{"ok":true}');
     await serve;
     expect(records).toEqual([{ model: 'abbonamento-claude', agent: 'scultore', task: 'model.sculpt', prompt: 100, cached: 0, output: 20, thoughts: 0, chi: 'io' }]);
-    const ledger = new UsageLedger();
+    const ledger = new UsageLog();
     ledger.record(records[0]);
     expect(ledger.session.usd).toBe(0);
     expect(ledger.session.unpriced).toBe(0);

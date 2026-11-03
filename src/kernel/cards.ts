@@ -225,7 +225,7 @@ export function readCards(files: FileMap): CardsFile {
 }
 
 /** The kernel's ledger of the cards' uses: counted as the world is played, written before every commit. */
-export class CardLedger {
+export class CardUses {
   private file: CardsFile = { utilizzi: {}, luoghi: {} };
   /** Bumped at every change: the kernel writes the file when it changed. */
   version = 0;

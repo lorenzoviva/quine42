@@ -6,7 +6,7 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import type { TextCall } from '../src/kernel/ai/models';
-import { UsageLedger } from '../src/kernel/ai/usage';
+import { UsageLog } from '../src/kernel/ai/usage';
 import { Council, lexiconSummary, type CatalogEntry } from '../src/kernel/agents/council';
 import { npcReply, weavePlot } from '../src/kernel/agents/minds';
 import { buildGraph, type GraphChunk } from '../src/kernel/graph';
@@ -177,7 +177,7 @@ describe('the context of the agents from the graph (T13)', () => {
     // The lexicon (T65) is the same with and without the graph, and the cache serves it: not what the graph saves.
     const lexicon = lexiconSummary(files);
     const ledger = (calls: TextCall[]) => {
-      const l = new UsageLedger();
+      const l = new UsageLog();
       for (const x of calls) l.record({ model: 'gemini-3.1-flash-lite', agent: x.agent, task: x.task, prompt: Math.ceil((x.system.replace(lexicon, '').length + x.prompt.length) / 4), cached: 0, output: 0, thoughts: 0 });
       return l.session;
     };

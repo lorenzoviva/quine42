@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { GeminiAiModels } from '../src/kernel/ai/gemini';
 import { BudgetError, parseJson } from '../src/kernel/ai/models';
 import { costOf, priceOf } from '../src/kernel/ai/prices';
-import { UsageLedger, type CallRecord } from '../src/kernel/ai/usage';
+import { UsageLog, type CallRecord } from '../src/kernel/ai/usage';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
@@ -85,7 +85,7 @@ describe('GeminiAiModels', () => {
 
 describe('usage ledger', () => {
   it('prices every call by day, model and task, with cache and reasoning', () => {
-    const l = new UsageLedger();
+    const l = new UsageLog();
     l.record({ model: 'gemini-3.1-flash-lite', agent: 'cartografo', task: 'chunk.plan', prompt: 10_000, cached: 4_000, output: 1_000, thoughts: 2_000, day: '2026-10-22' });
     l.record({ model: 'gemini-3.8-flash', agent: 'scultore', task: 'sculpt', prompt: 20_000, cached: 0, output: 5_000, thoughts: 0, day: '2026-10-22' });
     l.record({ model: 'mistero', agent: 'x', task: 'y', prompt: 1, cached: 0, output: 1, thoughts: 0, day: '2026-10-22' });
@@ -97,7 +97,7 @@ describe('usage ledger', () => {
     // Prices change on their date; models without a published price use the report's estimate.
     expect(costOf('gemini-3.8-flash', { prompt: 1e6, output: 0 }, '2027-01-02')).toBe(1.5);
     expect(priceOf('gemini-3.5-flash')?.note).toMatch(/stima/);
-    const again = new UsageLedger();
+    const again = new UsageLog();
     again.load(l.toJson());
     again.load(l.toJson());
     expect(again.day('2026-10-22').total.calls).toBe(6);

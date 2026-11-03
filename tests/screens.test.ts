@@ -11,7 +11,7 @@ import { MockAiModels } from '../src/kernel/ai/mock';
 import { CONSOLES_AT, DEVICE_MARGIN, ROOM_W, SITUATION_AT, WALL_AT, WALL_Y } from '../src/kernel/corona';
 import { alertOf, FILM, liveFeed, REJECTS_S, timeline, whoWanted } from '../src/kernel/screens';
 import { AGENTS } from '../src/kernel/agents/council';
-import { UsageLedger } from '../src/kernel/ai/usage';
+import { UsageLog } from '../src/kernel/ai/usage';
 
 const boot = () => Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
 
@@ -115,7 +115,7 @@ describe('the wall of screens', () => {
 
   it('the board of the costs adds up as the Council panel does, by agent and by task, with the budgets', async () => {
     const k = await boot();
-    const u: UsageLedger = k.usage;
+    const u: UsageLog = k.usage;
     u.record({ model: 'gemini-3.1-flash-lite', agent: 'narratore', task: 'npc.reply', prompt: 4000, cached: 1000, output: 300, thoughts: 100 });
     u.record({ model: 'gemini-3.1-flash-lite', agent: 'cartografo', task: 'chunk.plan', prompt: 9000, cached: 0, output: 1200, thoughts: 400 });
     u.record({ model: 'gemini-3.1-flash-lite', agent: 'narratore', task: 'npc.reply', prompt: 3000, cached: 0, output: 200, thoughts: 0 });

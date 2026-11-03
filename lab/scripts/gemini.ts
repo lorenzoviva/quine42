@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { GeminiAiModels } from '../../src/kernel/ai/gemini';
 import type { Thinking } from '../../src/kernel/ai/models';
-import { UsageLedger } from '../../src/kernel/ai/usage';
+import { UsageLog } from '../../src/kernel/ai/usage';
 
 /** The key in <root>/.env (a git worktree has none: pass the main checkout as root). */
 export function readKey(root: string): string {
@@ -19,7 +19,7 @@ export function readKey(root: string): string {
   return key;
 }
 
-export function direct(model: string, key: string, ledger: UsageLedger, opts: { thinking?: Thinking; timeout?: number; max?: number } = {}): GeminiAiModels {
+export function direct(model: string, key: string, ledger: UsageLog, opts: { thinking?: Thinking; timeout?: number; max?: number } = {}): GeminiAiModels {
   const g = new GeminiAiModels({
     endpoint: 'https://generativelanguage.googleapis.com/v1beta',
     textModel: model,
