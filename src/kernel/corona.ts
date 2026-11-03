@@ -579,7 +579,9 @@ export class Corona {
     for (let y = -max; y < max; y++)
       for (let x = -max; x < max; x++) {
         const d = Math.hypot(x + 0.5, y + 0.5);
-        if (d < R || d >= this.outer) continue;
+        // A cell the circle crosses is there even with its centre inside: what of it lies beyond the circle is avenue, not a hidden wall (T219).
+        const far = Math.hypot(Math.max(Math.abs(x), Math.abs(x + 1)), Math.max(Math.abs(y), Math.abs(y + 1)));
+        if (far < R || d >= this.outer) continue;
         const t = angleOf(x, y);
         const b = this.buildings.find((bb) => t >= bb.from && t < bb.to) ?? this.buildings[this.buildings.length - 1];
         const key = `${x},${y}`;
