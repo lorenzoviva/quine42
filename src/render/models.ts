@@ -128,7 +128,7 @@ export function changedBody(k: Kernel, f: Form, done: string[]): THREE.BufferGeo
  */
 export function modelMaterials(geo: THREE.BufferGeometry, mat: THREE.Material): THREE.Material | THREE.Material[] {
   if (geo.groups.length === 0) return mat;
-  return [mat, mat === MAT.cut ? MAT.cutGlass : mat === MAT.corona ? MAT.coronaGlass : MAT.glass];
+  return [mat, mat === MAT.cut ? MAT.cutGlass : mat === MAT.corona || mat === MAT.coronaSway ? MAT.coronaGlass : MAT.glass];
 }
 
 export interface ModelObject {

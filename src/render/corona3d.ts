@@ -217,7 +217,8 @@ export function buildCoronaRing(k: Kernel): THREE.Group {
       k.forms.get(p.model, p.seed);
       continue;
     }
-    const mat = p.kind === 'albero' ? MAT.sway : MAT.corona;
+    // Never a material with the circle clip: the campus stands beyond the circle (T218). The wind only for who has its weights.
+    const mat = geo.sway ? MAT.coronaSway : MAT.corona;
     const placeProp = (bg: THREE.BufferGeometry) => {
       const mesh = new THREE.Mesh(bg, modelMaterials(bg, mat));
       mesh.castShadow = mesh.receiveShadow = true;
