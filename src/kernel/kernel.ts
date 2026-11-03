@@ -1158,7 +1158,7 @@ export class Kernel {
   }
 
   /**
-   * The one place that decides whether the corona is drawn (T226, ADR-0123): only for whoever stands out of the circle
+   * The one place that decides whether the corona is drawn (T226, ADR-0124): only for whoever stands out of the circle
    * or in the studio, and never while following a player. Inside the circle nothing of it is drawn or hovered for anybody,
    * with any camera: the simulation simply continues.
    */

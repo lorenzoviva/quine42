@@ -4,7 +4,7 @@
 // Spaces (ADR-0004): the simulation — chunks, entities, runes — lives in carpet coordinates and is drawn
 // shifted by the carpet's offset; the wanderer, the corona and the studio are in real space. Kernel
 // (x, y) is three.js (x, z), one tile is one unit, y is up. Once the corona shows (`kernel.coronaRevealed`: only out of
-// the circle or in the studio, ADR-0123), nothing of the simulation is drawn beyond the circle.
+// the circle or in the studio, ADR-0124), nothing of the simulation is drawn beyond the circle.
 
 import * as THREE from 'three';
 import type { Kernel } from '../kernel/kernel';
@@ -150,7 +150,7 @@ export class Renderer {
 
   /**
    * Whether the camera has full orbit and far zoom: god mode (the master has it), following a player, the corona, the
-   * studio. Inside the circle the base is the 3/4 view. This says nothing about what is drawn (ADR-0123): the corona
+   * studio. Inside the circle the base is the 3/4 view. This says nothing about what is drawn (ADR-0124): the corona
    * depends on `kernel.coronaRevealed` alone, so an activity that one day asks for the orbit only needs a line here.
    */
   canFreeOrbit(): boolean {
@@ -277,7 +277,7 @@ export class Renderer {
     if (watch) this.wanderer.hideShadow();
 
     // The corona and the studio.
-    // Everything of it hangs from one group, shown by one decision: nothing of it is drawn inside the circle (ADR-0123).
+    // Everything of it hangs from one group, shown by one decision: nothing of it is drawn inside the circle (ADR-0124).
     if (this.corona) this.corona.root.visible = revealed;
     if (!watch) this.corona?.update(this.t, studio, revealed, k.coronaNear(), interior);
 

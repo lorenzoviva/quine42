@@ -330,7 +330,7 @@ export const ROOM_H = 15;
 export const INTERIOR_X = 30000;
 
 /**
- * Whether the corona is drawn for a wanderer standing here (T226, ADR-0123): out of the carpet's circle or inside a
+ * Whether the corona is drawn for a wanderer standing here (T226, ADR-0124): out of the carpet's circle or inside a
  * room of the studio, and nowhere else. It asks where they stand and nothing more: no role, no camera, no past.
  */
 export function coronaShown(x: number, y: number, radius: number): boolean {

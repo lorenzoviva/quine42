@@ -1,4 +1,4 @@
-# ADR-0123 — La corona si disegna solo fuori dal cerchio, per chiunque e con qualunque camera
+# ADR-0124 — La corona si disegna solo fuori dal cerchio, per chiunque e con qualunque camera
 
 - Stato: accettato
 - Data: 2026-11-03

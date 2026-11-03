@@ -1,4 +1,4 @@
-// The corona is drawn only out of the circle (T226, ADR-0123): one decision, for anybody, with any camera. The camera
+// The corona is drawn only out of the circle (T226, ADR-0124): one decision, for anybody, with any camera. The camera
 // keeps its 3/4 view in the simulation, and turning it free says nothing about what is drawn.
 import { describe, expect, it } from 'vitest';
 import * as THREE from 'three';
