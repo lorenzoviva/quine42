@@ -31,7 +31,7 @@ function commits(k: Kernel, n: number): void {
 describe('the wall of screens', () => {
   it('stands against the back wall of the Direction, three fields as wide as the room, the arrows under the film', async () => {
     const k = await boot();
-    const f = k.corona.building('universo')!.floors[0];
+    const f = k.corona.building('universo')!.storeys[0];
     const wall = f.items.filter((i) => i.kind === 'parete');
     expect(wall.map((i) => i.target)).toEqual(['tempo', 'registro', 'costi']);
     expect(new Set(wall.map((i) => i.y - f.oy))).toEqual(new Set([1]));
@@ -46,7 +46,7 @@ describe('the wall of screens', () => {
     expect(arrows.map((a) => [a.kind, a.x - film.x, a.y - film.y])).toEqual([['prev', 0, 1], ['next', WALL_AT[0].w - 1, 1]]);
     // The row in front of the film can be walked between the arrows; no other building has the wall.
     for (let x = film.x + 1; x < film.x + film.w! - 1; x++) expect(k.corona.free(x + 0.5, film.y + 1.5), `${x}`).toBe(true);
-    expect(k.corona.buildings.filter((b) => b.floors.some((fl) => fl.items.some((i) => i.kind === 'parete'))).map((b) => b.id)).toEqual(['universo']);
+    expect(k.corona.buildings.filter((b) => b.storeys.some((fl) => fl.items.some((i) => i.kind === 'parete'))).map((b) => b.id)).toEqual(['universo']);
   });
 
   it('the film moves with «<» «>» and stops at its ends, without going back', async () => {
@@ -143,7 +143,7 @@ describe('the wall of screens', () => {
   it('opens with E in front of a field or a click within reach, and the arrows move the film', async () => {
     const k = await boot();
     commits(k, 3);
-    const f = k.corona.building('universo')!.floors[0];
+    const f = k.corona.building('universo')!.storeys[0];
     const wall = f.items.filter((i) => i.kind === 'parete');
     const opened: any[] = [];
     k.bus.on('ui:screens', (e) => opened.push(e));
@@ -210,7 +210,7 @@ describe('the alert and the consoles of the Direction', () => {
 
   it("a console per agent in a row in front of the wall, off the film's row and the table's margin; E on one opens the live log", async () => {
     const k = await boot();
-    const f = k.corona.building('universo')!.floors[0];
+    const f = k.corona.building('universo')!.storeys[0];
     const desks = f.items.filter((i) => i.kind === 'console');
     expect(desks.map((d) => d.target)).toEqual(Object.keys(AGENTS));
     expect(desks.map((d) => [d.x - f.ox, d.y - f.oy])).toEqual(desks.map((_, i) => [CONSOLES_AT.x + i, WALL_Y + 1]));
@@ -227,7 +227,7 @@ describe('the alert and the consoles of the Direction', () => {
       expect(k.corona.free(d.x + 0.5, d.y + 1.5)).toBe(true);
     }
     // No other room has consoles.
-    expect(k.corona.buildings.filter((b) => b.floors.some((fl) => fl.items.some((i) => i.kind === 'console'))).map((b) => b.id)).toEqual(['universo']);
+    expect(k.corona.buildings.filter((b) => b.storeys.some((fl) => fl.items.some((i) => i.kind === 'console'))).map((b) => b.id)).toEqual(['universo']);
     const opened: any[] = [];
     k.bus.on('ui:screens', (e) => opened.push(e));
     stand(k, desks[3].x + 0.5, desks[3].y + 1.5);
@@ -238,7 +238,7 @@ describe('the alert and the consoles of the Direction', () => {
 
   it('who works in the log sits at their console, and gets up when they stop', async () => {
     const k = await boot();
-    const desk = k.corona.building('universo')!.floors[0].items.find((i) => i.kind === 'console' && i.target === 'cartografo')!;
+    const desk = k.corona.building('universo')!.storeys[0].items.find((i) => i.kind === 'console' && i.target === 'cartografo')!;
     const atDesk = () => [...k.archive.avatars.entries()].filter(([key]) => key.endsWith('#console'));
     k.archive.consoles([]);
     expect(atDesk()).toEqual([]);

@@ -1,6 +1,6 @@
 // The corona as the studio of a game company: a campus on the ring around the simulation, one
 // building per folder of the universe (and a gallery; the terrains and the atlas in the Office of places), with a door on the walkway.
-// Inside, buildings are bigger than outside (ADR-0022): rooms on several floors joined by stairs,
+// Inside, buildings are bigger than outside (ADR-0022): rooms on several storeys joined by stairs,
 // shelves with every file (book = manifest, crystal = Lua, scroll = text, tablet = data), framed
 // sprites and painted terrains, the history screen the Council's teams stand at, a notice board with the latest
 // changes. Interiors live in their own region of real space, far from the ring; doors teleport.
@@ -108,7 +108,7 @@ export function chainSlots(n: number): Array<{ x: number; w: number }> {
 }
 /**
  * The Office of places is also the Cartographer's studio (T26c, ADR-0051): the atlas on a table against its back wall,
- * the terrains in the sample room, which starts on its own floor after the files; after them, from a shelf of their own, a
+ * the terrains in the sample room, which starts on its own storey after the files; after them, from a shelf of their own, a
  * sample for each environment (T26d): its program run on a trial draft, in miniature (`Kernel.layoutSample`).
  */
 export const ATLAS_AT = { x: 10, y: 1, w: 4 };
@@ -232,7 +232,7 @@ export interface StudioItem {
   rule?: Rule;
 }
 
-export interface Floor {
+export interface Storey {
   index: number;
   /** Top-left of the room in real space. */
   ox: number;
@@ -253,7 +253,7 @@ export interface Building {
   /** Exterior: the door (real-space cell) and the cells of its walls/roof. */
   door: { x: number; y: number };
   cells: Set<string>;
-  floors: Floor[];
+  storeys: Storey[];
   /**
    * The building as a model (T20, ADR-0049): `models/corona-<id>.xml`, its middle (real space) and how it is
    * turned (its front towards the avenue). Without one, `cells` is a plain block.
@@ -326,10 +326,10 @@ export const CAMPUS = { ring: 36, avenue: 6, line: 3, door: 6.5, front: 7, back:
 
 export const ROOM_W = 24;
 export const ROOM_H = 15;
-/** Interiors start here (real space); each building has its column, each floor its row. */
+/** Interiors start here (real space); each building has its column, each storey its row. */
 export const INTERIOR_X = 30000;
 const BUILDING_STRIDE = 80;
-const FLOOR_STRIDE = 40;
+const STOREY_STRIDE = 40;
 const SHELF_ROWS = [3, 6, 9];
 const SHELF_X0 = 3;
 const SHELF_X1 = ROOM_W - 4;
@@ -415,7 +415,7 @@ function groundAt(d: number, R: number, t: number, n: number): CoronaCell['groun
   return Math.min(off, sector - off) * d < CAMPUS.alley ? 'vicolo' : 'prato';
 }
 
-/** Shelf positions of a floor, in reading order. */
+/** Shelf positions of a storey, in reading order. */
 function shelfSlots(sides = false): Array<{ x: number; y: number }> {
   const out: Array<{ x: number; y: number }> = [];
   const xs = sides ? Array.from({ length: SIDE_W * 2 }, (_, i) => (i < SIDE_W ? SHELF_X0 + i : ROOM_W - SHELF_X0 - (SIDE_W * 2 - 1 - i))) : Array.from({ length: SHELF_W }, (_, i) => SHELF_X0 + i);
@@ -442,7 +442,7 @@ export class Corona {
 
   /** Compatibility: the folders are the buildings. */
   get folders(): Array<{ id: string; name: string; color: string; from: number; to: number; files: string[] }> {
-    return this.buildings.map((b) => ({ id: b.id, name: b.name, color: b.color, from: b.from, to: b.to, files: b.floors.flatMap((f) => f.items.filter((i) => i.kind === 'file').map((i) => i.path!)) }));
+    return this.buildings.map((b) => ({ id: b.id, name: b.name, color: b.color, from: b.from, to: b.to, files: b.storeys.flatMap((f) => f.items.filter((i) => i.kind === 'file').map((i) => i.path!)) }));
   }
 
   build(files: FileMap, gallery: Exhibit[] = [], terrains: Exhibit[] = [], layouts: Exhibit[] = [], systems: Array<{ id: string; name: string }> = []): void {
@@ -480,23 +480,23 @@ export class Corona {
       const from = (index / total) * Math.PI * 2;
       const to = ((index + 1) / total) * Math.PI * 2;
       const mid = (from + to) / 2;
-      const perFloor = SLOTS.length;
-      const chunk = <T,>(list: T[]) => Array.from({ length: Math.ceil(list.length / perFloor) }, (_, i) => list.slice(i * perFloor, (i + 1) * perFloor));
+      const perStorey = SLOTS.length;
+      const chunk = <T,>(list: T[]) => Array.from({ length: Math.ceil(list.length / perStorey) }, (_, i) => list.slice(i * perStorey, (i + 1) * perStorey));
       // With a device, the ground floor holds fewer files (at the sides): the rest go upstairs.
-      const ground = DEVICES.has(id) ? DEVICE_SLOTS.length : perFloor;
+      const ground = DEVICES.has(id) ? DEVICE_SLOTS.length : perStorey;
       const files = groups.get(id)!;
       const filePages = files.length ? [files.slice(0, ground), ...chunk(files.slice(ground))] : [];
-      // The files floor by floor; the terrains of the sample room after them, from a floor of their own.
+      // The files storey by storey; the terrains of the sample room after them, from a storey of their own.
       const pages = [...filePages, ...(id === SAMPLES ? chunk(samples) : [])];
-      const firstSample = id === SAMPLES && samples.length ? pages.length - Math.ceil(samples.length / perFloor) : -1;
-      const floors: Floor[] = [];
-      const nFloors = Math.max(1, pages.length);
-      for (let f = 0; f < nFloors; f++) {
+      const firstSample = id === SAMPLES && samples.length ? pages.length - Math.ceil(samples.length / perStorey) : -1;
+      const storeys: Storey[] = [];
+      const nStoreys = Math.max(1, pages.length);
+      for (let f = 0; f < nStoreys; f++) {
         const ox = INTERIOR_X + index * BUILDING_STRIDE;
-        const oy = f * FLOOR_STRIDE;
+        const oy = f * STOREY_STRIDE;
         const council = id === 'concilio';
         // The Council's hall: its files on one shelf along the wall, the round table in the middle.
-        const slots = council ? Array.from({ length: perFloor }, (_, i) => ({ x: SHELF_X0 + (i % (SHELF_X1 - SHELF_X0 + 1)), y: 2 + Math.floor(i / (SHELF_X1 - SHELF_X0 + 1)) })) : f === 0 && DEVICES.has(id) ? DEVICE_SLOTS : SLOTS;
+        const slots = council ? Array.from({ length: perStorey }, (_, i) => ({ x: SHELF_X0 + (i % (SHELF_X1 - SHELF_X0 + 1)), y: 2 + Math.floor(i / (SHELF_X1 - SHELF_X0 + 1)) })) : f === 0 && DEVICES.has(id) ? DEVICE_SLOTS : SLOTS;
         const placed: StudioItem[] = (pages[f] ?? []).flatMap((it, i) => (it ? [{ ...it, x: ox + slots[i].x, y: oy + slots[i].y }] : []));
         if (council && f === 0) {
           placed.push({ kind: 'table', label: "il tavolo del Concilio: al centro, l'universo", x: ox + Math.floor(TABLE.cx), y: oy + Math.floor(TABLE.cy) });
@@ -557,10 +557,10 @@ export class Corona {
           }
         }
         if (f === 0) placed.push({ kind: 'exit', label: 'uscita', x: ox + Math.floor(ROOM_W / 2), y: oy + ROOM_H - 1 });
-        if (f < nFloors - 1) placed.push({ kind: 'up', label: `scala al piano ${f + 2}${f + 1 === firstSample ? `: il campionario dei terreni${layouts.length ? ' e degli ambienti' : ''}` : ''}`, x: ox + ROOM_W - 2, y: oy + 1 });
+        if (f < nStoreys - 1) placed.push({ kind: 'up', label: `scala al piano ${f + 2}${f + 1 === firstSample ? `: il campionario dei terreni${layouts.length ? ' e degli ambienti' : ''}` : ''}`, x: ox + ROOM_W - 2, y: oy + 1 });
         if (f > 0) placed.push({ kind: 'down', label: `scala al piano ${f}`, x: ox + 1, y: oy + 1 });
         for (const it of placed) if (it.kind === 'file' && it.path) this.slots.set(it.path, { x: it.x, y: it.y });
-        floors.push({ index: f, ox, oy, items: placed });
+        storeys.push({ index: f, ox, oy, items: placed });
       }
       // Outside: a block in the middle of the sector, the door towards the avenue.
       const span = (to - from) * CAMPUS.span;
@@ -572,7 +572,7 @@ export class Corona {
         }
       const door = polarCell(R + CAMPUS.door, mid);
       cells.delete(`${door.x},${door.y}`);
-      return { index, id, name: def.name, color: def.color, team: def.team, from, to, door, cells, floors };
+      return { index, id, name: def.name, color: def.color, team: def.team, from, to, door, cells, storeys };
     });
     // The avenue, the alleys between the sectors, the lawns and the edge of the campus.
     const max = Math.ceil(this.outer) + 1;
@@ -632,14 +632,14 @@ export class Corona {
     }
   }
 
-  /** The room (building and floor) containing a real-space point, if it is inside. */
-  roomAt(x: number, y: number): { building: Building; floor: Floor } | undefined {
+  /** The room (building and storey) containing a real-space point, if it is inside. */
+  roomAt(x: number, y: number): { building: Building; storey: Storey } | undefined {
     if (x < INTERIOR_X - 10) return undefined;
     const b = this.buildings[Math.floor((x - INTERIOR_X + 10) / BUILDING_STRIDE)];
     if (!b) return undefined;
-    const f = b.floors[Math.floor((y + 10) / FLOOR_STRIDE)];
+    const f = b.storeys[Math.floor((y + 10) / STOREY_STRIDE)];
     if (!f) return undefined;
-    return { building: b, floor: f };
+    return { building: b, storey: f };
   }
 
   isInterior(x: number): boolean {
@@ -650,13 +650,13 @@ export class Corona {
   at(cx: number, cy: number): CoronaCell | null {
     const room = this.roomAt(cx, cy);
     if (room) {
-      const lx = cx - room.floor.ox;
-      const ly = cy - room.floor.oy;
+      const lx = cx - room.storey.ox;
+      const ly = cy - room.storey.oy;
       if (lx < 0 || ly < 0 || lx >= ROOM_W || ly >= ROOM_H) return null;
-      const item = room.floor.items.find((i) => cy >= i.y && cy < i.y + (i.h ?? 1) && cx >= i.x && cx < i.x + (i.w ?? 1));
+      const item = room.storey.items.find((i) => cy >= i.y && cy < i.y + (i.h ?? 1) && cx >= i.x && cx < i.x + (i.w ?? 1));
       // The round table fills an ellipse in the middle of the Council's hall.
-      if (!item && room.building.id === 'concilio' && room.floor.index === 0 && ((lx + 0.5 - TABLE.cx) / TABLE.rx) ** 2 + ((ly + 0.5 - TABLE.cy) / TABLE.ry) ** 2 <= 1) {
-        const table = room.floor.items.find((i) => i.kind === 'table');
+      if (!item && room.building.id === 'concilio' && room.storey.index === 0 && ((lx + 0.5 - TABLE.cx) / TABLE.rx) ** 2 + ((ly + 0.5 - TABLE.cy) / TABLE.ry) ** 2 <= 1) {
+        const table = room.storey.items.find((i) => i.kind === 'table');
         if (table) return { kind: 'item', building: room.building.id, item: table, folder: room.building.id };
       }
       if (item) return { kind: 'item', building: room.building.id, item, path: item.path, look: item.look, lines: item.lines, line: 1, folder: room.building.id };
@@ -789,12 +789,12 @@ export class Corona {
     if (!room) return undefined;
     let best: StudioItem | undefined;
     let bd = r;
-    for (const it of room.floor.items) {
+    for (const it of room.storey.items) {
       if (it.kind === 'desk' || (kinds && !kinds.includes(it.kind))) continue;
       // Wide or deep things (screens, the atlas, the printer) are near from any of their cells; the table from its rim; the
       // Direction's wall of screens (T46b) and the chain's stations (T27a) from the foot of their screens, at the front of their cells.
       const c = cellNear(it, x, y);
-      const d = it.kind === 'table' ? Math.hypot((x - TABLE.cx - this.roomAt(x, y)!.floor.ox) / TABLE.rx, (y - TABLE.cy - this.roomAt(x, y)!.floor.oy) / TABLE.ry) * 1.2 - 0.2 : Math.hypot(c.x + 0.5 - x, c.y + (it.kind === 'parete' || it.kind === 'stazione' ? 1 : 0.5) - y);
+      const d = it.kind === 'table' ? Math.hypot((x - TABLE.cx - this.roomAt(x, y)!.storey.ox) / TABLE.rx, (y - TABLE.cy - this.roomAt(x, y)!.storey.oy) / TABLE.ry) * 1.2 - 0.2 : Math.hypot(c.x + 0.5 - x, c.y + (it.kind === 'parete' || it.kind === 'stazione' ? 1 : 0.5) - y);
       if (d < bd) [best, bd] = [it, d];
     }
     return best;
@@ -809,9 +809,9 @@ export class Corona {
     return this.buildings.find((b) => Math.hypot(b.door.x + 0.5 - x, b.door.y + 0.5 - y) < r);
   }
 
-  /** Where you appear entering a building (floor 0, just inside the door) or a floor by the stairs. */
-  entrance(b: Building, floor = 0, from: 'door' | 'up' | 'down' = 'door'): { x: number; y: number } {
-    const f = b.floors[Math.max(0, Math.min(b.floors.length - 1, floor))];
+  /** Where you appear entering a building (storey 0, just inside the door) or a storey by the stairs. */
+  entrance(b: Building, storey = 0, from: 'door' | 'up' | 'down' = 'door'): { x: number; y: number } {
+    const f = b.storeys[Math.max(0, Math.min(b.storeys.length - 1, storey))];
     if (from === 'up') return { x: f.ox + 2.5, y: f.oy + 2.5 };
     if (from === 'down') return { x: f.ox + ROOM_W - 2.5, y: f.oy + 2.5 };
     return { x: f.ox + ROOM_W / 2 + 0.5, y: f.oy + ROOM_H - 2.5 };
@@ -855,8 +855,8 @@ export class Corona {
   setRulesOffset(offset: number): void {
     this.rulesOffset = offset;
     const b = this.buildings.find((x) => x.id === 'mondo');
-    if (!b || !b.floors[0]) return;
-    const f = b.floors[0];
+    if (!b || !b.storeys[0]) return;
+    const f = b.storeys[0];
     let allRules: Rule[] = [];
     try {
       allRules = (JSON.parse(this.files['world/rules.json'] ?? '{}').regole ?? []) as Rule[];

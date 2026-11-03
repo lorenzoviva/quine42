@@ -4253,7 +4253,7 @@ export class Kernel {
       const b = this.corona.doorNear(p.x, p.y);
       if (b) {
         Object.assign(p, this.corona.entrance(b));
-        this.message(`${b.name}${b.floors.length > 1 ? ` — ${b.floors.length} piani` : ''}`);
+        this.message(`${b.name}${b.storeys.length > 1 ? ` — ${b.storeys.length} piani` : ''}`);
         this.updateZone();
         return;
       }
@@ -4340,7 +4340,7 @@ export class Kernel {
       }
       case 'up':
       case 'down': {
-        const next = room.floor.index + (it.kind === 'up' ? 1 : -1);
+        const next = room.storey.index + (it.kind === 'up' ? 1 : -1);
         Object.assign(p, this.corona.entrance(room.building, next, it.kind === 'up' ? 'up' : 'down'));
         this.message(`${room.building.name}, piano ${next + 1}`);
         return;
@@ -4560,7 +4560,7 @@ export class Kernel {
 
   /** What a showcase (by building) shows now, with its place in the list; a model of places also its phase (T26). */
   showcaseOf(building: string): { entry: ShowcaseEntry; index: number; count: number; phase?: number } | undefined {
-    const source = this.corona.building(building)?.floors[0]?.items.find((i) => i.kind === 'showcase')?.source;
+    const source = this.corona.building(building)?.storeys[0]?.items.find((i) => i.kind === 'showcase')?.source;
     const all = source ? this.showcaseEntries(source) : [];
     if (!all.length) return undefined;
     const index = (((this.showcaseIndex.get(building) ?? 0) % all.length) + all.length) % all.length;
@@ -4598,7 +4598,7 @@ export class Kernel {
   /** The latest changes to the files of a building (for its notice board). */
   boardOf(buildingId: string): Array<{ path: string; author: string; message: string; time: number }> {
     const b = this.corona.building(buildingId);
-    const paths = new Set(b?.floors.flatMap((f) => f.items.map((i) => i.path).filter(Boolean)) as string[]);
+    const paths = new Set(b?.storeys.flatMap((f) => f.items.map((i) => i.path).filter(Boolean)) as string[]);
     return [...this.recentChanges().entries()].filter(([p]) => paths.has(p)).map(([path, c]) => ({ path, ...c })).sort((x, y) => y.time - x.time);
   }
 

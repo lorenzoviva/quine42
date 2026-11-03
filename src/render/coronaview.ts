@@ -77,17 +77,17 @@ export class CoronaView {
       this.ring.visible = revealed && !interior;
       if (this.ring.visible) animateRing(this.ring, t, k);
     }
-    for (const [key, r] of this.rooms) r.group.visible = !!studio && key === `${studio.building.id}#${studio.floor.index}`;
+    for (const [key, r] of this.rooms) r.group.visible = !!studio && key === `${studio.building.id}#${studio.storey.index}`;
     if (studio) {
-      const key = `${studio.building.id}#${studio.floor.index}`;
+      const key = `${studio.building.id}#${studio.storey.index}`;
       let r = this.rooms.get(key);
       // A room with things on show is built again when their models are ready.
-      if (r && r.version !== k.forms.version && studio.floor.items.some((i) => i.kind === 'sprite' || i.kind === 'file')) {
+      if (r && r.version !== k.forms.version && studio.storey.items.some((i) => i.kind === 'sprite' || i.kind === 'file')) {
         this.root.remove(r.group);
         r = undefined;
       }
       if (!r) {
-        this.rooms.set(key, (r = { ...buildRoom(k, studio.building, studio.floor), version: k.forms.version }));
+        this.rooms.set(key, (r = { ...buildRoom(k, studio.building, studio.storey), version: k.forms.version }));
         this.root.add(r.group);
       }
       r.group.visible = true;
@@ -95,8 +95,8 @@ export class CoronaView {
       const anims = r.group.userData.animatedFiles as Array<{ frames: THREE.Mesh[]; offset: number }> | undefined;
       anims?.forEach((a) => showFrame(a.frames, t, a.offset));
     }
-    for (const [id, v] of this.shows) v.group.visible = studio?.building.id === id && studio.floor.index === 0;
-    const show = studio?.floor.items.find((i) => i.kind === 'showcase');
+    for (const [id, v] of this.shows) v.group.visible = studio?.building.id === id && studio.storey.index === 0;
+    const show = studio?.storey.items.find((i) => i.kind === 'showcase');
     if (studio && show) {
       const now = k.showcaseOf(studio.building.id);
       // A place in miniature (T26) read from its saved plan arrives later.
@@ -124,7 +124,7 @@ export class CoronaView {
         b.position.set(x + Math.sin(t * 0.8 + phase * 9) * 0.05, 0.35 + ((phase + t * speed * 0.5) % 1) * 1.9, z);
       }
     }
-    const table = studio?.floor.items.find((i) => i.kind === 'situazione');
+    const table = studio?.storey.items.find((i) => i.kind === 'situazione');
     if (this.sit) this.sit.group.visible = !!table;
     if (studio && table) {
       // Read again once a second; built again only when something changed.
@@ -139,8 +139,8 @@ export class CoronaView {
       }
       for (const [i, m] of this.sit.pulse.entries()) m.scale.y = 1 + 2.5 * (0.5 + 0.5 * Math.sin(t * 4 + i));
     }
-    const wall = studio?.floor.items.filter((i) => i.kind === 'parete') ?? [];
-    const here = studio ? `${studio.building.id}#${studio.floor.index}` : '';
+    const wall = studio?.storey.items.filter((i) => i.kind === 'parete') ?? [];
+    const here = studio ? `${studio.building.id}#${studio.storey.index}` : '';
     if (this.wall && (this.wall.room !== here || !wall.length)) {
       this.root.remove(this.wall.view.group);
       this.wall.view.dispose();
@@ -148,7 +148,7 @@ export class CoronaView {
     }
     if (studio && wall.length) {
       if (!this.wall) {
-        this.wall = { room: here, view: new ScreenWall(wall, studio.building.color, studio.floor) };
+        this.wall = { room: here, view: new ScreenWall(wall, studio.building.color, studio.storey) };
         this.root.add(this.wall.view.group);
       }
       // Read twice a second (the arrows answer at once enough); a field is drawn again only when it changed.
@@ -158,7 +158,7 @@ export class CoronaView {
       }
       this.wall.view.blink(t);
     }
-    const stations = studio?.floor.items.filter((i) => i.kind === 'stazione') ?? [];
+    const stations = studio?.storey.items.filter((i) => i.kind === 'stazione') ?? [];
     // Built again when a system joins or leaves the chain.
     const line = `${here}|${stations.map((i) => `${i.target}@${i.x}+${i.w}`).join(',')}`;
     if (this.chain && (this.chain.room !== line || !stations.length)) {
@@ -178,7 +178,7 @@ export class CoronaView {
       }
       this.chain.view.run(t);
     }
-    const bench = studio?.floor.items.find((i) => i.kind === 'banco');
+    const bench = studio?.storey.items.find((i) => i.kind === 'banco');
     if (this.bench && !bench) {
       this.root.remove(this.bench.view.group);
       this.bench.view.dispose();
@@ -195,14 +195,14 @@ export class CoronaView {
           this.bench = undefined;
         }
         if (now) {
-          const arrow = (kind: string) => studio.floor.items.find((i) => i.kind === kind && i.target === 'banco');
+          const arrow = (kind: string) => studio.storey.items.find((i) => i.kind === kind && i.target === 'banco');
           this.bench = { key, at: t, view: new BenchView(bench, now, studio.building.color, arrow('prev'), arrow('next')) };
           this.root.add(this.bench.view.group);
         }
       } else if (this.bench) this.bench.at = t;
     }
     this.bench?.view.update(t);
-    const tornio = studio?.floor.items.find((i) => i.kind === 'tornio');
+    const tornio = studio?.storey.items.find((i) => i.kind === 'tornio');
     if (this.tornio && !tornio) {
       this.root.remove(this.tornio.view.group);
       this.tornio.view.dispose();
@@ -218,7 +218,7 @@ export class CoronaView {
           this.tornio = undefined;
         }
         if (now) {
-          const arrow = (kind: string) => studio.floor.items.find((i) => i.kind === kind && i.target === 'tornio');
+          const arrow = (kind: string) => studio.storey.items.find((i) => i.kind === kind && i.target === 'tornio');
           this.tornio = { key, at: t, view: new LatheView(tornio, now, studio.building.color, arrow('prev'), arrow('next')) };
           this.root.add(this.tornio.view.group);
         }
@@ -231,7 +231,7 @@ export class CoronaView {
   /** The names over the doors, the Council at work, and in a room what is near and what changed lately. */
   overlay(o: Overlay, t: number, studio: StudioRoom, revealed: boolean, interior: boolean, distance: number): void {
     const k = this.kernel;
-    if (revealed && !interior) for (const b of k.corona.buildings) o.label(b.door.x + 0.5, 2.1, b.door.y + 0.5, b.floors.length > 1 ? `${b.name} (${b.floors.length} piani)` : b.name, b.color, 12, true);
+    if (revealed && !interior) for (const b of k.corona.buildings) o.label(b.door.x + 0.5, 2.1, b.door.y + 0.5, b.storeys.length > 1 ? `${b.name} (${b.storeys.length} piani)` : b.name, b.color, 12, true);
     for (const a of k.archive.avatars.values()) {
       if (Math.hypot(a.x - k.wandererPos().x, a.y - k.wandererPos().y) > distance * 2) continue;
       o.label(a.x, 1.45, a.y, `${a.sigil} ${a.name}`, a.color, 11);
@@ -241,13 +241,13 @@ export class CoronaView {
     const near = k.corona.itemNear(k.wandererPos().x, k.wandererPos().y);
     const recent = k.recentChanges();
     const pulse = 0.5 + 0.5 * Math.sin(t * 4);
-    for (const it of studio.floor.items) if (it.path && recent.has(it.path)) o.cell(it.x, it.y, `rgba(255, 220, 120, ${0.4 + 0.4 * pulse})`, `rgba(255, 220, 120, ${0.1 + 0.15 * pulse})`, 0.4);
+    for (const it of studio.storey.items) if (it.path && recent.has(it.path)) o.cell(it.x, it.y, `rgba(255, 220, 120, ${0.4 + 0.4 * pulse})`, `rgba(255, 220, 120, ${0.1 + 0.15 * pulse})`, 0.4);
     if (near) {
       const c = cellNear(near, k.wandererPos().x, k.wandererPos().y);
       o.cell(c.x, c.y, '#ffcf5c', undefined, 0.42);
     }
-    const fl = studio.floor;
-    o.title(`${studio.building.name.toUpperCase()}${studio.building.floors.length > 1 ? `  ·  PIANO ${fl.index + 1}/${studio.building.floors.length}` : ''}`, studio.building.color);
+    const fl = studio.storey;
+    o.title(`${studio.building.name.toUpperCase()}${studio.building.storeys.length > 1 ? `  ·  PIANO ${fl.index + 1}/${studio.building.storeys.length}` : ''}`, studio.building.color);
     const shown = near?.kind === 'showcase' ? k.showcaseOf(near.target!) : undefined;
     const tried = near?.kind === 'banco' ? k.benchOf() : undefined;
     const read = near?.kind === 'leggio' ? k.bibleOf() : undefined;

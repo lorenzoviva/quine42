@@ -76,7 +76,7 @@ describe('kernel', () => {
     expect(k.hoverAt(slot.x + 0.5, slot.y + 0.5)?.kind).toMatch(/studio|agent/);
   });
 
-  it('the corona is a studio: a building per folder, rooms on floors, galleries; teams go to the files they change', async () => {
+  it('the corona is a studio: a building per folder, rooms on storeys, galleries; teams go to the files they change', async () => {
     for (const f of Object.keys(k.files)) expect(k.corona.slotOf(f), f).toBeTruthy();
     const names = k.corona.buildings.map((b) => b.name);
     expect(names).toEqual(expect.arrayContaining(['Sala del Concilio', 'Studio dei Personaggi', 'Sala Sistemi', 'Torre della Magia', "Galleria dell'Artista", 'Ufficio dei Luoghi']));
@@ -85,19 +85,19 @@ describe('kernel', () => {
     const bOf = (p: string) => k.corona.buildingOf(p)!.id;
     expect(bOf('modules/npc.cat/manifest.json')).toBe(bOf('modules/npc.villager/manifest.json'));
     expect(bOf('modules/npc.cat/manifest.json')).not.toBe(bOf('modules/sys.needs/logic.lua'));
-    // The gallery shows every sprite and icon; the Office of places every terrain, from a floor after its files.
-    const gallery = k.corona.building('galleria')!.floors.flatMap((f) => f.items.filter((i) => i.kind === 'sprite'));
+    // The gallery shows every sprite and icon; the Office of places every terrain, from a storey after its files.
+    const gallery = k.corona.building('galleria')!.storeys.flatMap((f) => f.items.filter((i) => i.kind === 'sprite'));
     expect(gallery.some((i) => i.label === 'Mela rossa' || i.target?.startsWith('item:'))).toBe(true);
     const office = k.corona.building('luoghi')!;
-    const tiles = office.floors.flatMap((f) => f.items.filter((i) => i.kind === 'tile'));
+    const tiles = office.storeys.flatMap((f) => f.items.filter((i) => i.kind === 'tile'));
     expect(tiles.length).toBeGreaterThanOrEqual(Object.keys(k.palette).length - 1);
-    const sampleFloor = office.floors.findIndex((f) => f.items.some((i) => i.kind === 'tile'));
-    expect(sampleFloor).toBeGreaterThan(0);
-    expect(office.floors[sampleFloor].items.some((i) => i.kind === 'file')).toBe(false);
-    expect(office.floors[sampleFloor - 1].items.find((i) => i.kind === 'up')?.label).toMatch(/campionario/);
-    // Big buildings have several floors joined by stairs.
-    const big = k.corona.buildings.find((b) => b.floors.length > 1);
-    if (big) expect(big.floors[0].items.some((i) => i.kind === 'up')).toBe(true);
+    const sampleStorey = office.storeys.findIndex((f) => f.items.some((i) => i.kind === 'tile'));
+    expect(sampleStorey).toBeGreaterThan(0);
+    expect(office.storeys[sampleStorey].items.some((i) => i.kind === 'file')).toBe(false);
+    expect(office.storeys[sampleStorey - 1].items.find((i) => i.kind === 'up')?.label).toMatch(/campionario/);
+    // Big buildings have several storeys joined by stairs.
+    const big = k.corona.buildings.find((b) => b.storeys.length > 1);
+    if (big) expect(big.storeys[0].items.some((i) => i.kind === 'up')).toBe(true);
     // A member of the Engineers' team goes to the book of the module it changes.
     k.council.say('ingegnere', 'propone', 'ritocco object.well: secchio più capiente');
     const s0 = k.corona.slotOf('modules/object.well/manifest.json')!;
@@ -165,7 +165,7 @@ describe('kernel', () => {
 
   it('the studio holds every universe file, each on a shelf of a room', () => {
     const seen = new Set<string>();
-    for (const b of k.corona.buildings) for (const f of b.floors) for (const i of f.items) if (i.kind === 'file' && i.path) seen.add(i.path);
+    for (const b of k.corona.buildings) for (const f of b.storeys) for (const i of f.items) if (i.kind === 'file' && i.path) seen.add(i.path);
     expect([...seen].sort()).toEqual(Object.keys(k.files).sort());
   });
 });

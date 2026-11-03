@@ -25,6 +25,8 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Corona | `crown` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Corona | `anello` | 4 (4) | 1 (1) | 20 (11) | 0 (0) |
 | Edificio | `edificio` | 21 (8) | 1 (1) | 33 (16) | 0 (0) |
+| Piano | `Floor` | 507 (54) | 0 (0) | 27 (8) | 18 (10) |
+| Piano | `floors` | 16 (3) | 0 (0) | 1 (1) | 0 (0) |
 | Entità | `thing` | 98 (32) | 0 (0) | 3 (3) | 0 (0) |
 | Entità | `Things` | 70 (24) | 0 (0) | 0 (0) | 0 (0) |
 | Entità | `cosa` | 119 (21) | 17 (6) | 106 (51) | 5 (2) |

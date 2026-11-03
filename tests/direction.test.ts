@@ -61,11 +61,11 @@ function stand(k: Kernel, x: number, y: number): void {
 describe('the Direction', () => {
   it('has the situation table in the middle of its ground floor, 5 × 3, with room in front', async () => {
     const k = await boot();
-    const f = k.corona.building('universo')!.floors[0];
+    const f = k.corona.building('universo')!.storeys[0];
     const t = f.items.find((i) => i.kind === 'situazione')!;
     expect(t.label).toBe('il tavolo della situazione');
     expect([t.w, t.h]).toEqual([5, 3]);
-    expect(k.corona.buildings.filter((b) => b.floors.some((fl) => fl.items.some((i) => i.kind === 'situazione'))).map((b) => b.id)).toEqual(['universo']);
+    expect(k.corona.buildings.filter((b) => b.storeys.some((fl) => fl.items.some((i) => i.kind === 'situazione'))).map((b) => b.id)).toEqual(['universo']);
     for (let x = t.x; x < t.x + 5; x++)
       for (let y = t.y; y < t.y + 3; y++) {
         expect(f.items.filter((i) => y >= i.y && y < i.y + (i.h ?? 1) && x >= i.x && x < i.x + (i.w ?? 1)), `${x},${y}`).toEqual([t]);
@@ -78,7 +78,7 @@ describe('the Direction', () => {
 
   it('opens with E in front of it or a click within reach, changing nothing', async () => {
     const k = await boot();
-    const t = k.corona.building('universo')!.floors[0].items.find((i) => i.kind === 'situazione')!;
+    const t = k.corona.building('universo')!.storeys[0].items.find((i) => i.kind === 'situazione')!;
     const opened: any[] = [];
     k.bus.on('ui:situation', (e) => opened.push(e));
     const head = k.repo.head().id;

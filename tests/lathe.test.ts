@@ -68,7 +68,7 @@ describe("the Sculptor's lathe (tornio)", () => {
   it('stands in the middle of the Artist gallery with DEVICE_MARGIN clearance', async () => {
     const k = await boot();
     const b = k.corona.building('galleria')!;
-    const f = b.floors[0];
+    const f = b.storeys[0];
 
     const lathe = f.items.find((i) => i.kind === 'tornio');
     expect(lathe).toBeDefined();
@@ -134,7 +134,7 @@ describe("the Sculptor's lathe (tornio)", () => {
   it('opens ui:tornio upon E interaction or click within reach', async () => {
     const k = await boot();
     const b = k.corona.building('galleria')!;
-    const lathe = b.floors[0].items.find((i) => i.kind === 'tornio')!;
+    const lathe = b.storeys[0].items.find((i) => i.kind === 'tornio')!;
 
     const opened: unknown[] = [];
     k.bus.on('ui:tornio', (e) => opened.push(e));
@@ -157,7 +157,7 @@ describe("the Sculptor's lathe (tornio)", () => {
   it('steps through the library when clicking navigation arrows', async () => {
     const k = await boot();
     const b = k.corona.building('galleria')!;
-    const nextArrow = b.floors[0].items.find((i) => i.kind === 'next' && i.target === 'tornio')!;
+    const nextArrow = b.storeys[0].items.find((i) => i.kind === 'next' && i.target === 'tornio')!;
 
     stand(k, nextArrow.x + 0.5, nextArrow.y + 1.0);
     expect(k.latheOf()!.index).toBe(0);

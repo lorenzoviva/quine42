@@ -108,7 +108,7 @@ describe('the Library of the World (T47b): rules wall in Kernel', () => {
     const rules = createSampleRules(6);
     const k = await bootWithRules(rules);
     const b = k.corona.building('mondo')!;
-    const f = b.floors[0];
+    const f = b.storeys[0];
 
     const tablets = f.items.filter((it) => it.kind === 'lastra');
     expect(tablets.length).toBe(6);
@@ -148,7 +148,7 @@ describe('the Library of the World (T47b): rules wall in Kernel', () => {
     const rules = createSampleRules(4);
     const k = await bootWithRules(rules);
     const b = k.corona.building('mondo')!;
-    const f = b.floors[0];
+    const f = b.storeys[0];
     const firstTablet = f.items.find((it) => it.kind === 'lastra')!;
 
     const opened: unknown[] = [];

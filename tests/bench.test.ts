@@ -191,7 +191,7 @@ describe('the bench with the cases of the seed', () => {
 
   it('stands in the middle of the Systems Room; «<» «>» go through the cases of all the systems in the order of the tick', async () => {
     const k = await boot();
-    const room = k.corona.building('sistemi')!.floors[0];
+    const room = k.corona.building('sistemi')!.storeys[0];
     const bench = room.items.find((i) => i.kind === 'banco')!;
     expect([bench.x - room.ox, bench.y - room.oy, bench.w, bench.h]).toEqual([BENCH_AT.x, BENCH_AT.y, 3, 3]);
     expect(room.items.filter((i) => (i.kind === 'prev' || i.kind === 'next') && i.target === 'banco').length).toBe(2);
