@@ -126,5 +126,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0119](0119-piani-finestra-e-contesto-dei-task.md) | La pipeline: piani di abbonamento, la finestra delle 5 ore protetta dallo script, nessun ripiego su altri provider, `.pipeline-task.md` al posto del backlog, ADR rinumerati da `integra`, quadro come fotografia | accettato |
 | [0120](0120-agents-nucleo-e-dettagli.md) | `AGENTS.md` è il nucleo, con le regole inviolabili e un indice; i sottosistemi stanno, alla lettera, in `docs/architettura-dettagli.md` |
 | [0121](0121-il-sorvegliante-conta-da-pronto-e-aspetta-i-git.md) | Il sorvegliante conta `healthy` da `pronto`; `stop()` aspetta i git del suo universo, entro 5 s, e non lascia lock |
+| [0122](0122-un-commit-non-si-perde-per-la-rete.md) | Un commit non si perde per la rete: resta in fila, in ordine; un rifiuto del server non si ritenta |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

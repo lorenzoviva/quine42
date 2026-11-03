@@ -116,6 +116,7 @@ export async function openUniverse(opts: { name: string; base: string; offline?:
       kernel.saveUsage();
       const until = performance.now() + FLUSH_MS;
       while (client.pending > 0 && performance.now() < until) await new Promise((r) => setTimeout(r, 25));
+      client.close();
     },
   };
 }
