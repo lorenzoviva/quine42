@@ -26,11 +26,12 @@ Aggiornato il 03/11/2026, epoca 237. Crediti: vedi `stato`.
 - **T221 integrato** (ADR-0123): suoni come programmi MJ (`<sound>`, `src/mj/sound.ts`, `src/mj/synth.ts`), 4 preset, motore invariato. Nessun ascolto umano, `playSamples` solo typecheck. Scostamenti: preset 1 del mockup non compilava, corretto; preset 3 con pad garantito; picco scalato a 0,98.
 - **T226 integrato** (ADR-0124): corona solo fuori dal cerchio o nello studio, per chiunque e con qualunque camera; anello preparato invisibile da 0,3 del raggio, buttato dopo 60 s; bordo da 104-370 a 53-55 ms. Causa dell'orbita non riprodotta: la soglia 0,45 si supera solo col tappeto fermo o spostato, e ora non decide più nulla. Non provati: edificio davvero alto, teleport oltre il bordo senza preparazione, finestra vera. Cambio al bordo brusco: da far giudicare all'autore. Resta `H:	226-profilo-tmp`: detto all'autore.
 - **T222 integrato** (`a3ff6df`): SoundLab in `/lab/suono/`, suono solo da `src/mj/synth.ts`. Suite intera prima degli ultimi ritocchi di testo e CSS, poi typecheck, build e 4 file. Non provati: dialogo «Apri», scrittura reale su disco, `npm run dev`. **L'autore deve ascoltare:** i 4 preset contro il mockup, manopole in movimento, punto di ripetizione, morph, clic sul piano roll, WAV in un lettore.
-- ADR nuovi dallo **0125**.
+- **T223 integrato** (ADR-0125): analisi del suono (`src/mj/soundanalysis.ts`, `lab/scripts/mjx-sound.ts`, guida `lab/banco/suono.md`), validatore con le stesse soglie. Nessun ascolto umano; `giuntura` e dinamica minima solo su campioni costruiti; 4 terne di semi su 598 danno un falso difetto su Architettura Frattale; cutoff molto basso non segnalato; il rendering in più del validatore può costare qualche secondo in un caso limite.
+- ADR nuovi dallo **0126**.
 
 ## Pronti e priorità
 
-1. **In coda, approvati e pronti, partono da soli:** T223 (in corso) T224 T182 T89b T89c T89e T183 T152 T186 T158.
+1. **In coda, approvati e pronti, partono da soli:** T224 T182 T89b T89c T89e T183 T152 T186 T158.
 1b. **Suono da MJ (richiesta dell'autore, 03/11):** T221 (lingua XML, sintetizzatore puro, preset) → T222 (SoundLab in `/lab/suono/`) e T223 (analisi per gli agenti); T221 → T224 (nel gioco); T223 + T224 → T225 (Musicista nella `galleria`, nessun edificio nuovo). Mockup: `docs/userchats/mj_3d_soundlab_sintetizzatore_musicale_markovjunior.html`, committato perché i worktree lo vedano. Scelte mie da correggere se l'autore vuole: musica per ambiente e ora, un solo sintetizzatore puro al posto del grafo Web Audio del mockup.
 4. **T182 → T156** (strutture procedurali). T182 su Claude, stima 8 %, al più 4 giri; è pronto.
 4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla.
@@ -62,5 +63,5 @@ Aggiornato il 03/11/2026, epoca 237. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **237:** T222 integrato.
+- **237:** T222, T223 integrati.
 - **236:** T219, T218, T220, T221, T226 integrati.
