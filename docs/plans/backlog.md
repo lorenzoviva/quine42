@@ -3316,7 +3316,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 - Quando è fatto: commit su `task/T212`; nell'esito le misure prima e dopo e cosa non è stato provato. Sicurezza: nessuna superficie nuova, o le voci aggiunte.
 
 ### T213 · Il gioco a 1,5 frame al secondo nella verifica di T175: è il codice o la scheda? — `da fare`
-- Pipeline: claude · stima 1,5% · approvato · priorità 14
+- Pipeline: claude · stima 1.5% · approvato · priorità 14
 - Contesto: nasce da T175 (`dossier T175`): la scheda di verifica girava a circa 1,5 frame al secondo, causa non accertata e senza confronto col codice di prima; anche i 12-15 s per arrivare alla corona sono misurati a quel ritmo, quindi quel numero può non valere per un giocatore.
 - Cosa fare: solo misura e diagnosi, niente correzioni. Misura i frame al secondo con la scheda in primo piano (`document.visibilityState`, renderer WebGL da `WEBGL_debug_renderer_info`: una scheda nascosta o una GPU software spiegano già tutto), sul base e sul commit che precede il merge di T175, stessa scena, stessa partita, build di produzione, `?skip&offline`. Rimisura il tempo per arrivare alla corona. Se il rallentamento viene dal codice, individua dove va il tempo di un frame e scrivilo nell'esito: la correzione sarà un task a parte.
 - Test: nessun test nuovo se il codice non cambia.
