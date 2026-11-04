@@ -34,7 +34,7 @@ export function grantCapOf(env: Record<string, string | undefined>, hasAccounts:
 }
 
 /**
- * The platform fee, a fraction of the cost (ADR-0130): `QUINE_COMMISSIONE`, the server's alone. 0 is a fee (the beta's); what is not a
+ * The platform fee, a fraction of the cost (ADR-0131): `QUINE_COMMISSIONE`, the server's alone. 0 is a fee (the beta's); what is not a
  * fraction from 0 up to, not including, 1 is the default: a typing slip must neither charge a player double nor take a price away.
  */
 export function platformFeeOf(env: Record<string, string | undefined>): number {

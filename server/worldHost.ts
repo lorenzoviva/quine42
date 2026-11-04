@@ -72,7 +72,7 @@ export interface WorldOptions {
   masterUid?: string;
   ledgerFile?: string;
   grantCap?: number;
-  /** The platform fee, which the server decides (ADR-0130). */
+  /** The platform fee, which the server decides (ADR-0131). */
   platformFee?: number;
   /** The program of the process, and what it may read besides its own folder. */
   entry: string;
@@ -104,7 +104,7 @@ export function worldFlags(o: Pick<WorldOptions, 'entry' | 'reads' | 'memoryMb' 
 
 /**
  * The environment of a world: nothing of this process's, where the secrets are. What is left only lets Windows and Node start, and
- * the platform fee this server decided, by value: no secret, and the world cannot read it from anywhere else (ADR-0130).
+ * the platform fee this server decided, by value: no secret, and the world cannot read it from anywhere else (ADR-0131).
  */
 export function worldEnv(platformFee?: number): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = { NODE_ENV: 'production', ...(platformFee === undefined ? {} : { QUINE_COMMISSIONE: String(platformFee) }) };

@@ -45,7 +45,7 @@ export interface Wallet {
   crediti: number;
   /** Credits are charged only in a multiplayer game (`Kernel.billCall`). */
   multigiocatore: boolean;
-  /** The platform fee on every call charged, as this server decided it (ADR-0130). */
+  /** The platform fee on every call charged, as this server decided it (ADR-0131). */
   commissione: number;
   /** Newest first. */
   pagamenti: WalletPayment[];
@@ -77,7 +77,7 @@ export function linesOf(payments: PaymentRecord[], usageText: string | undefined
     if (!t) continue;
     const base = Number(t.usd) || 0;
     // What the balance lost: the fee is charged with the call, and only in a multiplayer game. The ledger keeps the cost alone, so a day
-    // before the fee changed reads at today's fee (ADR-0130).
+    // before the fee changed reads at today's fee (ADR-0131).
     const usd = many ? costWithFee(base, fee) : base;
     total += usd;
     days.push({ giorno, chiamate: Number(t.calls) || 0, usd });

@@ -74,7 +74,7 @@ export function formatSpent(n: number): string {
   return n > 0 && n < 0.01 ? `$${n.toFixed(4)}` : formatCredits(n);
 }
 
-/** What a credit pays for, with the fee this server decided (ADR-0130). */
+/** What a credit pays for, with the fee this server decided (ADR-0131). */
 export function feeText(fee: number): string {
   return fee > 0 ? `il loro costo, più la commissione della piattaforma (${feePercent(fee)})` : 'il loro costo, senza commissioni';
 }

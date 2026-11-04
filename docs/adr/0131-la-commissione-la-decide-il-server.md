@@ -1,4 +1,4 @@
-# ADR-0130 — La commissione la decide il server
+# ADR-0131 — La commissione la decide il server
 
 Data: 2026-11-04 · Stato: accettato · Riferimenti: ADR-0081 (i crediti), ADR-0104 (i saldi), ADR-0110 (i mondi senza segreti), T243
 

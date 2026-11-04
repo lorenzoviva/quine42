@@ -37,7 +37,7 @@ export class SessionClient {
   anonimo = false;
   /** Whether this wanderer is the master (T41): only the master hears the Council and gets all the files. */
   master = false;
-  /** The platform fee, as the server said to the master (ADR-0130). */
+  /** The platform fee, as the server said to the master (ADR-0131). */
   commissione?: number;
   /** What the Council said (the master's only), oldest first. */
   readonly feed: FeedEntry[] = [];

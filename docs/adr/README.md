@@ -134,6 +134,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0127](0127-il-musicista-e-una-stanza-con-piu-squadre.md) | Il Musicista sta nella casa dell'Artista: una stanza ha un elenco di squadre, e il mondo chiede la musica che gli manca |
 | [0128](0128-fasi-e-step.md) | Lo sviluppo si divide in quattro fasi e in step, cioè obiettivi condivisi tra task; la tabella è in `docs/fasi.md` |
 | [0129](0129-le-notizie-sono-file-nella-build.md) | Le notizie del sito sono file Markdown raccolti alla build: niente rotte né database, tutto il testo esce escapato |
-| [0130](0130-la-commissione-la-decide-il-server.md) | La commissione sui consumi è configurazione del server (`QUINE_COMMISSIONE`): 0 in beta, l'1 % se non detto, mai dal mondo o dal client |
+| [0131](0131-la-commissione-la-decide-il-server.md) | La commissione sui consumi è configurazione del server (`QUINE_COMMISSIONE`): 0 in beta, l'1 % se non detto, mai dal mondo o dal client |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.
