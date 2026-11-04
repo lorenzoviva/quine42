@@ -3867,7 +3867,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Browser: non serve.
 - Quando è fatto: con `QUINE_COMMISSIONE=0` il saldo cala esattamente del costo base; senza, nulla cambia; commit su `task/T243`. Sicurezza: scrivi l'esito, tocca i crediti.
 
-### T244 · La home per la beta: ritocchi, video, istruzioni — `da fare` (dipende da T234)
+### T244 · La home per la beta: ritocchi, video, istruzioni — `fatto` (`9b8523c`) (dipende da T234)
 - Pipeline: claude · stima 3% · approvato · browser · priorità 3
 - Step: 34
 - Contesto: l'autore (04/11): la home di oggi lo imbarazza («a metà tra un pitch per una startup e un blog per fumetti») e molti tester sono amici sviluppatori. Non è il launcher, che resta a T232: solo ritocchi. Un video in cui l'autore parla del progetto; le istruzioni della prima parte del test, senza corona; quando tutti passano alla seconda parte l'autore aggiunge le altre. I video li registra lui: **più di uno e non brevi** (lui che parla del progetto, il gameplay; autore, 04/11), serviti dal nostro sito.
@@ -3875,6 +3875,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Test: la seconda parte non finisce in `dist/` finché è spenta, testo compreso. Typecheck, build e suite intera con i loro turni.
 - Browser: sì, a 1920 e 390 px, in `npm run dev` e sotto `npm run serve`, con video e seconda parte accesi e spenti, salto in avanti in un video di prova lungo; catture nel commit.
 - Quando è fatto: l'autore aggiunge un video e accende la seconda parte senza toccare il codice; commit su `task/T244`. Sicurezza: la rotta dei video è una superficie nuova: nessun percorso fuori dalla sua cartella, intervalli `Range` non validi rifiutati; scrivi l'esito.
+- Esito: home ritoccata (meno pitch e fumetti, restano MarkovJunior e «coming soon»); video da `QUINE_VIDEO` con `video.json`, rotta `/api/video` con `Range`, tetti in `FRONT_RATES` e sull'elenco di `production.ts`, uguale in `npm run dev`; pagina istruzioni da `docs/beta/` con `site/beta.json` per la seconda parte, che spenta non entra in `dist/` (test con build vera); ADR-0131, guida `docs/beta/LEGGIMI.md`, voci di glossario; suite (1869), typecheck e build verdi; memoria circa 200 KB per visione (200 ferme su 4 GB: da 115 a 159 MB di RSS); sicurezza: superficie nuova `/api/video`, il nome chiesto si confronta con l'elenco e non diventa mai un percorso, un link che esce dalla cartella è rifiutato, `Range` non validi o multipli 416, passa da `gate`, provata in `tests/site-video.test.ts`, nessuna voce V perché nessuna falla; il test sul link simbolico si salta se Windows non permette di crearli; `guida.md` e `la-corona.md` non scritti (senza, la pagina non compare); il link alle istruzioni è solo nella home e nella pagina stessa; non provati un telefono vero e un `.mp4` vero (prova con WebM VP8 di 2 ore, 241 MB); la banda è da decidere al primo deploy pubblico.
 
 ### T245 · Gli NPC agiscono davvero: mestieri in sotto-compiti e scopi comuni, il progetto — `da fare` (dipende da T183)
 - Pipeline: fable · stima 5% · approvato · priorità 20

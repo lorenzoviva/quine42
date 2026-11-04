@@ -136,5 +136,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0129](0129-le-notizie-sono-file-nella-build.md) | Le notizie del sito sono file Markdown raccolti alla build: niente rotte né database, tutto il testo esce escapato |
 
 | [0130](0130-il-registro-delle-mancanze.md) | Ciò che il Concilio non riesce a fare si conta in `world/mancanze.json`: fuori da ciò che esce, oltre i rollback, con un comando che ne fa il rapporto |
+| [0131](0131-video-e-istruzioni-della-beta.md) | I video del sito stanno in una cartella del server e si servono a pezzi da un elenco; le istruzioni della beta entrano nella build solo se accese | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

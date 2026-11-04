@@ -866,6 +866,18 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Dove vive**: `site/notizie-testo.ts`, `site/notizie/`
 - **Da non usare**: nessuno
 
+### Video del sito
+- **Inglese**: `videoHandler`, `videoRoute`, `parseRange`, `parseVideoList`
+- **Definizione**: un file video in una cartella del server (`QUINE_VIDEO`), mai nel repository né nella build, che il sito mostra se è nell'elenco `video.json` e il file c'è.
+- **Dove vive**: `server/video.ts`, `site/video-testo.ts`
+- **Da non usare**: nessuno
+
+### Istruzioni della beta
+- **Inglese**: `betaGuide`, `guideParts`, `secondPartOn`
+- **Definizione**: la pagina per i tester, dal Markdown di `docs/beta/`: la prima parte se c'è, la seconda solo se `site/beta.json` la accende; spenta non entra nella build.
+- **Dove vive**: `server/betaGuide.ts`, `site/istruzioni.ts`
+- **Da non usare**: nessuno
+
 ## Il kernel
 
 ### Kernel

@@ -1,0 +1,77 @@
+// The instructions of the beta (T244, ADR-0131): Markdown in docs/beta/, in the build only when they are there and only what is switched on. The second part is a surprise
+// of the test: while it is off its text is not in `dist/` at all, not even hidden, because no module ever reads it. `site/beta.json` is the switch: nothing else decides.
+
+import fs from 'node:fs';
+import path from 'node:path';
+import type { Plugin } from 'vite';
+
+/** The text of the page. */
+const PARTS_ID = 'virtual:quine-istruzioni';
+/** Only whether the page exists: for who links to it, without carrying its text. */
+const PRESENT_ID = 'virtual:quine-istruzioni-presenti';
+
+export interface GuidePart {
+  id: 'guida' | 'la-corona';
+  md: string;
+}
+
+const guideFile = (root: string, id: GuidePart['id']) => path.join(root, 'docs', 'beta', `${id}.md`);
+const switchFile = (root: string) => path.join(root, 'site', 'beta.json');
+
+/** Off unless the file says exactly so: a file that is not there, or that does not read, shows nothing more. */
+export function secondPartOn(root: string): boolean {
+  try {
+    return (JSON.parse(fs.readFileSync(switchFile(root), 'utf8')) as { laCorona?: unknown }).laCorona === true;
+  } catch {
+    return false;
+  }
+}
+
+/** The parts to show, in order: a file that does not exist yet, or is empty, is not one. */
+export function guideParts(root: string): GuidePart[] {
+  const ids: GuidePart['id'][] = secondPartOn(root) ? ['guida', 'la-corona'] : ['guida'];
+  const parts: GuidePart[] = [];
+  for (const id of ids) {
+    try {
+      const md = fs.readFileSync(guideFile(root, id), 'utf8');
+      if (md.trim()) parts.push({ id, md });
+    } catch {
+      /* not written yet */
+    }
+  }
+  return parts;
+}
+
+/** The page among the build's inputs: without text, there is no page. */
+export function guidePage(root: string): Record<string, string> {
+  return guideParts(root).length ? { istruzioni: path.resolve(root, 'site/istruzioni.html') } : {};
+}
+
+export function betaGuide(root: string): Plugin {
+  const resolved = (id: string) => `\0${id}`;
+  return {
+    name: 'quine-beta-guide',
+    resolveId(id) {
+      return id === PARTS_ID || id === PRESENT_ID ? resolved(id) : undefined;
+    },
+    load(id) {
+      if (id !== resolved(PARTS_ID) && id !== resolved(PRESENT_ID)) return undefined;
+      const parts = guideParts(root);
+      return id === resolved(PARTS_ID) ? `export const parts = ${JSON.stringify(parts)};` : `export const guidePresent = ${parts.length > 0};`;
+    },
+    // In `npm run dev` a new file or the switch show at once. Not `addWatchFile`: for Vite that is an import, and a file not written yet would break the page.
+    configureServer(server) {
+      const files = [switchFile(root), guideFile(root, 'guida'), guideFile(root, 'la-corona')].map((f) => path.resolve(f));
+      server.watcher.add(files);
+      const changed = (file: string) => {
+        if (!files.includes(path.resolve(file))) return;
+        for (const id of [PARTS_ID, PRESENT_ID]) {
+          const module = server.moduleGraph.getModuleById(resolved(id));
+          if (module) server.moduleGraph.invalidateModule(module);
+        }
+        server.ws.send({ type: 'full-reload' });
+      };
+      for (const event of ['add', 'change', 'unlink'] as const) server.watcher.on(event, changed);
+    },
+  };
+}
