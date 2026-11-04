@@ -2182,7 +2182,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   `MockModels` se cambiano gli schemi.
 - Fatto quando: typecheck e test verdi; le icone nell'inventario e le foto dell'Artista nel browser hanno l'aspetto del mondo.
 
-### T89e · Cartone: laboratorio, prestazioni, togliere la prova — `da fare` (dipende da T89a-d)
+### T89e · Cartone: laboratorio, prestazioni, togliere la prova — `da fare` (dipende da T89b, T89d)
 - Pipeline: claude · stima 4% · approvato · browser · priorità 79
 - Step: 29
 - Contesto: ADR-0093, conseguenze e punto 6.
