@@ -4003,3 +4003,16 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Test: casi nuovi in `tests/pipeline.test.ts`: voce integrata e blocco `da fare` (viene lanciato, voce nuova con `tentativi` da capo); `riprendi` sulla stessa voce; `riprendi` con worktree assente; voce integrata e blocco `fatto` (nulla cambia); voce finita non integrata (resta da integrare). Suite intera e typecheck con i loro turni.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T256`; `docs/pipeline/README.md` aggiornato se descrive `riprendi`. Sicurezza: nessuna superficie nuova.
+
+### T257 · La scheda dei modelli: correggere attribuzioni e misure — `da fare`
+- Pipeline: argon · stima 5% · approvato · priorità 7
+- Contesto: richiesta dell'autore: sui modelli fatti, non impressioni. Nasce da T254 (`dossier T254`). Il controllo a campione dell'orchestratore su `docs/pipeline/modelli.md` conferma prezzi e Terminal-Bench 4.0 di Sonnet e Opus e i prezzi di Haiku, e trova gli errori qui sotto, che pesano proprio sulla proposta di assegnazione.
+- Cosa fare, nel solo `docs/pipeline/modelli.md`:
+  1. **Riga dei programmi MarkovJunior (sezione 4.2).** Dice che Opus in T180 «ha prodotto» 31 programmi statici e in T182 lavorava senza i pattern di Fable. Falso: T180 ha solo misurato programmi di prima; T182 aveva i pattern di T181 nel prompt ed è passato da 31/31 statici a 10/12 su misure e varianza, con foto 0/10 per giudizio dell'agente. T181 non è «3/3»: il tempio ha varianza 0,00 nel perimetro (`quadro.md`). Accerta quale modello usa `claude -p` nel banco (`lab/banco/README.md` non lo dice) e riscrivi il confronto con ciò che è misurato; Fable a mano in T181 (80 $) e il banco a richiesta (1,15 $ a modello) non sono la stessa prova: dillo.
+  2. **I consumi.** La scheda legge 141 righe; quelle vere sono 213, perché il file nel base non è committato. Leggi `H:\projects\rune\.claude\worktrees\step8.2A-lab3d\docs\pipeline\consumi.jsonl` (solo lettura) e rifai ogni aggregato; T181 e T182 hanno la loro riga.
+  3. **Argon «8×».** I 122 punti contano due volte lo stesso calo: T68b e T69 partono entrambi da 63 con esito 28 e 13, cioè girano insieme. Il calo vero è 37 + 50. Aggiungi T254: stima 10, misurati 11. Riscrivi il fattore, dicendo quanti task e quanto è incerto.
+  4. **OSWorld 2.1.** La pagina di Sonnet 5.5 dà per Opus 81,8 % (partial), la scheda 87,2 %: se sono entrambi veri riportali come contraddizione, altrimenti correggi. Il link della valutazione di Argon ora rimanda a `storage.googleapis.com/deepmind-media/gemini/gemini_4_argon_model_evaluation.pdf`: rileggi da lì i suoi numeri e aggiorna il link.
+  5. **La proposta.** Ciò che regge solo su quei numeri cambia con loro. Le voci mai provate da noi (i modelli Claude su `agy`, Sonnet e Haiku) si scrivono come tali, in chiaro.
+- Regole: quelle di T254. Non toccare `config.json` né il codice.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T257` col solo `docs/pipeline/modelli.md`; nell'esito cosa cambia nella proposta. Sicurezza: nessuna superficie nuova.

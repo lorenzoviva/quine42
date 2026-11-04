@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 04/11/2026, epoca 256. Crediti: vedi `stato`.
+Aggiornato il 04/11/2026, epoca 258. Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -33,10 +33,11 @@ Aggiornato il 04/11/2026, epoca 256. Crediti: vedi `stato`.
 - **T89b integrato** (`e3c0f20`): inchiostro da id di cosa, istanza e parte, con un secondo disegno; la parte è il gruppo delle sfumature di un colore (`partTable`, ADR-0093), cache delle forme alla versione 6 (la vecchia si scarta una volta). Suite 1980 e typecheck verdi sul branch, verificato nel browser con `?cartone`. Non provati: costo (T89e), notte, `devicePixelRatio` diverso da 1. Il predefinito resta a T89e.
 - **T183 integrato** (`3313447`): `docs/design/espressivita.md` e `tests/espressivita/`, 13 scenari in moduli veri, kernel non toccato. In una sessione 10 interi e 3 in parte; dopo una riapertura 2 e 3; in multigiocatore nessuno intero. Prime primitive: magazzino durevole (20 scenari), campi dei pannelli al client (15), eventi (9). Nessuna modifica misurata chiede un wipe; non aggiuntivi: caso cambiato (8,9 % delle caselle), API tolta, effetto in un `core.effects` riscritto. Suite 2006 sul branch. Non provati: resa a schermo, Ingegnere vero, multigiocatore per ogni modulo, `hashStr`.
 - **T89d integrato** (`58075ca`): foto dell'Artista e del tornio sempre a cartone, icone con fasce dietro l'interruttore, guida del seme e prompt di Artista e Scultore aggiornati; il sole delle foto è quello del mondo. Suite 1991 e typecheck verdi sul branch, browser con `?skip&offline&cartone`. Manca: laboratorio (T89e) e carte del sito ancora alle foto classiche; guide e modelli esistenti non toccati. Non provati: giudizio con Gemini vero, `devicePixelRatio` diverso da 1 sulle icone.
+- **T254 integrato:** `docs/pipeline/modelli.md`. Prezzi e Terminal-Bench controllati a campione, giusti. Errori trovati da me, li corregge **T257**: attribuzioni di T180-T182 nella riga MarkovJunior, 141 righe di consumi su 213, Argon «8×» con un calo contato due volte, OSWorld di Opus. **La domanda all'autore su quale modello faccia cosa va fatta quando T257 è integrato**, numerata e con la raccomandazione; T255 scrive nell'ADR ciò che dice il blocco in quel momento.
 
 ## Pronti e priorità
 
-1. **In corso T89e** (rilanciato da capo) **e T254** su Argon. **T256** (richiesta dell'autore, approvato): un task tornato `da fare` riparte da capo, senza togliere voci a mano. **Su Argon, dal 04/11 alle 18:44 UTC, in fila:** T254, T255, T253; misurato ben oltre le stime. Gemini all'8 % è sotto `sogliaUnSolo` (10): nessun task nuovo fino al reset del 05/11 alle 17:37 UTC. T253 corregge il parser su `T89a-d`; nel backlog nessun altro blocco usa quella forma tra le dipendenze.
+1. **In corso T89e su claude, T253 su Argon.** Pronti: **T256** (claude, se la finestra regge; richiesta dell'autore), **T257** e **T255** (Argon, in fila). Gemini all'8 % è sotto `sogliaUnSolo` (10): nessun task nuovo fino al reset del 05/11 alle 17:37 UTC. T253 corregge il parser su `T89a-d`.
 4. **T182 → T156** (strutture procedurali). **T182 fermo in attesa dell'autore al giro 3 di 4, non integrato:** soglia NO. Misure e varianza 10/12 entro due richieste (7 alla prima), foto 0/10 per giudizio dell'agente, locanda esclusa; 1,15 $ a modello, 30,59 $ in tutto a listino. **Chieste le 3 decisioni di `docs/pipeline/domande/T182.md` (sul branch `task/T182`):** cantina a due taglie, interni contro la misura `stanze`, se la ricchezza basta. Bloccati finché non risponde: T156, poi T207, T88, T153, T242.
 4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla.
 
