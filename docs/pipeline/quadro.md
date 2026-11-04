@@ -34,11 +34,11 @@ Aggiornato il 04/11/2026, epoca 248. Crediti: vedi `stato`.
 - **T220, T186, T246 integrati:** griglia nelle stanze (non accertato un blocco scuro nello Studio dei Personaggi); landing «coming soon» (non provata sotto `npm run serve`); tooltip nella chat web, si vede al riavvio del processo.
 - **T231 integrato** (`cf576f3`): il tag `step` (`pipeline.mjs step`), in `indice`, `dossier` e pagina web. `step --da-tabella` lanciato sul backlog vero: 282 task in tabella, 277 righe `- Step:` aggiunte, nient'altro cambiato. Pagina web provata solo col test. La priorità 0 scavalca la finestra delle 5 ore: `step <n> --priorita` non la usa.
 - **T234 integrato** (`5a29c93`, ADR-0129): notizie come Markdown in `site/notizie/`, raccolte alla build; una notizia nuova si pubblica con build e deploy. Non provati un telefono vero e la landing a 390 px; elenco e pagina a 390 px solo in iframe senza CSP.
-- **T238 integrato** (`6a60b78`, ADR-0130): ogni richiesta che finisce male è una voce di `world/mancanze.json`, fuori da `playerFiles` e `publicFiles`; rapporto con `npm run mancanze`. Solo modelli offline: non provati fallimenti veri con Gemini né una partita reale. `docs/glossario-censimento.md` non rigenerato. ADR nuovi dallo **0131**. Prossimo task: T248.
+- **T238 integrato** (`6a60b78`, ADR-0130): ogni richiesta che finisce male è una voce di `world/mancanze.json`, fuori da `playerFiles` e `publicFiles`; rapporto con `npm run mancanze`. Solo modelli offline: non provati fallimenti veri con Gemini né una partita reale. `docs/glossario-censimento.md` non rigenerato. ADR nuovi dallo **0132** (0131 è per T243). Prossimo task: T249.
 
 ## Pronti e priorità
 
-1. **In coda, approvati e pronti, partono da soli:** T243 (in corso) T244 T241 T247 T89b T89e T183 T152.
+1. **In coda, approvati e pronti, partono da soli:** T244 (in corso) T248 T241 T247 T89b T89e T183 T152.
 4. **T182 → T156** (strutture procedurali). **T182 fermo in attesa dell'autore al giro 3 di 4, non integrato:** soglia NO. Misure e varianza 10/12 entro due richieste (7 alla prima), foto 0/10 per giudizio dell'agente, locanda esclusa; 1,15 $ a modello, 30,59 $ in tutto a listino. **Chieste le 3 decisioni di `docs/pipeline/domande/T182.md` (sul branch `task/T182`):** cantina a due taglie, interni contro la misura `stanze`, se la ricchezza basta. Bloccati finché non risponde: T156, poi T207, T88, T153, T242.
 4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla. T89d resta bloccato.
 
@@ -70,5 +70,5 @@ Aggiornato il 04/11/2026, epoca 248. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **248:** T238 integrato, T243 in corso.
+- **248:** T238 integrato; T243 finito, `integra` in conflitto con T238 (`AGENTS.md`, `kernel.ts`): la risoluzione è T248, poi `integra T248` e `integra T243`.
 - **247:** T231 e T234 integrati, tag `step` messi sul backlog.

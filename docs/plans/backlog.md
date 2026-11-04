@@ -3906,3 +3906,12 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Test: riparazione dei valori fuori scala, master e non master sul server, rifiuto di ogni modifica a partita in corso anche dal master, comportamento di ogni manopola al minimo con `MockAiModels` senza chiamate, stima oraria; suite intera e typecheck con i loro turni.
 - Browser: sì, la lobby in una partita di molti come master e come altro viandante, a 1920 e 390 px; con una manopola a zero il gioco regge.
 - Quando è fatto: il master regola ogni consumo prima di entrare e nessun compito resta senza manopola o senza un motivo scritto; ADR e `docs/architettura-dettagli.md#lobby` aggiornati; commit su `task/T247`. Sicurezza: tocca `server/`, `src/session/` e i crediti; scrivi l'esito, comprese le prove che un non master non cambi nulla e che i minimi non scendano sotto ciò che il master ha fissato.
+
+### T248 · Integrare T243 — `da fare`
+- Pipeline: claude · stima 1% · approvato · priorità 1
+- Step: 34
+- Contesto: T243 (`dossier T243`) è finito, ma `integra T243` va in conflitto in `AGENTS.md` e `src/kernel/kernel.ts`: T238 (`dossier T238`), già nel base, ha scritto negli stessi punti. I due ADR hanno lo stesso numero: 0130 è di T238 nel base.
+- Cosa fare: nel tuo worktree `git merge task/T243`; le due aggiunte restano entrambe, in un testo unico dove stanno sulla stessa riga. L'ADR di T243 diventa il primo numero libero (0131, se lo è ancora), con i rimandi in `AGENTS.md`, nei dettagli, nel glossario e in `docs/adr/README.md`. Nessun'altra modifica.
+- Test: typecheck e suite intera con i loro turni.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T248`, con mancanze e commissione configurabile entrambe nel codice e descritte. Sicurezza: tocca i crediti, ma solo per l'unione; scrivi l'esito.
