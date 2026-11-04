@@ -1,12 +1,14 @@
-// Multiplayer Lobby (T45d, ADR-0086): displayed before entering a multiplayer universe.
-// Shows the master's universe generation coefficients, models, minimums, the entering wanderer's
-// credit spending cap (which adds to the universe AI budgets), and their collection of cards with usages.
+// The lobby (T45d, ADR-0086; T247, ADR-0133): what comes before entering. It shows the master's settings to everyone and lets the
+// master, and only the master, set every knob of the consumption while no match is under way: preset, coefficients, models, budgets and
+// minimums, with the estimate of an hour following the values. What it sets goes in with the master (`entra`): the server repairs it, refuses
+// it to anyone else and during a match. Then the entering wanderer's ceiling (which adds to the budgets) and their cards. Alone
+// (`alone`) it is the same screen without what is about other people.
 
 import { collectionOf } from '../kernel/cards';
-import { COEFFICIENT_INFO, COEFFICIENT_KEYS, hourlyEstimate, isLowDetail, pricedAiModels, repairActor, repairCoefficients } from '../kernel/coefficients';
+import { COEFFICIENT_INFO, COEFFICIENT_KEYS, FULL_DETAIL, hourlyEstimate, isLowDetail, LOW_DETAIL, pricedAiModels, repairActor, repairCoefficients, type CoefficientKey } from '../kernel/coefficients';
 import { DEFAULT_SCULPTORS, type SculptorAiModels } from '../kernel/agents/sculptor';
-import { readConfig } from '../kernel/universe';
-import type { FileMap } from '../kernel/types';
+import { BUDGET_KEYS, BUDGET_SCALE, readConfig, SCULPTOR_CLASSES, withinMinimums, type BudgetKey } from '../kernel/universe';
+import type { AiSettings, FileMap } from '../kernel/types';
 import { usd } from '../kernel/ai/prices';
 import { el } from './dom';
 
@@ -17,15 +19,32 @@ export interface LobbyOptions {
   wandererName?: string;
   credits: number;
   isAnonymous?: boolean;
+  /** A match is under way in this universe: the settings are shown and do not change, for the master too (T247). */
+  inCorso?: boolean;
+  /** A game alone: only the settings, there is no ceiling, no recharge and nobody else (T247). */
+  alone?: boolean;
   onRecharge?: (amount: number) => Promise<{ ok: boolean; url?: string; motivo?: string }>;
 }
 
 export interface LobbyResult {
   tetto: number;
   offline?: boolean;
-  /** The Actor (T157), as the master set it in the lobby; only when they changed it. */
-  attore?: { acceso: boolean; modello: string };
+  /** What the master set here (T247); only when they changed something. */
+  regolazioni?: AiSettings;
 }
+
+const BUDGET_NAMES: Record<BudgetKey, string> = {
+  maxText: 'Chiamate di testo per sessione',
+  maxForges: 'Fucine per sessione',
+  maxPacks: 'Pacchetti di oggetti per sessione',
+  maxCast: 'Tipi di abitanti per sessione',
+  maxModels: 'Modelli per sessione',
+  maxBrani: 'Brani per sessione',
+  placesPerMinute: 'Luoghi nuovi al minuto',
+};
+const BUDGET_DEFAULTS: Partial<Record<BudgetKey, number>> = { maxPacks: 4, maxCast: 3, maxModels: 40, maxBrani: 8, placesPerMinute: 20 };
+const CLASS_NAMES: Record<(typeof SCULPTOR_CLASSES)[number], string> = { semplice: 'Scultore, cose semplici', figura: 'Scultore, figure', struttura: 'Scultore, strutture', importante: 'Scultore, strutture importanti', artista: 'Artista (giudizio)', musicista: 'Musicista' };
+const THINKING: Array<[string, string]> = [['off', 'predefinito del modello'], ['low', 'basso'], ['medium', 'medio'], ['high', 'alto']];
 
 export class LobbyScreen {
   private root: HTMLElement;
@@ -59,7 +78,7 @@ export class LobbyScreen {
   }
 
   private render(): void {
-    const { name, files, wandererId, wandererName, credits, isAnonymous } = this.opts;
+    const { name, files, wandererId, wandererName, credits, isAnonymous, inCorso, alone } = this.opts;
     const { config } = readConfig(files);
     const ai = config.ai;
     const master = config.partita?.master ?? 'io';
@@ -67,22 +86,35 @@ export class LobbyScreen {
     const coef = repairCoefficients(ai.coefficienti);
     const sculpt: SculptorAiModels = { ...DEFAULT_SCULPTORS, ...(ai.scultori ?? {}) };
     const actor = repairActor(ai.attore);
-    // The Actor (T157): everyone sees it; the master, and only the master, sets it here (the server refuses the others).
-    const isMaster = wandererId === master;
-    const actorOn = el('input', { type: 'checkbox', id: 'lobby-attore' }) as HTMLInputElement;
-    actorOn.checked = actor.acceso;
-    const actorModel = el('select', { id: 'lobby-attore-modello' }, ...[...new Set([actor.modello, ...pricedAiModels()])].map((m) => el('option', { value: m }, m))) as HTMLSelectElement;
-    actorModel.value = actor.modello;
-    const estimateRow = el('div', { class: 'estimate-row' });
-    const showEstimate = () => {
-      const estimate = hourlyEstimate({ ...ai, attore: { acceso: actorOn.checked, modello: actorModel.value } });
-      estimateRow.textContent = `Stima oraria: circa ${usd(estimate.dollari)} (${estimate.chiamate} chiamate/ora). Budget sessione: ${ai.maxText} chiamate testo.`;
+    // Everyone sees the settings; the master, and only the master, sets them, while no match is under way (the server refuses the rest).
+    const isMaster = !!alone || wandererId === master;
+    const editable = isMaster && !inCorso;
+    const lockIf = <T extends HTMLInputElement | HTMLSelectElement>(c: T): T => {
+      c.disabled = !editable;
+      return c;
     };
+    const estimateRow = el('div', { class: 'estimate-row' });
+    const estimateLines = el('div', { class: 'note' });
+    let read: () => AiSettings = () => ({});
+    const showEstimate = () => {
+      const h = hourlyEstimate(withinMinimums({ ...ai, ...read() } as typeof ai));
+      const budget = (read().maxText as number | undefined) ?? ai.maxText;
+      estimateRow.textContent = `Stima oraria: circa ${usd(h.dollari)} (${h.chiamate} chiamate/ora). Budget sessione: ${budget} chiamate testo.`;
+      estimateLines.replaceChildren(...h.righe.map((x) => el('div', {}, `· ${x.voce}: ${x.chiamate} → ${usd(x.dollari)}`)));
+    };
+    const pick = (value: string, id: string, extra: string[] = []) => {
+      const s = lockIf(el('select', { id }, ...extra.map((m) => el('option', { value: m }, m || 'nessuno')), ...[...new Set([value, ...pricedAiModels()])].filter((m) => m && !extra.includes(m)).map((m) => el('option', { value: m }, m))) as HTMLSelectElement);
+      s.value = value;
+      s.onchange = showEstimate;
+      return s;
+    };
+    const field = (label: string, control: Node | string) => el('label', {}, label, control);
+
+    // The Actor (T157).
+    const actorOn = lockIf(el('input', { type: 'checkbox', id: 'lobby-attore' }) as HTMLInputElement);
+    actorOn.checked = actor.acceso;
     actorOn.onchange = showEstimate;
-    actorModel.onchange = showEstimate;
-    showEstimate();
-    actorOn.disabled = !isMaster;
-    actorModel.disabled = !isMaster;
+    const actorModel = pick(actor.modello, 'lobby-attore-modello');
     const actorRow = el(
       'div',
       { class: 'actor-row' },
@@ -95,45 +127,126 @@ export class LobbyScreen {
     const cards = collectionOf(files, wandererId);
     const totalUses = cards.reduce((s, c) => s + c.utilizzi.luoghi + c.utilizzi.trame + c.utilizzi.prompt, 0);
 
-    // Master settings block
-    const presetLabel = isLowDetail(coef)
-      ? 'Low Detail (a risparmio)'
-      : COEFFICIENT_KEYS.every((k) => coef[k] === 1)
-        ? 'Pieno dettaglio'
-        : 'Su misura';
+    // The coefficients: what each does, and what the game does at the minimum, for everyone to read.
+    const sliders = new Map<CoefficientKey, HTMLInputElement>();
+    const values = new Map<CoefficientKey, HTMLElement>();
+    const preset = lockIf(el('select', { id: 'lobby-preset' }, el('option', { value: 'pieno' }, 'Pieno dettaglio'), el('option', { value: 'low' }, 'Low Detail (a risparmio)'), el('option', { value: 'misura' }, 'Su misura')) as HTMLSelectElement);
+    const knobs = COEFFICIENT_KEYS.map((k) => {
+      const info = COEFFICIENT_INFO[k];
+      const slider = lockIf(el('input', { type: 'range', min: '0', max: '1', step: '0.05', id: `lobby-knob-${k}` }) as HTMLInputElement);
+      slider.value = String(coef[k]);
+      sliders.set(k, slider);
+      const value = el('span', { class: 'knob-value' }, coef[k].toFixed(2));
+      values.set(k, value);
+      slider.oninput = () => {
+        value.textContent = Number(slider.value).toFixed(2);
+        showPreset();
+        showEstimate();
+      };
+      return el('label', { class: 'knob', title: info.testo }, el('span', { class: 'knob-name' }, info.nome), slider, value, el('span', { class: 'note' }, `A 0: ${info.minimo}.`));
+    });
 
-    const coefItems = COEFFICIENT_KEYS.map((k) =>
-      el(
-        'span',
-        { class: 'comic-badge cyan' },
-        `${COEFFICIENT_INFO[k].nome}: ${coef[k].toFixed(2)}`,
-      ),
+    // The models.
+    const text = pick(ai.textModel, 'lobby-modello-testo');
+    const sculptors = new Map(SCULPTOR_CLASSES.map((k) => [k, pick(String(sculpt[k]), `lobby-scultore-${k}`)]));
+    const thinking = lockIf(el('select', { id: 'lobby-ragionamento' }, ...THINKING.map(([v, n]) => el('option', { value: v }, n))) as HTMLSelectElement);
+    thinking.value = ai.thinking ?? 'low';
+    thinking.onchange = showEstimate;
+
+    // The budgets: numbers for who sets them, words for who reads them (a player has only one field to fill: the ceiling).
+    const budgetOf = (k: BudgetKey): number => (ai[k] as number | undefined) ?? BUDGET_DEFAULTS[k] ?? 0;
+    const budgets = new Map<BudgetKey, HTMLInputElement>();
+    const budgetRows = BUDGET_KEYS.map((k) => {
+      if (!isMaster) return el('div', {}, `${BUDGET_NAMES[k]}: ${budgetOf(k)}`);
+      const input = lockIf(el('input', { type: 'number', id: `lobby-budget-${k}`, min: String(BUDGET_SCALE[k][0]), max: String(BUDGET_SCALE[k][1]), step: '1', value: String(budgetOf(k)) }) as HTMLInputElement);
+      input.oninput = showEstimate;
+      budgets.set(k, input);
+      return field(BUDGET_NAMES[k], input);
+    });
+
+    // The minimums: the master's to set; for everyone else, what is asked of them (below).
+    const minText = pick(minimi?.textModel ?? '', 'lobby-minimo-testo', ['']);
+    const minSculptors = new Map(SCULPTOR_CLASSES.map((k) => [k, pick(String(minimi?.scultori?.[k] ?? ''), `lobby-minimo-${k}`, [''])]));
+    const minCapField = lockIf(el('input', { type: 'number', id: 'lobby-minimo-tetto', min: '0', step: '0.5', value: String(minimi?.tetto ?? 0) }) as HTMLInputElement);
+    const minKnobs = new Map(
+      COEFFICIENT_KEYS.map((k) => {
+        const input = lockIf(el('input', { type: 'number', id: `lobby-minimo-${k}`, min: '0', max: '1', step: '0.05', value: minimi?.coefficienti?.[k] !== undefined ? String(minimi.coefficienti[k]) : '' }) as HTMLInputElement);
+        input.oninput = showEstimate;
+        return [k, input];
+      }),
     );
+    minCapField.oninput = showEstimate;
 
+    read = () => {
+      const number = (v: string) => (v.trim() === '' ? undefined : Number(v));
+      const minScult = Object.fromEntries([...minSculptors].filter(([, s]) => s.value).map(([k, s]) => [k, s.value]));
+      const minCoef = Object.fromEntries([...minKnobs].flatMap(([k, i]) => (number(i.value) === undefined ? [] : [[k, number(i.value)]])));
+      return {
+        textModel: text.value,
+        thinking: thinking.value as AiSettings['thinking'],
+        attore: { acceso: actorOn.checked, modello: actorModel.value },
+        scultori: { ...Object.fromEntries([...sculptors].map(([k, s]) => [k, s.value])), importanteFino: sculpt.importanteFino } as Partial<SculptorAiModels>,
+        coefficienti: Object.fromEntries([...sliders].map(([k, s]) => [k, Number(s.value)])) as AiSettings['coefficienti'],
+        ...Object.fromEntries([...budgets].map(([k, i]) => [k, Number(i.value)])),
+        minimi: {
+          ...(minText.value ? { textModel: minText.value } : {}),
+          ...(Object.keys(minScult).length ? { scultori: minScult } : {}),
+          ...(Number(minCapField.value) > 0 ? { tetto: Number(minCapField.value) } : {}),
+          ...(Object.keys(minCoef).length ? { coefficienti: minCoef } : {}),
+        },
+      };
+    };
+
+    const showPreset = () => {
+      const c = Object.fromEntries([...sliders].map(([k, s]) => [k, Number(s.value)])) as Record<CoefficientKey, number>;
+      preset.value = isLowDetail(c) ? 'low' : COEFFICIENT_KEYS.every((k) => c[k] === 1) ? 'pieno' : 'misura';
+    };
+    preset.onchange = () => {
+      const chosen = preset.value === 'low' ? LOW_DETAIL : preset.value === 'pieno' ? { coefficienti: FULL_DETAIL, scultori: DEFAULT_SCULPTORS as Partial<SculptorAiModels> } : undefined;
+      if (!chosen) return;
+      for (const [k, s] of sliders) {
+        s.value = String(chosen.coefficienti[k]);
+        values.get(k)!.textContent = chosen.coefficienti[k].toFixed(2);
+      }
+      for (const [k, s] of sculptors) if (chosen.scultori[k]) s.value = String(chosen.scultori[k]);
+      showEstimate();
+    };
+    showPreset();
+    showEstimate();
+    /** What the master found on opening, to send only what they changed. */
+    const opened = JSON.stringify(read());
+
+    const lockedNote = inCorso ? 'La partita è in corso: le regolazioni restano queste per chiunque, anche per il master. Si possono cambiare quando nel mondo non c’è più nessuno.' : '';
+    const howLong = alone ? 'Si fissano entrando: durante la partita non cambiano. Si regolano di nuovo la prossima volta che apri questo universo.' : 'Si fissano entrando: durante la partita nessuno le cambia, nemmeno il master. Si regolano di nuovo quando nel mondo non c’è più nessuno.';
     const masterBlock = el(
       'div',
       { class: 'lobby-section master-settings' },
-      el('div', { class: 'section-title' }, 'Impostazioni dell’universo (stabilite dal master)'),
-      el(
-        'div',
-        { class: 'row' },
-        el('div', {}, el('strong', {}, 'Dettaglio: '), presetLabel),
-        el('div', {}, el('strong', {}, 'Modello Concilio: '), ai.textModel),
-      ),
-      el(
-        'div',
-        { class: 'sculpt-row' },
-        el('strong', {}, 'Modelli Scultore: '),
-        `semplice (${sculpt.semplice}) · figure (${sculpt.figura}) · strutture (${sculpt.struttura}) · importanti (${sculpt.importante}) · artista (${sculpt.artista}) · musicista (${sculpt.musicista})`,
-      ),
-      el('div', { class: 'coef-list' }, el('strong', {}, 'Coefficienti: '), ...coefItems),
-      actorRow,
+      el('div', { class: 'section-title' }, alone ? 'Le regolazioni del consumo' : 'Impostazioni dell’universo (stabilite dal master)'),
+      lockedNote ? el('div', { class: 'locked-note' }, lockedNote) : el('div', { class: 'note' }, isMaster ? howLong : `Le stabilisce il master. ${howLong}`),
       estimateRow,
+      el('div', { class: 'settings-grid' }, field('Dettaglio', preset), field('Modello del Concilio', text), field('Ragionamento', thinking)),
+      el('div', { class: 'settings-title' }, 'Modelli'),
+      el('div', { class: 'settings-grid sculpt-row' }, ...SCULPTOR_CLASSES.map((k) => field(CLASS_NAMES[k], sculptors.get(k)!))),
+      actorRow,
+      el('div', { class: 'settings-title' }, 'Quanto spesso si chiede ai modelli (0: mai; 1: sempre)'),
+      el('div', { class: 'knobs coef-list' }, ...knobs),
+      el('div', { class: 'settings-title' }, 'Budget'),
+      el('div', { class: 'settings-grid' }, ...budgetRows),
+      el('details', {}, el('summary', {}, 'Da dove viene la stima'), estimateLines),
+      isMaster && !alone
+        ? el(
+            'details',
+            {},
+            el('summary', {}, 'Requisiti minimi per chi entra'),
+            el('div', { class: 'note' }, 'Né tu né chi entra scendete sotto questi valori: un modello non più economico, una manopola non più bassa, un tetto d’ingresso non più piccolo. Vuoto: nessun minimo.'),
+            el('div', { class: 'settings-grid' }, field('Tetto minimo d’ingresso', minCapField), field('Modello del Concilio', minText), ...SCULPTOR_CLASSES.map((k) => field(CLASS_NAMES[k], minSculptors.get(k)!)), ...COEFFICIENT_KEYS.map((k) => field(COEFFICIENT_INFO[k].nome, minKnobs.get(k)!))),
+          )
+        : '',
     );
 
-    // Minimi block (if set)
+    // Minimi block (if set): what the master asks of whoever enters.
     let minimumsBlock: HTMLElement | null = null;
-    if (minimi) {
+    if (minimi && !isMaster) {
       const items: HTMLElement[] = [];
       if (minimi.textModel) items.push(el('div', {}, `Modello testo minimo: ${minimi.textModel}`));
       if (minimi.scultori?.struttura) items.push(el('div', {}, `Strutture minime: ${minimi.scultori.struttura}`));
@@ -152,7 +265,7 @@ export class LobbyScreen {
     }
 
     // Wanderer & Tetto block
-    const minCap = minimi?.tetto ?? 0;
+    const minCap = editable ? Math.max(0, Number(minCapField.value) || 0) : (minimi?.tetto ?? 0);
     const defaultCap = isAnonymous ? 0 : Math.max(minCap, Math.min(1.0, credits > 0 ? credits : 1.0));
     const capInput = el('input', {
       type: 'number',
@@ -248,13 +361,13 @@ export class LobbyScreen {
     // Action buttons
     const btnEnter = el('button', { class: 'primary comic-btn arcade' }, 'Entra nel mondo');
     btnEnter.onclick = () => {
-      const tetto = isAnonymous ? 0 : Number(capInput.value) || 0;
-      if (tetto < minCap) {
+      const tetto = isAnonymous || alone ? 0 : Number(capInput.value) || 0;
+      if (!alone && tetto < minCap) {
         statusEl.textContent = `Il master richiede un tetto minimo di ${usd(minCap)} per entrare.`;
         return;
       }
-      const changed = isMaster && (actorOn.checked !== actor.acceso || actorModel.value !== actor.modello);
-      this.close({ tetto, ...(changed ? { attore: { acceso: actorOn.checked, modello: actorModel.value } } : {}) });
+      const now = read();
+      this.close({ tetto, ...(editable && JSON.stringify(now) !== opened ? { regolazioni: now } : {}) });
     };
 
     const btnOffline = el('button', { class: 'comic-btn cyan' }, 'Gioca offline (modelli locali)');
@@ -281,18 +394,17 @@ export class LobbyScreen {
       };
     }
 
-    const actions = el('div', { class: 'lobby-actions' }, btnEnter, btnOffline, btnRecharge);
+    const actions = alone ? el('div', { class: 'lobby-actions' }, btnEnter) : el('div', { class: 'lobby-actions' }, btnEnter, btnOffline, btnRecharge);
 
     const windowBox = el(
       'div',
       { class: 'lobby-window' },
       el('div', { class: 'lobby-logo' }, 'ᚱ ᚢ ᚾ ᛖ'),
-      el('h1', { class: 'comic-title' }, 'LOBBY MULTIGIOCATORE'),
-      el('div', { class: 'lobby-sub' }, `Universo «${name}» · Master: ${master}`),
+      el('h1', { class: 'comic-title' }, alone ? 'PRIMA DI ENTRARE' : 'LOBBY MULTIGIOCATORE'),
+      el('div', { class: 'lobby-sub' }, alone ? `Universo «${name}»` : `Universo «${name}» · Master: ${master}`),
       masterBlock,
       ...(minimumsBlock ? [minimumsBlock] : []),
-      wandererBlock,
-      cardsBlock,
+      ...(alone ? [] : [wandererBlock, cardsBlock]),
       statusEl,
       actions,
     );

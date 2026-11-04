@@ -3940,7 +3940,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Quando è fatto: commit su `task/T250` senza differenze di contenuto. Sicurezza: nessuna superficie nuova.
 - Esito: `task/T243` unito con `git merge -s ours` in `2221167`, nessuna differenza di contenuto (`git diff HEAD~1 HEAD --stat` vuoto); `12dfb2b` non porta nulla che manchi al base (24 righe su 25 identiche, la riga `.env` del base ha in più solo `QUINE_VIDEO` di T244; ADR-0132 identico). Manca: nulla. Non provato: suite e typecheck non lanciati, il task non li chiede perché l'albero non cambia. Sicurezza: nessuna superficie nuova.
 
-### T251 · Integrare T247 — `da fare`
+### T251 · Integrare T247 — `fatto` (`5edb09d`)
 - Pipeline: claude · stima 4% · approvato · priorità 1
 - Step: 34
 - Contesto: nasce da T247 (`dossier T247`, `traccia T247`). `integra T247` va in conflitto con il base in `AGENTS.md`, `src/session/client.ts`, `src/session/protocol.ts`, `src/style.css`: nel frattempo sono entrati T241 (scala φ in `src/theme.css` e negli stili di HUD e pannelli), T243 e T244.
@@ -3948,3 +3948,4 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Test: suite intera e typecheck verdi.
 - Browser: solo la lobby, perché `src/style.css` è in conflitto: `?offline&lobby` da soli a 1920 px, controlli leggibili e non tagliati, blocco dopo l'applicazione. Non rifare le altre prove di T247.
 - Quando è fatto: commit di merge su `task/T251`, nessun conflitto rimasto; l'esito dice come hai risolto ciascuno dei quattro file. Sicurezza: nessuna superficie nuova oltre a quella dichiarata da T247.
+- Esito: merge di T247 su `task/T251` (`5edb09d`), nessun conflitto rimasto: `AGENTS.md` tiene la commissione di T243 più la riga delle regolazioni; `client.ts` e `protocol.ts` portano in `ingresso` sia `commissione` sia `regolazioni`; `style.css` unisce `z-index: 55` di T247 e scala φ, con i nuovi stili della lobby sulle variabili della scala; ADR-0133 tenuto, ADR-0132 intatto; suite (1943), typecheck e build verdi. Sicurezza: nessuna superficie nuova oltre a quella dichiarata da T247. Manca: difetto nuovo non corretto, la casella del tema nella Genesi è schiacciata a 22 px (proposta `flex-shrink: 0` su `#genesis textarea`, task a parte); resta aperta `docs/pipeline/domande/T247.md`. Non provato, come da task: 390 px, partita di molti e le altre prove di T247.

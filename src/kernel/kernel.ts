@@ -27,10 +27,10 @@ import { ChainMeter, chainOf, type Chain } from './chain';
 import { alertOf, clampFrame, costBoard, liveFeed, SCREEN_NAME, timeline, type Budget, type ScreenField, type Screens } from './screens';
 import { activeQuests, plotFromRaw, plotText, PLOTS_FILE, readPlots, reviewPlot, secretsOf, writePlots, type Plot } from './plots';
 import { Input } from './input';
-import { discoverModules, readConfig } from './universe';
+import { discoverModules, readConfig, repairAiSettings } from './universe';
 import { askedRunes, carpetLine, CARPET_TOKENS, tileIndex, COUNCIL_RUNE, extractLines, tokenize, type RuneComp, type RuneLine } from './runes';
 import { hash32, hashStr, hex, Rng } from './rng';
-import { onBeat, repairActor, repairCoefficients, stretch, type ActorConfig, type Coefficients } from './coefficients';
+import { knobOfTask, onBeat, Rationing, rationedKnob, repairActor, repairCoefficients, stretch, type ActorConfig, type Coefficients } from './coefficients';
 import { BudgetError, type AiModels } from './ai/models';
 import { billedModel, costOf } from './ai/prices';
 import { USAGE_FILE, UsageLog, type CallRecord } from './ai/usage';
@@ -60,7 +60,7 @@ import { addItem, CARRY_CAPACITY, countItem, HOTBAR, equippedItem, moveSlot, new
 import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH, worldLevels } from './relief';
 import { CardUses, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, receivedBy, type Received, payerOf, chunkCardId, stampFiles, cardHolderOf, type Card, type CardStamp } from './cards';
 import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState, PER_WANDERER } from './wanderers';
-import type { ActionDef, AiConfig, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, GameSetup, ChunkInfo, Recipe, RuneFragment, TerrainDef, UniverseConfig } from './types';
+import type { ActionDef, AiSettings, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, GameSetup, ChunkInfo, Recipe, RuneFragment, TerrainDef, UniverseConfig } from './types';
 
 /** A solid entity with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
 interface SolidForm extends Ground {
@@ -639,6 +639,8 @@ export class Kernel {
     k.cards.load(repo.working);
     k.council.payer = (task) => payerOf(task, k.payerNow());
     k.council.hasCredits = (chi) => k.hasCredits(chi);
+    k.council.rationed = (task) => k.rationed(task);
+    k.council.thinking = () => k.config.ai.thinking;
     k.council.onFocus = (ids) => k.cards.use(ids, 'prompt', (id) => k.isCard(id));
     // A mirror saves nothing of its own: its commits hold only the files it was told and the master's edits (T42b). The Council
     // is fenced in on a mirror too: a kernel on the master's branch is one (T42e).
@@ -1255,10 +1257,14 @@ export class Kernel {
    * recompiled, the ECS world is untouched and the next tick runs the new logic.
    */
   applyFiles(files: FileMap, opts: { reset?: boolean } = {}): void {
-    const { config, error } = readConfig(files);
+    const read = readConfig(files);
+    const { error } = read;
+    // A copy: without a universe.json this is the shared default, and what the kernel keeps goes into it.
+    const config = { ...read.config };
     if (error) this.faults.raise('universe:config', error);
     else this.faults.clear('universe:config');
     this.keepGame(config, files);
+    this.keepSettings(config, files);
     const radiusChanged = !this.config || this.config.circleRadius !== config.circleRadius;
     const sizeChanged = !this.config || this.config.chunkSize !== config.chunkSize || this.config.seed !== config.seed;
     this.config = config;
@@ -4901,6 +4907,17 @@ export class Kernel {
     return this.sessionSpent.get(id) ?? 0;
   }
 
+  private rationing = new Rationing();
+
+  /** Whether the master's knob keeps a call of this task from the models (T247): the Council gives it to the local ones. */
+  private rationed(task: string): boolean {
+    const knob = knobOfTask(task);
+    if (!knob) return false;
+    const c = this.coefficients()[knob];
+    if (c <= 0) return true;
+    return rationedKnob(task) !== undefined && !this.rationing.allows(knob, c);
+  }
+
   /** Whether a wanderer has credits to pay for model calls (T45a, T45d: checks balance and session tetto). */
   hasCredits(id: string = this.wanderer().id): boolean {
     if (!this.manyPlayers()) return true;
@@ -5146,11 +5163,78 @@ export class Kernel {
     this.council?.say('kernel', 'scarta', "la partita (morte, modalità, PvP, «Altro…» tra giocatori) si sceglie solo alla Genesi: universe.json la tiene com'era");
   }
 
+  /** `universe.json → ai` as it was when the match started (T247, ADR-0133); undefined when no match is under way. */
+  private settingsHeld?: string;
+
+  /** Whether a match is under way: every knob is fixed until it ends, for the master too. */
+  get settingsLocked(): boolean {
+    return this.settingsHeld !== undefined;
+  }
+
+  /** Entering: the settings are fixed from here (a wanderer enters a world of many, or the one who plays alone closes the lobby). */
+  lockSettings(): void {
+    if (this.settingsLocked) return;
+    let raw: Record<string, unknown> = {};
+    try {
+      raw = JSON.parse(this.repo.working['universe.json'] ?? '{}');
+    } catch {
+      /* a broken universe.json has nothing to hold: the default config, as without a file */
+    }
+    this.settingsHeld = JSON.stringify(raw.ai ?? {});
+  }
+
+  /** Nobody is in the world any more: the master may set the knobs again as they enter. Alone it never comes back here: the page reloads. */
+  unlockSettings(): void {
+    this.settingsHeld = undefined;
+  }
+
+  /** A universe.json with the settings of the match, if one is under way: what a branch of the master brings stays the game's. */
+  withHeldSettings(text: string): string {
+    if (this.settingsHeld === undefined) return text;
+    try {
+      return JSON.stringify({ ...JSON.parse(text), ai: JSON.parse(this.settingsHeld) }, null, 2) + '\n';
+    } catch {
+      return text;
+    }
+  }
+
   /**
-   * The detail of generation and the agents' models (T45b): the Genesis screen (and then the lobby) writes them in
-   * universe.json → ai; unlike the game they may change, and they hold from the next call.
+   * Like the game, during a match the settings do not change (T247): a universe.json that says otherwise (the editor, a rollback, a
+   * publication) is written back, whoever wrote it. The budgets the wanderers' ceilings add stay in memory, as always.
    */
-  setAi(patch: Partial<Pick<AiConfig, 'textModel' | 'scultori' | 'coefficienti' | 'attore'>>): void {
+  private keepSettings(config: UniverseConfig, files: FileMap): void {
+    if (this.settingsHeld === undefined) return;
+    let said: string | undefined;
+    try {
+      said = JSON.stringify(JSON.parse(files['universe.json'] ?? '{}').ai ?? {});
+    } catch {
+      said = undefined;
+    }
+    if (said === this.settingsHeld) return;
+    config.ai = readConfig({ 'universe.json': JSON.stringify({ ai: JSON.parse(this.settingsHeld) }) }).config.ai;
+    const working = this.repo.working['universe.json'];
+    if (working !== undefined) this.repo.write('universe.json', this.withHeldSettings(working));
+    this.council?.say('kernel', 'scarta', 'le regolazioni si fissano entrando in partita: universe.json le tiene com\'erano');
+  }
+
+  /**
+   * What the master set before entering, from the lobby (T247): repaired, written and committed, unless a match is under way. Whoever
+   * asks has already been checked: the server for a world of many (`SessionServer.join`), alone there is nobody else.
+   */
+  applySettings(raw: unknown): { ok: boolean; motivo?: string; riparati?: string[] } {
+    if (this.settingsLocked) return { ok: false, motivo: 'la partita è in corso: le regolazioni restano quelle con cui è cominciata' };
+    const { settings, riparati } = repairAiSettings(raw);
+    if (!this.setAi(settings)) return { ok: false, motivo: 'le regolazioni non si possono scrivere' };
+    if (!this.mirror && this.repo.working['universe.json'] !== this.repo.head().files['universe.json']) this.repo.commit('il master regola il mondo, prima di entrare', 'kernel');
+    return { ok: true, ...(riparati.length ? { riparati } : {}) };
+  }
+
+  /**
+   * The detail of generation and the agents' models (T45b): the Genesis screen and the lobby write them in universe.json → ai, before
+   * the match. During one nobody changes them, not even the master (T247): it answers false. They hold from the next call.
+   */
+  setAi(patch: AiSettings): boolean {
+    if (this.settingsLocked) return false;
     let raw: Record<string, any>;
     try {
       raw = JSON.parse(this.repo.working['universe.json'] ?? '{}');
@@ -5158,9 +5242,15 @@ export class Kernel {
       raw = {};
     }
     const ai = { ...(raw.ai ?? {}), ...patch, ...(patch.coefficienti !== undefined ? { coefficienti: repairCoefficients(patch.coefficienti) } : {}), ...(patch.attore !== undefined ? { attore: repairActor(patch.attore) } : {}) };
-    this.writeCommanded('universe.json', JSON.stringify({ ...raw, ai }, null, 2) + '\n');
-    this.config = { ...this.config, ai: { ...this.config.ai, ...ai } };
+    const text = JSON.stringify({ ...raw, ai }, null, 2) + '\n';
+    this.writeCommanded('universe.json', text);
+    const before = this.config.ai.maxText;
+    // Through readConfig: what is repaired on reading, and the master's minimums, hold from now as from the next boot.
+    this.config = { ...this.config, ai: readConfig({ 'universe.json': text }).config.ai };
     if (this.ai.textModel !== undefined && this.config.ai.textModel) this.ai.textModel = this.config.ai.textModel;
+    // The budget in use follows, with what the wanderers' ceilings already added.
+    if (this.ai.limits) this.ai.limits.text = Math.max(0, this.ai.limits.text + this.config.ai.maxText - before);
+    return true;
   }
 
   /** Chooses the game of a universe that was never generated (the Genesis screen); after, it is fixed. */
@@ -6958,6 +7048,11 @@ export class Kernel {
     this.repaired.add(m[1]);
     this.council.say('kernel', 'obietta', `${m[1]}.${m[2]} fallisce durante il gioco: ${message}`, 'ingegnere', 'forge.fix');
     const unrepaired = (motivo: string) => this.noteShortfall({ richiesta: `riparare ${m[1]}.${m[2]}: ${message}`, agente: 'ingegnere', compito: 'forge.fix', esito: 'guasto', motivo });
+    // The knob of the repairs (T247): a local repair would empty the module, so without a call it stays as it is, isolated by its fault.
+    if (!this.rationing.allows('riparazioni', this.coefficients().riparazioni)) {
+      unrepaired('le riparazioni sono regolate dal master');
+      return false;
+    }
     let feedback = '';
     for (let round = 0; round < 2; round++) {
       try {
@@ -7573,6 +7668,8 @@ export class Kernel {
     if (body !== undefined) k.wandererEntity = body;
     k.council.payer = (task) => payerOf(task, wanderer);
     k.council.hasCredits = (chi) => this.hasCredits(chi);
+    k.council.rationed = (task) => this.rationed(task);
+    k.council.thinking = () => this.config.ai.thinking;
     k.onShortfall = (n) => this.noteShortfall(n);
     return k;
   }

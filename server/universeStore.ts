@@ -252,6 +252,15 @@ async function commitAll(root: string, message: string, author: string): Promise
 }
 
 /** The route, as a middleware: the dev server, the preview and the production server (T133) mount this same one. */
+/** The settings a universe.json says, to compare them; what cannot be read says something else than anything readable. */
+const aiOf = (text: string): string => {
+  try {
+    return JSON.stringify(JSON.parse(text).ai ?? {});
+  } catch {
+    return text;
+  }
+};
+
 export function universeHandler(baseDir: string, opts: { accounts?: AccountSettings; internal?: string; quota?: number } = {}): Connect.NextHandleFunction {
   const queues = new Map<string, Promise<unknown>>();
   /** One operation at a time per universe (git is not happy with concurrent writers). */
@@ -369,6 +378,8 @@ export function universeHandler(baseDir: string, opts: { accounts?: AccountSetti
     const touched = op === 'commit' ? body.changes : op === 'branch' ? body.files : undefined;
     if (Object.keys((op === 'create' ? body.files : touched) ?? {}).some((p) => !allowedPath(p))) return send(res, 400, { error: 'percorso non ammesso' });
     if (!who.server && game.many && Object.keys(touched ?? {}).some(creditFile)) return send(res, 403, { error: 'i crediti non si scrivono da qui' });
+    // In a multiplayer game `ai` moves only with the master entering from the lobby, through the world (T247, ADR-0133): from outside it would wait on the disk.
+    if (!who.server && game.many && typeof (touched ?? {})['universe.json'] === 'string' && aiOf(touched['universe.json']) !== aiOf(await fs.readFile(path.join(root, 'universe.json'), 'utf8').catch(() => '{}'))) return send(res, 403, { error: 'le regolazioni si cambiano nella lobby, entrando' });
     const made = op === 'create' ? newUniverse(who, body.files ?? {}) : undefined;
     if (made && 'refused' in made) return send(res, made.status, { error: made.refused });
     const work = () => serial(name, async () => {

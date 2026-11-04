@@ -456,7 +456,7 @@ input[type='checkbox'], input[type='radio'] { accent-color: var(--neon-pink); }
 
 /* Lobby multigiocatore (T45d, ADR-0086) */
 #lobby {
-  position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center;
+  position: fixed; inset: 0; z-index: 55; display: flex; align-items: center; justify-content: center;
   background: var(--synth-backdrop); background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px, auto; padding: var(--space-13);
 }
 #lobby .lobby-window {
@@ -475,6 +475,18 @@ input[type='checkbox'], input[type='radio'] { accent-color: var(--neon-pink); }
 #lobby .sculpt-row, #lobby .coef-list, #lobby .estimate-row { font-size: var(--text-13); color: var(--dim); }
 #lobby .sculpt-row strong, #lobby .coef-list strong { color: var(--fg); }
 #lobby .note { color: var(--dim); font-size: var(--text-13); }
+#lobby .knobs { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--measure-233), 1fr)); gap: var(--space-8) var(--space-13); }
+#lobby .knob { display: grid; grid-template-columns: 1fr var(--measure-47); gap: var(--space-2) var(--space-8); align-items: center; font-size: var(--text-13); min-width: 0; }
+#lobby .knob input[type='range'] { width: 100%; min-width: 0; margin: 0; }
+#lobby .knob .knob-value { text-align: right; color: var(--fg); }
+#lobby .knob .knob-name { grid-column: 1 / -1; color: var(--fg); }
+#lobby .knob .note { grid-column: 1 / -1; font-size: var(--text-11); }
+#lobby .settings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--measure-233), 1fr)); gap: var(--space-8) var(--space-13); font-size: var(--text-13); }
+#lobby .settings-grid label { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
+#lobby .settings-grid select, #lobby .settings-grid input[type='number'] { width: 100%; box-sizing: border-box; padding: var(--space-5) var(--space-8); font: inherit; min-width: 0; }
+#lobby .settings-title { color: var(--gold); font-size: var(--text-13); margin-top: var(--space-5); }
+#lobby details summary { cursor: pointer; color: var(--fg); font-size: var(--text-13); margin-top: var(--space-5); }
+#lobby .locked-note { color: var(--gold); font-size: var(--text-13); }
 #lobby .tetto-controls { display: flex; gap: var(--space-8); align-items: center; flex-wrap: wrap; margin-top: var(--space-5); }
 #lobby .tetto-controls input[type='number'] { width: var(--measure-89); padding: var(--space-5) var(--space-8); font: inherit; }
 #lobby .cards-header-row { display: flex; justify-content: space-between; align-items: center; gap: var(--space-13); }

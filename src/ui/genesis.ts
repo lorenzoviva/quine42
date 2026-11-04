@@ -70,7 +70,7 @@ export class GenesisScreen {
 
   /**
    * The detail of generation (T45b): a preset, a coefficient per rhythm of the Council, the agents' models, and what an
-   * hour of play costs with them. Unlike the game it can change later. `read` gives what goes into universe.json → ai.
+   * hour of play costs with them. Unlike the game it can change, but only before a match (T247): the lobby. `read` gives what goes into universe.json → ai.
    */
   private aiForm(): { form: HTMLElement; read: () => Pick<AiConfig, 'textModel' | 'scultori' | 'coefficienti' | 'attore'>; lock: (on: boolean) => void } {
     const ai = this.k.config.ai;
@@ -106,11 +106,10 @@ export class GenesisScreen {
       preset.value = isLowDetail(c) ? 'low' : COEFFICIENT_KEYS.every((k) => c[k] === 1) ? 'pieno' : 'misura';
       for (const s of sliders.values()) (s.nextElementSibling as HTMLElement).textContent = Number(s.value).toFixed(2);
       const h = hourlyEstimate({ ...ai, ...r });
-      const fixed = h.righe.filter((x) => x.modo === 'non regolabile');
       estimate.replaceChildren(
         el('div', {}, `Un'ora di gioco costa circa ${usd(h.dollari)} (${h.chiamate} chiamate), con ${ai.maxText} chiamate al più per sessione.`),
         ...h.righe.map((x) => el('div', {}, `· ${x.voce} (${x.modo}): ${x.chiamate} → ${usd(x.dollari)}`)),
-        el('div', {}, `Non si regolano (${fixed.map((x) => x.voce.toLowerCase()).join('; ')}): ${CENSUS.filter((c) => c.modo === 'non regolabile').length} compiti su ${CENSUS.length}, si pagano quando servono.`),
+        el('div', {}, `Una volta sola, in questa Genesi: ${CENSUS.filter((c) => c.modo === 'non regolabile').length} compiti su ${CENSUS.length}. Tutti gli altri si regolano qui e nella lobby.`),
       );
     };
     const rows = COEFFICIENT_KEYS.map((key) => {
@@ -136,7 +135,7 @@ export class GenesisScreen {
       'div',
       { class: 'game' },
       el('div', { class: 'section' }, 'Il dettaglio e i modelli'),
-      el('div', { class: 'note' }, "Quanto spesso ogni agente del Concilio interroga l'IA (1: sempre come serve; 0: mai). Si può cambiare anche dopo."),
+      el('div', { class: 'note' }, "Quanto spesso ogni agente del Concilio interroga l'IA (1: sempre come serve; 0: mai). Durante la partita non cambia: si regola di nuovo nella lobby, prima di entrare."),
       el('label', {}, 'Dettaglio', preset),
       ...rows,
       el('label', {}, 'Modello del Concilio', text),
@@ -145,7 +144,9 @@ export class GenesisScreen {
       el('div', { class: 'note' }, "Spento, il Narratore interpreta gli individui come sempre e nessuna chiamata si aggiunge. Acceso, il Narratore scrive una scheda per individuo alla sua prima battuta e l'Attore la recita con il suo modello."),
       estimate,
     );
-    return { form, read, lock: (on) => [preset, text, actorOn, actorModel, ...sculpt.values(), ...sliders.values()].forEach((c) => (c.disabled = on)) };
+    const lock = (on: boolean) => [preset, text, actorOn, actorModel, ...sculpt.values(), ...sliders.values()].forEach((c) => (c.disabled = on || this.k.settingsLocked));
+    lock(false);
+    return { form, read, lock };
   }
 
   /** Resolves when the player has a world to play (generated or the example one). */

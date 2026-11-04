@@ -87,16 +87,20 @@
   **L'Attore** (`ai.attore`, ADR-0116, T157): spento se non detto, e allora nulla cambia; acceso (un booleano, il nome di un modello o `{acceso, modello}`,
   `repairActor`), il Narratore scrive la scheda di ogni individuo alla sua prima battuta (`npc.sheet`, `Individual.scheda`, riscritta solo se cambiano legami o
   storia, `sheetFingerprint`) e l'agente `attore` recita `npc.reply` e `npc.dialogue` con il suo modello (`ACTOR_MODEL`, `gemini-3.8-flash`): stessi compiti,
-  paganti, limiti e modelli locali; si sceglie nella Genesi, nella lobby (solo il master: messaggio `attore`) o nell'editor; `kernel.interpreter()` dice chi recita.
+  paganti, limiti e modelli locali; si sceglie nella Genesi o nella lobby (solo il master, entrando: → #lobby); `kernel.interpreter()` dice chi recita.
   I **coefficienti di generazione** (`ai.coefficienti`, ADR-0085, T45b, `src/kernel/coefficients.ts`): quanto spesso ogni agente chiama l'IA,
-  da 0 a 1, riparati dal validatore; diretti (`sessioni dialoghi trame revisioni modelli`: ritmi allungati) e indiretti (`persone abitanti
-  pacchetti cose`: meno di ciò che causa le chiamate); il censimento delle chiamate in `CENSUS`, il preset «Low Detail» (`LOW_DETAIL`, anche
+  da 0 a 1, riparati dal validatore; diretti (`sessioni dialoghi trame revisioni modelli brani`: ritmi allungati; `luoghi parole sguardi azioni magia morte riparazioni studio`: la quota che va ai modelli, ADR-0133) e indiretti (`persone abitanti
+  pacchetti cose`: meno di ciò che causa le chiamate); a 0 nessuna chiamata, per nessuna riga; il censimento delle chiamate in `CENSUS`, dove solo la Genesi non ha una manopola, il preset «Low Detail» (`LOW_DETAIL`, anche
   lo Scultore su Flash-Lite), la stima di un'ora di gioco (`hourlyEstimate`); nella Genesi si scelgono con i modelli (`kernel.setAi`).
 
 <a id="lobby"></a>
 ## La lobby multigiocatore
 
-  La **lobby multigiocatore** (ADR-0086, T45d): mostra modelli, coefficienti del master, minimi (`ai.minimi`), tetto crediti che incrementa i budget (`addBudgetFromCap`); a crediti esauriti o al tetto, tre scelte (ricarica, offline, abbandona); la collezione carte fuori dalla partita con utilizzi.
+  La **lobby** (ADR-0086, T45d; ADR-0133, T247): il master regola tutto il consumo prima di entrare (preset, ogni coefficiente, ogni modello, ragionamento, Attore, budget, minimi), con la stima di un'ora che segue i valori e, accanto a ogni manopola, cosa fa il gioco a 0; gli altri vedono e non toccano. Il tetto crediti di chi entra incrementa i budget (`addBudgetFromCap`); a crediti esauriti o al tetto, tre scelte (ricarica, offline, abbandona), che restano di ogni viandante anche a partita in corso; la collezione carte fuori dalla partita con utilizzi.
+
+  **Quando compare**: in una partita di molti a ogni apertura della pagina, anche di un universo già avviato, se non c'è `?skip`. Da soli la stessa schermata con `alone` (solo le regolazioni), a ogni apertura di un universo già generato se ci sono i modelli (`?lobby` la forza; senza modelli non c'è nulla da regolare); un universo mai generato ha la Genesi.
+
+  **Partita in corso** (`kernel.settingsLocked`): in una partita di molti da quando il primo viandante entra a quando l'ultimo esce, anche se il mondo resta acceso; da soli da quando si chiude la lobby a quando si ricarica la pagina. In quel tempo nessuno cambia `ai`, nemmeno il master: `setAi` risponde `false`, `keepSettings` riscrive un `universe.json` che dice altro (editor, rollback, pubblicazione), `takeBranch` lo toglie dal ramo, `/api/universe` rifiuta da fuori un cambio di `ai` in un universo di molti. `/api/viandante` dice `inCorso` alla lobby. Le regolazioni entrano con il master nel messaggio `entra`, riparate da `repairAiSettings`; i minimi valgono per ogni via (`withinMinimums` in `readConfig`), e il server rifiuta un tetto sopra 0 e sotto il minimo.
 
 <a id="abbonamenti"></a>
 ## La coda della CLI degli abbonamenti
