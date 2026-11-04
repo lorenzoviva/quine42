@@ -3917,7 +3917,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Browser: non serve.
 - Quando è fatto: commit su `task/T248`, con mancanze e commissione configurabile entrambe nel codice e descritte. Sicurezza: tocca i crediti, ma solo per l'unione; scrivi l'esito.
 
-### T249 · Integrare T248 e T243 — `da fare`
+### T249 · Integrare T248 e T243 — `fatto` (`bf8061e`)
 - Pipeline: claude · stima 1% · approvato · priorità 1
 - Step: 34
 - Contesto: T248 (`dossier T248`) ha unito T243 a T238, ma `integra T248` va in conflitto in `AGENTS.md` e `vite.config.ts`: T244 (`dossier T244`), entrato nel base nel frattempo, ha scritto negli stessi punti. I due ADR hanno lo stesso numero: 0131 è di T244 nel base.
@@ -3925,3 +3925,4 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Test: typecheck e suite intera con i loro turni.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T249`, con video, mancanze e commissione configurabile tutti nel codice e descritti. Sicurezza: tocca i crediti e `server/production.ts` solo per l'unione; scrivi l'esito.
+- Esito: T248 unito in `bf8061e`: `QUINE_VIDEO` (ADR-0131), `world/mancanze.json` (ADR-0130) e `QUINE_COMMISSIONE` (ADR-0132) convivono nel codice e nei documenti; conflitti solo in `AGENTS.md` e `vite.config.ts`, risolti tenendo tutte le aggiunte; l'ADR di T243 era già 0132, nessun'altra modifica; typecheck e suite intera verdi (1875 test). Manca: `docs/glossario-censimento.md` non rigenerato (porta solo ciò che arriva dall'unione). Non provato: nulla nel browser (non richiesto) né sotto `npm run serve`; valgono i limiti già scritti negli esiti di T243, T238 e T244. Sicurezza: nessuna superficie nuova; crediti e `server/production.ts` toccati solo per l'unione, logica invariata.

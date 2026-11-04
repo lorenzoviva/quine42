@@ -847,6 +847,13 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Dove vive**: `src/kernel/credits.ts`, `server/ledger.ts`, `universes/.saldi/`
 - **Da non usare**: nessuno
 
+### Commissione
+- **Inglese**: `platformFee`, `DEFAULT_PLATFORM_FEE`, `platformFeeOf`, `costWithFee`
+- **Definizione**: ciò che la piattaforma aggiunge al costo di ogni chiamata addebitata, come frazione del costo; la decide solo il server.
+- **Dove vive**: `src/kernel/credits.ts`, `server/ledger.ts`, `server/wallet.ts`
+- **Da non usare**: `fee` (nei documenti e nella UI)
+- **Fermo**: `QUINE_COMMISSIONE`, `commissione` del protocollo e di `/api/crediti`.
+
 ### Tetto
 - **Inglese**: `tetto`, `sessionCap`, `setSessionCap`, `sessionCapOf`, `capBudgeted`, `addBudgetFromCap`
 - **Definizione**: quanto si può spendere al più, per sessione, per giorno o per universo.

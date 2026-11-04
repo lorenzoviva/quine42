@@ -14,7 +14,7 @@ import { queueWanted, subscriptionQueue } from './server/subscriptionQueue';
 import { wandererRoute } from './server/wanderer';
 import { testWorkers } from './server/testWorkers';
 import { walletRoute } from './server/wallet';
-import { grantCapOf } from './server/ledger';
+import { grantCapOf, platformFeeOf } from './server/ledger';
 import { videoFolder, videoRoute } from './server/video';
 import { betaGuide, guidePage } from './server/betaGuide';
 
@@ -49,8 +49,8 @@ export default defineConfig(({ mode }) => {
       // The site's profile page (T102): the account's wanderer, their profile and credits.
       wandererRoute({ accounts, universesDir, getActiveWorld }),
       // The site's credits page (T105): the account's balance and their lines of the two ledgers.
-      walletRoute({ accounts, universesDir, getActiveWorld }),
-      sessionServer(accounts, gemini.direct(), internal, { universesDir, grantCap: grantCapOf(env, !!accounts?.verify) }, Number(env.QUINE_MONDO_MEMORIA) || undefined, Number(env.QUINE_MONDI_MASSIMI) || undefined),
+      walletRoute({ accounts, universesDir, getActiveWorld, platformFee: platformFeeOf(env) }),
+      sessionServer(accounts, gemini.direct(), internal, { universesDir, grantCap: grantCapOf(env, !!accounts?.verify), platformFee: platformFeeOf(env) }, Number(env.QUINE_MONDO_MEMORIA) || undefined, Number(env.QUINE_MONDI_MASSIMI) || undefined),
       subscriptionQueue(path.resolve(process.cwd(), 'universes', '.coda'), { enabled: queueWanted(env) }),
       // The site's videos, from the same folder as in production (T244, ADR-0131), and the instructions of the beta: what is off never reaches the build.
       videoRoute({ folder: videoFolder(env), accounts }),

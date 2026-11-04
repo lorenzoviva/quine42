@@ -8,7 +8,7 @@ import path from 'node:path';
 import { promises as fs } from 'node:fs';
 import type { Kernel } from '../src/kernel/kernel';
 import type { FileMap } from '../src/kernel/types';
-import { costWithFee, type Ledger, type PaymentRecord } from '../src/kernel/credits';
+import { costWithFee, DEFAULT_PLATFORM_FEE, type Ledger, type PaymentRecord } from '../src/kernel/credits';
 import { USAGE_FILE } from '../src/kernel/ai/usage';
 import { playerFile, readWandererState } from '../src/kernel/wanderers';
 import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
@@ -45,6 +45,8 @@ export interface Wallet {
   crediti: number;
   /** Credits are charged only in a multiplayer game (`Kernel.billCall`). */
   multigiocatore: boolean;
+  /** The platform fee on every call charged, as this server decided it (ADR-0132). */
+  commissione: number;
   /** Newest first. */
   pagamenti: WalletPayment[];
   /** Newest first, at most WALLET_DAYS. */
@@ -54,7 +56,7 @@ export interface Wallet {
 }
 
 /** This wanderer's lines of the two ledgers. A usage file written by hand or by an older version must not break the page. */
-export function linesOf(payments: PaymentRecord[], usageText: string | undefined, id: string, many: boolean): Pick<Wallet, 'pagamenti' | 'consumi' | 'totaleConsumi'> {
+export function linesOf(payments: PaymentRecord[], usageText: string | undefined, id: string, many: boolean, fee: number): Pick<Wallet, 'pagamenti' | 'consumi' | 'totaleConsumi'> {
   const pagamenti: WalletPayment[] = [];
   for (const p of payments) {
     if (p?.wandererId !== id || !Number.isFinite(p.crediti) || !Number.isFinite(p.timestamp)) continue;
@@ -74,8 +76,9 @@ export function linesOf(payments: PaymentRecord[], usageText: string | undefined
     const t = payers?.[id];
     if (!t) continue;
     const base = Number(t.usd) || 0;
-    // What the balance really lost: the fee is charged with the call, and only in a multiplayer game.
-    const usd = many ? costWithFee(base) : base;
+    // What the balance lost: the fee is charged with the call, and only in a multiplayer game. The ledger keeps the cost alone, so a day
+    // before the fee changed reads at today's fee (ADR-0132).
+    const usd = many ? costWithFee(base, fee) : base;
     total += usd;
     days.push({ giorno, chiamate: Number(t.calls) || 0, usd });
   }
@@ -92,18 +95,18 @@ function manyIn(files: FileMap): boolean {
 }
 
 /** The wallet as the universe's files on disk say. */
-export function walletFromFiles(files: FileMap, ledger: Ledger, universo: string, id: string, account: WandererView['account']): Wallet {
+export function walletFromFiles(files: FileMap, ledger: Ledger, universo: string, id: string, account: WandererView['account'], fee: number): Wallet {
   const saved = readWandererState(files, id);
   const anonimo = account === 'anonimo' || !!saved?.anonimo;
   const many = manyIn(files);
-  return { id, universo, account, anonimo, crediti: anonimo ? 0 : ledger.balance(id), multigiocatore: many, ...linesOf(ledger.paymentsOf(id), files[USAGE_FILE], id, many) };
+  return { id, universo, account, anonimo, crediti: anonimo ? 0 : ledger.balance(id), multigiocatore: many, commissione: fee, ...linesOf(ledger.paymentsOf(id), files[USAGE_FILE], id, many, fee) };
 }
 
 /** The wallet from a world running here, whose ledgers are fresher than the disk. */
 export function walletFromKernel(k: Kernel, universo: string, id: string, account: WandererView['account']): Wallet {
   const anonimo = account === 'anonimo' || k.isAnonymous(id);
   const many = k.manyPlayers();
-  return { id, universo, account, anonimo, crediti: anonimo ? 0 : k.creditsOf(id), multigiocatore: many, ...linesOf(k.ledger.paymentsOf(id), k.usage.toJson(), id, many) };
+  return { id, universo, account, anonimo, crediti: anonimo ? 0 : k.creditsOf(id), multigiocatore: many, commissione: k.platformFee, ...linesOf(k.ledger.paymentsOf(id), k.usage.toJson(), id, many, k.platformFee) };
 }
 
 /** The few files a wallet needs. */
@@ -121,7 +124,12 @@ async function walletFiles(root: string, id: string): Promise<FileMap> {
   return files;
 }
 
-export function walletHandler(opts: WandererRouteOptions): Connect.NextHandleFunction {
+/** The wallet's route says the fee when no world is running: the server's. */
+export interface WalletRouteOptions extends WandererRouteOptions {
+  platformFee?: number;
+}
+
+export function walletHandler(opts: WalletRouteOptions): Connect.NextHandleFunction {
   return (req, res, next) => {
     const [url, query = ''] = (req.url ?? '').split('?');
     if (url !== '/api/crediti') return next();
@@ -144,7 +152,7 @@ export function walletHandler(opts: WandererRouteOptions): Connect.NextHandleFun
         } catch {
           return send(res, 404, { ok: false, motivo: `universo sconosciuto: ${universo}` });
         }
-        return send(res, 200, { ok: true, portafoglio: walletFromFiles(await walletFiles(root, who.id), await openLedger(opts.universesDir, universo), universo, who.id, who.account) });
+        return send(res, 200, { ok: true, portafoglio: walletFromFiles(await walletFiles(root, who.id), await openLedger(opts.universesDir, universo), universo, who.id, who.account, opts.platformFee ?? DEFAULT_PLATFORM_FEE) });
       } catch (e) {
         return send(res, 500, { ok: false, motivo: failureText('crediti', e) });
       }
@@ -153,7 +161,7 @@ export function walletHandler(opts: WandererRouteOptions): Connect.NextHandleFun
 }
 
 /** GET /api/crediti, in the dev server and in the preview. */
-export function walletRoute(opts: WandererRouteOptions): Plugin {
+export function walletRoute(opts: WalletRouteOptions): Plugin {
   const handler = walletHandler(opts);
   return {
     name: 'rune-crediti',

@@ -3,7 +3,7 @@
 // token) it asks over the channel. If the server goes away, so does it.
 
 import { fileURLToPath } from 'node:url';
-import { FileLedger } from '../../server/ledger';
+import { FileLedger, platformFeeOf } from '../../server/ledger';
 import { worldOf, type WorldCalls } from '../../server/worldCalls';
 import { openUniverse, type UniverseHost } from './host';
 import type { Account, Verifier } from './account';
@@ -71,6 +71,8 @@ async function open(o: WorldOpen): Promise<void> {
     masterUid: o.masterUid,
     restore: o.restore,
     grantCap: o.grantCap,
+    // Its environment holds only what the server put there (`worldEnv`).
+    platformFee: platformFeeOf(process.env),
     // The server made the folder: this process may write only this file and those beside it (its lock, its temporary one).
     ledger: o.ledgerFile ? new FileLedger(o.ledgerFile, { folderReady: true }) : undefined,
     onBeat: (tick) => send({ t: 'vivo', tick }),

@@ -3,6 +3,7 @@
 
 import type { Kernel } from '../kernel/kernel';
 import { tallyLine } from '../kernel/ai/usage';
+import { feePercent } from '../kernel/credits';
 import { $, el } from './dom';
 import { feedLine } from './feed';
 
@@ -239,7 +240,7 @@ export class Console {
             });
           };
           creditiRows.push(
-            el('div', { class: 'note' }, 'Crediti dei viandanti (multigiocatore, T45a): spese comuni divise tra i connessi, costo modello + 1% piattaforma. Crediti esauriti o anonimo → modelli locali. Le ricariche a mano hanno un tetto al giorno per universo.'),
+            el('div', { class: 'note' }, `Crediti dei viandanti (multigiocatore, T45a): spese comuni divise tra i connessi, ${k.platformFee > 0 ? `costo modello + ${feePercent(k.platformFee)} piattaforma` : 'solo il costo del modello, senza commissione'}. Crediti esauriti o anonimo → modelli locali. Le ricariche a mano hanno un tetto al giorno per universo.`),
             el('div', { class: 'row' }, target, amt, assegna, msg),
           );
         }
