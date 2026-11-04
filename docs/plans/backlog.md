@@ -3271,7 +3271,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: commit su `task/T181`; nell'esito token di pattern e programmi, cosa non si riesce a fare, la varianza contro la misura di partenza. Se a un terzo della stima nemmeno un programma arriva alla soglia: fermati e scrivi in `docs/pipeline/domande/T181.md`.
 - Esito: `lab/banco/pattern.md` (12 pattern, 10 328 token) e tre programmi di riferimento in `lab/banco/riferimento/` (palazzina 46 nodi/16 291 token, forte 58/16 121, tempio 36/9 982) che reggono tutte le misure a 5 semi e 2 taglie (partenza: 31/31 statici, 1/27 a Enorme); palazzina e forte variano oltre la soglia di T180 (perimetro 0,21-0,37), il tempio no nel perimetro (0,00: il lotto da 100 non lascia spazio); 22 programmi del repository in `lab/mjx/official/riferimento/` con licenza; test `lab/tests/riferimento.test.ts`; suite 112 file/1508 test e typecheck verdi; non provati nel gioco (T156) né giudicati sulle foto dall'autore; sicurezza: nessuna superficie nuova (solo `lab/`).
 
-### T182 · Il prompt procedurale delle strutture — `da fare` (dipende da T181)
+### T182 · Il prompt procedurale delle strutture — `in attesa` (dipende da T181)
 - Pipeline: claude · stima 8% · approvato · priorità 26
 - Step: 30
 - Contesto: richiesta 1, quarto pezzo: portare nel prompt del banco (`lab/banco/prompt.md`) i pattern di T181, senza perdere la qualità raggiunta. Oggi un programma costa 57-60 mila token di output: un giro di 14 tentativi ~20 dollari a listino e un pezzo del limite delle 5 ore (T155: 114 dollari). Metodo come T155: si corregge il prompt, mai il risultato.
@@ -3279,6 +3279,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Test: i modelli finali girano nel motore e passano i controlli. Typecheck col suo turno.
 - Browser: non serve; i fogli di contatto restano nel commit.
 - Quando è fatto: commit su `task/T182`; nell'esito token, costo per modello, quanti giri, soglia sì o no.
+- Esito: prompt procedurale con lo scheletro `riferimento/cantiere.xml` (pattern 13 in `pattern.md`, banco con semi e taglie, traccia nella seconda richiesta): 3 giri su 4; soglia NO: misure e varianza 10/12 entro due richieste (7 alla prima; 5 semi, 2 taglie, partenza 31/31 statici), foto 0/10 per giudizio mio (interni vuoti, salti su casse, meno ricchi di `conferma`), locanda esclusa dal giro 3 perché la cantina non regge due taglie con un programma solo; costo per modello alla prima richiesta: input 10 968, output 55 423, 1,15 $ (T173: 3 791, 60 553, 1,22 $), seconda richiesta 0,43-1,28 $, totale 30,59 $ su 27 chiamate misurate più 2 senza conto; non provato nel gioco (T156) né giudicato dall'autore; tempi 6-7 s a Enorme contro il limite di 8 s; decisioni in `docs/pipeline/domande/T182.md`; suite e typecheck verdi; sicurezza: nessuna superficie nuova (solo `lab/`).
 
 ### T183 · Le interfacce di simulazione complesse: una prova dell'espressività del kernel — `fatto` (`3313447`) (dipende da T205)
 - Pipeline: claude · stima 9% · approvato · priorità 79

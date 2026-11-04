@@ -1,0 +1,113 @@
+{
+  "taglie": [
+    {
+      "taglia": "grande",
+      "box": [
+        100,
+        100,
+        80
+      ],
+      "vpt": 20,
+      "gradino": 4,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [],
+          "ms": 3618
+        },
+        {
+          "seme": 2,
+          "difetti": [],
+          "ms": 3713
+        },
+        {
+          "seme": 3,
+          "difetti": [],
+          "ms": 3622
+        },
+        {
+          "seme": 4,
+          "difetti": [],
+          "ms": 3485
+        },
+        {
+          "seme": 5,
+          "difetti": [],
+          "ms": 3537
+        }
+      ],
+      "regge": true,
+      "varianza": {
+        "voxel": 0.48899826132953605,
+        "colore": 0.05210392947944628,
+        "pianta": 0.44318733711212227,
+        "perimetro": 0.19462719298245612,
+        "interno": 0.47581427942080623,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 2,
+        "architetture": 4,
+        "statico": false
+      },
+      "difettiVarianza": []
+    },
+    {
+      "taglia": "enorme",
+      "box": [
+        120,
+        120,
+        96
+      ],
+      "vpt": 16,
+      "gradino": 3,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [],
+          "ms": 5579
+        },
+        {
+          "seme": 2,
+          "difetti": [],
+          "ms": 5623
+        },
+        {
+          "seme": 3,
+          "difetti": [],
+          "ms": 5555
+        },
+        {
+          "seme": 4,
+          "difetti": [],
+          "ms": 5577
+        },
+        {
+          "seme": 5,
+          "difetti": [],
+          "ms": 5573
+        }
+      ],
+      "regge": true,
+      "varianza": {
+        "voxel": 0.5690119861522736,
+        "colore": 0.060848424824825734,
+        "pianta": 0.540168559453381,
+        "perimetro": 0.3026315789473684,
+        "interno": 0.5532350978769329,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 1,
+        "architetture": 3,
+        "statico": false
+      },
+      "difettiVarianza": [
+        "piani e stanze: 1 liste di piani, 1 di stanze (serve almeno una con ≥ 2)"
+      ]
+    }
+  ],
+  "regge": true,
+  "statico": false,
+  "varia": false,
+  "passa": false,
+  "ms": 46020
+}

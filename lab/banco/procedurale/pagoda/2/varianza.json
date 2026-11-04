@@ -1,0 +1,129 @@
+{
+  "taglie": [
+    {
+      "taglia": "grande",
+      "box": [
+        100,
+        100,
+        80
+      ],
+      "vpt": 20,
+      "gradino": 4,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [],
+          "ms": 5214
+        },
+        {
+          "seme": 2,
+          "difetti": [],
+          "ms": 5282
+        },
+        {
+          "seme": 3,
+          "difetti": [],
+          "ms": 5015
+        },
+        {
+          "seme": 4,
+          "difetti": [],
+          "ms": 5322
+        },
+        {
+          "seme": 5,
+          "difetti": [],
+          "ms": 5350
+        }
+      ],
+      "regge": true,
+      "varianza": {
+        "voxel": 0.6193522149858341,
+        "colore": 0.29961968661018257,
+        "pianta": 0.3510586622368952,
+        "perimetro": 0.24587263018736938,
+        "interno": 0.7751571585723199,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 5,
+        "architetture": 5,
+        "statico": false
+      },
+      "difettiVarianza": []
+    },
+    {
+      "taglia": "enorme",
+      "box": [
+        120,
+        120,
+        96
+      ],
+      "vpt": 16,
+      "gradino": 3,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [
+            "finisce: no (serve entro 8000 ms)",
+            "valido: non termina: dopo 1135 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)"
+          ],
+          "ms": 8389
+        },
+        {
+          "seme": 2,
+          "difetti": [
+            "finisce: no (serve entro 8000 ms)",
+            "valido: non termina: dopo 1085 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+            "piani: 1 (serve ≥ 2)",
+            "stanze: 1 (serve ≥ 3)",
+            "murato: 4.17 (serve ≤ 0.25)"
+          ],
+          "ms": 8406
+        },
+        {
+          "seme": 3,
+          "difetti": [
+            "finisce: no (serve entro 8000 ms)",
+            "valido: non termina: dopo 1117 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)"
+          ],
+          "ms": 8336
+        },
+        {
+          "seme": 4,
+          "difetti": [
+            "finisce: no (serve entro 8000 ms)",
+            "valido: non termina: dopo 1119 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)"
+          ],
+          "ms": 8311
+        },
+        {
+          "seme": 5,
+          "difetti": [
+            "finisce: no (serve entro 8000 ms)",
+            "valido: non termina: dopo 1169 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)"
+          ],
+          "ms": 8300
+        }
+      ],
+      "regge": false,
+      "varianza": {
+        "voxel": 0.6517477995015692,
+        "colore": 0.290421977282633,
+        "pianta": 0.4623867426944039,
+        "perimetro": 0.46323109107516425,
+        "interno": 0.8636256574200583,
+        "semi": 5,
+        "firmePiani": 2,
+        "firmeStanze": 5,
+        "architetture": 5,
+        "statico": false
+      },
+      "difettiVarianza": []
+    }
+  ],
+  "regge": false,
+  "statico": false,
+  "varia": true,
+  "passa": false,
+  "ms": 68061
+}

@@ -20,7 +20,7 @@ import { chiedi, LimiteAbbonamento, type Risposta } from '../banco/claude';
 import { fotoLati, fotoPianta, fotoSezioni } from '../banco/foto';
 import { esegui, giudica, misura, type Bersaglio, type Giudizio, type Misure } from '../banco/misure';
 import { daCorreggere, testoSeconda, type Scheda } from '../banco/seconda';
-import { fotoSemi, prova } from '../banco/varianza';
+import { difettiDiProva, fotoSemi, primaCaduta, prova } from '../banco/varianza';
 import { png } from './png';
 
 const args = process.argv.slice(2).filter((a) => a !== '--');
@@ -87,6 +87,11 @@ function valuta(xml: string, b: Bersaglio, dir: string, r?: Risposta): Riga {
     errore = (err as Error).message;
   }
   const { celle: _celle, analisi, ...misure } = m ?? ({} as Misure);
+  // With variance (T182) a program passes only if it holds at every seed and size and varies: seed 1 alone says little.
+  const p = conVarianza && !errore ? prova(xml, b) : undefined;
+  const passa = (g?.passa ?? false) && (p?.passa ?? true);
+  const difetti = p ? difettiDiProva(p) : (g?.difetti ?? [errore]);
+  const caduta = p ? primaCaduta(p) : undefined;
   fs.writeFileSync(
     path.join(dir, 'misure.json'),
     JSON.stringify(
@@ -95,8 +100,9 @@ function valuta(xml: string, b: Bersaglio, dir: string, r?: Risposta): Riga {
         ...(errore ? { errore } : {}),
         ...(r ? { token: r.token, modello: r.modello, dollari: r.dollari, ms: r.ms } : {}),
         caratteriXml: xml.length,
-        passa: g?.passa ?? false,
-        difetti: g?.difetti ?? [errore],
+        passa,
+        difetti,
+        ...(caduta ? { caduta } : {}),
         voci: g?.voci,
         misure: m ? { ...misure, errori: analisi.errors } : undefined,
       },
@@ -104,14 +110,13 @@ function valuta(xml: string, b: Bersaglio, dir: string, r?: Risposta): Riga {
       2,
     ),
   );
-  if (conVarianza && !errore) {
-    const p = prova(xml, b);
+  if (p) {
     const { esecuzioni: _esecuzioni, ...resto } = p;
     fs.writeFileSync(path.join(dir, 'varianza.json'), `${JSON.stringify(resto, null, 2)}\n`);
     salvaFoto(dir, 'semi.png', fotoSemi(p));
   }
   fs.writeFileSync(path.join(dir, 'giudizio.md'), `# Giudizio di chi guarda le foto — ${b.nome}\n\nVoto per ogni criterio (sì / in parte / no) e una riga su ciò che si vede.\n\n${CRITERI}\n`);
-  return { bersaglio: b.id, dir, passa: g?.passa ?? false, difetti: g?.difetti ?? [`il gioco lo rifiuta: ${errore}`], ...(r ? { inputTotale: r.token.inputTotale, output: r.token.output } : {}) };
+  return { bersaglio: b.id, dir, passa, difetti: p ? difettiDiProva(p) : (g?.difetti ?? [`il gioco lo rifiuta: ${errore}`]), ...(r ? { inputTotale: r.token.inputTotale, output: r.token.output } : {}) };
 }
 
 const righe: Riga[] = [];
@@ -126,9 +131,9 @@ interface Lavoro {
 }
 
 /** The trace of a program, if the game can run it at all: what it refuses comes back with its reason, and there is nothing to trace. */
-function tracciaDi(xml: string, b: Bersaglio): string | undefined {
+function tracciaDi(xml: string, b: Bersaglio, caduta?: Scheda['caduta']): string | undefined {
   try {
-    return traceText(esegui(xml, b).model, 1, { tetto });
+    return traceText(esegui(xml, caduta ? { ...b, taglia: caduta.taglia } : b, caduta?.seme ?? 1).model, caduta?.seme ?? 1, { tetto });
   } catch {
     return undefined;
   }
@@ -148,7 +153,7 @@ function lavoriSeconda(): Lavoro[] {
       const esame = daCorreggere(scheda, fs.existsSync(fileProblemi) ? fs.readFileSync(fileProblemi, 'utf8') : undefined);
       if (!esame) continue;
       const xml = fs.readFileSync(path.join(att, 'modello.xml'), 'utf8');
-      const traccia = conTraccia ? tracciaDi(xml, b) : undefined;
+      const traccia = conTraccia ? tracciaDi(xml, b, scheda.caduta) : undefined;
       const testo = testoSeconda(testoBersaglio(b), xml, { ...esame, ...(traccia ? { traccia } : {}) });
       out.push({
         b,

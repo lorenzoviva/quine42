@@ -1,0 +1,248 @@
+{
+  "bersaglio": "tempio",
+  "token": {
+    "input": 2,
+    "cacheScritta": 10832,
+    "cacheLetta": 9287,
+    "output": 21377,
+    "inputTotale": 20121
+  },
+  "modello": "claude-opus-5-5",
+  "dollari": 0.5160614,
+  "ms": 221750,
+  "caratteriXml": 12382,
+  "passa": false,
+  "difetti": [
+    "varianza a grande: pianta: 0.14 (serve ≥ 0.15)",
+    "varianza a grande: perimetro: 0.06 (serve ≥ 0.15)",
+    "varianza a grande: interno: 0.34 (serve ≥ 0.35)",
+    "varianza a grande: architetture: 2 su 5 semi (serve ≥ 3)"
+  ],
+  "voci": [
+    {
+      "id": "finisce",
+      "ok": true,
+      "valore": "3431 ms",
+      "richiesto": "entro 8000 ms"
+    },
+    {
+      "id": "valido",
+      "ok": true,
+      "valore": "sì",
+      "richiesto": "i controlli di check.ts"
+    },
+    {
+      "id": "piani",
+      "ok": true,
+      "valore": "2",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "testa",
+      "ok": true,
+      "valore": "1.5 1.5",
+      "richiesto": "≥ 1.5 caselle per piano"
+    },
+    {
+      "id": "stanze",
+      "ok": true,
+      "valore": "5",
+      "richiesto": "≥ 3"
+    },
+    {
+      "id": "murato",
+      "ok": true,
+      "valore": "0",
+      "richiesto": "≤ 0.25"
+    },
+    {
+      "id": "porta",
+      "ok": true,
+      "valore": "x 49, scarto 0.01, alta 1.5, libera",
+      "richiesto": "sul davanti, scarto ≤ 0.33, alta ≥ 1.5"
+    },
+    {
+      "id": "salti",
+      "ok": true,
+      "valore": "10",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "materiali",
+      "ok": true,
+      "valore": "14",
+      "richiesto": "≥ 6"
+    },
+    {
+      "id": "dominante",
+      "ok": true,
+      "valore": "0.25",
+      "richiesto": "≤ 0.6"
+    },
+    {
+      "id": "finestre",
+      "ok": true,
+      "valore": "28 su 4 lati",
+      "richiesto": "≥ 6 su ≥ 3 lati"
+    },
+    {
+      "id": "dettagli",
+      "ok": true,
+      "valore": "459, 0 lati vuoti",
+      "richiesto": "≥ 24, ≤ 1 lati vuoti"
+    },
+    {
+      "id": "rumore",
+      "ok": true,
+      "valore": "0.09",
+      "richiesto": "≤ 0.7"
+    },
+    {
+      "id": "sagoma",
+      "ok": true,
+      "valore": "13",
+      "richiesto": "≥ 4"
+    },
+    {
+      "id": "rilievo",
+      "ok": true,
+      "valore": "0.63",
+      "richiesto": "≥ 0.12"
+    },
+    {
+      "id": "ingombro",
+      "ok": true,
+      "valore": "0.71",
+      "richiesto": "≥ 0.3"
+    }
+  ],
+  "misure": {
+    "voxel": 103013,
+    "ms": 3431,
+    "finito": true,
+    "piani": [
+      {
+        "z": 2,
+        "quota": 0.1,
+        "area": 6.555,
+        "testa": 1.5,
+        "stanze": 4
+      },
+      {
+        "z": 34,
+        "quota": 1.7,
+        "area": 1.85,
+        "testa": 1.5,
+        "stanze": 1
+      }
+    ],
+    "cantina": 0,
+    "terrazze": 0,
+    "stanze": 5,
+    "murato": 0,
+    "persi": [],
+    "porta": {
+      "x": 49,
+      "y": 65,
+      "scarto": 0.025,
+      "alta": 1.5,
+      "libera": true
+    },
+    "salti": [
+      {
+        "x": 15,
+        "y": 71,
+        "z": 2,
+        "sale": false
+      },
+      {
+        "x": 27,
+        "y": 58,
+        "z": 2,
+        "sale": false
+      },
+      {
+        "x": 27,
+        "y": 77,
+        "z": 2,
+        "sale": false
+      },
+      {
+        "x": 15,
+        "y": 55,
+        "z": 2,
+        "sale": false
+      },
+      {
+        "x": 83,
+        "y": 96,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 81,
+        "y": 67,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 51,
+        "y": 78,
+        "z": 1,
+        "sale": false
+      },
+      {
+        "x": 84,
+        "y": 44,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 96,
+        "y": 60,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 96,
+        "y": 48,
+        "z": 0,
+        "sale": false
+      }
+    ],
+    "materiali": 14,
+    "dominante": 0.2471823944550688,
+    "finestre": 28,
+    "latiConFinestre": 4,
+    "dettagli": 459,
+    "latiVuoti": 0,
+    "rumore": 0.09288537549407115,
+    "rilievo": 0.6275071633237822,
+    "sagoma": 13,
+    "ingombro": 0.7111,
+    "luci": 18,
+    "inutili": [
+      "prl \"x\" → \"t\"",
+      "prl \"Q\" → \"H\" — in quel momento nella griglia non c'erano celle \"Q\"",
+      "all \"tz\" → \"*t\" — le celle cercate c'erano, ma mai disposte come nel pattern",
+      "all \"x/Q\" → \"z/p\" — in quel momento nella griglia non c'erano celle \"x\"",
+      "all \"AEg****/*******/*******/***E***/*******/*******/*******/****EEE/****EEE/****EEE\" → \"*******/*******/*******/***N***/*******/*******/*******/****QQQ/****QQQ/****QQQ\" — le celle cercate c'erano, ma mai disposte come nel pattern",
+      "all \"Q .\" → \"o Q\" — in quel momento nella griglia non c'erano celle \"Q\"",
+      "all \"Q .\" → \"r Q\" — in quel momento nella griglia non c'erano celle \"Q\"",
+      "all \"QQQ/QQQ/QQQ\" → \"*r*/rrr/*r*\" — in quel momento nella griglia non c'erano celle \"Q\"",
+      "prl \"Q\" → \".\" — in quel momento nella griglia non c'erano celle \"Q\"",
+      "all \"*r*/rrr/*r* *.*/.../*.*\" → \"***/***/*** ***/*r*/***\" — le celle cercate c'erano, ma mai disposte come nel pattern",
+      "all \"N .\" → \"S N\" — in quel momento nella griglia non c'erano celle \"N\"",
+      "all \".../.N./...\" → \"rrr/r*r/rrr\" — in quel momento nella griglia non c'erano celle \"N\"",
+      "all \"N .\" → \"r m\" — in quel momento nella griglia non c'erano celle \"N\""
+    ],
+    "avvisi": [
+      "riga 32: pattern irregolari completati con \"*\": in \"*zzzzzzzzzzz/Pppppppppppp/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt\", out \"************/*yyyyyyyyyyy/*ggggggggggg/************/************/************/************/************/************/************/************/************/************/************/************/************/************/************\" (riparato)",
+      "10 frammenti staccati (1% dei voxel)",
+      "tocca i bordi laterali della griglia: forse è tagliato",
+      "tocca il soffitto della griglia: forse è tagliato in alto",
+      "colori mai usati: N E x z a P p Q b O H t s g c d v e f w X i I J h j M U u Y G n y q l"
+    ],
+    "errori": []
+  }
+}

@@ -2,6 +2,7 @@
 // An attempt that does not pass gets its own XML back, with the defects measured or, if the measures pass and the photos do not, the problems written
 // by who judged them. The prompt stays the same: everything new is in the message.
 
+import type { SizeTier } from '../../src/mj/classes';
 import type { Perso, Piano, Porta } from './misure';
 
 /** What each measure says, for who only reads the prompt and has never seen the bench. The numbers stay those of `SOGLIA`. */
@@ -23,6 +24,14 @@ export const SIGNIFICATO: Record<string, string> = {
   sagoma: 'le altezze diverse della cima, ciascuna su almeno l’1,5 % della pianta',
   rilievo: 'la parte delle facciate fuori dal loro piano principale',
   ingombro: 'la parte della pianta della scatola occupata',
+  statico: 'semi diversi danno lo stesso edificio: la forma deve dipendere dal seme',
+  voxel: 'i voxel pieni in un seme solo, sul totale, mediana delle coppie di semi',
+  pianta: 'le colonne occupate in un seme solo, sul totale, mediana delle coppie di semi',
+  perimetro: 'la parte del contorno esterno lontana da quello di un altro seme',
+  interno: 'il pavimento coperto raggiunto in un seme solo, sul totale',
+  'piani e stanze': 'quante liste diverse di quote dei piani e di stanze per piano danno i semi',
+  architetture: 'i semi che sono davvero un altro edificio',
+  scatola: 'il programma deve usare la scatola che riceve, senza una size sua',
 };
 
 export interface Esame {
@@ -38,7 +47,9 @@ export interface Esame {
 }
 
 function rigaDifetto(d: string): string {
-  const senso = SIGNIFICATO[d.slice(0, d.indexOf(':'))];
+  // With variance (T182) a defect says first where it falls: `enorme (…), seme 3: piani: 1`, `varianza a grande: perimetro: 0`.
+  const senza = d.replace(/^(?:.*?, seme \d+(?: e altri \d+)?|varianza a \S+): /, '');
+  const senso = SIGNIFICATO[senza.slice(0, senza.indexOf(':'))];
   return `- ${d}${senso ? ` — ${senso}` : ''}`;
 }
 
@@ -70,6 +81,8 @@ export interface Scheda {
   passa: boolean;
   difetti: Array<string | null>;
   misure?: { piani?: Piano[]; persi?: Perso[]; porta?: Porta };
+  /** The first size and seed that did not hold (T182), where the trace looks. */
+  caduta?: { taglia: SizeTier; seme: number };
 }
 
 /**

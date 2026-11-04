@@ -1,0 +1,234 @@
+{
+  "bersaglio": "pagoda",
+  "token": {
+    "input": 2,
+    "cacheScritta": 833,
+    "cacheLetta": 9287,
+    "output": 66881,
+    "inputTotale": 10122
+  },
+  "modello": "claude-opus-5-5",
+  "dollari": 1.3461493999999998,
+  "ms": 718311,
+  "caratteriXml": 13786,
+  "passa": false,
+  "difetti": [
+    "enorme (16 voxel per casella, gradino 3), seme 2: salti: 1 (serve ≥ 2)"
+  ],
+  "caduta": {
+    "taglia": "enorme",
+    "seme": 2
+  },
+  "voci": [
+    {
+      "id": "finisce",
+      "ok": true,
+      "valore": "4719 ms",
+      "richiesto": "entro 8000 ms"
+    },
+    {
+      "id": "valido",
+      "ok": true,
+      "valore": "sì",
+      "richiesto": "i controlli di check.ts"
+    },
+    {
+      "id": "piani",
+      "ok": true,
+      "valore": "2",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "testa",
+      "ok": true,
+      "valore": "1.5 1.5",
+      "richiesto": "≥ 1.5 caselle per piano"
+    },
+    {
+      "id": "stanze",
+      "ok": true,
+      "valore": "6",
+      "richiesto": "≥ 3"
+    },
+    {
+      "id": "murato",
+      "ok": true,
+      "valore": "0",
+      "richiesto": "≤ 0.25"
+    },
+    {
+      "id": "porta",
+      "ok": true,
+      "valore": "x 49, scarto 0.01, alta 1.5, libera",
+      "richiesto": "sul davanti, scarto ≤ 0.33, alta ≥ 1.5"
+    },
+    {
+      "id": "salti",
+      "ok": true,
+      "valore": "9",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "materiali",
+      "ok": true,
+      "valore": "14",
+      "richiesto": "≥ 6"
+    },
+    {
+      "id": "dominante",
+      "ok": true,
+      "valore": "0.33",
+      "richiesto": "≤ 0.6"
+    },
+    {
+      "id": "finestre",
+      "ok": true,
+      "valore": "36 su 4 lati",
+      "richiesto": "≥ 6 su ≥ 3 lati"
+    },
+    {
+      "id": "dettagli",
+      "ok": true,
+      "valore": "278, 0 lati vuoti",
+      "richiesto": "≥ 24, ≤ 1 lati vuoti"
+    },
+    {
+      "id": "rumore",
+      "ok": true,
+      "valore": "0.14",
+      "richiesto": "≤ 0.7"
+    },
+    {
+      "id": "sagoma",
+      "ok": true,
+      "valore": "15",
+      "richiesto": "≥ 4"
+    },
+    {
+      "id": "rilievo",
+      "ok": true,
+      "valore": "0.43",
+      "richiesto": "≥ 0.12"
+    },
+    {
+      "id": "ingombro",
+      "ok": true,
+      "valore": "0.57",
+      "richiesto": "≥ 0.3"
+    }
+  ],
+  "misure": {
+    "voxel": 78158,
+    "ms": 4719,
+    "finito": true,
+    "piani": [
+      {
+        "z": 2,
+        "quota": 0.1,
+        "area": 5.45,
+        "testa": 1.5,
+        "stanze": 4
+      },
+      {
+        "z": 34,
+        "quota": 1.7,
+        "area": 3.12,
+        "testa": 1.5,
+        "stanze": 2
+      }
+    ],
+    "cantina": 0,
+    "terrazze": 1,
+    "stanze": 6,
+    "murato": 0,
+    "persi": [],
+    "porta": {
+      "x": 49,
+      "y": 95,
+      "scarto": 0.025,
+      "alta": 1.5,
+      "libera": true
+    },
+    "salti": [
+      {
+        "x": 54,
+        "y": 4,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 8,
+        "y": 27,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 45,
+        "y": 26,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 24,
+        "y": 52,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 9,
+        "y": 67,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 12,
+        "y": 19,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 21,
+        "y": 91,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 21,
+        "y": 72,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 28,
+        "y": 27,
+        "z": 0,
+        "sale": false
+      }
+    ],
+    "materiali": 14,
+    "dominante": 0.33006218173443536,
+    "finestre": 36,
+    "latiConFinestre": 4,
+    "dettagli": 278,
+    "latiVuoti": 0,
+    "rumore": 0.14461538461538462,
+    "rilievo": 0.43458242159008026,
+    "sagoma": 15,
+    "ingombro": 0.5662,
+    "luci": 4279,
+    "inutili": [
+      "one \"bHb\" → \"*n*\" — le celle cercate c'erano, ma mai disposte come nel pattern",
+      "all \"nH\" → \"*n\" (e altre 1 regole) — in quel momento nella griglia non c'erano celle \"n\"",
+      "one \"nnnnnnnnn\" → \"*eeeeeee*\" — in quel momento nella griglia non c'erano celle \"n\"",
+      "prl \"n\" → \"h\" — in quel momento nella griglia non c'erano celle \"n\""
+    ],
+    "avvisi": [
+      "riga 44: pattern irregolari completati con \"*\": in \"*zzzzzzzzzzz/Pppppppppppp/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt\", out \"************/*yyyyyyyyyyy/*ggggggggggg/************/************/************/************/************/************/************/************/************/************/************/************/************/************/************\" (riparato)",
+      "4 frammenti staccati (0% dei voxel)",
+      "tocca i bordi laterali della griglia: forse è tagliato",
+      "tocca il soffitto della griglia: forse è tagliato in alto",
+      "colori mai usati: N E x z a P p Q b O H t s c d v e f w X i I J h j M U u Y G n r l m"
+    ],
+    "errori": []
+  }
+}

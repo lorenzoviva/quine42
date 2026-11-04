@@ -1,0 +1,207 @@
+{
+  "bersaglio": "futuristica",
+  "token": {
+    "input": 2,
+    "cacheScritta": 10125,
+    "cacheLetta": 0,
+    "output": 42057,
+    "inputTotale": 10127
+  },
+  "modello": "claude-opus-5-5",
+  "dollari": 0.922148,
+  "ms": 453604,
+  "caratteriXml": 11404,
+  "passa": true,
+  "difetti": [],
+  "voci": [
+    {
+      "id": "finisce",
+      "ok": true,
+      "valore": "4244 ms",
+      "richiesto": "entro 8000 ms"
+    },
+    {
+      "id": "valido",
+      "ok": true,
+      "valore": "sì",
+      "richiesto": "i controlli di check.ts"
+    },
+    {
+      "id": "piani",
+      "ok": true,
+      "valore": "2",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "testa",
+      "ok": true,
+      "valore": "1.5 1.5",
+      "richiesto": "≥ 1.5 caselle per piano"
+    },
+    {
+      "id": "stanze",
+      "ok": true,
+      "valore": "5",
+      "richiesto": "≥ 3"
+    },
+    {
+      "id": "murato",
+      "ok": true,
+      "valore": "0",
+      "richiesto": "≤ 0.25"
+    },
+    {
+      "id": "porta",
+      "ok": true,
+      "valore": "x 49, scarto 0.01, alta 1.5, libera",
+      "richiesto": "sul davanti, scarto ≤ 0.33, alta ≥ 1.5"
+    },
+    {
+      "id": "salti",
+      "ok": true,
+      "valore": "6",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "materiali",
+      "ok": true,
+      "valore": "16",
+      "richiesto": "≥ 6"
+    },
+    {
+      "id": "dominante",
+      "ok": true,
+      "valore": "0.22",
+      "richiesto": "≤ 0.6"
+    },
+    {
+      "id": "finestre",
+      "ok": true,
+      "valore": "29 su 4 lati",
+      "richiesto": "≥ 6 su ≥ 3 lati"
+    },
+    {
+      "id": "dettagli",
+      "ok": true,
+      "valore": "228, 0 lati vuoti",
+      "richiesto": "≥ 24, ≤ 1 lati vuoti"
+    },
+    {
+      "id": "rumore",
+      "ok": true,
+      "valore": "0.04",
+      "richiesto": "≤ 0.7"
+    },
+    {
+      "id": "sagoma",
+      "ok": true,
+      "valore": "7",
+      "richiesto": "≥ 4"
+    },
+    {
+      "id": "rilievo",
+      "ok": true,
+      "valore": "0.4",
+      "richiesto": "≥ 0.12"
+    },
+    {
+      "id": "ingombro",
+      "ok": true,
+      "valore": "0.56",
+      "richiesto": "≥ 0.3"
+    }
+  ],
+  "misure": {
+    "voxel": 54813,
+    "ms": 4244,
+    "finito": true,
+    "piani": [
+      {
+        "z": 2,
+        "quota": 0.1,
+        "area": 5.6075,
+        "testa": 1.5,
+        "stanze": 4
+      },
+      {
+        "z": 34,
+        "quota": 1.7,
+        "area": 1.8875,
+        "testa": 1.5,
+        "stanze": 1
+      }
+    ],
+    "cantina": 0,
+    "terrazze": 1,
+    "stanze": 5,
+    "murato": 0,
+    "persi": [],
+    "porta": {
+      "x": 49,
+      "y": 95,
+      "scarto": 0.025,
+      "alta": 1.5,
+      "libera": true
+    },
+    "salti": [
+      {
+        "x": 55,
+        "y": 42,
+        "z": 2,
+        "sale": false
+      },
+      {
+        "x": 74,
+        "y": 48,
+        "z": 2,
+        "sale": false
+      },
+      {
+        "x": 19,
+        "y": 21,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 26,
+        "y": 60,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 18,
+        "y": 42,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 4,
+        "y": 60,
+        "z": 0,
+        "sale": false
+      }
+    ],
+    "materiali": 16,
+    "dominante": 0.22115191651615493,
+    "finestre": 29,
+    "latiConFinestre": 4,
+    "dettagli": 228,
+    "latiVuoti": 0,
+    "rumore": 0.04201680672268908,
+    "rilievo": 0.40407775195436296,
+    "sagoma": 7,
+    "ingombro": 0.5632,
+    "luci": 5919,
+    "inutili": [
+      "prl \"tHb\" → \"*Ht\"",
+      "all \"tb\" → \"*t\" — le celle cercate c'erano, ma mai disposte come nel pattern"
+    ],
+    "avvisi": [
+      "6 frammenti staccati (1% dei voxel)",
+      "tocca i bordi laterali della griglia: forse è tagliato",
+      "tocca il soffitto della griglia: forse è tagliato in alto",
+      "colori mai usati: E x z a P p b H t s c d v e f w X i I J h j M U u Y G n r y q l o"
+    ],
+    "errori": []
+  }
+}

@@ -323,6 +323,30 @@ export function prova(xml: string, b: Bersaglio, o: OpzioniProva = {}): Prova {
   return { taglie, regge, statico: taglie.every((t) => t.varianza?.statico === true), varia, passa: regge && varia, ms: Date.now() - t0, esecuzioni };
 }
 
+/** What a trial says went wrong, for who has to correct the program (T182): at most `max` lines; the same defect at many seeds is one line. */
+export function difettiDiProva(p: Prova, max = 12): string[] {
+  const out: string[] = [];
+  const visti = new Set<string>();
+  for (const t of p.taglie)
+    for (const s of t.semi)
+      for (const d of s.difetti) {
+        const chiave = d.startsWith('il gioco') ? d : `${t.taglia} ${d.split(':')[0]}`;
+        if (visti.has(chiave)) continue;
+        visti.add(chiave);
+        const altri = t.semi.filter((x) => x.difetti.some((y) => y.split(':')[0] === d.split(':')[0])).length;
+        out.push(`${t.taglia} (${t.vpt} voxel per casella, gradino ${t.gradino}), seme ${s.seme}${altri > 1 ? ` e altri ${altri - 1}` : ''}: ${d}`);
+      }
+  for (const t of p.taglie) for (const d of t.difettiVarianza) out.push(`varianza a ${t.taglia}: ${d}`);
+  return out.length > max ? [...out.slice(0, max), `… e altri ${out.length - max}`] : out;
+}
+
+/** The first size and seed that do not hold, where it pays to look at the trace. */
+export function primaCaduta(p: Prova): { taglia: SizeTier; seme: number } | undefined {
+  for (const t of p.taglie)
+    for (const s of t.semi) if (s.difetti.length) return { taglia: t.taglia, seme: s.seme };
+  return undefined;
+}
+
 const SFONDO: [number, number, number] = [112, 150, 84];
 
 /** Pictures one under the other, centred on nothing: rows of a sheet. */

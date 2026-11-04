@@ -1,0 +1,118 @@
+{
+  "taglie": [
+    {
+      "taglia": "enorme",
+      "box": [
+        120,
+        120,
+        96
+      ],
+      "vpt": 16,
+      "gradino": 3,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [],
+          "ms": 7937
+        },
+        {
+          "seme": 2,
+          "difetti": [],
+          "ms": 7942
+        },
+        {
+          "seme": 3,
+          "difetti": [],
+          "ms": 8037
+        },
+        {
+          "seme": 4,
+          "difetti": [],
+          "ms": 7735
+        },
+        {
+          "seme": 5,
+          "difetti": [],
+          "ms": 7878
+        }
+      ],
+      "regge": true,
+      "varianza": {
+        "voxel": 0.3904827637345025,
+        "colore": 0.06622029820828192,
+        "pianta": 0.4859579500687536,
+        "perimetro": 0,
+        "interno": 0.6668499208588773,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 3,
+        "architetture": 5,
+        "statico": false
+      },
+      "difettiVarianza": [
+        "perimetro: 0 (serve ≥ 0.15)"
+      ]
+    },
+    {
+      "taglia": "gargantuesca",
+      "box": [
+        120,
+        120,
+        96
+      ],
+      "vpt": 12,
+      "gradino": 2,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [],
+          "ms": 7911
+        },
+        {
+          "seme": 2,
+          "difetti": [],
+          "ms": 7928
+        },
+        {
+          "seme": 3,
+          "difetti": [
+            "finisce: no (serve entro 8000 ms)",
+            "valido: non termina: dopo 1025 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)"
+          ],
+          "ms": 8250
+        },
+        {
+          "seme": 4,
+          "difetti": [],
+          "ms": 7739
+        },
+        {
+          "seme": 5,
+          "difetti": [],
+          "ms": 7850
+        }
+      ],
+      "regge": false,
+      "varianza": {
+        "voxel": 0.3904827637345025,
+        "colore": 0.06622029820828192,
+        "pianta": 0.4859579500687536,
+        "perimetro": 0,
+        "interno": 0.657686454018724,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 3,
+        "architetture": 5,
+        "statico": false
+      },
+      "difettiVarianza": [
+        "perimetro: 0 (serve ≥ 0.15)"
+      ]
+    }
+  ],
+  "regge": false,
+  "statico": false,
+  "varia": false,
+  "passa": false,
+  "ms": 79377
+}

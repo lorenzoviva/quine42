@@ -1,0 +1,116 @@
+{
+  "taglie": [
+    {
+      "taglia": "grande",
+      "box": [
+        100,
+        100,
+        80
+      ],
+      "vpt": 20,
+      "gradino": 4,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [],
+          "ms": 3722
+        },
+        {
+          "seme": 2,
+          "difetti": [],
+          "ms": 3782
+        },
+        {
+          "seme": 3,
+          "difetti": [],
+          "ms": 3629
+        },
+        {
+          "seme": 4,
+          "difetti": [],
+          "ms": 3683
+        },
+        {
+          "seme": 5,
+          "difetti": [],
+          "ms": 3605
+        }
+      ],
+      "regge": true,
+      "varianza": {
+        "voxel": 0.3325273277428577,
+        "colore": 0.05212547870776986,
+        "pianta": 0.1377801025134578,
+        "perimetro": 0.05707762557077625,
+        "interno": 0.3436330571028617,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 3,
+        "architetture": 2,
+        "statico": false
+      },
+      "difettiVarianza": [
+        "pianta: 0.14 (serve ≥ 0.15)",
+        "perimetro: 0.06 (serve ≥ 0.15)",
+        "interno: 0.34 (serve ≥ 0.35)",
+        "architetture: 2 su 5 semi (serve ≥ 3)"
+      ]
+    },
+    {
+      "taglia": "enorme",
+      "box": [
+        120,
+        120,
+        96
+      ],
+      "vpt": 16,
+      "gradino": 3,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [],
+          "ms": 5854
+        },
+        {
+          "seme": 2,
+          "difetti": [],
+          "ms": 5768
+        },
+        {
+          "seme": 3,
+          "difetti": [],
+          "ms": 5949
+        },
+        {
+          "seme": 4,
+          "difetti": [],
+          "ms": 5635
+        },
+        {
+          "seme": 5,
+          "difetti": [],
+          "ms": 5658
+        }
+      ],
+      "regge": true,
+      "varianza": {
+        "voxel": 0.5087775801594743,
+        "colore": 0.07034993929096114,
+        "pianta": 0.3403735792727825,
+        "perimetro": 0.23538620857699805,
+        "interno": 0.5423206896907535,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 3,
+        "architetture": 4,
+        "statico": false
+      },
+      "difettiVarianza": []
+    }
+  ],
+  "regge": true,
+  "statico": false,
+  "varia": false,
+  "passa": false,
+  "ms": 47426
+}

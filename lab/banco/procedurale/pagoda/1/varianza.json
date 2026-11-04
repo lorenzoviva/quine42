@@ -1,0 +1,113 @@
+{
+  "taglie": [
+    {
+      "taglia": "grande",
+      "box": [
+        100,
+        100,
+        80
+      ],
+      "vpt": 20,
+      "gradino": 4,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [],
+          "ms": 4786
+        },
+        {
+          "seme": 2,
+          "difetti": [],
+          "ms": 4788
+        },
+        {
+          "seme": 3,
+          "difetti": [],
+          "ms": 4693
+        },
+        {
+          "seme": 4,
+          "difetti": [],
+          "ms": 4774
+        },
+        {
+          "seme": 5,
+          "difetti": [],
+          "ms": 4910
+        }
+      ],
+      "regge": true,
+      "varianza": {
+        "voxel": 0.6568431269875353,
+        "colore": 0.17721320478694746,
+        "pianta": 0.5006864231736463,
+        "perimetro": 0.2225861008610086,
+        "interno": 0.719625022016683,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 3,
+        "architetture": 5,
+        "statico": false
+      },
+      "difettiVarianza": []
+    },
+    {
+      "taglia": "enorme",
+      "box": [
+        120,
+        120,
+        96
+      ],
+      "vpt": 16,
+      "gradino": 3,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [],
+          "ms": 7722
+        },
+        {
+          "seme": 2,
+          "difetti": [
+            "salti: 1 (serve ≥ 2)"
+          ],
+          "ms": 7814
+        },
+        {
+          "seme": 3,
+          "difetti": [],
+          "ms": 7970
+        },
+        {
+          "seme": 4,
+          "difetti": [],
+          "ms": 7772
+        },
+        {
+          "seme": 5,
+          "difetti": [],
+          "ms": 7805
+        }
+      ],
+      "regge": false,
+      "varianza": {
+        "voxel": 0.6023759076804117,
+        "colore": 0.137251797810383,
+        "pianta": 0.5154352586906662,
+        "perimetro": 0.3219596590429572,
+        "interno": 0.6811783214181827,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 2,
+        "architetture": 5,
+        "statico": false
+      },
+      "difettiVarianza": []
+    }
+  ],
+  "regge": false,
+  "statico": false,
+  "varia": true,
+  "passa": false,
+  "ms": 63167
+}

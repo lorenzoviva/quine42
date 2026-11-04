@@ -1,0 +1,111 @@
+{
+  "taglie": [
+    {
+      "taglia": "enorme",
+      "box": [
+        120,
+        120,
+        96
+      ],
+      "vpt": 16,
+      "gradino": 3,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [],
+          "ms": 6279
+        },
+        {
+          "seme": 2,
+          "difetti": [],
+          "ms": 6132
+        },
+        {
+          "seme": 3,
+          "difetti": [],
+          "ms": 6169
+        },
+        {
+          "seme": 4,
+          "difetti": [],
+          "ms": 6223
+        },
+        {
+          "seme": 5,
+          "difetti": [],
+          "ms": 6481
+        }
+      ],
+      "regge": true,
+      "varianza": {
+        "voxel": 0.5345632264195113,
+        "colore": 0.16223036484097308,
+        "pianta": 0.4418998893743312,
+        "perimetro": 0.1601299338256163,
+        "interno": 0.6737982279245296,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 2,
+        "architetture": 4,
+        "statico": false
+      },
+      "difettiVarianza": []
+    },
+    {
+      "taglia": "gargantuesca",
+      "box": [
+        120,
+        120,
+        96
+      ],
+      "vpt": 12,
+      "gradino": 2,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [],
+          "ms": 6307
+        },
+        {
+          "seme": 2,
+          "difetti": [],
+          "ms": 6215
+        },
+        {
+          "seme": 3,
+          "difetti": [],
+          "ms": 6628
+        },
+        {
+          "seme": 4,
+          "difetti": [],
+          "ms": 6425
+        },
+        {
+          "seme": 5,
+          "difetti": [],
+          "ms": 6571
+        }
+      ],
+      "regge": true,
+      "varianza": {
+        "voxel": 0.5345632264195113,
+        "colore": 0.16223036484097308,
+        "pianta": 0.4418998893743312,
+        "perimetro": 0.1745405386564957,
+        "interno": 0.6707214996206872,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 3,
+        "architetture": 4,
+        "statico": false
+      },
+      "difettiVarianza": []
+    }
+  ],
+  "regge": true,
+  "statico": false,
+  "varia": true,
+  "passa": true,
+  "ms": 63599
+}

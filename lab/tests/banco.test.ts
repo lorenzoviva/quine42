@@ -206,6 +206,12 @@ describe('i modelli del giro di conferma (T173)', () => {
 });
 
 describe('la seconda richiesta (T173)', () => {
+  it('un difetto di un seme o di una taglia conserva il suo significato (T182)', () => {
+    const testo = testoSeconda('Edificio: prova', '<sequence values="B"/>', { difetti: ['enorme (16 voxel per casella, gradino 3), seme 3 e altri 1: piani: 1 (serve ≥ 2)', 'varianza a grande: perimetro: 0 (serve ≥ 0.15)'] });
+    expect(testo).toContain(SIGNIFICATO.piani);
+    expect(testo).toContain(SIGNIFICATO.perimetro);
+  });
+
   it('chi passa misure e foto non torna; chi non passa le misure torna con i difetti; chi passa le misure torna con i problemi delle foto', () => {
     expect(daCorreggere({ passa: true, difetti: [] })).toBeUndefined();
     expect(daCorreggere({ passa: true, difetti: [] }, '  \n')).toBeUndefined();
