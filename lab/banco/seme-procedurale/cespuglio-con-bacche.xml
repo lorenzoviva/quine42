@@ -1,0 +1,31 @@
+<!-- Cespuglio con bacche, procedurale (Cantiere 2): le foglie e le bacche rosse dell'originale. Il seme sceglie da due a quattro ciuffi su un
+     disco al suolo e quanto sale ciascuno; le foglie li uniscono in un cespuglio solo e le bacche nascono dove la luce arriva. -->
+<sequence values="BLHDIVc" size="20 20 16" symmetry="(xy)" name="Cespuglio con bacche">
+  <color symbol="L" value="3d7a35" name="foglie"/>
+  <color symbol="H" value="62a447" name="foglie chiare"/>
+  <color symbol="D" value="28552a" name="foglie scure"/>
+  <color symbol="I" value="c8323c" name="bacche"/>
+  <color symbol="V" hidden="True" name="dove nasce un ciuffo"/>
+  <color symbol="c" hidden="True" name="un ciuffo che sale"/>
+  <ellipsoid at="10 10 0" size="11 11 1" color="V"/>
+  <box at="10 10 0" size="1 1 1" color="c"/>
+  <one in="V" out="c" steps="1"/>
+  <prl steps="1" in="V" out="c" p="0.04"/>
+  <all in="V" out="B"/>
+  <!-- Ogni ciuffo sale di qualche voxel, a caso -->
+  <prl steps="9" in="B c" out="c c" p="0.55"/>
+  <!-- Le foglie: prima attorno ai ciuffi, poi le uniscono -->
+  <all steps="2" symmetry="(xyz)" in="cB" out="cL"/>
+  <one steps="520" symmetry="(xyz)" in="LB" out="LL"/>
+  <one steps="200" in="LB" out="LL"/>
+  <all in="c" out="L"/>
+  <convolution neighborhood="Moore" steps="2">
+    <rule in="B" out="L" values="L" sum="14..26"/>
+    <rule in="L" out="B" values="L" sum="1..6"/>
+  </convolution>
+  <prl steps="1">
+    <rule in="B L" out="B H" p="0.6"/>
+    <rule in="L" out="D" p="0.2"/>
+  </prl>
+  <prl steps="1" in="[LH]B" out="IB" p="0.05"/>
+</sequence>

@@ -1,0 +1,67 @@
+<!-- Quercia, procedurale (Cantiere 2): i colori dell'originale (tronco, legno in ombra, chioma, ombra, foglie medie, foglie al sole). Il seme
+     decide dove il fusto si apre (fra 14 e 22 voxel), quante branche partono e dove vanno; la chioma cresce dalle branche dentro una cupola
+     larga, così ogni quercia ha il suo profilo a nuvole. -->
+<sequence values="BTtFfLYhkVrx" size="40 40 60" symmetry="(xy)" name="Quercia">
+  <color symbol="T" value="6b4a2e" name="tronco base"/>
+  <color symbol="t" value="4a2f19" name="legno ombra"/>
+  <color symbol="F" value="2f6b3a" name="chioma base"/>
+  <color symbol="f" value="1a4023" name="chioma ombra"/>
+  <color symbol="L" value="4b8f4a" name="foglie medie"/>
+  <color symbol="Y" value="7ec850" name="foglie luce"/>
+  <color symbol="h" hidden="True" name="quote possibili della biforcazione"/>
+  <color symbol="k" hidden="True" name="la quota scelta"/>
+  <color symbol="V" hidden="True" name="la cupola della chioma"/>
+  <color symbol="r" hidden="True" name="punta di una branca"/>
+  <color symbol="x" hidden="True" name="sotto la chioma"/>
+  <!-- La biforcazione -->
+  <box at="0 0 14" size="1 1 9" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="kB" out="kk"/>
+  <box at="20 20 0" size="1 1 1" color="r"/>
+  <one steps="40">
+    <rule in="B r" out="r T" p="1"/>
+    <rule in="B* *r" out="r* *T" p="0.05"/>
+  </one>
+  <all in="k" out="B"/>
+  <!-- Le branche: da tre a sei, verso l'alto e verso fuori -->
+  <ellipsoid at="20 20 14" size="39 39 38" color="V" on="B"/>
+  <box at="20 20 0" size="40 40 13" color="x" on="[BV]"/>
+  <one steps="2" in="Vr" out="r*"/>
+  <prl steps="1" in="V r" out="r *" p="0.6"/>
+  <prl steps="1" in="V* *r" out="r* **" p="0.18"/>
+  <all in="r" out="T"/>
+  <one steps="3" in="V* *T" out="r* **"/>
+  <one steps="110">
+    <rule in="V* *r" out="r* *T" p="1"/>
+    <rule in="Vr" out="rT" p="1"/>
+    <rule in="V r" out="r T" p="0.3"/>
+  </one>
+  <all in="r" out="T"/>
+  <!-- Il fusto massiccio e le radici -->
+  <all steps="2" in="TB" out="TT"/>
+  <all steps="1" in="TB" out="tt"/>
+  <cylinder at="20 20 0" size="13 13 4" color="t" on="[Bx]"/>
+  <line at="20 20 7" to="12 12 0" r="2" color="t" on="[Bx]"/>
+  <line at="20 20 7" to="28 28 0" r="2" color="T" on="[Bx]"/>
+  <!-- La chioma dalle branche -->
+  <all steps="3" symmetry="(xyz)">
+    <rule in="[Tt]V" out="*F"/>
+    <rule in="FV" out="FF"/>
+  </all>
+  <one steps="9000" symmetry="(xyz)" in="FV" out="FF"/>
+  <all in="[Vx]" out="B"/>
+  <convolution neighborhood="Moore" steps="2">
+    <rule in="B" out="F" values="F" sum="15..26"/>
+    <rule in="F" out="B" values="B" sum="22..26"/>
+  </convolution>
+  <prl steps="1">
+    <rule in="F B" out="f B" p="0.85"/>
+  </prl>
+  <prl steps="1">
+    <rule in="B F" out="B L" p="0.9"/>
+  </prl>
+  <prl steps="1">
+    <rule in="B L" out="B Y" p="0.75"/>
+  </prl>
+</sequence>
