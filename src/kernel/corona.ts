@@ -193,6 +193,7 @@ export function tileNear(it: StudioItem, x: number, y: number): { x: number; y: 
 /** The Council at its round table: who sits where, and the room behind each seat's teleport. */
 export const SEATS: Array<{ agent: string; room: string }> = [
   { agent: 'narratore', room: 'persone' },
+  { agent: 'attore', room: 'persone' },
   { agent: 'cartografo', room: 'luoghi' },
   { agent: 'artista', room: 'galleria' },
   { agent: 'scultore', room: 'galleria' },
@@ -367,7 +368,7 @@ const ROOMS: Record<string, { name: string; color: string; teams: string[] }> = 
   luoghi: { name: 'Ufficio dei Luoghi', color: '#9ad27a', teams: ['cartografo'] },
   oggetti: { name: 'Magazzino degli Oggetti', color: '#e0b070', teams: ['fisico'] },
   cose: { name: 'Laboratorio delle Cose', color: '#d89a6a', teams: ['fisico'] },
-  persone: { name: 'Studio dei Personaggi', color: '#ffb38a', teams: ['narratore'] },
+  persone: { name: 'Studio dei Personaggi', color: '#ffb38a', teams: ['narratore', 'attore'] },
   magia: { name: 'Torre della Magia', color: '#c48aff', teams: ['narratore'] },
   altro: { name: 'Archivio', color: '#9fb2a8', teams: ['ingegnere'] },
   galleria: { name: "Galleria dell'Artista", color: '#ff8ad8', teams: ['artista', 'musicista'] },
@@ -522,8 +523,9 @@ export class Corona {
         if (council && f === 0) {
           placed.push({ kind: 'table', label: "il tavolo del Concilio: al centro, l'universo", x: ox + Math.floor(TABLE.cx), y: oy + Math.floor(TABLE.cy) });
           SEATS.forEach((s, i) => {
-            const a = -Math.PI / 2 + (i / SEATS.length) * Math.PI * 2;
-            placed.push({ kind: 'desk', label: `il posto del ${s.agent}`, target: s.agent, x: ox + Math.round(TABLE.cx + Math.cos(a) * 5), y: oy + Math.round(TABLE.cy + Math.sin(a) * 3.4) });
+            // Half a step off the top, so that with an even number of seats none falls on the column of the exit.
+            const a = -Math.PI / 2 + ((i + 0.5) / SEATS.length) * Math.PI * 2;
+            placed.push({ kind: 'desk', label: `il posto ${ofThe(AGENTS[s.agent as keyof typeof AGENTS].name)}`, target: s.agent, x: ox + Math.round(TABLE.cx + Math.cos(a) * 5), y: oy + Math.round(TABLE.cy + Math.sin(a) * 3.4) });
             placed.push({ kind: 'portal', label: s.room ? `teletrasporto: ${ROOMS[s.room]?.name ?? s.room}` : 'teletrasporto: fuori, sul viale', target: s.room, x: ox + Math.round(TABLE.cx + Math.cos(a) * 7.6), y: oy + Math.max(1, Math.min(ROOM_H - 2, Math.round(TABLE.cy + Math.sin(a) * 4.9))) });
           });
         } else if (f === 0) {

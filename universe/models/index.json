@@ -311,6 +311,12 @@
   "autore": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
+ "corona-gerboa-attore": {
+  "classe": "persona",
+  "nome": "Gerboa Attore (corona)",
+  "autore": "claude-opus-5-5 (Claude Code, T158)",
+  "vpt": 20
+ },
  "schermo-scritte": {
   "classe": "oggetto",
   "nome": "Schermo scritte",

@@ -3,6 +3,7 @@
 // of the file it is changing; members appear (teleport) where they are needed instead of walking
 // round the ring. Only those actually talking to each other in the Council's feed are seen talking.
 // The Referente waits for the wanderer on the ring and takes requests to the right team.
+// The Actor (T158) sits at the table and has its post in the Studio of the Characters, on or off: an agent nobody calls just rests.
 // Real space, kernel-driven, no Lua and no model calls.
 
 import { AGENTS, type AgentId, type FeedEntry } from './agents/council';

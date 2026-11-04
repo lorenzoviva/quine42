@@ -205,7 +205,7 @@ site/                   il sito web (ADR-0095, T97): landing, carte 3D, sessioni
 | Arbitro | coerenza tra narrativa, aspetto, fisica e codice; rimanda all'agente responsabile; tiene le sessioni del Concilio |
 | Referente | nella corona accoglie il viandante trasceso e porta le sue richieste alla squadra giusta (Fucina, Cartografo, Scultore, regole, pacchetti; in multigiocatore dà al master le rune che chiede) |
 | Musicista | nella casa dell'Artista (ADR-0127): scrive i programmi sonori di ciò che il mondo chiede (un ambiente che non ha un brano) e di ciò che il viandante chiede al Referente; il validatore applica le soglie dell'analisi e l'invalido torna a lui col motivo |
-| Attore | solo se il master lo accende (`ai.attore`, ADR-0116): interpreta gli individui (`npc.reply`, `npc.dialogue`) dalle **schede** che il Narratore scrive una volta per individuo; non inventa fatti del mondo |
+| Attore | solo se il master lo accende (`ai.attore`, ADR-0116): interpreta gli individui (`npc.reply`, `npc.dialogue`) dalle **schede** che il Narratore scrive una volta per individuo; non inventa fatti del mondo; nello studio ha il suo gerboa, il posto al tavolo accanto al Narratore e la console, e a opzione spenta resta a riposo (T158) |
 
 Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 

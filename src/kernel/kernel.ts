@@ -4424,7 +4424,7 @@ export class Kernel {
       'corona-drone', 'corona-treno',
       'corona-gerboa', 'corona-gerboa-narratore', 'corona-gerboa-cartografo',
       'corona-gerboa-artista', 'corona-gerboa-scultore', 'corona-gerboa-fisico',
-      'corona-gerboa-ingegnere', 'corona-gerboa-arbitro', 'corona-gerboa-referente', 'corona-gerboa-musicista',
+      'corona-gerboa-ingegnere', 'corona-gerboa-arbitro', 'corona-gerboa-referente', 'corona-gerboa-musicista', 'corona-gerboa-attore',
       'schermo-scritte', 'schermo-struttura', 'circuito-3D'
     ];
     for (const m of extra) {
@@ -4710,6 +4710,8 @@ export class Kernel {
     if (t === 'action.judge') return 'modules/core.effects/logic.lua';
     if (t === 'spell.name') return this.files['modules/magic.spells/manifest.json'] ? 'modules/magic.spells/manifest.json' : 'modules/magic.runes/manifest.json';
     if (t.startsWith('model.')) return 'world/style.md';
+    // The Actor's lines are about no file: it speaks from its post in the Studio of the Characters.
+    if (e.from === 'attore') return undefined;
     return e.from === 'kernel' ? undefined : `prompts/agents/${e.from}.md`;
   }
 
