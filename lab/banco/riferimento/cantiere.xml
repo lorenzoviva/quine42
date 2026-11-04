@@ -1,4 +1,4 @@
-<sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryql" symmetry="(xy)" ground="E" origin="bottom">
+<sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryql" symmetry="(xy)" suolo="E" origin="bottom">
   <union symbol="1" values="be"/>
   <union symbol="2" values="tsdcfv"/>
   <union symbol="3" values="tb"/>

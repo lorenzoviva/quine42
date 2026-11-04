@@ -7,7 +7,7 @@ Lo stesso XML gira con almeno 5 semi e 2 taglie: scatola da 100×100×80 (20 vox
 x da sinistra a destra, y dal retro al davanti (il davanti è y grande), z dal basso in alto. `values` sono le lettere, una lettera per cella (la prima, B, è l'aria), solo lettere: le cifre non hanno colore e servono per i nomi delle `union`. Un pattern: righe (y crescente) separate da `/`, strati separati da spazi, **lo strato in alto per primo**: `in="B t"` è t con sopra l'aria. `*` è qualunque cella (in `out`: non cambia), `[ab]` è a oppure b, `<union symbol="1" values="ab"/>` dà un nome a un insieme.
 - `<one>` riscrive una corrispondenza a caso per passo, `<all>` tutte quelle che non si sovrappongono, `<prl>` ognuna con la sua probabilità (`p` sta sulla `<rule>`; un solo passo). Senza `steps` un nodo va finché può; `steps="N"` lo ferma dopo N passi. I nodi girano in ordine.
 - La simmetria della radice, `(xy)`, prova ogni regola in tutte le direzioni del piano; `symmetry="()"` solo come è scritta, `(x)` e `(y)` anche specchiata.
-- `ground="E"` riempie lo strato z=0, `origin="bottom"` mette la seconda lettera al centro del pavimento.
+- `suolo="E"` è la lettera del suolo: prima che il programma parta, il kernel la scrive su tutto lo strato dove sta il suolo del mondo, a ogni taglia, e `origin="bottom"` mette lì, al centro, la seconda lettera. Senza cantina è z=0; con la cantina è più in alto, e quanto dipende dalla taglia: il programma non lo sa e non lo conta. `ground="Z"` riempie lo strato z=0, il fondo della scatola.
 - Una lettera senza `<color>` usa un colore predefinito: **ogni marcatore deve sparire alla fine**, riscritto da una regola. `glow="True"` dà luce, `alpha="0.5"` è vetro. `<action name="apri" label="Apri la porta">` apre la porta.
 
 ## Il corpo
@@ -23,7 +23,7 @@ Il corpo è largo 9 voxel (passa in 11), cammina sui pavimenti e non ci passa se
 ## Lo scheletro
 Regge 19-20 semi su 20 alle due taglie, ed è una palazzina qualunque: è il punto di partenza, non il risultato.
 ```xml
-<sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryql" symmetry="(xy)" ground="E" origin="bottom">
+<sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryql" symmetry="(xy)" suolo="E" origin="bottom">
   <union symbol="1" values="be"/>
   <union symbol="2" values="tsdcfv"/>
   <union symbol="3" values="tb"/>
@@ -122,7 +122,7 @@ Regge 19-20 semi su 20 alle due taglie, ed è una palazzina qualunque: è il pun
 ```
 Perché regge, ed è ciò che non si rompe:
 - **Sezione 1**: un marcatore cammina solo in avanti se la regola guarda la sua scia (`[Nx]az → *xa`); se può attraversare una linea (`[zp]`), la sua scia ha una lettera diversa (`l`), altrimenti torna indietro. Il reticolo è sempre 3×3 campate da 30: `E` fuori, `z` le campate, `p` le linee, `P` gli incroci, `O` la porta.
-- **Sezione 2**: un riempimento (`tz → *t`) si ferma alle linee. Si cresce passando un muro nel punto in cui si mette la porta: così tutto resta collegato, senza cammini da calcolare. Le porte stanno a 1-11 da un pilastro: il resto del muro resta libero. La scala si sceglie **prima** delle altre porte, nella campata davanti: una striscia di 11×17 attaccata a un pilastro, lontana dalla porta (`v`), che attraversa il muro verso una vicina (`y`); 16 passi di scala salgono 32, cioè dal pavimento (z=1) al pavimento di sopra (z=33), in linea oltre `y`. Attorno a lei `v` tiene lontane le altre porte. Le colonne `s`, `c`, `d` non hanno il solaio: è il foro. Una lettera per ogni cosa che sale in modo diverso.
+- **Sezione 2**: un riempimento (`tz → *t`) si ferma alle linee. Si cresce passando un muro nel punto in cui si mette la porta: così tutto resta collegato, senza cammini da calcolare. Le porte stanno a 1-11 da un pilastro: il resto del muro resta libero. La scala si sceglie **prima** delle altre porte, nella campata davanti: una striscia di 11×17 attaccata a un pilastro, lontana dalla porta (`v`), che attraversa il muro verso una vicina (`y`); 16 passi di scala salgono 32, cioè dal pavimento (un voxel sopra il suolo) al pavimento di sopra, in linea oltre `y`. Attorno a lei `v` tiene lontane le altre porte. Le colonne `s`, `c`, `d` non hanno il solaio: è il foro. Una lettera per ogni cosa che sale in modo diverso.
 - **Sezione 3**: i muri dicono cosa sono dalle lettere ai loro lati: `w` esterno basso, `X` esterno alto, `i`, `I` interni, `J` interno sotto ed esterno sopra, `h`, `H`, `j` porte interne. `2` è tutto ciò che è alto, `1` ciò che è basso.
 - **Sezione 4**: `in="B t" out="t F"` fa salire la testa `t` di uno strato e lascia `F`; `steps` è quanto sale: **le quote sono numeri di passi**, una riga per tratto. Ciò che finisce scrive `R S` e la testa sparisce. Una lettera nuova sulla pianta (`i`, `I` sono già contrafforti: sono due muri davanti a un muro) sale con una riga sua.
 - **Il tempo**: una lettera rara nella prima cella (in basso a sinistra) costa poco; un pattern che comincia con `*` o con l'aria su tutta la griglia costa molto.
@@ -135,7 +135,33 @@ L'edificio chiesto deve riconoscersi al primo sguardo: non consegnare lo schelet
 - **Il tetto**: la metà di ciò che si vede. A falde o a gradoni, sullo strato `R`: `<all in="***/*B*/*** *R*/RRR/*R*" out="***/*R*/*** ***/***/***" steps="10" symmetry="()"/>` sale di uno strato sopra le celle che hanno `R` attorno, fino al colmo; con una lettera per falda o un'altra lettera in cima si legge il colmo; per le gronde `RB → *R` nello strato prima. Merli: `WWWWWWWW → MMMMmmmm` sulla cima di un muro. Lanterne, comignoli, ciminiere, antenne: `<one in="B B R" out="* D *" steps="2" symmetry="()"/>` e `<all in="B D" out="D *" steps="N" symmetry="()"/>` (una ciminiera è alta e snella).
 - **Le facciate**: regole sui muri, dopo le colonne: fasce (`U`, `u`), tubi, travi a vista, ingranaggi, contrafforti, insegna sopra la porta. Le regole in piano valgono sulle quattro facce, così ogni lato ha le sue cose a seconda del seme.
 - **Dentro**: ogni stanza chiesta si riconosce. Nelle campate che devono restare sgombre: tappeti e pavimenti di un'altra lettera (alti 1), cose appese ai muri sopra le teste, luci. Nelle sale di due campate: arredi con una regola sulla pianta contro un muro (lettera sua, sale di 8-20 strati): banco, botti, letto, altare. Mai in mezzo.
-- **Se il suolo non è a z=0** (cantina, `base` voxel sotto il suolo): lo strato z=0 è sottoterra. Chi non è cantina non scrive nulla di visibile sotto il suolo dove il corpo cammina: sale lasciando `B` fino al suolo, i soli muri possono avere la fondazione piena. Nelle colonne con qualcosa di visibile sotto il suolo il corpo non sta oltre un gradino sopra ciò che ha sotto i piedi: la scala della cantina ha pedate da 6 voxel e alzate da 3 (`in="*BBBBBBB *BBBBBB* *BBBBBB* mn******" out="*KKKKKmn *KKKKKK* *KKKKKK* KK******"`, `steps` le pedate), parte da una campata-cantina con il pavimento pieno fin sotto e sbocca in linea. Almeno due campate unite: 2×2 caselle sgombre.
+- **Se il messaggio dice che c'è una cantina**: il suolo è `E` come sempre, e lo scheletro sale da lì senza cambiare un numero. Sotto il suolo c'è aria, e chi non è cantina non ci scrive nulla. Si scava dal suolo in giù, **con regole senza `steps`, che si fermano al fondo**: così lo stesso XML regge ogni profondità. Aggiungi `ground="Z"`, `Z` nei `values` e `Z → B` nella pulizia. Una persona ci deve stare in piedi: la cantina è un **pozzo** di due campate in linea, senza pavimento al suolo, coperto dal tetto delle campate basse. Questa ricetta regge 8 semi su 8 alle due taglie e varia; aggiungile `m o Z` ai `values`, `o x Q` all'union `1`, e un colore ad `a` (la fondazione):
+  - Dopo `tz → *t`, **prima** della scala: una campata accanto a quella davanti, poi le due campate del pozzo, in linea dietro una campata `t`, con la porta `m` contro un pilastro (`x`, `Q` sono le prime due file dietro la porta: la testa della scala).
+    ```xml
+    <one in="*P*/zpt/zpt/zpt/zpt/zpt/zpt/zpt/zpt/zpt/zpt/zpt/zpt" out="***/***/***/***/***/***/tH*/***/***/***/***/***/***" symmetry="(x)" steps="1"/>
+    <all in="tz" out="*t"/>
+    <one in="*t/Pp/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*p/*z" out="**/*m/*o/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/*l/*o" steps="1"/>
+    <all in="oz" out="*o"/>
+    <all in="lp" out="*l"/>
+    <prl in="l" out="o"/>
+    <all in="mp" out="*m" steps="10"/>
+    <all in="m/o" out="*/x"/>
+    <all in="x/o" out="*/Q"/>
+    ```
+  - Dopo `vt → *v steps="6"`: `<all in="m/t" out="*/v"/>`, così la scala non sbarra la porta. La porta fra le campate alte diventa `<all>` senza `steps`, perché le campate alte ora sono tre: da una sola scala si deve arrivare a tutte. Dopo `v → t`: `<prl in="m" out="H"/>`. Le campate `b` aggiunte diventano due: il pozzo ne ha già prese due. Le panche (`qqqqqqqqq`, `zzzzzzzzz`) salgono a `steps="10"`: con meno campate libere restano meno posti per i salti.
+  - Nelle colonne, in testa alle righe: nella prima `B o → o l`, `B x → x K`, `B Q → Q K`; nella seconda `B o → o B`, `B x → o m`, `B Q → o N`; in quella da `steps="30"` `B o → o B`; in quella che chiude il tetto basso `B o → R S`. Il pozzo sale come una campata bassa, ma lascia `l` al suolo e niente pavimento.
+  - Dopo le colonne, prima della scala che sale:
+    ```xml
+    <all in="Sl" out="al"/>
+    <all in="l B" out="* l" symmetry="()"/>
+    <all in="a B" out="* a" symmetry="()"/>
+    <all in="a Z" out="* a" symmetry="()"/>
+    <all in="l Z" out="* A" symmetry="()"/>
+    <prl in="l" out="B"/>
+    <all in="mN****** ******** ******** **BBBBBB" out="KK****** ******** ******** **KKKKmN"/>
+    <prl><rule in="m" out="K"/><rule in="N" out="K"/></prl>
+    ```
+    `a` è la fondazione dei muri attorno al pozzo, `l` il vuoto che scende, `A` il pavimento in fondo. La scala scende con alzate da 3 e pedate da 6 finché c'è spazio: sopra un pozzo il corpo non sta oltre un gradino da ciò che ha sotto i piedi, quindi questa, non quella da 2 e 1. Sotto è piena (`K B → * K`, che lo scheletro ha già). Il tempo: così il programma è già a 7 secondi su 8 a 120×120, quindi facciate e tetto con regole che partono da una lettera rara.
 
 ## Come farlo
 Decidi prima, in poche righe, cosa aggiungi allo scheletro e quale lettera per cosa. Poi scrivi il programma intero, in ordine: reticolo, progetto, muri, colonne, scala, facciate, tetto, pulizia. Controlla solo: ogni lettera è nei `values`, ogni pattern ha `in` e `out` della stessa forma, ogni marcatore sparisce.
