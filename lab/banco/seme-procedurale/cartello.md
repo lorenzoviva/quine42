@@ -8,7 +8,7 @@ Classe `mobile`, scatola 20 × 20 × 20 voxel; riscrittura procedurale di `unive
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.664**, minima 0.477, massima 0.874 (soglia 0.15) → passa
-- voxel per seme: 147, 217, 295, 267, 273; tempo per seme: 9, 6, 6, 5, 5 ms
+- voxel per seme: 147, 217, 295, 267, 273; tempo per seme: 6, 6, 6, 5, 6 ms
 - avvisi: tocca i bordi laterali della griglia: forse è tagliato; tocca il soffitto della griglia: forse è tagliato in alto
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -47,7 +47,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 27 nodi, 86 passi, finito in 5 ms.
+Traccia, seme 2: griglia 20×20×20, 27 nodi, 86 passi, finito in 6 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: N=palo, L=tavola, n=bordo, d=incisione, h=altezze possibili (marcatore), k=la quota scelta (marcatore), r=la punta del palo (marcatore), t=dove nasce una tavola (marcatore), a=una tavola che si allunga (marcatore), S=la cima (marcatore).
 Alla fine: L 123, N 65, n 24, d 5.

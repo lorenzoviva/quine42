@@ -8,7 +8,7 @@ Classe `persona`, scatola 20 × 15 × 30 voxel; riscrittura procedurale di `univ
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.243**, minima 0.110, massima 0.382 (soglia 0.15) → passa
-- voxel per seme: 2153, 2255, 2560, 2674, 2828; tempo per seme: 13, 13, 17, 16, 18 ms
+- voxel per seme: 2153, 2255, 2560, 2674, 2828; tempo per seme: 15, 15, 24, 18, 20 ms
 - avvisi: tocca i bordi laterali della griglia: forse è tagliato; colori mai usati: M C L; colori mai usati: M R C L T; colori mai usati: C L T; colori mai usati: C L
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×15×30, 64 nodi, 74 passi, finito in 14 ms.
+Traccia, seme 1: griglia 20×15×30, 64 nodi, 74 passi, finito in 15 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 0=mescola (marcatore), 1=scelta: la cesta (marcatore), 4=il braccio alzato possibile (marcatore), 5=la mano alzata possibile (marcatore), 8=il braccio lungo il fianco (marcatore), 9=la mano lungo il fianco (marcatore), G=scarpe, K=gonna rosso mattone, R=luce gonna, D=corsetto blu scuro, W=camicia e grembiule, F=ombra grembiule, S=carnagione, H=capelli castani, E=occhi, p=la gonna larga (marcatore), q=la gonna a campana (marcatore), m=dado (marcatore), b=scelta (marcatore), c=la cesta possibile (marcatore), d=il fazzoletto possibile (marcatore), r=la crocchia possibile (marcatore), T=vimini della cesta, u=il sacco possibile (marcatore), v=la brocca possibile (marcatore), y=niente da portare (marcatore).
 Alla fine: K 654, D 435, H 420, S 219, T 192, W 180, G 36, F 7, R 6, E 4.
@@ -43,7 +43,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×15×30, 64 nodi, 94 passi, finito in 15 ms.
+Traccia, seme 2: griglia 20×15×30, 64 nodi, 94 passi, finito in 17 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 0=mescola (marcatore), 2=scelta: il sacco (marcatore), 4=il braccio alzato possibile (marcatore), 5=la mano alzata possibile (marcatore), 6=il braccio alzato scelto (marcatore), 7=la mano alzata scelta (marcatore), 8=il braccio lungo il fianco (marcatore), 9=la mano lungo il fianco (marcatore), G=scarpe, K=gonna rosso mattone, D=corsetto blu scuro, W=camicia e grembiule, F=ombra grembiule, S=carnagione, H=capelli castani, E=occhi, p=la gonna larga (marcatore), q=la gonna a campana (marcatore), m=dado (marcatore), a=scelta (marcatore), b=scelta (marcatore), c=la cesta possibile (marcatore), d=il fazzoletto possibile (marcatore), r=la crocchia possibile (marcatore), u=il sacco possibile (marcatore), v=la brocca possibile (marcatore), y=niente da portare (marcatore).
 Alla fine: K 654, D 435, H 420, F 295, S 210, W 201, G 36, E 4.
@@ -61,7 +61,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×15×30, 64 nodi, 112 passi, finito in 18 ms.
+Traccia, seme 3: griglia 20×15×30, 64 nodi, 112 passi, finito in 21 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 0=mescola (marcatore), 3=scelta: la brocca (marcatore), 4=il braccio alzato possibile (marcatore), 5=la mano alzata possibile (marcatore), 6=il braccio alzato scelto (marcatore), 7=la mano alzata scelta (marcatore), 8=il braccio lungo il fianco (marcatore), 9=la mano lungo il fianco (marcatore), G=scarpe, K=gonna rosso mattone, M=ombra gonna, R=luce gonna, D=corsetto blu scuro, W=camicia e grembiule, F=ombra grembiule, S=carnagione, H=capelli castani, E=occhi, p=la gonna larga (marcatore), q=la gonna a campana (marcatore), m=dado (marcatore), a=scelta (marcatore), b=scelta (marcatore), c=la cesta possibile (marcatore), d=il fazzoletto possibile (marcatore), r=la crocchia possibile (marcatore), u=il sacco possibile (marcatore), v=la brocca possibile (marcatore), y=niente da portare (marcatore).
 Alla fine: K 1156, D 435, H 420, S 210, W 203, R 76, G 36, M 18, E 4, F 2.

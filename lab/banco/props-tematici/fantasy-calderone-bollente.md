@@ -8,7 +8,7 @@ Un calderone di ferro battuto su un fuoco di ciocchi, colmo di un intruglio verd
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.351**, minima 0.048, massima 0.557 (soglia 0.15) → passa
-- voxel per seme: 1444, 1433, 888, 1438, 896; tempo per seme: 24, 24, 25, 24, 24 ms
+- voxel per seme: 1444, 1433, 888, 1438, 896; tempo per seme: 36, 36, 28, 29, 31 ms
 - avvisi: colori mai usati: R w; tocca il soffitto della griglia: forse è tagliato in alto; colori mai usati: R
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 51 nodi, 93 passi, finito in 27 ms.
+Traccia, seme 1: griglia 20×20×20, 51 nodi, 93 passi, finito in 35 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: I=ferro battuto, i=ferro scuro, S=pietra, A=cenere, n=corteccia, N=ciocco, F=fiamma, G=intruglio, M=bolle, J=ferro in lavorazione (marcatore), V=lo spazio (marcatore), Q=dove salgono le bolle (marcatore), a=pancia tonda sui piedi (marcatore).
 Alla fine: I 939, A 137, G 109, i 94, S 88, M 49, N 11, F 11, n 6.
@@ -52,7 +52,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 51 nodi, 107 passi, finito in 27 ms.
+Traccia, seme 2: griglia 20×20×20, 51 nodi, 107 passi, finito in 33 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: I=ferro battuto, i=ferro scuro, S=pietra, A=cenere, n=corteccia, N=ciocco, F=fiamma, G=intruglio, M=bolle, J=ferro in lavorazione (marcatore), V=lo spazio (marcatore), Q=dove salgono le bolle (marcatore), a=pancia tonda sui piedi (marcatore).
 Alla fine: I 939, A 137, G 109, i 94, S 88, M 40, N 13, F 9, n 4.
@@ -79,7 +79,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 51 nodi, 111 passi, finito in 26 ms.
+Traccia, seme 3: griglia 20×20×20, 51 nodi, 111 passi, finito in 33 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: I=ferro battuto, i=ferro scuro, S=pietra, A=cenere, n=corteccia, N=ciocco, F=fiamma, G=intruglio, M=bolle, w=legno, J=ferro in lavorazione (marcatore), V=lo spazio (marcatore), Q=dove salgono le bolle (marcatore), a=pancia tonda sui piedi (marcatore), o=appeso al treppiede (marcatore).
 Alla fine: I 344, w 158, A 137, S 88, i 60, G 37, M 37, N 14, F 10, n 3.

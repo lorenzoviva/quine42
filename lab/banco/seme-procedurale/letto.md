@@ -8,7 +8,7 @@ Classe `mobile`, scatola 20 × 20 × 20 voxel; riscrittura procedurale di `unive
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.180**, minima 0.015, massima 0.337 (soglia 0.15) → passa
-- voxel per seme: 1130, 1170, 1127, 1034, 1548; tempo per seme: 14, 7, 8, 12, 7 ms
+- voxel per seme: 1130, 1170, 1127, 1034, 1548; tempo per seme: 8, 8, 9, 9, 8 ms
 - avvisi: tocca i bordi laterali della griglia: forse è tagliato; colori mai usati: n; colori mai usati: n P
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 36 nodi, 108 passi, finito in 11 ms.
+Traccia, seme 1: griglia 20×20×20, 36 nodi, 108 passi, finito in 10 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: N=legno, W=pagliericcio, C=coperta, R=coperta in ombra, P=cuscino, t=dove può salire la testiera (marcatore), c=la testiera che sale (marcatore), f=dove può piegarsi la coperta (marcatore), k=il taglio (marcatore), h=lunghezze possibili (marcatore), p=i posti dei cuscini (marcatore), q=la pediera, forse (marcatore).
 Alla fine: N 607, W 330, C 135, P 42, R 16.
@@ -46,7 +46,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 36 nodi, 100 passi, finito in 10 ms.
+Traccia, seme 2: griglia 20×20×20, 36 nodi, 100 passi, finito in 8 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: N=legno, W=pagliericcio, C=coperta, R=coperta in ombra, t=dove può salire la testiera (marcatore), c=la testiera che sale (marcatore), f=dove può piegarsi la coperta (marcatore), k=il taglio (marcatore), h=lunghezze possibili (marcatore), p=i posti dei cuscini (marcatore), q=la pediera, forse (marcatore).
 Alla fine: N 659, W 363, C 123, R 25.
@@ -67,7 +67,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 36 nodi, 105 passi, finito in 11 ms.
+Traccia, seme 3: griglia 20×20×20, 36 nodi, 105 passi, finito in 12 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: N=legno, W=pagliericcio, C=coperta, R=coperta in ombra, P=cuscino, t=dove può salire la testiera (marcatore), c=la testiera che sale (marcatore), f=dove può piegarsi la coperta (marcatore), k=il taglio (marcatore), h=lunghezze possibili (marcatore), p=i posti dei cuscini (marcatore), q=la pediera, forse (marcatore).
 Alla fine: N 604, W 330, C 122, P 42, R 29.

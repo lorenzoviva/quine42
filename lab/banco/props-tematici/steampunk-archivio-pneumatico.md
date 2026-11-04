@@ -8,7 +8,7 @@ Uno schedario di legno scuro a cassetti con maniglie d'ottone, da cui salgono tu
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.276**, minima 0.152, massima 0.413 (soglia 0.15) → passa
-- voxel per seme: 1230, 1049, 939, 1526, 1126; tempo per seme: 8, 9, 7, 6, 8 ms
+- voxel per seme: 1230, 1049, 939, 1526, 1126; tempo per seme: 8, 10, 8, 7, 9 ms
 - avvisi: tocca il soffitto della griglia: forse è tagliato in alto
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -43,7 +43,7 @@ Alla fine: D 931, E 117, O 113, N 36, C 30, A 3.
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 59 nodi, 161 passi, finito in 11 ms.
+Traccia, seme 2: griglia 20×20×20, 59 nodi, 161 passi, finito in 12 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: D=legno scuro, N=fuga dei cassetti, O=ottone, C=rame, A=capsula ambrata, E=ghisa, h=altezze possibili (marcatore), k=la quota scelta (marcatore), j=larghezze possibili (marcatore), g=dove finisce lo schedario (marcatore), r=il tubo che sale (marcatore), t=dove nasce un tubo (marcatore), V=dove possono correre i tubi (marcatore).
 Alla fine: D 786, E 90, O 86, C 45, N 36, A 6.
@@ -61,7 +61,7 @@ Alla fine: D 786, E 90, O 86, C 45, N 36, A 6.
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 59 nodi, 159 passi, finito in 11 ms.
+Traccia, seme 3: griglia 20×20×20, 59 nodi, 159 passi, finito in 14 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: D=legno scuro, N=fuga dei cassetti, O=ottone, C=rame, A=capsula ambrata, E=ghisa, h=altezze possibili (marcatore), k=la quota scelta (marcatore), j=larghezze possibili (marcatore), g=dove finisce lo schedario (marcatore), r=il tubo che sale (marcatore), t=dove nasce un tubo (marcatore), V=dove possono correre i tubi (marcatore).
 Alla fine: D 709, E 81, O 79, C 33, N 32, A 5.

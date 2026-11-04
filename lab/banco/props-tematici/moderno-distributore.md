@@ -8,7 +8,7 @@ I distributori di bibite e snack con la vetrina, la pulsantiera e lo schermo. Il
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.346**, minima 0.012, massima 0.497 (soglia 0.15) → passa
-- voxel per seme: 2273, 2883, 1910, 1911, 2893; tempo per seme: 50, 35, 36, 36, 35 ms
+- voxel per seme: 2273, 2883, 1910, 1911, 2893; tempo per seme: 35, 34, 35, 36, 37 ms
 - avvisi: tocca il soffitto della griglia: forse è tagliato in alto; colori mai usati: R; colori mai usati: C G Y; colori mai usati: N C G Y
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 45 nodi, 143 passi, finito in 41 ms.
+Traccia, seme 1: griglia 20×20×20, 45 nodi, 143 passi, finito in 39 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: N=lamiera blu notte, V=vetrina, K=pulsantiera, S=schermo, T=insegna, C=cemento, W=lattina bianca, A=snack arancio, G=bidone verde, Y=bidone giallo, O=confezione rosa, m=il dado (marcatore), J=uno con i bidoni (marcatore), L=con l'insegna (marcatore), I=scomparti della vetrina (marcatore), i=uno scomparto pieno (marcatore).
 Alla fine: N 1584, T 176, G 144, Y 128, C 77, W 52, K 34, O 32, A 28, V 16, S 2.
@@ -79,7 +79,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 45 nodi, 138 passi, finito in 39 ms.
+Traccia, seme 3: griglia 20×20×20, 45 nodi, 138 passi, finito in 42 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: R=lamiera rossa, V=vetrina, K=pulsantiera, S=schermo, T=insegna, W=lattina bianca, A=snack arancio, O=confezione rosa, m=il dado (marcatore), X=uno al centro (marcatore), L=con l'insegna (marcatore), I=scomparti della vetrina (marcatore), i=uno scomparto pieno (marcatore).
 Alla fine: R 1584, T 176, W 45, O 28, A 27, K 26, V 22, S 2.

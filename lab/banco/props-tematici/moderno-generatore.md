@@ -8,7 +8,7 @@ Il gruppo elettrogeno dei cantieri con il quadro comandi e lo scarico. Il seme s
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.508**, minima 0.075, massima 0.768 (soglia 0.15) → passa
-- voxel per seme: 1503, 788, 1853, 1779, 850; tempo per seme: 40, 41, 39, 45, 62 ms
+- voxel per seme: 1503, 788, 1853, 1779, 850; tempo per seme: 39, 41, 38, 39, 41 ms
 - avvisi: tocca i bordi laterali della griglia: forse è tagliato; colori mai usati: Y y E e D N T; colori mai usati: Y y O o T R; colori mai usati: O o E e D N J R; colori mai usati: O o E e D N T R; colori mai usati: Y y O o J R
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 56 nodi, 141 passi, finito in 44 ms.
+Traccia, seme 1: griglia 20×20×20, 56 nodi, 141 passi, finito in 43 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: K=ferro nero, O=cofano arancio, o=feritoie arancio, S=acciaio, H=display, J=tanica rossa, R=pneumatico, t=cassetta degli attrezzi, m=il dado (marcatore), V=su carrello (marcatore), n=le taniche (marcatore).
 Alla fine: O 1066, K 197, R 158, J 60, o 14, t 4, S 3, H 1.
@@ -54,7 +54,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 56 nodi, 144 passi, finito in 46 ms.
+Traccia, seme 2: griglia 20×20×20, 56 nodi, 144 passi, finito in 45 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: K=ferro nero, E=motore, e=testata, D=radiatore, S=acciaio, N=alternatore, H=display, J=tanica rossa, t=cassetta degli attrezzi, m=il dado (marcatore), U=a telaio aperto (marcatore), n=le taniche (marcatore).
 Alla fine: E 245, K 171, D 126, N 93, S 78, J 40, e 30, t 4, H 1.
@@ -83,7 +83,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 56 nodi, 140 passi, finito in 44 ms.
+Traccia, seme 3: griglia 20×20×20, 56 nodi, 140 passi, finito in 42 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: K=ferro nero, Y=cofano giallo, y=feritoie, S=acciaio, H=display, T=serbatoio, t=cassetta degli attrezzi, m=il dado (marcatore), X=cofanato (marcatore), L=il serbatoio (marcatore).
 Alla fine: Y 1509, K 204, T 103, y 21, S 11, t 4, H 1.

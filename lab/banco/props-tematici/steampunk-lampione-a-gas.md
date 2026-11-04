@@ -8,7 +8,7 @@ Un fusto d'ottone su uno zoccolo di ghisa, con la sbarra per la scala e le lante
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.453**, minima 0.281, massima 0.571 (soglia 0.15) → passa
-- voxel per seme: 483, 485, 629, 633, 401; tempo per seme: 36, 37, 34, 34, 33 ms
+- voxel per seme: 483, 485, 629, 633, 401; tempo per seme: 37, 40, 37, 36, 37 ms
 - avvisi: colori mai usati: L
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×60, 17 nodi, 67 passi, finito in 31 ms.
+Traccia, seme 1: griglia 20×20×60, 17 nodi, 67 passi, finito in 38 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: G=ghisa, P=ottone brunito, O=ottone, A=vetro ambrato acceso, L=pomo lucido, h=altezze possibili (marcatore), k=la quota scelta (marcatore), s=la cima del fusto (marcatore), t=la cima scelta (marcatore).
 Alla fine: G 289, O 133, P 30, A 30, L 1.
@@ -43,7 +43,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×60, 17 nodi, 65 passi, finito in 32 ms.
+Traccia, seme 2: griglia 20×20×60, 17 nodi, 65 passi, finito in 39 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: G=ghisa, P=ottone brunito, O=ottone, A=vetro ambrato acceso, L=pomo lucido, h=altezze possibili (marcatore), k=la quota scelta (marcatore), s=la cima del fusto (marcatore), t=la cima scelta (marcatore).
 Alla fine: G 289, O 133, P 32, A 30, L 1.
@@ -61,7 +61,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×60, 17 nodi, 65 passi, finito in 33 ms.
+Traccia, seme 3: griglia 20×20×60, 17 nodi, 65 passi, finito in 40 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: G=ghisa, P=ottone brunito, O=ottone, A=vetro ambrato acceso, L=pomo lucido, h=altezze possibili (marcatore), k=la quota scelta (marcatore), s=la cima del fusto (marcatore), t=la cima scelta (marcatore).
 Alla fine: G 289, O 247, A 60, P 32, L 1.

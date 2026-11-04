@@ -8,7 +8,7 @@ Classe `edificio`, scatola 50 × 50 × 50 voxel; riscrittura procedurale di `uni
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.271**, minima 0.008, massima 0.417 (soglia 0.15) → passa
-- voxel per seme: 11426, 11944, 11683, 15705, 11421; tempo per seme: 183, 175, 191, 194, 163 ms
+- voxel per seme: 11426, 11944, 11683, 15705, 11421; tempo per seme: 207, 220, 219, 222, 212 ms
 - avvisi: colori mai usati: C c
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 50×50×50, 62 nodi, 243 passi, finito in 214 ms.
+Traccia, seme 1: griglia 50×50×50, 62 nodi, 243 passi, finito in 281 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: P=pietra base, p=pietra chiara rilievo, d=pietra scura fessure, W=acqua pozzo profonda, g=muschio umido, N=legno scuro travi, n=legno caldo doghe, R=tegole tetto rossicce, o=tegole cresta calda, U=riflesso acqua brillante, m=mescola e dadi (marcatore), k=il taglio (marcatore), h=altezze possibili (marcatore), q=il parapetto largo (marcatore), r=il tetto a due falde (marcatore), s=il tetto a cono (marcatore), t=nessun tetto (marcatore), u=scelta: due falde (marcatore), y=scelta del secchio (marcatore), z=la corda possibile (marcatore), w=dove i due tetti si sovrappongono (marcatore).
 Alla fine: R 4517, d 1895, o 1672, P 1095, W 825, N 522, p 347, g 312, U 171, n 70.
@@ -44,7 +44,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 50×50×50, 62 nodi, 264 passi, finito in 234 ms.
+Traccia, seme 2: griglia 50×50×50, 62 nodi, 264 passi, finito in 246 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: P=pietra base, p=pietra chiara rilievo, d=pietra scura fessure, W=acqua pozzo profonda, g=muschio umido, N=legno scuro travi, n=legno caldo doghe, C=corda e ferro, c=ferro chiaro secchio, R=tegole tetto rossicce, o=tegole cresta calda, U=riflesso acqua brillante, m=mescola e dadi (marcatore), k=il taglio (marcatore), h=altezze possibili (marcatore), q=il parapetto largo (marcatore), r=il tetto a due falde (marcatore), s=il tetto a cono (marcatore), t=nessun tetto (marcatore), v=scelta: cono (marcatore), x=il secchio possibile (marcatore), y=scelta del secchio (marcatore), z=la corda possibile (marcatore), w=dove i due tetti si sovrappongono (marcatore).
 Alla fine: R 5018, o 2204, d 1559, P 959, W 850, N 522, p 333, g 274, U 146, n 66, C 9, c 4.
@@ -60,7 +60,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 50×50×50, 62 nodi, 257 passi, finito in 203 ms.
+Traccia, seme 3: griglia 50×50×50, 62 nodi, 257 passi, finito in 239 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: P=pietra base, p=pietra chiara rilievo, d=pietra scura fessure, W=acqua pozzo profonda, g=muschio umido, N=legno scuro travi, n=legno caldo doghe, C=corda e ferro, c=ferro chiaro secchio, R=tegole tetto rossicce, o=tegole cresta calda, U=riflesso acqua brillante, m=mescola e dadi (marcatore), k=il taglio (marcatore), h=altezze possibili (marcatore), q=il parapetto largo (marcatore), r=il tetto a due falde (marcatore), s=il tetto a cono (marcatore), t=nessun tetto (marcatore), v=scelta: cono (marcatore), x=il secchio possibile (marcatore), y=scelta del secchio (marcatore), z=la corda possibile (marcatore), w=dove i due tetti si sovrappongono (marcatore).
 Alla fine: R 5005, o 2217, d 1418, P 894, W 838, N 522, p 334, g 225, U 158, n 66, c 4, C 2.

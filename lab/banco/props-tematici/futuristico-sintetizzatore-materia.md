@@ -8,7 +8,7 @@ Un banco di ceramica bianca con la piastra di sintesi, quattro colonnine dalle p
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.273**, minima 0.028, massima 0.458 (soglia 0.15) → passa
-- voxel per seme: 1769, 1430, 985, 968, 1420; tempo per seme: 6, 7, 7, 8, 8 ms
+- voxel per seme: 1769, 1430, 985, 968, 1420; tempo per seme: 8, 8, 11, 9, 7 ms
 - avvisi: tocca il soffitto della griglia: forse è tagliato in alto; tocca i bordi laterali della griglia: forse è tagliato
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -63,7 +63,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 38 nodi, 123 passi, finito in 9 ms.
+Traccia, seme 3: griglia 20×20×20, 38 nodi, 123 passi, finito in 12 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=ceramica bianca, w=ceramica in ombra, G=grafite, g=grafite chiara, C=luce ciano, M=materia magenta, V=vetro, h=quote possibili (marcatore), k=la quota scelta (marcatore), c=il centro del banco (marcatore), e=l'emettitore (marcatore), x=piastra di sintesi, X=la piastra che si allarga (marcatore), p=una colonnina che sale (marcatore), o=l'oggetto che prende forma (marcatore), q=dove può stare un serbatoio (marcatore), t=un serbatoio (marcatore).
 Alla fine: W 610, G 165, g 94, w 52, C 24, x 21, V 10, M 9.

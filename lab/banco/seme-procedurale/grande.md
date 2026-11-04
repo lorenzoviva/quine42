@@ -8,7 +8,7 @@ Classe `grande`, scatola 100 × 100 × 80 voxel; riscrittura procedurale di `uni
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.347**, minima 0.006, massima 0.598 (soglia 0.15) → passa
-- voxel per seme: 33858, 27918, 30888, 33858, 40824; tempo per seme: 103, 102, 101, 102, 132 ms
+- voxel per seme: 33858, 27918, 30888, 33858, 40824; tempo per seme: 100, 104, 102, 103, 106 ms
 - avvisi: colori mai usati: S
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 24×24×30 → 72×72×90, 44 nodi, 523 passi, finito in 115 ms.
+Traccia, seme 1: griglia 24×24×30 → 72×72×90, 44 nodi, 523 passi, finito in 139 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 0=mescola (marcatore), X=volume della casa (marcatore), Q=volume del tetto (marcatore), I=interno (marcatore), W=intonaco, N=travi, n=assito, D=pietra, O=porta, U=vetro, R=coppi, r=coppi in ombra, K=comignolo, h=porta aperta (marcatore), k=il taglio (marcatore), w=intonaco scrostato, d=pietra scura, o=asse scura, g=muschio.
 Alla fine: R 11269, W 7236, N 5298, n 4752, r 1679, o 990, D 806, w 540, U 480, d 328, O 198, g 174, K 108.

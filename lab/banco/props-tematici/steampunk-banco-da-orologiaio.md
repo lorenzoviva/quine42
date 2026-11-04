@@ -8,7 +8,7 @@ Un piano di legno scuro su una cassettiera dai pomelli d'ottone, con una lampada
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.269**, minima 0.118, massima 0.333 (soglia 0.15) → passa
-- voxel per seme: 612, 649, 631, 618, 577; tempo per seme: 4, 5, 4, 3, 4 ms
+- voxel per seme: 612, 649, 631, 618, 577; tempo per seme: 5, 5, 6, 4, 5 ms
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -24,7 +24,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 32 nodi, 99 passi, finito in 7 ms.
+Traccia, seme 1: griglia 20×20×20, 32 nodi, 99 passi, finito in 5 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: D=legno scuro, W=piano di legno, N=fuga dei cassetti, O=ottone, C=rame, E=ghisa, A=vetro ambrato acceso, h=lunghezze possibili (marcatore), k=dove finisce il banco (marcatore), u=l'alzata possibile (marcatore), X=l'alzata scelta (marcatore), m=il dado dell'alzata (marcatore), l=il fianco (marcatore), r=la lampada che cresce (marcatore), t=il posto della lampada (marcatore).
 Alla fine: D 432, W 154, N 10, O 8, E 5, C 2, A 1.
@@ -42,7 +42,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 32 nodi, 99 passi, finito in 5 ms.
+Traccia, seme 2: griglia 20×20×20, 32 nodi, 99 passi, finito in 7 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: D=legno scuro, W=piano di legno, N=fuga dei cassetti, O=ottone, C=rame, E=ghisa, A=vetro ambrato acceso, h=lunghezze possibili (marcatore), k=dove finisce il banco (marcatore), u=l'alzata possibile (marcatore), X=l'alzata scelta (marcatore), m=il dado dell'alzata (marcatore), l=il fianco (marcatore), r=la lampada che cresce (marcatore), t=il posto della lampada (marcatore).
 Alla fine: D 440, W 182, N 10, O 8, E 5, C 3, A 1.
@@ -60,7 +60,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 32 nodi, 100 passi, finito in 7 ms.
+Traccia, seme 3: griglia 20×20×20, 32 nodi, 100 passi, finito in 5 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: D=legno scuro, W=piano di legno, N=fuga dei cassetti, O=ottone, C=rame, E=ghisa, A=vetro ambrato acceso, h=lunghezze possibili (marcatore), k=dove finisce il banco (marcatore), u=l'alzata possibile (marcatore), X=l'alzata scelta (marcatore), m=il dado dell'alzata (marcatore), l=il fianco (marcatore), r=la lampada che cresce (marcatore), t=il posto della lampada (marcatore).
 Alla fine: D 436, W 168, N 10, O 9, E 5, C 2, A 1.

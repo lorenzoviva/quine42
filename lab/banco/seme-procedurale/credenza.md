@@ -8,7 +8,7 @@ Classe `mobile`, scatola 20 × 20 × 20 voxel; riscrittura procedurale di `unive
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.301**, minima 0.102, massima 0.453 (soglia 0.15) → passa
-- voxel per seme: 2239, 3154, 2959, 1795, 3154; tempo per seme: 7, 8, 7, 9, 7 ms
+- voxel per seme: 2239, 3154, 2959, 1795, 3154; tempo per seme: 9, 8, 7, 9, 9 ms
 - avvisi: tocca i bordi laterali della griglia: forse è tagliato; tocca il soffitto della griglia: forse è tagliato in alto
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 32 nodi, 103 passi, finito in 8 ms.
+Traccia, seme 1: griglia 20×20×20, 32 nodi, 103 passi, finito in 12 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: N=legno scuro, n=ombra, L=anta, K=cornice, I=maniglia d'ottone, h=altezze possibili (marcatore), k=la quota scelta (marcatore), w=i fianchi che possono mancare (marcatore), a=scelta (marcatore), c=dove possono stare i divisori delle ante (marcatore), d=il divisorio scelto (marcatore), e=un vaso che nasce (marcatore).
 Alla fine: N 1815, K 234, L 126, n 47, I 17.
@@ -44,7 +44,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 32 nodi, 105 passi, finito in 9 ms.
+Traccia, seme 2: griglia 20×20×20, 32 nodi, 105 passi, finito in 11 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: N=legno scuro, n=ombra, L=anta, K=cornice, I=maniglia d'ottone, h=altezze possibili (marcatore), k=la quota scelta (marcatore), w=i fianchi che possono mancare (marcatore), a=scelta (marcatore), c=dove possono stare i divisori delle ante (marcatore), d=il divisorio scelto (marcatore), e=un vaso che nasce (marcatore).
 Alla fine: N 2618, K 262, L 192, n 50, I 32.
@@ -64,7 +64,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 32 nodi, 114 passi, finito in 7 ms.
+Traccia, seme 3: griglia 20×20×20, 32 nodi, 114 passi, finito in 14 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: N=legno scuro, n=ombra, L=anta, K=cornice, I=maniglia d'ottone, h=altezze possibili (marcatore), k=la quota scelta (marcatore), w=i fianchi che possono mancare (marcatore), a=scelta (marcatore), c=dove possono stare i divisori delle ante (marcatore), d=il divisorio scelto (marcatore), e=un vaso che nasce (marcatore).
 Alla fine: N 2475, K 234, L 182, n 51, I 17.

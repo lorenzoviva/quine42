@@ -8,7 +8,7 @@ Una colonna di grafite con un leggio di ceramica bianca e, sopra, un ologramma c
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.540**, minima 0.334, massima 0.620 (soglia 0.15) → passa
-- voxel per seme: 345, 344, 344, 346, 343; tempo per seme: 5, 5, 5, 5, 6 ms
+- voxel per seme: 345, 344, 344, 346, 343; tempo per seme: 7, 8, 6, 7, 6 ms
 - avvisi: tocca il soffitto della griglia: forse è tagliato in alto
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 23 nodi, 215 passi, finito in 5 ms.
+Traccia, seme 1: griglia 20×20×20, 23 nodi, 215 passi, finito in 6 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=ceramica bianca, w=ceramica in ombra, G=grafite, g=grafite chiara, C=luce ciano, M=luce magenta, V=vetro dell'emettitore, h=quote possibili (marcatore), k=la quota scelta (marcatore), r=la colonna che sale (marcatore), e=l'emettitore (marcatore), x=il leggio che si allarga (marcatore), H=ologramma.
 Alla fine: G 104, H 87, C 51, W 33, g 32, w 20, M 17, V 1.
@@ -46,7 +46,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 23 nodi, 216 passi, finito in 4 ms.
+Traccia, seme 2: griglia 20×20×20, 23 nodi, 216 passi, finito in 8 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=ceramica bianca, w=ceramica in ombra, G=grafite, g=grafite chiara, C=luce ciano, M=luce magenta, V=vetro dell'emettitore, h=quote possibili (marcatore), k=la quota scelta (marcatore), r=la colonna che sale (marcatore), e=l'emettitore (marcatore), x=il leggio che si allarga (marcatore), H=ologramma.
 Alla fine: G 105, H 93, C 45, g 33, W 33, w 20, M 14, V 1.
@@ -67,7 +67,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 23 nodi, 216 passi, finito in 4 ms.
+Traccia, seme 3: griglia 20×20×20, 23 nodi, 216 passi, finito in 6 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=ceramica bianca, w=ceramica in ombra, G=grafite, g=grafite chiara, C=luce ciano, M=luce magenta, V=vetro dell'emettitore, h=quote possibili (marcatore), k=la quota scelta (marcatore), r=la colonna che sale (marcatore), e=l'emettitore (marcatore), x=il leggio che si allarga (marcatore), H=ologramma.
 Alla fine: G 105, H 95, C 39, g 33, W 33, w 20, M 18, V 1.

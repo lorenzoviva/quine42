@@ -8,7 +8,7 @@ Uno scaffale di ceramica bianca e grafite con le vasche di coltura, le barre di 
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.360**, minima 0.052, massima 0.532 (soglia 0.15) → passa
-- voxel per seme: 1030, 806, 642, 630, 795; tempo per seme: 6, 7, 9, 7, 6 ms
+- voxel per seme: 1030, 806, 642, 630, 795; tempo per seme: 4, 5, 6, 5, 5 ms
 - avvisi: tocca il soffitto della griglia: forse è tagliato in alto; colori mai usati: V
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 36 nodi, 234 passi, finito in 6 ms.
+Traccia, seme 1: griglia 20×20×20, 36 nodi, 234 passi, finito in 5 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=ceramica bianca, w=ceramica in ombra, G=grafite, g=grafite chiara, C=luce di coltura ciano, M=fiore magenta, V=acqua di coltura, T=vasca, L=foglie, l=foglie in ombra, F=stelo, h=quote possibili (marcatore), k=la quota scelta, o lanci a vuoto (marcatore), s=un germoglio (marcatore), v=dove possono crescere le piante (marcatore).
 Alla fine: W 273, T 165, g 139, L 120, w 108, G 68, l 63, F 59, C 22, M 13.
@@ -45,7 +45,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 36 nodi, 239 passi, finito in 7 ms.
+Traccia, seme 2: griglia 20×20×20, 36 nodi, 239 passi, finito in 6 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=ceramica bianca, w=ceramica in ombra, G=grafite, g=grafite chiara, C=luce di coltura ciano, M=fiore magenta, V=acqua di coltura, T=vasca, L=foglie, l=foglie in ombra, F=stelo, h=quote possibili (marcatore), k=la quota scelta, o lanci a vuoto (marcatore), s=un germoglio (marcatore), v=dove possono crescere le piante (marcatore).
 Alla fine: W 182, g 139, L 118, T 110, w 72, l 62, F 54, G 48, C 13, M 8.
@@ -64,7 +64,7 @@ Alla fine: W 182, g 139, L 118, T 110, w 72, l 62, F 54, G 48, C 13, M 8.
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 36 nodi, 244 passi, finito in 9 ms.
+Traccia, seme 3: griglia 20×20×20, 36 nodi, 244 passi, finito in 8 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=ceramica bianca, w=ceramica in ombra, G=grafite, g=grafite chiara, C=luce di coltura ciano, M=fiore magenta, V=acqua di coltura, T=vasca, L=foglie, l=foglie in ombra, F=stelo, h=quote possibili (marcatore), k=la quota scelta, o lanci a vuoto (marcatore), s=un germoglio (marcatore), v=dove possono crescere le piante (marcatore).
 Alla fine: g 139, L 135, w 127, W 91, T 55, l 30, G 28, F 18, C 13, M 6.

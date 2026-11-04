@@ -8,7 +8,7 @@ Un seggio di pietra con il cuscino di velluto, i braccioli e uno schienale con u
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.424**, minima 0.078, massima 0.654 (soglia 0.15) → passa
-- voxel per seme: 854, 864, 1985, 853, 1926; tempo per seme: 40, 39, 42, 41, 40 ms
+- voxel per seme: 854, 864, 1985, 853, 1926; tempo per seme: 42, 42, 42, 42, 42 ms
 - avvisi: tocca il soffitto della griglia: forse è tagliato in alto; colori mai usati: C r; tocca i bordi laterali della griglia: forse è tagliato; colori mai usati: r
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 49 nodi, 69 passi, finito in 45 ms.
+Traccia, seme 1: griglia 20×20×20, 49 nodi, 69 passi, finito in 51 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: S=pietra, d=pietra scura, G=pietra chiara, R=velluto rosso, C=gemma runica, r=oro, M=muschio, X=scheggia, V=spazio basso (marcatore), U=spazio dello schienale (marcatore), v=per mescolare il caso (marcatore), b=quattro gambe (marcatore), f=schienale a punta (marcatore).
 Alla fine: S 516, d 180, G 66, R 45, X 27, M 10, C 9, r 1.
@@ -53,7 +53,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 49 nodi, 62 passi, finito in 45 ms.
+Traccia, seme 2: griglia 20×20×20, 49 nodi, 62 passi, finito in 47 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: S=pietra, d=pietra scura, G=pietra chiara, R=velluto rosso, M=muschio, X=scheggia, V=spazio basso (marcatore), U=spazio dello schienale (marcatore), v=per mescolare il caso (marcatore), b=quattro gambe (marcatore), h=schienale ad arco (marcatore).
 Alla fine: S 538, d 180, G 66, R 45, X 31, M 4.
@@ -82,7 +82,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 49 nodi, 63 passi, finito in 44 ms.
+Traccia, seme 3: griglia 20×20×20, 49 nodi, 63 passi, finito in 48 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: S=pietra, d=pietra scura, G=pietra chiara, R=velluto rosso, C=gemma runica, r=oro, M=muschio, X=scheggia, V=spazio basso (marcatore), U=spazio dello schienale (marcatore), v=per mescolare il caso (marcatore), o=podio tondo (marcatore), f=schienale a punta (marcatore).
 Alla fine: S 747, d 586, G 528, X 45, R 45, M 24, C 9, r 1.

@@ -8,7 +8,7 @@ Un altare di pietra con rune luminose sui fianchi. Il seme sceglie la forma del 
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.390**, minima 0.038, massima 0.571 (soglia 0.15) → passa
-- voxel per seme: 1021, 1407, 1565, 1017, 1585; tempo per seme: 44, 43, 42, 42, 40 ms
+- voxel per seme: 1021, 1407, 1565, 1017, 1585; tempo per seme: 52, 47, 43, 46, 62 ms
 - avvisi: colori mai usati: C K W F; colori mai usati: C K P p F L; colori mai usati: C K P p W F L; tocca i bordi laterali della griglia: forse è tagliato
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 43 nodi, 54 passi, finito in 50 ms.
+Traccia, seme 1: griglia 20×20×20, 43 nodi, 54 passi, finito in 55 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: S=pietra, d=pietra scura, R=runa luminosa, P=pergamena, p=legno del leggio, L=copertina di cuoio, V=spazio del corpo (marcatore), U=spazio sopra (marcatore), a=corpo a blocco (marcatore), b=corpo a tavola (marcatore), f=sopra: libro (marcatore).
 Alla fine: S 645, d 221, R 53, L 45, P 30, p 27.
@@ -51,7 +51,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 43 nodi, 60 passi, finito in 47 ms.
+Traccia, seme 2: griglia 20×20×20, 43 nodi, 60 passi, finito in 51 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: S=pietra, d=pietra scura, R=runa luminosa, W=cera, V=spazio del corpo (marcatore), U=spazio sopra (marcatore), a=corpo a blocco (marcatore), g=sopra: candele (marcatore).
 Alla fine: S 913, d 386, W 68, R 40.
@@ -80,7 +80,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 43 nodi, 55 passi, finito in 46 ms.
+Traccia, seme 3: griglia 20×20×20, 43 nodi, 55 passi, finito in 50 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: S=pietra, d=pietra scura, R=runa luminosa, V=spazio del corpo (marcatore), U=spazio sopra (marcatore), a=corpo a blocco (marcatore), o=corpo rotondo (marcatore), h=sopra: stele (marcatore).
 Alla fine: S 859, d 671, R 35.

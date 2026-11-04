@@ -8,7 +8,7 @@ Una panchina a doghe sui piedi di ghisa con il lampione d'acciaio a un capo. Il 
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.630**, minima 0.017, massima 0.930 (soglia 0.15) → passa
-- voxel per seme: 923, 524, 359, 359, 927; tempo per seme: 154, 154, 148, 146, 145 ms
+- voxel per seme: 923, 524, 359, 359, 927; tempo per seme: 153, 147, 156, 150, 176 ms
 - avvisi: tocca i bordi laterali della griglia: forse è tagliato; colori mai usati: w; colori mai usati: w G g
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×60, 60 nodi, 225 passi, finito in 160 ms.
+Traccia, seme 1: griglia 20×20×60, 60 nodi, 225 passi, finito in 180 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: C=cemento, P=acciaio verniciato, K=ghisa, W=doghe di legno, T=luce, G=siepe, g=fioriera, m=il dado (marcatore), d=doppio braccio a destra (marcatore), D=con la fioriera (marcatore), x=dove può stare la borsa (marcatore), X=borsa dimenticata.
 Alla fine: g 325, P 229, G 193, T 74, W 52, K 32, C 12, X 6.
@@ -52,7 +52,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×60, 60 nodi, 223 passi, finito in 161 ms.
+Traccia, seme 2: griglia 20×20×60, 60 nodi, 223 passi, finito in 168 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: C=cemento, P=acciaio verniciato, K=ghisa, W=doghe di legno, T=luce, m=il dado (marcatore), c=doppio braccio a sinistra (marcatore), L=con lo schienale (marcatore), x=dove può stare la borsa (marcatore), X=borsa dimenticata.
 Alla fine: P 229, W 143, T 74, K 56, C 16, X 6.
@@ -79,7 +79,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×60, 60 nodi, 220 passi, finito in 158 ms.
+Traccia, seme 3: griglia 20×20×60, 60 nodi, 220 passi, finito in 171 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: C=cemento, P=acciaio verniciato, K=ghisa, W=doghe di legno, T=luce, m=il dado (marcatore), a=pastorale a sinistra (marcatore), E=semplice (marcatore), x=dove può stare la borsa (marcatore), X=borsa dimenticata.
 Alla fine: P 226, W 52, K 32, T 27, C 16, X 6.

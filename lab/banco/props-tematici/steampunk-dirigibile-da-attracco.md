@@ -8,7 +8,7 @@ Un dirigibile di tela cerata con centine d'ottone e gondola di legno scuro, lega
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.605**, minima 0.011, massima 1.000 (soglia 0.15) → passa
-- voxel per seme: 4076, 4101, 4076, 4096, 4074; tempo per seme: 29, 28, 30, 29, 34 ms
+- voxel per seme: 4076, 4101, 4076, 4096, 4074; tempo per seme: 36, 37, 36, 34, 35 ms
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -24,7 +24,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 50×50×50, 96 nodi, 234 passi, finito in 32 ms.
+Traccia, seme 1: griglia 50×50×50, 96 nodi, 234 passi, finito in 39 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: T=tela cerata, O=ottone, D=legno scuro, E=ghisa, A=vetro ambrato acceso, R=toppa di cuoio, p=dado dietro (marcatore), q=dado al centro (marcatore), u=dado davanti (marcatore), S=la scelta (marcatore), K=ciò che sparisce (marcatore).
 Alla fine: T 3112, O 471, D 227, E 206, R 41, A 19.
@@ -45,7 +45,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 50×50×50, 96 nodi, 228 passi, finito in 32 ms.
+Traccia, seme 2: griglia 50×50×50, 96 nodi, 228 passi, finito in 40 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: T=tela cerata, O=ottone, D=legno scuro, E=ghisa, A=vetro ambrato acceso, R=toppa di cuoio, p=dado dietro (marcatore), q=dado al centro (marcatore), u=dado davanti (marcatore), S=la scelta (marcatore), K=ciò che sparisce (marcatore).
 Alla fine: T 3112, O 471, E 235, D 227, R 37, A 19.
@@ -66,7 +66,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 50×50×50, 96 nodi, 233 passi, finito in 32 ms.
+Traccia, seme 3: griglia 50×50×50, 96 nodi, 233 passi, finito in 39 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: T=tela cerata, O=ottone, D=legno scuro, E=ghisa, A=vetro ambrato acceso, R=toppa di cuoio, p=dado dietro (marcatore), q=dado al centro (marcatore), u=dado davanti (marcatore), S=la scelta (marcatore), K=ciò che sparisce (marcatore).
 Alla fine: T 3114, O 471, D 227, E 206, R 39, A 19.

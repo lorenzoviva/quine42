@@ -8,7 +8,7 @@ Classe `albero`, scatola 40 × 40 × 60 voxel; riscrittura procedurale di `unive
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.520**, minima 0.406, massima 0.645 (soglia 0.15) → passa
-- voxel per seme: 5153, 4484, 5542, 5298, 5457; tempo per seme: 86, 81, 104, 76, 77 ms
+- voxel per seme: 5153, 4484, 5542, 5298, 5457; tempo per seme: 92, 91, 95, 92, 136 ms
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -24,7 +24,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 40×40×60, 22 nodi, 2769 passi, finito in 80 ms.
+Traccia, seme 1: griglia 40×40×60, 22 nodi, 2769 passi, finito in 102 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: T=tronco, F=aghi, L=aghi al sole, N=aghi in ombra, h=altezze possibili della punta (marcatore), k=la quota scelta (marcatore), V=la sagoma a cono (marcatore), r=punta che cresce (marcatore), x=il piede, senza aghi (marcatore).
 Alla fine: F 4001, T 544, N 349, L 259.
@@ -43,7 +43,7 @@ Alla fine: F 4001, T 544, N 349, L 259.
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 40×40×60, 22 nodi, 2719 passi, finito in 78 ms.
+Traccia, seme 2: griglia 40×40×60, 22 nodi, 2719 passi, finito in 100 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: T=tronco, F=aghi, L=aghi al sole, N=aghi in ombra, h=altezze possibili della punta (marcatore), k=la quota scelta (marcatore), V=la sagoma a cono (marcatore), r=punta che cresce (marcatore), x=il piede, senza aghi (marcatore).
 Alla fine: F 3417, T 486, N 347, L 234.
@@ -62,7 +62,7 @@ Alla fine: F 3417, T 486, N 347, L 234.
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 40×40×60, 22 nodi, 2773 passi, finito in 78 ms.
+Traccia, seme 3: griglia 40×40×60, 22 nodi, 2773 passi, finito in 100 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: T=tronco, F=aghi, L=aghi al sole, N=aghi in ombra, h=altezze possibili della punta (marcatore), k=la quota scelta (marcatore), V=la sagoma a cono (marcatore), r=punta che cresce (marcatore), x=il piede, senza aghi (marcatore).
 Alla fine: F 4154, T 545, N 489, L 354.

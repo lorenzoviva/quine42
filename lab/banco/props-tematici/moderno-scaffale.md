@@ -8,7 +8,7 @@ Lo scaffale di un magazzino con i montanti blu, le traverse arancio e i ripiani 
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.626**, minima 0.454, massima 0.772 (soglia 0.15) → passa
-- voxel per seme: 428, 778, 477, 424, 598; tempo per seme: 25, 28, 24, 24, 25 ms
+- voxel per seme: 428, 778, 477, 424, 598; tempo per seme: 25, 20, 18, 20, 21 ms
 - avvisi: tocca il soffitto della griglia: forse è tagliato in alto
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -52,7 +52,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 58 nodi, 140 passi, finito in 23 ms.
+Traccia, seme 2: griglia 20×20×20, 58 nodi, 140 passi, finito in 21 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: P=montanti blu, O=traverse arancio, W=ripiani di lamiera, E=scatolone, e=nastro dello scatolone, A=cassa di plastica, m=il dado (marcatore), U=due campate (marcatore), h=le altezze possibili (marcatore), k=la quota del taglio (marcatore), c=uno scatolone che nasce (marcatore).
 Alla fine: W 384, O 120, P 114, E 88, A 48, e 24.
@@ -80,7 +80,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 58 nodi, 137 passi, finito in 22 ms.
+Traccia, seme 3: griglia 20×20×20, 58 nodi, 137 passi, finito in 23 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: P=montanti blu, O=traverse arancio, W=ripiani di lamiera, E=scatolone, e=nastro dello scatolone, A=cassa di plastica, m=il dado (marcatore), X=una campata (marcatore), h=le altezze possibili (marcatore), k=la quota del taglio (marcatore), c=uno scatolone che nasce (marcatore).
 Alla fine: W 240, O 80, P 76, E 37, A 36, e 8.

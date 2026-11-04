@@ -8,7 +8,7 @@ Il traliccio d'acciaio dei ripetitori con anelli, diagonali, ballatoio, parafulm
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.447**, minima 0.004, massima 0.678 (soglia 0.15) → passa
-- voxel per seme: 1162, 942, 626, 858, 942; tempo per seme: 85, 78, 81, 77, 76 ms
+- voxel per seme: 1162, 942, 626, 858, 942; tempo per seme: 74, 76, 79, 77, 93 ms
 - avvisi: tocca i bordi laterali della griglia: forse è tagliato; colori mai usati: W V; colori mai usati: W r G; colori mai usati: V r G
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×60, 126 nodi, 235 passi, finito in 87 ms.
+Traccia, seme 1: griglia 20×20×60, 126 nodi, 235 passi, finito in 108 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: P=acciaio zincato, C=cemento, Z=ballatoio, K=staffe, R=luce rossa, r=cabina degli apparati, G=porta della cabina, m=il dado (marcatore), q=le cime possibili (marcatore), Q=la cima scelta (marcatore), k=ciò che sta sopra la cima (marcatore), n=la cabina (marcatore), a=dove può stare la luce di metà torre (marcatore), b=la luce scelta (marcatore).
 Alla fine: P 580, r 376, C 100, Z 72, G 15, K 13, R 6.
@@ -52,7 +52,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×60, 126 nodi, 246 passi, finito in 86 ms.
+Traccia, seme 2: griglia 20×20×60, 126 nodi, 246 passi, finito in 82 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: P=acciaio zincato, C=cemento, Z=ballatoio, K=staffe, V=parabola, R=luce rossa, m=il dado (marcatore), q=le cime possibili (marcatore), Q=la cima scelta (marcatore), k=ciò che sta sopra la cima (marcatore), L=due parabole (marcatore), a=dove può stare la luce di metà torre (marcatore), b=la luce scelta (marcatore).
 Alla fine: P 488, V 284, C 100, Z 56, K 8, R 6.
@@ -79,7 +79,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×60, 126 nodi, 254 passi, finito in 95 ms.
+Traccia, seme 3: griglia 20×20×60, 126 nodi, 254 passi, finito in 87 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: P=acciaio zincato, C=cemento, Z=ballatoio, W=pannelli bianchi, K=staffe, R=luce rossa, m=il dado (marcatore), q=le cime possibili (marcatore), Q=la cima scelta (marcatore), k=ciò che sta sopra la cima (marcatore), D=tre pannelli (marcatore), a=dove può stare la luce di metà torre (marcatore), b=la luce scelta (marcatore).
 Alla fine: P 404, C 100, Z 56, W 54, R 6, K 6.

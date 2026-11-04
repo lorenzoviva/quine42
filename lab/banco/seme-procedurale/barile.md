@@ -8,7 +8,7 @@ Classe `mobile`, scatola 20 × 20 × 20 voxel; riscrittura procedurale di `unive
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.244**, minima 0.062, massima 0.436 (soglia 0.15) → passa
-- voxel per seme: 1750, 987, 1423, 1205, 1641; tempo per seme: 7, 11, 8, 7, 9 ms
+- voxel per seme: 1750, 987, 1423, 1205, 1641; tempo per seme: 8, 11, 9, 10, 8 ms
 - avvisi: colori mai usati: L T
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 28 nodi, 77 passi, finito in 10 ms.
+Traccia, seme 1: griglia 20×20×20, 28 nodi, 77 passi, finito in 11 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=legno doghe, D=fessura doghe, I=cerchio ferro, S=ferro lucido, h=altezze possibili (marcatore), k=il taglio (marcatore), p=la pancia larga (marcatore), q=la pancia a botte (marcatore), m=il dado della pancia, poi il mestolo (marcatore), b=scelta: pancia a botte (marcatore).
 Alla fine: W 1090, I 371, D 218, S 71.
@@ -44,7 +44,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 28 nodi, 73 passi, finito in 13 ms.
+Traccia, seme 2: griglia 20×20×20, 28 nodi, 73 passi, finito in 12 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=legno doghe, D=fessura doghe, I=cerchio ferro, S=ferro lucido, h=altezze possibili (marcatore), k=il taglio (marcatore), p=la pancia larga (marcatore), q=la pancia a botte (marcatore), m=il dado della pancia, poi il mestolo (marcatore).
 Alla fine: D 436, W 327, I 190, S 34.
@@ -64,7 +64,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 28 nodi, 73 passi, finito in 13 ms.
+Traccia, seme 3: griglia 20×20×20, 28 nodi, 73 passi, finito in 12 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=legno doghe, D=fessura doghe, I=cerchio ferro, S=ferro lucido, h=altezze possibili (marcatore), k=il taglio (marcatore), p=la pancia larga (marcatore), q=la pancia a botte (marcatore), m=il dado della pancia, poi il mestolo (marcatore).
 Alla fine: D 872, W 327, I 190, S 34.

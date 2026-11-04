@@ -8,7 +8,7 @@ Una scrivania d'ufficio con il computer. Il seme sceglie le gambe o la cassettie
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.597**, minima 0.005, massima 0.770 (soglia 0.15) → passa
-- voxel per seme: 919, 844, 721, 721, 844; tempo per seme: 51, 50, 43, 45, 42 ms
+- voxel per seme: 919, 844, 721, 721, 844; tempo per seme: 42, 43, 41, 42, 45 ms
 - avvisi: tocca i bordi laterali della griglia: forse è tagliato; colori mai usati: k S; colori mai usati: K W G Y h
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 59 nodi, 147 passi, finito in 45 ms.
+Traccia, seme 1: griglia 20×20×20, 59 nodi, 147 passi, finito in 46 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: D=laminato, d=bordo del piano, P=acciaio, K=plastica nera, W=schermo azzurro, G=carta, Y=lampadina, u=tazza, h=cassettiera, m=il dado (marcatore), J=cassettiera a sinistra (marcatore), n=il portatile (marcatore), F=la tazza (marcatore).
 Alla fine: h 486, D 152, d 96, P 85, G 46, K 36, W 15, u 2, Y 1.
@@ -52,7 +52,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 59 nodi, 146 passi, finito in 53 ms.
+Traccia, seme 2: griglia 20×20×20, 59 nodi, 146 passi, finito in 46 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: D=laminato, d=bordo del piano, P=acciaio, K=plastica nera, W=schermo azzurro, G=carta, Y=lampadina, u=tazza, h=cassettiera, m=il dado (marcatore), U=cassettiera a destra (marcatore), n=il portatile (marcatore), F=la tazza (marcatore).
 Alla fine: h 486, D 152, P 87, G 46, K 36, d 19, W 15, u 2, Y 1.
@@ -79,7 +79,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 59 nodi, 139 passi, finito in 63 ms.
+Traccia, seme 3: griglia 20×20×20, 59 nodi, 139 passi, finito in 47 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: D=laminato, d=bordo del piano, P=acciaio, k=plastica beige, S=schermo verde, u=tazza, m=il dado (marcatore), X=quattro gambe (marcatore), L=il terminale (marcatore), F=la tazza (marcatore).
 Alla fine: k 477, D 152, P 36, S 35, d 19, u 2.

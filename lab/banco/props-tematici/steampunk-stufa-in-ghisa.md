@@ -8,7 +8,7 @@ Una stufa panciuta di ghisa su quattro piedi, con lo sportello della brace acces
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.306**, minima 0.007, massima 0.503 (soglia 0.15) → passa
-- voxel per seme: 1066, 535, 1067, 537, 1064; tempo per seme: 6, 5, 6, 4, 5 ms
+- voxel per seme: 1066, 535, 1067, 537, 1064; tempo per seme: 8, 5, 6, 5, 6 ms
 - avvisi: tocca il soffitto della griglia: forse è tagliato in alto; colori mai usati: Q
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 32 nodi, 58 passi, finito in 5 ms.
+Traccia, seme 1: griglia 20×20×20, 32 nodi, 58 passi, finito in 7 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: E=ghisa, O=ottone, G=ghisa chiara, A=vetro ambrato acceso, F=brace, Q=ghisa dell'asse, s=la cima della pancia (marcatore), w=la pancia larga possibile (marcatore), m=il dado della pancia (marcatore), X=pancia larga (marcatore), r=la canna che sale (marcatore), c=il gomito (marcatore).
 Alla fine: E 852, G 117, O 83, F 12, A 2.
@@ -46,7 +46,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 32 nodi, 33 passi, finito in 4 ms.
+Traccia, seme 2: griglia 20×20×20, 32 nodi, 33 passi, finito in 5 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: E=ghisa, O=ottone, G=ghisa chiara, A=vetro ambrato acceso, F=brace, Q=ghisa dell'asse, s=la cima della pancia (marcatore), w=la pancia larga possibile (marcatore), m=il dado della pancia (marcatore), Y=pancia stretta (marcatore), r=la canna che sale (marcatore), c=il gomito (marcatore).
 Alla fine: E 344, G 97, O 80, F 12, A 2.
@@ -65,7 +65,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 32 nodi, 57 passi, finito in 7 ms.
+Traccia, seme 3: griglia 20×20×20, 32 nodi, 57 passi, finito in 9 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: E=ghisa, O=ottone, G=ghisa chiara, A=vetro ambrato acceso, F=brace, Q=ghisa dell'asse, s=la cima della pancia (marcatore), w=la pancia larga possibile (marcatore), m=il dado della pancia (marcatore), X=pancia larga (marcatore), r=la canna che sale (marcatore), c=il gomito (marcatore).
 Alla fine: E 862, G 104, O 87, F 12, A 2.

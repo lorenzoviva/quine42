@@ -8,7 +8,7 @@ L'isola dei rifiuti su una platea di cemento. Il seme sceglie se c'è il cassone
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.406**, minima 0.003, massima 0.562 (soglia 0.15) → passa
-- voxel per seme: 1750, 1237, 1941, 2023, 1237; tempo per seme: 41, 41, 39, 40, 41 ms
+- voxel per seme: 1750, 1237, 1941, 2023, 1237; tempo per seme: 47, 43, 52, 42, 44 ms
 - avvisi: tocca i bordi laterali della griglia: forse è tagliato; colori mai usati: Q q Y N O; colori mai usati: Q q g S E e O; colori mai usati: Y A G g E e N; colori mai usati: Y A G g N
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 51 nodi, 138 passi, finito in 46 ms.
+Traccia, seme 1: griglia 20×20×20, 51 nodi, 138 passi, finito in 48 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: C=cemento, K=gomma nera, A=plastica blu, G=plastica verde chiaro, g=plastica grigia, S=acciaio, E=cartone, e=cartone in ombra, m=il dado (marcatore), V=la campana del vetro (marcatore), D=scatoloni (marcatore), w=lattina.
 Alla fine: G 1195, C 247, g 144, E 100, A 26, e 18, K 12, S 6, w 2.
@@ -52,7 +52,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 51 nodi, 149 passi, finito in 46 ms.
+Traccia, seme 2: griglia 20×20×20, 51 nodi, 149 passi, finito in 50 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: C=cemento, K=gomma nera, Y=plastica gialla, A=plastica blu, G=plastica verde chiaro, N=sacco nero, m=il dado (marcatore), U=tre bidoni (marcatore), L=sacchi (marcatore), s=dove può stare un sacco (marcatore), z=un sacco (marcatore), w=lattina.
 Alla fine: A 273, Y 252, C 247, G 231, N 157, K 75, w 2.
@@ -79,7 +79,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 51 nodi, 140 passi, finito in 43 ms.
+Traccia, seme 3: griglia 20×20×20, 51 nodi, 140 passi, finito in 60 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: C=cemento, K=gomma nera, Q=plastica verde, q=coperchio verde, S=acciaio, O=adesivo, m=il dado (marcatore), X=il cassonetto (marcatore), n=niente (marcatore), w=lattina.
 Alla fine: Q 1350, q 278, C 247, K 36, O 15, S 13, w 2.

@@ -8,7 +8,7 @@ Classe `edificio`, scatola 50 × 50 × 50 voxel; riscrittura procedurale di `uni
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.408**, minima 0.139, massima 0.546 (soglia 0.15) → passa
-- voxel per seme: 7040, 14480, 14904, 7488, 11088; tempo per seme: 66, 66, 68, 66, 65 ms
+- voxel per seme: 7040, 14480, 14904, 7488, 11088; tempo per seme: 71, 69, 101, 91, 67 ms
 - avvisi: colori mai usati: W n F
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 25×25×24 → 50×50×48, 50 nodi, 260 passi, finito in 75 ms.
+Traccia, seme 1: griglia 25×25×24 → 50×50×48, 50 nodi, 260 passi, finito in 92 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: X=volume casa (marcatore), Q=prisma tetto (marcatore), N=legno scuro travi, D=pietra grigia, O=porta asse, U=vetro finestra, R=paglia chiara, r=paglia scura ombra, G=muschio verde, H=ferramenta e ombra profonda, h=misure possibili (marcatore), k=il taglio (marcatore), m=mescola (marcatore), d=fuga tra pietre, p=riflesso vetro.
 Alla fine: d 4470, R 1366, r 554, N 500, D 72, H 54, O 10, p 8, U 4, G 2.
@@ -45,7 +45,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 25×25×24 → 50×50×48, 50 nodi, 256 passi, finito in 76 ms.
+Traccia, seme 2: griglia 25×25×24 → 50×50×48, 50 nodi, 256 passi, finito in 83 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: X=volume casa (marcatore), Q=prisma tetto (marcatore), N=legno scuro travi, D=pietra grigia, O=porta asse, U=vetro finestra, R=paglia chiara, r=paglia scura ombra, G=muschio verde, H=ferramenta e ombra profonda, h=misure possibili (marcatore), k=il taglio (marcatore), m=mescola (marcatore), d=fuga tra pietre, p=riflesso vetro.
 Alla fine: d 8668, R 3970, r 1150, N 468, D 145, H 54, O 10, p 8, U 4, G 3.
@@ -65,7 +65,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 25×25×24 → 50×50×48, 50 nodi, 254 passi, finito in 79 ms.
+Traccia, seme 3: griglia 25×25×24 → 50×50×48, 50 nodi, 254 passi, finito in 84 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: X=volume casa (marcatore), Q=prisma tetto (marcatore), N=legno scuro travi, D=pietra grigia, O=porta asse, U=vetro finestra, R=paglia chiara, r=paglia scura ombra, G=muschio verde, H=ferramenta e ombra profonda, h=misure possibili (marcatore), k=il taglio (marcatore), m=mescola (marcatore), d=fuga tra pietre, p=riflesso vetro.
 Alla fine: d 9537, R 3536, r 1072, N 532, D 145, H 55, O 9, p 8, G 6, U 4.

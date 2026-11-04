@@ -8,7 +8,7 @@ Classe `cespuglio`, scatola 20 × 20 × 16 voxel; riscrittura procedurale di `un
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.556**, minima 0.427, massima 0.718 (soglia 0.15) → passa
-- voxel per seme: 776, 786, 753, 773, 781; tempo per seme: 8, 8, 8, 8, 8 ms
+- voxel per seme: 776, 786, 753, 773, 781; tempo per seme: 16, 11, 8, 8, 8 ms
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -24,7 +24,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×16, 11 nodi, 738 passi, finito in 8 ms.
+Traccia, seme 1: griglia 20×20×16, 11 nodi, 738 passi, finito in 10 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: L=foglie, H=foglie chiare, D=foglie scure, T=rametti, V=lo spazio del cespuglio (marcatore), r=punta di un rametto (marcatore).
 Alla fine: L 536, D 141, H 67, T 32.
@@ -66,7 +66,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×16, 11 nodi, 732 passi, finito in 12 ms.
+Traccia, seme 3: griglia 20×20×16, 11 nodi, 732 passi, finito in 9 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: L=foglie, H=foglie chiare, D=foglie scure, T=rametti, V=lo spazio del cespuglio (marcatore), r=punta di un rametto (marcatore).
 Alla fine: L 530, D 140, H 57, T 26.

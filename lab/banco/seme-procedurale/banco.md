@@ -8,7 +8,7 @@ Classe `mobile`, scatola 20 × 20 × 20 voxel; riscrittura procedurale di `unive
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.577**, minima 0.039, massima 0.958 (soglia 0.15) → passa
-- voxel per seme: 697, 697, 649, 480, 697; tempo per seme: 10, 10, 18, 11, 15 ms
+- voxel per seme: 697, 697, 649, 480, 697; tempo per seme: 9, 10, 9, 9, 10 ms
 - avvisi: tocca i bordi laterali della griglia: forse è tagliato
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 42 nodi, 151 passi, finito in 11 ms.
+Traccia, seme 1: griglia 20×20×20, 42 nodi, 151 passi, finito in 20 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: N=legno, n=legno scuro, T=piano, I=ferro, G=manico, V=dove può stare il piano (marcatore), h=altezze possibili (marcatore), k=la quota scelta (marcatore), r=dove può stare il ripiano (marcatore), s=un attrezzo che nasce (marcatore), w=la sporgenza (marcatore), a=la morsa (marcatore), b=il martello (marcatore), c=la cassetta (marcatore).
 Alla fine: T 470, n 181, N 36, G 6, I 4.
@@ -44,7 +44,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 42 nodi, 150 passi, finito in 11 ms.
+Traccia, seme 2: griglia 20×20×20, 42 nodi, 150 passi, finito in 16 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: N=legno, n=legno scuro, T=piano, I=ferro, G=manico, V=dove può stare il piano (marcatore), h=altezze possibili (marcatore), k=la quota scelta (marcatore), r=dove può stare il ripiano (marcatore), s=un attrezzo che nasce (marcatore), w=la sporgenza (marcatore), a=la morsa (marcatore), b=il martello (marcatore), c=la cassetta (marcatore).
 Alla fine: T 469, n 182, N 36, G 6, I 4.

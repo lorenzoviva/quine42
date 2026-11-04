@@ -8,7 +8,7 @@ Classe `monumento`, scatola 20 × 20 × 60 voxel; riscrittura procedurale di `un
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.187**, minima 0.113, massima 0.293 (soglia 0.15) → passa
-- voxel per seme: 4238, 4586, 4898, 5174, 5677; tempo per seme: 56, 54, 51, 72, 87 ms
+- voxel per seme: 4238, 4586, 4898, 5174, 5677; tempo per seme: 62, 65, 66, 69, 78 ms
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -24,7 +24,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×60, 37 nodi, 196 passi, finito in 66 ms.
+Traccia, seme 1: griglia 20×20×60, 37 nodi, 196 passi, finito in 80 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: D=pietra, d=pietra consumata, W=marmo, w=scanalatura, h=altezze possibili (marcatore), k=il taglio (marcatore), p=il pilastro quadrato possibile (marcatore), c=il capitello che si allarga (marcatore), s=il gradino in più possibile (marcatore), m=dado (marcatore), q=il capitello (marcatore).
 Alla fine: W 2514, D 1394, w 177, d 153, s 88.
@@ -45,7 +45,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×60, 37 nodi, 190 passi, finito in 59 ms.
+Traccia, seme 2: griglia 20×20×60, 37 nodi, 190 passi, finito in 82 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: D=pietra, d=pietra consumata, W=marmo, w=scanalatura, h=altezze possibili (marcatore), k=il taglio (marcatore), p=il pilastro quadrato possibile (marcatore), c=il capitello che si allarga (marcatore), s=il gradino in più possibile (marcatore), m=dado (marcatore), q=il capitello (marcatore).
 Alla fine: W 2862, D 1369, d 181, w 174, s 88.
@@ -66,7 +66,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×60, 37 nodi, 186 passi, finito in 60 ms.
+Traccia, seme 3: griglia 20×20×60, 37 nodi, 186 passi, finito in 77 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: D=pietra, d=pietra consumata, W=marmo, w=scanalatura, h=altezze possibili (marcatore), k=il taglio (marcatore), p=il pilastro quadrato possibile (marcatore), c=il capitello che si allarga (marcatore), s=il gradino in più possibile (marcatore), m=dado (marcatore), q=il capitello (marcatore).
 Alla fine: W 3048, D 1479, w 195, d 176, s 88.

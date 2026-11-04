@@ -8,7 +8,7 @@ Classe `mobile`, scatola 20 × 20 × 20 voxel; riscrittura procedurale di `unive
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.596**, minima 0.530, massima 0.649 (soglia 0.15) → passa
-- voxel per seme: 221, 220, 245, 193, 210; tempo per seme: 3, 3, 5, 4, 3 ms
+- voxel per seme: 221, 220, 245, 193, 210; tempo per seme: 5, 4, 4, 4, 4 ms
 - avvisi: colori mai usati: e
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -48,7 +48,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 21 nodi, 58 passi, finito in 5 ms.
+Traccia, seme 2: griglia 20×20×20, 21 nodi, 58 passi, finito in 4 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: X=seme (marcatore), D=pietra, d=pietra scura, E=cenere, N=ciocco, n=corteccia, Y=cuore della fiamma, O=fiamma, R=punta.
 Alla fine: E 85, D 46, d 21, Y 21, N 16, O 16, R 9, n 6.
@@ -69,7 +69,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 21 nodi, 61 passi, finito in 5 ms.
+Traccia, seme 3: griglia 20×20×20, 21 nodi, 61 passi, finito in 4 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: X=seme (marcatore), D=pietra, d=pietra scura, E=cenere, N=ciocco, n=corteccia, Y=cuore della fiamma, O=fiamma, R=punta.
 Alla fine: E 97, D 52, d 20, N 20, Y 20, O 18, R 11, n 7.

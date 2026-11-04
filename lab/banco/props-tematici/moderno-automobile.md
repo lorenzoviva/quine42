@@ -8,7 +8,7 @@ Una macchina di città con ruote, fari, paraurti e vetri. Il seme sceglie se è 
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.207**, minima 0.020, massima 0.396 (soglia 0.15) → passa
-- voxel per seme: 14421, 21985, 19193, 18781, 22438; tempo per seme: 726, 711, 733, 712, 800 ms
+- voxel per seme: 14421, 21985, 19193, 18781, 22438; tempo per seme: 823, 779, 810, 804, 790 ms
 - avvisi: colori mai usati: W w a H; colori mai usati: W A h O E e; colori mai usati: w A a H E e; colori mai usati: w A a h O E e; colori mai usati: W A H E e
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 50×50×50, 72 nodi, 354 passi, finito in 810 ms.
+Traccia, seme 1: griglia 50×50×50, 72 nodi, 354 passi, finito in 792 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: K=gomma e plastica nera, S=cerchi d'acciaio, V=vetri, T=fari, R=fanali, A=carrozzeria blu, h=portapacchi, O=valigia, E=cassa di legno, e=cassa in ombra, m=il dado (marcatore), J=pickup (marcatore), L=portapacchi (marcatore), c=dove può stare una cassa (marcatore).
 Alla fine: A 10873, V 1640, K 1087, O 495, E 120, S 100, h 52, e 24, R 18, T 12.
@@ -51,7 +51,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 50×50×50, 72 nodi, 330 passi, finito in 934 ms.
+Traccia, seme 2: griglia 50×50×50, 72 nodi, 330 passi, finito in 865 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: K=gomma e plastica nera, S=cerchi d'acciaio, V=vetri, T=fari, R=fanali, w=carrozzeria bianca, a=fascia arancio, H=insegna del taxi, m=il dado (marcatore), U=furgoncino (marcatore), D=taxi (marcatore).
 Alla fine: w 18015, V 1352, a 1311, K 1087, S 100, H 90, R 18, T 12.
@@ -80,7 +80,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 50×50×50, 72 nodi, 341 passi, finito in 870 ms.
+Traccia, seme 3: griglia 50×50×50, 72 nodi, 341 passi, finito in 885 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: K=gomma e plastica nera, S=cerchi d'acciaio, V=vetri, T=fari, R=fanali, W=carrozzeria rossa, h=portapacchi, O=valigia, m=il dado (marcatore), X=utilitaria (marcatore), L=portapacchi (marcatore).
 Alla fine: W 12848, V 4563, K 1105, O 495, S 100, h 52, R 18, T 12.

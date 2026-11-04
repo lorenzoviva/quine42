@@ -8,7 +8,7 @@ Un anello di ceramica bianca in piedi su una piattaforma di grafite, con la memb
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.195**, minima 0.015, massima 0.333 (soglia 0.15) → passa
-- voxel per seme: 5261, 4654, 3541, 3537, 4654; tempo per seme: 62, 55, 52, 50, 45 ms
+- voxel per seme: 5261, 4654, 3541, 3537, 4654; tempo per seme: 83, 89, 71, 64, 72 ms
 - avvisi: colori mai usati: P
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 50×50×50, 42 nodi, 190 passi, finito in 55 ms.
+Traccia, seme 1: griglia 50×50×50, 42 nodi, 190 passi, finito in 83 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=ceramica bianca, w=ceramica in ombra, G=grafite, g=grafite chiara, C=energia ciano, M=energia magenta, V=vetro, x=l'anello grande (marcatore), y=l'anello medio (marcatore), z=l'anello piccolo (marcatore), m=fra un anello e l'altro (marcatore), X=l'anello grande, nel piedistallo (marcatore), Y=l'anello medio, nel piedistallo (marcatore), Z=l'anello piccolo, nel piedistallo (marcatore), N=fra un anello e l'altro, nel piedistallo (marcatore), u=segno dell'anello grande (marcatore), v=segno dell'anello medio (marcatore), t=segno dell'anello piccolo (marcatore), R=l'anello scelto (marcatore), Q=la membrana (marcatore), k=lanci a vuoto (marcatore), p=dove può stare un pilone (marcatore), q=un pilone che sale (marcatore).
 Alla fine: C 2331, G 1330, M 767, g 431, W 301, V 56, w 45.
@@ -41,7 +41,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 50×50×50, 42 nodi, 169 passi, finito in 49 ms.
+Traccia, seme 2: griglia 50×50×50, 42 nodi, 169 passi, finito in 73 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=ceramica bianca, w=ceramica in ombra, G=grafite, g=grafite chiara, C=energia ciano, M=energia magenta, V=vetro, x=l'anello grande (marcatore), y=l'anello medio (marcatore), z=l'anello piccolo (marcatore), m=fra un anello e l'altro (marcatore), X=l'anello grande, nel piedistallo (marcatore), Y=l'anello medio, nel piedistallo (marcatore), Z=l'anello piccolo, nel piedistallo (marcatore), N=fra un anello e l'altro, nel piedistallo (marcatore), u=segno dell'anello grande (marcatore), v=segno dell'anello medio (marcatore), t=segno dell'anello piccolo (marcatore), R=l'anello scelto (marcatore), Q=la membrana (marcatore), P=piedistallo, k=lanci a vuoto (marcatore), p=dove può stare un pilone (marcatore), q=un pilone che sale (marcatore).
 Alla fine: C 1555, G 1330, M 541, W 521, g 431, V 136, w 105, P 35.
@@ -56,7 +56,7 @@ Alla fine: C 1555, G 1330, M 541, W 521, g 431, V 136, w 105, P 35.
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 50×50×50, 42 nodi, 149 passi, finito in 63 ms.
+Traccia, seme 3: griglia 50×50×50, 42 nodi, 149 passi, finito in 75 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=ceramica bianca, w=ceramica in ombra, G=grafite, g=grafite chiara, C=energia ciano, M=energia magenta, V=vetro, x=l'anello grande (marcatore), y=l'anello medio (marcatore), z=l'anello piccolo (marcatore), m=fra un anello e l'altro (marcatore), X=l'anello grande, nel piedistallo (marcatore), Y=l'anello medio, nel piedistallo (marcatore), Z=l'anello piccolo, nel piedistallo (marcatore), N=fra un anello e l'altro, nel piedistallo (marcatore), u=segno dell'anello grande (marcatore), v=segno dell'anello medio (marcatore), t=segno dell'anello piccolo (marcatore), R=l'anello scelto (marcatore), Q=la membrana (marcatore), P=piedistallo, k=lanci a vuoto (marcatore), p=dove può stare un pilone (marcatore), q=un pilone che sale (marcatore).
 Alla fine: G 1330, C 841, g 432, W 325, M 262, V 146, P 126, w 79.

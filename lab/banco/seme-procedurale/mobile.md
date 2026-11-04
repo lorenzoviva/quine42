@@ -8,7 +8,7 @@ Classe `mobile`, scatola 20 × 20 × 20 voxel; riscrittura procedurale di `unive
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.304**, minima 0.001, massima 0.512 (soglia 0.15) → passa
-- voxel per seme: 1852, 2381, 2787, 1537, 1852; tempo per seme: 19, 14, 12, 19, 13 ms
+- voxel per seme: 1852, 2381, 2787, 1537, 1852; tempo per seme: 17, 12, 15, 16, 13 ms
 - avvisi: tocca i bordi laterali della griglia: forse è tagliato; tocca il soffitto della griglia: forse è tagliato in alto
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 31 nodi, 159 passi, finito in 23 ms.
+Traccia, seme 1: griglia 20×20×20, 31 nodi, 159 passi, finito in 16 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: N=assi, n=fessure, I=ferro, K=coperchio, S=serratura, w=i fianchi che possono esserci (marcatore), a=scelta (marcatore), h=altezze possibili (marcatore), k=il taglio (marcatore), f=dove possono stare le fasce (marcatore), g=una fascia scelta (marcatore), o=il coperchio alzato (marcatore).
 Alla fine: N 766, K 612, I 315, n 158, S 1.
@@ -46,7 +46,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 31 nodi, 140 passi, finito in 13 ms.
+Traccia, seme 2: griglia 20×20×20, 31 nodi, 140 passi, finito in 14 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: N=assi, n=fessure, I=ferro, K=coperchio, S=serratura, w=i fianchi che possono esserci (marcatore), a=scelta (marcatore), h=altezze possibili (marcatore), k=il taglio (marcatore), f=dove possono stare le fasce (marcatore), g=una fascia scelta (marcatore), o=il coperchio alzato (marcatore).
 Alla fine: N 1578, n 402, I 280, K 120, S 1.
@@ -67,7 +67,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 31 nodi, 164 passi, finito in 26 ms.
+Traccia, seme 3: griglia 20×20×20, 31 nodi, 164 passi, finito in 20 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: N=assi, n=fessure, I=ferro, K=coperchio, S=serratura, w=i fianchi che possono esserci (marcatore), a=scelta (marcatore), h=altezze possibili (marcatore), k=il taglio (marcatore), f=dove possono stare le fasce (marcatore), g=una fascia scelta (marcatore), o=il coperchio alzato (marcatore).
 Alla fine: N 1462, K 651, n 353, I 320, S 1.

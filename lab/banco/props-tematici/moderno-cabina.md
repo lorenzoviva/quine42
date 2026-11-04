@@ -8,7 +8,7 @@ La cabina di vetro col telefono o il chiosco dei giornali con la tettoia a righe
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.500**, minima 0.030, massima 0.812 (soglia 0.15) → passa
-- voxel per seme: 2913, 2907, 1128, 1079, 2866; tempo per seme: 34, 36, 39, 40, 33 ms
+- voxel per seme: 2913, 2907, 1128, 1079, 2866; tempo per seme: 33, 36, 37, 39, 33 ms
 - avvisi: tocca i bordi laterali della griglia: forse è tagliato; colori mai usati: V K S E; colori mai usati: V K S N; colori mai usati: Q q O o R Y G N; colori mai usati: Q q O o R Y G E N; colori mai usati: V K S E N
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -51,7 +51,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 49 nodi, 140 passi, finito in 37 ms.
+Traccia, seme 2: griglia 20×20×20, 49 nodi, 140 passi, finito in 38 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: C=cemento, P=acciaio, T=insegna, Q=lamiera verde, q=lamiera in ombra, O=tenda a righe rosse, o=tenda a righe bianche, R=copertina rosa, Y=copertina gialla, G=copertina blu, m=il dado (marcatore), U=il chiosco (marcatore), I=dove stanno le riviste (marcatore), D=accanto: i pacchi (marcatore), E=pacco di giornali.
 Alla fine: Q 2057, P 266, C 187, q 187, o 39, T 39, E 34, G 30, O 29, R 20, Y 19.
@@ -77,7 +77,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 49 nodi, 151 passi, finito in 41 ms.
+Traccia, seme 3: griglia 20×20×20, 49 nodi, 151 passi, finito in 48 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: C=cemento, P=acciaio, V=vetro, K=telefono, S=schermo, T=insegna, m=il dado (marcatore), X=la cabina (marcatore), h=dove può stare la cornetta (marcatore), H=la cornetta scelta (marcatore), D=accanto: i pacchi (marcatore), E=pacco di giornali.
 Alla fine: V 513, P 329, C 121, T 72, E 48, K 39, S 6.

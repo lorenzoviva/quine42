@@ -8,7 +8,7 @@ Un corpo di rame cerchiato d'ottone su uno zoccolo di ghisa, con il focolare acc
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.265**, minima 0.052, massima 0.440 (soglia 0.15) → passa
-- voxel per seme: 1749, 1215, 1679, 1146, 1008; tempo per seme: 8, 8, 7, 7, 7 ms
+- voxel per seme: 1749, 1215, 1679, 1146, 1008; tempo per seme: 7, 8, 8, 8, 9 ms
 - avvisi: tocca il soffitto della griglia: forse è tagliato in alto
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 34 nodi, 84 passi, finito in 10 ms.
+Traccia, seme 1: griglia 20×20×20, 34 nodi, 84 passi, finito in 20 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: G=ghisa, C=rame, O=ottone, A=vetro ambrato, F=fuoco del focolare, M=quadrante del manometro, P=legno scuro, E=tubo di ferro, h=altezze possibili (marcatore), k=la quota scelta (marcatore), V=dove può uscire il tubo (marcatore), r=punta che cresce (marcatore), t=il tubo scelto (marcatore), w=la pancia possibile (marcatore), m=il dado della pancia (marcatore), Y=pancia no (marcatore).
 Alla fine: C 897, G 508, O 317, E 13, M 6, F 6, P 1, A 1.
@@ -43,7 +43,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 34 nodi, 94 passi, finito in 8 ms.
+Traccia, seme 2: griglia 20×20×20, 34 nodi, 94 passi, finito in 19 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: G=ghisa, C=rame, O=ottone, A=vetro ambrato, F=fuoco del focolare, M=quadrante del manometro, P=legno scuro, E=tubo di ferro, h=altezze possibili (marcatore), k=la quota scelta (marcatore), V=dove può uscire il tubo (marcatore), r=punta che cresce (marcatore), t=il tubo scelto (marcatore), w=la pancia possibile (marcatore), m=il dado della pancia (marcatore), Y=pancia no (marcatore).
 Alla fine: G 508, C 483, O 193, E 17, M 6, F 6, P 1, A 1.
@@ -61,7 +61,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 34 nodi, 84 passi, finito in 9 ms.
+Traccia, seme 3: griglia 20×20×20, 34 nodi, 84 passi, finito in 8 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: G=ghisa, C=rame, O=ottone, A=vetro ambrato, F=fuoco del focolare, M=quadrante del manometro, P=legno scuro, E=tubo di ferro, h=altezze possibili (marcatore), k=la quota scelta (marcatore), V=dove può uscire il tubo (marcatore), r=punta che cresce (marcatore), t=il tubo scelto (marcatore), w=la pancia possibile (marcatore), m=il dado della pancia (marcatore), Y=pancia no (marcatore).
 Alla fine: C 828, G 508, O 317, E 12, M 6, F 6, P 1, A 1.

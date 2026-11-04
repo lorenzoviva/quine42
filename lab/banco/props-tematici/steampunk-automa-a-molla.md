@@ -8,7 +8,7 @@ Un automa dal corpo a botte di rame cerchiato d'ottone, con la chiave della cari
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.178**, minima 0.037, massima 0.294 (soglia 0.15) → passa
-- voxel per seme: 846, 923, 924, 1070, 847; tempo per seme: 14, 15, 14, 15, 14 ms
+- voxel per seme: 846, 923, 924, 1070, 847; tempo per seme: 16, 14, 15, 15, 15 ms
 - avvisi: tocca i bordi laterali della griglia: forse è tagliato; colori mai usati: Q; tocca il soffitto della griglia: forse è tagliato in alto
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×15×30, 36 nodi, 88 passi, finito in 16 ms.
+Traccia, seme 1: griglia 20×15×30, 36 nodi, 88 passi, finito in 18 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: C=rame, O=ottone, E=ghisa, A=vetro ambrato acceso, G=quadrante, D=legno scuro, Q=rame dell'asse, h=altezze possibili (marcatore), k=la quota scelta (marcatore), s=le spalle (marcatore), w=la pancia possibile (marcatore), m=il dado della pancia (marcatore), X=pancia sì (marcatore).
 Alla fine: C 554, O 187, E 75, D 21, G 5, A 4.
@@ -45,7 +45,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×15×30, 36 nodi, 89 passi, finito in 15 ms.
+Traccia, seme 2: griglia 20×15×30, 36 nodi, 89 passi, finito in 17 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: C=rame, O=ottone, E=ghisa, A=vetro ambrato acceso, G=quadrante, D=legno scuro, Q=rame dell'asse, h=altezze possibili (marcatore), k=la quota scelta (marcatore), s=le spalle (marcatore), w=la pancia possibile (marcatore), m=il dado della pancia (marcatore), X=pancia sì (marcatore).
 Alla fine: C 619, O 143, E 71, A 64, D 21, G 5.
@@ -65,7 +65,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×15×30, 36 nodi, 89 passi, finito in 16 ms.
+Traccia, seme 3: griglia 20×15×30, 36 nodi, 89 passi, finito in 17 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: C=rame, O=ottone, E=ghisa, A=vetro ambrato acceso, G=quadrante, D=legno scuro, Q=rame dell'asse, h=altezze possibili (marcatore), k=la quota scelta (marcatore), s=le spalle (marcatore), w=la pancia possibile (marcatore), m=il dado della pancia (marcatore), X=pancia sì (marcatore).
 Alla fine: C 619, O 141, E 74, A 64, D 21, G 5.

@@ -8,7 +8,7 @@ Classe `albero`, scatola 40 × 40 × 60 voxel; riscrittura procedurale di `unive
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.959**, minima 0.881, massima 0.991 (soglia 0.15) → passa
-- voxel per seme: 586, 425, 777, 917, 421; tempo per seme: 125, 125, 67, 61, 63 ms
+- voxel per seme: 586, 425, 777, 917, 421; tempo per seme: 82, 83, 83, 84, 82 ms
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -24,7 +24,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 40×40×60, 24 nodi, 167 passi, finito in 71 ms.
+Traccia, seme 1: griglia 40×40×60, 24 nodi, 167 passi, finito in 88 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: T=fusto palma, K=anello tronco scuro, H=fusto illuminato, F=fronda, L=fronda al sole, D=fronda in ombra, C=noce di cocco, h=altezze possibili (marcatore), k=la quota scelta (marcatore), r=la punta del fusto (marcatore), f=punta di una fronda che si allunga (marcatore), c=la cima (marcatore).
 Alla fine: D 198, F 113, L 96, C 80, T 78, H 12, K 9.
@@ -42,7 +42,7 @@ Alla fine: D 198, F 113, L 96, C 80, T 78, H 12, K 9.
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 40×40×60, 24 nodi, 169 passi, finito in 70 ms.
+Traccia, seme 2: griglia 40×40×60, 24 nodi, 169 passi, finito in 82 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: T=fusto palma, K=anello tronco scuro, H=fusto illuminato, F=fronda, L=fronda al sole, D=fronda in ombra, C=noce di cocco, h=altezze possibili (marcatore), k=la quota scelta (marcatore), r=la punta del fusto (marcatore), f=punta di una fronda che si allunga (marcatore), c=la cima (marcatore).
 Alla fine: D 143, T 70, F 63, C 58, L 58, H 18, K 15.
@@ -60,7 +60,7 @@ Alla fine: D 143, T 70, F 63, C 58, L 58, H 18, K 15.
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 40×40×60, 24 nodi, 168 passi, finito in 70 ms.
+Traccia, seme 3: griglia 40×40×60, 24 nodi, 168 passi, finito in 84 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: T=fusto palma, K=anello tronco scuro, H=fusto illuminato, F=fronda, L=fronda al sole, D=fronda in ombra, C=noce di cocco, h=altezze possibili (marcatore), k=la quota scelta (marcatore), r=la punta del fusto (marcatore), f=punta di una fronda che si allunga (marcatore), c=la cima (marcatore).
 Alla fine: D 281, F 182, L 157, T 69, C 56, H 21, K 11.

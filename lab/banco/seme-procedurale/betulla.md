@@ -8,7 +8,7 @@ Classe `albero`, scatola 40 × 40 × 60 voxel; riscrittura procedurale di `unive
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.667**, minima 0.523, massima 0.775 (soglia 0.15) → passa
-- voxel per seme: 4056, 4106, 4097, 4130, 4104; tempo per seme: 90, 84, 85, 85, 84 ms
+- voxel per seme: 4056, 4106, 4097, 4130, 4104; tempo per seme: 97, 101, 98, 97, 96 ms
 - avvisi: tocca il soffitto della griglia: forse è tagliato in alto
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 40×40×60, 26 nodi, 4420 passi, finito in 159 ms.
+Traccia, seme 1: griglia 40×40×60, 26 nodi, 4420 passi, finito in 114 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=corteccia bianca, K=macchia scura, D=corteccia ombra, F=foglie verde chiaro, l=foglie sole, L=foglie ombra, S=foglie profonde, h=altezze possibili della cima (marcatore), k=la quota scelta (marcatore), V=dove possono stare le foglie (marcatore), r=punta che cresce (marcatore), x=il fusto nudo (marcatore), c=dove nasce una nuvola (marcatore).
 Alla fine: S 1489, F 1380, L 491, l 462, W 157, K 55, D 22.
@@ -42,7 +42,7 @@ Alla fine: S 1489, F 1380, L 491, l 462, W 157, K 55, D 22.
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 40×40×60, 26 nodi, 4421 passi, finito in 109 ms.
+Traccia, seme 2: griglia 40×40×60, 26 nodi, 4421 passi, finito in 114 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=corteccia bianca, K=macchia scura, D=corteccia ombra, F=foglie verde chiaro, l=foglie sole, L=foglie ombra, S=foglie profonde, h=altezze possibili della cima (marcatore), k=la quota scelta (marcatore), V=dove possono stare le foglie (marcatore), r=punta che cresce (marcatore), x=il fusto nudo (marcatore), c=dove nasce una nuvola (marcatore).
 Alla fine: S 1752, F 1249, L 485, l 389, W 164, K 48, D 19.
@@ -59,7 +59,7 @@ Alla fine: S 1752, F 1249, L 485, l 389, W 164, K 48, D 19.
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 40×40×60, 26 nodi, 4421 passi, finito in 102 ms.
+Traccia, seme 3: griglia 40×40×60, 26 nodi, 4421 passi, finito in 118 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=corteccia bianca, K=macchia scura, D=corteccia ombra, F=foglie verde chiaro, l=foglie sole, L=foglie ombra, S=foglie profonde, h=altezze possibili della cima (marcatore), k=la quota scelta (marcatore), V=dove possono stare le foglie (marcatore), r=punta che cresce (marcatore), x=il fusto nudo (marcatore), c=dove nasce una nuvola (marcatore).
 Alla fine: S 1451, F 1438, L 505, l 470, W 167, K 42, D 24.
