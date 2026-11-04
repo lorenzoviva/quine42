@@ -254,7 +254,7 @@ describe('a room with two teams', () => {
 
   it('the door says both, the rooms with one team say one; every seat and teleport of the round table is free of the others', async () => {
     const k = await bootWith(new MockAiModels());
-    for (const b of k.corona.buildings) expect(b.teams.length, b.id).toBe(b.id === 'galleria' ? 2 : 1);
+    for (const b of k.corona.buildings) expect(b.teams.length, b.id).toBe(b.id === 'galleria' || b.id === 'persone' ? 2 : 1);
     const items = k.corona.building('concilio')!.storeys[0].items.filter((i) => i.kind === 'desk' || i.kind === 'portal' || i.kind === 'table');
     const cells = items.map((i) => `${i.x},${i.y}`);
     expect(new Set(cells).size).toBe(cells.length);
