@@ -148,7 +148,7 @@ describe('il sorvegliante, con un mondo finto', () => {
       const env = worldEnv();
       expect(Object.keys(env).sort().join()).not.toMatch(/GEMINI|STRIPE|FIREBASE|QUINE/);
       expect(JSON.stringify(env)).not.toContain('chiave-finta');
-      // The fee passes by value (ADR-0131): that name, nothing else of ours.
+      // The fee passes by value (ADR-0132): that name, nothing else of ours.
       expect(Object.keys(worldEnv(0)).filter((k) => /GEMINI|STRIPE|FIREBASE|QUINE/.test(k))).toEqual(['QUINE_COMMISSIONE']);
       expect(worldEnv(0).QUINE_COMMISSIONE).toBe('0');
     } finally {

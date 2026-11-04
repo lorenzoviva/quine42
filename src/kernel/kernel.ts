@@ -296,7 +296,7 @@ export interface KernelOptions {
   ledger?: Ledger;
   /** Dollars a day the master may give by hand (ADR-0104). */
   grantCap?: number;
-  /** The platform fee on every call charged (ADR-0131): only the server says it, never the universe, Lua or the Council. */
+  /** The platform fee on every call charged (ADR-0132): only the server says it, never the universe, Lua or the Council. */
   platformFee?: number;
   store: KeyValueStore;
   ai: AiModels;
@@ -4995,7 +4995,7 @@ export class Kernel {
     return true;
   }
 
-  /** The platform fee of this world (ADR-0131). */
+  /** The platform fee of this world (ADR-0132). */
   get platformFee(): number {
     return this.fee;
   }
@@ -5033,7 +5033,7 @@ export class Kernel {
 
   /**
    * Deducts credits for a completed model call (T45a).
-   * Charges the payer (or divides common expenses equally among connected players) the cost plus the platform fee (ADR-0131).
+   * Charges the payer (or divides common expenses equally among connected players) the cost plus the platform fee (ADR-0132).
    */
   billCall(r: CallRecord): void {
     if (!this.manyPlayers() || this.mirror) return;
