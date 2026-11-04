@@ -17,6 +17,7 @@ import { clientAddress, proxyHops, Rates, type Pace } from './rates';
 import { attachSessions, getActiveWorld, sessionList, type SessionOptions } from './session';
 import { stripeHandler, stripeSettings } from './stripe';
 import { universeHandler, universesPerAccount } from './universeStore';
+import { videoFolder, videoHandler } from './video';
 import { walletHandler } from './wallet';
 import { wandererHandler } from './wanderer';
 
@@ -155,6 +156,12 @@ export interface FrontRates {
   sockets: Pace;
   /** Sockets at once. */
   socketsAtOnce: number;
+  /** Pieces of a video: every jump forward is one (ADR-0131). */
+  video: Pace;
+  /** Videos being sent to one address at once: many people can stand behind it, and a page with several videos holds one each. */
+  videosAtOnce: number;
+  /** Videos being sent at once, to anyone. */
+  videosInAll: number;
 }
 
 export const FRONT_RATES: FrontRates = {
@@ -162,9 +169,13 @@ export const FRONT_RATES: FrontRates = {
   heavy: { burst: 60, perSecond: 1 },
   sockets: { burst: 30, perSecond: 0.5 },
   socketsAtOnce: 24,
+  video: { burst: 60, perSecond: 1 },
+  videosAtOnce: 24,
+  videosInAll: 200,
 };
 
 const HEAVY = /^\/api\/universe\/[^/?]/;
+const VIDEO_PIECE = /^\/api\/video\/[^/?]/;
 
 export interface ProductionOptions {
   env: Record<string, string | undefined>;
@@ -200,7 +211,7 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
   const internal = newSecret();
   const hops = proxyHops(o.env.QUINE_PROXY_FIDATI) ?? 0;
   const limits = { ...FRONT_RATES, ...o.rates };
-  const [apiRate, heavyRate, socketRate] = [new Rates(limits.api), new Rates(limits.heavy), new Rates(limits.sockets)];
+  const [apiRate, heavyRate, socketRate, videoRate] = [new Rates(limits.api), new Rates(limits.heavy), new Rates(limits.sockets), new Rates(limits.video)];
   let warned = false;
   const addressOf = (req: IncomingMessage) => {
     // A client can write this too, so it is only said, once. With a proxy of ours in front and no QUINE_PROXY_FIDATI, everyone is one address, the proxy's, and is refused together: safe, and to be known.
@@ -214,11 +225,14 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
   const overRate = (req: IncomingMessage) => {
     if (isInternal(req, internal)) return false;
     const address = addressOf(req);
-    return !apiRate.take(address) || (HEAVY.test(req.url ?? '') && !heavyRate.take(address));
+    return !apiRate.take(address) || (HEAVY.test(req.url ?? '') && !heavyRate.take(address)) || (VIDEO_PIECE.test(req.url ?? '') && !videoRate.take(address));
   };
   const gemini = new GeminiGate({ apiKey: o.env.GEMINI_API_KEY, dailyCap: o.env.GEMINI_TETTO_GIORNALIERO, universesDir, ledgerFile: path.join(universesDir, '.spesa-gemini.json') });
   if (!gemini.available) console.warn('GEMINI_API_KEY assente: i mondi usano i modelli locali');
   const answerAccount = accountHandler(accounts);
+  const videos = videoFolder(o.env);
+  // Not a reason not to start: the site without videos is the site. The name, never the value.
+  if (videos && !existsSync(videos)) console.warn('QUINE_VIDEO: la cartella non c’è, il sito resta senza video');
   const routes: Route[] = [
     universeHandler(universesDir, { accounts, internal, quota: universesPerAccount(o.env.QUINE_UNIVERSI_PER_ACCOUNT) }),
     (req, res, next) => (req.url?.split('?')[0] === '/api/account' ? answerAccount(req, res) : next()),
@@ -226,6 +240,7 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
     wandererHandler({ accounts, universesDir, getActiveWorld }),
     walletHandler({ accounts, universesDir, getActiveWorld }),
     sessionList(accounts),
+    videoHandler({ folder: videos, accounts, addressOf, atOnce: limits.videosAtOnce, inAll: limits.videosInAll }),
   ] as Route[];
   const policy = contentSecurityPolicy(accounts.config);
 

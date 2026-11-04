@@ -1,6 +1,6 @@
 // The landing page of the site (T101, ADR-0095): the hero runs real MarkovJunior programs (the game's engine, src/mj/)
 // and shows them growing step by step as voxels in three.js; the navigation has status lights and follows the scroll;
-// the showcase of the features is a set of tabs; the demo card flips.
+// the showcase of the features is a set of tabs; the videos and the instructions show only when they are there (T244, ADR-0131).
 
 import * as THREE from 'three';
 import { compileMjx, type MjxModel } from '../src/mj/model';
@@ -9,6 +9,8 @@ import type { Snapshot } from '../src/mj/engine';
 import { MJ_PALETTE } from '../src/mj/palette';
 import { news } from './notizie-file';
 import { renderNewsCard } from './notizie-testo';
+import { fetchVideos, renderVideos } from './video-testo';
+import { guidePresent } from 'virtual:quine-istruzioni-presenti';
 import pino from '../universe/models/albero.xml?raw';
 
 /** A program of the hero: its MarkovJunior source and the line under the stage. */
@@ -366,23 +368,29 @@ function initNews(): void {
   section.hidden = false;
 }
 
-function initCard(): void {
-  const card = document.getElementById('demo-card');
-  const flip = () => card?.classList.toggle('is-flipped');
-  card?.addEventListener('click', flip);
-  card?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      flip();
-    }
-  });
+/** The videos under the hero: what the server has, with its file. Without any, or without the server, the section stays hidden. */
+async function initVideos(): Promise<void> {
+  const videos = await fetchVideos();
+  if (!videos.length) return;
+  const list = document.getElementById('video-list');
+  if (!list) return;
+  list.innerHTML = renderVideos(videos);
+  document.getElementById('video')?.removeAttribute('hidden');
+  document.getElementById('nav-video')?.removeAttribute('hidden');
+}
+
+/** The instructions exist only if their text was in the build. */
+function initGuide(): void {
+  if (!guidePresent) return;
+  for (const id of ['nav-guide', 'hero-guide']) document.getElementById(id)?.removeAttribute('hidden');
 }
 
 if (typeof document !== 'undefined') {
   const start = () => {
     initNav();
     initShowcase();
-    initCard();
+    initGuide();
+    void initVideos();
     initNews();
     initHero();
   };

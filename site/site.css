@@ -1433,41 +1433,6 @@ img, svg {
   50% { opacity: 0.45; }
 }
 
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 24px;
-}
-.feature-box {
-  background: var(--synth-panel);
-  border: var(--border-ink-thick);
-  box-shadow: var(--shadow-hard-cyan);
-  padding: 26px 20px;
-  position: relative;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-.feature-box:hover {
-  transform: translateY(-4px);
-  box-shadow: 6px 6px 0 var(--neon-pink);
-}
-.feature-icon {
-  font-size: 2.2rem;
-  display: inline-block;
-  margin-bottom: 12px;
-}
-.feature-title {
-  font-family: var(--font-display);
-  font-size: 1.45rem;
-  color: var(--neon-yellow);
-  margin: 0 0 10px 0;
-  letter-spacing: 0.05em;
-}
-.feature-text {
-  color: var(--comic-paper);
-  font-size: 0.95rem;
-  margin: 0;
-}
-
 /* The interactive showcase of the features: tabs on the left, the chosen one on the right. */
 .feature-showcase {
   display: grid;
@@ -1973,5 +1938,112 @@ main > section[id] {
 @media (max-width: 768px) {
   .news-title {
     font-size: 2rem;
+  }
+}
+
+/* The home for the beta (T244, ADR-0131): the same theme with fewer comics. Only these two pages: the others keep their look until the launcher (T232). */
+.home {
+  /* The comic lettering stays only in the logo. */
+  --font-display: var(--font-body);
+  --shadow-hard-cyan: 2px 2px 0 var(--neon-cyan);
+  --shadow-hard-pink: 2px 2px 0 var(--neon-pink);
+  --shadow-hard-yellow: 2px 2px 0 var(--neon-yellow);
+}
+
+.home .nav-logo {
+  font-family: 'Bangers', 'Impact', 'Arial Black', sans-serif;
+}
+
+.home .comic-title,
+.home .hero-title {
+  color: var(--comic-paper);
+  font-weight: 700;
+  letter-spacing: 0;
+  text-shadow: none;
+  transform: none;
+  text-transform: none;
+}
+
+.home .hero-title {
+  font-size: clamp(2.2rem, 3.6vw, 3.4rem);
+  line-height: 1.1;
+}
+
+.home .comic-btn,
+.home .nav-link {
+  font-style: normal;
+  letter-spacing: 0.02em;
+}
+
+.home .hero-desc {
+  font-size: 1.05rem;
+}
+
+.home .section-head {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.home .comic-btn {
+  font-size: 1rem;
+}
+
+.home .comic-btn.sm,
+.home .comic-btn.arcade {
+  font-size: 0.72rem;
+}
+
+.home .comic-card .arcade-text {
+  font-family: var(--font-body);
+  font-size: 0.95rem !important;
+  color: var(--comic-paper);
+}
+
+.home .comic-card:hover {
+  transform: none;
+}
+
+.video-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  gap: 28px;
+}
+
+.video-item {
+  margin: 0;
+  min-width: 0;
+}
+
+.video-item video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: var(--comic-ink);
+  border: var(--border-ink-thick);
+}
+
+.video-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  letter-spacing: 0.03em;
+  color: var(--comic-paper);
+  margin: 12px 0 4px;
+  overflow-wrap: anywhere;
+}
+
+.video-about {
+  margin: 0;
+  color: var(--comic-paper-dim);
+  overflow-wrap: anywhere;
+}
+
+.guide-part + .guide-part {
+  margin-top: 28px;
+}
+
+@media (max-width: 480px) {
+  /* On a phone the stage has no room for both: the badge says what it is. */
+  .home .hero-3d-meter {
+    display: none;
   }
 }
