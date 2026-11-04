@@ -35,11 +35,10 @@ export class Bloom {
     // The canvas' antialias is lost in a target: the target has its own samples.
     this.composer = new EffectComposer(gl, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 }));
     this.composer.addPass(new RenderPass(scene, camera));
-    if (CARTOON && camera instanceof THREE.PerspectiveCamera) {
+    if (camera instanceof THREE.PerspectiveCamera) {
       this.ink = new Ink(scene, camera, idsOf);
+      this.ink.pass.enabled = CARTOON;
       this.composer.addPass(this.ink.pass);
-      // The thresholds, to try from the console (`window.cartone.uDepthEdge.value.set(…)`).
-      (globalThis as { cartone?: unknown }).cartone = this.ink.pass.uniforms;
     }
     this.pass = new UnrealBloomPass(new THREE.Vector2(1, 1), strength, radius, 0);
     this.pass.materialHighPassFilter.fragmentShader = GLOW_PASS;
@@ -54,6 +53,14 @@ export class Bloom {
     this.ink?.setSize(w, h, dpr);
   }
 
+  /** Whether the ink is drawn: the look's, unless a page changes it (the lab's switch); the classic look does not pay for it. */
+  get inked(): boolean {
+    return !!this.ink?.pass.enabled;
+  }
+  set inked(on: boolean) {
+    if (this.ink) this.ink.pass.enabled = on;
+  }
+
   /** How strong the halo is (0 turns it off; the voxels still glow). */
   set strength(v: number) {
     this.pass.strength = v;
@@ -65,7 +72,7 @@ export class Bloom {
   }
 
   render(dt: number): void {
-    this.ink?.prepare(this.gl);
+    if (this.inked) this.ink?.prepare(this.gl);
     U.glowMask.value = 1;
     this.composer.render(dt);
     U.glowMask.value = 0;

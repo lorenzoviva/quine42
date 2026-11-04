@@ -16,7 +16,9 @@ import { floors, footprint, meshVoxels, type MeshData } from '../../src/mj/mesh'
 import type { BuildRequest, BuildResponse, Built } from './worker';
 import { makeLand, plan, type Land } from './world';
 import { Bloom } from '../../src/render/bloom';
-import { addGlow, glowing } from '../../src/render/materials';
+import { aerial, CARTOON } from '../../src/render/cartoon';
+import { glowing, U, windy } from '../../src/render/materials';
+import { bindLookButton, LabLook } from '../look';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -67,7 +69,7 @@ const canvas = $<HTMLCanvasElement>('view');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = THREE.PCFShadowMap;
 renderer.localClippingEnabled = true;
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 300);
@@ -81,32 +83,21 @@ sun.shadow.bias = -0.0004;
 sun.shadow.normalBias = 0.02;
 scene.add(sun, sun.target);
 
-const uTime = { value: 0 };
-const uWind = { value: 0.05 };
-const matStatic = glowing(new THREE.MeshLambertMaterial({ vertexColors: true }), 'lab');
-/** Vegetation: the vertices move with the wind, more at the top (the `sway` attribute), and glow voxels bloom. */
-const matSway = glowing(new THREE.MeshLambertMaterial({ vertexColors: true }), 'sway');
-matSway.onBeforeCompile = (sh) => {
-  sh.uniforms.uTime = uTime;
-  sh.uniforms.uWind = uWind;
-  sh.vertexShader = `attribute float sway;\nuniform float uTime;\nuniform float uWind;\n${sh.vertexShader}`.replace(
-    '#include <begin_vertex>',
-    `#include <begin_vertex>
-    vec3 wp = (modelMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-    float ph = uTime * 1.7 + wp.x * 0.37 + wp.z * 0.61;
-    transformed.x += sway * uWind * (sin(ph) + 0.35 * sin(ph * 2.3 + 1.0));
-    transformed.z += sway * uWind * 0.45 * cos(ph * 0.8);`,
-  );
-  addGlow(sh);
-};
-matSway.customProgramCacheKey = () => 'glow-sway';
-/** Structures: cut away above the head when the wanderer is inside. */
-const cut = new THREE.Plane(new THREE.Vector3(0, -1, 0), 1000);
-const matCut = glowing(new THREE.MeshLambertMaterial({ vertexColors: true, clippingPlanes: [cut] }), 'lab-cut');
-const matGlass = glowing(new THREE.MeshLambertMaterial({ vertexColors: true, transparent: true, depthWrite: false }), 'lab-glass');
-const matCutGlass = glowing(new THREE.MeshLambertMaterial({ vertexColors: true, clippingPlanes: [cut], transparent: true, depthWrite: false }), 'lab-cut-glass');
+const uTime = U.time;
+const uWind = U.wind;
 /** Glowing voxels (`<color glow="True">`) bloom as in the game. */
 const bloom = new Bloom(renderer, scene, camera);
+const look = new LabLook({ scene, bloom, sun, hemi, classic: { bloomStrength: 0.9, bloomRadius: 0.45 } });
+const matStatic = look.twin({ vertexColors: true }, (m) => glowing(m, 'lab'));
+/** Vegetation: the vertices move with the wind, more at the top (the `sway` attribute), and glow voxels bloom. */
+const matSway = look.twin({ vertexColors: true }, (m) => windy(m, 'lab-sway'));
+/** Structures: cut away above the head when the wanderer is inside. */
+const cut = new THREE.Plane(new THREE.Vector3(0, -1, 0), 1000);
+const matCut = look.twin({ vertexColors: true, clippingPlanes: [cut] }, (m) => glowing(m, 'lab-cut'));
+const matGlass = look.twin({ vertexColors: true, transparent: true, depthWrite: false }, (m) => glowing(m, 'lab-glass'));
+const matCutGlass = look.twin({ vertexColors: true, clippingPlanes: [cut], transparent: true, depthWrite: false }, (m) => glowing(m, 'lab-cut-glass'));
+look.set(CARTOON);
+bindLookButton(look, $('look'));
 
 function geometry(m: MeshData): THREE.BufferGeometry {
   const g = new THREE.BufferGeometry();
@@ -116,6 +107,7 @@ function geometry(m: MeshData): THREE.BufferGeometry {
   if (m.sway) g.setAttribute('sway', new THREE.BufferAttribute(m.sway, 1));
   if (m.glow) g.setAttribute('glow', new THREE.BufferAttribute(m.glow, 1));
   if (m.alpha) g.setAttribute('alpha', new THREE.BufferAttribute(m.alpha, 1));
+  if (m.part) g.setAttribute('part', new THREE.BufferAttribute(m.part, 1));
   g.setIndex(new THREE.BufferAttribute(m.indices, 1));
   if (m.opaqueCount !== undefined) {
     if (m.opaqueCount > 0) g.addGroup(0, m.opaqueCount, 0);
@@ -223,8 +215,8 @@ function place(a: Asset, x: number, z: number, yaw: number): Entity {
   const root = new THREE.Group();
   root.position.set(x, 0, z);
   root.rotation.y = yaw;
-  const mat = e.role === 'structure' ? matCut : sways(e) ? matSway : matStatic;
-  const glass = e.role === 'structure' ? matCutGlass : matGlass;
+  const mat = look.of(e.role === 'structure' ? matCut : sways(e) ? matSway : matStatic);
+  const glass = look.of(e.role === 'structure' ? matCutGlass : matGlass);
   const mesh = (g: THREE.BufferGeometry) => {
     const m = new THREE.Mesh(g, g.groups.length > 0 ? [mat, glass] : mat);
     m.castShadow = true;
@@ -591,14 +583,20 @@ function light() {
   const elev = Math.sin(a);
   const day = Math.max(0, elev);
   const dir = new THREE.Vector3(-Math.cos(a) * 0.8, Math.max(0.08, elev), -0.45).normalize();
-  sun.position.copy(cam.target).addScaledVector(dir, 30);
-  sun.target.position.copy(cam.target);
-  sun.intensity = 2.4 * Math.min(1, day * 2.5);
-  sun.color.setHSL(0.09, 0.6, 0.6 + 0.3 * day);
-  hemi.intensity = 0.18 + 0.95 * Math.min(1, day * 2);
+  if (look.cartoon) {
+    look.sunOver(cam.target);
+    look.daylight(day);
+  } else {
+    sun.position.copy(cam.target).addScaledVector(dir, 30);
+    sun.target.position.copy(cam.target);
+    sun.intensity = 2.4 * Math.min(1, day * 2.5);
+    sun.color.setHSL(0.09, 0.6, 0.6 + 0.3 * day);
+    hemi.intensity = 0.18 + 0.95 * Math.min(1, day * 2);
+  }
   const bg = day > 0.25 ? sky.day.clone() : day > 0 ? sky.dusk.clone().lerp(sky.day, day * 4) : sky.night.clone().lerp(sky.dusk, Math.max(0, 1 + elev * 4));
   scene.background = bg;
-  scene.fog = new THREE.Fog(bg, 30, 70);
+  const air = look.cartoon ? aerial(cam.dist, day) : { near: 30, far: 70 };
+  scene.fog = new THREE.Fog(bg, air.near, air.far);
   for (const t of [...things, ...(showcase ? [showcase] : [])]) if (t.light) t.light.intensity = (day > 0.3 ? 0.8 : 3.5) * (0.85 + 0.15 * Math.sin(uTime.value * 13 + Math.sin(uTime.value * 7)));
 }
 

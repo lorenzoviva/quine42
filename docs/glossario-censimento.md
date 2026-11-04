@@ -13,7 +13,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Luogo | `place` | 462 (67) | 0 (0) | 26 (13) | 2 (2) |
 | Luogo | `chunk` | 586 (43) | 0 (0) | 109 (27) | 0 (0) |
 | Luogo | `Place` | 462 (67) | 0 (0) | 26 (13) | 2 (2) |
-| Piano del luogo | `mappa` | 2 (2) | 0 (0) | 17 (11) | 1 (1) |
+| Piano del luogo | `mappa` | 2 (2) | 0 (0) | 18 (11) | 1 (1) |
 | Piano del luogo | `piano` | 12 (6) | 2 (2) | 152 (42) | 0 (0) |
 | Casella | `cell` | 533 (43) | 0 (0) | 7 (4) | 25 (2) |
 | Casella | `cella` | 9 (4) | 8 (3) | 9 (7) | 0 (0) |
@@ -34,7 +34,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Modulo | `mod` | 33 (4) | 0 (0) | 0 (0) | 0 (0) |
 | Struttura | `edificio` | 21 (8) | 1 (1) | 39 (19) | 0 (0) |
 | Struttura | `building` | 263 (15) | 0 (0) | 9 (6) | 0 (0) |
-| Modello | `modello` | 93 (29) | 6 (3) | 245 (60) | 15 (4) |
+| Modello | `modello` | 93 (29) | 6 (3) | 247 (60) | 15 (4) |
 | Programma | `codice` | 73 (16) | 17 (7) | 115 (51) | 3 (2) |
 | Programma | `xml` | 255 (24) | 4 (2) | 47 (17) | 6 (2) |
 | Programma sonoro | `preset` | 34 (7) | 0 (0) | 19 (8) | 2 (1) |
@@ -71,7 +71,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Stato | `buff` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Runa | `simbolo` | 1 (1) | 3 (3) | 4 (4) | 0 (0) |
 | Runa | `glifo` | 9 (4) | 1 (1) | 13 (10) | 0 (0) |
-| Frase | `hand` | 172 (27) | 0 (0) | 7 (6) | 0 (0) |
+| Frase | `hand` | 173 (28) | 0 (0) | 7 (6) | 0 (0) |
 | Frase | `sentence` | 1 (1) | 0 (0) | 0 (0) | 0 (0) |
 | Frase | `mano` | 20 (9) | 1 (1) | 55 (35) | 2 (1) |
 | Incidere | `engrave` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
@@ -83,8 +83,8 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Registro del Concilio | `registro` | 16 (6) | 0 (0) | 115 (46) | 0 (0) |
 | Registro del Concilio | `log` | 155 (33) | 1 (1) | 20 (15) | 1 (1) |
 | Sessione del Concilio | `sessione` | 36 (13) | 0 (0) | 84 (35) | 12 (1) |
-| Modello di IA | `modello` | 93 (29) | 6 (3) | 245 (60) | 15 (4) |
-| Modello di IA | `Models` | 392 (74) | 0 (0) | 90 (35) | 4 (3) |
+| Modello di IA | `modello` | 93 (29) | 6 (3) | 247 (60) | 15 (4) |
+| Modello di IA | `Models` | 393 (75) | 0 (0) | 90 (35) | 4 (3) |
 | Eredità | `Eredita` | 7 (4) | 0 (0) | 11 (5) | 5 (1) |
 | Eredità | `EREDITA` | 7 (4) | 0 (0) | 11 (5) | 5 (1) |
 | Eredità | `Origine` | 11 (5) | 0 (0) | 35 (17) | 2 (1) |

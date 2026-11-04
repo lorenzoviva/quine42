@@ -376,6 +376,13 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Dove vive**: `src/render/cartoon.ts`, `src/render/materials.ts`, `src/mj/photo.ts`
 - **Da non usare**: `outline`, `bordo` (per questa riga)
 
+### Interruttore dell'aspetto
+- **Inglese**: `LabLook`, `cartoonOn`, `CARTOON`
+- **Definizione**: la scelta tra il cartone, il predefinito, e l'aspetto classico: nel gioco si decide una volta dall'URL (`?classica`), nel laboratorio anche dal vivo con un bottone (ADR-0093).
+- **Dove vive**: `src/render/cartoon.ts`, `lab/look.ts`
+- **Da non usare**: nessuno
+- **Fermo**: il parametro `?classica`.
+
 ### Parte di un modello
 - **Inglese**: `partTable`, `part`
 - **Definizione**: ciò che l'inchiostro separa dentro un modello: le lettere della palette che sono sfumature di un colore, o quelle di una stessa `<color part>`. Non è un arto: gli arti sono le `<color part>`, e questa ne è solo una conseguenza.

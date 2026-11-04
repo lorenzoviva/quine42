@@ -8,13 +8,9 @@ import { BAND_LEVELS, CARTOON_HEMI, DAY_LIGHT, SHADOW_INTENSITY, SUN_FROM, type 
 
 export { BAND_LEVELS, CARTOON_HEMI, SHADOW_INTENSITY, SUN_FROM };
 
-/** Whether the game draws as a cartoon unless the URL says otherwise: `true` once T89b and T89c are done. */
-export const CARTOON_BY_DEFAULT = false;
-
-/** The switch: `?classica` is always the old look, `?cartone` the cartoon, otherwise the default. */
-export function cartoonOn(search: string, byDefault = CARTOON_BY_DEFAULT): boolean {
-  const url = new URLSearchParams(search);
-  return !url.has('classica') && (byDefault || url.has('cartone'));
+/** The switch: the world is a cartoon, `?classica` shows the old look for comparison. */
+export function cartoonOn(search: string): boolean {
+  return !new URLSearchParams(search).has('classica');
 }
 
 /** Whether the world draws as a cartoon (never in Node). */
