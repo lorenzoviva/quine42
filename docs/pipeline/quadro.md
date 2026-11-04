@@ -36,7 +36,7 @@ Aggiornato il 04/11/2026, epoca 256. Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-1. **In coda, approvati e pronti:** T254 e T253 (gemini, 8 % fino al reset del 05/11), T255 dietro T254 (argon, torna il 04/11 alle 18:44 UTC; misurato ben oltre le stime), T89e (claude, solo lui ha il browser). T253 corregge il parser su `T89a-d`; nel backlog nessun altro blocco usa quella forma tra le dipendenze.
+1. **In corso T89e** (`riprendi`: una voce vecchia in `esecuzioni.json` lo escludeva dai lanci). **Su Argon, dal 04/11 alle 18:44 UTC, in fila:** T254, T255, T253; misurato ben oltre le stime. Gemini all'8 % è sotto `sogliaUnSolo` (10): nessun task nuovo fino al reset del 05/11 alle 17:37 UTC. T253 corregge il parser su `T89a-d`; nel backlog nessun altro blocco usa quella forma tra le dipendenze.
 4. **T182 → T156** (strutture procedurali). **T182 fermo in attesa dell'autore al giro 3 di 4, non integrato:** soglia NO. Misure e varianza 10/12 entro due richieste (7 alla prima), foto 0/10 per giudizio dell'agente, locanda esclusa; 1,15 $ a modello, 30,59 $ in tutto a listino. **Chieste le 3 decisioni di `docs/pipeline/domande/T182.md` (sul branch `task/T182`):** cantina a due taglie, interni contro la misura `stanze`, se la ricchezza basta. Bloccati finché non risponde: T156, poi T207, T88, T153, T242.
 4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla.
 

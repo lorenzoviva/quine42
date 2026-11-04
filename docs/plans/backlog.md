@@ -3968,7 +3968,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Esito: chiuso senza lavoro: la stessa correzione è entrata con T152 (`e30e2c8`, `flex-shrink: 0` sui figli della finestra). Non provati i 390 px.
 
 ### T253 · Il parser delle dipendenze capisce gli intervalli — `da fare`
-- Pipeline: gemini · stima 2% · approvato · priorità 10
+- Pipeline: argon · stima 5% · approvato · priorità 10
 - Contesto: nasce da T89e (`dossier T89e`, `docs/pipeline/domande/T89e.md`). `parseBacklog` in `tools/pipeline/pipeline.mjs` legge un intervallo come `T89a-d` come il solo `T89a`: un task è partito troppo presto, a dipendenza non finita.
 - Cosa fare: in `parseBacklog` espandi le lettere di un intervallo (`T89a-d` → `T89a`, `T89b`, `T89c`, `T89d`; anche `T89a-T89d`). Solo dove il parser legge già le dipendenze: non cambiare le parole che le introducono. Non espandere gli intervalli di soli numeri come `T230-T242`: i due estremi restano ciò che sono oggi. Poi cerca nei blocchi non `fatto` di `docs/plans/backlog.md` la stessa forma e riporta nell'esito quali task cambierebbero dipendenze; il backlog non lo tocchi.
 - Test: casi nuovi in `tests/pipeline.test.ts`: intervallo di lettere nelle due forme, un elenco misto con un intervallo, i soli numeri invariati, il task stesso che non diventa una sua dipendenza. Suite intera e typecheck con i loro turni.
@@ -3980,7 +3980,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopra Fable 5.1 pur costando meno, in particolare nella pianificazione ad alto livello); i modelli vanno inquadrati con le loro benchmark, l'orchestratore deve sapere chi rende meglio su ogni tipo di task, i modelli di Claude vanno distinti (Opus, Sonnet, ecc.).
 
 ### T254 · La scheda dei modelli: benchmark e misure nostre per tipo di task — `da fare`
-- Pipeline: gemini · stima 3% · approvato · priorità 8
+- Pipeline: argon · stima 10% · approvato · priorità 8
 - Contesto: richiesta dell'autore, sopra. Oggi la scelta del provider in `docs/pipeline/pianifica.md` poggia su impressioni (ADR-0115 per Fable). Nasce anche dal contatore «Claude and GPT models» di Antigravity, che `stato` elenca come non usato.
 - Cosa fare: scrivi `docs/pipeline/modelli.md`. Per ogni modello disponibile: Claude Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable 5.1; Gemini e Argon come li usa `agy`; i modelli Claude e GPT che `agy` offre davvero (guarda cosa dice la CLI). Una tabella modelli × tipi di task della pipeline: pianificazione e orchestrazione, architettura e kernel, programmazione, sicurezza, programmi MarkovJunior, documenti, UI, test semplici. Per ogni cella la benchmark pubblica con nome, data e URL. Accanto, ciò che abbiamo misurato noi da `docs/pipeline/consumi.jsonl`: consumo contro stima per provider, esiti. Prezzi di listino e contatore su cui pesa ogni modello. Infine una proposta di assegnazione per tipo di task, con il motivo.
 - Regole: **nessun numero senza fonte**. Ciò che non trovi resta «non misurato», non si deduce e non si ricorda a memoria. Due benchmark che si contraddicono si riportano entrambe. Se non hai accesso al web, fermati e dillo nell'esito: niente tabella inventata. Non toccare `config.json` né il codice.
