@@ -1,0 +1,128 @@
+<sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryqlmoZ" symmetry="(xy)" ground="E" origin="bottom">
+  <union symbol="1" values="be"/>
+  <union symbol="2" values="tsdcfv"/>
+  <union symbol="3" values="tb"/>
+  <color symbol="k" value="66f2ff" glow="True" name="porta luminosa"/><color symbol="S" value="cfd6dd" name="pannello metallico"/><color symbol="F" value="2f3742" name="pavimento scuro"/><color symbol="C" value="e3e8ec" name="metallo bianco satinato"/><color symbol="W" value="f8fafb" name="metallo bianco"/><color symbol="R" value="4a525e" name="copertura tecnica"/><color symbol="V" value="10202e" alpha="0.5" name="vetro scuro"/><color symbol="D" value="262c35" name="telaio scuro"/><color symbol="L" value="6f8c96" name="banco da laboratorio"/><color symbol="T" value="eef3f6" name="rampa"/><color symbol="K" value="98a4b0" name="nucleo in acciaio"/><color symbol="A" value="59636f" name="viale"/><color symbol="N" value="35f0ff" glow="True" name="neon ciano"/><color symbol="Z" value="ff3bd0" glow="True" name="neon magenta"/><color symbol="x" value="7a7cff" glow="True" name="pavimento luminoso"/><color symbol="l" value="d7efe9" name="piastrelle del laboratorio"/><color symbol="Q" value="aeb7c0" name="piattaforma esterna"/><color symbol="c" value="2a2f55" name="pavimento della sala di comando"/>
+  <prl in="***/*E*/***" out="***/*z*/***"/>
+  <all in="Nz" out="*a" steps="1"/>
+  <all in="[Nx]az" out="*xa" steps="14"/>
+  <prl in="a" out="Q"/>
+  <all in="xQz" out="*Qa" steps="1"/>
+  <all in="[Qx]az" out="*xa" steps="29"/>
+  <prl in="a" out="Q"/>
+  <all in="z/Q/z" out="a/Q/a" symmetry="()"/>
+  <all in="[Qp]/a/z" out="*/p/a" symmetry="(y)" steps="44"/>
+  <prl in="a" out="p"/>
+  <all in="zQz" out="aQa" symmetry="()"/>
+  <all in="[Ql]a[zp]" out="*la" symmetry="(x)" steps="44"/>
+  <prl><rule in="a" out="p"/><rule in="l" out="p"/></prl>
+  <all in="x/Q/z" out="t/O/*" symmetry="()"/>
+  <prl in="Q" out="p"/>
+  <prl><rule in="x" out="z"/><rule in="N" out="o"/></prl>
+  <all in="Ez" out="*E"/>
+  <all><rule in="*p*/ppp/*p*" out="***/*P*/***"/><rule in="ppp/*p*" out="*P*/***"/><rule in="pp/p*" out="P*/**"/></all>
+  <all in="Op" out="*O" steps="5"/>
+  <all in="tz" out="*t"/>
+  <all in="Ot" out="*v"/>
+  <all in="vt" out="*v" steps="6"/>
+  <prl in="v" out="f"/>
+  <one in="*zzzzzzzzzzz/Pppppppppppp/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt" out="************/*yyyyyyyyyyy/*ggggggggggg/************/************/************/************/************/************/************/************/************/************/************/************/************/************/************" steps="1" symmetry="(x)"/>
+  <all in="[ys]/g/t" out="*/s/g" steps="16"/>
+  <all in="s/g" out="c/d"/>
+  <all in="z/y" out="t/*"/>
+  <all in="tz" out="*t"/>
+  <one in="*tttttttttttt/Ppppppppppppp/*tttttttttttt" out="*************/******H******/*************" steps="1"/>
+  <all in="[gsdc]t" out="*v"/>
+  <all in="vt" out="*v" steps="9"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <all in="bz" out="*b"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <all in="bz" out="*b"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <all in="bz" out="*b"/>
+  <all in="Hp" out="*H" steps="5"/>
+  <prl><rule in="tHb" out="*Ht" p="0.07"/></prl>
+  <all in="tb" out="*t"/>
+  <one in="bHb" out="*n*" steps="1"/>
+  <all><rule in="nH" out="*n"/><rule in="np" out="*n"/></all>
+  <one in="nnnnnnnnn" out="*eeeeeee*" steps="1"/>
+  <prl in="v" out="t"/>
+  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p1" out="*w*"/><rule in="[zE]p2" out="*X*"/><rule in="1p1" out="*i*"/><rule in="2p2" out="*I*"/><rule in="1p2" out="*J*"/><rule in="1H1" out="*h*"/><rule in="1H2" out="*j*"/><rule in="EO2" out="*M*"/></all>
+  <prl in="n" out="h"/>
+  <all in="P[XIJjHMy]" out="I*"/>
+  <all in="P[wihO]" out="i*"/>
+  <prl in="P" out="E"/>
+  <one in="JJJJJJJJJJJ" out="aaaaaaaaaaa" steps="1"/>
+  <all in="M/E" out="*/A" symmetry="()"/>
+  <all in="A/E" out="*/A" symmetry="()"/>
+  <all in="XM/EA/EA/EA" out="**/n*/n*/n*" symmetry="(x)"/>
+  <one steps="6"><rule in="EEEEEEE/EEEEEEE/wwwwwww" out="*iiiii*/*iiiii*/*******"/><rule in="EEEEEEE/EEEEEEE/XXXXXXX" out="*IIIII*/*IIIII*/*******"/></one>
+  <one steps="6"><rule in="qqqqqqqqq" out="GGGGGGGGG"/><rule in="zzzzzzzzz" out="GGGGGGGGG"/></one>
+  <prl in="q" out="E"/>
+  <all><rule in="[Ez]X" out="m*"/><rule in="[Ez]w" out="r*"/></all>
+  <all steps="3"><rule in="m[Ez]" out="*m"/><rule in="r[Ez]" out="*r"/></all>
+  <all steps="1" symmetry="()"><rule in="B b" out="b S"/><rule in="B t" out="t S"/><rule in="B s" out="s S"/><rule in="B d" out="d S"/><rule in="B c" out="c S"/><rule in="B e" out="e S"/><rule in="B f" out="f S"/><rule in="B w" out="w S"/><rule in="B X" out="X S"/><rule in="B i" out="i S"/><rule in="B I" out="I S"/><rule in="B J" out="J S"/><rule in="B h" out="h S"/><rule in="B H" out="H S"/><rule in="B j" out="j S"/><rule in="B M" out="M S"/><rule in="B y" out="y S"/><rule in="B a" out="a S"/><rule in="B o" out="o S"/></all>
+  <all steps="1" symmetry="()"><rule in="B y" out="y K"/><rule in="B b" out="b l"/><rule in="B t" out="t F"/><rule in="B s" out="s F"/><rule in="B d" out="s T"/><rule in="B c" out="s Y"/><rule in="B e" out="b G"/><rule in="B f" out="t x"/><rule in="B h" out="h F"/><rule in="B H" out="H F"/><rule in="B j" out="j F"/><rule in="B M" out="M F"/><rule in="B w" out="w C"/><rule in="B X" out="X C"/><rule in="B i" out="i C"/><rule in="B I" out="I C"/><rule in="B J" out="J C"/><rule in="B a" out="a C"/><rule in="B o" out="o g"/></all>
+  <all steps="30" symmetry="()"><rule in="B y" out="y K"/><rule in="B b" out="b B"/><rule in="B t" out="t B"/><rule in="B s" out="s B"/><rule in="B h" out="h B"/><rule in="B H" out="H B"/><rule in="B j" out="j B"/><rule in="B M" out="M k"/><rule in="B i" out="i C"/><rule in="B I" out="I C"/><rule in="B J" out="J C"/><rule in="B a" out="a C"/><rule in="B o" out="o B"/></all>
+  <all steps="8" symmetry="()"><rule in="B w" out="w C"/><rule in="B X" out="X C"/></all>
+  <all steps="14" symmetry="()"><rule in="B w" out="w U"/><rule in="B X" out="X U"/></all>
+  <all steps="6" symmetry="()"><rule in="B w" out="w C"/><rule in="B X" out="X C"/></all>
+  <all steps="1" symmetry="()"><rule in="B w" out="w N"/><rule in="B X" out="X N"/></all>
+  <all steps="1" symmetry="()"><rule in="B w" out="w C"/><rule in="B X" out="X C"/></all>
+  <all steps="2" symmetry="()"><rule in="B s" out="s B"/><rule in="B w" out="w S"/><rule in="B X" out="X S"/><rule in="B J" out="J S"/><rule in="B I" out="I S"/><rule in="B j" out="j S"/><rule in="B M" out="M S"/><rule in="B i" out="i S"/><rule in="B h" out="h S"/><rule in="B a" out="a S"/></all>
+  <all steps="1" symmetry="()"><rule in="B y" out="y K"/><rule in="B b" out="Q S"/><rule in="B t" out="t S"/><rule in="B H" out="H S"/><rule in="B o" out="o S"/></all>
+  <all steps="1" symmetry="()"><rule in="B y" out="y B"/><rule in="B t" out="t c"/><rule in="B H" out="H c"/><rule in="B o" out="o g"/></all>
+  <all steps="3" symmetry="()" in="B w" out="w W"/>
+  <all steps="1" symmetry="()" in="B w" out="w N"/>
+  <all steps="30" symmetry="()"><rule in="B y" out="y B"/><rule in="B t" out="t B"/><rule in="B s" out="s B"/><rule in="B H" out="H B"/><rule in="B I" out="I W"/><rule in="B o" out="o B"/></all>
+  <all steps="4" symmetry="()"><rule in="B X" out="X W"/><rule in="B J" out="J W"/><rule in="B j" out="j W"/><rule in="B M" out="M W"/><rule in="B a" out="a B"/></all>
+  <all steps="22" symmetry="()"><rule in="B X" out="X u"/><rule in="B J" out="J u"/><rule in="B j" out="j u"/><rule in="B M" out="M u"/><rule in="B a" out="a B"/></all>
+  <all steps="2" symmetry="()"><rule in="B X" out="X W"/><rule in="B J" out="J W"/><rule in="B j" out="j W"/><rule in="B M" out="M W"/><rule in="B a" out="a B"/></all>
+  <all steps="1" symmetry="()"><rule in="B X" out="X N"/><rule in="B J" out="J N"/><rule in="B j" out="j N"/><rule in="B M" out="M N"/><rule in="B a" out="a B"/></all>
+  <all steps="1" symmetry="()"><rule in="B X" out="X W"/><rule in="B J" out="J W"/><rule in="B j" out="j W"/><rule in="B M" out="M W"/><rule in="B a" out="a B"/></all>
+  <all steps="1" symmetry="()"><rule in="B y" out="R S"/><rule in="B t" out="R S"/><rule in="B s" out="R S"/><rule in="B H" out="R S"/><rule in="B I" out="R S"/><rule in="B o" out="o S"/></all>
+  <all steps="3" symmetry="()"><rule in="B X" out="X S"/><rule in="B J" out="J S"/><rule in="B j" out="j S"/><rule in="B M" out="M S"/><rule in="B a" out="a S"/></all>
+  <all steps="1" symmetry="()"><rule in="B X" out="X N"/><rule in="B J" out="J N"/><rule in="B j" out="j N"/><rule in="B M" out="M N"/><rule in="B a" out="a N"/></all>
+  <all in="*BB *B* TY*" out="*TY *K* KK*" steps="16"/>
+  <all in="K B" out="* K" symmetry="()"/>
+  <all steps="8" symmetry="()" in="B G" out="G L"/>
+  <all steps="34" symmetry="()" in="B n" out="n Z"/>
+  <prl in="n" out="Z"/>
+  <all steps="31" symmetry="()"><rule in="B r" out="r B"/><rule in="B m" out="m B"/></all>
+  <all steps="1" symmetry="()"><rule in="B r" out="r N"/><rule in="B m" out="m N"/></all>
+  <all steps="2" symmetry="()"><rule in="B r" out="r W"/><rule in="B m" out="m W"/></all>
+  <prl in="r" out="B"/>
+  <all steps="30" symmetry="()" in="B m" out="m B"/>
+  <all steps="1" symmetry="()" in="B m" out="m Z"/>
+  <all steps="2" symmetry="()" in="B m" out="m W"/>
+  <prl in="m" out="W"/>
+  <all in="g[Fc]" out="*g" steps="6"/>
+  <prl in="g" out="x"/>
+  <all in="k[CUN]" out="*Z"/>
+  <all in="S k" out="Z *" symmetry="()"/>
+  <prl symmetry="()"><rule in="Q S" out="* N" p="0.03"/></prl>
+  <all in="UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU" out="*********** *DDDDDDDDD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DDDDDDDDD* ***********"/>
+  <all in="uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu" out="*********** *DDDDDDDDD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DDDDDDDDD* ***********"/>
+  <all in="oR" out="*o" steps="3"/>
+  <all steps="3" symmetry="()" in="B o" out="o N"/>
+  <all in="*o*/ooo/*o*" out="***/*g*/***" symmetry="()"/>
+  <prl in="o" out="B"/>
+  <prl in="g" out="o"/>
+  <all steps="3" symmetry="()" in="B o" out="o W"/>
+  <all in="*o*/ooo/*o*" out="***/*g*/***" symmetry="()"/>
+  <prl in="o" out="B"/>
+  <prl in="g" out="o"/>
+  <all steps="3" symmetry="()" in="B o" out="o K"/>
+  <all in="*o*/ooo/*o*" out="***/*g*/***" symmetry="()"/>
+  <prl in="o" out="B"/>
+  <prl in="g" out="o"/>
+  <all steps="3" symmetry="()" in="B o" out="o K"/>
+  <all steps="1" symmetry="()" in="B o" out="o N"/>
+  <prl in="o" out="N"/>
+  <one in="B B R" out="* D *" steps="2" symmetry="()"/>
+  <all in="DB *R" out="*D **" symmetry="(x)" steps="8"/>
+  <all in="D/B */R" out="*/D */*" symmetry="(y)" steps="8"/>
+  <all in="B D" out="D *" steps="7" symmetry="()"/>
+  <prl><rule in="U" out="C"/><rule in="u" out="W"/><rule in="Y" out="T"/><rule in="G" out="L"/><rule in="E" out="B"/><rule in="z" out="B"/><rule in="w" out="C"/><rule in="X" out="C"/><rule in="J" out="C"/><rule in="j" out="C"/><rule in="M" out="C"/><rule in="a" out="C"/><rule in="i" out="Q"/><rule in="h" out="Q"/></prl>
+</sequence>
+<action name="apri" label="Apri la porta"><prl in="k" out="B"/></action>

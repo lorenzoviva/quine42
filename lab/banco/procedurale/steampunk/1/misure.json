@@ -1,0 +1,201 @@
+{
+  "bersaglio": "steampunk",
+  "token": {
+    "input": 2,
+    "cacheScritta": 10138,
+    "cacheLetta": 0,
+    "output": 57716,
+    "inputTotale": 10140
+  },
+  "modello": "claude-opus-5-5",
+  "dollari": 1.235432,
+  "ms": 606694,
+  "caratteriXml": 14518,
+  "passa": true,
+  "difetti": [],
+  "voci": [
+    {
+      "id": "finisce",
+      "ok": true,
+      "valore": "3881 ms",
+      "richiesto": "entro 8000 ms"
+    },
+    {
+      "id": "valido",
+      "ok": true,
+      "valore": "sì",
+      "richiesto": "i controlli di check.ts"
+    },
+    {
+      "id": "piani",
+      "ok": true,
+      "valore": "2",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "testa",
+      "ok": true,
+      "valore": "1.5 1.5",
+      "richiesto": "≥ 1.5 caselle per piano"
+    },
+    {
+      "id": "stanze",
+      "ok": true,
+      "valore": "6",
+      "richiesto": "≥ 3"
+    },
+    {
+      "id": "murato",
+      "ok": true,
+      "valore": "0",
+      "richiesto": "≤ 0.25"
+    },
+    {
+      "id": "porta",
+      "ok": true,
+      "valore": "x 49, scarto 0.01, alta 1.5, libera",
+      "richiesto": "sul davanti, scarto ≤ 0.33, alta ≥ 1.5"
+    },
+    {
+      "id": "salti",
+      "ok": true,
+      "valore": "4",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "materiali",
+      "ok": true,
+      "valore": "15",
+      "richiesto": "≥ 6"
+    },
+    {
+      "id": "dominante",
+      "ok": true,
+      "valore": "0.24",
+      "richiesto": "≤ 0.6"
+    },
+    {
+      "id": "finestre",
+      "ok": true,
+      "valore": "19 su 4 lati",
+      "richiesto": "≥ 6 su ≥ 3 lati"
+    },
+    {
+      "id": "dettagli",
+      "ok": true,
+      "valore": "439, 0 lati vuoti",
+      "richiesto": "≥ 24, ≤ 1 lati vuoti"
+    },
+    {
+      "id": "rumore",
+      "ok": true,
+      "valore": "0.33",
+      "richiesto": "≤ 0.7"
+    },
+    {
+      "id": "sagoma",
+      "ok": true,
+      "valore": "21",
+      "richiesto": "≥ 4"
+    },
+    {
+      "id": "rilievo",
+      "ok": true,
+      "valore": "0.49",
+      "richiesto": "≥ 0.12"
+    },
+    {
+      "id": "ingombro",
+      "ok": true,
+      "valore": "0.51",
+      "richiesto": "≥ 0.3"
+    }
+  ],
+  "misure": {
+    "voxel": 80666,
+    "ms": 3881,
+    "finito": true,
+    "piani": [
+      {
+        "z": 2,
+        "quota": 0.1,
+        "area": 5.45,
+        "testa": 1.5,
+        "stanze": 4
+      },
+      {
+        "z": 34,
+        "quota": 1.7,
+        "area": 3.02,
+        "testa": 1.5,
+        "stanze": 2
+      }
+    ],
+    "cantina": 0,
+    "terrazze": 0,
+    "stanze": 6,
+    "murato": 0,
+    "persi": [],
+    "porta": {
+      "x": 49,
+      "y": 95,
+      "scarto": 0.025,
+      "alta": 1.5,
+      "libera": true
+    },
+    "salti": [
+      {
+        "x": 7,
+        "y": 39,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 24,
+        "y": 74,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 18,
+        "y": 55,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 12,
+        "y": 33,
+        "z": 0,
+        "sale": false
+      }
+    ],
+    "materiali": 15,
+    "dominante": 0.24160117025760544,
+    "finestre": 19,
+    "latiConFinestre": 4,
+    "dettagli": 439,
+    "latiVuoti": 0,
+    "rumore": 0.33282674772036475,
+    "rilievo": 0.4892501776830135,
+    "sagoma": 21,
+    "ingombro": 0.512,
+    "luci": 29,
+    "inutili": [
+      "one \"bHb\" → \"*n*\" — le celle cercate c'erano, ma mai disposte come nel pattern",
+      "all \"nH\" → \"*n\" (e altre 1 regole) — in quel momento nella griglia non c'erano celle \"n\"",
+      "one \"nnnnnnnnn\" → \"*eeeeeee*\" — in quel momento nella griglia non c'erano celle \"n\"",
+      "all \"xa\" → \"*x\" — le celle cercate c'erano, ma mai disposte come nel pattern",
+      "one \"ppppppppp/aaaaaaaaa/aaaaaaaaa/aaaaaaaaa/aaaaaaaaa/aaaaaaaaa\" → \"*********/fffffffff/fffffffff/fffffffff/fffffffff/fffffffff\" — le celle cercate c'erano, ma mai disposte come nel pattern",
+      "prl \"n\" → \"h\" — in quel momento nella griglia non c'erano celle \"n\"",
+      "all \"g .\" → \"D g\" — in quel momento nella griglia non c'erano celle \"g\"",
+      "prl \"g\" → \"m\" — in quel momento nella griglia non c'erano celle \"g\""
+    ],
+    "avvisi": [
+      "5 frammenti staccati (1% dei voxel)",
+      "tocca i bordi laterali della griglia: forse è tagliato",
+      "tocca il soffitto della griglia: forse è tagliato in alto",
+      "colori mai usati: E x z a P p b O H t s g c d v e f w X i I J h j M U u Y G n y q o"
+    ],
+    "errori": []
+  }
+}

@@ -33,3 +33,20 @@ Soglia non raggiunta. Il giro 12 non è stato fatto: vedi `docs/pipeline/domande
 ## Il giro di conferma (T173)
 
 Prompt invariato, una seconda richiesta a chi non passa, un solo giro: 14 tentativi, 13 passano le misure alla prima, 9 anche le foto; alla seconda ne passano altri 3. **12 su 14**, soglia non raggiunta: `futuristica/2` (un `at` con due numeri nella seconda richiesta) e `pagoda/2` (la scala corretta, l'aspetto no). Seconda richiesta: input 14 251 e output 43 828 in media, 0,90 dollari contro 1,22 della prima. `conferma/giudizio.md`, `docs/pipeline/domande/T173.md`.
+
+## Il prompt procedurale (T182)
+
+Un altro prompt: invece di scrivere `<box>`, si parte da uno scheletro di regole corte (`riferimento/cantiere.xml`, `pattern.md` numero 13) che regge a ogni seme e taglia. La soglia è quella di T180 (`prova`: tutte le misure a 5 semi e 2 taglie, e varia) più le foto; ogni seconda richiesta porta la traccia di T179 della prima coppia taglia-seme che cade. Modello: `claude-opus-5-5`.
+
+| giro | cosa è cambiato | input | prove | misure e varianza alla prima | cosa si vede |
+|---|---|---|---|---|---|
+| g1 | primo prompt, con lo scheletro di 6 campate | ~9 800 | 4 (rocca: CLI senza risultato) | 0 | subito procedurali e riconoscibili; perimetro 0,12 (lo scheletro ha poco margine), stanze sparite con gli arredi, una cifra usata come lettera |
+| g2 | scheletro di 5 campate; solo lettere; campate sgombre | ~10 000 | 7 | 4 | due cadono per un soffio (perimetro 0,15, murato 0,25); la locanda è lontana: la cantina |
+| g3 | ricetta della cantina riscritta; 5 campate su 9 | ~10 100 | 12 (2 per bersaglio, senza locanda) | 7 | alla seconda altri 3: **10 su 12 entro due richieste** (`pagoda/1`: 8 s superati a un seme; `tempio/2`: il contorno varia poco) |
+
+Il giro 4 non è stato fatto: senza una decisione dell'autore non può raggiungere la soglia. `docs/pipeline/domande/T182.md`.
+
+- **Gli esempi**: lo scheletro si guadagna i suoi ~7 000 token: da 31 su 31 statici a 10 su 10 che variano, e 10 su 12 reggono a tutti i semi e le taglie, contro 1 su 27 a Enorme. I tre programmi di T181 non entrano (16 mila token l'uno; le loro stringhe da contare sono ciò che lo scheletro toglie).
+- **La traccia**: seconda richiesta su 5: 3 corrette. Costa 0,43-1,28 dollari, meno della prima, come in T173; non c'è un confronto senza traccia, quindi non dimostra che sia lei a correggere.
+- **Il costo**: alla prima, in media, input 10 968 e output 55 423, 1,15 dollari (T173: 3 791, 60 553, 1,22). **L'output scende appena: quasi tutto è ragionamento**, l'XML sono 11-15 mila caratteri. Il prompt non abbassa il costo; dà molto di più per lo stesso costo. Tutto T182: 27 chiamate misurate, 30,59 dollari a listino, più 2 senza conto (una CLI senza risultato, una al limite); il limite delle 5 ore è scattato una volta.
+- **Il tempo**: i programmi girano in 6-7 s a Enorme (limite 8 s) con altri processi sulla macchina: `pagoda/1` è caduta lì. Il margine è poco.

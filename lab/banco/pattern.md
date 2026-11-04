@@ -223,6 +223,30 @@ spariscono: «delete fine scaffold»), `River` (`W`, `R` → `U` → `B`).
   si fa con `path`, non con un campo.
 - Pattern più grandi di 1728 celle: una colonna da 96 strati sì, un profilo 18×96 sì (1728), una campata intera 31×31×anything no.
 
+### 13. Regole corte con `steps` al posto dei pattern lunghi (T182)
+
+I pattern 5 e 6 costano: una colonna da 66 strati è una stringa da contare, ed è il grosso dei 16 mila token della palazzina. Lo stesso edificio si scrive
+con regole di poche celle ripetute (`riferimento/cantiere.xml`, ~7 000 token stimati, 3-5 s), e chi lo scrive conta passi invece di caratteri:
+
+```xml
+<all in="[Nx]az" out="*xa" steps="14"/>        <!-- un camminatore: va solo avanti perché guarda la sua scia -->
+<all in="[Ql]a[zp]" out="*la" steps="44"/>     <!-- attraversa le linee p: la scia ha una lettera diversa, o torna indietro a caso -->
+<all in="tz" out="*t"/>                        <!-- riempie una campata e si ferma alle linee -->
+<one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>  <!-- cresce passando un muro: la porta è dove passa, tutto resta collegato -->
+<all steps="30" symmetry="()"><rule in="B t" out="t B"/><rule in="B i" out="i C"/></all>  <!-- la testa sale di 30 e lascia una lettera: le quote sono numeri di passi -->
+<all in="*BB *B* TY*" out="*TY *K* KK*" steps="16"/>  <!-- la scala: T è il gradino, Y dice la direzione; alzata 2, pedata 1 -->
+<all in="K B" out="* K" symmetry="()"/>        <!-- sotto la scala è pieno: un vuoto sotto i gradini ferma il corpo (`levelAt`) -->
+<all in="***/*B*/*** *R*/RRR/*R*" out="***/*R*/*** ***/***/***" steps="10" symmetry="()"/>  <!-- il tetto a falde: uno strato in più sopra chi ha R attorno -->
+```
+
+Tre cose che si sono dovute misurare:
+
+- **La scala sbocca in linea.** Il corpo non scende di lato dall'ultimo gradino (`rampBlocks`: sotto i suoi 9 voxel due colonne vicine non differiscono più di un gradino). Attraversa un muro (`y`), con il piano di sopra oltre: si sceglie **prima** delle altre porte, nella campata davanti, attaccata a un pilastro.
+- **Le porte a 1-11 da un pilastro**, non a caso nel muro: così resta posto per la scala nello stesso muro; una porta in mezzo non lo lascia.
+- **A Grande una campata da 29 è una stanza solo se è sgombra fino ai muri** (29 − 9 del corpo − 2×8 della strettoia di `contaStanze` lasciano 4×4, il minimo): un arredo la toglie dalla conta. Non è detto che sia giusto; è ciò che la soglia misura oggi.
+
+**La cantina non regge due taglie con un programma solo**: `docs/pipeline/domande/T182.md`.
+
 ## I programmi di riferimento (`riferimento/`)
 
 | programma | bersaglio | taglie | nodi | regge | varia | tempo |

@@ -84,6 +84,10 @@ Una terza richiesta non c'è.
 
 Il contrario dei modelli di `finale/` e `conferma/`: `pattern.md` dice con quali pattern di MarkovJunior (letti nei programmi del repository) un edificio **cresce** invece di essere disegnato, e `riferimento/` tiene tre programmi scritti a mano con il metodo del cantiere (`palazzina.xml`, `forte.xml`, `tempio.xml`), con i fogli di contatto e `riferimento/README.md` per i numeri; `lab/tests/riferimento.test.ts` li fa girare nel banco.
 
+## Il prompt procedurale (T182)
+
+`prompt.md` contiene lo scheletro `riferimento/cantiere.xml` e chiede di partire da lì. Con `--varianza` un tentativo passa solo se regge a ogni seme e taglia **e** varia (`prova`, `passa` di `misure.json`): i difetti dicono taglia e seme, e `--seconda --traccia --varianza` li riporta con la traccia della prima coppia che cade (`caduta`). Giri in `diario.md`, fogli e modelli in `procedurale/`.
+
 ## Varianza e scala (T180)
 
 Il banco qui sopra prova un seme in una scatola: premia i modelli statici. `varianza.ts` prova lo stesso programma con **almeno 5 semi** in **almeno 2 taglie** (`prova`; se nessuno le dice, `taglieDiProva`: quella del bersaglio e la successiva). Niente modelli, solo il motore. Il giudizio è in due parti, separate:

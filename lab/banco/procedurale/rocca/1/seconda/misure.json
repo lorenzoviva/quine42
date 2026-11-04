@@ -1,0 +1,207 @@
+{
+  "bersaglio": "rocca",
+  "token": {
+    "input": 2,
+    "cacheScritta": 13009,
+    "cacheLetta": 9287,
+    "output": 40043,
+    "inputTotale": 22298
+  },
+  "modello": "claude-opus-5-5",
+  "dollari": 0.9067974000000001,
+  "ms": 420185,
+  "caratteriXml": 13638,
+  "passa": true,
+  "difetti": [],
+  "voci": [
+    {
+      "id": "finisce",
+      "ok": true,
+      "valore": "6047 ms",
+      "richiesto": "entro 8000 ms"
+    },
+    {
+      "id": "valido",
+      "ok": true,
+      "valore": "sì",
+      "richiesto": "i controlli di check.ts"
+    },
+    {
+      "id": "piani",
+      "ok": true,
+      "valore": "2",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "testa",
+      "ok": true,
+      "valore": "1.88 1.88",
+      "richiesto": "≥ 1.5 caselle per piano"
+    },
+    {
+      "id": "stanze",
+      "ok": true,
+      "valore": "5",
+      "richiesto": "≥ 3"
+    },
+    {
+      "id": "murato",
+      "ok": true,
+      "valore": "0",
+      "richiesto": "≤ 0.25"
+    },
+    {
+      "id": "porta",
+      "ok": true,
+      "valore": "x 59, scarto 0, alta 1.88, libera",
+      "richiesto": "sul davanti, scarto ≤ 0.33, alta ≥ 1.5"
+    },
+    {
+      "id": "salti",
+      "ok": true,
+      "valore": "6",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "materiali",
+      "ok": true,
+      "valore": "15",
+      "richiesto": "≥ 6"
+    },
+    {
+      "id": "dominante",
+      "ok": true,
+      "valore": "0.42",
+      "richiesto": "≤ 0.6"
+    },
+    {
+      "id": "finestre",
+      "ok": true,
+      "valore": "18 su 3 lati",
+      "richiesto": "≥ 6 su ≥ 3 lati"
+    },
+    {
+      "id": "dettagli",
+      "ok": true,
+      "valore": "225, 0 lati vuoti",
+      "richiesto": "≥ 24, ≤ 1 lati vuoti"
+    },
+    {
+      "id": "rumore",
+      "ok": true,
+      "valore": "0.17",
+      "richiesto": "≤ 0.7"
+    },
+    {
+      "id": "sagoma",
+      "ok": true,
+      "valore": "8",
+      "richiesto": "≥ 4"
+    },
+    {
+      "id": "rilievo",
+      "ok": true,
+      "valore": "0.67",
+      "richiesto": "≥ 0.12"
+    },
+    {
+      "id": "ingombro",
+      "ok": true,
+      "valore": "0.41",
+      "richiesto": "≥ 0.3"
+    }
+  ],
+  "misure": {
+    "voxel": 104125,
+    "ms": 6047,
+    "finito": true,
+    "piani": [
+      {
+        "z": 2,
+        "quota": 0.125,
+        "area": 8.44921875,
+        "testa": 1.875,
+        "stanze": 4
+      },
+      {
+        "z": 34,
+        "quota": 2.125,
+        "area": 2.97265625,
+        "testa": 1.875,
+        "stanze": 1
+      }
+    ],
+    "cantina": 0,
+    "terrazze": 1,
+    "stanze": 5,
+    "murato": 0,
+    "persi": [],
+    "porta": {
+      "x": 59,
+      "y": 105,
+      "scarto": 0.03125,
+      "alta": 1.875,
+      "libera": true
+    },
+    "salti": [
+      {
+        "x": 100,
+        "y": 99,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 87,
+        "y": 80,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 34,
+        "y": 51,
+        "z": 34,
+        "sale": false
+      },
+      {
+        "x": 39,
+        "y": 60,
+        "z": 34,
+        "sale": false
+      },
+      {
+        "x": 39,
+        "y": 30,
+        "z": 2,
+        "sale": false
+      },
+      {
+        "x": 55,
+        "y": 36,
+        "z": 2,
+        "sale": false
+      }
+    ],
+    "materiali": 15,
+    "dominante": 0.41891956782713086,
+    "finestre": 18,
+    "latiConFinestre": 3,
+    "dettagli": 225,
+    "latiVuoti": 0,
+    "rumore": 0.17279411764705882,
+    "rilievo": 0.6656105100463678,
+    "sagoma": 8,
+    "ingombro": 0.41354166666666664,
+    "luci": 560,
+    "inutili": [
+      "prl \"tHb\" → \"*Ht\"",
+      "all \"tb\" → \"*t\" — le celle cercate c'erano, ma mai disposte come nel pattern",
+      "prl \"P\" → \"E\" — in quel momento nella griglia non c'erano celle \"P\""
+    ],
+    "avvisi": [
+      "2 frammenti staccati (0% dei voxel)",
+      "tocca i bordi laterali della griglia: forse è tagliato",
+      "colori mai usati: N E z a p Q b O H t s g c d v e f w X i I J h j M U u Y G n y l Z o"
+    ],
+    "errori": []
+  }
+}

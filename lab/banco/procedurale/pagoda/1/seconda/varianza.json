@@ -1,0 +1,119 @@
+{
+  "taglie": [
+    {
+      "taglia": "grande",
+      "box": [
+        100,
+        100,
+        80
+      ],
+      "vpt": 20,
+      "gradino": 4,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [],
+          "ms": 4767
+        },
+        {
+          "seme": 2,
+          "difetti": [],
+          "ms": 4775
+        },
+        {
+          "seme": 3,
+          "difetti": [],
+          "ms": 4657
+        },
+        {
+          "seme": 4,
+          "difetti": [],
+          "ms": 4756
+        },
+        {
+          "seme": 5,
+          "difetti": [],
+          "ms": 4849
+        }
+      ],
+      "regge": true,
+      "varianza": {
+        "voxel": 0.6574374532375729,
+        "colore": 0.1832546051582858,
+        "pianta": 0.49511060653819505,
+        "perimetro": 0.27990608890930435,
+        "interno": 0.719625022016683,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 3,
+        "architetture": 5,
+        "statico": false
+      },
+      "difettiVarianza": []
+    },
+    {
+      "taglia": "enorme",
+      "box": [
+        120,
+        120,
+        96
+      ],
+      "vpt": 16,
+      "gradino": 3,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [],
+          "ms": 7756
+        },
+        {
+          "seme": 2,
+          "difetti": [],
+          "ms": 7986
+        },
+        {
+          "seme": 3,
+          "difetti": [
+            "finisce: no (serve entro 8000 ms)",
+            "valido: non termina: dopo 1005 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+            "piani: 0 (serve ≥ 2)",
+            "testa: — (serve ≥ 1.5 caselle per piano)",
+            "stanze: 0 (serve ≥ 3)",
+            "murato: 3884 (serve ≤ 0.25)",
+            "porta: nessuna sul davanti (serve sul davanti, scarto ≤ 0.33, alta ≥ 1.5)"
+          ],
+          "ms": 8282
+        },
+        {
+          "seme": 4,
+          "difetti": [],
+          "ms": 7670
+        },
+        {
+          "seme": 5,
+          "difetti": [],
+          "ms": 7746
+        }
+      ],
+      "regge": false,
+      "varianza": {
+        "voxel": 0.6294104220943841,
+        "colore": 0.17598190672034425,
+        "pianta": 0.5185208838932176,
+        "perimetro": 0.34712072797999444,
+        "interno": 0.8849732618282582,
+        "semi": 5,
+        "firmePiani": 2,
+        "firmeStanze": 3,
+        "architetture": 5,
+        "statico": false
+      },
+      "difettiVarianza": []
+    }
+  ],
+  "regge": false,
+  "statico": false,
+  "varia": true,
+  "passa": false,
+  "ms": 63378
+}

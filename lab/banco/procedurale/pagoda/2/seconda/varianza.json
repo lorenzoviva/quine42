@@ -1,0 +1,111 @@
+{
+  "taglie": [
+    {
+      "taglia": "grande",
+      "box": [
+        100,
+        100,
+        80
+      ],
+      "vpt": 20,
+      "gradino": 4,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [],
+          "ms": 4466
+        },
+        {
+          "seme": 2,
+          "difetti": [],
+          "ms": 4384
+        },
+        {
+          "seme": 3,
+          "difetti": [],
+          "ms": 4230
+        },
+        {
+          "seme": 4,
+          "difetti": [],
+          "ms": 4435
+        },
+        {
+          "seme": 5,
+          "difetti": [],
+          "ms": 4383
+        }
+      ],
+      "regge": true,
+      "varianza": {
+        "voxel": 0.6367128380898625,
+        "colore": 0.25796058972146685,
+        "pianta": 0.46732671457890185,
+        "perimetro": 0.2660501492277193,
+        "interno": 0.7275850954532764,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 3,
+        "architetture": 5,
+        "statico": false
+      },
+      "difettiVarianza": []
+    },
+    {
+      "taglia": "enorme",
+      "box": [
+        120,
+        120,
+        96
+      ],
+      "vpt": 16,
+      "gradino": 3,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [],
+          "ms": 7095
+        },
+        {
+          "seme": 2,
+          "difetti": [],
+          "ms": 7143
+        },
+        {
+          "seme": 3,
+          "difetti": [],
+          "ms": 7208
+        },
+        {
+          "seme": 4,
+          "difetti": [],
+          "ms": 7018
+        },
+        {
+          "seme": 5,
+          "difetti": [],
+          "ms": 7105
+        }
+      ],
+      "regge": true,
+      "varianza": {
+        "voxel": 0.5884271274756225,
+        "colore": 0.21383945293372258,
+        "pianta": 0.498981418469056,
+        "perimetro": 0.4339568486433475,
+        "interno": 0.6912226642272568,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 2,
+        "architetture": 5,
+        "statico": false
+      },
+      "difettiVarianza": []
+    }
+  ],
+  "regge": true,
+  "statico": false,
+  "varia": true,
+  "passa": true,
+  "ms": 57603
+}

@@ -1,0 +1,205 @@
+{
+  "bersaglio": "moderna",
+  "token": {
+    "input": 2,
+    "cacheScritta": 10107,
+    "cacheLetta": 0,
+    "output": 46113,
+    "inputTotale": 10109
+  },
+  "modello": "claude-opus-5-5",
+  "dollari": 1.0031240000000001,
+  "ms": 501301,
+  "caratteriXml": 11371,
+  "passa": false,
+  "difetti": [
+    "varianza a grande: piani e stanze: 1 liste di piani, 1 di stanze (serve almeno una con ≥ 2)",
+    "varianza a enorme: piani e stanze: 1 liste di piani, 1 di stanze (serve almeno una con ≥ 2)"
+  ],
+  "voci": [
+    {
+      "id": "finisce",
+      "ok": true,
+      "valore": "3475 ms",
+      "richiesto": "entro 8000 ms"
+    },
+    {
+      "id": "valido",
+      "ok": true,
+      "valore": "sì",
+      "richiesto": "i controlli di check.ts"
+    },
+    {
+      "id": "piani",
+      "ok": true,
+      "valore": "2",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "testa",
+      "ok": true,
+      "valore": "1.5 1.5",
+      "richiesto": "≥ 1.5 caselle per piano"
+    },
+    {
+      "id": "stanze",
+      "ok": true,
+      "valore": "6",
+      "richiesto": "≥ 3"
+    },
+    {
+      "id": "murato",
+      "ok": true,
+      "valore": "0",
+      "richiesto": "≤ 0.25"
+    },
+    {
+      "id": "porta",
+      "ok": true,
+      "valore": "x 49, scarto 0.01, alta 1.5, libera",
+      "richiesto": "sul davanti, scarto ≤ 0.33, alta ≥ 1.5"
+    },
+    {
+      "id": "salti",
+      "ok": true,
+      "valore": "5",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "materiali",
+      "ok": true,
+      "valore": "15",
+      "richiesto": "≥ 6"
+    },
+    {
+      "id": "dominante",
+      "ok": true,
+      "valore": "0.25",
+      "richiesto": "≤ 0.6"
+    },
+    {
+      "id": "finestre",
+      "ok": true,
+      "valore": "32 su 4 lati",
+      "richiesto": "≥ 6 su ≥ 3 lati"
+    },
+    {
+      "id": "dettagli",
+      "ok": true,
+      "valore": "168, 0 lati vuoti",
+      "richiesto": "≥ 24, ≤ 1 lati vuoti"
+    },
+    {
+      "id": "rumore",
+      "ok": true,
+      "valore": "0.08",
+      "richiesto": "≤ 0.7"
+    },
+    {
+      "id": "sagoma",
+      "ok": true,
+      "valore": "5",
+      "richiesto": "≥ 4"
+    },
+    {
+      "id": "rilievo",
+      "ok": true,
+      "valore": "0.34",
+      "richiesto": "≥ 0.12"
+    },
+    {
+      "id": "ingombro",
+      "ok": true,
+      "valore": "0.5",
+      "richiesto": "≥ 0.3"
+    }
+  ],
+  "misure": {
+    "voxel": 52618,
+    "ms": 3475,
+    "finito": true,
+    "piani": [
+      {
+        "z": 2,
+        "quota": 0.1,
+        "area": 5.45,
+        "testa": 1.5,
+        "stanze": 4
+      },
+      {
+        "z": 34,
+        "quota": 1.7,
+        "area": 3.095,
+        "testa": 1.5,
+        "stanze": 2
+      }
+    ],
+    "cantina": 0,
+    "terrazze": 1,
+    "stanze": 6,
+    "murato": 0,
+    "persi": [],
+    "porta": {
+      "x": 49,
+      "y": 95,
+      "scarto": 0.025,
+      "alta": 1.5,
+      "libera": true
+    },
+    "salti": [
+      {
+        "x": 57,
+        "y": 20,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 23,
+        "y": 15,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 24,
+        "y": 67,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 12,
+        "y": 55,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 27,
+        "y": 32,
+        "z": 0,
+        "sale": false
+      }
+    ],
+    "materiali": 15,
+    "dominante": 0.2517389486487514,
+    "finestre": 32,
+    "latiConFinestre": 4,
+    "dettagli": 168,
+    "latiVuoti": 0,
+    "rumore": 0.07692307692307693,
+    "rilievo": 0.33859354965972976,
+    "sagoma": 5,
+    "ingombro": 0.4994,
+    "luci": 0,
+    "inutili": [
+      "one \"bHb\" → \"*n*\" — le celle cercate c'erano, ma mai disposte come nel pattern",
+      "all \"nH\" → \"*n\" (e altre 1 regole) — in quel momento nella griglia non c'erano celle \"n\"",
+      "one \"nnnnnnnnn\" → \"*eeeeeee*\" — in quel momento nella griglia non c'erano celle \"n\"",
+      "prl \"n\" → \"h\" — in quel momento nella griglia non c'erano celle \"n\""
+    ],
+    "avvisi": [
+      "5 frammenti staccati (1% dei voxel)",
+      "tocca i bordi laterali della griglia: forse è tagliato",
+      "colori mai usati: E x z a P p b H t s g c d v e f w X i I J h j M U u Y G r y l m o Z"
+    ],
+    "errori": []
+  }
+}
