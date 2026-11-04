@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 04/11/2026, epoca 253. Crediti: vedi `stato`.
+Aggiornato il 04/11/2026, epoca 254. Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -35,12 +35,13 @@ Aggiornato il 04/11/2026, epoca 253. Crediti: vedi `stato`.
 - **T243 nel base via T248 e T249** (ADR-0132, `QUINE_COMMISSIONE`, predefinita 0,01), suite 1875. Non provati: `npm run serve` e il browser. `docs/glossario-censimento.md` non rigenerato. Ramo chiuso da T250, entrambi integrati.
 - **T247 integrato via T251** (ADR-0133, suite 1943 sul branch di T251, non rilanciata nel base): consumo regolabile in lobby, blocco a partita in corso; browser a 1920 px con `?offline&lobby`. Non provati: partita di molti, lobby da soli con modelli veri, 390 px. Resta che `checkout`/`reset` del master muovono `ai` sul disco, con effetto dalla partita dopo. `domande/T247.md` chiusa da me nell'autonomia: le 8 righe della Genesi restano senza manopola. La casella del tema schiacciata l'ha corretta T152; T252 chiuso senza lavoro.
 - **T152 integrato** (ADR-0134): quattro temi modificabili nella Genesi su un seme solo, prompt e canone neutri, case comuni per mondo (`commonHouse`). Censimento in `docs/temi-censimento.md`. Verificato nel browser con `?offline`, che scrive sempre Valmora. Non provati: Gemini vero, contenuti generati per tema, `commonHouse` su un modello scolpito. Può tradire il tema, da leggere in T153: forma dei timbri, città rada, mestieri, casette, oggetti, leggende, magia, musica. Margine di `tests/focus.test.ts` quasi esaurito.
+- **T89b integrato** (`e3c0f20`): inchiostro da id di cosa, istanza e parte, con un secondo disegno; la parte è il gruppo delle sfumature di un colore (`partTable`, ADR-0093), cache delle forme alla versione 6 (la vecchia si scarta una volta). Suite 1980 e typecheck verdi sul branch, verificato nel browser con `?cartone`. Non provati: costo (T89e), notte, `devicePixelRatio` diverso da 1. Il predefinito resta a T89e.
 
 ## Pronti e priorità
 
-1. **In coda, approvati e pronti, partono da soli:** T253 (gemini), T89b, T183. T89e e T89d dietro T89b. T253 corregge il parser su `T89a-d`; nel backlog nessun altro blocco usa quella forma tra le dipendenze.
+1. **In coda, approvati e pronti, partono da soli:** T253 (gemini), T89d (sbloccato da T89b; tocca anche il prompt dello Scultore, come poi T156). T183 in corso. T89e dietro T89d. T253 corregge il parser su `T89a-d`; nel backlog nessun altro blocco usa quella forma tra le dipendenze.
 4. **T182 → T156** (strutture procedurali). **T182 fermo in attesa dell'autore al giro 3 di 4, non integrato:** soglia NO. Misure e varianza 10/12 entro due richieste (7 alla prima), foto 0/10 per giudizio dell'agente, locanda esclusa; 1,15 $ a modello, 30,59 $ in tutto a listino. **Chieste le 3 decisioni di `docs/pipeline/domande/T182.md` (sul branch `task/T182`):** cantina a due taglie, interni contro la misura `stanze`, se la ricchezza basta. Bloccati finché non risponde: T156, poi T207, T88, T153, T242.
-4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla. T89d resta bloccato.
+4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla.
 
 ## Attese dall'autore
 
@@ -70,5 +71,5 @@ Aggiornato il 04/11/2026, epoca 253. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **251:** integrati T250 e T243; T247 finito, in conflitto: T251 lo unisce.
 - **252:** integrati T251 e T247.
+- **253:** integrato T152, T252 chiuso senza lavoro. **254:** integrato T89b.
