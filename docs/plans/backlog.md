@@ -3916,3 +3916,12 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Test: typecheck e suite intera con i loro turni.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T248`, con mancanze e commissione configurabile entrambe nel codice e descritte. Sicurezza: tocca i crediti, ma solo per l'unione; scrivi l'esito.
+
+### T249 · Integrare T248 e T243 — `da fare`
+- Pipeline: claude · stima 1% · approvato · priorità 1
+- Step: 34
+- Contesto: T248 (`dossier T248`) ha unito T243 a T238, ma `integra T248` va in conflitto in `AGENTS.md` e `vite.config.ts`: T244 (`dossier T244`), entrato nel base nel frattempo, ha scritto negli stessi punti. I due ADR hanno lo stesso numero: 0131 è di T244 nel base.
+- Cosa fare: nel tuo worktree `git merge task/T248`; le aggiunte restano tutte, in un testo unico dove stanno sulla stessa riga. L'ADR di T243 diventa il primo numero libero (0132, se lo è ancora), con i rimandi in `AGENTS.md`, nei dettagli, nel glossario, nel codice e in `docs/adr/README.md`; `QUINE_VIDEO` e `QUINE_COMMISSIONE` restano ciascuna col suo ADR. Nessun'altra modifica.
+- Test: typecheck e suite intera con i loro turni.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T249`, con video, mancanze e commissione configurabile tutti nel codice e descritti. Sicurezza: tocca i crediti e `server/production.ts` solo per l'unione; scrivi l'esito.

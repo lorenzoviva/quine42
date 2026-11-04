@@ -34,11 +34,11 @@ Aggiornato il 04/11/2026, epoca 249. Crediti: vedi `stato`.
 - **T231 integrato** (`cf576f3`): il tag `step` (`pipeline.mjs step`), in `indice`, `dossier` e pagina web. `step --da-tabella` lanciato sul backlog vero: 282 task in tabella, 277 righe `- Step:` aggiunte, nient'altro cambiato. Pagina web provata solo col test. La priorità 0 scavalca la finestra delle 5 ore: `step <n> --priorita` non la usa.
 - **T234 integrato** (`5a29c93`, ADR-0129): notizie come Markdown in `site/notizie/`, raccolte alla build; una notizia nuova si pubblica con build e deploy. Non provati un telefono vero e la landing a 390 px; elenco e pagina a 390 px solo in iframe senza CSP.
 - **T238 integrato** (`6a60b78`, ADR-0130): ogni richiesta che finisce male è una voce di `world/mancanze.json`, fuori da `playerFiles` e `publicFiles`; rapporto con `npm run mancanze`. Solo modelli offline: non provati fallimenti veri con Gemini né una partita reale. `docs/glossario-censimento.md` non rigenerato. 
-- **T244 integrato** (`59bd9d5`, ADR-0131): home ritoccata, video da `QUINE_VIDEO` con `video.json` e rotta `/api/video` con `Range`, istruzioni da `docs/beta/` con `site/beta.json` per la seconda parte (spenta non entra in `dist/`). Provato nel browser sotto `serve` e `dev`. Non provati: telefono vero, `.mp4` vero, video spenti in `dev`. **Li scrive l'autore:** `guida.md` e `la-corona.md` (senza, la pagina non compare); guida in `docs/beta/LEGGIMI.md`. Banda da decidere al primo deploy pubblico. L'ADR di T243 va rinumerato da `integra` (0131 preso da T244). Prossimo task: T249.
+- **T244 integrato** (`59bd9d5`, ADR-0131): home ritoccata, video da `QUINE_VIDEO` con `video.json` e rotta `/api/video` con `Range`, istruzioni da `docs/beta/` con `site/beta.json` per la seconda parte (spenta non entra in `dist/`). Provato nel browser sotto `serve` e `dev`. Non provati: telefono vero, `.mp4` vero, video spenti in `dev`. **Li scrive l'autore:** `guida.md` e `la-corona.md` (senza, la pagina non compare); guida in `docs/beta/LEGGIMI.md`. Banda da decidere al primo deploy pubblico. Prossimo task: T250.
 
 ## Pronti e priorità
 
-1. **In coda, approvati e pronti, partono da soli:** T248 (in corso, poi `integra T248` e `integra T243`) T241 T247 T89b T89e T183 T152.
+1. **In coda, approvati e pronti, partono da soli:** T249 (unisce T248 al base con T244, ADR di T243 → 0132; poi `integra T249`, `integra T248`, `integra T243`) T241 T247 T89b T89e T183 T152.
 4. **T182 → T156** (strutture procedurali). **T182 fermo in attesa dell'autore al giro 3 di 4, non integrato:** soglia NO. Misure e varianza 10/12 entro due richieste (7 alla prima), foto 0/10 per giudizio dell'agente, locanda esclusa; 1,15 $ a modello, 30,59 $ in tutto a listino. **Chieste le 3 decisioni di `docs/pipeline/domande/T182.md` (sul branch `task/T182`):** cantina a due taglie, interni contro la misura `stanze`, se la ricchezza basta. Bloccati finché non risponde: T156, poi T207, T88, T153, T242.
 4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla. T89d resta bloccato.
 
@@ -70,5 +70,5 @@ Aggiornato il 04/11/2026, epoca 249. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **249:** T244 integrato; T248 in corso.
+- **249:** T244 integrato prima di T248, che ora va in conflitto con lui in `AGENTS.md` e `vite.config.ts`: la risoluzione è T249.
 - **248:** T238 integrato; T243 finito, `integra` in conflitto con T238 (`AGENTS.md`, `kernel.ts`): la risoluzione è T248, poi `integra T248` e `integra T243`.
