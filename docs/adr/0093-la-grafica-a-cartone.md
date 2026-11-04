@@ -78,3 +78,8 @@ T89c (punto 4, ancora dietro `?cartone`): la notte ha una luna al posto del sole
 raccolta, senza leggere due volte la mappa delle ombre (il sole è l'ultima luce che three.js attraversa); non è proprio il colore del cielo, perché al tramonto darebbe ombre
 arancioni e la foto le vuole fredde: è un azzurro, viola al tramonto. La nebbia si misura sulla distanza della camera e diventa tutto cielo prima della fine di ciò che è
 caricato, così anche la camera libera bassa sull'orizzonte non vede il bordo del mondo. Anche l'inchiostro sbiadisce con la nebbia. Numeri in `docs/architettura-dettagli.md#cartone`.
+
+T89b (punto 3, ancora dietro `?cartone`): un secondo disegno e non l'MRT, che avrebbe chiesto di cambiare ogni materiale della scena, e senza rifare la mappa delle ombre. **Una correzione al punto 3**: la parte non è la lettera della
+palette. Il pino del seme ha tre verdi sparsi a caso sulla chioma e una riga lungo ciascuno sarebbe di nuovo il rumore; quindi le lettere che sono sfumature di un colore (stessa tinta, luminosità vicina, anche per il tramite di una terza)
+sono una parte sola (`partTable` in `src/mj/mesh.ts`), mentre una `<color part>` resta una parte qualunque sia il colore. La regola guarda solo la palette, così non dipende dal seme. Una conseguenza per T89d: chi vuole una riga tra due parti della stessa tinta deve staccarle di
+luminosità. Il terreno ha una parte per il piano e una per le facce laterali, perché un gradino visto di fronte non ha salti di profondità. Il cartone non è ancora il predefinito: lo mette T89e. Numeri in `docs/architettura-dettagli.md#cartone`.

@@ -39,7 +39,7 @@ export interface MeshAnswer {
   meshes?: FormMeshes;
 }
 
-const buffers = (m: MeshData) => [m.positions.buffer, m.normals.buffer, m.colors.buffer, m.indices.buffer, ...(m.sway ? [m.sway.buffer] : []), ...(m.glow ? [m.glow.buffer] : []), ...(m.alpha ? [m.alpha.buffer] : [])];
+const buffers = (m: MeshData) => [m.positions.buffer, m.normals.buffer, m.colors.buffer, m.indices.buffer, ...(m.sway ? [m.sway.buffer] : []), ...(m.glow ? [m.glow.buffer] : []), ...(m.alpha ? [m.alpha.buffer] : []), ...(m.part ? [m.part.buffer] : [])];
 
 const meshBuffers = (m: FormMeshes) => [...buffers(m.body), ...m.limbs.flatMap((l) => buffers(l.mesh)), ...m.frames.flatMap(buffers)];
 

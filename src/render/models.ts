@@ -18,6 +18,7 @@ export function geometry(m: MeshData): THREE.BufferGeometry {
   if (m.sway) g.setAttribute('sway', new THREE.BufferAttribute(m.sway, 1));
   if (m.glow) g.setAttribute('glow', new THREE.BufferAttribute(m.glow, 1));
   if (m.alpha) g.setAttribute('alpha', new THREE.BufferAttribute(m.alpha, 1));
+  if (m.part) g.setAttribute('part', new THREE.BufferAttribute(m.part, 1));
   g.setIndex(new THREE.BufferAttribute(m.indices, 1));
   if (m.opaqueCount !== undefined) {
     if (m.opaqueCount > 0) g.addGroup(0, m.opaqueCount, 0);

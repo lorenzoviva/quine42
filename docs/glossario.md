@@ -370,6 +370,19 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Da non usare**: nessuno (i modelli `forma-…` degli oggetti sono modelli, con un nome storico)
 - **Fermo**: il componente `form`, `forma` del protocollo, gli id `forma-…`.
 
+### Inchiostro
+- **Inglese**: `Ink`, `idsOf`, `thingOf`
+- **Definizione**: i contorni della grafica a cartone: una riga scura dove cambia la cosa o la parte, o dove la profondità salta (ADR-0093).
+- **Dove vive**: `src/render/cartoon.ts`, `src/render/materials.ts`
+- **Da non usare**: `outline`, `bordo` (per questa riga)
+
+### Parte di un modello
+- **Inglese**: `partTable`, `part`
+- **Definizione**: ciò che l'inchiostro separa dentro un modello: le lettere della palette che sono sfumature di un colore, o quelle di una stessa `<color part>`. Non è un arto: gli arti sono le `<color part>`, e questa ne è solo una conseguenza.
+- **Dove vive**: `src/mj/mesh.ts`
+- **Da non usare**: nessuno
+- **Fermo**: `part` di `<color>`.
+
 ### Istanza
 - **Inglese**: `instanceGrid`
 - **Definizione**: un'entità con il modello del suo tipo e un seme suo.

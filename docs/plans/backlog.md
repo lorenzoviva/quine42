@@ -2150,7 +2150,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fatto quando: typecheck e test verdi; screenshot con e senza nel browser (un luogo con case e alberi, lo studio) e niente errori in console.
 - Esito: rampa a 3 fasce con soglie scelte sulle sei normali dei voxel per tutti i materiali illuminati di simulazione, corona e studio (`lit()`), voxel luminosi fuori dalle fasce, emisfero freddo, ombra portata che lascia la fascia bassa a 0,35, ombre nette (raggio 0), sole tenue nello studio solo nel cartone, interruttore `cartoonOn` con `CARTOON_BY_DEFAULT=false` e `?classica` che vince (da mettere a `true` dopo T89b e T89c), `PCFSoftShadowMap` rimosso da three sostituito con `PCFShadowMap` senza cambi nel classico; test nuovi in `tests/cartoon.test.ts`, suite 111 file/1502 test, typecheck e build verdi; non provati la notte nel cartone, le prestazioni (T89e) e i voxel luminosi visti da vicino su facce diverse (solo test e compilazione dello shader); icone e laboratorio restano Lambert (T89d, T89e). Sicurezza: nessuna superficie nuova.
 
-### T89b · Cartone: contorni dagli id di cosa e parte — `da fare` (dipende da T89a)
+### T89b · Cartone: contorni dagli id di cosa e parte — `fatto` (`e3c0f20`) (dipende da T89a)
 - Pipeline: claude · stima 6% · approvato · browser · priorità 76
 - Step: 29
 - Contesto: ADR-0093, punto 3. Il passo `Ink` di T89 legge normali e profondità: sugli alberi fa rumore.
@@ -2161,6 +2161,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   luminosi; il colore scurito del pixel. Test sull'attributo `part` di `mesh.ts`.
 - Fatto quando: typecheck e test verdi; nel browser gli alberi hanno la sagoma e i confini tra chioma e tronco senza rumore, le case i bordi di muri, tetto e
   finestre, il rilievo i gradini; screenshot confrontato con la foto di T89.
+- Esito: inchiostro da id di cosa, istanza e parte con un secondo disegno (`Ink`, `idsOf`, `thingOf`), senza rifare la mappa delle ombre; attributo `part` in `mesh.ts`, `models.ts` e `terrain.ts`; cambiato rispetto al previsto: la parte non è la lettera ma il gruppo delle sfumature di un colore (`partTable`, ADR-0093), il terreno ha una parte per il piano e una per i lati, sui `Builder` la parte è il colore, cache delle forme alla versione 6; test nuovi in `tests/cartoon-ink.test.ts`, voci nel glossario, suite 127 file/1980 test e typecheck verdi; non provati il costo (T89e), la notte e un `devicePixelRatio` diverso da 1; il predefinito resta a T89e. Sicurezza: nessuna superficie nuova.
 
 ### T89c · Cartone: luce tinta e prospettiva aerea — `fatto` (`8914f6f`) (dipende da T89a)
 - Pipeline: claude · stima 3% · approvato · browser · priorità 77

@@ -470,10 +470,18 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   colore del sole dice quanta ombra c'è, senza rileggere la mappa; le facce girate dal sole contano sempre come in ombra; la tinta (`SHADE`) moltiplica luce diretta e indiretta. La
   nebbia è `aerial(distanza, day)`: in 3/4 il suolo va da 0,8 a 1,33 distanze della camera, quindi comincia a 0,85 e la cima dello schermo è già sbiadita; è tutta cielo a 2,2 distanze,
   prima della fine di ciò che il kernel carica (1,1 distanze più un chunk), anche con la camera libera bassa sull'orizzonte; da vicino resta lontana; di notte si accorcia. Nella corona
-  e nello studio niente nebbia, come prima, e la luce è `CARTOON_INDOORS`. L'inchiostro sbiadisce con la nebbia (`uFog` in `Ink`): il passo che lo sostituisce (T89b) deve tenerlo. Il
+  e nello studio niente nebbia, come prima, e la luce è `CARTOON_INDOORS`. L'inchiostro sbiadisce con la nebbia (`uFog` in `Ink`). Il
   bloom è più stretto (`CARTOON_BLOOM_RADIUS`, 0,3) e più debole di giorno (0,5) che di notte (0,85). Il classico non cambia. Il raggio della camera delle ombre resta ±22: con la camera
   più lontana della vista predefinita le ombre portate finiscono prima del suolo visibile, come nel classico.
-- **I contorni** sono ancora la prova di T89 (passo `Ink` nel composer di `bloom.ts`, da profondità e normali, soglie in `window.cartone`) finché non arriva T89b.
+- **I contorni** (T89b): `Ink` in `cartoon.ts` disegna la scena una volta in più prima del composer (senza MRT, che chiederebbe di cambiare ogni materiale della scena; senza rifare la mappa delle ombre), con
+  `idsOf` di `materials.ts`: per ogni materiale uno `ShaderMaterial` che scrive rosso = la **cosa** (`thingOf`: la mesh, o `TERRAIN_THING` per terreno e muri di tutti i chunk), verde = l'istanza
+  (`gl_InstanceID`), blu = la **parte**, e tiene taglio del cerchio, `CUT` e vento del materiale che sostituisce. L'inchiostro va dove cambia uno dei tre (con gli angoli a metà, perché il bersaglio non ha campioni) o dove la
+  profondità salta di oltre `uDepthEdge` caselle (0,6-1,1, soglie in `window.cartone`), misurata sull'inverso della profondità, che su un piano cambia in modo uniforme: un pendio radente non è un salto. Largo un pixel CSS per lato a ogni
+  `devicePixelRatio`; niente su ciò che dà luce (l'alfa del fotogramma, `U.glowMask`). Fuori dai contorni: neon e righe del pavimento (`noInk`), ciò che è trasparente e non è voxel (etichette, l'ombra del viandante).
+  **La parte di un modello non è la lettera**: i programmi spargono più verdi su una chioma e una riga lungo ciascuno è di nuovo il rumore. `partTable` di `mesh.ts` unisce le lettere che sono sfumature di un colore (in Lab: tinta entro 15°, luminosità entro 25, anche
+  passando per una terza; due grigi solo la luminosità), quelle di una stessa `<color part>`, mai ciò che dà luce o è trasparente con ciò che non lo è. Un muro chiaro e una porta scura della stessa tinta restano due parti. Il valore (l'attributo `part`, un byte per vertice) è la
+  prima lettera del gruppo, e la cache delle forme è passata alla versione 6. **Il terreno**: la parte è il codice della casella, le facce laterali un'altra (`SIDE_PART`), così un gradino visto di fronte, dove la profondità non salta, ha la sua riga in cima e al piede. **Ciò che
+  fa un `Builder` altrove** (corona, studio, sostituti): senza `fixedPart` la parte è il colore della faccia. Una geometria senza `part` lo riceve a 0 dopo il fotogramma, solo se l'inchiostro la disegna: il classico non paga.
 
 <a id="mondo3d"></a>
 ## Il mondo in 3D, bozze di prova, mappa, voxel luminosi
