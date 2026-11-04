@@ -1,37 +1,37 @@
 # Il piano della pipeline
 
-> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-11-04T20:57:51.306Z: non modificarlo a mano,
+> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-11-04T21:11:07.532Z: non modificarlo a mano,
 > la fonte è `docs/plans/backlog.md` (righe `- Pipeline:`).
 
 ## Budget
 
 Orchestratore: **argon** (sotto il 10 % nessun task su di lui; si cambia con `orchestratore <provider>`).
 
-- **claude**: settimana 9 %, 5 ore 65 %; tetto 3, slot 1 (task in programma 19), esaurimento previsto 2026-11-05T07:50:24.657Z, reset 2026-11-05T15:59:00.000Z (letto da /usage il 2026-11-04T20:54:32.239Z)
+- **claude**: settimana 9 %, 5 ore 65 %; tetto 3, slot 1 (task in programma 19), esaurimento previsto 2026-11-05T08:12:54.329Z, reset 2026-11-05T15:59:00.000Z (letto da /usage il 2026-11-04T21:10:28.489Z)
   - session, 5h: 65 % residuo, reset 2026-11-04T22:49:00.000Z
   - week (all models), settimana: 9 % residuo, reset 2026-11-05T15:59:00.000Z
-- **gemini**: settimana 8 %, 5 ore 99 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto mai a questo ritmo, reset 2026-11-05T17:37:53.000Z (letto da /usage il 2026-11-04T20:57:45.219Z)
+- **gemini**: settimana 8 %, 5 ore 99 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto mai a questo ritmo, reset 2026-11-05T17:37:53.000Z (letto da /usage il 2026-11-04T21:08:20.433Z)
   - Gemini Models, settimana: 8 % residuo, reset 2026-11-05T17:37:53.000Z
   - Gemini Models, 5h: 99 % residuo, reset 2026-11-05T01:42:58.000Z
-- **argon**: settimana 54 %, 5 ore 54 %; tetto 1, slot 1 (task in programma 1), esaurimento previsto 2026-11-04T23:21:18.516Z, reset 2026-11-11T18:44:35.000Z (letto da /usage il 2026-11-04T20:54:35.108Z)
-  - Gemini 4 Argon, settimana: 54 % residuo, reset 2026-11-11T18:44:35.000Z
-- **fable**: settimana 9 %, 5 ore 65 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-05T08:09:56.512Z, reset 2026-11-05T16:00:00.000Z (letto da /usage il 2026-11-04T20:57:42.226Z)
+- **argon**: settimana 46 %, 5 ore 46 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-04T23:09:49.080Z, reset 2026-11-11T18:44:35.000Z (letto da /usage il 2026-11-04T21:10:03.956Z)
+  - Gemini 4 Argon, settimana: 46 % residuo, reset 2026-11-11T18:44:35.000Z
+- **fable**: settimana 9 %, 5 ore 65 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-05T08:24:03.461Z, reset 2026-11-05T16:00:00.000Z (letto da /usage il 2026-11-04T21:08:17.537Z)
   - session, 5h: 65 % residuo, reset 2026-11-04T22:50:00.000Z
   - week (all models), settimana: 9 % residuo, reset 2026-11-05T16:00:00.000Z
   - week (Fable), settimana: 59 % residuo, reset 2026-11-05T16:00:00.000Z
 
-## In corso (2)
+## In corso (1)
 
 - **T258** Il kernel segna il suolo per i programmi delle strutture — claude, 5 %
-- **T268** Prova e misura dei modelli esterni di `agy` (`Claude and GPT models`) — argon, 2 %
 
 ## Finiti, da guardare e integrare (`integra Txx`) (0)
 
 _nessuno_
 
-## Pronti, in ordine di priorità (5)
+## Pronti, in ordine di priorità (6)
 
 - **T259** Lo Scenografo: progetto e misura degli interni separati dall'edificio — claude, 5 %
+- **T255** I modelli di Claude distinti nella pipeline, l'assegnazione dalla scheda — claude, 5 %
 - **T260** Il versionamento del kernel (`X.Y.Z`) e la compatibilità degli universi — claude, 3 %
 - **T262** Il salvataggio che non si ferma — claude, 6 %
 - **T265** I commit non si perdono: fila su disco, tutte le scritture, token scaduto — claude, 6 %
@@ -45,7 +45,7 @@ _nessuno_
 
 _nessuno_
 
-## Bloccati da dipendenze (15)
+## Bloccati da dipendenze (14)
 
 - **T88** Spendere i crediti che avanzano con la generazione differita — claude, 4 % (aspetta T207, T156)
 - **T207** La generazione differita: un universo generato senza browser, solo dagli abbonamenti — claude, 6 % (aspetta T156)
@@ -53,7 +53,6 @@ _nessuno_
 - **T233** La landing launcher nel sito — claude, 3 % (aspetta T232)
 - **T237** La guida dei beta tester, in due file — claude, 2 % (aspetta T45f)
 - **T242** Il rapporto aureo nei prompt dello Scultore e dell'Artista — claude, 1 % (aspetta T156)
-- **T255** I modelli di Claude distinti nella pipeline, l'assegnazione dalla scheda — claude, 5 % (aspetta T268)
 - **T263** I pannelli e i comandi di ogni viandante in multigiocatore — claude, 8 % (aspetta T245a)
 - **T245a** Il magazzino durevole e `vite` — claude, 7 % (aspetta T262)
 - **T245b** Il lavoro degli NPC: i primi tre mestieri — claude, 12 % (aspetta T245a)
