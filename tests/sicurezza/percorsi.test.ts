@@ -93,6 +93,7 @@ describe('V-003 i percorsi ammessi', () => {
       'seed.json',
       'world/stato.json',
       'world/consumi.json',
+      'world/mancanze.json',
       'world/carte.json',
       'world/grafo.json',
       'world/pagamenti.json',

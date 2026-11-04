@@ -772,6 +772,13 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Dove vive**: `src/kernel/ai/usage.ts`, `world/consumi.json`
 - **Da non usare**: `UsageLedger`
 
+### Mancanze
+- **Inglese**: `shortfalls`, `ShortfallLog`, `noteShortfall`, `shortfallReport`
+- **Definizione**: le richieste che il Concilio non è riuscito a soddisfare, con chi, agente, motivo e quante volte; da qui parte la Fase III. Non va ai client.
+- **Dove vive**: `src/kernel/shortfalls.ts`, `world/mancanze.json`, `tools/mancanze/rapporto.ts`
+- **Da non usare**: «registro dei fallimenti»
+- **Fermo**: `world/mancanze.json` e i suoi campi (`voci`, `richiesta`, `chi`, `agente`, `compito`, `esito`, `motivo`, `volte`, `primo`, `ultimo`).
+
 ## Client, soldi e carte
 
 ### Client sottile

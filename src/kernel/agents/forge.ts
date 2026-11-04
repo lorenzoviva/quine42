@@ -265,6 +265,13 @@ export function assembleManifest(id: string, concept: Concept, physics: PhysicsS
   return m;
 }
 
+/** The last attempt did not pass the kernel's checks: `agent` is whose it was, as on an error of `Council.ask`. */
+export class ForgeRejected extends Error {
+  constructor(message: string, readonly agent: AgentId) {
+    super(message);
+  }
+}
+
 export async function forge(c: Council, req: ForgeRequest, validate: ModuleValidator): Promise<ForgeResult> {
   const data = { request: req };
   const codes = req.paletteCodes.join(', ');
@@ -332,7 +339,7 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
     c.say('kernel', 'scarta', why, 'narratore');
     concept = await askConcept(why);
     if (req.kind) concept.tipo = req.kind;
-    if (tries === 1 && (metaBreak(`${concept.nome} ${concept.descrizione} ${concept.persona ?? ''}`) || req.existingNames?.some((n) => normName(n) === normName(concept.nome)))) throw new Error(`ancora fuori dal mondo o doppione: ${concept.nome}`);
+    if (tries === 1 && (metaBreak(`${concept.nome} ${concept.descrizione} ${concept.persona ?? ''}`) || req.existingNames?.some((n) => normName(n) === normName(concept.nome)))) throw new ForgeRejected(`ancora fuori dal mondo o doppione: ${concept.nome}`, 'narratore');
   }
   // Buildings are environments (the Cartographer's layouts), never one-tile objects.
   if (isStructure(concept)) {
@@ -340,7 +347,7 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
     c.say('kernel', 'scarta', why, 'narratore');
     concept = await askConcept(why);
     if (req.kind) concept.tipo = req.kind;
-    if (isStructure(concept)) throw new Error(`ancora una struttura: ${concept.nome}`);
+    if (isStructure(concept)) throw new ForgeRejected(`ancora una struttura: ${concept.nome}`, 'narratore');
     c.say('narratore', 'corregge', `«${concept.nome}» (${concept.tipo}): ${concept.descrizione}`);
   }
   let physics = await askPhysics(concept);
@@ -383,7 +390,7 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
     const errors = [...validate(manifest, code.logic), ...missing.map((h) => `manca la funzione M.${h}`)];
     if (!errors.length) break;
     c.say('kernel', 'scarta', errors.join('; '), 'ingegnere');
-    if (round >= 2) throw new Error(`modulo non valido: ${errors.join('; ')}`);
+    if (round >= 2) throw new ForgeRejected(`modulo non valido: ${errors.join('; ')}`, 'ingegnere');
     code = await askCode(concept, physics, errors.join('; '));
     c.say('ingegnere', 'corregge', 'logic.lua corretto');
     manifest = assembleManifest(id, concept, physics, code, req.paletteCodes, req.origin);

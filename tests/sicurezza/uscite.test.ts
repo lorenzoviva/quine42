@@ -11,6 +11,7 @@ import { councilMayWrite } from '../../src/kernel/paths';
 import { memoryStore } from '../../src/kernel/repo';
 import { readConfig } from '../../src/kernel/universe';
 import { playerChanges, playerFiles, publicFiles } from '../../src/session/files';
+import { SHORTFALLS_FILE } from '../../src/kernel/shortfalls';
 
 // What goes out on a list, and what the Council writes on a list (T130, ADR-0109): V-012 and V-013. Fake values only.
 
@@ -93,6 +94,14 @@ describe('ciò che esce verso il giocatore', () => {
     expect(Object.keys(mirror.palette).length).toBeGreaterThan(0);
     expect(mirror.recipes().all.length).toBeGreaterThan(0);
     expect(Object.keys(mirror.content.runes).length).toBeGreaterThan(0);
+  });
+
+  it('V-012 il registro delle mancanze (T238) non esce: né al giocatore, né in pubblico, né come file cambiato', () => {
+    const files = { ...FILES, [SHORTFALLS_FILE]: JSON.stringify({ voci: [{ richiesta: SECRET, esito: 'rifiuto' }] }) };
+    expect(JSON.stringify(playerFiles(files))).not.toContain(SECRET);
+    expect(JSON.stringify(publicFiles(files))).not.toContain(SECRET);
+    expect(playerChanges(files, [SHORTFALLS_FILE])).toEqual({});
+    expect(playerChanges(FILES, [SHORTFALLS_FILE])).toEqual({});
   });
 
   it('V-012 alla scheda pubblica di ai resta ciò che la lobby mostra, non provider né agenti', () => {

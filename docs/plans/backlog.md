@@ -3815,7 +3815,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Browser: sì: segui la guida da viandante nuovo sul server di beta; ogni passo che non torna lo correggi.
 - Quando è fatto: l'autore può spedirla; commit su `task/T237`. Sicurezza: nessuna superficie nuova.
 
-### T238 · Il registro di ciò che il Concilio non riesce a fare — `da fare`
+### T238 · Il registro di ciò che il Concilio non riesce a fare — `fatto` (`ff1315b`)
 - Pipeline: claude · stima 2% · approvato · priorità 3
 - Step: 34
 - Contesto: la Fase III parte dalle funzionalità che il Concilio non riesce a implementare durante le sessioni, chieste dai giocatori o nate dal Concilio. Se la beta non le registra, si perdono: va fatto entro la Fase I. Approvato dall'autore il 04/11. I feedback dei giocatori non passano da qui: l'autore li porta in chat.
@@ -3823,6 +3823,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Test: typecheck e suite intera con i loro turni, offline con `MockAiModels`.
 - Browser: non serve.
 - Quando è fatto: una richiesta rifiutata in un test diventa una riga del rapporto; commit su `task/T238`. Sicurezza: il file resta fuori da `playerFiles` e `publicFiles`; scrivi l'esito.
+- Esito: ogni richiesta che finisce male (Referente, Fucina, azioni e fabbricazioni libere, ultimo tentativo rifiutato dal validatore, Ingegnere che non ripara, e anche modelli, brani, luoghi, trame, rune, pacchetti, Genesi) è una voce di `world/mancanze.json` (richiesta, chi, agente, compito, esito, motivo, volte), che sopravvive ai rollback, viene dal ramo del master e ha il comando `npm run mancanze`; una richiesta rifiutata in un test diventa una riga del rapporto; ADR-0129, glossario, AGENTS e dettagli aggiornati. Manca: `docs/glossario-censimento.md` non rigenerato. Non provato: fallimenti veri con Gemini o in una partita reale, solo modelli offline. Sicurezza: nessuna voce nuova nel registro, il file resta fuori da `playerFiles`, `publicFiles` e `playerChanges` (test V-012 in `tests/sicurezza/uscite.test.ts`), i testi di giocatori e modelli sono tagliati e appiattiti, con al massimo 500 voci; il master lo vede solo come ogni file del suo universo, un clone lo eredita.
 
 ### T239 · Quattro lingue: censimento e progetto — `in attesa`
 - Step: 36

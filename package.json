@@ -15,7 +15,8 @@
     "test:watch": "vitest",
     "test:sicurezza": "vitest run tests/sicurezza",
     "sicurezza:prove": "node tools/sicurezza/prove.mjs",
-    "abbonamento": "vite-node --script tools/abbonamenti/servi.ts"
+    "abbonamento": "vite-node --script tools/abbonamenti/servi.ts",
+    "mancanze": "vite-node --script tools/mancanze/rapporto.ts"
   },
   "author": "lorenzoviva <lorenzo.vaccaro@hotmail.com>",
   "license": "PolyForm-Noncommercial-1.0.0",
