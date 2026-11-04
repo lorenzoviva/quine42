@@ -2900,13 +2900,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   Suite intera: 1338 su 1338 (105 file) in 184 s al primo giro; nel log un processo figlio di un test è morto per il suo limite di heap
   (~200 MB, un mondo o una sandbox a parte), senza un rosso. Typecheck verde.
 
-### T158 · L'Attore nello studio — `da fare` (dipende da T157, T205)
+### T158 · L'Attore nello studio — `fatto` (`4759b9a`) (dipende da T157, T205)
 - Pipeline: claude · stima 3% · approvato · browser · priorità 86
 - Contesto: ogni agente è una squadra nella corona (`archive.ts`), con un gerboa e un cappello (`corona-gerboa-<agente>.xml`, T50), un posto nella Sala del Concilio e una console nella Direzione; l'Attore di T157 non c'è ancora.
 - Cosa fare: il suo gerboa con un cappello riconoscibile, il posto al tavolo (i membri seduti diventano nove), la console, lo studio dove sta, i colori e i nomi nei pannelli. Con l'opzione spenta scegli se non compare o resta a riposo come gli altri che non lavorano, e scrivilo.
 - Test: quelli di corona e archivio; typecheck e suite intera con i loro turni.
 - Browser: col turno `browser`: Sala del Concilio e Direzione, l'Attore c'è e la sala non si scontra; screenshot.
 - Quando è fatto: commit su `task/T158`.
+- Esito: gerboa dell'Attore (`corona-gerboa-attore.xml`: moschettiere verde acqua piumato, mezza maschera, gorgiera), posto al tavolo accanto al Narratore (nove seduti, nove teletrasporti, nessuna collisione, due verso `persone`), postazione nello Studio dei Personaggi (campo `guest` della stanza, un passo oltre il Narratore; le battute senza file le dice da lì, `pathForFeed`), etichette dei posti con `ofThe`; console, colori e nomi c'erano già da `AGENTS` e ora sono provati. Opzione spenta: resta a riposo, posto e avatar non dipendono dalla configurazione, console vuota perché non lavora; scritto in `docs/architettura-dettagli.md` e `AGENTS.md`, nessun ADR nuovo. Test: `tests/kernel-studio.test.ts`, typecheck, build e suite intera (119 file, 1706 test) verdi prima dell'ultima correzione, che tocca solo `docs/glossario.md` e dopo la quale ho rilanciato `tests/glossario.test.ts` (verde) ma non la suite. Non provato: l'Attore acceso con una battuta vera in browser (simulata con `council.say`; l'opzione accesa solo nel test). Da valutare a parte: `Archive.go` senza file manda lo Scultore in `buildings[0]`, difetto già presente; `docs/glossario-censimento.md` rigenerato porta differenze estranee, lasciato com'era. Sicurezza: nessuna superficie nuova.
 
 ### T162 · Integrare T161 — `fatto` (dab503e)
 - Pipeline: claude · stima 1% · approvato · priorità 0
