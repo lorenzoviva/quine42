@@ -1,0 +1,83 @@
+<!-- Portale di teletrasporto (ambientazione futuristica, sidera): un anello di ceramica bianca in piedi su una piattaforma di grafite, con
+     la membrana di energia ciano e magenta tesa al suo interno e i piloni accesi ai lati. Il seme sceglie quanto è grande l'anello (tre
+     misure: i più piccoli poggiano su un piedistallo), quanti piloni ci sono e quanto sono alti. -->
+<sequence values="BWwGgCMVxyzmXYZNuvtRQPkpq" size="50 50 50" symmetry="(xy)" name="Portale di teletrasporto">
+  <color symbol="W" value="eef1f5" name="ceramica bianca"/>
+  <color symbol="w" value="c3c9d3" name="ceramica in ombra"/>
+  <color symbol="G" value="353a42" name="grafite"/>
+  <color symbol="g" value="565d68" name="grafite chiara"/>
+  <color symbol="C" value="5ff0ff" name="energia ciano" glow="True"/>
+  <color symbol="M" value="ff3ec8" name="energia magenta" glow="True"/>
+  <color symbol="V" value="9fd8e6" name="vetro"/>
+  <color symbol="x" hidden="True" name="l'anello grande"/>
+  <color symbol="y" hidden="True" name="l'anello medio"/>
+  <color symbol="z" hidden="True" name="l'anello piccolo"/>
+  <color symbol="m" hidden="True" name="fra un anello e l'altro"/>
+  <color symbol="X" hidden="True" name="l'anello grande, nel piedistallo"/>
+  <color symbol="Y" hidden="True" name="l'anello medio, nel piedistallo"/>
+  <color symbol="Z" hidden="True" name="l'anello piccolo, nel piedistallo"/>
+  <color symbol="N" hidden="True" name="fra un anello e l'altro, nel piedistallo"/>
+  <color symbol="u" hidden="True" name="segno dell'anello grande"/>
+  <color symbol="v" hidden="True" name="segno dell'anello medio"/>
+  <color symbol="t" hidden="True" name="segno dell'anello piccolo"/>
+  <color symbol="R" hidden="True" name="l'anello scelto"/>
+  <color symbol="Q" hidden="True" name="la membrana"/>
+  <color symbol="P" value="353a42" name="piedistallo"/>
+  <color symbol="k" hidden="True" name="lanci a vuoto"/>
+  <color symbol="p" hidden="True" name="dove può stare un pilone"/>
+  <color symbol="q" hidden="True" name="un pilone che sale"/>
+  <!-- Il dado si scalda: tre lanci a vuoto -->
+  <box at="49 49 47" size="1 1 3" color="k"/>
+  <one in="k" out="B" steps="3"/>
+  <!-- La piattaforma a gradini -->
+  <box at="25 25 0" size="44 16 2" color="G"/>
+  <box at="25 25 2" size="40 12 1" color="g"/>
+  <!-- Tre anelli possibili, uno dentro l'altro, come sagome nascoste (centro a quota 26) -->
+  <ellipsoid at="25 25 3" size="46 3 46" color="x"/>
+  <ellipsoid at="25 25 6" size="40 3 40" color="m"/>
+  <ellipsoid at="25 25 8" size="36 3 36" color="y"/>
+  <ellipsoid at="25 25 11" size="30 3 30" color="m"/>
+  <ellipsoid at="25 25 13" size="26 3 26" color="z"/>
+  <ellipsoid at="25 25 16" size="20 3 20" color="m"/>
+  <!-- La colonna del piedistallo sotto il centro -->
+  <box at="25 25 3" size="7 3 23" color="X" on="x"/>
+  <box at="25 25 3" size="7 3 23" color="Y" on="y"/>
+  <box at="25 25 3" size="7 3 23" color="Z" on="z"/>
+  <box at="25 25 3" size="7 3 23" color="N" on="m"/>
+  <!-- La scelta: un segno in cima a ogni anello, il dado ne prende uno -->
+  <box at="25 25 27" size="1 1 23" color="u" on="x"/>
+  <box at="25 25 27" size="1 1 23" color="v" on="y"/>
+  <box at="25 25 27" size="1 1 23" color="t" on="z"/>
+  <one in="[uvt]" out="R" steps="1"/>
+  <all in="u" out="x"/>
+  <all in="v" out="y"/>
+  <all in="t" out="z"/>
+  <all symmetry="(xyz)">
+    <rule in="R[xX]" out="*R"/>
+    <rule in="R[yY]" out="*R"/>
+    <rule in="R[zZ]" out="*R"/>
+  </all>
+  <!-- La membrana: tutto ciò che sta dentro l'anello scelto -->
+  <box at="25 25 26" size="1 1 1" color="Q"/>
+  <all symmetry="(xyz)" in="Q[xyzmXYZN]" out="*Q"/>
+  <!-- Il piedistallo: sotto l'anello, fino alla piattaforma -->
+  <all in="R [XYZN]" out="* P" symmetry="()"/>
+  <all in="P [XYZN]" out="* P" symmetry="()"/>
+  <all in="[xyzmXYZN]" out="B"/>
+  <!-- I colori: l'anello con le luci, la membrana che vortica -->
+  <all in="R" out="W"/>
+  <all in="Q" out="C"/>
+  <prl in="C" out="M" p="0.25" steps="1"/>
+  <all in="B W" out="* w" symmetry="()" steps="1"/>
+  <all in="W/C" out="V/*" steps="1"/>
+  <!-- I piloni ai lati: alcuni sì, alti a caso -->
+  <box at="6 21 3" size="1 1 1" color="p"/>
+  <box at="6 29 3" size="1 1 1" color="p"/>
+  <box at="44 21 3" size="1 1 1" color="p"/>
+  <box at="44 29 3" size="1 1 1" color="p"/>
+  <prl in="p" out="q" p="0.6" steps="1"/>
+  <all in="p" out="B"/>
+  <one steps="40" in="B q" out="q G" symmetry="()"/>
+  <all in="Bq" out="gq" steps="1"/>
+  <all in="q" out="C"/>
+</sequence>

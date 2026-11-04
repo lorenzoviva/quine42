@@ -1,0 +1,65 @@
+<!-- Modulo botanico idroponico (ambientazione futuristica, sidera): uno scaffale di ceramica bianca e grafite con le vasche di coltura,
+     le barre di luce ciano sotto ogni ripiano e le piante che crescono, con qualche fiore magenta. Il seme sceglie quanti ripiani ha
+     (fin dove arriva lo scaffale) e come crescono le piante in ogni vasca. -->
+<sequence values="BWwGgCMVTLlFhksv" size="20 20 20" symmetry="(xy)" name="Modulo botanico idroponico">
+  <color symbol="W" value="eef1f5" name="ceramica bianca"/>
+  <color symbol="w" value="c3c9d3" name="ceramica in ombra"/>
+  <color symbol="G" value="353a42" name="grafite"/>
+  <color symbol="g" value="565d68" name="grafite chiara"/>
+  <color symbol="C" value="5ff0ff" name="luce di coltura ciano" glow="True"/>
+  <color symbol="M" value="ff3ec8" name="fiore magenta" glow="True"/>
+  <color symbol="V" value="9fd8e6" name="acqua di coltura"/>
+  <color symbol="T" value="2b5a63" name="vasca"/>
+  <color symbol="L" value="4fbf5a" name="foglie"/>
+  <color symbol="l" value="2e7d3a" name="foglie in ombra"/>
+  <color symbol="F" value="3b8f45" name="stelo"/>
+  <color symbol="h" hidden="True" name="quote possibili"/>
+  <color symbol="k" hidden="True" name="la quota scelta, o lanci a vuoto"/>
+  <color symbol="s" hidden="True" name="un germoglio"/>
+  <color symbol="v" hidden="True" name="dove possono crescere le piante"/>
+  <!-- Il dado si scalda: tre lanci a vuoto -->
+  <box at="19 19 17" size="1 1 3" color="k"/>
+  <one in="k" out="B" steps="3"/>
+  <!-- Lo zoccolo, i montanti e tre ripiani con le loro vasche -->
+  <box at="10 10 0" size="16 10 1" color="g"/>
+  <box at="3 6 1" size="1 1 19" color="G"/>
+  <box at="17 6 1" size="1 1 19" color="G"/>
+  <box at="3 14 1" size="1 1 19" color="G"/>
+  <box at="17 14 1" size="1 1 19" color="G"/>
+  <box at="10 10 1" size="14 8 2" color="W" on="B"/>
+  <box at="10 10 2" size="12 6 1" color="V"/>
+  <box at="10 10 8" size="14 8 2" color="W" on="B"/>
+  <box at="10 10 9" size="12 6 1" color="V"/>
+  <box at="10 10 15" size="14 8 2" color="W" on="B"/>
+  <box at="10 10 16" size="12 6 1" color="V"/>
+  <box at="10 10 7" size="10 1 1" color="C"/>
+  <box at="10 10 14" size="10 1 1" color="C"/>
+  <!-- Dove crescono le piante: sopra ogni vasca, sotto il ripiano dopo -->
+  <box at="10 10 3" size="12 6 4" color="v" on="B"/>
+  <box at="10 10 10" size="12 6 4" color="v" on="B"/>
+  <box at="10 10 17" size="12 6 3" color="v" on="B"/>
+  <!-- La quota dello scaffale: una fra 9 e 19; ciò che sta sopra sparisce -->
+  <box at="0 0 9" size="1 1 11" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="k[BWwGCVv]" out="*k"/>
+  <all in="[BWwGCVv] k" out="k *"/>
+  <all in="k" out="B"/>
+  <!-- Le cime dei montanti si accendono -->
+  <all in="B G" out="C *" symmetry="()"/>
+  <all in="C G" out="* g" symmetry="()" steps="1"/>
+  <!-- I germogli nelle vasche, poi steli e foglie -->
+  <prl in="v V" out="s *" p="0.18" symmetry="()" steps="1"/>
+  <prl in="v s" out="s F" p="0.6" symmetry="()" steps="3"/>
+  <one steps="160">
+    <rule in="sv" out="*L"/>
+    <rule in="Lv" out="*L"/>
+    <rule in="v L" out="L *" p="0.4"/>
+  </one>
+  <all in="s" out="L"/>
+  <all in="v" out="B"/>
+  <prl in="BL" out="BM" p="0.05" steps="1"/>
+  <all in="L/B" out="l/*" symmetry="()" steps="1"/>
+  <all in="B W" out="* w" symmetry="()" steps="1"/>
+  <all in="V" out="T"/>
+</sequence>

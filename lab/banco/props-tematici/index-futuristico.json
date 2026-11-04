@@ -1,0 +1,62 @@
+{
+  "futuristico-reattore-fusione": {
+    "classe": "edificio",
+    "nome": "Reattore a fusione",
+    "ambientazione": "futuristico (sidera)",
+    "descrizione": "Una colonna di vetro con il plasma ciano su uno zoccolo di grafite, cinta da anelli di ceramica bianca e da pilastri di raffreddamento magenta. Il seme sceglie l'altezza della colonna, la quota dei due anelli e quali pilastri ci sono e quanto sono alti."
+  },
+  "futuristico-capsula-criogenica": {
+    "classe": "mobile",
+    "nome": "Capsula criogenica",
+    "ambientazione": "futuristico (sidera)",
+    "descrizione": "Un guscio di ceramica bianca con la finestra di ghiaccio ciano acceso, su uno zoccolo di grafite. Il seme sceglie se sta in piedi o distesa, quanto è alta o lunga e quali bombole di raffreddamento ha accanto."
+  },
+  "futuristico-terminale-olografico": {
+    "classe": "mobile",
+    "nome": "Terminale olografico",
+    "ambientazione": "futuristico (sidera)",
+    "descrizione": "Una colonna di grafite con un leggio di ceramica bianca e, sopra, un ologramma ciano e magenta che sale dall'emettitore. Il seme sceglie l'altezza della colonna e la forma dell'ologramma."
+  },
+  "futuristico-drone-cargo": {
+    "classe": "mobile",
+    "nome": "Drone cargo",
+    "ambientazione": "futuristico (sidera)",
+    "descrizione": "Un drone con il corpo di ceramica bianca, quattro bracci di grafite con i rotori ciano accesi e le zampe di atterraggio, a volte con la cassa del carico appesa al cavo. Il seme sceglie quanto sta alto sulle zampe e se porta la cassa."
+  },
+  "futuristico-lampione-plasma": {
+    "classe": "monumento",
+    "nome": "Lampione al plasma",
+    "ambientazione": "futuristico (sidera)",
+    "descrizione": "Un fusto di grafite su uno zoccolo di ceramica bianca, con i bracci che reggono sfere di plasma ciano chiuse nel vetro e una punta magenta. Il seme sceglie l'altezza del fusto, quanti bracci ha (da uno a quattro) e quanto è lungo ciascuno."
+  },
+  "futuristico-torretta-sensoriale": {
+    "classe": "mobile",
+    "nome": "Torretta sensoriale",
+    "ambientazione": "futuristico (sidera)",
+    "descrizione": "Una base di grafite, un collo di ceramica bianca e una testa a cupola con la canna del sensore che finisce in un occhio ciano, con antenne magenta. Il seme sceglie l'altezza del collo, la direzione e la lunghezza della canna e dove spuntano le antenne."
+  },
+  "futuristico-sintetizzatore-materia": {
+    "classe": "mobile",
+    "nome": "Sintetizzatore di materia",
+    "ambientazione": "futuristico (sidera)",
+    "descrizione": "Un banco di ceramica bianca con la piastra di sintesi, quattro colonnine dalle punte ciano e, sopra, l'oggetto che prende forma in cristallo magenta e ciano. Il seme sceglie l'altezza del banco e delle colonnine, la forma dell'oggetto e quali serbatoi ha ai lati."
+  },
+  "futuristico-cristallo-energetico": {
+    "classe": "mobile",
+    "nome": "Cristallo energetico",
+    "ambientazione": "futuristico (sidera)",
+    "descrizione": "Un grappolo di cristalli ciano accesi con le punte magenta, incastonato in una presa di grafite cerchiata di ceramica bianca. Il seme sceglie quanti cristalli nascono, dove, quanto sale ciascuno e da che parte si piega."
+  },
+  "futuristico-portale-teletrasporto": {
+    "classe": "edificio",
+    "nome": "Portale di teletrasporto",
+    "ambientazione": "futuristico (sidera)",
+    "descrizione": "Un anello di ceramica bianca in piedi su una piattaforma di grafite, con la membrana di energia ciano e magenta tesa all'interno e i piloni accesi ai lati. Il seme sceglie la misura dell'anello (tre, i più piccoli su un piedistallo) e quanti piloni ci sono e quanto sono alti."
+  },
+  "futuristico-modulo-idroponico": {
+    "classe": "mobile",
+    "nome": "Modulo botanico idroponico",
+    "ambientazione": "futuristico (sidera)",
+    "descrizione": "Uno scaffale di ceramica bianca e grafite con le vasche di coltura, le barre di luce ciano sotto i ripiani e le piante che crescono, con qualche fiore magenta. Il seme sceglie quanti ripiani ha e come crescono le piante in ogni vasca."
+  }
+}

@@ -1,0 +1,39 @@
+<!-- Cristallo energetico (ambientazione futuristica, sidera): un grappolo di cristalli ciano accesi, con le punte magenta, incastonato in
+     una presa di grafite cerchiata di ceramica bianca. Il seme sceglie quanti cristalli nascono, dove, quanto sale ciascuno e da che
+     parte si piega. -->
+<sequence values="BWwGgCDMVkr" size="20 20 20" symmetry="(xy)" name="Cristallo energetico">
+  <color symbol="W" value="eef1f5" name="ceramica bianca"/>
+  <color symbol="w" value="c3c9d3" name="ceramica in ombra"/>
+  <color symbol="G" value="353a42" name="grafite"/>
+  <color symbol="g" value="565d68" name="grafite chiara"/>
+  <color symbol="C" value="3ee6f5" name="cristallo ciano" glow="True"/>
+  <color symbol="D" value="a8fbff" name="cristallo chiaro" glow="True"/>
+  <color symbol="M" value="ff3ec8" name="punta magenta" glow="True"/>
+  <color symbol="V" hidden="True" name="dove può nascere un cristallo"/>
+  <color symbol="k" hidden="True" name="lanci a vuoto"/>
+  <color symbol="r" hidden="True" name="la punta che cresce"/>
+  <!-- Il dado si scalda: tre lanci a vuoto -->
+  <box at="19 19 17" size="1 1 3" color="k"/>
+  <one in="k" out="B" steps="3"/>
+  <!-- La presa -->
+  <cylinder at="10 10 0" size="13 13 1" color="W"/>
+  <cylinder at="10 10 1" size="10 10 2" color="G"/>
+  <cylinder at="10 10 3" size="8 8 1" color="g"/>
+  <!-- Dove nascono i cristalli: il centro, uno a caso e altri forse -->
+  <cylinder at="10 10 4" size="7 7 1" color="V"/>
+  <box at="10 10 4" size="1 1 1" color="r"/>
+  <one in="V" out="r" steps="1"/>
+  <prl in="V" out="r" p="0.12" steps="1"/>
+  <all in="V" out="B"/>
+  <!-- Le punte salgono, a volte piegando; il grappolo si scopre ogni volta diverso -->
+  <one steps="75">
+    <rule in="B r" out="r C"/>
+    <rule in="B* *r" out="r* *C" p="0.25"/>
+  </one>
+  <all in="r" out="M"/>
+  <all in="M C" out="* M" symmetry="()" steps="1"/>
+  <!-- Ogni cristallo si ispessisce e la sua punta resta stretta -->
+  <all in="BC" out="DC"/>
+  <prl in="D" out="C" p="0.35" steps="1"/>
+  <all in="B W" out="* w" symmetry="()" steps="1"/>
+</sequence>
