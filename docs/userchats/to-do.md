@@ -19,3 +19,5 @@ Per ogni richiesta, facoltativi: `> Provider proposto: Claude Code | Antigravity
 <!-- Pianificate il 31/10/2026 in docs/plans/backlog.md, T97 (testo originale: docs/userchats/to-do-2026-10-31.md, «Il sito»). -->
 
 <!-- Pianificata il 31/10/2026 in docs/plans/backlog.md, T98 (bug del cartone, foto: docs/userchats/image.png). -->
+
+<!-- Pianificate il 04/11/2026 in docs/plans/backlog.md, T230-T240 (testo originale: docs/userchats/to-do-2026-11-04.md: il sito come launcher, fasi e step, beta, lingue, lancio). -->

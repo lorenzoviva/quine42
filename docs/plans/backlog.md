@@ -3478,3 +3478,87 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 - Browser: sì, con `?skip&offline`: Sala del Concilio con dieci gerboa ai loro posti, etichette leggibili, teletrasporti liberi; Direzione con le console di Musicista e Attore; Studio dei Personaggi con l'Attore; Galleria dell'Artista con Artista e Musicista; nessun errore del gioco in console.
 - Quando è fatto: commit su `task/T229`, con Musicista e Attore descritti entrambi in `AGENTS.md` e `docs/architettura-dettagli.md`. Sicurezza: nessuna superficie nuova.
 - Esito: merge di T158 con tutte le aggiunte; dieci al tavolo con posti ruotati di mezzo passo, così uscita e colonna restano libere; `guest` assorbito in `Building.teams` (`persone`: narratore, attore), un solo meccanismo con lo stesso comportamento di T158, voce del glossario tolta; Musicista e Attore descritti in `AGENTS.md` e `docs/architettura-dettagli.md`; test aggiornati e nuovo controllo su uscita e raggiungibilità dei teletrasporti; typecheck, build e suite intera verdi (120 file, 1725 test) sul codice finale. Non provato: Attore acceso con una battuta vera (battute simulate con `council.say`, opzione accesa solo nel test) e i teletrasporti con `E` nel browser (nei test solo quello verso `luoghi`). Sicurezza: nessuna superficie nuova.
+
+## Le fasi, il sito come launcher, la beta e il lancio (to-do del 04/11/2026)
+
+Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
+
+### T230 · Fasi e step: glossario, documento, il pregresso riassegnato — `da fare`
+- Pipeline: claude · stima 2% · approvato · priorità 1
+- Contesto: l'autore introduce due termini (to-do del 04/11, «Fasi dello sviluppo»). **Fase**: I kernel 0.9.0, II beta tester (10 persone), III kernel 1.0.0, IV produzione pubblica con Stripe. **Step**: non più una tappa del piano ma il raggiungimento di un obiettivo condiviso tra task (esempio suo: «step 25: aggiungere il suono al gioco»). La numerazione continua quella dei 9 step fatti. Le fasi possono cambiare in corso d'opera.
+- Cosa fare: voci `Fase` e `Step` in `docs/glossario.md`. Nuovo `docs/fasi.md`: le quattro fasi con ciò che l'autore ne ha detto e il criterio per dire finita ciascuna (per la Fase I proponilo tu, segnato come proposta); una tabella `| step | obiettivo | fase | stato | task |` col pregresso riassegnato agli obiettivi già raggiunti e il lavoro aperto raggruppato negli step da fare, numerati a seguire. Leggi il backlog con `pipeline.mjs indice` e, solo dove serve, i blocchi: non aprire i diari. ADR e riga in `AGENTS.md`. Il backlog non lo tocchi: i tag li mette l'orchestratore, con il comando di T231, dalla tua tabella.
+- Test: typecheck e suite intera con i loro turni (`tools/glossario` se il censimento ne risente; le sue differenze estranee non si committano).
+- Browser: non serve.
+- Quando è fatto: ogni task del backlog sta in una sola riga della tabella; commit su `task/T230`. Sicurezza: nessuna superficie nuova.
+
+### T231 · Il tag `step` nella pipeline — `da fare` (dipende da T230)
+- Pipeline: claude · stima 1% · approvato · priorità 1
+- Contesto: l'autore vuole dire all'orchestratore «priorizza lo step N». La tabella di `docs/fasi.md` dice quali task stanno in ogni step; serve che anche la pipeline lo sappia. Molti task vecchi non hanno la riga `- Pipeline:`: il tag è una riga a parte, `- Step: <n>`.
+- Cosa fare: in `tools/pipeline/pipeline.mjs` il parser di `- Step:`; il campo in `indice`, `dossier` e nella pagina web; `step <n> Txx…` assegna il tag; `step --da-tabella` li mette tutti leggendo `docs/fasi.md`; `step <n>` elenca i task; `step <n> --priorita <p>` porta alla priorità data quelli non finiti. Un task nuovo senza step resta valido. Aggiorna `docs/pipeline/README.md` e `orchestra.md`. Tocchi il backlog solo nei test, su una copia.
+- Test: `tests/` della pipeline; typecheck e suite intera con i loro turni.
+- Browser: non serve; il campo nella pagina web lo provi con il suo test.
+- Quando è fatto: l'orchestratore può lanciare il comando che mette i tag e chiederne la priorità; commit su `task/T231`. Sicurezza: nessuna superficie nuova.
+
+### T232 · Il sito come launcher: proposte della landing col rapporto aureo — `da fare`
+- Pipeline: claude · stima 3% · approvato · priorità 2
+- Contesto: per l'autore la home «sembra a metà tra un pitch per una startup e un blog per fumetti». La vuole come il launcher di un gioco multiplayer moderno: accattivante, «oddly satisfying», «che rimarresti ore a guardarla», con molti rapporti tra dimensioni che rispettano il rapporto aureo. Dossier: `dossier T97`, `dossier T186`. Le proposte del logo sono in `docs/design/logo/proposte/` (file dell'autore: non toccarli, mai `git add` di quella cartella).
+- Cosa fare: 3 proposte in `docs/design/sito/launcher/`, pagine statiche provabili nel browser, che rispettano la CSP (`server/csp.ts`). Griglia e tipografia da φ e Fibonacci, con la tabella dei rapporti usati. Almeno una con al centro un programma MarkovJunior che cresce dal vivo (la crescita è già di suo «oddly satisfying»), con ciò che costa misurato. Posto per: carte e strutture in 3D o video in loop, universi più giocati, notizie. Niente testi che guastino la scoperta della corona. Non cambiare `site/`.
+- Test: nessun codice del gioco: typecheck con il suo turno.
+- Browser: sì, a 1920 e 390 px; catture di ogni proposta nel commit.
+- Quando è fatto: l'autore può aprire e confrontare le tre proposte; commit su `task/T232`. Sicurezza: nessuna superficie nuova.
+
+### T233 · La landing launcher nel sito — `da fare` (dipende da T232)
+- Pipeline: claude · stima 3% · priorità 2
+- Contesto: si approva solo quando l'autore ha scelto una proposta (`dossier T232`).
+- Cosa fare: la proposta scelta in `site/` col tema condiviso, senza framework; le sezioni di showcase e notizie restano nascoste finché non hanno contenuti, niente «coming soon» finti. La striscia «coming soon» degli altri universi resta.
+- Test: typecheck, build e suite intera con i loro turni.
+- Browser: sì, a 1920 e 390 px, in `npm run dev` e sotto `npm run serve`.
+- Quando è fatto: la home è il launcher scelto; commit su `task/T233`. Sicurezza: nessuna superficie nuova, o le voci.
+
+### T234 · Il news-blog del sito — `da fare` (dipende da T233)
+- Pipeline: claude · stima 2% · approvato · priorità 3
+- Contesto: dal rilascio in beta l'autore vuole notizie: aggiornamenti del kernel, creazione di un universo, sessioni di generazione intensa, sondaggi per feedback, link alla pianificazione dell'utilizzo dei server.
+- Cosa fare: notizie come file Markdown in `site/`, trasformate alla build, senza rotte nuove sul server né database; elenco, pagina singola, tag per tipo, le ultime nella landing. Un sondaggio è un link esterno. Una notizia di prova e la guida di due righe per scriverne una.
+- Test: typecheck, build e suite intera con i loro turni; un test sul testo che non diventa HTML eseguibile.
+- Browser: sì, elenco e pagina a 1920 e 390 px.
+- Quando è fatto: l'autore aggiunge un file e la notizia appare; commit su `task/T234`. Sicurezza: nessuna superficie nuova, o le voci.
+
+### T235 · Showcase: carte famose e universi più giocati — `in attesa` (dipende da T233)
+- Contesto: dal to-do del 04/11: carte famose, video in loop di gameplay o delle strutture più «lerpe» in 3D, universi di giocatori più giocati. Ha senso solo con dati veri: riparte alla fine della Fase II, quando lo dice l'autore. Il conteggio delle partite non esiste ancora; una rotta pubblica nuova passa da `gate` e dall'elenco di `server/production.ts`.
+- Domanda per l'autore: nessuna ora; alla ripartenza si riscrive con ciò che la beta ha lasciato.
+
+### T236 · La beta: turni di gioco e crediti in due parti — `in attesa`
+- Contesto: per la Fase II l'autore dà 5 € a ogni tester e genera a sue spese gli universi vanilla; si gioca prenotando il turno; una parte dei crediti per esplorare, l'altra sbloccata da un secondo file che rivela la corona. Oggi con gli account `QUINE_TETTO_RICARICHE` vale 0.
+- Domande per l'autore: in `docs/pipeline/domande/T236.md`.
+
+### T237 · La guida dei beta tester, in due file — `da fare` (dipende da T45f, T236)
+- Pipeline: claude · stima 2% · approvato · priorità 3
+- Contesto: si scrive a fine Fase I, per gli amici dell'autore, non pagati: «non è il classico beta testing noioso». Il primo file: come giocare, come prenotare (anche insieme, senza esagerare con le sessioni a molti), tutte le limitazioni del server di beta con cui ci si potrebbe frustrare. Il secondo file: la corona, e come avere la seconda parte dei crediti, per chi non ha capito come uscire dal tappeto. Il primo non deve guastarla.
+- Cosa fare: `docs/beta/guida.md` e `docs/beta/la-corona.md`, in italiano, dal comportamento vero del server di beta (limiti di `LIMITS`, `FRONT_RATES`, mondi accesi, tetti, modelli locali a crediti finiti), non dai documenti: ciò che non puoi provare lo segni. Tono da amico.
+- Test: nessun codice: typecheck con il suo turno.
+- Browser: sì: segui la guida da viandante nuovo sul server di beta; ogni passo che non torna lo correggi.
+- Quando è fatto: l'autore può spedirla; commit su `task/T237`. Sicurezza: nessuna superficie nuova.
+
+### T238 · Il registro di ciò che il Concilio non riesce a fare — `da fare`
+- Pipeline: claude · stima 2% · priorità 3
+- Contesto: la Fase III parte dalle funzionalità che il Concilio non riesce a implementare durante le sessioni, chieste dai giocatori o nate dal Concilio. Se la beta non le registra, si perdono: va fatto entro la Fase I. Proposta dell'orchestratore sul come: aspetta l'approvazione.
+- Cosa fare: leggi `#concilio` e i punti in cui una richiesta finisce male (Referente, Fucina, azioni libere, validatore che rifiuta anche l'ultimo tentativo, Ingegnere che non ripara). Ognuno scrive una voce (richiesta, chi, agente, motivo, quante volte) in un file di mondo che non va ai client e senza quarta parete nel gioco; un comando che ne fa il rapporto per il kernel 1.0.0.
+- Test: typecheck e suite intera con i loro turni, offline con `MockAiModels`.
+- Browser: non serve.
+- Quando è fatto: una richiesta rifiutata in un test diventa una riga del rapporto; commit su `task/T238`. Sicurezza: il file resta fuori da `playerFiles` e `publicFiles`; scrivi l'esito.
+
+### T239 · Quattro lingue: censimento e progetto — `da fare`
+- Pipeline: claude · stima 2% · priorità 4
+- Contesto: prima della Fase IV il gioco va in italiano, inglese (la versione di punta sui social), francese e spagnolo: le lingue che l'autore può verificare. Oggi UI, prompt e testi di gioco sono in italiano per convenzione. Non è solo tradurre: i contenuti li genera il Concilio, gli universi hanno già una lingua, il multigiocatore può mescolarle, i costi dei modelli cambiano. Il lavoro vero è per la Fase III; ora solo il progetto, se l'autore lo approva.
+- Cosa fare: censimento dei testi (UI, sito, prompt, seme, lessico, canone delle rune, messaggi del kernel), proposta con le alternative in `docs/lingue.md`: lingua per universo o per viandante, cosa si traduce e cosa si genera, come si verifica. Nessun codice. Task spezzati proposti nell'esito.
+- Test: typecheck con il suo turno.
+- Browser: non serve.
+- Quando è fatto: l'autore può decidere; commit su `task/T239`. Sicurezza: nessuna superficie nuova.
+
+### T240 · Il piano di lancio: concorrenti, punti di forza, Boa Loger — `da fare`
+- Pipeline: fable · stima 5% · approvato · priorità 2
+- Contesto: leggi tutto il to-do del 04/11, «Fase IV». L'autore: «ci giochiamo tutte le carte», non ha studi di marketing, vuole le idee migliori e il dissenso dove c'è. Afferma che non esiste niente del genere e chiede se la narrativa generativa sia davvero solo sua: va verificato, non assecondato. Propone: account dedicati, una settimana di spoiler in contemporanea, post finale col link; il personaggio Boa Loger (gerboa, finto anonimato facile da forare, collettivo artistico, interviste animate).
+- Cosa fare: `docs/lancio/piano.md`, con le fonti. (1) Ricerca sul web dei concorrenti, per ogni punto di forza: chi lo fa già, e quanto; cosa resta davvero unico, in una frase difendibile su Hacker News. (2) I punti di forza in ordine, per pubblico (tecnico, giocatori, creatori), compresi quelli che l'autore non ha elencato: il mondo fatto del proprio codice, le rune eseguite, il tappeto e la corona, i modelli come programmi di testo. (3) Giudizio sul piano dell'autore: regole di autopromozione e di account nuovi di Reddit e Hacker News, la pubblicazione simultanea, quali canali mancano e quali togliere; cosa impone il farsi pagare in UE sull'identità pubblica. (4) Boa Loger: cosa tenere e cosa rischia, un personaggio dichiarato contro un finto sviluppatore, voce sintetica, compatibilità con la regola 0 se entra nella narrativa dell'universo. (5) Calendario dal termine della Fase III, narrativa e 3-5 idee migliori della sua, con il costo in tempo per una persona sola. (6) Ciò che il gioco deve avere prima (video, press kit, costi a molti utenti al picco, tetti di spesa). Non creare account e non pubblicare nulla.
+- Test: nessun codice: typecheck con il suo turno.
+- Browser: non serve.
+- Quando è fatto: l'autore può decidere voce per voce; commit su `task/T240`. Sicurezza: nessuna superficie nuova.
