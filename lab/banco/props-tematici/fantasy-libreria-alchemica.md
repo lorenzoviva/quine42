@@ -8,7 +8,7 @@ Uno scaffale di legno con tomi e ampolle luminose. Il seme sceglie la forma (alt
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.496**, minima 0.251, massima 0.666 (soglia 0.15) → passa
-- voxel per seme: 957, 913, 1092, 952, 1151; tempo per seme: 25, 23, 24, 24, 23 ms
+- voxel per seme: 957, 913, 1092, 952, 1151; tempo per seme: 25, 24, 26, 24, 23 ms
 - avvisi: tocca i bordi laterali della griglia: forse è tagliato; colori mai usati: g
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 45 nodi, 55 passi, finito in 27 ms.
+Traccia, seme 1: griglia 20×20×20, 45 nodi, 55 passi, finito in 30 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: D=legno scuro, W=legno, p=ripiano, K=cornice intagliata, Y=tomo rosso, y=tomo blu, Q=tomo verde, G=ampolla luminosa, C=candela, F=fiamma, V=lo spazio (marcatore), a=alta e stretta (marcatore), b=larga e bassa (marcatore).
 Alla fine: D 228, p 192, W 144, Y 144, K 95, y 70, Q 69, G 11, C 2, F 2.
@@ -53,7 +53,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 45 nodi, 71 passi, finito in 26 ms.
+Traccia, seme 2: griglia 20×20×20, 45 nodi, 71 passi, finito in 34 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: D=legno scuro, W=legno, p=ripiano, K=cornice intagliata, Y=tomo rosso, y=tomo blu, Q=tomo verde, G=ampolla luminosa, C=candela, F=fiamma, V=lo spazio (marcatore), a=alta e stretta (marcatore), b=larga e bassa (marcatore).
 Alla fine: D 228, p 192, Y 146, W 144, K 95, y 49, Q 41, G 16, C 1, F 1.
@@ -81,7 +81,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 45 nodi, 78 passi, finito in 26 ms.
+Traccia, seme 3: griglia 20×20×20, 45 nodi, 78 passi, finito in 27 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: D=legno scuro, W=legno, p=ripiano, K=cornice intagliata, Y=tomo rosso, y=tomo blu, Q=tomo verde, G=ampolla luminosa, g=elisir viola, C=candela, F=fiamma, V=lo spazio (marcatore), a=alta e stretta (marcatore), o=media con il banco (marcatore).
 Alla fine: p 231, D 225, Y 188, W 140, K 119, y 83, Q 50, G 29, g 19, C 4, F 4.

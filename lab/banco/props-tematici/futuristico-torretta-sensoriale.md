@@ -8,7 +8,7 @@ Una base di grafite, un collo di ceramica bianca e una testa a cupola con la can
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.395**, minima 0.163, massima 0.538 (soglia 0.15) → passa
-- voxel per seme: 233, 255, 255, 253, 250; tempo per seme: 4, 4, 6, 5, 5 ms
+- voxel per seme: 233, 255, 255, 253, 250; tempo per seme: 5, 4, 5, 4, 5 ms
 - avvisi: colori mai usati: W
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 28 nodi, 78 passi, finito in 6 ms.
+Traccia, seme 1: griglia 20×20×20, 28 nodi, 78 passi, finito in 5 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: w=ceramica in ombra, G=grafite, g=grafite chiara, C=occhio ciano, M=luce magenta, V=vetro, h=quote possibili (marcatore), k=la quota scelta (marcatore), r=il collo che sale (marcatore), P=collo, a=dove può guardare la canna (marcatore), A=la canna che si allunga (marcatore), H=cupola, n=dove può stare un'antenna (marcatore).
 Alla fine: w 77, G 74, H 41, g 31, P 6, V 2, C 1, M 1.
@@ -63,7 +63,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 28 nodi, 79 passi, finito in 5 ms.
+Traccia, seme 3: griglia 20×20×20, 28 nodi, 79 passi, finito in 4 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: w=ceramica in ombra, G=grafite, g=grafite chiara, C=occhio ciano, M=luce magenta, V=vetro, h=quote possibili (marcatore), k=la quota scelta (marcatore), r=il collo che sale (marcatore), P=collo, a=dove può guardare la canna (marcatore), A=la canna che si allunga (marcatore), H=cupola, n=dove può stare un'antenna (marcatore).
 Alla fine: w 77, G 74, g 48, H 41, P 7, M 5, V 2, C 1.

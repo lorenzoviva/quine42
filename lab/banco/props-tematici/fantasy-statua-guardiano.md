@@ -8,7 +8,7 @@ Un guerriero di pietra in armatura su un piedistallo, con occhi e rune luminose.
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.261**, minima 0.111, massima 0.394 (soglia 0.15) → passa
-- voxel per seme: 4239, 3018, 3102, 3541, 3792; tempo per seme: 160, 161, 160, 162, 163 ms
+- voxel per seme: 4239, 3018, 3102, 3541, 3792; tempo per seme: 158, 155, 155, 155, 154 ms
 - avvisi: tocca i bordi laterali della griglia: forse è tagliato; colori mai usati: C
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×60, 72 nodi, 100 passi, finito in 175 ms.
+Traccia, seme 1: griglia 20×20×60, 72 nodi, 100 passi, finito in 169 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: S=pietra, d=pietra scura, G=pietra della statua, g=pietra in ombra, R=runa luminosa, M=ferro, m=muschio, V=spazio del piedistallo (marcatore), H=spazio della testa (marcatore), L=spazio della sinistra (marcatore), P=spazio della destra (marcatore), a=piedistallo a gradoni (marcatore), h=cappuccio (marcatore), j=spada piantata (marcatore), u=braccio lungo il fianco (marcatore), v=per mescolare il caso (marcatore).
 Alla fine: d 1542, S 934, G 824, g 818, R 82, m 29, M 10.
@@ -52,7 +52,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×60, 72 nodi, 102 passi, finito in 181 ms.
+Traccia, seme 2: griglia 20×20×60, 72 nodi, 102 passi, finito in 169 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: S=pietra, d=pietra scura, G=pietra della statua, g=pietra in ombra, R=runa luminosa, M=ferro, m=muschio, V=spazio del piedistallo (marcatore), H=spazio della testa (marcatore), L=spazio della sinistra (marcatore), P=spazio della destra (marcatore), o=plinto con le rune (marcatore), c=elmo cornuto (marcatore), k=martello levato (marcatore), u=braccio lungo il fianco (marcatore), v=per mescolare il caso (marcatore).
 Alla fine: S 1372, G 841, g 598, M 84, R 82, m 23, d 18.
@@ -78,7 +78,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×60, 72 nodi, 111 passi, finito in 172 ms.
+Traccia, seme 3: griglia 20×20×60, 72 nodi, 111 passi, finito in 157 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: S=pietra, d=pietra scura, G=pietra della statua, g=pietra in ombra, R=runa luminosa, C=cristallo arcano, M=ferro, m=muschio, V=spazio del piedistallo (marcatore), H=spazio della testa (marcatore), L=spazio della sinistra (marcatore), P=spazio della destra (marcatore), o=plinto con le rune (marcatore), e=corona (marcatore), k=martello levato (marcatore), t=sfera alzata (marcatore), v=per mescolare il caso (marcatore).
 Alla fine: S 1372, G 823, g 619, M 84, R 82, C 82, m 22, d 18.

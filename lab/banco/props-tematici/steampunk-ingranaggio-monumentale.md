@@ -8,7 +8,7 @@ Una grande ruota dentata d'ottone con raggi e mozzo di ghisa, ritta su un pilast
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.400**, minima 0.019, massima 0.654 (soglia 0.15) → passa
-- voxel per seme: 1610, 1772, 1602, 1762, 1606; tempo per seme: 6, 7, 6, 6, 6 ms
+- voxel per seme: 1610, 1772, 1602, 1762, 1606; tempo per seme: 9, 8, 7, 7, 6 ms
 - avvisi: tocca i bordi laterali della griglia: forse è tagliato
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×60, 68 nodi, 105 passi, finito in 7 ms.
+Traccia, seme 1: griglia 20×20×60, 68 nodi, 105 passi, finito in 8 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: G=ghisa dello zoccolo, O=ottone, D=ghisa, L=ottone lucido, a=ruota dietro (marcatore), b=pilastro dietro (marcatore), c=ruota al centro (marcatore), d=pilastro al centro (marcatore), e=ruota davanti (marcatore), f=pilastro davanti (marcatore), p=dado dietro (marcatore), q=dado al centro (marcatore), u=dado davanti (marcatore), S=la scelta (marcatore), X=ottone scelto (marcatore), Y=ghisa scelta (marcatore), r=ribattino possibile (marcatore).
 Alla fine: G 867, O 525, D 162, L 56.
@@ -42,7 +42,7 @@ Alla fine: G 867, O 525, D 162, L 56.
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×60, 68 nodi, 123 passi, finito in 7 ms.
+Traccia, seme 2: griglia 20×20×60, 68 nodi, 123 passi, finito in 8 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: G=ghisa dello zoccolo, O=ottone, D=ghisa, L=ottone lucido, a=ruota dietro (marcatore), b=pilastro dietro (marcatore), c=ruota al centro (marcatore), d=pilastro al centro (marcatore), e=ruota davanti (marcatore), f=pilastro davanti (marcatore), p=dado dietro (marcatore), q=dado al centro (marcatore), u=dado davanti (marcatore), S=la scelta (marcatore), X=ottone scelto (marcatore), Y=ghisa scelta (marcatore), r=ribattino possibile (marcatore).
 Alla fine: G 867, O 521, D 324, L 60.
@@ -59,7 +59,7 @@ Alla fine: G 867, O 521, D 324, L 60.
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×60, 68 nodi, 105 passi, finito in 11 ms.
+Traccia, seme 3: griglia 20×20×60, 68 nodi, 105 passi, finito in 8 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: G=ghisa dello zoccolo, O=ottone, D=ghisa, L=ottone lucido, a=ruota dietro (marcatore), b=pilastro dietro (marcatore), c=ruota al centro (marcatore), d=pilastro al centro (marcatore), e=ruota davanti (marcatore), f=pilastro davanti (marcatore), p=dado dietro (marcatore), q=dado al centro (marcatore), u=dado davanti (marcatore), S=la scelta (marcatore), X=ottone scelto (marcatore), Y=ghisa scelta (marcatore), r=ribattino possibile (marcatore).
 Alla fine: G 867, O 522, D 162, L 51.

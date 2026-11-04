@@ -8,7 +8,7 @@ Un guscio di ceramica bianca con la finestra di ghiaccio ciano acceso, su uno zo
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.369**, minima 0.304, massima 0.543 (soglia 0.15) → passa
-- voxel per seme: 710, 1144, 858, 825, 549; tempo per seme: 24, 15, 14, 16, 16 ms
+- voxel per seme: 710, 1144, 858, 825, 549; tempo per seme: 17, 13, 14, 15, 17 ms
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -24,7 +24,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 53 nodi, 259 passi, finito in 22 ms.
+Traccia, seme 1: griglia 20×20×20, 53 nodi, 259 passi, finito in 18 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=ceramica bianca, w=ceramica in ombra, G=grafite, g=grafite chiara, C=ghiaccio ciano, M=spia magenta, V=vetro, a=la capsula in piedi (marcatore), b=la capsula distesa (marcatore), c=dove le due si sovrappongono (marcatore), x=segno della capsula in piedi (marcatore), y=segno della capsula distesa (marcatore), Y=la capsula distesa scelta (marcatore), h=quote possibili (marcatore), k=la quota scelta (marcatore), p=dove può stare una bombola (marcatore), q=una bombola (marcatore).
 Alla fine: W 314, G 145, g 105, C 76, w 50, V 16, M 4.
@@ -43,7 +43,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 53 nodi, 242 passi, finito in 16 ms.
+Traccia, seme 2: griglia 20×20×20, 53 nodi, 242 passi, finito in 12 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=ceramica bianca, w=ceramica in ombra, G=grafite, g=grafite chiara, C=ghiaccio ciano, M=spia magenta, V=vetro, a=la capsula in piedi (marcatore), b=la capsula distesa (marcatore), c=dove le due si sovrappongono (marcatore), x=segno della capsula in piedi (marcatore), y=segno della capsula distesa (marcatore), Y=la capsula distesa scelta (marcatore), h=quote possibili (marcatore), k=la quota scelta (marcatore), p=dove può stare una bombola (marcatore), q=una bombola (marcatore).
 Alla fine: W 688, G 128, w 118, C 100, g 88, V 20, M 2.
@@ -61,7 +61,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 53 nodi, 249 passi, finito in 18 ms.
+Traccia, seme 3: griglia 20×20×20, 53 nodi, 249 passi, finito in 15 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=ceramica bianca, w=ceramica in ombra, G=grafite, g=grafite chiara, C=ghiaccio ciano, M=spia magenta, V=vetro, a=la capsula in piedi (marcatore), b=la capsula distesa (marcatore), c=dove le due si sovrappongono (marcatore), x=segno della capsula in piedi (marcatore), y=segno della capsula distesa (marcatore), Y=la capsula distesa scelta (marcatore), h=quote possibili (marcatore), k=la quota scelta (marcatore), p=dove può stare una bombola (marcatore), q=una bombola (marcatore).
 Alla fine: W 441, G 131, g 91, w 91, C 80, V 20, M 4.

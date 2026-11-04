@@ -8,7 +8,7 @@ Una forca di legno da cui pende, a una catena, una gabbia di ferro con una fiamm
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.566**, minima 0.085, massima 0.696 (soglia 0.15) → passa
-- voxel per seme: 1150, 906, 869, 999, 1020; tempo per seme: 134, 137, 137, 159, 135 ms
+- voxel per seme: 1150, 906, 869, 999, 1020; tempo per seme: 148, 128, 128, 129, 133 ms
 - avvisi: colori mai usati: d; colori mai usati: S d; tocca il soffitto della griglia: forse è tagliato in alto
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×60, 82 nodi, 108 passi, finito in 149 ms.
+Traccia, seme 1: griglia 20×20×60, 82 nodi, 108 passi, finito in 147 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=legno, w=legno scuro, I=ferro battuto, i=catena, S=pietra, d=pietra scura, K=corvo, F=fiammella prigioniera, J=ferro della gabbia in lavorazione (marcatore), v=per mescolare il caso (marcatore), V=spazio della forca (marcatore), U=spazio della base (marcatore), a=braccio a 52, gabbia tonda (marcatore), q=mucchio di sassi (marcatore).
 Alla fine: W 519, I 436, S 127, w 20, F 19, i 13, d 11, K 5.
@@ -52,7 +52,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×60, 82 nodi, 94 passi, finito in 144 ms.
+Traccia, seme 2: griglia 20×20×60, 82 nodi, 94 passi, finito in 147 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=legno, w=legno scuro, I=ferro battuto, i=catena, S=pietra, K=corvo, F=fiammella prigioniera, J=ferro della gabbia in lavorazione (marcatore), v=per mescolare il caso (marcatore), V=spazio della forca (marcatore), U=spazio della base (marcatore), g=braccio a 42, gabbia alta e stretta (marcatore), e=base di pietra (marcatore).
 Alla fine: W 429, I 302, S 126, w 20, F 19, i 9, K 1.
@@ -79,7 +79,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×60, 82 nodi, 115 passi, finito in 143 ms.
+Traccia, seme 3: griglia 20×20×60, 82 nodi, 115 passi, finito in 144 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=legno, w=legno scuro, I=ferro battuto, i=catena, K=corvo, F=fiammella prigioniera, J=ferro della gabbia in lavorazione (marcatore), v=per mescolare il caso (marcatore), V=spazio della forca (marcatore), U=spazio della base (marcatore), g=braccio a 42, gabbia alta e stretta (marcatore), p=travi incrociate (marcatore).
 Alla fine: W 429, I 302, w 107, F 19, i 9, K 3.

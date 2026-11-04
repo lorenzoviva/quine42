@@ -8,7 +8,7 @@ Un cilindro di ghisa cerchiato d'ottone con il bilanciere e la bocca che versa, 
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.251**, minima 0.083, massima 0.364 (soglia 0.15) → passa
-- voxel per seme: 466, 507, 503, 679, 607; tempo per seme: 8, 7, 7, 8, 8 ms
+- voxel per seme: 466, 507, 503, 679, 607; tempo per seme: 8, 9, 8, 7, 9 ms
 - avvisi: colori mai usati: W Q; colori mai usati: Q
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 34 nodi, 83 passi, finito in 8 ms.
+Traccia, seme 1: griglia 20×20×20, 34 nodi, 83 passi, finito in 9 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: G=piastra di ghisa, E=ghisa, O=ottone, C=rame, D=legno scuro, A=spia ambrata, Q=ghisa dell'asse, h=altezze possibili (marcatore), k=la quota scelta (marcatore), s=la cima (marcatore), u=il trogolo possibile (marcatore), v=l'acqua possibile (marcatore), m=il dado del trogolo (marcatore), Y=trogolo no (marcatore), t=il tubo (marcatore), V=dove può uscire il tubo (marcatore).
 Alla fine: E 290, O 88, G 72, C 12, D 3, A 1.
@@ -65,7 +65,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 34 nodi, 82 passi, finito in 8 ms.
+Traccia, seme 3: griglia 20×20×20, 34 nodi, 82 passi, finito in 10 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: G=piastra di ghisa, E=ghisa, O=ottone, C=rame, D=legno scuro, A=spia ambrata, Q=ghisa dell'asse, h=altezze possibili (marcatore), k=la quota scelta (marcatore), s=la cima (marcatore), u=il trogolo possibile (marcatore), v=l'acqua possibile (marcatore), m=il dado del trogolo (marcatore), Y=trogolo no (marcatore), t=il tubo (marcatore), V=dove può uscire il tubo (marcatore).
 Alla fine: E 326, O 89, G 72, C 12, D 3, A 1.

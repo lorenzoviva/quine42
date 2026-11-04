@@ -8,7 +8,7 @@ Un banco di ceramica bianca con la piastra di sintesi, quattro colonnine dalle p
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.273**, minima 0.028, massima 0.458 (soglia 0.15) → passa
-- voxel per seme: 1769, 1430, 985, 968, 1420; tempo per seme: 6, 7, 7, 10, 7 ms
+- voxel per seme: 1769, 1430, 985, 968, 1420; tempo per seme: 6, 7, 7, 8, 8 ms
 - avvisi: tocca il soffitto della griglia: forse è tagliato in alto; tocca i bordi laterali della griglia: forse è tagliato
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 38 nodi, 109 passi, finito in 7 ms.
+Traccia, seme 1: griglia 20×20×20, 38 nodi, 109 passi, finito in 8 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=ceramica bianca, w=ceramica in ombra, G=grafite, g=grafite chiara, C=luce ciano, M=materia magenta, V=vetro, h=quote possibili (marcatore), k=la quota scelta (marcatore), c=il centro del banco (marcatore), e=l'emettitore (marcatore), x=piastra di sintesi, X=la piastra che si allarga (marcatore), p=una colonnina che sale (marcatore), o=l'oggetto che prende forma (marcatore), q=dove può stare un serbatoio (marcatore), t=un serbatoio (marcatore).
 Alla fine: W 1429, G 165, g 65, w 52, x 21, M 18, C 12, V 7.
@@ -44,7 +44,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 38 nodi, 115 passi, finito in 10 ms.
+Traccia, seme 2: griglia 20×20×20, 38 nodi, 115 passi, finito in 8 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=ceramica bianca, w=ceramica in ombra, G=grafite, g=grafite chiara, C=luce ciano, M=materia magenta, V=vetro, h=quote possibili (marcatore), k=la quota scelta (marcatore), c=il centro del banco (marcatore), e=l'emettitore (marcatore), x=piastra di sintesi, X=la piastra che si allarga (marcatore), p=una colonnina che sale (marcatore), o=l'oggetto che prende forma (marcatore), q=dove può stare un serbatoio (marcatore), t=un serbatoio (marcatore).
 Alla fine: W 1078, G 165, g 77, w 52, x 21, M 17, C 13, V 7.

@@ -8,7 +8,7 @@ Un grande cristallo viola luminoso piantato nella pietra, con schegge storte att
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.483**, minima 0.107, massima 0.734 (soglia 0.15) → passa
-- voxel per seme: 1004, 1001, 1096, 1000, 1092; tempo per seme: 31, 30, 27, 29, 27 ms
+- voxel per seme: 1004, 1001, 1096, 1000, 1092; tempo per seme: 25, 24, 24, 22, 24 ms
 - avvisi: tocca il soffitto della griglia: forse è tagliato in alto; tocca i bordi laterali della griglia: forse è tagliato; colori mai usati: R
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 30 nodi, 101 passi, finito in 29 ms.
+Traccia, seme 1: griglia 20×20×20, 30 nodi, 101 passi, finito in 27 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: S=pietra, d=pietra scura, R=runa luminosa, C=cristallo arcano, K=cristallo in ombra, W=cuore del cristallo, x=l'asse del cristallo (marcatore), k=la quota scelta (marcatore), h=quote possibili (marcatore), s=punta di una scheggia (marcatore), V=lo spazio (marcatore), v=per mescolare il caso (marcatore), b=piedistallo a gradini (marcatore).
 Alla fine: d 548, S 323, K 45, R 40, W 25, C 23.
@@ -46,7 +46,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 30 nodi, 117 passi, finito in 29 ms.
+Traccia, seme 2: griglia 20×20×20, 30 nodi, 117 passi, finito in 26 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: S=pietra, d=pietra scura, R=runa luminosa, C=cristallo arcano, K=cristallo in ombra, W=cuore del cristallo, x=l'asse del cristallo (marcatore), k=la quota scelta (marcatore), h=quote possibili (marcatore), s=punta di una scheggia (marcatore), V=lo spazio (marcatore), v=per mescolare il caso (marcatore), b=piedistallo a gradini (marcatore).
 Alla fine: d 548, S 323, K 45, R 40, C 25, W 20.
@@ -67,7 +67,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 30 nodi, 114 passi, finito in 32 ms.
+Traccia, seme 3: griglia 20×20×20, 30 nodi, 114 passi, finito in 27 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: S=pietra, d=pietra scura, C=cristallo arcano, K=cristallo in ombra, W=cuore del cristallo, x=l'asse del cristallo (marcatore), k=la quota scelta (marcatore), h=quote possibili (marcatore), s=punta di una scheggia (marcatore), V=lo spazio (marcatore), v=per mescolare il caso (marcatore), o=masso alto (marcatore).
 Alla fine: S 959, d 60, K 45, C 26, W 6.

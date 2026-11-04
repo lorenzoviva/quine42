@@ -1,0 +1,62 @@
+{
+  "moderno-semaforo": {
+    "classe": "monumento",
+    "nome": "Semaforo stradale",
+    "ambientazione": "moderno (neapolis)",
+    "descrizione": "Un palo d'acciaio con la lanterna a tre luci sul davanti. Il seme sceglie la quota della lanterna, cosa porta il retro del palo (pedoni, seconda lanterna o cartello), a che altezza sta la cassetta dei cavi e quale luce è accesa."
+  },
+  "moderno-cabina": {
+    "classe": "mobile",
+    "nome": "Cabina telefonica o chiosco",
+    "ambientazione": "moderno (neapolis)",
+    "descrizione": "La cabina di vetro col telefono o il chiosco dei giornali con la tettoia a righe. Il seme sceglie quale dei due, che cosa le sta accanto (cestino, pacchi di giornali o niente), se la cornetta è appesa o penzola e quante riviste sono in vetrina."
+  },
+  "moderno-distributore": {
+    "classe": "mobile",
+    "nome": "Distributore automatico",
+    "ambientazione": "moderno (neapolis)",
+    "descrizione": "I distributori di bibite e snack con la vetrina, la pulsantiera e lo schermo. Il seme sceglie come sono messi (uno al centro, due affiancati di altezze diverse, uno con i bidoni accanto), se in cima c'è l'insegna luminosa e quali scomparti sono pieni."
+  },
+  "moderno-panchina": {
+    "classe": "monumento",
+    "nome": "Panchina con lampione",
+    "ambientazione": "moderno (neapolis)",
+    "descrizione": "Una panchina a doghe sui piedi di ghisa con il lampione d'acciaio a un capo. Il seme sceglie a quale capo sta il lampione, se è a pastorale con la lanterna o a doppio braccio con due globi, e se la panchina ha lo schienale, la fioriera dietro o è semplice. Una borsa dimenticata sta sulla seduta in un punto scelto."
+  },
+  "moderno-cassonetto": {
+    "classe": "mobile",
+    "nome": "Cassonetto e differenziata",
+    "ambientazione": "moderno (neapolis)",
+    "descrizione": "L'isola dei rifiuti su una platea di cemento. Il seme sceglie se c'è il cassonetto verde con le ruote, i tre bidoni colorati della differenziata o la campana del vetro con un bidoncino, che cosa è stato lasciato lì (sacchi neri, scatoloni o niente) e dove è rimasta una lattina."
+  },
+  "moderno-automobile": {
+    "classe": "edificio",
+    "nome": "Automobile compatta",
+    "ambientazione": "moderno (neapolis)",
+    "descrizione": "Una macchina di città con ruote, fari, paraurti e vetri. Il seme sceglie se è l'utilitaria, il furgoncino o il pickup con le casse nel cassone, e che cosa porta sul tetto (portapacchi con la valigia, insegna del taxi o baule)."
+  },
+  "moderno-scrivania": {
+    "classe": "mobile",
+    "nome": "Scrivania con terminale",
+    "ambientazione": "moderno (neapolis)",
+    "descrizione": "Una scrivania d'ufficio con il computer. Il seme sceglie le gambe o la cassettiera (a destra, o a sinistra con il pannello sul retro), che cosa c'è sopra (il terminale a tubo, due schermi piatti col computer sotto, o il portatile con la lampada e le carte) e dove è rimasta la tazza."
+  },
+  "moderno-scaffale": {
+    "classe": "mobile",
+    "nome": "Scaffale industriale",
+    "ambientazione": "moderno (neapolis)",
+    "descrizione": "Lo scaffale di un magazzino con i montanti blu, le traverse arancio e i ripiani di lamiera, carico di scatoloni. Il seme sceglie se ha una campata o due, quanti ripiani ha (due, tre o quattro) e dove stanno gli scatoloni."
+  },
+  "moderno-antenna": {
+    "classe": "monumento",
+    "nome": "Antenna ripetitore",
+    "ambientazione": "moderno (neapolis)",
+    "descrizione": "Il traliccio d'acciaio dei ripetitori con anelli, diagonali, ballatoio, parafulmine e luce rossa. Il seme sceglie a che quota finisce (tre altezze), che cosa porta (due parabole, tre pannelli o la cabina degli apparati ai piedi) e dove sta la luce di metà torre."
+  },
+  "moderno-generatore": {
+    "classe": "mobile",
+    "nome": "Generatore diesel",
+    "ambientazione": "moderno (neapolis)",
+    "descrizione": "Il gruppo elettrogeno dei cantieri con il quadro comandi e lo scarico. Il seme sceglie se è cofanato giallo, a telaio aperto col motore in vista o arancio su un carrello con le ruote, che cosa gli sta accanto (serbatoio, due taniche o niente) e dove è appoggiata la cassetta degli attrezzi."
+  }
+}

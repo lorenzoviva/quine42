@@ -8,7 +8,7 @@ Una colonna di vetro con il plasma ciano su uno zoccolo di grafite, cinta da ane
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.246**, minima 0.121, massima 0.330 (soglia 0.15) → passa
-- voxel per seme: 10452, 10742, 11412, 11644, 10824; tempo per seme: 117, 121, 140, 103, 111 ms
+- voxel per seme: 10452, 10742, 11412, 11644, 10824; tempo per seme: 138, 112, 142, 150, 111 ms
 - avvisi: tocca il soffitto della griglia: forse è tagliato in alto
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 50×50×50, 50 nodi, 394 passi, finito in 124 ms.
+Traccia, seme 1: griglia 50×50×50, 50 nodi, 394 passi, finito in 125 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=ceramica bianca, w=ceramica in ombra, G=grafite, g=grafite chiara, C=plasma ciano, M=luce magenta, V=vetro, h=altezze possibili (marcatore), k=la quota scelta (marcatore), K=l'anello scelto (marcatore), a=dove può stare un anello (marcatore), P=tubo di raffreddamento, p=dove può stare un pilastro (marcatore), q=quanto sale un pilastro (marcatore).
 Alla fine: G 2767, C 2484, W 2263, g 1034, V 836, w 831, P 188, M 49.
@@ -44,7 +44,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 50×50×50, 50 nodi, 391 passi, finito in 134 ms.
+Traccia, seme 2: griglia 50×50×50, 50 nodi, 391 passi, finito in 117 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=ceramica bianca, w=ceramica in ombra, G=grafite, g=grafite chiara, C=plasma ciano, M=luce magenta, V=vetro, h=altezze possibili (marcatore), k=la quota scelta (marcatore), K=l'anello scelto (marcatore), a=dove può stare un anello (marcatore), P=tubo di raffreddamento, p=dove può stare un pilastro (marcatore), q=quanto sale un pilastro (marcatore).
 Alla fine: G 2775, C 2622, W 2433, g 1034, V 836, w 805, P 188, M 49.
@@ -63,7 +63,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 50×50×50, 50 nodi, 394 passi, finito in 119 ms.
+Traccia, seme 3: griglia 50×50×50, 50 nodi, 394 passi, finito in 210 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=ceramica bianca, w=ceramica in ombra, G=grafite, g=grafite chiara, C=plasma ciano, M=luce magenta, V=vetro, h=altezze possibili (marcatore), k=la quota scelta (marcatore), K=l'anello scelto (marcatore), a=dove può stare un anello (marcatore), P=tubo di raffreddamento, p=dove può stare un pilastro (marcatore), q=quanto sale un pilastro (marcatore).
 Alla fine: W 3151, G 2771, C 2553, g 1034, V 836, w 831, P 188, M 48.

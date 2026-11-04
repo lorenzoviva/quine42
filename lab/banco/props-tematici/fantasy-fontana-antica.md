@@ -8,7 +8,7 @@ Una vasca di pietra colma d'acqua con una colonna al centro da cui l'acqua ricad
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.407**, minima 0.233, massima 0.541 (soglia 0.15) → passa
-- voxel per seme: 6238, 4926, 7156, 6772, 6272; tempo per seme: 870, 837, 876, 870, 875 ms
+- voxel per seme: 6238, 4926, 7156, 6772, 6272; tempo per seme: 877, 880, 878, 863, 909 ms
 - avvisi: tocca i bordi laterali della griglia: forse è tagliato; colori mai usati: C; colori mai usati: L
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 50×50×50, 79 nodi, 132 passi, finito in 924 ms.
+Traccia, seme 1: griglia 50×50×50, 79 nodi, 132 passi, finito in 993 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: S=pietra, d=pietra scura, G=marmo antico, A=acqua, a=rivolo, M=muschio, L=anfora di rame, v=per mescolare il caso (marcatore), V=spazio della vasca (marcatore), U=spazio della colonna (marcatore), T=spazio della cima (marcatore), e=vasca a quadrifoglio (marcatore), f=una grande coppa (marcatore), r=cima: fanciulla (marcatore).
 Alla fine: G 2042, S 1880, A 1412, d 779, a 68, M 37, L 20.
@@ -52,7 +52,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 50×50×50, 79 nodi, 139 passi, finito in 960 ms.
+Traccia, seme 2: griglia 50×50×50, 79 nodi, 139 passi, finito in 931 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: S=pietra, d=pietra scura, G=marmo antico, A=acqua, a=rivolo, M=muschio, C=cristallo arcano, v=per mescolare il caso (marcatore), V=spazio della vasca (marcatore), U=spazio della colonna (marcatore), T=spazio della cima (marcatore), b=vasca tonda (marcatore), e=vasca a quadrifoglio (marcatore), p=quattro bocche (marcatore), q=cima: cristallo (marcatore).
 Alla fine: S 1264, A 1192, d 947, G 851, C 335, a 316, M 21.
@@ -79,7 +79,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 50×50×50, 79 nodi, 144 passi, finito in 995 ms.
+Traccia, seme 3: griglia 50×50×50, 79 nodi, 144 passi, finito in 929 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: S=pietra, d=pietra scura, G=marmo antico, A=acqua, a=rivolo, M=muschio, L=anfora di rame, v=per mescolare il caso (marcatore), V=spazio della vasca (marcatore), U=spazio della colonna (marcatore), T=spazio della cima (marcatore), c=vasca quadrata (marcatore), e=vasca a quadrifoglio (marcatore), g=due coppe (marcatore), r=cima: fanciulla (marcatore).
 Alla fine: G 2578, S 1792, A 1768, d 887, a 84, M 27, L 20.

@@ -8,7 +8,7 @@ Un grappolo di cristalli ciano accesi con le punte magenta, incastonato in una p
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.476**, minima 0.447, massima 0.508 (soglia 0.15) → passa
-- voxel per seme: 558, 591, 654, 638, 649; tempo per seme: 2, 2, 3, 2, 3 ms
+- voxel per seme: 558, 591, 654, 638, 649; tempo per seme: 1, 1, 2, 3, 2 ms
 - avvisi: tocca il soffitto della griglia: forse è tagliato in alto
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 17 nodi, 80 passi, finito in 3 ms.
+Traccia, seme 1: griglia 20×20×20, 17 nodi, 80 passi, finito in 2 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=ceramica bianca, w=ceramica in ombra, G=grafite, g=grafite chiara, C=cristallo ciano, D=cristallo chiaro, M=punta magenta, V=dove può nascere un cristallo (marcatore), k=lanci a vuoto (marcatore), r=la punta che cresce (marcatore).
 Alla fine: G 138, C 124, D 109, W 69, w 68, g 45, M 5.

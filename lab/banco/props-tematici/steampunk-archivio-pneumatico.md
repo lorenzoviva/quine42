@@ -8,7 +8,7 @@ Uno schedario di legno scuro a cassetti con maniglie d'ottone, da cui salgono tu
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.276**, minima 0.152, massima 0.413 (soglia 0.15) → passa
-- voxel per seme: 1230, 1049, 939, 1526, 1126; tempo per seme: 8, 14, 17, 12, 8 ms
+- voxel per seme: 1230, 1049, 939, 1526, 1126; tempo per seme: 8, 9, 7, 6, 8 ms
 - avvisi: tocca il soffitto della griglia: forse è tagliato in alto
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |

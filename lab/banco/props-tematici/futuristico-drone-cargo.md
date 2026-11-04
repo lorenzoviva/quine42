@@ -8,7 +8,7 @@ Un drone con il corpo di ceramica bianca, quattro bracci di grafite con i rotori
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.362**, minima 0.007, massima 0.638 (soglia 0.15) → passa
-- voxel per seme: 711, 603, 607, 463, 602; tempo per seme: 10, 11, 12, 13, 23 ms
+- voxel per seme: 711, 603, 607, 463, 602; tempo per seme: 9, 9, 9, 10, 9 ms
 - avvisi: tocca i bordi laterali della griglia: forse è tagliato; colori mai usati: q; tocca il soffitto della griglia: forse è tagliato in alto; colori mai usati: g q
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 54 nodi, 114 passi, finito in 12 ms.
+Traccia, seme 1: griglia 20×20×20, 54 nodi, 114 passi, finito in 8 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=ceramica bianca, w=ceramica in ombra, G=grafite, g=grafite chiara, C=rotore ciano, M=luce magenta, V=vetro del sensore, a=dove può stare il corpo (marcatore), b=dove possono stare i bracci (marcatore), o=dove possono stare i rotori (marcatore), l=dove possono stare le zampe (marcatore), h=quote possibili (marcatore), k=la quota scelta (marcatore), K=il corpo (marcatore), L=i bracci (marcatore), O=i rotori (marcatore), P=zampa, r=il cavo che sale (marcatore), c=dove può stare la cassa (marcatore), q=cassa, x=la faccia del dado senza cassa (marcatore), R=la faccia del dado con la cassa (marcatore).
 Alla fine: W 170, C 168, q 96, G 86, V 67, w 61, P 44, M 11, g 8.
@@ -43,7 +43,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 54 nodi, 92 passi, finito in 10 ms.
+Traccia, seme 2: griglia 20×20×20, 54 nodi, 92 passi, finito in 9 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=ceramica bianca, w=ceramica in ombra, G=grafite, g=grafite chiara, C=rotore ciano, M=luce magenta, V=vetro del sensore, a=dove può stare il corpo (marcatore), b=dove possono stare i bracci (marcatore), o=dove possono stare i rotori (marcatore), l=dove possono stare le zampe (marcatore), h=quote possibili (marcatore), k=la quota scelta (marcatore), K=il corpo (marcatore), L=i bracci (marcatore), O=i rotori (marcatore), P=zampa, r=il cavo che sale (marcatore), c=dove può stare la cassa (marcatore), x=la faccia del dado senza cassa (marcatore).
 Alla fine: W 169, C 168, G 86, w 62, V 59, P 48, M 10, g 1.
@@ -63,7 +63,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 54 nodi, 96 passi, finito in 12 ms.
+Traccia, seme 3: griglia 20×20×20, 54 nodi, 96 passi, finito in 11 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=ceramica bianca, w=ceramica in ombra, G=grafite, g=grafite chiara, C=rotore ciano, M=luce magenta, V=vetro del sensore, a=dove può stare il corpo (marcatore), b=dove possono stare i bracci (marcatore), o=dove possono stare i rotori (marcatore), l=dove possono stare le zampe (marcatore), h=quote possibili (marcatore), k=la quota scelta (marcatore), K=il corpo (marcatore), L=i bracci (marcatore), O=i rotori (marcatore), P=zampa, r=il cavo che sale (marcatore), c=dove può stare la cassa (marcatore), x=la faccia del dado senza cassa (marcatore).
 Alla fine: W 169, C 168, G 86, w 62, V 59, P 48, M 10, g 5.

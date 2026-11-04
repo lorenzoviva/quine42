@@ -8,7 +8,7 @@ Un obelisco di pietra con la punta di bronzo e rune che brillano dal fondo dei s
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.210**, minima 0.040, massima 0.391 (soglia 0.15) → passa
-- voxel per seme: 3006, 2998, 2672, 3008, 2586; tempo per seme: 141, 150, 125, 132, 127 ms
+- voxel per seme: 3006, 2998, 2672, 3008, 2586; tempo per seme: 146, 149, 172, 146, 147 ms
 - avvisi: tocca i bordi laterali della griglia: forse è tagliato; colori mai usati: C
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×60, 42 nodi, 106 passi, finito in 148 ms.
+Traccia, seme 1: griglia 20×20×60, 42 nodi, 106 passi, finito in 163 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: S=pietra, d=pietra scura, G=pietra chiara, P=bronzo, R=runa luminosa, x=solco inciso (marcatore), v=per mescolare il caso (marcatore), V=spazio della base (marcatore), U=spazio del fusto (marcatore), n=alto 58 (marcatore), o=cumulo di macerie (marcatore).
 Alla fine: S 1673, d 1138, R 148, G 27, P 20.
@@ -54,7 +54,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×60, 42 nodi, 98 passi, finito in 160 ms.
+Traccia, seme 2: griglia 20×20×60, 42 nodi, 98 passi, finito in 161 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: S=pietra, d=pietra scura, G=pietra chiara, P=bronzo, R=runa luminosa, x=solco inciso (marcatore), v=per mescolare il caso (marcatore), V=spazio della base (marcatore), U=spazio del fusto (marcatore), n=alto 58 (marcatore), o=cumulo di macerie (marcatore).
 Alla fine: S 1648, d 1138, R 165, G 27, P 20.
@@ -83,7 +83,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×60, 42 nodi, 105 passi, finito in 160 ms.
+Traccia, seme 3: griglia 20×20×60, 42 nodi, 105 passi, finito in 162 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: S=pietra, d=pietra scura, G=pietra chiara, P=bronzo, R=runa luminosa, C=cristallo arcano, x=solco inciso (marcatore), v=per mescolare il caso (marcatore), V=spazio della base (marcatore), U=spazio del fusto (marcatore), m=alto 52 (marcatore), b=tamburo con i cristalli (marcatore).
 Alla fine: S 1183, d 879, G 411, R 167, P 20, C 12.

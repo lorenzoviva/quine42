@@ -8,7 +8,7 @@ Un tavolino di legno scuro su una colonna di ghisa con il tasto d'ottone, il ric
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.436**, minima 0.023, massima 0.614 (soglia 0.15) → passa
-- voxel per seme: 412, 421, 399, 411, 423; tempo per seme: 6, 5, 5, 5, 5 ms
+- voxel per seme: 412, 421, 399, 411, 423; tempo per seme: 5, 4, 5, 6, 5 ms
 - avvisi: colori mai usati: G Q; tocca il soffitto della griglia: forse è tagliato in alto; colori mai usati: Q
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 18 nodi, 63 passi, finito in 6 ms.
+Traccia, seme 1: griglia 20×20×20, 18 nodi, 63 passi, finito in 7 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: E=ghisa, D=legno scuro, O=ottone, C=rame, W=nastro di carta, A=spia ambrata, Q=ghisa della colonna, h=altezze possibili (marcatore), k=la quota scelta (marcatore), s=la cima della colonna (marcatore).
 Alla fine: E 184, D 105, O 65, C 36, W 21, A 1.
@@ -44,7 +44,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 18 nodi, 62 passi, finito in 5 ms.
+Traccia, seme 2: griglia 20×20×20, 18 nodi, 62 passi, finito in 7 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: E=ghisa, D=legno scuro, O=ottone, C=rame, W=nastro di carta, A=spia ambrata, Q=ghisa della colonna, h=altezze possibili (marcatore), k=la quota scelta (marcatore), s=la cima della colonna (marcatore).
 Alla fine: E 193, D 105, O 65, C 36, W 21, A 1.

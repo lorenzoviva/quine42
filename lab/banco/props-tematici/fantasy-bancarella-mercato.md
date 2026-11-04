@@ -8,7 +8,7 @@ Un banco di legno su quattro pali sotto una tenda a strisce, con la merce in mos
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.280**, minima 0.017, massima 0.437 (soglia 0.15) → passa
-- voxel per seme: 1382, 1182, 1920, 1380, 1792; tempo per seme: 28, 27, 24, 25, 25 ms
+- voxel per seme: 1382, 1182, 1920, 1380, 1792; tempo per seme: 24, 24, 24, 26, 23 ms
 - avvisi: tocca i bordi laterali della griglia: forse è tagliato; colori mai usati: Y y P c G L; colori mai usati: O o Y y; colori mai usati: O o P c G L
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×20, 51 nodi, 67 passi, finito in 30 ms.
+Traccia, seme 1: griglia 20×20×20, 51 nodi, 67 passi, finito in 27 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=legno, w=piano del banco, T=stoffa rossa, Q=stoffa chiara, q=legno scuro, O=arance, o=mele, X=sacchetti, U=spazio della tenda (marcatore), Z=spazio della merce (marcatore), v=per mescolare il caso (marcatore), b=tettoia piatta (marcatore), e=cassette di frutta (marcatore).
 Alla fine: W 667, Q 223, q 152, w 131, T 79, o 65, O 51, X 14.
@@ -53,7 +53,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×20, 51 nodi, 69 passi, finito in 25 ms.
+Traccia, seme 2: griglia 20×20×20, 51 nodi, 69 passi, finito in 29 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=legno, w=piano del banco, T=stoffa rossa, Q=stoffa chiara, q=legno scuro, P=pezza blu, c=pezza verde, G=ampolla luminosa, L=lanterna, X=sacchetti, U=spazio della tenda (marcatore), Z=spazio della merce (marcatore), v=per mescolare il caso (marcatore), b=tettoia piatta (marcatore), g=stoffe e ampolle (marcatore).
 Alla fine: W 522, Q 223, q 152, w 131, T 79, P 42, X 17, G 7, c 7, L 2.
@@ -80,7 +80,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×20, 51 nodi, 66 passi, finito in 31 ms.
+Traccia, seme 3: griglia 20×20×20, 51 nodi, 66 passi, finito in 27 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=legno, w=piano del banco, T=stoffa rossa, Q=stoffa chiara, q=legno scuro, O=arance, o=mele, X=sacchetti, U=spazio della tenda (marcatore), Z=spazio della merce (marcatore), v=per mescolare il caso (marcatore), n=tetto a capanna (marcatore), e=cassette di frutta (marcatore).
 Alla fine: W 667, Q 613, T 217, q 171, w 131, o 65, O 51, X 5.

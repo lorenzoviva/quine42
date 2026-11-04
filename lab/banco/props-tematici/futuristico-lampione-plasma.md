@@ -8,7 +8,7 @@ Un fusto di grafite su uno zoccolo di ceramica bianca, con i bracci che reggono 
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.454**, minima 0.364, massima 0.503 (soglia 0.15) → passa
-- voxel per seme: 378, 377, 381, 352, 342; tempo per seme: 11, 11, 12, 12, 11 ms
+- voxel per seme: 378, 377, 381, 352, 342; tempo per seme: 11, 10, 12, 11, 10 ms
 - avvisi: colori mai usati: P
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×60, 28 nodi, 118 passi, finito in 13 ms.
+Traccia, seme 1: griglia 20×20×60, 28 nodi, 118 passi, finito in 9 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=ceramica bianca, w=ceramica in ombra, G=grafite, g=grafite chiara, C=plasma ciano, M=punta magenta, V=vetro, h=quote possibili (marcatore), k=la quota scelta (marcatore), r=il fusto che sale (marcatore), P=fusto, a=dove può nascere un braccio (marcatore), A=un braccio che si allunga (marcatore), L=una sfera di plasma (marcatore).
 Alla fine: W 138, G 62, g 60, C 60, w 42, V 15, M 1.
@@ -44,7 +44,7 @@ Alla fine: W 138, G 62, g 60, C 60, w 42, V 15, M 1.
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×60, 28 nodi, 117 passi, finito in 13 ms.
+Traccia, seme 2: griglia 20×20×60, 28 nodi, 117 passi, finito in 11 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=ceramica bianca, w=ceramica in ombra, G=grafite, g=grafite chiara, C=plasma ciano, M=punta magenta, V=vetro, h=quote possibili (marcatore), k=la quota scelta (marcatore), r=il fusto che sale (marcatore), P=fusto, a=dove può nascere un braccio (marcatore), A=un braccio che si allunga (marcatore), L=una sfera di plasma (marcatore).
 Alla fine: W 138, g 62, C 60, G 59, w 42, V 15, M 1.
@@ -65,7 +65,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×60, 28 nodi, 119 passi, finito in 14 ms.
+Traccia, seme 3: griglia 20×20×60, 28 nodi, 119 passi, finito in 10 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: W=ceramica bianca, w=ceramica in ombra, G=grafite, g=grafite chiara, C=plasma ciano, M=punta magenta, V=vetro, h=quote possibili (marcatore), k=la quota scelta (marcatore), r=il fusto che sale (marcatore), P=fusto, a=dove può nascere un braccio (marcatore), A=un braccio che si allunga (marcatore), L=una sfera di plasma (marcatore).
 Alla fine: W 138, G 64, g 61, C 60, w 42, V 15, M 1.

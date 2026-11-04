@@ -17,7 +17,8 @@ m = re.search(r'values="([^"]*)"', s)
 if letter in m.group(1):
     sys.exit(f'{letter} già usata in values')
 s = s[:m.start(1)] + m.group(1) + letter + s[m.end(1):]
-colors = list(re.finditer(r'\n(\s*)<color [^>]*/>', s))
+cut = s.find('<map')
+colors = [c for c in re.finditer(r'\n(\s*)<color [^>]*/>', s) if cut < 0 or c.start() < cut]
 last = colors[-1]
 ind = last.group(1)
 pre = (f'\n{ind}<color symbol="{letter}" hidden="True" name="mescola"/>'
