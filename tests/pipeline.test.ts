@@ -2071,3 +2071,162 @@ describe('mai zero slot e sospendi/riattiva (T96)', () => {
     expect(budget.claude.slot).toBe(1);
   });
 });
+
+describe('un task che torna da fare riparte da capo (T256)', () => {
+  type Run = Record<string, any>;
+  type Mod = {
+    plan: (tasks: unknown[], runs: Record<string, Run>, budget: unknown, only?: string) => Record<string, { id: string }[]>;
+    parseBacklog: (text: string) => unknown[];
+    resumeTasks: (ids: string[], opts: unknown) => string[];
+    dossierOf: (id: string, opts: unknown) => { markdown: string };
+    traceOf: (id: string, opts: unknown) => { log: string };
+  };
+  let S: Mod;
+  const script = path.resolve(__dirname, '../tools/pipeline/pipeline.mjs');
+  beforeAll(async () => { S = (await import(/* @vite-ignore */ pathToFileURL(script).href)) as Mod; });
+
+  const DA_FARE = '`da fare`';
+  const block = (state: string) => `# Backlog\n\n### T1 · Il task — ${state}\n- Pipeline: finto · stima 1% · approvato · priorità 5\n`;
+  const oldRun = (o: Run = {}): Run => ({ id: 'T1', provider: 'finto', stima: 1, tentativi: 3, stato: 'finito', sessione: 'vecchia', inizio: '2026-11-01T10:00:00.000Z', fine: '2026-11-01T11:00:00.000Z', esito: 'ESITO: fatto — prima', log: 'vecchio.log', ...o });
+
+  /** Un repository vero con una copia dello script: REPO è dove sta lo script, così i worktree non toccano questo repository. */
+  const world = (state: string, runs: Record<string, Run>) => {
+    const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'quine-dacapo-')));
+    const repo = path.join(root, 'repo');
+    const git = (...args: string[]) => execFileSync('git', args, { cwd: repo, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+    const copy = path.join(repo, 'tools', 'pipeline', 'pipeline.mjs');
+    fs.mkdirSync(path.dirname(copy), { recursive: true });
+    fs.mkdirSync(path.join(repo, 'docs', 'plans'), { recursive: true });
+    fs.copyFileSync(script, copy);
+    fs.writeFileSync(path.join(repo, 'docs', 'plans', 'backlog.md'), block(state));
+    fs.writeFileSync(path.join(repo, '.gitignore'), '.pipeline/\n.pipeline-task.md\n.claude/\ndocs/pipeline/\n');
+    git('init', '-q', '-b', 'base3d');
+    git('config', 'user.email', 'prova@example.com');
+    git('config', 'user.name', 'Prova');
+    git('config', 'commit.gpgsign', 'false');
+    git('add', '-A');
+    git('commit', '-qm', 'inizio');
+    const stateDir = path.join(root, 'stato');
+    fs.mkdirSync(stateDir);
+    const cli = path.join(root, 'cli.cjs');
+    fs.writeFileSync(cli, "console.log(JSON.stringify({ session_id: 'nuova', argv: process.argv.slice(2), result: 'ESITO: fatto — di nuovo' }));\n");
+    const config = {
+      base: 'base3d', orchestratore: 'nessuno', maxParalleli: 1, riserva: 0, sogliaUnSolo: 0, attesaLimiteMinuti: 60, controlloSecondi: 1, usoSecondi: 3600,
+      intervalloLanciMinuti: 0, approvazione: 'manuale', prompt: 'prova {id}',
+      providers: { finto: { cmd: process.execPath, args: [cli], resume: ['--resume', '{sessione}'], resetSettimanale: '', browser: true } },
+    };
+    fs.writeFileSync(path.join(root, 'config.json'), JSON.stringify(config));
+    const letto = new Date().toISOString();
+    fs.writeFileSync(path.join(stateDir, 'budget.json'), JSON.stringify({ finto: { residuo: 100, sessione: 100, letto, aggiornato: letto, contatori: [{ nome: 'x', finestra: 'settimana', residuo: 100 }] } }));
+    const runsFile = path.join(stateDir, 'esecuzioni.json');
+    fs.writeFileSync(runsFile, JSON.stringify(runs));
+    const env = { ...process.env, PIPELINE_STATE: stateDir, PIPELINE_CONFIG: path.join(root, 'config.json') };
+    const readRuns = (): Record<string, Run> => JSON.parse(fs.readFileSync(runsFile, 'utf8'));
+    const setRuns = (r: Record<string, Run>) => fs.writeFileSync(runsFile, JSON.stringify(r));
+    const esegui = () => execFileSync(process.execPath, [copy, 'esegui', '--max', '1'], { env, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 60_000 });
+    const clean = () => fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+    return { root, repo, git, readRuns, setRuns, esegui, clean, opts: { repo, stateDir, config } };
+  };
+
+  // `plan` qui legge la configurazione vera: un provider che c'è.
+  const queuesOf = (state: string, run: Run) => S.plan(S.parseBacklog(block(state).replace('finto', 'claude')), { T1: run }, {});
+  const ids = (list: { id: string }[]) => list.map((t) => t.id);
+
+  it('il piano: integrata e da fare è pronta, finita e non integrata resta da integrare, al lavoro resta in corso', () => {
+    expect(ids(queuesOf(DA_FARE, oldRun({ integrato: 'ieri' })).pronti)).toEqual(['T1']);
+    expect(ids(queuesOf(DA_FARE, { id: 'T1', stato: 'da capo', tentativi: 0 }).pronti)).toEqual(['T1']);
+    const notIntegrated = queuesOf(DA_FARE, oldRun());
+    expect(ids(notIntegrated.daIntegrare)).toEqual(['T1']);
+    expect(notIntegrated.pronti).toEqual([]);
+    expect(ids(queuesOf(DA_FARE, oldRun({ integrato: 'ieri', stato: 'in corso' })).inCorso)).toEqual(['T1']);
+    expect(ids(queuesOf('`in attesa`', oldRun({ integrato: 'ieri' })).inAttesa)).toEqual(['T1']);
+  });
+
+  it('voce integrata e blocco da fare: viene lanciato con worktree, branch e conversazione nuovi', () => {
+    const w = world(DA_FARE, { T1: oldRun({ integrato: '2026-11-01T12:00:00.000Z', dir: 'non-esiste-piu', branch: 'task/T1' }) });
+    expect(w.esegui()).toContain('lancio T1 da capo');
+    const r = w.readRuns().T1;
+    expect(r).toMatchObject({ stato: 'finito', tentativi: 1, branch: 'task/T1', esito: 'ESITO: fatto — di nuovo', sessione: 'nuova' });
+    expect(r.integrato).toBeUndefined();
+    expect(fs.existsSync(r.dir)).toBe(true);
+    expect(w.git('branch', '--list', 'task/T1')).toContain('task/T1');
+    // Il prompt del task, non la ripresa della vecchia conversazione.
+    expect(JSON.parse(fs.readFileSync(r.log, 'utf8').trim()).argv).toEqual(['-p', 'prova T1']);
+    expect(fs.existsSync(path.join(r.dir, '.pipeline-task.md'))).toBe(true);
+    // Il tentativo di prima resta, e il suo log non si sovrascrive.
+    expect(r.precedenti).toHaveLength(1);
+    expect(r.precedenti[0]).toMatchObject({ tentativi: 3, sessione: 'vecchia', esito: 'ESITO: fatto — prima', integrato: '2026-11-01T12:00:00.000Z', log: 'vecchio.log' });
+    expect(path.basename(r.log)).toBe('T1.d1.1.log');
+    expect(S.traceOf('T1', w.opts).log).toBe(r.log);
+    expect(S.dossierOf('T1', w.opts).markdown).toContain('tentativo di prima: finto, 3 tentativo/i, finito, integrato il 2026-11-01T12:00:00.000Z — ESITO: fatto — prima · sessione vecchia');
+    w.git('worktree', 'remove', '--force', r.dir);
+    w.clean();
+  }, 90_000);
+
+  it('riprendi sulla voce integrata di un task da fare: riparte da capo, senza riaprire la conversazione', () => {
+    const w = world(DA_FARE, { T1: oldRun({ integrato: 'ieri', dir: 'non-esiste-piu' }) });
+    expect(S.resumeTasks(['T1'], w.opts)).toEqual(['T1']);
+    const r = w.readRuns().T1;
+    expect(r).toMatchObject({ id: 'T1', stato: 'da capo', tentativi: 0, provider: 'finto' });
+    expect(r.sessione).toBeUndefined();
+    expect(r.dir).toBeUndefined();
+    expect(r.precedenti[0]).toMatchObject({ sessione: 'vecchia', tentativi: 3 });
+    // Rifatto non perde e non duplica nulla.
+    S.resumeTasks(['T1'], w.opts);
+    expect(w.readRuns().T1.precedenti).toHaveLength(1);
+    expect(w.esegui()).toContain('lancio T1 da capo');
+    const after = w.readRuns().T1;
+    expect(after).toMatchObject({ stato: 'finito', tentativi: 1, sessione: 'nuova' });
+    expect(after.precedenti).toHaveLength(1);
+    w.git('worktree', 'remove', '--force', after.dir);
+    w.clean();
+  }, 90_000);
+
+  it('riprendi con il worktree assente: riparte da capo e lo dice, anche se git ricorda ancora la cartella', () => {
+    const w = world(DA_FARE, {});
+    const gone = path.join(w.root, 'sparito');
+    w.git('worktree', 'add', '-q', '-b', 'task/T1', gone);
+    fs.rmSync(gone, { recursive: true, force: true });
+    w.setRuns({ T1: oldRun({ esito: 'ESITO: fallito (codice -1)', dir: gone }) });
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      S.resumeTasks(['T1'], w.opts);
+      expect(log.mock.calls.flat().join('\n')).toContain("T1: rimesso in coda (riparte da capo: il suo worktree non c'è più)");
+    } finally { log.mockRestore(); }
+    expect(w.readRuns().T1).toMatchObject({ stato: 'da capo', tentativi: 0 });
+    w.esegui();
+    const r = w.readRuns().T1;
+    expect(r).toMatchObject({ stato: 'finito', tentativi: 1, sessione: 'nuova' });
+    expect(r.dir).not.toBe(gone);
+    expect(fs.existsSync(r.dir)).toBe(true);
+    w.git('worktree', 'remove', '--force', r.dir);
+    w.clean();
+  }, 90_000);
+
+  it('riprendi con il worktree presente e la conversazione: la riprende, come prima', () => {
+    const w = world(DA_FARE, {});
+    w.setRuns({ T1: oldRun({ stato: 'interrotto', dir: w.repo }) });
+    S.resumeTasks(['T1'], w.opts);
+    expect(w.readRuns().T1).toMatchObject({ stato: 'sospeso', sessione: 'vecchia', tentativi: 3, dir: w.repo });
+    w.clean();
+  });
+
+  it('voce integrata e blocco fatto: nulla cambia, né con esegui né con riprendi', () => {
+    const before = oldRun({ integrato: 'ieri', dir: 'non-esiste-piu' });
+    const w = world('`fatto` (`abc1234`)', { T1: before });
+    expect(S.resumeTasks(['T1'], w.opts)).toEqual([]);
+    expect(w.readRuns().T1).toEqual(before);
+    expect(w.esegui()).not.toContain('lancio');
+    expect(w.readRuns().T1).toEqual(before);
+    expect(w.git('branch', '--list', 'task/T1')).toBe('');
+    w.clean();
+  }, 90_000);
+
+  it('voce finita e non integrata: resta da integrare, esegui non la rilancia', () => {
+    const before = oldRun({ dir: 'non-esiste-piu' });
+    const w = world(DA_FARE, { T1: before });
+    expect(w.esegui()).not.toContain('lancio');
+    expect(w.readRuns().T1).toEqual(before);
+    w.clean();
+  }, 90_000);
+});

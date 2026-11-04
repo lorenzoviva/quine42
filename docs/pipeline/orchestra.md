@@ -32,7 +32,7 @@ e ciò che rispondi l'autore lo legge nel terminale. Lo stesso processo esegue i
 | `assegna Txx <claude\|gemini\|argon> <stima %> [priorità] [--approva]`, `approva Txx…` | la riga `- Pipeline:` |
 | `step <n>`, `step <n> --priorita <p>` | i task di uno step; porta alla priorità data quelli non finiti («priorizza lo step N»; quelli non stimati la tengono quando li assegni) |
 | `step --da-tabella`, `step <n> Txx…` | le righe `- Step:` del backlog: tutte dalla tabella di `docs/fasi.md`, o a mano; un task senza step resta valido |
-| `interrompi Txx…` / `interrompi --tutti`, `riprendi Txx…` | ferma un task in corso (tiene la sua conversazione) e lo rimette in coda |
+| `interrompi Txx…` / `interrompi --tutti`, `riprendi Txx…` | ferma un task in corso (tiene la sua conversazione) e lo rimette in coda; già integrato o senza worktree riparte da capo |
 | `sospendi <provider> [fino a <data>]`, `riattiva <provider>` | non dà nuovi task a un provider per un po' (o fino a una data), per far completare un altro o risparmiare; `stato` lo mostra (T96) |
 | `ferma --ora` / `ferma --dopo` | spegne la pipeline e questo processo (ADR-0090): `--ora` interrompe i task in corso tenendo la conversazione (riprendono al riavvio), `--dopo` non lancia nulla e aspetta che finiscano. Lo dai solo quando l'autore te lo chiede («chiudi ora e spegni», «aspetta che finiscano e spegni»); il processo aspetta la fine del tuo turno: rispondi in una riga |
 | `integra Txx` | porta un task finito nel base; su un conflitto annulla e dice i file |

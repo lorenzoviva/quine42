@@ -382,6 +382,7 @@ export function parsePipelineLine(line) {
 
 export const loadTasks =() => parseBacklog(fs.readFileSync(path.join(REPO, 'docs', 'plans', 'backlog.md'), 'utf8'));
 const isDone = (s) => s.startsWith('fatto');
+const DA_CAPO = 'da capo';
 
 // --- Budget and limits -----------------------------------------------------------------------------------------
 
@@ -571,14 +572,40 @@ export function usageLimit(output, from = new Date()) {
 
 // --- The plan --------------------------------------------------------------------------------------------------
 
+/**
+ * Whether a run no longer stands for its task, which then starts over (new worktree, branch and conversation): one already
+ * turned into the state `da capo` (`retireRun`), or one already integrated whose task is not closed (its block went back to
+ * `da fare`: its worktree and branch are gone). A closed task keeps its run; one still working is followed to its end.
+ */
+export function startsOver(run, t) {
+  if (!run) return false;
+  return run.stato === DA_CAPO || (Boolean(run.integrato) && run.stato !== 'in corso' && Boolean(t) && !isDone(t.status));
+}
+
+/** What stays of a run that gives way to a new one: what `dossier` and `traccia` say of it. */
+const pastAttempt = (r) => ({ provider: r.provider, tentativi: r.tentativi, stato: r.stato, inizio: r.inizio, fine: r.fine, integrato: r.integrato, esito: r.esito, browser: r.browser, sessione: r.sessione, dir: r.dir, log: r.log });
+
+/** The run that waits to start over: no worktree, no conversation, attempts from zero, the old ones in `precedenti`. */
+export function retireRun(run) {
+  if (run.stato === DA_CAPO) return run;
+  return { id: run.id, provider: run.provider, stima: run.stima, stato: DA_CAPO, tentativi: 0, precedenti: [...(run.precedenti ?? []), pastAttempt(run)] };
+}
+
+/** The log of a run's attempt; a run that started over does not overwrite the logs of the one before. */
+const runLog = (logs, r) => path.join(logs, `${r.id}.${r.precedenti?.length ? `d${r.precedenti.length}.` : ''}${r.tentativi}.log`);
+
+/** One line on an attempt that gave way to a new one. */
+const attemptLine = (a) => `tentativo di prima: ${a.provider}, ${a.tentativi} tentativo/i, ${a.stato}${a.integrato ? `, integrato il ${a.integrato}` : ''}${a.esito ? ` — ${a.esito}` : ''}${a.sessione ? ` · sessione ${a.sessione}` : ''}${a.log ? ` · log ${a.log}` : ''}`;
+
 /** Tasks by queue: running, ready (dependencies done, approved, a provider and an estimate), waiting, blocked. */
 export function plan(tasks, runs, budget, only) {
   const byId = new Map(tasks.map((t) => [t.id, t]));
   const open = tasks.filter((t) => !isDone(t.status));
   const queues = { inCorso: [], daIntegrare: [], pronti: [], daApprovare: [], daStimare: [], bloccati: [], inAttesa: [] };
   for (const t of open) {
-    if (runs[t.id] && runs[t.id].stato !== 'finito') { queues.inCorso.push(t); continue; }
-    if (runs[t.id] && !runs[t.id].integrato) { queues.daIntegrare.push({ ...t, provider: runs[t.id].provider, title: `${t.title} — ${runs[t.id].esito}` }); continue; }
+    const run = startsOver(runs[t.id], t) ? undefined : runs[t.id];
+    if (run && run.stato !== 'finito') { queues.inCorso.push(t); continue; }
+    if (run && !run.integrato) { queues.daIntegrare.push({ ...t, provider: run.provider, title: `${t.title} — ${run.esito}` }); continue; }
     if (t.status.startsWith('in attesa')) { queues.inAttesa.push(t); continue; }
     if (!t.status.startsWith('da fare')) continue; // in corso by hand, or split into sub-tasks
     // A dependency without a block of its own (T53a) is its parent's (T53).
@@ -629,7 +656,9 @@ function worktrees(cwd = REPO) {
 function taskWorktree(id) {
   const branch = `task/${id}`;
   const existing = worktrees().find((w) => w.branch === branch);
-  if (existing) return { dir: existing.path, branch };
+  if (existing && fs.existsSync(existing.path)) return { dir: existing.path, branch };
+  // A folder taken away by hand: git still remembers it and would refuse the branch.
+  if (existing) git(['worktree', 'prune']);
   const main = path.resolve(git(['rev-parse', '--path-format=absolute', '--git-common-dir']), '..');
   const dir = path.join(main, '.claude', 'worktrees', id.toLowerCase());
   const exists = git(['branch', '--list', branch]) !== '';
@@ -704,7 +733,7 @@ export function launch(t, run, saveRuns = () => {}) {
     ? [...conf.args, ...conf.resume.map((a) => a.replace('{sessione}', run.sessione)), '-p', RESUME]
     : [...conf.args, ...(conf.sessioneNuova ?? []).map((a) => a.replace('{sessione}', run.sessione)), '-p', taskPrompt(t, run)];
   fs.mkdirSync(LOGS, { recursive: true });
-  const log = path.join(LOGS, `${t.id}.${run.tentativi}.log`);
+  const log = runLog(LOGS, run);
   const fd = fs.openSync(log, 'w');
   // PIPELINE_TASK: who holds a turn (`turno`) started by the task.
   const child = spawn(conf.cmd, args, { cwd: run.dir, stdio: ['ignore', fd, fd], windowsHide: true, detached: true, env: { ...process.env, PIPELINE_TASK: t.id } });
@@ -786,7 +815,7 @@ export async function execute({ max = CONFIG.maxParalleli, only, task, always = 
   writeJson(PROCESS, { pid: process.pid, dal: now() });
   // Runs left by a process that died or was shut down: the CLI still working (follow it), finished while nobody watched
   // (its outcome is in the log), gone (resume it), interrupted by `ferma --ora` (resume it).
-  const logOf = (r) => r.log ?? path.join(LOGS, `${r.id}.${r.tentativi}.log`);
+  const logOf = (r) => r.log ?? runLog(LOGS, r);
   const found = recoverRuns(runs, { readLog: (r) => readText(logOf(r)) });
   for (const r of found.seguiti) {
     say(`${r.id}: ancora al lavoro (processo ${r.pid}), lo seguo`);
@@ -821,21 +850,22 @@ export async function execute({ max = CONFIG.maxParalleli, only, task, always = 
     writePlan(queues, budget);
     // Suspended runs whose limit has reset come first; then ready tasks within the budget.
     const candidates = [
-      ...Object.values(runs).filter((r) => r.stato === 'sospeso' && !active.has(r.id) && new Date(r.fermoFino) <= new Date())
+      ...Object.values(runs).filter((r) => r.stato === 'sospeso' && !r.integrato && !active.has(r.id) && new Date(r.fermoFino) <= new Date())
         .map((r) => ({ ...tasks.find((t) => t.id === r.id), id: r.id, provider: r.provider, estimate: r.stima })),
-      ...queues.pronti.filter((t) => !runs[t.id] && (!task || t.id === task)),
+      ...queues.pronti.filter((t) => (!runs[t.id] || startsOver(runs[t.id], t)) && (!task || t.id === task)),
     ];
     for (const t of stop ? [] : candidates) {
       if (active.size >= max) break;
       // A task runs only on its provider: if that one cannot take it, it waits (ADR-0119).
-      const resuming = Boolean(runs[t.id]);
+      const resuming = Boolean(runs[t.id]) && !startsOver(runs[t.id], t);
       const prov = t.provider;
       if (!allowedProviders(t, CONFIG).includes(prov)) continue;
       const live = [...active.keys()].map((id) => runs[id]);
       if (!fitsOn(prov, t, { budget, live, orch, resuming })) continue;
       if (holdBack(t, live, { resuming, lastLaunch })) continue;
       const b = budget[prov];
-      const run = runs[t.id] ?? { id: t.id, provider: prov, stima: t.estimate, tentativi: 0, inizio: now(), ...(() => { const w = taskWorktree(t.id); return { dir: w.dir, branch: w.branch }; })() };
+      const past = !resuming && runs[t.id] ? retireRun(runs[t.id]).precedenti : undefined;
+      const run = resuming ? runs[t.id] : { id: t.id, provider: prov, stima: t.estimate, tentativi: 0, inizio: now(), ...(past ? { precedenti: past } : {}), ...(() => { const w = taskWorktree(t.id); return { dir: w.dir, branch: w.branch }; })() };
       run.tentativi += 1;
       run.needsBrowser = Boolean(t.needsBrowser);
       if (!resuming) lastLaunch = Date.now();
@@ -843,7 +873,7 @@ export async function execute({ max = CONFIG.maxParalleli, only, task, always = 
       run.prima ??= { settimana: b.residuo, sessione: b.sessione };
       runs[t.id] = run;
       saveRuns(t.id);
-      say(`${run.sessione ? 'riprendo' : 'lancio'} ${t.id} su ${t.provider} (${run.dir})`);
+      say(`${run.sessione ? 'riprendo' : 'lancio'} ${t.id}${past ? ' da capo' : ''} su ${t.provider} (${run.dir})`);
       active.set(t.id, launch(t, run, saveRuns).then((r) => finish(run, r, runs, saveRuns)).finally(() => active.delete(t.id)));
     }
     if (stop && !active.size) {
@@ -1364,7 +1394,7 @@ export function traceOf(id, opts) {
   const exists = Boolean((file && fs.existsSync(file)) || (transcriptFile && fs.existsSync(transcriptFile)));
   const rawCheck = file && fs.existsSync(file) ? fs.readFileSync(file).toString('latin1') : transcriptFile && fs.existsSync(transcriptFile) ? fs.readFileSync(transcriptFile, 'utf8') : '';
   const agents = isClaude ? rawCheck.includes('Regole inviolabili') : /[\\/]AGENTS\.md/.test(rawCheck);
-  const log = path.join(p.logs, `${id}.${run.tentativi}.log`);
+  const log = runLog(p.logs, run);
   const logText = fs.existsSync(log) ? fs.readFileSync(log, 'utf8') : '';
   const out = logText ? readOutput(logText) : undefined;
   const convText = transcriptFile && fs.existsSync(transcriptFile) ? fs.readFileSync(transcriptFile, 'utf8') : '';
@@ -1423,6 +1453,7 @@ function trace(id) {
   if (!t) { console.log(`${id}: nessuna esecuzione in .pipeline/esecuzioni.json`); return; }
   const { run, file, exists, agents, log, out } = t;
   console.log(`${id} su ${run.provider}, ${run.tentativi} tentativo/i, ${run.stato}${run.esito ? ` — ${run.esito}` : ''}`);
+  for (const a of run.precedenti ?? []) console.log(attemptLine(a));
   console.log(`Conversazione: ${t.sessione ?? '(id non ancora noto)'} · ${exists ? file : '(file non trovato)'}`);
   if (t.riprendi) console.log(`Riprendila con: ${t.riprendi}`);
   console.log(`AGENTS.md: ${exists ? (agents ? 'letto' : 'NON trovato nella conversazione') : '?'}`);
@@ -1447,18 +1478,28 @@ function traceOrchestratorCli() {
   if (cur.ultime.length) console.log(`\n--- Ultime azioni ---\n${cur.ultime.join('\n')}`);
 }
 
-/** Puts back in the queue a run that stopped without a usage limit being recognised: it resumes its conversation. */
+/**
+ * Puts back in the queue a run that stopped without a usage limit being recognised: it resumes its conversation. Without a
+ * conversation, already integrated or with its worktree gone there is none to go back to: it starts over, when its block
+ * says so (`plan`). A closed task keeps its run.
+ */
 export function resumeTasks(ids, opts) {
   const p = pathsOf(opts);
   const runs = readJson(p.runs, {});
+  const tasks = parseBacklog(readText(p.backlog));
   const resumed = [];
   for (const id of ids) {
     const run = runs[id];
     if (!run) { console.log(`${id}: nessuna esecuzione`); continue; }
-    if (run.sessione) Object.assign(run, { stato: 'sospeso', fermoFino: now(), esito: undefined, fine: undefined, pid: undefined });
-    else delete runs[id];
+    const t = tasks.find((x) => x.id === id);
+    const noWorktree = Boolean(run.dir) && !fs.existsSync(run.dir);
+    if ((run.integrato && (!t || isDone(t.status))) || (noWorktree && t && isDone(t.status))) { console.log(`${id}: è chiuso, nulla cambia`); continue; }
+    const why = run.integrato ? ': già integrato' : noWorktree ? ': il suo worktree non c\'è più' : '';
+    const again = Boolean(run.sessione) && !why;
+    if (again) Object.assign(run, { stato: 'sospeso', fermoFino: now(), esito: undefined, fine: undefined, pid: undefined });
+    else runs[id] = retireRun(run);
     writeJson(p.runs, runs);
-    say(`${id}: rimesso in coda (${run.sessione ? 'riprende la sua conversazione' : 'riparte da capo'})`, p.report);
+    say(`${id}: rimesso in coda (${again ? 'riprende la sua conversazione' : `riparte da capo${why}`})`, p.report);
     resumed.push(id);
   }
   return resumed;
@@ -1876,7 +1917,7 @@ export function dossierOf(id, opts) {
   const run = readJson(p.runs, {})[id];
   const out = [`# Dossier di ${id}`, '', block?.trim() ?? '(non c\'è nel backlog)', ''];
   if (run) out.push('## Esecuzione', '', `${run.provider}, ${run.tentativi} tentativo/i, ${run.stato}${run.integrato ? `, integrato il ${run.integrato}` : ''}`,
-    ...[run.esito, run.browser, run.sessione && `sessione ${run.sessione} (traccia: node tools/pipeline/pipeline.mjs traccia ${id})`].filter(Boolean), '');
+    ...[run.esito, run.browser, run.sessione && `sessione ${run.sessione} (traccia: node tools/pipeline/pipeline.mjs traccia ${id})`, ...(run.precedenti ?? []).map(attemptLine)].filter(Boolean), '');
   const word = new RegExp(`\\b${id}\\b`);
   // The id in the subject or in the body (a fix of T63 made by another task says so in its message).
   const commits = safeGit(['log', '--all', '--format=%h %ad %s%x01%b%x02', '--date=short', `--grep=${id}`, '-n', '60']).split('\x02')
