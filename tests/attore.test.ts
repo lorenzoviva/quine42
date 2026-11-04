@@ -262,7 +262,7 @@ describe('the Actor in a multiplayer game', () => {
     const anna = await thin(server, 'anna');
     expect(master.session.master).toBe(true);
     expect(anna.session.master).toBe(false);
-    // The message of the Actor is gone (T247, ADR-0132): nobody changes it during a match, the master neither.
+    // The message of the Actor is gone (T247, ADR-0133): nobody changes it during a match, the master neither.
     for (const who of [anna, master]) {
       const refused = await ask(server, [master, anna], who.session.act({ t: 'attore', acceso: true, modello: 'gemini-4-argon' } as never));
       expect(refused.ok).toBe(false);

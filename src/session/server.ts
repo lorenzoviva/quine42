@@ -388,7 +388,7 @@ export class SessionServer {
       this.kernel.setRemote(client.id, false);
       // What they carry stays theirs, saved; their entity leaves the world (`io` stays, without a client).
       this.kernel.removeWanderer(client.id);
-      // Nobody left: the match is over, and whoever enters first, if it is the master, may set the knobs again (T247, ADR-0132).
+      // Nobody left: the match is over, and whoever enters first, if it is the master, may set the knobs again (T247, ADR-0133).
       if (!this.clients.size) this.kernel.unlockSettings();
     });
   }
@@ -406,7 +406,7 @@ export class SessionServer {
       if (anonimo) this.anonymous.add(id);
       else this.anonymous.delete(id);
     }
-    // The settings come in with the master, before anything else of the match (T247, ADR-0132): this is sync, so nobody slips in between.
+    // The settings come in with the master, before anything else of the match (T247, ADR-0133): this is sync, so nobody slips in between.
     const settled = settings === undefined ? undefined : this.kernel.isMaster(id) ? this.kernel.applySettings(settings) : { ok: false, motivo: 'solo il master regola il mondo' };
     // The master's minimum: what is asked below it does not enter; asking nothing, or 0 (the local models), spends nothing of the world's.
     const least = this.kernel.config.ai.minimi?.tetto;

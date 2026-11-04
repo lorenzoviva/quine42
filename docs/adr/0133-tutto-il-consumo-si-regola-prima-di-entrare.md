@@ -1,4 +1,4 @@
-# ADR-0132 — Tutto il consumo si regola prima di entrare, e a partita in corso non cambia
+# ADR-0133 — Tutto il consumo si regola prima di entrare, e a partita in corso non cambia
 
 Data: 2026-11-04 · Stato: accettato (task T247 del backlog) · Riferimenti: ADR-0053 (la partita scelta alla Genesi), ADR-0085 (i coefficienti), ADR-0086 (la lobby), ADR-0102 (chi può scrivere), ADR-0109 (gli elenchi), ADR-0114 (un mondo solo finché c'è qualcuno), ADR-0116 (l'Attore)
 

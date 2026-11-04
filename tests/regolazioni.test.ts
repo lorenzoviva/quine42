@@ -1,4 +1,4 @@
-// Every consumption has a knob, set before entering and fixed during the match (T247, ADR-0132).
+// Every consumption has a knob, set before entering and fixed during the match (T247, ADR-0133).
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import http from 'node:http';
 import type { AddressInfo } from 'node:net';

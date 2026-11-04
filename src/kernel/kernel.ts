@@ -5149,7 +5149,7 @@ export class Kernel {
     this.council?.say('kernel', 'scarta', "la partita (morte, modalità, PvP, «Altro…» tra giocatori) si sceglie solo alla Genesi: universe.json la tiene com'era");
   }
 
-  /** `universe.json → ai` as it was when the match started (T247, ADR-0132); undefined when no match is under way. */
+  /** `universe.json → ai` as it was when the match started (T247, ADR-0133); undefined when no match is under way. */
   private settingsHeld?: string;
 
   /** Whether a match is under way: every knob is fixed until it ends, for the master too. */

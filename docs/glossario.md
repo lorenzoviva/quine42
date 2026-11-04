@@ -761,7 +761,7 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 
 ### Regolazioni
 - **Inglese**: `AiSettings`, `repairAiSettings`, `applySettings`, `settingsLocked`, `lockSettings`
-- **Definizione**: ciò che il master fissa prima di entrare: coefficienti, modelli, budget, minimi. Non cambiano a partita in corso, cioè da quando entra il primo viandante a quando esce l'ultimo (ADR-0132).
+- **Definizione**: ciò che il master fissa prima di entrare: coefficienti, modelli, budget, minimi. Non cambiano a partita in corso, cioè da quando entra il primo viandante a quando esce l'ultimo (ADR-0133).
 - **Da non usare**: impostazioni del consumo, tuning.
 - **Dove vive**: `src/kernel/universe.ts`, `src/kernel/kernel.ts`, `src/ui/lobby.ts`
 - **Fermo**: il campo `regolazioni` del messaggio `entra` e di `ingresso`.

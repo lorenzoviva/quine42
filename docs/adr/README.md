@@ -137,6 +137,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 
 | [0130](0130-il-registro-delle-mancanze.md) | Ciò che il Concilio non riesce a fare si conta in `world/mancanze.json`: fuori da ciò che esce, oltre i rollback, con un comando che ne fa il rapporto |
 | [0131](0131-video-e-istruzioni-della-beta.md) | I video del sito stanno in una cartella del server e si servono a pezzi da un elenco; le istruzioni della beta entrano nella build solo se accese | accettato |
-| [0132](0132-tutto-il-consumo-si-regola-prima-di-entrare.md) | Tutto il consumo si regola prima di entrare: una manopola per ogni compito tranne la Genesi, e a partita in corso nessuno cambia nulla, nemmeno il master | accettato |
+| [0133](0133-tutto-il-consumo-si-regola-prima-di-entrare.md) | Tutto il consumo si regola prima di entrare: una manopola per ogni compito tranne la Genesi, e a partita in corso nessuno cambia nulla, nemmeno il master | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

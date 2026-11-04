@@ -1,4 +1,4 @@
-// The lobby (T45d, ADR-0086; T247, ADR-0132): what comes before entering. It shows the master's settings to everyone and lets the
+// The lobby (T45d, ADR-0086; T247, ADR-0133): what comes before entering. It shows the master's settings to everyone and lets the
 // master, and only the master, set every knob of the consumption while no match is under way: preset, coefficients, models, budgets and
 // minimums, with the estimate of an hour following the values. What it sets goes in with the master (`entra`): the server repairs it, refuses
 // it to anyone else and during a match. Then the entering wanderer's ceiling (which adds to the budgets) and their cards. Alone

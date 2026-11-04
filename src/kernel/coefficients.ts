@@ -2,7 +2,7 @@
 // the game always did). Where a call has a rhythm the coefficient stretches it (sessions every N places, dialogues
 // between people, the Sculptor's revisions, plots, models); where it has none it thins what causes it (fewer people
 // per place, rarer item packs and new kinds, fewer new entities per place); what the wanderer asks for themselves
-// is rationed like the rest (T247, ADR-0132): the share of those requests the models answer, the others go to the local
+// is rationed like the rest (T247, ADR-0133): the share of those requests the models answer, the others go to the local
 // models, as when the credits run out. Only the Genesis has no knob: it happens once, before the lobby. «Low Detail» is the game played to save.
 
 import { priceOf, costOf } from './ai/prices';

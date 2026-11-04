@@ -219,7 +219,7 @@ export class Council {
   payer?: (task: string) => string;
   /** Whether a wanderer has credits for online calls (T45a); when false, local models are used. */
   hasCredits?: (chi: string) => boolean;
-  /** Whether a knob of the master keeps this call from the models (T247, ADR-0132): it goes to the local ones, as without credits. */
+  /** Whether a knob of the master keeps this call from the models (T247, ADR-0133): it goes to the local ones, as without credits. */
   rationed?: (task: string) => boolean;
   /** The reasoning of every call that does not say its own (`ai.thinking`): the lobby sets it (T247). */
   thinking?: () => CallOptions['thinking'];

@@ -77,14 +77,14 @@
   storia, `sheetFingerprint`) e l'agente `attore` recita `npc.reply` e `npc.dialogue` con il suo modello (`ACTOR_MODEL`, `gemini-3.8-flash`): stessi compiti,
   paganti, limiti e modelli locali; si sceglie nella Genesi o nella lobby (solo il master, entrando: → #lobby); `kernel.interpreter()` dice chi recita.
   I **coefficienti di generazione** (`ai.coefficienti`, ADR-0085, T45b, `src/kernel/coefficients.ts`): quanto spesso ogni agente chiama l'IA,
-  da 0 a 1, riparati dal validatore; diretti (`sessioni dialoghi trame revisioni modelli brani`: ritmi allungati; `luoghi parole sguardi azioni magia morte riparazioni studio`: la quota che va ai modelli, ADR-0132) e indiretti (`persone abitanti
+  da 0 a 1, riparati dal validatore; diretti (`sessioni dialoghi trame revisioni modelli brani`: ritmi allungati; `luoghi parole sguardi azioni magia morte riparazioni studio`: la quota che va ai modelli, ADR-0133) e indiretti (`persone abitanti
   pacchetti cose`: meno di ciò che causa le chiamate); a 0 nessuna chiamata, per nessuna riga; il censimento delle chiamate in `CENSUS`, dove solo la Genesi non ha una manopola, il preset «Low Detail» (`LOW_DETAIL`, anche
   lo Scultore su Flash-Lite), la stima di un'ora di gioco (`hourlyEstimate`); nella Genesi si scelgono con i modelli (`kernel.setAi`).
 
 <a id="lobby"></a>
 ## La lobby multigiocatore
 
-  La **lobby** (ADR-0086, T45d; ADR-0132, T247): il master regola tutto il consumo prima di entrare (preset, ogni coefficiente, ogni modello, ragionamento, Attore, budget, minimi), con la stima di un'ora che segue i valori e, accanto a ogni manopola, cosa fa il gioco a 0; gli altri vedono e non toccano. Il tetto crediti di chi entra incrementa i budget (`addBudgetFromCap`); a crediti esauriti o al tetto, tre scelte (ricarica, offline, abbandona), che restano di ogni viandante anche a partita in corso; la collezione carte fuori dalla partita con utilizzi.
+  La **lobby** (ADR-0086, T45d; ADR-0133, T247): il master regola tutto il consumo prima di entrare (preset, ogni coefficiente, ogni modello, ragionamento, Attore, budget, minimi), con la stima di un'ora che segue i valori e, accanto a ogni manopola, cosa fa il gioco a 0; gli altri vedono e non toccano. Il tetto crediti di chi entra incrementa i budget (`addBudgetFromCap`); a crediti esauriti o al tetto, tre scelte (ricarica, offline, abbandona), che restano di ogni viandante anche a partita in corso; la collezione carte fuori dalla partita con utilizzi.
 
   **Quando compare**: in una partita di molti a ogni apertura della pagina, anche di un universo già avviato, se non c'è `?skip`. Da soli la stessa schermata con `alone` (solo le regolazioni), a ogni apertura di un universo già generato se ci sono i modelli (`?lobby` la forza; senza modelli non c'è nulla da regolare); un universo mai generato ha la Genesi.
 
