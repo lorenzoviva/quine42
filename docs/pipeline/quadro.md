@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 04/11/2026, epoca 260. Crediti: vedi `stato`.
+Aggiornato il 04/11/2026, epoca 261. Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -33,13 +33,13 @@ Aggiornato il 04/11/2026, epoca 260. Crediti: vedi `stato`.
 ## Pronti e priorità
 
 0. **Decisioni dell'autore del 04/11 (D8-D26), pianificate.** Step 32: T261 → T262 → T245a → T263 e T245b → T245c, T245d → T245e → T245f; T260 a sé. T245g-i in attesa della Fase III (step 39). T265 prima della beta (step 34), T264 piccolo, T266 (rinomine, D14) in attesa verso fine Fase I. D16: `suono-effetto-morte` resta. D17-D26 confermate; D22: nessuna API sui crediti trovata cercando in `sandbox.ts`, `prelude.lua`, `validator.ts` (regola 8d).
-1. **In corso T258 (claude).** Pronti: **T259** e **T255** (spostato da Argon a claude: non è un task piccolo, e i crediti di Claude scadono il 05/11). **T256 integrato** (`d16d20a`): un task tornato `da fare` riparte da capo; integrare un `fallito` o un esito senza riga lascia il blocco `da fare`, quindi il task si rilancia da solo (attenzione a `integra`); non provato con una CLI reale. **T253 integrato:** il parser legge `T89a-d`, nessuna dipendenza del backlog cambia. `tests/subscription.test.ts` rosso nella suite intera e verde da solo per la seconda volta (T89c, T253), causa non cercata: proposto all'autore un task. Gemini all'8 % è sotto `sogliaUnSolo` (10): nessun task nuovo fino al reset del 05/11 alle 17:37 UTC.
-4. **T258 → T156** (strutture procedurali). **T182 integrato e chiuso dall'autore (04/11):** D4 A (il kernel segna il suolo, T258, approvato), D5 C (gli interni li fa un agente, T259: nel backlog risulta `approvato` dopo `5d70c1a`, nessun comando dell'orchestratore lo ha fatto, forse la pagina web dell'autore, non accertato; chiesta conferma, D29 aperta finché non risponde), D6 la ricchezza basta, D7 niente giro su Argon. Soglia foto non raggiunta, accettato; `pagoda/1` e `tempio/2` restano fuori dai 10. T156 aspetta T258, non T259.
+1. **In corso T258 (claude).** Pronti: **T259** e **T255** (spostato da Argon a claude: non è un task piccolo, e i crediti di Claude scadono il 05/11). **T256 integrato** (`d16d20a`): un task tornato `da fare` riparte da capo; integrare un `fallito` o un esito senza riga lascia il blocco `da fare`, quindi il task si rilancia da solo (attenzione a `integra`); non provato con una CLI reale. **T253 integrato:** il parser legge `T89a-d`, nessuna dipendenza del backlog cambia. `tests/subscription.test.ts` rosso nella suite intera e verde da solo: T267 ne cerca la causa (D28, approvato). Gemini all'8 % è sotto `sogliaUnSolo` (10): nessun task nuovo fino al reset del 05/11 alle 17:37 UTC.
+4. **T258 → T156** (strutture procedurali). **T182 integrato e chiuso dall'autore (04/11):** D4 A (il kernel segna il suolo, T258, approvato), D5 C (gli interni li fa un agente, T259, approvazione confermata dall'autore, D29), D6 la ricchezza basta, D7 niente giro su Argon. Soglia foto non raggiunta, accettato; `pagoda/1` e `tempio/2` restano fuori dai 10. T156 aspetta T258, non T259.
 4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla.
 
 ## Attese dall'autore
 
-- **Tutte le domande sono numerate in `docs/pipeline/domande/aperte.md`.** D1-D26 chiuse il 04/11; aperte D28-D31. Le voci qui sotto sono il contesto.
+- **Tutte le domande sono numerate in `docs/pipeline/domande/aperte.md`.** D1-D26 chiuse il 04/11; D28-D30 chiuse: D30, Fable a orchestrare, la casella la spunta l'autore, a mano, se e quando vuole (la casella la porta T255). Aperta D31. Le voci qui sotto sono il contesto.
 - **To-do del 04/11 pianificato, T230-T242:** approvati T230, T231 (fasi, step, tag), T232, T234 (landing launcher, blog), T237 (guida beta), T238 (registro), T241, T242 (aureo in UI e prompt; **i modelli esistenti non si toccano**). T236 chiuso (2 € + 3 € a mano, altri 5 € agli assidui, 4 universi condivisi; da mettere nel deploy: `QUINE_TETTO_RICARICHE`, `QUINE_UNIVERSI_PER_ACCOUNT`). T243 approvato (commissione configurabile). T232 e T233 a fine Fase II (autore, 04/11), T234 e T241 staccati. T244: ritocchi della home, più video lunghi dell'autore sul nostro server (con `Range`), istruzioni a due parti. Lo sconto: pagamento a mano e in dollari; come dichiarare i soldi lo gestisce l'autore (`domande/T243.md` chiusa). T235 riparte a fine Fase II; T239 (lingue) in Fase III, ultima operazione. **T240 (piano di lancio, Fable): dal reset del 05/11 alle 15:59 UTC lo riporto a `da fare` io.** L'autore porta in chat i feedback dei giocatori; su richiesta lo aiuto con i messaggi WhatsApp della beta.
 - **T247 (tutto il consumo regolabile in lobby, richiesta dell'autore del 04/11), approvato. Deciso dall'autore:** tutte le manopole bloccate a partita in corso, `setAi` in partita si toglie; il tetto del viandante e le scelte a crediti esauriti restano.
 - **Domande nei file (04/11): nessuna da chiedere ora. T45f (progetto, hosting, regione) aspetta la fine della Fase I, T93 (Managed Payments) la Fase IV: decisione dell'autore; le altre hanno `Stato: chiusa` in testa. T208 integrato: il conteggio giusto della pagina web si vede dopo il riavvio del processo, non provato nel browser.**
@@ -65,5 +65,5 @@ Aggiornato il 04/11/2026, epoca 260. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **259:** integrati T89e e T182; creati T258 e T259.
 - **260:** integrati T256 e T257; T255 su claude; D8-D26 chiuse, creati T260-T266 e T245a-i.
+- **261:** D28-D30 chiuse; creato T267.

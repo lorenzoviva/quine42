@@ -4182,3 +4182,11 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Test: Suite intera e typecheck con i loro turni.
 - Browser: non serve, salvo righe che toccano ciò che si vede.
 - Quando è fatto: commit su `task/T266`; Sicurezza: nessuna superficie nuova.
+
+### T267 · `tests/subscription.test.ts` rosso sotto carico, verde da solo: la causa — `da fare`
+- Pipeline: claude · stima 2% · approvato · priorità 40
+- Contesto: decisione dell'autore del 04/11 (D28). Il file è rosso nella suite intera e verde da solo: visto in T89c e T253, già notato in passato come «rosso di carico» senza cercarne la causa (`dossier T253`, `dossier T89c`). Un rosso che si ignora nasconde quelli veri.
+- Cosa fare: riprodurlo (suite intera o carico simulato), trovare la causa, correggerla nel test o nel codice, secondo dove sta. Se è un tempo massimo troppo stretto, dirlo con la misura, non alzarlo a occhio. Se non si riproduce, scrivere nell'esito cosa è stato provato e fermarsi lì: niente correzioni alla cieca.
+- Test: il file verde in più giri sotto carico. Suite intera e typecheck con i loro turni.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T267`; nell'esito la causa, o cosa è stato provato. Sicurezza: nessuna superficie nuova.
