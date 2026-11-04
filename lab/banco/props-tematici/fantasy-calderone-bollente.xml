@@ -1,0 +1,79 @@
+<!-- Calderone bollente (fantasy, aurora): un calderone di ferro battuto su un fuoco di ciocchi, dentro un cerchio di pietre, colmo di
+     un intruglio verde luminoso che ribolle e trabocca in bolle. Il seme sceglie il calderone (pancia tonda su quattro piedi, pentola alta
+     su tre pietre con il mestolo, o pentola appesa a un treppiede con le catene), dove nascono le fiamme e come salgono le bolle. -->
+<sequence values="BIiSAnNFRGMwJVQabo" size="20 20 20" symmetry="(xy)" name="Calderone bollente">
+  <color symbol="I" value="424754" name="ferro battuto"/>
+  <color symbol="i" value="2c2f38" name="ferro scuro"/>
+  <color symbol="S" value="8a8478" name="pietra"/>
+  <color symbol="A" value="3a2a22" name="cenere"/>
+  <color symbol="n" value="4a2e1a" name="corteccia"/>
+  <color symbol="N" value="6b4528" name="ciocco"/>
+  <color symbol="F" value="ff9a2e" name="fiamma" glow="True"/>
+  <color symbol="R" value="ffe27a" name="punta della fiamma" glow="True"/>
+  <color symbol="G" value="5cff7a" name="intruglio" glow="True"/>
+  <color symbol="M" value="b8ffc4" name="bolle" glow="True"/>
+  <color symbol="w" value="8a6440" name="legno"/>
+  <color symbol="J" hidden="True" name="ferro in lavorazione"/>
+  <color symbol="V" hidden="True" name="lo spazio"/>
+  <color symbol="Q" hidden="True" name="dove salgono le bolle"/>
+  <color symbol="a" hidden="True" name="pancia tonda sui piedi"/>
+  <color symbol="b" hidden="True" name="pentola alta sulle pietre"/>
+  <color symbol="o" hidden="True" name="appeso al treppiede"/>
+  <!-- Il dado del calderone -->
+  <box at="10 10 0" size="20 20 20" color="a"/>
+  <all in="a" out="V"/>
+  <one steps="1"><rule in="V" out="b"/><rule in="V" out="a"/><rule in="V" out="o"/></one>
+  <all symmetry="(xyz)"><rule in="aV" out="aa"/><rule in="bV" out="bb"/><rule in="oV" out="oo"/></all>
+  <!-- Il cerchio di pietre, la cenere e i ciocchi -->
+  <cylinder at="10 10 0" size="17 17 1" color="S"/>
+  <cylinder at="10 10 0" size="13 13 1" color="A"/>
+  <box at="10 10 1" size="9 2 1" color="N"/>
+  <box at="10 10 1" size="2 9 1" color="N"/>
+  <!-- Pancia tonda su quattro piedi -->
+  <box at="6 6 1" size="1 1 5" color="i" on="a"/>
+  <box at="14 6 1" size="1 1 5" color="i" on="a"/>
+  <box at="6 14 1" size="1 1 5" color="i" on="a"/>
+  <box at="14 14 1" size="1 1 5" color="i" on="a"/>
+  <ellipsoid at="10 10 3" size="15 15 12" color="J" on="a"/>
+  <box at="10 10 11" size="20 20 9" color="a" on="J"/>
+  <cylinder at="10 10 10" size="12 12 1" color="G" on="J"/>
+  <all in="J" out="I"/>
+  <cylinder at="10 10 11" size="15 15 1" color="i" on="a"/>
+  <cylinder at="10 10 11" size="12 12 1" color="a" on="i"/>
+  <box at="2 10 8" size="1 1 3" color="i" on="a"/>
+  <box at="18 10 8" size="1 1 3" color="i" on="a"/>
+  <cylinder at="10 10 11" size="11 11 5" color="Q" on="a"/>
+  <!-- Pentola alta su tre pietre, con il mestolo -->
+  <box at="5 10 1" size="2 2 2" color="S" on="b"/>
+  <box at="15 10 1" size="2 2 2" color="S" on="b"/>
+  <box at="10 15 1" size="2 2 2" color="S" on="b"/>
+  <cylinder at="10 10 3" size="11 11 11" color="J" on="b"/>
+  <cylinder at="10 10 6" size="12 12 1" color="i" on="b"/>
+  <cylinder at="10 10 13" size="9 9 1" color="G" on="J"/>
+  <all in="J" out="I"/>
+  <cylinder at="10 10 13" size="13 13 1" color="i" on="b"/>
+  <line at="10 10 13" to="14 12 18" r="0" color="w" on="b"/>
+  <cylinder at="10 10 14" size="9 9 4" color="Q" on="b"/>
+  <!-- Appeso a un treppiede, con le catene -->
+  <line at="5 5 1" to="10 10 18" r="0.5" color="w" on="o"/>
+  <line at="15 5 1" to="10 10 18" r="0.5" color="w" on="o"/>
+  <line at="10 16 1" to="10 10 18" r="0.5" color="w" on="o"/>
+  <ellipsoid at="10 10 5" size="11 11 9" color="J" on="o"/>
+  <box at="10 10 11" size="20 20 9" color="o" on="J"/>
+  <cylinder at="10 10 10" size="8 8 1" color="G" on="J"/>
+  <all in="J" out="I"/>
+  <cylinder at="10 10 11" size="11 11 1" color="i" on="o"/>
+  <cylinder at="10 10 11" size="8 8 1" color="o" on="i"/>
+  <line at="5 10 12" to="10 10 17" r="0" color="i" on="o"/>
+  <line at="15 10 12" to="10 10 17" r="0" color="i" on="o"/>
+  <cylinder at="10 10 11" size="7 7 4" color="Q" on="o"/>
+  <!-- Le fiamme: dove nascono e quanto salgono lo sceglie il seme -->
+  <prl steps="1" in="[abo] N" out="F *" p="0.45"/>
+  <one steps="18" in="[abo] F" out="F *"/>
+  <all in="[abo] F" out="* R"/>
+  <prl steps="1" in="N" out="n" p="0.3"/>
+  <!-- Le bolle che ribollono e traboccano -->
+  <prl steps="1" in="Q G" out="M *" p="0.12"/>
+  <one steps="30" symmetry="(xyz)" in="MQ" out="MM"/>
+  <all in="[VQabo]" out="B"/>
+</sequence>
