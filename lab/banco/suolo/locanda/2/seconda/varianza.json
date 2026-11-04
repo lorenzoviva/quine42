@@ -1,0 +1,161 @@
+{
+  "taglie": [
+    {
+      "taglia": "grande",
+      "box": [
+        100,
+        100,
+        100
+      ],
+      "vpt": 20,
+      "gradino": 4,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [
+            "finisce: no (serve entro 8000 ms)",
+            "valido: non termina: dopo 623 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+            "piani: 1 (serve ≥ 2)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 2.75 (serve ≤ 0.25)",
+            "salti: 0 (serve ≥ 2)",
+            "finestre: 4 su 3 lati (serve ≥ 6 su ≥ 3 lati)"
+          ],
+          "ms": 8557
+        },
+        {
+          "seme": 2,
+          "difetti": [],
+          "ms": 7083
+        },
+        {
+          "seme": 3,
+          "difetti": [],
+          "ms": 6627
+        },
+        {
+          "seme": 4,
+          "difetti": [],
+          "ms": 6829
+        },
+        {
+          "seme": 5,
+          "difetti": [],
+          "ms": 8074
+        }
+      ],
+      "regge": false,
+      "varianza": {
+        "voxel": 0.5614376224474436,
+        "colore": 0.21126469989392202,
+        "pianta": 0.18230155521508973,
+        "perimetro": 0.15484597569874053,
+        "interno": 0.6703924517134019,
+        "semi": 5,
+        "firmePiani": 2,
+        "firmeStanze": 4,
+        "architetture": 4,
+        "statico": false
+      },
+      "difettiVarianza": []
+    },
+    {
+      "taglia": "enorme",
+      "box": [
+        120,
+        120,
+        112
+      ],
+      "vpt": 16,
+      "gradino": 3,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [
+            "finisce: no (serve entro 8000 ms)",
+            "valido: il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 18% dei voxel non è attaccato al corpo principale (2 pezzi); non termina: dopo 687 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+            "piani: 1 (serve ≥ 2)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 3.81 (serve ≤ 0.25)",
+            "salti: 0 (serve ≥ 2)",
+            "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)"
+          ],
+          "ms": 8407
+        },
+        {
+          "seme": 2,
+          "difetti": [
+            "finisce: no (serve entro 8000 ms)",
+            "valido: il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 20% dei voxel non è attaccato al corpo principale (2 pezzi); non termina: dopo 594 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+            "piani: 1 (serve ≥ 2)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 4.6 (serve ≤ 0.25)",
+            "salti: 0 (serve ≥ 2)",
+            "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)",
+            "sagoma: 3 (serve ≥ 4)"
+          ],
+          "ms": 8631
+        },
+        {
+          "seme": 3,
+          "difetti": [
+            "finisce: no (serve entro 8000 ms)",
+            "valido: il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 25% dei voxel non è attaccato al corpo principale (2 pezzi); troppo basso: alto 51 voxel, la sua classe chiede almeno 64 (le cose simili hanno le stesse proporzioni); non termina: dopo 582 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+            "piani: 1 (serve ≥ 2)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 4.2 (serve ≤ 0.25)",
+            "salti: 0 (serve ≥ 2)",
+            "sagoma: 3 (serve ≥ 4)"
+          ],
+          "ms": 8521
+        },
+        {
+          "seme": 4,
+          "difetti": [
+            "finisce: no (serve entro 8000 ms)",
+            "valido: il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 33% dei voxel non è attaccato al corpo principale (2 pezzi); troppo basso: alto 34 voxel, la sua classe chiede almeno 64 (le cose simili hanno le stesse proporzioni); non termina: dopo 613 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+            "piani: 1 (serve ≥ 2)",
+            "testa: 0.94 (serve ≥ 1.5 caselle per piano)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 2.93 (serve ≤ 0.25)",
+            "porta: x 59, scarto 0, alta 0.94, libera (serve sul davanti, scarto ≤ 0.33, alta ≥ 1.5)",
+            "sagoma: 3 (serve ≥ 4)"
+          ],
+          "ms": 8794
+        },
+        {
+          "seme": 5,
+          "difetti": [
+            "finisce: no (serve entro 8000 ms)",
+            "valido: il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 22% dei voxel non è attaccato al corpo principale (2 pezzi); troppo basso: alto 51 voxel, la sua classe chiede almeno 64 (le cose simili hanno le stesse proporzioni); non termina: dopo 647 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+            "piani: 1 (serve ≥ 2)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 3.47 (serve ≤ 0.25)",
+            "salti: 0 (serve ≥ 2)",
+            "sagoma: 3 (serve ≥ 4)"
+          ],
+          "ms": 8636
+        }
+      ],
+      "regge": false,
+      "varianza": {
+        "voxel": 0.4869125709557529,
+        "colore": 0.2113196275097284,
+        "pianta": 0.5458442280120255,
+        "perimetro": 0.2948877805486284,
+        "interno": 0.8384371700105597,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 2,
+        "architetture": 4,
+        "statico": false
+      },
+      "difettiVarianza": []
+    }
+  ],
+  "regge": false,
+  "statico": false,
+  "varia": true,
+  "passa": false,
+  "ms": 80468
+}

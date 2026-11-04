@@ -50,3 +50,21 @@ Il giro 4 non è stato fatto: senza una decisione dell'autore non può raggiunge
 - **La traccia**: seconda richiesta su 5: 3 corrette. Costa 0,43-1,28 dollari, meno della prima, come in T173; non c'è un confronto senza traccia, quindi non dimostra che sia lei a correggere.
 - **Il costo**: alla prima, in media, input 10 968 e output 55 423, 1,15 dollari (T173: 3 791, 60 553, 1,22). **L'output scende appena: quasi tutto è ragionamento**, l'XML sono 11-15 mila caratteri. Il prompt non abbassa il costo; dà molto di più per lo stesso costo. Tutto T182: 27 chiamate misurate, 30,59 dollari a listino, più 2 senza conto (una CLI senza risultato, una al limite); il limite delle 5 ore è scattato una volta.
 - **Il tempo**: i programmi girano in 6-7 s a Enorme (limite 8 s) con altri processi sulla macchina: `pagoda/1` è caduta lì. Il margine è poco.
+
+## La locanda con la lettera del suolo (T258)
+
+Il kernel scrive `suolo="E"` sullo strato `base` (ADR-0135); la ricetta del pozzo sta nel prompt, presa da `riferimento/cantina.xml`, che a mano regge 12 semi su 12 alle due taglie. Prova: la locanda, 5 semi, Grande ed Enorme, al più 4 richieste. Modello: `claude-opus-5-5`.
+
+| richiesta | input | output | dollari | Grande | Enorme | cosa cade |
+|---|---|---|---|---|---|---|
+| `1` | 11 660 | 73 298 | 1,56 | 0/5 | 0/5 | botti basse nel pozzo (cantina scartata), tempo |
+| `2` | 11 661 | 68 101 | 1,46 | 0/5 | 0/5 | botti basse, tempo |
+| `1/seconda` | 25 958 | 48 041 | 1,17 | 4/5 | 0/5 | tempo; perimetro 0,04 |
+| `2/seconda` | 25 583 | 53 531 | 1,28 | 4/5 | 0/5 | tempo; una cantina a Grande; perimetro 0,05 |
+
+Le colonne delle taglie sono di `suolo/da-sola/`, un'esecuzione alla volta. Tra le prime e le seconde richieste il prompt è cambiato: cosa fa cadere la cantina e quanto tempo resta (`suolo/prompt-seconda.md`).
+
+- **Il prompt è seguito**: tutti e 4 i programmi usano la lettera e la ricetta alla lettera. Input 11 660 contro i ~10 100 di T182: la ricetta si paga ~1 500 token.
+- **Non regge, ma per il tempo**: senza il limite, `1/seconda` passa tutte le misure a tutti e 5 i semi di Enorme, in 7,3-7,8 s, e subito dopo con il limite supera gli 8 s. Lo scheletro con la cantina usa già 6,8 s. Un programma troncato perde tutto, quindi la misura salta da «passa» a 0/5 per pochi decimi.
+- **Una lezione del banco**: `--insieme 2` falsa i tempi quando il margine è così poco. Con questi programmi si prova uno alla volta.
+- **Il seguito**: `docs/pipeline/domande/T258.md`. Niente quinto tentativo.

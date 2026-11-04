@@ -8,7 +8,7 @@ import { FormCache, formKey, Forms, InlineRunner } from '../../src/kernel/forms'
 import { modelSize } from '../../src/kernel/modeldirector';
 import { Mj3Error } from '../../src/mj/engine';
 import { compileMjx } from '../../src/mj/model';
-import { runMjx } from '../../src/mj/run';
+import { MAX_FORM_TIME, runMjx } from '../../src/mj/run';
 import { bersaglio } from '../banco/bersagli';
 import { esegui, giudica, misura } from '../banco/misure';
 
@@ -99,7 +99,8 @@ describe('la cantina a mano (riferimento/cantina.xml)', () => {
   const xml = fs.readFileSync('lab/banco/riferimento/cantina.xml', 'utf8');
   it.each(['grande', 'enorme'] as const)('regge a %s, con la cantina raggiunta', (taglia) => {
     const b = { ...bersaglio('locanda')!, taglia };
-    const e = esegui(xml, b, 1);
+    // Under the suite's load 8 s may not be enough, and a program cut in half fails everything: here the limit does not count, the bench measures it alone.
+    const e = esegui(xml, b, 1, MAX_FORM_TIME);
     const m = misura(e, b);
     expect(m.cantina).toBeGreaterThanOrEqual(1.2);
     // The time depends on what else the machine is doing: the bench measures it alone.

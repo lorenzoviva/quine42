@@ -25,7 +25,7 @@ La stessa idea della palazzina con regole corte e `steps` (`../pattern.md`, patt
 
 ## La cantina (`cantina.xml`, T258)
 
-Lo scheletro con `suolo="E"` e un pozzo di due campate in linea scavato fino al fondo (`ground="Z"`, ADR-0135), per la locanda (`sotto: 1`): a Grande il suolo è a z=20, a Enorme a z=16, e nel programma quei numeri non ci sono. **8 semi su 8 alle due taglie, e varia**: voxel 0,64, pianta 0,31, perimetro 0,16, interno 0,77, architetture 5/8 a Grande; 5 s a Grande, 7-7,6 s a Enorme contro il limite di 8 s, poco margine. Foglio: `cantina-locanda.png`. La ricetta è dentro `../prompt.md`.
+Lo scheletro con `suolo="E"` e un pozzo di due campate in linea scavato fino al fondo (`ground="Z"`, ADR-0135), per la locanda (`sotto: 1`): a Grande il suolo è a z=20, a Enorme a z=16, e nel programma quei numeri non ci sono. **12 semi su 12 alle due taglie, e varia**: voxel 0,65, pianta 0,41, perimetro 0,20, interno 0,77, architetture 8/12 a Grande; 6,8 s a Enorme contro il limite di 8 s, poco margine: `docs/pipeline/domande/T258.md`. Le botti vanno dal pavimento al soffitto: una cima bassa è un pavimento non raggiunto, e il kernel butta via tutta la cantina. Foglio: `cantina-locanda.png`. La ricetta è dentro `../prompt.md`.
 
 ## Palazzina moderna
 
