@@ -35,7 +35,7 @@ import { BudgetError, type AiModels } from './ai/models';
 import { billedModel, costOf } from './ai/prices';
 import { USAGE_FILE, UsageLog, type CallRecord } from './ai/usage';
 import { SHORTFALLS_FILE, ShortfallLog, type ShortfallNote } from './shortfalls';
-import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, MemoryLedger, splitCost, type Ledger, type PaymentRecord } from './credits';
+import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, DEFAULT_PLATFORM_FEE, MemoryLedger, splitCost, type Ledger, type PaymentRecord } from './credits';
 import { MemoryChunks, type ChunkStore } from './chunks';
 import { bodyFoot, bodyGround, Forms, holesOf, InlineRunner, instanceGrid, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground } from './forms';
 import { classOf, guessClass, RARE_SIZES, sizeRank, SIZE_TIERS, tilesOf, type SizeTier } from '../mj/classes';
@@ -296,6 +296,8 @@ export interface KernelOptions {
   ledger?: Ledger;
   /** Dollars a day the master may give by hand (ADR-0104). */
   grantCap?: number;
+  /** The platform fee on every call charged (ADR-0132): only the server says it, never the universe, Lua or the Council. */
+  platformFee?: number;
   store: KeyValueStore;
   ai: AiModels;
   chunks?: ChunkStore;
@@ -496,6 +498,7 @@ export class Kernel {
   /** Balances and payments, outside the files and their history (ADR-0104). */
   readonly ledger: Ledger;
   private readonly grantCap: number;
+  private fee: number;
   private wanderersById = new Map<string, Wanderer & { entity: Id; tappeto?: { ox: number; oy: number }; profilo?: Profile; anonimo?: boolean }>();
   /** Spending ceiling for this session per wanderer (T45d: lobby). */
   private sessionCap = new Map<string, number>();
@@ -596,6 +599,7 @@ export class Kernel {
     this.mirror = !!opts.mirror;
     this.ledger = opts.ledger ?? new MemoryLedger();
     this.grantCap = opts.grantCap ?? DEFAULT_GRANT_CAP;
+    this.fee = opts.platformFee ?? DEFAULT_PLATFORM_FEE;
     this.wasmUri = opts.wasmUri;
     this.chunkStore = opts.chunks ?? new MemoryChunks();
     this.forms = new Forms(opts.forms ?? new InlineRunner());
@@ -4991,6 +4995,16 @@ export class Kernel {
     return true;
   }
 
+  /** The platform fee of this world (ADR-0132). */
+  get platformFee(): number {
+    return this.fee;
+  }
+
+  /** What a mirror shows of the fee: what the server said. It charges nothing with it; elsewhere nothing sets it. */
+  showPlatformFee(fee: unknown): void {
+    if (this.mirror && typeof fee === 'number' && fee >= 0 && fee < 1) this.fee = fee;
+  }
+
   /** Deducts credits from a wanderer (T45a), clamping to 0. Tracks session spending against tetto (T45d). */
   deductCredits(id: string, amount: number): number {
     if (amount <= 0) return this.creditsOf(id);
@@ -5019,7 +5033,7 @@ export class Kernel {
 
   /**
    * Deducts credits for a completed model call (T45a).
-   * Charges the payer (or divides common expenses equally among connected players) the cost plus 1% (P#1).
+   * Charges the payer (or divides common expenses equally among connected players) the cost plus the platform fee (ADR-0132).
    */
   billCall(r: CallRecord): void {
     if (!this.manyPlayers() || this.mirror) return;
@@ -5035,7 +5049,7 @@ export class Kernel {
     // A model of Google's off the price list costs what the gate counts it for, the dearest, never nothing (V-024); the local ones are free.
     const usd = costOf(billedModel(r.model), { prompt: r.prompt, cached: r.cached, output: r.output, thoughts: r.thoughts }, r.day) ?? 0;
     if (usd <= 0) return;
-    const total = costWithFee(usd);
+    const total = costWithFee(usd, this.fee);
     const payer = r.chi || COMUNE;
     if (payer !== COMUNE) {
       this.deductCredits(payer, total);

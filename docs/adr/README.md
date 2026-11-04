@@ -134,8 +134,8 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0127](0127-il-musicista-e-una-stanza-con-piu-squadre.md) | Il Musicista sta nella casa dell'Artista: una stanza ha un elenco di squadre, e il mondo chiede la musica che gli manca |
 | [0128](0128-fasi-e-step.md) | Lo sviluppo si divide in quattro fasi e in step, cioè obiettivi condivisi tra task; la tabella è in `docs/fasi.md` |
 | [0129](0129-le-notizie-sono-file-nella-build.md) | Le notizie del sito sono file Markdown raccolti alla build: niente rotte né database, tutto il testo esce escapato |
-
 | [0130](0130-il-registro-delle-mancanze.md) | Ciò che il Concilio non riesce a fare si conta in `world/mancanze.json`: fuori da ciò che esce, oltre i rollback, con un comando che ne fa il rapporto |
 | [0131](0131-video-e-istruzioni-della-beta.md) | I video del sito stanno in una cartella del server e si servono a pezzi da un elenco; le istruzioni della beta entrano nella build solo se accese | accettato |
+| [0132](0132-la-commissione-la-decide-il-server.md) | La commissione sui consumi è configurazione del server (`QUINE_COMMISSIONE`): 0 in beta, l'1 % se non detto, mai dal mondo o dal client |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

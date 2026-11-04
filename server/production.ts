@@ -12,7 +12,7 @@ import { isInternal, newSecret } from './access';
 import { accountHandler, accountSettings, type AccountSettings } from './account';
 import { contentSecurityPolicy } from './csp';
 import { settleAllGit } from './git';
-import { grantCapOf } from './ledger';
+import { grantCapOf, platformFeeOf } from './ledger';
 import { clientAddress, proxyHops, Rates, type Pace } from './rates';
 import { attachSessions, getActiveWorld, sessionList, type SessionOptions } from './session';
 import { stripeHandler, stripeSettings } from './stripe';
@@ -238,7 +238,7 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
     (req, res, next) => (req.url?.split('?')[0] === '/api/account' ? answerAccount(req, res) : next()),
     stripeHandler({ settings: stripeSettings(o.env), accounts, universesDir, getActiveWorld }),
     wandererHandler({ accounts, universesDir, getActiveWorld }),
-    walletHandler({ accounts, universesDir, getActiveWorld }),
+    walletHandler({ accounts, universesDir, getActiveWorld, platformFee: platformFeeOf(o.env) }),
     sessionList(accounts),
     videoHandler({ folder: videos, accounts, addressOf, atOnce: limits.videosAtOnce, inAll: limits.videosInAll }),
   ] as Route[];
@@ -284,7 +284,7 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
     accounts,
     gemini: gemini.direct(),
     internal,
-    credits: { universesDir, grantCap: grantCapOf(o.env, true) },
+    credits: { universesDir, grantCap: grantCapOf(o.env, true), platformFee: platformFeeOf(o.env) },
     memoryMb: Number(o.env.QUINE_MONDO_MEMORIA) || undefined,
     maxWorlds: Number(o.env.QUINE_MONDI_MASSIMI) || undefined,
     program: async () => o.worldProgram,

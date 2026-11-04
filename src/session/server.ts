@@ -428,7 +428,7 @@ export class SessionServer {
       ...(this.kernel.profileOf(id) ? { profilo: this.kernel.profileOf(id) } : {}),
       ...(fixed?.riparato.length ? { riparato: fixed.riparato } : {}),
       ...(this.isAnonymous(id) ? { anonimo: true as const } : {}),
-      ...(master ? { master: true as const, concilio: this.kernel.feed().slice(-FEED_KEEP), ...(Object.keys(this.branch.files).length ? { ramo: { ...this.branch.files } } : {}) } : {}),
+      ...(master ? { master: true as const, commissione: this.kernel.platformFee, concilio: this.kernel.feed().slice(-FEED_KEEP), ...(Object.keys(this.branch.files).length ? { ramo: { ...this.branch.files } } : {}) } : {}),
       ...(forma ? { forma } : {}),
       tick: u.tick,
       ora: u.ora,

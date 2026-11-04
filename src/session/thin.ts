@@ -90,6 +90,7 @@ export class ThinClient {
     this.heard(s.feed);
     s.onMessage = (m) => this.receive(m);
     if (s.master) {
+      k.showPlatformFee(s.commissione);
       this.openBranch();
       k.connected = [...s.players];
       k.follow = (id) => void this.follow(id);
