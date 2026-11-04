@@ -3953,7 +3953,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Quando è fatto: commit di merge su `task/T251`, nessun conflitto rimasto; l'esito dice come hai risolto ciascuno dei quattro file. Sicurezza: nessuna superficie nuova oltre a quella dichiarata da T247.
 - Esito: merge di T247 su `task/T251` (`5edb09d`), nessun conflitto rimasto: `AGENTS.md` tiene la commissione di T243 più la riga delle regolazioni; `client.ts` e `protocol.ts` portano in `ingresso` sia `commissione` sia `regolazioni`; `style.css` unisce `z-index: 55` di T247 e scala φ, con i nuovi stili della lobby sulle variabili della scala; ADR-0133 tenuto, ADR-0132 intatto; suite (1943), typecheck e build verdi. Sicurezza: nessuna superficie nuova oltre a quella dichiarata da T247. Manca: difetto nuovo non corretto, la casella del tema nella Genesi è schiacciata a 22 px (proposta `flex-shrink: 0` su `#genesis textarea`, task a parte); resta aperta `docs/pipeline/domande/T247.md`. Non provato, come da task: 390 px, partita di molti e le altre prove di T247.
 
-### T252 · La casella del tema nella Genesi non è schiacciata — `da fare`
+### T252 · La casella del tema nella Genesi non è schiacciata — `fatto` (`e30e2c8`)
 - Pipeline: claude · stima 1% · approvato · browser · priorità 10
 - Step: 34
 - Contesto: nasce da T251 (`dossier T251`). Nella schermata della Genesi la casella del tema è alta 22 px: un figlio di un contenitore flex che si restringe. Proposta dell'agente che l'ha trovata: `flex-shrink: 0` su `#genesis textarea` in `src/style.css:317`.
@@ -3961,6 +3961,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Test: typecheck con il suo turno; la suite intera non serve se cambia solo il CSS.
 - Browser: sì, la schermata della Genesi a 1920 e a 390 px: la casella mostra più righe, si può scrivere e ridimensionare, il resto della schermata non esce dalla vista né si taglia.
 - Quando è fatto: commit su `task/T252`; nell'esito l'altezza prima e ora. Sicurezza: nessuna superficie nuova.
+- Esito: chiuso senza lavoro: la stessa correzione è entrata con T152 (`e30e2c8`, `flex-shrink: 0` sui figli della finestra). Non provati i 390 px.
 
 ### T253 · Il parser delle dipendenze capisce gli intervalli — `da fare`
 - Pipeline: gemini · stima 2% · approvato · priorità 10
