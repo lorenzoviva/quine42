@@ -1,4 +1,4 @@
-// What the universes on this disk say the Council could not do (T238, ADR-0129): it reads `world/mancanze.json` of each one, without
+// What the universes on this disk say the Council could not do (T238, ADR-0130): it reads `world/mancanze.json` of each one, without
 // the server nor the kernel. A folder that starts with a dot is not a universe (`.saldi`, `.cestino`, `.coda`).
 
 import fs from 'node:fs';

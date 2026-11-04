@@ -1,4 +1,4 @@
-// What the Council could not do (T238, ADR-0129): a request that ends badly is one line of the report, and stays on the server.
+// What the Council could not do (T238, ADR-0130): a request that ends badly is one line of the report, and stays on the server.
 
 import { describe, expect, it } from 'vitest';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';

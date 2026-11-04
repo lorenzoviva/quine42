@@ -1,4 +1,4 @@
-// The report for the kernel 1.0.0 (T238, ADR-0129): `npm run mancanze [-- <universo>] [--cartella <dir>]` prints it as Markdown.
+// The report for the kernel 1.0.0 (T238, ADR-0130): `npm run mancanze [-- <universo>] [--cartella <dir>]` prints it as Markdown.
 
 import { shortfallReport } from '../../src/kernel/shortfalls';
 import { shortfallsOnDisk } from './leggi';

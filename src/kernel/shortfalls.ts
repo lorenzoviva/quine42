@@ -1,4 +1,4 @@
-// What the Council could not do (T238, ADR-0129): every request that ends badly, whoever asked it, is one entry of a ledger that
+// What the Council could not do (T238, ADR-0130): every request that ends badly, whoever asked it, is one entry of a ledger that
 // counts how often it happened. It is the list Phase III starts from, so it outlives rollbacks, as the usage does. It stays on the
 // server: nothing in the world reads it and `src/session/files.ts` does not name it. The text comes from players and from the
 // models, so it is cut down and flattened here. Pure and light: the report command imports it, without the kernel.

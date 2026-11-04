@@ -85,7 +85,7 @@ npm run sicurezza:prove # le prove dell'autore contro un server vero in un proge
 npm run build:server # il server di produzione: dist-server/server.mjs e il programma dei mondi (ADR-0112)
 npm run serve        # lo avvia (dopo build e build:server), legge il .env se c'è; rifiuta di partire senza configurazione
 npx vite-node lab/scripts/mjx-sound.ts -- suono-fuga-cellulare  # un programma sonoro: WAV, traccia e rapporto in testo, senza browser né modelli (ADR-0125)
-npm run mancanze -- <universo>  # il rapporto di ciò che il Concilio non è riuscito a fare, per il kernel 1.0.0 (senza nome: tutti gli universi; ADR-0129)
+npm run mancanze -- <universo>  # il rapporto di ciò che il Concilio non è riuscito a fare, per il kernel 1.0.0 (senza nome: tutti gli universi; ADR-0130)
 npm run abbonamento  # serve la coda /api/coda con la CLI di Claude (con QUINE_CODA=1 nel .env, ADR-0077, ADR-0106)
 ```
 
@@ -152,7 +152,7 @@ src/
     clone.ts            il clone con un altro master: `universe.json` e le carte che passano (ADR-0068)
     chain.ts            la catena della Sala sistemi (T27a): misure di ogni sistema nel tick, stazioni
                         (bench.ts: anche il banco di prova, T27b: casi, scena, nomi dei campi)
-    shortfalls.ts       le mancanze (ADR-0129): ciò che il Concilio non è riuscito a fare (`world/mancanze.json`, mai ai client), il rapporto
+    shortfalls.ts       le mancanze (ADR-0130): ciò che il Concilio non è riuscito a fare (`world/mancanze.json`, mai ai client), il rapporto
     credits.ts          la commissione di piattaforma (+1%, P#1) e la divisione delle spese comuni (ADR-0081)
     ai/                 models.ts, gemini.ts, mock.ts, prices.ts (prezzi, con la data), usage.ts (registro dei consumi),
                         subscription.ts (la tabella dei provider, RoutedAiModels, QueueAiModels: i compiti lenti sugli abbonamenti, ADR-0077)
@@ -188,7 +188,7 @@ tools/pipeline/          la pipeline agentica (ADR-0072, 0079): pipeline.mjs (co
                         orchestra.mjs (il processo dell'orchestratore: chat, eventi, epoche), web.mjs (l'interfaccia web locale, T69), config.json
 tools/sicurezza/        il kit delle prove dell'autore (T137): prove.mjs (esecuzione, esito), catalogo.mjs (le prove), ambiente.mjs (i limiti: loopback, cartella temporanea, segreti finti), server.mjs, sandbox.mjs (processi a parte)
 tools/glossario/        glossario.mjs: legge docs/glossario.md e riscrive il censimento dei sinonimi, docs/glossario-censimento.md (ADR-0117)
-tools/mancanze/         rapporto.ts (il comando), leggi.ts (legge `world/mancanze.json` degli universi sul disco, ADR-0129)
+tools/mancanze/         rapporto.ts (il comando), leggi.ts (legge `world/mancanze.json` degli universi sul disco, ADR-0130)
 tools/abbonamenti/      servi.ts (il processo che serve la coda degli abbonamenti con la CLI isolata, ADR-0077, ADR-0106)
 lab/                    laboratorio di MarkovJunior (ADR-0038): sandbox 3D /lab/3d/, editor modelli /lab/editor/ (T59a, T59b, T59c, T59d), SoundLab /lab/suono/ (T222), modelli ufficiali e conformità, i pattern con cui crescono le strutture e tre programmi di riferimento del cantiere (lab/banco/pattern.md, lab/banco/riferimento/, T181), script per
                         affettare, fotografare, misurare e provare i programmi con Gemini; non importarlo da src/
@@ -235,7 +235,7 @@ Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 - **Lotti e strutture, scale, piani** → `#lotti`; **taglie di D&D** → `#taglie`; **sotterranei** → `#sotterranei`
 - **Rilievo** (`Relief`, altezze, mare) → `#rilievo`; **acqua che scorre** (automa del kernel, `kernel.dig`) → `#acqua`; **grafica a cartone** → `#cartone`
 - **Grafo del mondo**: nodi e archi dai file, `focus` come contesto del Narratore → `#grafo`
-- **Il Concilio al lavoro**: registro, come nasce un luogo, Fucina, Genesi, le mancanze (ciò che non è riuscito a fare, ADR-0129) → `#concilio`
+- **Il Concilio al lavoro**: registro, come nasce un luogo, Fucina, Genesi, le mancanze (ciò che non è riuscito a fare, ADR-0130) → `#concilio`
 - **Il sito e il tema** → `#sito`; **confine e limiti di Lua** → `#lua-sandbox`; **Gemini, Attore, coefficienti** → `#gemini`
 - **Convalida nel browser**: build, preview, spostarsi fermando il tappeto, `interact()` → `#convalida-browser`
 - **Costi e prestazioni** → `#costi`; **stato del progetto e prossimi passi** → `#stato`; il lavoro da fare è in [`docs/plans/backlog.md`](docs/plans/backlog.md)

@@ -1,4 +1,4 @@
-# ADR-0129 — Ciò che il Concilio non riesce a fare si conta in un file di mondo che non esce
+# ADR-0130 — Ciò che il Concilio non riesce a fare si conta in un file di mondo che non esce
 
 Data: 2026-11-04 · Stato: accettato · Riferimenti: ADR-0025 (i due tavoli), ADR-0109 (ciò che esce è un elenco), ADR-0128 (le fasi), T238
 

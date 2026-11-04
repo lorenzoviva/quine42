@@ -134,6 +134,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0127](0127-il-musicista-e-una-stanza-con-piu-squadre.md) | Il Musicista sta nella casa dell'Artista: una stanza ha un elenco di squadre, e il mondo chiede la musica che gli manca |
 | [0128](0128-fasi-e-step.md) | Lo sviluppo si divide in quattro fasi e in step, cioè obiettivi condivisi tra task; la tabella è in `docs/fasi.md` |
 
-| [0129](0129-il-registro-delle-mancanze.md) | Ciò che il Concilio non riesce a fare si conta in `world/mancanze.json`: fuori da ciò che esce, oltre i rollback, con un comando che ne fa il rapporto |
+| [0130](0130-il-registro-delle-mancanze.md) | Ciò che il Concilio non riesce a fare si conta in `world/mancanze.json`: fuori da ciò che esce, oltre i rollback, con un comando che ne fa il rapporto |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.
