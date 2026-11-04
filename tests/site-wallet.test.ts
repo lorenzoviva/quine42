@@ -12,7 +12,7 @@ import { stripeHandler, type StripeRouteOptions } from '../server/stripe';
 import type { AccountSettings } from '../server/account';
 import { accountWanderer } from '../src/session/account';
 import type { PaymentRecord } from '../src/kernel/credits';
-import { checkoutTarget, cleanSearch, formatDay, formatSpent, parseAmount, returnState, returnUrlFor } from '../site/pagamenti';
+import { checkoutTarget, cleanSearch, feeText, formatDay, formatSpent, parseAmount, returnState, returnUrlFor } from '../site/pagamenti';
 
 function call(handler: Connect.NextHandleFunction, method: string, url: string, body?: unknown, headers: Record<string, string> = {}) {
   return new Promise<{ status: number; body: any; next?: true }>((resolve) => {
@@ -67,7 +67,7 @@ describe('the wallet route (T105)', () => {
       const r = await call(walletHandler({ universesDir: dir }), 'GET', '/api/crediti?universo=prova&viandante=ugo');
       expect(r.status).toBe(200);
       const w = r.body.portafoglio;
-      expect(w).toMatchObject({ id: 'ugo', account: 'locale', anonimo: false, crediti: 3.5, multigiocatore: true });
+      expect(w).toMatchObject({ id: 'ugo', account: 'locale', anonimo: false, crediti: 3.5, multigiocatore: true, commissione: 0.01 });
       expect(w.pagamenti).toEqual([
         { id: 'evt_new', data: 2000, crediti: 10 },
         { id: 'cs_old', data: 1000, crediti: 5, cents: 500 },
@@ -93,6 +93,24 @@ describe('the wallet route (T105)', () => {
       const w = (await call(walletHandler({ universesDir: dir }), 'GET', '/api/crediti?universo=prova&viandante=ugo')).body.portafoglio;
       expect(w.multigiocatore).toBe(false);
       expect(w.totaleConsumi).toBe(1.5);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('the fee is the server\'s: at 0 what is shown is the cost alone, and the page says so (ADR-0131)', async () => {
+    const dir = diskUniverse();
+    try {
+      const w = (await call(walletHandler({ universesDir: dir, platformFee: 0 }), 'GET', '/api/crediti?universo=prova&viandante=ugo')).body.portafoglio;
+      expect(w.commissione).toBe(0);
+      expect(w.consumi).toEqual([
+        { giorno: '2026-10-31', chiamate: 2, usd: 0.5 },
+        { giorno: '2026-10-30', chiamate: 3, usd: 1 },
+      ]);
+      expect(w.totaleConsumi).toBe(1.5);
+      expect(feeText(0)).toBe('il loro costo, senza commissioni');
+      expect(feeText(0.01)).toBe('il loro costo, più la commissione della piattaforma (1%)');
+      expect(feeText(0.005)).toContain('(0,5%)');
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -140,12 +158,12 @@ describe('the wallet route (T105)', () => {
   });
 
   it('broken or foreign ledgers do not break the page, and the days are bounded', () => {
-    expect(linesOf([], 'non json', 'ugo', true)).toEqual({ pagamenti: [], consumi: [], totaleConsumi: 0 });
+    expect(linesOf([], 'non json', 'ugo', true, 0.01)).toEqual({ pagamenti: [], consumi: [], totaleConsumi: 0 });
     const junk = [null, { wandererId: 'ugo', crediti: 'tanti', timestamp: 1 }] as unknown as PaymentRecord[];
-    expect(linesOf(junk, undefined, 'ugo', true).pagamenti).toEqual([]);
+    expect(linesOf(junk, undefined, 'ugo', true, 0.01).pagamenti).toEqual([]);
     const paganti: Record<string, unknown> = {};
     for (let d = 1; d <= 28; d++) for (const m of ['10', '11']) paganti[`2026-${m}-${String(d).padStart(2, '0')}`] = { ugo: tally(1, 1) };
-    const many = linesOf([], JSON.stringify({ paganti }), 'ugo', false);
+    const many = linesOf([], JSON.stringify({ paganti }), 'ugo', false, 0.01);
     expect(many.consumi.length).toBe(WALLET_DAYS);
     expect(many.consumi[0].giorno).toBe('2026-11-28');
     expect(many.totaleConsumi).toBe(56);

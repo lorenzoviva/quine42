@@ -4,7 +4,9 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import { COMUNE } from '../src/kernel/cards';
-import { costWithFee, splitCost } from '../src/kernel/credits';
+import { costWithFee, DEFAULT_PLATFORM_FEE, feePercent, splitCost } from '../src/kernel/credits';
+import { platformFeeOf } from '../server/ledger';
+import { paidCents } from '../server/stripe';
 import { fakeLink } from '../src/session/protocol';
 import { SessionServer } from '../src/session/server';
 import { SessionClient } from '../src/session/client';
@@ -13,13 +15,13 @@ import type { TextCall } from '../src/kernel/ai/models';
 
 const DT = 1 / 60;
 
-async function bootMany(): Promise<Kernel> {
+async function bootMany(platformFee?: number, more: Record<string, unknown> = {}): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const files = {
     ...bundledFiles,
-    'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2),
+    'universe.json': JSON.stringify({ ...cfg, ...more, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2),
   };
-  return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
+  return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels(), platformFee });
 }
 
 async function thin(server: SessionServer, id: string): Promise<ThinClient> {
@@ -58,14 +60,70 @@ async function until<T>(server: SessionServer, clients: ThinClient[], p: Promise
 
 describe('credits and common costs (T45a)', () => {
   it('platform fee (+1%) and cost splitting', () => {
-    expect(costWithFee(10)).toBeCloseTo(10.1, 5);
-    expect(costWithFee(0.25)).toBeCloseTo(0.2525, 5);
+    expect(costWithFee(10, DEFAULT_PLATFORM_FEE)).toBeCloseTo(10.1, 5);
+    expect(costWithFee(0.25, DEFAULT_PLATFORM_FEE)).toBeCloseTo(0.2525, 5);
 
     const shares = splitCost(0.2525, 3);
     expect(shares).toHaveLength(3);
     const sum = shares.reduce((a, b) => a + b, 0);
     expect(sum).toBeCloseTo(0.2525, 6);
     expect(shares[0]).toBeCloseTo(0.084167, 5);
+  });
+
+  it('the fee is the server\'s to say: 0 is a fee, what is not a fraction is the default (ADR-0131)', () => {
+    expect(platformFeeOf({})).toBe(0.01);
+    expect(platformFeeOf({ QUINE_COMMISSIONE: '0' })).toBe(0);
+    expect(platformFeeOf({ QUINE_COMMISSIONE: ' 0.05 ' })).toBe(0.05);
+    for (const bad of ['', '  ', 'tanti', '0,5', '-0.01', '1', '5', 'NaN', 'Infinity']) expect(platformFeeOf({ QUINE_COMMISSIONE: bad })).toBe(0.01);
+    expect(feePercent(0.01)).toBe('1%');
+    expect(feePercent(0.005)).toBe('0,5%');
+  });
+
+  it('prices are linear: no tiers on what is paid nor on what is spent', () => {
+    for (const cents of [100, 500, 1000, 2000, 5000, 100000]) expect(paidCents({ amount_total: cents, currency: 'usd' })! / 100).toBe(cents / 100);
+    for (const fee of [0, 0.01]) for (const base of [0.01, 1, 10, 100, 1000]) expect(costWithFee(base * 2, fee)).toBeCloseTo(costWithFee(base, fee) * 2, 5);
+  });
+
+  const COMMON_CALL = { model: 'gemini-3.1-flash-lite', agent: 'narratore', task: 'council.session', prompt: 1_000_000, cached: 0, output: 0, thoughts: 0, chi: COMUNE };
+
+  it('with fee 0 a balance goes down by the base cost exactly: a personal call and a common one (ADR-0131)', async () => {
+    const k = await bootMany(0);
+    const server = new SessionServer(k);
+    const a = await thin(server, 'io');
+    const b = await thin(server, 'anna');
+    run(server, [a, b], 6);
+    k.giveCredits('io', 10);
+    k.giveCredits('anna', 10);
+    // $0.25 of cost, split in two.
+    k.ai.onCall!(COMMON_CALL);
+    expect(k.creditsOf('io')).toBe(9.875);
+    expect(k.creditsOf('anna')).toBe(9.875);
+    // $0.025, all Anna's.
+    k.ai.onCall!({ ...COMMON_CALL, task: 'npc.reply', prompt: 100_000, chi: 'anna' });
+    expect(k.creditsOf('anna')).toBe(9.85);
+    expect(k.creditsOf('io')).toBe(9.875);
+  });
+
+  it('without a word from the server the fee stays 1%, and only the server can say otherwise (ADR-0131)', async () => {
+    // Neither a field written in the universe: it is not read.
+    const k = await bootMany(undefined, { commissione: 0, QUINE_COMMISSIONE: 0 });
+    expect(k.platformFee).toBe(0.01);
+    k.addWanderer('anna', 'Anna');
+    k.giveCredits('anna', 10);
+    k.ai.onCall!({ ...COMMON_CALL, prompt: 100_000, chi: 'anna' });
+    expect(k.creditsOf('anna')).toBe(9.97475);
+    // A kernel that is not a mirror takes it from nobody.
+    k.showPlatformFee(0);
+    expect(k.platformFee).toBe(0.01);
+  });
+
+  it('the master\'s mirror shows the fee the server decided, and a player\'s is not told (ADR-0131)', async () => {
+    const k = await bootMany(0.02);
+    const server = new SessionServer(k);
+    const master = await thin(server, 'io');
+    const anna = await thin(server, 'anna');
+    expect(master.k.platformFee).toBe(0.02);
+    expect(anna.session.commissione).toBeUndefined();
   });
 
   it('the balance is in the ledger, not in world/giocatori/<id>.json (ADR-0104)', async () => {

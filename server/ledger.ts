@@ -6,7 +6,7 @@
 import { closeSync, existsSync, fsyncSync, mkdirSync, openSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync, writeSync } from 'node:fs';
 import path from 'node:path';
 import { threadId } from 'node:worker_threads';
-import { DEFAULT_GRANT_CAP, emptyBook, Ledger, PAYMENTS_FILE, type LedgerBook, type PaymentRecord } from '../src/kernel/credits';
+import { DEFAULT_GRANT_CAP, DEFAULT_PLATFORM_FEE, emptyBook, Ledger, PAYMENTS_FILE, type LedgerBook, type PaymentRecord } from '../src/kernel/credits';
 import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
 import { PLAYERS_DIR, validWandererId } from '../src/kernel/wanderers';
 import { runGit } from './git';
@@ -31,6 +31,15 @@ export function grantCapOf(env: Record<string, string | undefined>, hasAccounts:
   const said = Number(env.QUINE_TETTO_RICARICHE);
   if (env.QUINE_TETTO_RICARICHE?.trim() && Number.isFinite(said) && said >= 0) return said;
   return hasAccounts ? 0 : DEFAULT_GRANT_CAP;
+}
+
+/**
+ * The platform fee, a fraction of the cost (ADR-0131): `QUINE_COMMISSIONE`, the server's alone. 0 is a fee (the beta's); what is not a
+ * fraction from 0 up to, not including, 1 is the default: a typing slip must neither charge a player double nor take a price away.
+ */
+export function platformFeeOf(env: Record<string, string | undefined>): number {
+  const said = Number(env.QUINE_COMMISSIONE);
+  return env.QUINE_COMMISSIONE?.trim() && said >= 0 && said < 1 ? said : DEFAULT_PLATFORM_FEE;
 }
 
 function readBook(text: string): LedgerBook {

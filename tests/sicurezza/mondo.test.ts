@@ -148,6 +148,9 @@ describe('il sorvegliante, con un mondo finto', () => {
       const env = worldEnv();
       expect(Object.keys(env).sort().join()).not.toMatch(/GEMINI|STRIPE|FIREBASE|QUINE/);
       expect(JSON.stringify(env)).not.toContain('chiave-finta');
+      // The fee passes by value (ADR-0131): that name, nothing else of ours.
+      expect(Object.keys(worldEnv(0)).filter((k) => /GEMINI|STRIPE|FIREBASE|QUINE/.test(k))).toEqual(['QUINE_COMMISSIONE']);
+      expect(worldEnv(0).QUINE_COMMISSIONE).toBe('0');
     } finally {
       delete process.env.GEMINI_API_KEY;
     }
@@ -398,14 +401,14 @@ describe('due mondi veri', () => {
   it('V-007 sotto i permessi il mondo scrive il suo archivio dei saldi e risponde alle rotte; il token vale per il suo universo', async () => {
     const saldi = path.join(dir, LEDGER_DIR);
     mkdirSync(saldi, { recursive: true });
-    const uno = world('uno', { ledgerFile: path.join(saldi, 'uno.json'), grantCap: 0 });
+    const uno = world('uno', { ledgerFile: path.join(saldi, 'uno.json'), grantCap: 0, platformFee: 0 });
     try {
       expect(await uno.start()).toEqual({ ok: true });
       const payment = { eventId: 'evt-mondo', wandererId: 'alice', crediti: 7, importo: 7, data: new Date().toISOString() } as unknown as PaymentRecord;
       expect(await uno.calls.creditRecharge(payment)).toMatchObject({ ok: true });
       expect(await uno.calls.creditRecharge(payment)).toMatchObject({ ok: true, duplica: true });
       expect(ledgerOf(dir, 'uno').balance('alice')).toBe(7);
-      expect(await uno.calls.wallet('uno', 'alice', 'google')).toMatchObject({ id: 'alice', crediti: 7 });
+      expect(await uno.calls.wallet('uno', 'alice', 'google')).toMatchObject({ id: 'alice', crediti: 7, commissione: 0 });
       // Written from another universe's token, the store refuses.
       const r = await fetch(`${base}/api/universe/due/commit`, { method: 'POST', headers: { 'Content-Type': 'application/json', [INTERNAL_HEADER]: worldToken(INTERNAL, 'uno') }, body: JSON.stringify({ changes: { 'modules/x/logic.lua': 'return {}' }, message: 'x', author: 'kernel' }) });
       expect(r.status).toBe(403);

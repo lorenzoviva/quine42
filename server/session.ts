@@ -176,7 +176,7 @@ export interface SessionOptions {
   accounts?: AccountSettings;
   gemini?: typeof fetch;
   internal?: string;
-  credits?: { universesDir: string; grantCap: number };
+  credits?: { universesDir: string; grantCap: number; platformFee?: number };
   memoryMb?: number;
   /** Worlds running at once (`QUINE_MONDI_MASSIMI`, V-025). */
   maxWorlds?: number;
@@ -233,7 +233,7 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
       gemini,
       verify: accounts?.verify,
       masterUid: accounts?.masterUid,
-      ...(universes && credits ? { ledgerFile: path.join(universes, LEDGER_DIR, `${name}.json`), grantCap: credits.grantCap } : {}),
+      ...(universes && credits ? { ledgerFile: path.join(universes, LEDGER_DIR, `${name}.json`), grantCap: credits.grantCap, platformFee: credits.platformFee } : {}),
       entry: await program(),
       memoryMb,
       headOf: universes ? () => runGit(path.join(universes, name), ['rev-parse', 'HEAD'], { author: ['kernel', 'kernel@quine'] }).then((out) => out.trim()) : undefined,
@@ -348,7 +348,7 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
   return { stop };
 }
 
-export function sessionServer(accounts?: AccountSettings, gemini?: typeof fetch, internal?: string, credits?: { universesDir: string; grantCap: number }, memoryMb?: number, maxWorlds?: number): Plugin {
+export function sessionServer(accounts?: AccountSettings, gemini?: typeof fetch, internal?: string, credits?: SessionOptions['credits'], memoryMb?: number, maxWorlds?: number): Plugin {
   return {
     name: 'rune-session',
     configureServer(server: ViteDevServer) {

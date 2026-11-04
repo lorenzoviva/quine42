@@ -162,10 +162,10 @@ export interface ContainerView {
 export type ServerMsg =
   /**
    * Coming in: the files (a player gets only what a client draws and walks with, `playerFiles`), whether this
-   * wanderer is the master (T41) and, only for the master, the Council's feed so far and their branch (T42b); the
+   * wanderer is the master (T41) and, only for the master, the platform fee their console shows (ADR-0131), the Council's feed so far and their branch (T42b); the
    * master's updates say (`giocatori`) every player connected and where they are, when it changes (T42c).
    */
-  | ({ t: 'ingresso'; id: string; nome: string; profilo?: Profile; riparato?: string[]; anonimo?: true; master?: true; concilio?: FeedEntry[]; ramo?: FileChanges; files: FileMap; me: Me; forma?: FormView; stato: MyState; luoghi: ChunkView[]; cose: EntityView[]; viandanti: OtherView[]; giocatori?: PlayerSpot[] } & Clock)
+  | ({ t: 'ingresso'; id: string; nome: string; profilo?: Profile; riparato?: string[]; anonimo?: true; master?: true; commissione?: number; concilio?: FeedEntry[]; ramo?: FileChanges; files: FileMap; me: Me; forma?: FormView; stato: MyState; luoghi: ChunkView[]; cose: EntityView[]; viandanti: OtherView[]; giocatori?: PlayerSpot[] } & Clock)
   | ({ t: 'aggiorna'; me?: Me; stato?: MyState; luoghi?: ChunkView[]; cose?: EntityView[]; via?: number[]; viandanti?: OtherView[]; partiti?: string[]; giocatori?: PlayerSpot[]; avvisi?: Notice[] } & Clock)
   /** The step was not possible (too fast, through a wall): the wanderer is here. */
   | { t: 'correzione'; seq: number; x: number; y: number }

@@ -4,6 +4,7 @@
 // the page waits to see the payment in the ledger before it says it was credited.
 
 import { $, alertBox, formatCredits, hideAlert, initNav, pageLogin, pageSignOut, pickUniverse, playLink, universes, UNIVERSE_KEY, store, stored, type Who } from './shared';
+import { feePercent } from '../src/kernel/credits';
 import type { Wallet } from '../server/wallet';
 
 /** What the checkout accepts (`/api/stripe/checkout`). */
@@ -71,6 +72,11 @@ export function formatDay(day: string): string {
 /** Spending under a cent is real money too: it must not read as zero. */
 export function formatSpent(n: number): string {
   return n > 0 && n < 0.01 ? `$${n.toFixed(4)}` : formatCredits(n);
+}
+
+/** What a credit pays for, with the fee this server decided (ADR-0131). */
+export function feeText(fee: number): string {
+  return fee > 0 ? `il loro costo, più la commissione della piattaforma (${feePercent(fee)})` : 'il loro costo, senza commissioni';
 }
 
 function cell(text: string, className?: string): HTMLTableCellElement {
@@ -173,6 +179,7 @@ class WalletPage {
     this.wallet = w;
     $('wallet-amount').textContent = formatCredits(w.crediti);
     $('wallet-who').textContent = w.id;
+    $('wallet-fee').textContent = feeText(w.commissione);
     $('wallet-note').textContent = w.anonimo
       ? 'Un viandante anonimo non ha crediti: gioca con i modelli locali.'
       : w.multigiocatore
