@@ -118,6 +118,49 @@
   --font-mono: 'Cascadia Mono', 'JetBrains Mono', Consolas, 'DejaVu Sans Mono', monospace;
   --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 
+  /* --- The golden scale (T241): each row grows by about φ. Table in docs/architettura-dettagli.md#sito --- */
+  /* Spaces: Fibonacci. Padding, margins, gaps, offsets. */
+  --space-1: 1px;
+  --space-2: 2px;
+  --space-3: 3px;
+  --space-5: 5px;
+  --space-8: 8px;
+  --space-13: 13px;
+  --space-21: 21px;
+  --space-34: 34px;
+  --space-144: 144px;
+  /* Type: Fibonacci and Lucas, interleaved, for a useful size between 13 and 21. */
+  --text-8: 8px;
+  --text-11: 11px;
+  --text-13: 13px;
+  --text-18: 18px;
+  --text-21: 21px;
+  --text-29: 29px;
+  --text-34: 34px;
+  --text-47: 47px;
+  --text-55: 55px;
+  --text-76: 76px;
+  --text-89: 89px;
+  --text-144: 144px;
+  /* Leading: φ for what is read (13 on 21), √φ for compact rows, φ^¼ for titles. */
+  --leading-read: 1.618;
+  --leading-snug: 1.272;
+  --leading-tight: 1.128;
+  /* Widths and cells: Fibonacci and Lucas too, so that two neighbours of a panel can divide it by φ (322 + 521 = 843). */
+  --measure-47: 47px;
+  --measure-55: 55px;
+  --measure-76: 76px;
+  --measure-89: 89px;
+  --measure-123: 123px;
+  --measure-144: 144px;
+  --measure-199: 199px;
+  --measure-233: 233px;
+  --measure-322: 322px;
+  --measure-377: 377px;
+  --measure-521: 521px;
+  --measure-610: 610px;
+  --measure-843: 843px;
+
   /* --- Comic & Arcade Hard Borders & Shadows --- */
   --border-ink: 2px solid var(--comic-ink);
   --border-ink-thick: 3px solid var(--comic-ink);
