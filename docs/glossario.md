@@ -925,6 +925,12 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Dove vive**: `docs/fasi.md`
 - **Da non usare**: `tappa` (per lo step)
 
+### Scala aurea
+- **Inglese**: `scale`
+- **Definizione**: i numeri di Fibonacci e di Lucas e le potenze di φ da cui HUD e pannelli prendono spazi, corpi, interlinea e larghezze (nel CSS i token `--space-N`, `--text-N`, `--measure-N`, `--leading-*`).
+- **Dove vive**: `src/theme.css`, `src/style.css`
+- **Da non usare**: nessuno
+
 ## Gli omonimi
 
 Stessa parola, concetti diversi: il problema che confonde di più, più dei sinonimi. Quando il contesto non basta si usa il nome lungo.

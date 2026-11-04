@@ -3840,7 +3840,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Browser: non serve.
 - Quando è fatto: l'autore può decidere voce per voce; commit su `task/T240`. Sicurezza: nessuna superficie nuova.
 
-### T241 · Il rapporto aureo in HUD e pannelli — `da fare`
+### T241 · Il rapporto aureo in HUD e pannelli — `fatto` (`84f5339`)
 - Pipeline: claude · stima 2% · approvato · priorità 4
 - Step: 33
 - Contesto: l'autore (04/11, `docs/pipeline/domande/T232.md`): nel gioco il rapporto aureo sì per la UI, senza spese grosse. La landing nuova non c'è ancora (T232 è a fine Fase II): la scala φ/Fibonacci nasce qui, e la landing la riprenderà.
@@ -3848,6 +3848,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Test: typecheck e suite intera con i loro turni.
 - Browser: sì, con `?skip&offline`: HUD, inventario, chat, profilo a 1920 e 1280 px, testi che non escono dai riquadri.
 - Quando è fatto: commit su `task/T241`, con la tabella dei rapporti in `#sito`. Sicurezza: nessuna superficie nuova.
+- Esito: HUD e pannelli leggono la scala φ/Fibonacci da `src/theme.css` (spazi, corpi, interlinea, larghezze; inventario 322:521, bisogni 55:89), tabella in `#sito`, voce nel glossario, test che rifiuta `font`/`padding`/`margin`/`gap` in px a mano; corretti griglia dell'inventario stirata, parole lunghe fuori dai fumetti, barra dei tasti a capo a 1920. Restano fuori bordi, ombre, pallini delle legende e classi `comic-*` del sito. Non provato: un vero viewport a 1280 (simulato, `vw`/`vh` restano a 1920×919) e la guida H a 800 px di altezza. Sicurezza: nessuna superficie nuova. Typecheck e suite intera verdi (1871 test), `tests/theme.test.ts` rilanciato dopo la rimozione di `--phi`.
 
 ### T242 · Il rapporto aureo nei prompt dello Scultore e dell'Artista — `da fare` (dipende da T156)
 - Pipeline: claude · stima 1% · approvato · priorità 33
