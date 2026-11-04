@@ -3908,7 +3908,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Browser: sì, la lobby in una partita di molti come master e come altro viandante, a 1920 e 390 px; con una manopola a zero il gioco regge.
 - Quando è fatto: il master regola ogni consumo prima di entrare e nessun compito resta senza manopola o senza un motivo scritto; ADR e `docs/architettura-dettagli.md#lobby` aggiornati; commit su `task/T247`. Sicurezza: tocca `server/`, `src/session/` e i crediti; scrivi l'esito, comprese le prove che un non master non cambi nulla e che i minimi non scendano sotto ciò che il master ha fissato.
 
-### T248 · Integrare T243 — `da fare`
+### T248 · Integrare T243 — `fatto` (`93a25f1`)
 - Pipeline: claude · stima 1% · approvato · priorità 1
 - Step: 34
 - Contesto: T243 (`dossier T243`) è finito, ma `integra T243` va in conflitto in `AGENTS.md` e `src/kernel/kernel.ts`: T238 (`dossier T238`), già nel base, ha scritto negli stessi punti. I due ADR hanno lo stesso numero: 0130 è di T238 nel base.
@@ -3916,6 +3916,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Test: typecheck e suite intera con i loro turni.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T248`, con mancanze e commissione configurabile entrambe nel codice e descritte. Sicurezza: tocca i crediti, ma solo per l'unione; scrivi l'esito.
+- Esito: T243 unito a T238 in `ca281f5`: `QUINE_COMMISSIONE` (ADR-0131) e `world/mancanze.json` (ADR-0130) convivono, in `AGENTS.md` e nell'indice degli ADR con entrambe le voci; conflitti risolti tenendo le due aggiunte, ADR già 0131 sul branch di T243, indice ADR riordinato in una tabella sola; typecheck e suite intera verdi (1792 test). Manca: `docs/glossario-censimento.md` non rigenerato. Non provato: nel browser non è stato visto nulla (non richiesto); valgono i limiti già scritti negli esiti di T243 e T238. Sicurezza: nessuna superficie nuova, tocca i crediti solo per l'unione; la logica degli addebiti è quella di T243, invariata.
 
 ### T249 · Integrare T248 e T243 — `fatto` (`bf8061e`)
 - Pipeline: claude · stima 1% · approvato · priorità 1
