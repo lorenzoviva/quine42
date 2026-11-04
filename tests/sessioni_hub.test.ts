@@ -11,13 +11,13 @@ import { SessionClient } from '../src/session/client';
 import {
   buildNewUniverseFiles,
   createUniverse,
-  escapeHtml,
   fetchActiveSessions,
   fetchUniverses,
   parseUniverseSnapshot,
   renderUniverseCard,
   type ActiveSessionRecord,
 } from '../site/sessioni';
+import { escapeHtml } from '../site/shared';
 
 describe('Hub Sessioni & Creazione Nuovo Universo (T103)', () => {
   it('SessionServer espone clientCount e wanderer connessi', async () => {

@@ -1,0 +1,2 @@
+Una notizia è un file `AAAA-MM-GG-titolo.md` in questa cartella (minuscole, cifre e trattini): si copia quello che c'è, si cambiano `titolo`, `data`, `tag` (`kernel`, `universo`, `generazione`, `sondaggio`, `server`), `riassunto`, il testo in Markdown sotto, e alla prossima build appare nel sito; `npm test` dice se un file non va.
+Un sondaggio o la pianificazione dei server sono un link esterno: si aggiunge la riga `link: https://…` e la pagina mostra il pulsante.

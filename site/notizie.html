@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Le notizie di QUINE42: aggiornamenti del kernel, universi nuovi, sessioni di generazione, sondaggi e pianificazione dei server." />
+    <title>QUINE42 · Notizie</title>
+    <link rel="stylesheet" href="./site.css" />
+  </head>
+  <body>
+    <header class="site-nav">
+      <a href="./index.html" class="nav-brand">
+        <span class="nav-logo">QUINE42</span>
+        <span class="nav-tagline">// ARCADE · VOXEL · IA</span>
+      </a>
+      <button class="nav-toggle-btn" id="nav-toggle" aria-controls="nav-links" aria-expanded="false">MENU ▼</button>
+      <nav aria-label="Sezioni">
+        <ul class="nav-links" id="nav-links">
+          <li><a href="./index.html" class="nav-link">Mondo</a></li>
+          <li><a href="./carte.html" class="nav-link">Carte 3D</a></li>
+          <li><a href="./index.html#reami" class="nav-link">Universi</a></li>
+          <li><a href="./sessioni.html" class="nav-link">Sessioni</a></li>
+          <li><a href="./notizie.html" class="nav-link active" aria-current="page">Notizie</a></li>
+          <li><a href="./profilo.html" class="nav-link">Profilo</a></li>
+          <li><a href="./pagamenti.html" class="nav-link">Crediti</a></li>
+        </ul>
+      </nav>
+      <div class="nav-actions">
+        <a href="../index.html" class="comic-btn arcade cyan">GIOCA SUBITO</a>
+      </div>
+    </header>
+
+    <main class="section-wrap news-page">
+      <div class="comic-alert" id="page-alert" role="status" aria-live="polite" hidden>
+        <span class="comic-badge" id="page-alert-badge">INFO</span>
+        <span class="arcade-text" id="page-alert-text" style="font-size: 0.75rem"></span>
+      </div>
+
+      <!-- La lista: filtri e carte li riempie site/notizie.ts -->
+      <div id="news-list-view">
+        <div class="section-head">
+          <h1 class="comic-title">LE NOTIZIE</h1>
+          <p>// KERNEL · UNIVERSI · GENERAZIONE · SONDAGGI · SERVER</p>
+        </div>
+        <nav class="comic-tabs" id="news-filters" aria-label="Tipo di notizia"></nav>
+        <div class="grid-3" id="news-list"></div>
+        <p class="arcade-text text-dim news-empty" id="news-empty" hidden>// NESSUNA NOTIZIA DI QUESTO TIPO, PER ORA //</p>
+      </div>
+
+      <!-- Una notizia sola: ?n=<nome del file> -->
+      <div id="news-one-view" hidden>
+        <a class="comic-btn arcade sm news-back" id="news-back" href="./notizie.html">◀ TUTTE LE NOTIZIE</a>
+        <p class="arcade-text text-dim news-empty" id="news-missing" hidden>// QUESTA NOTIZIA NON C'È //</p>
+        <div id="news-one"></div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-brand">QUINE42</div>
+      <div class="footer-links">
+        <a href="../index.html">GIOCO</a>
+        <a href="./index.html">MONDO</a>
+        <a href="./carte.html">CARTE</a>
+        <a href="./sessioni.html">SESSIONI</a>
+        <a href="./notizie.html">NOTIZIE</a>
+        <a href="./profilo.html">PROFILO</a>
+        <a href="./pagamenti.html">CREDITI</a>
+      </div>
+      <div class="footer-copy">QUINE42 © 2026 · Voxel e modelli MarkovJunior 3D · Generato con intelligenza artificiale</div>
+    </footer>
+
+    <script type="module" src="./notizie.ts"></script>
+  </body>
+</html>

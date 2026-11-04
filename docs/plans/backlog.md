@@ -3783,7 +3783,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Browser: sì, a 1920 e 390 px, in `npm run dev` e sotto `npm run serve`.
 - Quando è fatto: la home è il launcher scelto; commit su `task/T233`. Sicurezza: nessuna superficie nuova, o le voci.
 
-### T234 · Il news-blog del sito — `da fare`
+### T234 · Il news-blog del sito — `fatto` (`fc48b9b`)
 - Pipeline: claude · stima 2% · approvato · priorità 3
 - Step: 34
 - L'autore (04/11): non aspetta la landing nuova. Grafica semplice nel tema attuale, entro la Fase I.
@@ -3792,6 +3792,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Test: typecheck, build e suite intera con i loro turni; un test sul testo che non diventa HTML eseguibile.
 - Browser: sì, elenco e pagina a 1920 e 390 px.
 - Quando è fatto: l'autore aggiunge un file e la notizia appare; commit su `task/T234`. Sicurezza: nessuna superficie nuova, o le voci.
+- Esito: notizie come Markdown in `site/notizie/` raccolte alla build (nessuna rotta né database), elenco con filtri per tag, pagina singola, ultime tre nella landing, link esterno per sondaggi e server, notizia di prova, guida `LEGGIMI.md`, test su testo ostile, ADR-0129, voce di glossario; `escapeHtml` spostata in `shared.ts` e test del glossario esteso a `site/`; suite (1759), typecheck e build verdi; sicurezza: nessuna superficie nuova; non provati un telefono vero e la landing a 390 px; una notizia nuova si pubblica con build e deploy.
 
 ### T235 · Showcase: carte famose e universi più giocati — `in attesa` (dipende da T233)
 - Step: 35

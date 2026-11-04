@@ -7,6 +7,8 @@ import { compileMjx, type MjxModel } from '../src/mj/model';
 import { runMjx } from '../src/mj/run';
 import type { Snapshot } from '../src/mj/engine';
 import { MJ_PALETTE } from '../src/mj/palette';
+import { news } from './notizie-file';
+import { renderNewsCard } from './notizie-testo';
 import pino from '../universe/models/albero.xml?raw';
 
 /** A program of the hero: its MarkovJunior source and the line under the stage. */
@@ -353,6 +355,17 @@ function initShowcase(): void {
   });
 }
 
+const LATEST_NEWS = 3;
+
+/** The latest news under the hero (T234): the section stays hidden while there are none. */
+function initNews(): void {
+  const list = document.getElementById('news-latest');
+  const section = document.getElementById('notizie');
+  if (!list || !section || !news.length) return;
+  list.innerHTML = news.slice(0, LATEST_NEWS).map(renderNewsCard).join('');
+  section.hidden = false;
+}
+
 function initCard(): void {
   const card = document.getElementById('demo-card');
   const flip = () => card?.classList.toggle('is-flipped');
@@ -370,6 +383,7 @@ if (typeof document !== 'undefined') {
     initNav();
     initShowcase();
     initCard();
+    initNews();
     initHero();
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);

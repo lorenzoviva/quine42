@@ -189,7 +189,7 @@ tools/glossario/        glossario.mjs: legge docs/glossario.md e riscrive il cen
 tools/abbonamenti/      servi.ts (il processo che serve la coda degli abbonamenti con la CLI isolata, ADR-0077, ADR-0106)
 lab/                    laboratorio di MarkovJunior (ADR-0038): sandbox 3D /lab/3d/, editor modelli /lab/editor/ (T59a, T59b, T59c, T59d), SoundLab /lab/suono/ (T222), modelli ufficiali e conformità, i pattern con cui crescono le strutture e tre programmi di riferimento del cantiere (lab/banco/pattern.md, lab/banco/riferimento/, T181), script per
                         affettare, fotografare, misurare e provare i programmi con Gemini; non importarlo da src/
-site/                   il sito web (ADR-0095, T97): landing, carte 3D, sessioni, profilo e crediti; theme.css condiviso con il gioco
+site/                   il sito web (ADR-0095, T97): landing, carte 3D, sessioni, profilo, crediti e notizie (`site/notizie/`, un Markdown per notizia, ADR-0129); theme.css condiviso con il gioco
 ```
 
 ## Il Concilio (ADR-0008, 0011, 0012, 0013, 0014, 0016, 0042)
