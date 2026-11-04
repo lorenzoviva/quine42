@@ -790,5 +790,1593 @@
     "msMax": 2492
    }
   ]
+ },
+ "fantasy/casa-del-borgomastro": {
+  "file": "lab/banco/catalogo-cloud/fantasy/casa-del-borgomastro.xml",
+  "nome": "casa-del-borgomastro",
+  "ambientazione": "fantasy",
+  "cantina": false,
+  "passa": true,
+  "difetti": [],
+  "taglie": [
+   {
+    "taglia": "grande",
+    "box": [
+     100,
+     100,
+     80
+    ],
+    "vpt": 20,
+    "semi": [
+     {
+      "seme": 1,
+      "ms": 957,
+      "piani": 2,
+      "stanze": 6,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 28,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 2,
+      "ms": 713,
+      "piani": 2,
+      "stanze": 6,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 29,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 3,
+      "ms": 941,
+      "piani": 2,
+      "stanze": 5,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 7,
+      "finestre": 27,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 4,
+      "ms": 742,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 29,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 5,
+      "ms": 684,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 28,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     }
+    ],
+    "varianza": {
+     "voxel": 0.6872421823027568,
+     "colore": 0.1100289120270242,
+     "pianta": 0.5527993588021413,
+     "perimetro": 0.3651315789473684,
+     "interno": 0.6763836660599706,
+     "firmePiani": 1,
+     "firmeStanze": 3,
+     "architetture": 5,
+     "statico": false
+    },
+    "difettiVarianza": [],
+    "msMax": 957
+   },
+   {
+    "taglia": "enorme",
+    "box": [
+     120,
+     120,
+     96
+    ],
+    "vpt": 16,
+    "semi": [
+     {
+      "seme": 1,
+      "ms": 1477,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 31,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 2,
+      "ms": 1375,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 6,
+      "finestre": 28,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 3,
+      "ms": 1394,
+      "piani": 2,
+      "stanze": 6,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 26,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 4,
+      "ms": 1345,
+      "piani": 2,
+      "stanze": 6,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 10,
+      "finestre": 29,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 5,
+      "ms": 1878,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 43,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     }
+    ],
+    "varianza": {
+     "voxel": 0.607699496683181,
+     "colore": 0.12296221195104162,
+     "pianta": 0.33209479270767817,
+     "perimetro": 0.23236512724498995,
+     "interno": 0.6197545909710207,
+     "firmePiani": 1,
+     "firmeStanze": 2,
+     "architetture": 4,
+     "statico": false
+    },
+    "difettiVarianza": [],
+    "msMax": 1878
+   }
+  ]
+ },
+ "fantasy/forte-di-frontiera": {
+  "file": "lab/banco/catalogo-cloud/fantasy/forte-di-frontiera.xml",
+  "nome": "forte-di-frontiera",
+  "ambientazione": "fantasy",
+  "cantina": false,
+  "passa": true,
+  "difetti": [],
+  "taglie": [
+   {
+    "taglia": "grande",
+    "box": [
+     100,
+     100,
+     80
+    ],
+    "vpt": 20,
+    "semi": [
+     {
+      "seme": 1,
+      "ms": 606,
+      "piani": 2,
+      "stanze": 6,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 7,
+      "finestre": 28,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 2,
+      "ms": 716,
+      "piani": 2,
+      "stanze": 6,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 31,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 3,
+      "ms": 602,
+      "piani": 2,
+      "stanze": 5,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 28,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 4,
+      "ms": 822,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 35,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 5,
+      "ms": 708,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 6,
+      "finestre": 38,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     }
+    ],
+    "varianza": {
+     "voxel": 0.6513512806176163,
+     "colore": 0.19106554366402406,
+     "pianta": 0.562435297203138,
+     "perimetro": 0.3498560593652753,
+     "interno": 0.6763836660599706,
+     "firmePiani": 1,
+     "firmeStanze": 3,
+     "architetture": 5,
+     "statico": false
+    },
+    "difettiVarianza": [],
+    "msMax": 822
+   },
+   {
+    "taglia": "enorme",
+    "box": [
+     120,
+     120,
+     96
+    ],
+    "vpt": 16,
+    "semi": [
+     {
+      "seme": 1,
+      "ms": 1399,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 25,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 2,
+      "ms": 1746,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 31,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 3,
+      "ms": 1426,
+      "piani": 2,
+      "stanze": 6,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 26,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 4,
+      "ms": 1407,
+      "piani": 2,
+      "stanze": 6,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 10,
+      "finestre": 26,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 5,
+      "ms": 1384,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 43,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     }
+    ],
+    "varianza": {
+     "voxel": 0.6300627960731715,
+     "colore": 0.17361957227461183,
+     "pianta": 0.3798481176216767,
+     "perimetro": 0.1962533061923037,
+     "interno": 0.6197545909710207,
+     "firmePiani": 1,
+     "firmeStanze": 2,
+     "architetture": 4,
+     "statico": false
+    },
+    "difettiVarianza": [],
+    "msMax": 1746
+   }
+  ]
+ },
+ "steampunk/cattedrale-degli-ingranaggi": {
+  "file": "lab/banco/catalogo-cloud/steampunk/cattedrale-degli-ingranaggi.xml",
+  "nome": "cattedrale-degli-ingranaggi",
+  "ambientazione": "steampunk",
+  "cantina": false,
+  "passa": true,
+  "difetti": [],
+  "taglie": [
+   {
+    "taglia": "grande",
+    "box": [
+     100,
+     100,
+     80
+    ],
+    "vpt": 20,
+    "semi": [
+     {
+      "seme": 1,
+      "ms": 674,
+      "piani": 2,
+      "stanze": 6,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 7,
+      "finestre": 31,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 2,
+      "ms": 638,
+      "piani": 2,
+      "stanze": 6,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 27,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 3,
+      "ms": 539,
+      "piani": 2,
+      "stanze": 5,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 7,
+      "finestre": 28,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 4,
+      "ms": 743,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 32,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 5,
+      "ms": 814,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 37,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     }
+    ],
+    "varianza": {
+     "voxel": 0.7031627578312463,
+     "colore": 0.13427114657079825,
+     "pianta": 0.5626116260393161,
+     "perimetro": 0.3500258488426389,
+     "interno": 0.6763836660599706,
+     "firmePiani": 1,
+     "firmeStanze": 3,
+     "architetture": 5,
+     "statico": false
+    },
+    "difettiVarianza": [],
+    "msMax": 814
+   },
+   {
+    "taglia": "enorme",
+    "box": [
+     120,
+     120,
+     96
+    ],
+    "vpt": 16,
+    "semi": [
+     {
+      "seme": 1,
+      "ms": 1275,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 23,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 2,
+      "ms": 1911,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 33,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 3,
+      "ms": 1497,
+      "piani": 2,
+      "stanze": 6,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 28,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 4,
+      "ms": 1478,
+      "piani": 2,
+      "stanze": 6,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 10,
+      "finestre": 26,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 5,
+      "ms": 1544,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 43,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     }
+    ],
+    "varianza": {
+     "voxel": 0.6489547362498215,
+     "colore": 0.128429177839984,
+     "pianta": 0.3458537261877863,
+     "perimetro": 0.19244823386114496,
+     "interno": 0.6197545909710207,
+     "firmePiani": 1,
+     "firmeStanze": 2,
+     "architetture": 4,
+     "statico": false
+    },
+    "difettiVarianza": [],
+    "msMax": 1911
+   }
+  ]
+ },
+ "steampunk/faro-a-vapore": {
+  "file": "lab/banco/catalogo-cloud/steampunk/faro-a-vapore.xml",
+  "nome": "faro-a-vapore",
+  "ambientazione": "steampunk",
+  "cantina": true,
+  "passa": true,
+  "difetti": [],
+  "taglie": [
+   {
+    "taglia": "grande",
+    "box": [
+     100,
+     100,
+     100
+    ],
+    "vpt": 20,
+    "semi": [
+     {
+      "seme": 1,
+      "ms": 1450,
+      "piani": 2,
+      "stanze": 4,
+      "cantina": 2.09,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 27,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 2,
+      "ms": 1440,
+      "piani": 2,
+      "stanze": 4,
+      "cantina": 1.82,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 29,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 3,
+      "ms": 1419,
+      "piani": 2,
+      "stanze": 3,
+      "cantina": 1.825,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 29,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 4,
+      "ms": 1274,
+      "piani": 2,
+      "stanze": 3,
+      "cantina": 2.09,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 6,
+      "finestre": 25,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 5,
+      "ms": 1376,
+      "piani": 2,
+      "stanze": 4,
+      "cantina": 2.105,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 28,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     }
+    ],
+    "varianza": {
+     "voxel": 0.6471116019489103,
+     "colore": 0.17723983929560777,
+     "pianta": 0.3394853602498873,
+     "perimetro": 0.1538377459315035,
+     "interno": 0.7316021990714878,
+     "firmePiani": 1,
+     "firmeStanze": 2,
+     "architetture": 5,
+     "statico": false
+    },
+    "difettiVarianza": [],
+    "msMax": 1450
+   },
+   {
+    "taglia": "enorme",
+    "box": [
+     120,
+     120,
+     112
+    ],
+    "vpt": 16,
+    "semi": [
+     {
+      "seme": 1,
+      "ms": 2401,
+      "piani": 3,
+      "stanze": 4,
+      "cantina": 3.3671875,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 27,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 2,
+      "ms": 2258,
+      "piani": 3,
+      "stanze": 4,
+      "cantina": 3.33984375,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 31,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 3,
+      "ms": 2766,
+      "piani": 3,
+      "stanze": 4,
+      "cantina": 3.3515625,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 35,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 4,
+      "ms": 2267,
+      "piani": 3,
+      "stanze": 4,
+      "cantina": 2.9140625,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 24,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 5,
+      "ms": 2423,
+      "piani": 3,
+      "stanze": 5,
+      "cantina": 2.9296875,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 26,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     }
+    ],
+    "varianza": {
+     "voxel": 0.6961410962997294,
+     "colore": 0.16441007932532137,
+     "pianta": 0.37149652009575684,
+     "perimetro": 0.2758911368015414,
+     "interno": 0.8100623447759671,
+     "firmePiani": 1,
+     "firmeStanze": 2,
+     "architetture": 5,
+     "statico": false
+    },
+    "difettiVarianza": [],
+    "msMax": 2766
+   }
+  ]
+ },
+ "steampunk/officina-meccanica": {
+  "file": "lab/banco/catalogo-cloud/steampunk/officina-meccanica.xml",
+  "nome": "officina-meccanica",
+  "ambientazione": "steampunk",
+  "cantina": true,
+  "passa": true,
+  "difetti": [],
+  "taglie": [
+   {
+    "taglia": "grande",
+    "box": [
+     100,
+     100,
+     100
+    ],
+    "vpt": 20,
+    "semi": [
+     {
+      "seme": 1,
+      "ms": 1384,
+      "piani": 2,
+      "stanze": 4,
+      "cantina": 2.105,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 29,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 2,
+      "ms": 1445,
+      "piani": 2,
+      "stanze": 4,
+      "cantina": 1.815,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 30,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 3,
+      "ms": 1262,
+      "piani": 2,
+      "stanze": 3,
+      "cantina": 1.825,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 29,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 4,
+      "ms": 1472,
+      "piani": 2,
+      "stanze": 3,
+      "cantina": 2.1275,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 6,
+      "finestre": 21,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 5,
+      "ms": 1582,
+      "piani": 2,
+      "stanze": 4,
+      "cantina": 2.125,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 28,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     }
+    ],
+    "varianza": {
+     "voxel": 0.6459444208228888,
+     "colore": 0.14974288670214403,
+     "pianta": 0.3299730414272255,
+     "perimetro": 0.18707351337544575,
+     "interno": 0.7288701409552252,
+     "firmePiani": 1,
+     "firmeStanze": 2,
+     "architetture": 5,
+     "statico": false
+    },
+    "difettiVarianza": [],
+    "msMax": 1582
+   },
+   {
+    "taglia": "enorme",
+    "box": [
+     120,
+     120,
+     112
+    ],
+    "vpt": 16,
+    "semi": [
+     {
+      "seme": 1,
+      "ms": 2364,
+      "piani": 3,
+      "stanze": 4,
+      "cantina": 3.3125,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 27,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 2,
+      "ms": 2609,
+      "piani": 3,
+      "stanze": 4,
+      "cantina": 3.34765625,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 27,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 3,
+      "ms": 2403,
+      "piani": 3,
+      "stanze": 4,
+      "cantina": 3.30859375,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 33,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 4,
+      "ms": 2355,
+      "piani": 3,
+      "stanze": 4,
+      "cantina": 2.8828125,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 27,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 5,
+      "ms": 2811,
+      "piani": 3,
+      "stanze": 5,
+      "cantina": 2.93359375,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 27,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     }
+    ],
+    "varianza": {
+     "voxel": 0.693605488842348,
+     "colore": 0.14294866841163809,
+     "pianta": 0.34144520017376806,
+     "perimetro": 0.29876104494813677,
+     "interno": 0.8093748569329805,
+     "firmePiani": 1,
+     "firmeStanze": 2,
+     "architetture": 5,
+     "statico": false
+    },
+    "difettiVarianza": [],
+    "msMax": 2811
+   }
+  ]
+ },
+ "steampunk/palazzina-degli-inventori": {
+  "file": "lab/banco/catalogo-cloud/steampunk/palazzina-degli-inventori.xml",
+  "nome": "palazzina-degli-inventori",
+  "ambientazione": "steampunk",
+  "cantina": false,
+  "passa": false,
+  "difetti": [
+   "grande seme 5: sagoma: 3 (serve ≥ 4)"
+  ],
+  "taglie": [
+   {
+    "taglia": "grande",
+    "box": [
+     100,
+     100,
+     80
+    ],
+    "vpt": 20,
+    "semi": [
+     {
+      "seme": 1,
+      "ms": 537,
+      "piani": 2,
+      "stanze": 6,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 26,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 2,
+      "ms": 613,
+      "piani": 2,
+      "stanze": 6,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 32,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 3,
+      "ms": 606,
+      "piani": 2,
+      "stanze": 5,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 7,
+      "finestre": 29,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 4,
+      "ms": 675,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 33,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 5,
+      "ms": 604,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 41,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": [
+       "sagoma: 3 (serve ≥ 4)"
+      ]
+     }
+    ],
+    "varianza": {
+     "voxel": 0.6156644846943128,
+     "colore": 0.14448499050572614,
+     "pianta": 0.5556052820400833,
+     "perimetro": 0.3673470979821094,
+     "interno": 0.6763836660599706,
+     "firmePiani": 1,
+     "firmeStanze": 3,
+     "architetture": 5,
+     "statico": false
+    },
+    "difettiVarianza": [],
+    "msMax": 675
+   },
+   {
+    "taglia": "enorme",
+    "box": [
+     120,
+     120,
+     96
+    ],
+    "vpt": 16,
+    "semi": [
+     {
+      "seme": 1,
+      "ms": 1357,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 30,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 2,
+      "ms": 1294,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 6,
+      "finestre": 29,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 3,
+      "ms": 1361,
+      "piani": 2,
+      "stanze": 6,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 27,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 4,
+      "ms": 989,
+      "piani": 2,
+      "stanze": 6,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 10,
+      "finestre": 28,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 5,
+      "ms": 1106,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 46,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     }
+    ],
+    "varianza": {
+     "voxel": 0.5311334879365232,
+     "colore": 0.14665047390849514,
+     "pianta": 0.33244208786389484,
+     "perimetro": 0.22859025032938077,
+     "interno": 0.6197545909710207,
+     "firmePiani": 1,
+     "firmeStanze": 2,
+     "architetture": 4,
+     "statico": false
+    },
+    "difettiVarianza": [],
+    "msMax": 1361
+   }
+  ]
+ },
+ "steampunk/stazione-ferroviaria": {
+  "file": "lab/banco/catalogo-cloud/steampunk/stazione-ferroviaria.xml",
+  "nome": "stazione-ferroviaria",
+  "ambientazione": "steampunk",
+  "cantina": false,
+  "passa": true,
+  "difetti": [],
+  "taglie": [
+   {
+    "taglia": "grande",
+    "box": [
+     100,
+     100,
+     80
+    ],
+    "vpt": 20,
+    "semi": [
+     {
+      "seme": 1,
+      "ms": 595,
+      "piani": 2,
+      "stanze": 6,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 28,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 2,
+      "ms": 746,
+      "piani": 2,
+      "stanze": 6,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 32,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 3,
+      "ms": 619,
+      "piani": 2,
+      "stanze": 5,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 27,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 4,
+      "ms": 723,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 35,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 5,
+      "ms": 783,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 37,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     }
+    ],
+    "varianza": {
+     "voxel": 0.6845438187216273,
+     "colore": 0.14655783776477072,
+     "pianta": 0.5588859189759091,
+     "perimetro": 0.3523045217966846,
+     "interno": 0.6763836660599706,
+     "firmePiani": 1,
+     "firmeStanze": 3,
+     "architetture": 5,
+     "statico": false
+    },
+    "difettiVarianza": [],
+    "msMax": 783
+   },
+   {
+    "taglia": "enorme",
+    "box": [
+     120,
+     120,
+     96
+    ],
+    "vpt": 16,
+    "semi": [
+     {
+      "seme": 1,
+      "ms": 1219,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 33,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 2,
+      "ms": 1341,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 6,
+      "finestre": 30,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 3,
+      "ms": 1196,
+      "piani": 2,
+      "stanze": 6,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 27,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 4,
+      "ms": 1264,
+      "piani": 2,
+      "stanze": 6,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 10,
+      "finestre": 25,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 5,
+      "ms": 1285,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 43,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     }
+    ],
+    "varianza": {
+     "voxel": 0.6000117309619476,
+     "colore": 0.12354009024675511,
+     "pianta": 0.34479088745086717,
+     "perimetro": 0.20184996223978602,
+     "interno": 0.6197545909710207,
+     "firmePiani": 1,
+     "firmeStanze": 2,
+     "architetture": 4,
+     "statico": false
+    },
+    "difettiVarianza": [],
+    "msMax": 1341
+   }
+  ]
+ },
+ "steampunk/taverna-delle-caldaie": {
+  "file": "lab/banco/catalogo-cloud/steampunk/taverna-delle-caldaie.xml",
+  "nome": "taverna-delle-caldaie",
+  "ambientazione": "steampunk",
+  "cantina": true,
+  "passa": true,
+  "difetti": [],
+  "taglie": [
+   {
+    "taglia": "grande",
+    "box": [
+     100,
+     100,
+     100
+    ],
+    "vpt": 20,
+    "semi": [
+     {
+      "seme": 1,
+      "ms": 1367,
+      "piani": 2,
+      "stanze": 4,
+      "cantina": 2.11,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 26,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 2,
+      "ms": 1374,
+      "piani": 2,
+      "stanze": 4,
+      "cantina": 1.8475,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 32,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 3,
+      "ms": 1306,
+      "piani": 2,
+      "stanze": 3,
+      "cantina": 1.815,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 33,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 4,
+      "ms": 1233,
+      "piani": 2,
+      "stanze": 3,
+      "cantina": 2.105,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 6,
+      "finestre": 24,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 5,
+      "ms": 1295,
+      "piani": 2,
+      "stanze": 4,
+      "cantina": 2.09,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 30,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     }
+    ],
+    "varianza": {
+     "voxel": 0.6049638359009903,
+     "colore": 0.1585733842579815,
+     "pianta": 0.32932524239053473,
+     "perimetro": 0.18667697184338738,
+     "interno": 0.7318162454551336,
+     "firmePiani": 1,
+     "firmeStanze": 2,
+     "architetture": 5,
+     "statico": false
+    },
+    "difettiVarianza": [],
+    "msMax": 1374
+   },
+   {
+    "taglia": "enorme",
+    "box": [
+     120,
+     120,
+     112
+    ],
+    "vpt": 16,
+    "semi": [
+     {
+      "seme": 1,
+      "ms": 2255,
+      "piani": 3,
+      "stanze": 4,
+      "cantina": 3.3359375,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 26,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 2,
+      "ms": 2435,
+      "piani": 3,
+      "stanze": 4,
+      "cantina": 3.31640625,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 28,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 3,
+      "ms": 2072,
+      "piani": 3,
+      "stanze": 4,
+      "cantina": 3.34765625,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 35,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 4,
+      "ms": 2440,
+      "piani": 3,
+      "stanze": 4,
+      "cantina": 2.8828125,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 22,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 5,
+      "ms": 2305,
+      "piani": 3,
+      "stanze": 5,
+      "cantina": 2.9140625,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 26,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     }
+    ],
+    "varianza": {
+     "voxel": 0.6695413218450391,
+     "colore": 0.1679907962307964,
+     "pianta": 0.34110560083444363,
+     "perimetro": 0.3002915451895044,
+     "interno": 0.8097143431594589,
+     "firmePiani": 1,
+     "firmeStanze": 2,
+     "architetture": 5,
+     "statico": false
+    },
+    "difettiVarianza": [],
+    "msMax": 2440
+   }
+  ]
  }
 }
