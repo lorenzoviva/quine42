@@ -4027,7 +4027,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: commit su `task/T256`; `docs/pipeline/README.md` aggiornato se descrive `riprendi`. Sicurezza: nessuna superficie nuova.
 - Esito: una voce integrata di un task non chiuso non vale più: `esegui` lo rilancia con worktree, branch e conversazione nuovi e `tentativi` da capo; `riprendi` su voce integrata, senza worktree o senza conversazione la porta allo stato `da capo` e lo dice; tentativi vecchi in `precedenti`, mostrati da `dossier` e `traccia`; `fatto` e voci non integrate invariati; cambiato rispetto al previsto: log con nome proprio (`T1.d1.1.log`) per non sovrascrivere i vecchi, `taskWorktree` fa `git worktree prune` se la cartella è sparita; da sapere: integrare un `fallito` o un esito senza riga lascia il blocco `da fare`, quindi ora il task si rilancia da solo (scritto nel README), e con worktree sparito e branch ancora presente riparte da quel branch; non provato: una CLI reale (test su repository git veri con CLI finta); suite 2060 passati e 1 saltato, typecheck verde. Sicurezza: nessuna superficie nuova.
 
-### T257 · La scheda dei modelli: correggere attribuzioni e misure — `da fare`
+### T257 · La scheda dei modelli: correggere attribuzioni e misure — `fatto` (`5a08aac`)
 - Pipeline: argon · stima 5% · approvato · priorità 7
 - Contesto: richiesta dell'autore: sui modelli fatti, non impressioni. Nasce da T254 (`dossier T254`). Il controllo a campione dell'orchestratore su `docs/pipeline/modelli.md` conferma prezzi e Terminal-Bench 4.0 di Sonnet e Opus e i prezzi di Haiku, e trova gli errori qui sotto, che pesano proprio sulla proposta di assegnazione.
 - Cosa fare, nel solo `docs/pipeline/modelli.md`:
@@ -4039,3 +4039,4 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Regole: quelle di T254. Non toccare `config.json` né il codice.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T257` col solo `docs/pipeline/modelli.md`; nell'esito cosa cambia nella proposta. Sicurezza: nessuna superficie nuova.
+- Esito: aggiornato `docs/pipeline/modelli.md` correggendo l'attribuzione di T180/T181/T182 e del modello del banco (`claude-opus-5-5`), ricalcolando i consumi sulle 213 righe di `consumi.jsonl` (inclusi T181, T182 e T254), correggendo il fattore di Argon da 8,13× a 3,92× su 4 task (1,10× in T254, senza doppio conteggio T68b+T69), riallineando OSWorld 2.1 (Opus 81,8 % vs Sonnet 80,1 %) e tutti i numeri del PDF `gemini_4_argon_model_evaluation.pdf`, e aggiornando la proposta di assegnazione con indicazione esplicita delle voci `mai provato da noi`; nulla manca.
