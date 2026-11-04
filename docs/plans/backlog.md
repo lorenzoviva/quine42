@@ -1574,8 +1574,9 @@ le risposte alle domande del piano.
   dà l'autore: se mancano, la domanda va in `docs/pipeline/domande/T45e.md`.
 - Esito: implementati gli endpoint server (`/api/stripe/checkout`, `/api/stripe/webhook`) con verifica firma HMAC-SHA256 (`stripe-signature`), accredito crediti idempotente (`Kernel.creditRecharge` e persistenza `world/pagamenti.json`), blocco acquisti per anonimi (403), interfaccia di ricarica rapida e saldo nel profilo (`P`); test headless in `tests/stripe.test.ts` (6/6 passati); ADR-0083 registrato. Codice e test integrati nel base `3d` con T77. Chiavi di test inserite dall'autore in `.env` (con listener locale indicato su porta 4242); verifica nel browser delegata a T93.
 
-### T45f · Il server su Google Cloud — `da fare` (dipende da T44b, T45d, T133, T134, T172, T209)
+### T45f · Il server su Google Cloud — `in attesa` (dipende da T44b, T45d, T133, T134, T172, T209)
 - Pipeline: claude · stima 6% · priorità 10
+- **In attesa (autore, 04/11): la fine della Fase I.** Allora servono le risposte di `docs/pipeline/domande/T45f.md`.
 - Fare: il server della sessione e i repository degli universi su Google Cloud, sempre acceso (Cloud Run con istanza minima o una VM,
   disco persistente per `universes/`, repository privati), il deploy da script, i segreti in Secret Manager.
 - Fatto quando: un universo multigiocatore giocato da due browser sul server di prova, commit. Il progetto Google Cloud lo dà l'autore.
