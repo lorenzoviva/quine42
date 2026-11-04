@@ -3494,13 +3494,14 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Quando è fatto: ogni task del backlog sta in una sola riga della tabella; commit su `task/T230`. Sicurezza: nessuna superficie nuova.
 - Esito: nuovo `docs/fasi.md` (quattro fasi con criterio di fine, proposta per la Fase I; tabella di 38 step, 1-27 pregresso con suono = 25, 28-38 lavoro aperto, ogni id di `indice` in una sola riga, controllo una tantum), voci `Fase` e `Step` e omonimi nel glossario, due righe nel censimento, ADR-0128, riga in `AGENTS.md`. Manca: i tag li mette T231; il backlog ha due blocchi `T59` e il comando per id li tratterebbe uguali (l'id è nello step 16, l'editor è citato nel 23). Non provato: suite intera non rilanciata dopo il secondo commit, solo documenti (glossario e typecheck rilanciati, verdi). Sicurezza: nessuna superficie nuova.
 
-### T231 · Il tag `step` nella pipeline — `da fare` (dipende da T230)
+### T231 · Il tag `step` nella pipeline — `fatto` (`2ff2f99`) (dipende da T230)
 - Pipeline: claude · stima 1% · approvato · priorità 1
 - Contesto: l'autore vuole dire all'orchestratore «priorizza lo step N». La tabella di `docs/fasi.md` dice quali task stanno in ogni step; serve che anche la pipeline lo sappia. Molti task vecchi non hanno la riga `- Pipeline:`: il tag è una riga a parte, `- Step: <n>`.
 - Cosa fare: in `tools/pipeline/pipeline.mjs` il parser di `- Step:`; il campo in `indice`, `dossier` e nella pagina web; `step <n> Txx…` assegna il tag; `step --da-tabella` li mette tutti leggendo `docs/fasi.md`; `step <n>` elenca i task; `step <n> --priorita <p>` porta alla priorità data quelli non finiti. Un task nuovo senza step resta valido. Aggiorna `docs/pipeline/README.md` e `orchestra.md`. Tocchi il backlog solo nei test, su una copia.
 - Test: `tests/` della pipeline; typecheck e suite intera con i loro turni.
 - Browser: non serve; il campo nella pagina web lo provi con il suo test.
 - Quando è fatto: l'orchestratore può lanciare il comando che mette i tag e chiederne la priorità; commit su `task/T231`. Sicurezza: nessuna superficie nuova.
+- Esito: parser di `- Step:`, campo in `indice`, `dossier` e pagina web, comando `step` (`<n> Txx…`, `--da-tabella`, `<n>`, `<n> --priorita <p>`), README, `orchestra.md`, `fasi.md` e `AGENTS.md` aggiornati. Rispetto al previsto: un task non stimato riceve la riga `- Pipeline: priorità N`, che `assegna` mantiene; i sotto-task nello stesso titolo condividono il tag; i task «spezzato in…» non ricevono la priorità; `orchestra.md` ammette `docs/fasi.md` fra i documenti scrivibili e avvisa di non usare la priorità 0. Manca: l'orchestratore deve lanciare `step --da-tabella` sul backlog vero dopo l'integrazione. Provato su una copia del backlog: 282 id riconosciuti, 277 righe `- Step:`, nessun'altra differenza. Pagina web provata solo con il test. Non provato: il comando sul backlog vero. Sicurezza: nessuna superficie nuova.
 
 ### T232 · Il sito come launcher: proposte della landing col rapporto aureo — `in attesa`
 - Pipeline: claude · stima 3% · approvato · priorità 90

@@ -105,6 +105,10 @@ node tools/pipeline/pipeline.mjs dossier T63            # tutto di un task: bloc
 node tools/pipeline/pipeline.mjs indice                 # una riga per task
 node tools/pipeline/pipeline.mjs assegna T69 argon 6 60 [--approva]   # la riga Pipeline: provider, stima, priorità
 node tools/pipeline/pipeline.mjs approva T69            # aggiunge «approvato»
+node tools/pipeline/pipeline.mjs step 31                # i task dello step 31 (docs/fasi.md, ADR-0128)
+node tools/pipeline/pipeline.mjs step 31 --priorita 1   # porta a quella priorità i suoi task non finiti (anche se non stimati: `assegna` la tiene)
+node tools/pipeline/pipeline.mjs step 31 T152 T153      # la riga `- Step: 31` di quei task, a mano
+node tools/pipeline/pipeline.mjs step --da-tabella      # mette i tag leggendo la tabella di docs/fasi.md; rifatto non cambia nulla
 node tools/pipeline/pipeline.mjs prossimo               # il primo numero di task libero
 node tools/pipeline/pipeline.mjs orchestratore argon    # su quale provider gira l'orchestratore (lo scrive orchestra da solo)
 node tools/pipeline/pipeline.mjs nota "testo"           # una riga nel diario di orchestrazione.md

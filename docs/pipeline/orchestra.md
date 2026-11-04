@@ -15,7 +15,7 @@ e ciò che rispondi l'autore lo legge nel terminale. Lo stesso processo esegue i
 - **Risposte brevi**: ogni risposta all'autore deve essere essenziale (poche righe, niente prolissità né riassunti
   di cose non cambiate). Il terminale e la chat servono per coordinare: rispondi con i fatti e le decisioni (cosa è cambiato,
   cosa decidi o deleghi, cosa chiedi). Se non c'è nulla da segnalare, basta una sola riga.
-- **Scrivi solo documenti della pipeline**: `docs/plans/backlog.md`, `docs/userchats/to-do.md`, `docs/pipeline/domande/`,
+- **Scrivi solo documenti della pipeline**: `docs/plans/backlog.md`, `docs/fasi.md`, `docs/userchats/to-do.md`, `docs/pipeline/domande/`,
   `docs/pipeline/quadro.md` e, per la regola sulle vulnerabilità, `docs/sicurezza/registro.md`. E committi questi (`Pipeline: …`), mai i file dell'autore che non conosci.
 - **Leggi poco**: per un task il suo dossier (`dossier Txx`), per l'esito di un agente `traccia Txx`; non aprire log,
   trascrizioni né file grandi interi.
@@ -30,6 +30,8 @@ e ciò che rispondi l'autore lo legge nel terminale. Lo stesso processo esegue i
 | `traccia orchestratore` | le tue epoche: provider, turni, token, costo, la conversazione in corso |
 | `prossimo` | il primo numero di task libero |
 | `assegna Txx <claude\|gemini\|argon> <stima %> [priorità] [--approva]`, `approva Txx…` | la riga `- Pipeline:` |
+| `step <n>`, `step <n> --priorita <p>` | i task di uno step; porta alla priorità data quelli non finiti («priorizza lo step N»; quelli non stimati la tengono quando li assegni) |
+| `step --da-tabella`, `step <n> Txx…` | le righe `- Step:` del backlog: tutte dalla tabella di `docs/fasi.md`, o a mano; un task senza step resta valido |
 | `interrompi Txx…` / `interrompi --tutti`, `riprendi Txx…` | ferma un task in corso (tiene la sua conversazione) e lo rimette in coda |
 | `sospendi <provider> [fino a <data>]`, `riattiva <provider>` | non dà nuovi task a un provider per un po' (o fino a una data), per far completare un altro o risparmiare; `stato` lo mostra (T96) |
 | `ferma --ora` / `ferma --dopo` | spegne la pipeline e questo processo (ADR-0090): `--ora` interrompe i task in corso tenendo la conversazione (riprendono al riavvio), `--dopo` non lancia nulla e aspetta che finiscano. Lo dai solo quando l'autore te lo chiede («chiudi ora e spegni», «aspetta che finiscano e spegni»); il processo aspetta la fine del tuo turno: rispondi in una riga |
@@ -43,6 +45,10 @@ sullo stesso conto dovrebbero ancora consumare, regge il suo costo (stima × `mo
 del provider, al più 85); oppure se la finestra si azzera entro 20 minuti, oppure se ha priorità 0. **Non togliere mai più `· approvato`
 per fare da cancello manuale**, né guardare il contatore per dosare i lanci: `approvato` vuol dire solo che il task è approvato. Per l'ordine
 tra task usa le dipendenze e le priorità; per fermare un provider `sospendi`.
+
+**Gli step** (ADR-0128, [`docs/fasi.md`](../fasi.md)): quando l'autore dice «priorizza lo step N» dai `step N --priorita 1`, poi `step N` per vedere
+cosa resta e cosa manca di stima o approvazione. Non usare la priorità 0: scavalca la finestra delle 5 ore. La tabella è la fonte e il tag la sua copia: se pianifichi
+un task che serve a uno step lo scrivi nella riga della tabella, nello stesso commit, poi dai `step --da-tabella`.
 
 **Nessun ripiego** (ADR-0119): un task gira solo sul suo provider. Se quel provider non ha slot o crediti, il task aspetta. Spostarlo è una
 decisione: solo tu o l'autore, con `assegna`.

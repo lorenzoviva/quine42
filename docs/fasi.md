@@ -47,7 +47,7 @@ L'autore: il rilascio aperto al pubblico, con i pagamenti Stripe. Il piano di la
 
 - **Un numero non cambia mai.** Uno step nuovo prende il primo numero libero, qualunque sia la sua fase: la numerazione non è un calendario (il 26 e il 27 sono arrivati in gran parte prima del 25). Uno step può cambiare fase.
 - **Ogni task sta in una sola riga.** Chi pianifica un task che serve a uno step lo scrive qui nello stesso commit; un task che non serve a nessun obiettivo può non avere step.
-- **La colonna `task` è un elenco di id separati da spazi**, senza intervalli: `pipeline.mjs` la leggerà così (T231).
+- **La colonna `task` è un elenco di id separati da spazi**, senza intervalli: `pipeline.mjs step --da-tabella` la legge così e ne copia il numero nella riga `- Step:` di ogni task del backlog (T231). Un altro testo nella colonna, o un id in due righe, ferma il comando prima che scriva.
 - **`stato`** è uno di: `raggiunto` (i suoi task sono finiti e l'obiettivo si vede), `in corso` (almeno un task è fatto o in corso), `da fare`, `in attesa` (aspetta l'autore o un'altra fase).
 - **Gli step da 1 a 9 sono quelli di prima**, riletti come obiettivi: 1-8 dalle chat archiviate ([`archivio/1-thread-unico/userchats/`](archivio/1-thread-unico/userchats/), [`archivio/2-step/userchats/`](archivio/2-step/userchats/)), e non hanno task perché il backlog non c'era. La chat `step0.md` è la creazione del progetto, prima del conto. I riferimenti a «step 8.2B» e simili negli ADR e nei commenti restano com'erano e indicano quelle sessioni.
 
