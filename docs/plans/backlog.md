@@ -3859,7 +3859,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Browser: non serve.
 - Quando è fatto: commit su `task/T242`, con le misure prima e con la riga. Sicurezza: nessuna superficie nuova.
 
-### T243 · La beta senza commissione — `da fare`
+### T243 · La beta senza commissione — `fatto` (`12dfb2b`)
 - Pipeline: claude · stima 1% · approvato · priorità 3
 - Step: 34
 - Contesto: l'autore (04/11, da T236): in beta i crediti hanno un prezzo lineare e nessun interesse, perché chi gioca contribuisce allo sviluppo. Oggi `PLATFORM_FEE` è una costante di `src/kernel/credits.ts` (+1 %, ADR-0081). Lo sconto del 50 % non è qui: per ora si fa a mano (`docs/pipeline/domande/T243.md`).
@@ -3867,6 +3867,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Test: commissione 0 e predefinita su consumi e spese comuni; valore non valido. Typecheck e suite intera con i loro turni, offline.
 - Browser: non serve.
 - Quando è fatto: con `QUINE_COMMISSIONE=0` il saldo cala esattamente del costo base; senza, nulla cambia; commit su `task/T243`. Sicurezza: scrivi l'esito, tocca i crediti.
+- Esito: commissione configurabile con `QUINE_COMMISSIONE` (predefinita 0,01, 0 ammesso, non valido → predefinito), decisa solo dal server e passata al mondo con `worldEnv`; la seguono addebiti, portafoglio del sito e console del master, la lobby non la mostrava; ricariche e consumi controllati lineari; ADR-0130, `AGENTS.md`, `#carte-crediti` e glossario aggiornati; test e typecheck verdi. Limiti: i giorni passati del portafoglio si leggono alla commissione di oggi, un valore non valido non viene segnalato; pagina crediti e console non provate nel browser (non richiesto). Sicurezza: nessuna superficie nuova.
 
 ### T244 · La home per la beta: ritocchi, video, istruzioni — `fatto` (`9b8523c`) (dipende da T234)
 - Pipeline: claude · stima 3% · approvato · browser · priorità 3
