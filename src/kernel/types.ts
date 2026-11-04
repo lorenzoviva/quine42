@@ -374,6 +374,9 @@ export interface AiConfig {
   attore?: Partial<import('./coefficients').ActorConfig> | boolean | string;
 }
 
+/** What the master sets before entering (T247, ADR-0133): every knob of the consumption, none of the providers'. */
+export type AiSettings = Partial<Pick<AiConfig, 'textModel' | 'scultori' | 'coefficienti' | 'attore' | 'minimi' | 'maxText' | 'maxForges' | 'maxPacks' | 'maxCast' | 'maxModels' | 'maxBrani' | 'placesPerMinute' | 'thinking'>>;
+
 /** Quality and spending minimums of an universe (T45d). */
 export interface AiMinimums {
   /** Minimum text model (e.g. 'gemini-3.1-flash-lite'). */

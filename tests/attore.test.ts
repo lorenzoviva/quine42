@@ -262,20 +262,31 @@ describe('the Actor in a multiplayer game', () => {
     const anna = await thin(server, 'anna');
     expect(master.session.master).toBe(true);
     expect(anna.session.master).toBe(false);
-    const all = [master, anna];
-    const refused = await ask(server, all, anna.session.act({ t: 'attore', acceso: true, modello: 'gemini-4-argon' }));
-    expect(refused.ok).toBe(false);
-    expect(refused.motivo).toMatch(/master/);
-    expect(k.actor().acceso).toBe(false);
-    const done = await ask(server, all, master.session.act({ t: 'attore', acceso: true, modello: 'gemini-3.8-flash' }));
-    expect(done.ok).toBe(true);
+    // The message of the Actor is gone (T247, ADR-0133): nobody changes it during a match, the master neither.
+    for (const who of [anna, master]) {
+      const refused = await ask(server, [master, anna], who.session.act({ t: 'attore', acceso: true, modello: 'gemini-4-argon' } as never));
+      expect(refused.ok).toBe(false);
+      expect(k.actor().acceso).toBe(false);
+    }
+  });
+
+  it('the master sets it on entering: what the wire says is repaired', async () => {
+    const k = await bootMany();
+    const server = new SessionServer(k);
+    const { server: s, client: c } = fakeLink();
+    server.connect(s);
+    const session = new SessionClient(c, { id: 'io', regolazioni: { attore: { acceso: true, modello: 'gemini-3.8-flash' } } });
+    await session.ready;
+    expect(session.settingsAnswer?.ok).toBe(true);
     expect(k.actor()).toEqual({ acceso: true, modello: 'gemini-3.8-flash' });
-    // What the wire says is repaired: a model's name that is not one stays the default.
-    const odd = await ask(server, all, master.session.act({ t: 'attore', acceso: 'true' as unknown as boolean, modello: '../../etc' }));
-    expect(odd.ok).toBe(true);
-    expect(k.actor()).toEqual({ acceso: true, modello: ACTOR_MODEL });
-    const off = await ask(server, all, master.session.act({ t: 'attore', acceso: false }));
-    expect(off.ok).toBe(true);
-    expect(k.actor().acceso).toBe(false);
+    // A model's name that is not one stays the default.
+    const odd = await bootMany();
+    const other = new SessionServer(odd);
+    const link = fakeLink();
+    other.connect(link.server);
+    const oddSession = new SessionClient(link.client, { id: 'io', regolazioni: { attore: { acceso: true, modello: '../../etc' } } });
+    await oddSession.ready;
+    expect(oddSession.settingsAnswer?.riparati?.join(' ')).toMatch(/Attore/);
+    expect(odd.actor()).toEqual({ acceso: true, modello: ACTOR_MODEL });
   });
 });

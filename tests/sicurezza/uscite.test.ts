@@ -108,7 +108,7 @@ describe('ciò che esce verso il giocatore', () => {
     const files = publicFiles(FILES);
     expect(JSON.stringify(files)).not.toContain(SECRET);
     const { ai } = JSON.parse(files['universe.json']);
-    expect(Object.keys(ai).sort()).toEqual(['coefficienti', 'maxText', 'textModel']);
+    expect(Object.keys(ai).sort()).toEqual(['coefficienti', 'maxText', 'placesPerMinute', 'textModel', 'thinking']);
     expect(hourlyEstimate(readConfig(files).config.ai).dollari).toBeGreaterThan(0);
     // The lobby's collection counts an environment's card; its program stays home.
     expect(JSON.parse(files['modules/npc.sonda/manifest.json']).layouts.bosco).toEqual({ name: 'Bosco', description: 'Alberi.', carta: { autore: 'a', pagante: 'b', titolare: 'c' } });

@@ -3,7 +3,7 @@
 // actions, and takes back the server's corrections. No kernel and no drawing here: the thin client of T39
 // gives this to the renderer.
 
-import type { FileMap } from '../kernel/types';
+import type { AiSettings, FileMap } from '../kernel/types';
 import type { FeedEntry } from '../kernel/agents/council';
 import type { PlayerSpot } from '../kernel/situation';
 import type { Profile } from '../kernel/wanderers';
@@ -35,6 +35,8 @@ export class SessionClient {
   riparato: string[] = [];
   /** Signed in anonymously (T44b): what they ask is made with the local models, until they link a Google account. */
   anonimo = false;
+  /** What the server made of the settings the master brought from the lobby (T247): refused when a match is under way. */
+  settingsAnswer?: { ok: boolean; motivo?: string; riparati?: string[] };
   /** Whether this wanderer is the master (T41): only the master hears the Council and gets all the files. */
   master = false;
   /** The platform fee, as the server said to the master (ADR-0132). */
@@ -70,7 +72,7 @@ export class SessionClient {
 
   constructor(
     private link: ClientLink,
-    private who: { id: string; nome?: string; profilo?: Partial<Profile>; token?: string; tetto?: number; freshToken?: () => Promise<string> },
+    private who: { id: string; nome?: string; profilo?: Partial<Profile>; token?: string; tetto?: number; regolazioni?: AiSettings; freshToken?: () => Promise<string> },
   ) {
     this.ready = new Promise((r) => (this.entered = r));
     link.onMessage((m) => this.receive(m));
@@ -91,7 +93,10 @@ export class SessionClient {
       ...(who.profilo ? { profilo: who.profilo } : {}),
       ...(token ? { token } : {}),
       ...(typeof who.tetto === 'number' ? { tetto: who.tetto } : {}),
+      ...(who.regolazioni ? { regolazioni: who.regolazioni } : {}),
     });
+    // The master's settings are said once: entering again, into a world started again, is not choosing again.
+    delete who.regolazioni;
   }
 
   /** The world started again (T127): what was asked of the old one has no answer, and this client comes in again as the wanderer it was. */
@@ -134,6 +139,7 @@ export class SessionClient {
         break;
       case 'ingresso':
         Object.assign(this, { id: m.id, nome: m.nome, profilo: m.profilo, riparato: m.riparato ?? [], anonimo: !!m.anonimo, master: !!m.master, commissione: m.commissione, files: m.files, branch: m.ramo ?? {}, me: m.me, forma: m.forma, stato: m.stato });
+        if (m.regolazioni) this.settingsAnswer = m.regolazioni;
         this.feed.splice(0, this.feed.length, ...(m.concilio ?? []));
         this.places.clear();
         this.entities.clear();
