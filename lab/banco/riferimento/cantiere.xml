@@ -42,8 +42,6 @@
   <all in="bz" out="*b"/>
   <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
-  <all in="bz" out="*b"/>
   <all in="Hp" out="*H" steps="5"/>
   <prl><rule in="tHb" out="*Ht" p="0.07"/></prl>
   <all in="tb" out="*t"/>
@@ -59,7 +57,7 @@
   <all in="P[wihO]" out="i*"/>
   <prl in="P" out="E"/>
   <one steps="6"><rule in="EEEEEEE/EEEEEEE/wwwwwww" out="*iiiii*/*iiiii*/*******"/><rule in="EEEEEEE/EEEEEEE/XXXXXXX" out="*IIIII*/*IIIII*/*******"/></one>
-  <one in="qqqqqqqqq" out="GGGGGGGGG" steps="5"/>
+  <one steps="6"><rule in="qqqqqqqqq" out="GGGGGGGGG"/><rule in="zzzzzzzzz" out="GGGGGGGGG"/></one>
   <prl in="q" out="E"/>
   <all in="M/E" out="*/A" symmetry="()"/>
   <all in="A/E" out="*/A" symmetry="()"/>

@@ -11,6 +11,8 @@ const RIFERIMENTI = [
   { file: 'palazzina', bersaglio: 'moderna' },
   { file: 'forte', bersaglio: 'rocca' },
   { file: 'tempio', bersaglio: 'tempio' },
+  // The short skeleton the prompt starts from (T182): small rules and `steps` instead of long patterns.
+  { file: 'cantiere', bersaglio: 'moderna' },
 ];
 
 describe('i programmi di riferimento del cantiere', () => {

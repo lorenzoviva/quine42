@@ -48,7 +48,7 @@ export interface Esame {
 
 function rigaDifetto(d: string): string {
   // With variance (T182) a defect says first where it falls: `enorme (…), seme 3: piani: 1`, `varianza a grande: perimetro: 0`.
-  const senza = d.replace(/^(?:.*?, seme d+(?: e altri d+)?|varianza a S+): /, '');
+  const senza = d.replace(/^(?:.*?, seme \d+(?: e altri \d+)?|varianza a \S+): /, '');
   const senso = SIGNIFICATO[senza.slice(0, senza.indexOf(':'))];
   return `- ${d}${senso ? ` — ${senso}` : ''}`;
 }

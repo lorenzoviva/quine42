@@ -4,7 +4,7 @@ Scrivi un solo programma XML di MarkovJunior che **fa crescere** l'edificio chie
 Lo stesso XML gira con almeno 5 semi e 2 taglie: scatola da 100×100×80 (20 voxel per casella, gradino 4, persona alta 30) a 120×120×96 (16 voxel per casella, gradino 3, persona 24; con 12 voxel per casella gradino 2, persona 18). Ogni seme deve dare un altro edificio, con contorno, pianta e stanze diversi, e tutti devono reggere. Quindi niente `<box>`, niente coordinate e niente `size`: solo regole, ancorate al centro del pavimento e a ciò che c'è già.
 
 ## Il formato
-x da sinistra a destra, y dal retro al davanti (il davanti è y grande), z dal basso in alto. `values` sono le lettere, una per cella (la prima, B, è l'aria). Un pattern: righe (y crescente) separate da `/`, strati separati da spazi, **lo strato in alto per primo**: `in="B t"` è t con sopra l'aria. `*` è qualunque cella (in `out`: non cambia), `[ab]` è a oppure b, `<union symbol="1" values="ab"/>` dà un nome a un insieme.
+x da sinistra a destra, y dal retro al davanti (il davanti è y grande), z dal basso in alto. `values` sono le lettere, una lettera per cella (la prima, B, è l'aria), solo lettere: le cifre non hanno colore e servono per i nomi delle `union`. Un pattern: righe (y crescente) separate da `/`, strati separati da spazi, **lo strato in alto per primo**: `in="B t"` è t con sopra l'aria. `*` è qualunque cella (in `out`: non cambia), `[ab]` è a oppure b, `<union symbol="1" values="ab"/>` dà un nome a un insieme.
 - `<one>` riscrive una corrispondenza a caso per passo, `<all>` tutte quelle che non si sovrappongono, `<prl>` ognuna con la sua probabilità (`p` sta sulla `<rule>`; un solo passo). Senza `steps` un nodo va finché può; `steps="N"` lo ferma dopo N passi. I nodi girano in ordine.
 - La simmetria della radice, `(xy)`, prova ogni regola in tutte le direzioni del piano; `symmetry="()"` solo come è scritta, `(x)` e `(y)` anche specchiata.
 - `ground="E"` riempie lo strato z=0, `origin="bottom"` mette la seconda lettera al centro del pavimento.
@@ -15,13 +15,13 @@ Il corpo è largo 9 voxel (passa in 11), cammina sui pavimenti e non ci passa se
 
 ## Ciò che ogni seme deve avere
 - **Porta** sul davanti, in mezzo, alta come una persona e larga 11, con la strada dritta e scoperta fino al bordo (niente sopra di lei a nessuna altezza).
-- **Almeno 2 piani coperti** a cui si arriva a piedi, soffitto almeno 30 sopra il pavimento; **almeno 4 stanze** in tutto, di almeno 2 caselle di lato, con varchi di al più 11-20 voxel; arredi contro i muri; nessuna stanza o piano murato.
+- **Almeno 2 piani coperti** a cui si arriva a piedi, soffitto almeno 30 sopra il pavimento; **almeno 4 stanze** sommando i piani, con varchi di al più 11-20 voxel; nessuna stanza o piano murato. **A 100×100 una campata da 29 conta come stanza solo se è sgombra fino ai muri**: un arredo che sporge più di un voxel la toglie dalla conta (sala di due campate unite, muro aperto: quella regge gli arredi). Lascia sgombre almeno 3 campate a ogni seme.
 - **Almeno 2 posti dove il salto serve**: un ostacolo alto più di un gradino e al più 16, che si scavalca verso un pavimento a cui si arriva anche a piedi.
 - **Almeno 6 finestre su 3 lati** (vetro o fori, almeno 7 voxel di lato, sul piano esterno del muro; le feritoie si chiamano `name="finestra…"`); **6 materiali visibili**, il più usato sotto il 50 % dei voxel; **4 altezze della cima**; **almeno 24 dettagli** sulle facciate (pezzi di 2-300 voxel di una lettera) su tutti i lati; **il 12 % delle facciate fuori dal piano** (contrafforti, balconi, ali); **almeno il 30 % della pianta della scatola occupato, a ogni taglia** (a 120 sono almeno 5 campate da 30).
 - Tutto attaccato, poggiato sul fondo, finito in 8 secondi a 120×120×96.
 
 ## Lo scheletro
-Regge 20 semi su 20 alle due taglie, ed è una palazzina qualunque: è il punto di partenza, non il risultato.
+Regge 19-20 semi su 20 alle due taglie, ed è una palazzina qualunque: è il punto di partenza, non il risultato.
 ```xml
 <sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryql" symmetry="(xy)" ground="E" origin="bottom">
   <union symbol="1" values="be"/>
@@ -67,8 +67,6 @@ Regge 20 semi su 20 alle due taglie, ed è una palazzina qualunque: è il punto 
   <all in="bz" out="*b"/>
   <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
-  <all in="bz" out="*b"/>
   <all in="Hp" out="*H" steps="5"/>
   <prl><rule in="tHb" out="*Ht" p="0.07"/></prl>
   <all in="tb" out="*t"/>
@@ -84,7 +82,7 @@ Regge 20 semi su 20 alle due taglie, ed è una palazzina qualunque: è il punto 
   <all in="P[wihO]" out="i*"/>
   <prl in="P" out="E"/>
   <one steps="6"><rule in="EEEEEEE/EEEEEEE/wwwwwww" out="*iiiii*/*iiiii*/*******"/><rule in="EEEEEEE/EEEEEEE/XXXXXXX" out="*IIIII*/*IIIII*/*******"/></one>
-  <one in="qqqqqqqqq" out="GGGGGGGGG" steps="5"/>
+  <one steps="6"><rule in="qqqqqqqqq" out="GGGGGGGGG"/><rule in="zzzzzzzzz" out="GGGGGGGGG"/></one>
   <prl in="q" out="E"/>
   <all in="M/E" out="*/A" symmetry="()"/>
   <all in="A/E" out="*/A" symmetry="()"/>
@@ -133,10 +131,10 @@ Perché regge, ed è ciò che non si rompe:
 L'edificio chiesto deve riconoscersi al primo sguardo: non consegnare lo scheletro ricolorato.
 - **Colori e materiali** (`<color>`), e dove vanno: una fascia alta nelle righe di `w`, `X`, uno zoccolo di un'altra lettera, un pavimento per piano.
 - **Proporzioni**: il reticolo può essere più largo con passo diverso solo se rifai i conti (passo, `steps` di camminatori e scala); i piani no: 32 strati per piano reggono ogni taglia. Un terzo piano è un'altra lettera alta, con un'altra scala.
-- **Masse**: quante campate crescono, quante sono alte (`p`), un'ala bassa, un cortile (campata non costruita, chiusa da mura `q`), torri (una lettera sui pilastri che sale più delle altre), un recinto. Un cortile vale per le rocche: il contorno lo fanno le campate scelte.
+- **Masse**: quante campate crescono (più di 5 su 9 tolgono varietà al contorno, meno di 5 non riempiono la scatola grande), quante sono alte (`p`), un'ala bassa, un cortile (campata non costruita, chiusa da mura `q`), torri (una lettera sui pilastri che sale più delle altre), un recinto. Un cortile vale per le rocche: il contorno lo fanno le campate scelte.
 - **Il tetto**: la metà di ciò che si vede. A falde o a gradoni, sullo strato `R`: `<all in="***/*B*/*** *R*/RRR/*R*" out="***/*R*/*** ***/***/***" steps="10" symmetry="()"/>` sale di uno strato sopra le celle che hanno `R` attorno, fino al colmo; con una lettera per falda o un'altra lettera in cima si legge il colmo; per le gronde `RB → *R` nello strato prima. Merli: `WWWWWWWW → MMMMmmmm` sulla cima di un muro. Lanterne, comignoli, ciminiere, antenne: `<one in="B B R" out="* D *" steps="2" symmetry="()"/>` e `<all in="B D" out="D *" steps="N" symmetry="()"/>` (una ciminiera è alta e snella).
 - **Le facciate**: regole sui muri, dopo le colonne: fasce (`U`, `u`), tubi, travi a vista, ingranaggi, contrafforti, insegna sopra la porta. Le regole in piano valgono sulle quattro facce, così ogni lato ha le sue cose a seconda del seme.
-- **Dentro**: gli arredi di ogni stanza chiesta con una regola sulla pianta contro un muro (lettera sua, sale di 8-20 strati): banco, botti, letto, altare. Mai in mezzo alla stanza.
+- **Dentro**: ogni stanza chiesta si riconosce. Nelle campate che devono restare sgombre: tappeti e pavimenti di un'altra lettera (alti 1), cose appese ai muri sopra le teste, luci. Nelle sale di due campate: arredi con una regola sulla pianta contro un muro (lettera sua, sale di 8-20 strati): banco, botti, letto, altare. Mai in mezzo.
 - **Se il suolo non è a z=0** (cantina, `base` voxel sotto il suolo): lo strato z=0 è sottoterra. Dopo il progetto, un nodo `steps="base"` porta in alto tutte le lettere lasciando `B`, tranne quelle della campata-cantina, che lasciano pavimento, aria e muro; la scala verso il basso è la stessa regola, che parte da `base` e arriva in linea su un pavimento sgombro di almeno 2×2 caselle. Fuori dalla cantina, sotto il suolo, nulla.
 
 ## Come farlo
