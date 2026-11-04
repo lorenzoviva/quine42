@@ -377,7 +377,7 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Da non usare**: `outline`, `bordo` (per questa riga)
 
 ### Interruttore dell'aspetto
-- **Inglese**: `LabLook`, `cartoonOn`, `CARTOON`
+- **Inglese**: `cartoonOn`, `CARTOON`
 - **Definizione**: la scelta tra il cartone, il predefinito, e l'aspetto classico: nel gioco si decide una volta dall'URL (`?classica`), nel laboratorio anche dal vivo con un bottone (ADR-0093).
 - **Dove vive**: `src/render/cartoon.ts`, `lab/look.ts`
 - **Da non usare**: nessuno
