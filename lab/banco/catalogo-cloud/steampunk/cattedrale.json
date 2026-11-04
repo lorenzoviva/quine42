@@ -1,0 +1,35 @@
+{
+ "file": "steampunk/cattedrale.xml",
+ "ambientazione": "steampunk",
+ "nome": "cattedrale",
+ "titolo": "Cattedrale degli Ingranaggi",
+ "cantina": false,
+ "passa": true,
+ "regge": true,
+ "varia": true,
+ "maxMs": {
+  "grande": 906,
+  "enorme": 1808
+ },
+ "semiOk": {
+  "grande": "5/5",
+  "enorme": "5/5"
+ },
+ "varianza": {
+  "grande": {
+   "voxel": 0.6244965916518768,
+   "pianta": 0.5805940442107744,
+   "perimetro": 0.2336512141724248,
+   "interno": 0.5987324597904367,
+   "architetture": 5
+  },
+  "enorme": {
+   "voxel": 0.5574622139760794,
+   "pianta": 0.2604777667042526,
+   "perimetro": 0.17859029602130405,
+   "interno": 0.49646717117153993,
+   "architetture": 5
+  }
+ },
+ "difetti": []
+}
