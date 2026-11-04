@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 04/11/2026, epoca 259. Crediti: vedi `stato`.
+Aggiornato il 04/11/2026, epoca 260. Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -33,8 +33,8 @@ Aggiornato il 04/11/2026, epoca 259. Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-1. **In corso T257 su Argon.** Pronti: **T256** (claude, se la finestra regge; richiesta dell'autore), **T255** (Argon). **T253 integrato:** il parser legge `T89a-d`, nessuna dipendenza del backlog cambia. `tests/subscription.test.ts` rosso nella suite intera e verde da solo per la seconda volta (T89c, T253), causa non cercata: proposto all'autore un task. Gemini all'8 % è sotto `sogliaUnSolo` (10): nessun task nuovo fino al reset del 05/11 alle 17:37 UTC.
-4. **T258 → T156** (strutture procedurali). **T182 integrato e chiuso dall'autore (04/11):** D4 A (il kernel segna il suolo, T258, approvato), D5 C (gli interni li fa un agente, T259, da approvare: D29), D6 la ricchezza basta, D7 niente giro su Argon. Soglia foto non raggiunta, accettato; `pagoda/1` e `tempio/2` restano fuori dai 10. T156 aspetta T258, non T259.
+1. **In corso T257 (Argon) e T258 (claude).** Pronti: **T255** (Argon), **T259** (claude). **T256 integrato** (`d16d20a`): un task tornato `da fare` riparte da capo; integrare un `fallito` o un esito senza riga lascia il blocco `da fare`, quindi il task si rilancia da solo (attenzione a `integra`); non provato con una CLI reale. **T253 integrato:** il parser legge `T89a-d`, nessuna dipendenza del backlog cambia. `tests/subscription.test.ts` rosso nella suite intera e verde da solo per la seconda volta (T89c, T253), causa non cercata: proposto all'autore un task. Gemini all'8 % è sotto `sogliaUnSolo` (10): nessun task nuovo fino al reset del 05/11 alle 17:37 UTC.
+4. **T258 → T156** (strutture procedurali). **T182 integrato e chiuso dall'autore (04/11):** D4 A (il kernel segna il suolo, T258, approvato), D5 C (gli interni li fa un agente, T259: nel backlog risulta `approvato` dopo `5d70c1a`, nessun comando dell'orchestratore lo ha fatto, forse la pagina web dell'autore, non accertato; chiesta conferma, D29 aperta finché non risponde), D6 la ricchezza basta, D7 niente giro su Argon. Soglia foto non raggiunta, accettato; `pagoda/1` e `tempio/2` restano fuori dai 10. T156 aspetta T258, non T259.
 4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla.
 
 ## Attese dall'autore
@@ -68,5 +68,5 @@ Aggiornato il 04/11/2026, epoca 259. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **258:** integrati T254 e T253; creati T256 e T257.
 - **259:** integrati T89e e T182; creati T258 e T259.
+- **260:** integrato T256; lanciato T258.
