@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 04/11/2026, epoca 241. Crediti: vedi `stato`.
+Aggiornato il 04/11/2026, epoca 242. Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -31,12 +31,12 @@ Aggiornato il 04/11/2026, epoca 241. Crediti: vedi `stato`.
 - **T89c integrato** (`aced083`): luce tinta, ombre azzurre, prospettiva aerea, bloom tarato; dietro `?cartone`, `CARTOON_BY_DEFAULT` resta `false` fino a T89b, che deve tenere `uFog` in `Ink`. Verificato nel browser. Non provati: prestazioni (T89e), camera delle ombre da lontano. Rosso una volta `tests/subscription.test.ts`, verde da solo, causa non cercata.
 - **T186 integrato** (`cf88084`): landing, striscia «coming soon» con spazio, pirati, cowboy, senza link. Verificata a 1920 e 390 px; non provata sotto `npm run serve`.
 - **T225 integrato** (`c0c7868`, ADR-0127): Musicista (`sound.compose`) nella casa dell'Artista, `ScoreDirector` entro `ai.maxBrani` (8) e coefficiente `brani`, incarico `musica` del Referente. Non provati: ascolto umano, multigiocatore dal vivo, `ScoreDirector` con un modello vero; suite intera non rilanciata dopo una correzione ai soli documenti. Limiti: validazione sincrona ~0,8 s a tentativo sulla pagina; i brani di Gemini seguono da vicino l'esempio; un «Low Detail» salvato senza `brani` non è più riconosciuto finché non lo si riapplica.
-- **T158 finito, non integrato** (l'Attore nella corona, verificato nel browser da solo): conflitto col Musicista di T225 sul nono posto al tavolo e su `Building.teams`; lo risolve **T229**, con verifica nel browser. Scoperto da T158, nessun task: `Archive.go` senza file manda lo Scultore in `buildings[0]`; `docs/glossario-censimento.md` rigenerato porta differenze estranee.
+- **T229 e T158 integrati** (`d8909a5`): l'Attore nella corona (ADR-0116), dieci al tavolo, `guest` assorbito in `Building.teams`. Verificato nel browser. Non provati: Attore acceso con una battuta vera, teletrasporti con `E` nel browser. Scoperti, nessun task: `Archive.go` senza file manda lo Scultore in `buildings[0]`; `docs/glossario-censimento.md` rigenerato porta differenze estranee.
 - ADR nuovi dallo **0128**.
 
 ## Pronti e priorità
 
-1. **In coda, approvati e pronti, partono da soli:** T229 T182 T89b T89e T183 T152.
+1. **In coda, approvati e pronti, partono da soli:** T89b T89e T183 T152; T182 in corso.
 4. **T182 → T156** (strutture procedurali). T182 su Claude, stima 8 %, al più 4 giri; è pronto.
 4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla.
 5. T89d resta bloccato.
@@ -67,5 +67,5 @@ Aggiornato il 04/11/2026, epoca 241. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **242:** T229 e T158 integrati; Attore e Musicista nella corona.
 - **241:** T186 e T225 integrati; catena del suono finita; T158 in conflitto, T229 creato.
-- **240:** T89c, T228 e T224 integrati; suono nel gioco nel base.
