@@ -6,7 +6,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 // The pipeline is a plain `.mjs` with no types: imported by a computed URL so tsc does not look for a declaration.
-type Task = { id: string; title: string; status: string; deps: string[]; provider?: string; estimate?: number; approved?: boolean; priority?: number; parent?: string; needsBrowser?: boolean };
+type Task = { id: string; title: string; status: string; deps: string[]; provider?: string; estimate?: number; approved?: boolean; priority?: number; parent?: string; needsBrowser?: boolean; step?: number };
 type Counter = { nome: string; finestra: '5h' | 'settimana'; residuo: number; reset?: string };
 type Pipeline = {
   parseBacklog(text: string): Task[];
@@ -823,6 +823,166 @@ describe('il backlog per l\'orchestratore', () => {
   });
 });
 
+// The `step` command (T231, ADR-0128): the table of docs/fasi.md → `- Step:` in the backlog, always on a copy.
+describe('gli step nella pipeline (T231)', () => {
+  type Steps = {
+    parseBacklog(text: string): Task[];
+    parseStepTable(text: string): { step: number; tasks: string[] }[];
+    setStepLine(text: string, id: string, step: number): string;
+    stepCommand(args: string[], opts?: unknown): string[];
+    dossierOf(id: string, opts?: unknown): { step?: number; markdown: string };
+    assignTask(id: string, a: { provider: string; stima: number }, opts?: unknown): unknown;
+  };
+  const TABLE = [
+    '# Fasi', '',
+    '| step | obiettivo | fase | stato | task |',
+    '|---|---|---|---|---|',
+    '| 1 | Il primo mondo (l\'altro T9, vedi sotto) | I | raggiunto | — |',
+    '| 9 | Il 3D | I | raggiunto | T1 T2 T56a T56b |',
+    '| 28 | Parole | I | in corso | T3 T4 T5 T43 T77 |',
+    '',
+    'Testo dopo, con T9.',
+  ].join('\n');
+  const LOG = [
+    '# Backlog', '',
+    '### T1 · Finito — `fatto` (`abc1234`)', '- Fare: base.', '',
+    '### T2 · Doppio — `fatto` (`abc1235`)', '- Fare: il primo.', '',
+    '### T2 · Doppio, il secondo — `fatto` (`abc1236`)', '- Fare: il secondo.', '',
+    '### T3 · Pronto — `da fare`', '- Pipeline: gemini · stima 3% · approvato · priorità 50', '- Fare: altro.', '',
+    '### T4 · Senza riga — `da fare`', '- Fare: non stimato.', '',
+    '### T5 · In attesa — `in attesa`', '- Pipeline: claude · stima 2% · browser · priorità 20', '- Fare: domanda.', '',
+    '### T43 · Tra giocatori — spezzato in T43a-T43c', '',
+    '### T56 · Il salto — T56a `fatto` (`e5f8099`), T56b `da fare`', '- Pipeline: gemini · stima 5% · priorità 20', '',
+    '### T60 · Fuori tabella — `da fare`', '- Fare: nessuno step.', '',
+  ].join('\n');
+  let S: Steps;
+  let repo: string;
+  const backlog = () => fs.readFileSync(path.join(repo, 'docs/plans/backlog.md'), 'utf8');
+  const opts = () => ({ repo, config: { providers: { claude: {}, gemini: {}, argon: {} }, piani: {} } });
+  const task = (id: string) => S.parseBacklog(backlog()).find((t) => t.id === id);
+
+  beforeAll(async () => { S = (await import(/* @vite-ignore */ pathToFileURL(path.resolve(__dirname, '../tools/pipeline/pipeline.mjs')).href)) as unknown as Steps; });
+  const sandbox = (table = TABLE, log = LOG) => {
+    repo = fs.mkdtempSync(path.join(os.tmpdir(), 'quine-step-'));
+    fs.mkdirSync(path.join(repo, 'docs/plans'), { recursive: true });
+    fs.writeFileSync(path.join(repo, 'docs/fasi.md'), table);
+    fs.writeFileSync(path.join(repo, 'docs/plans/backlog.md'), log);
+  };
+  afterEach(() => { if (repo) fs.rmSync(repo, { recursive: true, force: true }); });
+
+  it('un task senza step resta valido; un `- Step:` non numerico non è un tag', () => {
+    expect(S.parseBacklog(LOG).find((t) => t.id === 'T3')?.step).toBeUndefined();
+    const text = '### T7 · Uno — `da fare`\n- Step: 12\n\n### T8 · Due — `da fare`\n- Step: 8.2B\n';
+    expect(S.parseBacklog(text).map((t) => t.step)).toEqual([12, undefined]);
+  });
+
+  it('il tag va sotto la riga Pipeline, o sotto il titolo; e si sostituisce', () => {
+    const a = S.setStepLine(LOG, 'T3', 28);
+    expect(a).toContain('priorità 50\n- Step: 28\n- Fare: altro.');
+    expect(S.setStepLine(LOG, 'T4', 28)).toContain('`da fare`\n- Step: 28\n- Fare: non stimato.');
+    const b = S.setStepLine(a, 'T3', 29);
+    expect(b).toContain('- Step: 29\n- Fare: altro.');
+    expect(b).not.toContain('- Step: 28');
+    expect(() => S.setStepLine(LOG, 'T99', 1)).toThrow(/non c'è/);
+  });
+
+  it('la tabella si legge solo nella colonna task, e un errore si dice', () => {
+    expect(S.parseStepTable(TABLE)).toEqual([{ step: 1, tasks: [] }, { step: 9, tasks: ['T1', 'T2', 'T56a', 'T56b'] }, { step: 28, tasks: ['T3', 'T4', 'T5', 'T43', 'T77'] }]);
+    expect(() => S.parseStepTable(TABLE.replace('T3 T4', 'T1 T4'))).toThrow(/T1 sta in due righe, 9 e 28/);
+    expect(() => S.parseStepTable(TABLE.replace('T3 T4', 'T3-T4'))).toThrow(/«T3-T4» non è un id/);
+    expect(() => S.parseStepTable('niente')).toThrow(/non c'è la tabella/);
+  });
+
+  it('la tabella vera di docs/fasi.md si legge: ogni task in una sola riga', () => {
+    const rows = S.parseStepTable(fs.readFileSync(path.resolve(__dirname, '../docs/fasi.md'), 'utf8'));
+    expect(rows.find((r) => r.step === 25)?.tasks).toContain('T221');
+    expect(rows.find((r) => r.step === 23)?.tasks).not.toContain('T59');
+  });
+
+  it('step --da-tabella mette i tag, dice ciò che non torna, e rifatto non cambia nulla', () => {
+    sandbox();
+    const lines = S.stepCommand(['--da-tabella'], opts());
+    expect(lines[0]).toBe('8 task nella tabella, 8 con un tag nuovo o cambiato.');
+    expect(lines).toContain('Nella tabella e non nel backlog: T77');
+    expect(lines).toContain('Nel backlog e non nella tabella (nessuno step): T60');
+    expect(task('T1')?.step).toBe(9);
+    expect(task('T3')?.step).toBe(28);
+    expect(task('T56b')?.step).toBe(9); // il blocco del padre, condiviso
+    expect(task('T60')?.step).toBeUndefined();
+    // Due blocchi con un id: il tag va al primo, come dice docs/fasi.md.
+    expect(backlog()).toContain('### T2 · Doppio — `fatto` (`abc1235`)\n- Step: 9\n');
+    expect(backlog()).toContain('### T2 · Doppio, il secondo — `fatto` (`abc1236`)\n- Fare');
+    const once = backlog();
+    expect(S.stepCommand(['--da-tabella'], opts())[0]).toContain(', 0 con un tag');
+    expect(backlog()).toBe(once);
+  });
+
+  it('una tabella sbagliata non scrive nulla', () => {
+    sandbox(TABLE.replace('T1 T2 T56a T56b', 'T1 T2 T56a').replace('T3 T4', 'T56b T3 T4'));
+    expect(() => S.stepCommand(['--da-tabella'], opts())).toThrow(/pezzi di T56 stanno negli step 9 e 28/);
+    expect(backlog()).toBe(LOG);
+  });
+
+  it('step <n> Txx… assegna il tag, tutto o niente', () => {
+    sandbox();
+    expect(S.stepCommand(['31', 'T60', 'T56a'], opts())).toEqual(['Step 31: T60 T56a']);
+    expect(task('T60')?.step).toBe(31);
+    expect(task('T56b')?.step).toBe(31);
+    const before = backlog();
+    expect(() => S.stepCommand(['32', 'T60', 'T99'], opts())).toThrow(/T99: non c'è/);
+    expect(backlog()).toBe(before);
+  });
+
+  it('step <n> elenca i task del suo step', () => {
+    sandbox();
+    S.stepCommand(['--da-tabella'], opts());
+    const lines = S.stepCommand(['28'], opts());
+    expect(lines.map((l) => l.split(' · ')[0])).toEqual(['T3', 'T4', 'T5', 'T43']);
+    expect(lines[0]).toContain('step 28');
+    expect(S.stepCommand(['30'], opts())).toEqual(['Step 30: nessun task con questo tag.']);
+  });
+
+  it('step <n> --priorita tocca solo i non finiti e tiene il resto della riga', () => {
+    sandbox();
+    S.stepCommand(['--da-tabella'], opts());
+    expect(S.stepCommand(['28', '--priorita', '1'], opts())).toEqual(['Step 28: priorità 1 a T3 T4 T5']); // T43 è spezzato
+    expect(backlog()).toContain('- Pipeline: gemini · stima 3% · approvato · priorità 1\n- Step: 28');
+    expect(backlog()).toContain('- Pipeline: claude · stima 2% · browser · priorità 1\n- Step: 28');
+    expect(task('T4')?.priority).toBe(1);
+    expect(task('T4')?.provider).toBeUndefined();
+    expect(backlog()).not.toContain('undefined');
+    // Lo step 9: T56b è da fare e condivide la riga con T56a, finito; T1 non ha riga e non ne prende una.
+    expect(S.stepCommand(['9', '--priorita', '2'], opts())).toEqual(['Step 9: priorità 2 a T56b']);
+    expect(task('T56b')?.priority).toBe(2);
+    expect(task('T1')?.priority).toBeUndefined();
+  });
+
+  it('il task non stimato con la priorità si assegna e la tiene', () => {
+    sandbox();
+    S.stepCommand(['--da-tabella'], opts());
+    S.stepCommand(['28', '--priorita', '1'], opts());
+    S.assignTask('T4', { provider: 'claude', stima: 3 }, { repo });
+    expect(task('T4')).toMatchObject({ provider: 'claude', estimate: 3, priority: 1, step: 28 });
+  });
+
+  it('il dossier dice lo step', () => {
+    sandbox();
+    S.stepCommand(['--da-tabella'], opts());
+    const d = S.dossierOf('T3', { repo });
+    expect(d.step).toBe(28);
+    expect(d.markdown).toContain('- step: 28');
+    expect(S.dossierOf('T60', { repo }).markdown).not.toContain('- step:');
+  });
+
+  it('gli argomenti sbagliati non scrivono', () => {
+    sandbox();
+    for (const args of [[], ['x'], ['0'], ['28', '--priorita'], ['28', '--priorita', 'alta'], ['28', 'pippo'], ['--da-tabella', '28']]) {
+      expect(() => S.stepCommand(args, opts()), args.join(' ')).toThrow(/Uso: step/);
+    }
+    expect(backlog()).toBe(LOG);
+  });
+});
+
 describe('orchestra', () => {
   let O: Orchestra;
   beforeAll(async () => { O = (await import(/* @vite-ignore */ pathToFileURL(path.resolve(__dirname, '../tools/pipeline/orchestra.mjs')).href)) as Orchestra; });
@@ -1290,6 +1450,19 @@ describe('interfaccia web della pipeline (T69)', () => {
     expect(scriptMatch).not.toBeNull();
     const script = scriptMatch![1];
     expect(() => new Function(script)).not.toThrow();
+  });
+
+  it('il campo step arriva alla pagina: nello stato, nella tabella e sulle carte (T231)', () => {
+    const opts = makeSandbox();
+    const backlog = path.join(tmpRepo, 'docs', 'plans', 'backlog.md');
+    fsMod.writeFileSync(backlog, fsMod.readFileSync(backlog, 'utf8').replace('- Fare: aspetta approvazione.', '- Step: 28\n- Fare: aspetta approvazione.'));
+    const tasks = W.handleApi('GET', '/api/stato', {}, opts).data.tasks as Task[];
+    expect(tasks.find((t) => t.id === 'T3')?.step).toBe(28);
+    expect(tasks.find((t) => t.id === 'T4')?.step).toBeUndefined();
+    const html = W.renderHtml();
+    expect(html).toContain('<th>Step</th>');
+    expect(html).toContain("<td>${t.step ?? '—'}</td>");
+    expect(html).toContain('step ${full.step}');
   });
 
   it('assignTask impedisce l\'assegnazione a gemini o argon di un task con verifica nel browser (T87)', () => {

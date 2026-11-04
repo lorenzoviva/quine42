@@ -1099,6 +1099,7 @@ export function renderHtml() {
               <th>Titolo</th>
               <th>Stato</th>
               <th>Coda</th>
+              <th>Step</th>
               <th>Provider</th>
               <th>Stima</th>
               <th>Priorità</th>
@@ -1452,6 +1453,7 @@ export function renderHtml() {
             <div class="task-title" onclick="openTask('\${esc(full.id)}')">\${esc(full.title)}</div>
             <div class="task-meta">
               <span>p\${full.priority ?? 100}</span>
+              \${full.step !== undefined ? \`<span>step \${full.step}</span>\` : ''}
               \${full.missing?.length ? \`<span style="color:var(--amber)">aspetta \${esc(full.missing.join(', '))}</span>\` : ''}
               \${r ? \`<span>· \${esc(r.stato)} (\${r.tentativi} tent.)</span>\` : ''}
             </div>
@@ -1496,6 +1498,7 @@ export function renderHtml() {
           <td><span style="cursor:pointer; font-weight:600;" onclick="openTask('\${esc(t.id)}')">\${esc(t.title)}</span></td>
           <td>\${statusBadge(t.status)}</td>
           <td><span class="badge st-dafare">\${esc(t.coda)}</span></td>
+          <td>\${t.step ?? '—'}</td>
           <td>\${provBadge(t.provider)}</td>
           <td>\${t.estimate !== undefined ? t.estimate + '%' : '—'}</td>
           <td>p\${t.priority ?? 100}</td>

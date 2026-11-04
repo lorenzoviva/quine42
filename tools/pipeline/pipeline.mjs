@@ -67,6 +67,7 @@ export function pathsOf(opts = {}) {
     plan: customState ? path.join(stateDir, 'PIANO.md') : path.join(repo, 'docs', 'pipeline', 'PIANO.md'),
     report: customState ? path.join(stateDir, 'diario.md') : path.join(repo, 'docs', 'pipeline', 'orchestrazione.md'),
     backlog: path.join(repo, 'docs', 'plans', 'backlog.md'),
+    fasi: path.join(repo, 'docs', 'fasi.md'),
     quadro: path.join(repo, 'docs', 'pipeline', 'quadro.md'),
     todo: path.join(repo, 'docs', 'userchats', 'to-do.md'),
     domande: path.join(repo, 'docs', 'pipeline', 'domande'),
@@ -331,7 +332,7 @@ export function refreshConfig() {
   }
 }
 
-/** Every task of the backlog: id, title, status, dependencies, and the `- Pipeline:` line if the planner wrote one. */
+/** Every task of the backlog: id, title, status, dependencies, the `- Pipeline:` line if the planner wrote one, the `- Step:` line if it has a step. */
 export function parseBacklog(text) {
   const tasks = [];
   const blocks = text.split(/^(?=### )/m).filter((b) => b.startsWith('### '));
@@ -345,6 +346,8 @@ export function parseBacklog(text) {
       for (const t of d[1].matchAll(/T\d+[a-z]?/g)) if (!new RegExp(`^${id}[a-z]?$`).test(t[0])) deps.add(t[0]); // not itself nor its sub-tasks (T6 ≠ T63)
     const pipe = /^- Pipeline:\s*(.+)$/m.exec(block);
     const info = pipe ? parsePipelineLine(pipe[1]) : {};
+    const stepLine = /^- Step:\s*(\d+)\s*$/m.exec(block);
+    if (stepLine) info.step = Number(stepLine[1]);
     const needsBrowser = Boolean(info.needsBrowser || taskNeedsBrowser(block));
     // A header that lists sub-tasks («T56a `fatto`, T56b `da fare`») gives one task per sub-task.
     const subs = [...tail.matchAll(/(T\d+[a-z])\s+`([^`]+)`/g)];
@@ -1627,8 +1630,8 @@ export function setPipelineLine(text, id, change) {
   if (!block) throw new Error(`${id}: non c'è nel backlog`);
   const old = /^- Pipeline:\s*(.+)$/m.exec(block);
   const info = change(old ? parsePipelineLine(old[1]) : undefined);
-  const browserTag = info.needsBrowser ? ' · browser' : '';
-  const line = `- Pipeline: ${info.provider} · stima ${info.estimate}%${info.approved ? ' · approvato' : ''}${browserTag} · priorità ${info.priority}`;
+  // Without provider and estimate the line holds only the priority (`step <n> --priorita`), and `assegna` keeps it.
+  const line = `- Pipeline: ${[info.provider, info.estimate !== undefined && `stima ${info.estimate}%`, info.approved && 'approvato', info.needsBrowser && 'browser', `priorità ${info.priority}`].filter(Boolean).join(' · ')}`;
   const next = old ? block.replace(old[0], line) : block.replace(/\n/, `\n${line}\n`);
   return text.replace(block, () => next);
 }
@@ -1707,14 +1710,152 @@ export function nextTaskId(text) {
   return `T${n + 1}`;
 }
 
+/** A task in one line, for `indice` and `step <n>`. */
+function indexLine(t, runs) {
+  const r = runs[t.id];
+  const run = r && !r.integrato ? ` [${r.stato}${r.esito ? `: ${r.esito.replace(/^ESITO:\s*/, '').slice(0, 60)}` : ''}]` : '';
+  const priority = t.provider ? ` · ${t.provider} ${t.estimate ?? '?'}%${t.approved ? ' ✓' : ''} p${t.priority}` : t.priority !== undefined ? ` · p${t.priority}` : '';
+  return `${t.id} · ${t.status}${t.step !== undefined ? ` · step ${t.step}` : ''}${priority}${t.deps.length ? ` · dopo ${t.deps.join(' ')}` : ''} · ${t.title}${run}`;
+}
+
 /** One line per task: the orchestrator's view of the whole backlog. */
 function index() {
   const runs = readJson(RUNS, {});
-  for (const t of loadTasks()) {
-    const r = runs[t.id];
-    const run = r && !r.integrato ? ` [${r.stato}${r.esito ? `: ${r.esito.replace(/^ESITO:\s*/, '').slice(0, 60)}` : ''}]` : '';
-    console.log(`${t.id} · ${t.status}${t.provider ? ` · ${t.provider} ${t.estimate ?? '?'}%${t.approved ? ' ✓' : ''} p${t.priority}` : ''}${t.deps.length ? ` · dopo ${t.deps.join(' ')}` : ''} · ${t.title}${run}`);
+  for (const t of loadTasks()) console.log(indexLine(t, runs));
+}
+
+// --- Steps (ADR-0128): the table of docs/fasi.md is the source, the `- Step:` line of the backlog its copy ----------
+
+const TASK_ID = /^T\d+[a-z]?$/;
+
+/**
+ * The table of docs/fasi.md → [{ step, tasks }]. The task column is a list of ids separated by spaces, `—` if none: anything
+ * else, or an id in two rows, is an error of the table, and it is better to say so than to tag half of it.
+ */
+export function parseStepTable(text) {
+  const lines = text.split('\n');
+  const header = lines.findIndex((l) => /^\|\s*step\s*\|.*\|\s*task\s*\|\s*$/.test(l));
+  if (header < 0) throw new Error("docs/fasi.md: non c'è la tabella degli step");
+  const rows = [];
+  const seen = new Map();
+  for (const line of lines.slice(header + 2)) {
+    if (!line.startsWith('|')) break;
+    const cells = line.split('|').map((c) => c.trim());
+    const step = Number(cells[1]);
+    if (!Number.isInteger(step) || step <= 0) throw new Error(`docs/fasi.md: step non valido: «${cells[1]}»`);
+    const tasks = cells.at(-2).split(/\s+/).filter((c) => c && c !== '—');
+    for (const id of tasks) {
+      if (!TASK_ID.test(id)) throw new Error(`docs/fasi.md, step ${step}: «${id}» non è un id di task`);
+      if (seen.has(id)) throw new Error(`docs/fasi.md: ${id} sta in due righe, ${seen.get(id)} e ${step}`);
+      seen.set(id, step);
+    }
+    rows.push({ step, tasks });
   }
+  return rows;
+}
+
+/** Sets the `- Step:` line of a task: under `- Pipeline:` if it has one, otherwise right under the heading. */
+export function setStepLine(text, id, step) {
+  const block = taskBlock(text, id);
+  if (!block) throw new Error(`${id}: non c'è nel backlog`);
+  const line = `- Step: ${step}`;
+  const old = /^- Step:[^\n]*$/m.exec(block);
+  const anchor = /^- Pipeline:[^\n]*$/m.exec(block)?.[0] ?? block.split('\n', 1)[0];
+  const next = old ? block.replace(old[0], () => line) : block.replace(anchor, () => `${anchor}\n${line}`);
+  return text.replace(block, () => next);
+}
+
+/** Whose block holds the lines of a task: its own or, for a sub-task listed in a heading (T56a), its parent's. */
+function ownerOf(text, tasks, id) {
+  if (taskBlock(text, id)) return id;
+  const parent = tasks.find((t) => t.id === id)?.parent;
+  if (parent && taskBlock(text, parent)) return parent;
+  throw new Error(`${id}: non c'è nel backlog`);
+}
+
+/** `step <n> Txx…`: all or nothing, the backlog is written once. Sub-tasks in one heading share the tag. */
+export function tagTasks(step, ids, opts) {
+  const p = pathsOf(opts);
+  let text = readText(p.backlog);
+  const tasks = parseBacklog(text);
+  for (const id of ids) text = setStepLine(text, ownerOf(text, tasks, id), step);
+  fs.writeFileSync(p.backlog, text);
+  return ids;
+}
+
+/**
+ * `step --da-tabella`: every id of the table gets the tag of its row. Says what the table names and the backlog does not
+ * have, and which tasks stay out of the table (valid: a task can have no step).
+ */
+export function tagFromTable(opts) {
+  const p = pathsOf(opts);
+  const rows = parseStepTable(readText(p.fasi));
+  const before = readText(p.backlog);
+  const tasks = parseBacklog(before);
+  const stepBefore = new Map();
+  for (const t of tasks) if (!stepBefore.has(t.id)) stepBefore.set(t.id, t.step); // two blocks with one id: the first is the one that gets the tag
+  const inTable = new Set(rows.flatMap((r) => r.tasks));
+  const byOwner = new Map();
+  const missing = [];
+  const changed = [];
+  let text = before;
+  for (const { step, tasks: ids } of rows) {
+    for (const id of ids) {
+      if (!stepBefore.has(id)) { missing.push(id); continue; }
+      const owner = ownerOf(before, tasks, id);
+      if (byOwner.has(owner) && byOwner.get(owner) !== step) throw new Error(`docs/fasi.md: i pezzi di ${owner} stanno negli step ${byOwner.get(owner)} e ${step}, e hanno un blocco solo`);
+      byOwner.set(owner, step);
+      if (stepBefore.get(id) !== step) changed.push(id);
+      text = setStepLine(text, owner, step);
+    }
+  }
+  if (text !== before) fs.writeFileSync(p.backlog, text);
+  return { tagged: inTable.size - missing.length, changed, missing, outside: [...stepBefore.keys()].filter((id) => !inTable.has(id)) };
+}
+
+/** A task can still be worked on: not finished, and not a heading split into others («spezzato in T43a-T43c»). */
+const isUnfinished = (t) => /^(da fare|in corso|in attesa)/.test(t.status);
+
+/** `step <n> --priorita <p>`: the unfinished tasks of a step, also those not yet estimated; finished ones stay as they are. */
+export function prioritizeStep(step, priority, opts) {
+  const p = pathsOf(opts);
+  let text = readText(p.backlog);
+  const tasks = parseBacklog(text);
+  const open = tasks.filter((t) => t.step === step && isUnfinished(t));
+  for (const owner of new Set(open.map((t) => ownerOf(text, tasks, t.id)))) {
+    text = setPipelineLine(text, owner, (i) => ({ approved: false, needsBrowser: false, ...i, priority }));
+  }
+  if (open.length) fs.writeFileSync(p.backlog, text);
+  return open.map((t) => t.id);
+}
+
+const STEP_USAGE = 'Uso: step <n> [Txx…] | step <n> --priorita <p> | step --da-tabella';
+
+/** The `step` command: gives the lines to print. Bad arguments and errors of the table throw, and nothing is written. */
+export function stepCommand(args, opts) {
+  if (args[0] === '--da-tabella' && args.length === 1) {
+    const r = tagFromTable(opts);
+    return [`${r.tagged} task nella tabella, ${r.changed.length} con un tag nuovo o cambiato.`,
+      ...(r.missing.length ? [`Nella tabella e non nel backlog: ${r.missing.join(' ')}`] : []),
+      ...(r.outside.length ? [`Nel backlog e non nella tabella (nessuno step): ${r.outside.join(' ')}`] : [])];
+  }
+  if (!/^[1-9]\d*$/.test(args[0] ?? '')) throw new Error(STEP_USAGE);
+  const step = Number(args[0]);
+  const tail = args.slice(1);
+  if (tail[0] === '--priorita' || tail[0] === '--priorità') {
+    if (tail.length !== 2 || !/^\d+$/.test(tail[1])) throw new Error(STEP_USAGE);
+    const ids = prioritizeStep(step, Number(tail[1]), opts);
+    return [ids.length ? `Step ${step}: priorità ${tail[1]} a ${ids.join(' ')}` : `Step ${step}: nessun task da finire.`];
+  }
+  if (tail.length) {
+    if (!tail.every((id) => TASK_ID.test(id))) throw new Error(STEP_USAGE);
+    tagTasks(step, tail, opts);
+    return [`Step ${step}: ${tail.join(' ')}`];
+  }
+  const p = pathsOf(opts);
+  const runs = readJson(p.runs, {});
+  const tasks = parseBacklog(readText(p.backlog)).filter((t) => t.step === step);
+  return tasks.length ? tasks.map((t) => indexLine(t, runs)) : [`Step ${step}: nessun task con questo tag.`];
 }
 
 /**
@@ -1756,7 +1897,7 @@ export function dossierOf(id, opts) {
     for (const m of subjects.matchAll(/\bT\d+[a-z]?\b/g)) if (m[0] !== id) near.set(m[0], (near.get(m[0]) ?? 0) + 1);
   }
   const sameFiles = [...near].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([t, n]) => ({ id: t, count: n }));
-  out.push('## Collegati', '', `- dipende da: ${me?.deps.join(', ') || '—'}`, `- dipendono da lui: ${after.join(', ') || '—'}`,
+  out.push('## Collegati', '', ...(me?.step !== undefined ? [`- step: ${me.step} (docs/fasi.md)`] : []), `- dipende da: ${me?.deps.join(', ') || '—'}`, `- dipendono da lui: ${after.join(', ') || '—'}`,
     `- stessi file: ${sameFiles.map((s) => `${s.id} (${s.count})`).join(', ') || '—'}`);
   const q = path.join(p.domande, `${id}.md`);
   const hasQuestions = fs.existsSync(q);
@@ -1769,6 +1910,7 @@ export function dossierOf(id, opts) {
     commits,
     files: [...files].sort(),
     adrs: adrList,
+    step: me?.step,
     deps: me?.deps ?? [],
     after,
     sameFiles,
@@ -1850,6 +1992,10 @@ if (process.argv[1]?.endsWith('pipeline.mjs')) {
     if (!CONFIG.providers[provider] || !(Number(stima) > 0)) console.log('Uso: assegna <Txx> <claude|fable|gemini|argon> <stima %> [priorità] [--approva]');
     else { assignTask(id, { provider, stima, priorita, approva: rest.includes('--approva') }); console.log(`${id}: ${provider}, ${stima}%`); }
   }
+  else if (cmd === 'step') {
+    try { for (const line of stepCommand(rest)) console.log(line); }
+    catch (e) { console.error(e.message); process.exitCode = 1; }
+  }
   else if (cmd === 'turno') {
     const sep = rest.indexOf('--');
     if (!rest[0] || sep < 0 || sep === rest.length - 1) {
@@ -1872,6 +2018,7 @@ if (process.argv[1]?.endsWith('pipeline.mjs')) {
   stato | uso | indice | dossier <Txx> | traccia <Txx>|orchestratore | worktree | prossimo
   esegui [--sempre] [--max N] [--solo <provider>] [--task Txx]
   approva <Txx…> | assegna <Txx> <provider> <stima %> [priorità] [--approva]
+  step <n> [Txx…] | step <n> --priorita <p> | step --da-tabella   i task di uno step, il tag, la priorità di quelli non finiti (ADR-0128)
   interrompi <Txx…|--tutti> | riprendi <Txx…> | integra <Txx>
   ferma --ora | --dopo                                      spegne la pipeline: interrompe i task (riprendono al riavvio) o aspetta che finiscano
   budget <provider> <residuo %> | sospendi <provider> [fino a <data>] | riattiva <provider>
