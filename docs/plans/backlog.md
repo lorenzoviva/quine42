@@ -3979,13 +3979,14 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 
 L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopra Fable 5.1 pur costando meno, in particolare nella pianificazione ad alto livello); i modelli vanno inquadrati con le loro benchmark, l'orchestratore deve sapere chi rende meglio su ogni tipo di task, i modelli di Claude vanno distinti (Opus, Sonnet, ecc.).
 
-### T254 · La scheda dei modelli: benchmark e misure nostre per tipo di task — `da fare`
+### T254 · La scheda dei modelli: benchmark e misure nostre per tipo di task — `fatto` (`302ec9c`)
 - Pipeline: argon · stima 10% · approvato · priorità 8
 - Contesto: richiesta dell'autore, sopra. Oggi la scelta del provider in `docs/pipeline/pianifica.md` poggia su impressioni (ADR-0115 per Fable). Nasce anche dal contatore «Claude and GPT models» di Antigravity, che `stato` elenca come non usato.
 - Cosa fare: scrivi `docs/pipeline/modelli.md`. Per ogni modello disponibile: Claude Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable 5.1; Gemini e Argon come li usa `agy`; i modelli Claude e GPT che `agy` offre davvero (guarda cosa dice la CLI). Una tabella modelli × tipi di task della pipeline: pianificazione e orchestrazione, architettura e kernel, programmazione, sicurezza, programmi MarkovJunior, documenti, UI, test semplici. Per ogni cella la benchmark pubblica con nome, data e URL. Accanto, ciò che abbiamo misurato noi da `docs/pipeline/consumi.jsonl`: consumo contro stima per provider, esiti. Prezzi di listino e contatore su cui pesa ogni modello. Infine una proposta di assegnazione per tipo di task, con il motivo.
 - Regole: **nessun numero senza fonte**. Ciò che non trovi resta «non misurato», non si deduce e non si ricorda a memoria. Due benchmark che si contraddicono si riportano entrambe. Se non hai accesso al web, fermati e dillo nell'esito: niente tabella inventata. Non toccare `config.json` né il codice.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T254` col solo `docs/pipeline/modelli.md`. Sicurezza: nessuna superficie nuova.
+- Esito: creato e committato `docs/pipeline/modelli.md` con tabella modelli × 8 tipi di task, benchmark pubbliche con data e URL (incluse le contraddizioni), misure reali sulle 141 righe di `consumi.jsonl` e sui benchmark interni (`costi-step8.2B.md`, `lab/banco/`, `quadro.md`), prezzi di listino, contatori CLI (`claude` e `agy`) e proposta motivata di assegnazione per T255; nessun file di codice o configurazione modificato.
 
 ### T255 · I modelli di Claude distinti nella pipeline, l'assegnazione dalla scheda — `da fare` (dipende da T254)
 - Pipeline: argon · stima 15% · approvato · priorità 9
