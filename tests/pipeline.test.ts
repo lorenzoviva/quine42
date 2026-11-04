@@ -110,6 +110,30 @@ describe('parseBacklog', () => {
   it('un id corto non scambia per sé i task che iniziano come lui', () => {
     expect(byId().get('T6')?.deps).toEqual(['T63']);
   });
+
+  it('espande gli intervalli di lettere nelle dipendenze senza espandere i soli numeri né includere sé stesso (T253)', () => {
+    const text = [
+      '### T89e · Forma corta — `da fare` (dipende da T89a-d)',
+      '',
+      '### T90e · Forma lunga — `da fare` (dipende da T89a-T89d)',
+      '',
+      '### T91 · Elenco misto — `da fare`',
+      '- Dipendenze: T10, T89a-c, T90b-T90d e T95.',
+      '',
+      '### T92 · Soli numeri — `da fare` (dopo T230-T242)',
+      '',
+      '### T89c · Sé stesso nell\'intervallo — `da fare` (dipende da T89a-d)',
+      '',
+      '### T89 · Padre con sotto-task nell\'intervallo — `da fare` (dipende da T89a-d, T10)',
+    ].join('\n');
+    const m = new Map(P.parseBacklog(text).map((t) => [t.id, t.deps]));
+    expect(m.get('T89e')).toEqual(['T89a', 'T89b', 'T89c', 'T89d']);
+    expect(m.get('T90e')).toEqual(['T89a', 'T89b', 'T89c', 'T89d']);
+    expect(m.get('T91')).toEqual(['T10', 'T89a', 'T89b', 'T89c', 'T90b', 'T90c', 'T90d', 'T95']);
+    expect(m.get('T92')).toEqual(['T230', 'T242']);
+    expect(m.get('T89c')).toEqual(['T89a', 'T89b', 'T89d']);
+    expect(m.get('T89')).toEqual(['T10']);
+  });
 });
 
 describe('parsePipelineLine', () => {
