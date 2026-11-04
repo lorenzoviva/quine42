@@ -3,7 +3,7 @@
 // JSON; positions are in the world's space (the carpet's, ADR-0004): every wanderer has a carpet of their
 // own, so a client draws itself where it likes on its circle and tells the server only where it is in the world.
 
-import type { FileMap } from '../kernel/types';
+import type { AiSettings, FileMap } from '../kernel/types';
 import type { Inventory } from '../kernel/inventory';
 import type { FeedEntry } from '../kernel/agents/council';
 import type { PlayerSpot } from '../kernel/situation';
@@ -103,7 +103,7 @@ export type ClientMsg =
    * tetto di spesa in USD per questa sessione (T45d, ADR-0086), che il server tiene entro il saldo. Essere anonimi lo dice il
    * token, non il client (T120, ADR-0102).
    */
-  | { t: 'entra'; id: string; nome?: string; profilo?: Partial<Profile>; token?: string; tetto?: number }
+  | { t: 'entra'; id: string; nome?: string; profilo?: Partial<Profile>; token?: string; tetto?: number; regolazioni?: AiSettings }
   /** The wanderer chooses again who they are (T44a): the answer says the profile as the server repaired it. */
   | { t: 'profilo'; seq: number; profilo: Partial<Profile> }
   /** Where the client's wanderer is now, in the world: the server checks the step and may correct it. */
@@ -142,9 +142,8 @@ export type ClientMsg =
   /** The master talks to an agent of the Council in the corona (T42e): what it makes goes on their branch. */
   | { t: 'agente'; seq: number; agente: string; testo: string }
   /** The master gives credits by hand (ADR-0104), within the day's cap. */
-  | { t: 'ricarica'; seq: number; viandante: string; quanti: number }
-  /** The master turns the Actor on or off, with its model (T157, ADR-0116): the lobby's choice, refused to anyone else. */
-  | { t: 'attore'; seq: number; acceso: boolean; modello?: string };
+  | { t: 'ricarica'; seq: number; viandante: string; quanti: number };
+
 
 /** Files changed: their new text, or null when they are gone. */
 export type FileChanges = Record<string, string | null>;
@@ -165,7 +164,7 @@ export type ServerMsg =
    * wanderer is the master (T41) and, only for the master, the Council's feed so far and their branch (T42b); the
    * master's updates say (`giocatori`) every player connected and where they are, when it changes (T42c).
    */
-  | ({ t: 'ingresso'; id: string; nome: string; profilo?: Profile; riparato?: string[]; anonimo?: true; master?: true; concilio?: FeedEntry[]; ramo?: FileChanges; files: FileMap; me: Me; forma?: FormView; stato: MyState; luoghi: ChunkView[]; cose: EntityView[]; viandanti: OtherView[]; giocatori?: PlayerSpot[] } & Clock)
+  | ({ t: 'ingresso'; id: string; nome: string; profilo?: Profile; riparato?: string[]; regolazioni?: { ok: boolean; motivo?: string; riparati?: string[] }; anonimo?: true; master?: true; concilio?: FeedEntry[]; ramo?: FileChanges; files: FileMap; me: Me; forma?: FormView; stato: MyState; luoghi: ChunkView[]; cose: EntityView[]; viandanti: OtherView[]; giocatori?: PlayerSpot[] } & Clock)
   | ({ t: 'aggiorna'; me?: Me; stato?: MyState; luoghi?: ChunkView[]; cose?: EntityView[]; via?: number[]; viandanti?: OtherView[]; partiti?: string[]; giocatori?: PlayerSpot[]; avvisi?: Notice[] } & Clock)
   /** The step was not possible (too fast, through a wall): the wanderer is here. */
   | { t: 'correzione'; seq: number; x: number; y: number }

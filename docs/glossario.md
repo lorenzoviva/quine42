@@ -759,6 +759,13 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Da non usare**: `modello` (da solo: è una voce della libreria), `Models`, `MockModels`, `GeminiModels`, `kernel.models`
 - **Fermo**: `textModel` in `universe.json`.
 
+### Regolazioni
+- **Inglese**: `AiSettings`, `repairAiSettings`, `applySettings`, `settingsLocked`, `lockSettings`
+- **Definizione**: ciò che il master fissa prima di entrare: coefficienti, modelli, budget, minimi. Non cambiano a partita in corso, cioè da quando entra il primo viandante a quando esce l'ultimo (ADR-0132).
+- **Da non usare**: impostazioni del consumo, tuning.
+- **Dove vive**: `src/kernel/universe.ts`, `src/kernel/kernel.ts`, `src/ui/lobby.ts`
+- **Fermo**: il campo `regolazioni` del messaggio `entra` e di `ingresso`.
+
 ### Coefficienti
 - **Inglese**: `Coefficients`, `LOW_DETAIL`, `CENSUS`, `hourlyEstimate`
 - **Definizione**: quanto spesso ogni agente chiama l'IA, da 0 a 1.

@@ -23,7 +23,7 @@ import { keepProfile, savedProfile, socketLink, tabWanderer } from './session/so
 import { accountConfig, signIn, type SignedIn } from './session/login';
 import { accountWanderer } from './session/account';
 import { ProfilePanel } from './ui/profile';
-import { LobbyScreen } from './ui/lobby';
+import { LobbyScreen, type LobbyResult } from './ui/lobby';
 import { CreditExhaustedModal } from './ui/creditdialog';
 import { Sfx } from './audio/sfx';
 import { readPrograms, SoundDirector, type SoundCue } from './audio/director';
@@ -101,7 +101,7 @@ let account: SignedIn | undefined;
  * A multiplayer game (T39, ADR-0059): the world runs on the server, this tab is one of its wanderers. The kernel here
  * is a mirror the thin client fills with what the server tells.
  */
-async function joinMany(name: string, lobbyChoice?: { tetto?: number; offline?: boolean; attore?: { acceso: boolean; modello?: string } }): Promise<ThinClient> {
+async function joinMany(name: string, lobbyChoice?: LobbyResult): Promise<ThinClient> {
   // With accounts (T44b) the wanderer is the account's: the server makes the id from the token.
   const config = await accountConfig();
   if (!account) account = config ? await signIn(config) : undefined;
@@ -111,11 +111,11 @@ async function joinMany(name: string, lobbyChoice?: { tetto?: number; offline?: 
     profilo: savedProfile(name, id),
     ...(account ? { token: account.token, freshToken: account.freshToken } : {}),
     ...(typeof lobbyChoice?.tetto === 'number' ? { tetto: lobbyChoice.tetto } : {}),
+    // The master's settings go in with them: the server fixes them on entering, and refuses them if a match is under way (T247).
+    ...(lobbyChoice?.regolazioni ? { regolazioni: lobbyChoice.regolazioni } : {}),
   });
   await session.ready;
   if (session.refused || !session.me) throw new Error(session.refused ?? 'il mondo non risponde');
-  // The Actor (T157): the lobby's choice is the master's; the server refuses it to anyone else.
-  if (lobbyChoice?.attore && session.master) void session.act({ t: 'attore', ...lobbyChoice.attore });
   const mirror = await Kernel.boot({ files: session.files, store: memoryStore(), ai: new MockAiModels(), forms: new WorkerRunner(), wasmUri, mirror: true });
   return new ThinClient(mirror, session);
 }
@@ -133,7 +133,7 @@ async function main() {
   const snap = client ? await client.load() : undefined;
   const snapFiles = snap?.files;
   const many = !!snapFiles && readConfig(snapFiles).config.partita?.modalita === 'multigiocatore';
-  let lobbyChoice: { tetto?: number; offline?: boolean; attore?: { acceso: boolean; modello?: string } } | undefined;
+  let lobbyChoice: LobbyResult | undefined;
   if (many && snapFiles && !params.has('skip')) {
     loading.hidden = true;
     const config = await accountConfig();
@@ -152,6 +152,7 @@ async function main() {
       wandererName: seen?.viandante?.profilo?.nome,
       credits,
       isAnonymous: isAnon,
+      inCorso: !!seen?.viandante?.inCorso,
       onRecharge: async (amount: number) => {
         const token = account?.token;
         const res = await fetch('/api/stripe/checkout', {
@@ -389,8 +390,9 @@ async function main() {
     configurable: true,
   });
 
+  let soloLobby: LobbyScreen | undefined;
   const syncFocus = () => {
-    kernel.input.enabled = !tools?.isOpen && !inventory.isOpen && !chat.isOpen && !actions.isOpen && !profile.isOpen && !kernel.dead;
+    kernel.input.enabled = !soloLobby?.isOpen && !tools?.isOpen && !inventory.isOpen && !chat.isOpen && !actions.isOpen && !profile.isOpen && !kernel.dead;
     if (!kernel.input.enabled) kernel.input.releaseAll();
   };
   inventory.onClose = syncFocus;
@@ -398,10 +400,17 @@ async function main() {
   profile.onClose = syncFocus;
   if (thin?.session.profilo) keepProfile(name, thin.session.id, thin.session.profilo);
   if (thin?.session.riparato.length) hud.message(`Il tuo profilo: ${thin.session.riparato.join('; ')}.`, 'warn');
+  const settled = thin?.session.settingsAnswer;
+  if (settled && !settled.ok) hud.message(`Regolazioni non applicate: ${settled.motivo}.`, 'warn');
+  else if (settled?.riparati?.length) hud.message(`Regolazioni riparate: ${settled.riparati.join('; ')}.`, 'warn');
   actions.onClose = syncFocus;
   const runGenesis = async () => tools?.runGenesis(online, syncFocus);
   // A universe that was never generated waits for its genesis before the Council paints anything.
-  if (!thin) kernel.generationHeld = online && kernel.needsGenesis() && !params.has('skip');
+  // Alone, nothing is asked of the models until the settings are fixed on entering (T247): the lobby, or the Genesis.
+  const entersWithLobby = !thin && !params.has('skip') && !kernel.needsGenesis() && (online || params.has('lobby'));
+  if (!thin) kernel.generationHeld = (online && kernel.needsGenesis() && !params.has('skip')) || entersWithLobby;
+  // With `?skip` there is no screen before the world: the match starts now.
+  if (!thin && params.has('skip')) kernel.lockSettings();
   if (tools) tools.konsole.onGenesis = () => void runGenesis();
   // Another master is another universe (T42d): the store copies this one, from the main line on disk.
   if (tools && thin && client) {
@@ -422,7 +431,20 @@ async function main() {
     setTimeout(() => (intro.hidden = true), 700);
     unlockSound();
     sound.cue('start');
-    if (!thin && kernel.needsGenesis() && !params.has('skip')) void runGenesis();
+    if (!thin && kernel.needsGenesis() && !params.has('skip')) void runGenesis().then(() => kernel.lockSettings());
+    else if (entersWithLobby) void enterAlone();
+    else if (!thin) kernel.lockSettings();
+  };
+  // Alone (T247): the same lobby, without what is about other people; it comes back with every new load of the page, which is what ends a match alone.
+  const enterAlone = async () => {
+    soloLobby = new LobbyScreen({ name, files: kernel.files, wandererId: kernel.wanderer().id, credits: 0, alone: true });
+    const chosen = soloLobby.open();
+    syncFocus();
+    const choice = await chosen;
+    if (choice.regolazioni) kernel.applySettings(choice.regolazioni);
+    kernel.lockSettings();
+    kernel.generationHeld = false;
+    syncFocus();
   };
   window.addEventListener('keydown', startGame);
   intro.addEventListener('click', startGame);

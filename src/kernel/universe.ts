@@ -1,9 +1,12 @@
 // Module discovery: every directory under modules/ with a manifest.json is a self-contained module.
 // Modules talk only through components and events; no implicit dependencies.
 
-import type { AiMinimums, FileMap, ModuleEntry, UniverseConfig } from './types';
+import type { AiConfig, AiMinimums, AiSettings, FileMap, ModuleEntry, UniverseConfig } from './types';
 import { repairActor, repairCoefficients, repairGameSetup, type Validator } from './validator';
 import { DEFAULT_GAME_SETUP } from './gameSetup';
+import { COEFFICIENT_KEYS, pricedAiModels, type Coefficients } from './coefficients';
+import { DEFAULT_SCULPTORS, type SculptorAiModels } from './agents/sculptor';
+import { priceOf } from './ai/prices';
 
 export const DEFAULT_CONFIG: UniverseConfig = {
   name: 'universo',
@@ -21,10 +24,119 @@ export function repairMinimums(raw: unknown): AiMinimums | undefined {
   const r = raw as Record<string, unknown>;
   const out: AiMinimums = {};
   if (typeof r.textModel === 'string' && r.textModel.trim()) out.textModel = r.textModel.trim();
-  if (r.scultori && typeof r.scultori === 'object') out.scultori = { ...(r.scultori as any) };
+  if (r.scultori && typeof r.scultori === 'object') {
+    // Only a class's model: a minimum on anything else means nothing.
+    const named = SCULPTOR_CLASSES.flatMap((k) => {
+      const m = (r.scultori as Record<string, unknown>)[k];
+      return typeof m === 'string' && m.trim() ? [[k, m.trim()]] : [];
+    });
+    if (named.length) out.scultori = Object.fromEntries(named);
+  }
   if (typeof r.tetto === 'number' && Number.isFinite(r.tetto) && r.tetto >= 0) out.tetto = Math.round(r.tetto * 100) / 100;
-  if (r.coefficienti && typeof r.coefficienti === 'object') out.coefficienti = repairCoefficients(r.coefficienti);
+  if (r.coefficienti && typeof r.coefficienti === 'object') {
+    // Only the knobs it names: a minimum not said is not a minimum of 1.
+    const repaired = repairCoefficients(r.coefficienti);
+    const named = COEFFICIENT_KEYS.filter((k) => (r.coefficienti as Record<string, unknown>)[k] !== undefined);
+    if (named.length) out.coefficienti = Object.fromEntries(named.map((k) => [k, repaired[k]])) as Partial<Coefficients>;
+  }
   return Object.keys(out).length > 0 ? out : undefined;
+}
+
+/** The dearer of two models: a minimum is a model at least as good, and what is dearer is what is better on the price list. */
+const atLeast = (model: string, min: string | undefined): string => {
+  const has = priceOf(model)?.output;
+  const floor = min ? priceOf(min)?.output : undefined;
+  return floor !== undefined && (has === undefined || has < floor) ? min! : model;
+};
+
+/**
+ * The configuration within the master's minimums (T247): a knob never below them, a model never cheaper. Every way in passes
+ * here (readConfig), so a universe.json written by hand with the world stopped obeys too.
+ */
+export function withinMinimums(ai: AiConfig): AiConfig {
+  const m = ai.minimi;
+  if (!m) return ai;
+  const out: AiConfig = { ...ai, textModel: atLeast(ai.textModel, m.textModel) };
+  if (m.coefficienti) {
+    const c = repairCoefficients(ai.coefficienti);
+    for (const k of COEFFICIENT_KEYS) c[k] = Math.max(c[k], m.coefficienti[k] ?? 0);
+    out.coefficienti = c;
+  }
+  if (m.scultori) {
+    const sculptors: Partial<SculptorAiModels> = { ...(ai.scultori ?? {}) };
+    for (const k of SCULPTOR_CLASSES) if (m.scultori[k]) sculptors[k] = atLeast(String(sculptors[k] ?? DEFAULT_SCULPTORS[k]), String(m.scultori[k]));
+    out.scultori = sculptors;
+  }
+  return out;
+}
+
+/** The Sculptor's classes that have a model of their own (the rest of `SculptorAiModels` is not a model). */
+export const SCULPTOR_CLASSES = ['semplice', 'figura', 'struttura', 'importante', 'artista', 'musicista'] as const;
+
+/** What every budget of `ai` may be, [least, most]: `placesPerMinute` at 0 would stop the world from having places at all. */
+export const BUDGET_SCALE = { maxText: [0, 20000], maxForges: [0, 50], maxPacks: [0, 50], maxCast: [0, 50], maxModels: [0, 400], maxBrani: [0, 100], placesPerMinute: [1, 120] } as const;
+export type BudgetKey = keyof typeof BUDGET_SCALE;
+export const BUDGET_KEYS = Object.keys(BUDGET_SCALE) as BudgetKey[];
+
+/**
+ * What the master set in the lobby, whatever came from the wire (T247): only the fields named here pass, a model only if it is
+ * on the price list, a budget within its scale. `riparati` says what was changed or dropped.
+ */
+export function repairAiSettings(raw: unknown): { settings: AiSettings; riparati: string[] } {
+  const r = (raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {}) as Record<string, unknown>;
+  const settings: AiSettings = {};
+  const riparati: string[] = [];
+  const priced = new Set(pricedAiModels());
+  const model = (v: unknown, what: string): string | undefined => {
+    if (v === undefined) return undefined;
+    if (typeof v === 'string' && priced.has(v.trim())) return v.trim();
+    riparati.push(`${what}: modello sconosciuto, resta quello di prima`);
+    return undefined;
+  };
+  const text = model(r.textModel, 'modello del Concilio');
+  if (text) settings.textModel = text;
+  if (r.coefficienti !== undefined) settings.coefficienti = repairCoefficients(r.coefficienti);
+  if (r.scultori && typeof r.scultori === 'object') {
+    const s = r.scultori as Record<string, unknown>;
+    const sculptors: Record<string, string | number> = {};
+    for (const k of SCULPTOR_CLASSES) {
+      const m = model(s[k], `Scultore, ${k}`);
+      if (m) sculptors[k] = m;
+    }
+    if (typeof s.importanteFino === 'number' && Number.isFinite(s.importanteFino) && s.importanteFino >= 0) sculptors.importanteFino = s.importanteFino;
+    if (Object.keys(sculptors).length) settings.scultori = sculptors as Partial<SculptorAiModels>;
+  }
+  if (r.attore !== undefined) {
+    const a = repairActor(r.attore);
+    const m = model(a.modello, "modello dell'Attore");
+    settings.attore = m ? a : { acceso: a.acceso };
+  }
+  for (const k of BUDGET_KEYS) {
+    const v = r[k];
+    if (v === undefined) continue;
+    const [lo, hi] = BUDGET_SCALE[k];
+    if (typeof v !== 'number' || !Number.isFinite(v)) {
+      riparati.push(`${k}: non è un numero, resta quello di prima`);
+      continue;
+    }
+    const n = Math.round(Math.max(lo, Math.min(hi, v)));
+    if (n !== v) riparati.push(`${k}: ${n}`);
+    settings[k] = n;
+  }
+  if (r.thinking !== undefined) {
+    if (r.thinking === 'low' || r.thinking === 'medium' || r.thinking === 'high' || r.thinking === 'off') settings.thinking = r.thinking;
+    else riparati.push('ragionamento: resta quello di prima');
+  }
+  if (r.minimi !== undefined) {
+    const m = repairMinimums(r.minimi);
+    if (m?.textModel && !priced.has(m.textModel)) {
+      riparati.push('minimo del Concilio: modello sconosciuto');
+      delete m.textModel;
+    }
+    if (m?.scultori) for (const k of SCULPTOR_CLASSES) if (m.scultori[k] && !priced.has(String(m.scultori[k]))) delete m.scultori[k];
+    settings.minimi = m ?? {};
+  }
+  return { settings, riparati };
 }
 
 export function readConfig(files: FileMap): { config: UniverseConfig; error?: string } {
@@ -36,13 +148,13 @@ export function readConfig(files: FileMap): { config: UniverseConfig; error?: st
       config: {
         ...DEFAULT_CONFIG,
         ...parsed,
-        ai: {
+        ai: withinMinimums({
           ...DEFAULT_CONFIG.ai,
           ...(parsed.ai ?? {}),
           coefficienti: repairCoefficients(parsed.ai?.coefficienti),
           minimi: repairMinimums(parsed.ai?.minimi),
           attore: repairActor(parsed.ai?.attore),
-        },
+        }),
         partita: repairGameSetup(parsed.partita),
       },
     };

@@ -2,21 +2,22 @@
 // the game always did). Where a call has a rhythm the coefficient stretches it (sessions every N places, dialogues
 // between people, the Sculptor's revisions, plots, models); where it has none it thins what causes it (fewer people
 // per place, rarer item packs and new kinds, fewer new entities per place); what the wanderer asks for themselves
-// cannot be thinned, and the Genesis screen says what it costs. «Low Detail» is the game played to save.
+// is rationed like the rest (T247, ADR-0132): the share of those requests the models answer, the others go to the local
+// models, as when the credits run out. Only the Genesis has no knob: it happens once, before the lobby. «Low Detail» is the game played to save.
 
 import { priceOf, costOf } from './ai/prices';
 import { DEFAULT_SCULPTORS, type SculptorAiModels } from './agents/sculptor';
 import type { AiConfig } from './types';
 
-export const COEFFICIENT_KEYS = ['sessioni', 'dialoghi', 'trame', 'revisioni', 'modelli', 'persone', 'abitanti', 'pacchetti', 'cose', 'brani'] as const;
+export const COEFFICIENT_KEYS = ['sessioni', 'dialoghi', 'trame', 'revisioni', 'modelli', 'persone', 'abitanti', 'pacchetti', 'cose', 'brani', 'luoghi', 'parole', 'sguardi', 'azioni', 'magia', 'morte', 'riparazioni', 'studio'] as const;
 export type CoefficientKey = (typeof COEFFICIENT_KEYS)[number];
 export type Coefficients = Record<CoefficientKey, number>;
 
-export const FULL_DETAIL: Coefficients = { sessioni: 1, dialoghi: 1, trame: 1, revisioni: 1, modelli: 1, persone: 1, abitanti: 1, pacchetti: 1, cose: 1, brani: 1 };
+export const FULL_DETAIL: Coefficients = { sessioni: 1, dialoghi: 1, trame: 1, revisioni: 1, modelli: 1, persone: 1, abitanti: 1, pacchetti: 1, cose: 1, brani: 1, luoghi: 1, parole: 1, sguardi: 1, azioni: 1, magia: 1, morte: 1, riparazioni: 1, studio: 1 };
 
-/** «Low Detail»: about a fifth of the calls the world makes by itself, and the cheap model for every figure. */
+/** «Low Detail»: about a fifth of the calls the world makes by itself, and the cheap model for every figure; what the wanderer asks stays answered. */
 export const LOW_DETAIL: { coefficienti: Coefficients; scultori: Partial<SculptorAiModels> } = {
-  coefficienti: { sessioni: 0.25, dialoghi: 0.2, trame: 0.34, revisioni: 0.25, modelli: 0.34, persone: 0.5, abitanti: 0.25, pacchetti: 0.25, cose: 0.34, brani: 0.34 },
+  coefficienti: { sessioni: 0.25, dialoghi: 0.2, trame: 0.34, revisioni: 0.25, modelli: 0.34, persone: 0.5, abitanti: 0.25, pacchetti: 0.25, cose: 0.34, brani: 0.34, luoghi: 1, parole: 1, sguardi: 1, azioni: 1, magia: 1, morte: 1, riparazioni: 1, studio: 1 },
   scultori: { figura: 'gemini-3.1-flash-lite', struttura: 'gemini-3.1-flash-lite', importante: 'gemini-3.8-flash', artista: 'gemini-3.1-flash-lite', musicista: 'gemini-3.1-flash-lite' },
 };
 
@@ -53,41 +54,52 @@ export function repairActor(raw: unknown): ActorConfig {
   return { acceso, modello };
 }
 
-/** What every coefficient regulates, in the words of the Genesis screen. */
-export const COEFFICIENT_INFO: Record<CoefficientKey, { nome: string; agente: string; modo: 'diretta' | 'indiretta'; testo: string }> = {
-  sessioni: { nome: 'Sessioni del Concilio', agente: 'arbitro', modo: 'diretta', testo: 'ogni 12 luoghi nuovi; a 0,5 ogni 24' },
-  dialoghi: { nome: 'Dialoghi tra individui', agente: 'narratore', modo: 'diretta', testo: 'al più uno ogni 40 secondi; a 0,5 ogni 80, a 0 solo saluti' },
-  trame: { nome: 'Trame', agente: 'narratore', modo: 'diretta', testo: 'una nuova quando nessuna è aperta; a 0,5 un giorno sì e uno no' },
-  revisioni: { nome: 'Revisioni dei modelli', agente: 'scultore', modo: 'diretta', testo: "sotto 0,75 un programma per le cose semplici, sotto 0,5 niente revisione, sotto 0,25 niente giudizio dell'Artista" },
-  modelli: { nome: 'Modelli nuovi', agente: 'scultore', modo: 'diretta', testo: 'una pausa tra un modello e il successivo: nessuna a 1, un minuto a 0,5' },
-  persone: { nome: 'Individui per luogo', agente: 'narratore', modo: 'indiretta', testo: 'meno individui: meno risposte e dialoghi' },
-  abitanti: { nome: 'Tipi di abitanti', agente: 'narratore', modo: 'indiretta', testo: 'un tipo nuovo ogni 7 luoghi; a 0,5 ogni 14' },
-  pacchetti: { nome: 'Pacchetti di oggetti', agente: 'narratore', modo: 'indiretta', testo: 'un pacchetto ogni 10 luoghi; a 0,5 ogni 20' },
-  cose: { nome: 'Cose nuove nei luoghi', agente: 'cartografo', modo: 'indiretta', testo: 'meno cose che la Fucina crea per un luogo e meno oggetti sconosciuti a terra' },
-  brani: { nome: 'Brani nuovi', agente: 'musicista', modo: 'diretta', testo: 'un brano per ogni ambiente che non ne ha: due minuti tra uno e il successivo, quattro a 0,5, a 0 nessuno' },
+/** What every coefficient regulates, in the words of the Genesis screen and of the lobby; `minimo` is what the game does at 0. */
+export const COEFFICIENT_INFO: Record<CoefficientKey, { nome: string; agente: string; modo: 'diretta' | 'indiretta'; testo: string; minimo: string }> = {
+  sessioni: { nome: 'Sessioni del Concilio', agente: 'arbitro', modo: 'diretta', testo: 'ogni 12 luoghi nuovi; a 0,5 ogni 24', minimo: "il Concilio non si riunisce" },
+  dialoghi: { nome: 'Dialoghi tra individui', agente: 'narratore', modo: 'diretta', testo: 'al più uno ogni 40 secondi; a 0,5 ogni 80, a 0 solo saluti', minimo: "gli individui si scambiano solo saluti" },
+  trame: { nome: 'Trame', agente: 'narratore', modo: 'diretta', testo: 'una nuova quando nessuna è aperta; a 0,5 un giorno sì e uno no', minimo: "nessuna trama nuova" },
+  revisioni: { nome: 'Revisioni dei modelli', agente: 'scultore', modo: 'diretta', testo: "sotto 0,75 un programma per le cose semplici, sotto 0,5 niente revisione, sotto 0,25 niente giudizio dell'Artista", minimo: "un programma solo, senza revisione né giudizio" },
+  modelli: { nome: 'Modelli nuovi', agente: 'scultore', modo: 'diretta', testo: 'una pausa tra un modello e il successivo: nessuna a 1, un minuto a 0,5', minimo: "solo i modelli generici" },
+  persone: { nome: 'Individui per luogo', agente: 'narratore', modo: 'indiretta', testo: 'meno individui: meno risposte e dialoghi', minimo: "nessun individuo nuovo" },
+  abitanti: { nome: 'Tipi di abitanti', agente: 'narratore', modo: 'indiretta', testo: 'un tipo nuovo ogni 7 luoghi; a 0,5 ogni 14', minimo: "solo i tipi di abitanti che ci sono" },
+  pacchetti: { nome: 'Pacchetti di oggetti', agente: 'narratore', modo: 'indiretta', testo: 'un pacchetto ogni 10 luoghi; a 0,5 ogni 20', minimo: "solo gli oggetti che ci sono" },
+  cose: { nome: 'Cose nuove nei luoghi', agente: 'cartografo', modo: 'indiretta', testo: 'meno cose che la Fucina crea per un luogo e meno oggetti sconosciuti a terra', minimo: "nei luoghi solo ciò che esiste già" },
+  brani: { nome: 'Brani nuovi', agente: 'musicista', modo: 'diretta', testo: 'un brano per ogni ambiente che non ne ha: due minuti tra uno e il successivo, quattro a 0,5, a 0 nessuno', minimo: "solo la musica che c'è" },
+  luoghi: { nome: 'Luoghi nuovi', agente: 'cartografo', modo: 'diretta', testo: 'la parte dei luoghi nuovi che il Cartografo scrive; gli altri nascono dai modelli locali', minimo: 'ogni luogo è abbozzato dai modelli locali, con nomi e cose più semplici' },
+  parole: { nome: 'Risposte degli individui', agente: 'narratore', modo: 'diretta', testo: 'la parte delle parole del viandante a cui risponde il modello', minimo: 'gli individui rispondono con frasi brevi e generiche, senza ricordi nuovi' },
+  sguardi: { nome: '«Esamina» e «Leggi»', agente: 'narratore', modo: 'diretta', testo: 'la parte degli sguardi che riceve un testo scritto apposta', minimo: 'una descrizione breve e generica' },
+  azioni: { nome: '«Altro…» e fabbricazioni libere', agente: 'narratore', modo: 'diretta', testo: 'la parte delle azioni libere e delle combinazioni giudicate dal Narratore', minimo: 'un giudizio semplice: per lo più non succede nulla' },
+  magia: { nome: 'Incantesimi e rune nuove', agente: 'narratore', modo: 'diretta', testo: 'la parte degli incantesimi nuovi che il Narratore nomina', minimo: 'nomi ed effetti semplici; le rune del canone restano tutte' },
+  morte: { nome: 'Racconto della morte', agente: 'narratore', modo: 'diretta', testo: 'la parte delle morti che il Narratore racconta', minimo: 'vale la punizione scelta alla Genesi, alla lettera' },
+  riparazioni: { nome: 'Riparazioni del codice', agente: 'ingegnere', modo: 'diretta', testo: "la parte dei moduli guasti che l'Ingegnere ripara", minimo: 'il modulo guasto resta isolato finché la partita non ricomincia' },
+  studio: { nome: 'Richieste nello studio', agente: 'referente', modo: 'diretta', testo: 'la parte delle richieste al Referente e alle squadre, nella corona, che va ai modelli', minimo: 'nello studio rispondono i modelli locali' },
 };
+
+/** Why the Genesis has no knob in the lobby: it comes before it (the question is in docs/pipeline/domande/T247.md). */
+const GENESIS_ONCE = "una volta, alla Genesi: la lobby viene dopo; chi non vuole pagarla gioca l'universo di esempio";
 
 /**
  * The census of every call (docs/conversazioni.md, T67): what regulates it. `diretta` and `indiretta` name their
- * coefficient; `non regolabile` are what the wanderer asks for (or the Genesis, once): they are paid as they come.
+ * coefficient; `non regolabile` is only the Genesis, with the reason in `nota` (a test holds this: T247).
  */
 export const CENSUS: Array<{ compito: string; agente: string; modo: 'diretta' | 'indiretta' | 'non regolabile'; coefficiente?: CoefficientKey; nota?: string }> = [
-  { compito: 'genesis.bible', agente: 'narratore', modo: 'non regolabile', nota: 'una volta, alla Genesi' },
-  { compito: 'genesis.style', agente: 'artista', modo: 'non regolabile', nota: 'una volta, alla Genesi' },
-  { compito: 'genesis.terrain', agente: 'cartografo', modo: 'non regolabile', nota: 'una volta, alla Genesi' },
-  { compito: 'genesis.physics', agente: 'fisico', modo: 'non regolabile', nota: 'una volta, alla Genesi' },
-  { compito: 'genesis.review', agente: 'arbitro', modo: 'non regolabile', nota: 'una volta, alla Genesi' },
-  { compito: 'genesis.layouts', agente: 'cartografo', modo: 'non regolabile', nota: 'una volta, alla Genesi' },
-  { compito: 'genesis.atlas', agente: 'cartografo', modo: 'non regolabile', nota: 'una volta, alla Genesi' },
-  { compito: 'genesis.cast', agente: 'narratore', modo: 'non regolabile', nota: 'una volta, alla Genesi' },
-  { compito: 'chunk.plan', agente: 'cartografo', modo: 'non regolabile', nota: 'uno per luogo nuovo: quanto si esplora' },
-  { compito: 'cartographer.environment', agente: 'cartografo', modo: 'non regolabile', nota: 'su richiesta nella corona' },
+  { compito: 'genesis.bible', agente: 'narratore', modo: 'non regolabile', nota: GENESIS_ONCE },
+  { compito: 'genesis.style', agente: 'artista', modo: 'non regolabile', nota: GENESIS_ONCE },
+  { compito: 'genesis.terrain', agente: 'cartografo', modo: 'non regolabile', nota: GENESIS_ONCE },
+  { compito: 'genesis.physics', agente: 'fisico', modo: 'non regolabile', nota: GENESIS_ONCE },
+  { compito: 'genesis.review', agente: 'arbitro', modo: 'non regolabile', nota: GENESIS_ONCE },
+  { compito: 'genesis.layouts', agente: 'cartografo', modo: 'non regolabile', nota: GENESIS_ONCE },
+  { compito: 'genesis.atlas', agente: 'cartografo', modo: 'non regolabile', nota: GENESIS_ONCE },
+  { compito: 'genesis.cast', agente: 'narratore', modo: 'non regolabile', nota: GENESIS_ONCE },
+  { compito: 'chunk.plan', agente: 'cartografo', modo: 'diretta', coefficiente: 'luoghi', nota: 'uno per luogo nuovo: quanto si esplora' },
+  { compito: 'cartographer.environment', agente: 'cartografo', modo: 'diretta', coefficiente: 'studio', nota: 'su richiesta nella corona' },
   { compito: 'forge.concept', agente: 'narratore', modo: 'indiretta', coefficiente: 'cose', nota: 'anche abitanti e sessioni' },
   { compito: 'forge.physics', agente: 'fisico', modo: 'indiretta', coefficiente: 'cose' },
   { compito: 'forge.code', agente: 'ingegnere', modo: 'indiretta', coefficiente: 'cose' },
   { compito: 'forge.review', agente: 'arbitro', modo: 'indiretta', coefficiente: 'cose' },
-  { compito: 'forge.fix', agente: 'ingegnere', modo: 'non regolabile', nota: 'ripara il codice che fallisce' },
-  { compito: 'craft.judge', agente: 'narratore', modo: 'non regolabile', nota: 'combinazioni del viandante' },
+  { compito: 'forge.fix', agente: 'ingegnere', modo: 'diretta', coefficiente: 'riparazioni', nota: 'ripara il codice che fallisce' },
+  { compito: 'craft.judge', agente: 'narratore', modo: 'diretta', coefficiente: 'azioni', nota: 'combinazioni del viandante' },
   { compito: 'content.items', agente: 'narratore', modo: 'indiretta', coefficiente: 'pacchetti' },
   { compito: 'content.physics', agente: 'fisico', modo: 'indiretta', coefficiente: 'pacchetti' },
   { compito: 'content.review', agente: 'arbitro', modo: 'indiretta', coefficiente: 'pacchetti' },
@@ -95,25 +107,59 @@ export const CENSUS: Array<{ compito: string; agente: string; modo: 'diretta' | 
   { compito: 'content.define', agente: 'narratore', modo: 'indiretta', coefficiente: 'cose', nota: 'anche ciò che il viandante fabbrica' },
   { compito: 'npc.individuate', agente: 'narratore', modo: 'indiretta', coefficiente: 'persone' },
   { compito: 'npc.sheet', agente: 'narratore', modo: 'indiretta', coefficiente: 'persone', nota: "solo con l'Attore acceso: una scheda per individuo, alla sua prima battuta" },
-  { compito: 'action.judge', agente: 'narratore', modo: 'non regolabile', nota: '«Altro…» del viandante' },
-  { compito: 'craft.free', agente: 'narratore', modo: 'non regolabile', nota: 'fabbricazione libera' },
-  { compito: 'spell.name', agente: 'narratore', modo: 'non regolabile', nota: 'un incantesimo nuovo, una volta' },
-  { compito: 'rune.invent', agente: 'narratore', modo: 'non regolabile', nota: 'una runa nuova: dalle sessioni o da una formula, al più 16 rune' },
+  { compito: 'action.judge', agente: 'narratore', modo: 'diretta', coefficiente: 'azioni', nota: '«Altro…» del viandante' },
+  { compito: 'craft.free', agente: 'narratore', modo: 'diretta', coefficiente: 'azioni', nota: 'fabbricazione libera' },
+  { compito: 'spell.name', agente: 'narratore', modo: 'diretta', coefficiente: 'magia', nota: 'un incantesimo nuovo, una volta' },
+  { compito: 'rune.invent', agente: 'narratore', modo: 'diretta', coefficiente: 'magia', nota: 'una runa nuova: dalle sessioni o da una formula, al più 16 rune' },
   { compito: 'council.session', agente: 'arbitro', modo: 'diretta', coefficiente: 'sessioni' },
-  { compito: 'player.death', agente: 'narratore', modo: 'non regolabile', nota: 'a ogni morte' },
-  { compito: 'npc.reply', agente: 'narratore', modo: 'non regolabile', nota: "quando il viandante parla (meno individui, meno occasioni); con l'Attore acceso la fa l'Attore" },
+  { compito: 'player.death', agente: 'narratore', modo: 'diretta', coefficiente: 'morte', nota: 'a ogni morte' },
+  { compito: 'npc.reply', agente: 'narratore', modo: 'diretta', coefficiente: 'parole', nota: "quando il viandante parla; con l'Attore acceso la fa l'Attore" },
   { compito: 'npc.dialogue', agente: 'narratore', modo: 'diretta', coefficiente: 'dialoghi', nota: "con l'Attore acceso la fa l'Attore" },
   { compito: 'plot.weave', agente: 'narratore', modo: 'diretta', coefficiente: 'trame' },
-  { compito: 'text.examine', agente: 'narratore', modo: 'non regolabile', nota: '«Esamina»' },
-  { compito: 'text.read', agente: 'narratore', modo: 'non regolabile', nota: '«Leggi»' },
-  { compito: 'referente.coordinate', agente: 'referente', modo: 'non regolabile', nota: 'nella corona' },
-  { compito: 'agent.chat', agente: 'referente', modo: 'non regolabile', nota: 'nella corona' },
+  { compito: 'text.examine', agente: 'narratore', modo: 'diretta', coefficiente: 'sguardi', nota: '«Esamina»' },
+  { compito: 'text.read', agente: 'narratore', modo: 'diretta', coefficiente: 'sguardi', nota: '«Leggi»' },
+  { compito: 'referente.coordinate', agente: 'referente', modo: 'diretta', coefficiente: 'studio', nota: 'nella corona' },
+  { compito: 'agent.chat', agente: 'referente', modo: 'diretta', coefficiente: 'studio', nota: 'nella corona' },
   { compito: 'model.sculpt', agente: 'scultore', modo: 'diretta', coefficiente: 'modelli', nota: 'e revisioni' },
   { compito: 'model.judge', agente: 'artista', modo: 'diretta', coefficiente: 'revisioni' },
-  { compito: 'model.action', agente: 'scultore', modo: 'non regolabile', nota: '«Altro…» che cambia la forma' },
-  { compito: 'mechanic.design', agente: 'ingegnere', modo: 'non regolabile', nota: 'su richiesta (sessioni e Referente)' },
+  { compito: 'model.action', agente: 'scultore', modo: 'diretta', coefficiente: 'azioni', nota: '«Altro…» che cambia la forma' },
+  { compito: 'mechanic.design', agente: 'ingegnere', modo: 'diretta', coefficiente: 'studio', nota: 'su richiesta (sessioni e Referente)' },
+  { compito: 'review.fourthwall', agente: 'narratore', modo: 'indiretta', coefficiente: 'sessioni', nota: 'una volta per universo, per ciò che era nato prima del filtro: a 0 restano i ritiri che il kernel decide da sé' },
   { compito: 'sound.compose', agente: 'musicista', modo: 'diretta', coefficiente: 'brani', nota: 'per gli ambienti senza musica; ciò che chiede il viandante non si dirada' },
 ];
+
+/** The knobs the Council applies to a call itself (T247): what they do not let through goes to the local models. */
+export const RATIONED_KEYS: readonly CoefficientKey[] = ['luoghi', 'parole', 'sguardi', 'azioni', 'magia', 'morte', 'studio'];
+
+/** The knob that rations a task, if the Council rations it. `forge.fix` is not here: a local repair would empty the module, so the kernel does not ask. */
+export const rationedKnob = (task: string): CoefficientKey | undefined => {
+  const k = CENSUS.find((c) => c.compito === task)?.coefficiente;
+  return k && RATIONED_KEYS.includes(k) ? k : undefined;
+};
+
+/**
+ * The knob of a task whose call, at 0, goes to the local models whatever else thins it: every row of the census but the Genesis's and
+ * `forge.fix` (which the kernel keeps itself). The indirect ones are thinned where they arise (ADR-0085), but what the wanderer causes
+ * (a name for who they talk to, an item they mention) comes here too, and 0 means no call.
+ */
+export const knobOfTask = (task: string): CoefficientKey | undefined => (task === 'forge.fix' ? undefined : CENSUS.find((c) => c.compito === task)?.coefficiente);
+
+/**
+ * How many calls of a knob go through: with `c` of 0.5 one in two, always in the same order, never by a draw (ADR-0055):
+ * the share accumulates and every whole one is a call.
+ */
+export class Rationing {
+  private carried = new Map<CoefficientKey, number>();
+
+  allows(key: CoefficientKey, c: number): boolean {
+    if (c >= 1) return true;
+    if (c <= 0) return false;
+    const n = (this.carried.get(key) ?? 0) + c;
+    const through = n >= 1 - 1e-9;
+    this.carried.set(key, through ? n - 1 : n);
+    return through;
+  }
+}
 
 const PRESETS: Record<string, Coefficients> = { 'low detail': LOW_DETAIL.coefficienti, low: LOW_DETAIL.coefficienti, pieno: FULL_DETAIL, full: FULL_DETAIL };
 
@@ -206,7 +252,7 @@ export function hourlyEstimate(ai: AiConfig, date?: string): { righe: HourLine[]
   const add = (voce: string, modo: HourLine['modo'], chiamate: number, dollari: number) => rows.push({ voce, modo, chiamate: Math.round(chiamate * 10) / 10, dollari });
   const per = (base: number, k: number) => (Number.isFinite(stretch(base, k)) ? H.luoghi / stretch(base, k) : 0);
 
-  add('Luoghi nuovi (Cartografo)', 'non regolabile', H.luoghi, text(H.luoghi));
+  add(COEFFICIENT_INFO.luoghi.nome, 'diretta', H.luoghi * c.luoghi, text(H.luoghi * c.luoghi));
   const sessions = per(12, c.sessioni);
   add(COEFFICIENT_INFO.sessioni.nome, 'diretta', sessions * (1 + FORGE_CALLS / 2), text(sessions * (1 + FORGE_CALLS / 2)));
   const packs = Math.min(per(10, c.pacchetti), ai.maxPacks ?? 4);
@@ -222,7 +268,7 @@ export function hourlyEstimate(ai: AiConfig, date?: string): { righe: HourLine[]
   add(COEFFICIENT_INFO.dialoghi.nome, 'diretta', talks, played(talks));
   // The Actor's sheets: one per individual heard for the first time (a conversation, a dialogue), never more than the people met.
   if (actor.acceso) {
-    const sheets = Math.min(people, H.parole / 2 + talks);
+    const sheets = Math.min(people, (H.parole * c.parole) / 2 + talks);
     add("Schede dei personaggi (l'Attore acceso)", 'indiretta', sheets, text(sheets));
   }
   const plots = c.trame <= 0 ? 0 : H.giorni / Math.max(4, stretch(1, c.trame));
@@ -242,8 +288,10 @@ export function hourlyEstimate(ai: AiConfig, date?: string): { righe: HourLine[]
   const pause = pieceGap(c.brani);
   const pieces = Number.isFinite(pause) ? Math.min(H.ambientiSenzaBrano, 3600 / pause, ai.maxBrani ?? 8) * 1.34 : 0;
   add(COEFFICIENT_INFO.brani.nome, 'diretta', pieces, pieces * (costOf(sc.musicista, WEIGHT.scultura, date) ?? 0));
-  const asked = H.parole + H.azioni + H.sguardi;
-  add('Ciò che chiede il viandante (parole, «Altro…», «Esamina»)', 'non regolabile', asked, played(H.parole) + text(H.azioni + H.sguardi));
+  // What the wanderer asks: the share of it the knobs let through to the models.
+  add(COEFFICIENT_INFO.parole.nome, 'diretta', H.parole * c.parole, played(H.parole * c.parole));
+  add(COEFFICIENT_INFO.azioni.nome, 'diretta', H.azioni * c.azioni, text(H.azioni * c.azioni));
+  add(COEFFICIENT_INFO.sguardi.nome, 'diretta', H.sguardi * c.sguardi, text(H.sguardi * c.sguardi));
   return { righe: rows, chiamate: Math.round(rows.reduce((s, r) => s + r.chiamate, 0)), dollari: rows.reduce((s, r) => s + r.dollari, 0) };
 }
 

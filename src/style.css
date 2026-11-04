@@ -454,7 +454,7 @@ input[type='checkbox'], input[type='radio'] { accent-color: var(--neon-pink); }
 
 /* Lobby multigiocatore (T45d, ADR-0086) */
 #lobby {
-  position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center;
+  position: fixed; inset: 0; z-index: 55; display: flex; align-items: center; justify-content: center;
   background: var(--synth-backdrop); background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px, auto; padding: 16px;
 }
 #lobby .lobby-window {
@@ -473,6 +473,18 @@ input[type='checkbox'], input[type='radio'] { accent-color: var(--neon-pink); }
 #lobby .sculpt-row, #lobby .coef-list, #lobby .estimate-row { font-size: 12px; color: var(--dim); }
 #lobby .sculpt-row strong, #lobby .coef-list strong { color: var(--fg); }
 #lobby .note { color: var(--dim); font-size: 12px; }
+#lobby .knobs { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px 16px; }
+#lobby .knob { display: grid; grid-template-columns: 1fr 44px; gap: 2px 8px; align-items: center; font-size: 12px; min-width: 0; }
+#lobby .knob input[type='range'] { width: 100%; min-width: 0; margin: 0; }
+#lobby .knob .knob-value { text-align: right; color: var(--fg); }
+#lobby .knob .knob-name { grid-column: 1 / -1; color: var(--fg); }
+#lobby .knob .note { grid-column: 1 / -1; font-size: 11px; }
+#lobby .settings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px 16px; font-size: 12px; }
+#lobby .settings-grid label { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+#lobby .settings-grid select, #lobby .settings-grid input[type='number'] { width: 100%; box-sizing: border-box; padding: 4px 6px; font: inherit; min-width: 0; }
+#lobby .settings-title { color: var(--gold); font-size: 13px; margin-top: 6px; }
+#lobby details summary { cursor: pointer; color: var(--fg); font-size: 12px; margin-top: 4px; }
+#lobby .locked-note { color: var(--gold); font-size: 13px; }
 #lobby .tetto-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
 #lobby .tetto-controls input[type='number'] { width: 90px; padding: 5px 8px; font: inherit; }
 #lobby .cards-header-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }

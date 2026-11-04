@@ -360,8 +360,9 @@ export class SessionServer {
       }
       if (msg?.t !== 'entra' || entering) return;
       const tetto = typeof (msg as { tetto?: number }).tetto === 'number' && Number.isFinite((msg as { tetto?: number }).tetto) ? (msg as { tetto?: number }).tetto : undefined;
+      const settings = (msg as { regolazioni?: unknown }).regolazioni;
       if (!this.verify) {
-        admit(() => this.join(link, msg.id, msg.nome, msg.profilo, undefined, tetto));
+        admit(() => this.join(link, msg.id, msg.nome, msg.profilo, undefined, tetto, settings));
         return;
       }
       entering = true;
@@ -377,7 +378,7 @@ export class SessionServer {
         const known = !!readWandererState(this.kernel.files, id);
         if (a.anonimo) this.anonymous.add(id);
         else this.anonymous.delete(id);
-        admit(() => this.join(link, id, known ? msg.nome : (a.nome ?? msg.nome), msg.profilo, a.anonimo, tetto));
+        admit(() => this.join(link, id, known ? msg.nome : (a.nome ?? msg.nome), msg.profilo, a.anonimo, tetto, settings));
       });
     });
     link.onClose(() => {
@@ -387,10 +388,12 @@ export class SessionServer {
       this.kernel.setRemote(client.id, false);
       // What they carry stays theirs, saved; their entity leaves the world (`io` stays, without a client).
       this.kernel.removeWanderer(client.id);
+      // Nobody left: the match is over, and whoever enters first, if it is the master, may set the knobs again (T247, ADR-0132).
+      if (!this.clients.size) this.kernel.unlockSettings();
     });
   }
 
-  private join(link: ServerLink, id: unknown, nome: unknown, profilo: unknown, anonimo?: boolean, tetto?: number): Client | undefined {
+  private join(link: ServerLink, id: unknown, nome: unknown, profilo: unknown, anonimo?: boolean, tetto?: number, settings?: unknown): Client | undefined {
     if (!validWandererId(id)) {
       link.send({ t: 'rifiuto', motivo: 'id del viandante non valido' });
       return undefined;
@@ -402,6 +405,14 @@ export class SessionServer {
     if (anonimo !== undefined) {
       if (anonimo) this.anonymous.add(id);
       else this.anonymous.delete(id);
+    }
+    // The settings come in with the master, before anything else of the match (T247, ADR-0132): this is sync, so nobody slips in between.
+    const settled = settings === undefined ? undefined : this.kernel.isMaster(id) ? this.kernel.applySettings(settings) : { ok: false, motivo: 'solo il master regola il mondo' };
+    // The master's minimum: what is asked below it does not enter; asking nothing, or 0 (the local models), spends nothing of the world's.
+    const least = this.kernel.config.ai.minimi?.tetto;
+    if (typeof tetto === 'number' && tetto > 0 && least !== undefined && tetto < least && !this.isAnonymous(id)) {
+      link.send({ t: 'rifiuto', motivo: `il master chiede un tetto di almeno ${least}: alzalo, o gioca con i modelli locali` });
+      return undefined;
     }
     if (this.kernel.addWanderer(id, typeof nome === 'string' ? nome.slice(0, LIMITS.name) : undefined, anonimo) === undefined) {
       link.send({ t: 'rifiuto', motivo: 'il viandante non può entrare' });
@@ -417,6 +428,7 @@ export class SessionServer {
     const fixed = profilo && typeof profilo === 'object' && !this.kernel.profileOf(id) ? this.kernel.setProfile(id, profilo) : undefined;
     const c: Client = { id, link, budget: this.kernel.paceOf(id) * BURST, places: new Map(), things: new Map(), others: new Map(), notices: [], tetto, pace: this.paceOf(id) };
     this.clients.set(id, c);
+    this.kernel.lockSettings();
     const u = this.view(c);
     const w = this.kernel.wanderers().find((x) => x.id === id)!;
     const forma = this.formOf(this.kernel.wandererAt(id)?.entity);
@@ -427,6 +439,7 @@ export class SessionServer {
       nome: w.nome,
       ...(this.kernel.profileOf(id) ? { profilo: this.kernel.profileOf(id) } : {}),
       ...(fixed?.riparato.length ? { riparato: fixed.riparato } : {}),
+      ...(settled ? { regolazioni: settled } : {}),
       ...(this.isAnonymous(id) ? { anonimo: true as const } : {}),
       ...(master ? { master: true as const, concilio: this.kernel.feed().slice(-FEED_KEEP), ...(Object.keys(this.branch.files).length ? { ramo: { ...this.branch.files } } : {}) } : {}),
       ...(forma ? { forma } : {}),
@@ -603,8 +616,6 @@ export class SessionServer {
         // The kernel checks that it is the master, the wanderer and the day's cap (ADR-0104).
         void this.kernel.grantCredits(String(msg.viandante), Number(msg.quanti), c.id).then((r) => this.answer(c, seq, r));
         return;
-      case 'attore':
-        return this.answer(c, seq, this.setActor(c, msg.acceso, msg.modello));
       case 'pubblica':
         return this.answer(c, seq, this.publish(c));
       case 'segui':
@@ -644,22 +655,14 @@ export class SessionServer {
     this.answer(c, seq, { ok: false, motivo: 'messaggio sconosciuto' });
   }
 
-  /** The Actor's option (T157): only the master changes it; `setAi` repairs what the wire says (a boolean, a model's name). */
-  private setActor(c: Client, acceso: unknown, modello: unknown): Answer {
-    if (!this.kernel.isMaster(c.id)) return { ok: false, motivo: "solo il master accende l'Attore" };
-    const on = acceso === true || acceso === 'true' || acceso === 1;
-    const model = typeof modello === 'string' && /^[a-z0-9.-]{1,64}$/i.test(modello.trim()) ? modello.trim() : undefined;
-    this.kernel.setAi({ attore: { acceso: on, ...(model ? { modello: model } : {}) } });
-    const a = this.kernel.actor();
-    return { ok: true, messaggi: [a.acceso ? `l'Attore è acceso (${a.modello})` : "l'Attore è spento: il Narratore interpreta gli individui"] };
-  }
-
   /** The master's branch, whole, as their client has it now; kept on disk too, on the branch `master`. */
   private takeBranch(c: Client, files: unknown, base: unknown): Answer {
     const k = this.kernel;
     if (!k.isMaster(c.id)) return { ok: false, motivo: 'solo il master ha un ramo' };
     const clean = cleanBranch(files);
     if (!clean) return { ok: false, motivo: 'ramo non valido' };
+    // A branch does not bring the settings: they are fixed while the match is under way, and it would merge them on the disk (T247).
+    if (typeof clean['universe.json'] === 'string') clean['universe.json'] = k.withHeldSettings(clean['universe.json']);
     const b = base && typeof base === 'object' ? (base as Record<string, unknown>) : {};
     this.branch = { files: clean, base: Object.fromEntries(Object.keys(clean).map((p) => [p, typeof b[p] === 'string' ? (b[p] as string) : null])) };
     void k.repo.backend?.branch?.(BRANCH, clean, `ramo del master: ${listOf(Object.keys(clean)) || 'vuoto'}`, 'player');

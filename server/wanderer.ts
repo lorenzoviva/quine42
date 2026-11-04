@@ -54,6 +54,8 @@ export interface WandererView {
   nelMondo: boolean;
   /** Whether the universe knows them already (a saved state, or in the world). */
   noto: boolean;
+  /** Whether a match is under way in this universe: the lobby then shows the settings without letting them change (T247). */
+  inCorso?: boolean;
   /** The program of their look, its seeds, and the letter the cloak's colour paints. */
   modello?: { xml: string; semi: number; tinta?: string };
 }
@@ -189,6 +191,7 @@ export function viewFromKernel(k: Kernel, universo: string, id: string, account:
     crediti: anonimo ? 0 : k.creditsOf(id),
     nelMondo: inWorld,
     noto: inWorld || !!saved,
+    ...(k.settingsLocked ? { inCorso: true } : {}),
     modello: lookOf(k.files),
   };
 }
