@@ -43,6 +43,7 @@ Aggiornato il 04/11/2026, epoca 242. Crediti: vedi `stato`.
 
 ## Attese dall'autore
 
+- **To-do in scrittura (04/11, non pianificato né toccato):** «Fibonacci e rapporto aureo» (landing) e «Fasi dello sviluppo» (fasi I-IV, step come obiettivo, tag `step` sui task, guida dei beta tester). Il testo si ferma a metà elenco: si pianifica quando l'autore dice che è finito.
 - **Domande nei file (03/11): aperte solo T45f (progetto, hosting, regione), T93 (regime fiscale, non blocca); le altre hanno `Stato: chiusa` in testa. T208 integrato: il conteggio giusto della pagina web si vede dopo il riavvio del processo, non provato nel browser.**
 - **T176, le due proposte sul sorvegliante:** approvate da me nell'autonomia, sono T209, integrato; T45f può procedere quando l'autore risponde a `domande/T45f.md`. T210 integrato: il `heap out of memory` è il mondo di prova di V-007, che muore apposta; non nasconde file né test rossi. Da dirgli al ritorno.
 - **T153**: domande chiuse. Nomi scelti (03/11): `orichalcum`, `neapolis`, `sidera`, già in `generazione` di `config.json`. Il resto è deciso: niente API, Claude Code, 25 % per universo modificabile in corsa, tutti multigiocatore, `aurora` intatto. T184-T185: `in attesa`, ripartono solo se lo dice lui.
