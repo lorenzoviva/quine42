@@ -1,0 +1,10 @@
+{
+  "id": "mech.bisca", "name": "La bisca", "kind": "system", "logic": "logic.lua", "order": 60,
+  "ui": { "id": "bisca", "titolo": "Il tavolo", "elementi": [
+    { "tipo": "testo", "etichetta": "Banco", "campo": "bisca.esito" },
+    { "tipo": "testo", "etichetta": "Vinte", "campo": "bisca.vinte" },
+    { "tipo": "barra", "etichetta": "Sospetto", "campo": "bisca.sospetto", "max": 3 },
+    { "tipo": "pulsante", "id": "rosso", "etichetta": "Un gettone sul rosso" },
+    { "tipo": "pulsante", "id": "nero", "etichetta": "Un gettone sul nero" }
+  ] }
+}

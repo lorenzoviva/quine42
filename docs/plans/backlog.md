@@ -3278,7 +3278,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Browser: non serve; i fogli di contatto restano nel commit.
 - Quando è fatto: commit su `task/T182`; nell'esito token, costo per modello, quanti giri, soglia sì o no.
 
-### T183 · Le interfacce di simulazione complesse: una prova dell'espressività del kernel — `da fare` (dipende da T205)
+### T183 · Le interfacce di simulazione complesse: una prova dell'espressività del kernel — `fatto` (`3313447`) (dipende da T205)
 - Pipeline: claude · stima 9% · approvato · priorità 79
 - Step: 32
 - **Scenario obbligato (autore, 04/11):** un gruppo di NPC costruisce un edificio in una sessione lunga mesi, con passi visivamente coerenti verso lo scopo comune. Provalo come gli altri: cosa manca al kernel, di che genere, se entra senza wipe. Serve a T245.
@@ -3288,6 +3288,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Test: i moduli girano in `tests/` e ciò che dichiari possibile è provato. Typecheck e suite con i loro turni.
 - Browser: non serve; ciò che si vede solo a schermo (camera, grafica) scrivilo come non provato.
 - Quando è fatto: commit su `task/T183`; nell'esito quanti scenari riescono senza kernel e le prime tre primitive. Sicurezza: nessuna superficie nuova, o le voci aggiunte.
+- Esito: scritto `docs/design/espressivita.md` (tabella scenario per primitiva, catalogo di 39, costo misurato, divisione delle primitive, regole senza wipe) e `tests/espressivita/` con 13 scenari in moduli veri, nessuna modifica a `src/kernel/`. Da solo in una sessione riescono 10 su 13 interi e 3 in parte; dopo una riapertura 2 interi e 3 in parte; in multigiocatore nessuno intero. Cantiere per mesi riuscito per caselle. Prime tre primitive per scenari sbloccati: magazzino durevole (20), campi dei pannelli al client (15), eventi (9); per la versione pubblica anche i comandi di ogni viandante. Nessuna modifica misurata chiede un wipe: sei semi dal 20/10 e `valmora` si aprono senza guasti; non aggiuntivi il caso cambiato (8,9 % delle caselle), un'API tolta, un effetto in un `core.effects` riscritto. Suite 2006 verdi e 1 saltato (`valmora`, solo con `QUINE_UNIVERSO_VECCHIO`), typecheck verde. Da decidere dall'autore: se un guasto a runtime può non fermare il salvataggio (regola 6). Non provato: resa a schermo, Ingegnere vero, partita di multigiocatore per ogni modulo, `hashStr` (solo letto nel codice). Sicurezza: nessuna superficie nuova; quelle che le primitive aprirebbero sono scritte nel documento.
 
 ### T184 · Le ambientazioni spazio, pirati, cowboy — `in attesa` (dipende da T152)
 - Pipeline: claude · stima 2% · browser · priorità 90

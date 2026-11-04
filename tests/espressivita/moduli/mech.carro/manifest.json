@@ -1,0 +1,8 @@
+{
+  "id": "mech.carro", "name": "Il carro", "kind": "system", "logic": "logic.lua", "order": 60,
+  "ui": { "id": "carro", "titolo": "Il carro", "elementi": [
+    { "tipo": "pulsante", "id": "sali", "etichetta": "Sali" },
+    { "tipo": "pulsante", "id": "guida", "etichetta": "Prendi le redini" }
+  ] },
+  "singleton": { "carro": { "guidatore": 0, "n": 0, "visti": 0, "tasti": 0 } }
+}

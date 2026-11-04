@@ -1,0 +1,13 @@
+{
+  "id": "mech.computer", "name": "Il terminale", "kind": "system", "logic": "logic.lua", "order": 60,
+  "ui": { "id": "terminale", "titolo": "Terminale", "elementi": [
+    { "tipo": "testo", "etichetta": "", "campo": "schermo.r1" },
+    { "tipo": "testo", "etichetta": "", "campo": "schermo.r2" },
+    { "tipo": "testo", "etichetta": "", "campo": "schermo.r3" },
+    { "tipo": "testo", "etichetta": "", "campo": "schermo.r4" },
+    { "tipo": "pulsante", "id": "su", "etichetta": "▲" },
+    { "tipo": "pulsante", "id": "giu", "etichetta": "▼" },
+    { "tipo": "pulsante", "id": "invio", "etichetta": "INVIO" },
+    { "tipo": "pulsante", "id": "esc", "etichetta": "ESC" }
+  ] }
+}

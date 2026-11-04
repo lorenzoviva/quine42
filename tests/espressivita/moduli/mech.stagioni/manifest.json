@@ -1,0 +1,8 @@
+{
+  "id": "mech.stagioni", "name": "Le stagioni", "kind": "system", "logic": "logic.lua", "order": 60,
+  "ui": { "id": "calendario", "titolo": "Calendario", "elementi": [
+    { "tipo": "testo", "etichetta": "Giorno", "campo": "calendario.giorno" },
+    { "tipo": "testo", "etichetta": "Stagione", "campo": "calendario.stagione" }
+  ] },
+  "singleton": { "almanacco": { "giorni_stagione": 90, "giornata": 600 } }
+}

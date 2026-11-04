@@ -1,0 +1,37 @@
+{
+  "id": "mech.cantiere",
+  "name": "Il cantiere",
+  "kind": "system",
+  "logic": "logic.lua",
+  "order": 60,
+  "ui": {
+    "id": "cantiere",
+    "titolo": "Il cantiere",
+    "elementi": [
+      {
+        "tipo": "testo",
+        "etichetta": "A che punto è",
+        "campo": "cantiere_visto.fase"
+      },
+      {
+        "tipo": "testo",
+        "etichetta": "Caselle finite",
+        "campo": "cantiere_visto.finite"
+      },
+      {
+        "tipo": "pulsante",
+        "id": "guarda",
+        "etichetta": "Chiedi ai muratori"
+      }
+    ]
+  },
+  "singleton": {
+    "cantiere": {
+      "ritmo": 0.1,
+      "posati": 0,
+      "fase": "scavo",
+      "x": -2,
+      "y": -6
+    }
+  }
+}

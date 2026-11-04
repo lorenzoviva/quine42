@@ -1,0 +1,3 @@
+{ "id": "bersaglio.uomo", "name": "Bandito", "kind": "entity", "tags": ["bersaglio"],
+  "appearance": { "glyph": "U", "color": "#aa3333", "aspetto": "un bandito" },
+  "physics": { "solid": false, "radius": 0.3 }, "components": { "salute": { "valore": 20 } } }

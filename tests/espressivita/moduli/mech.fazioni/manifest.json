@@ -1,0 +1,38 @@
+{
+  "id": "mech.fazioni",
+  "name": "La legge",
+  "kind": "system",
+  "logic": "logic.lua",
+  "order": 60,
+  "ui": {
+    "id": "legge",
+    "titolo": "La legge",
+    "elementi": [
+      {
+        "tipo": "testo",
+        "etichetta": "Taglia",
+        "campo": "fedina.taglia"
+      },
+      {
+        "tipo": "testo",
+        "etichetta": "Reati visti",
+        "campo": "fedina.reati"
+      },
+      {
+        "tipo": "pulsante",
+        "id": "paga",
+        "etichetta": "Paga la multa"
+      },
+      {
+        "tipo": "pulsante",
+        "id": "abbatti",
+        "etichetta": "Abbatti la statua"
+      }
+    ]
+  },
+  "singleton": {
+    "legge": {
+      "protetti": 0
+    }
+  }
+}

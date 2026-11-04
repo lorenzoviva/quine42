@@ -1,0 +1,2 @@
+{ "id": "gioco.palla", "name": "Palla", "kind": "entity", "appearance": { "glyph": "o", "color": "#ffffff", "aspetto": "una palla di cuoio" },
+  "physics": { "solid": false, "radius": 0.2 }, "components": { "palla": { "vx": 0, "vy": 0 } } }

@@ -1,0 +1,3 @@
+{ "id": "cantiere.catasta", "name": "Catasta", "kind": "entity", "tags": ["catasta"],
+  "appearance": { "glyph": "#", "color": "#999999", "aspetto": "una catasta di pietre squadrate" },
+  "physics": { "solid": false, "radius": 0.4 } }

@@ -1,0 +1,7 @@
+{
+  "id": "mech.posa", "name": "Costruire", "kind": "system", "logic": "logic.lua", "order": 60,
+  "ui": { "id": "posa", "titolo": "Costruire", "elementi": [
+    { "tipo": "pulsante", "id": "muro", "etichetta": "Posa un muro" },
+    { "tipo": "pulsante", "id": "mobile", "etichetta": "Posa un tavolo" }
+  ] }
+}
