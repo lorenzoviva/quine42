@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 04/11/2026, epoca 267. Crediti: vedi `stato`.
+Aggiornato il 04/11/2026, epoca 268. Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -66,5 +66,5 @@ Aggiornato il 04/11/2026, epoca 267. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **266:** T268 integrato (`215e2c1`), misure di `Claude and GPT models` in `modelli.md`; T255 sbloccato e pronto su `claude`.
 - **267:** T258 integrato (`cbfe5ca`, `in attesa`, ADR-0135): lettera del suolo e cantina a mano 12/12 funzionanti, locanda del modello 0/4 per il tetto di 8 s a Enorme; aperta D33 (`domande/T258.md`).
+- **268:** `git push origin 3d` e avviate su richiesta dell'autore 4 sessioni autonome su Claude Cloud (`claude-opus-5-5` su `claude.ai/code`) per consumare i 250 $ in scadenza domani alle 9:00: Cantiere 1 strutture 3D (`session_01Tozk123FBT7m2bcK2eJjnm`, branch `claude/quine42-3d-structures-catalog`), Cantiere 2 modelli seme + props (`session_01Tozk11CdD1xBuczzXmJB4K`, branch `claude/quine42-procedural-seed-models`), Cantiere 3 suoni MJ (`session_01Tozk15AdWzG8q4xRMv2qZy`, branch `claude/markov-junior-sound-programs`), Cantiere 4 universi `orichalcum`/`neapolis`/`sidera` (`session_01Tozk139u3r5JUxKpgtjZMs`, branch `claude/quine42-worldbuilding-narrative`).
