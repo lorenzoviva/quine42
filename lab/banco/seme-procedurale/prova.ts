@@ -6,9 +6,9 @@
 //   npx vite-node lab/banco/seme-procedurale/prova.ts -- lab/banco/seme-procedurale [id…]
 //   npx vite-node lab/banco/seme-procedurale/prova.ts -- lab/banco/props-tematici [id…]
 //
-// The folder holds `index.json` ({ id: { classe, nome, … } }); without ids every entry is tried. Exit code 1 if any fails.
+// The folder holds `index.json` or `index-<setting>.json` ({ id: { classe, nome, … } }); without ids every entry is tried. Exit code 1 if any fails.
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { checkProgram, withSize } from '../../../src/kernel/agents/sculptor';
 import { modelErrors } from '../../../src/kernel/validator';
@@ -145,7 +145,11 @@ const main = () => {
   const args = process.argv.slice(2).filter((a) => a !== '--');
   if (!args.length) return;
   const cartella = args[0];
-  const indice = JSON.parse(readFileSync(join(cartella, 'index.json'), 'utf8')) as Record<string, Voce>;
+  // `index.json`, or one `index-<ambientazione>.json` per setting (props-tematici): all of them together.
+  const indice: Record<string, Voce> = {};
+  for (const f of readdirSync(cartella).filter((f) => /^index(-[a-z]+)?\.json$/.test(f)).sort())
+    Object.assign(indice, JSON.parse(readFileSync(join(cartella, f), 'utf8')));
+  if (!Object.keys(indice).length && !existsSync(join(cartella, 'index.json'))) throw new Error(`${cartella}: nessun index.json`);
   const ids = args.length > 1 ? args.slice(1) : Object.keys(indice);
   let falliti = 0;
   for (const id of ids) {

@@ -8,7 +8,7 @@ Classe `albero`, scatola 40 × 40 × 60 voxel; riscrittura procedurale di `unive
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.494**, minima 0.414, massima 0.665 (soglia 0.15) → passa
-- voxel per seme: 12389, 12291, 12260, 12390, 12191; tempo per seme: 138, 132, 132, 119, 115 ms
+- voxel per seme: 12389, 12291, 12260, 12390, 12191; tempo per seme: 137, 137, 134, 134, 132 ms
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -24,7 +24,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 40×40×60, 29 nodi, 9237 passi, finito in 190 ms.
+Traccia, seme 1: griglia 40×40×60, 29 nodi, 9237 passi, finito in 146 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: T=tronco base, t=legno ombra, F=chioma base, f=chioma ombra, L=foglie medie, Y=foglie luce, h=quote possibili della biforcazione (marcatore), k=la quota scelta (marcatore), V=la cupola della chioma (marcatore), r=punta di una branca (marcatore), x=sotto la chioma (marcatore).
 Alla fine: F 9948, t 828, f 696, Y 445, T 338, L 134.
@@ -43,7 +43,7 @@ Alla fine: F 9948, t 828, f 696, Y 445, T 338, L 134.
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 40×40×60, 29 nodi, 9238 passi, finito in 180 ms.
+Traccia, seme 2: griglia 40×40×60, 29 nodi, 9238 passi, finito in 148 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: T=tronco base, t=legno ombra, F=chioma base, f=chioma ombra, L=foglie medie, Y=foglie luce, h=quote possibili della biforcazione (marcatore), k=la quota scelta (marcatore), V=la cupola della chioma (marcatore), r=punta di una branca (marcatore), x=sotto la chioma (marcatore).
 Alla fine: F 9758, t 828, f 712, Y 498, T 342, L 153.
@@ -62,7 +62,7 @@ Alla fine: F 9758, t 828, f 712, Y 498, T 342, L 153.
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 40×40×60, 29 nodi, 9238 passi, finito in 133 ms.
+Traccia, seme 3: griglia 40×40×60, 29 nodi, 9238 passi, finito in 147 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: T=tronco base, t=legno ombra, F=chioma base, f=chioma ombra, L=foglie medie, Y=foglie luce, h=quote possibili della biforcazione (marcatore), k=la quota scelta (marcatore), V=la cupola della chioma (marcatore), r=punta di una branca (marcatore), x=sotto la chioma (marcatore).
 Alla fine: F 9739, t 827, f 695, Y 489, T 338, L 172.

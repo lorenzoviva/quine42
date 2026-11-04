@@ -1,0 +1,64 @@
+<!-- Credenza, procedurale (Cantiere 2): il legno scuro, le ante, la cornice e le maniglie d'ottone dell'originale. Il seme sceglie quanto è
+     alta (da 10 a 18 voxel: una madia bassa o un armadio), quanto è larga, se le ante sono due o tre e quanti vasi ci stanno sopra. -->
+<sequence values="BNnLKIhkwabcde" size="20 20 20" symmetry="(xy)" name="Credenza">
+  <color symbol="N" value="5e3c22" name="legno scuro"/>
+  <color symbol="n" value="3e2614" name="ombra"/>
+  <color symbol="L" value="7a5232" name="anta"/>
+  <color symbol="K" value="6a4428" name="cornice"/>
+  <color symbol="I" value="c8b070" name="maniglia d'ottone"/>
+  <color symbol="h" hidden="True" name="altezze possibili"/>
+  <color symbol="k" hidden="True" name="la quota scelta"/>
+  <color symbol="w" hidden="True" name="i fianchi che possono mancare"/>
+  <color symbol="a" hidden="True" name="scelta"/>
+  <color symbol="b" hidden="True" name="scelta"/>
+  <color symbol="c" hidden="True" name="dove possono stare i divisori delle ante"/>
+  <color symbol="d" hidden="True" name="il divisorio scelto"/>
+  <color symbol="e" hidden="True" name="un vaso che nasce"/>
+  <!-- Il corpo più grande possibile: i fianchi esterni ci sono o no, ognuno per conto suo -->
+  <box at="10 7 0" size="18 12 19" color="w"/>
+  <box at="10 7 0" size="14 12 19" color="N"/>
+  <prl in="w" out="a" p="0.003" steps="1"/>
+  <all>
+    <rule in="aw" out="aa"/>
+    <rule in="a w" out="a a"/>
+    <rule in="w a" out="a a"/>
+  </all>
+  <all in="a" out="N"/>
+  <all in="w" out="B"/>
+  <!-- Le ante: tutto il davanti, poi i divisori a una delle due spartiture -->
+  <box at="10 13 2" size="20 1 18" color="L" on="B"/>
+  <all in="L/B" out="*/*"/>
+  <all in="LN/BB" out="**/**"/>
+  <box at="10 13 0" size="20 1 2" color="n" on="B"/>
+  <box at="10 13 2" size="1 1 1" color="c" on="L"/>
+  <box at="7 13 2" size="1 1 1" color="c" on="L"/>
+  <box at="13 13 2" size="1 1 1" color="c" on="L"/>
+  <one steps="1">
+    <rule in="c" out="d"/>
+    <rule in="c" out="d"/>
+    <rule in="c" out="d"/>
+  </one>
+  <all in="c" out="L"/>
+  <!-- Due ante se il divisorio è al centro; due ante e un vano se è di lato -->
+  <all in="L d" out="d *"/>
+  <all in="d" out="n"/>
+  <!-- Le ante senza corpo dietro (i fianchi mancanti) tornano aria -->
+  <all in="B/L" out="*/B" symmetry="()"/>
+  <!-- L'altezza -->
+  <box at="0 0 10" size="1 1 9" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="k*" out="kk"/>
+  <all in="* k" out="k *"/>
+  <all in="k [NLn]" out="* K"/>
+  <all in="k" out="B"/>
+  <!-- La cornice in cima, che sporge di uno -->
+  <prl in="KB" out="*K" p="1" steps="1"/>
+  <!-- Le maniglie d'ottone: due, sul davanti, dove capita -->
+  <one in="L/B" out="*/I" symmetry="()" steps="2"/>
+  <!-- Sopra, da zero a tre vasi -->
+  <prl in="B K" out="e *" p="0.006" steps="1"/>
+  <all in="B e" out="e *" steps="2"/>
+  <all in="eB" out="*e" steps="1"/>
+  <all in="e" out="I"/>
+</sequence>

@@ -8,7 +8,7 @@ Classe `roccia`, scatola 20 × 20 × 16 voxel; riscrittura procedurale di `unive
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.345**, minima 0.301, massima 0.412 (soglia 0.15) → passa
-- voxel per seme: 956, 979, 1007, 958, 948; tempo per seme: 8, 8, 9, 7, 7 ms
+- voxel per seme: 956, 979, 1007, 958, 948; tempo per seme: 9, 9, 9, 9, 9 ms
 - avvisi: tocca i bordi laterali della griglia: forse è tagliato
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×16, 16 nodi, 980 passi, finito in 10 ms.
+Traccia, seme 1: griglia 20×20×16, 16 nodi, 980 passi, finito in 11 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: R=granito grigio base, S=granito chiaro illuminato, D=crepa e ombra pietra, M=muschio vivace, V=dove corre la spina (marcatore).
 Alla fine: R 662, S 192, D 71, M 31.
@@ -46,7 +46,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×16, 16 nodi, 980 passi, finito in 11 ms.
+Traccia, seme 2: griglia 20×20×16, 16 nodi, 980 passi, finito in 10 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: R=granito grigio base, S=granito chiaro illuminato, D=crepa e ombra pietra, M=muschio vivace, V=dove corre la spina (marcatore).
 Alla fine: R 668, S 219, D 59, M 33.
@@ -67,7 +67,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×16, 16 nodi, 981 passi, finito in 9 ms.
+Traccia, seme 3: griglia 20×20×16, 16 nodi, 981 passi, finito in 11 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: R=granito grigio base, S=granito chiaro illuminato, D=crepa e ombra pietra, M=muschio vivace, V=dove corre la spina (marcatore).
 Alla fine: R 694, S 225, D 62, M 26.

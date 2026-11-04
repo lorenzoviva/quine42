@@ -8,7 +8,7 @@ Classe `roccia`, scatola 20 × 20 × 16 voxel; riscrittura procedurale di `unive
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.482**, minima 0.405, massima 0.585 (soglia 0.15) → passa
-- voxel per seme: 1004, 1006, 1001, 1003, 966; tempo per seme: 9, 8, 9, 9, 9 ms
+- voxel per seme: 1004, 1006, 1001, 1003, 966; tempo per seme: 9, 8, 8, 8, 8 ms
 - avvisi: tocca i bordi laterali della griglia: forse è tagliato
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×16, 18 nodi, 1018 passi, finito in 11 ms.
+Traccia, seme 1: griglia 20×20×16, 18 nodi, 1018 passi, finito in 10 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: R=granito, S=granito chiaro, D=crepa, M=muschio, V=dove nasce un lobo (marcatore), k=dove può nascere la scheggia (marcatore), K=la scheggia (marcatore).
 Alla fine: R 823, S 94, M 51, D 36.
@@ -47,7 +47,7 @@ Senza effetto (non hanno mai cambiato una cella):
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×16, 18 nodi, 1037 passi, finito in 10 ms.
+Traccia, seme 2: griglia 20×20×16, 18 nodi, 1037 passi, finito in 9 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: R=granito, S=granito chiaro, D=crepa, M=muschio, V=dove nasce un lobo (marcatore), k=dove può nascere la scheggia (marcatore), K=la scheggia (marcatore).
 Alla fine: R 820, S 72, M 66, D 48.

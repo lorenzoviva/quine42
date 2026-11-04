@@ -8,7 +8,7 @@ Classe `sasso`, scatola 10 × 10 × 8 voxel; riscrittura procedurale di `univers
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.634**, minima 0.384, massima 0.768 (soglia 0.15) → passa
-- voxel per seme: 131, 131, 94, 105, 113; tempo per seme: 2, 3, 2, 4, 2 ms
+- voxel per seme: 131, 131, 94, 105, 113; tempo per seme: 2, 2, 4, 2, 1 ms
 - avvisi: tocca i bordi laterali della griglia: forse è tagliato; colori mai usati: S
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -46,7 +46,7 @@ Alla fine: G 59, L 35, H 15, D 15, S 7.
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 10×10×8, 16 nodi, 87 passi, finito in 2 ms.
+Traccia, seme 2: griglia 10×10×8, 16 nodi, 87 passi, finito in 1 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: H=pietra lucida, L=pietra chiara, G=pietra grigia, D=pietra d'ombra, S=ombra profonda, V=dove può nascere un lobo (marcatore), c=il centro (marcatore).
 Alla fine: G 61, L 30, D 20, H 11, S 9.
@@ -67,7 +67,7 @@ Alla fine: G 61, L 30, D 20, H 11, S 9.
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 10×10×8, 16 nodi, 86 passi, finito in 2 ms.
+Traccia, seme 3: griglia 10×10×8, 16 nodi, 86 passi, finito in 1 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: H=pietra lucida, L=pietra chiara, G=pietra grigia, D=pietra d'ombra, V=dove può nascere un lobo (marcatore), c=il centro (marcatore).
 Alla fine: G 42, L 35, H 13, D 4.

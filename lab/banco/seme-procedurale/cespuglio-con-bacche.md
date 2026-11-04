@@ -8,7 +8,7 @@ Classe `cespuglio`, scatola 20 × 20 × 16 voxel; riscrittura procedurale di `un
 
 - validatore (`modelErrors`, `checkProgram`, `analyse` a ogni seme): nessun errore, nessun frammento staccato
 - varianza su 5 semi (voxel pieni in un seme e vuoti nell'altro, sui pieni in almeno uno; il colore non conta): **media 0.600**, minima 0.512, massima 0.716 (soglia 0.15) → passa
-- voxel per seme: 889, 956, 791, 815, 894; tempo per seme: 6, 6, 6, 5, 6 ms
+- voxel per seme: 889, 956, 791, 815, 894; tempo per seme: 7, 7, 9, 7, 8 ms
 - avvisi: tocca i bordi laterali della griglia: forse è tagliato
 
 | coppia | 1-2 | 1-3 | 1-4 | 1-5 | 2-3 | 2-4 | 2-5 | 3-4 | 3-5 | 4-5 |
@@ -25,7 +25,7 @@ righe che cambiano fra i semi sono le scelte del programma.
 ### Seme 1
 
 ```text
-Traccia, seme 1: griglia 20×20×16, 14 nodi, 741 passi, finito in 7 ms.
+Traccia, seme 1: griglia 20×20×16, 14 nodi, 741 passi, finito in 8 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: L=foglie, H=foglie chiare, D=foglie scure, I=bacche, V=dove nasce un ciuffo (marcatore), c=un ciuffo che sale (marcatore).
 Alla fine: L 606, D 187, H 76, I 20.
@@ -45,7 +45,7 @@ Alla fine: L 606, D 187, H 76, I 20.
 ### Seme 2
 
 ```text
-Traccia, seme 2: griglia 20×20×16, 14 nodi, 741 passi, finito in 7 ms.
+Traccia, seme 2: griglia 20×20×16, 14 nodi, 741 passi, finito in 8 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: L=foglie, H=foglie chiare, D=foglie scure, I=bacche, V=dove nasce un ciuffo (marcatore), c=un ciuffo che sale (marcatore).
 Alla fine: L 640, D 210, H 69, I 37.
@@ -65,7 +65,7 @@ Alla fine: L 640, D 210, H 69, I 37.
 ### Seme 3
 
 ```text
-Traccia, seme 3: griglia 20×20×16, 14 nodi, 733 passi, finito in 6 ms.
+Traccia, seme 3: griglia 20×20×16, 14 nodi, 733 passi, finito in 8 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: L=foglie, H=foglie chiare, D=foglie scure, I=bacche, V=dove nasce un ciuffo (marcatore), c=un ciuffo che sale (marcatore).
 Alla fine: L 534, D 150, H 82, I 25.
