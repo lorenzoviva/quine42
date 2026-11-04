@@ -1,0 +1,107 @@
+<!-- Steampunk, la birreria: un organetto da fiera che gira, l'oom-pa del basso, piatti di latta e bicchieri. -->
+<sequence name="Steampunk, città e locanda" values="BNSAGKHCMQTWRXYZD" size="128 5 18" symmetry="()">
+  <sound bpm="126" scale="dorian" root="50" swing="0.25" cutoff="5000" space="0.3">
+    <track y="0" instrument="lead" volume="0.5"/>
+    <track y="1" instrument="pad" volume="0.4"/>
+    <track y="2" instrument="lead" volume="0.28"/>
+    <track y="3" instrument="bass" volume="0.6"/>
+    <track y="4" instrument="bass" volume="0.48"/>
+  </sound>
+  <color symbol="N" value="38bdf8" name="Nota" glow="True"/>
+  <color symbol="S" value="0284c7" name="Sustain" alpha="0.85"/>
+  <color symbol="A" value="f43f5e" name="Accento" glow="True"/>
+  <color symbol="G" value="818cf8" name="Ghost" alpha="0.7"/>
+  <color symbol="K" value="fbbf24" name="Kick" glow="True"/>
+  <color symbol="H" value="fde047" name="Hi-hat" alpha="0.85"/>
+  <color symbol="C" value="fb923c" name="Rullante" glow="True"/>
+  <color symbol="M" value="10b981" name="Testa della melodia" hidden="True"/>
+  <color symbol="Q" value="14b8a6" name="Testa del controcanto" hidden="True"/>
+  <color symbol="T" value="ec4899" name="Testa degli accordi" hidden="True"/>
+  <color symbol="W" value="334155" name="Soffitto degli accordi" hidden="True"/>
+  <color symbol="R" value="a855f7" name="Radice" hidden="True"/>
+  <color symbol="X" value="c084fc" name="Segno del pad" hidden="True"/>
+  <color symbol="Y" value="7c3aed" name="Segno del basso" hidden="True"/>
+  <color symbol="Z" value="e879f9" name="Segno dell'arpeggio" hidden="True"/>
+  <color symbol="D" value="475569" name="Battuta" hidden="True"/>
+
+  <!-- Le teste, all'inizio del ciclo; il soffitto tiene gli accordi nel registro grave. -->
+  <line at="0 0 7" to="0 0 7" r="0" color="M"/>
+  <line at="0 3 0" to="0 3 0" r="0" color="T"/>
+  <line at="0 3 6" to="127 3 6" r="0" color="W"/>
+  <line at="0 3 7" to="127 3 7" r="0" color="W"/>
+  <line at="0 3 8" to="127 3 8" r="0" color="W"/>
+  <line at="0 3 9" to="127 3 9" r="0" color="W"/>
+  <line at="0 3 10" to="127 3 10" r="0" color="W"/>
+  <line at="0 3 11" to="127 3 11" r="0" color="W"/>
+  <line at="0 3 12" to="127 3 12" r="0" color="W"/>
+  <line at="0 3 13" to="127 3 13" r="0" color="W"/>
+  <line at="0 3 14" to="127 3 14" r="0" color="W"/>
+  <line at="0 3 15" to="127 3 15" r="0" color="W"/>
+  <line at="0 3 16" to="127 3 16" r="0" color="W"/>
+  <line at="0 3 17" to="127 3 17" r="0" color="W"/>
+  <line at="0 4 0" to="0 4 0" r="0" color="D"/>
+  <line at="16 4 0" to="16 4 0" r="0" color="D"/>
+  <line at="32 4 0" to="32 4 0" r="0" color="D"/>
+  <line at="48 4 0" to="48 4 0" r="0" color="D"/>
+  <line at="64 4 0" to="64 4 0" r="0" color="D"/>
+  <line at="80 4 0" to="80 4 0" r="0" color="D"/>
+  <line at="96 4 0" to="96 4 0" r="0" color="D"/>
+  <line at="112 4 0" to="112 4 0" r="0" color="D"/>
+
+  <!-- L'armonia: la testa cammina di 8 in 8 passi e lascia una radice; il seme sceglie il grado. -->
+  <one>
+    <rule in="********B ********* ********* T********" out="********T ********* ********* R********" p="3"/>
+    <rule in="T******** ********* ********* ********B" out="R******** ********* ********* ********T" p="3"/>
+    <rule in="********B ********* ********* ********* T********" out="********T ********* ********* ********* R********" p="2"/>
+    <rule in="T******** ********* ********* ********* ********B" out="R******** ********* ********* ********* ********T" p="2"/>
+    <rule in="********B T********" out="********T R********"/>
+    <rule in="T******** ********B" out="R******** ********T"/>
+    <rule in="T*******B" out="R*******T"/>
+  </one>
+  <all in="T" out="R"/>
+  <all in="W" out="B"/>
+  <all in="B/B/R" out="X/Z/Y"/>
+
+  <!-- Il pad: un disegno per battuta. -->
+  <one>
+    <rule in="**B***B* ******** **B***B* ******** X*B***B*" out="**N***N* ******** **N***N* ******** B*N***N*" p="3"/>
+    <rule in="**B*B*B* ******** **B*B*B* ******** X*B*B*B*" out="**N*N*N* ******** **N*N*N* ******** B*N*N*N*"/>
+    <rule in="**BB**B* ******** **BB**B* ******** X*BB**B*" out="**NS**N* ******** **NS**N* ******** B*NS**N*"/>
+  </one>
+  <!-- L'arpeggio sopra la radice. -->
+  <one>
+    <rule in="****B*** ******** **B***B* ******** B******* ******** ******** ******** ******** ******** ******** Z*******" out="****N*** ******** **N***N* ******** N******* ******** ******** ******** ******** ******** ******** B*******" p="2"/>
+    <rule in="B******* ******** *B**B*** ******** **B***** ******** ******** ******** ******** ******** ******** Z*******" out="N******* ******** *N**N*** ******** **N***** ******** ******** ******** ******** ******** ******** B*******"/>
+    <rule in="******B* ******** **B***** ******** ******** ******** ******** ******** ******** Z*******" out="******N* ******** **N***** ******** ******** ******** ******** ******** ******** B*******"/>
+  </one>
+  <!-- Il basso sulla radice. -->
+  <one>
+    <rule in="**B***B* ******** ******** ******** Y***B***" out="**N***N* ******** ******** ******** A***N***" p="3"/>
+    <rule in="**B***B* ******** ******** ****B*** ******** ******** ******** Y*******" out="**N***N* ******** ******** ****N*** ******** ******** ******** A*******"/>
+    <rule in="**BB**B* ******** ******** ******** Y***B***" out="**NN**N* ******** ******** ******** A***N***"/>
+  </one>
+  <!-- La batteria: un disegno per battuta. -->
+  <one>
+    <rule in="****B*******B*** **B***B***B***BB D*******B*******" out="****C*******C*** **H***H***H***HH K*******K*******" p="3"/>
+    <rule in="**************B* **************** ****B*******B*** **B***B***B***** D*******BB******" out="**************H* **************** ****C*******C*** **H***H***H***** K*******KK******"/>
+    <rule in="****B*******BB** **BB**B***BB**B* D*******B*******" out="****C*******CC** **HH**H***HH**H* K*******K*******"/>
+  </one>
+
+  <!-- La melodia: una testa che va avanti nel tempo e sale o scende. -->
+  <one>
+    <rule in="*B M*" out="*M N*" p="3"/>
+    <rule in="M* *B" out="N* *M" p="3"/>
+    <rule in="**B *** MB*" out="**M *** NS*" p="2"/>
+    <rule in="MB* *** **B" out="NS* *** **M" p="2"/>
+    <rule in="MBB" out="NSM"/>
+    <rule in="MB" out="BM" p="2"/>
+    <rule in="MBB" out="B*M"/>
+    <rule in="*B ** ** ** M*" out="*M ** ** ** N*"/>
+  </one>
+  <all in="M" out="B"/>
+  <one in="N/*/*/*/*" out="A/*/*/*/*" steps="6"/>
+  <all in="X" out="B"/>
+  <all in="Y" out="B"/>
+  <all in="Z" out="B"/>
+  <all in="D" out="B"/>
+</sequence>
