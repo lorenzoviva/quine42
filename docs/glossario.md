@@ -879,6 +879,20 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Dove vive**: `src/kernel/faults.ts`
 - **Da non usare**: `fault` (nei documenti e nella UI), `errore` (per il guasto)
 
+## Lo sviluppo
+
+### Fase
+- **Inglese**: `phase`
+- **Definizione**: un tratto dello sviluppo con un traguardo che si vede da fuori: I il kernel 0.9.0, II i beta tester, III il kernel 1.0.0, IV la produzione pubblica con Stripe. Possono cambiare in corso d'opera.
+- **Dove vive**: `docs/fasi.md`
+- **Da non usare**: `milestone`
+
+### Step
+- **Inglese**: `step`
+- **Definizione**: il raggiungimento di un obiettivo condiviso tra task, con un numero che non cambia («step 25: aggiungere il suono al gioco»); la numerazione continua quella dei nove step di prima, riletti come obiettivi.
+- **Dove vive**: `docs/fasi.md`
+- **Da non usare**: `tappa` (per lo step)
+
 ## Gli omonimi
 
 Stessa parola, concetti diversi: il problema che confonde di più, più dei sinonimi. Quando il contesto non basta si usa il nome lungo.
@@ -903,6 +917,8 @@ Stessa parola, concetti diversi: il problema che confonde di più, più dei sino
 | `path` | sentiero (`carvePath`); percorso di un file | «Sentiero» |
 | forma | ciò che esce da un programma (`Form`); gli id `forma-…` dei modelli degli oggetti (`ItemShape`) | «Forma» è la prima |
 | pannello | scheda di una meccanica (`UiPanel`); pannello dello studio (`ui:showcase`) | il contesto |
+| fase / `phase` | dello sviluppo; del giorno (`DayPhase`); di un'onda (`src/audio/sfx.ts`); le F0-F8 del piano dello step 9, nell'archivio | «Fase» è la prima, con il suo numero romano |
+| step / `step` | obiettivo dello sviluppo; il passo di un calcolo nel codice (`archive.ts`); una sessione del metodo di prima, negli ADR e nei commenti («step 8.2B») | «Step» è il primo, con il suo numero |
 
 ## Le scelte fatte
 

@@ -3485,13 +3485,14 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 
-### T230 · Fasi e step: glossario, documento, il pregresso riassegnato — `da fare`
+### T230 · Fasi e step: glossario, documento, il pregresso riassegnato — `fatto` (`0e16a6c`)
 - Pipeline: claude · stima 2% · approvato · priorità 1
 - Contesto: l'autore introduce due termini (to-do del 04/11, «Fasi dello sviluppo»). **Fase**: I kernel 0.9.0, II beta tester (10 persone), III kernel 1.0.0, IV produzione pubblica con Stripe. **Step**: non più una tappa del piano ma il raggiungimento di un obiettivo condiviso tra task (esempio suo: «step 25: aggiungere il suono al gioco»). La numerazione continua quella dei 9 step fatti. Le fasi possono cambiare in corso d'opera.
 - Cosa fare: voci `Fase` e `Step` in `docs/glossario.md`. Nuovo `docs/fasi.md`: le quattro fasi con ciò che l'autore ne ha detto e il criterio per dire finita ciascuna (per la Fase I proponilo tu, segnato come proposta); una tabella `| step | obiettivo | fase | stato | task |` col pregresso riassegnato agli obiettivi già raggiunti e il lavoro aperto raggruppato negli step da fare, numerati a seguire. Leggi il backlog con `pipeline.mjs indice` e, solo dove serve, i blocchi: non aprire i diari. ADR e riga in `AGENTS.md`. Il backlog non lo tocchi: i tag li mette l'orchestratore, con il comando di T231, dalla tua tabella.
 - Test: typecheck e suite intera con i loro turni (`tools/glossario` se il censimento ne risente; le sue differenze estranee non si committano).
 - Browser: non serve.
 - Quando è fatto: ogni task del backlog sta in una sola riga della tabella; commit su `task/T230`. Sicurezza: nessuna superficie nuova.
+- Esito: nuovo `docs/fasi.md` (quattro fasi con criterio di fine, proposta per la Fase I; tabella di 38 step, 1-27 pregresso con suono = 25, 28-38 lavoro aperto, ogni id di `indice` in una sola riga, controllo una tantum), voci `Fase` e `Step` e omonimi nel glossario, due righe nel censimento, ADR-0128, riga in `AGENTS.md`. Manca: i tag li mette T231; il backlog ha due blocchi `T59` e il comando per id li tratterebbe uguali (l'id è nello step 16, l'editor è citato nel 23). Non provato: suite intera non rilanciata dopo il secondo commit, solo documenti (glossario e typecheck rilanciati, verdi). Sicurezza: nessuna superficie nuova.
 
 ### T231 · Il tag `step` nella pipeline — `da fare` (dipende da T230)
 - Pipeline: claude · stima 1% · approvato · priorità 1

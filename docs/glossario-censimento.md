@@ -91,3 +91,5 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Tetto | `cap` | 119 (20) | 0 (0) | 4 (4) | 4 (1) |
 | Guasto | `fault` | 170 (19) | 0 (0) | 12 (7) | 0 (0) |
 | Guasto | `errore` | 63 (22) | 1 (1) | 21 (16) | 3 (1) |
+| Fase | `milestone` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
+| Step | `tappa` | 15 (4) | 0 (0) | 3 (2) | 0 (0) |

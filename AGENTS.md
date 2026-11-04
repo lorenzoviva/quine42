@@ -236,6 +236,7 @@ Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 - **Il sito e il tema** → `#sito`; **confine e limiti di Lua** → `#lua-sandbox`; **Gemini, Attore, coefficienti** → `#gemini`
 - **Convalida nel browser**: build, preview, spostarsi fermando il tappeto, `interact()` → `#convalida-browser`
 - **Costi e prestazioni** → `#costi`; **stato del progetto e prossimi passi** → `#stato`; il lavoro da fare è in [`docs/plans/backlog.md`](docs/plans/backlog.md)
+- **Fasi e step** (ADR-0128): le quattro fasi dello sviluppo e gli step, obiettivi condivisi tra task, in [`docs/fasi.md`](docs/fasi.md): ogni task sta in una sola riga della tabella, il numero di uno step non cambia
 
 ### Manifest (`src/kernel/types.ts`)
 `id`, `name`, `kind` (`system | entity | item | player | generator | data`), `logic`, `order`,
