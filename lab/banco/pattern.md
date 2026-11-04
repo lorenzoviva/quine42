@@ -37,7 +37,7 @@ passo fisso **finché c'è posto**. È ciò che rende un programma indipendente 
 3 o 4 a Enorme a seconda del passo.
 
 ```xml
-<sequence values="BNEzP…" symmetry="(xy)" ground="E" origin="bottom">   <!-- E riempie z=0, N sta al centro del pavimento -->
+<sequence values="BNEzP…" symmetry="(xy)" suolo="E" origin="bottom">   <!-- E riempie lo strato del suolo (z=0 senza cantina), N sta al suo centro -->
   <prl in="***/*E*/***" out="***/*z*/***"/>                            <!-- dentro l'orlo il lotto diventa z: l'orlo resta E -->
   <one in="Nzzzzzzzzzzzzzzz" out="***************Z" symmetry="()"/>      <!-- dal centro all'angolo della campata centrale -->
   <one in="Z/z/z/z/z/z/z/z/z/z/z/z/z/z/z/z" out="*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/P" symmetry="()"/>
@@ -245,7 +245,7 @@ Tre cose che si sono dovute misurare:
 - **Le porte a 1-11 da un pilastro**, non a caso nel muro: così resta posto per la scala nello stesso muro; una porta in mezzo non lo lascia.
 - **A Grande una campata da 29 è una stanza solo se è sgombra fino ai muri** (29 − 9 del corpo − 2×8 della strettoia di `contaStanze` lasciano 4×4, il minimo): un arredo la toglie dalla conta. Non è detto che sia giusto; è ciò che la soglia misura oggi.
 
-**La cantina non regge due taglie con un programma solo**: `docs/pipeline/domande/T182.md`.
+**La cantina regge due taglie con la lettera del suolo** (T258, ADR-0135): il piano parte da `suolo="E"`, il pozzo si scava fino al fondo (`ground="Z"`) con regole senza `steps`. Senza quella lettera un programma solo non poteva: `docs/pipeline/domande/T182.md`. Il programma è `riferimento/cantina.xml`.
 
 ## I programmi di riferimento (`riferimento/`)
 

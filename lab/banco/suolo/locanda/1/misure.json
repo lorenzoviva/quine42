@@ -1,0 +1,263 @@
+{
+  "bersaglio": "locanda",
+  "token": {
+    "input": 2,
+    "cacheScritta": 11658,
+    "cacheLetta": 0,
+    "output": 73298,
+    "inputTotale": 11660
+  },
+  "modello": "claude-opus-5-5",
+  "dollari": 1.559232,
+  "ms": 819023,
+  "caratteriXml": 16214,
+  "passa": false,
+  "difetti": [
+    "grande (20 voxel per casella, gradino 4), seme 1 e altri 3: cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+    "enorme (16 voxel per casella, gradino 3), seme 1 e altri 4: finisce: no (serve entro 8000 ms)",
+    "enorme (16 voxel per casella, gradino 3), seme 1 e altri 4: valido: non termina: dopo 1147 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+    "enorme (16 voxel per casella, gradino 3), seme 1 e altri 4: cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+    "enorme (16 voxel per casella, gradino 3), seme 1 e altri 3: murato: 2.59 (serve ≤ 0.25)",
+    "varianza a grande: pianta: 0.07 (serve ≥ 0.15)",
+    "varianza a grande: perimetro: 0.01 (serve ≥ 0.15)"
+  ],
+  "caduta": {
+    "taglia": "grande",
+    "seme": 1
+  },
+  "voci": [
+    {
+      "id": "finisce",
+      "ok": true,
+      "valore": "5292 ms",
+      "richiesto": "entro 8000 ms"
+    },
+    {
+      "id": "valido",
+      "ok": true,
+      "valore": "sì",
+      "richiesto": "i controlli di check.ts"
+    },
+    {
+      "id": "piani",
+      "ok": true,
+      "valore": "2",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "testa",
+      "ok": true,
+      "valore": "1.5 1.5",
+      "richiesto": "≥ 1.5 caselle per piano"
+    },
+    {
+      "id": "stanze",
+      "ok": true,
+      "valore": "3",
+      "richiesto": "≥ 3"
+    },
+    {
+      "id": "cantina",
+      "ok": false,
+      "valore": "0",
+      "richiesto": "≥ 1.2 caselle² raggiunte sotto il suolo"
+    },
+    {
+      "id": "murato",
+      "ok": true,
+      "valore": "0.13",
+      "richiesto": "≤ 0.25"
+    },
+    {
+      "id": "porta",
+      "ok": true,
+      "valore": "x 49, scarto 0.01, alta 1.5, libera",
+      "richiesto": "sul davanti, scarto ≤ 0.33, alta ≥ 1.5"
+    },
+    {
+      "id": "salti",
+      "ok": true,
+      "valore": "10",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "materiali",
+      "ok": true,
+      "valore": "18",
+      "richiesto": "≥ 6"
+    },
+    {
+      "id": "dominante",
+      "ok": true,
+      "valore": "0.2",
+      "richiesto": "≤ 0.6"
+    },
+    {
+      "id": "finestre",
+      "ok": true,
+      "valore": "27 su 4 lati",
+      "richiesto": "≥ 6 su ≥ 3 lati"
+    },
+    {
+      "id": "dettagli",
+      "ok": true,
+      "valore": "728, 0 lati vuoti",
+      "richiesto": "≥ 24, ≤ 1 lati vuoti"
+    },
+    {
+      "id": "rumore",
+      "ok": true,
+      "valore": "0.44",
+      "richiesto": "≤ 0.7"
+    },
+    {
+      "id": "sagoma",
+      "ok": true,
+      "valore": "27",
+      "richiesto": "≥ 4"
+    },
+    {
+      "id": "rilievo",
+      "ok": true,
+      "valore": "0.39",
+      "richiesto": "≥ 0.12"
+    },
+    {
+      "id": "ingombro",
+      "ok": true,
+      "valore": "0.59",
+      "richiesto": "≥ 0.3"
+    }
+  ],
+  "misure": {
+    "voxel": 93434,
+    "ms": 5292,
+    "finito": true,
+    "piani": [
+      {
+        "z": 22,
+        "quota": 0.1,
+        "area": 4.1975,
+        "testa": 1.5,
+        "stanze": 1
+      },
+      {
+        "z": 54,
+        "quota": 1.7,
+        "area": 3.0275,
+        "testa": 1.5,
+        "stanze": 2
+      }
+    ],
+    "cantina": 0,
+    "terrazze": 0,
+    "stanze": 3,
+    "murato": 0.13334995014955134,
+    "persi": [
+      {
+        "z": 1,
+        "x0": 40,
+        "x1": 60,
+        "y0": 10,
+        "y1": 60,
+        "area": 1.3375
+      }
+    ],
+    "porta": {
+      "x": 49,
+      "y": 95,
+      "scarto": 0.025,
+      "alta": 1.5,
+      "libera": true
+    },
+    "salti": [
+      {
+        "x": 82,
+        "y": 72,
+        "z": 54,
+        "sale": false
+      },
+      {
+        "x": 15,
+        "y": 29,
+        "z": 20,
+        "sale": false
+      },
+      {
+        "x": 15,
+        "y": 7,
+        "z": 20,
+        "sale": false
+      },
+      {
+        "x": 15,
+        "y": 95,
+        "z": 20,
+        "sale": false
+      },
+      {
+        "x": 9,
+        "y": 67,
+        "z": 20,
+        "sale": false
+      },
+      {
+        "x": 27,
+        "y": 50,
+        "z": 20,
+        "sale": false
+      },
+      {
+        "x": 1,
+        "y": 45,
+        "z": 20,
+        "sale": false
+      },
+      {
+        "x": 26,
+        "y": 78,
+        "z": 20,
+        "sale": false
+      },
+      {
+        "x": 27,
+        "y": 21,
+        "z": 20,
+        "sale": false
+      },
+      {
+        "x": 7,
+        "y": 21,
+        "z": 20,
+        "sale": false
+      }
+    ],
+    "materiali": 18,
+    "dominante": 0.19521801485540596,
+    "finestre": 27,
+    "latiConFinestre": 4,
+    "dettagli": 728,
+    "latiVuoti": 0,
+    "rumore": 0.4429992348890589,
+    "rilievo": 0.38717510567497077,
+    "sagoma": 27,
+    "ingombro": 0.5879,
+    "luci": 116,
+    "inutili": [
+      "one \"EEEEEEEEEEEEE/Ppppppppppppp/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/*zzzzzzzzzzzz/Ppppppppppppp/*333333333333\" → \"*************/*************/*************/*************/*************/*************/*************/*************/*************/*************/*************/*************/*************/*************/*************/*************/*************/*************/*************/*************/*************/*************/*************/*************/*************/*************/*************/*************/*************/*************/******b******/******H******/*************\" — le celle cercate c'erano, ma mai disposte come nel pattern",
+      "all \"bz\" → \"*b\" — le celle cercate c'erano, ma mai disposte come nel pattern",
+      "one \"bHb\" → \"*n*\" — le celle cercate c'erano, ma mai disposte come nel pattern",
+      "all \"nH\" → \"*n\" (e altre 1 regole) — in quel momento nella griglia non c'erano celle \"n\"",
+      "one \"nnnnnnnnn\" → \"*eeeeeee*\" — in quel momento nella griglia non c'erano celle \"n\"",
+      "prl \"n\" → \"h\" — in quel momento nella griglia non c'erano celle \"n\""
+    ],
+    "avvisi": [
+      "riga 78: pattern irregolari completati con \"*\": in \"EEEEEEEEEEEEEEEEEEE/Pppppppppppppppppp/*gggggggggggggggggg/*gggggggggggggggggg\", out \"*******************/*******************/************aaaaaaa/************aaaaaaa\" (riparato)",
+      "9 frammenti staccati (1% dei voxel)",
+      "tocca i bordi laterali della griglia: forse è tagliato",
+      "tocca il soffitto della griglia: forse è tagliato in alto",
+      "colori mai usati: E z p b H t s v e w X i I J h j M U u Y G n r q l m o Z"
+    ],
+    "errori": []
+  }
+}

@@ -2,7 +2,7 @@
   <union symbol="1" values="beoxQ"/>
   <union symbol="2" values="tsdcfv"/>
   <union symbol="3" values="tb"/>
-  <color symbol="k" value="5a3a22" name="porta"/><color symbol="S" value="d6d2c8" name="cemento chiaro"/><color symbol="F" value="a8743f" name="legno"/><color symbol="C" value="b9b5ab" name="cemento grigio"/><color symbol="W" value="f0ece2" name="intonaco"/><color symbol="R" value="8f8f88" name="ghiaia"/><color symbol="V" value="86b8c8" alpha="0.5" name="vetro"/><color symbol="D" value="3a3d42" name="telaio"/><color symbol="L" value="7a5a3c" name="rovere"/><color symbol="T" value="e0d9c2" name="gradino"/><color symbol="K" value="c2c7cc" name="acciaio"/><color symbol="A" value="9a9590" name="lastricato"/><color symbol="a" value="6f6c66" name="fondazione"/>
+  <color symbol="k" value="5a3a22" name="porta"/><color symbol="S" value="d6d2c8" name="cemento chiaro"/><color symbol="F" value="a8743f" name="legno"/><color symbol="C" value="b9b5ab" name="cemento grigio"/><color symbol="W" value="f0ece2" name="intonaco"/><color symbol="R" value="8f8f88" name="ghiaia"/><color symbol="V" value="86b8c8" alpha="0.5" name="vetro"/><color symbol="D" value="3a3d42" name="telaio"/><color symbol="L" value="7a5a3c" name="rovere"/><color symbol="T" value="e0d9c2" name="gradino"/><color symbol="K" value="c2c7cc" name="acciaio"/><color symbol="A" value="9a9590" name="lastricato"/><color symbol="a" value="6f6c66" name="fondazione"/><color symbol="x" value="7a4a24" name="botti"/>
   <!-- 1. reticolo: bracci dal centro, poi le linee -->
   <prl in="***/*E*/***" out="***/*z*/***"/>
   <all in="Nz" out="*a" steps="1"/>
@@ -101,6 +101,9 @@
   <!-- 5. la scala -->
   <all in="*BB *B* TY*" out="*TY *K* KK*" steps="16"/>
   <all in="K B" out="* K" symmetry="()"/>
+  <!-- le botti: dal pavimento al soffitto, contro un muro, dove la scala non c'è -->
+  <one in="*BB/*BB/*BB/*BB/*BB/*BB/*BB/*BB/*BB/*BB/*BB/*BB/*BB aAA/aAA/aAA/aAA/aAA/aAA/aAA/aAA/aAA/aAA/aAA/aAA/aAA" out="***/***/***/***/***/*xx/*xx/*xx/***/***/***/***/*** ***/***/***/***/***/***/***/***/***/***/***/***/***" steps="4"/>
+  <all in="B x" out="x *" symmetry="()"/>
   <!-- panche -->
   <all steps="8" symmetry="()" in="B G" out="G L"/>
   <!-- 6. finestre, tetto -->

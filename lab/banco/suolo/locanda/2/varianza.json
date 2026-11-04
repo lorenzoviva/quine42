@@ -1,0 +1,160 @@
+{
+  "taglie": [
+    {
+      "taglia": "grande",
+      "box": [
+        100,
+        100,
+        100
+      ],
+      "vpt": 20,
+      "gradino": 4,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "salti: 1 (serve ≥ 2)"
+          ],
+          "ms": 6064
+        },
+        {
+          "seme": 2,
+          "difetti": [
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "salti: 0 (serve ≥ 2)"
+          ],
+          "ms": 6118
+        },
+        {
+          "seme": 3,
+          "difetti": [
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "salti: 1 (serve ≥ 2)"
+          ],
+          "ms": 5991
+        },
+        {
+          "seme": 4,
+          "difetti": [
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "salti: 0 (serve ≥ 2)"
+          ],
+          "ms": 5845
+        },
+        {
+          "seme": 5,
+          "difetti": [
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "salti: 0 (serve ≥ 2)"
+          ],
+          "ms": 5925
+        }
+      ],
+      "regge": false,
+      "varianza": {
+        "voxel": 0.5309491057354095,
+        "colore": 0.08048406054080853,
+        "pianta": 0.1714795665105297,
+        "perimetro": 0.11461318051575932,
+        "interno": 0.5170240381076545,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 3,
+        "architetture": 3,
+        "statico": false
+      },
+      "difettiVarianza": [
+        "perimetro: 0.11 (serve ≥ 0.15)"
+      ]
+    },
+    {
+      "taglia": "enorme",
+      "box": [
+        120,
+        120,
+        112
+      ],
+      "vpt": 16,
+      "gradino": 3,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [
+            "finisce: no (serve entro 8000 ms)",
+            "valido: non termina: dopo 904 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 2.25 (serve ≤ 0.25)",
+            "salti: 0 (serve ≥ 2)",
+            "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)"
+          ],
+          "ms": 8399
+        },
+        {
+          "seme": 2,
+          "difetti": [
+            "finisce: no (serve entro 8000 ms)",
+            "valido: non termina: dopo 864 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 2.6 (serve ≤ 0.25)",
+            "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)"
+          ],
+          "ms": 8406
+        },
+        {
+          "seme": 3,
+          "difetti": [
+            "finisce: no (serve entro 8000 ms)",
+            "valido: non termina: dopo 863 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 2.6 (serve ≤ 0.25)",
+            "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)"
+          ],
+          "ms": 8395
+        },
+        {
+          "seme": 4,
+          "difetti": [
+            "finisce: no (serve entro 8000 ms)",
+            "valido: non termina: dopo 902 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 2.32 (serve ≤ 0.25)",
+            "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)"
+          ],
+          "ms": 8353
+        },
+        {
+          "seme": 5,
+          "difetti": [
+            "finisce: no (serve entro 8000 ms)",
+            "valido: non termina: dopo 895 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 2.25 (serve ≤ 0.25)",
+            "salti: 0 (serve ≥ 2)",
+            "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)"
+          ],
+          "ms": 8447
+        }
+      ],
+      "regge": false,
+      "varianza": {
+        "voxel": 0.503596195352279,
+        "colore": 0.18015235232104848,
+        "pianta": 0.5446310697442313,
+        "perimetro": 0.29738154613466333,
+        "interno": 0.849775377684229,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 2,
+        "architetture": 4,
+        "statico": false
+      },
+      "difettiVarianza": []
+    }
+  ],
+  "regge": false,
+  "statico": false,
+  "varia": false,
+  "passa": false,
+  "ms": 72127
+}
