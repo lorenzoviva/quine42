@@ -35,11 +35,12 @@ Aggiornato il 04/11/2026, epoca 250. Crediti: vedi `stato`.
 - **T234 integrato** (`5a29c93`, ADR-0129): notizie come Markdown in `site/notizie/`, raccolte alla build; una notizia nuova si pubblica con build e deploy. Non provati un telefono vero e la landing a 390 px; elenco e pagina a 390 px solo in iframe senza CSP.
 - **T238 integrato** (`6a60b78`, ADR-0130): ogni richiesta che finisce male è una voce di `world/mancanze.json`, fuori da `playerFiles` e `publicFiles`; rapporto con `npm run mancanze`. Solo modelli offline: non provati fallimenti veri con Gemini né una partita reale. `docs/glossario-censimento.md` non rigenerato. 
 - **T244 integrato** (`59bd9d5`, ADR-0131): home ritoccata, video da `QUINE_VIDEO` con `video.json` e rotta `/api/video` con `Range`, istruzioni da `docs/beta/` con `site/beta.json` per la seconda parte (spenta non entra in `dist/`). Provato nel browser sotto `serve` e `dev`. Non provati: telefono vero, `.mp4` vero, video spenti in `dev`. **Li scrive l'autore:** `guida.md` e `la-corona.md` (senza, la pagina non compare); guida in `docs/beta/LEGGIMI.md`. Banda da decidere al primo deploy pubblico. Prossimo task: T250.
-- **T241 finito, non integrato:** scala φ/Fibonacci in `src/theme.css` per HUD e pannelli, verificato nel browser a 1920 e a 1280 simulati, suite verde (1871). Fuori: bordi, ombre, pallini, classi `comic-*` del sito. Tocca `docs/architettura-dettagli.md` e `docs/glossario.md` come T248: **si integra dopo T249**, per non ricreare il conflitto di T244. Non provati: viewport vero a 1280, guida H a 800 px.
+- **T241 integrato** (`9017c09`): scala φ/Fibonacci in `src/theme.css` per HUD e pannelli, tabella in `#sito`; fuori bordi, ombre, pallini, classi `comic-*` del sito. Non provati: viewport vero a 1280, guida H a 800 px.
+- **T243 nel base via T248 e T249** (ADR-0132, `QUINE_COMMISSIONE`, predefinita 0,01), suite 1875. Non provati: `npm run serve` e il browser. `docs/glossario-censimento.md` non rigenerato. Sul suo ramo resta solo una rinumerazione doppia che va in conflitto: T250 lo chiude, poi `integra T250`, `integra T243`.
 
 ## Pronti e priorità
 
-1. **In coda, approvati e pronti, partono da soli:** T249 (unisce T248 al base con T244, ADR di T243 → 0132; poi `integra T249`, `integra T248`, `integra T243`, poi `integra T241`) T247 T89b T89e T183 T152.
+1. **In coda, approvati e pronti, partono da soli:** T250, T247 (in corso), T89b T89e T183 T152.
 4. **T182 → T156** (strutture procedurali). **T182 fermo in attesa dell'autore al giro 3 di 4, non integrato:** soglia NO. Misure e varianza 10/12 entro due richieste (7 alla prima), foto 0/10 per giudizio dell'agente, locanda esclusa; 1,15 $ a modello, 30,59 $ in tutto a listino. **Chieste le 3 decisioni di `docs/pipeline/domande/T182.md` (sul branch `task/T182`):** cantina a due taglie, interni contro la misura `stanze`, se la ricchezza basta. Bloccati finché non risponde: T156, poi T207, T88, T153, T242.
 4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla. T89d resta bloccato.
 
@@ -71,5 +72,5 @@ Aggiornato il 04/11/2026, epoca 250. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **249:** T244 integrato prima di T248, che ora va in conflitto con lui in `AGENTS.md` e `vite.config.ts`: la risoluzione è T249.
-- **250:** T241 finito, in attesa di T249 per l'integrazione.
+- **249:** T244 integrato prima di T248: conflitto, risolto da T249.
+- **250:** integrati T249, T248, T241; T243 già nel base, il ramo lo chiude T250.

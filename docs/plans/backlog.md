@@ -3928,3 +3928,12 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Browser: non serve.
 - Quando è fatto: commit su `task/T249`, con video, mancanze e commissione configurabile tutti nel codice e descritti. Sicurezza: tocca i crediti e `server/production.ts` solo per l'unione; scrivi l'esito.
 - Esito: T248 unito in `bf8061e`: `QUINE_VIDEO` (ADR-0131), `world/mancanze.json` (ADR-0130) e `QUINE_COMMISSIONE` (ADR-0132) convivono nel codice e nei documenti; conflitti solo in `AGENTS.md` e `vite.config.ts`, risolti tenendo tutte le aggiunte; l'ADR di T243 era già 0132, nessun'altra modifica; typecheck e suite intera verdi (1875 test). Manca: `docs/glossario-censimento.md` non rigenerato (porta solo ciò che arriva dall'unione). Non provato: nulla nel browser (non richiesto) né sotto `npm run serve`; valgono i limiti già scritti negli esiti di T243, T238 e T244. Sicurezza: nessuna superficie nuova; crediti e `server/production.ts` toccati solo per l'unione, logica invariata.
+
+### T250 · Chiudere il ramo di T243 — `da fare`
+- Pipeline: claude · stima 1% · approvato · priorità 1
+- Step: 34
+- Contesto: il lavoro di T243 è già nel base, entrato con T248 e T249 (`dossier T249`). Su `task/T243` resta solo `12dfb2b`, la rinumerazione dell'ADR a 0132, con le stesse righe di `93a25f1` che è già nel base; ma `integra T243` va in conflitto in `AGENTS.md`, perché nel frattempo quelle righe sono cambiate.
+- Cosa fare: nel tuo worktree controlla che `12dfb2b` non porti nulla che manca al base, poi `git merge -s ours task/T243`: il ramo risulta unito e l'albero non cambia. Se trovi qualcosa che manca, non unire: scrivilo nell'esito.
+- Test: basta `git diff HEAD~1 HEAD --stat` vuoto, niente suite: l'albero non cambia.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T250` senza differenze di contenuto. Sicurezza: nessuna superficie nuova.
