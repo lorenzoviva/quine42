@@ -33,12 +33,12 @@ Aggiornato il 04/11/2026, epoca 251. Crediti: vedi `stato`.
 - **T230 integrato** (ADR-0128): `docs/fasi.md`, quattro fasi e 38 step, glossario. Suite intera non rilanciata dopo il secondo commit, solo documenti. Scoperto: due blocchi `T59` nel backlog, da tenere presente per T231. **Chiesto all'autore:** approvare il criterio di fine della Fase I (proposta, in `docs/fasi.md`) e la fase III proposta per lo step 37. Attenzione: il punto 2 del criterio chiede T45f, che l'autore ha messo in attesa fino alla fine della Fase I: circolare, detto all'autore.
 - **T238 integrato** (`6a60b78`, ADR-0130): ogni richiesta che finisce male è una voce di `world/mancanze.json`, fuori da `playerFiles` e `publicFiles`; rapporto con `npm run mancanze`. Solo modelli offline: non provati fallimenti veri con Gemini né una partita reale. `docs/glossario-censimento.md` non rigenerato. 
 - **T244 integrato** (`59bd9d5`, ADR-0131): home ritoccata, video da `QUINE_VIDEO` con `video.json` e rotta `/api/video` con `Range`, istruzioni da `docs/beta/` con `site/beta.json` per la seconda parte (spenta non entra in `dist/`). Provato nel browser sotto `serve` e `dev`. Non provati: telefono vero, `.mp4` vero, video spenti in `dev`. **Li scrive l'autore:** `guida.md` e `la-corona.md` (senza, la pagina non compare); guida in `docs/beta/LEGGIMI.md`. Banda da decidere al primo deploy pubblico.
-- **T243 nel base via T248 e T249** (ADR-0132, `QUINE_COMMISSIONE`, predefinita 0,01), suite 1875. Non provati: `npm run serve` e il browser. `docs/glossario-censimento.md` non rigenerato. Sul suo ramo resta solo una rinumerazione doppia che va in conflitto: T250 lo chiude, poi `integra T250`, `integra T243`.
+- **T243 nel base via T248 e T249** (ADR-0132, `QUINE_COMMISSIONE`, predefinita 0,01), suite 1875. Non provati: `npm run serve` e il browser. `docs/glossario-censimento.md` non rigenerato. Ramo chiuso da T250, entrambi integrati.
 - **T247 finito, non integrato** (ADR-0133, 1935 test): consumo regolabile in lobby, blocco a partita in corso. `integra` in conflitto in `AGENTS.md`, `client.ts`, `protocol.ts`, `style.css`: lo unisce T251, poi `integra T251`, `integra T247`. Non provati: lobby da soli con modelli veri, viandante a 390 px. Resta che `checkout`/`reset` del master muovono `ai` sul disco, con effetto dalla partita dopo. **Chiesto all'autore:** `domande/T247.md` (sul branch), le 8 righe della Genesi senza manopola; proposta lasciarle così.
 
 ## Pronti e priorità
 
-1. **In coda, approvati e pronti, partono da soli:** T250 (in corso), T251, T89b T89e T183 T152.
+1. **In coda, approvati e pronti, partono da soli:** T251 (in corso), T89b T89e T183 T152.
 4. **T182 → T156** (strutture procedurali). **T182 fermo in attesa dell'autore al giro 3 di 4, non integrato:** soglia NO. Misure e varianza 10/12 entro due richieste (7 alla prima), foto 0/10 per giudizio dell'agente, locanda esclusa; 1,15 $ a modello, 30,59 $ in tutto a listino. **Chieste le 3 decisioni di `docs/pipeline/domande/T182.md` (sul branch `task/T182`):** cantina a due taglie, interni contro la misura `stanze`, se la ricchezza basta. Bloccati finché non risponde: T156, poi T207, T88, T153, T242.
 4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla. T89d resta bloccato.
 
@@ -70,5 +70,5 @@ Aggiornato il 04/11/2026, epoca 251. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **250:** integrati T249, T248, T241; T243 già nel base, il ramo lo chiude T250.
-- **251:** T247 finito, in conflitto: T251 lo unisce.
+- **250:** integrati T249, T248, T241.
+- **251:** integrati T250 e T243; T247 finito, in conflitto: T251 lo unisce.
