@@ -3527,13 +3527,15 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Contesto: dal to-do del 04/11: carte famose, video in loop di gameplay o delle strutture più «lerpe» in 3D, universi di giocatori più giocati. Ha senso solo con dati veri: riparte alla fine della Fase II, quando lo dice l'autore. Il conteggio delle partite non esiste ancora; una rotta pubblica nuova passa da `gate` e dall'elenco di `server/production.ts`.
 - Domanda per l'autore: nessuna ora; alla ripartenza si riscrive con ciò che la beta ha lasciato.
 
-### T236 · La beta: i crediti in due parti — `in attesa`
+### T236 · La beta: i crediti in due parti — `fatto` (decisioni dell'autore, 04/11, nessun commit di codice)
 - Contesto: per la Fase II l'autore dà 5 € a ogni tester e genera a sue spese gli universi vanilla; una parte dei crediti per esplorare, l'altra sbloccata da un secondo file che rivela la corona. Oggi con gli account `QUINE_TETTO_RICARICHE` vale 0. **Calendario, chat tra i partecipanti e comunicazioni li gestisce l'autore fuori dal repository (04/11):** niente prenotazioni nel sito né codice che in produzione sparirebbe; la beta non deve durare troppo. Su richiesta l'orchestratore lo aiuta con i messaggi WhatsApp d'invito.
-- Domande per l'autore: in `docs/pipeline/domande/T236.md`.
+- **Deciso dall'autore (04/11, `docs/pipeline/domande/T236.md`):** 2 € per esplorare, parlare, generare oggetti; 3 € con il secondo file, e chi li riceve può restare nel tappeto: è una scelta. Tutto a mano dal master. Altri 5 € a mano ai più assidui. Chi poi vuole continuare in beta ha uno sconto del 50 % sui crediti, a prezzo lineare e senza commissione (T243; come paga: `docs/pipeline/domande/T243.md`). Quattro universi condivisi: medievale (`aurora`), steampunk, moderno, futuristico, generati perlopiù sul server con gli abbonamenti (T207, T88, T153).
+- Conseguenze per il deploy: `QUINE_TETTO_RICARICHE` da alzare, oggi 0 con gli account (consigliato 50: 10 tester per 5); `QUINE_UNIVERSI_PER_ACCOUNT` è 3 e i mondi del master sono 4. I saldi stanno per universo (ADR-0104), quindi i crediti di un tester valgono in un mondo solo.
 
 ### T237 · La guida dei beta tester, in due file — `da fare` (dipende da T45f, T236)
 - Pipeline: claude · stima 2% · approvato · priorità 3
 - Contesto: si scrive a fine Fase I, per gli amici dell'autore, non pagati: «non è il classico beta testing noioso». Il primo file: come giocare, che si gioca prenotando il turno sul calendario dell'autore, fuori dal repository (anche insieme, senza esagerare con le sessioni a molti), tutte le limitazioni del server di beta con cui ci si potrebbe frustrare. Il secondo file: la corona, e come avere la seconda parte dei crediti, per chi non ha capito come uscire dal tappeto. Il primo non deve guastarla.
+- Decisioni di T236: 2 € + 3 €, a mano; il secondo file dice che si può anche restare nel tappeto; quattro universi condivisi con l'autore come master. Da provare, non da supporre: cosa può fare nella corona chi non è il master; come si spende il saldo, che vale per un universo solo. Gli altri 5 € e lo sconto li propone l'autore a voce: non stanno nei file.
 - Cosa fare: `docs/beta/guida.md` e `docs/beta/la-corona.md`, in italiano, dal comportamento vero del server di beta (limiti di `LIMITS`, `FRONT_RATES`, mondi accesi, tetti, modelli locali a crediti finiti), non dai documenti: ciò che non puoi provare lo segni. Tono da amico.
 - Test: nessun codice: typecheck con il suo turno.
 - Browser: sì: segui la guida da viandante nuovo sul server di beta; ogni passo che non torna lo correggi.
@@ -3575,3 +3577,11 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Test: typecheck e suite intera con i loro turni, offline.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T242`, con le misure prima e con la riga. Sicurezza: nessuna superficie nuova.
+
+### T243 · La beta senza commissione — `da fare`
+- Pipeline: claude · stima 1% · approvato · priorità 3
+- Contesto: l'autore (04/11, da T236): in beta i crediti hanno un prezzo lineare e nessun interesse, perché chi gioca contribuisce allo sviluppo. Oggi `PLATFORM_FEE` è una costante di `src/kernel/credits.ts` (+1 %, ADR-0081). Lo sconto del 50 % non è qui: per ora si fa a mano (`docs/pipeline/domande/T243.md`).
+- Cosa fare: la commissione diventa configurazione del server, `QUINE_COMMISSIONE`, predefinita 0,01; 0 è ammesso, un valore non valido dà il predefinito. Arriva al processo del mondo (`worldEnv`, nessun segreto) e la decide solo il server: mai `universe.json`, Lua, il Concilio o il client. Tutti i punti che calcolano o mostrano il +1 % la seguono, sito e lobby compresi. Controlla che ricariche e consumi siano lineari, senza fasce. Aggiorna `AGENTS.md`, `#carte-crediti` e un ADR.
+- Test: commissione 0 e predefinita su consumi e spese comuni; valore non valido. Typecheck e suite intera con i loro turni, offline.
+- Browser: non serve.
+- Quando è fatto: con `QUINE_COMMISSIONE=0` il saldo cala esattamente del costo base; senza, nulla cambia; commit su `task/T243`. Sicurezza: scrivi l'esito, tocca i crediti.

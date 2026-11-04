@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 04/11/2026, epoca 242. Crediti: vedi `stato`.
+Aggiornato il 04/11/2026, epoca 243. Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -32,18 +32,18 @@ Aggiornato il 04/11/2026, epoca 242. Crediti: vedi `stato`.
 - **T186 integrato** (`cf88084`): landing, striscia «coming soon» con spazio, pirati, cowboy, senza link. Verificata a 1920 e 390 px; non provata sotto `npm run serve`.
 - **T225 integrato** (`c0c7868`, ADR-0127): Musicista (`sound.compose`) nella casa dell'Artista, `ScoreDirector` entro `ai.maxBrani` (8) e coefficiente `brani`, incarico `musica` del Referente. Non provati: ascolto umano, multigiocatore dal vivo, `ScoreDirector` con un modello vero; suite intera non rilanciata dopo una correzione ai soli documenti. Limiti: validazione sincrona ~0,8 s a tentativo sulla pagina; i brani di Gemini seguono da vicino l'esempio; un «Low Detail» salvato senza `brani` non è più riconosciuto finché non lo si riapplica.
 - **T229 e T158 integrati** (`d8909a5`): l'Attore nella corona (ADR-0116), dieci al tavolo, `guest` assorbito in `Building.teams`. Verificato nel browser. Non provati: Attore acceso con una battuta vera, teletrasporti con `E` nel browser. Scoperti, nessun task: `Archive.go` senza file manda lo Scultore in `buildings[0]`; `docs/glossario-censimento.md` rigenerato porta differenze estranee.
-- ADR nuovi dallo **0128**. Prossimo task: T243.
+- ADR nuovi dallo **0128**. Prossimo task: T244.
 
 ## Pronti e priorità
 
-1. **In coda, approvati e pronti, partono da soli:** T230 T232 T238 T89b T89e T183 T152; T182 in corso.
+1. **In coda, approvati e pronti, partono da soli:** T230 T232 T238 T243 T89b T89e T183 T152; T182 in corso.
 4. **T182 → T156** (strutture procedurali). T182 su Claude, stima 8 %, al più 4 giri; è pronto.
 4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla.
 5. T89d resta bloccato.
 
 ## Attese dall'autore
 
-- **To-do del 04/11 pianificato, T230-T242:** approvati T230, T231 (fasi, step, tag), T232, T234 (landing launcher, blog), T237 (guida beta), T238 (registro), T241, T242 (aureo in UI e prompt; **i modelli esistenti non si toccano**). Aspettano l'autore: T233 (sceglie la proposta di T232), `domande/T236.md` (crediti della beta; calendario e chat li gestisce lui fuori dal repo). T235 riparte a fine Fase II; T239 (lingue) in Fase III, ultima operazione. **T240 (piano di lancio, Fable): dal reset del 05/11 alle 15:59 UTC lo riporto a `da fare` io.** Con T231 integrato: `step --da-tabella`. L'autore porta in chat i feedback dei giocatori; su richiesta lo aiuto con i messaggi WhatsApp della beta.
+- **To-do del 04/11 pianificato, T230-T242:** approvati T230, T231 (fasi, step, tag), T232, T234 (landing launcher, blog), T237 (guida beta), T238 (registro), T241, T242 (aureo in UI e prompt; **i modelli esistenti non si toccano**). T236 chiuso (2 € + 3 € a mano, altri 5 € agli assidui, 4 universi condivisi; da mettere nel deploy: `QUINE_TETTO_RICARICHE`, `QUINE_UNIVERSI_PER_ACCOUNT`). T243 approvato (commissione configurabile). Aspettano l'autore: T233 (sceglie la proposta di T232), `domande/T243.md` (come si paga lo sconto del 50 %). T235 riparte a fine Fase II; T239 (lingue) in Fase III, ultima operazione. **T240 (piano di lancio, Fable): dal reset del 05/11 alle 15:59 UTC lo riporto a `da fare` io.** Con T231 integrato: `step --da-tabella`. L'autore porta in chat i feedback dei giocatori; su richiesta lo aiuto con i messaggi WhatsApp della beta.
 - **Domande nei file (03/11): aperte solo T45f (progetto, hosting, regione), T93 (regime fiscale, non blocca); le altre hanno `Stato: chiusa` in testa. T208 integrato: il conteggio giusto della pagina web si vede dopo il riavvio del processo, non provato nel browser.**
 - **T176, le due proposte sul sorvegliante:** approvate da me nell'autonomia, sono T209, integrato; T45f può procedere quando l'autore risponde a `domande/T45f.md`. T210 integrato: il `heap out of memory` è il mondo di prova di V-007, che muore apposta; non nasconde file né test rossi. Da dirgli al ritorno.
 - **T153**: domande chiuse. Nomi scelti (03/11): `orichalcum`, `neapolis`, `sidera`, già in `generazione` di `config.json`. Il resto è deciso: niente API, Claude Code, 25 % per universo modificabile in corsa, tutti multigiocatore, `aurora` intatto. T184-T185: `in attesa`, ripartono solo se lo dice lui.
