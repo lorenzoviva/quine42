@@ -37,6 +37,8 @@ export class SessionClient {
   anonimo = false;
   /** Whether this wanderer is the master (T41): only the master hears the Council and gets all the files. */
   master = false;
+  /** The platform fee, as the server said to the master (ADR-0130). */
+  commissione?: number;
   /** What the Council said (the master's only), oldest first. */
   readonly feed: FeedEntry[] = [];
   /** The world's files: those it came in with, as the server said they changed since. */
@@ -131,7 +133,7 @@ export class SessionClient {
         if (m.stato === 'ripartito') this.reenter();
         break;
       case 'ingresso':
-        Object.assign(this, { id: m.id, nome: m.nome, profilo: m.profilo, riparato: m.riparato ?? [], anonimo: !!m.anonimo, master: !!m.master, files: m.files, branch: m.ramo ?? {}, me: m.me, forma: m.forma, stato: m.stato });
+        Object.assign(this, { id: m.id, nome: m.nome, profilo: m.profilo, riparato: m.riparato ?? [], anonimo: !!m.anonimo, master: !!m.master, commissione: m.commissione, files: m.files, branch: m.ramo ?? {}, me: m.me, forma: m.forma, stato: m.stato });
         this.feed.splice(0, this.feed.length, ...(m.concilio ?? []));
         this.places.clear();
         this.entities.clear();

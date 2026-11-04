@@ -1,20 +1,25 @@
-// The credit system (T45a, ADR-0081; P#1 of the multiplayer plan). Every model call deducts its cost + 1% (P#1) from its payer
+// The credit system (T45a, ADR-0081; P#1 of the multiplayer plan). Every model call deducts its cost + the platform fee (ADR-0130) from its payer
 // (`payerOf`). Common expenses (`comune`) are split equally among all currently connected players (master included). When credits
 // are exhausted, what the wanderer asks for is answered by local models (like without an API key). Anonymous wanderers have no
 // credits and always use local models. Stripe Checkout (T45e, ADR-0083) tops up.
 // Balances and payments live in a `Ledger` (T125, ADR-0104), outside the universe's files and their history: here its rules; on the
 // server `server/ledger.ts` keeps it on disk, a mirror or a test has it in memory.
 
-/** Platform fee on top of model cost (P#1): 1%. */
-export const PLATFORM_FEE = 0.01;
+/** Platform fee on top of model cost when the server says nothing (P#1): 1%. The server decides it (`QUINE_COMMISSIONE`, `platformFeeOf`, ADR-0130). */
+export const DEFAULT_PLATFORM_FEE = 0.01;
 
 /** Where a universe of before the ledger kept its payments: only the migration reads it (ADR-0104). */
 export const PAYMENTS_FILE = 'world/pagamenti.json';
 
-/** Total cost with the 1% platform fee. */
-export function costWithFee(baseCost: number): number {
+/** Total cost with the platform fee: proportional to the cost, no tiers. No default: who charges says which fee. */
+export function costWithFee(baseCost: number, fee: number): number {
   if (baseCost <= 0) return 0;
-  return Math.round(baseCost * (1 + PLATFORM_FEE) * 1e6) / 1e6;
+  return Math.round(baseCost * (1 + fee) * 1e6) / 1e6;
+}
+
+/** A fee as a player reads it: 0.01 → `1%`, 0.005 → `0,5%`. */
+export function feePercent(fee: number): string {
+  return `${String(Math.round(fee * 1e4) / 100).replace('.', ',')}%`;
 }
 
 /** Split a common cost among eligible connected wanderers into exact shares summing to total. */

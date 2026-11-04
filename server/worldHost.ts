@@ -72,6 +72,8 @@ export interface WorldOptions {
   masterUid?: string;
   ledgerFile?: string;
   grantCap?: number;
+  /** The platform fee, which the server decides (ADR-0130). */
+  platformFee?: number;
   /** The program of the process, and what it may read besides its own folder. */
   entry: string;
   entryArgs?: string[];
@@ -100,9 +102,12 @@ export function worldFlags(o: Pick<WorldOptions, 'entry' | 'reads' | 'memoryMb' 
   return flags;
 }
 
-/** The environment of a world: nothing of this process's, where the secrets are. What is left only lets Windows and Node start. */
-export function worldEnv(): NodeJS.ProcessEnv {
-  const env: NodeJS.ProcessEnv = { NODE_ENV: 'production' };
+/**
+ * The environment of a world: nothing of this process's, where the secrets are. What is left only lets Windows and Node start, and
+ * the platform fee this server decided, by value: no secret, and the world cannot read it from anywhere else (ADR-0130).
+ */
+export function worldEnv(platformFee?: number): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = { NODE_ENV: 'production', ...(platformFee === undefined ? {} : { QUINE_COMMISSIONE: String(platformFee) }) };
   for (const k of ['SystemRoot', 'SYSTEMROOT', 'TEMP', 'TMP']) if (process.env[k]) env[k] = process.env[k];
   return env;
 }
@@ -161,7 +166,7 @@ export class WorldHost {
     this.restore = undefined;
     const child = fork(o.entry, o.entryArgs ?? [], {
       execArgv: worldFlags(o),
-      env: worldEnv(),
+      env: worldEnv(o.platformFee),
       stdio: ['ignore', 'inherit', 'inherit', 'ipc'],
       serialization: 'json',
     });
