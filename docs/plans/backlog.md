@@ -2184,7 +2184,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fatto quando: typecheck e test verdi; le icone nell'inventario e le foto dell'Artista nel browser hanno l'aspetto del mondo.
 - Esito: foto dell'Artista e del tornio sempre a cartone (`cartoonRender`, `inkRaster`, `toonlight.ts`, nessun three.js), icone con fasce, luce di giorno e `Ink` dietro l'interruttore, guida del seme, prompt di Artista e Scultore, `genesis.style` e testo del giudizio aggiornati, schema e mock invariati; cambiato rispetto al previsto: il sole delle foto a cartone è quello del mondo (l'ombra cade a nord-est), le icone disegnano la scena due volte per non bucare i voxel luminosi e dare la riga alla sagoma, il pannello del tornio ora tiene le proporzioni, `window.cartone` si imposta in `bloom.ts`; manca: laboratorio (T89e) e carte del sito ancora alle foto classiche, guide e modelli esistenti non toccati; non provato: giudizio con Gemini vero, `devicePixelRatio` diverso da 1 sulle icone; suite 128 file/1991 test e typecheck verdi. Sicurezza: nessuna superficie nuova.
 
-### T89e · Cartone: laboratorio, prestazioni, togliere la prova — `da fare` (dipende da T89b, T89d)
+### T89e · Cartone: laboratorio, prestazioni, togliere la prova — `fatto` (`b05fc0a`) (dipende da T89b, T89d)
 - Pipeline: claude · stima 4% · approvato · browser · priorità 79
 - Step: 29
 - Contesto: ADR-0093, conseguenze e punto 6.
@@ -2193,6 +2193,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   lasciando `?classica`; ADR-0093 `accettato` e AGENTS.md aggiornato.
 - Fatto quando: typecheck e test verdi; misure nell'ADR; verifica nel browser di simulazione, studio, corona e laboratorio.
 - Nota: un primo lancio (04/11) è partito prima di T89b e T89d perché il parser non espande `T89a-d`; nessun codice. Dipendenza corretta a mano: `docs/pipeline/domande/T89e.md`.
+- Esito: cartone predefinito (`cartoonOn`: solo `?classica` lo spegne), tolti `?cartone`, `CARTOON_BY_DEFAULT` e `window.cartone`; interruttore dal vivo in `lab/3d/` e `lab/editor/` (`LabLook` in `lab/look.ts`, `Bloom.inked`); misure in ADR-0093, ora `accettato`, con `lab/scripts/misura-cartone.mjs`: l'inchiostro costa 0,9-2,7 ms a dpr 1 e 2,4-3,3 ms a dpr 2, caso peggiore 13,4 ms, quindi niente MRT né metà risoluzione; cambiato rispetto al previsto: l'interruttore è dal vivo e non un ricaricamento, l'editor passa sempre dal composer, `PCFSoftShadowMap` (rimosso da three.js) sostituito con `PCFShadowMap` nei laboratori; manca: foto del laboratorio (`lab/mjx`, `lab/banco`, script) e carte del sito restano classiche, alcuni task del backlog citano ancora `?cartone`, che ora non fa nulla; non provato: una GPU integrata (misure solo su RTX 2070), un `devicePixelRatio` diverso da 1 guardato a occhio (a dpr 2 solo misurato), la causa dei 2,5 ms di JavaScript nella corona (`Ink.swap` è un'ipotesi); suite 2038 passati e 1 saltato, typecheck verde. Sicurezza: nessuna superficie nuova.
 
 ### T92 · Integrare T52 (i sotterranei) nel base 3d — `fatto`
 - Pipeline: gemini · stima 1% · approvato · priorità 0

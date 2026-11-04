@@ -6,20 +6,10 @@ import { addShade, aerial, BAND_LEVELS, bandOf, bandRamp, CARTOON_BLOOM_RADIUS, 
 import { addGlow } from '../src/render/materials';
 
 describe('the switch', () => {
-  it('until the cartoon is the default, only ?cartone turns it on', () => {
-    expect(cartoonOn('', false)).toBe(false);
-    expect(cartoonOn('?skip&offline', false)).toBe(false);
-    expect(cartoonOn('?skip&cartone', false)).toBe(true);
-  });
-
-  it('once it is the default, only ?classica turns it off', () => {
-    expect(cartoonOn('', true)).toBe(true);
-    expect(cartoonOn('?cartone', true)).toBe(true);
-    expect(cartoonOn('?skip&classica', true)).toBe(false);
-  });
-
-  it('?classica wins over ?cartone', () => {
-    expect(cartoonOn('?cartone&classica', false)).toBe(false);
+  it('the cartoon is the default, only ?classica turns it off', () => {
+    expect(cartoonOn('')).toBe(true);
+    expect(cartoonOn('?skip&offline')).toBe(true);
+    expect(cartoonOn('?skip&classica')).toBe(false);
   });
 });
 

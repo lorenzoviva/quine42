@@ -453,17 +453,18 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 <a id="cartone"></a>
 ## La grafica a cartone
 
-- **La grafica a cartone** (ADR-0093, progetto T89, da attuare T89a-e): fasce toon, contorni a inchiostro dove cambiano cosa o parte (la lettera della
-  palette, attributo `part`), mai dalla geometria dei voxel (sugli alberi fa rumore), luce calda con ombre tinte e prospettiva aerea, e la guida di stile che
-  chiede parti di colore distinto. Oggi dietro `?cartone`; `?classica` vince sempre e mostra il vecchio aspetto. Il predefinito è una costante,
-  `CARTOON_BY_DEFAULT` in `src/render/cartoon.ts`: diventa `true` quando T89b e T89c sono fatti.
+- **La grafica a cartone** (ADR-0093, T89a-e): il mondo si disegna così, sempre; `?classica` mostra il vecchio aspetto per confronto (`cartoonOn` in `src/render/cartoon.ts`). Fasce toon,
+  contorni a inchiostro dove cambiano cosa o parte (attributo `part`), mai dalla geometria dei voxel (sugli alberi fa rumore), luce calda con ombre tinte e prospettiva aerea, e la guida di
+  stile che chiede parti di colore distinto.
+- **Il laboratorio** (T89e): `lab/3d/` e `lab/editor/` hanno un interruttore dal vivo, un bottone «Cartone»/«Classica» (`LabLook` in `lab/look.ts`), perché ricaricare perderebbe il mondo della sandbox e il modello dell'editor: ogni materiale esiste nei due aspetti (`twin`), il bottone li scambia su ciò che è in scena, muove luce, ombre e bloom e tiene l'URL (`?classica`), da cui parte anche il laboratorio. L'inchiostro si accende e si spegne con `Bloom.inked`. Nell'editor col cartone la luce di riempimento è spenta, perché `addShade` legge il sole come unica luce direzionale (l'emisfero fa da riempimento), «Bagliore» spegne l'alone e non l'inchiostro, e in wireframe l'inchiostro non c'è. Le foto del laboratorio (`lab/mjx/`, `lab/banco/`, gli script) restano classiche.
+- **Il costo** (T89e): si misura con `lab/scripts/misura-cartone.mjs` (Chrome headless sulla GPU vera); i numeri sono in ADR-0093.
 - **Le fasce** (T89a): `lit()` di `materials.ts` dà il `MeshToonMaterial` a tutti i materiali illuminati di simulazione, corona e studio (`MAT`, `solid()`, le
   figure del Concilio, le cornici degli schermi, il disco del tornio). Le soglie non sono tre terzi uguali: i voxel hanno sei normali e con il sole di `SUN_FROM`
   i terzi darebbero solo due fasce; `BAND_EDGES` dà la luce piena al tetto, la mezza luce alle facce verso sud e ovest, la fascia bassa (`BAND_LEVELS`, 0,35) alle
   altre. Le facce lontane dal sole sono anche in ombra portata: `SHADOW_INTENSITY` lascia passare 0,35 di sole, o la fascia bassa non si vedrebbe mai. L'emisfero
   (`CARTOON_HEMI`) è freddo a metà strada, così le facce verticali non vanno al grigio. Le ombre hanno il raggio del filtro a 0 (`SHADOW_RADIUS`). Nello studio il
   sole è acceso (`CARTOON_STUDIO`): senza, nessuna faccia cambierebbe fascia. I voxel luminosi escono dalle fasce in `addGlow` (colore × `GLOW_BASE` + `U.glow`,
-  uguale su ogni faccia), solo nello shader toon. Resta Lambert il laboratorio (T89e).
+  uguale su ogni faccia), solo nello shader toon.
 - **La luce e l'aria** (T89c): `cartoonLight(day)` in `cartoon.ts` mescola tre momenti (`PHASES`: giorno, tramonto, notte, agli stessi gradini del cielo) e dà al renderer colore e
   intensità della luce chiave, emisfero, tinta delle ombre e forza del bloom; di notte la luce chiave è una luna fredda, altrimenti tutte le facce avrebbero la stessa fascia. L'ombra
   tinta è `addShade`, un pezzo di shader dopo `lights_fragment_end` (da `toon()` e da `addGlow`): `directLight` lì è ancora il sole con l'ombra già moltiplicata, e confrontato col
@@ -476,7 +477,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 - **I contorni** (T89b): `Ink` in `cartoon.ts` disegna la scena una volta in più prima del composer (senza MRT, che chiederebbe di cambiare ogni materiale della scena; senza rifare la mappa delle ombre), con
   `idsOf` di `materials.ts`: per ogni materiale uno `ShaderMaterial` che scrive rosso = la **cosa** (`thingOf`: la mesh, o `TERRAIN_THING` per terreno e muri di tutti i chunk), verde = l'istanza
   (`gl_InstanceID`), blu = la **parte**, e tiene taglio del cerchio, `CUT` e vento del materiale che sostituisce. L'inchiostro va dove cambia uno dei tre (con gli angoli a metà, perché il bersaglio non ha campioni) o dove la
-  profondità salta di oltre `uDepthEdge` caselle (0,6-1,1, soglie in `window.cartone`), misurata sull'inverso della profondità, che su un piano cambia in modo uniforme: un pendio radente non è un salto. Largo un pixel CSS per lato a ogni
+  profondità salta di oltre `uDepthEdge` caselle (0,6-1,1), misurata sull'inverso della profondità, che su un piano cambia in modo uniforme: un pendio radente non è un salto. Largo un pixel CSS per lato a ogni
   `devicePixelRatio`; niente su ciò che dà luce (l'alfa del fotogramma, `U.glowMask`). Fuori dai contorni: neon e righe del pavimento (`noInk`), ciò che è trasparente e non è voxel (etichette, l'ombra del viandante).
   **La parte di un modello non è la lettera**: i programmi spargono più verdi su una chioma e una riga lungo ciascuno è di nuovo il rumore. `partTable` di `mesh.ts` unisce le lettere che sono sfumature di un colore (in Lab: tinta entro 15°, luminosità entro 25, anche
   passando per una terza; due grigi solo la luminosità), quelle di una stessa `<color part>`, mai ciò che dà luce o è trasparente con ciò che non lo è. Un muro chiaro e una porta scura della stessa tinta restano due parti. Il valore (l'attributo `part`, un byte per vertice) è la

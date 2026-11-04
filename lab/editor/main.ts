@@ -15,7 +15,9 @@ import {
 } from './syntax';
 import type { EditorBuildRequest, EditorBuildResponse } from './worker';
 import { Bloom } from '../../src/render/bloom';
+import { CARTOON, PHASES } from '../../src/render/cartoon';
 import { glowing } from '../../src/render/materials';
+import { bindLookButton, LabLook } from '../look';
 import type { MeshData } from '../../src/mj/mesh';
 import {
   type CadShape,
@@ -114,7 +116,7 @@ const canvas = $<HTMLCanvasElement>('viewport');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
 renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = THREE.PCFShadowMap;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0c0e14);
@@ -143,9 +145,27 @@ gridHelper.position.y = -0.001;
 scene.add(gridHelper);
 
 // Materials & Bloom
-const matMesh = glowing(new THREE.MeshLambertMaterial({ vertexColors: true }), 'editor');
-const matMeshGlass = glowing(new THREE.MeshLambertMaterial({ vertexColors: true, transparent: true, depthWrite: false }), 'editor-glass');
-const bloom = new Bloom(renderer, scene, camera, 0.85, 0.4);
+const BLOOM_STRENGTH = 0.85;
+const bloom = new Bloom(renderer, scene, camera, BLOOM_STRENGTH, 0.4);
+const look = new LabLook({ scene, bloom, sun, hemi: hemiLight, classic: { bloomStrength: BLOOM_STRENGTH, bloomRadius: 0.4 } });
+const matMesh = look.twin({ vertexColors: true }, (m) => glowing(m, 'editor'));
+const matMeshGlass = look.twin({ vertexColors: true, transparent: true, depthWrite: false }, (m) => glowing(m, 'editor-glass'));
+/** The materials a new model gets, in the look of now. */
+const meshMaterial = (geo: THREE.BufferGeometry) => (geo.groups.length > 0 ? [look.of(matMesh), look.of(matMeshGlass)] : look.of(matMesh));
+
+/** What the switch moves here beyond the shared parts: the sun as in the game, or as the editor had it with its fill. */
+function afterLook(): void {
+  if (look.cartoon) look.sunOver(sun.target.position);
+  else {
+    sun.position.set(12, 20, 14);
+    sun.intensity = 2.2;
+    sun.color.set(0xfff5e6);
+    hemiLight.intensity = 1.2;
+  }
+  // The toon shader reads the sun as the only directional light (`addShade`); its fill is the hemisphere.
+  fillLight.visible = !look.cartoon;
+  applyHalo();
+}
 
 // Active model mesh & bounding box
 let currentMesh: THREE.Mesh | null = null;
@@ -179,6 +199,7 @@ function createBufferGeometry(m: MeshData): THREE.BufferGeometry {
   geo.setAttribute('color', new THREE.BufferAttribute(m.colors, 3));
   if (m.glow) geo.setAttribute('glow', new THREE.BufferAttribute(m.glow, 1));
   if (m.alpha) geo.setAttribute('alpha', new THREE.BufferAttribute(m.alpha, 1));
+  if (m.part) geo.setAttribute('part', new THREE.BufferAttribute(m.part, 1));
   geo.setIndex(new THREE.BufferAttribute(m.indices, 1));
   if (m.opaqueCount !== undefined) {
     if (m.opaqueCount > 0) geo.addGroup(0, m.opaqueCount, 0);
@@ -192,7 +213,7 @@ function createBufferGeometry(m: MeshData): THREE.BufferGeometry {
 
 function applyFrameMesh(m: MeshData) {
   const geo = createBufferGeometry(m);
-  const mat = geo.groups.length > 0 ? [matMesh, matMeshGlass] : matMesh;
+  const mat = meshMaterial(geo);
   if (!currentMesh) {
     currentMesh = new THREE.Mesh(geo, mat);
     currentMesh.castShadow = true;
@@ -359,6 +380,16 @@ resizeObserver.observe($('pane-view'));
 
 let lastTime = performance.now();
 let enableBloom = true;
+let wireframe = false;
+
+/** "Bagliore" turns the halo off, not the ink: the frame always passes through the composer. In wireframe there is no surface to ink. */
+function applyHalo(): void {
+  bloom.strength = !enableBloom ? 0 : look.cartoon ? PHASES.day.bloom : BLOOM_STRENGTH;
+  bloom.inked = look.cartoon && !wireframe;
+}
+look.set(CARTOON);
+afterLook();
+bindLookButton(look, $('btn-toggle-look'), afterLook);
 
 function animate(now: number) {
   requestAnimationFrame(animate);
@@ -374,11 +405,7 @@ function animate(now: number) {
   camera.position.copy(cam.target).add(off);
   camera.lookAt(cam.target);
 
-  if (enableBloom) {
-    bloom.render(dt);
-  } else {
-    renderer.render(scene, camera);
-  }
+  bloom.render(dt);
 }
 
 requestAnimationFrame(animate);
@@ -703,7 +730,7 @@ async function triggerBuild() {
     // Ensure fallback mesh in case tracks were empty
     if (!currentMesh) {
       const geo = createBufferGeometry(res.mesh);
-      currentMesh = new THREE.Mesh(geo, geo.groups.length > 0 ? [matMesh, matMeshGlass] : matMesh);
+      currentMesh = new THREE.Mesh(geo, meshMaterial(geo));
       currentMesh.castShadow = true;
       currentMesh.receiveShadow = true;
       scene.add(currentMesh);
@@ -1661,14 +1688,16 @@ $('btn-toggle-bounds').addEventListener('click', () => {
 });
 
 $('btn-toggle-wireframe').addEventListener('click', () => {
-  matMesh.wireframe = !matMesh.wireframe;
-  matMeshGlass.wireframe = matMesh.wireframe;
-  $('btn-toggle-wireframe').classList.toggle('active', matMesh.wireframe);
+  wireframe = !wireframe;
+  for (const t of [matMesh, matMeshGlass]) t.classic.wireframe = t.cartoon.wireframe = wireframe;
+  applyHalo();
+  $('btn-toggle-wireframe').classList.toggle('active', wireframe);
 });
 
 $('btn-toggle-bloom').addEventListener('click', () => {
   enableBloom = !enableBloom;
   $('btn-toggle-bloom').classList.toggle('active', enableBloom);
+  applyHalo();
 });
 
 $('btn-toggle-playback').addEventListener('click', () => {
