@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 04/11/2026, epoca 252. Crediti: vedi `stato`.
+Aggiornato il 04/11/2026, epoca 253. Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -34,11 +34,11 @@ Aggiornato il 04/11/2026, epoca 252. Crediti: vedi `stato`.
 - **T238 integrato** (`6a60b78`, ADR-0130): ogni richiesta che finisce male è una voce di `world/mancanze.json`, fuori da `playerFiles` e `publicFiles`; rapporto con `npm run mancanze`. Solo modelli offline: non provati fallimenti veri con Gemini né una partita reale. `docs/glossario-censimento.md` non rigenerato. 
 - **T244 integrato** (`59bd9d5`, ADR-0131): home ritoccata, video da `QUINE_VIDEO` con `video.json` e rotta `/api/video` con `Range`, istruzioni da `docs/beta/` con `site/beta.json` per la seconda parte (spenta non entra in `dist/`). Provato nel browser sotto `serve` e `dev`. Non provati: telefono vero, `.mp4` vero, video spenti in `dev`. **Li scrive l'autore:** `guida.md` e `la-corona.md` (senza, la pagina non compare); guida in `docs/beta/LEGGIMI.md`. Banda da decidere al primo deploy pubblico.
 - **T243 nel base via T248 e T249** (ADR-0132, `QUINE_COMMISSIONE`, predefinita 0,01), suite 1875. Non provati: `npm run serve` e il browser. `docs/glossario-censimento.md` non rigenerato. Ramo chiuso da T250, entrambi integrati.
-- **T247 integrato via T251** (ADR-0133, suite 1943 sul branch di T251, non rilanciata nel base): consumo regolabile in lobby, blocco a partita in corso; browser a 1920 px con `?offline&lobby`. Non provati: partita di molti, lobby da soli con modelli veri, 390 px. Resta che `checkout`/`reset` del master muovono `ai` sul disco, con effetto dalla partita dopo. **Chiesto all'autore:** `domande/T247.md`, le 8 righe della Genesi senza manopola (proposta: lasciarle così); il difetto trovato da T251, casella del tema nella Genesi schiacciata a 22 px (proposta: task T252, `flex-shrink: 0` su `#genesis textarea`; nessun task finché non approva).
+- **T247 integrato via T251** (ADR-0133, suite 1943 sul branch di T251, non rilanciata nel base): consumo regolabile in lobby, blocco a partita in corso; browser a 1920 px con `?offline&lobby`. Non provati: partita di molti, lobby da soli con modelli veri, 390 px. Resta che `checkout`/`reset` del master muovono `ai` sul disco, con effetto dalla partita dopo. `domande/T247.md` chiusa da me nell'autonomia: le 8 righe della Genesi restano senza manopola. La casella del tema schiacciata è T252.
 
 ## Pronti e priorità
 
-1. **In coda, approvati e pronti, partono da soli:** T152 (in corso), T89b T183. T89e e T89d dietro T89b; T89e è partito per errore (il parser non espande `T89a-d`), dipendenza corretta a mano. **Chiesto all'autore:** task per correggere il parser (proposta T253).
+1. **In coda, approvati e pronti, partono da soli:** T152 (in corso), T252 T253 (gemini) T89b T183. T89e e T89d dietro T89b. T253 corregge il parser su `T89a-d`; nel backlog nessun altro blocco usa quella forma tra le dipendenze.
 4. **T182 → T156** (strutture procedurali). **T182 fermo in attesa dell'autore al giro 3 di 4, non integrato:** soglia NO. Misure e varianza 10/12 entro due richieste (7 alla prima), foto 0/10 per giudizio dell'agente, locanda esclusa; 1,15 $ a modello, 30,59 $ in tutto a listino. **Chieste le 3 decisioni di `docs/pipeline/domande/T182.md` (sul branch `task/T182`):** cantina a due taglie, interni contro la misura `stanze`, se la ricchezza basta. Bloccati finché non risponde: T156, poi T207, T88, T153, T242.
 4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla. T89d resta bloccato.
 
@@ -62,7 +62,7 @@ Aggiornato il 04/11/2026, epoca 252. Crediti: vedi `stato`.
 - **Argon:** quota esaurita fino al 04/11. **Fable:** solo i task più difficili, mai orchestratore; una sola misura (T157: 7 % sul suo contatore, ~55 punti di sessione).
 - Al più una verifica nel browser alla volta, solo su Claude. Risposte brevi all'autore.
 - Obiettivi: nessun parallelismo che aumenta il lavoro; finire i crediti entro il reset settimanale, non prima; margine per le urgenze.
-- **Autonomia scaduta il 03/11 alle 18:00:** le mie proposte nuove aspettano di nuovo l'approvazione dell'autore. Priorità 0 solo per le urgenze dell'autore e ciò che blocca gli altri.
+- **Autonomia dell'autore fino alle 19:00 del 04/11:** approvo le mie proposte; restano all'autore T182 (3 decisioni), il ripartire spostato dalla corona, i nomi rimasti, il criterio della Fase I. Dopo le 19 le proposte nuove aspettano di nuovo la sua approvazione. Priorità 0 solo per le urgenze dell'autore e ciò che blocca gli altri.
 - **Mai `git commit -a` nel base:** l'autore ha file suoi (`lab/mjx/models/handmade/lampione copy*.xml`, `docs/design/logo/proposte/`).
 - **Il parser delle dipendenze legge «dopo» e «dipende da» in tutto il blocco**, anche in un nome di file: niente «dopo» vicino a un Txx che non è una dipendenza. Dopo un blocco nuovo controlla `stato`.
 - Un test rosso nella suite intera e verde da solo non è per forza un difetto del task: guarda il carico. Un task «in corso» col log vuoto e la conversazione finita su `usage_limit_reached`: `interrompi` + `riprendi`.
