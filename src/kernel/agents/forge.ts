@@ -185,7 +185,7 @@ export function moduleId(concept: Concept, existing: string[]): string {
   return id;
 }
 
-const STRUCTURES = /^(?:(?:la|il|lo|l'|una|un|uno|le|i|gli|vecchi[oa]|antic[oa]|piccol[oa]|grande|modesta?)\s+)*(casa|case|casetta|capanna|casupola|baracca|edificio|torre|mulino|fienile|stalla|chiesa|cappella|tempio|castello|taverna|locanda|osteria|bottega|negozio|ponte|muro|mura|recinto|palizzata|villaggio|borgo|piazza|strada|sentiero|fattoria)\b/i;
+const STRUCTURES = /^(?:(?:la|il|lo|l'|una|un|uno|le|i|gli|vecchi[oa]|antic[oa]|piccol[oa]|grande|modesta?)\s+)*(casa|case|casetta|capanna|casupola|baracca|edificio|torre|mulino|fienile|stalla|chiesa|cappella|tempio|castello|taverna|locanda|osteria|bottega|negozio|ponte|muro|mura|recinto|palizzata|villaggio|borgo|piazza|strada|sentiero|fattoria|palazzo|condominio|grattacielo|stazione|fabbrica|officina|capannone|centrale|deposito|hangar)\b/i;
 const FURNITURE = /cass|baule|forziere|scrigno|credenz|armadi|cesta|cesto|madia|cassett|dispens|scaffal|librer|comò|como\b|banco/i;
 
 export function isStructure(concept: Pick<Concept, 'nome' | 'tipo'>): boolean {

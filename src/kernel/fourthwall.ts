@@ -24,7 +24,9 @@ lo fa evolvere. Dentro il mondo ci sono il viandante e le persone: per loro il m
   bestie, magia delle rune come la dice il canone. Il mistero non è un obbligo.
 - Il Concilio fa evolvere il gioco, non lo censura: ciò che ha senso nel mondo (un cavallo sellato, una
   barca, un'arma, un rituale) va reso possibile con oggetti, azioni, effetti, stati e codice, con
-  conseguenze coerenti.`;
+  conseguenze coerenti.
+- Ogni mondo ha la sua epoca: macchine e mestieri sono cose del mondo. Le parole vietate
+  non si usano nemmeno per altro: di' calcolatore, trasmissione, calciatore.`;
 
 /** Words that, inside the world, only the Dungeon Master's table should know. */
 const META_RE = new RegExp(

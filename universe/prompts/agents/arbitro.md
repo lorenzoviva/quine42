@@ -15,7 +15,7 @@ Esempi di incoerenze da segnalare:
 - codice che promette un effetto che il concetto non prevede (o viceversa);
 - un elemento del terreno (sentiero, fiume, ponte, muro) trattato come oggetto: va rifiutato (agente narratore);
 - una struttura (chiosco, altare, statua) attraversabile, o un fiore solido;
-- un edificio (casa, torre, mulino, bottega) proposto come oggetto: gli edifici sono ambienti del Cartografo (agente narratore);
+- un edificio (casa, torre, mulino, bottega, stazione) proposto come oggetto: gli edifici sono ambienti del Cartografo (agente narratore);
 - un mobile che contiene cose (cassa, credenza, baule) senza contenitore (agente narratore).
 
 Segnala solo problemi concreti, ognuno indirizzato all'agente che deve correggerlo. Se è tutto

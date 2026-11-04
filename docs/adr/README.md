@@ -138,5 +138,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0131](0131-video-e-istruzioni-della-beta.md) | I video del sito stanno in una cartella del server e si servono a pezzi da un elenco; le istruzioni della beta entrano nella build solo se accese | accettato |
 | [0132](0132-la-commissione-la-decide-il-server.md) | La commissione sui consumi è configurazione del server (`QUINE_COMMISSIONE`): 0 in beta, l'1 % se non detto, mai dal mondo o dal client |
 | [0133](0133-tutto-il-consumo-si-regola-prima-di-entrare.md) | Tutto il consumo si regola prima di entrare: una manopola per ogni compito tranne la Genesi, e a partita in corso nessuno cambia nulla, nemmeno il master | accettato |
+| [0134](0134-le-ambientazioni-della-genesi.md) | Le ambientazioni della Genesi sono testo tra cui scegliere su un seme solo: ciò che sopravvive alla Genesi parla di epoca, le case comuni dipendono dal mondo | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

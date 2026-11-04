@@ -101,7 +101,7 @@ export function readStructure(s: any): { concetto: string; taglia?: SizeTier } {
 export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan> {
   const prompt = [
     `Progetta il luogo (${ctx.cx}, ${ctx.cy}). Terreno di partenza: ${ctx.terrain}.`,
-    ctx.neighbors.length ? `Luoghi confinanti: ${ctx.neighbors.map((n) => `${n.place} (${n.layout})`).join('; ')}. Mantieni continuità: un borgo non finisce di colpo, un bosco sfuma.` : '',
+    ctx.neighbors.length ? `Luoghi confinanti: ${ctx.neighbors.map((n) => `${n.place} (${n.layout})`).join('; ')}. Mantieni continuità: un abitato non finisce di colpo, un bosco sfuma.` : '',
     `Ambienti disponibili ("ambiente" = uno di questi id):\n${ctx.layouts.map((l) => `- ${l.id}: ${l.name} [${l.environment}] — ${l.description}`).join('\n')}`,
     ctx.start ? 'È la piazza di partenza: scegli un ambiente abitato e accogliente.' : '',
     ctx.region ? `Questo luogo fa parte della regione «${ctx.region.nome}» (${ctx.region.descrizione}): il nome e ciò che c'è devono appartenerle (es. «${ctx.region.nome} — la porta nord»).` : '',
@@ -109,10 +109,10 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
     `"a_terra": 0-4 nomi di oggetti comuni che si trovano per terra qui (anche nuovi, se coerenti).${ctx.wanted.length ? ` Se ha senso, includi qualcosa di cui si è parlato: ${ctx.wanted.join(', ')}.` : ''}`,
     '"nuovi": quasi sempre vuoto; solo un oggetto concreto o un personaggio che il luogo richiede e che non esiste tra i moduli.',
     `"rune": 0-2 frammenti presi esattamente da questo elenco: ${ctx.fragments.map((f) => `«${f}»`).join(', ')}.`,
-    '"strutture": 0-2 edifici o costruzioni di questo luogo, se l\'ambiente ne ha (es. «il mulino sul fiume», «la casa del fabbro con la forgia»): ognuno diventa un modello intero in cui si entra, sui lotti dell\'ambiente (gli altri lotti hanno case comuni).',
-    `"taglia" (facoltativa, come le taglie di D&D: minuscola, piccola, media, grande, enorme, gargantuesca): media una casa, grande un mulino o una torre; il kernel la adatta al lotto.`,
+    '"strutture": 0-2 edifici o costruzioni di questo luogo, se l\'ambiente ne ha della sua epoca (es. «il mulino sul fiume», «il deposito dei tram», «l\'officina delle caldaie»): ognuno diventa un modello intero in cui si entra, sui lotti dell\'ambiente (gli altri lotti hanno case comuni).',
+    `"taglia" (facoltativa, come le taglie di D&D: minuscola, piccola, media, grande, enorme, gargantuesca): media una casa, grande un mulino, una stazione o una torre; il kernel la adatta al lotto.`,
     ctx.rari?.length
-      ? `Le taglie più grandi sono rare: in questa parte del mondo può esserci ancora ${ctx.rari.map((t) => (t === 'enorme' ? 'una struttura "enorme" (un castello, un tempio, la torre del mago)' : 'una struttura "gargantuesca" (una cittadella, una cattedrale, una rovina immensa)')).join(' e ')}: al più una per luogo, solo se il luogo lo merita davvero.`
+      ? `Le taglie più grandi sono rare: in questa parte del mondo può esserci ancora ${ctx.rari.map((t) => (t === 'enorme' ? 'una struttura "enorme" (ciò che nella sua epoca è enorme: un castello, una centrale, un grattacielo)' : 'una struttura "gargantuesca" (una cittadella, una cattedrale, una torre-città, una rovina immensa)')).join(' e ')}: al più una per luogo, solo se il luogo lo merita davvero.`
       : 'Niente strutture "enorme" né "gargantuesca" qui: questa parte del mondo ha già i suoi luoghi notevoli.',
     ctx.feedback ? `IL TENTATIVO PRECEDENTE È STATO SCARTATO: ${ctx.feedback}. Correggi.` : '',
   ]
@@ -161,8 +161,8 @@ export async function designLayouts(c: Council, palette: Record<string, TerrainD
     'genesis.layouts',
     [
       'Scrivi 10-14 ambienti per i luoghi di questo mondo, ognuno come programma di riscrittura MarkovJunior (vedi il tuo ruolo per la sintassi) che trasforma la bozza procedurale.',
-      'Varietà! Servono: borghi e villaggi (case di pietra, mattoni, capanne di paglia), campagne coltivate e maneggi, boschi, giungle, deserti, montagne, laghi e coste, e luoghi speciali con i timbri del kernel: un castello con fossato e ponte levatoio, una fortezza o caserma, una torre di mago, un tempio o una piramide, un sotterraneo, una tana di drago. Più un interno grande con più stanze.',
-      `Timbri disponibili: {"type":"stamp","shape":…} con shape tra ${STAMP_SHAPES.join(', ')} (vedi il ruolo).`,
+      'Varietà, nell\'epoca della bibbia! Servono: dove si abita (più di un tipo: dal borgo di pietra al quartiere di condomini, secondo il mondo), dove si lavora e si coltiva, la natura che in questo mondo resta (boschi, giungle, deserti, montagne, laghi e coste, o ciò che ne hanno fatto), e luoghi speciali con i timbri del kernel. Più un interno grande con più stanze. La bozza è natura: un ambiente costruito fitto prima la sgombra.',
+      `Timbri disponibili: {"type":"stamp","shape":…} con shape tra ${STAMP_SHAPES.join(', ')} (vedi il ruolo). Un timbro è una forma, non un'epoca: il suo nome resta nel programma, nome e descrizione dell'ambiente li decidi tu e "codes" gli dà i materiali di questo mondo.`,
       `Codici dei terreni utilizzabili:\n${paletteSummary(palette)}`,
       feedback && `ALCUNI PROGRAMMI ERANO INVALIDI, correggili: ${feedback}`,
     ]
@@ -185,7 +185,7 @@ export async function designLayouts(c: Council, palette: Record<string, TerrainD
 const REGION_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
-    nome: { type: 'STRING', description: 'nome proprio della regione (es. «Rocca di Montenero», «Dune del Sale»)' },
+    nome: { type: 'STRING', description: 'nome proprio della regione (es. «Rocca di Montenero», «Dune del Sale», «Darsena Vecchia»)' },
     descrizione: { type: 'STRING' },
     ambiente: { type: 'STRING' },
     direzione: { type: 'STRING', enum: ['nord', 'nord-est', 'est', 'sud-est', 'sud', 'sud-ovest', 'ovest', 'nord-ovest'] },
@@ -211,8 +211,8 @@ export async function drawAtlas(c: Council, layouts: Array<{ id: string; name: s
     'cartografo',
     'genesis.atlas',
     [
-      "Disegna la geografia del mondo: 8-14 regioni attorno al borgo di partenza (che è al centro). Ognuna ha un nome proprio, una frase, un ambiente tra quelli disponibili, una direzione e una distanza (in luoghi) dal centro, e un raggio.",
-      'Rendila credibile: il deserto lontano dai laghi, il castello su un colle con un villaggio vicino, le montagne a nord, il mare da un lato; più si va lontano più le cose sono strane.',
+      "Disegna la geografia del mondo: 8-14 regioni attorno al punto di partenza (che è al centro). Ognuna ha un nome proprio, una frase, un ambiente tra quelli disponibili, una direzione e una distanza (in luoghi) dal centro, e un raggio.",
+      'Rendila credibile e della sua epoca: il deserto lontano dai laghi, ciò che domina su un colle con un abitato vicino, le montagne a nord, il mare da un lato; più si va lontano più le cose sono strane.',
       `Ambienti:\n${layouts.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}`,
     ].join('\n\n'),
     { type: 'OBJECT', properties: { regioni: { type: 'ARRAY', items: { ...REGION_SCHEMA, properties: { ...REGION_SCHEMA.properties!, ambiente: { type: 'STRING', enum: ids } } } } }, required: ['regioni'] },

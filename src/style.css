@@ -314,6 +314,8 @@ input[type='checkbox'], input[type='radio'] { accent-color: var(--neon-pink); }
 #genesis .logo { color: var(--neon-cyan); letter-spacing: 0.4em; text-align: center; font-size: var(--text-29); text-shadow: 2px 2px 0 var(--neon-pink); }
 #genesis h1 { margin: 0; text-align: center; color: var(--neon-yellow); font: 400 var(--text-47)/var(--leading-tight) var(--font-display); letter-spacing: 0.08em; text-shadow: 3px 3px 0 var(--neon-pink); }
 #genesis .note { color: var(--dim); font-size: var(--text-13); }
+#genesis .window > * { flex-shrink: 0; }
+#genesis .window > label { display: flex; gap: var(--space-8); align-items: center; font-size: var(--text-13); }
 #genesis textarea { width: 100%; padding: var(--space-8); font: inherit; resize: vertical; }
 #genesis .actions { display: flex; gap: var(--space-8); flex-wrap: wrap; }
 #genesis .status { color: var(--gold); min-height: 1.4em; }
@@ -321,7 +323,7 @@ input[type='checkbox'], input[type='radio'] { accent-color: var(--neon-pink); }
 #genesis .game .section { color: var(--cyan); font: 400 var(--text-21)/var(--leading-tight) var(--font-display); letter-spacing: 0.06em; }
 #genesis .game label { display: flex; gap: var(--space-8); align-items: center; font-size: var(--text-13); }
 #genesis .game input[type=range] { flex: 1; max-width: var(--measure-233); accent-color: var(--neon-pink); }
-#genesis .game select { font: inherit; font-size: var(--text-13); padding: var(--space-3) var(--space-5); }
+#genesis .window > label select, #genesis .game select { font: inherit; font-size: var(--text-13); padding: var(--space-3) var(--space-5); }
 #genesis .game .row { display: flex; gap: var(--space-21); flex-wrap: wrap; }
 #genesis .feed { display: flex; flex-direction: column; gap: var(--space-3); max-height: 40vh; overflow: auto; }
 #genesis.running textarea { opacity: 0.5; }
@@ -513,7 +515,7 @@ input[type='checkbox'], input[type='radio'] { accent-color: var(--neon-pink); }
 
 /* --- The theme's windows (T106): ink outline, hard neon shadow, Ben-Day dots behind the words --- */
 #chat input, #profile input[type='text'], #profile textarea, #actions input, #inventory .freeline input,
-#genesis textarea, #genesis .game select, #lobby input[type='number'], #lobby select {
+#genesis textarea, #genesis .game select, #genesis .window > label select, #lobby input[type='number'], #lobby select {
   background: var(--synth-bg); color: var(--fg); border: var(--border-ink-thick); box-shadow: 2px 2px 0 var(--neon-cyan); outline: none;
 }
 #chat input:focus, #profile input[type='text']:focus, #profile textarea:focus, #actions input:focus, #inventory .freeline input:focus,

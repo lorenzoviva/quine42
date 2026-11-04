@@ -8,7 +8,7 @@ import type { AgentId, Bible, Council } from './council';
 import { wordsOf } from './council';
 import { designLayouts } from './cartography';
 import { repairProgram } from '../mj';
-import { bibleBreaks, cleanBible } from '../fourthwall';
+import { bibleBreaks, cleanBible, metaBreak } from '../fourthwall';
 
 /** Codes the procedural draft and the kernel rely on: every palette must define them. */
 export const BASE_CODES: Record<string, { meaning: string; layer: TerrainLayer; solid: boolean; indoor?: boolean }> = {
@@ -27,6 +27,9 @@ export const BASE_CODES: Record<string, { meaning: string; layer: TerrainLayer; 
   k: { meaning: 'montagna, pareti invalicabili', layer: 'rock', solid: true },
   n: { meaning: 'terreno freddo calpestabile e lento (neve, gelo)', layer: 'ground', solid: false },
 };
+
+/** The seed's environments that belong to no age (ADR-0134): a Genesis that wrote too few keeps these, not a castle in a city of neon. */
+const TIMELESS_LAYOUTS = new Set(['bosco', 'campi', 'rovine', 'dungeon', 'deserto', 'giungla', 'montagne', 'lago']);
 
 export interface CastEntry {
   tipo: 'npc' | 'oggetto' | 'strumento';
@@ -50,7 +53,7 @@ const BIBLE_SCHEMA: Schema = {
     luoghi: { type: 'ARRAY', items: { type: 'STRING' } },
     personaggi: { type: 'ARRAY', items: { type: 'STRING' } },
     fatti: { type: 'ARRAY', items: { type: 'STRING' } },
-    misteri: { type: 'ARRAY', items: { type: 'STRING' }, description: 'leggende raccontate dalla gente del mondo (persone, bestie, dei, re del passato)' },
+    misteri: { type: 'ARRAY', items: { type: 'STRING' }, description: 'leggende raccontate dalla gente del mondo (persone, bestie, dei, potenti del passato)' },
     usanze: { type: 'ARRAY', items: { type: 'STRING' }, description: 'al più 3 usanze o modi di dire propri di questo mondo, che arricchiscono il lessico senza contraddirlo né spiegarlo' },
   },
   required: ['titolo', 'tono', 'sintesi', 'storia', 'luoghi', 'personaggi', 'fatti', 'misteri'],
@@ -65,6 +68,7 @@ const STYLE_SCHEMA: Schema = {
     luce: { type: 'STRING' },
     regole: { type: 'ARRAY', items: { type: 'STRING' } },
     protagonista: { type: 'STRING', description: 'aspetto del viandante (il giocatore)' },
+    case_comuni: { type: 'STRING', description: 'come sono le case comuni, se non sono casette di pietra, legno e paglia; altrimenti vuoto' },
   },
   required: ['stile', 'forme', 'palette', 'luce', 'regole', 'protagonista'],
 };
@@ -134,6 +138,7 @@ interface RawStyle {
   luce: string;
   regole: string[];
   protagonista: string;
+  case_comuni?: string;
 }
 
 interface RawTerrain {
@@ -193,7 +198,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     c.ask<Bible>(
       'narratore',
       'genesis.bible',
-      `Crea la bibbia di un nuovo universo a partire da questo tema:\n${theme}\n\nPer chi ci vive il mondo è reale (vedi i principi). Scrivi un mondo semplice e concreto, fatto di persone e mestieri. Le rune sono come le dice il canone: non aggiungere nulla. Elenca 6-10 luoghi, 4-6 personaggi con mestieri concreti, 6-10 fatti, 2-4 leggende raccontate dalla gente (storie di persone, bestie, dei, re del passato: mai sul mondo stesso, né sulle rune oltre il canone). La gente parla e si comporta come dice il lessico: usalo dove viene da sé, senza spiegarlo; in «usanze» al più 3 usanze o modi di dire propri di questo mondo, che non contraddicono il lessico e non aggiungono parole che ne sostituiscono altre.${feedback ? `\nL'Arbitro ha obiettato: ${feedback}` : ''}`,
+      `Crea la bibbia di un nuovo universo a partire da questo tema:\n${theme}\n\nPer chi ci vive il mondo è reale (vedi i principi). Scrivi un mondo semplice e concreto, fatto di persone e mestieri, nell'epoca che il tema dice: tono e sintesi la dicono chiaramente (la tecnologia, com'è una città), perché gli altri lavoreranno da lì. Le rune sono come le dice il canone: non aggiungere nulla. Elenca 6-10 luoghi, 4-6 personaggi con mestieri concreti, 6-10 fatti, 2-4 leggende raccontate dalla gente (storie di persone, bestie, dei, potenti del passato: mai sul mondo stesso, né sulle rune oltre il canone). La gente parla e si comporta come dice il lessico: usalo dove viene da sé, senza spiegarlo; in «usanze» al più 3 usanze o modi di dire propri di questo mondo, che non contraddicono il lessico e non aggiungono parole che ne sostituiscono altre.${feedback ? `\nL'Arbitro ha obiettato: ${feedback}` : ''}`,
       BIBLE_SCHEMA,
       { data },
     );
@@ -201,7 +206,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     c.ask<RawStyle>(
       'artista',
       'genesis.style',
-      `Scrivi la guida di stile per tutti i modelli di questo universo: è un gioco 3D in cui ogni cosa (persone, animali, alberi, rocce, oggetti, edifici) è un modello a voxel (20 voxel per casella) costruito da un programma di regole, visto dall'alto in 3/4. Dì lo stile (semplice e leggibile da lontano), le forme e le proporzioni, la palette (pochi colori ben distinti), la luce, 3-6 regole e l'aspetto del protagonista.\nTitolo: ${bible.titolo}\nTono: ${bible.tono}\nSintesi: ${bible.sintesi}${feedback ? `\nL'Arbitro ha obiettato: ${feedback}` : ''}`,
+      `Scrivi la guida di stile per tutti i modelli di questo universo: è un gioco 3D in cui ogni cosa (persone, animali, alberi, rocce, oggetti, edifici) è un modello a voxel (20 voxel per casella) costruito da un programma di regole, visto dall'alto in 3/4. Dì lo stile (semplice e leggibile da lontano), le forme e le proporzioni, la palette (pochi colori ben distinti), la luce, 3-6 regole e l'aspetto del protagonista, tutto nell'epoca del tema. In «case_comuni», solo se le case comuni di quest'epoca non sono casette di pietra, legno e paglia, dì in una frase come sono (un condominio con i balconi, una baracca di lamiera con un'insegna); altrimenti lascialo vuoto.\nTema: ${theme}\nTitolo: ${bible.titolo}\nTono: ${bible.tono}\nSintesi: ${bible.sintesi}${feedback ? `\nL'Arbitro ha obiettato: ${feedback}` : ''}`,
       STYLE_SCHEMA,
       { data: { ...data, bible } },
     );
@@ -209,7 +214,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     c.ask<{ terreni: RawTerrain[]; tetto: string }>(
       'cartografo',
       'genesis.terrain',
-      `Definisci 14-20 tipi di terreno per le mappe di questo universo, esterni e interni.\nTono: ${bible.tono}\nLuoghi: ${bible.luoghi.join('; ')}\nStile: ${style.stile}; palette ${style.palette.join(', ')}\nCodici obbligatori (un carattere ciascuno), adattati al tema:\n${Object.entries(BASE_CODES).map(([k, v]) => `- ${k}: ${v.meaning} [strato ${v.layer}]`).join('\n')}\nAggiungine altri (un carattere: es. campi coltivati, fango, pavimento di pietra, muro di pietra, mattoni, paglia delle capanne, staccionata, ponte levatoio, lava, tappeto). Colori ben distinti tra loro.${feedback ? `\nDa correggere: ${feedback}` : ''}`,
+      `Definisci 14-20 tipi di terreno per le mappe di questo universo, esterni e interni, della sua epoca.\nTema: ${theme}\nTono: ${bible.tono}\nLuoghi: ${bible.luoghi.join('; ')}\nStile: ${style.stile}; palette ${style.palette.join(', ')}\nCodici obbligatori (un carattere ciascuno), adattati al tema:\n${Object.entries(BASE_CODES).map(([k, v]) => `- ${k}: ${v.meaning} [strato ${v.layer}]`).join('\n')}\nAggiungine altri (un carattere), ciò che nel tema esiste: in un borgo campi coltivati, fango, muro di pietra, paglia, staccionata, ponte levatoio; in una città asfalto, binari, cemento, vetro, lamiera, rete metallica; ovunque lava, tappeto. Colori ben distinti tra loro.${feedback ? `\nDa correggere: ${feedback}` : ''}`,
       TERRAIN_SCHEMA,
       { data: { ...data, bible } },
     );
@@ -311,7 +316,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
   const { moduli } = await c.ask<{ moduli: CastEntry[] }>(
     'narratore',
     'genesis.cast',
-    `Scegli i primi abitanti e le prime cose di «${bible.titolo}»: 5 npc molto diversi tra loro (almeno 3 persone di mestieri, età e generi diversi, e 1 animale; nessuno uguale a un altro), 5 oggetti che stanno nel mondo (almeno 3 mobili o contenitori: letto, credenza, cassa, banco da lavoro…, e 1-2 cose all'aperto con cui fare qualcosa: pozzo, altare, falò…), 2 strumenti speciali. Per ognuno una richiesta di una frase per la Fucina, coerente con la bibbia.`,
+    `Scegli i primi abitanti e le prime cose di «${bible.titolo}»: 5 npc molto diversi tra loro (almeno 3 persone di mestieri, età e generi diversi, e 1 animale; nessuno uguale a un altro), 5 oggetti che stanno nel mondo (almeno 3 mobili o contenitori, come li ha la sua epoca: letto, credenza, cassa, banco da lavoro…, e 1-2 cose all'aperto con cui fare qualcosa: pozzo, altare, falò, cabina, distributore…), 2 strumenti speciali. Per ognuno una richiesta di una frase per la Fucina, coerente con la bibbia.`,
     CAST_SCHEMA,
     { data: { bible } },
   );
@@ -326,12 +331,16 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
   const tm = JSON.parse(base[terrainPath]);
   tm.tiles = palette;
   if (/^#[0-9a-f]{6}$/i.test(terrain.tetto ?? '')) tm.roof = { color: terrain.tetto.toLowerCase() };
+  // Common houses of their own only where the seed's cottages would not fit (ADR-0134): a world of cottages keeps the seed's.
+  const house = typeof style.case_comuni === 'string' ? style.case_comuni.trim().slice(0, 200) : '';
+  if (house && !metaBreak(house, wordsOf(base))) tm.commonHouse = house;
+  else delete tm.commonHouse;
   files[terrainPath] = JSON.stringify(tm, null, 2) + '\n';
   if (Object.keys(layouts).length >= 1) {
     const lp = 'modules/world.layouts/manifest.json';
     const lm = JSON.parse(base[lp]);
-    // Too few environments make a monotonous world: previous ones that still fit the new terrains stay.
-    const keep = Object.keys(layouts).length < 3 ? Object.entries<EnvironmentDef>(lm.layouts ?? {}).filter(([id, def]) => !layouts[id] && !checkLayout(id, def, palette).length) : [];
+    // Too few environments make a monotonous world: previous ones that fit any age and the new terrains stay.
+    const keep = Object.keys(layouts).length < 3 ? Object.entries<EnvironmentDef>(lm.layouts ?? {}).filter(([id, def]) => TIMELESS_LAYOUTS.has(id) && !layouts[id] && !checkLayout(id, def, palette).length) : [];
     lm.layouts = { ...layouts, ...Object.fromEntries(keep) };
     files[lp] = JSON.stringify(lm, null, 2) + '\n';
   }

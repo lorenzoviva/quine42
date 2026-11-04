@@ -3009,7 +3009,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ## Dalla chat del 02/11/2026 (testo originale: `docs/userchats/to-do-2026-11-02.md`)
 
-### T152 · Le ambientazioni della Genesi: medievale, steampunk, moderna, futuristica — `da fare` (dipende da T205)
+### T152 · Le ambientazioni della Genesi: medievale, steampunk, moderna, futuristica — `fatto` (`e30e2c8`) (dipende da T205)
 - Pipeline: claude · stima 5% · approvato · browser · priorità 80
 - Step: 31
 - Contesto: richiesta 1 dell'autore: un universo medievale (quello che c'è, `aurora`), uno steampunk, uno moderno (grande città, anni 90), uno futuristico (tipo neonpunk). Oggi il tema è testo libero nella schermata della Genesi (`src/ui/genesis.ts`, `planGenesis` in `agents/genesis.ts`) e il seme `universe/prompts/theme.md` è il Regno di Valmora. Il seme può presupporre il medioevo anche altrove: i 20 ambienti, i prompt degli agenti, la guida di stile, il canone delle rune e i modelli generici. Il lessico è già uguale in ogni ambientazione (ADR-0075).
@@ -3017,6 +3017,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Test: una Genesi offline (`MockModels`) per ogni tema: i file giusti, `prompts/theme.md` scritto, un universo che parte. Un universo esistente non cambia. Typecheck e suite intera con i loro turni.
 - Browser: col turno `browser`, `?offline`: la schermata della Genesi offre i quattro temi e con ognuno si arriva al mondo senza errori in console. I contenuti veri non si vedono offline: scrivilo nell'esito.
 - Quando è fatto: commit su `task/T152`; nell'esito il censimento e cosa può ancora tradire il tema nei contenuti generati, da leggere in T153.
+- Esito: commit `fa0d352` e `e30e2c8` su `task/T152`: quattro temi modificabili nella Genesi su un seme solo (`src/kernel/themes.ts`, ADR-0134, `AGENTS.md`, glossario); prompt, principi e canone neutri; case comuni dipendenti dal mondo (`case_comuni` → `commonHouse`, `commonHouseModel`, prime nella coda del `ModelDirector`); con meno di 3 ambienti restano solo quelli senza epoca (`TIMELESS_LAYOUTS`, anche per il medievale); un piano il cui ambiente non c'è più si rifà; `?offline` può fare una Genesi locale; `STRUCTURES` riconosce edifici moderni; corretto il riquadro del tema schiacciato. Censimento in `docs/temi-censimento.md`: lasciati com'è, con il motivo, i contenuti di Valmora (la Genesi li sostituisce), i nomi dei timbri, i modelli generici, il viandante, la bozza naturale, `BASE_CODES`, `ITEM_SHAPES`, i ripieghi su terreni e oggetti del seme, la musica. Il filtro `META_RE` non è allentato. Può ancora tradire il tema, da leggere in T153: forma dei timbri, città rada sulla bozza naturale, mestieri, casette se l'Artista lascia vuoto `case_comuni` o finisce il budget, oggetti, righe ritirate dal filtro, leggende, modo di parlare della magia, musica. Non provato: Gemini vero, quindi nessun contenuto generato per tema, e `commonHouse` solo nei test con modelli finti, senza un modello scolpito davvero. Margine di `tests/focus.test.ts` quasi esaurito. Suite 1960 test, typecheck e build verdi. Sicurezza: nessuna superficie nuova.
 
 ### T153 · Gli universi steampunk, moderno e futuristico: leggerli e provarli — `in attesa` (dipende da T152, T156, T88)
 - Pipeline: claude · stima 2% · priorità 81

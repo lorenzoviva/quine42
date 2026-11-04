@@ -278,6 +278,8 @@ export interface Manifest {
   tiles?: Record<string, TerrainDef>;
   /** Roof of buildings (generator modules). */
   roof?: { color: string };
+  /** What this world's common houses are like, when not the seed's cottages (ADR-0134). */
+  commonHouse?: string;
   fragments?: RuneFragment[];
   /** Content packs (data modules). */
   items?: ItemDef[];

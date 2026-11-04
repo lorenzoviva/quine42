@@ -10,6 +10,7 @@ import type { AiConfig, GameSetup } from '../kernel/types';
 import { COEFFICIENT_INFO, COEFFICIENT_KEYS, CENSUS, FULL_DETAIL, hourlyEstimate, isLowDetail, LOW_DETAIL, pricedAiModels, type Coefficients } from '../kernel/coefficients';
 import { DEFAULT_SCULPTORS, type SculptorAiModels } from '../kernel/agents/sculptor';
 import { usd } from '../kernel/ai/prices';
+import { themeOfText, WORLD_THEMES } from '../kernel/themes';
 import { feedLine } from './feed';
 import { $, el } from './dom';
 
@@ -149,12 +150,23 @@ export class GenesisScreen {
     return { form, read, lock };
   }
 
-  /** Resolves when the player has a world to play (generated or the example one). */
-  show(canGenerate: boolean): Promise<void> {
+  /** Resolves when the player has a world to play (generated or the example one). `local`: the local models were asked for (`?offline`): a Genesis with them can be run. */
+  show(online: boolean, local = false): Promise<void> {
+    const canGenerate = online || local;
     return new Promise((resolve) => {
-      const theme = el('textarea', { rows: '7', spellcheck: 'false' }) as HTMLTextAreaElement;
+      const theme = el('textarea', { rows: '10', spellcheck: 'false' }) as HTMLTextAreaElement;
       theme.value = (this.k.files[this.k.config.theme] ?? '').trim();
-      const go = el('button', { class: 'primary' }, canGenerate ? 'Genera il mondo con Gemini' : 'Gemini non disponibile');
+      // Four themes to start from (ADR-0134): the text stays free, and a text rewritten is simply «su misura».
+      const CUSTOM = 'misura';
+      const themes = el('select', { id: 'genesi-tema' }, ...WORLD_THEMES.map((t) => el('option', { value: t.id }, t.name)), el('option', { value: CUSTOM }, 'Su misura')) as HTMLSelectElement;
+      const showTheme = () => (themes.value = themeOfText(theme.value)?.id ?? CUSTOM);
+      showTheme();
+      theme.oninput = showTheme;
+      themes.onchange = () => {
+        const chosen = WORLD_THEMES.find((t) => t.id === themes.value);
+        if (chosen) theme.value = chosen.text;
+      };
+      const go = el('button', { class: 'primary' }, online ? 'Genera il mondo con Gemini' : local ? 'Genera il mondo con i modelli locali' : 'Gemini non disponibile');
       const skip = el('button', {}, "Gioca l'universo di esempio");
       if (!canGenerate) go.setAttribute('disabled', '');
       const game = this.gameForm();
@@ -162,9 +174,11 @@ export class GenesisScreen {
       const cost = el(
         'div',
         { class: 'note' },
-        canGenerate
+        online
           ? `Il Concilio (${this.k.config.ai.textModel}) scriverà bibbia, stile, terreni, ambienti, decine di oggetti e i primi abitanti (circa 60 chiamate di testo, economiche). Niente immagini: ogni cosa sarà un modello scritto in regole.`
-          : 'Manca GEMINI_API_KEY nel file .env, oppure il server non è quello di Vite. Puoi giocare offline: i luoghi saranno abbozzati e gli agenti risponderanno con un modello locale.',
+          : local
+            ? 'Senza Gemini: i modelli locali non leggono il tema e scrivono sempre lo stesso mondo, ma ogni passo della Genesi si compie e il tema resta scritto.'
+            : 'Manca GEMINI_API_KEY nel file .env, oppure il server non è quello di Vite. Puoi giocare offline: i luoghi saranno abbozzati e gli agenti risponderanno con un modello locale.',
       );
       const feed = el('div', { class: 'feed' });
       const status = el('div', { class: 'status' });
@@ -182,6 +196,7 @@ export class GenesisScreen {
         go.setAttribute('disabled', '');
         skip.setAttribute('disabled', '');
         theme.setAttribute('disabled', '');
+        themes.disabled = true;
         game.lock(true);
         detail.lock(true);
         this.k.setAi(detail.read());
@@ -198,6 +213,7 @@ export class GenesisScreen {
           go.removeAttribute('disabled');
           skip.removeAttribute('disabled');
           theme.removeAttribute('disabled');
+          themes.disabled = false;
           game.lock(false);
           detail.lock(false);
           this.root.classList.remove('running');
@@ -209,7 +225,8 @@ export class GenesisScreen {
           { class: 'window' },
           el('div', { class: 'logo' }, 'ᚱ ᚢ ᚾ ᛖ'),
           el('h1', {}, 'Genesi'),
-          el('div', { class: 'note' }, 'Descrivi il mondo che vuoi. Il tappeto, le rune e la corona ci saranno comunque: sono le costanti di ogni universo.'),
+          el('div', { class: 'note' }, "Scegli un'ambientazione e, se vuoi, riscrivila: descrivi il mondo che vuoi. Il tappeto, le rune e la corona ci saranno comunque: sono le costanti di ogni universo."),
+          el('label', { for: 'genesi-tema' }, 'Ambientazione', themes),
           theme,
           game.form,
           detail.form,

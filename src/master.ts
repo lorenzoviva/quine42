@@ -87,10 +87,10 @@ export class MasterTools {
   }
 
   /** The Genesis: generation waits for it, the windows hold the keys meanwhile. */
-  async runGenesis(online: boolean, onFocus: () => void): Promise<void> {
+  async runGenesis(online: boolean, onFocus: () => void, local = false): Promise<void> {
     this.kernel.generationHeld = true;
     onFocus();
-    await this.genesis.show(online);
+    await this.genesis.show(online, local);
     this.kernel.generationHeld = false;
     onFocus();
   }

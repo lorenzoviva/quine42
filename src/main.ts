@@ -404,7 +404,7 @@ async function main() {
   if (settled && !settled.ok) hud.message(`Regolazioni non applicate: ${settled.motivo}.`, 'warn');
   else if (settled?.riparati?.length) hud.message(`Regolazioni riparate: ${settled.riparati.join('; ')}.`, 'warn');
   actions.onClose = syncFocus;
-  const runGenesis = async () => tools?.runGenesis(online, syncFocus);
+  const runGenesis = async () => tools?.runGenesis(online, syncFocus, params.has('offline'));
   // A universe that was never generated waits for its genesis before the Council paints anything.
   // Alone, nothing is asked of the models until the settings are fixed on entering (T247): the lobby, or the Genesis.
   const entersWithLobby = !thin && !params.has('skip') && !kernel.needsGenesis() && (online || params.has('lobby'));

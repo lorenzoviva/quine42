@@ -39,7 +39,7 @@ import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, DEFAULT_PLATFORM_FEE,
 import { MemoryChunks, type ChunkStore } from './chunks';
 import { bodyFoot, bodyGround, Forms, holesOf, InlineRunner, instanceGrid, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground } from './forms';
 import { classOf, guessClass, RARE_SIZES, sizeRank, SIZE_TIERS, tilesOf, type SizeTier } from '../mj/classes';
-import { GENERIC, ModelDirector, ownModelId } from './modeldirector';
+import { commonHouseModel, GENERIC, ModelDirector, ownModelId } from './modeldirector';
 import { ScoreDirector } from './scoredirector';
 import { categoryOf, DEFAULT_SCULPTORS, sculptAction, type SculptorAiModels } from './agents/sculptor';
 import { MODELS_INDEX, type ModelInfo } from './forms';
@@ -1626,7 +1626,8 @@ export class Kernel {
   private async develop(ch: Chunk): Promise<void> {
     const rec = await this.chunkStore.load(this.recordKey(ch));
     if (!this.alive(ch)) return;
-    if (rec) return this.applyPlan(ch, rec.plan);
+    // A plan whose environment is gone belongs to another world (a Genesis under the same title, ADR-0134): planned again.
+    if (rec && (!rec.plan.layout || this.content.layouts[rec.plan.layout])) return this.applyPlan(ch, rec.plan);
     // New to the universe: planned once, here, at the expense of who wanted it first (T40), within the quota.
     if (!this.chunkQuota()) {
       if (!ch.held) this.council.say('kernel', 'info', `luogo ${ch.key}: troppi luoghi nuovi in un minuto, aspetta`, 'cartografo', 'chunk.plan');
@@ -1854,7 +1855,7 @@ export class Kernel {
   private fallbackPlan(ch: Chunk, layouts: string[], start: boolean): ChunkPlan {
     const rng = new Rng(hash32(this.config.seed, ch.cx, ch.cy, 404));
     const trees = [...ch.draft].filter((c) => c === 't').length / ch.draft.length;
-    const layoutId = start ? (layouts.find((l) => /borgo|villag|paese/.test(l)) ?? layouts[0]) : trees > 0.3 && layouts.includes('bosco') ? 'bosco' : layouts[rng.int(Math.max(1, layouts.length))];
+    const layoutId = start ? (layouts.find((l) => /borgo|villag|paese|citt|quartier/.test(l)) ?? layouts[0]) : trees > 0.3 && layouts.includes('bosco') ? 'bosco' : layouts[rng.int(Math.max(1, layouts.length))];
     const plan: ChunkPlan = { place: { name: 'Terra senza nome', description: 'Qui il mondo non ha ancora trovato le parole.' }, layout: layoutId ?? '', objects: [], ground: [], fresh: [], runes: [] };
     for (const m of this.modules.values()) {
       const rule = m.manifest.spawn;
@@ -2165,7 +2166,9 @@ export class Kernel {
       const w = b.x1 - b.x0 + 1, h = b.y1 - b.y0 + 1;
       const classe = Math.max(w, h) >= 5 ? 'grande' : 'edificio';
       const req = wanted.shift();
-      const own = req ? `struttura-${ownModelId(req.concetto).slice(0, 30)}` : undefined;
+      // A world whose common houses are not the seed's cottages has its own (ADR-0134), one per class of lot, however many lots.
+      const house = req ? undefined : this.terrain?.manifest.commonHouse;
+      const own = req ? `struttura-${ownModelId(req.concetto).slice(0, 30)}` : house ? commonHouseModel(house, classe) : undefined;
       for (const c of [...b.walls, ...b.floor, ...b.doors]) {
         const d = this.palette[ch.draft[c]];
         tiles[c] = d && !d.solid && (d.layer ?? 'ground') === 'ground' ? ch.draft[c] : pathCode;
@@ -2190,7 +2193,7 @@ export class Kernel {
         x: ch.cx * S + (b.x0 + b.x1 + 1) / 2,
         y: ch.cy * S + (b.y0 + b.y1 + 1) / 2,
         form,
-        struttura: { concetto: req?.concetto ?? (classe === 'grande' ? 'una casa' : 'una casetta'), classe, ...(req?.taglia ? { taglia: req.taglia } : {}), ...(own ? { model: own } : {}) },
+        struttura: { concetto: req?.concetto ?? house ?? (classe === 'grande' ? 'una casa' : 'una casetta'), classe, ...(req?.taglia ? { taglia: req.taglia } : {}), ...(own ? { model: own } : {}) },
       });
     }
     return { tiles: tiles.join(''), lots };
