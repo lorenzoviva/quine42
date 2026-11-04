@@ -1,0 +1,39 @@
+<!-- Un passo su una grata di metallo: il colpo secco, la lamiera che vibra su un'altezza aspra e si spegne. -->
+<sequence name="Passo sul metallo" values="BNSAGKHCTUVPM" size="8 2 10" symmetry="()">
+  <sound bpm="150" scale="harmonic_minor" root="55" swing="0" cutoff="8000" space="0.4">
+    <track y="0" instrument="lead" volume="0.55"/>
+    <track y="1" instrument="bass" volume="0.7"/>
+  </sound>
+  <color symbol="N" value="38bdf8" name="Nota" glow="True"/>
+  <color symbol="S" value="0284c7" name="Sustain" alpha="0.85"/>
+  <color symbol="A" value="f43f5e" name="Accento" glow="True"/>
+  <color symbol="G" value="818cf8" name="Ghost" alpha="0.7"/>
+  <color symbol="K" value="fbbf24" name="Kick" glow="True"/>
+  <color symbol="H" value="fde047" name="Hi-hat" alpha="0.85"/>
+  <color symbol="C" value="fb923c" name="Rullante" glow="True"/>
+  <color symbol="T" value="ec4899" name="Scelta" hidden="True"/>
+  <color symbol="U" value="a855f7" name="Scelta" hidden="True"/>
+  <color symbol="V" value="10b981" name="Scelta" hidden="True"/>
+  <color symbol="P" value="64748b" name="Scelta" hidden="True"/>
+  <color symbol="M" value="14b8a6" name="Scelta" hidden="True"/>
+
+  <!-- Il colpo: rullante e hi-hat insieme. -->
+  <line at="0 1 2" to="0 1 2" r="0" color="C"/>
+  <line at="0 1 1" to="0 1 1" r="0" color="H"/>
+  <line at="2 1 1" to="2 1 1" r="0" color="T"/>
+  <line at="3 1 1" to="3 1 1" r="0" color="T"/>
+  <line at="4 1 4" to="4 1 4" r="0" color="T"/>
+  <one in="T" out="H" steps="1"/>
+  <all in="T" out="B"/>
+  <!-- La lamiera: un accento acuto (la sega), poi un rimbalzo più basso. -->
+  <line at="0 0 7" to="0 0 7" r="0" color="U"/>
+  <line at="0 0 8" to="0 0 8" r="0" color="U"/>
+  <line at="0 0 6" to="0 0 6" r="0" color="U"/>
+  <one in="U" out="A" steps="1"/>
+  <all in="U" out="B"/>
+  <all in="AB" out="AS"/>
+  <line at="3 0 4" to="5 0 4" r="0" color="V"/>
+  <line at="3 0 5" to="5 0 5" r="0" color="V"/>
+  <one in="V" out="G" steps="1"/>
+  <all in="V" out="B"/>
+</sequence>

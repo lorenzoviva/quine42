@@ -5,7 +5,7 @@
 Sorgente: `lab/banco/suoni-cloud/fantasy/suono-fantasy-citta-locanda.xml`. Rigenera con `npx vite-node lab/banco/suoni-cloud/valida.ts -- lab/banco/suoni-cloud/fantasy/suono-fantasy-citta-locanda.xml`.
 
 ## Esito
-Dieci terne su dieci senza difetti; il validatore (`modelErrors`, semi 1, 2, 3) non rimanda niente. Distanza media fra i 30 semi 0.74 (minima fra due semi 0.56, soglia 0,05), 30 partiture diverse su 30.
+Dieci terne su dieci senza difetti; il validatore (`modelErrors`, semi 1, 2, 3) non rimanda niente. Distanza fra i semi di ogni terna almeno 0,15 (tre volte la soglia 0,05); media fra i 30 semi 0.74 (minima fra due semi 0.56), 30 partiture diverse su 30.
 
 ## Le dieci terne
 | semi | verdetto | distanza | eventi | note diverse (min) | RMS dBFS | picco grezzo (max) | silenzio (max) | dinamica dB (min) | giuntura (max) | aspri (max) | periodo (min) |
