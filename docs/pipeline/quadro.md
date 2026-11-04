@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 04/11/2026, epoca 251. Crediti: vedi `stato`.
+Aggiornato il 04/11/2026, epoca 252. Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -34,11 +34,11 @@ Aggiornato il 04/11/2026, epoca 251. Crediti: vedi `stato`.
 - **T238 integrato** (`6a60b78`, ADR-0130): ogni richiesta che finisce male è una voce di `world/mancanze.json`, fuori da `playerFiles` e `publicFiles`; rapporto con `npm run mancanze`. Solo modelli offline: non provati fallimenti veri con Gemini né una partita reale. `docs/glossario-censimento.md` non rigenerato. 
 - **T244 integrato** (`59bd9d5`, ADR-0131): home ritoccata, video da `QUINE_VIDEO` con `video.json` e rotta `/api/video` con `Range`, istruzioni da `docs/beta/` con `site/beta.json` per la seconda parte (spenta non entra in `dist/`). Provato nel browser sotto `serve` e `dev`. Non provati: telefono vero, `.mp4` vero, video spenti in `dev`. **Li scrive l'autore:** `guida.md` e `la-corona.md` (senza, la pagina non compare); guida in `docs/beta/LEGGIMI.md`. Banda da decidere al primo deploy pubblico.
 - **T243 nel base via T248 e T249** (ADR-0132, `QUINE_COMMISSIONE`, predefinita 0,01), suite 1875. Non provati: `npm run serve` e il browser. `docs/glossario-censimento.md` non rigenerato. Ramo chiuso da T250, entrambi integrati.
-- **T247 finito, non integrato** (ADR-0133, 1935 test): consumo regolabile in lobby, blocco a partita in corso. `integra` in conflitto in `AGENTS.md`, `client.ts`, `protocol.ts`, `style.css`: lo unisce T251, poi `integra T251`, `integra T247`. Non provati: lobby da soli con modelli veri, viandante a 390 px. Resta che `checkout`/`reset` del master muovono `ai` sul disco, con effetto dalla partita dopo. **Chiesto all'autore:** `domande/T247.md` (sul branch), le 8 righe della Genesi senza manopola; proposta lasciarle così.
+- **T247 integrato via T251** (ADR-0133, suite 1943 sul branch di T251, non rilanciata nel base): consumo regolabile in lobby, blocco a partita in corso; browser a 1920 px con `?offline&lobby`. Non provati: partita di molti, lobby da soli con modelli veri, 390 px. Resta che `checkout`/`reset` del master muovono `ai` sul disco, con effetto dalla partita dopo. **Chiesto all'autore:** `domande/T247.md`, le 8 righe della Genesi senza manopola (proposta: lasciarle così); il difetto trovato da T251, casella del tema nella Genesi schiacciata a 22 px (proposta: task T252, `flex-shrink: 0` su `#genesis textarea`; nessun task finché non approva).
 
 ## Pronti e priorità
 
-1. **In coda, approvati e pronti, partono da soli:** T251 (in corso), T89b T89e T183 T152.
+1. **In coda, approvati e pronti, partono da soli:** T89e (in corso), T89b T183 T152.
 4. **T182 → T156** (strutture procedurali). **T182 fermo in attesa dell'autore al giro 3 di 4, non integrato:** soglia NO. Misure e varianza 10/12 entro due richieste (7 alla prima), foto 0/10 per giudizio dell'agente, locanda esclusa; 1,15 $ a modello, 30,59 $ in tutto a listino. **Chieste le 3 decisioni di `docs/pipeline/domande/T182.md` (sul branch `task/T182`):** cantina a due taglie, interni contro la misura `stanze`, se la ricchezza basta. Bloccati finché non risponde: T156, poi T207, T88, T153, T242.
 4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla. T89d resta bloccato.
 
@@ -70,5 +70,5 @@ Aggiornato il 04/11/2026, epoca 251. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **250:** integrati T249, T248, T241.
 - **251:** integrati T250 e T243; T247 finito, in conflitto: T251 lo unisce.
+- **252:** integrati T251 e T247.
