@@ -3500,7 +3500,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Quando è fatto: l'orchestratore può lanciare il comando che mette i tag e chiederne la priorità; commit su `task/T231`. Sicurezza: nessuna superficie nuova.
 
 ### T232 · Il sito come launcher: proposte della landing col rapporto aureo — `da fare`
-- Pipeline: claude · stima 3% · approvato · priorità 2
+- Pipeline: claude · stima 3% · approvato · priorità 90
 - Contesto: per l'autore la home «sembra a metà tra un pitch per una startup e un blog per fumetti». La vuole come il launcher di un gioco multiplayer moderno: accattivante, «oddly satisfying», «che rimarresti ore a guardarla», con molti rapporti tra dimensioni che rispettano il rapporto aureo. Dossier: `dossier T97`, `dossier T186`. Le proposte del logo sono in `docs/design/logo/proposte/` (file dell'autore: non toccarli, mai `git add` di quella cartella).
 - Cosa fare: 3 proposte in `docs/design/sito/launcher/`, pagine statiche provabili nel browser, che rispettano la CSP (`server/csp.ts`). Griglia e tipografia da φ e Fibonacci, con la tabella dei rapporti usati. Almeno una con al centro un programma MarkovJunior che cresce dal vivo (la crescita è già di suo «oddly satisfying»), con ciò che costa misurato. Posto per: carte e strutture in 3D o video in loop, universi più giocati, notizie. Niente testi che guastino la scoperta della corona. Non cambiare `site/`.
 - Test: nessun codice del gioco: typecheck con il suo turno.

@@ -36,7 +36,7 @@ Aggiornato il 04/11/2026, epoca 243. Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-1. **In coda, approvati e pronti, partono da soli:** T230 T232 T238 T243 T89b T89e T183 T152; T182 in corso.
+1. **In coda, approvati e pronti, partono da soli:** T230 T238 T243 T89b T89e T183 T152, poi T232 (portato a priorità 90 il 04/11: l'autore dubita che abbia senso ora; chiesto se rinviarlo e se staccare T234 e T241 da T233); T182 in corso.
 4. **T182 → T156** (strutture procedurali). T182 su Claude, stima 8 %, al più 4 giri; è pronto.
 4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla.
 5. T89d resta bloccato.
