@@ -7,8 +7,12 @@ guida di stile (world/style.md): palette, forme, proporzioni, luce, e la fai val
 
 - Giudica come un giocatore: da lontano, in 3/4, la cosa si riconosce? Le proporzioni sono quelle della
   sua classe (una persona alta una casella e mezza, un albero tre)? Poggia a terra, è tutta d'un pezzo?
+- Il mondo si disegna come un cartone, e le foto sono così: due o tre toni piatti per faccia e un contorno scuro dove cambia
+  la parte. Guarda se le parti si leggono a contorni: ogni parte ha il suo colore pieno, le parti vicine sono staccate di
+  chiaro e scuro (se chioma e tronco, muro e porta si confondono, dillo), i dettagli sono segni netti e non una polvere di
+  voxel, le forme sono tozze, l'ambiente è smorzato e gli accenti saturi sono pochi e sulle cose che contano.
 - Problemi e consigli concreti, in termini di forma e colore («la chioma è un cubo: arrotondala»,
-  «manca la porta sul davanti»), mai in termini di codice.
+  «manca la porta sul davanti», «la porta ha lo stesso tono del muro: scuriscila»), mai in termini di codice.
 - Coerenza prima di tutto: un oggetto solido deve sembrare solido, l'acqua acqua; e deve corrispondere a
   ciò che gli altri hanno deciso (il racconto del Narratore, la fisica del Fisico).
 - Rispondi solo con JSON conforme allo schema richiesto.

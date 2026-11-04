@@ -4,6 +4,9 @@
 
 import * as THREE from 'three';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import { BAND_LEVELS, CARTOON_HEMI, DAY_LIGHT, SHADOW_INTENSITY, SUN_FROM, type Tint } from '../mj/toonlight';
+
+export { BAND_LEVELS, CARTOON_HEMI, SHADOW_INTENSITY, SUN_FROM };
 
 /** Whether the game draws as a cartoon unless the URL says otherwise: `true` once T89b and T89c are done. */
 export const CARTOON_BY_DEFAULT = false;
@@ -16,12 +19,6 @@ export function cartoonOn(search: string, byDefault = CARTOON_BY_DEFAULT): boole
 
 /** Whether the world draws as a cartoon (never in Node). */
 export const CARTOON = typeof location !== 'undefined' && cartoonOn(location.search);
-
-/** Where the sun stands, from what the camera looks at. */
-export const SUN_FROM: readonly [number, number, number] = [-14, 24, 10];
-
-/** How much of the sun each band lets through: away from it, half-light, full light. */
-export const BAND_LEVELS: readonly [number, number, number] = [0.35, 0.6, 0.85];
 
 /**
  * Where the bands change, in the cosine between a face and the sun. Not three equal thirds: voxels only have six
@@ -46,23 +43,11 @@ export function bandRamp(): Uint8Array {
   return data;
 }
 
-/**
- * How much the sun still reaches inside a cast shadow, as the low band: the shadow's intensity is the rest. Faces
- * away from the sun are in shadow too, so at full intensity the low band would never be seen.
- */
-export const SHADOW_INTENSITY = 1 - BAND_LEVELS[0];
-
 /** The radius of the shadows' filter, in texels of the shadow map: sharp edges, without the filter's grain. */
 export const SHADOW_RADIUS = 0;
 
-/** The hemisphere: faces standing upright get the middle of the two, so that middle has to be cold, not grey. */
-export const CARTOON_HEMI = { sky: 0xc4dcff, ground: 0x5f5cb4 } as const;
-
 /** The light in the studio: without any sun no face would ever change band there. */
 export const CARTOON_STUDIO = { sun: 1.1, hemi: 0.7 } as const;
-
-/** Linear RGB multiplying the light of what lies in shadow: the blue of the photo, not a darker grey. */
-export type Tint = readonly [number, number, number];
 
 /** The light of a moment of the day, what `cartoonLight` blends. */
 interface Phase {
@@ -81,7 +66,7 @@ interface Phase {
  * back up in the dark, where the glowing voxels are what one sees.
  */
 export const PHASES: Readonly<Record<'day' | 'dusk' | 'night', Phase>> = {
-  day: { sun: 0xffdca6, sunIntensity: 2.4, sky: CARTOON_HEMI.sky, ground: CARTOON_HEMI.ground, hemiIntensity: 1.1, shade: [0.74, 0.86, 1.18], bloom: 0.5 },
+  day: { ...DAY_LIGHT, bloom: 0.5 },
   dusk: { sun: 0xff9458, sunIntensity: 2.0, sky: 0xc0a8e0, ground: 0x5c4490, hemiIntensity: 0.8, shade: [0.72, 0.72, 1.2], bloom: 0.65 },
   night: { sun: 0x9db4f0, sunIntensity: 0.9, sky: 0x5070c0, ground: 0x28306c, hemiIntensity: 0.55, shade: [0.68, 0.78, 1.22], bloom: 0.85 },
 };
@@ -257,8 +242,6 @@ export class Ink {
     // ShaderPass clones its uniforms (textures too): the targets go in after.
     this.pass.uniforms.tIds.value = this.target.texture;
     this.pass.uniforms.tDepth.value = this.target.depthTexture;
-    // The thresholds, to try from the console (`window.cartone.uDepthEdge.value.set(…)`).
-    (globalThis as { cartone?: unknown }).cartone = this.pass.uniforms;
   }
 
   setSize(w: number, h: number, dpr: number): void {

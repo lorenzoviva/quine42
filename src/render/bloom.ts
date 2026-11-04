@@ -38,6 +38,8 @@ export class Bloom {
     if (CARTOON && camera instanceof THREE.PerspectiveCamera) {
       this.ink = new Ink(scene, camera, idsOf);
       this.composer.addPass(this.ink.pass);
+      // The thresholds, to try from the console (`window.cartone.uDepthEdge.value.set(…)`).
+      (globalThis as { cartone?: unknown }).cartone = this.ink.pass.uniforms;
     }
     this.pass = new UnrealBloomPass(new THREE.Vector2(1, 1), strength, radius, 0);
     this.pass.materialHighPassFilter.fragmentShader = GLOW_PASS;

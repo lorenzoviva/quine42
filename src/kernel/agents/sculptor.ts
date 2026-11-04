@@ -13,7 +13,7 @@ import { boxOf, classOf, CLASSES, densityOf, RARE_SIZES, sizeOf, SIZE_TIERS, TIL
 import { Mj3Error, type RunResult, type Vec3 } from '../../mj/engine';
 import { compileMjx, type MjxModel } from '../../mj/model';
 import { MJ_PALETTE } from '../../mj/palette';
-import { DEFAULT_RENDER, render, sheet } from '../../mj/photo';
+import { cartoonRender, render, sheet, type RenderOptions } from '../../mj/photo';
 import { pngDataUrl } from '../../mj/png';
 import { act, runMjx } from '../../mj/run';
 import type { FileMap } from '../types';
@@ -167,11 +167,13 @@ export function checkProgram(xml: string, cls: AssetClass, taglia?: string): Che
   }
 }
 
-/** The four photographs the Artist looks at (front, right, back, left), as one image. */
+/** The four photographs the Artist looks at (front, right, back, left), as one image, as the world draws them (ADR-0093). */
 export function views(c: Checked): string {
-  const pics = [0, 1, 2, 3].map((v) => render(c.result!.grid, c.model!.program.palette, v, DEFAULT_RENDER));
-  const w = pics.reduce((s, v) => s + v.w + 4, 4);
-  return pngDataUrl(sheet(pics, Math.max(2, Math.min(6, Math.floor(1024 / w))), 4, [112, 150, 84]));
+  const shoot = (o: RenderOptions) => [0, 1, 2, 3].map((v) => render(c.result!.grid, c.model!.program.palette, v, o));
+  // Drawn at the size they are looked at, not enlarged after: the ink stays a thin line on every voxel.
+  const w = shoot({ ...cartoonRender(1), outline: false }).reduce((s, v) => s + v.w + 4, 4);
+  const px = Math.max(2, Math.min(6, Math.floor(1024 / w)));
+  return pngDataUrl(sheet(shoot(cartoonRender(px)), 1, 4 * px, [112, 150, 84]));
 }
 
 export function describe(req: SculptRequest, cls: AssetClass): string {
@@ -197,7 +199,7 @@ export function modelFor(req: SculptRequest, cls: AssetClass, m: SculptorAiModel
 
 export async function judge(c: Council, req: SculptRequest, cls: AssetClass, checked: Checked, artist: string): Promise<Critique | undefined> {
   try {
-    const raw = await c.ask<Partial<Critique>>('artista', 'model.judge', `${describe(req, cls)}\nL'immagine mostra il modello da quattro lati (fronte, destra, retro, sinistra). Giudicalo.`, CRITIQUE_SCHEMA, {
+    const raw = await c.ask<Partial<Critique>>('artista', 'model.judge', `${describe(req, cls)}\nL'immagine mostra il modello da quattro lati (fronte, destra, retro, sinistra), come appare nel mondo: fasce di luce piatte e un contorno scuro dove cambia la parte. Giudicalo, anche per come le sue parti si leggono a contorni.`, CRITIQUE_SCHEMA, {
       images: [views(checked)],
       model: artist,
       temperature: 0.3,
