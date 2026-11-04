@@ -4041,23 +4041,33 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: commit su `task/T257` col solo `docs/pipeline/modelli.md`; nell'esito cosa cambia nella proposta. Sicurezza: nessuna superficie nuova.
 - Esito: aggiornato `docs/pipeline/modelli.md` correggendo l'attribuzione di T180/T181/T182 e del modello del banco (`claude-opus-5-5`), ricalcolando i consumi sulle 213 righe di `consumi.jsonl` (inclusi T181, T182 e T254), correggendo il fattore di Argon da 8,13× a 3,92× su 4 task (1,10× in T254, senza doppio conteggio T68b+T69), riallineando OSWorld 2.1 (Opus 81,8 % vs Sonnet 80,1 %) e tutti i numeri del PDF `gemini_4_argon_model_evaluation.pdf`, e aggiornando la proposta di assegnazione con indicazione esplicita delle voci `mai provato da noi`; nulla manca.
 
-### T260 · Le regole per cambiare il kernel senza wipe — `in attesa`
-- Pipeline: claude · stima 6% · approvato · priorità 11
+### T260 · Il versionamento del kernel (`X.Y.Z`) e la compatibilità degli universi — `da fare`
+- Pipeline: claude · stima 3% · approvato · priorità 10
 - Step: 32
-- Contesto: in attesa di D32 (04/11): l'autore ha chiarito che una nuova versione del kernel non deve essere limitata dalla retrocompatibilità con gli universi precedenti (sul nuovo kernel si inizia un nuovo universo, o si tiene il vecchio kernel sul suo server / futura migrazione IA a pagamento). Nasce da T183 (`dossier T183`).
-- Cosa fare: da riscrivere dopo D32 (tenere solo `universe.json → kernel` con controllo di versione, guasto chiaro su effetto senza chi lo applica, e ADR/regola che lega ogni universo alla sua versione del kernel senza vincolare i kernel futuri).
-- Test: i test `TRAP` di `tests/espressivita/` che questo task chiude cambiano di conseguenza. Suite intera e typecheck con i loro turni.
+- Contesto: decisioni dell'autore del 04/11 (D32): (1) una nuova versione incompatibile del kernel non è vincolata dalla retrocompatibilità con gli universi precedenti («se vuoi giocare sul nuovo kernel devi iniziare un nuovo universo»; gli universi vecchi girano sul server della versione con cui sono nati o migrano in futuro via IA a pagamento); (2) introdurre da subito il versionamento rigoroso del kernel a partire da `0.1.0`, avanzando progressivamente quando le modifiche toccano `src/kernel/`. Nasce da T183 (`dossier T183`).
+- Cosa fare:
+  1. **Schema SemVer del kernel (`X.Y.Z` = `FASE . CONTRATTO . INCREMENTO`):**
+     - `X` (**Major — era**): `0` durante lo sviluppo e la beta (Fase I-II), `1` dal kernel `1.0.0` (Fase III-IV).
+     - `Y` (**Minor — contratto dell'universo**): parte da `1` (`0.1.0`), sale di `+1` quando uno step o una modifica di `src/kernel/` cambia il contratto con l'universo (formati in `world/`/`maps/`/`modules/`, semantica delle primitive o regole del terreno) in modo incompatibile con gli universi esistenti (richiedendo un nuovo universo), ed è `9` (`0.9.0`) al congelamento della Beta a fine Fase I.
+     - `Z` (**Patch — incremento progressivo del kernel**): parte da `0` e sale di `+1` a ogni task integrato che modifica `src/kernel/` restando compatibile con gli universi della stessa `X.Y` (correzioni, ottimizzazioni, aggiunte puramente additive; torna a `0` quando sale `Y`).
+  2. **`KERNEL_VERSION` e `universe.json → kernel`:**
+     - Definisci `KERNEL_VERSION = '0.1.0'` in `src/kernel/` (allineato a `package.json`, verificato da un test) e scrivilo in `universe/universe.json → kernel` e a ogni creazione/salvataggio dell'universo.
+     - Funzione pura `checkKernelVersion(universeKernel, kernelVersion)` chiamata al caricamento dell'universo: un universo è compatibile se ha lo **stesso `X.Y`** del kernel e `Z_universo <= Z_kernel`; se `X.Y` è diverso (o `Z_universo > Z_kernel`), rifiuta/avvisa in modo chiaro indicando la versione dell'universo e quella del kernel (serve iniziare un nuovo universo o usare il server della versione `X.Y`).
+  3. **Effetto senza chi lo applica:** quando un effetto invocato non è gestito né dal kernel né da `core.effects`, alza un guasto chiaro (`fault`) invece di ignorarlo in silenzio.
+  4. **ADR, regole e test:** ADR sul versionamento `X.Y.Z` e sulla regola «nuovo contratto `X.Y` = nuovo universo»; aggiorna `AGENTS.md` (chi tocca `src/kernel/` aggiorna `KERNEL_VERSION` e `package.json` secondo `Y`/`Z`) e `docs/fasi.md` (criteri 5 e 8 di Fase I); adatta i test `TRAP` di `tests/espressivita/` che assumevano la retrocompatibilità tra contratti diversi del kernel.
+- Test: `checkKernelVersion` (stesso `X.Y` con `Z <=` accettato, `X.Y` diverso o `Z >` rifiutato, allineamento con `package.json`), guasto su effetto ignoto, test di `tests/espressivita/`. Suite intera e typecheck con i loro turni.
 - Browser: non serve.
-- Quando è fatto: commit su `task/T260`; ADR, `AGENTS.md`. Sicurezza: scrivi l'esito, tocca il validatore o il caricamento di un universo.
+- Quando è fatto: commit su `task/T260`; ADR, `AGENTS.md`, `docs/fasi.md`. Sicurezza: scrivi l'esito, tocca il caricamento di un universo.
 
-### T261 · I luoghi salvati come caselle — `in attesa`
+### T261 · I luoghi salvati come caselle — `fatto` (chiuso senza lavoro: decisione dell'autore del 04/11, D32)
 - Pipeline: claude · stima 8% · approvato · priorità 10
 - Step: 32
-- Contesto: in attesa di D32 (04/11): `plan.tiles` serviva solo a congelare le caselle contro cambi di caso/MJ/layout tra versioni diverse del kernel, che l'autore ha escluso (e bloccare le caselle impedirebbe evoluzioni come l'immersione in acqua). Dentro la stessa versione del kernel `(piano, seme) + plan.edits` è già deterministico. Nasce da T183 (`dossier T183`).
-- Cosa fare: proposto l'annullamento in D32.
-- Test: con `hash32` cambiato nel test, un luogo già aperto resta identico; un universo di prima si apre come oggi. Suite intera e typecheck con i loro turni.
-- Browser: sì, `?skip&offline`: un luogo riaperto è uguale, nessun errore in console.
-- Quando è fatto: commit su `task/T261`; ADR, sezione in `docs/architettura-dettagli.md`; nell'esito byte in più per luogo. Sicurezza: scrivi l'esito.
+- Contesto: decisione dell'autore del 04/11 (D32): `plan.tiles` serviva solo a congelare le caselle contro cambi di caso/MJ/layout tra versioni diverse del kernel, che l'autore ha escluso (bloccare le caselle impedirebbe evoluzioni come l'immersione in acqua). Dentro lo stesso contratto `X.Y` del kernel `(piano, seme) + plan.edits` è già deterministico. Nasce da T183 (`dossier T183`).
+- Cosa fare: annullato in D32.
+- Test: non serve.
+- Browser: non serve.
+- Quando è fatto: chiuso senza lavoro.
+- Esito: chiuso senza lavoro per decisione dell'autore (04/11, D32): congelare le caselle in `plan.tiles` tra versioni del kernel legherebbe le mani alle evoluzioni future; dentro lo stesso contratto `X.Y` del kernel `(piano, seme) + plan.edits` è già deterministico, e un cambio incompatibile di `X.Y` richiede un nuovo universo.
 
 ### T262 · Il salvataggio che non si ferma — `da fare`
 - Pipeline: claude · stima 6% · approvato · priorità 12

@@ -82,7 +82,7 @@ L'autore: il rilascio aperto al pubblico, con i pagamenti Stripe. Il piano di la
 | 25 | Aggiungere il suono al gioco | I | raggiunto | T221 T222 T223 T224 T225 T227 T228 |
 | 26 | L'Attore interpreta gli individui, se il master lo accende | I | raggiunto | T157 T158 T229 |
 | 27 | Regge: test stabili e più veloci, cache delle forme, memoria, disco, git, prestazioni misurate | I | raggiunto | T91 T95 T148 T151 T160 T161 T162 T163 T164 T174 T175 T176 T177 T209 T210 T211 T212 T213 T214 T215 T216 |
-| 28 | Si parla del lavoro per fasi, step e titoli dei task | I | in corso | T230 T231 T246 |
+| 28 | Si parla del lavoro per fasi, step e titoli dei task | I | raggiunto | T230 T231 T246 |
 | 29 | La grafica a cartone | I | in corso | T89 T89a T89b T89c T89d T89e T98 |
 | 30 | Lo Scultore scolpisce strutture con un metodo misurato sul banco | I | in corso | T154 T155 T173 T180 T181 T182 T258 T259 T156 |
 | 31 | Quattro ambientazioni, generate senza browser dai crediti che avanzano | I | da fare | T152 T153 T207 T88 |
