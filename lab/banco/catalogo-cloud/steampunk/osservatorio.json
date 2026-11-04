@@ -1,0 +1,35 @@
+{
+ "file": "steampunk/osservatorio.xml",
+ "ambientazione": "steampunk",
+ "nome": "osservatorio",
+ "titolo": "Osservatorio a vapore, con la sala delle caldaie",
+ "cantina": true,
+ "passa": true,
+ "regge": true,
+ "varia": true,
+ "maxMs": {
+  "grande": 1641,
+  "enorme": 2578
+ },
+ "semiOk": {
+  "grande": "5/5",
+  "enorme": "5/5"
+ },
+ "varianza": {
+  "grande": {
+   "voxel": 0.6117220898759459,
+   "pianta": 0.42052013961793294,
+   "perimetro": 0.15663520586223834,
+   "interno": 0.688287080930327,
+   "architetture": 5
+  },
+  "enorme": {
+   "voxel": 0.5964011326924894,
+   "pianta": 0.3722435732058387,
+   "perimetro": 0.22689787909256146,
+   "interno": 0.6734382580351939,
+   "architetture": 5
+  }
+ },
+ "difetti": []
+}

@@ -1,0 +1,35 @@
+{
+ "file": "steampunk/officina.xml",
+ "ambientazione": "steampunk",
+ "nome": "officina",
+ "titolo": "Officina delle presse, con il deposito del carbone",
+ "cantina": true,
+ "passa": true,
+ "regge": true,
+ "varia": true,
+ "maxMs": {
+  "grande": 2042,
+  "enorme": 2967
+ },
+ "semiOk": {
+  "grande": "5/5",
+  "enorme": "5/5"
+ },
+ "varianza": {
+  "grande": {
+   "voxel": 0.5980405478186387,
+   "pianta": 0.42070194076147194,
+   "perimetro": 0.15646560012757196,
+   "interno": 0.688287080930327,
+   "architetture": 5
+  },
+  "enorme": {
+   "voxel": 0.5733349066945381,
+   "pianta": 0.37257462678460074,
+   "perimetro": 0.22663074242205622,
+   "interno": 0.6734382580351939,
+   "architetture": 5
+  }
+ },
+ "difetti": []
+}
