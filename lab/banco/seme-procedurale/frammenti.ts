@@ -20,3 +20,6 @@ for (let i = 0; i < g.cells.length; i++) {
 }
 console.log(parts.sort((a, b) => b.n - a.n).slice(0, 8));
 if (process.argv.includes('--strati')) for (let z = 0; z < g.Z; z++) { const rows: string[] = []; for (let y = 0; y < g.Y; y++) { let r = ''; for (let x = 0; x < g.X; x++) r += g.alphabet[g.cells[x + y * g.X + z * XY]].replace('B', '.'); rows.push(r); } if (rows.some((r) => /[^.]/.test(r))) console.log(`z=${z}\n${rows.join('\n')}`); }
+const conta: Record<string, number> = {};
+for (const c of g.cells) conta[g.alphabet[c]] = (conta[g.alphabet[c]] ?? 0) + 1;
+console.log(Object.entries(conta).filter(([k]) => k !== 'B').map(([k, v]) => `${k}${v}`).join(' '));
