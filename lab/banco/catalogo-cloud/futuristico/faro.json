@@ -1,0 +1,35 @@
+{
+ "file": "futuristico/faro.xml",
+ "ambientazione": "futuristico",
+ "nome": "faro",
+ "titolo": "Faro di segnalazione, con la sala dei generatori",
+ "cantina": true,
+ "passa": true,
+ "regge": true,
+ "varia": true,
+ "maxMs": {
+  "grande": 1751,
+  "enorme": 3128
+ },
+ "semiOk": {
+  "grande": "5/5",
+  "enorme": "5/5"
+ },
+ "varianza": {
+  "grande": {
+   "voxel": 0.6111792552035149,
+   "pianta": 0.40339023992764456,
+   "perimetro": 0.16365974820507634,
+   "interno": 0.6875175660062454,
+   "architetture": 5
+  },
+  "enorme": {
+   "voxel": 0.6139499588933179,
+   "pianta": 0.36355591466572773,
+   "perimetro": 0.2298780487804878,
+   "interno": 0.6730671482176455,
+   "architetture": 5
+  }
+ },
+ "difetti": []
+}

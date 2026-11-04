@@ -1,0 +1,35 @@
+{
+ "file": "moderno/laboratorio.xml",
+ "ambientazione": "moderno",
+ "nome": "laboratorio",
+ "titolo": "Laboratorio di ricerca, con il magazzino interrato",
+ "cantina": true,
+ "passa": true,
+ "regge": true,
+ "varia": true,
+ "maxMs": {
+  "grande": 1505,
+  "enorme": 2510
+ },
+ "semiOk": {
+  "grande": "5/5",
+  "enorme": "5/5"
+ },
+ "varianza": {
+  "grande": {
+   "voxel": 0.6087124096717325,
+   "pianta": 0.42025014889815365,
+   "perimetro": 0.15672451193058567,
+   "interno": 0.688287080930327,
+   "architetture": 5
+  },
+  "enorme": {
+   "voxel": 0.5873068231348106,
+   "pianta": 0.37179595817304145,
+   "perimetro": 0.2275104020648377,
+   "interno": 0.6734382580351939,
+   "architetture": 5
+  }
+ },
+ "difetti": []
+}

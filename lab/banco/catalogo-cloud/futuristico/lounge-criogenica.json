@@ -1,0 +1,35 @@
+{
+ "file": "futuristico/lounge-criogenica.xml",
+ "ambientazione": "futuristico",
+ "nome": "lounge-criogenica",
+ "titolo": "Lounge orbitale, con il deposito criogenico",
+ "cantina": true,
+ "passa": true,
+ "regge": true,
+ "varia": true,
+ "maxMs": {
+  "grande": 1890,
+  "enorme": 2909
+ },
+ "semiOk": {
+  "grande": "5/5",
+  "enorme": "5/5"
+ },
+ "varianza": {
+  "grande": {
+   "voxel": 0.5987406785068592,
+   "pianta": 0.40339023992764456,
+   "perimetro": 0.16365974820507634,
+   "interno": 0.6875175660062454,
+   "architetture": 5
+  },
+  "enorme": {
+   "voxel": 0.5775833129907039,
+   "pianta": 0.36355591466572773,
+   "perimetro": 0.2298780487804878,
+   "interno": 0.6730671482176455,
+   "architetture": 5
+  }
+ },
+ "difetti": []
+}
